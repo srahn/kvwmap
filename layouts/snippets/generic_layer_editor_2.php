@@ -672,7 +672,7 @@ function change_orderby(attribute, layer_id){
 			  		}
 					}
 				}
-				 if($this->new_entry != true AND $this->formvars['printversion'] == '' AND $this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['the_geom']]){ ?>
+				 if($this->new_entry != true AND $this->formvars['printversion'] == ''){ ?>
 					<tr>
 						<? if($this->qlayerset[$i]['querymaps'][$k] != ''){ ?>
 						<td bgcolor="<? echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;" align="center"><img style="border:1px solid grey" src="<? echo $this->qlayerset[$i]['querymaps'][$k]; ?>"></td>
@@ -680,7 +680,8 @@ function change_orderby(attribute, layer_id){
 			    	    <td bgcolor="<? echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;">&nbsp;</td>
 			    	    <? } ?>
 			    	    <td style="padding-top:5px; padding-bottom:5px;">&nbsp;&nbsp;
-<?
+<?						
+							if($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['the_geom']]){
 								if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY'){
 ?>
 			    					&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="" onclick="this.href='index.php?go=zoomtoPolygon&oid=<?php echo $this->qlayerset[$i]['shape'][$k][$tablename.'_oid']; ?>&layer_tablename=<? echo $tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $this->qlayerset[$i]['Layer_ID'];?>&selektieren='+document.GUI.selektieren<? echo $this->qlayerset[$i]['Layer_ID'].'_'.$k; ?>.checked;"><? echo $strMapZoom; ?></a>&nbsp;&nbsp;&nbsp;<span style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px"><? echo $strMapSelect; ?></span><input type="checkbox" name="selektieren<? echo $this->qlayerset[$i]['Layer_ID'].'_'.$k; ?>" value="1">
@@ -701,7 +702,7 @@ function change_orderby(attribute, layer_id){
 			    				}
 ?>
 							<br><br>&nbsp;&nbsp;
-<?
+<?					}
 								if($privileg == 1 AND !$lock[$k]) {
 									if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY'){
 	?>
