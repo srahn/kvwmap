@@ -2554,7 +2554,7 @@ class flurstueck {
   }
 
   function getAmtsgericht() {
-    $blattnummer = strval($this->Buchungen[0].blatt);
+    $blattnummer = strval($this->Buchungen[0]['blatt']);
     if ($blattnummer >= 90000 and $blattnummer <= 99999) {
       $ret[1]=array("schluessel"=>"", "name"=>"Im Grundbuch nicht gebucht");
     }
