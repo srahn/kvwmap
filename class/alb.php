@@ -3970,7 +3970,7 @@ class ALB {
     $Ausgabe.="<br>Lagebezeichnungen Neu: ".$anzLageNeu;
     echo "<br>Lagebezeichnungen Neu: ".$anzLageNeu;
 
-    # 2.2.5.3 Löschen aller Lagebezeichnungen für Flurstücke, die mindestens einen Adresseintrag haben
+    /*# 2.2.5.3 Löschen aller Lagebezeichnungen für Flurstücke, die mindestens einen Adresseintrag haben
     $ret=$this->database->deleteAddressLagen();
     if ($ret[0] AND DBWRITE) {
       $errmsg ='<br>Abbruch beim Löschen von Lagen, die Adressen haben';
@@ -3980,6 +3980,7 @@ class ALB {
     $anzLageAdr=$this->database->getAffectedRows($ret[1]);
     $Ausgabe.="<br>Lagebez. wegen vorh. Adresse Gelöscht: ".$anzLageAdr;
     echo "<br>Lagebez. wegen vorh. Adresse Gelöscht: ".$anzLageAdr;
+    */
 
     # 2.2.6 Aktualisieren der Verfahrenszuordnungen
     # 2.2.6.1 Löschen der Einträge in f_Verfahren, dessen FlurstKennz in x_f_Verfahren vorhanden sind
