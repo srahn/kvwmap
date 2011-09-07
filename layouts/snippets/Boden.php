@@ -1,0 +1,41 @@
+<h2><?php echo $this->qlayerset[$i]['Name']; ?></h2>
+<table border="1" cellspacing="0" cellpadding="2">
+  <tr bgcolor="<?php echo BG_DEFAULT ?>">
+    <td><b>Areal</b></td>
+    <td><b>Bodentyp</b></td>
+    <td><b>Substrat</b></td>
+    <td><b>WE</b></td>
+    <td><b>NFK</b></td>    <td><b>TONAP</b></td>
+    <td><b>HUMUSAP</b></td>
+    <td><b>Area</b></td>
+
+  </tr>
+  <?php
+  for ($j=0;$j<count($this->qlayerset[$i]['shape']);$j++) {
+    ?>
+  <tr>
+    <td><?php echo $this->qlayerset[$i]['shape'][$j]['areal']; ?></td>
+    <td><?php echo $this->qlayerset[$i]['shape'][$j]['bodentyp']; ?></td>
+    <td><?php echo $this->qlayerset[$i]['shape'][$j]['substrat']; ?></td>
+    <td><?php echo $this->qlayerset[$i]['shape'][$j]['we']; ?></td>
+    <td><?php echo $this->qlayerset[$i]['shape'][$j]['nfk']; ?></td>
+    <td><?php echo $this->qlayerset[$i]['shape'][$j]['tonap']; ?></td>
+
+    <td><?php echo $this->qlayerset[$i]['shape'][$j]['humusap']; ?></td>
+
+    <td><?php
+    if ($this->qlayerset[$i]['shape'][$j]['area'] == '') {
+      # ?><td>&nbsp;</td> <?php
+      echo 'hier';
+    }
+    else {
+      echo $this->qlayerset[$i]['shape'][$j]['area'];
+    }
+
+    ?></td>
+
+  </tr>
+  <?php
+  }
+  ?>
+</table><br />

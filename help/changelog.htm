@@ -1,0 +1,1993 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" dir="ltr" lang="de"><head>
+	<link rel="shortcut icon" href="http://kvwmap.geoinformatik.uni-rostock.de/favicon.ico">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="KEYWORDS" content="Changelog">
+<meta name="robots" content="index,follow">
+<link rel="shortcut icon" href="http://kvwmap.geoinformatik.uni-rostock.de/favicon.ico">
+    <title>Changelog - kvwmap</title>
+    <style type="text/css" media="screen,projection">/*<![CDATA[*/ @import "/skins/monobook/main.css"; /*]]>*/</style>
+    <link rel="stylesheet" type="text/css" href="changelog-Dateien/commonPrint.css">
+    <!--[if lt IE 5.5000]><style type="text/css">@import "/skins/monobook/IE50Fixes.css";</style><![endif]-->
+    <!--[if IE 5.5000]><style type="text/css">@import "/skins/monobook/IE55Fixes.css";</style><![endif]-->
+    <!--[if gte IE 6]><style type="text/css">@import "/skins/monobook/IE60Fixes.css";</style><![endif]-->
+    <!--[if IE]><script type="text/javascript" src="/skins/common/IEFixes.js"></script>
+    <meta http-equiv="imagetoolbar" content="no" /><![endif]-->
+    <script type="text/javascript" src="changelog-Dateien/index.php"></script>    <script type="text/javascript" src="changelog-Dateien/wikibits.js"></script>
+    <style type="text/css">/*<![CDATA[*/
+@import "/index.php?title=MediaWiki:Monobook.css&action=raw&ctype=text/css&smaxage=18000";
+@import "/index.php?title=-&action=raw&gen=css&maxage=18000";
+/*]]>*/</style>              </head>
+  <body class="ns-0">
+    <div id="globalWrapper">
+      <div id="column-content">
+	<div id="content">
+	  <a name="top" id="top"></a>
+	  	  <h1 class="firstHeading">Changelog</h1>
+	  <div id="bodyContent">
+	    <h3 id="siteSub">aus kvwmap, der freien Wissensdatenbank</h3>
+	    <div id="contentSub"></div>
+	    	    	    <!-- start content -->
+	    <pre>=========================================================================
+= Versionsinformationen zu Dateien der Anwendungen kvwmap und wldge2sql =
+=========================================================================
+ Diese Datei ist von unten nach oben zu lesen. Änderungen werden oben angefügt.
+ Damit die Änderungen wirksam werden müssen unter Umständen auch die Datenbanken
+ angepasst werden lesen Sie dazu die Hinweise in den Dateien
+ mysql_update.sql und postgres_update.sql im Verzeichnis layouts/sql_dumps
+ Bei einer Neuinstallation brauchen nur die Dateien mysql_install.sql und
+ postgres_install.sql zum Anlegen der Datenbanken berücksichtigt werden.
+</pre>
+<pre>===================
+= Versionsnummern =
+===================
+Softwareversionen werden mit einer 3 stelligen Nummer ausgeliefert.
+- Die erste nummer der Version wird nur geändert, wenn fundamentale Änderungen
+  an der Software oder an der Basisarchitektur vorgenommen wurden.
+- Die zweite Nummer wird geändert, wenn eine neue kvwmap-Version veröffentlicht wird.
+- Änderungen in der letzten Nummer sind Fehlerkorrekturen vorbehalten.
+</pre>
+<p><br>
+</p>
+<table id="toc" class="toc"><tbody><tr><td><div id="toctitle"><h2>Inhaltsverzeichnis</h2> <span class="toctoggle">[<a href="javascript:toggleToc()" class="internal" id="togglelink">Verbergen</a>]</span></div>
+<ul>
+<li class="toclevel-1"><a href="#kvwmap-1.8"><span class="tocnumber">1</span> <span class="toctext">kvwmap-1.8.0</span></a></li>
+<li class="toclevel-1"><a href="#kvwmap-1.7.6"><span class="tocnumber">2</span> <span class="toctext">kvwmap-1.7.6</span></a></li>
+<li class="toclevel-1"><a href="#kvwmap-1.7.5"><span class="tocnumber">3</span> <span class="toctext">kvwmap-1.7.5</span></a></li>
+<li class="toclevel-1"><a href="#kvwmap-1.7.4"><span class="tocnumber">4</span> <span class="toctext">kvwmap-1.7.4</span></a></li>
+<li class="toclevel-1"><a href="#kvwmap-1.7.3"><span class="tocnumber">5</span> <span class="toctext">kvwmap-1.7.3</span></a></li>
+<li class="toclevel-1"><a href="#kvwmap-1.7.2"><span class="tocnumber">6</span> <span class="toctext">kvwmap-1.7.2</span></a></li>
+<li class="toclevel-1"><a href="#kvwmap-1.7.1"><span class="tocnumber">7</span> <span class="toctext">kvwmap-1.7.1</span></a></li>
+<li class="toclevel-1"><a href="#kvwmap-1.7.0"><span class="tocnumber">8</span> <span class="toctext">kvwmap-1.7.0</span></a></li>
+<li class="toclevel-1"><a href="#kvwmap-1.6.9"><span class="tocnumber">9</span> <span class="toctext">kvwmap-1.6.9</span></a></li>
+<li class="toclevel-1"><a href="#kvwmap-1.6.8"><span class="tocnumber">10</span> <span class="toctext">kvwmap-1.6.8</span></a></li>
+<li class="toclevel-1"><a href="#kvwmap-1.6.7"><span class="tocnumber">11</span> <span class="toctext">kvwmap-1.6.7</span></a></li>
+<li class="toclevel-1"><a href="#kvwmap-1.6.6"><span class="tocnumber">12</span> <span class="toctext">kvwmap-1.6.6</span></a></li>
+<li class="toclevel-1"><a href="#kvwmap-1.6.5"><span class="tocnumber">13</span> <span class="toctext">kvwmap-1.6.5</span></a></li>
+<li class="toclevel-1"><a href="#kvwmap-1.6.4"><span class="tocnumber">14</span> <span class="toctext">kvwmap-1.6.4</span></a></li>
+<li class="toclevel-1"><a href="#kvwmap-1.6.3"><span class="tocnumber">15</span> <span class="toctext">kvwmap-1.6.3</span></a></li>
+<li class="toclevel-1"><a href="#kvwmap-1.6.2"><span class="tocnumber">16</span> <span class="toctext">kvwmap-1.6.2</span></a></li>
+<li class="toclevel-1"><a href="#kvwmap-1.6.1"><span class="tocnumber">17</span> <span class="toctext">kvwmap-1.6.1</span></a></li>
+<li class="toclevel-1"><a href="#kvwmap-1.6.0"><span class="tocnumber">18</span> <span class="toctext">kvwmap-1.6.0</span></a></li>
+<li class="toclevel-1"><a href="#kvwmap-1.5.9"><span class="tocnumber">19</span> <span class="toctext">kvwmap-1.5.9</span></a></li>
+<li class="toclevel-1"><a href="#kvwmap-1.5.8"><span class="tocnumber">20</span> <span class="toctext">kvwmap-1.5.8</span></a></li>
+<li class="toclevel-1"><a href="#kvwmap-1.5.7"><span class="tocnumber">21</span> <span class="toctext">kvwmap-1.5.7</span></a></li>
+<li class="toclevel-1"><a href="#kvwmap-1.5.6"><span class="tocnumber">22</span> <span class="toctext">kvwmap-1.5.6</span></a></li>
+<li class="toclevel-1"><a href="#kvwmap_1.5.5"><span class="tocnumber">23</span> <span class="toctext">kvwmap_1.5.5</span></a></li>
+<li class="toclevel-1"><a href="#kvwmap_1.5.4"><span class="tocnumber">24</span> <span class="toctext">kvwmap_1.5.4</span></a></li>
+<li class="toclevel-1"><a href="#kvwmap_1.5.3"><span class="tocnumber">25</span> <span class="toctext">kvwmap_1.5.3</span></a></li>
+<li class="toclevel-1"><a href="#kvwmap_1.5.2"><span class="tocnumber">26</span> <span class="toctext">kvwmap_1.5.2</span></a></li>
+<li class="toclevel-1"><a href="#kvwmap_1.5.1"><span class="tocnumber">27</span> <span class="toctext">kvwmap_1.5.1</span></a></li>
+<li class="toclevel-1"><a href="#kvwmap_1.5.0"><span class="tocnumber">28</span> <span class="toctext">kvwmap_1.5.0</span></a></li>
+<li class="toclevel-1"><a href="#kvwmap_1.4.6"><span class="tocnumber">29</span> <span class="toctext">kvwmap_1.4.6</span></a></li>
+<li class="toclevel-1"><a href="#kvwmap_1.4.5"><span class="tocnumber">30</span> <span class="toctext">kvwmap_1.4.5</span></a></li>
+<li class="toclevel-1"><a href="#kvwmap_1.4.4"><span class="tocnumber">31</span> <span class="toctext">kvwmap_1.4.4</span></a></li>
+<li class="toclevel-1"><a href="#kvwmap_1.4.3"><span class="tocnumber">32</span> <span class="toctext">kvwmap_1.4.3</span></a></li>
+<li class="toclevel-1"><a href="#kvwmap_1.4.2"><span class="tocnumber">33</span> <span class="toctext">kvwmap_1.4.2</span></a></li>
+<li class="toclevel-1"><a href="#kvwmap_1.3.0"><span class="tocnumber">34</span> <span class="toctext">kvwmap_1.3.0</span></a></li>
+<li class="toclevel-1"><a href="#Version_1.2.5"><span class="tocnumber">35</span> <span class="toctext">Version 1.2.5</span></a></li>
+</ul>
+</td></tr></tbody></table>
+<p><script type="text/javascript"> if (window.showTocToggle) { var tocShowText = "Anzeigen"; var tocHideText = "Verbergen"; showTocToggle(); } </script>
+</p>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit&amp;section=1" title="Changelog">bearbeiten</a>]</div><a name="kvwmap-1.8.0"></a><h3> kvwmap-1.8.0 </h3>
+<ul><li> Der Sachdatendruck-Editor wurde erweitert. Siehe <a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Weiterentwicklung_Sachdaten-Druckeditor" title="Weiterentwicklung Sachdaten-Druckeditor">Weiterentwicklung_Sachdaten-Druckeditor</a>
+</li><li> Beim Drucken wurde die Berechnung aller maßstabsabhängigen
+Größen (minscale, maxscale, ...) berichtigt. Dadurch sollten jetzt immer
+ genau die Layer im Druck erscheinen, die auch in der normalen Karte zu
+sehen sind.
+</li><li> Layer haben jetzt 2 zusätzliche Felder "kurzbeschreibung" und "datenherr" und man kann über die go-Variable <b>Layer_Uebersicht</b> eine Übersicht aller Layer nach Gruppen sortiert erzeugen.
+</li><li> In der Trefferliste der Jagdbezirkssuche kann man jetzt
+mehrere Jagdbezirke anhaken und diese sofort mit den Flurstücken
+verschneiden ohne jeden einzelnen Jagdbezirk aufrufen zu müssen.
+</li><li> Die CSV-Exporte für Flurstücke, Eigentümer und Nutzungsarten
+werden jetzt in einer neuen Tabelle geloggt. Es wird die Art des Exports
+ und die Anzahl der Flurstücke gespeichert.
+</li><li> In der config.php kann man über die Konstante <b>LAYER_IDS_DOP</b> die DOP-Layer definieren, damit diese dann in der Statistik der ALK-Drucke extra ausgegeben werden.
+</li><li> Wenn ein Layer als neuer Layer gespeichert werden soll und die
+ angegebene Layer ID schon existiert, wird eine Fehlermeldung angezeigt
+und die nächste freie Layer ID entsprechend dem Wert in AUTO_INCREMENT,
+die verwendet werden kann.
+</li><li> Für Polygonlayer gibt es im GLE nun einen Link um das Polygon als UKO-Datei zu exportieren.
+</li><li> Das Design des GLE wurde überarbeitet. In der config.php gibt es 3 neue Konstanten <b>BG_GLEHEADER</b>, <b>TXT_GLEHEADER</b> und <b>BG_GLEATTRIBUTE</b>
+ um die Farben individuell anzupassen. Außerdem gibt es jetzt im
+Datensatzheader die Möglichkeit, einen einzelnen Datensatz als CSV-Datei
+ zu exportieren, bzw. den Datensatz zu löschen.
+</li><li> Man kann jetzt alle Layer deaktivieren, indem man oben in der
+Legende auf das Layersymbol klickt. Möchte man nur alle Abfragehaken
+rausnehmen, kann man auf das Abfragesymbol klicken. Sollte die
+Benutzeroberfläche aus irgendwelchen Gründen nicht mehr zur Verfügung
+stehen, kann man beides auch über einen URL-Aufruf mit den go-Variablen <b>reset_layers</b> bzw. <b>reset_querys</b> erreichen.
+</li><li> In der Legende hat man die Möglichkeit, einzelne Klassen von Layern auszublenden, indem man auf die Klassenbildchen klickt.
+</li><li> Im GLE wird jetzt bei einem Attribut vom Typ "User" nicht mehr der Loginname, sondern Vorname und Nachname gespeichert.
+</li><li> Es gibt jetzt auch polnische Sprachunterstützung.
+</li><li> Man hat jetzt die Möglichkeit mehrere Gast-Stellen einzurichten. Die Konstante <b>GAST_STELLE</b> in der config.php wurde dazu durch ein array ersetzt. Der Aufruf für einen Gast-Login lautet jetzt nicht mehr <b>gast=true</b>, sondern <b>gast=&lt;Stellen_ID&gt;</b>.
+</li><li> Es gibt einen neuen Formularelementtyp <b>dynamischer Link</b>, der es ermöglicht eine URL anzuzeigen, die von bestimmten Attributen des Layers abhängig ist.
+</li><li> In der Nachweissuche kann man jetzt auch die Flurnummer und
+die Stammnummer weglassen, so dass in der ganzen Gemarkung gesucht wird.
+ Außerdemm kann nach Datum und Vermessungsstelle gesucht werden.
+</li><li> Man kann jetzt auch für historische Flurstücke einen ALB-Auszug 30 erzeugen.
+</li><li> In der Namenssuche kann man die Blattnummer jetzt auch ohne führende Nullen angeben.
+</li><li> Es gibt 3 neue Konstanten HEADER, FOOTER und LOGIN in der
+config.php mit denen man die eigenen Header- und Footerdateien und die
+login.php setzen kann.
+</li><li> Es gibt einen neuen Formularelementtyp "Fläche". Hat ein Layer
+ ein solches Attribut, wird hier die Fläche der aktuellen Geometrie
+gespeichert. Das Attribut ist aber trotzdem editierbar. Jedes Mal, wenn
+die Geometrie verändert wird, wird auch das Flächen-Attribut
+aktualisiert.
+</li><li> Es gibt jetzt eine neue Redlining-Funktion, mit der man Pfeile in die Karte zeichnen kann.
+</li><li> Im GLE wurde die Anzeige von Attributen des Typs "Link"
+geändert. Man kann im Attribut-Editor einen festen Text im Optionenfeld
+eintragen, dieser wird dann als Linktext im GLE angezeigt. Trägt man
+hier nichts ein, wird nicht wie bisher die komplette Link-Adresse
+angezeigt, sondern nur der letzte Teil der Adresse.
+</li><li> Im Geometrie-Editor werden die Eckpunkte bei einer
+Verschiebung ohne Füllung dargestellt, so dass man die darunterliegende
+Karte sehen kann. Außerdem werden neue Punkte, die man zwischen 2
+Punkten anlegen kann, nicht mehr rot, sondern grün dargestellt.
+</li><li> Mit der Konstante KVZKOPF kann man für die KVZ-Ausgabe einen Kopftext definieren.
+</li><li> Es gibt jetzt eine Importfunktion für uko-Dateien aus der
+ALK-Auskunft (go=UKO_Import). Damit lassen sich die Umringspolygone in
+eine PostGIS-Tabelle einspielen und dann über einen Layer in kvwmap
+weiter verwenden.
+</li><li> Die Layerauswahl in der Layersuche lässt sich jetzt durch eine Gruppenauswahl einschränken.
+</li></ul>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit&amp;section=2" title="Changelog">bearbeiten</a>]</div><a name="kvwmap-1.7.6"></a><h3> kvwmap-1.7.6 </h3>
+<ul><li> Im Polygon- und Linieneditor lassen sich beim Bearbeiten von
+Eckpunkten mit dem Undo-Button die vorgenommenen Änderungen rückgängig
+machen.
+</li><li> Im Geometrie-Editor gibt es jetzt auch die Maßstabseingabe und die Kartenhistorie.
+</li><li> Bei der Verknüpfung von Layern mittels SubFormFK hat sich die Schreibweise im Optionenfeld geändert. Siehe <a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Dokumentation#SubformFK" title="Dokumentation">Dokumentation#SubformFK</a>.
+</li><li> Beim Layer-Export von mehreren Layern, die über SubForms
+miteinander verknüpft sind, werden nun auch die bei den Verknüpfungen
+verwendeten Layer-IDs in der neuen Datenbank korrekt eingetragen.
+</li><li> Es gibt eine neue Funktion zum Zoomen auf eine Koordinate mittels URL-Aufruf. Beispiel: <a href="https://kvwmap.geoinformatik.uni-rostock.de/kvwmap_dev/index.php?go=zoom2coord&amp;INPUT_COORD=4490158,5999687&amp;CMD=jump_coords" class="external free" target="_blank" title="https://kvwmap.geoinformatik.uni-rostock.de/kvwmap dev/index.php?go=zoom2coord&amp;INPUT COORD=4490158,5999687&amp;CMD=jump coords" rel="nofollow">https://kvwmap.geoinformatik.uni-rostock.de/kvwmap_dev/index.php?go=zoom2coord&amp;INPUT_COORD=4490158,5999687&amp;CMD=jump_coords</a>
+</li><li> In der Adresssuche gibt es jetzt zusätzlich ein Auswahlfeld
+"Gemarkung/Ortsteil", mit dem man alternativ zum Auswahlfeld "Gemeinde"
+die Strassenliste laden kann.
+</li><li> Der Geburtsname in der Namensuche ist jetzt im zweiten Feld zu finden.
+</li><li> Hat ein Layer einen über MinScale/MaxScale eingeschränkten
+Maßstabsbereich, wird dieser jetzt in der Legende als Tooltip über dem
+Layernamen angezeigt.
+</li><li> Wenn man mehrere Shapes nacheinander hochläd, werden diese in unterschiedlichen Farben dargestellt.
+</li><li> Bei der Messfunktion gibt es jetzt zusätzlich die Möglichkeit
+einen Punktfang einzuschalten. Dadurch kann zwischen Eckpunkten aller
+aktiven Postgis-Layer koordinatengenau gemessen werden.
+</li><li> Die Kartendarstellung während der Navigation wurde auf Ajax
+umgestellt. Es werden jetzt nur noch die veränderlichen Kartenelemente
+(Kartenbild, Maßstabsbild, Referenzkarte, usw.) per Ajax nachgeladen.
+Dadurch ist auf dem Server weniger Rechenzeit erforderlich und es muss
+auch wesentlich weniger an Daten zum Browser übertragen werden. Bisher
+ist diese Variante allerdings nur im Firefox umgesetzt.
+</li><li> In der Legende wird die Outlinecolor einer Klasse jetzt nicht
+mehr immer mit schwarz, sondern in der Farbe angezeigt, die die Klasse
+als Outlinecolor hat.
+</li><li> Im GLE erscheint bei Attributen, die einen Tooltip besitzen,
+ein kleines Hinweisschild hinter dem Attributnamen. Geht man mit der
+Maus auf dieses Schild, erscheint der Tooltip. Außerdem erscheint bei
+Datumsattributen (Typen date, timestamp in der DB) hinter dem
+Attributnamen ein kleines Kalendersymbol, dessen Tooltip die korrekte
+Datumsschreibweise angibt. Die Attributnamen sind ja Links, die es
+ermöglichen, nach einem bestimmten Attribut zu sortieren. Auch hier
+erscheint nun ein entsprechender Hinweis in einem Tooltip.
+</li><li> In der Rechteverwaltung gibt es jetzt ganz unten ein
+zusätzliches Auswahlfeld, mit dem die Rechte für alle Attribute des
+aktuellen Layers auf einmal setzen kann.
+</li><li> Im Tooltip werden jetzt auch Bilder angezeigt.
+</li><li> Die Konstante LAGEBEZEICHNUNGSART wurde wieder eingeführt, falls man kvwmap ohne ALK benutzen möchte.
+</li><li> Im Formular zum Ändern der Layereigenschaften können nun auch <b>Processing</b>-Anweisungen eingegeben werden. Das braucht man z.B. zum definieren von <b>Charts</b> als Style, siehe PROCESSING in <a href="http://mapserver.org/mapfile/layer.html" class="external free" target="_blank" title="http://mapserver.org/mapfile/layer.html" rel="nofollow">http://mapserver.org/mapfile/layer.html</a>.
+ Mehrere Processings werden getrennt durch Semikolon eingegeben. Siehe
+auch Hilfe in dem Eingabeformular (I-Button). Das Attribut size im Style
+ kann nun auch mit Text belegt werden, nicht nur mit einer Zahl als
+Größe. Ein Text kann z.B. die Angabe eines Sachdatenattributes z.B.
+'[Einwohner]' sein, welches für den Anteil an einem Diagramm benötigt
+wird. siehe Doku von MapServer zum Thema dynamische Charts: <a href="http://mapserver.org/output/dynamic_charting.html" class="external free" target="_blank" title="http://mapserver.org/output/dynamic charting.html" rel="nofollow">http://mapserver.org/output/dynamic_charting.html</a>. Es wurden Änderung am MySQL DB-Schema vorgenommen, siehe mysql_update.sql oder mysql_install.sql.
+</li><li> Im Sachdaten-Layouteditor kann man nun die Attribute und
+Freitexte rechtsbündig anordnen, indem man negative x-Positionen
+verwendet. -100 bedeutet also 100 Pixel vom rechten Rand und
+rechtsbündigen Text.
+</li></ul>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit&amp;section=3" title="Changelog">bearbeiten</a>]</div><a name="kvwmap-1.7.5"></a><h3> kvwmap-1.7.5 </h3>
+<ul><li> Die Fachschale Jagdkataster wurde überarbeitet und erweitert.
+Man kann jetzt neben den Flurstücken auch alle anderen Vektorlayer zur
+Geometrieübernahme nutzen. Weiterhin gibt es jetzt auch in der
+Sachdatenanzeige, im Template, die Möglichkeit, die Sachdaten zu
+editieren. Bei den Jagdbezirks-Arten sind 4 neue Möglichkeiten
+hinzugekommen: <b>Enklaven, jagdbezirksfreie Flächen, Angliederungsflächen und Abtrennungsflächen</b>. Außerdem ist die Tabelle jagdbezirke um zwei neue Felder erweitert worden: <b>jb_zuordnung</b> und <b>status</b>.
+ Im Feld jb_zuordnung kann die ID eines Jagdbezirks eingegeben werden,
+um die Fläche einem Jagdbezirk zuzuordnen. Über das Feld status lassen
+sich historisch gewordene Flächen kennzeichnen.
+</li><li> Beim Erfassen von neuen Datensätzen im GLE hat man jetzt die
+Möglichkeit, durch Setzen eines Hakens mehrere Datensätze nacheinander
+zu erfassen, ohne jedesmal den Layer auswählen zu müssen.
+</li><li> Im Polygoneditor finden sich in der Liste der Geometrie-Übernahme-Layer auch die Suchergebnislayer des aktuellen Nutzers.
+</li><li> Auch die letzte Art des ALB-Auszugs, der Auszug 30, ist nun durch eine entsprechende Funktion "<b>ALB-Auszug 30</b>" geschützt.
+</li><li> In der Stellenwahl läßt sich nun die Farbe auswählen, in der
+die Suchergebnislayer in der Karte dargestellt werden sollen. Die Farben
+ werden in einer neuen MySQL-Tabelle <b>colors</b> gespeichert. Diese
+hier definierten Farben werden nun auch für die automatische
+Klassifizierung verwendet. D.h. wenn man mehr als 10 Klassen anzeigen
+lassen möchte, muss man hier einfach mehr Farben definieren.
+</li><li> Beim Anlegen eines neuen Datensatzes im GLE werden nun die Felder mit den Default-Werten aus der Datenbank vorbelegt.
+</li><li> Es gibt jetzt die Möglichkeit, die Sachdaten, die im GLE
+angezeigt werden, entsprechend einer vorher definierten Layoutvorlage
+als PDF zu exportieren. Der Layouteditor ist unter <b>go=sachdaten_druck_editor</b> zu finden. Im GLE gibt es unter "ausgewählte Datensätze" einen neuen Link "Drucken".
+</li><li> Beim Zeichnen von Polygonen im Geometrie-Editor wird nun der erste Eckpunkt als Punkt dargestellt.
+</li><li> In der Grundbuchblattsuche wird der Anteil am Flurstück bei
+den Eigentümern jetzt auch ausgegeben. Außerdem gibt es nun einen Link
+um alle Flurstücke anzuzeigen.
+</li><li> Bei den Druckrahmen gibt es nun die Möglichkeit, die aktuelle Stelle und den Nutzer, der den Ausdruck macht, auszugeben.
+</li><li> Im Attributeditor lässt sich nun definieren, welche der Attribute Pflichtfelder in der Layer-Suche sein sollen.
+</li><li> Im GLE wird jetzt bei Eingabe eines Datumsformates überprüft, ob dieses Format richtig eingegeben wurde.
+</li><li> Die Fachschale Bodenrichtwerte wurde überarbeitet. Man kann
+jetzt die Nummer des Gutachterausschusses auswählen. Die zur Auswahl
+stehenden Nummern werden in der config.php in einem Array definiert. Die
+ Konstanste GUTACHTERAUSCHUSS fällt dafür von nun an weg. Das Feld
+"Beitragszustand" ist um den Wert "ortsüblich erschlossen" erweitert
+worden (falls jemand die alte Tabelle der Bodenrichtwerte noch hat, dort
+ wurde das schonmal erfasst und kann evtl. übertragen werden). Die
+Fläche ist jetzt ein normales Eingabefeld. Gemeinde und Gemarkung werden
+ jetzt aus der Karte geholt, können aber immernoch angepasst werden. Die
+ Bodenrichtwertnumer ist jetzt eine Sequenz.
+</li><li> In der schnellen Druckausgabe wird nun auch der Maßstab ausgegeben.
+</li><li> Die Scrollposition der Legende bleibt beim Neuladen der Karte erhalten.
+</li><li> Die Funktion zum Anpassen der Kartenfenstergröße berücksichtigt nun auch ob Menü oder Legende eingeklappt sind.
+</li><li> Im Formular um eine Shape-Datei direkt in kvwmap anzuzeigen, gibt es nun eine Auswahlliste für den EPSG-Code.
+</li><li> Es gibt nun die Möglichkeit kvwmap auch ohne Nutzeranmeldung zu benutzen. Beim Aufruf über <b>...index.php?gast=true</b> wird ein neuer Gastnutzer angelegt. Dieser hat Zugriff auf die Stelle, die man in der config.php über die Konstante <b>GAST_STELLE</b>
+ definiert hat. Der aktuelle Kartenausschnitt wird auf den maximalen
+Kartenausschnitt der Stelle gesetzt. Außerdem sind beim ersten Start
+alle Layer aktiv, die in den stellenbezogenen Layereigenschaften der
+Gaststelle unter "aktiv bei Gast" auf "ja" gesetzt wurden.
+</li></ul>
+<dl><dd>Die Gastnutzer werden wie normale Nutzer in der Tabelle user
+angelegt, nur dass sie im Feld Funktion den Wert "gast" haben. Dadurch
+lassen sie sich später einfach wieder löschen.
+</dd></dl>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit&amp;section=4" title="Changelog">bearbeiten</a>]</div><a name="kvwmap-1.7.4"></a><h3> kvwmap-1.7.4 </h3>
+<ul><li> <b>Gilt eigentlich ja immer aber diesmal auf jeden Fall
+beachten: Die alte Version 1.7.3 funktioniert nicht mehr mit der
+MySQL-DB der Version 1.7.4. Beim Wechsel auf diese Version also
+unbedingt die MySQL kopieren!!!</b>
+</li></ul>
+<dl><dd> --<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Benutzer:Markus_Hentschel" title="Benutzer:Markus Hentschel">Markus Hentschel</a> 08:09, 14. Jun 2010 (CEST) Der Test kann so lauten (die Class-ID - hier 1 - muss bereits vorhanden sein!):
+</dd></dl>
+<pre>INSERT INTO classes (`Class_ID`,`Expression`) VALUES (1,'Weltmeister=Spanien') ON DUPLICATE KEY UPDATE `Expression`='Weltmeister=Brasilien';
+</pre>
+<dl><dd> Bei einer Fehlermeldung ist die verwendete MySQL-Version zu alt.
+<dl><dd> --<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Benutzer:Markus_Hentschel" title="Benutzer:Markus Hentschel">Markus Hentschel</a> 09:58, 16. Aug 2010 (CEST) Das Update hat sich als sehr einfach erwiesen:
+</dd><dd> - Sicherung
+</dd><dd> - Download eines geeigneten RPMs
+</dd><dd> - Installation mit Befehl "rpm -Uvh mysql-5.0.18-20.5.i586.rpm" als root
+</dd><dd> - In phpMyAdmin alle Tabellen der kvwmap-DB überprüfen
+(Datenbank auswählen, alle Tabellen markieren und unten "überprüfe
+Tabelle")
+</dd><dd> - Als "corrupted" markierte Tabellen mit "REPAIR TABLE &lt;tablename&gt; use_frm;" repariert
+</dd></dl>
+</dd></dl>
+<ul><li> Beim Exportieren von Layern werden jetzt auch die im
+Attributeditor vorgenommenen Einträge der Tabelle layer_attributes als
+SQL-Insert ausgegeben.
+</li><li> Wenn man eine Stelle kopiert, werden jetzt auch die Layerrechte mitkopiert.
+</li><li> Im Geometrieeditor lassen sich jetzt auch Kreisgeometrien
+erzeugen. Dazu wird die Puffer-Funktion verwendet. Man setzt den ersten
+Eckpunkt des Polygons (per Maus oder über Koordinateneingabe) und fügt
+anschließend einen Puffer mit dem gewünschten Radius hinzu.
+</li><li> Es gibt jetzt eine schnelle Druckausgabe, mit der man das PDF mit einem Klick erzeugen kann. Die go-Variable heißt: <b>Schnelle_Druckausgabe</b>.
+ Beim Anlegen des Menüpunktes sollte das Feld target auf "_blank"
+gesetzt werden, damit sich das PDF in einem neuen Fenster öffnet. Für
+den Druck wird der aktuelle Kartenausschnitt und der Druckrahmen
+verwendet, den man über die Konstante <b>DEFAULT_DRUCKRAHMEN_ID</b> definiert hat.
+</li><li> Es gibt jetzt auch eine Adressensuche, die direkt in die Karte
+ zoomt. Werden Gebäude gefunden, wird darauf gezoomt, ansonsten auf die
+entsprechenden Flurstücke. Die go-Variable heißt: <b>ALK-Adresse_Auswaehlen</b>.
+</li><li> Es gibt jetzt eine ALK-Flurstückssuche. Sie funktioniert
+genauso wie die normale Flurstückssuche, nur dass nicht im ALB sondern
+in der ALK gesucht wird und die gefundenen Flurstücke sofort in der
+Karte angezeigt werden. Die go-Variable heißt: <b>ALK-Flurstueck_Auswaehlen</b>.
+</li><li> Im Festpunkttemplate lassen sich die angezeigten Festpunkte jetzt auch direkt in eine KVZ-Datei schreiben.
+</li><li> Es gibt in der Hauptkarte 2 neue Buttons fürs "Redlining". Mit
+ dem ersten lassen sich Polygone zeichnen und mit dem zweiten Texte in
+die Karte einfügen. Diese Objekte sind auch beim "Anzeigen des
+Kartenbildes zum Abspeichern" enthalten. Bei der nächsten Nutzeraktion
+sind sie verschwunden.
+</li><li> Der Button "Koordinatenzoom" hat jetzt eine Zusatzfunktion.
+Klickt man ihn an, kann man wie bisher eine Koordinate eingeben und bei
+Klick auf "OK" springt man an die gewünschte Stelle. Klickt man aber auf
+ "Abbrechen", so wird bei jedem weiteren Klick in die Karte die aktuelle
+ Curserposition ausgegeben. Hat der Nutzer ein zweites Koordinatensystem
+ gewählt, so werden die Koordinaten in beiden Systemen ausgegeben. Die
+fortlaufende Ausgabe im 2. System entfällt.
+</li><li> Die im GLE selektierten Datensätze lassen sich nun nach einem
+auswählbaren Attribut automatisch klassifiziert in der Karte anzeigen.
+Maximal können 10 Klassen erzeugt werden.
+</li><li> In der Layer-Suche lassen sich die Suchparameter nun
+rollenbezogen speichern. So lassen sich z.B. häufig durchgeführte
+Suchabfragen speichern und später wieder laden.
+</li><li> Die Linienbreite in den Legendenbildern wurde für Linienlayer
+von 2 auf 3 erhöht, damit man die Farben der Linien besser erkennen
+kann.
+</li><li> In der Legende wird für Layer mit einem Hatch-Style die size
+(Abstand der Schraffurlinien) auf die doppelte width (Breite der
+Schraffurlinien) gesetzt, damit die Schraffur auch im kleinen
+Legendebild zu erkennen ist. Voraussetzung dafür ist, dass das Feld
+symbol im Style auf die Nummer des Hatch-Symbols gesetzt ist.
+</li><li> Analog zum Menü lässt sich jetzt auch die Legende wegklappen.
+</li><li> Man hat jetzt die Möglichkeit für jeden Layer einen eigenen
+Ordner zu definieren, in dem die Dokumente abgelegt werden sollen. Wird
+hier nichts angegeben, wird wie gehabt der CUSTOM_IMAGE_PATH verwendet.
+</li><li> Beim Speichern von Dokumenten wird nun keine komplette URL
+mehr gespeichert, sondern nur noch der Pfad zum Dokument. Das bedeutet
+für alle bereits gespeicherten Dokumente, dass die Datenbankeinträge
+angepasst werden müssen. Es muss der erste Teil
+"http://...index.php?go=sendeDokument&amp;dokument=" entfernt werden, so
+ dass nur noch der Pfad stehen bleibt (geht mit UPDATE und replace). Bei
+ Layern, die ihre Dokumente auf anderen Servern haben (wie z.B. bei der
+mobilen Variante), wird die fremde URL im Attributeditor im Feld
+Optionen eingetragen und dann bei Anzeige der Dokumente anstatt der
+eigenen URL verwendet.
+</li><li> Die Formatierung der Datumsangaben wurde auf die deutsche
+Schreibweise geändert (TT.MM.JJJJ). D.h. in der Layer-Suche und bei der
+Editierung von Datums-Attributen (vom Datenbank-Typ date) muss nun diese
+ Schreibweise verwendet werden.
+</li><li> Die maximale Länge eines varchar-Feldes in der Datenbank wird nun bei der Eingabe im GLE berücksichtigt.
+</li><li> Die interne Verwaltung der Attribute im GLE wurde geändert.
+Bisher wurden ja die Informationen zu jedem Attribut (Tabellenname,
+Datentyp, constraints, nullable ...) immer aktuell aus der PostgreSQL-DB
+ geholt und zwar bei jeder GLE-Aktion. Das hatte den Vorteil, dass sich
+Änderungen in der Datenbank (z.B. setzen eines Attributes auf NOT NULL)
+sofort im GLE ausgewirkt haben. Allerdings ist das Holen dieser
+Informationen aus der PostgreSQL-DB durch die vielen einzelnen Abfragen,
+ die gemacht werden müssen sehr zeitaufwändig.
+</li></ul>
+<dl><dd>Deshalb werden diese Informationen jetzt nur noch einmal
+ermittelt und zwar beim Speichern der Layerdefinition. Sie werden in der
+ MySQL-Tabelle <b>layer_attributes</b> gespeichert und können dann bei
+GLE-Aktionen mit einer einzigen Abfrage geholt werden. Dadurch läuft
+z.B. die Layer-Suche, die Kartenabfrage und die Tooltipabfrage jetzt
+schneller ab. Man merkt dies insbesondere bei Layern mit vielen
+Attributen.
+</dd><dd>Was bedeutet das jetzt konkret für den kvwmapper? Das einzige
+was man in Zukunft beachten muss ist, dass man nach einer Änderung im
+Datenmodell den Layer einfach nochmal speichern muss, weil dabei die
+Attributinformationen neu ausgelesen und in der Tabelle layer_attributes
+ gespeichert werden. Wichtig ist auch, dass alle jetzt vorhandenen Layer
+ einmal gespeichert werden. Damit man das nicht alles von Hand machen
+muss, gibt es dafür eine Funktion die alle PostGIS-Layer durchläuft und
+die Informationen in die Tabelle einträgt. Sie heißt "Alle
+Layerattribute speichern" ist unter den Administratorfunktionen
+(go=Administratorfunktionen) zu finden.
+</dd></dl>
+<ul><li> Man hat jetzt die Möglichkeit als Nutzer eine SHP-Datei sofort in kvwmap darzustellen. Über go=<b>SHP_Anzeigen</b>
+ gelangt man in ein Formular, in dem man die gezippten SHP-Dateien
+hochladen kann. Außerdem muss man hier den epsg-Code angeben. Die
+SHP-Dateien werden in einem neuen Ordner <b>CUSTOM_SHAPEPATH</b>
+abgelegt, welcher sich im SHAPEPATH befinden muss. Danach wird ein
+Rollenlayer erzeugt, der die SHP-Datei darstellt. Dabei wird jedoch
+nicht auf die maximale Ausdehnung des Layers gezoomt.
+</li><li> In der Grundbuchblattanzeige wird nun auch der Zusatz zum Eigentümer mit angezeigt.
+</li><li> In der Grundbuchblattsuche kann man jetzt auch nach mehreren Beständen gleichzeitig suchen.
+</li><li> Es gibt eine neue Funktion <b>Nachweise_bearbeiten</b>, welche im Recherche-Ergebnis die Bearbeitung von Nachweisen schützt.
+</li><li> Es gibt jetzt eine Importfunktion für GPX-Dateien (go=<b>GPX_Import</b>).
+ Man kann eine Datei hochladen und die darin enthaltenen Tracks werden
+als MULTILINESTRING-Geometrien in einer PostGIS-Tabelle gespeichert.
+Intern wird die GPX-Datei zunächst ins SHP-Format umgewandelt und dann
+anschließend in die DB gespielt. Dafür wird das Programm ogr2ogr
+verwendet. In der config.php muss dazu die Konstante <b>OGR_BINPATH</b> definiert werden. Sie gibt an, in welchem Verzeichnis ogr2ogr zu finden ist.
+</li></ul>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit&amp;section=5" title="Changelog">bearbeiten</a>]</div><a name="kvwmap-1.7.3"></a><h3> kvwmap-1.7.3 </h3>
+<ul><li> In der Stellenwahl hat man nun die Möglichkeit, unter den mittlerweile 12 verscheidenen Buttons in der Hauptkarte zu wählen.
+</li><li> Es gibt ein neues Abfragewerkzeug "Abfrage auf angrenzende
+Objekte". Klickt man damit in ein Objekt, werden das Objekt und alle
+umliegenden Objekte abgefragt.
+</li><li> Die Konstante FKT_PATH gibt es nicht mehr.
+</li><li> Die Konstante LAGEBEZEICHNUNGSART gibt es nicht mehr.
+</li><li> Die Konstante NEW_LEGEND gibt es nicht mehr. Ab dieser Version wird nur noch die neue Legende unterstützt.
+</li><li> Die Fachschale Bodenrichtwerte wurde auf das BORIS-MV
+Datenmodell angepasst. Das bedeutet u.a., dass jetzt nur noch
+flächenhafte Bodenrichtwerte erfasst werden können. Deshalb fällt die
+Konstante <b>BODENRICHTWERTTYP</b> in der config.php von nun an weg. Dafür gibt es eine neue Konstante <b>LAYERNAME_BODENRICHTWERTE</b>,
+ welche den Namen des Flächenlayers der Bodenrichtwerte definiert. Die
+Tabelle zur Speicherung der BRW hat natürlich eine andere Struktur. Es
+gibt aber einen SQL-Befehl zur Übertragung der Daten aus der alten
+Tabelle in die neue. Außerdem gehört zum Datenmodell noch ein View, der
+zum Austausch der BRW dient.
+</li><li> Im Übergabeprotokoll gibt es nun eine neue Spalte "andere", welche die Anzahl der anderen Dokumente auflistet.
+</li><li> Es gibt eine neue Konstante <b>IMAGEMAGICKPATH</b>, welche den Pfad zum convert-Programm von Imagemagick angibt.
+</li><li> Das Layout der Menüs wurde überarbeitet. Dabei lässt sich die
+Hintergrundfarbe für die Obermenüpunkte und Untermenüpunkte über die
+Konstanten <b>BG_MENUETOP</b> und <b>BG_MENUESUB</b> frei einstellen.
+</li><li> Es gibt eine neue Konstante <b>BG_TR</b>, welche die Hintergrundfarbe von selektierten Zeilen in Listen definiert (Layer, Nutzer).
+</li><li> Neben dem normalen CSV-Export gibt es jetzt auch einen Eigentümer- und einen Nutzungsarten-CSV-Export.
+</li><li> In der Nachweisrecherche und in der Flurstückssuche wird der
+Landesschlüssel jetzt getrennt vom Gemarkungsschlüssel dargestellt.
+</li><li> Auch bei WMS-Layern erscheint nun ein (+/-)Button, mit dem sich die Klassen der ein- und ausblenden lassen.
+</li><li> Besitzt ein Layer eine Transparenz, so wird diese nun auch in der Legende berücksichtigt.
+</li><li> Zum Erzeugen der Legendenbilder wird bei Linien- und
+Polygonlayern 'size' immer auf 2 gesetzt, damit dicke Linien nicht das
+ganze Legendenbild ausfüllen. Bei Punktlayern wird maxsize immer auf den
+ Wert von size gesetzt.
+</li><li> In der Stellenauswahl lassen sich nun 2 Koordinatensysteme
+auswählen. Das erste ist das System, welches für die Kartendarstellung
+verwendet und in dem gearbeitet wird. Wählt man ein zweites System aus,
+erscheint unter der Karte eine weitere Koordinatenausgabe in diesem
+zweiten Koordinatensystem. Wählt man kein zweites aus, bleibt alles wie
+gehabt.
+</li><li> Der feste Menüpunkt "Stelle wählen" wurde entfernt und kann
+nun als normaler Menüpunkt mit beliebiger Bezeichnung hinzugefügt werden
+ (go=Stelle Wählen).
+</li><li> Um z.B. großformatige Drucke mit einer niedrigeren Auflösung
+zu erstellen, lässt sich nun ein beliebiger Mapfactor an die
+Druckausschnittswahl übergeben. Um mit einem Mapfactor von 1 zu drucken,
+ wird einfach "&amp;map_factor=1" an die URL angehängt. Wird nichts
+angegeben, wird wie gehabt der Mapfactor aus der config.php verwendet.
+</li><li> Bei der Adressensuche werden jetzt die Strassennamen mit Gemarkungen ausgegeben, wenn es Strassen mit gleichem Namen gibt.
+</li><li> Im Nachweisrechercheergebnis lassen sich nun ausgewählte
+Nachweise als Vorlage für die Erstellung eines neuen Nachweises
+übernehmen. Sind mehrere Datensätze ausgewählt, werden die Geometrien
+vereinigt.
+</li><li> Im Style lassen sich jetzt auch die Parameter <b>offsetx</b> und <b>offsety</b> setzen. Damit kann man z.B. parallele Linien erzeugen.
+</li><li> Im Stellenformular haben die Pulldownmenüs jetzt Tooltips um
+auch lange Namen erkennen zu können. Auch Datei-Formularfelder haben
+jetzt einen Tooltip.
+</li><li> Im Geometrieeditor gibt es ein neues Werkzeug: <b>Koordinate eingeben</b>.
+ Hiermit kann zum Setzen eines Eckpunkts einer Fläche oder Linie oder
+zum Setzen einer Punktgeometrie eine Koordinate direkt eingegeben
+werden.
+</li><li> Im Geometrieeditor gibt es ein neues Werkzeug: <b>Puffer hinzufügen</b>. Hiermit kann die aktuelle Geometrie um eine beliebige Breite vergrößert werden.
+</li><li> Auch in der Nachweiserfassung hat man jetzt die Möglichkeit, beliebige Geometrien auszuwählen.
+</li><li> Es gibt ein neues Formularelement: <b>user</b>. Hier wird der Name des Nutzers automatisch eingetragen, wenn ein Datensatz gespeichert wird.
+</li></ul>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit&amp;section=6" title="Changelog">bearbeiten</a>]</div><a name="kvwmap-1.7.2"></a><h3> kvwmap-1.7.2 </h3>
+<ul><li> Der Attributtyp <b>Bild</b> heißt jetzt <b>Dokument</b>. Jetzt
+können nämlich nicht nur Bilder, sondern auch PDFs, DOCs und andere
+beliebige Dokumenttypen gespeichert werden. Damit diese Änderung im
+Datenmodell wirksam wird, muss zum einen die Tabelle layer_attributes
+angepasst werden (mysql_update.sql). Außerdem muss die Funktion <b>sendeBild</b> in <b>sendeDokument</b>
+ umbenannt werden. Damit auch schon mit älteren Versionen gespeicherte
+Bilder korrekt angezeigt werden, müssen die Einträge in der
+entsprechenden Postgis-Tabelle angepasst werden. Hier muss auch <b>sendeBild</b> durch <b>sendeDokument</b> und <b>bild</b> durch <b>dokument</b> ersetzt werden.
+</li><li> Beim CSV-Export werden Geometrie-Spalten jetzt ignoriert und nicht mit in die csv-Datei geschrieben.
+</li><li> Es gibt eine neue Konstante, <b>BEARBEITER</b>, die definiert, ob der Nutzername im Kopf des ALB-Auszugs 30 ausgegeben werden soll, oder nicht.
+</li><li> In der Sachdatenanzeige des GLE gibt es jetzt die Möglichkeit <b>alle</b> ausgewählten Datensätze in der Karte als Suchergebnis-Layer anzuzeigen.
+</li><li> Bei der Erfassung von Nachweisen wird jetzt geprüft, ob das
+Polygon in der angegebenen Flur liegt. Wenn nicht, erscheint ein
+Warnhinweis. Außerdem wird nach dem Hochladen der Datei geprüft, ob die
+Datei auch da ist und ob sie größer 0 Byte ist. Wenn nicht, wird kein
+Eintrag in die DB gemacht.
+</li><li> Es gibt eine neue Funktion zum Anpassen der Kartenbildgröße an
+ die Browserfenstergröße. Bisher gab es ja fest vorgegebene Kartengrößen
+ in der Stellenwahl. Jetzt gibt es zusätzlich einen Link "Kartengröße
+anpassen" rechts unterhalb der Karte. Wird dieser angeklickt, wird die
+Karte der Größe des aktuellen Browser-Fensters angepasst.
+</li><li> Es gibt jetzt eine Layer-Export-Funktion. Damit ist es
+möglich, die Layerdefinition samt Klassen, Styles und Labels in eine
+SQL-Datei zu exportieren. So lassen sich Layer sehr einfach von einem
+kvwmap-Server zu einem anderen übertragen. Die go-Variable heißt: <b>Layer_Export</b>.
+ Man kann ein oder mehrere Layer auszuwählen und klickt anschliessend
+auf 'Exportieren'. Danach kann man die SQL-Datei herunterladen.
+</li><li> Es ist nun möglich, Layer zu definieren, die auf Tabellen
+zugreifen, welche nicht im public-Schema liegen. Dafür gibt es ein neues
+ Feld in den Layereinstellungen. Hier kann das gewünschte Schema
+angegeben werden. Diese Schema-Angabe wird aber nur für die
+Sachdatenabfrage und den GLE benutzt. Damit der Mapserver den Layer auch
+ korrekt zeichnen kann, muss außerdem das Schema im Data-Statement vor
+den Tabellennamen erscheinen. Liegen die vom Layer benutzten Tabellen
+wie gehabt im public-Schema, bleibt alles beim alten und es muss nichts
+eingetragen werden. Siehe auch <a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/PostgreSQL-Tabellen_in_verschiedenen_Schemata" title="PostgreSQL-Tabellen in verschiedenen Schemata">PostgreSQL-Tabellen in verschiedenen Schemata</a>.
+</li><li> Es gibt jetzt eine Nutzerübersicht nach Stellen. Die go-Variable dafür lautet <b>BenutzerStellen_Anzeigen</b>.
+</li><li> In der Ergebnisdarstellung der Nachweisrecherche kann nun nach Spaltenüberschriften sortiert werden.
+</li><li> Für WMS-Layer lässt sich nun eine zusätzliche connection für
+den Druck angeben. Diese wird dann statt der normalen connection
+verwendet.
+</li><li> Man kann jetzt die im GLE angezeigten Datensätze nach
+Attributen sortieren. Dazu klickt man einfach den gewünschten
+Attributnamen an.
+</li><li> In der Namenssuche kann man jetzt auch über die Flur einschränken.
+</li><li> Beim Flurstücks-CSV-Export wird jetzt auch das
+Flurstückskennzeichen in Kurzform ausgegeben. Beim Öffnen der CSV-Datei
+mit Excel zeigte sich allerdings, dass Excel das Kennzeichen als Datum
+darstellt. Umgehen kann man das z.B. indem man die CSV-Datei in Excel
+importiert und die antsprechende Spalte als Text formatiert.
+</li><li> Bei den Layereinstellungen hat man jetzt auch die Möglichkeit, den Layer den gewünschten Stellen zuzuordnen.
+</li><li> Es gibt jetzt einen TIF-Export. Die go-Variable heißt <b>TIF_Export</b>.
+ Nach Angabe der gewünschten Auflösung wird eine TIF-Datei und die
+zugehörige TFW-Datei erzeugt. Für diese Funktion wird Imagemagick
+benötigt.
+</li><li> Im Druckrahmeneditor werden nun nicht mehr nur die Druckrahmen
+ der aktuellen Stelle, sondern alle Druckrahmen aufgelistet. Der Link
+"übernehmen" dient nun dazu, den ausgewählten Druckrahmen der gewählten
+Stelle zuzuordnen. Außerdem lassen die Druckrahmen im Stelleneditor der
+Stelle zuordnen.
+</li><li> Der Link "Kartenausschnitt" im GLE wurde erweitert. Nun kann
+man zusätzlich "selektieren" anhaken. Wird nun auf das Objekt gezoomt,
+wird es nicht gelb gehighlightet, sondern in dem Style dargestellt, den
+es auch sonst hat. Alle anderen Objekte des Layers werden ausgeblendet
+(d.h. der Layer wird ausgeschaltet).
+</li><li> Bei den Layereinstellungen lässt sich nun festlegen, ob in der
+ GLE-Sachdatenanzeige für jeden Datensatz eine Querymap angezeigt werden
+ soll. Dies funktioniert nur für Flächen- und Linienlayer.
+</li><li> Der Tooltip wurde leicht überarbeitet. Er ist jetzt
+halbtransparent, hat abgerundete Ecken und die Attribute werden
+untereinander angezeigt.
+</li><li> Bei der Tooltip-Abfrage wird nun auch die Geometrie des
+entsprechenden Datensatzes abgefragt und in der Karte gehighlightet.
+Einschalten lässt sich diese Funktion in der Stellenwahl.
+</li></ul>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit&amp;section=7" title="Changelog">bearbeiten</a>]</div><a name="kvwmap-1.7.1"></a><h3> kvwmap-1.7.1 </h3>
+<ul><li> Bei WMS-Layern erscheint das Legendenbild jetzt auch, wenn man
+mit dem WMS mehrere Layer abfragt (&amp;layers=L1,L2,L3). Außerdem wird
+das Legendenbild nur angezeigt, wenn der Layer eine Klasse mit Namen
+hat. Dadurch lässt sich für jeden WMS-Layer steuern, ob das Legendenbild
+ angezeigt werden soll, oder nicht.
+</li><li> Der Mapfaktor wird nun bei WMS-Layern von kvwmap-Servern mit
+berücksichtigt. D.h. im Druck erscheinen die maßstabsabhängigen Größen
+von diesen WMS-Layern korrekt.
+</li><li> Es gibt eine neue Konstante <b>PHPVERSION</b>. Mit PHP 5
+laufen alle Aktionen im GLE (Anzeige, Tootip, Suche, Speichern ...)
+nochmals schneller ab, da hier neue Funktionen zur Verfügung stehen.
+</li><li> Die Geschwindigkeit wurde sowohl in der normalen Kartenansicht als auch im GLE verbessert.
+</li><li> Man kann nun in der Layer-Suche auch nach WFS-Layern suchen.
+Zunächst werden nur die Operatoren =,&nbsp;!=, &lt; und &gt;
+unterstützt.
+</li><li> Es gibt ein neues Feld <b>wfs_geom</b> in der Tabelle Layer.
+In diesem Feld kann man das Attribut angeben, welches bei einem
+WFS-Layer die Geometrie repräsentiert. Ist aber nur bei WFS-Layern
+erforderlich, die mehrere Geometrien haben.
+</li><li> Im Style&amp;Labeleditor lassen sich die Styles nun in ihrer
+Zeichenreihenfolge anpassen. Die Styles werden dabei von unten nach oben
+ in der Zeichenreihenfolge aufsteigend dargestellt. Dabei ist zu
+beachten, dass die Styles auch eine Drawingorder haben müssen.
+</li><li> Die Streckenmessfunktion ist nun auch im Geometrie-Editor verfügbar.
+</li><li> Bei der Erstellung von neuen Datensätzen und der Bearbeitng
+von vorhandenen wird vor dem Speichern getestet, ob die Geometrie
+fehlerhaft ist. Ist dies der Fall, erfolgt eine Fehlermeldung und es
+wird nicht versucht zu speichern.
+</li><li> Es gibt 5 zusätzliche Default-Parameter für die Zuweisung von
+Layern zu Stellen: Transparenz, Drawingorder, Minscale, Maxscale,
+Offsite
+</li><li> Es gibt neues Feld <b>selectiontype</b> in der Tabelle layer.
+Trägt man hier 'radio' ein, so erhält dieser Layer in der Legende einen
+Radiobutton und alle anderen Radio-Layer innerhalb der Gruppe werden so
+zusammengefasst, dass man sie nur einzeln einschalten kann.
+</li><li> Bei der Stellenauswahl hat man nun die Möglichkeit, die Textgröße für die Sachdatenanzeige im GLE zu setzen.
+</li><li> Der GLE berücksichtigt nun die Eigenschaft 'NOT NULL' aus der
+PostgreSQL-DB. Fehlt bei einem solchen Attribut der Eintrag und ist es
+kein Attribut, welches automatisch hochzählt, wird nicht versucht zu
+speichern, sondern man erhält einen entsprechenden Hinweis.
+</li><li> Es gibt eine neue Konstante <b>ZIP_PATH</b>, die den Pfad zum
+Zip-Programm auf dem Server definiert. Bei Linux-Maschinen reicht hier
+normalerweise die Angabe 'zip'. Unter Windows kann der Pfad bspw. so
+aussehen: 'c:/programme/Zip/bin/zip.exe'.
+</li><li> Der Shape-Import wurde erweitert. Man hat jetzt die
+zusätzliche Option "Daten aktualisieren". Dadurch ist es jetzt z.B.
+möglich per Shape-Export Datensätze auszulesen, die Shape-Datei mit
+einem anderen Programm zu bearbeiten und dann per Shape-Import wieder
+einzuspielen. Die Datensätze werden dabei mit "UPDATE"-Statements
+aktualisiert.
+</li><li> Im Attribut-Editor gibt es nun die Möglichkeit einen Attribut-Tooltip zu vergeben, der dann im GLE erscheint.
+</li><li> Für den Formularelementtyp Auswahlfeld gibt es die Möglichkeit der Layerverknüpfung. Siehe <a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Dokumentation#Bearbeitung_von_Sachdaten" title="Dokumentation">Dokumentation</a>.
+</li><li> Für die Formularelementtypen SubFormPK, SubFormFK,
+SubformEmbeddedPK gibt es im Attributeditor die Möglichkeit im
+Optionenfeld einen zusätzlichen Parameter "no_new_window" anzugeben.
+Dadurch wird kein neues Fenster geöffnet. Siehe <a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Dokumentation#Bearbeitung_von_Sachdaten" title="Dokumentation">Dokumentation</a>.
+</li><li> Es gibt einen neuen Formularelementtyp "SubformEmbeddedPK".
+Dieser zeigt die Datensätze des abhängigen Layers nicht in einem extra
+Fenster an, sondern bietet eine verlinkte Vorschauliste, die in der
+Sachdatenanzeige eingebettet ist. Siehe <a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Dokumentation#Bearbeitung_von_Sachdaten" title="Dokumentation">Dokumentation</a>.
+</li><li> In der Grundbuchblattanzeige erscheinen nun auch die Informationen Eigentümer, Lage und Nutzung.
+</li><li> In der Sachdatenanzeige ALB ist die Grundbuchbezirk- und Blattnummer ein Link zur Grundbuchblattanzeige.
+</li><li> Beim Suchergebnis der Namenssuche gibt es nun Schalter, die
+alle Flurstücke, bzw. Grundbuchblätter auswählen. Die Schalter sind die
+Pfeile unter den Checkboxen.
+</li></ul>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit&amp;section=8" title="Changelog">bearbeiten</a>]</div><a name="kvwmap-1.7.0"></a><h3> kvwmap-1.7.0 </h3>
+<ul><li> Bei WMS-Layern, die ein getLegendGraphic anbieten, erscheinen diese Klassen nun auch in der Legende.
+</li><li> Die Flurstückssuche funktioniert nun auch über Fluren und Gemarkungen hinweg.
+</li><li> Es gibt nun eine Sachdaten-Druckfunktion.
+</li><li> Es gibt ein neues Attribut in der Tabelle User: Namenszusatz.
+Außerdem wird jetzt der volle Name des Nutzers in der GUI angezeigt.
+</li><li> Zur Verbesserung der Sicherheit kann jetzt für jede Stelle
+eingestellt werden, ob das Alter von Passwörtern der Nutzer in der
+Stelle geprüft werden soll und wenn ja, wie lange diese gelten dürfen.
+</li><li> Es ist nun möglich attributabhängige Auswahllisten zu
+definieren. Dies geschieht im Attributeditor. Hier ein Beispiel: Es gibt
+ ein Attribut <b>flur</b>, welches von einem Attribut <b>gemkg</b> abhängig sein soll. Das Feld Optionen des Attributs flur muss z.B. folgendermaßen aussehen:
+</li></ul>
+<pre>select flur as value, flur as output from alknflur as f WHERE f.gemkgschl = <b>&lt;requires&gt;gemkg&lt;/requires&gt;</b>
+</pre>
+<p>Dieses Attribut liefert eine Liste aller Fluren einer bestimmten Gemarkung.
+Das Attribut gemkg, welches die Gemarkungen auflistet, hat z.B. folgendes Optionen-Feld:
+</p>
+<pre>select gemkgschl as value, gemkgname as output from alb_v_gemarkungen <b>&lt;required by&gt;flur&lt;/required by&gt;</b>
+</pre>
+<ul><li> Beibehaltung der historischen ALB Informationen bei Fortführung möglich
+<ul><li> In der Auswahl für die Fortführung des ALB kann man jetzt
+wählen ob die historischen Objekte gelöscht werden solle oder nicht:
+"Historische Bestände und Flurstücke löschen". Defaultmäßig ist das auf
+"aus" gestellt, wenn die neue Konstante <b>WLDGE_HISTORISCHE_LOESCHEN_DEFAULT</b> auf 0 gesetzt ist, sonst ist der Radiobutton defaultmäßig eingeschaltet.
+</li><li> Des Weiteren wurde auch der Quelltext so angepasst, dass die
+historischen ALB Informationen erhalten bleiben, wenn der entsprechende
+Parameter in der WLDGE Auswahl gesetzt wurde.
+</li><li> Für die in diesem Zusammenhang geänderten Funktionen wurden Beschreibungen für die  API-Dokumentation eingefügt.
+</li><li> Der Export von geänderten Adressen mit der Funktion <b>export_ESAF64</b>
+ berücksichtigt die Aktualitaetsnr in den Grundbüchern. Es werden nur
+noch geänderte Adressen ausgegeben bei dem kein Vermerk aktualitaetsnr =
+ 'hist' vorliegt.
+</li><li> In der Auswahl der WLDGE Datei erscheint jetzt defaultmäßig
+der Name der WLDGE Datei, der in der Konstante WLDGEFILENAME steht.
+Vorher stand da immer ff.wldge.
+</li></ul>
+</li><li> Die für den Kartendruck erzeugten PDF Dateien erhalten
+zusätzlich zum Namen des Nutzers und dem Zeitstempel eine zufällige 8
+stellige Zahl, damit unbefugte Nutzer den Dateienamen von fremden für
+andere bestimmte Dateien schlechter erraten können.
+</li><li> Es gibt eine neue Konstante für einen maximalen Maßstab, bzw. minimale Maßstabszahl: <b>MINSCALE</b>
+</li></ul>
+<p>Wird sie in der config.php gesetzt, können alle Zoomfunktionen nur
+noch bis zu dieser Grenze zoomen. In der config_default.php wird der
+Wert auf 0 gesetzt.
+</p>
+<ul><li> Die Layer-Suche wurde <a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/%C3%9Cberarbeitung_der_Layersuche" title="Überarbeitung der Layersuche">überarbeitet</a>. Um den Titel der Layer-Suche anzupassen, muss in der Tabelle u_menues im Feld "links" folgendes eingetragen werden:
+</li></ul>
+<pre>index.php?go=Layer-Suche&amp;titel=<i>Layersuche</i>
+</pre>
+<ul><li> Es lassen sich nun auch WFS-Layer anzeigen und abfragen. Die
+Sachdaten werden im GLE als "nur lesbar" angezeigt. Außerdem lassen sich
+ neben den Postgis-Layern nun auch WFS-Layer als Geometrie-Abfragelayer
+bei der Geometriebearbeitung auswählen, um sie als Basis bei der
+Digitalisierung zu verwenden.
+</li><li> Die Fachschale Jagdkataster wurde überarbeitet. Neben der
+Anpassung der PostGIS-Tabellendefinitionen an die Condition-DB und der
+Aktualisierung der Snippets werden Layer-, Klassen-, Style- und
+Labeldefinitionen in der <i>mysql_install_help_jagdbezirke.sql</i> angeboten um die Jagdbezirke in der Karte darzustellen.
+</li><li> Bei eingeschalteten Layern, die aus einer PostGIS Datenbank kommen, kann man auf die maximale Ausdehnung zoomen
+</li><li> Es gibt jetzt auch einen Geometrieeditor für Linienlayer. Der Geometrietyp muss hier 'MULTILINESTRING' sein.
+</li><li> Es gibt nun einen Style-und Labeleditor (go=<b>Style_Label_Editor</b>).
+</li><li> Zusätzliche Formularelementtypen im Generischen Layereditor
+("href" zeigt Inhalt als Link an und "Bild" zeigt Bild mit Link auf das
+Bild an.). Für die Bildanzeige wird die Funktion <b>sendeBild</b> benötigt.
+</li></ul>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit&amp;section=9" title="Changelog">bearbeiten</a>]</div><a name="kvwmap-1.6.9"></a><h3> kvwmap-1.6.9 </h3>
+<ul><li> In der Nachweisverwaltung gibt es nun die Möglichkeit auch
+andere Dokumentarten als die 3 bisherigen (KVZ, GN, FFR) einzutragen. Um
+ festzulegen, welche anderen Dokumentarten es gibt, dient die Tabelle <b>n_dokumentarten</b>. Die Tabelle <b>n_nachweise2dokumentarten</b> ordnet die Dokumentarten den Nachweisen zu.
+</li><li> Es gibt jetzt eine Funktionenverwaltung. Man hat die Möglichkeit sich alle Funktionen anzeigen zu lassen (go=<b>Funktionen_Anzeigen</b>) und diese dann zu bearbeiten oder neue Funktionen anzulegen (go=<b>Funktionen_Formular</b>). Außerdem lassen sich im Stelleneditor die vorhandenen Funktionen der jeweiligen Stelle zuordnnen.
+</li><li> Die Tabelle u_menues hat eine neue Spalte <b>order</b>. Hier
+kann die Standard-Menueorder festgelegt werden. Die Zuordnung der
+Menüpunkte im Stelleneditor erfolgt dann nach der Standard-Menüorder.
+</li><li> Bei der Digitalisierung von Polygonen, wird nun die Entfernung zum letzten Punkt in der Statuszeile angezeigt.
+</li><li> Die Ausgabe der Kartenprojektion in der Stellenauswahl lässt sich nun auch umbenennen. Dazu gibt es eine neue Postgres-Tabelle <b>spatial_ref_sys_alias</b>. Trägt man hier einen epsg-code und einen Alias ein, wird dieser Alias anstelle des Eintrags in spatial_ref_sys angezeigt.
+</li><li> Es gibt eine neue Konstante <b>ALWAYS_DRAW</b>, welche
+festlegt, ob im Polygoneditor nach einem Zoom usw. immer in den
+Polygonzeichnen-Modus gewechselt werden soll (so wie früher) oder nicht.
+</li><li> Die Einstellmöglichkeiten zur Einschränkung der Zugriffsrechte wurden um IP Adressen erweitert. Neue Konstante <b>CHECK_CLIENT_IP</b> und neue Spalten für Tabelle user und stelle.
+</li></ul>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit&amp;section=10" title="Changelog">bearbeiten</a>]</div><a name="kvwmap-1.6.8"></a><h3> kvwmap-1.6.8 </h3>
+<ul><li> Es gibt eine neue Konstante <b>CHECKPUNKTDATEI</b>, über die
+sich einstellen lässt, ob die Festpunktdatei vor dem Einlesen auf
+doppelte Punktnummern überprüft werden soll. Wird dieser Test
+durchgeführt, werden die doppelten Punktnummern aus der Festpunktdatei
+entfernt und in eine separate Datei geschrieben.
+</li><li> kvwmap unterstützt nun auch den Mapserver in der Version 5.x.x. Dafür gibt es eine neue Konstante <b>MAPSERVERVERSION</b>
+ in der config.php. Beim Umstieg ist bis jetzt nur zu beachten, dass das
+ Attribut transparency der stellenbezogenen Layereigenschaften (bzw. der
+ Tabelle used_layer) nicht mehr "0" sein darf. Will man keine
+Transparenz haben, muß man transparency leer lassen. Ansonsten ist der
+Layer nicht zu sehen.
+</li><li> Bei Verwendung der neuen Legende wird jetzt auch beim Auf- und
+ Zuklappen der Klassen nur die Legende aktualisiert und nicht die ganze
+Seite neu geladen.
+</li><li> Bei den ALB-Auszügen 20 und 25 wird nun, die Buchungsart, wenn
+ vorhanden der Miteigentumsanteil und Sondereigentumshinweis ausgegeben.
+</li><li> Führt man in der Hauptkarte eine Strecken- oder Flächenmessung
+ durch, so bleibt die gezeichnete Strecke/Fläche jetzt auch nach
+Verschieben des Bildausschnittes erhalten. Um die Geometrie zu löschen,
+klickt man einfach ein weiteres Mal auf die entsprechende
+Strecken/Flächenmessschaltfläche.
+</li><li> Es gibt eine neue Konstante <b>HAUSNUMMER_TYPE</b>, über die man definieren kann ob die Adressierzusätze bei Hausnummern immer klein oder immmer groß geschrieben werden sollen.
+</li><li> Beim Drucken kann der Inhalt von Freitexten nun von den
+Nutzern selbst definiert werden. Dazu fügt man dem gewünschten
+Druckrahmen in der Druckrahmenverwaltung einen Freitext hinzu und lässt
+den Inhalt des Textes einfach leer. In der Druckausschnittswahl
+erscheint dann für jeden leeren Freitext ein Textfeld, in das der Nutzer
+ seinen Text eingeben kann.
+</li><li> Im GLE gibt es jetzt die Möglichkeit auch alle Treffer einer Sachdatenabfrage in eine CSV-Datei zu exportieren.
+</li><li> Hat man eine Namenssuche durchgeführt und klickt auf die
+Links, die zur Flurstücksanzeige oder zur Grundbuchblattanzeige führen,
+enthalten diese Seiten nun einen Link über den man wieder zurück zur
+Ergebnisanzeige der Namenssuche gelangt. Das gleiche gilt für die
+Grundbuchblattsuche und die Links zur Flurstücksanzeige.
+</li><li> Ist eine Stelle über die Tabelle stelle_gemeinden räumlich
+eingeschränkt, so wirkt sich diese Einschränkung nun auch auf die
+Grundbuchblattsuche aus. D.h. es stehen nur die Grundbuchbezirke der
+entsprechenden Gemeinden zur Auswahl.
+</li><li> In der Grundbuchblattanzeige wurden die Links zu den ALB-Auszügen überarbeitet.
+</li><li> Der Link zur Anzeige des Kartenbildes heißt nun "Kartenbild
+zum Abspeichern anzeigen" und das angezeigte Bild enthält die
+Maßstabsleiste.
+</li><li> Die <a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Dokumentation#Layer-Suche" title="Dokumentation">Layersuche</a> wurde überarbeitet.
+</li><li> In der Layer-Suche gibt es jetzt ein Eingabefeld um die Anzahl
+ der angezeigten Treffer festzulegen. Vorbelegt ist dieses Feld mit
+MAXQUERYROWS.
+</li><li> Im Polygoneditor gibt es jetzt die Möglichkeit die aktuelle
+Geometrie zwischenzuspeichern ohne das auf die Gesamtgeometrie gezoomt
+wird.
+</li><li> Die Schaltflächen für die Werkzeuge in den verschiedenen
+Fachschalen und dem GLE sind jetzt alle hintereinander angeordnet und
+nicht mehr durch Lücken unterbrochen, außerdem bleibt die zuletzt
+ausgewählte Schaltfläche nach einem Neuladen erhalten und springt nicht
+auf Polygon hinzufügen zurück.
+</li><li> Im Polygoneditor lassen sich nun auch neue Eckpunkte erzeugen
+und vorhandene löschen. Mit einem Doppelklick auf einen Eckpunkt wird
+dieser gelöscht. Um einen neuen Eckpunkt zwischen zwei vorhandenen zu
+erzeugen, bewegt man die Maus genau auf die Mitte zwischen beiden
+Eckpunkten. Klickt man auf den aufleuchtenden neuen Punkt, wird dieser
+als Eckpunkt übernommen.
+</li><li> Besitzt ein Layer einen Filter, der ihn räumlich einschränkt,
+so wird dieser Layer in der Legende grau dargestellt, wenn der aktuelle
+Kartenausschnitt außerhalb liegt.
+</li><li> Man hat jetzt die Möglichkeit auch nach historischen
+Flurstücken zu suchen. Die go-Variable für die historische
+Flurstückssuche heißt <b>Flurstueck_hist_Auswaehlen</b>. Die Suchmaske
+ist hier die selbe wie bei der normalen Flurstückssuche, allerdings
+werden hier nur Flurstücke mit dem Status 'H' angeboten. Die
+historischen Flurstücke werden mit dem selben Template wie die normalen
+Flurstücke angezeigt. Gibt es zu einem Flurstück Vorgänger oder
+Nachfolger, so erscheinen diese als Links, wodurch man sich in der
+Historie vor- und zurück bewegen kann. Dafür müssen folgende
+Vorraussetzungen erfüllt sein: Das Pfad-Statement des Flurstücks-Layers
+um die Attribute <b>nachfolger</b> und <b>status</b> erweitert werden.
+Also in der Form: 'template_erforderlich'::text AS &lt;Attribut&gt;.
+Anschließend müssen die Rechte für die beiden Attribute auf 'lesen'
+gesetzt werden. Außerdem muss das Attribut vorgaenger auch auf 'lesen'
+gesetzt sein.
+</li><li> Im Stelleneditor lassen sich nun neben den Obermenüpunkten auch die entsprechenden Untermenüs zuordnen.
+</li><li> Es gibt eine neue Konstante <b>SKIZZEN_DATEI_TYP</b>, über die man festlegen kann, welchen Dateityp die Skizzen für die Festpunktverwaltung haben (tif, pdf, ...).
+</li><li> Änderungen zum Auswählen verschiedener Sprachen für die die Texte in Menüs, der GUI und Snippets.
+</li><li> Funktion zum Minimieren und Maximieren der Menüleiste.
+</li><li> Die Automatische Includierung von Config-Dateien aus dem
+Ordner config ist von der Datei index.php an das Ende der Datei
+config.php umgezogen. Mehr und mehr Konfigurationsparameter, die
+fachschalenspezifisch sind und ohne die Nutzung der Fachschalen keine
+Auswirkungen haben, werden in separaten config Dateien ausgelagert.
+Dadurch fällt die Aktualisierung der eigenen config.php Datei etwas
+leichter, wenn Änderungen vorkommen. Außerdem können so leichter
+Fachschalen im Quellcode hinzugefügt oder entfernt werden.
+</li></ul>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit&amp;section=11" title="Changelog">bearbeiten</a>]</div><a name="kvwmap-1.6.7"></a><h3> kvwmap-1.6.7 </h3>
+<ul><li> Man hat nun die Möglichkeit, Festpunkte aus dem 4. und dem 5.
+Streifen in die Datenbank einzulesen. Dafür gibt es eine neue Konstante <b>FESTPUNKTE_2_STREIFEN</b>,
+ welche definiert ob man Festpunkte in beiden Streifen hat oder nur in
+einem. Außerdem gibt es eine zweite Tabelle fp_punkte2, für die
+Festpunkte im zweiten Streifen. In der Tabelle fp_punkte_temp wurde das
+constraint für den epsg-code entfernt, so dass hier jetzt die Geometrien
+ aus beiden Streifen erzeugt werden können. Damit man die Festpunkte aus
+ dem zweiten Streifen in kvwmap sehen kann, muß man ausgehend vom
+bestehenden Festpunkt-Layer einen zweiten Layer anlegen, welcher auf die
+ Tabelle fp_punkte2 zugreift und den epsg-code des 2. Streifens hat.
+</li><li> In der Statistik wird jetzt neben der Anzahl der erzeugten ALB-Auszüge auch die Anzahl der Seiten ausgegeben.
+</li><li> Es gibt eine neue Funktion <b>Layerattribut-Rechteverwaltung</b>, welche den Zugriff auf selbige schützt.
+</li><li> Beim Aufrufen der Rechteverwaltung der Layerattribute
+(go=Layerattribut-Rechteverwaltung) wird jetzt standardmäßig die Stelle
+vorausgewählt, in der der Benutzer sich gerade befindet. (pk)
+</li><li> Die dynamische Legende kann nun, neben der bisherigen Variante
+ über das Legenden-Template, auch mit PHP erzeugt werden. Die
+PHP-Variante hat den Vorteil, dass beim Auf- und Zuklappen der
+Layergruppen nicht mehr die gesamte Seite neu geladen wird, sondern die
+Legende per Ajax aktualisiert wird. Für die neue Variante der Legende
+ist jedoch mindestens die Mapserver-Version 4.10 erforderlich, da die
+Klassen jetzt mit einem getLegendGraphic-Request über go=OWS an den
+eigenen Server dargestellt werden. Welche der beiden Varianten man
+einsetzen will, kann man über die Konstante <b>NEW_LEGEND</b> in der config.php einstellen.
+</li><li> Für den Polygon-Geometrieeditor gibt es ein neues Werkzeug, mit dem man die Eckpunkte des aktuellen Polygons verschieben kann.
+</li><li> Im GLE ist es nun möglich alle Layer in eine CSV-Datei zu
+exportieren (funktioniert momentan allerdings wie das Löschen nur für
+Layer, die nur eine Tabelle benutzen)
+</li><li> In der Namenssuche gibt es nun eine Blätterfunktion
+</li><li> Für den generischen Layereditor gibt es einen neuen Formularelementtyp: <b>Time</b>.
+ Wird ein neuer Datensatz mit einem Time-Attribut erzeugt oder nach
+Bearbeitung gespeichert, so wird im Time-Attribut der aktuelle Timestamp
+ gespeichert. In der Datenbank empfiehlt sich für ein Time-Attribut der
+Datentyp <b>timestamp</b>. Möglich wäre aber auch varchar.
+</li><li> Es gibt eine Funktion zur <a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Dokumentation#.C3.84nderung_der_Eigent.C3.BCmeradressen" title="Dokumentation">Änderung von Eigentümeradressen</a>.
+</li><li> Nach einem Koordinatenzoom wird nun ein temporärer Punktlayer erzeugt und angezeigt.
+</li><li> Die Flächenmessfunktion ist nun mit in der Schaltfläche für
+die Abfrage über ein Polygon integriert. Wählt man die Schaltfäche aus,
+kann man wie gehabt ein Polygon zeichnen. Sobald 3 Eckpunkte gezeichnet
+wurden, wird der aktuelle Flächeninhalt als Tooltip angezeigt. Um eine
+Abfrage auszulösen, klickt man wie bisher den letzen Eckpunkt zweimal
+an.
+</li><li> Die Koordinatenzoom-Schaltfläche wird nun durch ein Fadenkreuz symbolisiert.
+</li><li> Die Druckfunktionalität wurde erweitert. Man kann nun für
+jeden Druckrahmen eine separates RefMapfile einbinden. Desweiteren wurde
+ die Legendendarstellung überarbeitet und die Auflistung der Druckrahmen
+ alphanumerisch sortiert.
+</li><li> Der Fehler bei der Darstellung des Kartenbildes im IE wurde nun in allen Fachschalen behoben.
+</li><li> Man hat nun die Möglichkeit sich das aktuelle Kartenbild
+separat anzeigen zu lassen. Um diese Funktion ein- und auszuschalten
+dient die Konstante <b>SHOW_MAP_IMAGE</b> in der config.php.
+</li><li>Die Layer-Tabelle wurde um Defaultwerte für template und
+queryable erweitert. Diese Werte werden bei Zuweisung eines Layers zu
+einer Stelle übernommen.
+</li><li> Die Nutzer- Stellen und Layereditoren wurden um eine frei wählbare ID erweitert.
+</li><li> Man kann die Layer in der stellenbezogenen Layerübersicht nun nach Layernamen oder nach Drawingorder sortieren.
+</li><li> Die Druckausschnittsspeicherfunktion speichert nun auch den Druckrahmen.
+</li><li> Es gibt eine neue Konstante BLATTNUMMERMAXLENGTH, über die man
+ die Länge der Blattnummer in der Nachweisverwaltung einstellen kann.
+</li><li> Es gibt eine neue Konstante <b>UPLOADPATH</b>, welche den Pfad
+ zu einem Upload-Ordner definiert. Dieser Ordner sollte aus
+Sicherheitsgründen außerhalb des Web-Verzeichnisses liegen, also z.B. in
+ var/data. Hier werden alle hochgeladenen Dateien temporär gespeichert.
+Der Ordner kann genauso wie der tmp-Ordner nachts gelöscht werden.
+</li></ul>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit&amp;section=12" title="Changelog">bearbeiten</a>]</div><a name="kvwmap-1.6.6"></a><h3> kvwmap-1.6.6 </h3>
+<ul><li> In der Namenssuche gibt es eine neue Option "Flurstücke
+anzeigen", mit der es möglich ist, sich unter jedem Eigentümer alle
+zugehörigen Flurstücke anzeigen zu lassen. Es werden das
+Flurstückskennzeichen, der Gemarkungsname und die ALB-Fläche ausgegeben.
+ Sowie Links zu den ALB-Auszügen 30 und 35 und zum Kartenausschnitt.
+</li><li> Es gibt eine neue Suchfunktion, mit der man in den Flurstücken nach Nutzungsarten suchen kann. Die go-Variable dazu heißt: <b>Nutzung_auswaehlen</b>.
+</li><li> Mit dem generischen Layereditor lassen sich nun auch neue
+Datensätze erzeugen und vorhandene löschen. In das Formular zum
+Erstellen von neuen Datensätzen gelangt man mit der go-Variablen <b>neuer_Layer_Datensatz</b>.
+ Hier kann man nun die Sachdaten eintragen und die Geometrie erzeugen.
+Nach Klick auf Speichern wird der neue Datensatz in der Datenbank
+gespeichert. Sofort danach wird der gerade erzeugte Datensatz abgefragt
+und im generischen Layereditor angezeigt. Um Datensätze zu löschen,
+erscheint nach der Abfrage im generischen Layereditor vor jedem
+Datensatz ein Häkchenfeld. Ganz unten gibt es einen Link "ausgewählte
+Datensätze löschen". Dadurch werden die markierten Datensätze gelöscht.
+Allerdings funktioniert das Löschen bis jetzt nur für Layer, die nur
+eine einzelne Tabelle als Grundlage haben.
+</li><li> Die Aktionen zum Erstellen und Löschen von Layerdatensätzen
+sind natürlich an Rechte gebunden. In der Rechteverwaltung der
+Layerattribute gibt es jetzt auch ein Formularfeld für diese
+Zugriffsrechte des Layers. Hier kann man zwischen "lesen und
+bearbeiten", "neue Datensätze erstellen" und "Datensätze erstellen und
+löschen" wählen. Die Standardeinstellung ist "lesen und bearbeiten".
+(gespeichert werden diese Rechte in einer neuen Spalte "privileg" in
+used_layer)
+</li><li> Im Polygon-Editor des generischen Layer-Editors lässt sich der Layer, dessen Geometrie abgefragt werden soll nun frei wählen.
+</li><li> In der Nachweisverwaltung kann man bei der Eingabe der Blattnummer nun beliebige Zeichen verwenden.
+</li><li> In der Druckausschnittswahl lassen sich die Druckausschnitte nun rollenbezogen speichern.
+</li><li> Für die einfache Sachdatenabfrage gibt es nun eine
+Tooltip-Vorschau. Für die Vorschau wird zur Zeit nur ein Layer abgefragt
+ (sind mehrere abfragbar geschaltet, wird der erste von ihnen genommen).
+ Welche Attribute des Layers in der Vorschau angezeigt werden sollen,
+lässt sich in der Rechteverwaltung der Layerattribute festlegen. Um die
+Tooltip-Abfrage zu benutzen, wählt man die Info-Abfrage aus und bewegt
+den Mauszeiger zur gewünschten Position. Kurz danach erscheint der
+Tooltip. Die Abfragedauer hängt natürlich von der Anzahl der Attribute
+und der Datensätze ab.
+</li><li> Bei der Adresssuche lässt sich nun auch nach mehreren Hausnummern suchen.
+</li><li> Bei der Sachdatenanzeige der Flurstücke gibt es jetzt hinter
+jedem Flurstück eine Checkbox zum Selektieren. Nur die ausgewählten
+Flurstücke werden jetzt an die ALB-Auszüge, CSV-Exporte und
+Kartenausschnitte übergeben. Das gilt allerdings nur im Snippet
+"Flurstuecke_custom.php", nicht im normalen Snippet "Flurstuecke.php".
+</li><li> Die Dokumentation wird überarbeitet.
+</li><li> Es wurden neue Tabellen druckfreibilder und
+druckrahmen2freibilder hinzugefügt, damit man auch Bilder frei in einen
+Druckrahmen einbinden kann.
+</li></ul>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit&amp;section=13" title="Changelog">bearbeiten</a>]</div><a name="kvwmap-1.6.5"></a><h3> kvwmap-1.6.5 </h3>
+<ul><li> Die Darstellung kann in unterschiedlichen Koordinatensystemen
+erfolgen. Diese ist an die Rolle gebunden und kann über den Menüpunkt
+"Stelle Wählen" eingestellt werden. Es gilt zunächst nur für die
+Darstellung. Digitalisierungen und Änderungen sollten im System der
+Daten erfolgen. siehe <a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Dokumentation#Stelle_W.C3.A4hlen" title="Dokumentation">Stelle Wählen</a>.
+</li><li> Die Authentifizierung der Nutzer wird nun nicht mehr vom
+Apache-Webserver durchgeführt, sondern von kvwmap selbst. D.h. für den
+Login erscheint nun eine Anmeldeseite, auf der man Nutzername und
+Passwort eingibt. Die Zugriffs-Einschränkung des kvwmap-Verzeichnisses
+auf dem Webserver (httpd.conf) kann damit entfernt werden. Diese
+Umstellung bietet mehrere Vorteile. Zum einen müssen diejenigen, die
+kein mod_auth_mysql haben, beim Anlegen eines Nutzers jetzt nur noch den
+ Eintrag in der Datenbank machen und keine htaccess-Datei mehr
+bearbeiten. Desweiteren gibt es jetzt einen logout-Button oben im Menü.
+Außerdem werden beim Einloggen einmalige Routinen möglich, so wie z.B.
+das Löschen der Rollenlayer. Weiteres dazu in der <a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Dokumentation#Nutzerverwaltung" title="Dokumentation">Dokumentation</a>.
+</li><li> Im generischen Layereditor gibt es für den Formularelementtyp "Auswahlfeld" neue Optionen. siehe <a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Dokumentation#Bearbeiten_von_Sach-_und_Geometriedaten" title="Dokumentation">Dokumentation</a>
+</li><li> Neben dem Shape-Export gibt es nun auch eine Shape-Import Funktionalität. Die entsprechende go-Variable heißt <b>SHP_Import</b>.
+</li><li> Die Trefferliste bei der Namenssuche läßt sich nun an Hand der Attribute sortieren
+</li><li> In den Sachdatenabfragen gibt es nun eine Blätterfunktion für
+den Fall, dass die Abfrage eines Layers mehr Datensätze liefert als
+MAXQUERYROWS
+</li><li> Die STYLE-Tabelle wurde um die Spalten width und sizeitem erweitert
+</li><li> Über die Konstante DELETE_ROLLENLAYER läßt sich einstellen, ob
+ die Suchergebnislayer beim Login eines Nutzers gelöscht werden sollen,
+oder nicht
+</li><li> Es lassen sich nun Aliasnamen für Layer-Attribute vergeben.
+Dies erfolgt im Attributeditor. Die Aliasnamen werden dann im
+generischen Layereditor(GLE) und in der Layer-Suche anstatt der
+richtigen Namen angezeigt.
+</li><li> Die Layer-Suche wurde durch die Operatoren =,&gt;,&lt;,LIKE,IS und IN erweitert
+</li><li> Die in der Namenssuche gefundenen Grundbuchblätter sind nun Links, die direkt zur Grundbuchblattsuche führen
+</li><li> In der Grundbuchblattsuche kann man nun auch nach Grundbuchbezirknamen suchen
+</li><li> Die in der Legende nicht sichtbaren Klassen , sind nun auch in der Drucklegende ausgeblendet
+</li><li> Es gibt zwei neue Funktionen <b>ALB-Auszug 25</b> und <b>ALB-Auszug 20</b>, die die Ausgabe der ALB-Formate 20 und 25 schützen
+</li><li> Im generischen Layereditor wird nun eine Statusmeldung ausgegeben, nachdem man die Änderungen gespeichert hat
+</li><li> Die Ausgabe der Benutzerliste im Stelleneditor erfolgt nun in der Form "Name, Vorname"
+</li><li> Beim Sortieren von Listen werden nun auch Umlaute berücksichtigt
+</li><li> Die nicht-sichtbaren Layer in der Legende werden nun grau dargestellt
+</li><li> Der Transparenzgrad beim (ALK-)Druckwasserzeichen läßt sich
+nun frei einstellen. Der Wertebereich liegt hier zwischen 0 und 127.
+</li><li> Die nicht editierbaren Attribute im generischen Layereditor werden nun grau ausgegeben.
+</li><li> Es gibt eine neue Konstante <b>GLEVIEW</b> über die sich definieren läßt, ob die Attribute im GLE spalten- oder zeilenweise ausgegeben werden.
+</li><li> Spalte epsg_code in Tabelle stelle hinzugefügt. Damit wird
+angegeben in welchem Koordinatensystem die MaxExtension angegeben sind.
+Das ist notwendig, weil der Client in der Rolle jetzt auch verschiedene
+EPSG_Codes auswählen können soll. Dazu muss das MaxExtent immer in das
+Zielsystem der Rolle umgerechnet werden.
+</li></ul>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit&amp;section=14" title="Changelog">bearbeiten</a>]</div><a name="kvwmap-1.6.4"></a><h3> kvwmap-1.6.4 </h3>
+<ul><li> Die Menüsteuerung wurde auf Ajax umgestellt. D.h. wenn man nun
+einen Menüpunkt aufklappt, wird nicht mehr die gesamte Seite neu
+geladen, sondern nur die Untermenüpunkte per Javascript eingefügt (Dazu
+gibts auch eine neue Konstante <b>AJAX_MENUE</b>, mit der man dies an
+und ausschalten kann). Anscheinend interpretiert der Browser bei den mit
+ Javascript eingefügten html-Elementen die Umlaute nicht richtig,
+deswegen werden diese Zeichen nicht korrekt dargestellt. Zum Beheben
+dieses Problems muß man die Umlaute in den Namen der Menüpunkte durch
+die entsprechenden html-Codes ersetzen. D.h. zum Beispiel
+Flächenversiegelung --&gt; Fl&amp;auml;chenversiegelung
+</li><li> Neue Packete für fgs und ms4w in separaten Packeten zum Download auf Sourceforge
+</li><li> Änderung der Pfadeinstellung für die Dokumente im Rechercheergebnis
+</li><li> Behebung einer Warnung bei der Sachdatenanzeige
+</li><li> Behebung eines Fehlers beim Abfragen der Suchergebnislayer
+</li><li> Es gibt nun einen Shape-Export. Man kann einen kompletten
+Layer oder auch einen durch ein Polygon räumlich eingeschränkten Teil
+eines Layers in eine Shape-Datei exportieren. Die go-Variable dazu heißt
+ <b>SHP_Export</b>. Außerdem muß über die Konstante POSTGRESBINPATH definiert werden, wo pgsql2shp liegt.
+</li><li> In der Tabelle q_notizen wurde die Spalte kategorie nach
+kategorie_id umbenannt. Deswegen müssen die Data und Pfad-Statements der
+ Layer Notizen und Notizen_poly dementsprechend angepasst werden.
+</li><li> Die Transparenz von Layern wird nun nicht mehr layerbezogen, sondern LayerzuStelle-bezogen gespeichert.
+</li></ul>
+<pre>Wichtig:
+Bevor man das Attribut "transparency" in der Tabelle "layer" löscht, sollte man das Attribut in der Tabelle "used_layer"
+angelegt haben und die Werte aus der Tabelle "layer" übernehmen. Dazu kann man nach dem Ausführen von
+   ALTER TABLE `used_layer` ADD `transparency` TINYINT( 3 ) NULL AFTER `offsite`;
+folgenden SQL-Befehl ausführen:
+   UPDATE layer, used_layer SET used_layer.transparency = layer.transparency WHERE layer.Layer_ID = used_layer.Layer_ID
+</pre>
+<ul><li> Man hat nun die Möglichkeit, die Klassen der Layer in der
+Legende auszublenden. Hinter jedem Layer erscheint ein + bzw. - zum Ein-
+ bzw. Ausblenden. Zur Speicherung des Status wurde eine neue Spalte in
+u_rolle2used_layer eingefügt.
+</li><li> Es gibt nun stellenbezogene ALB-Druckwasserzeichen. Diese können im Stelleneditor gesetzt werden.
+</li><li> Die Konstante POSTGRESVERSION wurde angepasst. Die Schreibweise ist jetzt z.B. '800' für Version 8.0.
+</li><li> Es gibt eine neue Tabelle "rollenlayer", in der u.a. die
+Suchergebnislayer gespeichert werden. Damit erscheinen diese Layer nun
+nicht mehr in den Tabellen layer, used_layer und rolle2used_layer. Diese
+ Einträge können also gelöscht oder, wenn die aktuellen
+Suchergebnislayer erhalten bleiben sollen, in die neue Tabelle
+übernommen werden.
+</li><li> Bei der Sachdatenabfrage mit Suchradius wird nun ein Kreis in der Größe des Suchgebietes angezeigt.
+</li><li> Bei der Flurstückssuche läßt sich nun auch die Gemarkungsnummer angeben.
+</li><li> Es gibt einen neuen custom-Ordner unter layouts. In ihm lassen
+ sich die individuellen gui.phps speichern, die bei der Stellenwahl zur
+Verfügung stehen. Außerdem steht immer die Standard gui.php zur
+Verfügung, welche sich in layouts befindet.
+</li><li> Über eine neue Konstante MENU_REFMAP in der config.php kann man nun die Referenzkarte oben oder unten positionieren.
+</li><li> Es gibt eine neue Funktion, die das Löschen von Nachweisen schützt. Die Funktion heißt <b>Nachweiseloeschen</b>.
+</li><li> Bei der ALB-Anzeige und dem ALB-Auszug werden die auf Grund
+der strukturierten Namensangabe auftretenden überflüssigen Kommas nun
+nicht mehr angezeigt.
+</li><li> Der Suchergebis-Layer wurde transparent gemacht, so dass man auch darunterliegende Layer erkennen kann.
+</li><li> Ein Bug bei der Namenssuche wurde behoben, der dazu führte, dass Suchergebnisse teilweise mehrmals aufgelistet wurden.
+</li><li> Die Fachschale Jagdkataster wurde nochmals erweitert. Man hat
+nun die Möglichkeit nach Jagdbezirken zu suchen. Die go-Variable dazu
+heißt <b>jagdbezirke_auswaehlen</b>.
+</li><li> Es gibt nun eine generische Layer-Suche. Nach Auswahl eines
+Layers kann man als Suchparameter die Layerattribute verwenden, für die
+man mindestens Leserecht hat. Das Ergebnis der Suche erscheint dann im
+generischen Layer-Editor. Die go-Variable für die Suche heißt <b>Layer-Suche</b>.
+</li><li> Für den generischen Layereditor gibt es nun eine Rechteverwaltung. Die Rechteverwaltung läßt sich über die go-Variable <b>Layerattribut-Rechteverwaltung</b>
+ aufrufen. Hier lassen sich nach Auswahl der Stelle und des Layers die
+Privilegien den Layerattributen zuordnen. Zur Auswahl stehen 'nicht
+sichtbar', 'lesen' und 'editieren'. Standardmäßig sind alle Attribute
+eines Layers nur lesbar.
+</li><li> Die Sachdatenanzeige der Flurstücke wurde erweitert. Neben dem
+ bekannten Template 'Flurstuecke.php' läßt sich nun auch das Template
+'Flurstuecke_custom.php' einbinden. Die Besonderheit des neuen Templates
+ liegt darin, dass neben den schon bekannten Sachdaten auch weitere
+angezeigt werden können (siehe <a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/%C3%9Cberarbeitung_Sachdatenanzeige_ALB" title="Überarbeitung Sachdatenanzeige ALB">Überarbeitung Sachdatenanzeige ALB</a>).
+ Außerdem läßt sich festlegen, welche der Daten in welcher Stelle
+angezeigt werden sollen. Dies erfolgt in der Rechteverwaltung der
+Layerattribute. D.h. dieses Template läßt sich genauso wie der
+generische Layereditor über die Rechteverwaltung einschränken, nur dass
+hier nicht editiert werden kann und das Layout der Sachdatenanzeige
+festgelegt ist. Damit man die Attribute des Layers Flurstuecke über die
+Rechteverwaltung einschränken kann, muss das Pfad-Statement des Layers
+angepasst werden (siehe <a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/%C3%9Cberarbeitung_Sachdatenanzeige_ALB" title="Überarbeitung Sachdatenanzeige ALB">Überarbeitung Sachdatenanzeige ALB</a>).
+ Eine weitere Neuerung in diesem Template ist, dass man die Daten aller
+gefundenen Flurstücke in eine CSV-Datei exportieren kann, die sich dann
+beispielsweise mit Excel öffnen läßt.
+</li></ul>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit&amp;section=15" title="Changelog">bearbeiten</a>]</div><a name="kvwmap-1.6.3"></a><h3> kvwmap-1.6.3 </h3>
+<ul><li> Es gibt einen neuen Menüpunkt, mit dem man sich die gerade
+aktiven Layer in einem GoogleMaps-Viewer als WMS-Overlay anzeigen lassen
+ kann. Die go-Variable dazu heißt <b>googlemaps</b>. Diese Funktionalität steht jedoch erst ab Mapserver-Version 4.10.0 zur Verfügung.
+</li><li> Man kann nun bei der Auswahl der Stelle eigene gui.php's
+auswählen und das Layout von kvwmap somit individuell anpassen. Die
+gui.php's werden rollenbezogen gespeichert, deswegen gibt es in der
+Tabelle 'rolle' auch eine neue Spalte 'gui'. In der Stellenwahl stehen
+alle Dateien im \layouts-Ordner zur Auswahl, die die Endung '.php'
+haben. In der Version 1.6.3 liegen in diesem Ordner die normale gui.php
+und als Beispiel eine gui_xmas.php.
+</li><li> Die Fachschale Jagdkataster wurde erweitert. Geometrisch
+unmögliche Objekte (z.B. mit sich kreuzenden Linien) können nun nicht
+mehr gespeichert werden. Beim Absenden wird bei nicht gültiger Geometrie
+ eine entsprechende Fehlermeldung ausgegeben. Die farbige Hervorhebung
+der Buttons beim Anklicken wurde überarbeitet. Das Abfragesnippet
+enthält nun einen Link "enthaltene Flurstücke". Beim Klick auf diesen
+Link werden alle im Bezirk liegenden Flurstücke aufgelistet. Über den
+"löschen"-Link im Abfragesnippet ist es nun möglich, Datensätze zu
+löschen.
+</li><li> Anpassung der Druckausgabe in PDF-Dokumente für die
+ALB-Bestandsformulare 20 und 25 in der Datei alb.php in den Funktionen
+ALBAuszug_Bestand, ALBAuszug_Seitenkopf, WLDGE_Datei_einlesen sowie in
+der Datei postgresql.php in den Funktionen getEigentümerliste und
+getBuchungenFromGrundbuch
+<ul><li> Änderung der Spaltenzuordnung
+</li><li> Überschriften
+</li><li> Aktualitätsnr. des Grundbuchblattes
+</li><li> Einfügen der Eigentümerart
+</li><li> Ausgabe Zusatz zum Eigentümer
+</li><li> Ausgabe/Format  der Flächen
+</li><li> Ausgabe/Format der Seitenzahl
+</li><li> Darstellung und Ausgabe der Gemarkung Flur etc
+</li><li> Einfügen von Flurkarte Riss --&gt; Änderung der Einleseroutine in alb.php
+</li><li> Ausgabe der Lagebezeichnung, wenn keine Adresse vorhanden
+</li><li> Ausgabe der Nutzungsarten im Formular 25
+</li></ul>
+</li><li> Was bisher nur auf unserer veränderten Version des Mapservers
+möglich war, wird nun auch vom Mapserver in der Version 4.10.0
+unterstützt: Man kann auf Basis des Mapobjektes von kvwmap direkt einen
+WMS realisieren ohne erst eine Mapdatei erzeugen zu müssen. Dazu einfach
+ die go-Variable 'OWS' setzen und die für den Request erforderlichen
+Parameter. Z.B. so: <i>...index.php?go=OWS&amp;request=getmap&amp;service=wms&amp;version=1.1.0&amp;layers=Flurstuecke&amp;format=png</i>.
+ Bei erstmaliger Verwendung wird der kvwmap-Login abgefragt und die
+letzte Stelle geladen. Also so, als wenn man die Anwendung normal
+startet. Man kann aber auch über den Parameter 'Stelle_ID' die
+gewünschte Stellen-ID mit übergeben. Diese muß dann natürlich auch dem
+Nutzer zugeordnet sein.
+</li><li> Der generische Layereditor wurde soweit implementiert, daß man
+ die Sach- und Geometriedaten von Postgis-Layern bearbeiten kann. <a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Dokumentation#Generischer_Layereditor" title="Dokumentation">--&gt; Dokumentation</a> <br><b>!!!
+ Achtung&nbsp;!!! Ist einem Layer in einer Stelle kein Template
+zugeordnet, kann JEDER, der diesen Layer abfragen darf, den generischen
+Layereditor benutzen und Daten verändern.</b> In der nächsten Version wird ein Rechtesystem für den Layereditor implementiert sein.
+</li><li> Die Fachschale Bodenrichtwerte wurde so angepasst, daß nun
+entweder flächenförmige (wie bisher mit einer Textposition) oder
+punktförmige Bodenrichtwerte verwaltet werden können. Dazu gibt es in
+der config.php eine neue Konstante BODENRICHTWERTTYP, die definiert,
+welchen Typ die Bodenrichtwerte haben.
+</li><li> Zeichenkettenlänge im mysql Datenmodell geändert für Attribut Namen in Tabelle Layer auf 255 und in Tabelle Classes auf 50.
+</li><li> Die Zeichenwerkzeuge zum Hinzufügen und Entfernen von
+Flurstücksgeometrien wurden nun auch in die Fachschalen
+Bodenrichtwerterfassung, Bauleitplanung und Nachweisverwaltung
+übernommen.
+</li><li> Bei Betätigung des History back/forward werden nun gleiche
+Kartenausschnitte übersprungen, so dass immer zum jeweils letzten
+unterschiedlichen Kartenausschnitt gesprungen wird.
+</li><li> Die Sachdatenabfrage ist nun auch in einem Polygon möglich.
+Dazu gibt es einen neuen Button. Nach Betätigung des Buttons kann man
+wie gewohnt ein Polygon zeichen. Das Polygonzeichnen wird beendet, indem
+ man nach setzen des letzten Eckpunkts diesen nochmals anklickt. Dann
+wird die Sachdatenabfrage abgeschickt und man erhält das Ergebnis.
+</li><li> Die Suchfunktion nach Flurstücken wurde erweitert. Nachdem man
+ nun die Gemarkung und Flur ausgewählt hat, erscheint eine Liste aller
+vorhandenen Flurstücke. Daneben gibt es eine Liste der ausgewählten
+Flurstücke, welche zu Beginn leer ist. Nun kann man nach dem schon aus
+dem Stelleneditor bekannten Prinzip die gewünschten Flurstücke auswählen
+ und auch ausgewählte wieder entfernen.
+</li><li> Die Layer- und Userauswahl im Stelleneditor ist nun alphabetisch geordnet.
+</li><li> Es werden nun auch großformatige Druckrahmen bis DIN A0 jeweils im Hoch und Querformat unterstützt.
+</li><li> Es gibt eine neue Funktion 'Jagdkataster', über die man die
+Einblendung der Spalte Jagdkataster in der Namenssuchergebnisanzeige
+ein- bzw. ausschalten kann.
+</li><li> Es gibt nun die Möglichkeit ein Druckvorschaubild zu erzeugen,
+ dass exakt so aussieht wie auch das spätere PDF. Dazu werden zwei
+zusätzliche Programme benötigt:  <a href="http://www.imagemagick.org/script/index.php" class="external text" target="_blank" title="http://www.imagemagick.org/script/index.php" rel="nofollow">ImageMagick</a> und <a href="http://www.cs.wisc.edu/%7Eghost/" class="external text" target="_blank" title="http://www.cs.wisc.edu/~ghost/" rel="nofollow">Ghostscript</a>.
+ Hat man beide Programme erfolgreich installiert und will die neue
+Vorschaufunktionalität nutzen, muss man die Konstante IMAGEMAGICK auf
+'true' setzen. Dann sollte es funktionieren. Wem die alte
+Vorschaufunktion ausreicht oder wer keine Luste hat die beiden Sachen zu
+ installieren, der setzt diese Konstante auf 'false' und bekommt die
+alte html-Vorschau.
+</li><li> Bei den Druckrahmen gibt man für die Legende jetzt nicht mehr
+die Legendenbreite an, sondern die Schriftgröße der Legendentexte. So
+erhält man unabhängig von der Layernamenbreite immer dieselbe
+Schriftgröße und die Größe der Legende passt sich dementsprechend an.
+</li></ul>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit&amp;section=16" title="Changelog">bearbeiten</a>]</div><a name="kvwmap-1.6.2"></a><h3> kvwmap-1.6.2 </h3>
+<ul><li> Bei der Flurstücksanzeige gibt es unten auf der Seite neue
+Funktionen mit denen man die bekannten ALB-Auszüge nun auch für alle
+aufgelisteten Flurstücke auf einmal erzeugen kann. Diese werden einfach
+hintereinander in ein PDF geschrieben.
+</li><li> In den ALB-Auszügen wird nun nach der Eigentümerliste der Zusatz zum Eigentümer mit ausgegeben.
+</li><li> In mehreren Fachschalen in denen man Polygone zeichnen kann,
+wurden zwei neue Zeichenwerkzeuge hinzugefügt. Mit dem Werkzeug
+'Flurstuecke hinzufuegen' lassen sich durch Klicken oder Aufziehen eines
+ Rechtecks die Geometrie der gewählten Flurstücke zum aktuellen Polygon
+hinzufügen. Das Werkzeug 'Flustuecke entfernen' bewirkt den
+gegenteiligen Effekt und entfernt die Geometrie der gewählten Flurstücke
+ wieder aus dem aktuellen Polygon.
+</li><li> Die Druckfunktionalität wurde ausgebaut. Es ist nun möglich
+eine Legende mit den aktiven Layern einzubetten, beliebig viele
+Freitexte auf dem PDF zu positionieren (alle drehbar), man kann ein
+textliches Wasserzeichen in die Karte einfügen, der zu druckende
+Kartenausschnitt ist frei drehbar (ein automatischer Nordpfeil zeigt die
+ Drehung an) und für alle textlichen Elemente (außer dem Wasserzeichen)
+lässt sich die Schriftart festlegen. Bis jetzt erscheinen nicht alle
+dieser Elemente in der Druckvorschau, weil sich mit html kein drehbarer
+Text darstellen lässt und der Nordpfeil als Vektor direkt im PDF erzeugt
+ wird. Dies wird aber später noch behoben, indem als Basis für die
+Druckvorschau auch ein PDF verwendet wird. Außerdem wurde der Dateiname
+des erzeugten PDFs angepasst und enthält nun den Nutzernamen und einen
+Zeitstempel.
+</li><li> In der Karte durch ein Suchergebnis hervorgehobene Flurstücke
+(aus Namens- oder Flurstückssuche) werden jetzt als Layer in die
+Datenbank eingetragen, so dass die Flurstücke auch nach folgenden
+Nutzeraktionen in der Karte zu sehen sind; Benötigt man das Suchergebnis
+ nicht mehr, löscht man diesen Layer über die Layerverwaltung (Achtung:
+nicht per Hand in der Datenbank löschen, da sonst nur der Layer gelöscht
+ wird und nicht die Zuordnungen in used_layer und rolle2used_layer)
+</li><li> In der Ergebnisanzeige der Namenssuche kann man sich jetzt auch die zugehörigen Flurstücke in der Karte anzeigen lassen
+</li><li> bei der Grundbuchblattsuche sind jetzt im Eingabefeld für die Blattnummer auch Eingaben ohne führende Nullen möglich
+</li><li> Korrekturen in der Ausgabe der ALB-Formate 20 und 25.
+</li><li> ALB Anzeige für Formular 40 ist über u_funktionen mit Bezeichnung 'ALB-Auszug 40' administrierbar.
+</li><li> 14:57, 29. Sep 2006 (CEST) Die Zeiteinschränkung für eine Stelle wurde verfügbar gemacht.
+</li><li> 14:57, 29. Sep 2006 (CEST) Der Fehler beim letzten Rücksprung in der History Back Funktion wurde behoben.
+</li><li> 10:58, 19. Sep 2006 (CEST) Die Sachdatenanzeige funktioniert
+jetzt auch für OGR Layer, war vorher nur für PostGIS und Shape Layer
+möglich. siehe <a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Bug_kvwmap#.2B_Sachdatenabfrage" title="Bug kvwmap">Bug Report</a>
+ In der Version 1.6.2 wird die Unterscheidung der Layertypen bei der
+Sachdatenabfrage über eine Switch Anweisung im Quellcode geregelt sein.
+Damit kann man dann später noch auf mehr Besonderheiten der
+verschiedenen Datentypen eingehen.
+</li><li> Korrekturen in der WLDGE2SQL und für die ALB-Anzeige (siehe <a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Bug_kvwmap" title="Bug kvwmap">Bug-Report</a>)
+</li><li> Es gibt nun eine neue MySQL-Tabelle <b>druckrahmen2stelle</b>
+mit der sich die Druckrahmen den Stellen zuordnen lassen. Befindet man
+sich in einer Stelle und erstellt einen Druckrahmen, so wird dieser für
+die aktuelle Stelle eingetragen. Löscht man einen Druckrahmen, so wird
+nur die Zuordnung zur aktuellen Stelle gelöscht.
+</li><li> 2006-08-21 Korrekturen an der postgis_install_help.sql Datei. Es waren doppelte CREATE Statements vorhanden.
+</li></ul>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit&amp;section=17" title="Changelog">bearbeiten</a>]</div><a name="kvwmap-1.6.1"></a><h3> kvwmap-1.6.1 </h3>
+<ul><li> In der Ergebnisanzeige der Namenssuche kann man sich jetzt auch alle Flurstücke eines Eigentümers in der Karte anzeigen lassen.
+</li><li> In der Filterverwaltung sind zwei neue Operatoren
+hinzugekommen: 'IS' und 'IN'. Wenn man nun einem Attribut mehrere Werte
+zuordnen möchte, geht dies nun nicht mehr mit dem '='-Operator und
+';'-Trennung, sondern mit dem neuen 'IN'-Operator. In das Werte-Feld
+kommen dann alle gewünschten Werte, geklammert und durch Komma getrennt.
+ Mit dem 'IS' Operator lassen sich z.B. Filter erzeugen wie 'Attribut IS
+ NULL' oder 'Attribut IS TRUE'.
+</li><li> Es gibt eine neue Fachschale zur Bauleitplanungsänderung. Die entsprechende go-Variable heißt <b>bauleitplanung</b>.
+ Um einer Stelle das Recht zu geben, bereits vorgenommene Änderungen
+wieder zu löschen, gibt es in u_funktionen eine neue Funktion <b>BplanAenderungLoeschen</b>, die dies ermöglicht.
+</li><li> Bei der Namenssuche kann man nun auch Grundbuchblättern suchen.
+</li><li> Es gibr einen neuen Ordner conf. Hier werden zukünftig
+config-Dateien mit fachschalenbezogenen Konstanten und Einstellungen
+hinterlegt.
+</li><li> Neue Funktion zur Koordinatenanzeige der
+Flurstücksgrenzpunkte. Ist verfügbar über
+go=showFlurstuckKoordinaten&amp;FlurstKennz=&lt;nr&gt;, wurde als Link
+in der Flurstücksdatenanzeige integriert für alle, die das Recht haben
+ALB Auszug 35 zu sehen und funktioniert zunächst nur für Flurstücke mit
+einem Polygonring.
+</li><li> Bei der Flurstücksdatenanzeige dürfte der Link zum
+Kartenfenster nicht funktioniert haben. Die Variable FlurstKennz war
+leer. Die wird jetzt mit dem FlurstKennz des jeweiligen Flurstückes
+ausgegeben
+</li><li> Bei der Druckausschnittswahl wurden die Eingabefelder und der Vorschau-Button an den Anfang der Seite verlegt.
+</li><li> Es gibt eine neue Funktion "ALB-Auszug 40" in u_funktionen, welche die Erzeugung dieses ALB-Auszuges schützt.
+</li><li> Löschfunktion für gespeicherte Kartenausschnitte implementiert.
+</li></ul>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit&amp;section=18" title="Changelog">bearbeiten</a>]</div><a name="kvwmap-1.6.0"></a><h3> kvwmap-1.6.0 </h3>
+<ul><li> Bei der Erstellung einer Notiz kann man nun zwischen Punkt- und Flächennotiz wählen.
+</li><li> Bei der Filterverwaltung wurde die Funktion zum Zeichnen von
+Polygonen so erweitert, dass man nun auch Polygone mit mehreren Ringen
+erstellen kann.
+</li><li> Es gibt nun zwei Infobuttons, einen mit Suchradius und einen ohne.
+</li><li> Ändern der Funktion insertGrundstueck, so dass doppelte Eintragungen ignoriert werden
+</li><li> Erweiterung des WLDGE2SQL - Konverters um die Ausgabesätze mit
+ der Dateikennzung 4 (Flurstücke mit
+Eigentümer-/Erbbauberechtigtenangaben)
+</li><li> Ersetzen des festen EPSG-Code für die Erzeugung der Suchergebnislayer durch die EPSG-Code-Variable der Rolle
+</li><li> Beim Druckrahmeneditor wurden der Koordinatenursprung des
+Pixelrasters im PDF sowie die Bezugspunkte aller positionierbaren
+Elemente auf die linke untere Ecke gelegt. Bereits erstellte Druckrahmen
+ müssen dementsprechend angepasst werden.
+</li><li> Man hat nun die Möglichkeit eine Mapdatei einzulesen und die
+darin enthaltenen Layer-, Klassen-, Styles- und Labels in die MySQL-DB
+zu speichern. Die go-Variable für diese Funktionalität heißt "<b>layerfrommapfile</b>".
+</li><li> Es gibt nun eine Filterverwaltung mit der man für die Layer
+einer Stelle entsprechend ihren Attributen Filter erstellen kann. Die
+go-Variable für diese Funktionalität heißt "<b>Filterverwaltung</b>".
+</li><li> Bug bei der Kartendarstellung behoben. Vorher kam es manchmal
+vor, dass ein Nutzer das Kartenbild eines anderen Nutzers bekam, wenn
+beide zum selben Zeitpunkt die Karte neu luden.
+</li><li> Bug bei der Nachweisrecherche behoben. Nach der Bearbeitung
+eines Dokuments gab es beim Zurückspringen zum Rechercheergebnis immer
+eine DB-Fehlermeldung.
+</li><li> Den zoom-in-Bug behoben. Nach einem zoom-in auf ein
+aufgezogenes Rechteck, war der neue Kartenausschnitt immer etwas
+versetzt. Dies ist nun behoben.
+</li><li> Die Funktion zum Schreiben von neuen Notizen wurde so
+geändert, dass die Koordinaten der Notiz vor dem Schreiben in die
+Datentabelle in PostgreSQL von dem EPSG-Code der für die aktuelle Rolle
+eingestellt ist in den EPSG-Code aus der Konstante EPSGCODE (in
+config.php) transformiert werden.
+</li><li> Es gibt nun eine Notizkategorieverwaltung. Mit dieser ist es
+möglich, die Kategorien den Stellen zuzuordnen und die Rechte zu setzen.
+</li><li> Hinweis für die richtige Schreibweise des wms_srs Parameters in Stelleneditor eingefügt.
+</li><li> WMS-Parameter wms_srs und wms_extent beim Laden der Layer in das MapObjekt hinzugefügt.
+</li><li> der Variablenbezeichner, die Beschriftungen in Snippets und
+die Datenbankspalte wms_accesscontraints wurde in wms_accessconstraints
+korrigiert
+</li></ul>
+<ul><li> Zur Tabelle stelle wurden Felder für OWS-Metadaten hinzugefügt.
+</li></ul>
+<ul><li> Internet Explorer-Bug behoben. Nach einem Microsoft-Update vom
+11.04.2006 musste die per SVG eingebundene Hauptkarte erst aktiviert,
+d.h. angeklickt werden, damit auf ihr Nutzeraktionen durchgeführt werden
+ können. Dies ist nun behoben.
+</li></ul>
+<ul><li> neue Konstante zum Einstellen der Druckqualität beim PDF-Export
+</li></ul>
+<pre># Faktor für die Einstellung der Druckqualität (MAPFACTOR * 72 dpi)
+define('MAPFACTOR',2.5);
+</pre>
+<ul><li> neue Konstante zum Einstellen der PostgreSQL-Serverversion
+</li></ul>
+<pre># PostgreSQL Server Version
+define('POSTGRESVERSION', '8.0');
+</pre>
+<ul><li> Es gibt ein neues Konzept für die Trennung von eigenen und
+kvwmap-internen Daten. Bisher bestand beim Einspielen einer neuen
+Version folgendes Problem: Neben den kvwmap-internen Grafiken, Snippets,
+ Fonts und Symbolen gibt es auch nutzerspezifische und insbesondere
+wurden solche kvwmap-internen Daten von den Anwendern verändert und
+unter gleichem Namen gespeichert. Bei einem Update mussten diese eigenen
+ Daten jedesmal neu in die Ordnerstruktur von kvwmap eingspielt werden.
+</li></ul>
+<dl><dd>Um diesen umständlichen Updateprozess zu erleichtern, wurde
+folgendes Konzept zur Trennung von nutzerspezifischen und
+kvwmap-internen Daten entwickelt:
+<ul><li> In jedem der Ordner <b>fonts</b>, <b>graphics</b>, <b>snippets</b> und <b>symbols</b> gibt es einen Unterordner <b>custom</b>.
+</li><li> Diese custom Ordner sind in jeder neuen Version von kvwmap leer.
+</li><li> Nutzer können nun in diesen Ordnern eigene Snippets, Grafiken,
+ Symbole usw. erstellen und auch kvwmap-interne Daten hinein kopieren
+und verändern.
+</li><li> Beim Update auf eine neue Version wird das alte
+kvwmap-Verzeichnis kopiert, der Name des Verzeichnisses entsprechend der
+ neuen Version umbenannt und die neue kvwmap-Version in dieses
+Verzeichnis entpackt. Dabei werden die kvwmap-internen Dateien
+überschrieben und die nutzereigenen Daten in den custom-Ordnern bleiben
+bestehen.
+</li></ul>
+</dd><dd> An dieser Stelle sei nochmal darauf hingewiesen, dass sich
+nutzerspezifische Snippets, Grafiken, Symbole usw. nur einbinden lassen,
+ wenn diese entweder in der config.php oder in der Datenbank definiert
+werden können.
+</dd></dl>
+<ul><li> Der bei der Recherche erzeugte Ordner kann jetzt als zip-Datei heruntergeladen werden.
+</li><li> Es gibt eine neue Updatefunktionalität. In zwei Log-Dateien
+werden die SQL-Statements aller von den Nutzern ausgeführten DB-Aktionen
+ gespeichert. Dadurch ist es möglich ein zweites System parallel dazu
+permanent zu verändern und nach abgeschlossener Änderungsphase die auf
+dem Nutzersystem durchgeführten Datenänderungen auch auf dem Testsystem
+auszuführen und beide Systeme so zu synchronisieren (siehe <a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Fragen-Liste#Zur_Aktualisierung_von_Systemen_im_laufenden_Betrieb" title="Fragen-Liste">Zur Aktualisierung von Systemen im laufenden Betrieb</a>). Die Pfade zu den beiden Log-Dateien werden in der config.php mit zwei Konstanten definiert:
+</li></ul>
+<pre># mySQL-Log-Datei zur Speicherung der SQL-Statements
+define('LOGFILE_MYSQL',LOGPATH.VERSION.'_log_mysql.sql');
+# postgreSQL-Log-Datei zur Speicherung der SQL-Statements
+define('LOGFILE_POSTGRES',LOGPATH.VERSION.'_log_postgres.sql');
+</pre>
+<p>Über eine weitere Konstante lässt sich das Aufzeichnen der DB-Aktionen ein- und ausschalten.
+</p>
+<pre># Log-Level zur Speicherung der SQL-Statements
+define('LOG_LEVEL',1);
+</pre>
+<p>Ist das Loggen eingeschaltet, werden die Log-Dateien durch folgende Befehle in der config.php geöffnet
+</p>
+<pre># Öffnen der Log-Dateien
+if (LOG_LEVEL&gt;0) {
+ # Datei für mysql-logs öffnen
+ $log_mysql=new LogFile(LOGFILE_MYSQL,'text','Log-Datei MySQL', <i>);</i>
+ # Datei für postgres-logs öffnen
+ $log_postgres=new LogFile(LOGFILE_POSTGRES,'text', 'Log-Datei-Postgres', <i>);</i>
+}
+</pre>
+<ul><li> Damit Nutzereinstellungen wie die Einträge in rolle,
+u_menue2rolle, u_groups2rolle und u_rolle2used_layer, nicht bei jeder
+Nutzeraktion mit in die mysql-Log-Datei geschrieben werden, werden diese
+ Schreibaktionen nicht geloggt. Um diese Nutzereinstellungen trotzdem
+auf das zweite System übertragen zu können, ist es möglich die erwähnten
+ Tabellen am Ende einmalig auszulesen und in Form von update-Statements
+an die Log-Datei anzuhängen. Diese Funktionalität ist mit in den
+Administratorfunktionen enthalten, die über die go-Variable <b>Administratorfunktionen</b> aufgerufen werden können. Hier gibt es einen Menüpunkt <b>Logfiles abschliessen</b>, der die oben genannte Funktion bewirkt.
+</li><li> Bei der ALB-Ausgabe im PDF wurde ein Bug behoben, im Auszug erscheint nun auch letzte Fortführung.
+</li></ul>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit&amp;section=19" title="Changelog">bearbeiten</a>]</div><a name="kvwmap-1.5.9"></a><h3> kvwmap-1.5.9 </h3>
+<dl><dd> 2006-03-28
+</dd></dl>
+<ul><li> Ein Bug in der Struktur der Tabelle layer wurde beseitigt (siehe mysql_update.sql)
+</li><li> Die Druckfunktion wurde nochmals erweitert. Im
+Druckrahmeneditor gibt es nun eine Vorschau wie der Druckrahmen aussehen
+ wird. Zudem sind weitere Druckrahmenelemente hinzugekommen: Eine
+Übersichtskarte, die Ausgabe eines ursprünglichen Maßstabes (die
+Datenquelle dieses Maßstabes muss jedoch noch integriert werden) und ein
+ Freitext. Alle diese Elemente können wieder beliebig auf dem
+Druckrahmen positioniert werden und die jeweilige Schriftgröße kann
+angepasst werden. Für die Übersichtskarte kann der Zoom- bzw.
+Vergrößerungsfaktor eingestellt werden. Um der Übersichtskarte einen
+Rahmen geben zu können, lässt sich, analog zum Druckkopf auch hier ein
+Hintergrundbild auswählen.
+</li><li> Damit die Übersichtskarte vom Mapserver gezeichnet werden
+kann, muss ein entsprechendes Mapfile existieren, dessen Pfad man in der
+ config.php über die Konstante REFMAPFILE festlegt. In diesem Mapfile
+kann man die Layer definieren, die in der Übersichtskarte zu sehen sein
+sollen.
+</li><li> Die Druckvorschau lässt sich vergrößern (und verkleinern) um die Details der Druckausgabe besser erkennen zu können.
+</li><li> Ein Bug bei der Abfragefunktion wurde beseitigt (wenn der
+letzte Navbutton der Abfragebutton war, erschien die Aufforderung zum
+Setzen des Suchradius bei jedem Neuladen der Karte).
+</li><li> Die history-Funktion (voriger und nächster Kartenausschnitt) funktioniert nun vollständig.
+</li></ul>
+<dl><dd> 2006-03-20
+</dd></dl>
+<ul><li> Tooltip-Breite passt sich dem tatsaechlichen Tooltip-Inhalt dynamisch an
+</li><li> Funktion "Wegstrecke messen" zeigt die Gesamtstrecke bis zum aktuellen und(!) bis zum vorherigen Punkt
+</li></ul>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit&amp;section=20" title="Changelog">bearbeiten</a>]</div><a name="kvwmap-1.5.8"></a><h3> kvwmap-1.5.8 </h3>
+<dl><dd> 2006-03-15
+</dd></dl>
+<ul><li> Es gibt eine neue Funktion, die die Suche nach Namen schützt. Diese Funktion heißt <b>Namensuche</b>.
+</li><li> Die Druckfunktion wurde überarbeitet und erweitert. Es gibt
+nun keine Dokumentenköpfe mehr, sondern Druckrahmen. In einen
+Druckrahmen lässt sich ein Druckkopf (der als Bilddatei vorliegen muss)
+einbinden, skalieren und positionieren. Analog kann man die Größe und
+Position des Kartenausschnitts im Druckrahmen festlegen. Die variablen
+Daten des Druckkopfes, wie z.B. Datum und Maßstab lassen sich ebenso
+definieren. Desweiteren kann man unter den Druckformaten A4 hoch, A4
+quer, A3 hoch und A3 quer wählen.
+</li></ul>
+<dl><dd> Um einen Kartenausschnitt in ein PDF mit einem bestimmten
+Druckrahmen zu exportieren, wählt man einen Druckmaßstab, einen
+Druckrahmen und den gewünschten Kartenausschnitt aus. In einer
+Druckvorschau sieht man, wie das PDF aussehen wird.
+</dd><dd> Um die maximale Druckqualität zu erhalten muss das defaultmapfile.map um ein zusätzliches Ausgabeformat erweitert werden:
+</dd></dl>
+<pre>OUTPUTFORMAT
+     NAME jpeg_print
+     MIMETYPE image/jpeg
+     DRIVER GD/JPEG
+     EXTENSION jpg
+     IMAGEMODE RGB
+     TRANSPARENT FALSE
+     FORMATOPTION "QUALITY=100"
+ END
+</pre>
+<ul><li> Die go-Variable zur Verwaltung der Druckrahmen heißt
+'Druckrahmen' und die go-Variable der neuen Druckfunktion heißt
+'Druckausschnittswahl'.
+</li><li> Es wurde eine Layerverwaltung hinzugefügt. Mit dieser ist es
+möglich, neue Layer zu erstellen, Layereigenschaften zu ändern und Layer
+ zu kopieren.
+</li><li> Im Stelleneditor gibt es jetzt bei den Layern einen Link
+'bearbeiten'. Dieser führt zu einer Seite, in der alle Layer der Stelle
+untereinander angezeigt werden. Hier kann die Zeichenreihenfolge der
+Layer geändert werden. Desweiteren besitzt jeder Layer zwei Links über
+die die anderen stellenbezogenen Layereigenschaften und die allgemeinen
+Layereigenschaften geändert werden können.
+</li><li> In der config.default.php wurden folgende Konstanten
+hinzugegfügt, die den Landkreis betreffen. Bei ALB-Auszügen werden jetzt
+ diese Konstanten verwendet.
+</li></ul>
+<pre>########################## Metadaten zum Landkreis
+define('LANDKREIS', 'Landkreis Bad Doberan');
+define('AMT', 'Kataster-/Vermessungsamt  0017');
+define('STRASSE', 'August-Bebel-Str. 4');
+define('PLZ', '18209');
+define('ORT', 'Bad Doberan');
+define('POSTANSCHRIFT', 'Postanschrift:');
+define('POSTANSCHRIFT_STRASSE', 'August-Bebel-Str. 3');
+define('POSTANSCHRIFT_PLZ', '18209');
+define('POSTANSCHRIFT_ORT', 'Bad Doberan');
+</pre>
+<ul><li> Außerdem wurden die WMS-Metadaten den neuen OGC-Standards
+angepasst und befinden sich nun in einem Block am Ende der
+config.default.php.
+</li></ul>
+<dl><dd> 2006-03-02
+</dd></dl>
+<ul><li> Hinzufügen der Spalte requires für die Angabe um den Zusammenhang zum Anzeigen des Layers festzulegen in der Tabelle used_layer
+</li></ul>
+<dl><dd> 2006-03-01
+</dd></dl>
+<ul><li> die Abfrage der Fluren in postgresql.php und mysql.php in
+getFlurenListeByGemkgIDByFlurID so geändert, dass sie nur für nicht
+historische Flurstücke gilt.
+</li><li> die Abfrage der ALB-Information in postgresql.php und
+mysql.php in getALBData so geändert, dass auch Flurstücke
+zurückgeliefert werden, wenn die Finanzamtnummer fehlt
+</li></ul>
+<dl><dd> 2006-02-19
+</dd></dl>
+<ul><li> die Abfragefunktion mit dem Info-Button wurde erweitert um die
+Angabe eines Suchradius. Da damit die Suche sowohl innerhalb eines
+Rechteck (bei aufziehen eines selbigen) als auch eines Kreises (nach dem
+ setzen eines Punktes) möglich ist muss die WHERE Klausel für die
+räumliche Einschränkung vereinheitlicht werden. Die Angaben in pfad
+werden dadurch wesentlich vereinfacht und beinhalten nur noch die
+thematischen Einschränkungen für die Sachdatenabfrage. Die räumlichen
+Einschränkungen werden durch die Funktion SachdatenAnzeige in kvwmap.php
+ angehängt. Das xxxx in der pfad-Spalte entfällt. Dadurch werden
+strategisch weitere individuellere räumliche Abfragemöglichkeiten leicht
+ realisierbar.
+</li></ul>
+<p>Das macht erforderlich, dass
+</p>
+<ol><li> alle Geometryspalten, über die mit dem SQL-Statement in der
+pfad Spalte der layer-Tabelle eine räumliche Abfrage erfolgen soll,
+"the_geom" heißen müssen!!! Spalten umbenennen mit Statements aus
+postgis_update.php
+</li><li> die Namen der Geometriespalten in den SELECT Statements der
+Spalte pfad in der Tabelle layer durch the_geom ersetzt werden müssen
+</li><li> alle räumlichen Statements in der pfad Spalte hinter WHERE gelöscht werden müssen.
+</li><li> alle Namen der Geometriespalten in der Spalte Data in der Tabelle layer mit den neuen Namen the_geom versehen werden
+</li></ol>
+<p>Änderungen vorgenommen für die Tabellen:
+fp_punkte,fp_punkte_temp,q_notizen,bw_bodenrichtwertzonen,n_nachweise,md_metadaten,ve_versiegelungen
+An den ALK-Tabellen ändert sich nichts, nur an den Abfragen in pfad
+Ein Beispiel zur Abfrage der Flurstücke:
+</p>
+<pre>vorher:
+select o.objnr as oid,o.objart,o.folie,AsText(o.the_geom) AS umring,f.flurstkennz,f.gemkgschl
+from alkobj_e_fla AS o,alknflst as f WHERE o.folie='001' AND o.the_geom &amp;&amp; GeometryFromText('xxxx',2398)
+AND NOT Disjoint(o.the_geom,GeometryFromText('xxxx',2398)) AND o.folie='001' AND o.objnr=f.objnr
+nachher:
+select o.objnr as oid,o.objart,o.folie,AsText(o.the_geom) AS umring,f.flurstkennz,f.gemkgschl
+from alkobj_e_fla AS o,alknflst as f WHERE o.folie='001' AND o.objnr=f.objnr
+</pre>
+<p>Thematische Einschränkung hinter WHERE bleiben stehen, sonst das
+(1=1) nicht vergessen, weil die räumlichen Abfragen, die durch kvwmap
+angehängt werden mit AND beginnen. Beipiel:
+</p>
+<pre>vorher:
+SELECT *,AsText(umring) AS umringtxt FROM n_nachweise WHERE NOT Disjoint(umring,GeometryFromText('xxxx'))
+nachher:
+SELECT *,AsText(the_geom) AS umringtxt FROM n_nachweise WHERE (1=1)
+</pre>
+<dl><dd> 2006-02-15
+</dd></dl>
+<ul><li> Hinzufügen der Konstante MAXQUERYROWS default=100 zur
+Eingrenzung der maximal bei einer Sachdaten anzeige zurückgelieferten
+Datenzeilen, soll den überlauf von Speicher verhindern bei unsachgemäßen
+ oder Abfragen aus Versehen. Führt dazu, dass LIMIT MAXQUERYROWS an alle
+ SQL-Statements aus dem Datenfeld pfad in Tabelle layer angehängt wird.
+</li></ul>
+<dl><dd> 2006-02-11
+</dd></dl>
+<ul><li> neue Tabellen u_consume, u_consume2layer und u_consumeALK für
+die Speicherung der Zugriffe und Abrechnungsmöglichkeit und
+Aktualisierung der Dateien mysql_update.sql und mysql_install.sql
+</li><li> Hinzufügen von jeweils einer neuen Spalte logconsume in den
+Tabellen stelle,layer, used_layer und  u_rolle2used_layer zum speichern
+der Einstellung wie ein layer geloggt werden soll, nie, immer, nur in
+der Stelle, nur für einen Benutzer innerhalb der Stelle oder alle immer
+alle layer innerhalb einer Steller
+</li><li> Hinzufügen der Konstante LOG_CONSUME_ACTIVITY mit der man
+schaltet, ob die Zugriffe in den Tabellen u_consume und u_consume2layer
+geloggt werden sollen
+</li></ul>
+<dl><dd> 2006-02-08
+</dd></dl>
+<ul><li>Integration der Hilfe, Dokumentation &amp; Changelog aus dem Wiki von kvwmap
+</li><li>Angaben bei Streckenmessung sowie Koordinatenausgabe in Abhaengigkeit der Zoomstufe
+</li></ul>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit&amp;section=21" title="Changelog">bearbeiten</a>]</div><a name="kvwmap-1.5.7"></a><h3> kvwmap-1.5.7 </h3>
+<dl><dd> 2006-02-01
+</dd></dl>
+<ul><li>Koordinatenzoom: Sprung/Pan auf eine konkret einzugebene Koordinate (neue Funktion)
+</li><li>Ergebnisanzeige der Namenssuche durch Grundbuchblattnummer ergänzt und Spaltenüberschriften angepasst
+</li><li>Die Flurstücksuche basiert vollständig auf den Flurstücken der
+ALB und ALK in der PostGIS-Datenbank. Die Entschlüsselung der
+Gemarkungs- und Gemeindenamen, werden den ALB-Tabellen entnommen
+</li></ul>
+<dl><dd> 2006-01-31
+</dd></dl>
+<ul><li>Die Adresssuche basiert jetzt vollständig auf den Adressen der
+ALB und ALK in der PostGIS-Datenbank. Die Entschlüsselung der
+Gemarkungs- und Gemeindenamen, werden den ALB-Tabellen entnommen ebenso
+funktioniert der Zoom auf Gemeinde, Strasse und Hausnummer
+ausschließlich über ALK-Geometrie.  Bei Adressen, die nur in ALB
+enthalten sind erfolgt die ALB-Daten Anzeige, bei Adressen der Gebäude
+der ALK direkt ein Zoom auf die betreffenden Gebäude
+</li><li>Neue Konstante LAGEBEZEICHNUNGSART in config.php Damit kann die
+ Lagebezeichnung des aktuellen Kartenausschnitts  modifiziert werden.
+Die neue Funktion getLagebezeichnung in kvwmap.php unterscheidet die
+Fälle. Dort können  auch neue Varianten integriert werden, z.B. der Name
+ des Ortes in der Mitte der Karte, oder andere administrative
+Bezeichnungen. Die Arte der Lagebezeichnung kann später auch an die
+Stelle gebunden werden. Dann ist wird die  Konstante nur als Defaultwert
+ betrachtet.
+</li></ul>
+<dl><dd> 2006-01-30
+</dd></dl>
+<ul><li>SQL-Statements zum Anlegen eines Layers für die Beschriftung der
+ Strassen aus den ALK-Daten der postgres-Datenbank  in
+mysql_install_help.sql hinzugefügt
+</li><li>Hinzufügen der Spalte 'labelangleitem' in der Tabelle layer zum
+ Eintragen eines Attributnamen der Tabelle,  die Werte für die Winkel
+der Beschriftung enthält
+</li><li>Das Löschen kompletter Anträge funktioniert jetzt
+</li></ul>
+<dl><dd> 2006-01-27
+</dd></dl>
+<ul><li>wieder Umstellung von iframe auf embed in den SVG-Dateien zur
+Einbindung der SVG-Dateien wegen Problemen  bei der Darstellung mit
+Internet Explorer (XML-Datei konnte nicht angezeigt werden)
+</li></ul>
+<dl><dd> 2006-01-26
+</dd></dl>
+<ul><li>Fehler bei der Anzeige der Flurstücke aus der Ergebnisanzeige der Grundbuchblattsuche  heraus behoben
+</li><li>Abfrage der Formularauswahlwerte im Nachweisformular auf postgres umgestellt
+</li><li>Fehler bei der Einschränkung der Nachweissuche auf FFR, KVZ, GN
+ behoben  die Auswahl der Nachweisart wirkt sich jetzt auf das
+Suchergebnis aus
+</li><li>Eintrag von sql-Statements zum gleichzeitigen Eintragen der Rechte an allen Funktionen  für den Admin in mysql_install_help.php
+</li><li>Tabellen create-Statement für Bauakten in postgres_install.php eingefügt, fehlte in 1.5.6
+</li><li>Korrektur der Darstellung der Wappen im Menü
+</li><li>Ändern der Anwendungsfallbezeichnung
+</li></ul>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit&amp;section=22" title="Changelog">bearbeiten</a>]</div><a name="kvwmap-1.5.6"></a><h3> kvwmap-1.5.6 </h3>
+<ul><li>im release erscheint jetzt eine Datei config.default.php und nicht mehr die config.php
+<dl><dd>  diese default-Datei enthält die Standardwerte, wenn man kvwmap neu installiert vorher
+</dd><dd>  config.default.php ein mal nach config.php kopieren und persönlich anpassen
+</dd></dl>
+</li><li>Fehlerhafte Ausgabe der Festpunkte in KVZ-Format korrigiert
+</li><li>Ausgabe der richtigen Anzahl der FFR, KVZ und GN zu Anträgen
+</li><li>neue Tabelle für PostgreSQL bau_akten (dump in postgres_update.php und postgres_install.php)
+</li><li>Feste Pfadangabe in menue.php durch WAPPENPFAD ersetzt.
+</li><li>Korrektur des Fehlers beim Einlesen der Strassen bei ALB-Fortführungen in postgres.sql
+</li><li>Korrektur der Navigationsfunktionen in den Fachschalen und der Fehler bei der Darstellung  der digitalisierten Flächen
+</li><li>Ändern der Länge des Datentypen für die Koordinaten des Flurstücks von 9,3 auf 12,3  in der Datei postgres_install.sql
+</li><li>neue Datei mysql_setup_GUI.sql zum Anlegen neuen GUI in der mysql-Datenbank
+<dl><dd>  Diese Datei ist vor allem für das erstmalige Anlegen einer
+ersten Stelle gedacht mit der man  dann an die Stellen und
+Nutzerverwaltung kommen kann. Dieses Script wollte ich mittelfristig so
+ausbauen,  dass die Ausführung des Skriptes zusammen mit Beispieldaten
+aus einem leeren kvwmap-Projekt eine fertige  Administrator-Stelle macht
+ wo schon die Beispieldaten eingebunden sind und alle verfügbaren
+Menüpunkte  Dazu bräuchte ich jeweils einen Beispieldatensatz für
+Punkte, Linien, Flächen, Raster, EDBS, ALB, Festpunkte,
+Einmessungsskizzen, FFR, KVZ, GN, Bauaktentabelle
+</dd></dl>
+</li><li>Ergänzungen in mysql_install_help.txt zum Anlegen eines Nutzers Administrators und der Menüpunkte für tellenverwaltung
+</li></ul>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit&amp;section=23" title="Changelog">bearbeiten</a>]</div><a name="kvwmap_1.5.5"></a><h3> kvwmap_1.5.5 </h3>
+<dl><dd> 2006-01-12 hch
+</dd></dl>
+<ul><li>Fehler bezüglich SVG-Kartenausgabe korrigiert
+</li><li>Menubreite passt sich dynamisch der Breitenangabe der Uebersichtskarte an (s. Datenbank!)
+</li><li>neue Konstanten:
+<ul><li>'POPUPMENUE' (TRUE/FALSE) zum Ein-/Ausschalten der Popup-Untermenupunkte
+</li><li>'MENU_WAPPEN' (OBEN/UNTEN) zur Bestimmung der Position des Wappens
+</li></ul>
+</li></ul>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit&amp;section=24" title="Changelog">bearbeiten</a>]</div><a name="kvwmap_1.5.4"></a><h3> kvwmap_1.5.4</h3>
+<dl><dd> 2006-01-12
+</dd></dl>
+<ul><li>Fehler bezüglich der Adress und Flurstückssuche auf postgres-Datenbestand korrigiert
+</li><li>Fehler bei der Aktualisierung der ALK aus shapes korrigiert
+</li></ul>
+<dl><dd> 2006-01-11
+</dd></dl>
+<ul><li>Es gibt einen neuen Menüpunkt "Bauauskunft". Mit der Bauauskunft ist es möglich nach Baudaten zu suchen.
+<dl><dd>  Die Verbindung zur Bau-Datenbank wird in der config.php definiert
+</dd></dl>
+</li><li>Zusätzlich erscheint bei der Flurstücksanzeige ein Link
+"Baudaten anzeigen", wenn zum entsprechenden  Flurstück Baudaten
+vorhanden sind
+</li></ul>
+<dl><dd> 2006-01-09
+</dd></dl>
+<ul><li>SQL-Insert Statements für postgres.sql und mysql.sql so
+umgestellt, dass bei doppelt vorkommende Daten  kein Konflikt mit dem
+Primary Key entsteht. Doppelte werden jetzt ignoriert.
+</li></ul>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit&amp;section=25" title="Changelog">bearbeiten</a>]</div><a name="kvwmap_1.5.3"></a><h3> kvwmap_1.5.3 </h3>
+<dl><dd> 2006-01-04
+</dd></dl>
+<ul><li>Unterdrückung von Wasserzeichen in Flurstücksergebnisanzeige über Karte und Formularsuche möglich.
+</li><li>Fehler in der Abfrage von Klassifizierungen in postgres behoben.
+</li></ul>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit&amp;section=26" title="Changelog">bearbeiten</a>]</div><a name="kvwmap_1.5.2"></a><h3> kvwmap_1.5.2 </h3>
+<dl><dd> 2006-01-03
+</dd></dl>
+<ul><li>Die Funktion zum unterdrücken der Wasserzeichen bei der
+ALB-Ausgabe ist einschrenkbar über u_funktionen mit  der Bezeichnung:
+ohneWasserzeichen
+</li><li>Korrektur von Fehlern beim Löschen von Anträgen sowie dem Zuordnen und Entfernen von Nachweisen aus Aufträgen.
+</li><li>Die Funktion Nachweisanzeige_aus_Auftrag_entfernen ist einschrenkbar gemacht worden in Tabelle u_funktionen
+</li><li>Korrektur von SQL-Statements (Groß/Kleinschreibung) in postgres.php
+</li></ul>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit&amp;section=27" title="Changelog">bearbeiten</a>]</div><a name="kvwmap_1.5.1"></a><h3> kvwmap_1.5.1 </h3>
+<dl><dd> 2006-01-02
+</dd></dl>
+<ul><li>Änderung an der Funktion getFestpuntke zur Einschränkung der Abfrage auf bestimmte Punktarten.
+</li><li>Hinzufügen der Tabelle alb_tmp_adressen für die Flurstückssuche
+ in postgres und anpassen der Funktion updateTempAdressTable() in
+postgres.php
+</li><li>Änderungen an der Groß und Kleinschreibung der Tabellen und Spaltennamen in postgres.sql
+</li><li>Hinzufügen von fehlenden Argumenten beim Aufruf von getGemeinden() in user.php  und getStrassenListe() in kataster.php
+</li></ul>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit&amp;section=28" title="Changelog">bearbeiten</a>]</div><a name="kvwmap_1.5.0"></a><h3> kvwmap_1.5.0 </h3>
+<dl><dd> 2005-12-27
+</dd></dl>
+<ul><li>Neue Konstante WLDGE_DATUM_PRUEFUNG Damit kann eingestellt
+werden, ob bei einer Fortführung das Datum des  Fortführungszeitraumes
+mit dem vorhergehenden verglichen werden soll (für das Zusammenspielen
+mehrerer  verschiedener BZSN in einer Datenbank, z.B. für mehrerer
+Kreise wie in LWL-SN nötig)
+</li><li>Anpassungen von Anfragen an postgres Übernahme von Funktionen mysql.php und postgres.php
+<dl><dd>  getStrassenListe, updateTempAdressTable, getStrassenListe, getAdressenListeByExtent
+</dd></dl>
+</li><li>Löschen von Anträgen funktioniert
+</li><li>Funktion zur Abfrage der Anzahl der Fluren
+</li><li>Funktion zur Abfrage der Anzahl von Flurstückshistorien
+</li><li>Tabellenbezeichnung in Funktionen insertNamen und updateNamen in postgres.php korrigiert (Groß/Kleinschreibung)
+</li><li>Kommentarzeichen in sql-dump-Datei durch Variable ersetzt
+</li><li>commitTransaction vor truncate all vor Starten der ALB-Fortführung rausgenommen
+</li></ul>
+<dl><dd> 2005-12-15
+</dd></dl>
+<ul><li>Hinweise zur Nutzung der Datein mysql_install_help.sql nach Einführung der Stellenverwaltung
+</li><li>Link auf die Flurstücksanzeige von der Namenssuche aus korrigiert
+</li><li>Modifizierung der Einlesestrategie beim Einlesen von großen
+WLDGE-Dateien. Ausführung in kleineren Tansaktionen  zu jeweils nur
+100000 Zeilen.
+</li><li>Behebung von Fehlern beim Einlesen der WLDGE-Daten in die PostGIS-Datenbank
+</li><li>Fehler in den Funktion zum Einlesen von ALK-Daten aus Shape-Datei korrigiert
+</li><li>Wasserzeichenkonstante in ALB-Auszug eingefügt
+</li><li>Tabellen polygon_used_layer, attribute_access und classdef_adds geändert
+</li></ul>
+<dl><dd> 2005-12-14
+</dd></dl>
+<ul><li>Primärschlüssel für die Tabellen alb_flurstuecke und alb_x_flurstuecke eingefügt
+</li></ul>
+<dl><dd> 2005-11-23
+</dd></dl>
+<ul><li>Statements zum Auffüllen der Tabelle u_menues mit den go=changemenue Parametern für die Obermenues
+</li><li>Ergänzung von mysql_update.sql und mysql_install.sql um die
+Tabellen u_groups und u_groups2rolle  und Statement zum Auffüllen der
+bisherigen Werte in mysql_update.sql
+</li><li>Statement zum Auffüllen der Tabelle u_menue2rolle mit vorhandenen Werten in mysql_update.sql
+</li><li>neue Konstante WASSERZEICHEN, in der die Datei angegeben werden kann, die in Dokumenten im Hintergrund  ausgegeben wird
+</li><li>neuer Parameter beim Aufrufen der pdf-Dokumente 30 und 35. wz=0 heißt ohne Wasserzeichen, wz=1 mit Wasserzeichen
+</li><li>Konstante PUNKTDATEIARCHIVPATH eingeführt
+</li><li>Umfassende Anpassungen des Quellcodes (HTML, SVG, ECMA, etc.)
+zur Unterstuetzung des Browsers  Mozilla Firefox 1.5 (derzeit:
+RC-Stadium)
+</li><li>empfohlener Browser: Mozilla Firefox 1.5 (mit integriertem SVG
+Support) oder   MS Internet Explorer in Verbindung mit Adobe SVG Viewer 6
+ (Beta-Stadium)
+</li><li>Einführung einer Stellen und Nutzerverwaltung. Zur Stelle
+können Layer, Menüs und Benutzer zugeordnet werden  zum Nutzer Stellen.
+</li></ul>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit&amp;section=29" title="Changelog">bearbeiten</a>]</div><a name="kvwmap_1.4.6"></a><h3> kvwmap_1.4.6 </h3>
+<ul><li>Streckenmessungen implemenmtiert (neuer Button!)
+</li><li>Änderung bei der Namenssuche.
+<dl><dd>  vorher:
+</dd><dd>  "Zur nicht exakten Suche geben Sie den Platzhalter % ein. z.B. erhalten Sie Angermeier und Neumeier
+</dd><dd>   mit der Eingabe %meier"
+</dd><dd>  nachher:
+</dd><dd>  "Das Zeichen % kann als Jockerzeichen verwendet werden.
+</dd><dd>  Diese Zeichen wird automatisch vor und hinter jeden Suchstring durch das Programm eingefügt.
+</dd><dd>  Damit finden Sie automatisch Angermeier, wenn Sie nur Meier eingeben."
+</dd></dl>
+</li><li>Die Konstante PDFCLASSPATH erweitet mit fonts: WWWROOT.'PDFClass/fonts/'
+<dl><dd>  Dafür das Unterverzeichnis /fonts/ in alb.php, function ALBAuszug gelöscht
+</dd><dd>  $pdf-&gt;selectFont(PDFCLASSPATH.'Courier.afm');
+</dd></dl>
+</li><li>Navigation innerhalb FS: Zoomfenster farblich gegenueber FS-Funktionalitaet abgegrenzt.
+</li><li>Antragsverwaltung: erzeugtes PDF-Übergabeprotokoll wird nun auch in seperatem Fenster geoeffnet.
+</li><li>Neue Konstante MAPFILENAME. Damit kann der Parameter Name in der Map-Datei definiert werden.
+<dl><dd>  Wird für eine korrekte WMS-getCapabilities-Ausgabe benötigt.
+</dd></dl>
+</li><li>Fehler bei der Selektion der Punktnummern aus PKZ beim Laden der Festpunkte behoben.
+</li><li>Flurstücks und Adresssuche ist jetzt auch möglich, wenn der
+Flurstückslayer nicht zu der Stelle, in der  gearbeitet wird zugeordnet
+ist.
+</li><li>Fehler in SQL behoben bei der Abfrage der Gemeindeliste in class Gemeinde in kvwmap.php
+</li><li>Buttons in Werkzeugleiste visuell ueberarbeitet *groessere Symbole.
+<dl><dd>	Desweiteren: Tooltip-Funktionalitaet hinzugefuegt.
+</dd></dl>
+</li><li>'Stelle waehlen' aus Kopfzeile entfernt und dem Menu dauerhaft statisch zugeordnet.
+</li></ul>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit&amp;section=30" title="Changelog">bearbeiten</a>]</div><a name="kvwmap_1.4.5"></a><h3> kvwmap_1.4.5 </h3>
+<ul><li>Wenn die Ausführung eines Menuepunktes vorher bestätigt werden
+soll einfach in die Spalte Target  in der Tabelle für Menüpunkte confirm
+ Eintragen. Ein entsprechendes Javascriptfenster erscheint vor  dem
+Ausführen des Links. Darin ist ein Abbruch möglich.
+</li><li>Fachschale Festpunktverwaltung
+</li><li>Editorfunktion für Bodenrichtwertzonen
+</li><li>Der Eintrag in used_layer Spalte template wird als
+Abfragetemplate jetzt berücksichtigt. Damit können  Layer in
+verschiedenen Stellen unterschiedliche Sachdatenanzeigen bekommen. Wenn
+template leer gelassen  wird, wird als Standardtemplate der
+Layername.php gesetzt.
+</li><li>Konstante zur Definition der Festpunktdatei, des Festpunktpfades und des Festpunktarchivpfades
+</li><li>Linkkorrektur bei Flurstuecksanzeige: 'zur Karte', 'zur Flurstueckssuche', 'Kartenausschnitt'
+</li><li>Automatisches Oeffnen der PDF-Ausgabe fuer ALB-Auszuege 30 &amp; 35 in seperatem Browserfenster
+</li><li>Übernahme der Spalte selectedButton aus der Tabelle stelle in die Tabelle rolle
+<dl><dd>  Damit wird jetzt der zuletzt genutzte Button in der
+Kartenansicht nicht mehr für die Stelle  gespeichert, sondern für den
+Benutzer in der Stelle und Konflikte bei mehreren Nutzer sind behoben
+</dd></dl>
+</li><li>Beim Klicken in die Karte zum Navigieren oder Abfragen werden
+jetzt auch vorher vorgenommene  Eistellungen in der Legende für die
+nächste Darstellung übernommen
+</li><li>Nicht mehr benötigte Spalte Status in used_layer durch
+queryable ersetzt. Damit können Layer  als abfragbar '1' oder nicht '0'
+gekennzeichnet werden. Die Unterscheidung wird in der Datei
+legend_layer.htm an Hand der metadatenvariable queryable vorgenommen,
+die auch gleichzeitig   als WMS-Metadatenvariable verwendet werden kann.
+</li><li>Parameter LABELREQUIRES in Tabelle u_rolle2used_layer verfügbar gemacht und in loadMap einlesbar
+</li><li>Einführen einer Spalte drawingorder in die Tabelle classes zur
+Festlegung der Zeichnungsreihenfolge  der Klassen und Änderung der
+Abfrage load_Klassen in read_Classes in db_MapObj
+<dl><dd>  Sortierung jetzt nach drawingorder,Class_ID
+</dd></dl>
+</li><li>Sachdatenabfrage auf PostGIS Layern über vordefinierte SQL-Statements
+<dl><dd>  Diese werden in der Tabelle layer in Spalte pfad eingetragen.
+Je nach dem ob connectiontype=6  ist oder nicht wird die Abfrage über
+die dbf-Dateien oder über die PostGIS Datenbank gestartet.
+</dd><dd>  Das Suchfenster wird im Abfragestatement durch xxxx
+freigehalten und bei einer Abfrage durch  das Suchrechteck bzw. Punkt
+ersetzt.
+</dd></dl>
+</li><li>Einführen einer Spalte drawingorder in die Tabelle
+u_styles2classes zur Festlegung  der Zeichnungsreihenfolge der Symbole
+einer Klasse, wirkt nur bei mehreren styles pro class
+</li><li>Parameter Minsize und Maxsize in Tabelle styles verfügbar gemacht und in loadMap einlesbar
+</li><li>Parameter Symbolscale in Tabelle used_layer verfügbar gemacht und in loadMap einlesbar
+</li><li>Neue SQL-Skripte in mysql_install_help.sql zur Einrichtung von Festpunktlayer und Klassen
+</li><li>Beheben eines Fehlers in der kvwmap.php: classitem aus tabelle
+layer wird auf ID gesetzt,  wenn nichts anderes angegeben ist
+($layerset[$i]['classitem']!=<i>)</i>
+</li><li>Shell-Skript für die Einrichtung einer PostGIS Datenbank für kvwmap in layouts/sql_dumps
+</li><li>Einführung von README-Dateien in Wurzelverzeichnis mit Hinweisen zur Installation
+</li><li>Die Einstellungen für die aktivierten und zur Abfrage
+ausgewählten Layer sind jetzt an die Rolle  gebunden und nicht mehr an
+die Stelle. Damit werden jetzt nicht mehr für zwei Nutzer, die  zur
+selben Zeit in einer Stelle angemeldet sind die Einstellungen
+gegenseitig überschreiben.
+<dl><dd>  Entsprechende Änderungen in der Datenbank sind eine neue
+Tabelle u_rolle2used_layer. Darin wurden  die Spalten aktivStatus und
+queryStatus aus used_layer übernommen und dort gelöscht. Für die
+Änderungen steht das Skript layouts/sql_dumps/mysql_update.sql zur
+Verfügung. Darin werden die  neue Tabelle angelegt, die Werte aus
+used_layer nach u_rolle2used_layer übernommen und die nicht  mehr
+benötigten Spalten gelöscht.
+</dd></dl>
+</li><li>Mehrere Styledefinitionen lassen sich über die Tabelle u_styles2classes einer Klasse zuordnen
+<dl><dd>  Achtung! Alle bisherigen Zuordnungen von Styles zu Klassen aus
+ der Tabelle classes müssen in  die Tabelle u_styles2classes übernommen
+werden. Nutzen Sie dazu das SQL-Statement  "Kopiere die Stylezuordnungen
+ von classes nach styles2classes" in layouts/sql_dumps/mysql_update.sql
+</dd></dl>
+</li><li>Mehrere Labeldefinitionen lassen sich über die Tabelle u_labels2classes einer Klasse zuordnen
+<dl><dd>  Achtung! Alle bisherigen Zuordnungen von Labels zu Klassen aus
+ der Tabelle classes müssen in  die Tabelle u_styles2classes übernommen
+werden. Nutzen Sie dazu das SQL-Statement  "Kopiere die Labelzuordnungen
+ von classes nach labels2classes" in layouts/sql_dumps/mysql_update.sql
+</dd></dl>
+</li></ul>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit&amp;section=31" title="Changelog">bearbeiten</a>]</div><a name="kvwmap_1.4.4"></a><h3> kvwmap_1.4.4 </h3>
+<ul><li>SVG-Werkzeugleiste ueberarbeitet
+</li><li>zusaetzliche Navigationsmoeglichkeiten in Fachschalen(FS)
+</li></ul>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit&amp;section=32" title="Changelog">bearbeiten</a>]</div><a name="kvwmap_1.4.3"></a><h3> kvwmap_1.4.3 </h3>
+<ul><li>Die php-Skript können jetzt auch von der Komandozeile aus aufgerufen werden (PHP mit CLI)
+</li><li>WMS Konformität
+<dl><dd>  Konstante WMS_MAPFILE_PATH eingeführt, Pfad zum speichern von wms konformen mapfiles.
+</dd></dl>
+</li><li>Fehler bei der Nachweisverwaltung wurden korrigiert.
+</li><li>Zur Einstellung einer transparenten Farbe im Rasterlayer wurde
+die Spalte offsite in  die Tabelle used_layer eingefügt. Das Zuweisen
+zum mapObj ist vorher schon erfolgt.
+</li><li>Zur besseren Konfiguration von Rasterlayern, können nun auch
+Classendefinitionen für Rasterlayer  angegeben werden, bzw. diese werden
+ beim Zuweisen der Classen zum mapObj nun mit berücksichtigt  und nicht
+nur bei Vektorlayern.
+</li><li>Der Fehler, daß die Ausgabe der Bestandsinformationen n-mal erfolgte bei Beständen auf  n-Grundbüchern ist behoben
+</li></ul>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit&amp;section=33" title="Changelog">bearbeiten</a>]</div><a name="kvwmap_1.4.2"></a><h3> kvwmap_1.4.2 </h3>
+<ul><li>Funktionalität vollständig in SVG. Es wird kein Java-Applet mehr verwendet.
+</li><li>zoom, pan und Abfragefunktionen neu in Oberfläche integriert.
+</li></ul>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit&amp;section=34" title="Changelog">bearbeiten</a>]</div><a name="kvwmap_1.3.0"></a><h3> kvwmap_1.3.0 </h3>
+<ul><li>Konstante DBWRITE zum Einstellen der Schreibaktionen auf der Datenbank in config.php aufgenommen
+</li><li>Änderung der Hochkomma in den SQL-Statements zum Einfügen von
+ALK und Administrativen Sachdaten aus  den dbf Datein in die MySql
+Tabellen.
+</li><li>2004-12-10: Änderung des SQL-Statements in function
+getEigentuemerListe in Klasse flurstueck zur Abfrage  der Eigentümer es
+wurden vorher die Eigentümer zum Grundbuch abgefragt, es müssen aber die
+ Eigentümer  bezüglich des Bestandes abgefragt werden, also mit
+Einschränkung Bestandsnummer, Blattnummer und Buchungsvermerknummer.
+Geändert wurde entsprechend auch der Aufruf der Funktion in ALB_Auszug
+der Klasse ALB in  kataster.php
+</li><li>Einfügen der Funktion getALBData der Klasse database in postgres.php und mysql.php
+<dl><dd>  Diese wird in Funktion readALB_Data der Klasse Flurstuecke
+aufgerufen  davor wird das Objekt database an die Klasse flurstueck
+übergeben  damit die Datenbankverbindung für die Klasse flurstueck
+verfügbar ist.
+</dd></dl>
+</li><li>Änderungen am Schema (schema/table_dump_postgres.sql)
+<dl><dd>  Feldlänge für Koordinaten auf 11,3
+</dd><dd>  Feldlänge auch für Bezeichnungen verlängert
+</dd></dl>
+</li><li>Einlesen der Koordinaten als 8 stelligen String und Reduzierung
+ der letzten Stelle  als Nachkommastelle, z.B. 45123456 -&gt; 4512345.6
+</li><li>Änderung der Voreinstellung in der WLDGE-Datei-Auswahl jetzt wird der Pfad und Name aus der Config entnommen.
+</li><li>Einlesen des Erbbaurechtshinweises zur Buchung in Tabelle alb_g_buchung
+<dl><dd>  Dazu wurde das Datenmodell um das Attribut erbbaurechtshinw erweitert vom Typ character(1) Not Null Default <i>  </i>
+</dd></dl>
+</li></ul>
+<div class="editsection" style="float:right;margin-left:5px;">[<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit&amp;section=35" title="Changelog">bearbeiten</a>]</div><a name="Version_1.2.5"></a><h3> Version 1.2.5 </h3>
+<ul><li>Neue Konstante VERSION in config.php, enthält die Versionsnummer
+</li><li>Anzeige der Versionsnummer in layouts/snippets/header.php
+</li><li>Ausführen der Truncate Anweisungen außerhalb von Transaktionblocks
+</li><li>Abfangen von Fehlermeldungen die durch BEGIN, ROLLBACK und COMMIT
+<dl><dd>  Anweisungen verursacht werden in postgres.php, mysql.php, kataster.php  und GUI.php.
+</dd></dl>
+</li><li>Ändern der Datentypen für die Attribute koorrw und koorhw in
+den Tababellen  alb_flurstuecke und alb_x_flurstuecke von numeric(8,3)
+auf numeric(9,3)
+</li><li>Hinzufügen des Attributes commentsign in Klasse database
+welches den Kommentarstring der entsprechenden Datenbank enthält  mysql =
+ und postgresql --  die Zuweisung des Zeichens erfolgt in der Methode
+open($db)
+<dl><dd>  In den Anweisungen zum Einfügen von Kommentarzeilen in der
+Logdatei  wird das Zeichen = durch die Variable
+$this-&gt;database-&gt;commentsign ersetzt
+</dd></dl>
+</li><li>Korrektur der Logfunktion jetzt erscheinen auch die
+Logmeldungen, die  innerhalb der Datei GUI.php abgesetzt werden, weil
+jetzt die Datenbank  statements nicht mehr über das Datenbankobjekt
+$GUI-&gt;database, sondern  $GUI-&gt;ALB-&gt;database abgesetzt werden,
+denn nur die ALB-&gt;database hat den  Wert loglevel auf 1 gesetzt.
+</li></ul>
+
+<!-- Saved in parser cache with key kvwmap_wiki:pcache:idhash:1293-0!1!0!0!!de!2 and timestamp 20110902134604 -->
+<div class="printfooter">
+Von "<a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Changelog">http://kvwmap.geoinformatik.uni-rostock.de/index.php/Changelog</a>"</div>
+	    	    <!-- end content -->
+	    <div class="visualClear"></div>
+	  </div>
+	</div>
+      </div>
+      <div id="column-one">
+	<div id="p-cactions" class="portlet">
+	  <h5>Views</h5>
+	  <ul>
+	    <li id="ca-nstab-main" class="selected"><a title="View the content page [alt-c]" accesskey="c" href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Changelog">Artikel</a></li><li id="ca-talk" class="new"><a title="Discussion about the content page [alt-t]" accesskey="t" href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Diskussion:Changelog&amp;action=edit">Diskussion</a></li><li id="ca-edit"><a title="You can edit this page. Please use the preview button before saving. [alt-e]" accesskey="e" href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=edit">bearbeiten</a></li><li id="ca-history"><a title="Past versions of this page. [alt-h]" accesskey="h" href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=history">Versionen</a></li><li id="ca-protect"><a title="Protect this page [alt-=]" accesskey="=" href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=protect">Schützen</a></li><li id="ca-delete"><a title="Delete this page [alt-d]" accesskey="d" href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=delete">löschen</a></li><li id="ca-move"><a title="Move this page [alt-m]" accesskey="m" href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Spezial:Movepage/Changelog">verschieben</a></li><li id="ca-watch"><a title="Add this page to your watchlist [alt-w]" accesskey="w" href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;action=watch">Beobachten</a></li>	  </ul>
+	</div>
+	<div class="portlet" id="p-personal">
+	  <h5>'Persönliche Werkzeuge</h5>
+	  <div class="pBody">
+	    <ul>
+	    <li id="pt-userpage"><a title="My user page [alt-.]" accesskey="." href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Benutzer:Rahn">Rahn</a></li><li id="pt-mytalk"><a title="My talk page [alt-n]" accesskey="n" href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Benutzer_Diskussion:Rahn" class="new">Meine Diskussion</a></li><li id="pt-preferences"><a title="My preferences" href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Spezial:Preferences">Einstellungen</a></li><li id="pt-watchlist"><a title="The list of pages you're monitoring for changes. [alt-l]" accesskey="l" href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Spezial:Watchlist">Beobachtungsliste</a></li><li id="pt-mycontris"><a title="List of my contributions [alt-y]" accesskey="y" href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Spezial:Contributions/Rahn">Meine Beiträge</a></li><li id="pt-logout"><a title="Log out [alt-o]" accesskey="o" href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Spezial:Userlogout&amp;returnto=Changelog">Abmelden</a></li>	    </ul>
+	  </div>
+	</div>
+	<div class="portlet" id="p-logo">
+	  <a style="background-image: url(&quot;/skins/kvwmap/images/kvwmap-wiki.gif&quot;);" href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Hauptseite" title="Hauptseite"></a>
+	</div>
+	<script type="text/javascript"> if (window.isMSIE55) fixalpha(); </script>
+		<div class="portlet" id="p-navigation">
+	  <h5>Navigation</h5>
+	  <div class="pBody">
+	    <ul>
+	    	      <li id="n-mainpage"><a title="Visit the Main Page [alt-z]" accesskey="z" href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Hauptseite">Hauptseite</a></li>
+	     	      <li id="n-kvwmap-Portal"><a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/kvwmap:Portal">kvwmap-Portal</a></li>
+	     	      <li id="n-Dokumentation"><a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Dokumentation">Dokumentation</a></li>
+	     	      <li id="n-Funktionsumfang"><a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Dokumentation#Funktionalit.C3.A4t_im_Client">Funktionsumfang</a></li>
+	     	      <li id="n-Versionen"><a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Changelog">Versionen</a></li>
+	     	      <li id="n-Metadaten"><a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Metadaten">Metadaten</a></li>
+	     	      <li id="n-Fragen+Antworten"><a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/FAQ">Fragen+Antworten</a></li>
+	     	    </ul>
+	  </div>
+	</div>
+		<div class="portlet" id="p-SourceForge.net">
+	  <h5>SourceForge.net</h5>
+	  <div class="pBody">
+	    <ul>
+	    	      <li id="n-Projektseite"><a href="http://sourceforge.net/projects/kvwmap/">Projektseite</a></li>
+	     	      <li id="n-Mailingliste"><a href="http://sourceforge.net/mailarchive/forum.php?forum_name=kvwmap-users">Mailingliste</a></li>
+	     	      <li id="n-Downloads"><a href="http://sourceforge.net/project/showfiles.php?group_id=137679">Downloads</a></li>
+	     	      <li id="n-Kontakt"><a href="http://sourceforge.net/project/memberlist.php?group_id=137679">Kontakt</a></li>
+	     	    </ul>
+	  </div>
+	</div>
+		<div class="portlet" id="p-Foren">
+	  <h5>Foren</h5>
+	  <div class="pBody">
+	    <ul>
+	    	      <li id="n-Wunschliste"><a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Wunsch-Liste">Wunschliste</a></li>
+	     	      <li id="n-ToDo-Liste"><a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/ToDo-Liste">ToDo-Liste</a></li>
+	     	      <li id="n-Bug-Report"><a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Bug-Report">Bug-Report</a></li>
+	     	      <li id="n-HowTos"><a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/HowTo-Liste">HowTos</a></li>
+	     	      <li id="n-GLE-Fachschalen"><a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/GLE-Fachschalen">GLE-Fachschalen</a></li>
+	     	      <li id="n-InternetGIS"><a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/InternetGIS">InternetGIS</a></li>
+	     	    </ul>
+	  </div>
+	</div>
+		<div class="portlet" id="p-Extras">
+	  <h5>Extras</h5>
+	  <div class="pBody">
+	    <ul>
+	    	      <li id="n-kvwmap-Nutzer"><a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Kvwmap-Nutzer">kvwmap-Nutzer</a></li>
+	     	      <li id="n-Anwendertreffen"><a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Anwendertreffen">Anwendertreffen</a></li>
+	     	      <li id="n-Wiki-Teilnehmer"><a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Spezial:Listusers">Wiki-Teilnehmer</a></li>
+	     	      <li id="n-recentchanges"><a title="The list of recent changes in the wiki. [alt-r]" accesskey="r" href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Spezial:Recentchanges">Letzte Änderungen</a></li>
+	     	      <li id="n-Aktuelles"><a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Vorlage:Aktuelles">Aktuelles</a></li>
+	     	      <li id="n-help"><a title="The place to find out." href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/kvwmap:Hilfe">Hilfe</a></li>
+	     	    </ul>
+	  </div>
+	</div>
+		<div id="p-search" class="portlet">
+	  <h5><label for="searchInput">Suche</label></h5>
+	  <div class="pBody">
+	    <form name="searchform" action="/index.php/Spezial:Search" id="searchform">
+	      <input id="searchInput" name="search" accesskey="f" type="text">
+	      <input name="go" class="searchButton" id="searchGoButton" value="Los" type="submit">&nbsp;<input name="fulltext" class="searchButton" value="Suche" type="submit">
+	    </form>
+	  </div>
+	</div>
+	<div class="portlet" id="p-tb">
+	  <h5>Werkzeuge</h5>
+	  <div class="pBody">
+	    <ul>
+		  		  <li id="t-whatlinkshere"><a title="List of all wiki pages that link here [alt-j]" accesskey="j" href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Spezial:Whatlinkshere/Changelog">Was zeigt hierhin</a></li>
+		  		  <li id="t-recentchangeslinked"><a title="Recent changes in pages linked from this page [alt-k]" accesskey="k" href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Spezial:Recentchangeslinked/Changelog">Verlinkte Seiten</a></li>
+		                	      	      	      	      	      	      	      <li id="t-upload"><a title="Upload images or media files [alt-u]" accesskey="u" href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Spezial:Upload">Hochladen</a></li>	      	      <li id="t-specialpages"><a title="List of all special pages [alt-q]" accesskey="q" href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/Spezial:Specialpages">Spezialseiten</a></li>	      	      	      <li id="t-print"><a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php?title=Changelog&amp;printable=yes&amp;printable=yes">Druckversion</a></li>
+	      	    </ul>
+	  </div>
+	</div>
+	      </div><!-- end of the left (by default at least) column -->
+      <div class="visualClear"></div>
+      <div id="footer">
+    <div id="f-poweredbyico"><a href="http://www.mediawiki.org/"><img src="changelog-Dateien/poweredby_mediawiki_88x31.png" alt="MediaWiki"></a></div>		<ul id="f-list">
+	  <li id="f-lastmod"> Diese Seite wurde zuletzt geändert um 13:46, 2. Sep 2011.</li>	  <li id="f-viewcount">Diese Seite wurde bisher 100102 mal abgerufen.</li>	  	  	  	  <li id="f-about"><a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/kvwmap:%C3%9Cber_kvwmap" title="kvwmap:Über kvwmap">Über kvwmap</a></li>	  <li id="f-disclaimer"><a href="http://kvwmap.geoinformatik.uni-rostock.de/index.php/kvwmap:Lizenzbestimmungen" title="kvwmap:Lizenzbestimmungen">Lizenzbestimmungen</a></li>	  	</ul>
+      </div>
+    </div>
+    <!-- Served by berg in 0.28 secs. -->
+
+</body></html>

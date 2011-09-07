@@ -1,0 +1,5 @@
+<p><h2><?php echo $this->titel; ?></h2>  <table height="<?php echo $this->param['height']; ?>">
+    <tr valign="center">
+      <td align="center"><?php echo $this->param['str1']; ?></td>
+    </tr>
+  </table>

@@ -1,0 +1,193 @@
+body {  
+	font-family: Arial, Verdana, Helvetica, sans-serif;
+	BACKGROUND:white;
+	margin-left:5px;
+	margin-top:5px;
+}
+
+h1 {  
+	font-size: 20pt; 
+	margin-top: 0px; 
+	margin-bottom: 0px; 
+	padding-top: 0px; 
+	padding-bottom: 0px
+}
+
+.input {
+	font-size: 9pt
+}
+
+.button {
+	font-size: 9pt
+}
+
+.select {
+	font-size: 9pt
+}
+
+.textarea {
+	font-size: 9pt
+}
+
+td {  
+	font-size: 10pt
+}
+
+h2 {  
+	font-size: 12pt; 
+	margin-bottom: 0px
+}
+
+.small {
+	font-size: 9pt
+}
+
+.verysmall {
+	font-size: 8pt
+}
+
+
+a.menuered {
+color: #990000;
+font-size: 10pt;
+        TEXT-DECORATION:none;
+font-family: Arial, Helvetica, sans-serif;
+}
+
+
+a.testred:hover { 
+text-decoration:underline;  
+}
+
+
+a.infobox {  
+	text-decoration:none; 
+}
+
+a.infobox:hover { 
+	text-decoration:none;  
+}
+
+a.infobox span 
+	{ visibility:hidden; 
+		position:absolute;
+    margin-top:1.5em; 
+    padding:0.5em; 
+    text-decoration:none; 
+}
+
+a.infobox:hover span, a.infobox:focus span, a.infobox:active span {
+	visibility:visible; 
+  border:1px solid steelblue; 
+  background:white; 
+  text-decoration:none;
+}
+
+
+
+
+select.imagebacked { 
+	padding: 2px 0 3px 155px; 
+	background-repeat: no-repeat; 
+	background-position: 0px 0px; 
+	vertical-align: middle; 
+}
+
+option.imagebacked {
+	padding: 2px 0 3px 1px; 
+	background-repeat: no-repeat; 
+	background-position: 0px 0px; 
+	vertical-align: top; 
+}
+
+.bold {
+	font-weight: bold; 
+}
+
+span.italic {
+	font-style: italic; 
+}
+
+span.red {  
+	font-size: 10pt; 
+	font-weight: bold; 
+	color: firebrick}
+
+a {  
+	color: firebrick; 
+	TEXT-DECORATION: none
+}
+a:hover {  
+	color: black;
+	TEXT-DECORATION:underline
+}
+
+a.name:link {
+	text-decoration: none;
+	font-family: Arial, Helvetica, sans-serif;
+	color: #993333;
+	font-weight: bold;
+}
+a.name:visited {
+	text-decoration:none;
+	font-family: Arial, Helvetica, sans-serif;
+	color: #006633;
+	font-weight: bold;
+}
+
+a.red {
+	color: #993333;
+	font-weight: 600; 
+}
+
+a.blue_underline {
+	color: #0000CC;
+    font-weight: bold;
+	TEXT-DECORATION:underline; 
+}
+
+a.green {
+	color: #339933;
+	TEXT-DECORATION: none; 
+}
+
+a.black {
+	color: black;
+	font-weight: bold; 
+	TEXT-DECORATION:none
+}
+
+#layer {
+  border:1px solid gray;
+  margin:20px 10px 0px 10px;
+  font:italic 120px verdana, arial, helvetica, sans-serif;
+}
+
+#datensatz {
+ border:0px solid gray;
+ border-collapse:collapse;
+ padding:0px 0px 0px 0px;
+}
+
+table.tgle {
+ border:1px solid gray;
+ border-collapse:collapse;
+ margin-left:auto;
+ margin-right:auto;
+}
+
+thead.gle th { 
+ padding:6px 6px 6px 6px;
+ font-size:9px;
+ font:normal 10px verdana, arial, helvetica, sans-serif;
+ text-align:left;
+}
+
+tbody.gle tr { 
+ border:1px dotted gray;
+ font:normal 10px verdana, arial, helvetica, sans-serif;
+}
+
+tbody.gle tr:hover { 
+ border:1px solid #03476F;
+}

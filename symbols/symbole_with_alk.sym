@@ -1,0 +1,2867 @@
+SYMBOLSET
+
+SYMBOL        #1
+  NAME "Wohngebaeude"
+  TYPE PIXMAP
+  IMAGE "wohngebaeude_allgemein.png"
+  TRANSPARENT 0
+END
+
+SYMBOL        #2
+  NAME "Wirtschaftsgebaeude"
+  TYPE PIXMAP
+  IMAGE "wirtschaftsgebaeude.png"
+  TRANSPARENT 0
+END
+
+SYMBOL        #3
+  NAME "Gruenanlage"
+  TYPE PIXMAP
+  IMAGE "gruenanlage.png"
+  TRANSPARENT 1
+END
+
+SYMBOL        #4
+  NAME "(Klein-)Garten"
+  TYPE PIXMAP
+  IMAGE "garten.png"
+  TRANSPARENT 1
+END
+
+SYMBOL        #5
+  NAME "Gruenland_Bild"
+  TYPE PIXMAP
+  IMAGE "gruenland.png"
+  TRANSPARENT 1
+END
+
+SYMBOL        #6
+  NAME "Gartenland (allgemein)"
+  TYPE PIXMAP
+  IMAGE "gartenland.png"
+  TRANSPARENT 1
+END
+
+SYMBOL        #7
+  NAME "Nadelwald_Bild"
+  TYPE PIXMAP
+  IMAGE "nadelwald.png"
+  TRANSPARENT 1
+END
+
+SYMBOL        #8
+  NAME "Mischwald_Bild"
+  TYPE PIXMAP
+  IMAGE "mischwald.png"
+  TRANSPARENT 1
+END
+
+SYMBOL        #9
+  NAME "Linie"
+  TYPE ELLIPSE
+  POINTS
+    1 1
+  END
+END
+
+SYMBOL #10
+  NAME "Flurgrenze"
+  TYPE ELLIPSE
+  POINTS 1 1 END
+ # FILLED true
+  STYLE 1 4 1 4 1 4 14 4 END
+END
+
+SYMBOL #11
+  NAME "B-Plan-Grenze"
+  TYPE ELLIPSE
+  POINTS 1 1 END
+  FILLED true
+  STYLE 5 10 5 END
+END
+
+SYMBOL #12
+  NAME "Gemarkungsgrenze"
+  TYPE ELLIPSE
+  POINTS 1 1 END
+  STYLE 1 4 1 4 14 4 END
+END
+
+SYMBOL #13
+  NAME "Gemeindegrenze"
+  TYPE ELLIPSE
+  POINTS 1 1 END
+  STYLE 1 4 14 4 END
+END
+
+SYMBOL        #14
+  NAME "Denkmal_Bild"
+  TYPE PIXMAP
+  IMAGE "denkmal.png"
+  TRANSPARENT 255
+END
+
+SYMBOL #15
+  NAME "Alt-Liegenschaft"
+  TYPE VECTOR
+  POINTS
+    1 12
+    1 1
+    4 3
+    1 6
+    1 12
+  END
+END
+
+SYMBOL #16
+  NAME "Naturdenkmal"
+  TYPE VECTOR
+  POINTS
+    1 10
+    5 10
+    1 10
+  END
+  POINTS
+    9 10
+    13 10
+    9 10
+  END
+  POINTS
+    3 10
+    7 5
+    3 10
+  END
+  POINTS
+    11 10
+    7 5
+    11 10
+  END
+  POINTS
+    7 5
+    3 3
+    7 1
+    11 3
+    7 5
+  END
+  POINTS
+    1 1
+    3 1
+    1 1
+  END
+END
+
+
+SYMBOL        #17
+  NAME "Altlastenbilder"
+  TYPE PIXMAP
+  IMAGE "kamera.png"
+  TRANSPARENT 255
+END
+
+SYMBOL    #18
+  NAME "Telephon"
+  TYPE VECTOR
+  POINTS
+    1 0
+    2 0
+    2 2
+    1 2
+    1 4
+    2 4
+    2 6
+    1 6
+    0 5
+    0 1
+    1 0
+  END
+END
+
+SYMBOL #19
+	Name "circle"
+	Type ELLIPSE
+	Filled TRUE
+	POINTS
+	  1 1
+	END
+END 
+
+SYMBOL #20
+	Type ELLIPSE
+	POINTS
+		1 1
+	END
+	FILLED TRUE
+	STYLE	10 0 10 END
+END
+
+# Ab hier aus Mapbender Symboldatei
+
+#default SYMBOL
+SYMBOL
+   NAME "defaultSYMBOL"
+   TYPE TRUETYPE
+   FONT 'alk_sym1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER "&#238;"
+END
+#default SYMBOL
+
+
+#schraffur_test
+
+SYMBOL
+   NAME "schraffur_test"
+   TYPE TRUETYPE
+   FONT "arial"
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER "&#047;"
+END
+
+#schraffur_test
+#####
+
+SYMBOL
+NAME 'triangle'
+TYPE VECTOR
+ FILLED false
+ POINTS
+ 0 1
+ 1 1
+ 0.5 0
+ 0 1
+ END
+END
+
+ SYMBOL
+ NAME 'circle'
+ TYPE ELLIPSE
+ FILLED FALSE
+ POINTS
+ 1 1
+ END
+END
+
+SYMBOL
+NAME 'square'
+TYPE VECTOR
+ FILLED false
+ POINTS
+ 0 0
+ 0 1
+ 1 1
+ 1 0
+ 0 0
+ END
+END
+
+SYMBOL
+NAME 'mauer'
+TYPE vector
+ POINTS
+2 0
+2 4
+-99 -99
+0 2
+4 2
+ END
+STYLE
+20
+8
+END
+END
+
+#-------- LINIENSYMBOLE -----------------
+
+#------ Linien folie 001/081/023  ---------
+
+SYMBOL
+NAME 'dash6_1_d4' #streitige Grenze F001 235
+TYPE VECTOR
+ POINTS
+ 1 1
+ 2 1
+ 2 2
+ 1 2
+ 1 1
+ END
+ STYLE
+ 16#17.00787401574803149606299212598
+ 4#2.83464566929133858267716535433
+ END
+END
+
+SYMBOL
+NAME 'dash2_1_d4'  # Dicke 2 - 2/1
+TYPE VECTOR
+ POINTS
+ 0 0
+ 0 1
+ 1 1
+ 1 0
+ 0 0
+ END
+ STYLE
+  5.66929133858267716535433070866
+ 3#2.83464566929133858267716535433
+ END
+END
+
+#------ folie 002_li / 082_li ---------
+
+SYMBOL
+NAME 'line'
+TYPE VECTOR
+ POINTS
+0 0
+ 0 1
+ 1 1
+ 1 0
+ 0 0
+ END
+END
+
+SYMBOL
+NAME 'flurgrenze'  #4 1 0,5 1 0,5 1 0,5_d5
+TYPE VECTOR
+ POINTS
+ 0 0
+ 0 1
+ 1 1
+ 1 0
+ 0 0
+ END
+ STYLE
+ 6
+ 2
+ 1
+ 2
+ 1
+ 2
+ 1
+ 2
+ END
+END
+
+SYMBOL
+NAME 'gemarkungsgrenze'  # 4/1/0,5_d5
+TYPE VECTOR
+ POINTS
+ 0 0
+ 0 1
+ 1 1
+ 1 0
+ 0 0
+ END
+ STYLE
+ 6
+ 2
+ 1
+ 2
+ 1
+ 2
+ END
+END
+
+
+SYMBOL
+	NAME "grenzhecke"
+	TYPE truetype
+	FONT 'alk_sym1'
+	FILLED True
+	ANTIALIAS True
+	Gap -30
+  POSITION ur
+	Character "&#068;"
+END
+
+SYMBOL
+	NAME "senk_trenner"
+	TYPE truetype
+	FONT 'alk_sym1'
+	FILLED True
+	ANTIALIAS True
+	GAP -12
+	Character "&#061;"
+END
+
+SYMBOL
+	NAME "grenzzaun"
+	TYPE truetype
+	FONT 'alk_sym2'  ##"ip8"
+	FILLED True
+	ANTIALIAS True
+	Gap -30
+  POSITION lc
+	Character '&#33;'
+END
+
+SYMBOL
+	NAME "tri_li"
+	TYPE truetype
+	FONT 'alk_sym2'
+	FILLED True
+	ANTIALIAS True
+	Gap -30
+  POSITION lc
+	Character '&#75;'
+END
+
+SYMBOL
+	NAME "tri_re"
+	TYPE truetype
+	FONT 'alk_sym2'
+	FILLED True
+	ANTIALIAS True
+	Gap -30
+  POSITION uc
+	Character '&#76;'
+END
+
+
+#-----82 
+SYMBOL
+   NAME "ruine"
+TYPE VECTOR
+ POINTS
+ 0 0
+ 0 1
+ 1 1
+ 1 0
+ 0 0
+ END
+ STYLE
+ 5.66929133858267716535433070866	
+ 5.66929133858267716535433070866	
+ END
+END
+
+
+#---- line folie 011 , 65, 66 , 81------
+
+ SYMBOL
+   NAME "dash2_1_d2" #"ueberd_top_begrenz" Folien 11, 65, 66
+   TYPE VECTOR
+  POINTS
+ 0 0
+ 0 1
+ 1 1
+ 1 0
+ 0 0
+ END
+ STYLE
+ 5.66929133858267716535433070866
+ 3#2.83464566929133858267716535433
+ END
+END
+
+SYMBOL
+   NAME "dash1.5_0.5_d2" #"offene_begrenzungslinie"
+   TYPE VECTOR
+  POINTS
+ 0 0
+ 0 1
+ 1 1
+ 1 0
+ 0 0
+ END
+ STYLE
+ 4.251968503937007874015748031495
+ 2#1.417322834645669291338582677165
+ END
+END
+
+SYMBOL
+   NAME "dash4_1_d2" #"unterirdische_gebaeude"
+   TYPE VECTOR
+  POINTS
+ 0 0
+ 0 1
+ 1 1
+ 1 0
+ 0 0
+ END
+ STYLE
+ 11.33858267716535433070866141732
+2.83464566929133858267716535433
+ END
+END
+
+SYMBOL
+   NAME "dash2_1_0.5_1_d2" #1018 "zerstoertes_gebaeude"
+   TYPE VECTOR
+  POINTS
+ 0 0
+ 0 1
+ 1 1
+ 1 0
+ 0 0
+ END
+ STYLE
+ 5.66929133858267716535433070866
+2.83464566929133858267716535433
+1
+2.83464566929133858267716535433
+ END
+END
+
+#------------ folie 21 --------------
+
+SYMBOL
+   NAME "nutzungsartengrenze" #1/1/d2
+   TYPE VECTOR
+  POINTS
+ 0 0
+ 0 1
+ 1 1
+ 1 0
+ 0 0
+ END
+ STYLE
+ 2.83464566929133858267716535433
+  2.83464566929133858267716535433
+ END
+END
+
+#--------- folie 65, 66 -------
+SYMBOL
+    NAME "dash3_1_d2"
+   TYPE VECTOR
+  POINTS
+ 0 0
+ 0 1
+ 1 1
+ 1 0
+ 0 0
+ END
+ STYLE
+ 8.50393700787401574803149606299
+ 4#2.83464566929133858267716535433
+ END
+END
+
+#-----------folie 82 ------------
+
+SYMBOL
+    NAME "dash6_1_d3"
+   TYPE VECTOR
+  POINTS
+ 0 0
+ 0 1
+ 1 1
+ 1 0
+ 0 0
+ END
+ STYLE
+ 17.00787401574803149606299212598
+ 4#2.83464566929133858267716535433
+ END
+END
+
+SYMBOL
+    NAME "dash1.5_1.5_d2"
+   TYPE VECTOR
+  POINTS
+ 0 0
+ 0 1
+ 1 1
+ 1 0
+ 0 0
+ END
+ STYLE
+ 4.251968503937007874015748031495
+ 4.251968503937007874015748031495
+ END
+END
+
+
+#-----------folie 003----------------
+
+SYMBOL
+   NAME "staatsgrenze"
+   TYPE TRUETYPE
+   FONT 'alk_textsym'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#97;'
+END
+
+SYMBOL
+   NAME "landesgrenze"
+   TYPE TRUETYPE
+   FONT 'alk_textsym'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#98;'
+END
+
+ #### versuch
+#SYMBOL
+#NAME 'landesgrenze_2'
+#TYPE vector
+# POINTS
+# 0 2
+# 0 6
+# -99 -99
+# 0 4
+# 6 4
+# -99 -99
+# 6 2
+# 6 6
+# END
+#STYLE
+# 6
+# 2
+ #END
+#END
+
+
+SYMBOL
+   NAME "regierungsbezirksgrenze"
+   TYPE TRUETYPE
+   FONT 'alk_textsym'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#99;'
+END
+
+SYMBOL
+   NAME "kreisgrenze"
+TYPE VEcTOR
+ POINTS
+0 0
+ 0 1
+ 1 1
+ 1 0
+ 0 0
+ END
+ STYLE
+ 11.33858267716535433070866141732
+ 2#1.984251968503937007874015748031
+ 11.33858267716535433070866141732
+ 1.417322834645669291338582677165
+ 1.417322834645669291338582677165
+ 1.417322834645669291338582677165
+ END
+END
+
+SYMBOL
+   NAME "gemeindegrenze"
+
+TYPE VECTOR
+ POINTS
+ 0 0
+ 0 1
+ 1 1
+ 1 0
+ 0 0
+ END
+ STYLE
+ 11.33858267716535433070866141732
+ 1.417322834645669291338582677165
+ 1.417322834645669291338582677165
+ 1.417322834645669291338582677165
+ END
+END
+
+SYMBOL
+   NAME "grenze_gemeindeteil"
+    TYPE VECTOR
+  POINTS
+ 0 0
+ 0 1
+ 1 1
+ 1 0
+ 0 0
+ END
+ STYLE
+ 11.33858267716535433070866141732
+  2#1.984251968503937007874015748031
+  11.33858267716535433070866141732
+ 1.417322834645669291338582677165
+ 1.417322834645669291338582677165
+ 1.417322834645669291338582677165
+ 1.417322834645669291338582677165
+ 1.417322834645669291338582677165
+ END
+END
+
+#-------- LINIENSYMBOLE -----------------
+
+
+
+#############--Folie_01--##################
+
+SYMBOL
+   NAME "zugehoerigkeitshaken"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#32;'
+END
+
+SYMBOL
+   NAME "zuordnungspfeil"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#33;'
+END
+
+#############--Folie_11--##################
+
+SYMBOL
+   NAME "treppe_freitreppe"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#34'
+END
+
+SYMBOL
+   NAME "schornstein_im_gebaeude"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#35;'
+END
+
+SYMBOL
+   NAME "markierung_wohngebaeude_ohne_hausnummer"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#36;'
+END
+
+SYMBOL
+   NAME "markierung_wirtschaftsgebaeude"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#37;'
+END
+
+SYMBOL
+   NAME "kirche"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#38;'
+END
+
+SYMBOL
+   NAME "synagoge"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#39;'
+END
+
+SYMBOL
+   NAME "ubahn"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#40;'
+END
+
+SYMBOL
+   NAME "sbahn"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#41;'
+END
+
+SYMBOL
+   NAME "bergwerk_betrieb"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#42;'
+END
+
+SYMBOL
+   NAME "bergwerk_stillgelegt"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#43;'
+END
+
+SYMBOL
+   NAME "bergwerk_voruebergehend_stillgelegt"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#44;'
+END
+
+SYMBOL
+   NAME "parkhaus"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#45;'
+END
+
+SYMBOL
+   NAME "umformer"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#46;'
+END
+
+#################--Folie_21--###################
+
+SYMBOL
+   NAME "gestein"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#47;'
+END
+
+SYMBOL
+   NAME "erz"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#48;'
+END
+
+SYMBOL
+   NAME "kohle"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#49;'
+END
+
+SYMBOL
+   NAME "torf"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#50;'
+END
+
+SYMBOL
+   NAME "lava"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#51;'
+END
+
+SYMBOL
+   NAME "garten"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#52;'
+END
+
+SYMBOL
+   NAME "parkplatz"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#53;'
+END
+
+SYMBOL
+   NAME "verkehrsbegleitflaeche_buschsignatur"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#54;'
+END
+
+SYMBOL
+   NAME "verkehrsbegleitflaeche_wiesensignatur"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#55;'
+END
+
+SYMBOL
+   NAME "verkehrsbegleitflaeche_nadelsignatur"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#56;'
+END
+
+SYMBOL
+   NAME "verkehrsbegleitflaeche"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#57;'
+END
+
+SYMBOL
+   NAME "ackerland"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#58;'
+END
+
+SYMBOL
+   NAME "streuobstacker"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#59;'
+END
+
+SYMBOL
+   NAME "hopfen"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#60;'
+END
+
+SYMBOL
+   NAME "spargel"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#61;'
+END
+
+SYMBOL
+   NAME "gruenland_allgemein"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#62;'
+END
+
+SYMBOL
+   NAME "gruenland"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#63;'
+END
+
+SYMBOL
+   NAME "streuobstwiese"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#64;'
+END
+
+SYMBOL
+   NAME "gartenland_allgemein"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#65;'
+END
+
+SYMBOL
+   NAME "gartenland"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#66;'
+END
+
+SYMBOL
+   NAME "baumschule"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#67;'
+END
+
+SYMBOL
+   NAME "weingarten"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#68;'
+END
+
+SYMBOL
+   NAME "moor"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#69;'
+END
+
+SYMBOL
+   NAME "heide"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#70;'
+END
+
+SYMBOL
+   NAME "obstanbauflaeche"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#71;'
+END
+
+SYMBOL
+   NAME "obstbaumanlage"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#72;'
+END
+
+SYMBOL
+   NAME "obststrauchanlage"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#73;'
+END
+
+SYMBOL
+   NAME "ackerland_brach"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#74;'
+END
+
+SYMBOL
+   NAME "gruenland_brach"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#75;'
+END
+
+SYMBOL
+   NAME "gartenland_brach"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#76;'
+END
+
+SYMBOL
+   NAME "weingarten_brach"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#77;'
+END
+
+SYMBOL
+   NAME "streuobstacker_brach"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#78;'
+END
+
+SYMBOL
+   NAME "streuobstwiese_brach"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#79;'
+END
+
+SYMBOL
+   NAME "obstanbauflaeche_brach"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#80;'
+END
+
+SYMBOL
+   NAME "laubwald"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#80;'
+END
+
+SYMBOL
+   NAME "nadelwald"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#82;'
+END
+
+SYMBOL
+   NAME "mischwald"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#83;'
+END
+
+SYMBOL
+   NAME "mischwald_einzelne_nadelwaldsignatur"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#84;'
+END
+
+SYMBOL
+   NAME "mischwald_einzelne_laubwaldsignatur"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#85;'
+END
+
+SYMBOL
+   NAME "laubwald_mit_nadelholz"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#86;'
+END
+
+SYMBOL
+   NAME "nadelwald_mit_laubholz"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#87;'
+END
+
+SYMBOL
+   NAME "gehoelz"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#88;'
+END
+
+SYMBOL
+   NAME "gehoelz_einzelne_nadelsignatur"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#89;'
+END
+
+SYMBOL
+   NAME "gehoelz_einzelne_laubsignatur"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#90;'
+END
+
+SYMBOL
+   NAME "wallhecke"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#91;'
+END
+
+SYMBOL
+   NAME "windschutzstreifen"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#92;'
+END
+
+SYMBOL
+   NAME "windschutzanlage"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#93;'
+END
+
+SYMBOL
+   NAME "sumpf"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#94;'
+END
+
+SYMBOL
+   NAME "ackerland_51"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#95;'
+END
+
+SYMBOL
+   NAME "hopfen_51"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#96;'
+END
+
+SYMBOL
+   NAME "spargel_51"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#97;'
+END
+
+SYMBOL
+   NAME "gruenland_51"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#98;'
+END
+
+SYMBOL
+   NAME "gartenland_51"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#99;'
+END
+
+SYMBOL
+   NAME "weingarten_51"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#100;'
+END
+
+SYMBOL
+   NAME "moor_51"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#101;'
+END
+
+SYMBOL
+   NAME "heide_51"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#102;'
+END
+
+SYMBOL
+   NAME "obstbaumanlage_51"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#103;'
+END
+
+SYMBOL
+   NAME "obststrauchanlage_51"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#104;'
+END
+
+#################--Folie_50--#################
+
+SYMBOL
+   NAME "trigonometrischer_hochpunkt_zentrum"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#105;'
+END
+
+SYMBOL
+   NAME "trigonometrischer_bodenpunkt_zentrum"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#106;'
+END
+
+SYMBOL
+   NAME "trigonometrischer_punkt_exzentrum1"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#107;'
+END
+
+SYMBOL
+   NAME "trigonometrischer_punkt_exzentrum2"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#108;'
+END
+
+#################--Folie_51--#################
+
+SYMBOL
+   NAME "aufnahmepunkt_1verdichtungsstufe"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#109;'
+END
+
+#################--Folie_52--#################
+
+SYMBOL
+   NAME "grenzzeichen_staats_landesgrenzen"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#110;'
+END
+
+SYMBOL
+   NAME "grenzsaeule_staats_landesgrenzen"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#111;'
+END
+
+SYMBOL
+   NAME "grenzpunkt_keine_angaben"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#112;'
+END
+
+SYMBOL
+   NAME "abgemarkter_grenzpunkt"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#113;'
+END
+
+SYMBOL
+   NAME "nichtabgemarkter_grenzpunkt"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#114;'
+END
+
+SYMBOL
+   NAME "zuordnungspfeil"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#115;'
+END
+
+
+#################--Folie_59--#################
+
+SYMBOL
+   NAME "hoehenfestpunkt"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#116;'
+END
+
+SYMBOL
+   NAME "zuordnungspfeil"
+   TYPE TRUETYPE
+   FONT 'symboldata_1'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#117;'
+END
+
+#################--Folie_65--#################
+
+SYMBOL
+   NAME "brunnen"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#32;'
+END
+
+SYMBOL
+   NAME "hintergrundsymbol"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#33;'
+END
+
+SYMBOL
+   NAME "merkzeichen_wasserversorgung"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#34;'
+END
+
+SYMBOL
+   NAME "oberirdische_hochspannungsleitung"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#35;'
+END
+
+SYMBOL
+   NAME "unterirdische_hochspannungsleitung"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#36;'
+END
+
+SYMBOL
+   NAME "umformer_65"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#37;'
+END
+
+SYMBOL
+   NAME "merkzeichen_hochspannungsleitung"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#38;'
+END
+
+SYMBOL
+   NAME "stahlrohrmast"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#39;'
+END
+
+SYMBOL
+   NAME "stahlbetonmast"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#40;'
+END
+
+SYMBOL
+   NAME "einfacher_stahlgittermast"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#41;'
+END
+
+SYMBOL
+   NAME "stahlgittermast_wenn_leitung_nicht_dargestellt"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#42;'
+END
+
+SYMBOL
+   NAME "doppelmast"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#43;'
+END
+
+SYMBOL
+   NAME "holzmast"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#44;'
+END
+
+SYMBOL
+   NAME "leitungsmast_allgemein"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#45;'
+END
+
+SYMBOL
+   NAME "merkzeichen_rohoelleitung"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#46;'
+END
+
+SYMBOL
+   NAME "merkzeichen_fernheizleitung"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#47;'
+END
+
+SYMBOL
+   NAME "funkmast"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#48;'
+END
+
+SYMBOL
+   NAME "merkzeichen_produktenfernleitung"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#49;'
+END
+
+SYMBOL
+   NAME "windrad"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#50;'
+END
+
+SYMBOL
+   NAME "flutlichtmast"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#51;'
+END
+
+#################--Folie_66--#################
+
+SYMBOL
+   NAME "brunnen_66"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#52;'
+END
+
+SYMBOL
+   NAME "hintergrundsymbol_66"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#53;'
+END
+
+SYMBOL
+   NAME "merkzeichen_wasserversorgung_66"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#54;'
+END
+
+SYMBOL
+   NAME "hydrant_oberirdisch"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#55;'
+END
+
+SYMBOL
+   NAME "hydrant_unterirdisch"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#56;'
+END
+
+SYMBOL
+   NAME "schieberkappe_wasser"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#57;'
+END
+
+SYMBOL
+   NAME "merkzeichen_gasleitung_66"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#58;'
+END
+
+SYMBOL
+   NAME "gasschieberkappe"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#59;'
+END
+
+SYMBOL
+   NAME "merkzeichen_allgemein"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#60;'
+END
+
+SYMBOL
+   NAME "schieberkappe_allgemein"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#61;'
+END
+
+SYMBOL
+   NAME "einsteigeschacht_allgemein"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#62;'
+END
+
+SYMBOL
+   NAME "merkzeichen_elektrizitaet"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#63;'
+END
+
+SYMBOL
+   NAME "oberirdische_hochspannungsleitung_66"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#64;'
+END
+
+SYMBOL
+   NAME "unterirdische_hochspannungsleitung_66"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#65;'
+END
+
+SYMBOL
+   NAME "merkzeichen_hochspannungsleitung_66"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#66;'
+END
+
+SYMBOL
+   NAME "stahlrohrmast_66"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#67;'
+END
+
+SYMBOL
+   NAME "stahlbetonmast_66"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#68;'
+END
+
+SYMBOL
+   NAME "einfacher_stahlgittermast_66"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#69;'
+END
+
+SYMBOL
+   NAME "stahlgittermast_wenn_leitung_nicht_dargestellt_66"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#70;'
+END
+
+SYMBOL
+   NAME "doppelmast_66"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#71;'
+END
+
+SYMBOL
+   NAME "holzmast_66"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#72;'
+END
+
+SYMBOL
+   NAME "leitungsmast_allgemein_66"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#73;'
+END
+
+SYMBOL
+   NAME "merkzeichen_rohoelleitung_66"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#74;'
+END
+
+SYMBOL
+   NAME "merkzeichen_heizungsanlage_66"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#75;'
+END
+
+SYMBOL
+   NAME "einsteigeschacht_heizungsanlage_66"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#76;'
+END
+
+SYMBOL
+   NAME "merkzeichen_fernheizleitung"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#77;'
+END
+
+SYMBOL
+   NAME "einsteigeschacht_fernheizleitung"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#78;'
+END
+
+SYMBOL
+   NAME "merkzeichen_fernmeldewesen_66"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#79;'
+END
+
+SYMBOL
+   NAME "einsteigeschacht_fernmeldewesen_66"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#80;'
+END
+
+SYMBOL
+   NAME "funkmast_66"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#81;'
+END
+
+SYMBOL
+   NAME "fernsprechhaeuschen"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#82;'
+END
+
+SYMBOL
+   NAME "feuermelder"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#83;'
+END
+
+SYMBOL
+   NAME "polizeirufsaeule"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#84;'
+END
+
+SYMBOL
+   NAME "kabelkasten"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#85;'
+END
+
+SYMBOL
+   NAME "merkzeichen_produktenfernleitung_66"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#86;'
+END
+
+SYMBOL
+   NAME "windrad_66"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#87;'
+END
+
+SYMBOL
+   NAME "einsteigeschacht_abwasserleitung"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#88;'
+END
+
+SYMBOL
+   NAME "strassensinkkasten"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#89;'
+END
+
+SYMBOL
+   NAME "muellboxenanlage"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#90;'
+END
+
+SYMBOL
+   NAME "kehrichtgrube"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#91;'
+END
+
+SYMBOL
+   NAME "laterne_gas"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#92;'
+END
+
+SYMBOL
+   NAME "laterne_elektrisch"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#93;'
+END
+
+SYMBOL
+   NAME "kandelaber_gas"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#94;'
+END
+
+SYMBOL
+   NAME "kandelaber_elektrisch"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#95;'
+END
+
+SYMBOL
+   NAME "briefkasten"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#96;'
+END
+
+SYMBOL
+   NAME "uhr"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#97;'
+END
+
+SYMBOL
+   NAME "anschlagsaeule"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#98;'
+END
+
+SYMBOL
+   NAME "leuchtsaeule"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#99;'
+END
+
+SYMBOL
+   NAME "rolltreppe"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#100;'
+END
+
+SYMBOL
+   NAME "fahnenmast_freistehend"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#101;'
+END
+
+SYMBOL
+   NAME "flutlichtmast_66"
+   TYPE TRUETYPE
+   FONT 'symboldata_2'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#102;'
+END
+
+#################--Folie_71--#################
+
+SYMBOL
+   NAME "kookreuz"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#032;'
+END
+
+#################--Folie_81--#################
+
+SYMBOL
+   NAME "treppe"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#033;'
+END
+
+SYMBOL
+   NAME "kilometerstein_strasse"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#034;'
+END
+
+SYMBOL
+   NAME "ortsdurchfahrtsstein"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#035;'
+END
+
+SYMBOL
+   NAME "kilometerstein"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#036;'
+END
+
+#SYMBOL
+#   NAME "kilometerstein_wasserstrasse"
+#   TYPE TRUETYPE
+#   FONT 'symboldata_3'
+#   FILLED TRUE
+#   ANTIALIAS TRUE
+#   CHARACTER '&#037;'
+#END
+
+SYMBOL
+   NAME "fussgaengersteg"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#038;'
+END
+
+SYMBOL
+   NAME "brueckenpfeiler"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#039;'
+END
+
+#SYMBOL
+#   NAME "wasserpegel"
+#   TYPE TRUETYPE
+#   FONT 'symboldata_3'
+#   FILLED TRUE
+#   ANTIALIAS TRUE
+#   CHARACTER '&#040;'
+#END
+
+SYMBOL
+   NAME "fliessrichtungspfeil"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#041;'
+END
+
+#SYMBOL
+#   NAME "wasserfall"
+#   TYPE TRUETYPE
+#   FONT 'symboldata_3'
+#   FILLED TRUE
+#   ANTIALIAS TRUE
+#   CHARACTER '&#042;'
+#END
+
+#SYMBOL
+#   NAME "schleuse"
+#   TYPE TRUETYPE
+#   FONT 'symboldata_3'
+#   FILLED TRUE
+#   ANTIALIAS TRUE
+#   CHARACTER '&#043;'
+#END
+
+#SYMBOL
+#   NAME "sicherheitstor"
+#   TYPE TRUETYPE
+#   FONT 'symboldata_3'
+#   FILLED TRUE
+#   ANTIALIAS TRUE
+#   CHARACTER '&#044;'
+#END
+
+SYMBOL
+   NAME "wehr"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   GAP -3
+   CHARACTER '&#045;'
+END
+
+#SYMBOL
+#   NAME "sperrschleuse"
+#   TYPE TRUETYPE
+#   FONT 'symboldata_3'
+#   FILLED TRUE
+#   ANTIALIAS TRUE
+#   CHARACTER '&#046;'
+#END
+
+#SYMBOL
+#   NAME "sperrwerk"
+#   TYPE TRUETYPE
+#   FONT 'symboldata_3'
+#   FILLED TRUE
+#   ANTIALIAS TRUE
+#   CHARACTER '&#047;'
+#END
+
+#SYMBOL
+#   NAME "durchlass"
+#   TYPE TRUETYPE
+#   FONT 'symboldata_3'
+#   FILLED TRUE
+#   ANTIALIAS TRUE
+#   CHARACTER '&#048;'
+#END
+
+#SYMBOL
+#   NAME "einfacher_rohrdurchlass"
+#   TYPE TRUETYPE
+#   FONT 'symboldata_3'
+#   FILLED TRUE
+#   ANTIALIAS TRUE
+#   CHARACTER '&#049;'
+#END
+
+#SYMBOL
+#   NAME "dueker"
+#   TYPE TRUETYPE
+#   FONT 'symboldata_3'
+#   FILLED TRUE
+#   ANTIALIAS TRUE
+#   CHARACTER '&#050;'
+#END
+
+#SYMBOL
+#   NAME "einlass_auslass"
+#   TYPE TRUETYPE
+#   FONT 'symboldata_3'
+#   FILLED TRUE
+#   ANTIALIAS TRUE
+#   CHARACTER '&#051;'
+#END
+
+#SYMBOL
+#   NAME "fischtreppe"
+#   TYPE TRUETYPE
+#   FONT 'symboldata_3'
+#   FILLED TRUE
+#   ANTIALIAS TRUE
+#   CHARACTER '&#052;'
+#END
+
+SYMBOL
+   NAME "sumpf_bruch"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#053;'
+END
+
+SYMBOL
+   NAME "friedhof"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#054;'
+END
+
+SYMBOL
+   NAME "juedischer_friedhof"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#055;'
+END
+
+SYMBOL
+   NAME "friedhof_51"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#056;'
+END
+
+SYMBOL
+   NAME "juedischer_friedhof_51"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#057;'
+END
+
+SYMBOL
+   NAME "sumpf_bruch_51"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#127;'
+END
+
+#################--Folie_82--#################
+
+SYMBOL
+   NAME "jagenstein"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#058;'
+END
+
+SYMBOL
+   NAME "topographisch_bedeutende_hecke"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#059;'
+END
+
+SYMBOL
+   NAME "topographisch_bedeutende_mauer"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#060;'
+END
+
+SYMBOL
+   NAME "topographisch_bedeutender_zaun"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#061;'
+END
+
+SYMBOL
+   NAME "topographisch_bedeutender_wall"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#061;'
+END
+
+SYMBOL
+   NAME "steinbruch"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#062;'
+END
+
+SYMBOL
+   NAME "erztagebau"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#063;'
+END
+
+SYMBOL
+   NAME "kohletagebau"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#064;'
+END
+
+SYMBOL
+   NAME "torfabbau"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#065;'
+END
+
+SYMBOL
+   NAME "lavaabau"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#066;'
+END
+
+SYMBOL
+   NAME "erdoelpumpe"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#067;'
+END
+
+SYMBOL
+   NAME "erdgasfoerderstelle"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#068;'
+END
+
+SYMBOL
+   NAME "schacht_bergbau"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#069;'
+END
+
+SYMBOL
+   NAME "stollenmundloch"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#070;'
+END
+
+SYMBOL
+   NAME "schornstein"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#071;'
+END
+
+SYMBOL
+   NAME "drehkran"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#072;'
+END
+
+SYMBOL
+   NAME "portalkran"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#073;'
+END
+
+SYMBOL
+   NAME "laufkran"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#074;'
+END
+
+SYMBOL
+   NAME "sport_spielflaeche"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#075;'
+END
+
+SYMBOL
+   NAME "sport_spielflaeche_rasen"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#076;'
+END
+
+SYMBOL
+   NAME "schwimmbad"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#077;'
+END
+
+SYMBOL
+   NAME "parkanlage"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#078;'
+END
+
+SYMBOL
+   NAME "liegewiese"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#079;'
+END
+
+SYMBOL
+   NAME "zierflaeche"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#080;'
+END
+
+SYMBOL
+   NAME "springbrunnen"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#081;'
+END
+
+SYMBOL
+   NAME "ziehbrunnen"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#082;'
+END
+
+SYMBOL
+   NAME "schrebergarten"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#083;'
+END
+
+SYMBOL
+   NAME "campingplatz"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#084;'
+END
+
+SYMBOL
+   NAME "parkplatz"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#085;'
+END
+
+#SYMBOL
+#   NAME "ubahn_station"
+#   TYPE TRUETYPE
+#   FONT 'symboldata_3'
+#   FILLED TRUE
+#   ANTIALIAS TRUE
+#   CHARACTER '&#094;'
+#END
+
+#SYMBOL
+#   NAME "sbahn_station"
+#   TYPE TRUETYPE
+#   FONT 'symboldata_3'
+#   FILLED TRUE
+#   ANTIALIAS TRUE
+#   CHARACTER '&#095;'
+#END
+
+#SYMBOL
+#   NAME "seilbahn_mast"
+#   TYPE TRUETYPE
+#   FONT 'symboldata_3'
+#   FILLED TRUE
+#   ANTIALIAS TRUE
+#   CHARACTER '&#096;'
+#END
+
+#SYMBOL
+#   NAME "richtscheinwerfer"
+#   TYPE TRUETYPE
+#   FONT 'symboldata_3'
+#   FILLED TRUE
+#   ANTIALIAS TRUE
+#   CHARACTER '&#097;'
+#END
+
+#SYMBOL
+#   NAME "fels_punkt"
+#   TYPE TRUETYPE
+#   FONT 'symboldata_3'
+#   FILLED TRUE
+#   ANTIALIAS TRUE
+#   CHARACTER '&#098;'
+#END
+
+#SYMBOL
+#   NAME "fels_band"
+#   TYPE TRUETYPE
+#   FONT 'symboldata_3'
+#   FILLED TRUE
+#   ANTIALIAS TRUE
+#   CHARACTER '&#099;'
+#END
+
+#SYMBOL
+#   NAME "fels_flaeche"
+#   TYPE TRUETYPE
+#   FONT 'symboldata_3'
+#   FILLED TRUE
+#   ANTIALIAS TRUE
+#   CHARACTER '&#100;'
+#END
+
+#SYMBOL
+#   NAME "leuchtfeuer"
+#   TYPE TRUETYPE
+#   FONT 'symboldata_3'
+#   FILLED TRUE
+#   ANTIALIAS TRUE
+#   CHARACTER '&#101;'
+#END
+
+SYMBOL
+   NAME "laubbaum_einzeln"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#102;'
+END
+
+SYMBOL
+   NAME "nadelbaum_einzeln"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#103;'
+END
+
+SYMBOL
+   NAME "hervorragender_laubbaum"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#104;'
+END
+
+SYMBOL
+   NAME "hervorragender_nadelbaum"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#105;'
+END
+
+SYMBOL
+   NAME "einzelner_baum_allgemein"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#106;'
+END
+
+SYMBOL
+   NAME "quelle"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#107;'
+END
+
+SYMBOL
+   NAME "heilquelle"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#108;'
+END
+
+SYMBOL
+   NAME "gasquelle"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#109;'
+END
+
+SYMBOL
+   NAME "quelle_allgemein"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#110;'
+END
+
+#SYMBOL
+#   NAME "eisbrecher"
+#   TYPE TRUETYPE
+#   FONT 'symboldata_3'
+#   FILLED TRUE
+#   ANTIALIAS TRUE
+#   CHARACTER '&#111;'
+#END
+
+SYMBOL
+   NAME "lattenpegel"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#112;'
+END
+
+SYMBOL
+   NAME "denkmal"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#118;'
+END
+
+SYMBOL
+   NAME "naturdenkmal_baum"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#119;'
+END
+
+SYMBOL
+   NAME "hoehle"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#120;'
+END
+
+SYMBOL
+   NAME "bildstock"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#121;'
+END
+
+SYMBOL
+   NAME "wegekreuz"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#122;'
+END
+
+SYMBOL
+   NAME "historischer_grenzstein"
+   TYPE TRUETYPE
+   FONT 'symboldata_3'
+   FILLED TRUE
+   ANTIALIAS TRUE
+   CHARACTER '&#126;'
+END
+
+#################--Symbole_als_Text--#################
+
+######################
+
+
+END #Symbolset

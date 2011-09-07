@@ -1,0 +1,12 @@
+arial	                        arial.ttf
+arial_bold			arial_bold.ttf
+arial_underline_1		arial_underline_1.ttf
+arial_underline_2		arial_underline_2.ttf
+courier				courier.ttf
+verdana				verdana.ttf
+times-new-roman_bold		times-new-roman-bold.ttf
+garamond			GARAIT.TTF
+comic_sans			comicbd.ttf
+engravers			Engr.TTF
+lep1				custom/IFGDV1.TTF
+lep2				custom/rrop-sig.ttf

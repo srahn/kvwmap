@@ -1,0 +1,1 @@
+document.write('<EMBED align="center" SRC='+top.document.GUI.srcpath2.value+' TYPE="image/svg+xml" width='+top.document.GUI.breite2.value+' height='+top.document.GUI.hoehe2.value+' PLUGINSPAGE="http://www.adobe.com/svg/viewer/install/"/>');

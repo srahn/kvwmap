@@ -1,0 +1,48 @@
+<HTML><HEAD>
+<TITLE><? echo TITLE; ?></TITLE>
+<META http-equiv=Content-Type content="text/html; charset=<?php echo $this->user->rolle->charset; ?>">
+
+<?
+include(WWWROOT.APPLVERSION.'funktionen/gui_functions.php');
+?>
+
+<link rel="shortcut icon" href="graphics/wappen/favicon.ico">
+<link rel="stylesheet" href="<?php echo 'layouts/'.$this->style; ?>">
+<?php include(WWWROOT.APPLVERSION.'funktionen/msgboxes.php'); ?>
+</HEAD>
+<BODY onload="onload_functions();">
+  <table width="900" align="center" border="0" cellspacing="0" cellpadding="0">
+    <tr>
+      <td align="center" valign="top">
+      <form name="GUI" id="GUI" enctype="multipart/form-data" method="post" action="index.php">
+        <table style="border-style:solid; border-width:1px; border-color:#CCCCCC;" cellpadding="0" cellspacing="2">
+          <tr>
+            <td colspan="2"><?php
+             $this->debug->write("Include <b>".LAYOUTPATH."snippets/header.php</b> in gui.php",4);
+             include(LAYOUTPATH."snippets/header.php");
+          ?></td>
+          </tr>
+          <tr>
+            <td style="border-style:solid; border-width:1px; border-color:#CCCCCC;" width="1%" valign="top" height="100%" background="<?php echo GRAPHICSPATH."bg.gif"; ?>">
+            <?php
+             $this->debug->write("Include <b>".LAYOUTPATH."snippets/menue_button_switch.php</b> in gui.php",4);
+             include(LAYOUTPATH."snippets/menue_button_switch.php"); ?>
+            </td>
+
+            <td style="border-style:solid; border-width:1px; border-color:#CCCCCC;" align="center" valign="top" background="<?php echo GRAPHICSPATH."bg.gif"; ?>"> <?php
+              $this->debug->write("Include <b>".LAYOUTPATH."snippets/".$this->main."</b> in gui.php",4);
+              include(LAYOUTPATH."snippets/".$this->main); ?>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2"><?php
+             $this->debug->write("Include <b>".LAYOUTPATH."snippets/footer.php</b> in gui.php",4);
+             include(LAYOUTPATH."snippets/footer.php"); ?>
+            </td>
+          </tr>
+        </table>
+        </form>
+      </td>
+    </tr>
+</table>
+</BODY></HTML>

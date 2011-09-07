@@ -1,0 +1,51 @@
+BODY {
+	MARGIN-TOP: 5px; BACKGROUND: white; MARGIN-LEFT: 5px; FONT-FAMILY: Arial, Verdana, Helvetica, sans-serif
+}
+H1 {
+	MARGIN-TOP: 0px; FONT-SIZE: 20pt; MARGIN-BOTTOM: 0px; PADDING-BOTTOM: 0px; PADDING-TOP: 0px
+}
+.button {
+	FONT-SIZE: 9pt
+}
+TD {
+	FONT-SIZE: 10pt
+}
+H2 {
+	FONT-SIZE: 12pt; MARGIN-BOTTOM: 0px
+}
+.small {
+	FONT-SIZE: 9pt
+}
+.bold {
+	FONT-WEIGHT: bold
+}
+SPAN.italic {
+	FONT-STYLE: italic
+}
+SPAN.red {
+	FONT-WEIGHT: bold; FONT-SIZE: 10pt; COLOR: #ff0000
+}
+A {
+	COLOR: firebrick; TEXT-DECORATION: none
+}
+A:hover {
+	COLOR: black; TEXT-DECORATION: underline
+}
+A.name:link {
+	FONT-WEIGHT: bold; COLOR: #993333; FONT-FAMILY: Arial, Helvetica, sans-serif; TEXT-DECORATION: none
+}
+A.name:visited {
+	FONT-WEIGHT: bold; COLOR: #006633; FONT-FAMILY: Arial, Helvetica, sans-serif; TEXT-DECORATION: none
+}
+A.red {
+	FONT-WEIGHT: 600; COLOR: #993333
+}
+A.blue_underline {
+	FONT-WEIGHT: bold; COLOR: #0000cc; TEXT-DECORATION: underline
+}
+A.green {
+	COLOR: #339933; TEXT-DECORATION: none
+}
+A.black {
+	FONT-WEIGHT: bold; COLOR: black; TEXT-DECORATION: none
+}

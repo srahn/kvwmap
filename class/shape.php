@@ -1,0 +1,394 @@
+<?php
+###################################################################
+# kvwmap - Kartenserver für Kreisverwaltungen                     #
+###################################################################
+# Lizenz                                                          #
+#                                                                 # 
+# Copyright (C) 2004  Peter Korduan                               #
+#                                                                 # 
+# This program is free software; you can redistribute it and/or   #
+# modify it under the terms of the GNU General Public License as  # 
+# published by the Free Software Foundation; either version 2 of  # 
+# the License, or (at your option) any later version.             # 
+#                                                                 #   
+# This program is distributed in the hope that it will be useful, #  
+# but WITHOUT ANY WARRANTY; without even the implied warranty of  #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the    #
+# GNU General Public License for more details.                    #
+#                                                                 #  
+# You should have received a copy of the GNU General Public       #
+# License along with this program; if not, write to the Free      #
+# Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,  # 
+# MA 02111-1307, USA.                                             # 
+#                                                                 #
+# Kontakt:                                                        #
+# pkorduan@gmx.de peter.korduan@auf.uni-rostock.de                #
+###################################################################
+#############################
+# Klasse dbf #
+#############################
+
+class shape {
+    
+  ################### Liste der Funktionen ########################################################################################################
+  # dbf($database)
+  ##################################################################################################################################################
+
+  function shape() {
+    global $debug;
+    $this->debug=$debug;
+  }
+  
+  function create_shape_rollenlayer($formvars, $stelle, $user, $database){
+  	if($_FILES['zipfile']['name']){     # eine Zipdatei wurde ausgewählt
+      $nachDatei = SHAPEPATH.CUSTOM_SHAPEPATH.$_FILES['zipfile']['name'];
+      if(move_uploaded_file($_FILES['zipfile']['tmp_name'],$nachDatei)){
+				$files = unzip($nachDatei, false, false, true);
+				$firstfile = explode('.', $files[0]);
+				$file = $firstfile[0];
+				if(file_exists(SHAPEPATH.CUSTOM_SHAPEPATH.$file.'.dbf') OR file_exists(SHAPEPATH.CUSTOM_SHAPEPATH.$file.'.DBF')){      
+		      $command = POSTGRESBINPATH.'shp2pgsql -p '.SHAPEPATH.CUSTOM_SHAPEPATH.$file.' table1 > '.SHAPEPATH.CUSTOM_SHAPEPATH.$file.'.sql'; 
+		      exec($command);
+		      $sql = file_get_contents(SHAPEPATH.CUSTOM_SHAPEPATH.$file.'.sql');
+		      if(strpos($sql, 'POINT') !== false){
+		      	$datatype = 0;
+		      }elseif(strpos($sql, 'LINESTRING') !== false){
+		      	$datatype = 1;
+		      }elseif(strpos($sql, 'POLYGON') !== false){
+		      	$datatype = 2;
+		      }
+		      # ------ Rollenlayer erzeugen ------- #
+		      $result_colors = read_colors($database);
+		      $dbmap = new db_mapObj($stelle->id, $user->id);
+			    $group = $dbmap->getGroupbyName('Eigene Shapes');
+			    if($group != ''){
+			      $groupid = $group['id'];
+			    }
+			    else{
+			      $groupid = $dbmap->newGroup('Eigene Shapes');
+			    }
+			
+			    $this->formvars['user_id'] = $user->id;
+			    $this->formvars['stelle_id'] = $stelle->id;
+			    $this->formvars['aktivStatus'] = 1;
+			    $this->formvars['Name'] = $file;
+			    $this->formvars['Gruppe'] = $groupid;
+			    $this->formvars['Datentyp'] = $datatype;
+			    $this->formvars['Data'] = CUSTOM_SHAPEPATH.$file;
+			    $this->formvars['connectiontype'] = 1;
+			    $this->formvars['epsg_code'] = $formvars['epsg'];
+			    $this->formvars['transparency'] = 65;
+			
+					$layer_id = $dbmap->newRollenLayer($this->formvars);
+			
+			    $classdata[0] = '';
+			    $classdata[1] = -$layer_id;
+			    $classdata[2] = '';
+			    $classdata[3] = 0;
+			    $class_id = $dbmap->new_Class($classdata);
+			    $this->formvars['class'] = $class_id;
+						    
+			    $style['colorred'] = $result_colors[rand(0,10)]['red'];
+      		$style['colorgreen'] = $result_colors[rand(0,10)]['green'];
+      		$style['colorblue'] = $result_colors[rand(0,10)]['blue'];
+			    
+			    $style['outlinecolorred'] = 0;
+			    $style['outlinecolorgreen'] = 0;
+			    $style['outlinecolorblue'] = 0;
+			    switch ($datatype) {
+				    case 0 :{
+				    	$style['size'] = 8;
+				    	$style['maxsize'] = 8;
+				    	$style['symbol'] = 9;
+				    }break;
+				    case 1 :{
+				    	$style['size'] = 1;
+				    	$style['maxsize'] = 2;
+				    	$style['symbol'] = NULL;
+				    }break;
+				    case 2 :{
+				    	$style['size'] = 1;
+				    	$style['maxsize'] = 2;
+				    	$style['symbol'] = NULL;
+				    }
+			    }
+			    $style['symbolname'] = NULL;
+			    $style['backgroundcolor'] = NULL;
+			    $style['minsize'] = NULL;
+			    
+			    $style['angle'] = 360;
+			    $style_id = $dbmap->new_Style($style);
+			
+			    $dbmap->addStyle2Class($class_id, $style_id, 0);          # den Style der Klasse zuordnen
+			    $user->rolle->set_one_Group($user->id, $stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
+				}
+      }
+    }
+  }
+  
+   function shp_import_speichern($formvars, $database){
+   	$this->formvars = $formvars;
+    if(file_exists(UPLOADPATH.$this->formvars['dbffile'])){
+      $this->dbf = new dbf();
+      $this->dbf->header = $this->dbf->get_dbf_header(UPLOADPATH.$this->formvars['dbffile']);
+      $this->dbf->header = $this->dbf->get_sql_types($this->dbf->header);
+      for($i = 0; $i < count($this->dbf->header); $i++){
+        if($i > 0){
+          $alterstring .= ';';
+        }
+        if($this->formvars['check_'.$this->dbf->header[$i][0]]){
+          $alterstring .= $this->formvars['dbf_name_'.$this->dbf->header[$i][0]].' as '.strtolower($this->formvars['sql_name_'.$this->dbf->header[$i][0]]).' '.$this->formvars['sql_type_'.$this->dbf->header[$i][0]];
+          if($this->formvars['primary_key'] == $this->dbf->header[$i][0]){
+            $alterstring .= ' PRIMARY KEY';
+          }
+        }
+        else{
+          $alterstring .= $this->formvars['dbf_name_'.$this->dbf->header[$i][0]].' as NULL';
+        }
+      }
+      if($this->formvars['table_option'] == '-u') {
+        $command = POSTGRESBINPATH.'shp2pgsql -A "'.$alterstring.'" -a ';
+      }
+      else {
+        $command = POSTGRESBINPATH.'shp2pgsql -A "'.$alterstring.'" '.$this->formvars['table_option'].' ';
+      }
+      if($this->formvars['srid'] != ''){
+        $command .= '-s '.$this->formvars['srid'].' ';
+      }
+      if($this->formvars['gist'] != ''){
+        $command .= '-I ';
+      }
+      if($this->formvars['oids'] != ''){
+        $command .= '-o ';
+      }
+      if($this->formvars['primary_key'] == 'gid'){
+        $command .= '-P ';
+      }
+      $command.= UPLOADPATH.$this->formvars['dbffile'].' '.$this->formvars['table_name'].' > '.UPLOADPATH.$this->formvars['table_name'].'.sql'; 
+      exec($command);
+      #echo $command;
+      
+      # erzeugte SQL-Datei anpassen
+      if($this->formvars['table_option'] == '-u') {
+        $oldsqld = UPLOADPATH.$this->formvars['table_name'].'.sql';
+        # Shared lock auf die Quelldatei
+        $oldsql = fopen($oldsqld, "r");
+        flock($oldsql, 1) or die("Kann die Quelldatei $oldsqld nicht locken.");
+        # Exclusive lock auf die Zieldatei     
+        $newsql = fopen($oldsqld.".new", "w");
+        flock($newsql, 2) or die("Kann die Zieldatei $newsql nicht locken.");
+				# Zeilenweises einlesen der SQL-Datei $oldsqld in das array *sqlold zum weiteren Umformen
+        $sqlold = file($oldsqld);
+				# Anzahl der Zeilen bestimmen
+				$anzzei = count($sqlold);
+				# Schleife für jede Zeile durchlaufen
+				for ($i = 0; $i < $anzzei; $i++) {
+				# Neuer SQL-Befehl $sqlnew wird gelesen
+					$sqlnew = $sqlold[$i];
+				# Wenn der SQL-Befehl mit INSERT beginnt, dann weiterverarbeiten
+          if (substr($sqlnew,0,6) == "INSERT") {
+  			# alte Befehlszeile wird bei jedem Leerzeichen gesplittet  
+            $old = explode(" ",$sqlnew);
+  			# Feldbezeichner werden herausgelesen, sind durch Kommata getrennt
+            $feld = explode(",",$old[3]);
+  			# da Feldbezeichner in der INSERT-Anweisung eingeklammert sind werden die oeffnende und schliessende Klammer entfernt
+            for ($j=0; $j < count($feld); $j++) {
+              $feld[$j] = trim($feld[$j],"()");
+            }
+  			# heraussuchen, an welcher Stelle der primary_key steht
+            $primkey = array_search($this->formvars['primary_key'],$feld);
+  			# Werte extrahieren, sind duch Kommata getrennt
+  			# Achtung, kommen in den Werten Kommata vor, so wird hier ein fehlerhaftes Statement erzeugt, da die Anzahl der Felder nicht mehr mit der Anzahl der Werte uebereinstimmt
+            $wert = explode(",",$old[5]);
+  			# Bereinigen der Werte
+            for ($j=0; $j < count($wert); $j++) {
+              $wert[$j] = trim($wert[$j]);
+              $wert[$j] = trim($wert[$j],"(;)");
+            }
+  			# SQL-Anweisung neu schreiben
+            $sqlnew = "UPDATE ".$this->formvars['table_name']." SET ";
+  			# den Feldbezeichnern die Werte zuweisen
+            for ($j=0; $j < count($feld); $j++) {
+              $sqlnew .= $feld[$j]." = ". $wert[$j];
+    		# Wertzuweisungen mit Komma voneinander trennen
+              if ($j < count($feld)-1) {
+                $sqlnew .= ", ";
+              }
+            }
+  			# Bindungung hinzufuegen 
+            $sqlnew .= " WHERE ".$feld[$primkey]." = ".$wert[$primkey].";";
+          }
+  			# SQL-Anweisung in die neue Datei $newsql schreiben  
+          fwrite($newsql,$sqlnew);
+        }
+        fclose($oldsql);
+        unlink($oldsqld);
+        rename($oldsqld.".new", $oldsqld);
+        fclose($newsql);
+      }
+      
+      exec(POSTGRESBINPATH.'psql -f '.UPLOADPATH.$this->formvars['table_name'].'.sql '.$database->dbName.' -U '.$database->user);
+      #echo POSTGRESBINPATH.'psql -f '.UPLOADPATH.$this->formvars['table_name'].'.sql '.$database->dbName.' -U '.$database->user;
+      $sql = 'SELECT count(*) FROM '.$this->formvars['table_name'];
+      $ret = $database->execSQL($sql,4, 0);
+      if (!$ret[0]) {
+        $count = pg_fetch_array($ret[1]);
+        $alert = 'Import erfolgreich.';
+        if($this->formvars['table_option'] == '-c'){
+        	$alert.= ' Die Tabelle '.$this->formvars['table_name'].' wurde erzeugt.';
+        }
+        $alert .= ' Die Tabelle enthält jetzt '.$count[0].' Datensätze.';
+        showAlert($alert);
+      }
+      else{
+        showAlert('Import fehlgeschlagen.');
+      }
+    }
+  }
+  
+	function shp_import($formvars){
+		$this->formvars = $formvars;
+    if($_FILES['zipfile']['name']){     # eine Zipdatei wurde ausgewählt
+      $this->formvars['zipfile'] = $_FILES['zipfile']['name'];
+      $nachDatei = UPLOADPATH.$_FILES['zipfile']['name'];
+      if(move_uploaded_file($_FILES['zipfile']['tmp_name'],$nachDatei)){
+				$files = unzip($nachDatei, false, false, true);
+				$firstfile = explode('.', $files[0]);
+				$file = $firstfile[0].'.dbf';
+        
+        $this->dbf = new dbf();
+        $this->dbf->file = '';
+        $this->dbf->file = $file;
+        
+        if($this->dbf->file != ''){
+          if(file_exists(UPLOADPATH.$this->dbf->file)){   
+            $this->dbf->header = $this->dbf->get_dbf_header(UPLOADPATH.$this->dbf->file);
+            $this->dbf->header = $this->dbf->get_sql_types($this->dbf->header);
+          }
+        }
+      }
+    }
+  }
+  
+  function simple_shp_import_speichern($formvars, $database){
+  	$this->formvars = $formvars;
+    if(file_exists(UPLOADPATH.$this->formvars['dbffile'])){      
+      $command = POSTGRESBINPATH.'shp2pgsql '.$this->formvars['table_option'].' ';
+      if($this->formvars['srid'] != ''){
+        $command .= '-s '.$this->formvars['srid'].' ';
+      }
+      if($this->formvars['gist'] != ''){
+        $command .= '-I ';
+      }
+      $command.= UPLOADPATH.$this->formvars['dbffile'].' '.$this->formvars['table_name'].' > '.UPLOADPATH.$this->formvars['table_name'].'.sql'; 
+      exec($command);
+      #echo $command;
+      exec(POSTGRESBINPATH.'psql -f '.UPLOADPATH.$this->formvars['table_name'].'.sql '.$database->dbName.' '.$database->user);
+      //echo POSTGRESBINPATH.'psql -f '.UPLOADPATH.$this->formvars['table_name'].'.sql '.$database->dbName.' '.$database->user;
+      $sql = 'SELECT count(*) FROM '.$this->formvars['table_name'];
+      $ret = $database->execSQL($sql,4, 0);
+      if (!$ret[0]) {
+        $count = pg_fetch_array($ret[1]);
+        $alert = 'Import erfolgreich.';
+        if($this->formvars['table_option'] == '-c'){
+        	$alert.= ' Die Tabelle '.$this->formvars['table_name'].' wurde erzeugt.';
+        	$sql = 'INSERT INTO shp_import_tables (tabellenname) VALUES (\''.$this->formvars['table_name'].'\')';
+        	$ret = $database->execSQL($sql,4, 1);
+        }
+        $alert .= ' Die Tabelle enthält jetzt '.$count[0].' Datensätze.';
+        showAlert($alert);
+      }
+      else{
+        showAlert('Import fehlgeschlagen.');
+      }
+    }
+  }
+  
+  function simple_shp_import($formvars, $database){
+  	$this->shp_import($formvars);
+  	$sql = 'SELECT DISTINCT * FROM shp_import_tables';
+  	$ret = $database->execSQL($sql,4, 0);
+    while($rs = pg_fetch_array($ret[1])){
+    	$this->tables[] = $rs;
+    }
+  }
+  
+  function shp_export($formvars, $stelle, $mapdb){
+  	$this->formvars = $formvars;
+    $this->layerdaten = $stelle->getqueryablePostgisLayers(NULL);
+    if($this->formvars['load'] AND $this->formvars['selected_layer_id']){
+      $data = $mapdb->getData($this->formvars['selected_layer_id']);
+      $select = $mapdb->getSelectFromData($data);
+      $fromposition = strpos(strtolower($select), 'from');
+      $from = substr($select, $fromposition);
+      $attributesstring = substr($select, 6, $fromposition-6);
+      $attributes = explode(',', $attributesstring);
+      $selectstring = 'SELECT ';
+      for($i = 0; $i < count($attributes); $i++){
+        if(strpos($attributes[$i], 'oid') === false){
+          if($komma == true){
+            $selectstring .= ', ';
+          }
+          $selectstring .= $attributes[$i];
+          $komma = true;
+        }
+      }
+      $selectstring .= $from;
+      if(strpos(strtolower($selectstring), 'where') === false){
+        $selectstring .= ' WHERE (1=1)';
+      }
+      $this->formvars['selectstring'] = $selectstring;
+      $this->formvars['selectstring_save'] = $selectstring;
+      
+      $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+      if($layerdb->schema != ''){
+      	$select = str_replace($layerdb->schema.'.', '', $select);	
+      }
+      $fields = $layerdb->getFieldsfromSelect($select);
+      $this->formvars['columnname'] = $fields['table_alias_name'][$fields['the_geom']].'.'.$fields['the_geom'];
+      $this->formvars['fromwhere'] = $from;
+      if(strpos(strtolower($this->formvars['fromwhere']), 'where') === false){
+	      $this->formvars['fromwhere'] .= ' where (1=1)';
+	    }  
+    }
+  }
+  
+  function shp_export_exportieren($formvars, $stelle, $user){
+  	$this->formvars = $formvars;
+    $mapdb = new db_mapObj($stelle->id,$user->id);
+    $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $stelle->pgdbhost);
+    $filter = $mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id);
+    $sql = $this->formvars['selectstring'];
+    if($filter != ''){
+    	$sql .= ' AND '.$filter;
+    }
+    $sql = str_replace('\\', '', $sql);
+    $ret = $layerdb->execSQL($sql,4, 0);
+    if (!$ret[0]) {
+      $count = pg_num_rows($ret[1]);
+      showAlert('Abfrage erfolgreich. Es wurden '.$count.' Zeilen geliefert.');
+      $this->formvars['layer_name'] = umlaute_umwandeln($this->formvars['layer_name']);
+      $this->formvars['layer_name'] = str_replace('.', '_', $this->formvars['layer_name']);
+      $this->formvars['layer_name'] = str_replace('(', '_', $this->formvars['layer_name']);
+      $this->formvars['layer_name'] = str_replace(')', '_', $this->formvars['layer_name']);
+      $this->formvars['layer_name'] = str_replace('/', '_', $this->formvars['layer_name']);
+      $folder = 'shp_Export_'.$this->formvars['layer_name'].rand(0,10000);
+      mkdir(IMAGEPATH.$folder);                       # Ordner erzeugen 
+      exec(POSTGRESBINPATH.'pgsql2shp -u '.$layerdb->user.' -P '.$layerdb->passwd.' -f '.IMAGEPATH.$folder.'/'.$this->formvars['layer_name'].' '.$layerdb->dbName.' "'.$sql.'"'); # Shps erzeugen
+      #echo POSTGRESBINPATH.'pgsql2shp -u '.$layerdb->user.' -P '.$layerdb->passwd.' -f '.IMAGEPATH.$folder.'/'.$this->formvars['layer_name'].' '.$layerdb->dbName.' "'.$sql.'"';
+      exec(ZIP_PATH.' '.IMAGEPATH.$folder.' '.IMAGEPATH.$folder.'/*'); # Ordner zippen
+      #echo ZIP_PATH.' '.IMAGEPATH.$folder.' '.IMAGEPATH.$folder.'/*';
+      $this->formvars['filename'] = TEMPPATH_REL.$folder.'.zip';
+      unlink(IMAGEPATH.$folder.'/'.$this->formvars['layer_name'].'.shp');
+      unlink(IMAGEPATH.$folder.'/'.$this->formvars['layer_name'].'.shx');
+      unlink(IMAGEPATH.$folder.'/'.$this->formvars['layer_name'].'.dbf');
+      #rmdir(IMAGEPATH.$folder);         # Ordner löschen
+      return $this->formvars['filename'];
+    }
+    else{
+      showAlert('Abfrage fehlgeschlagen.');
+    }
+  }
+ 
+}
+?>

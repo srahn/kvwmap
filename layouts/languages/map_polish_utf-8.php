@@ -1,0 +1,29 @@
+﻿<?php
+  $strAvailableLayer="dost&#281;pne warstwy / tematy"; 
+  $strCoordinates="współrzędne"; 
+  $strShowCoordinates="pokaż współrzędne"; 
+  $strLoadNew="nowe pobranie"; 
+  $strMapImageURL="pokaż obraz mapy do zapisania"; 
+  $strChoose="wybierz"; 
+  $strMapScale="skala"; 
+  $strMapSettingsFrom="pobierz mapy z"; 
+  $strPreviousView=" poprzedni widok";
+  $strNextView="następny widok"; 
+  $strZoomIn="powiększ"; 
+  $strZoomOut="zmniejsz";
+  $strZoomToFullExtent="widok ogólny"; 
+  $strPan="przesunąć / Pan"; 
+  $strCoordinatesZoom="współrzędne zoom / zapytanie"; 
+  $strInfo="wyszukiwanie informacji"; 
+  $strTouchInfo="wyszukiwanie informacji dot. zaznaczonych obiektów"; 
+  $strInfoWithRadius="wyszukiwanie informacji dot. promienia wielokątu"; 
+  $strInfoInPolygon="wyszukiwanie informacji za pomocą wielokątu"; 
+  $strRuler="pomiar odległości"; 
+  $strFreePolygon="rysuj wielokąt"; 
+  $strFreeText="dodaj tekst"; 
+  $strX="R"; 
+  $strY="H"; 
+  $strSave="Mapa sklepu";
+  $strMap="Mapa";
+  $strMapSize="Zmiana rozmiaru";
+?>

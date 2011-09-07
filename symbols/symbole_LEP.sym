@@ -1,0 +1,262 @@
+SYMBOLSET
+
+SYMBOL        #1
+  NAME "punkte"
+  TYPE PIXMAP
+  IMAGE "punkte.gif"
+  TRANSPARENT 1
+END
+
+SYMBOL        #2
+  NAME "linien"
+  TYPE PIXMAP
+  IMAGE "linien_schraeg.gif"
+  TRANSPARENT 1
+END
+
+SYMBOL #3
+    NAME "linie-vertikal"
+    TYPE vector
+    POINTS
+        0.5	0
+        0.5 1
+    END
+END
+
+SYMBOL #4
+	Type ELLIPSE
+	POINTS
+		1 1
+	END
+	FILLED TRUE
+END
+
+SYMBOL #5
+	Type ELLIPSE
+	POINTS
+		1 1
+	END
+	STYLE 6 8 END
+	FILLED TRUE
+END
+
+SYMBOL # 6
+	NAME "binnenhafen"
+	TYPE TRUETYPE
+	FONT lep1
+	FILLED true
+	ANTIALIAS true
+	CHARACTER "u"
+END
+
+SYMBOL #7
+	Type ELLIPSE
+	POINTS
+		1 1
+	END
+	STYLE 10 2 1 1 1 2 END
+	FILLED TRUE
+END
+
+SYMBOL        #8
+  NAME "wind"
+  TYPE PIXMAP
+  IMAGE "wind.gif"
+  TRANSPARENT 1
+END
+
+SYMBOL        #9
+  NAME "linien2"
+  TYPE PIXMAP
+  IMAGE "linien_schraeg2.gif"
+  TRANSPARENT 1
+END
+
+SYMBOL        #10
+  NAME "rohstoff1"
+  TYPE PIXMAP
+  IMAGE "rohstoff1.gif"
+  TRANSPARENT 1
+END
+
+SYMBOL        #11
+  NAME "rohstoff2"
+  TYPE PIXMAP
+  IMAGE "rohstoff2.gif"
+  TRANSPARENT 1
+END
+
+SYMBOL        #12
+  NAME "linien3"
+  TYPE PIXMAP
+  IMAGE "linien_schraeg3.gif"
+  TRANSPARENT 1
+END
+
+SYMBOL # 13
+	NAME "oberzentrum"
+	TYPE TRUETYPE
+	FONT lep1
+	FILLED true
+	ANTIALIAS true
+	CHARACTER "&#65;"
+END
+
+SYMBOL # 14
+	NAME "reg. Hafen"
+	TYPE TRUETYPE
+	FONT lep1
+	FILLED true
+	ANTIALIAS true
+	CHARACTER "w"
+END
+
+SYMBOL # 15
+	NAME "Flughafen"
+	TYPE TRUETYPE
+	FONT lep1
+	FILLED true
+	ANTIALIAS true
+	CHARACTER "y"
+END
+
+SYMBOL # 16
+	NAME "Flugplatz"
+	TYPE TRUETYPE
+	FONT lep1
+	FILLED true
+	ANTIALIAS true
+	CHARACTER "z"
+END
+
+SYMBOL        #17
+  NAME "linien4"
+  TYPE PIXMAP
+  IMAGE "linien_schraeg4.gif"
+  TRANSPARENT 255
+END
+
+SYMBOL		#18
+    NAME "kreis"
+    TYPE ELLIPSE
+    POINTS
+        1 1
+    END
+    STYLE
+        0 5 1 6
+    END
+END
+
+SYMBOL # 19
+	NAME "überreg. Hafen"
+	TYPE TRUETYPE
+	FONT lep1
+	FILLED true
+	ANTIALIAS true
+	CHARACTER "v"
+END
+
+SYMBOL        #20
+  NAME "hochwasser"
+  TYPE PIXMAP
+  IMAGE "hochwasser.gif"
+  TRANSPARENT 1
+END
+
+SYMBOL	# 21
+    NAME "linie-horizontal"
+    TYPE vector
+    POINTS
+	    0   0.5
+        1   0.5
+    END
+END
+
+SYMBOL        #22
+  NAME "touri1"
+  TYPE PIXMAP
+  IMAGE "touri1.gif"
+  TRANSPARENT 1
+END
+
+SYMBOL        #23
+  NAME "touri2"
+  TYPE PIXMAP
+  IMAGE "touri2.gif"
+  TRANSPARENT 1
+END
+
+SYMBOL # 24
+	NAME "I"
+	TYPE TRUETYPE
+	FONT arial_bold
+	FILLED true
+	ANTIALIAS true
+	CHARACTER "I"
+	GAP -8
+END
+
+SYMBOL # 25
+	NAME "gewerbe/industrie"
+	TYPE TRUETYPE
+	FONT lep2
+	FILLED true
+	ANTIALIAS true
+	CHARACTER "F"
+END
+
+SYMBOL        #26
+  NAME "stralsund"
+  TYPE PIXMAP
+  IMAGE "stralsund.gif"
+  TRANSPARENT 7
+END
+
+SYMBOL        #27
+  NAME "greifswald"
+  TYPE PIXMAP
+  IMAGE "greifswald.gif"
+  TRANSPARENT 7
+END
+
+SYMBOL        #28
+  NAME "florafauna"
+  TYPE PIXMAP
+  IMAGE "florafauna.gif"
+  TRANSPARENT 1
+END
+
+SYMBOL #29
+	Type ELLIPSE
+	POINTS
+		1 1
+	END
+	STYLE 12 3 5 3 END
+	FILLED TRUE
+END
+
+
+######
+
+END
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,530 @@
+<?php
+  # 2007-12-30 pk
+  include(LAYOUTPATH.'languages/stelle_formular_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
+  include(LAYOUTPATH.'snippets/ahah.php');
+  echo $ahah;
+?><script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript">
+</script>
+<script language="JavaScript">
+<!--
+
+function getsubmenues(){
+	menue_id = document.GUI.allmenues.options[document.GUI.allmenues.selectedIndex].value;
+	ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=getsubmenues&menue_id='+menue_id, new Array(document.getElementById('submenue_div')), "");
+}
+
+function getInsertIndex(insertObj, id, order){
+	// diese Funktion ermittelt den index, an dem ein Element aus einem anderen Selectfeld mit der Reihenfolge 'order' eingefügt werden muss
+	// (die Order wird hier in Selectfeldern im Attribut 'id' gespeichert)
+	// (Man muss hier unterscheiden zwischen 1. der Menüorder - die wird in der id gespeichert und
+	// 																			 2. dem eigentlichen index i im Selectfeld)		
+	ordersplit = order.split('_');
+	for(i=0; i<insertObj.length; i++) {
+		if(insertObj.options[i].value == id){
+			return -i;			// Obermenü ist bereits vorhanden -> index negieren
+		}
+		options_order_string = insertObj.options[i].id + "";
+		options_order_split = options_order_string.split('_');
+		if(parseInt(options_order_split[0]) > parseInt(ordersplit)){
+			//alert(options_order_split[0] + ' - ' + ordersplit[0]);
+			return i;
+		}
+	}
+	return insertObj.length;		// am Ende einfügen
+}
+
+function addMenues(){
+	// index ermitteln
+	index = getInsertIndex(document.GUI.selectedmenues, document.GUI.allmenues.options[document.GUI.allmenues.selectedIndex].value, document.GUI.allmenues.options[document.GUI.allmenues.selectedIndex].id);
+	if(index >= 0){
+		addOptionsWithIndex(document.GUI.allmenues,document.GUI.selectedmenues,document.GUI.selmenues,'value', index);		// Obermenü hinzufügen
+	}
+	else{
+		index = -1 * index;																																																// index negativ -> nur Untermenü hinzufügen
+	} 
+	if(document.GUI.submenues.length > 0){
+		addOptionsWithIndex(document.GUI.submenues,document.GUI.selectedmenues,document.GUI.selmenues,'value', index+1);	// wenn vorhanden, Untermenü hinzufügen
+	}
+}
+
+//-->
+</script>
+
+<table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
+  <tr align="center">
+    <td><strong><font size="+1"><?php echo $strTitle; ?></font></strong></td>
+  </tr>
+  <tr>
+    <td align="center"><?php
+if ($this->Meldung=='Daten der Stelle erfolgreich eingetragen!' OR $this->Meldung=='') {
+  $bgcolor=BG_FORM;
+}
+else {
+  $this->Fehlermeldung=$this->Meldung;
+  include('Fehlermeldung.php');
+  $bgcolor=BG_FORMFAIL;
+}
+ ?>
+    <table border="0" cellspacing="0" cellpadding="5" style="border:1px solid #C3C7C3">
+        <tr align="center">
+          <td colspan="3" style="border-bottom:1px solid #C3C7C3"><em><font size="-1"><?php echo $strAsteriskRequired; ?> </font></em></td>
+        </tr><?php if ($this->formvars['selected_stelle_id']>0) {?>
+        <tr>
+          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDataBankID; ?></th>
+          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
+          	<input name="id" type="text" value="<?php echo $this->formvars['selected_stelle_id']; ?>" size="25" maxlength="11">
+          </td>
+        </tr><?php } ?>
+        <tr>
+          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTask; ?></th>
+          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
+              <input name="bezeichnung" type="text" value="<?php echo $this->formvars['bezeichnung']; ?>" size="25" maxlength="100">
+          </td>
+        </tr>
+        <tr>
+          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strReferenceMapID; ?></th>
+          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
+              <input name="Referenzkarte_ID" type="text" value="<?php echo $this->formvars['Referenzkarte_ID']; ?>" size="25" maxlength="100">
+          </td>
+        </tr>
+        <tr>
+          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strMinExtent; ?></th>
+          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
+              x&nbsp;<input name="minxmax" type="text" value="<?php echo $this->formvars['minxmax']; ?>" size="15" maxlength="100">
+              y&nbsp;<input name="minymax" type="text" value="<?php echo $this->formvars['minymax']; ?>" size="15" maxlength="100">
+          </td>
+        </tr>
+        <tr>
+          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strMaxExtent;  ?></th>
+          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
+              x&nbsp;<input name="maxxmax" type="text" value="<?php echo $this->formvars['maxxmax']; ?>" size="15" maxlength="100">
+              y&nbsp;<input name="maxymax" type="text" value="<?php echo $this->formvars['maxymax']; ?>" size="15" maxlength="100">
+          </td>
+        </tr>
+				<tr>
+          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strStart; ?></th>
+          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
+              <input name="start" type="text" value="<?php echo $this->formvars['start']; ?>" size="25" maxlength="100">
+          </td>
+        </tr>
+        <tr>
+          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strStop; ?></th>
+          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
+              <input name="stop" type="text" value="<?php echo $this->formvars['stop']; ?>" size="25" maxlength="100">
+          </td>
+        </tr>
+
+        <tr>
+          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPostgisHost; ?></th>
+          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
+              <input name="pgdbhost" type="text" value="<?php echo $this->formvars['pgdbhost']; ?>" size="25" maxlength="100">
+          </td>
+        </tr>
+
+        <tr>
+          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPostGISDataBankName; ?></th>
+          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
+              <input name="pgdbname" type="text" value="<?php echo $this->formvars['pgdbname']; ?>" size="25" maxlength="100">
+          </td>
+        </tr>
+
+        <tr>
+          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPostGISUserName; ?></th>
+          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
+              <input name="pgdbuser" type="text" value="<?php echo $this->formvars['pgdbuser']; ?>" size="25" maxlength="100">
+          </td>
+        </tr>
+
+        <tr>
+          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPostGISPassword; ?></th>
+          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
+              <input name="pgdbpasswd" type="password" value="<?php echo $this->formvars['pgdbpasswd']; ?>" size="25" maxlength="100">
+          </td>
+        </tr>
+
+        <tr>
+          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsTitle; ?></th>
+          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
+              <input name="ows_title" type="text" value="<?php echo $this->formvars['ows_title']; ?>" size="25" maxlength="100">
+          </td>
+        </tr>
+        <tr>
+          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsAbstract; ?></th>
+          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
+              <input name="ows_abstract" type="text" value="<?php echo $this->formvars['ows_abstract']; ?>" size="25" maxlength="100">
+          </td>
+        </tr>
+        <tr>
+          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWmsAccessConstraints; ?></th>
+          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
+              <input name="wms_accessconstraints" type="text" value="<?php echo $this->formvars['wms_accessconstraints']; ?>" size="25" maxlength="100">
+          </td>
+        </tr>
+        <tr>
+          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsContactPerson; ?></th>
+          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
+              <input name="ows_contactperson" type="text" value="<?php echo $this->formvars['ows_contactperson']; ?>" size="25" maxlength="100">
+          </td>
+        </tr>
+        <tr>
+          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsContactOrganization; ?></th>
+          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
+              <input name="ows_contactorganization" type="text" value="<?php echo $this->formvars['ows_contactorganization']; ?>" size="25" maxlength="100">
+          </td>
+        </tr>
+        <tr>
+          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsContactEmailAddress; ?></th>
+          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
+              <input name="ows_contactemailaddress" type="text" value="<?php echo $this->formvars['ows_contactemailaddress']; ?>" size="25" maxlength="100">
+          </td>
+        </tr>
+        <tr>
+          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsContactPosition; ?></th>
+          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
+              <input name="ows_contactposition" type="text" value="<?php echo $this->formvars['ows_contactposition']; ?>" size="25" maxlength="100">
+          </td>
+        </tr>
+        <tr>
+          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsFees; ?></th>
+          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
+              <input name="ows_fees" type="text" value="<?php echo $this->formvars['ows_fees']; ?>" size="25" maxlength="100">
+          </td>
+        </tr>
+        <tr>
+          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsSrs; ?></th>
+          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
+              <input name="ows_srs" type="text" value="<?php echo $this->formvars['ows_srs']; ?>" size="25" maxlength="100">
+               <font size="-1">(EPSG:4326 EPSG:2398 ...)</font> </td>
+        </tr>
+        <tr>
+          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLogo; ?></th>
+          <td style="border-bottom:1px solid #C3C7C3">
+            &nbsp;<input type="file" name="wappen" size="15"><br>
+            &nbsp;<? echo $this->formvars['wappen'] ?>
+          </td>
+          <td style="border-bottom:1px solid #C3C7C3">
+            &nbsp;<img src="<? echo WAPPENPATH.basename($this->formvars['wappen']); ?>" width="100" alt="<?php echo $strNoLogoSelected; ?>">
+            <input type="hidden" name="wappen_save" value="<? echo $this->formvars['wappen']; ?>">
+          </td>
+        </tr>
+        <tr>
+          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWaterMark; ?></th>
+          <td style="border-bottom:1px solid #C3C7C3">
+            &nbsp;<input type="file" name="wasserzeichen" size="15"><br>
+            &nbsp;<? echo $this->formvars['wasserzeichen'] ?>
+          </td>
+          <td style="border-bottom:1px solid #C3C7C3">
+            &nbsp;<img src="<? echo WAPPENPATH.basename($this->formvars['wasserzeichen']); ?>" width="100" alt="<?php echo $strNoWatermarkSelected; ?>">
+            <input type="hidden" name="wasserzeichen_save" value="<? echo $this->formvars['wasserzeichen']; ?>">
+          </td>
+        </tr>
+        <tr>
+          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strALBReferencingRegion; ?></th>
+          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
+            <select name="alb_raumbezug" size="1" style="width:160px">
+                  <option value="Gemeinde"
+                  <?php
+                  if($this->formvars['alb_raumbezug'] == "Gemeinde"){
+                    echo " selected";
+                }
+                ?>
+                ><?php echo $strCommunity; ?></option>
+                  <option value="Amtsverwaltung"
+                  <?php
+                  if($this->formvars['alb_raumbezug'] == "Amtsverwaltung"){
+                    echo " selected";
+                  }
+                  ?>
+                  ><?php echo $strAdministrationAgency; ?></option>
+                  <option value="Kreis"
+                  <?php
+                  if($this->formvars['alb_raumbezug'] == "Kreis"){
+                    echo " selected";
+                  }
+                  ?>
+                  ><?php echo $strDistrict; ?></option>
+                  <option value=""
+                  <?php
+                  if($this->formvars['alb_raumbezug'] == ""){
+                    echo " selected";
+                  }
+                  ?>
+                  >kein</option>
+                </select>
+          </td>
+        </tr>
+        <tr>
+          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strALBReferencingRegionKey; ?></th>
+          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
+              <input name="alb_raumbezug_wert" type="text" value="<?php echo $this->formvars['alb_raumbezug_wert']; ?>" size="25" maxlength="100">
+          </td>
+        </tr>
+        <tr>
+          <th align="right" style="border-bottom:1px solid #C3C7C3">
+            <table border="0" cellspacing="0" cellpadding="0">
+              <tr>
+                  <th align="right"><?php echo $strMenuPoint; ?></th>
+                </tr>
+                <tr>
+                  <td align="right">&nbsp;</td>
+                </tr>
+            </table>
+          </th>
+          <td colspan=2 valign="top" style="border-bottom:1px solid #C3C7C3">
+              <table border="0" cellspacing="0" cellpadding="0">
+                <tr valign="top">
+                    <td><?php echo $strAssigned; ?><br>
+
+                      <select name="selectedmenues" size="8" multiple style="width:160px">
+                      <?
+                      for($i=0; $i < count($this->formvars['selmenues']["Bezeichnung"]); $i++){
+                          echo '<option id="'.$this->formvars['selmenues']["ORDER"][$i].'_sel_'.$i.'" title="'.str_replace(' ', '&nbsp;', $this->formvars['selmenues']["Bezeichnung"][$i]).'" value="'.$this->formvars['selmenues']["ID"][$i].'">'.$this->formvars['selmenues']["Bezeichnung"][$i].'</option>';
+                         }
+                      ?>
+                      </select>
+                    </td>
+                    <td align="center" valign="middle" width="1">
+                      <input type="button" name="addPlaces" value="&lt;&lt;" onClick="addMenues()">
+                      <input type="button" name="substractPlaces" value="&gt;&gt;" onClick=substractOptions(document.GUI.selectedmenues,document.GUI.selmenues,'value')>
+                    </td>
+                    <td>
+                      <?php echo $strAvailable; ?><br>
+                      <select name="allmenues" size="4" onchange="getsubmenues();" style="width:160px">
+                      <? for($i=0; $i < count($this->formvars['menues']["Bezeichnung"]); $i++){
+                          echo '<option id="'.$this->formvars['menues']["ORDER"][$i].'_all_'.$i.'" title="'.str_replace(' ', '&nbsp;', $this->formvars['menues']["Bezeichnung"][$i]).'" value="'.$this->formvars['menues']["ID"][$i].'">'.$this->formvars['menues']["Bezeichnung"][$i].'</option>';
+                           }
+                      ?>
+                      </select>
+                      <div id="submenue_div">
+                      	<select name="submenues" size="4" multiple style="width:160px">
+                      	</select>
+                      </div>
+                    </td>
+                </tr>
+              </table>
+          </td>
+        </tr>
+
+				<tr>
+          <th align="right" style="border-bottom:1px solid #C3C7C3">
+            <table border="0" cellspacing="0" cellpadding="0">
+              <tr>
+                  <th align="right">Funktionen</th>
+                </tr>
+                <tr>
+                  <td align="right">&nbsp;</td>
+                </tr>
+            </table>
+          </th>
+          <td colspan=2 valign="top" style="border-bottom:1px solid #C3C7C3">
+              <table border="0" cellspacing="0" cellpadding="0">
+                <tr valign="top">
+                    <td>
+                      <select name="selectedfunctions" size="4" multiple style="width:160px">
+                      <?
+                      for($i=0; $i < count($this->formvars['selfunctions']); $i++){
+                          echo '<option title="'.str_replace(' ', '&nbsp;', $this->formvars['selfunctions'][$i]["bezeichnung"]).'" value="'.$this->formvars['selfunctions'][$i]["id"].'">'.$this->formvars['selfunctions'][$i]["bezeichnung"].'</option>';
+                         }
+                      ?>
+                      </select>
+                    </td>
+                    <td align="center" valign="middle" width="1">
+                      <input type="button" name="addPlaces" value="&lt;&lt;" onClick=addOptions(document.GUI.allfunctions,document.GUI.selectedfunctions,document.GUI.selfunctions,'value')>
+                      <input type="button" name="substractPlaces" value="&gt;&gt;" onClick=substractOptions(document.GUI.selectedfunctions,document.GUI.selfunctions,'value')>
+                    </td>
+                    <td>
+                      <select name="allfunctions" size="4" multiple style="width:160px">
+                      <? for($i=0; $i < count($this->formvars['functions']); $i++){
+                          echo '<option title="'.str_replace(' ', '&nbsp;', $this->formvars['functions'][$i]["bezeichnung"]).'" value="'.$this->formvars['functions'][$i]["id"].'">'.$this->formvars['functions'][$i]["bezeichnung"].'</option>';
+                           }
+                      ?>
+                      </select>
+                    </td>
+                </tr>
+              </table>
+          </td>
+        </tr>
+
+				<tr>
+          <th align="right" style="border-bottom:1px solid #C3C7C3">
+            <table border="0" cellspacing="0" cellpadding="0">
+              <tr>
+                  <th align="right">Druckrahmen</th>
+                </tr>
+                <tr>
+                  <td align="right">&nbsp;</td>
+                </tr>
+            </table>
+          </th>
+          <td colspan=2 valign="top" style="border-bottom:1px solid #C3C7C3">
+              <table border="0" cellspacing="0" cellpadding="0">
+                <tr valign="top">
+                    <td>
+                      <select name="selectedframes" size="4" multiple style="width:160px">
+                      <?
+                      for($i=0; $i < count($this->formvars['selframes']); $i++){
+                          echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['selframes'][$i]["Name"]).' value="'.$this->formvars['selframes'][$i]["id"].'">'.$this->formvars['selframes'][$i]["Name"].'</option>';
+                         }
+                      ?>
+                      </select>
+                    </td>
+                    <td align="center" valign="middle" width="1">
+                      <input type="button" name="addPlaces" value="&lt;&lt;" onClick=addOptions(document.GUI.allframes,document.GUI.selectedframes,document.GUI.selframes,'value')>
+                      <input type="button" name="substractPlaces" value="&gt;&gt;" onClick=substractOptions(document.GUI.selectedframes,document.GUI.selframes,'value')>
+                    </td>
+                    <td>
+                      <select name="allframes" size="4" multiple style="width:160px">
+                      <? for($i=0; $i < count($this->formvars['frames']); $i++){
+                          echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['frames'][$i]["Name"]).'  value="'.$this->formvars['frames'][$i]["id"].'">'.$this->formvars['frames'][$i]["Name"].'</option>';
+                           }
+                      ?>
+                      </select>
+                    </td>
+                </tr>
+              </table>
+          </td>
+        </tr>
+
+        <tr>
+          <th align="right" style="border-bottom:1px solid #C3C7C3">
+            <table border="0" cellspacing="0" cellpadding="0">
+              <tr>
+                  <th align="right">
+                  <? if(count($this->formvars['sellayer']["Bezeichnung"]) > 0){?>
+                    <a href="index.php?go=Layer2Stelle_Reihenfolge&selected_stelle_id=<? echo $this->formvars['selected_stelle_id']; ?>"><?php echo $strEdit; ?></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                  <?}?>
+                  <?php echo $strLayer; ?></th>
+                </tr>
+                <tr>
+                  <td align="right">&nbsp;</td>
+                </tr>
+            </table>
+          </th>
+          <td colspan=2 valign="top" style="border-bottom:1px solid #C3C7C3">
+              <table border="0" cellspacing="0" cellpadding="0">
+                <tr valign="top">
+                    <td>
+                      <select name="selectedlayer" size="4" multiple style="width:160px">
+                      <?
+                      for($i=0; $i < count($this->formvars['sellayer']["Bezeichnung"]); $i++){
+                          echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['sellayer']["Bezeichnung"][$i]).' value="'.$this->formvars['sellayer']["ID"][$i].'">'.$this->formvars['sellayer']["Bezeichnung"][$i].'</option>';
+                         }
+                      ?>
+                      </select>
+                    </td>
+                    <td align="center" valign="middle" width="1">
+                      <input type="button" name="addPlaces" value="&lt;&lt;" onClick=addOptions(document.GUI.alllayer,document.GUI.selectedlayer,document.GUI.sellayer,'value')>
+                      <input type="button" name="substractPlaces" value="&gt;&gt;" onClick=substractOptions(document.GUI.selectedlayer,document.GUI.sellayer,'value')>
+                    </td>
+                    <td>
+                      <select name="alllayer" size="4" multiple style="width:160px">
+                      <? for($i=0; $i < count($this->formvars['layer']["Bezeichnung"]); $i++){
+                          echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['layer']["Bezeichnung"][$i]).' value="'.$this->formvars['layer']["ID"][$i].'">'.$this->formvars['layer']["Bezeichnung"][$i].'</option>';
+                           }
+                      ?>
+                      </select>
+                    </td>
+                </tr>
+              </table>
+          </td>
+        </tr>
+
+        <tr>
+          <th align="right" style="border-bottom:1px solid #C3C7C3">
+            <table border="0" cellspacing="0" cellpadding="0">
+              <tr>
+                  <th align="right"><?php echo $strUser;?></th>
+                </tr>
+                <tr>
+                  <td align="right">&nbsp;</td>
+                </tr>
+            </table>
+          </th>
+          <td colspan=2 valign="top" style="border-bottom:1px solid #C3C7C3">
+              <table border="0" cellspacing="0" cellpadding="0">
+                <tr valign="top">
+                    <td>
+                      <select name="selectedusers" size="4" multiple style="width:160px">
+                      <?
+                      for($i=0; $i < count($this->formvars['selusers']["Bezeichnung"]); $i++){
+                          echo '<option value="'.$this->formvars['selusers']["ID"][$i].'">'.$this->formvars['selusers']["Bezeichnung"][$i].'</option>';
+                         }
+                      ?>
+                      </select>
+                    </td>
+                    <td align="center" valign="middle" width="1">
+                      <input type="button" name="addPlaces" value="&lt;&lt;" onClick=addOptions(document.GUI.allusers,document.GUI.selectedusers,document.GUI.selusers,'value')>
+                      <input type="button" name="substractPlaces" value="&gt;&gt;" onClick=substractOptions(document.GUI.selectedusers,document.GUI.selusers,'value')>
+                    </td>
+                    <td>
+                      <select name="allusers" size="4" multiple style="width:160px">
+                      <? for($i=0; $i < count($this->formvars['users']["Bezeichnung"]); $i++){
+                          echo '<option value="'.$this->formvars['users']["ID"][$i].'">'.$this->formvars['users']["Bezeichnung"][$i].'</option>';
+                           }
+                      ?>
+                      </select>
+                    </td>
+                </tr>
+              </table>
+          </td>
+        </tr>
+        <tr>
+          <td align="right" style="border-bottom:1px solid #C3C7C3">
+            <input name="checkPasswordAge" type="checkbox" value="1" <?php if ($this->formvars['checkPasswordAge']) { ?> checked<?php } ?>>
+          </td>
+          <td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strCheckPasswordAge; ?></td>
+        </tr>
+        <tr>
+          <td align="right">
+            <input name="allowedPasswordAge" type="text" size="1" value="<?php echo $this->formvars['allowedPasswordAge']; ?>">
+          </td>
+          <td colspan="2" align="left"><?php echo $strAllowedPasswordAge; ?></td>
+        </tr>  
+    </table>
+  </td>
+  </tr>
+  <tr>
+    <td align="center">
+    	<input type="hidden" name="go_plus" id="go_plus" value="">
+    	<input type="reset" value="<?php echo $this->strButtonBack; ?>">&nbsp;<?php
+     if ($this->formvars['selected_stelle_id']>0) {
+     	?><input type="hidden" name="selected_stelle_id" value="<?php echo $this->formvars['selected_stelle_id']; ?>"><?php
+     	 	# 2007-12-30 pk
+     	 	# Wenn kein Button gewählt wurde, wird go_plus ohne Wert gesendet
+      ?><input type="button" name="dummy" value="<?php echo $strButtonUpdate; ?>" onclick="submitWithValue('GUI','go_plus','Ändern')"><?php
+     } ?>&nbsp;<input type="button" name="dummy" value="<?php echo $strButtonInsert; ?>" onclick="submitWithValue('GUI','go_plus','Als neue Stelle eintragen')">
+  </td>
+  </tr>
+</table>
+
+<input type="hidden" name="go" value="Stelleneditor">
+<input type="hidden" name="selmenues" value="<?
+        echo $this->formvars['selmenues']["ID"][0];
+        for($i=1; $i < count($this->formvars['selmenues']["Bezeichnung"]); $i++){
+          echo ', '.$this->formvars['selmenues']["ID"][$i];
+        }
+      ?>">
+<input type="hidden" name="selfunctions" value="<?
+        echo $this->formvars['selfunctions'][0]["id"];
+        for($i=1; $i < count($this->formvars['selfunctions']); $i++){
+          echo ', '.$this->formvars['selfunctions'][$i]["id"];
+        }
+      ?>">
+<input type="hidden" name="selframes" value="<?
+        echo $this->formvars['selframes'][0]["id"];
+        for($i=1; $i < count($this->formvars['selframes']); $i++){
+          echo ', '.$this->formvars['selframes'][$i]["id"];
+        }
+      ?>">      
+<input type="hidden" name="sellayer" value="<?
+        echo $this->formvars['sellayer']["ID"][0];
+        for($i=1; $i < count($this->formvars['sellayer']["Bezeichnung"]); $i++){
+          echo ', '.$this->formvars['sellayer']["ID"][$i];
+        }
+      ?>">
+<input type="hidden" name="selusers" value="<?
+        echo $this->formvars['selusers']["ID"][0];
+        for($i=1; $i < count($this->formvars['selusers']["Bezeichnung"]); $i++){
+          echo ', '.$this->formvars['selusers']["ID"][$i];
+        }
+      ?>">

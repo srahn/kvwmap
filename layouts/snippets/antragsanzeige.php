@@ -1,0 +1,97 @@
+<table width="0%" border="0" cellpadding="5" cellspacing="0">
+  <tr> 
+    <td bgcolor="<?php echo BG_FORM ?>"><div align="center"><strong><font size="+1"><?php echo $this->titel; ?></font></strong> 
+      </div></td>
+  </tr>
+  <tr> 
+    <td bgcolor="<?php echo BG_FORM ?>"><div align="center">
+	
+	<?php if ($this->Fehlermeldung!='') { include(LAYOUTPATH."snippets/Fehlermeldung.php"); } ?>
+	<strong><font color="#FF0000">
+	<?php if ($this->Meldung!='') { echo $this->Meldung; } ?>
+	</font> </strong>
+	 </div>
+	 
+    </td>
+  </tr>
+  <tr> 
+    <?php $this->formvars['order']='';?>
+    <td bgcolor="<?php echo BG_FORM ?>"><table border="0" cellspacing="0" cellpadding="5">
+        <tr bgcolor="#FFFFFF"> 
+          <td>&nbsp;</td>
+          <td><div align="center"><a href="index.php?go=Antraege_Anzeigen&order=antr_nr&richtung=<?php  if ($this->antrag->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach Antragsnummer sortieren"><strong><strong>Antragsnummer</strong></strong></a></div></td>
+          <td><div align="center"><a href="index.php?go=Antraege_Anzeigen&order=vermstelle&richtung=<?php	if ($this->antrag->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach Vermessungstelle sortieren"><strong>Vermessungsstelle</strong></a></div></td>
+          <td ><div align="center"><a href="index.php?go=Antraege_Anzeigen&order=verm_art&richtung=<?php	if ($this->antrag->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach Vermessungsart sortieren"><strong>Vermessungsart</strong></a></div></td>
+          <td>&nbsp;&nbsp;<a href="index.php?go=Antraege_Anzeigen&order=datum&richtung=<?php  if ($this->antrag->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach Datum sortieren"><strong>Datum</strong></a>&nbsp;&nbsp;&nbsp;</td>
+          <td>&nbsp;</td>
+          <td colspan="2">&nbsp;</td>
+        </tr>
+        <?php
+		 for ($i=0;$i<(count ($this->antrag->antragsliste));$i++) {
+        ?>
+        <tr align="left" bgcolor="<?php if ($i%2!=0) {
+							 echo '#FFFFFF';
+						 		}
+		                   else {
+							 echo '#EBEBEB';}?>"> 
+          <td><div align="left">
+            <input type="radio" name="antr_selected" value="<?php echo $this->antrag->antragsliste[$i]['antr_nr']; ?>"<?php
+			 if ($this->antrag->antragsliste[$i]['antr_nr']==$this->formvars['antr_selected']) { ?> checked<?php } ?>>
+          </div></td>
+          <td><?php echo $this->antrag->antragsliste[$i]['antr_nr']; ?>
+          <div align="left"></div></td>
+          <td><?php echo $this->antrag->antragsliste[$i]['vermst']; ?>
+          <div align="left"></div></td>
+          <td><?php echo $this->antrag->antragsliste[$i]['vermart']?> 
+            <div align="left"></div></td>
+          <td><div align="left"><?php echo $this->formvars['datum']=$this->antrag->antragsliste[$i]['datum']; ?></div></td>
+          <td><div align="left"><a href="index.php?go=Nachweis_antragsnr_form_aufrufen&antr_nr=<?php echo $this->antrag->antragsliste[$i]['antr_nr'];?>" title="bearbeiten"><img src="graphics/button_edit.png" border="0"></a></div></td>
+          <td><div align="left"><a href="index.php?go=Antrag_loeschen&antr_nr=<?php echo $this->antrag->antragsliste[$i]['antr_nr']; ?>" title="löschen"><img src="graphics/button_drop.png" border="0"></a></div></td>
+        </tr>
+        <?php
+		}
+		?>
+      </table>
+    </td>
+  </tr>
+  <tr> 
+    <td bgcolor="<?php echo BG_FORM ?>">
+			<SCRIPT TYPE="text/javascript">
+			
+			<!--
+			function submitting(this_value)
+			{
+			if (this_value=="Uebergabeprotokoll_Erzeugen"){
+				for(var i = 0; i < <?php echo count ($this->antrag->antragsliste); ?>; ++i)
+				{
+					if (document.GUI.antr_selected[i].checked){
+						var selected_antr = document.GUI.antr_selected[i].value;
+					}
+				}
+				window.open('index.php?go=Antraganzeige&go_plus=Uebergabeprotokoll_Erzeugen&antr_selected='+selected_antr,'_blank');
+			}
+			else {
+				document.GUI.submit();
+			}
+			}
+			
+			-->
+			</SCRIPT>
+    	<select name="go_plus" onChange="submitting(this.value)"> 
+        <option value="">---</option>
+       <?php if($this->Stelle->isFunctionAllowed('Antraganzeige_Zugeordnete_Dokumente_Anzeigen')) { ?>
+        <option value="Zugeordnete_Dokumente_Anzeigen"<?php if ($this->formvars['antr_verarbeitung']=='erzeugen') { ?> selected<?php } ?>>Zugeordnete Dokumente Anzeigen</option>
+       <?php } ?>
+				<option value="Festpunkte_in_Karte_Anzeigen">Zugeordnete Festpunkte in Karte Anzeigen</option>
+				<option value="Festpunkte_in_Liste_Anzeigen">Zugeordnete Festpunkte in Liste Anzeigen</option>
+		 		<option value="Festpunkte_in_KVZ_schreiben">Zugeordnete Festpunkte in KVZ Schreiben</option>
+        <option value="Rechercheergebnis_in_Ordner_zusammenstellen"<?php if ($this->formvars['doc_verwaltung']=='zusammenstellen') { ?> selected<?php } ?>>Rechercheergebnis in Ordner zusammenstellen</option>
+        <option value="Recherche_Ordner_packen"<?php if ($this->formvars['doc_verwaltung']=='zusammenstellen_packen') { ?> selected<?php } ?>>Recherche-Ordner als Zip-Datei herunterladen</option>
+        <option value="Uebergabeprotokoll_Erzeugen"<?php if ($this->formvars['antr_verarbeitung']=='erzeugen') { ?> selected<?php } ?>>Übergabeprotokoll erzeugen</option>
+        <option value="Zusammenstellen_Zippen">Zusammenstellen & Packen</option>
+      </select>
+      <input type="hidden" name="go" value="Antraganzeige">
+      <input type="hidden" name="file" value="1">
+    </td>
+  </tr>
+</table>
