@@ -2652,6 +2652,13 @@ class pgdatabase extends pgdatabase_core {
 
       $Eigentuemer->lfd_nr=$rs['lfd_nr_name'];
 
+      $plztest = explode('     ', $rs['name3']);
+      if($plztest[1] != ''){
+        $plztest[1] = '  PLZPF '.trim($plztest[1]);
+        $plztest[2] = 'PF '.trim($plztest[2]);
+        $rs['name3'] = implode('   ', $plztest);
+      }
+
       $Eigentuemer->Name[]=$rs['name1'];
       $Eigentuemer->Name[] = $rs['name2'];
       $Eigentuemer->Name[] = $rs['name3'];
