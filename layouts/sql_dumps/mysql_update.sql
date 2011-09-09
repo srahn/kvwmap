@@ -987,7 +987,7 @@ ALTER TABLE `layer` ADD `processing` VARCHAR( 255 ) NULL DEFAULT NULL;
 
 
 #------------------------------------------------------------------------------------------
-# Änderung von 1.7.6 zu 1.7.7
+# Änderung von 1.7.6 zu 1.8.0
 
 ALTER TABLE `druckfreitexte` ADD `type` BOOL NULL ;
 

@@ -1009,7 +1009,7 @@ $BODY$SELECT
 COMMENT ON FUNCTION linefrompoly(geometry) IS 'Liefert eine LINESTRING Gemetrie von einer MULTIPOLYGON oder POLYGON Geometrie zurück';
 
 
-----# Änderungen von 1.7.6 nach 1.7.7
+----# Änderungen von 1.7.6 nach 1.8.0
 
 -- Tabelle zur Speicherung von Umringspolygonen aus uko-Dateien
 
