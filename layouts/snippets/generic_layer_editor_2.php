@@ -296,11 +296,13 @@ function change_orderby(attribute, layer_id){
 							echo '<table width="100%"><tr><td>';
 							if($this->qlayerset[$i]['attributes']['form_element_type'][$j] != 'SubFormPK' AND $this->qlayerset[$i]['attributes']['form_element_type'][$j] != 'SubFormEmbeddedPK'){
 								echo '<a style="font-size: '.$this->user->rolle->fontsize_gle.'px" title="Sortieren nach '.$this->qlayerset[$i]['attributes']['alias'][$j].'" href="javascript:change_orderby(\''.$this->qlayerset[$i]['attributes']['name'][$j].'\', '.$this->qlayerset[$i]['Layer_ID'].');">
-							 					'.$this->qlayerset[$i]['attributes']['alias'][$j].'
-											</a>';
+							 					'.$this->qlayerset[$i]['attributes']['alias'][$j].'</a>';
 							}
 							else{
 								echo '<span style="font-size: '.$this->user->rolle->fontsize_gle.'px; color:#222222;">'.$this->qlayerset[$i]['attributes']['alias'][$j].'</span>';
+							}
+							if($this->qlayerset[$i]['attributes']['nullable'][$j] == '0'){
+								echo '<span title="Eingabe erforderlich">*</span>';
 							}
 							if ($this->qlayerset[$i]['attributes']['tooltip'][$j]!='' AND $this->qlayerset[$i]['attributes']['form_element_type'][$j] != 'Time') {
 							  echo '<td align="right"><a href="#" title="'.$this->qlayerset[$i]['attributes']['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';

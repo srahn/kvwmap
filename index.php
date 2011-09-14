@@ -184,6 +184,10 @@ $GUI->requeststring = $QUERY_STRING;
 
 switch($GUI->go) {
 
+	case 'bevoelkerung_bericht' : {
+    $GUI->bevoelkerung_bericht();
+  } break;
+
 	 case 'reset_layers' : {
     $GUI->reset_layers();
     $GUI->loadMap('DataBase');

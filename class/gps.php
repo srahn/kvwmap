@@ -59,7 +59,7 @@ class gps {
     }
     #echo 'linenumber:'.$linenumber.'<br>';
     $next_line = true;
-    while($next_line == true){
+    while($next_line == true AND $linenumber > 0){
 	    # Extrahieren der Zeile
 	   	$line=$data_sets[$linenumber];
 	   	#echo 'line:'.$line.'<br>';

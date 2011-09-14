@@ -265,6 +265,11 @@ class GUI extends GUI_core{
 		$this->user->rolle->readSettings();
 	}
 	
+	function bevoelkerung_bericht(){
+    $this->main='bevoelkerung_bericht.php';
+    $this->output();
+	}
+	
 	function delete_bplan(){
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
@@ -6740,15 +6745,18 @@ class GUI extends GUI_core{
 		$attributes = $mapDB->add_attribute_values($attributes, $layerdb, NULL, true);
 		$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
     # Daten abfragen
-    for($i = 0; $i < count($checkbox_names); $i++){
-      if($this->formvars[$checkbox_names[$i]] == 'on'){
-        $element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
-        $oids .= $element[3].', ';
-      }
-    }
-    $sql = $newpath." AND ".$element[1].".oid IN (".$oids.'0)';
-    if($this->formvars['orderby'.$this->formvars['chosen_layer_id']] != ''){
-    	$sql .= ' ORDER BY '.$this->formvars['orderby'.$this->formvars['chosen_layer_id']];
+    $sql = $newpath;
+    if($this->formvars['all'] != 'true'){
+	    for($i = 0; $i < count($checkbox_names); $i++){
+	      if($this->formvars[$checkbox_names[$i]] == 'on'){
+	        $element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
+	        $oids .= $element[3].', ';
+	      }
+	    }
+	    $sql .= " AND ".$element[1].".oid IN (".$oids.'0)';
+	    if($this->formvars['orderby'.$this->formvars['chosen_layer_id']] != ''){
+	    	$sql .= ' ORDER BY '.$this->formvars['orderby'.$this->formvars['chosen_layer_id']];
+	    }
     }
     #echo $sql.'<br><br>';
     $this->debug->write("<p>file:kvwmap class:generisches_sachdaten_diagramm :",4);
@@ -6768,7 +6776,6 @@ class GUI extends GUI_core{
         }
       }
     }
-    
     # defining colors
     $colors['white'] =			 Array(255, 255, 255);
     $colors['yellowLight'] = Array(255, 255, 200);
@@ -6972,7 +6979,8 @@ class GUI extends GUI_core{
     //imagepng($finalimage, IMAGEPATH.$imagename);
     ob_end_clean();
     ob_start("output_handler");
-    ImagePNG($finalimage);
+    #ImagePNG($finalimage);
+    ImageJPEG($finalimage);
     //return TEMPPATH_REL.$imagename;
     //$this->output();
 	}
