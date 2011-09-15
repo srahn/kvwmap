@@ -838,7 +838,7 @@ class Nachweis {
           }
           if($FlurID!=''){
           	if(strpos($FlurID, '%')){
-          		$sql.=" AND n.flurid LIKE '".$FlurID."'";
+          		$sql.=" AND n.flurid::text LIKE '".$FlurID."'";
           	}
           	else{
             	$sql.=" AND n.flurid='".$FlurID."'";
