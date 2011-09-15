@@ -31,22 +31,8 @@
       <tr>
         <td bgcolor="<?php echo BG_FORM ?>">Stichtag,&nbsp;der&nbsp;f&uuml;r&nbsp;die&nbsp;neuen&nbsp;Zonen&nbsp;an&nbsp;gegeben&nbsp;werden
           soll.</td>
-        <td align="left" bgcolor="<?php echo BG_FORM ?>"><input name="newStichtag" type="text" value="YYYY-12-31" size="11" maxlength="10">
+        <td align="left" bgcolor="<?php echo BG_FORM ?>"><input name="newStichtag" type="text" value="31.12.YYYY" size="11" maxlength="10">
         </td>
-      </tr>
-      <tr>
-        <td bgcolor="<?php echo BG_FORM ?>">Soll auch ein neuer Layer zum Stichtag angelegt werden?<em><font size="-1"><br>
-          (Wenn
-              ein Layer angelegt werden soll,<br> 
-            muss anschlie&szlig;end noch der
-              Stelle zugeordnet werden!)</font></em><br>
-          <em></em></td>
-        <td align="left" bgcolor="<?php echo BG_FORM ?>"><input name="newbwlayer" type="radio" value="1" checked>ja<input name="newbwlayer" type="radio" value="0">nein</td>
-      </tr>
-      <tr>
-        <td bgcolor="<?php echo BG_FORM ?>">Zu welcher Gruppen_id soll
-          der Layer geh&ouml;ren?</td>
-        <td align="left" bgcolor="<?php echo BG_FORM ?>"><input name="group_id" type="text" id="group_id" size="3" maxlength="5"></td>
       </tr>
       <tr>
         <td colspan="2" align="center" bgcolor="<?php echo BG_FORM ?>">

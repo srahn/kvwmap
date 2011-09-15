@@ -5362,7 +5362,8 @@ class GUI extends GUI_core{
 
   function copyBodenrichtwertzonen() {
     # Bodenrichtwertzonenobjekt erzeugen
-    $bodenrichtwertzone=new bodenrichtwertzone($this->pgdatabase);
+    $layer = $this->user->rolle->getLayer(LAYERNAME_BODENRICHTWERTE);
+    $bodenrichtwertzone=new bodenrichtwertzone($this->pgdatabase, $layer[0]['epsg_code'], $this->user->rolle->epsg_code);
     # Abfragen, ob der Vorgang schon bestätigt wurde
     if ($this->formvars['bestaetigung']!='Ja') {
       # nein
@@ -5382,9 +5383,6 @@ class GUI extends GUI_core{
       else {
         # Anlegen eines neuen Layers für die Bodenrichtwertzonen mit dem neuen Stichtag
         # wenn es ausgewählt wurde
-        if ($this->formvars['newbwlayer']) {
-          $bodenrichtwertzone->createNewLayer($this->formvars);
-        }
         # Beschließen der Transaktion
         $bodenrichtwertzone->database->committransaction();
         # Starten der letzten Kartenansicht
@@ -5404,7 +5402,8 @@ class GUI extends GUI_core{
     $this->main='waehlebodenwertstichtagtocopy.php';
     $this->titel='Kopieren von Bodenrichtwertzonen auf einen neuen Stichtag';
     # Bodenrichtwertzonenobjekt erzeugen
-    $bodenrichtwertzone=new bodenrichtwertzone($this->pgdatabase);
+    $layer = $this->user->rolle->getLayer(LAYERNAME_BODENRICHTWERTE);
+    $bodenrichtwertzone=new bodenrichtwertzone($this->pgdatabase, $layer[0]['epsg_code'], $this->user->rolle->epsg_code);
     # Abfragen der bisher vorhandenen Stichtage
     $ret=$bodenrichtwertzone->getStichtage();
     if ($ret[0]) { # Fehler bei der Abfrage der vorhandenen Stichtage
@@ -6754,9 +6753,9 @@ class GUI extends GUI_core{
 	      }
 	    }
 	    $sql .= " AND ".$element[1].".oid IN (".$oids.'0)';
-	    if($this->formvars['orderby'.$this->formvars['chosen_layer_id']] != ''){
-	    	$sql .= ' ORDER BY '.$this->formvars['orderby'.$this->formvars['chosen_layer_id']];
-	    }
+    }
+    if($this->formvars['orderby'.$this->formvars['chosen_layer_id']] != ''){
+    	$sql .= ' ORDER BY '.$this->formvars['orderby'.$this->formvars['chosen_layer_id']];
     }
     #echo $sql.'<br><br>';
     $this->debug->write("<p>file:kvwmap class:generisches_sachdaten_diagramm :",4);

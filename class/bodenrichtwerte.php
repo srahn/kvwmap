@@ -122,7 +122,7 @@ class bodenrichtwertzone {
   
   function getStichtage() {
     # Liefert alle bisher für Bodenrichtwertzonen erfassten Stichtage
-    $sql ='SELECT DISTINCT datum FROM bw_zonen ORDER BY datum DESC';
+    $sql ='SELECT DISTINCT stichtag FROM bw_zonen ORDER BY stichtag DESC';
     $ret=$this->database->execSQL($sql,4, 0);
     if ($ret[0]) {
       # Fehler beim Abfragen der Datenbank
@@ -318,8 +318,8 @@ class bodenrichtwertzone {
       # SQL-Einfügeanfrage stellen
       $this->debug->write('Kopieren der Zonen von einem Stichtag zu einem neuen.',4);
       $sql.="INSERT INTO bw_zonen";
-      $sql.=" SELECT old_oid, zonennr, standort, richtwertdefinition, gemeinde, gemarkung, ortsteilname, postleitzahl, gutachterausschuss, bodenrichtwertnummer, oertliche_bezeichnung, bodenrichtwert, '.$newStichtag.', basiskarte, entwicklungszustand, beitragszustand, nutzungsart, ergaenzende_nutzung, bauweise, geschosszahl, grundflaechenzahl, geschossflaechenzahl, baumassenzahl, flaeche, tiefe, breite, wegeerschliessung, ackerzahl, gruenlandzahl, aufwuchs, verfahrensgrund, verfahrensgrund_zusatz, bemerkungen, the_geom, textposition";
-      $sql.=" FROM bw_zonen WHERE stichtag LIKE '".$oldStichtag."'";
+      $sql.=" SELECT old_oid, zonennr, standort, richtwertdefinition, gemeinde, gemarkung, ortsteilname, postleitzahl, zonentyp, gutachterausschuss, bodenrichtwertnummer, oertliche_bezeichnung, bodenrichtwert, '".$newStichtag."', basiskarte, entwicklungszustand, beitragszustand, nutzungsart, ergaenzende_nutzung, bauweise, geschosszahl, grundflaechenzahl, geschossflaechenzahl, baumassenzahl, flaeche, tiefe, breite, wegeerschliessung, ackerzahl, gruenlandzahl, aufwuchs, verfahrensgrund, verfahrensgrund_zusatz, bemerkungen, textposition, the_geom";
+      $sql.=" FROM bw_zonen WHERE stichtag = '".$oldStichtag."'";
       $ret=$this->database->execSQL($sql,4, 1);
       if ($ret[0]) {
         # Fehler beim Eintragen in Datenbank
@@ -329,62 +329,5 @@ class bodenrichtwertzone {
     return $ret;
   }
   
-  function createNewLayer($parameter) {
-    $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-    $formvars['Name']=$parameter['newStichtag'];
-    $formvars['Datentyp']=2;
-    $formvars['Gruppe']=$parameter['group_id'];
-    if(BODENRICHTWERTTYP == 'punkt'){
-    	$formvars['pfad'] ="SELECT oid,*,AsText(the_geom) AS textpositiontxt";
-    }
-    else{
-    	$formvars['pfad'] ="SELECT oid,*,AsText(the_geom) AS umringtxt,AsText(textposition) AS textpositiontxt";
-    }
-    $formvars['pfad'].=" FROM bw_bodenrichtwertzonen WHERE datum='".$parameter['newStichtag']."'";
-    $formvars['Data'] ="the_geom from (select oid,*,case when erschliessungsart='[ortsuebliche Erschl.]' then '['";
-    $formvars['Data'].=" when erschliessungsart='(vollerschlossen)' then '(' else '' end || bodenwert || case";
-    $formvars['Data'].=" when erschliessungsart='[ortsuebliche Erschl.]' then ']' when erschliessungsart='(vollerschlossen)' then ')'";
-    $formvars['Data'].=" else '' end || case when sanierungsgebiete='Sanierungsanfangswert' then ' SanA ;     '";
-    $formvars['Data'].=" when sanierungsgebiete='Sanierungsendwert' then ' SanE ;     ' when sanierungsgebiete='ohne' then ';'";
-    $formvars['Data'].=" end || richtwertdefinition as beschriftung from bw_bodenrichtwertzonen) as foo using unique oid using srid=".EPSGCODE;
-    $formvars['tileindex']="";
-    $formvars['tileitem']="";
-    $formvars['labelangleitem']="";
-    $formvars['labelitem']="beschriftung";
-    $formvars['labelmaxscale']="";
-    $formvars['labelminscale']="";
-    $formvars['labelrequires']="";
-    $formvars['connection']="user=".$this->database->user." password=".$this->database->passwd." dbname=".$this->database->dbName;
-    $formvars['connectiontype']=6;
-    $formvars['classitem']="datum";
-    $formvars['filteritem']="datum";
-    $formvars['tolerance']="3";
-    $formvars['toleranceunits']="";
-    $formvars['epsg_code']=EPSGCODE;
-    $formvars['ows_srs']=OWS_SRS;
-    $formvars['wms_name']="Bodenrichtwertzone Stichtag ".$parameter['newStichtag'];
-    $formvars['wms_server_version']=SUPORTED_WMS_VERSION;
-    $formvars['wms_format']="";
-    $formvars['wms_connectiontimeout']."'";
-    $layer_id=$mapDB->newLayer($formvars);
-    
-    // funktioniert noch nicht, dazu muss hier erst eine Verbindung zu mysql her.
-    // Am besten es wird ausgelagert in die classe db_mapObj
-    # Erzeugen der Klasse entsprechend der Angaben des Layers oldStichtag
-    $sql ="INSERT INTO classes (SELECT '' AS Class_ID,c.Name,".$layer_id.", '(''[datum]'' eq ''".$parameter['newStichtag']."'')' AS Expression";
-    $sql.=",c.drawingorder, NULL FROM classes AS c, layer AS l WHERE c.Layer_ID=l.Layer_ID AND l.Name='".$parameter['oldStichtag']."')";
-    $this->debug->write("<p>file:kvwmap class:bodenrichtwerte->createNewLayer:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $class_id = mysql_insert_id();
-    # Zuordnen des Styles der Classe des Layers oldStichtag zur Classe des Layers newLayer
-    # Erzeugen der Klasse entsprechend der Angaben des Layers oldStichtag
-    $sql ="INSERT INTO u_styles2classes (SELECT ".$class_id.", s2c.style_id,s2c.drawingorder FROM u_styles2classes AS s2c,classes AS c, layer AS l";
-    $sql.=" WHERE s2c.class_id=c.Class_ID AND c.Layer_ID=l.Layer_ID AND l.Name='".$parameter['oldStichtag']."')";
-    $this->debug->write("<p>file:kvwmap class:bodenrichtwerte->createNewLayer:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    return $layer_id;  
-  }
 }
 ?>
