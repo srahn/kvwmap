@@ -54,6 +54,7 @@
 	<input name="lastcoordy" type="hidden" value="">
 	<input type="hidden" name="str_pathx" value="<? echo $this->formvars['str_pathx']; ?>">
   <input type="hidden" name="str_pathy" value="<? echo $this->formvars['str_pathy']; ?>">
+  <input type="hidden" name="vertices" id="vertices" value="">
 	
 
 <?php
@@ -77,6 +78,7 @@ $svg .= $scriptdefinitions;
 $svg .= $basicfunctions;				# Basisfunktionen
 $svg .= $SVGvars_navscript;			# Funktionen zur Navigation
 $svg .= $linefunctions;					# Funktionen zum Zeichnen einer Linie
+$svg .= $vertex_catch_functions;# Punktfangfunktionen
 $svg .= $coord_input_functions;	# Funktionen zum Eingeben von Koordinaten
 $svg .= $measurefunctions;
 if($_SESSION['mobile'] == 'true'){

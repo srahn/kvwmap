@@ -2,6 +2,10 @@
 <script language="JavaScript">
 <!--
 
+function toggle_vertices(){	
+	document.getElementById("vertices").SVGtoggle_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+}
+
 function send(zoom){
 	document.GUI.zoom.value = zoom;
 	if(document.GUI.newpathwkt.value == ''){
@@ -97,6 +101,7 @@ function buildwktlinefromsvgpath(svgpath){
   <tr>
   	<td>&nbsp;</td>
   	<td>&nbsp;<b>Maﬂstab&nbsp;1:&nbsp;</b><input type="text" id="scale" name="nScale" size="5" value="<?php echo round($this->map->scale); ?>"></td>
+  	<td align="right"><input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang</td>
   </tr>
 </table>
 <INPUT TYPE="HIDDEN" NAME="zoom" VALUE="">

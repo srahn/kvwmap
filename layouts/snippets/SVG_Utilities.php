@@ -118,6 +118,7 @@
 	var time_mouse_down;
 	var mouse_coords_type = "image";
 	var measuring  = false;
+	var deactivated_foreign_vertex = 0;
 	';
 
 	$polygonANDpoint = '
@@ -601,6 +602,9 @@
 
 
 function mousemove(evt){
+	if(deactivated_foreign_vertex != 0){		// wenn es einen deaktivierten foreign vertex gibt, wird dieser jetzt wieder aktiviert
+		document.getElementById(deactivated_foreign_vertex).setAttribute("pointer-events", "auto");
+	}
 	if(top.document.GUI.last_doing.value == "vertex_edit" && selected_vertex != undefined && selected_vertex != ""){
 		move_vertex(evt, selected_vertex, "image");
 	}
@@ -1098,6 +1102,9 @@ function mouseup(evt){
 		vertex_id = vertex_id_string.split("_");
 		if(vertex_id[1] != "new"){
 			if(selected_vertex == vertex){
+				if(deactivated_foreign_vertex != 0){		// wenn es einen deaktivierten foreign vertex gibt, wird dieser jetzt wieder aktiviert
+					document.getElementById(deactivated_foreign_vertex).setAttribute("pointer-events", "auto");
+				}
 				if(coordtype == "world"){
 					vertex_new_world_x = evt.clientX; 
 					vertex_new_world_y = evt.clientY;
@@ -1703,6 +1710,9 @@ function mouseup(evt){
 		vertex_id = vertex_id_string.split("_");
 		if(vertex_id[1] != "new"){
 			if(selected_vertex == vertex){
+				if(deactivated_foreign_vertex != 0){		// wenn es einen deaktivierten foreign vertex gibt, wird dieser jetzt wieder aktiviert
+					document.getElementById(deactivated_foreign_vertex).setAttribute("pointer-events", "auto");
+				}
 				if(coordtype == "world"){
 					vertex_new_world_x = evt.clientX; 
 					vertex_new_world_y = evt.clientY;
@@ -2027,6 +2037,7 @@ function mouseup(evt){
 		add_vertices(pixel_path);
 	}
 
+
 	function save_geometry_for_undo(){
 		newpath_undo = top.document.GUI.newpath.value;
 		newpathwkt_undo = top.document.GUI.newpathwkt.value;
@@ -2283,6 +2294,102 @@ function mouseup(evt){
 	}
 	';
 	
+
+$vertex_catch_functions = '
+
+	//-------------------- Punktfang -----------------------------
+
+	top.document.getElementById("vertices").SVGtoggle_vertices = toggle_vertices;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+
+	function toggle_vertices(){
+		if(top.document.GUI.punktfang.checked){
+			add_foreign_vertices();
+		}
+		else{
+			remove_foreign_vertices();
+		}
+	}
+
+	function add_foreign_vertices(){
+		get_vertices_loop = window.setInterval("get_foreign_vertices()", 200);
+		top.ahah("'.URL.APPLVERSION.'index.php", "go=getSVG_foreign_vertices&layer_id="+top.document.GUI.layer_id.value+"&oid="+top.document.GUI.oid.value, new Array(top.document.GUI.vertices), "setvalue");
+	}
+
+	function remove_foreign_vertices(){
+		var parent = document.getElementById("foreignvertices");
+		var count = parent.childNodes.length;
+		for(i = 0; i < count-2; i++){
+			parent.removeChild(parent.lastChild);
+		}
+	}
+
+	function activate_foreign_vertex(evt){
+		if(top.document.GUI.last_doing.value == "vertex_edit" && (selected_vertex == undefined || selected_vertex == "")){
+			// wenn man im Vertex-Edit Modus ist, die Events von diesem foreign-vertex ausschalten, damit die Geometrie-Vertices Vorrang haben 
+			evt.target.setAttribute("pointer-events", "none");
+			deactivated_foreign_vertex = evt.target.getAttribute("id");  
+		}
+		else{
+			evt.target.setAttribute("opacity", "1");
+		}
+	}
+
+	function deactivate_foreign_vertex(evt){
+		evt.target.setAttribute("opacity", "0.1");
+	}
+
+	function add_foreign_vertex(evt){
+		// punktobjekt bilden, welches die Koordinaten aufnimmt
+    function point(x,y) {
+      this.clientX = x;
+      this.clientY = y;
+    }
+		// Aufrufen der Funktion mousedown() fuer die jeweilige Aktion
+    position= new point(evt.target.getAttribute("x"), evt.target.getAttribute("y"));
+		if(top.document.GUI.last_doing.value == "vertex_edit"){
+			if(last_selected_vertex != ""){
+				selected_vertex = last_selected_vertex;
+				position.target = selected_vertex; 
+				move_vertex(position, last_selected_vertex, "world");
+				end_vertex_move(position);
+			}
+		}
+		else{
+			mouse_coords_type = "world";
+	  	mousedown(position);
+			mouse_coords_type = "image";
+		}  
+	}	
+
+	function get_foreign_vertices(){
+		if(top.document.GUI.vertices.value != ""){
+			window.clearInterval(get_vertices_loop);
+			var parent = document.getElementById("foreignvertices");
+			circle = new Array();
+			var kreis1 = document.getElementById("kreis3");
+			vertex_string = top.document.GUI.vertices.value+"";
+			top.document.GUI.vertices.value = "";
+			vertices = vertex_string.split("|");
+			for(i = 0; i < vertices.length-1; i++){
+				circle[i] = kreis1.cloneNode(true);
+				coords = vertices[i].split(" ");
+				circle[i].setAttribute("x", coords[0]);
+				circle[i].setAttribute("y", coords[1]);
+				coords[0] = Math.round((coords[0] - parseFloat(top.document.GUI.minx.value))/parseFloat(top.document.GUI.pixelsize.value));
+				coords[1] = Math.round((coords[1] - top.document.GUI.miny.value)/parseFloat(top.document.GUI.pixelsize.value));
+				circle[i].setAttribute("cx", coords[0]);
+				circle[i].setAttribute("cy", coords[1]);
+				circle[i].setAttribute("style","fill: #FF0000");
+				circle[i].setAttribute("id", "foreign_vertex_"+i);
+				parent.appendChild(circle[i]);
+			}
+		}
+	}
+
+	//------------------------------------------------------------
+
+';	
+
 $gps_functions = '  
   function update_gps_position(){
 		posx = top.document.GUI.gps_posx.value+"";
@@ -2473,6 +2580,9 @@ $measurefunctions = '
 	  <rect id="canvas" cursor="crosshair" onmousedown="mousedown(evt);" onmousemove="mousemove(evt);hide_tooltip();" onmouseup="mouseup(evt);" width="100%" height="100%" opacity="0" visibility="visible"/>
 		<g id="vertices" transform="translate(0,'.$res_y.') scale(1,-1)">
 			<circle id="kreis" cx="-500" cy="-500" r="7" opacity="0.3" onmouseover="activate_vertex(evt)" onmouseout="deactivate_vertex(evt)" onmousedown="select_vertex(evt)" onmousemove="move_vertex(evt)" onmouseup="end_vertex_move(evt)" />
+		</g>
+		<g id="foreignvertices" transform="translate(0,'.$res_y.') scale(1,-1)">
+			<circle id="kreis3" cx="-500" cy="-500" r="7" opacity="0.1" onmouseover="activate_foreign_vertex(evt)" onmouseout="deactivate_foreign_vertex(evt)" onmouseup="add_foreign_vertex(evt)" />
 		</g>
 
 	  <g id="alleButtons" transform="translate(0 0)">

@@ -231,10 +231,11 @@ class GUI extends GUI_core{
 				}
 				else{	# LINE / POLYGON
 					$sql = 'SELECT x(the_geom), y(the_geom) FROM (SELECT transform(pointn(foo.linestring, foo.count1), '.$this->user->rolle->epsg_code.') AS the_geom
-							FROM (SELECT generate_series(1, npoints(foo2.linestring)) AS count1, foo2.linestring
-      							FROM (SELECT linefrompoly(intersection(the_geom, '.$extent.')) AS linestring '.$fromwhere.') foo2
-							) foo
-							WHERE (foo.count1 + 1) <= npoints(foo.linestring)) foo3 LIMIT 10000';
+					FROM (SELECT generate_series(1, npoints(foo4.linestring)) AS count1, foo4.linestring FROM (
+					SELECT GeometryN(foo2.linestring, foo2.count2) as linestring FROM (
+					SELECT generate_series(1, NumGeometries(foo5.linestring)) AS count2, foo5.linestring FROM (SELECT linefrompoly(intersection(the_geom, '.$extent.')) AS linestring '.$fromwhere.') foo5) foo2
+					) foo4) foo
+					WHERE (foo.count1 + 1) <= npoints(foo.linestring)) foo3 LIMIT 10000';
 				}
 				#echo $sql;
 				$ret=$layerdb->execSQL($sql,4, 0);
@@ -244,6 +245,42 @@ class GUI extends GUI_core{
           }
         }
 			}
+		} 
+	}
+	
+	function getSVG_foreign_vertices(){
+		# Diese Funktion liefert die Eckpunkte der Geometrien des übergebenen Postgis-Layers, die im aktuellen Kartenausschnitt liegen
+		$this->user->rolle->readSettings();
+		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$mapDB->nurAktiveLayerOhneRequires = true;
+		$layer = $mapDB->get_Layer($this->formvars['layer_id']);
+		$offset = 0;
+		if($layer['connectiontype'] == MS_POSTGIS){
+			$layerdb = $mapDB->getlayerdatabase($layer['Layer_ID'], $this->Stelle->pgdbhost);
+    	$data_attributes = $mapDB->getDataAttributes($layerdb, $layer['Layer_ID']);
+    	if(in_array($data_attributes['geomtype'][$data_attributes['the_geom']] , array('MULTIPOLYGON', 'POLYGON', 'GEOMETRY'))){
+    		$offset = 1;
+    	}
+			$select = str_replace('from', ', '.$data_attributes['table_alias_name'][$data_attributes['the_geom']].'.oid as exclude_oid'.' from', strtolower($mapDB->getSelectFromData($layer['Data'])));
+			$extent = 'Transform(geomfromtext(\'POLYGON(('.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layer['epsg_code'].')';				
+			$fromwhere = 'from ('.$select.') as foo1 WHERE intersects(the_geom, '.$extent.') ';
+			if($this->formvars['oid']){
+				$fromwhere .= 'AND exclude_oid != '.$this->formvars['oid'];
+			}
+			# LINE / POLYGON
+			$sql = 'SELECT x(the_geom), y(the_geom) FROM (SELECT transform(pointn(foo.linestring, foo.count1), '.$this->user->rolle->epsg_code.') AS the_geom
+					FROM (SELECT generate_series(1, npoints(foo4.linestring)) AS count1, foo4.linestring FROM (
+					SELECT CASE WHEN GeometryN(foo2.linestring, foo2.count2) IS NULL THEN foo2.linestring ELSE GeometryN(foo2.linestring, foo2.count2) END as linestring FROM (
+					SELECT generate_series(1, CASE WHEN NumGeometries(foo5.linestring) IS NULL THEN 1 ELSE NumGeometries(foo5.linestring) END) AS count2, foo5.linestring FROM (SELECT linefrompoly(intersection(the_geom, '.$extent.')) AS linestring '.$fromwhere.') foo5) foo2
+					) foo4) foo
+					WHERE (foo.count1 + '.$offset.') <= npoints(foo.linestring)) foo3 LIMIT 10000';
+			#echo $sql;
+			$ret=$layerdb->execSQL($sql,4, 0);
+      if(!$ret[0]){
+      	while ($rs=pg_fetch_array($ret[1])){
+        	echo $rs[0].' '.$rs[1].'|';
+        }
+      }
 		} 
 	}
 
@@ -10283,6 +10320,9 @@ class GUI extends GUI_core{
               else {
                 $layer->set('template',DEFAULTTEMPLATE);
               }
+              $projFROM = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);
+    					$projTO = ms_newprojectionobj("init=epsg:".$layerset[$i]['epsg_code']);
+    					$rect->project($projFROM, $projTO);
               @$layer->queryByRect($rect);
               $layer->open();
               $anzResult=$layer->getNumResults();

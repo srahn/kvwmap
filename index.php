@@ -218,6 +218,10 @@ switch($GUI->go) {
 	case 'getSVG_vertices' : {
 		$GUI->getSVG_vertices();
   } break;
+  
+  case 'getSVG_foreign_vertices' : {
+		$GUI->getSVG_foreign_vertices();
+  } break;
 
   case 'ResizeMap2Window' : {
     $GUI->resizeMap2Window();
