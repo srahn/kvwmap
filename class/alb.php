@@ -670,7 +670,6 @@ class ALB {
       }
 
       if ($flst->Status != 'H' OR $formnummer = '30') {
-          # nur wenn das Flurstück nicht historisch ist
         switch ($formnummer) {
           case '30' : {
             $Ueberschrift='*Flurstücksnachweis';
@@ -724,6 +723,11 @@ class ALB {
 
         if($formnummer == '30' || $formnummer == '35'){
           $pdf->addText($col0,$row-=24,$fontSize,'GMKG   FLR FLURST-NR    P');
+          if($flst->Status == 'H'){
+          	$row = $row + 24;
+          	$pdf->addText($col3,$row,$fontSize,'Status');
+          	$pdf->addText($col6,$row-=24,$fontSize,'(H) Historisches Flurstück');
+          }
           if ($flst->Nenner!=0) { $nennerausgabe="/".$flst->Nenner; }
           $pdf->addText($col0,$row-=12,$fontSize,$flst->GemkgSchl." ".str_pad($flst->FlurNr,3," ",STR_PAD_LEFT)." ".str_pad($flst->Zaehler,5," ",STR_PAD_LEFT).$nennerausgabe);
           $pdf->addText($col0+173,$row,$fontSize,$flst->getPruefKZ());
@@ -1009,262 +1013,272 @@ class ALB {
               $pdf->addText($col2_1,$row-=12,$fontSize,substr($flst->Vorgaenger[$v]['vorgaenger'],0,20));
             }
           }
+          # Nachfolgerflurstücke
+          if (count($flst->Nachfolger)>0) {
+            $pdf->addText($col0,$row-=24,$fontSize,'Nachfolgerflurstück');
+            $pdf->addText($col2_1,$row,$fontSize,substr($flst->Nachfolger[0]['nachfolger'],0,20));
+            for ($v=1;$v<count($flst->Nachfolger);$v++) {
+              $pdf->addText($col2_1,$row-=12,$fontSize,substr($flst->Nachfolger[$v]['nachfolger'],0,20));
+            }
+          }
         } # endif 30 oder 35
-
-        # Amtsgericht, Grundbuchbezirk
-        $pdf->addText($col0,$row-=24,$fontSize,'Amtsgericht');
-        $pdf->addText($col2_1,$row,$fontSize,str_pad($flst->Amtsgericht['schluessel'],11," "));
-        $pdf->addText($col4,$row,$fontSize,$flst->Amtsgericht['name']);
-        $pdf->addText($col0,$row-=12,$fontSize,'Grundbuchbezirk');
-        $pdf->addText($col2_1,$row,$fontSize,str_pad($flst->Grundbuchbezirk['schluessel'],11," "));
-        $pdf->addText($col4,$row,$fontSize,$flst->Grundbuchbezirk['name']);
-
-        ################################################################################
-        # Bestandsnachweis #
-        ####################
-        switch ($formnummer) {
-          case 40 : {
-            for ($g=0;$g<count($flst->Grundbuecher);$g++) {
-              # Bestand
-              $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],1);
-              for ($b=0;$b<count($flst->Buchungen);$b++) {
-                # Seitenumbruch wenn erforderlich
-                if($row<120) {
-                  # Seitenumbruch
-                  $seite++;
-                  # aktuelle Seite abschließen
-                  $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
-                  # neue Seite beginnen
-                  $pageid=$pdf->newPage();
-                  $pagecount[$f] = $pagecount[$f] + 1;
-                  if ($wasserzeichen) {
-                    $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
-                  }
-                  $row=825; # 812 -> 825 2007-04-02 Schmidt
-                  $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
-                }
-
-                # Ausgabe der Zeile für die Bestandbezeichnung
-                $pdf->addText($col0,$row-=12,$fontSize,'Bestand');
-                $BestandStr =$flst->Buchungen[$b]['bezirk'].'-'.intval($flst->Buchungen[$b]['blatt']);
-                $BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
-                $BestandStr.=' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
-                $BestandStr.=' ('.$flst->Buchungen[$b]['buchungsart'].')';
-                $BestandStr.=' '.$flst->Buchungen[$b]['bezeichnung'];
-                $pdf->addText($col2_1,$row,$fontSize,$BestandStr);
-                $pdf->addText($col0,$row-=12,$fontSize,str_repeat("=",7));
-
-                # Abfragen und Ausgeben der Eigentümer zum Grundbuchblatt
-                $Eigentuemerliste=$flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
-                $anzEigentuemer=count($Eigentuemerliste);
-                for ($i=0;$i<$anzEigentuemer;$i++) {
-                  if($row<120) {
-                    # Seitenumbruch
-                    $seite++;
-                    # aktuelle Seite abschließen
-                    $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
-                    # neue Seite beginnen
-                    $pageid=$pdf->newPage();
-                    $pagecount[$f] = $pagecount[$f] + 1;
-                    if ($wasserzeichen) {
-                      $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
-                    }
-                    $row=825; # 812 -> 825 2007-04-02 Schmidt;
-                    $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
-                  }
-                  else {
-                    $row-=12;
-                  }
-                  if ($Eigentuemerliste[$i]->Nr!=0) {
-                    $pdf->addText($col0,$row-=12,$fontSize,$Eigentuemerliste[$i]->Nr);
-                    if($Eigentuemerliste[$i]->Anteil != '')$pdf->addText($col3,$row,$fontSize,'zu '.$Eigentuemerliste[$i]->Anteil);
-                  }
-                  else {
-                    $row-=12;
-                  }
-                  $anzNamenszeilen=count($Eigentuemerliste[$i]->Name);
-                  for ($k=0;$k<$anzNamenszeilen;$k++) {
-                    $pdf->addText($col1,$row-=12,$fontSize,$Eigentuemerliste[$i]->Name[$k]);
-                  }
-                } # ende Schleife Eigentümer des Grundbuchblattes
-              } # ende Schleife Bestand
-              if ($flst->Grundbuecher[$g]['zusatz_eigentuemer']!='') {
-                $zusatzeigentuemertext=$flst->Grundbuecher[$g]['zusatz_eigentuemer'];
-                while(strlen($zusatzeigentuemertext) > 60){
-                  $positionkomma=strrpos(substr($zusatzeigentuemertext,0,60),",");
-                  $positionleerzeichen=strrpos(substr($zusatzeigentuemertext,0,60)," ");
-                  if($positionkomma>$positionleerzeichen){
-                    $positiontrenner=$positionkomma;
-                  }
-                  else{
-                    $positiontrenner=$positionleerzeichen;
-                  }
-                  if($row<120) {
-                    # Seitenumbruch
-                    $seite++;
-                    # aktuelle Seite abschließen
-                    $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
-                    # neue Seite beginnen
-                    $pageid=$pdf->newPage();
-                    $pagecount[$f] = $pagecount[$f] + 1;
-                    if ($wasserzeichen) {
-                      $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
-                    }
-                    $row=825; # 812 -> 825 2007-04-02 Schmidt;
-                    $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
-                  }
-                  $pdf->addText($col1,$row-=12,$fontSize,substr($zusatzeigentuemertext,0,$positiontrenner));
-                  $zusatzeigentuemertext=substr($zusatzeigentuemertext,$positiontrenner+1);
-                }
-                $pdf->addText($col1,$row-=12,$fontSize,$zusatzeigentuemertext);
-              }
-            } # ende Schleife Grundbuecher
-          } # ende Ausgabe Formular 40
-          break;
-          case 35 : {
-            for ($g=0;$g<count($flst->Grundbuecher);$g++) {
-              # Bestand
-              $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],1);
-              for ($b=0;$b<count($flst->Buchungen);$b++) {
-                # Seitenumbruch wenn erforderlich
-                if($row<120) {
-                  # Seitenumbruch
-                  $seite++;
-                  # aktuelle Seite abschließen
-                  $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
-                  # neue Seite beginnen
-                  $pageid=$pdf->newPage();
-                  $pagecount[$f] = $pagecount[$f] + 1;
-                  if ($wasserzeichen) {
-                    $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
-                  }
-                  $row=825; # 812 -> 825 2007-04-02 Schmidt;
-                  $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
-                }
-
-                # Ausgabe der Zeile für die Bestandbezeichnung
-                $pdf->addText($col0,$row-=24,$fontSize,'Bestand');
-                $BestandStr =$flst->Buchungen[$b]['bezirk'].'-'.intval($flst->Buchungen[$b]['blatt']);
-                $BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
-                $BestandStr.=' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
-                $BestandStr.=' ('.$flst->Buchungen[$b]['buchungsart'].')';
-                $BestandStr.=' '.$flst->Buchungen[$b]['bezeichnung'];
-                $pdf->addText($col2_1,$row,$fontSize,$BestandStr);
-                $pdf->addText($col0,$row-=12,$fontSize,str_repeat("=",7));
-
-                # Abfragen und Ausgeben der Eigentümer zum Grundbuchblatt
-                $Eigentuemerliste=$flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
-                $anzEigentuemer=count($Eigentuemerliste);
-                for ($i=0;$i<$anzEigentuemer;$i++) {
-                  if($row<120) {
-                    # Seitenumbruch
-                    $seite++;
-                    # aktuelle Seite abschließen
-                    $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
-                    # neue Seite beginnen
-                    $pageid=$pdf->newPage();
-                    $pagecount[$f] = $pagecount[$f] + 1;
-                    if ($wasserzeichen) {
-                      $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
-                    }
-                    $row=825; # 812 -> 825 2007-04-02 Schmidt;
-                    $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
-                  }
-                  else {
-                    $row-=12;
-                  }
-                  if ($Eigentuemerliste[$i]->Nr!=0) {
-                    $pdf->addText($col0,$row-=12,$fontSize,$Eigentuemerliste[$i]->Nr);
-                    if($Eigentuemerliste[$i]->Anteil != '')$pdf->addText($col3,$row,$fontSize,'zu '.$Eigentuemerliste[$i]->Anteil);
-                  }
-                  else {
-                    $row-=12;
-                  }
-                  $anzNamenszeilen=count($Eigentuemerliste[$i]->Name);
-                  # --- Kommas rausfiltern ---
-                  $Eigentuemerliste[$i]->Name_bearb = $Eigentuemerliste[$i]->Name;
-                  $Eigentuemerliste[$i]->Name_bearb[0] = str_replace(',,,', '', $Eigentuemerliste[$i]->Name_bearb[0]);
-                  $Eigentuemerliste[$i]->Name_bearb[0] = str_replace(',,', ',', $Eigentuemerliste[$i]->Name_bearb[0]);
-                  if(substr($Eigentuemerliste[$i]->Name_bearb[0], strlen($Eigentuemerliste[$i]->Name_bearb[0])-1) == ','){
-                    $Eigentuemerliste[$i]->Name_bearb[0] = substr($Eigentuemerliste[$i]->Name_bearb[0], 0, strlen($Eigentuemerliste[$i]->Name_bearb[0])-1);
-                  }
-                  # ---------------------------
-                  for ($k=0;$k<$anzNamenszeilen;$k++) {
-                    $pdf->addText($col1,$row-=12,$fontSize,$Eigentuemerliste[$i]->Name_bearb[$k]);
-                  }
-                } # ende Schleife Eigentümer des Grundbuchblattes
-              } # ende Schleife Bestand
-                            
-              if ($flst->Grundbuecher[$g]['zusatz_eigentuemer']!='') {
-                $zusatzeigentuemertext=$flst->Grundbuecher[$g]['zusatz_eigentuemer'];
-                while(strlen($zusatzeigentuemertext) > 60){
-                  $positionkomma=strrpos(substr($zusatzeigentuemertext,0,60),",");
-                  $positionleerzeichen=strrpos(substr($zusatzeigentuemertext,0,60)," ");
-                  if($positionkomma>$positionleerzeichen){
-                    $positiontrenner=$positionkomma;
-                  }
-                  else{
-                    $positiontrenner=$positionleerzeichen;
-                  }
-                  if($row<120) {
-                    # Seitenumbruch
-                    $seite++;
-                    # aktuelle Seite abschließen
-                    $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
-                    # neue Seite beginnen
-                    $pageid=$pdf->newPage();
-                    $pagecount[$f] = $pagecount[$f] + 1;
-                    if ($wasserzeichen) {
-                      $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
-                    }
-                    $row=825; # 812 -> 825 2007-04-02 Schmidt;
-                    $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
-                  }
-                  $pdf->addText($col1,$row-=12,$fontSize,substr($zusatzeigentuemertext,0,$positiontrenner));
-                  $zusatzeigentuemertext=substr($zusatzeigentuemertext,$positiontrenner+1);
-                }
-                $pdf->addText($col1,$row-=12,$fontSize,$zusatzeigentuemertext);
-              }
-              
-            } # ende Schleife Grundbuecher
-          } # ende Ausgabe Formular 35
-          break;
-          case 30 : {
-            # Bestand
-            $pdf->addText($col0,$row-=24,$fontSize,'Bestand');
-            $pdf->addText($col0,$row-12,$fontSize,str_repeat("=",7));
-
-            for ($b=0;$b<count($flst->Buchungen);$b++) {
-              # Seitenumbruch wenn erforderlich
-              if($row<60) {
-                # Seitenumbruch
-                $seite++;
-                # aktuelle Seite abschließen
-                $pdf->addText($col9_1,$row-=24,$fontSize,'Forts. Seite '.$seite);
-                # neue Seite beginnen
-                $pageid=$pdf->newPage();
-                $pagecount[$f] = $pagecount[$f] + 1;
-                if ($wasserzeichen) {
-                  $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
-                }
-                $row=825; # 812 -> 825 2007-04-02 Schmidt
-                $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
-                $pdf->addText($col0,$row-=24,$fontSize,'Bestand');
-                $pdf->addText($col0,$row-12,$fontSize,str_repeat("=",7));
-              }
-
-              # Ausgabe der Zeile für die Bestandbezeichnung
-              $BestandStr =$flst->Buchungen[$b]['bezirk'].'-'.intval($flst->Buchungen[$b]['blatt']);
-              $BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
-              $BestandStr.=' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
-              $BestandStr.=' ('.$flst->Buchungen[$b]['buchungsart'].')';
-              $BestandStr.=' '.$flst->Buchungen[$b]['bezeichnung'];
-              $pdf->addText($col2_1,$row-=12,$fontSize,$BestandStr);
-
-            } # ende Schleife Bestand
-          } # ende Ausgabe Bestandsnachweis Formular 30
-          break;
-        } # end of switch for Bestandsnachweis
+					
+				if($flst->Status != 'H'){
+	        # Amtsgericht, Grundbuchbezirk
+	        $pdf->addText($col0,$row-=24,$fontSize,'Amtsgericht');
+	        $pdf->addText($col2_1,$row,$fontSize,str_pad($flst->Amtsgericht['schluessel'],11," "));
+	        $pdf->addText($col4,$row,$fontSize,$flst->Amtsgericht['name']);
+	        $pdf->addText($col0,$row-=12,$fontSize,'Grundbuchbezirk');
+	        $pdf->addText($col2_1,$row,$fontSize,str_pad($flst->Grundbuchbezirk['schluessel'],11," "));
+	        $pdf->addText($col4,$row,$fontSize,$flst->Grundbuchbezirk['name']);
+				
+	        ################################################################################
+	        # Bestandsnachweis #
+	        ####################
+	        switch ($formnummer) {
+	          case 40 : {
+	            for ($g=0;$g<count($flst->Grundbuecher);$g++) {
+	              # Bestand
+	              $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],1);
+	              for ($b=0;$b<count($flst->Buchungen);$b++) {
+	                # Seitenumbruch wenn erforderlich
+	                if($row<120) {
+	                  # Seitenumbruch
+	                  $seite++;
+	                  # aktuelle Seite abschließen
+	                  $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
+	                  # neue Seite beginnen
+	                  $pageid=$pdf->newPage();
+	                  $pagecount[$f] = $pagecount[$f] + 1;
+	                  if ($wasserzeichen) {
+	                    $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
+	                  }
+	                  $row=825; # 812 -> 825 2007-04-02 Schmidt
+	                  $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+	                }
+	
+	                # Ausgabe der Zeile für die Bestandbezeichnung
+	                $pdf->addText($col0,$row-=12,$fontSize,'Bestand');
+	                $BestandStr =$flst->Buchungen[$b]['bezirk'].'-'.intval($flst->Buchungen[$b]['blatt']);
+	                $BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
+	                $BestandStr.=' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
+	                $BestandStr.=' ('.$flst->Buchungen[$b]['buchungsart'].')';
+	                $BestandStr.=' '.$flst->Buchungen[$b]['bezeichnung'];
+	                $pdf->addText($col2_1,$row,$fontSize,$BestandStr);
+	                $pdf->addText($col0,$row-=12,$fontSize,str_repeat("=",7));
+	
+	                # Abfragen und Ausgeben der Eigentümer zum Grundbuchblatt
+	                $Eigentuemerliste=$flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
+	                $anzEigentuemer=count($Eigentuemerliste);
+	                for ($i=0;$i<$anzEigentuemer;$i++) {
+	                  if($row<120) {
+	                    # Seitenumbruch
+	                    $seite++;
+	                    # aktuelle Seite abschließen
+	                    $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
+	                    # neue Seite beginnen
+	                    $pageid=$pdf->newPage();
+	                    $pagecount[$f] = $pagecount[$f] + 1;
+	                    if ($wasserzeichen) {
+	                      $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
+	                    }
+	                    $row=825; # 812 -> 825 2007-04-02 Schmidt;
+	                    $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+	                  }
+	                  else {
+	                    $row-=12;
+	                  }
+	                  if ($Eigentuemerliste[$i]->Nr!=0) {
+	                    $pdf->addText($col0,$row-=12,$fontSize,$Eigentuemerliste[$i]->Nr);
+	                    if($Eigentuemerliste[$i]->Anteil != '')$pdf->addText($col3,$row,$fontSize,'zu '.$Eigentuemerliste[$i]->Anteil);
+	                  }
+	                  else {
+	                    $row-=12;
+	                  }
+	                  $anzNamenszeilen=count($Eigentuemerliste[$i]->Name);
+	                  for ($k=0;$k<$anzNamenszeilen;$k++) {
+	                    $pdf->addText($col1,$row-=12,$fontSize,$Eigentuemerliste[$i]->Name[$k]);
+	                  }
+	                } # ende Schleife Eigentümer des Grundbuchblattes
+	              } # ende Schleife Bestand
+	              if ($flst->Grundbuecher[$g]['zusatz_eigentuemer']!='') {
+	                $zusatzeigentuemertext=$flst->Grundbuecher[$g]['zusatz_eigentuemer'];
+	                while(strlen($zusatzeigentuemertext) > 60){
+	                  $positionkomma=strrpos(substr($zusatzeigentuemertext,0,60),",");
+	                  $positionleerzeichen=strrpos(substr($zusatzeigentuemertext,0,60)," ");
+	                  if($positionkomma>$positionleerzeichen){
+	                    $positiontrenner=$positionkomma;
+	                  }
+	                  else{
+	                    $positiontrenner=$positionleerzeichen;
+	                  }
+	                  if($row<120) {
+	                    # Seitenumbruch
+	                    $seite++;
+	                    # aktuelle Seite abschließen
+	                    $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
+	                    # neue Seite beginnen
+	                    $pageid=$pdf->newPage();
+	                    $pagecount[$f] = $pagecount[$f] + 1;
+	                    if ($wasserzeichen) {
+	                      $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
+	                    }
+	                    $row=825; # 812 -> 825 2007-04-02 Schmidt;
+	                    $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+	                  }
+	                  $pdf->addText($col1,$row-=12,$fontSize,substr($zusatzeigentuemertext,0,$positiontrenner));
+	                  $zusatzeigentuemertext=substr($zusatzeigentuemertext,$positiontrenner+1);
+	                }
+	                $pdf->addText($col1,$row-=12,$fontSize,$zusatzeigentuemertext);
+	              }
+	            } # ende Schleife Grundbuecher
+	          } # ende Ausgabe Formular 40
+	          break;
+	          case 35 : {
+	            for ($g=0;$g<count($flst->Grundbuecher);$g++) {
+	              # Bestand
+	              $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],1);
+	              for ($b=0;$b<count($flst->Buchungen);$b++) {
+	                # Seitenumbruch wenn erforderlich
+	                if($row<120) {
+	                  # Seitenumbruch
+	                  $seite++;
+	                  # aktuelle Seite abschließen
+	                  $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
+	                  # neue Seite beginnen
+	                  $pageid=$pdf->newPage();
+	                  $pagecount[$f] = $pagecount[$f] + 1;
+	                  if ($wasserzeichen) {
+	                    $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
+	                  }
+	                  $row=825; # 812 -> 825 2007-04-02 Schmidt;
+	                  $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+	                }
+	
+	                # Ausgabe der Zeile für die Bestandbezeichnung
+	                $pdf->addText($col0,$row-=24,$fontSize,'Bestand');
+	                $BestandStr =$flst->Buchungen[$b]['bezirk'].'-'.intval($flst->Buchungen[$b]['blatt']);
+	                $BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
+	                $BestandStr.=' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
+	                $BestandStr.=' ('.$flst->Buchungen[$b]['buchungsart'].')';
+	                $BestandStr.=' '.$flst->Buchungen[$b]['bezeichnung'];
+	                $pdf->addText($col2_1,$row,$fontSize,$BestandStr);
+	                $pdf->addText($col0,$row-=12,$fontSize,str_repeat("=",7));
+	
+	                # Abfragen und Ausgeben der Eigentümer zum Grundbuchblatt
+	                $Eigentuemerliste=$flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
+	                $anzEigentuemer=count($Eigentuemerliste);
+	                for ($i=0;$i<$anzEigentuemer;$i++) {
+	                  if($row<120) {
+	                    # Seitenumbruch
+	                    $seite++;
+	                    # aktuelle Seite abschließen
+	                    $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
+	                    # neue Seite beginnen
+	                    $pageid=$pdf->newPage();
+	                    $pagecount[$f] = $pagecount[$f] + 1;
+	                    if ($wasserzeichen) {
+	                      $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
+	                    }
+	                    $row=825; # 812 -> 825 2007-04-02 Schmidt;
+	                    $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+	                  }
+	                  else {
+	                    $row-=12;
+	                  }
+	                  if ($Eigentuemerliste[$i]->Nr!=0) {
+	                    $pdf->addText($col0,$row-=12,$fontSize,$Eigentuemerliste[$i]->Nr);
+	                    if($Eigentuemerliste[$i]->Anteil != '')$pdf->addText($col3,$row,$fontSize,'zu '.$Eigentuemerliste[$i]->Anteil);
+	                  }
+	                  else {
+	                    $row-=12;
+	                  }
+	                  $anzNamenszeilen=count($Eigentuemerliste[$i]->Name);
+	                  # --- Kommas rausfiltern ---
+	                  $Eigentuemerliste[$i]->Name_bearb = $Eigentuemerliste[$i]->Name;
+	                  $Eigentuemerliste[$i]->Name_bearb[0] = str_replace(',,,', '', $Eigentuemerliste[$i]->Name_bearb[0]);
+	                  $Eigentuemerliste[$i]->Name_bearb[0] = str_replace(',,', ',', $Eigentuemerliste[$i]->Name_bearb[0]);
+	                  if(substr($Eigentuemerliste[$i]->Name_bearb[0], strlen($Eigentuemerliste[$i]->Name_bearb[0])-1) == ','){
+	                    $Eigentuemerliste[$i]->Name_bearb[0] = substr($Eigentuemerliste[$i]->Name_bearb[0], 0, strlen($Eigentuemerliste[$i]->Name_bearb[0])-1);
+	                  }
+	                  # ---------------------------
+	                  for ($k=0;$k<$anzNamenszeilen;$k++) {
+	                    $pdf->addText($col1,$row-=12,$fontSize,$Eigentuemerliste[$i]->Name_bearb[$k]);
+	                  }
+	                } # ende Schleife Eigentümer des Grundbuchblattes
+	              } # ende Schleife Bestand
+	                            
+	              if ($flst->Grundbuecher[$g]['zusatz_eigentuemer']!='') {
+	                $zusatzeigentuemertext=$flst->Grundbuecher[$g]['zusatz_eigentuemer'];
+	                while(strlen($zusatzeigentuemertext) > 60){
+	                  $positionkomma=strrpos(substr($zusatzeigentuemertext,0,60),",");
+	                  $positionleerzeichen=strrpos(substr($zusatzeigentuemertext,0,60)," ");
+	                  if($positionkomma>$positionleerzeichen){
+	                    $positiontrenner=$positionkomma;
+	                  }
+	                  else{
+	                    $positiontrenner=$positionleerzeichen;
+	                  }
+	                  if($row<120) {
+	                    # Seitenumbruch
+	                    $seite++;
+	                    # aktuelle Seite abschließen
+	                    $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
+	                    # neue Seite beginnen
+	                    $pageid=$pdf->newPage();
+	                    $pagecount[$f] = $pagecount[$f] + 1;
+	                    if ($wasserzeichen) {
+	                      $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
+	                    }
+	                    $row=825; # 812 -> 825 2007-04-02 Schmidt;
+	                    $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+	                  }
+	                  $pdf->addText($col1,$row-=12,$fontSize,substr($zusatzeigentuemertext,0,$positiontrenner));
+	                  $zusatzeigentuemertext=substr($zusatzeigentuemertext,$positiontrenner+1);
+	                }
+	                $pdf->addText($col1,$row-=12,$fontSize,$zusatzeigentuemertext);
+	              }
+	              
+	            } # ende Schleife Grundbuecher
+	          } # ende Ausgabe Formular 35
+	          break;
+	          case 30 : {
+	            # Bestand
+	            $pdf->addText($col0,$row-=24,$fontSize,'Bestand');
+	            $pdf->addText($col0,$row-12,$fontSize,str_repeat("=",7));
+	
+	            for ($b=0;$b<count($flst->Buchungen);$b++) {
+	              # Seitenumbruch wenn erforderlich
+	              if($row<60) {
+	                # Seitenumbruch
+	                $seite++;
+	                # aktuelle Seite abschließen
+	                $pdf->addText($col9_1,$row-=24,$fontSize,'Forts. Seite '.$seite);
+	                # neue Seite beginnen
+	                $pageid=$pdf->newPage();
+	                $pagecount[$f] = $pagecount[$f] + 1;
+	                if ($wasserzeichen) {
+	                  $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
+	                }
+	                $row=825; # 812 -> 825 2007-04-02 Schmidt
+	                $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+	                $pdf->addText($col0,$row-=24,$fontSize,'Bestand');
+	                $pdf->addText($col0,$row-12,$fontSize,str_repeat("=",7));
+	              }
+	
+	              # Ausgabe der Zeile für die Bestandbezeichnung
+	              $BestandStr =$flst->Buchungen[$b]['bezirk'].'-'.intval($flst->Buchungen[$b]['blatt']);
+	              $BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
+	              $BestandStr.=' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
+	              $BestandStr.=' ('.$flst->Buchungen[$b]['buchungsart'].')';
+	              $BestandStr.=' '.$flst->Buchungen[$b]['bezeichnung'];
+	              $pdf->addText($col2_1,$row-=12,$fontSize,$BestandStr);
+	
+	            } # ende Schleife Bestand
+	          } # ende Ausgabe Bestandsnachweis Formular 30
+	          break;
+	        } # end of switch for Bestandsnachweis
+				}
         # neue Seite beginnen
         if($f < count($FlurstKennz)-1){
           $pageid=$pdf->newPage();
