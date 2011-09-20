@@ -2242,7 +2242,7 @@ class pgdatabase extends pgdatabase_core {
   function getKlassifizierung($FlurstKennz) {
     $sql ="SELECT k.tabkenn,fk.flaeche,fk.angaben,k.klass,k.bezeichnung,k.abkuerzung";
     $sql.=" FROM alb_f_klassifizierungen AS fk,alb_v_klassifizierungen AS k";
-    $sql.=" WHERE fk.klass=k.klass AND fk.flurstkennz='".$FlurstKennz."' ORDER BY tabkenn";
+    $sql.=" WHERE fk.klass=k.klass AND fk.tabkenn = k.tabkenn AND fk.flurstkennz='".$FlurstKennz."' ORDER BY tabkenn";
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
     if (pg_num_rows($ret[1])>0) {
