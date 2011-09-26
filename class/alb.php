@@ -724,9 +724,8 @@ class ALB {
         if($formnummer == '30' || $formnummer == '35'){
           $pdf->addText($col0,$row-=24,$fontSize,'GMKG   FLR FLURST-NR    P');
           if($flst->Status == 'H'){
-          	$row = $row + 24;
           	$pdf->addText($col3,$row,$fontSize,'Status');
-          	$pdf->addText($col6,$row-=24,$fontSize,'(H) Historisches Flurstück');
+          	$pdf->addText($col6,$row,$fontSize,'(H) Historisches Flurstück');
           }
           if ($flst->Nenner!=0) { $nennerausgabe="/".$flst->Nenner; }
           $pdf->addText($col0,$row-=12,$fontSize,$flst->GemkgSchl." ".str_pad($flst->FlurNr,3," ",STR_PAD_LEFT)." ".str_pad($flst->Zaehler,5," ",STR_PAD_LEFT).$nennerausgabe);
