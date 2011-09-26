@@ -107,7 +107,7 @@ class uko{
       header('Expires: 0');
       header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
       header('Pragma: public');
-      readfile(TEMPPATH_REL.$folder.'.zip');
+      readfile(IMAGEPATH.$folder.'.zip');
     }
     else{
     	ob_end_clean();
@@ -116,7 +116,7 @@ class uko{
       header('Expires: 0');
       header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
       header('Pragma: public');
-   		readfile(TEMPPATH_REL.$folder.'/'.$filenames[0]);
+   		readfile(IMAGEPATH.$folder.'/'.$filenames[0]);
     } 
   }
  
