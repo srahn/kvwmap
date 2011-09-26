@@ -39,16 +39,18 @@ function Bestaetigung(link,text) {
 		      <?
 	      }
 	      ?>
+	      <? if($this->unassigned_users['ID']){ ?>
 	      <tr>
 	    		<td colspan="3" bgcolor="<?php echo BG_DEFAULT ?>" style="border:1px solid <?php echo BG_DEFAULT ?>"><b>Nicht zugeordnete Nutzer</b></td>
 	    	</tr>
-	   <? for($i = 0; $i < count($this->unassigned_users['ID']); $i++){ ?>
+	   <? }
+	   		for($i = 0; $i < count($this->unassigned_users['ID']); $i++){ ?>
 	      <tr>
 	      	<? if($i == 0){ ?><td align="center" rowspan="<? echo count($this->unassigned_users['ID']); ?>" style="border-right:1px solid <?php echo BG_DEFAULT ?>" width="200"><? echo count($this->unassigned_users['ID']).' Nutzer'; ?></td><? } ?>
 	      	<td style="border-right:1px solid <?php echo BG_DEFAULT ?>; border-bottom:1px solid <?php echo BG_DEFAULT ?>"><? echo $this->unassigned_users['Bezeichnung'][$i]; ?></td
 		      <td style="border-bottom:1px solid <?php echo BG_DEFAULT ?>"><? echo $this->unassigned_users['email'][$i]; ?>&nbsp;</td>
 	      </tr>
-	   <? }  ?>
+	   <? } if($this->user_count){ ?>
 	   		<tr>
 	    		<td colspan="3" bgcolor="<?php echo BG_DEFAULT ?>" style="border:1px solid <?php echo BG_DEFAULT ?>"><b>Nutzer insgesamt</b></td>
 	    	</tr>
@@ -57,6 +59,7 @@ function Bestaetigung(link,text) {
 	      	<td style="border-right:1px solid <?php echo BG_DEFAULT ?>; border-bottom:1px solid <?php echo BG_DEFAULT ?>">&nbsp;</td
 		      <td style="border-bottom:1px solid <?php echo BG_DEFAULT ?>">&nbsp;</td>
 	      </tr>
+	      <? } ?>
 	    </table>
     </td>
   </tr>

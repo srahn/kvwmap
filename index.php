@@ -1476,6 +1476,10 @@ switch($GUI->go) {
 	case 'BenutzerStellen_Anzeigen' : {
     $GUI->BenutzerNachStellenAnzeigen();
   } break;
+  
+  case 'BenutzerderStelleAnzeigen' : {
+    $GUI->BenutzerderStelleAnzeigen();
+  } break;
 
   case 'Benutzerdaten_Anzeigen' : {
     $GUI->BenutzerdatenAnzeigen();
