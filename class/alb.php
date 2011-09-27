@@ -75,7 +75,8 @@ class ALB {
     if($formvars['ausfstelle']){ $csv .= 'ausführende Stelle;';}
     if($formvars['verfahren']){ $csv .= 'Verfahren;';}
     if($formvars['nutzung']){ $csv .= 'Nutzung;';}
-    $csv .= 'Bestand;';
+    if($formvars['bestandsnr']){ $csv .= 'Bestand;';}
+    $csv .= 'Namensnummer;'; 
     $csv .= 'Eigentümer;';
     
     $csv .= chr(10);
@@ -142,10 +143,17 @@ class ALB {
 				        }
 				        $csv .= ';';
 				      }
-				      if($formvars['klassifizierung']){ $csv .= $flst->Klassifizierung['tabkenn'].' '.$flst->Klassifizierung['flaeche'].' m2 '.$flst->Klassifizierung['tabkenn'].'-'.$flst->Klassifizierung['klass'].' '.$flst->Klassifizierung['bezeichnung'].';';}
+				      if($formvars['klassifizierung']){
+				        for($j = 0; $j < count($flst->Klassifizierung)-1; $j++){
+				        	if($j > 0)$csv .= ' | ';
+				          $csv .= $flst->Klassifizierung[$j]['flaeche'].'m² '.$flst->Klassifizierung[$j]['tabkenn'].'-'.$flst->Klassifizierung[$j]['klass'].' '.$flst->Klassifizierung[$j]['bezeichnung'];
+				        }
+				        $csv .= ';';
+				    	}      
 				      if($formvars['freitext']) {
 				        for($j = 0; $j < count($flst->FreiText); $j++){
-				          $csv .= $flst->FreiText[$j]['text'].' ';
+				        	if($j > 0)$csv .= ' | ';
+				          $csv .= $flst->FreiText[$j]['text'];
 				        }
 				        $csv .= ';';
 				      }
@@ -158,24 +166,25 @@ class ALB {
 				      }
 				      if ($formvars['ausfstelle']){ 
 				      	for($v = 0; $v < count($flst->Verfahren); $v++){
-				      		$csv .= $flst->Verfahren[$v]['ausfstelleid'].' '.$flst->Verfahren[$v]['ausfstellename'].' | ';
+				      		if($v > 0)$csv .= ' | ';
+				      		$csv .= $flst->Verfahren[$v]['ausfstelleid'].' '.$flst->Verfahren[$v]['ausfstellename'];
 				      	}
 				      	$csv .= ';';
 				      }
 				      if ($formvars['verfahren']){
 				      	for($v = 0; $v < count($flst->Verfahren); $v++){
-				      		$csv .= $flst->Verfahren[$v]['verfnr'].' '.$flst->Verfahren[$v]['verfbemid'].' '.$flst->Verfahren[$v]['verfbemerkung'].' | ';
+				      		if($v > 0)$csv .= ' | ';
+				      		$csv .= $flst->Verfahren[$v]['verfnr'].' '.$flst->Verfahren[$v]['verfbemerkung'];
 				      	}
 				      	$csv .= ';';
 				      }
-				      
 				      if ($formvars['nutzung']){
 				        $anzNutzung=count($flst->Nutzung);
 				        for ($j = 0; $j < $anzNutzung; $j++){
-				          $csv .= $flst->Nutzung[$j][flaeche].' m2 ';
-				          $csv .= $flst->Nutzung[$j][nutzungskennz].' ';
-				          $csv .= $flst->Nutzung[$j][bezeichnung].' ';
-				          $csv .= $flst->Nutzung[$j][kurzbezeichnung].'  ';
+				        	if($j > 0)$csv .= ' | ';
+				          $csv .= $flst->Nutzung[$j][flaeche].'m² ';
+          				$csv .= $flst->Nutzung[$j][nutzungskennz].' ';
+          				$csv .= $flst->Nutzung[$j][abkuerzung].'-'.$flst->Nutzung[$j][bezeichnung].';';
 				        }
 				        $csv .= ';';
 				      }
@@ -183,12 +192,13 @@ class ALB {
 				        for($g = 0; $g < count($flst->Grundbuecher); $g++){
 				          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
 				          for($b = 0; $b < count($flst->Buchungen); $b++){
+				          	if($b > 0)$csv .= ' | ';
 				            $BestandStr =$flst->Buchungen[$b]['bezirk'].'-'.intval($flst->Buchungen[$b]['blatt']);
 				            $BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
 				            $BestandStr.=' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
 				            $BestandStr.=' ('.$flst->Buchungen[$b]['buchungsart'].')';
 				            $BestandStr.=' '.$flst->Buchungen[$b]['bezeichnung'];
-				            $csv .= $BestandStr.' | ';
+				            $csv .= $BestandStr;
 				          }
 				        }
 				        $csv .= ';';
@@ -312,10 +322,17 @@ class ALB {
 	        }
 	        $csv .= ';';
 	      }
-	      if($formvars['klassifizierung']){ $csv .= $flst->Klassifizierung['tabkenn'].' '.$flst->Klassifizierung['flaeche'].' m2 '.$flst->Klassifizierung['tabkenn'].'-'.$flst->Klassifizierung['klass'].' '.$flst->Klassifizierung['bezeichnung'].';';}
+	      if($formvars['klassifizierung']){
+	        for($j = 0; $j < count($flst->Klassifizierung)-1; $j++){
+	        	if($j > 0)$csv .= ' | ';
+	          $csv .= $flst->Klassifizierung[$j]['flaeche'].'m² '.$flst->Klassifizierung[$j]['tabkenn'].'-'.$flst->Klassifizierung[$j]['klass'].' '.$flst->Klassifizierung[$j]['bezeichnung'];
+	        }
+	        $csv .= ';';
+	    	}      
 	      if($formvars['freitext']) {
 	        for($j = 0; $j < count($flst->FreiText); $j++){
-	          $csv .= $flst->FreiText[$j]['text'].' ';
+	        	if($j > 0)$csv .= ' | ';
+	          $csv .= $flst->FreiText[$j]['text'];
 	        }
 	        $csv .= ';';
 	      }
@@ -328,56 +345,60 @@ class ALB {
 	      }
 	      if ($formvars['ausfstelle']){ 
 	      	for($v = 0; $v < count($flst->Verfahren); $v++){
-	      		$csv .= $flst->Verfahren[$v]['ausfstelleid'].' '.$flst->Verfahren[$v]['ausfstellename'].' | ';
+	      		if($v > 0)$csv .= ' | ';
+	      		$csv .= $flst->Verfahren[$v]['ausfstelleid'].' '.$flst->Verfahren[$v]['ausfstellename'];
 	      	}
 	      	$csv .= ';';
 	      }
 	      if ($formvars['verfahren']){
 	      	for($v = 0; $v < count($flst->Verfahren); $v++){
-	      		$csv .= $flst->Verfahren[$v]['verfnr'].' '.$flst->Verfahren[$v]['verfbemid'].' '.$flst->Verfahren[$v]['verfbemerkung'].' | ';
+	      		if($v > 0)$csv .= ' | ';
+	      		$csv .= $flst->Verfahren[$v]['verfnr'].' '.$flst->Verfahren[$v]['verfbemerkung'];
 	      	}
 	      	$csv .= ';';
 	      }
-	      
-	      if($formvars['bestandsnr']){
+		      
+		      if($formvars['bestandsnr']){
 	        for($g = 0; $g < count($flst->Grundbuecher); $g++){
 	          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
 	          for($b = 0; $b < count($flst->Buchungen); $b++){
+	          	if($b > 0)$csv .= ' | ';
 	            $BestandStr =$flst->Buchungen[$b]['bezirk'].'-'.intval($flst->Buchungen[$b]['blatt']);
 	            $BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
 	            $BestandStr.=' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
 	            $BestandStr.=' ('.$flst->Buchungen[$b]['buchungsart'].')';
 	            $BestandStr.=' '.$flst->Buchungen[$b]['bezeichnung'];
-	            $csv .= $BestandStr.' | ';
+	            $csv .= $BestandStr;
 	          }
 	        }
 	        $csv .= ';';
 	      }
 	      
   			if($formvars['eigentuemer']){
-	        for($g = 0; $g < count($flst->Grundbuecher); $g++){
-	          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
-	          for($b = 0; $b < count($flst->Buchungen); $b++){
-	            $Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
-	            $anzEigentuemer=count($Eigentuemerliste);
-	            for($e=0;$e<$anzEigentuemer;$e++){
-	              $csv .= $Eigentuemerliste[$e]->Nr.' ';
-	              $anzNamenszeilen = count($Eigentuemerliste[$e]->Name);
-	              for($na=0;$na<$anzNamenszeilen;$na++) {
-	                $csv .= $Eigentuemerliste[$e]->Name[$na].' ';
-	              }
-	            }
-	          }
-	        }
-	        $csv .= ';';
-	      }
-
+        for($g = 0; $g < count($flst->Grundbuecher); $g++){
+          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
+          for($b = 0; $b < count($flst->Buchungen); $b++){
+            $Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
+            $anzEigentuemer=count($Eigentuemerliste);
+            for($e=0;$e<$anzEigentuemer;$e++){
+            	if($e > 0)$csv .= ' | ';
+              $csv .= $Eigentuemerliste[$e]->Nr.' ';
+              $anzNamenszeilen = count($Eigentuemerliste[$e]->Name);
+              for($n=0;$n<$anzNamenszeilen;$n++) {
+                $csv .= $Eigentuemerliste[$e]->Name[$n].' ';
+              }
+            }
+          }
+        }
+        $csv .= ';';
+      }
 
         
-        $csv .= $flst->Nutzung[$n][flaeche].' m2 ;';
-        $csv .= $flst->Nutzung[$n][nutzungskennz].' ;';
-        $csv .= $flst->Nutzung[$n][bezeichnung].' ';
-        $csv .= $flst->Nutzung[$n][kurzbezeichnung].'  ';
+        $csv .= $flst->Nutzung[$n][flaeche].'m²;';
+        $csv .= $flst->Nutzung[$n][nutzungskennz].';';
+        $csv .= $flst->Nutzung[$n][abkuerzung].'-'.$flst->Nutzung[$n][bezeichnung].';';
+             
+       
       	$csv .= ';';
 
 
@@ -490,10 +511,17 @@ class ALB {
         }
         $csv .= ';';
       }
-      if($privileg['klassifizierung']){ $csv .= $flst->Klassifizierung['tabkenn'].' '.$flst->Klassifizierung['flaeche'].' m2 '.$flst->Klassifizierung['tabkenn'].'-'.$flst->Klassifizierung['klass'].' '.$flst->Klassifizierung['bezeichnung'].';';}
+      if($privileg['klassifizierung']){
+        for($j = 0; $j < count($flst->Klassifizierung)-1; $j++){
+        	if($j > 0)$csv .= ' | ';
+          $csv .= $flst->Klassifizierung[$j]['flaeche'].'m² '.$flst->Klassifizierung[$j]['tabkenn'].'-'.$flst->Klassifizierung[$j]['klass'].' '.$flst->Klassifizierung[$j]['bezeichnung'];
+        }
+        $csv .= ';';
+    	}      
       if($privileg['freitext']) {
         for($j = 0; $j < count($flst->FreiText); $j++){
-          $csv .= $flst->FreiText[$j]['text'].' ';
+        	if($j > 0)$csv .= ' | ';
+          $csv .= $flst->FreiText[$j]['text'];
         }
         $csv .= ';';
       }
@@ -505,24 +533,27 @@ class ALB {
         $csv .= ';';
       }
       if ($privileg['ausfstelle']){ 
-	      	for($v = 0; $v < count($flst->Verfahren); $v++){
-	      		$csv .= $flst->Verfahren[$v]['ausfstelleid'].' '.$flst->Verfahren[$v]['ausfstellename'].' | ';
-	      	}
-	      	$csv .= ';';
-	      }
-	      if ($privileg['verfahren']){
-	      	for($v = 0; $v < count($flst->Verfahren); $v++){
-	      		$csv .= $flst->Verfahren[$v]['verfnr'].' '.$flst->Verfahren[$v]['verfbemid'].' '.$flst->Verfahren[$v]['verfbemerkung'].' | ';
-	      	}
-	      	$csv .= ';';
-	      }
+      	for($v = 0; $v < count($flst->Verfahren); $v++){
+      		if($v > 0)$csv .= ' | ';
+      		$csv .= $flst->Verfahren[$v]['ausfstelleid'].' '.$flst->Verfahren[$v]['ausfstellename'];
+      	}
+      	$csv .= ';';
+      }
+      if ($privileg['verfahren']){
+      	for($v = 0; $v < count($flst->Verfahren); $v++){
+      		if($v > 0)$csv .= ' | ';
+      		$csv .= $flst->Verfahren[$v]['verfnr'].' '.$flst->Verfahren[$v]['verfbemerkung'];
+      	}
+      	$csv .= ';';
+      }
       if ($privileg['nutzung']){
         $anzNutzung=count($flst->Nutzung);
         for ($j = 0; $j < $anzNutzung; $j++){
+        	if($j > 0)$csv .= ' | ';
           $csv .= $flst->Nutzung[$j][flaeche].' m2 ';
           $csv .= $flst->Nutzung[$j][nutzungskennz].' ';
           $csv .= $flst->Nutzung[$j][bezeichnung].' ';
-          $csv .= $flst->Nutzung[$j][kurzbezeichnung].'  ';
+          $csv .= $flst->Nutzung[$j][kurzbezeichnung];
         }
         $csv .= ';';
       }
@@ -530,12 +561,13 @@ class ALB {
         for($g = 0; $g < count($flst->Grundbuecher); $g++){
           $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
           for($b = 0; $b < count($flst->Buchungen); $b++){
+          	if($b > 0)$csv .= ' | ';
             $BestandStr =$flst->Buchungen[$b]['bezirk'].'-'.intval($flst->Buchungen[$b]['blatt']);
             $BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
             $BestandStr.=' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
             $BestandStr.=' ('.$flst->Buchungen[$b]['buchungsart'].')';
             $BestandStr.=' '.$flst->Buchungen[$b]['bezeichnung'];
-            $csv .= $BestandStr.' | ';
+            $csv .= $BestandStr;
           }
         }
         $csv .= ';';
@@ -547,6 +579,7 @@ class ALB {
             $Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
             $anzEigentuemer=count($Eigentuemerliste);
             for($e=0;$e<$anzEigentuemer;$e++){
+            	if($e > 0)$csv .= ' | ';
               $csv .= $Eigentuemerliste[$e]->Nr.' ';
               $anzNamenszeilen = count($Eigentuemerliste[$e]->Name);
               for($n=0;$n<$anzNamenszeilen;$n++) {

@@ -598,7 +598,16 @@ function backto(go){
                 <? } ?>
               </tr>
               <? if($flst->Buchungen[$b]['zusatz_eigentuemer'] != ''){
-      						echo '<tr><td></td><td colspan="2">'.$flst->Buchungen[$b]['zusatz_eigentuemer'].'</td></tr>';
+      						echo '<tr><td></td><td colspan="2">';
+      						$zusatz_eigentuemer = $flst->Buchungen[$b]['zusatz_eigentuemer'];
+      						while (strlen($zusatz_eigentuemer)>90):
+		                $zusatz = substr($zusatz_eigentuemer,0,90);
+		                $stop = strrpos($zusatz,' ');
+		                $zusatz = substr($zusatz_eigentuemer,0,$stop+1);
+		                echo $zusatz."<br>";
+		                $zusatz_eigentuemer = substr($zusatz_eigentuemer,$stop+1);
+		              endwhile;
+              		echo $zusatz_eigentuemer.'<br>&nbsp</td></tr>';
       			 			} ?>
               <? }
           } ?>
