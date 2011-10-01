@@ -1,7 +1,7 @@
 Zusammenfassung
 
 kvwmap ist ein System zur Erstellung einer Internet-GIS Anwendung. Es basiert auf
-PHP und der Nutzung des UMN-MapServers, einer MySQL und einer Postgres-Datenbank
+PHP und der Nutzung des MapServers, einer MySQL und einer Postgres-Datenbank
 mit PostGIS Erweiterung. Die Benutzeroberfläche wird entsprechend der Einstellungen
 für die Benutzer und die Karteninhalte dynamisch über phpMapScript an die Clients
 ausgeliefert. Als Datengrundlage kann alles dienen, was vom UMN-MapServer gelesen
