@@ -1022,6 +1022,15 @@ WITH OIDS;
 select AddGeometryColumn ('public','uko_polygon','the_geom',2398,'GEOMETRY',2);  -- oder 2399
 
 
+----# Änderungen von 1.8.0 nach 1.9.0
+
+ALTER TABLE tabelleninfo ALTER COLUMN thema TYPE character varying(20);
+
+-- !!!!!!!!hier muss der Schlüssel angepasst werden !!!!!!!!!!!!
+INSERT INTO tabelleninfo VALUES ('adressaend0019', 1234);
+INSERT INTO tabelleninfo VALUES ('adressaend0021', 1324);
+
+
 
 
 

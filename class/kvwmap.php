@@ -307,6 +307,37 @@ class GUI extends GUI_core{
     $this->output();
 	}
 	
+	function bevoelkerung_bericht_erstellen(){
+		include (PDFCLASSPATH."class.ezpdf.php");
+    $pdf=new Cezpdf();
+		if($this->formvars['check1'] == 'on'){
+			#$image = 'http://www.mdi-de.org:8080/kvwmap_dev/index.php?go=generisches_sachdaten_diagramm&chosen_layer_id=465&chartvalue_465=einwohner2009&chartlabel_465=kreis&charttype_465=bar&anzahl=30&all=true&width=1000';
+			$dateiname=rand(100000,999999).'.jpg';
+  		copy('http://www.mdi-de.org:8080/kvwmap_dev/index.php?go=generisches_sachdaten_diagramm&chosen_layer_id=465&chartvalue_465=einwohner2009&chartlabel_465=kreis&charttype_465=bar&anzahl=30&all=true&width=1000', IMAGEPATH.$dateiname);
+			$pdf->addJpegFromFile(IMAGEPATH.$dateiname,50,100,500);
+			#$pdf->ezImage($image); 
+		}
+		/*
+		$this->pdf=$pdf;
+    $this->mime_type='pdf';
+    $dateipfad=IMAGEPATH;
+    $currenttime = date('Y-m-d_H_i_s',time());
+    $name = str_replace('ä', 'ae', $this->user->Name);
+    $name = str_replace('ü', 'ue', $name);
+    $name = str_replace('ö', 'oe', $name);
+    $name = str_replace('Ä', 'Ae', $name);
+    $name = str_replace('Ü', 'Ue', $name);
+    $name = str_replace('Ö', 'Oe', $name);
+    $name = str_replace('ß', 'ss', $name);
+    $dateiname = $name.'-'.$currenttime.'_'.rand(0,99999999).'.pdf';
+    $this->outputfile = $dateiname;
+    $fp=fopen($dateipfad.$dateiname,'wb');
+    fwrite($fp,$this->pdf->ezOutput());
+    fclose($fp);
+    $this->output();
+    */
+	}
+	
 	function delete_bplan(){
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);

@@ -618,7 +618,9 @@ function change_orderby(attribute, layer_id){
 											echo '<div style="display:inline" id="dynamicLink'.$this->qlayerset[$i]['Layer_ID'].'_'.$k.'_'.$j.'"></div>';
 										}
 										else{
-											echo '<a target="_blank" style="font-size: '.$this->user->rolle->fontsize_gle.'px" href="'.$href.'">';
+											echo '<a ';
+											if($explosion[2] != 'no_new_window'){echo 'target="_blank"';}
+											echo ' style="font-size: '.$this->user->rolle->fontsize_gle.'px" href="'.$href.'">';
 											echo $alias;
 											echo '</a><br>';
 										}

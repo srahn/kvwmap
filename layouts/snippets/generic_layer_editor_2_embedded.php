@@ -76,6 +76,9 @@ function update_require_attribute(attributes, k,layer_id, value){
 								}
 								echo '<span style="font-size: '.$this->user->rolle->fontsize_gle.'px; color: #222222;" title="'.$this->qlayerset[$i]['attributes']['tooltip'][$j].'">'.$this->qlayerset[$i]['attributes']['alias'][$j].'</span>';
 							}
+							if($this->qlayerset[$i]['attributes']['nullable'][$j] == '0'){
+								echo '<span title="Eingabe erforderlich">*</span>';
+							}
 							echo '</td>';
 						}
 ?>
