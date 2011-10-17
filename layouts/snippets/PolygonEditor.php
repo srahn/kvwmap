@@ -103,7 +103,7 @@ function buildwktpolygonfromsvgpath(svgpath){
   </tr>
   <? if($this->new_entry != true){ ?>
   <tr> 
-    <td align="center"><input type="button" name="senden2" value="<? echo $strSaveWithoutZoom; ?>" onclick="send('false');"><br><br><input type="button" name="senden" value="<? echo $strSave; ?>" onclick="send('true');"></td>
+    <td align="center"><input type="button" name="senden2" value="<? echo $strSaveWithoutZoom; ?>" onclick="send('false');"><br><br><input type="button" value="zurünclick="window.open('index.php?go=Layer-Suche&go_plus=Suchen&selected_layer_id=<?php echo $this->formvars['selected_layer_id']; ?>&value_<?php echo $this->formvars['layer_tablename']; ?>_oid=<?php echo $this->formvars['oid']; ?>')"><input type="button" name="senden" value="<? echo $strSave; ?>" onclick="send('true');"></td>
   </tr>
   <? }else{ ?>
   <tr>
