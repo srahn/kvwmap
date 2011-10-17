@@ -1,3 +1,65 @@
+<?
+
+if($this->go == 'bevoelkerung_bericht_Bericht erstellen'){
+	include (PDFCLASSPATH."class.ezpdf.php");
+  $pdf=new Cezpdf();
+  $pdf->selectFont(PDFCLASSPATH.'fonts/Helvetica.afm');
+  $y = 825;
+  $pdf->addText(45, $y-=30, 18, 'Bevölkerungsprognose - Bericht');
+  $ueberschriften = array('Einwohner pro Landkreis', 'Einwohnerdichte pro Landkreis', 'Einwohner pro Altersgruppe', 'Durchschnittsalter pro Landkreis', 'Zusammengefasste Geburtenziffer', 'Bevölkerungsbewegung');
+  $formvars_chosen_layer_id = array(465, 465, 551, 466, 94, 524);
+  $formvars_chartvalue = array('einwohner2009', 'einwohnerproqkm2009', 'einwohner2009', 'durchschnittsalter2009', 'geburtenziffer', 'rueckgang');
+  $formvars_chartlabel = array('kreis', 'kreis', 'altersgruppe', 'kreis', 'kreis', 'kreis');
+  $formvars_chartsplit = array('', '', 'geschlecht');
+  $formvars_chartcomparison = array('', '', 'einwohner2030p');
+  $formvars_orderby = array('', '', 'altersgruppe desc, geschlecht', 'durchschnittsalter2009', 'geburtenziffer', 'rueckgang');
+  $formvars_charttype = array('bar', 'bar', 'mirrorbar', 'bar', 'bar', 'bar');
+  for($i = 0; $i < count($formvars_chosen_layer_id); $i++){
+		if($this->formvars['check'.$i] == 'on'){
+			$this->formvars['chosen_layer_id'] = $formvars_chosen_layer_id[$i];
+			$this->formvars['chartvalue_'.$formvars_chosen_layer_id[$i]] = $formvars_chartvalue[$i];
+			$this->formvars['chartlabel_'.$formvars_chosen_layer_id[$i]] = $formvars_chartlabel[$i];
+			$this->formvars['chartsplit_'.$formvars_chosen_layer_id[$i]] = $formvars_chartsplit[$i];
+			$this->formvars['chartcomparison_'.$formvars_chosen_layer_id[$i]] = $formvars_chartcomparison[$i];
+			$this->formvars['orderby_'.$formvars_chosen_layer_id[$i]] = $formvars_orderby[$i];
+			$this->formvars['charttype_'.$formvars_chosen_layer_id[$i]] = $formvars_charttype[$i];
+			$this->formvars['anzahl'] = 300;
+			$this->formvars['all'] = 'true';
+			$dateiname=IMAGEPATH.rand(100000,999999).'.jpg';
+			$this->generisches_sachdaten_diagramm(1000, $dateiname);
+			list($width, $height, $type, $attr)= getimagesize($dateiname);
+			# Seitenumbruch wenn erforderlich
+			if($y-$height*500/$width-12 < 0) {
+        # neue Seite beginnen
+        $pageid=$pdf->newPage();
+        $y = 825;
+      }
+      $pdf->addText(45, $y-=30, 14, $ueberschriften[$i]);
+			$y = $y-$height*500/$width-12;			
+			$pdf->addJpegFromFile($dateiname,45,$y,500); 
+		}
+  }
+	$this->pdf=$pdf;
+  $this->mime_type='pdf';
+  $dateipfad=IMAGEPATH;
+  $currenttime = date('Y-m-d_H_i_s',time());
+  $name = str_replace('ä', 'ae', $this->user->Name);
+  $name = str_replace('ü', 'ue', $name);
+  $name = str_replace('ö', 'oe', $name);
+  $name = str_replace('Ä', 'Ae', $name);
+  $name = str_replace('Ü', 'Ue', $name);
+  $name = str_replace('Ö', 'Oe', $name);
+  $name = str_replace('ß', 'ss', $name);
+  $dateiname = $name.'-'.$currenttime.'_'.rand(0,99999999).'.pdf';
+  $this->outputfile = $dateiname;
+  $fp=fopen($dateipfad.$dateiname,'wb');
+  fwrite($fp,$this->pdf->ezOutput());
+  fclose($fp);
+  $this->output();
+}
+else{
+
+?>
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
@@ -12,43 +74,37 @@
 	  	<tr>
 	  		<td>&nbsp;</td>
 	    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-	    			<input name="check1" type="checkbox" size="25" maxlength="100"><b>Einwohner pro Landkreis</b>
-	    			http://www.mdi-de.org:8080/kvwmap_dev/index.php?go=generisches_sachdaten_diagramm&chosen_layer_id=465&chartvalue_465=einwohner2009&chartlabel_465=kreis&charttype_465=bar&anzahl=30&all=true&width=1000
+	    			<input name="check0" checked="true" type="checkbox" size="25" maxlength="100"><b>Einwohner pro Landkreis</b>
 	  		</td>
 	  	</tr>
 	  	<tr>
 	  		<td>&nbsp;</td>
 	    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-	    			<input name="check2" type="checkbox" size="25" maxlength="100"><b>Einwohnerdichte pro Landkreis</b>
-	    			http://www.mdi-de.org:8080/kvwmap_dev/index.php?go=generisches_sachdaten_diagramm&chosen_layer_id=465&chartvalue_465=einwohnerproqkm2009&chartlabel_465=kreis&charttype_465=bar&anzahl=30&all=true&width=1000
+	    			<input name="check1" checked="true" type="checkbox" size="25" maxlength="100"><b>Einwohnerdichte pro Landkreis</b>
 	  		</td>
 	  	</tr>
 	  	<tr>
 	  		<td>&nbsp;</td>
 	    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-	    			<input name="check3" type="checkbox" size="25" maxlength="100"><b>Einwohner pro Altersgruppe</b>
-	    			http://www.mdi-de.org:8080/kvwmap_dev/index.php?go=generisches_sachdaten_diagramm&chosen_layer_id=551&chartvalue_551=einwohner2009&chartlabel_551=altersgruppe&chartsplit_551=geschlecht&chartcomparison_551=einwohner2030p&charttype_551=mirrorbar&orderby551=altersgruppe%20desc,%20geschlecht&anzahl=300&all=true&width=1000
+	    			<input name="check2" checked="true" type="checkbox" size="25" maxlength="100"><b>Einwohner pro Altersgruppe</b>
 	  		</td>
 	  	</tr>
 	  	<tr>
 	  		<td>&nbsp;</td>
 	    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-	    			<input name="check4" type="checkbox" size="25" maxlength="100"><b>Durchschnittsalter pro Landkreis</b>
-	    			http://www.mdi-de.org:8080/kvwmap_dev/index.php?go=generisches_sachdaten_diagramm&chosen_layer_id=466&chartvalue_466=durchschnittsalter2009&chartlabel_466=kreis&charttype_466=bar&orderby466=durchschnittsalter2009&anzahl=30&all=true&width=1000
+	    			<input name="check3" checked="true" type="checkbox" size="25" maxlength="100"><b>Durchschnittsalter pro Landkreis</b>
 	  		</td>
 	  	</tr>
 	  	<tr>
 	  		<td>&nbsp;</td>
 	    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-	    			<input name="check5" type="checkbox" size="25" maxlength="100"><b>Zusammengefasste Geburtenziffer</b>
-	    			http://www.mdi-de.org:8080/kvwmap_dev/index.php?go=generisches_sachdaten_diagramm&chosen_layer_id=94&chartvalue_94=geburtenziffer&chartlabel_94=kreis&charttype_94=bar&orderby94=geburtenziffer&anzahl=30&all=true&width=1000
+	    			<input name="check4" checked="true" type="checkbox" size="25" maxlength="100"><b>Zusammengefasste Geburtenziffer</b>
 	  		</td>
 	  	</tr>
 	  	<tr>
 	  		<td>&nbsp;</td>
 	    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-	    			<input name="check6" type="checkbox" size="25" maxlength="100"><b>Bevölkerungsbewegung</b>
-	    			http://www.mdi-de.org:8080/kvwmap_dev/index.php?go=generisches_sachdaten_diagramm&chosen_layer_id=524&chartvalue_524=rueckgang&chartlabel_524=kreis&charttype_524=bar&orderby524=rueckgang&anzahl=30&all=true&width=1000
+	    			<input name="check5" checked="true" type="checkbox" size="25" maxlength="100"><b>Bevölkerungsbewegung</b>
 	  		</td>
 	  	</tr>
 		</table>
@@ -59,7 +115,7 @@
   </tr>
   <tr> 
     <td align="center">
-    	<input type="submit" name="go_plus" id="go_plus" value="Bericht erstellen">
+    	<input type="button" name="button" onclick="document.GUI.go_plus.value='Bericht erstellen';document.GUI.target='_blank';submit();" value="Bericht erstellen">
 		</td>
   </tr>
   <tr>
@@ -68,3 +124,8 @@
 </table>
 
 <input type="hidden" name="go" value="bevoelkerung_bericht">
+<input type="hidden" name="go_plus" value="">
+
+<?
+}
+?>

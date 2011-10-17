@@ -1335,6 +1335,10 @@ switch($GUI->go) {
   case 'Layer_Datensaetze_Loeschen' : {
     $GUI->layer_Datensaetze_loeschen();
   } break;
+  
+  case 'Dokument_Loeschen' : {
+    $GUI->dokument_loeschen();
+  } break;
 
   case 'neuer_Layer_Datensatz' : {
     $GUI->neuer_Layer_Datensatz();

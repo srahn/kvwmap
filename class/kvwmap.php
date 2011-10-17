@@ -6196,7 +6196,15 @@ class GUI extends GUI_core{
     $this->output();
   }
 
-	
+	function dokument_loeschen(){
+		$this->deleteDokument($this->formvars['document_path']);
+		if($this->formvars['search']){        # man kam von der Suche   -> nochmal suchen
+      $this->GenerischeSuche_Suchen();
+    }
+    else{                                 # man kam aus einer Sachdatenabfrage    -> nochmal abfragen
+      $this->sachdaten_anzeigen();
+    }
+	}
 
   function layer_Datensaetze_loeschen(){
     $success = true;
