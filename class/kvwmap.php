@@ -6197,13 +6197,8 @@ class GUI extends GUI_core{
   }
 
 	function dokument_loeschen(){
-		$this->deleteDokument($this->formvars['document_path']);
-		if($this->formvars['search']){        # man kam von der Suche   -> nochmal suchen
-      $this->GenerischeSuche_Suchen();
-    }
-    else{                                 # man kam aus einer Sachdatenabfrage    -> nochmal abfragen
-      $this->sachdaten_anzeigen();
-    }
+		$_FILES[$this->formvars['document_attributename']]['name'] = 'delete';
+		$this->sachdaten_speichern();
 	}
 
   function layer_Datensaetze_loeschen(){
@@ -10214,17 +10209,19 @@ class GUI extends GUI_core{
                 $datei_erweiterung=array_pop($name_array);
                 $doc_path = $mapdb->getDocument_Path($layer_id);
                 $nachDatei = $doc_path.md5(serialize($datei_name)).'.'.$datei_erweiterung;
+                $eintrag = $nachDatei."&original_name=".$_FILES[$form_fields[$i]]['name'];
+                if($datei_name == 'delete')$eintrag = '';
                 # Bild in das Datenverzeichnis kopieren
-                if (move_uploaded_file($_FILES[$form_fields[$i]]['tmp_name'],$nachDatei)) {
+                if (move_uploaded_file($_FILES[$form_fields[$i]]['tmp_name'],$nachDatei) OR $datei_name == 'delete') {
                   #echo '<br>Lade '.$_FILES[$form_fields[$i]]['tmp_name'].' nach '.$nachDatei.' hoch';
 
                   # Wenn eine alte Datei existiert, die nicht so heißt wie die neue --> löschen
                   $old = $this->formvars[str_replace(';Dokument;', ';Dokument_alt;', $form_fields[$i])];
-                  if ($old != '' AND $old != $nachDatei."&original_name=".$_FILES[$form_fields[$i]]['name']) {
+                  if ($old != '' AND $old != $eintrag) {
                   	$this->deleteDokument($old);
                   }
                   # Dateiname in der Datentabelle aktualisieren
-                  $sql = "UPDATE ".$tablename." SET ".$attributname." = '".$nachDatei."&original_name=".$_FILES[$form_fields[$i]]['name']."' WHERE oid = '".$oid."'";
+                  $sql = "UPDATE ".$tablename." SET ".$attributname." = '".$eintrag."' WHERE oid = '".$oid."'";
                   $this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
                 } # ende von Datei wurde erfolgreich in Datenverzeichnis kopiert
                 else {
