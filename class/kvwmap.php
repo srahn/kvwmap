@@ -10167,7 +10167,7 @@ class GUI extends GUI_core{
               $this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
             } break;
             case 'User' : {
-              $sql = "UPDATE ".$tablename." SET ".$attributname." = '".$this->user->login_name."' WHERE oid = '".$oid."'";
+              $sql = "UPDATE ".$tablename." SET ".$attributname." = '".$this->user->Vorname." ".$this->user->Name."' WHERE oid = '".$oid."'";
               $this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
             } break;
             case 'Geometrie' : {
