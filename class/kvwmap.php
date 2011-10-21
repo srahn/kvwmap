@@ -5773,6 +5773,7 @@ class GUI extends GUI_core{
 		if($this->formvars['connectiontype'] == 6 AND $this->formvars['pfad'] != ''){
 			#---------- Speichern der Layerattribute -------------------
 	    $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+	    $layerdb->setClientEncoding();
 	    $path = $this->formvars['pfad'];
 	    $attributes = $mapDB->load_attributes($layerdb, $path);
 	    $mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes);
@@ -7225,7 +7226,7 @@ class GUI extends GUI_core{
     $this->main='shape_export.php';
     $this->loadMap('DataBase');
     $this->shape = new shape();
-    if($this->formvars['CMD']== 'Full_Extent' OR $this->formvars['CMD'] == 'zoomin' OR $this->formvars['CMD'] == 'zoomout' OR $this->formvars['CMD'] == 'previous' OR $this->formvars['CMD'] == 'next') {
+    if($this->formvars['CMD']== 'Full_Extent' OR $this->formvars['CMD'] == 'recentre' OR $this->formvars['CMD'] == 'zoomin' OR $this->formvars['CMD'] == 'zoomout' OR $this->formvars['CMD'] == 'previous' OR $this->formvars['CMD'] == 'next') {
       $this->navMap($this->formvars['CMD']);
     }
     else{
