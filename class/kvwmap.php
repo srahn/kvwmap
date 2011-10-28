@@ -5571,7 +5571,7 @@ class GUI extends GUI_core{
         $this->user->rolle->saveSettings($this->map);
         $this->user->rolle->readSettings();
       }
-      else {
+      elseif($nachweis->document['wkt_umring'] != ''){
         # Zoom zum Polygon des Dokumentes
         $this->zoomToNachweis($nachweis,10);
         $this->user->rolle->saveSettings($this->map);
@@ -5581,6 +5581,9 @@ class GUI extends GUI_core{
         $this->formvars['newpath'] = $PolygonAsSVG;
         $this->formvars['newpathwkt'] = $nachweis->document['wkt_umring'];
         $this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
+      }
+      else{
+      	showAlert('Achtung! Nachweis hat noch keine Geometrie!');
       }
       # Zuweisen der Werte des Dokumentes zum Formular
       $this->formvars['flurid']=$nachweis->document['flurid'];

@@ -107,6 +107,7 @@
 	var highlighted  = "yellow";
 	var must_redraw = false;
 	var mobile = '.$_SESSION['mobile'].';
+	var gps_follow_cooldown = 0;
 	var always_draw = '.$always_draw.';
 	var selected_vertex;
 	var last_selected_vertex;
@@ -2402,10 +2403,14 @@ $gps_functions = '
 	  	pos.setAttribute("x", x);
 	  	pos.setAttribute("y", y);
 			if(top.document.GUI.gps_follow.value == "on"){
-				if(x < 50 || x > resx-50 || y < 50 || y > resy-50){
+				if(gps_follow_cooldown == 0 && (x < 50 || x > resx-50 || y < 50 || y > resy-50)){
+					gps_follow_cooldown = 3;
 					pathx[0] = x;
 					pathy[0] = resy-y;
 					sendpath("recentre", pathx, pathy);
+				}
+				if(gps_follow_cooldown > 0){
+					gps_follow_cooldown--;
 				}
 			}
 		}

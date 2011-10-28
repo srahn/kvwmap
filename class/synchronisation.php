@@ -48,7 +48,7 @@ class synchro {
     	$where = " WHERE WITHIN(TRANSFORM(".$attributes['all_table_names'][0].".".$attributes['the_geom'].", ".$this->user->rolle->epsg_code."), geomfromtext('".$formvars['newpathwkt']."', ".$this->user->rolle->epsg_code."))";
 			if($this->export_layer_table_data($mapDB, $this->trans_id[$i], $attributes, $layerdb, $export_layerset[$i]['Layer_ID'], $where, $formvars['leeren'], $formvars['mitbildern'], $formvars['username'], $formvars['passwort'])){
 				$this->commands[] = POSTGRESBINPATH."psql -U ".$this->database->user." -f ".SYNC_PATH.$this->trans_id[$i].".sql ".$this->database->dbName;
-				$this->commands = array_reverse($this->commands);		# Die Reihenfolge der Datenimporte muss umgedreht werden, damit erst die übergeordneten Tabellen eingespielt werden und dann die abhängigen (ansonsten könnte es sein, dass abhängige Tabelle auf Grund eines Delete Cascade-Constraints wieder gelöscht werden)
+				$this->commands = array_reverse($this->commands);		# Die Reihenfolge der Datenimporte muss umgedreht werden, damit erst die übergeordneten Tabellen eingespielt werden und dann die abhängigen (ansonsten könnte es sein, dass abhängige Tabellen auf Grund eines Delete Cascade-Constraints wieder gelöscht werden)
 				foreach($this->commands AS $command){
 					exec($command, $output, $ret);
 				}
@@ -69,7 +69,7 @@ class synchro {
 			$attributes = $mapDB->read_layer_attributes($import_layerset[$i]['Layer_ID'], $layerdb, NULL);
 			if($this->import_layer_table_data($mapDB, $attributes, $layerdb, $import_layerset[$i]['Layer_ID'], $formvars['mitbildern'], $formvars['username'], $formvars['passwort'])){
 				$this->commands[] = POSTGRESBINPATH."psql -U ".$this->database->user." -f ".SYNC_PATH.$import_layerset[$i]['Layer_ID'].".sql ".$this->database->dbName;
-				$this->commands = array_reverse($this->commands);		# Die Reihenfolge der Datenimporte muss umgedreht werden, damit erst die übergeordneten Tabellen eingespielt werden und dann die abhängigen (ansonsten könnte es sein, dass abhängige Tabelle auf Grund eines Delete Cascade-Constraints wieder gelöscht werden)
+				$this->commands = array_reverse($this->commands);		# Die Reihenfolge der Datenimporte muss umgedreht werden, damit erst die übergeordneten Tabellen eingespielt werden und dann die abhängigen (ansonsten könnte es sein, dass abhängige Tabellen auf Grund eines Delete Cascade-Constraints wieder gelöscht werden)
 				foreach($this->commands AS $command){
 					exec($command, $output, $ret);
 				}
@@ -121,7 +121,7 @@ class synchro {
 	    	$count++;
 	    	$this->count++;
 	    	for($k = 0; $k < count($rs); $k++){
-	    		if($withimages == 'on' AND $attributes['form_element_type'][key($rs)] == 'Dokument'){			# Bilder vom Server holen und auf lokalem Server speichern
+	    		if($withimages == 'on' AND $attributes['form_element_type'][key($rs)] == 'Dokument' AND $rs[key($rs)] != ''){			# Bilder vom Server holen und auf lokalem Server speichern
 	    			$this->imagecount++;
 	    			$image_string = file_get_contents($attributes['options'][key($rs)].$rs[key($rs)].'&username='.$username.'&passwort='.$passwort);
 	          $name_array=explode('.', $rs[key($rs)]);
@@ -180,7 +180,7 @@ class synchro {
     while($rs = pg_fetch_assoc($ret[1])){
     	$this->newcount++;
     	for($k = 0; $k < count($rs); $k++){
-    		if($withimages == 'on' AND $attributes['form_element_type'][key($rs)] == 'Dokument'){			# Bilder vom Server holen und auf lokalem Server speichern
+    		if($withimages == 'on' AND $attributes['form_element_type'][key($rs)] == 'Dokument' AND $rs[key($rs)] != ''){			# Bilder vom Server holen und auf lokalem Server speichern
     			$image_string = file_get_contents($attributes['options'][key($rs)].$rs[key($rs)].'&username='.$username.'&passwort='.$passwort);
           $name_array=explode('.', $rs[key($rs)]);
           $datei_erweiterung = array_pop($name_array);
@@ -215,7 +215,7 @@ class synchro {
 	    	$trans_id = $rs['lock']; 
 	    	fwrite($fp, "UPDATE ".$layerdb->schema.".".$attributes['all_table_names'][0]." SET ");
 	    	for($k = 0; $k < count($rs); $k++){
-	    		if($withimages == 'on' AND $attributes['form_element_type'][key($rs)] == 'Dokument'){			# Bilder vom Server holen und auf lokalem Server speichern
+	    		if($withimages == 'on' AND $attributes['form_element_type'][key($rs)] == 'Dokument' AND $rs[key($rs)] != ''){			# Bilder vom Server holen und auf lokalem Server speichern
 	    			$image_string = file_get_contents($attributes['options'][key($rs)].$rs[key($rs)].'&username='.$username.'&passwort='.$passwort);
 	          $name_array=explode('.', $rs[key($rs)]);
 	          $datei_erweiterung = array_pop($name_array);
@@ -228,7 +228,7 @@ class synchro {
 	    		if($k > 0){
 	    			fwrite($fp, ',');
 	    		}
-	    		if(key($rs) == 'lock'){
+	    		if(key($rs) == 'lock' OR $rs[key($rs)] == ''){
 	    			fwrite($fp, key($rs)."= NULL");							# lock wieder freigeben
 	    		}
 	    		else{

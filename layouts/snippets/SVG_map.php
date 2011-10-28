@@ -256,7 +256,7 @@ if($_SESSION['mobile'] == 'true'){
   	top.ahah("'.URL.APPLVERSION.'index.php", "go=get_gps_position&srs='.$this->user->rolle->epsg_code.'", new Array(top.document.GUI.gps_posx, top.document.GUI.gps_posy), "");
  	}
  	
- 	window.setInterval("update_gps_position()", 5000);';
+ 	window.setInterval("update_gps_position()", 2000);';
 }
 $svg .='
 
