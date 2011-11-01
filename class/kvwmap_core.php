@@ -1168,10 +1168,9 @@ class GUI_core {
 
     # Erstellen des Maßstabes
     $img_scalebar = $this->map->drawScaleBar();
-    $filename = $img_scalebar->saveWebImage(MS_PNG, 1, 1, 0);
-    $newname = $this->user->id.basename($filename);
-    rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
-    $this->img['scalebar'] = IMAGEURL.$newname;
+    $filename = $this->user->id.'_'.rand(0, 1000000).'.png';
+    $img_scalebar->saveImage(IMAGEPATH.$filename);
+    $this->img['scalebar'] = IMAGEURL.$filename;
     $this->debug->write("Name des Scalebars: ".$this->img['scalebar'],4);
     # Berechnen der Pixelgrösse
     $this->pixwidth = ($this->map->extent->maxx - $this->map->extent->minx)/$this->map->width;
