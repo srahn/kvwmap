@@ -45,7 +45,8 @@
 # Klasse GUI #
 ##############
 class GUI_core {
-
+	var $scaleUnitSwitchScale=239210;
+	
   ###################### Liste der Funktionen ####################################
 
   # Konstruktor
@@ -1167,12 +1168,23 @@ class GUI_core {
     }
 
     # Erstellen des Maßstabes
+	  $this->switchScaleUnitIfNecessary();
     $img_scalebar = $this->map->drawScaleBar();
     $filename = $this->user->id.'_'.rand(0, 1000000).'.png';
     $img_scalebar->saveImage(IMAGEPATH.$filename);
     $this->img['scalebar'] = IMAGEURL.$filename;
     $this->debug->write("Name des Scalebars: ".$this->img['scalebar'],4);
-    # Berechnen der Pixelgrösse
+		
+		$this->calculatePixelSize();
+		
+		$this->drawReferenceMap();
+  }
+
+  function switchScaleUnitIfNecessary() {
+		if ($this->map->scale > $this->scaleUnitSwitchScale) $this->map->scalebar->set('units', MS_KILOMETERS);
+  }
+
+	function calculatePixelSize() {
     $this->pixwidth = ($this->map->extent->maxx - $this->map->extent->minx)/$this->map->width;
     $this->pixheight = ($this->map->extent->maxy - $this->map->extent->miny)/$this->map->height;
     if ($this->pixwidth>$this->pixheight) {
@@ -1180,7 +1192,10 @@ class GUI_core {
     }
     else {
       $this->pixsize=$this->pixheight;
-    }
+    }	
+	}
+	
+  function drawReferenceMap() { 
     # Erstellen der Referenzkarte
     if($this->map->reference->image != NULL){
       $img_refmap = $this->map->drawReferenceMap();
@@ -1191,8 +1206,8 @@ class GUI_core {
       $this->debug->write("Name der Referenzkarte: ".$this->img['referenzkarte'],4);
       $this->Lagebezeichung=$this->getLagebezeichnung($this->user->rolle->epsg_code);
     }
-  }
-
+	}
+	
 	function loadMultiLingualText($language,$charset) {
     #echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language.' CharSet: '.$GUI->user->rolle->charset;
     $this->Stelle->language=$language;

@@ -12150,31 +12150,17 @@ class GUI extends GUI_core{
     $this->debug->write("Legende erzeugt",4);
     
     # Erstellen des Maßstabes
+    $this->switchScaleUnitIfNecessary();
     $img_scalebar = $this->map->drawScaleBar();
     $filename = $img_scalebar->saveWebImage(MS_PNG, 1, 1, 0);
     $newname = $this->user->id.basename($filename);
     rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
     $this->img['scalebar'] = IMAGEURL.$newname;
     $this->debug->write("Name des Scalebars: ".$this->img['scalebar'],4);
-    # Berechnen der Pixelgrösse
-    $this->pixwidth = ($this->map->extent->maxx - $this->map->extent->minx)/$this->map->width;
-    $this->pixheight = ($this->map->extent->maxy - $this->map->extent->miny)/$this->map->height;
-    if ($this->pixwidth>$this->pixheight) {
-      $this->pixsize=$this->pixwidth;
-    }
-    else {
-      $this->pixsize=$this->pixheight;
-    }
-    # Erstellen der Referenzkarte
-    if($this->map->reference->image != NULL){
-      $img_refmap = $this->map->drawReferenceMap();
-      $filename = $img_refmap->saveWebImage (MS_PNG, 1, 1, 0);
-      $newname = $this->user->id.basename($filename);
-      rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
-      $this->img['referenzkarte'] = IMAGEURL.$newname;
-      $this->debug->write("Name der Referenzkarte: ".$this->img['referenzkarte'],4);
-      $this->Lagebezeichung=$this->getLagebezeichnung($this->user->rolle->epsg_code);
-    }
+		
+		$this->calculatePixelSize();
+		
+		$this->drawReferenceMap();
   }
 
   # Flurstücksauswahl
