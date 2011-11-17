@@ -202,5 +202,5 @@ function change_orderby(attribute, layer_id){
 	</tr>
 </table>
 <input type="hidden" name="checkbox_names_<? echo $layerId; ?>" value="<? echo $checkbox_names; ?>">
-<input type="hidden" name="orderby<? echo $layerId; ?>" id="orderby<? echo $layerId; ?>" value="<? echo $this->formvars['orderby'.$layerId]; ?>">
+<input type="hidden" name="orderby<? echo $layerId; ?>" id="orderby<? echo $layerId; ?>" value="<? echo $this->formvars['orderby'.$layerId]; ?>,geschlecht">
 

@@ -324,3 +324,4 @@ for ($i=0;$i<$anzLayer;$i++) {
 </div>
 <input type="hidden" name="titel" value="<? echo $this->formvars['titel'] ?>">
 <input type="hidden" name="width" value="">
+<input type="hidden" name="document_attributename" value="">

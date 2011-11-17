@@ -2283,7 +2283,7 @@ class stelle extends stelle_core{
     }
     if($user_id != NULL){
 			$sql .= ' UNION ';
-			$sql .= 'SELECT -id as Layer_ID, concat(Name," (Suchergebnis)"), -1, " " FROM rollenlayer'; 
+			$sql .= 'SELECT -id as Layer_ID, concat(SUBSTRING(Name FROM 1 FOR 30)," (Suchergebnis)"), -1, " " FROM rollenlayer'; 
 			$sql .= ' WHERE stelle_id = '.$this->id.' AND user_id = '.$user_id.' AND connectiontype = 6';
     } 
 	  $sql .= ' ORDER BY Name';

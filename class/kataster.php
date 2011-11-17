@@ -2268,6 +2268,14 @@ class flurstueck {
     return $ret[1];
   }
 
+	function getEMZfromALK() {
+    if ($this->FlurstKennz=="") { return 0; }
+    $this->debug->write("<br>kataster.php->flurstueck->getEMZfromALK Abfrage der Klassifizierungen zum Flurstück<br>".$sql,4);
+    if(ALKIS){}		# ALKIS-TODO
+    else $emz=$this->database->getEMZfromALK($this->FlurstKennz);
+    return $emz;
+  }
+
   function getKlassifizierung() {
     if ($this->FlurstKennz=="") { return 0; }
     $this->debug->write("<br>kataster.php->flurstueck->getKlassifizierung Abfrage der Klassifizierungen zum Flurstück<br>".$sql,4);

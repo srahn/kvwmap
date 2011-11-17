@@ -20,21 +20,27 @@ function save(){
 
 function check_poly(){
 	if(document.GUI.check.value == 'checking'){
-		if(document.GUI.result2.value == 'f'){
+		if(document.GUI.result2.value == 'invalid'){
+			alert('Achtung! Das Polygon ist fehlerhaft. Bitte korrigieren.');
 			document.GUI.check.value = '';
-			conf = confirm('Achtung! Das Polygon liegt nicht in der angegebenen Flur.\nTrotzdem Speichern?');
-			if(conf == true){
+		}
+		else{
+			if(document.GUI.result2.value == 'f'){
+				document.GUI.check.value = '';
+				conf = confirm('Achtung! Das Polygon liegt nicht in der angegebenen Flur.\nTrotzdem Speichern?');
+				if(conf == true){
+					document.GUI.go_plus.value = 'Senden';
+					document.GUI.submit();
+				}
+				else{
+					return;
+				}
+			}
+			if(document.GUI.result2.value == 't'){
+				window.clearInterval(polycheck);
 				document.GUI.go_plus.value = 'Senden';
 				document.GUI.submit();
 			}
-			else{
-				return;
-			}
-		}
-		if(document.GUI.result2.value == 't'){
-			window.clearInterval(polycheck);
-			document.GUI.go_plus.value = 'Senden';
-			document.GUI.submit();
 		}
 	}
 }

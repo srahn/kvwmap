@@ -77,7 +77,7 @@ class ALB {
     if($formvars['nutzung']){ $csv .= 'Nutzung;';}
     if($formvars['bestandsnr']){ $csv .= 'Bestand;';}
     $csv .= 'Namensnummer;'; 
-    $csv .= 'Eigentümer;';
+    $csv .= 'Eigentümer;Zusatz;Adresse;Ort;';
     
     $csv .= chr(10);
     for($i = 0; $i < count($flurstuecke); $i++) {
@@ -184,7 +184,10 @@ class ALB {
 				        	if($j > 0)$csv .= ' | ';
 				          $csv .= $flst->Nutzung[$j][flaeche].'m² ';
           				$csv .= $flst->Nutzung[$j][nutzungskennz].' ';
-          				$csv .= $flst->Nutzung[$j][abkuerzung].'-'.$flst->Nutzung[$j][bezeichnung].';';
+          				if($flst->Nutzung[$j][abkuerzung]!='') {
+						      	$csv .= $flst->Nutzung[$j][abkuerzung].'-';
+						      }
+						      $csv .= $flst->Nutzung[$j][bezeichnung];
 				        }
 				        $csv .= ';';
 				      }
@@ -396,8 +399,10 @@ class ALB {
         
         $csv .= $flst->Nutzung[$n][flaeche].'m²;';
         $csv .= $flst->Nutzung[$n][nutzungskennz].';';
-        $csv .= $flst->Nutzung[$n][abkuerzung].'-'.$flst->Nutzung[$n][bezeichnung].';';
-             
+        if($flst->Nutzung[$n][abkuerzung]!='') {
+          $csv .= $flst->Nutzung[$n][abkuerzung].'-';
+        }
+        $csv .= $flst->Nutzung[$n][bezeichnung].';';             
        
       	$csv .= ';';
 
@@ -445,7 +450,7 @@ class ALB {
     if($privileg['status']){ $csv .= 'Status;';}
     if($privileg['vorgaenger']){ $csv .= 'Vorgaenger;';}
     if($privileg['nachfolger']){ $csv .= 'Nachfolger;';}
-    if($privileg['klassifizierung']){ $csv .= 'Klassifizierung;';}
+    if($privileg['klassifizierung']){ $csv .= 'Klassifizierung;Angabe;';}
     if($privileg['freitext']){ $csv .= 'Freitext;';}
     if($privileg['hinweis']){ $csv .= 'Hinweis;';}
     if($privileg['baulasten']){ $csv .= 'Baulasten;';}
@@ -513,11 +518,29 @@ class ALB {
       }
       if($privileg['klassifizierung']){
         for($j = 0; $j < count($flst->Klassifizierung)-1; $j++){
-        	if($j > 0)$csv .= ' | ';
+          if($j > 0)$csv .= ' | ';
           $csv .= $flst->Klassifizierung[$j]['flaeche'].'m² '.$flst->Klassifizierung[$j]['tabkenn'].'-'.$flst->Klassifizierung[$j]['klass'].' '.$flst->Klassifizierung[$j]['bezeichnung'];
         }
         $csv .= ';';
-    	}      
+        for($j = 0; $j < count($flst->Klassifizierung)-1; $j++){
+          if($j > 0 AND $flst->Klassifizierung[$j]['angaben'] !='')$csv .= ' | ';
+          $wert=substr($flst->Klassifizierung[$j]['angaben'],strrpos($flst->Klassifizierung[$j]['angaben'],'/')+1);
+          $emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
+          if($flst->Klassifizierung[$j]['tabkenn'] =='32' AND $flst->Klassifizierung[$j]['angaben'] !='') {
+            $csv .= "'".$flst->Klassifizierung[$j]['angaben']."'";
+          } else {
+            $csv .= $flst->Klassifizierung[$j]['angaben'];
+          }
+          if ($flst->Klassifizierung[$j]['tabkenn'] == '32' AND $flst->Klassifizierung[$j]['angaben'] !='') {
+            $csv .= ' EMZ: '.$emz;
+            $emzges=$emzges+$emz;
+          }
+        }
+        if ($flst->Klassifizierung[$j]['tabkenn'] == '32' AND $emzges > 0) {
+          $csv .= ' || EMZ gesamt: '.$emzges;
+        }
+        $csv .= ';';
+      }      
       if($privileg['freitext']) {
         for($j = 0; $j < count($flst->FreiText); $j++){
         	if($j > 0)$csv .= ' | ';
@@ -552,8 +575,10 @@ class ALB {
         	if($j > 0)$csv .= ' | ';
           $csv .= $flst->Nutzung[$j][flaeche].' m2 ';
           $csv .= $flst->Nutzung[$j][nutzungskennz].' ';
-          $csv .= $flst->Nutzung[$j][bezeichnung].' ';
-          $csv .= $flst->Nutzung[$j][kurzbezeichnung];
+          if($flst->Nutzung[$j][abkuerzung]!='') {
+            $csv .= $flst->Nutzung[$j][abkuerzung].'-';
+          }
+          $csv .= $flst->Nutzung[$j][bezeichnung];
         }
         $csv .= ';';
       }

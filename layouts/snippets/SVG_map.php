@@ -225,6 +225,7 @@ $svg='<?xml version="1.0"?>
   var x_pos="";
   var y_pos="";
 	var get_vertices_loop;
+	var gps_follow_cooldown = 0;
   		
   ';
 
@@ -241,10 +242,14 @@ if($_SESSION['mobile'] == 'true'){
 	  	pos.setAttribute("x", x);
 	  	pos.setAttribute("y", y);
 			if(top.document.GUI.gps_follow.value == "on"){
-				if(x < 50 || x > resx-50 || y < 50 || y > resy-50){
+				if(gps_follow_cooldown == 0 && (x < 50 || x > resx-50 || y < 50 || y > resy-50)){
+					gps_follow_cooldown = 3;
 					pathx[0] = x;
 					pathy[0] = resy-y;
 					top.sendpath("recentre", pathx, pathy);
+				}
+				if(gps_follow_cooldown > 0){
+					gps_follow_cooldown--;
 				}
 			}
 		}

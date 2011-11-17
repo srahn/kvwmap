@@ -278,6 +278,13 @@ class Nachweis {
   }
   
   function check_poly_in_flur($polygon, $flur, $gemarkung, $epsg){
+  	$sql = "SELECT isvalid(geomfromtext('".$polygon."', ".$epsg."))";
+  	$ret=$this->database->execSQL($sql,4, 1);
+  	$rs = pg_fetch_row($ret[1]);
+		if($rs[0] == 'f'){
+			$result = 'invalid';
+			return $result;
+		}
   	$sql = "SELECT alknflur.gemkgschl, alknflur.flur FROM alkobj_e_fla, alknflur WHERE alknflur.objnr = alkobj_e_fla.objnr AND intersects(the_geom, TRANSFORM(geometryfromtext('".$polygon."', ".$epsg."), ".EPSGCODE."))";
   	$ret=$this->database->execSQL($sql,4, 1);
   	$result = 'f';	

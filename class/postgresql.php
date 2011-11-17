@@ -2260,6 +2260,25 @@ class pgdatabase extends pgdatabase_core {
     $ret[1]=$Klassifizierung;
     return $ret;
   }
+  
+  function getEMZfromALK($FlurstKennz){
+  	$sql = "select DISTINCT intersection(o.the_geom,f.the_geom) AS intersection_geom,round(area(intersection(o.the_geom,f.the_geom))) as flaeche,substring(t.label from 18 for 3) AS wert,t.label, area(f.the_geom) as flstflaeche, o.objart"; 
+		$sql.=" FROM alkobj_e_fla as o, alkobj_e_fla as f, alknflst as fl, alkobj_t_pkt as t"; 
+		$sql.=" WHERE o.the_geom && f.the_geom"; 
+		$sql.=" AND fl.flurstkennz = '".$FlurstKennz."'" ; 
+		$sql.=" AND fl.objnr = f.objnr";
+		$sql.=" AND (o.objart = '222' OR o.objart = '223')"; 
+		$sql.=" AND area(intersection(o.the_geom,f.the_geom)) > 0"; 
+		$sql.=" AND o.objnr=t.objnr ORDER BY o.objart";
+		$ret=$this->execSQL($sql, 4, 0);
+    if($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
+    if(pg_num_rows($ret[1]) > 0) {
+      while($rs=pg_fetch_array($ret[1])){
+        $emz[]=$rs;
+      }
+    }
+    return $emz;
+  }
 
   function insertText($FlurstKennz,$lfdNr,$freierText) {
     $sql ="INSERT INTO alb_".$this->tableprefix."f_texte";

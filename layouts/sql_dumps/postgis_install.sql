@@ -85,7 +85,7 @@ ALTER TABLE n_nachweise2dokumentarten OWNER TO kvwmap;
 
 CREATE TABLE tabelleninfo
 (
-  thema character varying(10),
+  thema character varying(20),
   datum character varying(10)
 )
 WITH OIDS;

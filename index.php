@@ -184,9 +184,13 @@ $GUI->requeststring = $QUERY_STRING;
 
 switch($GUI->go) {
 
-	case 'bevoelkerung_bericht' : {
-    $GUI->bevoelkerung_bericht();
-  } break;
+		case 'bevoelkerung_bericht' : {
+		  $GUI->bevoelkerung_bericht();
+		}break;
+		
+		case 'bevoelkerung_bericht_Bericht erstellen' : {
+		  $GUI->bevoelkerung_bericht_erstellen();
+		}break;
 
 	 case 'reset_layers' : {
     $GUI->reset_layers();
@@ -1330,6 +1334,10 @@ switch($GUI->go) {
 
   case 'Layer_Datensaetze_Loeschen' : {
     $GUI->layer_Datensaetze_loeschen();
+  } break;
+  
+  case 'Dokument_Loeschen' : {
+    $GUI->dokument_loeschen();
   } break;
 
   case 'neuer_Layer_Datensatz' : {

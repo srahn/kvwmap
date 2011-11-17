@@ -81,6 +81,14 @@ function delete_datasets(layer_id){
 	}
 }
 
+function delete_document(attributename){
+	if(confirm('Wollen Sie das ausgewählte Dokument wirklich löschen?')){
+		document.GUI.document_attributename.value = attributename; 
+		document.GUI.go.value = 'Dokument_Loeschen';
+		document.GUI.submit();
+	}
+}
+
 function csv_export_all(layer_id){
 	document.GUI.all.value = 'true';
 	document.GUI.chosen_layer_id.value = layer_id;
@@ -565,11 +573,13 @@ function change_orderby(attribute, layer_id){
 												$url = URL.APPLVERSION.'index.php?go=sendeDokument&dokument=';
 											}
 											$type = strtolower(array_pop(explode('.', $this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]])));
+											echo '<table border="0"><tr><td>';
 			  							if($type == 'jpg' OR $type == 'png' OR $type == 'gif' ){
 												echo '<iframe height="160" style="border:none" frameborder="0" marginheight="3" marginwidth="3" src="'.$url.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]].'&go_plus=mit_vorschau"></iframe>';
 			  							}else{
 			  								echo '<iframe height="80" style="border:none" frameborder="0" marginheight="3" marginwidth="3" src="'.$url.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]].'&go_plus=mit_vorschau"></iframe>';
 			  							}
+			  							echo '</td><td><a href="javascript:delete_document(\''.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].';'.$this->qlayerset[$i]['attributes']['type'][$j].'\');">Dokument <br>löschen</a></td></tr></table>';
 											echo '<input type="hidden" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].'_alt'.';'.$this->qlayerset[$i]['attributes']['nullable'][$j].';'.$this->qlayerset[$i]['attributes']['type'][$j].'" value="'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]].'">';
 
 										}
@@ -618,7 +628,9 @@ function change_orderby(attribute, layer_id){
 											echo '<div style="display:inline" id="dynamicLink'.$this->qlayerset[$i]['Layer_ID'].'_'.$k.'_'.$j.'"></div>';
 										}
 										else{
-											echo '<a target="_blank" style="font-size: '.$this->user->rolle->fontsize_gle.'px" href="'.$href.'">';
+											echo '<a ';
+											if($explosion[2] != 'no_new_window'){echo 'target="_blank"';}
+											echo ' style="font-size: '.$this->user->rolle->fontsize_gle.'px" href="'.$href.'">';
 											echo $alias;
 											echo '</a><br>';
 										}
