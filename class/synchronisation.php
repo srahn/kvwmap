@@ -67,7 +67,7 @@ class synchro {
 			$this->commands = array();
 			$layerdb = $mapDB->getlayerdatabase($import_layerset[$i]['Layer_ID'], $this->Stelle->pgdbhost);
 			$attributes = $mapDB->read_layer_attributes($import_layerset[$i]['Layer_ID'], $layerdb, NULL);
-			if($this->import_layer_table_data($mapDB, $attributes, $layerdb, $import_layerset[$i]['Layer_ID'], $formvars['mitbildern'], $formvars['username'], $formvars['passwort'])){
+			if($this->import_layer_table_data($mapDB, $attributes, $layerdb, $import_layerset[$i]['Layer_ID'], $import_layerset[$i]['Name'], $formvars['mitbildern'], $formvars['username'], $formvars['passwort'])){
 				$this->commands[] = POSTGRESBINPATH."psql -U ".$this->database->user." -f ".SYNC_PATH.$import_layerset[$i]['Layer_ID'].".sql ".$this->database->dbName;
 				$this->commands = array_reverse($this->commands);		# Die Reihenfolge der Datenimporte muss umgedreht werden, damit erst die übergeordneten Tabellen eingespielt werden und dann die abhängigen (ansonsten könnte es sein, dass abhängige Tabellen auf Grund eines Delete Cascade-Constraints wieder gelöscht werden)
 				foreach($this->commands AS $command){
@@ -163,7 +163,7 @@ class synchro {
     return false;
 	}
 	
-	function import_layer_table_data($mapDB, $attributes, $layerdb, $layer_id, $withimages, $username, $passwort){
+	function import_layer_table_data($mapDB, $attributes, $layerdb, $layer_id, $layername, $withimages, $username, $passwort){
 		$this->already_imported_layers[] = $layer_id;
 		# erst alle neuen Datensätze
 		$sql = "SELECT * FROM ".$attributes['all_table_names'][0];
@@ -177,10 +177,12 @@ class synchro {
     $fp = fopen(SYNC_PATH.$layer_id.".sql", "w");
     fwrite($fp, "SET datestyle TO 'German';".chr(10));
     fwrite($fp, "COPY ".$layerdb->schema.".".$attributes['all_table_names'][0]." FROM STDIN WITH DELIMITER AS '~' CSV;".chr(10));
+    $i = 0;
     while($rs = pg_fetch_assoc($ret[1])){
     	$this->newcount++;
     	for($k = 0; $k < count($rs); $k++){
     		if($withimages == 'on' AND $attributes['form_element_type'][key($rs)] == 'Dokument' AND $rs[key($rs)] != ''){			# Bilder vom Server holen und auf lokalem Server speichern
+    			$i++;
     			$image_string = file_get_contents($attributes['options'][key($rs)].$rs[key($rs)].'&username='.$username.'&passwort='.$passwort);
           $name_array=explode('.', $rs[key($rs)]);
           $datei_erweiterung = array_pop($name_array);
@@ -188,7 +190,7 @@ class synchro {
           $new_image = fopen($filename, 'w');
           fwrite($new_image, $image_string);
           fclose($new_image);
-          $rs[key($rs)] = $filename;
+          $rs[key($rs)] = $filename.'&original_name='.$layername.'_'.$i.'.'.$datei_erweiterung;
     		}
     		if($k > 0){
     			fwrite($fp, '~');
@@ -216,6 +218,7 @@ class synchro {
 	    	fwrite($fp, "UPDATE ".$layerdb->schema.".".$attributes['all_table_names'][0]." SET ");
 	    	for($k = 0; $k < count($rs); $k++){
 	    		if($withimages == 'on' AND $attributes['form_element_type'][key($rs)] == 'Dokument' AND $rs[key($rs)] != ''){			# Bilder vom Server holen und auf lokalem Server speichern
+	    			$i++;
 	    			$image_string = file_get_contents($attributes['options'][key($rs)].$rs[key($rs)].'&username='.$username.'&passwort='.$passwort);
 	          $name_array=explode('.', $rs[key($rs)]);
 	          $datei_erweiterung = array_pop($name_array);
@@ -223,7 +226,7 @@ class synchro {
 	          $new_image = fopen($filename, 'w');
 	          fwrite($new_image, $image_string);
 	          fclose($new_image);
-	          $rs[key($rs)] = $filename;
+	          $rs[key($rs)] = $filename.'&original_name='.$layername.'_'.$i.'.'.$datei_erweiterung;
 	    		}
 	    		if($k > 0){
 	    			fwrite($fp, ',');

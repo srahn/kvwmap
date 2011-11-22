@@ -50,7 +50,7 @@ function DruckAufloesung(pixel,breite) {
   		<td colspan="3" align="center">TIF-Datei erzeugt. <a href="<?echo $this->tif->tifimage;?>" type="multipart/form-data">Herunterladen</a></td>
   	</tr>
   	<tr>
-  		<td colspan="3" align="center">TFW-Datei erzeugt. <a href="<?echo $this->tif->tfwfile;?>" type="multipart/form-data">Herunterladen</a></td>
+  		<td colspan="3" align="center">TFW-Datei erzeugt. <a href="<?echo $this->tif->tfwfile;?>" target="_blank" type="multipart/form-data">Herunterladen</a></td>
   	</tr>
   <?	}
   	}?>

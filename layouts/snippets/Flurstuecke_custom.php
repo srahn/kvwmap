@@ -40,17 +40,18 @@ function backto(go){
   document.GUI.submit();
 }
 
-var emzangezeigt = false;
+emzangezeigt = new Array();
 
-function emzversteckt(){
-	if(emzangezeigt){
-		document.getElementById('gkb').style.display = 'none';
-		emzangezeigt = false;
-	}
-	else{
-		document.getElementById('gkb').style.display = 'inline';
-		emzangezeigt = true;
-	}
+function emzversteckt(k){
+  var gkbelement='gkb'+k;
+  if (emzangezeigt[k]){
+  	document.getElementById(gkbelement).style.display = 'none';
+  	emzangezeigt[k] = false;
+  }
+  else{
+  	document.getElementById(gkbelement).style.display = 'inline';
+  	emzangezeigt[k] = true;
+  }
 }
 
 
@@ -437,11 +438,11 @@ function emzversteckt(){
 	        		$ratio = $flst->ALB_Flaeche/$alkemz[0]['flstflaeche'];
 	        ?>
 	        	<tr>
-		          <td colspan="2">
-		            <strong>Gesetzl.&nbsp;Klassifizierung Bodensch&auml;tzung</strong>&nbsp;<a href="#" onclick="emzversteckt()" onmouseover="emz.src='graphics/pfeil_red.gif';" onmouseout="emz.src='graphics/pfeil.gif';"><img src="<? echo GRAPHICSPATH.'pfeil.gif'; ?>" width="11" height="11" border="0" name="emz"></a>
-                  </td>
-                </tr>
-                <tr style="display:none" id="gkb">
+          		<td colspan="2">
+            		<strong>Gesetzl.&nbsp;Klassifizierung Bodensch&auml;tzung</strong>&nbsp;<a href="#" onclick="emzversteckt(<? echo $k; ?>)" onmouseover="emz<? echo $k; ?>.src='graphics/pfeil_red.gif';" onmouseout="emz<? echo $k; ?>.src='graphics/pfeil.gif';"><img src="<? echo GRAPHICSPATH.'pfeil.gif'; ?>" width="11" height="11" border="0" name="emz<? echo $k; ?>"></a>
+              </td>
+            </tr>
+            <tr style="display:none" id="gkb<? echo $k; ?>">
                   <td>
 		            <table border="0" cellspacing="0" cellpadding="2">
                     <colgroup>

@@ -87,7 +87,7 @@ class uko{
 	        $result[$i][] = $rs;
 	      }
 	    }
-	    $uko = '* UKO-Datei'.chr(10);
+	    $uko = 'TYP UPO 1'.chr(10);
 	    # Daten schreiben
 	    for($j = 0; $j < count($result[$i]); $j++){
 		  	$uko .= $result[$i][$j]['coords'];

@@ -6286,7 +6286,7 @@ class GUI extends GUI_core{
             $datei_name=$name_array[0];
             $datei_erweiterung=array_pop($name_array);
             if($layerset[0]['document_path'] == '')$layerset[0]['document_path'] = CUSTOM_IMAGE_PATH; 
-            $nachDatei = $layerset[0]['document_path'].md5(serialize($datei_name)).'.'.$datei_erweiterung;
+            $nachDatei = $layerset[0]['document_path'].rand(0, 1000000).'.'.$datei_erweiterung;
             # Bild in das Datenverzeichnis kopieren
             if (move_uploaded_file($_FILES[$form_fields[$i]]['tmp_name'],$nachDatei)) {
               //echo '<br>Lade '.$_FILES[$form_fields[$i]]['tmp_name'].' nach '.$nachDatei.' hoch';
@@ -10212,7 +10212,7 @@ class GUI extends GUI_core{
                 $datei_name=$name_array[0];
                 $datei_erweiterung=array_pop($name_array);
                 $doc_path = $mapdb->getDocument_Path($layer_id);
-                $nachDatei = $doc_path.md5(serialize($datei_name)).'.'.$datei_erweiterung;
+                $nachDatei = $doc_path.rand(0, 1000000).'.'.$datei_erweiterung;
                 $eintrag = $nachDatei."&original_name=".$_FILES[$form_fields[$i]]['name'];
                 if($datei_name == 'delete')$eintrag = '';
                 # Bild in das Datenverzeichnis kopieren
@@ -10260,9 +10260,9 @@ class GUI extends GUI_core{
             } # end of default case
           } # end of switch for type
           
-          if($filter != ''){
-            $sql .= " AND ".$filter;
-          }
+          #if($filter != ''){							# erstmal wieder rausgenommen, weil der Filter sich auf Attribute beziehen kann, die zu anderen Tabellen gehören
+          #  $sql .= " AND ".$filter;
+          #}
           $ret = $layerdb->execSQL($sql,4, 1);
           
           if ($ret[0]) {
