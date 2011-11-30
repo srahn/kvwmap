@@ -168,10 +168,7 @@ class bodenrichtwertzone {
   	$formvars['oertliche_bezeichnung'] = str_replace(chr(13), '', $formvars['oertliche_bezeichnung']);
     $this->debug->write('<br>file:bodenrichtwerte.php class:bodenrichtwertzone function eintragenNeueZone<br>Einfügen der Daten zu einer Richtwertzone in<br>PostGIS',4);
   	$sql ="INSERT INTO bw_zonen (";
-  	if($formvars['zonennr']){$sql.= "zonennr,";}
   	if($formvars['stichtag']){$sql.= "stichtag";} 
-  	if($formvars['standort']){$sql.= ",standort";} 
-		if($formvars['richtwertdefinition']){$sql.= ",richtwertdefinition";} 
 		if($formvars['gemeinde']){$sql.= ",gemeinde";} 
 		if($formvars['gemarkung']){$sql.= ",gemarkung";} 
 		if($formvars['ortsteilname']){$sql.= ",ortsteilname";} 
@@ -202,10 +199,7 @@ class bodenrichtwertzone {
 		if($formvars['verfahrensgrund_zusatz']){$sql.= ",verfahrensgrund_zusatz";} 
 		if($formvars['bemerkungen']){$sql.= ",bemerkungen";} 
   	$sql.=", the_geom, textposition) VALUES (";
-  	if($formvars['zonennr']){$sql.= $formvars['zonennr'].',';}
   	if($formvars['stichtag']){$sql.= "'31.12.".$formvars['stichtag']."' ";}
-    if($formvars['standort']){$sql.= ",'".$formvars['standort']."' ";}
-    if($formvars['richtwertdefinition']){$sql.= ",'".$formvars['richtwertdefinition']."' ";}
     if($formvars['gemeinde']){$sql.= ",".$formvars['gemeinde'];}
     if($formvars['gemarkung']){$sql.= ",".$formvars['gemarkung'];}
     if($formvars['ortsteilname']){$sql.= ",'".$formvars['ortsteilname']."' ";}
@@ -255,9 +249,6 @@ class bodenrichtwertzone {
   	$formvars['oertliche_bezeichnung'] = str_replace(chr(13), '', $formvars['oertliche_bezeichnung']);
     $this->debug->write('<br>file:bodenrichtwerte.php class:bodenrichtwertzone function aktualisierenZone<br>Einfügen der Daten zu einer Richtwertzone in<br>PostGIS',4);
     $sql = "UPDATE bw_zonen SET ";
-    if($formvars['zonennr']){$sql.= "zonennr = ".$formvars['zonennr'].", ";}
-    if($formvars['standort']){$sql.= "standort = '".$formvars['standort']."', ";}
-    if($formvars['richtwertdefinition']){$sql.= "richtwertdefinition = '".$formvars['richtwertdefinition']."', ";}
     if($formvars['gemeinde']){$sql.= "gemeinde = ".$formvars['gemeinde'].", ";}
     if($formvars['gemarkung']){$sql.= "gemarkung = ".$formvars['gemarkung'].", ";}
     if($formvars['ortsteilname']){$sql.= "ortsteilname = '".$formvars['ortsteilname']."', ";}
@@ -318,7 +309,7 @@ class bodenrichtwertzone {
       # SQL-Einfügeanfrage stellen
       $this->debug->write('Kopieren der Zonen von einem Stichtag zu einem neuen.',4);
       $sql.="INSERT INTO bw_zonen";
-      $sql.=" SELECT old_oid, zonennr, standort, richtwertdefinition, gemeinde, gemarkung, ortsteilname, postleitzahl, zonentyp, gutachterausschuss, bodenrichtwertnummer, oertliche_bezeichnung, bodenrichtwert, '".$newStichtag."', basiskarte, entwicklungszustand, beitragszustand, nutzungsart, ergaenzende_nutzung, bauweise, geschosszahl, grundflaechenzahl, geschossflaechenzahl, baumassenzahl, flaeche, tiefe, breite, wegeerschliessung, ackerzahl, gruenlandzahl, aufwuchs, verfahrensgrund, verfahrensgrund_zusatz, bemerkungen, textposition, the_geom";
+      $sql.=" SELECT gemeinde, gemarkung, ortsteilname, postleitzahl, zonentyp, gutachterausschuss, bodenrichtwertnummer, oertliche_bezeichnung, bodenrichtwert, '".$newStichtag."', basiskarte, entwicklungszustand, beitragszustand, nutzungsart, ergaenzende_nutzung, bauweise, geschosszahl, grundflaechenzahl, geschossflaechenzahl, baumassenzahl, flaeche, tiefe, breite, wegeerschliessung, ackerzahl, gruenlandzahl, aufwuchs, verfahrensgrund, verfahrensgrund_zusatz, bemerkungen, textposition, the_geom";
       $sql.=" FROM bw_zonen WHERE stichtag = '".$oldStichtag."'";
       $ret=$this->database->execSQL($sql,4, 1);
       if ($ret[0]) {

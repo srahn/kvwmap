@@ -989,6 +989,7 @@ ALTER TABLE jagdbezirke ADD COLUMN status boolean;
 ALTER TABLE jagdbezirke ALTER COLUMN jb_zuordnung TYPE character varying(10);
 ALTER TABLE jagdbezirke ALTER COLUMN id TYPE character varying(10);
 
+
 CREATE OR REPLACE FUNCTION linefrompoly(geometry)
   RETURNS geometry AS
 $BODY$SELECT 
@@ -1023,6 +1024,8 @@ select AddGeometryColumn ('public','uko_polygon','the_geom',2398,'GEOMETRY',2); 
 
 
 ----# Änderungen von 1.8.0 nach 1.9.0
+
+-- ACHTUNG: DIE FUNKTION linefrompoly (siehe Änderungen von 1.7.5 nach 1.7.6) MUSS IN ALLEN DATENBANKEN ANGELEGT WERDEN, AUF DIE LAYER ZUGREIFEN, FÜR DIE DER PUNKTFANG ZUR VERFÜGUNG STEHEN SOLL!!!
 
 ALTER TABLE tabelleninfo ALTER COLUMN thema TYPE character varying(20);
 

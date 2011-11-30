@@ -344,28 +344,6 @@ function update_require_attribute(attributes, layer_id, value){
 	 	</td>
 	 	<td valign="top">
 	 		<table cellpadding="0" cellspacing="0" border="0">
-			  <tr>
-			  	<td>
-			  		<table border="0" cellpadding="4" cellspacing="0">
-						  <tr> 
-						    <td colspan="3">Zonennummer: 
-						      <input name="zonennr" type="text" id="Zonennr" value="<?php echo $this->formvars['zonennr']; ?>" size="5" maxlength="5"> 
-						    </td>
-						  </tr>
-						  <tr> 
-						    <td colspan="3">Standort: 
-						      <input name="standort" type="text" value="<?php echo $this->formvars['standort']; ?>" size="25" maxlength="255"> 
-						    </td>
-						  </tr>
-						  <tr> 
-						    <td colspan="3">Richtwertdef.: 
-						      <input name="richtwertdefinition" type="text" id="richtwertdefinition" value="<?php echo $this->formvars['richtwertdefinition']; ?>" size="21" maxlength="50"> 
-						    </td>
-						  </tr>
-						</table>
-					</td>
-				</tr>
-				
 				<tr>
 			  	<td>
 			  		<table border="0" style="border:1px steelblue solid" cellpadding="3" cellspacing="0">
