@@ -100,6 +100,9 @@ function show_all_flurst(){
     <td align="center"><a href="javascript:document.GUI.go.value = 'jagdbezirke_auswaehlen_Suchen';javascript:document.GUI.submit()">zur&uuml;ck zur Trefferliste</a></td>
   </tr>
   <? } ?>
+  <tr>
+  	<td align="center"><a href="javascript:hideMenue();javascript:print();">Drucken</a></td>
+  </tr>
   <tr> 
     <td align="right">&nbsp;</td>
   </tr>
