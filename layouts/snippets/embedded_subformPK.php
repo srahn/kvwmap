@@ -41,6 +41,10 @@
 							$output = '<img border="0" title="zum Datensatz" src="'.GRAPHICSPATH.'zum_datensatz.gif">';
 						}break;
 						
+						case 'Link': {
+							$output = basename($this->qlayerset[$i]['shape'][$k][$this->formvars['preview_attribute']]);								
+						} break;
+						
 						default : {
 							$output = $this->qlayerset[$i]['shape'][$k][$this->formvars['preview_attribute']];						
 						}
