@@ -1030,6 +1030,8 @@ ALTER TABLE tabelleninfo ALTER COLUMN thema TYPE character varying(20);
 INSERT INTO tabelleninfo VALUES ('adressaend0019', 1234);
 INSERT INTO tabelleninfo VALUES ('adressaend0021', 1324);
 
+ALTER TABLE uko_polygon ADD COLUMN dateiname character varying(50);
+
 
 
 

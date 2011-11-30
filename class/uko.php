@@ -50,7 +50,7 @@ class uko{
 					}
 				}
 				$polygon = 'MULTIPOLYGON((('.implode(',', $coords).')))';
-				$sql = "INSERT INTO uko_polygon (username, the_geom) VALUES('".$username."', geometryfromtext('".$polygon."', ".EPSGCODE."))";
+				$sql = "INSERT INTO uko_polygon (username, dateiname, the_geom) VALUES('".$username."', '".$_FILES['ukofile']['name']."', geometryfromtext('".$polygon."', ".EPSGCODE."))";
 				$ret = $database->execSQL($sql,4, 1);
 				if ($ret[0])$this->success = false;
         else $this->success = true;
