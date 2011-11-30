@@ -15,6 +15,7 @@
  $strNoMatch="Zu diesem Layer wurden keine Objekte gefunden!";
  $strDeleteThisDataset="Datensatz löschen";
  $strCSVExportThis="Datensatz in CSV exportieren";
+ $strUKOExportThis="Geometrie ins UKO-Format exportieren";
  $strShowPK="anzeigen";
  $strNewPK="neu";
  $strShowFK="anzeigen";

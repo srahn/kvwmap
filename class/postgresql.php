@@ -998,7 +998,7 @@ class pgdatabase extends pgdatabase_core {
   }
   
   function getBuchungenFromGrundbuchALKIS($FlurstKennz,$Bezirk,$Blatt,$keine_historischen) {
-    $sql ="SELECT DISTINCT bezirk.schluesselgesamt AS bezirk, blatt.buchungsblattnummermitbuchstabenerweiterung AS blatt, buchung.laufendenummer AS bvnr, buchung.buchungsart, ba.bezeichner as bezeichnung, f.flurstueckskennzeichen as flurstkennz, buchung.zaehler||buchung.nenner as anteil, buchung.nummerimaufteilungsplan as auftplannr, buchung.beschreibungdessondereigentums as sondereigentum, namensnummer.beschriebderrechtsgemeinschaft as zusatz_eigentuemer"; 
+    $sql ="SELECT DISTINCT bezirk.schluesselgesamt AS bezirk, blatt.buchungsblattnummermitbuchstabenerweiterung AS blatt, buchung.laufendenummer AS bvnr, buchung.buchungsart, ba.bezeichner as bezeichnung, f.flurstueckskennzeichen as flurstkennz, buchung.zaehler::text||buchung.nenner::text as anteil, buchung.nummerimaufteilungsplan as auftplannr, buchung.beschreibungdessondereigentums as sondereigentum, namensnummer.beschriebderrechtsgemeinschaft as zusatz_eigentuemer"; 
 		$sql.=" FROM ax_flurstueck f, alkis_beziehungen flst2buchung, ax_buchungsstelle buchung, ax_buchungsstelle_buchungsart ba, alkis_beziehungen buchung2blatt, ax_buchungsblattbezirk bezirk, ax_buchungsblatt blatt, alkis_beziehungen blatt2namensnummer, ax_namensnummer namensnummer";
 		$sql.=" WHERE flst2buchung.beziehungsart::text = 'istGebucht'::text AND f.gml_id = flst2buchung.beziehung_von AND flst2buchung.beziehung_zu = buchung.gml_id AND buchung2blatt.beziehungsart::text = 'istBestandteilVon'::text AND buchung2blatt.beziehung_von = buchung.gml_id AND buchung2blatt.beziehung_zu = blatt.gml_id AND blatt.land = bezirk.land AND blatt.bezirk = bezirk.bezirk AND buchung.buchungsart = ba.wert AND blatt2namensnummer.beziehungsart::text = 'istBestandteilVon'::text AND blatt2namensnummer.beziehung_zu = blatt.gml_id AND blatt2namensnummer.beziehung_von = namensnummer.gml_id";
     if ($Bezirk!='') {
@@ -1490,7 +1490,7 @@ class pgdatabase extends pgdatabase_core {
 		$sql.=" AND buchung2blatt.beziehung_von = buchung.gml_id";
 		$sql.=" AND buchung2blatt.beziehung_zu = blatt.gml_id";
 		$sql.=" AND blatt.land = bezirk.land AND blatt.bezirk = bezirk.bezirk";
-    $sql.=" AND bezirk.schluesselgesamt = ".$bezirk." AND blatt.buchungsblattnummermitbuchstabenerweiterung = ".$blatt;
+    $sql.=" AND bezirk.schluesselgesamt = ".$bezirk." AND blatt.buchungsblattnummermitbuchstabenerweiterung = '".$blatt."'";
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
       while($rs=pg_fetch_array($ret[1])) {
@@ -1626,7 +1626,7 @@ class pgdatabase extends pgdatabase_core {
   }
   
   function getALBDataALKIS($FlurstKennz) {
-    $sql ="SELECT lpad(f.flurnummer, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, zaehler, nenner, k.schluesselgesamt AS kreisid, k.bezeichnung as kreisname, f.land||f.gemarkungsnummer as gemkgschl, g_g.gemarkungsname as gemkgname, g.schluesselgesamt as gemeinde, g_g.gemeindename";
+    $sql ="SELECT lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, zaehler, nenner, k.schluesselgesamt AS kreisid, k.bezeichnung as kreisname, f.land::text||f.gemarkungsnummer::text as gemkgschl, g_g.gemarkungsname as gemkgname, g.schluesselgesamt as gemeinde, g_g.gemeindename";
 	  //$sql.=",f.pruefzeichen,f.status,f.entsteh,f.letzff,f.aktunr,f.karte,f.baublock,f.koorrw,f.koorhw,f.forstamt,fa.finanzamt,fa.name AS finanzamtname,";
 	  $sql.=" FROM ax_kreisregion AS k, ax_gemeinde as g, gemeinde_gemarkung AS g_g, ax_flurstueck AS f";
 	  //$sql.="LEFT JOIN alb_v_finanzaemter AS fa ON f.finanzamt=fa.finanzamt";
@@ -2978,7 +2978,7 @@ class pgdatabase extends pgdatabase_core {
       $sql.=" AND blatt.buchungsblattnummermitbuchstabenerweiterung= '".$blatt."'";
     }   
     if ($gemkgschl>0) {
-      $sql.=" AND f.land||f.gemarkungsnummer IN (".implode(',', $gemkgschl).")";
+      $sql.=" AND f.land*10000 + f.gemarkungsnummer IN (".implode(',', $gemkgschl).")";
     }    
     if ($flur>0) {
       $sql.=" AND lpad(f.flurnummer, 3, '0') = '".$flur."'";
@@ -3401,7 +3401,7 @@ class pgdatabase extends pgdatabase_core {
   }
   
   function getGemarkungNameALKIS($GemkgSchl) {
-    $sql ="SELECT bezeichnung as gemkgname FROM ax_gemarkung WHERE land||gemarkungsnummer=".$GemkgSchl;
+    $sql ="SELECT bezeichnung as gemkgname FROM ax_gemarkung WHERE land*10000 + gemarkungsnummer = ".$GemkgSchl;
     $this->debug->write("<p>postgres.sql getGemarkungName Abfragen des Gemarkungsnamen:<br>".$sql,4);
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0]) {
@@ -3477,7 +3477,7 @@ class pgdatabase extends pgdatabase_core {
 	}
 	
 	function getGrundbuchblattlisteALKIS($bezirk){
-		$sql = "SELECT buchungsblattnummermitbuchstabenerweiterung as blatt FROM ax_buchungsblatt WHERE land||bezirk = ".$bezirk." ORDER BY blatt";
+		$sql = "SELECT buchungsblattnummermitbuchstabenerweiterung as blatt FROM ax_buchungsblatt WHERE land*10000 + bezirk = ".$bezirk." ORDER BY blatt";
 		$ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
     	while($rs=pg_fetch_array($ret[1])){
@@ -3544,7 +3544,7 @@ class pgdatabase extends pgdatabase_core {
 		$sql.=" AND buchung2blatt.beziehung_von = buchung.gml_id";
 		$sql.=" AND buchung2blatt.beziehung_zu = blatt.gml_id";
 		$sql.=" AND blatt.land = bezirk.land AND blatt.bezirk = bezirk.bezirk";
-		$sql.=" AND f.land||f.gemarkungsnummer IN (".implode(',', $gemkg_ids).")";
+		$sql.=" AND f.land*10000 + f.gemarkungsnummer IN (".implode(',', $gemkg_ids).")";
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
@@ -4119,7 +4119,7 @@ class pgdatabase extends pgdatabase_core {
       $sql.=" AND g.schluesselgesamt=".$GemID;
     }
     if ($GemkgID!='') {
-      $sql.=" AND f.land||f.gemarkungsnummer=".$GemkgID;
+      $sql.=" AND f.land*10000 + f.gemarkungsnummer=".$GemkgID;
     }
     $sql.=" ORDER BY gemeinde, strassenname";
     #echo $sql;
@@ -4245,11 +4245,11 @@ class pgdatabase extends pgdatabase_core {
   }
   
   function getFlurenListeByGemkgIDByFlurIDALKIS($GemkgID,$FlurID,$order, $historical = false){
-    $sql ="SELECT lpad(gemarkungsteilflur, 3, '0') AS FlurID, lpad(gemarkungsteilflur, 3, '0') AS Name";
+    $sql ="SELECT lpad(gemarkungsteilflur::tetx, 3, '0') AS FlurID, lpad(gemarkungsteilflur::text, 3, '0') AS Name";
     $sql.=",schluesselgesamt AS GemFlurID FROM ax_gemarkungsteilflur WHERE 1=1 ";
     
     if ($GemkgID>0) {
-      $sql.=" AND land || gemarkung=".$GemkgID;
+      $sql.=" AND land*10000 + gemarkung=".$GemkgID;
     }
     if ($FlurID[0]>0) {
       $sql.=" AND schluesselgesamt IN (".$FlurID[0];

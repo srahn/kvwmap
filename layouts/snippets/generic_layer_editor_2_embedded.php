@@ -55,8 +55,7 @@ function update_require_attribute(attributes, k,layer_id, value){
 					$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]] = $this->qlayerset[$i]['attributes']['default'][$j];
 				}
 				if($this->qlayerset[$i]['attributes']['invisible'][$this->qlayerset[$i]['attributes']['name'][$j]] != 'true'  AND $this->qlayerset[$i]['attributes']['name'][$j] != 'lock'){
-				if($this->qlayerset[$i]['attributes']['privileg'][$j] == '0' AND $this->qlayerset[$i]['attributes']['form_element_type'][$j] == 'Auswahlfeld' OR
-					$this->qlayerset[$i]['attributes']['type'][$j] == 'not_saveable'){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar
+				if($this->qlayerset[$i]['attributes']['privileg'][$j] == '0' AND $this->qlayerset[$i]['attributes']['form_element_type'][$j] == 'Auswahlfeld' OR $this->qlayerset[$i]['attributes']['type'][$j] == 'not_saveable'){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar
 					$this->qlayerset[$i]['attributes']['form_element_type'][$j] .= '_not_saveable';
 				}
 ?>

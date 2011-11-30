@@ -6337,7 +6337,7 @@ class GUI extends GUI_core{
       if($table['tablename'] != ''){
         $sql = "INSERT INTO ".$table['tablename']." (";
         for($i = 0; $i < count($table['attributname']); $i++){
-          if(($table['type'][$i] != 'not_saveable' AND $table['type'][$i] != 'Auswahlfeld_not_saveable' AND $table['type'][$i] != 'SubFormPK' AND $table['type'][$i] != 'SubFormFK' AND $this->formvars[$table['formfield'][$i]] != '') 
+          if(($table['type'][$i] != 'Text_not_saveable' AND $table['type'][$i] != 'Auswahlfeld_not_saveable' AND $table['type'][$i] != 'SubFormPK' AND $table['type'][$i] != 'SubFormFK' AND $this->formvars[$table['formfield'][$i]] != '') 
           OR $table['type'][$i] == 'Time' OR $table['type'][$i] == 'User' OR $table['type'][$i] == 'Geometrie'){
             if($table['type'][$i] == 'Geometrie'){
               if($this->formvars['geomtype'] == 'POINT' AND $this->formvars['loc_x'] != ''){
@@ -6364,7 +6364,7 @@ class GUI extends GUI_core{
           elseif($table['type'][$i] == 'User'){                       # Typ "User"
             $sql.= "'".$this->user->Vorname." ".$this->user->Name."', ";
           }
-          elseif($table['type'][$i] != 'not_saveable' AND $table['type'][$i] != 'Auswahlfeld_not_saveable' AND $table['type'][$i] != 'SubFormPK' AND $table['type'][$i] != 'SubFormFK' AND $this->formvars[$table['formfield'][$i]] != ''){
+          elseif($table['type'][$i] != 'Text_not_saveable' AND $table['type'][$i] != 'Auswahlfeld_not_saveable' AND $table['type'][$i] != 'SubFormPK' AND $table['type'][$i] != 'SubFormFK' AND $this->formvars[$table['formfield'][$i]] != ''){
             $sql.= "'".addslashes($this->formvars[$table['formfield'][$i]])."', ";      # Typ "normal"
           }
           elseif($table['type'][$i] == 'Geometrie'){                    # Typ "Geometrie"
@@ -10245,7 +10245,7 @@ class GUI extends GUI_core{
               # nichts machen
             } break;
             default : {
-              if($tablename AND $type != 'not_saveable' AND $type != 'Auswahlfeld_not_saveable' AND $type != 'SubFormPK' AND $type != 'SubFormFK' AND $type != 'SubFormEmbeddedPK' AND $attributname != 'the_geom'){
+              if($tablename AND $type != 'Text_not_saveable' AND $type != 'Auswahlfeld_not_saveable' AND $type != 'SubFormPK' AND $type != 'SubFormFK' AND $type != 'SubFormEmbeddedPK' AND $attributname != 'the_geom'){
                 if($this->formvars[$form_fields[$i]] == ''){
                   $sql = "UPDATE ".$tablename." SET ".$attributname." = NULL WHERE oid = '".$oid."'";
                 }
@@ -12100,13 +12100,19 @@ class GUI extends GUI_core{
     $this->saveMap('');
   }
 
+
+	function layer_error_handling(){
+		$this->reset_layers();
+		return '<br><br>Einer der Layer ist fehlerhaft. Klicken Sie <a href="index.php">auf Neu starten</a> um alle Layer auszuschalten.';
+	}
+
   # Zeichnet die Kartenelemente Hauptkarte, Legende, Maßstab und Referenzkarte
   # drawMap #
-  function drawMap() {  	
+  function drawMap() {
     if(MINSCALE != '' AND $this->map_factor == '' AND $this->map->scale < MINSCALE){
       $this->scaleMap(MINSCALE);
     }    
-    $this->image_map = $this->map->draw();   
+    $this->image_map = $this->map->draw() OR die($this->layer_error_handling());    
     $filename = $this->user->id.'_'.rand(0, 1000000).'.'.$this->map->outputformat->extension;
     $this->image_map->saveImage(IMAGEPATH.$filename);
     $this->img['hauptkarte'] = IMAGEURL.$filename;

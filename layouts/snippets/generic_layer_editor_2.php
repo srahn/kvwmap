@@ -264,7 +264,7 @@ function change_orderby(attribute, layer_id){
 			        <span style="color:<? echo TXT_GLEHEADER; ?>;"><? echo $strSelectThisDataset; ?></span>
 			      </td>
 			      <td align="right">
-			      	<a id="uko_<? echo $this->qlayerset[$i]['Layer_ID'].'_'.$k; ?>" style="visibility:hidden" href=""><img src="<? echo GRAPHICSPATH; ?>datensatz_exportieren_uko.png" border="0"></a>&nbsp;&nbsp;
+			      	<a id="uko_<? echo $this->qlayerset[$i]['Layer_ID'].'_'.$k; ?>" style="visibility:hidden" href="" title="<? echo $strUKOExportThis; ?>"><img src="<? echo GRAPHICSPATH; ?>datensatz_exportieren_uko.png" border="0"></a>&nbsp;&nbsp;
 			        <a href="javascript:select_this_dataset(<? echo $this->qlayerset[$i]['Layer_ID']; ?>, <? echo $k; ?>);csv_export(<? echo $this->qlayerset[$i]['Layer_ID']; ?>);" title="<? echo $strCSVExportThis; ?>"><img src="<? echo GRAPHICSPATH; ?>datensatz_exportieren_csv.png" border="0"></a>&nbsp;&nbsp;
 			        <? if($this->qlayerset[$i]['privileg'] == '2'){ ?>
 			        	<a href="javascript:select_this_dataset(<? echo $this->qlayerset[$i]['Layer_ID']; ?>, <? echo $k; ?>);delete_datasets(<?php echo $this->qlayerset[$i]['Layer_ID']; ?>);" title="<? echo $strDeleteThisDataset; ?>"><img src="<? echo GRAPHICSPATH; ?>datensatz_loeschen.png" border="0"></a>
@@ -288,8 +288,7 @@ function change_orderby(attribute, layer_id){
 				if($this->new_entry == true AND $this->qlayerset[$i]['attributes']['default'][$j] != '' AND $this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]] == ''){		# Default-Werte setzen
 					$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]] = $this->qlayerset[$i]['attributes']['default'][$j];
 				}
-				if($this->qlayerset[$i]['attributes']['privileg'][$j] == '0' AND $this->qlayerset[$i]['attributes']['form_element_type'][$j] == 'Auswahlfeld' OR
-					$this->qlayerset[$i]['attributes']['type'][$j] == 'not_saveable'){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar
+				if($this->qlayerset[$i]['attributes']['privileg'][$j] == '0' AND $this->qlayerset[$i]['attributes']['form_element_type'][$j] == 'Auswahlfeld' OR $this->qlayerset[$i]['attributes']['type'][$j] == 'not_saveable'){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar
 					$this->qlayerset[$i]['attributes']['form_element_type'][$j] .= '_not_saveable';
 				}
 				if($this->qlayerset[$i]['attributes']['invisible'][$this->qlayerset[$i]['attributes']['name'][$j]] != 'true' AND $this->qlayerset[$i]['attributes']['name'][$j] != 'lock'){

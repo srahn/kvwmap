@@ -1127,7 +1127,7 @@ class GUI_core {
     if(MINSCALE != '' AND $this->map_factor == '' AND $this->map->scale < MINSCALE){
       $this->scaleMap(MINSCALE);
     }    
-    $this->image_map = $this->map->draw();   
+    $this->image_map = @$this->map->draw() OR die($this->reset_layers());   
     $filename = $this->user->id.'_'.rand(0, 1000000).'.'.$this->map->outputformat->extension;
     $this->image_map->saveImage(IMAGEPATH.$filename);
     $this->img['hauptkarte'] = IMAGEURL.$filename;
