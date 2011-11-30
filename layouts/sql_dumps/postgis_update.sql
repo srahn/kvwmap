@@ -1035,6 +1035,11 @@ INSERT INTO tabelleninfo VALUES ('adressaend0021', 1324);
 
 ALTER TABLE uko_polygon ADD COLUMN dateiname character varying(50);
 
+ALTER TABLE public.bw_zonen DROP COLUMN old_oid;
+ALTER TABLE public.bw_zonen DROP COLUMN zonennr;
+ALTER TABLE public.bw_zonen DROP COLUMN standort;
+ALTER TABLE public.bw_zonen DROP COLUMN richtwertdefinition;
+
 
 
 
