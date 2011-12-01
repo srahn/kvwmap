@@ -219,6 +219,10 @@ function change_orderby(attribute, layer_id){
 	document.GUI.submit();
 }
 
+function set_changed_flag(flag){
+	flag.value=1;
+}
+
 
 //-->
 </script>
@@ -253,6 +257,7 @@ function change_orderby(attribute, layer_id){
 	<tr>
 	  <td>
 	    <div id="datensatz">
+	    <input type="hidden" value="" name="changed_<? echo $this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][0]].'_oid']; ?>"> 
 	    <table class="tgle" border="1">
 	      <thead class="gle">
 	        <th colspan="2" style="background-color:<? echo BG_GLEHEADER; ?>;">
@@ -325,7 +330,7 @@ function change_orderby(attribute, layer_id){
 									echo '<input readonly style="background-color:#e8e3da;" size="'.$size.'" type="text" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].';'.$this->qlayerset[$i]['attributes']['type'][$j].'" value="'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]].'">';
 							}
 							else{
-			  					echo '<select title="'.$this->qlayerset[$i]['attributes']['alias'][$j].'"  style="font-size: '.$this->user->rolle->fontsize_gle.'px" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].';'.$this->qlayerset[$i]['attributes']['type'][$j].'">';
+			  					echo '<select onchange="set_changed_flag(document.GUI.changed_'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].')" title="'.$this->qlayerset[$i]['attributes']['alias'][$j].'"  style="font-size: '.$this->user->rolle->fontsize_gle.'px" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].';'.$this->qlayerset[$i]['attributes']['type'][$j].'">';
 									for($e = 0; $e < count($this->qlayerset[$i]['attributes']['enum_value'][$j]); $e++){
 										echo '<option ';
 										if($this->qlayerset[$i]['attributes']['enum_value'][$j][$e] == $this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]){
@@ -339,7 +344,7 @@ function change_orderby(attribute, layer_id){
 			  			else{
 								switch ($this->qlayerset[$i]['attributes']['form_element_type'][$j]){
 									case 'Textfeld' : {
-										echo '<textarea cols="45"';
+										echo '<textarea cols="45" onchange="set_changed_flag(document.GUI.changed_'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].')"';
 										if($this->qlayerset[$i]['attributes']['privileg'][$j] == '0' OR $lock[$k]){
 											echo ' readonly style="border:0px;background-color:transparent;font-family:arial,verdana,helvetica,sans-serif;font-size: '.$this->user->rolle->fontsize_gle.'px;"';
 										}
@@ -374,7 +379,7 @@ function change_orderby(attribute, layer_id){
                       $auswahlfeld_output_laenge = '';
 										}
 										else{
-											echo '<select title="'.$this->qlayerset[$i]['attributes']['alias'][$j].'" style="font-size: '.$this->user->rolle->fontsize_gle.'px"';
+											echo '<select onchange="set_changed_flag(document.GUI.changed_'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].')" title="'.$this->qlayerset[$i]['attributes']['alias'][$j].'" style="font-size: '.$this->user->rolle->fontsize_gle.'px"';
 											if($this->qlayerset[$i]['attributes']['req_by'][$j] != ''){
 												echo 'onchange="update_require_attribute(\''.$this->qlayerset[$i]['attributes']['req_by'][$j].'\', '.$k.','.$this->qlayerset[$i]['Layer_ID'].', this.value);" ';
 											}
@@ -583,7 +588,7 @@ function change_orderby(attribute, layer_id){
 
 										}
 										if($this->qlayerset[$i]['attributes']['privileg'][$j] != '0' AND !$lock[$k]){
-											echo '<input style="font-size: '.$this->user->rolle->fontsize_gle.'px" size="43" type="file" onchange="this.title=this.value;" accept="image/*" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].';'.$this->qlayerset[$i]['attributes']['type'][$j].'">';
+											echo '<input onchange="set_changed_flag(document.GUI.changed_'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].')" style="font-size: '.$this->user->rolle->fontsize_gle.'px" size="43" type="file" onchange="this.title=this.value;" accept="image/*" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].';'.$this->qlayerset[$i]['attributes']['type'][$j].'">';
 										}
 										else{
 											echo '&nbsp;';
@@ -602,7 +607,7 @@ function change_orderby(attribute, layer_id){
 											echo '</a><br>';
 										}
 										if($this->qlayerset[$i]['attributes']['privileg'][$j] != '0' OR $lock[$k]){
-											echo '<input style="font-size: '.$this->user->rolle->fontsize_gle.'px" size="61" type="text" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].';'.$this->qlayerset[$i]['attributes']['type'][$j].'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">';
+											echo '<input onchange="set_changed_flag(document.GUI.changed_'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].')" style="font-size: '.$this->user->rolle->fontsize_gle.'px" size="61" type="text" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].';'.$this->qlayerset[$i]['attributes']['type'][$j].'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">';
 										}
 									} break;
 
@@ -636,7 +641,7 @@ function change_orderby(attribute, layer_id){
 									} break;
 
 									case 'Fläche': {
-										echo '<input id="custom_area" onkeyup="checknumbers(this, \''.$this->qlayerset[$i]['attributes']['type'][$j].'\');"; title="'.$this->qlayerset[$i]['attributes']['alias'][$j].'" ';
+										echo '<input onchange="set_changed_flag(document.GUI.changed_'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].')" id="custom_area" onkeyup="checknumbers(this, \''.$this->qlayerset[$i]['attributes']['type'][$j].'\');"; title="'.$this->qlayerset[$i]['attributes']['alias'][$j].'" ';
 										if($this->qlayerset[$i]['attributes']['length'][$j]){
 											echo ' maxlength="'.$this->qlayerset[$i]['attributes']['length'][$j].'"';
 										}
@@ -650,7 +655,7 @@ function change_orderby(attribute, layer_id){
 									}break;
 
 									default : {
-										echo '<input onkeyup="checknumbers(this, \''.$this->qlayerset[$i]['attributes']['type'][$j].'\');"; title="'.$this->qlayerset[$i]['attributes']['alias'][$j].'" ';
+										echo '<input onchange="set_changed_flag(document.GUI.changed_'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].')" onkeyup="checknumbers(this, \''.$this->qlayerset[$i]['attributes']['type'][$j].'\');"; title="'.$this->qlayerset[$i]['attributes']['alias'][$j].'" ';
 										if($this->qlayerset[$i]['attributes']['length'][$j]){
 											echo ' maxlength="'.$this->qlayerset[$i]['attributes']['length'][$j].'"';
 										}

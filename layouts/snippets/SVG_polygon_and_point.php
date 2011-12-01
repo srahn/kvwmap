@@ -38,6 +38,8 @@
 	<input name="last_doing" type="hidden" value="<? echo $this->formvars['last_doing']; ?>">
 	<input name="lastcoordx" type="hidden" value="">
 	<input name="lastcoordy" type="hidden" value="">
+	<input type="hidden" name="str_pathx" value="<? echo $this->formvars['str_pathx']; ?>">
+  <input type="hidden" name="str_pathy" value="<? echo $this->formvars['str_pathy']; ?>">
   
 <?php
 #
@@ -54,6 +56,7 @@ $svg .= $basicfunctions;
 $svg .= $pointfunctions;
 $svg .= $polygonfunctions;
 $svg .= $flurstqueryfunctions;
+$svg .= $measurefunctions;
 $svg .= $SVGvars_coordscript;
 $svg .= $SVGvars_tooltipscript;
 $svg .= ']]></script>';
@@ -70,6 +73,7 @@ $svg .= polygonbuttons($strUndo, $strDeletePolygon, $strDrawPolygon, $strCutByPo
 $svg .= flurstquerybuttons();
 $svg .= vertex_edit_buttons($strCornerPoint);
 $svg .= pointbuttons($strSetPosition);
+$svg .= measure_buttons($strRuler);
 $svg .= '</g>';
 $svg .= $SVG_end;
 

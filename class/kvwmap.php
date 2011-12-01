@@ -1996,7 +1996,7 @@ class GUI extends GUI_core{
       $select .= ")";
       $datastring = $this->formvars['layer_columnname']." from (".$select.' '.$orderby;
       $datastring.=") as foo using unique oid using srid=".$layerset[0]['epsg_code'];
-      $legendentext=$layerset[0]['Name'];
+      $legendentext = $layerset[0]['Name']." (".date('d.m. H:i',time()).")";
 
       $group = $dbmap->getGroupbyName('Suchergebnis');
       if($group != ''){
@@ -10197,11 +10197,11 @@ class GUI extends GUI_core{
         $type = $element[4];
         if($layer_id != $old_layer_id AND $tablename != ''){
           $layerdb = $mapdb->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
-          $filter = $mapdb->getFilter($layer_id, $this->Stelle->id);
+          #$filter = $mapdb->getFilter($layer_id, $this->Stelle->id);		# siehe unten
           $old_layer_id = $layer_id;
         }
 
-        if($attributname != 'oid' AND $tablename != ''){
+        if($this->formvars['changed_'.$oid] == 1 AND $attributname != 'oid' AND $tablename != ''){
           # 2008-03-26 pk
           switch($type) {
             case 'Dokument' : {
@@ -11113,7 +11113,7 @@ class GUI extends GUI_core{
       
       # SVG-Geometrie abfragen für highlighting
       if($this->user->rolle->highlighting == '1'){
-        $pfad = "asSVG(transform(".$the_geom.", ".$client_epsg."), 0, 4) AS highlight_geom, ".$pfad;
+        $pfad = "asSVG(transform(".$the_geom.", ".$client_epsg."), 0, 8) AS highlight_geom, ".$pfad;
       }
       
       # 2006-06-12 sr   Filter zur Where-Klausel hinzugefügt
@@ -11588,7 +11588,7 @@ class GUI extends GUI_core{
     if(count($FlurstListe) > 1){
       $legendentext .= "e";
     }
-    $legendentext .= ":<br>".$FlurstListe[0];
+    $legendentext .= " (".date('d.m. H:i',time())."):<br>".$FlurstListe[0];
     for ($i=1;$i<count($FlurstListe);$i++) {
       $datastring.=",'".$FlurstListe[$i]."'";
       $legendentext.=",<br>".$FlurstListe[$i];

@@ -232,7 +232,12 @@ class GUI_core {
         $map->set('width',$this->user->rolle->nImageWidth);
         $map->set('height',$this->user->rolle->nImageHeight);
         $map->set('resolution',96);
-        $map->set('units',MS_METERS);
+        if($this->user->rolle->epsg_code == '4326'){
+        	$map->set('units',MS_DD);
+        }
+        else{
+        	$map->set('units',MS_METERS);
+        }        
         #$map->set('transparent', MS_OFF);
         #$map->set('interlace', MS_ON);
         $map->set('status', MS_ON);

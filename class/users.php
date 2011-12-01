@@ -2283,9 +2283,11 @@ class stelle extends stelle_core{
     }
     if($user_id != NULL){
 			$sql .= ' UNION ';
-			$sql .= 'SELECT -id as Layer_ID, concat(SUBSTRING(Name FROM 1 FOR 30)," (Suchergebnis)"), -1, " ", `connection` FROM rollenlayer'; 
+			$sql .= 'SELECT -id as Layer_ID, concat(substring( `Name` FROM 1 FOR locate( ")", `Name` ))," -Suchergebnis-"), -1, " ", `connection` FROM rollenlayer';
 			$sql .= ' WHERE stelle_id = '.$this->id.' AND user_id = '.$user_id.' AND connectiontype = 6';
-    } 
+    }
+
+
 	  $sql .= ' ORDER BY Name';
     #echo $sql;
     $this->debug->write("<p>file:users.php class:stelle->getqueryableVectorLayers - Lesen der abfragbaren VektorLayer zur Stelle:<br>".$sql,4);
