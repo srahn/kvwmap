@@ -5949,8 +5949,13 @@ class GUI extends GUI_core{
           if($this->formvars['value2_'.$layerset[0]['attributes']['name'][$i]] != ''){
             $sql_where.=' AND \''.$this->formvars['value2_'.$layerset[0]['attributes']['name'][$i]].'\'';
           }
-          # Suche nur im Stellen-Extent
+          # räumliche Einschränkung
           if($layerset[0]['attributes']['name'][$i] == $layerset[0]['attributes']['the_geom']){
+          	# Suche im Suchpolygon
+          	if($this->formvars['newpathwkt'] != ''){
+							$sql_where.=' AND Intersects('.$layerset[0]['attributes']['the_geom'].', (Transform(geomfromtext(\''.$this->formvars['newpathwkt'].'\', '.$this->user->rolle->epsg_code.'), '.$layerset[0]['epsg_code'].')))';          		
+          	}
+          	# Suche nur im Stellen-Extent
             $sql_where.=' AND ('.$layerset[0]['attributes']['the_geom'].' && Transform(geomfromtext(\'POLYGON(('.$this->Stelle->MaxGeorefExt->minx.' '.$this->Stelle->MaxGeorefExt->miny.', '.$this->Stelle->MaxGeorefExt->maxx.' '.$this->Stelle->MaxGeorefExt->miny.', '.$this->Stelle->MaxGeorefExt->maxx.' '.$this->Stelle->MaxGeorefExt->maxy.', '.$this->Stelle->MaxGeorefExt->minx.' '.$this->Stelle->MaxGeorefExt->maxy.', '.$this->Stelle->MaxGeorefExt->minx.' '.$this->Stelle->MaxGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layerset[0]['epsg_code'].') OR '.$layerset[0]['attributes']['the_geom'].' IS NULL)';
           }
         }
@@ -6143,6 +6148,34 @@ class GUI extends GUI_core{
     	$this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, NULL, $this->formvars['selected_group_id']);	
     }
     if($this->formvars['selected_layer_id']){
+    	################# Map ###############################################
+    	$this->loadMap('DataBase');
+	    $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
+	    if($this->formvars['layer_id'] == '')$this->formvars['layer_id'] = $this->formvars['selected_layer_id']; 
+	    # Geometrie-Übernahme-Layer:
+	    # Spaltenname und from-where abfragen
+	    $data = $this->mapDB->getData($this->formvars['layer_id']);
+	    #echo $data;
+	    $data_explosion = explode(' ', $data);
+	    $this->formvars['columnname'] = $data_explosion[0];
+	    $select = $this->mapDB->getSelectFromData($data);
+	    # order by rausnehmen
+	  	$orderbyposition = strpos(strtolower($select), 'order by');
+	  	if($orderbyposition !== false){
+		  	$select = substr($select, 0, $orderbyposition);
+	  	}
+	    $this->formvars['fromwhere'] = 'from ('.$select.') as foo where 1=1';
+	    if(strpos(strtolower($this->formvars['fromwhere']), 'where') === false){
+	      $this->formvars['fromwhere'] .= ' where (1=1)';
+	    } 
+	    if($this->formvars['CMD']== 'Full_Extent' OR $this->formvars['CMD'] == 'recentre' OR $this->formvars['CMD'] == 'zoomin' OR $this->formvars['CMD'] == 'zoomout' OR $this->formvars['CMD'] == 'previous' OR $this->formvars['CMD'] == 'next') {
+	      $this->navMap($this->formvars['CMD']);
+	    }
+	    $this->saveMap('');
+	    $currenttime=date('Y-m-d H:i:s',time());
+	    $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
+	    $this->drawMap();
+    	########################################################################
       $this->formvars['anzahl'] = MAXQUERYROWS;
       $layerset=$this->user->rolle->getLayer($this->formvars['selected_layer_id']);
       $this->formvars['selected_group_id'] = $layerset[0]['Gruppe']; 
@@ -7228,7 +7261,26 @@ class GUI extends GUI_core{
     $this->titel='Shape-Export';
     $this->main='shape_export.php';
     $this->loadMap('DataBase');
+    $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
     $this->shape = new shape();
+    if($this->formvars['layer_id']){
+	    # Geometrie-Übernahme-Layer:
+	    # Spaltenname und from-where abfragen
+	    $data = $this->mapDB->getData($this->formvars['layer_id']);
+	    #echo $data;
+	    $data_explosion = explode(' ', $data);
+	    $this->formvars['columnname'] = $data_explosion[0];
+	    $select = $this->mapDB->getSelectFromData($data);
+	    # order by rausnehmen
+	  	$orderbyposition = strpos(strtolower($select), 'order by');
+	  	if($orderbyposition !== false){
+		  	$select = substr($select, 0, $orderbyposition);
+	  	}
+	    $this->formvars['fromwhere'] = 'from ('.$select.') as foo where 1=1';
+	    if(strpos(strtolower($this->formvars['fromwhere']), 'where') === false){
+	      $this->formvars['fromwhere'] .= ' where (1=1)';
+	    }
+    }
     if($this->formvars['CMD']== 'Full_Extent' OR $this->formvars['CMD'] == 'recentre' OR $this->formvars['CMD'] == 'zoomin' OR $this->formvars['CMD'] == 'zoomout' OR $this->formvars['CMD'] == 'previous' OR $this->formvars['CMD'] == 'next') {
       $this->navMap($this->formvars['CMD']);
     }

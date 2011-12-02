@@ -98,7 +98,18 @@ function buildwktpolygonfromsvgpath(svgpath){
   	</td>
   </tr>
   <tr> 
-    <td colspan="5" align="center"> 
+    <td colspan="5" align="right">
+    	Geometrie übernehmen von: 
+  		<select name="layer_id" onchange="document.GUI.submit();">
+  			<option value="">--- Auswahl ---</option>
+  			<?
+  				for($i = 0; $i < count($this->queryable_vector_layers['ID']); $i++){
+  					echo '<option';
+  					if($this->formvars['layer_id'] == $this->queryable_vector_layers['ID'][$i]){echo ' selected';}
+  					echo ' value="'.$this->queryable_vector_layers['ID'][$i].'">'.$this->queryable_vector_layers['Bezeichnung'][$i].'</option>';
+  				}
+  			?>
+  		</select>
       <?php
  				include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php')
 			?>
@@ -114,8 +125,7 @@ function buildwktpolygonfromsvgpath(svgpath){
 <input type="hidden" name="client_epsg" value="<? echo $this->user->rolle->epsg_code ?>">
 <input type="hidden" name="go" value="SHP_Export">
 <input type="hidden" name="area" value="">
-<INPUT TYPE="hidden" NAME="layer_id" VALUE="<? echo $this->formvars['selected_layer_id']; ?>">
-<INPUT TYPE="hidden" NAME="columnname" VALUE="<? echo $this->shape->formvars['columnname'] ?>">
-<INPUT TYPE="hidden" NAME="fromwhere" VALUE="<? echo $this->shape->formvars['fromwhere']; ?>">
+<INPUT TYPE="hidden" NAME="columnname" VALUE="<? echo $this->formvars['columnname'] ?>">
+<INPUT TYPE="hidden" NAME="fromwhere" VALUE="<? echo $this->formvars['fromwhere']; ?>">
 
 

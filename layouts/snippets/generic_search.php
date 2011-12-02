@@ -79,6 +79,16 @@ function suche(){
 	<?	} 
 		}
 	}?>
+	if(document.GUI.map_flag.value == 1){
+		if(document.GUI.newpathwkt.value == ''){
+			if(document.GUI.newpath.value == ''){
+				nogo = 'Geben Sie ein Polygon an.';
+			}
+			else{
+				document.GUI.newpathwkt.value = buildwktpolygonfromsvgpath(document.GUI.newpath.value);
+			}
+		}
+	}
 	if(nogo != ''){
 		alert(nogo);
 	}
@@ -86,6 +96,32 @@ function suche(){
 		document.GUI.go_plus.value = 'Suchen';
 		document.GUI.submit();
 	}
+}
+
+
+function buildwktpolygonfromsvgpath(svgpath){
+	var koords;
+	var wkt = '';
+	if(svgpath != '' && svgpath != undefined){
+		wkt = "POLYGON((";
+		parts = svgpath.split("M");
+		for(j = 1; j < parts.length; j++){
+			if(j > 1){
+				wkt = wkt + "),("
+			}
+			koords = ""+parts[j];
+			coord = koords.split(" ");
+			wkt = wkt+coord[1]+" "+coord[2];
+			for(var i = 3; i < coord.length-1; i++){
+				if(coord[i] != ""){
+					wkt = wkt+","+coord[i]+" "+coord[i+1];
+				}
+				i++;
+			}
+		}
+		wkt = wkt+"))";
+	}
+	return wkt;
 }
 
 
@@ -108,6 +144,21 @@ function showsearches(){
 	else{
 		document.getElementById('searches1').style.border="none";
 		document.getElementById('searches2').style.display = 'none';
+	}
+}
+
+function showmap(){
+	if(document.getElementById('map2').style.display == 'none'){
+		document.getElementById('map1').style.borderTop="1px solid #C3C7C3";
+		document.getElementById('map1').style.borderLeft="1px solid #C3C7C3";
+		document.getElementById('map1').style.borderRight="1px solid #C3C7C3";
+		document.getElementById('map2').style.display = '';
+		document.GUI.map_flag.value = 1;
+	}
+	else{
+		document.getElementById('map1').style.border="none";
+		document.getElementById('map2').style.display = 'none';
+		document.GUI.map_flag.value = '';
 	}
 }
 
@@ -209,7 +260,32 @@ function delete_search(){
     	</table>
     </td>
   </tr>
+  
+  <? if($this->formvars['columnname'] != ''){ ?>
+  <tr>
+    <td id="map1"><a href="javascript:showmap();">Suche räumlich eingrenzen...</a>&nbsp;</td>
+  </tr>
+  <tr id="map2" style="display:none"> 
+    <td align="right" style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3">
+    	Geometrie übernehmen von: 
+  		<select name="layer_id" onchange="document.GUI.submit();">
+  			<?
+  				for($i = 0; $i < count($this->queryable_vector_layers['ID']); $i++){
+  					echo '<option';
+  					if($this->formvars['layer_id'] == $this->queryable_vector_layers['ID'][$i]){echo ' selected';}
+  					echo ' value="'.$this->queryable_vector_layers['ID'][$i].'">'.$this->queryable_vector_layers['Bezeichnung'][$i].'</option>';
+  				}
+  			?>
+  		</select>
+  		<?php
+				include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php')
+			?>
+    </td>
+  </tr>
+  <? } ?>
+  
   <? if($this->selected_search != ''){echo '<script type="text/javascript">showsearches();</script>';} ?>
+  <? if($this->formvars['map_flag'] != ''){echo '<script type="text/javascript">showmap();</script>';} ?>
   <tr> 
     <td colspan="5">
       <table align="center" border="0" cellspacing="0" cellpadding="0">
@@ -314,4 +390,8 @@ function delete_search(){
 <input type="hidden" name="go_plus" value="">
 <input type="hidden" name="go" value="Layer-Suche">
 <input type="hidden" name="titel" value="<? echo $this->formvars['titel'] ?>">
+<input type="hidden" name="map_flag" value="<? echo $this->formvars['map_flag']; ?>">
+<input type="hidden" name="area" value="">
+<INPUT TYPE="HIDDEN" NAME="columnname" VALUE="<?php echo $this->formvars['columnname']; ?>">
+<INPUT TYPE="HIDDEN" NAME="fromwhere" VALUE="<? echo $this->formvars['fromwhere']; ?>">
 

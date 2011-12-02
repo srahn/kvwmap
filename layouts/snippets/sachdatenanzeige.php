@@ -325,3 +325,9 @@ for ($i=0;$i<$anzLayer;$i++) {
 <input type="hidden" name="titel" value="<? echo $this->formvars['titel'] ?>">
 <input type="hidden" name="width" value="">
 <input type="hidden" name="document_attributename" value="">
+<input type="hidden" name="map_flag" value="<? echo $this->formvars['map_flag']; ?>">
+<input name="newpath" type="hidden" value="<?php echo $this->formvars['newpath']; ?>">
+<input name="pathwkt" type="hidden" value="<?php echo $this->formvars['newpathwkt']; ?>">
+<input name="newpathwkt" type="hidden" value="<?php echo $this->formvars['newpathwkt']; ?>">
+<input name="result" type="hidden" value="">
+<input name="firstpoly" type="hidden" value="<?php echo $this->formvars['firstpoly']; ?>">
