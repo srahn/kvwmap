@@ -118,6 +118,15 @@
 		  </select>
     </td>
   </tr>
+  <tr>
+    <td align="right"><?php echo $strCoordType; ?>:&nbsp;</td>
+    <td>
+			<select name="coordtype">
+        <option value="dec" <?php if ($this->user->rolle->coordtype=="dec") { echo "selected"; } ?>>Dezimal</option>
+        <option value="dms" <?php if ($this->user->rolle->coordtype=="dms") { echo "selected"; } ?>>Grad,Minuten,Sekunden</option>
+			</select>
+		</td>
+  </tr>
   <tr align="center">
     <td align="right"><?php echo $strLanguage; ?>:&nbsp;</td>
     <td align="left">

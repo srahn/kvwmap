@@ -1021,3 +1021,9 @@ CREATE TABLE `u_consumeCSV` (
 
 ALTER TABLE `layer` ADD `kurzbeschreibung` TEXT NULL ,
 ADD `datenherr` VARCHAR( 100 ) NULL ;
+
+
+#------------------------------------------------------------------------------------------
+# Änderung von 1.8.0 zu 1.9.0
+
+ALTER TABLE `rolle` ADD `coordtype` ENUM( 'dec', 'dms' ) NOT NULL DEFAULT 'dec' AFTER `epsg_code2` 

@@ -1022,8 +1022,12 @@ class GUI_core {
       }
       else{
         #---------- Punkt-Rollenlayer erzeugen --------#
-        $datastring ="the_geom from (select geomfromtext('POINT(".$minx." ".$maxy.")', ".$this->user->rolle->epsg_code.") as the_geom, 1 as oid) as foo using unique oid using srid=".$this->user->rolle->epsg_code;
         $legendentext ="Koordinate: ".$minx." ".$maxy;
+        if(strpos($minx, '°') !== false){
+	      	$minx = dms2dec($minx);
+	      	$maxy = dms2dec($maxy);
+	      }
+        $datastring ="the_geom from (select geomfromtext('POINT(".$minx." ".$maxy.")', ".$this->user->rolle->epsg_code.") as the_geom, 1 as oid) as foo using unique oid using srid=".$this->user->rolle->epsg_code;
         $group = $this->mapDB->getGroupbyName('Suchergebnis');
         if($group != ''){
           $groupid = $group['id'];

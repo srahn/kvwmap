@@ -19,5 +19,6 @@
   $strPlatt="Lower German";
   $strSearchColor="Result-Color";
   $strPolish="Polish";
+  $strCoordType="Coordinate Presentation";
   
 ?>  

@@ -815,31 +815,6 @@ function redrawPolygon(){
 
 //---------------- Flaeche messen --------------------
 
-function format_number(number){
-	if(parseFloat(top.document.GUI.pixelsize.value) < 0.01){
-    stellen = 2;
-  }
-  else if(parseFloat(top.document.GUI.pixelsize.value) < 0.1){
-    stellen = 1;
-  }
-  else{
-    stellen = 0;
-  }
-	number = Math.round( number * Math.pow(10, stellen) ) / Math.pow(10, stellen);
-	str_number = number+"";
-	str_split = str_number.split(".");
-	if(!str_split[1]) str_split[1] = "";
-	if(str_split[1].length < stellen){
-		nachkomma = str_split[1];
-		for(i=str_split[1].length+1; i <= stellen; i++){
-		 	nachkomma += "0";
-		}
-		str_split[1] = nachkomma;
-	}
-	if(stellen == 0){sep = "";}
-	else{sep = ".";	}
-	return str_split[0]+sep+str_split[1];
-}		
 		
 function polygonarea(evt){
   // Flaecheninhalt eines Polygons nach Gauss
@@ -1000,10 +975,12 @@ function redrawPL(){
 }
 
 function show_coords(evt){
-	coorx = format_number(evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value));
-	coory = format_number(top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value));
+	coorx = evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value);
+	coory = top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value);
+	if(top.document.GUI.secondcoords != undefined)top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&curSRID='.$this->user->rolle->epsg_code.'&newSRID='.$this->user->rolle->epsg_code2.'&point="+coorx+" "+coory+"&operation=transformPoint&resulttype=wkt&coordtype='.$this->user->rolle->coordtype.'", new Array(top.document.GUI.secondcoords), "");
+	coorx = top.format_number(coorx);
+	coory = top.format_number(coory);
 	top.document.GUI.firstcoords.value = coorx+" "+coory; 
-	if(top.document.GUI.secondcoords != undefined)top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&curSRID='.$this->user->rolle->epsg_code.'&newSRID='.$this->user->rolle->epsg_code2.'&point="+coorx+" "+coory+"&operation=transformPoint&resulttype=wkt", new Array(top.document.GUI.secondcoords), "");
 	top.document.getElementById("showcoords").style.display="";
 }
 

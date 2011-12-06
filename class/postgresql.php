@@ -91,13 +91,21 @@ class pgdatabase extends pgdatabase_core {
     return $rs[0];
   }
 
-	function transformPoint($point, $curSRID, $newSRID){
-		$sql ="SELECT round(CAST (X(point) AS numeric),2) AS x, round(CAST (Y(point) AS numeric),2) AS y";
+	function transformPoint($point, $curSRID, $newSRID, $coordtype){
+		$sql ="SELECT X(point) AS x, Y(point) AS y";
     $sql.=" FROM (SELECT TRANSFORM(GeomFromText('POINT(".$point.")',".$curSRID."),".$newSRID.") AS point) AS foo";
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
       $rs=pg_fetch_array($ret[1]);
-      $ret[1]=$rs['x'].' '.$rs['y'];
+      if($coordtype == 'dms' AND $rs['x'] < 361){
+      	$rs['x'] = dec2dms($rs['x']);
+      	$rs['y'] = dec2dms($rs['y']);
+      }
+      else{
+      	$rs['x'] = round($rs['x'], 2);
+      	$rs['y'] = round($rs['y'], 2);
+      }
+      $ret[1]=utf8_encode($rs['x'].' '.$rs['y']);
     }
     return $ret;
 	}

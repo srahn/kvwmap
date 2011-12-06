@@ -19,6 +19,7 @@
   $strPlatt="Plattdeutsch";
   $strSearchColor="Suchergebnis-Farbe";
   $strPolish="Polnisch";
+  $strCoordType="Koordinatendarstellung";
   
   
 ?>

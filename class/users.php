@@ -662,6 +662,7 @@ class user extends user_core{
       $sql.=',nImageHeight='.$nImageHeight.',gui="'.$formvars['gui'].'"';
       $sql.=',epsg_code="'.$formvars['epsg_code'].'"';
       $sql.=',epsg_code2="'.$formvars['epsg_code2'].'"';
+      $sql.=',coordtype="'.$formvars['coordtype'].'"';
       $sql.=',minx='.$newExtent['minx'].',miny='.$newExtent['miny'];
       $sql.=',maxx='.$newExtent['maxx'].',maxy='.$newExtent['maxy'];
       $sql.=',language="'.$formvars['language'].'"';

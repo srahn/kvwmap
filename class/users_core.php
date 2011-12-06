@@ -280,6 +280,7 @@ class rolle_core {
     $this->nZoomFactor=$rs['nZoomFactor'];
     $this->epsg_code=$rs['epsg_code'];
     $this->epsg_code2=$rs['epsg_code2'];
+    $this->coordtype=$rs['coordtype'];
     $this->last_time_id=$rs['last_time_id'];
     $this->gui=$rs['gui'];
     $this->language=$rs['language'];

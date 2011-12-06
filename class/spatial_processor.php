@@ -118,7 +118,8 @@ class spatial_processor {
 		    $point = $formvars['point'];
 		    $newSRID=$formvars['newSRID'];
 		    $curSRID=$formvars['curSRID'];
-		    $ret=$this->pgdatabase->transformPoint($point, $curSRID, $newSRID);
+		    $coordtype=$formvars['coordtype'];
+		    $ret=$this->pgdatabase->transformPoint($point, $curSRID, $newSRID, $coordtype);
 		    if ($ret[0]) {
 		    	$result = 'Fehler bei der Abfrage in PostGIS!';
 		    }

@@ -4,6 +4,27 @@
  * nicht gefunden wurden, nicht verstanden wurden oder zu umfrangreich waren.
  */
 
+function dms2dec($number){
+	$part1 = explode('°', $number);
+	$degrees = $part1[0];
+	$part2 = explode("'", $part1[1]);
+	$minutes = $part2[0];
+	$seconds = trim($part2[1], '"');
+	$seconds = $seconds / 60;
+	$minutes = ($minutes+$seconds) / 60;
+	return $degrees + $minutes;  
+}
+
+function dec2dms($number){
+	$part1 = explode('.', $number);
+	$degrees = $part1[0];
+	$minutes = ('0.'.$part1[1]) * 60;
+	$part2 = explode('.', $minutes);
+	$minutes = $part2[0];
+	$seconds = round(('0.'.$part2[1]) * 60);
+	return $degrees."°".$minutes."'".$seconds.'"';
+}
+
 function allocateImageColors($image, $colors) {
 	$imageColors = Array();
 	foreach($colors AS $colorName => $rgbValues) {

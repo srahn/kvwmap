@@ -12154,8 +12154,7 @@ class GUI extends GUI_core{
 
 
 	function layer_error_handling(){
-		$this->reset_layers();
-		return '<br><br>Einer der Layer ist fehlerhaft. Klicken Sie <a href="index.php">auf Neu starten</a> um alle Layer auszuschalten.';
+		return '<br><br>Einer der Layer ist fehlerhaft. Klicken Sie <a href="index.php?go=reset_layers">auf Neu starten</a> um alle Layer auszuschalten.';
 	}
 
   # Zeichnet die Kartenelemente Hauptkarte, Legende, Maﬂstab und Referenzkarte
@@ -13333,7 +13332,7 @@ class db_mapObj extends db_mapObj_core{
     $sql .= "'".$formvars['user_id']."', ";
     $sql .= "'".$formvars['stelle_id']."', ";
     $sql .= "'".$formvars['aktivStatus']."', ";
-    $sql .= "'".$formvars['Name']."', ";
+    $sql .= "'".addslashes($formvars['Name'])."', ";
     $sql .= "'".$formvars['Datentyp']."', ";
     $sql .= "'".$formvars['Gruppe']."', ";
     $sql .= "'".$formvars['Data']."', ";

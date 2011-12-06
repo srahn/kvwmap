@@ -570,6 +570,7 @@ CREATE TABLE rolle (
   selectedButton varchar(20) NOT NULL default 'zoomin',
   epsg_code varchar(6) default '2398',
   epsg_code2 varchar(6) NULL,
+  coordtype ENUM( 'dec', 'dms' ) NOT NULL DEFAULT 'dec',
   active_frame int(11) NOT NULL default '0',  
   last_time_id DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
   gui varchar(25) collate latin1_german2_ci NOT NULL default 'gui.php',
