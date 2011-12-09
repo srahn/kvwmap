@@ -116,9 +116,9 @@ function delete_selection(){
           if($privileg['baulasten']){ echo '<input  name="baulasten" type="checkbox" '; if($this->formvars['baulasten'] == 'true') echo 'checked'; echo '>Baulasten<br>';}
           if($privileg['bestandsnr']){ echo '<input  name="blattnr" type="checkbox" '; if($this->formvars['blattnr'] == 'true') echo 'checked'; echo '>Blattnummer<br>';}
           if($privileg['bestandsnr']){ echo '<input  name="buchungsart" type="checkbox" '; if($this->formvars['buchungsart'] == 'true') echo 'checked'; echo '>Buchungsart<br>';}
-          if($privileg['bestandsnr']){ echo '<input  name="bvnr" type="checkbox" '; if($this->formvars['bvnr'] == 'true') echo 'checked'; echo '>BVNR<br>';}
+          if($privileg['bestandsnr']){ echo '<input  name="bvnr" type="checkbox" '; if($this->formvars['bvnr'] == 'true') echo 'checked'; echo '>Bestandsverzeichnisnummer<br>';}
           if($privileg['entsteh']){ echo '<input  name="entsteh" type="checkbox" '; if($this->formvars['entsteh'] == 'true') echo 'checked'; echo '>Entstehung<br>';}
-          if($this->formvars['go'] != 'Eigentümer-CSV-Export' AND $privileg['eigentuemer']){ echo '<input  name="eigentuemer" type="checkbox" '; if($this->formvars['eigentuemer'] == 'true') echo 'checked'; echo '>Eigentümer<br>';}
+          if($this->formvars['formnummer'] != 'Eigentümer' AND $privileg['eigentuemer']){ echo '<input  name="eigentuemer" type="checkbox" '; if($this->formvars['eigentuemer'] == 'true') echo 'checked'; echo '>Eigentümer<br>';}
           if($privileg['finanzamtname']){ echo '<input  name="finanzamtname" type="checkbox" '; if($this->formvars['finanzamtname'] == 'true') echo 'checked'; echo '>Finanzamtname<br>';}
 			    if($privileg['finanzamt']){ echo '<input  name="finanzamt" type="checkbox" '; if($this->formvars['finanzamt'] == 'true') echo 'checked'; echo '>Finanzamtschlüssel<br>';}
 			    if($privileg['karte']){ echo '<input  name="karte" type="checkbox" '; if($this->formvars['karte'] == 'true') echo 'checked'; echo '>Flurkarte<br>';}
@@ -144,11 +144,11 @@ function delete_selection(){
 			    if($privileg['klassifizierung']){ echo '<input  name="klassifizierung" type="checkbox" '; if($this->formvars['klassifizierung'] == 'true') echo 'checked'; echo '>Klassifizierung<br>';}
 			    if($privileg['kreisname']){ echo '<input  name="kreisname" type="checkbox" '; if($this->formvars['kreisname'] == 'true') echo 'checked'; echo '>Kreisname<br>';}
 			    if($privileg['kreisid']){ echo '<input  name="kreisid" type="checkbox" '; if($this->formvars['kreisid'] == 'true') echo 'checked'; echo '>Kreisschlüssel<br>';}
-			    if($this->formvars['go'] != 'Nutzungsarten-CSV-Export' AND $privileg['nutzung']){ echo '<input  name="nutzung" type="checkbox" '; if($this->formvars['nutzung'] == 'true') echo 'checked'; echo '>Nutzung<br>';}
+			    if($this->formvars['formnummer'] != 'Nutzungsarten' AND $privileg['nutzung']){ echo '<input  name="nutzung" type="checkbox" '; if($this->formvars['nutzung'] == 'true') echo 'checked'; echo '>Nutzung<br>';}
 			    if($privileg['bestandsnr']){ echo '<input  name="pruefzeichen" type="checkbox" '; if($this->formvars['pruefzeichen'] == 'true') echo 'checked'; echo '>Prüfzeichen<br>';}
 			    if($privileg['status']){ echo '<input  name="status" type="checkbox" '; if($this->formvars['status'] == 'true') echo 'checked'; echo '>Status<br>';}
 			    if($privileg['verfahren']){ echo '<input  name="verfahren" type="checkbox" '; if($this->formvars['verfahren'] == 'true') echo 'checked'; echo '>Verfahren<br>';}
-			    if($privileg['vorgaenger']){ echo '<input  name="vorgaenger" type="checkbox" '; if($this->formvars['vorgaenger'] == 'true') echo 'checked'; echo '>Vorgaenger<br>';}			    
+			    if($privileg['vorgaenger']){ echo '<input  name="vorgaenger" type="checkbox" '; if($this->formvars['vorgaenger'] == 'true') echo 'checked'; echo '>Vorgänger<br>';}			    
 			    ?>
           </td>
         </tr>
@@ -164,7 +164,7 @@ function delete_selection(){
 			  <tr>
 			  	<td align="left"  colspan="2">
 			  		<input class="button" type="button" style="width:84px" name="delete" value="löschen" onclick="delete_selection();">&nbsp;			
-			  		<select name="selection" style="width:220px">
+			  		<select name="selection" onchange="load_selection();" style="width:220px">
 			  			<option value="">-- Auswahl --</option>
 			  			<?
 			  				for($i = 0; $i < count($this->attribute_selections); $i++){
@@ -174,7 +174,6 @@ function delete_selection(){
 			  				}
 			  			?>
 			  		</select>
-			  		<input class="button" type="button" style="width:84px" name="laden" value="laden" onclick="load_selection();">
 			    </td>
 			  </tr>
         
