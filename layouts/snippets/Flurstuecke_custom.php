@@ -931,11 +931,11 @@ function emzversteckt(k){
 		</tr>
 		<tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
 		  <td colspan="2">
-        <a href="javascript:browser_switch('Flurstuecks-CSV-Export');">CSV-Export FST</a>&nbsp;|&nbsp;
+        <a href="javascript:send_selected_flurst('Flurstuecks-CSV-Export', 'Flurstück', '', '');">CSV-Export FST</a>&nbsp;|&nbsp;
         <? if($privileg['eigentuemer']){ ?>
-        <a href="javascript:send_selected_flurst('Eigentümer-CSV-Export', '', '', '');">CSV-Export Eigent&uuml;mer</a>&nbsp;|&nbsp;
+        <a href="javascript:send_selected_flurst('Flurstuecks-CSV-Export', 'Eigentümer', '', '');">CSV-Export Eigent&uuml;mer</a>&nbsp;|&nbsp;
         <? } ?>
-        <a href="javascript:send_selected_flurst('Nutzungsarten-CSV-Export', '', '', '');">CSV-Export NA</a>
+        <a href="javascript:send_selected_flurst('Flurstuecks-CSV-Export', 'Nutzungsarten', '', '');">CSV-Export NA</a>
   		  </td>
 		</tr>
 		<tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
@@ -968,7 +968,19 @@ function emzversteckt(k){
 <input type="hidden" name="FlurstKennz" value="">
 <input type="hidden" name="formnummer" value="">
 <input type="hidden" name="wz" value="">
+<input name="querypolygon" type="hidden" value="<?php echo $this->querypolygon; ?>">
+<input name="rectminx" type="hidden" value="<?php echo $this->formvars['rectminx'] ? $this->formvars['rectminx'] : $this->queryrect->minx; ?>">
+<input name="rectminy" type="hidden" value="<?php echo $this->formvars['rectminy'] ? $this->formvars['rectminy'] : $this->queryrect->miny; ?>">
+<input name="rectmaxx" type="hidden" value="<?php echo $this->formvars['rectmaxx'] ? $this->formvars['rectmaxx'] : $this->queryrect->maxx; ?>">
+<input name="rectmaxy" type="hidden" value="<?php echo $this->formvars['rectmaxy'] ? $this->formvars['rectmaxy'] : $this->queryrect->maxy; ?>">
+
 <?
+echo '<input type="hidden" name="selFlstID" value="'.$this->formvars['selFlstID'].'">';
+echo '<input type="hidden" name="GemID" value="'.$this->formvars['GemID'].'">';
+echo '<input type="hidden" name="GemkgID" value="'.$this->formvars['GemkgID'].'">';
+echo '<input type="hidden" name="FlstNr" value="'.$this->formvars['FlstNr'].'">';
+echo '<input type="hidden" name="FlurID" value="'.$this->formvars['FlurID'].'">';
+
 if($this->formvars['go'] != 'neu Laden' AND $this->formvars['go'] != 'Layer-Suche' AND $this->formvars['go'] != 'Layer-Suche_Suchen' AND $this->formvars['go'] != 'Sachdaten'){
 ?>
 <input name="go" type="hidden" value="">
@@ -992,7 +1004,6 @@ if($this->formvars['namensuche'] == 'true'){
   <input name="name4" type="hidden" value="<? echo $this->formvars['name4']; ?>">
   <input name="bezirk" type="hidden" value="<? echo $this->formvars['bezirk']; ?>">
   <input name="blatt" type="hidden" value="<? echo $this->formvars['blatt']; ?>">
-  <input name="GemkgID" type="hidden" value="<? echo $this->formvars['GemkgID']; ?>">
   <input name="offset" type="hidden" value="<? echo $this->formvars['offset']; ?>">
   <input name="order" type="hidden" value="<? echo $this->formvars['order'] ?>">
   <input name="anzahl" type="hidden" value="<?php echo $this->formvars['anzahl']; ?>">

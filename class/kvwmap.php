@@ -4705,9 +4705,35 @@ class GUI extends GUI_core{
     $this->output();
   }
 
-  function export_flurst_csv(){
+	function export_flurst_csv(){
+		$this->attribute_selections = $this->user->rolle->get_csv_attribute_selections();
+    $this->attribute = explode(';', $this->formvars['attributliste']);
+    $this->main = 'export_flurstuecke_csv.php';
+   	$this->titel = $this->formvars['formnummer'].'-CSV-Export';
+    $this->output();
+  }
+  
+  function export_flurst_csv_auswahl_speichern(){
+  	$this->formvars['selection'] = $this->user->rolle->save_csv_attribute_selection($this->formvars['name'], $this->formvars['attributes']);
+  	$this->export_flurst_csv_auswahl_laden();
+  }
+  
+  function export_flurst_csv_auswahl_laden(){
+  	$this->selection = $this->user->rolle->get_csv_attribute_selection($this->formvars['selection']);
+  	$attributes = explode('|', $this->selection['attributes']);
+  	for($i = 0; $i < count($attributes); $i++){
+  		$this->formvars[$attributes[$i]] = 'true';
+  	}
+  	$this->export_flurst_csv();
+  }
+  
+  function export_flurst_csv_auswahl_loeschen(){
+  	$this->user->rolle->delete_csv_attribute_selection($this->formvars['selection']);
+  	$this->export_flurst_csv();
+  }
+
+  function export_flurst_csv_exportieren(){
     $flurstuecke = explode(';', $this->formvars['FlurstKennz']);
-    $attribute = explode(';', $this->formvars['attributliste']);
     $ret = $this->Stelle->getFlurstueckeAllowed($flurstuecke, $this->pgdatabase);
     if ($ret[0]) {
       $this->Fehlermeldung=$ret[1];
@@ -4717,58 +4743,23 @@ class GUI extends GUI_core{
       $flurstuecke = $ret[1];
       $ALB = new ALB($this->pgdatabase);
       $currenttime=date('Y-m-d H:i:s',time());
-      $ALB->export_flurst_csv($flurstuecke, $attribute);
-      $this->user->rolle->setConsumeCSV($currenttime,'Flurstück',count($flurstuecke));
+      switch ($this->formvars['formnummer']){
+      	case 'Flurstück' : {
+      		$ALB->export_flurst_csv($flurstuecke, $this->formvars);
+      		$this->user->rolle->setConsumeCSV($currenttime,'Flurstück',count($flurstuecke));
+      	}break;
+      	case 'Nutzungsarten' : {
+      		$ALB->export_nutzungsarten_csv($flurstuecke, $this->formvars);
+      		$this->user->rolle->setConsumeCSV($currenttime,'Nutzungsarten',count($flurstuecke));
+      	}break;
+      	case 'Eigentümer' : {
+      		$ALB->export_eigentuemer_csv($flurstuecke, $this->formvars);
+      		$this->user->rolle->setConsumeCSV($currenttime,'Eigentümer',count($flurstuecke));
+      	}break;
+      }
     }
   }
-  
-  
-  function export_nutzungsarten_csv(){
-    $this->attribute = explode(';', $this->formvars['attributliste']);
-    $this->main = 'export_nutzungsarten_csv.php';
-    $this->titel = 'Nutzungsarten-CSV-Export';
-    $this->output();
-  }
-  
-  function export_nutzungsarten_csv_exportieren(){
-  	$flurstuecke = explode(';', $this->formvars['FlurstKennz']);
-    $ret = $this->Stelle->getFlurstueckeAllowed($flurstuecke, $this->pgdatabase);
-    if ($ret[0]) {
-      $this->Fehlermeldung=$ret[1];
-      showAlert($ret[1]);
-    }
-    else {
-      $flurstuecke = $ret[1];
-      $ALB = new ALB($this->pgdatabase);
-      $currenttime=date('Y-m-d H:i:s',time());
-      $ALB->export_nutzungsarten_csv($flurstuecke, $this->formvars);
-      $this->user->rolle->setConsumeCSV($currenttime,'Nutzungsarten',count($flurstuecke));
-    }
-  }
-  
-  function export_eigentuemer_csv(){
-    $this->attribute = explode(';', $this->formvars['attributliste']);
-    $this->main = 'export_eigentuemer_csv.php';
-    $this->titel = 'Eigentümer-CSV-Export';
-    $this->output();
-  }
-  
-  function export_eigentuemer_csv_exportieren(){
-  	$flurstuecke = explode(';', $this->formvars['FlurstKennz']);
-    $ret = $this->Stelle->getFlurstueckeAllowed($flurstuecke, $this->pgdatabase);
-    if ($ret[0]) {
-      $this->Fehlermeldung=$ret[1];
-      showAlert($ret[1]);
-    }
-    else {
-      $flurstuecke = $ret[1];
-      $ALB = new ALB($this->pgdatabase);
-      $currenttime=date('Y-m-d H:i:s',time());
-      $ALB->export_eigentuemer_csv($flurstuecke, $this->formvars);
-      $this->user->rolle->setConsumeCSV($currenttime,'Eigentümer',count($flurstuecke));
-    }
-  }
-  
+ 
   
   function createMapPDF($frame_id, $preview, $fast = false) {
     # Abfrage der aktuellen Karte

@@ -43,12 +43,12 @@ class ALB {
   }
     
   function export_eigentuemer_csv($flurstuecke, $formvars){
-  	if($formvars['flurstkennz']){ $csv .= 'Flurstückskennzeichen;';}
-  	if($formvars['flurstkennz']){ $csv .= 'Flurstückskennzeichen_kurz;';}
-    if($formvars['gemkgname']){ $csv .= 'Gemarkungsname;';}
-    if($formvars['gemkgschl']){ $csv .= 'Gemarkungsschlüssel;';}
-    if($formvars['flurnr']){ $csv .= 'Flurnummer;';}
-    if($formvars['gemeindename']){ $csv .= 'Gemeindename;';}
+  	if($formvars['flurstkennz']){ $csv .= 'FlstKZ;';}
+  	if($formvars['flurstkennz']){ $csv .= 'FlstKZ_kurz;';}
+    if($formvars['gemkgname']){ $csv .= 'Gemkg-Name;';}
+    if($formvars['gemkgschl']){ $csv .= 'Gemkg-Schl.;';}
+    if($formvars['flurnr']){ $csv .= 'Flur;';}
+    if($formvars['gemeindename']){ $csv .= 'Gem-Name;';}
     if($formvars['gemeinde']){ $csv .= 'Gemeinde;';}
     if($formvars['kreisname']){ $csv .= 'Kreisname;';}
     if($formvars['kreisid']){ $csv .= 'Kreisschlüssel;';}
@@ -57,10 +57,10 @@ class ALB {
     if($formvars['forstname']){ $csv .= 'Forstamtname;';}
     if($formvars['forstschluessel']){ $csv .= 'Forstamtschlüssel;';}
     if($formvars['flaeche']){ $csv .= 'Fläche;';}
-    if($formvars['amtsgerichtnr']){ $csv .= 'Amtsgerichtschlüssel;';}
+    if($formvars['amtsgerichtnr']){ $csv .= 'Amtsgericht;';}
     if($formvars['amtsgerichtname']){ $csv .= 'Amtsgerichtname;';}
-    if($formvars['grundbuchbezirkschl']){ $csv .= 'Grundbuchbezirkschlüssel;';}
-    if($formvars['grundbuchbezirkname']){ $csv .= 'Grundbuchbezirkname;';}
+    if($formvars['grundbuchbezirkschl']){ $csv .= 'GBBschlüssel;';}
+    if($formvars['grundbuchbezirkname']){ $csv .= 'GBBname;';}
     if($formvars['lagebezeichnung']){ $csv .= 'Lage;';}
     if($formvars['entsteh']){ $csv .= 'Entstehung;';}
     if($formvars['letzff']){ $csv .= 'Fortführung;';}
@@ -75,7 +75,10 @@ class ALB {
     if($formvars['ausfstelle']){ $csv .= 'ausführende Stelle;';}
     if($formvars['verfahren']){ $csv .= 'Verfahren;';}
     if($formvars['nutzung']){ $csv .= 'Nutzung;';}
-    if($formvars['bestandsnr']){ $csv .= 'Bestand;';}
+    if($formvars['blattnr']){ $csv .= 'Blattnummer;';}
+    if($formvars['pruefzeichen']){ $csv .= 'Prüfzeichen;';}
+    if($formvars['bvnr']){ $csv .= 'BVNR;';}
+    if($formvars['buchungsart']){ $csv .= 'Buchungsart;';}
     $csv .= 'Namensnummer;'; 
     $csv .= 'Eigentümer;Zusatz;Adresse;Ort;';
     
@@ -191,21 +194,51 @@ class ALB {
 				        }
 				        $csv .= ';';
 				      }
-				      if($formvars['bestandsnr']){
-				        for($g = 0; $g < count($flst->Grundbuecher); $g++){
-				          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
-				          for($b = 0; $b < count($flst->Buchungen); $b++){
-				          	if($b > 0)$csv .= ' | ';
-				            $BestandStr =$flst->Buchungen[$b]['bezirk'].'-'.intval($flst->Buchungen[$b]['blatt']);
-				            $BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
-				            $BestandStr.=' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
-				            $BestandStr.=' ('.$flst->Buchungen[$b]['buchungsart'].')';
-				            $BestandStr.=' '.$flst->Buchungen[$b]['bezeichnung'];
-				            $csv .= $BestandStr;
-				          }
-				        }
-				        $csv .= ';';
-				      }
+				      
+				 if($formvars['blattnr']){
+	        for($g = 0; $g < count($flst->Grundbuecher); $g++){
+	          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
+	          for($b = 0; $b < count($flst->Buchungen); $b++){
+	          	if($b > 0)$csv .= ' | ';
+	            $csv .= intval($flst->Buchungen[$b]['blatt']);
+	          }
+	        }
+	        $csv .= ';';
+		    }
+		    
+		    if($formvars['pruefzeichen']){
+	        for($g = 0; $g < count($flst->Grundbuecher); $g++){
+	          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
+	          for($b = 0; $b < count($flst->Buchungen); $b++){
+	          	if($b > 0)$csv .= ' | ';
+	            $csv .= str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
+	          }
+	        }
+	        $csv .= ';';
+		    }
+		    
+		    if($formvars['bvnr']){
+	        for($g = 0; $g < count($flst->Grundbuecher); $g++){
+	          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
+	          for($b = 0; $b < count($flst->Buchungen); $b++){
+	          	if($b > 0)$csv .= ' | ';
+	            $csv .= ' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
+	          }
+	        }
+	        $csv .= ';';
+		    }
+		    
+		    if($formvars['buchungsart']){
+	        for($g = 0; $g < count($flst->Grundbuecher); $g++){
+	          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
+	          for($b = 0; $b < count($flst->Buchungen); $b++){
+	          	if($b > 0)$csv .= ' | ';
+	            $csv .= ' ('.$flst->Buchungen[$b]['buchungsart'].')';
+	            $csv .= ' '.$flst->Buchungen[$b]['bezeichnung'];
+	          }
+	        }
+	        $csv .= ';';
+	      }
 				      
         			$csv .= '\''.$Eigentuemerliste[$e]->Nr.'\';';
               $anzNamenszeilen = count($Eigentuemerliste[$e]->Name);
@@ -228,12 +261,12 @@ class ALB {
   }
   
   function export_nutzungsarten_csv($flurstuecke, $formvars){
-  	if($formvars['flurstkennz']){ $csv .= 'Flurstückskennzeichen;';}
-  	if($formvars['flurstkennz']){ $csv .= 'Flurstückskennzeichen_kurz;';}
-    if($formvars['gemkgname']){ $csv .= 'Gemarkungsname;';}
-    if($formvars['gemkgschl']){ $csv .= 'Gemarkungsschlüssel;';}
-    if($formvars['flurnr']){ $csv .= 'Flurnummer;';}
-    if($formvars['gemeindename']){ $csv .= 'Gemeindename;';}
+  	if($formvars['flurstkennz']){ $csv .= 'FlstKZ;';}
+  	if($formvars['flurstkennz']){ $csv .= 'FlstKZ_kurz;';}
+    if($formvars['gemkgname']){ $csv .= 'Gemkg-Name;';}
+    if($formvars['gemkgschl']){ $csv .= 'Gemkg-Schl.;';}
+    if($formvars['flurnr']){ $csv .= 'Flur;';}
+    if($formvars['gemeindename']){ $csv .= 'Gem-Name;';}
     if($formvars['gemeinde']){ $csv .= 'Gemeinde;';}
     if($formvars['kreisname']){ $csv .= 'Kreisname;';}
     if($formvars['kreisid']){ $csv .= 'Kreisschlüssel;';}
@@ -242,10 +275,10 @@ class ALB {
     if($formvars['forstname']){ $csv .= 'Forstamtname;';}
     if($formvars['forstschluessel']){ $csv .= 'Forstamtschlüssel;';}
     if($formvars['flaeche']){ $csv .= 'Fläche;';}
-    if($formvars['amtsgerichtnr']){ $csv .= 'Amtsgerichtschlüssel;';}
+    if($formvars['amtsgerichtnr']){ $csv .= 'Amtsgericht;';}
     if($formvars['amtsgerichtname']){ $csv .= 'Amtsgerichtname;';}
-    if($formvars['grundbuchbezirkschl']){ $csv .= 'Grundbuchbezirkschlüssel;';}
-    if($formvars['grundbuchbezirkname']){ $csv .= 'Grundbuchbezirkname;';}
+    if($formvars['grundbuchbezirkschl']){ $csv .= 'GBBschlüssel;';}
+    if($formvars['grundbuchbezirkname']){ $csv .= 'GBBname;';}
     if($formvars['lagebezeichnung']){ $csv .= 'Lage;';}
     if($formvars['entsteh']){ $csv .= 'Entstehung;';}
     if($formvars['letzff']){ $csv .= 'Fortführung;';}
@@ -259,7 +292,10 @@ class ALB {
     if($formvars['baulasten']){ $csv .= 'Baulasten;';}
     if($formvars['ausfstelle']){ $csv .= 'ausführende Stelle;';}
     if($formvars['verfahren']){ $csv .= 'Verfahren;';}
-   	if($formvars['bestandsnr']){ $csv .= 'Bestand;';}
+   	if($formvars['blattnr']){ $csv .= 'Blattnummer;';}
+    if($formvars['pruefzeichen']){ $csv .= 'Prüfzeichen;';}
+    if($formvars['bvnr']){ $csv .= 'BVNR;';}
+    if($formvars['buchungsart']){ $csv .= 'Buchungsart;';}
     if($formvars['eigentuemer']){ $csv .= 'Eigentümer;';}
     $csv .= 'Nutzung - Fläche;';
     $csv .= 'Nutzung - Kennzeichen;';
@@ -361,17 +397,46 @@ class ALB {
 	      	$csv .= ';';
 	      }
 		      
-		      if($formvars['bestandsnr']){
+		    if($formvars['blattnr']){
 	        for($g = 0; $g < count($flst->Grundbuecher); $g++){
 	          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
 	          for($b = 0; $b < count($flst->Buchungen); $b++){
 	          	if($b > 0)$csv .= ' | ';
-	            $BestandStr =$flst->Buchungen[$b]['bezirk'].'-'.intval($flst->Buchungen[$b]['blatt']);
-	            $BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
-	            $BestandStr.=' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
-	            $BestandStr.=' ('.$flst->Buchungen[$b]['buchungsart'].')';
-	            $BestandStr.=' '.$flst->Buchungen[$b]['bezeichnung'];
-	            $csv .= $BestandStr;
+	            $csv .= intval($flst->Buchungen[$b]['blatt']);
+	          }
+	        }
+	        $csv .= ';';
+		    }
+		    
+		    if($formvars['pruefzeichen']){
+	        for($g = 0; $g < count($flst->Grundbuecher); $g++){
+	          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
+	          for($b = 0; $b < count($flst->Buchungen); $b++){
+	          	if($b > 0)$csv .= ' | ';
+	            $csv .= str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
+	          }
+	        }
+	        $csv .= ';';
+		    }
+		    
+		    if($formvars['bvnr']){
+	        for($g = 0; $g < count($flst->Grundbuecher); $g++){
+	          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
+	          for($b = 0; $b < count($flst->Buchungen); $b++){
+	          	if($b > 0)$csv .= ' | ';
+	            $csv .= ' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
+	          }
+	        }
+	        $csv .= ';';
+		    }
+		    
+		    if($formvars['buchungsart']){
+	        for($g = 0; $g < count($flst->Grundbuecher); $g++){
+	          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
+	          for($b = 0; $b < count($flst->Buchungen); $b++){
+	          	if($b > 0)$csv .= ' | ';
+	            $csv .= ' ('.$flst->Buchungen[$b]['buchungsart'].')';
+	            $csv .= ' '.$flst->Buchungen[$b]['bezeichnung'];
 	          }
 	        }
 	        $csv .= ';';
@@ -397,7 +462,7 @@ class ALB {
       }
 
         
-        $csv .= $flst->Nutzung[$n][flaeche].'m²;';
+        $csv .= $flst->Nutzung[$n][flaeche].';';
         $csv .= $flst->Nutzung[$n][nutzungskennz].';';
         if($flst->Nutzung[$n][abkuerzung]!='') {
           $csv .= $flst->Nutzung[$n][abkuerzung].'-';
@@ -420,70 +485,69 @@ class ALB {
     print $csv;
   }
 
-  function export_flurst_csv($flurstuecke, $attribute){
-    for($i = 0; $i < count($attribute); $i++){
-      $privileg[$attribute[$i]] = true;
-    }
-
-    if($privileg['flurstkennz']){ $csv .= 'Flurstückskennzeichen;';}
-    if($privileg['flurstkennz']){ $csv .= 'Flurstückskennzeichen_kurz;';}
-    if($privileg['gemkgname']){ $csv .= 'Gemarkungsname;';}
-    if($privileg['gemkgschl']){ $csv .= 'Gemarkungsschlüssel;';}
-    if($privileg['flurnr']){ $csv .= 'Flurnummer;';}
-    if($privileg['gemeindename']){ $csv .= 'Gemeindename;';}
-    if($privileg['gemeinde']){ $csv .= 'Gemeinde;';}
-    if($privileg['kreisname']){ $csv .= 'Kreisname;';}
-    if($privileg['kreisid']){ $csv .= 'Kreisschlüssel;';}
-    if($privileg['finanzamtname']){ $csv .= 'Finanzamtname;';}
-    if($privileg['finanzamt']){ $csv .= 'Finanzamtschlüssel;';}
-    if($privileg['forstname']){ $csv .= 'Forstamtname;';}
-    if($privileg['forstschluessel']){ $csv .= 'Forstamtschlüssel;';}
-    if($privileg['flaeche']){ $csv .= 'Fläche;';}
-    if($privileg['amtsgerichtnr']){ $csv .= 'Amtsgerichtschlüssel;';}
-    if($privileg['amtsgerichtname']){ $csv .= 'Amtsgerichtname;';}
-    if($privileg['grundbuchbezirkschl']){ $csv .= 'Grundbuchbezirkschlüssel;';}
-    if($privileg['grundbuchbezirkname']){ $csv .= 'Grundbuchbezirkname;';}
-    if($privileg['lagebezeichnung']){ $csv .= 'Lage;';}
-    if($privileg['entsteh']){ $csv .= 'Entstehung;';}
-    if($privileg['letzff']){ $csv .= 'Fortführung;';}
-    if($privileg['karte']){ $csv .= 'Flurkarte;';}
-    if($privileg['status']){ $csv .= 'Status;';}
-    if($privileg['vorgaenger']){ $csv .= 'Vorgaenger;';}
-    if($privileg['nachfolger']){ $csv .= 'Nachfolger;';}
-    if($privileg['klassifizierung']){ $csv .= 'Klassifizierung;Angabe;';}
-    if($privileg['freitext']){ $csv .= 'Freitext;';}
-    if($privileg['hinweis']){ $csv .= 'Hinweis;';}
-    if($privileg['baulasten']){ $csv .= 'Baulasten;';}
-    if($privileg['ausfstelle']){ $csv .= 'ausführende Stelle;';}
-    if($privileg['verfahren']){ $csv .= 'Verfahren;';}
-    if($privileg['nutzung']){ $csv .= 'Nutzung;';}
-    if($privileg['bestandsnr']){ $csv .= 'Bestand;';}
-    if($privileg['eigentuemer']){ $csv .= 'Eigentümer;';}
+  function export_flurst_csv($flurstuecke, $formvars){
+    if($formvars['flurstkennz']){ $csv .= 'FlstKZ;';}
+  	if($formvars['flurstkennz']){ $csv .= 'FlstKZ_kurz;';}
+    if($formvars['gemkgname']){ $csv .= 'Gemkg-Name;';}
+    if($formvars['gemkgschl']){ $csv .= 'Gemkg-Schl.;';}
+    if($formvars['flurnr']){ $csv .= 'Flur;';}
+    if($formvars['gemeindename']){ $csv .= 'Gem-Name;';}
+    if($formvars['gemeinde']){ $csv .= 'Gemeinde;';}
+    if($formvars['kreisname']){ $csv .= 'Kreisname;';}
+    if($formvars['kreisid']){ $csv .= 'Kreisschlüssel;';}
+    if($formvars['finanzamtname']){ $csv .= 'Finanzamtname;';}
+    if($formvars['finanzamt']){ $csv .= 'Finanzamtschlüssel;';}
+    if($formvars['forstname']){ $csv .= 'Forstamtname;';}
+    if($formvars['forstschluessel']){ $csv .= 'Forstamtschlüssel;';}
+    if($formvars['flaeche']){ $csv .= 'Fläche;';}
+    if($formvars['amtsgerichtnr']){ $csv .= 'Amtsgericht;';}
+    if($formvars['amtsgerichtname']){ $csv .= 'Amtsgerichtname;';}
+    if($formvars['grundbuchbezirkschl']){ $csv .= 'GBBschlüssel;';}
+    if($formvars['grundbuchbezirkname']){ $csv .= 'GBBname;';}
+    if($formvars['lagebezeichnung']){ $csv .= 'Lage;';}
+    if($formvars['entsteh']){ $csv .= 'Entstehung;';}
+    if($formvars['letzff']){ $csv .= 'Fortführung;';}
+    if($formvars['karte']){ $csv .= 'Flurkarte;';}
+    if($formvars['status']){ $csv .= 'Status;';}
+    if($formvars['vorgaenger']){ $csv .= 'Vorgaenger;';}
+    if($formvars['nachfolger']){ $csv .= 'Nachfolger;';}
+    if($formvars['klassifizierung']){ $csv .= 'Klassifizierung;Angabe;';}
+    if($formvars['freitext']){ $csv .= 'Freitext;';}
+    if($formvars['hinweis']){ $csv .= 'Hinweis;';}
+    if($formvars['baulasten']){ $csv .= 'Baulasten;';}
+    if($formvars['ausfstelle']){ $csv .= 'ausführende Stelle;';}
+    if($formvars['verfahren']){ $csv .= 'Verfahren;';}
+    if($formvars['nutzung']){ $csv .= 'Nutzung;';}
+    if($formvars['blattnr']){ $csv .= 'Blattnummer;';}
+    if($formvars['pruefzeichen']){ $csv .= 'Prüfzeichen;';}
+    if($formvars['bvnr']){ $csv .= 'BVNR;';}
+    if($formvars['buchungsart']){ $csv .= 'Buchungsart;';}
+    if($formvars['eigentuemer']){ $csv .= 'Eigentümer;';}
     
     $csv .= chr(10);
     for($i = 0; $i < count($flurstuecke); $i++) {
       $flurstkennz = $flurstuecke[$i];
       $flst = new flurstueck($flurstkennz,$this->database);
       $flst->readALB_Data($flurstkennz);
-      if($privileg['flurstkennz']){ $csv .= $flst->FlurstKennz.';';}
-      if($privileg['flurstkennz']){ $csv .= "'".$flst->FlurstNr."';";}
-      if($privileg['gemkgname']){ $csv .= $flst->GemkgName.';';}
-      if($privileg['gemkgschl']){ $csv .= $flst->GemkgSchl.';';}
-      if($privileg['flurnr']){ $csv .= $flst->FlurNr.';';}
-      if($privileg['gemeindename']){ $csv .= $flst->GemeindeName.';';}
-      if($privileg['gemeinde']){ $csv .= $flst->GemeindeID.';';}
-      if($privileg['kreisname']){ $csv .= $flst->KreisName.';';}
-      if($privileg['kreisid']){ $csv .= $flst->KreisID.';';}
-      if($privileg['finanzamtname']){ $csv .= $flst->FinanzamtName.';';}
-      if($privileg['finanzamt']){ $csv .= $flst->FinanzamtSchl.';';}
-      if($privileg['forstname']){ $csv .= $flst->Forstamt['name'].';';}
-      if($privileg['forstschluessel']){ $csv .= '00'.$flst->Forstamt['schluessel'].';';}
-      if($privileg['flaeche']){ $csv .= $flst->ALB_Flaeche.';';}
-      if($privileg['amtsgerichtnr']){ $csv .= $flst->Amtsgericht['schluessel'].';';}
-      if($privileg['amtsgerichtname']){ $csv .= $flst->Amtsgericht['name'].';';}
-      if($privileg['grundbuchbezirkschl']){ $csv .= $flst->Grundbuchbezirk['schluessel'].';';}
-      if($privileg['grundbuchbezirkname']){ $csv .= $flst->Grundbuchbezirk['name'].';';}
-      if($privileg['lagebezeichnung']){
+      if($formvars['flurstkennz']){ $csv .= $flst->FlurstKennz.';';}
+      if($formvars['flurstkennz']){ $csv .= "'".$flst->FlurstNr."';";}
+      if($formvars['gemkgname']){ $csv .= $flst->GemkgName.';';}
+      if($formvars['gemkgschl']){ $csv .= $flst->GemkgSchl.';';}
+      if($formvars['flurnr']){ $csv .= $flst->FlurNr.';';}
+      if($formvars['gemeindename']){ $csv .= $flst->GemeindeName.';';}
+      if($formvars['gemeinde']){ $csv .= $flst->GemeindeID.';';}
+      if($formvars['kreisname']){ $csv .= $flst->KreisName.';';}
+      if($formvars['kreisid']){ $csv .= $flst->KreisID.';';}
+      if($formvars['finanzamtname']){ $csv .= $flst->FinanzamtName.';';}
+      if($formvars['finanzamt']){ $csv .= $flst->FinanzamtSchl.';';}
+      if($formvars['forstname']){ $csv .= $flst->Forstamt['name'].';';}
+      if($formvars['forstschluessel']){ $csv .= '00'.$flst->Forstamt['schluessel'].';';}
+      if($formvars['flaeche']){ $csv .= $flst->ALB_Flaeche.';';}
+      if($formvars['amtsgerichtnr']){ $csv .= $flst->Amtsgericht['schluessel'].';';}
+      if($formvars['amtsgerichtname']){ $csv .= $flst->Amtsgericht['name'].';';}
+      if($formvars['grundbuchbezirkschl']){ $csv .= $flst->Grundbuchbezirk['schluessel'].';';}
+      if($formvars['grundbuchbezirkname']){ $csv .= $flst->Grundbuchbezirk['name'].';';}
+      if($formvars['lagebezeichnung']){
         $anzStrassen=count($flst->Adresse);
         for ($s=0;$s<$anzStrassen;$s++) {
           $csv .= $flst->Adresse[$s]["gemeindename"].' ';
@@ -500,23 +564,23 @@ class ALB {
         }
         $csv .= ';';
       }
-      if($privileg['entsteh']){ $csv .= $flst->Entstehung.';';}
-      if($privileg['letzff']){ $csv .= $flst->LetzteFF.';';}
-      if($privileg['karte']){ $csv .= $flst->Flurkarte.';';}
-      if($privileg['status']){ $csv .= $flst->Status.';';}
-      if($privileg['vorgaenger']){
+      if($formvars['entsteh']){ $csv .= $flst->Entstehung.';';}
+      if($formvars['letzff']){ $csv .= $flst->LetzteFF.';';}
+      if($formvars['karte']){ $csv .= $flst->Flurkarte.';';}
+      if($formvars['status']){ $csv .= $flst->Status.';';}
+      if($formvars['vorgaenger']){
         for($v = 0; $v < count($flst->Vorgaenger); $v++){
           $csv .= $flst->Vorgaenger[$v]['vorgaenger'].' ';
         }
         $csv .= ';';
       }
-      if($privileg['nachfolger']){
+      if($formvars['nachfolger']){
         for($v = 0; $v < count($flst->Nachfolger); $v++){
           $csv .= $flst->Nachfolger[$v]['nachfolger'].' ';
         }
         $csv .= ';';
       }
-      if($privileg['klassifizierung']){
+      if($formvars['klassifizierung']){
         for($j = 0; $j < count($flst->Klassifizierung)-1; $j++){
           if($j > 0)$csv .= ' | ';
           $csv .= $flst->Klassifizierung[$j]['flaeche'].'m² '.$flst->Klassifizierung[$j]['tabkenn'].'-'.$flst->Klassifizierung[$j]['klass'].' '.$flst->Klassifizierung[$j]['bezeichnung'];
@@ -541,35 +605,35 @@ class ALB {
         }
         $csv .= ';';
       }      
-      if($privileg['freitext']) {
+      if($formvars['freitext']) {
         for($j = 0; $j < count($flst->FreiText); $j++){
         	if($j > 0)$csv .= ' | ';
           $csv .= $flst->FreiText[$j]['text'];
         }
         $csv .= ';';
       }
-      if ($privileg['hinweis']){ $csv .= $flst->Hinweis['bezeichnung'].';';}
-      if ($privileg['baulasten']){
+      if ($formvars['hinweis']){ $csv .= $flst->Hinweis['bezeichnung'].';';}
+      if ($formvars['baulasten']){
         for($b=0; $b < count($flst->Baulasten); $b++) {
           $csv .= " ".$flst->Baulasten[$b]['blattnr'];
         }
         $csv .= ';';
       }
-      if ($privileg['ausfstelle']){ 
+      if ($formvars['ausfstelle']){ 
       	for($v = 0; $v < count($flst->Verfahren); $v++){
       		if($v > 0)$csv .= ' | ';
       		$csv .= $flst->Verfahren[$v]['ausfstelleid'].' '.$flst->Verfahren[$v]['ausfstellename'];
       	}
       	$csv .= ';';
       }
-      if ($privileg['verfahren']){
+      if ($formvars['verfahren']){
       	for($v = 0; $v < count($flst->Verfahren); $v++){
       		if($v > 0)$csv .= ' | ';
       		$csv .= $flst->Verfahren[$v]['verfnr'].' '.$flst->Verfahren[$v]['verfbemerkung'];
       	}
       	$csv .= ';';
       }
-      if ($privileg['nutzung']){
+      if ($formvars['nutzung']){
         $anzNutzung=count($flst->Nutzung);
         for ($j = 0; $j < $anzNutzung; $j++){
         	if($j > 0)$csv .= ' | ';
@@ -582,22 +646,53 @@ class ALB {
         }
         $csv .= ';';
       }
-      if($privileg['bestandsnr']){
-        for($g = 0; $g < count($flst->Grundbuecher); $g++){
-          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
-          for($b = 0; $b < count($flst->Buchungen); $b++){
-          	if($b > 0)$csv .= ' | ';
-            $BestandStr =$flst->Buchungen[$b]['bezirk'].'-'.intval($flst->Buchungen[$b]['blatt']);
-            $BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
-            $BestandStr.=' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
-            $BestandStr.=' ('.$flst->Buchungen[$b]['buchungsart'].')';
-            $BestandStr.=' '.$flst->Buchungen[$b]['bezeichnung'];
-            $csv .= $BestandStr;
-          }
-        }
-        $csv .= ';';
-      }
-      if($privileg['eigentuemer']){
+      
+      if($formvars['blattnr']){
+	        for($g = 0; $g < count($flst->Grundbuecher); $g++){
+	          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
+	          for($b = 0; $b < count($flst->Buchungen); $b++){
+	          	if($b > 0)$csv .= ' | ';
+	            $csv .= intval($flst->Buchungen[$b]['blatt']);
+	          }
+	        }
+	        $csv .= ';';
+		    }
+		    
+		    if($formvars['pruefzeichen']){
+	        for($g = 0; $g < count($flst->Grundbuecher); $g++){
+	          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
+	          for($b = 0; $b < count($flst->Buchungen); $b++){
+	          	if($b > 0)$csv .= ' | ';
+	            $csv .= str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
+	          }
+	        }
+	        $csv .= ';';
+		    }
+		    
+		    if($formvars['bvnr']){
+	        for($g = 0; $g < count($flst->Grundbuecher); $g++){
+	          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
+	          for($b = 0; $b < count($flst->Buchungen); $b++){
+	          	if($b > 0)$csv .= ' | ';
+	            $csv .= ' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
+	          }
+	        }
+	        $csv .= ';';
+		    }
+		    
+		    if($formvars['buchungsart']){
+	        for($g = 0; $g < count($flst->Grundbuecher); $g++){
+	          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
+	          for($b = 0; $b < count($flst->Buchungen); $b++){
+	          	if($b > 0)$csv .= ' | ';
+	            $csv .= ' ('.$flst->Buchungen[$b]['buchungsart'].')';
+	            $csv .= ' '.$flst->Buchungen[$b]['bezeichnung'];
+	          }
+	        }
+	        $csv .= ';';
+	      }
+      
+      if($formvars['eigentuemer']){
         for($g = 0; $g < count($flst->Grundbuecher); $g++){
           $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
           for($b = 0; $b < count($flst->Buchungen); $b++){

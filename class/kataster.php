@@ -99,7 +99,7 @@ class Festpunkte {
     }
     $kvzPfad.='KVZ/';
     if (!is_dir($kvzPfad)) {
-      mkdir($kvzPfad,0770); # erzeugt das Verzeichnis für das KVZ, weil es das noch nicht gibt
+      mkdir($kvzPfad,0775); # erzeugt das Verzeichnis für das KVZ, weil es das noch nicht gibt
     }
     # Dateinamen bilden mit Pfadangabe
     $dateiname=$kvzPfad.KVZAUSGABEDATEINAME;
@@ -2773,6 +2773,7 @@ class flurstueck {
     $this->FlurNr=intval($rs['flurnr']);
     $this->FinanzamtName=$rs['finanzamtname'];
     $this->FinanzamtSchl=$rs['finanzamt'];
+    if($rs['entsteh'] == '/     -')$rs['entsteh'] = '';
     $this->Entstehung=$rs['entsteh'];
     $this->LetzteFF=$rs['letzff'];
     $this->Flurkarte=$rs['karte'];

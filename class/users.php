@@ -976,6 +976,47 @@ class rolle extends rolle_core{
     $this->loglevel = 0;
   }
 
+	function get_csv_attribute_selections(){
+		$sql = 'SELECT id, name FROM rolle_csv_attributes WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' ORDER BY name';
+		$this->debug->write("<p>file:users.php class:rolle->get_csv_attribute_selections - Abfragen der gespeicherten CSV-Attributlisten der Rolle:<br>".$sql,4);
+    $query=mysql_query($sql,$this->database->dbConn);
+    if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+    while ($rs=mysql_fetch_assoc($query)) {
+      $attribute_selections[]=$rs;
+    }
+    return $attribute_selections;
+	}
+	
+	function get_csv_attribute_selection($id){
+		$sql = 'SELECT id, name, attributes FROM rolle_csv_attributes WHERE id='.$id;
+		$this->debug->write("<p>file:users.php class:rolle->get_csv_attribute_selection - Abfragen einer CSV-Attributliste der Rolle:<br>".$sql,4);
+    $query=mysql_query($sql,$this->database->dbConn);
+    if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+    $rs=mysql_fetch_assoc($query);
+    return $rs;
+	}
+	
+	function save_csv_attribute_selection($name, $attributes){
+		# alle anderen Listen unter dem Namen löschen 
+		$this->delete_csv_attribute_selection($name);
+		$sql = 'INSERT INTO rolle_csv_attributes (user_id, stelle_id, name, attributes) VALUES ('.$this->user_id.', '.$this->stelle_id.', "'.$name.'", "'.$attributes.'");';
+		$this->debug->write("<p>file:users.php class:rolle->save_search - Speichern einer Attributauswahl:",4);
+ 		$this->database->execSQL($sql,4, $this->loglevel);
+ 		$sql = 'SELECT LAST_INSERT_ID();';
+    $query = mysql_query($sql);
+    $user_id = mysql_fetch_row($query);
+    $id = $user_id[0];
+    return $id;
+	}
+	
+	function delete_csv_attribute_selection($id){
+		if($id != ''){
+			$sql = 'DELETE FROM rolle_csv_attributes WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND id = "'.$id.'"';
+			$this->debug->write("<p>file:users.php class:rolle->delete_search - Loeschen einer Suchabfrage:",4);
+  		$this->database->execSQL($sql,4, $this->loglevel);
+		}
+	}
+
 	function save_search($attributes, $formvars){
 		# alle anderen Suchabfragen unter dem Namen löschen 
 		$this->delete_search($formvars['search_name'], $formvars['selected_layer_id']);
@@ -991,13 +1032,13 @@ class rolle extends rolle_core{
 	function delete_search($search, $layer_id){
 		if($search != ''){
 			$sql = 'DELETE FROM search_attributes2rolle WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND layer_id='.$layer_id.' AND name = "'.$search.'"';
-			$this->debug->write("<p>file:users.php class:rolle->save_search - Speichern einer Suchabfrage:",4);
+			$this->debug->write("<p>file:users.php class:rolle->delete_search - Loeschen einer Suchabfrage:",4);
   		$this->database->execSQL($sql,4, $this->loglevel);
 		}
 	}
 
 	function getsearches($layer_id){
-		$sql = 'SELECT name FROM search_attributes2rolle WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND layer_id='.$layer_id.' GROUP BY name';
+		$sql = 'SELECT name FROM search_attributes2rolle WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND layer_id='.$layer_id.' ORDER BY name';
 		$this->debug->write("<p>file:users.php class:rolle->getsearches - Abfragen der gespeicherten Suchabfragen der Rolle:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
     if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }

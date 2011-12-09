@@ -452,22 +452,22 @@ switch($GUI->go) {
     $GUI->export_flurst_csv();
   } break;
   
-  case 'Eigentümer-CSV-Export' : {
-    $GUI->export_eigentuemer_csv();
+  case 'Flurstuecks-CSV-Export_Auswahl_speichern' : {
+    $GUI->export_flurst_csv_auswahl_speichern();
   } break;
   
-  case 'Eigentümer-CSV-Export_Exportieren' : {
-    $GUI->export_eigentuemer_csv_exportieren();
+  case 'Flurstuecks-CSV-Export_Auswahl_laden' : {
+    $GUI->export_flurst_csv_auswahl_laden();
+  } break;
+  
+  case 'Flurstuecks-CSV-Export_Auswahl_loeschen' : {
+    $GUI->export_flurst_csv_auswahl_loeschen();
+  } break;
+  
+  case 'Flurstuecks-CSV-Export_Exportieren' : {
+    $GUI->export_flurst_csv_exportieren();
   } break;
     
-  case 'Nutzungsarten-CSV-Export' : {
-    $GUI->export_nutzungsarten_csv();
-  } break;
-  
-  case 'Nutzungsarten-CSV-Export_Exportieren' : {
-    $GUI->export_nutzungsarten_csv_exportieren();
-  } break;  
-  
   case 'Layerattribut-Rechteverwaltung' : {
     if($GUI->Stelle->isFunctionAllowed($go)){
       $GUI->layer_attributes_privileges();

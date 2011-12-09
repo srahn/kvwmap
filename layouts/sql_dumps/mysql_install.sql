@@ -916,3 +916,13 @@ CREATE TABLE `u_consumeALB` (
   `numpages` INT( 11 ) NULL ,
   PRIMARY KEY  (`user_id`,`stelle_id`,`time_id`,`log_number`)
 );
+
+
+CREATE TABLE IF NOT EXISTS `rolle_csv_attributes` (
+  `user_id` int(11) NOT NULL,
+  `stelle_id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) COLLATE latin1_german2_ci NOT NULL,
+  `attributes` text COLLATE latin1_german2_ci NOT NULL,
+  PRIMARY KEY (`user_id`,`stelle_id`,`id`)
+ );
