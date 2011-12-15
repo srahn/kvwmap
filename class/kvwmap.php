@@ -7069,6 +7069,13 @@ class GUI extends GUI_core{
     $attributes = $mapDB->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, $privileges['attributenames']);
     # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
 		$attributes = $mapDB->add_attribute_values($attributes, $layerdb, NULL, true);
+		
+		# order by rausnehmen
+  	$orderbyposition = strpos(strtolower($newpath), 'order by');
+  	if($orderbyposition !== false){
+	  	$orderby = ' '.substr($newpath, $orderbyposition);
+	  	$newpath = substr($newpath, 0, $orderbyposition);
+  	}
 
     if($this->formvars['all'] != 'true'){                     // nur ausgewählte Datensätze abfragen
       $checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
@@ -7077,6 +7084,7 @@ class GUI extends GUI_core{
         if($this->formvars[$checkbox_names[$i]] == 'on'){
           $element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
           $sql = $newpath." AND ".$element[1].".oid = '".$element[3]."'";
+          $sql.= $orderby;
           #echo $sql.'<br><br>';
           $this->debug->write("<p>file:kvwmap class:generic_csv_export :",4);
           $ret = $layerdb->execSQL($sql,4, 1);
@@ -7126,6 +7134,9 @@ class GUI extends GUI_core{
       	if($attributes['type'][$j] != 'geometry' AND $attributes['name'][$i] != 'lock'){
 	        $result[$i][$attributes['name'][$j]] = str_replace(chr(10), ": ", $result[$i][$attributes['name'][$j]]);
 	        $result[$i][$attributes['name'][$j]] = str_replace(chr(13), " :", $result[$i][$attributes['name'][$j]]);
+	        if(in_array($attributes['type'][$j], array('numeric', 'float4', 'float8'))){
+	        	$result[$i][$attributes['name'][$j]] = str_replace('.', ",", $result[$i][$attributes['name'][$j]]);	
+	        }
 	        $csv .= $result[$i][$attributes['name'][$j]].';';
       	}
       }

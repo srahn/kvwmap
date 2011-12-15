@@ -468,22 +468,6 @@ switch($GUI->go) {
     $GUI->export_flurst_csv_exportieren();
   } break;
     
-  case 'Layerattribut-Rechteverwaltung' : {
-    if($GUI->Stelle->isFunctionAllowed($go)){
-      $GUI->layer_attributes_privileges();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
-  } break;
-
-  case 'Layerattribut-Rechteverwaltung_speichern' : {
-    $GUI->layer_attributes_privileges_save();
-  } break;
-
   case 'googlemaps' : {
     $GUI->googlemaps();
   } break;
@@ -945,22 +929,6 @@ switch($GUI->go) {
     $GUI->output();
   } break;
 
-  case 'Filterverwaltung' : {
-    $GUI->Filterverwaltung();
-    $currenttime=date('Y-m-d H:i:s',time());
-    $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
-    $GUI->drawMap();
-    $GUI->output();
-  }break;
-
-  case 'Filterverwaltung_speichern' : {
-    $GUI->Filter_speichern($GUI->formvars);
-    $currenttime=date('Y-m-d H:i:s',time());
-    $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
-    $GUI->drawMap();
-    $GUI->output();
-  }break;
-
   case 'Notizenformular' : {
     $GUI->notizErfassung();
   } break;
@@ -1393,93 +1361,326 @@ switch($GUI->go) {
   } break;
   
   case 'Layer_Export' : {
-    $GUI->layer_export();
+    if($GUI->Stelle->isFunctionAllowed('Layerverwaltung')){
+      $GUI->layer_export();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+      $GUI->output();
+    }
   } break;
   
   case 'Layer_Export_Exportieren' : {
-    $GUI->layer_export_exportieren();
+    if($GUI->Stelle->isFunctionAllowed('Layerverwaltung')){
+      $GUI->layer_export_exportieren();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+      $GUI->output();
+    }
+  } break;
+
+	case 'Style_Label_Editor' : {
+  	if($GUI->Stelle->isFunctionAllowed('Layerverwaltung')){
+      $GUI->StyleLabelEditor();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+      $GUI->output();
+    }
   } break;
 
   case 'Layereditor' : {
-    $GUI->Layereditor();
+  	if($GUI->Stelle->isFunctionAllowed('Layerverwaltung')){
+      $GUI->Layereditor();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+      $GUI->output();
+    }
   } break;
 
   case 'Layereditor_Klasse_Löschen' : {
-    $GUI->Layereditor_KlasseLoeschen();
+  	if($GUI->Stelle->isFunctionAllowed('Layerverwaltung')){
+      $GUI->Layereditor_KlasseLoeschen();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+      $GUI->output();
+    }
   } break;
 
   case 'Layereditor_Klasse_Hinzufügen' : {
-    $GUI->Layereditor_KlasseHinzufuegen();
+    if($GUI->Stelle->isFunctionAllowed('Layerverwaltung')){
+      $GUI->Layereditor_KlasseHinzufuegen();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+      $GUI->output();
+    }
   } break;
 
   case 'Layereditor_Als neuen Layer eintragen' : {
-    $GUI->LayerAnlegen();
+    if($GUI->Stelle->isFunctionAllowed('Layerverwaltung')){
+      $GUI->LayerAnlegen();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+      $GUI->output();
+    }
   } break;
 
   case 'Layereditor_Ändern' : {
-    $GUI->LayerAendern();
+    if($GUI->Stelle->isFunctionAllowed('Layerverwaltung')){
+      $GUI->LayerAendern();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+      $GUI->output();
+    }
   } break;
 
   case 'Layereditor_erweiterte Einstellungen' : {
-    $GUI->Attributeditor();
+  	if($GUI->Stelle->isFunctionAllowed('Layerverwaltung')){
+      $GUI->Attributeditor();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+      $GUI->output();
+    }
   } break;
 
   case 'Attributeditor' : {
-    $GUI->Attributeditor();
+  	if($GUI->Stelle->isFunctionAllowed('Layerverwaltung')){
+      $GUI->Attributeditor();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+      $GUI->output();
+    }
   } break;
 
-  case 'Attributeditor_speichern' : {
-    $GUI->Attributeditor_speichern();
+  case 'Attributeditor_speichern' : {    
+    if($GUI->Stelle->isFunctionAllowed('Layerverwaltung')){
+      $GUI->Attributeditor_speichern();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+      $GUI->output();
+    }
   } break;
 
   case 'Layer_Anzeigen' : {
-    $GUI->LayerAnzeigen();
+    if($GUI->Stelle->isFunctionAllowed('Layerverwaltung')){
+      $GUI->LayerAnzeigen();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+      $GUI->output();
+    }
   } break;
   
   case 'Layer_Uebersicht' : {
     $GUI->LayerUebersicht();
   } break;
 
-  case 'Layer_Löschen' : {
-    $GUI->LayerLoeschen();
+  case 'Layer_Löschen' : {    
+    if($GUI->Stelle->isFunctionAllowed('Layerverwaltung')){
+      $GUI->LayerLoeschen();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+      $GUI->output();
+    }
   } break;
 
   case 'Layer2Stelle_Reihenfolge' : {
-    $GUI->Layer2Stelle_Reihenfolge();
+    if($GUI->Stelle->isFunctionAllowed('Stellenverwaltung')){
+      $GUI->Layer2Stelle_Reihenfolge();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+      $GUI->output();
+    }
   } break;
 
-  case 'Layer2Stelle_Reihenfolge_Speichern' : {
-    $GUI->Layer2Stelle_ReihenfolgeSpeichern();
+  case 'Layer2Stelle_Reihenfolge_Speichern' : {    
+    if($GUI->Stelle->isFunctionAllowed('Stellenverwaltung')){
+      $GUI->Layer2Stelle_ReihenfolgeSpeichern();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+      $GUI->output();
+    }
   } break;
 
   case 'Layer2Stelle_Editor' : {
-    $GUI->Layer2Stelle_Editor();
+    if($GUI->Stelle->isFunctionAllowed('Stellenverwaltung')){
+      $GUI->Layer2Stelle_Editor();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+      $GUI->output();
+    }
   } break;
 
   case 'Layer2Stelle_Editor_Speichern' : {
-    $GUI->Layer2Stelle_EditorSpeichern();
+    if($GUI->Stelle->isFunctionAllowed('Stellenverwaltung')){
+      $GUI->Layer2Stelle_EditorSpeichern();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+      $GUI->output();
+    }
   } break;
 
+	case 'Layerattribut-Rechteverwaltung' : {
+    if($GUI->Stelle->isFunctionAllowed('Stellenverwaltung')){
+      $GUI->layer_attributes_privileges();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+      $GUI->output();
+    }
+  } break;
+
+  case 'Layerattribut-Rechteverwaltung_speichern' : {
+    if($GUI->Stelle->isFunctionAllowed('Stellenverwaltung')){
+      $GUI->layer_attributes_privileges_save();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+      $GUI->output();
+    }
+  } break;
 
   case 'Stelleneditor' : {
-    $GUI->Stelleneditor();
+    if($GUI->Stelle->isFunctionAllowed('Stellenverwaltung')){
+      $GUI->Stelleneditor();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+      $GUI->output();
+    }
   } break;
 
   case 'Stelle_Löschen' : {
-    $GUI->StelleLoeschen();
+    if($GUI->Stelle->isFunctionAllowed('Stellenverwaltung')){
+      $GUI->StelleLoeschen();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+      $GUI->output();
+    }
   } break;
 
   case 'Stelleneditor_Als neue Stelle eintragen' : {
-    $GUI->StelleAnlegen();
+    if($GUI->Stelle->isFunctionAllowed('Stellenverwaltung')){
+      $GUI->StelleAnlegen();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+      $GUI->output();
+    }
   } break;
 
   case 'Stelleneditor_Ändern' : {
-    $GUI->StelleAendern();
+    if($GUI->Stelle->isFunctionAllowed('Stellenverwaltung')){
+      $GUI->StelleAendern();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+      $GUI->output();
+    }
   } break;
 
   case 'Stellen_Anzeigen' : {
-    $GUI->StellenAnzeigen();
+    if($GUI->Stelle->isFunctionAllowed('Stellenverwaltung')){
+      $GUI->StellenAnzeigen();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+      $GUI->output();
+    }
   } break;
+  
+  case 'Filterverwaltung' : {
+  	if($GUI->Stelle->isFunctionAllowed('Stellenverwaltung')){
+      $GUI->Filterverwaltung();
+	    $currenttime=date('Y-m-d H:i:s',time());
+	    $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+	    $GUI->drawMap();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+    }
+    $GUI->output();
+  }break;
+
+  case 'Filterverwaltung_speichern' : {
+    if($GUI->Stelle->isFunctionAllowed('Stellenverwaltung')){
+      $GUI->Filter_speichern($GUI->formvars);
+	    $currenttime=date('Y-m-d H:i:s',time());
+	    $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+	    $GUI->drawMap();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+    }
+    $GUI->output();
+  }break;
 
 	case 'BenutzerStellen_Anzeigen' : {
     $GUI->BenutzerNachStellenAnzeigen();
@@ -1490,48 +1691,124 @@ switch($GUI->go) {
   } break;
 
   case 'Benutzerdaten_Anzeigen' : {
-    $GUI->BenutzerdatenAnzeigen();
+    if($GUI->Stelle->isFunctionAllowed('Nutzerverwaltung')){
+      $GUI->BenutzerdatenAnzeigen();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+      $GUI->output();
+    }
   } break;
 
   case 'Benutzerdaten_Formular' : {
-    $GUI->BenutzerdatenFormular();
+  	if($GUI->Stelle->isFunctionAllowed('Nutzerverwaltung')){
+      $GUI->BenutzerdatenFormular();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+      $GUI->output();
+    }
   } break;
 
   case 'Benutzer_Löschen' : {
-    $GUI->BenutzerLöschen();
+    if($GUI->Stelle->isFunctionAllowed('Nutzerverwaltung')){
+      $GUI->BenutzerLöschen();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+      $GUI->output();
+    }
   } break;
 
   case 'Benutzerdaten_Als neuen Nutzer eintragen' : {
-    $GUI->BenutzerdatenAnlegen();
+    if($GUI->Stelle->isFunctionAllowed('Nutzerverwaltung')){
+      $GUI->BenutzerdatenAnlegen();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+      $GUI->output();
+    }
   } break;
 
   case 'Benutzerdaten_Ändern' : {
-    $GUI->BenutzerdatenAendern();
+    if($GUI->Stelle->isFunctionAllowed('Nutzerverwaltung')){
+      $GUI->BenutzerdatenAendern();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+      $GUI->output();
+    }
   } break;
 
 
   case 'Funktionen_Anzeigen' : {
-    $GUI->FunktionenAnzeigen();
+  	if($GUI->Stelle->isFunctionAllowed('Funktionenverwaltung')){
+      $GUI->FunktionenAnzeigen();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+      $GUI->output();
+    }
   } break;
 
-  case 'Funktionen_Formular' : {
-    $GUI->FunktionenFormular();
+  case 'Funktionen_Formular' : {    
+    if($GUI->Stelle->isFunctionAllowed('Funktionenverwaltung')){
+      $GUI->FunktionenFormular();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+      $GUI->output();
+    }
   } break;
 
   case 'Funktion_Löschen' : {
-    $GUI->FunktionLoeschen();
+    if($GUI->Stelle->isFunctionAllowed('Funktionenverwaltung')){
+      $GUI->FunktionLoeschen();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+      $GUI->output();
+    }
   } break;
 
   case 'Funktionen_Als neue Funktion eintragen' : {
-    $GUI->FunktionAnlegen();
+    if($GUI->Stelle->isFunctionAllowed('Funktionenverwaltung')){
+      $GUI->FunktionAnlegen();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+      $GUI->output();
+    }
   } break;
 
   case 'Funktionen_Ändern' : {
-    $GUI->FunktionAendern();
-  } break;
-
-  case 'Style_Label_Editor' : {
-    $GUI->StyleLabelEditor();
+    if($GUI->Stelle->isFunctionAllowed('Funktionenverwaltung')){
+      $GUI->FunktionAendern();
+    }
+    else {
+      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
+      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
+      $GUI->rollenwahl($Stelle_ID);
+      $GUI->output();
+    }
   } break;
 
   case 'help' : {

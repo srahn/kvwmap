@@ -216,19 +216,20 @@ class pgdatabase extends pgdatabase_core {
 	      }
 	      $fields['constraints'][] = $enumstring; 
         
+        $attr_info = $this->get_attribute_information($tablename, $fields['real_name'][$fieldname]);
         # nullable
-        $fields['nullable'][] = $this->is_nullable($tablename, $fields['real_name'][$fieldname]);
+        $fields['nullable'][] = $attr_info['is_nullable']; 
         
         # Länge des Feldes
         if($fieldtype == 'varchar'){
-        	$fields['length'][] = $this->get_field_length($tablename, $fields['real_name'][$fieldname]);
+        	$fields['length'][] = $attr_info['character_maximum_length'];
         }
         else{
         	$fields['length'][] = 'NULL';
         }
         
         # Default-Wert
-        $fields['default'][] = $this->get_field_default($tablename, $fields['real_name'][$fieldname]);       
+        $fields['default'][] = $attr_info['column_default']; 
       }
       
       if($all_table_names != NULL){   
@@ -243,73 +244,35 @@ class pgdatabase extends pgdatabase_core {
     }
     else return NULL;
   }
-   
-  function get_field_length($tablename, $columnname){
+     
+  function get_attribute_information($tablename, $columnname){
   	if($columnname != '' AND $tablename != ''){
-  		$sql = "SELECT a.atttypmod-4 AS length
-							FROM pg_attribute a , pg_class c, pg_type t
-							WHERE c.relname = '".$tablename."'
-							AND attname = '".$columnname."'
-							AND a.attrelid = c.oid AND a.atttypid = t.oid and a.attnum > 0 and not a.attisdropped";
-			#echo $sql;
+  		$sql = "SELECT is_nullable, character_maximum_length, column_default, pg_get_serial_sequence('".$tablename."', '".$columnname."') as serial FROM information_schema.columns WHERE column_name = '".$columnname."' AND table_name = '".$tablename."' AND table_schema = '".$this->schema."'";
   		$ret1 = $this->execSQL($sql, 4, 0);
 	  	if($ret1[0]==0){
-	      $length = pg_fetch_row($ret1[1]);
-	      if($length[0] > 0){
-	      	return $length[0];
-	      }
-	      else{
-	      	return 'NULL';
-	      }
-	    }
-  	}
-  	else{
-  		return 'NULL';
-  	}
-  }
-  
-  function get_field_default($tablename, $columnname){
-  	if($columnname != '' AND $tablename != ''){
-  		$sql = "SELECT adsrc AS default
-							FROM pg_attrdef a, pg_attribute b, pg_class c
-							WHERE c.relname = '".$tablename."'
-							AND b.attname = '".$columnname."'
-							AND a.adrelid = b.attrelid AND c.oid = b.attrelid AND a.adnum = b.attnum";
-			#echo $sql;
-  		$ret1 = $this->execSQL($sql, 4, 0);
-	  	if($ret1[0]==0){
-	      $default = pg_fetch_row($ret1[1]);
-	      if($default[0] != '' AND strpos($default[0], 'nextval') === false){
-		      $sql = 'SELECT '.$default[0];
+	      $attr_info = pg_fetch_assoc($ret1[1]);
+	      if($attr_info['is_nullable'] == 'NO' AND $attr_info['serial'] == ''){$attr_info['is_nullable'] = '0';}else{$attr_info['is_nullable'] = '1';}
+	      if($attr_info['character_maximum_length'] == NULL){$attr_info['character_maximum_length'] = 'NULL';}
+	      if($attr_info['column_default'] != '' AND $attr_info['serial'] == ''){
+		      $sql = 'SELECT '.$attr_info['column_default'];
 		     	#echo $sql;
 	  			$ret1 = $this->execSQL($sql, 4, 0);
 	  			if($ret1[0]==0){
 	      		$defaultvalue = pg_fetch_row($ret1[1]);
-	      		return $defaultvalue[0];
+	      		$attr_info['column_default'] = $defaultvalue[0];
 	  			}
+	  		}
+	  		else{
+	  			$attr_info['column_default'] = '';
 	  		}
 	    }
   	}
-  }
-     
-  function is_nullable($tablename, $columnname){
-  	if($columnname != '' AND $tablename != ''){
-  		$sql = "SELECT is_nullable FROM information_schema.columns WHERE column_name = '".$columnname."' AND table_name = '".$tablename."' AND table_schema = '".$this->schema."' AND pg_get_serial_sequence('".$tablename."', '".$columnname."') IS NULL";
-  		//$sql = "SELECT is_nullable FROM information_schema.columns, pg_attrdef pad, pg_attribute pat, pg_class pc WHERE column_name = '".$columnname."' AND table_name = '".$tablename."' AND pg_get_serial_sequence('".$tablename."', '".$columnname."') IS NULL AND substring(adsrc,0, 8) != 'nextval' AND pc.relname='".$tablename."' AND pc.oid=pat.attrelid AND pat.attname='".$columnname."' AND pat.attrelid=pad.adrelid AND pat.attnum=pad.adnum";
-  		#echo $sql;
-  		$ret1 = $this->execSQL($sql, 4, 0);
-	  	if($ret1[0]==0){
-	      $nullable = pg_fetch_row($ret1[1]);
-	      if($nullable[0] == 'NO'){
-	      	return 0;
-	      }else{
-	      	return 1;
-	      }
-	    }
-  	}
   	else{
-  		return 'NULL';
+  		$attr_info['is_nullable'] = 'NULL';
+  		$attr_info['character_maximum_length'] = 'NULL';
+  		$attr_info['column_default'] = 'NULL';
   	}
+  	return $attr_info;
   }
 
 
