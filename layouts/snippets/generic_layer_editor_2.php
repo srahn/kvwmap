@@ -491,15 +491,6 @@ function set_changed_flag(flag){
 												}
 												echo 	' style="font-size: '.$this->user->rolle->fontsize_gle.'px">'.$strShowFK.'</a>';
 											}
-											/*if($this->qlayerset[$i]['attributes']['subform_layer_privileg'][$j] > 0){
-												echo '|&nbsp;<a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id='.$this->qlayerset[$i]['attributes']['subform_layer_id'][$j];
-												echo 	'"';
-												if($this->qlayerset[$i]['attributes']['no_new_window'][$j] != true){
-													echo 	' target="_blank"';
-												}
-												echo 	' style="font-size: '.$this->user->rolle->fontsize_gle.'px">'.$strNewFK.'</a>';
-											}
-											*/
 										}
 									}break;
 

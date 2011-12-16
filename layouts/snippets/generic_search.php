@@ -341,6 +341,10 @@ function delete_search(){
 									?> 
                   	id="value_<?php echo $this->attributes['name'][$i]; ?>" name="value_<?php echo $this->attributes['name'][$i]; ?>"><?echo "\n"; ?>
                       <option value="">-- Bitte Auswählen --</option><?php echo "\n";
+                      if(is_array($this->attributes['enum_value'][$i][0])){
+                      	$this->attributes['enum_value'][$i] = $this->attributes['enum_value'][$i][0];
+                      	$this->attributes['enum_output'][$i] = $this->attributes['enum_output'][$i][0];
+                      }
                     for($o = 0; $o < count($this->attributes['enum_value'][$i]); $o++){
                       ?>
                       <option <? if($this->formvars['value_'.$this->attributes['name'][$i]] == $this->attributes['enum_value'][$i][$o]){ echo 'selected';} ?> value="<?php echo $this->attributes['enum_value'][$i][$o]; ?>"><?php echo $this->attributes['enum_output'][$i][$o]; ?></option><?php echo "\n";
