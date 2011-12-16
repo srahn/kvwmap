@@ -6104,8 +6104,12 @@ class GUI extends GUI_core{
           $privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
           $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
           $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
+          # wenn Attributname/Wert-Paare übergeben wurden, diese im Formular einsetzen
+	        for($i = 0; $i < count($this->attributes['name']); $i++){
+	          $this->qlayerset['shape'][0][$this->attributes['name'][$i]] = $this->formvars['value_'.$this->attributes['name'][$i]];
+	        }
           # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
-					$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, NULL, true);
+					$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $this->qlayerset['shape'], true);
         }break;
         
         case MS_WFS : {
