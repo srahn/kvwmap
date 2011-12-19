@@ -12,10 +12,27 @@
 	}
  ?>
 
-function checknumbers(input, type){
+function checknumbers(input, type, length, decimal_length){
 	if(type == 'numeric' || type == 'float4' || type == 'float8'){
 		var val = input.value.replace(/[a-zA-Z]/g, '');
 		val = val.replace(/,/g, '.');
+		var len = input.value.length;
+		if(length != ''){
+			if(val.search(/\../) != -1){
+				len = len - 1;
+			}
+			if(len > parseInt(length)){
+				alert('Für dieses Feld sind maximal '+length+' Stellen erlaubt.');
+				val = val.substring(0, length);
+			}
+		}
+		if(decimal_length != '' && val.search(/\./) != -1){
+			parts = val.split('.');
+			if(parts[1].length > parseInt(decimal_length)){
+				alert('Für dieses Feld sind maximal '+decimal_length+' Nachkommastellen erlaubt.');
+				val = parts[0]+'.'+parts[1].substring(0, decimal_length); 
+			}
+		}
   	input.value = val;
   }
   if(type == 'int2' || type == 'int4' || type == 'int8'){
@@ -632,8 +649,9 @@ function set_changed_flag(flag){
 									} break;
 
 									case 'Fläche': {
-										echo '<input onchange="set_changed_flag(document.GUI.changed_'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].')" id="custom_area" onkeyup="checknumbers(this, \''.$this->qlayerset[$i]['attributes']['type'][$j].'\');"; title="'.$this->qlayerset[$i]['attributes']['alias'][$j].'" ';
+										echo '<input onchange="set_changed_flag(document.GUI.changed_'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].')" id="custom_area" onkeyup="checknumbers(this, \''.$this->qlayerset[$i]['attributes']['type'][$j].'\', \''.$this->qlayerset[$i]['attributes']['length'][$j].'\', \''.$this->qlayerset[$i]['attributes']['decimal_length'][$j].'\');" title="'.$this->qlayerset[$i]['attributes']['alias'][$j].'" ';
 										if($this->qlayerset[$i]['attributes']['length'][$j]){
+											if($this->qlayerset[$i]['attributes']['decimal_length'][$j])$this->qlayerset[$i]['attributes']['length'][$j]++;
 											echo ' maxlength="'.$this->qlayerset[$i]['attributes']['length'][$j].'"';
 										}
 										if($this->qlayerset[$i]['attributes']['privileg'][$j] == '0' OR $lock[$k]){
@@ -646,8 +664,9 @@ function set_changed_flag(flag){
 									}break;
 
 									default : {
-										echo '<input onchange="set_changed_flag(document.GUI.changed_'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].')" onkeyup="checknumbers(this, \''.$this->qlayerset[$i]['attributes']['type'][$j].'\');"; title="'.$this->qlayerset[$i]['attributes']['alias'][$j].'" ';
+										echo '<input onchange="set_changed_flag(document.GUI.changed_'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].')" onkeyup="checknumbers(this, \''.$this->qlayerset[$i]['attributes']['type'][$j].'\', \''.$this->qlayerset[$i]['attributes']['length'][$j].'\', \''.$this->qlayerset[$i]['attributes']['decimal_length'][$j].'\');" title="'.$this->qlayerset[$i]['attributes']['alias'][$j].'" ';
 										if($this->qlayerset[$i]['attributes']['length'][$j]){
+											if($this->qlayerset[$i]['attributes']['decimal_length'][$j])$this->qlayerset[$i]['attributes']['length'][$j]++;
 											echo ' maxlength="'.$this->qlayerset[$i]['attributes']['length'][$j].'"';
 										}
 										if($this->qlayerset[$i]['attributes']['privileg'][$j] == '0' OR $lock[$k]){

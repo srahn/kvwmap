@@ -190,6 +190,7 @@ CREATE TABLE layer_attributes (
   constraints varchar(255) default NULL,
   nullable tinyint(1) default NULL,
   length int(11) default NULL,
+  `decimal_length` INT( 11 ) NULL,
   `default` VARCHAR( 255 ) NULL,
   form_element_type enum('Text','Textfeld','Auswahlfeld','Geometrie','SubFormPK','SubFormFK','SubFormEmbeddedPK','Time','Dokument','Link','User','Fläche','dynamicLink') NOT NULL default 'Text',
   options text,

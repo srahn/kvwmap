@@ -1036,3 +1036,5 @@ CREATE TABLE IF NOT EXISTS `rolle_csv_attributes` (
   `attributes` text COLLATE latin1_german2_ci NOT NULL,
   PRIMARY KEY (`user_id`,`stelle_id`,`id`)
 );
+
+ALTER TABLE `layer_attributes` ADD `decimal_length` INT( 11 ) NULL AFTER `length`;

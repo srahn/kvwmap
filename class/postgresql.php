@@ -221,15 +221,19 @@ class pgdatabase extends pgdatabase_core {
         $fields['nullable'][] = $attr_info['is_nullable']; 
         
         # Länge des Feldes
-        if($fieldtype == 'varchar'){
-        	$fields['length'][] = $attr_info['character_maximum_length'];
+        if($attr_info['numeric_precision'] != ''){
+        	$fields['length'][] = $attr_info['numeric_precision'];
         }
         else{
-        	$fields['length'][] = 'NULL';
-        }
+        	$fields['length'][] = $attr_info['character_maximum_length'];
+      	}        
+        
+        # Länge des Dezimalteils eines numeric-Feldes
+        $fields['decimal_length'][] = $attr_info['numeric_scale'];
         
         # Default-Wert
-        $fields['default'][] = $attr_info['column_default']; 
+        $fields['default'][] = $attr_info['column_default'];
+        
       }
       
       if($all_table_names != NULL){   
@@ -247,12 +251,13 @@ class pgdatabase extends pgdatabase_core {
      
   function get_attribute_information($tablename, $columnname){
   	if($columnname != '' AND $tablename != ''){
-  		$sql = "SELECT is_nullable, character_maximum_length, column_default, pg_get_serial_sequence('".$tablename."', '".$columnname."') as serial FROM information_schema.columns WHERE column_name = '".$columnname."' AND table_name = '".$tablename."' AND table_schema = '".$this->schema."'";
+  		$sql = "SELECT is_nullable, character_maximum_length, column_default, numeric_precision, numeric_scale, pg_get_serial_sequence('".$tablename."', '".$columnname."') as serial FROM information_schema.columns WHERE column_name = '".$columnname."' AND table_name = '".$tablename."' AND table_schema = '".$this->schema."'";
   		$ret1 = $this->execSQL($sql, 4, 0);
 	  	if($ret1[0]==0){
 	      $attr_info = pg_fetch_assoc($ret1[1]);
 	      if($attr_info['is_nullable'] == 'NO' AND $attr_info['serial'] == ''){$attr_info['is_nullable'] = '0';}else{$attr_info['is_nullable'] = '1';}
 	      if($attr_info['character_maximum_length'] == NULL){$attr_info['character_maximum_length'] = 'NULL';}
+	      if($attr_info['numeric_scale'] < 1){$attr_info['numeric_scale'] = 'NULL';}	      
 	      if($attr_info['column_default'] != '' AND $attr_info['serial'] == ''){
 		      $sql = 'SELECT '.$attr_info['column_default'];
 		     	#echo $sql;
@@ -271,6 +276,7 @@ class pgdatabase extends pgdatabase_core {
   		$attr_info['is_nullable'] = 'NULL';
   		$attr_info['character_maximum_length'] = 'NULL';
   		$attr_info['column_default'] = 'NULL';
+  		$attr_info['numeric_scale'] = 'NULL';
   	}
   	return $attr_info;
   }

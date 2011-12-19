@@ -13227,6 +13227,7 @@ class db_mapObj extends db_mapObj_core{
 	  	$sql.= "constraints = '".addslashes($attributes['constraints'][$i])."', ";
 	  	$sql.= "nullable = ".$attributes['nullable'][$i].", ";
 	  	$sql.= "length = ".$attributes['length'][$i].", ";
+	  	$sql.= "decimal_length = ".$attributes['decimal_length'][$i].", ";
 	  	$sql.= "`default` = '".$attributes['default'][$i]."', ";
 	  	$sql.= "`order` = ".$i;
 	  	$sql.= " ON DUPLICATE KEY UPDATE ";
@@ -13238,6 +13239,7 @@ class db_mapObj extends db_mapObj_core{
 	  	$sql.= "constraints = '".addslashes($attributes['constraints'][$i])."', ";
 	  	$sql.= "nullable = ".$attributes['nullable'][$i].", ";
 	  	$sql.= "length = ".$attributes['length'][$i].", ";
+	  	$sql.= "decimal_length = ".$attributes['decimal_length'][$i].", ";
 	  	$sql.= "`default` = '".$attributes['default'][$i]."', ";
 	  	$sql.= "`order` = ".$i;
 	  	$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>".$sql,4);
@@ -13653,6 +13655,7 @@ class db_mapObj extends db_mapObj_core{
     	$attributes['constraints'][$i]= $rs['constraints'];
     	$attributes['nullable'][$i]= $rs['nullable'];
     	$attributes['length'][$i]= $rs['length'];
+    	$attributes['decimal_length'][$i]= $rs['decimal_length'];
     	$attributes['default'][$i]= $rs['default'];
     	$attributes['form_element_type'][$i]= $rs['form_element_type'];
     	$attributes['form_element_type'][$rs['name']]= $rs['form_element_type'];
