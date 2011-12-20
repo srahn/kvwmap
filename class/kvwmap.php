@@ -11289,7 +11289,7 @@ class GUI extends GUI_core{
     $GemObj=new Gemeinde($Gemeinde,$this->pgdatabase);
     $layer=ms_newLayerObj($this->map);
     $datastring ="the_geom from (select o.objnr as oid,o.the_geom from alkobj_e_fla AS o,alknflur as fl";
-    $datastring.=",alb_v_gemarkungen AS g WHERE o.objnr=fl.objnr AND fl.gemkgschl=g.gemkgschl";
+    $datastring.=",alb_v_gemarkungen AS g WHERE o.objnr=fl.objnr AND fl.gemkgschl::integer=g.gemkgschl";
     $datastring.=" AND g.gemeinde=".$Gemeinde;
     $datastring.=") as foo using unique oid using srid=".EPSGCODE;
     $legendentext ="Gemeinde: ".$GemObj->getGemeindeName($Gemeinde);

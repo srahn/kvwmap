@@ -4392,7 +4392,7 @@ class pgdatabase extends pgdatabase_core {
     $sql ="SELECT MIN(XMIN(ENVELOPE(TRANSFORM(o.the_geom, ".$epsgcode.")))) AS minx,MAX(XMAX(ENVELOPE(TRANSFORM(o.the_geom, ".$epsgcode.")))) AS maxx";
     $sql.=",MIN(YMIN(ENVELOPE(TRANSFORM(o.the_geom, ".$epsgcode.")))) AS miny,MAX(YMAX(ENVELOPE(TRANSFORM(o.the_geom, ".$epsgcode.")))) AS maxy";
     $sql.=" FROM alkobj_e_fla as o,alknflur AS fl,alb_v_gemarkungen AS g";
-    $sql.=" WHERE o.objnr=fl.objnr AND fl.gemkgschl=g.gemkgschl";
+    $sql.=" WHERE o.objnr=fl.objnr AND fl.gemkgschl::integer=g.gemkgschl";
     $sql.=" AND g.gemeinde=".$Gemeinde;
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);

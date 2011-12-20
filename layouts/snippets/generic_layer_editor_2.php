@@ -696,6 +696,7 @@ function set_changed_flag(flag){
 			  			$geomtype = $this->qlayerset[$i]['attributes']['geomtype'][$this->qlayerset[$i]['attributes']['name'][$j]];
 			  			$dimension = $this->qlayerset[$i]['attributes']['dimension'][$j];
 			  			$privileg = $this->qlayerset[$i]['attributes']['privileg'][$j];
+			  			$nullable = $this->qlayerset[$i]['attributes']['nullable'][$j];
 			  			$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';Geometrie;'.$this->qlayerset[$i]['attributes']['nullable'][$j].'|';
 			  		}
 					}
@@ -754,6 +755,11 @@ function set_changed_flag(flag){
 
 				if($privileg == 1) {
 					if($this->new_entry == true){
+						if(!$nullable){ ?>
+							<script type="text/javascript">
+    						geom_not_null = true;
+    					</script>
+<?					}
 						$this->titel=$strTitleGeometryEditor;
 						if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY'){
 							echo '

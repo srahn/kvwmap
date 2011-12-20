@@ -6,6 +6,8 @@
 <script type="text/javascript">
 <!--
 
+	var geom_not_null = false;
+
 	function checkDate(string){
     var split = string.split(".");
     var day = parseInt(split[0], 10);
@@ -24,6 +26,10 @@
 	}
 
 	function save(){
+		if((geom_not_null && document.GUI.newpath.value == '' && document.GUI.loc_x == undefined) || (geom_not_null && document.GUI.loc_x != undefined && document.GUI.loc_x.value == '')){ 
+			alert('Sie haben keine Geometrie angegeben.');
+			return;
+		}
   	form_fieldstring = document.GUI.form_field_names.value+'';
   	form_fields = form_fieldstring.split('|');
   	for(i = 0; i < form_fields.length; i++){
