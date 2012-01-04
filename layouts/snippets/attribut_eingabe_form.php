@@ -74,7 +74,18 @@ function setlayers(selected_options){
     <td colspan="5"><strong><font size="+1"><?php echo $strTitle; ?></font></strong></td>
   </tr>
   <tr> 
-    <td colspan="5" align="center"> 
+    <td align="right" colspan="5" align="center">
+    	Geometrie übernehmen von: 
+  		<select name="layer_id" onchange="document.GUI.submit();">
+  			<option value="">--- Auswahl ---</option>
+  			<?
+  				for($i = 0; $i < count($this->queryable_vector_layers['ID']); $i++){
+  					echo '<option';
+  					if($this->formvars['layer_id'] == $this->queryable_vector_layers['ID'][$i]){echo ' selected';}
+  					echo ' value="'.$this->queryable_vector_layers['ID'][$i].'">'.$this->queryable_vector_layers['Bezeichnung'][$i].'</option>';
+  				}
+  			?>
+  		</select> 
       <?php
 	  #	if ($this->stellendaten['ID']=='' OR $this->layerdaten['ID']!='') {
  				include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php')
@@ -249,9 +260,8 @@ function setlayers(selected_options){
 			;
     }
 ?>
-<INPUT TYPE="HIDDEN" NAME="layer_id" VALUE="">
-<INPUT TYPE="HIDDEN" NAME="columnname" VALUE="">
-<INPUT TYPE="hidden" NAME="fromwhere" VALUE="">
+<INPUT TYPE="hidden" NAME="columnname" VALUE="<? echo $this->formvars['columnname'] ?>">
+<INPUT TYPE="hidden" NAME="fromwhere" VALUE="<? echo $this->formvars['fromwhere']; ?>">
 <input type="hidden" name="go" value="Filterverwaltung">
 <input type="hidden" name="go_plus" value="">
 <input type="hidden" name="selected_layers" value="<? echo $this->formvars['selected_layers'] ?>">

@@ -79,52 +79,6 @@ function switchlegend(){
 	}
 }
 
-function dec2dms(number){
-	number = number+'';
-	part1 = number.split('.');
-	degrees = part1[0];
-	minutes = parseFloat('0.'+part1[1]) * 60;
-	minutes = minutes+'';
-	part2 = minutes.split('.');
-	minutes = part2[0];
-	seconds = Math.round(parseFloat('.'+part2[1]) * 60);
-	return degrees+"°"+minutes+"'"+seconds+'"';
-}
-
-function format_number(number){
-	coordtype = '<? echo $this->user->rolle->coordtype; ?>';
-	if(coordtype == 'dms' && parseFloat(number) < 361){
-		return dec2dms(number);
-	}
-	else{
-		if(parseFloat(document.GUI.pixelsize.value) < 0.01){
-	    stellen = 2;
-	  }
-	  else if(parseFloat(document.GUI.pixelsize.value) < 0.1){
-	    stellen = 1;
-	  }
-	  else{
-	    stellen = 0;
-	  }
-		number = Math.round( number * Math.pow(10, stellen) ) / Math.pow(10, stellen);
-		str_number = number+"";
-		str_split = str_number.split(".");
-		if(!str_split[1]) str_split[1] = "";
-		if(str_split[1].length < stellen){
-			nachkomma = str_split[1];
-			for(i=str_split[1].length+1; i <= stellen; i++){
-			 	nachkomma += "0";
-			}
-			str_split[1] = nachkomma;
-		}
-		if(stellen == 0){sep = "";}
-		else{sep = ".";	}
-		return str_split[0]+sep+str_split[1];
-	}
-}		
-
-
-
 </script>
 
 <?

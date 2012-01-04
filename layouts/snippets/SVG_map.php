@@ -827,7 +827,7 @@ function polygonarea(evt){
 		parea	= 0.5 * Math.sqrt(parts*parts);
 		hidetooltip(evt);
 		area = parea*parseFloat(top.document.GUI.pixelsize.value)*parseFloat(top.document.GUI.pixelsize.value);			
-		area = format_number(area);
+		area = top.format_number(area);
 		showtooltip("Fl"+unescape("%E4")+"cheninhalt: "+area+" m"+unescape("%B2")+" ~"+unescape("%A0"));
 		return;
 	}

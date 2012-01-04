@@ -7679,6 +7679,25 @@ class GUI extends GUI_core{
     $this->main='attribut_eingabe_form.php';
     $this->stellendaten=$this->Stelle->getStellen('Bezeichnung');
     $showpolygon = true;
+    $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
+    if($this->formvars['layer_id']){
+	    # Geometrie-Übernahme-Layer:
+	    # Spaltenname und from-where abfragen
+	    $data = $this->mapDB->getData($this->formvars['layer_id']);
+	    #echo $data;
+	    $data_explosion = explode(' ', $data);
+	    $this->formvars['columnname'] = $data_explosion[0];
+	    $select = $this->mapDB->getSelectFromData($data);
+	    # order by rausnehmen
+	  	$orderbyposition = strpos(strtolower($select), 'order by');
+	  	if($orderbyposition !== false){
+		  	$select = substr($select, 0, $orderbyposition);
+	  	}
+	    $this->formvars['fromwhere'] = 'from ('.$select.') as foo where 1=1';
+	    if(strpos(strtolower($this->formvars['fromwhere']), 'where') === false){
+	      $this->formvars['fromwhere'] .= ' where (1=1)';
+	    }
+    }
     if($this->formvars['stelle'] != ''){
       $stelle = new stelle($this->formvars['stelle'], $this->database);
       $this->layerdaten = $stelle->getLayers(NULL, 'Name');

@@ -1335,7 +1335,7 @@ class pgdatabase extends pgdatabase_core {
     $sql ="SELECT flurstueckskennzeichen as flurstkennz, zaehler, nenner";
     $sql.=" FROM ax_flurstueck WHERE 1=1";
     if ($GemkgID>0) {
-      $sql.=" AND land || gemarkungsnummer= ".$GemkgID;
+      $sql.=" AND land*10000 + gemarkungsnummer= ".$GemkgID;
     }
     if ($FlurID!='') {
       $sql.=" AND flurnummer=".intval($FlurID);
@@ -1835,7 +1835,7 @@ class pgdatabase extends pgdatabase_core {
     $sql.=" FROM ax_flurstueck as f, ax_gemeinde as g, alkis_beziehungen v";
     $sql.=" JOIN ax_lagebezeichnungmithausnummer l ON v.beziehung_zu=l.gml_id";
     $sql.=" LEFT JOIN ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde";
-    $sql.=" AND to_char(l.lage, 'FM00000') = lpad(s.lage,5,'0')";
+    $sql.=" AND s.lage = lpad(l.lage,5,'0')";
     $sql.=" WHERE v.beziehung_von=f.gml_id AND v.beziehungsart='weistAuf' AND g.gemeinde = l.gemeinde";
     $sql.=" AND f.flurstueckskennzeichen = '".$FlurstKennz."'";
     #echo $sql;
@@ -1901,7 +1901,7 @@ class pgdatabase extends pgdatabase_core {
     $sql.=" FROM ax_flurstueck as f, alkis_beziehungen v";
     $sql.=" JOIN ax_lagebezeichnungmithausnummer l ON v.beziehung_zu=l.gml_id";
     $sql.=" WHERE v.beziehung_von=f.gml_id AND v.beziehungsart='weistAuf'";
-    $sql.=" AND l.lage=".$Strasse;
+    $sql.=" AND l.lage='".$Strasse."'";
     $sql.=" AND f.flurstueckskennzeichen = '".$FlurstKennz."'";
     #echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
@@ -3182,7 +3182,7 @@ class pgdatabase extends pgdatabase_core {
 	function getAmtsgerichtbyBezirkALKIS($bezirk){
 		$sql ="SELECT a.bezeichnung as name, a.stelle as schluessel";
 		$sql.=" FROM ax_buchungsblattbezirk b , ax_dienststelle a";
-		$sql.=" WHERE b.\"gehoertzu|ax_dienststelle_schluessel|land\"=a.land AND b.stelle=a.stelle AND a.stellenart=1000";
+		$sql.=" WHERE b.land=a.land AND b.stelle=a.stelle AND a.stellenart=1000";
 		$sql.=" AND b.schluesselgesamt = ".$bezirk['schluessel'];
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0]) {
@@ -4222,7 +4222,7 @@ class pgdatabase extends pgdatabase_core {
   }
   
   function getFlurenListeByGemkgIDByFlurIDALKIS($GemkgID,$FlurID,$order, $historical = false){
-    $sql ="SELECT lpad(gemarkungsteilflur::tetx, 3, '0') AS FlurID, lpad(gemarkungsteilflur::text, 3, '0') AS Name";
+    $sql ="SELECT lpad(gemarkungsteilflur::text, 3, '0') AS FlurID, lpad(gemarkungsteilflur::text, 3, '0') AS Name";
     $sql.=",schluesselgesamt AS GemFlurID FROM ax_gemarkungsteilflur WHERE 1=1 ";
     
     if ($GemkgID>0) {
