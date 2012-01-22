@@ -557,6 +557,13 @@
 				}
 				redrawsecondline();
 			break;
+			case "split_lines":
+				addlinepoint_second(world_x, world_y);
+				if(top.document.GUI.secondline.value == "true"){
+					top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&geotype=line&path1="+top.document.GUI.pathwkt.value+"&path2="+path_second+"&operation=split&resulttype=svgwkt&layer_id="+top.document.GUI.layer_id.value, new Array(top.document.GUI.result), "");
+				}
+				redrawsecondline();
+			break;
 
 			case "draw_polygon":
 				addpoint_first(world_x, world_y);
@@ -609,6 +616,20 @@ function mousemove(evt){
 	if(top.document.GUI.last_doing.value == "vertex_edit" && selected_vertex != undefined && selected_vertex != ""){
 		move_vertex(evt, selected_vertex, "image");
 	}
+	if(top.document.GUI.last_doing.value == "split_lines"){
+		client_x = evt.clientX;
+  	client_y = resy - evt.clientY;
+  	world_x = (client_x * scale) + minx;
+  	world_y = (client_y * scale) + miny;
+		pathx_second.push(world_x);
+	  pathy_second.push(world_y);
+		path_second = buildsvglinepath(pathx_second, pathy_second);
+		pixel_path_second = world2pixelsvg(path_second);
+	  var obj = document.getElementById("line_second");
+	  obj.setAttribute("d", pixel_path_second);
+		pathx_second.pop();
+		pathy_second.pop();
+	} 
 	else{
 		if (dragging){
 			movePoint(evt);
@@ -682,6 +703,7 @@ function mouseup(evt){
 		  	document.getElementById("new0").style.setProperty("fill","ghostwhite", "");
 				document.getElementById("line0").style.setProperty("fill","ghostwhite", "");
 				document.getElementById("del0").style.setProperty("fill","ghostwhite", "");
+				document.getElementById("split0").style.setProperty("fill","ghostwhite", "");
 				document.getElementById("vertex_edit1").style.setProperty("fill","ghostwhite", "");
 				remove_vertices();
 			}
@@ -894,6 +916,22 @@ function mouseup(evt){
 		}
 		applylines();
 		top.document.GUI.last_doing.value = "delete_lines";
+	}
+
+	function split_lines(){
+		var length = poly_pathx_second.length;
+		for(i = 0; i < length; i++ ){
+			poly_pathx_second.pop();
+			poly_pathy_second.pop();
+		}
+		if(top.document.GUI.pathwkt.value == "" && top.document.GUI.newpath.value != ""){
+			top.document.GUI.pathwkt.value = buildwktlinefromsvgpath(top.document.GUI.newpath.value);
+		}
+		else{
+			top.document.GUI.pathwkt.value = top.document.GUI.newpathwkt.value;
+		}
+		applylines();
+		top.document.GUI.last_doing.value = "split_lines";
 	}
 	
 	function applylines(){
@@ -2521,8 +2559,8 @@ $measurefunctions = '
 	  else{
 	    stellen = 0;
 	  }
-	  track0 = top.format_number(track0, stellen);
-	  track = top.format_number(track, stellen);
+	  track0 = top.format_number(track0, false);
+	  track = top.format_number(track, false);
 	
 	  output = "Strecke: "+track+" m ("+track0+" m)";
 	  show_tooltip(output,client_x,resy-client_y);
@@ -2753,7 +2791,7 @@ $measurefunctions = '
 		return $boxbuttons;
 	}
 
-	function linebuttons($strUndo, $strDeleteLine, $strDrawLine, $strDelLine){
+	function linebuttons($strUndo, $strDeleteLine, $strDrawLine, $strDelLine, $strSplitLine){
 		global $last_x;
 		$linebuttons = '
 				 <g id="undo" onmousedown="deletelastline(evt);" transform="translate(0 0)">
@@ -2828,8 +2866,21 @@ $measurefunctions = '
 						 style="fill:rgb(222,222,222);stroke:rgb(0,0,0);stroke-width:25"/>
 					<rect id="del0" onmouseover="show_tooltip(\''.$strDelLine.'\',evt.clientX,evt.clientY)" x="0" y="0" width="25" height="25" style="fill:white;opacity:0.25"/>
 				</g>
+
+				<g id="line" onmousedown="split_lines();highlightbyid(\'split0\');" transform="translate(104 0 )">
+		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
+		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+		      	<set attributeName="filter" begin="del0.mousedown" dur="0s" fill="freeze" to="none"/>
+						<set attributeName="filter" begin="del0.mouseup;del0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+					</rect>
+						<line	x1="81.5" y1="391" x2="127.5" y2="250" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
+						<line	x1="127.5" y1="250" x2="310.5" y2="243" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
+						<line	x1="310.5" y1="243" x2="370.5" y2="103" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
+						<line x1="300" y1="340" x2="150" y2="160" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="fill:rgb(222,222,222);stroke:rgb(111,111,111);stroke-width:35"/>
+					<rect id="split0" onmouseover="show_tooltip(\''.$strSplitLine.'\',evt.clientX,evt.clientY)" x="0" y="0" width="25" height="25" style="fill:white;opacity:0.25"/>
+				</g>
 		';
-		$last_x = 78;
+		$last_x = 104;
 		return $linebuttons;
 	}
 

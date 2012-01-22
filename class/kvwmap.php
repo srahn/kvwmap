@@ -5222,7 +5222,7 @@ class GUI extends GUI_core{
       # Zoom zum Polygon des Dokumentes
       $this->loadMap('DataBase');
       $this->zoomToBodenrichtwertzone($this->formvars['oid'],20);
-      $this->user->rolle->saveSettings($this->map);
+      $this->user->rolle->saveSettings($this->map->extent);
       $this->user->rolle->readSettings();
       # Zuweisen der Werte der Zone zum Formular
       $this->formvars=array_merge($this->formvars,$bodenrichtwertzone->zonen[0]);
@@ -5559,13 +5559,13 @@ class GUI extends GUI_core{
         # Es soll navigiert werden
         # Navigieren
         $this->navMap($this->formvars['CMD']);
-        $this->user->rolle->saveSettings($this->map);
+        $this->user->rolle->saveSettings($this->map->extent);
         $this->user->rolle->readSettings();
       }
       elseif($nachweis->document['wkt_umring'] != ''){
         # Zoom zum Polygon des Dokumentes
         $this->zoomToNachweis($nachweis,10);
-        $this->user->rolle->saveSettings($this->map);
+        $this->user->rolle->saveSettings($this->map->extent);
         $this->user->rolle->readSettings();
         # Übernahme des Nachweisumrings aus der PostGIS-Datenbank
         $PolygonAsSVG = str_replace('-', '', $nachweis->document['svg_umring']);
@@ -7749,7 +7749,7 @@ class GUI extends GUI_core{
           # Es soll navigiert werden
           # Navigieren
           $this->navMap($this->formvars['CMD']);
-          $this->user->rolle->saveSettings($this->map);
+          $this->user->rolle->saveSettings($this->map->extent);
           $this->user->rolle->readSettings();
         }
         else {
@@ -7780,7 +7780,7 @@ class GUI extends GUI_core{
 							$PolygonAsSVG .= $newsvgcoords[$i].' ';
     				}
             $this->zoomToPolygon($poly_id,20, $this->user->rolle->epsg_code);
-            $this->user->rolle->saveSettings($this->map);
+            $this->user->rolle->saveSettings($this->map->extent);
             $this->user->rolle->readSettings();
             # Übernahme des Nachweisumrings aus der PostGIS-Datenbank
             $this->formvars['newpath'] = $PolygonAsSVG;
@@ -7794,7 +7794,7 @@ class GUI extends GUI_core{
         # Es soll navigiert werden
         # Navigieren
         $this->navMap($this->formvars['CMD']);
-        $this->user->rolle->saveSettings($this->map);
+        $this->user->rolle->saveSettings($this->map->extent);
         $this->user->rolle->readSettings();
       }
     }
@@ -7802,7 +7802,7 @@ class GUI extends GUI_core{
       # Es soll navigiert werden
       # Navigieren
       $this->navMap($this->formvars['CMD']);
-      $this->user->rolle->saveSettings($this->map);
+      $this->user->rolle->saveSettings($this->map->extent);
       $this->user->rolle->readSettings();
     }
   }
@@ -9204,13 +9204,13 @@ class GUI extends GUI_core{
     if ($this->formvars['CMD']!='') {
       # Navigieren
       $this->navMap($this->formvars['CMD']);
-      $this->user->rolle->saveSettings($this->map);
+      $this->user->rolle->saveSettings($this->map->extent);
       $this->user->rolle->readSettings();
     }
     elseif($nachweis != '') {
       # Zoom zum Polygon des Dokumentes
       $this->zoomToGeom($nachweis->document['geom'],10);
-      $this->user->rolle->saveSettings($this->map);
+      $this->user->rolle->saveSettings($this->map->extent);
       $this->user->rolle->readSettings();
       # Übernahme des Nachweisumrings aus der PostGIS-Datenbank
       $PolygonAsSVG = str_replace('-', '', $nachweis->document['svg_umring']);
@@ -10277,8 +10277,7 @@ class GUI extends GUI_core{
           #$filter = $mapdb->getFilter($layer_id, $this->Stelle->id);		# siehe unten
           $old_layer_id = $layer_id;
         }
-
-        if(($this->formvars['changed_'.$oid] == 1 OR $this->formvars['embedded']) AND $attributname != 'oid' AND $tablename != ''){
+        if(($this->formvars['go'] == 'Dokument_Loeschen' OR $this->formvars['changed_'.$oid] == 1 OR $this->formvars['embedded']) AND $attributname != 'oid' AND $tablename != ''){
           # 2008-03-26 pk
           switch($type) {
             case 'Dokument' : {
@@ -10295,7 +10294,6 @@ class GUI extends GUI_core{
                 # Bild in das Datenverzeichnis kopieren
                 if (move_uploaded_file($_FILES[$form_fields[$i]]['tmp_name'],$nachDatei) OR $datei_name == 'delete') {
                   #echo '<br>Lade '.$_FILES[$form_fields[$i]]['tmp_name'].' nach '.$nachDatei.' hoch';
-
                   # Wenn eine alte Datei existiert, die nicht so heißt wie die neue --> löschen
                   $old = $this->formvars[str_replace(';Dokument;', ';Dokument_alt;', $form_fields[$i])];
                   if ($old != '' AND $old != $eintrag) {

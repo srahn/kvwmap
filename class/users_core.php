@@ -246,11 +246,12 @@ class rolle_core {
     return $groups;
   }
 
-
-  function saveSettings($map) {
-    # sichern des aktiven Kartenausschnittes
-    $sql ='UPDATE rolle SET minx='.$map->extent->minx.',miny='.$map->extent->miny;
-    $sql.=',maxx='.$map->extent->maxx.',maxy='.$map->extent->maxy;
+	/*
+	 * Sichert den gegebenen Kartenausschnittes für die Rolle
+	 */
+  function saveSettings($extent) {
+    $sql ='UPDATE rolle SET minx='.$extent->minx.',miny='.$extent->miny;
+    $sql.=',maxx='.$extent->maxx.',maxy='.$extent->maxy;
     $sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
     # echo $sql;
     $this->debug->write("<p>file:users.php class:rolle function:saveSettings - Speichern der Einstellungen zur Rolle:",4);

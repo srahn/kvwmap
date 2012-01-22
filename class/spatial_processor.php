@@ -204,6 +204,17 @@ class spatial_processor {
 				}
 			}break;
 			
+			case 'split':{
+				if($formvars['resulttype'] == 'svgwkt'){
+					$result = $this->difference($polywkt1, $polywkt2, 'svg');
+					$result .= '||';
+					$result .= $this->difference($polywkt1, $polywkt2, 'wkt');
+				}
+				else{
+					$result = $this->difference($polywkt1, $polywkt2, $formvars['resulttype']);
+				}
+			}break;
+			
 			case 'area':{
 				if($polywkt1 != ''){
 					$result = $this->area($polywkt1, $formvars['unit']);

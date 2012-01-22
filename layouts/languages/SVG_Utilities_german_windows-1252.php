@@ -6,6 +6,7 @@
   $strDrawLine="Linie hinzufuegen";
   $strDeleteLine="alles loeschen";
   $strDelLine="Linien loeschen";
+  $strSplitLine="Linien teilen";
   $strUndo="Rueckgaengig";
   $strSetPosition="Position setzen";
   $strSetGPSPosition="GPS Position setzen";

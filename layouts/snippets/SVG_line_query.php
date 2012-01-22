@@ -95,7 +95,7 @@ $svg .='
 $svg .= $canvaswithall;
 $svg .= $navbuttons;
 $svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate(0 26)">';
-$svg .= linebuttons($strUndo, $strDeleteLine, $strDrawLine, $strDelLine);
+$svg .= linebuttons($strUndo, $strDeleteLine, $strDrawLine, $strDelLine, $strSplitLine);
 $svg .= vertex_edit_buttons($strCornerPoint);
 $svg .= coord_input_buttons();
 if($_SESSION['mobile'] == 'true'){

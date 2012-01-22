@@ -91,7 +91,9 @@ SYMBOL #13
   NAME "Gemeindegrenze"
   TYPE ELLIPSE
   POINTS 1 1 END
-  STYLE 1 4 14 4 END
+  STYLE
+    6 12
+  END
 END
 
 SYMBOL        #14
@@ -522,6 +524,19 @@ SYMBOL
   IMAGE "town_hall.png"
   TRANSPARENT 0
 END
+
+SYMBOL
+  NAME "linie-gestrichelt10"
+  TYPE ELLIPSE
+  POINTS
+    1 1
+  END
+  style
+    1 20
+  END
+END
+
+
 
 
 ######

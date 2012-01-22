@@ -160,6 +160,7 @@ $GUI->requeststring = $QUERY_STRING;
 # sendeDokument
 # sendImage
 # sendeFestpunktskizze
+# setMapExtent
 # spatial_processing
 # StatistikAuswahl
 # StatistikAuswahl_anzeigen
@@ -2074,6 +2075,10 @@ switch($GUI->go) {
     $GUI->drawMap();
     $GUI->output();
   } break;
+	
+	case "setMapExtent" : {
+		$GUI->setMapExtent();
+	} break;
 
   case "history_move" : {
     $GUI->changeMap();

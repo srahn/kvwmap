@@ -698,7 +698,7 @@ class GUI_core {
             
             # Klassen
             $classset=$layerset[$i]['Class'];
-            $this->loadclasses($layer, $layerset[$i], $classset);
+            $this->loadclasses($layer, $layerset[$i], $classset, $map);
           } # Ende Layer ist aktiv
         } # end of Schleife layer
         
@@ -709,7 +709,7 @@ class GUI_core {
     return 1;
   }
 
-  function loadclasses($layer, $layerset, $classset){
+  function loadclasses($layer, $layerset, $classset, $map){
     $anzClass=count($classset);
     for ($j=0;$j<$anzClass;$j++) {
       $klasse = ms_newClassObj($layer);
@@ -739,6 +739,20 @@ class GUI_core {
         }
         if ($dbStyle['symbol']>0) {
           $style->set('symbol',$dbStyle['symbol']);
+        }
+                
+        if($this->map_factor != ''){
+        	if($style->symbol > 0){
+        		$symbol = $map->getSymbolObjectById($style->symbol);
+        		$pattern = $symbol->getpatternarray();
+        		if(is_array($pattern) AND $symbol->inmapfile != 1){
+	        		foreach($pattern as &$pat){
+	        			$pat = $pat * $this->map_factor;
+	        		}
+							$symbol->setpattern($pattern);
+							$symbol->set('inmapfile', 1);
+        		}
+        	}
         }
 
         if($this->map_factor != '' and $layerset['Datentyp'] != 8){ 
@@ -1108,17 +1122,34 @@ class GUI_core {
     #echo ('<br/>formvars[pathy]: '.$this->formvars['pathy']);
   }
 
-
   # Speichert die Daten des MapObjetes in Datei oder Datenbank
   function saveMap($saveMapDestination) {
     if ($saveMapDestination=='') {
       $saveMapDestination=SAVEMAPFILE;
     }
     $this->map->save($saveMapDestination);
-    $this->user->rolle->saveSettings($this->map);
+    $this->user->rolle->saveSettings($this->map->extent);
     # 2006-02-16 pk
     $this->user->rolle->readSettings();
   }
+	
+	/**
+	 * transformiert die gegebenen Koordinaten von wgs in das System der Stelle und speichert den Kartenextent für die Rolle
+	 */
+	function setMapExtent() {
+		$extent = ms_newRectObj();
+		$extent->setextent($this->formvars['left'],$this->formvars['bottom'],$this->formvars['right'],$this->formvars['top']);
+		$wgsProjection = ms_newprojectionobj("init=epsg:4326");
+		$userProjection = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);
+		$extent->project($wgsProjection, $userProjection);
+    $this->user->rolle->saveSettings($extent);
+		echo '{
+						"minx" : '.$extent->minx.',
+						"miny" : '.$extent->miny.',
+						"maxx" : '.$extent->maxx.',
+						"maxy" : '.$extent->maxy.'
+				  }';
+	}
 
 	function BBoxinExtent($geom){
     $sql = "SELECT geomfromtext('POLYGON((".$this->map->extent->minx." ".$this->map->extent->miny.", ".$this->map->extent->maxx." ".$this->map->extent->miny.", ".$this->map->extent->maxx." ".$this->map->extent->maxy.", ".$this->map->extent->minx." ".$this->map->extent->maxy.", ".$this->map->extent->minx." ".$this->map->extent->miny."))', ".$this->user->rolle->epsg_code.") && TRANSFORM(".$geom.", ".$this->user->rolle->epsg_code.")";

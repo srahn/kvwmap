@@ -439,7 +439,7 @@ function emzversteckt(k){
 	        ?>
 	        	<tr>
           		<td colspan="2">
-            		<strong>Gesetzl.&nbsp;Klassifizierung Bodensch&auml;tzung</strong>&nbsp;<a href="#" onclick="emzversteckt(<? echo $k; ?>)" onmouseover="emz<? echo $k; ?>.src='graphics/pfeil_red.gif';" onmouseout="emz<? echo $k; ?>.src='graphics/pfeil.gif';"><img src="<? echo GRAPHICSPATH.'pfeil.gif'; ?>" width="11" height="11" border="0" name="emz<? echo $k; ?>"></a>
+            		<strong>Gesetzl.&nbsp;Klassifizierung Bodensch&auml;tzung</strong>&nbsp;<a href="javascript:;" onclick="emzversteckt(<? echo $k; ?>)" onmouseover="emz<? echo $k; ?>.src='graphics/pfeil_red.gif';" onmouseout="emz<? echo $k; ?>.src='graphics/pfeil.gif';"><img src="<? echo GRAPHICSPATH.'pfeil.gif'; ?>" width="11" height="11" border="0" name="emz<? echo $k; ?>"></a>
               </td>
             </tr>
             <tr style="display:none" id="gkb<? echo $k; ?>">

@@ -958,7 +958,6 @@ class rolle extends rolle_core{
   # insertMapComment($consumetime,$comment)
   # readSettings()
   # rolle($user_id,$stelle_id) konstruktor
-  # saveSettings($map,$nZoomFactor)
   # setAktivLayer($formvars)
   # setConsumeActivity($time,$activity,$prevtime)
   # setSelectedButton($selectedButton)

@@ -827,7 +827,7 @@ function polygonarea(evt){
 		parea	= 0.5 * Math.sqrt(parts*parts);
 		hidetooltip(evt);
 		area = parea*parseFloat(top.document.GUI.pixelsize.value)*parseFloat(top.document.GUI.pixelsize.value);			
-		area = top.format_number(area);
+		area = top.format_number(area, false);
 		showtooltip("Fl"+unescape("%E4")+"cheninhalt: "+area+" m"+unescape("%B2")+" ~"+unescape("%A0"));
 		return;
 	}
@@ -899,7 +899,8 @@ function deactivate_vertex(evt){
 	}
 }
 
-function add_vertex(evt){
+/*function add_vertex(evt){
+	alert("sfsdf");
 	if(doing == "measure"){
 		if(!measuring){
 			restart();	
@@ -912,6 +913,7 @@ function add_vertex(evt){
 	  redrawPL();
 	}
 }
+*/
 
 function startMeasure(evt) {
   restart();
@@ -919,8 +921,8 @@ function startMeasure(evt) {
   // neuen punkt abgreifen
 	pathx[0] = evt.clientX;
 	pathy[0] = resy - evt.clientY;
-	pathx_world[0] = format_number(evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value));
-	pathy_world[0] = format_number(top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value));
+	pathx_world[0] = top.format_number(evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value), false);
+	pathy_world[0] = top.format_number(top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value), false);
 }
 
 function showMeasurement(evt){
@@ -930,8 +932,8 @@ function showMeasurement(evt){
     part0 = parts;
     parts = parts + Math.sqrt(((pathx_world[j]-pathx_world[j+1])*(pathx_world[j]-pathx_world[j+1]))+((pathy_world[j]-pathy_world[j+1])*(pathy_world[j]-pathy_world[j+1])));
   }
-  track0 = top.format_number(part0, 3);
-  track = top.format_number(parts, 3);
+  track0 = top.format_number(part0, false);
+  track = top.format_number(parts, false);
   output = "Strecke: "+track+" m ("+track0+" m)";
   show_tooltip(output, evt.clientX, evt.clientY);
   deletelast(evt);
@@ -941,8 +943,8 @@ function addpoint(evt) {
   // neuen eckpunkt abgreifen
 	pathx.push(evt.clientX);
 	pathy.push(resy - evt.clientY);
-	pathx_world.push(format_number(evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value)));
-	pathy_world.push(format_number(top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value)));
+	pathx_world.push(top.format_number(evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value)), false);
+	pathy_world.push(top.format_number(top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value)), false);
   redrawPL();
 }
 
@@ -978,8 +980,8 @@ function show_coords(evt){
 	coorx = evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value);
 	coory = top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value);
 	if(top.document.GUI.secondcoords != undefined)top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&curSRID='.$this->user->rolle->epsg_code.'&newSRID='.$this->user->rolle->epsg_code2.'&point="+coorx+" "+coory+"&operation=transformPoint&resulttype=wkt&coordtype='.$this->user->rolle->coordtype.'", new Array(top.document.GUI.secondcoords), "");
-	coorx = top.format_number(coorx);
-	coory = top.format_number(coory);
+	coorx = top.format_number(coorx, true);
+	coory = top.format_number(coory, true);
 	top.document.GUI.firstcoords.value = coorx+" "+coory; 
 	top.document.getElementById("showcoords").style.display="";
 }
