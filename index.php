@@ -40,7 +40,6 @@ $debug->write("<br><b>Anwendungsfall go: ".$go."</b>",4);
 if ($GUI->formvars['go_plus']!='') {
   $go = $go.'_'.$GUI->formvars['go_plus'];
   $debug->write("<br>goplus: ".$GUI->formvars['go_plus'],4);
-  # $GUI->go=$go; # gelöscht pk 2008-06-25
 }
 $GUI->go=$go;
 if ($GUI->Stelle->protected) {
@@ -185,15 +184,19 @@ $GUI->requeststring = $QUERY_STRING;
 
 switch($GUI->go) {
 
-		case 'bevoelkerung_bericht' : {
-		  $GUI->bevoelkerung_bericht();
-		}break;
-		
-		case 'bevoelkerung_bericht_Bericht erstellen' : {
-		  $GUI->bevoelkerung_bericht_erstellen();
-		}break;
+	case 'Multi_Geometrien_splitten' : {
+	  $GUI->split_multi_geometries();
+	}break;
 
-	 case 'reset_layers' : {
+	case 'bevoelkerung_bericht' : {
+	  $GUI->bevoelkerung_bericht();
+	}break;
+	
+	case 'bevoelkerung_bericht_Bericht erstellen' : {
+	  $GUI->bevoelkerung_bericht_erstellen();
+	}break;
+
+	case 'reset_layers' : {
     $GUI->reset_layers();
     $GUI->loadMap('DataBase');
     $GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
@@ -255,6 +258,7 @@ switch($GUI->go) {
 
   # auslesen der Layer vom mobilen Client
   case 'import_layer' : {
+  	$GUI->checkCaseAllowed($go);
     $GUI->import_layer();
   } break;
 
@@ -265,6 +269,7 @@ switch($GUI->go) {
 
   # auslesen der Layer von der Primärdatenbank
   case 'export_layer' : {
+  	$GUI->checkCaseAllowed($go);
     $GUI->export_layer();
   } break;
 
@@ -284,12 +289,6 @@ switch($GUI->go) {
     $GUI->output();
   } break;
   
-  case 'pivotTable' : {
-    $GUI->pivotTable('einwohner_pro_landkreis','kreis','jahr');
-    $GUI->output();
-    break;
-  }
-
   # Kartenbild anzeigen
   case 'showMapImage' : {
     $GUI->showMapImage();
@@ -372,41 +371,20 @@ switch($GUI->go) {
 
   # Eigentuemerfortführung
   case 'export_ESAF64' : {
-    if($GUI->Stelle->isFunctionAllowed($go)){
-      $GUI->export_ESAF64();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+  	$GUI->checkCaseAllowed($go);
+    $GUI->export_ESAF64();
   } break;
 
   # Eigentuemerfortführung
   case 'export_ESAF64_Exportieren' : {
-    if($GUI->Stelle->isFunctionAllowed('export_ESAF64')){
-      $GUI->export_ESAF64_exportieren();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+    $GUI->checkCaseAllowed('export_ESAF64');
+    $GUI->export_ESAF64_exportieren();
   } break;
 
   # Eigentuemerfortführung
   case 'export_ESAF64_Tabelle Bereinigen' : {
-    if($GUI->Stelle->isFunctionAllowed('export_ESAF64')){
-      $GUI->export_ESAF64_bereiningen();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+    $GUI->checkCaseAllowed('export_ESAF64');
+   	$GUI->export_ESAF64_bereiningen();
   } break;
   
   case 'exportWMC' :{
@@ -418,18 +396,9 @@ switch($GUI->go) {
   } break;
 
   case 'Externer_Druck' : {
-    # Speichern der Layer, die gedruckt werden sollen
-    if ($GUI->Stelle->isFunctionAllowed($go)) {
-      #$GUI->rewriteLayer();
-      $GUI->formvars['loadmapsource'] = 'Post';
-      $GUI->druckausschnittswahl($GUI->formvars['loadmapsource']);
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+    $GUI->checkCaseAllowed($go);
+    $GUI->formvars['loadmapsource'] = 'Post';
+    $GUI->druckausschnittswahl($GUI->formvars['loadmapsource']);
   } break;
 
   case 'Externer_Druck_Drucken' : {
@@ -540,6 +509,7 @@ switch($GUI->go) {
 
   # Anliegerbeiträge
   case 'anliegerbeitraege' : {
+  	$GUI->checkCaseAllowed($go);
     $GUI->Anliegerbeiträge_editor();
   }break;
 
@@ -556,16 +526,6 @@ switch($GUI->go) {
   # Sachdaten anzeigen
   case 'Sachdaten' : {
     $GUI->sachdaten_anzeigen();
-  }break;
-
-  # Fachschale Gebäudeeditor
-  case 'gebaeude_editor' : {
-    $GUI->gebaeude_editor();
-  }break;
-
-  # Fachschale Gebäudeeditor
-  case 'gebaeude_editor_speichern' : {
-    $GUI->gebaeude_editor_speichern();
   }break;
 
   # Jagdbezirke Sachdaten anzeigen
@@ -590,6 +550,7 @@ switch($GUI->go) {
 
   # Jagdkatastereditor
   case 'jagdkatastereditor' : {
+  	$GUI->checkCaseAllowed($go);
     $GUI->jagdkatastereditor();
   }break;
 
@@ -670,6 +631,7 @@ switch($GUI->go) {
 
   # layer aus mapfile laden
   case 'layerfrommapfile' : {
+  	$GUI->checkCaseAllowed($go);
     $GUI->layerfromMapfile();
     $GUI->output();
   }break;
@@ -702,6 +664,7 @@ switch($GUI->go) {
 
   # 2006-03-24 CG
   case 'StatistikAuswahl' : {
+  	$GUI->checkCaseAllowed($go);
     $GUI->StatistikAuswahl();
   }break;
 
@@ -735,6 +698,7 @@ switch($GUI->go) {
 
   #2006-01-03 pk
   case 'Grundbuchblatt_Auswaehlen' : {
+  	$GUI->checkCaseAllowed($go);
     $GUI->grundbuchblattWahl();
   } break;
 
@@ -745,21 +709,10 @@ switch($GUI->go) {
 
   # 2006-01-26 pk
   case 'Flurstueck_Anzeigen' : {
-    if ($GUI->Stelle->isFunctionAllowed($go)) {
-      $explodedFlurstKennz = explode(';',$GUI->formvars['FlurstKennz']);
-      $GUI->flurstAnzeige($explodedFlurstKennz);
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-    }
+  	$GUI->checkCaseAllowed($go);
+    $explodedFlurstKennz = explode(';',$GUI->formvars['FlurstKennz']);
+    $GUI->flurstAnzeige($explodedFlurstKennz);
     $GUI->output();
-  } break;
-
-  #2005-11-29 pk
-  case 'buildtopology' : {
-    $GUI->buildTopology();
   } break;
 
   case 'changemenue' : {
@@ -786,14 +739,8 @@ switch($GUI->go) {
   } break;
 
   case 'Administratorfunktionen' : {
-    if ($GUI->Stelle->isFunctionAllowed($go)) {
-      $GUI->adminFunctions();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-    }
+  	$GUI->checkCaseAllowed($go);
+    $GUI->adminFunctions();
     $GUI->output();
   } break;
   
@@ -803,59 +750,41 @@ switch($GUI->go) {
   } break;
   
   case 'Bauauskunft_Suche' : {
+  	$GUI->checkCaseAllowed($go);
     $GUI->bauauskunftSuche();
     $GUI->output();
   } break;
 
   case 'Bauauskunft_Suche_Suchen' : {
-    if ($GUI->Stelle->isFunctionAllowed('Bauakteneinsicht')) {
-      $GUI->bauauskunftSucheSenden($GUI->formvars['flurstkennz']);
-    }
-    else {
-      # Benutzer ist nicht berechtigt zur Einsicht der Bauakten
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-    }
+  	$GUI->checkCaseAllowed('Bauakteneinsicht');
+    $GUI->bauauskunftSucheSenden($GUI->formvars['flurstkennz']);
     $GUI->output();
   } break;
 
   case 'Baudatenanzeige' : {
-    if ($GUI->Stelle->isFunctionAllowed('Bauakteneinsicht')) {
-      $GUI->bauauskunftanzeige();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zur Einsicht der Bauakten
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-    }
-    $GUI->output();
-  } break;
-
-  case 'Baudaten_aktualisieren' : {
-    $GUI->baudaten_aktualisieren();
-    $GUI->output();
-  } break;
-
-  case 'Baudaten_aktualisieren_OK' : {
-    $GUI->baudaten_aktualisieren_OK();
+  	$GUI->checkCaseAllowed('Bauakteneinsicht');
+    $GUI->bauauskunftanzeige();
     $GUI->output();
   } break;
 
   case 'Druckrahmen' : {
-    $GUI->druckrahmen_init();
-    $GUI->druckrahmen_load();
+  	$GUI->checkCaseAllowed($go);
+  	$GUI->druckrahmen_init();
+  	$GUI->druckrahmen_load();
     $GUI->output();
   } break;
 
   case 'Druckrahmen_Freitexthinzufuegen' : {
-    $GUI->druckrahmen_init();
-    $GUI->Document->update_frame($GUI->formvars, $_FILES);
-    $GUI->Document->addfreetext($GUI->formvars);
-    $GUI->druckrahmen_load();
+  	$GUI->checkCaseAllowed('Druckrahmen');
+	  $GUI->druckrahmen_init();
+	  $GUI->Document->update_frame($GUI->formvars, $_FILES);
+	  $GUI->Document->addfreetext($GUI->formvars);
+	  $GUI->druckrahmen_load();
     $GUI->output();
   } break;
 
   case 'Druckrahmen_Freitextloeschen' : {
+  	$GUI->checkCaseAllowed('Druckrahmen');
     $GUI->druckrahmen_init();
     $GUI->Document->update_frame($GUI->formvars, $_FILES);
     $GUI->Document->removefreetext($GUI->formvars);
@@ -864,6 +793,7 @@ switch($GUI->go) {
   } break;
 
   case 'Druckrahmen_übernehmen >>' : {
+  	$GUI->checkCaseAllowed('Druckrahmen');
     $GUI->druckrahmen_init();
     $GUI->Document->add_frame2stelle($GUI->formvars['aktiverRahmen'], $GUI->formvars['stelle']);
     $GUI->druckrahmen_load();
@@ -871,6 +801,7 @@ switch($GUI->go) {
   } break;
 
   case 'Druckrahmen_als neuen Rahmen speichern' : {
+  	$GUI->checkCaseAllowed('Druckrahmen');
     $GUI->druckrahmen_init();
     $GUI->formvars['aktiverRahmen'] = $GUI->Document->save_frame($GUI->formvars, $_FILES, $GUI->Stelle->id);
     $GUI->druckrahmen_load();
@@ -878,6 +809,7 @@ switch($GUI->go) {
   } break;
 
   case 'Druckrahmen_Änderungen Speichern' : {
+  	$GUI->checkCaseAllowed('Druckrahmen');
     $GUI->druckrahmen_init();
     $GUI->Document->update_frame($GUI->formvars, $_FILES);
     $GUI->druckrahmen_load();
@@ -885,6 +817,7 @@ switch($GUI->go) {
   } break;
 
   case 'Druckrahmen_Löschen' : {
+  	$GUI->checkCaseAllowed('Druckrahmen');
     $GUI->druckrahmen_init();
     $GUI->Document->delete_frame($GUI->formvars['selected_frame_id']);
     $GUI->druckrahmen_load();
@@ -948,15 +881,8 @@ switch($GUI->go) {
   } break;
 
   case 'Notizenformular_KatVerwaltung' : {
-    # Abfragen ob Stelle den Anwendungsfall ausführen darf
-    if ($GUI->Stelle->isFunctionAllowed('kategorienverwaltung')) {
-      $GUI->notizKatVerwaltung();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->notizErfassung();
-    }
+  	$GUI->checkCaseAllowed($go);
+    $GUI->notizKatVerwaltung();
   } break;
 
   case 'NotizKategorie_hinzufuegen' : {
@@ -971,7 +897,6 @@ switch($GUI->go) {
     $GUI->notizKategorieLoeschen();
   } break;
 
-	
 	case 'Metadaten_Uebersicht' : {
     $GUI->metadaten_uebersicht();
   } break;
@@ -984,7 +909,6 @@ switch($GUI->go) {
     $GUI->metadaten_generieren($this->formvars['layer_id']);
   } break;
 	
-
   case 'Metadaten_Auswaehlen' : {
     $GUI->metadatenSuchForm();
   } break;
@@ -1018,6 +942,7 @@ switch($GUI->go) {
   } break;
 
   case 'Festpunkte_Auswaehlen' : {
+  	$GUI->checkCaseAllowed($go);
     $GUI->festpunkteWahl();
   } break;
 
@@ -1026,6 +951,7 @@ switch($GUI->go) {
   } break;
 
   case 'Nutzung_auswaehlen' : {
+  	$GUI->checkCaseAllowed($go);
     $GUI->nutzungWahl();
   } break;
 
@@ -1038,15 +964,8 @@ switch($GUI->go) {
   } break;
 
   case 'Namen_Auswaehlen_Suchen' : {
-    if ($GUI->Stelle->isFunctionAllowed('Namensuche')) {
-      $GUI->nameSuchen();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ändern der Festpunkte
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+  	$GUI->checkCaseAllowed('Namensuche');
+    $GUI->nameSuchen();    
   } break;
 
   case 'Suche_Flurstuecke_zu_Grundbuechern' : {
@@ -1089,75 +1008,30 @@ switch($GUI->go) {
     if ($GUI->formvars['format'] == '') {
       $GUI->formvars['format']='png';
     }
-    #$GUI->sendImage($GUI->formvars['name'],$GUI->formvars['format']);
-    # Derzeit wird nur png unterstützt
     $GUI->sendImage($GUI->formvars['name'],'png');
   } break;
 
   case 'sendeFestpunktskizze' : {
-    if ($GUI->Stelle->isFunctionAllowed('sendeFestpunktskizze')) {
-      $GUI->sendeFestpunktskizze($GUI->formvars['name'],PUNKTDATEIPATH);
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ändern der Festpunkte
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+  	$GUI->checkCaseAllowed($go);
+    $GUI->sendeFestpunktskizze($GUI->formvars['name'],PUNKTDATEIPATH);
   } break;
 
   case 'sendeDokument' : {
-    if ($GUI->Stelle->isFunctionAllowed('sendeDokument')) {
-      $GUI->sendeDokument($GUI->formvars['dokument'], $GUI->formvars['original_name']);
-    }
-    else {
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+    $GUI->sendeDokument($GUI->formvars['dokument'], $GUI->formvars['original_name']);
   } break;
 
   case 'sendeDokument_mit_vorschau' : {
-    if ($GUI->Stelle->isFunctionAllowed('sendeDokument')) {
-      $GUI->sendeDokument_mit_vorschau($GUI->formvars['dokument'], $GUI->formvars['original_name']);
-    }
-    else {
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
-  } break;
-
-  case 'neuerLayer' : {
-    $GUI->neuerLayer();
-  } break;
-
-  case 'neuerLayer_Senden' : {
-    $GUI->neuenLayerEintragen();
+    $GUI->sendeDokument_mit_vorschau($GUI->formvars['dokument'], $GUI->formvars['original_name']);    
   } break;
 
   case 'FestpunktDateiUebernehmen' : {
-    if ($GUI->Stelle->isFunctionAllowed($go)) {
-      $GUI->uebernehmeFestpunkte();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ändern der Festpunkte
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+  	$GUI->checkCaseAllowed($go);
+    $GUI->uebernehmeFestpunkte();
   } break;
 
   case 'FestpunktDateiAktualisieren' : {
-    if ($GUI->Stelle->isFunctionAllowed($go)) {
-      $GUI->aktualisiereFestpunkte();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ändern der Festpunkte
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+  	$GUI->checkCaseAllowed($go);
+    $GUI->aktualisiereFestpunkte();
   } break;
 
   case 'Sachdaten_FestpunkteSkizzenZuordnung' : {
@@ -1165,15 +1039,8 @@ switch($GUI->go) {
   } break;
 
   case 'FestpunkteSkizzenZuordnung_Senden' : {
-    if ($GUI->Stelle->isFunctionAllowed($go)) {
-      $GUI->ordneFestpunktSkizzen();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ändern der Festpunkte
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+  	$GUI->checkCaseAllowed($go);
+    $GUI->ordneFestpunktSkizzen();
   } break;
 
   case 'ExportMapToPDF' : {
@@ -1185,27 +1052,28 @@ switch($GUI->go) {
   } break;
 
   case 'Bodenrichtwertformular' : {
+  	$GUI->checkCaseAllowed('Bodenrichtwertformular');
     $GUI->titel='Bodenrichtwerterfassung';
     $GUI->bodenRichtWertErfassung();
   } break;
 
-  case 'editLayerForm' : {
-    $GUI->editLayerForm($this->formvars['layerName'],$this->formvars['oid']);
-  } break;
-
   case 'Bodenrichtwertformular_Aendern' : {
+  	$GUI->checkCaseAllowed('Bodenrichtwertformular');
     $GUI->aendernBodenRichtWert();
   } break;
 
   case 'Bodenrichtwertformular_Senden' : {
+  	$GUI->checkCaseAllowed('Bodenrichtwertformular');
     $GUI->bodenRichtWertFormSenden();
   } break;
 
   case 'BodenrichtwertzonenKopieren' : {
+  	$GUI->checkCaseAllowed('BodenrichtwertzonenKopieren');
     $GUI->waehleBodenwertStichtagToCopy();
   } break;
 
   case 'BodenrichtwertzonenKopieren_Senden' : {
+  	$GUI->checkCaseAllowed('BodenrichtwertzonenKopieren');
     $GUI->copyBodenrichtwertzonen();
   } break;
 
@@ -1218,38 +1086,47 @@ switch($GUI->go) {
   } break;
 
   case 'WMS_Export_Senden' : {
+  	$GUI->checkCaseAllowed('WMS_Export');
     $GUI->wmsExportSenden();
   } break;
 
   case 'WMS_Export' : {
+  	$GUI->checkCaseAllowed('WMS_Export');
     $GUI->wmsExport();
   } break;
 
   case 'WMS_Import_Eintragen' : {
+  	$GUI->checkCaseAllowed('WMS_Import');
     $GUI->wmsImportieren();
   } break;
 
   case 'WMS_Import' : {
+  	$GUI->checkCaseAllowed('WMS_Import');
     $GUI->wmsImportFormular();
   } break;
   
   case 'UKO_Export' : {
+  	$GUI->checkCaseAllowed('UKO_Export');
     $GUI->uko_export();
   } break;
   
   case 'UKO_Import' : {
+  	$GUI->checkCaseAllowed('UKO_Import');
     $GUI->uko_import();
   } break;
   
   case 'UKO_Import_Importieren' : {
+  	$GUI->checkCaseAllowed('UKO_Import');
     $GUI->uko_import_importieren();
   } break;
 	
 	case 'GPX_Import' : {
+		$GUI->checkCaseAllowed('GPX_Import');
     $GUI->gpx_import();
   } break;
   
   case 'GPX_Import_importieren' : {
+  	$GUI->checkCaseAllowed('GPX_Import');
     $GUI->gpx_import_importieren();
   } break;
 
@@ -1262,26 +1139,32 @@ switch($GUI->go) {
   } break;
 
   case 'simple_SHP_Import' : {
+  	$GUI->checkCaseAllowed('simple_SHP_Import');
     $GUI->simple_shp_import();
   } break;
 
   case 'simple_SHP_Import_speichern' : {
+  	$GUI->checkCaseAllowed('simple_SHP_Import');
     $GUI->simple_shp_import_speichern();
   } break;
   
   case 'SHP_Import' : {
+  	$GUI->checkCaseAllowed('SHP_Import');
     $GUI->shp_import();
   } break;
 
   case 'SHP_Import_speichern' : {
+  	$GUI->checkCaseAllowed('SHP_Import');
     $GUI->shp_import_speichern();
   } break;
 
   case 'SHP_Export' : {
+  	$GUI->checkCaseAllowed('SHP_Export');
     $GUI->shp_export();
   } break;
 
   case 'SHP_Export_Shape-Datei erzeugen' : {
+  	$GUI->checkCaseAllowed('SHP_Export');
     $GUI->shp_export_exportieren();
   } break;
 
@@ -1334,175 +1217,98 @@ switch($GUI->go) {
   } break;
   
   case 'sachdaten_druck_editor' : {
+  	$GUI->checkCaseAllowed('sachdaten_druck_editor');
     $GUI->sachdaten_druck_editor();
   } break;
   
   case 'sachdaten_druck_editor_als neues Layout speichern' : {
+  	$GUI->checkCaseAllowed('sachdaten_druck_editor');
     $GUI->sachdaten_druck_editor_speichern();
   } break;
   
   case 'sachdaten_druck_editor_Änderungen Speichern' : {
+  	$GUI->checkCaseAllowed('sachdaten_druck_editor');
     $GUI->sachdaten_druck_editor_aendern();
   } break;
   
   case 'sachdaten_druck_editor_Löschen' : {
+  	$GUI->checkCaseAllowed('sachdaten_druck_editor');
     $GUI->sachdaten_druck_editor_loeschen();
   } break;
   
   case 'sachdaten_druck_editor_übernehmen >>' : {
+  	$GUI->checkCaseAllowed('sachdaten_druck_editor');
     $GUI->sachdaten_druck_editor_add2stelle();
   } break;
   
-  case 'sachdaten_druck_editor_Freitexthinzufuegen' : {
+  case 'sachdaten_druck_editor_Freitexthinzufuegen' :
+  	$GUI->checkCaseAllowed('sachdaten_druck_editor'); {
     $GUI->sachdaten_druck_editor_Freitexthinzufuegen();
   } break;
   
   case 'sachdaten_druck_editor_Freitextloeschen' : {
+  	$GUI->checkCaseAllowed('sachdaten_druck_editor');
     $GUI->sachdaten_druck_editor_Freitextloeschen();
   } break;
   
   case 'Layer_Export' : {
-    if($GUI->Stelle->isFunctionAllowed('Layerverwaltung')){
-      $GUI->layer_export();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+  	$GUI->checkCaseAllowed($go);
+    $GUI->layer_export();
   } break;
   
   case 'Layer_Export_Exportieren' : {
-    if($GUI->Stelle->isFunctionAllowed('Layerverwaltung')){
-      $GUI->layer_export_exportieren();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+  	$GUI->checkCaseAllowed('Layer_Export');
+    $GUI->layer_export_exportieren();
   } break;
 
 	case 'Style_Label_Editor' : {
-  	if($GUI->Stelle->isFunctionAllowed('Layerverwaltung')){
-      $GUI->StyleLabelEditor();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+		$GUI->checkCaseAllowed($go);
+    $GUI->StyleLabelEditor();
   } break;
 
   case 'Layereditor' : {
-  	if($GUI->Stelle->isFunctionAllowed('Layerverwaltung')){
-      $GUI->Layereditor();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+  	$GUI->checkCaseAllowed($go);
+    $GUI->Layereditor();
   } break;
 
   case 'Layereditor_Klasse_Löschen' : {
-  	if($GUI->Stelle->isFunctionAllowed('Layerverwaltung')){
-      $GUI->Layereditor_KlasseLoeschen();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+  	$GUI->checkCaseAllowed('Layereditor');
+   	$GUI->Layereditor_KlasseLoeschen();
   } break;
 
   case 'Layereditor_Klasse_Hinzufügen' : {
-    if($GUI->Stelle->isFunctionAllowed('Layerverwaltung')){
-      $GUI->Layereditor_KlasseHinzufuegen();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+  	$GUI->checkCaseAllowed('Layereditor');
+    $GUI->Layereditor_KlasseHinzufuegen();    
   } break;
 
   case 'Layereditor_Als neuen Layer eintragen' : {
-    if($GUI->Stelle->isFunctionAllowed('Layerverwaltung')){
-      $GUI->LayerAnlegen();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+  	$GUI->checkCaseAllowed('Layereditor');
+    $GUI->LayerAnlegen();
   } break;
 
   case 'Layereditor_Ändern' : {
-    if($GUI->Stelle->isFunctionAllowed('Layerverwaltung')){
-      $GUI->LayerAendern();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+  	$GUI->checkCaseAllowed('Layereditor');
+    $GUI->LayerAendern();
   } break;
 
   case 'Layereditor_erweiterte Einstellungen' : {
-  	if($GUI->Stelle->isFunctionAllowed('Layerverwaltung')){
-      $GUI->Attributeditor();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+  	$GUI->checkCaseAllowed('Attributeditor');
+    $GUI->Attributeditor();
   } break;
 
   case 'Attributeditor' : {
-  	if($GUI->Stelle->isFunctionAllowed('Layerverwaltung')){
-      $GUI->Attributeditor();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+  	$GUI->checkCaseAllowed('Attributeditor');
+    $GUI->Attributeditor();
   } break;
 
   case 'Attributeditor_speichern' : {    
-    if($GUI->Stelle->isFunctionAllowed('Layerverwaltung')){
-      $GUI->Attributeditor_speichern();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+    $GUI->checkCaseAllowed('Attributeditor');
+    $GUI->Attributeditor_speichern();
   } break;
 
   case 'Layer_Anzeigen' : {
-    if($GUI->Stelle->isFunctionAllowed('Layerverwaltung')){
-      $GUI->LayerAnzeigen();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+    $GUI->checkCaseAllowed($go);
+    $GUI->LayerAnzeigen();
   } break;
   
   case 'Layer_Uebersicht' : {
@@ -1510,176 +1316,80 @@ switch($GUI->go) {
   } break;
 
   case 'Layer_Löschen' : {    
-    if($GUI->Stelle->isFunctionAllowed('Layerverwaltung')){
-      $GUI->LayerLoeschen();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+    $GUI->checkCaseAllowed('Layer_Anzeigen');
+    $GUI->LayerLoeschen();
   } break;
 
   case 'Layer2Stelle_Reihenfolge' : {
-    if($GUI->Stelle->isFunctionAllowed('Stellenverwaltung')){
-      $GUI->Layer2Stelle_Reihenfolge();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+  	$GUI->checkCaseAllowed('Stelleneditor');
+    $GUI->Layer2Stelle_Reihenfolge();
   } break;
 
   case 'Layer2Stelle_Reihenfolge_Speichern' : {    
-    if($GUI->Stelle->isFunctionAllowed('Stellenverwaltung')){
-      $GUI->Layer2Stelle_ReihenfolgeSpeichern();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+    $GUI->checkCaseAllowed('Stelleneditor');
+    $GUI->Layer2Stelle_ReihenfolgeSpeichern();
   } break;
 
   case 'Layer2Stelle_Editor' : {
-    if($GUI->Stelle->isFunctionAllowed('Stellenverwaltung')){
-      $GUI->Layer2Stelle_Editor();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+    $GUI->checkCaseAllowed('Stelleneditor');
+    $GUI->Layer2Stelle_Editor();
   } break;
 
   case 'Layer2Stelle_Editor_Speichern' : {
-    if($GUI->Stelle->isFunctionAllowed('Stellenverwaltung')){
-      $GUI->Layer2Stelle_EditorSpeichern();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+    $GUI->checkCaseAllowed('Stelleneditor');
+    $GUI->Layer2Stelle_EditorSpeichern();
   } break;
 
 	case 'Layerattribut-Rechteverwaltung' : {
-    if($GUI->Stelle->isFunctionAllowed('Stellenverwaltung')){
-      $GUI->layer_attributes_privileges();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+    $GUI->checkCaseAllowed('Layerattribut-Rechteverwaltung');
+    $GUI->layer_attributes_privileges();
   } break;
 
   case 'Layerattribut-Rechteverwaltung_speichern' : {
-    if($GUI->Stelle->isFunctionAllowed('Stellenverwaltung')){
-      $GUI->layer_attributes_privileges_save();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+    $GUI->checkCaseAllowed('Layerattribut-Rechteverwaltung');
+    $GUI->layer_attributes_privileges_save();
   } break;
 
   case 'Stelleneditor' : {
-    if($GUI->Stelle->isFunctionAllowed('Stellenverwaltung')){
-      $GUI->Stelleneditor();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+    $GUI->checkCaseAllowed('Stelleneditor');
+    $GUI->Stelleneditor();
   } break;
 
   case 'Stelle_Löschen' : {
-    if($GUI->Stelle->isFunctionAllowed('Stellenverwaltung')){
-      $GUI->StelleLoeschen();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+  	$GUI->checkCaseAllowed('Stellen_Anzeigen');
+    $GUI->StelleLoeschen();
   } break;
 
   case 'Stelleneditor_Als neue Stelle eintragen' : {
-    if($GUI->Stelle->isFunctionAllowed('Stellenverwaltung')){
-      $GUI->StelleAnlegen();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+    $GUI->checkCaseAllowed('Stelleneditor');
+    $GUI->StelleAnlegen();
   } break;
 
   case 'Stelleneditor_Ändern' : {
-    if($GUI->Stelle->isFunctionAllowed('Stellenverwaltung')){
-      $GUI->StelleAendern();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+    $GUI->checkCaseAllowed('Stelleneditor');
+    $GUI->StelleAendern();
   } break;
 
   case 'Stellen_Anzeigen' : {
-    if($GUI->Stelle->isFunctionAllowed('Stellenverwaltung')){
-      $GUI->StellenAnzeigen();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+    $GUI->checkCaseAllowed('Stellen_Anzeigen');
+    $GUI->StellenAnzeigen();
   } break;
   
   case 'Filterverwaltung' : {
-  	if($GUI->Stelle->isFunctionAllowed('Stellenverwaltung')){
-      $GUI->Filterverwaltung();
-	    $currenttime=date('Y-m-d H:i:s',time());
-	    $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
-	    $GUI->drawMap();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-    }
+  	$GUI->checkCaseAllowed('Filterverwaltung');
+    $GUI->Filterverwaltung();
+    $currenttime=date('Y-m-d H:i:s',time());
+    $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+    $GUI->drawMap();
     $GUI->output();
   }break;
 
   case 'Filterverwaltung_speichern' : {
-    if($GUI->Stelle->isFunctionAllowed('Stellenverwaltung')){
-      $GUI->Filter_speichern($GUI->formvars);
-	    $currenttime=date('Y-m-d H:i:s',time());
-	    $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
-	    $GUI->drawMap();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-    }
+    $GUI->checkCaseAllowed('Filterverwaltung');
+    $GUI->Filter_speichern($GUI->formvars);
+    $currenttime=date('Y-m-d H:i:s',time());
+    $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+    $GUI->drawMap();
     $GUI->output();
   }break;
 
@@ -1692,124 +1402,54 @@ switch($GUI->go) {
   } break;
 
   case 'Benutzerdaten_Anzeigen' : {
-    if($GUI->Stelle->isFunctionAllowed('Nutzerverwaltung')){
-      $GUI->BenutzerdatenAnzeigen();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+    $GUI->checkCaseAllowed('Benutzerdaten_Anzeigen');
+    $GUI->BenutzerdatenAnzeigen();
   } break;
 
   case 'Benutzerdaten_Formular' : {
-  	if($GUI->Stelle->isFunctionAllowed('Nutzerverwaltung')){
-      $GUI->BenutzerdatenFormular();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+  	$GUI->checkCaseAllowed('Benutzerdaten_Formular');
+    $GUI->BenutzerdatenFormular();
   } break;
 
   case 'Benutzer_Löschen' : {
-    if($GUI->Stelle->isFunctionAllowed('Nutzerverwaltung')){
-      $GUI->BenutzerLöschen();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+    $GUI->checkCaseAllowed('Benutzerdaten_Anzeigen');
+    $GUI->BenutzerLöschen();
   } break;
 
   case 'Benutzerdaten_Als neuen Nutzer eintragen' : {
-    if($GUI->Stelle->isFunctionAllowed('Nutzerverwaltung')){
-      $GUI->BenutzerdatenAnlegen();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+    $GUI->checkCaseAllowed('Benutzerdaten_Formular');
+    $GUI->BenutzerdatenAnlegen();
   } break;
 
   case 'Benutzerdaten_Ändern' : {
-    if($GUI->Stelle->isFunctionAllowed('Nutzerverwaltung')){
-      $GUI->BenutzerdatenAendern();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+    $GUI->checkCaseAllowed('Benutzerdaten_Formular');
+   	$GUI->BenutzerdatenAendern();
   } break;
 
 
   case 'Funktionen_Anzeigen' : {
-  	if($GUI->Stelle->isFunctionAllowed('Funktionenverwaltung')){
-      $GUI->FunktionenAnzeigen();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+  	$GUI->checkCaseAllowed('Funktionen_Anzeigen');
+    $GUI->FunktionenAnzeigen();
   } break;
 
   case 'Funktionen_Formular' : {    
-    if($GUI->Stelle->isFunctionAllowed('Funktionenverwaltung')){
-      $GUI->FunktionenFormular();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+    $GUI->checkCaseAllowed('Funktionen_Formular');
+    $GUI->FunktionenFormular();
   } break;
 
   case 'Funktion_Löschen' : {
-    if($GUI->Stelle->isFunctionAllowed('Funktionenverwaltung')){
-      $GUI->FunktionLoeschen();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+    $GUI->checkCaseAllowed('Funktionen_Anzeigen');
+    $GUI->FunktionLoeschen();
   } break;
 
   case 'Funktionen_Als neue Funktion eintragen' : {
-    if($GUI->Stelle->isFunctionAllowed('Funktionenverwaltung')){
-      $GUI->FunktionAnlegen();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+    $GUI->checkCaseAllowed('Funktionen_Formular');
+    $GUI->FunktionAnlegen();    
   } break;
 
   case 'Funktionen_Ändern' : {
-    if($GUI->Stelle->isFunctionAllowed('Funktionenverwaltung')){
-      $GUI->FunktionAendern();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+    $GUI->checkCaseAllowed('Funktionen_Formular');
+    $GUI->FunktionAendern();
   } break;
 
   case 'help' : {
@@ -1844,19 +1484,13 @@ switch($GUI->go) {
   } break;
 
   case 'Antraege_Anzeigen' : {
+  	$GUI->checkCaseAllowed('Antraege_Anzeigen');
     $GUI->Antraege_Anzeigen();
   } break;
 
   case 'Antrag_loeschen' : {
-    if ($GUI->Stelle->isFunctionAllowed($go)) {
-      $GUI->Antrag_Loeschen();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen des Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+    $GUI->checkCaseAllowed($go);
+    $GUI->Antrag_Loeschen();
   } break;
 
   case 'Antraganzeige_Festpunkte_in_Karte_Anzeigen' : {
@@ -1873,15 +1507,8 @@ switch($GUI->go) {
   } break;
 
   case 'Antraganzeige_Zugeordnete_Dokumente_Anzeigen' : {
-    if ($GUI->Stelle->isFunctionAllowed($go)) {
-      $GUI->DokumenteZuAntraegeAnzeigen();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen des Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+    $GUI->checkCaseAllowed($go);
+    $GUI->DokumenteZuAntraegeAnzeigen();
   } break;
 
   case 'Antraganzeige_Uebergabeprotokoll_Erzeugen' : {
@@ -1913,49 +1540,25 @@ switch($GUI->go) {
     $GUI->formvars['Bilddatei_name']=$_FILES['Bilddatei']['name'];
     $GUI->formvars['Bilddatei_size']=$_FILES['Bilddatei']['size'];
     $GUI->formvars['Bilddatei_type']=$_FILES['Bilddatei']['type'];
-#    $GUI->formvars['pathx']=$pathx;
-#    $GUI->formvars['pathy']=$pathy;
-#    echo '<b>Nachweisformular Senden</b>';
     $GUI->nachweisFormSenden();
   } break;
 
   case 'Nachweisloeschen':{
-    if($GUI->Stelle->isFunctionAllowed($go)){
-      $GUI->nachweisLoeschen();
-    }
-    else{
-      # Benutzer ist nicht berechtigt zum Ausführen des Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+    $GUI->checkCaseAllowed($go);
+    $GUI->nachweisLoeschen();
   } break;
 
 
 #Documente die in der Ergebnisliste ausgewählt wurden sollen weiterverarbeitet werden!
 # 2006-01-26 pk
   case 'Nachweisanzeige_zum_Auftrag_hinzufuegen' : {
-    if ($GUI->Stelle->isFunctionAllowed($go)) {
-      $GUI->nachweiseZuAuftrag();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen des Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+    $GUI->checkCaseAllowed($go);
+    $GUI->nachweiseZuAuftrag();
   } break;
 
   case 'Nachweisanzeige_aus_Auftrag_entfernen':{
-    if ($GUI->Stelle->isFunctionAllowed($go)) {
-      $GUI->nachweiseZuAuftragEntfernen();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen des Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+    $GUI->checkCaseAllowed($go);
+    $GUI->nachweiseZuAuftragEntfernen();
   } break;
 
   # Der case 'Bestaetigung' wurde am 2006-01-30 gelöscht, weil nicht mehr benutzt
@@ -1994,6 +1597,7 @@ switch($GUI->go) {
   # für Fortführungsrisse, Koordinatenverzeichnisse und Grenzniederschriften
 
   case 'Nachweisformular' : {
+  	$GUI->checkCaseAllowed($go);
     # Unterscheidung ob vorhandene Dokumente geändert werden sollen oder neu eingegeben
     if ($GUI->formvars['id']!='') {
       # Ein Nachweis soll geändert werden
@@ -2016,27 +1620,13 @@ switch($GUI->go) {
   } break;
 
   case 'Antrag_Aendern' : {
-    if ($GUI->Stelle->isFunctionAllowed($go)) {
-      $GUI->vermessungsantragAendern();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen des Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+    $GUI->checkCaseAllowed($go);
+    $GUI->vermessungsantragAendern();
   } break;
 
   case 'Nachweis_antragsnr_form_aufrufen' : {
-    if ($GUI->Stelle->isFunctionAllowed($go)) {
-      $GUI->vermessungsantragsFormular();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ausführen des Anwendungsfalles
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-      $GUI->output();
-    }
+    $GUI->checkCaseAllowed($go);
+    $GUI->vermessungsantragsFormular();
   } break;
 
   case 'Nachweis_antragsnummer_Senden' : {
@@ -2044,6 +1634,7 @@ switch($GUI->go) {
   } break;
 
   case 'Nachweisrechercheformular':{
+  	$GUI->checkCaseAllowed($go);
     $GUI->rechercheFormAnzeigen();
   } break;
 
@@ -2109,11 +1700,13 @@ switch($GUI->go) {
   } break;
 
 	case "Adresse_Auswaehlen" : {
+		$GUI->checkCaseAllowed($go);
     $GUI->adresswahl();
     $GUI->output();
   } break;
 
   case "ALK-Adresse_Auswaehlen" : {
+  	$GUI->checkCaseAllowed($go);
   	$GUI->formvars['ALK_Suche'] = 1;
     $GUI->adresswahl();
     $GUI->output();
@@ -2125,18 +1718,21 @@ switch($GUI->go) {
   } break;
 
   case "Flurstueck_hist_Auswaehlen" : {
+  	$GUI->checkCaseAllowed($go);
     $GUI->formvars['historical'] = 1;
     $GUI->flurstwahl();
     $GUI->output();
   } break;
 
 	case "ALK-Flurstueck_Auswaehlen" : {
+		$GUI->checkCaseAllowed($go);
 		$GUI->formvars['ALK_Suche'] = 1;
     $GUI->flurstwahl();
     $GUI->output();
   } break;
 
   case "Flurstueck_Auswaehlen" : {
+  	$GUI->checkCaseAllowed($go);
     $GUI->flurstwahl();
     $GUI->output();
   } break;
@@ -2156,15 +1752,9 @@ switch($GUI->go) {
   } break;
 
   case 'ALK_Fortfuehrung' : {
-    if ($GUI->Stelle->isFunctionAllowed($go)) {
-      $GUI->ALK_Fortfuehrung();
-      $GUI->tmp_Adr_Tabelle_Aktualisieren();
-    }
-    else {
-      # Benutzer ist nicht berechtigt zum Ändern der ALB-Daten
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
-    }
+    $GUI->checkCaseAllowed($go);
+    $GUI->ALK_Fortfuehrung();
+    $GUI->tmp_Adr_Tabelle_Aktualisieren();
     $GUI->output();
   } break;
 
@@ -2185,19 +1775,12 @@ switch($GUI->go) {
   # Aktualisierung des ALB-Datenbestandes an Hand einer WLDGE-Datei
   # Dieser Anwendungsfall deckt das Anlegen eines neuen ALB-Bestandes mit ab, dazu muß die Variable ist_Fortführung=0 sein
   case 'ALB_Aenderung' : {
-    if ($GUI->Stelle->isFunctionAllowed($go)) {
-      # Benutzer ist berechtigt für Änderung der ALB-Daten
-      if ($GUI->formvars['WLDGE_lokal']==2) {
-        $GUI->ALB_Aenderung_Stapel();
-      }
-      else {
-        $GUI->ALB_Aenderung();
-      }
-    } # end of Benutzer ist berechtigt
+    $GUI->checkCaseAllowed($go);
+    if ($GUI->formvars['WLDGE_lokal']==2) {
+      $GUI->ALB_Aenderung_Stapel();
+    }
     else {
-      # Benutzer ist nicht berechtigt zum Ändern der ALB-Daten
-      $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-      $GUI->rollenwahl($Stelle_ID);
+      $GUI->ALB_Aenderung();
     }
     $GUI->output();
   } break; # end of Änderung des ALB-Datenbestandes

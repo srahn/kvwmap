@@ -1976,6 +1976,26 @@ class stelle extends stelle_core{
       return 0;
     }
   }
+  
+  function isMenueAllowed($menuename){
+  	$sql = "SELECT distinct a.* from u_menues as a, u_menue2stelle as b ";
+  	$sql.= "WHERE links = 'index.php?go=".$menuename."' AND b.menue_id = a.id AND b.stelle_id = ".$this->id;
+  	$this->debug->write("<p>file:users.php class:stelle->isMenueAllowed - Guckt ob der Menuepunkt der Stelle zugeordnet ist:<br>".$sql,4);
+    $query=mysql_query($sql,$this->database->dbConn);
+    if ($query==0) {
+      $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4);
+      $errmsg='Fehler bei der Ueberpruefung des Menuepunkts für die Stelle';
+    }
+    else{
+      $rs=mysql_fetch_array($query);
+    }
+    if($rs[0] != '') {
+      return 1;
+    }
+    else {
+      return 0;
+    }
+  }
 
   function getFlurstueckeAllowed($FlurstKennz, $database) {
     $GemeindenStelle = $this->getGemeindeIDs();

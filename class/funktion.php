@@ -84,6 +84,9 @@ class funktion {
   	$sql = "DELETE FROM u_funktionen ";
   	$sql.= "WHERE id = ".$formvars['selected_function_id'];
   	$ret=$this->database->execSQL($sql,4, 1);
+  	$sql = "DELETE FROM u_funktion2stelle ";
+  	$sql.= "WHERE funktion_id = ".$formvars['selected_function_id'];
+  	$ret=$this->database->execSQL($sql,4, 1);
   }
     
 }

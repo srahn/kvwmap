@@ -1026,9 +1026,9 @@ ADD `datenherr` VARCHAR( 100 ) NULL ;
 #------------------------------------------------------------------------------------------
 # Änderung von 1.8.0 zu 1.9.0
 
-ALTER TABLE `rolle` ADD `coordtype` ENUM( 'dec', 'dms' ) NOT NULL DEFAULT 'dec' AFTER `epsg_code2` 
+ALTER TABLE `rolle` ADD `coordtype` ENUM( 'dec', 'dms' ) NOT NULL DEFAULT 'dec' AFTER `epsg_code2`;
 
-CREATE TABLE IF NOT EXISTS `rolle_csv_attributes` (
+CREATE TABLE `rolle_csv_attributes` (
   `user_id` int(11) NOT NULL,
   `stelle_id` int(11) NOT NULL,
   `id` int(11) NOT NULL AUTO_INCREMENT,

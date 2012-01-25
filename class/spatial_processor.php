@@ -45,6 +45,18 @@ class spatial_processor {
 		$this->rolle = $rolle;
   }
   
+  function split_multi_geometries($wktgeom, $layer_epsg, $client_epsg){
+  	$sql = "select ST_geometryN(transform(geometryfromtext('".$wktgeom."', ".$client_epsg."), ".$layer_epsg."),"; 
+		$sql.= "generate_series(1, ST_NumGeometries(geometryfromtext('".$wktgeom."', ".$client_epsg."))))";
+		$ret = $this->pgdatabase->execSQL($sql,4, 0);
+		if (!$ret[0]) {
+      while($rs=pg_fetch_row($ret[1])) {
+        $geoms[]=$rs[0];
+      }
+      return $geoms;
+    }
+  }
+  
   function union($geom_1, $geom_2, $type){
   	if($type == 'wkt'){
   		//$sql = "SELECT AsText(validize_polygon(GeomUnion(GeomFromText('".$geom_1."'), GeomFromText('".$geom_2."'))))";
@@ -194,17 +206,6 @@ class spatial_processor {
 			}break;
 			
 			case 'subtract':{
-				if($formvars['resulttype'] == 'svgwkt'){
-					$result = $this->difference($polywkt1, $polywkt2, 'svg');
-					$result .= '||';
-					$result .= $this->difference($polywkt1, $polywkt2, 'wkt');
-				}
-				else{
-					$result = $this->difference($polywkt1, $polywkt2, $formvars['resulttype']);
-				}
-			}break;
-			
-			case 'split':{
 				if($formvars['resulttype'] == 'svgwkt'){
 					$result = $this->difference($polywkt1, $polywkt2, 'svg');
 					$result .= '||';

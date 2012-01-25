@@ -210,6 +210,15 @@ class GUI extends GUI_core{
     if (isset ($mime_type)) $this->mime_type=$mime_type;
   }
   
+  function checkCaseAllowed($case){
+  	if(!$this->Stelle->isFunctionAllowed($case) AND !$this->Stelle->isMenueAllowed($case)) {
+      $this->Fehlermeldung=$this->TaskChangeWarning;
+      $this->rollenwahl($this->Stelle->id);
+      $this->output();
+      exit;
+    }
+  }
+  
 	function getSVG_vertices(){
 		# Diese Funktion liefert die Eckpunkte der Geometrien von allen aktiven Postgis-Layern, die im aktuellen Kartenausschnitt liegen
 		$this->user->rolle->readSettings();
@@ -300,6 +309,29 @@ class GUI extends GUI_core{
 		$height = $this->formvars['height']-140;
 		$this->user->rolle->setSize($width.'x'.$height);
 		$this->user->rolle->readSettings();
+	}
+	
+	function split_multi_geometries(){
+		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
+		$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
+		$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+		$spatial_processor = new spatial_processor($this->user->rolle, $this->database, $layerdb);
+		$single_geoms = $spatial_processor->split_multi_geometries($this->formvars['newpathwkt'], $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+		for($i = 0; $i < count($single_geoms); $i++){
+			$sql = "INSERT INTO ".$this->formvars['layer_tablename']." SELECT * FROM ".$this->formvars['layer_tablename']." WHERE oid = ".$this->formvars['oid'];
+			$ret = $layerdb->execSQL($sql,4, 0);
+			$new_oid = pg_last_oid($ret[1]);
+			$sql = "UPDATE ".$this->formvars['layer_tablename']." SET ".$this->formvars['layer_columnname']." = '".$single_geoms[$i]."' WHERE oid = ".$new_oid;
+			$ret = $layerdb->execSQL($sql,4, 0);
+		}
+		$sql = "DELETE FROM ".$this->formvars['layer_tablename']." WHERE oid = ".$this->formvars['oid'];
+		$ret = $layerdb->execSQL($sql,4, 0);
+		$this->loadMap('DataBase');					# Karte anzeigen
+		$currenttime=date('Y-m-d H:i:s',time());
+    $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
+    $this->drawMap();
+    $this->saveMap('');
+		$this->output(); 
 	}
 	
 	function bevoelkerung_bericht(){
@@ -546,26 +578,6 @@ class GUI extends GUI_core{
     $this->main='denkmale_geladen.php';
   }
   
-  function pivotTable($tableName, $colForHeader, $colName) {
-    $result = $this->pivotTable = $this->pgdatabase->pivotTable('mvbevoelkerung',$tableName);
-    $arrayAll = pg_fetch_all($result);
-    $this->arrayAll = $arrayAll;
-    $arrayKeys = array_keys($arrayAll[0]);
-    $sql = "";
-    for ($i=0; $i < count($arrayKeys); $i++) {
-      if ($arrayKeys[$i]!=$colForHeader) {
-				if ($i>0) $sql .="<br>union<br>";    
-				$sql .= "SELECT '$arrayKeys[$i]' AS $colName, ";
-				for ($j=0; $j < count($arrayAll); $j++) {
-					if ($j>0) $sql .= " ,";
-					$sql .="(SELECT \"$arrayKeys[$i]\" FROM mvbevoelkerung.$tableName WHERE $colForHeader='".$arrayAll[$j][$colForHeader]."') AS \"".$arrayAll[$j][$colForHeader]."\"";
-				}
-			}
-    }
-    $this->pivotTable = $sql;
-    $this->main='pivotTable.php';
-  }
-
   function get_classes(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->classdaten = $mapDB->read_Classes($this->formvars['layer_id']);
@@ -1145,36 +1157,6 @@ class GUI extends GUI_core{
       }
     }
   }
-
-  function editLayerForm($layerName,$oid) {
-    # diese Funktion sammelt die Daten zur Darstellung eines Formulars zur
-    # Änderung von Daten eines Layers ein und stellt diese schließlich dar.
-    # 1) LayerObjekt bilden
-    $layer=new layer($layerName,$this->pgdatabase);
-    # 2) Abfrage der Attribute des Layers
-    $layer->getAttributs();
-    # 3) Abfragen der Daten des Layers wenn eine oid übergeben wurde
-    if ($oid!='') {
-      $layer->getData($oid);
-      $this->titel=$layerName." Datensatz Ändern";
-    }
-    else {
-      $this->titel=$layerName." Datensatz Anlegen";
-    }
-    # 4) Übergeben der Layerdaten und Ausgabe des Formulars
-    $this->layer=$layer;
-    $this->main="sachdateneditor.php";
-    $this->loadMap('DataBase');
-    if ($this->formvars['refmap_x']!='') {
-      $this->zoomToRefExt();
-    }
-    $this->navMap($this->formvars['CMD']);
-    $this->saveMap('');
-    $currenttime=date('Y-m-d H:i:s',time());
-    $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-    $this->drawMap();
-    $this->output();
-  }
     
   function https_proxy(){
     $params = array_keys($this->formvars);
@@ -1442,12 +1424,6 @@ class GUI extends GUI_core{
       } # ende CapabilitiesURI konnte gelesen werden
     } # ende CapabilitiesURI wurde übergeben
     $this->output();
-  }
-
-  #2005-11-29_pk
-  function buildTopology() {
-    # lese alle Flurstückspolygone
-
   }
 
   function adminFunctions() {
@@ -2547,91 +2523,6 @@ class GUI extends GUI_core{
     }
   }
 
-  function gebaeude_editor_speichern(){
-    $gebaeude_editor = new gebaeude_editor($this->pgdatabase);
-    if($this->formvars['oid'] != ''){
-      $ret = $gebaeude_editor->gebaeude_aendern($this->formvars['oid'], $this->formvars['newpathwkt'], $this->formvars['GemID'], $this->formvars['StrID'], $this->formvars['nummer'], $this->formvars['zusatz'], $this->formvars['kommentar']);
-    }
-    else{
-      $ret = $gebaeude_editor->eintragenNeuesGebaeude($this->formvars['newpathwkt'], $this->formvars['GemID'], $this->formvars['StrID'], $this->formvars['nummer'], $this->formvars['zusatz'], $this->formvars['kommentar']);
-    }
-    showAlert($ret);
-    $this->gebaeude_editor();
-  }
-
-  function gebaeude_editor(){
-    $this->main='gebaeude_editor.php';
-    $this->titel='Gebäude Adressen bearbeiten';
-    # aktuellen Kartenausschnitt laden
-    $this->loadMap('DataBase');
-    $layerset = $this->user->rolle->getLayer(LAYERNAME_GEBAEUDE);
-    if ($this->formvars['CMD']!='') {
-      $this->navMap($this->formvars['CMD']);
-    }
-
-    # from where des Layers abfragen
-    $data = $this->mapDB->getData($layerset[0]['Layer_ID']);
-    $select = $this->mapDB->getSelectFromData($data);
-    #$fromposition = strpos(strtolower($select), 'from');
-    #$this->formvars['fromwhere'] = substr($select, $fromposition);
-    $this->formvars['fromwhere'] = 'from ('.$select.') as foo where 1=1';
-    if(strpos(strtolower($this->formvars['fromwhere']), 'where') === false){
-      $this->formvars['fromwhere'] .= ' where (1=1)';
-    }
-
-    $this->saveMap('');
-    $currenttime=date('Y-m-d H:i:s',time());
-    $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-    $this->drawMap();
-
-    if($this->formvars['oid'] != ''){     # wenn oid übergeben wurde, Gebäude laden
-      $gebaeude_editor = new gebaeude_editor($this->pgdatabase);
-      $gebaeude = $gebaeude_editor->load_gebaeude($this->formvars['oid']);
-      $GemID = $gebaeude['gemeinde'];
-      $StrID = $gebaeude['strasse'];
-      $this->formvars['nummer'] = $gebaeude['nummer'];
-      $this->formvars['zusatz'] = $gebaeude['zusatz'];
-      $this->formvars['kommentar'] = $gebaeude['kommentar'];
-      $this->formvars['newpath'] = str_replace('-', '', $gebaeude['segment']);
-    }
-    else{
-      if ($this->formvars['CMD']!='') {
-        $GemID = $this->Lagebezeichung['gemeinde'];   # nach Navigation Gemeinde abfragen
-      }
-      if($GemID == ''){
-        if($this->formvars['GemID'] == ''){
-          $GemID = $this->Lagebezeichung['gemeinde']; # beim ersten Start Gemeinde abfragen
-        }
-        else{
-          $GemID = $this->formvars['GemID'];          # sonst ausgewählte Gemeinde nehmen
-        }
-      }
-      $StrID=$this->formvars['StrID'];
-    }
-
-    $Gemeinde=new gemeinde('',$this->pgdatabase);
-    $Adresse=new adresse('','','',$this->pgdatabase);
-    $GemeindenStelle=$this->Stelle->getGemeindeIDs();
-    $GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle, 'Name');
-    // Sortieren der Gemeinden unter Berücksichtigung von Umlauten
-    $sorted_arrays = umlaute_sortieren($GemListe['Name'], $GemListe['ID']);
-    $GemListe['Name'] = $sorted_arrays['array'];
-    $GemListe['ID'] = $sorted_arrays['second_array'];
-    # Erzeugen des Formobjektes für die Gemeindeauswahl
-    $GemFormObj=new selectFormObject("GemID","select",$GemListe['ID'],array($GemID),$GemListe['Name'],"1","","",NULL);
-    $GemFormObj->insertOption(-1,0,'--Auswahl--',0);
-    $GemFormObj->outputHTML();
-    $StrassenListe=$Adresse->getStrassenListe($GemID,'','StrassenName');
-    $StrSelected[0]=$StrID;
-    # Erzeugen des Formobjektes für die Strassenauswahl
-    $StrFormObj=new selectFormObject("StrID","select",$StrassenListe['StrID'],$StrSelected,$StrassenListe['Name'],"1","","",NULL);
-    $StrFormObj->nochange = true;
-    $StrFormObj->outputHTML();
-    $this->FormObject["Gemeinden"]=$GemFormObj;
-    $this->FormObject["Strassen"]=$StrFormObj;
-    $this->output();
-  }
-
   function jagdbezirk_show_data(){
     $jagdkataster = new jagdkataster($this->pgdatabase);
     $jagdkataster->clientepsg = $this->user->rolle->epsg_code;
@@ -2917,22 +2808,6 @@ class GUI extends GUI_core{
     $this->bau->baudata[0]['bauort'] = $Gemarkung->getGemkgName();
     $this->main='bauauskunftanzeige.php';
     $this->titel='Baudatenanzeige';
-  }
-
-  function baudaten_aktualisieren(){
-    $this->bau = new Bauauskunft($this->baudatabase);
-    $this->bau->checkfile();
-    $this->main='baudaten_aktualisieren.php';
-    $this->titel='Baudaten aktualisieren';
-  }
-
-  function baudaten_aktualisieren_OK(){
-    $this->bau = new Bauauskunft($this->baudatabase);
-    if($this->bau->checkfile()){
-      $this->bau->updatedatabase();
-    }
-    $this->main='baudaten_aktualisieren.php';
-    $this->titel='Baudaten aktualisieren';
   }
 
   function druckrahmen_init() {
@@ -4377,24 +4252,6 @@ class GUI extends GUI_core{
     readfile($Pfad.$Bild);
     ob_flush();
     return 1;
-  }
-
-  function neuerLayer() {
-    $this->titel='Neuen Layer anlegen';
-    $this->main="formularneuerlayer.php";
-    $this->output();
-  }
-
-  function neuenLayerEintragen() {
-    # Eintragen des neuen Layers mit seinen Angaben
-    # Erzeugen eines neuen Datenbank MapObjektes db_mapObj
-    $dbMapObj=new db_mapObj($this->Stelle->id,$this->user->id);
-    # Start einer Transaktion
-
-    $ret=$layer->newLayer($this->formvars);
-    if ($ret[0]) { # Fehler beim Eintragen des neuen Layers
-
-    }
   }
 
   function showFestpunkteSkizze() {
@@ -6510,11 +6367,12 @@ class GUI extends GUI_core{
           for($j = 0; $j < count($layerset[0]['attributes']['name']); $j++){
             $layerset[0]['attributes']['privileg'][$j] = $privileges[$layerset[0]['attributes']['name'][$j]];
             $layerset[0]['attributes']['privileg'][$layerset[0]['attributes']['name'][$j]] = $privileges[$layerset[0]['attributes']['name'][$j]];
+            $layerset[0]['shape'][0][$layerset[0]['attributes']['name'][$j]] = $this->formvars[$layerset[0]['Layer_ID'].';'.$layerset[0]['attributes']['real_name'][$layerset[0]['attributes']['name'][$j]].';'.$layerset[0]['attributes']['table_name'][$layerset[0]['attributes']['name'][$j]].';;'.$layerset[0]['attributes']['form_element_type'][$j].';'.$layerset[0]['attributes']['nullable'][$j].';'.$layerset[0]['attributes']['type'][$j]];
           }
         }
         $this->formvars['layer_columnname'] = $layerset[0]['attributes']['name'][$j];
         $this->formvars['layer_tablename'] = $layerset[0]['attributes']['table_name'][$layerset[0]['attributes']['name'][$j]];
-        $this->qlayerset[0]=$layerset[0];
+        $this->qlayerset[0]=$layerset[0];				
 
         # wenn Attributname/Wert-Paare übergeben wurden, diese im Formular einsetzen
         if(is_array($this->formvars['attributenames'])){
@@ -6524,6 +6382,7 @@ class GUI extends GUI_core{
         for($i = 0; $i < count($attributenames); $i++){
           $this->qlayerset[0]['shape'][0][$attributenames[$i]] = $values[$i];
         }
+        
         # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
 				$this->qlayerset[0]['attributes'] = $mapDB->add_attribute_values($this->qlayerset[0]['attributes'], $layerdb, $this->qlayerset[0]['shape'], true);
         $this->new_entry = true;

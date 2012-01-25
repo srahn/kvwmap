@@ -6,6 +6,11 @@ function toggle_vertices(){
 	document.getElementById("vertices").SVGtoggle_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 }
 
+function split_geometries(){
+	document.GUI.go.value = 'Multi_Geometrien_splitten';
+	document.GUI.submit();
+}
+
 function send(zoom){
 	document.GUI.zoom.value = zoom;
 	if(document.GUI.newpathwkt.value == ''){
@@ -60,8 +65,8 @@ function buildwktlinefromsvgpath(svgpath){
     <td align="center" colspan="3"><strong><font size="+1"><a name="geoedit_anchor"><?php echo $this->titel; ?></a></font></strong></td>
   </tr>
   <tr> 
-    <td rowspan="6">&nbsp;</td>
-    <td colspan="2" rowspan="6"> 
+    <td rowspan="5">&nbsp;</td>
+    <td colspan="2" rowspan="5"> 
       <?php
 				include(LAYOUTPATH.'snippets/SVG_line_query.php')
 			?>
@@ -71,7 +76,8 @@ function buildwktlinefromsvgpath(svgpath){
   	<td height="380">&nbsp;</td>
   </tr>
   <tr>
-  	<td>Geometrie übernehmen von:<br>
+  	<td align="center"><input type="button" style="visibility:hidden" name="split" value="Geometrie in neue Datensätze aufteilen" onclick="split_geometries();"></td>
+  	<!--td>Geometrie übernehmen von:<br>
   		<select name="layer_id" onchange="document.GUI.no_load.value='true';document.GUI.submit();">
   			<?
   				for($i = 0; $i < count($this->queryable_postgis_layers['ID']); $i++){
@@ -81,10 +87,7 @@ function buildwktlinefromsvgpath(svgpath){
   				}
   			?>
   		</select> 
-  	</td>
-  </tr>
-  <tr> 
-    <td><hr align="center" noshade></td>
+  	</td-->
   </tr>
   <tr> 
     <td><hr align="center" noshade></td>
@@ -105,6 +108,7 @@ function buildwktlinefromsvgpath(svgpath){
   </tr>
 </table>
 <INPUT TYPE="HIDDEN" NAME="zoom" VALUE="">
+<INPUT TYPE="HIDDEN" NAME="layer_id" VALUE="">
 <INPUT TYPE="HIDDEN" NAME="columnname" VALUE="<?php echo $this->formvars['columnname']; ?>">
 <INPUT TYPE="HIDDEN" NAME="fromwhere" VALUE="<? echo $this->formvars['fromwhere']; ?>">
 <INPUT TYPE="HIDDEN" NAME="layer_columnname" VALUE="<?php echo $this->formvars['layer_columnname']; ?>">

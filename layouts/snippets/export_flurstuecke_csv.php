@@ -9,6 +9,7 @@ function browser_switch(){
 }
 
 function back(){
+	document.GUI.target = '';
 	if(document.GUI.GemkgID != undefined){
 		document.GUI.go.value = 'Flurstueck_Auswaehlen';
 		document.GUI.go_plus.value = 'Suchen';

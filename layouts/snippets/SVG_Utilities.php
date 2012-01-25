@@ -403,6 +403,14 @@
 	  	if(polygonfunctions == true){
 	  		polygonarea();
 	  	}
+			if(linefunctions == true){
+				if(paths[1].search(/MULTI.+/) != -1){
+	  			top.document.GUI.split.style.visibility = "visible";
+				}
+				else{
+					top.document.GUI.split.style.visibility = "hidden";
+				}
+	  	}
   	}
  	}
 
@@ -560,7 +568,7 @@
 			case "split_lines":
 				addlinepoint_second(world_x, world_y);
 				if(top.document.GUI.secondline.value == "true"){
-					top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&geotype=line&path1="+top.document.GUI.pathwkt.value+"&path2="+path_second+"&operation=split&resulttype=svgwkt&layer_id="+top.document.GUI.layer_id.value, new Array(top.document.GUI.result), "");
+					top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&geotype=line&path1="+top.document.GUI.pathwkt.value+"&path2="+path_second+"&operation=subtract&resulttype=svgwkt&layer_id="+top.document.GUI.layer_id.value, new Array(top.document.GUI.result), "");
 				}
 				redrawsecondline();
 			break;
@@ -980,6 +988,7 @@ function mouseup(evt){
 		path_second = "";
 		redrawsecondline();
 		redraw();
+		top.document.GUI.split.style.visibility = "hidden";
 	}
 
 	function deletelastline(evt){

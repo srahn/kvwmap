@@ -899,8 +899,7 @@ function deactivate_vertex(evt){
 	}
 }
 
-/*function add_vertex(evt){
-	alert("sfsdf");
+function add_vertex(evt){
 	if(doing == "measure"){
 		if(!measuring){
 			restart();	
@@ -908,12 +907,11 @@ function deactivate_vertex(evt){
 		}
 		pathx.push(evt.target.getAttribute("cx"));
 		pathy.push(evt.target.getAttribute("cy"));
-		pathx_world.push(top.format_number(evt.target.getAttribute("x"), 2));
-		pathy_world.push(top.format_number(evt.target.getAttribute("y"), 2));
+		pathx_world.push(top.format_number(evt.target.getAttribute("x"), false));
+		pathy_world.push(top.format_number(evt.target.getAttribute("y"), false));
 	  redrawPL();
 	}
 }
-*/
 
 function startMeasure(evt) {
   restart();
@@ -943,8 +941,8 @@ function addpoint(evt) {
   // neuen eckpunkt abgreifen
 	pathx.push(evt.clientX);
 	pathy.push(resy - evt.clientY);
-	pathx_world.push(top.format_number(evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value)), false);
-	pathy_world.push(top.format_number(top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value)), false);
+	pathx_world.push(top.format_number(evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value), false));
+	pathy_world.push(top.format_number(top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value), false));
   redrawPL();
 }
 
