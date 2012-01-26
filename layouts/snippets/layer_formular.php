@@ -313,7 +313,7 @@ else {
 		  	</tr>
         <tr valign="top"> 
           <td align="right">Zugeordnete<br>
-            <select name="selectedstellen" size="4" multiple style="width:160px">
+            <select name="selectedstellen" size="4" multiple style="width:220px">
             <? 
             for($i=0; $i < count($this->formvars['selstellen']["Bezeichnung"]); $i++){
               	echo '<option value="'.$this->formvars['selstellen']["ID"][$i].'">'.$this->formvars['selstellen']["Bezeichnung"][$i].'</option>';
@@ -326,7 +326,7 @@ else {
             <input type="button" name="substractPlaces" value="&gt;&gt;" onClick=substractOptions(document.GUI.selectedstellen,document.GUI.selstellen,'value')>
           </td>
           <td>verfügbare<br>
-            <select name="allstellen" size="4" multiple style="width:160px">
+            <select name="allstellen" size="4" multiple style="width:220px">
             <? for($i=0; $i < count($this->stellen["Bezeichnung"]); $i++){
               	echo '<option value="'.$this->stellen["ID"][$i].'">'.$this->stellen["Bezeichnung"][$i].'</option>';
                }

@@ -38,9 +38,9 @@ function checknumbers(input, type, length, decimal_length){
   if(type == 'int2' || type == 'int4' || type == 'int8'){
   	if(input.value.search(/[^-\d]/g) != -1){
   		alert('Es sind nur ganzzahlige Angaben erlaubt!');
+  		var val = input.value.replace(/[^-\d]/g, '');
+  		input.value = val;
   	}
-		var val = input.value.replace(/[^-\d]/g, '');
-  	input.value = val;
   }
 }
 

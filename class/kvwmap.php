@@ -211,7 +211,7 @@ class GUI extends GUI_core{
   }
   
   function checkCaseAllowed($case){
-  	if(!$this->Stelle->isFunctionAllowed($case) AND !$this->Stelle->isMenueAllowed($case)) {
+  	if(!$this->Stelle->isMenueAllowed($case) AND !$this->Stelle->isFunctionAllowed($case)) {
       $this->Fehlermeldung=$this->TaskChangeWarning;
       $this->rollenwahl($this->Stelle->id);
       $this->output();
@@ -1724,8 +1724,8 @@ class GUI extends GUI_core{
     $this->titel='Geometrie bearbeiten';
     # aktuellen Kartenausschnitt laden
     $this->loadMap('DataBase');
-    $layerdb = $this->mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-    $layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
+    $layerdb = $this->mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+    $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
     $this->queryable_postgis_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
     $lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
     $oldscale=round($this->map->scale);
@@ -1752,7 +1752,7 @@ class GUI extends GUI_core{
       }
     }
     # Spaltenname und from-where abfragen
-    $data = $this->mapDB->getData($this->formvars['layer_id']);
+    $data = $this->mapDB->getData($this->formvars['selected_layer_id']);
     $data_explosion = explode(' ', $data);
     $this->formvars['columnname'] = $data_explosion[0];
     $select = $this->mapDB->getSelectFromData($data);
