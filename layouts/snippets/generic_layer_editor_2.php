@@ -33,7 +33,9 @@ function checknumbers(input, type, length, decimal_length){
 				val = parts[0]+'.'+parts[1].substring(0, decimal_length); 
 			}
 		}
-  	input.value = val;
+		if(input.value != val){
+  		input.value = val;
+  	}
   }
   if(type == 'int2' || type == 'int4' || type == 'int8'){
   	if(input.value.search(/[^-\d]/g) != -1){

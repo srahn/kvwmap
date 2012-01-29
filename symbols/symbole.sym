@@ -494,7 +494,7 @@ SYMBOL # 57
   NAME "marker-blue"
   TYPE PIXMAP
   IMAGE "marker-blue7.png"
-  TRANSPARENT 11
+  #TRANSPARENT 11
 END
 
 SYMBOL # 57

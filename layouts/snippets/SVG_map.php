@@ -937,7 +937,7 @@ function showMeasurement(evt){
   deletelast(evt);
 }
 
-function addpoint(evt) {
+function addpoint(evt){
   // neuen eckpunkt abgreifen
 	pathx.push(evt.clientX);
 	pathy.push(resy - evt.clientY);

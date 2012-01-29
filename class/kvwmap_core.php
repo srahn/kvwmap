@@ -243,7 +243,7 @@ class GUI_core {
         $map->set('status', MS_ON);
         $map->set('name', MAPFILENAME);
         $map->set('debug', MS_ON);
-        $map->imagecolor->setRGB(255,255,255);
+        $map->imagecolor->setRGB(0,255,255);
         $map->maxsize = 4096;
 
         # OWS Metadaten
