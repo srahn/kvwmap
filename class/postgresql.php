@@ -126,15 +126,15 @@ class pgdatabase extends pgdatabase_core {
     	$offset = 7;
   	}
     $select = $this->eliminate_star($select, $offset);
-  	if(substr_count(strtolower($select), 'from') > 1){
-  		$whereposition = strpos($select, 'WHERE');
+  	if(substr_count(strtolower($select), ' from ') > 1){
+  		$whereposition = strpos($select, ' WHERE ');
   		$withoutwhere = substr($select, 0, $whereposition);
-  		$fromposition = strpos($withoutwhere, 'FROM');
+  		$fromposition = strpos($withoutwhere, ' FROM ');
   	}
   	else{
-  		$whereposition = strpos(strtolower($select), 'where');
+  		$whereposition = strpos(strtolower($select), ' where ');
   		$withoutwhere = substr($select, 0, $whereposition);
-  		$fromposition = strpos(strtolower($withoutwhere), 'from');
+  		$fromposition = strpos(strtolower($withoutwhere), ' from ');
   	}
     $sql = $select." LIMIT 0";
     $ret = $this->execSQL($sql, 4, 0);
@@ -319,20 +319,20 @@ class pgdatabase extends pgdatabase_core {
   }
 
   function eliminate_star($query, $offset){
-  	if(substr_count(strtolower($query), 'from') > 1){
-  		$whereposition = strpos($query, 'WHERE');
+  	if(substr_count(strtolower($query), ' from ') > 1){
+  		$whereposition = strpos($query, ' WHERE ');
   		$withoutwhere = substr($query, 0, $whereposition);
-  		$fromposition = strpos($withoutwhere, 'FROM');
+  		$fromposition = strpos($withoutwhere, ' FROM ');
   	}
   	else{
-  		$whereposition = strpos(strtolower($query), 'where');
+  		$whereposition = strpos(strtolower($query), ' where ');
   		if($whereposition){
   			$withoutwhere = substr($query, 0, $whereposition);
   		}
   		else{
   			$withoutwhere = $query;
   		}
-  		$fromposition = strpos(strtolower($withoutwhere), 'from');
+  		$fromposition = strpos(strtolower($withoutwhere), ' from ');
   	}
     $select = substr($query, $offset, $fromposition-$offset);
     $from = substr($query, $fromposition);
@@ -369,13 +369,14 @@ class pgdatabase extends pgdatabase_core {
 	        	$name_pair['name'] = $explosion[count($explosion)-1];
 	        }
 	      }
-	      elseif(strpos(strtolower($explosion[0]), '||')){		# irgendwas zusammengesetztes mit ||
-	      	$explosion2 = explode('||', $explosion[0]);
+	      elseif(strpos(strtolower($fieldstring), '||')){		# irgendwas zusammengesetztes mit ||
+	      	$explosion2 = explode('||', $fieldstring);
 	      	for($i = 0; $i < count($explosion2); $i++){
 	      		if(strpos($explosion2[$i], "'") === false){
 	      			$name_pair['real_name'] = $explosion2[$i];
 	          	$name_pair['name'] = $explosion[count($explosion)-1];
 	          	$name_pair['no_real_attribute'] = true;
+	          	break;
 	      		}
 	      	}
 	      }
@@ -425,29 +426,29 @@ class pgdatabase extends pgdatabase_core {
   }
 
   function getfrom($query){
-  	if(substr_count(strtolower($query), 'from') > 1){
+  	if(substr_count(strtolower($query), ' from ') > 1){
   		# wenn Sub-Selects vorhanden sind, müssen from und where in der Hauptabfrage groß geschrieben sein
-  		$whereposition = strpos($query, 'WHERE');
+  		$whereposition = strpos($query, ' WHERE ');
 	    if($whereposition != false){
 	      $withoutwhere = substr($query, 0, $whereposition);
-	      $fromposition = strpos($withoutwhere, 'FROM');
-	      $from = substr($withoutwhere, $fromposition+4);
+	      $fromposition = strpos($withoutwhere, ' FROM ');
+	      $from = substr($withoutwhere, $fromposition+6);
 	    }
 	    else{
-	      $fromposition = strpos($query, 'FROM');
-	      $from = substr($query, $fromposition+4);
+	      $fromposition = strpos($query, ' FROM ');
+	      $from = substr($query, $fromposition+6);
 	    }
   	}
   	else{
-  		$whereposition = strpos(strtolower($query), 'where');
+  		$whereposition = strpos(strtolower($query), ' where ');
 	    if($whereposition != false){
 	      $withoutwhere = substr($query, 0, $whereposition);
-	      $fromposition = strpos(strtolower($withoutwhere), 'from');
-	      $from = substr($withoutwhere, $fromposition+4);
+	      $fromposition = strpos(strtolower($withoutwhere), ' from ');
+	      $from = substr($withoutwhere, $fromposition+6);
 	    }
 	    else{
-	      $fromposition = strpos(strtolower($query), 'from');
-	      $from = substr($query, $fromposition+4);
+	      $fromposition = strpos(strtolower($query), ' from ');
+	      $from = substr($query, $fromposition+6);
 	    }
   	}
   	return $from;

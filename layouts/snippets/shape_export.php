@@ -13,11 +13,11 @@ function getpoly(){
 		}
 		else{
 			document.GUI.newpathwkt.value = buildwktpolygonfromsvgpath(document.GUI.newpath.value);			
-			document.GUI.selectstring.value = document.GUI.selectstring_save.value + " AND Transform("+document.GUI.columnname.value+", "+document.GUI.client_epsg.value+") && GeomFromText('"+document.GUI.newpathwkt.value+"', "+document.GUI.client_epsg.value+") AND INTERSECTS(Transform("+document.GUI.columnname.value+", "+document.GUI.client_epsg.value+"), GeomFromText('"+document.GUI.newpathwkt.value+"', "+document.GUI.client_epsg.value+"))";
+			document.GUI.selectstring.value = document.GUI.selectstring_save.value + " AND Transform("+document.GUI.export_columnname.value+", "+document.GUI.client_epsg.value+") && GeomFromText('"+document.GUI.newpathwkt.value+"', "+document.GUI.client_epsg.value+") AND INTERSECTS(Transform("+document.GUI.export_columnname.value+", "+document.GUI.client_epsg.value+"), GeomFromText('"+document.GUI.newpathwkt.value+"', "+document.GUI.client_epsg.value+"))";
 		}
 	}
 	else{
-		document.GUI.selectstring.value = document.GUI.selectstring_save.value + " AND Transform("+document.GUI.columnname.value+", "+document.GUI.client_epsg.value+") && GeomFromText('"+document.GUI.newpathwkt.value+"', "+document.GUI.client_epsg.value+") AND INTERSECTS(Transform("+document.GUI.columnname.value+", "+document.GUI.client_epsg.value+"), GeomFromText('"+document.GUI.newpathwkt.value+"', "+document.GUI.client_epsg.value+"))";
+		document.GUI.selectstring.value = document.GUI.selectstring_save.value + " AND Transform("+document.GUI.export_columnname.value+", "+document.GUI.client_epsg.value+") && GeomFromText('"+document.GUI.newpathwkt.value+"', "+document.GUI.client_epsg.value+") AND INTERSECTS(Transform("+document.GUI.export_columnname.value+", "+document.GUI.client_epsg.value+"), GeomFromText('"+document.GUI.newpathwkt.value+"', "+document.GUI.client_epsg.value+"))";
 	}
 }
 
@@ -127,5 +127,6 @@ function buildwktpolygonfromsvgpath(svgpath){
 <input type="hidden" name="area" value="">
 <INPUT TYPE="hidden" NAME="columnname" VALUE="<? echo $this->formvars['columnname'] ?>">
 <INPUT TYPE="hidden" NAME="fromwhere" VALUE="<? echo $this->formvars['fromwhere']; ?>">
+<INPUT TYPE="hidden" NAME="export_columnname" VALUE="<? echo $this->shape->formvars['columnname'] ?>">
 
 

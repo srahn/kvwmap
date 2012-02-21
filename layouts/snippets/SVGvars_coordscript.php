@@ -57,7 +57,7 @@
 			coords1 = prompt("Geben Sie die gewünschten Koordinaten ein \noder klicken Sie auf Abbrechen für die Koordinatenabfrage.",mittex+" "+mittey);
 			if(coords1){
 				coords2 = coords1.split(" ");
-				if(!coords2[0] || !coords2[1]){
+				if(!coords2[0] || !coords2[1] || coords2[0].search(/[^-\d]/g) != -1 || coords2[1].search(/[^-\d]/g) != -1){
 					alert("Falsches Format");
 					return;
 				}

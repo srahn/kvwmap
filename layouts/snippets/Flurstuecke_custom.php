@@ -69,8 +69,8 @@ function emzversteckt(k){
   $aktalb = date("d.m.Y", mktime(0, 0, 0, substr($r_aktalb[0], 3, 2), substr($r_aktalb[0], 0, 2), substr($r_aktalb[0], 6, 4)));
   $sql_aktalk="SELECT max(auftaktu) FROM edbsauftrag;";
 
-  @$query=pg_query($sql_aktalk);
-  @$r_aktalk = pg_fetch_array($query);
+	@$ret=$this->pgdatabase->execSQL($sql_aktalk,4,0);
+  @$r_aktalk = pg_fetch_array($ret[1]);
   # $ret=$this->pgdatabase->execSQL($sql_aktalk,4,0);
   # $r_aktalk = pg_fetch_array($ret[1]);
 

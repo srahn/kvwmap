@@ -375,7 +375,6 @@ function delete_search(){
               </tr>
               <tr>                
                 <td align="center" colspan="5"><br>
-                	<input type="submit" onclick="suche();" style="width: 0px;height: 0px;border: none">
                 	<input class="button" type="button" name="suchen" onclick="suche();" value="Suchen">
                 </td>
               </tr><?php

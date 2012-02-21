@@ -2484,15 +2484,15 @@ class stelle extends stelle_core{
     }
     $offstring = substr($path, 0, $offset);
     $path = $database->eliminate_star($path, $offset);
-    if(substr_count(strtolower($path), 'from') > 1){
-      $whereposition = strpos($path, 'WHERE');
+    if(substr_count(strtolower($path), ' from ') > 1){
+      $whereposition = strpos($path, ' WHERE ');
       $withoutwhere = substr($path, 0, $whereposition);
-      $fromposition = strpos($withoutwhere, 'FROM');
+      $fromposition = strpos($withoutwhere, ' FROM ');
     }
     else{
-      $whereposition = strpos(strtolower($path), 'where');
+      $whereposition = strpos(strtolower($path), ' where ');
       $withoutwhere = substr($path, 0, $whereposition);
-      $fromposition = strpos(strtolower($withoutwhere), 'from');
+      $fromposition = strpos(strtolower($withoutwhere), ' from ');
     }
     if($privileges == NULL){  # alle Attribute sind abfragbar
       $newpath = $path;

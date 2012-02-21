@@ -610,7 +610,7 @@ function searchdir($path, $recursive){
 
 function getAttributesfromSelect($select){
   echo $select;
-  $select = substr($select,0,strpos(strtolower($select),'from'));
+  $select = substr($select,0,strpos(strtolower($select), ' from '));
   $attribute = explode(',', $select);
   for($i = 0; $i < count($attribute); $i++){
     $rest = strrchr($attribute[$i], ' ');

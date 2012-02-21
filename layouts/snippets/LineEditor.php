@@ -108,7 +108,7 @@ function buildwktlinefromsvgpath(svgpath){
   </tr>
 </table>
 <INPUT TYPE="HIDDEN" NAME="zoom" VALUE="">
-<INPUT TYPE="HIDDEN" NAME="layer_id" VALUE="">
+<INPUT TYPE="HIDDEN" NAME="layer_id" VALUE="<?php echo $this->formvars['selected_layer_id']; ?>">
 <INPUT TYPE="HIDDEN" NAME="columnname" VALUE="<?php echo $this->formvars['columnname']; ?>">
 <INPUT TYPE="HIDDEN" NAME="fromwhere" VALUE="<? echo $this->formvars['fromwhere']; ?>">
 <INPUT TYPE="HIDDEN" NAME="layer_columnname" VALUE="<?php echo $this->formvars['layer_columnname']; ?>">

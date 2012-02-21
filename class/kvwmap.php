@@ -270,7 +270,7 @@ class GUI extends GUI_core{
     	if(in_array($data_attributes['geomtype'][$data_attributes['the_geom']] , array('MULTIPOLYGON', 'POLYGON', 'GEOMETRY'))){
     		$offset = 1;
     	}
-			$select = str_replace('from', ', '.$data_attributes['table_alias_name'][$data_attributes['the_geom']].'.oid as exclude_oid'.' from', strtolower($mapDB->getSelectFromData($layer['Data'])));
+			$select = str_replace(' from ', ', '.$data_attributes['table_alias_name'][$data_attributes['the_geom']].'.oid as exclude_oid'.' from ', strtolower($mapDB->getSelectFromData($layer['Data'])));
 			$extent = 'Transform(geomfromtext(\'POLYGON(('.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layer['epsg_code'].')';				
 			$fromwhere = 'from ('.$select.') as foo1 WHERE intersects(the_geom, '.$extent.') ';
 			if($this->formvars['oid']){
@@ -1756,10 +1756,8 @@ class GUI extends GUI_core{
     $data_explosion = explode(' ', $data);
     $this->formvars['columnname'] = $data_explosion[0];
     $select = $this->mapDB->getSelectFromData($data);
-    //$fromposition = strpos(strtolower($select), 'from');
-    //$this->formvars['fromwhere'] = substr($select, $fromposition);
     $this->formvars['fromwhere'] = 'from ('.$select.') as foo where 1=1';
-    if(strpos(strtolower($this->formvars['fromwhere']), 'where') === false){
+    if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
       $this->formvars['fromwhere'] .= ' where (1=1)';
     }
 
@@ -1858,10 +1856,8 @@ class GUI extends GUI_core{
 	  	$select = substr($select, 0, $orderbyposition);
   	}
     
-    //$fromposition = strpos(strtolower($select), 'from');
-    //$this->formvars['fromwhere'] = substr($select, $fromposition);
     $this->formvars['fromwhere'] = 'from ('.$select.') as foo where 1=1';
-    if(strpos(strtolower($this->formvars['fromwhere']), 'where') === false){
+    if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
       $this->formvars['fromwhere'] .= ' where (1=1)';
     }    
     if($this->formvars['CMD'] != 'previous' AND $this->formvars['CMD'] != 'next'){
@@ -1950,7 +1946,7 @@ class GUI extends GUI_core{
       if($this->formvars['klass_'.$this->formvars['chosen_layer_id']] != '' AND strpos($select, '*') === false AND strpos($select, $this->formvars['klass_'.$this->formvars['chosen_layer_id']]) === false){			# Attribut für automatische Klassifizierung mit ins data packen
       	$select = str_replace(' from ', ', '.$this->formvars['klass_'.$this->formvars['chosen_layer_id']].' from ', strtolower($select));
       }
-      if(strpos(strtolower($select), 'where') === false){
+      if(strpos(strtolower($select), ' where ') === false){
         $select .= " WHERE ";
       }
       else{
@@ -2134,7 +2130,7 @@ class GUI extends GUI_core{
       	$select = str_replace($this->formvars['layer_columnname'], $this->formvars['layer_columnname'].', oid', $select);
       }
       
-      if(strpos(strtolower($select), 'where') === false){
+      if(strpos(strtolower($select), ' where ') === false){
         $select .= " WHERE ";
       }
       else{
@@ -2250,7 +2246,7 @@ class GUI extends GUI_core{
       	$select = str_replace($this->formvars['layer_columnname'], $this->formvars['layer_columnname'].', oid', $select);
       }
       
-      if(strpos(strtolower($select), 'where') === false){
+      if(strpos(strtolower($select), ' where ') === false){
         $select .= " WHERE ";
       }
       else{
@@ -2452,10 +2448,8 @@ class GUI extends GUI_core{
       $data_explosion = explode(' ', $data);
       $this->formvars['columnname'] = $data_explosion[0];
       $select = $this->mapDB->getSelectFromData($data);
-      //$fromposition = strpos(strtolower($select), 'from');
-      //$this->formvars['fromwhere'] = substr($select, $fromposition);
       $this->formvars['fromwhere'] = 'from ('.$select.') as foo where 1=1';
-      if(strpos(strtolower($this->formvars['fromwhere']), 'where') === false){
+      if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
         $this->formvars['fromwhere'] .= ' where (1=1)';
       }
     }
@@ -2579,10 +2573,8 @@ class GUI extends GUI_core{
 		  	$select = substr($select, 0, $orderbyposition);
 	  	}
 	    
-	    //$fromposition = strpos(strtolower($select), 'from');
-	    //$this->formvars['fromwhere'] = substr($select, $fromposition);
 	    $this->formvars['fromwhere'] = 'from ('.$select.') as foo where 1=1';
-	    if(strpos(strtolower($this->formvars['fromwhere']), 'where') === false){
+	    if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
 	      $this->formvars['fromwhere'] .= ' where (1=1)';
 	    }
     }
@@ -4184,6 +4176,7 @@ class GUI extends GUI_core{
   # 2008-03-26 pk
   function sendeDokument($dokument, $original_name) {
     $dateiname=basename($dokument);
+    if($original_name == '')$original_name=$dateiname;
     $dateinamensteil=explode('.',$dateiname);
     ob_end_clean();
     header("Content-type: image/".$dateinamensteil[1]);
@@ -5178,7 +5171,7 @@ class GUI extends GUI_core{
       $this->formvars['columnname'] = $data_explosion[0];
       $select = $this->mapDB->getSelectFromData($data);
       $this->formvars['fromwhere'] = 'from ('.$select.') as foo where 1=1';
-      if(strpos(strtolower($this->formvars['fromwhere']), 'where') === false){
+      if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
         $this->formvars['fromwhere'] .= ' where (1=1)';
       }
     }
@@ -5403,10 +5396,8 @@ class GUI extends GUI_core{
 			  	$select = substr($select, 0, $orderbyposition);
 		  	}
 		    
-		    //$fromposition = strpos(strtolower($select), 'from');
-		    //$this->formvars['fromwhere'] = substr($select, $fromposition);
 		    $this->formvars['fromwhere'] = 'from ('.$select.') as foo where 1=1';
-		    if(strpos(strtolower($this->formvars['fromwhere']), 'where') === false){
+		    if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
 		      $this->formvars['fromwhere'] .= ' where (1=1)';
 		    }
 	    }
@@ -6013,7 +6004,7 @@ class GUI extends GUI_core{
 		  	$select = substr($select, 0, $orderbyposition);
 	  	}
 	    $this->formvars['fromwhere'] = 'from ('.$select.') as foo where 1=1';
-	    if(strpos(strtolower($this->formvars['fromwhere']), 'where') === false){
+	    if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
 	      $this->formvars['fromwhere'] .= ' where (1=1)';
 	    } 
 	    if($this->formvars['CMD']== 'Full_Extent' OR $this->formvars['CMD'] == 'recentre' OR $this->formvars['CMD'] == 'zoomin' OR $this->formvars['CMD'] == 'zoomout' OR $this->formvars['CMD'] == 'previous' OR $this->formvars['CMD'] == 'next') {
@@ -6300,7 +6291,7 @@ class GUI extends GUI_core{
       switch ($attributes['form_element_type'][0]){
         case 'Auswahlfeld' : {
           list($sql) = explode(';', $attributes['options'][0]);
-          $sql = str_replace('from', ',oid from', strtolower($sql));    # auch die oid abfragen
+          $sql = str_replace(' from ', ',oid from ', strtolower($sql));    # auch die oid abfragen
           $re=$layerdb->execSQL($sql,4,0);
           if ($re[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; var_dump($layerdb); return 0; }
           while($rs = pg_fetch_array($re[1])){
@@ -6411,10 +6402,8 @@ class GUI extends GUI_core{
             $space_explosion = explode(' ', $data);
             $this->formvars['columnname'] = $space_explosion[0];
             $select = $mapdb->getSelectFromData($data);
-            //$fromposition = strpos(strtolower($select), 'from');
-            //$this->formvars['fromwhere'] = substr($select, $fromposition);
             $this->formvars['fromwhere'] = 'from ('.$select.') as foo where 1=1';
-            if(strpos(strtolower($this->formvars['fromwhere']), 'where') === false){
+            if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
               $this->formvars['fromwhere'] .= ' where (1=1)';
             }
             #-----Polygoneditor---#
@@ -7142,7 +7131,7 @@ class GUI extends GUI_core{
 		  	$select = substr($select, 0, $orderbyposition);
 	  	}
 	    $this->formvars['fromwhere'] = 'from ('.$select.') as foo where 1=1';
-	    if(strpos(strtolower($this->formvars['fromwhere']), 'where') === false){
+	    if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
 	      $this->formvars['fromwhere'] .= ' where (1=1)';
 	    }
     }
@@ -7553,7 +7542,7 @@ class GUI extends GUI_core{
 		  	$select = substr($select, 0, $orderbyposition);
 	  	}
 	    $this->formvars['fromwhere'] = 'from ('.$select.') as foo where 1=1';
-	    if(strpos(strtolower($this->formvars['fromwhere']), 'where') === false){
+	    if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
 	      $this->formvars['fromwhere'] .= ' where (1=1)';
 	    }
     }
@@ -9052,10 +9041,8 @@ class GUI extends GUI_core{
 		  	$select = substr($select, 0, $orderbyposition);
 	  	}
 	    
-	    //$fromposition = strpos(strtolower($select), 'from');
-	    //$this->formvars['fromwhere'] = substr($select, $fromposition);
 	    $this->formvars['fromwhere'] = 'from ('.$select.') as foo where 1=1';
-	    if(strpos(strtolower($this->formvars['fromwhere']), 'where') === false){
+	    if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
 	      $this->formvars['fromwhere'] .= ' where (1=1)';
 	    }
 	  }
@@ -9299,10 +9286,8 @@ class GUI extends GUI_core{
 		  	$select = substr($select, 0, $orderbyposition);
 	  	}
 	    
-	    //$fromposition = strpos(strtolower($select), 'from');
-	    //$this->formvars['fromwhere'] = substr($select, $fromposition);
 	    $this->formvars['fromwhere'] = 'from ('.$select.') as foo where 1=1';
-	    if(strpos(strtolower($this->formvars['fromwhere']), 'where') === false){
+	    if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
 	      $this->formvars['fromwhere'] .= ' where (1=1)';
 	    }
     }
@@ -10489,11 +10474,11 @@ class GUI extends GUI_core{
             }
             
             if($this->formvars['CMD'] == 'touchquery'){
-            	if(substr_count(strtolower($pfad), 'from') > 1){			# mehrere froms -> das FROM der Hauptabfrage muss groß geschrieben sein
-            		$fromposition = strpos($pfad, 'FROM');
+            	if(substr_count(strtolower($pfad), ' from ') > 1){			# mehrere froms -> das FROM der Hauptabfrage muss groß geschrieben sein
+            		$fromposition = strpos($pfad, ' FROM ');
             	}
             	else{
-            		$fromposition = strpos(strtolower($pfad), 'from');
+            		$fromposition = strpos(strtolower($pfad), ' from ');
             	}
             	$new_pfad = $the_geom." ".substr($pfad, $fromposition);
             	if($the_geom == 'query.the_geom'){
@@ -11845,11 +11830,11 @@ class GUI extends GUI_core{
 		# Filter berücksichtigen
 		$filter = $this->mapDB->getFilter($layer_id, $this->Stelle->id);
 		if($filter != ''){
-			if(strpos(strtolower($subquery), 'where') !== false){
-				$subquery .= 'AND '.$filter;
+			if(strpos(strtolower($subquery), ' where ') !== false){
+				$subquery .= ' AND '.$filter;
 			}
 			else{
-				$subquery .= 'WHERE '.$filter;
+				$subquery .= ' WHERE '.$filter;
 			}
 		}
 
@@ -12879,7 +12864,7 @@ class db_mapObj extends db_mapObj_core{
 
   function getSelectFromData($data){
     if(strpos($data, '(') === false){
-      $from = stristr($data, 'from');
+      $from = stristr($data, ' from ');
       $fooposition = strpos($from, 'as foo');
       if($fooposition > 0){
         $from = substr($from, 0, $fooposition);
@@ -13689,7 +13674,7 @@ class db_mapObj extends db_mapObj_core{
         $exp = str_replace('ne', '!=', $exp);
 
 				# wenn im Data sowas wie "tabelle.attribut" vorkommt, soll das anstatt dem "attribut" aus der Expression verwendet werden        
-        $attributes = explode(',', substr($select, 0, strpos(strtolower($select), 'from')));							
+        $attributes = explode(',', substr($select, 0, strpos(strtolower($select), ' from ')));							
         $exp_parts = explode(' ', $exp);
         for($k = 0; $k < count($exp_parts); $k++){
 	      	for($j = 0; $j < count($attributes); $j++){
@@ -13699,15 +13684,12 @@ class db_mapObj extends db_mapObj_core{
 	      	}
 	      }
 	      $exp = implode(' ', $exp_parts);
-        
-        //$sql = "SELECT oid FROM ".$tablename." WHERE oid = ".$oid." AND ".$exp;
         $sql = $select." AND ".$exp;
         $this->debug->write("<p>file:kvwmap class:db_mapObj->getClassFromObject - Lesen einer Klasse eines Objektes:<br>".$sql,4);
         $query=pg_query($sql);
         if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
         $count=pg_num_rows($query);
         if($count == 1){
-        	echo $classes[$i]['Class_ID'];
           return $classes[$i]['Class_ID'];
         }
       }

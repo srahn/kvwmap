@@ -319,7 +319,7 @@ class shape {
     if($this->formvars['load'] AND $this->formvars['selected_layer_id']){
       $data = $mapdb->getData($this->formvars['selected_layer_id']);
       $select = $mapdb->getSelectFromData($data);
-      $fromposition = strpos(strtolower($select), 'from');
+      $fromposition = strpos(strtolower($select), ' from ');
       $from = substr($select, $fromposition);
       $attributesstring = substr($select, 6, $fromposition-6);
       $attributes = explode(',', $attributesstring);
@@ -334,7 +334,7 @@ class shape {
         }
       }
       $selectstring .= $from;
-      if(strpos(strtolower($selectstring), 'where') === false){
+      if(strpos(strtolower($selectstring), ' where ') === false){
         $selectstring .= ' WHERE (1=1)';
       }
       $this->formvars['selectstring'] = $selectstring;
@@ -347,7 +347,7 @@ class shape {
       $fields = $layerdb->getFieldsfromSelect($select);
       $this->formvars['columnname'] = $fields['table_alias_name'][$fields['the_geom']].'.'.$fields['the_geom'];
       $this->formvars['fromwhere'] = $from;
-      if(strpos(strtolower($this->formvars['fromwhere']), 'where') === false){
+      if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
 	      $this->formvars['fromwhere'] .= ' where (1=1)';
 	    }  
     }
