@@ -42,13 +42,6 @@ if ($GUI->formvars['go_plus']!='') {
   $debug->write("<br>goplus: ".$GUI->formvars['go_plus'],4);
 }
 $GUI->go=$go;
-if ($GUI->Stelle->protected) {
-  if (!$GUI->Stelle->isFunctionAllowed($go)) {
-    # Benutzer ist nicht berechtigt zum Ausführen diese Anwendungsfalles
-    $GUI->Fehlermeldung=$GUI->TaskChangeWarning;
-    $GUI->go="Stelle Wählen";
-  }
-}
 $GUI->requeststring = $QUERY_STRING;
 ##### Anwendungsfälle der Benutzeroberfläche GUI #################
 # ALB_Aenderung
@@ -572,6 +565,11 @@ switch($GUI->go) {
   # Jagdkatastereditor
   case 'jagdkatastereditor_Flurstuecke_Listen' : {
     $GUI->jagdkatastereditor_listflurst();
+  }break;
+  
+  # Jagdkatastereditor
+  case 'jagdkatastereditor_Flurstuecke_Listen_csv' : {
+    $GUI->jagdkatastereditor_listflurst_csv();
   }break;
 
   # Jagdkatastereditor
@@ -1716,6 +1714,11 @@ switch($GUI->go) {
     $GUI->adresseSuchen();
     $GUI->output();
   } break;
+  
+  case "ALK-Adresse_Auswaehlen_Suchen" : {
+    $GUI->adresseSuchen();
+    $GUI->output();
+  } break;
 
   case "Flurstueck_hist_Auswaehlen" : {
   	$GUI->checkCaseAllowed($go);
@@ -1738,6 +1741,11 @@ switch($GUI->go) {
   } break;
 
   case "Flurstueck_Auswaehlen_Suchen" : {
+    $GUI->flurstSuchen();
+    $GUI->output();
+  } break;
+  
+  case "ALK-Flurstueck_Auswaehlen_Suchen" : {
     $GUI->flurstSuchen();
     $GUI->output();
   } break;

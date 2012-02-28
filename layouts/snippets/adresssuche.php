@@ -35,7 +35,7 @@
   }
 </script>
 
-<input type="hidden" name="go" value="Adresse_Auswaehlen">
+<input type="hidden" name="go" value="<? if($this->formvars['ALK_Suche']) echo 'ALK-'; ?>Adresse_Auswaehlen">
 <br><h2><?php echo $this->titel; ?></h2><br>
 <?php if ($this->Fehlermeldung!='') {
 include(LAYOUTPATH."snippets/Fehlermeldung.php");

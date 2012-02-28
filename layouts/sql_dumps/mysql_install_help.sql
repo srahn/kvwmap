@@ -57,205 +57,28 @@ VALUES (
 ############################################################################
 # Sicherheitskritische Anwendungsfälle Werte für go Variablen              #
 ############################################################################
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('ALB_Anzeige');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('ALB_Anzeige_Bestand');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Adresse_Auswaehlen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Adresse_Auswaehlen_Suchen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Flurstueck_Auswaehlen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Flurstueck_Auswaehlen_Suchen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Hausnummernkorrektur');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('ZoomToFlst');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('history_move');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('tooltip_query');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Ändern');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('ALB_Aenderung');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('ALK_Fortfuehrung');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Adm_Fortfuehrung');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Administratorfunktionen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Antraege_Anzeigen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Antrag_Aendern');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Antrag_loeschen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Antraganzeige_Festpunkte_in_KVZ_schreiben');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Antraganzeige_Festpunkte_in_Karte_Anzeigen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Antraganzeige_Festpunkte_in_Liste_Anzeigen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Antraganzeige_Recherche_Ordner_packen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Antraganzeige_Rechercheergebnis_in_Ordner_zusammenstellen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Antraganzeige_Uebergabeprotokoll_Erzeugen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Antraganzeige_Zugeordnete_Dokumente_Anzeigen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Attributeditor');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Attributeditor_speichern');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Bauauskunft_Suche');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Bauauskunft_Suche_Suchen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Baudaten_aktualisieren');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Baudaten_aktualisieren_OK');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Baudatenanzeige');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Benutzer_Löschen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Benutzerdaten_Als neuen Nutzer eintragen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Benutzerdaten_Anzeigen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Benutzerdaten_Formular');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Benutzerdaten_Ändern');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Bodenrichtwertformular');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Bodenrichtwertformular_Aendern');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Bodenrichtwertformular_Senden');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Bodenrichtwertzone_Loeschen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('BodenrichtwertzonenKopieren');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('BodenrichtwertzonenKopieren_Senden');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Druckausschnitt_loeschen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Druckausschnitt_speichern');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Druckausschnittswahl');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Druckausschnittswahl_Drucken');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Druckausschnittswahl_Vorschau');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Druckrahmen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Druckrahmen_Freitexthinzufuegen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Druckrahmen_Freitextloeschen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Druckrahmen_Löschen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Druckrahmen_als neuen Rahmen speichern');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Druckrahmen_Änderungen Speichern');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Druckrahmen_übernehmen >>');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('ExportMapToPDF');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Externer_Druck');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Externer_Druck_Drucken');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('FestpunktDateiAktualisieren');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('FestpunktDateiUebernehmen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Festpunkte in Liste Anzeigen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Festpunkte zum Antrag Hinzufügen_Senden');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('FestpunkteSkizzenZuordnung_Senden');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Festpunkte_Auswaehlen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Festpunkte_Auswaehlen_Suchen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Filterverwaltung');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Filterverwaltung_speichern');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Flurstueck_Anzeigen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Flurstuecks-CSV-Export');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Geothermie_Abfrage');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Geothermie_Eingabe');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Grundbuchblatt_Auswaehlen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Grundbuchblatt_Auswaehlen_Suchen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Kartenkommentar_Formular');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Kartenkommentar_Speichern');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Kartenkommentar_Waehlen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Kartenkommentar_Zoom');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Kartenkommentar_loeschen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Layer-Suche');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Layer-Suche_Suchen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Layer2Stelle_Editor');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Layer2Stelle_Editor_Speichern');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Layer2Stelle_Reihenfolge');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Layer2Stelle_Reihenfolge_Speichern');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Layer_Anzeigen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Layer_Datensaetze_Loeschen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Layer_Löschen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Layerattribut-Rechteverwaltung');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Layerattribut-Rechteverwaltung_speichern');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Layereditor');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Layereditor_Als neuen Layer eintragen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Layereditor_Klasse_Hinzufügen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Layereditor_Klasse_Löschen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Layereditor_erweiterte Einstellungen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Layereditor_Ändern');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Metadaten_Auswaehlen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Metadaten_Auswaehlen_Senden');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Metadatenblattanzeige');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Metadateneingabe');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Metadateneingabe_Senden');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Nachweis_antragsnr_form_aufrufen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Nachweis_antragsnummer_Senden');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Nachweisanzeige');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Nachweisanzeige_aus_Auftrag_entfernen':{
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Nachweisanzeige_zum_Auftrag_hinzufuegen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Nachweisformular');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Nachweisformular_Senden');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Nachweisloeschen':{
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Nachweisrechercheformular':{ 
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Nachweisrechercheformular_Senden':{
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Namen_Auswaehlen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Namen_Auswaehlen_Suchen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('NotizKategorie_aendern');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('NotizKategorie_hinzufuegen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('NotizKategorie_loeschen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Notiz_Loeschen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Notizenformular');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Notizenformular_KatVerwaltung');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Notizenformular_Senden');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Nutzung_auswaehlen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Nutzung_auswaehlen_Suchen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('OWS');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('OWS_Exception');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('PointEditor');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('PointEditor_Senden');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('PolygonEditor');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('PolygonEditor_Senden');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('SHP_Export');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('SHP_Export_Shape-Datei erzeugen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('SHP_Import');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('SHP_Import_speichern');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Sachdaten');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Sachdaten_Festpunkte Anzeigen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Sachdaten_Festpunkte zu Auftrag Hinzufügen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Sachdaten_FestpunkteSkizzenZuordnung');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Sachdaten_speichern');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('StatistikAuswahl');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('StatistikAuswahl_anzeigen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Stelle Wählen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Stelle_Löschen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Stellen_Anzeigen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Stelleneditor');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Stelleneditor_Als neue Stelle eintragen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Stelleneditor_Ändern');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Suche_Flurstuecke_zu_Namen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Versiegelung');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('WMS_Export');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('WMS_Export_Senden');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('WMS_Import');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('WMS_Import_Eintragen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Zeige_Flurstuecke_zu_Namen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('anliegerbeitraege');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('anliegerbeitraege_buffer_speichern');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('anliegerbeitraege_strasse_speichern');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('bauleitplanung');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('bauleitplanung_Loeschen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('bauleitplanung_Senden');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('buildtopology');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('changemenue');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('changemenue_with_ajax');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('document_anzeigen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('editLayerForm');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('export_ESAF64');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('export_ESAF64_Exportieren');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('export_ESAF64_Tabelle Bereinigen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('gebaeude_editor');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('gebaeude_editor_speichern');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('generischer_csv_export');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('georg_export');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('getRow');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('get_gps_position');   
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('get_legend');   
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('googlemaps');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('jagdbezirk_show_data');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('jagdbezirke_auswaehlen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('jagdbezirke_auswaehlen_Suchen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('jagdkatastereditor');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('jagdkatastereditor_Flurstuecke_Listen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('jagdkatastereditor_Loeschen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('jagdkatastereditor_Senden');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('layerfrommapfile');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('layerfrommapfile_Datei laden');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('layerfrommapfile_Layer hinzufügen');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('logout');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('neuerLayer');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('neuerLayer_Senden');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('neuer_Layer_Datensatz');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('neuer_Layer_Datensatz_speichern');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('sendImage');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('showFlurstuckKoordinaten');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('simple_SHP_Import');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('simple_SHP_Import_speichern');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('spatialDocIndexing');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('spatial_processing');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('test');   
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('tmp_Adr_Tabelle_Aktualisieren');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('zoomtoPoint');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('zoomtoPolygon');
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('zoomtojagdbezirk');
+INSERT INTO `u_funktionen` (`id`, `bezeichnung`, `link`) VALUES
+(1, 'ALB-Auszug 35', NULL),
+(2, 'FestpunktDateiAktualisieren', NULL),
+(3, 'FestpunktDateiUebernehmen', NULL),
+(4, 'Antrag_loeschen', NULL),
+(5, 'Nachweisanzeige_zum_Auftrag_hinzufuegen', NULL),
+(6, 'Antrag_Aendern', NULL),
+(7, 'FestpunkteSkizzenZuordnung_Senden', NULL),
+(8, 'Nachweisanzeige_aus_Auftrag_entfernen', NULL),
+(9, 'ohneWasserzeichen', NULL),
+(10, 'Flurstueck_Anzeigen', NULL),
+(11, 'Bauakteneinsicht', NULL),
+(12, 'Namensuche', NULL),
+(13, 'ALB-Auszug 40', NULL),
+(14, 'Nachweisloeschen', NULL),
+(15, 'ALB-Auszug 20', NULL),
+(16, 'ALB-Auszug 25', NULL),
+(17, 'Externer_Druck', NULL),
+(18, 'Adressaenderungen', NULL),
+(19, 'sendeFestpunktskizze', NULL),
+(20, 'Nachweise_bearbeiten', NULL),
+(21, 'ALB-Auszug 30', NULL);
 
 
 ####################################################################################
@@ -265,41 +88,27 @@ INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('zoomtojagdbezirk');
 
 SET @stelle_id=1;
 
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('ALB-Auszug 35');
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (LAST_INSERT_ID(),@stelle_id);
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('ALK_Fortfuehrung');
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (LAST_INSERT_ID(),@stelle_id);
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('ALB_Aenderung');
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (LAST_INSERT_ID(),@stelle_id);
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('FestpunktDateiAktualisieren');
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (LAST_INSERT_ID(),@stelle_id);
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('FestpunktDateiUebernehmen');
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (LAST_INSERT_ID(),@stelle_id);
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Antrag_loeschen');
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (LAST_INSERT_ID(),@stelle_id);
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Nachweis_antragsnr_form_aufrufen');
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (LAST_INSERT_ID(),@stelle_id);
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Nachweisanzeige_zum_Auftrag_hinzufuegen');
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (LAST_INSERT_ID(),@stelle_id);
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Antrag_Aendern');
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (LAST_INSERT_ID(),@stelle_id);
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('FestpunkteSkizzenZuordnung_Senden');
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (LAST_INSERT_ID(),@stelle_id);
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Administratorfunktionen');
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (LAST_INSERT_ID(),@stelle_id);
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Nachweisanzeige_aus_Auftrag_entfernen');
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (LAST_INSERT_ID(),@stelle_id);
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('ohneWasserzeichen');
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (LAST_INSERT_ID(),@stelle_id);
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Flurstueck_Anzeigen');
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (LAST_INSERT_ID(),@stelle_id);
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Bauakteneinsicht');
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (LAST_INSERT_ID(),@stelle_id);
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('Namensuche');
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (LAST_INSERT_ID(),@stelle_id);
-INSERT INTO `u_funktionen` (`bezeichnung`) VALUES ('kategorienverwaltung');
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (LAST_INSERT_ID(),@stelle_id);
-
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (1,@stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (2,@stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (3,@stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (4,@stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (5,@stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (6,@stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (7,@stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (8,@stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (9,@stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (10,@stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (11,@stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (12,@stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (13,@stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (14,@stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (15,@stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (16,@stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (17,@stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (18,@stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (19,@stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (20,@stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (21,@stelle_id);
 
 ###########################
 # Einträge der Menüpunkte #

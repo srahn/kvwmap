@@ -884,7 +884,7 @@ class adresse {
   # Funktion aktualisiert die Tabelle in der die Adressen aus ALK und ALB zusammengefasst sind
   function updateAdressTable() {
     # übernommen nach mysql.php und postgres.php
-    $this->database->updateTempAdressTable();
+    #$this->database->updateTempAdressTable();
   }
 
   function getStrassenListe($GemID,$extent,$order) {

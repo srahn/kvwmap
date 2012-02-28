@@ -6,21 +6,6 @@
 <script type="text/javascript">
 <!--
 
-function getpoly(){
-	if(document.GUI.newpathwkt.value == ''){
-		if(document.GUI.newpath.value == ''){
-			alert('Geben Sie ein Polygon an.');
-		}
-		else{
-			document.GUI.newpathwkt.value = buildwktpolygonfromsvgpath(document.GUI.newpath.value);			
-			document.GUI.selectstring.value = document.GUI.selectstring_save.value + " AND Transform("+document.GUI.export_columnname.value+", "+document.GUI.client_epsg.value+") && GeomFromText('"+document.GUI.newpathwkt.value+"', "+document.GUI.client_epsg.value+") AND INTERSECTS(Transform("+document.GUI.export_columnname.value+", "+document.GUI.client_epsg.value+"), GeomFromText('"+document.GUI.newpathwkt.value+"', "+document.GUI.client_epsg.value+"))";
-		}
-	}
-	else{
-		document.GUI.selectstring.value = document.GUI.selectstring_save.value + " AND Transform("+document.GUI.export_columnname.value+", "+document.GUI.client_epsg.value+") && GeomFromText('"+document.GUI.newpathwkt.value+"', "+document.GUI.client_epsg.value+") AND INTERSECTS(Transform("+document.GUI.export_columnname.value+", "+document.GUI.client_epsg.value+"), GeomFromText('"+document.GUI.newpathwkt.value+"', "+document.GUI.client_epsg.value+"))";
-	}
-}
-
 function buildwktpolygonfromsvgpath(svgpath){
 	var koords;
 	wkt = "POLYGON((";
@@ -41,64 +26,127 @@ function buildwktpolygonfromsvgpath(svgpath){
 	}
 	wkt = wkt+"))";
 	return wkt;
-}	
+}
+
+function export_shape(){
+	if(document.GUI.selected_layer_id.value != ''){
+		if(document.GUI.newpath.value != ''){
+			document.GUI.newpathwkt.value = buildwktpolygonfromsvgpath(document.GUI.newpath.value);
+		}
+		document.GUI.go_plus.value = 'Shape-Datei erzeugen';
+		document.GUI.submit();
+	}
+	else{
+		alert('Bitten wählen Sie einen Layer aus.');
+	}
+}
   
 //-->
 </script>
 
-<table border="0" cellpadding="5" cellspacing="3" bgcolor="<?php echo $bgcolor; ?>">
-  <tr align="center"> 
-    <td colspan="5"><strong><font size="+1"><?php echo $strTitle; ?></font></strong></td>
-  </tr>
-  <tr>
-  	<td>&nbsp;</td>
+<table border="0" cellpadding="1" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>" width="100%">
+  <tr> 
+    <td align="center" colspan="8" height="40" valign="middle"><strong><font size="+1"><?php echo $strTitle; ?></font></strong></td>
   </tr>
   
   <?if($this->shape->formvars['filename'] != ''){?>
   <tr>
-  	<td colspan="5">Shape-Dateien erzeugt. <a href="<? echo $this->shape->formvars['filename'] ?>">Herunterladen</a></td>
+  	<td></td><td colspan="6">Shape-Dateien erzeugt. <a href="<? echo $this->shape->formvars['filename'] ?>">Herunterladen</a></td>
   </tr>
   <tr>
   	<td>&nbsp;</td>
   </tr>	
   <?}?>
   
-  <tr> 
-    <td style="border-top:1px solid #C3C7C3;border-left:1px solid #C3C7C3;border-right:1px solid #C3C7C3" colspan="2"><?php echo   $this->strLayer; ?></td>
-    <td>&nbsp;</td>
-    <td style="border-top:1px solid #C3C7C3;border-left:1px solid #C3C7C3;border-right:1px solid #C3C7C3" colspan="2"><?php echo $strSelectStatement; ?></td>
-  </tr>
-  <tr> 
-    <td valign="top" style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3" colspan="2"> 
-      <select style="width:250px" size="1" class="select" name="selected_layer_id" onchange="document.GUI.submit();" <?php if(count($this->shape->layerdaten['ID'])==0){ echo 'disabled';}?>>
-      	<option value=""><?php echo $this->strPleaseSelect; ?></option>
-        <?
-    		for($i = 0; $i < count($this->shape->layerdaten['ID']); $i++){    			
-    			echo '<option';
-    			if($this->shape->layerdaten['ID'][$i] == $this->shape->formvars['selected_layer_id']){
-    				echo ' selected';
-    				$selectindex = $i;
-    			}
-    			echo ' value="'.$this->shape->layerdaten['ID'][$i].'">'.$this->shape->layerdaten['Bezeichnung'][$i].'</option>';
-    		}
-    	?>
-      </select> 
-     </td>
-     <td>&nbsp;</td>
-     <td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3" colspan="2"> 
-      <textarea class="textarea" cols="35" rows="4" name="selectstring" ><? echo $this->shape->formvars['selectstring'] ?></textarea> 
-     </td>
-  </tr>
   <tr>
-  	<td align="center" colspan="2"><input class="button" type="button" value="<?php echo $strButtonCutByPolygon; ?>" onclick="getpoly()"></td>
+  	<td>&nbsp;</td>
+  	<td colspan="6" width="100%">
+  		<table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>" width="100%">
+			  <tr>
+			    <td style="border-top:1px solid #C3C7C3;border-left:1px solid #C3C7C3" colspan="2"><?php echo $this->strLayer; ?></td>
+			    <td style="border-top:1px solid #C3C7C3">
+					  transformieren nach:
+			    </td>
+			    <td style="border-bottom:1px solid #C3C7C3;border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3" rowspan="2">
+			     	<input class="button" name="create" type="button" onclick="export_shape();" value="<?php echo $strButtonGenerateShapeData; ?>">
+			    </td>
+			  </tr>
+			  <tr>
+			    <td valign="top" style="border-bottom:1px solid #C3C7C3;border-left:1px solid #C3C7C3" colspan="2"> 
+			      <select style="width:250px" size="1" class="select" name="selected_layer_id" onchange="document.GUI.submit();" <?php if(count($this->shape->layerdaten['ID'])==0){ echo 'disabled';}?>>
+			      	<option value=""><?php echo $this->strPleaseSelect; ?></option>
+			        <?
+			    		for($i = 0; $i < count($this->shape->layerdaten['ID']); $i++){    			
+			    			echo '<option';
+			    			if($this->shape->layerdaten['ID'][$i] == $this->shape->formvars['selected_layer_id']){
+			    				echo ' selected';
+			    				$selectindex = $i;
+			    			}
+			    			echo ' value="'.$this->shape->layerdaten['ID'][$i].'">'.$this->shape->layerdaten['Bezeichnung'][$i].'</option>';
+			    		}
+			    		?>
+			      </select> 
+			    </td>
+			    <td style="border-bottom:1px solid #C3C7C3">
+					  <select name="epsg">
+					    <option value="">-- Auswahl --</option>
+					    <?
+							for($i = 0; $i < count($this->epsg_codes); $i++){
+								echo '<option ';
+								if($this->formvars['epsg'] == $this->epsg_codes[$i]['srid'])echo 'selected="true"';
+								echo ' value="'.$this->epsg_codes[$i]['srid'].'">';
+								echo $this->epsg_codes[$i]['srid'].': '.$this->epsg_codes[$i]['srtext'];
+								echo "</option>\n";
+							}
+							?>
+					  </select>
+			    </td>
+			  </tr>
+			  <tr>
+		     	<td style="border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3" colspan="5" width="100%">
+		     		Attributauswahl:
+		     	</td>
+		    </tr>
+		    <tr>
+		    	<td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3" colspan="5" width="100%"> 
+		      	<table cellpadding="1" cellspacing="0">
+		      		<tr>
+			      		<?
+				      		for($i = 0; $i < count($this->shape->attributes['name']); $i++){
+				      			if($i % 6 == 0){ echo '</tr><tr>';}	
+				      	?>
+			            <td>
+			            	<input type="checkbox" checked="true" value="1" name="check_<? echo $this->shape->attributes['name'][$i]; ?>">
+			            	<?php
+			              if($this->shape->attributes['alias'][$i] != ''){
+			                echo $this->shape->attributes['alias'][$i];
+			              }
+			              else{
+			                echo $this->shape->attributes['name'][$i];
+			              }
+			          ?></td>
+			          	<td>&nbsp;&nbsp;</td>
+				          <?
+				      	}
+			      	?>
+			      	</tr>
+			      </table> 
+			    </td>
+			 	</tr>
+			</table>
+		</td>
+		<td>&nbsp;</td>
+	</tr>
+  <tr>
+  	<td></td>
   	<td>&nbsp;</td>
   	<td align="center" colspan="2">
   		<input id="go_plus" type="hidden" name="go_plus" value="">
-  		<input class="button" name="create" type="button" onclick="submitWithValue('GUI', 'go_plus', 'Shape-Datei erzeugen')" value="<?php echo $strButtonGenerateShapeData; ?>">
   	</td>
   </tr>
-  <tr> 
-    <td colspan="5" align="right">
+  <tr>
+  	<td></td> 
+    <td colspan="6" align="right">
     	Geometrie übernehmen von: 
   		<select name="layer_id" onchange="document.GUI.submit();">
   			<option value="">--- Auswahl ---</option>
@@ -116,7 +164,7 @@ function buildwktpolygonfromsvgpath(svgpath){
     </td>
   </tr>
   <tr> 
-    <td colspan="5">&nbsp;</td>
+    <td colspan="6">&nbsp;</td>
   </tr>
 </table>
 

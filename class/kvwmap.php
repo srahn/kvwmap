@@ -2662,6 +2662,30 @@ class GUI extends GUI_core{
     $this->jagdkatastereditor();
   }
 
+  function jagdkatastereditor_listflurst_csv(){
+  	$this->jagdkataster = new jagdkataster($this->pgdatabase);
+    $this->flurstuecke = $this->jagdkataster->getIntersectedFlurst($this->formvars);
+  	for($i = 0; $i < count($this->flurstuecke); $i++){          	
+    	$csv .= $this->flurstuecke[$i]['gemkgname'].';';
+      $csv .= $this->flurstuecke[$i]['flur'].';';
+      $csv .= $this->flurstuecke[$i]['zaehlernenner'].';';
+      for($j=0; $j < count($this->flurstuecke[$i]['eigentuemer']); $j++){
+      	$csv .= $this->flurstuecke[$i]['eigentuemer'][$j].'   ';
+      }
+      $csv .= ';';
+      $csv .= $this->flurstuecke[$i]['albflaeche'].';';
+      $csv .= $this->flurstuecke[$i]['anteil'].';';
+     	$csv .= chr(10);  
+    }
+    $csv = 'Gemarkung;Flur;Zähler/Nenner;Eigentümer;Flst-Fläche(ALB);Anteil'.chr(10).$csv;
+    ob_end_clean();
+    header("Content-type: application/vnd.ms-excel");
+    header("Content-disposition:  inline; filename=Flurstuecke.csv");
+    header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+    header('Pragma: public');
+    print $csv;
+  }
+  
   function jagdkatastereditor_listflurst(){
     $this->main='jagdkataster_flurstlist.php';
     if($this->formvars['oid'])$this->titel='Im Jagdbezirk '.$this->formvars['name'].' enthaltene Flurstücke';
@@ -5062,7 +5086,7 @@ class GUI extends GUI_core{
     # Bodenrichtwertzone aus der Datenbank abfragen
     $layer = $this->user->rolle->getLayer(LAYERNAME_BODENRICHTWERTE);
     $bodenrichtwertzone=new bodenrichtwertzone($this->pgdatabase, $layer[0]['epsg_code'], $this->user->rolle->epsg_code);
-    $ret=$bodenrichtwertzone->getBodenrichtwertzonen($this->formvars['oid'],'');
+    $ret=$bodenrichtwertzone->getBodenrichtwertzonen($this->formvars['oid']);
     if ($ret[0]) {
       # Fehler bei der Abfrage
       showAlert($ret);
@@ -5079,9 +5103,7 @@ class GUI extends GUI_core{
       $datumteile=explode('-',$this->formvars['datum']);
       $this->formvars['datum']=$datumteile[0];
 
-      $PolygonAsSVG = str_replace('-', '', $this->formvars['svg_umring']);
-      $PolygonAsSVG = str_replace(' L', '', $PolygonAsSVG);
-      $PolygonAsSVG = str_replace(' Z', '', $PolygonAsSVG);
+      $PolygonAsSVG = transformCoordsSVG($this->formvars['svg_umring']);
       $this->formvars['newpath'] = $PolygonAsSVG;
       $this->formvars['newpathwkt'] = $this->formvars['wkt_umring'];
       $this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
@@ -7115,6 +7137,7 @@ class GUI extends GUI_core{
     $this->titel='Shape-Export';
     $this->main='shape_export.php';
     $this->loadMap('DataBase');
+    $this->epsg_codes = read_epsg_codes($this->pgdatabase);
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
     $this->shape = new shape();
     if($this->formvars['layer_id']){
@@ -7604,29 +7627,7 @@ class GUI extends GUI_core{
           # Zoom zum Polygon des Filters
           if ($poly_id != '' AND $showpolygon == true){
             $PolygonAsSVG = $this->pgdatabase->selectPolyAsSVG($poly_id, $this->user->rolle->epsg_code);
-            $PolygonAsSVG = str_replace('L ', '', $PolygonAsSVG);		# neuere Postgis-Versionen haben ein L mit drin
-						$svgcoords = explode(' ',$PolygonAsSVG);
-						$anzahl = count($svgcoords);
-						for($i = 0; $i < count($svgcoords); $i++){
-							if($svgcoords[$i] == 'M'){
-								$newsvgcoords[] = 'M';
-								$last_startcoordx = $svgcoords[$i+1];
-								$last_startcoordy = -1 * $svgcoords[$i+2];
-							}
-							if($svgcoords[$i] != 'M' AND $svgcoords[$i] != 'Z' AND $svgcoords[$i] != ''){
-								$newsvgcoords[] = $svgcoords[$i];
-								$newsvgcoords[] = -1 * $svgcoords[$i+1];
-								$i++;
-							}
-							if($svgcoords[$i] == 'Z'){			# neuere Postgis-Versionen liefern bei asSVG ein Z zum Schließen des Rings anstatt der Startkoordinate
-								$newsvgcoords[] = $last_startcoordx;
-								$newsvgcoords[] = $last_startcoordy;
-							}
-						}
-						$PolygonAsSVG = '';
-						for($i = 0; $i < count($newsvgcoords); $i++){
-							$PolygonAsSVG .= $newsvgcoords[$i].' ';
-    				}
+            $PolygonAsSVG = transformCoordsSVG($PolygonAsSVG);    				
             $this->zoomToPolygon($poly_id,20, $this->user->rolle->epsg_code);
             $this->user->rolle->saveSettings($this->map->extent);
             $this->user->rolle->readSettings();
@@ -13502,10 +13503,10 @@ class db_mapObj extends db_mapObj_core{
     while($rs=mysql_fetch_array($query)){
     	$attributes['name'][$i]= $rs['name'];
     	$attributes['real_name'][$rs['name']]= $rs['real_name'];
-    	$attributes['table_name'][$i]= $rs['tablename'];
-    	$attributes['table_name'][$rs['name']] = $rs['tablename']; 
-    	$attributes['table_alias_name'][$i]= $rs['table_alias_name'];
-    	$attributes['table_alias_name'][$rs['name']]= $rs['table_alias_name'];
+    	if($rs['tablename'])$attributes['table_name'][$i]= $rs['tablename'];
+    	if($rs['tablename'])$attributes['table_name'][$rs['name']] = $rs['tablename']; 
+    	if($rs['table_alias_name'])$attributes['table_alias_name'][$i]= $rs['table_alias_name'];
+    	if($rs['table_alias_name'])$attributes['table_alias_name'][$rs['name']]= $rs['table_alias_name'];
     	#$attributes['table_alias_name'][$rs['tablename']]= $rs['table_alias_name'];
     	$attributes['type'][$i]= $rs['type'];
     	if($rs['type'] == 'geometry'){

@@ -94,7 +94,7 @@ class bodenrichtwertzone {
     return $ret;
   }
   
-  function getBodenrichtwertzonen($oid,$polygon){
+  function getBodenrichtwertzonen($oid){
     # Prüfen der Suchparameter
     # Es muss ein gültiges Polygon vorhanden sein.
     $this->debug->write('file:bodenrichtwerte.php class:bodenrichtwerte function:getBodenrichtwertzonen<br>Abfragen des Umrings und der Textpunkte aus<br>PostGIS:',4);

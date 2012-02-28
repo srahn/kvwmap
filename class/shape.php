@@ -317,39 +317,11 @@ class shape {
   	$this->formvars = $formvars;
     $this->layerdaten = $stelle->getqueryablePostgisLayers(NULL);
     if($this->formvars['load'] AND $this->formvars['selected_layer_id']){
-      $data = $mapdb->getData($this->formvars['selected_layer_id']);
-      $select = $mapdb->getSelectFromData($data);
-      $fromposition = strpos(strtolower($select), ' from ');
-      $from = substr($select, $fromposition);
-      $attributesstring = substr($select, 6, $fromposition-6);
-      $attributes = explode(',', $attributesstring);
-      $selectstring = 'SELECT ';
-      for($i = 0; $i < count($attributes); $i++){
-        if(strpos($attributes[$i], 'oid') === false){
-          if($komma == true){
-            $selectstring .= ', ';
-          }
-          $selectstring .= $attributes[$i];
-          $komma = true;
-        }
-      }
-      $selectstring .= $from;
-      if(strpos(strtolower($selectstring), ' where ') === false){
-        $selectstring .= ' WHERE (1=1)';
-      }
-      $this->formvars['selectstring'] = $selectstring;
-      $this->formvars['selectstring_save'] = $selectstring;
-      
-      $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-      if($layerdb->schema != ''){
-      	$select = str_replace($layerdb->schema.'.', '', $select);	
-      }
-      $fields = $layerdb->getFieldsfromSelect($select);
-      $this->formvars['columnname'] = $fields['table_alias_name'][$fields['the_geom']].'.'.$fields['the_geom'];
-      $this->formvars['fromwhere'] = $from;
-      if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
-	      $this->formvars['fromwhere'] .= ' where (1=1)';
-	    }  
+      $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $stelle->pgdbhost);
+      $path = $mapdb->getPath($this->formvars['selected_layer_id']);
+      $privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
+      $newpath = $stelle->parse_path($layerdb, $path, $privileges);
+      $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
     }
   }
   
@@ -357,12 +329,39 @@ class shape {
   	$this->formvars = $formvars;
     $mapdb = new db_mapObj($stelle->id,$user->id);
     $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $stelle->pgdbhost);
+    $path = $mapdb->getPath($this->formvars['selected_layer_id']);
+    $privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
+    $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
+    for($i = 0; $i < count($this->attributes); $i++){
+    	if($this->formvars['check_'.$this->attributes['name'][$i]]){
+    		$selection[$this->attributes['name'][$i]] = 1;
+    	}
+    }
+    $sql = $stelle->parse_path($layerdb, $path, $selection);		# parse_path wird hier benutzt um die Auswahl der Attribute auf das Pfad-SQL zu übertragen
+    # Transformieren
+    if($this->formvars['epsg']){
+    	$sql = str_replace($this->attributes['the_geom'], 'TRANSFORM('.$this->attributes['the_geom'].', '.$this->formvars['epsg'].')', $sql);
+    }
+    # order by rausnehmen
+  	$orderbyposition = strpos(strtolower($sql), 'order by');
+  	if($orderbyposition !== false){
+	  	$orderby = ' '.substr($sql, $orderbyposition);
+	  	$sql = substr($sql, 0, $orderbyposition);
+  	}
+  	# über Polygon einschränken
+    if($this->formvars['newpathwkt']){
+    	$sql.= " AND Transform(".$this->attributes[$this->attributes['the_geom']].", ".$user->rolle->epsg_code.") && GeomFromText('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code.") AND INTERSECTS(Transform(".$this->attributes[$this->attributes['the_geom']].", ".$user->rolle->epsg_code."), GeomFromText('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."))";
+    }
+    # Filter
     $filter = $mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id);
-    $sql = $this->formvars['selectstring'];
     if($filter != ''){
     	$sql .= ' AND '.$filter;
     }
-    $sql = str_replace('\\', '', $sql);
+    $sql.= $orderby;
+    $temp_table = 'public.shp_export_'.rand(1, 10000);
+    $sql = 'CREATE TABLE '.$temp_table.' AS '.$sql;		# temporäre Tabelle erzeugen, damit das/die Schema/ta berücksichtigt werden
+    $ret = $layerdb->execSQL($sql,4, 0);
+    $sql = 'SELECT * FROM '.$temp_table;
     $ret = $layerdb->execSQL($sql,4, 0);
     if (!$ret[0]) {
       $count = pg_num_rows($ret[1]);
@@ -374,15 +373,14 @@ class shape {
       $this->formvars['layer_name'] = str_replace('/', '_', $this->formvars['layer_name']);
       $folder = 'shp_Export_'.$this->formvars['layer_name'].rand(0,10000);
       mkdir(IMAGEPATH.$folder);                       # Ordner erzeugen 
-      exec(POSTGRESBINPATH.'pgsql2shp -u '.$layerdb->user.' -P '.$layerdb->passwd.' -f '.IMAGEPATH.$folder.'/'.$this->formvars['layer_name'].' '.$layerdb->dbName.' "'.$sql.'"'); # Shps erzeugen
-      #echo POSTGRESBINPATH.'pgsql2shp -u '.$layerdb->user.' -P '.$layerdb->passwd.' -f '.IMAGEPATH.$folder.'/'.$this->formvars['layer_name'].' '.$layerdb->dbName.' "'.$sql.'"';
+      exec(POSTGRESBINPATH.'pgsql2shp -u '.$layerdb->user.' -P '.$layerdb->passwd.' -f '.IMAGEPATH.$folder.'/'.$this->formvars['layer_name'].' '.$layerdb->dbName.' '.$temp_table);
+      #echo POSTGRESBINPATH.'pgsql2shp -u '.$layerdb->user.' -P '.$layerdb->passwd.' -f '.IMAGEPATH.$folder.'/'.$this->formvars['layer_name'].' '.$layerdb->dbName.' '.$temp_table;
       exec(ZIP_PATH.' '.IMAGEPATH.$folder.' '.IMAGEPATH.$folder.'/*'); # Ordner zippen
       #echo ZIP_PATH.' '.IMAGEPATH.$folder.' '.IMAGEPATH.$folder.'/*';
       $this->formvars['filename'] = TEMPPATH_REL.$folder.'.zip';
-      unlink(IMAGEPATH.$folder.'/'.$this->formvars['layer_name'].'.shp');
-      unlink(IMAGEPATH.$folder.'/'.$this->formvars['layer_name'].'.shx');
-      unlink(IMAGEPATH.$folder.'/'.$this->formvars['layer_name'].'.dbf');
       #rmdir(IMAGEPATH.$folder);         # Ordner löschen
+      $sql = 'DROP TABLE '.$temp_table;		# temp. Tabelle wieder löschen
+      $ret = $layerdb->execSQL($sql,4, 0);
       return $this->formvars['filename'];
     }
     else{

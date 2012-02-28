@@ -661,29 +661,7 @@ class spatial_processor {
   function transformCoordsSVG($path){
     $part = explode('||',$path);
     # SVG Part
-    $part[0] = str_replace('L ', '', $part[0]);		# neuere Postgis-Versionen haben ein L mit drin
-    $svgcoords = explode(' ',$part[0]);
-    $anzahl = count($svgcoords);
-    for($i = 0; $i < count($svgcoords); $i++){
-	    if($svgcoords[$i] == 'M'){
-	    	$newsvgcoords[] = 'M';
-	    	$last_startcoordx = $svgcoords[$i+1];
-	    	$last_startcoordy = -1 * $svgcoords[$i+2]; 
-	    }
-      if($svgcoords[$i] != 'M' AND $svgcoords[$i] != 'Z' AND $svgcoords[$i] != ''){
-      	$newsvgcoords[] = $svgcoords[$i];
-        $newsvgcoords[] = -1 * $svgcoords[$i+1];
-        $i++;
-      }
-      if($svgcoords[$i] == 'Z'){			# neuere Postgis-Versionen liefern bei asSVG ein Z zum Schließen des Rings anstatt der Startkoordinate
-	    	$newsvgcoords[] = $last_startcoordx;
-	    	$newsvgcoords[] = $last_startcoordy;
-	    }
-    }
-    $svgresult = '';
-    for($i = 0; $i < count($newsvgcoords); $i++){
-      $svgresult .= $newsvgcoords[$i].' ';
-    }
+    $svgresult = transformCoordsSVG($part[0]);
     if(count($part) > 1){
       $result = $svgresult.'||'.$part[1];
     }

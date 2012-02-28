@@ -45,6 +45,11 @@ function show_all_flurst(){
   }
 }
 
+function csv_export(){
+	document.GUI.go.value = 'jagdkatastereditor_Flurstuecke_Listen_csv';
+	document.GUI.submit();
+}
+
 -->
 </script>
 
@@ -93,13 +98,16 @@ function show_all_flurst(){
   </tr>
   <? if($this->formvars['oid']){ ?>
   <tr>
-  	<td align="center"><a href="javascript:document.GUI.submit()">zurück zum Jagdbezirk</a></td>
+  	<td align="center"><a href="javascript:document.GUI.go.value = 'jagdbezirk_show_data';javascript:document.GUI.submit()">zurück zum Jagdbezirk</a></td>
   </tr>
   <? }else{ ?>
   <tr>
     <td align="center"><a href="javascript:document.GUI.go.value = 'jagdbezirke_auswaehlen_Suchen';javascript:document.GUI.submit()">zur&uuml;ck zur Trefferliste</a></td>
   </tr>
   <? } ?>
+  <tr>
+  	<td align="center"><a href="javascript:csv_export();">CSV-Export</a></td>
+  </tr>
   <tr>
   	<td align="center"><a href="javascript:hideMenue();javascript:print();">Drucken</a></td>
   </tr>

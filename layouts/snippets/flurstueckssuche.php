@@ -18,7 +18,7 @@ function updateGemarkungsauswahl(){
 -->
 </script>
 
-<input type="hidden" name="go" value="Flurstueck_Auswaehlen">
+<input type="hidden" name="go" value="<? if($this->formvars['ALK_Suche']) echo 'ALK-'; ?>Flurstueck_Auswaehlen">
 <br><h2><?php echo $this->titel; ?></h2>
 <?php
 if ($this->Fehlermeldung!='') {
