@@ -2264,7 +2264,7 @@ class GUI extends GUI_core{
       
       $datastring = $this->formvars['layer_columnname']." from (".$select;
       $datastring.=") as foo using unique oid using srid=".$layerset[0]['epsg_code'];
-      $legendentext=$layerset[0]['Name'];
+      $legendentext = $layerset[0]['Name']." (".date('d.m. H:i',time()).")";
 
       $group = $dbmap->getGroupbyName('Suchergebnis');
       if($group != ''){
@@ -2589,8 +2589,7 @@ class GUI extends GUI_core{
       $this->jagdbezirk = $jagdkataster->getjagdbezirk($this->formvars['oid']);
       $this->formvars['newpathwkt'] = $this->jagdbezirk['wktgeom'];
       $this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
-      $this->formvars['newpath'] = str_replace('-', '', $this->jagdbezirk['svggeom']);
-      $this->formvars['newpath'] = str_replace('L ', '', $this->formvars['newpath']);
+      $this->formvars['newpath'] = transformCoordsSVG($this->jagdbezirk['svggeom']);
       $this->formvars['firstpoly'] = 'true';
     }
     if($this->formvars['lfd_nr_name'] != ''){   # von der Namenssuche
@@ -5438,8 +5437,7 @@ class GUI extends GUI_core{
         $this->user->rolle->saveSettings($this->map->extent);
         $this->user->rolle->readSettings();
         # Übernahme des Nachweisumrings aus der PostGIS-Datenbank
-        $PolygonAsSVG = str_replace('-', '', $nachweis->document['svg_umring']);
-        $this->formvars['newpath'] = $PolygonAsSVG;
+        $this->formvars['newpath'] = transformCoordsSVG($nachweis->document['svg_umring']);
         $this->formvars['newpathwkt'] = $nachweis->document['wkt_umring'];
         $this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
       }
@@ -9060,8 +9058,7 @@ class GUI extends GUI_core{
       $this->user->rolle->saveSettings($this->map->extent);
       $this->user->rolle->readSettings();
       # Übernahme des Nachweisumrings aus der PostGIS-Datenbank
-      $PolygonAsSVG = str_replace('-', '', $nachweis->document['svg_umring']);
-      $this->formvars['newpath'] = $PolygonAsSVG;
+      $this->formvars['newpath'] = transformCoordsSVG($nachweis->document['svg_umring']);
       $this->formvars['newpathwkt'] = $nachweis->document['wkt_umring'];
       $this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
     }

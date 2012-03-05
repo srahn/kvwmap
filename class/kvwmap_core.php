@@ -464,13 +464,15 @@ class GUI_core {
           	}
           }
 
-          if($layers_of_group[$layerset[$i]['Gruppe']] == ''){
-            $layers_of_group[$layerset[$i]['Gruppe']] .= $layerset[$i]['Layer_ID'];
-          }
-          else{
-            $layers_of_group[$layerset[$i]['Gruppe']] .= ','.$layerset[$i]['Layer_ID'];
-          }
-          $map->setMetaData('layers_of_group_'.$layerset[$i]['Gruppe'], $layers_of_group[$layerset[$i]['Gruppe']]);
+					if($layerset[$i]['requires'] == ''){
+	          if($layers_of_group[$layerset[$i]['Gruppe']] == ''){
+	            $layers_of_group[$layerset[$i]['Gruppe']] .= $layerset[$i]['Layer_ID'];
+	          }
+	          else{
+	            $layers_of_group[$layerset[$i]['Gruppe']] .= ','.$layerset[$i]['Layer_ID'];
+	          }
+	          $map->setMetaData('layers_of_group_'.$layerset[$i]['Gruppe'], $layers_of_group[$layerset[$i]['Gruppe']]);
+					}
 
           if($layerset[$i]['status'] == 0){
             if($layerset[$i]['aktivStatus'] != 0){
