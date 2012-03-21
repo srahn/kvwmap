@@ -701,7 +701,8 @@ class pgdatabase extends pgdatabase_core {
   }
 
   function readaktualitaet(){
-    $sql = "SELECT datum FROM tabelleninfo WHERE thema = 'probaug'";
+  	$sql = "SET datestyle TO 'German';";
+	$sql.= "SELECT max(datum::date) FROM tabelleninfo WHERE thema = 'probaug'"; 
     $ret = $this->execSQL($sql, 4, 0);
     if($ret[0]==0){
       $datum = pg_fetch_array($ret[1]);

@@ -435,13 +435,13 @@ function unzip($src_file, $dest_dir=false, $create_zip_name_dir=true, $overwrite
 	# 1. Methode über unzip (nur Linux)
 	$output = array();
 	$entries = NULL;
-	exec('unzip -l "'.$src_file.'" -d '.dirname($src_file), $output);
-	echo 'unzip -l "'.$src_file.'" -d '.dirname($src_file);
+	exec('export LD_LIBRARY_PATH=;unzip -l "'.$src_file.'" -d '.dirname($src_file), $output);
+	#echo 'unzip -l "'.$src_file.'" -d '.dirname($src_file);
 	for($i = 3; $i < count($output)-2; $i++){
-  	$entries[] = array_pop(explode(' ', $output[$i]));
+  		$entries[] = array_pop(explode(' ', $output[$i]));
 	}
 	if($entries != NULL){
-		exec('unzip -o "'.$src_file.'" -d '.dirname($src_file));
+		exec('export LD_LIBRARY_PATH=;unzip -o "'.$src_file.'" -d '.dirname($src_file));
 	}
 	# 2. Methode über php_zip Extension
 	else{

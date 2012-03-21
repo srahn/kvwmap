@@ -133,7 +133,7 @@ class esaf {
         fwrite($fp, '4'.$this->eigentuemerliste[$i]['bezirk'].'-'.$this->eigentuemerliste[$i]['blatt'].' '.$this->eigentuemerliste[$i]['pruefzeichen'].'; ; '.$namensnr.'  ; ; '.$this->eigentuemerliste[$i]['art'].'; '.$this->eigentuemerliste[$i]['name1'].'# '.$this->eigentuemerliste[$i]['name2'].'# '.$this->eigentuemerliste[$i]['neu_name3'].'# '.$this->eigentuemerliste[$i]['neu_name4'].';0D0A'.chr(10));
       }
 
-      exec(ZIP_PATH.' -j '.IMAGEPATH.$folder.' '.IMAGEPATH.$folder.'/*'); # Ordner zippen
+      exec(ZIP_PATH.' '.IMAGEPATH.$folder.' '.IMAGEPATH.$folder.'/*'); # Ordner zippen
       $zipfilename = TEMPPATH_REL.$folder.'.zip';
       for($i = 0; $i < count($filenames); $i++){
         unlink(IMAGEPATH.$folder.'/'.$filenames[$i]);

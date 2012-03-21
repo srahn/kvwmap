@@ -1118,8 +1118,8 @@ switch($GUI->go) {
     $GUI->uko_import_importieren();
   } break;
 	
-	case 'GPX_Import' : {
-		$GUI->checkCaseAllowed('GPX_Import');
+  case 'GPX_Import' : {
+	$GUI->checkCaseAllowed('GPX_Import');
     $GUI->gpx_import();
   } break;
   

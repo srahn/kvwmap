@@ -246,25 +246,24 @@ class shape {
     }
   }
   
-	function shp_import($formvars){
-		$this->formvars = $formvars;
+  function shp_import($formvars){
+    $this->formvars = $formvars;
     if($_FILES['zipfile']['name']){     # eine Zipdatei wurde ausgewählt
       $this->formvars['zipfile'] = $_FILES['zipfile']['name'];
       $nachDatei = UPLOADPATH.$_FILES['zipfile']['name'];
       if(move_uploaded_file($_FILES['zipfile']['tmp_name'],$nachDatei)){
-				$files = unzip($nachDatei, false, false, true);
-				$firstfile = explode('.', $files[0]);
-				$file = $firstfile[0].'.dbf';
-        
+        $files = unzip($nachDatei, false, false, true);
+        $firstfile = explode('.', $files[0]);
+        $file = $firstfile[0].'.dbf';
         $this->dbf = new dbf();
         $this->dbf->file = '';
         $this->dbf->file = $file;
-        
+      
         if($this->dbf->file != ''){
           if(file_exists(UPLOADPATH.$this->dbf->file)){   
             $this->dbf->header = $this->dbf->get_dbf_header(UPLOADPATH.$this->dbf->file);
             $this->dbf->header = $this->dbf->get_sql_types($this->dbf->header);
-          }
+          }  
         }
       }
     }
@@ -284,7 +283,7 @@ class shape {
       exec($command);
       #echo $command;
       exec(POSTGRESBINPATH.'psql -f '.UPLOADPATH.$this->formvars['table_name'].'.sql '.$database->dbName.' '.$database->user);
-      //echo POSTGRESBINPATH.'psql -f '.UPLOADPATH.$this->formvars['table_name'].'.sql '.$database->dbName.' '.$database->user;
+      #echo POSTGRESBINPATH.'psql -f '.UPLOADPATH.$this->formvars['table_name'].'.sql '.$database->dbName.' '.$database->user;
       $sql = 'SELECT count(*) FROM '.$this->formvars['table_name'];
       $ret = $database->execSQL($sql,4, 0);
       if (!$ret[0]) {
@@ -332,7 +331,7 @@ class shape {
     $path = $mapdb->getPath($this->formvars['selected_layer_id']);
     $privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
     $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
-    for($i = 0; $i < count($this->attributes); $i++){
+    for($i = 0; $i < count($this->attributes['name']); $i++){
     	if($this->formvars['check_'.$this->attributes['name'][$i]]){
     		$selection[$this->attributes['name'][$i]] = 1;
     	}
