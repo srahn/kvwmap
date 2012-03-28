@@ -11,7 +11,7 @@ function send(){
 	if(document.GUI.postleitzahl.value == ''){alert('Bitte geben Sie eine Postleitzahl an.');exit();}
 	if(document.GUI.zonentyp.value == ''){alert('Bitte geben Sie einen Zonentyp an.');exit();}
 	if(document.GUI.entwicklungszustand.value == ''){alert('Bitte geben Sie einen Entwicklungszustand an.');exit();}
-	if(document.GUI.beitragszustand.value == ''){alert('Bitte geben Sie einen Beitragszustand an.');exit();}
+	if(document.GUI.zonentyp.value != 'Ackerland' && document.GUI.zonentyp.value != 'Grünland' && document.GUI.beitragszustand.value == ''){alert('Bitte geben Sie einen Beitragszustand an.');exit();}
 	if(document.GUI.nutzungsart.value == ''){alert('Bitte geben Sie eine Nutzungsart an.');exit();}
 	if(document.GUI.newpathwkt.value == ''){
 		if(document.GUI.newpath.value == ''){
