@@ -15,7 +15,7 @@
   </tr>
   <?php
     for ($j=0;$j<$anzObj;$j++) {
-    	$this->notiz=new notiz($this->pgdatabase);
+    	$this->notiz=new notiz($this->pgdatabase, $this->user->rolle->epsg_code);
   		$this->notiz->aendernKategorie = $this->notiz->getKategorie($this->qlayerset[$i]['shape'][$j]['id'], $this->Stelle->id, NULL, NULL, 'true');
       ?>
   <tr> 

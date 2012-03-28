@@ -317,6 +317,19 @@ class GUI extends GUI_core{
 		$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 		$spatial_processor = new spatial_processor($this->user->rolle, $this->database, $layerdb);
 		$single_geoms = $spatial_processor->split_multi_geometries($this->formvars['newpathwkt'], $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+		
+		/*
+		 SELECT               
+  pg_attribute.attname
+FROM pg_index, pg_class, pg_attribute 
+WHERE 
+  pg_class.oid = 'laerm.strassen_original'::regclass AND
+  indrelid = pg_class.oid AND
+  pg_attribute.attrelid = pg_class.oid AND 
+  pg_attribute.attnum = any(pg_index.indkey)
+  AND indisprimary
+		 */
+		
 		for($i = 0; $i < count($single_geoms); $i++){
 			$sql = "INSERT INTO ".$this->formvars['layer_tablename']." SELECT * FROM ".$this->formvars['layer_tablename']." WHERE oid = ".$this->formvars['oid'];
 			$ret = $layerdb->execSQL($sql,4, 0);
@@ -328,9 +341,9 @@ class GUI extends GUI_core{
 		$ret = $layerdb->execSQL($sql,4, 0);
 		$this->loadMap('DataBase');					# Karte anzeigen
 		$currenttime=date('Y-m-d H:i:s',time());
-    $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-    $this->drawMap();
-    $this->saveMap('');
+    	$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
+    	$this->drawMap();
+    	$this->saveMap('');
 		$this->output(); 
 	}
 	
@@ -3576,7 +3589,7 @@ class GUI extends GUI_core{
     $this->main="notizerfassung.php";
     # aktuellen Kartenausschnitt laden + zeichnen!
     $this->loadMap('DataBase');
-    $this->notizen=new notiz($this->pgdatabase);
+    $this->notizen=new notiz($this->pgdatabase, $this->user->rolle->epsg_code);
     $this->notizen->anlegenKategorien = $this->notizen->getKategorie(NULL, $this->Stelle->id, NULL, 'true', NULL);
     if ($this->formvars['CMD']!='') {
       $this->navMap($this->formvars['CMD']);
@@ -3597,7 +3610,7 @@ class GUI extends GUI_core{
         $this->notizen->notizKategorie = $this->notizen->getKategorie($ret[1][0]['kategorie_id'], NULL, NULL, NULL, NULL);
         # Bildung der Textposition zur SVG-Ausgabe
         if(strpos($ret[1][0]['textgeom'], 'POINT') === false){    # Polygon
-          $PolygonAsSVG = str_replace('-', '', $ret[1][0]['svggeom']);
+          $PolygonAsSVG = transformCoordsSVG($ret[1][0]['svggeom']);
           $this->formvars['newpath'] = $PolygonAsSVG;
           $this->formvars['newpathwkt'] = $ret[1][0]['textgeom'];
           $this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
@@ -3640,7 +3653,7 @@ class GUI extends GUI_core{
     $this->formvars['epsg_von']=$this->user->rolle->epsg_code;
 
     # Notizobjekt erzeugen
-    $notiz=new notiz($this->pgdatabase);
+    $notiz=new notiz($this->pgdatabase, $this->user->rolle->epsg_code);
 
     # 1. Prüfen der Eingabewerte
     #echo '<br>Prüfen der Eingabewerte.';
@@ -3685,14 +3698,14 @@ class GUI extends GUI_core{
   }
 
   function notizLoeschen($oid){
-    $notiz=new notiz($this->pgdatabase);
+    $notiz=new notiz($this->pgdatabase, $this->user->rolle->epsg_code);
     $notiz->NotizLoeschen($oid);
   }
 
   function notizKatVerwaltung() {
     $this->stelle=new stelle('',$this->database);
     $this->stellen=$this->stelle->getStellen('Bezeichnung');
-    $this->notiz=new notiz($this->pgdatabase);
+    $this->notiz=new notiz($this->pgdatabase, $this->user->rolle->epsg_code);
     $this->AllKat=$this->notiz->selectKategorie('','','');
     if($this->formvars['kategorie_id'] != ''){
       $this->Kat=$this->notiz->getKategorie($this->formvars['kategorie_id'],'','','','');
@@ -3704,7 +3717,7 @@ class GUI extends GUI_core{
   } # END of funtion notizKatVerwaltung
 
   function notizKategoriehinzufügen(){
-    $this->notiz=new notiz($this->pgdatabase);
+    $this->notiz=new notiz($this->pgdatabase, $this->user->rolle->epsg_code);
     $this->notiz->insertKategorie($this->formvars['newKategorie']);
     $kat=$this->notiz->selectKategorie('',$this->formvars['newKategorie'],'');
     $this->formvars['kategorie_id']=$kat[0]['id'];
@@ -3712,7 +3725,7 @@ class GUI extends GUI_core{
   } # END of function notizKathinzufügen
 
   function notizKategorieAendern(){
-    $this->notiz=new notiz($this->pgdatabase);
+    $this->notiz=new notiz($this->pgdatabase, $this->user->rolle->epsg_code);
     if($this->formvars['kategorie_id'] != ''){
       $this->notiz->notizKategorieAenderung($this->formvars);
     }
@@ -3720,7 +3733,7 @@ class GUI extends GUI_core{
   } # END of function notizKategorieAendern
 
   function notizKategorieLoeschen() {
-    $this->notiz=new notiz($this->pgdatabase);
+    $this->notiz=new notiz($this->pgdatabase, $this->user->rolle->epsg_code);
     $this->notiz->notizKategorieLoeschen($this->formvars['kategorie_id'],$this->formvars['plus_notiz']);
     $max_id=$this->notiz->selectKategorie('','','');
     $this->formvars['kategorie_id']=$max_id[0]['id'];
@@ -4578,7 +4591,7 @@ class GUI extends GUI_core{
     $this->output();
   }
 
-	function export_flurst_csv(){
+  function export_flurst_csv(){
 		$this->attribute_selections = $this->user->rolle->get_csv_attribute_selections();
     $this->attribute = explode(';', $this->formvars['attributliste']);
     $this->main = 'export_flurstuecke_csv.php';
@@ -4587,7 +4600,8 @@ class GUI extends GUI_core{
   }
   
   function export_flurst_csv_auswahl_speichern(){
-  	$this->formvars['selection'] = $this->user->rolle->save_csv_attribute_selection($this->formvars['name'], $this->formvars['attributes']);
+  	$this->user->rolle->save_csv_attribute_selection($this->formvars['name'], $this->formvars['attributes']);
+  	$this->formvars['selection'] = $this->formvars['name'];
   	$this->export_flurst_csv_auswahl_laden();
   }
   
@@ -11604,7 +11618,7 @@ class GUI extends GUI_core{
 		    $datastring.=" LEFT JOIN alkis_beziehungen v ON g.gml_id=v.beziehung_von"; 
 				$datastring.=" LEFT JOIN ax_lagebezeichnungmithausnummer l ON v.beziehung_zu=l.gml_id";
 				$datastring.=" LEFT JOIN ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde";
-				$datastring.=" AND to_char(l.lage, 'FM00000') = lpad(s.lage,5,'0')";
+				$datastring.=" AND l.lage = lpad(s.lage,5,'0')";
 				$datastring.=" WHERE gem.gemeinde = l.gemeinde";
 		    $datastring.=" AND gem.schluesselgesamt=".$Gemeinde;
 		    if ($Strasse!='') {

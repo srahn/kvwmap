@@ -1265,27 +1265,27 @@ switch($GUI->go) {
   } break;
 
   case 'Layereditor' : {
-  	$GUI->checkCaseAllowed($go);
+  	$GUI->checkCaseAllowed('Layer_Anzeigen');
     $GUI->Layereditor();
   } break;
 
   case 'Layereditor_Klasse_Löschen' : {
-  	$GUI->checkCaseAllowed('Layereditor');
+  	$GUI->checkCaseAllowed('Layer_Anzeigen');
    	$GUI->Layereditor_KlasseLoeschen();
   } break;
 
   case 'Layereditor_Klasse_Hinzufügen' : {
-  	$GUI->checkCaseAllowed('Layereditor');
+  	$GUI->checkCaseAllowed('Layer_Anzeigen');
     $GUI->Layereditor_KlasseHinzufuegen();    
   } break;
 
   case 'Layereditor_Als neuen Layer eintragen' : {
-  	$GUI->checkCaseAllowed('Layereditor');
+  	$GUI->checkCaseAllowed('Layer_Anzeigen');
     $GUI->LayerAnlegen();
   } break;
 
   case 'Layereditor_Ändern' : {
-  	$GUI->checkCaseAllowed('Layereditor');
+  	$GUI->checkCaseAllowed('Layer_Anzeigen');
     $GUI->LayerAendern();
   } break;
 
@@ -1319,22 +1319,22 @@ switch($GUI->go) {
   } break;
 
   case 'Layer2Stelle_Reihenfolge' : {
-  	$GUI->checkCaseAllowed('Stelleneditor');
+  	$GUI->checkCaseAllowed('Stellen_Anzeigen');
     $GUI->Layer2Stelle_Reihenfolge();
   } break;
 
   case 'Layer2Stelle_Reihenfolge_Speichern' : {    
-    $GUI->checkCaseAllowed('Stelleneditor');
+    $GUI->checkCaseAllowed('Stellen_Anzeigen');
     $GUI->Layer2Stelle_ReihenfolgeSpeichern();
   } break;
 
   case 'Layer2Stelle_Editor' : {
-    $GUI->checkCaseAllowed('Stelleneditor');
+    $GUI->checkCaseAllowed('Stellen_Anzeigen');
     $GUI->Layer2Stelle_Editor();
   } break;
 
   case 'Layer2Stelle_Editor_Speichern' : {
-    $GUI->checkCaseAllowed('Stelleneditor');
+    $GUI->checkCaseAllowed('Stellen_Anzeigen');
     $GUI->Layer2Stelle_EditorSpeichern();
   } break;
 
@@ -1349,7 +1349,7 @@ switch($GUI->go) {
   } break;
 
   case 'Stelleneditor' : {
-    $GUI->checkCaseAllowed('Stelleneditor');
+    $GUI->checkCaseAllowed('Stellen_Anzeigen');
     $GUI->Stelleneditor();
   } break;
 
@@ -1359,12 +1359,12 @@ switch($GUI->go) {
   } break;
 
   case 'Stelleneditor_Als neue Stelle eintragen' : {
-    $GUI->checkCaseAllowed('Stelleneditor');
+    $GUI->checkCaseAllowed('Stellen_Anzeigen');
     $GUI->StelleAnlegen();
   } break;
 
   case 'Stelleneditor_Ändern' : {
-    $GUI->checkCaseAllowed('Stelleneditor');
+    $GUI->checkCaseAllowed('Stellen_Anzeigen');
     $GUI->StelleAendern();
   } break;
 

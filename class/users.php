@@ -975,8 +975,8 @@ class rolle extends rolle_core{
     $this->loglevel = 0;
   }
 
-	function get_csv_attribute_selections(){
-		$sql = 'SELECT id, name FROM rolle_csv_attributes WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' ORDER BY name';
+  function get_csv_attribute_selections(){
+		$sql = 'SELECT name FROM rolle_csv_attributes WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' ORDER BY name';
 		$this->debug->write("<p>file:users.php class:rolle->get_csv_attribute_selections - Abfragen der gespeicherten CSV-Attributlisten der Rolle:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
     if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
@@ -984,10 +984,10 @@ class rolle extends rolle_core{
       $attribute_selections[]=$rs;
     }
     return $attribute_selections;
-	}
+  }
 	
-	function get_csv_attribute_selection($id){
-		$sql = 'SELECT id, name, attributes FROM rolle_csv_attributes WHERE id='.$id;
+	function get_csv_attribute_selection($name){
+		$sql = 'SELECT name, attributes FROM rolle_csv_attributes WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND name = "'.$name.'"';
 		$this->debug->write("<p>file:users.php class:rolle->get_csv_attribute_selection - Abfragen einer CSV-Attributliste der Rolle:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
     if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
@@ -1001,16 +1001,11 @@ class rolle extends rolle_core{
 		$sql = 'INSERT INTO rolle_csv_attributes (user_id, stelle_id, name, attributes) VALUES ('.$this->user_id.', '.$this->stelle_id.', "'.$name.'", "'.$attributes.'");';
 		$this->debug->write("<p>file:users.php class:rolle->save_search - Speichern einer Attributauswahl:",4);
  		$this->database->execSQL($sql,4, $this->loglevel);
- 		$sql = 'SELECT LAST_INSERT_ID();';
-    $query = mysql_query($sql);
-    $user_id = mysql_fetch_row($query);
-    $id = $user_id[0];
-    return $id;
 	}
 	
-	function delete_csv_attribute_selection($id){
-		if($id != ''){
-			$sql = 'DELETE FROM rolle_csv_attributes WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND id = "'.$id.'"';
+	function delete_csv_attribute_selection($name){
+		if($name != ''){
+			$sql = 'DELETE FROM rolle_csv_attributes WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND name = "'.$name.'"';
 			$this->debug->write("<p>file:users.php class:rolle->delete_search - Loeschen einer Suchabfrage:",4);
   		$this->database->execSQL($sql,4, $this->loglevel);
 		}

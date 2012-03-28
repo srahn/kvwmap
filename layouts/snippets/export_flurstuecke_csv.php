@@ -43,7 +43,7 @@ function save_selection(){
 		if(document.GUI.forstschluessel.checked == true){attributes = attributes+'forstschluessel|'}
 		if(document.GUI.forstname.checked == true){attributes = attributes+'forstname|'}
 		if(document.GUI.lagebezeichnung.checked == true){attributes = attributes+'lagebezeichnung|'}
-		if(document.GUI.nutzung.checked == true){attributes = attributes+'nutzung|'}
+		if(document.GUI.nutzung != undefined && document.GUI.nutzung.checked == true){attributes = attributes+'nutzung|'}
 		if(document.GUI.ausfstelle.checked == true){attributes = attributes+'ausfstelle|'}
 		if(document.GUI.verfahren.checked == true){attributes = attributes+'verfahren|'}
 		if(document.GUI.vorgaenger.checked == true){attributes = attributes+'vorgaenger|'}
@@ -51,7 +51,7 @@ function save_selection(){
 		if(document.GUI.buchungsart.checked == true){attributes = attributes+'buchungsart|'}
 		if(document.GUI.bvnr.checked == true){attributes = attributes+'bvnr|'}
 		if(document.GUI.pruefzeichen.checked == true){attributes = attributes+'pruefzeichen|'}
-		if(document.GUI.eigentuemer.checked == true){attributes = attributes+'eigentuemer|'}
+		if(document.GUI.eigentuemer != undefined && document.GUI.eigentuemer.checked == true){attributes = attributes+'eigentuemer|'}
 		if(document.GUI.freitext.checked == true){attributes = attributes+'freitext|'}
 		if(document.GUI.hinweis.checked == true){attributes = attributes+'hinweis|'}
 		if(document.GUI.baulasten.checked == true){attributes = attributes+'baulasten|'}
@@ -169,8 +169,8 @@ function delete_selection(){
 			  			<option value="">-- Auswahl --</option>
 			  			<?
 			  				for($i = 0; $i < count($this->attribute_selections); $i++){
-			  					echo '<option value="'.$this->attribute_selections[$i]['id'].'" ';
-			  					if($this->selection['id'] == $this->attribute_selections[$i]['id'])echo 'selected';
+			  					echo '<option value="'.$this->attribute_selections[$i]['name'].'" ';
+			  					if($this->selection['name'] == $this->attribute_selections[$i]['name'])echo 'selected';
 			  					echo ' >'.$this->attribute_selections[$i]['name'].'</option>';
 			  				}
 			  			?>

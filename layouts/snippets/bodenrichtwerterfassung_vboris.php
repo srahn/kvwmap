@@ -35,9 +35,6 @@ function update_verfahren(){
 			document.GUI.verfahrensgrund_zusatz.value = 'A';
 		}
 	}
-	else{
-		document.GUI.verfahrensgrund_zusatz.value = '';
-	}
 }
 
 function buildwktpolygonfromsvgpath(svgpath){
