@@ -407,6 +407,8 @@ switch($GUI->go) {
     if (isset($newPassword)) {
       $locationStr.='?newPassword='.$newPassword;
       $locationStr.='&msg='.$GUI->Fehlermeldung;
+      #$locationStr.='&passwort='.$passwort;
+      #$locationStr.='&username='.$username;
     }
     header('Location: '.$locationStr);
   } break;

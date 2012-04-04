@@ -5,7 +5,7 @@
 #                                                                  #
 ####################################################################
 # aktuelle Versionsnummer
-define('VERSION','1.8.0');
+define('VERSION','1.9.0');
 define('APPLVERSION','kvwmap_'.VERSION.'/');
 # Bezeichnung der MySQL-Datenbank mit den Benutzerdaten
 $dbname='kvwmapdb';
@@ -30,6 +30,11 @@ define('BEARBEITER', 'false');			# true/false					# Version 1.7.2
 # Gutachterausschuss BORIS
 #define('GUTACHTERAUSSCHUSS', '12345 NVP');								# Version 1.7.3			# in Version 1.7.5 wieder gelöscht
 $gutachterausschuesse = array('12345', '6789');       # Version 1.7.5
+# katasterführende Stellen ALB
+# bei zwei katasterführenden Stellen in einer kvwmap-DB (Nur für Adressänderungen wichtig, sonst auskommentieren)
+# erste Stelle bis einschließlich GBBZ-Schlüssel, zweite Stelle bis einschließlich GBBZ-Schlüssel, ....
+# wer nur eine katasterführende Stelle hat, kann das Array weglassen oder auskommentieren
+$katasterfuehrendestelle = array('0019' => '132845', '0021' => '132846');		# Version 1.9.0
 
 
 # definiert, ob zu Tetszwecken auf ein PostNAS-Schema zugegriffen wird, oder nicht

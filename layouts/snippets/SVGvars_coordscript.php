@@ -19,8 +19,13 @@
 		function format_number(number, convert){
 			coordtype = \''.$this->user->rolle->coordtype.'\';
 			epsgcode = \''.$this->user->rolle->epsg_code.'\';
-			if(coordtype == "dms" && epsgcode == 4326 && convert == true){
-				return dec2dms(number);
+			if(epsgcode == 4326){
+				if(coordtype == "dms" && convert == true){
+					return dec2dms(number);
+				}
+				else{
+					stellen = 5;
+				}
 			}
 			else{
 				if(parseFloat(document.GUI.pixelsize.value) < 0.01){
@@ -32,21 +37,21 @@
 			  else{
 			    stellen = 0;
 			  }
-				number = Math.round( number * Math.pow(10, stellen) ) / Math.pow(10, stellen);
-				str_number = number+"";
-				str_split = str_number.split(".");
-				if(!str_split[1]) str_split[1] = "";
-				if(str_split[1].length < stellen){
-					nachkomma = str_split[1];
-					for(i=str_split[1].length+1; i <= stellen; i++){
-					 	nachkomma += "0";
-					}
-					str_split[1] = nachkomma;
-				}
-				if(stellen == 0){sep = "";}
-				else{sep = ".";	}
-				return str_split[0]+sep+str_split[1];
 			}
+			number = Math.round( number * Math.pow(10, stellen) ) / Math.pow(10, stellen);
+			str_number = number+"";
+			str_split = str_number.split(".");
+			if(!str_split[1]) str_split[1] = "";
+			if(str_split[1].length < stellen){
+				nachkomma = str_split[1];
+				for(i=str_split[1].length+1; i <= stellen; i++){
+				 	nachkomma += "0";
+				}
+				str_split[1] = nachkomma;
+			}
+			if(stellen == 0){sep = "";}
+			else{sep = ".";	}
+			return str_split[0]+sep+str_split[1];
 		}					
 	
 		function coords_input(){			

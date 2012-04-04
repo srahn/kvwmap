@@ -652,7 +652,7 @@ class ALB {
 	          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
 	          for($b = 0; $b < count($flst->Buchungen); $b++){
 	          	if($b > 0)$csv .= ' | ';
-	            $csv .= intval($flst->Buchungen[$b]['blatt']);
+	            $csv .= intval($flst->Buchungen[$b]['blatt']).'|';
 	          }
 	        }
 	        $csv .= ';';

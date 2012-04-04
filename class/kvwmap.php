@@ -318,20 +318,20 @@ class GUI extends GUI_core{
 		$spatial_processor = new spatial_processor($this->user->rolle, $this->database, $layerdb);
 		$single_geoms = $spatial_processor->split_multi_geometries($this->formvars['newpathwkt'], $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
 		
-		/*
-		 SELECT               
-  pg_attribute.attname
-FROM pg_index, pg_class, pg_attribute 
-WHERE 
-  pg_class.oid = 'laerm.strassen_original'::regclass AND
-  indrelid = pg_class.oid AND
-  pg_attribute.attrelid = pg_class.oid AND 
-  pg_attribute.attnum = any(pg_index.indkey)
-  AND indisprimary
-		 */
+		# Primärschlüssel weglassen
+		$sql = "SELECT column_name FROM information_schema.columns WHERE table_name = 'gasleitungen' AND table_schema = 'public' ";
+		$sql.= "AND column_name NOT IN (SELECT pg_attribute.attname FROM pg_index, pg_class, pg_attribute "; 
+		$sql.= "WHERE pg_class.oid = 'gasleitungen'::regclass AND	indrelid = pg_class.oid AND pg_attribute.attrelid = pg_class.oid AND "; 
+		$sql.= "pg_attribute.attnum = any(pg_index.indkey) AND indisprimary)";
+		$ret=$layerdb->execSQL($sql,4, 0);
+		if(!$ret[0]){
+			while ($rs=pg_fetch_row($ret[1])){
+				$attributes[] = $rs[0];
+			}
+		}
 		
 		for($i = 0; $i < count($single_geoms); $i++){
-			$sql = "INSERT INTO ".$this->formvars['layer_tablename']." SELECT * FROM ".$this->formvars['layer_tablename']." WHERE oid = ".$this->formvars['oid'];
+			$sql = "INSERT INTO ".$this->formvars['layer_tablename']." (".implode(',', $attributes).") SELECT ".implode(',', $attributes)." FROM ".$this->formvars['layer_tablename']." WHERE oid = ".$this->formvars['oid'];
 			$ret = $layerdb->execSQL($sql,4, 0);
 			$new_oid = pg_last_oid($ret[1]);
 			$sql = "UPDATE ".$this->formvars['layer_tablename']." SET ".$this->formvars['layer_columnname']." = '".$single_geoms[$i]."' WHERE oid = ".$new_oid;
@@ -341,9 +341,9 @@ WHERE
 		$ret = $layerdb->execSQL($sql,4, 0);
 		$this->loadMap('DataBase');					# Karte anzeigen
 		$currenttime=date('Y-m-d H:i:s',time());
-    	$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-    	$this->drawMap();
-    	$this->saveMap('');
+    $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
+    $this->drawMap();
+    $this->saveMap('');
 		$this->output(); 
 	}
 	

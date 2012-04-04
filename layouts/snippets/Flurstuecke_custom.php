@@ -1,6 +1,13 @@
 
 <script language="JavaScript" type="text/javascript">
 <!--
+
+function show_all(){
+	document.GUI.anzahl.value='10000000';
+	document.GUI.offset_<? echo $this->qlayerset[$i]['Layer_ID'] ?>.value = 0;
+	document.GUI.submit();
+}
+
 function send_selected_flurst(go, formnummer, wz, target){
 	document.GUI.go_backup.value=document.GUI.go.value;
   var semi = false;
@@ -89,7 +96,9 @@ function emzversteckt(k){
 	  <span style="font-size:80%;">
 	  Stand ALB vom: <?php echo $aktalb; ?><br>
 	  Stand ALK vom: <?php echo $aktalk; ?><br><br></span>
-	  <u><? echo $anzObj; ?> Flurst&uuml;ck<? if ($anzObj>1) { echo "e"; } ?> gefunden:</u>
+	  <? if ($anzObj>1) { ?>
+	  <u><? echo $anzObj ?> von <? echo $this->qlayerset[$i]['count']; ?> Flurst&uuml;cken:</u>
+	  <? } ?>
 	  <br>
 
   	<?
@@ -950,6 +959,12 @@ function emzversteckt(k){
       </table>
     </td>
   </tr>
+  
+  <? if($this->formvars['go'] != 'Flurstueck_Auswaehlen' AND $this->formvars['anzahl'] < 10000000 AND $this->formvars['anzahl'] < $this->qlayerset[$i]['count']){ ?>
+  <tr>
+  	<td align="center"><a href="javascript: show_all();">alle <? echo $this->qlayerset[$i]['count']; ?> Treffer anzeigen</a></td>
+  </tr>
+  <? } ?>
 
   <?
   } # Ende es liegen Flurstücke im Suchbereich

@@ -332,7 +332,7 @@ function set_changed_flag(flag){
 							else{
 								echo '<span style="font-size: '.$this->user->rolle->fontsize_gle.'px; color:#222222;">'.$this->qlayerset[$i]['attributes']['alias'][$j].'</span>';
 							}
-							if($this->qlayerset[$i]['attributes']['nullable'][$j] == '0'){
+							if($this->qlayerset[$i]['attributes']['nullable'][$j] == '0' AND $this->qlayerset[$i]['attributes']['privileg'][$j] != '0'){
 								echo '<span title="Eingabe erforderlich">*</span>';
 							}
 							if ($this->qlayerset[$i]['attributes']['tooltip'][$j]!='' AND $this->qlayerset[$i]['attributes']['form_element_type'][$j] != 'Time') {

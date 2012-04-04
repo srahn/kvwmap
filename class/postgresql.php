@@ -102,8 +102,14 @@ class pgdatabase extends pgdatabase_core {
       	$rs['y'] = dec2dms($rs['y']);
       }
       else{
-      	$rs['x'] = round($rs['x'], 2);
-      	$rs['y'] = round($rs['y'], 2);
+      	if($newSRID == 4326){
+      		$stellen = 5;
+      	}
+      	else{
+      		$stellen = 2;
+      	} 
+      	$rs['x'] = round($rs['x'], $stellen);
+      	$rs['y'] = round($rs['y'], $stellen);
       }
       $ret[1]=utf8_encode($rs['x'].' '.$rs['y']);
     }

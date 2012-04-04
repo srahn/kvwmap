@@ -620,6 +620,7 @@
 function mousemove(evt){
 	if(deactivated_foreign_vertex != 0){		// wenn es einen deaktivierten foreign vertex gibt, wird dieser jetzt wieder aktiviert
 		document.getElementById(deactivated_foreign_vertex).setAttribute("pointer-events", "auto");
+		deactivated_foreign_vertex = 0;
 	}
 	if(top.document.GUI.last_doing.value == "vertex_edit" && selected_vertex != undefined && selected_vertex != ""){
 		move_vertex(evt, selected_vertex, "image");
@@ -1103,10 +1104,10 @@ function mouseup(evt){
 			vertex_id_string = evt.target.getAttribute("id");
 			vertex_id = vertex_id_string.split("_");
 			if(vertex_id[1] == "new"){
-				evt.target.setAttribute("style", "opacity: 1;fill: #00DD00");
+				evt.target.setAttribute("style", "-moz-user-select: none;opacity: 1;fill: #00DD00");
 			}
 			else{
-				evt.target.setAttribute("style", "opacity: 1;fill-opacity: 0.1;stroke: #FF0000;stroke-width:2");
+				evt.target.setAttribute("style", "-moz-user-select: none;opacity: 1;fill-opacity: 0.1;stroke: #FF0000;stroke-width:2");
 			}
 		}
 	}
@@ -1116,10 +1117,10 @@ function mouseup(evt){
 			vertex_id_string = evt.target.getAttribute("id");
 			vertex_id = vertex_id_string.split("_");
 			if(vertex_id[1] == "new"){
-				evt.target.setAttribute("style", "fill: #FF0000;opacity: 0.01");
+				evt.target.setAttribute("style", "-moz-user-select: none;fill: #FF0000;opacity: 0.01");
 			}
 			else{
-				evt.target.setAttribute("style", "fill: #FF0000;opacity: 0.3");
+				evt.target.setAttribute("style", "-moz-user-select: none;fill: #FF0000;opacity: 0.3");
 			}
 		}
 	}
@@ -1152,6 +1153,7 @@ function mouseup(evt){
 			if(selected_vertex == vertex){
 				if(deactivated_foreign_vertex != 0){		// wenn es einen deaktivierten foreign vertex gibt, wird dieser jetzt wieder aktiviert
 					document.getElementById(deactivated_foreign_vertex).setAttribute("pointer-events", "auto");
+					deactivated_foreign_vertex = 0;
 				}
 				if(coordtype == "world"){
 					vertex_new_world_x = evt.clientX; 
@@ -1710,10 +1712,10 @@ function mouseup(evt){
 			vertex_id_string = evt.target.getAttribute("id");
 			vertex_id = vertex_id_string.split("_");
 			if(vertex_id[1] == "new"){
-				evt.target.setAttribute("style", "opacity: 1;fill: #00DD00");
+				evt.target.setAttribute("style", "-moz-user-select: none;opacity: 1;fill: #00DD00");
 			}
 			else{
-				evt.target.setAttribute("style", "opacity: 1;fill-opacity: 0.1;stroke: #FF0000;stroke-width:2");
+				evt.target.setAttribute("style", "-moz-user-select: none;opacity: 1;fill-opacity: 0.1;stroke: #FF0000;stroke-width:2");
 			}
 		}
 	}
@@ -1724,10 +1726,10 @@ function mouseup(evt){
 			vertex_id_string = evt.target.getAttribute("id");
 			vertex_id = vertex_id_string.split("_");
 			if(vertex_id[1] == "new"){
-				evt.target.setAttribute("style", "fill: #FF0000;opacity: 0.01");
+				evt.target.setAttribute("style", "-moz-user-select: none;fill: #FF0000;opacity: 0.01");
 			}
 			else{
-				evt.target.setAttribute("style", "fill: #FF0000;opacity: 0.3");
+				evt.target.setAttribute("style", "-moz-user-select: none;fill: #FF0000;opacity: 0.3");
 			}
 		}
 	}
@@ -1760,6 +1762,7 @@ function mouseup(evt){
 			if(selected_vertex == vertex){
 				if(deactivated_foreign_vertex != 0){		// wenn es einen deaktivierten foreign vertex gibt, wird dieser jetzt wieder aktiviert
 					document.getElementById(deactivated_foreign_vertex).setAttribute("pointer-events", "auto");
+					deactivated_foreign_vertex = 0;
 				}
 				if(coordtype == "world"){
 					vertex_new_world_x = evt.clientX; 
@@ -1983,7 +1986,7 @@ function mouseup(evt){
 	}
 
 	function end_vertex_move(evt){
-		if(selected_vertex == evt.target){
+		if(selected_vertex == evt.target){			
 			if(vertex_moved == true){
 				if(top.document.GUI.newpathwkt.value != ""){
 					vertex_id_string = selected_vertex.getAttribute("id");
@@ -2397,7 +2400,7 @@ $vertex_catch_functions = '
 		if(top.document.GUI.last_doing.value == "vertex_edit"){
 			if(last_selected_vertex != ""){
 				selected_vertex = last_selected_vertex;
-				position.target = selected_vertex; 
+				position.target = selected_vertex;  
 				move_vertex(position, last_selected_vertex, "world");
 				end_vertex_move(position);
 			}
@@ -2631,7 +2634,7 @@ $measurefunctions = '
 	  </g>
 	  <rect id="canvas" cursor="crosshair" onmousedown="mousedown(evt);" onmousemove="mousemove(evt);hide_tooltip();" onmouseup="mouseup(evt);" width="100%" height="100%" opacity="0" visibility="visible"/>
 		<g id="vertices" transform="translate(0,'.$res_y.') scale(1,-1)">
-			<circle id="kreis" cx="-500" cy="-500" r="7" opacity="0.3" onmouseover="activate_vertex(evt)" onmouseout="deactivate_vertex(evt)" onmousedown="select_vertex(evt)" onmousemove="move_vertex(evt)" onmouseup="end_vertex_move(evt)" />
+			<circle style="-moz-user-select: none;" id="kreis" cx="-500" cy="-500" r="7" opacity="0.3" onmouseover="activate_vertex(evt)" onmouseout="deactivate_vertex(evt)" onmousedown="select_vertex(evt)" onmousemove="move_vertex(evt)" onmouseup="end_vertex_move(evt)" />
 		</g>
 		<g id="foreignvertices" transform="translate(0,'.$res_y.') scale(1,-1)">
 			<circle id="kreis3" cx="-500" cy="-500" r="7" opacity="0.1" onmouseover="activate_foreign_vertex(evt)" onmouseout="deactivate_foreign_vertex(evt)" onmouseup="add_foreign_vertex(evt)" />

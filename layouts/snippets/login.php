@@ -20,11 +20,13 @@
 	}
 	$oldPassword = $_REQUEST['passwort'];
 	$newPassword = $_REQUEST['newPassword'];
+	#$newPassword2 = $_REQUEST['newPassword2'];
 	$msg = $_REQUEST['msg'];
 	$mobile = $_REQUEST['mobile'];
         $remote_addr = getenv('REMOTE_ADDR');
     
 	// Benutzername und Passwort werden überprüft
+	##if (($newPassword == '' OR ($newPassword != '' AND $newPassword2 != '')) AND $userDb->login_user($username, $passwort)) {
 	if ($userDb->login_user($username, $passwort)) {
 		$_SESSION['angemeldet'] = true;
 		$_SESSION['login_name'] = $username;
@@ -72,7 +74,7 @@
 								</tr>
 								<tr>
 									<td>Passwort: </td>
-									<td><input type="password" name="passwort" size="10"/></td>
+									<td><input type="password" value="<? echo $passwort; ?>" name="passwort" size="10"/></td>
 								</tr><?php
 					if (isset($newPassword) AND $newPassword!='') {
 						  ?><tr>
