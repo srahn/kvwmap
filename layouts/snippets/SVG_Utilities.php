@@ -1272,8 +1272,7 @@ function mouseup(evt){
 	
 				if(top.document.GUI.newpathwkt.value != ""){			// wenn ein WKT-String da ist, hier auch den Vertex loeschen
 					wktarray = get_array_from_wktstring(top.document.GUI.newpathwkt.value);
-					wktarray[parseInt(vertex_id[1])] = "";
-					wktarray[parseInt(vertex_id[1])+1] = "";
+					wktarray.splice(parseInt(vertex_id[1]), 2);
 					// wenn vertex nur noch einen Nachbarvertex hat, auch diesen und das "),(" loeschen
 					if(( wktarray[parseInt(vertex_id[1])-3] == "),(" || wktarray[parseInt(vertex_id[1])-3] == "MULTILINESTRING((" ) && ( wktarray[parseInt(vertex_id[1])+2] == "),(" || wktarray[parseInt(vertex_id[1])+2] == "))")){
 						if(wktarray[parseInt(vertex_id[1])-3] == "MULTILINESTRING(("){
@@ -1875,8 +1874,7 @@ function mouseup(evt){
 	
 				if(top.document.GUI.newpathwkt.value != ""){			// wenn ein WKT-String da ist, hier auch den Vertex loeschen
 					wktarray = get_array_from_wktstring(top.document.GUI.newpathwkt.value);
-					wktarray[parseInt(vertex_id[1])] = "";
-					wktarray[parseInt(vertex_id[1])+1] = "";
+					wktarray.splice(parseInt(vertex_id[1]), 2);
 					if(vertex_id[2] != ""){			// Anfangs und Endpunkt
 						wktarray[parseInt(vertex_id[2])] = wktarray[parseInt(vertex_id[1])+2];
 						wktarray[parseInt(vertex_id[2])+1] = wktarray[parseInt(vertex_id[1])+3];
