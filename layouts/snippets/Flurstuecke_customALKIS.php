@@ -515,7 +515,7 @@ function backto(go){
                 $Eigentuemerliste[$e]->Name_bearb[0] = substr($Eigentuemerliste[$e]->Name_bearb[0], 0, strlen($Eigentuemerliste[$e]->Name_bearb[0])-1);
               }
               if(false AND $this->Stelle->isFunctionAllowed('Adressaenderungen')) {
-                    $eigentuemer = new eigentuemer(NULL, NULL);
+                    $eigentuemer = new eigentuemer(NULL, NULL, $this->pgdatabase);
                     $adressaenderungen =  $eigentuemer->getAdressaenderungen($Eigentuemerliste[$e]->Name[0], $Eigentuemerliste[$e]->Name[1], $Eigentuemerliste[$e]->Name[2], $Eigentuemerliste[$e]->Name[3]);
                     $aendatum=substr($adressaenderungen['datum'],0,10);
               }
