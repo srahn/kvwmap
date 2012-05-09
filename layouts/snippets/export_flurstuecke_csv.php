@@ -26,40 +26,40 @@ function save_selection(){
 	if(document.GUI.name.value != ''){
 		var attributes = '';
 		if(document.GUI.flurstkennz.checked == true){attributes = attributes+'flurstkennz|'}
-		if(document.GUI.flurnr.checked == true){attributes = attributes+'flurnr|'}
-		if(document.GUI.entsteh.checked == true){attributes = attributes+'entsteh|'}
-		if(document.GUI.letzff.checked == true){attributes = attributes+'letzff|'}
-		if(document.GUI.status.checked == true){attributes = attributes+'status|'}
-		if(document.GUI.flaeche.checked == true){attributes = attributes+'flaeche|'}
-		if(document.GUI.karte.checked == true){attributes = attributes+'karte|'}
-		if(document.GUI.kreisid.checked == true){attributes = attributes+'kreisid|'}
-		if(document.GUI.kreisname.checked == true){attributes = attributes+'kreisname|'}
-		if(document.GUI.gemkgschl.checked == true){attributes = attributes+'gemkgschl|'}
-		if(document.GUI.gemkgname.checked == true){attributes = attributes+'gemkgname|'}
-		if(document.GUI.gemeinde.checked == true){attributes = attributes+'gemeinde|'}
-		if(document.GUI.gemeindename.checked == true){attributes = attributes+'gemeindename|'}
-		if(document.GUI.finanzamt.checked == true){attributes = attributes+'finanzamt|'}
-		if(document.GUI.finanzamtname.checked == true){attributes = attributes+'finanzamtname|'}
-		if(document.GUI.forstschluessel.checked == true){attributes = attributes+'forstschluessel|'}
-		if(document.GUI.forstname.checked == true){attributes = attributes+'forstname|'}
-		if(document.GUI.lagebezeichnung.checked == true){attributes = attributes+'lagebezeichnung|'}
+		if(document.GUI.flurnr != undefined && document.GUI.flurnr.checked == true){attributes = attributes+'flurnr|'}
+		if(document.GUI.entsteh != undefined && document.GUI.entsteh.checked == true){attributes = attributes+'entsteh|'}
+		if(document.GUI.letzff != undefined && document.GUI.letzff.checked == true){attributes = attributes+'letzff|'}
+		if(document.GUI.status != undefined && document.GUI.status.checked == true){attributes = attributes+'status|'}
+		if(document.GUI.flaeche != undefined && document.GUI.flaeche.checked == true){attributes = attributes+'flaeche|'}
+		if(document.GUI.karte != undefined && document.GUI.karte.checked == true){attributes = attributes+'karte|'}
+		if(document.GUI.kreisid != undefined && document.GUI.kreisid.checked == true){attributes = attributes+'kreisid|'}
+		if(document.GUI.kreisname != undefined && document.GUI.kreisname.checked == true){attributes = attributes+'kreisname|'}
+		if(document.GUI.gemkgschl != undefined && document.GUI.gemkgschl.checked == true){attributes = attributes+'gemkgschl|'}
+		if(document.GUI.gemkgname != undefined && document.GUI.gemkgname.checked == true){attributes = attributes+'gemkgname|'}
+		if(document.GUI.gemeinde != undefined && document.GUI.gemeinde.checked == true){attributes = attributes+'gemeinde|'}
+		if(document.GUI.gemeindename != undefined && document.GUI.gemeindename.checked == true){attributes = attributes+'gemeindename|'}
+		if(document.GUI.finanzamt != undefined && document.GUI.finanzamt.checked == true){attributes = attributes+'finanzamt|'}
+		if(document.GUI.finanzamtname != undefined && document.GUI.finanzamtname.checked == true){attributes = attributes+'finanzamtname|'}
+		if(document.GUI.forstschluessel != undefined && document.GUI.forstschluessel.checked == true){attributes = attributes+'forstschluessel|'}
+		if(document.GUI.forstname != undefined && document.GUI.forstname.checked == true){attributes = attributes+'forstname|'}
+		if(document.GUI.lagebezeichnung != undefined && document.GUI.lagebezeichnung.checked == true){attributes = attributes+'lagebezeichnung|'}
 		if(document.GUI.nutzung != undefined && document.GUI.nutzung.checked == true){attributes = attributes+'nutzung|'}
-		if(document.GUI.ausfstelle.checked == true){attributes = attributes+'ausfstelle|'}
-		if(document.GUI.verfahren.checked == true){attributes = attributes+'verfahren|'}
-		if(document.GUI.vorgaenger.checked == true){attributes = attributes+'vorgaenger|'}
-		if(document.GUI.blattnr.checked == true){attributes = attributes+'blattnr|'}
-		if(document.GUI.buchungsart.checked == true){attributes = attributes+'buchungsart|'}
-		if(document.GUI.bvnr.checked == true){attributes = attributes+'bvnr|'}
-		if(document.GUI.pruefzeichen.checked == true){attributes = attributes+'pruefzeichen|'}
+		if(document.GUI.ausfstelle != undefined && document.GUI.ausfstelle.checked == true){attributes = attributes+'ausfstelle|'}
+		if(document.GUI.verfahren != undefined && document.GUI.verfahren.checked == true){attributes = attributes+'verfahren|'}
+		if(document.GUI.vorgaenger != undefined && document.GUI.vorgaenger.checked == true){attributes = attributes+'vorgaenger|'}
+		if(document.GUI.blattnr != undefined && document.GUI.blattnr.checked == true){attributes = attributes+'blattnr|'}
+		if(document.GUI.buchungsart != undefined && document.GUI.buchungsart.checked == true){attributes = attributes+'buchungsart|'}
+		if(document.GUI.bvnr != undefined && document.GUI.bvnr.checked == true){attributes = attributes+'bvnr|'}
+		if(document.GUI.pruefzeichen != undefined && document.GUI.pruefzeichen.checked == true){attributes = attributes+'pruefzeichen|'}
 		if(document.GUI.eigentuemer != undefined && document.GUI.eigentuemer.checked == true){attributes = attributes+'eigentuemer|'}
-		if(document.GUI.freitext.checked == true){attributes = attributes+'freitext|'}
-		if(document.GUI.hinweis.checked == true){attributes = attributes+'hinweis|'}
-		if(document.GUI.baulasten.checked == true){attributes = attributes+'baulasten|'}
-		if(document.GUI.amtsgerichtname.checked == true){attributes = attributes+'amtsgerichtname|'}
-		if(document.GUI.amtsgerichtnr.checked == true){attributes = attributes+'amtsgerichtnr|'}
-		if(document.GUI.grundbuchbezirkname.checked == true){attributes = attributes+'grundbuchbezirkname|'}
-		if(document.GUI.grundbuchbezirkschl.checked == true){attributes = attributes+'grundbuchbezirkschl|'}
-		if(document.GUI.klassifizierung.checked == true){attributes = attributes+'klassifizierung|'}
+		if(document.GUI.freitext != undefined && document.GUI.freitext.checked == true){attributes = attributes+'freitext|'}
+		if(document.GUI.hinweis != undefined && document.GUI.hinweis.checked == true){attributes = attributes+'hinweis|'}
+		if(document.GUI.baulasten != undefined && document.GUI.baulasten.checked == true){attributes = attributes+'baulasten|'}
+		if(document.GUI.amtsgerichtname != undefined && document.GUI.amtsgerichtname.checked == true){attributes = attributes+'amtsgerichtname|'}
+		if(document.GUI.amtsgerichtnr != undefined && document.GUI.amtsgerichtnr.checked == true){attributes = attributes+'amtsgerichtnr|'}
+		if(document.GUI.grundbuchbezirkname != undefined && document.GUI.grundbuchbezirkname.checked == true){attributes = attributes+'grundbuchbezirkname|'}
+		if(document.GUI.grundbuchbezirkschl != undefined && document.GUI.grundbuchbezirkschl.checked == true){attributes = attributes+'grundbuchbezirkschl|'}
+		if(document.GUI.klassifizierung != undefined && document.GUI.klassifizierung.checked == true){attributes = attributes+'klassifizierung|'}
 		document.GUI.attributes.value = attributes;
 		document.GUI.go_plus.value = 'Auswahl_speichern';
 		document.GUI.submit();
