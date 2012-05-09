@@ -1965,11 +1965,12 @@ class eigentuemer {
  #
  ################################################################################
 
-  function eigentuemer($Grundbuch,$NamensNr) {
+  function eigentuemer($Grundbuch,$NamensNr, $database = NULL) {
     global $debug;
     $this->debug=$debug;
     $this->Grundbuch=$Grundbuch;
     $this->NamensNr=$NamensNr;
+    $this->database=$database;
     /*$NrTeil=explode('.',$NamensNr);
     $this->Nr=$NrTeil[0];
     if ($NrTeil[1]!='') {
@@ -2020,13 +2021,10 @@ class eigentuemer {
     }
     #echo $sql;
     $query=pg_query($sql);
-    if ($query==0){
-    	return 0;
-    }
-    else{
-      $rs=pg_fetch_array($query);
-      return $rs;
-    }
+  	$ret=$this->database->execSQL($sql, 4, 0);
+    if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
+    $rs=pg_fetch_array($ret[1]);
+    return $rs;
   }
 }
 
