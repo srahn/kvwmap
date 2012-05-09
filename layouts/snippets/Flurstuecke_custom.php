@@ -383,11 +383,13 @@ function emzversteckt(k){
 						  </tr>
 						  <tr align="right" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
 							<td>
+								<? if($this->Stelle->isFunctionAllowed('Namensuche')){ ?>
 								<a href="index.php?go=Namen_Auswaehlen&name1=<?php echo $this->formvars['name1'];
 								?>&name2=<?php echo $this->formvars['name2'];
 								?>&name3=<?php echo $this->formvars['name3'];
 								?>&name4=<?php echo $this->formvars['name4'];
 								?>"><span style="font-size:90%;">Namensuche&nbsp;</span></a>
+								<? } ?>
 							</td>
 						  </tr>
 						  <? if($flst->Status != 'H'){
@@ -843,8 +845,10 @@ function emzversteckt(k){
 			<table width="100%" cellspacing="0" cellpading="0" border="0">
 			  <tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
 				<td colspan="2">
-				<a href="index.php?go=ALB_Anzeige&FlurstKennz=<?php echo $flst->FlurstKennz; ?>&formnummer=30&wz=1" target="_blank">ALB-Auszug&nbsp;30&nbsp;mit&nbsp;WZ</a>
 				<?php
+				if ($this->Stelle->funktionen['ALB-Auszug 30']['erlaubt']) { ?>
+				<a href="index.php?go=ALB_Anzeige&FlurstKennz=<?php echo $flst->FlurstKennz; ?>&formnummer=30&wz=1" target="_blank">ALB-Auszug&nbsp;30&nbsp;mit&nbsp;WZ</a>
+				<?php }
 				if ($this->Stelle->funktionen['ALB-Auszug 35']['erlaubt']) { ?>
 				| <a href="index.php?go=ALB_Anzeige&FlurstKennz=<?php echo $flst->FlurstKennz; ?>&formnummer=35&wz=1" target="_blank">ALB-Auszug&nbsp;35&nbsp;mit&nbsp;WZ</a>
 				<?php }
@@ -857,10 +861,9 @@ function emzversteckt(k){
 				<td colspan="2">
 				<?php
 				$this->getFunktionen();
-				if ($this->Stelle->funktionen['ohneWasserzeichen']['erlaubt']) { ?>
+				if ($this->Stelle->funktionen['ALB-Auszug 30']['erlaubt'] AND $this->Stelle->funktionen['ohneWasserzeichen']['erlaubt']) { ?>
 				<a href="index.php?go=ALB_Anzeige&FlurstKennz=<?php echo $flst->FlurstKennz; ?>&formnummer=30&wz=0" target="_blank">ALB-Auszug&nbsp;30&nbsp;ohne&nbsp;WZ</a>
-				<?php } ?>
-				<?php
+				<?php }
 				if ($this->Stelle->funktionen['ALB-Auszug 35']['erlaubt'] AND $this->Stelle->funktionen['ohneWasserzeichen']['erlaubt']) { ?>
 				| <a href="index.php?go=ALB_Anzeige&FlurstKennz=<?php echo $flst->FlurstKennz; ?>&formnummer=35&wz=0" target="_blank">ALB-Auszug&nbsp;35&nbsp;ohne&nbsp;WZ</a>
 				<?php }
@@ -912,8 +915,10 @@ function emzversteckt(k){
 		</tr>
 		<tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
 		    <td colspan="2">
+		    	<?php
+		      if ($this->Stelle->funktionen['ALB-Auszug 30']['erlaubt']) { ?>
 		        <a href="javascript:send_selected_flurst('ALB_Anzeige', 30, 1, '_blank');">ALB-Auszug&nbsp;30&nbsp;mit&nbsp;WZ</a>
-		      <?php
+		      <?php }
 		      if ($this->Stelle->funktionen['ALB-Auszug 35']['erlaubt']) { ?>
 		        | <a href="javascript:send_selected_flurst('ALB_Anzeige', 35, 1, '_blank');">ALB-Auszug&nbsp;35&nbsp;mit&nbsp;WZ</a>
 		      <?php }
@@ -926,7 +931,7 @@ function emzversteckt(k){
 	      <td colspan="2">
 	        <?php
 	        $this->getFunktionen();
-	        if ($this->Stelle->funktionen['ohneWasserzeichen']['erlaubt']) { ?>
+	        if ($this->Stelle->funktionen['ALB-Auszug 30']['erlaubt'] AND $this->Stelle->funktionen['ohneWasserzeichen']['erlaubt']) { ?>
 		          <a href="javascript:send_selected_flurst('ALB_Anzeige', 30, 0, '_blank');">ALB-Auszug&nbsp;30&nbsp;ohne&nbsp;WZ</a>
 	        <?php } ?>
 	        <?php
