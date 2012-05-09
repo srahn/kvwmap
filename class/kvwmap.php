@@ -7018,12 +7018,11 @@ class GUI extends GUI_core{
     for($i = 0; $i < count($result); $i++){
       for($j = 0; $j < count($attributes['name']); $j++){
       	if($attributes['type'][$j] != 'geometry' AND $attributes['name'][$i] != 'lock'){
-	        $result[$i][$attributes['name'][$j]] = str_replace(chr(10), ": ", $result[$i][$attributes['name'][$j]]);
-	        $result[$i][$attributes['name'][$j]] = str_replace(chr(13), " :", $result[$i][$attributes['name'][$j]]);
+      		$csv .= '"';
 	        if(in_array($attributes['type'][$j], array('numeric', 'float4', 'float8'))){
 	        	$result[$i][$attributes['name'][$j]] = str_replace('.', ",", $result[$i][$attributes['name'][$j]]);	
 	        }
-	        $csv .= $result[$i][$attributes['name'][$j]].';';
+	        $csv .= $result[$i][$attributes['name'][$j]].'";';
       	}
       }
       $csv .= chr(10);
