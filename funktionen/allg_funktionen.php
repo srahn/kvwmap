@@ -4,6 +4,22 @@
  * nicht gefunden wurden, nicht verstanden wurden oder zu umfrangreich waren.
  */
 
+
+function tausenderTrenner($number){
+	$explosion = explode('.', $number);
+	$length = strlen($explosion[0]) - 3;
+	while($length > 0){
+		$new_number = substr($explosion[0], $length, 3).' '.$new_number;
+		$length = $length-3;
+	}
+	$new_number = substr($explosion[0], 0, $length+3).' '.$new_number;
+	$new_number = trim($new_number);
+	if($explosion[1] != ''){
+		$new_number .= '.'.$explosion[1];
+	}
+	return $new_number;
+}
+
 function transformCoordsSVG($path){
 	$path = str_replace('L ', '', $path);		# neuere Postgis-Versionen haben ein L mit drin
   $svgcoords = explode(' ',$path);

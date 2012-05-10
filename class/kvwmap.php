@@ -10126,7 +10126,8 @@ class GUI extends GUI_core{
         $attributname = $element[1];
         $tablename = $element[2];
         $oid = $element[3];
-        $type = $element[4];
+        $formtype = $element[4];
+        $datatype = $element[6];
         if($layer_id != $old_layer_id AND $tablename != ''){
           $layerdb = $mapdb->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
           #$filter = $mapdb->getFilter($layer_id, $this->Stelle->id);		# siehe unten
@@ -10134,7 +10135,7 @@ class GUI extends GUI_core{
         }
         if(($this->formvars['go'] == 'Dokument_Loeschen' OR $this->formvars['changed_'.$oid] == 1 OR $this->formvars['embedded']) AND $attributname != 'oid' AND $tablename != ''){
           # 2008-03-26 pk
-          switch($type) {
+          switch($formtype) {
             case 'Dokument' : {
               # Prüfen ob ein neues Bild angegebeben wurde
               if($_FILES[$form_fields[$i]]['name']){
@@ -10175,7 +10176,10 @@ class GUI extends GUI_core{
               # nichts machen
             } break;
             default : {
-              if($tablename AND $type != 'Text_not_saveable' AND $type != 'Auswahlfeld_not_saveable' AND $type != 'SubFormPK' AND $type != 'SubFormFK' AND $type != 'SubFormEmbeddedPK' AND $attributname != 'the_geom'){
+              if($tablename AND $formtype != 'Text_not_saveable' AND $formtype != 'Auswahlfeld_not_saveable' AND $formtype != 'SubFormPK' AND $formtype != 'SubFormFK' AND $formtype != 'SubFormEmbeddedPK' AND $attributname != 'the_geom'){
+              	if(in_array($datatype, array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))){
+              		$this->formvars[$form_fields[$i]] = str_replace(' ', '', $this->formvars[$form_fields[$i]]);		# bei Zahlen das Leerzeichen (Tausendertrenner) entfernen
+              	}
                 if($this->formvars[$form_fields[$i]] == ''){
                   $sql = "UPDATE ".$tablename." SET ".$attributname." = NULL WHERE oid = '".$oid."'";
                 }

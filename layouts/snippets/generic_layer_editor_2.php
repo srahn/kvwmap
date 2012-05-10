@@ -16,23 +16,19 @@ function checknumbers(input, type, length, decimal_length){
 	if(type == 'numeric' || type == 'float4' || type == 'float8'){
 		var val = input.value.replace(/[a-zA-Z]/g, '');
 		val = val.replace(/,/g, '.');
-		var len = input.value.length;
-		if(length != ''){
-			if(val.search(/\../) != -1){
-				len = len - 1;
-			}
-			if(len > parseInt(length)){
-				alert('Für dieses Feld sind maximal '+length+' Stellen erlaubt.');
-				val = val.substring(0, length);
-			}
+		parts = val.split('.');
+		ohne_leerz = parts[0].replace(/ /g, '').length;
+		mit_leerz = parts[0].length;
+		length = parseInt(length) - parseInt(decimal_length);
+		if(length != '' &&  ohne_leerz > length){
+			alert('Für dieses Feld sind maximal '+length+' Vorkommastellen erlaubt.');
+			parts[0] = parts[0].substring(0, length - ohne_leerz + mit_leerz);
 		}
-		if(decimal_length != '' && val.search(/\./) != -1){
-			parts = val.split('.');
-			if(parts[1].length > parseInt(decimal_length)){
-				alert('Für dieses Feld sind maximal '+decimal_length+' Nachkommastellen erlaubt.');
-				val = parts[0]+'.'+parts[1].substring(0, decimal_length); 
-			}
+		if(decimal_length != '' && parts[1].length > parseInt(decimal_length)){
+			alert('Für dieses Feld sind maximal '+decimal_length+' Nachkommastellen erlaubt.');
+			parts[1] = parts[1].substring(0, decimal_length);
 		}
+		val = parts[0]+'.'+parts[1].substring(0, decimal_length);
 		if(input.value != val){
   		input.value = val;
   	}
@@ -659,10 +655,6 @@ function set_changed_flag(flag){
 
 									case 'Fläche': {
 										echo '<input onchange="set_changed_flag(document.GUI.changed_'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].')" id="custom_area" onkeyup="checknumbers(this, \''.$this->qlayerset[$i]['attributes']['type'][$j].'\', \''.$this->qlayerset[$i]['attributes']['length'][$j].'\', \''.$this->qlayerset[$i]['attributes']['decimal_length'][$j].'\');" title="'.$this->qlayerset[$i]['attributes']['alias'][$j].'" ';
-										if($this->qlayerset[$i]['attributes']['length'][$j]){
-											if($this->qlayerset[$i]['attributes']['decimal_length'][$j])$this->qlayerset[$i]['attributes']['length'][$j]++;
-											echo ' maxlength="'.$this->qlayerset[$i]['attributes']['length'][$j].'"';
-										}
 										if($this->qlayerset[$i]['attributes']['privileg'][$j] == '0' OR $lock[$k]){
 											echo ' readonly style="font-size: '.$this->user->rolle->fontsize_gle.'px;background-color:#e8e3da;"';
 										}
@@ -673,11 +665,10 @@ function set_changed_flag(flag){
 									}break;
 
 									default : {
-										echo '<input onchange="set_changed_flag(document.GUI.changed_'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].')" onkeyup="checknumbers(this, \''.$this->qlayerset[$i]['attributes']['type'][$j].'\', \''.$this->qlayerset[$i]['attributes']['length'][$j].'\', \''.$this->qlayerset[$i]['attributes']['decimal_length'][$j].'\');" title="'.$this->qlayerset[$i]['attributes']['alias'][$j].'" ';
-										if($this->qlayerset[$i]['attributes']['length'][$j]){
-											if($this->qlayerset[$i]['attributes']['decimal_length'][$j])$this->qlayerset[$i]['attributes']['length'][$j]++;
-											echo ' maxlength="'.$this->qlayerset[$i]['attributes']['length'][$j].'"';
+										if(in_array($this->qlayerset[$i]['attributes']['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))){		# bei Zahlen Tausendertrennzeichen einfügen 
+											$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]] = tausenderTrenner($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]);
 										}
+										echo '<input onchange="set_changed_flag(document.GUI.changed_'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].')" onkeyup="checknumbers(this, \''.$this->qlayerset[$i]['attributes']['type'][$j].'\', \''.$this->qlayerset[$i]['attributes']['length'][$j].'\', \''.$this->qlayerset[$i]['attributes']['decimal_length'][$j].'\');" title="'.$this->qlayerset[$i]['attributes']['alias'][$j].'" ';
 										if($this->qlayerset[$i]['attributes']['privileg'][$j] == '0' OR $lock[$k]){
 											echo ' readonly style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;"';
 										}
@@ -686,6 +677,9 @@ function set_changed_flag(flag){
 										}
 										if($this->qlayerset[$i]['attributes']['name'][$j] == 'lock'){
 											echo ' type="hidden"';
+										}
+										if($this->qlayerset[$i]['attributes']['length'][$j] AND !in_array($this->qlayerset[$i]['attributes']['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))){
+											echo ' maxlength="'.$this->qlayerset[$i]['attributes']['length'][$j].'"';
 										}
 										echo ' size="61" type="text" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].';'.$this->qlayerset[$i]['attributes']['type'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">';
 									}
