@@ -104,7 +104,10 @@ function buildwktlinefromsvgpath(svgpath){
   <tr>
   	<td>&nbsp;</td>
   	<td>&nbsp;<b>Maﬂstab&nbsp;1:&nbsp;</b><input type="text" id="scale" name="nScale" size="5" value="<?php echo round($this->map->scale); ?>"></td>
-  	<td align="right"><input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang</td>
+  	<td align="right">
+  		<input type="checkbox" name="always_draw" value="1" <?if($always_draw == 1 OR $always_draw == 'true')echo 'checked'; ?>>&nbsp;weiterzeichnen&nbsp;&nbsp;
+  		<input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang
+  	</td>
   </tr>
 </table>
 <INPUT TYPE="HIDDEN" NAME="zoom" VALUE="">

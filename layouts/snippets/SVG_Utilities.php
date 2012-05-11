@@ -18,12 +18,11 @@
 	$dy       = $this->map->extent->maxy-$this->map->extent->miny;
 	$pixelsize    = ($dx/$res_x+$dy/$res_y)/2;
 	
-	if($this->geomload){		# Geometrie wird das erste Mal geladen, deshalb nicht in den Weiterzeichnenmodus gehen
-		$always_draw = 'false';
-	}
-	else{
-		$always_draw = ALWAYS_DRAW;
-	}
+	if($this->user->rolle->always_draw == '')$this->user->rolle->always_draw = ALWAYS_DRAW; 
+	$always_draw = $this->user->rolle->always_draw;
+	
+	if($this->geomload)$geomload = 'true';
+	else $geomload = 'false';
 
 	#
 	# Positionsanzeigetext ausserhalb der Anzeigeflaeche bei Start
@@ -108,7 +107,6 @@
 	var must_redraw = false;
 	var mobile = '.$_SESSION['mobile'].';
 	var gps_follow_cooldown = 0;
-	var always_draw = '.$always_draw.';
 	var selected_vertex;
 	var last_selected_vertex;
 	var vertex_old_world_x = "";
@@ -120,6 +118,7 @@
 	var mouse_coords_type = "image";
 	var measuring  = false;
 	var deactivated_foreign_vertex = 0;
+	var geomload = '.$geomload.';		// Geometrie wird das erste Mal geladen, diese Variable verhindert den Weiterzeichnenmodus
 	';
 
 	$polygonANDpoint = '
@@ -423,7 +422,7 @@
 			update_gps_position();
 		}
 		if(polygonfunctions == true){
-			if(always_draw == true){
+			if(top.document.GUI.always_draw.checked && !geomload){
 				top.document.GUI.last_button.value = "pgon0";
 				if(top.document.GUI.secondpoly.value == "true"){
 					top.document.GUI.last_doing.value = "draw_second_polygon";
@@ -446,7 +445,7 @@
 			}
 		}
 		if(linefunctions == true){
-			if(always_draw == true){
+			if(top.document.GUI.always_draw.checked && !geomload){
 				top.document.GUI.last_button.value = "line0";
 				if(top.document.GUI.secondline.value == "true"){
 					top.document.GUI.last_doing.value = "draw_second_line";

@@ -158,7 +158,10 @@ function update_form(art){
   <tr>
   	<td>&nbsp;</td>
   	<td>&nbsp;</td>
-  	<td align="right"><input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang</td>
+  	<td align="right">
+  		<input type="checkbox" name="always_draw" value="1" <?if($always_draw == 1 OR $always_draw == 'true')echo 'checked'; ?>>&nbsp;weiterzeichnen&nbsp;&nbsp;
+  		<input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang
+  	</td>
   </tr>
 </table>
 <INPUT TYPE="HIDDEN" NAME="oid" VALUE="">

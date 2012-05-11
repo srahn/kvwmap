@@ -594,6 +594,7 @@ CREATE TABLE rolle (
   `buttons` VARCHAR( 255 ) NULL DEFAULT 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,query,touchquery,queryradius,polyquery,measure',
   `scrollposition` INT( 11 ) NOT NULL DEFAULT '0',
   `result_color` INT( 11 ) NULL DEFAULT '1',
+  `always_draw` BOOLEAN NULL,
   PRIMARY KEY  (user_id,stelle_id)
 );
 

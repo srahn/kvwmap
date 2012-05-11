@@ -173,6 +173,10 @@ else {
   <tr> 
     <td align="left"> <input type="reset" name="go_reset" value="Zurücksetzen">&nbsp;<input type="button" name="senden" value="Senden" onclick="save();"> </td>
   </tr>
+  <tr>
+  	<td></td>
+  	<td align="right"><input type="checkbox" name="always_draw" value="1" <?if($always_draw == 1 OR $always_draw == 'true')echo 'checked'; ?>>&nbsp;weiterzeichnen&nbsp;&nbsp;</td>
+  </tr>
 </table>
 		
 		<INPUT TYPE="HIDDEN" NAME="columnname" VALUE="<?php echo $this->formvars['columnname']; ?>">

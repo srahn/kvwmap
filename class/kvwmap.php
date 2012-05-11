@@ -1744,6 +1744,7 @@ class GUI extends GUI_core{
     $oldscale=round($this->map->scale);
     if ($this->formvars['CMD']!='') {
       $this->navMap($this->formvars['CMD']);
+      $this->user->rolle->saveDrawmode($this->formvars['always_draw']);
     }
     elseif($oldscale!=$this->formvars['nScale'] AND $this->formvars['nScale'] != '') {
       $this->scaleMap($this->formvars['nScale']);
@@ -1836,6 +1837,7 @@ class GUI extends GUI_core{
     $oldscale=round($this->map->scale);
     if ($this->formvars['CMD']!='') {
       $this->navMap($this->formvars['CMD']);
+      $this->user->rolle->saveDrawmode($this->formvars['always_draw']);
     }
     elseif($oldscale!=$this->formvars['nScale'] AND $this->formvars['nScale'] != '') {
       $this->scaleMap($this->formvars['nScale']);
@@ -2452,6 +2454,7 @@ class GUI extends GUI_core{
     $this->loadMap('DataBase');
     if ($this->formvars['CMD']!='') {
       $this->navMap($this->formvars['CMD']);
+      $this->user->rolle->saveDrawmode($this->formvars['always_draw']);
     }
     $this->queryable_postgis_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
 
@@ -2620,6 +2623,7 @@ class GUI extends GUI_core{
     }
     if ($this->formvars['CMD']!='') {
       $this->navMap($this->formvars['CMD']);
+      $this->user->rolle->saveDrawmode($this->formvars['always_draw']);
     }
     $this->saveMap('');
     $currenttime=date('Y-m-d H:i:s',time());
@@ -5213,6 +5217,7 @@ class GUI extends GUI_core{
     if ($this->formvars['CMD']!='') {
       # Nur Navigieren
       $this->navMap($this->formvars['CMD']);
+      $this->user->rolle->saveDrawmode($this->formvars['always_draw']);
     }
     $this->saveMap('');
     $currenttime=date('Y-m-d H:i:s',time());
@@ -6418,6 +6423,7 @@ class GUI extends GUI_core{
           $oldscale=round($this->map->scale);
           if($this->formvars['CMD']!='') {
             $this->navMap($this->formvars['CMD']);
+            $this->user->rolle->saveDrawmode($this->formvars['always_draw']);
           }
 			    elseif($oldscale!=$this->formvars['nScale'] AND $this->formvars['nScale'] != '') {
 			      $this->scaleMap($this->formvars['nScale']);
@@ -9060,10 +9066,8 @@ class GUI extends GUI_core{
 	  }
         
     if ($this->formvars['CMD']!='') {
-      # Navigieren
       $this->navMap($this->formvars['CMD']);
-      $this->user->rolle->saveSettings($this->map->extent);
-      $this->user->rolle->readSettings();
+      $this->user->rolle->saveDrawmode($this->formvars['always_draw']);
     }
     elseif($nachweis != '') {
       # Zoom zum Polygon des Dokumentes
@@ -9282,6 +9286,7 @@ class GUI extends GUI_core{
     if ($this->formvars['CMD']!='') {
       # Nur Navigieren
       $this->navMap($this->formvars['CMD']);
+      $this->user->rolle->saveDrawmode($this->formvars['always_draw']);
     }
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
     # Spaltenname und from-where abfragen

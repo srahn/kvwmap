@@ -102,7 +102,7 @@ else {
           <td>Flur:&nbsp; 
             <input name="Flur" type="text" value="<?php echo $this->formvars['Flur']; ?>" size="3" maxlength="3">
           </td>
-          <td>Stammnr:&nbsp; 
+          <td>Antragsnr:&nbsp; 
             <input name="stammnr" type="text" value="<?php echo $this->formvars['stammnr']; ?>" size="<?php echo STAMMNUMMERMAXLENGTH; ?>" maxlength="<?php echo STAMMNUMMERMAXLENGTH; ?>">
           </td>
         </tr>
@@ -120,8 +120,8 @@ else {
       </table></td>
   </tr>
   <tr> 
-    <td rowspan="17">&nbsp; </td>
-    <td rowspan="17"> 
+    <td rowspan="18">&nbsp; </td>
+    <td rowspan="18"> 
       <?php
  				include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php')
 			?>
@@ -225,8 +225,10 @@ else {
   <tr> 
     <td colspan="2"><hr align="center" noshade></td>
   <tr> 
-    <td colspan="2"><?php if ($this->formvars['stammnr']!='') { ?><a href="index.php?go=Nachweisanzeige">&lt;&lt;&nbsp;zur&uuml;ck&nbsp;zum&nbsp;Rechercheergebnis</a><?php } ?></td>
-    <td colspan="2"><table border="0">
+    <td><?php if ($this->formvars['stammnr']!='') { ?><a href="index.php?go=Nachweisanzeige">&lt;&lt;&nbsp;zur&uuml;ck&nbsp;zum&nbsp;Rechercheergebnis</a><?php } ?></td>
+    <td align="right"><input type="checkbox" name="always_draw" value="1" <?if($always_draw == 1 OR $always_draw == 'true')echo 'checked'; ?>>&nbsp;weiterzeichnen&nbsp;&nbsp;</td>
+    <td colspan="2">
+    	<table border="0">
         <tr> 
           <td><input type="reset" name="go_plus2" value="Zurücksetzen"></td>
           <td><input type="button" name="senden" value="Senden" onclick="save();"></td>
