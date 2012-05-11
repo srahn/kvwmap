@@ -19,7 +19,7 @@ function show_tooltip(data,x_pos,y_pos)
 	y_pos = y_pos + 20; 	// 	Abstand zw. cursor und tooltip
 	document.getElementById("tooltip_group").setAttribute("transform","translate(" + x_pos.toString() + " " + y_pos.toString() + ")") 
 	document.getElementById("tooltip_data").firstChild.data = data;
-	setTimeout("document.getElementById(\'tooltip_group\').setAttribute(\'visibility\',\'visible\')",750);
+	setTimeout("document.getElementById(\'tooltip_group\').setAttribute(\'visibility\',\'visible\')",250);
 	get_bbox();
 } 
 
@@ -30,7 +30,7 @@ function hide_tooltip()
 		tooltip_group.setAttribute("visibility","hidden");
 		tooltip_group.setAttribute("opacity","0");
 	}
-	setTimeout("document.getElementById(\'tooltip_group\').setAttribute(\'opacity\',\'0.9\')",755);
+	setTimeout("document.getElementById(\'tooltip_group\').setAttribute(\'opacity\',\'0.9\')",255);
 } 
 '
 ?>

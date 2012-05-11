@@ -828,7 +828,7 @@ function polygonarea(evt){
 		hidetooltip(evt);
 		area = parea*parseFloat(top.document.GUI.pixelsize.value)*parseFloat(top.document.GUI.pixelsize.value);			
 		area = top.format_number(area, false);
-		showtooltip("Fl"+unescape("%E4")+"cheninhalt: "+area+" m"+unescape("%B2")+" ~"+unescape("%A0"));
+		show_tooltip("Fl"+unescape("%E4")+"cheninhalt: "+area+" m"+unescape("%B2")+" "+unescape("%A0"),  evt.clientX, evt.clientY);
 		return;
 	}
 }
