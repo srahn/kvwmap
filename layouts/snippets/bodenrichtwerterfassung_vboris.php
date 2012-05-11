@@ -2,6 +2,10 @@
 <script language="JavaScript">
 <!--
 
+function toggle_vertices(){	
+	document.getElementById("vertices").SVGtoggle_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+}
+
 function send(){
 	if(document.GUI.bodenrichtwert.value == ''){alert('Bitte geben Sie einen Bodenrichtwert an.');exit();}
 	if(document.GUI.stichtag.value == ''){alert('Bitte geben Sie einen Stichtag an.');exit();}
@@ -98,7 +102,7 @@ function update_require_attribute(attributes, layer_id, value){
 				</tr>
 				<tr>
 					<td valign="top">
-						<table border="0" cellpadding="0" cellspacing="0">
+						<table border="0" cellpadding="0" cellspacing="0" width="100%">
 							<tr>
 								<td><img src="<? echo GRAPHICSPATH; ?>leer.gif" height="5"></td>
 							</tr>
@@ -333,6 +337,7 @@ function update_require_attribute(attributes, layer_id, value){
 									  </tr>
 						  		</table>
 								</td>
+								<td width="100%" align="right" valign="top"><input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang</td>
 							</tr>
 						</table>
 					</td>
@@ -456,7 +461,9 @@ function update_require_attribute(attributes, layer_id, value){
 						</table>
 					</td>
 				</tr>
-				
+				<tr>
+					<td>&nbsp;</td>
+				</tr>
 			  <tr>
 			  	<td colspan="3">Geometrie übernehmen von:<br>
 			  		<select name="layer_id" onchange="document.GUI.submit();">
@@ -472,7 +479,7 @@ function update_require_attribute(attributes, layer_id, value){
 			  	</td>
 			  </tr>
 			  <tr> 
-			    <td colspan="3" align="left">
+			    <td height="40" colspan="3" align="left">
 			    	<table border="0">
 			        <tr> 
 			          <td><input type="reset" name="reset" value="Zurücksetzen"></td>

@@ -2,6 +2,10 @@
 <script language="JavaScript">
 <!--
 
+function toggle_vertices(){	
+	document.getElementById("vertices").SVGtoggle_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+}
+
 function send(){
 	if(document.GUI.newpathwkt.value == ''){
 		if(document.GUI.newpath.value == ''){
@@ -84,8 +88,8 @@ function update_form(art){
       </div></td>
   </tr>
   <tr>
-    <td rowspan="11">&nbsp;</td>
-    <td colspan="2" rowspan="10">
+    <td rowspan="9">&nbsp;</td>
+    <td colspan="2" rowspan="9">
       <?php
 				include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php')
 			?>
@@ -148,10 +152,13 @@ function update_form(art){
   		</select>
   	</td>
   </tr>
-</table>
-<table width="100%" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr>
-    <td width="100%" align="center"> <input type="button" name="senden" value="Senden" onclick="send();"> </td>
+    <td width="100%" height="50" align="center" valign="bottom"><input type="button" name="senden" value="Senden" onclick="send();"></td>
+  </tr>
+  <tr>
+  	<td>&nbsp;</td>
+  	<td>&nbsp;</td>
+  	<td align="right"><input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang</td>
   </tr>
 </table>
 <INPUT TYPE="HIDDEN" NAME="oid" VALUE="">
@@ -159,10 +166,6 @@ function update_form(art){
 <INPUT TYPE="HIDDEN" NAME="areaunit" VALUE="hektar">
 <INPUT TYPE="HIDDEN" NAME="columnname" VALUE="<?php echo $this->formvars['columnname']; ?>">
 <INPUT TYPE="HIDDEN" NAME="fromwhere" VALUE="<? echo $this->formvars['fromwhere']; ?>">
-<INPUT TYPE="HIDDEN" NAME="minx" VALUE="<?php echo $this->map->extent->minx; ?>">
-<INPUT TYPE="HIDDEN" NAME="miny" VALUE="<?php echo $this->map->extent->miny; ?>">
-<INPUT TYPE="HIDDEN" NAME="maxx" VALUE="<?php echo $this->map->extent->maxx; ?>">
-<INPUT TYPE="HIDDEN" NAME="maxy" VALUE="<?php echo $this->map->extent->maxy; ?>">
 <INPUT TYPE="HIDDEN" NAME="scale" VALUE="<?php echo $scale; ?>">
 <INPUT TYPE="HIDDEN" NAME="go" VALUE="jagdkatastereditor" >
 <INPUT TYPE="HIDDEN" NAME="go_plus" VALUE="" >
