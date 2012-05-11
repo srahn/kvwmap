@@ -403,6 +403,7 @@
 	  		polygonarea();
 	  	}
 			if(linefunctions == true){
+				linelength();
 				if(paths[1].search(/MULTI.+/) != -1){
 	  			top.document.GUI.split.style.visibility = "visible";
 				}
@@ -479,6 +480,7 @@
 		}
 		if(linefunctions == true){
 			redrawfirstline();
+			linelength();
 		}
 		redrawpoint();
 	}
@@ -833,6 +835,7 @@ function mouseup(evt){
 	  top.document.GUI.newpath.value = path;
 	  if(pathy.length > 1){
 	  	top.document.GUI.firstline.value = true;
+	  	linelength();
 	  }
 	}
 
@@ -965,6 +968,7 @@ function mouseup(evt){
 		top.document.GUI.pathwkt.value = "";
 		top.document.GUI.newpathwkt.value = "";
 		top.document.GUI.result.value = "";
+		top.document.GUI.linelength.value = "";
 		path = "";
 		top.document.GUI.firstline.value = false;
 		top.document.GUI.secondline.value = false;
@@ -1319,6 +1323,7 @@ function mouseup(evt){
 				redrawsecondline();
 				selected_vertex = "";
 				last_selected_vertex = "";
+				linelength();
 			}
 		}
 	}
@@ -1402,6 +1407,7 @@ function mouseup(evt){
 				remove_vertices();													// alle entfernen
 				pixel_path = world2pixelsvg(top.document.GUI.newpath.value);
 				add_vertices(pixel_path);										// und wieder hinzufuegen
+				linelength();
 			}
 			else{
 				vertex_id_string = evt.target.getAttribute("id");
@@ -1505,6 +1511,20 @@ function mouseup(evt){
 		pixel_path = world2pixelsvg(top.document.GUI.newpath.value);
 		add_vertices(pixel_path);										// und wieder hinzufuegen
 		redrawfirstline();
+	}
+	
+	function linelength(){
+	  if(top.document.GUI.newpathwkt.value != ""){
+	  	top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&geotype=line&path1="+top.document.GUI.newpathwkt.value+"&operation=length&layer_id="+top.document.GUI.layer_id.value, new Array(top.document.GUI.linelength), "");
+	  }
+	  else{
+	  	if(top.document.GUI.newpath.value != ""){
+	  		top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&geotype=line&path2="+top.document.GUI.newpath.value+"&operation=length&layer_id="+top.document.GUI.layer_id.value, new Array(top.document.GUI.linelength), "");
+	  	}
+	  	else{
+	  		top.document.GUI.linelength.value = "0.0";
+	  	}
+	  }
 	}
 
 	';

@@ -110,6 +110,18 @@ class spatial_processor {
     return $rs[0].'^'.$rs[0];
   }
   
+	function length($geom){
+  	$sql = "SELECT round(Length(GeomFromText('".$geom."'))::numeric, 2)";
+  	$ret = $this->pgdatabase->execSQL($sql,4, 0);
+    if ($ret[0]) {
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
+    }
+    else {
+    	$rs = pg_fetch_array($ret[1]);
+    }
+    return $rs[0];
+  }
+  
   function process_query($formvars){
 		if($formvars['path2'] != ''){
 			if($formvars['geotype'] == 'line'){
@@ -225,6 +237,15 @@ class spatial_processor {
 				}
 			}break;
 			
+			case 'length':{
+				if($polywkt1 != ''){
+					$result = $this->length($polywkt1);
+				}
+				else{
+					$result = $this->length($polywkt2);
+				}
+			}break;
+			
 			case 'add_geometry':{
 				$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['layer_id'], $formvars['fromwhere'], $formvars['columnname']);
 				if($querygeometryWKT == ''){
@@ -265,7 +286,7 @@ class spatial_processor {
 			}break;
 			
 		}
-		if($formvars['resulttype'] != 'wkt' AND $formvars['operation'] != 'area'){
+		if($formvars['resulttype'] != 'wkt' AND $formvars['operation'] != 'area' AND $formvars['operation'] != 'length'){
 			$result = $this->transformCoordsSVG($result);
 		}
 		echo $result;

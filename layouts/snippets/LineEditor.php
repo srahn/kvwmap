@@ -65,8 +65,8 @@ function buildwktlinefromsvgpath(svgpath){
     <td align="center" colspan="3"><strong><font size="+1"><a name="geoedit_anchor"><?php echo $this->titel; ?></a></font></strong></td>
   </tr>
   <tr> 
-    <td rowspan="5">&nbsp;</td>
-    <td colspan="2" rowspan="5"> 
+    <td rowspan="6">&nbsp;</td>
+    <td colspan="2" rowspan="6"> 
       <?php
 				include(LAYOUTPATH.'snippets/SVG_line_query.php')
 			?>
@@ -88,6 +88,9 @@ function buildwktlinefromsvgpath(svgpath){
   			?>
   		</select> 
   	</td-->
+  </tr>
+  <tr>  
+  	<td width="160">Länge:<br><input size="12" type="text" name="linelength" value="<?echo $this->formvars['linelength']?>">&nbsp;m</td>
   </tr>
   <tr> 
     <td><hr align="center" noshade></td>
