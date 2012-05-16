@@ -1739,7 +1739,7 @@ class GUI extends GUI_core{
     $this->loadMap('DataBase');
     $layerdb = $this->mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
     $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
-    $this->queryable_postgis_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
+    $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
     $lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
     $oldscale=round($this->map->scale);
     if ($this->formvars['CMD']!='') {
@@ -6428,8 +6428,8 @@ class GUI extends GUI_core{
 			    elseif($oldscale!=$this->formvars['nScale'] AND $this->formvars['nScale'] != '') {
 			      $this->scaleMap($this->formvars['nScale']);
 			    }
-          if($this->geomtype == 'POLYGON' OR $this->geomtype == 'MULTIPOLYGON' OR $this->geomtype == 'GEOMETRY'){
-            #-----Polygoneditor---#
+          if($this->geomtype == 'POLYGON' OR $this->geomtype == 'MULTIPOLYGON' OR $this->geomtype == 'GEOMETRY' OR $this->geomtype == 'MULTILINESTRING'){
+            #-----Polygoneditor und Linieneditor---#
             # aktuellen Kartenausschnitt laden
             $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
             $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
@@ -6446,7 +6446,7 @@ class GUI extends GUI_core{
             if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
               $this->formvars['fromwhere'] .= ' where (1=1)';
             }
-            #-----Polygoneditor---#
+            #-----Polygoneditor und Linieneditor---#
           }
           elseif($this->geomtype == 'POINT'){
             #-----Pointeditor-----#
@@ -6454,13 +6454,6 @@ class GUI extends GUI_core{
             $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
             $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
             #-----Pointeditor-----#
-          }
-          elseif($this->geomtype == 'MULTILINESTRING'){
-            #-----Linieneditor----#
-            # aktuellen Kartenausschnitt laden
-            $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-            $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
-            #-----Linieneditor----#
           }
           $this->saveMap('');
           if($this->formvars['CMD'] != 'previous' AND $this->formvars['CMD'] != 'next'){
