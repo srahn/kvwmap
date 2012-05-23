@@ -692,13 +692,17 @@ CREATE TABLE n_nachweise (
     link_datei character varying,
     art character(3),
     format character(2),
-    stammnr character varying(8)
+    stammnr character varying(15)
 )
 WITH OIDS;
 SELECT AddGeometryColumn('public', 'n_nachweise','the_geom',2398,'POLYGON', 2);
 CREATE INDEX n_nachweise_the_geom_gist ON n_nachweise USING GIST (the_geom GIST_GEOMETRY_OPS);
 ALTER TABLE n_nachweise DROP CONSTRAINT enforce_geotype_the_geom;
 ALTER TABLE n_nachweise ADD CONSTRAINT enforce_geotype_the_geom CHECK (geometrytype(the_geom) = 'POLYGON'::text OR geometrytype(the_geom) = 'MULTIPOLYGON'::text OR the_geom IS NULL);
+
+ALTER TABLE public.n_nachweise ADD COLUMN fortfuehrung integer;
+ALTER TABLE public.n_nachweise ADD COLUMN rissnummer character varying(20);
+ALTER TABLE public.n_nachweise ADD COLUMN bemerkungen text;
 
 -- Zuordnung der Nachweise zu den Antraegen
 CREATE TABLE n_nachweise2antraege (

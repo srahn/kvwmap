@@ -1041,6 +1041,14 @@ ALTER TABLE public.bw_zonen DROP COLUMN standort;
 ALTER TABLE public.bw_zonen DROP COLUMN richtwertdefinition;
 
 
+----# Änderungen von 1.9.0 nach 1.10.0
+
+ALTER TABLE public.n_nachweise ALTER COLUMN stammnr TYPE character varying(15);
+ALTER TABLE public.n_nachweise ADD COLUMN fortfuehrung integer;
+ALTER TABLE public.n_nachweise ADD COLUMN rissnummer character varying(20);
+ALTER TABLE public.n_nachweise ADD COLUMN bemerkungen text;
+
+
 
 
 

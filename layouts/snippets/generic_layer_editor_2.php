@@ -24,11 +24,14 @@ function checknumbers(input, type, length, decimal_length){
 			alert('Für dieses Feld sind maximal '+length+' Vorkommastellen erlaubt.');
 			parts[0] = parts[0].substring(0, length - ohne_leerz + mit_leerz);
 		}
-		if(decimal_length != '' && parts[1].length > parseInt(decimal_length)){
-			alert('Für dieses Feld sind maximal '+decimal_length+' Nachkommastellen erlaubt.');
-			parts[1] = parts[1].substring(0, decimal_length);
+		val = parts[0];
+		if(parts[1] != undefined){
+			if(decimal_length != '' && parts[1].length > parseInt(decimal_length)){
+				alert('Für dieses Feld sind maximal '+decimal_length+' Nachkommastellen erlaubt.');
+				parts[1] = parts[1].substring(0, decimal_length);
+			}
+			val = val+'.'+parts[1].substring(0, decimal_length);
 		}
-		val = parts[0]+'.'+parts[1].substring(0, decimal_length);
 		if(input.value != val){
   		input.value = val;
   	}
@@ -109,6 +112,14 @@ function csv_export_all(layer_id){
 	document.GUI.chosen_layer_id.value = layer_id;
 	document.GUI.go_backup.value = document.GUI.go.value;
 	document.GUI.go.value = 'generischer_csv_export';
+	document.GUI.submit();
+}
+
+function shape_export_all(layer_id, anzahl){
+	document.GUI.chosen_layer_id.value = layer_id;
+	document.GUI.anzahl.value = anzahl;
+	document.GUI.go_backup.value = document.GUI.go.value;
+	document.GUI.go.value = 'SHP_Export';
 	document.GUI.submit();
 }
 
@@ -927,6 +938,10 @@ function set_changed_flag(flag){
 	<? if($this->new_entry != true){ ?>
 	<tr>
 		<td><a id="csv_link" href="javascript:csv_export_all(<?php echo $this->qlayerset[$i]['Layer_ID']; ?>);"><? echo $strCSVExportAll; ?></a>
+		<? if ($this->qlayerset[$i]['count'] > MAXQUERYROWS) {
+		  echo "&nbsp;(".$this->qlayerset[$i]['count'].")";
+		   } ?>
+		&nbsp;&nbsp;<a id="csv_link" href="javascript:shape_export_all(<?php echo $this->qlayerset[$i]['Layer_ID']; ?>, <? echo $this->qlayerset[$i]['count']; ?>);"><? echo $strSHPExportAll; ?></a>
 		<? if ($this->qlayerset[$i]['count'] > MAXQUERYROWS) {
 		  echo "&nbsp;(".$this->qlayerset[$i]['count'].")";
 		   } ?>

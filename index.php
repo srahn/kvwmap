@@ -1106,7 +1106,7 @@ switch($GUI->go) {
   } break;
   
   case 'UKO_Export' : {
-  	$GUI->checkCaseAllowed('UKO_Export');
+  	//$GUI->checkCaseAllowed('UKO_Export');
     $GUI->uko_export();
   } break;
   
@@ -1579,7 +1579,7 @@ switch($GUI->go) {
     $GUI->savedformvars=$GUI->user->rolle->getNachweisParameter();
     $GUI->formvars=array_merge($GUI->savedformvars,$GUI->formvars);
     $GUI->nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
-    $ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkungflurid'],$GUI->formvars['suchstammnr'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr']);
+    $ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkungflurid'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr']);
     if($ret!=''){
       $GUI->nachweisAnzeige();
       showAlert($ret);

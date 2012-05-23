@@ -55,7 +55,7 @@ else {
 }
  ?>
 
-<table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
+<table border="0" cellpadding="4" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr> 
     <td colspan="3"> <div align="center"></div>      <div align="center"><strong><font size="+1"><?php echo $this->titel; ?></font></strong> 
     </div></td>
@@ -67,7 +67,7 @@ else {
 				include(LAYOUTPATH.'snippets/SVG_polygon_box_query_area.php')
 			?>
     </td>
-    <td><hr align="center" noshade></td>
+    <td></td>
   </tr>
   <tr> 
     <td>Recherche nach folgenden Dokumenten:</td>
@@ -95,7 +95,7 @@ else {
     </strong>
       <table border="0" cellspacing="0" cellpadding="2">
         <tr>
-          <td rowspan="5"><input type="radio" name="abfrageart" value="indiv_nr" <?php if ($this->formvars['abfrageart']=='indiv_nr') { ?> checked<?php } ?>>
+          <td rowspan="7"><input type="radio" name="abfrageart" value="indiv_nr" <?php if ($this->formvars['abfrageart']=='indiv_nr') { ?> checked<?php } ?>>
           </td>
           <td>Gemarkung&nbsp;</td>
           <td>Flur</td>
@@ -110,8 +110,18 @@ else {
           </td>
         </tr>
         <tr>
-          <td colspan="2">          Stammnummer<br>
+          <td colspan="2">          Antragsnummer<br>
   					<input type="text" name="suchstammnr" value="<?php echo $this->formvars['suchstammnr']; ?>" size="<?php echo STAMMNUMMERMAXLENGTH; ?>" maxlength="<?php echo STAMMNUMMERMAXLENGTH; ?>">
+ 					</td>    
+        </tr>
+        <tr>
+          <td colspan="2">          Rissnummer<br>
+  					<input type="text" name="suchrissnr" value="<?php echo $this->formvars['suchrissnr']; ?>" size="<?php echo STAMMNUMMERMAXLENGTH; ?>" maxlength="<?php echo STAMMNUMMERMAXLENGTH; ?>">
+ 					</td>    
+        </tr>
+        <tr>
+          <td colspan="2">          Fortfuehrung<br>
+  					<input type="text" name="suchfortf" value="<?php echo $this->formvars['suchfortf']; ?>" size="4" maxlength="4">
  					</td>    
         </tr>
         <tr> 
@@ -142,7 +152,7 @@ else {
   </tr>
   <tr> 
     <td>
-      <strong>&nbsp;Antragsnummer:</strong></td>
+      <strong>&nbsp;Vorbereitungsnummer:</strong></td>
   </tr>
   <tr> 
     <td><input type="radio" name="abfrageart" value="antr_nr" <?php if ($this->formvars['abfrageart']=='antr_nr') { ?> checked<?php } ?>>

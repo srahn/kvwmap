@@ -5371,7 +5371,7 @@ class GUI extends GUI_core{
       $nachweis=new Nachweis($this->pgdatabase, $this->user->rolle->epsg_code);
       $ret=$nachweis->getNachw2Antr($this->formvars['antr_selected']);
       if($ret==''){
-        $ret=$nachweis->getNachweise($nachweis->nachweise_id,'','','','','','multibleIDs','','');
+        $ret=$nachweis->getNachweise($nachweis->nachweise_id,'','','','','','','','multibleIDs','','');
         if ($ret==''){
           $ret=$antrag->DokumenteInOrdnerZusammenstellen($nachweis);
           $msg.=$ret;
@@ -5409,7 +5409,7 @@ class GUI extends GUI_core{
     # abfragen der Dokumentarten
     $this->dokumentarten = $nachweis->getDokumentarten();
     #echo 'Suche nach id:'.$this->formvars['id'];
-    $ret=$nachweis->getNachweise($this->formvars['id'],'','','','','','bySingleID','',0,0);
+    $ret=$nachweis->getNachweise($this->formvars['id'],'','','','','','','','bySingleID','',0,0);
     if ($ret!='') {
       # Fehler bei der Abfrage des Nachweises
       # Anzeige des letzten Rechercheergebnisses
@@ -5477,6 +5477,9 @@ class GUI extends GUI_core{
       $this->formvars['Flur']=intval(substr($this->formvars['flurid'],6,9));
       $this->formvars['Bilddatei']=NACHWEISDOCPATH.$nachweis->document['link_datei'];
       $this->formvars['andere_art']=$nachweis->document['andere_art'];
+      $this->formvars['rissnr']=$nachweis->document['rissnummer'];
+      $this->formvars['fortf']=$nachweis->document['fortfuehrung'];
+      $this->formvars['bemerkungen']=$nachweis->document['bemerkungen'];
 
       # Abfragen der Gemarkungen
       # 2006-01-26 pk
@@ -7145,6 +7148,7 @@ class GUI extends GUI_core{
 
   function shp_export(){
     $this->titel='Shape-Export';
+    if($this->formvars['chosen_layer_id'] != '')$this->formvars['selected_layer_id'] = $this->formvars['chosen_layer_id'];		# aus der Sachdatenanzeige des GLE
     $this->main='shape_export.php';
     $this->loadMap('DataBase');
     $this->epsg_codes = read_epsg_codes($this->pgdatabase);
@@ -8351,7 +8355,7 @@ class GUI extends GUI_core{
     	$this->formvars['flur'] = '%%%';
     }
     $this->formvars['suchgemarkungflurid']=str_pad(intval(trim($this->formvars['gemarkung'])),6,'0',STR_PAD_LEFT).str_pad(trim($this->formvars['flur']),3,'0',STR_PAD_LEFT);
-    $this->user->rolle->setNachweisSuchparameter($this->formvars['suchffr'],$this->formvars['suchkvz'],$this->formvars['suchgn'], $this->formvars['suchan'], $this->formvars['abfrageart'],$this->formvars['suchgemarkungflurid'],$this->formvars['suchstammnr'],$this->formvars['suchpolygon'],$this->formvars['suchantrnr']);
+    $this->user->rolle->setNachweisSuchparameter($this->formvars['suchffr'],$this->formvars['suchkvz'],$this->formvars['suchgn'], $this->formvars['suchan'], $this->formvars['abfrageart'],$this->formvars['suchgemarkungflurid'],$this->formvars['suchstammnr'],$this->formvars['suchrissnr'],$this->formvars['suchfortf'],$this->formvars['suchpolygon'],$this->formvars['suchantrnr']);
     # Die Anzeigeparameter werden so gesetzt, daß genau das gezeigt wird, wonach auch gesucht wurde.
     # bzw. was als Suchparameter im Formular angegeben wurde.
     $this->user->rolle->setNachweisAnzeigeparameter($this->formvars['suchffr'],$this->formvars['suchkvz'],$this->formvars['suchgn'],$this->formvars['suchan'],$this->formvars['suchffr'],$this->formvars['suchkvz'],$this->formvars['suchgn']);
@@ -8361,7 +8365,7 @@ class GUI extends GUI_core{
     $this->nachweis = new Nachweis($this->pgdatabase, $this->user->rolle->epsg_code);
     # Suchparameter in Ordnung
     # Recherchieren nach den Nachweisen
-    $ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkungflurid'],$this->formvars['suchstammnr'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr'], $this->formvars['datum'], $this->formvars['VermStelle']);
+    $ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkungflurid'],$this->formvars['suchstammnr'],$this->formvars['suchrissnr'],$this->formvars['suchfortf'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr'], $this->formvars['datum'], $this->formvars['VermStelle']);
     #$this->nachweis->getAnzahlNachweise($this->formvars['suchpolygon']);
     if($ret!=''){
       # Fehler bei der Recherche im Datenbestand
@@ -8724,7 +8728,7 @@ class GUI extends GUI_core{
         else {
           # Speicherung der Bilddatei erfolgreich, Eintragen in Datenbank
           $this->nachweis->database->begintransaction();
-          $ret=$this->nachweis->eintragenNeuesDokument($this->formvars['datum'],$this->formvars['flurid'],$this->formvars['VermStelle'], $this->formvars['art'], $this->formvars['andere_art'], $this->formvars['gueltigkeit'],$this->formvars['stammnr'],$this->formvars['Blattformat'],$this->formvars['Blattnr'],$this->formvars['artname']."/".$this->formvars['zieldateiname'],$this->formvars['umring']);
+          $ret=$this->nachweis->eintragenNeuesDokument($this->formvars['datum'],$this->formvars['flurid'],$this->formvars['VermStelle'], $this->formvars['art'], $this->formvars['andere_art'], $this->formvars['gueltigkeit'],$this->formvars['stammnr'],$this->formvars['Blattformat'],$this->formvars['Blattnr'],$this->formvars['rissnr'],$this->formvars['fortf'],$this->formvars['bemerkungen'],$this->formvars['artname']."/".$this->formvars['zieldateiname'],$this->formvars['umring']);
           if ($ret[0]) {
             $this->nachweis->database->rollbacktransaction();
             $errmsg=$ret[1];
@@ -8756,7 +8760,7 @@ class GUI extends GUI_core{
       # 1.4 Zur zur Anzeige der Rechercheergebnisse mit Meldung über Erfolg der Änderung
       # 1.4.1 Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
       $this->formvars=$this->user->rolle->getNachweisParameter();
-      $ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkungflurid'],$this->formvars['suchstammnr'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr']);
+      $ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkungflurid'],$this->formvars['suchstammnr'],$this->formvars['suchrissnr'],$this->formvars['suchfortf'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr']);
       # 1.4.2 Anzeige der Rechercheergebnisse
       $this->nachweisAnzeige();
       # 1.4.3 Anzeige der Erfolgsmeldung
@@ -9001,7 +9005,7 @@ class GUI extends GUI_core{
 	function nachweisFormAnzeigeVorlage(){
 		# Nachweisdaten aus Datenbank abfragen
     $nachweis=new Nachweis($this->pgdatabase, $this->user->rolle->epsg_code);
-    $ret=$nachweis->getNachweise($this->formvars['id'],'','','','','','MergeIDs','',0,0);
+    $ret=$nachweis->getNachweise($this->formvars['id'],'','','','','','','','MergeIDs','',0,0);
     $nachweis->document=$nachweis->Dokumente[0];
     # Zuweisen der Werte des Dokumentes zum Formular
     $this->formvars['flurid']=$nachweis->document['flurid'];
@@ -9127,7 +9131,7 @@ class GUI extends GUI_core{
     # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
     $this->formvars=$this->user->rolle->getNachweisParameter();
     $this->nachweis = new Nachweis($this->pgdatabase, $this->user->rolle->epsg_code);
-    $ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkungflurid'],$this->formvars['suchstammnr'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr']);
+    $ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkungflurid'],$this->formvars['suchstammnr'],$this->formvars['suchrissnr'],$this->formvars['suchfortf'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr']);
     if ($ret!='') {
       $errmsg.=$ret;
     }
@@ -9174,7 +9178,7 @@ class GUI extends GUI_core{
       # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
       $this->formvars=$this->user->rolle->getNachweisParameter();
       $this->nachweis = new nachweis($this->pgdatabase, $this->user->rolle->epsg_code);
-      $ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkungflurid'],$this->formvars['suchstammnr'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr']);
+      $ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkungflurid'],$this->formvars['suchstammnr'],$this->formvars['suchrissnr'],$this->formvars['suchfortf'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr']);
       $errmsg.=$ret[1];
       # Anzeige der Rechercheergebnisse
       $this->nachweisAnzeige();
@@ -9231,7 +9235,7 @@ class GUI extends GUI_core{
       # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
       $this->formvars=$this->user->rolle->getNachweisParameter();
       # Abfragen der Nachweise entsprechend der eingestellten Suchparameter
-      $ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkungflurid'],$this->formvars['suchstammnr'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr']);
+      $ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkungflurid'],$this->formvars['suchstammnr'],$this->formvars['suchrissnr'],$this->formvars['suchfortf'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr']);
       if ($ret!='') {
         $this->Fehlermeldung.=$ret;
       }

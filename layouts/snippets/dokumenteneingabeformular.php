@@ -120,8 +120,8 @@ else {
       </table></td>
   </tr>
   <tr> 
-    <td rowspan="18">&nbsp; </td>
-    <td rowspan="18"> 
+    <td rowspan="21">&nbsp; </td>
+    <td rowspan="21" colspan="2"> 
       <?php
  				include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php')
 			?>
@@ -133,10 +133,12 @@ else {
     <td colspan="2"><input type="radio" name="art" value="100"<?php if ($this->formvars['art']=='100') { ?> checked<?php } ?>>
       Fortführungsriss&nbsp;(FFR)
     </td>
+  </tr>
   <tr> 
     <td colspan="2"><input type="radio" name="art" value="010"<?php if ($this->formvars['art']=='010') { ?> checked<?php } ?>>
       Koordinatenverzeichnis&nbsp;(KVZ)
     </td>
+  </tr>
   <tr> 
     <td colspan="2"><input type="radio" name="art" value="001"<?php if ($this->formvars['art']=='001') { ?> checked<?php } ?>>
       Grenzniederschrift&nbsp;(GN)
@@ -152,20 +154,43 @@ else {
       	<? } ?>
       </select>
     </td>
+  </tr>
   <tr> 
     <td colspan="2"><hr align="center" noshade></td>
+  </tr>
   <tr> 
-    <td colspan="2">Blattnummer:
-	    <?php #if ($this->formvars['Blattnr'] == '') { $this->formvars['Blattnr']='0'; } ?>
+    <td>Blattnummer:</td>
+    <td>
   		<input name="Blattnr" type="text" value="<?php echo $this->formvars['Blattnr']; ?>" size="<?php echo BLATTNUMMERMAXLENGTH; ?>" maxlength="<?php echo BLATTNUMMERMAXLENGTH; ?>">
  		</td>
+ 	</tr>
+ 	<tr> 
+    <td>Fortführung:</td>
+    <td>
+  		<input name="fortf" type="text" value="<?php echo $this->formvars['fortf']; ?>" maxlength="4" size="4">
+ 		</td>
+ 	</tr>
+ 	<tr> 
+    <td>Rissnummer:</td>
+   	<td>
+  		<input name="rissnr" type="text" value="<?php echo $this->formvars['rissnr']; ?>" size="<?php echo STAMMNUMMERMAXLENGTH; ?>">
+ 		</td>
+ 	</tr>
+ 	<tr> 
+    <td colspan="2">Bemerkungen:
+  		<textarea name="bemerkungen"><?php echo $this->formvars['bemerkungen']; ?></textarea>
+ 		</td>
+ 	</tr>
   <tr> 
     <td colspan="2">&nbsp;</td>
+  </tr>
   <tr> 
     <td>Datum:<br> <font size="1"><em>(1989-05-31)</em></font></td>
     <td><input name="datum" type="text" value="<?php echo $this->formvars['datum']; ?>" size="10" maxlength="50"></td>
+  </tr>
   <tr> 
     <td colspan="2">&nbsp;</td>
+  </tr>
   <tr> 
     <td colspan="2">Vermessungsstelle:<br> 
       <?php
@@ -173,8 +198,10 @@ else {
               echo $this->FormObjVermStelle->html;
           ?>
     </td>
+  </tr>
   <tr> 
     <td colspan="2">&nbsp;</td>
+  </tr>
   <tr> 
     <td colspan="2">Blattformat: 
       <?php 
@@ -189,8 +216,10 @@ else {
                 echo $Blattformat->html;
               ?>
     </td>
+  </tr>
   <tr> 
     <td colspan="2">&nbsp;</td>
+  </tr>
   <tr> 
     <td colspan="2"><table border="0" cellspacing="0" cellpadding="5">
         <tr> 
@@ -224,10 +253,12 @@ else {
   
   <tr> 
     <td colspan="2"><hr align="center" noshade></td>
-  <tr> 
+  </tr>
+  <tr>
+  	<td>&nbsp;</td> 
     <td><?php if ($this->formvars['stammnr']!='') { ?><a href="index.php?go=Nachweisanzeige">&lt;&lt;&nbsp;zur&uuml;ck&nbsp;zum&nbsp;Rechercheergebnis</a><?php } ?></td>
     <td align="right"><input type="checkbox" name="always_draw" value="1" <?if($always_draw == 1 OR $always_draw == 'true')echo 'checked'; ?>>&nbsp;weiterzeichnen&nbsp;&nbsp;</td>
-    <td colspan="2">
+    <td colspan="2" align="center">
     	<table border="0">
         <tr> 
           <td><input type="reset" name="go_plus2" value="Zurücksetzen"></td>

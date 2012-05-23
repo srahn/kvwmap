@@ -116,7 +116,7 @@ function export_shape(){
 				      			if($i % 6 == 0){ echo '</tr><tr>';}	
 				      	?>
 			            <td>
-			            	<input type="checkbox" checked="true" value="1" name="check_<? echo $this->shape->attributes['name'][$i]; ?>">
+			            	<input type="checkbox" <? if($this->formvars['load'] OR $this->formvars['check_'.$this->shape->attributes['name'][$i]] == 1)echo 'checked'; ?> value="1" name="check_<? echo $this->shape->attributes['name'][$i]; ?>">
 			            	<?php
 			              if($this->shape->attributes['alias'][$i] != ''){
 			                echo $this->shape->attributes['alias'][$i];
@@ -133,6 +133,15 @@ function export_shape(){
 			      </table> 
 			    </td>
 			 	</tr>
+			 	<? if($this->formvars['sql_'.$this->formvars['selected_layer_id']] != ''){ ?>
+			 	<tr>
+			 		<td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3" colspan="5" width="100%">
+			 			<? echo $this->formvars['anzahl']; ?> Datensätze aus Sachdatenanzeige
+			 			<input type="hidden" name="sql_<? echo $this->formvars['selected_layer_id']; ?>" value="<? echo $this->formvars['sql_'.$this->formvars['selected_layer_id']]; ?>">
+			 			<input type="hidden" name="anzahl" value="<? echo $this->formvars['anzahl']; ?>">
+			 		</td>
+			 	</tr>
+			 	<? } ?>
 			</table>
 		</td>
 		<td>&nbsp;</td>
@@ -176,5 +185,6 @@ function export_shape(){
 <INPUT TYPE="hidden" NAME="columnname" VALUE="<? echo $this->formvars['columnname'] ?>">
 <INPUT TYPE="hidden" NAME="fromwhere" VALUE="<? echo $this->formvars['fromwhere']; ?>">
 <INPUT TYPE="hidden" NAME="export_columnname" VALUE="<? echo $this->shape->formvars['columnname'] ?>">
+<input type="hidden" name="always_draw" value="<? echo $always_draw; ?>">
 
 

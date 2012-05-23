@@ -315,7 +315,7 @@ class shape {
   function shp_export($formvars, $stelle, $mapdb){
   	$this->formvars = $formvars;
     $this->layerdaten = $stelle->getqueryablePostgisLayers(NULL);
-    if($this->formvars['load'] AND $this->formvars['selected_layer_id']){
+    if($this->formvars['selected_layer_id']){
       $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $stelle->pgdbhost);
       $path = $mapdb->getPath($this->formvars['selected_layer_id']);
       $privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
@@ -346,6 +346,13 @@ class shape {
   	if($orderbyposition !== false){
 	  	$orderby = ' '.substr($sql, $orderbyposition);
 	  	$sql = substr($sql, 0, $orderbyposition);
+  	}
+  	# Where-Klausel aus Sachdatenabfrage-SQL anhängen
+  	if($this->formvars['sql_'.$this->formvars['selected_layer_id']]){
+  		$where = substr($this->formvars['sql_'.$this->formvars['selected_layer_id']], strrpos(strtolower($this->formvars['sql_'.$this->formvars['selected_layer_id']]), 'where')+5);
+  		$orderbyposition = strpos(strtolower($where), 'order by');
+  		$where = substr($where, 0, $orderbyposition);
+  		$sql.= " AND".$where;
   	}
   	# über Polygon einschränken
     if($this->formvars['newpathwkt']){

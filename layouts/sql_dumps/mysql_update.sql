@@ -1043,3 +1043,7 @@ ALTER TABLE `layer_attributes` ADD `decimal_length` INT( 11 ) NULL AFTER `length
 # Änderung von 1.9.0 zu 1.10.0
 
 ALTER TABLE `rolle` ADD `always_draw` BOOLEAN NULL;
+
+ALTER TABLE `rolle_nachweise` CHANGE `suchstammnr` `suchstammnr` VARCHAR(15) NOT NULL;
+ALTER TABLE `rolle_nachweise` ADD `suchrissnr` VARCHAR(20) NOT NULL AFTER `suchstammnr`,
+ 			      ADD `suchfortf` INT(4) NULL AFTER `suchrissnr`;

@@ -27,20 +27,22 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 	  </td>
         </tr>
         <tr> 
-          <td>Gesucht nach:<b> 
+          <td>Gesucht nach:<br><b> 
             <?php
             switch ($this->formvars['abfrageart']) {
               case 'indiv_nr' : {
                 ?>
             Individuelle Nummer in Gemarkung/Flur: <?php echo $this->formvars['suchgemarkungflurid']; ?>
-                mit Stammnr: <?php echo str_pad(intval($this->formvars['suchstammnr']),STAMMNUMMERMAXLENGTH,'0',STR_PAD_LEFT); ?>
+                mit Antragsnummer: <?php echo str_pad(intval($this->formvars['suchstammnr']),STAMMNUMMERMAXLENGTH,'0',STR_PAD_LEFT); ?>
+                mit Rissnummer: <?php echo $this->formvars['suchrissnr']; ?>
+                mit Fortführung: <?php echo $this->formvars['suchfortf']; ?>
                 von <?php
                 if ($this->formvars['suchffr']){ echo ' FFR, '; }
                 if ($this->formvars['suchkvz']){ echo ' KVZ, '; }
                 if ($this->formvars['suchgn']){ echo ' GN'; }
               } break;
               case 'antr_nr' : { 
-                ?>Antragsnummer - <?php echo $this->formvars['suchantrnr'];
+                ?>Vorbereitungsnummer - <?php echo $this->formvars['suchantrnr'];
                 if ($this->formvars['suchffr']){ echo ' FFR, '; }
                 if ($this->formvars['suchkvz']){ echo ' KVZ, '; }
                 if ($this->formvars['suchgn']){ echo ' GN'; }
@@ -64,7 +66,9 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
           <td width="65"><div align="center"><a href="index.php?go=Nachweisanzeige&order=FlurID&richtung=<?php
             if ($this->nachweis->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach individueller Nummer sortieren"><strong>Indiv.-Nr.</strong></a></div></td>
           <td width="64"><div align="center"><a href="index.php?go=Nachweisanzeige&order=stammnr&richtung=<?php
-            if ($this->nachweis->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach Stammnr. sortieren"><strong>Stammnr.</strong></a></div></td>
+            if ($this->nachweis->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach Antragsnr. sortieren"><strong>Antragsnr.</strong></a></div></td>
+          <td width="64"><div align="center"><a href="index.php?go=Nachweisanzeige&order=rissnummer&richtung=<?php
+            if ($this->nachweis->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach Rissnr. sortieren"><strong>Rissnr.</strong></a></div></td>
           <td width="137"><div align="center"><a href="index.php?go=Nachweisanzeige&order=art&richtung=<?php
             if ($this->nachweis->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach Dokumentenart sortieren"><strong>Art 
               d. Documents</strong></a></div></td>
@@ -72,6 +76,8 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
             if ($this->nachweis->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach Blattnummer sortieren"><strong>Blattnummer</strong></a></div></td>
           <td width="45">&nbsp;&nbsp;<a href="index.php?go=Nachweisanzeige&order=datum&richtung=<?php
             if ($this->nachweis->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach Datum sortieren"><strong>Datum</strong></a>&nbsp;&nbsp;&nbsp;</td>
+          <td width="45">&nbsp;&nbsp;<a href="index.php?go=Nachweisanzeige&order=fortfuehrung&richtung=<?php
+            if ($this->nachweis->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach Fortführung sortieren"><strong>Fortführung</strong></a>&nbsp;&nbsp;&nbsp;</td>
           <td width="75"><div align="center"><a href="index.php?go=Nachweisanzeige&order=vermstelle&richtung=<?php
             if ($this->nachweis->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach Vermessungsstelle sortieren"><strong>VermStelle</strong></a></div></td>
           <td width="75"><div align="center"><a href="index.php?go=Nachweisanzeige&order=gueltigkeit&richtung=<?php
@@ -81,7 +87,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
           <td colspan="3"><div align="center"><?php    echo $this->nachweis->erg_dokumente.' Treffer';   ?></div></td>
         </tr>
         <tr bgcolor="#FFFFFF"> 
-          <td colspan="13"><hr></td>
+          <td colspan="15"><hr></td>
         </tr>
         <?php
      for ($i=0;$i<$this->nachweis->erg_dokumente;$i++) {
@@ -111,6 +117,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
           <td><?php echo $this->formvars['id']=$this->nachweis->Dokumente[$i]['id']; ?></td>
           <td><div align="center"><?php echo $this->formvars['flurid']=$this->nachweis->Dokumente[$i]['flurid']; ?></div></td>
           <td><div align="center"><?php echo $this->formvars['stammnr']=str_pad($this->nachweis->Dokumente[$i]['stammnr'],STAMMNUMMERMAXLENGTH,'0',STR_PAD_LEFT); ?></div></td>
+          <td><div align="center"><?php echo $this->formvars['rissnr']=str_pad($this->nachweis->Dokumente[$i]['rissnummer'],STAMMNUMMERMAXLENGTH,'0',STR_PAD_LEFT); ?></div></td>
           <td><div align="center"> 
               <?php if ($this->formvars['art']=$this->nachweis->Dokumente[$i]['art']=='100'){?>
               FFR 
@@ -131,6 +138,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
             </div></td>
           <td><div align="center"><?php echo $this->formvars['blattnummer']=str_pad($this->nachweis->Dokumente[$i]['blattnummer'],BLATTNUMMERMAXLENGTH,'0',STR_PAD_LEFT); ?></div></td>
           <td><div align="center"><?php echo $this->formvars['datum']=$this->nachweis->Dokumente[$i]['datum']; ?></div></td>
+          <td><div align="center"><?php echo $this->formvars['fortf']=$this->nachweis->Dokumente[$i]['fortfuehrung']; ?></div></td>
           <td><div align="center"><?php echo $this->formvars['vermstelle']=$this->nachweis->Dokumente[$i]['vermst']; ?></div></td>
           <td><div align="center"><?php echo $this->formvars['gueltigkeit']=$this->nachweis->Dokumente[$i]['gueltigkeit']; ?></div></td>
           <td><div align="center"><?php echo $this->formvars['format']=$this->nachweis->Dokumente[$i]['format']; ?> 
@@ -198,7 +206,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
             </select></td>
         </tr>
         <tr> 
-          <td>Antragsnummer:</td>
+          <td>Vorbereitungsnummer:</td>
           <td><strong>
             <?php $this->FormObjAntr_nr->outputHTML();
     					echo $this->FormObjAntr_nr->html;?>
