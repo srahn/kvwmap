@@ -16,6 +16,18 @@
 			return degrees+"°"+minutes+"\'"+seconds+\'"\';
 		}
 		
+		function dms2dec(number){
+			number = number+"";
+			part1 = number.split("°");
+			degrees = parseFloat(part1[0]);
+			part2 = part1[1].split("\'");
+			minutes = parseFloat(part2[0]);
+			seconds = part2[1].replace(/"/g, "");
+			seconds = parseFloat(seconds)/60;
+			minutes = (minutes+seconds)/60;
+			return Math.round((degrees + minutes)*10000)/10000;  
+		}
+		
 		function format_number(number, convert){
 			coordtype = \''.$this->user->rolle->coordtype.'\';
 			epsgcode = \''.$this->user->rolle->epsg_code.'\';
@@ -54,7 +66,9 @@
 			return str_split[0]+sep+str_split[1];
 		}					
 	
-		function coords_input(){			
+		function coords_input(){
+			epsgcode = \''.$this->user->rolle->epsg_code.'\';
+			coordtype = \''.$this->user->rolle->coordtype.'\';		
 			var mittex  = '.$this->map->width.'/2*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value);
 			var mittey  = parseFloat(top.document.GUI.maxy.value) - '.$this->map->height.'/2*parseFloat(top.document.GUI.pixelsize.value);
 			mittex = format_number(mittex, true);
@@ -62,7 +76,11 @@
 			coords1 = prompt("Geben Sie die gewünschten Koordinaten ein \noder klicken Sie auf Abbrechen für die Koordinatenabfrage.",mittex+" "+mittey);
 			if(coords1){
 				coords2 = coords1.split(" ");
-				if(!coords2[0] || !coords2[1] || coords2[0].search(/[^-\d]/g) != -1 || coords2[1].search(/[^-\d]/g) != -1){
+				if(epsgcode == 4326 && coordtype == "dms"){
+					coords2[0] = dms2dec(coords2[0])+"";
+					coords2[1] = dms2dec(coords2[1])+"";
+				}
+				if(!coords2[0] || !coords2[1] || coords2[0].search(/[^-\d.]/g) != -1 || coords2[1].search(/[^-\d.]/g) != -1){
 					alert("Falsches Format");
 					return;
 				}
