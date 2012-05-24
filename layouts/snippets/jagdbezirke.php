@@ -73,7 +73,7 @@ function save(){
   <tr><td>&nbsp;</td></tr>
   <tr>
     <td>
-
+			<input type="hidden" value="1" name="changed_<? echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>">
       <table border="1" cellspacing="0" cellpadding="2" width="100%">
       <colgroup>
        <col width="30%">
