@@ -676,8 +676,9 @@ function set_changed_flag(flag){
 									}break;
 
 									default : {
+										$value = $this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]];
 										if(in_array($this->qlayerset[$i]['attributes']['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))){		# bei Zahlen Tausendertrennzeichen einfügen 
-											$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]] = tausenderTrenner($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]);
+											$value = tausenderTrenner($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]);
 										}
 										echo '<input onchange="set_changed_flag(document.GUI.changed_'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].')" onkeyup="checknumbers(this, \''.$this->qlayerset[$i]['attributes']['type'][$j].'\', \''.$this->qlayerset[$i]['attributes']['length'][$j].'\', \''.$this->qlayerset[$i]['attributes']['decimal_length'][$j].'\');" title="'.$this->qlayerset[$i]['attributes']['alias'][$j].'" ';
 										if($this->qlayerset[$i]['attributes']['privileg'][$j] == '0' OR $lock[$k]){
@@ -692,7 +693,7 @@ function set_changed_flag(flag){
 										if($this->qlayerset[$i]['attributes']['length'][$j] AND !in_array($this->qlayerset[$i]['attributes']['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))){
 											echo ' maxlength="'.$this->qlayerset[$i]['attributes']['length'][$j].'"';
 										}
-										echo ' size="61" type="text" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].';'.$this->qlayerset[$i]['attributes']['type'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">';
+										echo ' size="61" type="text" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].';'.$this->qlayerset[$i]['attributes']['type'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($value).'">';
 									}
 								}
 			  			}

@@ -108,11 +108,12 @@ function update_form(art){
   	<td>Art:<br>
   		<select onchange="update_form(this.value);" name="art">
   			<option <? if($this->jagdbezirk['art'] == 'ejb' OR $this->formvars['art'] == 'ejb'){echo 'selected';} ?> value="ejb">Eigenjagdbezirk</option>
-  			<option <? if($this->jagdbezirk['art'] == 'gjb' OR $this->formvars['art'] == 'gjb'){echo 'selected';} ?> value="gjb">gem. Jagdbezirk</option>
+  			<option <? if($this->jagdbezirk['art'] == 'ajb' OR $this->formvars['art'] == 'ajb'){echo 'selected';} ?> value="ajb">Abgerundeter Eigenjagdbezirk</option>
+  			<option <? if($this->jagdbezirk['art'] == 'gjb' OR $this->formvars['art'] == 'gjb'){echo 'selected';} ?> value="gjb">Gemeinschaftlicher Jagdbezirk</option>
   			<option <? if($this->jagdbezirk['art'] == 'tjb' OR $this->formvars['art'] == 'tjb'){echo 'selected';} ?> value="tjb">Teiljagdbezirk</option>
   			<option <? if($this->jagdbezirk['art'] == 'sf' OR $this->formvars['art'] == 'sf'){echo 'selected';} ?> value="sf">Sonderfläche</option>
   			<option <? if($this->jagdbezirk['art'] == 'jbe' OR $this->formvars['art'] == 'jbe'){echo 'selected';} ?> value="jbe">Enklave</option>
-  			<option <? if($this->jagdbezirk['art'] == 'jbf' OR $this->formvars['art'] == 'jbf'){echo 'selected';} ?> value="jbf">jagdbezirksfreie Fläche</option>
+  			<option <? if($this->jagdbezirk['art'] == 'jbf' OR $this->formvars['art'] == 'jbf'){echo 'selected';} ?> value="jbf">Jagdbezirksfreie Fläche</option>
   			<option <? if($this->jagdbezirk['art'] == 'agf' OR $this->formvars['art'] == 'agf'){echo 'selected';} ?> value="agf">Angliederungsfläche</option>
   			<option <? if($this->jagdbezirk['art'] == 'atf' OR $this->formvars['art'] == 'atf'){echo 'selected';} ?> value="atf">Abtrennungsfläche</option>
   			<option <? if($this->jagdbezirk['art'] == 'slf' OR $this->formvars['art'] == 'slf'){echo 'selected';} ?> value="slf">Schmalfläche</option>

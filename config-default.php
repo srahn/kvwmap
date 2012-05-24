@@ -322,6 +322,7 @@ define("LAYERNAME_FLUR",'Flur');
 define("LAYERNAME_BODENRICHTWERTE",'BORIS');	# Version 1.7.3
 define("LAYER_ID_ADRESSAENDERUNGEN", '162');  # Version 1.6.7
 define("LAYER_IDS_DOP", '79,80');							# Version 1.8.0
+define("LAYER_ID_JAGDBEZIRKE", '432');				# Version 1.10.0
 
 ######################### Dateieinstellungen
 # Datei in der das MapFile als Dokumentation zur Kartenausgabe geschrieben wird

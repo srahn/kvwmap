@@ -2538,7 +2538,7 @@ class GUI extends GUI_core{
     $jagdkataster->clientepsg = $this->user->rolle->epsg_code;
     $jagdbezirk = $jagdkataster->getjagdbezirk($this->formvars['oid']);
     $this->qlayerset[0]['shape'][0] = $jagdbezirk;
-    $layerset = $this->user->rolle->getLayer('Jagdbezirke');
+    $layerset = $this->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
     $this->qlayerset[0]['Layer_ID'] = $layerset[0]['Layer_ID']; 
     $i = 0;
     $this->main='jagdbezirke.php';
@@ -2595,7 +2595,7 @@ class GUI extends GUI_core{
 	    }
     }
     $jagdkataster = new jagdkataster($this->pgdatabase);
-    $layerset = $this->user->rolle->getLayer('Eigenjagdbezirke');
+    $layerset = $this->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
     $jagdkataster->layerepsg = $layerset[0]['epsg_code'];
     $jagdkataster->clientepsg = $this->user->rolle->epsg_code;
     if ($this->formvars['oid']!='') {           # Jagdbezirk bearbeiten
@@ -2634,7 +2634,7 @@ class GUI extends GUI_core{
 	
   function jagdkatastereditor_senden(){
     $jagdkataster = new jagdkataster($this->pgdatabase);
-    $layerset = $this->user->rolle->getLayer('Eigenjagdbezirke');
+    $layerset = $this->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
     $jagdkataster->layerepsg = $layerset[0]['epsg_code'];
     $jagdkataster->clientepsg = $this->user->rolle->epsg_code;
     # eingeabewerte pruefen:
