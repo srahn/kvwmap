@@ -37,10 +37,11 @@ function checknumbers(input, type, length, decimal_length){
   		input.value = val;
   	}
   }
-  if(type == 'int2' || type == 'int4' || type == 'int8'){
-  	if(input.value.search(/[^-\d]/g) != -1){
+	if(type == 'int2' || type == 'int4' || type == 'int8'){
+  	if(input.value.search(/[^-\d]/g) != -1 || input.value.search(/.-/g) != -1){
   		alert('Es sind nur ganzzahlige Angaben erlaubt!');
   		var val = input.value.replace(/[^-\d]/g, '');
+  		var val = input.value.replace(/-/g, '');
   		input.value = val;
   	}
   }
