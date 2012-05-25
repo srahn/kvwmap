@@ -136,7 +136,7 @@ function export_shape(){
 			 	<? if($this->formvars['sql_'.$this->formvars['selected_layer_id']] != ''){ ?>
 			 	<tr>
 			 		<td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3" colspan="5" width="100%">
-			 			<? echo $this->formvars['anzahl']; ?> Datensätze aus Sachdatenanzeige
+			 			<b><? echo $this->formvars['anzahl']; ?> Datensätze aus Sachdatenanzeige</b>
 			 			<input type="hidden" name="sql_<? echo $this->formvars['selected_layer_id']; ?>" value="<? echo $this->formvars['sql_'.$this->formvars['selected_layer_id']]; ?>">
 			 			<input type="hidden" name="anzahl" value="<? echo $this->formvars['anzahl']; ?>">
 			 		</td>

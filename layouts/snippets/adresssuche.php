@@ -100,5 +100,5 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
    </td>
   </tr>
 </table>
-<input type="hidden" name="selHausID" value="">
+<input type="hidden" name="selHausID" value="<? echo $this->formvars['selHausID']; ?>">
 <input type="hidden" name="ALK_Suche" value="<? echo $this->formvars['ALK_Suche']; ?>">

@@ -11595,7 +11595,7 @@ class GUI extends GUI_core{
     $this->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
   }
 
-  function zoomToALKGebaeude($Gemeinde,$Strasse,$Hausnr,$border) {
+  function zoomToALKGebaeude($Hausnr,$border) {
     # 2006-01-31 pk
     # 1. Funktion ermittelt das umschließende Rechteck der mit $Gemeinde,$Strasse und $Hausnr übergebenen
     # Gebaeude aus der postgis Datenbank mit Rand entsprechend dem Faktor $border
@@ -11604,7 +11604,7 @@ class GUI extends GUI_core{
     # zu 1)
     $alk=new ALK();
     $alk->database=$this->pgdatabase;
-    $ret=$alk->getMERfromGebaeude($Gemeinde,$Strasse,$Hausnr, $this->user->rolle->epsg_code);
+    $ret=$alk->getMERfromGebaeude($Hausnr, $this->user->rolle->epsg_code);
     if ($ret[0]) {
       $this->Fehlermeldung='Es konnten keine Gebäude gefunden werden.<br>'.$ret[1];
       $rect=$this->user->rolle->oGeorefExt;
@@ -11625,36 +11625,25 @@ class GUI extends GUI_core{
 				$datastring.=" LEFT JOIN ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde";
 				$datastring.=" AND l.lage = lpad(s.lage,5,'0')";
 				$datastring.=" WHERE gem.gemeinde = l.gemeinde";
-		    $datastring.=" AND gem.schluesselgesamt=".$Gemeinde;
-		    if ($Strasse!='') {
-		      $datastring.=" AND l.lage='".$Strasse."'";
-		    }
 		    if ($Hausnr!='') {
 		    	$Hausnr = str_replace(", ", ",", $Hausnr);
 		    	$Hausnr = strtolower(str_replace(",", "','", $Hausnr));    	
-		      $datastring.=" AND TRIM(LOWER(l.hausnummer)) IN ('".$Hausnr."')";
+		      $datastring.=" AND gem.schluesselgesamt||'-'||l.lage||'-'||TRIM(LOWER(l.hausnummer)) IN ('".$Hausnr."')";
 		    }
 	    }
 	    else{
 		    $datastring ="the_geom from (select o.objnr as oid,o.the_geom from alkobj_e_fla AS o,alknhaus as h";
-		    $datastring.=" WHERE o.objnr=h.objnr AND h.gemeinde=".$Gemeinde;
-		    $datastring.=" AND h.gemeinde=".$Gemeinde;
-		    if ($Strasse!='') {
-		      $datastring.=" AND h.strasse='".$Strasse."'";
-		    }
+		    $datastring.=" WHERE o.objnr=h.objnr";
 		    if (trim($Hausnr)!='') {
 		    	$Hausnr = str_replace(", ", ",", $Hausnr);
 		    	$Hausnr = strtolower(str_replace(",", "','", $Hausnr));
-		      $datastring.=" AND TRIM(LOWER(h.hausnr)) IN ('".$Hausnr."')";
+		      $datastring.=" AND h.gemeinde||'-'||h.strasse||'-'||TRIM(LOWER(h.hausnr)) IN ('".$Hausnr."')";
 		    }
 	    }
 	    $datastring.=") as foo using unique oid using srid=".EPSGCODE;
-	    $legendentext ="Geb&auml;ude:<br>Gemeinde: ".$Gemeinde;
-	    if ($Strasse!='') {
-	      $legendentext.="<br>Strasse: ".$Strasse;
-	    }
+	    $legendentext ="Geb&auml;ude:<br>";
 	    if ($Hausnr!='') {
-	      $legendentext.="<br>HausNr: ".$Hausnr;
+	      $legendentext.="HausNr: ".str_replace(',', '<br>', $Hausnr);
 	    }
 	    $layer->set('data',$datastring);
 	    $layer->set('status',MS_ON);
@@ -12251,6 +12240,7 @@ class GUI extends GUI_core{
       }
       $HausID=$this->formvars['HausID'];
       $HausNr=$this->formvars['HausNr'];
+      $selHausID = explode(', ',$this->formvars['selHausID']);
     }
     $Gemeinde=new gemeinde('',$this->pgdatabase);
     # 2006-01-02 pk
@@ -12309,11 +12299,23 @@ class GUI extends GUI_core{
         }
         $HausNrFormObj=new FormObject("HausID","select",$HausNrListe['HausID'],array($HausID),$HausNrListe['HausNr'],"12","","multiple",100);
         $HausNrFormObj->outputHTML();
-        $SelectedHausNrFormObj=new FormObject("selectedHausID","select",NULL,NULL,"","12","","multiple",100);
+        if($this->formvars['selHausID'] != ''){
+          $SelectedHausNrFormObj=new FormObject("selectedHausID","select", $selHausID, NULL, $selHausID,"12","","multiple",170);
+        }
+        else{
+          $SelectedHausNrFormObj=new FormObject("selectedHausID","select",NULL,NULL,"","12","","multiple",170);
+        }
         $SelectedHausNrFormObj->outputHTML();
       }
-      else { # Es wurde noch keine Strasse ausgewählt, Hausnummer als Textfeld
-        $HausNrFormObj=new FormObject("HausNr","text","","","","5","5","",NULL);
+      
+    	else {
+        if($this->formvars['selHausID'] != ''){
+          $SelectedHausNrFormObj=new FormObject("selectedHausID","select", $selHausID, NULL, $selHausID,"12","","multiple",100);
+          $SelectedHausNrFormObj->outputHTML();
+        }
+        else{
+          $HausNrFormObj=new FormObject("HausNr","text","","","","5","5","multiple",NULL);
+        }
       }
     }
     else {
@@ -12373,7 +12375,7 @@ class GUI extends GUI_core{
         $FlurstKennz=$Adresse->getFlurstKennzListe();
         if($this->formvars['ALK_Suche'] == 1){
         	$this->loadMap('DataBase');
-	        $ret = $this->zoomToALKGebaeude($GemID,$StrID,$HausID,100);
+	        $ret = $this->zoomToALKGebaeude($HausID,100);
 	        if($ret[0]){
 	        	$this->zoomToALKFlurst($FlurstKennz,100);
 	        }
@@ -12391,7 +12393,7 @@ class GUI extends GUI_core{
 	          # Anzeige der Gebaeude in der ALK
 	          # Karte laden, auf die Gebaeude zoomen, Karte Zeichnen und speichern für späteren gebrauch
 	          $this->loadMap('DataBase');
-	          $this->zoomToALKGebaeude($GemID,$StrID,$HausID,100);
+	          $this->zoomToALKGebaeude($HausID,100);
 	          $currenttime=date('Y-m-d H:i:s',time());
 	          $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
 	          $this->drawMap();

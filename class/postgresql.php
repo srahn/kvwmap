@@ -1364,22 +1364,20 @@ class pgdatabase extends pgdatabase_core {
   
   
 
-  function getFlurstKennzListeByGemSchlByStrSchl($GemeindeSchl,$StrassenSchl,$HausNr) {
+  function getFlurstKennzListeByGemSchlByStrSchl($HausNr) {
     $sql ="SELECT alb_f_adressen.flurstkennz FROM alb_f_adressen, alb_flurstuecke";
     $sql.=" WHERE alb_flurstuecke.flurstkennz = alb_f_adressen.flurstkennz";
     $sql.=" AND status != 'H'";
-    $sql.=" AND gemeinde=".$GemeindeSchl;
-    $sql.=" AND strasse='".$StrassenSchl."'";
     if ($HausNr!='') {
     	if($HausNr == 'ohne'){
     		$HausNr = '';
     	}
     	if(strpos($HausNr, ', ') !== false){							# wenn mehrere Hausnummern:					1, 2, 3a, 4
     		$HausNr = str_replace(", ", "','", $HausNr);		# Hochkommas dazwischen hinzufügen: 1','2','3a','4
-    		$sql.=" AND TRIM(".HAUSNUMMER_TYPE."(hausnr)) IN ('".$HausNr."')";		# und noch die äußeren:      			 '1','2','3a','4'
+    		$sql.=" AND gemeinde||'-'||strasse||'-'||TRIM(".HAUSNUMMER_TYPE."(hausnr)) IN ('".$HausNr."')";		# und noch die äußeren:      			 '1','2','3a','4'
     	}
     	else{
-      	$sql.=" AND TRIM(".HAUSNUMMER_TYPE."(hausnr))='".$HausNr."'";
+      	$sql.=" AND gemeinde||'-'||strasse||'-'||TRIM(".HAUSNUMMER_TYPE."(hausnr))='".$HausNr."'";
     	}
     }
     #echo $sql;
@@ -1393,25 +1391,23 @@ class pgdatabase extends pgdatabase_core {
     return $ret;
   }
   
-  function getFlurstKennzListeByGemSchlByStrSchlALKIS($GemeindeSchl,$StrassenSchl,$HausNr) {
+  function getFlurstKennzListeByGemSchlByStrSchlALKIS($HausNr) {
   	$sql.=" SELECT f.flurstueckskennzeichen as flurstkennz";
     $sql.=" FROM ax_flurstueck as f, ax_gemeinde as g, alkis_beziehungen v";
     $sql.=" JOIN ax_lagebezeichnungmithausnummer l ON v.beziehung_zu=l.gml_id";
     $sql.=" LEFT JOIN ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde";
     $sql.=" AND l.lage = lpad(s.lage,5,'0')";
     $sql.=" WHERE v.beziehung_von=f.gml_id AND v.beziehungsart='weistAuf' AND g.gemeinde = l.gemeinde";
-    $sql.=" AND g.schluesselgesamt=".$GemeindeSchl;
-    $sql.=" AND l.lage='".$StrassenSchl."'";
     if ($HausNr!='') {
     	if($HausNr == 'ohne'){
     		$HausNr = '';
     	}
     	if(strpos($HausNr, ', ') !== false){							# wenn mehrere Hausnummern:					1, 2, 3a, 4
     		$HausNr = str_replace(", ", "','", $HausNr);		# Hochkommas dazwischen hinzufügen: 1','2','3a','4
-    		$sql.=" AND TRIM(".HAUSNUMMER_TYPE."(l.hausnummer)) IN ('".$HausNr."')";		# und noch die äußeren:      			 '1','2','3a','4'
+    		$sql.=" AND g.schluesselgesamt||'-'||l.lage||'-'||TRIM(".HAUSNUMMER_TYPE."(l.hausnummer)) IN ('".$HausNr."')";		# und noch die äußeren:      			 '1','2','3a','4'
     	}
     	else{
-      	$sql.=" AND TRIM(".HAUSNUMMER_TYPE."(l.hausnummer))='".$HausNr."'";
+      	$sql.=" AND g.schluesselgesamt||'-'||l.lage||'-'||TRIM(".HAUSNUMMER_TYPE."(l.hausnummer))='".$HausNr."'";
     	}
     }
     #echo $sql;
@@ -3972,7 +3968,7 @@ class pgdatabase extends pgdatabase_core {
     $sql.="SELECT '-1' AS id,'--Auswahl--' AS nr, '-1' AS ordernr";
     $sql.=" UNION";
     # Abfrage der Hausnummern aus dem ALK-Bestand
-    $sql.=" SELECT TRIM(".HAUSNUMMER_TYPE."(alk.hausnr)) AS id,".HAUSNUMMER_TYPE."(alk.hausnr) AS nrtext,alk.hausnr AS ordernr";
+    $sql.=" SELECT '".$GemID."-".$StrID."-'||TRIM(".HAUSNUMMER_TYPE."(alk.hausnr)) AS id,".HAUSNUMMER_TYPE."(alk.hausnr) AS nrtext,alk.hausnr AS ordernr";
     $sql.=" FROM alknhaus AS alk,alkobj_e_fla AS alkfl,alb_v_strassen AS s";
     $sql.=" WHERE alkfl.folie='011'";
     # $sql.=" AND alkfl.the_geom && GeometryFromText('".$PolygonWKTString."',".EPSGCODE.")";
@@ -3990,7 +3986,7 @@ class pgdatabase extends pgdatabase_core {
     $sql.=" UNION";
     # Abfrage der Hausnummern aus dem ALB-Bestand
     # Anfang
-    $sql.=" SELECT alb.hausnr AS id, ".HAUSNUMMER_TYPE."(alb.hausnr) AS nrtext,alb.hausnr AS ordernr FROM alb_f_adressen AS alb WHERE (1=1)";
+    $sql.=" SELECT '".$GemID."-".$StrID."-'||alb.hausnr AS id, ".HAUSNUMMER_TYPE."(alb.hausnr) AS nrtext,alb.hausnr AS ordernr FROM alb_f_adressen AS alb WHERE (1=1)";
     if ($GemID!='') {
       $sql.=" AND alb.gemeinde=".$GemID;
     }
@@ -4019,7 +4015,7 @@ class pgdatabase extends pgdatabase_core {
     $sql.=",(CASE WHEN TRIM(ordernr)='' THEN '0' ELSE SPLIT_PART(TRIM(ordernr),' ',1) END) as ordernr FROM (";
     $sql.="SELECT '-1' AS id,'--Auswahl--' AS nr, '-1' AS ordernr";
     $sql.=" UNION";
-    $sql.=" SELECT DISTINCT TRIM(".HAUSNUMMER_TYPE."(l.hausnummer)) AS id, ".HAUSNUMMER_TYPE."(l.hausnummer) AS nrtext, l.hausnummer AS ordernr";
+    $sql.=" SELECT DISTINCT '".$GemID."-".$StrID."-'||TRIM(".HAUSNUMMER_TYPE."(l.hausnummer)) AS id, ".HAUSNUMMER_TYPE."(l.hausnummer) AS nrtext, l.hausnummer AS ordernr";
     $sql.=" FROM ax_flurstueck as f, ax_gemeinde as g, alkis_beziehungen v";
     $sql.=" JOIN ax_lagebezeichnungmithausnummer l ON v.beziehung_zu=l.gml_id";
     $sql.=" LEFT JOIN ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde";
@@ -4096,7 +4092,7 @@ class pgdatabase extends pgdatabase_core {
     $sql.=" FROM ax_flurstueck as f, ax_gemeinde as g, ax_gemarkung as gem, alkis_beziehungen v";
     $sql.=" JOIN ax_lagebezeichnungmithausnummer l ON v.beziehung_zu=l.gml_id";
     $sql.=" LEFT JOIN ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde";
-    $sql.=" AND l.lage = lpad(s.lage,5,'0')";
+    $sql.=" AND s.lage = lpad(l.lage,5,'0')";
     $sql.=" WHERE v.beziehung_von=f.gml_id AND v.beziehungsart='weistAuf' AND g.gemeinde = l.gemeinde";
     $sql.=" AND f.gemarkungsnummer = gem.gemarkungsnummer";
     if ($GemID!='') {
@@ -4323,20 +4319,16 @@ class pgdatabase extends pgdatabase_core {
   }
 
   # 2006-01-31 pk
-  function getMERfromGebaeude($Gemeinde,$Strasse,$Hausnr, $epsgcode) {
+  function getMERfromGebaeude($Hausnr, $epsgcode) {
     $this->debug->write("<br>postgres.php->database->getMERfromGebaeude, Abfrage des Maximalen umschließenden Rechtecks um die Gebaeude",4);
     $sql ="SELECT MIN(XMIN(ENVELOPE(TRANSFORM(o.the_geom, ".$epsgcode.")))) AS minx,MAX(XMAX(ENVELOPE(TRANSFORM(o.the_geom, ".$epsgcode.")))) AS maxx";
     $sql.=",MIN(YMIN(ENVELOPE(TRANSFORM(o.the_geom, ".$epsgcode.")))) AS miny,MAX(YMAX(ENVELOPE(TRANSFORM(o.the_geom, ".$epsgcode.")))) AS maxy";
     $sql.=" FROM alkobj_e_fla as o,alknhaus AS h";
     $sql.=" WHERE o.objnr=h.objnr";
-    $sql.=" AND h.gemeinde=".$Gemeinde;
-    if ($Strasse!='') {
-      $sql.=" AND h.strasse='".$Strasse."'";
-    }
     if ($Hausnr!='') {
     	$Hausnr = str_replace(", ", ",", $Hausnr);
     	$Hausnr = strtolower(str_replace(",", "','", $Hausnr));    	
-      $sql.=" AND TRIM(LOWER(h.hausnr)) IN ('".$Hausnr."')";
+      $sql.=" AND h.gemeinde||'-'||h.strasse||'-'||TRIM(LOWER(h.hausnr)) IN ('".$Hausnr."')";
     }
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
@@ -4356,7 +4348,7 @@ class pgdatabase extends pgdatabase_core {
     return $ret;
   }
   
-  function getMERfromGebaeudeALKIS($Gemeinde,$Strasse,$Hausnr, $epsgcode) {
+  function getMERfromGebaeudeALKIS($Hausnr, $epsgcode) {
     $this->debug->write("<br>postgres.php->database->getMERfromGebaeude, Abfrage des Maximalen umschließenden Rechtecks um die Gebaeude",4);
     $sql ="SELECT MIN(XMIN(ENVELOPE(TRANSFORM(wkb_geometry, ".$epsgcode.")))) AS minx,MAX(XMAX(ENVELOPE(TRANSFORM(wkb_geometry, ".$epsgcode.")))) AS maxx";
     $sql.=",MIN(YMIN(ENVELOPE(TRANSFORM(wkb_geometry, ".$epsgcode.")))) AS miny,MAX(YMAX(ENVELOPE(TRANSFORM(wkb_geometry, ".$epsgcode.")))) AS maxy";
@@ -4366,14 +4358,10 @@ class pgdatabase extends pgdatabase_core {
 		$sql.=" LEFT JOIN ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde";
 		$sql.=" AND l.lage = lpad(s.lage,5,'0')";
 		$sql.=" WHERE gem.gemeinde = l.gemeinde";
-    $sql.=" AND gem.schluesselgesamt=".$Gemeinde;
-    if ($Strasse!='') {
-      $sql.=" AND l.lage='".$Strasse."'";
-    }
     if ($Hausnr!='') {
     	$Hausnr = str_replace(", ", ",", $Hausnr);
     	$Hausnr = strtolower(str_replace(",", "','", $Hausnr));    	
-      $sql.=" AND TRIM(LOWER(l.hausnummer)) IN ('".$Hausnr."')";
+      $sql.=" AND gem.schluesselgesamt||'-'||l.lage||'-'||TRIM(LOWER(l.hausnummer)) IN ('".$Hausnr."')";
     }
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
