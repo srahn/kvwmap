@@ -981,6 +981,7 @@ class ALB {
   }
 
   function ALBAuszug_Flurstueck($FlurstKennz,$formnummer,$wasserzeichen) {
+  	global $katasterfuehrendestelle;
     $pdf=new Cezpdf();
     $pdf->selectFont(PDFCLASSPATH.'fonts/Courier.afm');
     # Hilfsobjekte erzeugen
@@ -1038,7 +1039,18 @@ class ALB {
 
         $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,$art,$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 
-        if(AMT != '')$pdf->addText($col0,$row-=12,$fontSize,AMT);
+        if(AMT != ''){
+        	$amt = AMT;
+        	if($katasterfuehrendestelle){
+	        	foreach ($katasterfuehrendestelle as $key => $value) {
+					    if($flst->Grundbuecher[0]['bezirk'] <= $key) {
+					      $amt .= $value;
+					      break;
+					    }
+	        	}
+        	}
+        	$pdf->addText($col0,$row-=12,$fontSize,$amt);
+        }
         if(LANDKREIS != '')$pdf->addText($col7,$row-=12,$fontSize,LANDKREIS);
         if(($formnummer == '30' OR $formnummer == '35') AND BEARBEITER == 'true')$pdf->addText($col0,$row-=12,$fontSize,BEARBEITER_NAME);
         if(STRASSE != '')$pdf->addText($col7,$row-=12,$fontSize,STRASSE);

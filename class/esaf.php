@@ -97,8 +97,8 @@ class esaf {
         if($this->eigentuemerliste[$i]['bezirk'] != $last_bezirk){
         	if($katasterfuehrendestelle){
 	        	foreach ($katasterfuehrendestelle as $key => $value) {
-					    if($this->eigentuemerliste[$i]['bezirk'] <= $value) {
-					      $kswert = $key;
+					    if($this->eigentuemerliste[$i]['bezirk'] <= $key) {
+					      $kswert = $value;
 					      break;
 					    }
 	        	}

@@ -34,7 +34,8 @@ $gutachterausschuesse = array('12345', '6789');       # Version 1.7.5
 # bei zwei katasterführenden Stellen in einer kvwmap-DB (Nur für Adressänderungen wichtig, sonst auskommentieren)
 # erste Stelle bis einschließlich GBBZ-Schlüssel, zweite Stelle bis einschließlich GBBZ-Schlüssel, ....
 # wer nur eine katasterführende Stelle hat, kann das Array weglassen oder auskommentieren
-$katasterfuehrendestelle = array('0019' => '132845', '0021' => '132846');		# Version 1.9.0
+#$katasterfuehrendestelle = array('0019' => '132845', '0021' => '132846');		# Version 1.9.0
+$katasterfuehrendestelle = array('132845' => '0019', '132846' => '0021');		# Version 1.10.0  (Schlüssel und Werte wurden vertauscht)
 
 
 # definiert, ob zu Tetszwecken auf ein PostNAS-Schema zugegriffen wird, oder nicht
