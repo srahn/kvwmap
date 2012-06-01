@@ -771,7 +771,7 @@ function set_changed_flag(flag){
 
 				if($privileg == 1) {
 					if($this->new_entry == true){
-						if(!$nullable){ ?>
+						if($nullable === '0'){ ?>
 							<script type="text/javascript">
     						geom_not_null = true;
     					</script>

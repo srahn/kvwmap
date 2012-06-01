@@ -1047,3 +1047,5 @@ ALTER TABLE `rolle` ADD `always_draw` BOOLEAN NULL;
 ALTER TABLE `rolle_nachweise` CHANGE `suchstammnr` `suchstammnr` VARCHAR(15) NOT NULL;
 ALTER TABLE `rolle_nachweise` ADD `suchrissnr` VARCHAR(20) NOT NULL AFTER `suchstammnr`,
  			      ADD `suchfortf` INT(4) NULL AFTER `suchrissnr`;
+ 			      
+ALTER TABLE `layer_attributes` CHANGE `form_element_type` `form_element_type` ENUM('Text','Textfeld','Auswahlfeld','Geometrie','SubFormPK','SubFormFK','SubFormEmbeddedPK','Time','Dokument','Link','User','Stelle','Fläche','dynamicLink') NOTNULL DEFAULT 'Text';

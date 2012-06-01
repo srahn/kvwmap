@@ -6282,6 +6282,9 @@ class GUI extends GUI_core{
           elseif($table['type'][$i] == 'User'){                       # Typ "User"
             $sql.= "'".$this->user->Vorname." ".$this->user->Name."', ";
           }
+        	elseif($table['type'][$i] == 'Stelle'){                       # Typ "Stelle"
+            $sql.= "'".$this->Stelle->Bezeichnung."', ";
+          }
           elseif($table['type'][$i] != 'Text_not_saveable' AND $table['type'][$i] != 'Auswahlfeld_not_saveable' AND $table['type'][$i] != 'SubFormPK' AND $table['type'][$i] != 'SubFormFK' AND $this->formvars[$table['formfield'][$i]] != ''){
             $sql.= "'".addslashes($this->formvars[$table['formfield'][$i]])."', ";      # Typ "normal"
           }
@@ -10174,6 +10177,10 @@ class GUI extends GUI_core{
               $sql = "UPDATE ".$tablename." SET ".$attributname." = '".$this->user->Vorname." ".$this->user->Name."' WHERE oid = '".$oid."'";
               $this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
             } break;
+            case 'Stelle' : {
+              $sql = "UPDATE ".$tablename." SET ".$attributname." = '".$this->Stelle->Bezeichnung."' WHERE oid = '".$oid."'";
+              $this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
+            } break;
             case 'Geometrie' : {
               # nichts machen
             } break;
@@ -10504,7 +10511,17 @@ class GUI extends GUI_core{
 	            else{
 	              $sql = "SELECT ".$new_pfad." ".$sql_where;
 	            }
-	            $sql = "SELECT ".$pfad." AND the_geom && (".$sql.") AND (TOUCHES(the_geom, (".$sql.")) OR the_geom = (".$sql."))";
+	            $ret=$layerdb->execSQL($sql,4, 0);
+	            if(!$ret[0]){
+	            	while($rs=pg_fetch_array($ret[1])){
+	              	$geoms[]=$rs[0];
+	              }
+	            }
+	            $sql = '';
+	            for($g = 0; $g < count($geoms); $g++){
+	            	if($g > 0)$sql .= " UNION ";
+	            	$sql .= "SELECT ".$pfad." AND the_geom && ('".$geoms[$g]."') AND (INTERSECTS(the_geom, ('".$geoms[$g]."')) OR the_geom = ('".$geoms[$g]."'))";
+	            }
             }
             else{
 	            if($the_geom == 'query.the_geom'){
