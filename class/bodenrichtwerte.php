@@ -266,15 +266,23 @@ class bodenrichtwertzone {
     if($formvars['ergaenzende_nutzung']){$sql.= "ergaenzende_nutzung = '".$formvars['ergaenzende_nutzung']."', ";}
     if($formvars['bauweise']){$sql.= "bauweise = '".$formvars['bauweise']."', ";}
     if($formvars['geschosszahl']){$sql.= "geschosszahl = '".$formvars['geschosszahl']."', ";}
-    if($formvars['grundflaechenzahl']){$sql.= "grundflaechenzahl = ".$formvars['grundflaechenzahl'].", ";}
-    if($formvars['geschossflaechenzahl']){$sql.= "geschossflaechenzahl = ".$formvars['geschossflaechenzahl'].", ";}
-    if($formvars['baumassenzahl']){$sql.= "baumassenzahl = ".$formvars['baumassenzahl'].", ";}
-    if($formvars['flaeche'] != ''){$sql.= "flaeche = ".$formvars['flaeche'].", ";}
-    if($formvars['tiefe'] != ''){$sql.= "tiefe = ".$formvars['tiefe'].", ";}
-    if($formvars['breite'] != ''){$sql.= "breite = ".$formvars['breite'].", ";}
+    if($formvars['grundflaechenzahl'] == '')$formvars['grundflaechenzahl'] = 'NULL';
+    $sql.= "grundflaechenzahl = ".$formvars['grundflaechenzahl'].", ";
+    if($formvars['geschossflaechenzahl'] == '')$formvars['geschossflaechenzahl'] = 'NULL';
+    $sql.= "geschossflaechenzahl = ".$formvars['geschossflaechenzahl'].", ";
+    if($formvars['baumassenzahl'] == '')$formvars['baumassenzahl'] = 'NULL';
+    $sql.= "baumassenzahl = ".$formvars['baumassenzahl'].", ";
+    if($formvars['flaeche'] == '')$formvars['flaeche'] = 'NULL';
+    $sql.= "flaeche = ".$formvars['flaeche'].", ";
+    if($formvars['tiefe'] == '')$formvars['tiefe'] = 'NULL';
+    $sql.= "tiefe = ".$formvars['tiefe'].", ";
+    if($formvars['breite'] == '')$formvars['breite'] = 'NULL';
+    $sql.= "breite = ".$formvars['breite'].", ";
     if($formvars['wegeerschliessung']){$sql.= "wegeerschliessung = '".$formvars['wegeerschliessung']."', ";}
-    if($formvars['ackerzahl']){$sql.= "ackerzahl = ".$formvars['ackerzahl'].", ";}
-    if($formvars['gruenlandzahl']){$sql.= "gruenlandzahl = ".$formvars['gruenlandzahl'].", ";}
+    if($formvars['ackerzahl'] == '')$formvars['ackerzahl'] = 'NULL';
+    $sql.= "ackerzahl = ".$formvars['ackerzahl'].", ";
+    if($formvars['gruenlandzahl'] == '')$formvars['gruenlandzahl'] = 'NULL';
+    $sql.= "gruenlandzahl = ".$formvars['gruenlandzahl'].", ";
     if($formvars['aufwuchs']){$sql.= "aufwuchs = '".$formvars['aufwuchs']."', ";}
     if($formvars['verfahrensgrund']){$sql.= "verfahrensgrund = '".$formvars['verfahrensgrund']."', ";}
     if($formvars['verfahrensgrund_zusatz']){$sql.= "verfahrensgrund_zusatz = '".$formvars['verfahrensgrund_zusatz']."', ";}
