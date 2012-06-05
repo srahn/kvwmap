@@ -1733,7 +1733,18 @@ class ALB {
 #28.11.2006 H.Riedel, Aktualitaetsnr uebergeben
     $AktualitaetsNr=$buchungen[0]['aktualitaetsnr'];
     $this->ALBAuszug_SeitenKopf($pdf,NULL,$Ueberschrift,$art,$seite,$row,$fontSize,$BestandStr,$AktualitaetsNr);
-    if(AMT != '')$pdf->addText($col1,$row-=12,$fontSize,AMT);
+  	if(AMT != ''){
+    	$amt = AMT;
+    	if($katasterfuehrendestelle){
+    		foreach ($katasterfuehrendestelle as $key => $value) {
+					if($flst->Grundbuecher[0]['bezirk'] <= $key) {
+		      	$amt .= $value;
+		      	break;
+		    	}
+        }
+      }
+      $pdf->addText($col0,$row-=12,$fontSize,$amt);
+    }
     if(LANDKREIS != '')$pdf->addText($col42,$row-=12,$fontSize,LANDKREIS);
     if(STRASSE != '')$pdf->addText($col42,$row-=12,$fontSize,STRASSE);
     if(STRASSE2 != '')$pdf->addText($col42,$row-=12,$fontSize,STRASSE2);
