@@ -188,15 +188,6 @@ CREATE INDEX gaz_begriffe_gist ON gaz_begriffe USING GIST (wgs_geom GIST_GEOMETR
 --# Die Funktionen müssen in dieser Reihenfolge erzeugt werden! #
 --###############################################################
 
--- Function: linefrompoly(geometry)
--- Liefert eine LINESTRING Gemetrie von einer MULTIPOLYGON oder POLYGON Geometrie zurück
--- DROP FUNCTION linefrompoly(geometry); 
-CREATE OR REPLACE FUNCTION linefrompoly(geometry)
-  RETURNS geometry AS
-  $BODY$SELECT GeomFromText(replace(replace(replace(asText($1),'MULTIPOLYGON','LINESTRING'),'(((','('),')))',')'),srid($1))$BODY$
-  LANGUAGE 'sql' IMMUTABLE STRICT;
-
-COMMENT ON FUNCTION linefrompoly(geometry) IS 'Liefert eine LINESTRING Gemetrie von einer MULTIPOLYGON oder POLYGON Geometrie zurück';
 
 -- Function: linen(geometry, int4)
 -- Liefert die n-te Linien innerhalb eines Polygon als Geometry zurück
