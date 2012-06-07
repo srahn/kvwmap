@@ -18,7 +18,7 @@
 	<input type="HIDDEN" name="maxx" value="<?php echo $this->map->extent->maxx; ?>">
 	<input type="HIDDEN" name="maxy" value="<?php echo $this->map->extent->maxy; ?>">
 	<input type="hidden" name="pathlength" value="<?php echo $this->formvars['pathlength']; ?>">
-	<input type="hidden" name="scale" value="<?php echo $this->user->rolle->pixsize; ?>">
+	<INPUT TYPE="hidden" NAME="pixelsize" VALUE="<?php echo $pixelsize; ?>">
 	<input name="newpath" type="hidden" value="<?php echo $this->formvars['newpath']; ?>">
 	<input name="pathwkt" type="hidden" value="<?php echo $this->formvars['pathwkt']; ?>">
 	<input name="newpathwkt" type="hidden" value="<?php echo $this->formvars['newpathwkt']; ?>">
