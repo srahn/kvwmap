@@ -5757,6 +5757,7 @@ class GUI extends GUI_core{
       case MS_POSTGIS : {
         $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
         $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+        $layerdb->setClientEncoding();
         $path = $layerset[0]['pfad'];
         $privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
         $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
@@ -6277,7 +6278,7 @@ class GUI extends GUI_core{
         $sql.= ") VALUES (";
         for($i = 0; $i < count($table['attributname']); $i++){
           if($table['type'][$i] == 'Time'){                       # Typ "Time"
-            $sql.= "'".date('Y-m-d G:i:s')."', ";
+            $sql.= "(now())::timestamp(0), ";
           }
           elseif($table['type'][$i] == 'User'){                       # Typ "User"
             $sql.= "'".$this->user->Vorname." ".$this->user->Name."', ";
@@ -6390,6 +6391,7 @@ class GUI extends GUI_core{
       if($layerset[0]['privileg'] > 0){   # überprüfen, ob Recht zum Erstellen von neuen Datensätzen gesetzt ist
         $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
         $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+        $layerdb->setClientEncoding();
         $privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
         $layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
 
@@ -10135,6 +10137,7 @@ class GUI extends GUI_core{
         $datatype = $element[6];
         if($layer_id != $old_layer_id AND $tablename != ''){
           $layerdb = $mapdb->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
+          $layerdb->setClientEncoding();
           #$filter = $mapdb->getFilter($layer_id, $this->Stelle->id);		# siehe unten
           $old_layer_id = $layer_id;
         }
@@ -10356,6 +10359,7 @@ class GUI extends GUI_core{
             # Rechte den Attributen zuweisen
 
             $layerdb = $this->mapDB->getlayerdatabase($layerset[$i]['Layer_ID'], $this->Stelle->pgdbhost);
+            $layerdb->setClientEncoding();
             $path = $layerset[$i]['pfad'];
             $privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
             $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);

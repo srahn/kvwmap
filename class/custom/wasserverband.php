@@ -1,0 +1,40 @@
+<?php
+class gewaesser {
+  var $shapeFile;
+  var $dbDir;
+  var $pgdatabase;
+  
+  function gewaesser($pgdatabase) {
+    $this->pgdatabase = $pgdatabase;
+	$this->shapeFile = '/home/fgs/wasserverband-kroepelin/gew-kroepelin_utm_ost';
+	$this->dbDir = '/home/fgs/wasserverband-kroepelin/db/';
+  }
+
+  function truncateSpatial() {
+    $sql = 'TRUNCATE wasserverband.gewaesser;';
+    $this->pgdatabase->execSQL($sql,4, 0);
+  }
+  
+  function loadSpatial($shapeFile) {
+    exec('shp2pgsql -a -s 25833 '.$shapeFile.' wasserverband.gewaesser > '.$shapeFile.'.sql');
+	exec(POSTGRESBINPATH.'psql -f '.$shapeFile.'.sql -U '.$this->pgdatabase->user.' '.$this->pgdatabase->dbName);
+  }
+  
+  function loadThematic() {
+	$sqlFiles = scandir($this->dbDir);
+	foreach($sqlFiles AS $sqlFile) {
+		if ($sqlFile != '.' and $sqlFile != '..') {
+			echo $this->dbDir.$sqlFile.'<br>';
+			$dateizeilen = file($this->dbDir.$sqlFile);
+			foreach($dateizeilen AS $zeile) {
+			  $zeile = str_replace("\"\",","'',",$zeile);
+			  $zeile = str_replace("char","character varying",$zeile);
+			  echo $zeile.'<br>';
+			}
+			file_put_contents($this->dbDir.'_'.$sqlFile);
+		}
+	}
+  }
+  
+}
+?>
