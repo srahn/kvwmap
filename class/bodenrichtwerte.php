@@ -284,8 +284,8 @@ class bodenrichtwertzone {
     if($formvars['gruenlandzahl'] == '')$formvars['gruenlandzahl'] = 'NULL';
     $sql.= "gruenlandzahl = ".$formvars['gruenlandzahl'].", ";
     if($formvars['aufwuchs']){$sql.= "aufwuchs = '".$formvars['aufwuchs']."', ";}
-    if($formvars['verfahrensgrund']){$sql.= "verfahrensgrund = '".$formvars['verfahrensgrund']."', ";}
-    if($formvars['verfahrensgrund_zusatz']){$sql.= "verfahrensgrund_zusatz = '".$formvars['verfahrensgrund_zusatz']."', ";}
+    $sql.= "verfahrensgrund = '".$formvars['verfahrensgrund']."', ";
+    $sql.= "verfahrensgrund_zusatz = '".$formvars['verfahrensgrund_zusatz']."', ";
     if($formvars['bemerkungen']){$sql.= "bemerkungen = '".$formvars['bemerkungen']."', ";}
     $sql.= "the_geom = Transform(GeometryFromText('".$formvars['umring']."',".$this->client_epsg."), ".$this->layer_epsg.")";
     $sql.= ", textposition = Transform(GeometryFromText('".$formvars['textposition']."',".$this->client_epsg."), ".$this->layer_epsg.")";
