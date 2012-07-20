@@ -270,11 +270,13 @@ for ($i=0;$i<$anzLayer;$i++) {
   					<input name="selected_layer_id" type="hidden" value="'.$this->formvars['selected_layer_id'].'">
   					<input id="offset_'.$this->formvars['selected_layer_id'].'" name="offset_'.$this->formvars['selected_layer_id'].'" type="hidden" value="'.$this->formvars['offset_'.$this->formvars['selected_layer_id']].'">';
 
-  		foreach($this->qlayerset[0]['attributes']['all_table_names'] as $tablename){
-	    	if($this->formvars['value_'.$tablename.'_oid']){
-	      	echo '<input name="value_'.$tablename.'_oid" type="hidden" value="'.$this->formvars['value_'.$tablename.'_oid'].'">';
-	      }
-	    }
+  		if(is_array($this->qlayerset[0]['attributes']['all_table_names'])){
+  			foreach($this->qlayerset[0]['attributes']['all_table_names'] as $tablename){
+		    	if($this->formvars['value_'.$tablename.'_oid']){
+		      	echo '<input name="value_'.$tablename.'_oid" type="hidden" value="'.$this->formvars['value_'.$tablename.'_oid'].'">';
+		      }
+		    }
+  		}
 
 	  	for($j = 0; $j < count($this->qlayerset[0]['attributes']['type']); $j++){
 	  		if($this->qlayerset[0]['attributes']['type'][$j] != 'geometry'){

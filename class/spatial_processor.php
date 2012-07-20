@@ -39,7 +39,7 @@ class spatial_processor {
 
   function spatial_processor($rolle, $database, $pgdatabase) {
     global $debug;
-    $this->debug=$debug;
+    $this->debug = $debug;
     $this->database = $database;
     $this->pgdatabase = $pgdatabase;
 		$this->rolle = $rolle;
@@ -124,6 +124,7 @@ class spatial_processor {
   
   function process_query($formvars){
 		if($formvars['path2'] != ''){
+      $this->debug->write("path2:".$formvars['path2']."\n",4);
 			if($formvars['geotype'] == 'line'){
 				$polywkt2 = $this->composeMultilineWKTStringFromSVGPath($formvars['path2']);
 			}
@@ -134,7 +135,8 @@ class spatial_processor {
 		if($formvars['path1'] != ''){
 			$polywkt1 = $formvars['path1'];
   	}
-  	
+    
+    $this->debug->write("Starte operation: ".$formvars['operation']."\n",4);
 		switch($formvars['operation']){
 			
 			case 'transformPoint':{
@@ -235,6 +237,7 @@ class spatial_processor {
 				else{
 					$result = $this->area($polywkt2, $formvars['unit']);
 				}
+        $this->debug->write("Operation Flächenberechnung beendet.\n",4);
 			}break;
 			
 			case 'length':{
@@ -262,6 +265,7 @@ class spatial_processor {
 				else{
 					$result = $this->union($polywkt1, $polywkt2, $formvars['resulttype']);
 				}
+        $this->debug->write("Operation add_geometry beendet.\n",4);
 			}break;
 			
 			case 'subtract_geometry':{
@@ -293,6 +297,7 @@ class spatial_processor {
 	}
 	
 	function queryMap($input_coord, $layer_id, $fromwhere, $columnname) {
+    $this->debug->write("Starte Funktion queryMap.\n",4);
     # Abfragebereich berechnen
     $corners=explode(';',$input_coord);
     $lo=explode(',',$corners[0]); # linke obere Ecke in Bildkoordinaten von links oben gesehen
@@ -487,13 +492,12 @@ class spatial_processor {
 	      $searchbox_maxx=strval($rect->maxx+$rand);
 	      $searchbox_maxy=strval($rect->maxy+$rand);
 	      $request = $layerset[0]['connection'].'&service=wfs&version=1.0.0&request=getfeature&typename='.$layerset[0]['wms_name'].'&bbox='.$searchbox_minx.','.$searchbox_miny.','.$searchbox_maxx.','.$searchbox_maxy;
-	      #echo $request;
+        $this->debug->write("<br>WFS-Request: ".$request,4);
 	      $gml = file_get_contents($request);
-	      #echo $gml;
+        #$this->debug->write("<br>WFS-Response: ".$gml,4);
 	      $wkt = $this->composeMultipolygonWKTStringFromGML($gml, $layerset[0]['wfs_geom']);
-	      #echo $wkt;
-	      $wkt = $this->pgdatabase->transformPoly($wkt, $layerset[0]['epsg_code'], $this->rolle->epsg_code);
-	      #echo $wkt;
+	      #$this->debug->write("<br>WKT von GML-Geometrie: ".$wkt,4);
+	      if($layerset[0]['epsg_code'] != $this->rolle->epsg_code)$wkt = $this->pgdatabase->transformPoly($wkt, $layerset[0]['epsg_code'], $this->rolle->epsg_code);
 	      return $wkt;
     	}break;
     }
@@ -701,28 +705,30 @@ class spatial_processor {
   	else{
   		$geom = $gml;
   	}
-    $WKT = 'MULTIPOLYGON(';
-    $polygons = explode('<gml:Polygon>', $geom);
+    $polygons = explode('<gml:Polygon', $geom);
     for($i = 1; $i < count($polygons); $i++){
-    	if($i > 1){$WKT .= ',';}
-    	$WKT .= '(';
+    	$wkt_polygon[$i-1] = 'geomfromtext(\'POLYGON(';
     	$rings = explode('<gml:coordinates', $polygons[$i]);
       for($j = 1; $j < count($rings); $j++){
-      	if($j > 1){$WKT .= ',';}
-      	$WKT .= '(';
+      	if($j > 1){$wkt_polygon[$i-1] .= ',';}
+      	$wkt_polygon[$i-1] .= '(';
       	$start = strpos($rings[$j], '>')+1;
       	$end = strpos($rings[$j], '</gml:coordinates>');
       	$coords = substr($rings[$j], $start, $end-$start);
       	$coords = str_replace(' ', '_', trim($coords));
       	$coords = str_replace(',', ' ', $coords);
       	$coords = str_replace('_', ',', $coords);
-      	$WKT .= $coords;
-      	$WKT .= ')';
+      	$wkt_polygon[$i-1] .= $coords;
+      	$wkt_polygon[$i-1] .= ')';
       }
-      $WKT .= ')';
+      $wkt_polygon[$i-1] .= ')\')';
     }
-    $WKT .= ')';
-    return $WKT;
+    $sql = "SELECT astext(st_union(ARRAY[".implode(',', $wkt_polygon)."]))";
+  	$ret=$this->pgdatabase->execSQL($sql,4, 0);
+  	if(!$ret[0]){
+  		$rs=pg_fetch_array($ret[1]);
+  		return $rs[0];	
+    }
   }
 	 
 }

@@ -10749,7 +10749,9 @@ class GUI extends GUI_core{
       $layerdb = $this->pgdatabase;
     }
     $this->processor = new spatial_processor($this->user->rolle, $this->database, $layerdb);
+    $this->processor->debug->write("Starte spatial_processing.\n",4);
     $this->processor->process_query($this->formvars);
+    $this->processor->debug->write("process_query beendet.\n",4);
   }
 
   function getRow() {

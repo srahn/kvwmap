@@ -28,12 +28,39 @@
       <?  
       for ($i=0;$i<count($this->layerdaten['ID']);$i++) { 
       if($this->formvars['order']=="Name") {
-      if(!in_array(strtoupper(substr($this->layerdaten['Bezeichnung'][$i],0,1)),$umlaute) AND strtolower(substr($this->layerdaten['Bezeichnung'][$i],0,1)) != $first) { ?>
+        $first=strtoupper(substr($this->layerdaten['Bezeichnung'][$i],0,1));
+          if (in_array($first,$umlaute)) {
+            switch ($first) {
+              case 'Ä': {
+              $first='A';
+              }break;
+              case 'Ö': {
+              $first='O';
+              }break;
+              case 'Ü': {
+              $first='U';
+              }break;                           
+            }          
+          } 
+        if($first != $nextfirst) { ?>
       <tr>
         <th align="left" style="border-top:1px solid #808080; margin:0px;">
-          <? echo "<a name='".strtoupper(substr($this->layerdaten['Bezeichnung'][$i],0,1))."'>".strtoupper(substr($this->layerdaten['Bezeichnung'][$i],0,1))."</a>";
-          $first=strtolower(substr($this->layerdaten['Bezeichnung'][$i],0,1)); ?>
-        </td>
+          <? echo "<a name='".$first."'>".$first."</a>";
+            $nextfirst=$first;
+          if (in_array($first,$umlaute)) {
+            switch ($first) {
+              case 'Ä': {
+              $nextfirst='A';
+              }break;
+              case 'Ö': {
+              $nextfirst='O';
+              }break;
+              case 'Ü': {
+              $nextfirst='U';
+              }break;                           
+            }
+          } ?>
+        </th>
         <td colspan="4" align="right" style="border-top:1px solid #808080; margin:0px;">
           <a href="#oben"><img src="<? echo GRAPHICSPATH; ?>pfeil2.gif" width="11" height="11" border="0"></a>
         </td>

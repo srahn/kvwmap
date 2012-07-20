@@ -213,12 +213,12 @@ class jagdkataster {
 		else{				# ein Jagdbezirk
 			$oids[] = $formvars['oid']; 
 		}
-		$sql = "SELECT alb.gemkgschl, gemkgname, alb.flurstkennz, area(alkobj_e_fla.the_geom) AS flurstflaeche, area(Intersection(alkobj_e_fla.the_geom, jagdbezirke.the_geom)) AS schnittflaeche, jagdbezirke.name, jagdbezirke.art, alb.flaeche AS albflaeche";
+		$sql = "SELECT alb.gemkgschl, gemkgname, alb.flurstkennz, st_area(alkobj_e_fla.the_geom) AS flurstflaeche, st_area(st_intersection(alkobj_e_fla.the_geom, jagdbezirke.the_geom)) AS schnittflaeche, jagdbezirke.name, jagdbezirke.art, alb.flaeche AS albflaeche";
 		$sql.= " FROM alb_v_gemarkungen, alknflst, alkobj_e_fla, jagdbezirke, alb_flurstuecke AS alb";
 		$sql.= " WHERE alb_v_gemarkungen.gemkgschl = CAST(alknflst.gemkgschl AS integer) AND alknflst.objnr = alkobj_e_fla.objnr";
 		$sql.= " AND jagdbezirke.oid IN (".implode(',', $oids).")";
 		$sql.= " AND alkobj_e_fla.the_geom && jagdbezirke.the_geom AND intersects(alkobj_e_fla.the_geom, jagdbezirke.the_geom)";
-		$sql.= " AND area(Intersection(alkobj_e_fla.the_geom, jagdbezirke.the_geom)) > 1";
+		$sql.= " AND st_area(st_intersection(alkobj_e_fla.the_geom, jagdbezirke.the_geom)) > 1";
 		$sql.= " AND alb.flurstkennz = alknflst.flurstkennz ORDER BY jagdbezirke.name";
 		#echo $sql;
 		$ret = $this->database->execSQL($sql, 4, 0);
@@ -227,7 +227,7 @@ class jagdkataster {
 			$rs['albflaeche'] = round($rs['albflaeche'], 2);
 			$explosion = explode('-', $rs['flurstkennz']);
 			$rs['flur'] = $explosion[1];
-			$rs['zaehlernenner'] = $explosion[2];
+			$rs['zaehlernenner'] = substr($explosion[2],0,-3);
 			
 			
 			# --- Eigentümer ---

@@ -182,8 +182,8 @@ if(!function_exists('imagerotate')){
 
  
 function transform($x,$y,$from_epsg,$to_epsg) {
-	$x = 12.099281283333;
-	$y = 54.075214183333;
+	#$x = 12.099281283333;
+	#$y = 54.075214183333;
   $point = ms_newPointObj();
 	$point->setXY($x,$y);
 	$projFROM = ms_newprojectionobj("init=epsg:".$from_epsg);
@@ -1040,5 +1040,27 @@ function output_handler($img) {
    header('Content-type: image/png');
    header('Content-Length: ' . strlen($img));
    return $img;
+}
+function getArrayOfChars() {
+	$characters = array();
+	$characterNumbers = array();
+
+	for ($i=48; $i<=57; $i++) {
+	  $characterNumbers[]=$i; # Zahlen
+	}
+
+	for ($i=65; $i<=90; $i++) {
+	  $characterNumbers[]=$i; # Großbuchstaben
+	}
+	for ($i=97; $i<=122; $i++) {
+	  $characterNumbers[]=$i; # Kleinbuchstaben
+	}
+	
+	array_push($characterNumbers,223,196,228,214,246,220,252); # Sonderzeichen
+	
+	foreach ($characterNumbers as $characterNumber) {
+	  $characters[] = chr($characterNumber);
+	}
+	return $characters;
 }
 ?>
