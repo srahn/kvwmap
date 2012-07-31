@@ -2777,6 +2777,7 @@ class flurstueck {
     $this->Flurkarte=$rs['karte'];
     $this->ALB_Flaeche=$rs['flaeche'];
     $this->Status=$rs['status'];
+    $this->Pruefzeichen=$rs['pruefzeichen'];
     $this->Forstamt=$this->getForstamt();				# ALKIS TODO
     $this->AktualitaetsNr=$this->getAktualitaetsNr();			# ALKIS TODO
     $this->Adresse=$this->getAdresse();
