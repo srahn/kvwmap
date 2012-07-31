@@ -1063,4 +1063,28 @@ function getArrayOfChars() {
 	}
 	return $characters;
 }
+
+function url_get_contents($url) {
+	try {
+		$response = @ file_get_contents($url);
+		if ($response == false) {
+			throw new Exception("Fehler beim Abfragen der URL mit file_get_contents(".$url.")");
+		}
+	}	
+	catch (Exception $e) {
+		$response = curl_get_contents($url);
+	}
+	return $response;
+}
+
+function curl_get_contents($url) {
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+  $result = curl_exec($ch);
+  if (curl_getinfo($ch, CURLINFO_HTTP_CODE)==404) {
+	$result = "Fehler 404: File not found. Die Resource konnte mit der URL: ".$url." nicht auf dem Server gefunden werden!";
+  }
+  curl_close($ch);
+  return $result;
+}
 ?>

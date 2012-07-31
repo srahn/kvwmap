@@ -15,7 +15,7 @@
   }
    
   function submit(input_coord, cmd){
-  	if(navigator.appName == "Netscape" && document.GUI.legendtouched.value == 0){
+  	if((navigator.userAgent.toLowerCase().indexOf('firefox') >= 0) && document.GUI.legendtouched.value == 0){
   		svgdoc = document.SVG.getSVGDocument();	
 			var mapimg = svgdoc.getElementById("mapimg2");
 			var scalebar = document.getElementById("scalebar");
@@ -58,6 +58,7 @@
   }
 
   function sendpath(cmd,pathx,pathy)   {;
+		document.GUI.stopnavigation.value = 1;
     path  = "";
     switch(cmd) 
     {
@@ -226,6 +227,9 @@ $svg='<?xml version="1.0"?>
   var y_pos="";
 	var get_vertices_loop;
 	var gps_follow_cooldown = 0;
+	var root = document.documentElement;
+	var mousewheelloop;
+	var stopnavigation = false;
   		
   ';
 
@@ -246,7 +250,7 @@ if($_SESSION['mobile'] == 'true'){
 					gps_follow_cooldown = 3;
 					pathx[0] = x;
 					pathy[0] = resy-y;
-					top.sendpath("recentre", pathx, pathy);
+					sendpath("recentre", pathx, pathy);
 				}
 				if(gps_follow_cooldown > 0){
 					gps_follow_cooldown--;
@@ -274,25 +278,86 @@ function startup(){';
   document.getElementById(doing+"0").style.setProperty("fill",highlighted,"");
 }
 
+function sendpath(cmd, pathx, pathy){
+	document.getElementById("waitingimage").style.visibility = "visible";
+	top.sendpath(cmd, pathx, pathy);
+}
+
+function mousewheelzoom(){
+	window.clearInterval(mousewheelloop);
+	var g = document.getElementById("moveGroup");
+	zx = g.getCTM().inverse();
+	pathx[0] = Math.round(zx.e);
+	pathy[0] = Math.round(zx.f);
+	pathx[2] = Math.round(zx.e + resx*zx.a); 
+	pathy[2] = Math.round(zx.f + resy*zx.a);
+	sendpath("zoomin_box", pathx, pathy);
+}
+
+function mousewheelchange(evt){
+	if(top.document.GUI.stopnavigation.value == 0){
+		window.clearInterval(mousewheelloop);
+		if(evt.preventDefault)evt.preventDefault();
+		if(evt.wheelDelta)
+			delta = evt.wheelDelta / 3600; // Chrome/Safari
+		else
+			delta = evt.detail / -90; // Mozilla
+		var z = 1 + delta*5;
+		var g = document.getElementById("moveGroup");
+		var p = getEventPoint(evt);
+		p = p.matrixTransform(g.getCTM().inverse());
+		var k = root.createSVGMatrix().translate(p.x, p.y).scale(z).translate(-p.x, -p.y);
+		setCTM(g, g.getCTM().multiply(k));
+		mousewheelloop = window.setInterval("mousewheelzoom()", 400);
+	}
+}
+
+function setCTM(element, matrix) {
+	var s = "matrix(" + matrix.a + "," + matrix.b + "," + matrix.c + "," + matrix.d + "," + matrix.e + "," + matrix.f + ")";
+	element.setAttribute("transform", s);
+}
+
+function getEventPoint(evt) {
+	var p = root.createSVGPoint();
+	p.x = evt.clientX;
+	p.y = evt.clientY;
+	return p;
+}
+
 function init(){
 	startup();
 	if(navigator.appName == "Adobe SVG Viewer"){
 		//document.getElementById("mapimg2").addEventListener("load", function(evt) { moveback(); }, false);
 	}
 	else{
-		document.getElementById("mapimg2").addEventListener("load", function(evt) { moveback(); }, false);
+		document.getElementById("mapimg2").addEventListener("load", function(evt) { moveback(evt); }, false);
+	}
+	if(window.addEventListener){
+		if(navigator.userAgent.toLowerCase().indexOf(\'webkit\') >= 0)
+			window.addEventListener(\'mousewheel\', mousewheelchange, false); // Chrome/Safari
+		else
+  		window.addEventListener(\'DOMMouseScroll\', mousewheelchange, false);
+  }
+  else{
+		window.onmousewheel = document.onmousewheel = mousewheelchange;
 	}
 }
 
 top.document.getElementById("map").SVGstartup = startup;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
-function moveback(){
+function moveback(evt){
 	document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");
 	document.getElementById("mapimg").setAttribute("xlink:href", document.getElementById("mapimg2").getAttribute("xlink:href"));
-	// Redling-Sachen loeschen
+	// Redlining-Sachen loeschen
 	while(child = document.getElementById("redlining").firstChild){
   	document.getElementById("redlining").removeChild(child);
 	}
+	// Tooltip refreshen
+	oldmousex = undefined;
+	hidetooltip(evt);
+	// Navigation wieder erlauben
+	top.document.GUI.stopnavigation.value = 0;
+	document.getElementById("waitingimage").style.visibility = "hidden";
 	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("xlink:href", "")\', 200);		// Firefox 4 
 }
 
@@ -531,70 +596,68 @@ function world2pixelsvg(pathWelt){
 
 
 function mousedown(evt){
-//  alert(doing);
-  switch(doing) 
-  {
-   case "previous":
-    
-   break;
-   case "next":
-    
-   break;
-   case "zoomin":
-    startPoint(evt);
-   break;
-   case "zoomout":
-    selectPoint(evt);
-   break;
-   case "recentre":
-    startMove(evt);
-   break;
-	case "showcoords":
-    show_coords(evt);
-   break;
-   case "pquery":
-    startPoint(evt);
-   break;
-	 case "touchquery":
-    startPoint(evt);
-   break;
-   case "ppquery":
-    startPoint(evt);
-   break;
-   case "polygonquery":
- 		if (polydrawing){
-      addpolypoint(evt);
-    }
-    else {
-      startpolydraw(evt);
-    }
-   break;
-	 case "drawpolygon":
- 		if (polydrawing){
-      addpolypoint(evt);
-    }
-    else {
-      startpolydraw(evt);
-    }
-   break;
-	 case "addtext":
-     addnewtext(evt);
-   break;
-	 case "drawarrow":
-	   startarrowdraw(evt);
-   break;
-   case "measure":
-    if (measuring){
-      addpoint(evt);
-    }
-    else {
-      startMeasure(evt);
-    }
-   break;
-   default:
-    alert("Fehlerhafte Eingabe! \nUebergebene Daten: "+cmd+", "+doing);
-   break;
-  }
+	if(top.document.GUI.stopnavigation.value == 0){
+	  switch(doing){
+	   case "previous":
+	   break;
+	   case "next":
+	   break;
+	   case "zoomin":
+	    startPoint(evt);
+	   break;
+	   case "zoomout":
+	    selectPoint(evt);
+	   break;
+	   case "recentre":
+	    startMove(evt);
+	   break;
+		case "showcoords":
+	    show_coords(evt);
+	   break;
+	   case "pquery":
+	    startPoint(evt);
+	   break;
+		 case "touchquery":
+	    startPoint(evt);
+	   break;
+	   case "ppquery":
+	    startPoint(evt);
+	   break;
+	   case "polygonquery":
+	 		if (polydrawing){
+	      addpolypoint(evt);
+	    }
+	    else {
+	      startpolydraw(evt);
+	    }
+	   break;
+		 case "drawpolygon":
+	 		if (polydrawing){
+	      addpolypoint(evt);
+	    }
+	    else {
+	      startpolydraw(evt);
+	    }
+	   break;
+		 case "addtext":
+	     addnewtext(evt);
+	   break;
+		 case "drawarrow":
+		   startarrowdraw(evt);
+	   break;
+	   case "measure":
+	    if (measuring){
+	      addpoint(evt);
+	    }
+	    else {
+	      startMeasure(evt);
+	    }
+	   break;
+	   default:
+	    alert("Fehlerhafte Eingabe! \nUebergebene Daten: "+cmd+", "+doing);
+	   break;
+	  }
+	}
 }
 
 function mousemove(evt){
@@ -775,7 +838,7 @@ function addpolypoint(evt){
   client_x = evt.clientX;
   client_y = resy - evt.clientY;
   if(doing == "polygonquery" && client_x == polypathx[polypathx.length-1] && client_y == polypathy[polypathy.length-1]){
-  	top.sendpath(doing,polypathx,polypathy);
+  	sendpath(doing,polypathx,polypathy);
   }
   else{
   	polypathx.push(client_x);
@@ -990,7 +1053,7 @@ function selectPoint(evt) {
   // neuen punkt abgreifen
   pathx[0] = evt.clientX;
   pathy[0] = evt.clientY;
-  top.sendpath(cmd,pathx,pathy);
+  sendpath(cmd,pathx,pathy);
 }
 
 // ----------------------------box aufziehen---------------------------------
@@ -1055,7 +1118,7 @@ function endPoint(evt) {
   dragging  = false;
   dragdone  = false;
   // hiddenformvars aktualisieren
-  top.sendpath(cmd,boxx,boxy);
+  sendpath(cmd,boxx,boxy);
 }
 
 // ----------------------------vektor aufziehen---------------------------------
@@ -1083,14 +1146,11 @@ if (!moving) return;
   moved = true;
 }
 
-function moveMap() 
-{
-  // transformation erstellen
+function moveMap(){
+  //kartenausschnitt verschieben
   move_x = pathx[1]-pathx[0];
   move_y = pathy[1]-pathy[0];
   path = "translate("+move_x+" "+move_y+")";
-
-  // kartenausschnitt verschieben
   document.getElementById("moveGroup").setAttribute("transform", path);
 }
 
@@ -1105,7 +1165,7 @@ function endMove(evt) {
   moving  = false;
   moved  = false;
   // hiddenformvars aktualisieren
-  top.sendpath(cmd,pathx,pathy);
+  sendpath(cmd,pathx,pathy);
 }
 
 // -----------------------kl. koordinatenpaar zuerst---------------------------
@@ -1184,7 +1244,30 @@ if($_SESSION['mobile'] == 'true'){
 $svg.='
     </g>
   </g>
-	<image id="mapimg2" xlink:href="" height="100%" width="100%" y="0" x="0"/>
+	<g id="waitingimage" style="visibility:hidden" transform="translate('.$res_xm.', '.$res_ym.') scale(0.3 0.3)">
+		<g>
+	    <line id="line" x1="-165" y1="0" x2="-115" y2="0" stroke="#111" stroke-width="30" style="stroke-linecap:round"/>
+	    <use xlink:href="#line" transform="rotate(30,0,0)" style="opacity:.0833"/>
+	    <use xlink:href="#line" transform="rotate(60,0,0)" style="opacity:.166"/>
+	    <use xlink:href="#line" transform="rotate(90,0,0)" style="opacity:.25"/>
+	    <use xlink:href="#line" transform="rotate(120,0,0)" style="opacity:.3333"/>
+	    <use xlink:href="#line" transform="rotate(150,0,0)" style="opacity:.4166"/>
+	    <use xlink:href="#line" transform="rotate(180,0,0)" style="opacity:.5"/>
+	    <use xlink:href="#line" transform="rotate(210,0,0)" style="opacity:.5833"/>
+	    <use xlink:href="#line" transform="rotate(240,0,0)" style="opacity:.6666"/>
+	    <use xlink:href="#line" transform="rotate(270,0,0)" style="opacity:.75"/>
+	    <use xlink:href="#line" transform="rotate(300,0,0)" style="opacity:.8333"/>
+	    <use xlink:href="#line" transform="rotate(330,0,0)" style="opacity:.9166"/>
+	    
+	    <animateTransform attributeName="transform" attributeType="XML" type="rotate" begin="0s" dur="1s" repeatCount="indefinite" calcMode="discrete"
+	    keyTimes="0;.0833;.166;.25;.3333;.4166;.5;.5833;.6666;.75;.8333;.9166;1"
+	    values="0,0,0;30,0,0;60,0,0;90,0,0;120,0,0;150,0,0;180,0,0;210,0,0;240,0,0;270,0,0;300,0,0;330,0,0;360,0,0"/>
+    </g>
+  </g>
+  <g id="mapimg2_group">
+  	<image id="mapimg2" xlink:href="" height="100%" width="100%" y="0" x="0"/>
+  </g>
+	
   <rect id="canvas" cursor="crosshair" onmousedown="mousedown(evt)" onmousemove="mousemove(evt);" onmouseup="mouseup(evt);" width="100%" height="100%" opacity="0"/>
 		<g id="vertices" transform="translate(0,'.$res_y.') scale(1,-1)">
 			<circle id="kreis" cx="-500" cy="-500" r="7" opacity="0.1" onmouseover="activate_vertex(evt)" onmouseout="deactivate_vertex(evt)" onmousedown="add_vertex(evt)" />

@@ -1111,7 +1111,7 @@ class GUI_core {
       $this->debug->write('<br>Es wird auf eine Rechteckgezoomt gezoomt',4);
       $oPixelExt=ms_newRectObj();
       if($minx != 'undefined' AND $miny != 'undefined' AND $maxx != 'undefined' AND $maxy != 'undefined'){
-        $oPixelExt->setextent($minx,$miny,$maxx,$maxy);
+        $oPixelExt->setextent($minx,$miny,$maxx,$maxy); 
         $this->map->zoomrectangle($oPixelExt,$this->map->width,$this->map->height,$this->map->extent);
         # Nochmal Zoomen auf die Mitte mit Faktor 1, damit der Ausschnitt in den erlaubten Bereich
         # verschoben wird, falls er ausserhalb liegt, zoompoint berücksichtigt das, zoomrectangle nicht.

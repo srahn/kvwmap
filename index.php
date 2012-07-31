@@ -1110,7 +1110,6 @@ if ($goNotExecutedInIncludeCases) {
 	  } break;
 	  
 	  case 'UKO_Export' : {
-		//$GUI->checkCaseAllowed('UKO_Export');
 		$GUI->uko_export();
 	  } break;
 	  

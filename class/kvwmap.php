@@ -514,8 +514,9 @@ class GUI extends GUI_core{
     $attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
     $req_start = strpos(strtolower($attributes['options'][0]), "<requires>");
     $req_end = strpos(strtolower($attributes['options'][0]), "</requires>")+11;
+    $reqby_start = strpos(strtolower($attributes['options'][0]), "<required by>");
     if($req_start > 0){
-    	$sql_rest = substr($attributes['options'][0], $req_end);
+    	$sql_rest = substr($attributes['options'][0], $req_end, $req_end-$reqby_start);
       $sql = substr($attributes['options'][0], 0, $req_start)."'".$this->formvars['value']."' ".$sql_rest;    # requires-Tag aus SQL entfernen und um den übergebenen Wert erweitern
       $ret=$layerdb->execSQL(utf8_decode($sql),4,0);
       if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
