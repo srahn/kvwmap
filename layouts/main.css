@@ -33,6 +33,21 @@ td {
 	font-size: 10pt
 }
 
+.menu a{ 
+    font-size: 10pt;
+   -moz-transition-property: text-shadow;
+   -moz-transition-duration: 0.1s;
+   -moz-transition-delay: 0s;
+}
+
+.menu a:hover { 
+    font-size: 10pt;
+     text-shadow: #808080 3px 3px 5px;
+   -moz-transition-property: text-shadow;
+   -moz-transition-duration: 0.4s;
+   -moz-transition-delay: 0s;
+}
+
 h2 {  
 	font-size: 12pt; 
 	margin-bottom: 0px
@@ -56,7 +71,7 @@ font-family: Arial, Helvetica, sans-serif;
 
 
 a.testred:hover { 
-text-decoration:underline;  
+text-decoration:none;  
 }
 
 
@@ -119,7 +134,6 @@ a {
 }
 a:hover {  
 	color: black;
-	TEXT-DECORATION:underline
 }
 
 a.name:link {

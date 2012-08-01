@@ -76,8 +76,8 @@ class ALB {
     if($formvars['verfahren']){ $csv .= 'Verfahren;';}
     if($formvars['nutzung']){ $csv .= 'Nutzung;';}
     if($formvars['blattnr']){ $csv .= 'Blattnummer;';}
-    if($formvars['pruefzeichen']){ $csv .= 'Prüfzeichen Buchung;';}
-  	if($formvars['pruefzeichen_f']){ $csv .= 'Prüfzeichen Flurstück;';}
+    if($formvars['pruefzeichen']){ $csv .= 'P Buchung;';}
+  	if($formvars['pruefzeichen_f']){ $csv .= 'P Flurstück;';}
     if($formvars['bvnr']){ $csv .= 'BVNR;';}
     if($formvars['buchungsart']){ $csv .= 'Buchungsart;';}
     $csv .= 'Namensnummer;'; 
@@ -370,8 +370,8 @@ class ALB {
     if($formvars['ausfstelle']){ $csv .= 'ausführende Stelle;';}
     if($formvars['verfahren']){ $csv .= 'Verfahren;';}
    	if($formvars['blattnr']){ $csv .= 'Blattnummer;';}
-    if($formvars['pruefzeichen']){ $csv .= 'Prüfzeichen Buchung;';}
-  	if($formvars['pruefzeichen_f']){ $csv .= 'Prüfzeichen Flurstück;';}
+    if($formvars['pruefzeichen']){ $csv .= 'P Buchung;';}
+  	if($formvars['pruefzeichen_f']){ $csv .= 'P Flurstück;';}
     if($formvars['bvnr']){ $csv .= 'BVNR;';}
     if($formvars['buchungsart']){ $csv .= 'Buchungsart;';}
     if($formvars['eigentuemer']){ $csv .= 'Eigentümer;';}
@@ -673,8 +673,8 @@ class ALB {
     if($formvars['verfahren']){ $csv .= 'Verfahren;';}
     if($formvars['nutzung']){ $csv .= 'Nutzung;';}
     if($formvars['blattnr']){ $csv .= 'Blattnummer;';}
-    if($formvars['pruefzeichen']){ $csv .= 'Prüfzeichen Buchung;';}
-  	if($formvars['pruefzeichen_f']){ $csv .= 'Prüfzeichen Flurstück;';}
+    if($formvars['pruefzeichen']){ $csv .= 'P Buchung;';}
+  	if($formvars['pruefzeichen_f']){ $csv .= 'P Flurstück;';}
     if($formvars['bvnr']){ $csv .= 'BVNR;';}
     if($formvars['buchungsart']){ $csv .= 'Buchungsart;';}
     if($formvars['eigentuemer']){ $csv .= 'Eigentümer;';}

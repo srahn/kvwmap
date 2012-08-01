@@ -228,7 +228,7 @@ $svg='<?xml version="1.0"?>
 	var get_vertices_loop;
 	var gps_follow_cooldown = 0;
 	var root = document.documentElement;
-	var mousewheelloop;
+	var mousewheelloop = 0;
 	var stopnavigation = false;
   		
   ';
@@ -279,12 +279,11 @@ function startup(){';
 }
 
 function sendpath(cmd, pathx, pathy){
-	document.getElementById("waitingimage").style.visibility = "visible";
+	document.getElementById("waitingimage").style.setProperty("visibility","visible", "");
 	top.sendpath(cmd, pathx, pathy);
 }
 
 function mousewheelzoom(){
-	window.clearInterval(mousewheelloop);
 	var g = document.getElementById("moveGroup");
 	zx = g.getCTM().inverse();
 	pathx[0] = Math.round(zx.e);
@@ -295,8 +294,9 @@ function mousewheelzoom(){
 }
 
 function mousewheelchange(evt){
+	if(!evt)evt = window.event; // For IE
 	if(top.document.GUI.stopnavigation.value == 0){
-		window.clearInterval(mousewheelloop);
+		window.clearTimeout(mousewheelloop);
 		if(evt.preventDefault)evt.preventDefault();
 		if(evt.wheelDelta)
 			delta = evt.wheelDelta / 3600; // Chrome/Safari
@@ -308,7 +308,7 @@ function mousewheelchange(evt){
 		p = p.matrixTransform(g.getCTM().inverse());
 		var k = root.createSVGMatrix().translate(p.x, p.y).scale(z).translate(-p.x, -p.y);
 		setCTM(g, g.getCTM().multiply(k));
-		mousewheelloop = window.setInterval("mousewheelzoom()", 400);
+		mousewheelloop = window.setTimeout("mousewheelzoom()", 400);
 	}
 }
 
@@ -321,6 +321,10 @@ function getEventPoint(evt) {
 	var p = root.createSVGPoint();
 	p.x = evt.clientX;
 	p.y = evt.clientY;
+	if(top.navigator.userAgent.toLowerCase().indexOf("msie") >= 0){
+		p.x = p.x - (top.document.body.clientWidth - resx)/2;
+    p.y = p.y - 85;
+	}
 	return p;
 }
 
@@ -339,7 +343,7 @@ function init(){
   		window.addEventListener(\'DOMMouseScroll\', mousewheelchange, false);
   }
   else{
-		window.onmousewheel = document.onmousewheel = mousewheelchange;
+		top.document.onmousewheel = mousewheelchange;
 	}
 }
 
