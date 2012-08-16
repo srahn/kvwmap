@@ -633,7 +633,8 @@ class GUI extends GUI_core{
               echo html_umlaute('&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:delete_style('.$this->classdaten[0]['Style'][$i]['Style_ID'].');">löschen</a>');
         echo'
             </td>
-          </tr>';
+          </tr>
+          ';
       }
     }
     echo'
@@ -646,7 +647,7 @@ class GUI extends GUI_core{
       echo'
         <table width="100%" align="left" border="0" cellspacing="0" cellpadding="3">
           <tr>
-            <td height="25" valign="top">Labels</td>
+            <td height="25" valign="top">Labels</td><td colspan="2" align="right"><a href="javascript:add_label();">neues Label</a></td>
           </tr>';
       if(count($this->classdaten[0]['Label']) > 0){
         for($i = 0; $i < count($this->classdaten[0]['Label']); $i++){
@@ -665,9 +666,6 @@ class GUI extends GUI_core{
         }
       }
       echo'
-          <tr>
-            <td colspan="2" align="right"><a href="javascript:add_label();">neues Label</a></td>
-          </tr>
         </table>';
   }
 
@@ -745,14 +743,16 @@ class GUI extends GUI_core{
   function get_style(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->styledaten = $mapDB->get_Style($this->formvars['style_id']);
-    if(count($this->styledaten) > 0){
+    if(is_array($this->styledaten)){
       echo'
         <table align="left" border="0" cellspacing="0" cellpadding="3">';
       for($i = 0; $i < count($this->styledaten); $i++){
         echo'
           <tr>
             <td class="verysmall">';
-              echo key($this->styledaten).'</td><td><input name="style_'.key($this->styledaten).'" size="11" type="text" value="'.$this->styledaten[key($this->styledaten)].'">';
+              echo key($this->styledaten).'</td><td><input ';
+              if($i === 0)echo 'onkeyup="if(event.keyCode != 8)get_style(this.value)"';
+              echo ' name="style_'.key($this->styledaten).'" size="11" type="text" value="'.$this->styledaten[key($this->styledaten)].'">';
         echo'
             </td>
           </tr>';
@@ -13579,6 +13579,9 @@ class db_mapObj extends db_mapObj_core{
         $attributes['oids'][] = $layerdb->check_oid($tablename);   # testen ob Tabelle oid hat
       }
     }
+    else{
+    	$attributes['all_table_names'] = array();
+    }
     return $attributes;
   }
 
@@ -13860,13 +13863,13 @@ class db_mapObj extends db_mapObj_core{
   }
 
 	function get_classes2style($style_id){
-		$sql = 'SELECT * FROM u_styles2classes WHERE Style_ID = '.$style_id;
+		$sql = 'SELECT class_id FROM u_styles2classes WHERE Style_ID = '.$style_id;
 		#echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->get_classes2style - Abfragen der Klassen, die einen Style benutzen:<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
     while($rs=mysql_fetch_array($query)) {
-      $classes[]=$rs;
+      $classes[]=$rs[0];
     }
     return $classes;
 	}
@@ -13957,7 +13960,10 @@ class db_mapObj extends db_mapObj_core{
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
   }
 
-  function save_Style($formvars) {
+  function save_Style($formvars){
+  	# wenn der Style nicht der Klasse zugeordnet ist, zuordnen
+  	$classes = $this->get_classes2style($formvars["style_id"]);
+  	if(!in_array($formvars["class_id"], $classes))$this->addStyle2Class($formvars["class_id"], $formvars["style_id"], NULL);
     $sql ="UPDATE styles SET ";
     if($formvars["symbol"]){$sql.="symbol = '".$formvars["symbol"]."',";}else{$sql.="symbol = NULL,";}
     $sql.="symbolname = '".$formvars["symbolname"]."',";
@@ -13983,14 +13989,16 @@ class db_mapObj extends db_mapObj_core{
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
   }
 
-  function get_Style($style_id) {
-    $sql ='SELECT * FROM styles AS s';
-    $sql.=' WHERE s.Style_ID = '.$style_id;
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->get_Style - Lesen der Styledaten:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
-    $rs=mysql_fetch_assoc($query);
-    return $rs;
+  function get_Style($style_id){
+  	if($style_id){
+	    $sql ='SELECT * FROM styles AS s';
+	    $sql.=' WHERE s.Style_ID = '.$style_id;
+	    $this->debug->write("<p>file:kvwmap class:db_mapObj->get_Style - Lesen der Styledaten:<br>".$sql,4);
+	    $query=mysql_query($sql);
+	    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
+	    $rs=mysql_fetch_assoc($query);
+	    return $rs;
+  	}
   }
 
   function save_Label($formvars){

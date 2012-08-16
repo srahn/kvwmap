@@ -1592,9 +1592,6 @@ class db_mapObj_core {
 		return $classarray;
   }
  
-  # Änderung am 12.07.2005 von 1.4.4 nach 1.4.5, Korduan
-  # Einer Klasse können nun mehrere Styles zugeordnet werden
-  # Abfrage der Styles nicht mehr aus Tabelle classes sondern aus u_styles2classes
   function read_Styles($Class_ID) {
     $sql ='SELECT * FROM styles AS s,u_styles2classes AS s2c';
     $sql.=' WHERE s.Style_ID=s2c.style_id AND s2c.class_id='.$Class_ID;

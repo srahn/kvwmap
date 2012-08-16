@@ -4,6 +4,7 @@
  ?><script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <script src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
+
   function testConnection() {
     if (document.getElementById('connectiontype').value == 7) {
       getCapabilitiesURL=document.getElementById('connection').value+'&service=WMS&request=GetCapabilities';    
@@ -19,6 +20,7 @@
       document.getElementById('test_link').innerHTML=getCapabilitiesURL;
     }
   }
+  
 </script>						
 
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
@@ -158,7 +160,10 @@ else {
 		  		<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strConnection; ?></th>
 		  		<td>
 		  			<textarea id="connection" name="connection" cols="33" rows="2"><? echo $this->formvars['connection'] ?></textarea>
-						<input type="button"  onclick="testConnection();" value="Test"><br>
+		  			<input type="button"  onclick="testConnection();" value="Test"
+		  			<? if(in_array($this->formvars['connectiontype'], array(7,9))){ ?>
+						style="display: inline;"
+						<? }else{ ?>style="display: none;"<? } ?>><br>
 						<img border="1" id ="test_img" src="" style="display: none;"><br>
 						<a id="test_link" href="" target="_blank"></a>
 						
@@ -476,7 +481,9 @@ else {
   	<td>&nbsp;</td>
   </tr>
   <tr> 
-    <td align="center"><input type="hidden" name="go_plus" id="go_plus" value=""><input type="reset" value="<?php echo $this->strButtonBack; ?>">&nbsp;<?php
+    <td align="center">
+    	<input type="hidden" name="go_plus" id="go_plus" value="">
+    	<input type="button" name="dummy2" value="<?php echo $this->strButtonBack; ?>" onclick="location.href='index.php?go=Layer_Anzeigen'">&nbsp;<?php
      if ($this->formvars['selected_layer_id']>0) { ?>
       <input type="hidden" name="selected_layer_id" value="<?php echo $this->formvars['selected_layer_id']; ?>">
       <input type="button" name="dummy" value="<?php echo $strButtonSave; ?>" onclick="submitWithValue('GUI','go_plus','Ändern')">

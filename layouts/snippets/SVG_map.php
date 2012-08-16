@@ -297,7 +297,11 @@ function mousewheelchange(evt){
 	if(!evt)evt = window.event; // For IE
 	if(top.document.GUI.stopnavigation.value == 0){
 		window.clearTimeout(mousewheelloop);
-		if(evt.preventDefault)evt.preventDefault();
+		if(evt.preventDefault){
+			evt.preventDefault();
+		}else{ // IE fix
+    	evt.returnValue = false;
+    };
 		if(evt.wheelDelta)
 			delta = evt.wheelDelta / 3600; // Chrome/Safari
 		else
@@ -305,10 +309,12 @@ function mousewheelchange(evt){
 		var z = 1 + delta*5;
 		var g = document.getElementById("moveGroup");
 		var p = getEventPoint(evt);
-		p = p.matrixTransform(g.getCTM().inverse());
-		var k = root.createSVGMatrix().translate(p.x, p.y).scale(z).translate(-p.x, -p.y);
-		setCTM(g, g.getCTM().multiply(k));
-		mousewheelloop = window.setTimeout("mousewheelzoom()", 400);
+		if(p.x > 0 && p.y > 0){
+			p = p.matrixTransform(g.getCTM().inverse());
+			var k = root.createSVGMatrix().translate(p.x, p.y).scale(z).translate(-p.x, -p.y);
+			setCTM(g, g.getCTM().multiply(k));
+			mousewheelloop = window.setTimeout("mousewheelzoom()", 400);
+		}
 	}
 }
 
@@ -323,7 +329,7 @@ function getEventPoint(evt) {
 	p.y = evt.clientY;
 	if(top.navigator.userAgent.toLowerCase().indexOf("msie") >= 0){
 		p.x = p.x - (top.document.body.clientWidth - resx)/2;
-    p.y = p.y - 85;
+    p.y = p.y - 30;
 	}
 	return p;
 }
@@ -343,7 +349,7 @@ function init(){
   		window.addEventListener(\'DOMMouseScroll\', mousewheelchange, false);
   }
   else{
-		top.document.onmousewheel = mousewheelchange;
+		top.document.getElementById("map").onmousewheel = mousewheelchange;
 	}
 }
 

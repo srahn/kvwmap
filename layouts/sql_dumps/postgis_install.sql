@@ -462,7 +462,6 @@ WITH OIDS;
 SELECT AddGeometryColumn('public', 'q_notizen','the_geom',2398,'POLYGON', 2);
 CREATE INDEX q_notizen_the_geom_gist ON q_notizen USING GIST (the_geom GIST_GEOMETRY_OPS);
 ALTER TABLE q_notizen DROP CONSTRAINT enforce_geotype_the_geom;
-ALTER TABLE q_notizen ADD CONSTRAINT enforce_geotype_the_geom CHECK (geometrytype(the_geom) = 'POLYGON'::text OR geometrytype(the_geom) = 'MULTIPOLYGON'::text OR the_geom IS NULL);
 -- ALTER TABLE q_notizen DROP CONSTRAINT enforce_geotype_position;
 
 

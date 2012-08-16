@@ -37,11 +37,11 @@ function change_class(){
 
 function get_style(style_id){
 	if(document.GUI.selected_style_id.value != ''){
-		document.getElementById('td1_style_'+document.GUI.selected_style_id.value).style.backgroundColor='';
-		document.getElementById('td2_style_'+document.GUI.selected_style_id.value).style.backgroundColor='';
+		if(document.getElementById('td1_style_'+style_id))document.getElementById('td1_style_'+document.GUI.selected_style_id.value).style.backgroundColor='';
+		if(document.getElementById('td2_style_'+style_id))document.getElementById('td2_style_'+document.GUI.selected_style_id.value).style.backgroundColor='';
 	}
-	document.getElementById('td1_style_'+style_id).style.backgroundColor='lightsteelblue';
-	document.getElementById('td2_style_'+style_id).style.backgroundColor='lightsteelblue';
+	if(document.getElementById('td1_style_'+style_id))document.getElementById('td1_style_'+style_id).style.backgroundColor='lightsteelblue';
+	if(document.getElementById('td2_style_'+style_id))document.getElementById('td2_style_'+style_id).style.backgroundColor='lightsteelblue';
 	document.GUI.selected_style_id.value = style_id;
 	ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=get_style&style_id='+style_id, new Array(document.getElementById('selected_style_div')), "");
 }
@@ -295,9 +295,6 @@ function browser_check(){
 								}
 							}
 								echo'
-										<tr>
-											<td colspan="2" align="right"><a href="javascript:add_label();">neues Label</a></td>
-										</tr>
 									</table>';
 				    	}
 				    	?>
