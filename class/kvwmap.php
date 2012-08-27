@@ -2927,6 +2927,14 @@ class GUI extends GUI_core{
       }
 
       switch ($this->Document->selectedframe[0]['format']){
+      	case 'A5hoch' : {
+          $ratio = 420/595;
+          $height = 595;
+        } break;
+        case 'A5quer' : {
+          $ratio = 595/595;
+          $height = 420/$ratio;
+        } break;
         case 'A4hoch' : {
           $ratio = 595/595;
           $height = 842;
@@ -3185,6 +3193,14 @@ class GUI extends GUI_core{
     $zoom = $this->formvars['vorschauzoom'];
 
     switch ($this->Document->activeframe[0]['format']){
+    	case 'A5hoch' : {
+        $ratio = 420/595/$zoom;
+        $height = 595/$ratio;
+      } break;
+      case 'A5quer' : {
+        $ratio = 595/595/$zoom;
+        $height = 420/$ratio;
+      } break;
       case 'A4hoch' : {
         $ratio = 595/595/$zoom;
         $height = 842/$ratio;
@@ -3416,6 +3432,8 @@ class GUI extends GUI_core{
     }
     $scale = $this->map->scale * $this->map_factor;
     $legendimage = imagecreatetruecolor(1,1);
+    $backgroundColor = ImageColorAllocate($legendimage, 255, 255, 255);
+    imagefill ($legendimage, 0, 0, $backgroundColor);
     for($i = 0; $i < $this->map->numlayers; $i++){
       if($layerset[$i]['aktivStatus'] != 0){
         if(($layerset[$i]['minscale'] < $scale OR $layerset[$i]['minscale'] == 0) AND ($layerset[$i]['maxscale'] > $scale OR $layerset[$i]['maxscale'] == 0)){
@@ -4814,6 +4832,18 @@ class GUI extends GUI_core{
     # Einbinden der PDF Klassenbibliotheken
     include (PDFCLASSPATH."class.ezpdf.php");
     switch ($this->Docu->activeframe[0]['format']) {
+    	case "A5hoch" : {
+        # Erzeugen neue pdf-Klasse
+        $pdf=new Cezpdf('A5', 'portrait');
+        $height = 595;
+      } break;
+
+      case "A5quer" : {
+        # Erzeugen neue pdf-Klasse
+        $pdf=new Cezpdf('A5', 'landscape');
+        $height = 420;
+      } break;
+    	
       case "A4hoch" : {
         # Erzeugen neue pdf-Klasse
         $pdf=new Cezpdf();
@@ -4984,8 +5014,8 @@ class GUI extends GUI_core{
     fclose($fp);
 
     if($preview == true){
-      exec(IMAGEMAGICKPATH.'convert '.$dateipfad.$dateiname.' -resize 595 '.$dateipfad.$name.'-'.$currenttime.'.jpg');
-      #echo IMAGEMAGICKPATH.'convert '.$dateipfad.$dateiname.' -resize 595 '.$dateipfad.$name.'-'.$currenttime.'.jpg';
+      exec(IMAGEMAGICKPATH.'convert -density 300x300 '.$dateipfad.$dateiname.' -resize 595 '.$dateipfad.$name.'-'.$currenttime.'.jpg');
+      #echo IMAGEMAGICKPATH.'convert -density 300x300  '.$dateipfad.$dateiname.' -resize 595 '.$dateipfad.$name.'-'.$currenttime.'.jpg';
       return TEMPPATH_REL.$name.'-'.$currenttime.'.jpg';
     }
   }
@@ -6186,6 +6216,7 @@ class GUI extends GUI_core{
     $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
     $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+    $layerdb->setClientEncoding();
     $layer_epsg = $layerset[0]['epsg_code'];
     $client_epsg = $this->user->rolle->epsg_code;
     $form_fields = explode('|', $this->formvars['form_field_names']);

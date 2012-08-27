@@ -30,7 +30,7 @@ function checknumbers(input, type, length, decimal_length){
 				alert('Für dieses Feld sind maximal '+decimal_length+' Nachkommastellen erlaubt.');
 				parts[1] = parts[1].substring(0, decimal_length);
 			}
-			val = val+'.'+parts[1].substring(0, decimal_length);
+			val = val+'.'+parts[1];
 		}
 		if(input.value != val){
   		input.value = val;
@@ -40,7 +40,7 @@ function checknumbers(input, type, length, decimal_length){
   	if(input.value.search(/[^-\d]/g) != -1 || input.value.search(/.-/g) != -1){
   		alert('Es sind nur ganzzahlige Angaben erlaubt!');
   		var val = input.value.replace(/[^-\d]/g, '');
-  		var val = input.value.replace(/-/g, '');
+  		val = val.replace(/-/g, '');
   		input.value = val;
   	}
   }
@@ -626,7 +626,7 @@ function set_changed_flag(flag){
 
 									case 'Link': {
 										if ($layer['shape'][$k][$attributes['name'][$j]]!='') {
-											echo '<a target="_blank" style="font-size: '.$this->user->rolle->fontsize_gle.'px" href="'.$layer['shape'][$k][$attributes['name'][$j]].'">';
+											echo '<a class="link" target="_blank" style="font-size: '.$this->user->rolle->fontsize_gle.'px" href="'.$layer['shape'][$k][$attributes['name'][$j]].'">';
 											if($attributes['options'][$j] != ''){
 												echo $attributes['options'][$j];
 											}

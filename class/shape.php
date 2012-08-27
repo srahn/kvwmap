@@ -351,7 +351,7 @@ class shape {
   	if($this->formvars['sql_'.$this->formvars['selected_layer_id']]){
   		$where = substr($this->formvars['sql_'.$this->formvars['selected_layer_id']], strrpos(strtolower($this->formvars['sql_'.$this->formvars['selected_layer_id']]), 'where')+5);
   		$orderbyposition = strpos(strtolower($where), 'order by');
-  		$where = substr($where, 0, $orderbyposition);
+  		if($orderbyposition)$where = substr($where, 0, $orderbyposition);
   		$sql.= " AND".$where;
   	}
   	# über Polygon einschränken

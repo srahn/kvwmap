@@ -281,7 +281,7 @@ class pgdatabase extends pgdatabase_core {
   	else{
   		$attr_info['is_nullable'] = 'NULL';
   		$attr_info['character_maximum_length'] = 'NULL';
-  		$attr_info['column_default'] = 'NULL';
+  		$attr_info['column_default'] = '';
   		$attr_info['numeric_scale'] = 'NULL';
   	}
   	return $attr_info;

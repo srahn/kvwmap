@@ -154,6 +154,10 @@ a.red {
 	font-weight: 600; 
 }
 
+a.link {
+	color: firebrick; 
+}
+
 a.blue_underline {
 	color: #0000CC;
     font-weight: bold;

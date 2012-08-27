@@ -283,7 +283,7 @@ class database {
                     SELECT ".$id.", ".$gast_stelle.", '800', '600', minxmax, minymax, maxxmax, maxymax, '2', 'zoomin', epsg_code, ".DEFAULT_DRUCKRAHMEN_ID." , '0000-00-00 00:00:00', 'gui.php', 'german', 'windows-1252', '0', '13', '0' FROM stelle WHERE ID = ".$gast_stelle;
     $query = mysql_query($sql);
     
-    $sql = "INSERT INTO `u_groups2rolle` (`user_id`,`stelle_id`,`id`,`status`) SELECT ".$id.", ".$gast_stelle.", id, '1' FROM u_groups";
+    $sql = "INSERT INTO `u_groups2rolle` (`user_id`,`stelle_id`,`id`,`status`) SELECT ".$id.", ".$gast_stelle.", id, '0' FROM u_groups";
     $query = mysql_query($sql);
 
     $sql = "INSERT INTO `u_menue2rolle` ( `user_id` , `stelle_id` , `menue_id` , `status` ) SELECT ".$id.", ".$gast_stelle.", menue_id, '0' FROM u_menue2stelle WHERE stelle_id = ".$gast_stelle;
@@ -292,6 +292,16 @@ class database {
 
     $sql = "INSERT INTO `u_rolle2used_layer` ( `user_id` , `stelle_id` , `layer_id` , `aktivStatus` , `queryStatus` , `showclasses` , `logconsume` ) ";
     $sql.= "SELECT ".$id.", ".$gast_stelle.", Layer_ID, start_aktiv, 0, 1, 0 FROM used_layer WHERE Stelle_ID=".$gast_stelle;
+		$query = mysql_query($sql);
+		
+    $sql = "UPDATE u_groups2rolle, u_rolle2used_layer, layer SET u_groups2rolle.status = 1 ";
+		$sql.= "WHERE u_groups2rolle.user_id = ".$id." "; 
+		$sql.= "AND u_groups2rolle.stelle_id = ".$gast_stelle." "; 
+		$sql.= "AND u_rolle2used_layer.user_id = ".$id." ";
+		$sql.= "AND u_rolle2used_layer.stelle_id = ".$gast_stelle." ";
+		$sql.= "AND u_rolle2used_layer.aktivStatus = '1' ";
+		$sql.= "AND u_rolle2used_layer.layer_id = layer.Layer_ID ";
+		$sql.= "AND layer.Gruppe = u_groups2rolle.id";
     $query = mysql_query($sql);
     
     $gast['username'] = $loginname;
