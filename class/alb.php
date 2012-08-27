@@ -606,8 +606,8 @@ class ALB {
             	if($e > 0)$csv .= ' | ';
               $csv .= $Eigentuemerliste[$e]->Nr.' ';
               $anzNamenszeilen = count($Eigentuemerliste[$e]->Name);
-              for($n=0;$n<$anzNamenszeilen;$n++) {
-                $csv .= $Eigentuemerliste[$e]->Name[$n].' ';
+              for($nz=0;$nz<$anzNamenszeilen;$nz++) {
+                $csv .= $Eigentuemerliste[$e]->Name[$nz].' ';
               }
             }
           }
