@@ -251,7 +251,7 @@ class jagdkataster {
 		return $flurstuecke;
 	}
 	
-function getIntersectedFlurstALKIS($formvars){
+	function getIntersectedFlurstALKIS($formvars){
 		if($formvars['oid'] == ''){		# mehrere Jagdbezirke
 			$checkbox_names = explode('|', $formvars['checkbox_names']);
 	    for($i = 0; $i < count($checkbox_names); $i++){
@@ -264,12 +264,12 @@ function getIntersectedFlurstALKIS($formvars){
 		else{				# ein Jagdbezirk
 			$oids[] = $formvars['oid']; 
 		}
-		$sql = "SELECT f.land*10000 + f.gemarkungsnummer as gemkgschl, f.flurnummer as flur, f.zaehler, f.nenner, g.bezeichnung as gemkgname, f.flurstueckskennzeichen as flurstkennz, st_area(f.wkb_geometry) AS flurstflaeche, st_area(st_intersection(f.wkb_geometry, transform(jagdbezirke.the_geom, ".EPSGCODE."))) AS schnittflaeche, jagdbezirke.name, jagdbezirke.art, f.amtlicheflaeche AS albflaeche";
+		$sql = "SELECT f.land*10000 + f.gemarkungsnummer as gemkgschl, f.flurnummer as flur, f.zaehler, f.nenner, g.bezeichnung as gemkgname, f.flurstueckskennzeichen as flurstkennz, st_area(f.wkb_geometry) AS flurstflaeche, st_area(st_intersection(f.wkb_geometry, transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS."))) AS schnittflaeche, jagdbezirke.name, jagdbezirke.art, f.amtlicheflaeche AS albflaeche";
 		$sql.= " FROM alkis.ax_gemarkung AS g, jagdbezirke, alkis.ax_flurstueck AS f";
 		$sql.= " WHERE f.gemarkungsnummer = g.gemarkungsnummer";
 		$sql.= " AND jagdbezirke.oid IN (".implode(',', $oids).")";
-		$sql.= " AND f.wkb_geometry && transform(jagdbezirke.the_geom, ".EPSGCODE.") AND intersects(f.wkb_geometry, transform(jagdbezirke.the_geom, ".EPSGCODE."))";
-		$sql.= " AND st_area(st_intersection(f.wkb_geometry, transform(jagdbezirke.the_geom, ".EPSGCODE."))) > 1";
+		$sql.= " AND f.wkb_geometry && transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.") AND intersects(f.wkb_geometry, transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS."))";
+		$sql.= " AND st_area(st_intersection(f.wkb_geometry, transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS."))) > 1";
 		$sql.= " ORDER BY jagdbezirke.name";
 		#echo $sql;
 		$ret = $this->database->execSQL($sql, 4, 0);

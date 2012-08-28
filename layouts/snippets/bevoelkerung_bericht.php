@@ -9,10 +9,10 @@ if($this->go == 'bevoelkerung_bericht_Bericht erstellen'){
   $ueberschriften = array('Einwohner pro Landkreis', 'Einwohnerdichte pro Landkreis', 'Einwohner pro Altersgruppe', 'Durchschnittsalter pro Landkreis', 'Zusammengefasste Geburtenziffer', 'Bevölkerungsbewegung');
   $formvars_chosen_layer_id = array(465, 465, 551, 466, 94, 524);
   $formvars_chartvalue = array('einwohner2009', 'einwohnerproqkm2009', 'einwohner2009', 'durchschnittsalter2009', 'geburtenziffer', 'rueckgang');
-  $formvars_chartlabel = array('kreis', 'kreis', 'altersgruppe', 'kreis', 'kreis', 'kreis');
+  $formvars_chartlabel = array('kreis', 'kreis', 'gruppe', 'kreis', 'kreis', 'kreis');
   $formvars_chartsplit = array('', '', 'geschlecht');
   $formvars_chartcomparison = array('', '', 'einwohner2030p');
-  $formvars_orderby = array('', '', 'altersgruppe desc, geschlecht', 'durchschnittsalter2009', 'geburtenziffer', 'rueckgang');
+  $formvars_orderby = array('', '', 'nr desc, geschlecht', 'durchschnittsalter2009', 'geburtenziffer', 'rueckgang');
   $formvars_charttype = array('bar', 'bar', 'mirrorbar', 'bar', 'bar', 'bar');
   for($i = 0; $i < count($formvars_chosen_layer_id); $i++){
 		if($this->formvars['check'.$i] == 'on'){
@@ -21,9 +21,9 @@ if($this->go == 'bevoelkerung_bericht_Bericht erstellen'){
 			$this->formvars['chartlabel_'.$formvars_chosen_layer_id[$i]] = $formvars_chartlabel[$i];
 			$this->formvars['chartsplit_'.$formvars_chosen_layer_id[$i]] = $formvars_chartsplit[$i];
 			$this->formvars['chartcomparison_'.$formvars_chosen_layer_id[$i]] = $formvars_chartcomparison[$i];
-			$this->formvars['orderby_'.$formvars_chosen_layer_id[$i]] = $formvars_orderby[$i];
+			$this->formvars['orderby'.$formvars_chosen_layer_id[$i]] = $formvars_orderby[$i];
 			$this->formvars['charttype_'.$formvars_chosen_layer_id[$i]] = $formvars_charttype[$i];
-			$this->formvars['anzahl'] = 300;
+			$this->formvars['anzahl'] = 310;
 			$this->formvars['all'] = 'true';
 			$dateiname=IMAGEPATH.rand(100000,999999).'.jpg';
 			$this->generisches_sachdaten_diagramm(1000, $dateiname);

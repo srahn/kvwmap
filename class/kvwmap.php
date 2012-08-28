@@ -2679,7 +2679,7 @@ class GUI extends GUI_core{
     $this->jagdkatastereditor();
   }
 
-function jagdkatastereditor_listflurst_csv(){
+  function jagdkatastereditor_listflurst_csv(){
   	$this->jagdkataster = new jagdkataster($this->pgdatabase);
   	if(ALKIS){$this->flurstuecke = $this->jagdkataster->getIntersectedFlurstALKIS($this->formvars);}
     else{$this->flurstuecke = $this->jagdkataster->getIntersectedFlurst($this->formvars);}
@@ -8733,7 +8733,8 @@ function jagdkatastereditor_listflurst_csv(){
 
 	function check_nachweis_poly(){
 		$this->nachweis = new Nachweis($this->pgdatabase, $this->user->rolle->epsg_code);
-		echo $this->nachweis->check_poly_in_flur($this->formvars['umring'], $this->formvars['flur'], $this->formvars['gemkgschl'], $this->user->rolle->epsg_code);
+		if(ALKIS){echo $this->nachweis->check_poly_in_flurALKIS($this->formvars['umring'], $this->formvars['flur'], $this->formvars['gemkgschl'], $this->user->rolle->epsg_code);}
+		else{echo $this->nachweis->check_poly_in_flur($this->formvars['umring'], $this->formvars['flur'], $this->formvars['gemkgschl'], $this->user->rolle->epsg_code);}
 	}
 
   function nachweisFormSenden() {
@@ -9124,9 +9125,11 @@ function jagdkatastereditor_listflurst_csv(){
     # Abfragen der Gemarkungen
     $GemeindenStelle=$this->Stelle->getGemeindeIDs();
     $Gemeinde=new gemeinde('',$this->pgdatabase);
-    $GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle, 'GemeindeName');
+    if(ALKIS){$GemListe=$Gemeinde->getGemeindeListeALKIS($GemeindenStelle, 'bezeichnung');}
+    else{$GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle, 'GemeindeName');}
     $Gemarkung=new gemarkung('',$this->pgdatabase);
-    $GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'','gmk.GemkgName');
+    if(ALKIS){$GemkgListe=$Gemarkung->getGemarkungListeALKIS($GemListe['ID'],'','gmk.bezeichnung');}
+    else{$GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'','gmk.GemkgName');}
         
     # Erzeugen des Formobjektes für die Gemarkungsauswahl
     $this->GemkgFormObj=new FormObject("Gemarkung","select",$GemkgListe['GemkgID'],$this->formvars['Gemarkung'],$GemkgListe['Bezeichnung'],"1","","",NULL);

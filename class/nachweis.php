@@ -297,6 +297,26 @@ class Nachweis {
   	return $result;
   }
   
+	function check_poly_in_flurALKIS($polygon, $flur, $gemarkung, $epsg){
+  	$sql = "SELECT isvalid(geomfromtext('".$polygon."', ".$epsg."))";
+  	$ret=$this->database->execSQL($sql,4, 1);
+  	$rs = pg_fetch_row($ret[1]);
+		if($rs[0] == 'f'){
+			$result = 'invalid';
+			return $result;
+		}
+  	$sql = "SELECT f.land * 10000 + f.gemarkungsnummer, f.flurnummer FROM alkis.ax_flurstueck f WHERE intersects(wkb_geometry, TRANSFORM(geometryfromtext('".$polygon."', ".$epsg."), ".EPSGCODE_ALKIS."))";
+  	$ret=$this->database->execSQL($sql,4, 1);
+  	$result = 'f';	
+  	while($rs = pg_fetch_row($ret[1])){
+  		if($gemarkung == $rs[0] AND $flur == $rs[1]){
+  			$result = 't';
+  			break;
+  		}
+  	}
+  	return $result;
+  }
+  
   function pruefeEingabedaten($datum, $VermStelle, $art, $gueltigkeit, $stammnr, $Blattformat, $Blattnr, $changeDocument,$Bilddatei_name, $pathlength, $umring) {
     #echo '<br>Starten der Funktion zum testen der Eingabedaten.';
     # Test: wurde das Polgon für den raumbezug festgelegt?
