@@ -2679,9 +2679,10 @@ class GUI extends GUI_core{
     $this->jagdkatastereditor();
   }
 
-  function jagdkatastereditor_listflurst_csv(){
+function jagdkatastereditor_listflurst_csv(){
   	$this->jagdkataster = new jagdkataster($this->pgdatabase);
-    $this->flurstuecke = $this->jagdkataster->getIntersectedFlurst($this->formvars);
+  	if(ALKIS){$this->flurstuecke = $this->jagdkataster->getIntersectedFlurstALKIS($this->formvars);}
+    else{$this->flurstuecke = $this->jagdkataster->getIntersectedFlurst($this->formvars);}
   	for($i = 0; $i < count($this->flurstuecke); $i++){          	
     	$csv .= $this->flurstuecke[$i]['gemkgname'].';';
       $csv .= $this->flurstuecke[$i]['flur'].';';
@@ -2708,7 +2709,8 @@ class GUI extends GUI_core{
     if($this->formvars['oid'])$this->titel='Im Jagdbezirk '.$this->formvars['name'].' enthaltene Flurstücke';
     else $this->titel='Enthaltene Flurstücke in Jagdbezirken';
     $this->jagdkataster = new jagdkataster($this->pgdatabase);
-    $this->flurstuecke = $this->jagdkataster->getIntersectedFlurst($this->formvars);
+    if(ALKIS){$this->flurstuecke = $this->jagdkataster->getIntersectedFlurstALKIS($this->formvars);}
+    else{$this->flurstuecke = $this->jagdkataster->getIntersectedFlurst($this->formvars);}
     $this->output();
   }
   

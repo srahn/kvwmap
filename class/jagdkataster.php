@@ -250,6 +250,57 @@ class jagdkataster {
 		}
 		return $flurstuecke;
 	}
+	
+function getIntersectedFlurstALKIS($formvars){
+		if($formvars['oid'] == ''){		# mehrere Jagdbezirke
+			$checkbox_names = explode('|', $formvars['checkbox_names']);
+	    for($i = 0; $i < count($checkbox_names); $i++){
+	      if($formvars[$checkbox_names[$i]] == 'on'){
+	        $element = explode('_', $checkbox_names[$i]);     #  check_oid
+	        $oids[] = $element[1];
+	      }
+	    }
+		}
+		else{				# ein Jagdbezirk
+			$oids[] = $formvars['oid']; 
+		}
+		$sql = "SELECT f.land*10000 + f.gemarkungsnummer as gemkgschl, f.flurnummer as flur, f.zaehler, f.nenner, g.bezeichnung as gemkgname, f.flurstueckskennzeichen as flurstkennz, st_area(f.wkb_geometry) AS flurstflaeche, st_area(st_intersection(f.wkb_geometry, transform(jagdbezirke.the_geom, ".EPSGCODE."))) AS schnittflaeche, jagdbezirke.name, jagdbezirke.art, f.amtlicheflaeche AS albflaeche";
+		$sql.= " FROM alkis.ax_gemarkung AS g, jagdbezirke, alkis.ax_flurstueck AS f";
+		$sql.= " WHERE f.gemarkungsnummer = g.gemarkungsnummer";
+		$sql.= " AND jagdbezirke.oid IN (".implode(',', $oids).")";
+		$sql.= " AND f.wkb_geometry && transform(jagdbezirke.the_geom, ".EPSGCODE.") AND intersects(f.wkb_geometry, transform(jagdbezirke.the_geom, ".EPSGCODE."))";
+		$sql.= " AND st_area(st_intersection(f.wkb_geometry, transform(jagdbezirke.the_geom, ".EPSGCODE."))) > 1";
+		$sql.= " ORDER BY jagdbezirke.name";
+		#echo $sql;
+		$ret = $this->database->execSQL($sql, 4, 0);
+		while($rs = pg_fetch_array($ret[1])){
+			$rs['anteil'] = round($rs['schnittflaeche'] * 100 / $rs['flurstflaeche'], 2);
+			$rs['albflaeche'] = round($rs['albflaeche'], 2);
+      if ($rs['nenner']!='') {
+        $rs['nenner']="/".$rs['nenner'];
+      }
+			$rs['zaehlernenner'] = $rs['zaehler'].$rs['nenner'];
+			
+			# --- Eigentümer ---
+			$flst = new flurstueck($rs['flurstkennz'], $this->database);
+			$flst->Grundbuecher=$flst->getGrundbuecher();
+			for($g = 0; $g < count($flst->Grundbuecher); $g++){
+      	$flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
+      	for($b = 0; $b < count($flst->Buchungen); $b++){
+	        $Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
+	        $anzEigentuemer=count($Eigentuemerliste);
+	        for($e=0;$e<$anzEigentuemer;$e++){
+	        	$rs['eigentuemer'][$e] = rtrim($Eigentuemerliste[$e]->Name[0], ',');
+	        }
+      	}
+			}
+			# --- Eigentümer ---
+			
+			
+			$flurstuecke[] = $rs;
+		}
+		return $flurstuecke;
+	}
 
 	function getflurstgeometryfromnamen($formvars, $type){
 		$flurstueck=new flurstueck('',$this->database);
