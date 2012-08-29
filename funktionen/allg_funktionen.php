@@ -5,6 +5,23 @@
  */
 
 
+function formatFlurstkennzALKIS($FlurstKennz){
+	$explosion = explode('-', $FlurstKennz);
+  $gem = trim($explosion[0]);
+  $flur = trim($explosion[1]);
+  $flurst = trim($explosion[2]);
+  $explosion = explode('/',$flurst);
+  $zaehler = $explosion[0];
+  $nenner = $explosion[1];
+  if($nenner != '000.00'){
+  	$explosion = explode('.',$nenner);
+  	$vorkomma = '0'.$explosion[0];
+  }
+  $FlurstKennz = $gem.$flur.$zaehler.$vorkomma;
+  $FlurstKennz = str_pad($FlurstKennz, 20, '_', STR_PAD_RIGHT);
+  return $FlurstKennz;
+}
+
 function tausenderTrenner($number){
 	$explosion = explode('.', $number);
 	$length = strlen($explosion[0]) - 3;
