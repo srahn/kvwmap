@@ -11577,12 +11577,14 @@ class GUI extends GUI_core{
 
     # zu 3)
     if(ALKIS){
-    	$datastring ="the_geom from (select f.gml_id as oid, wkb_geometry as the_geom from ax_flurstueck as f";
+    	$datastring ="the_geom from (select f.gml_id as oid, wkb_geometry as the_geom from alkis.ax_flurstueck as f";
     	$datastring.=" WHERE f.flurstueckskennzeichen IN ('".$FlurstListe[0]."'";
+    	$epsg = EPSGCODE_ALKIS;
     }
     else{
     	$datastring ="the_geom from (select o.objnr as id, o.objnr as oid,o.the_geom from alkobj_e_fla AS o,alknflst as f";
     	$datastring.=" WHERE o.objnr=f.objnr AND f.flurstkennz IN ('".$FlurstListe[0]."'";
+    	$epsg = EPSGCODE;
     }
     $legendentext="Flurstück";
     if(count($FlurstListe) > 1){
@@ -11593,7 +11595,7 @@ class GUI extends GUI_core{
       $datastring.=",'".$FlurstListe[$i]."'";
       $legendentext.=",<br>".$FlurstListe[$i];
     }
-    $datastring.=")) as foo using unique oid using srid=".EPSGCODE;
+   	$datastring.=")) as foo using unique oid using srid=".$epsg;
 
     $dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
 
@@ -11622,7 +11624,7 @@ class GUI extends GUI_core{
     }
     $connectionstring.=' dbname='.$this->pgdatabase->dbName;
     $this->formvars['connection'] = $connectionstring;
-    $this->formvars['epsg_code'] = EPSGCODE;
+    $this->formvars['epsg_code'] = $epsg;
     $this->formvars['transparency'] = 60;
 
     $layer_id = $dbmap->newRollenLayer($this->formvars);
@@ -11683,10 +11685,10 @@ class GUI extends GUI_core{
 	    # zu 3)
 	    $layer=ms_newLayerObj($this->map);
 	    if(ALKIS){
-	    	$datastring ="the_geom from (select g.gml_id as oid, wkb_geometry as the_geom FROM ax_gemeinde gem, ax_gebaeude g";
+	    	$datastring ="the_geom from (select g.gml_id as oid, wkb_geometry as the_geom FROM alkis.ax_gemeinde gem, alkis.ax_gebaeude g";
 		    $datastring.=" LEFT JOIN alkis_beziehungen v ON g.gml_id=v.beziehung_von"; 
-				$datastring.=" LEFT JOIN ax_lagebezeichnungmithausnummer l ON v.beziehung_zu=l.gml_id";
-				$datastring.=" LEFT JOIN ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde";
+				$datastring.=" LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON v.beziehung_zu=l.gml_id";
+				$datastring.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde";
 				$datastring.=" AND l.lage = lpad(s.lage,5,'0')";
 				$datastring.=" WHERE gem.gemeinde = l.gemeinde";
 		    if ($Hausnr!='') {
@@ -13592,7 +13594,7 @@ class db_mapObj extends db_mapObj_core{
     	#$attributes['table_alias_name'][$rs['tablename']]= $rs['table_alias_name'];
     	$attributes['type'][$i]= $rs['type'];
     	if($rs['type'] == 'geometry'){
-    		$attributes['the_geom'] = $rs['name']; 
+    		$attributes['the_geom'] = $rs['name'];
     	}
     	$attributes['geomtype'][$i]= $rs['geometrytype'];
     	$attributes['geomtype'][$rs['name']]= $rs['geometrytype'];
