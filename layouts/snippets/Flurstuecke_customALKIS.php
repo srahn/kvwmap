@@ -294,7 +294,7 @@ function backto(go){
               ?>
           <tr>
               <td align="right"><strong> Baudaten&nbsp;</strong></td>
-              <td><a href="index.php?go=Bauauskunft_Suche_Suchen&flurstkennz=<? echo $flst->FlurstKennz; ?>&distinct=1">anzeigen</a></td>
+              <td><a href="index.php?go=Bauauskunft_Suche_Suchen&flurstkennz=<? echo $flst->Flurstkennz_alt; ?>&distinct=1">anzeigen</a></td>
             </tr>
               <?
               }

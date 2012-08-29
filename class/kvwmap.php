@@ -2794,10 +2794,12 @@ class GUI extends GUI_core{
     $GemeindenStelle=$this->Stelle->getGemeindeIDs();
     $Gemeinde=new gemeinde('',$this->pgdatabase);
     # Abfrage der Gemeinde Namen
-    $GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle, 'GemeindeName');
+    if(ALKIS)$GemListe=$Gemeinde->getGemeindeListeALKIS($GemeindenStelle, 'bezeichnung');
+    else $GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle, 'GemeindeName');
     # Abfragen der Gemarkungen zur Gemeinde
     $Gemarkung=new gemarkung('',$this->pgdatabase);
-    $this->GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'','gmk.GemkgName');
+    if(ALKIS)$this->GemkgListe=$Gemarkung->getGemarkungListeALKIS($GemListe['ID'],'','gmk.bezeichnung');
+    else $this->GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'','gmk.GemkgName');
     $this->main='bauauskunftsuche.php';
     $this->titel='Bauauskunftsuche';
   }
