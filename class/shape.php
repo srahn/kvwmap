@@ -324,7 +324,7 @@ class shape {
     }
   }
   
-  function shp_export_exportieren($formvars, $stelle, $user){
+	function shp_export_exportieren($formvars, $stelle, $user){
   	$this->formvars = $formvars;
     $mapdb = new db_mapObj($stelle->id,$user->id);
     $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $stelle->pgdbhost);
@@ -339,7 +339,12 @@ class shape {
     $sql = $stelle->parse_path($layerdb, $path, $selection);		# parse_path wird hier benutzt um die Auswahl der Attribute auf das Pfad-SQL zu übertragen
     # Transformieren
     if($this->formvars['epsg']){
-    	$sql = str_replace($this->attributes['the_geom'], 'TRANSFORM('.$this->attributes['the_geom'].', '.$this->formvars['epsg'].')', $sql);
+    	if($this->attributes['table_alias_name'][$this->attributes['the_geom']] != ''){
+    		$sql = str_replace($this->attributes['table_alias_name'][$this->attributes['the_geom']].'.'.$this->attributes['the_geom'], 'TRANSFORM('.$this->attributes['table_alias_name'][$this->attributes['the_geom']].'.'.$this->attributes['the_geom'].', '.$this->formvars['epsg'].')', $sql);
+    	}
+    	else{
+    		$sql = str_replace($this->attributes['the_geom'], 'TRANSFORM('.$this->attributes['the_geom'].', '.$this->formvars['epsg'].')', $sql);
+    	}
     }
     # order by rausnehmen
   	$orderbyposition = strpos(strtolower($sql), 'order by');
@@ -347,9 +352,16 @@ class shape {
 	  	$orderby = ' '.substr($sql, $orderbyposition);
 	  	$sql = substr($sql, 0, $orderbyposition);
   	}
+  	# Where-Klausel aus Sachdatenabfrage-SQL anhängen
+  	if($this->formvars['sql_'.$this->formvars['selected_layer_id']]){
+  		$where = substr($this->formvars['sql_'.$this->formvars['selected_layer_id']], strrpos(strtolower($this->formvars['sql_'.$this->formvars['selected_layer_id']]), 'where')+5);
+  		$orderbyposition = strpos(strtolower($where), 'order by');
+  		if($orderbyposition)$where = substr($where, 0, $orderbyposition);
+  		$sql.= " AND".$where;
+  	}
   	# über Polygon einschränken
     if($this->formvars['newpathwkt']){
-    	$sql.= " AND Transform(".$this->attributes[$this->attributes['the_geom']].", ".$user->rolle->epsg_code.") && GeomFromText('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code.") AND INTERSECTS(Transform(".$this->attributes[$this->attributes['the_geom']].", ".$user->rolle->epsg_code."), GeomFromText('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."))";
+    	$sql.= " AND Transform(".$this->attributes['the_geom'].", ".$user->rolle->epsg_code.") && GeomFromText('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code.") AND INTERSECTS(Transform(".$this->attributes['the_geom'].", ".$user->rolle->epsg_code."), GeomFromText('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."))";
     }
     # Filter
     $filter = $mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id);
