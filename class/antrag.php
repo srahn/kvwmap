@@ -320,7 +320,7 @@ class antrag {
       # Setzen der laufenden Nummer der Vorgänge
       $FFR[$i]['Lfd']=$i+1;
       
-      if(NACHWEIS_PRIMARY_ATTRIBUTE == 'Rissnummer'){
+      if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){
       	$FFR[$i]['Riss-Nummer']=$rs['flurid'].'/'.$rs['rissnummer'];
       	$FFR[$i]['Antrags-Nummer']=str_pad($rs['stammnr'],STAMMNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
       }

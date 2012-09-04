@@ -101,15 +101,15 @@ else {
           <td>Flur:&nbsp; 
             <input name="Flur" type="text" value="<?php echo $this->formvars['Flur']; ?>" size="3" maxlength="3">
           </td>
-          <? if(NACHWEIS_PRIMARY_ATTRIBUTE != 'Rissnummer'){ ?>
+          <? if(NACHWEIS_PRIMARY_ATTRIBUTE != 'rissnummer'){ ?>
           <td>Antragsnr:&nbsp; 
             <input name="stammnr" type="text" value="<?php echo $this->formvars['stammnr']; ?>" size="<?php echo STAMMNUMMERMAXLENGTH; ?>" maxlength="<?php echo STAMMNUMMERMAXLENGTH; ?>">
           </td>
           <? } ?>
           <td>Rissnummer:
-			  		<input name="rissnr" type="text" value="<?php echo $this->formvars['rissnr']; ?>" size="<?php echo STAMMNUMMERMAXLENGTH; ?>">
+			  		<input name="rissnummer" type="text" value="<?php echo $this->formvars['rissnummer']; ?>" size="<?php echo STAMMNUMMERMAXLENGTH; ?>">
 			 		</td>
-			 		<? if(NACHWEIS_PRIMARY_ATTRIBUTE == 'Rissnummer'){ ?>
+			 		<? if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){ ?>
           <td>Antragsnr:&nbsp; 
             <input name="stammnr" type="text" value="<?php echo $this->formvars['stammnr']; ?>" size="<?php echo STAMMNUMMERMAXLENGTH; ?>" maxlength="<?php echo STAMMNUMMERMAXLENGTH; ?>">
           </td>

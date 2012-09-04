@@ -88,7 +88,7 @@ class Nachweis {
     $this->database->begintransaction();        
 
     # 2. Prüfen der Eingabewerte
-    $ret=$this->pruefeEingabedaten($formvars['datum'],$formvars['VermStelle'],$formvars['art'],$formvars['gueltigkeit'],$formvars['stammnr'],$formvars['Blattformat'],$formvars['Blattnr'],$formvars['changeDocument'],$formvars['Bilddatei_name'],$formvars['pathlength'],$formvars['umring']);
+    $ret=$this->pruefeEingabedaten($formvars['datum'],$formvars['VermStelle'],$formvars['art'],$formvars['gueltigkeit'],$formvars['stammnr'],$formvars['rissnummer'],$formvars['Blattformat'],$formvars['Blattnr'],$formvars['changeDocument'],$formvars['Bilddatei_name'],$formvars['pathlength'],$formvars['umring']);
     if ($ret[0]) {
       # Fehler bei den Eingabewerten entdeckt.  
       #echo '<br>Ergebnis der Prüfung: '.$ret;
@@ -136,7 +136,7 @@ class Nachweis {
               # 5.2 Löschen der alten Datei war erfolgreich
               echo '<br>Alte Datei: '.$doclocation.' gelöscht';
               # Speichern der neuen Bilddatei auf dem Server
-              $ret=$this->dokumentenDateiHochladen($formvars['flurid'],$formvars['stammnr'],$formvars['artname'],$formvars['Bilddatei'],$formvars['zieldateiname']);
+              $ret=$this->dokumentenDateiHochladen($formvars['flurid'],$formvars[NACHWEIS_PRIMARY_ATTRIBUTE],$formvars['artname'],$formvars['Bilddatei'],$formvars['zieldateiname']);
               if ($ret!='') {
                 # Neue Datei konnte nicht hochgeladen werden
                 $errmsg=$ret;
@@ -317,7 +317,7 @@ class Nachweis {
   	return $result;
   }
   
-  function pruefeEingabedaten($datum, $VermStelle, $art, $gueltigkeit, $stammnr, $Blattformat, $Blattnr, $changeDocument,$Bilddatei_name, $pathlength, $umring) {
+  function pruefeEingabedaten($datum, $VermStelle, $art, $gueltigkeit, $stammnr, $rissnummer, $Blattformat, $Blattnr, $changeDocument,$Bilddatei_name, $pathlength, $umring) {
     #echo '<br>Starten der Funktion zum testen der Eingabedaten.';
     # Test: wurde das Polgon für den raumbezug festgelegt?
     if ($umring == ''){
@@ -400,21 +400,42 @@ class Nachweis {
       }
     }
     # Testen der Stammnummer
-    $stammnr=trim($stammnr);
-    if ($stammnr ==''){ 
-      $errmsg.='Bitte geben Sie die Stammnummer korrekt ein! \n';
+    if(NACHWEIS_PRIMARY_ATTRIBUTE == 'stammnr'){
+	    $stammnr=trim($stammnr);
+	    if ($stammnr == ''){ 
+	      $errmsg.='Bitte geben Sie die Antragsnummer korrekt ein! \n';
+	    }
+	    else{
+	      $nums = array ( "-", "(", ")", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" );
+	      $strenthalten=0;
+	      for ($i=0;$i<strlen($stammnr);$i++) {
+	        if (!in_array($stammnr[$i],$nums)) {
+	          $strenthalten=1;
+	        }
+	      }
+	      if ($strenthalten==1) {
+	        $errmsg.='Ungültige Zeichen bei der Antragsnummer ! \n';
+	      }
+	    }
     }
-    else{
-      $nums = array ( "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" );
-      $strenthalten=0;
-      for ($i=0;$i<strlen($stammnr);$i++) {
-        if (!in_array($stammnr[$i],$nums)) {
-          $strenthalten=1;
-        }
-      }
-      if ($strenthalten==1) {
-        $errmsg.='Die Stammnummer darf nur Ziffern enthalten ! \n';
-      }
+  	# Testen der Rissnummer
+    if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){
+	    $rissnummer=trim($rissnummer);
+	    if ($rissnummer == ''){ 
+	      $errmsg.='Bitte geben Sie die Rissnummer korrekt ein! \n';
+	    }
+	    else{
+	      $nums = array ( "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" );
+	      $strenthalten=0;
+	      for ($i=0;$i<strlen($stammnr);$i++) {
+	        if (!in_array($rissnummer[$i],$nums)) {
+	          $strenthalten=1;
+	        }
+	      }
+	      if ($strenthalten==1) {
+	        $errmsg.='Ungültige Zeichen bei der Rissnummer ! \n';
+	      }
+	    }
     }
     # Test der Blattnummer
     $Blattnr=trim($Blattnr);
@@ -1145,7 +1166,7 @@ class Nachweis {
   
   function getDocLocation($id){
     #2005-11-24_pk
-    $sql='SELECT flurid,stammnr,link_datei FROM n_nachweise WHERE id ='.$id;
+    $sql='SELECT flurid,'.NACHWEIS_PRIMARY_ATTRIBUTE.',link_datei FROM n_nachweise WHERE id ='.$id;
     $this->debug->write("<br>nachweis.php getDocLocation zum Anzeigen der Nachweise.",4);
     $queryret=$this->database->execSQL($sql,4, 0);    
     if ($queryret[0]) {
@@ -1154,7 +1175,7 @@ class Nachweis {
     else {
       $ret[0]=0;
       $rs=pg_fetch_array($queryret[1]);
-      $ret[1]=NACHWEISDOCPATH.$rs['flurid'].'/'.str_pad($rs['stammnr'],STAMMNUMMERMAXLENGTH,'0',STR_PAD_LEFT).'/'.$rs['link_datei'];
+      $ret[1]=NACHWEISDOCPATH.$rs['flurid'].'/'.str_pad($rs[NACHWEIS_PRIMARY_ATTRIBUTE],STAMMNUMMERMAXLENGTH,'0',STR_PAD_LEFT).'/'.$rs['link_datei'];
     }
     return $ret;
   }

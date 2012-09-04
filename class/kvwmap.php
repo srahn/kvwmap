@@ -5514,7 +5514,7 @@ class GUI extends GUI_core{
       $this->formvars['Flur']=intval(substr($this->formvars['flurid'],6,9));
       $this->formvars['Bilddatei']=NACHWEISDOCPATH.$nachweis->document['link_datei'];
       $this->formvars['andere_art']=$nachweis->document['andere_art'];
-      $this->formvars['rissnr']=$nachweis->document['rissnummer'];
+      $this->formvars['rissnummer']=$nachweis->document['rissnummer'];
       $this->formvars['fortf']=$nachweis->document['fortfuehrung'];
       $this->formvars['bemerkungen']=$nachweis->document['bemerkungen'];
 
@@ -8756,7 +8756,7 @@ class GUI extends GUI_core{
     if ($this->formvars['id']=='') {
       # Prüfen der Eingabewerte
       #echo '<br>Prüfen der Eingabewerte.';
-      $ret=$this->nachweis->pruefeEingabedaten($this->formvars['datum'],$this->formvars['VermStelle'],$this->formvars['art'],$this->formvars['gueltigkeit'],$this->formvars['stammnr'],$this->formvars['Blattformat'],$this->formvars['Blattnr'],$this->formvars['changeDocument'],$this->formvars['Bilddatei_name'],$this->formvars['pathlength'],$this->formvars['umring']);
+      $ret=$this->nachweis->pruefeEingabedaten($this->formvars['datum'],$this->formvars['VermStelle'],$this->formvars['art'],$this->formvars['gueltigkeit'],$this->formvars['stammnr'],$this->formvars['rissnummer'], $this->formvars['Blattformat'],$this->formvars['Blattnr'],$this->formvars['changeDocument'],$this->formvars['Bilddatei_name'],$this->formvars['pathlength'],$this->formvars['umring']);
       if ($ret[0]) {
         #echo '<br>Ergebnis der Prüfung: '.$ret;
         $errmsg=$ret[1];
@@ -8767,12 +8767,12 @@ class GUI extends GUI_core{
         # 2.1 Speichern der Bilddatei zum Nachweis auf dem Server
         # Zusammensetzen des Dateinamen unter dem das Dokument gespeichert werden soll.
         $this->formvars['zieldateiname']=$this->nachweis->getZielDateiName($this->formvars);
-        $ret=$this->nachweis->dokumentenDateiHochladen($this->formvars['flurid'],$this->formvars['stammnr'],$this->formvars['artname'],$this->formvars['Bilddatei'],$this->formvars['zieldateiname']);
+        $ret=$this->nachweis->dokumentenDateiHochladen($this->formvars['flurid'],$this->formvars[NACHWEIS_PRIMARY_ATTRIBUTE],$this->formvars['artname'],$this->formvars['Bilddatei'],$this->formvars['zieldateiname']);
         if ($ret!='') { $errmsg=$ret; }
         else {
           # Speicherung der Bilddatei erfolgreich, Eintragen in Datenbank
           $this->nachweis->database->begintransaction();
-          $ret=$this->nachweis->eintragenNeuesDokument($this->formvars['datum'],$this->formvars['flurid'],$this->formvars['VermStelle'], $this->formvars['art'], $this->formvars['andere_art'], $this->formvars['gueltigkeit'],$this->formvars['stammnr'],$this->formvars['Blattformat'],$this->formvars['Blattnr'],$this->formvars['rissnr'],$this->formvars['fortf'],$this->formvars['bemerkungen'],$this->formvars['artname']."/".$this->formvars['zieldateiname'],$this->formvars['umring']);
+          $ret=$this->nachweis->eintragenNeuesDokument($this->formvars['datum'],$this->formvars['flurid'],$this->formvars['VermStelle'], $this->formvars['art'], $this->formvars['andere_art'], $this->formvars['gueltigkeit'],$this->formvars['stammnr'],$this->formvars['Blattformat'],$this->formvars['Blattnr'],$this->formvars['rissnummer'],$this->formvars['fortf'],$this->formvars['bemerkungen'],$this->formvars['artname']."/".$this->formvars['zieldateiname'],$this->formvars['umring']);
           if ($ret[0]) {
             $this->nachweis->database->rollbacktransaction();
             $errmsg=$ret[1];

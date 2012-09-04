@@ -65,13 +65,13 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
           <td width="18"><strong>ID</strong></td>
           <td width="65"><div align="center"><a href="index.php?go=Nachweisanzeige&order=FlurID&richtung=<?php
             if ($this->nachweis->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach individueller Nummer sortieren"><strong>Flur-ID</strong></a></div></td>
-          <? if(NACHWEIS_PRIMARY_ATTRIBUTE != 'Rissnummer'){ ?>  
+          <? if(NACHWEIS_PRIMARY_ATTRIBUTE != 'rissnummer'){ ?>  
           <td width="64"><div align="center"><a href="index.php?go=Nachweisanzeige&order=stammnr&richtung=<?php
             if ($this->nachweis->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach Antragsnr. sortieren"><strong>Antragsnr.</strong></a></div></td>
           <? } ?>
           <td width="64"><div align="center"><a href="index.php?go=Nachweisanzeige&order=rissnummer&richtung=<?php
             if ($this->nachweis->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach Rissnr. sortieren"><strong>Rissnr.</strong></a></div></td>
-          <? if(NACHWEIS_PRIMARY_ATTRIBUTE == 'Rissnummer'){ ?>
+          <? if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){ ?>
           <td width="64"><div align="center"><a href="index.php?go=Nachweisanzeige&order=stammnr&richtung=<?php
             if ($this->nachweis->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach Antragsnr. sortieren"><strong>Antragsnr.</strong></a></div></td>
           <? } ?>            
@@ -122,11 +122,11 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
             </div></td>
           <td><?php echo $this->formvars['id']=$this->nachweis->Dokumente[$i]['id']; ?></td>
           <td><div align="center"><?php echo $this->formvars['flurid']=$this->nachweis->Dokumente[$i]['flurid']; ?></div></td>
-          <? if(NACHWEIS_PRIMARY_ATTRIBUTE != 'Rissnummer'){ ?>  
+          <? if(NACHWEIS_PRIMARY_ATTRIBUTE != 'rissnummer'){ ?>  
           <td><div align="center"><?php echo $this->formvars['stammnr']=str_pad($this->nachweis->Dokumente[$i]['stammnr'],STAMMNUMMERMAXLENGTH,'0',STR_PAD_LEFT); ?></div></td>
           <? } ?>
-          <td><div align="center"><?php echo $this->formvars['rissnr']=str_pad($this->nachweis->Dokumente[$i]['rissnummer'],STAMMNUMMERMAXLENGTH,'0',STR_PAD_LEFT); ?></div></td>
-          <? if(NACHWEIS_PRIMARY_ATTRIBUTE == 'Rissnummer'){ ?>
+          <td><div align="center"><?php echo $this->formvars['rissnummer']=str_pad($this->nachweis->Dokumente[$i]['rissnummer'],STAMMNUMMERMAXLENGTH,'0',STR_PAD_LEFT); ?></div></td>
+          <? if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){ ?>
           <td><div align="center"><?php echo $this->formvars['stammnr']=str_pad($this->nachweis->Dokumente[$i]['stammnr'],STAMMNUMMERMAXLENGTH,'0',STR_PAD_LEFT); ?></div></td>
           <? } ?>
           <td><div align="center"> 
