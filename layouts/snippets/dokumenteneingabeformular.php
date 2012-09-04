@@ -98,19 +98,28 @@ else {
 		    ?><input type="hidden" name="changeDocument" value="1"><?php
 		  }
 		  ?></td>
-         
           <td>Flur:&nbsp; 
             <input name="Flur" type="text" value="<?php echo $this->formvars['Flur']; ?>" size="3" maxlength="3">
           </td>
+          <? if(NACHWEIS_PRIMARY_ATTRIBUTE != 'Rissnummer'){ ?>
           <td>Antragsnr:&nbsp; 
             <input name="stammnr" type="text" value="<?php echo $this->formvars['stammnr']; ?>" size="<?php echo STAMMNUMMERMAXLENGTH; ?>" maxlength="<?php echo STAMMNUMMERMAXLENGTH; ?>">
           </td>
+          <? } ?>
+          <td>Rissnummer:
+			  		<input name="rissnr" type="text" value="<?php echo $this->formvars['rissnr']; ?>" size="<?php echo STAMMNUMMERMAXLENGTH; ?>">
+			 		</td>
+			 		<? if(NACHWEIS_PRIMARY_ATTRIBUTE == 'Rissnummer'){ ?>
+          <td>Antragsnr:&nbsp; 
+            <input name="stammnr" type="text" value="<?php echo $this->formvars['stammnr']; ?>" size="<?php echo STAMMNUMMERMAXLENGTH; ?>" maxlength="<?php echo STAMMNUMMERMAXLENGTH; ?>">
+          </td>
+          <? } ?>
         </tr>
         <tr> 
           <td>Datei vom lokalen Rechner:<br> <input name="Bilddatei" type="file" onchange="this.title=this.value;" value="<?php echo $this->formvars['Bilddatei']; ?>" size="22" accept="image/*.jpg"> 
           </td>
          
-          <td colspan="2">Gemarkung/Gemeinde: 
+          <td colspan="3">Gemarkung/Gemeinde: 
             <?php 
 		  $this->GemkgFormObj->outputHTML();
 		  echo $this->GemkgFormObj->html;
@@ -120,8 +129,8 @@ else {
       </table></td>
   </tr>
   <tr> 
-    <td rowspan="21">&nbsp; </td>
-    <td rowspan="21" colspan="2"> 
+    <td rowspan="20">&nbsp; </td>
+    <td rowspan="20" colspan="2"> 
       <?php
  				include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php')
 			?>
@@ -168,12 +177,6 @@ else {
     <td>Fortführung:</td>
     <td>
   		<input name="fortf" type="text" value="<?php echo $this->formvars['fortf']; ?>" maxlength="4" size="4">
- 		</td>
- 	</tr>
- 	<tr> 
-    <td>Rissnummer:</td>
-   	<td>
-  		<input name="rissnr" type="text" value="<?php echo $this->formvars['rissnr']; ?>" size="<?php echo STAMMNUMMERMAXLENGTH; ?>">
  		</td>
  	</tr>
  	<tr> 

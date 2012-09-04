@@ -109,16 +109,25 @@ else {
           <td><input type="text" name="flur" value="<?php echo $this->formvars['flur']; ?>" size="3" maxlength="3">
           </td>
         </tr>
+        <? if(NACHWEIS_PRIMARY_ATTRIBUTE != 'Rissnummer'){ ?>
         <tr>
           <td colspan="2">          Antragsnummer<br>
   					<input type="text" name="suchstammnr" value="<?php echo $this->formvars['suchstammnr']; ?>" size="<?php echo STAMMNUMMERMAXLENGTH; ?>" maxlength="<?php echo STAMMNUMMERMAXLENGTH; ?>">
  					</td>    
         </tr>
+        <? } ?>
         <tr>
           <td colspan="2">          Rissnummer<br>
   					<input type="text" name="suchrissnr" value="<?php echo $this->formvars['suchrissnr']; ?>" size="<?php echo STAMMNUMMERMAXLENGTH; ?>" maxlength="<?php echo STAMMNUMMERMAXLENGTH; ?>">
  					</td>    
         </tr>
+        <? if(NACHWEIS_PRIMARY_ATTRIBUTE == 'Rissnummer'){ ?>
+        <tr>
+          <td colspan="2">          Antragsnummer<br>
+  					<input type="text" name="suchstammnr" value="<?php echo $this->formvars['suchstammnr']; ?>" size="<?php echo STAMMNUMMERMAXLENGTH; ?>" maxlength="<?php echo STAMMNUMMERMAXLENGTH; ?>">
+ 					</td>    
+        </tr>
+        <? } ?>
         <tr>
           <td colspan="2">          Fortfuehrung<br>
   					<input type="text" name="suchfortf" value="<?php echo $this->formvars['suchfortf']; ?>" size="4" maxlength="4">

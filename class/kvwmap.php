@@ -1956,7 +1956,7 @@ class GUI extends GUI_core{
         $select = substr($select, 0, $orderbyposition);
       }
       if(strpos(strtolower($select), 'oid') === false){
-      	$select = str_replace($this->formvars['layer_columnname'], $this->formvars['layer_columnname'].', oid', $select);
+      	$select = str_replace($this->formvars['layer_columnname'], 'oid, '.$this->formvars['layer_columnname'], $select);
       	$select = str_replace('*', '*, oid', $select);
       }
       if($this->formvars['klass_'.$this->formvars['chosen_layer_id']] != '' AND strpos($select, '*') === false AND strpos($select, $this->formvars['klass_'.$this->formvars['chosen_layer_id']]) === false){			# Attribut für automatische Klassifizierung mit ins data packen
@@ -2143,7 +2143,7 @@ class GUI extends GUI_core{
       }
       if(strpos(strtolower($select), 'oid') === false){
       	$select = str_replace('*', '*, oid', $select);
-      	$select = str_replace($this->formvars['layer_columnname'], $this->formvars['layer_columnname'].', oid', $select);
+      	$select = str_replace($this->formvars['layer_columnname'], 'oid, '.$this->formvars['layer_columnname'], $select);
       }
       
       if(strpos(strtolower($select), ' where ') === false){
@@ -2259,7 +2259,7 @@ class GUI extends GUI_core{
       }
       if(strpos(strtolower($select), 'oid') === false){
 				$select = str_replace('*', '*, oid', $select);
-      	$select = str_replace($this->formvars['layer_columnname'], $this->formvars['layer_columnname'].', oid', $select);
+      	$select = str_replace($this->formvars['layer_columnname'], 'oid, '.$this->formvars['layer_columnname'], $select);
       }
       
       if(strpos(strtolower($select), ' where ') === false){

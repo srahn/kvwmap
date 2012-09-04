@@ -1069,7 +1069,7 @@ function selectPoint(evt) {
 // ----------------------------box aufziehen---------------------------------
 function startPoint(evt) {
   dragging  = true;
-  var alle = boxx.length;
+  var alle = pathx.length;
 	top.document.GUI.INPUT_COORD.value  = boxx+" "+alle;
   for(var i = 0; i < alle; ++i){
     pathx.pop();
@@ -1193,7 +1193,6 @@ function redraw()
    {
     path = path+" "+pathx[i]+","+pathy[i];
    }
-  
   // polygon um punktepfad erweitern
   document.getElementById("polygon").setAttribute("points", path);
 }
