@@ -647,6 +647,11 @@ function set_changed_flag(flag){
 										$href = $explosion[0];
 										if($explosion[1] != ''){
 											$alias = $explosion[1];
+											$explosion1 = explode('$', $alias);
+											for($d = 1; $d < count($explosion1); $d++){
+												$explosion2 = explode('&', $explosion1[$d]);
+												$alias = str_replace('$'.$explosion2[0], $layer['shape'][$k][$explosion2[0]], $alias);
+											}
 										}
 										else{
 											$alias = $href;

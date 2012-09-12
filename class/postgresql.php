@@ -3986,7 +3986,7 @@ class pgdatabase extends pgdatabase_core {
     $sql.=" UNION";
     # Abfrage der Hausnummern aus dem ALB-Bestand
     # Anfang
-    $sql.=" SELECT '".$GemID."-".$StrID."-'||alb.hausnr AS id, ".HAUSNUMMER_TYPE."(alb.hausnr) AS nrtext,alb.hausnr AS ordernr FROM alb_f_adressen AS alb WHERE (1=1)";
+    $sql.=" SELECT '".$GemID."-".$StrID."-'||alb.hausnr AS id, ".HAUSNUMMER_TYPE."(alb.hausnr) AS nrtext,alb.hausnr AS ordernr FROM alb_f_adressen AS alb, alb_flurstuecke as f WHERE (1=1) AND f.flurstkennz = alb.flurstkennz AND f.status != 'H' ";
     if ($GemID!='') {
       $sql.=" AND alb.gemeinde=".$GemID;
     }
@@ -4052,7 +4052,7 @@ class pgdatabase extends pgdatabase_core {
     # Abfrage der Strassen aus dem ALB-Bestand
     $sql.=" SELECT s.gemeinde,s.strasse,s.strassenname,s.strassenname AS ordertext, g.gemkgname";
     $sql.=" FROM alb_f_adressen AS a,alb_v_strassen AS s, alb_flurstuecke as f, alb_v_gemarkungen as g";
-    $sql.=" WHERE f.flurstkennz = a.flurstkennz AND g.gemkgschl = f.gemkgschl AND a.gemeinde=s.gemeinde AND a.strasse=s.strasse";
+    $sql.=" WHERE f.status != 'H' AND f.flurstkennz = a.flurstkennz AND g.gemkgschl = f.gemkgschl AND a.gemeinde=s.gemeinde AND a.strasse=s.strasse";
     if ($GemID!='') {
       $sql.=" AND a.gemeinde=".$GemID;
     }

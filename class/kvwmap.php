@@ -2601,7 +2601,7 @@ class GUI extends GUI_core{
     $jagdkataster->clientepsg = $this->user->rolle->epsg_code;
     if ($this->formvars['oid']!='') {           # Jagdbezirk bearbeiten
     	$this->titel='Jagdbezirk bearbeiten';
-      $rect = $jagdkataster->zoomTojagdbezirk($this->formvars['oid'], 10, $this->Stelle, $this->user);
+      $rect = $jagdkataster->zoomTojagdbezirk($this->formvars['oid'], 10);
       $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
       $this->jagdbezirk = $jagdkataster->getjagdbezirk($this->formvars['oid']);
       $this->formvars['newpathwkt'] = $this->jagdbezirk['wktgeom'];

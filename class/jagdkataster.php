@@ -41,8 +41,8 @@ class jagdkataster {
   }
 
   function zoomTojagdbezirk($oid, $border) {
-  	$sql = 'SELECT MIN(XMIN(ENVELOPE(the_geom))) AS minx, MAX(XMAX(ENVELOPE(the_geom))) AS maxx';
-    $sql.= ', MIN(YMIN(ENVELOPE(the_geom))) AS miny, MAX(YMAX(ENVELOPE(the_geom))) AS maxy';
+  	$sql = 'SELECT MIN(XMIN(ENVELOPE(TRANSFORM(the_geom, '.$this->clientepsg.')))) AS minx, MAX(XMAX(ENVELOPE(TRANSFORM(the_geom, '.$this->clientepsg.')))) AS maxx';
+    $sql.= ', MIN(YMIN(ENVELOPE(TRANSFORM(the_geom, '.$this->clientepsg.')))) AS miny, MAX(YMAX(ENVELOPE(TRANSFORM(the_geom, '.$this->clientepsg.')))) AS maxy';
     $sql.= ' FROM jagdbezirke WHERE oid = '.$oid;
     $ret = $this->database->execSQL($sql, 4, 0);
 		$rs = pg_fetch_array($ret[1]);
