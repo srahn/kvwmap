@@ -11,7 +11,7 @@ define('APPLVERSION','kvwmap_'.VERSION.'/');
 $dbname='kvwmapdb';
 # Wenn der pgdbname leer gelassen wird, wird versucht die Information
 # für die Verbindung zur PostGIS-Datenbank aus der Tabelle Stelle zu lesen.
-$pgdbname='';	
+$pgdbname='kvwmapsp';	
 #$pgdbname='alkis_25833';
 
 ########################## Metadaten zum Landkreis
