@@ -68,7 +68,7 @@ class ALB {
     if($formvars['status']){ $csv .= 'Status;';}
     if($formvars['vorgaenger']){ $csv .= 'Vorgaenger;';}
     if($formvars['nachfolger']){ $csv .= 'Nachfolger;';}
-    if($formvars['klassifizierung']){ $csv .= 'Klassifizierung;';}
+  	if($formvars['klassifizierung']){ $csv .= 'Klassifizierung-ALB;Klassifizierung-ALK;';}
     if($formvars['freitext']){ $csv .= 'Freitext;';}
     if($formvars['hinweis']){ $csv .= 'Hinweis;';}
     if($formvars['baulasten']){ $csv .= 'Baulasten;';}
@@ -76,7 +76,8 @@ class ALB {
     if($formvars['verfahren']){ $csv .= 'Verfahren;';}
     if($formvars['nutzung']){ $csv .= 'Nutzung;';}
     if($formvars['blattnr']){ $csv .= 'Blattnummer;';}
-    if($formvars['pruefzeichen']){ $csv .= 'Prüfzeichen;';}
+    if($formvars['pruefzeichen']){ $csv .= 'P Buchung;';}
+  	if($formvars['pruefzeichen_f']){ $csv .= 'P Flurstück;';}
     if($formvars['bvnr']){ $csv .= 'BVNR;';}
     if($formvars['buchungsart']){ $csv .= 'Buchungsart;';}
     $csv .= 'Namensnummer;'; 
@@ -146,13 +147,84 @@ class ALB {
 				        }
 				        $csv .= ';';
 				      }
-				      if($formvars['klassifizierung']){
-				        for($j = 0; $j < count($flst->Klassifizierung)-1; $j++){
-				        	if($j > 0)$csv .= ' | ';
-				          $csv .= $flst->Klassifizierung[$j]['flaeche'].'m² '.$flst->Klassifizierung[$j]['tabkenn'].'-'.$flst->Klassifizierung[$j]['klass'].' '.$flst->Klassifizierung[$j]['bezeichnung'];
+            if($formvars['klassifizierung']){
+			      	$csv .= '"';
+			        for($j = 0; $j < count($flst->Klassifizierung)-1; $j++){
+			          if($j > 0)$csv .= " \n ";
+			          $csv .= $flst->Klassifizierung[$j]['flaeche'].'m² '.$flst->Klassifizierung[$j]['tabkenn'].'-'.$flst->Klassifizierung[$j]['klass'].' '.$flst->Klassifizierung[$j]['bezeichnung'].' ';
+			          $wert=substr($flst->Klassifizierung[$j]['angaben'],strrpos($flst->Klassifizierung[$j]['angaben'],'/')+1);
+			          $emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
+			          if($flst->Klassifizierung[$j]['tabkenn'] =='32' AND $flst->Klassifizierung[$j]['angaben'] !='') {
+			            $csv .= "'".$flst->Klassifizierung[$j]['angaben']."'";
+			          } else {
+			            $csv .= $flst->Klassifizierung[$j]['angaben'];
+			          }
+			          if ($flst->Klassifizierung[$j]['tabkenn'] == '32' AND $flst->Klassifizierung[$j]['angaben'] !='') {
+			            $csv .= ' EMZ: '.$emz;
+			            $emzges=$emzges+$emz;
+			            $flst->emz = true;
+			          }
+			        }
+			        if ($emzges > 0) {
+			          $csv .= "\n EMZ gesamt: ".$emzges;
+			        }
+			        $csv .= '";"';
+			        //////////////////////EMZ aus ALK////////////////////////
+			      		if(!$flst->emz){
+				        	$alkemz = $flst->getEMZfromALK();
+				        	if($alkemz[0]['wert'] != ''){
+				        		$ratio = $flst->ALB_Flaeche/$alkemz[0]['flstflaeche'];
+										$emzges_222 = 0; $emzges_223 = 0;
+					          $flaeche_222 = 0; $flaeche_223 = 0;
+					          for($j = 0; $j < count($alkemz); $j++){
+				            	$wert=$alkemz[$j]['wert'];
+				            	$alkemz[$j]['flaeche'] = $alkemz[$j]['flaeche']*$ratio;
+						          $emz = round($alkemz[$j]['flaeche'] * $wert / 100);
+						          if($alkemz[$j]['objart'] == '222'){
+						          	$emzges_222 = $emzges_222 + $emz;
+						          	$flaeche_222 = $flaeche_222 + $alkemz[$j]['flaeche'];
+						          }
+						          if($alkemz[$j]['objart'] == '223'){
+						          	$emzges_223 = $emzges_223 + $emz;
+						          	$flaeche_223 = $flaeche_223 + $alkemz[$j]['flaeche'];
+						          }
+						          if (strlen($alkemz[$j]['label'])==20) {
+						            $label1=substr(substr($alkemz[$j]['label'],4),0,-6);
+						            $label2=ltrim(substr(trim(substr($alkemz[$j]['label'],-6,6)),0,3),"0");
+						            $label3=ltrim(substr($alkemz[$j]['label'],-3,3),"0");
+						          } elseif (strlen($alkemz[$j]['label'])==23) {
+						            $label1=substr(substr($alkemz[$j]['label'],4),0,-9);
+						            $label2=ltrim(substr(trim(substr($alkemz[$j]['label'],-9,6)),0,3),"0");
+						            $label3=ltrim(substr($alkemz[$j]['label'],-6,3),"0");
+						            $label4=substr($alkemz[$j]['label'],-3,3);
+						          } elseif (strlen($alkemz[$j]['label'])==29) {
+						            $label1=substr(substr($alkemz[$j]['label'],4),0,-15);
+						            $label2=ltrim(substr(trim(substr($alkemz[$j]['label'],-15,6)),0,3),"0");
+						            $label3=ltrim(substr($alkemz[$j]['label'],-12,3),"0");
+						            $label4='W';
+						          }
+					            $csv .= round($alkemz[$j]['flaeche']).' m² '; 
+					            $csv .= $label1.' '.$label2.'/'.$label3.' '.$label4;
+					            $csv .= ' EMZ: '.$emz." \n ";
+					          }
+				            $nichtgeschaetzt=round($flst->ALB_Flaeche-$flaeche_222-$flaeche_223);
+				            if($nichtgeschaetzt>0){
+			          			$csv .=  'nicht geschätzt: '.$nichtgeschaetzt." m² \n";
+			          		}
+			        			if($emzges_222 > 0){
+			        				$BWZ_222 = round($emzges_222/$flaeche_222*100);
+			          			$csv .= ' Ackerland gesamt: EMZ '.$emzges_222.' , BWZ '.$BWZ_222." \n";
+			          		}
+			        			if($emzges_223 > 0){
+			        				$BWZ_223 = round($emzges_223/$flaeche_223*100);
+			        				$csv .= ' Grünland gesamt: EMZ '.$emzges_223.' , BWZ '.$BWZ_223;
+										}
+				        	}
 				        }
-				        $csv .= ';';
-				    	}      
+			        //////////////////////
+			        
+			        $csv .= '";';
+			      }      
 				      if($formvars['freitext']) {
 				        for($j = 0; $j < count($flst->FreiText); $j++){
 				        	if($j > 0)$csv .= ' | ';
@@ -216,6 +288,11 @@ class ALB {
 	        }
 	        $csv .= ';';
 		    }
+		    
+        if($formvars['pruefzeichen_f']){
+	      	$csv .= $flst->Pruefzeichen;
+	      	$csv .= ';';
+	      }
 		    
 		    if($formvars['bvnr']){
 	        for($g = 0; $g < count($flst->Grundbuecher); $g++){
@@ -286,14 +363,15 @@ class ALB {
     if($formvars['status']){ $csv .= 'Status;';}
     if($formvars['vorgaenger']){ $csv .= 'Vorgaenger;';}
     if($formvars['nachfolger']){ $csv .= 'Nachfolger;';}
-    if($formvars['klassifizierung']){ $csv .= 'Klassifizierung;';}
+  	if($formvars['klassifizierung']){ $csv .= 'Klassifizierung-ALB;Klassifizierung-ALK;';}
     if($formvars['freitext']){ $csv .= 'Freitext;';}
     if($formvars['hinweis']){ $csv .= 'Hinweis;';}
     if($formvars['baulasten']){ $csv .= 'Baulasten;';}
     if($formvars['ausfstelle']){ $csv .= 'ausführende Stelle;';}
     if($formvars['verfahren']){ $csv .= 'Verfahren;';}
    	if($formvars['blattnr']){ $csv .= 'Blattnummer;';}
-    if($formvars['pruefzeichen']){ $csv .= 'Prüfzeichen;';}
+    if($formvars['pruefzeichen']){ $csv .= 'P Buchung;';}
+  	if($formvars['pruefzeichen_f']){ $csv .= 'P Flurstück;';}
     if($formvars['bvnr']){ $csv .= 'BVNR;';}
     if($formvars['buchungsart']){ $csv .= 'Buchungsart;';}
     if($formvars['eigentuemer']){ $csv .= 'Eigentümer;';}
@@ -361,13 +439,84 @@ class ALB {
 	        }
 	        $csv .= ';';
 	      }
-	      if($formvars['klassifizierung']){
-	        for($j = 0; $j < count($flst->Klassifizierung)-1; $j++){
-	        	if($j > 0)$csv .= ' | ';
-	          $csv .= $flst->Klassifizierung[$j]['flaeche'].'m² '.$flst->Klassifizierung[$j]['tabkenn'].'-'.$flst->Klassifizierung[$j]['klass'].' '.$flst->Klassifizierung[$j]['bezeichnung'];
+			if($formvars['klassifizierung']){
+      	$csv .= '"';
+        for($j = 0; $j < count($flst->Klassifizierung)-1; $j++){
+          if($j > 0)$csv .= " \n ";
+          $csv .= $flst->Klassifizierung[$j]['flaeche'].'m² '.$flst->Klassifizierung[$j]['tabkenn'].'-'.$flst->Klassifizierung[$j]['klass'].' '.$flst->Klassifizierung[$j]['bezeichnung'].' ';
+          $wert=substr($flst->Klassifizierung[$j]['angaben'],strrpos($flst->Klassifizierung[$j]['angaben'],'/')+1);
+          $emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
+          if($flst->Klassifizierung[$j]['tabkenn'] =='32' AND $flst->Klassifizierung[$j]['angaben'] !='') {
+            $csv .= "'".$flst->Klassifizierung[$j]['angaben']."'";
+          } else {
+            $csv .= $flst->Klassifizierung[$j]['angaben'];
+          }
+          if ($flst->Klassifizierung[$j]['tabkenn'] == '32' AND $flst->Klassifizierung[$j]['angaben'] !='') {
+            $csv .= ' EMZ: '.$emz;
+            $emzges=$emzges+$emz;
+            $flst->emz = true;
+          }
+        }
+        if ($emzges > 0) {
+          $csv .= "\n EMZ gesamt: ".$emzges;
+        }
+        $csv .= '";"';
+        //////////////////////EMZ aus ALK////////////////////////
+      		if(!$flst->emz){
+	        	$alkemz = $flst->getEMZfromALK();
+	        	if($alkemz[0]['wert'] != ''){
+	        		$ratio = $flst->ALB_Flaeche/$alkemz[0]['flstflaeche'];
+							$emzges_222 = 0; $emzges_223 = 0;
+		          $flaeche_222 = 0; $flaeche_223 = 0;
+		          for($j = 0; $j < count($alkemz); $j++){
+	            	$wert=$alkemz[$j]['wert'];
+	            	$alkemz[$j]['flaeche'] = $alkemz[$j]['flaeche']*$ratio;
+			          $emz = round($alkemz[$j]['flaeche'] * $wert / 100);
+			          if($alkemz[$j]['objart'] == '222'){
+			          	$emzges_222 = $emzges_222 + $emz;
+			          	$flaeche_222 = $flaeche_222 + $alkemz[$j]['flaeche'];
+			          }
+			          if($alkemz[$j]['objart'] == '223'){
+			          	$emzges_223 = $emzges_223 + $emz;
+			          	$flaeche_223 = $flaeche_223 + $alkemz[$j]['flaeche'];
+			          }
+			          if (strlen($alkemz[$j]['label'])==20) {
+			            $label1=substr(substr($alkemz[$j]['label'],4),0,-6);
+			            $label2=ltrim(substr(trim(substr($alkemz[$j]['label'],-6,6)),0,3),"0");
+			            $label3=ltrim(substr($alkemz[$j]['label'],-3,3),"0");
+			          } elseif (strlen($alkemz[$j]['label'])==23) {
+			            $label1=substr(substr($alkemz[$j]['label'],4),0,-9);
+			            $label2=ltrim(substr(trim(substr($alkemz[$j]['label'],-9,6)),0,3),"0");
+			            $label3=ltrim(substr($alkemz[$j]['label'],-6,3),"0");
+			            $label4=substr($alkemz[$j]['label'],-3,3);
+			          } elseif (strlen($alkemz[$j]['label'])==29) {
+			            $label1=substr(substr($alkemz[$j]['label'],4),0,-15);
+			            $label2=ltrim(substr(trim(substr($alkemz[$j]['label'],-15,6)),0,3),"0");
+			            $label3=ltrim(substr($alkemz[$j]['label'],-12,3),"0");
+			            $label4='W';
+			          }
+		            $csv .= round($alkemz[$j]['flaeche']).' m² '; 
+		            $csv .= $label1.' '.$label2.'/'.$label3.' '.$label4;
+		            $csv .= ' EMZ: '.$emz." \n ";
+		          }
+	            $nichtgeschaetzt=round($flst->ALB_Flaeche-$flaeche_222-$flaeche_223);
+	            if($nichtgeschaetzt>0){
+          			$csv .=  'nicht geschätzt: '.$nichtgeschaetzt." m² \n";
+          		}
+        			if($emzges_222 > 0){
+        				$BWZ_222 = round($emzges_222/$flaeche_222*100);
+          			$csv .= ' Ackerland gesamt: EMZ '.$emzges_222.' , BWZ '.$BWZ_222." \n";
+          		}
+        			if($emzges_223 > 0){
+        				$BWZ_223 = round($emzges_223/$flaeche_223*100);
+        				$csv .= ' Grünland gesamt: EMZ '.$emzges_223.' , BWZ '.$BWZ_223;
+							}
+	        	}
 	        }
-	        $csv .= ';';
-	    	}      
+        //////////////////////
+        
+        $csv .= '";';
+      }      
 	      if($formvars['freitext']) {
 	        for($j = 0; $j < count($flst->FreiText); $j++){
 	        	if($j > 0)$csv .= ' | ';
@@ -418,6 +567,11 @@ class ALB {
 	        }
 	        $csv .= ';';
 		    }
+		    
+				if($formvars['pruefzeichen_f']){
+	      	$csv .= $flst->Pruefzeichen;
+	      	$csv .= ';';
+	      }
 		    
 		    if($formvars['bvnr']){
 	        for($g = 0; $g < count($flst->Grundbuecher); $g++){
@@ -511,7 +665,7 @@ class ALB {
     if($formvars['status']){ $csv .= 'Status;';}
     if($formvars['vorgaenger']){ $csv .= 'Vorgaenger;';}
     if($formvars['nachfolger']){ $csv .= 'Nachfolger;';}
-    if($formvars['klassifizierung']){ $csv .= 'Klassifizierung;Angabe;';}
+    if($formvars['klassifizierung']){ $csv .= 'Klassifizierung-ALB;Klassifizierung-ALK;';}
     if($formvars['freitext']){ $csv .= 'Freitext;';}
     if($formvars['hinweis']){ $csv .= 'Hinweis;';}
     if($formvars['baulasten']){ $csv .= 'Baulasten;';}
@@ -519,7 +673,8 @@ class ALB {
     if($formvars['verfahren']){ $csv .= 'Verfahren;';}
     if($formvars['nutzung']){ $csv .= 'Nutzung;';}
     if($formvars['blattnr']){ $csv .= 'Blattnummer;';}
-    if($formvars['pruefzeichen']){ $csv .= 'Prüfzeichen;';}
+    if($formvars['pruefzeichen']){ $csv .= 'P Buchung;';}
+  	if($formvars['pruefzeichen_f']){ $csv .= 'P Flurstück;';}
     if($formvars['bvnr']){ $csv .= 'BVNR;';}
     if($formvars['buchungsart']){ $csv .= 'Buchungsart;';}
     if($formvars['eigentuemer']){ $csv .= 'Eigentümer;';}
@@ -581,13 +736,10 @@ class ALB {
         $csv .= ';';
       }
       if($formvars['klassifizierung']){
+      	$csv .= '"';
         for($j = 0; $j < count($flst->Klassifizierung)-1; $j++){
-          if($j > 0)$csv .= ' | ';
-          $csv .= $flst->Klassifizierung[$j]['flaeche'].'m² '.$flst->Klassifizierung[$j]['tabkenn'].'-'.$flst->Klassifizierung[$j]['klass'].' '.$flst->Klassifizierung[$j]['bezeichnung'];
-        }
-        $csv .= ';';
-        for($j = 0; $j < count($flst->Klassifizierung)-1; $j++){
-          if($j > 0 AND $flst->Klassifizierung[$j]['angaben'] !='')$csv .= ' | ';
+          if($j > 0)$csv .= "\n";
+          $csv .= $flst->Klassifizierung[$j]['flaeche'].'m² '.$flst->Klassifizierung[$j]['tabkenn'].'-'.$flst->Klassifizierung[$j]['klass'].' '.$flst->Klassifizierung[$j]['bezeichnung'].' ';
           $wert=substr($flst->Klassifizierung[$j]['angaben'],strrpos($flst->Klassifizierung[$j]['angaben'],'/')+1);
           $emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
           if($flst->Klassifizierung[$j]['tabkenn'] =='32' AND $flst->Klassifizierung[$j]['angaben'] !='') {
@@ -598,12 +750,68 @@ class ALB {
           if ($flst->Klassifizierung[$j]['tabkenn'] == '32' AND $flst->Klassifizierung[$j]['angaben'] !='') {
             $csv .= ' EMZ: '.$emz;
             $emzges=$emzges+$emz;
+            $flst->emz = true;
           }
         }
-        if ($flst->Klassifizierung[$j]['tabkenn'] == '32' AND $emzges > 0) {
-          $csv .= ' || EMZ gesamt: '.$emzges;
+        if ($emzges > 0) {
+          $csv .= "\n EMZ gesamt: ".$emzges;
         }
-        $csv .= ';';
+        $csv .= '";"';
+        //////////////////////EMZ aus ALK////////////////////////
+      		if(!$flst->emz){
+	        	$alkemz = $flst->getEMZfromALK();
+	        	if($alkemz[0]['wert'] != ''){
+	        		$ratio = $flst->ALB_Flaeche/$alkemz[0]['flstflaeche'];
+							$emzges_222 = 0; $emzges_223 = 0;
+		          $flaeche_222 = 0; $flaeche_223 = 0;
+		          for($j = 0; $j < count($alkemz); $j++){
+	            	$wert=$alkemz[$j]['wert'];
+	            	$alkemz[$j]['flaeche'] = $alkemz[$j]['flaeche']*$ratio;
+			          $emz = round($alkemz[$j]['flaeche'] * $wert / 100);
+			          if($alkemz[$j]['objart'] == '222'){
+			          	$emzges_222 = $emzges_222 + $emz;
+			          	$flaeche_222 = $flaeche_222 + $alkemz[$j]['flaeche'];
+			          }
+			          if($alkemz[$j]['objart'] == '223'){
+			          	$emzges_223 = $emzges_223 + $emz;
+			          	$flaeche_223 = $flaeche_223 + $alkemz[$j]['flaeche'];
+			          }
+			          if (strlen($alkemz[$j]['label'])==20) {
+			            $label1=substr(substr($alkemz[$j]['label'],4),0,-6);
+			            $label2=ltrim(substr(trim(substr($alkemz[$j]['label'],-6,6)),0,3),"0");
+			            $label3=ltrim(substr($alkemz[$j]['label'],-3,3),"0");
+			          } elseif (strlen($alkemz[$j]['label'])==23) {
+			            $label1=substr(substr($alkemz[$j]['label'],4),0,-9);
+			            $label2=ltrim(substr(trim(substr($alkemz[$j]['label'],-9,6)),0,3),"0");
+			            $label3=ltrim(substr($alkemz[$j]['label'],-6,3),"0");
+			            $label4=substr($alkemz[$j]['label'],-3,3);
+			          } elseif (strlen($alkemz[$j]['label'])==29) {
+			            $label1=substr(substr($alkemz[$j]['label'],4),0,-15);
+			            $label2=ltrim(substr(trim(substr($alkemz[$j]['label'],-15,6)),0,3),"0");
+			            $label3=ltrim(substr($alkemz[$j]['label'],-12,3),"0");
+			            $label4='W';
+			          }
+		            $csv .= round($alkemz[$j]['flaeche']).' m² '; 
+		            $csv .= $label1.' '.$label2.'/'.$label3.' '.$label4;
+		            $csv .= ' EMZ: '.$emz." \n ";
+		          }
+	            $nichtgeschaetzt=round($flst->ALB_Flaeche-$flaeche_222-$flaeche_223);
+	            if($nichtgeschaetzt>0){
+          			$csv .=  'nicht geschätzt: '.$nichtgeschaetzt." m² \n";
+          		}
+        			if($emzges_222 > 0){
+        				$BWZ_222 = round($emzges_222/$flaeche_222*100);
+          			$csv .= ' Ackerland gesamt: EMZ '.$emzges_222.' , BWZ '.$BWZ_222." \n";
+          		}
+        			if($emzges_223 > 0){
+        				$BWZ_223 = round($emzges_223/$flaeche_223*100);
+        				$csv .= ' Grünland gesamt: EMZ '.$emzges_223.' , BWZ '.$BWZ_223;
+							}
+	        	}
+	        }
+        //////////////////////
+        
+        $csv .= '";';
       }      
       if($formvars['freitext']) {
         for($j = 0; $j < count($flst->FreiText); $j++){
@@ -669,6 +877,11 @@ class ALB {
 	        $csv .= ';';
 		    }
 		    
+    		if($formvars['pruefzeichen_f']){
+	      	$csv .= $flst->Pruefzeichen;
+	      	$csv .= ';';
+	      }
+		    
 		    if($formvars['bvnr']){
 	        for($g = 0; $g < count($flst->Grundbuecher); $g++){
 	          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
@@ -693,13 +906,16 @@ class ALB {
 	      }
       
       if($formvars['eigentuemer']){
+      	$csv .= '"';
         for($g = 0; $g < count($flst->Grundbuecher); $g++){
+        	if($g > 0)$csv .= "\n";
           $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
           for($b = 0; $b < count($flst->Buchungen); $b++){
+          	if($b > 0)$csv .= "\n";
             $Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
             $anzEigentuemer=count($Eigentuemerliste);
             for($e=0;$e<$anzEigentuemer;$e++){
-            	if($e > 0)$csv .= ' | ';
+            	if($e > 0)$csv .= "\n";
               $csv .= $Eigentuemerliste[$e]->Nr.' ';
               $anzNamenszeilen = count($Eigentuemerliste[$e]->Name);
               for($n=0;$n<$anzNamenszeilen;$n++) {
@@ -708,7 +924,7 @@ class ALB {
             }
           }
         }
-        $csv .= ';';
+        $csv .= '";';
       }
       $csv .= chr(10);
     }
@@ -783,6 +999,7 @@ class ALB {
   }
 
   function ALBAuszug_Flurstueck($FlurstKennz,$formnummer,$wasserzeichen) {
+  	global $katasterfuehrendestelle;
     $pdf=new Cezpdf();
     $pdf->selectFont(PDFCLASSPATH.'fonts/Courier.afm');
     # Hilfsobjekte erzeugen
@@ -840,7 +1057,18 @@ class ALB {
 
         $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,$art,$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 
-        if(AMT != '')$pdf->addText($col0,$row-=12,$fontSize,AMT);
+        if(AMT != ''){
+        	$amt = AMT;
+        	if($katasterfuehrendestelle){
+	        	foreach ($katasterfuehrendestelle as $key => $value) {
+					    if($flst->Grundbuecher[0]['bezirk'] <= $key) {
+					      $amt .= $value;
+					      break;
+					    }
+	        	}
+        	}
+        	$pdf->addText($col0,$row-=12,$fontSize,$amt);
+        }
         if(LANDKREIS != '')$pdf->addText($col7,$row-=12,$fontSize,LANDKREIS);
         if(($formnummer == '30' OR $formnummer == '35') AND BEARBEITER == 'true')$pdf->addText($col0,$row-=12,$fontSize,BEARBEITER_NAME);
         if(STRASSE != '')$pdf->addText($col7,$row-=12,$fontSize,STRASSE);
@@ -1523,7 +1751,18 @@ class ALB {
 #28.11.2006 H.Riedel, Aktualitaetsnr uebergeben
     $AktualitaetsNr=$buchungen[0]['aktualitaetsnr'];
     $this->ALBAuszug_SeitenKopf($pdf,NULL,$Ueberschrift,$art,$seite,$row,$fontSize,$BestandStr,$AktualitaetsNr);
-    if(AMT != '')$pdf->addText($col1,$row-=12,$fontSize,AMT);
+  	if(AMT != ''){
+    	$amt = AMT;
+    	if($katasterfuehrendestelle){
+    		foreach ($katasterfuehrendestelle as $key => $value) {
+					if($flst->Grundbuecher[0]['bezirk'] <= $key) {
+		      	$amt .= $value;
+		      	break;
+		    	}
+        }
+      }
+      $pdf->addText($col0,$row-=12,$fontSize,$amt);
+    }
     if(LANDKREIS != '')$pdf->addText($col42,$row-=12,$fontSize,LANDKREIS);
     if(STRASSE != '')$pdf->addText($col42,$row-=12,$fontSize,STRASSE);
     if(STRASSE2 != '')$pdf->addText($col42,$row-=12,$fontSize,STRASSE2);

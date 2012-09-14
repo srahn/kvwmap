@@ -6,6 +6,7 @@
  $strSelectedDatasets="selected datasets:";
  $strCSVExport="export into CSV-File";
  $strCSVExportAll="export all into CSV-File";
+ $strSHPExportAll="export all into SHP-File";
  $strMapSelect="select";
  $strzoomtodatasets="show in map";
  $strPrint="print";

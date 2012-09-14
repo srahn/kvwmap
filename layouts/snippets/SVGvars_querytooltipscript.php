@@ -66,7 +66,7 @@ $SVGvars_querytooltipscript .= '
 			for(i = 1; i < objects.length; i++){
 				if(objects[i] != ""){
 					var elements = objects[i].split("| ");
-					texts[i] = settext(elements[0], xpos, ypos);									// Sachdaten
+					texts[i] = settext(elements[0]+".", xpos, ypos);									// Sachdaten
 					texts[i].setAttribute(\'visibility\', \'visible\');
 					box[i] = texts[i].getBBox();																	// BBox berechnen
 					ypos = ypos + box[i].height;

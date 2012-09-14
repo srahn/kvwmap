@@ -64,10 +64,11 @@ class gps {
 	   	$line=$data_sets[$linenumber];
 	   	#echo 'line:'.$line.'<br>';
 	   	# Separieren in Array nach Kommas
-	    $parts=explode(',',$line);
+    	$parts1=explode(':',$line);
+	    $parts=explode(',',$parts1[0]);
 	    $this->sentence_type=substr($parts[0],-3);
 	    #echo 'Sentence Type:'.$this->sentence_type;
-	    switch ($this->sentence_type) {
+	    switch ($this->sentence_type){
 	    	case 'GGA' : {
 		      # Extrahieren der Koordinaten und Umrechnen in Dezimalgrad
 		      $this->lon=$this->degMin2deg(substr($parts[4],0,3),substr($parts[4],3));
@@ -80,12 +81,19 @@ class gps {
 		      $this->lat=$this->degMin2deg(substr($parts[3],0,2),substr($parts[3],2));
 		      $next_line = false;
 	    	} break;
-	    	default : {
-	    		$next_line = true;
-	    		$linenumber--;
-	    	}
-	    }
-    }
+				case 'ION' : {
+					# Extrahieren der Koordinaten
+					$parts = explode(',', $parts1[1]);
+					$this->lon=substr($parts[0],0,8);
+					$this->lat=substr($parts[1],0,8);
+					$next_line = false;
+		    	} break;
+		    	default : {
+		    		$next_line = true;
+		    		$linenumber--;
+		    	}
+		    }
+    	}
     #echo '<br>lon:'.$this->lon;
     #echo '<br>lat:'.$this->lat;    
  	}

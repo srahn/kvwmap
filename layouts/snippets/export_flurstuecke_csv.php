@@ -51,6 +51,7 @@ function save_selection(){
 		if(document.GUI.buchungsart != undefined && document.GUI.buchungsart.checked == true){attributes = attributes+'buchungsart|'}
 		if(document.GUI.bvnr != undefined && document.GUI.bvnr.checked == true){attributes = attributes+'bvnr|'}
 		if(document.GUI.pruefzeichen != undefined && document.GUI.pruefzeichen.checked == true){attributes = attributes+'pruefzeichen|'}
+		if(document.GUI.pruefzeichen_f != undefined && document.GUI.pruefzeichen_f.checked == true){attributes = attributes+'pruefzeichen_f|'}
 		if(document.GUI.eigentuemer != undefined && document.GUI.eigentuemer.checked == true){attributes = attributes+'eigentuemer|'}
 		if(document.GUI.freitext != undefined && document.GUI.freitext.checked == true){attributes = attributes+'freitext|'}
 		if(document.GUI.hinweis != undefined && document.GUI.hinweis.checked == true){attributes = attributes+'hinweis|'}
@@ -146,7 +147,8 @@ function delete_selection(){
 			    if($privileg['kreisname']){ echo '<input  name="kreisname" type="checkbox" '; if($this->formvars['kreisname'] == 'true') echo 'checked'; echo '>Kreisname<br>';}
 			    if($privileg['kreisid']){ echo '<input  name="kreisid" type="checkbox" '; if($this->formvars['kreisid'] == 'true') echo 'checked'; echo '>Kreisschlüssel<br>';}
 			    if($this->formvars['formnummer'] != 'Nutzungsarten' AND $privileg['nutzung']){ echo '<input  name="nutzung" type="checkbox" '; if($this->formvars['nutzung'] == 'true') echo 'checked'; echo '>Nutzung<br>';}
-			    if($privileg['bestandsnr']){ echo '<input  name="pruefzeichen" type="checkbox" '; if($this->formvars['pruefzeichen'] == 'true') echo 'checked'; echo '>Prüfzeichen<br>';}
+			    if($privileg['bestandsnr']){ echo '<input  name="pruefzeichen" type="checkbox" '; if($this->formvars['pruefzeichen'] == 'true') echo 'checked'; echo '>Prüfzeichen Buchung<br>';}
+			    if($privileg['bestandsnr']){ echo '<input  name="pruefzeichen_f" type="checkbox" '; if($this->formvars['pruefzeichen_f'] == 'true') echo 'checked'; echo '>Prüfzeichen Flurstück<br>';}
 			    if($privileg['status']){ echo '<input  name="status" type="checkbox" '; if($this->formvars['status'] == 'true') echo 'checked'; echo '>Status<br>';}
 			    if($privileg['verfahren']){ echo '<input  name="verfahren" type="checkbox" '; if($this->formvars['verfahren'] == 'true') echo 'checked'; echo '>Verfahren<br>';}
 			    if($privileg['vorgaenger']){ echo '<input  name="vorgaenger" type="checkbox" '; if($this->formvars['vorgaenger'] == 'true') echo 'checked'; echo '>Vorgänger<br>';}			    

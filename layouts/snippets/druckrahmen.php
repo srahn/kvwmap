@@ -23,6 +23,12 @@ function updaterefwidth(imagewidth, imageheight){
 }
 
 function updateformatinfo(){
+	if(document.GUI.format.value == 'A5hoch'){
+		document.GUI.formatinfo.value = '(420 x 595)';
+	}
+	if(document.GUI.format.value == 'A5quer'){
+		document.GUI.formatinfo.value = '(595 x 420)';
+	}
 	if(document.GUI.format.value == 'A4hoch'){
 		document.GUI.formatinfo.value = '(595 x 842)';
 	}
@@ -162,7 +168,7 @@ function addfreetext(){
       </table>
       <table border="1" width="605" cellspacing="0" cellpadding="0">
         	<td colspan=8 align="left">
-        		<img width="595" src="<? echo $this->previewfile ?>">
+        		<img src="<? echo $this->previewfile ?>">
 					</td>
         </tr>
       </table>
@@ -455,6 +461,8 @@ function addfreetext(){
           <td colspan="8" style="border-bottom:1px solid #C3C7C3">
 			    	&nbsp;<b>Format:</b>&nbsp;
 			    	<select class="select" name="format" onchange="updateformatinfo();">
+			    		<option <? if($this->Document->selectedframe[0]['format'] == 'A5hoch') echo 'selected'; ?> value="A5hoch">A5 hoch</option>
+			    		<option <? if($this->Document->selectedframe[0]['format'] == 'A5quer') echo 'selected'; ?> value="A5quer">A5 quer</option>
 			    		<option <? if($this->Document->selectedframe[0]['format'] == 'A4hoch') echo 'selected'; ?> value="A4hoch">A4 hoch</option>
 			    		<option <? if($this->Document->selectedframe[0]['format'] == 'A4quer') echo 'selected'; ?> value="A4quer">A4 quer</option>
 			    		<option <? if($this->Document->selectedframe[0]['format'] == 'A3hoch') echo 'selected'; ?> value="A3hoch">A3 hoch</option>
@@ -466,7 +474,9 @@ function addfreetext(){
 			    		<option <? if($this->Document->selectedframe[0]['format'] == 'A0hoch') echo 'selected'; ?> value="A0hoch">A0 hoch</option>
 			    		<option <? if($this->Document->selectedframe[0]['format'] == 'A0quer') echo 'selected'; ?> value="A0quer">A0 quer</option>
 			    	</select>
-			    	<input type="text" class="input" style="border:0px;background-color:transparent;" size="10" readonly name="formatinfo" value="<? 
+			    	<input type="text" class="input" style="border:0px;background-color:transparent;" size="10" readonly name="formatinfo" value="<?
+			    		if($this->Document->selectedframe[0]['format'] == 'A5hoch') echo '(420 x 595)';
+			    		if($this->Document->selectedframe[0]['format'] == 'A5quer') echo '(595 x 420)'; 
 			    		if($this->Document->selectedframe[0]['format'] == 'A4hoch') echo '(595 x 842)';
 			    		if($this->Document->selectedframe[0]['format'] == 'A4quer') echo '(842 x 595)';
 			    		if($this->Document->selectedframe[0]['format'] == 'A3hoch') echo '(842 x 1191)';

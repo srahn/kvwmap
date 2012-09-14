@@ -121,6 +121,7 @@ if ($this->Fehlermeldung!='') {
   </tr>
   <tr align="center"> 
     <td colspan="2">
+    	<input type="hidden" name="always_draw" value="<? echo $always_draw; ?>"> 
     	<INPUT TYPE="HIDDEN" NAME="layer_id" VALUE="">
 			<INPUT TYPE="HIDDEN" NAME="columnname" VALUE="">
 			<INPUT TYPE="hidden" NAME="fromwhere" VALUE="">

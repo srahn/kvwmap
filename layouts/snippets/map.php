@@ -132,6 +132,7 @@ if($this->formvars['gps_follow'] == ''){
             <input type="hidden" name="scrollposition" value="">
             <input type="hidden" name="vertices" id="vertices" value="">
             <input type="hidden" name="legendtouched" value="0">
+            <input type="hidden" name="stopnavigation" value="0">
 
     <?php
         include(LAYOUTPATH.'snippets/SVG_map.php');

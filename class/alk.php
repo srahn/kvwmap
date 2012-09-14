@@ -508,10 +508,10 @@ class ALK {
     }
   }
   
-  function getMERfromGebaeude($Gemeinde,$Strasse,$Hausnr, $epsgcode) {
+  function getMERfromGebaeude($Hausnr, $epsgcode) {
     # 2006-01-31 pk
-    if(ALKIS)$ret=$this->database->getMERfromGebaeudeALKIS($Gemeinde,$Strasse,$Hausnr, $epsgcode);
-    else $ret=$this->database->getMERfromGebaeude($Gemeinde,$Strasse,$Hausnr, $epsgcode);
+    if(ALKIS)$ret=$this->database->getMERfromGebaeudeALKIS($Hausnr, $epsgcode);
+    else $ret=$this->database->getMERfromGebaeude($Hausnr, $epsgcode);
     if ($ret[0]==0) {
       $rect=ms_newRectObj();
       $rect->minx=$ret[1]['minx']; $rect->maxx=$ret[1]['maxx'];

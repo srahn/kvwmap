@@ -88,7 +88,7 @@ class Nachweis {
     $this->database->begintransaction();        
 
     # 2. Prüfen der Eingabewerte
-    $ret=$this->pruefeEingabedaten($formvars['datum'],$formvars['VermStelle'],$formvars['art'],$formvars['gueltigkeit'],$formvars['stammnr'],$formvars['Blattformat'],$formvars['Blattnr'],$formvars['changeDocument'],$formvars['Bilddatei_name'],$formvars['pathlength'],$formvars['umring']);
+    $ret=$this->pruefeEingabedaten($formvars['datum'],$formvars['VermStelle'],$formvars['art'],$formvars['gueltigkeit'],$formvars['stammnr'],$formvars['rissnummer'],$formvars['Blattformat'],$formvars['Blattnr'],$formvars['changeDocument'],$formvars['Bilddatei_name'],$formvars['pathlength'],$formvars['umring']);
     if ($ret[0]) {
       # Fehler bei den Eingabewerten entdeckt.  
       #echo '<br>Ergebnis der Prüfung: '.$ret;
@@ -115,7 +115,7 @@ class Nachweis {
         $formvars['zieldateiname']=$this->getZielDateiName($formvars);
 
         # 4. Ändern der Eintragung in der Datenbank
-        $ret=$this->aktualisierenDokument($formvars['id'],$formvars['datum'],$formvars['flurid'],$formvars['VermStelle'],$formvars['art'],$formvars['andere_art'],$formvars['gueltigkeit'],$formvars['stammnr'],$formvars['Blattformat'],$formvars['Blattnr'],$formvars['umring'],$formvars['artname'].'/'.$formvars['zieldateiname']);
+        $ret=$this->aktualisierenDokument($formvars['id'],$formvars['datum'],$formvars['flurid'],$formvars['VermStelle'],$formvars['art'],$formvars['andere_art'],$formvars['gueltigkeit'],$formvars['stammnr'],$formvars['Blattformat'],$formvars['Blattnr'],$formvars['rissnr'],$formvars['fortf'],$formvars['bemerkungen'],$formvars['umring'],$formvars['artname'].'/'.$formvars['zieldateiname']);
         if ($ret[0]) {
           # Aktualisierungsvorgang in der Datenbank nicht erfolgreich
           $errmsg=$ret[1];
@@ -136,7 +136,7 @@ class Nachweis {
               # 5.2 Löschen der alten Datei war erfolgreich
               echo '<br>Alte Datei: '.$doclocation.' gelöscht';
               # Speichern der neuen Bilddatei auf dem Server
-              $ret=$this->dokumentenDateiHochladen($formvars['flurid'],$formvars['stammnr'],$formvars['artname'],$formvars['Bilddatei'],$formvars['zieldateiname']);
+              $ret=$this->dokumentenDateiHochladen($formvars['flurid'],$formvars[NACHWEIS_PRIMARY_ATTRIBUTE],$formvars['artname'],$formvars['Bilddatei'],$formvars['zieldateiname']);
               if ($ret!='') {
                 # Neue Datei konnte nicht hochgeladen werden
                 $errmsg=$ret;
@@ -248,8 +248,8 @@ class Nachweis {
   
   function getBBoxAsRectObj($id,$source) {
     # ermittelt die Boundingbox des Nachweises $id
-    $sql ='SELECT XMIN(EXTENT(the_geom)) AS minx,YMIN(EXTENT(the_geom)) AS miny';
-    $sql.=',XMAX(EXTENT(the_geom)) AS maxx,YMAX(EXTENT(the_geom)) AS maxy';
+    $sql ='SELECT XMIN(EXTENT(Transform(the_geom, '.$this->client_epsg.'))) AS minx,YMIN(EXTENT(Transform(the_geom, '.$this->client_epsg.'))) AS miny';
+    $sql.=',XMAX(EXTENT(Transform(the_geom, '.$this->client_epsg.'))) AS maxx,YMAX(EXTENT(Transform(the_geom, '.$this->client_epsg.'))) AS maxy';
     if ($source=='nachweis') { $sql.=' FROM n_nachweise '; }
     $sql.='WHERE id='.$id;
     $ret=$this->database->execSQL($sql,4, 0);
@@ -297,7 +297,27 @@ class Nachweis {
   	return $result;
   }
   
-  function pruefeEingabedaten($datum, $VermStelle, $art, $gueltigkeit, $stammnr, $Blattformat, $Blattnr, $changeDocument,$Bilddatei_name, $pathlength, $umring) {
+	function check_poly_in_flurALKIS($polygon, $flur, $gemarkung, $epsg){
+  	$sql = "SELECT isvalid(geomfromtext('".$polygon."', ".$epsg."))";
+  	$ret=$this->database->execSQL($sql,4, 1);
+  	$rs = pg_fetch_row($ret[1]);
+		if($rs[0] == 'f'){
+			$result = 'invalid';
+			return $result;
+		}
+  	$sql = "SELECT f.land * 10000 + f.gemarkungsnummer, f.flurnummer FROM alkis.ax_flurstueck f WHERE intersects(wkb_geometry, TRANSFORM(geometryfromtext('".$polygon."', ".$epsg."), ".EPSGCODE_ALKIS."))";
+  	$ret=$this->database->execSQL($sql,4, 1);
+  	$result = 'f';	
+  	while($rs = pg_fetch_row($ret[1])){
+  		if($gemarkung == $rs[0] AND $flur == $rs[1]){
+  			$result = 't';
+  			break;
+  		}
+  	}
+  	return $result;
+  }
+  
+  function pruefeEingabedaten($datum, $VermStelle, $art, $gueltigkeit, $stammnr, $rissnummer, $Blattformat, $Blattnr, $changeDocument,$Bilddatei_name, $pathlength, $umring) {
     #echo '<br>Starten der Funktion zum testen der Eingabedaten.';
     # Test: wurde das Polgon für den raumbezug festgelegt?
     if ($umring == ''){
@@ -380,21 +400,42 @@ class Nachweis {
       }
     }
     # Testen der Stammnummer
-    $stammnr=trim($stammnr);
-    if ($stammnr ==''){ 
-      $errmsg.='Bitte geben Sie die Stammnummer korrekt ein! \n';
+    if(NACHWEIS_PRIMARY_ATTRIBUTE == 'stammnr'){
+	    $stammnr=trim($stammnr);
+	    if ($stammnr == ''){ 
+	      $errmsg.='Bitte geben Sie die Antragsnummer korrekt ein! \n';
+	    }
+	    else{
+	      $nums = array ( "-", "(", ")", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" );
+	      $strenthalten=0;
+	      for ($i=0;$i<strlen($stammnr);$i++) {
+	        if (!in_array($stammnr[$i],$nums)) {
+	          $strenthalten=1;
+	        }
+	      }
+	      if ($strenthalten==1) {
+	        $errmsg.='Ungültige Zeichen bei der Antragsnummer ! \n';
+	      }
+	    }
     }
-    else{
-      $nums = array ( "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" );
-      $strenthalten=0;
-      for ($i=0;$i<strlen($stammnr);$i++) {
-        if (!in_array($stammnr[$i],$nums)) {
-          $strenthalten=1;
-        }
-      }
-      if ($strenthalten==1) {
-        $errmsg.='Die Stammnummer darf nur Ziffern enthalten ! \n';
-      }
+  	# Testen der Rissnummer
+    if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){
+	    $rissnummer=trim($rissnummer);
+	    if ($rissnummer == ''){ 
+	      $errmsg.='Bitte geben Sie die Rissnummer korrekt ein! \n';
+	    }
+	    else{
+	      $nums = array ( "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" );
+	      $strenthalten=0;
+	      for ($i=0;$i<strlen($stammnr);$i++) {
+	        if (!in_array($rissnummer[$i],$nums)) {
+	          $strenthalten=1;
+	        }
+	      }
+	      if ($strenthalten==1) {
+	        $errmsg.='Ungültige Zeichen bei der Rissnummer ! \n';
+	      }
+	    }
     }
     # Test der Blattnummer
     $Blattnr=trim($Blattnr);
@@ -483,7 +524,7 @@ class Nachweis {
       # Sollen auch die Dateien zu den Nachweisen auf dem Server gelöscht werden
       if ($loeschenDateien) {
         # Abfragen des Namens der Datei zum Nachweis
-        $ret=$this->getNachweise($idListe[$i],'','','','','','bySingleID','','');
+        $ret=$this->getNachweise($idListe[$i],'','','','','','','','bySingleID','','');
         if ($ret=='') {
           # Abfrage war erfolgreich
           # Es wurde ein Eintrag in Datenbank gefunden, das löschen der Datei kann erfolgen
@@ -542,12 +583,13 @@ class Nachweis {
     return $ret;
   }
   
-  function eintragenNeuesDokument($datum,$flurid,$VermStelle,$art,$andere_art,$gueltigkeit,$stammnr,$blattformat,$blattnr,$zieldatei,$umring) {
+  function eintragenNeuesDokument($datum,$flurid,$VermStelle,$art,$andere_art,$gueltigkeit,$stammnr,$blattformat,$blattnr,$rissnr,$fortf,$bemerkungen,$zieldatei,$umring) {
     #2005-11-24_pk
     $this->debug->write('Einfügen der Metadaten zum neuen Nachweisdokument in die Sachdatenbank',4);
-    $sql ="INSERT INTO n_nachweise (flurid,stammnr,art,blattnummer,datum,vermstelle,gueltigkeit,format,link_datei,the_geom)";
+    $sql ="INSERT INTO n_nachweise (flurid,stammnr,art,blattnummer,datum,vermstelle,gueltigkeit,format,link_datei,the_geom,fortfuehrung,rissnummer,bemerkungen)";
     $sql.=" VALUES (".$flurid.",'".trim($stammnr)."','".$art."','".trim($blattnr)."','".$datum."'";
-    $sql.=",'".$VermStelle."','".$gueltigkeit."','".$blattformat."','".$zieldatei."',GeometryFromText('".$umring."',".EPSGCODE."))";
+    $sql.=",'".$VermStelle."','".$gueltigkeit."','".$blattformat."','".$zieldatei."',Transform(GeometryFromText('".$umring."', ".$this->client_epsg."),".EPSGCODE.")";
+    $sql.=",".$fortf.",'".$rissnummer."','".$bemerkungen."')";
 		# echo '<br>Polygon-SQL: '.$sql;
     $ret=$this->database->execSQL($sql,4, 1);
     if($andere_art != ''){
@@ -563,12 +605,13 @@ class Nachweis {
     return $ret;
   }
   
-  function aktualisierenDokument($id,$datum,$flurid,$VermStelle,$art,$andere_art,$gueltigkeit,$stammnr,$Blattformat,$Blattnr,$umring,$zieldateiname) {
+  function aktualisierenDokument($id,$datum,$flurid,$VermStelle,$art,$andere_art,$gueltigkeit,$stammnr,$Blattformat,$Blattnr,$rissnr,$fortf,$bemerkungen,$umring,$zieldateiname) {
     #2005-11-24_pk
     $this->debug->write('Aktualisieren der Metadaten zu einem bestehenden Nachweisdokument',4);
     $sql="UPDATE n_nachweise SET flurid='".$flurid."', stammnr='".trim($stammnr)."', art='".$art."'";
     $sql.=",blattnummer='".trim($Blattnr)."', datum='".$datum."', vermstelle='".$VermStelle."'";
-    $sql.=",gueltigkeit='".$gueltigkeit."', format='".$Blattformat."',the_geom=GeometryFromText('".$umring."',".EPSGCODE."), link_datei='".$zieldateiname."'";
+    $sql.=",gueltigkeit='".$gueltigkeit."', format='".$Blattformat."',the_geom=Transform(GeometryFromText('".$umring."', ".$this->client_epsg."),".EPSGCODE."), link_datei='".$zieldateiname."'";
+    $sql.=",fortfuehrung=".$fortf.",rissnummer='".$rissnr."',bemerkungen='".$bemerkungen."'";
     $sql.=" WHERE id = ".$id;
     #echo $sql;
     $ret=$this->database->execSQL($sql,4, 1);
@@ -685,7 +728,7 @@ class Nachweis {
     return $errmsg;
   }
   
-  function getNachweise($id,$polygon,$FlurID,$stammnr,$art_einblenden,$richtung,$abfrage_art,$order,$antr_nr, $datum = NULL, $VermStelle = NULL) {
+  function getNachweise($id,$polygon,$FlurID,$stammnr,$rissnr,$fortf,$art_einblenden,$richtung,$abfrage_art,$order,$antr_nr, $datum = NULL, $VermStelle = NULL) {
     # Die Funktion liefert die Nachweise nach verschiedenen Suchverfahren.
     # Vor dem Suchen nach Nachweisen werden jeweils die Suchparameter überprüft    
     if (is_array($id)) { $idListe=$id; } else { $idListe=array($id); }
@@ -783,6 +826,12 @@ class Nachweis {
         if($stammnr!=''){
           $sql.=" AND n.stammnr='".$stammnr."'";
         }
+      	if($rissnr!=''){
+          $sql.=" AND n.rissnummer='".$rissnr."'";
+        }
+      	if($fortf!=''){
+          $sql.=" AND n.fortfuehrung=".$fortf;
+        }
         if (substr($art_einblenden,0,1)) { $art[]='100'; }
         if (substr($art_einblenden,1,1)) { $art[]='010'; }
         if (substr($art_einblenden,2,1)) { $art[]='001'; }
@@ -854,6 +903,12 @@ class Nachweis {
           if($stammnr!=''){
             $sql.=" AND n.stammnr='".$stammnr."'";
           }
+	        if($rissnr!=''){
+	          $sql.=" AND n.rissnummer='".$rissnr."'";
+	        }
+	      	if($fortf!=''){
+	          $sql.=" AND n.fortfuehrung=".$fortf;
+	        }
           if($datum != ''){
             $sql.=" AND n.datum = '".$datum."'";
           }
@@ -1111,7 +1166,7 @@ class Nachweis {
   
   function getDocLocation($id){
     #2005-11-24_pk
-    $sql='SELECT flurid,stammnr,link_datei FROM n_nachweise WHERE id ='.$id;
+    $sql='SELECT flurid,'.NACHWEIS_PRIMARY_ATTRIBUTE.',link_datei FROM n_nachweise WHERE id ='.$id;
     $this->debug->write("<br>nachweis.php getDocLocation zum Anzeigen der Nachweise.",4);
     $queryret=$this->database->execSQL($sql,4, 0);    
     if ($queryret[0]) {
@@ -1120,7 +1175,7 @@ class Nachweis {
     else {
       $ret[0]=0;
       $rs=pg_fetch_array($queryret[1]);
-      $ret[1]=NACHWEISDOCPATH.$rs['flurid'].'/'.str_pad($rs['stammnr'],STAMMNUMMERMAXLENGTH,'0',STR_PAD_LEFT).'/'.$rs['link_datei'];
+      $ret[1]=NACHWEISDOCPATH.$rs['flurid'].'/'.str_pad($rs[NACHWEIS_PRIMARY_ATTRIBUTE],STAMMNUMMERMAXLENGTH,'0',STR_PAD_LEFT).'/'.$rs['link_datei'];
     }
     return $ret;
   }

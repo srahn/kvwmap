@@ -100,6 +100,9 @@
 							<option value="User" ';
 				  		if($this->attributes['form_element_type'][$i] == 'User'){echo 'selected';}
 				  		echo ' >User</option>
+				  		<option value="Stelle" ';
+				  		if($this->attributes['form_element_type'][$i] == 'Stelle'){echo 'selected';}
+				  		echo ' >Stelle</option>
 				  		<option value="Dokument" ';
 				  		if($this->attributes['form_element_type'][$i] == 'Dokument'){echo 'selected';}
 				  		echo ' >Dokument</option>

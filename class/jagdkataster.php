@@ -41,8 +41,8 @@ class jagdkataster {
   }
 
   function zoomTojagdbezirk($oid, $border) {
-  	$sql = 'SELECT MIN(XMIN(ENVELOPE(the_geom))) AS minx, MAX(XMAX(ENVELOPE(the_geom))) AS maxx';
-    $sql.= ', MIN(YMIN(ENVELOPE(the_geom))) AS miny, MAX(YMAX(ENVELOPE(the_geom))) AS maxy';
+  	$sql = 'SELECT MIN(XMIN(ENVELOPE(TRANSFORM(the_geom, '.$this->clientepsg.')))) AS minx, MAX(XMAX(ENVELOPE(TRANSFORM(the_geom, '.$this->clientepsg.')))) AS maxx';
+    $sql.= ', MIN(YMIN(ENVELOPE(TRANSFORM(the_geom, '.$this->clientepsg.')))) AS miny, MAX(YMAX(ENVELOPE(TRANSFORM(the_geom, '.$this->clientepsg.')))) AS maxy';
     $sql.= ' FROM jagdbezirke WHERE oid = '.$oid;
     $ret = $this->database->execSQL($sql, 4, 0);
 		$rs = pg_fetch_array($ret[1]);
@@ -213,12 +213,12 @@ class jagdkataster {
 		else{				# ein Jagdbezirk
 			$oids[] = $formvars['oid']; 
 		}
-		$sql = "SELECT alb.gemkgschl, gemkgname, alb.flurstkennz, area(alkobj_e_fla.the_geom) AS flurstflaeche, area(Intersection(alkobj_e_fla.the_geom, jagdbezirke.the_geom)) AS schnittflaeche, jagdbezirke.name, jagdbezirke.art, alb.flaeche AS albflaeche";
+		$sql = "SELECT alb.gemkgschl, gemkgname, alb.flurstkennz, st_area(alkobj_e_fla.the_geom) AS flurstflaeche, st_area(st_intersection(alkobj_e_fla.the_geom, jagdbezirke.the_geom)) AS schnittflaeche, jagdbezirke.name, jagdbezirke.art, alb.flaeche AS albflaeche";
 		$sql.= " FROM alb_v_gemarkungen, alknflst, alkobj_e_fla, jagdbezirke, alb_flurstuecke AS alb";
 		$sql.= " WHERE alb_v_gemarkungen.gemkgschl = CAST(alknflst.gemkgschl AS integer) AND alknflst.objnr = alkobj_e_fla.objnr";
 		$sql.= " AND jagdbezirke.oid IN (".implode(',', $oids).")";
 		$sql.= " AND alkobj_e_fla.the_geom && jagdbezirke.the_geom AND intersects(alkobj_e_fla.the_geom, jagdbezirke.the_geom)";
-		$sql.= " AND area(Intersection(alkobj_e_fla.the_geom, jagdbezirke.the_geom)) > 1";
+		$sql.= " AND st_area(st_intersection(alkobj_e_fla.the_geom, jagdbezirke.the_geom)) > 1";
 		$sql.= " AND alb.flurstkennz = alknflst.flurstkennz ORDER BY jagdbezirke.name";
 		#echo $sql;
 		$ret = $this->database->execSQL($sql, 4, 0);
@@ -227,8 +227,59 @@ class jagdkataster {
 			$rs['albflaeche'] = round($rs['albflaeche'], 2);
 			$explosion = explode('-', $rs['flurstkennz']);
 			$rs['flur'] = $explosion[1];
-			$rs['zaehlernenner'] = $explosion[2];
+			$rs['zaehlernenner'] = substr($explosion[2],0,-3);
 			
+			
+			# --- Eigentümer ---
+			$flst = new flurstueck($rs['flurstkennz'], $this->database);
+			$flst->Grundbuecher=$flst->getGrundbuecher();
+			for($g = 0; $g < count($flst->Grundbuecher); $g++){
+      	$flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
+      	for($b = 0; $b < count($flst->Buchungen); $b++){
+	        $Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
+	        $anzEigentuemer=count($Eigentuemerliste);
+	        for($e=0;$e<$anzEigentuemer;$e++){
+	        	$rs['eigentuemer'][$e] = rtrim($Eigentuemerliste[$e]->Name[0], ',');
+	        }
+      	}
+			}
+			# --- Eigentümer ---
+			
+			
+			$flurstuecke[] = $rs;
+		}
+		return $flurstuecke;
+	}
+	
+	function getIntersectedFlurstALKIS($formvars){
+		if($formvars['oid'] == ''){		# mehrere Jagdbezirke
+			$checkbox_names = explode('|', $formvars['checkbox_names']);
+	    for($i = 0; $i < count($checkbox_names); $i++){
+	      if($formvars[$checkbox_names[$i]] == 'on'){
+	        $element = explode('_', $checkbox_names[$i]);     #  check_oid
+	        $oids[] = $element[1];
+	      }
+	    }
+		}
+		else{				# ein Jagdbezirk
+			$oids[] = $formvars['oid']; 
+		}
+		$sql = "SELECT f.land*10000 + f.gemarkungsnummer as gemkgschl, f.flurnummer as flur, f.zaehler, f.nenner, g.bezeichnung as gemkgname, f.flurstueckskennzeichen as flurstkennz, st_area(f.wkb_geometry) AS flurstflaeche, st_area(st_intersection(f.wkb_geometry, transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS."))) AS schnittflaeche, jagdbezirke.name, jagdbezirke.art, f.amtlicheflaeche AS albflaeche";
+		$sql.= " FROM alkis.ax_gemarkung AS g, jagdbezirke, alkis.ax_flurstueck AS f";
+		$sql.= " WHERE f.gemarkungsnummer = g.gemarkungsnummer";
+		$sql.= " AND jagdbezirke.oid IN (".implode(',', $oids).")";
+		$sql.= " AND f.wkb_geometry && transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.") AND intersects(f.wkb_geometry, transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS."))";
+		$sql.= " AND st_area(st_intersection(f.wkb_geometry, transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS."))) > 1";
+		$sql.= " ORDER BY jagdbezirke.name";
+		#echo $sql;
+		$ret = $this->database->execSQL($sql, 4, 0);
+		while($rs = pg_fetch_array($ret[1])){
+			$rs['anteil'] = round($rs['schnittflaeche'] * 100 / $rs['flurstflaeche'], 2);
+			$rs['albflaeche'] = round($rs['albflaeche'], 2);
+      if ($rs['nenner']!='') {
+        $rs['nenner']="/".$rs['nenner'];
+      }
+			$rs['zaehlernenner'] = $rs['zaehler'].$rs['nenner'];
 			
 			# --- Eigentümer ---
 			$flst = new flurstueck($rs['flurstkennz'], $this->database);

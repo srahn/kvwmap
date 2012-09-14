@@ -4,6 +4,45 @@
  * nicht gefunden wurden, nicht verstanden wurden oder zu umfrangreich waren.
  */
 
+
+function formatFlurstkennzALKIS($FlurstKennz){
+	$explosion = explode('-', $FlurstKennz);
+  $gem = trim($explosion[0]);
+  $flur = trim($explosion[1]);
+  $flurst = trim($explosion[2]);
+  $explosion = explode('/',$flurst);
+  $zaehler = $explosion[0];
+  $nenner = $explosion[1];
+  if($nenner != '000.00'){
+  	$explosion = explode('.',$nenner);
+  	$vorkomma = '0'.$explosion[0];
+  }
+  $FlurstKennz = $gem.$flur.$zaehler.$vorkomma;
+  $FlurstKennz = str_pad($FlurstKennz, 20, '_', STR_PAD_RIGHT);
+  return $FlurstKennz;
+}
+
+function tausenderTrenner($number){
+	$explosion = explode('.', $number);
+	$length = strlen($explosion[0]);
+	if($length > 6){
+		$length = $length - 3;
+		while($length > 0){
+			$new_number = substr($explosion[0], $length, 3).' '.$new_number;
+			$length = $length-3;
+		}
+		$new_number = substr($explosion[0], 0, $length+3).' '.$new_number;
+		$new_number = trim($new_number);
+		if($explosion[1] != ''){
+			$new_number .= '.'.$explosion[1];
+		}
+		return $new_number;
+	}
+	else{
+		return $number;
+	}
+}
+
 function transformCoordsSVG($path){
 	$path = str_replace('L ', '', $path);		# neuere Postgis-Versionen haben ein L mit drin
   $svgcoords = explode(' ',$path);
@@ -166,8 +205,8 @@ if(!function_exists('imagerotate')){
 
  
 function transform($x,$y,$from_epsg,$to_epsg) {
-	$x = 12.099281283333;
-	$y = 54.075214183333;
+	#$x = 12.099281283333;
+	#$y = 54.075214183333;
   $point = ms_newPointObj();
 	$point->setXY($x,$y);
 	$projFROM = ms_newprojectionobj("init=epsg:".$from_epsg);
@@ -1024,5 +1063,51 @@ function output_handler($img) {
    header('Content-type: image/png');
    header('Content-Length: ' . strlen($img));
    return $img;
+}
+function getArrayOfChars() {
+	$characters = array();
+	$characterNumbers = array();
+
+	for ($i=48; $i<=57; $i++) {
+	  $characterNumbers[]=$i; # Zahlen
+	}
+
+	for ($i=65; $i<=90; $i++) {
+	  $characterNumbers[]=$i; # Großbuchstaben
+	}
+	for ($i=97; $i<=122; $i++) {
+	  $characterNumbers[]=$i; # Kleinbuchstaben
+	}
+	
+	array_push($characterNumbers,223,196,228,214,246,220,252); # Sonderzeichen
+	
+	foreach ($characterNumbers as $characterNumber) {
+	  $characters[] = chr($characterNumber);
+	}
+	return $characters;
+}
+
+function url_get_contents($url) {
+	try {
+		$response = @ file_get_contents($url);
+		if ($response == false) {
+			throw new Exception("Fehler beim Abfragen der URL mit file_get_contents(".$url.")");
+		}
+	}	
+	catch (Exception $e) {
+		$response = curl_get_contents($url);
+	}
+	return $response;
+}
+
+function curl_get_contents($url) {
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+  $result = curl_exec($ch);
+  if (curl_getinfo($ch, CURLINFO_HTTP_CODE)==404) {
+	$result = "Fehler 404: File not found. Die Resource konnte mit der URL: ".$url." nicht auf dem Server gefunden werden!";
+  }
+  curl_close($ch);
+  return $result;
 }
 ?>
