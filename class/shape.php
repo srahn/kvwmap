@@ -326,6 +326,7 @@ class shape {
   
 	function shp_export_exportieren($formvars, $stelle, $user){
   	$this->formvars = $formvars;
+  	$layerset = $user->rolle->getLayer($this->formvars['selected_layer_id']);
     $mapdb = new db_mapObj($stelle->id,$user->id);
     $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $stelle->pgdbhost);
     $path = $mapdb->getPath($this->formvars['selected_layer_id']);
@@ -340,10 +341,10 @@ class shape {
     # Transformieren
     if($this->formvars['epsg']){
     	if($this->attributes['table_alias_name'][$this->attributes['the_geom']] != ''){
-    		$sql = str_replace($this->attributes['table_alias_name'][$this->attributes['the_geom']].'.'.$this->attributes['the_geom'], 'TRANSFORM('.$this->attributes['table_alias_name'][$this->attributes['the_geom']].'.'.$this->attributes['the_geom'].', '.$this->formvars['epsg'].')', $sql);
+    		$sql = str_replace($this->attributes['table_alias_name'][$this->attributes['the_geom']].'.'.$this->attributes['the_geom'], 'TRANSFORM('.$this->attributes['table_alias_name'][$this->attributes['the_geom']].'.'.$this->attributes['the_geom'].', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $sql);
     	}
     	else{
-    		$sql = str_replace($this->attributes['the_geom'], 'TRANSFORM('.$this->attributes['the_geom'].', '.$this->formvars['epsg'].')', $sql);
+    		$sql = str_replace($this->attributes['the_geom'], 'TRANSFORM('.$this->attributes['the_geom'].', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $sql);
     	}
     }
     # order by rausnehmen
@@ -368,6 +369,9 @@ class shape {
     	$sql .= ' AND '.$filter;
     }
     if(strpos($where, 'query.') !== false){
+    	if($this->formvars['epsg']){
+    		$where = str_replace('), '.$layerset[0]['epsg_code'].')', '), '.$this->formvars['epsg'].')', $where);		# die räumliche Einschränkung das Such-SQLs auf den neuen EPSG-Code anpassen
+    	}
     	$sql = "SELECT * FROM (".$sql.") as query WHERE 1=1 AND ".$where;
     }
     else{

@@ -7688,7 +7688,6 @@ class GUI extends GUI_core{
             $this->zoomToPolygon($poly_id,20, $this->user->rolle->epsg_code);
             $this->user->rolle->saveSettings($this->map->extent);
             $this->user->rolle->readSettings();
-            # Übernahme des Nachweisumrings aus der PostGIS-Datenbank
             $this->formvars['newpath'] = $PolygonAsSVG;
             $PolygonAsText = $this->pgdatabase->selectPolyAsText($poly_id, $this->user->rolle->epsg_code);
             $this->formvars['newpathwkt'] = $PolygonAsText;

@@ -536,6 +536,17 @@ SYMBOL
   END
 END
 
+SYMBOL
+
+  NAME "306" # Vorfahrtsstraﬂe
+
+  TYPE PIXMAP
+
+  IMAGE '306.gif'
+
+  TRANSPARENT 0
+
+END
 
 
 

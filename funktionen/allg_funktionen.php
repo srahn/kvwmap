@@ -24,17 +24,23 @@ function formatFlurstkennzALKIS($FlurstKennz){
 
 function tausenderTrenner($number){
 	$explosion = explode('.', $number);
-	$length = strlen($explosion[0]) - 3;
-	while($length > 0){
-		$new_number = substr($explosion[0], $length, 3).' '.$new_number;
-		$length = $length-3;
+	$length = strlen($explosion[0]);
+	if($length > 6){
+		$length = $length - 3;
+		while($length > 0){
+			$new_number = substr($explosion[0], $length, 3).' '.$new_number;
+			$length = $length-3;
+		}
+		$new_number = substr($explosion[0], 0, $length+3).' '.$new_number;
+		$new_number = trim($new_number);
+		if($explosion[1] != ''){
+			$new_number .= '.'.$explosion[1];
+		}
+		return $new_number;
 	}
-	$new_number = substr($explosion[0], 0, $length+3).' '.$new_number;
-	$new_number = trim($new_number);
-	if($explosion[1] != ''){
-		$new_number .= '.'.$explosion[1];
+	else{
+		return $number;
 	}
-	return $new_number;
 }
 
 function transformCoordsSVG($path){
