@@ -270,3 +270,4 @@ function setlayers(selected_options){
 <input type="hidden" name="map_miny" value="<? echo $this->map->extent->miny; ?>">
 <input type="hidden" name="map_pixsize" value="<? echo $this->user->rolle->pixsize; ?>">
 <input type="hidden" name="area" value="<?echo $this->formvars['area']?>">
+<input type="hidden" name="always_draw" value="<? echo $always_draw; ?>">

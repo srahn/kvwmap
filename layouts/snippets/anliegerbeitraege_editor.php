@@ -91,8 +91,8 @@ function buildwktpolygonfromsvgpath(svgpath){
       </div></td>
   </tr>
   <tr> 
-    <td rowspan="7">&nbsp;</td>
-    <td colspan="2" rowspan="7"> 
+    <td rowspan="8">&nbsp;</td>
+    <td colspan="2" rowspan="8"> 
       <?php
 				include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php')
 			?>
@@ -130,6 +130,10 @@ function buildwktpolygonfromsvgpath(svgpath){
   </tr>
   <tr> 
     <td><hr align="center" noshade></td>
+  </tr>
+  <tr>
+  	<td></td>
+  	<td align="right"><input type="checkbox" name="always_draw" value="1" <?if($always_draw == 1 OR $always_draw == 'true')echo 'checked'; ?>>&nbsp;weiterzeichnen&nbsp;&nbsp;</td>
   </tr>
 </table>
 <INPUT TYPE="HIDDEN" NAME="columnname" VALUE="<? echo $this->formvars['columnname']; ?>">

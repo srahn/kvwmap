@@ -382,7 +382,8 @@ class ddl {
         $sql .= ", `size` = ".$formvars['textsize'.$i];
         $sql .= ", `angle` = ".$formvars['textangle'.$i];
         $sql .= ", `font` = '".$formvars['textfont'.$i]."'";
-        $sql .= ", `type` = '".$formvars['texttype'.$i]."'";
+        if($formvars['texttype'.$i] == '')$formvars['texttype'.$i] = 0;
+        $sql .= ", `type` = ".$formvars['texttype'.$i];
         $sql .= " WHERE id = ".$formvars['text_id'.$i];
         #echo $sql;
         $this->debug->write("<p>file:kvwmap class:ddl->update_layout :",4);

@@ -211,13 +211,14 @@ class antrag {
     # Individuelle Einstellungen für die Spalten.
     $options['cols']['Lfd']=array('justification'=>'centre');
     $options['cols']['Riss-Nummer']=array('justification'=>'centre');
+    $options['cols']['Antrags-Nummer']=array('justification'=>'centre');
     $options['cols']['FFR']=array('justification'=>'centre');
     $options['cols']['KVZ']=array('justification'=>'centre');
     $options['cols']['GN']=array('justification'=>'centre');
     $options['cols']['andere']=array('justification'=>'centre');
     $options['cols']['Datum']=array('justification'=>'left','width'=>80);
     $options['cols']['gemessen durch']=array('justification'=>'left');
-    $options['cols']['Bemerkung']=array('justification'=>'left','width'=>100);
+    #$options['cols']['Bemerkung']=array('justification'=>'left','width'=>100);
     $pdf->ezSetY($rowtab);
     $pdf->ezTable($tabledata[0],$cols,$title,$options);
     $zahl=$anzTab+1;
@@ -298,7 +299,7 @@ class antrag {
     # Dieser Vorgang ist hier mit der Variable FFR belegt, weil zu einem Vorgang
     # meistens mindestens ein Fortführungsriss gehört.
     $this->debug->write('nachweis.php getFFR Abfragen der Risse zum Antrag.',4);                
-    $sql ="SELECT DISTINCT n.flurid,n.stammnr";
+    $sql ="SELECT DISTINCT n.flurid,n.stammnr,n.rissnummer";
     $sql.=" FROM n_nachweise AS n, n_nachweise2antraege AS n2a";
     $sql.=" WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
     if ($flurid!="") {
@@ -319,8 +320,14 @@ class antrag {
       # Setzen der laufenden Nummer der Vorgänge
       $FFR[$i]['Lfd']=$i+1;
       
-      # Setzen der Rissnummer
-      $FFR[$i]['Riss-Nummer']=$rs['flurid'].'/'.str_pad($rs['stammnr'],STAMMNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
+      if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){
+      	$FFR[$i]['Riss-Nummer']=$rs['flurid'].'/'.$rs['rissnummer'];
+      	$FFR[$i]['Antrags-Nummer']=str_pad($rs['stammnr'],STAMMNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
+      }
+      else{
+      	$FFR[$i]['Antrags-Nummer']=$rs['flurid'].'/'.str_pad($rs['stammnr'],STAMMNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
+      	$FFR[$i]['Riss-Nummer']=$rs['rissnummer'];
+      }
 
       # Abfrage der Anzahl der FFR zum Vorgang
       $ret=$this->getAnzFFR($rs['flurid'],$rs['stammnr']);
@@ -355,7 +362,7 @@ class antrag {
       # Abfrage der Gültigkeiten der Dokumente im Vorgang
       $ret=$this->getGueltigkeit($rs['flurid'],$rs['stammnr']);
       if ($ret[0]) { return $ret; }
-      $FFR[$i]['Bemerkung']=$ret[1]; 
+      #$FFR[$i]['Bemerkung']=$ret[1]; 
       #var_dump($FFR[$i]);
       $i++;
     }

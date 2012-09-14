@@ -514,8 +514,9 @@ class GUI extends GUI_core{
     $attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
     $req_start = strpos(strtolower($attributes['options'][0]), "<requires>");
     $req_end = strpos(strtolower($attributes['options'][0]), "</requires>")+11;
+    $reqby_start = strpos(strtolower($attributes['options'][0]), "<required by>");
     if($req_start > 0){
-    	$sql_rest = substr($attributes['options'][0], $req_end);
+    	$sql_rest = substr($attributes['options'][0], $req_end, $req_end-$reqby_start);
       $sql = substr($attributes['options'][0], 0, $req_start)."'".$this->formvars['value']."' ".$sql_rest;    # requires-Tag aus SQL entfernen und um den übergebenen Wert erweitern
       $ret=$layerdb->execSQL(utf8_decode($sql),4,0);
       if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
@@ -632,7 +633,8 @@ class GUI extends GUI_core{
               echo html_umlaute('&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:delete_style('.$this->classdaten[0]['Style'][$i]['Style_ID'].');">löschen</a>');
         echo'
             </td>
-          </tr>';
+          </tr>
+          ';
       }
     }
     echo'
@@ -645,7 +647,7 @@ class GUI extends GUI_core{
       echo'
         <table width="100%" align="left" border="0" cellspacing="0" cellpadding="3">
           <tr>
-            <td height="25" valign="top">Labels</td>
+            <td height="25" valign="top">Labels</td><td colspan="2" align="right"><a href="javascript:add_label();">neues Label</a></td>
           </tr>';
       if(count($this->classdaten[0]['Label']) > 0){
         for($i = 0; $i < count($this->classdaten[0]['Label']); $i++){
@@ -664,9 +666,6 @@ class GUI extends GUI_core{
         }
       }
       echo'
-          <tr>
-            <td colspan="2" align="right"><a href="javascript:add_label();">neues Label</a></td>
-          </tr>
         </table>';
   }
 
@@ -744,14 +743,16 @@ class GUI extends GUI_core{
   function get_style(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->styledaten = $mapDB->get_Style($this->formvars['style_id']);
-    if(count($this->styledaten) > 0){
+    if(is_array($this->styledaten)){
       echo'
         <table align="left" border="0" cellspacing="0" cellpadding="3">';
       for($i = 0; $i < count($this->styledaten); $i++){
         echo'
           <tr>
             <td class="verysmall">';
-              echo key($this->styledaten).'</td><td><input name="style_'.key($this->styledaten).'" size="11" type="text" value="'.$this->styledaten[key($this->styledaten)].'">';
+              echo key($this->styledaten).'</td><td><input ';
+              if($i === 0)echo 'onkeyup="if(event.keyCode != 8)get_style(this.value)"';
+              echo ' name="style_'.key($this->styledaten).'" size="11" type="text" value="'.$this->styledaten[key($this->styledaten)].'">';
         echo'
             </td>
           </tr>';
@@ -1739,11 +1740,12 @@ class GUI extends GUI_core{
     $this->loadMap('DataBase');
     $layerdb = $this->mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
     $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
-    $this->queryable_postgis_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
+    $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
     $lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
     $oldscale=round($this->map->scale);
     if ($this->formvars['CMD']!='') {
       $this->navMap($this->formvars['CMD']);
+      $this->user->rolle->saveDrawmode($this->formvars['always_draw']);
     }
     elseif($oldscale!=$this->formvars['nScale'] AND $this->formvars['nScale'] != '') {
       $this->scaleMap($this->formvars['nScale']);
@@ -1836,6 +1838,7 @@ class GUI extends GUI_core{
     $oldscale=round($this->map->scale);
     if ($this->formvars['CMD']!='') {
       $this->navMap($this->formvars['CMD']);
+      $this->user->rolle->saveDrawmode($this->formvars['always_draw']);
     }
     elseif($oldscale!=$this->formvars['nScale'] AND $this->formvars['nScale'] != '') {
       $this->scaleMap($this->formvars['nScale']);
@@ -1953,7 +1956,7 @@ class GUI extends GUI_core{
         $select = substr($select, 0, $orderbyposition);
       }
       if(strpos(strtolower($select), 'oid') === false){
-      	$select = str_replace($this->formvars['layer_columnname'], $this->formvars['layer_columnname'].', oid', $select);
+      	$select = str_replace($this->formvars['layer_columnname'], 'oid, '.$this->formvars['layer_columnname'], $select);
       	$select = str_replace('*', '*, oid', $select);
       }
       if($this->formvars['klass_'.$this->formvars['chosen_layer_id']] != '' AND strpos($select, '*') === false AND strpos($select, $this->formvars['klass_'.$this->formvars['chosen_layer_id']]) === false){			# Attribut für automatische Klassifizierung mit ins data packen
@@ -2140,7 +2143,7 @@ class GUI extends GUI_core{
       }
       if(strpos(strtolower($select), 'oid') === false){
       	$select = str_replace('*', '*, oid', $select);
-      	$select = str_replace($this->formvars['layer_columnname'], $this->formvars['layer_columnname'].', oid', $select);
+      	$select = str_replace($this->formvars['layer_columnname'], 'oid, '.$this->formvars['layer_columnname'], $select);
       }
       
       if(strpos(strtolower($select), ' where ') === false){
@@ -2256,7 +2259,7 @@ class GUI extends GUI_core{
       }
       if(strpos(strtolower($select), 'oid') === false){
 				$select = str_replace('*', '*, oid', $select);
-      	$select = str_replace($this->formvars['layer_columnname'], $this->formvars['layer_columnname'].', oid', $select);
+      	$select = str_replace($this->formvars['layer_columnname'], 'oid, '.$this->formvars['layer_columnname'], $select);
       }
       
       if(strpos(strtolower($select), ' where ') === false){
@@ -2452,6 +2455,7 @@ class GUI extends GUI_core{
     $this->loadMap('DataBase');
     if ($this->formvars['CMD']!='') {
       $this->navMap($this->formvars['CMD']);
+      $this->user->rolle->saveDrawmode($this->formvars['always_draw']);
     }
     $this->queryable_postgis_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
 
@@ -2535,7 +2539,7 @@ class GUI extends GUI_core{
     $jagdkataster->clientepsg = $this->user->rolle->epsg_code;
     $jagdbezirk = $jagdkataster->getjagdbezirk($this->formvars['oid']);
     $this->qlayerset[0]['shape'][0] = $jagdbezirk;
-    $layerset = $this->user->rolle->getLayer('Jagdbezirke');
+    $layerset = $this->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
     $this->qlayerset[0]['Layer_ID'] = $layerset[0]['Layer_ID']; 
     $i = 0;
     $this->main='jagdbezirke.php';
@@ -2592,12 +2596,12 @@ class GUI extends GUI_core{
 	    }
     }
     $jagdkataster = new jagdkataster($this->pgdatabase);
-    $layerset = $this->user->rolle->getLayer('Eigenjagdbezirke');
+    $layerset = $this->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
     $jagdkataster->layerepsg = $layerset[0]['epsg_code'];
     $jagdkataster->clientepsg = $this->user->rolle->epsg_code;
     if ($this->formvars['oid']!='') {           # Jagdbezirk bearbeiten
     	$this->titel='Jagdbezirk bearbeiten';
-      $rect = $jagdkataster->zoomTojagdbezirk($this->formvars['oid'], 10, $this->Stelle, $this->user);
+      $rect = $jagdkataster->zoomTojagdbezirk($this->formvars['oid'], 10);
       $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
       $this->jagdbezirk = $jagdkataster->getjagdbezirk($this->formvars['oid']);
       $this->formvars['newpathwkt'] = $this->jagdbezirk['wktgeom'];
@@ -2620,6 +2624,7 @@ class GUI extends GUI_core{
     }
     if ($this->formvars['CMD']!='') {
       $this->navMap($this->formvars['CMD']);
+      $this->user->rolle->saveDrawmode($this->formvars['always_draw']);
     }
     $this->saveMap('');
     $currenttime=date('Y-m-d H:i:s',time());
@@ -2630,7 +2635,7 @@ class GUI extends GUI_core{
 	
   function jagdkatastereditor_senden(){
     $jagdkataster = new jagdkataster($this->pgdatabase);
-    $layerset = $this->user->rolle->getLayer('Eigenjagdbezirke');
+    $layerset = $this->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
     $jagdkataster->layerepsg = $layerset[0]['epsg_code'];
     $jagdkataster->clientepsg = $this->user->rolle->epsg_code;
     # eingeabewerte pruefen:
@@ -2676,7 +2681,8 @@ class GUI extends GUI_core{
 
   function jagdkatastereditor_listflurst_csv(){
   	$this->jagdkataster = new jagdkataster($this->pgdatabase);
-    $this->flurstuecke = $this->jagdkataster->getIntersectedFlurst($this->formvars);
+  	if(ALKIS){$this->flurstuecke = $this->jagdkataster->getIntersectedFlurstALKIS($this->formvars);}
+    else{$this->flurstuecke = $this->jagdkataster->getIntersectedFlurst($this->formvars);}
   	for($i = 0; $i < count($this->flurstuecke); $i++){          	
     	$csv .= $this->flurstuecke[$i]['gemkgname'].';';
       $csv .= $this->flurstuecke[$i]['flur'].';';
@@ -2703,7 +2709,8 @@ class GUI extends GUI_core{
     if($this->formvars['oid'])$this->titel='Im Jagdbezirk '.$this->formvars['name'].' enthaltene Flurstücke';
     else $this->titel='Enthaltene Flurstücke in Jagdbezirken';
     $this->jagdkataster = new jagdkataster($this->pgdatabase);
-    $this->flurstuecke = $this->jagdkataster->getIntersectedFlurst($this->formvars);
+    if(ALKIS){$this->flurstuecke = $this->jagdkataster->getIntersectedFlurstALKIS($this->formvars);}
+    else{$this->flurstuecke = $this->jagdkataster->getIntersectedFlurst($this->formvars);}
     $this->output();
   }
   
@@ -2787,10 +2794,12 @@ class GUI extends GUI_core{
     $GemeindenStelle=$this->Stelle->getGemeindeIDs();
     $Gemeinde=new gemeinde('',$this->pgdatabase);
     # Abfrage der Gemeinde Namen
-    $GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle, 'GemeindeName');
+    if(ALKIS)$GemListe=$Gemeinde->getGemeindeListeALKIS($GemeindenStelle, 'bezeichnung');
+    else $GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle, 'GemeindeName');
     # Abfragen der Gemarkungen zur Gemeinde
     $Gemarkung=new gemarkung('',$this->pgdatabase);
-    $this->GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'','gmk.GemkgName');
+    if(ALKIS)$this->GemkgListe=$Gemarkung->getGemarkungListeALKIS($GemListe['ID'],'','gmk.bezeichnung');
+    else $this->GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'','gmk.GemkgName');
     $this->main='bauauskunftsuche.php';
     $this->titel='Bauauskunftsuche';
   }
@@ -2922,6 +2931,14 @@ class GUI extends GUI_core{
       }
 
       switch ($this->Document->selectedframe[0]['format']){
+      	case 'A5hoch' : {
+          $ratio = 420/595;
+          $height = 595;
+        } break;
+        case 'A5quer' : {
+          $ratio = 595/595;
+          $height = 420/$ratio;
+        } break;
         case 'A4hoch' : {
           $ratio = 595/595;
           $height = 842;
@@ -3180,6 +3197,14 @@ class GUI extends GUI_core{
     $zoom = $this->formvars['vorschauzoom'];
 
     switch ($this->Document->activeframe[0]['format']){
+    	case 'A5hoch' : {
+        $ratio = 420/595/$zoom;
+        $height = 595/$ratio;
+      } break;
+      case 'A5quer' : {
+        $ratio = 595/595/$zoom;
+        $height = 420/$ratio;
+      } break;
       case 'A4hoch' : {
         $ratio = 595/595/$zoom;
         $height = 842/$ratio;
@@ -3411,6 +3436,8 @@ class GUI extends GUI_core{
     }
     $scale = $this->map->scale * $this->map_factor;
     $legendimage = imagecreatetruecolor(1,1);
+    $backgroundColor = ImageColorAllocate($legendimage, 255, 255, 255);
+    imagefill ($legendimage, 0, 0, $backgroundColor);
     for($i = 0; $i < $this->map->numlayers; $i++){
       if($layerset[$i]['aktivStatus'] != 0){
         if(($layerset[$i]['minscale'] < $scale OR $layerset[$i]['minscale'] == 0) AND ($layerset[$i]['maxscale'] > $scale OR $layerset[$i]['maxscale'] == 0)){
@@ -4809,6 +4836,18 @@ class GUI extends GUI_core{
     # Einbinden der PDF Klassenbibliotheken
     include (PDFCLASSPATH."class.ezpdf.php");
     switch ($this->Docu->activeframe[0]['format']) {
+    	case "A5hoch" : {
+        # Erzeugen neue pdf-Klasse
+        $pdf=new Cezpdf('A5', 'portrait');
+        $height = 595;
+      } break;
+
+      case "A5quer" : {
+        # Erzeugen neue pdf-Klasse
+        $pdf=new Cezpdf('A5', 'landscape');
+        $height = 420;
+      } break;
+    	
       case "A4hoch" : {
         # Erzeugen neue pdf-Klasse
         $pdf=new Cezpdf();
@@ -4979,8 +5018,8 @@ class GUI extends GUI_core{
     fclose($fp);
 
     if($preview == true){
-      exec(IMAGEMAGICKPATH.'convert '.$dateipfad.$dateiname.' -resize 595 '.$dateipfad.$name.'-'.$currenttime.'.jpg');
-      #echo IMAGEMAGICKPATH.'convert '.$dateipfad.$dateiname.' -resize 595 '.$dateipfad.$name.'-'.$currenttime.'.jpg';
+      exec(IMAGEMAGICKPATH.'convert -density 300x300 '.$dateipfad.$dateiname.' -resize 595 '.$dateipfad.$name.'-'.$currenttime.'.jpg');
+      #echo IMAGEMAGICKPATH.'convert -density 300x300  '.$dateipfad.$dateiname.' -resize 595 '.$dateipfad.$name.'-'.$currenttime.'.jpg';
       return TEMPPATH_REL.$name.'-'.$currenttime.'.jpg';
     }
   }
@@ -5190,12 +5229,14 @@ class GUI extends GUI_core{
     $bodenrichtwertzone=new bodenrichtwertzone($this->pgdatabase, $layer[0]['epsg_code'], $this->user->rolle->epsg_code);
     # Formularobjekt für Gemeinde bilden
     $GemObj=new gemeinde(0,$this->pgdatabase);
-    $Gemeindeliste=$GemObj->getGemeindeListe(array(), "g.Gemeindename");
+  	if(ALKIS){$Gemeindeliste=$GemObj->getGemeindeListeALKIS(array(), 'bezeichnung');}
+    else{$Gemeindeliste=$GemObj->getGemeindeListe(array(), 'g.GemeindeName');}
     $this->GemFormObj=new FormObject("gemeinde","select",$Gemeindeliste["ID"],$this->formvars['gemeinde'],$Gemeindeliste["Name"],1,0,0,158);
     $this->GemFormObj->addJavaScript('onchange', "update_require_attribute('gemarkung', ".$this->formvars['boris_layer_id'].", this.value);");
     # Formularobjekt für Gemarkung bilden
     $GemkgObj = new gemarkung(0,$this->pgdatabase);
-    $gemarkungsliste=$GemkgObj->getGemarkungListe(array($this->formvars['gemeinde']),array(),'gmk.GemkgName');
+  	if(ALKIS){$gemarkungsliste=$GemkgObj->getGemarkungListeALKIS(array($this->formvars['gemeinde']),array(),'gmk.bezeichnung');}
+    else{$gemarkungsliste=$GemkgObj->getGemarkungListe(array($this->formvars['gemeinde']),array(),'gmk.GemkgName');}
     $this->GemkgFormObj=new FormObject('gemarkung','select',$gemarkungsliste['GemkgID'],$this->formvars['gemarkung'],$gemarkungsliste['Name'],1,0,0,158);
     
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
@@ -5213,6 +5254,7 @@ class GUI extends GUI_core{
     if ($this->formvars['CMD']!='') {
       # Nur Navigieren
       $this->navMap($this->formvars['CMD']);
+      $this->user->rolle->saveDrawmode($this->formvars['always_draw']);
     }
     $this->saveMap('');
     $currenttime=date('Y-m-d H:i:s',time());
@@ -5366,7 +5408,7 @@ class GUI extends GUI_core{
       $nachweis=new Nachweis($this->pgdatabase, $this->user->rolle->epsg_code);
       $ret=$nachweis->getNachw2Antr($this->formvars['antr_selected']);
       if($ret==''){
-        $ret=$nachweis->getNachweise($nachweis->nachweise_id,'','','','','','multibleIDs','','');
+        $ret=$nachweis->getNachweise($nachweis->nachweise_id,'','','','','','','','multibleIDs','','');
         if ($ret==''){
           $ret=$antrag->DokumenteInOrdnerZusammenstellen($nachweis);
           $msg.=$ret;
@@ -5404,7 +5446,7 @@ class GUI extends GUI_core{
     # abfragen der Dokumentarten
     $this->dokumentarten = $nachweis->getDokumentarten();
     #echo 'Suche nach id:'.$this->formvars['id'];
-    $ret=$nachweis->getNachweise($this->formvars['id'],'','','','','','bySingleID','',0,0);
+    $ret=$nachweis->getNachweise($this->formvars['id'],'','','','','','','','bySingleID','',0,0);
     if ($ret!='') {
       # Fehler bei der Abfrage des Nachweises
       # Anzeige des letzten Rechercheergebnisses
@@ -5472,6 +5514,9 @@ class GUI extends GUI_core{
       $this->formvars['Flur']=intval(substr($this->formvars['flurid'],6,9));
       $this->formvars['Bilddatei']=NACHWEISDOCPATH.$nachweis->document['link_datei'];
       $this->formvars['andere_art']=$nachweis->document['andere_art'];
+      $this->formvars['rissnummer']=$nachweis->document['rissnummer'];
+      $this->formvars['fortf']=$nachweis->document['fortfuehrung'];
+      $this->formvars['bemerkungen']=$nachweis->document['bemerkungen'];
 
       # Abfragen der Gemarkungen
       # 2006-01-26 pk
@@ -5749,6 +5794,7 @@ class GUI extends GUI_core{
       case MS_POSTGIS : {
         $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
         $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+        $layerdb->setClientEncoding();
         $path = $layerset[0]['pfad'];
         $privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
         $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
@@ -6176,6 +6222,7 @@ class GUI extends GUI_core{
     $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
     $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+    $layerdb->setClientEncoding();
     $layer_epsg = $layerset[0]['epsg_code'];
     $client_epsg = $this->user->rolle->epsg_code;
     $form_fields = explode('|', $this->formvars['form_field_names']);
@@ -6269,10 +6316,13 @@ class GUI extends GUI_core{
         $sql.= ") VALUES (";
         for($i = 0; $i < count($table['attributname']); $i++){
           if($table['type'][$i] == 'Time'){                       # Typ "Time"
-            $sql.= "'".date('Y-m-d G:i:s')."', ";
+            $sql.= "(now())::timestamp(0), ";
           }
           elseif($table['type'][$i] == 'User'){                       # Typ "User"
             $sql.= "'".$this->user->Vorname." ".$this->user->Name."', ";
+          }
+        	elseif($table['type'][$i] == 'Stelle'){                       # Typ "Stelle"
+            $sql.= "'".$this->Stelle->Bezeichnung."', ";
           }
           elseif($table['type'][$i] != 'Text_not_saveable' AND $table['type'][$i] != 'Auswahlfeld_not_saveable' AND $table['type'][$i] != 'SubFormPK' AND $table['type'][$i] != 'SubFormFK' AND $this->formvars[$table['formfield'][$i]] != ''){
             $sql.= "'".addslashes($this->formvars[$table['formfield'][$i]])."', ";      # Typ "normal"
@@ -6379,6 +6429,7 @@ class GUI extends GUI_core{
       if($layerset[0]['privileg'] > 0){   # überprüfen, ob Recht zum Erstellen von neuen Datensätzen gesetzt ist
         $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
         $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+        $layerdb->setClientEncoding();
         $privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
         $layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
 
@@ -6418,12 +6469,13 @@ class GUI extends GUI_core{
           $oldscale=round($this->map->scale);
           if($this->formvars['CMD']!='') {
             $this->navMap($this->formvars['CMD']);
+            $this->user->rolle->saveDrawmode($this->formvars['always_draw']);
           }
 			    elseif($oldscale!=$this->formvars['nScale'] AND $this->formvars['nScale'] != '') {
 			      $this->scaleMap($this->formvars['nScale']);
 			    }
-          if($this->geomtype == 'POLYGON' OR $this->geomtype == 'MULTIPOLYGON' OR $this->geomtype == 'GEOMETRY'){
-            #-----Polygoneditor---#
+          if($this->geomtype == 'POLYGON' OR $this->geomtype == 'MULTIPOLYGON' OR $this->geomtype == 'GEOMETRY' OR $this->geomtype == 'MULTILINESTRING'){
+            #-----Polygoneditor und Linieneditor---#
             # aktuellen Kartenausschnitt laden
             $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
             $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
@@ -6440,7 +6492,7 @@ class GUI extends GUI_core{
             if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
               $this->formvars['fromwhere'] .= ' where (1=1)';
             }
-            #-----Polygoneditor---#
+            #-----Polygoneditor und Linieneditor---#
           }
           elseif($this->geomtype == 'POINT'){
             #-----Pointeditor-----#
@@ -6448,13 +6500,6 @@ class GUI extends GUI_core{
             $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
             $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
             #-----Pointeditor-----#
-          }
-          elseif($this->geomtype == 'MULTILINESTRING'){
-            #-----Linieneditor----#
-            # aktuellen Kartenausschnitt laden
-            $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-            $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
-            #-----Linieneditor----#
           }
           $this->saveMap('');
           if($this->formvars['CMD'] != 'previous' AND $this->formvars['CMD'] != 'next'){
@@ -7018,12 +7063,11 @@ class GUI extends GUI_core{
     for($i = 0; $i < count($result); $i++){
       for($j = 0; $j < count($attributes['name']); $j++){
       	if($attributes['type'][$j] != 'geometry' AND $attributes['name'][$i] != 'lock'){
-	        $result[$i][$attributes['name'][$j]] = str_replace(chr(10), ": ", $result[$i][$attributes['name'][$j]]);
-	        $result[$i][$attributes['name'][$j]] = str_replace(chr(13), " :", $result[$i][$attributes['name'][$j]]);
+      		$csv .= '"';
 	        if(in_array($attributes['type'][$j], array('numeric', 'float4', 'float8'))){
 	        	$result[$i][$attributes['name'][$j]] = str_replace('.', ",", $result[$i][$attributes['name'][$j]]);	
 	        }
-	        $csv .= $result[$i][$attributes['name'][$j]].';';
+	        $csv .= $result[$i][$attributes['name'][$j]].'";';
       	}
       }
       $csv .= chr(10);
@@ -7147,6 +7191,7 @@ class GUI extends GUI_core{
 
   function shp_export(){
     $this->titel='Shape-Export';
+    if($this->formvars['chosen_layer_id'] != '')$this->formvars['selected_layer_id'] = $this->formvars['chosen_layer_id'];		# aus der Sachdatenanzeige des GLE
     $this->main='shape_export.php';
     $this->loadMap('DataBase');
     $this->epsg_codes = read_epsg_codes($this->pgdatabase);
@@ -7643,7 +7688,6 @@ class GUI extends GUI_core{
             $this->zoomToPolygon($poly_id,20, $this->user->rolle->epsg_code);
             $this->user->rolle->saveSettings($this->map->extent);
             $this->user->rolle->readSettings();
-            # Übernahme des Nachweisumrings aus der PostGIS-Datenbank
             $this->formvars['newpath'] = $PolygonAsSVG;
             $PolygonAsText = $this->pgdatabase->selectPolyAsText($poly_id, $this->user->rolle->epsg_code);
             $this->formvars['newpathwkt'] = $PolygonAsText;
@@ -8353,7 +8397,7 @@ class GUI extends GUI_core{
     	$this->formvars['flur'] = '%%%';
     }
     $this->formvars['suchgemarkungflurid']=str_pad(intval(trim($this->formvars['gemarkung'])),6,'0',STR_PAD_LEFT).str_pad(trim($this->formvars['flur']),3,'0',STR_PAD_LEFT);
-    $this->user->rolle->setNachweisSuchparameter($this->formvars['suchffr'],$this->formvars['suchkvz'],$this->formvars['suchgn'], $this->formvars['suchan'], $this->formvars['abfrageart'],$this->formvars['suchgemarkungflurid'],$this->formvars['suchstammnr'],$this->formvars['suchpolygon'],$this->formvars['suchantrnr']);
+    $this->user->rolle->setNachweisSuchparameter($this->formvars['suchffr'],$this->formvars['suchkvz'],$this->formvars['suchgn'], $this->formvars['suchan'], $this->formvars['abfrageart'],$this->formvars['suchgemarkungflurid'],$this->formvars['suchstammnr'],$this->formvars['suchrissnr'],$this->formvars['suchfortf'],$this->formvars['suchpolygon'],$this->formvars['suchantrnr']);
     # Die Anzeigeparameter werden so gesetzt, daß genau das gezeigt wird, wonach auch gesucht wurde.
     # bzw. was als Suchparameter im Formular angegeben wurde.
     $this->user->rolle->setNachweisAnzeigeparameter($this->formvars['suchffr'],$this->formvars['suchkvz'],$this->formvars['suchgn'],$this->formvars['suchan'],$this->formvars['suchffr'],$this->formvars['suchkvz'],$this->formvars['suchgn']);
@@ -8363,7 +8407,7 @@ class GUI extends GUI_core{
     $this->nachweis = new Nachweis($this->pgdatabase, $this->user->rolle->epsg_code);
     # Suchparameter in Ordnung
     # Recherchieren nach den Nachweisen
-    $ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkungflurid'],$this->formvars['suchstammnr'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr'], $this->formvars['datum'], $this->formvars['VermStelle']);
+    $ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkungflurid'],$this->formvars['suchstammnr'],$this->formvars['suchrissnr'],$this->formvars['suchfortf'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr'], $this->formvars['datum'], $this->formvars['VermStelle']);
     #$this->nachweis->getAnzahlNachweise($this->formvars['suchpolygon']);
     if($ret!=''){
       # Fehler bei der Recherche im Datenbestand
@@ -8692,7 +8736,8 @@ class GUI extends GUI_core{
 
 	function check_nachweis_poly(){
 		$this->nachweis = new Nachweis($this->pgdatabase, $this->user->rolle->epsg_code);
-		echo $this->nachweis->check_poly_in_flur($this->formvars['umring'], $this->formvars['flur'], $this->formvars['gemkgschl'], $this->user->rolle->epsg_code);
+		if(ALKIS){echo $this->nachweis->check_poly_in_flurALKIS($this->formvars['umring'], $this->formvars['flur'], $this->formvars['gemkgschl'], $this->user->rolle->epsg_code);}
+		else{echo $this->nachweis->check_poly_in_flur($this->formvars['umring'], $this->formvars['flur'], $this->formvars['gemkgschl'], $this->user->rolle->epsg_code);}
 	}
 
   function nachweisFormSenden() {
@@ -8710,7 +8755,7 @@ class GUI extends GUI_core{
     if ($this->formvars['id']=='') {
       # Prüfen der Eingabewerte
       #echo '<br>Prüfen der Eingabewerte.';
-      $ret=$this->nachweis->pruefeEingabedaten($this->formvars['datum'],$this->formvars['VermStelle'],$this->formvars['art'],$this->formvars['gueltigkeit'],$this->formvars['stammnr'],$this->formvars['Blattformat'],$this->formvars['Blattnr'],$this->formvars['changeDocument'],$this->formvars['Bilddatei_name'],$this->formvars['pathlength'],$this->formvars['umring']);
+      $ret=$this->nachweis->pruefeEingabedaten($this->formvars['datum'],$this->formvars['VermStelle'],$this->formvars['art'],$this->formvars['gueltigkeit'],$this->formvars['stammnr'],$this->formvars['rissnummer'], $this->formvars['Blattformat'],$this->formvars['Blattnr'],$this->formvars['changeDocument'],$this->formvars['Bilddatei_name'],$this->formvars['pathlength'],$this->formvars['umring']);
       if ($ret[0]) {
         #echo '<br>Ergebnis der Prüfung: '.$ret;
         $errmsg=$ret[1];
@@ -8721,12 +8766,12 @@ class GUI extends GUI_core{
         # 2.1 Speichern der Bilddatei zum Nachweis auf dem Server
         # Zusammensetzen des Dateinamen unter dem das Dokument gespeichert werden soll.
         $this->formvars['zieldateiname']=$this->nachweis->getZielDateiName($this->formvars);
-        $ret=$this->nachweis->dokumentenDateiHochladen($this->formvars['flurid'],$this->formvars['stammnr'],$this->formvars['artname'],$this->formvars['Bilddatei'],$this->formvars['zieldateiname']);
+        $ret=$this->nachweis->dokumentenDateiHochladen($this->formvars['flurid'],$this->formvars[NACHWEIS_PRIMARY_ATTRIBUTE],$this->formvars['artname'],$this->formvars['Bilddatei'],$this->formvars['zieldateiname']);
         if ($ret!='') { $errmsg=$ret; }
         else {
           # Speicherung der Bilddatei erfolgreich, Eintragen in Datenbank
           $this->nachweis->database->begintransaction();
-          $ret=$this->nachweis->eintragenNeuesDokument($this->formvars['datum'],$this->formvars['flurid'],$this->formvars['VermStelle'], $this->formvars['art'], $this->formvars['andere_art'], $this->formvars['gueltigkeit'],$this->formvars['stammnr'],$this->formvars['Blattformat'],$this->formvars['Blattnr'],$this->formvars['artname']."/".$this->formvars['zieldateiname'],$this->formvars['umring']);
+          $ret=$this->nachweis->eintragenNeuesDokument($this->formvars['datum'],$this->formvars['flurid'],$this->formvars['VermStelle'], $this->formvars['art'], $this->formvars['andere_art'], $this->formvars['gueltigkeit'],$this->formvars['stammnr'],$this->formvars['Blattformat'],$this->formvars['Blattnr'],$this->formvars['rissnummer'],$this->formvars['fortf'],$this->formvars['bemerkungen'],$this->formvars['artname']."/".$this->formvars['zieldateiname'],$this->formvars['umring']);
           if ($ret[0]) {
             $this->nachweis->database->rollbacktransaction();
             $errmsg=$ret[1];
@@ -8758,7 +8803,7 @@ class GUI extends GUI_core{
       # 1.4 Zur zur Anzeige der Rechercheergebnisse mit Meldung über Erfolg der Änderung
       # 1.4.1 Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
       $this->formvars=$this->user->rolle->getNachweisParameter();
-      $ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkungflurid'],$this->formvars['suchstammnr'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr']);
+      $ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkungflurid'],$this->formvars['suchstammnr'],$this->formvars['suchrissnr'],$this->formvars['suchfortf'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr']);
       # 1.4.2 Anzeige der Rechercheergebnisse
       $this->nachweisAnzeige();
       # 1.4.3 Anzeige der Erfolgsmeldung
@@ -9003,7 +9048,7 @@ class GUI extends GUI_core{
 	function nachweisFormAnzeigeVorlage(){
 		# Nachweisdaten aus Datenbank abfragen
     $nachweis=new Nachweis($this->pgdatabase, $this->user->rolle->epsg_code);
-    $ret=$nachweis->getNachweise($this->formvars['id'],'','','','','','MergeIDs','',0,0);
+    $ret=$nachweis->getNachweise($this->formvars['id'],'','','','','','','','MergeIDs','',0,0);
     $nachweis->document=$nachweis->Dokumente[0];
     # Zuweisen der Werte des Dokumentes zum Formular
     $this->formvars['flurid']=$nachweis->document['flurid'];
@@ -9061,10 +9106,8 @@ class GUI extends GUI_core{
 	  }
         
     if ($this->formvars['CMD']!='') {
-      # Navigieren
       $this->navMap($this->formvars['CMD']);
-      $this->user->rolle->saveSettings($this->map->extent);
-      $this->user->rolle->readSettings();
+      $this->user->rolle->saveDrawmode($this->formvars['always_draw']);
     }
     elseif($nachweis != '') {
       # Zoom zum Polygon des Dokumentes
@@ -9085,9 +9128,11 @@ class GUI extends GUI_core{
     # Abfragen der Gemarkungen
     $GemeindenStelle=$this->Stelle->getGemeindeIDs();
     $Gemeinde=new gemeinde('',$this->pgdatabase);
-    $GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle, 'GemeindeName');
+    if(ALKIS){$GemListe=$Gemeinde->getGemeindeListeALKIS($GemeindenStelle, 'bezeichnung');}
+    else{$GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle, 'GemeindeName');}
     $Gemarkung=new gemarkung('',$this->pgdatabase);
-    $GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'','gmk.GemkgName');
+    if(ALKIS){$GemkgListe=$Gemarkung->getGemarkungListeALKIS($GemListe['ID'],'','gmk.bezeichnung');}
+    else{$GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'','gmk.GemkgName');}
         
     # Erzeugen des Formobjektes für die Gemarkungsauswahl
     $this->GemkgFormObj=new FormObject("Gemarkung","select",$GemkgListe['GemkgID'],$this->formvars['Gemarkung'],$GemkgListe['Bezeichnung'],"1","","",NULL);
@@ -9131,7 +9176,7 @@ class GUI extends GUI_core{
     # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
     $this->formvars=$this->user->rolle->getNachweisParameter();
     $this->nachweis = new Nachweis($this->pgdatabase, $this->user->rolle->epsg_code);
-    $ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkungflurid'],$this->formvars['suchstammnr'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr']);
+    $ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkungflurid'],$this->formvars['suchstammnr'],$this->formvars['suchrissnr'],$this->formvars['suchfortf'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr']);
     if ($ret!='') {
       $errmsg.=$ret;
     }
@@ -9178,7 +9223,7 @@ class GUI extends GUI_core{
       # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
       $this->formvars=$this->user->rolle->getNachweisParameter();
       $this->nachweis = new nachweis($this->pgdatabase, $this->user->rolle->epsg_code);
-      $ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkungflurid'],$this->formvars['suchstammnr'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr']);
+      $ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkungflurid'],$this->formvars['suchstammnr'],$this->formvars['suchrissnr'],$this->formvars['suchfortf'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr']);
       $errmsg.=$ret[1];
       # Anzeige der Rechercheergebnisse
       $this->nachweisAnzeige();
@@ -9235,7 +9280,7 @@ class GUI extends GUI_core{
       # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
       $this->formvars=$this->user->rolle->getNachweisParameter();
       # Abfragen der Nachweise entsprechend der eingestellten Suchparameter
-      $ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkungflurid'],$this->formvars['suchstammnr'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr']);
+      $ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkungflurid'],$this->formvars['suchstammnr'],$this->formvars['suchrissnr'],$this->formvars['suchfortf'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr']);
       if ($ret!='') {
         $this->Fehlermeldung.=$ret;
       }
@@ -9283,6 +9328,7 @@ class GUI extends GUI_core{
     if ($this->formvars['CMD']!='') {
       # Nur Navigieren
       $this->navMap($this->formvars['CMD']);
+      $this->user->rolle->saveDrawmode($this->formvars['always_draw']);
     }
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
     # Spaltenname und from-where abfragen
@@ -10127,15 +10173,17 @@ class GUI extends GUI_core{
         $attributname = $element[1];
         $tablename = $element[2];
         $oid = $element[3];
-        $type = $element[4];
+        $formtype = $element[4];
+        $datatype = $element[6];
         if($layer_id != $old_layer_id AND $tablename != ''){
           $layerdb = $mapdb->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
+          $layerdb->setClientEncoding();
           #$filter = $mapdb->getFilter($layer_id, $this->Stelle->id);		# siehe unten
           $old_layer_id = $layer_id;
         }
         if(($this->formvars['go'] == 'Dokument_Loeschen' OR $this->formvars['changed_'.$oid] == 1 OR $this->formvars['embedded']) AND $attributname != 'oid' AND $tablename != ''){
           # 2008-03-26 pk
-          switch($type) {
+          switch($formtype) {
             case 'Dokument' : {
               # Prüfen ob ein neues Bild angegebeben wurde
               if($_FILES[$form_fields[$i]]['name']){
@@ -10172,11 +10220,18 @@ class GUI extends GUI_core{
               $sql = "UPDATE ".$tablename." SET ".$attributname." = '".$this->user->Vorname." ".$this->user->Name."' WHERE oid = '".$oid."'";
               $this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
             } break;
+            case 'Stelle' : {
+              $sql = "UPDATE ".$tablename." SET ".$attributname." = '".$this->Stelle->Bezeichnung."' WHERE oid = '".$oid."'";
+              $this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
+            } break;
             case 'Geometrie' : {
               # nichts machen
             } break;
             default : {
-              if($tablename AND $type != 'Text_not_saveable' AND $type != 'Auswahlfeld_not_saveable' AND $type != 'SubFormPK' AND $type != 'SubFormFK' AND $type != 'SubFormEmbeddedPK' AND $attributname != 'the_geom'){
+              if($tablename AND $formtype != 'Text_not_saveable' AND $formtype != 'Auswahlfeld_not_saveable' AND $formtype != 'SubFormPK' AND $formtype != 'SubFormFK' AND $formtype != 'SubFormEmbeddedPK' AND $attributname != 'the_geom'){
+              	if(in_array($datatype, array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))){
+              		$this->formvars[$form_fields[$i]] = str_replace(' ', '', $this->formvars[$form_fields[$i]]);		# bei Zahlen das Leerzeichen (Tausendertrenner) entfernen
+              	}
                 if($this->formvars[$form_fields[$i]] == ''){
                   $sql = "UPDATE ".$tablename." SET ".$attributname." = NULL WHERE oid = '".$oid."'";
                 }
@@ -10344,6 +10399,7 @@ class GUI extends GUI_core{
             # Rechte den Attributen zuweisen
 
             $layerdb = $this->mapDB->getlayerdatabase($layerset[$i]['Layer_ID'], $this->Stelle->pgdbhost);
+            $layerdb->setClientEncoding();
             $path = $layerset[$i]['pfad'];
             $privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
             $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
@@ -10499,7 +10555,17 @@ class GUI extends GUI_core{
 	            else{
 	              $sql = "SELECT ".$new_pfad." ".$sql_where;
 	            }
-	            $sql = "SELECT ".$pfad." AND the_geom && (".$sql.") AND (TOUCHES(the_geom, (".$sql.")) OR the_geom = (".$sql."))";
+	            $ret=$layerdb->execSQL($sql,4, 0);
+	            if(!$ret[0]){
+	            	while($rs=pg_fetch_array($ret[1])){
+	              	$geoms[]=$rs[0];
+	              }
+	            }
+	            $sql = '';
+	            for($g = 0; $g < count($geoms); $g++){
+	            	if($g > 0)$sql .= " UNION ";
+	            	$sql .= "SELECT ".$pfad." AND the_geom && ('".$geoms[$g]."') AND (INTERSECTS(the_geom, ('".$geoms[$g]."')) OR the_geom = ('".$geoms[$g]."'))";
+	            }
             }
             else{
 	            if($the_geom == 'query.the_geom'){
@@ -10723,7 +10789,9 @@ class GUI extends GUI_core{
       $layerdb = $this->pgdatabase;
     }
     $this->processor = new spatial_processor($this->user->rolle, $this->database, $layerdb);
+    $this->processor->debug->write("Starte spatial_processing.\n",4);
     $this->processor->process_query($this->formvars);
+    $this->processor->debug->write("process_query beendet.\n",4);
   }
 
   function getRow() {
@@ -11508,12 +11576,14 @@ class GUI extends GUI_core{
 
     # zu 3)
     if(ALKIS){
-    	$datastring ="the_geom from (select f.gml_id as oid, wkb_geometry as the_geom from ax_flurstueck as f";
+    	$datastring ="the_geom from (select f.gml_id as oid, wkb_geometry as the_geom from alkis.ax_flurstueck as f";
     	$datastring.=" WHERE f.flurstueckskennzeichen IN ('".$FlurstListe[0]."'";
+    	$epsg = EPSGCODE_ALKIS;
     }
     else{
     	$datastring ="the_geom from (select o.objnr as id, o.objnr as oid,o.the_geom from alkobj_e_fla AS o,alknflst as f";
     	$datastring.=" WHERE o.objnr=f.objnr AND f.flurstkennz IN ('".$FlurstListe[0]."'";
+    	$epsg = EPSGCODE;
     }
     $legendentext="Flurstück";
     if(count($FlurstListe) > 1){
@@ -11524,7 +11594,7 @@ class GUI extends GUI_core{
       $datastring.=",'".$FlurstListe[$i]."'";
       $legendentext.=",<br>".$FlurstListe[$i];
     }
-    $datastring.=")) as foo using unique oid using srid=".EPSGCODE;
+   	$datastring.=")) as foo using unique oid using srid=".$epsg;
 
     $dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
 
@@ -11553,7 +11623,7 @@ class GUI extends GUI_core{
     }
     $connectionstring.=' dbname='.$this->pgdatabase->dbName;
     $this->formvars['connection'] = $connectionstring;
-    $this->formvars['epsg_code'] = EPSGCODE;
+    $this->formvars['epsg_code'] = $epsg;
     $this->formvars['transparency'] = 60;
 
     $layer_id = $dbmap->newRollenLayer($this->formvars);
@@ -11590,7 +11660,7 @@ class GUI extends GUI_core{
     $this->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
   }
 
-  function zoomToALKGebaeude($Gemeinde,$Strasse,$Hausnr,$border) {
+  function zoomToALKGebaeude($Hausnr,$border) {
     # 2006-01-31 pk
     # 1. Funktion ermittelt das umschließende Rechteck der mit $Gemeinde,$Strasse und $Hausnr übergebenen
     # Gebaeude aus der postgis Datenbank mit Rand entsprechend dem Faktor $border
@@ -11599,7 +11669,7 @@ class GUI extends GUI_core{
     # zu 1)
     $alk=new ALK();
     $alk->database=$this->pgdatabase;
-    $ret=$alk->getMERfromGebaeude($Gemeinde,$Strasse,$Hausnr, $this->user->rolle->epsg_code);
+    $ret=$alk->getMERfromGebaeude($Hausnr, $this->user->rolle->epsg_code);
     if ($ret[0]) {
       $this->Fehlermeldung='Es konnten keine Gebäude gefunden werden.<br>'.$ret[1];
       $rect=$this->user->rolle->oGeorefExt;
@@ -11614,42 +11684,31 @@ class GUI extends GUI_core{
 	    # zu 3)
 	    $layer=ms_newLayerObj($this->map);
 	    if(ALKIS){
-	    	$datastring ="the_geom from (select g.gml_id as oid, wkb_geometry as the_geom FROM ax_gemeinde gem, ax_gebaeude g";
+	    	$datastring ="the_geom from (select g.gml_id as oid, wkb_geometry as the_geom FROM alkis.ax_gemeinde gem, alkis.ax_gebaeude g";
 		    $datastring.=" LEFT JOIN alkis_beziehungen v ON g.gml_id=v.beziehung_von"; 
-				$datastring.=" LEFT JOIN ax_lagebezeichnungmithausnummer l ON v.beziehung_zu=l.gml_id";
-				$datastring.=" LEFT JOIN ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde";
+				$datastring.=" LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON v.beziehung_zu=l.gml_id";
+				$datastring.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde";
 				$datastring.=" AND l.lage = lpad(s.lage,5,'0')";
 				$datastring.=" WHERE gem.gemeinde = l.gemeinde";
-		    $datastring.=" AND gem.schluesselgesamt=".$Gemeinde;
-		    if ($Strasse!='') {
-		      $datastring.=" AND l.lage='".$Strasse."'";
-		    }
 		    if ($Hausnr!='') {
 		    	$Hausnr = str_replace(", ", ",", $Hausnr);
 		    	$Hausnr = strtolower(str_replace(",", "','", $Hausnr));    	
-		      $datastring.=" AND TRIM(LOWER(l.hausnummer)) IN ('".$Hausnr."')";
+		      $datastring.=" AND gem.schluesselgesamt||'-'||l.lage||'-'||TRIM(LOWER(l.hausnummer)) IN ('".$Hausnr."')";
 		    }
 	    }
 	    else{
 		    $datastring ="the_geom from (select o.objnr as oid,o.the_geom from alkobj_e_fla AS o,alknhaus as h";
-		    $datastring.=" WHERE o.objnr=h.objnr AND h.gemeinde=".$Gemeinde;
-		    $datastring.=" AND h.gemeinde=".$Gemeinde;
-		    if ($Strasse!='') {
-		      $datastring.=" AND h.strasse='".$Strasse."'";
-		    }
+		    $datastring.=" WHERE o.objnr=h.objnr";
 		    if (trim($Hausnr)!='') {
 		    	$Hausnr = str_replace(", ", ",", $Hausnr);
 		    	$Hausnr = strtolower(str_replace(",", "','", $Hausnr));
-		      $datastring.=" AND TRIM(LOWER(h.hausnr)) IN ('".$Hausnr."')";
+		      $datastring.=" AND h.gemeinde||'-'||h.strasse||'-'||TRIM(LOWER(h.hausnr)) IN ('".$Hausnr."')";
 		    }
 	    }
 	    $datastring.=") as foo using unique oid using srid=".EPSGCODE;
-	    $legendentext ="Geb&auml;ude:<br>Gemeinde: ".$Gemeinde;
-	    if ($Strasse!='') {
-	      $legendentext.="<br>Strasse: ".$Strasse;
-	    }
+	    $legendentext ="Geb&auml;ude:<br>";
 	    if ($Hausnr!='') {
-	      $legendentext.="<br>HausNr: ".$Hausnr;
+	      $legendentext.="HausNr: ".str_replace(',', '<br>', $Hausnr);
 	    }
 	    $layer->set('data',$datastring);
 	    $layer->set('status',MS_ON);
@@ -12246,6 +12305,7 @@ class GUI extends GUI_core{
       }
       $HausID=$this->formvars['HausID'];
       $HausNr=$this->formvars['HausNr'];
+      $selHausID = explode(', ',$this->formvars['selHausID']);
     }
     $Gemeinde=new gemeinde('',$this->pgdatabase);
     # 2006-01-02 pk
@@ -12304,11 +12364,23 @@ class GUI extends GUI_core{
         }
         $HausNrFormObj=new FormObject("HausID","select",$HausNrListe['HausID'],array($HausID),$HausNrListe['HausNr'],"12","","multiple",100);
         $HausNrFormObj->outputHTML();
-        $SelectedHausNrFormObj=new FormObject("selectedHausID","select",NULL,NULL,"","12","","multiple",100);
+        if($this->formvars['selHausID'] != ''){
+          $SelectedHausNrFormObj=new FormObject("selectedHausID","select", $selHausID, NULL, $selHausID,"12","","multiple",170);
+        }
+        else{
+          $SelectedHausNrFormObj=new FormObject("selectedHausID","select",NULL,NULL,"","12","","multiple",170);
+        }
         $SelectedHausNrFormObj->outputHTML();
       }
-      else { # Es wurde noch keine Strasse ausgewählt, Hausnummer als Textfeld
-        $HausNrFormObj=new FormObject("HausNr","text","","","","5","5","",NULL);
+      
+    	else {
+        if($this->formvars['selHausID'] != ''){
+          $SelectedHausNrFormObj=new FormObject("selectedHausID","select", $selHausID, NULL, $selHausID,"12","","multiple",100);
+          $SelectedHausNrFormObj->outputHTML();
+        }
+        else{
+          $HausNrFormObj=new FormObject("HausNr","text","","","","5","5","multiple",NULL);
+        }
       }
     }
     else {
@@ -12368,7 +12440,7 @@ class GUI extends GUI_core{
         $FlurstKennz=$Adresse->getFlurstKennzListe();
         if($this->formvars['ALK_Suche'] == 1){
         	$this->loadMap('DataBase');
-	        $ret = $this->zoomToALKGebaeude($GemID,$StrID,$HausID,100);
+	        $ret = $this->zoomToALKGebaeude($HausID,100);
 	        if($ret[0]){
 	        	$this->zoomToALKFlurst($FlurstKennz,100);
 	        }
@@ -12386,7 +12458,7 @@ class GUI extends GUI_core{
 	          # Anzeige der Gebaeude in der ALK
 	          # Karte laden, auf die Gebaeude zoomen, Karte Zeichnen und speichern für späteren gebrauch
 	          $this->loadMap('DataBase');
-	          $this->zoomToALKGebaeude($GemID,$StrID,$HausID,100);
+	          $this->zoomToALKGebaeude($HausID,100);
 	          $currenttime=date('Y-m-d H:i:s',time());
 	          $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
 	          $this->drawMap();
@@ -13521,7 +13593,7 @@ class db_mapObj extends db_mapObj_core{
     	#$attributes['table_alias_name'][$rs['tablename']]= $rs['table_alias_name'];
     	$attributes['type'][$i]= $rs['type'];
     	if($rs['type'] == 'geometry'){
-    		$attributes['the_geom'] = $rs['name']; 
+    		$attributes['the_geom'] = $rs['name'];
     	}
     	$attributes['geomtype'][$i]= $rs['geometrytype'];
     	$attributes['geomtype'][$rs['name']]= $rs['geometrytype'];
@@ -13547,6 +13619,9 @@ class db_mapObj extends db_mapObj_core{
       foreach($attributes['all_table_names'] as $tablename){
         $attributes['oids'][] = $layerdb->check_oid($tablename);   # testen ob Tabelle oid hat
       }
+    }
+    else{
+    	$attributes['all_table_names'] = array();
     }
     return $attributes;
   }
@@ -13829,13 +13904,13 @@ class db_mapObj extends db_mapObj_core{
   }
 
 	function get_classes2style($style_id){
-		$sql = 'SELECT * FROM u_styles2classes WHERE Style_ID = '.$style_id;
+		$sql = 'SELECT class_id FROM u_styles2classes WHERE Style_ID = '.$style_id;
 		#echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->get_classes2style - Abfragen der Klassen, die einen Style benutzen:<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
     while($rs=mysql_fetch_array($query)) {
-      $classes[]=$rs;
+      $classes[]=$rs[0];
     }
     return $classes;
 	}
@@ -13926,7 +14001,10 @@ class db_mapObj extends db_mapObj_core{
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
   }
 
-  function save_Style($formvars) {
+  function save_Style($formvars){
+  	# wenn der Style nicht der Klasse zugeordnet ist, zuordnen
+  	$classes = $this->get_classes2style($formvars["style_id"]);
+  	if(!in_array($formvars["class_id"], $classes))$this->addStyle2Class($formvars["class_id"], $formvars["style_id"], NULL);
     $sql ="UPDATE styles SET ";
     if($formvars["symbol"]){$sql.="symbol = '".$formvars["symbol"]."',";}else{$sql.="symbol = NULL,";}
     $sql.="symbolname = '".$formvars["symbolname"]."',";
@@ -13952,14 +14030,16 @@ class db_mapObj extends db_mapObj_core{
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
   }
 
-  function get_Style($style_id) {
-    $sql ='SELECT * FROM styles AS s';
-    $sql.=' WHERE s.Style_ID = '.$style_id;
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->get_Style - Lesen der Styledaten:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
-    $rs=mysql_fetch_assoc($query);
-    return $rs;
+  function get_Style($style_id){
+  	if($style_id){
+	    $sql ='SELECT * FROM styles AS s';
+	    $sql.=' WHERE s.Style_ID = '.$style_id;
+	    $this->debug->write("<p>file:kvwmap class:db_mapObj->get_Style - Lesen der Styledaten:<br>".$sql,4);
+	    $query=mysql_query($sql);
+	    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
+	    $rs=mysql_fetch_assoc($query);
+	    return $rs;
+  	}
   }
 
   function save_Label($formvars){

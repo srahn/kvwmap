@@ -3,6 +3,26 @@
   include(LAYOUTPATH.'languages/layer_formular_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
  ?><script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <script src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></script>
+<script type="text/javascript">
+
+  function testConnection() {
+    if (document.getElementById('connectiontype').value == 7) {
+      getCapabilitiesURL=document.getElementById('connection').value+'&service=WMS&request=GetCapabilities';    
+      getMapURL = document.getElementById('connection').value+'&service=WMS&request=GetMap&srs=epsg:<?php echo $this->formvars['epsg_code']; ?>&BBOX=<?php echo $this->user->rolle->oGeorefExt->minx; ?>,<?php echo $this->user->rolle->oGeorefExt->miny; ?>,<?php echo $this->user->rolle->oGeorefExt->maxx; ?>,<?php echo $this->user->rolle->oGeorefExt->maxy; ?>&width=<?php echo $this->user->rolle->nImageWidth; ?>&height=<?php echo $this->user->rolle->nImageHeight; ?>';
+      document.getElementById('test_img').src = getMapURL;
+      document.getElementById('test_img').style.display='block';
+      document.getElementById('test_link').href=getCapabilitiesURL;
+      document.getElementById('test_link').innerHTML=getCapabilitiesURL;
+    }
+    else {
+      getCapabilitiesURL=document.getElementById('connection').value+'&service=WFS&request=GetCapabilities';
+      document.getElementById('test_link').href=getCapabilitiesURL;
+      document.getElementById('test_link').innerHTML=getCapabilitiesURL;
+    }
+  }
+  
+</script>						
+
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
     <td><strong><font size="+1"><?php echo $strTitle; ?></font></strong></td>
@@ -139,7 +159,14 @@ else {
 		  	<tr>
 		  		<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strConnection; ?></th>
 		  		<td>
-		  			<textarea name="connection" cols="33" rows="2"><? echo $this->formvars['connection'] ?></textarea>
+		  			<textarea id="connection" name="connection" cols="33" rows="2"><? echo $this->formvars['connection'] ?></textarea>
+		  			<input type="button"  onclick="testConnection();" value="Test"
+		  			<? if(in_array($this->formvars['connectiontype'], array(7,9))){ ?>
+						style="display: inline;"
+						<? }else{ ?>style="display: none;"<? } ?>><br>
+						<img border="1" id ="test_img" src="" style="display: none;"><br>
+						<a id="test_link" href="" target="_blank"></a>
+						
 		  		</td>
 		  	</tr>
 		  	<tr>
@@ -151,7 +178,7 @@ else {
     		<tr>
 		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strConnectionType; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-		      		<select name="connectiontype">
+		      		<select id="connectiontype" name="connectiontype">
 		      			<option value=""><?php echo $this->strPleaseSelect; ?></option>
 		      			<option <? if($this->formvars['connectiontype'] == '0'){echo 'selected ';} ?>value="0">MS_INLINE</option>
 		      			<option <? if($this->formvars['connectiontype'] == 1){echo 'selected ';} ?>value="1">MS_SHAPEFILE</option>
@@ -454,7 +481,9 @@ else {
   	<td>&nbsp;</td>
   </tr>
   <tr> 
-    <td align="center"><input type="hidden" name="go_plus" id="go_plus" value=""><input type="reset" value="<?php echo $this->strButtonBack; ?>">&nbsp;<?php
+    <td align="center">
+    	<input type="hidden" name="go_plus" id="go_plus" value="">
+    	<input type="button" name="dummy2" value="<?php echo $this->strButtonBack; ?>" onclick="location.href='index.php?go=Layer_Anzeigen'">&nbsp;<?php
      if ($this->formvars['selected_layer_id']>0) { ?>
       <input type="hidden" name="selected_layer_id" value="<?php echo $this->formvars['selected_layer_id']; ?>">
       <input type="button" name="dummy" value="<?php echo $strButtonSave; ?>" onclick="submitWithValue('GUI','go_plus','Ändern')">

@@ -5,18 +5,18 @@
 #                                                                  #
 ####################################################################
 # aktuelle Versionsnummer
-define('VERSION','1.9.0');
+define('VERSION','1.10.0');
 define('APPLVERSION','kvwmap_'.VERSION.'/');
 # Bezeichnung der MySQL-Datenbank mit den Benutzerdaten
 $dbname='kvwmapdb';
 # Wenn der pgdbname leer gelassen wird, wird versucht die Information
 # für die Verbindung zur PostGIS-Datenbank aus der Tabelle Stelle zu lesen.
-$pgdbname='kvwmapsp';
+$pgdbname='kvwmapsp';	
 #$pgdbname='alkis_25833';
 
 ########################## Metadaten zum Landkreis
 define('LANDKREIS', 'für den Landkreis');
-define('AMT', 'Kataster-/Vermessungsamt  0017');
+define('AMT', 'Kataster-/Vermessungsamt ');
 define('STRASSE', 'Nordvorpommern und die');
 define('STRASSE2', '');																	# Version 1.7.1
 define('PLZ', 'Hansestadt Stralsund');
@@ -34,14 +34,16 @@ $gutachterausschuesse = array('12345', '6789');       # Version 1.7.5
 # bei zwei katasterführenden Stellen in einer kvwmap-DB (Nur für Adressänderungen wichtig, sonst auskommentieren)
 # erste Stelle bis einschließlich GBBZ-Schlüssel, zweite Stelle bis einschließlich GBBZ-Schlüssel, ....
 # wer nur eine katasterführende Stelle hat, kann das Array weglassen oder auskommentieren
-$katasterfuehrendestelle = array('0019' => '132845', '0021' => '132846');		# Version 1.9.0
+#$katasterfuehrendestelle = array('0019' => '132845', '0021' => '132846');		# Version 1.9.0
+$katasterfuehrendestelle = array('132845' => '0019', '132846' => '0021');		# Version 1.10.0  (Schlüssel und Werte wurden vertauscht)
 
 
-# definiert, ob zu Tetszwecken auf ein PostNAS-Schema zugegriffen wird, oder nicht
+# definiert, ob zu Testzwecken auf ein PostNAS-Schema zugegriffen wird, oder nicht
 define('ALKIS', false);																# Version 1.8.0
 #define('ALKIS', true);																# Version 1.8.0
 #define("LAYERNAME_FLURSTUECKE",'Flurstuecke_Alkis');
-#define('EPSGCODE','25833');
+#define('EPSGCODE','2398');
+#define('EPSGCODE_ALKIS','25833');
 
 
 ########################## Layout-Vorgaben
@@ -113,7 +115,7 @@ define('PUBLISHERNAME','Kartenserver');
 # Varianten:
 # Flurbezeichnung: bedeutet Ausgabe von Gemeinde, Gemarkung und Flur, soweit in ALK tabellen vorhanden
 # Wenn kein Wert gesetzt wird, erfolgt keine Anzeige einer Lagebezeichung
-#define('LAGEBEZEICHNUNGSART', 'Flurbezeichnung');						# in Version 1.7.6 wieder eingeführt für Fälle ohne ALK
+define('LAGEBEZEICHNUNGSART', 'Flurbezeichnung');						# in Version 1.7.6 wieder eingeführt für Fälle ohne ALK
 
 # Erweiterung der Authentifizierung um die IP Adresse des Nutzers
 # Testet ob die IP des anfragenden Clientrechners dem Nutzer zugeordnet ist
@@ -134,7 +136,7 @@ switch ($subnetaddr) {
     define('URL','https://andere.adresse.de/');
   } break;
   default : {
-    define('URL','http://www.mdi-de.org:8080/');
+    define('URL','http://139.30.111.16/fgs/');
   }
 }
 # -----------------Version 1.6.6 End
@@ -182,7 +184,7 @@ define('DRUCKRAHMEN_PATH',SHAPEPATH.'Druckrahmen/');
 define('PDFCLASSPATH',WWWROOT.'PDFClass/');
 
 # Bin-Pfad der Postgres-tools (shp2pgsql, pgsql2shp)
-define('POSTGRESBINPATH', '/usr/local/bin/');         # Version 1.6.4
+define('POSTGRESBINPATH', '/home/fgs/fgs/bin/');         # Version 1.6.4
 
 # Bin-Pfad der OGR-tools (ogr2ogr, ogrinfo)
 define('OGR_BINPATH', '/usr/local/bin/');					# Version 1.7.4
@@ -197,7 +199,7 @@ define('EPSGCODE','2398'); # Krassowski, Pulkowo 42, Gauß Krüger 3° Streifen 4 (
 #define('EPSGCODE','2399'); # Krassowski, Pulkowo 42, Gauß Krüger 3° Streifen 5 (15°)
 
 # Unterstützte SRIDs, nur diese stehen zur Auswahl bei der Stellenwahl
-$supportedSRIDs = array(4326,2397,2398,2399,31466,31467,31468,32648,25832,25833,35833,32633,325833,15833,900913);                    # Version 1.6.8
+$supportedSRIDs = array(4326,2397,2398,2399,31466,31467,31468,31469,32648,25832,25833,325833,35833,32633,325833,15833,900913);                    # Version 1.6.8
 
 # Name der Stopwortdatei
 define('STOPWORDFILE',SHAPEPATH.'gazetteer/top10000de.txt');
@@ -242,6 +244,9 @@ define('MAXQUERYROWS',10);
 # Erlaubte maximale Länge der Blattnummer in der Fachschale Nachweisverwaltung
 define('BLATTNUMMERMAXLENGTH',4);                         # Version 1.6.7
 
+# das primäre Ordnungskriterium der Nachweisverwaltung: rissnummer/stammnr
+define('NACHWEIS_PRIMARY_ATTRIBUTE', 'rissnummer');			# Version 1.10.0
+
 # PostgreSQL Server Version                         # Version 1.6.4
 define('POSTGRESVERSION', '804');                   # Version 1.6.4   (800 == 8.0)
 
@@ -258,7 +263,7 @@ define('PHPVERSION', '450');										# Version 1.7.1  (5.2.0 == 520)
 define('MOBILE', 'true');                                  # Version 1.6.7 (noch in Entwicklung)
 
 # Pfad zur GPS-Logdatei                         # Version 1.7.0
-define('GPSPATH', SHAPEPATH.'gps/gpsulog.txt');
+define('GPSPATH', SHAPEPATH.'gpsulog.txt');
 #define('GPSPATH', 'http://localhost:8081/');
 #define('GPSPATH', 'http://www.gdi-service.de/gps_position_nmea_gga.txt');
 
@@ -266,7 +271,7 @@ define('GPSPATH', SHAPEPATH.'gps/gpsulog.txt');
 define('SYNC_PATH', SHAPEPATH.'synchro/');
 
 # Faktor für die Einstellung der Druckqualität (MAPFACTOR * 72 dpi)     # Version 1.6.0
-define('MAPFACTOR', 3);                                                # Version 1.6.0
+define('MAPFACTOR', 4);                                                # Version 1.6.0
 
 # Standarddruckrahmen für die schnelle Druckausgabe						# Version 1.7.4
 define('DEFAULT_DRUCKRAHMEN_ID', 42);													# Version 1.7.4
@@ -311,7 +316,7 @@ define('METADATA_SEARCH_LINK', 'http://berg.preagro.de:8088/geonetwork/srv/de/ma
 
 ######################### Voreinstellungen zu den Layern
 # Layernamen für die ALK
-define("LAYERNAME_FLURSTUECKE",'Flurst%cke');
+define("LAYERNAME_FLURSTUECKE",'Flurstücke Demo');
 define("LAYERNAME_GEBAEUDE",'Gebaeude');
 define("LAYERNAME_NUTZUNGEN",'Nutzung');
 define("LAYERNAME_AUSGESTALTUNGEN",'Ausgestaltung');
@@ -322,6 +327,7 @@ define("LAYERNAME_FLUR",'Flur');
 define("LAYERNAME_BODENRICHTWERTE",'BORIS');	# Version 1.7.3
 define("LAYER_ID_ADRESSAENDERUNGEN", '162');  # Version 1.6.7
 define("LAYER_IDS_DOP", '79,80');							# Version 1.8.0
+define("LAYER_ID_JAGDBEZIRKE", '432');				# Version 1.10.0
 
 ######################### Dateieinstellungen
 # Datei in der das MapFile als Dokumentation zur Kartenausgabe geschrieben wird
@@ -451,16 +457,15 @@ define(MYSQL_CHARSET,'latin1');													# Version 1.7.6
 define(POSTGRES_CHARSET,'LATIN1');												# Version 1.8.0
 
 
-################################ Datenbankangaben setzen######################			
+################################ Datenbankangaben setzen######################		
 # Datenbank für die Nutzerdaten (mysql)
 $userDb=new database();
 $userDb->host='localhost';
 $userDb->user='kvwmap';
-$userDb->passwd='kvwmap';
+$userDb->passwd='didpvku';
 $userDb->dbName=$dbname;
 
 $GISdb = $userDb; 																			# Version 1.7.6
-
 
 # Datenbank mit den Geometrieobjekten (PostgreSQL mit PostGIS Aufsatz)
 if ($pgdbname!='') {
@@ -471,13 +476,14 @@ if ($pgdbname!='') {
   	$PostGISdb=new pgdatabase();												# Version 1.7.6
 	}																											# Version 1.7.6
   $PostGISdb->host='localhost';
-  $PostGISdb->user='kvwmap';
-  $PostGISdb->passwd='kvwmap';
+  $PostGISdb->user='fgs';
+  $PostGISdb->passwd='fgs';
   $PostGISdb->dbName=$pgdbname;
-}																																								
+}
+
+###########################################################################
 
 ##################################################
-
 # Metadaten
 ########################## Voreinstellungen für die Ausgabe von Dienste MapFiles
 define('MAPFILENAME','kvwmap');

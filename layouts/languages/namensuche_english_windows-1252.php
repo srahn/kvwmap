@@ -35,4 +35,5 @@
  $strShowFstInMap="Show land parcels in map";
  $strBack="back";
  $strNext="next";
+ $strCheckAll="select all";
 ?>

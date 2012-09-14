@@ -47,7 +47,7 @@ class shape {
 				$firstfile = explode('.', $files[0]);
 				$file = $firstfile[0];
 				if(file_exists(SHAPEPATH.CUSTOM_SHAPEPATH.$file.'.dbf') OR file_exists(SHAPEPATH.CUSTOM_SHAPEPATH.$file.'.DBF')){      
-		      $command = POSTGRESBINPATH.'shp2pgsql -p '.SHAPEPATH.CUSTOM_SHAPEPATH.$file.' table1 > '.SHAPEPATH.CUSTOM_SHAPEPATH.$file.'.sql'; 
+		      $command = POSTGRESBINPATH.'shp2pgsql -W UTF-8 -p '.SHAPEPATH.CUSTOM_SHAPEPATH.$file.' table1 > '.SHAPEPATH.CUSTOM_SHAPEPATH.$file.'.sql'; 
 		      exec($command);
 		      $sql = file_get_contents(SHAPEPATH.CUSTOM_SHAPEPATH.$file.'.sql');
 		      if(strpos($sql, 'POINT') !== false){
@@ -272,7 +272,7 @@ class shape {
   function simple_shp_import_speichern($formvars, $database){
   	$this->formvars = $formvars;
     if(file_exists(UPLOADPATH.$this->formvars['dbffile'])){      
-      $command = POSTGRESBINPATH.'shp2pgsql '.$this->formvars['table_option'].' ';
+      $command = POSTGRESBINPATH.'shp2pgsql -W UTF-8 '.$this->formvars['table_option'].' ';
       if($this->formvars['srid'] != ''){
         $command .= '-s '.$this->formvars['srid'].' ';
       }
@@ -315,7 +315,7 @@ class shape {
   function shp_export($formvars, $stelle, $mapdb){
   	$this->formvars = $formvars;
     $this->layerdaten = $stelle->getqueryablePostgisLayers(NULL);
-    if($this->formvars['load'] AND $this->formvars['selected_layer_id']){
+    if($this->formvars['selected_layer_id']){
       $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $stelle->pgdbhost);
       $path = $mapdb->getPath($this->formvars['selected_layer_id']);
       $privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
@@ -326,6 +326,7 @@ class shape {
   
 	function shp_export_exportieren($formvars, $stelle, $user){
   	$this->formvars = $formvars;
+  	$layerset = $user->rolle->getLayer($this->formvars['selected_layer_id']);
     $mapdb = new db_mapObj($stelle->id,$user->id);
     $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $stelle->pgdbhost);
     $path = $mapdb->getPath($this->formvars['selected_layer_id']);
@@ -340,10 +341,10 @@ class shape {
     # Transformieren
     if($this->formvars['epsg']){
     	if($this->attributes['table_alias_name'][$this->attributes['the_geom']] != ''){
-    		$sql = str_replace($this->attributes['table_alias_name'][$this->attributes['the_geom']].'.'.$this->attributes['the_geom'], 'TRANSFORM('.$this->attributes['table_alias_name'][$this->attributes['the_geom']].'.'.$this->attributes['the_geom'].', '.$this->formvars['epsg'].')', $sql);
+    		$sql = str_replace($this->attributes['table_alias_name'][$this->attributes['the_geom']].'.'.$this->attributes['the_geom'], 'TRANSFORM('.$this->attributes['table_alias_name'][$this->attributes['the_geom']].'.'.$this->attributes['the_geom'].', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $sql);
     	}
     	else{
-    		$sql = str_replace($this->attributes['the_geom'], 'TRANSFORM('.$this->attributes['the_geom'].', '.$this->formvars['epsg'].')', $sql);
+    		$sql = str_replace($this->attributes['the_geom'], 'TRANSFORM('.$this->attributes['the_geom'].', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $sql);
     	}
     }
     # order by rausnehmen
@@ -357,7 +358,6 @@ class shape {
   		$where = substr($this->formvars['sql_'.$this->formvars['selected_layer_id']], strrpos(strtolower($this->formvars['sql_'.$this->formvars['selected_layer_id']]), 'where')+5);
   		$orderbyposition = strpos(strtolower($where), 'order by');
   		if($orderbyposition)$where = substr($where, 0, $orderbyposition);
-  		$sql.= " AND".$where;
   	}
   	# über Polygon einschränken
     if($this->formvars['newpathwkt']){
@@ -367,6 +367,15 @@ class shape {
     $filter = $mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id);
     if($filter != ''){
     	$sql .= ' AND '.$filter;
+    }
+    if(strpos($where, 'query.') !== false){
+    	if($this->formvars['epsg']){
+    		$where = str_replace('), '.$layerset[0]['epsg_code'].')', '), '.$this->formvars['epsg'].')', $where);		# die räumliche Einschränkung das Such-SQLs auf den neuen EPSG-Code anpassen
+    	}
+    	$sql = "SELECT * FROM (".$sql.") as query WHERE 1=1 AND ".$where;
+    }
+    else{
+    	$sql = $sql." AND ".$where;
     }
     $sql.= $orderby;
     $temp_table = 'public.shp_export_'.rand(1, 10000);

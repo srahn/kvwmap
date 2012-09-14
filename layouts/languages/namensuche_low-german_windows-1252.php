@@ -36,4 +36,5 @@
  $strBack="torüch";
  $strNext="wieter";
  $strFlur="Flur";
+ $strCheckAll="all utsöken";
 ?>

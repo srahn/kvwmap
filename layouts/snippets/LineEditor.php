@@ -65,8 +65,8 @@ function buildwktlinefromsvgpath(svgpath){
     <td align="center" colspan="3"><strong><font size="+1"><a name="geoedit_anchor"><?php echo $this->titel; ?></a></font></strong></td>
   </tr>
   <tr> 
-    <td rowspan="5">&nbsp;</td>
-    <td colspan="2" rowspan="5"> 
+    <td rowspan="7">&nbsp;</td>
+    <td colspan="2" rowspan="7"> 
       <?php
 				include(LAYOUTPATH.'snippets/SVG_line_query.php')
 			?>
@@ -77,17 +77,22 @@ function buildwktlinefromsvgpath(svgpath){
   </tr>
   <tr>
   	<td align="center"><input type="button" style="visibility:hidden" name="split" value="Geometrie in neue Datensätze aufteilen" onclick="split_geometries();"></td>
-  	<!--td>Geometrie übernehmen von:<br>
+  </tr>
+  <tr>
+  	<td>Geometrie übernehmen von:<br>
   		<select name="layer_id" onchange="document.GUI.no_load.value='true';document.GUI.submit();">
   			<?
-  				for($i = 0; $i < count($this->queryable_postgis_layers['ID']); $i++){
+  				for($i = 0; $i < count($this->queryable_vector_layers['ID']); $i++){
   					echo '<option';
-  					if($this->formvars['layer_id'] == $this->queryable_postgis_layers['ID'][$i]){echo ' selected';}
-  					echo ' value="'.$this->queryable_postgis_layers['ID'][$i].'">'.$this->queryable_postgis_layers['Bezeichnung'][$i].'</option>';
+  					if($this->formvars['layer_id'] == $this->queryable_vector_layers['ID'][$i]){echo ' selected';}
+  					echo ' value="'.$this->queryable_vector_layers['ID'][$i].'">'.$this->queryable_vector_layers['Bezeichnung'][$i].'</option>';
   				}
   			?>
   		</select> 
-  	</td-->
+  	</td>
+  </tr>
+  <tr>  
+  	<td width="160">Länge:<br><input size="12" type="text" name="linelength" value="<?echo $this->formvars['linelength']?>">&nbsp;m</td>
   </tr>
   <tr> 
     <td><hr align="center" noshade></td>
@@ -104,11 +109,13 @@ function buildwktlinefromsvgpath(svgpath){
   <tr>
   	<td>&nbsp;</td>
   	<td>&nbsp;<b>Maßstab&nbsp;1:&nbsp;</b><input type="text" id="scale" name="nScale" size="5" value="<?php echo round($this->map->scale); ?>"></td>
-  	<td align="right"><input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang</td>
+  	<td align="right">
+  		<input type="checkbox" name="always_draw" value="1" <?if($always_draw == 1 OR $always_draw == 'true')echo 'checked'; ?>>&nbsp;weiterzeichnen&nbsp;&nbsp;
+  		<input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang
+  	</td>
   </tr>
 </table>
 <INPUT TYPE="HIDDEN" NAME="zoom" VALUE="">
-<INPUT TYPE="HIDDEN" NAME="layer_id" VALUE="<?php echo $this->formvars['selected_layer_id']; ?>">
 <INPUT TYPE="HIDDEN" NAME="columnname" VALUE="<?php echo $this->formvars['columnname']; ?>">
 <INPUT TYPE="HIDDEN" NAME="fromwhere" VALUE="<? echo $this->formvars['fromwhere']; ?>">
 <INPUT TYPE="HIDDEN" NAME="layer_columnname" VALUE="<?php echo $this->formvars['layer_columnname']; ?>">

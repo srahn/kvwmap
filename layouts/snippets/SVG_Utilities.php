@@ -18,12 +18,11 @@
 	$dy       = $this->map->extent->maxy-$this->map->extent->miny;
 	$pixelsize    = ($dx/$res_x+$dy/$res_y)/2;
 	
-	if($this->geomload){		# Geometrie wird das erste Mal geladen, deshalb nicht in den Weiterzeichnenmodus gehen
-		$always_draw = 'false';
-	}
-	else{
-		$always_draw = ALWAYS_DRAW;
-	}
+	if($this->user->rolle->always_draw == '')$this->user->rolle->always_draw = ALWAYS_DRAW; 
+	$always_draw = $this->user->rolle->always_draw;
+	
+	if($this->geomload)$geomload = 'true';
+	else $geomload = 'false';
 
 	#
 	# Positionsanzeigetext ausserhalb der Anzeigeflaeche bei Start
@@ -108,7 +107,6 @@
 	var must_redraw = false;
 	var mobile = '.$_SESSION['mobile'].';
 	var gps_follow_cooldown = 0;
-	var always_draw = '.$always_draw.';
 	var selected_vertex;
 	var last_selected_vertex;
 	var vertex_old_world_x = "";
@@ -120,6 +118,7 @@
 	var mouse_coords_type = "image";
 	var measuring  = false;
 	var deactivated_foreign_vertex = 0;
+	var geomload = '.$geomload.';		// Geometrie wird das erste Mal geladen, diese Variable verhindert den Weiterzeichnenmodus
 	';
 
 	$polygonANDpoint = '
@@ -404,6 +403,7 @@
 	  		polygonarea();
 	  	}
 			if(linefunctions == true){
+				linelength();
 				if(paths[1].search(/MULTI.+/) != -1){
 	  			top.document.GUI.split.style.visibility = "visible";
 				}
@@ -423,7 +423,7 @@
 			update_gps_position();
 		}
 		if(polygonfunctions == true){
-			if(always_draw == true){
+			if(top.document.GUI.always_draw.checked && !geomload){
 				top.document.GUI.last_button.value = "pgon0";
 				if(top.document.GUI.secondpoly.value == "true"){
 					top.document.GUI.last_doing.value = "draw_second_polygon";
@@ -446,7 +446,7 @@
 			}
 		}
 		if(linefunctions == true){
-			if(always_draw == true){
+			if(top.document.GUI.always_draw.checked && !geomload){
 				top.document.GUI.last_button.value = "line0";
 				if(top.document.GUI.secondline.value == "true"){
 					top.document.GUI.last_doing.value = "draw_second_line";
@@ -480,6 +480,7 @@
 		}
 		if(linefunctions == true){
 			redrawfirstline();
+			linelength();
 		}
 		redrawpoint();
 	}
@@ -674,7 +675,12 @@ function mouseup(evt){
 		top.document.GUI.secondpoly.value = "true";
 		if(top.document.GUI.last_doing.value == "add_geom"){
 			top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+top.document.GUI.pathwkt.value+"&input_coord="+top.document.GUI.INPUT_COORD.value+"&operation=add_geometry&resulttype=svgwkt&fromwhere="+top.document.GUI.fromwhere.value+"&columnname="+top.document.GUI.columnname.value+"&layer_id="+top.document.GUI.layer_id.value,new Array(top.document.GUI.result), "");
-			top.document.GUI.firstpoly.value = "true";
+			if(polygonfunctions == true){
+				top.document.GUI.firstpoly.value = "true";
+			}
+			else{
+				top.document.GUI.firstline.value = "true";
+			}
 		}
 		else{
 			if(top.document.GUI.last_doing.value == "subtract_geom"){
@@ -714,6 +720,8 @@ function mouseup(evt){
 				document.getElementById("del0").style.setProperty("fill","ghostwhite", "");
 				document.getElementById("split0").style.setProperty("fill","ghostwhite", "");
 				document.getElementById("vertex_edit1").style.setProperty("fill","ghostwhite", "");
+				document.getElementById("ppquery0").style.setProperty("fill","ghostwhite", "");
+		  	document.getElementById("ppquery1").style.setProperty("fill","ghostwhite", "");
 				remove_vertices();
 			}
 			if(coord_input_functions == true){
@@ -816,6 +824,19 @@ function mouseup(evt){
 	function update_geometry(){
 		if(top.document.GUI.secondline.value == "true" || top.document.GUI.secondpoly.value == "true"){
 			updatepaths();
+			if(top.document.GUI.last_doing.value == "add_geom" || top.document.GUI.last_doing.value == "subtract_geom"){
+				if(top.document.GUI.pathwkt.value == ""){
+					top.document.GUI.pathwkt.value = buildwktlinefromsvgpath(top.document.GUI.newpath.value);
+				}
+				else{
+					top.document.GUI.pathwkt.value = top.document.GUI.newpathwkt.value;
+				}
+				if(top.document.GUI.secondline.value == "true" && must_redraw){
+					applylines();
+					must_redraw = false;
+				}
+				top.document.GUI.secondline.value = "true";
+			}
 			wktstring = top.document.GUI.newpathwkt.value + "";
 			if(must_redraw){
 				redrawsecondline();
@@ -834,6 +855,7 @@ function mouseup(evt){
 	  top.document.GUI.newpath.value = path;
 	  if(pathy.length > 1){
 	  	top.document.GUI.firstline.value = true;
+	  	linelength();
 	  }
 	}
 
@@ -966,6 +988,7 @@ function mouseup(evt){
 		top.document.GUI.pathwkt.value = "";
 		top.document.GUI.newpathwkt.value = "";
 		top.document.GUI.result.value = "";
+		top.document.GUI.linelength.value = "";
 		path = "";
 		top.document.GUI.firstline.value = false;
 		top.document.GUI.secondline.value = false;
@@ -1023,6 +1046,32 @@ function mouseup(evt){
 			breaK;
 		}
 	}
+	
+	function add_geometry(){
+	 	if(top.document.GUI.pathwkt.value == "" && top.document.GUI.newpath.value != ""){
+			top.document.GUI.pathwkt.value = buildwktlinefromsvgpath(top.document.GUI.newpath.value);
+		}
+		else{
+			top.document.GUI.pathwkt.value = top.document.GUI.newpathwkt.value;
+		}
+		if(top.document.GUI.secondpoly.value == "true"){
+			applylines();
+		}
+		top.document.GUI.last_doing.value = "add_geom";
+	};
+
+	function subtract_geometry(){
+	 	if(top.document.GUI.pathwkt.value == "" && top.document.GUI.newpath.value != ""){
+			top.document.GUI.pathwkt.value = buildwktlinefromsvgpath(top.document.GUI.newpath.value);
+		}
+		else{
+			top.document.GUI.pathwkt.value = top.document.GUI.newpathwkt.value;
+		}
+		if(top.document.GUI.secondpoly.value == "true"){
+			applylines();
+		}
+		top.document.GUI.last_doing.value = "subtract_geom";
+	};
 
 	function buildwktlinefromsvgpath(svgpath){
 		if(svgpath != ""){
@@ -1320,6 +1369,7 @@ function mouseup(evt){
 				redrawsecondline();
 				selected_vertex = "";
 				last_selected_vertex = "";
+				linelength();
 			}
 		}
 	}
@@ -1403,6 +1453,7 @@ function mouseup(evt){
 				remove_vertices();													// alle entfernen
 				pixel_path = world2pixelsvg(top.document.GUI.newpath.value);
 				add_vertices(pixel_path);										// und wieder hinzufuegen
+				linelength();
 			}
 			else{
 				vertex_id_string = evt.target.getAttribute("id");
@@ -1506,6 +1557,20 @@ function mouseup(evt){
 		pixel_path = world2pixelsvg(top.document.GUI.newpath.value);
 		add_vertices(pixel_path);										// und wieder hinzufuegen
 		redrawfirstline();
+	}
+	
+	function linelength(){
+	  if(top.document.GUI.newpathwkt.value != ""){
+	  	top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&geotype=line&path1="+top.document.GUI.newpathwkt.value+"&operation=length&layer_id="+top.document.GUI.layer_id.value, new Array(top.document.GUI.linelength), "");
+	  }
+	  else{
+	  	if(top.document.GUI.newpath.value != ""){
+	  		top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&geotype=line&path2="+top.document.GUI.newpath.value+"&operation=length&layer_id="+top.document.GUI.layer_id.value, new Array(top.document.GUI.linelength), "");
+	  	}
+	  	else{
+	  		top.document.GUI.linelength.value = "0.0";
+	  	}
+	  }
 	}
 
 	';
@@ -2876,8 +2941,40 @@ $measurefunctions = '
 						 style="fill:rgb(222,222,222);stroke:rgb(0,0,0);stroke-width:25"/>
 					<rect id="del0" onmouseover="show_tooltip(\''.$strDelLine.'\',evt.clientX,evt.clientY)" x="0" y="0" width="25" height="25" style="fill:white;opacity:0.25"/>
 				</g>
+				
+				<g id="query_add" transform="translate(104 0)">
+	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
+	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+	          <set attributeName="filter" begin="ppquery0.mousedown" dur="0s" fill="freeze" to="none"/>
+	          <set attributeName="filter" begin="ppquery0.mouseup;ppquery0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+	        </rect>
+	        <polygon
+						points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284
+							379.5,218 378.5,139 357.5,138 260.5,91"
+						transform="matrix(1 0 0 1 0 0) scale(0.05)"
+						 style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
+					<polygon points="178.579,57.7353 164.258,51.2544 178.96,44.515 176.48,49.1628 185.48,49.1628 185.48,53.1628 176.48,53.1628"
+							 style="fill:rgb(255,255,255);stroke:rgb(0,0,0);stroke-width:1.7" transform="scale(0.7) translate(-46 -154) rotate(60.992 13.3045 25.4374)"/>
+	        <rect id="ppquery0" onmouseover="show_tooltip(\'Geometrie hinzufuegen\',evt.clientX,evt.clientY)" onmousedown="add_geometry();hide_tooltip();highlightbyid(\'ppquery0\');" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
+	      </g>
+	      
+	      <g id="query_subtract" transform="translate(130 0)">
+	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
+	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(111,111,111);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+	          <set attributeName="filter" begin="ppquery1.mousedown" dur="0s" fill="freeze" to="none"/>
+	          <set attributeName="filter" begin="ppquery1.mouseup;ppquery1.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+	        </rect>
+	        <polygon
+						points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284
+							379.5,218 378.5,139 357.5,138 260.5,91"
+						transform="matrix(1 0 0 1 0 0) scale(0.05)"
+						 style="fill:rgb(244,244,244);stroke:rgb(0,0,0);stroke-width:25"/>
+					<polygon points="178.579,57.7353 164.258,51.2544 178.96,44.515 176.48,49.1628 185.48,49.1628 185.48,53.1628 176.48,53.1628"
+							 style="fill:rgb(255,255,255);stroke:rgb(0,0,0);stroke-width:1.7" transform="scale(0.7) translate(-46 -154) rotate(60.992 13.3045 25.4374)"/>
+	        <rect id="ppquery1" onmouseover="show_tooltip(\'Geometrie entfernen\',evt.clientX,evt.clientY)" onmousedown="subtract_geometry();hide_tooltip();highlightbyid(\'ppquery1\');" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
+	      </g>
 
-				<g id="line" onmousedown="split_lines();highlightbyid(\'split0\');" transform="translate(104 0 )">
+				<g id="line" onmousedown="split_lines();highlightbyid(\'split0\');" transform="translate(156 0 )">
 		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
 		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
 		      	<set attributeName="filter" begin="del0.mousedown" dur="0s" fill="freeze" to="none"/>
@@ -2890,7 +2987,7 @@ $measurefunctions = '
 					<rect id="split0" onmouseover="show_tooltip(\''.$strSplitLine.'\',evt.clientX,evt.clientY)" x="0" y="0" width="25" height="25" style="fill:white;opacity:0.25"/>
 				</g>
 		';
-		$last_x = 104;
+		$last_x = 156;
 		return $linebuttons;
 	}
 

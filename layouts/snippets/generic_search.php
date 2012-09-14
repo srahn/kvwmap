@@ -397,4 +397,5 @@ function delete_search(){
 <input type="hidden" name="area" value="">
 <INPUT TYPE="HIDDEN" NAME="columnname" VALUE="<?php echo $this->formvars['columnname']; ?>">
 <INPUT TYPE="HIDDEN" NAME="fromwhere" VALUE="<? echo $this->formvars['fromwhere']; ?>">
+<input type="hidden" name="always_draw" value="<? echo $always_draw; ?>">
 

@@ -202,7 +202,7 @@ CREATE TABLE layer_attributes (
   length int(11) default NULL,
   `decimal_length` INT( 11 ) NULL,
   `default` VARCHAR( 255 ) NULL,
-  form_element_type enum('Text','Textfeld','Auswahlfeld','Geometrie','SubFormPK','SubFormFK','SubFormEmbeddedPK','Time','Dokument','Link','User','Fläche','dynamicLink') NOT NULL default 'Text',
+  form_element_type enum('Text','Textfeld','Auswahlfeld','Geometrie','SubFormPK','SubFormFK','SubFormEmbeddedPK','Time','Dokument','Link','User','Stelle','Fläche','dynamicLink') NOT NULL default 'Text',
   options text,
   alias varchar(255) default NULL,
   tooltip varchar(255) default NULL,
@@ -594,6 +594,7 @@ CREATE TABLE rolle (
   `buttons` VARCHAR( 255 ) NULL DEFAULT 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,query,touchquery,queryradius,polyquery,measure',
   `scrollposition` INT( 11 ) NOT NULL DEFAULT '0',
   `result_color` INT( 11 ) NULL DEFAULT '1',
+  `always_draw` BOOLEAN NULL,
   PRIMARY KEY  (user_id,stelle_id)
 );
 
@@ -629,7 +630,9 @@ CREATE TABLE rolle_nachweise (
   suchan CHAR(1) NOT NULL DEFAULT '0',
   abfrageart varchar(10) NOT NULL default '',
   suchgemarkungflurid varchar(10) NOT NULL default '',
-  suchstammnr varchar(9) NOT NULL default '',
+  suchstammnr varchar(15) NOT NULL default '',
+  suchrissnr varchar(20) NOT NULL,
+  suchfortf int(4) NULL,
   suchpolygon text,
   suchantrnr varchar(8) NOT NULL default '',
   showffr char(1) NOT NULL default '0',

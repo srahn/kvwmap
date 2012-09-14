@@ -65,11 +65,12 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
     	<select name="search_art" onchange="update_form(this.value);">
     		<option value="">Alle</option>
   			<option <? if($this->formvars['search_art'] == 'ejb'){echo 'selected';} ?> value="ejb">Eigenjagdbezirk</option>
-  			<option <? if($this->formvars['search_art'] == 'gjb'){echo 'selected';} ?> value="gjb">gem. Jagdbezirk</option>
+  			<option <? if($this->formvars['search_art'] == 'ajb'){echo 'selected';} ?> value="ajb">Abgerundeter Eigenjagdbezirk</option>
+  			<option <? if($this->formvars['search_art'] == 'gjb'){echo 'selected';} ?> value="gjb">Gemeinschaftlicher Jagdbezirk</option>
   			<option <? if($this->formvars['search_art'] == 'tjb'){echo 'selected';} ?> value="tjb">Teiljagdbezirk</option>
   			<option <? if($this->formvars['search_art'] == 'sf'){echo 'selected';} ?> value="sf">Sonderfläche</option>
   			<option <? if($this->formvars['search_art'] == 'jbe'){echo 'selected';} ?> value="jbe">Enklave</option>
-  			<option <? if($this->formvars['search_art'] == 'jbf'){echo 'selected';} ?> value="jbf">jagdbezirksfreie Fläche</option>
+  			<option <? if($this->formvars['search_art'] == 'jbf'){echo 'selected';} ?> value="jbf">Jagdbezirksfreie Fläche</option>
   			<option <? if($this->formvars['search_art'] == 'agf'){echo 'selected';} ?> value="agf">Angliederungsfläche</option>
   			<option <? if($this->formvars['search_art'] == 'atf'){echo 'selected';} ?> value="atf">Abtrennungsfläche</option>
   			<option <? if($this->formvars['search_art'] == 'slf'){echo 'selected';} ?> value="slf">Schmalfläche</option>

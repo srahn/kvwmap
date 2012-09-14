@@ -72,11 +72,14 @@ class polygoneditor {
       $ret[0]=1;
     }
     else{
-    	$sql = "SELECT isvalid(geomfromtext('".$newpathwkt."'))";
+    	$sql = "SELECT isvalid(SnapToGrid(geomfromtext('".$newpathwkt."'), 0.0001))";
     	$ret = $this->database->execSQL($sql, 4, 0);
     	$valid = pg_fetch_row($ret[1]);
 			if($valid[0] == 'f'){
-				$ret[1]='\nDie Geometrie des Polygons ist fehlerhaft und kann nicht gespeichert werden.';
+				$sql = "SELECT st_isvalidreason(SnapToGrid(geomfromtext('".$newpathwkt."'), 0.0001))";
+				$ret = $this->database->execSQL($sql, 4, 0);
+    		$reason = pg_fetch_row($ret[1]);
+				$ret[1]='\nDie Geometrie des Polygons ist fehlerhaft und kann nicht gespeichert werden: \n'.$reason[0];
       	$ret[0]=1;
 			}
     }

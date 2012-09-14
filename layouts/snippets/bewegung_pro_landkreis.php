@@ -15,7 +15,7 @@ function create_chart(layer_id){
 	checkbox_names = checkbox_name_string.split('|');
 
 	if(go == 'false'){
-		alert('Es wurde kein Datensatz ausgewählt.');
+		alert('Es wurde kein Datensatz ausgewÃ¤hlt.');
 	}
 	else{
 		document.GUI.target = 'chartframe';
@@ -116,9 +116,9 @@ function change_orderby(attribute, layer_id){
 				<tr>
 					<td></td>
 					<td height="23" colspan="3">
-						<b>Diagramm erzeugen für:&nbsp;</b>
+						<b>Diagramm erzeugen f&uuml;r:&nbsp;</b>
 						<select style="width:170px" name="chartvalue_<?php echo $this->qlayerset[$i]['Layer_ID']; ?>" onchange="create_chart(<?php echo $this->qlayerset[$i]['Layer_ID']; ?>);">
-							<option value="">--- Bitte Wählen ---</option>
+							<option value="">--- Bitte W&auml;hlen ---</option>
 							<?
 							for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
 								if($this->qlayerset[$i]['attributes']['name'][$j] != $this->qlayerset[$i]['attributes']['the_geom'] AND $this->qlayerset[$i]['attributes']['name'][$j] != 'kreis'){
@@ -170,7 +170,7 @@ function change_orderby(attribute, layer_id){
 								</td>
 								<td>
 									<select style="width:133px" name="chartsplit_<?php echo $this->qlayerset[$i]['Layer_ID']; ?>" onchange="create_chart(<?php echo $this->qlayerset[$i]['Layer_ID']; ?>);">
-										<option value="">--- Bitte Wählen ---</option>
+										<option value="">--- Bitte W&auml;hlen ---</option>
 										<?
 										for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
 											if($this->qlayerset[$i]['attributes']['name'][$j] != $this->qlayerset[$i]['attributes']['the_geom']){

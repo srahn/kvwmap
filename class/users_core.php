@@ -258,6 +258,16 @@ class rolle_core {
     $this->database->execSQL($sql,4, $this->loglevel);
     return 1;
   }
+  
+	function saveDrawmode($always_draw){
+		if($always_draw == '')$always_draw = 'false';
+    $sql ='UPDATE rolle SET always_draw = '.$always_draw;
+    $sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+    #echo $sql;
+    $this->debug->write("<p>file:users.php class:rolle function:saveDrawmode - Speichern der Einstellungen zur Rolle:",4);
+    $this->database->execSQL($sql,4, $this->loglevel);
+    return 1;
+  }
 
   function readSettings() {
     # Abfragen und Zuweisen der Einstellungen der Rolle
@@ -292,6 +302,7 @@ class rolle_core {
     $this->highlighting=$rs['highlighting'];
     $this->scrollposition=$rs['scrollposition'];
     $this->result_color=$rs['result_color'];
+    $this->always_draw=$rs['always_draw'];
     $buttons = explode(',', $rs['buttons']);
     $this->back = in_array('back', $buttons);
     $this->forward = in_array('forward', $buttons);

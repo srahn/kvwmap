@@ -870,8 +870,8 @@ class adresse {
 
   function getFlurstKennzListe() {
     # liefert FlurstKennz zur Adressangaben aus dem ALB Bestand
-    if(ALKIS)$ret=$this->database->getFlurstKennzListeByGemSchlByStrSchlALKIS($this->GemeindeSchl,$this->StrassenSchl,$this->HausNr);
-    else $ret=$this->database->getFlurstKennzListeByGemSchlByStrSchl($this->GemeindeSchl,$this->StrassenSchl,$this->HausNr);
+    if(ALKIS)$ret=$this->database->getFlurstKennzListeByGemSchlByStrSchlALKIS($this->HausNr);
+    else $ret=$this->database->getFlurstKennzListeByGemSchlByStrSchl($this->HausNr);
     if ($ret[0]) {
       $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4);
       return 0;
@@ -2777,6 +2777,7 @@ class flurstueck {
     $this->Flurkarte=$rs['karte'];
     $this->ALB_Flaeche=$rs['flaeche'];
     $this->Status=$rs['status'];
+    $this->Pruefzeichen=$rs['pruefzeichen'];
     $this->Forstamt=$this->getForstamt();				# ALKIS TODO
     $this->AktualitaetsNr=$this->getAktualitaetsNr();			# ALKIS TODO
     $this->Adresse=$this->getAdresse();

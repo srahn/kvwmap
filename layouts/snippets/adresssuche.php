@@ -51,16 +51,20 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   </td>
 </tr>
 //-->
+	<? if(!$this->FormObject["Gemarkungen"]->selected){ ?>
   <tr>
     <td align="right"><strong><?php echo $strGem; ?>:&nbsp;</strong></td>
     <td colspan="3"><?php echo $this->FormObject["Gemeinden"]->html; ?><!-- Name GemID //-->
     </td>
   </tr>
+  <? }
+  if(!$this->FormObject["Gemeinden"]->selected){ ?>
   <tr>
     <td align="right"><strong><?php echo $strGemkg; ?>:&nbsp;</strong></td>
     <td colspan="3"><?php echo $this->FormObject["Gemarkungen"]->html; ?><!-- Name GemkgID //-->
     </td>
   </tr>
+  <? } ?>
   <tr>
     <td align="right"><strong><?php echo $strStreet; ?>:&nbsp;</strong></td>
     <td colspan="3"><?php echo $this->FormObject["Strassen"]->html; ?><!-- Name StrID //--></td>
@@ -100,5 +104,5 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
    </td>
   </tr>
 </table>
-<input type="hidden" name="selHausID" value="">
+<input type="hidden" name="selHausID" value="<? echo $this->formvars['selHausID']; ?>">
 <input type="hidden" name="ALK_Suche" value="<? echo $this->formvars['ALK_Suche']; ?>">

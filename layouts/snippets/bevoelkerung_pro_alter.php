@@ -86,7 +86,7 @@ function change_orderby(attribute, layer_id){
 ?>
 			<tr>
 <?		for($j = 0; $j < count($attributes['name']); $j++){
-				if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $resultSet[$k]['nr'] >= 0){		# nur die Interval-Gruppen darstellen){
+				if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $resultSet[$k]['nr'] >= 300){		# nur die Interval-Gruppen darstellen){
 					if($attributes['name'][$j] != 'nr' AND $attributes['type'][$j] != 'geometry'){
 						echo '<td><input title="'.$attributes['alias'][$j].'" ';
 						if($attributes['length'][$j]){
@@ -130,7 +130,7 @@ function change_orderby(attribute, layer_id){
 							<option value="">--- Bitte Wählen ---</option>
 							<?
 							for($j = 0; $j < count($attributes['name']); $j++){
-								if($attributes['name'][$j] != $attributes['the_geom'] AND $attributes['name'][$j] != 'gruppe' AND $attributes['name'][$j] != 'geschlecht' AND $attributes['name'][$j] != 'nr'){
+								if($attributes['name'][$j] != $attributes['the_geom'] AND $attributes['name'][$j] != 'gruppe' AND $attributes['name'][$j] != 'geschlecht' AND $attributes['name'][$j] != 'nr' AND $attributes['name'][$j] != 'kkz'){
 									echo '<option value="'.$attributes['name'][$j].'">'.$attributes['alias'][$j].'</option>';
 								}
 							}

@@ -96,11 +96,12 @@ function save(){
           	<select onchange="update_form(this.value);" name="<? echo $this->qlayerset[$i]['Layer_ID'].';art;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j]['oid'].';Text;1'; ?>">
           		<option value="">--- Bitte wählen ---</option>
               <option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'ejb'){echo 'selected';} ?> value="ejb">Eigenjagdbezirk</option>
-			  			<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'gjb'){echo 'selected';} ?> value="gjb">gem. Jagdbezirk</option>
+              <option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'ajb'){echo 'selected';} ?> value="ajb">Abgerundeter Eigenjagdbezirk</option>
+			  			<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'gjb'){echo 'selected';} ?> value="gjb">Gemeinschaftlicher Jagdbezirk</option>
 			  			<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'tjb'){echo 'selected';} ?> value="tjb">Teiljagdbezirk</option>
 			  			<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'sf'){echo 'selected';} ?> value="sf">Sonderfläche</option>
 			  			<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'jbe'){echo 'selected';} ?> value="jbe">Enklave</option>
-			  			<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'jbf'){echo 'selected';} ?> value="jbf">jagdbezirksfreie Fläche</option>
+			  			<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'jbf'){echo 'selected';} ?> value="jbf">Jagdbezirksfreie Fläche</option>
 			  			<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'agf'){echo 'selected';} ?> value="agf">Angliederungsfläche</option>
 			  			<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'atf'){echo 'selected';} ?> value="atf">Abtrennungsfläche</option>
 			  			<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'slf'){echo 'selected';} ?> value="slf">Schmalfläche</option>
