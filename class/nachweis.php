@@ -75,7 +75,7 @@ class Nachweis {
   function getZielDateiName($formvars) {
     #2005-11-24_pk
     $pathparts=pathinfo($formvars['Bilddatei_name']);
-    $zieldateiname=$formvars['flurid'].'-'.str_pad(trim($formvars['stammnr']),STAMMNUMMERMAXLENGTH,'0',STR_PAD_LEFT).'-'.$formvars['artname'].'-'.str_pad(trim($formvars['Blattnr']),3,'0',STR_PAD_LEFT).'.'.$pathparts['extension'];
+    $zieldateiname=$formvars['flurid'].'-'.str_pad(trim($formvars[NACHWEIS_PRIMARY_ATTRIBUTE]),STAMMNUMMERMAXLENGTH,'0',STR_PAD_LEFT).'-'.$formvars['artname'].'-'.str_pad(trim($formvars['Blattnr']),3,'0',STR_PAD_LEFT).'.'.$pathparts['extension'];
     #echo $zieldateiname;
     return $zieldateiname;
   }
@@ -427,7 +427,7 @@ class Nachweis {
 	    else{
 	      $nums = array ( "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" );
 	      $strenthalten=0;
-	      for ($i=0;$i<strlen($stammnr);$i++) {
+	      for ($i=0;$i<strlen($rissnummer);$i++) {
 	        if (!in_array($rissnummer[$i],$nums)) {
 	          $strenthalten=1;
 	        }
@@ -583,7 +583,7 @@ class Nachweis {
     return $ret;
   }
   
-  function eintragenNeuesDokument($datum,$flurid,$VermStelle,$art,$andere_art,$gueltigkeit,$stammnr,$blattformat,$blattnr,$rissnr,$fortf,$bemerkungen,$zieldatei,$umring) {
+  function eintragenNeuesDokument($datum,$flurid,$VermStelle,$art,$andere_art,$gueltigkeit,$stammnr,$blattformat,$blattnr,$rissnummer,$fortf,$bemerkungen,$zieldatei,$umring) {
     #2005-11-24_pk
     $this->debug->write('Einfügen der Metadaten zum neuen Nachweisdokument in die Sachdatenbank',4);
     $sql ="INSERT INTO n_nachweise (flurid,stammnr,art,blattnummer,datum,vermstelle,gueltigkeit,format,link_datei,the_geom,fortfuehrung,rissnummer,bemerkungen)";
