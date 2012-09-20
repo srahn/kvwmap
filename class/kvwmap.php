@@ -6102,6 +6102,7 @@ class GUI extends GUI_core{
         case MS_POSTGIS : {
           $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
           $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+          $layerdb->setClientEncoding();
           $path = $mapdb->getPath($this->formvars['selected_layer_id']);
           $privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
           $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
@@ -6994,6 +6995,7 @@ class GUI extends GUI_core{
   function generic_csv_export(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $layerdb = $mapDB->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
+    $layerdb->setClientEncoding();
     $path = $mapDB->getPath($this->formvars['chosen_layer_id']);
     $privileges = $this->Stelle->get_attributes_privileges($this->formvars['chosen_layer_id']);
     $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);    
