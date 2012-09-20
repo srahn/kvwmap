@@ -2,6 +2,7 @@
  # 2008-09-30 sr
   include(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
  ?>
+<script type="text/javascript" src="funktionen/calendar.js"></script>
 <script type="text/javascript">
 <!--
 
@@ -352,7 +353,11 @@ function set_changed_flag(flag){
 							  echo '<td align="right"><a href="#" title="'.$attributes['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
 							}
 							if ($attributes['type'][$j] == 'date' OR $attributes['type'][$j] == 'timestamp' OR $attributes['type'][$j] == 'timestamptz') {
-							  echo '<td align="right"><a href="#" title=" (TT.MM.JJJJ) '.$attributes['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a></td>';
+							  echo '<td align="right"><a href="#" title=" (TT.MM.JJJJ) '.$attributes['tooltip'][$j].'" ';
+							  if($attributes['privileg'][$j] == '1' AND !$lock[$k]){
+							  	echo 'onclick="new CalendarJS().init(\''.$attributes['name'][$j].'_'.$k.'\');"';
+							  }
+							  echo '><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div name="calendar_'.$attributes['name'][$j].'_'.$k.'" id="calendar"></div></td>';
 							}
 							echo '</td></tr></table>';
 							echo '</td><td>';

@@ -209,3 +209,98 @@ tbody.gle tr {
 tbody.gle tr:hover { 
  border:1px solid #03476F;
 }
+
+
+#calendar { /* Fuer IE <= 6 */
+	text-align: center;
+	position: absolute;
+}
+
+#calendar tr { 
+ border:none;
+}
+
+#calendar table thead th{ 
+	font-weight: bold; 
+	font-size: 1.25em;
+	line-height: 1.5em;				
+	color: #BFBFC1; 
+	text-align: center;
+	background-color: #112A5D;
+}
+
+#calendar table thead th.weekday{ 
+	font-weight: bold; 
+	font-size: 1em;
+	line-height: 1.5em;
+	color: #112A5D; 
+	text-align: center;
+	background-color: #CCD2D8;
+	border: solid #112A5D 1px;
+}
+
+#calendar table tbody td, #calendar table tfoot td{ 
+	font-weight: normal; 
+	font-size: 1em;
+	line-height: 1.5em;
+	width: 2.0em;
+	padding-left: 0.6em; 
+	padding-right: 0.6em; 
+	color: #0E224B; 
+	text-align: right;
+	border: 1px solid #CCD2D8;
+}
+
+#calendar table tfoot td {
+	font-size: 0.65em;
+	border: none;
+}
+
+#calendar table tfoot td.calendar_week {
+	text-align: left;
+}
+
+#calendar table tbody td:hover{ 
+	background-color: #CCD2D8;
+	font-weight: bold;
+}
+
+#calendar table tbody td.saturday{ 
+	color: #9A2525;
+	font-weight: normal;
+}
+
+#calendar table tbody td.sunday{ 
+	color: #9A2525;
+	font-weight: bold;
+}
+
+#calendar table tbody td.weekend{ 
+	color: #9A2525;
+}
+
+#calendar table tbody td.today{
+	background-color: #A7B5C7;
+}
+
+#calendar table thead th.prev_year, #calendar table thead th.next_year {
+	border:none;
+	margin: 0.1em;
+	padding: 0.1em;
+	line-height: 0.75em;
+	font-size: 1em;
+}
+
+#calendar table tbody td.last_month, #calendar table tbody td.next_month {
+	color: 	#a3afc4;
+}
+
+#calendar table{
+	border-collapse: collapse;
+	border: solid #112A5D 2px;
+	padding: 0;
+	margin-top: 7px;
+	margin-left:auto;
+	margin-right:auto;
+	background-color: #F6F6F6;
+}
