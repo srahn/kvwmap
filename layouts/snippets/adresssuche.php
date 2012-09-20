@@ -51,20 +51,16 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   </td>
 </tr>
 //-->
-	<? if(!$this->FormObject["Gemarkungen"]->selected){ ?>
-  <tr>
+  <tr <? if($this->FormObject["Gemarkungen"]->selected){ echo 'style="visibility:collapse"'; }?>>
     <td align="right"><strong><?php echo $strGem; ?>:&nbsp;</strong></td>
     <td colspan="3"><?php echo $this->FormObject["Gemeinden"]->html; ?><!-- Name GemID //-->
     </td>
   </tr>
-  <? }
-  if(!$this->FormObject["Gemeinden"]->selected){ ?>
-  <tr>
+  <tr <? if($this->FormObject["Gemeinden"]->selected){ echo 'style="visibility:collapse"'; }?>>
     <td align="right"><strong><?php echo $strGemkg; ?>:&nbsp;</strong></td>
     <td colspan="3"><?php echo $this->FormObject["Gemarkungen"]->html; ?><!-- Name GemkgID //-->
     </td>
   </tr>
-  <? } ?>
   <tr>
     <td align="right"><strong><?php echo $strStreet; ?>:&nbsp;</strong></td>
     <td colspan="3"><?php echo $this->FormObject["Strassen"]->html; ?><!-- Name StrID //--></td>
