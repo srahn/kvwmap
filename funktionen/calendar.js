@@ -28,9 +28,9 @@ function CalendarJS() {
     this.monthname = ["Januar","Februar","M\u00e4rz","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];    
     this.tooltip = ["vorheriger Monat","n\u00e4chster Monat","aktuelles Datum","vorheriges Jahr","n\u00e4chstes Jahr"];
     this.monthCell = document.createElement("th");
-        this.tableHead = null;
-		this.tableFoot = null;
-        this.parEl = null;
+    this.tableHead = null;
+	this.tableFoot = null;
+    this.parEl = null;
  
         this.init = function( elementid, initDate ) {
             this.now = initDate?initDate:new Date();
@@ -41,7 +41,7 @@ function CalendarJS() {
             this.tableHead = this.createTableHead();
             this.tableFoot = this.createTableFoot();
             this.attributefield = document.getElementById(elementid);
-            this.parEl = document.getElementsByName('calendar_'+elementid)[0];
+            this.parEl = document.getElementsByName('calendar_'+elementid)[0].parentNode;
             this.show();
             if (!initDate) this.checkDate();
         },
@@ -67,20 +67,21 @@ function CalendarJS() {
             window.setTimeout(function() { self.checkDate(); }, Math.abs(new Date(this.year, this.month, this.date, 24, 0, 0)-this.now));
         },
  
-        this.removeElements = function( Obj ) {
-            while( Obj.childNodes.length > 0)
-                Obj.removeChild(Obj.childNodes[Obj.childNodes.length-1]);
-            return Obj;
+        this.removeElement = function(Obj) {
+			Obj.parentNode.removeChild(Obj);
+            //while( Obj.childNodes.length > 0)
+            //    Obj.removeChild(Obj.childNodes[Obj.childNodes.length-1]);
+            //return Obj;
         },
         		
         this.show = function() {
-            this.parEl = this.removeElements( this.parEl );
+            if(this.table)this.removeElement(this.table);
             this.monthCell.firstChild.replaceData(0, this.monthCell.firstChild.nodeValue.length, this.monthname[this.mm]+"\u00a0"+this.yy);
-            var table = document.createElement("table");
-            table.appendChild( this.createTableBody() );
-            table.appendChild( this.tableHead );
+            this.table = document.createElement("table");
+            this.table.appendChild( this.createTableBody() );
+            this.table.appendChild( this.tableHead );
             //table.appendChild( this.tableFoot );
-            this.parEl.appendChild( table );
+            this.parEl.appendChild( this.table );
         },
 	
 	this.createTableFoot = function() {
@@ -192,11 +193,11 @@ function CalendarJS() {
                 td.mm = this.mm;
                 td.yy = this.yy;
                 td.attributefield = this.attributefield;
-                td.removeElements = this.removeElements;
-                td.parEl = this.parEl;
+                td.removeElement = this.removeElement;
+                td.table = this.table;
                 td.onclick = function(e) {
                     this.setDate( this.attributefield, this.dd, this.mm+1, this.yy);
-                    this.removeElements(this.parEl);
+                    this.removeElement(this.table);
                 };
                 try { td.style.cursor = "pointer"; } catch(e){ td.style.cursor = "hand"; }
                 tr.appendChild( td );

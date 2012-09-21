@@ -222,7 +222,7 @@ tbody.gle tr:hover {
 
 #calendar table thead th{ 
 	font-weight: bold; 
-	font-size: 1.25em;
+	font-size: 1em;
 	line-height: 1.5em;				
 	color: #BFBFC1; 
 	text-align: center;
@@ -243,7 +243,7 @@ tbody.gle tr:hover {
 	font-weight: normal; 
 	font-size: 1em;
 	line-height: 1.5em;
-	width: 2.0em;
+	width: 1.7em;
 	padding-left: 0.6em; 
 	padding-right: 0.6em; 
 	color: #0E224B; 
