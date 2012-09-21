@@ -115,7 +115,7 @@ class Nachweis {
         $formvars['zieldateiname']=$this->getZielDateiName($formvars);
 
         # 4. Ändern der Eintragung in der Datenbank
-        $ret=$this->aktualisierenDokument($formvars['id'],$formvars['datum'],$formvars['flurid'],$formvars['VermStelle'],$formvars['art'],$formvars['andere_art'],$formvars['gueltigkeit'],$formvars['stammnr'],$formvars['Blattformat'],$formvars['Blattnr'],$formvars['rissnr'],$formvars['fortf'],$formvars['bemerkungen'],$formvars['umring'],$formvars['artname'].'/'.$formvars['zieldateiname']);
+        $ret=$this->aktualisierenDokument($formvars['id'],$formvars['datum'],$formvars['flurid'],$formvars['VermStelle'],$formvars['art'],$formvars['andere_art'],$formvars['gueltigkeit'],$formvars['stammnr'],$formvars['Blattformat'],$formvars['Blattnr'],$formvars['rissnummer'],$formvars['fortf'],$formvars['bemerkungen'],$formvars['umring'],$formvars['artname'].'/'.$formvars['zieldateiname']);
         if ($ret[0]) {
           # Aktualisierungsvorgang in der Datenbank nicht erfolgreich
           $errmsg=$ret[1];
@@ -156,14 +156,14 @@ class Nachweis {
             # Prüfen, ob sich der Speicherort auf Grund von geänderten Sachdaten ändern muss
             # $doclocation... alter Speicherort
             # Zusammensetzen des neuen Speicherortes
-            $zieldatei=NACHWEISDOCPATH.$formvars['flurid'].'/'.str_pad(trim($formvars['stammnr']),STAMMNUMMERMAXLENGTH,'0',STR_PAD_LEFT).'/'.$formvars['artname'].'/'.$formvars['zieldateiname'];
+            $zieldatei=NACHWEISDOCPATH.$formvars['flurid'].'/'.str_pad(trim($formvars[NACHWEIS_PRIMARY_ATTRIBUTE]),STAMMNUMMERMAXLENGTH,'0',STR_PAD_LEFT).'/'.$formvars['artname'].'/'.$formvars['zieldateiname'];
             if ($doclocation!=$zieldatei) {
               echo '<br>Speicherort der Datei muss geändert werden.';
               echo '<br>von:&nbsp; '.$doclocation;
               echo '<br>nach: '.$zieldatei; 
               # Datei muss an neuen Speicherort.
               # Speichern der Bilddatei unter neuem Pfad und Namen auf dem Server
-              $ret=$this->dokumentenDateiHochladen($formvars['flurid'],$formvars['stammnr'],$formvars['artname'],$doclocation,$formvars['zieldateiname']);
+              $ret=$this->dokumentenDateiHochladen($formvars['flurid'],$formvars[NACHWEIS_PRIMARY_ATTRIBUTE],$formvars['artname'],$doclocation,$formvars['zieldateiname']);
               if ($ret!='') {
                 # bestehende Datei konnte nicht an neuen Ort geschrieben werden
                 $errmsg=$ret;
@@ -529,7 +529,7 @@ class Nachweis {
           # Abfrage war erfolgreich
           # Es wurde ein Eintrag in Datenbank gefunden, das löschen der Datei kann erfolgen
           # Abfrage, ob die Datei überhaupt existiert
-          $nachweisDatei=NACHWEISDOCPATH.$this->Dokumente[0]['flurid'].'/'.str_pad($this->Dokumente[0]['stammnr'],STAMMNUMMERMAXLENGTH,'0',STR_PAD_LEFT).'/'.$this->Dokumente[0]['link_datei'];
+          $nachweisDatei=NACHWEISDOCPATH.$this->Dokumente[0]['flurid'].'/'.str_pad($this->Dokumente[0][NACHWEIS_PRIMARY_ATTRIBUTE],STAMMNUMMERMAXLENGTH,'0',STR_PAD_LEFT).'/'.$this->Dokumente[0]['link_datei'];
           if (file_exists($nachweisDatei)) {
             # Datei existiert und kann jetzt im Filesystem gelöscht werden
             if (unlink($nachweisDatei)) {
@@ -585,6 +585,7 @@ class Nachweis {
   
   function eintragenNeuesDokument($datum,$flurid,$VermStelle,$art,$andere_art,$gueltigkeit,$stammnr,$blattformat,$blattnr,$rissnummer,$fortf,$bemerkungen,$zieldatei,$umring) {
     #2005-11-24_pk
+    if($fortf == '')$fortf = 'NULL';
     $this->debug->write('Einfügen der Metadaten zum neuen Nachweisdokument in die Sachdatenbank',4);
     $sql ="INSERT INTO n_nachweise (flurid,stammnr,art,blattnummer,datum,vermstelle,gueltigkeit,format,link_datei,the_geom,fortfuehrung,rissnummer,bemerkungen)";
     $sql.=" VALUES (".$flurid.",'".trim($stammnr)."','".$art."','".trim($blattnr)."','".$datum."'";
@@ -606,7 +607,7 @@ class Nachweis {
   }
   
   function aktualisierenDokument($id,$datum,$flurid,$VermStelle,$art,$andere_art,$gueltigkeit,$stammnr,$Blattformat,$Blattnr,$rissnr,$fortf,$bemerkungen,$umring,$zieldateiname) {
-    #2005-11-24_pk
+    if($fortf == '')$fortf = 'NULL';
     $this->debug->write('Aktualisieren der Metadaten zu einem bestehenden Nachweisdokument',4);
     $sql="UPDATE n_nachweise SET flurid='".$flurid."', stammnr='".trim($stammnr)."', art='".$art."'";
     $sql.=",blattnummer='".trim($Blattnr)."', datum='".$datum."', vermstelle='".$VermStelle."'";

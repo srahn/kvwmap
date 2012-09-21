@@ -101,7 +101,7 @@ class antrag {
         mkdir ($zielpfad, 0777);
       }
       # Erzeuge ein Unterverzeichnis für die stammnr des Dokumentes, wenn noch nicht vorhanden
-      $stammnr=str_pad($nachweis->Dokumente[$i]['stammnr'],STAMMNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
+      $stammnr=str_pad($nachweis->Dokumente[$i][NACHWEIS_PRIMARY_ATTRIBUTE],STAMMNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
       $zielpfad.=$stammnr.'/';
       if (!is_dir($zielpfad)) {
         mkdir ($zielpfad, 0777);
@@ -330,37 +330,37 @@ class antrag {
       }
 
       # Abfrage der Anzahl der FFR zum Vorgang
-      $ret=$this->getAnzFFR($rs['flurid'],$rs['stammnr']);
+      $ret=$this->getAnzFFR($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE]);
       if ($ret[0]) { return $ret; }
       $FFR[$i]['FFR']=$ret[1];      
       
       # Abfrage der Anzahl der KVZ zum Vorgang
-      $ret=$this->getAnzKVZ($rs['flurid'],$rs['stammnr']);
+      $ret=$this->getAnzKVZ($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE]);
       if ($ret[0]) { return $ret; }
       $FFR[$i]['KVZ']=$ret[1];
       
       # Abfrage der Anzahl der GN zum Vorgang
-      $ret=$this->getAnzGN($rs['flurid'],$rs['stammnr']);
+      $ret=$this->getAnzGN($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE]);
       if ($ret[0]) { return $ret; }
       $FFR[$i]['GN']=$ret[1];
       
       # Abfrage der Anzahl der anderen Dokumente zum Vorgang
-      $ret=$this->getAnzAndere($rs['flurid'],$rs['stammnr']);
+      $ret=$this->getAnzAndere($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE]);
       if ($ret[0]) { return $ret; }
       $FFR[$i]['andere']=$ret[1];            
             
       # Abfrage der Datumsangaben im Vorgang
-      $ret=$this->getDatum($rs['flurid'],$rs['stammnr']);
+      $ret=$this->getDatum($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE]);
       if ($ret[0]) { return $ret; }
       $FFR[$i]['Datum']=$ret[1];
 
       # Abfrage der Vermessungsstellen im Vorgang
-      $ret=$this->getVermessungsStellen($rs['flurid'],$rs['stammnr']);
+      $ret=$this->getVermessungsStellen($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE]);
       if ($ret[0]) { return $ret; }
       $FFR[$i]['gemessen durch']=$ret[1]; 
             
       # Abfrage der Gültigkeiten der Dokumente im Vorgang
-      $ret=$this->getGueltigkeit($rs['flurid'],$rs['stammnr']);
+      $ret=$this->getGueltigkeit($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE]);
       if ($ret[0]) { return $ret; }
       #$FFR[$i]['Bemerkung']=$ret[1]; 
       #var_dump($FFR[$i]);
@@ -372,11 +372,11 @@ class antrag {
     return $ret;
   }
   
-  function getDatum($flurid,$stammnr) {
+  function getDatum($flurid,$nr) {
     $this->debug->write('<br>nachweis.php getDatum Abfragen der Datum zu einem Vorgang in der Nachweisführung.',4);
     # Abfragen der Datum zu einem Vorgang in der Nachweisführung
     $sql.="SELECT DISTINCT n.datum FROM n_nachweise AS n";
-    $sql.=" WHERE n.flurid=".$flurid." AND n.stammnr='".$stammnr."'";
+    $sql.=" WHERE n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
     $ret=$this->database->execSQL($sql,4, 0);
     if (!$ret[0]) {
       $rs=pg_fetch_array($ret[1]);
@@ -388,11 +388,11 @@ class antrag {
     }     
     return $ret;  
   }
-  function getGueltigkeit($flurid,$stammnr) {
+  function getGueltigkeit($flurid,$nr) {
     $this->debug->write('<br>nachweis.php getDatum Abfragen der Gueltigkeit der Dokumente in einem Vorgang in der Nachweisführung.',4);
     # Abfragen der Gueltigkeit der Dokumente in einem Vorgang in der Nachweisführung.
     $sql.="SELECT DISTINCT n.gueltigkeit FROM n_nachweise AS n";
-    $sql.=" WHERE n.flurid=".$flurid." AND n.stammnr='".$stammnr."'";
+    $sql.=" WHERE n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
     $sql.=" AND n.gueltigkeit=0";
     $ret=$this->database->execSQL($sql,4, 0);
     if (!$ret[0]) {
@@ -409,11 +409,11 @@ class antrag {
     return $ret;  
   }
   
-  function getVermessungsStellen($flurid,$stammnr) {
+  function getVermessungsStellen($flurid,$nr) {
     $this->debug->write('<br>nachweis.php getDatum Abfragen der Vermessungsstellen, die an einem Vorgang beteiligt waren in der Nachweisführung.',4);
     # Abfragen der Vermessungsstellen, die an einem Vorgang beteiligt waren in der Nachweisführung.
     $sql.="SELECT DISTINCT v.name FROM n_nachweise AS n, n_vermstelle AS v";
-    $sql.=" WHERE n.flurid=".$flurid." AND n.stammnr='".$stammnr."'";
+    $sql.=" WHERE n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
     $sql.=" AND n.vermstelle::integer=v.id";
     $ret=$this->database->execSQL($sql,4, 0);
     if (!$ret[0]) {
@@ -427,7 +427,7 @@ class antrag {
     return $ret;    
   }
     
-  function getAnzFFR($flurid,$stammnr) {
+  function getAnzFFR($flurid,$nr) {
     $this->debug->write('<br>nachweis.php getAnzFFR Abfragen der Anzahl der Blätter eines FFR.',4);
     # Abfrag der Anzahl der zum Riss gehörenden Fortführungsrisse
     $sql.="SELECT COUNT(n.id) AS anzffr FROM n_nachweise AS n";
@@ -437,7 +437,7 @@ class antrag {
     else {
       $sql.=" WHERE (1=1)";
     }
-    $sql.=" AND n.flurid=".$flurid." AND n.stammnr='".$stammnr."'";
+    $sql.=" AND n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
     $sql.=" AND n.art = '100'";
     $queryret=$this->database->execSQL($sql,4, 0);
     if ($queryret[0]) { $ret=$queryret; }
@@ -454,7 +454,7 @@ class antrag {
     return $ret;
   }
    
-  function getAnzKVZ($flurid,$stammnr) {
+  function getAnzKVZ($flurid,$nr) {
     $this->debug->write('<br>nachweis.php getAnzKVZ Abfragen der Anzahl der KVZ zum Riss.',4);
     # Abfrag der Anzahl der zum Riss gehörenden Koordinatenverzeichnisse
     $sql.="SELECT COUNT(n.id) AS anzkvz FROM n_nachweise AS n";
@@ -464,7 +464,7 @@ class antrag {
     else {
       $sql.=" WHERE (1=1)";
     }
-    $sql.=" AND n.flurid=".$flurid." AND n.stammnr='".$stammnr."'";
+    $sql.=" AND n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
     $sql.=" AND n.art = '010'";
     $queryret=$this->database->execSQL($sql,4, 0);
     if ($queryret[0]) { $ret=$queryret; }
@@ -481,7 +481,7 @@ class antrag {
     return $ret;
   }
   
-  function getAnzGN($flurid,$stammnr) {
+  function getAnzGN($flurid,$nr) {
     $this->debug->write('<br>nachweis.php getAnzGN Abfragen der Anzahl der Grenzniederschriften zum Riss.',4);
     # Abfrage der Anzahl der zum Riss gehörenden Grenzniederschriften
     $sql.="SELECT COUNT(n.id) AS anzgn FROM n_nachweise AS n";
@@ -491,7 +491,7 @@ class antrag {
     else {
       $sql.=" WHERE (1=1)";
     }
-    $sql.=" AND n.flurid=".$flurid." AND n.stammnr='".$stammnr."'";
+    $sql.=" AND n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
     $sql.=" AND n.art = '001'";
     $queryret=$this->database->execSQL($sql,4, 0);
     if ($queryret[0]) { $ret=$queryret; }
@@ -508,7 +508,7 @@ class antrag {
     return $ret;    
   }
   
-  function getAnzAndere($flurid,$stammnr) {
+  function getAnzAndere($flurid,$nr) {
     $this->debug->write('<br>nachweis.php getAnzAn Abfragen der Anzahl der anderen Dokumente zum Riss.',4);
     # Abfrage der Anzahl der zum Riss gehörenden Grenzniederschriften
     $sql.="SELECT COUNT(n.id) AS anzan FROM n_nachweise AS n";
@@ -518,7 +518,7 @@ class antrag {
     else {
       $sql.=" WHERE (1=1)";
     }
-    $sql.=" AND n.flurid=".$flurid." AND n.stammnr='".$stammnr."'";
+    $sql.=" AND n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
     $sql.=" AND n.art = '111'";
     $queryret=$this->database->execSQL($sql,4, 0);
     if ($queryret[0]) { $ret=$queryret; }
