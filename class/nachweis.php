@@ -588,9 +588,9 @@ class Nachweis {
     $this->debug->write('Einfügen der Metadaten zum neuen Nachweisdokument in die Sachdatenbank',4);
     $sql ="INSERT INTO n_nachweise (flurid,stammnr,art,blattnummer,datum,vermstelle,gueltigkeit,format,link_datei,the_geom,fortfuehrung,rissnummer,bemerkungen)";
     $sql.=" VALUES (".$flurid.",'".trim($stammnr)."','".$art."','".trim($blattnr)."','".$datum."'";
-    $sql.=",'".$VermStelle."','".$gueltigkeit."','".$blattformat."','".$zieldatei."',Transform(GeometryFromText('".$umring."', ".$this->client_epsg."),".EPSGCODE.")";
+    $sql.=",'".$VermStelle."','".$gueltigkeit."','".$blattformat."','".$zieldatei."',Transform(GeometryFromText('".$umring."', ".$this->client_epsg."), (select srid(the_geom) from n_nachweise limit 1))";
     $sql.=",".$fortf.",'".$rissnummer."','".$bemerkungen."')";
-		# echo '<br>Polygon-SQL: '.$sql;
+		#echo '<br>Polygon-SQL: '.$sql;
     $ret=$this->database->execSQL($sql,4, 1);
     if($andere_art != ''){
     	$sql = "INSERT INTO n_nachweise2dokumentarten";
@@ -610,7 +610,7 @@ class Nachweis {
     $this->debug->write('Aktualisieren der Metadaten zu einem bestehenden Nachweisdokument',4);
     $sql="UPDATE n_nachweise SET flurid='".$flurid."', stammnr='".trim($stammnr)."', art='".$art."'";
     $sql.=",blattnummer='".trim($Blattnr)."', datum='".$datum."', vermstelle='".$VermStelle."'";
-    $sql.=",gueltigkeit='".$gueltigkeit."', format='".$Blattformat."',the_geom=Transform(GeometryFromText('".$umring."', ".$this->client_epsg."),".EPSGCODE."), link_datei='".$zieldateiname."'";
+    $sql.=",gueltigkeit='".$gueltigkeit."', format='".$Blattformat."',the_geom=Transform(GeometryFromText('".$umring."', ".$this->client_epsg."), (select srid(the_geom) from n_nachweise limit 1)), link_datei='".$zieldateiname."'";
     $sql.=",fortfuehrung=".$fortf.",rissnummer='".$rissnr."',bemerkungen='".$bemerkungen."'";
     $sql.=" WHERE id = ".$id;
     #echo $sql;
