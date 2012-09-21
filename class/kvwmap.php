@@ -8346,6 +8346,9 @@ class GUI extends GUI_core{
     if($this->formvars['stammnr']!=''){
       $_SESSION['stammnr']=$this->formvars['stammnr'];
     }
+  	if($this->formvars['rissnummer']!=''){
+      $_SESSION['rissnummer']=$this->formvars['rissnummer'];
+    }
     if($this->formvars['antr_nr_a']!=''){
       $_SESSION['antr_nr_a']=$this->formvars['antr_nr_a'];
     }
@@ -8367,6 +8370,7 @@ class GUI extends GUI_core{
     $this->formvars['abfrage_art']=$_SESSION['abfrage_art'];
     $this->formvars['FlurID']=$_SESSION['FlurID'];
     $this->formvars['stammnr']=$_SESSION['stammnr'];
+    $this->formvars['rissnummer']=$_SESSION['rissnummer'];
     $this->formvars['antr_nr_a']=$_SESSION['antr_nr_a'];
     $this->formvars['antr_nr_b']=$_SESSION['antr_nr_b'];
     $this->formvars['f']=$_SESSION['f'];
@@ -9055,6 +9059,7 @@ class GUI extends GUI_core{
     # Zuweisen der Werte des Dokumentes zum Formular
     $this->formvars['flurid']=$nachweis->document['flurid'];
     $this->formvars['stammnr']=$nachweis->document['stammnr'];
+    $this->formvars['rissnummer']=$nachweis->document['rissnummer'];
     $this->formvars['art']=$nachweis->document['art'];
     $this->formvars['Blattnr']=$nachweis->document['blattnummer'];
     $this->formvars['datum']=$nachweis->document['datum'];

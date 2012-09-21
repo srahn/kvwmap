@@ -17,7 +17,7 @@
   </tr>
   <?php
   for ($j=0;$j<count($this->qlayerset[$i]['shape']);$j++) {
-    $stammnr=$this->qlayerset[$i]['shape'][$j]['stammnr'];
+    $nr=$this->qlayerset[$i]['shape'][$j][NACHWEIS_PRIMARY_ATTRIBUTE];
     $oid=$this->qlayerset[$i]['shape'][$j]['oid'];
     $id=$this->qlayerset[$i]['shape'][$j]['id'];
     $flurid=$this->qlayerset[$i]['shape'][$j]['flurid'];
@@ -30,7 +30,7 @@
     {
       $stammnr="0".$stammnr;
     }
-$dname=NACHWEISDOCPATH.$this->qlayerset[$i]['shape'][$j]['flurid']."/".$stammnr."/".$this->qlayerset[$i]['shape'][$j]['link_datei'];
+$dname=NACHWEISDOCPATH.$this->qlayerset[$i]['shape'][$j]['flurid']."/".$nr."/".$this->qlayerset[$i]['shape'][$j]['link_datei'];
     ?>
   <tr>
 	<td><b><?php echo $this->qlayerset[$i]['shape'][$j]['nummer']; ?></b></td>
