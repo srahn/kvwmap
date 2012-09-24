@@ -447,7 +447,7 @@ else {
                       <select name="selectedusers" size="4" multiple style="width:160px">
                       <?
                       for($i=0; $i < count($this->formvars['selusers']["Bezeichnung"]); $i++){
-                          echo '<option value="'.$this->formvars['selusers']["ID"][$i].'">'.$this->formvars['selusers']["Bezeichnung"][$i].'</option>';
+                          echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['selusers']["Bezeichnung"][$i]).' value="'.$this->formvars['selusers']["ID"][$i].'">'.$this->formvars['selusers']["Bezeichnung"][$i].'</option>';
                          }
                       ?>
                       </select>
@@ -459,7 +459,7 @@ else {
                     <td>
                       <select name="allusers" size="4" multiple style="width:160px">
                       <? for($i=0; $i < count($this->formvars['users']["Bezeichnung"]); $i++){
-                          echo '<option value="'.$this->formvars['users']["ID"][$i].'">'.$this->formvars['users']["Bezeichnung"][$i].'</option>';
+                          echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['users']["Bezeichnung"][$i]).' value="'.$this->formvars['users']["ID"][$i].'">'.$this->formvars['users']["Bezeichnung"][$i].'</option>';
                            }
                       ?>
                       </select>

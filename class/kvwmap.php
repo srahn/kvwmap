@@ -5616,7 +5616,7 @@ class GUI extends GUI_core{
       # Abfragen der Stellen des Layer
       $this->formvars['selstellen']=$mapDB->get_stellen_from_layer($this->formvars['selected_layer_id']);
     }
-    $this->stellen=$this->Stelle->getStellen(0);
+    $this->stellen=$this->Stelle->getStellen('Bezeichnung');
     $this->Groups = $mapDB->getall_Groups();
     $this->epsg_codes = read_epsg_codes($this->pgdatabase);
     $this->output();
@@ -7564,7 +7564,7 @@ class GUI extends GUI_core{
       $Stelle->getFunktionen();
       $this->formvars['selfunctions'] = $Stelle->funktionen['array'];
       $this->formvars['selframes'] = $document->load_frames($this->formvars['selected_stelle_id'], NULL);
-      $this->formvars['sellayer'] = $Stelle->getLayers(NULL);
+      $this->formvars['sellayer'] = $Stelle->getLayers(NULL, 'Name');
       $this->formvars['selusers'] = $Stelle->getUser();
     }
     # Abfragen aller möglichen Menuepunkte
@@ -13657,7 +13657,7 @@ class db_mapObj extends db_mapObj_core{
   }
   
   function get_stellen_from_layer($layer_id){
-    $sql = 'SELECT ID, Bezeichnung FROM stelle, used_layer WHERE used_layer.Stelle_ID = stelle.ID AND used_layer.Layer_ID = '.$layer_id;
+    $sql = 'SELECT ID, Bezeichnung FROM stelle, used_layer WHERE used_layer.Stelle_ID = stelle.ID AND used_layer.Layer_ID = '.$layer_id.' ORDER BY Bezeichnung';
     $this->debug->write("<p>file:kvwmap class:db_mapObj->get_stellen_from_layer - Lesen der Stellen eines Layers:<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }

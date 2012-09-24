@@ -1948,7 +1948,7 @@ class stelle extends stelle_core{
   function getFunktionen() {
     # Abfragen der Funktionen, die in der Stelle ausgeführt werden dürfen
     $sql ='SELECT f.id,f.bezeichnung,f2s.erlaubt FROM u_funktionen AS f,u_funktion2stelle AS f2s';
-    $sql.=' WHERE f.id=f2s.funktion_id AND f2s.stelle_id='.$this->id;
+    $sql.=' WHERE f.id=f2s.funktion_id AND f2s.stelle_id='.$this->id.' ORDER BY bezeichnung';
     $this->debug->write("<p>file:users.php class:stelle->getFunktionen - Fragt die Funktionen der Stelle ab:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
     if ($query==0) {
