@@ -423,16 +423,24 @@
 			update_gps_position();
 		}
 		if(polygonfunctions == true){
-			if(top.document.GUI.always_draw.checked && !geomload){
+			if(top.document.GUI.always_draw.checked && !geomload){		// bei "weiterzeichnen" in den Polygonzeichnen-Modus gehen  
 				top.document.GUI.last_button.value = "pgon0";
-				if(top.document.GUI.secondpoly.value == "true"){
+				if(top.document.GUI.secondpoly.value == "started" || top.document.GUI.secondpoly.value == "true"){	// am zweiten Polygon wird weitergezeichnet
 					top.document.GUI.last_doing.value = "draw_second_polygon";
+					if(pathx_second.length == 1){				// ersten Punkt darstellen
+						document.getElementById("startvertex").setAttribute("cx", (pathx_second[0]-minx)/scale);
+						document.getElementById("startvertex").setAttribute("cy", (pathy_second[0]-miny)/scale);
+					}
 				}
-				else{
+				else{																												// am ersten Polygon wird weitergezeichnet
 					top.document.GUI.last_doing.value = "draw_polygon";
+					if(pathx.length == 1){							// ersten Punkt darstellen
+						document.getElementById("startvertex").setAttribute("cx", (pathx[0]-minx)/scale);
+						document.getElementById("startvertex").setAttribute("cy", (pathy[0]-miny)/scale);
+					}
 				}
 			}
-			else{
+			else{			// bei nicht "weiterzeichnen" wird alles vom zweiten Polygon geloescht
 				var alles = pathx_second.length;
 				for(var i = 0; i < alles; ++i){
 					pathx_second.pop();
@@ -784,6 +792,11 @@ function mouseup(evt){
 		evt1.clientY = coords1[1];
 		mousedown(evt1);
 		mouse_coords_type = "image";
+		if(coords1[0] < minx || coords1[0] > maxx || coords1[1] < miny || coords1[1] > maxy){		// wenn Punkt ausserhalb des Kartenausschnittes -> hinzoomen
+			pathx[0] = (coords1[0]-minx)/scale;
+			pathy[0] = resy-((coords1[1]-miny)/scale);
+			sendpath("recentre", pathx, pathy);
+		}
 	}
 
 	';
@@ -1762,6 +1775,9 @@ function mouseup(evt){
 	  if(pathy_second.length > 2){
 	  	top.document.GUI.secondpoly.value = true;
 	  }
+	  else{
+	  	top.document.GUI.secondpoly.value = "started";
+	  }
 	}
 
 	function redrawfirstpolygon(){
@@ -2716,23 +2732,7 @@ $measurefunctions = '
 	function polygonbuttons($strUndo, $strDeletePolygon, $strDrawPolygon, $strCutByPolygon){
 		global $last_x;
 		$polygonbuttons = '
-	      <g id="undo" onmousedown="deletelast(evt);" transform="translate(0 0)">
-	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-	        	<set attributeName="filter" begin="undo0.mousedown" dur="0s" fill="freeze" to="none"/>
-						<set attributeName="filter" begin="undo0.mouseup;undo0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
-					</rect>
-					<g transform="translate(0 -4.5)">
-						<polygon points="178.579,57.7353 164.258,51.2544 178.96,44.515 174.48,51.1628"
-							 style="fill:rgb(0,0,0);stroke:rgb(0,0,0);stroke-width:2" transform="scale(0.7) translate(-5 0) rotate(320.992 13.3045 25.4374) rotate(2.66158 14.8833 25.1086) translate(-0.0187408 0.792412) translate(-0.846674 1.15063) translate(0.846674 -1.15063) translate(-8.46674 11.5063) translate(8.46674 -11.5063) rotate(1 14.8488 24.959) rotate(1 14.8322 24.9037) rotate(1 14.8138 24.849) rotate(1 14.7934 24.795) rotate(1 14.7712 24.7418) rotate(1 14.7471 24.6893) rotate(-1 14.7212 24.6378) rotate(-1 14.7471 24.6893) rotate(-1 14.7712 24.7418) rotate(-1 14.7934 24.795) rotate(-1 14.8138 24.849) rotate(-1 14.8322 24.9037) rotate(-1 14.8488 24.959) rotate(-1 14.8634 25.0148) rotate(-1 14.876 25.0711) translate(-0.205848 0.251079) rotate(-1 14.8867 25.1278) rotate(-1 14.8954 25.1849) rotate(-1 14.9021 25.2422) rotate(-1 14.9067 25.2997) rotate(-1 14.9094 25.3573) translate(0.318975 -0.00363643) matrix(-1 0 0 1 100 -25) scale(0.5) rotate(180) translate(-345 -152)"/>
-						<path d="M137.5 355 C230.674 287.237 311.196 227.137 396.5 349"
-							transform="matrix(1 0 0 1 0 0) scale(0.05)"
-							 style="fill:none;stroke:rgb(0,0,0);stroke-width:30"/>
-					</g>
-	        <rect id="undo0" onmouseover="show_tooltip(\''.$strUndo.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="1" ry="1" width="25" height="25" transform="translate(0 0)" fill="none" opacity="0.2"/>
-	      </g>
-
-	      <g id="new" onmousedown="restart();highlightbyid(\'pgon0\');" transform="translate(26 0 )">
+	      <g id="new" onmousedown="restart();highlightbyid(\'pgon0\');" transform="translate(0 0 )">
 	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
 	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
 	        	<set attributeName="filter" begin="new0.mousedown" dur="0s" fill="freeze" to="none"/>
@@ -2756,6 +2756,22 @@ $measurefunctions = '
 							105.026 130.236 95.2056 C132.77 85.3855 153.245 92.3923 153.245 92.3923 z"
 						transform="matrix(1 0 0 1 0 0) translate(2 2) scale(0.042)" style="fill:rgb(0,0,0)"/>
 	        <rect id="new0" onmouseover="show_tooltip(\''.$strDeletePolygon.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="1" ry="1" width="25" height="25" fill="none" opacity="0.2"/>
+	      </g>
+	      
+	      <g id="undo" onmousedown="deletelast(evt);" transform="translate(26 0)">
+	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
+	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+	        	<set attributeName="filter" begin="undo0.mousedown" dur="0s" fill="freeze" to="none"/>
+						<set attributeName="filter" begin="undo0.mouseup;undo0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+					</rect>
+					<g transform="translate(0 -4.5)">
+						<polygon points="178.579,57.7353 164.258,51.2544 178.96,44.515 174.48,51.1628"
+							 style="fill:rgb(0,0,0);stroke:rgb(0,0,0);stroke-width:2" transform="scale(0.7) translate(-5 0) rotate(320.992 13.3045 25.4374) rotate(2.66158 14.8833 25.1086) translate(-0.0187408 0.792412) translate(-0.846674 1.15063) translate(0.846674 -1.15063) translate(-8.46674 11.5063) translate(8.46674 -11.5063) rotate(1 14.8488 24.959) rotate(1 14.8322 24.9037) rotate(1 14.8138 24.849) rotate(1 14.7934 24.795) rotate(1 14.7712 24.7418) rotate(1 14.7471 24.6893) rotate(-1 14.7212 24.6378) rotate(-1 14.7471 24.6893) rotate(-1 14.7712 24.7418) rotate(-1 14.7934 24.795) rotate(-1 14.8138 24.849) rotate(-1 14.8322 24.9037) rotate(-1 14.8488 24.959) rotate(-1 14.8634 25.0148) rotate(-1 14.876 25.0711) translate(-0.205848 0.251079) rotate(-1 14.8867 25.1278) rotate(-1 14.8954 25.1849) rotate(-1 14.9021 25.2422) rotate(-1 14.9067 25.2997) rotate(-1 14.9094 25.3573) translate(0.318975 -0.00363643) matrix(-1 0 0 1 100 -25) scale(0.5) rotate(180) translate(-345 -152)"/>
+						<path d="M137.5 355 C230.674 287.237 311.196 227.137 396.5 349"
+							transform="matrix(1 0 0 1 0 0) scale(0.05)"
+							 style="fill:none;stroke:rgb(0,0,0);stroke-width:30"/>
+					</g>
+	        <rect id="undo0" onmouseover="show_tooltip(\''.$strUndo.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="1" ry="1" width="25" height="25" transform="translate(0 0)" fill="none" opacity="0.2"/>
 	      </g>
 
 				<g id="pgon" onmousedown="draw_pgon_on();add_polygon();highlightbyid(\'pgon0\');" transform="translate(52 0 )">
@@ -3083,12 +3099,12 @@ $measurefunctions = '
 			<g id="vertex_edit" transform="translate('.$last_x.' 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-          <set attributeName="filter" begin="coord_input1.mousedown" dur="0s" fill="freeze" to="none"/>
-          <set attributeName="filter" begin="coord_input1.mouseup;coord_input1.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+          <!--set attributeName="filter" begin="coord_input1.mousedown" dur="0s" fill="freeze" to="none"/-->
+          <!--set attributeName="filter" begin="coord_input1.mouseup;coord_input1.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/-->
         </rect>
         <circle cx="178.579" cy="57.7353" r="3" transform="translate(-166 -41)"/>
 				<text transform="scale(0.7 0.7)" x="18" y="14" style="text-anchor:middle;fill:rgb(0,0,0);font-size:15;font-family:Arial;font-weight:bold">x,y</text>
-        <rect id="coord_input1" onmouseover="show_tooltip(\'Koordinate eingeben\',evt.clientX,evt.clientY)" onmousedown="highlightbyid(\'coord_input1\');coord_input();hide_tooltip();" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
+        <rect id="coord_input1" onmouseover="show_tooltip(\'Koordinate eingeben\',evt.clientX,evt.clientY)" onmousedown="coord_input();hide_tooltip();" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
       </g>
     ';
     return $vertex_edit_buttons;

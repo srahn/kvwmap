@@ -50,7 +50,7 @@ class uko{
 					}
 				}
 				$polygon = 'MULTIPOLYGON((('.implode(',', $coords).')))';
-				$sql = "INSERT INTO uko_polygon (username, dateiname, the_geom) VALUES('".$username."', '".$_FILES['ukofile']['name']."', geometryfromtext('".$polygon."', ".EPSGCODE."))";
+				$sql = "INSERT INTO uko_polygon (username, dateiname, the_geom) VALUES('".$username."', '".$_FILES['ukofile']['name']."', geometryfromtext('".$polygon."', (select srid from geometry_columns where f_table_name = 'uko_polygon')))";
 				$ret = $database->execSQL($sql,4, 1);
 				if ($ret[0])$this->success = false;
         else $this->success = true;
@@ -78,7 +78,7 @@ class uko{
     	else{
     		$geom = 'GeometryN('.$formvars['layer_columnname'].', '.$i.')';
     	}
-	    $sql = "SELECT replace(replace(astext(pointn(ExteriorRing($geom), generate_series(2,npoints(".$formvars['layer_columnname'].")))), 'POINT(', 'KOO '), ')', '') as coords";
+	    $sql = "SELECT replace(replace(astext(pointn(ExteriorRing($geom), generate_series(1,npoints(".$formvars['layer_columnname'].")))), 'POINT(', 'KOO '), ')', '') as coords";
 			$sql.= " From ".$formvars['layer_tablename']." WHERE oid = ".$formvars['oid'];
 	    #echo $sql;
 	    $ret = $layerdb->execSQL($sql,4, 1);

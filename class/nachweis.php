@@ -589,7 +589,7 @@ class Nachweis {
     $this->debug->write('Einfügen der Metadaten zum neuen Nachweisdokument in die Sachdatenbank',4);
     $sql ="INSERT INTO n_nachweise (flurid,stammnr,art,blattnummer,datum,vermstelle,gueltigkeit,format,link_datei,the_geom,fortfuehrung,rissnummer,bemerkungen)";
     $sql.=" VALUES (".$flurid.",'".trim($stammnr)."','".$art."','".trim($blattnr)."','".$datum."'";
-    $sql.=",'".$VermStelle."','".$gueltigkeit."','".$blattformat."','".$zieldatei."',Transform(GeometryFromText('".$umring."', ".$this->client_epsg."), (select srid(the_geom) from n_nachweise limit 1))";
+    $sql.=",'".$VermStelle."','".$gueltigkeit."','".$blattformat."','".$zieldatei."',Transform(GeometryFromText('".$umring."', ".$this->client_epsg."), (select srid from geometry_columns where f_table_name = 'n_nachweise'))";
     $sql.=",".$fortf.",'".$rissnummer."','".$bemerkungen."')";
 		#echo '<br>Polygon-SQL: '.$sql;
     $ret=$this->database->execSQL($sql,4, 1);
@@ -611,7 +611,7 @@ class Nachweis {
     $this->debug->write('Aktualisieren der Metadaten zu einem bestehenden Nachweisdokument',4);
     $sql="UPDATE n_nachweise SET flurid='".$flurid."', stammnr='".trim($stammnr)."', art='".$art."'";
     $sql.=",blattnummer='".trim($Blattnr)."', datum='".$datum."', vermstelle='".$VermStelle."'";
-    $sql.=",gueltigkeit='".$gueltigkeit."', format='".$Blattformat."',the_geom=Transform(GeometryFromText('".$umring."', ".$this->client_epsg."), (select srid(the_geom) from n_nachweise limit 1)), link_datei='".$zieldateiname."'";
+    $sql.=",gueltigkeit='".$gueltigkeit."', format='".$Blattformat."',the_geom=Transform(GeometryFromText('".$umring."', ".$this->client_epsg."), (select srid from geometry_columns where f_table_name = 'n_nachweise')), link_datei='".$zieldateiname."'";
     $sql.=",fortfuehrung=".$fortf.",rissnummer='".$rissnr."',bemerkungen='".$bemerkungen."'";
     $sql.=" WHERE id = ".$id;
     #echo $sql;
@@ -970,7 +970,7 @@ class Nachweis {
 					$sql.=" 		LEFT JOIN n_dokumentarten d ON n2d.dokumentart_id = d.id";
 					$sql.=" ON n2d.nachweis_id = n.id";
  					$sql.=" WHERE CAST(n.vermstelle AS integer)=v.id";
-          $sql.=" AND NOT DISJOINT(Transform(GeometryFromText('".$polygon."',".$this->client_epsg."), ".EPSGCODE."),the_geom)";
+          $sql.=" AND NOT DISJOINT(Transform(GeometryFromText('".$polygon."',".$this->client_epsg."), (select srid from geometry_columns where f_table_name = 'n_nachweise')),the_geom)";
           
           if (substr($art_einblenden,0,1)) { $art[]='100'; }
           if (substr($art_einblenden,1,1)) { $art[]='010'; }
