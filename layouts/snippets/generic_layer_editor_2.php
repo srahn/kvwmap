@@ -691,12 +691,28 @@ function set_changed_flag(flag){
 										}
 										echo ' size="61" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.htmlspecialchars($layer['shape'][$k][$attributes['name'][$j]]).'">';
 									}break;
-
+									
+									case 'Zahl': {
+										# bei Zahlen Tausendertrennzeichen einfügen 
+										$value = tausenderTrenner($layer['shape'][$k][$attributes['name'][$j]]);
+										echo '<input onchange="set_changed_flag(document.GUI.changed_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$attributes['alias'][$j].'" ';
+										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
+											echo ' readonly style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;"';
+										}
+										else{
+											echo ' style="font-size: '.$this->user->rolle->fontsize_gle.'px;"';
+										}
+										if($attributes['name'][$j] == 'lock'){
+											echo ' type="hidden"';
+										}
+										if($attributes['length'][$j] AND !in_array($attributes['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))){
+											echo ' maxlength="'.$attributes['length'][$j].'"';
+										}
+										echo ' size="61" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" id="'.$attributes['name'][$j].'_'.$k.'" value="'.htmlspecialchars($value).'">';
+									}break;
+									
 									default : {
 										$value = $layer['shape'][$k][$attributes['name'][$j]];
-										if(in_array($attributes['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))){		# bei Zahlen Tausendertrennzeichen einfügen 
-											$value = tausenderTrenner($layer['shape'][$k][$attributes['name'][$j]]);
-										}
 										echo '<input onchange="set_changed_flag(document.GUI.changed_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$attributes['alias'][$j].'" ';
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
 											echo ' readonly style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;"';

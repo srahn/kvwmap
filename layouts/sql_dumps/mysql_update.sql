@@ -1049,3 +1049,10 @@ ALTER TABLE `rolle_nachweise` ADD `suchrissnr` VARCHAR(20) NOT NULL AFTER `suchs
  			      ADD `suchfortf` INT(4) NULL AFTER `suchrissnr`;
  			      
 ALTER TABLE `layer_attributes` CHANGE `form_element_type` `form_element_type` ENUM('Text','Textfeld','Auswahlfeld','Geometrie','SubFormPK','SubFormFK','SubFormEmbeddedPK','Time','Dokument','Link','User','Stelle','Fläche','dynamicLink') NOT NULL DEFAULT 'Text';
+
+
+
+#------------------------------------------------------------------------------------------
+# Änderung von 1.10.0 zu 1.11.0
+
+ALTER TABLE `layer_attributes` CHANGE `form_element_type` `form_element_type` ENUM('Text','Textfeld','Auswahlfeld','Geometrie','SubFormPK','SubFormFK','SubFormEmbeddedPK','Time','Dokument','Link','User','Stelle','Fläche','dynamicLink','Zahl') NOT NULL DEFAULT 'Text';

@@ -79,6 +79,9 @@
 				  		<option value="Text" ';
 				  		if($this->attributes['form_element_type'][$i] == 'Text'){echo 'selected';}
 				  		echo ' >Text</option>
+				  		<option value="Zahl" ';
+				  		if($this->attributes['form_element_type'][$i] == 'Zahl'){echo 'selected';}
+				  		echo ' >Zahl</option>
 				  		<option value="Textfeld" ';
 				  		if($this->attributes['form_element_type'][$i] == 'Textfeld'){echo 'selected';}
 				  		echo ' >Textfeld</option>
