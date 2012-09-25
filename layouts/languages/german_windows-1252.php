@@ -6,6 +6,7 @@
   $this->strDeleteWarningMessage="Wollen Sie wirklich Löschen?";
   $this->strLayer="Layer";
   $this->strName="Name";
+  $this->strGroup="Gruppe";
   $this->strNo="Nein";
   $this->strPleaseSelect="Bitte auswählen";
   $this->strSave="Speichern";

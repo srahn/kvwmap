@@ -1,6 +1,7 @@
 <?php
   $this->strID="ID";
   $this->strName="Name";
+  $this->strGroup="Group";
   $this->strChoose="Choose";
   $this->strChange="Change";
   $this->strDelete="Delete";

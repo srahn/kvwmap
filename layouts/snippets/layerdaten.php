@@ -22,6 +22,7 @@
         <td>&nbsp;</td>
         <th align="left"><a href="index.php?go=Layer_Anzeigen&order=Layer_ID"><?php echo $this->strID; ?></a></th>
         <th align="left"><a href="index.php?go=Layer_Anzeigen&order=Name"><?php echo $this->strName; ?></a></th>
+        <th align="left"><a href="index.php?go=Layer_Anzeigen&order=Gruppe"><?php echo $this->strGroup; ?></a></th>
         <td>&nbsp;</td>
         <td>&nbsp;</td>
       </tr>
@@ -61,7 +62,7 @@
             }
           } ?>
         </th>
-        <td colspan="4" align="right" style="border-top:1px solid #808080; margin:0px;">
+        <td colspan="5" align="right" style="border-top:1px solid #808080; margin:0px;">
           <a href="#oben"><img src="<? echo GRAPHICSPATH; ?>pfeil2.gif" width="11" height="11" border="0"></a>
         </td>
       </tr>
@@ -71,6 +72,7 @@
         <td>&nbsp;</td>
         <td><?php echo $this->layerdaten['ID'][$i]; ?>&nbsp;&nbsp;</td>
         <td><?php echo $this->layerdaten['Bezeichnung'][$i]; ?></td>
+        <td><?php echo $this->layerdaten['Gruppe'][$i]; ?></td>
         <td>&nbsp;<a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->layerdaten['ID'][$i]; ?>"><?php echo $this->strChange; ?></a></td>
         <td>&nbsp;&nbsp;<a href="javascript:Bestaetigung('index.php?go=Layer_Löschen&selected_layer_id=<? echo $this->layerdaten['ID'][$i]; ?>&order=<? echo $this->formvars['order']; ?>','Wollen Sie Layer <?php echo $this->layerdaten['Bezeichnung'][$i]; ?> wirklich löschen?')"><?php echo $this->strDelete; ?></a></td>        
       </tr>
