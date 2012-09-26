@@ -62,12 +62,12 @@ function suche(){
 					$this->attributes['alias'][$i] = $this->attributes['name'][$i];
 				}		?>
 				if(document.GUI.value_<?php echo $this->attributes['name'][$i]; ?>.value == ''){
-					nogo = 'Das Feld <?php echo $this->attributes['alias'][$i]; ?> ist ein Such-Pflichtfeld und muss ausgefüllt werden.';
+					nogo = 'Das Feld <?php echo $this->attributes['alias'][$i]; ?> ist ein Such-Pflichtfeld und muss ausgefÃ¼llt werden.';
 				}
 	<?	} ?>
 			test = document.GUI.value_<?php echo $this->attributes['name'][$i]; ?>.value + '';
 			if(test.search(/%/) > -1 && document.GUI.operator_<?php echo $this->attributes['name'][$i]; ?>.value == 'IN'){
-				nogo = 'Der Platzhalter % darf nur bei der Suche mit ähnlich oder nicht ähnlich verwendet werden.';
+				nogo = 'Der Platzhalter % darf nur bei der Suche mit Ã¤hnlich oder nicht Ã¤hnlich verwendet werden.';
 			}
 	<? 	if(strpos($this->attributes['type'][$i], 'time') !== false OR $this->attributes['type'][$i] == 'date'){ ?>
 				test = document.GUI.value_<?php echo $this->attributes['name'][$i]; ?>.value + '';
@@ -168,17 +168,17 @@ function save_search(){
 		document.GUI.submit();
 	}
 	else{
-		alert('Bitte geben Sie einen Namen für die Suchabfrage an.');
+		alert('Bitte geben Sie einen Namen fÃ¼r die Suchabfrage an.');
 	}
 }
 
 function delete_search(){
 	if(document.GUI.searches.value != ''){
-		document.GUI.go_plus.value = 'Suchabfrage_löschen';
+		document.GUI.go_plus.value = 'Suchabfrage_lÃ¶schen';
 		document.GUI.submit();
 	}
 	else{
-		alert('Es wurde keine Suchabfrage ausgewählt.');
+		alert('Es wurde keine Suchabfrage ausgewÃ¤hlt.');
 	}
 }
   
@@ -197,7 +197,7 @@ function delete_search(){
   <tr> 
     <td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3" colspan="5"> 
       <select style="width:250px" size="1" class="select" name="selected_group_id" onchange="document.GUI.selected_layer_id.value='';document.GUI.submit();" <?php if(count($this->layergruppen['ID'])==0){ echo 'disabled';}?>>
-        <option value="">  -- Bitte auswählen --  </option>
+        <option value="">  -- <? echo $this->strPleaseSelect; ?> --  </option>
         <?
         for($i = 0; $i < count($this->layergruppen['ID']); $i++){         
           echo '<option';
@@ -216,7 +216,7 @@ function delete_search(){
   <tr> 
     <td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3" colspan="5"> 
       <select style="width:250px" size="1" class="select" name="selected_layer_id" onchange="document.GUI.submit();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
-        <option value="">  -- Bitte auswählen --  </option>
+        <option value="">  -- <? echo $this->strPleaseSelect; ?> --  </option>
         <?
         for($i = 0; $i < count($this->layerdaten['ID']); $i++){         
           echo '<option';
@@ -243,9 +243,9 @@ function delete_search(){
 			  </tr>
     		<tr>
 			  	<td align="right"  colspan="2">
-			  		<input class="button" type="button" style="width:74px" name="delete" value="löschen" onclick="delete_search();">
+			  		<input class="button" type="button" style="width:74px" name="delete" value="lÃ¶schen" onclick="delete_search();">
 			  		<select name="searches">
-			  			<option value="">  -- Bitte auswählen --  </option>
+			  			<option value="">  -- <? echo $this->strPleaseSelect; ?> --  </option>
 			  			<?
 			  				for($i = 0; $i < count($this->searchset); $i++){
 			  					echo '<option value="'.$this->searchset[$i]['name'].'" ';
@@ -263,11 +263,11 @@ function delete_search(){
   
   <? if($this->formvars['columnname'] != ''){ ?>
   <tr>
-    <td id="map1"><a href="javascript:showmap();">Suche räumlich eingrenzen...</a>&nbsp;</td>
+    <td id="map1"><a href="javascript:showmap();">Suche rÃ¤umlich eingrenzen...</a>&nbsp;</td>
   </tr>
   <tr id="map2" style="display:none"> 
     <td align="right" style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3">
-    	Geometrie übernehmen von: 
+    	Geometrie Ã¼bernehmen von: 
   		<select name="layer_id" onchange="document.GUI.submit();">
   			<?
   				for($i = 0; $i < count($this->queryable_vector_layers['ID']); $i++){
@@ -321,11 +321,11 @@ function delete_search(){
                 <option title="Der Suchbegriff muss exakt so in der Datenbank stehen" value="=" <? if($this->formvars['operator_'.$this->attributes['name'][$i]] == '='){ echo 'selected';} ?> >=</option>
                 <option title="Der Suchbegriff kommt so NICHT in der Datenbank vor" value="!=" <? if($this->formvars['operator_'.$this->attributes['name'][$i]] == '!='){ echo 'selected';} ?> >!=</option>
                 <option title="'kleiner als': nur bei Zahlen verwenden!" value="<" <? if($this->formvars['operator_'.$this->attributes['name'][$i]] == '<'){ echo 'selected';} ?> ><</option>
-                <option title="'größer als': nur bei Zahlen verwenden!" value=">" <? if($this->formvars['operator_'.$this->attributes['name'][$i]] == '>'){ echo 'selected';} ?> >></option>
-                <option title="Fügen Sie das %-Zeichen vor und/oder nach dem Suchbegriff für beliebige Zeichen ein" value="LIKE" <? if($this->formvars['operator_'.$this->attributes['name'][$i]] == 'LIKE'){ echo 'selected';} ?> >ähnlich</option>
-                <option title="Fügen Sie das %-Zeichen vor und/oder nach dem Suchbegriff für beliebige Zeichen ein" value="NOT LIKE" <? if($this->formvars['operator_'.$this->attributes['name'][$i]] == 'NOT LIKE'){ echo 'selected';} ?> >nicht ähnlich</option>
-                <option title="Sucht nach Datensätzen ohne Eintrag in diesem Attribut" value="IS NULL" <? if($this->formvars['operator_'.$this->attributes['name'][$i]] == 'IS NULL'){ echo 'selected';} ?> >ist leer</option>
-                <option title="Sucht nach Datensätzen mit beliebigem Eintrag in diesem Attribut" value="IS NOT NULL" <? if($this->formvars['operator_'.$this->attributes['name'][$i]] == 'IS NOT NULL'){ echo 'selected';} ?> >ist nicht leer</option>
+                <option title="'grÃ¶ÃŸer als': nur bei Zahlen verwenden!" value=">" <? if($this->formvars['operator_'.$this->attributes['name'][$i]] == '>'){ echo 'selected';} ?> >></option>
+                <option title="FÃ¼gen Sie das %-Zeichen vor und/oder nach dem Suchbegriff fÃ¼r beliebige Zeichen ein" value="LIKE" <? if($this->formvars['operator_'.$this->attributes['name'][$i]] == 'LIKE'){ echo 'selected';} ?> >Ã¤hnlich</option>
+                <option title="FÃ¼gen Sie das %-Zeichen vor und/oder nach dem Suchbegriff fÃ¼r beliebige Zeichen ein" value="NOT LIKE" <? if($this->formvars['operator_'.$this->attributes['name'][$i]] == 'NOT LIKE'){ echo 'selected';} ?> >nicht Ã¤hnlich</option>
+                <option title="Sucht nach DatensÃ¤tzen ohne Eintrag in diesem Attribut" value="IS NULL" <? if($this->formvars['operator_'.$this->attributes['name'][$i]] == 'IS NULL'){ echo 'selected';} ?> >ist leer</option>
+                <option title="Sucht nach DatensÃ¤tzen mit beliebigem Eintrag in diesem Attribut" value="IS NOT NULL" <? if($this->formvars['operator_'.$this->attributes['name'][$i]] == 'IS NOT NULL'){ echo 'selected';} ?> >ist nicht leer</option>
                 <option title="Sucht nach mehreren exakten Suchbegriffen, zur Trennung '|' verwenden:  [Alt Gr] + [<]" value="IN" <? if (count($this->attributes['enum_value'][$i]) > 0){ echo 'disabled="true"'; } ?> <? if($this->formvars['operator_'.$this->attributes['name'][$i]] == 'IN'){ echo 'selected';} ?> >befindet sich in</option>
                 <option title="Sucht zwischen zwei Zahlwerten" value="between" <? if (count($this->attributes['enum_value'][$i]) > 0){ echo 'disabled="true"'; } ?> <? if($this->formvars['operator_'.$this->attributes['name'][$i]] == 'between'){ echo 'selected';} ?> >zwischen</option>
               </select>
@@ -340,7 +340,7 @@ function delete_search(){
 										}
 									?> 
                   	id="value_<?php echo $this->attributes['name'][$i]; ?>" name="value_<?php echo $this->attributes['name'][$i]; ?>"><?echo "\n"; ?>
-                      <option value="">-- Bitte Auswählen --</option><?php echo "\n";
+                      <option value="">-- <? echo $this->strPleaseSelect; ?> --</option><?php echo "\n";
                       if(is_array($this->attributes['enum_value'][$i][0])){
                       	$this->attributes['enum_value'][$i] = $this->attributes['enum_value'][$i][0];
                       	$this->attributes['enum_output'][$i] = $this->attributes['enum_output'][$i][0];
@@ -368,10 +368,10 @@ function delete_search(){
                 <td colspan="5"><br>Anzahl Treffer anzeigen:&nbsp;<input size="2" type="text" name="anzahl" value="<? echo $this->formvars['anzahl']; ?>"></td>
               </tr>
         			<tr>
-                <td colspan="5"><br><em>Zur nicht exakten Suche verwenden Sie den <br>Operator "ähnlich" und den Platzhalter %.</em></td>
+                <td colspan="5"><br><em>Zur nicht exakten Suche verwenden Sie den <br>Operator "Ã¤hnlich" und den Platzhalter %.</em></td>
               </tr>
               <tr>
-                <td colspan="5"><br><em>Für Datumsangaben verwenden Sie bitte das <br>Format "TT.MM.JJJJ".</em></td>
+                <td colspan="5"><br><em>FÃ¼r Datumsangaben verwenden Sie bitte das <br>Format "TT.MM.JJJJ".</em></td>
               </tr>
               <tr>                
                 <td align="center" colspan="5"><br>

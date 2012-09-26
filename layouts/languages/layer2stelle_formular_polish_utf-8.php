@@ -1,4 +1,4 @@
-<?php
+﻿<?php
  $strTitle="właściwości warstwy w odniesieniu do miejsca"; 
  $strTask="miejsce"; 
  $strQueryable="możliwy do zapytania";

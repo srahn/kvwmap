@@ -35,7 +35,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
             Individuelle Nummer in Gemarkung/Flur: <?php echo $this->formvars['suchgemarkungflurid']; ?>
                 mit Antragsnummer: <?php echo str_pad(intval($this->formvars['suchstammnr']),STAMMNUMMERMAXLENGTH,'0',STR_PAD_LEFT); ?>
                 mit Rissnummer: <?php echo $this->formvars['suchrissnr']; ?>
-                mit Fortführung: <?php echo $this->formvars['suchfortf']; ?>
+                mit FortfÃ¼hrung: <?php echo $this->formvars['suchfortf']; ?>
                 von <?php
                 if ($this->formvars['suchffr']){ echo ' FFR, '; }
                 if ($this->formvars['suchkvz']){ echo ' KVZ, '; }
@@ -83,11 +83,11 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
           <td width="45">&nbsp;&nbsp;<a href="index.php?go=Nachweisanzeige&order=datum&richtung=<?php
             if ($this->nachweis->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach Datum sortieren"><strong>Datum</strong></a>&nbsp;&nbsp;&nbsp;</td>
           <td width="45">&nbsp;&nbsp;<a href="index.php?go=Nachweisanzeige&order=fortfuehrung&richtung=<?php
-            if ($this->nachweis->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach Fortführung sortieren"><strong>Fortführung</strong></a>&nbsp;&nbsp;&nbsp;</td>
+            if ($this->nachweis->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach FortfÃ¼hrung sortieren"><strong>FortfÃ¼hrung</strong></a>&nbsp;&nbsp;&nbsp;</td>
           <td width="75"><div align="center"><a href="index.php?go=Nachweisanzeige&order=vermstelle&richtung=<?php
             if ($this->nachweis->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach Vermessungsstelle sortieren"><strong>VermStelle</strong></a></div></td>
           <td width="75"><div align="center"><a href="index.php?go=Nachweisanzeige&order=gueltigkeit&richtung=<?php
-            if ($this->nachweis->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach Gültigkeit sortieren"><strong>Gültigkeit</strong></a></div></td>
+            if ($this->nachweis->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach GÃ¼ltigkeit sortieren"><strong>GÃ¼ltigkeit</strong></a></div></td>
           <td width="48"><div align="center"><a href="index.php?go=Nachweisanzeige&order=format&richtung=<?php
             if ($this->nachweis->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach Blattformat sortieren"><strong>Format</strong></a></div></td>
           <td colspan="3"><div align="center"><?php    echo $this->nachweis->erg_dokumente.' Treffer';   ?></div></td>
@@ -105,7 +105,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
                echo '#EBEBEB';}?>"> 
           <td><div align="center"> 
               <input type="checkbox" name="id[<?php echo $this->nachweis->Dokumente[$i]['id']; ?>]" value="<?php echo $this->nachweis->Dokumente[$i]['id']; ?>"<?php 
-        # Püfen ob das Dokument markiert werden soll
+        # PÃ¼fen ob das Dokument markiert werden soll
                 
         if ($this->art_markieren=='individuell') {
           if ($this->formvars['id'][$this->nachweis->Dokumente[$i]['id']]!=0) {
@@ -161,7 +161,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
           	<? } ?>
           <td width="30">
           	<? if($this->Stelle->isFunctionAllowed('Nachweisloeschen')){ ?>
-          	<a href="index.php?go=Nachweisloeschen&id=<?php echo $this->nachweis->Dokumente[$i]['id']; ?>"  title="löschen"><img src="graphics/button_drop.png" border="0"></a>
+          	<a href="index.php?go=Nachweisloeschen&id=<?php echo $this->nachweis->Dokumente[$i]['id']; ?>"  title="lÃ¶schen"><img src="graphics/button_drop.png" border="0"></a>
           	<? } ?>
           </td>
         </tr>
@@ -193,7 +193,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
           </td>
           <td>
           	<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten')){ ?>
-          		<a href="javascript:vorlage();"><b>--> markierte als Vorlage übernehmen</b></a></td>
+          		<a href="javascript:vorlage();"><b>--> markierte als Vorlage Ã¼bernehmen</b></a></td>
           	<? } ?>
         </tr>
         <tr> 
@@ -225,7 +225,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
           <td> <select name="go_plus" onChange="document.GUI.submit()">
               <option value="">---</option>
               <option value="zum_Auftrag_hinzufuegen"<?php if ($this->formvars['nachweisaction']=='markierte_zum_Auftrag_hinzufuegen') { ?> selected<?php } ?>>zu 
-              Auftrag hinzufügen</option>
+              Auftrag hinzufÃ¼gen</option>
               <option value="aus_Auftrag_entfernen"<?php if ($this->formvars['nachweisaction']=='markierte_aus_Auftrag_entfernen') { ?> selected<?php } ?>>aus 
               Auftrag entfernen</option>
             </select><strong>&nbsp;</strong>          </td>
@@ -235,7 +235,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 	  } else {
 	  ?>
 	  <b>Es konnten keine Dokumente zu der Auswahl gefunden werden.<br>
-Wählen Sie neue Suchparameter.</b><br>
+WÃ¤hlen Sie neue Suchparameter.</b><br>
 	  <?php } ?>
          <a href="index.php?go=Nachweisrechercheformular">&lt;&lt; zur&uuml;ck
          zur Auswahl</a></td>

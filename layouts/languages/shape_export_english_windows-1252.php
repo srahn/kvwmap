@@ -1,4 +1,4 @@
-<?php
+﻿<?php
  $strTitle="Shape-Export";
  $strSelectStatement="Select Statement";
  $strButtonCutByPolygon="Cut by Polygon";

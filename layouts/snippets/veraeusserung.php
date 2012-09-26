@@ -68,7 +68,7 @@ function go_back(){
 	   	echo'
 	   		<table width="100%" border="0" cellpadding="2" cellspacing="0">
 					<tr align="center"> 
-				  	<td><input type="button" class="button" name="back" value="zur¸ck" onclick="go_back();"></td>
+				  	<td><input type="button" class="button" name="back" value="zur√ºck" onclick="go_back();"></td>
 				  </tr>
 				</table><br>
 			';
@@ -102,16 +102,16 @@ function go_back(){
 			
     ?>
   <input type="hidden" name="fromsearch" value="<? echo $this->search; ?>">
-	<h2>Ver‰uﬂerung</h2><br>	   
+	<h2>Ver√§u√üerung</h2><br>	   
 	<table border="0" cellspacing="2" cellpadding="2">
 	  <tr>
-	  	<td><b>Flurst¸ck</b></td>
+	  	<td><b>Flurst√ºck</b></td>
 	  	<td><b>&nbsp;</b></td>
 	  	<td><b>Lfdnr</b></td>
 	  	<td><b>&nbsp;</b></td>
 	  	<td><b>Bereich</b></td>
 	  	<td><b>&nbsp;</b></td>
-	  	<td><b>verkaufte&nbsp;Fl‰che</b></td>
+	  	<td><b>verkaufte&nbsp;Fl√§che</b></td>
 	  	<td><b>&nbsp;</b></td>
 	  	<td><b>Verkaufspreis</b></td>
 	  	<td><b>&nbsp;</b></td>
@@ -124,14 +124,14 @@ function go_back(){
 	  	<td><b>&nbsp;</b></td>
 	  	<td><b>Projekt</b></td>
 	  	<td><b>&nbsp;</b></td>
-	  	<td><b>ALB-Fl‰che</b></td>
+	  	<td><b>ALB-Fl√§che</b></td>
 	  	<td><b>&nbsp;</b></td>
 	  	<td><b>Gesamtpreis</b></td>
 	  	<td><b>&nbsp;</b></td>
 	  	<td><b>Urkunde</b></td>
 	  </tr>
 	  <tr>
-	  	<td><b>1. K‰ufer</b></td>
+	  	<td><b>1. K√§ufer</b></td>
 	  	<td><b>&nbsp;</b></td>
 	  	<td><b>&nbsp;</b></td>
 	  	<td><b>&nbsp;</b></td>
@@ -240,7 +240,7 @@ function go_back(){
   else {
   	?><br><strong><font color="#FF0000">
 	  Zu diesem Layer wurden keine Objekte gefunden!</font></strong><br>
-	  W‰hlen Sie einen neuen Bereich oder pr¸fen Sie die Datenquellen.<br>
+	  W√§hlen Sie einen neuen Bereich oder pr√ºfen Sie die Datenquellen.<br>
 	  <?php  	
   }
 ?>

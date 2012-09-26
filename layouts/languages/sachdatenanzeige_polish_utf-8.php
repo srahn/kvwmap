@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 $strPrint="drukuj";
 $strSave="zapisz";
 $strbacktomap="powrót do mapy";

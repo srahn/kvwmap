@@ -75,7 +75,7 @@ function buildwktpolygonfromsvgpath(svgpath){
       <p>(<i>Es wird ein Polygon beschrieben!</i>)</p></td>
   </tr>
   <tr>
-  	<td><p>Fl‰che:</p><input size="12" type="text" name="area" value="<?echo $this->formvars['area']?>">&nbsp;m<SUP>2</SUP></td>
+  	<td><p>Fl√§che:</p><input size="12" type="text" name="area" value="<?echo $this->formvars['area']?>">&nbsp;m<SUP>2</SUP></td>
   </tr>
   <tr> 
     <td><hr align="center" noshade></td>

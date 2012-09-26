@@ -262,7 +262,7 @@ else {
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		    	  <input name="processing" type="text" value="<?php echo $this->formvars['processing']; ?>" size="25" maxlength="255">
 		    	  <script type="text/javascript">
-						  Text[0]=["Hilfe:","Wendet eine Prozessierungsanweisung für den Layer an. Die unterstützen Anweisungen hängen vom Layertyp und dem verwendeten Treiber ab. Es gibt Anweisungen für Attribute, Connection Pooling, OGR Styles und Raster. siehe Beschreibung zum Layerattribut PROCESSING unter: http://www.mapserver.org/mapfile/layer.html. Mehrere Prozessinganweisungen werden hier eingegeben getrennt durch Semikolon. z.B. CHART_SIZE=60;CHART_TYPE=pie für die Darstellung eines Tortendiagramms des Typs MS_LAYER_CHART"]
+						  Text[0]=["Hilfe:","Wendet eine Prozessierungsanweisung fÃ¼r den Layer an. Die unterstÃ¼tzen Anweisungen hÃ¤ngen vom Layertyp und dem verwendeten Treiber ab. Es gibt Anweisungen fÃ¼r Attribute, Connection Pooling, OGR Styles und Raster. siehe Beschreibung zum Layerattribut PROCESSING unter: http://www.mapserver.org/mapfile/layer.html. Mehrere Prozessinganweisungen werden hier eingegeben getrennt durch Semikolon. z.B. CHART_SIZE=60;CHART_TYPE=pie fÃ¼r die Darstellung eines Tortendiagramms des Typs MS_LAYER_CHART"]
 						</script>
 		    	  <img src="<?php echo GRAPHICSPATH;?>ikon_i.gif" onMouseOver="stm(Text[0],Style[0])" onmouseout="htm()">
 		    	</td>
@@ -352,7 +352,7 @@ else {
             <input type="button" name="addPlaces" value="&lt;&lt;" onClick=addOptions(document.GUI.allstellen,document.GUI.selectedstellen,document.GUI.selstellen,'value')>
             <input type="button" name="substractPlaces" value="&gt;&gt;" onClick=substractOptions(document.GUI.selectedstellen,document.GUI.selstellen,'value')>
           </td>
-          <td>verfügbare<br>
+          <td>verfÃ¼gbare<br>
             <select name="allstellen" size="4" multiple style="width:220px">
             <? for($i=0; $i < count($this->stellen["Bezeichnung"]); $i++){
               	echo '<option value="'.$this->stellen["ID"][$i].'">'.$this->stellen["Bezeichnung"][$i].'</option>';
@@ -451,7 +451,7 @@ else {
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strExpression; ?></td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strSignOrder; ?></td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strDelete; ?></td>
-	<!--			<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">ändern</td>  -->
+	<!--			<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">Ã¤ndern</td>  -->
 			</tr>
 			<?
 			for($i = 0; $i < count($this->classes); $i++){
@@ -462,13 +462,13 @@ else {
 				<td style="border-bottom:1px solid #C3C7C3"><input size="12" type="text" name="name['.$this->classes[$i]['Class_ID'].']" value="'.$this->classes[$i]['Name'].'"</td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><textarea name="expression['.$this->classes[$i]['Class_ID'].']" cols="28" rows="3">'.$this->classes[$i]['Expression'].'</textarea></td>
 				<td align="center" style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><input size="3" type="text" name="order['.$this->classes[$i]['Class_ID'].']" value="'.$this->classes[$i]['drawingorder'].'"></td>
-				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><a href="javascript:Bestaetigung(\'index.php?go=Layereditor_Klasse_Löschen&class_id='.$this->classes[$i]['Class_ID'].'&selected_layer_id='.$this->formvars['selected_layer_id'].'#Klassen\', \''.$this->strDeleteWarningMessage.'\');">'.$this->strDelete.'</a></td>
+				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><a href="javascript:Bestaetigung(\'index.php?go=Layereditor_Klasse_LÃ¶schen&class_id='.$this->classes[$i]['Class_ID'].'&selected_layer_id='.$this->formvars['selected_layer_id'].'#Klassen\', \''.$this->strDeleteWarningMessage.'\');">'.$this->strDelete.'</a></td>
 			</tr>						
 				';
 			}
 			?>
 			<tr>
-				<td style="border-bottom:1px solid #C3C7C3" colspan="5"><a href="index.php?go=Layereditor_Klasse_Hinzufügen&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>#Klassen"><?php echo $strAddClass; ?></a></td>
+				<td style="border-bottom:1px solid #C3C7C3" colspan="5"><a href="index.php?go=Layereditor_Klasse_HinzufÃ¼gen&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>#Klassen"><?php echo $strAddClass; ?></a></td>
 			</tr>
 			<tr>
 				<td colspan="5"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>">Styles und Labels bearbeiten</a></td>
@@ -486,7 +486,7 @@ else {
     	<input type="button" name="dummy2" value="<?php echo $this->strButtonBack; ?>" onclick="location.href='index.php?go=Layer_Anzeigen'">&nbsp;<?php
      if ($this->formvars['selected_layer_id']>0) { ?>
       <input type="hidden" name="selected_layer_id" value="<?php echo $this->formvars['selected_layer_id']; ?>">
-      <input type="button" name="dummy" value="<?php echo $strButtonSave; ?>" onclick="submitWithValue('GUI','go_plus','Ändern')">
+      <input type="button" name="dummy" value="<?php echo $strButtonSave; ?>" onclick="submitWithValue('GUI','go_plus','Ã„ndern')">
       <?php
      } ?>&nbsp;<input type="button" name="dummy" value="<?php echo $strButtonSaveAsNewLayer; ?>" onclick="submitWithValue('GUI','go_plus','Als neuen Layer eintragen')">     
 	</td>

@@ -62,7 +62,7 @@ else {
   </tr><?php if ($this->formvars['selected_user_id']>0) {?>
   <tr>
     <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strChangePassword;?></th>
-    <td style="border-bottom:1px solid #C3C7C3"><input type="checkbox" onchange="toggle_password();" name="changepasswd" value="1">&nbsp;Letzte Änderung am: <?php
+    <td style="border-bottom:1px solid #C3C7C3"><input type="checkbox" onchange="toggle_password();" name="changepasswd" value="1">&nbsp;Letzte Ã„nderung am: <?php
     $passwordSettingUnixTime=strtotime($this->formvars['password_setting_time']);
     echo date('d.m.Y',$passwordSettingUnixTime); ?><?php
     if ($this->Stelle->check_password_age) {
@@ -141,7 +141,7 @@ else {
       if ($this->formvars['selected_user_id']>0) { ?>
     	<input type="reset" name="reset1" value="<?php echo $strButtonBack; ?>">&nbsp;
     	<input type="hidden" name="selected_user_id" value="<?php echo $this->formvars['selected_user_id']; ?>">
-        <input type="button" name="dummy" value="<?php echo $this->strSave; ?>" onclick="submitWithValue('GUI','go_plus','Ändern')">&nbsp;<?php
+        <input type="button" name="dummy" value="<?php echo $this->strSave; ?>" onclick="submitWithValue('GUI','go_plus','Ã„ndern')">&nbsp;<?php
       }
       else {
       	?><input type="button" value="<?php echo $strButtonBack; ?>" onclick="document.location.href='index.php?go=Benutzerdaten_Formular'">&nbsp;<?

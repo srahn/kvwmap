@@ -1,6 +1,6 @@
-<?php
-  $strTitle="Stäeeditor";
-  $strAsteriskRequired="Weerte mit een * mööst du indragen";
+ï»¿<?php
+  $strTitle="StÃ¤eeditor";
+  $strAsteriskRequired="Weerte mit een * mÃ¶Ã¶st du indragen";
   $strDataBankID="Datenbank ID";
   $strTask="Nomen*";
   $strReferenceMapID="Referenzkoort ID*";
@@ -20,24 +20,24 @@
   $strOwsFees="OWS fees";
   $strOwsSrs="OWS SRS";
   $strLogo="Wapen*";
-  $strNoLogoSelected="du hest keen Wapen utsökt";
+  $strNoLogoSelected="du hest keen Wapen utsÃ¶kt";
   $strWaterMark="Waderteken";
-  $strNoWatermarkSelected="du hest keen Waderteken utsökt";
+  $strNoWatermarkSelected="du hest keen Waderteken utsÃ¶kt";
   $strALBReferencingRegion="ALB_Ruumbetog";
-  $strALBReferencingRegionKey="ALB_Ruumbetogsslötel";
-  $strMenuPoint="Menüpunkte";
-  $strAssigned="Tauhürend";
+  $strALBReferencingRegionKey="ALB_RuumbetogsslÃ¶tel";
+  $strMenuPoint="MenÃ¼punkte";
+  $strAssigned="TauhÃ¼rend";
   $strAvailable="praate";
   $strLayer="Layer";
   $strEdit="bearbeiden";
   $strUser="Bruker";
-  $strButtonUpdate="Ännern";
-  $strButtonInsert="As niege Stäe indragen";
+  $strButtonUpdate="Ã„nnern";
+  $strButtonInsert="As niege StÃ¤e indragen";
   $strCommunity="Gemeend";
-  $strAdministrationAgency="Amtsbehöörd";
+  $strAdministrationAgency="AmtsbehÃ¶Ã¶rd";
   $strDistrict="Kreis";
-  $strCheckPasswordAge="Öller vun de Passwoorte in disse Stäe dörchschecken";
-  $strAllowedPasswordAge="Verlööft Öller vun'n Passwoorte, wann et dörchscheckt wierd (in Mond)";
+  $strCheckPasswordAge="Ã–ller vun de Passwoorte in disse StÃ¤e dÃ¶rchschecken";
+  $strAllowedPasswordAge="VerlÃ¶Ã¶ft Ã–ller vun'n Passwoorte, wann et dÃ¶rchscheckt wierd (in Mond)";
   $strStart="Start";
   $strStop="Stop";
 ?>

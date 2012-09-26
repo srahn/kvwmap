@@ -148,7 +148,7 @@
 			    </td>
 			    <?}?>
 			 <!--   <td> 
-			      <a href="javascript:Bestaetigung('index.php?go=jagdkatastereditor_Loeschen&oid=<?php echo $this->qlayerset[$i]['shape'][$k]['oid']; ?>', 'Wollen Sie diesen Jagdbezirk wirklich löschen?');">löschen</a>
+			      <a href="javascript:Bestaetigung('index.php?go=jagdkatastereditor_Loeschen&oid=<?php echo $this->qlayerset[$i]['shape'][$k]['oid']; ?>', 'Wollen Sie diesen Jagdbezirk wirklich lÃ¶schen?');">lÃ¶schen</a>
 			    </td>
 			 --> </tr>
 			  <?php
@@ -167,7 +167,7 @@
   else {
     ?><br><strong><font color="#FF0000">
     Zu diesem Layer wurden keine Objekte gefunden!</font></strong><br>
-    Wählen Sie einen neuen Bereich oder prüfen Sie die Datenquellen.<br>
+    WÃ¤hlen Sie einen neuen Bereich oder prÃ¼fen Sie die Datenquellen.<br>
     <?php   
   }
 ?>

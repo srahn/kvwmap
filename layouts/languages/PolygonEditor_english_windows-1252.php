@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 $strSave="Save";
 $strSaveWithoutZoom="Save without Zoom";
 $strArea="Area";

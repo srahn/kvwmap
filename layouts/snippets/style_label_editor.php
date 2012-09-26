@@ -174,7 +174,7 @@ function applyfont(){
 		document.GUI.label_font.value = document.GUI.font.value;
 	}
 	else{
-		alert("Bitte erst ein Label auswählen.");
+		alert("Bitte erst ein Label auswÃ¤hlen.");
 	}
 }
 
@@ -205,7 +205,7 @@ function browser_check(){
 			  <tr>
 			  	<td colspan="2" valign="top" style="border-right:1px solid #C3C7C3;border-bottom:1px solid #C3C7C3;">
 			      <select style="width:200px" class="select" name="layer" onchange="change_layer();">
-			        <option value="">------------------- Bitte wählen ----------------</option>
+			        <option value="">------------------- Bitte wÃ¤hlen ----------------</option>
 			        <?
 			    		for($i = 0; $i < count($this->layerdaten['ID']); $i++){
 			    			echo '<option value="'.$this->layerdaten['ID'][$i].'" ';
@@ -257,7 +257,7 @@ function browser_check(){
 										  		echo '>';
 										  		if($i < count($this->classdaten[0]['Style'])-1){echo '<a href="javascript:movedown_style('.$this->classdaten[0]['Style'][$i]['Style_ID'].');" title="in der Zeichenreihenfolge nach unten verschieben"><img src="'.GRAPHICSPATH.'pfeil.gif" border="0"></a>';}
 													if($i > 0){echo '&nbsp;<a href="javascript:moveup_style('.$this->classdaten[0]['Style'][$i]['Style_ID'].');" title="in der Zeichenreihenfolge nach oben verschieben"><img src="'.GRAPHICSPATH.'pfeil2.gif" border="0"></a>';}
-										  		echo '&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:delete_style('.$this->classdaten[0]['Style'][$i]['Style_ID'].');">löschen</a>';
+										  		echo '&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:delete_style('.$this->classdaten[0]['Style'][$i]['Style_ID'].');">lÃ¶schen</a>';
 										echo'
 												</td>
 											</tr>';
@@ -288,7 +288,7 @@ function browser_check(){
 									  		echo 'Label '.$this->classdaten[0]['Label'][$i]['Label_ID'].'</td>';
 									  		echo '<td align="right" id="td2_label_'.$this->classdaten[0]['Label'][$i]['Label_ID'].'" ';
 										  	if($this->formvars['selected_label_id'] == $this->classdaten[0]['Label'][$i]['Label_ID']){echo 'style="background-color:lightsteelblue;" ';}
-										  	echo '><a href="javascript:delete_label('.$this->classdaten[0]['Label'][$i]['Label_ID'].');">löschen</a>';
+										  	echo '><a href="javascript:delete_label('.$this->classdaten[0]['Label'][$i]['Label_ID'].');">lÃ¶schen</a>';
 									echo'
 											</td>
 										</tr>';
@@ -396,7 +396,7 @@ function browser_check(){
 								</td>
 							</tr>
 							<tr>
-								<td><a href="javascript:applyfont();">Font übernehmen</a></td>
+								<td><a href="javascript:applyfont();">Font Ã¼bernehmen</a></td>
 							</tr>
 						</table>
 					</td>
@@ -417,7 +417,7 @@ function browser_check(){
 					<td valign="top">
 			      <table cellspacing=0 cellpadding=2 border=0 style="border:1px solid #C3C7C3;">
 			        <tr align="center">
-			          <td>Verfügbare Themen:</td>
+			          <td>VerfÃ¼gbare Themen:</td>
 			        </tr>
 			        <tr align="left">
 			          <td>

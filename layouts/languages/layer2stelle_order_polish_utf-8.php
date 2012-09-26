@@ -1,4 +1,4 @@
- <?php
+﻿ <?php
   $strTitle="warstwa miejsca"; 
   $strDrawingOrder="znak - kolejność "; 
   $strProperties="w³aœciwoœci"; 

@@ -1,3 +1,3 @@
-<?php
-  $strTitel="St�edaten";
+﻿<?php
+  $strTitel="Stäedaten";
 ?>

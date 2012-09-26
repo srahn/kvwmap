@@ -73,7 +73,7 @@
 					<td><input name="check_<? echo $this->shape->dbf->header[$i][0] ?>" type="checkbox" onclick="update_inputs('<? echo $this->shape->dbf->header[$i][0]; ?>');" checked></td>
 					<td><input name="sql_name_<? echo $this->shape->dbf->header[$i][0]; ?>" type="text" value="<? echo $this->shape->dbf->header[$i][0]; ?>" class="input" size="20"></td>
 					<td><input name="sql_type_<? echo $this->shape->dbf->header[$i][0]; ?>" type="text" value="<? echo $this->shape->dbf->header[$i]['type']; ?>" class="input" size="10"></td>
-					<td><input name="primary_key" id="pkey_<? echo $this->shape->dbf->header[$i][0]; ?>" title="Primärschlüssel" type="radio" value="<? echo $this->shape->dbf->header[$i][0]; ?>"></td>
+					<td><input name="primary_key" id="pkey_<? echo $this->shape->dbf->header[$i][0]; ?>" title="PrimÃ¤rschlÃ¼ssel" type="radio" value="<? echo $this->shape->dbf->header[$i][0]; ?>"></td>
 				</tr>
   			<? } ?>
   		</table>
@@ -95,12 +95,12 @@
   				<td><input name="primary_key" type="radio" value="gid" checked>&nbsp;mit gid-Index</td>
   			</tr>
   			<tr>
-  				<td><input type="radio" name="table_option" value="-d">Tabelle überschreiben</td>
+  				<td><input type="radio" name="table_option" value="-d">Tabelle Ã¼berschreiben</td>
   				<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
   				<td><input type="checkbox" name="gist">&nbsp;GiST-Index erzeugen</td>
   			</tr>
   			<tr>
-  				<td><input type="radio" name="table_option" value="-a">Daten anhängen</td>
+  				<td><input type="radio" name="table_option" value="-a">Daten anhÃ¤ngen</td>
   				<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
   				<td><input type="checkbox" name="oids" checked>&nbsp;mit oids</td>
   			</tr>

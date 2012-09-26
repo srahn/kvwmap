@@ -15,7 +15,7 @@ function create_chart(layer_id){
 	checkbox_names = checkbox_name_string.split('|');
 
 	if(go == 'false'){
-		alert('Es wurde kein Datensatz ausgewählt.');
+		alert('Es wurde kein Datensatz ausgewÃ¤hlt.');
 	}
 	else{
 		document.GUI.target = 'chartframe';
@@ -77,7 +77,7 @@ function change_orderby(attribute, layer_id){
 ?></tr>
 <?
 	for ($k=0;$k<$anzObj;$k++) {
-		if($resultSet[$k]['nr'] < 0){		# nur die Gruppen 0 - 101 für das Diagramm anhaken
+		if($resultSet[$k]['nr'] < 0){		# nur die Gruppen 0 - 101 fÃ¼r das Diagramm anhaken
 		$checkbox_names .= 'check;'.$attributes['table_alias_name'][$attributes['name'][0]].';'.$attributes['table_name'][$attributes['name'][0]].';'.$resultSet[$k][$attributes['table_name'][$attributes['name'][0]].'_oid'].'|';
 		?>
   		<input id="<? echo $layerId.'_'.$k; ?>" type="hidden" value="on" name="check;<? echo $attributes['table_alias_name'][$attributes['name'][0]].';'.$attributes['table_name'][$attributes['name'][0]].';'.$resultSet[$k][$attributes['table_name'][$attributes['name'][0]].'_oid']; ?>">
@@ -125,9 +125,9 @@ function change_orderby(attribute, layer_id){
 				<tr>
 					<td></td>
 					<td height="23" colspan="3">
-						<b>Diagramm erzeugen für das Jahr:&nbsp;</b>
+						<b>Diagramm erzeugen fÃ¼r das Jahr:&nbsp;</b>
 						<select style="width:133px" name="chartvalue_<?php echo $layerId; ?>" onchange="create_chart(<?php echo $layerId; ?>);">
-							<option value="">--- Bitte Wählen ---</option>
+							<option value="">--- Bitte WÃ¤hlen ---</option>
 							<?
 							for($j = 0; $j < count($attributes['name']); $j++){
 								if($attributes['name'][$j] != $attributes['the_geom'] AND $attributes['name'][$j] != 'gruppe' AND $attributes['name'][$j] != 'geschlecht' AND $attributes['name'][$j] != 'nr' AND $attributes['name'][$j] != 'kkz'){

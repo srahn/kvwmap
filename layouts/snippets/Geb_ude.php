@@ -26,7 +26,7 @@
   else {
   	?><br><strong><font color="#FF0000">
 	  Zu diesem Layer wurden keine Objekte gefunden!</font></strong><br>
-	  Wählen Sie einen neuen Bereich oder prüfen Sie die Datenquellen.<br>
+	  WÃ¤hlen Sie einen neuen Bereich oder prÃ¼fen Sie die Datenquellen.<br>
 	  <?php  	
   }
 ?><?php

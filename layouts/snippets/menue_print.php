@@ -75,7 +75,7 @@ function changemenue(id){
                   ';
               }
               else{
-                # Abstand der Aufklappenden Untermenuepunkte bezüglich des linken Randes
+                # Abstand der Aufklappenden Untermenuepunkte bezÃ¼glich des linken Randes
                 $haengend=$this->Menue->width-0;
                 echo'
                 <div id="menue'.$this->Menue->Menueoption[$i-1]['id'].'subpop" class="" style="position: absolute; visibility: hidden; left: '.$haengend.'px; top: 0px; z-index:3">
@@ -95,7 +95,7 @@ function changemenue(id){
                         }
                         echo $this->Menue->Menueoption[$i]['links']; 
                         if ($this->Menue->Menueoption[$i]['target']=='confirm') {
-                            ?>','Diese Aktion wirklich ausführen?')<?
+                            ?>','Diese Aktion wirklich ausfÃ¼hren?')<?
                             $this->Menue->Menueoption[$i]['target']='';
                         }
                         ?>" class="red"<?
@@ -120,7 +120,7 @@ function changemenue(id){
                         }
                         echo $this->Menue->Menueoption[$i]['links']; 
                         if ($this->Menue->Menueoption[$i]['target']=='confirm') {
-                            ?>','Diese Aktion wirklich ausführen?')<?
+                            ?>','Diese Aktion wirklich ausfÃ¼hren?')<?
                             $this->Menue->Menueoption[$i]['target']='';
                         }
                         ?>" class="red"<?

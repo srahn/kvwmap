@@ -22,13 +22,13 @@ function checknumbers(input, type, length, decimal_length){
 		mit_leerz = parts[0].length;
 		length = parseInt(length) - parseInt(decimal_length);
 		if(length != '' &&  ohne_leerz > length){
-			alert('F¸r dieses Feld sind maximal '+length+' Vorkommastellen erlaubt.');
+			alert('F√ºr dieses Feld sind maximal '+length+' Vorkommastellen erlaubt.');
 			parts[0] = parts[0].substring(0, length - ohne_leerz + mit_leerz);
 		}
 		val = parts[0];
 		if(parts[1] != undefined){
 			if(decimal_length != '' && parts[1].length > parseInt(decimal_length)){
-				alert('F¸r dieses Feld sind maximal '+decimal_length+' Nachkommastellen erlaubt.');
+				alert('F√ºr dieses Feld sind maximal '+decimal_length+' Nachkommastellen erlaubt.');
 				parts[1] = parts[1].substring(0, decimal_length);
 			}
 			val = val+'.'+parts[1];
@@ -68,7 +68,7 @@ function zoomto_datasets(layer_id, tablename, columnname){
 		}
 	}
 	if(go == 'false'){
-		alert('Es wurde kein Datensatz ausgew‰hlt.');
+		alert('Es wurde kein Datensatz ausgew√§hlt.');
 	}
 	else{
 		document.GUI.chosen_layer_id.value = layer_id;
@@ -90,10 +90,10 @@ function delete_datasets(layer_id){
 		}
 	}
 	if(go == 'false'){
-		alert('Es wurde kein Datensatz ausgew‰hlt.');
+		alert('Es wurde kein Datensatz ausgew√§hlt.');
 	}
 	else{
-		if(confirm('Wollen Sie die ausgew‰hlten Datens‰tze wirklich lˆschen?')){
+		if(confirm('Wollen Sie die ausgew√§hlten Datens√§tze wirklich l√∂schen?')){
 			document.GUI.chosen_layer_id.value = layer_id;
 			document.GUI.go.value = 'Layer_Datensaetze_Loeschen';
 			document.GUI.submit();
@@ -102,7 +102,7 @@ function delete_datasets(layer_id){
 }
 
 function delete_document(attributename){
-	if(confirm('Wollen Sie das ausgew‰hlte Dokument wirklich lˆschen?')){
+	if(confirm('Wollen Sie das ausgew√§hlte Dokument wirklich l√∂schen?')){
 		document.GUI.document_attributename.value = attributename; 
 		document.GUI.go.value = 'Dokument_Loeschen';
 		document.GUI.submit();
@@ -147,7 +147,7 @@ function csv_export(layer_id){
 		}
 	}
 	if(go == 'false'){
-		alert('Es wurde kein Datensatz ausgew‰hlt.');
+		alert('Es wurde kein Datensatz ausgew√§hlt.');
 	}
 	else{
 		document.GUI.chosen_layer_id.value = layer_id;
@@ -168,7 +168,7 @@ function print_data(layer_id){
 		}
 	}
 	if(go == 'false'){
-		alert('Es wurde kein Datensatz ausgew‰hlt.');
+		alert('Es wurde kein Datensatz ausgew√§hlt.');
 	}
 	else{
 		document.GUI.chosen_layer_id.value = layer_id;
@@ -210,7 +210,7 @@ function create_chart(layer_id){
 		}
 	}
 	if(go == 'false'){
-		alert('Es wurde kein Datensatz ausgew‰hlt.');
+		alert('Es wurde kein Datensatz ausgew√§hlt.');
 	}
 	else{
 		document.GUI.target = "_blank";
@@ -316,8 +316,8 @@ function set_changed_flag(flag){
 		  </thead>
           <tbody class="gle">
 <?		$trans_oid = explode('|', $layer['shape'][$k]['lock']);
-			if($layer['shape'][$k]['lock'] == 'bereits ¸bertragen' OR $trans_oid[1] != '' AND $layer['shape'][$k][$attributes['table_name'][$attributes['name'][0]].'_oid'] == $trans_oid[1]){
-				echo '<tr><td colspan="2" align="center"><span class="red">Dieser Datensatz wurde bereits ¸bertragen und kann nicht bearbeitet werden.</span></td></tr>';
+			if($layer['shape'][$k]['lock'] == 'bereits √ºbertragen' OR $trans_oid[1] != '' AND $layer['shape'][$k][$attributes['table_name'][$attributes['name'][0]].'_oid'] == $trans_oid[1]){
+				echo '<tr><td colspan="2" align="center"><span class="red">Dieser Datensatz wurde bereits √ºbertragen und kann nicht bearbeitet werden.</span></td></tr>';
 				$lock[$k] = true;
 			}
 			for($j = 0; $j < count($attributes['name']); $j++){
@@ -585,7 +585,7 @@ function set_changed_flag(flag){
 								</td>
 								<td>
 									<select style="width:133px" name="chartvalue_<?php echo $layer['Layer_ID']; ?>" onchange="create_chart(<?php echo $layer['Layer_ID']; ?>);">
-										<option value="">--- Bitte W‰hlen ---</option>
+										<option value="">--- Bitte W√§hlen ---</option>
 										<?
 										for($j = 0; $j < count($attributes['name']); $j++){
 											if($attributes['name'][$j] != $attributes['the_geom']){
@@ -602,7 +602,7 @@ function set_changed_flag(flag){
 								</td>
 								<td>
 									<select style="width:133px" name="chartsplit_<?php echo $layer['Layer_ID']; ?>" onchange="create_chart(<?php echo $layer['Layer_ID']; ?>);">
-										<option value="">--- Bitte W‰hlen ---</option>
+										<option value="">--- Bitte W√§hlen ---</option>
 										<?
 										for($j = 0; $j < count($attributes['name']); $j++){
 											if($attributes['name'][$j] != $attributes['the_geom']){

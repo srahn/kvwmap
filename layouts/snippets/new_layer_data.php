@@ -37,7 +37,7 @@
   		field = fieldstring.split(';'); 
   		if(document.getElementsByName(fieldstring)[0] != undefined && field[4] != 'Dokument' && field[4] != 'SubFormFK' && (document.getElementsByName(fieldstring)[0].readOnly != true || field[4] == 'TextFK') && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
   			if(field[4] == 'TextFK'){
-			  	alert('Neuer Datensatz nicht im abhängigen Layer!\nGeben Sie neue Datensätze nur über den übergeordneten Layer ein.');
+			  	alert('Neuer Datensatz nicht im abhÃ¤ngigen Layer!\nGeben Sie neue DatensÃ¤tze nur Ã¼ber den Ã¼bergeordneten Layer ein.');
 				}else{
 			  	alert('Das Feld '+document.getElementsByName(fieldstring)[0].title+' erfordert eine Eingabe.');
 			  }
@@ -61,7 +61,7 @@
 		// targetobject ist die id von dem Objekt im Hauptformular, welches nach Speicherung des neuen Datensatzes aktualisiert werden soll
 		// targetlayer_id ist die von dem Layer, zu dem das targetobject gehoert
 		// targetattribute ist das Attribut, zu dem das targetobject gehoert
-		// data ist ein string, der weitere benötigte KVPs enthalten kann (durch <und> getrennt)
+		// data ist ein string, der weitere benÃ¶tigte KVPs enthalten kann (durch <und> getrennt)
 		data_r = data.replace(/<und>/g, "&");
   	form_fieldstring = document.getElementById('sub_'+layer_id+'_form_field_names').value;
   	form_fields = form_fieldstring.split('|');
@@ -88,7 +88,7 @@
 		// targetobject ist die id von dem Objekt im Hauptformular, welches nach Speicherung des neuen Datensatzes aktualisiert werden soll
 		// targetlayer_id ist die von dem Layer, zu dem das targetobject gehoert
 		// targetattribute ist das Attribut, zu dem das targetobject gehoert
-		// data ist ein string, der weitere benötigte KVPs enthalten kann (durch <und> getrennt)
+		// data ist ein string, der weitere benÃ¶tigte KVPs enthalten kann (durch <und> getrennt)
 		data_r = data.replace(/<und>/g, "&");
   	form_fieldstring = document.getElementById('sub_'+layer_id+'_form_field_names').value;
   	form_fields = form_fieldstring.split('|');
@@ -180,9 +180,9 @@
 	   	 	 #Version 1.6.5 pk 2007-04-17
 	   	 	 echo '<p>Das in den stellenbezogenen Layereigenschaften angegebene Templatefile:';
 	   	 	 echo '<br><b>'.SNIPPETS.$this->qlayerset[$i]['template'].'</b>';
-	   	 	 echo '<br>kann nicht gefunden werden. Überprüfen Sie ob der angegebene Dateiname richtig ist oder eventuell Leerzeichen angegeben sind.';
-	   	 	 echo ' Die Templatezuordnung für die Sachdatenanzeige ändern Sie über Stellen anzeigen, ändern, Layer bearbeiten, stellenbezogen bearbeiten.';
-	   	 	 #echo '<p><a href="index.php?go=Layer2Stelle_Editor&selected_layer_id='.$this->qlayerset[$i]['Layer_ID'].'&selected_stelle_id='.$this->Stelle->id.'&stellen_name='.$this->Stelle->Bezeichnung.'">zum Stellenbezogener Layereditor</a> (nur mit Berechtigung möglich)';
+	   	 	 echo '<br>kann nicht gefunden werden. ÃœberprÃ¼fen Sie ob der angegebene Dateiname richtig ist oder eventuell Leerzeichen angegeben sind.';
+	   	 	 echo ' Die Templatezuordnung fÃ¼r die Sachdatenanzeige Ã¤ndern Sie Ã¼ber Stellen anzeigen, Ã¤ndern, Layer bearbeiten, stellenbezogen bearbeiten.';
+	   	 	 #echo '<p><a href="index.php?go=Layer2Stelle_Editor&selected_layer_id='.$this->qlayerset[$i]['Layer_ID'].'&selected_stelle_id='.$this->Stelle->id.'&stellen_name='.$this->Stelle->Bezeichnung.'">zum Stellenbezogener Layereditor</a> (nur mit Berechtigung mÃ¶glich)';
 	   	 }
 	   }
 		

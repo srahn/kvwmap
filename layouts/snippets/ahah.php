@@ -33,7 +33,7 @@ function ahahDone(url, target, req, action) {
     	response = response.replace(/\n/,"");
     	response = response.replace(/\r/,"");
 	    //Behandlung des Zielformelements als ein Array
-	    //Zerlegung des Resultes für den Fall, dass es mehrere Responsvalues sind
+	    //Zerlegung des Resultes fÃ¼r den Fall, dass es mehrere Responsvalues sind
 	    responsevalues = response.split("^");
 			if(action == undefined)action = "";
 			actions = action.split("^");

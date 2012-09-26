@@ -4,7 +4,7 @@
   $strEnglish="Englisch";
   $strGerman="Deutsch";
   $strGUI="Graphische&nbsp;Oberfl&auml;che";
-  $strButtons="Schaltfl‰chen";
+  $strButtons="Schaltfl√§chen";
   $strMapExtent="Aktuelle Kartenausdehnung";
   $strMapProjection="1.Kartenprojektion (EPSG-Code)";
   $strSecondMapProjection="2.Kartenprojektion (EPSG-Code)";
@@ -14,7 +14,7 @@
   $strVietnamese="Vietnamesisch";
   $strZoomFactor="Zoomfaktor";
   $strButtonNext="Weiter";
-  $strFontSizeGLE="GLE-Textgrˆﬂe";
+  $strFontSizeGLE="GLE-Textgr√∂√üe";
   $strHighlight="Tooltip-Highlighting";
   $strPlatt="Plattdeutsch";
   $strSearchColor="Suchergebnis-Farbe";

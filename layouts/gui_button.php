@@ -1,11 +1,9 @@
 <HTML><HEAD>
 <TITLE><? echo TITLE; ?></TITLE>
-<META http-equiv=Content-Type content="text/html; charset=<?php echo $this->user->rolle->charset; ?>">
-
+<META http-equiv=Content-Type content="text/html; charset=UTF-8">
 <?
 include(WWWROOT.APPLVERSION.'funktionen/gui_functions.php');
 ?>
-
 <link rel="shortcut icon" href="graphics/wappen/favicon.ico">
 <link rel="stylesheet" href="<?php echo 'layouts/'.$this->style; ?>">
 <?php include(WWWROOT.APPLVERSION.'funktionen/msgboxes.php'); ?>

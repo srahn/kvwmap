@@ -15,7 +15,7 @@ function send(){
 	if(document.GUI.postleitzahl.value == ''){alert('Bitte geben Sie eine Postleitzahl an.');exit();}
 	if(document.GUI.zonentyp.value == ''){alert('Bitte geben Sie einen Zonentyp an.');exit();}
 	if(document.GUI.entwicklungszustand.value == ''){alert('Bitte geben Sie einen Entwicklungszustand an.');exit();}
-	if(document.GUI.zonentyp.value != 'Ackerland' && document.GUI.zonentyp.value != 'Gr¸nland' && document.GUI.beitragszustand.value == ''){alert('Bitte geben Sie einen Beitragszustand an.');exit();}
+	if(document.GUI.zonentyp.value != 'Ackerland' && document.GUI.zonentyp.value != 'Gr√ºnland' && document.GUI.beitragszustand.value == ''){alert('Bitte geben Sie einen Beitragszustand an.');exit();}
 	if(document.GUI.nutzungsart.value == ''){alert('Bitte geben Sie eine Nutzungsart an.');exit();}
 	if(document.GUI.newpathwkt.value == ''){
 		if(document.GUI.newpath.value == ''){
@@ -95,7 +95,7 @@ function update_require_attribute(attributes, layer_id, value){
     		<tr>
     			<td> 
 				    <?php
-					  # Wenn ein Polygon ¸bergeben wird, wird es in SVG mit dargestellt.
+					  # Wenn ein Polygon √ºbergeben wird, wird es in SVG mit dargestellt.
 				      include(LAYOUTPATH.'snippets/SVG_polygon_and_point.php');
 				    ?>
 				  </td>
@@ -133,7 +133,7 @@ function update_require_attribute(attributes, layer_id, value){
 												    <td colspan="2"> 
 												      <?php 
 												        $FormatWerte = array('','R','E','B','L');
-												        $FormatBez = array('-- Bitte w‰hlen --','Rohbauland','Bauerwartungsland','baureifes Land','Land- und Forstwirtschaft'); 
+												        $FormatBez = array('-- Bitte w√§hlen --','Rohbauland','Bauerwartungsland','baureifes Land','Land- und Forstwirtschaft'); 
 												        $zustand = new FormObject('entwicklungszustand','select',$FormatWerte,array($this->formvars['entwicklungszustand']),$FormatBez,1,$maxlenght,$multiple,146);
 												        $zustand->OutputHTML();
 												        echo $zustand->html;
@@ -146,8 +146,8 @@ function update_require_attribute(attributes, layer_id, value){
 												    </td>
 												    <td colspan="2"> 
 												      <?php 
-												        $FormatWerte = array('', 'frei', 'pflichtig', 'orts¸blich erschlossen');
-												        $FormatBez = array('-- Bitte w‰hlen --', 'frei', 'pflichtig', 'orts¸blich erschlossen'); 
+												        $FormatWerte = array('', 'frei', 'pflichtig', 'orts√ºblich erschlossen');
+												        $FormatBez = array('-- Bitte w√§hlen --', 'frei', 'pflichtig', 'orts√ºblich erschlossen'); 
 												        $zustand = new FormObject('beitragszustand','select',$FormatWerte,array($this->formvars['beitragszustand']),$FormatBez,1,$maxlenght,$multiple,146);
 												        $zustand->OutputHTML();
 												        echo $zustand->html;
@@ -161,7 +161,7 @@ function update_require_attribute(attributes, layer_id, value){
 												    <td colspan="2"> 
 												      <?php 
 												        $FormatWerte = array('', 'A',' A/GR',' F',' G',' GE',' GE/GI',' GE/MI',' GI',' GR',' H',' L',' M',' MD',' MI',' MI/MK',' MI/W',' MK',' S',' SO',' SW',' W',' W/M',' WA',' WA/MD',' WA/MI',' WA/WB',' WA/WR',' WB',' WR',' WS');
-												        $FormatBez = array('-- Bitte w‰hlen --', 'A',' A/GR',' F',' G',' GE',' GE/GI',' GE/MI',' GI',' GR',' H',' L',' M',' MD',' MI',' MI/MK',' MI/W',' MK',' S',' SO',' SW',' W',' W/M',' WA',' WA/MD',' WA/MI',' WA/WB',' WA/WR',' WB',' WR',' WS'); 
+												        $FormatBez = array('-- Bitte w√§hlen --', 'A',' A/GR',' F',' G',' GE',' GE/GI',' GE/MI',' GI',' GR',' H',' L',' M',' MD',' MI',' MI/MK',' MI/W',' MK',' S',' SO',' SW',' W',' W/M',' WA',' WA/MD',' WA/MI',' WA/WB',' WA/WR',' WB',' WR',' WS'); 
 												        $nutzung = new FormObject('nutzungsart','select',$FormatWerte,array($this->formvars['nutzungsart']),$FormatBez,1,$maxlenght,$multiple,146);
 												        $nutzung->OutputHTML();
 												        echo $nutzung->html;
@@ -170,7 +170,7 @@ function update_require_attribute(attributes, layer_id, value){
 												  </tr>
 												  <tr> 
 												    <td>
-												    	Erg‰nz. Nutzung:
+												    	Erg√§nz. Nutzung:
 												    </td>
 												    <td colspan="2" align="right">
 												    	<input name="ergaenzende_nutzung" type="text" style="width:146px" id="ergaenzende_nutzung" value="<?php echo $this->formvars['ergaenzende_nutzung']; ?>">
@@ -178,12 +178,12 @@ function update_require_attribute(attributes, layer_id, value){
 												  </tr>
 												  <tr> 
 												    <td>
-												    	Wegerschlieﬂung:
+												    	Wegerschlie√üung:
 												    </td>
 												    <td colspan="2" align="right"> 
 												      <?php 
 												        $FormatWerte = array('','ohne','mit');
-												        $FormatBez = array('-- Bitte w‰hlen --','ohne','mit'); 
+												        $FormatBez = array('-- Bitte w√§hlen --','ohne','mit'); 
 												        $wegeerschliessung = new FormObject('wegeerschliessung','select',$FormatWerte,array($this->formvars['wegeerschliessung']),$FormatBez,1,$maxlenght,$multiple,146);
 												        $wegeerschliessung->OutputHTML();
 												        echo $wegeerschliessung->html;
@@ -209,7 +209,7 @@ function update_require_attribute(attributes, layer_id, value){
 												  </tr>
 												  <tr> 
 												    <td>
-												    	Gr¸nlandzahl:
+												    	Gr√ºnlandzahl:
 												    </td>
 												    <td colspan="2" align="right"> 
 												      <input name="gruenlandzahl" type="text" style="width:146px" id="gruenlandzahl" value="<?php echo $this->formvars['gruenlandzahl']; ?>">
@@ -222,7 +222,7 @@ function update_require_attribute(attributes, layer_id, value){
 												    <td colspan="2" align="right"> 
 												      <?php 
 												        $FormatWerte = array('','ohne','mit');
-												        $FormatBez = array('-- Bitte w‰hlen --','ohne','mit'); 
+												        $FormatBez = array('-- Bitte w√§hlen --','ohne','mit'); 
 												        $aufwuchs = new FormObject('aufwuchs','select',$FormatWerte,array($this->formvars['aufwuchs']),$FormatBez,1,$maxlenght,$multiple,146);
 												        $aufwuchs->OutputHTML();
 												        echo $aufwuchs->html;
@@ -244,7 +244,7 @@ function update_require_attribute(attributes, layer_id, value){
 									    <td colspan="2"> 
 									      <?php 
 									        $FormatWerte = array('', 'DH', 'EH', 'g', 'o', 'REH', 'RH', 'RMH');
-									        $FormatBez = array('-- Bitte w‰hlen --', 'DH', 'EH', 'geschlossen', 'offen', 'REH', 'RH', 'RMH'); 
+									        $FormatBez = array('-- Bitte w√§hlen --', 'DH', 'EH', 'geschlossen', 'offen', 'REH', 'RH', 'RMH'); 
 									        $bauweise = new FormObject('bauweise','select',$FormatWerte,array($this->formvars['bauweise']),$FormatBez,1,$maxlenght,$multiple,NULL);
 									        $bauweise->OutputHTML();
 									        echo $bauweise->html;
@@ -258,7 +258,7 @@ function update_require_attribute(attributes, layer_id, value){
 									    <td colspan="2">
 									      <?php 
 									        $FormatWerte = array('', 'I', 'I-II', 'II', 'II-III', 'III', 'III-IV', 'IV', 'IV-V', 'V', 'V-VI', 'VI','VI-VII','VII','VII-VIII','VIII','VIII-IX','IX','IX-X','X','X-XI','XI','XI-XII');
-									        $FormatBez = array('-- Bitte w‰hlen --', 'I', 'I-II', 'II', 'II-III', 'III', 'III-IV', 'IV', 'IV-V', 'V', 'V-VI', 'VI','VI-VII','VII','VII-VIII','VIII','VIII-IX','IX','IX-X','X','X-XI','XI','XI-XII');  
+									        $FormatBez = array('-- Bitte w√§hlen --', 'I', 'I-II', 'II', 'II-III', 'III', 'III-IV', 'IV', 'IV-V', 'V', 'V-VI', 'VI','VI-VII','VII','VII-VIII','VIII','VIII-IX','IX','IX-X','X','X-XI','XI','XI-XII');  
 									        $geschosszahl = new FormObject('geschosszahl','select',$FormatWerte,array($this->formvars['geschosszahl']),$FormatBez,1,$maxlenght,$multiple,NULL);
 									        $geschosszahl->OutputHTML();
 									        echo $geschosszahl->html;
@@ -267,7 +267,7 @@ function update_require_attribute(attributes, layer_id, value){
 									  </tr>
 									  <tr> 
 									    <td>
-									    	Geschossfl‰chenzahl:
+									    	Geschossfl√§chenzahl:
 									    </td>
 									    <td colspan="2"> 
 									      <input name="geschossflaechenzahl" type="text" size="13" id="geschossflaechenzahl" value="<?php echo $this->formvars['geschossflaechenzahl']; ?>">
@@ -275,7 +275,7 @@ function update_require_attribute(attributes, layer_id, value){
 									  </tr>
 									  <tr> 
 									    <td>
-									    	Grundfl‰chenzahl:
+									    	Grundfl√§chenzahl:
 									    </td>
 									    <td colspan="2"> 
 									      <input name="grundflaechenzahl" type="text" size="13" id="grundflaechenzahl" value="<?php echo $this->formvars['grundflaechenzahl']; ?>">
@@ -291,7 +291,7 @@ function update_require_attribute(attributes, layer_id, value){
 									  </tr>
 									  <tr> 
 									    <td>
-									    	Fl‰che: [m<sup>2</sup>]
+									    	Fl√§che: [m<sup>2</sup>]
 									    </td>
 									    <td colspan="2"> 
 									      <input name="flaeche" type="text" size="13" id="flaeche" value="<?php echo $this->formvars['flaeche']; ?>">
@@ -363,7 +363,7 @@ function update_require_attribute(attributes, layer_id, value){
 						    	<?php 
 						    		global $gutachterausschuesse;
 						        $FormatWerte = array_merge(array(''), $gutachterausschuesse);
-						        $FormatBez = array_merge(array('--- Bitte w‰hlen ---'), $gutachterausschuesse);
+						        $FormatBez = array_merge(array('--- Bitte w√§hlen ---'), $gutachterausschuesse);
 						        $gutachterausschuss = new FormObject('gutachterausschuss','select',$FormatWerte,array($this->formvars['gutachterausschuss']),$FormatBez,1,$maxlenght,$multiple,120);
 						        $gutachterausschuss->OutputHTML();
 						        echo $gutachterausschuss->html;
@@ -441,8 +441,8 @@ function update_require_attribute(attributes, layer_id, value){
 						    </td>
 						    <td colspan="3"> 
 						      <?php 
-						        $FormatWerte = array('', 'Plangebiet', 'orts¸blich erschlossen', 'Gewerbegebiet', 'Sanierungsgebiet', 'Ackerland', 'Gr¸nland');
-						        $FormatBez = array('-- Bitte w‰hlen --', 'Plangebiet', 'orts¸blich erschlossen', 'Gewerbegebiet', 'Sanierungsgebiet', 'Ackerland', 'Gr¸nland'); 
+						        $FormatWerte = array('', 'Plangebiet', 'orts√ºblich erschlossen', 'Gewerbegebiet', 'Sanierungsgebiet', 'Ackerland', 'Gr√ºnland');
+						        $FormatBez = array('-- Bitte w√§hlen --', 'Plangebiet', 'orts√ºblich erschlossen', 'Gewerbegebiet', 'Sanierungsgebiet', 'Ackerland', 'Gr√ºnland'); 
 						        $zonentyp = new FormObject('zonentyp','select',$FormatWerte,array($this->formvars['zonentyp']),$FormatBez,1,$maxlenght,$multiple,158);
 						        $zonentyp->OutputHTML();
 						        echo $zonentyp->html;
@@ -451,7 +451,7 @@ function update_require_attribute(attributes, layer_id, value){
 						  </tr>
 						  <tr>
 						  	<td colspan="4">
-						  		÷rtliche Bezeichnung:<br>
+						  		√ñrtliche Bezeichnung:<br>
 						  		<textarea cols="30" rows="2" name="oertliche_bezeichnung"><? echo $this->formvars['oertliche_bezeichnung']; ?></textarea>
 						  	</td>
 						  </tr>
@@ -468,7 +468,7 @@ function update_require_attribute(attributes, layer_id, value){
 					<td>&nbsp;</td>
 				</tr>
 			  <tr>
-			  	<td colspan="3">Geometrie ¸bernehmen von:<br>
+			  	<td colspan="3">Geometrie √ºbernehmen von:<br>
 			  		<select name="layer_id" onchange="document.GUI.submit();">
 			  			<option value="">--- Auswahl ---</option>
 			  			<?
@@ -485,7 +485,7 @@ function update_require_attribute(attributes, layer_id, value){
 			    <td height="40" colspan="3" align="left">
 			    	<table border="0">
 			        <tr> 
-			          <td><input type="reset" name="reset" value="Zur¸cksetzen"></td>
+			          <td><input type="reset" name="reset" value="Zur√ºcksetzen"></td>
 			          <td><input type="button" name="senden" value="Senden" onclick="send();"></td>
 			        </tr>
 			      </table>

@@ -14,14 +14,14 @@ function getsubmenues(){
 }
 
 function getInsertIndex(insertObj, id, order){
-	// diese Funktion ermittelt den index, an dem ein Element aus einem anderen Selectfeld mit der Reihenfolge 'order' eingefügt werden muss
+	// diese Funktion ermittelt den index, an dem ein Element aus einem anderen Selectfeld mit der Reihenfolge 'order' eingefÃ¼gt werden muss
 	// (die Order wird hier in Selectfeldern im Attribut 'id' gespeichert)
-	// (Man muss hier unterscheiden zwischen 1. der Menüorder - die wird in der id gespeichert und
+	// (Man muss hier unterscheiden zwischen 1. der MenÃ¼order - die wird in der id gespeichert und
 	// 																			 2. dem eigentlichen index i im Selectfeld)		
 	ordersplit = order.split('_');
 	for(i=0; i<insertObj.length; i++) {
 		if(insertObj.options[i].value == id){
-			return -i;			// Obermenü ist bereits vorhanden -> index negieren
+			return -i;			// ObermenÃ¼ ist bereits vorhanden -> index negieren
 		}
 		options_order_string = insertObj.options[i].id + "";
 		options_order_split = options_order_string.split('_');
@@ -30,20 +30,20 @@ function getInsertIndex(insertObj, id, order){
 			return i;
 		}
 	}
-	return insertObj.length;		// am Ende einfügen
+	return insertObj.length;		// am Ende einfÃ¼gen
 }
 
 function addMenues(){
 	// index ermitteln
 	index = getInsertIndex(document.GUI.selectedmenues, document.GUI.allmenues.options[document.GUI.allmenues.selectedIndex].value, document.GUI.allmenues.options[document.GUI.allmenues.selectedIndex].id);
 	if(index >= 0){
-		addOptionsWithIndex(document.GUI.allmenues,document.GUI.selectedmenues,document.GUI.selmenues,'value', index);		// Obermenü hinzufügen
+		addOptionsWithIndex(document.GUI.allmenues,document.GUI.selectedmenues,document.GUI.selmenues,'value', index);		// ObermenÃ¼ hinzufÃ¼gen
 	}
 	else{
-		index = -1 * index;																																																// index negativ -> nur Untermenü hinzufügen
+		index = -1 * index;																																																// index negativ -> nur UntermenÃ¼ hinzufÃ¼gen
 	} 
 	if(document.GUI.submenues.length > 0){
-		addOptionsWithIndex(document.GUI.submenues,document.GUI.selectedmenues,document.GUI.selmenues,'value', index+1);	// wenn vorhanden, Untermenü hinzufügen
+		addOptionsWithIndex(document.GUI.submenues,document.GUI.selectedmenues,document.GUI.selmenues,'value', index+1);	// wenn vorhanden, UntermenÃ¼ hinzufÃ¼gen
 	}
 }
 
@@ -490,8 +490,8 @@ else {
      if ($this->formvars['selected_stelle_id']>0) {
      	?><input type="hidden" name="selected_stelle_id" value="<?php echo $this->formvars['selected_stelle_id']; ?>"><?php
      	 	# 2007-12-30 pk
-     	 	# Wenn kein Button gewählt wurde, wird go_plus ohne Wert gesendet
-      ?><input type="button" name="dummy" value="<?php echo $strButtonUpdate; ?>" onclick="submitWithValue('GUI','go_plus','Ändern')"><?php
+     	 	# Wenn kein Button gewÃ¤hlt wurde, wird go_plus ohne Wert gesendet
+      ?><input type="button" name="dummy" value="<?php echo $strButtonUpdate; ?>" onclick="submitWithValue('GUI','go_plus','Ã„ndern')"><?php
      } ?>&nbsp;<input type="button" name="dummy" value="<?php echo $strButtonInsert; ?>" onclick="submitWithValue('GUI','go_plus','Als neue Stelle eintragen')">
   </td>
   </tr>

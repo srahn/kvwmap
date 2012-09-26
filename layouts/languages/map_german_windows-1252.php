@@ -1,11 +1,11 @@
 <?php
-  $strAvailableLayer="Verfügbare&nbsp;Themen";
+  $strAvailableLayer="VerfÃ¼gbare&nbsp;Themen";
   $strCoordinates="Koordinaten";
   $strShowCoordinates="Koordinatenabfrage";
   $strLoadNew="Neu Laden";
   $strMapImageURL="Bild speichern";
   $strChoose="Ausschnitt laden";
-  $strMapScale="Maßstab";
+  $strMapScale="MaÃŸstab";
   $strMapSettingsFrom="Karteneinstellungen vom";
   $strPreviousView="vorherige Ansicht";
   $strNextView="naechste Ansicht";
@@ -26,6 +26,6 @@
   $strY="H";
   $strSave="Ausschnitt speichern";
   $strMap="Kartenausschnitt";
-  $strMapSize="Größe anpassen";
+  $strMapSize="GrÃ¶ÃŸe anpassen";
   
 ?>

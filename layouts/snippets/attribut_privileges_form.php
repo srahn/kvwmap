@@ -5,7 +5,7 @@
 <script type="text/javascript">
 <!--
 
-Text[1]=["Hilfe:","Auf dieser Seite können Sie festlegen, welche Rechte eine Stelle beim Zugriff auf einen	bestimmten Layer haben soll.<br><br> Auf Layerebene gibt es 3 verschiedene Privilegien, die Sie der Stelle zuordnen können. Die niedrigste ist 'Lesen und bearbeiten'. Mit dieser Stufe kann der Layer nur abgefragt werden. Mit der zweiten Stufe lassen sich neue Datensätze erzeugen und mit der dritten Stufe außerdem vorhandene Datensätze löschen.<br><br> Darüberhinaus können Sie der Stelle attributbezogene Rechte zuweisen. Ist ein Attribut 'nicht sichtbar', so taucht es in der Sachdatenabfrage nicht auf. Ist ein Attribut lesbar, so erscheint es in der Abfrage. Soll ein Attribut editierbar sein, so wählt man hier das Privileg 'editierbar'. Beim Geometrie-Attribut 'the_geom' gilt: Ist dieses Attribut nicht sichtbar, so kann man auch nicht von der Sachdatenanzeige in die Karte auf das Objekt zoomen. Dafür muß es mindestens lesbar sein.<br>Damit ein Attribut in der Layer-Suche als Suchoption zur Verfügung steht, muss es ebenfalls mindestens lesbar sein."]
+Text[1]=["Hilfe:","Auf dieser Seite kÃ¶nnen Sie festlegen, welche Rechte eine Stelle beim Zugriff auf einen	bestimmten Layer haben soll.<br><br> Auf Layerebene gibt es 3 verschiedene Privilegien, die Sie der Stelle zuordnen kÃ¶nnen. Die niedrigste ist 'Lesen und bearbeiten'. Mit dieser Stufe kann der Layer nur abgefragt werden. Mit der zweiten Stufe lassen sich neue DatensÃ¤tze erzeugen und mit der dritten Stufe auÃŸerdem vorhandene DatensÃ¤tze lÃ¶schen.<br><br> DarÃ¼berhinaus kÃ¶nnen Sie der Stelle attributbezogene Rechte zuweisen. Ist ein Attribut 'nicht sichtbar', so taucht es in der Sachdatenabfrage nicht auf. Ist ein Attribut lesbar, so erscheint es in der Abfrage. Soll ein Attribut editierbar sein, so wÃ¤hlt man hier das Privileg 'editierbar'. Beim Geometrie-Attribut 'the_geom' gilt: Ist dieses Attribut nicht sichtbar, so kann man auch nicht von der Sachdatenanzeige in die Karte auf das Objekt zoomen. DafÃ¼r muÃŸ es mindestens lesbar sein.<br>Damit ein Attribut in der Layer-Suche als Suchoption zur VerfÃ¼gung steht, muss es ebenfalls mindestens lesbar sein."]
 
 
 
@@ -35,7 +35,7 @@ function set_all(attribute_names, value){
   <tr>
   	<td colspan="2" valign="top" style="border-bottom:1px solid #C3C7C3;border-left:1px solid #C3C7C3;border-right:1px solid #C3C7C3">
       <select class="select" name="stelle" onchange="document.GUI.selected_layer_id.disabled = true;document.GUI.submit()">
-        <option value="">------------------- Bitte wählen ----------------</option>
+        <option value="">------------------- Bitte wÃ¤hlen ----------------</option>
         <?
     		for($i = 0; $i < count($this->stellendaten['ID']); $i++){
     			echo '<option value="'.$this->stellendaten['ID'][$i].'" ';
@@ -49,7 +49,7 @@ function set_all(attribute_names, value){
     </td>
     <td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3" colspan="2"> 
       <select style="width:250px" size="1" class="select" name="selected_layer_id" onchange="document.GUI.submit();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
-      	<option value="">----------- Bitte wählen -----------</option>
+      	<option value="">----------- Bitte wÃ¤hlen -----------</option>
         <?
     		for($i = 0; $i < count($this->layerdaten['ID']); $i++){
     			echo '<option';
@@ -80,8 +80,8 @@ function set_all(attribute_names, value){
 			  	<td>
 			  		<select name="privileg">
 			  			<option <? if($this->layer[0]['privileg'] == '0'){echo 'selected';} ?> value="0">lesen und bearbeiten</option>
-			  			<option <? if($this->layer[0]['privileg'] == '1'){echo 'selected';} ?> value="1">neue Datensätze erzeugen</option>
-			  			<option <? if($this->layer[0]['privileg'] == '2'){echo 'selected';} ?> value="2">Datensätze erzeugen und löschen</option>
+			  			<option <? if($this->layer[0]['privileg'] == '1'){echo 'selected';} ?> value="1">neue DatensÃ¤tze erzeugen</option>
+			  			<option <? if($this->layer[0]['privileg'] == '2'){echo 'selected';} ?> value="2">DatensÃ¤tze erzeugen und lÃ¶schen</option>
 			  		</select>
 					</td>
 				</tr>

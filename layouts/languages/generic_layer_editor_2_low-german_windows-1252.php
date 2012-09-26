@@ -1,19 +1,19 @@
-<?php
+ï»¿<?php
  $strEditGeom="Anner Geometrie marachen";
  $strMapZoom="Koortutsnitt";
- $strSelectAll="all utsöken";
- $strdelete="löschen";
- $strSelectedDatasets="utsökt Datensetts";
+ $strSelectAll="all utsÃ¶ken";
+ $strdelete="lÃ¶schen";
+ $strSelectedDatasets="utsÃ¶kt Datensetts";
  $strCSVExport="in een CSV-Datei exporteren";
  $strCSVExportAll="all Treffer in een CSV-Datei exporteren";
  $strMapSelect="utkieken";
  $strzoomtodatasets="in Koort ankieken";
  $strPrint="Drucken";
  $strCreateChart="Diagramm erzeugen";
- $strSelectAllShown="all opwiest Datensetts utsöken";
- $strSelectThisDataset="disse Datensett utwählen";
+ $strSelectAllShown="all opwiest Datensetts utsÃ¶ken";
+ $strSelectThisDataset="disse Datensett utwÃ¤hlen";
  $strNoMatch="To disse Layer heff ik nix funnen!";
- $strDeleteThisDataset="disse Datensett löschen";
+ $strDeleteThisDataset="disse Datensett lÃ¶schen";
  $strCSVExportThis="disse Datensett in CSV exporteren";
  $strShowPK="ankieken";
  $strNewPK="nie";

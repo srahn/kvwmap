@@ -1,4 +1,4 @@
-﻿<?php
+<?php
   $strMapScale="Tỉ lệ";
   $strCoordinates="Tọa độ";
   $strShowCoordinates="Coordinates";

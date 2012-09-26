@@ -1,4 +1,4 @@
-<?php
+﻿<?php
   $strAsteriskRequired="wartości oznaczone * muszą zostać wpisane";
   $strDataBankID="warstwa ID*"; 
   $strName="nazwa*"; 

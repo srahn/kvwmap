@@ -53,7 +53,7 @@ function back(){
         <tr>
           <td>
             &nbsp;<select class="select" name="aktivesLayout" onchange="document.GUI.submit()">
-            <option value="">--- bitte w‰hlen ---</option>
+            <option value="">--- bitte w√§hlen ---</option>
             <?  
             for($i = 0; $i < count($this->ddl->layouts); $i++){
               echo ($this->formvars['aktivesLayout']<>$this->ddl->layouts[$i]['id']) ? '<option value="'.$this->ddl->layouts[$i]['id'].'">'.$this->ddl->layouts[$i]['name'].'</option>' : '<option value="'.$this->ddl->layouts[$i]['id'].'" selected>'.$this->ddl->layouts[$i]['name'].'</option>';
@@ -62,7 +62,7 @@ function back(){
           </select> 
           </td>
           <td align="left"> 
-			    	<input class="button" type="submit" name="zurueck" value="zur¸ck" onclick="back();">
+			    	<input class="button" type="submit" name="zurueck" value="zur√ºck" onclick="back();">
 			    </td>
           <td align="left"> 
 			    	<input class="button" type="submit" name="drucken" value="Drucken" onclick="print();">
@@ -119,7 +119,7 @@ function back(){
 <?	}
 	}
 
-# Hidden-Felder um zur¸ck zur Sachdatenanzeige zu kommen
+# Hidden-Felder um zur√ºck zur Sachdatenanzeige zu kommen
 if($this->formvars['qLayer'.$this->formvars['chosen_layer_id']] == 1){
 	echo '<input name="qLayer'.$this->formvars['chosen_layer_id'].'" type="hidden" value="1">';
 	echo '<input id="offset_'.$this->formvars['chosen_layer_id'].'" name="offset_'.$this->formvars['chosen_layer_id'].'" type="hidden" value="'.$this->formvars['offset_'.$this->formvars['chosen_layer_id']].'">';

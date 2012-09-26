@@ -1,8 +1,8 @@
 <SCRIPT src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></SCRIPT>
 <DIV id="TipLayer" style="visibility:hidden;position:absolute;z-index:1000;top:-100"></DIV>
 <script type="text/javascript">
-Text[1]=["Tipp:","Durch die Auswahl zwischen Stelle und Nutzer kann die Statistik so angepasst werden, dass die Zugriffe pro Layer und Stelle oder die Zugriffe pro Layer und Nutzer angezeigt werden kˆnnen. W‰hlt man hierbei Stelle und Nutzer aus, werden die Zugriffe pro Layer durch den Nutzer ¸ber eine bestimmt Stelle angezeigt."]
-Text[2]=["Tipp:","An dieser Stelle kann die graphische Ausgabe der Zugriffe in einem entsprechenden Diagramm gew‰hlt werden."]
+Text[1]=["Tipp:","Durch die Auswahl zwischen Stelle und Nutzer kann die Statistik so angepasst werden, dass die Zugriffe pro Layer und Stelle oder die Zugriffe pro Layer und Nutzer angezeigt werden k√∂nnen. W√§hlt man hierbei Stelle und Nutzer aus, werden die Zugriffe pro Layer durch den Nutzer √ºber eine bestimmt Stelle angezeigt."]
+Text[2]=["Tipp:","An dieser Stelle kann die graphische Ausgabe der Zugriffe in einem entsprechenden Diagramm gew√§hlt werden."]
 
 function display(id) {
   if (id=="tablemonth") {
@@ -59,10 +59,10 @@ function display(id) {
         </tr>
         <tr> 
           <td align="center"><select name="month_m">
-              <option value="">...bitte w‰hlen</option>
+              <option value="">...bitte w√§hlen</option>
               <option value="1" <?php if ($this->formvars['month_m']=='1') { ?> selected<?php } ?>>Januar</option>
               <option value="2" <?php if ($this->formvars['month_m']=='2') { ?> selected<?php } ?>>Februar</option>
-              <option value="3" <?php if ($this->formvars['month_m']=='3') { ?> selected<?php } ?>>M‰rz</option>
+              <option value="3" <?php if ($this->formvars['month_m']=='3') { ?> selected<?php } ?>>M√§rz</option>
               <option value="4" <?php if ($this->formvars['month_m']=='4') { ?> selected<?php } ?>>April</option>
               <option value="5" <?php if ($this->formvars['month_m']=='5') { ?> selected<?php } ?>>Mai</option>
               <option value="6" <?php if ($this->formvars['month_m']=='6') { ?> selected<?php } ?>>Juni</option>
@@ -93,7 +93,7 @@ function display(id) {
         </tr>
         <tr> 
           <td align="center"> <select name="week_w">
-              <option value="">...bitte w‰hlen</option>
+              <option value="">...bitte w√§hlen</option>
               <?php for ($i=1; $i<=51; $i++) { ?>
               <option value="<?php echo $i;?>" <?php if ($this->formvars['week_w']==$i) { ?> selected<?php } ?> ><?php echo $i.'. KW'; ?></option>
               <?php } ?>
@@ -126,10 +126,10 @@ function display(id) {
               <?php } ?>
             </select></td>
           <td align="center"><select name="month_d">
-              <option value="">...bitte w‰hlen</option>
+              <option value="">...bitte w√§hlen</option>
               <option value="1" <?php if ($this->formvars['month_d']=='1') { ?> selected<?php } ?>>Januar</option>
               <option value="2" <?php if ($this->formvars['month_d']=='2') { ?> selected<?php } ?>>Februar</option>
-              <option value="3" <?php if ($this->formvars['month_d']=='3') { ?> selected<?php } ?>>M‰rz</option>
+              <option value="3" <?php if ($this->formvars['month_d']=='3') { ?> selected<?php } ?>>M√§rz</option>
               <option value="4" <?php if ($this->formvars['month_d']=='4') { ?> selected<?php } ?>>April</option>
               <option value="5" <?php if ($this->formvars['month_d']=='5') { ?> selected<?php } ?>>Mai</option>
               <option value="6" <?php if ($this->formvars['month_d']=='6') { ?> selected<?php } ?>>Juni</option>
@@ -170,10 +170,10 @@ function display(id) {
               <?php } ?>
             </select></td>
           <td><select name="month_e1">
-              <option value="">...bitte w‰hlen</option>
+              <option value="">...bitte w√§hlen</option>
               <option value="1" <?php if ($this->formvars['month_e1']=='1') { ?> selected<?php } ?>>Januar</option>
               <option value="2" <?php if ($this->formvars['month_e1']=='2') { ?> selected<?php } ?>>Februar</option>
-              <option value="3" <?php if ($this->formvars['month_e1']=='3') { ?> selected<?php } ?>>M‰rz</option>
+              <option value="3" <?php if ($this->formvars['month_e1']=='3') { ?> selected<?php } ?>>M√§rz</option>
               <option value="4" <?php if ($this->formvars['month_e1']=='4') { ?> selected<?php } ?>>April</option>
               <option value="5" <?php if ($this->formvars['month_e1']=='5') { ?> selected<?php } ?>>Mai</option>
               <option value="6" <?php if ($this->formvars['month_e1']=='6') { ?> selected<?php } ?>>Juni</option>
@@ -212,10 +212,10 @@ function display(id) {
               <?php } ?>
             </select></td>
           <td><select name="month_e2">
-              <option value="">...bitte w‰hlen</option>
+              <option value="">...bitte w√§hlen</option>
               <option value="1" <?php if ($this->formvars['month_e2']=='1') { ?> selected<?php } ?>>Januar</option>
               <option value="2" <?php if ($this->formvars['month_e2']=='2') { ?> selected<?php } ?>>Februar</option>
-              <option value="3" <?php if ($this->formvars['month_e2']=='3') { ?> selected<?php } ?>>M‰rz</option>
+              <option value="3" <?php if ($this->formvars['month_e2']=='3') { ?> selected<?php } ?>>M√§rz</option>
               <option value="4" <?php if ($this->formvars['month_e2']=='4') { ?> selected<?php } ?>>April</option>
               <option value="5" <?php if ($this->formvars['month_e2']=='5') { ?> selected<?php } ?>>Mai</option>
               <option value="6" <?php if ($this->formvars['month_e2']=='6') { ?> selected<?php } ?>>Juni</option>
@@ -298,7 +298,7 @@ function display(id) {
           <td align="right" > <img src="<?php echo GRAPHICSPATH;?>ikon_i.gif" onMouseOver="stm(Text[2],Style[0])" onmouseout="htm()"></td>
         </tr>
         <tr> 
-          <td align="center">S‰ulendiagramm</td>
+          <td align="center">S√§ulendiagramm</td>
           <td align="center" colspan="2">Kreisdiagramm</td>
         </tr>
         <tr> 

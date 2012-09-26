@@ -1,6 +1,6 @@
-<?php
- $strTitle="Layeregenschopten in de Stäe";
- $strTask="de Stäe";
+ï»¿<?php
+ $strTitle="Layeregenschopten in de StÃ¤e";
+ $strTask="de StÃ¤e";
  $strQueryable="befrogbar";
  $strMinScale="Min scale";
  $strMaxScale="Max scale";

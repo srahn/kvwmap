@@ -69,7 +69,7 @@ function toggle(attribute){
 
 function save_layout(){
 	if(document.GUI.name.value == ''){
-		alert('Bitte geben Sie einen Namen f¸r das Layout ein.');
+		alert('Bitte geben Sie einen Namen f√ºr das Layout ein.');
 	}
 	else{
 		check = true;
@@ -119,7 +119,7 @@ function save_layout(){
       	<tr>
 		      <td colspan="5"> 
 			      <select style="width:250px" size="1" class="select" name="selected_layer_id" onchange="if(document.GUI.aktivesLayout != undefined)document.GUI.aktivesLayout.value='';document.GUI.submit();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
-			      <option value="">--- bitte w‰hlen ---</option>
+			      <option value="">--- bitte w√§hlen ---</option>
 			        <?
 			    		for($i = 0; $i < count($this->layerdaten['ID']); $i++){
 			    			echo '<option';
@@ -151,7 +151,7 @@ function save_layout(){
         <tr>
           <td colspan=1>
             &nbsp;<select class="select" name="aktivesLayout" onchange="document.GUI.submit()">
-            <option value="">--- bitte w‰hlen ---</option>
+            <option value="">--- bitte w√§hlen ---</option>
             <?  
             for($i = 0; $i < count($this->ddl->layouts); $i++){
               echo ($this->formvars['aktivesLayout']<>$this->ddl->layouts[$i]['id']) ? '<option value="'.$this->ddl->layouts[$i]['id'].'">'.$this->ddl->layouts[$i]['name'].'</option>' : '<option value="'.$this->ddl->layouts[$i]['id'].'" selected>'.$this->ddl->layouts[$i]['name'].'</option>';
@@ -160,11 +160,11 @@ function save_layout(){
           </select> 
           </td>
           <td>
-            <input class="button" type="submit" name="go_plus" value="¸bernehmen >>">
+            <input class="button" type="submit" name="go_plus" value="√ºbernehmen >>">
           </td>
           <td style="border-left:1px solid #C3C7C3">
           	&nbsp;<select class="select" name="stelle">
-          	<option value="">--- bitte w‰hlen ---</option>
+          	<option value="">--- bitte w√§hlen ---</option>
           		<?
           		for($i = 0; $i < count($this->stellendaten['ID']); $i++){
 			    			echo '<option value="'.$this->stellendaten['ID'][$i].'" ';
@@ -200,7 +200,7 @@ function save_layout(){
           	&nbsp;<b>Typ:</b> 
           	<select name="type">
           		<option value="0" <? if($this->ddl->selectedlayout[0]['type'] == 0)echo 'selected' ?>>pro Datensatz eine Seite</option>
-          		<option value="1" <? if($this->ddl->selectedlayout[0]['type'] == 1)echo 'selected' ?>>Datens‰tze untereinander</option>
+          		<option value="1" <? if($this->ddl->selectedlayout[0]['type'] == 1)echo 'selected' ?>>Datens√§tze untereinander</option>
           	</select>	
           </td>
         </tr>
@@ -215,10 +215,10 @@ function save_layout(){
 					<td><input class="input" type="text" name="bgwidth" value="<? echo $this->ddl->selectedlayout[0]['bgwidth'] ?>" size="5"></td>
         </tr>
         <tr>
-        	<td width="50%" style="border-bottom:1px solid #C3C7C3" colspan=4>&nbsp;w‰hlen:&nbsp;<input class="button" type="file" name="bgsrc" size="20"></td>
+        	<td width="50%" style="border-bottom:1px solid #C3C7C3" colspan=4>&nbsp;w√§hlen:&nbsp;<input class="button" type="file" name="bgsrc" size="20"></td>
         	<td>&nbsp;y:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" class="input" name="bgposy" value="<? echo $this->ddl->selectedlayout[0]['bgposy'] ?>" size="5"></td>
-        	<td>&nbsp;Hˆhe:</td>
+        	<td>&nbsp;H√∂he:</td>
         	<td><input class="input" type="text" name="bgheight" value="<? echo $this->ddl->selectedlayout[0]['bgheight'] ?>" size="5"></td>
         </tr>
         <tr>
@@ -257,7 +257,7 @@ function save_layout(){
         </tr>
         <tr id="tr1_<? echo $this->attributes['name'][$i]; ?>" <? if($this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['xpos'] == ''){echo 'style="display:none"';} ?>>
         	<td>&nbsp;&nbsp;&nbsp;x:</td>
-        	<td><input type="text" class="input" title="negative Werte bewirken eine rechtsb¸ndige Ausrichtung" name="posx_<? echo $this->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['xpos']; ?>" size="5"></td>
+        	<td><input type="text" class="input" title="negative Werte bewirken eine rechtsb√ºndige Ausrichtung" name="posx_<? echo $this->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['xpos']; ?>" size="5"></td>
 					<td width="60px">&nbsp;Breite:</td>
 					<td><input class="input"  type="text" name="width_<? echo $this->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['width']; ?>" size="5"></td>
 					<td align="left" colspan="3" align="center">
@@ -279,7 +279,7 @@ function save_layout(){
         	<td><input type="text" class="input" name="posy_<? echo $this->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['ypos']; ?>" size="5"></td>
         	<td>&nbsp;Rahmen:</td>
         	<td><input type="checkbox" name="border_<? echo $this->attributes['name'][$i]; ?>" value="1" <? if($this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['border'] == '1'){echo 'checked="true"';} ?> size="5"></td>
-        	<td align="left" align="center" colspan="2"><input type="text" class="input" title="Schriftgrˆﬂe" name="fontsize_<? echo $this->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['fontsize']; ?>" size="5">&nbsp;pt</td>
+        	<td align="left" align="center" colspan="2"><input type="text" class="input" title="Schriftgr√∂√üe" name="fontsize_<? echo $this->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['fontsize']; ?>" size="5">&nbsp;pt</td>
         </tr>
  <?  		}	
     	}
@@ -294,7 +294,7 @@ function save_layout(){
         	<td style="border-right:1px solid #C3C7C3"><input type="text" class="input" name="dateposx" value="<? echo $this->ddl->selectedlayout[0]['dateposx'] ?>" size="5"></td>
         	<td colspan="2" style="border-right:2px solid #C3C7C3" align="center">
         		<select title="Schriftart" name="font_date">
-        			<option value="">--- bitte w‰hlen ---</option>
+        			<option value="">--- bitte w√§hlen ---</option>
 	        		<?
 	        		for($i = 0; $i < count($this->ddl->fonts); $i++){
 	        			echo '<option ';
@@ -310,7 +310,7 @@ function save_layout(){
         		&nbsp;x:&nbsp;<input type="text" class="input" name="userposx" value="<? echo $this->ddl->selectedlayout[0]['userposx'] ?>" size="5"></td>
         	<td colspan="2" align="center">
         		<select title="Schriftart" name="font_user">
-        			<option value="">--- bitte w‰hlen ---</option>
+        			<option value="">--- bitte w√§hlen ---</option>
 	        		<?
 	        		for($i = 0; $i < count($this->ddl->fonts); $i++){
 	        			echo '<option ';
@@ -329,7 +329,7 @@ function save_layout(){
         	<td style="border-right:2px solid #C3C7C3" align="center" colspan="2"><input type="text" class="input" name="datesize" value="<? echo $this->ddl->selectedlayout[0]['datesize'] ?>" size="5">&nbsp;pt</td>
         	<td style="border-right:1px solid #C3C7C3">
         		&nbsp;y:&nbsp;<input type="text" class="input" name="userposy" value="<? echo $this->ddl->selectedlayout[0]['userposy'] ?>" size="5"></td>
-        	<td align="center" colspan="2"><input type="text" class="input" title="Schriftgrˆﬂe" name="usersize" value="<? echo $this->ddl->selectedlayout[0]['usersize'] ?>" size="5">&nbsp;pt</td>
+        	<td align="center" colspan="2"><input type="text" class="input" title="Schriftgr√∂√üe" name="usersize" value="<? echo $this->ddl->selectedlayout[0]['usersize'] ?>" size="5">&nbsp;pt</td>
         </tr>        
         <tr>
           <td class="bold" style="border-top:2px solid #C3C7C3" colspan=8 align="center">Freitexte</td>
@@ -349,7 +349,7 @@ function save_layout(){
 	        	</td>
 	        	<td style="border-top:2px solid #C3C7C3;" colspan=2 align="center">
 	        		<select title="Schriftart" name="textfont<? echo $i ?>">
-	        			<option value="">--- bitte w‰hlen ---</option>
+	        			<option value="">--- bitte w√§hlen ---</option>
 		        		<?
 		        		for($j = 0; $j < count($this->ddl->fonts); $j++){
 		        			echo '<option ';
@@ -364,21 +364,21 @@ function save_layout(){
 	        </tr>
 	        <tr>
 	        	<td>&nbsp;x:</td>
-	        	<td style="border-right:1px solid #C3C7C3"><input type="text" class="input" title="negative Werte bewirken eine rechtsb¸ndige Ausrichtung" name="textposx<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['texts'][$i]['posx'] ?>" size="5"></td>	        	
-	        	<td colspan="2"><input type="text" class="input" title="Schriftgrˆﬂe" name="textsize<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['texts'][$i]['size'] ?>" size="5">&nbsp;pt</td>
+	        	<td style="border-right:1px solid #C3C7C3"><input type="text" class="input" title="negative Werte bewirken eine rechtsb√ºndige Ausrichtung" name="textposx<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['texts'][$i]['posx'] ?>" size="5"></td>	        	
+	        	<td colspan="2"><input type="text" class="input" title="Schriftgr√∂√üe" name="textsize<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['texts'][$i]['size'] ?>" size="5">&nbsp;pt</td>
 	        </tr>
 	       	<tr>
 	       		<td>&nbsp;y:</td>
 	        	<td style="border-right:1px solid #C3C7C3"><input type="text" class="input" name="textposy<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['texts'][$i]['posy'] ?>" size="5"><input type="hidden" name="text_id<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['texts'][$i]['id'] ?>"></td>
-	       		<td colspan="2"><input type="text" class="input" title="Drehwinkel" name="textangle<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['texts'][$i]['angle'] ?>" size="5">∞</td>
+	       		<td colspan="2"><input type="text" class="input" title="Drehwinkel" name="textangle<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['texts'][$i]['angle'] ?>" size="5">¬∞</td>
 	        </tr>
 	        <tr>
 	        	<td style="border-right:1px solid #C3C7C3" colspan="2">&nbsp;</td>
-	        	<td colspan="2" align="right"><a href="javascript:Bestaetigung('index.php?go=sachdaten_druck_editor_Freitextloeschen&freitext_id=<? echo $this->ddl->selectedlayout[0]['texts'][$i]['id'] ?>&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&aktivesLayout=<? echo $this->formvars['aktivesLayout']; ?>', 'Wollen Sie den Freitext wirklich lˆschen?');">lˆschen</a></td>
+	        	<td colspan="2" align="right"><a href="javascript:Bestaetigung('index.php?go=sachdaten_druck_editor_Freitextloeschen&freitext_id=<? echo $this->ddl->selectedlayout[0]['texts'][$i]['id'] ?>&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&aktivesLayout=<? echo $this->formvars['aktivesLayout']; ?>', 'Wollen Sie den Freitext wirklich l√∂schen?');">l√∂schen</a></td>
 	        </tr>
 	      <? } ?>
 	      <tr>
-          <td style="border-top:2px solid #C3C7C3" colspan=8 align="left">&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:addfreetext();">Freitext hinzuf¸gen</a></td>
+          <td style="border-top:2px solid #C3C7C3" colspan=8 align="left">&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:addfreetext();">Freitext hinzuf√ºgen</a></td>
         </tr>        
         <tr>
           <td style="border-top:1px solid #C3C7C3" colspan=8>&nbsp;</td>
@@ -394,8 +394,8 @@ function save_layout(){
   
   <tr align="center"> 
     <td colspan="3"> 
-    <input class="button" type="button" name="go_plus" value="Layout lˆschen" onclick="Bestaetigung('index.php?go=sachdaten_druck_editor_Lˆschen&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&selected_layout_id=<? echo $this->ddl->selectedlayout[0]['id']; ?>', 'Wollen Sie dieses Layout wirklich lˆschen?');">&nbsp;
-    <input class="button" type="submit" name="go_plus" value="ƒnderungen Speichern">&nbsp;
+    <input class="button" type="button" name="go_plus" value="Layout l√∂schen" onclick="Bestaetigung('index.php?go=sachdaten_druck_editor_L√∂schen&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&selected_layout_id=<? echo $this->ddl->selectedlayout[0]['id']; ?>', 'Wollen Sie dieses Layout wirklich l√∂schen?');">&nbsp;
+    <input class="button" type="submit" name="go_plus" value="√Ñnderungen Speichern">&nbsp;
     <input class="button" type="button" name="go_plus" onclick="save_layout();" value="als neues Layout speichern">
     </td>
   </tr>

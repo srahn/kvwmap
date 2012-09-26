@@ -18,11 +18,11 @@
     <td align="right"><?php echo $strGUI; ?>:&nbsp;</td>
     <td>
     	<select name="gui"><?
-    		# Anzeige der GUI´s, die kvwmap bereitstellt
+    		# Anzeige der GUIÂ´s, die kvwmap bereitstellt
     		for($i = 0; $i < count($this->guifiles); $i++){ ?>
     		  <option value="<? echo basename($this->guifiles[$i]); ?>" <?php if ($this->user->rolle->gui == basename($this->guifiles[$i])) { echo "selected"; } ?>><?php echo basename($this->guifiles[$i]); ?></option><?php
     		}
-    		# Anzeige der GUI´s, die Admins in ihren custom Verzeichnissen haben
+    		# Anzeige der GUIÂ´s, die Admins in ihren custom Verzeichnissen haben
     		for($i = 0; $i < count($this->customguifiles); $i++){ ?>
     		  <option value="<? echo 'custom/'.basename($this->customguifiles[$i]); ?>" <?php if ($this->user->rolle->gui == 'custom/'.basename($this->customguifiles[$i])) { echo "selected"; } ?>><? echo 'custom/'.basename($this->customguifiles[$i]); ?></option><?php
     		} ?>

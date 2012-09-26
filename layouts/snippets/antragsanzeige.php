@@ -46,7 +46,7 @@
             <div align="left"></div></td>
           <td><div align="left"><?php echo $this->formvars['datum']=$this->antrag->antragsliste[$i]['datum']; ?></div></td>
           <td><div align="left"><a href="index.php?go=Nachweis_antragsnr_form_aufrufen&antr_nr=<?php echo $this->antrag->antragsliste[$i]['antr_nr'];?>" title="bearbeiten"><img src="graphics/button_edit.png" border="0"></a></div></td>
-          <td><div align="left"><a href="index.php?go=Antrag_loeschen&antr_nr=<?php echo $this->antrag->antragsliste[$i]['antr_nr']; ?>" title="löschen"><img src="graphics/button_drop.png" border="0"></a></div></td>
+          <td><div align="left"><a href="index.php?go=Antrag_loeschen&antr_nr=<?php echo $this->antrag->antragsliste[$i]['antr_nr']; ?>" title="lÃ¶schen"><img src="graphics/button_drop.png" border="0"></a></div></td>
         </tr>
         <?php
 		}
@@ -87,7 +87,7 @@
 		 		<option value="Festpunkte_in_KVZ_schreiben">Zugeordnete Festpunkte in KVZ Schreiben</option>
         <option value="Rechercheergebnis_in_Ordner_zusammenstellen"<?php if ($this->formvars['doc_verwaltung']=='zusammenstellen') { ?> selected<?php } ?>>Rechercheergebnis in Ordner zusammenstellen</option>
         <option value="Recherche_Ordner_packen"<?php if ($this->formvars['doc_verwaltung']=='zusammenstellen_packen') { ?> selected<?php } ?>>Recherche-Ordner als Zip-Datei herunterladen</option>
-        <option value="Uebergabeprotokoll_Erzeugen"<?php if ($this->formvars['antr_verarbeitung']=='erzeugen') { ?> selected<?php } ?>>Übergabeprotokoll erzeugen</option>
+        <option value="Uebergabeprotokoll_Erzeugen"<?php if ($this->formvars['antr_verarbeitung']=='erzeugen') { ?> selected<?php } ?>>Ãœbergabeprotokoll erzeugen</option>
         <option value="Zusammenstellen_Zippen">Zusammenstellen & Packen</option>
       </select>
       <input type="hidden" name="go" value="Antraganzeige">

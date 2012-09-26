@@ -1,4 +1,4 @@
-<?php
+﻿<?php
   $this->strID="ID";
   $this->strName="Name";
   $this->strChange="Change";

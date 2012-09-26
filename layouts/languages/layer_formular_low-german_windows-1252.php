@@ -1,5 +1,5 @@
-<?php
-  $strAsteriskRequired="Weerte mit een * mööst du indragen";
+ï»¿<?php
+  $strAsteriskRequired="Weerte mit een * mÃ¶Ã¶st du indragen";
   $strLayerID="Layer ID*";
   $strName="Naam*";
   $strDataType="Datentyp*";
@@ -34,26 +34,26 @@
   $strClass="Klass";
   $strExpression="Expression";
   $strSignOrder="Riegfolg vun de Teiken";
-  $strDelete="löschen";
-  $strAddClass="Klass tau fögen";
+  $strDelete="lÃ¶schen";
+  $strAddClass="Klass tau fÃ¶gen";
   $strOtherExtentions="tosett Instellen";
-  $strButtonSave="Ännern";
-  $strBack="Trüggsetten";
-  $strSave="Ännern";
+  $strButtonSave="Ã„nnern";
+  $strBack="TrÃ¼ggsetten";
+  $strSave="Ã„nnern";
   $strButtonSaveAsNewLayer="As niegen Layer indragen";
   $strCommonData="Allgemeen Angaaven";
-  $strtransparency="Dörchsichtigkeit";
+  $strtransparency="DÃ¶rchsichtigkeit";
   $strdrawingorder="Drawingorder";
   $strminscale="Minscale";
   $strmaxscale="Maxscale";
   $stroffsite="Offsite";
   $strOWSParameter="OWS-Parameter";
-  $strDefaultValues="Vörinstellt Weerte förs Towiesen to'n Stäen";
+  $strDefaultValues="VÃ¶rinstellt Weerte fÃ¶rs Towiesen to'n StÃ¤en";
   $strWFS_geom="WFS-Geometrieattribut";
   $strQueryMap="QueryMap";
   $strProcessing="Processing";
-  $strTasks="Berechtigte Stäen";
-  $strSchema="Vörlaag";
+  $strTasks="Berechtigte StÃ¤en";
+  $strSchema="VÃ¶rlaag";
   $strWMSAuthUsername="wms_auth_username";
   $strDocument_path="Dokumente Ordner";
   $strDescribtion="Kurzbeschreibung";

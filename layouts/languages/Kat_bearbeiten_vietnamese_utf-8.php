@@ -1,4 +1,4 @@
-﻿<?php
+<?php
   $strTitle="Quản lý danh mục thông báo";
   $strCategory="Danh mục";
   $strDeleteCategory="Xóa mục thông báo";

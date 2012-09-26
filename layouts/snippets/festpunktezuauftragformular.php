@@ -28,7 +28,7 @@ else {
       <br>
       <input type="submit" name="go_plus" value="Senden">
       <br>
-      <input type="hidden" name="go" value="Festpunkte zum Antrag Hinzufügen">
+      <input type="hidden" name="go" value="Festpunkte zum Antrag HinzufÃ¼gen">
 
 </td>
   </tr>

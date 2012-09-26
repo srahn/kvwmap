@@ -68,7 +68,7 @@ function go_back(){
 	   	echo'
 	   		<table width="100%" border="0" cellpadding="2" cellspacing="0">
 					<tr align="center"> 
-				  	<td><input type="button" class="button" name="back" value="zurück" onclick="go_back();"></td>
+				  	<td><input type="button" class="button" name="back" value="zurÃ¼ck" onclick="go_back();"></td>
 				  </tr>
 				</table><br>
 			';
@@ -105,11 +105,11 @@ function go_back(){
 	<h2>Erbbaurechte</h2>	   
 	<table border="0" cellspacing="2" cellpadding="2">
 	  <tr>
-	  	<td><b>Flurstück</b></td>
+	  	<td><b>FlurstÃ¼ck</b></td>
 	  	<td><b>&nbsp;</b></td>
 	  	<td><b>Form</b></td>
 	  	<td><b>&nbsp;</b></td>
-	  	<td><b>Größe</b></td>
+	  	<td><b>GrÃ¶ÃŸe</b></td>
 	  	<td><b>&nbsp;</b></td>
 	  	<td><b>Beginn</b></td>
 	  	<td><b>&nbsp;</b></td>
@@ -122,7 +122,7 @@ function go_back(){
 	  	<td><b>&nbsp;</b></td>
 	  	<td><b>Art</b></td>
 	  	<td><b>&nbsp;</b></td>
-	  	<td><b>Vertragsfläche</b></td>
+	  	<td><b>VertragsflÃ¤che</b></td>
 	  	<td><b>&nbsp;</b></td>
 	  	<td><b>Ende</b></td>
 	  	<td><b>&nbsp;</b></td>
@@ -259,7 +259,7 @@ function go_back(){
   else {
   	?><br><strong><font color="#FF0000">
 	  Zu diesem Layer wurden keine Objekte gefunden!</font></strong><br>
-	  Wählen Sie einen neuen Bereich oder prüfen Sie die Datenquellen.<br>
+	  WÃ¤hlen Sie einen neuen Bereich oder prÃ¼fen Sie die Datenquellen.<br>
 	  <?php  	
   }
 ?>

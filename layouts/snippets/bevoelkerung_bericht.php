@@ -5,8 +5,8 @@ if($this->go == 'bevoelkerung_bericht_Bericht erstellen'){
   $pdf=new Cezpdf();
   $pdf->selectFont(PDFCLASSPATH.'fonts/Helvetica.afm');
   $y = 825;
-  $pdf->addText(45, $y-=30, 18, 'Bevölkerungsprognose - Bericht');
-  $ueberschriften = array('Einwohner pro Landkreis', 'Einwohnerdichte pro Landkreis', 'Einwohner pro Altersgruppe', 'Durchschnittsalter pro Landkreis', 'Zusammengefasste Geburtenziffer', 'Bevölkerungsbewegung');
+  $pdf->addText(45, $y-=30, 18, 'BevÃ¶lkerungsprognose - Bericht');
+  $ueberschriften = array('Einwohner pro Landkreis', 'Einwohnerdichte pro Landkreis', 'Einwohner pro Altersgruppe', 'Durchschnittsalter pro Landkreis', 'Zusammengefasste Geburtenziffer', 'BevÃ¶lkerungsbewegung');
   $formvars_chosen_layer_id = array(465, 465, 551, 466, 94, 524);
   $formvars_chartvalue = array('einwohner2009', 'einwohnerproqkm2009', 'einwohner2009', 'durchschnittsalter2009', 'geburtenziffer', 'rueckgang');
   $formvars_chartlabel = array('kreis', 'kreis', 'gruppe', 'kreis', 'kreis', 'kreis');
@@ -43,13 +43,13 @@ if($this->go == 'bevoelkerung_bericht_Bericht erstellen'){
   $this->mime_type='pdf';
   $dateipfad=IMAGEPATH;
   $currenttime = date('Y-m-d_H_i_s',time());
-  $name = str_replace('ä', 'ae', $this->user->Name);
-  $name = str_replace('ü', 'ue', $name);
-  $name = str_replace('ö', 'oe', $name);
-  $name = str_replace('Ä', 'Ae', $name);
-  $name = str_replace('Ü', 'Ue', $name);
-  $name = str_replace('Ö', 'Oe', $name);
-  $name = str_replace('ß', 'ss', $name);
+  $name = str_replace('Ã¤', 'ae', $this->user->Name);
+  $name = str_replace('Ã¼', 'ue', $name);
+  $name = str_replace('Ã¶', 'oe', $name);
+  $name = str_replace('Ã„', 'Ae', $name);
+  $name = str_replace('Ãœ', 'Ue', $name);
+  $name = str_replace('Ã–', 'Oe', $name);
+  $name = str_replace('ÃŸ', 'ss', $name);
   $dateiname = $name.'-'.$currenttime.'_'.rand(0,99999999).'.pdf';
   $this->outputfile = $dateiname;
   $fp=fopen($dateipfad.$dateiname,'wb');
@@ -63,7 +63,7 @@ else{
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
-    <td height="50" valign="middle"><strong><font size="+1">Bevölkerungsprognose Berichterstellung</font></strong></td>
+    <td height="50" valign="middle"><strong><font size="+1">BevÃ¶lkerungsprognose Berichterstellung</font></strong></td>
   </tr>
   <tr>
     <td align="center">
@@ -104,7 +104,7 @@ else{
 	  	<tr>
 	  		<td>&nbsp;</td>
 	    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-	    			<input name="check5" checked="true" type="checkbox" size="25" maxlength="100"><b>Bevölkerungsbewegung</b>
+	    			<input name="check5" checked="true" type="checkbox" size="25" maxlength="100"><b>BevÃ¶lkerungsbewegung</b>
 	  		</td>
 	  	</tr>
 		</table>

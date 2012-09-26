@@ -1,5 +1,5 @@
-<?php
- $strTitle="Eigentümersuche";
+ï»¿<?php
+ $strTitle="EigentÃ¼mersuche";
  $strName1="Name, Vorname/Firma";
  $strName2="Geburtsname/geboren am/Firmenzusatz";
  $strName3="Strasse Hausnummer";
@@ -7,10 +7,10 @@
  $strGbbez="Grundbuchbezirk";
  $strGbbl="Grundbuchblatt";
  $strGemkg="Gemarkung (Gemeinde)";
- $strHintCaseSens="Groß- und Kleinschreibung beachten";
- $strHintWildcard="Geben Sie den Platzhalter &quot;%&quot; ein (z.B. &quot;me%er&quot;), wenn an der Stelle beliebige und beliebig viele Zeichen stehen dürfen. Geben Sie den Platzhalter &quot;_&quot; ein (z.B. &quot;me_er&quot;), wenn an der Stelle ein beliebiges Zeichen stehen darf";
+ $strHintCaseSens="GroÃŸ- und Kleinschreibung beachten";
+ $strHintWildcard="Geben Sie den Platzhalter &quot;%&quot; ein (z.B. &quot;me%er&quot;), wenn an der Stelle beliebige und beliebig viele Zeichen stehen dÃ¼rfen. Geben Sie den Platzhalter &quot;_&quot; ein (z.B. &quot;me_er&quot;), wenn an der Stelle ein beliebiges Zeichen stehen darf";
  $strShowHits="Anzahl Treffer anzeigen";
- $strShowWithFst="Flurstücke anzeigen";
+ $strShowWithFst="FlurstÃ¼cke anzeigen";
  $strSearch="Suchen";
  $strTotalHits="Treffer gesamt";
  $strGbbezShort="Bezirk";
@@ -19,22 +19,22 @@
  $strName2Short="GebDatum/Zusatz";
  $strName3Short="Strasse Hausnr.";
  $strName4Short="PLZ Ort";
- $strFst="Flurstücke";
+ $strFst="FlurstÃ¼cke";
  $strHunt="Jagdkataster";
  $strShowFst="anzeigen";
  $strToMap="Karte";
  $strHuntEdit="Jagdbezirk bearbeiten";
  $strParcelNo="Flurstkennz";
  $strGemkgName="Gemarkungsname";
- $strAreaALB="ALB-Fläche";
- $strDoPrintoutsALB="ALB-Auszüge erzeugen";
+ $strAreaALB="ALB-FlÃ¤che";
+ $strDoPrintoutsALB="ALB-AuszÃ¼ge erzeugen";
  $strPrintoutALB="ALB-Auszug";
  $strMapSection="Kartenausschnitt";
- $strSelFst="ausgewählte Flurstücke";
- $strSelGbbl="ausgewählte Grundbuchblätter";
- $strShowFstInMap="Flurstücke in Karte anzeigen";
- $strBack="zurück";
+ $strSelFst="ausgewÃ¤hlte FlurstÃ¼cke";
+ $strSelGbbl="ausgewÃ¤hlte GrundbuchblÃ¤tter";
+ $strShowFstInMap="FlurstÃ¼cke in Karte anzeigen";
+ $strBack="zurÃ¼ck";
  $strNext="weiter";
  $strFlur="Flur";
- $strCheckAll="alle auswählen";
+ $strCheckAll="alle auswÃ¤hlen";
 ?>

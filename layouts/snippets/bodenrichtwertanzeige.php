@@ -48,7 +48,7 @@ function zoomto_datasets(layer_id, tablename, columnname){
 		}
 	}
 	if(go == 'false'){
-		alert('Es wurde kein Datensatz ausgew‰hlt.');
+		alert('Es wurde kein Datensatz ausgew√§hlt.');
 	}
 	else{
 		document.GUI.chosen_layer_id.value = layer_id;
@@ -70,10 +70,10 @@ function delete_datasets(layer_id){
 		}
 	}
 	if(go == 'false'){
-		alert('Es wurde kein Datensatz ausgew‰hlt.');
+		alert('Es wurde kein Datensatz ausgew√§hlt.');
 	}
 	else{
-		if(confirm('Wollen Sie die ausgew‰hlten Datens‰tze wirklich lˆschen?')){
+		if(confirm('Wollen Sie die ausgew√§hlten Datens√§tze wirklich l√∂schen?')){
 			document.GUI.chosen_layer_id.value = layer_id;
 			document.GUI.go.value = 'Layer_Datensaetze_Loeschen';
 			document.GUI.submit();
@@ -100,7 +100,7 @@ function csv_export(layer_id){
 		}
 	}
 	if(go == 'false'){
-		alert('Es wurde kein Datensatz ausgew‰hlt.');
+		alert('Es wurde kein Datensatz ausgew√§hlt.');
 	}
 	else{
 		document.GUI.chosen_layer_id.value = layer_id;
@@ -121,7 +121,7 @@ function print_data(layer_id){
 		}
 	}
 	if(go == 'false'){
-		alert('Es wurde kein Datensatz ausgew‰hlt.');
+		alert('Es wurde kein Datensatz ausgew√§hlt.');
 	}
 	else{
 		document.GUI.chosen_layer_id.value = layer_id;
@@ -163,7 +163,7 @@ function create_chart(layer_id){
 		}
 	}
 	if(go == 'false'){
-		alert('Es wurde kein Datensatz ausgew‰hlt.');
+		alert('Es wurde kein Datensatz ausgew√§hlt.');
 	}
 	else{
 		document.GUI.target = "_blank";
@@ -248,7 +248,7 @@ function change_orderby(attribute, layer_id){
 			      </td>
 			      <td align="right">
 			        <a href="#" title="<? echo $strCSVExportThis; ?>"><img src="<? echo GRAPHICSPATH; ?>datensatz_exportieren_csv.png" border="0"></a>&nbsp;&nbsp;
-			        <a href="javascript:Bestaetigung('index.php?go=Bodenrichtwertzone_Loeschen&oid=<?php echo $this->qlayerset[$i]['shape'][$k][$tablename.'_oid']; ?>','Wollen Sie den Richtwert mit der Nummer <?php echo $rs['bodenrichtwert']; ?> wirklich lˆschen?')" title="Richtwert lˆschen"><img src="<? echo GRAPHICSPATH; ?>datensatz_loeschen.png" border="0"></a>
+			        <a href="javascript:Bestaetigung('index.php?go=Bodenrichtwertzone_Loeschen&oid=<?php echo $this->qlayerset[$i]['shape'][$k][$tablename.'_oid']; ?>','Wollen Sie den Richtwert mit der Nummer <?php echo $rs['bodenrichtwert']; ?> wirklich l√∂schen?')" title="Richtwert l√∂schen"><img src="<? echo GRAPHICSPATH; ?>datensatz_loeschen.png" border="0"></a>
 			      </td>
 			    </tr>
 			  </table>
@@ -327,7 +327,7 @@ function change_orderby(attribute, layer_id){
 
 									case 'Auswahlfeld' : case 'Auswahlfeld_not_saveable' : {
 										if($this->qlayerset[$i]['attributes']['privileg'][$j] == '0' OR $lock[$k]){
-										  if(is_array($this->qlayerset[$i]['attributes']['dependent_options'][$j])){		# mehrere Datens‰tze und ein abh‰ngiges Auswahlfeld --> verschiedene Auswahlmˆglichkeiten
+										  if(is_array($this->qlayerset[$i]['attributes']['dependent_options'][$j])){		# mehrere Datens√§tze und ein abh√§ngiges Auswahlfeld --> verschiedene Auswahlm√∂glichkeiten
 												for($e = 0; $e < count($this->qlayerset[$i]['attributes']['enum_value'][$j][$k]); $e++){
 													if($this->qlayerset[$i]['attributes']['enum_value'][$j][$k][$e] == $this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]){
 														$auswahlfeld_output = $this->qlayerset[$i]['attributes']['enum_output'][$j][$k][$e];
@@ -355,8 +355,8 @@ function change_orderby(attribute, layer_id){
 												echo 'onchange="update_require_attribute(\''.$this->qlayerset[$i]['attributes']['req_by'][$j].'\', '.$k.','.$this->qlayerset[$i]['Layer_ID'].', this.value);" ';
 											}
 											echo 'id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].';'.$this->qlayerset[$i]['attributes']['type'][$j].'">';
-											echo '<option value="">-- Bitte Ausw‰hlen --</option>';
-											if(is_array($this->qlayerset[$i]['attributes']['dependent_options'][$j])){		# mehrere Datens‰tze und ein abh‰ngiges Auswahlfeld --> verschiedene Auswahlmˆglichkeiten
+											echo '<option value="">-- '.$this->strPleaseSelect.' --</option>';
+											if(is_array($this->qlayerset[$i]['attributes']['dependent_options'][$j])){		# mehrere Datens√§tze und ein abh√§ngiges Auswahlfeld --> verschiedene Auswahlm√∂glichkeiten
 												for($e = 0; $e < count($this->qlayerset[$i]['attributes']['enum_value'][$j][$k]); $e++){
 													echo '<option ';
 													if($this->qlayerset[$i]['attributes']['enum_value'][$j][$k][$e] == $this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]] OR ($this->qlayerset[$i]['attributes']['enum_value'][$j][$k][$e] != '' AND $this->qlayerset[$i]['attributes']['enum_value'][$j][$k][$e] == $this->formvars[$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j]])){
@@ -607,7 +607,7 @@ function change_orderby(attribute, layer_id){
 										}
 									} break;
 
-									case 'Fl‰che': {
+									case 'Fl√§che': {
 										echo '<input id="custom_area" onkeyup="checknumbers(this, \''.$this->qlayerset[$i]['attributes']['type'][$j].'\');"; title="'.$this->qlayerset[$i]['attributes']['alias'][$j].'" ';
 										if($this->qlayerset[$i]['attributes']['length'][$j]){
 											echo ' maxlength="'.$this->qlayerset[$i]['attributes']['length'][$j].'"';
@@ -806,7 +806,7 @@ function change_orderby(attribute, layer_id){
 								</td>
 								<td>
 									<select style="width:133px" name="chartvalue_<?php echo $this->qlayerset[$i]['Layer_ID']; ?>" onchange="create_chart(<?php echo $this->qlayerset[$i]['Layer_ID']; ?>);">
-										<option value="">--- Bitte W‰hlen ---</option>
+										<option value="">--- Bitte W√§hlen ---</option>
 										<?
 										for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
 											if($this->qlayerset[$i]['attributes']['name'][$j] != $this->qlayerset[$i]['attributes']['the_geom']){
@@ -823,7 +823,7 @@ function change_orderby(attribute, layer_id){
 								</td>
 								<td>
 									<select style="width:133px" name="chartsplit_<?php echo $this->qlayerset[$i]['Layer_ID']; ?>" onchange="create_chart(<?php echo $this->qlayerset[$i]['Layer_ID']; ?>);">
-										<option value="">--- Bitte W‰hlen ---</option>
+										<option value="">--- Bitte W√§hlen ---</option>
 										<?
 										for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
 											if($this->qlayerset[$i]['attributes']['name'][$j] != $this->qlayerset[$i]['attributes']['the_geom']){

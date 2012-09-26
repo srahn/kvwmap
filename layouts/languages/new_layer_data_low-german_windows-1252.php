@@ -1,7 +1,7 @@
-<?php
+ï»¿<?php
 $strLayer="Layer";
-$strPleaseSelect="---------Beed utsöken---------";
+$strPleaseSelect="---------Beed utsÃ¶ken---------";
 $strSave="Spiekern";
-$strtitle="Niegen Datensatz infögen"; 
-$strCancel="Afbräcken";
+$strtitle="Niegen Datensatz infÃ¶gen"; 
+$strCancel="AfbrÃ¤cken";
 ?>  

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
   $strAsteriskRequired="Fields marked with an asterisk * are required";
   $strLayerID="Layer ID*";
   $strName="Name*";

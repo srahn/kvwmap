@@ -23,7 +23,7 @@ function Bestaetigung(link,text) {
         <td><?php echo $this->funktionen[$i]['id']; ?></td>
         <td><?php echo $this->funktionen[$i]['bezeichnung']; ?></td>
         <td><a href="index.php?go=Funktionen_Formular&selected_function_id=<?php echo $this->funktionen[$i]['id']; ?>">Bearbeiten</a></td>
-        <td>&nbsp;&nbsp;<a href="javascript:Bestaetigung('index.php?go=Funktion_Löschen&selected_function_id=<?php echo $this->funktionen[$i]['id']; ?>&order=<? echo $this->formvars['order']; ?>','Wollen Sie diese Funktion wirklich löschen?')">Löschen</a></td>
+        <td>&nbsp;&nbsp;<a href="javascript:Bestaetigung('index.php?go=Funktion_LÃ¶schen&selected_function_id=<?php echo $this->funktionen[$i]['id']; ?>&order=<? echo $this->formvars['order']; ?>','Wollen Sie diese Funktion wirklich lÃ¶schen?')">LÃ¶schen</a></td>
       </tr>
       <?php  
       }

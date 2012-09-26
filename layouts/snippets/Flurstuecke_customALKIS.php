@@ -51,7 +51,7 @@ function backto(go){
   $anzObj=count($this->qlayerset[$i]['shape']);
   if ($anzObj>0) { ?>
 		<br><br>
-    <u><? echo $anzObj; ?> Flurstück<? if ($anzObj>1) { echo "e"; } ?> gefunden:</u>
+    <u><? echo $anzObj; ?> FlurstÃ¼ck<? if ($anzObj>1) { echo "e"; } ?> gefunden:</u>
     <br>
 
     <?
@@ -89,7 +89,7 @@ function backto(go){
         $Flurstueckskennz .= $flurstkennz;
 ?>
 
-  <!-- Für jedes einzelne Flurstück -->
+  <!-- FÃ¼r jedes einzelne FlurstÃ¼ck -->
   <tr>
     <td colspan="2">&nbsp;<a name="<? echo $flurstkennz; ?>" href="#<? echo $flurstkennz; ?>"></a></td>
   </tr>
@@ -101,7 +101,7 @@ function backto(go){
         <td colspan="2">
           <table width="100%">
             <tr>
-              <td align="left"><span style="font-size:80%;">auswählen</span></td>
+              <td align="left"><span style="font-size:80%;">auswÃ¤hlen</span></td>
               <td align="right"><a href="#anfang"><span style="font-size:80%;">>> nach oben</span></a></td>
             </tr>
           </table>
@@ -240,7 +240,7 @@ function backto(go){
               <? } ?>
               <?php if ($privileg['vorgaenger'] AND $flst->Vorgaenger != '') { ?>
           <tr>
-              <td align="right"><strong>Vorgänger</strong></td>
+              <td align="right"><strong>VorgÃ¤nger</strong></td>
               <td>
                 <?php
                 for($v = 0; $v < count($flst->Vorgaenger); $v++){ ?>
@@ -484,7 +484,7 @@ function backto(go){
         <td colspan="2">
             <table border="0" cellspacing="0" cellpadding="2">
               <tr>
-                <td colspan="3"><strong>Eigentümer</strong></td>
+                <td colspan="3"><strong>EigentÃ¼mer</strong></td>
               </tr>
             <? for ($g=0;$g<count($flst->Grundbuecher);$g++) {
             $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
@@ -594,7 +594,7 @@ function backto(go){
         <a href="index.php?go=Flurstueck_Auswaehlen&searchInExtent=<?php echo $this->searchInExtent;
         ?>&GemID=<?php echo $flst->GemeindeID;
         ?>&GemkgID=<?php echo $flst->GemkgSchl; ?>&FlurID=<?php echo $flst->FlurID;
-        ?>&FlstID=<?php echo $flst->FlurstKennz; ?>">zur Flurstückssuche</a> |
+        ?>&FlstID=<?php echo $flst->FlurstKennz; ?>">zur FlurstÃ¼ckssuche</a> |
         <a href="index.php?go=Adresse_Auswaehlen&searchInExtent=<?php echo $this->searchInExtent;
         ?>&GemID=<?php echo $this->formvars['GemID'];
         ?>&StrID=<?php echo $this->formvars['StrID'];
@@ -661,17 +661,17 @@ function backto(go){
     </td>
   </tr>
   
-  <?} # Ende es wurde auch was zum Flurstück gefunden
+  <?} # Ende es wurde auch was zum FlurstÃ¼ck gefunden
     else { ?>
     <tr>
-    <td>Das Flurstück mit Kennzeichen: <?php echo $flurstkennz; ?> ist nicht in der aktuellen<br> PostGIS-Datenbank enthalten. Aktualisieren Sie die ALB und ALK-Daten.
+    <td>Das FlurstÃ¼ck mit Kennzeichen: <?php echo $flurstkennz; ?> ist nicht in der aktuellen<br> PostGIS-Datenbank enthalten. Aktualisieren Sie die ALB und ALK-Daten.
     </td>
     </tr>
     <? } 
-  } # Ende der Schleife zur Abfrage und Anzeige der einzelnen Flurstücke
+  } # Ende der Schleife zur Abfrage und Anzeige der einzelnen FlurstÃ¼cke
   ?>
 
-  <!-- Für alle Flurstücke -->
+  <!-- FÃ¼r alle FlurstÃ¼cke -->
   <tr>
     <td>&nbsp;</td>
   </tr>
@@ -681,7 +681,7 @@ function backto(go){
     <tr>
       <td colspan="2">
         <? echo '<img src="'.GRAPHICSPATH.'pfeil_unten-rechts.gif" width="10" height="20" border="0">'; ?>
-        <b>Für alle ausgewählten Flurstücke:</b><br>
+        <b>FÃ¼r alle ausgewÃ¤hlten FlurstÃ¼cke:</b><br>
       </td>
     </tr>
     <? if($forall == true){ ?>
@@ -717,7 +717,7 @@ function backto(go){
     <tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
       <td colspan="2">
         <a href="javascript:browser_switch('Flurstuecks-CSV-Export');">CSV-Export</a>&nbsp;|&nbsp;
-        <? if($privileg['eigentuemer']){?><a href="javascript:send_selected_flurst('Eigentümer-CSV-Export', '', '', '');">CSV-Export-Eigentümer</a>&nbsp;|&nbsp;<?}?>
+        <? if($privileg['eigentuemer']){?><a href="javascript:send_selected_flurst('EigentÃ¼mer-CSV-Export', '', '', '');">CSV-Export-EigentÃ¼mer</a>&nbsp;|&nbsp;<?}?>
         <a href="javascript:send_selected_flurst('Nutzungsarten-CSV-Export', '', '', '');">CSV-Export_Nutzungsarten</a>
         <? if($flst->Status != 'H'){ ?>&nbsp;|&nbsp;<a href="javascript:send_selected_flurst('ZoomToFlst', '', '', '');">Kartenausschnitt</a><? } ?>
         </td>
@@ -730,12 +730,12 @@ function backto(go){
   </tr>
 
   <?
-  } # Ende es liegen Flurstücke im Suchbereich
+  } # Ende es liegen FlurstÃ¼cke im Suchbereich
 
   else {
     ?><br><strong><font color="#FF0000">
     Zu diesem Layer wurden keine Objekte gefunden!</font></strong><br>
-    Wählen Sie einen neuen Bereich oder prüfen Sie die Datenquellen.<br>
+    WÃ¤hlen Sie einen neuen Bereich oder prÃ¼fen Sie die Datenquellen.<br>
     <?php
   }
 ?>
@@ -759,7 +759,7 @@ if($this->formvars['grundbuchsuche'] == 'true'){
 ?>
   <input name="selBlatt" type="hidden" value="<? echo $this->formvars['selBlatt']; ?>">
  	<input name="Bezirk" type="hidden" value="<? echo $this->formvars['Bezirk']; ?>">
-  <a href="javascript:backto('Grundbuchblatt_Auswaehlen_Suchen');">zurück zur Grundbuchblattanzeige</a>
+  <a href="javascript:backto('Grundbuchblatt_Auswaehlen_Suchen');">zurÃ¼ck zur Grundbuchblattanzeige</a>
   <br><br>
 <?}
 if($this->formvars['namensuche'] == 'true'){
@@ -774,7 +774,7 @@ if($this->formvars['namensuche'] == 'true'){
   <input name="offset" type="hidden" value="<? echo $this->formvars['offset']; ?>">
   <input name="order" type="hidden" value="<? echo $this->formvars['order'] ?>">
   <input name="anzahl" type="hidden" value="<?php echo $this->formvars['anzahl']; ?>">
-  <a href="javascript:backto('Namen_Auswaehlen_Suchen');">zurück zur Namensuche</a>
+  <a href="javascript:backto('Namen_Auswaehlen_Suchen');">zurÃ¼ck zur Namensuche</a>
   <br><br>
  <?}
  if($this->formvars['jagdkataster'] == 'true'){
@@ -784,6 +784,6 @@ if($this->formvars['namensuche'] == 'true'){
   <input name="search_nummer" type="hidden" value="<?php echo $this->formvars['search_nummer']; ?>">
   <input name="search_name" type="hidden" value="<?php echo $this->formvars['search_name']; ?>">
   <input name="search_art" type="hidden" value="<?php echo $this->formvars['search_art']; ?>">
-  <a href="javascript:backto('jagdkatastereditor_Flurstuecke_Listen');">zurück zur Jagdbezirk-Flurstücksliste</a>
+  <a href="javascript:backto('jagdkatastereditor_Flurstuecke_Listen');">zurÃ¼ck zur Jagdbezirk-FlurstÃ¼cksliste</a>
   <br><br>
 <?} ?>

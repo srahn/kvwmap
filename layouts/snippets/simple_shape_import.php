@@ -22,7 +22,7 @@
   <? if($this->shape->formvars['zipfile'] == ''){ ?>
   <tr>
   	<td>&nbsp;</td>
-  	<td>Sie können hier ein zip-Archiv hochladen, welches <br>die 3 Dateien vom Typ dbf, shp und shx enthält.</td>
+  	<td>Sie kÃ¶nnen hier ein zip-Archiv hochladen, welches <br>die 3 Dateien vom Typ dbf, shp und shx enthÃ¤lt.</td>
   	<td>&nbsp;</td>
   </tr>
   <tr>
@@ -83,12 +83,12 @@
   				<td>srid:&nbsp;<input type="text" name="srid" size="5" value="<? echo EPSGCODE; ?>"></td>
   			</tr>
   			<tr>
-  				<td><input type="radio" name="table_option" value="-d">Tabelle überschreiben</td>
+  				<td><input type="radio" name="table_option" value="-d">Tabelle Ã¼berschreiben</td>
   				<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
   				<td><input type="checkbox" name="gist">&nbsp;GiST-Index erzeugen</td>
   			</tr>
   			<tr>
-  				<td><input type="radio" name="table_option" value="-a">Daten anhängen</td>
+  				<td><input type="radio" name="table_option" value="-a">Daten anhÃ¤ngen</td>
   				<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
   			</tr>
   		</table>

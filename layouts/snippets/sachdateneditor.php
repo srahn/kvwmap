@@ -21,7 +21,7 @@
     <td><?php echo $attrib[$i]['formobj']->html(); ?></td>
   </tr>
   <tr align="center">
-    <td colspan="2"><input type="reset" name="reset" value="Zurücksetzen">&nbsp;<input type="submit" name="go_plus" value="Senden"></td>
+    <td colspan="2"><input type="reset" name="reset" value="ZurÃ¼cksetzen">&nbsp;<input type="submit" name="go_plus" value="Senden"></td>
     </tr>
   <?php
   }

@@ -1,4 +1,4 @@
-<h2>B-Plan-Änderungen</h2>
+<h2>B-Plan-Ã„nderungen</h2>
 <?php
   $anzObj=count($this->qlayerset[$i]['shape']);
   if ($anzObj>0) {
@@ -27,7 +27,7 @@
 	    </td>
       <td><?php
       if($this->Stelle->isFunctionAllowed('BplanAenderungLoeschen')){
-        ?><a href="javascript:Bestaetigung('index.php?go=bauleitplanung_Loeschen&id=<?php echo $this->qlayerset[$i]['shape'][$j]['id']; ?>', 'Wollen Sie diese B-Plan-Änderung wirklich löschen?');">löschen</a><?php
+        ?><a href="javascript:Bestaetigung('index.php?go=bauleitplanung_Loeschen&id=<?php echo $this->qlayerset[$i]['shape'][$j]['id']; ?>', 'Wollen Sie diese B-Plan-Ã„nderung wirklich lÃ¶schen?');">lÃ¶schen</a><?php
       }
       else {
         ?>&nbsp;<?php
@@ -41,7 +41,7 @@
   else {
     ?><br><strong><font color="#FF0000">
     Zu diesem Layer wurden keine Objekte gefunden!</font></strong><br>
-    Wählen Sie einen neuen Bereich oder prüfen Sie die Datenquellen.<br>
+    WÃ¤hlen Sie einen neuen Bereich oder prÃ¼fen Sie die Datenquellen.<br>
     <?php   
   }
 ?>

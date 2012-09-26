@@ -1,4 +1,4 @@
-<?php
+﻿<?php
  $strEditGeom="Geometrie bearbeiten";
  $strMapZoom="Kartenausschnitt";
  $strShowPK="anzeigen";

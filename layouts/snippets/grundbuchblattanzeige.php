@@ -35,7 +35,7 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 	  <tr bgcolor="<?php echo BG_DEFAULT ?>">
 	    <th>BVNR</th>
 	    <th>EBRH</th>
-	    <th width="150">Eigentümer</th>
+	    <th width="150">EigentÃ¼mer</th>
 	    <th>Lage</th>
 	    <th width="250">Nutzung</th>
 	    <th>Gemarkung</th>
@@ -94,7 +94,7 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
       		} 
       	?>
       </td>
-      <td valign="top" align="center"><a href="javascript:flurstanzeige('<?php echo $this->buchungen[0]['flurstkennz']; ?>');" title="Flurstücksdaten anzeigen">anzeigen</a></td>
+      <td valign="top" align="center"><a href="javascript:flurstanzeige('<?php echo $this->buchungen[0]['flurstkennz']; ?>');" title="FlurstÃ¼cksdaten anzeigen">anzeigen</a></td>
 	  </tr>
 	  <?php
 	  for ($i=1;$i<$anzObj;$i++) {
@@ -129,13 +129,13 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
       		} 
       	?>
       </td>
-	      <td valign="top" align="center"><a href="javascript:flurstanzeige('<?php echo $this->buchungen[$i]['flurstkennz']; ?>');" title="Flurstücksdaten anzeigen">anzeigen</a></td>
+	      <td valign="top" align="center"><a href="javascript:flurstanzeige('<?php echo $this->buchungen[$i]['flurstkennz']; ?>');" title="FlurstÃ¼cksdaten anzeigen">anzeigen</a></td>
 	  </tr>
 	  <?php }
 	  if(count($alle_flst) > 1){ ?>
 	  <tr>
 	  	<td colspan="7">&nbsp;</td>
-	  	<td colspan="2" align="center"><a href="javascript:flurstanzeige('<?php echo implode(';', $alle_flst); ?>');" title="Flurstücksdaten anzeigen">alle anzeigen</a></td>
+	  	<td colspan="2" align="center"><a href="javascript:flurstanzeige('<?php echo implode(';', $alle_flst); ?>');" title="FlurstÃ¼cksdaten anzeigen">alle anzeigen</a></td>
 	  </tr>
 	  <? } ?>
 </table>
@@ -170,7 +170,7 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
    <br><strong><font color="#FF0000">Es wurden keine Daten gefunden.<br>
  <? }
 } ?>
-<a href="javascript:backto_gbbsearch();">zurück zur Grundbuchblattsuche</a>
+<a href="javascript:backto_gbbsearch();">zurÃ¼ck zur Grundbuchblattsuche</a>
 <br>
 <br>
 
@@ -193,5 +193,5 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
   <input name="offset" type="hidden" value="<? echo $this->formvars['offset']; ?>">
 	<input name="order" type="hidden" value="<? echo $this->formvars['order'] ?>">
 	<input name="anzahl" type="hidden" value="<?php echo $this->formvars['anzahl']; ?>">
-  <a href="javascript:backto_namesearch();">zurück zur Namensuche</a>
+  <a href="javascript:backto_namesearch();">zurÃ¼ck zur Namensuche</a>
  <?}?>

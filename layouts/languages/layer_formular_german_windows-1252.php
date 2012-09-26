@@ -1,4 +1,4 @@
-<?php
+ï»¿<?php
   $strAsteriskRequired="Werte mit * mussen eingetragen werden";
 	$strLayerID="Layer ID*";
   $strName="Name*";
@@ -34,12 +34,12 @@
   $strClass="Klasse";
   $strExpression="Expression";
   $strSignOrder="Zeichenreihenfolge";
-  $strDelete="löschen";
-  $strAddClass="Klasse hinzufügen";
+  $strDelete="lÃ¶schen";
+  $strAddClass="Klasse hinzufÃ¼gen";
   $strOtherExtentions="erweiterte Einstellungen";
-  $strButtonSave="Ändern";
-  $strBack="Zurücksetzen";
-  $strSave="Ändern";
+  $strButtonSave="Ã„ndern";
+  $strBack="ZurÃ¼cksetzen";
+  $strSave="Ã„ndern";
   $strButtonSaveAsNewLayer="Als neuen Layer eintragen";
   $strCommonData="Allgemeine Angaben";
   $strtransparency="Transparenz";
@@ -48,7 +48,7 @@
   $strmaxscale="Maxscale";
   $stroffsite="Offsite";
   $strOWSParameter="OWS-Parameter";
-  $strDefaultValues="Default-Werte für Stellen-Zuweisung";
+  $strDefaultValues="Default-Werte fÃ¼r Stellen-Zuweisung";
   $strWFS_geom="WFS-Geometrieattribut";
   $strQueryMap="QueryMap";
   $strProcessing="Processing";

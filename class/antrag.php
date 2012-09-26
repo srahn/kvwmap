@@ -199,7 +199,7 @@ class antrag {
     $anzTab=0;
     for ($i=0;$i<count($this->FFR);$i++) {
       $row=$row-18;
-      $tabledata[$anzTab][]=$this->FFR[$i];
+      $tabledata[$anzTab][]=utf8_decode($this->FFR[$i]);
       if ($row < 300) { $anzTab++; $row=800;}
     }
         

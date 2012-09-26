@@ -4,7 +4,7 @@
   $strShowCoordinates="Koordinatenabfrage";
   $strLoadNew="Nieg Loden";
   $strMapImageURL="Koortbeld taun Ofsekern anwiesen";
-  $strChoose="Utw‰hlen";
+  $strChoose="Utw√§hlen";
   $strSave="Spiekern";
   $strMapScale="Maat";
   $strMapSettingsFrom="Koortinstellen vun";

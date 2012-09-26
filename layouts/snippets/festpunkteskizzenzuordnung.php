@@ -22,7 +22,7 @@ if ($this->festpunkte->anzPunkte>0) {
       <?php
 		  # Anzeige von Formularobjekten zur Eingabe eines anderen Dateinamens oder Uploadfunktion
 		  if ($rs['skizze']['tif']) {
-		    # Es ist eine Bilddatei im tif-Format für den Punkt vorhanden. Anzeige des Textfeldes mit Dateinamenvorschlag zur Änderungseingabe
+		    # Es ist eine Bilddatei im tif-Format fÃ¼r den Punkt vorhanden. Anzeige des Textfeldes mit Dateinamenvorschlag zur Ã„nderungseingabe
 		    ?><input name="name[<?php echo $rs['pkz'];?>]" type="text" value="<?php echo substr($rs['datei'],0,-3)."*"; ?>" size="25"><?php
 		  }
 		  else {	
@@ -132,7 +132,7 @@ Verschoben bzw. gel&ouml;scht werden immer tif und png Dateien soweit beide vorh
   <br>
   <strong><font color="#FF0000">
 	    Zu dieser Anfrage wurden keine Objekte gefunden!</font></strong><br>
-	    Wählen Sie einen neuen Bereich oder prüfen Sie die Datenquellen.<br>
+	    WÃ¤hlen Sie einen neuen Bereich oder prÃ¼fen Sie die Datenquellen.<br>
 	    <?php  	
   }
 ?>

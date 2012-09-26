@@ -117,16 +117,16 @@ function buildwktpolygonfromsvgpath(svgpath){
     <td><hr align="center" noshade></td>
   </tr>
   <tr>  
-  	<td align="center">Fl‰che:<br><input size="12" type="text" name="area" value="">&nbsp;m<sup>2</sup></td>
+  	<td align="center">Fl√§che:<br><input size="12" type="text" name="area" value="">&nbsp;m<sup>2</sup></td>
   </tr>
   <tr> 
-    <td align="center"> <input type="button" name="senden" value="Straﬂenabschnitt speichern" onclick="save_road();"> </td>
+    <td align="center"> <input type="button" name="senden" value="Stra√üenabschnitt speichern" onclick="save_road();"> </td>
   </tr>
   <tr> 
     <td align="center"> <input type="text" size="1" name="buffersize" value="50">m&nbsp;<input type="button" name="create_buffer" value="Randgeometrie erzeugen" onclick="createbuffer();"> </td>
   </tr>
   <tr> 
-    <td align="center"> <input type="button" name="senden" value="Grundst¸cksbereiche speichern" onclick="save_buffer();"> </td>
+    <td align="center"> <input type="button" name="senden" value="Grundst√ºcksbereiche speichern" onclick="save_buffer();"> </td>
   </tr>
   <tr> 
     <td><hr align="center" noshade></td>

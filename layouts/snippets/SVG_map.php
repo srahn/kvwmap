@@ -177,7 +177,7 @@
 # Zusammenstellen der SVG  
 #
 # 2006-02-16 pk
-# in function highlight(evt) Zeilen für previous und next eingefügt
+# in function highlight(evt) Zeilen fÃ¼r previous und next eingefÃ¼gt
 $fpsvg = fopen(IMAGEPATH.$svgfile,w) or die('fail: fopen('.$svgfile.')');
 chmod(IMAGEPATH.$svgfile, 0666);
 $svg='<?xml version="1.0"?>

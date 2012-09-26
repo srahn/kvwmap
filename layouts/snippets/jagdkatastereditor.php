@@ -99,7 +99,7 @@ function update_form(art){
     <td><hr align="center" noshade></td>
   </tr>
   <tr>
-  	<td>Fl‰che:<br><input size="12" type="text" name="area" value="">&nbsp;ha</SUP></td>
+  	<td>Fl√§che:<br><input size="12" type="text" name="area" value="">&nbsp;ha</SUP></td>
   </tr>
   <tr>
   	<td>Name:<br><input type="text" name="name" value="<? echo $this->jagdbezirk['name'] ? $this->jagdbezirk['name']: $this->formvars['name']; ?>"></td>
@@ -111,12 +111,12 @@ function update_form(art){
   			<option <? if($this->jagdbezirk['art'] == 'ajb' OR $this->formvars['art'] == 'ajb'){echo 'selected';} ?> value="ajb">Abgerundeter Eigenjagdbezirk</option>
   			<option <? if($this->jagdbezirk['art'] == 'gjb' OR $this->formvars['art'] == 'gjb'){echo 'selected';} ?> value="gjb">Gemeinschaftlicher Jagdbezirk</option>
   			<option <? if($this->jagdbezirk['art'] == 'tjb' OR $this->formvars['art'] == 'tjb'){echo 'selected';} ?> value="tjb">Teiljagdbezirk</option>
-  			<option <? if($this->jagdbezirk['art'] == 'sf' OR $this->formvars['art'] == 'sf'){echo 'selected';} ?> value="sf">Sonderfl‰che</option>
+  			<option <? if($this->jagdbezirk['art'] == 'sf' OR $this->formvars['art'] == 'sf'){echo 'selected';} ?> value="sf">Sonderfl√§che</option>
   			<option <? if($this->jagdbezirk['art'] == 'jbe' OR $this->formvars['art'] == 'jbe'){echo 'selected';} ?> value="jbe">Enklave</option>
-  			<option <? if($this->jagdbezirk['art'] == 'jbf' OR $this->formvars['art'] == 'jbf'){echo 'selected';} ?> value="jbf">Jagdbezirksfreie Fl‰che</option>
-  			<option <? if($this->jagdbezirk['art'] == 'agf' OR $this->formvars['art'] == 'agf'){echo 'selected';} ?> value="agf">Angliederungsfl‰che</option>
-  			<option <? if($this->jagdbezirk['art'] == 'atf' OR $this->formvars['art'] == 'atf'){echo 'selected';} ?> value="atf">Abtrennungsfl‰che</option>
-  			<option <? if($this->jagdbezirk['art'] == 'slf' OR $this->formvars['art'] == 'slf'){echo 'selected';} ?> value="slf">Schmalfl‰che</option>
+  			<option <? if($this->jagdbezirk['art'] == 'jbf' OR $this->formvars['art'] == 'jbf'){echo 'selected';} ?> value="jbf">Jagdbezirksfreie Fl√§che</option>
+  			<option <? if($this->jagdbezirk['art'] == 'agf' OR $this->formvars['art'] == 'agf'){echo 'selected';} ?> value="agf">Angliederungsfl√§che</option>
+  			<option <? if($this->jagdbezirk['art'] == 'atf' OR $this->formvars['art'] == 'atf'){echo 'selected';} ?> value="atf">Abtrennungsfl√§che</option>
+  			<option <? if($this->jagdbezirk['art'] == 'slf' OR $this->formvars['art'] == 'slf'){echo 'selected';} ?> value="slf">Schmalfl√§che</option>
   		</select>
   	</td>
   </tr>
@@ -140,7 +140,7 @@ function update_form(art){
     <td><hr align="center" noshade></td>
   </tr>
   <tr>
-  	<td>Geometrie ¸bernehmen von:<br>
+  	<td>Geometrie √ºbernehmen von:<br>
   		<select name="layer_id" onchange="document.GUI.submit();">
   			<option value="">--- Auswahl ---</option>
   			<?

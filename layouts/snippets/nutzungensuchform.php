@@ -43,9 +43,9 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 		</strong>	
 		<table width="100%" border="1" cellpadding="3" cellspacing="0">
 	  	<tr>
-	    	<td><b>Flurstück</b></td>
+	    	<td><b>FlurstÃ¼ck</b></td>
 	    	<td><b>Gemarkung</b></td>
-	    	<td><b>ALB-Fläche</b></td>
+	    	<td><b>ALB-FlÃ¤che</b></td>
 	    	<td><b>Nutzung</b></td>
 	    	<td colspan="2"><b>ALB-Auszug</b></td>
 	    	<td><b>Kartenausschnitt</b></td>
@@ -54,8 +54,8 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 			<tr>
 				<td><? echo $this->flurstuecke[$j]['flurstkennz']; ?></td>
 				<td><? echo $this->flurstuecke[$j]['gemkgname']; ?></td>
-	    	<td><? echo $this->flurstuecke[$j]['flaeche']; ?> m²</td>
-	    	<td><? echo $this->flurstuecke[$j]['bezeichnung'].' ('.$this->flurstuecke[$j]['nutzkennz'].') '.$this->flurstuecke[$j]['nutzflaeche']; ?>&nbsp;m²</td>
+	    	<td><? echo $this->flurstuecke[$j]['flaeche']; ?> mÂ²</td>
+	    	<td><? echo $this->flurstuecke[$j]['bezeichnung'].' ('.$this->flurstuecke[$j]['nutzkennz'].') '.$this->flurstuecke[$j]['nutzflaeche']; ?>&nbsp;mÂ²</td>
 	    	<td>
 	    		<? $this->getFunktionen();
 	        if ($this->Stelle->funktionen['ohneWasserzeichen']['erlaubt']) { ?>

@@ -288,7 +288,7 @@ else {
         <option value="w&ouml;chentlich">w&ouml;chentlich</option>
         <option value="vierzehnt&auml;gig">vierzehnt&auml;gig</option>
         <option value="monatlich">monatlich</option>
-        <option value="vierteljählich">viertelj&auml;hrlich</option>
+        <option value="vierteljÃ¤hlich">viertelj&auml;hrlich</option>
         <option value="halbj&auml;hrlich">halbj&auml;hrlich</option>
         <option value="wenn n&ouml;tig">wenn n&ouml;tig</option>
         <option value="unregelm&auml;&szlig;ig">unregelm&ouml;&szlig;ig</option>

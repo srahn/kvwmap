@@ -31,7 +31,7 @@ function Bestaetigung(link,text) {
         <td><?php echo $this->userdaten[$i]['phon']; ?>&nbsp;</td>
         <td><?php echo $this->userdaten[$i]['email']; ?>&nbsp;</td>
         <td><a href="index.php?go=Benutzerdaten_Formular&selected_user_id=<?php echo $this->userdaten[$i]['ID']; ?>"><?php echo $this->strChange; ?></a></td>
-        <td>&nbsp;&nbsp;<a href="javascript:Bestaetigung('index.php?go=Benutzer_Löschen&selected_user_id=<?php echo $this->userdaten[$i]['ID']; ?>&order=<? echo $this->formvars['order']; ?>','Wollen Sie den Benutzer <?php echo $this->userdaten[$i]['Vorname']." ".$this->userdaten[$i]['Name']; ?> wirklich löschen?')"><?php echo $this->strDelete?></a></td>
+        <td>&nbsp;&nbsp;<a href="javascript:Bestaetigung('index.php?go=Benutzer_LÃ¶schen&selected_user_id=<?php echo $this->userdaten[$i]['ID']; ?>&order=<? echo $this->formvars['order']; ?>','Wollen Sie den Benutzer <?php echo $this->userdaten[$i]['Vorname']." ".$this->userdaten[$i]['Name']; ?> wirklich lÃ¶schen?')"><?php echo $this->strDelete?></a></td>
       </tr>
       <?php  
       }

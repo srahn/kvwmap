@@ -1,6 +1,6 @@
-<?php
+﻿<?php
  $strTitle="Shape-Export";
  $strSelectStatement="Select Statement";
- $strButtonCutByPolygon="�vern Polygon inengen";
+ $strButtonCutByPolygon="Övern Polygon inengen";
  $strButtonGenerateShapeData="Shape-Datei maken";
  ?>  

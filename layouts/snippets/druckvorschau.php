@@ -47,7 +47,7 @@ function goback(){
   </tr>
   <tr align="center"> 
     <td colspan="2"> 
-      <input class="button" type="button" name="zurueck" value="zurück zum Druckausschnitt" onclick="goback();">
+      <input class="button" type="button" name="zurueck" value="zurÃ¼ck zum Druckausschnitt" onclick="goback();">
       <input class="button" type="button" name="drucken" value="Drucken" onclick="print();">
     </td>
   </tr>
@@ -88,7 +88,7 @@ function goback(){
 	<input type="hidden" name="map_factor" value="<? echo $this->formvars['map_factor'] ?>">
 <? } ?>
 
-<!-- für den externen Druck -->
+<!-- fÃ¼r den externen Druck -->
 <input type="hidden" name="loadmapsource" value="<? echo $this->formvars['loadmapsource']; ?>">	
 <input type="hidden" name="post_width" value="<? echo $this->formvars['post_width'] ?>">
 <input type="hidden" name="post_height" value="<? echo $this->formvars['post_height'] ?>">

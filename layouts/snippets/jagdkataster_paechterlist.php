@@ -58,7 +58,7 @@
                       echo "Teiljagdbezirk";
                       break;
                     case sf:
-                      echo "Sonderfläche";
+                      echo "SonderflÃ¤che";
                       break;
                   }
                   echo ")";
@@ -119,7 +119,7 @@
   ?>
 
   <tr>
-    <td align="center"><a href="javascript:document.GUI.submit()">zurück zum Jagdbezirk</a></td>
+    <td align="center"><a href="javascript:document.GUI.submit()">zurÃ¼ck zum Jagdbezirk</a></td>
   </tr>
 
 

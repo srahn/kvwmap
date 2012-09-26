@@ -1,4 +1,4 @@
-<?php
+﻿<?php
  $strTitle="Search Owner";
  $strName1="Name, Prename Name of birth / Incorporation";
  $strName2="Date of birth / Annex";

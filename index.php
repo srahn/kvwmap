@@ -1,6 +1,6 @@
 <?php
 ###################################################################
-# kvwmap - Kartenserver für Kreisverwaltungen                     #
+# kvwmap - Kartenserver fÃ¼r Kreisverwaltungen                     #
 ###################################################################
 # Lizenz                                                          #
 #                                                                 #
@@ -21,7 +21,7 @@
 # Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,  #
 # MA 02111-1307, USA.                                             #
 #                                                                 #
-# Eine deutsche Übersetzung zur Lizenz finden Sie unter:          #
+# Eine deutsche Ãœbersetzung zur Lizenz finden Sie unter:          #
 # http://www.gnu.de/gpl-ger.html                                  #
 #                                                                 #
 # Kontakt:                                                        #
@@ -34,7 +34,7 @@ if(!$_SESSION['angemeldet']){
 }
 include(WWWROOT.APPLVERSION.'start.php');
 #$starttime=microtime_float();
-# Übergeben des Anwendungsfalles
+# Ãœbergeben des Anwendungsfalles
 $go=$GUI->formvars['go'];
 $debug->write("<br><b>Anwendungsfall go: ".$go."</b>",4);
 if ($GUI->formvars['go_plus']!='') {
@@ -43,7 +43,7 @@ if ($GUI->formvars['go_plus']!='') {
 }
 $GUI->go=$go;
 $GUI->requeststring = $QUERY_STRING;
-##### Anwendungsfälle der Benutzeroberfläche GUI #################
+##### AnwendungsfÃ¤lle der BenutzeroberflÃ¤che GUI #################
 # ALB_Aenderung
 # ALB_Anzeige
 # ALK_Fortfuehrung
@@ -51,7 +51,7 @@ $GUI->requeststring = $QUERY_STRING;
 # Administratorfunktionen
 # Adresse_Auswaehlen
 # Adresse_Auswaehlen_Suchen
-# Ändern
+# Ã„ndern
 # Antraege_Anzeigen
 # Antrag_Aendern
 # Antrag_Loeschen
@@ -69,9 +69,9 @@ $GUI->requeststring = $QUERY_STRING;
 # bauleitplanung
 # bauleitplanung_Senden
 # Benutzerdaten_Als neuen Nutzer eintragen
-# Benutzerdaten_Ändern
+# Benutzerdaten_Ã„ndern
 # Benutzerdaten_Formular
-# Benutzer_Löschen
+# Benutzer_LÃ¶schen
 # Benutzerdaten_Anzeigen
 # Bestaetigung
 # Bodenrichtwertformular
@@ -83,8 +83,8 @@ $GUI->requeststring = $QUERY_STRING;
 # document_anzeigen
 # Dokumentenkoepfe
 # Dokumentenkoepfe_als neuen Kopf speichern
-# Dokumentenkoepfe_Änderungen Speichern
-# Dokumentenkoepfe_übernehmen >>
+# Dokumentenkoepfe_Ã„nderungen Speichern
+# Dokumentenkoepfe_Ã¼bernehmen >>
 # Druckausschnittswahl
 # Druckausschnittswahl_Vorschau
 # editLayerForm($layerName,$oid)
@@ -97,8 +97,8 @@ $GUI->requeststring = $QUERY_STRING;
 # Festpunkte_Auswaehlen
 # Festpunkte_Auswaehlen_Suchen
 # Festpunkte zum Antrag Anzeigen
-# Festpunkte zum Antrag Hinzufügen
-# Festpunkte zum Antrag Hinzufügen_Senden
+# Festpunkte zum Antrag HinzufÃ¼gen
+# Festpunkte zum Antrag HinzufÃ¼gen_Senden
 # FestpunkteSkizzenZuordnung
 # FestpunkteSkizzenZuordnung_Senden
 # Flurstueck_Anzeigen
@@ -156,11 +156,11 @@ $GUI->requeststring = $QUERY_STRING;
 # spatial_processing
 # StatistikAuswahl
 # StatistikAuswahl_anzeigen
-# Stelle Wählen
+# Stelle WÃ¤hlen
 # Stelleneditor
-# Stelle_Löschen
+# Stelle_LÃ¶schen
 # Stelleneditor_Als neue Stelle eintragen
-# Stelleneditor_Ändern
+# Stelleneditor_Ã„ndern
 # Stellen_Anzeigen
 # Suche_Flurstuecke_zu_Namen
 # tmp_Adr_Tabelle_Aktualisieren
@@ -264,23 +264,23 @@ if ($goNotExecutedInIncludeCases) {
 		$GUI->import_layer_importieren();
 	  } break;
 
-	  # auslesen der Layer von der Primärdatenbank
+	  # auslesen der Layer von der PrimÃ¤rdatenbank
 	  case 'export_layer' : {
 		$GUI->checkCaseAllowed($go);
 		$GUI->export_layer();
 	  } break;
 
-	  # auslesen der Layer von der Primärdatenbank
+	  # auslesen der Layer von der PrimÃ¤rdatenbank
 	  case 'export_layer_einlesen' : {
 		$GUI->export_layer_exportieren();
 	  } break;
 
-	  # liefert die options für ein Selectfeld für abhängige Attribute
+	  # liefert die options fÃ¼r ein Selectfeld fÃ¼r abhÃ¤ngige Attribute
 	  case 'get_select_list' : {
 		$GUI->get_select_list();
 	  } break;
 
-	  # CASE für Testzwecke der postgresql-Datenbankanfragens
+	  # CASE fÃ¼r Testzwecke der postgresql-Datenbankanfragens
 	  case 'loadDenkmale_laden' : {
 		$GUI->loadDenkmale_laden();
 		$GUI->output();
@@ -311,12 +311,12 @@ if ($goNotExecutedInIncludeCases) {
 		$GUI->save_style();
 	  } break;
 
-	  # Style löschen
+	  # Style lÃ¶schen
 	  case 'delete_style' : {
 		$GUI->delete_style();
 	  } break;
 
-	  # neuen Style hinzufügen
+	  # neuen Style hinzufÃ¼gen
 	  case 'add_style' : {
 		$GUI->add_style();
 	  } break;
@@ -341,12 +341,12 @@ if ($goNotExecutedInIncludeCases) {
 		$GUI->save_label();
 	  } break;
 
-	  # Label Löschen
+	  # Label LÃ¶schen
 	  case 'delete_label' : {
 		$GUI->delete_label();
 	  } break;
 
-	  # neues Label hinzufügen
+	  # neues Label hinzufÃ¼gen
 	  case 'add_label' : {
 		$GUI->add_label();
 	  } break;
@@ -366,19 +366,19 @@ if ($goNotExecutedInIncludeCases) {
 		$GUI->get_gps_position();
 	  } break;
 
-	  # Eigentuemerfortführung
+	  # EigentuemerfortfÃ¼hrung
 	  case 'export_ESAF64' : {
 		$GUI->checkCaseAllowed($go);
 		$GUI->export_ESAF64();
 	  } break;
 
-	  # Eigentuemerfortführung
+	  # EigentuemerfortfÃ¼hrung
 	  case 'export_ESAF64_Exportieren' : {
 		$GUI->checkCaseAllowed('export_ESAF64');
 		$GUI->export_ESAF64_exportieren();
 	  } break;
 
-	  # Eigentuemerfortführung
+	  # EigentuemerfortfÃ¼hrung
 	  case 'export_ESAF64_Tabelle Bereinigen' : {
 		$GUI->checkCaseAllowed('export_ESAF64');
 		$GUI->export_ESAF64_bereiningen();
@@ -506,20 +506,20 @@ if ($goNotExecutedInIncludeCases) {
 		$GUI->sachdaten_speichern();
 	  }break;
 
-	  # Anliegerbeiträge
+	  # AnliegerbeitrÃ¤ge
 	  case 'anliegerbeitraege' : {
 		$GUI->checkCaseAllowed($go);
-		$GUI->Anliegerbeiträge_editor();
+		$GUI->AnliegerbeitrÃ¤ge_editor();
 	  }break;
 
-	  # Anliegerbeiträge Strasse speichern
+	  # AnliegerbeitrÃ¤ge Strasse speichern
 	  case 'anliegerbeitraege_strasse_speichern' : {
-		$GUI->Anliegerbeiträge_strasse_speichern();
+		$GUI->AnliegerbeitrÃ¤ge_strasse_speichern();
 	  }break;
 
-	  # Anliegerbeiträge Buffer speichern
+	  # AnliegerbeitrÃ¤ge Buffer speichern
 	  case 'anliegerbeitraege_buffer_speichern' : {
-		$GUI->Anliegerbeiträge_buffer_speichern();
+		$GUI->AnliegerbeitrÃ¤ge_buffer_speichern();
 	  }break;
 
 	  # Sachdaten anzeigen
@@ -583,7 +583,7 @@ if ($goNotExecutedInIncludeCases) {
 		$GUI->jagdkatastereditor_listpaechter();
 	  }break;
 
-	  # gibt die Koordinaten des in der Variable FlurstKennz übergebenen Flurstückes aus
+	  # gibt die Koordinaten des in der Variable FlurstKennz Ã¼bergebenen FlurstÃ¼ckes aus
 	  case 'showFlurstuckKoordinaten' : {
 		$GUI->showFlurstueckKoordinaten();
 	  } break;
@@ -593,17 +593,17 @@ if ($goNotExecutedInIncludeCases) {
 		$GUI->export_georg($GUI->formvars);
 	  }break;
 
-	  # Bauleitplanungsänderung
+	  # BauleitplanungsÃ¤nderung
 	  case 'bauleitplanung' : {
 		$GUI->bauleitplanung();
 	  }break;
 
-	  # Bauleitplanungsänderung
+	  # BauleitplanungsÃ¤nderung
 	  case 'bauleitplanung_Senden' : {
 		$GUI->bauleitplanungSenden();
 	  }break;
 
-	  # Bauleitplanungsänderung
+	  # BauleitplanungsÃ¤nderung
 	  case 'bauleitplanung_Loeschen' : {
 		$GUI->bauleitplanungLoeschen();
 		$GUI->loadMap('DataBase');
@@ -619,16 +619,16 @@ if ($goNotExecutedInIncludeCases) {
 	  }break;
 
 	  # Abfrage einer Zeile in der MySQL Datenbank
-	  # Beliebige Tabelle, Einschränkung über c1,c2,c3 und v1,v2,v3 (Werte beliebig)
+	  # Beliebige Tabelle, EinschrÃ¤nkung Ã¼ber c1,c2,c3 und v1,v2,v3 (Werte beliebig)
 	  case 'getRow' : {
-		# Derzeit nur für die Tabelle Rolle
+		# Derzeit nur fÃ¼r die Tabelle Rolle
 		if ($GUI->formvars['from'] == 'rolle') {
 		  $GUI->getRow();
 		}
 	  } break;
 
 	  # layer aus mapfile laden
-	  case 'layerfrommapfile_Layer hinzufügen' : {
+	  case 'layerfrommapfile_Layer hinzufÃ¼gen' : {
 		$GUI->layerfromMapfile_addlayer($GUI->formvars);
 		$GUI->output();
 	  }break;
@@ -796,7 +796,7 @@ if ($goNotExecutedInIncludeCases) {
 		$GUI->output();
 	  } break;
 
-	  case 'Druckrahmen_übernehmen >>' : {
+	  case 'Druckrahmen_Ã¼bernehmen >>' : {
 		$GUI->checkCaseAllowed('Druckrahmen');
 		$GUI->druckrahmen_init();
 		$GUI->Document->add_frame2stelle($GUI->formvars['aktiverRahmen'], $GUI->formvars['stelle']);
@@ -812,7 +812,7 @@ if ($goNotExecutedInIncludeCases) {
 		$GUI->output();
 	  } break;
 
-	  case 'Druckrahmen_Änderungen Speichern' : {
+	  case 'Druckrahmen_Ã„nderungen Speichern' : {
 		$GUI->checkCaseAllowed('Druckrahmen');
 		$GUI->druckrahmen_init();
 		$GUI->Document->update_frame($GUI->formvars, $_FILES);
@@ -820,7 +820,7 @@ if ($goNotExecutedInIncludeCases) {
 		$GUI->output();
 	  } break;
 
-	  case 'Druckrahmen_Löschen' : {
+	  case 'Druckrahmen_LÃ¶schen' : {
 		$GUI->checkCaseAllowed('Druckrahmen');
 		$GUI->druckrahmen_init();
 		$GUI->Document->delete_frame($GUI->formvars['selected_frame_id']);
@@ -829,7 +829,7 @@ if ($goNotExecutedInIncludeCases) {
 	  } break;
 
 	  case 'Druckausschnitt_loeschen' : {
-		$GUI->druckausschnitt_löschen($GUI->formvars['loadmapsource']);
+		$GUI->druckausschnitt_lÃ¶schen($GUI->formvars['loadmapsource']);
 	  } break;
 
 	  case 'Druckausschnitt_speichern' : {
@@ -890,7 +890,7 @@ if ($goNotExecutedInIncludeCases) {
 	  } break;
 
 	  case 'NotizKategorie_hinzufuegen' : {
-		$GUI->notizKategoriehinzufügen();
+		$GUI->notizKategoriehinzufÃ¼gen();
 	  } break;
 
 	  case 'NotizKategorie_aendern' : {
@@ -988,7 +988,7 @@ if ($goNotExecutedInIncludeCases) {
 		$GUI->flurstuecksAnzeigeByNamen();
 	  } break;
 
-	  case 'Sachdaten_Festpunkte zu Auftrag Hinzufügen' : {
+	  case 'Sachdaten_Festpunkte zu Auftrag HinzufÃ¼gen' : {
 		$GUI->festpunkteZuAuftragFormular();
 	  } break;
 	  
@@ -1004,7 +1004,7 @@ if ($goNotExecutedInIncludeCases) {
 		readfile($GUI->datei);
 	  } break;
 
-	  case 'Festpunkte zum Antrag Hinzufügen_Senden' : {
+	  case 'Festpunkte zum Antrag HinzufÃ¼gen_Senden' : {
 		$GUI->festpunkteZuAuftragSenden();
 	  } break;
 
@@ -1183,7 +1183,7 @@ if ($goNotExecutedInIncludeCases) {
 		$GUI->GenerischeSuche();
 	  } break;
 	  
-	  case 'Layer-Suche_Suchabfrage_löschen' : {
+	  case 'Layer-Suche_Suchabfrage_lÃ¶schen' : {
 		$GUI->GenerischeSuche();
 	  } break;
 
@@ -1229,17 +1229,17 @@ if ($goNotExecutedInIncludeCases) {
 		$GUI->sachdaten_druck_editor_speichern();
 	  } break;
 	  
-	  case 'sachdaten_druck_editor_Änderungen Speichern' : {
+	  case 'sachdaten_druck_editor_Ã„nderungen Speichern' : {
 		$GUI->checkCaseAllowed('sachdaten_druck_editor');
 		$GUI->sachdaten_druck_editor_aendern();
 	  } break;
 	  
-	  case 'sachdaten_druck_editor_Löschen' : {
+	  case 'sachdaten_druck_editor_LÃ¶schen' : {
 		$GUI->checkCaseAllowed('sachdaten_druck_editor');
 		$GUI->sachdaten_druck_editor_loeschen();
 	  } break;
 	  
-	  case 'sachdaten_druck_editor_übernehmen >>' : {
+	  case 'sachdaten_druck_editor_Ã¼bernehmen >>' : {
 		$GUI->checkCaseAllowed('sachdaten_druck_editor');
 		$GUI->sachdaten_druck_editor_add2stelle();
 	  } break;
@@ -1274,12 +1274,12 @@ if ($goNotExecutedInIncludeCases) {
 		$GUI->Layereditor();
 	  } break;
 
-	  case 'Layereditor_Klasse_Löschen' : {
+	  case 'Layereditor_Klasse_LÃ¶schen' : {
 		$GUI->checkCaseAllowed('Layer_Anzeigen');
 		$GUI->Layereditor_KlasseLoeschen();
 	  } break;
 
-	  case 'Layereditor_Klasse_Hinzufügen' : {
+	  case 'Layereditor_Klasse_HinzufÃ¼gen' : {
 		$GUI->checkCaseAllowed('Layer_Anzeigen');
 		$GUI->Layereditor_KlasseHinzufuegen();    
 	  } break;
@@ -1289,7 +1289,7 @@ if ($goNotExecutedInIncludeCases) {
 		$GUI->LayerAnlegen();
 	  } break;
 
-	  case 'Layereditor_Ändern' : {
+	  case 'Layereditor_Ã„ndern' : {
 		$GUI->checkCaseAllowed('Layer_Anzeigen');
 		$GUI->LayerAendern();
 	  } break;
@@ -1318,7 +1318,7 @@ if ($goNotExecutedInIncludeCases) {
 		$GUI->LayerUebersicht();
 	  } break;
 
-	  case 'Layer_Löschen' : {    
+	  case 'Layer_LÃ¶schen' : {    
 		$GUI->checkCaseAllowed('Layer_Anzeigen');
 		$GUI->LayerLoeschen();
 	  } break;
@@ -1358,7 +1358,7 @@ if ($goNotExecutedInIncludeCases) {
 		$GUI->Stelleneditor();
 	  } break;
 
-	  case 'Stelle_Löschen' : {
+	  case 'Stelle_LÃ¶schen' : {
 		$GUI->checkCaseAllowed('Stellen_Anzeigen');
 		$GUI->StelleLoeschen();
 	  } break;
@@ -1368,7 +1368,7 @@ if ($goNotExecutedInIncludeCases) {
 		$GUI->StelleAnlegen();
 	  } break;
 
-	  case 'Stelleneditor_Ändern' : {
+	  case 'Stelleneditor_Ã„ndern' : {
 		$GUI->checkCaseAllowed('Stellen_Anzeigen');
 		$GUI->StelleAendern();
 	  } break;
@@ -1414,9 +1414,9 @@ if ($goNotExecutedInIncludeCases) {
 		$GUI->BenutzerdatenFormular();
 	  } break;
 
-	  case 'Benutzer_Löschen' : {
+	  case 'Benutzer_LÃ¶schen' : {
 		$GUI->checkCaseAllowed('Benutzerdaten_Anzeigen');
-		$GUI->BenutzerLöschen();
+		$GUI->BenutzerLÃ¶schen();
 	  } break;
 
 	  case 'Benutzerdaten_Als neuen Nutzer eintragen' : {
@@ -1424,7 +1424,7 @@ if ($goNotExecutedInIncludeCases) {
 		$GUI->BenutzerdatenAnlegen();
 	  } break;
 
-	  case 'Benutzerdaten_Ändern' : {
+	  case 'Benutzerdaten_Ã„ndern' : {
 		$GUI->checkCaseAllowed('Benutzerdaten_Formular');
 		$GUI->BenutzerdatenAendern();
 	  } break;
@@ -1440,7 +1440,7 @@ if ($goNotExecutedInIncludeCases) {
 		$GUI->FunktionenFormular();
 	  } break;
 
-	  case 'Funktion_Löschen' : {
+	  case 'Funktion_LÃ¶schen' : {
 		$GUI->checkCaseAllowed('Funktionen_Anzeigen');
 		$GUI->FunktionLoeschen();
 	  } break;
@@ -1450,7 +1450,7 @@ if ($goNotExecutedInIncludeCases) {
 		$GUI->FunktionAnlegen();    
 	  } break;
 
-	  case 'Funktionen_Ändern' : {
+	  case 'Funktionen_Ã„ndern' : {
 		$GUI->checkCaseAllowed('Funktionen_Formular');
 		$GUI->FunktionAendern();
 	  } break;
@@ -1552,7 +1552,7 @@ if ($goNotExecutedInIncludeCases) {
 	  } break;
 
 
-	#Documente die in der Ergebnisliste ausgewählt wurden sollen weiterverarbeitet werden!
+	#Documente die in der Ergebnisliste ausgewÃ¤hlt wurden sollen weiterverarbeitet werden!
 	# 2006-01-26 pk
 	  case 'Nachweisanzeige_zum_Auftrag_hinzufuegen' : {
 		$GUI->checkCaseAllowed($go);
@@ -1564,9 +1564,9 @@ if ($goNotExecutedInIncludeCases) {
 		$GUI->nachweiseZuAuftragEntfernen();
 	  } break;
 
-	  # Der case 'Bestaetigung' wurde am 2006-01-30 gelöscht, weil nicht mehr benutzt
+	  # Der case 'Bestaetigung' wurde am 2006-01-30 gelÃ¶scht, weil nicht mehr benutzt
 
-	  # Rechercheanfrage an die Datenbank senden / mit prüfen der Eingabedaten
+	  # Rechercheanfrage an die Datenbank senden / mit prÃ¼fen der Eingabedaten
 	  case 'Nachweisanzeige' : {
 		if($GUI->formvars['art_markieren'] AND $GUI->formvars['art_einblenden']){
 		  $GUI->formvars['showffr']=substr($GUI->formvars['art_einblenden'],0,1);
@@ -1596,14 +1596,14 @@ if ($goNotExecutedInIncludeCases) {
 		$GUI->nachweisDokumentAnzeigen();
 	  } break;
 
-	  # Eingabe oder Änderung der Daten zu einem Dokument im Katasternachweis
-	  # für Fortführungsrisse, Koordinatenverzeichnisse und Grenzniederschriften
+	  # Eingabe oder Ã„nderung der Daten zu einem Dokument im Katasternachweis
+	  # fÃ¼r FortfÃ¼hrungsrisse, Koordinatenverzeichnisse und Grenzniederschriften
 
 	  case 'Nachweisformular' : {
 		$GUI->checkCaseAllowed($go);
-		# Unterscheidung ob vorhandene Dokumente geändert werden sollen oder neu eingegeben
+		# Unterscheidung ob vorhandene Dokumente geÃ¤ndert werden sollen oder neu eingegeben
 		if ($GUI->formvars['id']!='') {
-		  # Ein Nachweis soll geändert werden
+		  # Ein Nachweis soll geÃ¤ndert werden
 		  $GUI->nachweisAenderungsformular();
 		}
 		else {
@@ -1641,12 +1641,12 @@ if ($goNotExecutedInIncludeCases) {
 		$GUI->rechercheFormAnzeigen();
 	  } break;
 
-	  # Rechercheanfrage an die Datenbank senden/ mit prüfen der Eingabedaten
+	  # Rechercheanfrage an die Datenbank senden/ mit prÃ¼fen der Eingabedaten
 	  case 'Nachweisrechercheformular_Senden':{
 		$GUI->nachweiseRecherchieren();
 	  } break;
 
-	  case "Ändern" : {
+	  case "Ã„ndern" : {
 		$GUI->loadMap('DataBase');
 		$GUI->scaleMap($GUI->formvars['nScale']);
 		$currenttime=date('Y-m-d H:i:s',time());
@@ -1786,7 +1786,7 @@ if ($goNotExecutedInIncludeCases) {
 	  } break;
 
 	  # Aktualisierung des ALB-Datenbestandes an Hand einer WLDGE-Datei
-	  # Dieser Anwendungsfall deckt das Anlegen eines neuen ALB-Bestandes mit ab, dazu muß die Variable ist_Fortführung=0 sein
+	  # Dieser Anwendungsfall deckt das Anlegen eines neuen ALB-Bestandes mit ab, dazu muÃŸ die Variable ist_FortfÃ¼hrung=0 sein
 	  case 'ALB_Aenderung' : {
 		$GUI->checkCaseAllowed($go);
 		if ($GUI->formvars['WLDGE_lokal']==2) {
@@ -1796,7 +1796,7 @@ if ($goNotExecutedInIncludeCases) {
 		  $GUI->ALB_Aenderung();
 		}
 		$GUI->output();
-	  } break; # end of Änderung des ALB-Datenbestandes
+	  } break; # end of Ã„nderung des ALB-Datenbestandes
 
 	  case 'tmp_Adr_Tabelle_Aktualisieren' : {
 		$GUI->tmp_Adr_Tabelle_Aktualisieren();
@@ -1808,13 +1808,13 @@ if ($goNotExecutedInIncludeCases) {
 		$GUI->saveMap('');
 	  } break;
 
-	  # Auswählen einer neuen Stelle
-	  case 'Stelle Wählen' : {
+	  # AuswÃ¤hlen einer neuen Stelle
+	  case 'Stelle WÃ¤hlen' : {
 		$GUI->rollenwahl($Stelle_ID);
 		$GUI->output();
 	  } break;
 	  
-	   # Auswählen einer neuen Stelle
+	   # AuswÃ¤hlen einer neuen Stelle
 	  case 'Stelle_waehlen' : {
 		$GUI->rollenwahl($Stelle_ID);
 		$GUI->output();

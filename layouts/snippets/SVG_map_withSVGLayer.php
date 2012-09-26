@@ -17,20 +17,20 @@
 	# Wie stelle ich mir das in Zukunft vor?
 	# Ein SVG-Layer wird als ganz normaler Layer in mysql eingetragen
 	# mit folgenden Ausnahmen/Besonderheiten:
-	#  - es wird eine neue Spalte eingeführt, die den Layer als SVG-Layer kennzeichnet
+	#  - es wird eine neue Spalte eingefÃ¼hrt, die den Layer als SVG-Layer kennzeichnet
 	#    beim einlesen der Layer kann dann unterschieden werden, welche Layer SVG-Layer sind
 	#  - Wenn ein Layer ein SVG-Layer ist, wird das Data-feld im MapObjekt mit einem dummy Eintrag versehen
-	#    der dafür sorgt, dass der Layer zwar gezeichnet wird, aber nicht zu sehen ist, damit
+	#    der dafÃ¼r sorgt, dass der Layer zwar gezeichnet wird, aber nicht zu sehen ist, damit
 	#    der Layer in der Legende erscheint. Irgend eine leere Abfrage auf postgis, dabei muss der Datentyp
-	#    Punkt, Linie und Fläche unterschieden werden. Also jeweils eine dummy-Abfrage 
-	#    Der Layer muss für UMN also nur existieren, damit die Legende gezeichnet wird und er an
+	#    Punkt, Linie und FlÃ¤che unterschieden werden. Also jeweils eine dummy-Abfrage 
+	#    Der Layer muss fÃ¼r UMN also nur existieren, damit die Legende gezeichnet wird und er an
 	#    und ausgeschaltet werden kann.
 	#  - eine weitere neue Spalte definiert den SVG-Datentyp, weil die Typen von Mapserver ja nicht reichen
 	#    hier kann dann nach belieben erweitert werden, z.B. Ellipse
-	#  - in der Spalte Data steht die Abfrage, die für die Ausgabe in SVG benötigt wird.
-	#  Beim laden der Layer in kvwmap.php in Funktion loadMap werden zusätzlich zum laden der normalen Layer
-	#  Alle Informationen für die SVG-Layer abgefragt, und zwar
-	# !! nur für den jeweils aktuellen Kartenausschnitt !!
+	#  - in der Spalte Data steht die Abfrage, die fÃ¼r die Ausgabe in SVG benÃ¶tigt wird.
+	#  Beim laden der Layer in kvwmap.php in Funktion loadMap werden zusÃ¤tzlich zum laden der normalen Layer
+	#  Alle Informationen fÃ¼r die SVG-Layer abgefragt, und zwar
+	# !! nur fÃ¼r den jeweils aktuellen Kartenausschnitt !!
 	# Im Ergebnis dieser Abfrage gibt es dann nicht nur einen layerset, sondern auch noch einen SVGlayerset
 	# dieser Layerset kann dann in seiner Reihenfolge in SVG gezeichnet werden
 	#
@@ -49,7 +49,7 @@
 		# zuweisen des Datentyps
 		$SVGlayerset[0]['Datentyp']='ellipse';
 	}
-	# hier liegt dann also ein layer für fehlerellipsen in Form eines Arrays bereit.
+	# hier liegt dann also ein layer fÃ¼r fehlerellipsen in Form eines Arrays bereit.
 	# und kann gezeichnet werden
 	# in den Feldern rw und hw liegen die Koordinaten, in phi der Winkel der Ellipse und in a und b die Halbachsen.
 	# z.B. $SVGlayerset[0][0]['rw'] ist der Rechtswert der ersten Ellipse im ersten (hier gibt es nur einen) Layer

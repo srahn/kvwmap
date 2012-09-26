@@ -1,4 +1,4 @@
-﻿<?php
+<?php
   $strAvailableLayer="dost&#281;pne warstwy / tematy"; 
   $strCoordinates="współrzędne"; 
   $strShowCoordinates="pokaż współrzędne"; 

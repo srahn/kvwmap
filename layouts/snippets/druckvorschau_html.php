@@ -107,7 +107,7 @@ function zoom(zoomdirection){
   </tr>
   <tr align="center"> 
     <td colspan="2"> 
-      <input class="button" type="button" name="zurueck" value="zurück" onclick="goback();">
+      <input class="button" type="button" name="zurueck" value="zurÃ¼ck" onclick="goback();">
       <input class="button" type="button" name="drucken" value="Drucken" onclick="print();">
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       <input class="button" type="button" name="vorschauzoomin" value=" + " onclick="zoom('in');">

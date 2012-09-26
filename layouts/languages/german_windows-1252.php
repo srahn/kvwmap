@@ -1,22 +1,22 @@
 <?php
   $this->strID="ID";
-  $this->strChoose="Bitte Wählen";
-  $this->strChange="Ändern";
-  $this->strDelete="Löschen";
-  $this->strDeleteWarningMessage="Wollen Sie wirklich Löschen?";
+  $this->strChoose="Bitte WÃ¤hlen";
+  $this->strChange="Ã„ndern";
+  $this->strDelete="LÃ¶schen";
+  $this->strDeleteWarningMessage="Wollen Sie wirklich LÃ¶schen?";
   $this->strLayer="Layer";
   $this->strName="Name";
   $this->strGroup="Gruppe";
   $this->strNo="Nein";
-  $this->strPleaseSelect="Bitte auswählen";
+  $this->strPleaseSelect="Bitte AuswÃ¤hlen";
   $this->strSave="Speichern";
   $this->strTask="Stelle";
   $this->strYes="Ja";
-  $this->TaskChangeWarning="Sie sind nicht berechtigt zur Auführung der Funktion in dieser Stelle.";
-  $this->strButtonBack="Zurück";  
+  $this->TaskChangeWarning="Sie sind nicht berechtigt zur AufÃ¼hrung der Funktion in dieser Stelle.";
+  $this->strButtonBack="ZurÃ¼ck";  
  $this->strCancel="Abbrechen";
  $this->strSend="Senden";
  $this->strEnter="Start";
- $this->strReset="Zurücksetzen";
+ $this->strReset="ZurÃ¼cksetzen";
  $this->strSaveMapViewCommittMassage="Kartenausschnitt wurde gespeichert";
 ?>

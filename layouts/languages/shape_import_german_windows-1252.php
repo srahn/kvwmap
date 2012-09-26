@@ -1,6 +1,6 @@
-<?php
+ï»¿<?php
  $strTitle="Shape-Import";
- $strLoadZipArchieve="Sie können hier ein zip-Archiv hochladen, welches die 3 Dateien vom Typ dbf, shp und shx enthält.";
+ $strLoadZipArchieve="Sie kÃ¶nnen hier ein zip-Archiv hochladen, welches die 3 Dateien vom Typ dbf, shp und shx enthÃ¤lt.";
  $strZipArchive="Zip-Archiv: ";
  $strLoadData="Datei laden";
  $strMapProjection="EPSG-Code";

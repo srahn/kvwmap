@@ -32,10 +32,10 @@ function setfields(){
 		<?
 		if($this->synchro->result != NULL){
 			echo '<tr>
-							<td>Es wurden '.$this->synchro->result['newcount'].' neue Datens‰tze eingelesen.</td>
+							<td>Es wurden '.$this->synchro->result['newcount'].' neue Datens√§tze eingelesen.</td>
 						</tr>
 						<tr>
-							<td>Es wurden '.$this->synchro->result['oldcount'].' alte Datens‰tze eingelesen.</td>
+							<td>Es wurden '.$this->synchro->result['oldcount'].' alte Datens√§tze eingelesen.</td>
 						</tr>
 						';
 		}
@@ -52,7 +52,7 @@ function setfields(){
 					<td valign="top">
 			      <table cellspacing=0 cellpadding=2 border=0 style="border:1px solid #C3C7C3;">
 			        <tr align="center">
-			          <td>Verf¸gbare Themen:</td>
+			          <td>Verf√ºgbare Themen:</td>
 			        </tr>
 			        <tr align="left">
 			          <td>

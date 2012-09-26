@@ -1,10 +1,10 @@
-<?php
- $strTitle="Flurstückssuche";
- $strGemkgschl="Gemarkungsschlüssel";
+ï»¿<?php
+ $strTitle="FlurstÃ¼ckssuche";
+ $strGemkgschl="GemarkungsschlÃ¼ssel";
  $strGemkgGem="Gemarkung, Gemeinde";
  $strFlur="Flur";
- $strFst="Flurstück";
- $strSelected="ausgewählte";
+ $strFst="FlurstÃ¼ck";
+ $strSelected="ausgewÃ¤hlte";
  $strExist="vorhandene";
  $strClear="Neu";
  $strSearch="Suchen";

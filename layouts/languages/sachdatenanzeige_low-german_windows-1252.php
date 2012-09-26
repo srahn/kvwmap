@@ -1,12 +1,12 @@
-<?php
+ï»¿<?php
 $strPrint="utdrucken";
 $strSave="Spiekern";
-$strbacktomap="Trügg to'r Koort";
-$strCancel="Afbräcken";
-$strDelete="Löschen";
-$strBackDatasets="trügg";
+$strbacktomap="TrÃ¼gg to'r Koort";
+$strCancel="AfbrÃ¤cken";
+$strDelete="LÃ¶schen";
+$strBackDatasets="trÃ¼gg";
 $strFromDatasets="vun";
 $strForwardDatasets="wieder";
-$strbackToSearch="trügg to'r Sök";
-$strNoLayer="Du mööst een Layer för de Sachdatenaffraag utwählen!";
+$strbackToSearch="trÃ¼gg to'r SÃ¶k";
+$strNoLayer="Du mÃ¶Ã¶st een Layer fÃ¶r de Sachdatenaffraag utwÃ¤hlen!";
 ?>

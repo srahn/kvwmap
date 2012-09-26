@@ -502,7 +502,7 @@ function emzversteckt(k){
 		            if ($nichtgeschaetzt>0) { ?>
           				<tr>
           					<td></td>
-          					<td colspan="3">nicht geschätzt: <? echo $nichtgeschaetzt; ?> m&sup2;</td>
+          					<td colspan="3">nicht geschÃ¤tzt: <? echo $nichtgeschaetzt; ?> m&sup2;</td>
           				</tr>
 		            <? }
         			if ($emzges_222 > 0)  {
@@ -518,7 +518,7 @@ function emzversteckt(k){
         					?>
           				<tr>
           					<td></td>
-          					<td colspan="3">Grünland gesamt: EMZ <? echo $emzges_223; ?>, BWZ <? echo $BWZ_223; ?></td>
+          					<td colspan="3">GrÃ¼nland gesamt: EMZ <? echo $emzges_223; ?>, BWZ <? echo $BWZ_223; ?></td>
           				</tr>
         			<?	} ?>
 		          </table>
@@ -788,7 +788,7 @@ function emzversteckt(k){
 			      	  if ($zusatz_eigentuemer!='') {
 			      	?>
 			      	<tr>
-			      	  <td colspan="3">Zusatz Eigentümer:</td>
+			      	  <td colspan="3">Zusatz EigentÃ¼mer:</td>
 			        </tr>
 			      	<tr>
 			      	  <td colspan="3">
@@ -901,7 +901,7 @@ function emzversteckt(k){
   } # Ende der Schleife zur Abfrage und Anzeige der einzelnen Flurst&uuml;cke
   ?>
 
-  <!-- Für alle Flurstücke -->
+  <!-- FÃ¼r alle FlurstÃ¼cke -->
   <tr height="140px">
     <td valign="bottom">
       <table width="100%" border="0" cellspacing="0" cellpadding="2">
@@ -944,9 +944,9 @@ function emzversteckt(k){
 		</tr>
 		<tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
 		  <td colspan="2">
-        <a href="javascript:send_selected_flurst('Flurstuecks-CSV-Export', 'Flurstück', '', '');">CSV-Export FST</a>&nbsp;|&nbsp;
+        <a href="javascript:send_selected_flurst('Flurstuecks-CSV-Export', 'FlurstÃ¼ck', '', '');">CSV-Export FST</a>&nbsp;|&nbsp;
         <? if($privileg['eigentuemer']){ ?>
-        <a href="javascript:send_selected_flurst('Flurstuecks-CSV-Export', 'Eigentümer', '', '');">CSV-Export Eigent&uuml;mer</a>&nbsp;|&nbsp;
+        <a href="javascript:send_selected_flurst('Flurstuecks-CSV-Export', 'EigentÃ¼mer', '', '');">CSV-Export Eigent&uuml;mer</a>&nbsp;|&nbsp;
         <? } ?>
         <a href="javascript:send_selected_flurst('Flurstuecks-CSV-Export', 'Nutzungsarten', '', '');">CSV-Export NA</a>
   		  </td>
@@ -971,7 +971,7 @@ function emzversteckt(k){
   <? } ?>
 
   <?
-  } # Ende es liegen Flurstücke im Suchbereich
+  } # Ende es liegen FlurstÃ¼cke im Suchbereich
 
   else {
   	?><br><strong><font color="#FF0000">
@@ -1011,7 +1011,7 @@ if($this->formvars['grundbuchsuche'] == 'true'){
 ?>
 <input name="selBlatt" type="hidden" value="<? echo $this->formvars['selBlatt']; ?>">
 <input name="Bezirk" type="hidden" value="<? echo $this->formvars['Bezirk']; ?>">
-<a href="javascript:backto('Grundbuchblatt_Auswaehlen_Suchen');">zurück zur Grundbuchblattauswahl</a>
+<a href="javascript:backto('Grundbuchblatt_Auswaehlen_Suchen');">zurÃ¼ck zur Grundbuchblattauswahl</a>
 <br><br>
 <?}
 if($this->formvars['namensuche'] == 'true'){
@@ -1026,7 +1026,7 @@ if($this->formvars['namensuche'] == 'true'){
   <input name="offset" type="hidden" value="<? echo $this->formvars['offset']; ?>">
   <input name="order" type="hidden" value="<? echo $this->formvars['order'] ?>">
   <input name="anzahl" type="hidden" value="<?php echo $this->formvars['anzahl']; ?>">
-  <a href="javascript:backto('Namen_Auswaehlen_Suchen');">zurück zur Namensuche</a>
+  <a href="javascript:backto('Namen_Auswaehlen_Suchen');">zurÃ¼ck zur Namensuche</a>
   <br><br>
  <?}
  if($this->formvars['jagdkataster'] == 'true'){
@@ -1037,6 +1037,6 @@ if($this->formvars['namensuche'] == 'true'){
   <input name="search_nummer" type="hidden" value="<?php echo $this->formvars['search_nummer']; ?>">
   <input name="search_name" type="hidden" value="<?php echo $this->formvars['search_name']; ?>">
   <input name="search_art" type="hidden" value="<?php echo $this->formvars['search_art']; ?>">
-  <a href="javascript:backto('jagdkatastereditor_Flurstuecke_Listen');">zurück zur Jagdbezirk-Flurstücksliste</a>
+  <a href="javascript:backto('jagdkatastereditor_Flurstuecke_Listen');">zurÃ¼ck zur Jagdbezirk-FlurstÃ¼cksliste</a>
   <br><br>
 <?} ?>

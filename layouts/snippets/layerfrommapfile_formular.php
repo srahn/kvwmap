@@ -55,7 +55,7 @@ function selectall(count){
 				if($this->mapobject->fontsetfilename != '' OR $this->mapobject->symbolsetfilename != ''){
 					echo '
 						<tr>
-							<td colspan="3" align="center"><b>Symbole und Fonts hinzufügen?</b></td>
+							<td colspan="3" align="center"><b>Symbole und Fonts hinzufÃ¼gen?</b></td>
 						</tr>
 					';
 				}
@@ -80,7 +80,7 @@ function selectall(count){
 						<td colspan="3" align="center"><b>'.count($this->layers).' Layer in '.basename($this->formvars['mapfile']).' gefunden:</b></td>
 					</tr>
 					<tr>
-						<td colspan="3" align="right"><input class="button" type="button" value="alle auswählen" name="alleauswaehlen" onClick="selectall('.count($this->layers).')"></td>
+						<td colspan="3" align="right"><input class="button" type="button" value="alle auswÃ¤hlen" name="alleauswaehlen" onClick="selectall('.count($this->layers).')"></td>
 					</tr>
 				';
 				for($i = 0; $i < count($this->layers); $i++){
@@ -103,7 +103,7 @@ function selectall(count){
 				}
 				echo '
 				<tr>
-					<td colspan="3" align="right"><input class="button" type="submit" name="go_plus" value="Layer hinzufügen"></td>
+					<td colspan="3" align="right"><input class="button" type="submit" name="go_plus" value="Layer hinzufÃ¼gen"></td>
 				</tr>
 				<input type="hidden" name="mapfilename" value="'.$this->formvars['mapfile'].'">
 				';
@@ -118,14 +118,14 @@ function selectall(count){
 			if($this->fontsetcount > 0){
 				echo '
 				<tr>
-					<td colspan="3">Die Fontset-Datei '.FONTSET.' wurde um '.$this->fontsetcount.' Einträge erweitert und es wurden '.$this->fontfilecount.' Fontdateien nach '.dirname(FONTSET).' kopiert.</td>
+					<td colspan="3">Die Fontset-Datei '.FONTSET.' wurde um '.$this->fontsetcount.' EintrÃ¤ge erweitert und es wurden '.$this->fontfilecount.' Fontdateien nach '.dirname(FONTSET).' kopiert.</td>
 				</tr>
 				';
 			}
 			if($this->symbolcount > 0){
 				echo '
 				<tr>
-					<td colspan="3">Zur Symbolset-Datei '.SYMBOLSET.' wurden '.$this->symbolcount.' Symbole hinzugefügt.</td>
+					<td colspan="3">Zur Symbolset-Datei '.SYMBOLSET.' wurden '.$this->symbolcount.' Symbole hinzugefÃ¼gt.</td>
 				</tr>
 				';
 			}

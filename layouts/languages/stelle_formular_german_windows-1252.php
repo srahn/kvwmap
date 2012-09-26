@@ -1,4 +1,4 @@
-<?php
+ï»¿<?php
   $strTitle="Stelleneditor";
   $strAsteriskRequired="Werte mit * mussen eingetragen werden";
   $strDataBankID="Datenbank ID";
@@ -20,24 +20,24 @@
   $strOwsFees="OWS fees";
   $strOwsSrs="OWS SRS";
   $strLogo="Wappen*";
-  $strNoLogoSelected="kein Wappen ausgewählt";
+  $strNoLogoSelected="kein Wappen ausgewÃ¤hlt";
   $strWaterMark="Wasserzeichen";
-  $strNoWatermarkSelected="kein Wasserzeichen ausgewählt";
+  $strNoWatermarkSelected="kein Wasserzeichen ausgewÃ¤hlt";
   $strALBReferencingRegion="ALB_Raumbezug";
-  $strALBReferencingRegionKey="ALB_Raumbezugschlüssel";
-  $strMenuPoint="Menüpunkte";
+  $strALBReferencingRegionKey="ALB_RaumbezugschlÃ¼ssel";
+  $strMenuPoint="MenÃ¼punkte";
   $strAssigned="Zugeordnete";
-  $strAvailable="verfügbare";
+  $strAvailable="verfÃ¼gbare";
   $strLayer="Layer";
   $strEdit="bearbeiten";
   $strUser="Benutzer";
-  $strButtonUpdate="Ändern";
+  $strButtonUpdate="Ã„ndern";
   $strButtonInsert="Als neue Stelle eintragen";
   $strCommunity="Gemeinde";
   $strAdministrationAgency="Amtsverwaltung";
   $strDistrict="Kreis";
-  $strCheckPasswordAge="Alter von Passwörtern in dieser Stelle prüfen";
-  $strAllowedPasswordAge="Erlaubtes Alter von Passwörtern, wenn es geprüft wird (in Monaten)";
+  $strCheckPasswordAge="Alter von PasswÃ¶rtern in dieser Stelle prÃ¼fen";
+  $strAllowedPasswordAge="Erlaubtes Alter von PasswÃ¶rtern, wenn es geprÃ¼ft wird (in Monaten)";
   $strStart="Start";
   $strStop="Stop";
 ?>

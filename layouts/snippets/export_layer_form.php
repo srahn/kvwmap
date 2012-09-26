@@ -71,11 +71,11 @@ function buildwktpolygonfromsvgpath(svgpath){
 		<?
 		if($this->synchro->result != NULL){
 			echo '<tr>
-							<td>Es wurden '.$this->synchro->result['count'].' Datens‰tze eingelesen.</td>
+							<td>Es wurden '.$this->synchro->result['count'].' Datens√§tze eingelesen.</td>
 						</tr>';
 			if($this->synchro->result['lock'] == true AND $this->synchro->result['count'] > 0){
 				echo '<tr>
-							<td>Die Datens‰tze wurden gelockt.</td>
+							<td>Die Datens√§tze wurden gelockt.</td>
 						</tr>';
 			}		
 	#		echo '<tr>
@@ -96,7 +96,7 @@ function buildwktpolygonfromsvgpath(svgpath){
 					<td valign="top">
 			      <table cellspacing=0 cellpadding=2 border=0 style="border:1px solid #C3C7C3;">
 			        <tr align="center">
-			          <td>Verf¸gbare Themen:</td>
+			          <td>Verf√ºgbare Themen:</td>
 			        </tr>
 			        <tr align="left">
 			          <td>
@@ -104,7 +104,7 @@ function buildwktpolygonfromsvgpath(svgpath){
 			          		<br>
 			        			<div style="width:230; height:<?php echo $this->map->height-59; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
 				          		&nbsp;
-				          		<img src="graphics/lock.gif" alt="Datens‰tze sperren" title="ausgelesene Datens‰tze werden gesperrt" height="20">
+				          		<img src="graphics/lock.gif" alt="Datens√§tze sperren" title="ausgelesene Datens√§tze werden gesperrt" height="20">
 				          		<br>
 				          	<div id="legend_div"><? echo $this->legende; ?></div>
 				        	</div>

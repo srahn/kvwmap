@@ -66,7 +66,7 @@ function save_selection(){
 		document.GUI.submit();
 	}
 	else{
-		alert('Bitte geben Sie einen Namen für die Auswahl an.');
+		alert('Bitte geben Sie einen Namen fÃ¼r die Auswahl an.');
 	}
 }
 
@@ -76,7 +76,7 @@ function load_selection(){
 		document.GUI.submit();
 	}
 	else{
-		alert('Bitte wählen Sie eine Auswahl aus.');
+		alert('Bitte wÃ¤hlen Sie eine Auswahl aus.');
 	}
 }
 
@@ -86,7 +86,7 @@ function delete_selection(){
 		document.GUI.submit();
 	}
 	else{
-		alert('Bitte wählen Sie eine Auswahl aus.');
+		alert('Bitte wÃ¤hlen Sie eine Auswahl aus.');
 	}
 }
 
@@ -100,7 +100,7 @@ function delete_selection(){
     </td>
   </tr>
   <tr>
-  	<td align="center">Welche Attribute sollen zusätzlich ausgegeben werden?</td>
+  	<td align="center">Welche Attribute sollen zusÃ¤tzlich ausgegeben werden?</td>
   </tr>
   <tr> 
     <td colspan="2" ><div align="center">
@@ -113,45 +113,45 @@ function delete_selection(){
           <td valign="top" width="250">
           <?
           if($privileg['amtsgerichtname']){ echo '<input  name="amtsgerichtname" type="checkbox" '; if($this->formvars['amtsgerichtname'] == 'true') echo 'checked'; echo '>Amtsgerichtname<br>';}
-          if($privileg['amtsgerichtnr']){ echo '<input  name="amtsgerichtnr" type="checkbox" '; if($this->formvars['amtsgerichtnr'] == 'true') echo 'checked'; echo '>Amtsgerichtschlüssel<br>';}
-          if($privileg['ausfstelle']){ echo '<input  name="ausfstelle" type="checkbox" '; if($this->formvars['ausfstelle'] == 'true') echo 'checked'; echo '>ausführende Stelle<br>';}
+          if($privileg['amtsgerichtnr']){ echo '<input  name="amtsgerichtnr" type="checkbox" '; if($this->formvars['amtsgerichtnr'] == 'true') echo 'checked'; echo '>AmtsgerichtschlÃ¼ssel<br>';}
+          if($privileg['ausfstelle']){ echo '<input  name="ausfstelle" type="checkbox" '; if($this->formvars['ausfstelle'] == 'true') echo 'checked'; echo '>ausfÃ¼hrende Stelle<br>';}
           if($privileg['baulasten']){ echo '<input  name="baulasten" type="checkbox" '; if($this->formvars['baulasten'] == 'true') echo 'checked'; echo '>Baulasten<br>';}
           if($privileg['bestandsnr']){ echo '<input  name="blattnr" type="checkbox" '; if($this->formvars['blattnr'] == 'true') echo 'checked'; echo '>Blattnummer<br>';}
           if($privileg['bestandsnr']){ echo '<input  name="buchungsart" type="checkbox" '; if($this->formvars['buchungsart'] == 'true') echo 'checked'; echo '>Buchungsart<br>';}
           if($privileg['bestandsnr']){ echo '<input  name="bvnr" type="checkbox" '; if($this->formvars['bvnr'] == 'true') echo 'checked'; echo '>Bestandsverzeichnisnummer<br>';}
           if($privileg['entsteh']){ echo '<input  name="entsteh" type="checkbox" '; if($this->formvars['entsteh'] == 'true') echo 'checked'; echo '>Entstehung<br>';}
-          if($this->formvars['formnummer'] != 'Eigentümer' AND $privileg['eigentuemer']){ echo '<input  name="eigentuemer" type="checkbox" '; if($this->formvars['eigentuemer'] == 'true') echo 'checked'; echo '>Eigentümer<br>';}
+          if($this->formvars['formnummer'] != 'EigentÃ¼mer' AND $privileg['eigentuemer']){ echo '<input  name="eigentuemer" type="checkbox" '; if($this->formvars['eigentuemer'] == 'true') echo 'checked'; echo '>EigentÃ¼mer<br>';}
           if($privileg['finanzamtname']){ echo '<input  name="finanzamtname" type="checkbox" '; if($this->formvars['finanzamtname'] == 'true') echo 'checked'; echo '>Finanzamtname<br>';}
-			    if($privileg['finanzamt']){ echo '<input  name="finanzamt" type="checkbox" '; if($this->formvars['finanzamt'] == 'true') echo 'checked'; echo '>Finanzamtschlüssel<br>';}
+			    if($privileg['finanzamt']){ echo '<input  name="finanzamt" type="checkbox" '; if($this->formvars['finanzamt'] == 'true') echo 'checked'; echo '>FinanzamtschlÃ¼ssel<br>';}
 			    if($privileg['karte']){ echo '<input  name="karte" type="checkbox" '; if($this->formvars['karte'] == 'true') echo 'checked'; echo '>Flurkarte<br>';}
 			    if($privileg['flurnr']){ echo '<input  name="flurnr" type="checkbox" '; if($this->formvars['flurnr'] == 'true') echo 'checked'; echo '>Flurnummer<br>';}
-			    if($privileg['flaeche']){ echo '<input  name="flaeche" type="checkbox" '; if($this->formvars['flaeche'] == 'true') echo 'checked'; echo '>Flurstücksfläche<br>';}
-          if($privileg['flurstkennz']){ echo '<input  name="flurstkennz" checked="true" type="checkbox" '; if($this->formvars['flurstkennz'] == 'true') echo 'checked'; echo '>Flurstückskennzeichen<br>';}
+			    if($privileg['flaeche']){ echo '<input  name="flaeche" type="checkbox" '; if($this->formvars['flaeche'] == 'true') echo 'checked'; echo '>FlurstÃ¼cksflÃ¤che<br>';}
+          if($privileg['flurstkennz']){ echo '<input  name="flurstkennz" checked="true" type="checkbox" '; if($this->formvars['flurstkennz'] == 'true') echo 'checked'; echo '>FlurstÃ¼ckskennzeichen<br>';}
           if($privileg['forstname']){ echo '<input  name="forstname" type="checkbox" '; if($this->formvars['forstname'] == 'true') echo 'checked'; echo '>Forstamtname<br>';}
-			    if($privileg['forstschluessel']){ echo '<input  name="forstschluessel" type="checkbox" '; if($this->formvars['forstschluessel'] == 'true') echo 'checked'; echo '>Forstamtschlüssel<br>';}
-			    if($privileg['letzff']){ echo '<input  name="letzff" type="checkbox" '; if($this->formvars['letzff'] == 'true') echo 'checked'; echo '>Fortführung<br>';}
+			    if($privileg['forstschluessel']){ echo '<input  name="forstschluessel" type="checkbox" '; if($this->formvars['forstschluessel'] == 'true') echo 'checked'; echo '>ForstamtschlÃ¼ssel<br>';}
+			    if($privileg['letzff']){ echo '<input  name="letzff" type="checkbox" '; if($this->formvars['letzff'] == 'true') echo 'checked'; echo '>FortfÃ¼hrung<br>';}
 			    ?>
           </td>
           <td valign="top">
           <?
 			    if($privileg['freitext']){ echo '<input  name="freitext" type="checkbox" '; if($this->formvars['freitext'] == 'true') echo 'checked'; echo '>Freitext<br>';}
 			    if($privileg['gemkgname']){ echo '<input  name="gemkgname" type="checkbox" '; if($this->formvars['gemkgname'] == 'true') echo 'checked'; echo '>Gemarkungsname<br>';}
-			    if($privileg['gemkgschl']){ echo '<input  name="gemkgschl" type="checkbox" '; if($this->formvars['gemkgschl'] == 'true') echo 'checked'; echo '>Gemarkungsschlüssel<br>';}
+			    if($privileg['gemkgschl']){ echo '<input  name="gemkgschl" type="checkbox" '; if($this->formvars['gemkgschl'] == 'true') echo 'checked'; echo '>GemarkungsschlÃ¼ssel<br>';}
 			    if($privileg['gemeinde']){ echo '<input  name="gemeinde" type="checkbox" '; if($this->formvars['gemeinde'] == 'true') echo 'checked'; echo '>Gemeinde<br>';}
 			    if($privileg['gemeindename']){ echo '<input  name="gemeindename" type="checkbox" '; if($this->formvars['gemeindename'] == 'true') echo 'checked'; echo '>Gemeindename<br>';}
 			    if($privileg['grundbuchbezirkname']){ echo '<input  name="grundbuchbezirkname" type="checkbox" '; if($this->formvars['grundbuchbezirkname'] == 'true') echo 'checked'; echo '>Grundbuchbezirkname<br>';}
-			    if($privileg['grundbuchbezirkschl']){ echo '<input  name="grundbuchbezirkschl" type="checkbox" '; if($this->formvars['grundbuchbezirkschl'] == 'true') echo 'checked'; echo '>Grundbuchbezirkschlüssel<br>';}
+			    if($privileg['grundbuchbezirkschl']){ echo '<input  name="grundbuchbezirkschl" type="checkbox" '; if($this->formvars['grundbuchbezirkschl'] == 'true') echo 'checked'; echo '>GrundbuchbezirkschlÃ¼ssel<br>';}
 			    if($privileg['hinweis']){ echo '<input  name="hinweis" type="checkbox" '; if($this->formvars['hinweis'] == 'true') echo 'checked'; echo '>Hinweis<br>';}
 			    if($privileg['lagebezeichnung']){ echo '<input  name="lagebezeichnung" type="checkbox" '; if($this->formvars['lagebezeichnung'] == 'true') echo 'checked'; echo '>Lage<br>';}
 			    if($privileg['klassifizierung']){ echo '<input  name="klassifizierung" type="checkbox" '; if($this->formvars['klassifizierung'] == 'true') echo 'checked'; echo '>Klassifizierung<br>';}
 			    if($privileg['kreisname']){ echo '<input  name="kreisname" type="checkbox" '; if($this->formvars['kreisname'] == 'true') echo 'checked'; echo '>Kreisname<br>';}
-			    if($privileg['kreisid']){ echo '<input  name="kreisid" type="checkbox" '; if($this->formvars['kreisid'] == 'true') echo 'checked'; echo '>Kreisschlüssel<br>';}
+			    if($privileg['kreisid']){ echo '<input  name="kreisid" type="checkbox" '; if($this->formvars['kreisid'] == 'true') echo 'checked'; echo '>KreisschlÃ¼ssel<br>';}
 			    if($this->formvars['formnummer'] != 'Nutzungsarten' AND $privileg['nutzung']){ echo '<input  name="nutzung" type="checkbox" '; if($this->formvars['nutzung'] == 'true') echo 'checked'; echo '>Nutzung<br>';}
-			    if($privileg['bestandsnr']){ echo '<input  name="pruefzeichen" type="checkbox" '; if($this->formvars['pruefzeichen'] == 'true') echo 'checked'; echo '>Prüfzeichen Buchung<br>';}
-			    if($privileg['bestandsnr']){ echo '<input  name="pruefzeichen_f" type="checkbox" '; if($this->formvars['pruefzeichen_f'] == 'true') echo 'checked'; echo '>Prüfzeichen Flurstück<br>';}
+			    if($privileg['bestandsnr']){ echo '<input  name="pruefzeichen" type="checkbox" '; if($this->formvars['pruefzeichen'] == 'true') echo 'checked'; echo '>PrÃ¼fzeichen Buchung<br>';}
+			    if($privileg['bestandsnr']){ echo '<input  name="pruefzeichen_f" type="checkbox" '; if($this->formvars['pruefzeichen_f'] == 'true') echo 'checked'; echo '>PrÃ¼fzeichen FlurstÃ¼ck<br>';}
 			    if($privileg['status']){ echo '<input  name="status" type="checkbox" '; if($this->formvars['status'] == 'true') echo 'checked'; echo '>Status<br>';}
 			    if($privileg['verfahren']){ echo '<input  name="verfahren" type="checkbox" '; if($this->formvars['verfahren'] == 'true') echo 'checked'; echo '>Verfahren<br>';}
-			    if($privileg['vorgaenger']){ echo '<input  name="vorgaenger" type="checkbox" '; if($this->formvars['vorgaenger'] == 'true') echo 'checked'; echo '>Vorgänger<br>';}			    
+			    if($privileg['vorgaenger']){ echo '<input  name="vorgaenger" type="checkbox" '; if($this->formvars['vorgaenger'] == 'true') echo 'checked'; echo '>VorgÃ¤nger<br>';}			    
 			    ?>
           </td>
         </tr>
@@ -166,7 +166,7 @@ function delete_selection(){
 			  </tr>
 			  <tr>
 			  	<td align="left"  colspan="2">
-			  		<input class="button" type="button" style="width:84px" name="delete" value="löschen" onclick="delete_selection();">&nbsp;			
+			  		<input class="button" type="button" style="width:84px" name="delete" value="lÃ¶schen" onclick="delete_selection();">&nbsp;			
 			  		<select name="selection" onchange="load_selection();" style="width:220px">
 			  			<option value="">-- Auswahl --</option>
 			  			<?
@@ -186,7 +186,7 @@ function delete_selection(){
   </tr>
    <tr> 
     <td align="center" >
-    	<input type="button" name="zurück" onclick="back();" value="zurück">&nbsp;
+    	<input type="button" name="zurÃ¼ck" onclick="back();" value="zurÃ¼ck">&nbsp;
     	<input type="button" name="exportieren" onclick="browser_switch();" value="Exportieren">
     </td>
   </tr>

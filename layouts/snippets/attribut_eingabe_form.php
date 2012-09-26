@@ -75,7 +75,7 @@ function setlayers(selected_options){
   </tr>
   <tr> 
     <td align="right" colspan="5" align="center">
-    	Geometrie übernehmen von: 
+    	Geometrie Ã¼bernehmen von: 
   		<select name="layer_id" onchange="document.GUI.submit();">
   			<option value="">--- Auswahl ---</option>
   			<?
@@ -152,7 +152,7 @@ function setlayers(selected_options){
 						</td>
 					</tr>
 			';
-			// durch das intersecten der Arrays kann es sein, dass einige Schlüssel nicht mehr im Array existieren
+			// durch das intersecten der Arrays kann es sein, dass einige SchlÃ¼ssel nicht mehr im Array existieren
 			// diese werden einfach ausgelassen
 			$keys = array_keys($this->attributes['name']);
 			$lastindex = $keys[count($keys)-1]; 

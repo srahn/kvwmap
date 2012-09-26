@@ -161,7 +161,7 @@ if($this->formvars['gps_follow'] == ''){
 						          <td>&nbsp;</td>
 						          <? } ?>
 						          <td width="210px" align="right">
-						            <img id="scalebar" alt="Maßstabsleiste" src="<? echo $this->img['scalebar']; ?>">
+						            <img id="scalebar" alt="MaÃŸstabsleiste" src="<? echo $this->img['scalebar']; ?>">
 						          </td>
 						        </tr>
 						    	</table>
@@ -202,7 +202,7 @@ if($this->formvars['gps_follow'] == ''){
 						          		&nbsp;<a href="index.php?go=Kartenkommentar_Formular&consumetime=<?php echo $this->user->rolle->newtime; ?>&hauptkarte=<?php echo $this->img['hauptkarte']; ?>"><?php echo $strSave; ?></a>&nbsp;|&nbsp;<a href="index.php?go=Kartenkommentar_Waehlen&prevtime=<?php echo $this->user->rolle->newtime; ?>"><?php echo $strChoose ?></a>&nbsp;|&nbsp;<? if(SHOW_MAP_IMAGE == 'true'){ ?><a id="MapImageLink" target="_blank" href="" onmouseover="javascript:showMapImage();"><?php echo $strMapImageURL; ?></a></b><? } ?>&nbsp;|&nbsp;<a href="javascript:resizemap2window();" ><? echo $strMapSize; ?></a>
 						            </div>
 						          </td>
-						          <td id="options"></td><!-- hier werden die Spezialoptionen eingefügt -->
+						          <td id="options"></td><!-- hier werden die Spezialoptionen eingefÃ¼gt -->
 						        </tr>
 						    	</table>
 			          </td>

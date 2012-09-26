@@ -15,7 +15,7 @@ function create_chart(layer_id){
 	checkbox_names = checkbox_name_string.split('|');
 
 	if(go == 'false'){
-		alert('Es wurde kein Datensatz ausgewählt.');
+		alert('Es wurde kein Datensatz ausgewÃ¤hlt.');
 	}
 	else{
 		document.GUI.target = 'chartframe';
@@ -121,9 +121,9 @@ function change_orderby(attribute, layer_id){
 				<tr>
 					<td></td>
 					<td height="23" colspan="3">
-						<b>Diagramm erzeugen für das Jahr:&nbsp;</b>
+						<b>Diagramm erzeugen fÃ¼r das Jahr:&nbsp;</b>
 						<select style="width:133px" name="chartvalue_<?php echo $layerId; ?>" onchange="create_chart(<?php echo $layerId; ?>);">
-							<option value="">--- Bitte Wählen ---</option>
+							<option value="">--- Bitte WÃ¤hlen ---</option>
 							<?
 							for($j = 0; $j < count($attributes['name']); $j++){
 								if($attributes['name'][$j] != $attributes['the_geom'] AND $attributes['name'][$j] != 'gruppe' AND $attributes['name'][$j] != 'geschlecht' AND $attributes['name'][$j] != 'nr'){

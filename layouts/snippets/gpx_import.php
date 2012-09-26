@@ -39,7 +39,7 @@
 	<? }else{ ?>
 	<tr>
 		<td>&nbsp;</td>
-		<td>GPX-Datei erfolgreich geladen. Wie soll die PostgreSQL-Tabelle heiﬂen?</td>
+		<td>GPX-Datei erfolgreich geladen. Wie soll die PostgreSQL-Tabelle hei√üen?</td>
 		<td>&nbsp;</td>
 	</tr> 
   <tr>
@@ -56,11 +56,11 @@
   			</tr>
   			<tr>
   				<td></td>
-  				<td><input type="radio" name="table_option" value="-d">Tabelle ¸berschreiben</td>
+  				<td><input type="radio" name="table_option" value="-d">Tabelle √ºberschreiben</td>
   			</tr>
   			<tr>
   				<td></td>
-  				<td><input type="radio" name="table_option" value="-a">Daten anh‰ngen</td>
+  				<td><input type="radio" name="table_option" value="-a">Daten anh√§ngen</td>
   			</tr>
   		</table>
   	</td>

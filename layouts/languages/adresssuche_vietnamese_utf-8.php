@@ -1,4 +1,4 @@
-<?php
+﻿<?php
  $strTitle="Search Adresses";
  $strGem="Municipality";
  $strStreet="Street";

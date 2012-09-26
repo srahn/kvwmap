@@ -104,7 +104,7 @@ function addfreetext(){
           </select> 
           </td>
           <td>
-            <input class="button" type="submit" name="go_plus" value="übernehmen >>">
+            <input class="button" type="submit" name="go_plus" value="Ã¼bernehmen >>">
           </td>
           <td style="border-left:1px solid #C3C7C3">
           <select class="select" name="stelle">
@@ -151,11 +151,11 @@ function addfreetext(){
         <tr>
         	<td>&nbsp;y:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" class="input" name="headposy" value="<? echo $this->Document->selectedframe[0]['headposy'] ?>" size="5"></td>
-        	<td>&nbsp;Höhe:</td>
+        	<td>&nbsp;HÃ¶he:</td>
         	<td style="border-right:2px solid #C3C7C3"><input class="input" onchange="updatewidth(<? echo $this->Document->headsize[0].','.$this->Document->headsize[1] ?>);" type="text" name="headheight" value="<? echo $this->Document->selectedframe[0]['headheight'] ?>" size="5"></td>
         	<td>&nbsp;y:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" class="input" name="refmapposy" value="<? echo $this->Document->selectedframe[0]['refmapposy'] ?>" size="5"></td>
-        	<td>&nbsp;Höhe:</td>
+        	<td>&nbsp;HÃ¶he:</td>
         	<td><input type="text" class="input" name="refmapheight" onchange="updaterefwidth(<? echo $this->Document->refmapsize[0].','.$this->Document->refmapsize[1] ?>);" value="<? echo $this->Document->selectedframe[0]['refmapheight'] ?>" size="5"></td>
         </tr>
         <tr>
@@ -184,7 +184,7 @@ function addfreetext(){
 							<div title="Datum" id="date" class="" style="font-family:helvetica; font-size: <? echo $this->Document->datesize; ?>px; font-weight:bold; position: absolute; visibility: visible; left: <? echo $this->Document->dateposx; ?>px; bottom: <? echo $this->Document->dateposy; ?>px">
 								<? echo date("d.m.Y"); ?>
 							</div>
-							<div title="Maßstab" id="scale" class="" style="font-size: <? echo $this->Document->scalesize; ?>px; font-weight:bold; position: absolute; visibility: visible; left: <? echo $this->Document->scaleposx; ?>px; bottom: <? echo $this->Document->scaleposy; ?>px">
+							<div title="MaÃŸstab" id="scale" class="" style="font-size: <? echo $this->Document->scalesize; ?>px; font-weight:bold; position: absolute; visibility: visible; left: <? echo $this->Document->scaleposx; ?>px; bottom: <? echo $this->Document->scaleposy; ?>px">
 								<? echo '1:1000'; ?>
 							</div>
 							<div title="Gemarkung" id="gemarkung" class="" style="font-size: <? echo $this->Document->gemarkungsize; ?>px; font-weight:bold; position: absolute; visibility: visible; left: <? echo $this->Document->gemarkungposx; ?>px; bottom: <? echo $this->Document->gemarkungposy; ?>px">
@@ -193,7 +193,7 @@ function addfreetext(){
 							<div title="Flur" id="flur" class="" style="font-size: <? echo $this->Document->flursize; ?>px; font-weight:bold; position: absolute; visibility: visible; left: <? echo $this->Document->flurposx; ?>px; bottom: <? echo $this->Document->flurposy; ?>px">
 								<? echo 'Flur: 23'; ?>
 							</div>
-							<div title="ursprünglicher Maßstab" id="oscale" class="" style="font-size: <? echo $this->Document->oscalesize; ?>px; font-weight:bold; position: absolute; visibility: visible; left: <? echo $this->Document->oscaleposx; ?>px; bottom: <? echo $this->Document->oscaleposy; ?>px">
+							<div title="ursprÃ¼nglicher MaÃŸstab" id="oscale" class="" style="font-size: <? echo $this->Document->oscalesize; ?>px; font-weight:bold; position: absolute; visibility: visible; left: <? echo $this->Document->oscaleposx; ?>px; bottom: <? echo $this->Document->oscaleposy; ?>px">
 								<? echo '1: 2000'; ?>
 							</div>
 							
@@ -238,15 +238,15 @@ function addfreetext(){
         </tr>
         <tr>
           <td width="50%" style="border-bottom:1px solid #C3C7C3" colspan=4>&nbsp;<b>Druckkopf:</b> <? echo $this->Document->selectedframe[0]['headsrc'] ?></td>
-          <td width="50%" style="border-bottom:1px solid #C3C7C3" colspan=4>&nbsp;wählen:&nbsp;<input class="button" type="file" name="headsrc" size="10"></td>
+          <td width="50%" style="border-bottom:1px solid #C3C7C3" colspan=4>&nbsp;wÃ¤hlen:&nbsp;<input class="button" type="file" name="headsrc" size="10"></td>
         </tr>
         <tr>
           <td width="50%" style="border-bottom:2px solid #C3C7C3" colspan=4>&nbsp;<b>Ref.hintergrund:</b> <? echo $this->Document->selectedframe[0]['refmapsrc'] ?></td>
-          <td width="50%" style="border-bottom:2px solid #C3C7C3" colspan=4>&nbsp;wählen:&nbsp;<input class="button" type="file" name="refmapsrc" size="10"></td>
+          <td width="50%" style="border-bottom:2px solid #C3C7C3" colspan=4>&nbsp;wÃ¤hlen:&nbsp;<input class="button" type="file" name="refmapsrc" size="10"></td>
         </tr>
         <tr>
           <td width="50%" style="border-bottom:2px solid #C3C7C3" colspan=4>&nbsp;<b>Ref.Mapfile:</b> <? echo $this->Document->selectedframe[0]['refmapfile'] ?></td>
-          <td width="50%" style="border-bottom:2px solid #C3C7C3" colspan=4>&nbsp;wählen:&nbsp;<input class="button" type="file" name="refmapfile" size="10"></td>
+          <td width="50%" style="border-bottom:2px solid #C3C7C3" colspan=4>&nbsp;wÃ¤hlen:&nbsp;<input class="button" type="file" name="refmapfile" size="10"></td>
         </tr>
         <tr>
           <td style="border-bottom:1px solid #C3C7C3" colspan=8>&nbsp;</td>
@@ -268,11 +268,11 @@ function addfreetext(){
         <tr>
         	<td>&nbsp;y:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" class="input" name="mapposy" value="<? echo $this->Document->selectedframe[0]['mapposy'] ?>" size="5"></td>
-        	<td>&nbsp;Höhe:</td>
+        	<td>&nbsp;HÃ¶he:</td>
         	<td style="border-right:2px solid #C3C7C3"><input type="text" class="input" name="mapheight" value="<? echo $this->Document->selectedframe[0]['mapheight'] ?>" size="5"></td>
         	<td>&nbsp;y:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" class="input" name="refposy" value="<? echo $this->Document->selectedframe[0]['refposy'] ?>" size="5"></td>
-        	<td>&nbsp;Höhe:</td>
+        	<td>&nbsp;HÃ¶he:</td>
         	<td><input type="text" class="input" name="refheight" value="<? echo $this->Document->selectedframe[0]['refheight'] ?>" size="5"></td>
         </tr>
         <tr>
@@ -321,7 +321,7 @@ function addfreetext(){
         </tr>
         <tr>
         	<td class="bold" align="center" style="border-top:2px solid #C3C7C3; border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Datum&nbsp;</td>
-        	<td class="bold" align="center" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;ursprünglicher Maßstab&nbsp;</td>
+        	<td class="bold" align="center" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;ursprÃ¼nglicher MaÃŸstab&nbsp;</td>
         </tr>
         <tr>
         	<td>&nbsp;x:</td>
@@ -365,7 +365,7 @@ function addfreetext(){
         </tr>
         <tr>
         	<td class="bold" align="center" style="border-top:2px solid #C3C7C3; border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Legende&nbsp;</td>
-        	<td class="bold" align="center" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Maßstab&nbsp;</td>
+        	<td class="bold" align="center" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;MaÃŸstab&nbsp;</td>
         </tr>
         <tr>
         	<td>&nbsp;x:</td>
@@ -415,7 +415,7 @@ function addfreetext(){
         <tr>
         	<td>&nbsp;x:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" class="input" name="arrowposx" value="<? echo $this->Document->selectedframe[0]['arrowposx'] ?>" size="5"></td>
-        	<td style="border-right:2px solid #C3C7C3" colspan="2" align="center">Länge:&nbsp;<input type="text" class="input" name="arrowlength" value="<? echo $this->Document->selectedframe[0]['arrowlength'] ?>" size="5">&nbsp;</td>		
+        	<td style="border-right:2px solid #C3C7C3" colspan="2" align="center">LÃ¤nge:&nbsp;<input type="text" class="input" name="arrowlength" value="<? echo $this->Document->selectedframe[0]['arrowlength'] ?>" size="5">&nbsp;</td>		
         	<td>&nbsp;x:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" class="input" name="userposx" value="<? echo $this->Document->selectedframe[0]['userposx'] ?>" size="5"></td>
         	<td colspan="2" align="center">
@@ -472,16 +472,16 @@ function addfreetext(){
 	       	<tr>
 	       		<td>&nbsp;y:</td>
 	        	<td style="border-right:1px solid #C3C7C3"><input type="text" class="input" name="textposy<? echo $i ?>" value="<? echo $this->Document->selectedframe[0]['texts'][$i]['posy'] ?>" size="5"><input type="hidden" name="text_id<? echo $i ?>" value="<? echo $this->Document->selectedframe[0]['texts'][$i]['id'] ?>"></td>
-	       		<td colspan="2"><input type="text" class="input" name="textangle<? echo $i ?>" value="<? echo $this->Document->selectedframe[0]['texts'][$i]['angle'] ?>" size="5">°</td>
+	       		<td colspan="2"><input type="text" class="input" name="textangle<? echo $i ?>" value="<? echo $this->Document->selectedframe[0]['texts'][$i]['angle'] ?>" size="5">Â°</td>
 	        </tr>
 	        <tr>
 	        	<td style="border-right:1px solid #C3C7C3" colspan="2">&nbsp;</td>
-	        	<td colspan="2" align="right"><a href="javascript:Bestaetigung('index.php?go=Druckrahmen_Freitextloeschen&freitext_id=<? echo $this->Document->selectedframe[0]['texts'][$i]['id'] ?>', 'Wollen Sie den Freitext wirklich löschen?');">löschen</a></td>
+	        	<td colspan="2" align="right"><a href="javascript:Bestaetigung('index.php?go=Druckrahmen_Freitextloeschen&freitext_id=<? echo $this->Document->selectedframe[0]['texts'][$i]['id'] ?>', 'Wollen Sie den Freitext wirklich lÃ¶schen?');">lÃ¶schen</a></td>
 	        </tr>
 	      <? } ?>
 	      
 	      <tr>
-          <td style="border-top:2px solid #C3C7C3" colspan=8 align="left">&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:addfreetext();">Freitext hinzufügen</a></td>
+          <td style="border-top:2px solid #C3C7C3" colspan=8 align="left">&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:addfreetext();">Freitext hinzufÃ¼gen</a></td>
         </tr>        
         
         <tr>
@@ -508,7 +508,7 @@ function addfreetext(){
         <tr>
         	<td>&nbsp;y:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" class="input" name="watermarkposy" value="<? echo $this->Document->selectedframe[0]['watermarkposy'] ?>" size="5"></td>
-        	<td colspan="1">Drehwinkel:&nbsp;<input type="text" class="input" name="watermarkangle" value="<? echo $this->Document->selectedframe[0]['watermarkangle'] ?>" size="3">°</td>
+        	<td colspan="1">Drehwinkel:&nbsp;<input type="text" class="input" name="watermarkangle" value="<? echo $this->Document->selectedframe[0]['watermarkangle'] ?>" size="3">Â°</td>
         	<td colspan="3" style="border-right:1px solid #C3C7C3">Transparenz:&nbsp;<input type="text" class="input" name="watermarktransparency" value="<? echo $this->Document->selectedframe[0]['watermarktransparency'] ?>" size="1"></td>
         	<td colspan="2" align="center"><input type="text" class="input" name="watermarksize" value="<? echo $this->Document->selectedframe[0]['watermarksize'] ?>" size="5">&nbsp;pt</td>
         </tr>
@@ -548,7 +548,7 @@ function addfreetext(){
         <tr>
           <td colspan="8" style="border-bottom:1px solid #C3C7C3">
           	&nbsp;<b>Preis:</b>&nbsp;
-       	  <input align="right" type="text" class="input" name="euro" value="<? echo $this->Document->euro; ?>" size="1">,<input type="text" class="input" name="cent" value="<? echo $this->Document->cent; ?>" size="1">&nbsp;€          </td>
+       	  <input align="right" type="text" class="input" name="euro" value="<? echo $this->Document->euro; ?>" size="1">,<input type="text" class="input" name="cent" value="<? echo $this->Document->cent; ?>" size="1">&nbsp;â‚¬          </td>
         </tr>
         <tr>
           <td  colspan=8 style="border-bottom:1px solid #C3C7C3">
@@ -567,7 +567,7 @@ function addfreetext(){
   
   <tr align="center"> 
     <td colspan="3"> 
-    <input class="button" type="button" name="go_plus" value="Rahmen löschen" onclick="Bestaetigung('index.php?go=Druckrahmen_Löschen&selected_frame_id=<? echo $this->Document->selectedframe[0]['id']; ?>', 'Wollen Sie diesen Druckrahmen wirklich löschen?');">&nbsp;<input class="button" type="submit" name="go_plus" value="Änderungen Speichern">&nbsp;<input class="button" type="submit" name="go_plus" value="als neuen Rahmen speichern">
+    <input class="button" type="button" name="go_plus" value="Rahmen lÃ¶schen" onclick="Bestaetigung('index.php?go=Druckrahmen_LÃ¶schen&selected_frame_id=<? echo $this->Document->selectedframe[0]['id']; ?>', 'Wollen Sie diesen Druckrahmen wirklich lÃ¶schen?');">&nbsp;<input class="button" type="submit" name="go_plus" value="Ã„nderungen Speichern">&nbsp;<input class="button" type="submit" name="go_plus" value="als neuen Rahmen speichern">
     </td>
   </tr>
   

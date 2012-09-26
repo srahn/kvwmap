@@ -1,8 +1,8 @@
-<?php
+ï»¿<?php
   $this->strID="ID";
   $this->strName="Naam";
-  $this->strChange="Ännern";
-  $this->strDelete="Löschen";
+  $this->strChange="Ã„nnern";
+  $this->strDelete="LÃ¶schen";
   
   
 ?>  

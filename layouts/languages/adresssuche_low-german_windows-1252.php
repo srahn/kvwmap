@@ -1,10 +1,10 @@
-<?php
- $strTitle="Adress dörchschnöckern";
+ï»¿<?php
+ $strTitle="Adress dÃ¶rchschnÃ¶ckern";
  $strGem="Gemeen";
  $strStreet="Stroot";
  $strHnr="Husnr.";
- $strSelected="utsökt";
- $strExist="vörhanden";
+ $strSelected="utsÃ¶kt";
+ $strExist="vÃ¶rhanden";
  $strClear="Nieg";
- $strSearch="Söken";
+ $strSearch="SÃ¶ken";
 ?>

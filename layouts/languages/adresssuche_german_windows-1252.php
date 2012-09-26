@@ -1,10 +1,10 @@
-<?php
+﻿<?php
  $strTitle="Adressensuche";
  $strGem="Gemeinde";
  $strGemkg="Gemarkung/Ortsteil";
  $strStreet="Strasse";
  $strHnr="Hausnr.";
- $strSelected="ausgew�hlte";
+ $strSelected="ausgewählte";
  $strExist="vorhandene";
  $strClear="Neu";
  $strSearch="Suchen";

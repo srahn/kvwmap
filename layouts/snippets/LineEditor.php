@@ -76,10 +76,10 @@ function buildwktlinefromsvgpath(svgpath){
   	<td height="380">&nbsp;</td>
   </tr>
   <tr>
-  	<td align="center"><input type="button" style="visibility:hidden" name="split" value="Geometrie in neue Datensätze aufteilen" onclick="split_geometries();"></td>
+  	<td align="center"><input type="button" style="visibility:hidden" name="split" value="Geometrie in neue DatensÃ¤tze aufteilen" onclick="split_geometries();"></td>
   </tr>
   <tr>
-  	<td>Geometrie übernehmen von:<br>
+  	<td>Geometrie Ã¼bernehmen von:<br>
   		<select name="layer_id" onchange="document.GUI.no_load.value='true';document.GUI.submit();">
   			<?
   				for($i = 0; $i < count($this->queryable_vector_layers['ID']); $i++){
@@ -92,7 +92,7 @@ function buildwktlinefromsvgpath(svgpath){
   	</td>
   </tr>
   <tr>  
-  	<td width="160">Länge:<br><input size="12" type="text" name="linelength" value="<?echo $this->formvars['linelength']?>">&nbsp;m</td>
+  	<td width="160">LÃ¤nge:<br><input size="12" type="text" name="linelength" value="<?echo $this->formvars['linelength']?>">&nbsp;m</td>
   </tr>
   <tr> 
     <td><hr align="center" noshade></td>
@@ -108,7 +108,7 @@ function buildwktlinefromsvgpath(svgpath){
   <? } ?>
   <tr>
   	<td>&nbsp;</td>
-  	<td>&nbsp;<b>Maßstab&nbsp;1:&nbsp;</b><input type="text" id="scale" name="nScale" size="5" value="<?php echo round($this->map->scale); ?>"></td>
+  	<td>&nbsp;<b>MaÃŸstab&nbsp;1:&nbsp;</b><input type="text" id="scale" name="nScale" size="5" value="<?php echo round($this->map->scale); ?>"></td>
   	<td align="right">
   		<input type="checkbox" name="always_draw" value="1" <?if($always_draw == 1 OR $always_draw == 'true')echo 'checked'; ?>>&nbsp;weiterzeichnen&nbsp;&nbsp;
   		<input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang

@@ -1,5 +1,5 @@
 <?php
-if ($this->Meldung=='' OR $this->Meldung=='Auftragsnummer erfolgreich übernommen! ') {
+if ($this->Meldung=='' OR $this->Meldung=='Auftragsnummer erfolgreich Ã¼bernommen! ') {
   $bgcolor=BG_FORM;
 }
 else {

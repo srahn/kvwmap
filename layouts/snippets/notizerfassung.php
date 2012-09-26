@@ -114,7 +114,7 @@ if ($this->Fehlermeldung!='') {
   <tr valign="top"> 
     <td align="center" colspan="2"> 
       <?php
-	  # Wenn ein Polygon übergeben wird, wird es in SVG mit dargestellt.
+	  # Wenn ein Polygon Ã¼bergeben wird, wird es in SVG mit dargestellt.
       include(LAYOUTPATH.'snippets/SVG_polygon_xor_point.php');
     ?>
     </td>

@@ -103,7 +103,7 @@ function buildwktpolygonfromsvgpath(svgpath){
   </tr>
   <? if($this->new_entry != true){ ?>
   <tr> 
-    <td align="center"><input type="button" name="senden2" value="<? echo $strSaveWithoutZoom; ?>" onclick="send('false');"><br><br><input type="button" value="zur¸ck" onclick="window.location.href='index.php?go=Layer-Suche&go_plus=Suchen&selected_layer_id=<?php echo $this->formvars['selected_layer_id']; ?>&value_<?php echo $this->formvars['layer_tablename']; ?>_oid=<?php echo $this->formvars['oid']; ?>'"><input type="button" name="senden" value="<? echo $strSave; ?>" onclick="send('true');"></td>
+    <td align="center"><input type="button" name="senden2" value="<? echo $strSaveWithoutZoom; ?>" onclick="send('false');"><br><br><input type="button" value="zur√ºck" onclick="window.location.href='index.php?go=Layer-Suche&go_plus=Suchen&selected_layer_id=<?php echo $this->formvars['selected_layer_id']; ?>&value_<?php echo $this->formvars['layer_tablename']; ?>_oid=<?php echo $this->formvars['oid']; ?>'"><input type="button" name="senden" value="<? echo $strSave; ?>" onclick="send('true');"></td>
   </tr>
   <? }else{ ?>
   <tr>
@@ -112,7 +112,7 @@ function buildwktpolygonfromsvgpath(svgpath){
   <? } ?>
   <tr>
   	<td>&nbsp;</td>
-  	<td>&nbsp;<b>Maﬂstab&nbsp;1:&nbsp;</b><input type="text" id="scale" name="nScale" size="5" value="<?php echo round($this->map->scale); ?>"></td>
+  	<td>&nbsp;<b>Ma√üstab&nbsp;1:&nbsp;</b><input type="text" id="scale" name="nScale" size="5" value="<?php echo round($this->map->scale); ?>"></td>
   	<td align="right">
   		<input type="checkbox" name="always_draw" value="1" <?if($always_draw == 1 OR $always_draw == 'true')echo 'checked'; ?>>&nbsp;weiterzeichnen&nbsp;&nbsp;
   		<input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang

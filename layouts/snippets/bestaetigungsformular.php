@@ -26,11 +26,11 @@
 <?php
 # 2006-01-03 pk
 if (is_array($this->formvars['id'])) {
-	# die Variable für id enthält einen einzelnen Wert
+	# die Variable fÃ¼r id enthÃ¤lt einen einzelnen Wert
 	$idListe=$this->formvars['id'];
 }
 else {
-	# die Variable für id ist eine Liste (Array)
+	# die Variable fÃ¼r id ist eine Liste (Array)
 	$idListe[$this->formvars['id']]=$this->formvars['id'];
 }
 $idselected=array_keys ($idListe);

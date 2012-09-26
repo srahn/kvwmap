@@ -79,7 +79,7 @@ function georg(){
 	      <tr>
 	      <? }elseif($this->formvars['nutzung']=='stelle_nutzer' ){ ?>
 	      <tr>
-		      <td colspan="2"><li>Zugriffe durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> über
+		      <td colspan="2"><li>Zugriffe durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> Ã¼ber
 		          die Stelle: <?php echo $this->account->Bezeichnung ;?></li>
 		      </td>
 		    </tr>
@@ -102,7 +102,7 @@ function georg(){
 										if(count($this->account->NumbOfAccess)==0){ ?>
 	            			<tr>
 	                  	<td colspan="2">
-	                    	<?php  echo 'Es wurden keine Einträge in der Datenbank gefunden!'; ?>
+	                    	<?php  echo 'Es wurden keine EintrÃ¤ge in der Datenbank gefunden!'; ?>
 	                    </td>
 	                  </tr>
 	                 	<?php
@@ -134,7 +134,7 @@ function georg(){
 			      <tr>
 			      <? }elseif($this->formvars['nutzung']=='stelle_nutzer' ){ ?>
 			      <tr>
-				      <td colspan="2"><li>ALK-Drucke durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> über
+				      <td colspan="2"><li>ALK-Drucke durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> Ã¼ber
 				          die Stelle: <?php echo $this->account->Bezeichnung ;?></li>
 				      </td>
 				    </tr>
@@ -158,7 +158,7 @@ function georg(){
 												if ( count($this->account->ALKNumbOfAccess)==0 ) { ?>
 		                    	<tr>
 		                      	<td align="center" colspan="2">
-		                        	<?php  echo 'Es wurden keine Einträge in der Datenbank gefunden!'; ?>
+		                        	<?php  echo 'Es wurden keine EintrÃ¤ge in der Datenbank gefunden!'; ?>
 		                      	</td>
 		                      <?php
 												}
@@ -190,7 +190,7 @@ function georg(){
 			      <tr>
 			      <? }elseif($this->formvars['nutzung']=='stelle_nutzer' ){ ?>
 			      <tr>
-				      <td colspan="2"><li>ALB-Drucke durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> über
+				      <td colspan="2"><li>ALB-Drucke durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> Ã¼ber
 				          die Stelle: <?php echo $this->account->Bezeichnung ;?></li>
 				      </td>
 				    </tr>
@@ -214,7 +214,7 @@ function georg(){
 												if ( count($this->account->ALBNumbOfAccess)==0 ) { ?>
 		                    	<tr>
 		                      	<td align="center" colspan="2">
-		                        	<?php  echo 'Es wurden keine Einträge in der Datenbank gefunden!'; ?>
+		                        	<?php  echo 'Es wurden keine EintrÃ¤ge in der Datenbank gefunden!'; ?>
 		                      	</td>
 		                      <?php
 												}
@@ -246,7 +246,7 @@ function georg(){
 			      <tr>
 			      <? }elseif($this->formvars['nutzung']=='stelle_nutzer' ){ ?>
 			      <tr>
-				      <td colspan="2"><li>CSV-Exporte durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> über
+				      <td colspan="2"><li>CSV-Exporte durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> Ã¼ber
 				          die Stelle: <?php echo $this->account->Bezeichnung ;?></li>
 				      </td>
 				    </tr>
@@ -260,7 +260,7 @@ function georg(){
 		                    <tr bgcolor="#FFFFFF">
 		                      <td width="33%"><strong>Export-Art</strong></td>
 		                      <td width="33%"><strong>Anzahl der Exporte</strong></td>
-		                      <td width="33%"><strong>Anzahl der Flurstücke</strong></td>
+		                      <td width="33%"><strong>Anzahl der FlurstÃ¼cke</strong></td>
 		                    </tr>
 		                    <tr bgcolor="#FFFFFF">
 		                      <td colspan="13"><hr></td>
@@ -270,7 +270,7 @@ function georg(){
 												if ( count($this->account->CSVNumbOfAccess)==0 ) { ?>
 		                    	<tr>
 		                      	<td align="center" colspan="2">
-		                        	<?php  echo 'Es wurden keine Einträge in der Datenbank gefunden!'; ?>
+		                        	<?php  echo 'Es wurden keine EintrÃ¤ge in der Datenbank gefunden!'; ?>
 		                      	</td>
 		                      <?php
 												}
@@ -299,7 +299,7 @@ function georg(){
 						  <tr>
 						    <td align="center" colspan="2"><hr color="#000000" size="1"></td>
 						  <tr>
-						    <td align="center" colspan="2"> <input name="zurueck" type="submit" value="Zurück"> </td>
+						    <td align="center" colspan="2"> <input name="zurueck" type="submit" value="ZurÃ¼ck"> </td>
 						  </tr>
 						  <tr>
 						    <td colspan="2" align="center">&nbsp;</td>
@@ -314,7 +314,7 @@ function georg(){
 
 <br>
 <br>
-<input name="zurueck" type="submit" value="Zurück">
+<input name="zurueck" type="submit" value="ZurÃ¼ck">
 <br><br>
 -->
 

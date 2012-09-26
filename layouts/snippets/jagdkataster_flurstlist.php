@@ -20,7 +20,7 @@ function show_selected_flurst(){
     document.GUI.submit();
   }
   else{
-  	alert('Sie haben kein Flurstueck ausgewählt.');
+  	alert('Sie haben kein Flurstueck ausgewÃ¤hlt.');
   }
 }
 
@@ -41,7 +41,7 @@ function show_all_flurst(){
     document.GUI.submit();
   }
   else{
-  	alert('Sie haben kein Flurstueck ausgewählt.');
+  	alert('Sie haben kein Flurstueck ausgewÃ¤hlt.');
   }
 }
 
@@ -70,9 +70,9 @@ function csv_export(){
       	<? if(!$this->formvars['oid']){ ?><td class="bold" style="border-top:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">Jagdbezirk</td><? } ?>
         <td class="bold" style="border-top:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">Gemarkung</td>
         <td class="bold" style="border-top:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">Flur</td>
-        <td class="bold" style="border-top:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">Zähler/Nenner</td>
-        <td class="bold" style="border-top:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">Eigentümer</td>
-        <td class="bold" style="border-top:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">Flurstücksfläche(ALB)</td>
+        <td class="bold" style="border-top:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">ZÃ¤hler/Nenner</td>
+        <td class="bold" style="border-top:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">EigentÃ¼mer</td>
+        <td class="bold" style="border-top:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">FlurstÃ¼cksflÃ¤che(ALB)</td>
         <td class="bold" style="border-top:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">Anteil am Jagdbezirk</td>
       </tr>
       <?php 
@@ -92,13 +92,13 @@ function csv_export(){
       ?>
       <tr>
       	<td valign="top" align="center"><img src="<? echo GRAPHICSPATH?>pfeil_unten-rechts.gif"></td>
-      	<td height="29" valign="bottom" colspan="5"><a href="javascript:show_selected_flurst();">ausgewählte Flurstücke anzeigen</a> | <a href="javascript:show_all_flurst();">alle Flurstücke anzeigen</a></td>
+      	<td height="29" valign="bottom" colspan="5"><a href="javascript:show_selected_flurst();">ausgewÃ¤hlte FlurstÃ¼cke anzeigen</a> | <a href="javascript:show_all_flurst();">alle FlurstÃ¼cke anzeigen</a></td>
       </tr>
     </table></td>
   </tr>
   <? if($this->formvars['oid']){ ?>
   <tr>
-  	<td align="center"><a href="javascript:document.GUI.go.value = 'jagdbezirk_show_data';javascript:document.GUI.submit()">zurück zum Jagdbezirk</a></td>
+  	<td align="center"><a href="javascript:document.GUI.go.value = 'jagdbezirk_show_data';javascript:document.GUI.submit()">zurÃ¼ck zum Jagdbezirk</a></td>
   </tr>
   <? }else{ ?>
   <tr>

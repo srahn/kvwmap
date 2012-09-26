@@ -87,11 +87,11 @@
       document.GUI.submit();
   }
   function sendpath(cmd,navX,navY)   {
-    // navX[0] enthält den Rechtswert des ersten gesetzte Punktes im Bild in Pixeln
+    // navX[0] enthÃ¤lt den Rechtswert des ersten gesetzte Punktes im Bild in Pixeln
     // von links nach rechts gerechnet
-    // navY[0] enthält den Hochwert des ersten Punktes im Bild in Pixeln
+    // navY[0] enthÃ¤lt den Hochwert des ersten Punktes im Bild in Pixeln
     // allerdings von oben nach untern gerechnet
-    // [2] jeweils den anderen Punkt wenn ein Rechteck übergeben wurde
+    // [2] jeweils den anderen Punkt wenn ein Rechteck Ã¼bergeben wurde
     switch(cmd) {
      case "zoomin_point":
       document.GUI.INPUT_COORD.value  = navX[0]+","+navY[0];

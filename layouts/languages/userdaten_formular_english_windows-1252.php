@@ -1,4 +1,4 @@
-<?php
+﻿<?php
   
   $strAsteriskRequired="Fields marked with an asterisk * are required";
   $strDataBankID="Data bank ID";

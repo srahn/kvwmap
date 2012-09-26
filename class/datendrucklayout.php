@@ -1,6 +1,6 @@
 <?php
 ###################################################################
-# kvwmap - Kartenserver für Kreisverwaltungen                     #
+# kvwmap - Kartenserver fÃ¼r Kreisverwaltungen                     #
 ###################################################################
 # Lizenz                                                          #
 #                                                                 # 
@@ -49,7 +49,7 @@ class ddl {
     # Nutzer
     if($this->layout['usersize']){
     	$this->pdf->selectFont($this->layout['font_user']);
-    	$this->pdf->addText($this->layout['userposx'],$this->layout['userposy'],$this->layout['usersize'], 'Stelle: '.$this->Stelle->Bezeichnung.', Nutzer: '.$this->user->Name);
+    	$this->pdf->addText($this->layout['userposx'],$this->layout['userposy'],$this->layout['usersize'], utf8_decode('Stelle: '.$this->Stelle->Bezeichnung.', Nutzer: '.$this->user->Name));
     }
     # feste Freitexte
     for($j = 0; $j < count($this->layout['texts']); $j++){
@@ -72,7 +72,7 @@ class ddl {
 	        else{
 	        	$justification = 'left';
 	        }
-	        $this->pdf->addTextWrap($posx,$posy,$width,$this->layout['texts'][$j]['size'],$freitext[$z],$justification,-1 * $alpha);
+	        $this->pdf->addTextWrap($posx,$posy,$width,$this->layout['texts'][$j]['size'],utf8_decode($freitext[$z]),$justification,-1 * $alpha);
 	      }
 	    }
 	  }
@@ -97,7 +97,7 @@ class ddl {
     		$this->pdf->newPage();
     		$this->add_static_elements();
     	}
-	    if($this->layout['type'] == 1  AND $this->miny - $datasetcount_on_page * ($this->maxy-$this->miny+5) < 50){		# neue Seite beim Untereinander-Typ und Seitenüberlauf
+	    if($this->layout['type'] == 1  AND $this->miny - $datasetcount_on_page * ($this->maxy-$this->miny+5) < 50){		# neue Seite beim Untereinander-Typ und SeitenÃ¼berlauf
 				$datasetcount_on_page = 0;
 				$this->pdf->newPage();
 				$this->add_static_elements();
@@ -135,7 +135,7 @@ class ddl {
 			        else{
 			        	$justification = 'left';
 			        }
-			        $this->pdf->addTextWrap($posx,$y,$width,$this->layout['texts'][$j]['size'],$freitext[$z],$justification,-1 * $alpha);
+			        $this->pdf->addTextWrap($posx,$y,$width,$this->layout['texts'][$j]['size'],utf8_decode($freitext[$z]),$justification,-1 * $alpha);
 			      }
 			    }
 			  }
@@ -159,17 +159,17 @@ class ddl {
 								}
 							}break;
 							default: {
-								$data = array(array($attributes['name'][$j] => $result[$i][$attributes['name'][$j]]));
+								$data = array(array($attributes['name'][$j] => utf8_decode($result[$i][$attributes['name'][$j]])));
 							}break;
 						}
-						# Zeilenumbruch berücksichtigen
+						# Zeilenumbruch berÃ¼cksichtigen
 						$text = $result[$i][$attributes['name'][$j]];
 						$size = $this->layout['elements'][$attributes['name'][$j]]['fontsize'];
 						$textwidth = $this->pdf->getTextWidth($size, $text);
 						$width = $this->layout['elements'][$attributes['name'][$j]]['width'];
 						if($width != '' AND $textwidth/$width > 1){ 
 							while($text != ''){
-								$text = $this->pdf->addTextWrap(-100, -100, $width, $size, $text);
+								$text = $this->pdf->addTextWrap(-100, -100, $width, $size, utf8_decode($text));
 								$wordwrapoffset++;
 							} 
 						}

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
   $strTitle="Thiết lập thông số in";
   $strButtonPrintPreview="Xem trước khi in";
   $strButtonPrintScale="Tỉ lệ in: 1: ";

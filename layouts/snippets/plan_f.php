@@ -73,9 +73,9 @@ function save_as_new_dataset(){
 }
 
 function delete_dataset(oid){
-	really = confirm('Wollen Sie diesen Datensatz wirklich lˆschen?');
+	really = confirm('Wollen Sie diesen Datensatz wirklich l√∂schen?');
 	if(really){
-		if((document.GUI.details.value != 'true' && document.GUI.value_tblf_plan_oid.value == '') || (document.GUI.details.value == 'true' && document.GUI.value_tblf_plan_oid.value != '')){		// Trefferliste vorhanden -> wieder zur¸ck zur Trefferliste
+		if((document.GUI.details.value != 'true' && document.GUI.value_tblf_plan_oid.value == '') || (document.GUI.details.value == 'true' && document.GUI.value_tblf_plan_oid.value != '')){		// Trefferliste vorhanden -> wieder zur√ºck zur Trefferliste
 			document.GUI.details.value = '';
 			document.GUI.selected_layer_id.value = <? echo $this->qlayerset[$i]['Layer_ID'] ?>;
 			document.GUI.value_tblf_plan_oid.value = '';
@@ -112,7 +112,7 @@ function zoomto(gkz){
 		echo $this->qlayerset[$i]['attributes']['name'][$a].'  '.$a.'<br>';
 	}*/
 	if($this->formvars['value_tblf_plan_oid'] != '' OR $this->new_entry == true){
-		$this->formvars['printversion'] = 'n';   # nur dazu da, damit die Links "zur¸ck zur Suche" und "drucken" nicht erscheinen
+		$this->formvars['printversion'] = 'n';   # nur dazu da, damit die Links "zur√ºck zur Suche" und "drucken" nicht erscheinen
 ?>
 		<td>&nbsp;&nbsp;&nbsp;</td>
 		<td colspan="3" width="100%">
@@ -125,7 +125,7 @@ function zoomto(gkz){
 									echo '<select title="'.$this->qlayerset[$i]['attributes']['alias'][$j].'" style="font-size: '.$this->user->rolle->fontsize_gle.'px" ';
 									echo 'onchange="update_require_attribute(\''.$this->qlayerset[$i]['attributes']['req_by'][$j].'\', '.$k.','.$this->qlayerset[$i]['Layer_ID'].', this.value);" ';
 									echo 'id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'">';
-									echo '<option value="">-- Bitte Ausw‰hlen --</option>';
+									echo '<option value="">-- Bitte Ausw√§hlen --</option>';
 									for($e = 0; $e < count($this->qlayerset[$i]['attributes']['enum_value'][$j]); $e++){
 										echo '<option ';
 										if($this->qlayerset[$i]['attributes']['enum_value'][$j][$e] == $this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]] OR ($this->qlayerset[$i]['attributes']['enum_value'][$j][$e] != '' AND $this->qlayerset[$i]['attributes']['enum_value'][$j][$e] == $this->formvars[$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j]])){
@@ -138,7 +138,7 @@ function zoomto(gkz){
 					</td>
 					<td>Gemeindekennzahl:</td>
 					<td><input readonly="true" <? $this->qlayerset[$i]['attributes']['name'][$j] = 'gemkz'; echo ' type="text" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?></td>
-					<td rowspan="4"><span style="background-color: #80AEFF" class="titel">&nbsp;&nbsp;&nbsp;Fl‰chennutzungsplandaten&nbsp;&nbsp;&nbsp;</span></td>
+					<td rowspan="4"><span style="background-color: #80AEFF" class="titel">&nbsp;&nbsp;&nbsp;Fl√§chennutzungsplandaten&nbsp;&nbsp;&nbsp;</span></td>
 				</tr>
 				<tr>
 					<td>Amt:</td>
@@ -210,7 +210,7 @@ function zoomto(gkz){
   				?>
 					<td><?  echo '<select style="width:115px" title="'.$this->qlayerset[$i]['attributes']['alias'][$j].'" style="font-size: '.$this->user->rolle->fontsize_gle.'px"';
 									echo 'id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'">';
-									echo '<option value="">-- Bitte Ausw‰hlen --</option>';
+									echo '<option value="">-- Bitte Ausw√§hlen --</option>';
 									for($e = 0; $e < count($this->qlayerset[$i]['attributes']['enum_value'][$j]); $e++){
 										echo '<option ';
 										if($this->qlayerset[$i]['attributes']['enum_value'][$j][$e] == $this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]] OR ($this->qlayerset[$i]['attributes']['enum_value'][$j][$e] != '' AND $this->qlayerset[$i]['attributes']['enum_value'][$j][$e] == $this->formvars[$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j]])){
@@ -234,7 +234,7 @@ function zoomto(gkz){
   		<br>
   		<table style="border: 2px solid #80AEFF" cellspacing="0" cellpadding="4">
   			<tr>
-  				<td colspan="2" align="center" bgcolor="#80AEFF"><b>Fl‰chen</b></td>
+  				<td colspan="2" align="center" bgcolor="#80AEFF"><b>Fl√§chen</b></td>
   			</tr>
   			<tr>
   				<td>
@@ -246,7 +246,7 @@ function zoomto(gkz){
   							<td style="border: 1px solid black;" align="center" valign="top"><b>Gesamt [ha]</b></td>
   						</tr>
   						<tr bgcolor="ACCAFF">
-  							<td style="border: 1px solid black;">Wohnbaufl‰che</td>
+  							<td style="border: 1px solid black;">Wohnbaufl√§che</td>
   							<?
   								$this->qlayerset[$i]['attributes']['name'][$j] = 'w_best';
   								$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'|';
@@ -264,7 +264,7 @@ function zoomto(gkz){
   							<td style="border: 1px solid black;"><input <? echo ' type="text" onkeyup="nurZahlen(this)"; class="class2" size="8" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?></td>
   						</tr>
   						<tr bgcolor="FFFFFF">
-  							<td style="border: 1px solid black;">gemischte Baufl‰che</td>
+  							<td style="border: 1px solid black;">gemischte Baufl√§che</td>
   							<?
   								$this->qlayerset[$i]['attributes']['name'][$j] = 'm_best';
   								$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'|';
@@ -282,7 +282,7 @@ function zoomto(gkz){
   							<td style="border: 1px solid black;"><input <? echo ' type="text" onkeyup="nurZahlen(this)"; class="class2" size="8" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?></td>
   						</tr>
   						<tr bgcolor="ACCAFF">
-  							<td style="border: 1px solid black;">gewerbliche Baufl‰che</td>
+  							<td style="border: 1px solid black;">gewerbliche Baufl√§che</td>
   							<?
   								$this->qlayerset[$i]['attributes']['name'][$j] = 'g_best';
   								$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'|';
@@ -372,7 +372,7 @@ function zoomto(gkz){
   							<td style="border: 1px solid black;"><input <? echo ' type="text" onkeyup="nurZahlen(this)"; class="class2" size="8" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?></td>
   						</tr>
   						<tr bgcolor="C5FEFE">
-  							<td style="border: 1px solid black;">Sonderbaufl‰che gesamt</td>
+  							<td style="border: 1px solid black;">Sonderbaufl√§che gesamt</td>
   							<?
   								$this->qlayerset[$i]['attributes']['name'][$j] = 'so_gesbest';
   								$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'|';
@@ -391,7 +391,7 @@ function zoomto(gkz){
   						</tr>
   						
   						<tr bgcolor="ACCAFF">
-  							<td style="border: 1px solid black;">Industriefl‰chen</td>
+  							<td style="border: 1px solid black;">Industriefl√§chen</td>
   							<?
   								$this->qlayerset[$i]['attributes']['name'][$j] = 'i_best';
   								$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'|';
@@ -409,7 +409,7 @@ function zoomto(gkz){
   							<td style="border: 1px solid black;"><input <? echo ' type="text" onkeyup="nurZahlen(this)"; class="class2" size="8" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?></td>
   						</tr>
   						<tr bgcolor="FFFFFF">
-  							<td style="border: 1px solid black;">Fl‰chen f¸r Gemeinbedarf</td>
+  							<td style="border: 1px solid black;">Fl√§chen f√ºr Gemeinbedarf</td>
   							<?
   								$this->qlayerset[$i]['attributes']['name'][$j] = 'gem_best';
   								$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'|';
@@ -427,7 +427,7 @@ function zoomto(gkz){
   							<td style="border: 1px solid black;"><input <? echo ' type="text" onkeyup="nurZahlen(this)"; class="class2" size="8" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?></td>
   						</tr>
   						<tr bgcolor="ACCAFF">
-  							<td style="border: 1px solid black;">Verkehrsfl‰chen</td>
+  							<td style="border: 1px solid black;">Verkehrsfl√§chen</td>
   							<?
   								$this->qlayerset[$i]['attributes']['name'][$j] = 'vk_best';
   								$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'|';
@@ -445,7 +445,7 @@ function zoomto(gkz){
   							<td style="border: 1px solid black;"><input <? echo ' type="text" onkeyup="nurZahlen(this)"; class="class2" size="8" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?></td>
   						</tr>
   						<tr bgcolor="FFFFFF">
-  							<td style="border: 1px solid black;">Fl‰chen&nbsp;f¸r&nbsp;Ver&nbsp;u.&nbsp;Entsorgung</td>
+  							<td style="border: 1px solid black;">Fl√§chen&nbsp;f√ºr&nbsp;Ver&nbsp;u.&nbsp;Entsorgung</td>
   							<?
   								$this->qlayerset[$i]['attributes']['name'][$j] = 'ver_best';
   								$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'|';
@@ -463,7 +463,7 @@ function zoomto(gkz){
   							<td style="border: 1px solid black;"><input <? echo ' type="text" onkeyup="nurZahlen(this)"; class="class2" size="8" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?></td>
   						</tr>
   						<tr bgcolor="ACCAFF">
-  							<td style="border: 1px solid black;">Gr¸nfl‰chen</td>
+  							<td style="border: 1px solid black;">Gr√ºnfl√§chen</td>
   							<?
   								$this->qlayerset[$i]['attributes']['name'][$j] = 'gruen_best';
   								$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'|';
@@ -481,7 +481,7 @@ function zoomto(gkz){
   							<td style="border: 1px solid black;"><input <? echo ' type="text" onkeyup="nurZahlen(this)"; class="class2" size="8" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?></td>
   						</tr>
   						<tr bgcolor="FFFFFF">
-  							<td style="border: 1px solid black;">Fl‰chen f¸r Landwirtschaft</td>
+  							<td style="border: 1px solid black;">Fl√§chen f√ºr Landwirtschaft</td>
   							<?
   								$this->qlayerset[$i]['attributes']['name'][$j] = 'lw_best';
   								$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'|';
@@ -499,7 +499,7 @@ function zoomto(gkz){
   							<td style="border: 1px solid black;"><input <? echo ' type="text" onkeyup="nurZahlen(this)"; class="class2" size="8" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?></td>
   						</tr>
   						<tr bgcolor="ACCAFF">
-  							<td style="border: 1px solid black;">Fl‰chen f¸r Wald</td>
+  							<td style="border: 1px solid black;">Fl√§chen f√ºr Wald</td>
   							<?
   								$this->qlayerset[$i]['attributes']['name'][$j] = 'fo_best';
   								$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'|';
@@ -517,7 +517,7 @@ function zoomto(gkz){
   							<td style="border: 1px solid black;"><input <? echo ' type="text" onkeyup="nurZahlen(this)"; class="class2" size="8" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?></td>
   						</tr>
   						<tr bgcolor="FFFFFF">
-  							<td style="border: 1px solid black;">Wasserfl‰chen</td>
+  							<td style="border: 1px solid black;">Wasserfl√§chen</td>
   							<?
   								$this->qlayerset[$i]['attributes']['name'][$j] = 'wa_best';
   								$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'|';
@@ -535,7 +535,7 @@ function zoomto(gkz){
   							<td style="border: 1px solid black;"><input <? echo ' type="text" onkeyup="nurZahlen(this)"; class="class2" size="8" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?></td>
   						</tr>
   						<tr bgcolor="ACCAFF">
-  							<td style="border: 1px solid black;">Aufsch¸tung und Abtragung</td>
+  							<td style="border: 1px solid black;">Aufsch√ºtung und Abtragung</td>
   							<?
   								$this->qlayerset[$i]['attributes']['name'][$j] = 'auf_best';
   								$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'|';
@@ -553,7 +553,7 @@ function zoomto(gkz){
   							<td style="border: 1px solid black;"><input <? echo ' type="text" onkeyup="nurZahlen(this)"; class="class2" size="8" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?></td>
   						</tr>
   						<tr bgcolor="FFFFFF">
-  							<td style="border: 1px solid black;">sonstige Fl‰chen</td>
+  							<td style="border: 1px solid black;">sonstige Fl√§chen</td>
   							<?
   								$this->qlayerset[$i]['attributes']['name'][$j] = 'sonst_best';
   								$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'|';
@@ -571,7 +571,7 @@ function zoomto(gkz){
   							<td style="border: 1px solid black;"><input <? echo ' type="text" onkeyup="nurZahlen(this)"; class="class2" size="8" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?></td>
   						</tr>
   						<tr bgcolor="ACCAFF">
-  							<td style="border: 1px solid black;">Gesamtfl‰che</td>
+  							<td style="border: 1px solid black;">Gesamtfl√§che</td>
   							<?
   								$this->qlayerset[$i]['attributes']['name'][$j] = 'gesfl_best';
   								$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'|';
@@ -593,7 +593,7 @@ function zoomto(gkz){
   				<td>
   					<table border="0" style="border-collapse: collapse;">
   						<tr bgcolor="80AEFF">
-  							<td style="border: 1px solid black;" align="center" valign="top"><b>Sonderbaufl‰chen</td>
+  							<td style="border: 1px solid black;" align="center" valign="top"><b>Sonderbaufl√§chen</td>
   							<td style="border: 1px solid black;" align="center" valign="top"><b>Bestand [ha]</b></td>
   							<td style="border: 1px solid black;" align="center" valign="top"><b>+/- Planung [ha]</b></td>
   							<td style="border: 1px solid black;" align="center" valign="top"><b>Gesamt [ha]</b></td>
@@ -780,7 +780,7 @@ function zoomto(gkz){
   							<td style="border: 1px solid black;"><input <? echo ' type="text" onkeyup="nurZahlen(this)"; class="class2" size="8" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?></td>
   						</tr>
   						<tr bgcolor="FFFFFF">
-  							<td style="border: 1px solid black;">ausschl. gewerbl. Pr‰g.</td>
+  							<td style="border: 1px solid black;">ausschl. gewerbl. Pr√§g.</td>
   							<?
   								$this->qlayerset[$i]['attributes']['name'][$j] = 'hfn_best';
   								$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'|';
@@ -876,7 +876,7 @@ function zoomto(gkz){
   							<td style="border: 1px solid black;"><input class="class2" size="8" type="text"></td>
   						</tr>
   						<tr bgcolor="ACCAFF">
-  							<td style="border: 1px solid black;">Gesamtfl‰che Sonderbau</td>
+  							<td style="border: 1px solid black;">Gesamtfl√§che Sonderbau</td>
   							<?
   								$this->qlayerset[$i]['attributes']['name'][$j] = 'so_gesbest';
   								#$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'|';
@@ -951,7 +951,7 @@ function zoomto(gkz){
   				<td colspan="4" align="center"><b>Ergebnis der Stellungnahme</b></td>
   			</tr>
   			<tr>
-					<td>Maﬂgaben:
+					<td>Ma√ügaben:
 					<?
 						$this->qlayerset[$i]['attributes']['name'][$j] = 't_massgabe';
 						$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'|';
@@ -986,7 +986,7 @@ function zoomto(gkz){
 						$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'|';
 					  echo '<select title="'.$this->qlayerset[$i]['attributes']['alias'][$j].'" style="font-size: '.$this->user->rolle->fontsize_gle.'px"';
 									echo 'id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'">';
-									echo '<option value="">-- Bitte Ausw‰hlen --</option>';
+									echo '<option value="">-- Bitte Ausw√§hlen --</option>';
 									for($e = 0; $e < count($this->qlayerset[$i]['attributes']['enum_value'][$j]); $e++){
 										echo '<option ';
 										if($this->qlayerset[$i]['attributes']['enum_value'][$j][$e] == $this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]] OR ($this->qlayerset[$i]['attributes']['enum_value'][$j][$e] != '' AND $this->qlayerset[$i]['attributes']['enum_value'][$j][$e] == $this->formvars[$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j]])){
@@ -1012,7 +1012,7 @@ function zoomto(gkz){
     <td>
     	<input type="button" class="button" name="savebutton" value="<? echo $strSave; ?>" onclick="save();">&nbsp;&nbsp;
     	<input type="button" class="button" name="savebutton2" value="Als neuen Datensatz speichern" onclick="save_as_new_dataset();">&nbsp;&nbsp;
-    	<input type="button" class="button" name="deletebutton" value="Lˆschen" onclick="delete_dataset(<? echo $this->qlayerset[$i]['shape'][$k]['tblf_plan_oid']; ?>);">&nbsp;&nbsp;
+    	<input type="button" class="button" name="deletebutton" value="L√∂schen" onclick="delete_dataset(<? echo $this->qlayerset[$i]['shape'][$k]['tblf_plan_oid']; ?>);">&nbsp;&nbsp;
     	<input type="button" class="button" name="mapbutton" value="In die Karte" onclick="zoomto('<? echo $this->qlayerset[$i]['shape'][$k]['gemkz']; ?>');">
     </td>
   </tr>
@@ -1020,12 +1020,12 @@ function zoomto(gkz){
 <? } ?>
 <? if($this->new_entry != true AND $this->formvars['details'] == true){ ?>
 		<br>
-		<a href="javascript:go_back();">zur¸ck zur Trefferliste</a>
+		<a href="javascript:go_back();">zur√ºck zur Trefferliste</a>
 		<br>
 <? } ?>
 <br>
 <?php   
-		#  zus‰tzliches Hiddenfeld zum Merken des Offsets der Trefferliste, solange man in der Detailansicht ist 
+		#  zus√§tzliches Hiddenfeld zum Merken des Offsets der Trefferliste, solange man in der Detailansicht ist 
 		echo '<input name="_offset_'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="'.$this->formvars['_offset_'.$this->qlayerset[$i]['Layer_ID']].'">';
 	}				# details == true
 	else{ ?>
@@ -1047,7 +1047,7 @@ function zoomto(gkz){
 					<td valign="top"><a href="javascript:show_details(<? echo $this->qlayerset[$i]['shape'][$k]['tblf_plan_oid']; ?>);"><? echo htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]); ?></a></td>
 					<? $this->qlayerset[$i]['attributes']['name'][$j] = 'aktuell'; ?>
 					<td valign="top"><a href="javascript:show_details(<? echo $this->qlayerset[$i]['shape'][$k]['tblf_plan_oid']; ?>);"><? echo htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]); ?></a></td>
-					<td valign="top"><a href="javascript:delete_dataset(<? echo $this->qlayerset[$i]['shape'][$k]['tblf_plan_oid']; ?>);">lˆschen</a></td>
+					<td valign="top"><a href="javascript:delete_dataset(<? echo $this->qlayerset[$i]['shape'][$k]['tblf_plan_oid']; ?>);">l√∂schen</a></td>
   			</tr>
 	<?	} ?>
 		</table>
@@ -1059,7 +1059,7 @@ function zoomto(gkz){
 else {
     ?><br><strong><font color="#FF0000">
     Zu diesem Layer wurden keine Objekte gefunden!</font></strong><br>
-    W‰hlen Sie einen neuen Bereich oder pr¸fen Sie die Datenquellen.<br>
+    W√§hlen Sie einen neuen Bereich oder pr√ºfen Sie die Datenquellen.<br>
     <?php   
   }
 ?>

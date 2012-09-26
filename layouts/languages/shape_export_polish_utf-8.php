@@ -1,4 +1,4 @@
-<?php
+﻿<?php
  $strTitle="eksportuj dane"; 
  $strSelectStatement="zaznacz stwierdzenie"; 
  $strButtonCutByPolygon="ogranicz przez wielokąt"; 

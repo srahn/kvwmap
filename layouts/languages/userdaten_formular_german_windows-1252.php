@@ -1,18 +1,18 @@
-<?php
+ï»¿<?php
   
-  $strAsteriskRequired="Werte mit * müssen eingetragen werden";
+  $strAsteriskRequired="Werte mit * mÃ¼ssen eingetragen werden";
   $strDataBankID="Datenbank ID";
   $strName="Nachname*";
   $strForeName="Vorname*";
   $strLogInName="Loginname*";
-  $strChangePassword="Auch Password ändern?";
+  $strChangePassword="Auch Password Ã¤ndern?";
   $strPassword="Password";
   $strReEnterPassword='Passwordwiederholung';
   $strAuthorizeTask="Berechtigte Stellen";
   $strTelephone="Telefon";
   $strEmail="E-Mail";
-  $strButtonBack="Zurücksetzen";
-  $strButtonEdit="Ändern";
+  $strButtonBack="ZurÃ¼cksetzen";
+  $strButtonEdit="Ã„ndern";
   $strButtonSaveAs="Als neuen Nutzer eintragen";
   $strTitle="Benutzerdaten Editor";
   $strAllowedIps="erlaubte IP-Adressen";

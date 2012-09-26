@@ -7,9 +7,9 @@ $AlleZugriffe=0;
 $LayerAnz=count($this->account->NumbOfAccessUserStelleM);
 $effekt3d=10; // Gibt die Dicke vom Pie Chart an. 
 $b_ellipse=200; // Breite der Ellipse
-$h_ellipse=150; // Höhe der Ellipse
+$h_ellipse=150; // HÃ¶he der Ellipse
 $rr=255; $gg=255; $bb=255; //Legt die Hintergrundfarbe fest
-$titel="Diagramm der Zugriffe pro Layer! "; // Überschrift zum Pie Chart
+$titel="Diagramm der Zugriffe pro Layer! "; // Ãœberschrift zum Pie Chart
 
 // Ermitteln der Summe aller Zugriffe auf die einzelnen Layer 
 for ($i=0; $i<=$LayerAnz; $i++) {
@@ -28,11 +28,11 @@ for ($i=0; $i<=$LayerAnz; $i++) {
 $summe=0;
 for($i=0;$i<=$LayerAnz;$i++)
 {$summe=$summe+$proz[$i];}
-//Summe der Prozente darf nicht grösser als 100 sein.
+//Summe der Prozente darf nicht grÃ¶sser als 100 sein.
 if($summe>100)
-{echo 'Error!!! Summe der Prozente ist große als 100.';}
+{echo 'Error!!! Summe der Prozente ist groÃŸe als 100.';}
 
-//Höhe und Breite des gesamten Bildes
+//HÃ¶he und Breite des gesamten Bildes
 $breitebild=3*$b_ellipse;
 $hoehebild=1.5*$h_ellipse;
 
@@ -82,7 +82,7 @@ imagefilledrectangle($bild,$xx,$yy+$i*15,$xx+10,$yy+$i*15+10,$farbehell[$k]);
 $schwarz=imagecolorallocate($bild,0,0,0);
 imagettftext($bild,14,0,10,20,$schwarz,WWWROOT.APPLVERSION."fonts/arial.ttf",$titel);
 
-//Legende schreiben (Bild, Schriftgrösse, Schriftneigung, x, y, Schriftfarbe, Schrift, Text)
+//Legende schreiben (Bild, SchriftgrÃ¶sse, Schriftneigung, x, y, Schriftfarbe, Schrift, Text)
 for($i=1;$i<=$imagettftext;$i++)
 {
 $legende= " =  ".$name[$i].": ".$anzahl[$i]." Stimmen (".$proz[$i]."%)";

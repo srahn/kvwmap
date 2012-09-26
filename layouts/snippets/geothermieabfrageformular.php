@@ -42,7 +42,7 @@ else {
   </tr>
   <tr> 
     <td colspan="3"> <div align="left"> </div></td>
-    <td align="left"> <input type="reset" name="go_plus" value="Zurücksetzen"> 
+    <td align="left"> <input type="reset" name="go_plus" value="ZurÃ¼cksetzen"> 
     </td>
     <td align="left"><input type="submit" name="go_plus2" value="Senden"></td>
   </tr>

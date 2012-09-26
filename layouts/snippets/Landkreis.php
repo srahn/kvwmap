@@ -1,17 +1,1 @@
-<h2><?php echo $this->qlayerset[$i]['Name']; ?></h2>
-<table border="1" cellspacing="0" cellpadding="2">
-  <tr bgcolor="<?php echo BG_DEFAULT ?>"> 
-    <td><b>Kreis</b></td>
-    <td><b>Kreis&nbsp;ID</b></td>
-  </tr>
-  <?php
-  for ($j=0;$j<count($this->qlayerset[$i]['shape']);$j++) {
-    ?> 
-  <tr> 
-    <td><?php echo $this->qlayerset[$i]['shape'][$j]->values['KREIS']; ?></td>
-    <td><?php echo $this->qlayerset[$i]['shape'][$j]->values['KREIS_ID']; ?></td>
-  </tr>
-  <?php
-  }
-  ?> 
-</table>
+<h2><?php echo $this->qlayerset[$i]['Name']; ?></h2><table border="1" cellspacing="0" cellpadding="2">  <tr bgcolor="<?php echo BG_DEFAULT ?>">     <td><b>Kreis</b></td>    <td><b>Kreis&nbsp;ID</b></td>  </tr>  <?php  for ($j=0;$j<count($this->qlayerset[$i]['shape']);$j++) {    ?>   <tr>     <td><?php echo $this->qlayerset[$i]['shape'][$j]->values['KREIS']; ?></td>    <td><?php echo $this->qlayerset[$i]['shape'][$j]->values['KREIS_ID']; ?></td>  </tr>  <?php  }  ?> </table>

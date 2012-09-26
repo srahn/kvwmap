@@ -1,4 +1,4 @@
-<?php
+﻿<?php
  $strEditGeom="Anner Geometrie marachen";
  $strMapZoom="Koortutsnitt";
  $strShowPK="ankieken";

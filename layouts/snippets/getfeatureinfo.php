@@ -5,7 +5,7 @@
 
 
   <iframe style="border:none;"  src="<?php echo $this->qlayerset[$i][GetFeatureInfoRequest]; ?>" width="90%" height="500">
-    Wenn Sie dies hier lesen können, unterstützt Ihr Browser keine iframes.
+    Wenn Sie dies hier lesen kÃ¶nnen, unterstÃ¼tzt Ihr Browser keine iframes.
   </iframe>
 
 

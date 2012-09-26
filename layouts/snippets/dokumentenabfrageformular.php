@@ -73,7 +73,7 @@ else {
     <td>Recherche nach folgenden Dokumenten:</td>
   </tr>
   <tr> 
-    <td><input type="checkbox" name="suchffr" value="1"<?php if ($this->formvars['suchffr']) { ?> checked<?php } ?>>&nbsp;Fortführungsriss&nbsp;(FFR) </td>
+    <td><input type="checkbox" name="suchffr" value="1"<?php if ($this->formvars['suchffr']) { ?> checked<?php } ?>>&nbsp;FortfÃ¼hrungsriss&nbsp;(FFR) </td>
   </tr>
   <tr> 
     <td><input type="checkbox" name="suchkvz" value="1"<?php if ($this->formvars['suchkvz']) { ?> checked<?php } ?>>&nbsp;Koordinatenverzeichnis&nbsp;(KVZ)</td>
@@ -173,7 +173,7 @@ else {
   	<td>&nbsp;</td>
   </tr>
   <tr>
-  	<td>Geometrie übernehmen von:<br>
+  	<td>Geometrie Ã¼bernehmen von:<br>
   		<select name="layer_id" onchange="document.GUI.submit();">
   			<option value="">--- Auswahl ---</option>
   			<?
@@ -190,7 +190,7 @@ else {
     <td><hr align="center" noshade></td>
   </tr>
   <tr> 
-    <td align="left"> <input type="reset" name="go_reset" value="Zurücksetzen">&nbsp;<input type="button" name="senden" value="Senden" onclick="save();"> </td>
+    <td align="left"> <input type="reset" name="go_reset" value="ZurÃ¼cksetzen">&nbsp;<input type="button" name="senden" value="Senden" onclick="save();"> </td>
   </tr>
   <tr>
   	<td></td>

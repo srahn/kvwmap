@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 $strLayer="Layer";
-$strPleaseSelect="---------Beed uts�ken---------";
+$strPleaseSelect="---------Beed utsöken---------";
  
   
 ?>  

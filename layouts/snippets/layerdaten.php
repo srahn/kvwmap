@@ -6,11 +6,11 @@
 <? if($this->formvars['order']=="Name") { ?>
   <tr height="50px" valign="bottom">
     <td>
-    <? $umlaute=array("Ä","Ö","Ü");
+    <? $umlaute=array("Ã„","Ã–","Ãœ");
        for ($i=0;$i<count($this->layerdaten['ID']);$i++) {
-         if(!in_array(strtoupper(substr($this->layerdaten['Bezeichnung'][$i],0,1)),$umlaute) AND strtolower(substr($this->layerdaten['Bezeichnung'][$i],0,1)) != $first) {
-           echo "<a href='#".strtoupper(substr($this->layerdaten['Bezeichnung'][$i],0,1))."'>".strtoupper(substr($this->layerdaten['Bezeichnung'][$i],0,1))."</a>&nbsp;&nbsp;";
-           $first=strtolower(substr($this->layerdaten['Bezeichnung'][$i],0,1));
+         if(!in_array(strtoupper(mb_substr($this->layerdaten['Bezeichnung'][$i],0,1,'UTF-8')),$umlaute) AND strtolower(mb_substr($this->layerdaten['Bezeichnung'][$i],0,1,'UTF-8')) != $first) {
+           echo "<a href='#".strtoupper(mb_substr($this->layerdaten['Bezeichnung'][$i],0,1,'UTF-8'))."'>".strtoupper(mb_substr($this->layerdaten['Bezeichnung'][$i],0,1,'UTF-8'))."</a>&nbsp;&nbsp;";
+           $first=strtolower(mb_substr($this->layerdaten['Bezeichnung'][$i],0,1));
          }
        } ?> 
     </td>
@@ -29,16 +29,16 @@
       <?  
       for ($i=0;$i<count($this->layerdaten['ID']);$i++) { 
       if($this->formvars['order']=="Name") {
-        $first=strtoupper(substr($this->layerdaten['Bezeichnung'][$i],0,1));
+        $first=strtoupper(mb_substr($this->layerdaten['Bezeichnung'][$i],0,1,'UTF-8'));
           if (in_array($first,$umlaute)) {
             switch ($first) {
-              case 'Ä': {
+              case 'Ã„': {
               $first='A';
               }break;
-              case 'Ö': {
+              case 'Ã–': {
               $first='O';
               }break;
-              case 'Ü': {
+              case 'Ãœ': {
               $first='U';
               }break;                           
             }          
@@ -50,13 +50,13 @@
             $nextfirst=$first;
           if (in_array($first,$umlaute)) {
             switch ($first) {
-              case 'Ä': {
+              case 'Ã„': {
               $nextfirst='A';
               }break;
-              case 'Ö': {
+              case 'Ã–': {
               $nextfirst='O';
               }break;
-              case 'Ü': {
+              case 'Ãœ': {
               $nextfirst='U';
               }break;                           
             }
@@ -74,7 +74,7 @@
         <td><?php echo $this->layerdaten['Bezeichnung'][$i]; ?></td>
         <td><?php echo $this->layerdaten['Gruppe'][$i]; ?></td>
         <td>&nbsp;<a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->layerdaten['ID'][$i]; ?>"><?php echo $this->strChange; ?></a></td>
-        <td>&nbsp;&nbsp;<a href="javascript:Bestaetigung('index.php?go=Layer_Löschen&selected_layer_id=<? echo $this->layerdaten['ID'][$i]; ?>&order=<? echo $this->formvars['order']; ?>','Wollen Sie Layer <?php echo $this->layerdaten['Bezeichnung'][$i]; ?> wirklich löschen?')"><?php echo $this->strDelete; ?></a></td>        
+        <td>&nbsp;&nbsp;<a href="javascript:Bestaetigung('index.php?go=Layer_LÃ¶schen&selected_layer_id=<? echo $this->layerdaten['ID'][$i]; ?>&order=<? echo $this->formvars['order']; ?>','Wollen Sie Layer <?php echo $this->layerdaten['Bezeichnung'][$i]; ?> wirklich lÃ¶schen?')"><?php echo $this->strDelete; ?></a></td>        
       </tr>
       <? } ?>
     </table></td>

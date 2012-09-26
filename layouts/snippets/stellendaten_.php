@@ -19,7 +19,7 @@
         <td><?php echo $this->stellendaten['ID'][$i]; ?></td>
         <td><?php echo $this->stellendaten['Bezeichnung'][$i]; ?></td>
         <td>&nbsp;<a href="index.php?go=Stelleneditor&selected_stelle_id=<? echo $this->stellendaten['ID'][$i]; ?>"><?php echo $this->strChange; ?></a></td>
-        <td>&nbsp;&nbsp;<a href="javascript:Bestaetigung('index.php?go=Stelle_Löschen&selected_stelle_id=<? echo $this->stellendaten['ID'][$i]; ?>&order=<? echo $this->formvars['order']; ?>','Wollen Sie diese Stelle wirklich löschen?')"><?php echo $this->strDelete; ?></a></td>
+        <td>&nbsp;&nbsp;<a href="javascript:Bestaetigung('index.php?go=Stelle_LÃ¶schen&selected_stelle_id=<? echo $this->stellendaten['ID'][$i]; ?>&order=<? echo $this->formvars['order']; ?>','Wollen Sie diese Stelle wirklich lÃ¶schen?')"><?php echo $this->strDelete; ?></a></td>
       </tr>
       <?php  
       }

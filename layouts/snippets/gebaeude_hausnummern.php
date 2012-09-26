@@ -1,4 +1,4 @@
-<h2>bearbeitete Gebäude</h2>
+<h2>bearbeitete GebÃ¤ude</h2>
 <?php
   $anzObj=count($this->qlayerset[$i]['shape']);
   if ($anzObj>0) { 
@@ -7,7 +7,7 @@
 <table border="1" cellspacing="0" cellpadding="2">
   <tr bgcolor="<?php echo BG_DEFAULT ?>"> 
     <td><b>Gemeinde</b></td>
-    <td><b>Straße</b></td>
+    <td><b>StraÃŸe</b></td>
     <td><b>Hausnummer</b></td>
     <td><b>Zusatz</b></td>
     <td><b>Kommentar</b></td>
@@ -46,7 +46,7 @@
   else {
     ?><br><strong><font color="#FF0000">
     Zu diesem Layer wurden keine Objekte gefunden!</font></strong><br>
-    Wählen Sie einen neuen Bereich oder prüfen Sie die Datenquellen.<br>
+    WÃ¤hlen Sie einen neuen Bereich oder prÃ¼fen Sie die Datenquellen.<br>
     <?php   
   }
 ?>

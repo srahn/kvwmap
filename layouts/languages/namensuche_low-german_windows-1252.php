@@ -1,17 +1,17 @@
-<?php
- $strTitle="Egendömer dörchschnöckern";
- $strName1="Naam, Vörnaam Geburtsnaam/Firma";
+ï»¿<?php
+ $strTitle="EgendÃ¶mer dÃ¶rchschnÃ¶ckern";
+ $strName1="Naam, VÃ¶rnaam Geburtsnaam/Firma";
  $strName2="geburen am/Firmentosatz";
  $strName3="Stroat Husnummer";
  $strName4="PLZ Uurt";
  $strGbbez="Grundbookbezirk";
  $strGbbl="Grundbookblatt";
  $strGemkg="Gemorkung (Gemeend)";
- $strHintCaseSens="Up Groot- und Lüttschrieven achten";
- $strHintWildcard="Giv de Platsholler &quot;%&quot; in (as Bispill &quot;me%er&quot;), wenn an de Stäe egol wecke und egol wie veel Teken dor stohn dörven. Giv de Platsholler &quot;_&quot; in (as Bispill &quot;me_er&quot;), wenn an de Stäe egol een Teken dor stohn dörv";
+ $strHintCaseSens="Up Groot- und LÃ¼ttschrieven achten";
+ $strHintWildcard="Giv de Platsholler &quot;%&quot; in (as Bispill &quot;me%er&quot;), wenn an de StÃ¤e egol wecke und egol wie veel Teken dor stohn dÃ¶rven. Giv de Platsholler &quot;_&quot; in (as Bispill &quot;me_er&quot;), wenn an de StÃ¤e egol een Teken dor stohn dÃ¶rv";
  $strShowHits="Antohl Treffer anwiesen";
- $strShowWithFst="Flagstücks anwiesen";
- $strSearch="Söken";
+ $strShowWithFst="FlagstÃ¼cks anwiesen";
+ $strSearch="SÃ¶ken";
  $strTotalHits="Treffer all in all";
  $strGbbezShort="Bezirk";
  $strGbblShort="Blatt";
@@ -19,7 +19,7 @@
  $strName2Short="GebDatum/Tosatz";
  $strName3Short="Stroat Husnr.";
  $strName4Short="PLZ Uurt";
- $strFst="Flagstücks";
+ $strFst="FlagstÃ¼cks";
  $strHunt="Jagdkataster";
  $strShowFst="anwiesen";
  $strToMap="Koort";
@@ -27,14 +27,14 @@
  $strParcelNo="Flagstkennt";
  $strGemkgName="Gemorkungsnaam";
  $strAreaALB="ALB-Flach";
- $strDoPrintoutsALB="ALB-Uttöög maken";
+ $strDoPrintoutsALB="ALB-UttÃ¶Ã¶g maken";
  $strPrintoutALB="ALB-Uttog";
  $strMapSection="Koortutsnitt";
- $strSelFst="utsökt Flagstücks";
- $strSelGbbl="utsökt Grundbookbläder";
- $strShowFstInMap="Flagstücks inner Koort anwiesen";
- $strBack="torüch";
+ $strSelFst="utsÃ¶kt FlagstÃ¼cks";
+ $strSelGbbl="utsÃ¶kt GrundbookblÃ¤der";
+ $strShowFstInMap="FlagstÃ¼cks inner Koort anwiesen";
+ $strBack="torÃ¼ch";
  $strNext="wieter";
  $strFlur="Flur";
- $strCheckAll="all utsöken";
+ $strCheckAll="all utsÃ¶ken";
 ?>

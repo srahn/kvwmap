@@ -18,7 +18,7 @@ else {
       $rs=$this->qlayerset[$i]['shape'][$j];
       ?><i><?php echo $rs['idtype']; ?>:</i>&nbsp;<a href="index.php?go=Metadatenblattanzeige&oid=<?php echo $rs['oid']; ?>" class="blue_underline"><?php echo $rs['restitle']; ?></a>
     <br><i>Kurzbeschreibung:</i>&nbsp;<?php echo $rs['idabs']; ?>
-    <br><i>Schlagwörter:</i>&nbsp;<?php echo $rs['themekeywords']; ?> <?php echo $rs['placekeywords']; ?>
+    <br><i>SchlagwÃ¶rter:</i>&nbsp;<?php echo $rs['themekeywords']; ?> <?php echo $rs['placekeywords']; ?>
     <br><i>Organization:</i>&nbsp;<?php echo $rs['rporgname']; ?>
     <br><i>Download:</i>&nbsp;<a href="<?php echo $rs['download']; ?>" class="green"><?php echo $rs['download']; ?></a>
     <br><b><a href="index.php?go=Metadateneingabe&oid=<?php echo $rs['oid']; ?>">Bearbeiten</a></b><br><br>

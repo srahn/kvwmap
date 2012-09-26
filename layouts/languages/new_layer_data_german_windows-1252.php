@@ -1,8 +1,8 @@
-<?php
+ï»¿<?php
 $strLayer="Layer";
-$strPleaseSelect="---------Bitte auswählen---------";
+$strPleaseSelect="---------Bitte auswÃ¤hlen---------";
 $strSave="Speichern";
-$strtitle="neuen Datensatz einfügen"; 
+$strtitle="neuen Datensatz einfÃ¼gen"; 
 $strCancel="Abbrechen";
   
 ?>  

@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 $strLayer="Layer";
-$strPleaseSelect="---------Bitte w�hlen---------";
+$strPleaseSelect="---------Bitte wählen---------";
  
   
 ?>  

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
   $strCharSet="Kiểu ký tự";
   $strLanguage="Ngôn ngữ";
   $strEnglish="Tiếng Anh";

@@ -31,7 +31,7 @@ function intersect_flurst(){
 		}
 	}
 	if(go == 'false'){
-		alert('Es wurde kein Datensatz ausgew‰hlt.');
+		alert('Es wurde kein Datensatz ausgew√§hlt.');
 	}
 	else{
 		document.GUI.go.value = 'jagdkatastereditor_Flurstuecke_Listen';
@@ -68,12 +68,12 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   			<option <? if($this->formvars['search_art'] == 'ajb'){echo 'selected';} ?> value="ajb">Abgerundeter Eigenjagdbezirk</option>
   			<option <? if($this->formvars['search_art'] == 'gjb'){echo 'selected';} ?> value="gjb">Gemeinschaftlicher Jagdbezirk</option>
   			<option <? if($this->formvars['search_art'] == 'tjb'){echo 'selected';} ?> value="tjb">Teiljagdbezirk</option>
-  			<option <? if($this->formvars['search_art'] == 'sf'){echo 'selected';} ?> value="sf">Sonderfl‰che</option>
+  			<option <? if($this->formvars['search_art'] == 'sf'){echo 'selected';} ?> value="sf">Sonderfl√§che</option>
   			<option <? if($this->formvars['search_art'] == 'jbe'){echo 'selected';} ?> value="jbe">Enklave</option>
-  			<option <? if($this->formvars['search_art'] == 'jbf'){echo 'selected';} ?> value="jbf">Jagdbezirksfreie Fl‰che</option>
-  			<option <? if($this->formvars['search_art'] == 'agf'){echo 'selected';} ?> value="agf">Angliederungsfl‰che</option>
-  			<option <? if($this->formvars['search_art'] == 'atf'){echo 'selected';} ?> value="atf">Abtrennungsfl‰che</option>
-  			<option <? if($this->formvars['search_art'] == 'slf'){echo 'selected';} ?> value="slf">Schmalfl‰che</option>
+  			<option <? if($this->formvars['search_art'] == 'jbf'){echo 'selected';} ?> value="jbf">Jagdbezirksfreie Fl√§che</option>
+  			<option <? if($this->formvars['search_art'] == 'agf'){echo 'selected';} ?> value="agf">Angliederungsfl√§che</option>
+  			<option <? if($this->formvars['search_art'] == 'atf'){echo 'selected';} ?> value="atf">Abtrennungsfl√§che</option>
+  			<option <? if($this->formvars['search_art'] == 'slf'){echo 'selected';} ?> value="slf">Schmalfl√§che</option>
   		</select>
 		</td>
   </tr>
@@ -120,7 +120,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
       	<td></td>
         <td align="center"><strong>lfd. Nummer</strong></td>
         <td align="center"><strong>Name</strong></td>
-        <td align="center"><strong>Fl‰che</strong></td>
+        <td align="center"><strong>Fl√§che</strong></td>
         <td align="center"><strong>Typ</strong></td>
         <td align="center">&nbsp;</td>
         <td align="center">&nbsp;</td>
@@ -151,7 +151,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 	  <table cellpadding="3" cellspacing="0">
 	  	<tr>
       	<td width="30" valign="top" align="center" valign="bottom"><img src="<? echo GRAPHICSPATH?>pfeil_unten-rechts.gif"></td>
-      	<td height="29" valign="bottom" colspan="5"><a href="javascript:intersect_flurst();">enthaltene Flurst¸cke</a>&nbsp;&nbsp;<b>! Achtung dies kann u.U. sehr lange dauern !</b>&nbsp;&nbsp;</td>
+      	<td height="29" valign="bottom" colspan="5"><a href="javascript:intersect_flurst();">enthaltene Flurst√ºcke</a>&nbsp;&nbsp;<b>! Achtung dies kann u.U. sehr lange dauern !</b>&nbsp;&nbsp;</td>
       </tr>
     </table></td>
   </tr><?php

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
   $strZoomIn="Phóng to";
   $strZoomOut="Thu nhỏ";
   $strZoomToFullExtent="Phóng toàn cảnh";

@@ -15,7 +15,7 @@ function create_chart(layer_id){
 	checkbox_names = checkbox_name_string.split('|');
 
 	if(go == 'false'){
-		alert('Es wurde kein Datensatz ausgew‰hlt.');
+		alert('Es wurde kein Datensatz ausgew√§hlt.');
 	}
 	else{
 		document.GUI.target = 'chartframe';

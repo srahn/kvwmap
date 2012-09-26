@@ -8,7 +8,7 @@ $Diagrammhoehe = 400;
 
 $Diagrammtitel = "Darstellung der Anzahl der Zugriffe pro Layer";
 
-//R‰nder & Abst‰nde
+//R√§nder & Abst√§nde
 
 $AbstandAussen = 3;
 
@@ -62,7 +62,7 @@ rsort($Tmp);
 $YMax = $Tmp[0];
 
 
-//Festlegung des Inhalttyps f¸r den Webbrowser
+//Festlegung des Inhalttyps f√ºr den Webbrowser
 
 # header("Content-type: image/png");
 $Grafik = imagecreatetruecolor($Diagrammbreite, $Diagrammhoehe);
@@ -77,7 +77,7 @@ $Achsenfarbe = imagecolorallocate($Grafik, $AchsenfarbeR, $AchsenfarbeG, $Achsen
 $Balkenfarbe = imagecolorallocate($Grafik, $BalkenfarbeR, $BalkenfarbeG, $BalkenfarbeB);
 
 
-//Allgemeinen Hintergrund und Auswertungsbereich einf‰rben
+//Allgemeinen Hintergrund und Auswertungsbereich einf√§rben
 
 imagefill($Grafik, 0, 0, $Hintergrundfarbe);
 imagefilledrectangle($Grafik, $AbstandAussen+$RandLinks, $AbstandAussen+$RandOben, $Diagrammbreite-1-$AbstandAussen-$RandRechts, $Diagrammhoehe-1-$AbstandAussen-$RandUnten, $HintergrundfarbeAuswertungsbereich);

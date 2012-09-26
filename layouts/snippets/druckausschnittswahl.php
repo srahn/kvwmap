@@ -11,11 +11,11 @@ function setprintextent(wert){
 
 function preview(){
 	if(document.GUI.printextent.value == 'false'){
-		alert("Bitte aktualisieren Sie den Druckausschnitt durch Klick in die Maßstabseingabe und dann [Enter].");
+		alert("Bitte aktualisieren Sie den Druckausschnitt durch Klick in die MaÃŸstabseingabe und dann [Enter].");
 	}
 	else{
 		if(Math.abs(document.GUI.angle.value) > 90){
-			alert("Bitte geben Sie einen Winkel zwischen -90° und 90° an.");
+			alert("Bitte geben Sie einen Winkel zwischen -90Â° und 90Â° an.");
 		}
 		else{
 			if(document.GUI.printscale.value != ''){
@@ -24,7 +24,7 @@ function preview(){
 					document.GUI.submit();
 				}
 				else{
-					alert("Bitte wählen Sie einen Druckausschnitt aus.");
+					alert("Bitte wÃ¤hlen Sie einen Druckausschnitt aus.");
 				}
 			}
 			else{
@@ -36,11 +36,11 @@ function preview(){
 
 function save(){
 	if(document.GUI.name.value == ''){
-		alert("Bitte geben Sie einen Namen für den Druckausschnitt an.");
+		alert("Bitte geben Sie einen Namen fÃ¼r den Druckausschnitt an.");
 	}
 	else{
 		if(Math.abs(document.GUI.angle.value) > 90){
-			alert("Bitte geben Sie einen Winkel zwischen -90° und 90° an.");
+			alert("Bitte geben Sie einen Winkel zwischen -90Â° und 90Â° an.");
 		}
 		else{
 			if(document.GUI.printscale.value != ''){
@@ -49,7 +49,7 @@ function save(){
 					document.GUI.submit();
 				}
 				else{
-					alert("Bitte wählen Sie einen Druckausschnitt aus.");
+					alert("Bitte wÃ¤hlen Sie einen Druckausschnitt aus.");
 				}
 			}
 			else{
@@ -61,7 +61,7 @@ function save(){
 
 function load(){
 	if(document.GUI.druckausschnitt.value == ''){
-		alert("Bitte wählen Sie einen Druckausschnitt aus.");
+		alert("Bitte wÃ¤hlen Sie einen Druckausschnitt aus.");
 	}
 	else{
 		document.GUI.submit();
@@ -70,7 +70,7 @@ function load(){
 
 function remove(){
 	if(document.GUI.druckausschnitt.value == ''){
-		alert("Bitte wählen Sie einen Druckausschnitt aus.");
+		alert("Bitte wÃ¤hlen Sie einen Druckausschnitt aus.");
 	}
 	else{
 		document.GUI.go.value = "Druckausschnitt_loeschen";
@@ -131,7 +131,7 @@ function remove(){
 
   <tr align="center"> 
     <td valign="top" align="left">
-    	<?php echo $strRotationAngle; ?><input type="text" size="3" name="angle" value="<?php echo $this->formvars['angle']; ?>">&nbsp;°
+    	<?php echo $strRotationAngle; ?><input type="text" size="3" name="angle" value="<?php echo $this->formvars['angle']; ?>">&nbsp;Â°
     </td>
     <td colspan="2"  align="right"> 
       <?php echo $strPrintDetail; ?>
@@ -159,7 +159,7 @@ function remove(){
   	# Wenn der Druckrahmen Freitexte hat, die leer sind, werden dem Nutzer Textfelder angeboten um die Freitexte selber belegen
 		for($j = 0; $j < count($this->Document->activeframe[0]['texts']); $j++){
       if($this->Document->activeframe[0]['texts'][$j]['text'] == ''){
-      	# falls man von der Vorschau zurück gekommen ist
+      	# falls man von der Vorschau zurÃ¼ck gekommen ist
       	$this->formvars['freetext'.$this->Document->activeframe[0]['texts'][$j]['id']] = str_replace(';', chr(10), $this->formvars['freetext'.$this->Document->activeframe[0]['texts'][$j]['id']]);
 	?>
 					<tr>
@@ -188,7 +188,7 @@ function remove(){
 <input type="hidden" name="printextent" value="">
 <input type="hidden" name="map_factor" value="<? echo $this->formvars['map_factor'] ?>">
 
-<!-- für den externen Druck -->
+<!-- fÃ¼r den externen Druck -->
 <input type="hidden" name="post_width" value="<? echo $this->formvars['post_width'] ?>">
 <input type="hidden" name="post_height" value="<? echo $this->formvars['post_height'] ?>">
 <input type="hidden" name="post_epsg" value="<? echo $this->formvars['post_epsg'] ?>">

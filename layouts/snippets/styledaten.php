@@ -47,4 +47,4 @@
     </table></td>
   </tr>
 </table>
-<a href="index.php?go=Administratorfunktionen">zurück</a>
+<a href="index.php?go=Administratorfunktionen">zurÃ¼ck</a>

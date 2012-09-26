@@ -22,7 +22,7 @@
         <td align="right"><?php echo $rs['bodenrichtwert']; ?>&nbsp;&euro;</td>
         <td><?php echo $rs['verfahrensgrund'].' '.$rs['verfahrensgrund_zusatz'];; ?></td>
         <td><a href="index.php?go=Bodenrichtwertformular_Aendern&layer_id=<? echo $this->qlayerset[$i]['Layer_ID']; ?>&oid=<?php echo $rs['oid']; ?>">&Auml;ndern</a></td>
-        <td><a href="javascript:Bestaetigung('index.php?go=Bodenrichtwertzone_Loeschen&oid=<?php echo $rs['oid']; ?>','Wollen Sie das Objekt mit der ID: <?php echo $rs['oid']; ?> wirklich löschen?')">L&ouml;schen</a></td>
+        <td><a href="javascript:Bestaetigung('index.php?go=Bodenrichtwertzone_Loeschen&oid=<?php echo $rs['oid']; ?>','Wollen Sie das Objekt mit der ID: <?php echo $rs['oid']; ?> wirklich lÃ¶schen?')">L&ouml;schen</a></td>
     </tr><?php
     }
     ?></table>
@@ -32,7 +32,7 @@
   else {?>
     <br><strong><font color="#FF0000">
     Zu diesem Layer wurden keine Objekte gefunden!</font></strong><br>
-    Wählen Sie einen neuen Bereich oder prüfen Sie die Datenquellen.<br>
+    WÃ¤hlen Sie einen neuen Bereich oder prÃ¼fen Sie die Datenquellen.<br>
     <?php   
   }
 ?>  

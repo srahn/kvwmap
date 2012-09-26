@@ -95,7 +95,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
       <input type="hidden" name="go_plus" id="go_plus" value="">
       <input type="button" name="dummy" value="<?php echo $strSearch; ?>" onclick="submitWithValue('GUI','go_plus','Suchen')">
 	  <?php if ($this->Stelle->isFunctionAllowed('Haltestellen_Suche')) {
-	    ?><a href="#" onclick="this.href='index.php?go=Haltestellen_Suche&defaultAddress='+getAddressText();">Haltestellen in der Nähe Suchen</a><?php
+	    ?><a href="#" onclick="this.href='index.php?go=Haltestellen_Suche&defaultAddress='+getAddressText();">Haltestellen in der NÃ¤he Suchen</a><?php
 	  }	?>	  
    </td>
   </tr>

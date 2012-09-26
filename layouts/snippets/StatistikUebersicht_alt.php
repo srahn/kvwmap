@@ -56,7 +56,7 @@
 					if ( count($this->account->NumbOfAccessStelleM)==0 ) { ?>
                     <tr> 
                       <td align="center" colspan="2">
-                        <?php  echo 'Es wurden keine Einträge in der Datenbank gefunden!'; ?>
+                        <?php  echo 'Es wurden keine EintrÃ¤ge in der Datenbank gefunden!'; ?>
                       </td>
                       <?php
 					}
@@ -99,7 +99,7 @@
 					if ( count($this->account->NumbOfAccessUserM)==0 ) { ?>
                     <tr> 
                       <td align="center" colspan="3">
-                        <?php  echo 'Es wurden keine Einträge in der Datenbank gefunden!'; ?>
+                        <?php  echo 'Es wurden keine EintrÃ¤ge in der Datenbank gefunden!'; ?>
                       </td>
                       <?php
 					}
@@ -126,7 +126,7 @@
          
         if ($this->formvars['nutzung']=='stelle_nutzer' ) {     ?>
 	        <tr> 
-	          <td colspan="2"><li>Layer-Zugriffe durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> über 
+	          <td colspan="2"><li>Layer-Zugriffe durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> Ã¼ber 
 	              die Stelle: <?php echo $this->account->Bezeichnung ;?></li>
 	          </td>
 	        </tr>
@@ -146,7 +146,7 @@
 						if ( count($this->account->NumbOfAccessUserStelleM)==0 ) { ?>
 	                    <tr> 
 	                      <td align="center" colspan="2">
-	                        <?php  echo 'Es wurden keine Einträge in der Datenbank gefunden!'; ?>
+	                        <?php  echo 'Es wurden keine EintrÃ¤ge in der Datenbank gefunden!'; ?>
 	                      </td>
 	                      <?php
 						}
@@ -175,7 +175,7 @@
 	 	
 	  				
 	  				<tr> 
-	          <td colspan="2"><li>Drucke durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> über 
+	          <td colspan="2"><li>Drucke durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> Ã¼ber 
 	              die Stelle: <?php echo $this->account->Bezeichnung ;?></li>
 	          </td>
 	        </tr>
@@ -195,7 +195,7 @@
 						if ( count($this->account->ALKNumbOfAccessUserStelleM)==0 ) { ?>
 	                    <tr> 
 	                      <td align="center" colspan="2">
-	                        <?php  echo 'Es wurden keine Einträge in der Datenbank gefunden!'; ?>
+	                        <?php  echo 'Es wurden keine EintrÃ¤ge in der Datenbank gefunden!'; ?>
 	                      </td>
 	                      <?php
 						}
@@ -251,7 +251,7 @@
 					if ( count($this->account->NumbOfAccessStelleW)==0 ) { ?>
                     <tr> 
                       <td align="center" colspan="3">
-                        <?php  echo 'Es wurden keine Einträge in der Datenbank gefunden!'; ?>
+                        <?php  echo 'Es wurden keine EintrÃ¤ge in der Datenbank gefunden!'; ?>
                       </td>
                       <?php
 					}
@@ -295,7 +295,7 @@
 					if ( count($this->account->NumbOfAccessUserW)==0 ) { ?>
                     <tr> 
                       <td align="center" colspan="3">
-                        <?php  echo 'Es wurden keine Einträge in der Datenbank gefunden!'; ?>
+                        <?php  echo 'Es wurden keine EintrÃ¤ge in der Datenbank gefunden!'; ?>
                       </td>
                       <?php
 					}
@@ -322,7 +322,7 @@
 		if ($this->formvars['nutzung']=='stelle_nutzer') { 
 		       ?>
         <tr> 
-          <td colspan="2"><li>Zugriffe durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> über 
+          <td colspan="2"><li>Zugriffe durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> Ã¼ber 
               die Stelle: <?php echo $this->account->Bezeichnung ;?></li></td>
         <tr> 
           <td colspan="2"><ul>
@@ -340,7 +340,7 @@
 					if ( count($this->account->NumbOfAccessUserStelleW)==0 ) { ?>
                     <tr> 
                       <td align="center" colspan="3">
-                        <?php  echo 'Es wurden keine Einträge in der Datenbank gefunden!'; ?>
+                        <?php  echo 'Es wurden keine EintrÃ¤ge in der Datenbank gefunden!'; ?>
                       </td>
                       <?php
 					}
@@ -389,7 +389,7 @@
 					if ( count($this->account->NumbOfAccessStelleD)==0 ) { ?>
                     <tr> 
                       <td align="center" colspan="3">
-                        <?php  echo 'Es wurden keine Einträge in der Datenbank gefunden!'; ?>
+                        <?php  echo 'Es wurden keine EintrÃ¤ge in der Datenbank gefunden!'; ?>
                       </td>
                       <?php
 					}
@@ -430,7 +430,7 @@
 					if ( count($this->account->NumbOfAccessUserM)==0 ) { ?>
                     <tr> 
                       <td align="center" colspan="3">
-                        <?php  echo 'Es wurden keine Einträge in der Datenbank gefunden!'; ?>
+                        <?php  echo 'Es wurden keine EintrÃ¤ge in der Datenbank gefunden!'; ?>
                       </td>
                       <?php
 					}
@@ -455,7 +455,7 @@
 			<?php }
 		  if ($this->formvars['nutzung']=='stelle_nutzer') { ?>
         <tr> 
-          <td colspan="2"><li>Zugriffe durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> über 
+          <td colspan="2"><li>Zugriffe durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> Ã¼ber 
               die Stelle: <?php echo $this->account->Bezeichnung ;?></li></td>
         <tr> 
           <td colspan="2"><ul>
@@ -473,7 +473,7 @@
 					if ( count($this->account->NumbOfAccessUserStelleD)==0 ) { ?>
                     <tr> 
                       <td align="center" colspan="3">
-                        <?php  echo 'Es wurden keine Einträge in der Datenbank gefunden!'; ?>
+                        <?php  echo 'Es wurden keine EintrÃ¤ge in der Datenbank gefunden!'; ?>
                       </td>
                       <?php
 					}
@@ -523,7 +523,7 @@
 					if ( count($this->account->NumbOfAccessStelleE)==0 ) { ?>
                     <tr> 
                       <td align="center" colspan="3">
-                        <?php  echo 'Es wurden keine Einträge in der Datenbank gefunden!'; ?>
+                        <?php  echo 'Es wurden keine EintrÃ¤ge in der Datenbank gefunden!'; ?>
                       </td>
                       <?php
 					}
@@ -565,7 +565,7 @@
 					if ( count($this->account->NumbOfAccessUserE)==0 ) { ?>
                     <tr> 
                       <td align="center" colspan="3">
-                        <?php  echo 'Es wurden keine Einträge in der Datenbank gefunden!'; ?>
+                        <?php  echo 'Es wurden keine EintrÃ¤ge in der Datenbank gefunden!'; ?>
                       </td>
                       <?php
 					}
@@ -590,7 +590,7 @@
 			<?php }
 		  if ($this->formvars['nutzung']=='stelle_nutzer') { ?>
         <tr> 
-          <td colspan="2"><li>Zugriffe durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> über 
+          <td colspan="2"><li>Zugriffe durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> Ã¼ber 
               die Stelle: <?php echo $this->account->Bezeichnung ;?></li></td>
         <tr> 
           <td colspan="2"><ul>
@@ -608,7 +608,7 @@
 					if ( count($this->account->NumbOfAccessUserStelleE)==0 ) { ?>
                     <tr> 
                       <td align="center" colspan="2">
-                        <?php  echo 'Es wurden keine Einträge in der Datenbank gefunden!'; ?>
+                        <?php  echo 'Es wurden keine EintrÃ¤ge in der Datenbank gefunden!'; ?>
                       </td>
                       <?php
 					}
@@ -635,7 +635,7 @@
   <tr> 
     <td align="center" colspan="2"><hr color="#000000" size="1"></td>
   <tr> 
-    <td align="center" colspan="2"> <input name="zurueck" type="submit" value="Zurück"> </td>
+    <td align="center" colspan="2"> <input name="zurueck" type="submit" value="ZurÃ¼ck"> </td>
   </tr>
   <tr>
     <td colspan="2" align="center">&nbsp;</td>
@@ -649,7 +649,7 @@
 </table>
 <br>
 <br>
-<input name="zurueck" type="submit" value="Zurück">
+<input name="zurueck" type="submit" value="ZurÃ¼ck">
 <br><br>
 <input type="hidden" name="go" value="StatistikAuswahl">
   <input type="hidden" name="order" value="<?php echo $this->formvars['order']; ?>">

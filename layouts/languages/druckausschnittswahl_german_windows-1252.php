@@ -1,7 +1,7 @@
 <?php
-$strTitle="Druckausschnitt wählen";
+$strTitle="Druckausschnitt wÃ¤hlen";
 $strButtonPrintPreview="Vorschau";
-$strButtonPrintScale="Druckmaßstab: 1:";
+$strButtonPrintScale="DruckmaÃŸstab: 1:";
 $strPrintFrame="Druckrahmen: ";
 $strRotationAngle="Drehwinkel: ";
 $strPrintDetail="Druckausschnitt";

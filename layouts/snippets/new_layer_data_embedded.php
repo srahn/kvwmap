@@ -2,7 +2,8 @@
  # 2008-01-12 pkvvm
   include(LAYOUTPATH.'languages/new_layer_data_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
  ?>
-
+
+
 	<?  
 		if($this->formvars['selected_layer_id'] AND $this->Fehler == ''){
 			$i = 0;
@@ -20,4 +21,5 @@
 	
 	
 	<input name="sub_<? echo $this->formvars['selected_layer_id']; ?>_form_field_names" id="sub_<? echo $this->formvars['selected_layer_id']; ?>_form_field_names" type="hidden" value="<?php echo $this->form_field_names; ?>">
-	 
+	
+ 

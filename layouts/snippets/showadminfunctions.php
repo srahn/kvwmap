@@ -16,7 +16,7 @@
   </tr>
   <tr>
   	<td bordercolor="#000000" bgcolor="<?php echo BG_DEFAULT ?>">
-    	<strong><font color="#000000"><a href="index.php?go=Administratorfunktionen&func=createRandomPassword">Erzeuge zuf‰lliges Passwort</a></font></strong>
+    	<strong><font color="#000000"><a href="index.php?go=Administratorfunktionen&func=createRandomPassword">Erzeuge zuf√§lliges Passwort</a></font></strong>
     </td>
   </tr>
   <tr>

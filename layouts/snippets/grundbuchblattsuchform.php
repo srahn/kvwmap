@@ -40,7 +40,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
     <td>&nbsp;</td>
   </tr>
   <tr> 
-    <td align="right"><strong>Grundbuchbezirksschlüssel:</strong></td>
+    <td align="right"><strong>GrundbuchbezirksschlÃ¼ssel:</strong></td>
     <td colspan="3">
     	<input name="bezirk" style="width:230px" type="text" value="<?php echo $this->formvars['bezirk']; ?>" onkeyup="updateBezirksauswahl();" size="25" tabindex="1">
     </td>
@@ -69,7 +69,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   <tr>
     <td align="right"><strong>Grundbuchblatt:</strong></td>
     <td>
-    	<br>ausgewählte:<br>
+    	<br>ausgewÃ¤hlte:<br>
     	<select size="10" style="width:110px" multiple="true" class="select" name="selectedBlatt">
     		 <?
           for($i=0; $i < count($this->selblattliste); $i++){
@@ -130,5 +130,5 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 	<input name="order" type="hidden" value="<? echo $this->formvars['order'] ?>">
 	<input name="anzahl" type="hidden" value="<?php echo $this->formvars['anzahl']; ?>">
 	<br>
-  <a href="javascript:backto_namesearch();">zurück zur Namensuche</a>
+  <a href="javascript:backto_namesearch();">zurÃ¼ck zur Namensuche</a>
  <?}?>

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
  $strTitle="Layereigenschaften stellenbezogen";
  $strTask="der Stelle";
  $strQueryable="abfragbar";

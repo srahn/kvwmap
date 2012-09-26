@@ -1,6 +1,6 @@
 <strong><font size="+2"><?php echo $this->titel; ?></font></strong>
 <br><br>
-<strong><font size="+1">Neue Kategorie hinzufügen</font></strong>
+<strong><font size="+1">Neue Kategorie hinzufÃ¼gen</font></strong>
 <br>
 <br>
 <table align="center" border="1" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>" rules="groups">
@@ -10,7 +10,7 @@
         <tr> 
           <th> Kategorie: </th>
           <td> <input name="newKategorie" id="newKategorie" type="text" size="20" value=""> </td>
-		  <td> <input type="submit" name="senden" value="Hinzufügen"> </td>
+		  <td> <input type="submit" name="senden" value="HinzufÃ¼gen"> </td>
         </tr>
       </table> 
 </table>

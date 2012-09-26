@@ -1,5 +1,5 @@
 <?php
-$strTitle="Druckutsnitt utsöken";
+$strTitle="Druckutsnitt utsÃ¶ken";
 $strButtonPrintPreview="Utkiek";
 $strButtonPrintScale="Druckmaat: 1:";
 $strPrintFrame="Druckrohmen: ";

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
  $strTitle="szukanie własciciela działki"; 
  $strName1="nazwisko, imię, nazwisko rodowe / firma"; 
  $strName2="urodzona/y dnia / dodatek do firmy"; 

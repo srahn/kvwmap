@@ -25,7 +25,7 @@
 	$mobile = $_REQUEST['mobile'];
         $remote_addr = getenv('REMOTE_ADDR');
     
-	// Benutzername und Passwort werden überprüft
+	// Benutzername und Passwort werden Ã¼berprÃ¼ft
 	##if (($newPassword == '' OR ($newPassword != '' AND $newPassword2 != '')) AND $userDb->login_user($username, $passwort)) {
 	if ($userDb->login_user($username, $passwort)) {
 		$_SESSION['angemeldet'] = true;

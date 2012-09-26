@@ -35,12 +35,12 @@ else {
   	<td align="center">
     <input type="hidden" name="go_plus" id="go_plus" value=""><?php
       if ($this->formvars['selected_function_id']>0) { ?>
-    	<input type="reset" name="reset1" value="Zurücksetzen">&nbsp;
+    	<input type="reset" name="reset1" value="ZurÃ¼cksetzen">&nbsp;
     	<input type="hidden" name="selected_function_id" value="<?php echo $this->formvars['selected_function_id']; ?>">
-      <input type="button" name="dummy" value="Ändern" onclick="submitWithValue('GUI','go_plus','Ändern')">&nbsp;<?php
+      <input type="button" name="dummy" value="Ã„ndern" onclick="submitWithValue('GUI','go_plus','Ã„ndern')">&nbsp;<?php
       }
       else {
-      	?><input type="button" value="Zurücksetzen" onclick="document.location.href='index.php?go=Benutzerdaten_Formular'">&nbsp;<?
+      	?><input type="button" value="ZurÃ¼cksetzen" onclick="document.location.href='index.php?go=Benutzerdaten_Formular'">&nbsp;<?
       } 
       ?><input type="button" name="dummy" value="Als neue Funktion eintragen" onclick="submitWithValue('GUI','go_plus','Als neue Funktion eintragen')">
 	  </td>

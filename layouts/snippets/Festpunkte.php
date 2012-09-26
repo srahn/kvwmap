@@ -41,7 +41,7 @@
         <td>&nbsp;<?php echo trim($rs['hoe']); ?></td>
         <td><?php
         $festpunktskizze_extension="png";
-        # Pfüfen ob Festpunktskizze eine PDF Datei ist
+        # PfÃ¼fen ob Festpunktskizze eine PDF Datei ist
         $dateiname=basename($rs['datei']);
         $dateinamensteil=explode('.',$dateiname);
         if (strtolower($dateinamensteil[1])=='pdf') {
@@ -264,7 +264,7 @@
       <br>
 	  <br>
       <input name="go_plus" type="submit" value="Festpunkte Anzeigen"> 
-      <input name="go_plus" type="submit" value="Festpunkte zu Auftrag Hinzufügen">
+      <input name="go_plus" type="submit" value="Festpunkte zu Auftrag HinzufÃ¼gen">
       <input name="go_plus" type="submit" value="KVZ-Datei erzeugen">
 	  <?php if ($this->formvars['kiloquad']!='' AND $this->formvars['pkz']=='') { ?>
 	  <input name="kiloquad" type="hidden" value="<?php echo $this->formvars['kiloquad']; ?>">
@@ -291,7 +291,7 @@
 	  ?><br>
 	<strong><font color="#FF0000">
 	  Zu diesem Layer wurden keine Objekte gefunden!</font></strong><br>
-	  Wählen Sie einen neuen Bereich oder prüfen Sie die Datenquellen.<br>
+	  WÃ¤hlen Sie einen neuen Bereich oder prÃ¼fen Sie die Datenquellen.<br>
 	  <?php  	
   }
 ?>

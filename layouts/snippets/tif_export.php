@@ -20,7 +20,7 @@ function DruckAufloesung(pixel,breite) {
   <tr>
   	<td>&nbsp;</td>
 		<td align="center">
-			<b>Auflösung:</b>  1 Pixel = <input type="text" value="<? echo round($this->formvars['resolution'],3); ?>" name="resolution" size="3" onkeyup="DruckAufloesung(this.value,<? echo $this->map->extent->maxx - $this->map->extent->minx; ?>)">&nbsp;m
+			<b>AuflÃ¶sung:</b>  1 Pixel = <input type="text" value="<? echo round($this->formvars['resolution'],3); ?>" name="resolution" size="3" onkeyup="DruckAufloesung(this.value,<? echo $this->map->extent->maxx - $this->map->extent->minx; ?>)">&nbsp;m
 		</td>
 		<td>&nbsp;</td>
 	</tr>
@@ -28,12 +28,12 @@ function DruckAufloesung(pixel,breite) {
   	<td>&nbsp;</td>
 		<td align="center">
 		    <? $cm = round((($this->map->extent->maxx - $this->map->extent->minx)/$this->formvars['resolution'])/200*2.54,0).' cm'; ?>
-			Für einen Ausdruck dieses TIFs mit 200 dpi<br>
+			FÃ¼r einen Ausdruck dieses TIFs mit 200 dpi<br>
 			=> Breite des Ausdrucks :
 			<input type="text" readonly="readonly" size="5" id="cm" style="border:0px;background-color:transparent;" value="<? echo $cm; ?>"><br>
             <br>
-			(Hinweis: Die Halbierung der Pixelauflösung ergibt die Verdopplung<br>
-			 der Druckauflösung und die Vervierfachung der Dateigröße)<br>&nbsp;
+			(Hinweis: Die Halbierung der PixelauflÃ¶sung ergibt die Verdopplung<br>
+			 der DruckauflÃ¶sung und die Vervierfachung der DateigrÃ¶ÃŸe)<br>&nbsp;
 		</td>
 		<td>&nbsp;</td>
 	</tr>

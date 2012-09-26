@@ -52,7 +52,7 @@ if ($this->Fehlermeldung!='') {
     <td> 
      <input type="radio" name="historische_loeschen" value="1"<?php if (WLDGE_HISTORISCHE_LOESCHEN_DEFAULT) { ?> checked<?php } ?>>
     </td>
-    <td>Historische Bestände und Flurstücke löschen</td>
+    <td>Historische BestÃ¤nde und FlurstÃ¼cke lÃ¶schen</td>
   </tr><?php
  # 2006-12-12 pk
 ?>
@@ -74,8 +74,8 @@ if ($this->Fehlermeldung!='') {
     <td valign="top">
       <input type="checkbox" name="disableDbWrite" value="1">
     </td>
-    <td>Schreiben in die Datenbank unterdrücken.<br>
-    <em><font size="-2">(Wenn die SQL-Statements später über einen anderen Datenbankclient aus der Logdatei eingelesen werden sollen.)</font></em></td>
+    <td>Schreiben in die Datenbank unterdrÃ¼cken.<br>
+    <em><font size="-2">(Wenn die SQL-Statements spÃ¤ter Ã¼ber einen anderen Datenbankclient aus der Logdatei eingelesen werden sollen.)</font></em></td>
   </tr>
   <tr>
     <td valign="top">
@@ -93,17 +93,17 @@ if ($this->Fehlermeldung!='') {
   </tr>
   <tr>
     <td valign="top"><input name="dontCheckHeader" type="checkbox" id="dontCheckHeader" value="1"></td>
-    <td>Prüfung der WLDGE Kopfzeilen unterdrücken<br>
-      <em><font size="-2">(Wird benötigt, wenn Grundbestand in mehreren Teilen eingelesen wird,
-       Fortführungen nicht aufeinanderfolgend sind oder zu Testzwecken.)</font></em></td>
+    <td>PrÃ¼fung der WLDGE Kopfzeilen unterdrÃ¼cken<br>
+      <em><font size="-2">(Wird benÃ¶tigt, wenn Grundbestand in mehreren Teilen eingelesen wird,
+       FortfÃ¼hrungen nicht aufeinanderfolgend sind oder zu Testzwecken.)</font></em></td>
   </tr>
   <tr>
     <td valign="top"><input name="logALBSQL" type="checkbox" id="logALBSQL" value="1" checked></td>
     <td>SQL-Statements in ALB-Logdateien schreiben<br>
       <em><font size="-2">(Kann benutzt werden um den Einlesevorgang zu dokumentieren oder die 
-      Daten später über einen SQL-Client in eine Datenbank einzulesen.
-      <br>Wenn hier nicht gewählt, wird SQL in Abhängigkeit der Konstante LOG_LEVEL getrennt für MySQL und PostgreSQL gelogged.
-      <br>Wenn hier ausgewählt, erscheint das SQL zum ALB nicht in der debug Datei.)</font></em></td>
+      Daten spÃ¤ter Ã¼ber einen SQL-Client in eine Datenbank einzulesen.
+      <br>Wenn hier nicht gewÃ¤hlt, wird SQL in AbhÃ¤ngigkeit der Konstante LOG_LEVEL getrennt fÃ¼r MySQL und PostgreSQL gelogged.
+      <br>Wenn hier ausgewÃ¤hlt, erscheint das SQL zum ALB nicht in der debug Datei.)</font></em></td>
   </tr>
   <tr> 
     <td>&nbsp;</td>

@@ -1,11 +1,11 @@
-<?php
- $strTitle="Flagstücks dörchschnöckern";
- $strGemkgschl="Slötel von de Gemarkung";
+ï»¿<?php
+ $strTitle="FlagstÃ¼cks dÃ¶rchschnÃ¶ckern";
+ $strGemkgschl="SlÃ¶tel von de Gemarkung";
  $strGemkgGem="Gemarkung, Gemeen";
  $strFlur="Flag";
- $strFst="Flagstück";
- $strSelected="utsökt";
- $strExist="vörhanden";
+ $strFst="FlagstÃ¼ck";
+ $strSelected="utsÃ¶kt";
+ $strExist="vÃ¶rhanden";
  $strClear="Nieg";
- $strSearch="Söken";
+ $strSearch="SÃ¶ken";
 ?>

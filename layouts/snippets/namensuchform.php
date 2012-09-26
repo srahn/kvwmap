@@ -74,7 +74,7 @@
 		 	}
 		}
 		else{
-			alert('Es wurden keine Flurst¸cke ausgew‰hlt.');
+			alert('Es wurden keine Flurst√ºcke ausgew√§hlt.');
 		}
 	}
 
@@ -107,7 +107,7 @@
 		 	location.href=url;
 		}
 		else{
-			alert('Es wurden keine Grundbuchbl‰tter ausgew‰hlt.');
+			alert('Es wurden keine Grundbuchbl√§tter ausgew√§hlt.');
 		}
 	}
 
@@ -261,7 +261,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 			      	</td>
 			      	<td><span style="font-size:12px;"><? echo $this->namen[$i]['flurstuecke'][$j]; ?></span></td>
 			      	<td><span style="font-size:12px;"><? echo $this->namen[$i]['alb_data'][$j]['gemkgname']; ?></span></td>
-			      	<td><span style="font-size:12px;"><? echo $this->namen[$i]['alb_data'][$j]['flaeche']; ?> m≤</span></td>
+			      	<td><span style="font-size:12px;"><? echo $this->namen[$i]['alb_data'][$j]['flaeche']; ?> m¬≤</span></td>
 			      	<td>
 			      		<? $this->getFunktionen();
 				        if ($this->Stelle->funktionen['ohneWasserzeichen']['erlaubt']) { ?>
@@ -314,7 +314,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   <tr>
   	<td colspan="9" align="center">
 
-  	<?	# Bl‰tterfunktion
+  	<?	# Bl√§tterfunktion
 	   if($this->formvars['offset'] == ''){
 		   $this->formvars['offset'] = 0;
 		 }

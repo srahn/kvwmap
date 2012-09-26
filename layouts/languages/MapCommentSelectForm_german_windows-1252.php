@@ -1,5 +1,5 @@
-<?php
-$strTitle="Gespeicherte Kartenausschnitte w�hlen";
+﻿<?php
+$strTitle="Gespeicherte Kartenausschnitte wählen";
 $strTime="Zeitstempel";
 $strComment="Kommentar";
 

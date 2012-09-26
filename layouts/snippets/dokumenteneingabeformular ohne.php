@@ -16,7 +16,7 @@ else {
         <tr> 
           <td>Dokument<?php 
 		  if ($this->formvars['id']!='') { 
-		  ?> auch ändern: 
+		  ?> auch Ã¤ndern: 
           <input type="checkbox" name="changeDocument" value="1"><?php
 		  }
 		  ?></td>
@@ -53,7 +53,7 @@ else {
     <td colspan="2"><hr align="center" noshade></td>
   <tr> 
     <td colspan="2"><input type="radio" name="art" value="100"<?php if ($this->formvars['art']=='100') { ?> checked<?php } ?>>
-      Fortführungsriss&nbsp;(FFR)</td>
+      FortfÃ¼hrungsriss&nbsp;(FFR)</td>
   <tr> 
     <td colspan="2"><input type="radio" name="art" value="010"<?php if ($this->formvars['art']=='010') { ?> checked<?php } ?>>
       Koordinatenverzeichnis&nbsp;(KVZ)</td>
@@ -115,7 +115,7 @@ else {
     <td colspan="2"><?php if ($this->formvars['stammnr']!='') { ?><a href="file:///H|/kvwmap/2005-09-15_kvwmap_dev_home/layouts/snippets/index.php?go=Nachweisanzeige">&lt;&lt;&nbsp;zur&uuml;ck&nbsp;zum&nbsp;Rechercheergebnis</a><?php } ?></td>
     <td colspan="2"><table border="0">
         <tr> 
-          <td><input type="reset" name="go_plus2" value="Zurücksetzen"></td>
+          <td><input type="reset" name="go_plus2" value="ZurÃ¼cksetzen"></td>
           <td><input type="submit" name="go_plus" value="Senden"></td>
         </tr>
       </table></td>

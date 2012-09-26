@@ -13,12 +13,12 @@
 			part2 = minutes.split(".");
 			minutes = part2[0];
 			seconds = Math.round(parseFloat("."+part2[1]) * 60);
-			return degrees+"°"+minutes+"\'"+seconds+\'"\';
+			return degrees+"Â°"+minutes+"\'"+seconds+\'"\';
 		}
 		
 		function dms2dec(number){
 			number = number+"";
-			part1 = number.split("°");
+			part1 = number.split("Â°");
 			degrees = parseFloat(part1[0]);
 			part2 = part1[1].split("\'");
 			minutes = parseFloat(part2[0]);
@@ -73,7 +73,7 @@
 			var mittey  = parseFloat(top.document.GUI.maxy.value) - '.$this->map->height.'/2*parseFloat(top.document.GUI.pixelsize.value);
 			mittex = format_number(mittex, true);
 			mittey = format_number(mittey, true);
-			coords1 = prompt("Geben Sie die gewünschten Koordinaten ein \noder klicken Sie auf Abbrechen für die Koordinatenabfrage.",mittex+" "+mittey);
+			coords1 = prompt("Geben Sie die gewÃ¼nschten Koordinaten ein \noder klicken Sie auf Abbrechen fÃ¼r die Koordinatenabfrage.",mittex+" "+mittey);
 			if(coords1){
 				coords2 = coords1.split(" ");
 				if(epsgcode == 4326 && coordtype == "dms"){
@@ -116,7 +116,8 @@
 
 	//-->
 	</script>';	
-	
+	
+
 echo $javascript;
 		
 ?>

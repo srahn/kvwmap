@@ -1,6 +1,6 @@
 <?php
-  $strChangeTask="Stäe utsöken";
-  $strHelp="Hülp";
+  $strChangeTask="StÃ¤e utsÃ¶ken";
+  $strHelp="HÃ¼lp";
   $strMaximize="Maximieren";
   $strMinimize="Minimieren";
   $strMapInfo="Koortinfo";

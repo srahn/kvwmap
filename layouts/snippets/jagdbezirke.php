@@ -94,17 +94,17 @@ function save(){
           <td bgcolor="<?php echo BG_DEFAULT ?>"><b>Art</b></td>
           <td valign="top">
           	<select onchange="update_form(this.value);" name="<? echo $this->qlayerset[$i]['Layer_ID'].';art;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j]['oid'].';Text;1'; ?>">
-          		<option value="">--- Bitte w‰hlen ---</option>
+          		<option value="">--- Bitte w√§hlen ---</option>
               <option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'ejb'){echo 'selected';} ?> value="ejb">Eigenjagdbezirk</option>
               <option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'ajb'){echo 'selected';} ?> value="ajb">Abgerundeter Eigenjagdbezirk</option>
 			  			<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'gjb'){echo 'selected';} ?> value="gjb">Gemeinschaftlicher Jagdbezirk</option>
 			  			<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'tjb'){echo 'selected';} ?> value="tjb">Teiljagdbezirk</option>
-			  			<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'sf'){echo 'selected';} ?> value="sf">Sonderfl‰che</option>
+			  			<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'sf'){echo 'selected';} ?> value="sf">Sonderfl√§che</option>
 			  			<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'jbe'){echo 'selected';} ?> value="jbe">Enklave</option>
-			  			<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'jbf'){echo 'selected';} ?> value="jbf">Jagdbezirksfreie Fl‰che</option>
-			  			<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'agf'){echo 'selected';} ?> value="agf">Angliederungsfl‰che</option>
-			  			<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'atf'){echo 'selected';} ?> value="atf">Abtrennungsfl‰che</option>
-			  			<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'slf'){echo 'selected';} ?> value="slf">Schmalfl‰che</option>
+			  			<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'jbf'){echo 'selected';} ?> value="jbf">Jagdbezirksfreie Fl√§che</option>
+			  			<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'agf'){echo 'selected';} ?> value="agf">Angliederungsfl√§che</option>
+			  			<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'atf'){echo 'selected';} ?> value="atf">Abtrennungsfl√§che</option>
+			  			<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'slf'){echo 'selected';} ?> value="slf">Schmalfl√§che</option>
 			  		</select>
 			  		<?
 			  		$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';art;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j]['oid'].';Text;1|';
@@ -192,9 +192,9 @@ function save(){
         <tr>
           <td colspan="2" bgcolor="<?php echo BG_DEFAULT ?>">
             <a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="" onclick="this.href='index.php?go=zoomtoPolygon&oid=<?php echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>&layer_tablename=jagdbezirke&layer_columnname=the_geom&layer_id=<? echo $this->qlayerset[$i]['Layer_ID'];?>&selektieren='+document.GUI.selektieren<? echo $this->qlayerset[$i]['Layer_ID'].'_'.$j; ?>.checked;">Kartenausschnitt</a>&nbsp;&nbsp;<span style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px">Selektieren</span><input type="checkbox" name="selektieren<? echo $this->qlayerset[$i]['Layer_ID'].'_'.$j; ?>" value="1">&nbsp;|&nbsp;
-            <a href="index.php?go=jagdkatastereditor_Flurstuecke_Listen&oid=<?php echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>&name=<? echo $this->qlayerset[$i]['shape'][$j]['name'] ?>&search_nummer=<? echo $this->formvars['search_nummer']; ?>&search_name=<? echo $this->formvars['search_name']; ?>&search_art=<? echo $this->formvars['search_art']; ?>">enthaltene Flurst¸cke</a>&nbsp;|&nbsp;
+            <a href="index.php?go=jagdkatastereditor_Flurstuecke_Listen&oid=<?php echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>&name=<? echo $this->qlayerset[$i]['shape'][$j]['name'] ?>&search_nummer=<? echo $this->formvars['search_nummer']; ?>&search_name=<? echo $this->formvars['search_name']; ?>&search_art=<? echo $this->formvars['search_art']; ?>">enthaltene Flurst√ºcke</a>&nbsp;|&nbsp;
             <a href="index.php?go=jagdkatastereditor&oid=<?php echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>">bearbeiten</a>&nbsp;|&nbsp;
-            <a href="javascript:Bestaetigung('index.php?go=jagdkatastereditor_Loeschen&oid=<?php echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>', 'Wollen Sie diesen Jagdbezirk wirklich lˆschen?');">lˆschen</a>&nbsp;|&nbsp;
+            <a href="javascript:Bestaetigung('index.php?go=jagdkatastereditor_Loeschen&oid=<?php echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>', 'Wollen Sie diesen Jagdbezirk wirklich l√∂schen?');">l√∂schen</a>&nbsp;|&nbsp;
             <a href="index.php?go=jagdkatastereditor_kopieren&oid=<?php echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>">kopieren</a>
           </td>
         </tr>
@@ -226,7 +226,7 @@ function save(){
 else {
     ?><br><strong><font color="#FF0000">
     Es wurden keine Objekte gefunden!</font></strong><br>
-    W‰hlen Sie einen neuen Bereich oder pr¸fen Sie die Datenquellen.<br>
+    W√§hlen Sie einen neuen Bereich oder pr√ºfen Sie die Datenquellen.<br>
     <?php
 }
 ?>

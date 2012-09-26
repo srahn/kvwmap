@@ -1,9 +1,9 @@
 <?php
  $strEditGeom="Geometrie bearbeiten";
  $strMapZoom="Kartenausschnitt";
- $strSelectAll="alle auswählen";
- $strdelete="löschen";
- $strSelectedDatasets="ausgewählte Datensätze";
+ $strSelectAll="alle auswÃ¤hlen";
+ $strdelete="lÃ¶schen";
+ $strSelectedDatasets="ausgewÃ¤hlte DatensÃ¤tze";
  $strCSVExport="in CSV-Datei exportieren";
  $strCSVExportAll="alle Treffer in CSV-Datei exportieren";
  $strSHPExportAll="alle Treffer in SHP-Datei exportieren";
@@ -11,10 +11,10 @@
  $strzoomtodatasets="in Karte anzeigen";
  $strPrint="drucken";
  $strCreateChart="als Diagramm ausgeben";
- $strSelectAllShown="alle angezeigten auswählen";
- $strSelectThisDataset="Datensatz auswählen";
+ $strSelectAllShown="alle angezeigten auswÃ¤hlen";
+ $strSelectThisDataset="Datensatz auswÃ¤hlen";
  $strNoMatch="Zu diesem Layer wurden keine Objekte gefunden!";
- $strDeleteThisDataset="Datensatz löschen";
+ $strDeleteThisDataset="Datensatz lÃ¶schen";
  $strCSVExportThis="Datensatz in CSV exportieren";
  $strUKOExportThis="Geometrie ins UKO-Format exportieren";
  $strShowPK="anzeigen";

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
   
   $strTel="Tel.";
   $strEMail="E-Mail";

@@ -17,7 +17,7 @@
 	  <span style="font-size:80%;">
 	  Stand ALB vom: <?php echo $aktalb; ?><br>
 	  Stand ALK vom: <?php echo $aktalk; ?><br><br></span>
-	  Anzahl der gefundenen Flurstücke: <?php echo $this->qlayerset[$i]['count'].'<br><br>';
+	  Anzahl der gefundenen FlurstÃ¼cke: <?php echo $this->qlayerset[$i]['count'].'<br><br>';
   	for ($k=0;$k<$anzObj;$k++) {
       $flurstkennz=$this->qlayerset[$i]['shape'][$k]['flurstkennz'];
       #echo '<br>'.$flurstkennz; #2005-11-30_pk
@@ -341,7 +341,7 @@
 
       <tr valign="top">
 
-        <td align="right"><strong>Ausführende&nbsp;Stelle</strong></td>
+        <td align="right"><strong>AusfÃ¼hrende&nbsp;Stelle</strong></td>
 
         <td><?php echo $flst->Verfahren['ausfstelleid']; ?></td>
 
@@ -461,10 +461,10 @@ if ($flst->Nutzung[$j][kurzbezeichnung]!='') {
     </td>
   </tr>
 <?php
-     } # Ende es wurde auch was zum Flurstück gefunden
+     } # Ende es wurde auch was zum FlurstÃ¼ck gefunden
      else {
   ?><tr>
-     	<td>Das Flurstück mit Kennzeichen: <?php echo $flurstkennz; ?> ist nicht in der aktuellen PostGIS-Datenbank enthalten.
+     	<td>Das FlurstÃ¼ck mit Kennzeichen: <?php echo $flurstkennz; ?> ist nicht in der aktuellen PostGIS-Datenbank enthalten.
      	<br>Aktualisieren Sie die ALB und ALK-Daten.</td>
     </tr><?php
      } ?>
@@ -473,7 +473,7 @@ if ($flst->Nutzung[$j][kurzbezeichnung]!='') {
   <a href="index.php?go=Flurstueck_Auswaehlen&searchInExtent=<?php echo $this->searchInExtent;
   ?>&GemID=<?php echo $flst->GemeindeID;
   ?>&GemkgID=<?php echo $flst->GemkgSchl; ?>&FlurID=<?php echo $flst->FlurID;
-  ?>&FlstID=<?php echo $flst->FlurstKennz; ?>">zur Flurstückssuche</a> |
+  ?>&FlstID=<?php echo $flst->FlurstKennz; ?>">zur FlurstÃ¼ckssuche</a> |
   <a href="index.php?go=Adresse_Auswaehlen&searchInExtent=<?php echo $this->searchInExtent;
   ?>&GemID=<?php echo $this->formvars['GemID'];
   ?>&StrID=<?php echo $this->formvars['StrID'];
@@ -521,14 +521,14 @@ if ($flst->Nutzung[$j][kurzbezeichnung]!='') {
         <?php } ?>
       </td>
   </tr><?php
-	  } # Ende der Schleife zur Abfrage und Anzeige der Flurstücke
+	  } # Ende der Schleife zur Abfrage und Anzeige der FlurstÃ¼cke
 	?>
 	
 	<tr>
 		<td>&nbsp;</td>
 	</tr>
 	<tr>
-		<td><b>Für alle Flurstücke:</b><br></td>
+		<td><b>FÃ¼r alle FlurstÃ¼cke:</b><br></td>
 	</tr>
 	<tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
     <td colspan="2">
@@ -580,11 +580,11 @@ if ($flst->Nutzung[$j][kurzbezeichnung]!='') {
 	</tr>
 	
 	<? 
-  } # Ende es liegen Flurstücke im Suchbereich
+  } # Ende es liegen FlurstÃ¼cke im Suchbereich
   else {
   	?><br><strong><font color="#FF0000">
 	  Zu diesem Layer wurden keine Objekte gefunden!</font></strong><br>
-	  Wählen Sie einen neuen Bereich oder prüfen Sie die Datenquellen.<br>
+	  WÃ¤hlen Sie einen neuen Bereich oder prÃ¼fen Sie die Datenquellen.<br>
 	  <?php  	
   }
 #/2005-11-30_pk

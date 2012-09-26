@@ -1,4 +1,4 @@
-﻿<?php
+<?php
   $strCornerPoint="Làm việc với các điểm góc";
   $strCutByPolygon="Cắt theo hình đa giác";
   $strDrawPolygon="Vẽ đa giác";

@@ -1,7 +1,7 @@
-<?php
+ï»¿<?php
  $strTitle="Shape-Export";
  $strSelectStatement="Select Statement";
- $strButtonCutByPolygon="über Polygon einschränken";
+ $strButtonCutByPolygon="Ã¼ber Polygon einschrÃ¤nken";
  $strButtonGenerateShapeData="Shape-Datei erzeugen";
  
 ?>  

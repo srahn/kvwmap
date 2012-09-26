@@ -1,4 +1,4 @@
-<?php
+﻿<?php
  $strTitle="wyszukiwanie adresu"; 
  $strGem="obręb jednostki ewidencyjnej, gmina"; 
  $strStreet="ulica"; 

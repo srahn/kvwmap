@@ -1,11 +1,11 @@
 <?php
   $strTitle="Notizkategorienverwaltung";
   $strCategory="Kategorie:";
-  $strDeleteCategory="Kategorie löschen";
+  $strDeleteCategory="Kategorie lÃ¶schen";
   $strIncludeAllNoticeOfCategory="inclusive aller Notizen der Kategorie?";
   $strViewable="lesen";
   $strSelectable="anlegen";
-  $strEditable="ändern";
+  $strEditable="Ã¤ndern";
   $strNewCategory="neue Kategorie:";
-  $strButtonAdd="Hinzufügen";
+  $strButtonAdd="HinzufÃ¼gen";
 ?>  

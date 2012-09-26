@@ -4,7 +4,7 @@
 ?>
 <SCRIPT src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></SCRIPT>
 <script type="text/javascript">
-Text[3]=["Tipp:","Mit der Kategorienverwaltung lassen sich Kategorien hinzufügen, löschen oder die Zugriffe der Stellen pro Kategorie festlegen. Wenn Sie ein Kategorie löschen, wird auch die Zuordnung der Stellen gelöscht. Um die entsprechenden Notizen mit zu löschen müssen sie das Häckchen neben dem 'Kategorie löschen'-Link setzen."]
+Text[3]=["Tipp:","Mit der Kategorienverwaltung lassen sich Kategorien hinzufÃ¼gen, lÃ¶schen oder die Zugriffe der Stellen pro Kategorie festlegen. Wenn Sie ein Kategorie lÃ¶schen, wird auch die Zuordnung der Stellen gelÃ¶scht. Um die entsprechenden Notizen mit zu lÃ¶schen mÃ¼ssen sie das HÃ¤ckchen neben dem 'Kategorie lÃ¶schen'-Link setzen."]
 
 function change(){
 	document.GUI.go.value = 'Notizenformular';
@@ -55,7 +55,7 @@ function hinzufuegen(){
   	<td>&nbsp;</td>
   </tr>
   <tr>
-    <td valign="bottom"><a href="JavaScript:loeschen()" onClick="return confirm('<?php echo $this->strDeleteWarningMessage; ?>'); submit();" title="Hier klicken, wenn Sie die selektierte Kategorie löschen möchten."><font color="#FF0000" size="-1"><?php echo $strDeleteCategory; ?></font></a></td>
+    <td valign="bottom"><a href="JavaScript:loeschen()" onClick="return confirm('<?php echo $this->strDeleteWarningMessage; ?>'); submit();" title="Hier klicken, wenn Sie die selektierte Kategorie lÃ¶schen mÃ¶chten."><font color="#FF0000" size="-1"><?php echo $strDeleteCategory; ?></font></a></td>
     <td valign="bottom">&nbsp;<input name="plus_notiz" type="checkbox" value="1"><?php echo $strIncludeAllNoticeOfCategory; ?></td>
 </table>
 

@@ -1,19 +1,19 @@
-<?php
+ï»¿<?php
 
-  $strAsteriskRequired="Weerte mit een * mööst du indragen";
+  $strAsteriskRequired="Weerte mit een * mÃ¶Ã¶st du indragen";
   $strDataBankID="Datenbank ID";
   $strName="Achternaam*";
-  $strForeName="Förnaam*";
+  $strForeName="FÃ¶rnaam*";
   $strLogInName="Loginnaam*";
-  $strChangePassword="Wist ook dat Passwoort Ännern?";
+  $strChangePassword="Wist ook dat Passwoort Ã„nnern?";
   $strPassword="Passwoort";
   $strReEnterPassword='Passwoort nochmal maken';
-  $strAuthorizeTask="Berechtigte Stäen";
+  $strAuthorizeTask="Berechtigte StÃ¤en";
   $strTelephone="Telefoon";
   $strEmail="E-Mail";
-  $strButtonBack="Trüggsetten";
-  $strButtonEdit="Ännern";
+  $strButtonBack="TrÃ¼ggsetten";
+  $strButtonEdit="Ã„nnern";
   $strButtonSaveAs="As niegen Bruker indragen";
   $strTitle="Brukerdaten Editor";
-  $strAllowedIps="verlööft IP-Adressen";
+  $strAllowedIps="verlÃ¶Ã¶ft IP-Adressen";
 ?>

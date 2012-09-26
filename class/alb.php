@@ -973,7 +973,7 @@ class ALB {
       # $pdf->addText(374,$row-=12,$fontSize,str_repeat('=',25));
     }
     else{
-      $pdf->addText(477,$row,$fontSize,$BestandStr); # 2007-04-02 Schmidt
+      $pdf->addText(477,$row,$fontSize,utf8_decode($BestandStr)); # 2007-04-02 Schmidt
       # $pdf->addText($col58,$row,$fontSize,$BestandStr);
       # $pdf->addText(477,$row-=12,$fontSize,str_repeat('=',14));
       $pdf->addText($col58,$row-=12,$fontSize,str_repeat('=',15));
@@ -1067,36 +1067,36 @@ class ALB {
 					    }
 	        	}
         	}
-        	$pdf->addText($col0,$row-=12,$fontSize,$amt);
+        	$pdf->addText($col0,$row-=12,$fontSize,utf8_decode($amt));
         }
-        if(LANDKREIS != '')$pdf->addText($col7,$row-=12,$fontSize,LANDKREIS);
-        if(($formnummer == '30' OR $formnummer == '35') AND BEARBEITER == 'true')$pdf->addText($col0,$row-=12,$fontSize,BEARBEITER_NAME);
-        if(STRASSE != '')$pdf->addText($col7,$row-=12,$fontSize,STRASSE);
-        if(STRASSE2 != '')$pdf->addText($col7,$row-=12,$fontSize,STRASSE2);
-        if(PLZ != '')$pdf->addText($col7,$row-=12,$fontSize,PLZ.' '.ORT);
-      	if(POSTANSCHRIFT != '')$pdf->addText($col7,$row-=12,$fontSize,POSTANSCHRIFT);
-        if(POSTANSCHRIFT_STRASSE != '')$pdf->addText($col7,$row-=12,$fontSize,POSTANSCHRIFT_STRASSE);
-        if(POSTANSCHRIFT_PLZ != '')$pdf->addText($col7,$row-=12,$fontSize,POSTANSCHRIFT_PLZ.' '.POSTANSCHRIFT_ORT);
+        if(LANDKREIS != '')$pdf->addText($col7,$row-=12,$fontSize,utf8_decode(LANDKREIS));
+        if(($formnummer == '30' OR $formnummer == '35') AND BEARBEITER == 'true')$pdf->addText($col0,$row-=12,$fontSize,utf8_decode(BEARBEITER_NAME));
+        if(STRASSE != '')$pdf->addText($col7,$row-=12,$fontSize,utf8_decode(STRASSE));
+        if(STRASSE2 != '')$pdf->addText($col7,$row-=12,$fontSize,utf8_decode(STRASSE2));
+        if(PLZ != '')$pdf->addText($col7,$row-=12,$fontSize,utf8_decode(PLZ.' '.ORT));
+      	if(POSTANSCHRIFT != '')$pdf->addText($col7,$row-=12,$fontSize,utf8_decode(POSTANSCHRIFT));
+        if(POSTANSCHRIFT_STRASSE != '')$pdf->addText($col7,$row-=12,$fontSize,utf8_decode(POSTANSCHRIFT_STRASSE));
+        if(POSTANSCHRIFT_PLZ != '')$pdf->addText($col7,$row-=12,$fontSize,utf8_decode(POSTANSCHRIFT_PLZ.' '.POSTANSCHRIFT_ORT));
         $pdf->addText($col0,$row-=12,$fontSize,'Gemarkung');
         $pdf->addText($col3,$row,$fontSize,$flst->GemkgSchl);
-        $pdf->addText($col7,$row,$fontSize,$flst->GemkgName);
+        $pdf->addText($col7,$row,$fontSize,utf8_decode($flst->GemkgName));
 
         if($formnummer == '30' || $formnummer == '35'){
           $pdf->addText($col0,$row-=12,$fontSize,'Gemeinde');
           $pdf->addText($col3,$row,$fontSize,$flst->GemeindeID);
-          $pdf->addText($col7,$row,$fontSize,$flst->GemeindeName);
+          $pdf->addText($col7,$row,$fontSize,utf8_decode($flst->GemeindeName));
 
           $pdf->addText($col0,$row-=12,$fontSize,'Kreis/Stadt');
           $pdf->addText($col3,$row,$fontSize,$flst->KreisID);
-          $pdf->addText($col7,$row,$fontSize,$flst->KreisName);
+          $pdf->addText($col7,$row,$fontSize,utf8_decode($flst->KreisName));
 
           $pdf->addText($col0,$row-=12,$fontSize,'Finanzamt');
           $pdf->addText($col3,$row,$fontSize,$flst->FinanzamtSchl);
-          $pdf->addText($col7,$row,$fontSize,$flst->FinanzamtName);
+          $pdf->addText($col7,$row,$fontSize,utf8_decode($flst->FinanzamtName));
 
           $pdf->addText($col0,$row-=12,$fontSize,'Forstamt');
           $pdf->addText($col3,$row,$fontSize,'00'.$flst->Forstamt['schluessel']);
-          $pdf->addText($col7,$row,$fontSize,$flst->Forstamt['name']);
+          $pdf->addText($col7,$row,$fontSize,utf8_decode($flst->Forstamt['name']));
         }
 
 
@@ -1106,7 +1106,7 @@ class ALB {
           $pdf->addText($col0,$row-=24,$fontSize,'GMKG   FLR FLURST-NR    P');
           if($flst->Status == 'H'){
           	$pdf->addText($col3,$row,$fontSize,'Status');
-          	$pdf->addText($col6,$row,$fontSize,'(H) Historisches Flurstück');
+          	$pdf->addText($col6,$row,$fontSize,utf8_decode('(H) Historisches Flurstück'));
           }
           if ($flst->Nenner!=0) { $nennerausgabe="/".$flst->Nenner; }
           $pdf->addText($col0,$row-=12,$fontSize,$flst->GemkgSchl." ".str_pad($flst->FlurNr,3," ",STR_PAD_LEFT)." ".str_pad($flst->Zaehler,5," ",STR_PAD_LEFT).$nennerausgabe);
@@ -1132,15 +1132,15 @@ class ALB {
             $Adressbezeichnung.=' '.$flst->Adresse[$s]["strassenname"];
             $Adressbezeichnung.=' '.$flst->Adresse[$s]["hausnr"];
             $ausgabetext=zeilenumbruch($Adressbezeichnung,40);
-            $pdf->addText($col3,$row-=12,$fontSize,$ausgabetext[0]);
+            $pdf->addText($col3,$row-=12,$fontSize,utf8_decode($ausgabetext[0]));
             for ($j=1;$j<count($ausgabetext);$j++) {
-              $pdf->addText($col4a,$row-=12,$fontSize,$ausgabetext[$j]);
+              $pdf->addText($col4a,$row-=12,$fontSize,utf8_decode($ausgabetext[$j]));
             }
           }
           # Ausgabe Lagebezeichnung falls vorhanden
           $Lagebezeichnung=$flst->Lage;
           for ($i=0;$i<count($Lagebezeichnung);$i++) {
-            $pdf->addText($col3,$row-=12,$fontSize,$Lagebezeichnung[$i]);
+            $pdf->addText($col3,$row-=12,$fontSize,utf8_decode($Lagebezeichnung[$i]));
           }
           $pdf->addText($col0,$row-=24,$fontSize,'Tatsächliche Nutzung');
           for ($i=0;$i<count($flst->Nutzung);$i++) {
@@ -1166,9 +1166,9 @@ class ALB {
               $Nutzunglangtext.=' ('.$flst->Nutzung[$i]['abkuerzung'].')';
             }
             $ausgabetext=zeilenumbruch($Nutzunglangtext,40);
-            $pdf->addText($col5,$row,$fontSize,$ausgabetext[0]);
+            $pdf->addText($col5,$row,$fontSize,utf8_decode($ausgabetext[0]));
             for ($j=1;$j<count($ausgabetext);$j++) {
-              $pdf->addText($col5,$row-=12,$fontSize,$ausgabetext[$j]);
+              $pdf->addText($col5,$row-=12,$fontSize,utf8_decode($ausgabetext[$j]));
             }
           }
           $pdf->addText($col0,$row-=12,$fontSize,str_repeat('-',25));
@@ -1202,11 +1202,11 @@ class ALB {
                 $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
               }
               $pdf->addText($col2,$row-=12,$fontSize,str_pad ($flst->Klassifizierung[$i]['flaeche'].' m2', 11, ' ', STR_PAD_LEFT));
-              $pdf->addText($col4,$row,$fontSize,$flst->Klassifizierung[$i]['tabkenn'].'-'.$flst->Klassifizierung[$i]['klass']);
+              $pdf->addText($col4,$row,$fontSize,utf8_decode($flst->Klassifizierung[$i]['tabkenn'].'-'.$flst->Klassifizierung[$i]['klass']));
               $ausgabetext=zeilenumbruch($flst->Klassifizierung[$i]['bezeichnung'],40);
-              $pdf->addText($col5,$row,$fontSize,$ausgabetext[0]);
+              $pdf->addText($col5,$row,$fontSize,utf8_decode($ausgabetext[0]));
               for ($j=1;$j<count($ausgabetext);$j++) {
-                $pdf->addText($col5,$row-=12,$fontSize,$ausgabetext[$j]);
+                $pdf->addText($col5,$row-=12,$fontSize,utf8_decode($ausgabetext[$j]));
               }
               # $pdf->addText($col5,$row-=12,$fontSize,$flst->Klassifizierung[$i]['Abkuerzung']);
 
@@ -1234,7 +1234,7 @@ class ALB {
                     $ausgabe = 'WZ  '.ltrim($bruch[0], '0').'/'.ltrim($bruch[1], '0');
                     $abstand += 40;
                   }
-                  $pdf->addText($col4+$abstand,$row,$fontSize,$ausgabe);
+                  $pdf->addText($col4+$abstand,$row,$fontSize,utf8_decode($ausgabe));
                   $z++;
                 }
               }
@@ -1331,9 +1331,9 @@ class ALB {
             for ($z=0;$z<count($flst->FreiText);$z++) {
               if ($z==0) { $row+=12; }
               $ausgabetext=zeilenumbruch($flst->FreiText[$z]['text'],40);
-              $pdf->addText($col2_1,$row-=12,$fontSize,$ausgabetext[0]);
+              $pdf->addText($col2_1,$row-=12,$fontSize,utf8_decode($ausgabetext[0]));
               for ($j=1;$j<count($ausgabetext);$j++) {
-                $pdf->addText($col2_1,$row-=12,$fontSize,$ausgabetext[$j]);
+                $pdf->addText($col2_1,$row-=12,$fontSize,utf8_decode($ausgabetext[$j]));
               }
             }
           }
@@ -1343,8 +1343,8 @@ class ALB {
             $pdf->addText($col0,$row-=24,$fontSize,'Hinweise');
           }
           for($h = 0; $h < count($flst->Hinweis); $h++){
-            $pdf->addText($col2_1,$row,$fontSize,$flst->Hinweis[$h]['hinwzflst']);
-            $pdf->addText($col2_2,$row,$fontSize,$flst->Hinweis[$h]['bezeichnung']);
+            $pdf->addText($col2_1,$row,$fontSize,utf8_decode($flst->Hinweis[$h]['hinwzflst']));
+            $pdf->addText($col2_2,$row,$fontSize,utf8_decode($flst->Hinweis[$h]['bezeichnung']));
             $row = $row - 12;
           }
 
@@ -1356,9 +1356,9 @@ class ALB {
               $BaulastenStr.=', '.$flst->Baulasten[$k]['blattnr'];
             }
             $ausgabetext=zeilenumbruch($BaulastenStr,40);
-            $pdf->addText($col2_1,$row,$fontSize,$ausgabetext[0]);
+            $pdf->addText($col2_1,$row,$fontSize,utf8_decode($ausgabetext[0]));
             for ($j=1;$j<count($ausgabetext);$j++) {
-              $pdf->addText($col2_1,$row-=12,$fontSize,$ausgabetext[$j]);
+              $pdf->addText($col2_1,$row-=12,$fontSize,utf8_decode($ausgabetext[$j]));
             }
             #$pdf->addText($col2_1,$row,$fontSize,$BaulastenStr);
           }
@@ -1369,18 +1369,18 @@ class ALB {
             $pdf->addText($col0,$row-=24,$fontSize,'Ausführende Stelle');
             $pdf->addText($col2_1,$row,$fontSize,$flst->Verfahren[$i]['ausfstelleid']);
             $AusfStelleName=zeilenumbruch($flst->Verfahren[$i]['ausfstellename'],40);
-            $pdf->addText($col4,$row,$fontSize,$AusfStelleName[0]);
+            $pdf->addText($col4,$row,$fontSize,utf8_decode($AusfStelleName[0]));
             for ($j=1;$j<count($AusfStelleName);$j++) {
-              $pdf->addText($col4,$row-=12,$fontSize,$AusfStelleName[$j]);
+              $pdf->addText($col4,$row-=12,$fontSize,utf8_decode($AusfStelleName[$j]));
             }
             if($flst->Verfahren[$i]['verfnr'] != ''){
               $pdf->addText($col0,$row-=12,$fontSize,'Verfahren');
               $pdf->addText($col2_1,$row,$fontSize,$flst->Verfahren[$i]['verfnr']);
               $pdf->addText($col4,$row,$fontSize,'('.$flst->Verfahren[$i]['verfbemid'].')');
               $AusfBemerkung=zeilenumbruch($flst->Verfahren[$i]['verfbemerkung'],40);
-              $pdf->addText($col5,$row,$fontSize,$AusfBemerkung[0]);
+              $pdf->addText($col5,$row,$fontSize,utf8_decode($AusfBemerkung[0]));
               for ($j=1;$j<count($AusfBemerkung);$j++) {
-                $pdf->addText($col5,$row-=12,$fontSize,$AusfBemerkung[$j]);
+                $pdf->addText($col5,$row-=12,$fontSize,utf8_decode($AusfBemerkung[$j]));
               }
             }
           }
@@ -1407,10 +1407,10 @@ class ALB {
 	        # Amtsgericht, Grundbuchbezirk
 	        $pdf->addText($col0,$row-=24,$fontSize,'Amtsgericht');
 	        $pdf->addText($col2_1,$row,$fontSize,str_pad($flst->Amtsgericht['schluessel'],11," "));
-	        $pdf->addText($col4,$row,$fontSize,$flst->Amtsgericht['name']);
+	        $pdf->addText($col4,$row,$fontSize,utf8_decode($flst->Amtsgericht['name']));
 	        $pdf->addText($col0,$row-=12,$fontSize,'Grundbuchbezirk');
 	        $pdf->addText($col2_1,$row,$fontSize,str_pad($flst->Grundbuchbezirk['schluessel'],11," "));
-	        $pdf->addText($col4,$row,$fontSize,$flst->Grundbuchbezirk['name']);
+	        $pdf->addText($col4,$row,$fontSize,utf8_decode($flst->Grundbuchbezirk['name']));
 				
 	        ################################################################################
 	        # Bestandsnachweis #
@@ -1477,7 +1477,7 @@ class ALB {
 	                  }
 	                  $anzNamenszeilen=count($Eigentuemerliste[$i]->Name);
 	                  for ($k=0;$k<$anzNamenszeilen;$k++) {
-	                    $pdf->addText($col1,$row-=12,$fontSize,$Eigentuemerliste[$i]->Name[$k]);
+	                    $pdf->addText($col1,$row-=12,$fontSize,utf8_decode($Eigentuemerliste[$i]->Name[$k]));
 	                  }
 	                } # ende Schleife Eigentümer des Grundbuchblattes
 	              } # ende Schleife Bestand
@@ -1506,10 +1506,10 @@ class ALB {
 	                    $row=825; # 812 -> 825 2007-04-02 Schmidt;
 	                    $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 	                  }
-	                  $pdf->addText($col1,$row-=12,$fontSize,substr($zusatzeigentuemertext,0,$positiontrenner));
+	                  $pdf->addText($col1,$row-=12,$fontSize,utf8_decode(substr($zusatzeigentuemertext,0,$positiontrenner)));
 	                  $zusatzeigentuemertext=substr($zusatzeigentuemertext,$positiontrenner+1);
 	                }
-	                $pdf->addText($col1,$row-=12,$fontSize,$zusatzeigentuemertext);
+	                $pdf->addText($col1,$row-=12,$fontSize,utf8_decode($zusatzeigentuemertext));
 	              }
 	            } # ende Schleife Grundbuecher
 	          } # ende Ausgabe Formular 40
@@ -1583,7 +1583,7 @@ class ALB {
 	                  }
 	                  # ---------------------------
 	                  for ($k=0;$k<$anzNamenszeilen;$k++) {
-	                    $pdf->addText($col1,$row-=12,$fontSize,$Eigentuemerliste[$i]->Name_bearb[$k]);
+	                    $pdf->addText($col1,$row-=12,$fontSize,utf8_decode($Eigentuemerliste[$i]->Name_bearb[$k]));
 	                  }
 	                } # ende Schleife Eigentümer des Grundbuchblattes
 	              } # ende Schleife Bestand
@@ -1613,10 +1613,10 @@ class ALB {
 	                    $row=825; # 812 -> 825 2007-04-02 Schmidt;
 	                    $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 	                  }
-	                  $pdf->addText($col1,$row-=12,$fontSize,substr($zusatzeigentuemertext,0,$positiontrenner));
+	                  $pdf->addText($col1,$row-=12,$fontSize,utf8_decode(substr($zusatzeigentuemertext,0,$positiontrenner)));
 	                  $zusatzeigentuemertext=substr($zusatzeigentuemertext,$positiontrenner+1);
 	                }
-	                $pdf->addText($col1,$row-=12,$fontSize,$zusatzeigentuemertext);
+	                $pdf->addText($col1,$row-=12,$fontSize,utf8_decode($zusatzeigentuemertext));
 	              }
 	              
 	            } # ende Schleife Grundbuecher
@@ -1763,20 +1763,20 @@ class ALB {
       }
       $pdf->addText($col0,$row-=12,$fontSize,$amt);
     }
-    if(LANDKREIS != '')$pdf->addText($col42,$row-=12,$fontSize,LANDKREIS);
-    if(STRASSE != '')$pdf->addText($col42,$row-=12,$fontSize,STRASSE);
-    if(STRASSE2 != '')$pdf->addText($col42,$row-=12,$fontSize,STRASSE2);
-    if(PLZ != '')$pdf->addText($col42,$row-=12,$fontSize,PLZ.' '.ORT);
-    if(POSTANSCHRIFT != '')$pdf->addText($col42,$row-=12,$fontSize,POSTANSCHRIFT);
-    if(POSTANSCHRIFT_STRASSE != '')$pdf->addText($col42,$row-=12,$fontSize,POSTANSCHRIFT_STRASSE);
-    if(POSTANSCHRIFT_PLZ != '')$pdf->addText($col42,$row-=12,$fontSize,POSTANSCHRIFT_PLZ.' '.POSTANSCHRIFT_ORT);
+    if(LANDKREIS != '')$pdf->addText($col42,$row-=12,$fontSize,utf8_decode(LANDKREIS));
+    if(STRASSE != '')$pdf->addText($col42,$row-=12,$fontSize,utf8_decode(STRASSE));
+    if(STRASSE2 != '')$pdf->addText($col42,$row-=12,$fontSize,utf8_decode(STRASSE2));
+    if(PLZ != '')$pdf->addText($col42,$row-=12,$fontSize,utf8_decode(PLZ.' '.ORT));
+    if(POSTANSCHRIFT != '')$pdf->addText($col42,$row-=12,$fontSize,utf8_decode(POSTANSCHRIFT));
+    if(POSTANSCHRIFT_STRASSE != '')$pdf->addText($col42,$row-=12,$fontSize,utf8_decode(POSTANSCHRIFT_STRASSE));
+    if(POSTANSCHRIFT_PLZ != '')$pdf->addText($col42,$row-=12,$fontSize,utf8_decode(POSTANSCHRIFT_PLZ.' '.POSTANSCHRIFT_ORT));
     # Amtsgericht, Grundbuchbezirk
     $pdf->addText($col1,$row-=12,$fontSize,'Grundbuchbezirk');
     $pdf->addText($col27,$row,$fontSize,str_pad($flst->Grundbuchbezirk['schluessel'],11," "));
-    $pdf->addText($col42,$row,$fontSize,$flst->Grundbuchbezirk['name']);
+    $pdf->addText($col42,$row,$fontSize,utf8_decode($flst->Grundbuchbezirk['name']));
     $pdf->addText($col1,$row-=12,$fontSize,'Amtsgericht');
     $pdf->addText($col27,$row,$fontSize,str_pad($flst->Amtsgericht['schluessel'],11," "));
-    $pdf->addText($col42,$row,$fontSize,$flst->Amtsgericht['name']);
+    $pdf->addText($col42,$row,$fontSize,utf8_decode($flst->Amtsgericht['name']));
 #   $pdf->addText($col00,$row-=12,$fontSize,str_repeat("-",75));
     $pdf->addText($col0,$row-=12,$fontSize,str_repeat("-",73));
 
@@ -1821,10 +1821,10 @@ class ALB {
           $anzNamenszeilen=count($Eigentuemerliste[$i]->Name);
           for ($k=0;$k<$anzNamenszeilen;$k++) {
 #            $pdf->addText($col1,$row-=12,$fontSize,$Eigentuemerliste[$i]->Name[$k]);
-            $pdf->addText($col6,$row-=12,$fontSize,$Eigentuemerliste[$i]->Name[$k]);
+            $pdf->addText($col6,$row-=12,$fontSize,utf8_decode($Eigentuemerliste[$i]->Name[$k]));
 #28.11.2006 H.Riedel - Einfuegen der Eigentuemerart
             if ($k == 0) {
-              $pdf->addText($col62,$row,$fontSize,$Eigentuemerliste[$i]->Art);
+              $pdf->addText($col62,$row,$fontSize,utf8_decode($Eigentuemerliste[$i]->Art));
             }
           }
         } # ende Schleife Eigentümer des Grundbuchblattes
@@ -1854,10 +1854,10 @@ class ALB {
                     $row=825; # 812 -> 825 2007-04-02 Schmidt;
                     $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Bestand',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
                   }
-                  $pdf->addText($col1,$row-=12,$fontSize,substr($zusatzeigentuemertext,0,$positiontrenner));
+                  $pdf->addText($col1,$row-=12,$fontSize,utf8_decode(substr($zusatzeigentuemertext,0,$positiontrenner)));
                   $zusatzeigentuemertext=substr($zusatzeigentuemertext,$positiontrenner+1);
                 }
-                $pdf->addText($col1,$row-=12,$fontSize,$zusatzeigentuemertext);
+                $pdf->addText($col1,$row-=12,$fontSize,utf8_decode($zusatzeigentuemertext));
               }
 
         $gesamtflaeche = 0;
@@ -1932,14 +1932,14 @@ class ALB {
             $Adressbezeichnung.=$flst->Adresse[$s]["strassenname"];
             $Adressbezeichnung.=' '.$flst->Adresse[$s]["hausnr"];
             $ausgabetext=zeilenumbruch($Adressbezeichnung,40);
-            $pdf->addText($col18,$row-=$s*12,$fontSize,$ausgabetext[0]);
+            $pdf->addText($col18,$row-=$s*12,$fontSize,utf8_decode($ausgabetext[0]));
             for ($j=1;$j<count($ausgabetext);$j++) {
-              $pdf->addText($col18+43,$row-=12,$fontSize,$ausgabetext[$j]);
+              $pdf->addText($col18+43,$row-=12,$fontSize,utf8_decode($ausgabetext[$j]));
             }
           }
           if ($anzStrassen == 0) {
           	$Adressbezeichnung=$flst->Lage[0];
-            $pdf->addText($col18,$row,$fontSize,$Adressbezeichnung);
+            $pdf->addText($col18,$row,$fontSize,utf8_decode($Adressbezeichnung));
           }
           $Adressbezeichnung = '';
 
@@ -1972,10 +1972,10 @@ class ALB {
             }
             $ausgabetext=zeilenumbruch($Nutzunglangtext,40);
 #           $pdf->addText($col2_3,$row,$fontSize,$ausgabetext[0]);
-            $pdf->addText($col18,$row,$fontSize,$ausgabetext[0]);
+            $pdf->addText($col18,$row,$fontSize,utf8_decode($ausgabetext[0]));
             for ($j=1;$j<count($ausgabetext);$j++) {
 #             $pdf->addText($col2_3,$row-=12,$fontSize,$ausgabetext[$j]);
-              $pdf->addText($col18,$row-=12,$fontSize,$ausgabetext[$j]);
+              $pdf->addText($col18,$row-=12,$fontSize,utf8_decode($ausgabetext[$j]));
             }
 #           $pdf->addText($col9-10,$row,$fontSize,str_pad($flst->Nutzung[$i]['flaeche'],6, ' ', STR_PAD_LEFT).' m2');
             $pdf->addText($col59,$row,$fontSize,str_pad(str_space($flst->Nutzung[$i]['flaeche'],3).' m2',14, ' ', STR_PAD_LEFT));
@@ -1983,9 +1983,9 @@ class ALB {
           if($buchungen[$b+1]['bvnr'] != $buchungen[$b]['bvnr']){
             if($buchungen[$b]['sondereigentum'] != ''){
               $sondereigentum = zeilenumbruch('verbunden mit dem Sondereigentum an '.$buchungen[$b]['sondereigentum'],40);
-              $pdf->addText($col6,$row-=12,$fontSize,$sondereigentum[0]);
+              $pdf->addText($col6,$row-=12,$fontSize,utf8_decode($sondereigentum[0]));
               for ($j=1;$j<count($sondereigentum);$j++) {
-                $pdf->addText($col6,$row-=12,$fontSize,$sondereigentum[$j]);
+                $pdf->addText($col6,$row-=12,$fontSize,utf8_decode($sondereigentum[$j]));
               }
             }
             if($buchungen[$b]['auftplannr'] != ''){
@@ -2046,10 +2046,10 @@ class ALB {
           $anzNamenszeilen=count($Eigentuemerliste[$i]->Name);
           for ($k=0;$k<$anzNamenszeilen;$k++) {
 #            $pdf->addText($col1,$row-=12,$fontSize,$Eigentuemerliste[$i]->Name[$k]);
-            $pdf->addText($col6,$row-=12,$fontSize,$Eigentuemerliste[$i]->Name[$k]);
+            $pdf->addText($col6,$row-=12,$fontSize,utf8_decode($Eigentuemerliste[$i]->Name[$k]));
 #28.11.2006 H.Riedel - Einfuegen der Eigentuemerart
             if ($k == 0) {
-              $pdf->addText($col62,$row,$fontSize,$Eigentuemerliste[$i]->Art);
+              $pdf->addText($col62,$row,$fontSize,utf8_decode($Eigentuemerliste[$i]->Art));
             }
           }
         } # ende Schleife Eigentümer des Grundbuchblattes
@@ -2078,10 +2078,10 @@ class ALB {
               $row=825; # 812 -> 825 2007-04-02 Schmidt;
               $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Bestand',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
             }
-            $pdf->addText($col1,$row-=12,$fontSize,substr($zusatzeigentuemertext,0,$positiontrenner));
+            $pdf->addText($col1,$row-=12,$fontSize,utf8_decode(substr($zusatzeigentuemertext,0,$positiontrenner)));
             $zusatzeigentuemertext=substr($zusatzeigentuemertext,$positiontrenner+1);
           }
-          $pdf->addText($col1,$row-=12,$fontSize,$zusatzeigentuemertext);
+          $pdf->addText($col1,$row-=12,$fontSize,utf8_decode($zusatzeigentuemertext));
         }
 
         $gesamtflaeche = 0;
@@ -2142,9 +2142,9 @@ class ALB {
           if($buchungen[$b+1]['bvnr'] != $buchungen[$b]['bvnr']){
             if($buchungen[$b]['sondereigentum'] != ''){
               $sondereigentum = zeilenumbruch('verbunden mit dem Sondereigentum an '.$buchungen[$b]['sondereigentum'],40);
-              $pdf->addText($col6,$row-=12,$fontSize,$sondereigentum[0]);
+              $pdf->addText($col6,$row-=12,$fontSize,utf8_decode($sondereigentum[0]));
               for ($j=1;$j<count($sondereigentum);$j++) {
-                $pdf->addText($col6,$row-=12,$fontSize,$sondereigentum[$j]);
+                $pdf->addText($col6,$row-=12,$fontSize,utf8_decode($sondereigentum[$j]));
               }
             }
             if($buchungen[$b]['auftplannr'] != ''){

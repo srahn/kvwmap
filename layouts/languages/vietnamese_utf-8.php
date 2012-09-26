@@ -1,4 +1,4 @@
-﻿<?php
+<?php
   $this->strID="Số ID";
   $this->strName="Tên";
   $this->strChoose="Chọn";

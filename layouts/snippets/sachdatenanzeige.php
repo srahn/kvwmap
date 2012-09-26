@@ -88,7 +88,7 @@
 		// targetobject ist die id von dem Objekt im Hauptformular, welches nach Loeschung des Datensatzes aktualisiert werden soll
 		// targetlayer_id ist die von dem Layer, zu dem das targetobject gehoert
 		// targetattribute ist das Attribut, zu dem das targetobject gehoert
-		// data ist ein string, der weitere benötigte KVPs enthalten kann (durch <und> getrennt)
+		// data ist ein string, der weitere benÃ¶tigte KVPs enthalten kann (durch <und> getrennt)
 		data_r = data.replace(/<und>/g, "&");
   	data = 'go=Layer_Datensaetze_Loeschen&chosen_layer_id='+layer_id+'&selected_layer_id='+layer_id+'&fromobject='+fromobject+'&targetobject='+targetobject+'&targetlayer_id='+targetlayer_id+'&targetattribute='+targetattribute+'&data='+data+'&embedded=true' + data_r;
   	data += '&checkbox_names_'+layer_id+'='+document.getElementsByName('checkbox_names_'+layer_id)[0].value;
@@ -102,7 +102,7 @@
 		// targetobject ist die id von dem Objekt im Hauptformular, welches nach Speicherung des Datensatzes aktualisiert werden soll
 		// targetlayer_id ist die von dem Layer, zu dem das targetobject gehoert
 		// targetattribute ist das Attribut, zu dem das targetobject gehoert
-		// data ist ein string, der weitere benötigte KVPs enthalten kann (durch <und> getrennt)
+		// data ist ein string, der weitere benÃ¶tigte KVPs enthalten kann (durch <und> getrennt)
 		data_r = data.replace(/<und>/g, "&");
   	form_fieldstring = document.getElementById('sub_'+layer_id+'_form_field_names').value;
   	form_fields = form_fieldstring.split('|');
@@ -129,7 +129,7 @@
 		// targetobject ist die id von dem Objekt im Hauptformular, welches nach Speicherung des neuen Datensatzes aktualisiert werden soll
 		// targetlayer_id ist die von dem Layer, zu dem das targetobject gehoert
 		// targetattribute ist das Attribut, zu dem das targetobject gehoert
-		// data ist ein string, der weitere benötigte KVPs enthalten kann (durch <und> getrennt)
+		// data ist ein string, der weitere benÃ¶tigte KVPs enthalten kann (durch <und> getrennt)
 		data_r = data.replace(/<und>/g, "&");
   	form_fieldstring = document.getElementById('sub_'+layer_id+'_form_field_names').value;
   	form_fields = form_fieldstring.split('|');
@@ -199,14 +199,14 @@ for ($i=0;$i<$anzLayer;$i++) {
    	 	 #Version 1.6.5 pk 2007-04-17
    	 	 echo '<p>Das in den stellenbezogenen Layereigenschaften angegebene Templatefile:';
    	 	 echo '<br><b>'.SNIPPETS.$this->qlayerset[$i]['template'].'</b>';
-   	 	 echo '<br>kann nicht gefunden werden. Überprüfen Sie ob der angegebene Dateiname richtig ist oder eventuell Leerzeichen angegeben sind.';
-   	 	 echo ' Die Templatezuordnung für die Sachdatenanzeige ändern Sie über Stellen anzeigen, ändern, Layer bearbeiten, stellenbezogen bearbeiten.';
-   	 	 #echo '<p><a href="index.php?go=Layer2Stelle_Editor&selected_layer_id='.$this->qlayerset[$i]['Layer_ID'].'&selected_stelle_id='.$this->Stelle->id.'&stellen_name='.$this->Stelle->Bezeichnung.'">zum Stellenbezogener Layereditor</a> (nur mit Berechtigung möglich)';
+   	 	 echo '<br>kann nicht gefunden werden. ÃœberprÃ¼fen Sie ob der angegebene Dateiname richtig ist oder eventuell Leerzeichen angegeben sind.';
+   	 	 echo ' Die Templatezuordnung fÃ¼r die Sachdatenanzeige Ã¤ndern Sie Ã¼ber Stellen anzeigen, Ã¤ndern, Layer bearbeiten, stellenbezogen bearbeiten.';
+   	 	 #echo '<p><a href="index.php?go=Layer2Stelle_Editor&selected_layer_id='.$this->qlayerset[$i]['Layer_ID'].'&selected_stelle_id='.$this->Stelle->id.'&stellen_name='.$this->Stelle->Bezeichnung.'">zum Stellenbezogener Layereditor</a> (nur mit Berechtigung mÃ¶glich)';
    	 }
    }
 
    if($this->qlayerset[$i]['connectiontype'] == MS_POSTGIS AND $this->qlayerset[$i]['count'] > 1){
-	   # Blätterfunktion
+	   # BlÃ¤tterfunktion
 	   if($this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] == ''){
 		   $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] = 0;
 		 }

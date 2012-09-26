@@ -115,9 +115,9 @@
 							<option value="dynamicLink" ';
 				  		if($this->attributes['form_element_type'][$i] == 'dynamicLink'){echo 'selected';}
 				  		echo ' >dynamischer Link</option>
-							<option value="Fl‰che" ';
-				  		if($this->attributes['form_element_type'][$i] == 'Fl‰che'){echo 'selected';}
-				  		echo ' >Fl‰che</option>';
+							<option value="Fl√§che" ';
+				  		if($this->attributes['form_element_type'][$i] == 'Fl√§che'){echo 'selected';}
+				  		echo ' >Fl√§che</option>';
 				  	}
 				  	echo'
 				  	</select>

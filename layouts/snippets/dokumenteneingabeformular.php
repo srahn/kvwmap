@@ -91,7 +91,7 @@ else {
         <tr> 
           <td>Dokument<?php 
 		  if ($this->formvars['id']!='') { 
-		    ?> auch ändern: 
+		    ?> auch Ã¤ndern: 
             <input type="checkbox" name="changeDocument" value="1" <?php if ($this->formvars['changeDocument']) { ?> checked<?php } ?>><?php
 		  }
 		  else {
@@ -140,7 +140,7 @@ else {
     
   <tr> 
     <td colspan="2"><input type="radio" name="art" value="100"<?php if ($this->formvars['art']=='100') { ?> checked<?php } ?>>
-      Fortführungsriss&nbsp;(FFR)
+      FortfÃ¼hrungsriss&nbsp;(FFR)
     </td>
   </tr>
   <tr> 
@@ -174,7 +174,7 @@ else {
  		</td>
  	</tr>
  	<tr> 
-    <td>Fortführung:</td>
+    <td>FortfÃ¼hrung:</td>
     <td>
   		<input name="fortf" type="text" value="<?php echo $this->formvars['fortf']; ?>" maxlength="4" size="4">
  		</td>
@@ -240,7 +240,7 @@ else {
   	<td>&nbsp;</td>
   </tr>
   <tr>
-  	<td colspan="2">Geometrie übernehmen von:<br>
+  	<td colspan="2">Geometrie Ã¼bernehmen von:<br>
   		<select name="layer_id" onchange="document.GUI.submit();">
   			<option value="">--- Auswahl ---</option>
   			<?
@@ -264,7 +264,7 @@ else {
     <td colspan="2" align="center">
     	<table border="0">
         <tr> 
-          <td><input type="reset" name="go_plus2" value="Zurücksetzen"></td>
+          <td><input type="reset" name="go_plus2" value="ZurÃ¼cksetzen"></td>
           <td><input type="button" name="senden" value="Senden" onclick="save();"></td>
         </tr>
       </table>

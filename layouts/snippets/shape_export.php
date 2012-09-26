@@ -37,7 +37,7 @@ function export_shape(){
 		document.GUI.submit();
 	}
 	else{
-		alert('Bitten wählen Sie einen Layer aus.');
+		alert('Bitten wÃ¤hlen Sie einen Layer aus.');
 	}
 }
   
@@ -136,7 +136,7 @@ function export_shape(){
 			 	<? if($this->formvars['sql_'.$this->formvars['selected_layer_id']] != ''){ ?>
 			 	<tr>
 			 		<td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3" colspan="5" width="100%">
-			 			<b><? echo $this->formvars['anzahl']; ?> Datensätze aus Sachdatenanzeige</b>
+			 			<b><? echo $this->formvars['anzahl']; ?> DatensÃ¤tze aus Sachdatenanzeige</b>
 			 			<input type="hidden" name="sql_<? echo $this->formvars['selected_layer_id']; ?>" value="<? echo $this->formvars['sql_'.$this->formvars['selected_layer_id']]; ?>">
 			 			<input type="hidden" name="anzahl" value="<? echo $this->formvars['anzahl']; ?>">
 			 		</td>
@@ -156,7 +156,7 @@ function export_shape(){
   <tr>
   	<td></td> 
     <td colspan="6" align="right">
-    	Geometrie übernehmen von: 
+    	Geometrie Ã¼bernehmen von: 
   		<select name="layer_id" onchange="document.GUI.submit();">
   			<option value="">--- Auswahl ---</option>
   			<?

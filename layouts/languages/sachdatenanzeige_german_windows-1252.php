@@ -1,12 +1,12 @@
-<?php
+ï»¿<?php
 $strDataPrint="Sachdatenanzeige drucken";
 $strSave="Speichern";
-$strbacktomap="zurück zur Karte";
+$strbacktomap="zurÃ¼ck zur Karte";
 $strCancel="Abbrechen";
-$strDelete="Löschen";
-$strBackDatasets="zurück";
+$strDelete="LÃ¶schen";
+$strBackDatasets="zurÃ¼ck";
 $strFromDatasets="von";
 $strForwardDatasets="weiter";
-$strbackToSearch="zurück zur Suche";
-$strNoLayer="Es wurde kein Layer zur Sachdatenabfrage ausgewählt!";
+$strbackToSearch="zurÃ¼ck zur Suche";
+$strNoLayer="Es wurde kein Layer zur Sachdatenabfrage ausgewÃ¤hlt!";
 ?>

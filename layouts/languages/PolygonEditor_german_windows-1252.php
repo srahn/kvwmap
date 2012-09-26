@@ -1,7 +1,7 @@
 <?php
 $strSave="Speichern";
 $strSaveWithoutZoom="Zwischenspeichern";
-$strArea="Fläche";
-$strGeomFrom="Geometrie übernehmen von";
+$strArea="FlÃ¤che";
+$strGeomFrom="Geometrie Ã¼bernehmen von";
 
 ?>  
