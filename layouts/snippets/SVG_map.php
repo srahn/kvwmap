@@ -230,6 +230,7 @@ $svg='<?xml version="1.0"?>
 	var root = document.documentElement;
 	var mousewheelloop = 0;
 	var stopnavigation = false;
+	var last_x = 0;
   		
   ';
 
@@ -698,7 +699,10 @@ function mousemove(evt){
 	 break;
 			
 	 default:
-	  hide_tooltip();
+	 	if(last_x != evt.clientX){
+	  	hide_tooltip();
+	  	last_x = evt.clientX;
+	  }
 	  movePoint(evt);
 	  moveVector(evt);
 	 break;
