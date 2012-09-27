@@ -75,7 +75,7 @@ class Nachweis {
   function getZielDateiName($formvars) {
     #2005-11-24_pk
     $pathparts=pathinfo($formvars['Bilddatei_name']);
-    $zieldateiname=$formvars['flurid'].'-'.str_pad(trim($formvars[NACHWEIS_PRIMARY_ATTRIBUTE]),STAMMNUMMERMAXLENGTH,'0',STR_PAD_LEFT).'-'.$formvars['artname'].'-'.str_pad(trim($formvars['Blattnr']),3,'0',STR_PAD_LEFT).'.'.$pathparts['extension'];
+    $zieldateiname=$formvars['flurid'].'-'.$this->buildNachweisNr($formvars[NACHWEIS_PRIMARY_ATTRIBUTE], $formvars[NACHWEIS_SECONDARY_ATTRIBUTE]).'-'.$formvars['artname'].'-'.str_pad(trim($formvars['Blattnr']),3,'0',STR_PAD_LEFT).'.'.$pathparts['extension'];
     #echo $zieldateiname;
     return $zieldateiname;
   }
@@ -136,7 +136,7 @@ class Nachweis {
               # 5.2 Löschen der alten Datei war erfolgreich
               echo '<br>Alte Datei: '.$doclocation.' gelöscht';
               # Speichern der neuen Bilddatei auf dem Server
-              $ret=$this->dokumentenDateiHochladen($formvars['flurid'],$formvars[NACHWEIS_PRIMARY_ATTRIBUTE],$formvars['artname'],$formvars['Bilddatei'],$formvars['zieldateiname']);
+              $ret=$this->dokumentenDateiHochladen($formvars['flurid'],$this->buildNachweisNr($formvars[NACHWEIS_PRIMARY_ATTRIBUTE], $formvars[NACHWEIS_SECONDARY_ATTRIBUTE]),$formvars['artname'],$formvars['Bilddatei'],$formvars['zieldateiname']);
               if ($ret!='') {
                 # Neue Datei konnte nicht hochgeladen werden
                 $errmsg=$ret;
@@ -156,14 +156,14 @@ class Nachweis {
             # Prüfen, ob sich der Speicherort auf Grund von geänderten Sachdaten ändern muss
             # $doclocation... alter Speicherort
             # Zusammensetzen des neuen Speicherortes
-            $zieldatei=NACHWEISDOCPATH.$formvars['flurid'].'/'.str_pad(trim($formvars[NACHWEIS_PRIMARY_ATTRIBUTE]),STAMMNUMMERMAXLENGTH,'0',STR_PAD_LEFT).'/'.$formvars['artname'].'/'.$formvars['zieldateiname'];
+            $zieldatei=NACHWEISDOCPATH.$formvars['flurid'].'/'.$this->buildNachweisNr($formvars[NACHWEIS_PRIMARY_ATTRIBUTE], $formvars[NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$formvars['artname'].'/'.$formvars['zieldateiname'];
             if ($doclocation!=$zieldatei) {
               echo '<br>Speicherort der Datei muss geändert werden.';
               echo '<br>von:&nbsp; '.$doclocation;
               echo '<br>nach: '.$zieldatei; 
               # Datei muss an neuen Speicherort.
               # Speichern der Bilddatei unter neuem Pfad und Namen auf dem Server
-              $ret=$this->dokumentenDateiHochladen($formvars['flurid'],$formvars[NACHWEIS_PRIMARY_ATTRIBUTE],$formvars['artname'],$doclocation,$formvars['zieldateiname']);
+              $ret=$this->dokumentenDateiHochladen($formvars['flurid'],$this->buildNachweisNr($formvars[NACHWEIS_PRIMARY_ATTRIBUTE], $formvars[NACHWEIS_SECONDARY_ATTRIBUTE]),$formvars['artname'],$doclocation,$formvars['zieldateiname']);
               if ($ret!='') {
                 # bestehende Datei konnte nicht an neuen Ort geschrieben werden
                 $errmsg=$ret;
@@ -468,15 +468,18 @@ class Nachweis {
     return $ret;
   }
 
-  function dokumentenDateiHochladen($flurid,$stammnr,$artname,$quelldatei,$zieldateiname) {
+  function buildNachweisNr($primary, $secondary){
+  	return $secondary.str_pad($primary, STAMMNUMMERMAXLENGTH-strlen($secondary),'0',STR_PAD_LEFT);
+  }
+  
+  function dokumentenDateiHochladen($flurid,$nr,$artname,$quelldatei,$zieldateiname) {
     #2005-11-24_pk
     # Speicherort für die Nachweisdatei bestimmen
     $pfad=NACHWEISDOCPATH.$flurid.'/';
     if (!is_dir($pfad)) {
       mkdir ($pfad, 0777);
     }
-    $stammnr=str_pad(trim($stammnr),STAMMNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
-    $pfad.=$stammnr.'/';
+    $pfad.=$nr.'/';
     if (!is_dir($pfad)) {
       mkdir ($pfad, 0777);
     }
@@ -529,7 +532,7 @@ class Nachweis {
           # Abfrage war erfolgreich
           # Es wurde ein Eintrag in Datenbank gefunden, das löschen der Datei kann erfolgen
           # Abfrage, ob die Datei überhaupt existiert
-          $nachweisDatei=NACHWEISDOCPATH.$this->Dokumente[0]['flurid'].'/'.str_pad($this->Dokumente[0][NACHWEIS_PRIMARY_ATTRIBUTE],STAMMNUMMERMAXLENGTH,'0',STR_PAD_LEFT).'/'.$this->Dokumente[0]['link_datei'];
+          $nachweisDatei=NACHWEISDOCPATH.$this->Dokumente[0]['flurid'].'/'.$this->buildNachweisNr($this->Dokumente[0][NACHWEIS_PRIMARY_ATTRIBUTE], $this->Dokumente[0][NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$this->Dokumente[0]['link_datei'];
           if (file_exists($nachweisDatei)) {
             # Datei existiert und kann jetzt im Filesystem gelöscht werden
             if (unlink($nachweisDatei)) {
@@ -1167,7 +1170,7 @@ class Nachweis {
   
   function getDocLocation($id){
     #2005-11-24_pk
-    $sql='SELECT flurid,'.NACHWEIS_PRIMARY_ATTRIBUTE.',link_datei FROM n_nachweise WHERE id ='.$id;
+    $sql='SELECT * FROM n_nachweise WHERE id ='.$id;
     $this->debug->write("<br>nachweis.php getDocLocation zum Anzeigen der Nachweise.",4);
     $queryret=$this->database->execSQL($sql,4, 0);    
     if ($queryret[0]) {
@@ -1176,7 +1179,7 @@ class Nachweis {
     else {
       $ret[0]=0;
       $rs=pg_fetch_array($queryret[1]);
-      $ret[1]=NACHWEISDOCPATH.$rs['flurid'].'/'.str_pad($rs[NACHWEIS_PRIMARY_ATTRIBUTE],STAMMNUMMERMAXLENGTH,'0',STR_PAD_LEFT).'/'.$rs['link_datei'];
+      $ret[1]=NACHWEISDOCPATH.$rs['flurid'].'/'.$this->buildNachweisNr($rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$rs['link_datei'];
     }
     return $ret;
   }

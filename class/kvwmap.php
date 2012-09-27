@@ -8683,7 +8683,7 @@ class GUI extends GUI_core{
       $antrag = new antrag($antr_nr,$this->pgdatabase);
       # 2006-01-26
       # Frage aller Vorgänge zum Antrag ab
-      $ret=$antrag->getFFR('','','');
+      $ret=$antrag->getFFR();
       if ($ret[0]) {
         $this->Fehlermeldung=$ret[1];
         # Abbruch mit Fehlermeldung und Rücksprung in Auswahl
@@ -8772,7 +8772,7 @@ class GUI extends GUI_core{
         # 2.1 Speichern der Bilddatei zum Nachweis auf dem Server
         # Zusammensetzen des Dateinamen unter dem das Dokument gespeichert werden soll.
         $this->formvars['zieldateiname']=$this->nachweis->getZielDateiName($this->formvars);
-        $ret=$this->nachweis->dokumentenDateiHochladen($this->formvars['flurid'],$this->formvars[NACHWEIS_PRIMARY_ATTRIBUTE],$this->formvars['artname'],$this->formvars['Bilddatei'],$this->formvars['zieldateiname']);
+        $ret=$this->nachweis->dokumentenDateiHochladen($this->formvars['flurid'], $this->nachweis->buildNachweisNr($this->formvars[NACHWEIS_PRIMARY_ATTRIBUTE], $this->formvars[NACHWEIS_SECONDARY_ATTRIBUTE]),$this->formvars['artname'],$this->formvars['Bilddatei'],$this->formvars['zieldateiname']);
         if ($ret!='') { $errmsg=$ret; }
         else {
           # Speicherung der Bilddatei erfolgreich, Eintragen in Datenbank
