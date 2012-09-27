@@ -176,7 +176,7 @@ else {
  	<tr> 
     <td>Fortführung:</td>
     <td>
-  		<input name="fortf" type="text" value="<?php echo $this->formvars['fortf']; ?>" maxlength="4" size="4">
+  		<input name="fortfuehrung" type="text" value="<?php echo $this->formvars['fortfuehrung']; ?>" maxlength="4" size="4">
  		</td>
  	</tr>
  	<tr> 

@@ -5515,7 +5515,7 @@ class GUI extends GUI_core{
       $this->formvars['Bilddatei']=NACHWEISDOCPATH.$nachweis->document['link_datei'];
       $this->formvars['andere_art']=$nachweis->document['andere_art'];
       $this->formvars['rissnummer']=$nachweis->document['rissnummer'];
-      $this->formvars['fortf']=$nachweis->document['fortfuehrung'];
+      $this->formvars['fortfuehrung']=$nachweis->document['fortfuehrung'];
       $this->formvars['bemerkungen']=$nachweis->document['bemerkungen'];
 
       # Abfragen der Gemarkungen
@@ -8777,7 +8777,7 @@ class GUI extends GUI_core{
         else {
           # Speicherung der Bilddatei erfolgreich, Eintragen in Datenbank
           $this->nachweis->database->begintransaction();
-          $ret=$this->nachweis->eintragenNeuesDokument($this->formvars['datum'],$this->formvars['flurid'],$this->formvars['VermStelle'], $this->formvars['art'], $this->formvars['andere_art'], $this->formvars['gueltigkeit'],$this->formvars['stammnr'],$this->formvars['Blattformat'],$this->formvars['Blattnr'],$this->formvars['rissnummer'],$this->formvars['fortf'],$this->formvars['bemerkungen'],$this->formvars['artname']."/".$this->formvars['zieldateiname'],$this->formvars['umring']);
+          $ret=$this->nachweis->eintragenNeuesDokument($this->formvars['datum'],$this->formvars['flurid'],$this->formvars['VermStelle'], $this->formvars['art'], $this->formvars['andere_art'], $this->formvars['gueltigkeit'],$this->formvars['stammnr'],$this->formvars['Blattformat'],$this->formvars['Blattnr'],$this->formvars['rissnummer'],$this->formvars['fortfuehrung'],$this->formvars['bemerkungen'],$this->formvars['artname']."/".$this->formvars['zieldateiname'],$this->formvars['umring']);
           if ($ret[0]) {
             $this->nachweis->database->rollbacktransaction();
             $errmsg=$ret[1];
