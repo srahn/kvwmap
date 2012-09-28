@@ -2548,6 +2548,7 @@ class GUI extends GUI_core{
 
   function zoomtojagdbezirk(){
     $jagdkataster = new jagdkataster($this->pgdatabase);
+    $jagdkataster->clientepsg = $this->user->rolle->epsg_code;
     $rect = $jagdkataster->zoomTojagdbezirk($this->formvars['oid'], 10);
     $this->loadMap('DataBase');
     $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
