@@ -306,7 +306,7 @@ class ALB {
     }
 
     ob_end_clean();
-    header("Content-type: application/vnd.ms-excel");
+    header("Content-type: application/vnd.ms-excel; charset=utf-8");
     header("Content-disposition:  inline; filename=Flurstuecke.csv");
     header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
     header('Pragma: public');
