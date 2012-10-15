@@ -268,24 +268,12 @@ class ALB {
 				      }
 				      
 				 if($formvars['blattnr']){
-	        for($g = 0; $g < count($flst->Grundbuecher); $g++){
-	          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
-	          for($b = 0; $b < count($flst->Buchungen); $b++){
-	          	if($b > 0)$csv .= ' | ';
-	            $csv .= intval($flst->Buchungen[$b]['blatt']);
-	          }
-	        }
+	        $csv .= intval($flst->Buchungen[$b]['blatt']);
 	        $csv .= ';';
 		    }
 		    
 		    if($formvars['pruefzeichen']){
-	        for($g = 0; $g < count($flst->Grundbuecher); $g++){
-	          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
-	          for($b = 0; $b < count($flst->Buchungen); $b++){
-	          	if($b > 0)$csv .= ' | ';
-	            $csv .= str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
-	          }
-	        }
+	        $csv .= str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
 	        $csv .= ';';
 		    }
 		    
@@ -295,25 +283,13 @@ class ALB {
 	      }
 		    
 		    if($formvars['bvnr']){
-	        for($g = 0; $g < count($flst->Grundbuecher); $g++){
-	          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
-	          for($b = 0; $b < count($flst->Buchungen); $b++){
-	          	if($b > 0)$csv .= ' | ';
-	            $csv .= ' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
-	          }
-	        }
+	        $csv .= ' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
 	        $csv .= ';';
 		    }
 		    
 		    if($formvars['buchungsart']){
-	        for($g = 0; $g < count($flst->Grundbuecher); $g++){
-	          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
-	          for($b = 0; $b < count($flst->Buchungen); $b++){
-	          	if($b > 0)$csv .= ' | ';
-	            $csv .= ' ('.$flst->Buchungen[$b]['buchungsart'].')';
-	            $csv .= ' '.$flst->Buchungen[$b]['bezeichnung'];
-	          }
-	        }
+          $csv .= ' ('.$flst->Buchungen[$b]['buchungsart'].')';
+          $csv .= ' '.$flst->Buchungen[$b]['bezeichnung'];
 	        $csv .= ';';
 	      }
 				      
