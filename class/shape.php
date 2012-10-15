@@ -353,12 +353,6 @@ class shape {
 	  	$orderby = ' '.substr($sql, $orderbyposition);
 	  	$sql = substr($sql, 0, $orderbyposition);
   	}
-  	# Where-Klausel aus Sachdatenabfrage-SQL anhängen
-  	if($this->formvars['sql_'.$this->formvars['selected_layer_id']]){
-  		$where = substr($this->formvars['sql_'.$this->formvars['selected_layer_id']], strrpos(strtolower($this->formvars['sql_'.$this->formvars['selected_layer_id']]), 'where')+5);
-  		$orderbyposition = strpos(strtolower($where), 'order by');
-  		if($orderbyposition)$where = substr($where, 0, $orderbyposition);
-  	}
   	# über Polygon einschränken
     if($this->formvars['newpathwkt']){
     	$sql.= " AND Transform(".$this->attributes['the_geom'].", ".$user->rolle->epsg_code.") && GeomFromText('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code.") AND INTERSECTS(Transform(".$this->attributes['the_geom'].", ".$user->rolle->epsg_code."), GeomFromText('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."))";
@@ -368,15 +362,21 @@ class shape {
     if($filter != ''){
     	$sql .= ' AND '.$filter;
     }
-    if(strpos($where, 'query.') !== false){
-    	if($this->formvars['epsg']){
-    		$where = str_replace('), '.$layerset[0]['epsg_code'].')', '), '.$this->formvars['epsg'].')', $where);		# die räumliche Einschränkung das Such-SQLs auf den neuen EPSG-Code anpassen
-    	}
-    	$sql = "SELECT * FROM (".$sql.") as query WHERE 1=1 AND ".$where;
-    }
-    else{
-    	$sql = $sql." AND ".$where;
-    }
+		# Where-Klausel aus Sachdatenabfrage-SQL anhängen
+  	if($this->formvars['sql_'.$this->formvars['selected_layer_id']]){
+  		$where = substr($this->formvars['sql_'.$this->formvars['selected_layer_id']], strrpos(strtolower($this->formvars['sql_'.$this->formvars['selected_layer_id']]), 'where')+5);
+  		$orderbyposition = strpos(strtolower($where), 'order by');
+  		if($orderbyposition)$where = substr($where, 0, $orderbyposition);
+	    if(strpos($where, 'query.') !== false){
+	    	if($this->formvars['epsg']){
+	    		$where = str_replace('), '.$layerset[0]['epsg_code'].')', '), '.$this->formvars['epsg'].')', $where);		# die räumliche Einschränkung das Such-SQLs auf den neuen EPSG-Code anpassen
+	    	}
+	    	$sql = "SELECT * FROM (".$sql.") as query WHERE 1=1 AND ".$where;
+	    }
+	    else{
+	    	$sql = $sql." AND ".$where;
+	    }
+  	}
     $sql.= $orderby;
     $temp_table = 'public.shp_export_'.rand(1, 10000);
     $sql = 'CREATE TABLE '.$temp_table.' AS '.$sql;		# temporäre Tabelle erzeugen, damit das/die Schema/ta berücksichtigt werden
