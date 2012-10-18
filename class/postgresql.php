@@ -1364,7 +1364,7 @@ class pgdatabase extends pgdatabase_core {
   
   
 
-  function getFlurstKennzListeByGemSchlByStrSchl($HausNr) {
+  function getFlurstKennzListeByGemSchlByStrSchl($GemeindeSchl,$StrassenSchl,$HausNr) {
     $sql ="SELECT alb_f_adressen.flurstkennz FROM alb_f_adressen, alb_flurstuecke";
     $sql.=" WHERE alb_flurstuecke.flurstkennz = alb_f_adressen.flurstkennz";
     $sql.=" AND status != 'H'";
@@ -1380,6 +1380,10 @@ class pgdatabase extends pgdatabase_core {
       	$sql.=" AND gemeinde||'-'||strasse||'-'||TRIM(".HAUSNUMMER_TYPE."(hausnr))='".$HausNr."'";
     	}
     }
+    else{
+    	$sql.=" AND gemeinde=".$GemeindeSchl;
+    	$sql.=" AND strasse='".$StrassenSchl."'";
+    }
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
@@ -1391,7 +1395,7 @@ class pgdatabase extends pgdatabase_core {
     return $ret;
   }
   
-  function getFlurstKennzListeByGemSchlByStrSchlALKIS($HausNr) {
+  function getFlurstKennzListeByGemSchlByStrSchlALKIS($GemeindeSchl,$StrassenSchl,$HausNr) {
   	$sql.=" SELECT f.flurstueckskennzeichen as flurstkennz";
     $sql.=" FROM alkis.ax_flurstueck as f, alkis.ax_gemeinde as g, alkis.alkis_beziehungen v";
     $sql.=" JOIN alkis.ax_lagebezeichnungmithausnummer l ON v.beziehung_zu=l.gml_id";
@@ -1409,6 +1413,10 @@ class pgdatabase extends pgdatabase_core {
     	else{
       	$sql.=" AND g.schluesselgesamt||'-'||l.lage||'-'||TRIM(".HAUSNUMMER_TYPE."(l.hausnummer))='".$HausNr."'";
     	}
+    }
+    else{
+    	$sql.=" AND g.schluesselgesamt=".$GemeindeSchl;
+    	$sql.=" AND l.lage='".$StrassenSchl."'";
     }
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
@@ -4319,7 +4327,7 @@ class pgdatabase extends pgdatabase_core {
   }
 
   # 2006-01-31 pk
-  function getMERfromGebaeude($Hausnr, $epsgcode) {
+  function getMERfromGebaeude($Gemeinde,$Strasse,$Hausnr, $epsgcode){
     $this->debug->write("<br>postgres.php->database->getMERfromGebaeude, Abfrage des Maximalen umschließenden Rechtecks um die Gebaeude",4);
     $sql ="SELECT MIN(XMIN(ENVELOPE(TRANSFORM(o.the_geom, ".$epsgcode.")))) AS minx,MAX(XMAX(ENVELOPE(TRANSFORM(o.the_geom, ".$epsgcode.")))) AS maxx";
     $sql.=",MIN(YMIN(ENVELOPE(TRANSFORM(o.the_geom, ".$epsgcode.")))) AS miny,MAX(YMAX(ENVELOPE(TRANSFORM(o.the_geom, ".$epsgcode.")))) AS maxy";
@@ -4329,6 +4337,12 @@ class pgdatabase extends pgdatabase_core {
     	$Hausnr = str_replace(", ", ",", $Hausnr);
     	$Hausnr = strtolower(str_replace(",", "','", $Hausnr));    	
       $sql.=" AND h.gemeinde||'-'||h.strasse||'-'||TRIM(LOWER(h.hausnr)) IN ('".$Hausnr."')";
+    }
+    else{
+	    $sql.=" AND h.gemeinde=".$Gemeinde;
+	    if ($Strasse!='') {
+	      $sql.=" AND h.strasse='".$Strasse."'";
+	    }
     }
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
@@ -4362,6 +4376,12 @@ class pgdatabase extends pgdatabase_core {
     	$Hausnr = str_replace(", ", ",", $Hausnr);
     	$Hausnr = strtolower(str_replace(",", "','", $Hausnr));    	
       $sql.=" AND gem.schluesselgesamt||'-'||l.lage||'-'||TRIM(LOWER(l.hausnummer)) IN ('".$Hausnr."')";
+    }
+    else{
+	    $sql.=" AND gem.schluesselgesamt=".$Gemeinde;
+	    if ($Strasse!='') {
+	      $sql.=" AND l.lage='".$Strasse."'";
+	    }
     }
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);

@@ -870,8 +870,8 @@ class adresse {
 
   function getFlurstKennzListe() {
     # liefert FlurstKennz zur Adressangaben aus dem ALB Bestand
-    if(ALKIS)$ret=$this->database->getFlurstKennzListeByGemSchlByStrSchlALKIS($this->HausNr);
-    else $ret=$this->database->getFlurstKennzListeByGemSchlByStrSchl($this->HausNr);
+    if(ALKIS)$ret=$this->database->getFlurstKennzListeByGemSchlByStrSchlALKIS($this->GemeindeSchl,$this->StrassenSchl,$this->HausNr);
+    else $ret=$this->database->getFlurstKennzListeByGemSchlByStrSchl($this->GemeindeSchl,$this->StrassenSchl,$this->HausNr);
     if ($ret[0]) {
       $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4);
       return 0;
