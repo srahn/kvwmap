@@ -11675,7 +11675,7 @@ class GUI extends GUI_core{
     # zu 1)
     $alk=new ALK();
     $alk->database=$this->pgdatabase;
-    $ret=$alk->getMERfromGebaeude($Hausnr, $this->user->rolle->epsg_code);
+    $ret=$alk->getMERfromGebaeude($Gemeinde,$Strasse,$Hausnr, $this->user->rolle->epsg_code);
     if ($ret[0]) {
       $this->Fehlermeldung='Es konnten keine Gebäude gefunden werden.<br>'.$ret[1];
       $rect=$this->user->rolle->oGeorefExt;
@@ -11701,6 +11701,12 @@ class GUI extends GUI_core{
 		    	$Hausnr = strtolower(str_replace(",", "','", $Hausnr));    	
 		      $datastring.=" AND gem.schluesselgesamt||'-'||l.lage||'-'||TRIM(LOWER(l.hausnummer)) IN ('".$Hausnr."')";
 		    }
+	    	else{
+			    $datastring.=" AND gem.schluesselgesamt=".$Gemeinde;
+			    if ($Strasse!='') {
+			      $datastring.=" AND l.lage='".$Strasse."'";
+			    }
+		    }
 	    }
 	    else{
 		    $datastring ="the_geom from (select o.objnr as oid,o.the_geom from alkobj_e_fla AS o,alknhaus as h";
@@ -11709,6 +11715,12 @@ class GUI extends GUI_core{
 		    	$Hausnr = str_replace(", ", ",", $Hausnr);
 		    	$Hausnr = strtolower(str_replace(",", "','", $Hausnr));
 		      $datastring.=" AND h.gemeinde||'-'||h.strasse||'-'||TRIM(LOWER(h.hausnr)) IN ('".$Hausnr."')";
+		    }
+	    	else{
+			    $datastring.=" AND h.gemeinde=".$Gemeinde;
+			    if ($Strasse!='') {
+			      $datastring.=" AND h.strasse='".$Strasse."'";
+			    }
 		    }
 	    }
 	    $datastring.=") as foo using unique oid using srid=".EPSGCODE;
@@ -12446,7 +12458,7 @@ class GUI extends GUI_core{
         $FlurstKennz=$Adresse->getFlurstKennzListe();
         if($this->formvars['ALK_Suche'] == 1){
         	$this->loadMap('DataBase');
-	        $ret = $this->zoomToALKGebaeude($HausID,100);
+	        $ret = $this->zoomToALKGebaeude($GemID,$StrID,$HausID,100);
 	        if($ret[0]){
 	        	$this->zoomToALKFlurst($FlurstKennz,100);
 	        }
@@ -12464,7 +12476,7 @@ class GUI extends GUI_core{
 	          # Anzeige der Gebaeude in der ALK
 	          # Karte laden, auf die Gebaeude zoomen, Karte Zeichnen und speichern für späteren gebrauch
 	          $this->loadMap('DataBase');
-	          $this->zoomToALKGebaeude($HausID,100);
+	          $this->zoomToALKGebaeude($GemID,$StrID,$HausID,100);
 	          $currenttime=date('Y-m-d H:i:s',time());
 	          $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
 	          $this->drawMap();
