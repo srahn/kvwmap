@@ -210,6 +210,27 @@ class GUI extends GUI_core{
     if (isset ($mime_type)) $this->mime_type=$mime_type;
   }
   
+  function truncateAlbAlkTables(){
+  	echo 'ALB und ALK Tabellen werden geleert<br>';
+ 		echo 'mit Befehl:<br>';
+  	$sql="SELECT * FROM pg_tables WHERE schemaname = 'public' AND tablename like 'alb%' OR tablename like 'alk%' OR tablename like 'edbs%'";
+  	echo $sql;
+  	echo '<br>Folgende Tabellen wurden geleert:';
+  	$ret=$this->pgdatabase->execSQL($sql,4, 1);
+  	$sql="TRUNCATE TABLE ";
+  	while ($rs=pg_fetch_array($ret[1])) {
+  		echo '<br>'.$rs['tablename'];
+      if($sql=='TRUNCATE TABLE '){
+      	$sql.="public.".$rs['tablename'];
+      }
+      else{
+      	$sql.=",public.".$rs['tablename'];
+      }
+    }
+    $sql.=" CASCADE";
+    $this->pgdatabase->execSQL($sql,4, 1);
+  } 
+  
   function checkCaseAllowed($case){
   	if(!$this->Stelle->isMenueAllowed($case) AND !$this->Stelle->isFunctionAllowed($case)) {
       $this->Fehlermeldung=$this->TaskChangeWarning;
@@ -7081,7 +7102,7 @@ class GUI extends GUI_core{
     header("Content-disposition:  attachment; filename=".$this->user->id."_".$this->formvars['chosen_layer_id']."_export.csv");
     header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
     header('Pragma: public');
-    print $csv;
+    print utf8_decode($csv);
   }
 	  
   function uko_export(){
@@ -8762,7 +8783,7 @@ class GUI extends GUI_core{
     if ($this->formvars['id']=='') {
       # Prüfen der Eingabewerte
       #echo '<br>Prüfen der Eingabewerte.';
-      $ret=$this->nachweis->pruefeEingabedaten($this->formvars['datum'],$this->formvars['VermStelle'],$this->formvars['art'],$this->formvars['gueltigkeit'],$this->formvars['stammnr'],$this->formvars['rissnummer'], $this->formvars['Blattformat'],$this->formvars['Blattnr'],$this->formvars['changeDocument'],$this->formvars['Bilddatei_name'],$this->formvars['pathlength'],$this->formvars['umring']);
+      $ret=$this->nachweis->pruefeEingabedaten($this->formvars['datum'],$this->formvars['VermStelle'],$this->formvars['art'],$this->formvars['gueltigkeit'],$this->formvars['stammnr'],$this->formvars['rissnummer'], $this->formvars['fortfuehrung'], $this->formvars['Blattformat'],$this->formvars['Blattnr'],$this->formvars['changeDocument'],$this->formvars['Bilddatei_name'],$this->formvars['pathlength'],$this->formvars['umring']);
       if ($ret[0]) {
         #echo '<br>Ergebnis der Prüfung: '.$ret;
         $errmsg=$ret[1];

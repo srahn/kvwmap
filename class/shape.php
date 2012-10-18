@@ -255,6 +255,9 @@ class shape {
         $files = unzip($nachDatei, false, false, true);
         $firstfile = explode('.', $files[0]);
         $file = $firstfile[0].'.dbf';
+        if(!file_exists(UPLOADPATH.$file)){
+        	$file = $firstfile[0].'.DBF';
+        }
         $this->dbf = new dbf();
         $this->dbf->file = '';
         $this->dbf->file = $file;

@@ -2,6 +2,18 @@
 <script type="text/javascript">
 <!--
 
+<!-- wird fuer das Absenden bei Enter benoetigt -->
+document.onkeydown = function(ev){
+	var key;
+	ev = ev || event;
+	key = ev.keyCode;
+	if (key == 13) {
+		document.GUI.suchen.click();
+	}
+}
+
+
+
 function changeInputType(oldObject, oType) {
 	if(oldObject != undefined){
 	  var newObject = document.createElement('input');

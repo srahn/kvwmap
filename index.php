@@ -181,6 +181,12 @@ if (file_exists($index_include_file)) {
 }
 if ($goNotExecutedInIncludeCases) {
 	switch($GUI->go) {
+		case 'ALB_ALK_Tabellen_leeren' : {
+			$GUI->checkCaseAllowed($go);
+	    $GUI->truncateAlbAlkTables();
+	    $GUI->output();
+  	} break;
+  	 
 		case 'Multi_Geometrien_splitten' : {
 		  $GUI->split_multi_geometries();
 		}break;

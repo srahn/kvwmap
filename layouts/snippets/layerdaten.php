@@ -1,4 +1,3 @@
-<a name="oben"></a>
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
     <td><strong><font size="+1"><?php echo $this->titel; ?></font></strong></td>

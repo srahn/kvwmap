@@ -66,7 +66,7 @@
   	for(i = 0; i < form_fields.length-1; i++){
   		fieldstring = form_fields[i]+'';
   		field = fieldstring.split(';');
-  		if(document.getElementsByName(fieldstring)[0] != undefined && field[4] != 'Dokument' && (document.getElementsByName(fieldstring)[0].readOnly != true || field[4] == 'TextFK') && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
+  		if(document.getElementsByName(fieldstring)[0] != undefined && field[4] != 'Dokument' && (document.getElementsByName(fieldstring)[0].readOnly != true) && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
   			alert('Das Feld '+document.getElementsByName(fieldstring)[0].title+' erfordert eine Eingabe.');
   			return;
   		}
@@ -88,7 +88,7 @@
 		// targetobject ist die id von dem Objekt im Hauptformular, welches nach Loeschung des Datensatzes aktualisiert werden soll
 		// targetlayer_id ist die von dem Layer, zu dem das targetobject gehoert
 		// targetattribute ist das Attribut, zu dem das targetobject gehoert
-		// data ist ein string, der weitere benötigte KVPs enthalten kann (durch <und> getrennt)
+		// data ist ein string, der weitere benÃ¶tigte KVPs enthalten kann (durch <und> getrennt)
 		data_r = data.replace(/<und>/g, "&");
   	data = 'go=Layer_Datensaetze_Loeschen&chosen_layer_id='+layer_id+'&selected_layer_id='+layer_id+'&fromobject='+fromobject+'&targetobject='+targetobject+'&targetlayer_id='+targetlayer_id+'&targetattribute='+targetattribute+'&data='+data+'&embedded=true' + data_r;
   	data += '&checkbox_names_'+layer_id+'='+document.getElementsByName('checkbox_names_'+layer_id)[0].value;
@@ -102,7 +102,7 @@
 		// targetobject ist die id von dem Objekt im Hauptformular, welches nach Speicherung des Datensatzes aktualisiert werden soll
 		// targetlayer_id ist die von dem Layer, zu dem das targetobject gehoert
 		// targetattribute ist das Attribut, zu dem das targetobject gehoert
-		// data ist ein string, der weitere benötigte KVPs enthalten kann (durch <und> getrennt)
+		// data ist ein string, der weitere benÃ¶tigte KVPs enthalten kann (durch <und> getrennt)
 		data_r = data.replace(/<und>/g, "&");
   	form_fieldstring = document.getElementById('sub_'+layer_id+'_form_field_names').value;
   	form_fields = form_fieldstring.split('|');
@@ -129,7 +129,7 @@
 		// targetobject ist die id von dem Objekt im Hauptformular, welches nach Speicherung des neuen Datensatzes aktualisiert werden soll
 		// targetlayer_id ist die von dem Layer, zu dem das targetobject gehoert
 		// targetattribute ist das Attribut, zu dem das targetobject gehoert
-		// data ist ein string, der weitere benötigte KVPs enthalten kann (durch <und> getrennt)
+		// data ist ein string, der weitere benÃ¶tigte KVPs enthalten kann (durch <und> getrennt)
 		data_r = data.replace(/<und>/g, "&");
   	form_fieldstring = document.getElementById('sub_'+layer_id+'_form_field_names').value;
   	form_fields = form_fieldstring.split('|');
@@ -171,6 +171,9 @@
 
   <br/>
   <h2><u>Sachdaten:</u></h2>
+  <table border="0" cellpadding="10" cellspacing="0" width="100%">
+  	<tr><td align="right"><a href="#unten"><img title="nach unten" src="<? echo GRAPHICSPATH; ?>pfeil.gif" width="11" height="11" border="0"></a></td></tr>
+  </table>
 <?php
 $anzLayer=count($this->qlayerset);
 if ($anzLayer==0) {
@@ -200,13 +203,13 @@ for ($i=0;$i<$anzLayer;$i++) {
    	 	 echo '<p>Das in den stellenbezogenen Layereigenschaften angegebene Templatefile:';
    	 	 echo '<br><b>'.SNIPPETS.$this->qlayerset[$i]['template'].'</b>';
    	 	 echo '<br>kann nicht gefunden werden. Überprüfen Sie ob der angegebene Dateiname richtig ist oder eventuell Leerzeichen angegeben sind.';
-   	 	 echo ' Die Templatezuordnung für die Sachdatenanzeige ändern Sie über Stellen anzeigen, ändern, Layer bearbeiten, stellenbezogen bearbeiten.';
-   	 	 #echo '<p><a href="index.php?go=Layer2Stelle_Editor&selected_layer_id='.$this->qlayerset[$i]['Layer_ID'].'&selected_stelle_id='.$this->Stelle->id.'&stellen_name='.$this->Stelle->Bezeichnung.'">zum Stellenbezogener Layereditor</a> (nur mit Berechtigung möglich)';
+   	 	 echo ' Die Templatezuordnung für die Sachdatenanzeige ändern Sie über Stellen anzeigen, Ändern, Layer bearbeiten, stellenbezogen bearbeiten.';
+   	 	 #echo '<p><a href="index.php?go=Layer2Stelle_Editor&selected_layer_id='.$this->qlayerset[$i]['Layer_ID'].'&selected_stelle_id='.$this->Stelle->id.'&stellen_name='.$this->Stelle->Bezeichnung.'">zum Stellenbezogener Layereditor</a> (nur mit Berechtigung mÃ¶glich)';
    	 }
    }
 
    if($this->qlayerset[$i]['connectiontype'] == MS_POSTGIS AND $this->qlayerset[$i]['count'] > 1){
-	   # Blätterfunktion
+	   # BlÃ¤tterfunktion
 	   if($this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] == ''){
 		   $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] = 0;
 		 }
@@ -243,8 +246,10 @@ for ($i=0;$i<$anzLayer;$i++) {
 <?
 	if($this->editable == 'true' AND $this->formvars['printversion'] == ''){ ?>
 		<table width="100%" border="0" cellpadding="10" cellspacing="0">
-    <tr align="center">
-      <td><input type="button" class="button" name="savebutton" value="<? echo $strSave; ?>" onclick="save();"></td>
+    <tr>
+    	<td>&nbsp;</td>
+      <td align="center" width="100%"><input type="button" class="button" name="savebutton" value="<? echo $strSave; ?>" onclick="save();">&nbsp;<input class="button" type="reset" value="Zurücksetzen"></td>
+      <td align="right"><a href="#oben"><img title="nach oben" src="<? echo GRAPHICSPATH; ?>pfeil2.gif" width="11" height="11" border="0"></a></td>
     </tr>
   </table>
 <?
@@ -298,8 +303,10 @@ for ($i=0;$i<$anzLayer;$i++) {
 
   if($this->found != 'false' AND $this->formvars['printversion'] == ''){
   ?>
-  <a href="javascript:druck();"><? echo $strDataPrint; ?></a><br><br><br><br>
+  <a href="javascript:druck();"><? echo $strDataPrint; ?></a>
+  <br><br>
   <?}?>
+  <a name="unten"></a>
   <input type="hidden" name="anzahl" value="<? echo $this->formvars['anzahl']; ?>">
   <input type="hidden" name="printversion" value="">
   <input type="hidden" name="go_backup" value="">

@@ -88,7 +88,7 @@ class Nachweis {
     $this->database->begintransaction();        
 
     # 2. Prüfen der Eingabewerte
-    $ret=$this->pruefeEingabedaten($formvars['datum'],$formvars['VermStelle'],$formvars['art'],$formvars['gueltigkeit'],$formvars['stammnr'],$formvars['rissnummer'],$formvars['Blattformat'],$formvars['Blattnr'],$formvars['changeDocument'],$formvars['Bilddatei_name'],$formvars['pathlength'],$formvars['umring']);
+    $ret=$this->pruefeEingabedaten($formvars['datum'],$formvars['VermStelle'],$formvars['art'],$formvars['gueltigkeit'],$formvars['stammnr'],$formvars['rissnummer'],$formvars['fortfuehrung'],$formvars['Blattformat'],$formvars['Blattnr'],$formvars['changeDocument'],$formvars['Bilddatei_name'],$formvars['pathlength'],$formvars['umring']);
     if ($ret[0]) {
       # Fehler bei den Eingabewerten entdeckt.  
       #echo '<br>Ergebnis der Prüfung: '.$ret;
@@ -317,7 +317,7 @@ class Nachweis {
   	return $result;
   }
   
-  function pruefeEingabedaten($datum, $VermStelle, $art, $gueltigkeit, $stammnr, $rissnummer, $Blattformat, $Blattnr, $changeDocument,$Bilddatei_name, $pathlength, $umring) {
+  function pruefeEingabedaten($datum, $VermStelle, $art, $gueltigkeit, $stammnr, $rissnummer, $fortfuehrung, $Blattformat, $Blattnr, $changeDocument,$Bilddatei_name, $pathlength, $umring) {
     #echo '<br>Starten der Funktion zum testen der Eingabedaten.';
     # Test: wurde das Polgon für den raumbezug festgelegt?
     if ($umring == ''){
@@ -435,6 +435,12 @@ class Nachweis {
 	      if ($strenthalten==1) {
 	        $errmsg.='Ungültige Zeichen bei der Rissnummer ! \n';
 	      }
+	    }
+    }
+  # Testen der Fortfuehrung
+    if(NACHWEIS_SECONDARY_ATTRIBUTE == 'fortfuehrung'){
+    	if($fortfuehrung == '' OR $fortfuehrung < 1860 OR $fortfuehrung > date('Y')){
+	      $errmsg.='Bitte geben Sie das Fortführungsjahr korrekt ein! \n';
 	    }
     }
     # Test der Blattnummer
