@@ -175,7 +175,6 @@ class pgdatabase extends pgdatabase_core {
 	          $tablename = $table['name'];
 	        }
         }
-
         if($tablename != NULL){
           $all_table_names[] = $tablename;
         }

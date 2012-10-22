@@ -19,6 +19,9 @@
 --# START TRANSACTION;
 
 
+CREATE SCHEMA custom_shapes;	-- kann auch anders heißen, ist der config.php über CUSTOM_SHAPE_SCHEMA definierbar
+
+
 -- Tabelle zur Speicherung von Umringspolygonen aus uko-Dateien
 
 CREATE TABLE uko_polygon

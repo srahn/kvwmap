@@ -357,7 +357,7 @@ if($_SESSION['login_routines'] == true){
 	# Löschen der Rollenlayer
 	if(DELETE_ROLLENLAYER == 'true'){
 		$mapdb = new db_mapObj($GUI->Stelle->id, $GUI->user->id);
-		$rollenlayerset = $mapdb->read_RollenLayer();
+		$rollenlayerset = $mapdb->read_RollenLayer(NULL, 'search');
     for($i = 0; $i < count($rollenlayerset); $i++){   
       $mapdb->deleteRollenLayer($rollenlayerset[$i]['id']);
       # auch die Klassen und styles löschen

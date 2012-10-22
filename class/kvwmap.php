@@ -962,7 +962,7 @@ class GUI extends GUI_core{
               }
               $legend .=' size="2">'.html_umlaute($current_group[$j]->name).'</font>';
               # Bei eingeschalteten Layern kann man auf die maximale Ausdehnung des Layers zoomen
-              if ($groupname != 'Suchergebnis' AND $current_group[$j]->status == 1) {
+              if ($current_group[$j]->status == 1) {
                 if ($current_group[$j]->connectiontype==6) {
                   # Link zum Zoomen auf maximalen Extent des Layers erstmal nur für PostGIS Layer
                   $legend.='&nbsp;<a href="index.php?go=zoomToMaxLayerExtent&layer_id='.$current_group[$j]->getMetaData('Layer_ID').'"><img src="graphics/maxLayerExtent.gif" border="0" title="volle Layerausdehnung"></a>';
@@ -971,7 +971,7 @@ class GUI extends GUI_core{
             }
             if($current_group[$j]->getMetaData('layer_has_classes') == 1){
               if($current_group[$j]->status == 1 ){
-              	if($current_group[$j]->getMetaData('off_requires') != 1 AND is_numeric($current_group[$j]->getMetaData('Layer_ID'))){
+              	if($current_group[$j]->getMetaData('off_requires') != 1 AND $current_group[$j]->getMetaData('Layer_ID') > 0){
                   $legend .=  ' <a href="javascript:updateclasses(document.GUI.classes_'.$current_group[$j]->getMetaData('Layer_ID').')" title="Klassen ein/ausblenden"><img border="0" src="graphics/';
                     if($current_group[$j]->getMetaData('showclasses')){
                       $legend .=  'minus.gif';
@@ -2020,6 +2020,7 @@ class GUI extends GUI_core{
       $this->formvars['aktivStatus'] = 1;
       $this->formvars['Name'] = $legendentext;
       $this->formvars['Gruppe'] = $groupid;
+      $this->formvars['Typ'] = 'search';
       $this->formvars['Datentyp'] = $layerset[0]['Datentyp'];;
       $this->formvars['Data'] = $datastring;
       $this->formvars['connectiontype'] = 6;
@@ -2200,6 +2201,7 @@ class GUI extends GUI_core{
       $this->formvars['aktivStatus'] = 1;
       $this->formvars['Name'] = $legendentext;
       $this->formvars['Gruppe'] = $groupid;
+      $this->formvars['Typ'] = 'search';
       $this->formvars['Datentyp'] = 1;
       $this->formvars['Data'] = $datastring;
       $this->formvars['connectiontype'] = 6;
@@ -2316,6 +2318,7 @@ class GUI extends GUI_core{
       $this->formvars['aktivStatus'] = 1;
       $this->formvars['Name'] = $legendentext;
       $this->formvars['Gruppe'] = $groupid;
+      $this->formvars['Typ'] = 'search';
       $this->formvars['Datentyp'] = 2;
       $this->formvars['Data'] = $datastring;
       $this->formvars['connectiontype'] = 6;
@@ -2417,6 +2420,7 @@ class GUI extends GUI_core{
       $this->formvars['aktivStatus'] = 1;
       $this->formvars['Name'] = $legendentext;
       $this->formvars['Gruppe'] = $groupid;
+      $this->formvars['Typ'] = 'search';
       $this->formvars['Datentyp'] = 0;
       $this->formvars['Data'] = $datastring;
       $this->formvars['connectiontype'] = 6;
@@ -7173,8 +7177,9 @@ class GUI extends GUI_core{
 	
 	function create_shp_rollenlayer_load(){
 		$this->shape = new shape();
-		$this->shape->create_shape_rollenlayer($this->formvars, $this->Stelle, $this->user, $this->database);
+		$layer_id = $this->shape->create_shape_rollenlayer($this->formvars, $this->Stelle, $this->user, $this->database, $this->pgdatabase);
 		$this->loadMap('DataBase');
+		$this->zoomToMaxLayerExtent($layer_id);
 		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
     $this->drawMap();
     $this->saveMap('');
@@ -11640,6 +11645,7 @@ class GUI extends GUI_core{
     $this->formvars['aktivStatus'] = 1;
     $this->formvars['Name'] = $legendentext;
     $this->formvars['Gruppe'] = $groupid;
+    $this->formvars['Typ'] = 'search';
     $this->formvars['Datentyp'] = 2;
     $this->formvars['Data'] = $datastring;
     $this->formvars['connectiontype'] = 6;
@@ -11912,9 +11918,6 @@ class GUI extends GUI_core{
     # Abfragen des Data Statements des Layers
     $data=$this->mapDB->getData($layer_id);
     
-    # Abfragen des Pfad Statements des Layers
-    $path = $this->mapDB->getPath($layer_id);
-
     # suchen nach dem ersten Vorkommen von using unique
     $pos = strpos(strtolower($data),'using unique');
 
@@ -11931,13 +11934,8 @@ class GUI extends GUI_core{
 		# Abfragen der Datenbankverbindung des Layers
     $layerdb=$this->mapDB->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
     
-    # Laden der Layerattribute
-    //$this->attributes = $this->mapDB->read_layer_attributes($layer_id, $layerdb, NULL);
-
-		//if($this->attributes['the_geom'] == ''){					# Geometriespalte ist nicht geladen --> aus Data holen
-  		$data_attributes = $this->mapDB->getDataAttributes($layerdb, $layer_id);
-  		$this->attributes['the_geom'] = $data_attributes['the_geom'];
-  	//}
+  	$data_attributes = $this->mapDB->getDataAttributes($layerdb, $layer_id);
+  	$this->attributes['the_geom'] = $data_attributes['the_geom'];
 
 		# Filter berücksichtigen
 		$filter = $this->mapDB->getFilter($layer_id, $this->Stelle->id);
@@ -12936,7 +12934,7 @@ class db_mapObj extends db_mapObj_core{
 
   function getlayerdatabase($layer_id, $host){
   	if($layer_id < 0){	# Rollenlayer
-  		$sql ='SELECT `connection`, "public" as `schema` FROM rollenlayer WHERE -id = '.$layer_id.' AND connectiontype = 6';
+  		$sql ='SELECT `connection`, "" as `schema` FROM rollenlayer WHERE -id = '.$layer_id.' AND connectiontype = 6';
   	}
   	else{
     	$sql ='SELECT `connection`, `schema` FROM layer WHERE Layer_ID = '.$layer_id.' AND connectiontype = 6';
@@ -12994,7 +12992,7 @@ class db_mapObj extends db_mapObj_core{
       if($fooposition > 0){
         $from = substr($from, 0, $fooposition);
       }
-      $select = 'select * '.$from;
+      $select = 'select * '.$from.' where 1=1';
     }
     else{
       $select = stristr($data,'(');
@@ -13304,6 +13302,17 @@ class db_mapObj extends db_mapObj_core{
   }
 
   function deleteRollenLayer($id){
+  	$sql = 'SELECT Typ, Data FROM rollenlayer WHERE id = '.$id;
+  	$query=mysql_query($sql);
+    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+    $rs=mysql_fetch_array($query);
+    if($rs['Typ'] == 'import'){		# beim Shape-Import-Layern die Tabelle löschen
+    	$explosion = explode(CUSTOM_SHAPE_SCHEMA.'.', $rs['Data']);
+    	$sql = 'DROP TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$explosion[1].';';
+    	$sql.= 'DELETE FROM geometry_columns WHERE f_table_schema = \''.CUSTOM_SHAPE_SCHEMA.'\' AND f_table_name = \''.$explosion[1].'\'';
+    	$this->debug->write("<p>file:kvwmap class:db_mapObj->deleteRollenLayer - Löschen eines RollenLayers:<br>".$sql,4);
+      $query=pg_query($sql);
+    }
     $sql = 'DELETE FROM rollenlayer WHERE id = '.$id;
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->deleteRollenLayer - Löschen eines RollenLayers:<br>".$sql,4);
@@ -13322,13 +13331,14 @@ class db_mapObj extends db_mapObj_core{
   function newRollenLayer($formvars){
     $formvars['Data'] = str_replace ( "'", "''", $formvars['Data']);
 
-    $sql = "INSERT INTO rollenlayer (`user_id`, `stelle_id`, `aktivStatus`, `Name`, `Datentyp`, `Gruppe`, `Data`, `connection`, `connectiontype`, `transparency`, `epsg_code`, `labelitem`) VALUES(";
+    $sql = "INSERT INTO rollenlayer (`user_id`, `stelle_id`, `aktivStatus`, `Name`, `Datentyp`, `Gruppe`, `Typ`, `Data`, `connection`, `connectiontype`, `transparency`, `epsg_code`, `labelitem`) VALUES(";
     $sql .= "'".$formvars['user_id']."', ";
     $sql .= "'".$formvars['stelle_id']."', ";
     $sql .= "'".$formvars['aktivStatus']."', ";
     $sql .= "'".addslashes($formvars['Name'])."', ";
     $sql .= "'".$formvars['Datentyp']."', ";
     $sql .= "'".$formvars['Gruppe']."', ";
+    $sql .= "'".$formvars['Typ']."', ";
     $sql .= "'".$formvars['Data']."', ";
     $sql .= "'".$formvars['connection']."', ";
     $sql .= "'".$formvars['connectiontype']."', ";

@@ -167,6 +167,7 @@ CREATE TABLE `rollenlayer` (
   `aktivStatus` enum('0','1','2') collate latin1_german2_ci NOT NULL,
   `Name` varchar(255) collate latin1_german2_ci NOT NULL,
   `Gruppe` int(11) NOT NULL,
+  `Typ` ENUM('search','import') NOT NULL DEFAULT 'search',
   `Datentyp` int(11) NOT NULL,
   `Data` text,
   `connectiontype` int(11) NOT NULL,

@@ -1056,6 +1056,7 @@ class GUI_core {
         $this->formvars['aktivStatus'] = 1;
         $this->formvars['Name'] = $legendentext;
         $this->formvars['Gruppe'] = $groupid;
+        $this->formvars['Typ'] = 'search';
         $this->formvars['Datentyp'] = 0;
         $this->formvars['Data'] = $datastring;
         $this->formvars['connectiontype'] = 6;
@@ -1469,11 +1470,14 @@ class db_mapObj_core {
     return $rs;
   }  
 
-  function read_RollenLayer($id = NULL){
-    $sql = 'SELECT DISTINCT l.*, g.Gruppenname, gr.status, concat("_rolle", l.id) AS Layer_ID, 1 as showclasses from rollenlayer AS l, u_groups AS g, u_groups2rolle as gr';
+  function read_RollenLayer($id = NULL, $typ = NULL){
+    $sql = 'SELECT DISTINCT l.*, g.Gruppenname, gr.status, -l.id AS Layer_ID, 1 as showclasses from rollenlayer AS l, u_groups AS g, u_groups2rolle as gr';
     $sql.= ' WHERE l.Gruppe = g.id AND l.stelle_id='.$this->Stelle_ID.' AND l.user_id='.$this->User_ID.' AND gr.id = g.id AND gr.stelle_id='.$this->Stelle_ID.' AND gr.user_id='.$this->User_ID;
     if($id != NULL){
     	$sql .= ' AND l.id = '.$id;
+    }
+  	if($typ != NULL){
+    	$sql .= ' AND l.Typ = \''.$typ.'\'';
     }
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_RollenLayer - Lesen der RollenLayer:<br>".$sql,4);
     $query=mysql_query($sql);

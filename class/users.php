@@ -1153,7 +1153,7 @@ class rolle extends rolle_core{
     $mapdb = new db_mapObj($stelle_id, $user_id);
     $rollenlayerset = $mapdb->read_RollenLayer();
     for($i = 0; $i < count($rollenlayerset); $i++){
-      if($formvars['thema_rolle'.$rollenlayerset[$i]['id']] == 0){   
+      if($formvars['thema'.$rollenlayerset[$i]['Layer_ID']] == 0){   
         $mapdb->deleteRollenLayer($rollenlayerset[$i]['id']);
         # auch die Klassen und styles löschen
         foreach($rollenlayerset[$i]['Class'] as $class){

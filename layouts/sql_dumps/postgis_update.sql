@@ -1049,6 +1049,11 @@ ALTER TABLE public.n_nachweise ADD COLUMN rissnummer character varying(20);
 ALTER TABLE public.n_nachweise ADD COLUMN bemerkungen text;
 
 
+----# Änderungen von 1.10.0 nach 1.11.0
+
+CREATE SCHEMA custom_shapes;	-- kann auch anders heißen, ist der config.php über CUSTOM_SHAPE_SCHEMA definierbar
+
+
 
 
 
