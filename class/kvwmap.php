@@ -11695,7 +11695,7 @@ class GUI extends GUI_core{
     $this->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
   }
 
-  function zoomToALKGebaeude($Hausnr,$border) {
+  function zoomToALKGebaeude($Gemeinde,$Strasse,$Hausnr,$border) {
     # 2006-01-31 pk
     # 1. Funktion ermittelt das umschließende Rechteck der mit $Gemeinde,$Strasse und $Hausnr übergebenen
     # Gebaeude aus der postgis Datenbank mit Rand entsprechend dem Faktor $border
