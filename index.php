@@ -1827,7 +1827,7 @@ if ($goNotExecutedInIncludeCases) {
 	  } break;
 
 		case 'getMap_ajax' : {   
-			$GUI->formvars['nurAktiveLayer'] = true;		
+		$GUI->formvars['nurAktiveLayer'] = true;		
 		$GUI->loadMap('DataBase');		
 		$GUI->navMap($GUI->formvars['CMD']);
 		$GUI->saveMap('');    

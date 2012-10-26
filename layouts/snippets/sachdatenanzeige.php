@@ -254,6 +254,15 @@ for ($i=0;$i<$anzLayer;$i++) {
   </table>
 <?
 	}
+	else{ ?>
+		<table width="100%" border="0" cellpadding="10" cellspacing="0">
+    <tr>
+    	<td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td align="right"><a href="#oben"><img title="nach oben" src="<? echo GRAPHICSPATH; ?>pfeil2.gif" width="11" height="11" border="0"></a></td>
+    </tr>
+  </table>
+<?	}
 ?>
   <br><div align="center">
 

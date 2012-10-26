@@ -28,7 +28,7 @@ $this->img['hauptkarte'].'^
 '.$this->img['referenzkarte'].'^
 '.round($this->map->scale).'^';
 if($this->Lagebezeichung != ''){
-	$response.= '<b>Gemeinde:&nbsp;</b>'.htmlentities($this->Lagebezeichung['gemeindename']).' <b>Gemarkung:</b>&nbsp;'.htmlentities($this->Lagebezeichung['gemkgname']).' <b>Flur:</b>&nbsp;'.htmlentities($this->Lagebezeichung['flur']);
+	$response.= '<b>Gemeinde:&nbsp;</b>'.$this->Lagebezeichung['gemeindename'].' <b>Gemarkung:</b>&nbsp;'.$this->Lagebezeichung['gemkgname'].' <b>Flur:</b>&nbsp;'.$this->Lagebezeichung['flur'];
 }
 $response.= '^
 '.$this->map->extent->minx.'^
@@ -45,6 +45,6 @@ $response .='&nbsp;|&nbsp;<a href="javascript:resizemap2window();" >Gr&ouml;&szl
 ^startup()
 ^update_legend(\''.$this->layerhiddenstring.'\')';
 
-echo utf8_decode($response);
+echo $response;
 
 ?>

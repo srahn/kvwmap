@@ -14,10 +14,20 @@
 				if($this->formvars['preview_attribute'] == $this->qlayerset[$i]['attributes']['name'][$j]){
 					switch ($this->qlayerset[$i]['attributes']['form_element_type'][$j]){
 						case 'Auswahlfeld' : {
-							for($e = 0; $e < count($this->qlayerset[$i]['attributes']['enum_value'][$j]); $e++){
-								if($this->qlayerset[$i]['attributes']['enum_value'][$j][$e] == $this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]){
-									$output = $this->qlayerset[$i]['attributes']['enum_output'][$j][$e];
-									break;
+							if(is_array($this->qlayerset[$i]['attributes']['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
+								for($e = 0; $e < count($this->qlayerset[$i]['attributes']['enum_value'][$j][$k]); $e++){
+									if($this->qlayerset[$i]['attributes']['enum_value'][$j][$k][$e] == $this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]){
+										$output = $this->qlayerset[$i]['attributes']['enum_output'][$j][$k][$e];
+										break;
+									}
+								}
+							}
+							else{
+								for($e = 0; $e < count($this->qlayerset[$i]['attributes']['enum_value'][$j]); $e++){
+									if($this->qlayerset[$i]['attributes']['enum_value'][$j][$e] == $this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]){
+										$output = $this->qlayerset[$i]['attributes']['enum_output'][$j][$e];
+										break;
+									}
 								}
 							} 
 						}break;
