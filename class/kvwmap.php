@@ -339,11 +339,11 @@ class GUI extends GUI_core{
 		$spatial_processor = new spatial_processor($this->user->rolle, $this->database, $layerdb);
 		$single_geoms = $spatial_processor->split_multi_geometries($this->formvars['newpathwkt'], $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
 		
-		# Primärschlüssel weglassen
-		$sql = "SELECT column_name FROM information_schema.columns WHERE table_name = 'gasleitungen' AND table_schema = 'public' ";
-		$sql.= "AND column_name NOT IN (SELECT pg_attribute.attname FROM pg_index, pg_class, pg_attribute "; 
-		$sql.= "WHERE pg_class.oid = 'gasleitungen'::regclass AND	indrelid = pg_class.oid AND pg_attribute.attrelid = pg_class.oid AND "; 
-		$sql.= "pg_attribute.attnum = any(pg_index.indkey) AND indisprimary)";
+		# Attribute, die eine Sequenz haben weglassen
+		$sql = "SELECT column_name FROM information_schema.columns WHERE table_name = '".$this->formvars['layer_tablename']."' AND table_schema = '".$layerdb->schema."' ";
+		$sql.= "AND column_name NOT IN (SELECT pg_attribute.attname FROM pg_class a, pg_class b, pg_attribute "; 
+		$sql.= "WHERE a.relname = '".$this->formvars['layer_tablename']."' AND pg_attribute.attrelid = a.oid "; 
+		$sql.= "AND b.relkind = 'S' and b.relname = a.relname||'_'||pg_attribute.attname||'_seq')";
 		$ret=$layerdb->execSQL($sql,4, 0);
 		if(!$ret[0]){
 			while ($rs=pg_fetch_row($ret[1])){
