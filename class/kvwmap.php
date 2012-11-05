@@ -536,8 +536,9 @@ class GUI extends GUI_core{
     $req_start = strpos(strtolower($attributes['options'][0]), "<requires>");
     $req_end = strpos(strtolower($attributes['options'][0]), "</requires>")+11;
     $reqby_start = strpos(strtolower($attributes['options'][0]), "<required by>");
+    if($reqby_start > 0)$ende = $reqby_start-$req_end;else $ende = strlen($attributes['options'][0]); 
     if($req_start > 0){
-    	$sql_rest = substr($attributes['options'][0], $req_end, $reqby_start-$req_end);
+    	$sql_rest = substr($attributes['options'][0], $req_end, $ende);
       $sql = substr($attributes['options'][0], 0, $req_start)."'".$this->formvars['value']."' ".$sql_rest;    # requires-Tag aus SQL entfernen und um den übergebenen Wert erweitern
       $ret=$layerdb->execSQL($sql,4,0);
       if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }

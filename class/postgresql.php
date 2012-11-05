@@ -2880,6 +2880,7 @@ class pgdatabase extends pgdatabase_core {
 		$sql.=" AND gb.aktualitaetsnr NOT LIKE 'hist'";
     for ($i=1;$i<5;$i++) {
       if ($name[$i]!='%%') {
+      	$name[$i]=addslashes($name[$i]);
         if ($caseSensitive) {
           $sql.=" AND name".$i." LIKE '".$name[$i]."'";
         }
