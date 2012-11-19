@@ -183,7 +183,8 @@ class bodenrichtwertzone {
 		if($formvars['beitragszustand']){$sql.= ",beitragszustand";} 
 		if($formvars['nutzungsart']){$sql.= ",nutzungsart";} 
 		if($formvars['ergaenzende_nutzung']){$sql.= ",ergaenzende_nutzung";} 
-		if($formvars['bauweise']){$sql.= ",bauweise";} 
+		if($formvars['bauweise']){$sql.= ",bauweise";}
+  	if($formvars['ebauweise']){$sql.= ",ebauweise";} 
 		if($formvars['geschosszahl']){$sql.= ",geschosszahl";} 
 		if($formvars['grundflaechenzahl']){$sql.= ",grundflaechenzahl";} 
 		if($formvars['geschossflaechenzahl']){$sql.= ",geschossflaechenzahl";} 
@@ -192,6 +193,7 @@ class bodenrichtwertzone {
 		if($formvars['tiefe']){$sql.= ",tiefe";} 
 		if($formvars['breite']){$sql.= ",breite";} 
 		if($formvars['wegeerschliessung']){$sql.= ",wegeerschliessung";} 
+  	if($formvars['erschliessung']){$sql.= ",erschliessung";}
 		if($formvars['ackerzahl']){$sql.= ",ackerzahl";} 
 		if($formvars['gruenlandzahl']){$sql.= ",gruenlandzahl";} 
 		if($formvars['aufwuchs']){$sql.= ",aufwuchs";} 
@@ -215,6 +217,7 @@ class bodenrichtwertzone {
     if($formvars['nutzungsart']){$sql.= ",'".$formvars['nutzungsart']."' ";}
     if($formvars['ergaenzende_nutzung']){$sql.= ",'".$formvars['ergaenzende_nutzung']."' ";}
     if($formvars['bauweise']){$sql.= ",'".$formvars['bauweise']."' ";}
+  	if($formvars['ebauweise']){$sql.= ",'".$formvars['ebauweise']."' ";}
     if($formvars['geschosszahl']){$sql.= ",'".$formvars['geschosszahl']."' ";}
     if($formvars['grundflaechenzahl']){$sql.= ",".$formvars['grundflaechenzahl'];}
     if($formvars['geschossflaechenzahl']){$sql.= ",".$formvars['geschossflaechenzahl'];}
@@ -223,6 +226,7 @@ class bodenrichtwertzone {
     if($formvars['tiefe']){$sql.= ",".$formvars['tiefe'];}
     if($formvars['breite']){$sql.= ",".$formvars['breite'];}
     if($formvars['wegeerschliessung']){$sql.= ",'".$formvars['wegeerschliessung']."' ";}
+  	if($formvars['erschliessung']){$sql.= ",'".$formvars['erschliessung']."' ";}
     if($formvars['ackerzahl']){$sql.= ",".$formvars['ackerzahl'];}
     if($formvars['gruenlandzahl']){$sql.= ",".$formvars['gruenlandzahl'];}
     if($formvars['aufwuchs']){$sql.= ",'".$formvars['aufwuchs']."' ";}
@@ -265,6 +269,7 @@ class bodenrichtwertzone {
     if($formvars['nutzungsart']){$sql.= "nutzungsart = '".$formvars['nutzungsart']."', ";}
     if($formvars['ergaenzende_nutzung']){$sql.= "ergaenzende_nutzung = '".$formvars['ergaenzende_nutzung']."', ";}
     if($formvars['bauweise']){$sql.= "bauweise = '".$formvars['bauweise']."', ";}
+  	if($formvars['ebauweise']){$sql.= "ebauweise = '".$formvars['ebauweise']."', ";}
     if($formvars['geschosszahl']){$sql.= "geschosszahl = '".$formvars['geschosszahl']."', ";}
     if($formvars['grundflaechenzahl'] == '')$formvars['grundflaechenzahl'] = 'NULL';
     $sql.= "grundflaechenzahl = ".$formvars['grundflaechenzahl'].", ";
@@ -279,6 +284,7 @@ class bodenrichtwertzone {
     if($formvars['breite'] == '')$formvars['breite'] = 'NULL';
     $sql.= "breite = ".$formvars['breite'].", ";
     if($formvars['wegeerschliessung']){$sql.= "wegeerschliessung = '".$formvars['wegeerschliessung']."', ";}
+  	if($formvars['erschliessung']){$sql.= "erschliessung = '".$formvars['erschliessung']."', ";}
     if($formvars['ackerzahl'] == '')$formvars['ackerzahl'] = 'NULL';
     $sql.= "ackerzahl = ".$formvars['ackerzahl'].", ";
     if($formvars['gruenlandzahl'] == '')$formvars['gruenlandzahl'] = 'NULL';

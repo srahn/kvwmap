@@ -5268,6 +5268,10 @@ class GUI extends GUI_core{
     
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
     # Spaltenname und from-where abfragen
+    if(!$this->formvars['layer_id']){
+      $layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
+      $this->formvars['layer_id'] = $layerset[0]['Layer_ID'];
+    }
     if($this->formvars['layer_id']){
       $data = $this->mapDB->getData($this->formvars['layer_id']);
       $data_explosion = explode(' ', $data);
