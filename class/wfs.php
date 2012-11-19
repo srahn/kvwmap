@@ -107,10 +107,52 @@ class wfs{
     $this->objects = $objects;
 	}
 	
+/*	function xml2array($xml){
+    $opened = array();
+    $opened[1] = 0;
+    $xml_parser = xml_parser_create();
+    xml_parser_set_option($xml_parser, XML_OPTION_CASE_FOLDING, 0);
+    xml_parser_set_option($xml_parser, XML_OPTION_SKIP_WHITE, 1);
+    xml_parse_into_struct($xml_parser, $xml, $xmlarray);
+    xml_parser_free($xml_parser);
+    $array = array_shift($xmlarray);
+    unset($array["level"]);
+    unset($array["type"]);
+    $arrsize = sizeof($xmlarray);
+    for($j=0;$j<$arrsize;$j++){
+        $val = $xmlarray[$j];
+        switch($val["type"]){
+            case "open":
+                $opened[$val["level"]]=0;
+            case "complete":
+                $index = "";
+                for($i = 1; $i < ($val["level"]); $i++)
+                    $index .= "[" . $opened[$i] . "]";
+                $path = explode('][', substr($index, 1, -1));
+                $value = &$array;
+                foreach($path as $segment)
+                    $value = &$value[$segment];
+                $value = $val;
+                unset($value["level"]);
+                unset($value["type"]);
+                if($val["type"] == "complete")
+                    $opened[$val["level"]-1]++;
+            break;
+            case "close":
+                $opened[$val["level"]-1]++;
+                unset($opened[$val["level"]]);
+            break;
+        }
+    }
+    return $array;
+	} 
+*/
+		
 	function extract_features(){
 		# liefert die Datensätze einer getfeature-Abfrage (zuvor muss get_feature_request() und parse_gml() ausgeführt werden)
 		for($i=0; $i < count($this->objects); $i++){		# durchläuft alle Objekte
 			for($j = 0; $j < count($this->objects[$i]); $j++){		# durchläuft alle Tags im Objekt
+				#echo $this->objects[$i][$j]["tag"].': '.$this->objects[$i][$j]["value"].'<br>';
 				if($this->objects[$i][$j]["type"] == 'complete' AND $this->objects[$i][$j]["tag"] != 'gml:coordinates'){			# alle kompletten Tags und keine Geometrie-Tags
 		  		$features[$i]['tag'][] = $this->objects[$i][$j]["tag"];
 		  		$features[$i]['value'][] = $this->objects[$i][$j]["value"];

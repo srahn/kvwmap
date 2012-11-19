@@ -10764,7 +10764,7 @@ class GUI extends GUI_core{
             $bbox=$searchbox_minx.','.$searchbox_miny.','.$searchbox_maxx.','.$searchbox_maxy;
             $wfs = new wfs($url, $version, $typename);
             # Attributnamen ermitteln
-            $wfs->describe_featuretype_request();
+            $wfs->describe_featuretype_request();            
             $wfs->parse_gml('sequence');
             $layerset[$i]['attributes'] = $wfs->get_attributes();
             # Abfrage absetzen
@@ -12135,7 +12135,7 @@ class GUI extends GUI_core{
 
 
 	function layer_error_handling(){
-		return '<br><br>Einer der Layer ist fehlerhaft. Klicken Sie <a href="index.php?go=reset_layers">auf Neu starten</a> um alle Layer auszuschalten.';
+		return '<br><br>Eines der Themen ist fehlerhaft. Klicken Sie <a href="index.php?go=reset_layers">auf Neu starten</a> um alle Themen auszuschalten.';
 	}
 
   # Zeichnet die Kartenelemente Hauptkarte, Legende, Maßstab und Referenzkarte
@@ -13392,6 +13392,7 @@ class db_mapObj extends db_mapObj_core{
 	}
 
   function updateLayer($formvars){
+  	$formvars['pfad'] = str_replace(array("\r\n", "\n"), '', $formvars['pfad']);
     $formvars['pfad'] = str_replace ( "'", "''", $formvars['pfad']);
     $formvars['Data'] = str_replace ( "'", "''", $formvars['Data']);
 

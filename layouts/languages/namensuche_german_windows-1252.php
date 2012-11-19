@@ -2,7 +2,7 @@
  $strTitle="Eigentümersuche";
  $strName1="Name, Vorname/Firma";
  $strName2="Geburtsname/geboren am/Firmenzusatz";
- $strName3="Strasse Hausnummer";
+ $strName3="Straße Hausnummer";
  $strName4="PLZ Ort";
  $strGbbez="Grundbuchbezirk";
  $strGbbl="Grundbuchblatt";

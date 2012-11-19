@@ -8,5 +8,5 @@ $strBackDatasets="zurück";
 $strFromDatasets="von";
 $strForwardDatasets="weiter";
 $strbackToSearch="zurück zur Suche";
-$strNoLayer="Es wurde kein Layer zur Sachdatenabfrage ausgewählt!";
+$strNoLayer="Es wurde kein Thema zur Sachdatenabfrage ausgewählt!";
 ?>

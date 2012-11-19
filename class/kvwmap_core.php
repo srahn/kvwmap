@@ -1130,7 +1130,9 @@ class GUI_core {
     if ($saveMapDestination=='') {
       $saveMapDestination=SAVEMAPFILE;
     }
-    $this->map->save($saveMapDestination);
+    if ($saveMapDestination != '') {
+      $this->map->save($saveMapDestination);
+    }  
     $this->user->rolle->saveSettings($this->map->extent);
     # 2006-02-16 pk
     $this->user->rolle->readSettings();

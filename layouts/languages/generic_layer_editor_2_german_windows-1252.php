@@ -13,7 +13,7 @@
  $strCreateChart="als Diagramm ausgeben";
  $strSelectAllShown="alle angezeigten auswählen";
  $strSelectThisDataset="Datensatz auswählen";
- $strNoMatch="Zu diesem Layer wurden keine Objekte gefunden!";
+ $strNoMatch="Zu diesem Thema wurden keine Objekte gefunden!";
  $strDeleteThisDataset="Datensatz löschen";
  $strCSVExportThis="Datensatz in CSV exportieren";
  $strUKOExportThis="Geometrie ins UKO-Format exportieren";

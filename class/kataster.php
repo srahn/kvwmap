@@ -2008,16 +2008,16 @@ class eigentuemer {
     $sql ="SELECT neu_name3, neu_name4, user_id, datum FROM alb_g_namen_temp";
     $sql.=" WHERE 1=1 ";
     if($name1 != ''){
-    	$sql.= "AND name1 = '".$name1."' ";
+    	$sql.= "AND name1 = '".addslashes($name1)."' ";
     }
     if($name2 != ''){
-    	$sql.= "AND name2 = '".$name2."' ";
+    	$sql.= "AND name2 = '".addslashes($name2)."' ";
     }
     if($name3 != ''){
-    	$sql.= "AND name3 = '".$name3."' ";
+    	$sql.= "AND name3 = '".addslashes($name3)."' ";
     }
     if($name4 != ''){
-    	$sql.= "AND name4 = '".$name4."' ";
+    	$sql.= "AND name4 = '".addslashes($name4)."' ";
     }
     #echo $sql;
     $query=pg_query($sql);

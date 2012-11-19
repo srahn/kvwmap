@@ -2,7 +2,7 @@
  $strTitle="Adressensuche";
  $strGem="Gemeinde";
  $strGemkg="Gemarkung/Ortsteil";
- $strStreet="Strasse";
+ $strStreet="Straße";
  $strHnr="Hausnr.";
  $strSelected="ausgewählte";
  $strExist="vorhandene";
