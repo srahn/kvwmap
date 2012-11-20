@@ -5288,8 +5288,10 @@ class GUI extends GUI_core{
       $this->user->rolle->saveDrawmode($this->formvars['always_draw']);
     }
     $this->saveMap('');
-    $currenttime=date('Y-m-d H:i:s',time());
-    $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
+  	if($this->formvars['CMD'] != 'previous' AND $this->formvars['CMD'] != 'next'){
+    	$currenttime=date('Y-m-d H:i:s',time());
+    	$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
+    }
     $this->drawMap();
     $this->output();
   }
