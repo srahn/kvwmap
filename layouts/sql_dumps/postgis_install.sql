@@ -620,27 +620,6 @@ CREATE TABLE md_keywords2metadata
 ) 
 WITHOUT OIDS;
 
---####################################
---# Tabellen für die Bodenrichtwerte #
---####################################
-
-CREATE TABLE bw_bodenrichtwertzonen (
-  gemeinde_id int8 NOT NULL DEFAULT 0,
-  zonennr int8 NOT NULL DEFAULT 0,
-  standort varchar(255),
-  richtwertdefinition varchar(50),
-  bodenwert float4,
-  erschliessungsart varchar(50),
-  sanierungsgebiete varchar(50),
-  sichtbarkeit bool NOT NULL DEFAULT true,
-  datum date
-)
-WITH OIDS;
-
-SELECT AddGeometryColumn('public', 'bw_bodenrichtwertzonen','the_geom',2398,'POLYGON', 2);
-CREATE INDEX bw_bodenrichtwertzonen_the_geom_gist ON bw_bodenrichtwertzonen USING GIST (the_geom GIST_GEOMETRY_OPS);
-SELECT AddGeometryColumn('public', 'bw_bodenrichtwertzonen','textposition',2398,'POINT', 2);
-CREATE INDEX bw_bodenrichtwertzonen_textposition_gist ON bw_bodenrichtwertzonen USING GIST (textposition GIST_GEOMETRY_OPS);
 
 --####################################
 --# Tabellen für Ver- und Entsorgung #
@@ -2214,42 +2193,42 @@ ALTER TABLE ONLY alb_x_v_strassen
  
  -- neue Tabelle bw_zonen zur Speicherung der BRWs
  
- CREATE TABLE bw_zonen (
-   old_oid int4,				-- aus der alten Tabelle (nur für Verknüpfung zwischen alt und neu) 
-   zonennr int4 NOT NULL DEFAULT 0,	-- aus der alten Tabelle 
-   standort varchar(255),		-- aus der alten Tabelle (muss überarbeitet werden)
-   richtwertdefinition varchar(50),	-- aus der alten Tabelle (muss überarbeitet werden)
-   
-   gemeinde int4,
-   gemarkung int4,
-   ortsteilname character varying(100),
-   postleitzahl int4,
-   zonentyp character varying(256),
-   gutachterausschuss int4,
-   bodenrichtwertnummer serial,
-   oertliche_bezeichnung character varying(256),
-   bodenrichtwert float4,
-   stichtag date,
-   basiskarte character varying(6),
-   entwicklungszustand character varying(1),
-   beitragszustand character varying(22),
-   nutzungsart character varying(7),
-   ergaenzende_nutzung character varying(30), 
-   bauweise character varying(3),
-   geschosszahl character varying(9),
-   grundflaechenzahl float4,
-   geschossflaechenzahl float4,
-   baumassenzahl float4,
-   flaeche float4,
-   tiefe int4,
-   breite int4,
-   wegeerschliessung character varying(4),
-   ackerzahl int4,
-   gruenlandzahl int4,
-   aufwuchs character varying(4),
-   verfahrensgrund character varying(3),
-   verfahrensgrund_zusatz character varying(1),
-   bemerkungen character varying(256)
+ CREATE TABLE bw_zonen (   
+     gemeinde integer,
+     gemarkung integer,
+     ortsteilname character varying(60),
+     postleitzahl integer,
+     zonentyp character varying(256),
+     gutachterausschuss integer,
+     bodenrichtwertnummer serial,
+     oertliche_bezeichnung character varying(256),
+     bodenrichtwert real,
+     stichtag date,
+     basiskarte character varying(8),
+     entwicklungszustand character varying(2),
+     beitragszustand character varying(1),
+     nutzungsart character varying(7),
+     ergaenzende_nutzung character varying(30),
+     bauweise character varying(2),
+     geschosszahl character varying(9),
+     grundflaechenzahl real,
+     geschossflaechenzahl real,
+     baumassenzahl real,
+     flaeche character varying(12),
+     tiefe character varying(8),
+     breite character varying(8),
+     wegeerschliessung character varying(1),
+     ackerzahl character varying(7),
+     gruenlandzahl character varying(7),
+     aufwuchs character varying(2),
+     verfahrensgrund character varying(4),
+     verfahrensgrund_zusatz character varying(2),
+     bemerkungen character varying(256),
+     textposition geometry,
+     the_geom geometry,
+     erschliessungsverhaeltnisse integer,
+     bedarfswert real,
+     bodenart character varying(6)
  )
  WITH OIDS;
  

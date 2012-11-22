@@ -221,9 +221,18 @@ if ($goNotExecutedInIncludeCases) {
 			$GUI->loadMap('DataBase');
 			$GUI->zoom2coord();
 			$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-		$GUI->drawMap();
-		$GUI->saveMap('');
-		$GUI->output();
+			$GUI->drawMap();
+			$GUI->saveMap('');
+			$GUI->output();
+		} break;
+		
+		case 'zoom2wkt' : {
+			$GUI->loadMap('DataBase');
+			$GUI->zoom2wkt();
+			$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+			$GUI->drawMap();
+			$GUI->saveMap('');
+			$GUI->output();
 		} break;
 
 		case 'getSVG_vertices' : {

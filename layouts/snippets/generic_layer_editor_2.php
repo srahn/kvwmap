@@ -432,6 +432,11 @@ function set_changed_flag(flag){
 ?>
 							<br><br>&nbsp;&nbsp;
 <?					}
+						elseif($layer['shape'][$k]['geom']){		# bei WFS-Layern
+?>
+							&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="index.php?go=zoom2wkt&wkt=<? echo $layer['shape'][$k]['geom']; ?>&epsg=<? echo $layer['epsg_code']; ?>"><? echo $strMapZoom; ?></a>&nbsp;&nbsp;&nbsp;
+<?															
+						}
 								if($privileg == 1 AND !$lock[$k]) {
 									if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY'){
 	?>

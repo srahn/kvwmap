@@ -616,6 +616,19 @@ class pgdatabase extends pgdatabase_core {
     return $ret;
   }
 
+	function getWKTBBox($wkt, $fromsrid, $tosrid) {
+    $sql ="SELECT XMIN(geom) AS minx, YMIN(geom) AS miny, XMAX(geom) AS maxx, YMAX(geom) AS maxy ";
+    $sql.=" FROM (select EXTENT(transform(geomfromtext('".$wkt."', ".$fromsrid."), ".$tosrid.")) as geom) as foo";
+    $ret=$this->execSQL($sql,4, 0);
+    if($ret[0] == 0){
+      $rect= ms_newRectObj();
+      $rs=pg_fetch_array($ret[1]);
+      $rect->minx=$rs['minx']; $rect->miny=$rs['miny'];
+      $rect->maxx=$rs['maxx']; $rect->maxy=$rs['maxy'];
+      return $rect;
+    }
+  }
+  
   function read_epsg_codes(){
     global $supportedSRIDs;
     $sql ="SELECT spatial_ref_sys.srid, srtext, alias FROM spatial_ref_sys ";

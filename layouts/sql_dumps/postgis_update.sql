@@ -1067,23 +1067,35 @@ ALTER TABLE public.bw_zonen ALTER COLUMN beitragszustand TYPE character varying(
 ALTER TABLE public.bw_zonen ALTER COLUMN tiefe TYPE varchar(8);
 ALTER TABLE public.bw_zonen ALTER COLUMN flaeche TYPE varchar(12);
 ALTER TABLE public.bw_zonen ALTER COLUMN breite TYPE varchar(8);
-ALTER TABLE public.bw_zonen ADD COLUMN ergaenzende_bauweise character varying(2);
-UPDATE public.bw_zonen SET ergaenzende_bauweise = 'dh' WHERE bauweise = 'DH';
-UPDATE public.bw_zonen SET ergaenzende_bauweise = 'eh' WHERE bauweise = 'EH';
-UPDATE public.bw_zonen SET ergaenzende_bauweise = 're' WHERE bauweise = 'REH';
-UPDATE public.bw_zonen SET ergaenzende_bauweise = 'rh' WHERE bauweise = 'RH';
-UPDATE public.bw_zonen SET ergaenzende_bauweise = 'rm' WHERE bauweise = 'RMH';
-UPDATE public.bw_zonen SET bauweise = NULL WHERE bauweise IN ('DH', 'EH', 'REH', 'RH', 'RMH');
+UPDATE public.bw_zonen SET bauweise = 'dh' WHERE bauweise = 'DH';
+UPDATE public.bw_zonen SET bauweise = 'eh' WHERE bauweise = 'EH';
+UPDATE public.bw_zonen SET bauweise = 're' WHERE bauweise = 'REH';
+UPDATE public.bw_zonen SET bauweise = 'rh' WHERE bauweise = 'RH';
+UPDATE public.bw_zonen SET bauweise = 'rm' WHERE bauweise = 'RMH';
+ALTER TABLE public.bw_zonen ALTER COLUMN bauweise TYPE character varying(2);
 ALTER TABLE public.bw_zonen ADD COLUMN erschliessungsverhaeltnisse integer;
 ALTER TABLE public.bw_zonen ALTER COLUMN verfahrensgrund TYPE character varying(4);
 UPDATE public.bw_zonen SET verfahrensgrund = 'Entw' WHERE verfahrensgrund = 'ENT';
 UPDATE public.bw_zonen SET verfahrensgrund = 'San' WHERE verfahrensgrund = 'SAN';
-UPDATE public.bw_zonen SET aufwuchs = 'oA' WHERE aufwuchs = 'ohne';
+ALTER TABLE public.bw_zonen ALTER COLUMN verfahrensgrund_zusatz TYPE character varying(2);
+UPDATE public.bw_zonen SET verfahrensgrund_zusatz = 'SU' WHERE verfahrensgrund_zusatz = 'A' AND verfahrensgrund = 'San';
+UPDATE public.bw_zonen SET verfahrensgrund_zusatz = 'EU' WHERE verfahrensgrund_zusatz = 'A' AND verfahrensgrund = 'Entw';
+UPDATE public.bw_zonen SET verfahrensgrund_zusatz = 'SB' WHERE verfahrensgrund_zusatz = 'E' AND verfahrensgrund = 'San';
+UPDATE public.bw_zonen SET verfahrensgrund_zusatz = 'EB' WHERE verfahrensgrund_zusatz = 'E' AND verfahrensgrund = 'Entw';
+UPDATE public.bw_zonen SET aufwuchs = NULL WHERE aufwuchs = 'ohne';
 UPDATE public.bw_zonen SET aufwuchs = 'mA' WHERE aufwuchs = 'mit';
 ALTER TABLE public.bw_zonen ALTER COLUMN aufwuchs TYPE character varying(2);
+ALTER TABLE public.bw_zonen ADD COLUMN bedarfswert real;
+ALTER TABLE public.bw_zonen ADD COLUMN bodenart character varying(6);
+ALTER TABLE public.bw_zonen ALTER COLUMN ackerzahl TYPE varchar(7);
+ALTER TABLE public.bw_zonen ALTER COLUMN gruenlandzahl TYPE varchar(7);
+UPDATE public.bw_zonen SET wegeerschliessung = '0' WHERE wegeerschliessung = 'ohne';
+UPDATE public.bw_zonen SET wegeerschliessung = '1' WHERE wegeerschliessung = 'mit';
+ALTER TABLE public.bw_zonen ALTER COLUMN wegeerschliessung TYPE character varying(1);
+
 
 CREATE OR REPLACE VIEW public.bw_boris_view AS 
- SELECT bw.oid, 13 AS landesschluessel, bw.gemeinde, g.gemeindename, gm.gemkgname, bw.ortsteilname, bw.postleitzahl, bw.zonentyp, bw.gutachterausschuss, bw.bodenrichtwertnummer, bw.oertliche_bezeichnung, bw.bodenrichtwert, round(bw.bodenrichtwert::double precision) AS bw_darstellung, bw.stichtag, 25833 AS bezug, x(bw.textposition) AS rechtswert, y(bw.textposition) AS hochwert, bw.basiskarte, bw.entwicklungszustand, bw.beitragszustand, bw.nutzungsart, bw.ergaenzende_nutzung, bw.bauweise, bw.ergaenzende_bauweise, bw.geschosszahl, bw.grundflaechenzahl, bw.geschossflaechenzahl, bw.baumassenzahl, bw.flaeche, bw.tiefe, bw.breite, bw.wegeerschliessung, bw.erschliessungsverhaeltnisse, bw.ackerzahl, bw.gruenlandzahl, bw.aufwuchs, bw.verfahrensgrund, bw.verfahrensgrund_zusatz, bw.bemerkungen, bw.textposition, bw.the_geom
+ SELECT bw.oid, 13 AS landesschluessel, bw.gemeinde, g.gemeindename, gm.gemkgname, bw.ortsteilname, bw.postleitzahl, bw.zonentyp, bw.gutachterausschuss, bw.bodenrichtwertnummer, bw.oertliche_bezeichnung, bw.bodenrichtwert, round(bw.bodenrichtwert::double precision) AS bw_darstellung, bw.stichtag, bw.bedarfswert, 25833 AS bezug, x(bw.textposition) AS rechtswert, y(bw.textposition) AS hochwert, bw.basiskarte, bw.entwicklungszustand, bw.beitragszustand, bw.nutzungsart, bw.ergaenzende_nutzung, bw.bauweise, bw.geschosszahl, bw.grundflaechenzahl, bw.geschossflaechenzahl, bw.baumassenzahl, bw.flaeche, bw.tiefe, bw.breite, bw.wegeerschliessung, bw.erschliessungsverhaeltnisse, bw.ackerzahl, bw.gruenlandzahl, bw.aufwuchs, bw.verfahrensgrund, bw.verfahrensgrund_zusatz, bw.bemerkungen, 0 as umdart, 'http://pfad/zur/umrechungstabelle/tabelle'||stichtag||'.pdf', bw.textposition, bw.the_geom
    FROM bw_zonen bw
    LEFT JOIN alb_v_gemeinden g ON bw.gemeinde = g.gemeinde
    LEFT JOIN alb_v_gemarkungen gm ON bw.gemarkung = gm.gemkgschl;

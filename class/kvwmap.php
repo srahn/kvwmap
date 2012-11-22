@@ -8513,6 +8513,11 @@ class GUI extends GUI_core{
   	$this->zoomMap(1);
   	$this->scaleMap(5000);
   }
+  
+	function zoom2wkt(){
+    $rect = $this->pgdatabase->getWKTBBox($this->formvars['wkt'], $this->formvars['epsg'], $this->user->rolle->epsg_code);
+    $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
+  }
 
 # 2006-03-20 pk
   function zoomToStoredMapExtent($storetime){
@@ -10782,6 +10787,7 @@ class GUI extends GUI_core{
                 $layerset[$i]['shape'][$j][$layerset[$i]['attributes']['name'][$k]] = $features[$j]['value'][$k];
                 $layerset[$i]['attributes']['privileg'][$k] = 0;
               }
+              $layerset[$i]['shape'][$j]['geom'] = $features[$j]['geom'];
             }
             $this->qlayerset[]=$layerset[$i];
           } break;

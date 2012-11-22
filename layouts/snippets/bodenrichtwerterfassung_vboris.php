@@ -11,11 +11,11 @@ function send(){
 	if(document.GUI.stichtag.value == ''){alert('Bitte geben Sie einen Stichtag an.');exit();}
 	if(document.GUI.gemeinde.value == ''){alert('Bitte geben Sie eine Gemeinde an.');exit();}
 	if(document.GUI.gemarkung.value == ''){alert('Bitte geben Sie eine Gemarkung an.');exit();}
-	if(document.GUI.ortsteilname.value == ''){alert('Bitte geben Sie einen Ortsteilnamen an.');exit();}
-	if(document.GUI.postleitzahl.value == ''){alert('Bitte geben Sie eine Postleitzahl an.');exit();}
 	if(document.GUI.zonentyp.value == ''){alert('Bitte geben Sie einen Zonentyp an.');exit();}
+	if(document.GUI.zonentyp.value == 'Grünland' && document.GUI.gruenlandzahl.value == ''){alert('Bitte geben Sie eine Grünlandzahl an.');exit();}
+	if(document.GUI.zonentyp.value == 'Ackerland' && document.GUI.ackerzahl.value == ''){alert('Bitte geben Sie eine Ackerzahl an.');exit();}
 	if(document.GUI.entwicklungszustand.value == ''){alert('Bitte geben Sie einen Entwicklungszustand an.');exit();}
-	if(document.GUI.zonentyp.value != 'Ackerland' && document.GUI.zonentyp.value != 'Grünland' && document.GUI.beitragszustand.value == ''){alert('Bitte geben Sie einen Beitragszustand an.');exit();}
+	if(document.GUI.entwicklungszustand.value == 'B' && document.GUI.beitragszustand.value == ''){alert('Bitte geben Sie einen Beitragszustand an.');exit();}
 	if(document.GUI.nutzungsart.value == ''){alert('Bitte geben Sie eine Nutzungsart an.');exit();}
 	if(document.GUI.newpathwkt.value == ''){
 		if(document.GUI.newpath.value == ''){
@@ -34,10 +34,23 @@ function send(){
 }
 
 function update_verfahren(){
+	document.GUI.verfahrensgrund_zusatz.options[1] = null;
+	document.GUI.verfahrensgrund_zusatz.options[1] = null;
+	document.GUI.verfahrensgrund_zusatz.options[1] = null;
+	document.GUI.verfahrensgrund_zusatz.options[1] = null;
+	if(document.GUI.verfahrensgrund.value == 'Entw'){
+		document.GUI.verfahrensgrund_zusatz.options[document.GUI.verfahrensgrund_zusatz.length] = new Option('EU', 'EU');
+		document.GUI.verfahrensgrund_zusatz.options[document.GUI.verfahrensgrund_zusatz.length] = new Option('EB', 'EB');
+	}
 	if(document.GUI.verfahrensgrund.value == 'San'){
-		if(document.GUI.verfahrensgrund_zusatz.value == ''){
-			document.GUI.verfahrensgrund_zusatz.value = 'A';
-		}
+		document.GUI.verfahrensgrund_zusatz.options[document.GUI.verfahrensgrund_zusatz.length] = new Option('SU', 'SU');
+		document.GUI.verfahrensgrund_zusatz.options[document.GUI.verfahrensgrund_zusatz.length] = new Option('SB', 'SB');		
+	}
+	if(document.GUI.verfahrensgrund.value == 'StUb'){
+		document.GUI.verfahrensgrund_zusatz.options[document.GUI.verfahrensgrund_zusatz.length] = new Option('EU', 'EU');
+		document.GUI.verfahrensgrund_zusatz.options[document.GUI.verfahrensgrund_zusatz.length] = new Option('EB', 'EB');
+		document.GUI.verfahrensgrund_zusatz.options[document.GUI.verfahrensgrund_zusatz.length] = new Option('SU', 'SU');
+		document.GUI.verfahrensgrund_zusatz.options[document.GUI.verfahrensgrund_zusatz.length] = new Option('SB', 'SB');
 	}
 }
 
@@ -214,6 +227,20 @@ function update_require_attribute(attributes, layer_id, value){
 									  		<table width="100%" border="0" style="border:1px steelblue solid" cellpadding="3" cellspacing="0">
 									  			<tr> 
 												    <td>
+												    	Bodenart:
+												    </td>
+												    <td colspan="2" align="right"> 
+												      <?php 
+												        $FormatWerte = array('','L','lS','LT','Mo','S','SL','Sl','sL','T');
+												        $FormatBez = array('-- Bitte wählen --','L','lS','LT','Mo','S','SL','Sl','sL','T'); 
+												        $bodenart = new FormObject('bodenart','select',$FormatWerte,array($this->formvars['bodenart']),$FormatBez,1,$maxlenght,$multiple,146);
+												        $bodenart->OutputHTML();
+												        echo $bodenart->html;
+												      ?>
+												    </td>
+												  </tr>
+									  			<tr> 
+												    <td>
 												    	Ackerzahl:
 												    </td>
 												    <td colspan="2" align="right"> 
@@ -234,8 +261,8 @@ function update_require_attribute(attributes, layer_id, value){
 												    </td>
 												    <td colspan="2" align="right"> 
 												      <?php 
-												        $FormatWerte = array('','oA','mA');
-												        $FormatBez = array('-- Bitte wählen --','ohne','mit'); 
+												        $FormatWerte = array('', 'mA');
+												        $FormatBez = array('-- Bitte wählen --','mit'); 
 												        $aufwuchs = new FormObject('aufwuchs','select',$FormatWerte,array($this->formvars['aufwuchs']),$FormatBez,1,$maxlenght,$multiple,146);
 												        $aufwuchs->OutputHTML();
 												        echo $aufwuchs->html;
@@ -256,25 +283,11 @@ function update_require_attribute(attributes, layer_id, value){
 									    </td>
 									    <td colspan="2"> 
 									      <?php 
-									        $FormatWerte = array('', 'o', 'g', 'a');
-									        $FormatBez = array('-- Bitte wählen --', 'offen', 'geschlossen', 'abweichend'); 
+									        $FormatWerte = array('', 'o', 'g', 'a','eh', 'ed', 'dh', 'rh', 'rm');
+									        $FormatBez = array('-- Bitte wählen --', 'offen', 'geschlossen', 'abweichend','Einzelhaus', 'Einzel- und Doppelhaus', 'Doppelhaushälfte', 'Reihenhaus', 'Reihenmittelhaus'); 
 									        $bauweise = new FormObject('bauweise','select',$FormatWerte,array($this->formvars['bauweise']),$FormatBez,1,$maxlenght,$multiple,146);
 									        $bauweise->OutputHTML();
 									        echo $bauweise->html;
-									      ?>
-									    </td>
-									  </tr>
-									  <tr> 
-									    <td>
-									    	Ergänz. Bauweise:
-									    </td>
-									    <td colspan="2"> 
-									      <?php 
-									        $FormatWerte = array('', 'eh', 'ed', 'dh', 'rh', 'rm');
-									        $FormatBez = array('-- Bitte wählen --', 'Einzelhaus', 'Einzel- und Doppelhaus', 'Doppelhaushälfte', 'Reihenhaus', 'Reihenmittelhaus'); 
-									        $ebauweise = new FormObject('ebauweise','select',$FormatWerte,array($this->formvars['ebauweise']),$FormatBez,1,$maxlenght,$multiple,146);
-									        $ebauweise->OutputHTML();
-									        echo $ebauweise->html;
 									      ?>
 									    </td>
 									  </tr>
@@ -353,10 +366,9 @@ function update_require_attribute(attributes, layer_id, value){
 									        $verfahren->OutputHTML();
 									        echo $verfahren->html;
 									       
-									        $FormatWerte = array('','A','E');
-									        $FormatBez = array('kein','A','E'); 
+									        $FormatWerte = array('','EB','EU','SB','SU');
+									        $FormatBez = array('kein','EB','EU','SB','SU'); 
 									        $verfahren = new FormObject('verfahrensgrund_zusatz','select',$FormatWerte,array($this->formvars['verfahrensgrund_zusatz']),$FormatBez,1,$maxlenght,$multiple,NULL);
-									        $verfahren->addJavaScript('onchange', "update_verfahren();");
 									        $verfahren->OutputHTML();
 									        echo $verfahren->html;
 									      ?>  
@@ -387,14 +399,7 @@ function update_require_attribute(attributes, layer_id, value){
 						  <tr> 
 						    <td colspan="4">
 						    	Gutachterausschuss:
-						    	<?php 
-						    		global $gutachterausschuesse;
-						        $FormatWerte = array_merge(array(''), $gutachterausschuesse);
-						        $FormatBez = array_merge(array('--- Bitte wählen ---'), $gutachterausschuesse);
-						        $gutachterausschuss = new FormObject('gutachterausschuss','select',$FormatWerte,array($this->formvars['gutachterausschuss']),$FormatBez,1,$maxlenght,$multiple,120);
-						        $gutachterausschuss->OutputHTML();
-						        echo $gutachterausschuss->html;
-						      ?>
+						      <input name="gutachterausschuss" style="border: 0px;background-color: transparent" type="text" id="gutachterausschuss" readonly="true" value="<?php echo GUTACHTERAUSSCHUSS; ?>" size="15" maxlength="15">
 						    </td>
 						  </tr>	 
 						  <tr> 
@@ -407,7 +412,7 @@ function update_require_attribute(attributes, layer_id, value){
 						  </tr>
 						  <tr> 
 						    <td colspan="2">
-						    	Bodenrichtwert: [&euro;/m&sup2;]
+						    	Bodenrichtwert [&euro;/m&sup2;]:
 						    </td>
 						    <td> 
 						      <input name="bodenrichtwert" type="text" id="bodenrichtwert" value="<?php echo $this->formvars['bodenrichtwert']; ?>" size="5" maxlength="5">
@@ -422,6 +427,14 @@ function update_require_attribute(attributes, layer_id, value){
 						    </td>
 						    <td>
 						    	<input name="stichtag" type="text" value="<?php echo array_pop(explode('.', $this->formvars['stichtag'])); ?>" size="5" maxlength="5">
+						    </td>
+						  </tr>
+						  <tr> 
+						    <td colspan="2">
+						    	Bedarfswert [&euro;/m&sup2;]:
+						    </td>
+						    <td> 
+						      <input name="bedarfswert" type="text" id="bedarfswert" value="<?php echo $this->formvars['bedarfswert']; ?>" size="5" maxlength="5">
 						    </td>
 						  </tr>
 						  <tr> 
@@ -478,7 +491,7 @@ function update_require_attribute(attributes, layer_id, value){
 						  </tr>
 						  <tr>
 						  	<td colspan="4">
-						  		Örtliche Bezeichnung:<br>
+						  		Bodenrichtwert Zonenname:<br>
 						  		<textarea cols="30" rows="2" name="oertliche_bezeichnung"><? echo $this->formvars['oertliche_bezeichnung']; ?></textarea>
 						  	</td>
 						  </tr>
