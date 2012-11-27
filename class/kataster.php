@@ -976,6 +976,18 @@ class adresse {
       return 0;
     }
   }
+  
+	function getStrNamefromID($GemID,$StrID) {
+    if(ALKIS)$ret=$this->database->getStrNameByIDALKIS($GemID,$StrID);
+    else $ret=$this->database->getStrNameByID($GemID,$StrID);
+    if ($ret[0]==0 AND count($ret[1])>0) {
+      # liefert die erste gefundene Strasse zurück
+      return $ret[1];
+    }
+    else {
+      return 0;
+    }
+  }
 }
 
 #-----------------------------------------------------------------------------------------------------------------

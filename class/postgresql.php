@@ -1895,6 +1895,39 @@ class pgdatabase extends pgdatabase_core {
     }
     return $ret;
   }
+  
+	function getStrNameByID($GemID,$StrID) {
+    $sql ="SELECT DISTINCT strassenname FROM alb_v_strassen WHERE gemeinde= ".$GemID;
+    $sql.=" AND strasse = '".$StrID."'";
+    $queryret=$this->execSQL($sql, 4, 0);
+    if ($queryret[0]) {
+      $ret[0]=1;
+      $ret[1]=$queryret[1];
+    }
+    else {
+      $ret[0]=0;
+      $rs=pg_fetch_array($queryret[1]);
+      $StrID=$rs[0];
+      $ret[1]=$StrID;
+    }
+    return $ret;
+  }
+  
+	function getStrNameByIDALKIS($GemID,$StrID) {
+    $sql ="SELECT bezeichnung FROM alkis.ax_lagebezeichnungkatalogeintrag WHERE schluesselgesamt = '".$GemID.str_pad($StrID, 5, '0', STR_PAD_LEFT)."'";
+    $queryret=$this->execSQL($sql, 4, 0);
+    if ($queryret[0]) {
+      $ret[0]=1;
+      $ret[1]=$queryret[1];
+    }
+    else {
+      $ret[0]=0;
+      $rs=pg_fetch_array($queryret[1]);
+      $StrID=$rs[0];
+      $ret[1]=$StrID;
+    }
+    return $ret;
+  }
 
   function getHausNummern($FlurstKennz,$Strasse) {
     # Abfragen der Hausnummern zu den jeweiligen Strassen
@@ -4375,7 +4408,7 @@ class pgdatabase extends pgdatabase_core {
     return $ret;
   }
   
-  function getMERfromGebaeudeALKIS($Hausnr, $epsgcode) {
+  function getMERfromGebaeudeALKIS($Gemeinde,$Strasse,$Hausnr, $epsgcode) {
     $this->debug->write("<br>postgres.php->database->getMERfromGebaeude, Abfrage des Maximalen umschlieﬂenden Rechtecks um die Gebaeude",4);
     $sql ="SELECT MIN(XMIN(ENVELOPE(TRANSFORM(wkb_geometry, ".$epsgcode.")))) AS minx,MAX(XMAX(ENVELOPE(TRANSFORM(wkb_geometry, ".$epsgcode.")))) AS maxx";
     $sql.=",MIN(YMIN(ENVELOPE(TRANSFORM(wkb_geometry, ".$epsgcode.")))) AS miny,MAX(YMAX(ENVELOPE(TRANSFORM(wkb_geometry, ".$epsgcode.")))) AS maxy";

@@ -11711,7 +11711,7 @@ class GUI extends GUI_core{
     $this->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
   }
 
-  function zoomToALKGebaeude($Gemeinde,$Strasse,$Hausnr,$border) {
+  function zoomToALKGebaeude($Gemeinde,$Strasse,$StrName,$Hausnr,$border) {
     # 2006-01-31 pk
     # 1. Funktion ermittelt das umschließende Rechteck der mit $Gemeinde,$Strasse und $Hausnr übergebenen
     # Gebaeude aus der postgis Datenbank mit Rand entsprechend dem Faktor $border
@@ -11735,8 +11735,9 @@ class GUI extends GUI_core{
 	    # zu 3)
 	    $layer=ms_newLayerObj($this->map);
 	    if(ALKIS){
+	    	$epsg = EPSGCODE_ALKIS;
 	    	$datastring ="the_geom from (select g.gml_id as oid, wkb_geometry as the_geom FROM alkis.ax_gemeinde gem, alkis.ax_gebaeude g";
-		    $datastring.=" LEFT JOIN alkis_beziehungen v ON g.gml_id=v.beziehung_von"; 
+		    $datastring.=" LEFT JOIN alkis.alkis_beziehungen v ON g.gml_id=v.beziehung_von"; 
 				$datastring.=" LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON v.beziehung_zu=l.gml_id";
 				$datastring.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde";
 				$datastring.=" AND l.lage = lpad(s.lage,5,'0')";
@@ -11754,6 +11755,7 @@ class GUI extends GUI_core{
 		    }
 	    }
 	    else{
+	    	$epsg = EPSGCODE;
 		    $datastring ="the_geom from (select o.objnr as oid,o.the_geom from alkobj_e_fla AS o,alknhaus as h";
 		    $datastring.=" WHERE o.objnr=h.objnr";
 		    if (trim($Hausnr)!='') {
@@ -11768,11 +11770,80 @@ class GUI extends GUI_core{
 			    }
 		    }
 	    }
-	    $datastring.=") as foo using unique oid using srid=".EPSGCODE;
-	    $legendentext ="Geb&auml;ude:<br>";
+	    $datastring.=") as foo using unique oid using srid=".$epsg;
+	    $legendentext ="Geb&auml;ude<br>";
 	    if ($Hausnr!='') {
 	      $legendentext.="HausNr: ".str_replace(',', '<br>', $Hausnr);
 	    }
+	    else{
+	    	$legendentext.=$StrName;
+	    }
+	    	    
+	    $dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
+
+	    $group = $dbmap->getGroupbyName('Suchergebnis');
+	    if($group != ''){
+	      $groupid = $group['id'];
+	    }
+	    else{
+	      $groupid = $dbmap->newGroup('Suchergebnis');
+	    }
+	
+	    $this->formvars['user_id'] = $this->user->id;
+	    $this->formvars['stelle_id'] = $this->Stelle->id;
+	    $this->formvars['aktivStatus'] = 1;
+	    $this->formvars['Name'] = $legendentext;
+	    $this->formvars['Gruppe'] = $groupid;
+	    $this->formvars['Typ'] = 'search';
+	    $this->formvars['Datentyp'] = 2;
+	    $this->formvars['Data'] = $datastring;
+	    $this->formvars['connectiontype'] = 6;
+	    $connectionstring ='user='.$this->pgdatabase->user;
+	    if($this->pgdatabase->passwd != ''){
+	      $connectionstring.=' password='.$this->pgdatabase->passwd;
+	    }
+	    if($this->pgdatabase->host != ''){
+	      $connectionstring.=' host='.$this->pgdatabase->host;
+	    }
+	    $connectionstring.=' dbname='.$this->pgdatabase->dbName;
+	    $this->formvars['connection'] = $connectionstring;
+	    $this->formvars['epsg_code'] = $epsg;
+	    $this->formvars['transparency'] = 60;
+	
+	    $layer_id = $dbmap->newRollenLayer($this->formvars);
+	    
+	    $classdata[0] = '';
+	    $classdata[1] = -$layer_id;
+	    $classdata[2] = '';
+	    $classdata[3] = 0;
+	    $class_id = $dbmap->new_Class($classdata);
+	
+			$color = $this->user->rolle->readcolor();
+	    $style['colorred'] = $color['red'];
+			$style['colorgreen'] = $color['green'];
+			$style['colorblue'] = $color['blue'];    
+	    $style['outlinecolorred'] = 0;
+	    $style['outlinecolorgreen'] = 0;
+	    $style['outlinecolorblue'] = 0;
+	    $style['size'] = 1;
+	    $style['symbol'] = NULL;
+	    $style['symbolname'] = NULL;
+	    $style['backgroundcolor'] = NULL;
+	    $style['minsize'] = NULL;
+	    $style['maxsize'] = 100000;
+	    if (MAPSERVERVERSION > '500') {
+	    	$style['angle'] = 360;
+	    }
+	    $style_id = $dbmap->new_Style($style);
+	
+	    $dbmap->addStyle2Class($class_id, $style_id, 0);          # den Style der Klasse zuordnen
+	    $this->user->rolle->set_one_Group($this->user->id, $this->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
+	
+	    $this->loadMap('DataBase');
+	    # zu 2)
+	    $this->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
+	    
+/*	    
 	    $layer->set('data',$datastring);
 	    $layer->set('status',MS_ON);
 	    $layer->set('template', ' ');
@@ -11806,6 +11877,7 @@ class GUI extends GUI_core{
 	    $style=ms_newStyleObj($klasse);
 	    $style->color->setRGB(255,255,128);
 	    $style->outlinecolor->setRGB(0,0,0);
+	    */
     }
     return $ret;
   }
@@ -12466,8 +12538,11 @@ class GUI extends GUI_core{
       $Adresse=new adresse($GemID,'','',$this->pgdatabase);
       $StrID=$this->formvars['StrID'];
       $StrName=$this->formvars['StrName'];
-      if ($StrName!='') {
+      if($StrName!='') {
         $StrID=$Adresse->getStrIDfromName($GemID,$StrName);
+      }
+    	else{
+        $StrName=$Adresse->getStrNamefromID($GemID,$StrID);
       }
       $Adresse->StrassenSchl=$StrID;
       $HausID=$this->formvars['selHausID'];
@@ -12495,7 +12570,7 @@ class GUI extends GUI_core{
         $FlurstKennz=$Adresse->getFlurstKennzListe();
         if($this->formvars['ALK_Suche'] == 1){
         	$this->loadMap('DataBase');
-	        $ret = $this->zoomToALKGebaeude($GemID,$StrID,$HausID,100);
+	        $ret = $this->zoomToALKGebaeude($GemID,$StrID,$StrName,$HausID,100);
 	        if($ret[0]){
 	        	$this->zoomToALKFlurst($FlurstKennz,100);
 	        }
@@ -12513,7 +12588,7 @@ class GUI extends GUI_core{
 	          # Anzeige der Gebaeude in der ALK
 	          # Karte laden, auf die Gebaeude zoomen, Karte Zeichnen und speichern für späteren gebrauch
 	          $this->loadMap('DataBase');
-	          $this->zoomToALKGebaeude($GemID,$StrID,$HausID,100);
+	          $this->zoomToALKGebaeude($GemID,$StrID,$StrName,$HausID,100);
 	          $currenttime=date('Y-m-d H:i:s',time());
 	          $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
 	          $this->drawMap();

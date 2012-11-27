@@ -699,7 +699,7 @@ function mousemove(evt){
 	 break;
 			
 	 default:
-	 	if(last_x != evt.clientX){
+	 	if(Math.abs(last_x - evt.clientX) > 10){
 	  	hide_tooltip();
 	  	last_x = evt.clientX;
 	  }
