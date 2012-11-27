@@ -33,24 +33,36 @@ function send(){
 	}
 }
 
+function add_options(select, options, firstoption){
+	if(firstoption)select.options[select.length] = new Option(firstoption, '');
+	for(i = 0; i < options.length; i++){
+		select.options[select.length] = new Option(options[i], options[i]);
+	}
+}
+
 function update_verfahren(){
-	document.GUI.verfahrensgrund_zusatz.options[1] = null;
-	document.GUI.verfahrensgrund_zusatz.options[1] = null;
-	document.GUI.verfahrensgrund_zusatz.options[1] = null;
-	document.GUI.verfahrensgrund_zusatz.options[1] = null;
+	document.GUI.verfahrensgrund_zusatz.length = 0;
 	if(document.GUI.verfahrensgrund.value == 'Entw'){
-		document.GUI.verfahrensgrund_zusatz.options[document.GUI.verfahrensgrund_zusatz.length] = new Option('EU', 'EU');
-		document.GUI.verfahrensgrund_zusatz.options[document.GUI.verfahrensgrund_zusatz.length] = new Option('EB', 'EB');
+		add_options(document.GUI.verfahrensgrund_zusatz, new Array('EU', 'EB'), 'kein');
 	}
 	if(document.GUI.verfahrensgrund.value == 'San'){
-		document.GUI.verfahrensgrund_zusatz.options[document.GUI.verfahrensgrund_zusatz.length] = new Option('SU', 'SU');
-		document.GUI.verfahrensgrund_zusatz.options[document.GUI.verfahrensgrund_zusatz.length] = new Option('SB', 'SB');		
+		add_options(document.GUI.verfahrensgrund_zusatz, new Array('SU', 'SB'), 'kein');
 	}
 	if(document.GUI.verfahrensgrund.value == 'StUb'){
-		document.GUI.verfahrensgrund_zusatz.options[document.GUI.verfahrensgrund_zusatz.length] = new Option('EU', 'EU');
-		document.GUI.verfahrensgrund_zusatz.options[document.GUI.verfahrensgrund_zusatz.length] = new Option('EB', 'EB');
-		document.GUI.verfahrensgrund_zusatz.options[document.GUI.verfahrensgrund_zusatz.length] = new Option('SU', 'SU');
-		document.GUI.verfahrensgrund_zusatz.options[document.GUI.verfahrensgrund_zusatz.length] = new Option('SB', 'SB');
+		add_options(document.GUI.verfahrensgrund_zusatz, new Array('EU', 'EB', 'SU', 'SB'), 'kein');
+	}
+}
+
+function update_nutzungsart(){
+	document.GUI.nutzungsart.length = 0;
+	if(document.GUI.entwicklungszustand.value in {'B':'', 'R':'','E':''}){
+		add_options(document.GUI.nutzungsart, new Array('W', 'WS', 'WR', 'WA', 'WB', 'M', 'MD', 'MI', 'MK', 'G', 'GE', 'GI', 'S', 'SE', 'SO', 'GB'), '-- Bitte wählen --');
+	}
+	if(document.GUI.entwicklungszustand.value == 'LF'){
+		add_options(document.GUI.nutzungsart, new Array('LW', 'A', 'GR', 'EGA', 'SK', 'WG', 'KUP', 'UN', 'F'), '-- Bitte wählen --');
+	}
+	if(document.GUI.entwicklungszustand.value == 'SF'){
+		add_options(document.GUI.nutzungsart, new Array('PG', 'KGA', 'FGA', 'CA', 'SPO', 'SG', 'FH', 'WF', 'FP', 'PP', 'LG', 'AB', 'GF', 'SN'), '-- Bitte wählen --');
 	}
 }
 
@@ -147,6 +159,7 @@ function update_require_attribute(attributes, layer_id, value){
 												        $FormatWerte = array('','R','E','B','LF','SF');
 												        $FormatBez = array('-- Bitte wählen --','Rohbauland','Bauerwartungsland','baureifes Land','Land- und Forstwirtschaft','sonstige Fläche'); 
 												        $zustand = new FormObject('entwicklungszustand','select',$FormatWerte,array($this->formvars['entwicklungszustand']),$FormatBez,1,$maxlenght,$multiple,146);
+												        $zustand->addJavaScript('onchange', "update_nutzungsart();");
 												        $zustand->OutputHTML();
 												        echo $zustand->html;
 												      ?>
@@ -172,8 +185,8 @@ function update_require_attribute(attributes, layer_id, value){
 												    </td>
 												    <td colspan="2"> 
 												      <?php 
-												        $FormatWerte = array('', 'A',' A/GR',' F',' G',' GE',' GE/GI',' GE/MI',' GI',' GR',' H',' L',' M',' MD',' MI',' MI/MK',' MI/W',' MK',' S',' SO',' SW',' W',' W/M',' WA',' WA/MD',' WA/MI',' WA/WB',' WA/WR',' WB',' WR',' WS');
-												        $FormatBez = array('-- Bitte wählen --', 'A',' A/GR',' F',' G',' GE',' GE/GI',' GE/MI',' GI',' GR',' H',' L',' M',' MD',' MI',' MI/MK',' MI/W',' MK',' S',' SO',' SW',' W',' W/M',' WA',' WA/MD',' WA/MI',' WA/WB',' WA/WR',' WB',' WR',' WS'); 
+												        $FormatWerte = array('');
+												        $FormatBez = array('-- Bitte wählen --'); 
 												        $nutzung = new FormObject('nutzungsart','select',$FormatWerte,array($this->formvars['nutzungsart']),$FormatBez,1,$maxlenght,$multiple,146);
 												        $nutzung->OutputHTML();
 												        echo $nutzung->html;
