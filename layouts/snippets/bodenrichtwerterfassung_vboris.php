@@ -48,9 +48,6 @@ function update_verfahren(){
 	if(document.GUI.verfahrensgrund.value == 'San'){
 		add_options(document.GUI.verfahrensgrund_zusatz, new Array('SU', 'SB'), 'kein');
 	}
-	if(document.GUI.verfahrensgrund.value == 'StUb'){
-		add_options(document.GUI.verfahrensgrund_zusatz, new Array('EU', 'EB', 'SU', 'SB'), 'kein');
-	}
 }
 
 function update_nutzungsart(){
@@ -207,8 +204,8 @@ function update_require_attribute(attributes, layer_id, value){
 												    </td>
 												    <td colspan="2" align="right"> 
 												      <?php 
-												        $FormatWerte = array('','ohne','mit');
-												        $FormatBez = array('-- Bitte wählen --','ohne','mit'); 
+												        $FormatWerte = array('','0','1');
+												        $FormatBez = array('-- Bitte wählen --','nicht erschlossen','erschlossen'); 
 												        $wegeerschliessung = new FormObject('wegeerschliessung','select',$FormatWerte,array($this->formvars['wegeerschliessung']),$FormatBez,1,$maxlenght,$multiple,146);
 												        $wegeerschliessung->OutputHTML();
 												        echo $wegeerschliessung->html;
@@ -323,7 +320,7 @@ function update_require_attribute(attributes, layer_id, value){
 									    	Geschossflächenzahl:
 									    </td>
 									    <td colspan="2"> 
-									      <input name="geschossflaechenzahl" type="text" style="width:146px" id="geschossflaechenzahl" value="<?php echo $this->formvars['geschossflaechenzahl']; ?>">
+									      <input name="geschossflaechenzahl" type="text" style="width:146px" maxlength="11" id="geschossflaechenzahl" value="<?php echo $this->formvars['geschossflaechenzahl']; ?>">
 									    </td>
 									  </tr>
 									  <tr> 
@@ -331,7 +328,7 @@ function update_require_attribute(attributes, layer_id, value){
 									    	Grundflächenzahl:
 									    </td>
 									    <td colspan="2"> 
-									      <input name="grundflaechenzahl" type="text" style="width:146px" id="grundflaechenzahl" value="<?php echo $this->formvars['grundflaechenzahl']; ?>">
+									      <input name="grundflaechenzahl" type="text" style="width:146px" maxlength="9" id="grundflaechenzahl" value="<?php echo $this->formvars['grundflaechenzahl']; ?>">
 									    </td>
 									  </tr>
 									  <tr> 
@@ -339,7 +336,7 @@ function update_require_attribute(attributes, layer_id, value){
 									    	Baumassenzahl:
 									    </td>
 									    <td colspan="2"> 
-									      <input name="baumassenzahl" type="text" style="width:146px" id="baumassenzahl" value="<?php echo $this->formvars['baumassenzahl']; ?>">
+									      <input name="baumassenzahl" type="text" style="width:146px" maxlength="9" id="baumassenzahl" value="<?php echo $this->formvars['baumassenzahl']; ?>">
 									    </td>
 									  </tr>
 									  <tr> 
@@ -372,15 +369,15 @@ function update_require_attribute(attributes, layer_id, value){
 									    </td>
 									    <td colspan="2">
 									    	<?php 
-									        $FormatWerte = array('', 'San', 'Entw', 'StUb');
-									        $FormatBez = array('kein','San', 'Entw', 'StUb'); 
+									        $FormatWerte = array('', 'San', 'Entw', 'StUb', 'SoSt');
+									        $FormatBez = array('kein','San', 'Entw', 'StUb', 'SoSt'); 
 									        $verfahren = new FormObject('verfahrensgrund','select',$FormatWerte,array($this->formvars['verfahrensgrund']),$FormatBez,1,$maxlenght,$multiple,NULL);
 									        $verfahren->addJavaScript('onchange', "update_verfahren();");
 									        $verfahren->OutputHTML();
 									        echo $verfahren->html;
 									       
-									        $FormatWerte = array('','EB','EU','SB','SU');
-									        $FormatBez = array('kein','EB','EU','SB','SU'); 
+									        $FormatWerte = array('');
+									        $FormatBez = array('kein'); 
 									        $verfahren = new FormObject('verfahrensgrund_zusatz','select',$FormatWerte,array($this->formvars['verfahrensgrund_zusatz']),$FormatBez,1,$maxlenght,$multiple,NULL);
 									        $verfahren->OutputHTML();
 									        echo $verfahren->html;
