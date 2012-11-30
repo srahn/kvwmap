@@ -90,18 +90,15 @@
 			}
 		}
 
-		function coords2(evt) {
+		function coords3(evt) {
 		  coorx = evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value);
 		  coory = parseFloat(top.document.GUI.maxy.value) - evt.clientY*parseFloat(top.document.GUI.pixelsize.value);
 		  	
 		  coorx = format_number(coorx, true);
 		  coory = format_number(coory, true);
-		  		
-		  if(top.document.GUI.coordx){
-		  	top.document.GUI.coordx.value = coorx;
-		  }
-			if(top.document.GUI.coordy){
-		  	top.document.GUI.coordy.value = coory;
+		  		  		
+		  if(top.document.GUI.firstcoords){
+		  	top.document.GUI.firstcoords.value = coorx+" "+coory;
 		  }
 			if(top.document.GUI.lastcoordx != undefined && top.document.GUI.lastcoordx.value != ""){
 				vectorx = top.document.GUI.lastcoordx.value - coorx;

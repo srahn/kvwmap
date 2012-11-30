@@ -1610,6 +1610,10 @@ if ($goNotExecutedInIncludeCases) {
 	  case 'document_anzeigen' : {
 		$GUI->nachweisDokumentAnzeigen();
 	  } break;
+	  
+	  case 'document_vorschau' : {
+		$GUI->nachweisDokumentVorschau();
+	  } break;
 
 	  # Eingabe oder Änderung der Daten zu einem Dokument im Katasternachweis
 	  # für Fortführungsrisse, Koordinatenverzeichnisse und Grenzniederschriften

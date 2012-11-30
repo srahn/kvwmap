@@ -2728,7 +2728,7 @@ class GUI extends GUI_core{
     header("Content-disposition:  inline; filename=Flurstuecke.csv");
     header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
     header('Pragma: public');
-    print $csv;
+    print utf8_decode($csv);
   }
   
   function jagdkatastereditor_listflurst(){
@@ -9303,6 +9303,24 @@ class GUI extends GUI_core{
     }
   }
   
+	function nachweisDokumentVorschau() {
+    $this->nachweis = new nachweis($this->pgdatabase, $this->user->rolle->epsg_code);
+    $ret=$this->nachweis->getDocLocation($this->formvars['id']);
+    if($ret[0]!='') {
+      showAlert($ret[0]);
+      return 0;
+    }
+    else {
+	    $dateiname=basename($ret[1]);
+      $dateinamensteil=explode('.',$dateiname);
+      if(!file_exists(IMAGEPATH.$dateinamensteil[0].'.jpg')){
+      	exec(IMAGEMAGICKPATH.'convert '.$ret[1].' -resize 500x500 '.IMAGEPATH.$dateinamensteil[0].'.jpg');
+      	#echo IMAGEMAGICKPATH.'convert '.$ret[1].' -resize 500x500 '.IMAGEPATH.$dateinamensteil[0].'.jpg';
+      }
+      echo '<img style="border: 1px solid black" src="'.TEMPPATH_REL.$dateinamensteil[0].'.jpg">';
+    }
+  }
+  
 
   function nachweisLoeschen(){
     # Abfragen ob der Löschvorgang schon bestätigt wurde.
@@ -11842,42 +11860,6 @@ class GUI extends GUI_core{
 	    $this->loadMap('DataBase');
 	    # zu 2)
 	    $this->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
-	    
-/*	    
-	    $layer->set('data',$datastring);
-	    $layer->set('status',MS_ON);
-	    $layer->set('template', ' ');
-	    $layer->set('name',$legendentext);
-	    $layer->set('type',2);
-	    $layer->set('group','Suchergebnis');
-	    $layer->setMetaData('off_requires',0);
-	    $layer->setMetaData('layer_has_classes',0);
-	    $this->map->setMetaData('group_status_Suchergebnis','0');
-	    $this->map->setMetaData('group_Suchergebnis_has_active_layers','0');
-	    if (MAPSERVERVERSION < '540') {
-	      $layer->set('connectiontype', 6);
-	    }
-	    else {
-	      $layer->setConnectionType(6);
-	    }
-	    $connectionstring ='user='.$this->pgdatabase->user;
-	    $connectionstring.=' password='.$this->pgdatabase->passwd;
-	    if($this->pgdatabase->host != ''){
-	      $connectionstring.=' host='.$this->pgdatabase->host;
-	    }
-	    $connectionstring.=' dbname='.$this->pgdatabase->dbName;
-	    $layer->set('connection',$connectionstring);
-	    $layer->setMetaData('queryStatus','2');
-	    $layer->setMetaData('wms_queryable','0');
-	    $layer->setMetaData('layer_hidden','0'); #2005-11-30_pk
-	    $layer->setProjection('+init=epsg:'.EPSGCODE);
-	    $klasse=ms_newClassObj($layer);
-	    $klasse->set('status', MS_ON);
-	    $klasse->setexpression($expression);
-	    $style=ms_newStyleObj($klasse);
-	    $style->color->setRGB(255,255,128);
-	    $style->outlinecolor->setRGB(0,0,0);
-	    */
     }
     return $ret;
   }

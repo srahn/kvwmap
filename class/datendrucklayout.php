@@ -157,6 +157,9 @@ class ddl {
 									}
 									else $data = array(array($attributes['name'][$j] => $result[$i][$attributes['name'][$j]]));
 								}
+								if(count($attributes['enum_value'][$j]) == 0){	
+									$data = array(array($attributes['name'][$j] => $result[$i][$attributes['name'][$j]]));
+								}
 							}break;
 							default: {
 								$data = array(array($attributes['name'][$j] => utf8_decode($result[$i][$attributes['name'][$j]])));
