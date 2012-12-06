@@ -27,7 +27,7 @@ else {
         <tr align="left" valign="bottom" bgcolor="EBEBEB"> 
           <td>  
             <div align="left">
-              <input name="antr_nr_a" type="text" value="<?php echo $this->formvars['antr_nr_a']?>" size="2" maxlength="2">&nbsp;V&nbsp;<input name="antr_nr_b" type="text" value="<?php echo $this->formvars['antr_nr_b']?>" size="4" maxlength="4">
+              <input name="antr_nr" type="text" value="<?php echo $this->formvars['antr_nr']?>" size="10" maxlength="10">&nbsp;
           </div></td>
           <td><div align="center"> 
           <?php $this->FormObjVermStelle->outputHTML(); echo $this->FormObjVermStelle->html; ?>            <div align="left"></div></td>

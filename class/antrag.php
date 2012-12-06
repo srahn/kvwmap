@@ -1,6 +1,6 @@
 <?php
 ###################################################################
-# kvwmap - Kartenserver für Kreisverwaltungen                     #
+# kvwmap - Kartenserver fÃ¼r Kreisverwaltungen                     #
 ###################################################################
 # Lizenz                                                          #
 #                                                                 # 
@@ -58,61 +58,61 @@ class antrag {
   }
   
   function clearRecherchePfad() {
-    # Löschen der vorhandenen alten Dateien des Auftrages oder anlegen eines neuen Verzeichnisses
+    # LÃ¶schen der vorhandenen alten Dateien des Auftrages oder anlegen eines neuen Verzeichnisses
     if (!is_dir(RECHERCHEERGEBNIS_PATH)) {
-      # Verzeichnis für recherchierte Aufträge existierte noch nicht. 
+      # Verzeichnis fÃ¼r recherchierte AuftrÃ¤ge existierte noch nicht. 
       # Anlegen eines neuen Verzeichnisses zur Speicherung der Dokumentendateien entsprechend RECHERCHEERGEBNIS_PATH
       mkdir (RECHERCHEERGEBNIS_PATH, 0777);
-      echo "<br>Verzeichnis für Rechercheergebnisse erstmalig angelegt: ".RECHERCHEERGEBNIS_PATH;
+      echo "<br>Verzeichnis fÃ¼r Rechercheergebnisse erstmalig angelegt: ".RECHERCHEERGEBNIS_PATH;
     }    
-    # Festlegen des Pfades für den Auftrag
+    # Festlegen des Pfades fÃ¼r den Auftrag
     $auftragspfad=RECHERCHEERGEBNIS_PATH.$this->nr;
     #echo '<br>'.$auftragspfad;
     if (!is_dir($auftragspfad)) {
       # Verzeichnis existierte noch nicht. 
       # Anlegen eines neuen Verzeichnisses zur Speicherung der Dokumentendateien mit Auftragsnummer als Name
       mkdir ($auftragspfad, 0777);
-      echo "<br>Neues Verzeichnis: ".$auftragspfad." für Auftrag hinzugefügt.";
+      echo "<br>Neues Verzeichnis: ".$auftragspfad." fÃ¼r Auftrag hinzugefÃ¼gt.";
     }
     else {
-      # Verzeichnis existiert schon. Den gesamten Inhalt löschen
+      # Verzeichnis existiert schon. Den gesamten Inhalt lÃ¶schen
       $exceptions = array(".", "..");
       if(delete_files($auftragspfad, $exceptions, 0)) {
         # Ordner wieder neu anlegen
         mkdir ($auftragspfad, 0777);
-        echo "<br>Alle alten Dateien des Auftrages vor dem Hinzufügen der neuen Dateien gelöscht.";
+        echo "<br>Alle alten Dateien des Auftrages vor dem HinzufÃ¼gen der neuen Dateien gelÃ¶scht.";
       }
       else {
-        echo "<br>Löschen vorhandener Dateien fehlgeschlagen";
+        echo "<br>LÃ¶schen vorhandener Dateien fehlgeschlagen";
       }
     }
   }
 
   function DokumenteInOrdnerZusammenstellen($nachweis){
     $auftragspfad=RECHERCHEERGEBNIS_PATH.$this->nr.'/Nachweise/';
-    # Erzeuge ein Unterverzeichnis für die Nachweisdokumente
+    # Erzeuge ein Unterverzeichnis fÃ¼r die Nachweisdokumente
     mkdir ($auftragspfad,0777);
-    # Führe in Schleif für alle zum Auftrag gehörenden Dokumente folgendes aus
+    # FÃ¼hre in Schleif fÃ¼r alle zum Auftrag gehÃ¶renden Dokumente folgendes aus
     for ($i=0; $i<$nachweis->erg_dokumente;$i++){
-      # Erzeuge ein Unterverzeichnis für die Flur des Dokumentes, wenn noch nicht vorhanden
+      # Erzeuge ein Unterverzeichnis fÃ¼r die Flur des Dokumentes, wenn noch nicht vorhanden
       $flurid=trim($nachweis->Dokumente[$i]['flurid']);
       $zielpfad=$auftragspfad.$flurid.'/';
       if (!is_dir($zielpfad)) {
         mkdir ($zielpfad, 0777);
       }
-      # Erzeuge ein Unterverzeichnis für die nr des Dokumentes, wenn noch nicht vorhanden
+      # Erzeuge ein Unterverzeichnis fÃ¼r die nr des Dokumentes, wenn noch nicht vorhanden
       $nr = $nachweis->buildNachweisNr($nachweis->Dokumente[$i][NACHWEIS_PRIMARY_ATTRIBUTE], $nachweis->Dokumente[$i][NACHWEIS_SECONDARY_ATTRIBUTE]);
       $zielpfad.=$nr.'/';
       if (!is_dir($zielpfad)) {
         mkdir ($zielpfad, 0777);
       }
-      # Erzeuge ein Unterverzeichnis für die Dokumentenart, wenn noch nicht vorhanden
+      # Erzeuge ein Unterverzeichnis fÃ¼r die Dokumentenart, wenn noch nicht vorhanden
       $artname=ArtCode2Abk($nachweis->Dokumente[$i]['art']);    
       $zielpfad.=$artname.'/';
       if (!is_dir($zielpfad)) {
         mkdir ($zielpfad, 0777);
       }
-      # Wie heißt die Datei, die in den Ordner kopiert werden soll
+      # Wie heiÃŸt die Datei, die in den Ordner kopiert werden soll
       # Pfad zur Quelle erstellen
       $quellpfad=NACHWEISDOCPATH.$flurid.'/'.$nr.'/';
       $quelle=$quellpfad.$nachweis->Dokumente[$i]['link_datei'];
@@ -143,17 +143,17 @@ class antrag {
 
   function EinmessungsskizzenInOrdnerZusammenstellen($festpunkte){
     $skizzenpfad=RECHERCHEERGEBNIS_PATH.$this->nr.'/Einmessungsskizzen/';
-    # Erzeuge ein Unterverzeichnis für die Einmessungsskizzen
+    # Erzeuge ein Unterverzeichnis fÃ¼r die Einmessungsskizzen
     mkdir ($skizzenpfad,0777);
     # Frage die in der Liste vorkommenden Kilometerquadrate ab.
     $kmquad=$festpunkte->getKilometerQuadrate();
-    # Erzeuge je ein Unterverzeichnis für die Kilometerquadrate
+    # Erzeuge je ein Unterverzeichnis fÃ¼r die Kilometerquadrate
     foreach($kmquad AS $value) {
       mkdir ($skizzenpfad.'/'.$value,0777);
     }
-    # Führe in Schleife für alle zum Auftrag gehörenden Einmessungsskizzen folgendes aus
+    # FÃ¼hre in Schleife fÃ¼r alle zum Auftrag gehÃ¶renden Einmessungsskizzen folgendes aus
     foreach($festpunkte->liste AS $festpunkt){
-      # Wie heißt die Datei, die in den Ordner kopiert werden soll
+      # Wie heiÃŸt die Datei, die in den Ordner kopiert werden soll
       # Pfad zur Quelle zusammensetzen
       $quelle=PUNKTDATEIPATH.$festpunkt['datei'];
       # Pfad zum Ziel zusammensetzen
@@ -190,7 +190,7 @@ class antrag {
     $pdf->selectFont(PDFCLASSPATH.'fonts/Times-Roman.afm',$tmp);
     $pdf->addText(120,$row-=12,20,'<b>Anlage der Vermessungsvorbereitung</b>');
     $pdf->addText(165,$row-=20,18,'<b>zur Auftragsnummer '.$this->nr.'</b>');
-    $pdf->addText(200,$row-=20,16,'Liste der Fortführungsrisse');
+    $pdf->addText(200,$row-=20,16,utf8_decode('Liste der FortfÃ¼hrungsrisse'));
     $row-=3; $pdf->line(200,$row,375,$row);
     $row-=3; $pdf->line(200,$row,375,$row);
     
@@ -206,9 +206,9 @@ class antrag {
     $cols='';
     $title='';
     # Konfiguration der Tabelle
-    # Allgemeine Einstellungen für die ganze Tabelle
+    # Allgemeine Einstellungen fÃ¼r die ganze Tabelle
     $options=array('xPos'=>'left','xOrientation'=>'right','rowGap'=>$rowGap,'colGap'=>$colGap,'showLines'=>2 ,'width'=>550,'showHeadings'=>1,'fontSize'=>13, 'shaded'=>0);
-    # Individuelle Einstellungen für die Spalten.
+    # Individuelle Einstellungen fÃ¼r die Spalten.
     $options['cols']['Lfd']=array('justification'=>'centre');
     $options['cols']['Riss-Nummer']=array('justification'=>'centre');
     $options['cols']['Antrags-Nummer']=array('justification'=>'centre');
@@ -228,7 +228,7 @@ class antrag {
       $pdf->ezNewPage();
       $pdf->ezSetY(800);
       $pdf->addText(155,$row-=20,16,'<b>weiter zur Auftragsnummer '.$this->nr.'</b>');
-      $pdf->addText(200,$row-=20,16,'Liste der Fortführungsrisse');
+      $pdf->addText(200,$row-=20,16,utf8_decode('Liste der FortfÃ¼hrungsrisse'));
       $row-=3; $pdf->line(200,$row,375,$row);
       $row-=3; $pdf->line(200,$row,375,$row);
       $pdf->ezSetY($row-=15);
@@ -265,7 +265,7 @@ class antrag {
       $sql.=" ORDER BY ".$order." ".$richtung;
     }
     #echo $sql;
-    $this->debug->write("<br>nachweis.php getAntraege Abfragen der Anträge.<br>".$sql,4);        
+    $this->debug->write("<br>nachweis.php getAntraege Abfragen der AntrÃ¤ge.<br>".$sql,4);        
     $queryret=$this->database->execSQL($sql,4, 0);
     if ($queryret[0]) {
       $ret[0]=1;
@@ -274,7 +274,7 @@ class antrag {
     else {
       if (pg_num_rows($queryret[1])=='') {
         $ret[0]=1;
-        $ret[1]='Es wurden keine Anträge gefunden!';
+        $ret[1]='Es wurden keine AntrÃ¤ge gefunden!';
       }
       else {
         $ret[0]=0;
@@ -288,16 +288,16 @@ class antrag {
   }
     
   function getFFR() {
-    # Abfrage der Vorgänge, die zu einem Auftrag zugeordnet sind
+    # Abfrage der VorgÃ¤nge, die zu einem Auftrag zugeordnet sind
     # Ein Vorgang umfasst alle FFR, GN, KVZ mit gleicher flurid und stammnr
-    # Die Abfrage liefert für jeden Vorgang eine Datenzeile zurück
-    # Anschließend wird für jeden Vorgang die Anzahl der FFR, GN und KVZ ermittelt
+    # Die Abfrage liefert fÃ¼r jeden Vorgang eine Datenzeile zurÃ¼ck
+    # AnschlieÃŸend wird fÃ¼r jeden Vorgang die Anzahl der FFR, GN und KVZ ermittelt
     # 2006-01-25 pk
-    # Die Abfrage der Anzahl der FFR, KVZ und GN kann eingeschränkt werden auf die,
+    # Die Abfrage der Anzahl der FFR, KVZ und GN kann eingeschrÃ¤nkt werden auf die,
     # die einem Auftrag zugeordnet sind.
     # mehr wird im Protokoll nicht erfasst, nicht jedes einzelne Blatt
     # Dieser Vorgang ist hier mit der Variable FFR belegt, weil zu einem Vorgang
-    # meistens mindestens ein Fortführungsriss gehört.
+    # meistens mindestens ein FortfÃ¼hrungsriss gehÃ¶rt.
     $this->debug->write('nachweis.php getFFR Abfragen der Risse zum Antrag.',4);                
     $sql ="SELECT DISTINCT n.flurid,n.stammnr,n.rissnummer";
     $sql.=" FROM n_nachweise AS n, n_nachweise2antraege AS n2a";
@@ -308,7 +308,7 @@ class antrag {
     else { $query_id=$ret[1]; }
     $i=0;
     while($rs=pg_fetch_array($query_id)) {
-      # Setzen der laufenden Nummer der Vorgänge
+      # Setzen der laufenden Nummer der VorgÃ¤nge
       $FFR[$i]['Lfd']=$i+1;
       
       if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){
@@ -350,7 +350,7 @@ class antrag {
       if ($ret[0]) { return $ret; }
       $FFR[$i]['gemessen durch']=utf8_decode($ret[1]); 
             
-      # Abfrage der Gültigkeiten der Dokumente im Vorgang
+      # Abfrage der GÃ¼ltigkeiten der Dokumente im Vorgang
       $ret=$this->getGueltigkeit($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
       if ($ret[0]) { return $ret; }
       #$FFR[$i]['Bemerkung']=$ret[1]; 
@@ -364,8 +364,8 @@ class antrag {
   }
   
   function getDatum($flurid,$nr,$secondary) {
-    $this->debug->write('<br>nachweis.php getDatum Abfragen der Datum zu einem Vorgang in der Nachweisführung.',4);
-    # Abfragen der Datum zu einem Vorgang in der Nachweisführung
+    $this->debug->write('<br>nachweis.php getDatum Abfragen der Datum zu einem Vorgang in der NachweisfÃ¼hrung.',4);
+    # Abfragen der Datum zu einem Vorgang in der NachweisfÃ¼hrung
     $sql.="SELECT DISTINCT n.datum FROM n_nachweise AS n";
     $sql.=" WHERE n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
     if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
@@ -381,21 +381,21 @@ class antrag {
     return $ret;  
   }
   function getGueltigkeit($flurid,$nr,$secondary) {
-    $this->debug->write('<br>nachweis.php getDatum Abfragen der Gueltigkeit der Dokumente in einem Vorgang in der Nachweisführung.',4);
-    # Abfragen der Gueltigkeit der Dokumente in einem Vorgang in der Nachweisführung.
+    $this->debug->write('<br>nachweis.php getDatum Abfragen der Gueltigkeit der Dokumente in einem Vorgang in der NachweisfÃ¼hrung.',4);
+    # Abfragen der Gueltigkeit der Dokumente in einem Vorgang in der NachweisfÃ¼hrung.
     $sql.="SELECT DISTINCT n.gueltigkeit FROM n_nachweise AS n";
     $sql.=" WHERE n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
     if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
     $sql.=" AND n.gueltigkeit=0";
     $ret=$this->database->execSQL($sql,4, 0);
     if (!$ret[0]) {
-      # Wenn die Abfrage mindestens eine Datenzeile enthält, sind ungültige Dokumente enthalten 
+      # Wenn die Abfrage mindestens eine Datenzeile enthÃ¤lt, sind ungÃ¼ltige Dokumente enthalten 
       if (pg_num_rows($ret[1])>0) {
-        # Ungültige Dokumente enthalten
-        $ret[1]='enthält ungültige Dokumente';      
+        # UngÃ¼ltige Dokumente enthalten
+        $ret[1]='enthÃ¤lt ungÃ¼ltige Dokumente';      
       }
       else {
-        # keine ungültigen Dokumente enthalten.
+        # keine ungÃ¼ltigen Dokumente enthalten.
         $ret[1]='';
       }
     }     
@@ -403,8 +403,8 @@ class antrag {
   }
   
   function getVermessungsStellen($flurid,$nr,$secondary) {
-    $this->debug->write('<br>nachweis.php getDatum Abfragen der Vermessungsstellen, die an einem Vorgang beteiligt waren in der Nachweisführung.',4);
-    # Abfragen der Vermessungsstellen, die an einem Vorgang beteiligt waren in der Nachweisführung.
+    $this->debug->write('<br>nachweis.php getDatum Abfragen der Vermessungsstellen, die an einem Vorgang beteiligt waren in der NachweisfÃ¼hrung.',4);
+    # Abfragen der Vermessungsstellen, die an einem Vorgang beteiligt waren in der NachweisfÃ¼hrung.
     $sql.="SELECT DISTINCT v.name FROM n_nachweise AS n, n_vermstelle AS v";
     $sql.=" WHERE n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
     if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
@@ -422,8 +422,8 @@ class antrag {
   }
     
   function getAnzFFR($flurid,$nr,$secondary) {
-    $this->debug->write('<br>nachweis.php getAnzFFR Abfragen der Anzahl der Blätter eines FFR.',4);
-    # Abfrag der Anzahl der zum Riss gehörenden Fortführungsrisse
+    $this->debug->write('<br>nachweis.php getAnzFFR Abfragen der Anzahl der BlÃ¤tter eines FFR.',4);
+    # Abfrag der Anzahl der zum Riss gehÃ¶renden FortfÃ¼hrungsrisse
     $sql.="SELECT COUNT(n.id) AS anzffr FROM n_nachweise AS n";
     if ($this->nr!='') {
       $sql.=",n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
@@ -451,7 +451,7 @@ class antrag {
    
   function getAnzKVZ($flurid,$nr,$secondary) {
     $this->debug->write('<br>nachweis.php getAnzKVZ Abfragen der Anzahl der KVZ zum Riss.',4);
-    # Abfrag der Anzahl der zum Riss gehörenden Koordinatenverzeichnisse
+    # Abfrag der Anzahl der zum Riss gehÃ¶renden Koordinatenverzeichnisse
     $sql.="SELECT COUNT(n.id) AS anzkvz FROM n_nachweise AS n";
     if ($this->nr!='') {
       $sql.=",n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
@@ -479,7 +479,7 @@ class antrag {
   
   function getAnzGN($flurid,$nr,$secondary) {
     $this->debug->write('<br>nachweis.php getAnzGN Abfragen der Anzahl der Grenzniederschriften zum Riss.',4);
-    # Abfrage der Anzahl der zum Riss gehörenden Grenzniederschriften
+    # Abfrage der Anzahl der zum Riss gehÃ¶renden Grenzniederschriften
     $sql.="SELECT COUNT(n.id) AS anzgn FROM n_nachweise AS n";
     if ($this->nr!='') {
       $sql.=",n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
@@ -507,7 +507,7 @@ class antrag {
   
   function getAnzAndere($flurid,$nr,$secondary) {
     $this->debug->write('<br>nachweis.php getAnzAn Abfragen der Anzahl der anderen Dokumente zum Riss.',4);
-    # Abfrage der Anzahl der zum Riss gehörenden Grenzniederschriften
+    # Abfrage der Anzahl der zum Riss gehÃ¶renden Grenzniederschriften
     $sql.="SELECT COUNT(n.id) AS anzan FROM n_nachweise AS n";
     if ($this->nr!='') {
       $sql.=",n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
@@ -534,57 +534,33 @@ class antrag {
   }
   
   
-  function pruefe_antrag_eintragen($antr_nr_a,$antr_nr_b,$VermStelle,$verm_art,$datum) {
-    #prüfen, ob die Antragsnummer korrekt eingegeben wurde!
+  function pruefe_antrag_eintragen($antr_nr,$VermStelle,$verm_art,$datum) {
+    #prÃ¼fen, ob die Antragsnummer korrekt eingegeben wurde!
     $strenthalten=0;
-    if($antr_nr_a=='' OR $antr_nr_b==''){
+    if($antr_nr==''){
       $errmsg.='Bitte geben Sie die Antragsnummer ein! \n';
     }
-    else{
-      if(strlen($antr_nr_a)!=2 OR strlen($antr_nr_b)!=4){
-        $errmsg.='Die Antragsnummer ist nicht korrekt eingegeben! \n';
-      }
-      else{
-        $nums = array ( "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" );
-        $antr_nr_a=trim($antr_nr_a);
-        /*for ($i=0;$i<strlen($antr_nr_a);$i++) {
-          if (!in_array($antr_nr_a[$i],$nums)) {
-            $strenthalten=1;
-          }
-        }
-        */
-        $antr_nr_b=trim($antr_nr_b);
-        for ($i=0;$i<strlen($antr_nr_b);$i++) {
-          if (!in_array($antr_nr_b[$i],$nums)) {
-            $strenthalten=1;
-          }
-        }
-      }
-      if ($strenthalten==1) {
-        $errmsg.='Die Felder für die Antragsnummer dürfen nur Ziffern enthalten! \n';
-      }
-    }
-    $this->debug->write("<br>antrag.php pruefe_antrag_eintragen() prüfen der Eingabe der Anträge, ob Antragsnummer schin vorhanden.<br>".$sql,4);        
-    $sql ="SELECT * FROM n_antraege WHERE antr_nr = '".$antr_nr_a."V".$antr_nr_b."'";
+    $this->debug->write("<br>antrag.php pruefe_antrag_eintragen() prÃ¼fen der Eingabe der AntrÃ¤ge, ob Antragsnummer schin vorhanden.<br>".$sql,4);        
+    $sql ="SELECT * FROM n_antraege WHERE antr_nr = '".$antr_nr."'";
     $queryret=$this->database->execSQL($sql,4, 0);
     if ($queryret[0]) {
-      $errmsg.='Fehler bei der Abfrage der Anträge! '.$queryret[1].'\n';
+      $errmsg.='Fehler bei der Abfrage der AntrÃ¤ge! '.$queryret[1].'\n';
     }
     else {
       if (pg_num_rows($queryret[1])>0) {
-        $errmsg.='Antragsnummer '.$antr_nr_a.'V'.$antr_nr_b.' existiert bereits! '.$queryret[1];
+        $errmsg.='Antragsnummer '.$antr_nr.' existiert bereits! '.$queryret[1];
       }
     }
 
-    #prüfen, ob ein Datum eingegeben wurde
+    #prÃ¼fen, ob ein Datum eingegeben wurde
     if ($datum==''){
       $errmsg.='Bitte geben Sie ein Datum an! \n';
     }
     else {
-      # Pfüfen, ob es sich um das richtige Format handelt.
+      # PfÃ¼fen, ob es sich um das richtige Format handelt.
       $datumteile=explode('-',$datum);
       if (!checkdate($datumteile[1],$datumteile[2],$datumteile[0])) {
-        $errmsg.='Das ist kein gültiges Datum. Geben sie es in der Form JJJJ-MM-TT ein.\n';
+        $errmsg.='Das ist kein gÃ¼ltiges Datum. Geben sie es in der Form JJJJ-MM-TT ein.\n';
       }
     }
     if($verm_art==''){
@@ -593,46 +569,46 @@ class antrag {
     return $errmsg;
   }
   
-  function antrag_eintragen($antr_nr_a,$antr_nr_b,$VermStelle,$verm_art,$datum) {
+  function antrag_eintragen($antr_nr,$VermStelle,$verm_art,$datum) {
     $sql ="INSERT INTO n_antraege (antr_nr,vermstelle,vermart,datum)";
-    $sql.=" VALUES('".$antr_nr_a."V".$antr_nr_b."',".$VermStelle.",".$verm_art.",'".$datum."')";
+    $sql.=" VALUES('".$antr_nr."',".$VermStelle.",".$verm_art.",'".$datum."')";
     $queryret=$this->database->execSQL($sql,4, 1);
     if ($queryret[0]) {
       $errmsg='Es konnte keine Antragsnummer in die Datenbank eingetragen werden!\n'; 
     }
     else {
-      $errmsg.='Auftragsnummer erfolgreich übernommen! ';
+      $errmsg.='Auftragsnummer erfolgreich Ã¼bernommen! ';
     }
     return $errmsg;
   }
   
-  function antrag_aendern($antr_nr_a,$antr_nr_b,$VermStelle,$verm_art,$datum) {
+  function antrag_aendern($antr_nr,$VermStelle,$verm_art,$datum) {
     $sql ="UPDATE n_antraege SET vermstelle=".$VermStelle.",vermart=".$verm_art.",datum='".$datum."'";
-    $sql.=" WHERE antr_nr='".$antr_nr_a."V".$antr_nr_b."'";
+    $sql.=" WHERE antr_nr='".$antr_nr_a."'";
     $queryret=$this->database->execSQL($sql,4, 1);
     if ($queryret[0]) {
       $ret[0]=1;
-      $ret[1]='Fehler beim ändern der Antragsdaten in der Datenbank! '.$queryret[1]; 
+      $ret[1]='Fehler beim Ã¤ndern der Antragsdaten in der Datenbank! '.$queryret[1]; 
     }
     else {
       $ret[0]=0;
-      $ret[1]='Auftragsdaten erfolgreich geändert!';
+      $ret[1]='Auftragsdaten erfolgreich geÃ¤ndert!';
     }
     return $ret;
   }
   
   function antrag_loeschen($antr_nr){
     $this->database->begintransaction();
-    $this->debug->write("<br>antrag.php antrag_loeschen Löschen der Anträge inclusive der Zuordnungen zu Nachweisdokumenten.<br>",4);
+    $this->debug->write("<br>antrag.php antrag_loeschen LÃ¶schen der AntrÃ¤ge inclusive der Zuordnungen zu Nachweisdokumenten.<br>",4);
     $sql="DELETE FROM n_antraege WHERE antr_nr='".$antr_nr."'";
     $queryret=$this->database->execSQL($sql,4, 1);
     if ($queryret[0]) {
-      $errmsg.='Fehler beim Löschen des Antrages!';
+      $errmsg.='Fehler beim LÃ¶schen des Antrages!';
     }
     $sql="DELETE FROM n_nachweise2antraege WHERE antrag_id='".$antr_nr."'";
     $queryret=$this->database->execSQL($sql,4, 1);
     if ($queryret[0]) {
-      $errmsg.='Fehler beim Löschen der Zuordnungen der Nachweisdokumente zum Antrag!';
+      $errmsg.='Fehler beim LÃ¶schen der Zuordnungen der Nachweisdokumente zum Antrag!';
     }
     if ($errmsg!='') {
       $this->database->rollbacktransaction();
@@ -640,7 +616,7 @@ class antrag {
     else {
       $exceptions = array(".", "..");
       delete_files(RECHERCHEERGEBNIS_PATH.$antr_nr, $exceptions, 0);
-      $errmsg='Antrag erfolgreich gelöscht';
+      $errmsg='Antrag erfolgreich gelÃ¶scht';
       $this->database->committransaction();      
     }
     return $errmsg;
@@ -666,7 +642,7 @@ class antrag {
   }
   
   function addFestpunkt($pkz) {
-    # Fügt einen Festpunkt in dem Antrag hinzu
+    # FÃ¼gt einen Festpunkt in dem Antrag hinzu
     $sql ="INSERT INTO fp_punkte2antraege (pkz,antrag_nr,zeitstempel)";
     $sql.="(";
     $sql.=" SELECT '".$pkz."','".$this->nr."',CURRENT_TIMESTAMP(0)";

@@ -363,9 +363,17 @@ class shape {
     	$the_geom = $this->attributes['the_geom'];
     }
     
-    # Transformieren
+    # Transformieren von the_geom im Select-Teil
     if($this->formvars['epsg']){
-    	$sql = implode('TRANSFORM('.$the_geom.', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], explode($the_geom, $sql, 2));
+    	$select = substr($sql, 0, strrpos(strtolower($sql), 'from'));
+    	$rest = substr($sql, strrpos(strtolower($sql), 'from'));
+    	if(strpos($select, ' '.$this->attributes['the_geom']) !== false){		// nur the_geom muss ersetzt werden
+    		$select = str_replace($this->attributes['the_geom'], 'TRANSFORM('.$this->attributes['the_geom'].', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);
+    	}
+    	else{																																// table.the_geom muss ersetzt werden
+    		$select = str_replace($the_geom, 'TRANSFORM('.$the_geom.', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);
+    	}
+    	$sql = $select.$rest;
     }
     # order by rausnehmen
   	$orderbyposition = strpos(strtolower($sql), 'order by');

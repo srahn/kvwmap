@@ -8676,9 +8676,9 @@ class GUI extends GUI_core{
 
   function vermessungsantragAnlegen() {
     $this->antrag= new antrag('',$this->pgdatabase);
-    $ret=$this->antrag->pruefe_antrag_eintragen($this->formvars['antr_nr_a'],$this->formvars['antr_nr_b'],$this->formvars['VermStelle'],$this->formvars['verm_art'],$this->formvars['datum']);
+    $ret=$this->antrag->pruefe_antrag_eintragen($this->formvars['antr_nr'],$this->formvars['VermStelle'],$this->formvars['verm_art'],$this->formvars['datum']);
     if($ret==''){
-      $ret=$this->antrag->antrag_eintragen($this->formvars['antr_nr_a'],$this->formvars['antr_nr_b'],$this->formvars['VermStelle'],$this->formvars['verm_art'],$this->formvars['datum']);
+      $ret=$this->antrag->antrag_eintragen($this->formvars['antr_nr'],$this->formvars['VermStelle'],$this->formvars['verm_art'],$this->formvars['datum']);
     }
     $this->Meldung=$ret;
     $this->titel='Neuen Antrag anlegen';
@@ -8688,7 +8688,7 @@ class GUI extends GUI_core{
 
   function vermessungsantragAendern() {
     $this->antrag= new antrag('',$this->pgdatabase);
-    $ret=$this->antrag->antrag_aendern($this->formvars['antr_nr_a'],$this->formvars['antr_nr_b'],$this->formvars['VermStelle'],$this->formvars['verm_art'],$this->formvars['datum']);
+    $ret=$this->antrag->antrag_aendern($this->formvars['antr_nr'],$this->formvars['VermStelle'],$this->formvars['verm_art'],$this->formvars['datum']);
     if ($ret[0]) {
       $this->vermessungsantragsFormular();
     }
