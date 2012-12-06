@@ -41,7 +41,8 @@
 	else{
 		?><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" lang="de">
 		 <head>
-		  <title>kvwmap</title>
+		  <title><?php echo TITLE; ?></title>
+      <META http-equiv=Content-Type content="text/html; charset=UTF-8">
 		 </head>
 		 <body style="font-family: Arial, Verdana, Helvetica, sans-serif" onload="document.login.username.focus();">
 		  <form name="login" action="index.php" method="post">

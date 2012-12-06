@@ -209,7 +209,7 @@ class GUI extends GUI_core{
     # mime_type html, pdf
     if (isset ($mime_type)) $this->mime_type=$mime_type;
   }
-  
+ 
   function truncateAlbAlkTables(){
   	echo 'ALB und ALK Tabellen werden geleert<br>';
  		echo 'mit Befehl:<br>';
@@ -839,12 +839,12 @@ class GUI extends GUI_core{
     for ($i=0;$i<$this->map->numlayers;$i++) {
       $layer=$this->map->getLayer($i);
       #$layer->setMetaData('layer_hidden','0');
-      #echo '<br>scale:'.$this->map->scale.' max: '.$layer->maxscale.' min:'.$layer->minscale;
+      #echo '<br>scale:'.$this->map_scaledenom.' max: '.$layer->maxscaledenom.' min:'.$layer->minscaledenom;
       $layer->setMetaData('layer_scalehidden','0');
-      if ($this->map->scale < $layer->minscale) {
+      if ($this->map_scaledenom < $layer->minscaledenom) {
         $layer->setMetaData('layer_scalehidden','1');
       }
-      if ($layer->maxscale > 0 AND $this->map->scale > $layer->maxscale) {
+      if ($layer->maxscaledenom > 0 AND $this->map_scaledenom > $layer->maxscaledenom) {
         $layer->setMetaData('layer_scalehidden','1');
       }
     }
@@ -1012,15 +1012,26 @@ class GUI extends GUI_core{
 	                      else{
 	                      	$style->set('maxsize', $style->size);		# maxsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
 	                      }
-	                      if($current_group[$j]->transparency < 100 AND $current_group[$j]->transparency > 0){			# Layer-Transparenz auch in Legendenbildchen berücksichtigen
-		                      $hsv = rgb2hsv($style->color->red,$style->color->green, $style->color->blue);
-		                      $hsv[1] = $hsv[1]*$current_group[$j]->transparency/100;
-		                      $rgb = hsv2rgb($hsv[0], $hsv[1], $hsv[2]);
-		                      $style->color->setRGB($rgb[0],$rgb[1],$rgb[2]);
-                      	}
+												if (MAPSERVERVERSION > 500) {
+													if($current_group[$j]->opacity < 100 AND $current_group[$j]->opacity > 0){			# Layer-Transparenz auch in Legendenbildchen berücksichtigen
+														$hsv = rgb2hsv($style->color->red,$style->color->green, $style->color->blue);
+														$hsv[1] = $hsv[1]*$current_group[$j]->opacity/100;
+														$rgb = hsv2rgb($hsv[0], $hsv[1], $hsv[2]);
+														$style->color->setRGB($rgb[0],$rgb[1],$rgb[2]);
+													}
+												}
+												else {
+													if($current_group[$j]->transparency < 100 AND $current_group[$j]->transparency > 0){			# Layer-Transparenz auch in Legendenbildchen berücksichtigen
+														$hsv = rgb2hsv($style->color->red,$style->color->green, $style->color->blue);
+														$hsv[1] = $hsv[1]*$current_group[$j]->transparency/100;
+														$rgb = hsv2rgb($hsv[0], $hsv[1], $hsv[2]);
+														$style->color->setRGB($rgb[0],$rgb[1],$rgb[2]);
+													}												
+												}
+												
                       }
                       $image = $class->createLegendIcon(18,12);
-                      $filename = $image->saveWebImage(MS_JPEG, 1, 1, 0);
+                      $filename = $this->map_saveWebImage($image,'jpeg');
                       $newname = $this->user->id.basename($filename);
                       rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
                       #Anne
@@ -1702,7 +1713,7 @@ class GUI extends GUI_core{
     $layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
     $layerdb = $this->mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
     $pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
-    $oldscale=round($this->map->scale);
+    $oldscale=round($this->map_scaledenom);
     if ($this->formvars['CMD']!='') {
       $this->navMap($this->formvars['CMD']);
     }
@@ -1764,7 +1775,7 @@ class GUI extends GUI_core{
     $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
     $lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
-    $oldscale=round($this->map->scale);
+    $oldscale=round($this->map_scaledenom);
     if ($this->formvars['CMD']!='') {
       $this->navMap($this->formvars['CMD']);
       $this->user->rolle->saveDrawmode($this->formvars['always_draw']);
@@ -1857,7 +1868,7 @@ class GUI extends GUI_core{
     $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
     $polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
-    $oldscale=round($this->map->scale);
+    $oldscale=round($this->map_scaledenom);
     if ($this->formvars['CMD']!='') {
       $this->navMap($this->formvars['CMD']);
       $this->user->rolle->saveDrawmode($this->formvars['always_draw']);
@@ -3469,7 +3480,7 @@ class GUI extends GUI_core{
       $layer = $this->map->getlayer($i);
       $layer->set('status', 0);
     }
-    $scale = $this->map->scale * $this->map_factor;
+    $scale = $this->map_scaledenom * $this->map_factor;
     $legendimage = imagecreatetruecolor(1,1);
     $backgroundColor = ImageColorAllocate($legendimage, 255, 255, 255);
     imagefill ($legendimage, 0, 0, $backgroundColor);
@@ -3491,7 +3502,7 @@ class GUI extends GUI_core{
           $layer->set('status', 1);
           if($layer->connectiontype != 7){
 	          $classimage = $this->map->drawLegend();
-	          $filename = $classimage->saveWebImage(MS_JPEG, 1, 1, 0);
+	          $filename = $this->map_saveWebImage($classimage,'jpeg');
 	          $newname = $this->user->id.basename($filename);
 	          rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
 	          $classimage = imagecreatefromjpeg(IMAGEPATH.$newname);
@@ -3634,7 +3645,7 @@ class GUI extends GUI_core{
     }
 
     $image = $klasse->createLegendIcon(25,18);
-    $filename = $image->saveWebImage(MS_JPEG, 1, 1, 0);
+    $filename = $this->map_saveWebImage($image,'jpeg');
     $newname = $this->user->id.basename($filename);
     rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
     return $newname;
@@ -4626,7 +4637,7 @@ class GUI extends GUI_core{
     $pdf=new Cezpdf();
     $pdf->selectFont(PDFCLASSPATH.'fonts/Helvetica-Bold.afm');
 
-    $massstab = explode('.', $this->map->scale);
+    $massstab = explode('.', $this->map_scaledenom);
     $row = 712;
 
     $pdf->addText(50,$row,14,utf8_decode('Gemeinde: '.$this->Lagebezeichung['gemeindename'].'   Gemarkung: '.$this->Lagebezeichung['gemkgname'].'   Flur: '.$this->Lagebezeichung['flur']));
@@ -4739,7 +4750,7 @@ class GUI extends GUI_core{
       $this->map->selectOutputFormat('jpeg');
     }
     if($fast == true){			# schnelle Druckausgabe ohne Druckausschnittswahl
-    	$this->formvars['printscale'] = round($this->map->scale);
+    	$this->formvars['printscale'] = round($this->map_scaledenom);
     	$this->formvars['center_x'] = $this->map->width/2;
     	$this->formvars['center_y'] = $this->map->height/2;    	
     	$this->formvars['worldprintwidth'] = $this->Docu->activeframe[0]['mapwidth'] * $this->formvars['printscale'] * 0.0003526;
@@ -4843,7 +4854,7 @@ class GUI extends GUI_core{
     }
 */
 		#$this->saveMap('');
-		#$this->debug->write("<p>Maßstab des Drucks:".$this->map->scale,4);
+		#$this->debug->write("<p>Maßstab des Drucks:".$this->map_scaledenom,4);
     $this->drawMap();
 
     if($this->formvars['angle'] != 0){
@@ -6513,7 +6524,7 @@ class GUI extends GUI_core{
         $this->geomtype = $this->qlayerset[0]['attributes']['geomtype'][$this->qlayerset[0]['attributes']['the_geom']];
         if($this->geomtype != ''){
           $this->loadMap('DataBase');
-          $oldscale=round($this->map->scale);
+          $oldscale=round($this->map_scaledenom);
           if($this->formvars['CMD']!='') {
             $this->navMap($this->formvars['CMD']);
             $this->user->rolle->saveDrawmode($this->formvars['always_draw']);
@@ -8510,7 +8521,7 @@ class GUI extends GUI_core{
     # Karteninformationen lesen
     $this->loadMap('DataBase');
     # zwischenspeichern des vorherigen Maßstabs
-    $oldscale=round($this->map->scale);
+    $oldscale=round($this->map_scaledenom);
     # Zoom auf den in der Referenzkarte ausgewählten Ausschnitt
     if ($this->formvars['refmap_x']!=0) {
       $this->zoomToRefExt();
@@ -10412,7 +10423,7 @@ class GUI extends GUI_core{
     $map->set('shapepath', SHAPEPATH);
     for ($i=0;$i<$anzLayer;$i++) {
     	$sql_order = ''; 
-      if ($this->formvars['qLayer'.$layerset[$i]['Layer_ID']]=='1' AND ($layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] > $this->map->scale) AND ($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] < $this->map->scale)) {
+      if ($this->formvars['qLayer'.$layerset[$i]['Layer_ID']]=='1' AND ($layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] > $this->map_scaledenom) AND ($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] < $this->map_scaledenom)) {
         # Dieser Layer soll abgefragt werden
         switch ($layerset[$i]['connectiontype']) {
           case MS_SHAPEFILE : { # Shape File Layer (1)
@@ -10872,7 +10883,7 @@ class GUI extends GUI_core{
       $refmap->selectOutputFormat('jpeg');
     }
     $image_map = $refmap->draw();
-    $filename = $image_map->saveWebImage(MS_JPEG, 1, 1, 0);
+    $filename = $this->map_saveWebImage($image_map,'jpeg');
     $newname = $this->user->id.basename($filename);
     rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
     $uebersichtskarte = IMAGEURL.$newname;
@@ -12158,7 +12169,7 @@ class GUI extends GUI_core{
 		    $map->set('width', 50);
 		    $map->set('height', 50);
 		    $image_map = $map->draw();
-		    $filename = $image_map->saveWebImage(MS_JPEG, 1, 1, 0);
+		    $filename = $this->map_saveWebImage($image_map,'jpeg');
 		    $newname = $this->user->id.basename($filename);
 		    rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);    
 		    return IMAGEURL.$newname;
@@ -12234,7 +12245,7 @@ class GUI extends GUI_core{
   # Zeichnet die Kartenelemente Hauptkarte, Legende, Maßstab und Referenzkarte
   # drawMap #
   function drawMap() {
-    if(MINSCALE != '' AND $this->map_factor == '' AND $this->map->scale < MINSCALE){
+    if(MINSCALE != '' AND $this->map_factor == '' AND $this->map_scaledenom < MINSCALE){
       $this->scaleMap(MINSCALE);
     }    
     $this->image_map = $this->map->draw() OR die($this->layer_error_handling());    
@@ -12247,12 +12258,12 @@ class GUI extends GUI_core{
     for ($i=0;$i<$this->map->numlayers;$i++) {
       $layer=$this->map->getLayer($i);
       #$layer->setMetaData('layer_hidden','0');
-      #echo '<br>scale:'.$this->map->scale.' max: '.$layer->maxscale.' min:'.$layer->minscale;
+      #echo '<br>scale:'.$this->map_scaledenom.' max: '.$layer->maxscaledenom.' min:'.$layer->minscaledenom;
       $layer->setMetaData('layer_scalehidden','0');
-      if ($this->map->scale < $layer->minscale) {
+      if ($this->map_scaledenom < $layer->minscaledenom) {
         $layer->setMetaData('layer_scalehidden','1');
       }
-      elseif ($layer->maxscale > 0 AND $this->map->scale > $layer->maxscale) {
+      elseif ($layer->maxscaledenom > 0 AND $this->map_scaledenom > $layer->maxscaledenom) {
         $layer->setMetaData('layer_scalehidden','1');
       }
       else{
@@ -12283,7 +12294,7 @@ class GUI extends GUI_core{
     # Erstellen des Maßstabes
     $this->switchScaleUnitIfNecessary();
     $img_scalebar = $this->map->drawScaleBar();
-    $filename = $img_scalebar->saveWebImage(MS_PNG, 1, 1, 0);
+    $filename = $this->map_saveWebImage($img_scalebar,'png');
     $newname = $this->user->id.basename($filename);
     rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
     $this->img['scalebar'] = IMAGEURL.$newname;

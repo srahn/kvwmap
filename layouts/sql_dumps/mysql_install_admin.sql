@@ -12,7 +12,7 @@
 # Bei verschiedenen SQL-Anweisungen sind vorher Konstanten für die Einträge in der Datenbank zu setzen
 # Benutzer für den Zugriff auf die PostGIS-Datenbank
 SET @pg_user='kvwmap';
-SET @pg_dbname='kvwmapsp170';
+SET @pg_dbname='kvwmap_msp';
 # Benutzer in der Mysql-Datenbank für den die Eintragungen vorgenommen werden sollen
 SET @user_id=1;
 # Stelle in der Mysql-Datenbank, für die die Eintragungen vorgenommen werden sollen

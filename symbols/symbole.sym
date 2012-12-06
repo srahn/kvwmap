@@ -1,545 +1,537 @@
 SYMBOLSET
 
-SYMBOL        #1
-  NAME "Wohngebaeude"
-  TYPE PIXMAP
-  IMAGE "wohngebaeude_allgemein.png"
-  TRANSPARENT 0
-END
-
-SYMBOL        #2
-  NAME "Wirtschaftsgebaeude"
-  TYPE PIXMAP
-  IMAGE "wirtschaftsgebaeude.png"
-  TRANSPARENT 0
-END
-
-SYMBOL        #3
-  NAME "Gruenanlage"
-  TYPE PIXMAP
-  IMAGE "gruenanlage.png"
-  TRANSPARENT 1
-END
-
-SYMBOL        #4
-  NAME "(Klein-)Garten"
-  TYPE PIXMAP
-  IMAGE "garten.png"
-  TRANSPARENT 1
-END
-
-SYMBOL        #5
-  NAME "Gruenland_Bild"
-  TYPE PIXMAP
-  IMAGE "gruenland.png"
-  TRANSPARENT 1
-END
-
-SYMBOL        #6
-  NAME "Gartenland (allgemein)"
-  TYPE PIXMAP
-  IMAGE "gartenland.png"
-  TRANSPARENT 1
-END
-
-SYMBOL        #7
-  NAME "Nadelwald_Bild"
-  TYPE PIXMAP
-  IMAGE "nadelwald.png"
-  TRANSPARENT 1
-END
-
-SYMBOL        #8
-  NAME "Mischwald_Bild"
-  TYPE PIXMAP
-  IMAGE "mischwald.png"
-  TRANSPARENT 1
-END
-
-SYMBOL        #9
-  NAME "Linie"
-  TYPE ELLIPSE
-  POINTS
-    1 1
-  END
-END
-
-SYMBOL #10
-  NAME "Flurgrenze"
-  TYPE ELLIPSE
-  POINTS 1 1 END
- # FILLED true
-  STYLE 1 4 1 4 1 4 14 4 END
-END
-
-SYMBOL #11
-  NAME "B-Plan-Grenze"
-  TYPE ELLIPSE
-  POINTS 1 1 END
-  FILLED true
-  STYLE 5 10 5 END
-END
-
-SYMBOL #12
-  NAME "Gemarkungsgrenze"
-  TYPE ELLIPSE
-  POINTS 1 1 END
-  STYLE 1 4 1 4 14 4 END
-END
-
-SYMBOL #13
-  NAME "Gemeindegrenze"
-  TYPE ELLIPSE
-  POINTS 1 1 END
-  STYLE
-    6 12
-  END
-END
-
-SYMBOL        #14
-  NAME "Denkmal_Bild"
-  TYPE PIXMAP
-  IMAGE "denkmal.png"
-  TRANSPARENT 255
-END
-
-SYMBOL #15
-  NAME "Alt-Liegenschaft"
-  TYPE VECTOR
-  POINTS
-    1 12
-    1 1
-    4 3
-    1 6
-    1 12
-  END
-END
-
-SYMBOL #16
-  NAME "Naturdenkmal"
-  TYPE VECTOR
-  POINTS
-    1 10
-    5 10
-    1 10
-  END
-  POINTS
-    9 10
-    13 10
-    9 10
-  END
-  POINTS
-    3 10
-    7 5
-    3 10
-  END
-  POINTS
-    11 10
-    7 5
-    11 10
-  END
-  POINTS
-    7 5
-    3 3
-    7 1
-    11 3
-    7 5
-  END
-  POINTS
-    1 1
-    3 1
-    1 1
-  END
-END
-
-
-SYMBOL        #17
-  NAME "Altlastenbilder"
-  TYPE PIXMAP
-  IMAGE "kamera.png"
-  TRANSPARENT 255
-END
-
-SYMBOL    #18
-  NAME "Telephon"
-  TYPE VECTOR
-  POINTS
-    1 0
-    2 0
-    2 2
-    1 2
-    1 4
-    2 4
-    2 6
-    1 6
-    0 5
-    0 1
-    1 0
-  END
-END
-
-SYMBOL   #19
-  NAME "diagonal-auf"
-  TYPE PIXMAP
-  IMAGE "diagonal-auf.png"
-  TRANSPARENT 1
-END
-
-Symbol #20
-Name 'star'
-Type VECTOR
-Filled TRUE
-Points
-0 .375
-.35 .375
-.5 0
-.65 .375
-1 .375
-.75 .625
-.875 1
-.5 .75
-.125 1
-.25 .625
-END
-END 
-
-Symbol #21
-Name 'triangle'
-Type VECTOR
-Filled TRUE
-Points
-0 1
-.5 0
-1 1
-0 1
-END
-END 
-
-Symbol #22
-Name 'square'
-Type VECTOR
-Filled TRUE
-Points
-0 1
-0 0
-1 0
-1 1
-0 1
-END
-END 
-
-Symbol #23
-Name 'plus'
-Type VECTOR
-Points
-.5 0
-.5 1
--99 -99
-0 .5
-1 .5
-END
-END 
-
-Symbol #24
-Name 'cross'
-Type VECTOR
-Points
-0 0
-1 1
--99 -99
-0 1
-1 0
-END
-END
-
-Symbol #25
-Name 'circle'
-Type ELLIPSE
-Filled TRUE
-Points
-1 1
-END
-END 
-
-SYMBOL #26
-  NAME "punkt"
-  TYPE ELLIPSE
-  POINTS
-    1 1
-  END
-  FILLED TRUE
-END 
-
-Symbol #27
-Type VECTOR
-TRANSPARENT 0
-Points
-1 0
-1 1
-END
-END 
-
-Symbol #28
-Type VECTOR
-TRANSPARENT 0
-Points
-0 0
-1 1
-END
-END 
-
-Symbol #29
-Type VECTOR
-TRANSPARENT 0
-Points
-0 1
-1 0
-END
-END 
-
-Symbol #30
-Type VECTOR
-Points
-0 1
-1 0
--99 -99
-0 0
-1 1
-END
-END 
-
-Symbol #31
-Type ELLIPSE
-Filled TRUE
-Points
-1 1
-END
-END 
-
-SYMBOL #32
-	NAME "filledcircle"
-	TYPE ELLIPSE
-	POINTS
-	  1 1
+	SYMBOL        #1
+		NAME "Wohngebaeude"
+		TYPE PIXMAP
+		IMAGE "wohngebaeude_allgemein.png"
+		TRANSPARENT 0
 	END
-	FILLED TRUE
-END 
 
-SYMBOL #33
+	SYMBOL        #2
+		NAME "Wirtschaftsgebaeude"
+		TYPE PIXMAP
+		IMAGE "wirtschaftsgebaeude.png"
+		TRANSPARENT 0
+	END
+
+	SYMBOL        #3
+		NAME "Gruenanlage"
+		TYPE PIXMAP
+		IMAGE "gruenanlage.png"
+		TRANSPARENT 1
+	END
+
+	SYMBOL        #4
+		NAME "(Klein-)Garten"
+		TYPE PIXMAP
+		IMAGE "garten.png"
+		TRANSPARENT 1
+	END
+
+	SYMBOL        #5
+		NAME "Gruenland_Bild"
+		TYPE PIXMAP
+		IMAGE "gruenland.png"
+		TRANSPARENT 1
+	END
+
+	SYMBOL        #6
+		NAME "Gartenland (allgemein)"
+		TYPE PIXMAP
+		IMAGE "gartenland.png"
+		TRANSPARENT 1
+	END
+
+	SYMBOL        #7
+		NAME "Nadelwald_Bild"
+		TYPE PIXMAP
+		IMAGE "nadelwald.png"
+		TRANSPARENT 1
+	END
+
+	SYMBOL        #8
+		NAME "Mischwald_Bild"
+		TYPE PIXMAP
+		IMAGE "mischwald.png"
+		TRANSPARENT 1
+	END
+
+	SYMBOL        #9
+		NAME "Linie"
+		TYPE ELLIPSE
+		POINTS
+		  1 1
+		END
+	END
+
+	SYMBOL #10
+		NAME "Flurgrenze"
+		TYPE ELLIPSE
+		POINTS
+		 	1 1
+		END
+#		STYLE	1 4 1 4 1 4 14 4 END
+	END
+
+	SYMBOL #11
+		NAME "B-Plan-Grenze"
+		TYPE ELLIPSE
+		POINTS 1 1 END
+		FILLED true
+#		STYLE 5 10 5 END
+	END
+
+	SYMBOL #12
+		NAME "Gemarkungsgrenze"
+		TYPE ELLIPSE
+		POINTS 1 1 END
+#		STYLE 1 4 1 4 14 4 END
+	END
+
+	SYMBOL #13
+		NAME "Gemeindegrenze"
+		TYPE ELLIPSE
+		POINTS 1 1 END
+#		STYLE 6 12 END
+	END
+
+	SYMBOL        #14
+		NAME "Denkmal_Bild"
+		TYPE PIXMAP
+		IMAGE "denkmal.png"
+		TRANSPARENT 255
+	END
+
+	SYMBOL #15
+		NAME "Alt-Liegenschaft"
+		TYPE VECTOR
+		POINTS
+		  1 12
+		  1 1
+		  4 3
+		  1 6
+		  1 12
+		END
+	END
+
+	SYMBOL #16
+		NAME "Naturdenkmal"
+		TYPE VECTOR
+		POINTS
+		  1 10
+		  5 10
+		  1 10
+		END
+		POINTS
+		  9 10
+		  13 10
+		  9 10
+		END
+		POINTS
+		  3 10
+		  7 5
+		  3 10
+		END
+		POINTS
+		  11 10
+		  7 5
+		  11 10
+		END
+		POINTS
+		  7 5
+		  3 3
+		  7 1
+		  11 3
+		  7 5
+		END
+		POINTS
+		  1 1
+		  3 1
+		  1 1
+		END
+	END
+
+
+	SYMBOL        #17
+		NAME "Altlastenbilder"
+		TYPE PIXMAP
+		IMAGE "kamera.png"
+		TRANSPARENT 255
+	END
+
+	SYMBOL    #18
+		NAME "Telephon"
+		TYPE VECTOR
+		POINTS
+		  1 0
+		  2 0
+		  2 2
+		  1 2
+		  1 4
+		  2 4
+		  2 6
+		  1 6
+		  0 5
+		  0 1
+		  1 0
+		END
+	END
+
+	SYMBOL   #19
+		NAME "diagonal-auf"
+		TYPE PIXMAP
+		IMAGE "diagonal-auf.png"
+		TRANSPARENT 1
+	END
+
+	Symbol #20
+	Name 'star'
+	Type VECTOR
+	Filled TRUE
+	Points
+	0 .375
+	.35 .375
+	.5 0
+	.65 .375
+	1 .375
+	.75 .625
+	.875 1
+	.5 .75
+	.125 1
+	.25 .625
+	END
+	END 
+
+	Symbol #21
+	Name 'triangle'
+	Type VECTOR
+	Filled TRUE
+	Points
+	0 1
+	.5 0
+	1 1
+	0 1
+	END
+	END 
+
+	Symbol #22
+	Name 'square'
+	Type VECTOR
+	Filled TRUE
+	Points
+	0 1
+	0 0
+	1 0
+	1 1
+	0 1
+	END
+	END 
+
+	Symbol #23
+	Name 'plus'
+	Type VECTOR
+	Points
+	.5 0
+	.5 1
+	-99 -99
+	0 .5
+	1 .5
+	END
+	END 
+
+	Symbol #24
+	Name 'cross'
+	Type VECTOR
+	Points
+	0 0
+	1 1
+	-99 -99
+	0 1
+	1 0
+	END
+	END
+
+	Symbol #25
+	Name 'circle'
 	Type ELLIPSE
-	POINTS
-		1 1
+	Filled TRUE
+	Points
+	1 1
 	END
-	FILLED TRUE
-	STYLE	10 0 10 END
-END
+	END 
 
-SYMBOL #34
-  NAME 'glseitstehdreieck'
-  TYPE VECTOR
-  POINTS
-    0 2.5
-    2 -1
-    4 2.5
-    0 2.5
-  END
-  FILLED TRUE
-END
+	SYMBOL #26
+		NAME "punkt"
+		TYPE ELLIPSE
+		POINTS
+		  1 1
+		END
+		FILLED TRUE
+	END 
 
-SYMBOL #35 Auf dem Kopf stehendes gleichseitiges Dreieck
-  NAME 'glseitkopfdreieck'
-  TYPE VECTOR
-  POINTS
-    0 1
-    2 4.5
-    4 1
-    0 1
-  END
-  FILLED TRUE
-END
+	Symbol #27
+	Type VECTOR
+	TRANSPARENT 0
+	Points
+	1 0
+	1 1
+	END
+	END 
 
-SYMBOL #36
-  NAME 'documentensymbol'
-  TYPE VECTOR
-  POINTS
-    0 4
-    3.5 4
-    3.5 1
-    2.5 0
-    2.5 1
-    3.5 1
-    2.5 0
-    0   0
-  END
-  FILLED TRUE
-END
+	Symbol #28
+	Type VECTOR
+	TRANSPARENT 0
+	Points
+	0 0
+	1 1
+	END
+	END 
 
-SYMBOL #37
-  NAME 'zugehoerigkeitspfeil'
-  TYPE VECTOR
-  POINTS
-    5  5
-   10  9
-    9  9
-    9 10
-    5  5
-  END
-  FILLED TRUE
-END
+	Symbol #29
+	Type VECTOR
+	TRANSPARENT 0
+	Points
+	0 1
+	1 0
+	END
+	END 
 
-SYMBOL # 38
-	NAME "Text"
-	TYPE TRUETYPE
-	FONT verdana
-	FILLED true
-	ANTIALIAS true
-	CHARACTER "&#65;"
-END
+	Symbol #30
+		Type VECTOR
+		Points
+			0 1
+			1 0
+			-99 -99
+			0 0
+			1 1
+		END
+	END 
 
-SYMBOL # 39
-	NAME "i"
-	TYPE TRUETYPE
-	FONT times-new-roman_bold
-	FILLED true
-	ANTIALIAS true
-	CHARACTER "&#105;"
-END
+	Symbol #31
+		Type ELLIPSE
+		Filled TRUE
+		Points
+			1 1
+		END
+	END 
 
-SYMBOL #40
-  NAME "Fahne"
-  TYPE VECTOR
-  POINTS
-    0 12
-    3 0
-    6 3
-    10 2
-    10 6
-    6 7
-    2 5
-  END
-END
+	SYMBOL #32
+		NAME "filledcircle"
+		TYPE ELLIPSE
+		POINTS
+			1 1
+		END
+		FILLED TRUE
+	END 
 
+	SYMBOL #33
+		Type ELLIPSE
+		POINTS
+			1 1
+		END
+		FILLED TRUE
+#		STYLE	10 0 10 END
+	END
 
-SYMBOL
-  NAME 'pfeil_oben'
-  Type VECTOR
-  FILLED TRUE
-   Points 
-    3 0
-    6 2
-    4 2
-    4 5
-    2 5
-    2 2
-    0 2
-    3 0
-  END
-END 
+	SYMBOL #34
+		NAME 'glseitstehdreieck'
+		TYPE VECTOR
+		POINTS
+		  0 2.5
+		  2 -1
+		  4 2.5
+		  0 2.5
+		END
+		FILLED TRUE
+	END
 
-SYMBOL
-  NAME 'pfeil_unten'
-  Type VECTOR
-  FILLED TRUE
-   Points 
-    2 0
-    4 0
-    4 3
-    6 3
-    3 5
-    0 3
-    2 3
-    2 0
-  END
-END 
+	SYMBOL #35 Auf dem Kopf stehendes gleichseitiges Dreieck
+		NAME 'glseitkopfdreieck'
+		TYPE VECTOR
+		POINTS
+		  0 1
+		  2 4.5
+		  4 1
+		  0 1
+		END
+		FILLED TRUE
+	END
 
-SYMBOL
-  NAME 'pfeil_links'
-  Type VECTOR
-  FILLED TRUE
-   Points 
-    2 0
-    2 2
-    5 2
-    5 4
-    2 4
-    2 6
-    0 3
-    2 0
-  END
-END 
+	SYMBOL #36
+		NAME 'documentensymbol'
+		TYPE VECTOR
+		POINTS
+		  0 4
+		  3.5 4
+		  3.5 1
+		  2.5 0
+		  2.5 1
+		  3.5 1
+		  2.5 0
+		  0   0
+		END
+		FILLED TRUE
+	END
 
-SYMBOL
-  NAME "filledcircle"
-  TYPE ELLIPSE
-  POINTS
-    1 1
-  END
-  FILLED TRUE
-END 
+	SYMBOL #37
+		NAME 'zugehoerigkeitspfeil'
+		TYPE VECTOR
+		POINTS
+		  5  5
+		 10  9
+		  9  9
+		  9 10
+		  5  5
+		END
+		FILLED TRUE
+	END
 
+	SYMBOL # 38
+		NAME "Text"
+		TYPE TRUETYPE
+		FONT verdana
+		FILLED true
+		ANTIALIAS true
+		CHARACTER "&#65;"
+	END
 
-SYMBOL
-  NAME 'hatch'
-  TYPE HATCH
-END
+	SYMBOL # 39
+		NAME "i"
+		TYPE TRUETYPE
+		FONT times-new-roman_bold
+		FILLED true
+		ANTIALIAS true
+		CHARACTER "&#105;"
+	END
 
-SYMBOL 
-  NAME "marker"
-  TYPE PIXMAP
-  IMAGE "marker.png"
-  TRANSPARENT 0
-END
-
-SYMBOL # 57
-  NAME "marker-blue"
-  TYPE PIXMAP
-  IMAGE "marker-blue7.png"
-  #TRANSPARENT 11
-END
-
-SYMBOL # 57
-  NAME "marker-blue2"
-  TYPE PIXMAP
-  IMAGE "marker-blue4.png"
-  TRANSPARENT 13
-END
-
-SYMBOL 
-  NAME "marker-gold"
-  TYPE PIXMAP
-  IMAGE "marker-blue.png"
-  TRANSPARENT 0
-END
-
-SYMBOL 
-  NAME "marker-green"
-  TYPE PIXMAP
-  IMAGE "marker-green.png"
-  TRANSPARENT 0
-END
-
-SYMBOL 
-  NAME "townhall"
-  TYPE PIXMAP
-  IMAGE "town_hall.png"
-  TRANSPARENT 0
-END
-
-SYMBOL
-  NAME "linie-gestrichelt10"
-  TYPE ELLIPSE
-  POINTS
-    1 1
-  END
-  style
-    1 20
-  END
-END
+	SYMBOL #40
+		NAME "Fahne"
+		TYPE VECTOR
+		POINTS
+		  0 12
+		  3 0
+		  6 3
+		  10 2
+		  10 6
+		  6 7
+		  2 5
+		END
+	END
 
 
+	SYMBOL
+		NAME 'pfeil_oben'
+		Type VECTOR
+		FILLED TRUE
+		 Points 
+		  3 0
+		  6 2
+		  4 2
+		  4 5
+		  2 5
+		  2 2
+		  0 2
+		  3 0
+		END
+	END 
+
+	SYMBOL
+		NAME 'pfeil_unten'
+		Type VECTOR
+		FILLED TRUE
+		 Points 
+		  2 0
+		  4 0
+		  4 3
+		  6 3
+		  3 5
+		  0 3
+		  2 3
+		  2 0
+		END
+	END 
+
+	SYMBOL
+		NAME 'pfeil_links'
+		Type VECTOR
+		FILLED TRUE
+		 Points 
+		  2 0
+		  2 2
+		  5 2
+		  5 4
+		  2 4
+		  2 6
+		  0 3
+		  2 0
+		END
+	END 
+
+	SYMBOL
+		NAME "filledcircle"
+		TYPE ELLIPSE
+		POINTS
+		  1 1
+		END
+		FILLED TRUE
+	END 
 
 
-######
+	SYMBOL
+		NAME 'hatch'
+		TYPE HATCH
+	END
+
+	SYMBOL 
+		NAME "marker"
+		TYPE PIXMAP
+		IMAGE "marker.png"
+		TRANSPARENT 0
+	END
+
+	SYMBOL # 57
+		NAME "marker-blue"
+		TYPE PIXMAP
+		IMAGE "marker-blue7.png"
+		#TRANSPARENT 11
+	END
+
+	SYMBOL # 57
+		NAME "marker-blue2"
+		TYPE PIXMAP
+		IMAGE "marker-blue4.png"
+		TRANSPARENT 13
+	END
+
+	SYMBOL 
+		NAME "marker-gold"
+		TYPE PIXMAP
+		IMAGE "marker-blue.png"
+		TRANSPARENT 0
+	END
+
+	SYMBOL 
+		NAME "marker-green"
+		TYPE PIXMAP
+		IMAGE "marker-green.png"
+		TRANSPARENT 0
+	END
+
+	SYMBOL 
+		NAME "townhall"
+		TYPE PIXMAP
+		IMAGE "town_hall.png"
+		TRANSPARENT 0
+	END
+
+	SYMBOL
+		NAME "linie-gestrichelt10"
+		TYPE ELLIPSE
+		POINTS
+		  1 1
+		END
+#		STYLE 1 20 END
+	END
 
 END
 

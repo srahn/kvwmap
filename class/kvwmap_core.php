@@ -46,6 +46,7 @@
 ##############
 class GUI_core {
 	var $scaleUnitSwitchScale=239210;
+  var $map_scaledenom;
 	
   ###################### Liste der Funktionen ####################################
 
@@ -90,16 +91,23 @@ class GUI_core {
     switch ($loadMapSource) {
       # lade Karte aus Post-Parametern
       case 'Post' : {
-        $map = ms_newMapObj(SHAPEPATH.'MapFiles/tk_niedersachsen.map');
+        if (MAPSERVERVERSION < 600) {
+				  $map = ms_newMapObj(SHAPEPATH.'MapFiles/tk_niedersachsen.map');
+				}
+				else {
+				  $map = new mapObj(SHAPEPATH.'MapFiles/tk_niedersachsen.map');
+				}
+				echo '<br>MapServer Version: '.ms_GetVersionInt();
+				echo '<br>Details: '.ms_GetVersion();	
 
         # Allgemeine Parameter
         #var_dump($this->formvars);
-        $map->set('width', $this->formvars['post_width']);
+        $map->width = $this->formvars['post_width'];
         $map->set('height', $this->formvars['post_height']);
         $map->set('resolution',72);
         $map->set('units',MS_METERS);
-        $map->set('transparent', MS_OFF);
-        $map->set('interlace', MS_ON);
+        #$map->set('transparent', MS_OFF);
+        #$map->set('interlace', MS_ON);
         $map->set('status', MS_ON);
         $map->set('name', MAPFILENAME);
         $map->imagecolor->setRGB(255,255,255);
@@ -125,7 +133,7 @@ class GUI_core {
 
         # Legendobject
         $map->legend->set('status', MS_ON);
-        $map->legend->set('transparent', MS_OFF);
+        #$map->legend->set('transparent', MS_OFF);
         $map->legend->set('keysizex', '16');
         $map->legend->set('keysizey', '16');
         $map->legend->set('template', LAYOUTPATH.'legend_layer.htm');
@@ -144,8 +152,13 @@ class GUI_core {
           $layerset=array();
         }
         for ($i=0; $i<count($layerset); $i++) {
-          $layer = ms_newLayerObj($map);
-          $layer->setMetaData('wms_name', $layerset[$i][name]);
+				  if (MAPSERVERVERSION < 600) {
+            $layer = ms_newLayerObj($map);
+          }
+					else {
+					  $layer = new layerObj($map);
+					}
+					$layer->setMetaData('wms_name', $layerset[$i][name]);
           $layer->setMetaData('wms_server_version','1.1.1');
           $layer->setMetaData('wms_format','image/png');
           $layer->setMetaData('wms_extent',$this->formvars['post_minx'].' '.$this->formvars['post_miny'].' '.$this->formvars['post_maxx'].' '.$this->formvars['post_maxy']);
@@ -194,7 +207,7 @@ class GUI_core {
           #echo '<br>Name: '.$layerset[$i][name];
           #echo '<br>Connection: '.$layerset[$i][connection];
           $layer->set('connection', $layerset[$i][connection]);
-          if (MAPSERVERVERSION < '540') {
+          if (MAPSERVERVERSION < 540) {
 			      $layer->set('connectiontype', 7);
 			    }
 			    else {
@@ -215,12 +228,22 @@ class GUI_core {
       # lade Karte von einer Map-Datei
       case 'File' : {
         $debug->write("MapDatei $connStr laden",4);
-        $this->map = ms_newMapObj(DEFAULTMAPFILE);
-      } break;
+				if (MAPSERVERVERSION < 600) {
+          $this->map = ms_newMapObj(DEFAULTMAPFILE);
+        }
+				else {
+				  $this->map = new mapObj(DEFAULTMAPFILE);
+				}
+			} break;
 
       # lade Karte von Datenbank
       case 'DataBase' : {
-        $map = ms_newMapObj(DEFAULTMAPFILE);
+				if (MAPSERVERVERSION < 600) {
+          $map = ms_newMapObj(DEFAULTMAPFILE);
+        }
+				else {
+				  $map = new mapObj(DEFAULTMAPFILE);
+				}
         if($this->formvars['go'] == 'getMap_ajax'){
         	$mapDB = new db_mapObj_core($this->Stelle->id,$this->user->id);
         }
@@ -229,8 +252,7 @@ class GUI_core {
         }
 
         # Allgemeine Parameter
-        $map->set('width',$this->user->rolle->nImageWidth);
-        $map->set('height',$this->user->rolle->nImageHeight);
+        $map->setSize($this->user->rolle->nImageWidth,$this->user->rolle->nImageHeight);
         $map->set('resolution',96);
         if($this->user->rolle->epsg_code == '4326'){
         	$map->set('units',MS_DD);
@@ -331,7 +353,12 @@ class GUI_core {
         $map->reference->set('width',$ref['width']);
         $map->reference->set('height',$ref['height']);
         $map->reference->set('status','MS_ON');
-        $extent=ms_newRectObj();
+				if (MAPSERVERVERSION <600) {
+					$extent=ms_newRectObj();
+				}
+				else {
+				  $extent = new rectObj();
+				}
         $map->reference->extent->setextent(round($ref['xmin']),round($ref['ymin']),round($ref['xmax']),round($ref['ymax']));
         # Umrechnen des Referenzkartenextents
         if($this->Stelle->epsg_code != $this->user->rolle->epsg_code){
@@ -538,7 +565,7 @@ class GUI_core {
               $layer->set('connection', $layerset[$i]['connection']);
             }
             if ($layerset[$i]['connectiontype']>0) {
-              if (MAPSERVERVERSION >= '540') {
+              if (MAPSERVERVERSION >= 540) {
                 $layer->setConnectionType($layerset[$i]['connectiontype']);
               }
               else {
@@ -705,11 +732,35 @@ class GUI_core {
         } # end of Schleife layer
         
         $this->map=$map;
+				if (MAPSERVERVERSION > 600) {
+					$this->map_scaledenom = $map->scaledenom;
+				}
+				else {
+					$this->map_scaledenom = $map->scale;
+				}
         $this->mapDB=$mapDB;
       } break; # end of lade Karte von Datenbank
     } # end of switch loadMapSource
     return 1;
   }
+
+
+
+
+
+function loadMap2() {
+   $map = $this->map;
+   $layer = ms_newLayerObj($map);
+   $layer->set('status', 1);
+   $layer->setProjection('+init=epsg: 2398');
+   $layer->set('connection', "http://www.gaia-mv.de/dienste/gdimv_topomv?REQUEST=GetMap&VERSION=1.1.1&SERVICE=WMS&LAYERS=gdimv_topomv&FORMAT=image/jpeg");
+   $layer->setConnectionType(7);
+  }
+
+
+
+
+
 
   function loadclasses($layer, $layerset, $classset, $map){
     $anzClass=count($classset);
@@ -735,8 +786,13 @@ class GUI_core {
       # Änderung am 12.07.2005 Korduan
       for ($k=0;$k<count($classset[$j]['Style']);$k++) {
         $dbStyle=$classset[$j]['Style'][$k];
-        $style = ms_newStyleObj($klasse);
-        if ($dbStyle['symbolname']!='') {
+				if (MAPSERVERVERSION < 600) {
+          $style = ms_newStyleObj($klasse);
+        }
+				else {
+				  $style = new styleObj($klasse);
+				}
+				if ($dbStyle['symbolname']!='') {
           $style -> set('symbolname',$dbStyle['symbolname']);
         }
         if ($dbStyle['symbol']>0) {
@@ -851,91 +907,186 @@ class GUI_core {
       # Änderung am 12.07.2005 Korduan
       for ($k=0;$k<count($classset[$j]['Label']);$k++) {
         $dbLabel=$classset[$j]['Label'][$k];
-        $klasse->label->set('type',$dbLabel['type']);
-        $klasse->label->set('font',$dbLabel['font']);
-        $RGB=explode(" ",$dbLabel['color']);
-        $klasse->label->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
-        $RGB=explode(" ",$dbLabel['outlinecolor']);
-        $klasse->label->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
-        if ($dbLabel['shadowcolor']!='') {
-          $RGB=explode(" ",$dbLabel['shadowcolor']);
-          $klasse->label->shadowcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
-          $klasse->label->set('shadowsizex',$dbLabel['shadowsizex']);
-          $klasse->label->set('shadowsizey',$dbLabel['shadowsizey']);
-        }
-        if ($dbLabel['backgroundcolor']!='') {
-          $RGB=explode(" ",$dbLabel['backgroundcolor']);
-          $klasse->label->backgroundcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
-        }
-        if ($dbLabel['backgroundshadowcolor']!='') {
-          $RGB=explode(" ",$dbLabel['backgroundshadowcolor']);
-          $klasse->label->backgroundshadowcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
-          $klasse->label->set('backgroundshadowsizex',$dbLabel['backgroundshadowsizex']);
-          $klasse->label->set('backgroundshadowsizey',$dbLabel['backgroundshadowsizey']);
-        }
-        $klasse->label->set('angle',$dbLabel['angle']);
-        if(MAPSERVERVERSION > 500 AND $layerset['labelangleitem']!=''){
-          $klasse->label->setbinding(MS_LABEL_BINDING_ANGLE, $layerset['labelangleitem']);
-        }
-        if ($dbLabel['autoangle']==1) {
-          $klasse->label->set('autoangle',$dbLabel['autoangle']);
-        }
-        if ($dbLabel['buffer']!='') {
-          $klasse->label->set('buffer',$dbLabel['buffer']);
-        }
-        $klasse->label->set('wrap',$dbLabel['wrap']);
-        $klasse->label->set('force',$dbLabel['the_force']);
-        $klasse->label->set('partials',$dbLabel['partials']);
-        $klasse->label->set('size',$dbLabel['size']);
-        $klasse->label->set('minsize',$dbLabel['minsize']);
-        $klasse->label->set('maxsize',$dbLabel['maxsize']);
-        # Skalierung der Labelschriftgröße, wenn map_factor gesetzt
-        if($this->map_factor != ''){
-          $klasse->label->set('minsize',$dbLabel['minsize']*$this->map_factor);
-          $klasse->label->set('maxsize',$dbLabel['size']*$this->map_factor);
-          $klasse->label->set('size',$dbLabel['size']*$this->map_factor);
-        }
-
-        if ($dbLabel['position']!='') {
-          switch ($dbLabel['position']){
-            case '0' :{
-              $klasse->label->set('position', MS_UL);
-            }break;
-            case '1' :{
-              $klasse->label->set('position', MS_LR);
-            }break;
-            case '2' :{
-              $klasse->label->set('position', MS_UR);
-            }break;
-            case '3' :{
-              $klasse->label->set('position', MS_LL);
-            }break;
-            case '4' :{
-              $klasse->label->set('position', MS_CR);
-            }break;
-            case '5' :{
-              $klasse->label->set('position', MS_CL);
-            }break;
-            case '6' :{
-              $klasse->label->set('position', MS_UC);
-            }break;
-            case '7' :{
-              $klasse->label->set('position', MS_LC);
-            }break;
-            case '8' :{
-              $klasse->label->set('position', MS_CC);
-            }break;
-            case '9' :{
-              $klasse->label->set('position', MS_AUTO);
-            }break;
+        if (MAPSERVERVERSION < 600) { 
+          $klasse->label->set('type',$dbLabel['type']);
+          $klasse->label->set('font',$dbLabel['font']);
+          $RGB=explode(" ",$dbLabel['color']);
+          if ($RGB[0]=='') { $RGB[0]=0; }
+          if ($RGB[1]=='') { $RGB[1]=0; }
+          if ($RGB[2]=='') { $RGB[2]=0; }
+          $klasse->label->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+          $RGB=explode(" ",$dbLabel['outlinecolor']);
+          $klasse->label->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+          if ($dbLabel['shadowcolor']!='') {
+            $RGB=explode(" ",$dbLabel['shadowcolor']);
+            $klasse->label->shadowcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+            $klasse->label->set('shadowsizex',$dbLabel['shadowsizex']);
+            $klasse->label->set('shadowsizey',$dbLabel['shadowsizey']);
           }
-        }
-        if ($dbLabel['offsetx']!='') {
-          $klasse->label->set('offsetx',$dbLabel['offsetx']);
-        }
-        if ($dbLabel['offsety']!='') {
-          $klasse->label->set('offsety',$dbLabel['offsety']);
-        }
+          if ($dbLabel['backgroundcolor']!='') {
+            $RGB=explode(" ",$dbLabel['backgroundcolor']);
+            $klasse->label->backgroundcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+          }
+          if ($dbLabel['backgroundshadowcolor']!='') {
+            $RGB=explode(" ",$dbLabel['backgroundshadowcolor']);
+            $klasse->label->backgroundshadowcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+            $klasse->label->set('backgroundshadowsizex',$dbLabel['backgroundshadowsizex']);
+            $klasse->label->set('backgroundshadowsizey',$dbLabel['backgroundshadowsizey']);
+          }
+          $klasse->label->set('angle',$dbLabel['angle']);
+          if(MAPSERVERVERSION > 500 AND $layerset['labelangleitem']!=''){
+            $klasse->label->setbinding(MS_LABEL_BINDING_ANGLE, $layerset['labelangleitem']);
+          }
+          if ($dbLabel['autoangle']==1) {
+            $klasse->label->set('autoangle',$dbLabel['autoangle']);
+          }
+          if ($dbLabel['buffer']!='') {
+            $klasse->label->set('buffer',$dbLabel['buffer']);
+          }
+          $klasse->label->set('wrap',$dbLabel['wrap']);
+          $klasse->label->set('force',$dbLabel['the_force']);
+          $klasse->label->set('partials',$dbLabel['partials']);
+          $klasse->label->set('size',$dbLabel['size']);
+          $klasse->label->set('minsize',$dbLabel['minsize']);
+          $klasse->label->set('maxsize',$dbLabel['maxsize']);
+          # Skalierung der Labelschriftgröße, wenn map_factor gesetzt
+          if($this->map_factor != ''){
+            $klasse->label->set('minsize',$dbLabel['minsize']*$this->map_factor);
+            $klasse->label->set('maxsize',$dbLabel['size']*$this->map_factor);
+            $klasse->label->set('size',$dbLabel['size']*$this->map_factor);
+          }
+          if ($dbLabel['position']!='') {
+            switch ($dbLabel['position']){
+              case '0' :{
+                $klasse->label->set('position', MS_UL);
+              }break;
+              case '1' :{
+                $klasse->label->set('position', MS_LR);
+              }break;
+              case '2' :{
+                $klasse->label->set('position', MS_UR);
+              }break;
+              case '3' :{
+                $klasse->label->set('position', MS_LL);
+              }break;
+              case '4' :{
+                $klasse->label->set('position', MS_CR);
+              }break;
+              case '5' :{
+                $klasse->label->set('position', MS_CL);
+              }break;
+              case '6' :{
+                $klasse->label->set('position', MS_UC);
+              }break;
+              case '7' :{
+                $klasse->label->set('position', MS_LC);
+              }break;
+              case '8' :{
+                $klasse->label->set('position', MS_CC);
+              }break;
+              case '9' :{
+                $klasse->label->set('position', MS_AUTO);
+              }break;
+            }
+          }
+          if ($dbLabel['offsetx']!='') {
+            $klasse->label->set('offsetx',$dbLabel['offsetx']);
+          }
+          if ($dbLabel['offsety']!='') {
+            $klasse->label->set('offsety',$dbLabel['offsety']);
+          }          
+        } # ende mapserver < 600
+        else {
+          $label = new labelObj();
+          $label->type = $dbLabel['type'];
+          $label->font = $dbLabel['font'];
+          $RGB=explode(" ",$dbLabel['color']);
+          if ($RGB[0]=='') { $RGB[0]=0; }
+          if ($RGB[1]=='') { $RGB[1]=0; }
+          if ($RGB[2]=='') { $RGB[2]=0; }
+          $label->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+          $RGB=explode(" ",$dbLabel['outlinecolor']);
+          $label->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+          if ($dbLabel['shadowcolor']!='') {
+            $RGB=explode(" ",$dbLabel['shadowcolor']);
+            $label->shadowcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+            $label->shadowsizex = $dbLabel['shadowsizex'];
+            $label->shadowsizey = $dbLabel['shadowsizey'];
+          }
+          if ($dbLabel['backgroundcolor']!='') {
+            $RGB=explode(" ",$dbLabel['backgroundcolor']);
+            $label->backgroundcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+          }
+          if ($dbLabel['backgroundshadowcolor']!='') {
+            $RGB=explode(" ",$dbLabel['backgroundshadowcolor']);
+            $label->backgroundshadowcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+            $label->backgroundshadowsizex = $dbLabel['backgroundshadowsizex'];
+            $label->backgroundshadowsizey = $dbLabel['backgroundshadowsizey'];
+          }
+          $label->angle = $dbLabel['angle'];
+          if($layerset['labelangleitem']!=''){
+            $label->setBinding(MS_LABEL_BINDING_ANGLE, $layerset['labelangleitem']);
+          }
+          if ($dbLabel['autoangle']==1) {
+            $label->autoangle = $dbLabel['autoangle'];
+          }
+          if ($dbLabel['buffer']!='') {
+            $label->buffer = $dbLabel['buffer'];
+          }
+          $label->wrap = $dbLabel['wrap'];
+          $label->force = $dbLabel['the_force'];
+          $label->partials = $dbLabel['partials'];
+          $label->size = $dbLabel['size'];
+          $label->minsize = $dbLabel['minsize'];
+          $label->maxsize = $dbLabel['maxsize'];
+          # Skalierung der Labelschriftgröße, wenn map_factor gesetzt
+          if($this->map_factor != ''){
+            $label->minsize = $dbLabel['minsize']*$this->map_factor;
+            $label->maxsize = $dbLabel['size']*$this->map_factor;
+            $label->size = $dbLabel['size']*$this->map_factor;
+          }
+          if ($dbLabel['position']!='') {
+            switch ($dbLabel['position']){
+              case '0' :{
+                $label->position = MS_UL;
+              }break;
+              case '1' :{
+                $label->position = MS_LR;
+              }break;
+              case '2' :{
+                $label->position = MS_UR;
+              }break;
+              case '3' :{
+                $label->position = MS_LL;
+              }break;
+              case '4' :{
+                $label->position = MS_CR;
+              }break;
+              case '5' :{
+                $label->position = MS_CL;
+              }break;
+              case '6' :{
+                $label->position = MS_UC;
+              }break;
+              case '7' :{
+                $label->position = MS_LC;
+              }break;
+              case '8' :{
+                $label->position = MS_CC;
+              }break;
+              case '9' :{
+                $label->position = MS_AUTO;
+              }break;
+            }
+          }
+          if ($dbLabel['offsetx']!='') {
+            $label->offsetx = $dbLabel['offsetx'];
+          }
+          if ($dbLabel['offsety']!='') {
+            $label->offsety = $dbLabel['offsety'];
+          }
+          $klasse->addLabel($label);
+        } # ende mapserver >=600
       } # ende Schleife für mehrere Label
     } # end of Schleife Class
   }
@@ -1034,7 +1185,14 @@ class GUI_core {
 
       if($this->formvars['CMD'] != 'jump_coords'){
         $oPixelPos->setXY($minx,$maxy);
+				debug_write("vor zoompoint: nZoomFactor=$nZoomFactor pPixelPos=$oPixelPos->x,$oPixelPos->y, width=".$this->map->width.", height=".$this->map->height.", minx=".$this->map->extent->minx.", miny=".$this->map->extent->miny.", maxx=".$this->map->extent->maxx.", maxy=".$this->map->extent->maxy.", minxmax=".$this->Stelle->MaxGeorefExt->minx.", minymax=".$this->Stelle->MaxGeorefExt->miny.", maxxmax=".$this->Stelle->MaxGeorefExt->maxx.", maxymax=".$this->Stelle->MaxGeorefExt->maxy);
         $this->map->zoompoint($nZoomFactor,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
+        
+        //$oPixelPos->setXY(4555241, 5925775);
+        //$this->map->setCenter($oPixelPos);
+        
+        
+				debug_write("nach zoompoint: width=".$this->map->width.", height=".$this->map->height.", minx=".$this->map->extent->minx.", miny=".$this->map->extent->miny.", maxx=".$this->map->extent->maxx.", maxy=".$this->map->extent->maxy);
       }
       else{
         #---------- Punkt-Rollenlayer erzeugen --------#
@@ -1110,7 +1268,12 @@ class GUI_core {
     else {
       # Zoomen auf ein Rechteck
       $this->debug->write('<br>Es wird auf eine Rechteckgezoomt gezoomt',4);
-      $oPixelExt=ms_newRectObj();
+			if (MAPSERVERVERSION <600) {
+				$oPixelExt=ms_newRectObj();
+			}
+			else {
+				$oPixelExt = new rectObj();
+			}			
       if($minx != 'undefined' AND $miny != 'undefined' AND $maxx != 'undefined' AND $maxy != 'undefined'){
        	$oPixelExt->setextent($minx,$miny,$maxx,$maxy); 
         $this->map->zoomrectangle($oPixelExt,$this->map->width,$this->map->height,$this->map->extent);
@@ -1127,7 +1290,8 @@ class GUI_core {
 
   # Speichert die Daten des MapObjetes in Datei oder Datenbank
   function saveMap($saveMapDestination) {
-    if ($saveMapDestination=='') {
+    debug_write("in saveMap extent(".$this->map->extent->minx.", ".$this->map->extent->miny.", ".$this->map->extent->maxx.", ".$this->map->extent->maxy);
+		if ($saveMapDestination=='') {
       $saveMapDestination=SAVEMAPFILE;
     }
     if ($saveMapDestination != '') {
@@ -1142,7 +1306,12 @@ class GUI_core {
 	 * transformiert die gegebenen Koordinaten von wgs in das System der Stelle und speichert den Kartenextent für die Rolle
 	 */
 	function setMapExtent() {
-		$extent = ms_newRectObj();
+    if (MAPSERVERVERSION < 600) {
+	    $extent = ms_newRectObj();
+		}
+    else {
+		  $extent = new rectObj();
+		}		
 		$extent->setextent($this->formvars['left'],$this->formvars['bottom'],$this->formvars['right'],$this->formvars['top']);
 		$wgsProjection = ms_newprojectionobj("init=epsg:4326");
 		$userProjection = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);
@@ -1168,24 +1337,43 @@ class GUI_core {
 
   # Zeichnet die Kartenelemente Hauptkarte, Legende, Maßstab und Referenzkarte
   # drawMap #
-  function drawMap() {  	
-    if(MINSCALE != '' AND $this->map_factor == '' AND $this->map->scale < MINSCALE){
+  function drawMap() {
+    debug_write("in drawMap  vor if: extent(".$this->map->extent->minx.", ".$this->map->extent->miny.", ".$this->map->extent->maxx.", ".$this->map->extent->maxy);	
+    if(MINSCALE != '' AND $this->map_factor == '' AND $this->map_scaledenom < MINSCALE){
       $this->scaleMap(MINSCALE);
-    }    
-    $this->image_map = @$this->map->draw() OR die($this->reset_layers());   
+    }
+    debug_write("in drawMap nach if: extent(".$this->map->extent->minx.", ".$this->map->extent->miny.", ".$this->map->extent->maxx.", ".$this->map->extent->maxy);		
+    $this->image_map = $this->map->draw() OR die($this->reset_layers());   
     $filename = $this->user->id.'_'.rand(0, 1000000).'.'.$this->map->outputformat->extension;
     $this->image_map->saveImage(IMAGEPATH.$filename);
     $this->img['hauptkarte'] = IMAGEURL.$filename;
     $this->debug->write("Name der Hauptkarte: ".$this->img['hauptkarte'],4);
+		debug_write("indrawMap nach draw: extent(".$this->map->extent->minx.", ".$this->map->extent->miny.", ".$this->map->extent->maxx.", ".$this->map->extent->maxy);
+    debug_write("Karte: ".$filename);
 
 		# Ausblenden der Layer in der Legende, die im aktuellen Maßstab nicht gezeichnet werden sollen
     for ($i=0;$i<$this->map->numlayers;$i++) {
       $layer=$this->map->getLayer($i);
       $layerhiddenflag = '0';
-      if($this->map->scale < $layer->minscale){
+			
+			if (MAPSERVERVERSION > 500) {
+			  $msLayerMinScaleDenom = $layer->minscaledenom;
+      }
+			else {
+				$msLayerMinScaleDenom = $layer->minscale;
+			}
+
+			if (MAPSERVERVERSION > 500) {
+			  $msLayerMaxScaleDenom = $layer->maxscaledenom;
+      }
+			else {
+				$msLayerMaxScaleDenom = $layer->maxscale;
+			}
+			
+      if($this->map_scaledenom < $msLayerMinScaleDenom){
         $layerhiddenflag = '1';
       }
-      elseif ($layer->maxscale > 0 AND $this->map->scale > $layer->maxscale) {
+      elseif ($msLayerMaxScaleDenom > 0 AND $this->map_scaledenom > $msLayerMaxScaleDenom) {
         $layerhiddenflag = '1';
       }
       else{
@@ -1209,6 +1397,7 @@ class GUI_core {
           }
         }
       }
+			
       $this->layerhiddenstring .= $layer->getMetaData('Layer_ID').' '.$layerhiddenflag.' ';
     }
 
@@ -1226,7 +1415,7 @@ class GUI_core {
   }
 
   function switchScaleUnitIfNecessary() {
-		if ($this->map->scale > $this->scaleUnitSwitchScale) $this->map->scalebar->set('units', MS_KILOMETERS);
+		if ($this->map_scaledenom > $this->scaleUnitSwitchScale) $this->map->scalebar->set('units', MS_KILOMETERS);
   }
 
 	function calculatePixelSize() {
@@ -1239,12 +1428,22 @@ class GUI_core {
       $this->pixsize=$this->pixheight;
     }	
 	}
-	
+
+	function map_saveWebImage($image,$format) {
+		if(MAPSERVERVERSION > 600) {		
+			$this->map->selectOutputFormat($format);
+			return $image->saveWebImage();
+		}
+		else {
+			return $image->saveWebImage($format, 1, 1, 0);
+		}
+	}	
+
   function drawReferenceMap() { 
     # Erstellen der Referenzkarte
     if($this->map->reference->image != NULL){
       $img_refmap = $this->map->drawReferenceMap();
-      $filename = $img_refmap->saveWebImage (MS_PNG, 1, 1, 0);
+      $filename = $this->map_saveWebImage($img_refmap,'png');
       $newname = $this->user->id.basename($filename);
       rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
       $this->img['referenzkarte'] = IMAGEURL.$newname;
@@ -1299,8 +1498,8 @@ class GUI_core {
         include (LAYOUTPATH.'snippets/printversion.php');
       } break;
       case 'html' : {
-        #echo 'actual extent: '.$this->map->extent->minx.' '.$this->map->extent->miny.' '.$this->map->extent->maxx.' '.$this->map->extent->maxy;
-        #echo 'Klickposition: '.$this->formvars['INPUT_COORD'];
+        debug_write('actual extent: '.$this->map->extent->minx.', '.$this->map->extent->miny.', '.$this->map->extent->maxx.', '.$this->map->extent->maxy);
+        debug_write('Klickposition: '.$this->formvars['INPUT_COORD']);
         $this->debug->write("Include <b>".LAYOUTPATH.$this->user->rolle->gui."</b> in kvwmap.php function output()",4);
         # erzeugen des Menueobjektes
         $this->Menue=new menue($this->user->rolle->language,$this->user->rolle->charset);
@@ -1313,7 +1512,9 @@ class GUI_core {
         include (LAYOUTPATH.$this->user->rolle->gui);
       } break;
       case 'map_ajax' : {
-        $this->debug->write("Include <b>".LAYOUTPATH."snippets/map_ajax.php</b> in kvwmap.php function output()",4);
+        debug_write('output extent: '.$this->map->extent->minx.', '.$this->map->extent->miny.', '.$this->map->extent->maxx.', '.$this->map->extent->maxy);
+        debug_write('Klickposition: '.$this->formvars['INPUT_COORD']);
+				$this->debug->write("Include <b>".LAYOUTPATH."snippets/map_ajax.php</b> in kvwmap.php function output()",4);
         include (LAYOUTPATH.'snippets/map_ajax.php');
       } break;
       case 'pdf' : {

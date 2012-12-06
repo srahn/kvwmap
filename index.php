@@ -1840,24 +1840,23 @@ if ($goNotExecutedInIncludeCases) {
 	  } break;
 
 		case 'getMap_ajax' : {   
-		$GUI->formvars['nurAktiveLayer'] = true;		
-		$GUI->loadMap('DataBase');		
-		$GUI->navMap($GUI->formvars['CMD']);
-		$GUI->saveMap('');    
-		$currenttime=date('Y-m-d H:i:s',time());
-		$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
-		$GUI->drawMap();    
-		$GUI->mime_type='map_ajax';
-		$GUI->output();
-	  }break;
+      $GUI->formvars['nurAktiveLayer'] = true;		
+      $GUI->loadMap('DataBase');		
+      $GUI->navMap($GUI->formvars['CMD']);
+      $GUI->saveMap('');    
+      $currenttime=date('Y-m-d H:i:s',time());
+      $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+      $GUI->drawMap();    
+      $GUI->mime_type='map_ajax';
+      $GUI->output();
 
-	  default : {
-		# Karteninformationen lesen
-		$GUI->loadMap('DataBase');
-		$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-		$GUI->drawMap();
-		$GUI->saveMap('');
-		$GUI->output();
+    default : {
+      # Karteninformationen lesen
+      $GUI->loadMap('DataBase');
+      $GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+      $GUI->drawMap();
+      $GUI->saveMap('');
+      $GUI->output();
 	  }
 	}
 }
