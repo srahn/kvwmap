@@ -26,7 +26,7 @@ $response =
 $this->img['hauptkarte'].'^
 '.$this->img['scalebar'].'^
 '.$this->img['referenzkarte'].'^
-'.round($this->map->scale).'^';
+'.round($this->map_scaledenom).'^';
 if($this->Lagebezeichung != ''){
 	$response.= '<b>Gemeinde:&nbsp;</b>'.htmlentities($this->Lagebezeichung['gemeindename']).' <b>Gemarkung:</b>&nbsp;'.htmlentities($this->Lagebezeichung['gemkgname']).' <b>Flur:</b>&nbsp;'.htmlentities($this->Lagebezeichung['flur']);
 }
@@ -37,6 +37,7 @@ $response.= '^
 '.$this->map->extent->maxy.'^
 '.$pixelsize.'^
 &nbsp;<a href="index.php?go=Kartenkommentar_Formular&consumetime='.$this->user->rolle->newtime.'&hauptkarte='.$this->img['hauptkarte'].'">'.$strSave.'</a>&nbsp;|&nbsp;<a href="index.php?go=Kartenkommentar_Waehlen&prevtime='.$this->user->rolle->newtime.'">'.$strChoose.'</a>&nbsp;|&nbsp;';
+debug_write('map_ajax.php extent:'.$this->map->extent->minx.', '.$this->map->extent->miny.', '.$this->map->extent->maxx.', '.$this->map->extent->maxy.', '.$pixelsize);
 if(SHOW_MAP_IMAGE == 'true'){
 	$response .= '<a id="MapImageLink" target="_blank" href="" onmouseover="javascript:showMapImage();">'.$strMapImageURL.'</a></b>';
 }

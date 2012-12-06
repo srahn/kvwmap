@@ -59,7 +59,7 @@ function ahahDone(url, target, req, action) {
 						}
 				  break;
 					case "setvalue":
-				    target[i].value = responsevalues[i];
+						target[i].value = responsevalues[i];
 				  break;
 				  default :{
 						if(target[i] != null){

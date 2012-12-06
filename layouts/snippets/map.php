@@ -147,7 +147,7 @@ if($this->formvars['gps_follow'] == ''){
         					<table width="100%" border="0" cellpadding="0" cellspacing="0">
 						        <tr style="background-color: <? echo BG_MENUETOP; ?>;">
 						          <td width="140px" height="30">
-						          	&nbsp;<b><?php echo $strMapScale; ?>&nbsp;1:&nbsp;</b><input type="text" id="scale" name="nScale" size="5" value="<?php echo round($this->map->scale); ?>">
+						          	&nbsp;<b><?php echo $strMapScale; ?>&nbsp;1:&nbsp;</b><input type="text" id="scale" name="nScale" size="5" value="<?php echo round($this->map_scaledenom); ?>">
 						          </td>
 						          <td align="center">
 						          	<? if($this->map->width > 700) {

@@ -254,7 +254,7 @@ define('POSTGRESVERSION', '804');                   # Version 1.6.4   (800 == 8.
 define('MYSQLVERSION', '500');                   # Version 1.6.4   (4.1.0 == 410)
 
 # Mapserver Version                             # Version 1.6.8
-define('MAPSERVERVERSION', '542');              # Version 1.6.8     (5.0.2 == 502)
+define('MAPSERVERVERSION', 542);              # Version 1.6.8     (5.0.2 == 502)
 
 # PHP-Version
 define('PHPVERSION', '450');										# Version 1.7.1  (5.2.0 == 520)

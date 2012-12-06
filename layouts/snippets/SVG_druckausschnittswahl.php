@@ -295,7 +295,7 @@ function task(evt) {
 }
 
 function get_map_scale(){
-	top.document.GUI.printscale.value = Math.round('.$this->map->scale.');
+	top.document.GUI.printscale.value = Math.round('.$this->map_scaledenom.');
 }		
 		
 // --------------------------wechsel zwischen pgon&text-------------------------------

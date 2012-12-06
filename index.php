@@ -1826,16 +1826,19 @@ if ($goNotExecutedInIncludeCases) {
 		$GUI->output();
 	  } break;
 
-		case 'getMap_ajax' : {   
+		case 'getMap_ajax' : {
+			debug_write('-------------------------- case getMap_ajax ------------------------------------------------');
 			$GUI->formvars['nurAktiveLayer'] = true;		
-		$GUI->loadMap('DataBase');		
-		$GUI->navMap($GUI->formvars['CMD']);
-		$GUI->saveMap('');    
-		$currenttime=date('Y-m-d H:i:s',time());
-		$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
-		$GUI->drawMap();    
-		$GUI->mime_type='map_ajax';
-		$GUI->output();
+		  $GUI->loadMap('DataBase');		
+		  $GUI->navMap($GUI->formvars['CMD']);
+		  $GUI->saveMap('');    
+		  $currenttime=date('Y-m-d H:i:s',time());
+		  $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+		  $GUI->loadMap2();
+		  $GUI->saveMap('');  
+		  $GUI->drawMap();    
+		  $GUI->mime_type='map_ajax';
+		  $GUI->output();
 	  }break;
 
 	  default : {

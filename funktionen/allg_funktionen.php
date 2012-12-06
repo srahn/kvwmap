@@ -4,7 +4,6 @@
  * nicht gefunden wurden, nicht verstanden wurden oder zu umfrangreich waren.
  */
 
-
 function formatFlurstkennzALKIS($FlurstKennz){
 	$explosion = explode('-', $FlurstKennz);
   $gem = trim($explosion[0]);
@@ -1104,5 +1103,19 @@ function curl_get_contents($url) {
   }
   curl_close($ch);
   return $result;
+}
+
+function debug_write($msg) {
+  $fp = fopen('/home/gisadmin/apache/kvwmap_logs/debug.htm','a+');
+	$log = getTimestamp().":\n";
+	$msg = "- ".$msg."\n";
+	fwrite($fp,$log.$msg);
+	fclose($fp);
+}
+
+function getTimestamp() {
+  $microtime = floatval(substr((string)microtime(), 1, 8));
+  $rounded = round($microtime, 5);
+  return date("d.m.Y H:i:s") . substr((string)$rounded, 1, strlen($rounded));
 }
 ?>
