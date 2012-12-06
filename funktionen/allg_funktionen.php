@@ -1106,11 +1106,11 @@ function curl_get_contents($url) {
 }
 
 function debug_write($msg) {
-  $fp = fopen('/home/gisadmin/apache/kvwmap_logs/debug.htm','a+');
-	$log = getTimestamp().":\n";
-	$msg = "- ".$msg."\n";
-	fwrite($fp,$log.$msg);
-	fclose($fp);
+  #$fp = fopen(LOGPATH.'debug.htm','a+');
+	#$log = getTimestamp().":\n";
+	#$msg = "- ".$msg."\n";
+	#fwrite($fp,$log.$msg);
+	#fclose($fp);
 }
 
 function getTimestamp() {
