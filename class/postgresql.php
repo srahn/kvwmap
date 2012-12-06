@@ -780,11 +780,10 @@ class pgdatabase extends pgdatabase_core {
   }
   
   function getGrundbuecherALKIS($FlurstKennz) {
-    $sql ="SELECT distinct bezirk.schluesselgesamt AS bezirk, blatt.buchungsblattnummermitbuchstabenerweiterung AS blatt, namensnummer.beschriebderrechtsgemeinschaft AS zusatz_eigentuemer";
-		$sql.=" FROM alkis.ax_flurstueck f, alkis.alkis_beziehungen flst2buchung, alkis.ax_buchungsstelle buchung, alkis.alkis_beziehungen buchung2blatt, alkis.ax_buchungsblattbezirk bezirk, alkis.ax_buchungsblatt blatt, alkis.alkis_beziehungen blatt2namensnummer, alkis.ax_namensnummer namensnummer";   
+    $sql ="SELECT distinct bezirk.schluesselgesamt AS bezirk, blatt.buchungsblattnummermitbuchstabenerweiterung AS blatt";
+		$sql.=" FROM alkis.ax_flurstueck f, alkis.alkis_beziehungen flst2buchung, alkis.ax_buchungsstelle buchung, alkis.alkis_beziehungen buchung2blatt, alkis.ax_buchungsblattbezirk bezirk, alkis.ax_buchungsblatt blatt";   
 		$sql.=" WHERE flst2buchung.beziehungsart::text = 'istGebucht'::text AND f.gml_id = flst2buchung.beziehung_von AND flst2buchung.beziehung_zu = buchung.gml_id";
 		$sql.=" AND buchung2blatt.beziehungsart::text = 'istBestandteilVon'::text AND buchung2blatt.beziehung_von = buchung.gml_id AND buchung2blatt.beziehung_zu = blatt.gml_id AND blatt.land = bezirk.land AND blatt.bezirk = bezirk.bezirk";
-		$sql.=" AND blatt2namensnummer.beziehungsart::text = 'istBestandteilVon'::text AND blatt2namensnummer.beziehung_zu = blatt.gml_id AND blatt2namensnummer.beziehung_von = namensnummer.gml_id";
 		$sql.=" AND f.flurstueckskennzeichen = '".$FlurstKennz."'";
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
@@ -995,7 +994,9 @@ class pgdatabase extends pgdatabase_core {
   }
   
   function getBuchungenFromGrundbuchALKIS($FlurstKennz,$Bezirk,$Blatt,$keine_historischen) {
-    $sql ="SELECT DISTINCT bezirk.schluesselgesamt AS bezirk, blatt.buchungsblattnummermitbuchstabenerweiterung AS blatt, buchung.laufendenummer AS bvnr, buchung.buchungsart, ba.bezeichner as bezeichnung, f.flurstueckskennzeichen as flurstkennz, buchung.zaehler::text||buchung.nenner::text as anteil, buchung.nummerimaufteilungsplan as auftplannr, buchung.beschreibungdessondereigentums as sondereigentum, namensnummer.beschriebderrechtsgemeinschaft as zusatz_eigentuemer"; 
+  	// max(namensnummer.beschriebderrechtsgemeinschaft) weil es bei einer Buchung mit Zusatz zum Eigentümer einen weiteren Eintrag mit diesem Zusatz in ax_namensnummer gibt
+  	// ohne Aggregation würden sonst 2 Buchungen von der Abfrage zurückgeliefert werden 
+    $sql ="SELECT DISTINCT bezirk.schluesselgesamt AS bezirk, blatt.buchungsblattnummermitbuchstabenerweiterung AS blatt, buchung.laufendenummer AS bvnr, buchung.buchungsart, ba.bezeichner as bezeichnung, f.flurstueckskennzeichen as flurstkennz, buchung.zaehler::text||buchung.nenner::text as anteil, buchung.nummerimaufteilungsplan as auftplannr, buchung.beschreibungdessondereigentums as sondereigentum, max(namensnummer.beschriebderrechtsgemeinschaft) as zusatz_eigentuemer"; 
 		$sql.=" FROM alkis.ax_flurstueck f, alkis.alkis_beziehungen flst2buchung, alkis.ax_buchungsstelle buchung, alkis.ax_buchungsstelle_buchungsart ba, alkis.alkis_beziehungen buchung2blatt, alkis.ax_buchungsblattbezirk bezirk, alkis.ax_buchungsblatt blatt, alkis.alkis_beziehungen blatt2namensnummer, alkis.ax_namensnummer namensnummer";
 		$sql.=" WHERE flst2buchung.beziehungsart::text = 'istGebucht'::text AND f.gml_id = flst2buchung.beziehung_von AND flst2buchung.beziehung_zu = buchung.gml_id AND buchung2blatt.beziehungsart::text = 'istBestandteilVon'::text AND buchung2blatt.beziehung_von = buchung.gml_id AND buchung2blatt.beziehung_zu = blatt.gml_id AND blatt.land = bezirk.land AND blatt.bezirk = bezirk.bezirk AND buchung.buchungsart = ba.wert AND blatt2namensnummer.beziehungsart::text = 'istBestandteilVon'::text AND blatt2namensnummer.beziehung_zu = blatt.gml_id AND blatt2namensnummer.beziehung_von = namensnummer.gml_id";
     if ($Bezirk!='') {
@@ -1007,6 +1008,7 @@ class pgdatabase extends pgdatabase_core {
     if ($FlurstKennz!='') {
       $sql.=" AND f.flurstueckskennzeichen='".$FlurstKennz."'";
     }
+    $sql.=" GROUP BY bezirk.schluesselgesamt,blatt.buchungsblattnummermitbuchstabenerweiterung,buchung.laufendenummer,f.flurstueckskennzeichen, buchung.buchungsart, ba.bezeichner, buchung.zaehler, buchung.nenner, buchung.nummerimaufteilungsplan, buchung.beschreibungdessondereigentums";
     $sql.=" ORDER BY bezirk.schluesselgesamt,blatt.buchungsblattnummermitbuchstabenerweiterung,buchung.laufendenummer,f.flurstueckskennzeichen";
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);

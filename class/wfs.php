@@ -14,7 +14,7 @@ class wfs{
 		if($filter != ''){$request .= '&filter='.$filter;}
 		if($maxfeatures != ''){$request .= '&maxfeatures='.$maxfeatures;}
 		#$this->gml = utf8_decode(file_get_contents($request));
-    $this->gml = utf8_decode(url_get_contents($request));
+    $this->gml = url_get_contents($request);
 	}
 	
 	function describe_featuretype_request(){

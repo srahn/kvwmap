@@ -2485,6 +2485,10 @@ class GUI extends GUI_core{
     }
     $this->queryable_postgis_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
 
+  	if(!$this->formvars['layer_id']){
+      $layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
+      $this->formvars['layer_id'] = $layerset[0]['Layer_ID'];
+    }
     if($this->formvars['layer_id']){
       $layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
       $data = $this->mapDB->getData($this->formvars['layer_id']);
@@ -2604,6 +2608,10 @@ class GUI extends GUI_core{
     $this->titel='Jagdbezirk anlegen';
     $this->loadMap('DataBase');
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
+  	if(!$this->formvars['layer_id']){
+      $layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
+      $this->formvars['layer_id'] = $layerset[0]['Layer_ID'];
+    }
     # Spaltenname und from-where abfragen
     if($this->formvars['layer_id']){
 	    $data = $this->mapDB->getData($this->formvars['layer_id']);
@@ -5493,6 +5501,10 @@ class GUI extends GUI_core{
       $this->loadMap('DataBase');
       
       $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
+	    if(!$this->formvars['layer_id']){
+	      $layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
+	      $this->formvars['layer_id'] = $layerset[0]['Layer_ID'];
+	    }
 	    # Spaltenname und from-where abfragen
 	    if($this->formvars['layer_id']){
 		    $data = $this->mapDB->getData($this->formvars['layer_id']);
@@ -6056,6 +6068,7 @@ class GUI extends GUI_core{
             $layerset[0]['shape'][$j][$layerset[0]['attributes']['name'][$k]] = $features[$j]['value'][$k];
             $layerset[0]['attributes']['privileg'][$k] = 0;
           }
+          $layerset[0]['shape'][$j]['geom'] = $features[$j]['geom'];
         }
         $this->qlayerset[]=$layerset[0];
       }break;
@@ -7233,6 +7246,10 @@ class GUI extends GUI_core{
     $this->epsg_codes = read_epsg_codes($this->pgdatabase);
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
     $this->shape = new shape();
+  	if(!$this->formvars['layer_id']){
+      $layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
+      $this->formvars['layer_id'] = $layerset[0]['Layer_ID'];
+    }
     if($this->formvars['layer_id']){
 	    # Geometrie-Übernahme-Layer:
 	    # Spaltenname und from-where abfragen
@@ -7644,6 +7661,10 @@ class GUI extends GUI_core{
     $this->stellendaten=$this->Stelle->getStellen('Bezeichnung');
     $showpolygon = true;
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
+  	if(!$this->formvars['layer_id']){
+      $layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
+      $this->formvars['layer_id'] = $layerset[0]['Layer_ID'];
+    }
     if($this->formvars['layer_id']){
 	    # Geometrie-Übernahme-Layer:
 	    # Spaltenname und from-where abfragen
@@ -9136,6 +9157,10 @@ class GUI extends GUI_core{
     $this->loadMap('DataBase');
     
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
+  	if(!$this->formvars['layer_id']){
+      $layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
+      $this->formvars['layer_id'] = $layerset[0]['Layer_ID'];
+    }
     if($this->formvars['layer_id']){
 	    $data = $this->mapDB->getData($this->formvars['layer_id']);
 	    $data_explosion = explode(' ', $data);
@@ -9314,8 +9339,8 @@ class GUI extends GUI_core{
 	    $dateiname=basename($ret[1]);
       $dateinamensteil=explode('.',$dateiname);
       if(!file_exists(IMAGEPATH.$dateinamensteil[0].'.jpg')){
-      	exec(IMAGEMAGICKPATH.'convert '.$ret[1].' -resize 500x500 '.IMAGEPATH.$dateinamensteil[0].'.jpg');
-      	#echo IMAGEMAGICKPATH.'convert '.$ret[1].' -resize 500x500 '.IMAGEPATH.$dateinamensteil[0].'.jpg';
+      	exec(IMAGEMAGICKPATH.'convert '.$ret[1].' -resize 600x500 '.IMAGEPATH.$dateinamensteil[0].'.jpg');
+      	#echo IMAGEMAGICKPATH.'convert '.$ret[1].' -resize 600x500 '.IMAGEPATH.$dateinamensteil[0].'.jpg';
       }
       echo '<img style="border: 1px solid black" src="'.TEMPPATH_REL.$dateinamensteil[0].'.jpg">';
     }
@@ -9399,6 +9424,10 @@ class GUI extends GUI_core{
     }
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
     # Spaltenname und from-where abfragen
+  	if(!$this->formvars['layer_id']){
+      $layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
+      $this->formvars['layer_id'] = $layerset[0]['Layer_ID'];
+    }
     if($this->formvars['layer_id']){
 	    $data = $this->mapDB->getData($this->formvars['layer_id']);
 	    $data_explosion = explode(' ', $data);
@@ -10857,9 +10886,7 @@ class GUI extends GUI_core{
       $layerdb = $this->pgdatabase;
     }
     $this->processor = new spatial_processor($this->user->rolle, $this->database, $layerdb);
-    $this->processor->debug->write("Starte spatial_processing.\n",4);
     $this->processor->process_query($this->formvars);
-    $this->processor->debug->write("process_query beendet.\n",4);
   }
 
   function getRow() {

@@ -17,7 +17,7 @@ function Bestaetigung(link,text) {
   <? if($this->formvars['order']=="Name") { ?>
   <tr height="50px" valign="bottom">
     <td>
-    <? $umlaute=array("Ä","Ö","Ü");
+    <? $umlaute=array("Ã„","Ã–","Ãœ");
        for ($i=0;$i<count($this->userdaten);$i++) {
          if(!in_array(strtoupper(substr($this->userdaten[$i]['Name'],0,1)),$umlaute) AND strtolower(substr($this->userdaten[$i]['Name'],0,1)) != $first) {
            echo "<a href='#".strtoupper(substr($this->userdaten[$i]['Name'],0,1))."'>".strtoupper(substr($this->userdaten[$i]['Name'],0,1))."</a>&nbsp;&nbsp;";
@@ -44,13 +44,13 @@ function Bestaetigung(link,text) {
         $first=strtoupper(substr($this->userdaten[$i]['Name'],0,1));
           if (in_array($first,$umlaute)) {
             switch ($first) {
-              case 'Ä': {
+              case 'Ã„': {
               $first='A';
               }break;
-              case 'Ö': {
+              case 'Ã–': {
               $first='O';
               }break;
-              case 'Ü': {
+              case 'Ãœ': {
               $first='U';
               }break;                           
             }          
@@ -62,13 +62,13 @@ function Bestaetigung(link,text) {
             $nextfirst=$first;
           if (in_array($first,$umlaute)) {
             switch ($first) {
-              case 'Ä': {
+              case 'Ã„': {
               $nextfirst='A';
               }break;
-              case 'Ö': {
+              case 'Ã–': {
               $nextfirst='O';
               }break;
-              case 'Ü': {
+              case 'Ãœ': {
               $nextfirst='U';
               }break;                           
             }
@@ -90,7 +90,7 @@ function Bestaetigung(link,text) {
         <td><?php echo $this->userdaten[$i]['phon']; ?>&nbsp;</td>
         <td><?php echo $this->userdaten[$i]['email']; ?>&nbsp;</td>
         <td><a href="index.php?go=Benutzerdaten_Formular&selected_user_id=<?php echo $this->userdaten[$i]['ID']; ?>"><?php echo $this->strChange; ?></a></td>
-        <td>&nbsp;&nbsp;<a href="javascript:Bestaetigung('index.php?go=Benutzer_Löschen&selected_user_id=<?php echo $this->userdaten[$i]['ID']; ?>&order=<? echo $this->formvars['order']; ?>','Wollen Sie den Benutzer <?php echo $this->userdaten[$i]['Vorname']." ".$this->userdaten[$i]['Name']; ?> wirklich löschen?')"><?php echo $this->strDelete?></a></td>
+        <td>&nbsp;&nbsp;<a href="javascript:Bestaetigung('index.php?go=Benutzer_LÃ¶schen&selected_user_id=<?php echo $this->userdaten[$i]['ID']; ?>&order=<? echo $this->formvars['order']; ?>','Wollen Sie den Benutzer <?php echo $this->userdaten[$i]['Vorname']." ".$this->userdaten[$i]['Name']; ?> wirklich lÃ¶schen?')"><?php echo $this->strDelete?></a></td>
       </tr>
       <?php  
       }

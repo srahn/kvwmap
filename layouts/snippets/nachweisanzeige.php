@@ -245,5 +245,10 @@ Wählen Sie neue Suchparameter.</b><br>
     </td>
   </tr>
 </table>
-<div id="vorschau" style="position: fixed; left:50%; margin-left:-150px;  top:190px; overflow:auto;"></div>
 
+<!--[IF !IE]> -->
+<div id="vorschau" style="position: fixed; left:50%; margin-left:-150px;  top:190px; "></div>
+<!-- <![ENDIF]-->
+ <!--[IF IE]>
+<div id="vorschau" style="position: absolute; left:50%; margin-left:-150px; top: expression((190 + (ignoreMe = document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop)) + 'px');"></div>
+<![ENDIF]-->

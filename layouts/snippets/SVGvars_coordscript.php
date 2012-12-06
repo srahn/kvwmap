@@ -90,7 +90,7 @@
 			}
 		}
 
-		function coords3(evt) {
+		function coords2(evt) {
 		  coorx = evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value);
 		  coory = parseFloat(top.document.GUI.maxy.value) - evt.clientY*parseFloat(top.document.GUI.pixelsize.value);
 		  	

@@ -297,7 +297,6 @@ class spatial_processor {
 	}
 	
 	function queryMap($input_coord, $layer_id, $fromwhere, $columnname) {
-    $this->debug->write("Starte Funktion queryMap.\n",4);
     # Abfragebereich berechnen
     $corners=explode(';',$input_coord);
     $lo=explode(',',$corners[0]); # linke obere Ecke in Bildkoordinaten von links oben gesehen
@@ -380,18 +379,15 @@ class spatial_processor {
   
   function getgeometrybyquery($rect, $layer_id, $fromwhere, $columnname) {
   	$dbmap = new db_mapObj($this->rolle->stelle_id, $this->rolle->user_id);
-    # Abfragen der Layer, die zur Stelle gehören
-    if($layer_id < 0){	# Rollenlayer
-			$layerset = $dbmap->read_RollenLayer(-$layer_id);
-    }
-    else{
-	    if($layer_id != ''){
+  	if($layer_id != ''){
+    	if($layer_id < 0){	# Rollenlayer
+				$layerset = $dbmap->read_RollenLayer(-$layer_id);
+    	}
+    	else{	# normaler Layer
 	    	$layerset = $this->rolle->getLayer($layer_id);
 	    }
-	    else{
-	    	$layerset = $this->rolle->getLayer('Flurst%cke');
-	    }
     }
+    else return NULL;
     switch ($layerset[0]['toleranceunits']) {
       case 'pixels' : $pixsize=$this->rolle->pixsize; break;
       case 'meters' : $pixsize=1; break;
@@ -464,9 +460,6 @@ class spatial_processor {
 		        $sql = "SELECT astext(memgeomunion(".$columnname.")) AS geomwkt ".$fromwhere." ".$sql_where;
 		      }  
 	 			}
-	 			else{		# Flurstücksgeometrie abfragen
-	 				$sql = "SELECT astext(Transform(memgeomunion(".$columnname."), ".$client_epsg.")) AS geomwkt  FROM alkobj_e_fla AS o,alknflst as f WHERE o.folie='001' AND o.objnr=f.objnr".$sql_where;
-	 			}
 	   
 	   		# order by wieder einbauen
         $sql .= $layerset[0]['attributes']['orderby'];
@@ -474,6 +467,7 @@ class spatial_processor {
 	      # Anhängen des Begrenzers zur Einschränkung der Anzahl der Ergebniszeilen
 	      $sql.=' LIMIT '.MAXQUERYROWS;
 	      $ret=$this->pgdatabase->execSQL($sql,4, 0);
+	      #echo $sql;
 	      if (!$ret[0]) {
 	        while ($rs=pg_fetch_array($ret[1])) {
 	          $layerset[0]['shape'][]=$rs;

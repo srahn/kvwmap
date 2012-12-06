@@ -355,14 +355,17 @@ class shape {
     	}
     }
     $sql = $stelle->parse_path($layerdb, $path, $selection);		# parse_path wird hier benutzt um die Auswahl der Attribute auf das Pfad-SQL zu übertragen
+    
+    if($this->attributes['table_alias_name'][$this->attributes['the_geom']] != ''){
+    	$the_geom = $this->attributes['table_alias_name'][$this->attributes['the_geom']].'.'.$this->attributes['the_geom'];
+    }
+    else{
+    	$the_geom = $this->attributes['the_geom'];
+    }
+    
     # Transformieren
     if($this->formvars['epsg']){
-    	if($this->attributes['table_alias_name'][$this->attributes['the_geom']] != ''){
-    		$sql = str_replace($this->attributes['table_alias_name'][$this->attributes['the_geom']].'.'.$this->attributes['the_geom'], 'TRANSFORM('.$this->attributes['table_alias_name'][$this->attributes['the_geom']].'.'.$this->attributes['the_geom'].', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $sql);
-    	}
-    	else{
-    		$sql = str_replace($this->attributes['the_geom'], 'TRANSFORM('.$this->attributes['the_geom'].', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $sql);
-    	}
+    	$sql = implode('TRANSFORM('.$the_geom.', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], explode($the_geom, $sql, 2));
     }
     # order by rausnehmen
   	$orderbyposition = strpos(strtolower($sql), 'order by');
@@ -372,7 +375,7 @@ class shape {
   	}
   	# über Polygon einschränken
     if($this->formvars['newpathwkt']){
-    	$sql.= " AND Transform(".$this->attributes['the_geom'].", ".$user->rolle->epsg_code.") && GeomFromText('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code.") AND INTERSECTS(Transform(".$this->attributes['the_geom'].", ".$user->rolle->epsg_code."), GeomFromText('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."))";
+    	$sql.= " AND Transform(".$the_geom.", ".$user->rolle->epsg_code.") && GeomFromText('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code.") AND INTERSECTS(Transform(".$the_geom.", ".$user->rolle->epsg_code."), GeomFromText('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."))";
     }
     # Filter
     $filter = $mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id);
