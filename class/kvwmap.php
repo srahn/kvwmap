@@ -3636,6 +3636,7 @@ class GUI extends GUI_core{
     }
     #######################################################
     $RGB=explode(" ",$dbStyle['color']);
+    if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
     $style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
     $RGB=explode(" ",$dbStyle['outlinecolor']);
     $style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
@@ -14186,6 +14187,7 @@ class db_mapObj extends db_mapObj_core{
     $sql.="sizeitem = '".$formvars["sizeitem"]."',";
     if($formvars["offsetx"] != ''){$sql.="offsetx = '".$formvars["offsetx"]."',";}else{$sql.="offsetx = NULL,";}
     if($formvars["offsety"] != ''){$sql.="offsety = '".$formvars["offsety"]."',";}else{$sql.="offsety = NULL,";}
+    if($formvars["pattern"] != ''){$sql.="pattern = '".$formvars["pattern"]."',";}else{$sql.="pattern = NULL,";}
     $sql.="Style_ID = ".$formvars["new_style_id"];
     $sql.=" WHERE Style_ID = ".$formvars["style_id"];
     $this->debug->write("<p>file:kvwmap class:db_mapObj->save_Style - Speichern der Styledaten:<br>".$sql,4);
