@@ -388,7 +388,7 @@ else {
 		      			<option <? if($this->formvars['wms_server_version'] == '1.0.0'){echo 'selected';} ?> value="1.0.0">1.0.0</option>
 		      			<option <? if($this->formvars['wms_server_version'] == '1.1.0'){echo 'selected';} ?> value="1.1.0">1.1.0</option>
 		      			<option <? if($this->formvars['wms_server_version'] == '1.1.1'){echo 'selected';} ?> value="1.1.1">1.1.1</option>
-		      			<option <? if($this->formvars['wms_server_version'] == '1.3.0'){echo 'selected';} ?> value="1.3.1">1.3.0</option>		      			
+		      			<option <? if($this->formvars['wms_server_version'] == '1.3.0'){echo 'selected';} ?> value="1.3.0">1.3.0</option>		      			
 		      		</select>
 		  		</td>
 		  	</tr>

@@ -268,6 +268,17 @@ class GUI_core {
         $map->imagecolor->setRGB(255,255,255);
         $map->maxsize = 4096;
 
+        # setzen der Kartenausdehnung ¸ber die letzten Benutzereinstellungen
+        if ($this->user->rolle->oGeorefExt->minx==0 OR $this->user->rolle->oGeorefExt->minx=='') {
+          echo "Richten Sie mit phpMyAdmin in der kvwmap Datenbank eine Referenzkarte, eine Stelle, einen Benutzer und eine Rolle ein ";
+          echo "<br>(Tabellen referenzkarten, stelle, user, rolle) ";
+          echo "<br>oder wenden Sie sich an ihren Systemverwalter.";
+          exit;
+        }
+        else {
+          $map->setextent($this->user->rolle->oGeorefExt->minx,$this->user->rolle->oGeorefExt->miny,$this->user->rolle->oGeorefExt->maxx,$this->user->rolle->oGeorefExt->maxy);
+        }
+        
         # OWS Metadaten
 
         if($this->Stelle->ows_title != ''){
@@ -317,20 +328,9 @@ class GUI_core {
         }
         $ows_onlineresource = OWS_SERVICE_ONLINERESOURCE.'&Stelle_ID='.$this->Stelle->id;
         $map->setMetaData("ows_onlineresource",$ows_onlineresource);
-        $bb=$map->extent;
+        $bb=$this->Stelle->MaxGeorefExt;
         $map->setMetaData("wms_extent",$bb->minx.' '.$bb->miny.' '.$bb->maxx.' '.$bb->maxy);
         ///------------------------------////
-
-        # setzen der Kartenausdehnung ¸ber die letzten Benutzereinstellungen
-        if ($this->user->rolle->oGeorefExt->minx==0 OR $this->user->rolle->oGeorefExt->minx=='') {
-          echo "Richten Sie mit phpMyAdmin in der kvwmap Datenbank eine Referenzkarte, eine Stelle, einen Benutzer und eine Rolle ein ";
-          echo "<br>(Tabellen referenzkarten, stelle, user, rolle) ";
-          echo "<br>oder wenden Sie sich an ihren Systemverwalter.";
-          exit;
-        }
-        else {
-          $map->setextent($this->user->rolle->oGeorefExt->minx,$this->user->rolle->oGeorefExt->miny,$this->user->rolle->oGeorefExt->maxx,$this->user->rolle->oGeorefExt->maxy);
-        }
 
         $map->setSymbolSet(SYMBOLSET);
         $map->setFontSet(FONTSET);
@@ -429,7 +429,7 @@ class GUI_core {
           $layer->setMetaData('wms_group_title',$layerset[$i]['Gruppenname']);
           $layer->setMetaData('wms_queryable',$layerset[$i]['queryable']);
           $layer->setMetaData('wms_format',$layerset[$i]['wms_format']);
-          $layer->setMetaData('ows_version',$layerset[$i]['wms_server_version']);
+          $layer->setMetaData('ows_server_version',$layerset[$i]['wms_server_version']);
           $layer->setMetaData('ows_srs',$layerset[$i]['ows_srs']);
           $layer->setMetaData('wms_connectiontimeout',$layerset[$i]['wms_connectiontimeout']);
           $layer->setMetaData('selectiontype',$layerset[$i]['selectiontype']);
@@ -562,6 +562,7 @@ class GUI_core {
                 	//$layerset[$i]['connection'] .= '&mapfactor='.$this->map_factor;			# bei WMS-Layern wird der map_factor durchgeschleift (f¸r die eigenen WMS) erstmal rausgenommen, weil einige WMS-Server der zus‰tzliche Parameter mapfactor stˆrt
               	}
               }
+              if($layerset[$i]['connectiontype'] == 6)$layerset[$i]['connection'] .= " options='-c client_encoding=".MYSQL_CHARSET."'";		# z.B. f¸r Klassen mit Umlauten
               $layer->set('connection', $layerset[$i]['connection']);
             }
             if ($layerset[$i]['connectiontype']>0) {
@@ -743,24 +744,6 @@ class GUI_core {
     } # end of switch loadMapSource
     return 1;
   }
-
-
-
-
-
-function loadMap2() {
-   $map = $this->map;
-   $layer = ms_newLayerObj($map);
-   $layer->set('status', 1);
-   $layer->setProjection('+init=epsg: 2398');
-   $layer->set('connection', "http://www.gaia-mv.de/dienste/gdimv_topomv?REQUEST=GetMap&VERSION=1.1.1&SERVICE=WMS&LAYERS=gdimv_topomv&FORMAT=image/jpeg");
-   $layer->setConnectionType(7);
-  }
-
-
-
-
-
 
   function loadclasses($layer, $layerset, $classset, $map){
     $anzClass=count($classset);
@@ -1140,12 +1123,24 @@ function loadMap2() {
       default : {
       }
     }
+  	if (MAPSERVERVERSION > 600) {
+			$this->map_scaledenom = $this->map->scaledenom;
+		}
+		else {
+			$this->map_scaledenom = $this->map->scale;
+		}
   }
 
   function scaleMap($nScale) {
     $oPixelPos=ms_newPointObj();
     $oPixelPos->setXY($this->map->width/2,$this->map->height/2);
     $this->map->zoomscale($nScale,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
+  	if (MAPSERVERVERSION > 600) {
+			$this->map_scaledenom = $this->map->scaledenom;
+		}
+		else {
+			$this->map_scaledenom = $this->map->scale;
+		}
   }
 
   function zoomMap($nZoomFactor) {
@@ -1185,14 +1180,7 @@ function loadMap2() {
 
       if($this->formvars['CMD'] != 'jump_coords'){
         $oPixelPos->setXY($minx,$maxy);
-				debug_write("vor zoompoint: nZoomFactor=$nZoomFactor pPixelPos=$oPixelPos->x,$oPixelPos->y, width=".$this->map->width.", height=".$this->map->height.", minx=".$this->map->extent->minx.", miny=".$this->map->extent->miny.", maxx=".$this->map->extent->maxx.", maxy=".$this->map->extent->maxy.", minxmax=".$this->Stelle->MaxGeorefExt->minx.", minymax=".$this->Stelle->MaxGeorefExt->miny.", maxxmax=".$this->Stelle->MaxGeorefExt->maxx.", maxymax=".$this->Stelle->MaxGeorefExt->maxy);
         $this->map->zoompoint($nZoomFactor,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
-        
-        //$oPixelPos->setXY(4555241, 5925775);
-        //$this->map->setCenter($oPixelPos);
-        
-        
-				debug_write("nach zoompoint: width=".$this->map->width.", height=".$this->map->height.", minx=".$this->map->extent->minx.", miny=".$this->map->extent->miny.", maxx=".$this->map->extent->maxx.", maxy=".$this->map->extent->maxy);
       }
       else{
         #---------- Punkt-Rollenlayer erzeugen --------#
@@ -1285,12 +1273,10 @@ function loadMap2() {
         $this->map->zoompoint(1,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
       }
     }
-    #echo ('<br/>formvars[pathy]: '.$this->formvars['pathy']);
   }
 
   # Speichert die Daten des MapObjetes in Datei oder Datenbank
   function saveMap($saveMapDestination) {
-    debug_write("in saveMap extent(".$this->map->extent->minx.", ".$this->map->extent->miny.", ".$this->map->extent->maxx.", ".$this->map->extent->maxy);
 		if ($saveMapDestination=='') {
       $saveMapDestination=SAVEMAPFILE;
     }
@@ -1337,19 +1323,15 @@ function loadMap2() {
 
   # Zeichnet die Kartenelemente Hauptkarte, Legende, Maﬂstab und Referenzkarte
   # drawMap #
-  function drawMap() {
-    debug_write("in drawMap  vor if: extent(".$this->map->extent->minx.", ".$this->map->extent->miny.", ".$this->map->extent->maxx.", ".$this->map->extent->maxy);	
+  function drawMap() {	
     if(MINSCALE != '' AND $this->map_factor == '' AND $this->map_scaledenom < MINSCALE){
       $this->scaleMap(MINSCALE);
-    }
-    debug_write("in drawMap nach if: extent(".$this->map->extent->minx.", ".$this->map->extent->miny.", ".$this->map->extent->maxx.", ".$this->map->extent->maxy);		
+    }		
     $this->image_map = $this->map->draw() OR die($this->reset_layers());   
     $filename = $this->user->id.'_'.rand(0, 1000000).'.'.$this->map->outputformat->extension;
     $this->image_map->saveImage(IMAGEPATH.$filename);
     $this->img['hauptkarte'] = IMAGEURL.$filename;
     $this->debug->write("Name der Hauptkarte: ".$this->img['hauptkarte'],4);
-		debug_write("indrawMap nach draw: extent(".$this->map->extent->minx.", ".$this->map->extent->miny.", ".$this->map->extent->maxx.", ".$this->map->extent->maxy);
-    debug_write("Karte: ".$filename);
 
 		# Ausblenden der Layer in der Legende, die im aktuellen Maﬂstab nicht gezeichnet werden sollen
     for ($i=0;$i<$this->map->numlayers;$i++) {
@@ -1498,8 +1480,6 @@ function loadMap2() {
         include (LAYOUTPATH.'snippets/printversion.php');
       } break;
       case 'html' : {
-        debug_write('actual extent: '.$this->map->extent->minx.', '.$this->map->extent->miny.', '.$this->map->extent->maxx.', '.$this->map->extent->maxy);
-        debug_write('Klickposition: '.$this->formvars['INPUT_COORD']);
         $this->debug->write("Include <b>".LAYOUTPATH.$this->user->rolle->gui."</b> in kvwmap.php function output()",4);
         # erzeugen des Menueobjektes
         $this->Menue=new menue($this->user->rolle->language,$this->user->rolle->charset);
@@ -1512,8 +1492,6 @@ function loadMap2() {
         include (LAYOUTPATH.$this->user->rolle->gui);
       } break;
       case 'map_ajax' : {
-        debug_write('output extent: '.$this->map->extent->minx.', '.$this->map->extent->miny.', '.$this->map->extent->maxx.', '.$this->map->extent->maxy);
-        debug_write('Klickposition: '.$this->formvars['INPUT_COORD']);
 				$this->debug->write("Include <b>".LAYOUTPATH."snippets/map_ajax.php</b> in kvwmap.php function output()",4);
         include (LAYOUTPATH.'snippets/map_ajax.php');
       } break;

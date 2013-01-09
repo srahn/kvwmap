@@ -2532,65 +2532,30 @@ class stelle extends stelle_core{
     if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
   }
   
-  function set_attributes_privileges($layer_id, $attributename, $privileg, $tooltip){
-    if($privileg == ''){
-      $sql = 'SELECT * FROM layer_attributes2stelle WHERE ';
-      $sql.= 'layer_id = '.$layer_id.' AND ';
-      $sql.= 'stelle_id = '.$this->id.' AND ';
-      $sql.= 'attributename = "'.$attributename.'"';
-      $this->debug->write("<p>file:users.php class:stelle->set_attributes_privileges - Speichern des Layerrechte zur Stelle:<br>".$sql,4);
-      $query=mysql_query($sql,$this->database->dbConn);
-      if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-      if($rs = mysql_fetch_array($query)){
-        $sql = 'DELETE FROM layer_attributes2stelle WHERE ';
-        $sql.= 'layer_id = '.$layer_id.' AND ';
-        $sql.= 'stelle_id = '.$this->id.' AND ';
-        $sql.= 'attributename = "'.$attributename.'"';
-        $this->debug->write("<p>file:users.php class:stelle->set_attributes_privileges - Speichern des Layerrechte zur Stelle:<br>".$sql,4);
-        $query=mysql_query($sql,$this->database->dbConn);
-        if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-      }
-    }
-    else{
-      if(MYSQLVERSION < 410){
-        $sql = 'REPLACE INTO layer_attributes2stelle SET ';
-        $sql.= 'layer_id = '.$layer_id.', ';
-        $sql.= 'stelle_id = '.$this->id.', ';
-        $sql.= 'attributename = "'.$attributename.'", ';
-        $sql.= 'privileg = '.$privileg.', ';
-        if($tooltip == 'on'){
-          $sql.= 'tooltip = 1';
-        }
-        else{
-          $sql.= 'tooltip = 0';
-        }
-        $this->debug->write("<p>file:users.php class:stelle->set_attributes_privileges - Speichern des Layerrechte zur Stelle:<br>".$sql,4);
-        $query=mysql_query($sql,$this->database->dbConn);
-        if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-      }
-      else{
-        $sql = 'INSERT INTO layer_attributes2stelle SET ';
-        $sql.= 'layer_id = '.$layer_id.', ';
-        $sql.= 'stelle_id = '.$this->id.', ';
-        $sql.= 'attributename = "'.$attributename.'", ';
-        $sql.= 'privileg = '.$privileg;
-        if($tooltip == 'on'){
-          $sql.= ', tooltip = 1';
-        }
-        else{
-          $sql.= ', tooltip = 0';
-        }
-        $sql .= ' ON DUPLICATE KEY UPDATE privileg = "'.$privileg.'"';
-        if($tooltip == 'on'){
-          $sql.= ', tooltip = 1';
-        }
-        else{
-          $sql.= ', tooltip = 0';
-        }
-        $this->debug->write("<p>file:users.php class:stelle->set_attributes_privileges - Speichern des Layerrechte zur Stelle:<br>".$sql,4);
-        $query=mysql_query($sql,$this->database->dbConn);
-        if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-      }
+  function set_attributes_privileges($formvars, $attributes){
+  	# erst alles löschen zu diesem Layer und Stelle
+    $sql = 'DELETE FROM layer_attributes2stelle WHERE ';
+    $sql.= 'layer_id = '.$formvars['selected_layer_id'].' AND ';
+    $sql.= 'stelle_id = '.$this->id;
+    $this->debug->write("<p>file:users.php class:stelle->set_attributes_privileges - Speichern des Layerrechte zur Stelle:<br>".$sql,4);
+    $query=mysql_query($sql,$this->database->dbConn);
+    if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+    # dann Attributrechte eintragen		
+    for($i = 0; $i < count($attributes['type']); $i++){
+	    $sql = 'INSERT INTO layer_attributes2stelle SET ';
+	    $sql.= 'layer_id = '.$formvars['selected_layer_id'].', ';
+	    $sql.= 'stelle_id = '.$this->id.', ';
+	    $sql.= 'attributename = "'.$attributes['name'][$i].'", ';
+	    $sql.= 'privileg = '.$formvars['privileg_'.$attributes['name'][$i]];
+	    if($formvars['tooltip_'.$attributes['name'][$i]] == 'on'){
+	    	$sql.= ', tooltip = 1';
+	    }
+	    else{
+	    	$sql.= ', tooltip = 0';
+	    }
+    	$this->debug->write("<p>file:users.php class:stelle->set_attributes_privileges - Speichern des Layerrechte zur Stelle:<br>".$sql,4);
+    	$query=mysql_query($sql,$this->database->dbConn);
+    	if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
     }
   }
 

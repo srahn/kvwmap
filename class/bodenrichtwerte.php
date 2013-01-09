@@ -152,8 +152,8 @@ class bodenrichtwertzone {
       $ret[1].='\nGeben Sie den Bodenwert an.';
       $ret[0]=1;
     }
-    if ($formvars['stichtag']=='') {
-      $ret[1].='\nGeben Sie den Stichtag an.';
+    if ($formvars['stichtag']=='' OR !(intval($formvars['stichtag']) > 1900)) {
+      $ret[1].='\nGeben Sie die 4-stellige Jahreszahl des Stichtags an.';
       $ret[0]=1;
     }
     return $ret;

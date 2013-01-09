@@ -58,6 +58,7 @@ class pgdatabase extends pgdatabase_core {
     # und der Einlesevorgang muss wiederholt werden bis er fehlerfrei durchgelaufen ist.
     # Dazu Fehlerausschriften bearchten.
     $this->blocktransaction=0;
+    if($this->port == '')$this->port = 5432;
   }
 
   function getFlurstByNutzungen($gemkgschl, $nutzung, $anzahl){
@@ -2167,7 +2168,7 @@ class pgdatabase extends pgdatabase_core {
 		$sql.=" FROM alkis.ax_flurstueck f, alkis.nutzung n";
 		$sql.=" JOIN alkis.nutzung_meta m ON m.nutz_id=n.nutz_id";
 		$sql.=" LEFT JOIN alkis.nutzung_class c ON c.nutz_id=n.nutz_id AND c.class=n.class";
-		$sql.=" WHERE intersects(n.wkb_geometry,f.wkb_geometry) = true";
+		$sql.=" WHERE st_intersects(n.wkb_geometry,f.wkb_geometry) = true";
 		$sql.=" AND area(intersection(n.wkb_geometry,f.wkb_geometry)) > 0.05";
 		$sql.=" AND f.flurstueckskennzeichen = '".$FlurstKennz."'";
 		#echo $sql;

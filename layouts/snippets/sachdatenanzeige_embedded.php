@@ -1,11 +1,15 @@
 <?php
  # 2008-09-30 sr
   include(LAYOUTPATH.'languages/sachdatenanzeige_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
- ?>
-
-<?php 
+  
 	$i = 0;
-  include(SNIPPETS.'generic_layer_editor_2_embedded.php');			
+
+  if($this->qlayerset[$i]['template']==''){
+   	include(SNIPPETS.'generic_layer_editor_2_embedded.php');
+	}
+  else{
+  	include(SNIPPETS.$this->qlayerset[$i]['template']);			# falls man mal ein eigenes Subformular einbinden will  	 
+  }
 
 	# Vorschauattribut extrahieren
 	$data = explode('<und>', $this->formvars['data']);
@@ -16,7 +20,7 @@
 		}
 	}
  ?>
-		<table width="100%" border="0" cellpadding="2" cellspacing="0">
+ <table width="100%" border="0" cellpadding="2" cellspacing="0">
     <tr align="center"> 
       <td>
     <? if($this->editable == 'true'){ ?>
@@ -25,8 +29,10 @@
       	<input type="button" class="button" name="deletebutton" value="<? echo $strDelete; ?>" onclick="subdelete_data(<? echo $this->formvars['selected_layer_id']; ?>, '<? echo $this->formvars['fromobject'] ?>', '<? echo $this->formvars['targetobject'] ?>', '<? echo $this->formvars['targetlayer_id'] ?>', '<? echo $this->formvars['targetattribute'] ?>', '<? echo $this->formvars['data'] ?>');">
      <? } ?>
       	<input type="button" class="button" name="cancelbutton" value="<? echo $strCancel; ?>" onclick="clearsubform('<? echo $this->formvars['fromobject'] ?>');">
-      <? } ?>
+      <? }
+      if($this->qlayerset[$i]['template']==''){ # wenn man ein Template für einen embeddeden Layer gesetzt hat, will man diesen Layer ja nur in der embeddeten Anzeige sehen?>
    			<input type="button" class="button" name="extrabutton" value="Datensatz anzeigen" onclick="location.href='index.php?go=Layer-Suche_Suchen&selected_layer_id=<? echo $this->qlayerset[$i]['Layer_ID'].'&value_'.$this->qlayerset[$i]['attributes']['table_name'][$preview_attribute].'_oid='.$this->qlayerset[$i]['shape'][0][$this->qlayerset[$i]['attributes']['table_name'][$preview_attribute].'_oid']; ?>'">
+   		<? } ?>
       </td>
     </tr>
   </table>

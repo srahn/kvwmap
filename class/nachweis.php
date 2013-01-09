@@ -237,7 +237,7 @@ class Nachweis {
   }
   
   function getAnzahlNachweise($polygon){
-    $sql="SELECT COUNT (the_geom) as anzahl FROM n_nachweise where intersects ('".$polygon."',the_geom)"; 
+    $sql="SELECT COUNT (the_geom) as anzahl FROM n_nachweise where st_intersects ('".$polygon."',the_geom)"; 
     $ret=$this->database->execSQL($sql,4, 0);    
     if (!$ret[0]) {
       $rs=pg_fetch_array($ret[1]);
@@ -285,7 +285,7 @@ class Nachweis {
 			$result = 'invalid';
 			return $result;
 		}
-  	$sql = "SELECT alknflur.gemkgschl, alknflur.flur FROM alkobj_e_fla, alknflur WHERE alknflur.objnr = alkobj_e_fla.objnr AND intersects(the_geom, TRANSFORM(geometryfromtext('".$polygon."', ".$epsg."), ".EPSGCODE."))";
+  	$sql = "SELECT alknflur.gemkgschl, alknflur.flur FROM alkobj_e_fla, alknflur WHERE alknflur.objnr = alkobj_e_fla.objnr AND st_intersects(the_geom, TRANSFORM(geometryfromtext('".$polygon."', ".$epsg."), ".EPSGCODE."))";
   	$ret=$this->database->execSQL($sql,4, 1);
   	$result = 'f';	
   	while($rs = pg_fetch_row($ret[1])){
@@ -305,7 +305,7 @@ class Nachweis {
 			$result = 'invalid';
 			return $result;
 		}
-  	$sql = "SELECT f.land * 10000 + f.gemarkungsnummer, f.flurnummer FROM alkis.ax_flurstueck f WHERE intersects(wkb_geometry, TRANSFORM(geometryfromtext('".$polygon."', ".$epsg."), ".EPSGCODE_ALKIS."))";
+  	$sql = "SELECT f.land * 10000 + f.gemarkungsnummer, f.flurnummer FROM alkis.ax_flurstueck f WHERE st_intersects(wkb_geometry, TRANSFORM(geometryfromtext('".$polygon."', ".$epsg."), ".EPSGCODE_ALKIS."))";
   	$ret=$this->database->execSQL($sql,4, 1);
   	$result = 'f';	
   	while($rs = pg_fetch_row($ret[1])){

@@ -217,7 +217,7 @@ class jagdkataster {
 		$sql.= " FROM alb_v_gemarkungen, alknflst, alkobj_e_fla, jagdbezirke, alb_flurstuecke AS alb";
 		$sql.= " WHERE alb_v_gemarkungen.gemkgschl = CAST(alknflst.gemkgschl AS integer) AND alknflst.objnr = alkobj_e_fla.objnr";
 		$sql.= " AND jagdbezirke.oid IN (".implode(',', $oids).")";
-		$sql.= " AND alkobj_e_fla.the_geom && jagdbezirke.the_geom AND intersects(alkobj_e_fla.the_geom, jagdbezirke.the_geom)";
+		$sql.= " AND alkobj_e_fla.the_geom && jagdbezirke.the_geom AND st_intersects(alkobj_e_fla.the_geom, jagdbezirke.the_geom)";
 		$sql.= " AND st_area(st_intersection(alkobj_e_fla.the_geom, jagdbezirke.the_geom)) > 1";
 		$sql.= " AND alb.flurstkennz = alknflst.flurstkennz ORDER BY jagdbezirke.name";
 		#echo $sql;
@@ -268,7 +268,7 @@ class jagdkataster {
 		$sql.= " FROM alkis.ax_gemarkung AS g, jagdbezirke, alkis.ax_flurstueck AS f";
 		$sql.= " WHERE f.gemarkungsnummer = g.gemarkungsnummer";
 		$sql.= " AND jagdbezirke.oid IN (".implode(',', $oids).")";
-		$sql.= " AND f.wkb_geometry && transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.") AND intersects(f.wkb_geometry, transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS."))";
+		$sql.= " AND f.wkb_geometry && transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.") AND st_intersects(f.wkb_geometry, transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS."))";
 		$sql.= " AND st_area(st_intersection(f.wkb_geometry, transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS."))) > 1";
 		$sql.= " ORDER BY jagdbezirke.name";
 		#echo $sql;

@@ -181,9 +181,23 @@ function update_require_attribute(attributes, layer_id, value){
 												    	Nutzungsart:
 												    </td>
 												    <td colspan="2"> 
-												      <?php 
-												        $FormatWerte = array('');
-												        $FormatBez = array('-- Bitte wählen --'); 
+												      <?php
+											      	 	if(in_array($this->formvars['entwicklungszustand'], array('B', 'R', 'E'))){
+																	$FormatWerte = array('W', 'WS', 'WR', 'WA', 'WB', 'M', 'MD', 'MI', 'MK', 'G', 'GE', 'GI', 'S', 'SE', 'SO', 'GB', '');
+																	$FormatBez = array('W', 'WS', 'WR', 'WA', 'WB', 'M', 'MD', 'MI', 'MK', 'G', 'GE', 'GI', 'S', 'SE', 'SO', 'GB', '-- Bitte wählen --'); 
+																}
+																elseif($this->formvars['entwicklungszustand'] == 'LF'){
+																	$FormatWerte = array('LW', 'A', 'GR', 'EGA', 'SK', 'WG', 'KUP', 'UN', 'F', '');
+																	$FormatBez = array('LW', 'A', 'GR', 'EGA', 'SK', 'WG', 'KUP', 'UN', 'F', '-- Bitte wählen --');
+																}
+																elseif($this->formvars['entwicklungszustand'] == 'SF'){
+																	$FormatWerte = array('PG', 'KGA', 'FGA', 'CA', 'SPO', 'SG', 'FH', 'WF', 'FP', 'PP', 'LG', 'AB', 'GF', 'SN', '');
+																	$FormatBez = array('PG', 'KGA', 'FGA', 'CA', 'SPO', 'SG', 'FH', 'WF', 'FP', 'PP', 'LG', 'AB', 'GF', 'SN', '-- Bitte wählen --');
+																}
+																else{ 
+												        	$FormatWerte = array('');
+												        	$FormatBez = array('-- Bitte wählen --');
+																} 
 												        $nutzung = new FormObject('nutzungsart','select',$FormatWerte,array($this->formvars['nutzungsart']),$FormatBez,1,$maxlenght,$multiple,146);
 												        $nutzung->OutputHTML();
 												        echo $nutzung->html;

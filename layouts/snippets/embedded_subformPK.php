@@ -1,4 +1,3 @@
-
 <? 
 	$doit = false;
   $anzObj = count($this->qlayerset[$i]['shape']);

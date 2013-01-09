@@ -1849,7 +1849,7 @@ if ($goNotExecutedInIncludeCases) {
       $GUI->drawMap();    
       $GUI->mime_type='map_ajax';
       $GUI->output();
-		}
+		}break;
 
     default : {
       # Karteninformationen lesen
@@ -1858,7 +1858,7 @@ if ($goNotExecutedInIncludeCases) {
       $GUI->drawMap();
       $GUI->saveMap('');
       $GUI->output();
-	  }
+	  }break;
 	}
 }
 include('end.php');

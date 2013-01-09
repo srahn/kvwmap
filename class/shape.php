@@ -383,7 +383,7 @@ class shape {
   	}
   	# über Polygon einschränken
     if($this->formvars['newpathwkt']){
-    	$sql.= " AND Transform(".$the_geom.", ".$user->rolle->epsg_code.") && GeomFromText('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code.") AND INTERSECTS(Transform(".$the_geom.", ".$user->rolle->epsg_code."), GeomFromText('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."))";
+    	$sql.= " AND Transform(".$the_geom.", ".$user->rolle->epsg_code.") && GeomFromText('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code.") AND ST_INTERSECTS(Transform(".$the_geom.", ".$user->rolle->epsg_code."), GeomFromText('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."))";
     }
     # Filter
     $filter = $mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id);

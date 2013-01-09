@@ -228,7 +228,7 @@ function save_layout(){
         	<td colspan=8 align="left">
         		<? if($this->previewfile){ ?>
         			<div id="preview_div" onmouseout="document.getElementById('coords').style.visibility='hidden';" onmousemove="image_coords(event)" style="width:595px;height:842px;background-image:url('<? echo $this->previewfile; ?>');">
-        				<div id="coords" style="background-color: white;width:55px;visibility: hidden;position:relative;border: 1px solid black">
+        				<div id="coords" style="background-color: white;width:65px;visibility: hidden;position:relative;border: 1px solid black">
         					&nbsp;x:&nbsp;<input type="text" id="posx" size="2" style="border:none"><br>
         					&nbsp;y:&nbsp;<input type="text" id="posy" size="2" style="border:none">
         				</div>

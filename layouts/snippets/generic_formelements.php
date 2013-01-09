@@ -1,7 +1,7 @@
 <?
 								switch ($attributes['form_element_type'][$j]){
 									case 'Textfeld' : {
-										echo '<textarea cols="45" onchange="set_changed_flag(document.GUI.changed_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')"';
+										echo '<textarea title="'.$attributes['alias'][$j].'" cols="45" onchange="set_changed_flag(document.GUI.changed_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')"';
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
 											echo ' readonly style="border:0px;background-color:transparent;font-family:arial,verdana,helvetica,sans-serif;font-size: '.$this->user->rolle->fontsize_gle.'px;"';
 										}

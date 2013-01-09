@@ -20,9 +20,7 @@ $pixelsize    = ($dx/$res_x+$dy/$res_y)/2;		# ist $scale in SVG_map.php
 #			var polygon = svgdoc.getElementById("polygon");
 #			// nix
 #			// nix
-
-$response =  
-
+$response =
 $this->img['hauptkarte'].'^
 '.$this->img['scalebar'].'^
 '.$this->img['referenzkarte'].'^
@@ -37,7 +35,6 @@ $response.= '^
 '.$this->map->extent->maxy.'^
 '.$pixelsize.'^
 &nbsp;<a href="index.php?go=Kartenkommentar_Formular&consumetime='.$this->user->rolle->newtime.'&hauptkarte='.$this->img['hauptkarte'].'">'.$strSave.'</a>&nbsp;|&nbsp;<a href="index.php?go=Kartenkommentar_Waehlen&prevtime='.$this->user->rolle->newtime.'">'.$strChoose.'</a>&nbsp;|&nbsp;';
-debug_write('map_ajax.php extent:'.$this->map->extent->minx.', '.$this->map->extent->miny.', '.$this->map->extent->maxx.', '.$this->map->extent->maxy.', '.$pixelsize);
 if(SHOW_MAP_IMAGE == 'true'){
 	$response .= '<a id="MapImageLink" target="_blank" href="" onmouseover="javascript:showMapImage();">'.$strMapImageURL.'</a></b>';
 }
@@ -46,6 +43,7 @@ $response .='&nbsp;|&nbsp;<a href="javascript:resizemap2window();" >Gr&ouml;&szl
 ^startup()
 ^update_legend(\''.$this->layerhiddenstring.'\')';
 
+ob_end_clean();
 echo $response;
 
 ?>

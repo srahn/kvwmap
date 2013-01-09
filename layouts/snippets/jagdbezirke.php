@@ -239,10 +239,13 @@ else {
 <input name="operator_oid" type="hidden" value="=">
 <input name="value_oid" type="hidden" value="<? echo $this->qlayerset[$i]['shape'][0]['oid']; ?>">
 <input name="keinzurueck" type="hidden" value="1">
-<? } ?>
+<? }
+if(!$this->jagd_hiddenfields){
+	$this->jagd_hiddenfields = true; ?>
 <input name="name" type="hidden" value="<? echo $this->formvars['name']; ?>">
 <input name="oid" type="hidden" value="<?php echo $this->formvars['oid']; ?>">
 <input name="search_nummer" type="hidden" value="<?php echo $this->formvars['search_nummer']; ?>">
 <input name="search_name" type="hidden" value="<?php echo $this->formvars['search_name']; ?>">
 <input name="search_art" type="hidden" value="<?php echo $this->formvars['search_art']; ?>">
 <input name="search_status" type="hidden" value="<?php echo $this->formvars['search_status']; ?>">
+<? } ?>

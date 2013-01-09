@@ -551,7 +551,7 @@ function set_changed_flag(flag){
 				</tr>
 					<?}?>
 				<tr style="display:none">
-					<td></td>
+					<td>&nbsp;</td>
 					<td height="23" colspan="3">
 						&bull;&nbsp;<a href="javascript:showcharts(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCreateChart; ?></a>
 					</td>
@@ -565,6 +565,7 @@ function set_changed_flag(flag){
 									&nbsp;&nbsp;<select name="charttype_<?php echo $layer['Layer_ID']; ?>" onchange="change_charttype(<?php echo $layer['Layer_ID']; ?>);">
 										<option value="bar">Balkendiagramm</option>
 										<option value="mirrorbar">doppeltes Balkendiagramm</option>
+										<option value="circle">Kreisdiagramm</option>
 									</select>
 								</td>
 							</tr>

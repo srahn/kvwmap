@@ -9,6 +9,32 @@ function setprintextent(wert){
 	document.GUI.printextent.value = wert;
 }
 
+function druck(){
+	if(document.GUI.printextent.value == 'false'){
+		alert("Bitte aktualisieren Sie den Druckausschnitt durch Klick in die Maßstabseingabe und dann [Enter].");
+	}
+	else{
+		if(Math.abs(document.GUI.angle.value) > 90){
+			alert("Bitte geben Sie einen Winkel zwischen -90° und 90° an.");
+		}
+		else{
+			if(document.GUI.printscale.value != ''){
+				if(document.GUI.center_x.value != ''){
+					document.GUI.target = '_blank';
+					document.GUI.go.value = 'Druckausschnittswahl_Drucken';
+					document.GUI.submit();
+				}
+				else{
+					alert("Bitte wählen Sie einen Druckausschnitt aus.");
+				}
+			}
+			else{
+				alert("Bitte geben Sie einen Druckmassstab ein.");
+			}
+		}
+	}
+}
+
 function preview(){
 	if(document.GUI.printextent.value == 'false'){
 		alert("Bitte aktualisieren Sie den Druckausschnitt durch Klick in die Maßstabseingabe und dann [Enter].");
@@ -102,6 +128,7 @@ function remove(){
   <tr align="center"> 
     <td colspan="4"> 
       <input class="button" type="button" name="vorschau" value="<?php echo $strButtonPrintPreview; ?>" onclick="preview();">
+      <input class="button" type="button" name="drucken" value="<?php echo $strButtonPrint; ?>" onclick="druck();">
       <br><br>
     </td>
   </tr>
@@ -133,9 +160,14 @@ function remove(){
     <td valign="top" align="left">
     	<?php echo $strRotationAngle; ?><input type="text" size="3" name="angle" value="<?php echo $this->formvars['angle']; ?>">&nbsp;°
     </td>
-    <td colspan="2"  align="right"> 
+    <td align="left">
+    	<? if($this->Document->activeframe[0]['refmapfile']){ 
+    		if(!isset($this->formvars['referencemap']))$this->formvars['referencemap'] = 1;
+    	echo $strReferenceMap; ?>&nbsp;<input type="checkbox" name="referencemap" value="1" <? if($this->formvars['referencemap']) echo 'checked="true"'; ?>">
+    	<? } ?>
+    </td>
+    <td align="right"> 
       <?php echo $strPrintDetail; ?>
-
     	<input type="text" name="name" value="" style="width:120px" >&nbsp;<input class="button" type="button" style="width:84px" name="speichern" value="<?php echo $this->strSave; ?>" onclick="save();">
     </td>
   </tr>
@@ -156,7 +188,7 @@ function remove(){
     </td>
   </tr>
   <?
-  	# Wenn der Druckrahmen Freitexte hat, die leer sind, werden dem Nutzer Textfelder angeboten um die Freitexte selber belegen
+  	# Wenn der Druckrahmen Freitexte hat, die leer sind, werden dem Nutzer Textfelder angeboten um die Freitexte selber zu belegen
 		for($j = 0; $j < count($this->Document->activeframe[0]['texts']); $j++){
       if($this->Document->activeframe[0]['texts'][$j]['text'] == ''){
       	# falls man von der Vorschau zurück gekommen ist

@@ -255,7 +255,7 @@ class GUI extends GUI_core{
 				$layerdb = $mapDB->getlayerdatabase($layer[$i]['Layer_ID'], $this->Stelle->pgdbhost);
 				$select = $mapDB->getSelectFromData($layer[$i]['Data']);
 				$extent = 'Transform(geomfromtext(\'POLYGON(('.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layer[$i]['epsg_code'].')';				
-				$fromwhere = 'from ('.$select.') as foo1 WHERE intersects(the_geom, '.$extent.')';
+				$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects(the_geom, '.$extent.')';
 				if($layer[$i]['Datentyp'] == 0){	# POINT
 					$sql = 'SELECT x(the_geom), y(the_geom) FROM (SELECT Transform(the_geom, '.$this->user->rolle->epsg_code.') as the_geom '.$fromwhere.') foo LIMIT 10000';
 				}
@@ -293,7 +293,7 @@ class GUI extends GUI_core{
     	}
 			$select = str_replace(' from ', ', '.$data_attributes['table_alias_name'][$data_attributes['the_geom']].'.oid as exclude_oid'.' from ', strtolower($mapDB->getSelectFromData($layer['Data'])));
 			$extent = 'Transform(geomfromtext(\'POLYGON(('.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layer['epsg_code'].')';				
-			$fromwhere = 'from ('.$select.') as foo1 WHERE intersects(the_geom, '.$extent.') ';
+			$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects(the_geom, '.$extent.') ';
 			if($this->formvars['oid']){
 				$fromwhere .= 'AND exclude_oid != '.$this->formvars['oid'];
 			}
@@ -2152,6 +2152,12 @@ class GUI extends GUI_core{
       # Polygon abfragen und Extent setzen
       $rect = $dbmap->zoomToDatasets($oids, $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], 10, $layerdb, $this->user->rolle->epsg_code);
       $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
+	    if (MAPSERVERVERSION > 600) {
+				$this->map_scaledenom = $this->map->scaledenom;
+			}
+			else {
+				$this->map_scaledenom = $this->map->scale;
+			}
     }
 
     $this->saveMap('');
@@ -2269,6 +2275,12 @@ class GUI extends GUI_core{
       # Linie abfragen und Extent setzen
       $rect = $lineeditor->zoomToLine($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], 10);
       $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
+	    if (MAPSERVERVERSION > 600) {
+				$this->map_scaledenom = $this->map->scaledenom;
+			}
+			else {
+				$this->map_scaledenom = $this->map->scale;
+			}
     }
 
     $this->saveMap('');
@@ -2390,6 +2402,12 @@ class GUI extends GUI_core{
       # Polygon abfragen und Extent setzen
       $rect = $polygoneditor->zoomTopolygon($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], 10);
       $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
+	    if (MAPSERVERVERSION > 600) {
+				$this->map_scaledenom = $this->map->scaledenom;
+			}
+			else {
+				$this->map_scaledenom = $this->map->scale;
+			}
     }
 
     $this->saveMap('');
@@ -2477,6 +2495,12 @@ class GUI extends GUI_core{
       $this->loadMap('DataBase');
 
       $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
+	    if (MAPSERVERVERSION > 600) {
+				$this->map_scaledenom = $this->map->scaledenom;
+			}
+			else {
+				$this->map_scaledenom = $this->map->scale;
+			}
     }
     $this->saveMap('');
     $currenttime=date('Y-m-d H:i:s',time());
@@ -2923,7 +2947,7 @@ class GUI extends GUI_core{
       $ratio = $this->Document->selectedframe[0]['mapwidth']/$this->Document->selectedframe[0]['mapheight'];
       $this->formvars['worldprintwidth'] = $this->Document->selectedframe[0]['mapwidth'] * $this->formvars['printscale'] * 0.0003526;
       $this->formvars['worldprintheight'] = $this->Document->selectedframe[0]['mapheight'] * $this->formvars['printscale'] * 0.0003526;
-
+			$this->formvars['map_factor'] = 1;
       $this->previewfile = $this->createMapPDF($this->formvars['aktiverRahmen'], true);
 
       # Fonts auslesen
@@ -4873,7 +4897,7 @@ class GUI extends GUI_core{
     }
 
     # Übersichtskarte
-    if($this->Docu->activeframe[0]['refmapfile']){
+    if($this->Docu->activeframe[0]['refmapfile'] AND $this->formvars['referencemap']){
       $refmapfile = DRUCKRAHMEN_PATH.$this->Docu->activeframe[0]['refmapfile'];
       $zoomfactor = $this->Docu->activeframe[0]['refzoom'];
       $this->Docu->referencemap = $this->createReferenceMap($this->Docu->activeframe[0]['refwidth']*$this->map_factor, $this->Docu->activeframe[0]['refheight']*$this->map_factor, $minx,$miny,$maxx,$maxy, $zoomfactor,  $refmapfile);
@@ -4975,7 +4999,7 @@ class GUI extends GUI_core{
     $pdf->addJpegFromFile(IMAGEPATH.basename($this->img['hauptkarte']),$this->Docu->activeframe[0]['mapposx'],$this->Docu->activeframe[0]['mapposy'],$this->Docu->activeframe[0]['mapwidth'], $this->Docu->activeframe[0]['mapheight']);
 
     # Hinzufügen der Referenzkarte, wenn eine angegeben ist.
-    if($this->Docu->activeframe[0]['refmapfile'] != ''){
+    if($this->Docu->activeframe[0]['refmapfile'] AND $this->formvars['referencemap']){
       $pdf->addJpegFromFile(DRUCKRAHMEN_PATH.basename($this->Docu->activeframe[0]['refmapsrc']),$this->Docu->activeframe[0]['refmapposx'],$this->Docu->activeframe[0]['refmapposy'],$this->Docu->activeframe[0]['refmapwidth']);
       $pdf->addJpegFromFile(IMAGEPATH.basename($this->Docu->referencemap),$this->Docu->activeframe[0]['refposx'],$this->Docu->activeframe[0]['refposy'],$this->Docu->activeframe[0]['refwidth'], $this->Docu->activeframe[0]['refheight']);
     }
@@ -5010,7 +5034,7 @@ class GUI extends GUI_core{
         $this->formvars['freetext'.$this->Docu->activeframe[0]['texts'][$j]['id']] = str_replace(chr(13), '', $this->formvars['freetext'.$this->Docu->activeframe[0]['texts'][$j]['id']]);
         $this->Docu->activeframe[0]['texts'][$j]['text'] = $this->formvars['freetext'.$this->Docu->activeframe[0]['texts'][$j]['id']];
       }
-      $freitext = explode(';', $this->Docu->activeframe[0]['texts'][$j]['text']);
+      $freitext = explode(';', $this->substituteFreitext($this->Docu->activeframe[0]['texts'][$j]['text']));
       $anzahlzeilen = count($freitext);
       $alpha = $this->Docu->activeframe[0]['texts'][$j]['angle'];
       for($i = 0; $i < $anzahlzeilen; $i++){
@@ -5068,6 +5092,12 @@ class GUI extends GUI_core{
       #echo IMAGEMAGICKPATH.'convert -density 300x300  '.$dateipfad.$dateiname.' -resize 595 '.$dateipfad.$name.'-'.$currenttime.'.jpg';
       return TEMPPATH_REL.$name.'-'.$currenttime.'.jpg';
     }
+  }
+  
+  function substituteFreitext($text){
+  	$text = str_replace('$stelle', $this->Stelle->Bezeichnung, $text);
+  	$text = str_replace('$user', $this->user->Name, $text);
+  	return $text;
   }
 
   function wmsExportSenden() {
@@ -5928,7 +5958,7 @@ class GUI extends GUI_core{
           if($layerset[0]['attributes']['name'][$i] == $layerset[0]['attributes']['the_geom']){
           	# Suche im Suchpolygon
           	if($this->formvars['newpathwkt'] != ''){
-							$sql_where.=' AND Intersects('.$layerset[0]['attributes']['the_geom'].', (Transform(geomfromtext(\''.$this->formvars['newpathwkt'].'\', '.$this->user->rolle->epsg_code.'), '.$layerset[0]['epsg_code'].')))';          		
+							$sql_where.=' AND st_intersects('.$layerset[0]['attributes']['the_geom'].', (Transform(geomfromtext(\''.$this->formvars['newpathwkt'].'\', '.$this->user->rolle->epsg_code.'), '.$layerset[0]['epsg_code'].')))';          		
           	}
           	# Suche nur im Stellen-Extent
             $sql_where.=' AND ('.$layerset[0]['attributes']['the_geom'].' && Transform(geomfromtext(\'POLYGON(('.$this->Stelle->MaxGeorefExt->minx.' '.$this->Stelle->MaxGeorefExt->miny.', '.$this->Stelle->MaxGeorefExt->maxx.' '.$this->Stelle->MaxGeorefExt->miny.', '.$this->Stelle->MaxGeorefExt->maxx.' '.$this->Stelle->MaxGeorefExt->maxy.', '.$this->Stelle->MaxGeorefExt->minx.' '.$this->Stelle->MaxGeorefExt->maxy.', '.$this->Stelle->MaxGeorefExt->minx.' '.$this->Stelle->MaxGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layerset[0]['epsg_code'].') OR '.$layerset[0]['attributes']['the_geom'].' IS NULL)';
@@ -6088,12 +6118,13 @@ class GUI extends GUI_core{
     $i = 0;
     $this->search = true;
     if($this->formvars['embedded_subformPK'] != ''){
-      header('Content-type: text/html; charset=UTF-8');
-      include(LAYOUTPATH.'snippets/embedded_subformPK.php');
+      header('Content-type: text/html; charset=UTF-8');      
+      include(LAYOUTPATH.'snippets/embedded_subformPK.php');			# listenförmige Ausgabe mit Links untereinander
     }
     elseif($this->formvars['embedded'] != ''){
+    	ob_end_clean();
       header('Content-type: text/html; charset=UTF-8');
-      include(LAYOUTPATH.'snippets/sachdatenanzeige_embedded.php');
+      include(LAYOUTPATH.'snippets/sachdatenanzeige_embedded.php');		# ein aufgeklappter Link
     }
     else{
       $this->main = 'sachdatenanzeige.php';
@@ -6263,7 +6294,7 @@ class GUI extends GUI_core{
       $this->output();
     }
     else{
-      header('Content-type: text/html; charset=ISO-8859-1');
+      header('Content-type: text/html; charset=UTF-8');
       $attributenames[0] = $this->formvars['targetattribute'];
       $attributes = $mapdb->read_layer_attributes($this->formvars['targetlayer_id'], $layerdb, $attributenames);
       switch ($attributes['form_element_type'][0]){
@@ -6414,7 +6445,7 @@ class GUI extends GUI_core{
             }
           }
           else{
-            @$ret = $layerdb->execSQL(utf8_decode($sql),4, 1);
+            @$ret = $layerdb->execSQL($sql,4, 1);
             if(!$ret[0]){
               $last_oid = pg_last_oid($ret[1]);
             }
@@ -6427,7 +6458,7 @@ class GUI extends GUI_core{
       }
     }
     if($this->formvars['embedded'] != ''){    # wenn es ein neuer Datensatz aus einem embedded-Formular ist, muss das entsprechende Attribut des Hauptformulars aktualisiert werden
-      header('Content-type: text/html; charset=ISO-8859-1');
+      header('Content-type: text/html; charset=UTF-8');
       $attributenames[0] = $this->formvars['targetattribute'];
       $attributes = $mapdb->read_layer_attributes($this->formvars['targetlayer_id'], $layerdb, $attributenames);
       switch ($attributes['form_element_type'][0]){
@@ -6573,7 +6604,8 @@ class GUI extends GUI_core{
       }
     }
     if($this->formvars['embedded'] != ''){
-      header('Content-type: text/html; charset=ISO-8859-1');
+    	ob_end_clean();
+      header('Content-type: text/html; charset=UTF-8');
       include(LAYOUTPATH.'snippets/new_layer_data_embedded.php');
     }
     else{
@@ -6789,6 +6821,7 @@ class GUI extends GUI_core{
 	
 	function generisches_sachdaten_diagramm($width, $datei = NULL){
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$layerset = $this->user->rolle->getLayer($this->formvars['chosen_layer_id']);
     $layerdb = $mapDB->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
     $path = $mapDB->getPath($this->formvars['chosen_layer_id']);
     $privileges = $this->Stelle->get_attributes_privileges($this->formvars['chosen_layer_id']);
@@ -6831,6 +6864,7 @@ class GUI extends GUI_core{
         if($rs[$this->formvars['chartvalue_'.$this->formvars['chosen_layer_id']]] < $minimum){
         	$minimum = $rs[$this->formvars['chartvalue_'.$this->formvars['chosen_layer_id']]];
         }
+        $summe += $rs[$this->formvars['chartvalue_'.$this->formvars['chosen_layer_id']]];
         $maxlabelbox = imagettfbbox(36, 0, dirname(FONTSET).'/arial.ttf', $rs[$this->formvars['chartlabel_'.$this->formvars['chosen_layer_id']]]);
         if($maxlabelwidth < $maxlabelbox[2] - $maxlabelbox[0]){
     			$maxlabelwidth = $maxlabelbox[2] - $maxlabelbox[0];
@@ -6843,6 +6877,11 @@ class GUI extends GUI_core{
 		$colors['red'] =				 Array(255,  50,  50);
 		$colors['blue'] =				 Array( 80,  80, 255);    
     $colors['black'] =  		 Array(  0,   0,   0);
+    
+    $result_colors = read_colors($this->database);		# Farben fürs Kreisdiagramm
+    for($i = 0; $i < count($result_colors); $i++){
+    	$piecolors[] = Array($result_colors[$i]['red'], $result_colors[$i]['green'], $result_colors[$i]['blue']);
+    }
  
     switch($this->formvars['charttype_'.$this->formvars['chosen_layer_id']]){
     	case 'bar' : {
@@ -7028,6 +7067,67 @@ class GUI extends GUI_core{
 					}     		
 		    }
     	}break;
+    	
+    	case 'circle' : {
+     	  $image = imagecreatetruecolor(2000, 2000);
+		    $chartColors = allocateImageColors($image, $colors);
+		    $pieColors = allocateImageColors($image, $piecolors); 
+        
+        $backGroundColor = $chartColors['white'];
+				$barLabelSize = 30;
+				$barLabelColor = $chartColors['black'];
+				$barValueSize = 30;
+				$barValueColor = $chartColors['black'];
+				$barNegativValueColor = $chartColors['red'];
+				$barWidth = 40;
+    	  $barColor = $chartColors['blue'];
+		    $barBorderWidth = 4;
+		    $barBorderColor = $chartColors['black'];
+		    
+		    $y = 120;
+		    #imagefill($image, 0, 0, $backGroundColor);	# geht bei FGS wohl nicht
+			  imagefilledrectangle($image, 0, 0, 2000, 2000, $backGroundColor);
+			  #Layername als Überschrift
+			  $labelbox = imagettfbbox(50, 0, dirname(FONTSET).'/arial_bold.ttf', $layerset[0]['Name']);
+			  $labelwidth = $labelbox[2] - $labelbox[0];
+			  imagettftext($image, 50, 0, 1000-$labelwidth/2, $y, $chartColors['black'], dirname(FONTSET).'/arial_bold.ttf', $layerset[0]['Name']);
+			  $y = $y + 120;
+		    $label = $this->formvars['chartlabel_'.$this->formvars['chosen_layer_id']];
+		    if($attributes['alias'][$this->formvars['chartlabel_'.$this->formvars['chosen_layer_id']]])$label = $attributes['alias'][$this->formvars['chartlabel_'.$this->formvars['chosen_layer_id']]];
+				$value = $this->formvars['chartvalue_'.$this->formvars['chosen_layer_id']];
+		    if($attributes['alias'][$this->formvars['chartvalue_'.$this->formvars['chosen_layer_id']]]) $value = $attributes['alias'][$this->formvars['chartvalue_'.$this->formvars['chosen_layer_id']]];
+		    imagettftext($image, 36, 0, 70, $y, $chartColors['black'], dirname(FONTSET).'/arial.ttf', $label);
+		    $labelbox = imagettfbbox(36, 0, dirname(FONTSET).'/arial.ttf', $label);
+		    if($maxlabelwidth < $labelbox[2] - $labelbox[0]){
+    			$maxlabelwidth = $labelbox[2] - $labelbox[0];
+        }
+		    imagettftext($image, 36, 0, 190+$maxlabelwidth, $y, $chartColors['black'], dirname(FONTSET).'/arial.ttf', $value);
+		    $maxbarwidth = 2000-$maxlabelwidth;
+		    $y = $y + 20;
+		    
+		    $maximum = $maximum - $minimum;		# wenn negative Werte dabei sind, -minimum + maximum addieren
+		    
+		    $endwinkel = 0;
+		    for($i = 0; $i < count($result); $i++){
+		    	$value = $result[$i][$this->formvars['chartvalue_'.$this->formvars['chosen_layer_id']]];
+					$label = $result[$i][$this->formvars['chartlabel_'.$this->formvars['chosen_layer_id']]];					
+					$y = $y+60;
+					if ($barBorderWidth > 0) {
+					  imagefilledrectangle($image, 70-$barBorderWidth,  $y-$barWidth-$barBorderWidth, 110+$barBorderWidth,  $y+$barBorderWidth, $barBorderColor);
+					}
+					imagefilledrectangle($image, 70,  $y-$barWidth, 110,  $y, $pieColors[$i]);
+					imagettftext($image, $barLabelSize, 0, 130, $y, $barLabelColor, dirname(FONTSET).'/arial.ttf', $label);
+					$xstop = 190+$maxlabelwidth;
+					imagettftext($image, $barValueSize, 0, $xstop, $y, $useBarValueColor, dirname(FONTSET).'/arial.ttf', $value);
+					#Piechart
+					$offset = count($result)*60+80;
+					$startwinkel = $endwinkel;		# das nächste Stück fängt da an, wo das letzte aufhörte 
+					$endwinkel = $startwinkel + (360*$value/$summe);
+					imagesetthickness($image, $barBorderWidth);
+					imagefilledarc($image, 1000, (2000-$offset)/2+$offset, 1700-$offset, 1700-$offset, $startwinkel, $endwinkel, $pieColors[$i], IMG_ARC_PIE);
+					imagefilledarc($image, 1000, (2000-$offset)/2+$offset, 1700-$offset, 1700-$offset, $startwinkel, $endwinkel, $barValueColor, IMG_ARC_PIE+IMG_ARC_NOFILL+IMG_ARC_EDGED);
+		    }
+    	}break;   
     }
     
     $imagewidth = imagesx($image);
@@ -7349,9 +7449,7 @@ class GUI extends GUI_core{
       $stelle = new stelle($this->formvars['stelle'], $this->database);
       $layerdb = $this->mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
       $this->attributes = $this->mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
-      for($i = 0; $i < count($this->attributes['type']); $i++){
-        $stelle->set_attributes_privileges($this->formvars['selected_layer_id'], $this->attributes['name'][$i], $this->formvars['privileg_'.$this->attributes['name'][$i]], $this->formvars['tooltip_'.$this->attributes['name'][$i]]);
-      }
+      $stelle->set_attributes_privileges($this->formvars, $this->attributes);
       $stelle->set_layer_privileges($this->formvars['selected_layer_id'], $this->formvars['privileg']);
     }
     $this->layer_attributes_privileges();
@@ -10346,9 +10444,6 @@ class GUI extends GUI_core{
                   $sql = "UPDATE ".$tablename." SET ".$attributname." = '".addslashes($this->formvars[$form_fields[$i]])."' WHERE oid = '".$oid."'";
                 }
                 $this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
-                if($this->formvars['embedded'] != ''){
-                  $sql = utf8_decode($sql);
-                }
               }
             } # end of default case
           } # end of switch for type
@@ -10373,7 +10468,7 @@ class GUI extends GUI_core{
       }
     }
     if($this->formvars['embedded'] != ''){    # wenn es ein Datensatz aus einem embedded-Formular ist, muss das entsprechende Attribut des Hauptformulars aktualisiert werden
-      header('Content-type: text/html; charset=ISO-8859-1');
+      header('Content-type: text/html; charset=UTF-8');
       $attributenames[0] = $this->formvars['targetattribute'];
       $attributes = $mapdb->read_layer_attributes($this->formvars['targetlayer_id'], $layerdb, $attributenames);
       switch ($attributes['form_element_type'][0]){
@@ -10637,10 +10732,10 @@ class GUI extends GUI_core{
             else {
               # Behandlung der Suchanfrage mit Rechteck, exakte Suche im Rechteck
               if ($client_epsg!=$layer_epsg) {
-                $sql_where.=" AND INTERSECTS(".$the_geom.",Transform(GeomFromText('".$searchbox_wkt."',".$client_epsg."),".$layer_epsg."))";
+                $sql_where.=" AND st_intersects(".$the_geom.",Transform(GeomFromText('".$searchbox_wkt."',".$client_epsg."),".$layer_epsg."))";
               }
               else {
-                $sql_where.=" AND INTERSECTS(".$the_geom.",GeomFromText('".$searchbox_wkt."',".$client_epsg."))";
+                $sql_where.=" AND st_intersects(".$the_geom.",GeomFromText('".$searchbox_wkt."',".$client_epsg."))";
               }
             }
             # 2006-06-12 sr   Filter zur Where-Klausel hinzugefügt
@@ -10671,7 +10766,7 @@ class GUI extends GUI_core{
 	            $sql = '';
 	            for($g = 0; $g < count($geoms); $g++){
 	            	if($g > 0)$sql .= " UNION ";
-	            	$sql .= "SELECT ".$pfad." AND the_geom && ('".$geoms[$g]."') AND (INTERSECTS(the_geom, ('".$geoms[$g]."')) OR the_geom = ('".$geoms[$g]."'))";
+	            	$sql .= "SELECT ".$pfad." AND the_geom && ('".$geoms[$g]."') AND (st_intersects(the_geom, ('".$geoms[$g]."')) OR the_geom = ('".$geoms[$g]."'))";
 	            }
             }
             else{
@@ -11209,10 +11304,10 @@ class GUI extends GUI_core{
       else {
         # Behandlung der Suchanfrage mit Rechteck, exakte Suche im Rechteck
         if ($client_epsg!=$layer_epsg) {
-          $sql_where.=" AND INTERSECTS(".$the_geom.",Transform(GeomFromText('".$searchbox_wkt."',".$client_epsg."),".$layer_epsg."))";
+          $sql_where.=" AND st_intersects(".$the_geom.",Transform(GeomFromText('".$searchbox_wkt."',".$client_epsg."),".$layer_epsg."))";
         }
         else {
-          $sql_where.=" AND INTERSECTS(".$the_geom.",GeomFromText('".$searchbox_wkt."',".$client_epsg."))";
+          $sql_where.=" AND st_intersects(".$the_geom.",GeomFromText('".$searchbox_wkt."',".$client_epsg."))";
         }
       }
       
@@ -12082,6 +12177,12 @@ class GUI extends GUI_core{
 	    $oPixelPos->setXY($this->map->width/2,$this->map->height/2);
 	    $this->map->zoompoint(1,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);    
 	    #var_dump($this->map->extent);
+	    if (MAPSERVERVERSION > 600) {
+				$this->map_scaledenom = $this->map->scaledenom;
+			}
+			else {
+				$this->map_scaledenom = $this->map->scale;
+			}
     }
   }
 
@@ -13525,7 +13626,7 @@ class db_mapObj extends db_mapObj_core{
       $sql .= "labelminscale = ".$formvars['labelminscale'].", ";
     }
     $sql .= "labelrequires = '".$formvars['labelrequires']."', ";
-    $sql .= "`connection` = '".$formvars['connection']."', ";
+    $sql .= "`connection` = '".addslashes($formvars['connection'])."', ";
     $sql .= "`printconnection` = '".$formvars['printconnection']."', ";
     $sql .= "connectiontype = '".$formvars['connectiontype']."', ";
     $sql .= "classitem = '".$formvars['classitem']."', ";

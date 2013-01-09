@@ -1,6 +1,50 @@
+<?
+if($this->Document->selectedframe[0]['format'] == 'A5hoch'){ $formatx = 420; $formaty = 595;}
+if($this->Document->selectedframe[0]['format'] == 'A5quer'){ $formatx = 595; $formaty = 420;} 
+if($this->Document->selectedframe[0]['format'] == 'A4hoch'){ $formatx = 595; $formaty = 842;}
+if($this->Document->selectedframe[0]['format'] == 'A4quer'){ $formatx = 842; $formaty = 595;}
+if($this->Document->selectedframe[0]['format'] == 'A3hoch'){ $formatx = 842; $formaty = 1191;}
+if($this->Document->selectedframe[0]['format'] == 'A3quer'){ $formatx = 1191; $formaty = 842;} 
+if($this->Document->selectedframe[0]['format'] == 'A2hoch'){ $formatx = 1191; $formaty = 1684;}
+if($this->Document->selectedframe[0]['format'] == 'A2quer'){ $formatx = 1684; $formaty = 1191;}
+if($this->Document->selectedframe[0]['format'] == 'A1hoch'){ $formatx = 1684; $formaty = 2384;}
+if($this->Document->selectedframe[0]['format'] == 'A1quer'){ $formatx = 2384; $formaty = 1684;}
+if($this->Document->selectedframe[0]['format'] == 'A0hoch'){ $formatx = 2384; $formaty = 3370;}
+if($this->Document->selectedframe[0]['format'] == 'A0quer'){ $formatx = 3370; $formaty = 2384;}
+
+$preview_height = round(595 * $formaty / $formatx);
+?>
 
 <script type="text/javascript">
 <!--
+
+function image_coords(event){
+	document.getElementById('coords').style.visibility='';
+	var pointer_div = document.getElementById("preview_div");
+	if(window.ActiveXObject){		//for IE
+		pos_x = window.event.offsetX;
+		pos_y = window.event.offsetY;
+	}
+	else{	//for Firefox
+		var top = 0, left = 0;
+		var elm = pointer_div;
+		while(elm){
+			left += elm.offsetLeft;
+			top += elm.offsetTop;
+			elm = elm.offsetParent;
+		}
+		pos_x = event.pageX - left;
+		pos_y = event.pageY - top;
+	}
+
+	pos_x2 = Math.round(document.GUI.formatx.value * pos_x / 595);
+	pos_y2 = Math.round(document.GUI.formaty.value - document.GUI.formaty.value * pos_y / <? echo $preview_height; ?>);
+	
+	document.getElementById("coords").style.left = pos_x+7;
+	document.getElementById("coords").style.top = pos_y+7;
+	document.getElementById("posx").value = pos_x2;
+	document.getElementById("posy").value = pos_y2;
+}
 
 function updateheight(imagewidth, imageheight){
 	ratio = imageheight/imagewidth;
@@ -24,40 +68,52 @@ function updaterefwidth(imagewidth, imageheight){
 
 function updateformatinfo(){
 	if(document.GUI.format.value == 'A5hoch'){
-		document.GUI.formatinfo.value = '(420 x 595)';
+		document.GUI.formatx.value = '420';
+		document.GUI.formaty.value = '595';
 	}
 	if(document.GUI.format.value == 'A5quer'){
-		document.GUI.formatinfo.value = '(595 x 420)';
+		document.GUI.formatx.value = '595';
+		document.GUI.formaty.value = '420';
 	}
 	if(document.GUI.format.value == 'A4hoch'){
-		document.GUI.formatinfo.value = '(595 x 842)';
+		document.GUI.formatx.value = '595';
+		document.GUI.formaty.value = '842';
 	}
 	if(document.GUI.format.value == 'A4quer'){
-		document.GUI.formatinfo.value = '(842 x 595)';
+		document.GUI.formatx.value = '842';
+		document.GUI.formaty.value = '595';
 	}
 	if(document.GUI.format.value == 'A3hoch'){
-		document.GUI.formatinfo.value = '(842 x 1191)';
+		document.GUI.formatx.value = '842';
+		document.GUI.formaty.value = '1191';
 	}
 	if(document.GUI.format.value == 'A3quer'){
-		document.GUI.formatinfo.value = '(1191 x 842)';
+		document.GUI.formatx.value = '1191';
+		document.GUI.formaty.value = '842';
 	}
 	if(document.GUI.format.value == 'A2hoch'){
-		document.GUI.formatinfo.value = '(1191 x 1684)';
+		document.GUI.formatx.value = '1191';
+		document.GUI.formaty.value = '1684';
 	}
 	if(document.GUI.format.value == 'A2quer'){
-		document.GUI.formatinfo.value = '(1684 x 1191)';
+		document.GUI.formatx.value = '1684';
+		document.GUI.formaty.value = '1191';
 	}
 	if(document.GUI.format.value == 'A1hoch'){
-		document.GUI.formatinfo.value = '(1684 x 2384)';
+		document.GUI.formatx.value = '1684';
+		document.GUI.formaty.value = '2384';
 	}
 	if(document.GUI.format.value == 'A1quer'){
-		document.GUI.formatinfo.value = '(2384 x 1684)';
+		document.GUI.formatx.value = '2384';
+		document.GUI.formaty.value = '1684';
 	}
 	if(document.GUI.format.value == 'A0hoch'){
-		document.GUI.formatinfo.value = '(2384 x 3370)';
+		document.GUI.formatx.value = '2384';
+		document.GUI.formaty.value = '3370';
 	}
 	if(document.GUI.format.value == 'A0quer'){
-		document.GUI.formatinfo.value = '(3370 x 2384)';
+		document.GUI.formatx.value = '3370';
+		document.GUI.formaty.value = '2384';
 	}
 }
 
@@ -104,7 +160,7 @@ function addfreetext(){
             <?  
             for($i = 0; $i < count($this->Document->frames); $i++){
             	
-              echo ($this->formvars['aktiverRahmen']<>$this->Document->frames[$i]['id']) ? '<option value="'.$this->Document->frames[$i]['id'].'">'.$this->Document->frames[$i]['Name'].'</option>' : '<option value="'.$this->Document->frames[$i]['id'].'" selected>'.$this->Document->frames[$i]['Name'].'</option>';
+              echo ($this->formvars['aktiverRahmen']<>$this->Document->frames[$i]['id']) ? '<option value="'.$this->Document->frames[$i]['id'].'">'.$this->Document->frames[$i]['Name'].'  ('.$this->Document->frames[$i]['id'].')</option>' : '<option value="'.$this->Document->frames[$i]['id'].'" selected>'.$this->Document->frames[$i]['Name'].'  ('.$this->Document->frames[$i]['id'].')</option>';
             }
             ?>
           </select> 
@@ -168,7 +224,14 @@ function addfreetext(){
       </table>
       <table border="1" width="605" cellspacing="0" cellpadding="0">
         	<td colspan=8 align="left">
-        		<img src="<? echo $this->previewfile ?>">
+        		<? if($this->previewfile){ ?>
+        			<div id="preview_div" onmouseout="document.getElementById('coords').style.visibility='hidden';" onmousemove="image_coords(event)" style="width:595px;height:<? echo $preview_height; ?>px;background-image:url('<? echo $this->previewfile; ?>');">
+        				<div id="coords" style="background-color: white;width:65px;visibility: hidden;position:relative;border: 1px solid black">
+        					&nbsp;x:&nbsp;<input type="text" id="posx" size="3" style="border:none"><br>
+        					&nbsp;y:&nbsp;<input type="text" id="posy" size="3" style="border:none">
+        				</div>
+        			</div>
+        		<? } ?>
 					</td>
         </tr>
       </table>
@@ -351,7 +414,7 @@ function addfreetext(){
         
         <tr>
         	<td class="bold" align="center" style="border-top:2px solid #C3C7C3; border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Nordpfeil&nbsp;</td>
-        	<td class="bold" align="center" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">Nutzer</td>
+        	<td class="bold" align="center" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">Stelle-Nutzer</td>
         </tr>
         <tr>
         	<td>&nbsp;x:</td>
@@ -474,20 +537,11 @@ function addfreetext(){
 			    		<option <? if($this->Document->selectedframe[0]['format'] == 'A0hoch') echo 'selected'; ?> value="A0hoch">A0 hoch</option>
 			    		<option <? if($this->Document->selectedframe[0]['format'] == 'A0quer') echo 'selected'; ?> value="A0quer">A0 quer</option>
 			    	</select>
-			    	<input type="text" class="input" style="border:0px;background-color:transparent;" size="10" readonly name="formatinfo" value="<?
-			    		if($this->Document->selectedframe[0]['format'] == 'A5hoch') echo '(420 x 595)';
-			    		if($this->Document->selectedframe[0]['format'] == 'A5quer') echo '(595 x 420)'; 
-			    		if($this->Document->selectedframe[0]['format'] == 'A4hoch') echo '(595 x 842)';
-			    		if($this->Document->selectedframe[0]['format'] == 'A4quer') echo '(842 x 595)';
-			    		if($this->Document->selectedframe[0]['format'] == 'A3hoch') echo '(842 x 1191)';
-			    		if($this->Document->selectedframe[0]['format'] == 'A3quer') echo '(1191 x 842)'; 
-			    		if($this->Document->selectedframe[0]['format'] == 'A2hoch') echo '(1191 x 1684)';
-			    		if($this->Document->selectedframe[0]['format'] == 'A2quer') echo '(1684 x 1191)';
-			    		if($this->Document->selectedframe[0]['format'] == 'A1hoch') echo '(1684 x 2384)';
-			    		if($this->Document->selectedframe[0]['format'] == 'A1quer') echo '(2384 x 1684)';
-			    		if($this->Document->selectedframe[0]['format'] == 'A0hoch') echo '(2384 x 3370)';
-			    		if($this->Document->selectedframe[0]['format'] == 'A0quer') echo '(3370 x 2384)';
-			    	?>">
+			    	(
+			    	<input type="text" class="input" style="border:0px;background-color:transparent;" size="3" readonly name="formatx" value="<? echo $formatx; ?>">
+			    	x
+			    	<input type="text" class="input" style="border:0px;background-color:transparent;" size="3" readonly name="formaty" value="<? echo $formaty;	?>">
+			    	)
 	      </td>
         </tr>
         <tr>

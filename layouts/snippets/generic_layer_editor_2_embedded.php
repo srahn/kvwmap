@@ -1,21 +1,7 @@
 <?php
  # 2008-09-30 sr
   include(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
- ?>
-<script type="text/javascript">
-<!--
-
-function update_require_attribute(attributes, k,layer_id, value){
-	// attributes ist eine Liste von zu aktualisierenden Attribut, k die Nummer des Datensatzes und value der ausgewaehlte Wert
-	attribute = attributes.split(',');
-	for(i = 0; i < attribute.length; i++){
-		ahah("<? echo URL.APPLVERSION; ?>index.php", "go=get_select_list&layer_id="+layer_id+"&attribute="+attribute[i]+"&value="+value, new Array(document.getElementById(attribute[i]+'_'+k)), 'sethtml');
-	}
-}
-
-//-->
-</script>
-<?php
+ 
  # Variablensubstitution
  $layer = $this->qlayerset[$i];
  $attributes = $layer['attributes'];

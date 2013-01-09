@@ -185,7 +185,6 @@ if ($anzLayer==0) {
 	$this->found = 'false';
 }
 for ($i=0;$i<$anzLayer;$i++) {
- #echo '<br>includiere:'.SNIPPETS.$this->qlayerset[$i]['Name'].'.php';
    if ($this->qlayerset[$i]['template']=='') {
    	if(GLEVIEW == '2'){
     	include(SNIPPETS.'generic_layer_editor_2.php');			# Attribute zeilenweise
