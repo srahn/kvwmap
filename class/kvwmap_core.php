@@ -792,8 +792,11 @@ class GUI_core {
         if ($dbStyle['symbol']>0) {
           $style->set('symbol',$dbStyle['symbol']);
         }
-        
+                
         if (MAPSERVERVERSION >= 620) {
+	        if($dbStyle['geomtransform'] != '') {
+	          $style->setGeomTransform($dbStyle['geomtransform']);
+	        }
           if ($dbStyle['pattern']!='') {
             $style->setPattern(explode(' ',$dbStyle['pattern']));
             $style->linecap = 'butt';
@@ -804,11 +807,11 @@ class GUI_core {
           if (MAPSERVERVERSION >= 620) {
             $pattern = $style->getpatternarray();
             if($pattern){
-		    foreach($pattern as &$pat){
-		      $pat = $pat * $this->map_factor;
-		    }
-		    $style->setPattern($pattern);
-	    }
+					    foreach($pattern as &$pat){
+					      $pat = $pat * $this->map_factor;
+					    }
+					    $style->setPattern($pattern);
+				    }
           }
           else {
             if($style->symbol > 0){

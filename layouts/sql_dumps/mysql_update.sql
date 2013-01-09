@@ -1060,3 +1060,4 @@ ALTER TABLE `layer_attributes` CHANGE `form_element_type` `form_element_type` EN
 ALTER TABLE `rollenlayer` ADD `Typ` ENUM('search','import') NOT NULL DEFAULT 'search' AFTER `Gruppe`;
 
 ALTER TABLE `styles` ADD `pattern` VARCHAR(255) NULL;
+ALTER TABLE `styles` ADD `geomtransform` VARCHAR(20) NULL;
