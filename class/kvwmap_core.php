@@ -47,6 +47,7 @@
 class GUI_core {
 	var $scaleUnitSwitchScale=239210;
   var $map_scaledenom;
+  var $map_factor='';
 	
   ###################### Liste der Funktionen ####################################
 
@@ -69,7 +70,6 @@ class GUI_core {
     if (isset ($mime_type)) $this->mime_type=$mime_type;
   }
   
-
   /**
   * Laden der Daten f¸r das Map-Objekt aus Variablen, der Datenbank und/oder einer Map-Datei.
   *
@@ -267,6 +267,17 @@ class GUI_core {
         $map->set('debug', MS_ON);
         $map->imagecolor->setRGB(255,255,255);
         $map->maxsize = 4096;
+        
+	# setzen der Kartenausdehnung ¸ber die letzten Benutzereinstellungen
+	if ($this->user->rolle->oGeorefExt->minx==0 OR $this->user->rolle->oGeorefExt->minx=='') {
+	  echo "Richten Sie mit phpMyAdmin in der kvwmap Datenbank eine Referenzkarte, eine Stelle, einen Benutzer und eine Rolle ein ";
+	  echo "<br>(Tabellen referenzkarten, stelle, user, rolle) ";
+	  echo "<br>oder wenden Sie sich an ihren Systemverwalter.";
+	  exit;
+	}
+	else {
+	  $map->setextent($this->user->rolle->oGeorefExt->minx,$this->user->rolle->oGeorefExt->miny,$this->user->rolle->oGeorefExt->maxx,$this->user->rolle->oGeorefExt->maxy);
+        }
 
         # setzen der Kartenausdehnung ¸ber die letzten Benutzereinstellungen
         if ($this->user->rolle->oGeorefExt->minx==0 OR $this->user->rolle->oGeorefExt->minx=='') {
@@ -353,7 +364,7 @@ class GUI_core {
         $map->reference->set('width',$ref['width']);
         $map->reference->set('height',$ref['height']);
         $map->reference->set('status','MS_ON');
-				if (MAPSERVERVERSION <600) {
+				if (MAPSERVERVERSION < 600) {
 					$extent=ms_newRectObj();
 				}
 				else {
@@ -733,7 +744,7 @@ class GUI_core {
         } # end of Schleife layer
         
         $this->map=$map;
-				if (MAPSERVERVERSION > 600) {
+				if (MAPSERVERVERSION >= 600 ) {
 					$this->map_scaledenom = $map->scaledenom;
 				}
 				else {
@@ -781,19 +792,37 @@ class GUI_core {
         if ($dbStyle['symbol']>0) {
           $style->set('symbol',$dbStyle['symbol']);
         }
+        
+        if (MAPSERVERVERSION >= 620) {
+          if ($dbStyle['pattern']!='') {
+            $style->setPattern(explode(' ',$dbStyle['pattern']));
+            $style->linecap = 'butt';
+          }
+        }  
                 
         if($this->map_factor != ''){
-        	if($style->symbol > 0){
-        		$symbol = $map->getSymbolObjectById($style->symbol);
-        		$pattern = $symbol->getpatternarray();
-        		if(is_array($pattern) AND $symbol->inmapfile != 1){
-	        		foreach($pattern as &$pat){
-	        			$pat = $pat * $this->map_factor;
-	        		}
-							$symbol->setpattern($pattern);
-							$symbol->set('inmapfile', 1);
-        		}
-        	}
+          if (MAPSERVERVERSION >= 620) {
+            $pattern = $style->getpatternarray();
+            if($pattern){
+		    foreach($pattern as &$pat){
+		      $pat = $pat * $this->map_factor;
+		    }
+		    $style->setPattern($pattern);
+	    }
+          }
+          else {
+            if($style->symbol > 0){
+              $symbol = $map->getSymbolObjectById($style->symbol);
+              $pattern = $symbol->getpatternarray();
+              if(is_array($pattern) AND $symbol->inmapfile != 1){
+                foreach($pattern as &$pat){
+                  $pat = $pat * $this->map_factor;
+                }
+                $symbol->setpattern($pattern);
+                $symbol->set('inmapfile', 1);
+              }
+            }
+          }
         }
 
         if($this->map_factor != '' and $layerset['Datentyp'] != 8){ 
@@ -868,6 +897,7 @@ class GUI_core {
         }
         if ($dbStyle['color']!='') {
           $RGB=explode(" ",$dbStyle['color']);
+          if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
           $style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
         }
         if ($dbStyle['outlinecolor']!='') {
@@ -984,9 +1014,7 @@ class GUI_core {
           $label->type = $dbLabel['type'];
           $label->font = $dbLabel['font'];
           $RGB=explode(" ",$dbLabel['color']);
-          if ($RGB[0]=='') { $RGB[0]=0; }
-          if ($RGB[1]=='') { $RGB[1]=0; }
-          if ($RGB[2]=='') { $RGB[2]=0; }
+          if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
           $label->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
           $RGB=explode(" ",$dbLabel['outlinecolor']);
           $label->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
@@ -1135,7 +1163,7 @@ class GUI_core {
     $oPixelPos=ms_newPointObj();
     $oPixelPos->setXY($this->map->width/2,$this->map->height/2);
     $this->map->zoomscale($nScale,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
-  	if (MAPSERVERVERSION > 600) {
+  	if (MAPSERVERVERSION >= 600 ) {
 			$this->map_scaledenom = $this->map->scaledenom;
 		}
 		else {
@@ -1256,7 +1284,7 @@ class GUI_core {
     else {
       # Zoomen auf ein Rechteck
       $this->debug->write('<br>Es wird auf eine Rechteckgezoomt gezoomt',4);
-			if (MAPSERVERVERSION <600) {
+			if (MAPSERVERVERSION < 600) {
 				$oPixelExt=ms_newRectObj();
 			}
 			else {
@@ -1332,7 +1360,7 @@ class GUI_core {
     $this->image_map->saveImage(IMAGEPATH.$filename);
     $this->img['hauptkarte'] = IMAGEURL.$filename;
     $this->debug->write("Name der Hauptkarte: ".$this->img['hauptkarte'],4);
-
+    
 		# Ausblenden der Layer in der Legende, die im aktuellen Maﬂstab nicht gezeichnet werden sollen
     for ($i=0;$i<$this->map->numlayers;$i++) {
       $layer=$this->map->getLayer($i);
@@ -1412,8 +1440,7 @@ class GUI_core {
 	}
 
 	function map_saveWebImage($image,$format) {
-		if(MAPSERVERVERSION > 600) {		
-			$this->map->selectOutputFormat($format);
+		if(MAPSERVERVERSION >= 600 ) {		
 			return $image->saveWebImage();
 		}
 		else {

@@ -130,6 +130,7 @@ function save_style(style_id){
 	data+= '&sizeitem='+document.GUI.style_sizeitem.value;
 	data+= '&offsetx='+document.GUI.style_offsetx.value;
 	data+= '&offsety='+document.GUI.style_offsety.value;
+  data+= '&pattern='+document.GUI.style_pattern.value;  
 	ahah('<? echo URL.APPLVERSION; ?>index.php', data, new Array(document.getElementById('style_div'), document.getElementById('selected_style_div')), "");
 }
 

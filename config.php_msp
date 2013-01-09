@@ -1,0 +1,656 @@
+<?php
+####################################################################
+#                                                                  #
+#   Konfigurationsdatei zu kvwmap									                 #
+#                                                                  #
+####################################################################
+
+# aktuelle Versionsnummer
+define('VERSION','msp');
+define('APPLVERSION','kvwmap'.VERSION.'/');
+# Bezeichnung der Datenbank
+$dbname='kvwmapmsp';
+# Wenn der pgdbname leer gelassen wird, wird versucht die Information
+# fr die Verbindung zur PostGIS-Datenbank aus der Tabelle Stelle zu lesen.
+$pgdbname='geobasis_msp';
+
+########################## Metadaten zum Landkreis
+define('LANDKREIS', 'Landkreis Meckl. Seenplatte');
+define('AMT', 'Kataster-/Vermessungsamt 13071');
+define('STRASSE', 'Gartenstraße 17');
+define('STRASSE2', '');
+
+define('PLZ', '17033');
+define('ORT', 'Neubrandenburg');
+define('POSTANSCHRIFT', 'Telefon:');
+define('POSTANSCHRIFT_STRASSE', '0395-5818626');
+define('POSTANSCHRIFT_PLZ', 'Fax:');
+define('POSTANSCHRIFT_ORT', '0395-5818631');
+# definiert, ob Nutzername im ALB-Auszug 30 angezeigt wird, oder nicht
+define('BEARBEITER', 'true');			# true/false					# Version 1.7.2
+# Gutachterausschuss BORIS
+$gutachterausschuesse = array('13071');       # Version 1.7.5
+
+
+# definiert, ob zu Tetszwecken auf ein PostNAS-Schema zugegriffen wird, oder nicht
+define('ALKIS', false);																# Version 1.8.0
+#define('ALKIS', true);																# Version 1.8.0
+#define("LAYERNAME_FLURSTUECKE",'Flurstuecke_Alkis');
+#define('EPSGCODE','25833');
+
+########################## Layout-Vorgaben
+# Schalter für die neue Legende
+
+# Schalter für die mobile Variante
+define('MOBILE', 'false');                                  # Version 1.6.7 (noch in Entwicklung)
+# definiert, ob der Polygoneditor nach einem Neuladen
+# der Seite immer in den Modus "Polygon zeichnen" wechselt
+define('ALWAYS_DRAW', 'true');			#true/false							# Version 1.6.9
+define('GLEVIEW', 2);
+
+# Header und Footer
+define('HEADER', 'header.php');															# Version 1.8.0
+define('FOOTER', 'footer.php');															# Version 1.8.0
+# login.php
+define('LOGIN', 'login.php');																# Version 1.8.0
+
+
+
+### Einstellungen für das Menü
+# Da die Bezeichnungen der Menüs frei wählbar sind, muss man hier angegen
+# welchen Namen man für welche Aufgabe gewählt hat.
+# Hier werden die Werte aus der Spalte name der Tabelle u_menues
+# Konstanten zugewiesen um sie später beim Layout verwenden zu können
+define('TITLE','Geoportal Landkreis Mecklenburgische Seenplatte');             		# Version 1.7.6
+define('TITLE_DRUCKEN','Druckausschnittswahl');             # Version 1.6.6
+define('TITLE_KARTE','Karte anzeigen');                     # Version 1.6.6
+define('TITLE_NOTIZEN','neue Notiz');                       # Version 1.6.6
+define('TITLE_HILFE','Hilfe (Dokumente)');                  # Version 1.6.6
+define('TITLE_OPTIONEN','Stelle wählen');		# Version 1.7.3
+define('TITLE_SCHNELLDRUCK','schnelle Druckausgabe');					# Version 1.7.5
+
+# Schalter fr die PopUp-Funktion des Mens
+define('POPUPMENUE','false');          # true / false
+# Position des Wappens (oben/unten)
+define('MENU_WAPPEN','oben');          # oben / unten
+# Position der Referenzkarte (oben/unten)                   # Version 1.6.4
+define('MENU_REFMAP','unten');          # oben / unten      # Version 1.6.4
+# Schalter fr die Ajax-Funktionalitï¿½ des Mens            # Version 1.6.4
+define('AJAX_MENUE','true');          # true / false        # Version 1.6.4
+
+# Hintergrundfarbe Zeile bei Listen
+define('BG_TR','lightsteelblue');  # lightblue lightsteelblue		# Version 1.7.3
+# Hintergrundfarbe Top-Menüzeilen
+define('BG_MENUETOP','#DAE4EC');																# Version 1.7.3
+# Hintergrundfarbe Sub-Menüzeilen
+define('BG_MENUESUB','#EDEFEF'); 																# Version 1.7.3
+
+
+# Hintergrundfarbe (Kopf-/Fusszeile)
+define('BG_DEFAULT','lightsteelblue');  # lightblue lightsteelblue
+# Hintergrundfarbe (Eingabeformulare)
+define('BG_FORM','cornflowerblue');     #66CCFF cornflowerblue  steelblue mediumslateblue
+# Hintergrundfarbe (Formularfehler)
+define('BG_FORMFAIL','lightpink');      #FFAEAE thistle lightpink mistyrose hotpink lightcoral
+
+
+# Hintergrundfarbe GLE Datensatzheader
+define('BG_GLEHEADER','lightsteelblue'); # #99D942		# Version 1.8.0
+# Schriftfarbe GLE Datensatzheader
+define('TXT_GLEHEADER','#000000');						# Version 1.8.0
+# Hintergrundfarbe GLE Attributnamen
+define('BG_GLEATTRIBUTE','#DAE4EC');					# Version 1.8.0
+
+
+
+
+# Bezeichung des Datenproviders
+define('PUBLISHERNAME','Kartenserver');
+define('LAGEBEZEICHNUNGSART', 'Flurbezeichnung');						# in Version 1.7.6
+# Testet ob die IP des anfragenden Clientrechners dem Nutzer zugeordnet ist
+define('CHECK_CLIENT_IP',true);	  														# Version 1.6.9 Setzt zusätzliche Spalte in Tabelle stelle voraus.
+
+########################## Pfadeinstellungen
+# Installationspfad
+define('INSTALLPATH','/var/www/');
+
+define('WWWROOT',INSTALLPATH);
+
+
+define('URL','../');
+
+
+define('MAPSERV_CGI_BIN',URL.'cgi-bin/mapserv');
+
+
+define('LOGPATH',INSTALLPATH.'logs/');
+# ms4w define('LOGPATH',INSTALLPATH.'Apache/logs/');
+# fgs  define('LOGPATH',INSTALLPATH.'www/logs/');
+
+# Shapepath [Pfad zum Shapefileverzeichnis]
+define('SHAPEPATH','/data/');
+
+# Custom-Shapepath [Name des Verzeichnisses, in dem die von den Usern hochgeladenen SHPs liegen (muss im SHAPEPATH liegen)]
+define('CUSTOM_SHAPEPATH', 'custom_shps/');
+
+
+define('REFERENCEMAPPATH',SHAPEPATH.'referencemaps/');
+define('NACHWEISDOCPATH',SHAPEPATH.'nachweise/');
+define('NACHWEIS_PRIMARY_ATTRIBUTE', 'rissnummer'); # Version 1.10.b
+
+# Dateiname nnd Pfad der Festpunkte, mit der die Tabelle der Festpunkte aktualisiert werden soll
+define('PUNKTDATEINAME','festpunkte_msp.csv');
+#define('PUNKTDATEINAME','alk');
+define('PUNKTDATEIPATH',SHAPEPATH.'festpunkte/');
+define('PUNKTDATEIARCHIVPATH',PUNKTDATEIPATH.'archiv/');
+define('KVZAUSGABEDATEINAME','festpunkte.kvz');
+define('SKIZZEN_DATEI_TYP','tif');						# Version 1.6.8
+# Pfad zu den WLDGE Dateien
+define('WLDGEFILEPATH',SHAPEPATH.'alb/');
+# Name der WLDGE Datei, die geladen werden soll
+define('WLDGEFILENAME','fortfuerung.wldge');
+# Schalter zum Vergleich der Datum der Grundausstattung und Fortfhrung in der Datenbank und der WLDGE Dateien
+# beim Einlesen der ALB-Daten
+# default 1
+define('WLDGE_DATUM_PRUEFUNG',1);
+# define('WLDGE_DATUM_PRUEFUNG',0);
+
+/*
+ * Wenn historische_loeschen=1 werden alle in der Fortführungsdatei aufgeführten
+ * historischen Objekte aus dem Bestand gelöscht
+*/
+  define('WLDGE_HISTORISCHE_LOESCHEN_DEFAULT',0);
+
+# Pfad zum Speichern der Nachweisrecherche
+define('RECHERCHEERGEBNIS_PATH',SHAPEPATH.'recherchierte_antraege/');
+# Pfad zum Speichern der Druckrahmen
+define('DRUCKRAHMEN_PATH',SHAPEPATH.'Druckrahmen_msp/');
+
+
+# Pfad zu den PDF-Generator Klassen
+define('PDFCLASSPATH',WWWROOT.'PDFClass/');
+
+# Bin-Pfad der Postgres-tools (shp2pgsql, pgsql2shp)
+define('POSTGRESBINPATH', '/home/fgs/fgs/bin/');
+
+# Bin-Pfad der OGR-tools (ogr2ogr, ogrinfo)
+define('OGR_BINPATH', '/usr/local/bin/');					# Version 1.7.4
+
+
+# ms4w define('POSTGRESBINPATH', 'c:\Programme\PostgreSQL\<Version>\bin\');         # Version 1.6.4
+# fgs define('POSTGRESBINPATH', '/home/fgs/fgs/bin/');         											# Version 1.6.4
+
+define('ZIP_PATH', 'zip -j');
+
+# EPSG-Code dem die Koordinaten der Flurstcke zugeordnet werden sollen in den Tabellen
+# alb_flurstuecke und alb_x_flurstuecke wenn man postgres verwendet
+# die Geometriespalte muï¿½auch mit dieser EPSG Nummer angelegt sein.
+define('EPSGCODE','2398'); # Krassowski, Pulkowo 42, Gauï¿½Krger 3 Streifen 4 (12)
+
+
+# Unterstützte SRIDs, nur diese stehen zur Auswahl bei der Stellenwahl
+$supportedSRIDs = array(4326,2397,2398,2399,31466,31467,31468,32633,25832,25833,35833,325833);                    # Version 1.6.8
+
+
+# Imagepath
+define('IMAGEPATH',WWWROOT.'tmp/');
+# Pfad für selbst gemachte Bilder
+define('CUSTOM_IMAGE_PATH',SHAPEPATH.'Bilder/');                # Version 1.6.9
+#Cachespeicherort
+define('CACHEPATH',WWWROOT.'cache/');                             # Version 1.6.8
+#Cachezeit Nach welcher Zeit in Stunden sollen gecachte Dateien aktualisiert werden
+#wird derzeit noch nicht berücksichtigt
+define('CACHETIME',168);                                          # Version 1.6.8
+# relative Pfadangabe zum Webverzeichnis mit temprï¿½en Dateien
+define('TEMPPATH_REL','../tmp/');
+#Imageurl
+define('IMAGEURL','../tmp/');
+# Symbolset
+define('SYMBOLSET',WWWROOT.APPLVERSION.'symbols/symbole.sym');
+# Fontset
+define('FONTSET',WWWROOT.APPLVERSION.'fonts/fonts.txt');
+# Graphics
+define ('GRAPHICSPATH','graphics/');
+# Wappen
+define('WAPPENPATH',GRAPHICSPATH.'wappen/');
+# Wasserzeichenbild fr Ausdrucke
+define('WASSERZEICHEN',WAPPENPATH.'wasserzeichen.jpg');
+# Layouts
+define ('LAYOUTPATH',WWWROOT.APPLVERSION.'layouts/');
+define ('SNIPPETS',LAYOUTPATH.'snippets/');
+define('CLASSPATH',WWWROOT.APPLVERSION.'class/');
+define('TEMPTABLEPREFIX','x_');
+# Default Templates fr Sachdatenanzeige
+define('DEFAULTTEMPLATE',' ');
+define('DEFAULTHEADER',' ');
+define('DEFAULTFOOTER',' ');
+# Erlaubte maximale Lï¿½ge der Stammnummer in der Fachschale Nachweisverwaltung
+define('STAMMNUMMERMAXLENGTH',8);
+# maximale Anzahl der in einer Sachdatenabfrage zurckgelieferten Zeilen.
+define('MAXQUERYROWS',400);
+
+# Erlaubte maximale Länge der Blattnummer in der Fachschale Nachweisverwaltung
+define('BLATTNUMMERMAXLENGTH',4);                         # Version 1.6.7
+
+# PostgreSQL Server Version                         # Version 1.6.4
+define('POSTGRESVERSION', '822');                   # Version 1.6.4   (800 == 8.0)
+
+# MySQLSQL Server Version                         # Version 1.6.4
+define('MYSQLVERSION', '500');                   # Version 1.6.4   (4.1.0 == 410)
+
+# Mapserver Version															# Version 1.6.8
+define('MAPSERVERVERSION', 521); # Version 1.6.8
+# PHP-Version
+define('PHPVERSION', '520');
+
+# Schalter für die mobile Variante
+define('MOBILE', 'false');                                  # Version 1.6.7 (noch in Entwicklung)
+
+# Pfad zur GPS-Logdatei                         # Version 1.7.0
+define('GPSPATH', SHAPEPATH.'gps/gpsulog.txt');
+#define('GPSPATH', 'http://localhost:8081/');
+#define('GPSPATH', 'http://www.gdi-service.de/gps_position_nmea_gga.txt');
+
+# Synchronisationsverzeichnis                         # Version 1.7.0
+define('SYNC_PATH', SHAPEPATH.'synchro/');
+
+
+# Faktor fr die Einstellung der Druckqualitï¿½ (MAPFACTOR * 72 dpi)     # Version 1.6.0
+define('MAPFACTOR',1.9);                                                # Version 1.6.0
+
+# Standarddruckrahmen für die schnelle Druckausgabe						# Version 1.7.4
+define('DEFAULT_DRUCKRAHMEN_ID',7027);													# Version 1.7.4
+
+
+# Zeigt an, ob Image Magick und Ghostscript installiert sind oder nicht (wird fr neue Druckvorschau benï¿½igt)
+define('IMAGEMAGICK', 'true');                        # Version 1.6.3
+
+# Pfad zum Imagemagick convert
+#define('IMAGEMAGICKPATH', '/home/fgs/fgs/bin/');                        # Version 1.7.3
+# geae 20100331 jens Falkenberg nach Installaion ImageMagick CentOS Paket
+define('IMAGEMAGICKPATH', '/usr/bin/');
+
+# Pfad zum Ordner für Datei-Uploads
+define('UPLOADPATH',SHAPEPATH.'upload/');       # Version 1.6.7
+
+# Definiert, ob die Festpunkte in 2 Streifen liegen oder nicht
+define('FESTPUNKTE_2_STREIFEN', 'false');	#true/false		# Version 1.6.7
+
+# Legt fest, ob die Hausnummernzusätze groß oder klein dargestellt werden
+define('HAUSNUMMER_TYPE', 'LOWER');			# UPPER/LOWER		# Version 1.6.8
+
+# Definiert ob die einzulesende Festpunktedatei auf doppelte Punktkennzeichen getestet werden soll, oder nicht		# Version 1.6.8
+define('CHECKPUNKTDATEI', 'true');			# true/false																																# Version 1.6.8
+# Minimale Maßstabszahl
+define('MINSCALE', 100);                               # Version 1.7.0
+
+# URL zum Authentifizieren am CSW-Metadatensystem
+define('METADATA_AUTH_LINK', 'http://berg:8088/geonetwork/srv/en/xml.user.login?username=editor&password=editor');		# Version 1.7.5
+
+# URL zum CSW-Server
+define('METADATA_ONLINE_RESOURCE', 'http://berg:8088/geonetwork/srv/en/csw');			# Version 1.7.5
+
+# URL zum Editieren von Metadaten im CSW-Metadatensystem
+#define('METADATA_EDIT_LINK', 'http://berg:8088/geonetwork/srv/en/metadata.edit?id=');
+define('METADATA_EDIT_LINK', 'http://berg:8088/geonetwork/srv/de/metadata.create?id=1&group=3');		# Version 1.7.5
+
+# URL zum Recherchieren von Metadaten im CSW-Metadatensystem
+define('METADATA_SEARCH_LINK', 'http://berg:8088/geonetwork/srv/de/main.home');		# Version 1.7.5
+
+
+######################### Voreinstellungen zu den Layern
+# Layernamen fr die ALK
+define("LAYERNAME_FLURSTUECKE",'Flurstuecke');
+define("LAYERNAME_GEBAEUDE",'Gebaeude');
+define("LAYERNAME_NUTZUNGEN",'Nutzung');
+define("LAYERNAME_AUSGESTALTUNGEN",'Ausgestaltung');
+# Namen fr Layer mit administrativen Grenzen
+define("LAYERNAME_GEMARKUNGEN",'Gemeinde');
+define("LAYERNAME_GEMEINDEN",'Gemarkung');
+define("LAYERNAME_FLUR",'Fluren');
+define("LAYERNAME_BODENRICHTWERTE",'BORIS-F 2011');	# Version 1.7.3
+define("LAYER_ID_ADRESSAENDERUNGEN",'1013');
+define("LAYER_IDS_DOP", '3101');							# Version 1.8.0
+define("LAYER_ID_JAGDBEZIRKE", '60070');				# Version 1.10.0
+
+######################### Dateieinstellungen
+# Datei in der das MapFile als Dokumentation zur Kartenausgabe geschrieben wird
+define("DEFAULTMAPFILE",SHAPEPATH.'mapfiles/defaultmapfile.map');
+define("SAVEMAPFILE",LOGPATH.'save_mapfile.map');
+define("REFMAPFILE",SHAPEPATH.'MapFiles/refmapfile.map');
+# Ort der Datei, in der die Meldungen beim Debugen geschrieben werden
+define('DEBUGFILE',LOGPATH.VERSION.'_debug.htm');
+# Level der Fehlermeldungen beim debuggen
+# 3 nur Ausgaben die fr Admin bestimmt sind
+# 2 nur Datenbankanfragen
+# 1 nur wichtige Fehlermeldungen
+# 0 keine Ausgaben
+define('DEBUG_LEVEL',3);
+
+# mySQL-Log-Datei zur Speicherung der SQL-Statements              # Version 1.6.0
+define('LOGFILE_MYSQL',LOGPATH.VERSION.'_log_mysql.sql');         # Version 1.6.0
+# postgreSQL-Log-Datei zur Speicherung der SQL-Statements         # Version 1.6.0
+define('LOGFILE_POSTGRES',LOGPATH.VERSION.'_log_postgres.sql');   # Version 1.6.0
+# Log-Level zur Speicherung der SQL-Statements                    # Version 1.6.0
+define('LOG_LEVEL',1);                                            # Version 1.6.0
+# Loglevel
+# 0 niemals loggen
+# 1 immer loggen
+# 2 nur loggen wenn loglevel in execSQL 1 ist.
+
+# Ermöglicht die Ausführung der SQL-Statements in der Datenbank zu unterdrücken.
+# In dem Fall werden die Statements nur in die Log-Datei geschrieben.
+# Die Definition von DBWRITE ist umgezogen nach start.php, damit das Unterdrücken
+# des Schreiben in die Datenbank auch mit Formularwerten eingestellt werden kann.
+# das übernimmt in dem Falle die Formularvariable disableDbWrite.
+# Hier kann jedoch noch der Defaultwert gesetzt werden
+define('DEFAULTDBWRITE',1);                                       # Version 1.6.6
+# Die ID der Stelle aus der Datenbank, auf die alle Nutzer Zugriff haben
+# und die als Einstiegsseite fr neue Benutzer eingestellt ist
+define('DEFAULTSTELLE','4');
+
+# Gast-Stelle
+$gast_stellen = array(50);						# Version 1.8.0
+
+
+#### Einstellungen zur Speicherung der Zugriffe
+define('LOG_CONSUME_ACTIVITY',1);
+
+define('DELETE_ROLLENLAYER', 'true');
+
+# Definiert, ob das aktuelle Kartenbild separat angezeigt werden darf oder nicht
+define('SHOW_MAP_IMAGE', 'true');       # true / false                            # Version 1.6.7
+
+############################# Klassenbibliotheken lesen
+# laden der Klassenbibliotheken
+include (CLASSPATH.'kvwmap_core.php');							# Version 1.7.6
+include (CLASSPATH.'kataster_core.php');						# Version 1.7.6
+include (CLASSPATH.'mysql.php');										# Version 1.7.6
+include (CLASSPATH.'postgresql_core.php');					# Version 1.7.6
+include (CLASSPATH.'users_core.php');								# Version 1.7.6
+if($_REQUEST['go'] != 'getMap_ajax'){								# Version 1.7.6    (die folgenden Klassen nicht laden, wenn man nur in der Karte navigiert)
+	include (CLASSPATH.'kvwmap.php');
+	include (CLASSPATH.'kataster.php');
+	include (CLASSPATH.'postgresql.php');
+	include (CLASSPATH.'users.php');
+	include (CLASSPATH.'alb.php');
+	include (CLASSPATH.'alk.php');
+	include (CLASSPATH.'antrag.php');
+	include (CLASSPATH.'bau.php');
+	include (CLASSPATH.'nachweis.php');
+	include (CLASSPATH.'geothermie.php');
+	include (CLASSPATH.'bodenrichtwerte.php');
+	include (CLASSPATH.'verundentsorgung.php');
+	include (CLASSPATH.'metadaten.php');
+	include (CLASSPATH.'spatial_processor.php');
+	include (CLASSPATH.'bauleitplanung.php');           # Version 1.6.1
+	include (CLASSPATH.'jagdkataster.php');             # Version 1.6.1
+	include (CLASSPATH.'polygoneditor.php');            # Version 1.6.3
+	include (CLASSPATH.'pointeditor.php');              # Version 1.6.3
+	include (CLASSPATH.'dbf.php');                      # Version 1.6.5
+	include (CLASSPATH.'anliegerbeitraege.php');        # Version 1.6.6   (nur für die, die diese Fachschale nutzen wollen)
+	include (CLASSPATH.'gebaeude_editor.php');          # Version 1.6.6   (nur für die, die diese Fachschale nutzen wollen)
+	include (CLASSPATH.'documents.php');                # Version 1.6.6
+	include (CLASSPATH.'esaf.php');                     # Version 1.6.6
+	include (CLASSPATH.'shape.php');                    # Version 1.6.6
+	include (CLASSPATH.'gps.php');                      # Version 1.6.7   (noch in Entwicklung)
+	include (CLASSPATH.'wms.php');                      # Version 1.6.7   (noch in Entwicklung)
+	include (CLASSPATH.'funktion.php');                 # Version 1.6.9
+	include (CLASSPATH.'lineeditor.php');               # Version 1.7.0
+	include (CLASSPATH.'wfs.php');                      # Version 1.7.0
+	include (CLASSPATH.'synchronisation.php');          # Version 1.7.0
+	include (CLASSPATH.'rok.php');          						# Version 1.7.1
+	include (CLASSPATH.'tif.php');          						# Version 1.7.2
+	include (CLASSPATH.'gpx.php');          						# Version 1.7.4
+	include (CLASSPATH.'datendrucklayout.php');         # Version 1.7.5
+	include (CLASSPATH.'metadaten_csw.php');						# Version 1.7.5
+	include (CLASSPATH.'uko.php');          						# Version 1.8.0
+}																											# Version 1.7.6
+include (WWWROOT.APPLVERSION.'funktionen/allg_funktionen.php');		# In Version 1.7.3
+#include (FKT_PATH.'objektzugriff.php');
+#include_once('/www/gdi/mapbender_221/conf/mapbender.conf');
+
+################################ Erweiterungen laden
+# PHP-Extensions laden
+# dl('php_mapscript.so');
+# ms4w dl('php_mapscript_4.10.0.dll');
+# fgs dl('php_mapscript_4.8.2.so');
+
+# tmp-Verzeichnis aufrï¿½men
+# include 'tmpclear.php';
+
+# Einstellen des Debuglevels und ï¿½fnen der Debug-log-datei
+if (DEBUG_LEVEL>0) {
+ # Datei fr debug Meldungen ï¿½fnen
+ $debug=new debugfile(DEBUGFILE,'w');
+}
+
+# ï¿½fnen der Log-Dateien
+# Derzeit werden in den Log-Dateien nur die SQL-Statements gespeichert, die ber execSQL
+# in den Classen mysql und postgres ausgefhrt werden.
+if (LOG_LEVEL>0) {
+ # Datei fr mysql-logs ï¿½fnen
+ $log_mysql=new LogFile(LOGFILE_MYSQL,'text','Log-Datei MySQL', '#------v: '.date("Y:m:d H:i:s",time())); # Version 1.6.4
+ # Datei fr postgres-logs ï¿½fnen
+ $log_postgres=new LogFile(LOGFILE_POSTGRES,'text', 'Log-Datei-Postgres', '------v: '.date("Y:m:d H:i:s",time())); # Version 1.6.4
+}
+
+# Festlegung von Fehlermeldungen und Hinweisen
+define ('INFO1','Prfen Sie ob Ihr Datenbankmodell aktuell ist.');
+
+# Character Set der MySQL-Datenbank
+define(MYSQL_CHARSET,'latin1');													# Version 1.7.6
+define(POSTGRES_CHARSET,'LATIN1');												# Version 1.8.0
+
+################################ Datenbankangaben setzen
+# Datenbank fr die Nutzerdaten
+$userDb=new database();
+$userDb->host='localhost';
+$userDb->user='kvwmap';
+$userDb->passwd='Kvwmap_13071';
+$userDb->dbName=$dbname;
+
+
+$GISdb = $userDb; 																			# Version 1.7.6
+
+
+# Datenbank mit den Geometrieobjekten (PostgreSQL mit PostGIS Aufsatz)
+if ($pgdbname!='') {
+	if($_REQUEST['go'] == 'getMap_ajax'){									# Version 1.7.6
+		$PostGISdb=new pgdatabase_core();										# Version 1.7.6
+	}																											# Version 1.7.6
+	else{																									# Version 1.7.6
+  	$PostGISdb=new pgdatabase();												# Version 1.7.6
+	}																											# Version 1.7.6
+  $PostGISdb->host='localhost';
+  $PostGISdb->user='gisadmin';
+  $PostGISdb->passwd='Gis_13071';
+  $PostGISdb->dbName=$pgdbname;
+}
+
+
+##################################################
+# Metadaten
+########################## Voreinstellungen fr die Ausgabe von Dienste MapFiles
+define('MAPFILENAME','kvwmap');
+# Voreinstellungen fr Metadaten zu Web Map Services (WMS-Server)
+define('WMS_MAPFILE_REL_PATH','wms/');
+# ms4w define('WMS_MAPFILE_REL_PATH','Apache/wms/');
+# fgs define('WMS_MAPFILE_REL_PATH','www/wms/');
+define('WMS_MAPFILE_PATH',INSTALLPATH.WMS_MAPFILE_REL_PATH);
+define('SUPORTED_WMS_VERSION','1.1.0');
+
+# Metadaten zur Ausgabe im Capabilities Dokument gelten fr WMS, WFS und WCS
+# sets base URL for OGC Schemas so the root element in the
+# Capabilities document points to the correct schema location
+# to produce valid XML
+define("OWS_SCHEMAS_LOCATION","http://schemas.opengeospatial.net");
+# unified OWS tags
+# /WMT_MS_Capabilities/Service/Title
+# /WMT_MS_Capabilities/Capability/Layer/Title
+# /WFS_Capabilities/Service/Title
+
+# An Stelle von WMS_TITLE
+define("OWS_TITLE","MapServer kvwmap");
+# /WMT_MS_Capabilities/Service/Abstract
+# /WFS_Capabilities/Service/Abstract
+
+# An Stelle von WMS_Abstract
+define("OWS_ABSTRACT","Kartenserver fr kommunale Verwaltungen");
+
+# /WMT_MS_Capabilities/Service/KeywordList/Keyword[]
+# /WFS_Capabilities/Service/Keywords
+# /WCS_Capabilities/Service/keywords/keyword[]
+define("OWS_KEYWORDLIST","GIS,Landkreis,Kataster,Geoinformation");
+
+# /WMT_MS_Capabilities/Service/OnlineResource
+# /WFS_Capabilities/Service/OnlineResource
+# /WCS_Capabilities/Service/responsibleParty/onlineResource/@xlink:href
+define("OWS_SERVICE_ONLINERESOURCE",URL.APPLVERSION.'index.php?go=OWS');
+
+# sets:
+# /WMT_MS_Capabilities/Capability/Request/GetCapabilities/DCPType/HTTP/Get/OnlineResource/@xlink:href
+# /WMT_MS_Capabilities/Capability/Request/GetCapabilities/DCPType/HTTP/Post/OnlineResource/@xlink:href
+# /WMT_MS_Capabilities/Capability/Request/GetMap/DCPType/HTTP/Get/OnlineResource/@xlink:href
+# /WMT_MS_Capabilities/Capability/Request/GetMap/DCPType/HTTP/Post/OnlineResource/@xlink:href
+# /WMT_MS_Capabilities/Capability/Request/GetFeatureInfo/DCPType/HTTP/Get/OnlineResource/@xlink:href
+# /WMT_MS_Capabilities/Capability/Request/GetFeatureInfo/DCPType/HTTP/Post/OnlineResource/@xlink:href
+# /WMT_MS_Capabilities/Capability/Request/DescribeLayer/DCPType/HTTP/Get/OnlineResource/@xlink:href
+# /WMT_MS_Capabilities/Capability/Request/DescribeLayer/DCPType/HTTP/Post/OnlineResource/@xlink:href
+# /WMT_MS_Capabilities/Capability/Request/GetLegendGraphic/DCPType/HTTP/Get/OnlineResource/@xlink:href
+# /WMT_MS_Capabilities/Capability/Request/GetLegendGraphic/DCPType/HTTP/Post/OnlineResource/@xlink:href
+# /WMS_DescribeLayerResponse/LayerDescription/@wfs is WFS is enabled
+# /WFS_Capabilities/Capability/Request/GetCapabilities/DCPType/HTTP/Get/OnlineResource/@xlink:href
+# /WFS_Capabilities/Capability/Request/GetCapabilities/DCPType/HTTP/Post/OnlineResource/@xlink:href
+# /WFS_Capabilities/Capability/Request/DescribeFeatureType/DCPType/HTTP/Get/OnlineResource/@xlink:href
+# /WFS_Capabilities/Capability/Request/DescribeFeatureType/DCPType/HTTP/Post/OnlineResource/@xlink:href
+# /WFS_Capabilities/Capability/Request/GetFeature/DCPType/HTTP/Get/OnlineResource/@xlink:href
+# /WFS_Capabilities/Capability/Request/GetFeature/DCPType/HTTP/Post/OnlineResource/@xlink:href
+# /WCS_Capabilities/Capability/Request/GetCapabilities/DCPType/HTTP/Get/OnlineResource/@xlink:href
+# /WCS_Capabilities/Capability/Request/GetCapabilities/DCPType/HTTP/Post/OnlineResource/@xlink:href
+# /WCS_Capabilities/Capability/Request/DescribeFeatureType/DCPType/HTTP/Get/OnlineResource/@xlink:href
+# /WCS_Capabilities/Capability/Request/DescribeFeatureType/DCPType/HTTP/Post/OnlineResource/@xlink:href
+# /WCS_Capabilities/Capability/Request/GetFeature/DCPType/HTTP/Get/OnlineResource/@xlink:href
+# /WCS_Capabilities/Capability/Request/GetFeature/DCPType/HTTP/Post/OnlineResource/@xlink:href
+
+# sets:
+# /WMT_MS_Capabilities/Service/Fees
+# /WFS_Capabilities/Service/Fees
+# /WCS_Capabilities/Service/fees
+
+# An Stelle WMS_FEES
+define("OWS_FEES","zu Testzwecken frei");
+
+# /WMT_MS_Capabilities/Service/AccessConstraints
+# /WFS_Capabilities/Service/AccessConstraints
+# /WCS_Capabilities/Service/accessConstraints
+define("OWS_ACCESSCONSTRAINTS","none");
+
+# OGC:WMS specific tags
+
+# An Stelle von WMS_CONTACTPERSON
+# /WMT_MS_Capabilities/Service/ContactInformation/ContactPersonPrimary/ContactPerson
+# /WCS_Capabilities/Service/responsibleParty/individualName
+define("OWS_CONTACTPERSON","Andreas Thurm");
+
+# An Stelle von WMS_CONTACTORGANIZATION
+# /WMT_MS_Capabilities/Service/ContactInformation/ContactPersonPrimary/ContactOrganization
+# /WCS_Capabilities/Service/responsibleParty/organisationName
+define("OWS_CONTACTORGANIZATION","Landkreis Mecklenburgische Seenplatte");
+
+# An Stelle von WMS_CONTACTPOSITION
+# /WMT_MS_Capabilities/Service/ContactInformation/ContactPosition
+# /WCS_Capabilities/Service/responsibleParty/positionName
+define("OWS_CONTACTPOSITION","Ansprechpartner");
+
+# /WMT_MS_Capabilities/Service/ContactInformation/ContactAddress/AddressType
+define("OWS_ADDRESSTYPE","postal");
+
+# /WMT_MS_Capabilities/Service/ContactInformation/ContactAddress/Address
+# /WCS_Capabilities/Service/contactInfo/address/deliveryPoint
+define("OWS_ADDRESS","Zum Amtsbrink 2");
+
+# /WMT_MS_Capabilities/Service/ContactInformation/ContactAddress/City
+# /WCS_Capabilities/Service/contactInfo/address/city
+define("OWS_CITY","Waren(Müritz)");
+
+# /WMT_MS_Capabilities/Service/ContactInformation/ContactAddress/StateOrProvince
+# /WCS_Capabilities/Service/contactInfo/address/administrativeArea
+define("OWS_STATEORPROVINCE","Mecklenburg-Vorpommern");
+
+# /WMT_MS_Capabilities/Service/ContactInformation/ContactAddress/PostCode
+# /WCS_Capabilities/Service/contactInfo/address/postalCode
+define("OWS_POSTCODE","17192");
+
+# /WMT_MS_Capabilities/Service/ContactInformation/ContactAddress/Country
+# /WCS_Capabilities/Service/contactInfo/address/country
+define("OWS_COUNTRY","Germany");
+
+# /WMT_MS_Capabilities/Service/ContactInformation/ContactVoiceTelephone
+# /WCS_Capabilities/Service/contactInfo/phone/voice
+define("OWS_CONTACTVOICETELEPHONE","0049-3991-782477");
+
+# /WMT_MS_Capabilities/Service/ContactInformation/ContactFacsimileTelephone
+# /WCS_Capabilities/Service/contactInfo/phone/facsimile
+define("OWS_CONTACTFACSIMILETELEPHONE","0049-3991-782492");
+
+# An Stelle von WMS_CONTACTELECTRONICMAILADDRESS
+# /WMT_MS_Capabilities/Service/ContactInformation/ContactElectronicMailAddress
+# /WCS_Capabilities/Service/contactInfo/address/eletronicMailAddress
+define("OWS_CONTACTELECTRONICMAILADDRESS","thurm@landkreis-mueritz.de");
+
+# An Stelle von WMS_SRS
+# /WMT_MS_Capabilities/Capability/Layer/SRS
+# /WMT_MS_Capabilities/Capability/Layer/Layer[*]/SRS
+# /WFS_Capabilities/FeatureTypeList/FeatureType[*]/SRS
+# unless differently defined in LAYER object
+# if you are setting > 1 SRS for WMS, you need to define "wms_srs" and "wfs_srs"
+# seperately because OGC:WFS only accepts one OUTPUT SRS
+define("OWS_SRS","EPSG:25833 EPSG:4326 EPSG:2398");
+define("WFS_SRS","EPSG:25833");
+
+/*
+# sets /WMT_MS_Capabilities/Capability/Layer/Attribution/OnlineResource/@xlink:href
+define("WMS_ATTRIBUTION_ONLINERESOURCE","http://www.preagro.de/");
+
+# sets /WMT_MS_Capabilities/Capability/Layer/Attribution/Title
+define("WMS_ATTRIBUTION_TITLE" "Daten aus Kommunen und Landkreisen");"
+
+# sets /WMT_MS_Capabilities/Capability/Layer/Attribution/LogoURL/@width
+define("WMS_ATTRIBUTION_LOGOURL_WIDTH","655");
+
+# sets /WMT_MS_Capabilities/Capability/Layer/Attribution/LogoURL/@height
+define("WMS_ATTRIBUTION_LOGOURL_HEIGHT" "130");
+
+# sets /WMT_MS_Capabilities/Capability/Layer/Attribution/LogoURL/Format
+define("WMS_ATTRIBUTION_LOGOURL_FORMAT","image/png");
+
+# sets /WMT_MS_Capabilities/Capability/Layer/Attribution/LogoURL/OnlineResource/@xlink:href
+define("WMS_ATTRIBUTION_LOGOURL_HREF","http://mapserver.gis.umn.edu/mum/header_fsa.png");
+
+# we support GetFeatureInfo text/html queries
+# you NEED query headers, footers, and body templates
+define("WMS_FEATURE_INFO_MIME_TYPE","text/html");
+
+# sets namespace URI when performing a DescribeFeatureType or GetFeature
+# in the root element of the XML response
+define("WFS_NAMESPACE_URI","http://www.preagro.de/");
+
+# sets the XML namespace prefix to be used when defining types for data
+# in this mapfile
+define("WFS_NAMESPACE_PREFIX","ms_ogc_workshop");
+
+# OGC:WCS
+
+# /WCS_Capabilities/Service/label
+define("WCS_LABEL","Sample OWS for MapServer OGC Web Services Workshop");
+
+# /WCS_Capabilities/Service/description
+define("WCS_DESCRIPTION","Sample OWS for MapServer OGC Web Services Workshop.  Enjoy!");
+
+# /WCS_Capabilities/Service/metadataLink/@xlink:href
+define("WCS_METADATALINK_HREF" "http://localhost/ms_ogc_workshop/index.html");
+*/
+
+?>
+

@@ -1058,3 +1058,5 @@ ALTER TABLE `layer_attributes` CHANGE `form_element_type` `form_element_type` EN
 ALTER TABLE `layer_attributes` CHANGE `form_element_type` `form_element_type` ENUM('Text','Textfeld','Auswahlfeld','Geometrie','SubFormPK','SubFormFK','SubFormEmbeddedPK','Time','Dokument','Link','User','Stelle','Fläche','dynamicLink','Zahl') NOT NULL DEFAULT 'Text';
 
 ALTER TABLE `rollenlayer` ADD `Typ` ENUM('search','import') NOT NULL DEFAULT 'search' AFTER `Gruppe`;
+
+ALTER TABLE `styles` ADD `pattern` VARCHAR(255) NULL;
