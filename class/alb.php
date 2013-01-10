@@ -10,18 +10,18 @@ class ALB {
   # Mitteilungen zum Aktualisieren vorhandener ALB-Tabellen
   var $Protokoll_Aktualisieren;
   var $debug;
-  # $WLDGE_Datei - array für die WLDGE-Datei ['tmp_name']...Dateiname mit Pfadangabe zur Datei auf Server
-  # ['name'] Dateiname auf dem Client Rechner, von dem die Datei hochgeladen wurde (muß nicht)
+  # $WLDGE_Datei - array fÃ¼r die WLDGE-Datei ['tmp_name']...Dateiname mit Pfadangabe zur Datei auf Server
+  # ['name'] Dateiname auf dem Client Rechner, von dem die Datei hochgeladen wurde (muÃŸ nicht)
   var $WLDGE_Datei;
-  # Datei enthält nach dem Einlesen der WLDGE-Datei alle ausgeführten SQL-Statements
+  # Datei enthÃ¤lt nach dem Einlesen der WLDGE-Datei alle ausgefÃ¼hrten SQL-Statements
   # kann zur Import/Export, zur Kontrolle oder zum Loggen verwendet werden.
   var $WLDGE_Dump_Datei;
-  # Datei enthält nach dem Fortführen der ALB-Tabellen alle ausgeführten SQL-Statements
-  # kann zum Fortführen, zur Kontrolle und zum Loggen verwendet werden.
+  # Datei enthÃ¤lt nach dem FortfÃ¼hren der ALB-Tabellen alle ausgefÃ¼hrten SQL-Statements
+  # kann zum FortfÃ¼hren, zur Kontrolle und zum Loggen verwendet werden.
   var $WLDGE_updateDump_Datei;
   # Datenbankobjekt in der die ALB Daten vorgehalten werden
   var $database;
-  # Variable, die auf 1 gesetzt wird, wenn die WLDGE-Datei auf Grund eines bei der Prüfung
+  # Variable, die auf 1 gesetzt wird, wenn die WLDGE-Datei auf Grund eines bei der PrÃ¼fung
   # festgestellten Fehlers nicht eingelesen werden kann.
   var $WLDGE_Datei_fehlerhaft;
 
@@ -51,19 +51,19 @@ class ALB {
     if($formvars['gemeindename']){ $csv .= 'Gem-Name;';}
     if($formvars['gemeinde']){ $csv .= 'Gemeinde;';}
     if($formvars['kreisname']){ $csv .= 'Kreisname;';}
-    if($formvars['kreisid']){ $csv .= 'Kreisschlüssel;';}
+    if($formvars['kreisid']){ $csv .= 'KreisschlÃ¼ssel;';}
     if($formvars['finanzamtname']){ $csv .= 'Finanzamtname;';}
-    if($formvars['finanzamt']){ $csv .= 'Finanzamtschlüssel;';}
+    if($formvars['finanzamt']){ $csv .= 'FinanzamtschlÃ¼ssel;';}
     if($formvars['forstname']){ $csv .= 'Forstamtname;';}
-    if($formvars['forstschluessel']){ $csv .= 'Forstamtschlüssel;';}
-    if($formvars['flaeche']){ $csv .= 'Flst-Fläche ALB;';}
+    if($formvars['forstschluessel']){ $csv .= 'ForstamtschlÃ¼ssel;';}
+    if($formvars['flaeche']){ $csv .= 'Flst-FlÃ¤che ALB;';}
     if($formvars['amtsgerichtnr']){ $csv .= 'Amtsgericht;';}
     if($formvars['amtsgerichtname']){ $csv .= 'Amtsgerichtname;';}
-    if($formvars['grundbuchbezirkschl']){ $csv .= 'GBBschlüssel;';}
+    if($formvars['grundbuchbezirkschl']){ $csv .= 'GBBschlÃ¼ssel;';}
     if($formvars['grundbuchbezirkname']){ $csv .= 'GBBname;';}
     if($formvars['lagebezeichnung']){ $csv .= 'Lage;';}
     if($formvars['entsteh']){ $csv .= 'Entstehung;';}
-    if($formvars['letzff']){ $csv .= 'Fortführung;';}
+    if($formvars['letzff']){ $csv .= 'FortfÃ¼hrung;';}
     if($formvars['karte']){ $csv .= 'Flurkarte;';}
     if($formvars['status']){ $csv .= 'Status;';}
     if($formvars['vorgaenger']){ $csv .= 'Vorgaenger;';}
@@ -72,16 +72,16 @@ class ALB {
     if($formvars['freitext']){ $csv .= 'Freitext;';}
     if($formvars['hinweis']){ $csv .= 'Hinweis;';}
     if($formvars['baulasten']){ $csv .= 'Baulasten;';}
-    if($formvars['ausfstelle']){ $csv .= 'ausführende Stelle;';}
+    if($formvars['ausfstelle']){ $csv .= 'ausfÃ¼hrende Stelle;';}
     if($formvars['verfahren']){ $csv .= 'Verfahren;';}
     if($formvars['nutzung']){ $csv .= 'Nutzung;';}
     if($formvars['blattnr']){ $csv .= 'Blattnummer;';}
     if($formvars['pruefzeichen']){ $csv .= 'P Buchung;';}
-  	if($formvars['pruefzeichen_f']){ $csv .= 'P Flurstück;';}
+  	if($formvars['pruefzeichen_f']){ $csv .= 'P FlurstÃ¼ck;';}
     if($formvars['bvnr']){ $csv .= 'BVNR;';}
     if($formvars['buchungsart']){ $csv .= 'Buchungsart;';}
     $csv .= 'Namensnummer;'; 
-    $csv .= 'Eigentümer;Zusatz;Adresse;Ort;';
+    $csv .= 'EigentÃ¼mer;Zusatz;Adresse;Ort;';
     
     $csv .= chr(10);
     for($i = 0; $i < count($flurstuecke); $i++) {
@@ -151,7 +151,7 @@ class ALB {
 			      	$csv .= '"';
 			        for($j = 0; $j < count($flst->Klassifizierung)-1; $j++){
 			          if($j > 0)$csv .= " \n ";
-			          $csv .= $flst->Klassifizierung[$j]['flaeche'].'m² '.$flst->Klassifizierung[$j]['tabkenn'].'-'.$flst->Klassifizierung[$j]['klass'].' '.$flst->Klassifizierung[$j]['bezeichnung'].' ';
+			          $csv .= $flst->Klassifizierung[$j]['flaeche'].'mÂ² '.$flst->Klassifizierung[$j]['tabkenn'].'-'.$flst->Klassifizierung[$j]['klass'].' '.$flst->Klassifizierung[$j]['bezeichnung'].' ';
 			          $wert=substr($flst->Klassifizierung[$j]['angaben'],strrpos($flst->Klassifizierung[$j]['angaben'],'/')+1);
 			          $emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
 			          if($flst->Klassifizierung[$j]['tabkenn'] =='32' AND $flst->Klassifizierung[$j]['angaben'] !='') {
@@ -203,13 +203,13 @@ class ALB {
 						            $label3=ltrim(substr($alkemz[$j]['label'],-12,3),"0");
 						            $label4='W';
 						          }
-					            $csv .= round($alkemz[$j]['flaeche']).' m² '; 
+					            $csv .= round($alkemz[$j]['flaeche']).' mÂ² '; 
 					            $csv .= $label1.' '.$label2.'/'.$label3.' '.$label4;
 					            $csv .= ' EMZ: '.$emz." \n ";
 					          }
 				            $nichtgeschaetzt=round($flst->ALB_Flaeche-$flaeche_222-$flaeche_223);
 				            if($nichtgeschaetzt>0){
-			          			$csv .=  'nicht geschätzt: '.$nichtgeschaetzt." m² \n";
+			          			$csv .=  'nicht geschÃ¤tzt: '.$nichtgeschaetzt." mÂ² \n";
 			          		}
 			        			if($emzges_222 > 0){
 			        				$BWZ_222 = round($emzges_222/$flaeche_222*100);
@@ -217,7 +217,7 @@ class ALB {
 			          		}
 			        			if($emzges_223 > 0){
 			        				$BWZ_223 = round($emzges_223/$flaeche_223*100);
-			        				$csv .= ' Grünland gesamt: EMZ '.$emzges_223.' , BWZ '.$BWZ_223;
+			        				$csv .= ' GrÃ¼nland gesamt: EMZ '.$emzges_223.' , BWZ '.$BWZ_223;
 										}
 				        	}
 				        }
@@ -257,7 +257,7 @@ class ALB {
 				        $anzNutzung=count($flst->Nutzung);
 				        for ($j = 0; $j < $anzNutzung; $j++){
 				        	if($j > 0)$csv .= ' | ';
-				          $csv .= $flst->Nutzung[$j][flaeche].'m² ';
+				          $csv .= $flst->Nutzung[$j][flaeche].'mÂ² ';
           				$csv .= $flst->Nutzung[$j][nutzungskennz].' ';
           				if($flst->Nutzung[$j][abkuerzung]!='') {
 						      	$csv .= $flst->Nutzung[$j][abkuerzung].'-';
@@ -322,19 +322,19 @@ class ALB {
     if($formvars['gemeindename']){ $csv .= 'Gem-Name;';}
     if($formvars['gemeinde']){ $csv .= 'Gemeinde;';}
     if($formvars['kreisname']){ $csv .= 'Kreisname;';}
-    if($formvars['kreisid']){ $csv .= 'Kreisschlüssel;';}
+    if($formvars['kreisid']){ $csv .= 'KreisschlÃ¼ssel;';}
     if($formvars['finanzamtname']){ $csv .= 'Finanzamtname;';}
-    if($formvars['finanzamt']){ $csv .= 'Finanzamtschlüssel;';}
+    if($formvars['finanzamt']){ $csv .= 'FinanzamtschlÃ¼ssel;';}
     if($formvars['forstname']){ $csv .= 'Forstamtname;';}
-    if($formvars['forstschluessel']){ $csv .= 'Forstamtschlüssel;';}
-    if($formvars['flaeche']){ $csv .= 'Flst-Fläche ALB;';}
+    if($formvars['forstschluessel']){ $csv .= 'ForstamtschlÃ¼ssel;';}
+    if($formvars['flaeche']){ $csv .= 'Flst-FlÃ¤che ALB;';}
     if($formvars['amtsgerichtnr']){ $csv .= 'Amtsgericht;';}
     if($formvars['amtsgerichtname']){ $csv .= 'Amtsgerichtname;';}
-    if($formvars['grundbuchbezirkschl']){ $csv .= 'GBBschlüssel;';}
+    if($formvars['grundbuchbezirkschl']){ $csv .= 'GBBschlÃ¼ssel;';}
     if($formvars['grundbuchbezirkname']){ $csv .= 'GBBname;';}
     if($formvars['lagebezeichnung']){ $csv .= 'Lage;';}
     if($formvars['entsteh']){ $csv .= 'Entstehung;';}
-    if($formvars['letzff']){ $csv .= 'Fortführung;';}
+    if($formvars['letzff']){ $csv .= 'FortfÃ¼hrung;';}
     if($formvars['karte']){ $csv .= 'Flurkarte;';}
     if($formvars['status']){ $csv .= 'Status;';}
     if($formvars['vorgaenger']){ $csv .= 'Vorgaenger;';}
@@ -343,15 +343,15 @@ class ALB {
     if($formvars['freitext']){ $csv .= 'Freitext;';}
     if($formvars['hinweis']){ $csv .= 'Hinweis;';}
     if($formvars['baulasten']){ $csv .= 'Baulasten;';}
-    if($formvars['ausfstelle']){ $csv .= 'ausführende Stelle;';}
+    if($formvars['ausfstelle']){ $csv .= 'ausfÃ¼hrende Stelle;';}
     if($formvars['verfahren']){ $csv .= 'Verfahren;';}
    	if($formvars['blattnr']){ $csv .= 'Blattnummer;';}
     if($formvars['pruefzeichen']){ $csv .= 'P Buchung;';}
-  	if($formvars['pruefzeichen_f']){ $csv .= 'P Flurstück;';}
+  	if($formvars['pruefzeichen_f']){ $csv .= 'P FlurstÃ¼ck;';}
     if($formvars['bvnr']){ $csv .= 'BVNR;';}
     if($formvars['buchungsart']){ $csv .= 'Buchungsart;';}
-    if($formvars['eigentuemer']){ $csv .= 'Eigentümer;';}
-    $csv .= 'Nutzung - Fläche;';
+    if($formvars['eigentuemer']){ $csv .= 'EigentÃ¼mer;';}
+    $csv .= 'Nutzung - FlÃ¤che;';
     $csv .= 'Nutzung - Kennzeichen;';
     $csv .= 'Nutzung - Bezeichnung;';
     
@@ -419,7 +419,7 @@ class ALB {
       	$csv .= '"';
         for($j = 0; $j < count($flst->Klassifizierung)-1; $j++){
           if($j > 0)$csv .= " \n ";
-          $csv .= $flst->Klassifizierung[$j]['flaeche'].'m² '.$flst->Klassifizierung[$j]['tabkenn'].'-'.$flst->Klassifizierung[$j]['klass'].' '.$flst->Klassifizierung[$j]['bezeichnung'].' ';
+          $csv .= $flst->Klassifizierung[$j]['flaeche'].'mÂ² '.$flst->Klassifizierung[$j]['tabkenn'].'-'.$flst->Klassifizierung[$j]['klass'].' '.$flst->Klassifizierung[$j]['bezeichnung'].' ';
           $wert=substr($flst->Klassifizierung[$j]['angaben'],strrpos($flst->Klassifizierung[$j]['angaben'],'/')+1);
           $emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
           if($flst->Klassifizierung[$j]['tabkenn'] =='32' AND $flst->Klassifizierung[$j]['angaben'] !='') {
@@ -471,13 +471,13 @@ class ALB {
 			            $label3=ltrim(substr($alkemz[$j]['label'],-12,3),"0");
 			            $label4='W';
 			          }
-		            $csv .= round($alkemz[$j]['flaeche']).' m² '; 
+		            $csv .= round($alkemz[$j]['flaeche']).' mÂ² '; 
 		            $csv .= $label1.' '.$label2.'/'.$label3.' '.$label4;
 		            $csv .= ' EMZ: '.$emz." \n ";
 		          }
 	            $nichtgeschaetzt=round($flst->ALB_Flaeche-$flaeche_222-$flaeche_223);
 	            if($nichtgeschaetzt>0){
-          			$csv .=  'nicht geschätzt: '.$nichtgeschaetzt." m² \n";
+          			$csv .=  'nicht geschÃ¤tzt: '.$nichtgeschaetzt." mÂ² \n";
           		}
         			if($emzges_222 > 0){
         				$BWZ_222 = round($emzges_222/$flaeche_222*100);
@@ -485,7 +485,7 @@ class ALB {
           		}
         			if($emzges_223 > 0){
         				$BWZ_223 = round($emzges_223/$flaeche_223*100);
-        				$csv .= ' Grünland gesamt: EMZ '.$emzges_223.' , BWZ '.$BWZ_223;
+        				$csv .= ' GrÃ¼nland gesamt: EMZ '.$emzges_223.' , BWZ '.$BWZ_223;
 							}
 	        	}
 	        }
@@ -624,19 +624,19 @@ class ALB {
     if($formvars['gemeindename']){ $csv .= 'Gem-Name;';}
     if($formvars['gemeinde']){ $csv .= 'Gemeinde;';}
     if($formvars['kreisname']){ $csv .= 'Kreisname;';}
-    if($formvars['kreisid']){ $csv .= 'Kreisschlüssel;';}
+    if($formvars['kreisid']){ $csv .= 'KreisschlÃ¼ssel;';}
     if($formvars['finanzamtname']){ $csv .= 'Finanzamtname;';}
-    if($formvars['finanzamt']){ $csv .= 'Finanzamtschlüssel;';}
+    if($formvars['finanzamt']){ $csv .= 'FinanzamtschlÃ¼ssel;';}
     if($formvars['forstname']){ $csv .= 'Forstamtname;';}
-    if($formvars['forstschluessel']){ $csv .= 'Forstamtschlüssel;';}
-    if($formvars['flaeche']){ $csv .= 'Flst-Fläche ALB;';}
+    if($formvars['forstschluessel']){ $csv .= 'ForstamtschlÃ¼ssel;';}
+    if($formvars['flaeche']){ $csv .= 'Flst-FlÃ¤che ALB;';}
     if($formvars['amtsgerichtnr']){ $csv .= 'Amtsgericht;';}
     if($formvars['amtsgerichtname']){ $csv .= 'Amtsgerichtname;';}
-    if($formvars['grundbuchbezirkschl']){ $csv .= 'GBBschlüssel;';}
+    if($formvars['grundbuchbezirkschl']){ $csv .= 'GBBschlÃ¼ssel;';}
     if($formvars['grundbuchbezirkname']){ $csv .= 'GBBname;';}
     if($formvars['lagebezeichnung']){ $csv .= 'Lage;';}
     if($formvars['entsteh']){ $csv .= 'Entstehung;';}
-    if($formvars['letzff']){ $csv .= 'Fortführung;';}
+    if($formvars['letzff']){ $csv .= 'FortfÃ¼hrung;';}
     if($formvars['karte']){ $csv .= 'Flurkarte;';}
     if($formvars['status']){ $csv .= 'Status;';}
     if($formvars['vorgaenger']){ $csv .= 'Vorgaenger;';}
@@ -645,15 +645,15 @@ class ALB {
     if($formvars['freitext']){ $csv .= 'Freitext;';}
     if($formvars['hinweis']){ $csv .= 'Hinweis;';}
     if($formvars['baulasten']){ $csv .= 'Baulasten;';}
-    if($formvars['ausfstelle']){ $csv .= 'ausführende Stelle;';}
+    if($formvars['ausfstelle']){ $csv .= 'ausfÃ¼hrende Stelle;';}
     if($formvars['verfahren']){ $csv .= 'Verfahren;';}
     if($formvars['nutzung']){ $csv .= 'Nutzung;';}
     if($formvars['blattnr']){ $csv .= 'Blattnummer;';}
     if($formvars['pruefzeichen']){ $csv .= 'P Buchung;';}
-  	if($formvars['pruefzeichen_f']){ $csv .= 'P Flurstück;';}
+  	if($formvars['pruefzeichen_f']){ $csv .= 'P FlurstÃ¼ck;';}
     if($formvars['bvnr']){ $csv .= 'BVNR;';}
     if($formvars['buchungsart']){ $csv .= 'Buchungsart;';}
-    if($formvars['eigentuemer']){ $csv .= 'Eigentümer;';}
+    if($formvars['eigentuemer']){ $csv .= 'EigentÃ¼mer;';}
     
     $csv .= chr(10);
     for($i = 0; $i < count($flurstuecke); $i++) {
@@ -715,7 +715,7 @@ class ALB {
       	$csv .= '"';
         for($j = 0; $j < count($flst->Klassifizierung)-1; $j++){
           if($j > 0)$csv .= "\n";
-          $csv .= $flst->Klassifizierung[$j]['flaeche'].'m² '.$flst->Klassifizierung[$j]['tabkenn'].'-'.$flst->Klassifizierung[$j]['klass'].' '.$flst->Klassifizierung[$j]['bezeichnung'].' ';
+          $csv .= $flst->Klassifizierung[$j]['flaeche'].'mÂ² '.$flst->Klassifizierung[$j]['tabkenn'].'-'.$flst->Klassifizierung[$j]['klass'].' '.$flst->Klassifizierung[$j]['bezeichnung'].' ';
           $wert=substr($flst->Klassifizierung[$j]['angaben'],strrpos($flst->Klassifizierung[$j]['angaben'],'/')+1);
           $emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
           if($flst->Klassifizierung[$j]['tabkenn'] =='32' AND $flst->Klassifizierung[$j]['angaben'] !='') {
@@ -767,13 +767,13 @@ class ALB {
 			            $label3=ltrim(substr($alkemz[$j]['label'],-12,3),"0");
 			            $label4='W';
 			          }
-		            $csv .= round($alkemz[$j]['flaeche']).' m² '; 
+		            $csv .= round($alkemz[$j]['flaeche']).' mÂ² '; 
 		            $csv .= $label1.' '.$label2.'/'.$label3.' '.$label4;
 		            $csv .= ' EMZ: '.$emz." \n ";
 		          }
 	            $nichtgeschaetzt=round($flst->ALB_Flaeche-$flaeche_222-$flaeche_223);
 	            if($nichtgeschaetzt>0){
-          			$csv .=  'nicht geschätzt: '.$nichtgeschaetzt." m² \n";
+          			$csv .=  'nicht geschÃ¤tzt: '.$nichtgeschaetzt." mÂ² \n";
           		}
         			if($emzges_222 > 0){
         				$BWZ_222 = round($emzges_222/$flaeche_222*100);
@@ -781,7 +781,7 @@ class ALB {
           		}
         			if($emzges_223 > 0){
         				$BWZ_223 = round($emzges_223/$flaeche_223*100);
-        				$csv .= ' Grünland gesamt: EMZ '.$emzges_223.' , BWZ '.$BWZ_223;
+        				$csv .= ' GrÃ¼nland gesamt: EMZ '.$emzges_223.' , BWZ '.$BWZ_223;
 							}
 	        	}
 	        }
@@ -926,7 +926,7 @@ class ALB {
   }
 
   function ALBAuszug_SeitenKopf(&$pdf,$flst,$Ueberschrift,$art,$seite,&$row,$fontSize,$BestandStr,$AktualitaetsNr) {
-    # 2006-11-23 Holger Riedel Formatierungsänderung
+    # 2006-11-23 Holger Riedel FormatierungsÃ¤nderung
     $col0=50; # 28 -> 50 2007-04-02 Schmidt
     $col1=$col0+7.23;
     $col27=$col0+195.17;
@@ -958,7 +958,7 @@ class ALB {
     # $pdf->addText($col37,$row-=12,$fontSize,'Datum');
     $pdf->addText(412,$row,$fontSize,date('d.m.Y')); # 2007-04-02 Schmidt
     # $pdf->addText($col48,$row,$fontSize,date('d.m.Y'));
-    # 23.11.2006 H.Riedel - Aktualitätsnr für Bestand aus Grundbuchblatt holen
+    # 23.11.2006 H.Riedel - AktualitÃ¤tsnr fÃ¼r Bestand aus Grundbuchblatt holen
     if($art != 'Bestand'){
       $pdf->addText(490,$row,$fontSize,str_pad($flst->AktualitaetsNr,2,"0",STR_PAD_LEFT)); # 2007-04-02 Schmidt
       # $pdf->addText(453,$row,$fontSize,str_pad($flst->AktualitaetsNr,2,"0",STR_PAD_LEFT));
@@ -1018,16 +1018,16 @@ class ALB {
       if ($flst->Status != 'H' OR $formnummer = '30') {
         switch ($formnummer) {
           case '30' : {
-            $Ueberschrift='*Flurstücksnachweis';
-            $art = 'Flurstück';
+            $Ueberschrift='*FlurstÃ¼cksnachweis';
+            $art = 'FlurstÃ¼ck';
           } break;
           case '35' : {
-            $Ueberschrift='*Flurstücks- und Eigentümernachweis';
-            $art = 'Flurstück';
+            $Ueberschrift='*FlurstÃ¼cks- und EigentÃ¼mernachweis';
+            $art = 'FlurstÃ¼ck';
           } break;
           case '40' : {
-            $Ueberschrift='******** Eigentümernachweis *******';
-            $art = 'Flurstück';
+            $Ueberschrift='******** EigentÃ¼mernachweis *******';
+            $art = 'FlurstÃ¼ck';
           } break;
         }
 
@@ -1082,7 +1082,7 @@ class ALB {
           $pdf->addText($col0,$row-=24,$fontSize,'GMKG   FLR FLURST-NR    P');
           if($flst->Status == 'H'){
           	$pdf->addText($col3,$row,$fontSize,'Status');
-          	$pdf->addText($col6,$row,$fontSize,utf8_decode('(H) Historisches Flurstück'));
+          	$pdf->addText($col6,$row,$fontSize,utf8_decode('(H) Historisches FlurstÃ¼ck'));
           }
           if ($flst->Nenner!=0) { $nennerausgabe="/".$flst->Nenner; }
           $pdf->addText($col0,$row-=12,$fontSize,$flst->GemkgSchl." ".str_pad($flst->FlurNr,3," ",STR_PAD_LEFT)." ".str_pad($flst->Zaehler,5," ",STR_PAD_LEFT).$nennerausgabe);
@@ -1095,10 +1095,10 @@ class ALB {
           }
           $pdf->addText($col6,$row,$fontSize,$flst->Entstehung);
 
-          $pdf->addText($col3,$row-=12,$fontSize,'Fortführung');
+          $pdf->addText($col3,$row-=12,$fontSize,'FortfÃ¼hrung');
           $pdf->addText($col6,$row,$fontSize,$flst->LetzteFF);
 
-          $pdf->addText($col3,$row-=12,$fontSize,'Flurkarte Riß');
+          $pdf->addText($col3,$row-=12,$fontSize,'Flurkarte RiÃŸ');
           $pdf->addText($col6,$row,$fontSize,$flst->Flurkarte);
           $pdf->addText($col0,$row-=24,$fontSize,'Lage');
           # Ausgabe der Adressangabe zur Lage
@@ -1118,13 +1118,13 @@ class ALB {
           for ($i=0;$i<count($Lagebezeichnung);$i++) {
             $pdf->addText($col3,$row-=12,$fontSize,utf8_decode($Lagebezeichnung[$i]));
           }
-          $pdf->addText($col0,$row-=24,$fontSize,'Tatsächliche Nutzung');
+          $pdf->addText($col0,$row-=24,$fontSize,'TatsÃ¤chliche Nutzung');
           for ($i=0;$i<count($flst->Nutzung);$i++) {
           	# Seitenumbruch wenn erforderlich
             if($row<120) {
               # Seitenumbruch
               $seite++;
-              # aktuelle Seite abschließen
+              # aktuelle Seite abschlieÃŸen
               $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
               # neue Seite beginnen
               $pageid=$pdf->newPage();
@@ -1133,7 +1133,7 @@ class ALB {
                 $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
               }
               $row=825; # 812 -> 825 2007-04-02 Schmidt
-              $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+              $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'FlurstÃ¼ck',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
             }
             $pdf->addText($col1_1,$row-=12,$fontSize,str_pad (str_space($flst->Nutzung[$i]['flaeche'],3), 11, ' ', STR_PAD_LEFT).' m2');
             $pdf->addText($col4,$row,$fontSize,$flst->Nutzung[$i]['nutzungskennz']);
@@ -1148,7 +1148,7 @@ class ALB {
             }
           }
           $pdf->addText($col0,$row-=12,$fontSize,str_repeat('-',25));
-          $pdf->addText($col0,$row-=12,$fontSize,'Fläche');
+          $pdf->addText($col0,$row-=12,$fontSize,'FlÃ¤che');
           $pdf->addText($col1_1,$row,$fontSize,str_pad (str_space($flst->ALB_Flaeche,3), 11, "*", STR_PAD_LEFT).' m2');
           $pdf->addText($col0,$row-=12,$fontSize,str_repeat('=',25));
 
@@ -1166,7 +1166,7 @@ class ALB {
               if($row<120) {
                 # Seitenumbruch
                 $seite++;
-                # aktuelle Seite abschließen
+                # aktuelle Seite abschlieÃŸen
                 $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
                 # neue Seite beginnen
                 $pageid=$pdf->newPage();
@@ -1175,7 +1175,7 @@ class ALB {
                   $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
                 }
                 $row=825; # 812 -> 825 2007-04-02 Schmidt
-                $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+                $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'FlurstÃ¼ck',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
               }
               $pdf->addText($col2,$row-=12,$fontSize,str_pad ($flst->Klassifizierung[$i]['flaeche'].' m2', 11, ' ', STR_PAD_LEFT));
               $pdf->addText($col4,$row,$fontSize,utf8_decode($flst->Klassifizierung[$i]['tabkenn'].'-'.$flst->Klassifizierung[$i]['klass']));
@@ -1301,9 +1301,9 @@ class ALB {
           }
           */
 
-          # Freier Text zum Flurstück
+          # Freier Text zum FlurstÃ¼ck
           if (count($flst->FreiText)>0) {
-            $pdf->addText($col0,$row-=24,$fontSize,'Zusätzliche Angaben');
+            $pdf->addText($col0,$row-=24,$fontSize,'ZusÃ¤tzliche Angaben');
             for ($z=0;$z<count($flst->FreiText);$z++) {
               if ($z==0) { $row+=12; }
               $ausgabetext=zeilenumbruch($flst->FreiText[$z]['text'],40);
@@ -1314,7 +1314,7 @@ class ALB {
             }
           }
 
-          # Hinweise zum Flurstücke
+          # Hinweise zum FlurstÃ¼cke
           if ($flst->Hinweis[0]['hinwzflst']!='') {
             $pdf->addText($col0,$row-=24,$fontSize,'Hinweise');
           }
@@ -1342,7 +1342,7 @@ class ALB {
           # Verfahren
           $anzVerfahren=count($flst->Verfahren);
           for ($i=0;$i<$anzVerfahren;$i++) {
-            $pdf->addText($col0,$row-=24,$fontSize,'Ausführende Stelle');
+            $pdf->addText($col0,$row-=24,$fontSize,'AusfÃ¼hrende Stelle');
             $pdf->addText($col2_1,$row,$fontSize,$flst->Verfahren[$i]['ausfstelleid']);
             $AusfStelleName=zeilenumbruch($flst->Verfahren[$i]['ausfstellename'],40);
             $pdf->addText($col4,$row,$fontSize,utf8_decode($AusfStelleName[0]));
@@ -1361,17 +1361,17 @@ class ALB {
             }
           }
 
-          # Vorgängerflurstücke
+          # VorgÃ¤ngerflurstÃ¼cke
           if (count($flst->Vorgaenger)>0) {
-            $pdf->addText($col0,$row-=24,$fontSize,'Vorgängerflurstück');
+            $pdf->addText($col0,$row-=24,$fontSize,'VorgÃ¤ngerflurstÃ¼ck');
             $pdf->addText($col2_1,$row,$fontSize,substr($flst->Vorgaenger[0]['vorgaenger'],0,20));
             for ($v=1;$v<count($flst->Vorgaenger);$v++) {
               $pdf->addText($col2_1,$row-=12,$fontSize,substr($flst->Vorgaenger[$v]['vorgaenger'],0,20));
             }
           }
-          # Nachfolgerflurstücke
+          # NachfolgerflurstÃ¼cke
           if (count($flst->Nachfolger)>0) {
-            $pdf->addText($col0,$row-=24,$fontSize,'Nachfolgerflurstück');
+            $pdf->addText($col0,$row-=24,$fontSize,'NachfolgerflurstÃ¼ck');
             $pdf->addText($col2_1,$row,$fontSize,substr($flst->Nachfolger[0]['nachfolger'],0,20));
             for ($v=1;$v<count($flst->Nachfolger);$v++) {
               $pdf->addText($col2_1,$row-=12,$fontSize,substr($flst->Nachfolger[$v]['nachfolger'],0,20));
@@ -1401,7 +1401,7 @@ class ALB {
 	                if($row<120) {
 	                  # Seitenumbruch
 	                  $seite++;
-	                  # aktuelle Seite abschließen
+	                  # aktuelle Seite abschlieÃŸen
 	                  $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
 	                  # neue Seite beginnen
 	                  $pageid=$pdf->newPage();
@@ -1410,10 +1410,10 @@ class ALB {
 	                    $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
 	                  }
 	                  $row=825; # 812 -> 825 2007-04-02 Schmidt
-	                  $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+	                  $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'FlurstÃ¼ck',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 	                }
 	
-	                # Ausgabe der Zeile für die Bestandbezeichnung
+	                # Ausgabe der Zeile fÃ¼r die Bestandbezeichnung
 	                $pdf->addText($col0,$row-=12,$fontSize,'Bestand');
 	                $BestandStr =$flst->Buchungen[$b]['bezirk'].'-'.intval($flst->Buchungen[$b]['blatt']);
 	                $BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
@@ -1423,14 +1423,14 @@ class ALB {
 	                $pdf->addText($col2_1,$row,$fontSize,$BestandStr);
 	                $pdf->addText($col0,$row-=12,$fontSize,str_repeat("=",7));
 	
-	                # Abfragen und Ausgeben der Eigentümer zum Grundbuchblatt
+	                # Abfragen und Ausgeben der EigentÃ¼mer zum Grundbuchblatt
 	                $Eigentuemerliste=$flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
 	                $anzEigentuemer=count($Eigentuemerliste);
 	                for ($i=0;$i<$anzEigentuemer;$i++) {
 	                  if($row<120) {
 	                    # Seitenumbruch
 	                    $seite++;
-	                    # aktuelle Seite abschließen
+	                    # aktuelle Seite abschlieÃŸen
 	                    $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
 	                    # neue Seite beginnen
 	                    $pageid=$pdf->newPage();
@@ -1439,7 +1439,7 @@ class ALB {
 	                      $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
 	                    }
 	                    $row=825; # 812 -> 825 2007-04-02 Schmidt;
-	                    $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+	                    $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'FlurstÃ¼ck',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 	                  }
 	                  else {
 	                    $row-=12;
@@ -1455,7 +1455,7 @@ class ALB {
 	                  for ($k=0;$k<$anzNamenszeilen;$k++) {
 	                    $pdf->addText($col1,$row-=12,$fontSize,utf8_decode($Eigentuemerliste[$i]->Name[$k]));
 	                  }
-	                } # ende Schleife Eigentümer des Grundbuchblattes
+	                } # ende Schleife EigentÃ¼mer des Grundbuchblattes
 	              } # ende Schleife Bestand
 	              if ($flst->Grundbuecher[$g]['zusatz_eigentuemer']!='') {
 	                $zusatzeigentuemertext=$flst->Grundbuecher[$g]['zusatz_eigentuemer'];
@@ -1471,7 +1471,7 @@ class ALB {
 	                  if($row<120) {
 	                    # Seitenumbruch
 	                    $seite++;
-	                    # aktuelle Seite abschließen
+	                    # aktuelle Seite abschlieÃŸen
 	                    $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
 	                    # neue Seite beginnen
 	                    $pageid=$pdf->newPage();
@@ -1480,7 +1480,7 @@ class ALB {
 	                      $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
 	                    }
 	                    $row=825; # 812 -> 825 2007-04-02 Schmidt;
-	                    $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+	                    $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'FlurstÃ¼ck',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 	                  }
 	                  $pdf->addText($col1,$row-=12,$fontSize,utf8_decode(substr($zusatzeigentuemertext,0,$positiontrenner)));
 	                  $zusatzeigentuemertext=substr($zusatzeigentuemertext,$positiontrenner+1);
@@ -1499,7 +1499,7 @@ class ALB {
 	                if($row<120) {
 	                  # Seitenumbruch
 	                  $seite++;
-	                  # aktuelle Seite abschließen
+	                  # aktuelle Seite abschlieÃŸen
 	                  $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
 	                  # neue Seite beginnen
 	                  $pageid=$pdf->newPage();
@@ -1508,10 +1508,10 @@ class ALB {
 	                    $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
 	                  }
 	                  $row=825; # 812 -> 825 2007-04-02 Schmidt;
-	                  $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+	                  $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'FlurstÃ¼ck',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 	                }
 	
-	                # Ausgabe der Zeile für die Bestandbezeichnung
+	                # Ausgabe der Zeile fÃ¼r die Bestandbezeichnung
 	                $pdf->addText($col0,$row-=24,$fontSize,'Bestand');
 	                $BestandStr =$flst->Buchungen[$b]['bezirk'].'-'.intval($flst->Buchungen[$b]['blatt']);
 	                $BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
@@ -1521,14 +1521,14 @@ class ALB {
 	                $pdf->addText($col2_1,$row,$fontSize,$BestandStr);
 	                $pdf->addText($col0,$row-=12,$fontSize,str_repeat("=",7));
 	
-	                # Abfragen und Ausgeben der Eigentümer zum Grundbuchblatt
+	                # Abfragen und Ausgeben der EigentÃ¼mer zum Grundbuchblatt
 	                $Eigentuemerliste=$flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
 	                $anzEigentuemer=count($Eigentuemerliste);
 	                for ($i=0;$i<$anzEigentuemer;$i++) {
 	                  if($row<120) {
 	                    # Seitenumbruch
 	                    $seite++;
-	                    # aktuelle Seite abschließen
+	                    # aktuelle Seite abschlieÃŸen
 	                    $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
 	                    # neue Seite beginnen
 	                    $pageid=$pdf->newPage();
@@ -1537,7 +1537,7 @@ class ALB {
 	                      $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
 	                    }
 	                    $row=825; # 812 -> 825 2007-04-02 Schmidt;
-	                    $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+	                    $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'FlurstÃ¼ck',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 	                  }
 	                  else {
 	                    $row-=12;
@@ -1561,7 +1561,7 @@ class ALB {
 	                  for ($k=0;$k<$anzNamenszeilen;$k++) {
 	                    $pdf->addText($col1,$row-=12,$fontSize,utf8_decode($Eigentuemerliste[$i]->Name_bearb[$k]));
 	                  }
-	                } # ende Schleife Eigentümer des Grundbuchblattes
+	                } # ende Schleife EigentÃ¼mer des Grundbuchblattes
 	              } # ende Schleife Bestand
 	                            
 	              if ($flst->Grundbuecher[$g]['zusatz_eigentuemer']!='') {
@@ -1578,7 +1578,7 @@ class ALB {
 	                  if($row<120) {
 	                    # Seitenumbruch
 	                    $seite++;
-	                    # aktuelle Seite abschließen
+	                    # aktuelle Seite abschlieÃŸen
 	                    $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
 	                    # neue Seite beginnen
 	                    $pageid=$pdf->newPage();
@@ -1587,7 +1587,7 @@ class ALB {
 	                      $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
 	                    }
 	                    $row=825; # 812 -> 825 2007-04-02 Schmidt;
-	                    $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+	                    $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'FlurstÃ¼ck',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 	                  }
 	                  $pdf->addText($col1,$row-=12,$fontSize,utf8_decode(substr($zusatzeigentuemertext,0,$positiontrenner)));
 	                  $zusatzeigentuemertext=substr($zusatzeigentuemertext,$positiontrenner+1);
@@ -1608,7 +1608,7 @@ class ALB {
 	              if($row<60) {
 	                # Seitenumbruch
 	                $seite++;
-	                # aktuelle Seite abschließen
+	                # aktuelle Seite abschlieÃŸen
 	                $pdf->addText($col9_1,$row-=24,$fontSize,'Forts. Seite '.$seite);
 	                # neue Seite beginnen
 	                $pageid=$pdf->newPage();
@@ -1617,12 +1617,12 @@ class ALB {
 	                  $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
 	                }
 	                $row=825; # 812 -> 825 2007-04-02 Schmidt
-	                $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+	                $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'FlurstÃ¼ck',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 	                $pdf->addText($col0,$row-=24,$fontSize,'Bestand');
 	                $pdf->addText($col0,$row-12,$fontSize,str_repeat("=",7));
 	              }
 	
-	              # Ausgabe der Zeile für die Bestandbezeichnung
+	              # Ausgabe der Zeile fÃ¼r die Bestandbezeichnung
 	              $BestandStr =$flst->Buchungen[$b]['bezirk'].'-'.intval($flst->Buchungen[$b]['blatt']);
 	              $BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
 	              $BestandStr.=' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
@@ -1640,8 +1640,8 @@ class ALB {
           $pageid=$pdf->newPage();
           //$pagecount[$f] = $pagecount[$f] + 1;
         }
-      } # end of flurstück is not historisch
-    } # end of for all flurstücke
+      } # end of flurstÃ¼ck is not historisch
+    } # end of for all flurstÃ¼cke
     $pdf->pagecount = $pagecount;
     return $pdf;
   }
@@ -1652,11 +1652,11 @@ class ALB {
     # Hilfsobjekte erzeugen
 
     $grundbuch=new grundbuch($Grundbuchbezirk,$Grundbuchblatt,$this->database);
-    # Abfrage aller Flurstücke, die auf dem angegebenen Grundbuchblatt liegen.
+    # Abfrage aller FlurstÃ¼cke, die auf dem angegebenen Grundbuchblatt liegen.
     $ret=$grundbuch->getBuchungen('','','',1);
     $buchungen=$ret[1];
 
-    # ein Flurstück erzeugen
+    # ein FlurstÃ¼ck erzeugen
     $flst=new flurstueck($buchungen[0]['flurstkennz'],$this->database);
     $flst->database=$this->database;
     $ret=$flst->readALB_Data($buchungen[0]['flurstkennz']);
@@ -1714,8 +1714,8 @@ class ALB {
         $art = 'Bestand';
       } break;
       case '25' : {
-#        $Ueberschrift='******** Bestandsübersicht *******';
-        $Ueberschrift='******** Bestandsübersicht ********';
+#        $Ueberschrift='******** BestandsÃ¼bersicht *******';
+        $Ueberschrift='******** BestandsÃ¼bersicht ********';
         $art = 'Bestand';
       } break;
     }
@@ -1763,14 +1763,14 @@ class ALB {
       case 25 : {
         # Bestand
 
-        # Abfragen und Ausgeben der Eigentümer zum Grundbuchblatt
+        # Abfragen und Ausgeben der EigentÃ¼mer zum Grundbuchblatt
         $Eigentuemerliste=$flst->getEigentuemerliste($buchungen[0]['bezirk'],$buchungen[0]['blatt'],$buchungen[0]['bvnr']);
         $anzEigentuemer=count($Eigentuemerliste);
         for ($i=0;$i<$anzEigentuemer;$i++) {
           if($row<120) {
             # Seitenumbruch
             $seite++;
-            # aktuelle Seite abschließen
+            # aktuelle Seite abschlieÃŸen
 #            $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
             $pdf->addText($col57,$row-=12,$fontSize,'Forts. Seite '.str_pad($seite,3," ",STR_PAD_LEFT));
             # neue Seite beginnen
@@ -1803,7 +1803,7 @@ class ALB {
               $pdf->addText($col62,$row,$fontSize,utf8_decode($Eigentuemerliste[$i]->Art));
             }
           }
-        } # ende Schleife Eigentümer des Grundbuchblattes
+        } # ende Schleife EigentÃ¼mer des Grundbuchblattes
 
 
         if ($buchungen[0]['zusatz_eigentuemer'] != '') {
@@ -1820,7 +1820,7 @@ class ALB {
                   if($row<120) {
                     # Seitenumbruch
                     $seite++;
-                    # aktuelle Seite abschließen
+                    # aktuelle Seite abschlieÃŸen
                     $pdf->addText($col57,$row-=12,$fontSize,'Forts. Seite '.$seite);
                     # neue Seite beginnen
                     $pageid=$pdf->newPage();
@@ -1838,7 +1838,7 @@ class ALB {
 
         $gesamtflaeche = 0;
         for ($b=0;$b < count($buchungen);$b++) {
-          # Flurstück erzeugen
+          # FlurstÃ¼ck erzeugen
           $flst=new flurstueck($buchungen[$b]['flurstkennz'],$this->database);
           $flst->database=$this->database;
           $ret=$flst->readALB_Data($buchungen[$b]['flurstkennz']);
@@ -1847,7 +1847,7 @@ class ALB {
           if($row<120) {
             # Seitenumbruch
             $seite++;
-            # aktuelle Seite abschließen
+            # aktuelle Seite abschlieÃŸen
 #            $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
             $pdf->addText($col57,$row-=12,$fontSize,'Forts. Seite '.str_pad($seite,3," ",STR_PAD_LEFT));
             # neue Seite beginnen
@@ -1865,10 +1865,10 @@ class ALB {
             $pdf->addText($col10,$row-=24,$fontSize,'Gemarkung  '.$flst->GemkgName);
 #         $pdf->addText($col0,$row-=24,$fontSize,'BVNR Art GMKG   FLR FLURST-NR    P');
       $pdf->addText($col1,$row-=24,$fontSize,'BVNR Art GMKG   FLR FLURST-NR    P');
-#         $pdf->addText($col9-10,$row,$fontSize,'Fläche');
-#29.11.2006 H. Riedel, Flurkarte, Riss hinzugefügt
+#         $pdf->addText($col9-10,$row,$fontSize,'FlÃ¤che');
+#29.11.2006 H. Riedel, Flurkarte, Riss hinzugefÃ¼gt
       $pdf->addText($col44,$row,$fontSize,'Flurkarte Riss');
-      $pdf->addText($col64,$row,$fontSize,'Fläche');
+      $pdf->addText($col64,$row,$fontSize,'FlÃ¤che');
         }
           if ($flst->Nenner!=0) {
             $nennerausgabe="/".$flst->Nenner;
@@ -1926,7 +1926,7 @@ class ALB {
             if($row<120) {
               # Seitenumbruch
               $seite++;
-              # aktuelle Seite abschließen
+              # aktuelle Seite abschlieÃŸen
   #            $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
               $pdf->addText($col57,$row-=12,$fontSize,'Forts. Seite '.str_pad($seite,3," ",STR_PAD_LEFT));
               # neue Seite beginnen
@@ -1979,8 +1979,8 @@ class ALB {
         } # ende Schleife Bestand
 #        $pdf->addText($col7+10,$row-=12,$fontSize,str_repeat("-",29));
         $pdf->addText($col44,$row-=12,$fontSize,str_repeat("-",29));
-#       $pdf->addText($col7+10,$row-=12,$fontSize,'Bestandsfläche '.str_pad($gesamtflaeche,11,'*',STR_PAD_LEFT).' m2');
-        $pdf->addText($col44,$row-=12,$fontSize,'Bestandsfläche '.str_pad(str_space($gesamtflaeche,3).' m2',14,'*',STR_PAD_LEFT));
+#       $pdf->addText($col7+10,$row-=12,$fontSize,'BestandsflÃ¤che '.str_pad($gesamtflaeche,11,'*',STR_PAD_LEFT).' m2');
+        $pdf->addText($col44,$row-=12,$fontSize,'BestandsflÃ¤che '.str_pad(str_space($gesamtflaeche,3).' m2',14,'*',STR_PAD_LEFT));
 #       $pdf->addText($col7+10,$row-=12,$fontSize,str_repeat("=",29));
         $pdf->addText($col44,$row-=12,$fontSize,str_repeat("=",29));
       } # ende Ausgabe Formular 25
@@ -1988,14 +1988,14 @@ class ALB {
       case 20 : {
         # Bestand
 
-        # Abfragen und Ausgeben der Eigentümer zum Grundbuchblatt
+        # Abfragen und Ausgeben der EigentÃ¼mer zum Grundbuchblatt
         $Eigentuemerliste=$flst->getEigentuemerliste($buchungen[0]['bezirk'],$buchungen[0]['blatt'],$buchungen[0]['bvnr']);
         $anzEigentuemer=count($Eigentuemerliste);
         for ($i=0;$i<$anzEigentuemer;$i++) {
           if($row<120) {
             # Seitenumbruch
             $seite++;
-            # aktuelle Seite abschließen
+            # aktuelle Seite abschlieÃŸen
 #            $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
             $pdf->addText($col57,$row-=12,$fontSize,'Forts. Seite '.str_pad($seite,3," ",STR_PAD_LEFT));
             # neue Seite beginnen
@@ -2028,7 +2028,7 @@ class ALB {
               $pdf->addText($col62,$row,$fontSize,utf8_decode($Eigentuemerliste[$i]->Art));
             }
           }
-        } # ende Schleife Eigentümer des Grundbuchblattes
+        } # ende Schleife EigentÃ¼mer des Grundbuchblattes
 
 				if ($buchungen[0]['zusatz_eigentuemer'] != '') {
           $zusatzeigentuemertext=$buchungen[0]['zusatz_eigentuemer'];
@@ -2044,7 +2044,7 @@ class ALB {
             if($row<120) {
               # Seitenumbruch
               $seite++;
-              # aktuelle Seite abschließen
+              # aktuelle Seite abschlieÃŸen
               $pdf->addText($col57,$row-=12,$fontSize,'Forts. Seite '.$seite);
               # neue Seite beginnen
               $pageid=$pdf->newPage();
@@ -2062,7 +2062,7 @@ class ALB {
 
         $gesamtflaeche = 0;
         for ($b=0;$b < count($buchungen);$b++) {
-          # Flurstück erzeugen
+          # FlurstÃ¼ck erzeugen
           $flst=new flurstueck($buchungen[$b]['flurstkennz'],$this->database);
           $flst->database=$this->database;
           $ret=$flst->readALB_Data($buchungen[$b]['flurstkennz']);
@@ -2071,7 +2071,7 @@ class ALB {
           if($row<120) {
             # Seitenumbruch
             $seite++;
-            # aktuelle Seite abschließen
+            # aktuelle Seite abschlieÃŸen
             $pdf->addText($col57,$row-=12,$fontSize,'Forts. Seite '.str_pad($seite,3," ",STR_PAD_LEFT));
             # neue Seite beginnen
             $pageid=$pdf->newPage();
@@ -2084,7 +2084,7 @@ class ALB {
           if($buchungen[$b-1]['gemkgname'] != $buchungen[$b]['gemkgname']) {
             $pdf->addText($col10,$row-=36,$fontSize,'Gemarkung  '.$flst->GemkgName);
             $pdf->addText($col1,$row-=24,$fontSize,'BVNR Art GMKG   FLR FLURST-NR    P');
-            $pdf->addText($col64,$row,$fontSize,'Fläche');
+            $pdf->addText($col64,$row,$fontSize,'FlÃ¤che');
           }
           if ($flst->Nenner!=0) {
             $nennerausgabe="/".$flst->Nenner;
@@ -2136,8 +2136,8 @@ class ALB {
         } # ende Schleife Bestand
 #        $pdf->addText($col7+10,$row-=12,$fontSize,str_repeat("-",29));
         $pdf->addText($col44,$row-=12,$fontSize,str_repeat("-",29));
-#       $pdf->addText($col7+10,$row-=12,$fontSize,'Bestandsfläche '.str_pad($gesamtflaeche,11,'*',STR_PAD_LEFT).' m2');
-  $pdf->addText($col44,$row-=12,$fontSize,'Bestandsfläche '.str_pad(str_space($gesamtflaeche,3).' m2',14,'*',STR_PAD_LEFT));
+#       $pdf->addText($col7+10,$row-=12,$fontSize,'BestandsflÃ¤che '.str_pad($gesamtflaeche,11,'*',STR_PAD_LEFT).' m2');
+  $pdf->addText($col44,$row-=12,$fontSize,'BestandsflÃ¤che '.str_pad(str_space($gesamtflaeche,3).' m2',14,'*',STR_PAD_LEFT));
 #       $pdf->addText($col7+10,$row-=12,$fontSize,str_repeat("=",29));
   $pdf->addText($col44,$row-=12,$fontSize,str_repeat("=",29));
       } # ende Ausgabe Formular 20
@@ -2185,12 +2185,13 @@ class ALB {
   function GrundausstattungAnlegen() {
     # 2006-12-12 pk
     if ($this->checkHeader) {
-      # Prüfen ob die WLDGE Datei fehlerfrei ist
+      # PrÃ¼fen ob die WLDGE Datei fehlerfrei ist
       $Fehlermeldung=$this->WLDGE_Datei_Pruefen();
     }
     if ($Fehlermeldung!='') { return $Fehlermeldung; }
     # Datei fehlerfrei
     # Direktes einlesen der WLDGE Datei in die ALB-Tabellen, SQL-Dump in Datei schreiben
+    $this->database->logfile->write("SET client_encoding='UTF8';");    
     $this->database->logfile->write($this->database->commentsign.' Einlesen der WLDGE-Datei: '.$this->WLDGE_Datei['tmp_name']);
 
     # Einlesen der Daten aus der WLDGE-Datei in die alb-Tabellen
@@ -2200,15 +2201,15 @@ class ALB {
     }
     else {
       # Einlesen ist fehlerfrei erfolgt
-      # Auffüllen der Zusatztabelle z_Fluren
+      # AuffÃ¼llen der Zusatztabelle z_Fluren
       $ret=$this->database->updateFluren();
       if ($ret[0] AND DBWRITE) {
-        $errmsg ='<br>Abbruch beim Einfügen der Fluren in function GrundausstattungAnlegen in alb.php line: '.__LINE__;
+        $errmsg ='<br>Abbruch beim EinfÃ¼gen der Fluren in function GrundausstattungAnlegen in alb.php line: '.__LINE__;
         $errmsg.='<br>'.$ret[1];
         return $errmsg;
       }
       $anzFluren=$this->database->getAnzFluren();
-      echo "<br>Fluren nach Fortführung gesamt: ".$anzFluren;
+      echo "<br>Fluren nach FortfÃ¼hrung gesamt: ".$anzFluren;
     }
     # reorganisieren des Datenbankspeicherns
     $this->database->vacuum();
@@ -2217,9 +2218,9 @@ class ALB {
   }
 
   function WLDGE_Datei_Pruefen() {
-    echo '<br>Beginne Prüfung der WLDGE-Datei:';
-    echo '<br>Öffne WLDGE-Datei.';
-    # öffnen der WLDGE_Datei
+    echo '<br>Beginne PrÃ¼fung der WLDGE-Datei:';
+    echo '<br>Ã–ffne WLDGE-Datei.';
+    # Ã¶ffnen der WLDGE_Datei
     $fp=fopen($this->WLDGE_Datei['tmp_name'],'r');
     echo '<br>Einlesen der ersten Zeile.';
 
@@ -2233,36 +2234,36 @@ class ALB {
     }
     if ($this->database->ist_Fortfuehrung) {
       # 5. Stelle der Druckauftragsnummer muss ein S sein, das bedeutet die
-      # Veränderungsdaten sind stichtagsbezogen
+      # VerÃ¤nderungsdaten sind stichtagsbezogen
       if ($Dateikennung=='1' AND $Aenderungsart=='L') {
-        $Fehler='Die Veränderungsdaten sind Fortführungsfallbezogen.';
-        $Fehler.='<br>Die Datei muß stichtagsbezogen sein.';
+        $Fehler='Die VerÃ¤nderungsdaten sind FortfÃ¼hrungsfallbezogen.';
+        $Fehler.='<br>Die Datei muÃŸ stichtagsbezogen sein.';
         return $Fehler;
       }
       else {
         if ($Dateikennung=='1' AND $Aenderungsart!='S') {
-          $Fehler='Es handelt sich nicht um eine Fortführungsdatei.';
-          $Fehler.='<br>Es wird nur die Fortführungsart S (stichtagsbezogen) akzeptiert.';
+          $Fehler='Es handelt sich nicht um eine FortfÃ¼hrungsdatei.';
+          $Fehler.='<br>Es wird nur die FortfÃ¼hrungsart S (stichtagsbezogen) akzeptiert.';
           return $Fehler;
         }
       }
     }
     echo '<br>Dateikennung ist korrekt.';
-    # Prüfen der Druckauftragsart, sie darf nur 11=Ausgabe mit Entschlüsselung sein
+    # PrÃ¼fen der Druckauftragsart, sie darf nur 11=Ausgabe mit EntschlÃ¼sselung sein
     $Satzart=substr($line,26,1);
     $Satzunterart=substr($line,30,2);
     $Druckauftragsart=substr($line,49,2);
-    echo '<br>Prüfen der Druckauftragsart.';
+    echo '<br>PrÃ¼fen der Druckauftragsart.';
     if ($Dateikennung=='1' AND $Satzart=='D' AND $Satzunterart=='00' AND $Druckauftragsart==10) {
-      return 'Die Druckauftragsart muss 11 (Ausgabe mit Entschlüsselung) sein.';
+      return 'Die Druckauftragsart muss 11 (Ausgabe mit EntschlÃ¼sselung) sein.';
     }
     else {
       if ($Dateikennung=='1' AND $Satzart=='D' AND $Satzunterart=='00' AND $Druckauftragsart!=11) {
-        return 'Die Druckauftragsart "'.$Druckauftragsart.'" ist ungültig.';
+        return 'Die Druckauftragsart "'.$Druckauftragsart.'" ist ungÃ¼ltig.';
       }
     }
-    # Einlesen der Datensätze 1.E.20 und 1.E.30
-    echo '<br>Einlesen der Datensätze 1.E.20 und 1.E.30...';
+    # Einlesen der DatensÃ¤tze 1.E.20 und 1.E.30
+    echo '<br>Einlesen der DatensÃ¤tze 1.E.20 und 1.E.30...';
     do {
       $line=fgets($fp);
       $Dateikennung=substr($line,0,1);
@@ -2277,7 +2278,7 @@ class ALB {
     } while (($line1E20=='' OR $line1E30=='') AND $Dateikennung=='1');
     echo 'fertig';
     echo '<br>Einlesen der Datum.';
-    # Einlesen des Datums für die Grundausstattung und den Fortführungszeitraum
+    # Einlesen des Datums fÃ¼r die Grundausstattung und den FortfÃ¼hrungszeitraum
     $GA_Datum=substr($line1E20,33,8);
     $GA['Tag']=substr($GA_Datum,6,2);
     $GA['Monat']=substr($GA_Datum,4,2);
@@ -2297,7 +2298,7 @@ class ALB {
     $bis['Minute']=substr($bis_Zeitraum,10,2);
     $bis['Sekunde']=substr($bis_Zeitraum,12,2);
     if ($this->database->ist_Fortfuehrung) {
-      echo '<br>Prüfung der Datei als Fortführungsdatei.';
+      echo '<br>PrÃ¼fung der Datei als FortfÃ¼hrungsdatei.';
       if ($line1E20=='') {
         return 'Im Auftrag (Dateikennung 1) fehlt der Datensatz 1.E.20';
       }
@@ -2307,22 +2308,22 @@ class ALB {
       # Pruefen der Kennung Erstabgabe
       $KennErst=substr($line1E20,41,1);
       switch ($KennErst) {
-        case 'E' : return 'Es handelt sich um eine Erstabgabe, keine Fortführung.';
+        case 'E' : return 'Es handelt sich um eine Erstabgabe, keine FortfÃ¼hrung.';
         case 'W' : return 'Es handelt sich um eine Wiederholung. Diese sind nicht zugelassen.';
         case 'A' : return 'Es handelt sich um ein Altverfahren. Diese sind nicht zugelassen.';
         case 'L' : break; #alles ok
-        default : return 'Die Kennung der Erstabgabe ('.$KennErst.') ist nicht gültig.';
+        default : return 'Die Kennung der Erstabgabe ('.$KennErst.') ist nicht gÃ¼ltig.';
       }
-      # Prüfen ob das Datum der Grundausstattung gültig ist
+      # PrÃ¼fen ob das Datum der Grundausstattung gÃ¼ltig ist
       if (!checkdate($GA['Monat'],$GA['Tag'],$GA['Jahr'])) {
-        return 'Das Datum der Grundausstattung ('.$GA['Tag'].'.'.$GA['Monat'].'.'.$GA['Jahr'].') ist ungültig.';
+        return 'Das Datum der Grundausstattung ('.$GA['Tag'].'.'.$GA['Monat'].'.'.$GA['Jahr'].') ist ungÃ¼ltig.';
       }
-      # lesen des Datums der Grundausstattung und den Endzeitpung der letzten Fortführung aus der Datenbank
+      # lesen des Datums der Grundausstattung und den Endzeitpung der letzten FortfÃ¼hrung aus der Datenbank
       # zum Vergleich mit der Angabe in der WLDGE Datei
       $ret=$this->database->readLastUpdateDate($GA['Jahr'].$GA['Monat'].$GA['Tag']);
       if ($ret[0] AND DBWRITE) {
         $errmsg ='<br>Abbruch beim Lesen der Datumsangaben zur letzten ALB Aktualisierung in Zeile: '.$zeNr.'<br>'.$ze;
-        $errmsg.='<br>beim Prüfen der einzulesenden WLDGE Datei in function readLastUpdateDate alb.php line: '.__LINE__;
+        $errmsg.='<br>beim PrÃ¼fen der einzulesenden WLDGE Datei in function readLastUpdateDate alb.php line: '.__LINE__;
         $errmsg.='<br>'.$ret[1];
         echo $errmsg;
         exit;
@@ -2332,35 +2333,35 @@ class ALB {
       }
       echo ' Datum der Grundausstattung in Datenbank: '.$rs['ga_datum'];
       echo "<br>WLDGE_DATUM_PRUEFUNG=".WLDGE_DATUM_PRUEFUNG;
-      echo "<br>Datum der Grundausstattung in Fortführungsdatei: ".$GA_Datum;
+      echo "<br>Datum der Grundausstattung in FortfÃ¼hrungsdatei: ".$GA_Datum;
       if (WLDGE_DATUM_PRUEFUNG==1) {
         if ($GA_Datum!=$rs['ga_datum']) {
-          return 'Das Datum der Grundausstattung in der Datei: '.$GA_Datum.' stimmt mit keinem Grundausstattungsdatum in der Datenbank überein.';
+          return 'Das Datum der Grundausstattung in der Datei: '.$GA_Datum.' stimmt mit keinem Grundausstattungsdatum in der Datenbank Ã¼berein.';
         }
       }
 
-      # prüfen ob der Anfangszeitpunkt des Fortführungszeitraumes gültig ist
+      # prÃ¼fen ob der Anfangszeitpunkt des FortfÃ¼hrungszeitraumes gÃ¼ltig ist
       if (!checkdate($von['Monat'],$von['Tag'],$von['Jahr'])) {
-        return 'Das Anfangszeitpunkt der Fortführungszeitraumes ('.$von['Tag'].'.'.$von['Monat'].'.'.$von['Jahr'].' '.$von['Stunde'].':'.$von['Minute'].':'.$von['Sekunde'].') ist ungültig.';
+        return 'Das Anfangszeitpunkt der FortfÃ¼hrungszeitraumes ('.$von['Tag'].'.'.$von['Monat'].'.'.$von['Jahr'].' '.$von['Stunde'].':'.$von['Minute'].':'.$von['Sekunde'].') ist ungÃ¼ltig.';
       }
-      # prüfen, ob der Anfangszeitpunkt der Fortführung mit dem Endzeitpunkt der letzten Fortführung übereinstimmt
+      # prÃ¼fen, ob der Anfangszeitpunkt der FortfÃ¼hrung mit dem Endzeitpunkt der letzten FortfÃ¼hrung Ã¼bereinstimmt
       if (WLDGE_DATUM_PRUEFUNG==1) {
-        echo "<br>Prüfe ob Anfangszeitraum in Fortführungsdatei mit Enddatum in Datenbank übereinstimmt.";
+        echo "<br>PrÃ¼fe ob Anfangszeitraum in FortfÃ¼hrungsdatei mit Enddatum in Datenbank Ã¼bereinstimmt.";
         echo "<br>Endzeit in Datenbank :".$rs['bis_letzer_zeitraum']." Anfangszeit in FF-Datei: ".$von_Zeitraum; 
         if ($von_Zeitraum!=$rs['bis_letzer_zeitraum']) {
-          return 'Der Anfangszeitpunkt des Fortführungszeitraumes ('.$von_Zeitraum.') stimmt nicht mit dem Endzeitpunkt der letzten Fortführung ('.$rs['bis_letzer_zeitraum'].') überein.';
+          return 'Der Anfangszeitpunkt des FortfÃ¼hrungszeitraumes ('.$von_Zeitraum.') stimmt nicht mit dem Endzeitpunkt der letzten FortfÃ¼hrung ('.$rs['bis_letzer_zeitraum'].') Ã¼berein.';
         }
       }
 
-      # prüfen ob der Endzeitpunkt des Fortführungszeitraumes gültig ist
+      # prÃ¼fen ob der Endzeitpunkt des FortfÃ¼hrungszeitraumes gÃ¼ltig ist
       if (!checkdate($bis['Monat'],$bis['Tag'],$bis['Jahr'])) {
-        return 'Der Endzeitpunkt des Fortführungszeitraumes ('.$bis['Tag'].'.'.$bis['Monat'].'.'.$bis['Jahr'].') ist ungültig.';
+        return 'Der Endzeitpunkt des FortfÃ¼hrungszeitraumes ('.$bis['Tag'].'.'.$bis['Monat'].'.'.$bis['Jahr'].') ist ungÃ¼ltig.';
       }
 
     }
     else {
-      # Prüfung der Datei als Grundausstattung
-      echo '<br>Prüfung der Datei als Grundausstattung.';
+      # PrÃ¼fung der Datei als Grundausstattung
+      echo '<br>PrÃ¼fung der Datei als Grundausstattung.';
       if ($line1E20=='') {
         return 'Der Datensatz 1.E.20 darf nicht leer sein.';
       }
@@ -2375,23 +2376,23 @@ class ALB {
         case 'W' : return 'Es handelt sich um eine Wiederholung, keine Grundausstattung.';
         case 'A' : return 'Es handelt sich um ein Altverfahren, keine Grundausstattung.';
         case 'L' : return 'Es handelt sich um ein laufendes Verfahren, keine Grundausstattung.';
-        default : return 'Die Kennung der Erstabgabe ('.$KennErst.') ist nicht gültig.';
+        default : return 'Die Kennung der Erstabgabe ('.$KennErst.') ist nicht gÃ¼ltig.';
       }
-      echo '<br>Prüfen ob Anfangs- und Endpunkt des Fortführungszeitpunktes gleich sind.';
-      # Prüfen ob Anfangs- und Endpunkt des Fortführungszeitpunktes gleich sind
+      echo '<br>PrÃ¼fen ob Anfangs- und Endpunkt des FortfÃ¼hrungszeitpunktes gleich sind.';
+      # PrÃ¼fen ob Anfangs- und Endpunkt des FortfÃ¼hrungszeitpunktes gleich sind
       if ($von_Zeitraum!=$bis_Zeitraum) {
-        return 'Bei einer Grundausstattung muss die Zeitangabe für den Begin und das Ende des Fortführungszeitraumes gleich sein.';
+        return 'Bei einer Grundausstattung muss die Zeitangabe fÃ¼r den Begin und das Ende des FortfÃ¼hrungszeitraumes gleich sein.';
       }
     }
-    echo '<br>Prüfen ob das Datum der Grundausstattung bzw. des Endzeitpunktes des Fortführungszeitraumes nach dem aktuellen Datum liegt.';
-    # Prüfen ob das Datum der Grundausstattung bzw. des Endzeitpunktes des Fortführungszeitraumes nach dem aktuellen Datum liegt.
+    echo '<br>PrÃ¼fen ob das Datum der Grundausstattung bzw. des Endzeitpunktes des FortfÃ¼hrungszeitraumes nach dem aktuellen Datum liegt.';
+    # PrÃ¼fen ob das Datum der Grundausstattung bzw. des Endzeitpunktes des FortfÃ¼hrungszeitraumes nach dem aktuellen Datum liegt.
     if ($bis_Zeitraum>DATE("YmdHis",time())) {
       return 'Das Ende des Zeitraumes ('.$bis['Tag'].'.'.$bis['Monat'].'.'.$bis['Jahr'].' '.$bis['Stunde'].':'.$bis['Minute'].':'.$bis['Sekunde'].') aus dem Datensatz 1.E.30 liegt in der Zukunft.';
     }
-    echo '<br>Prüfen ob der Endzeitpunkt nach dem Anfangszeitpunkt des Fortführungszeitraumes liegt.';
-    # prüfen ob der Endzeitpunkt nach dem Anfangszeitpunkt des Fortführungszeitraumes liegt
+    echo '<br>PrÃ¼fen ob der Endzeitpunkt nach dem Anfangszeitpunkt des FortfÃ¼hrungszeitraumes liegt.';
+    # prÃ¼fen ob der Endzeitpunkt nach dem Anfangszeitpunkt des FortfÃ¼hrungszeitraumes liegt
     if ($von_Zeitraum>$bis_Zeitraum) {
-      return 'Der Endzeitpunkt ('.$bis['Tag'].'.'.$bis['Monat'].'.'.$bis['Jahr'].' '.$bis['Stunde'].':'.$bis['Minute'].':'.$bis['Sekunde'].') des Fortführungszeitraumes liegt vor dem Anfangzeitpunkt ('.$von['Tag'].'.'.$von['Monat'].'.'.$von['Jahr'].').';
+      return 'Der Endzeitpunkt ('.$bis['Tag'].'.'.$bis['Monat'].'.'.$bis['Jahr'].' '.$bis['Stunde'].':'.$bis['Minute'].':'.$bis['Sekunde'].') des FortfÃ¼hrungszeitraumes liegt vor dem Anfangzeitpunkt ('.$von['Tag'].'.'.$von['Monat'].'.'.$von['Jahr'].').';
     }
     echo '<br> >>>Es sind keine Fehler gefunden worden.<<<';
     # Es sind keine Fehler gefunden worden
@@ -2409,12 +2410,12 @@ class ALB {
     echo '<br>Lese Datei: '.$this->WLDGE_Datei['tmp_name'].' in '.$this->database->type.'-Datenbank: '.$this->database->dbName.' ein.';
     echo "<br>Starte die Aktualisierung!";
 
-    # Leeren der vorhandenen Tabellen (bei Fortführung nur die temporären)
-    # Wenn es sich um einen Grundbestandhandelt und truncateTables ausgewählt wurde,
-    # werden die ALB Tabellen gelöscht, sonst nur die temporärer.
+    # Leeren der vorhandenen Tabellen (bei FortfÃ¼hrung nur die temporÃ¤ren)
+    # Wenn es sich um einen Grundbestandhandelt und truncateTables ausgewÃ¤hlt wurde,
+    # werden die ALB Tabellen gelÃ¶scht, sonst nur die temporÃ¤rer.
     if ($this->truncateTables OR $this->database->ist_Fortfuehrung) {
-      echo "<br>Leeren der Tabellen für die Grunddaten.";
-      $this->database->logfile->write($this->database->commentsign." Leeren der Tabellen für die Grunddaten.");
+      echo "<br>Leeren der Tabellen fÃ¼r die Grunddaten.";
+      $this->database->logfile->write($this->database->commentsign." Leeren der Tabellen fÃ¼r die Grunddaten.");
       $ret=$this->database->truncateAll();
       if ($ret[0] AND DBWRITE) {
         $errmsg ='<br>Abbruch beim Leeren der Tabellen.';
@@ -2425,7 +2426,7 @@ class ALB {
     }
     else {
       # Es handelt sich um einen Grundbestand, der zu einem vorhandenen Bestand
-      # hinzugefügt werden soll. Tabellen nicht vor dem Einlesen leeren.
+      # hinzugefÃ¼gt werden soll. Tabellen nicht vor dem Einlesen leeren.
       # Abfragen der letzen lfd_Nr_Namen aus Datenbank
       $ret=$this->database->getLastLfdNrName();
       if ($ret[0] AND DBWRITE) {
@@ -2440,7 +2441,7 @@ class ALB {
     }
 
     # 2006-12-12 pk
-    # Wird nicht ausgeführt, wenn Ausführung in Transaktion im Formular unterdrückt wurde
+    # Wird nicht ausgefÃ¼hrt, wenn AusfÃ¼hrung in Transaktion im Formular unterdrÃ¼ckt wurde
     $ret=$this->database->begintransaction();
     if ($ret[0] AND DBWRITE) {
       $errmsg ='<br>Abbruch beim Starten der Transaktion nach dem leeren der Tabellen.';
@@ -2512,7 +2513,7 @@ class ALB {
                 } # end of switch Satzunterart
               } break;
             } # end of switch Satzart
-            # Die Datenzeilen der Satzart 1 Anforderungsdaten werden erst am Schluß verwendet
+            # Die Datenzeilen der Satzart 1 Anforderungsdaten werden erst am SchluÃŸ verwendet
             # zum Eintragen des Aktualisierungsvorgangs
             $satzignore=1;
           } break;
@@ -2541,9 +2542,9 @@ class ALB {
               }
             }
             if ($Satzart==5 OR $Satzart==6 OR $Satzart==8) {
-              # Wenn neues Buchungskennzeichen, neues Grundstück eintragen
+              # Wenn neues Buchungskennzeichen, neues GrundstÃ¼ck eintragen
               $BuchungsKennz_alt=$BuchungsKennz;
-              $BuchungsKennz=str_replace('ß','>',substr($ze,1,18));
+              $BuchungsKennz=str_replace('ÃŸ','>',substr($ze,1,18));
               if ($BuchungsKennz!=$BuchungsKennz_alt) {
                 $Bezirk=substr($BuchungsKennz,0,6);
                 $Blatt=trim(substr($BuchungsKennz,7,6));
@@ -2552,7 +2553,7 @@ class ALB {
                 $ret=$this->database->insertGrundstueck($Bezirk,$Blatt,$BVNR,$Buchungsart);
                 if ($ret[0] AND DBWRITE) {
                   $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                  $errmsg.='<br>beim Einlesen eines Grundstückes in function insertGrundstueck alb.php line: '.__LINE__;
+                  $errmsg.='<br>beim Einlesen eines GrundstÃ¼ckes in function insertGrundstueck alb.php line: '.__LINE__;
                   $errmsg.='<br>'.$ret[1];
                   echo $errmsg;
                 }
@@ -2563,9 +2564,9 @@ class ALB {
             }
             switch ($Satzart) {
               case "0" : {
-                # Diese Satzart kommt nur bei Fortführungen vor
-                # historische Grundbuchblätter werden mit der Konstante 'hist' in die Spalte AktualitaetsNr eingetragen
-                # damit können die historischen Daten aus dem Grunddatenbestand gelöscht werden
+                # Diese Satzart kommt nur bei FortfÃ¼hrungen vor
+                # historische GrundbuchblÃ¤tter werden mit der Konstante 'hist' in die Spalte AktualitaetsNr eingetragen
+                # damit kÃ¶nnen die historischen Daten aus dem Grunddatenbestand gelÃ¶scht werden
                 $Bezirk=substr($ze,1,6);
                 $Blatt=substr($ze,8,6);
                 $Pruefzeichen=substr($ze,24,1);
@@ -2580,12 +2581,12 @@ class ALB {
                   $Grundbuecher++;
                 }
               } break;
-              case "1" : { # 2.1.0 Bestand/Eigentümer
+              case "1" : { # 2.1.0 Bestand/EigentÃ¼mer
                 $Satzunterart=substr($ze,47,1);
                 if ($Satzunterart=="0") { # Namensnummer, Eigentumart und Anteil
                   # erster Teil der Namensnummern
                   $NamensNr=intval(substr($ze,27,4));
-                  # weitere Unternummern abfragen und wenn vorhanden an die Nummer anhängen mit . getrennt
+                  # weitere Unternummern abfragen und wenn vorhanden an die Nummer anhÃ¤ngen mit . getrennt
                   for ($i=0;$i<4;$i++) {
                     $NrTeil=substr($ze,31+$i*3,3);
                     if ($NrTeil!='.00') { $NamensNr.=$NrTeil; }
@@ -2593,11 +2594,11 @@ class ALB {
                   $Eigentuemerart=trim(substr($ze,49,2));
                   $Anteilsverhaeltnis=trim(substr($ze,52,16));
                   $lfd_Nr_Name++;
-                  # Eintragen eines neuen Eigentümers
+                  # Eintragen eines neuen EigentÃ¼mers
                   $ret=$this->database->insertEigentuemer($Bezirk,$Blatt,$NamensNr,$Eigentuemerart,$Anteilsverhaeltnis,$lfd_Nr_Name);
                   if ($ret[0] AND DBWRITE) {
                     $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                    $errmsg.='<br>beim Einlesen eines Eigentümers in function insertEigentuemer alb.php line: '.__LINE__;
+                    $errmsg.='<br>beim Einlesen eines EigentÃ¼mers in function insertEigentuemer alb.php line: '.__LINE__;
                     $errmsg.='<br>'.$ret[1];
                     echo $errmsg;
                   }
@@ -2621,18 +2622,18 @@ class ALB {
                       $g_Namen++;
                     }
                   }
-                  else { # Schon eingetragener Name, zusätzliche Namensteile
+                  else { # Schon eingetragener Name, zusÃ¤tzliche Namensteile
                     $ret=$this->database->updateName($lfd_Nr_Name,$Satzunterart,$Namen);
                     if ($ret[0] AND DBWRITE) {
                       $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                      $errmsg.='<br>beim Aktualisieren von Namenseinträgen in function updateName alb.php line: '.__LINE__;
+                      $errmsg.='<br>beim Aktualisieren von NamenseintrÃ¤gen in function updateName alb.php line: '.__LINE__;
                       $errmsg.='<br>'.$ret[1];
                       echo $errmsg;
                     }
                   }
                 }
               } break;
-              case "2" : { # 2.2 Eintragen von Zusätzen zum Eigentümer im Grundbuchblatt
+              case "2" : { # 2.2 Eintragen von ZusÃ¤tzen zum EigentÃ¼mer im Grundbuchblatt
                 $TextZeile=substr($ze,30,2);
                 if ($TextZeile=="01") {
                   $Zusatz_Eigentuemer=trim(substr($ze,33,52));
@@ -2643,17 +2644,17 @@ class ALB {
                 $ret=$this->database->updateGrundbuch($Bezirk,$Blatt,$Zusatz_Eigentuemer,'');
                 if ($ret[0] AND DBWRITE) {
                   $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                  $errmsg.='<br>beim Aktualisieren der Eigentümerdaten eines Grundbuches in function updateGrundbuch alb.php line: '.__LINE__;
+                  $errmsg.='<br>beim Aktualisieren der EigentÃ¼merdaten eines Grundbuches in function updateGrundbuch alb.php line: '.__LINE__;
                   $errmsg.='<br>'.$ret[1];
                   echo $errmsg;
                 }
               } break;
-              case "4" : { # 2.4 Eintragen der Bestandsfläche im Grundbuchblatt
+              case "4" : { # 2.4 Eintragen der BestandsflÃ¤che im Grundbuchblatt
                 $Bestandsflaeche=intval(substr($ze,30,9));
                 $ret=$this->database->updateGrundbuch($Bezirk,$Blatt,'',$Bestandsflaeche);
                 if ($ret[0] AND DBWRITE) {
                   $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                  $errmsg.='<br>beim Aktualisieren der Bestandsfläche des Grundbuches in function updateGrundbuch alb.php line: '.__LINE__;
+                  $errmsg.='<br>beim Aktualisieren der BestandsflÃ¤che des Grundbuches in function updateGrundbuch alb.php line: '.__LINE__;
                   $errmsg.='<br>'.$ret[1];
                   echo $errmsg;
                 }
@@ -2675,7 +2676,7 @@ class ALB {
                 $ret=$this->database->insertBuchung($FlurstKennz,$Bezirk,$Blatt,$BVNR,$ErbbaurechtsHinw);
                 if ($ret[0] AND DBWRITE) {
                   $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                  $errmsg.='<br>beim Einfügen einer Buchung in function insertBuchungen alb.php line: '.__LINE__;
+                  $errmsg.='<br>beim EinfÃ¼gen einer Buchung in function insertBuchungen alb.php line: '.__LINE__;
                   $errmsg.='<br>'.$ret[1];
                   echo $errmsg;
                 }
@@ -2702,7 +2703,7 @@ class ALB {
             }
           } break; # end Dateikennung 2 Bestand
 
-          ############## Dateikennung Flurstück
+          ############## Dateikennung FlurstÃ¼ck
           case "3" : {
             $FlurstKennz_alt=$FlurstKennz;
             $FlurstKennz=substr($ze,1,23);
@@ -2710,11 +2711,11 @@ class ALB {
             $FlurNr=substr($ze,8,3);
             $Pruefzeichen=substr($ze,24,1);
             if ($FlurstKennz!=$FlurstKennz_alt) {
-              # Anlegenen eines neuen Flurstücks
+              # Anlegenen eines neuen FlurstÃ¼cks
               $ret=$this->database->insertFlurstueck($FlurstKennz,$GemkgSchl,$FlurNr,$Pruefzeichen);
               if ($ret[0] AND DBWRITE) {
                 $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                $errmsg.='<br>beim Einfügen eines Flurstücks in function insertFlurstueck alb.php line: '.__LINE__;
+                $errmsg.='<br>beim EinfÃ¼gen eines FlurstÃ¼cks in function insertFlurstueck alb.php line: '.__LINE__;
                 $errmsg.='<br>'.$ret[1];
                 echo $errmsg;
               }
@@ -2723,7 +2724,7 @@ class ALB {
               }
             }
             switch ($Satzart) {
-              case "B" : { # 3.B Status, Entstehung, Letzte Fortführung, Fläche, Aktual. Nummer
+              case "B" : { # 3.B Status, Entstehung, Letzte FortfÃ¼hrung, FlÃ¤che, Aktual. Nummer
                 $Status=substr($ze,31,1);
                 $Entsteh=trim(substr($ze,33,13));
                 $LetzFF=trim(substr($ze,47,13));
@@ -2732,7 +2733,7 @@ class ALB {
                 $ret=$this->database->updateFlurstueck($FlurstKennz,$Status,$Entsteh,$LetzFF,$Flaeche,$AktuNr,'','','','','','');
                 if ($ret[0] AND DBWRITE) {
                   $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                  $errmsg.='<br>beim Aktualisieren eines Flurstücks in function updateFlurstueck alb.php line: '.__LINE__;
+                  $errmsg.='<br>beim Aktualisieren eines FlurstÃ¼cks in function updateFlurstueck alb.php line: '.__LINE__;
                   $errmsg.='<br>'.$ret[1];
                   echo $errmsg;
                 }
@@ -2749,18 +2750,18 @@ class ALB {
                 $ret=$this->database->updateFlurstueck($FlurstKennz,'','','','','',$Karte,$BauBlock,$KoorRW,$KoorHW,$Forstamt,$Finanzamt);
                 if ($ret[0] AND DBWRITE) {
                   $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                  $errmsg.='<br>beim Aktualisieren eines Flurstücks in function updateFlurstueck alb.php line: '.__LINE__;
+                  $errmsg.='<br>beim Aktualisieren eines FlurstÃ¼cks in function updateFlurstueck alb.php line: '.__LINE__;
                   $errmsg.='<br>'.$ret[1];
                   echo $errmsg;
                 }
               } break;
-              case "F" : { # 3.F Hinweise zum Flurstück
+              case "F" : { # 3.F Hinweise zum FlurstÃ¼ck
                 $Hinweise=explode(",",substr($ze,30,59));
                 for ($i=0;$i<count($Hinweise);$i++) {
                   $ret=$this->database->insertHinweis($FlurstKennz,trim($Hinweise[$i]));
                   if ($ret[0] AND DBWRITE) {
                     $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                    $errmsg.='<br>beim Einfügen eines Hinweises für ein Flurstück in function insertHinweis alb.php line: '.__LINE__;
+                    $errmsg.='<br>beim EinfÃ¼gen eines Hinweises fÃ¼r ein FlurstÃ¼ck in function insertHinweis alb.php line: '.__LINE__;
                     $errmsg.='<br>'.$ret[1];
                     echo $errmsg;
                   }
@@ -2772,11 +2773,11 @@ class ALB {
               case "G" : { # 3.G Adressen
                 $Gemeinde=intval(substr($ze,30,12));
                 $Strasse=substr($ze,42,5);
-                $HausNr=trim(preg_replace('(§+)',' ',preg_replace('( |-|/|\.)','§',rtrim(ltrim(substr($ze,48,8),'0')))));
+                $HausNr=trim(preg_replace('(Â§+)',' ',preg_replace('( |-|/|\.)','Â§',rtrim(ltrim(substr($ze,48,8),'0')))));
                 $ret=$this->database->insertAdresse($FlurstKennz,$Gemeinde,$Strasse,$HausNr);
                 if ($ret[0] AND DBWRITE) {
                   $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                  $errmsg.='<br>beim Einfügen einer Adresse zum Flurstück in function insertAdresse alb.php line: '.__LINE__;
+                  $errmsg.='<br>beim EinfÃ¼gen einer Adresse zum FlurstÃ¼ck in function insertAdresse alb.php line: '.__LINE__;
                   $errmsg.='<br>'.$ret[1];
                   echo $errmsg;
                 }
@@ -2784,13 +2785,13 @@ class ALB {
                   $f_Adressen++;
                 }
               } break;
-              case "H" : { # 3.H unverschlüsselte Lagebezeichnungen
+              case "H" : { # 3.H unverschlÃ¼sselte Lagebezeichnungen
                 $lfdNr=substr($ze,30,2);
                 $Lage=trim(substr($ze,33,30));
                 $ret=$this->database->insertLage($FlurstKennz,$lfdNr,$Lage);
                 if ($ret[0] AND DBWRITE) {
                   $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                  $errmsg.='<br>beim Einfügen einer Lagebezeichnung zum Flurstück in function insertLage alb.php line: '.__LINE__;
+                  $errmsg.='<br>beim EinfÃ¼gen einer Lagebezeichnung zum FlurstÃ¼ck in function insertLage alb.php line: '.__LINE__;
                   $errmsg.='<br>'.$ret[1];
                   echo $errmsg;
                 }
@@ -2807,7 +2808,7 @@ class ALB {
                 $ret=$this->database->insertNutzung($FlurstKennz,$Nutzungsart,$NutzungFlaeche);
                 if ($ret[0] AND DBWRITE) {
                   $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                  $errmsg.='<br>beim Einfügen einer Nutzung zum Flurstück in function insertNutzung alb.php line: '.__LINE__;
+                  $errmsg.='<br>beim EinfÃ¼gen einer Nutzung zum FlurstÃ¼ck in function insertNutzung alb.php line: '.__LINE__;
                   $errmsg.='<br>'.$ret[1];
                   echo $errmsg;
                 }
@@ -2823,7 +2824,7 @@ class ALB {
                 $ret=$this->database->insertKlassifizierung($FlurstKennz,$TabKenn,$Klass,$KlassFlaeche,$KlassAngabe);
                 if ($ret[0] AND DBWRITE) {
                   $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                  $errmsg.='<br>beim Einfügen einer Klassifizierung zum Flurstück in function insertKlassifizierung alb.php line: '.__LINE__;
+                  $errmsg.='<br>beim EinfÃ¼gen einer Klassifizierung zum FlurstÃ¼ck in function insertKlassifizierung alb.php line: '.__LINE__;
                   $errmsg.='<br>'.$ret[1];
                   echo $errmsg;
                 }
@@ -2837,7 +2838,7 @@ class ALB {
                 $ret=$this->database->insertText($FlurstKennz,$lfdNr,$freierText);
                 if ($ret[0] AND DBWRITE) {
                   $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                  $errmsg.='<br>beim Einfügen eines Textes zum Flurstück in function insertText alb.php line: '.__LINE__;
+                  $errmsg.='<br>beim EinfÃ¼gen eines Textes zum FlurstÃ¼ck in function insertText alb.php line: '.__LINE__;
                   $errmsg.='<br>'.$ret[1];
                   echo $errmsg;
                 }
@@ -2852,7 +2853,7 @@ class ALB {
                 $ret=$this->database->insertAnlieger($FlurstKennz,$Kennung,$AnlFlstKennz,$AnlFlstPruefz);
                 if ($ret[0] AND DBWRITE) {
                   $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                  $errmsg.='<br>beim Eintragen eines Anliegers zum Flurstück in function insertAnlieger alb.php line: '.__LINE__;
+                  $errmsg.='<br>beim Eintragen eines Anliegers zum FlurstÃ¼ck in function insertAnlieger alb.php line: '.__LINE__;
                   $errmsg.='<br>'.$ret[1];
                   echo $errmsg;
                 }
@@ -2866,7 +2867,7 @@ class ALB {
                   $ret=$this->database->insertBaulast($FlurstKennz,trim($BlattNr[$i]));
                   if ($ret[0] AND DBWRITE) {
                     $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                    $errmsg.='<br>beim Eintragen einer Baulast zum Flurstück in function insertBaulast alb.php line: '.__LINE__;
+                    $errmsg.='<br>beim Eintragen einer Baulast zum FlurstÃ¼ck in function insertBaulast alb.php line: '.__LINE__;
                     $errmsg.='<br>'.$ret[1];
                     echo $errmsg;
                   }
@@ -2882,7 +2883,7 @@ class ALB {
                 $ret=$this->database->insertVerfahren($FlurstKennz,$AusfStelle,$VerfNr,$VerfBem);
                 if ($ret[0] AND DBWRITE) {
                   $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                  $errmsg.='<br>beim Eintragen einer Baulast zum Flurstück in function insertVerfahren alb.php line: '.__LINE__;
+                  $errmsg.='<br>beim Eintragen einer Baulast zum FlurstÃ¼ck in function insertVerfahren alb.php line: '.__LINE__;
                   $errmsg.='<br>'.$ret[1];
                   echo $errmsg;
                 }
@@ -2890,12 +2891,12 @@ class ALB {
                   $f_Verfahren++;
                 }
               } break;
-              case "V" : { # 3.V Historie, Vorgänger
+              case "V" : { # 3.V Historie, VorgÃ¤nger
                 $Vorgaenger=substr($ze,30,23);
                 $ret=$this->database->insertHistorie($Vorgaenger,$FlurstKennz);
                 if ($ret[0] AND DBWRITE) {
                   $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                  $errmsg.='<br>beim Eintragen eines Vorgängers zum Flurstück in function insertHistorie alb.php line: '.__LINE__;
+                  $errmsg.='<br>beim Eintragen eines VorgÃ¤ngers zum FlurstÃ¼ck in function insertHistorie alb.php line: '.__LINE__;
                   $errmsg.='<br>'.$ret[1];
                   echo $errmsg;
                 }
@@ -2912,7 +2913,7 @@ class ALB {
                 $ret=$this->database->insertHistorie($FlurstKennz,$Nachfolger);
                 if ($ret[0] AND DBWRITE) {
                   $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                  $errmsg.='<br>beim Eintragen eines Nachfolgers zum Flurstück in function insertHistorie alb.php line: '.__LINE__;
+                  $errmsg.='<br>beim Eintragen eines Nachfolgers zum FlurstÃ¼ck in function insertHistorie alb.php line: '.__LINE__;
                   $errmsg.='<br>'.$ret[1];
                   echo $errmsg;
                 }
@@ -2926,15 +2927,15 @@ class ALB {
               } break;
               case "X" : { # 3.X Buchungskennzeichen
                 $satzignore=1;
-                # Hier sind alle Buchungen angegeben, auch die von historischen Flurstücken
-                # Die Buchungen der nicht historischen Flurstücke wurde schon über die Zeilen 2.6 vorgenommen
-                # wird nur gebraucht, wenn historische Flurstücke gehalten werden sollen oder zum Prüfen
+                # Hier sind alle Buchungen angegeben, auch die von historischen FlurstÃ¼cken
+                # Die Buchungen der nicht historischen FlurstÃ¼cke wurde schon Ã¼ber die Zeilen 2.6 vorgenommen
+                # wird nur gebraucht, wenn historische FlurstÃ¼cke gehalten werden sollen oder zum PrÃ¼fen
               } break;
             } # ende of switch Satzart
-          } break; # ende of Dateikennung 3 Flurstück
+          } break; # ende of Dateikennung 3 FlurstÃ¼ck
 
           # 2006-07-04 pk
-          ############## Dateikennung: Flurstücke mit Eigentümer-/Erbbauberechtigtenangaben
+          ############## Dateikennung: FlurstÃ¼cke mit EigentÃ¼mer-/Erbbauberechtigtenangaben
           case "4" : {
             $FlurstKennz_alt=$FlurstKennz;
             $FlurstKennz=substr($ze,1,23);
@@ -2942,11 +2943,11 @@ class ALB {
             $FlurNr=substr($ze,8,3);
             $Pruefzeichen=substr($ze,24,1);
             if ($FlurstKennz!=$FlurstKennz_alt) {
-              # Anlegenen eines neuen Flurstücks
+              # Anlegenen eines neuen FlurstÃ¼cks
               $ret=$this->database->insertFlurstueck($FlurstKennz,$GemkgSchl,$FlurNr,$Pruefzeichen);
               if ($ret[0] AND DBWRITE) {
                 $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                $errmsg.='<br>beim Einfügen eines Flurstücks in function insertFlurstueck alb.php line: '.__LINE__;
+                $errmsg.='<br>beim EinfÃ¼gen eines FlurstÃ¼cks in function insertFlurstueck alb.php line: '.__LINE__;
                 $errmsg.='<br>'.$ret[1];
                 echo $errmsg;
               }
@@ -2955,7 +2956,7 @@ class ALB {
               }
             }
             switch ($Satzart) {
-              case "B" : { # 4.B Status, Entstehung, Letzte Fortführung, Fläche, Aktual. Nummer
+              case "B" : { # 4.B Status, Entstehung, Letzte FortfÃ¼hrung, FlÃ¤che, Aktual. Nummer
                 $Status=substr($ze,31,1);
                 $Entsteh=trim(substr($ze,33,13));
                 $LetzFF=trim(substr($ze,47,13));
@@ -2964,7 +2965,7 @@ class ALB {
                 $ret=$this->database->updateFlurstueck($FlurstKennz,$Status,$Entsteh,$LetzFF,$Flaeche,$AktuNr,'','','','','','');
                 if ($ret[0] AND DBWRITE) {
                   $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                  $errmsg.='<br>beim Aktualisieren eines Flurstücks in function updateFlurstueck alb.php line: '.__LINE__;
+                  $errmsg.='<br>beim Aktualisieren eines FlurstÃ¼cks in function updateFlurstueck alb.php line: '.__LINE__;
                   $errmsg.='<br>'.$ret[1];
                   echo $errmsg;
                 }
@@ -2979,18 +2980,18 @@ class ALB {
                 $ret=$this->database->updateFlurstueck($FlurstKennz,'','','','','',$Karte,$BauBlock,$KoorRW,$KoorHW,$Forstamt,$Finanzamt);
                 if ($ret[0] AND DBWRITE) {
                   $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                  $errmsg.='<br>beim Aktualisieren eines Flurstücks in function updateFlurstueck alb.php line: '.__LINE__;
+                  $errmsg.='<br>beim Aktualisieren eines FlurstÃ¼cks in function updateFlurstueck alb.php line: '.__LINE__;
                   $errmsg.='<br>'.$ret[1];
                   echo $errmsg;
                 }
               } break;
-              case "F" : { # 4.F Hinweise zum Flurstück
+              case "F" : { # 4.F Hinweise zum FlurstÃ¼ck
                 $Hinweise=explode(",",substr($ze,30,59));
                 for ($i=0;$i<count($Hinweise);$i++) {
                   $ret=$this->database->insertHinweis($FlurstKennz,trim($Hinweise[$i]));
                   if ($ret[0] AND DBWRITE) {
                     $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                    $errmsg.='<br>beim Einfügen eines Hinweises für ein Flurstück in function insertHinweis alb.php line: '.__LINE__;
+                    $errmsg.='<br>beim EinfÃ¼gen eines Hinweises fÃ¼r ein FlurstÃ¼ck in function insertHinweis alb.php line: '.__LINE__;
                     $errmsg.='<br>'.$ret[1];
                     echo $errmsg;
                   }
@@ -3014,7 +3015,7 @@ class ALB {
                 $ret=$this->database->insertAdresse($FlurstKennz,$Gemeinde,$Strasse,$HausNr);
                 if ($ret[0] AND DBWRITE) {
                   $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                  $errmsg.='<br>beim Einfügen einer Adresse zum Flurstück in function insertAdresse alb.php line: '.__LINE__;
+                  $errmsg.='<br>beim EinfÃ¼gen einer Adresse zum FlurstÃ¼ck in function insertAdresse alb.php line: '.__LINE__;
                   $errmsg.='<br>'.$ret[1];
                   echo $errmsg;
                 }
@@ -3022,13 +3023,13 @@ class ALB {
                   $f_Adressen++;
                 }
               } break;
-              case "H" : { # 4.H unverschlüsselte Lagebezeichnungen
+              case "H" : { # 4.H unverschlÃ¼sselte Lagebezeichnungen
                 $lfdNr=substr($ze,30,2);
                 $Lage=trim(substr($ze,33,30));
                 $ret=$this->database->insertLage($FlurstKennz,$lfdNr,$Lage);
                 if ($ret[0] AND DBWRITE) {
                   $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                  $errmsg.='<br>beim Einfügen einer Lagebezeichnung zum Flurstück in function insertLage alb.php line: '.__LINE__;
+                  $errmsg.='<br>beim EinfÃ¼gen einer Lagebezeichnung zum FlurstÃ¼ck in function insertLage alb.php line: '.__LINE__;
                   $errmsg.='<br>'.$ret[1];
                   echo $errmsg;
                 }
@@ -3045,7 +3046,7 @@ class ALB {
                 $ret=$this->database->insertNutzung($FlurstKennz,$Nutzungsart,$NutzungFlaeche);
                 if ($ret[0] AND DBWRITE) {
                   $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                  $errmsg.='<br>beim Einfügen einer Nutzung zum Flurstück in function insertNutzung alb.php line: '.__LINE__;
+                  $errmsg.='<br>beim EinfÃ¼gen einer Nutzung zum FlurstÃ¼ck in function insertNutzung alb.php line: '.__LINE__;
                   $errmsg.='<br>'.$ret[1];
                   echo $errmsg;
                 }
@@ -3061,7 +3062,7 @@ class ALB {
                 $ret=$this->database->insertKlassifizierung($FlurstKennz,$TabKenn,$Klass,$KlassFlaeche,$KlassAngabe);
                 if ($ret[0] AND DBWRITE) {
                   $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                  $errmsg.='<br>beim Einfügen einer Klassifizierung zum Flurstück in function insertKlassifizierung alb.php line: '.__LINE__;
+                  $errmsg.='<br>beim EinfÃ¼gen einer Klassifizierung zum FlurstÃ¼ck in function insertKlassifizierung alb.php line: '.__LINE__;
                   $errmsg.='<br>'.$ret[1];
                   echo $errmsg;
                 }
@@ -3075,7 +3076,7 @@ class ALB {
                 $ret=$this->database->insertText($FlurstKennz,$lfdNr,$freierText);
                 if ($ret[0] AND DBWRITE) {
                   $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                  $errmsg.='<br>beim Einfügen eines Textes zum Flurstück in function insertText alb.php line: '.__LINE__;
+                  $errmsg.='<br>beim EinfÃ¼gen eines Textes zum FlurstÃ¼ck in function insertText alb.php line: '.__LINE__;
                   $errmsg.='<br>'.$ret[1];
                   echo $errmsg;
                 }
@@ -3090,7 +3091,7 @@ class ALB {
                 $ret=$this->database->insertAnlieger($FlurstKennz,$Kennung,$AnlFlstKennz,$AnlFlstPruefz);
                 if ($ret[0] AND DBWRITE) {
                   $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                  $errmsg.='<br>beim Eintragen eines Anliegers zum Flurstück in function insertAnlieger alb.php line: '.__LINE__;
+                  $errmsg.='<br>beim Eintragen eines Anliegers zum FlurstÃ¼ck in function insertAnlieger alb.php line: '.__LINE__;
                   $errmsg.='<br>'.$ret[1];
                   echo $errmsg;
                 }
@@ -3104,7 +3105,7 @@ class ALB {
                   $ret=$this->database->insertBaulast($FlurstKennz,trim($BlattNr[$i]));
                   if ($ret[0] AND DBWRITE) {
                     $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                    $errmsg.='<br>beim Eintragen einer Baulast zum Flurstück in function insertBaulast alb.php line: '.__LINE__;
+                    $errmsg.='<br>beim Eintragen einer Baulast zum FlurstÃ¼ck in function insertBaulast alb.php line: '.__LINE__;
                     $errmsg.='<br>'.$ret[1];
                     echo $errmsg;
                   }
@@ -3120,7 +3121,7 @@ class ALB {
                 $ret=$this->database->insertVerfahren($FlurstKennz,$AusfStelle,$VerfNr,$VerfBem);
                 if ($ret[0] AND DBWRITE) {
                   $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                  $errmsg.='<br>beim Eintragen einer Baulast zum Flurstück in function insertVerfahren alb.php line: '.__LINE__;
+                  $errmsg.='<br>beim Eintragen einer Baulast zum FlurstÃ¼ck in function insertVerfahren alb.php line: '.__LINE__;
                   $errmsg.='<br>'.$ret[1];
                   echo $errmsg;
                 }
@@ -3128,12 +3129,12 @@ class ALB {
                   $f_Verfahren++;
                 }
               } break;
-              case "V" : { # 4.V Historie, Vorgänger
+              case "V" : { # 4.V Historie, VorgÃ¤nger
                 $Vorgaenger=substr($ze,30,23);
                 $ret=$this->database->insertHistorie($Vorgaenger,$FlurstKennz);
                 if ($ret[0] AND DBWRITE) {
                   $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                  $errmsg.='<br>beim Eintragen eines Vorgängers zum Flurstück in function insertHistorie alb.php line: '.__LINE__;
+                  $errmsg.='<br>beim Eintragen eines VorgÃ¤ngers zum FlurstÃ¼ck in function insertHistorie alb.php line: '.__LINE__;
                   $errmsg.='<br>'.$ret[1];
                   echo $errmsg;
                 }
@@ -3150,7 +3151,7 @@ class ALB {
                 $ret=$this->database->insertHistorie($FlurstKennz,$Nachfolger);
                 if ($ret[0] AND DBWRITE) {
                   $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                  $errmsg.='<br>beim Eintragen eines Nachfolgers zum Flurstück in function insertHistorie alb.php line: '.__LINE__;
+                  $errmsg.='<br>beim Eintragen eines Nachfolgers zum FlurstÃ¼ck in function insertHistorie alb.php line: '.__LINE__;
                   $errmsg.='<br>'.$ret[1];
                   echo $errmsg;
                 }
@@ -3183,29 +3184,29 @@ class ALB {
                     $Grundbuecher++;
                   }
                 }
-                # Wenn neues Buchungskennzeichen, neues Grundstück eintragen und neue Buchung für Flurstück
+                # Wenn neues Buchungskennzeichen, neues GrundstÃ¼ck eintragen und neue Buchung fÃ¼r FlurstÃ¼ck
                 $BuchungsKennz_alt=$BuchungsKennz;
-                $BuchungsKennz=str_replace('ß','>',substr($ze,32,18));
+                $BuchungsKennz=str_replace('ÃŸ','>',substr($ze,32,18));
                 $BVNR=trim(substr($BuchungsKennz,14,4));
                 if ($BuchungsKennz!=$BuchungsKennz_alt) {
                   $Buchungsart=substr($ze,55,1);
                   $ret=$this->database->insertGrundstueck($Bezirk,$Blatt,$BVNR,$Buchungsart);
                   if ($ret[0] AND DBWRITE) {
                     $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                    $errmsg.='<br>beim Einlesen eines Grundstückes in function insertGrundstueck alb.php line: '.__LINE__;
+                    $errmsg.='<br>beim Einlesen eines GrundstÃ¼ckes in function insertGrundstueck alb.php line: '.__LINE__;
                     $errmsg.='<br>'.$ret[1];
                     echo $errmsg;
                   }
                   else {
                     $g_Grundstuecke++;
                   }
-                  # Buchung des Flurstücks auf dem Grundstück
+                  # Buchung des FlurstÃ¼cks auf dem GrundstÃ¼ck
                   $FlurstKennz=substr($ze,1,23);
                   $ErbbaurechtsHinw='';
                   $ret=$this->database->insertBuchung($FlurstKennz,$Bezirk,$Blatt,$BVNR,$ErbbaurechtsHinw);
                   if ($ret[0] AND DBWRITE) {
                     $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                    $errmsg.='<br>beim Einfügen einer Buchung in function insertBuchungen alb.php line: '.__LINE__;
+                    $errmsg.='<br>beim EinfÃ¼gen einer Buchung in function insertBuchungen alb.php line: '.__LINE__;
                     $errmsg.='<br>'.$ret[1];
                     echo $errmsg;
                   }
@@ -3222,7 +3223,7 @@ class ALB {
                     if ($Satzunterart=="0") { # 4.Z.1.0 Namensnummer, Eigentumart und Anteil
                       # erster Teil der Namensnummern
                       $NamensNr=intval(substr($ze,57,4));
-                      # weitere Unternummern abfragen und wenn vorhanden an die Nummer anhängen mit . getrennt
+                      # weitere Unternummern abfragen und wenn vorhanden an die Nummer anhÃ¤ngen mit . getrennt
                       for ($i=0;$i<4;$i++) {
                         $NrTeil=substr($ze,61+$i*3,3);
                         if ($NrTeil!='.00') { $NamensNr.=$NrTeil; }
@@ -3230,11 +3231,11 @@ class ALB {
                       $Eigentuemerart=trim(substr($ze,78,2));
                       $Anteilsverhaeltnis=trim(substr($ze,81,16));
                       $lfd_Nr_Name++;
-                      # Eintragen eines neuen Eigentümers
+                      # Eintragen eines neuen EigentÃ¼mers
                       $ret=$this->database->insertEigentuemer($Bezirk,$Blatt,$NamensNr,$Eigentuemerart,$Anteilsverhaeltnis,$lfd_Nr_Name);
                       if ($ret[0] AND DBWRITE) {
                         $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                        $errmsg.='<br>beim Einlesen eines Eigentümers in function insertEigentuemer alb.php line: '.__LINE__;
+                        $errmsg.='<br>beim Einlesen eines EigentÃ¼mers in function insertEigentuemer alb.php line: '.__LINE__;
                         $errmsg.='<br>'.$ret[1];
                         echo $errmsg;
                       }
@@ -3256,18 +3257,18 @@ class ALB {
                           $g_Namen++;
                         }
                       }
-                      else { # Schon eingetragener Name, zusätzliche Namensteile
+                      else { # Schon eingetragener Name, zusÃ¤tzliche Namensteile
                         $ret=$this->database->updateName($lfd_Nr_Name,$Satzunterart,$Namen);
                         if ($ret[0] AND DBWRITE) {
                           $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                          $errmsg.='<br>beim Aktualisieren von Namenseinträgen in function updateName alb.php line: '.__LINE__;
+                          $errmsg.='<br>beim Aktualisieren von NamenseintrÃ¤gen in function updateName alb.php line: '.__LINE__;
                           $errmsg.='<br>'.$ret[1];
                           echo $errmsg;
                         }
                       }
                     }
                   } break;
-                  case "2" : { # 4.Z.2 Eintragen von Zusätzen zum Eigentümer/Erbauberechtigten im Grundbuchblatt
+                  case "2" : { # 4.Z.2 Eintragen von ZusÃ¤tzen zum EigentÃ¼mer/Erbauberechtigten im Grundbuchblatt
                     $TextZeile=substr($ze,60,2);
                     if ($TextZeile=="01") {
                       $Zusatz_Eigentuemer=trim(substr($ze,63,52));
@@ -3278,7 +3279,7 @@ class ALB {
                     $ret=$this->database->updateGrundbuch($Bezirk,$Blatt,$Zusatz_Eigentuemer,'');
                     if ($ret[0] AND DBWRITE) {
                       $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                      $errmsg.='<br>beim Aktualisieren der Eigentümerdaten eines Grundbuches in function updateGrundbuch alb.php line: '.__LINE__;
+                      $errmsg.='<br>beim Aktualisieren der EigentÃ¼merdaten eines Grundbuches in function updateGrundbuch alb.php line: '.__LINE__;
                       $errmsg.='<br>'.$ret[1];
                       echo $errmsg;
                     }
@@ -3288,12 +3289,12 @@ class ALB {
             } # end of Satzart Spalte 26
           } break; # end Dateikennung 4 Bestand
 
-          ############## Dateikennung 7 Entschlüsselungen
-          # Entschlüsselungen für Liegenschaftskataster führende Stellen, Gemarkungen, Landkreise, Gemeinden und Strassen
+          ############## Dateikennung 7 EntschlÃ¼sselungen
+          # EntschlÃ¼sselungen fÃ¼r Liegenschaftskataster fÃ¼hrende Stellen, Gemarkungen, Landkreise, Gemeinden und Strassen
           case "7" : {
             $Satzunterart=substr($ze,27,1);
             switch ($Satzart) {
-              case "A" : { # 7.A Liegenschaftskataster führende Stellen
+              case "A" : { # 7.A Liegenschaftskataster fÃ¼hrende Stellen
                 for ($Feld=0;$Feld<3;$Feld++) {
                   if ($Satzunterart=='0' AND $Feld==0) {
                     $Katasteramt=substr($ze,1,4);
@@ -3388,7 +3389,7 @@ class ALB {
                   $v_Gemeinden++;
                 }
               } break;
-              case "E" : { # 7.C Straßenname
+              case "E" : { # 7.C StraÃŸenname
                 $Gemeinde=substr($ze,1,8);
                 $Strasse=substr($ze,13,5);
                 $Name=trim(substr($ze,29,30));
@@ -3407,12 +3408,12 @@ class ALB {
             } # end of switch Satzart
           } break; # end of Dateikennung 7
 
-          ############## Dateikennung 8 Entschlüsselungen
-          # Entschlüsselungen für Grundbuchämter (Amtsgerichte), Eigentümerarten und Buchungsarten
+          ############## Dateikennung 8 EntschlÃ¼sselungen
+          # EntschlÃ¼sselungen fÃ¼r GrundbuchÃ¤mter (Amtsgerichte), EigentÃ¼merarten und Buchungsarten
           case "8" : {
             $Satzunterart=substr($ze,27,1);
             switch ($Satzart) {
-              case "A" : { # 8.A Grundbuchämter (Amtsgerichte)
+              case "A" : { # 8.A GrundbuchÃ¤mter (Amtsgerichte)
                 for ($Feld=0;$Feld<3;$Feld++) {
                   if ($Satzunterart=='0' AND $Feld==0) {
                     $Amtsgericht=substr($ze,1,4);
@@ -3442,7 +3443,7 @@ class ALB {
                   }
                 }
               } break;
-              case "B" : { # 8.B Eigentümerarten
+              case "B" : { # 8.B EigentÃ¼merarten
                 for ($Feld=0;$Feld<3;$Feld++) {
                   if ($Satzunterart=='0' AND $Feld==0) {
                     $Eigentuemerart=substr($ze,1,2);
@@ -3455,7 +3456,7 @@ class ALB {
                   if ($Satzfolge=='9') {
                     $mehrzeilig=0;
                     $Feld=3; # nicht weiter einlesen
-                    # Eintragen der neuen Eigentümerart
+                    # Eintragen der neuen EigentÃ¼merart
                     $ret=$this->database->insertEigentuemerart($Eigentuemerart,trim($Bezeichnung));
                     if ($ret[0] AND DBWRITE) {
                       $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
@@ -3490,12 +3491,12 @@ class ALB {
             } # end of switch Satzart
           } break; # end of Dateikennung 8
 
-          ############## Dateikennung 9 Entschlüsselungen
-          # Entschlüsselungen für Ämter, Hinweise zu Flurstücken, Nutzungsarten, Klassifizierungen, ausführende Stelle und Bemerkungen
+          ############## Dateikennung 9 EntschlÃ¼sselungen
+          # EntschlÃ¼sselungen fÃ¼r Ã„mter, Hinweise zu FlurstÃ¼cken, Nutzungsarten, Klassifizierungen, ausfÃ¼hrende Stelle und Bemerkungen
           case "9" : {
             $Satzunterart=substr($ze,27,1);
             switch ($Satzart) {
-              case "A" : { # 9.A Forstämter
+              case "A" : { # 9.A ForstÃ¤mter
                 for ($Feld=0;$Feld<3;$Feld++) {
                   if ($Satzunterart=='0' AND $Feld==0) {
                     $Forstamt=substr($ze,3,2);
@@ -3525,7 +3526,7 @@ class ALB {
                   }
                 }
               } break;
-              case "B" : { # 9.B Finanzämter
+              case "B" : { # 9.B FinanzÃ¤mter
                 for ($Feld=0;$Feld<3;$Feld++) {
                   if ($Satzunterart=='0' AND $Feld==0) {
                     $Finanzamt=substr($ze,1,4);
@@ -3555,7 +3556,7 @@ class ALB {
                   }
                 }
               } break;
-              case "C" : { # 9.C Hinweise zum Flurstück
+              case "C" : { # 9.C Hinweise zum FlurstÃ¼ck
                 for ($Feld=0;$Feld<3;$Feld++) {
                   if ($Satzunterart=='0' AND $Feld==0) {
                     $HinwZFlst=substr($ze,1,2);
@@ -3637,7 +3638,7 @@ class ALB {
                     $ret=$this->database->insertKlassifizierungsart($TabKenn,$Klass,trim($Bezeichnung),trim($Abkuerzung));
                     if ($ret[0] AND DBWRITE) {
                       $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                      $errmsg.='<br>beim Einfügen einer Klassifizierungsart in function insertKlassifizierungsart alb.php line: '.__LINE__;
+                      $errmsg.='<br>beim EinfÃ¼gen einer Klassifizierungsart in function insertKlassifizierungsart alb.php line: '.__LINE__;
                       $errmsg.='<br>'.$ret[1];
                       echo $errmsg;
                     }
@@ -3650,7 +3651,7 @@ class ALB {
                   }
                 }
               } break;
-              case "F" : { # # 9.F Ausführende Stelle
+              case "F" : { # # 9.F AusfÃ¼hrende Stelle
                 for ($Feld=0;$Feld<3;$Feld++) {
                   if ($Satzunterart=='0' AND $Feld==0) {
                     $AusfStelle=substr($ze,1,5);
@@ -3663,11 +3664,11 @@ class ALB {
                   if ($Satzfolge=='9') {
                     $mehrzeilig=0;
                     $Feld=3; # nicht weiter einlesen
-                    # Anlegen einer neuen Ausführenden Stelle
+                    # Anlegen einer neuen AusfÃ¼hrenden Stelle
                     $ret=$this->database->insertAusfuehrendeStelle($AusfStelle,trim($Name));
                     if ($ret[0] AND DBWRITE) {
                       $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                      $errmsg.='<br>beim Einfügen einer ausführenden Stelle in function insertAusfuehrendeStelle alb.php line: '.__LINE__;
+                      $errmsg.='<br>beim EinfÃ¼gen einer ausfÃ¼hrenden Stelle in function insertAusfuehrendeStelle alb.php line: '.__LINE__;
                       $errmsg.='<br>'.$ret[1];
                       echo $errmsg;
                     }
@@ -3697,7 +3698,7 @@ class ALB {
                     $ret=$this->database->insertBemerkgZumVerfahren($VerfBemerkung,trim($Bezeichnung));
                     if ($ret[0] AND DBWRITE) {
                       $errmsg ='<br>Abbruch beim Einlesen der WLDGE-Datei in Zeile: '.$zeNr.'<br>'.$ze;
-                      $errmsg.='<br>beim Einfügen einer Bemerkung zum Verfahren in function insertBemerkgZumVerfahren alb.php line: '.__LINE__;
+                      $errmsg.='<br>beim EinfÃ¼gen einer Bemerkung zum Verfahren in function insertBemerkgZumVerfahren alb.php line: '.__LINE__;
                       $errmsg.='<br>'.$ret[1];
                       echo $errmsg;
                     }
@@ -3719,15 +3720,15 @@ class ALB {
                 $anzFlurstuecke=substr($ze,36,7);
                 $anzBestaende=substr($ze,43,7);
                 $ret[0]='';
-                # Damit die Ausgabe: "Konnte nicht eingelesen werden" für diese Zeile unterdrückt wird
+                # Damit die Ausgabe: "Konnte nicht eingelesen werden" fÃ¼r diese Zeile unterdrÃ¼ckt wird
               } break;
             } # end of switch Satzart
           } break; # end of Dateikennung 9
         } # ende switch Dateikennung
-        # registrieren aller nicht verarbeiteten Datensätze
-        # Einträge, aus denen kein SQL-Statement abgeleitet werden konnte
-        # Zeilen, die zu mehrzeiligen Argumenten zusammengesetzt werden müssen werden ignoriert,
-        # z.B. in 7.A Name der Liegenschaftskatasterführenden Stelle
+        # registrieren aller nicht verarbeiteten DatensÃ¤tze
+        # EintrÃ¤ge, aus denen kein SQL-Statement abgeleitet werden konnte
+        # Zeilen, die zu mehrzeiligen Argumenten zusammengesetzt werden mÃ¼ssen werden ignoriert,
+        # z.B. in 7.A Name der LiegenschaftskatasterfÃ¼hrenden Stelle
 
         if ($ret[0] AND !($mehrzeilig OR $satzignore)) {
           if ($ret[1]=='') {
@@ -3744,8 +3745,8 @@ class ALB {
     if ($Konstante9=='9999999999999999999999999' AND $Satzunterart=='0' AND $Satzfolge=='9') {
       $Ausgabe.='<b>Abrechnungsdaten aus WLDGE Datei:</b>';
       $Ausgabe.='<br>Anzahl der Bereichskennzeichen: '.$anzBereichskennz;
-      $Ausgabe.='<br>Anzahl der Flurstücke: '.$anzFlurstuecke;
-      $Ausgabe.='<br>Anzahl der Bestandsdatensätze: '.$anzBestaende;
+      $Ausgabe.='<br>Anzahl der FlurstÃ¼cke: '.$anzFlurstuecke;
+      $Ausgabe.='<br>Anzahl der BestandsdatensÃ¤tze: '.$anzBestaende;
       $this->dategrundausstattung=$GA['Jahr'].'-'.$GA['Monat'].'-'.$GA['Tag'];
       $this->zeitraumvon=$von['Jahr'].'-'.$von['Monat'].'-'.$von['Tag'].' '.$von['Stunde'].':'.$von['Minute'].':'.$von['Sekunde'];
       $this->zeitraumbis=$bis['Jahr'].'-'.$bis['Monat'].'-'.$bis['Tag'].' '.$bis['Stunde'].':'.$bis['Minute'].':'.$bis['Sekunde'];
@@ -3763,14 +3764,14 @@ class ALB {
     else {
       $ret=$this->database->committransaction();
       $Ausgabe.='<p><b>Gelesene Zeilen gesamt:</b> '.$zeNr;
-      $Ausgabe.='<p><b>Anzahl der Eingelesenen Datensätze:</b>';
+      $Ausgabe.='<p><b>Anzahl der Eingelesenen DatensÃ¤tze:</b>';
       $Ausgabe.='<br><i>Bestand</i>';
       $Ausgabe.='<br>'.$tableprefix.'Grundbuecher: '.$Grundbuecher;
       $Ausgabe.='<br>'.$tableprefix.'g_Grundstuecke: '.$g_Grundstuecke;
       $Ausgabe.='<br>'.$tableprefix.'g_Eigentuemer: '.$g_Eigentuemer;
       $Ausgabe.='<br>'.$tableprefix.'g_Namen: '.$g_Namen;
       $Ausgabe.='<br>'.$tableprefix.'g_Buchungen: '.$g_Buchungen;
-      $Ausgabe.='<br><i>Flurstücke</i>';
+      $Ausgabe.='<br><i>FlurstÃ¼cke</i>';
       $Ausgabe.='<br>'.$tableprefix.'Flurstuecke: '.$Flurstuecke;
       $Ausgabe.='<br>'.$tableprefix.'f_Hinweise: '.$f_Hinweise;
       $Ausgabe.='<br>'.$tableprefix.'f_Adressen: '.$f_Adressen;
@@ -3784,7 +3785,7 @@ class ALB {
       # 2005-12-27 pk
       $f_Historie=$this->database->getAnzHistorien(1,'','');
       $Ausgabe.='<br>'.$tableprefix.'f_Historie: '.$f_Historie;
-      $Ausgabe.='<br><i>Entschlüsselungen</i>';
+      $Ausgabe.='<br><i>EntschlÃ¼sselungen</i>';
       $Ausgabe.='<br>'.$tableprefix.'v_Katasteraemter: '.$v_Katasteraemter;
       $Ausgabe.='<br>'.$tableprefix.'v_Gemarkungen: '.$v_Gemarkungen;
       $Ausgabe.='<br>'.$tableprefix.'v_Grundbuchbezirke: '.$v_Grundbuchbezirke;
@@ -3815,13 +3816,13 @@ class ALB {
 
 
   #########################################################
-  # ALB Fortführen (Aktualisierung)
+  # ALB FortfÃ¼hren (Aktualisierung)
   #
   function Fortfuehren() {
-    # Prüfen ob die WLDGE Datei fehlerfrei ist
-    $this->database->logfile->write($this->database->commentsign.' Prüfen der Eingangsdaten.');
+    # PrÃ¼fen ob die WLDGE Datei fehlerfrei ist
+    $this->database->logfile->write($this->database->commentsign.' PrÃ¼fen der Eingangsdaten.');
     if ($this->checkHeader) {
-      # Prüfen ob die WLDGE Datei fehlerfrei ist
+      # PrÃ¼fen ob die WLDGE Datei fehlerfrei ist
       $Fehlermeldung=$this->WLDGE_Datei_Pruefen();
     }
     if ($Fehlermeldung!='') {
@@ -3830,7 +3831,7 @@ class ALB {
     }
 
     # Datei fehlerfrei
-    # Einlesen der WLDGE-Datei in temporäre Tabellen, SQL-Dump in Datei schreiben
+    # Einlesen der WLDGE-Datei in temporÃ¤re Tabellen, SQL-Dump in Datei schreiben
     $this->database->logfile->write($this->database->commentsign.' Einlesen der WLDGE-Datei: '.$this->WLDGE_Datei['tmp_name']);
 
     $Fehlermeldung=$this->WLDGE_Datei_einlesen();
@@ -3847,12 +3848,12 @@ class ALB {
 
     # Start aktualisieren
     $this->database->begintransaction();
-    echo "<br>Starte Fortführung...";
+    echo "<br>Starte FortfÃ¼hrung...";
     $starttime=time();
     $Ausgabe.='<b>Protokoll der Aktualisierung:</b>';
     $exitMsg='Abbruch in ALB->Fortfuehren() Zeile: ';
 
-    ############################################ Aktualisieren der Grundbücher
+    ############################################ Aktualisieren der GrundbÃ¼cher
     $Ausgabe.="<br><i>Bestand</i>";
     echo "<br><i>Bestand</i>";
 
@@ -3864,30 +3865,30 @@ class ALB {
       return $errmsg;
     }
     $anzGrundbuecherHist=$ret[1];
-    $Ausgabe.="<br>Historische Grundbucheinträge: ".$anzGrundbuecherHist;
-    echo "<br>Historische Grundbucheinträge: ".$anzGrundbuecherHist;
+    $Ausgabe.="<br>Historische GrundbucheintrÃ¤ge: ".$anzGrundbuecherHist;
+    echo "<br>Historische GrundbucheintrÃ¤ge: ".$anzGrundbuecherHist;
 
-    # Löschen aller Grundbuchblätter, zu denen neue Informationen vorhanden sind
-    # Wenn die Option historische_loeschen gewählt wurde, werden auch alle historischen gelöscht
-    # Alle die gelöscht werden, werden hinterher wieder eingefügt (geupdateed), außer die, die historisch sind
+    # LÃ¶schen aller GrundbuchblÃ¤tter, zu denen neue Informationen vorhanden sind
+    # Wenn die Option historische_loeschen gewÃ¤hlt wurde, werden auch alle historischen gelÃ¶scht
+    # Alle die gelÃ¶scht werden, werden hinterher wieder eingefÃ¼gt (geupdateed), auÃŸer die, die historisch sind
     # denn die sind entweder schon drin, oder sollen nicht rein.
     $ret=$this->database->deleteGrundbuecher($this->historische_loeschen);
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Löschen der Grundbuecher, die neu eingetragen werden sollen in function deleteGrundbuecher alb.php line: '.__LINE__;
+      $errmsg ='<br>Abbruch beim LÃ¶schen der Grundbuecher, die neu eingetragen werden sollen in function deleteGrundbuecher alb.php line: '.__LINE__;
       $errmsg.='<br>'.$ret[1];
       return $errmsg;
     }
     $anzGrundbuecherDeleted=$this->database->getAffectedRows($ret[1]);
     if ($this->historische_loeschen) {
-      $Ausgabe.="<br>Grundbücher aktualisiert oder gelöscht: ".$anzGrundbuecherDeleted;
-      echo "<br>Grundbücher aktualisiert oder gelöscht: ".$anzGrundbuecherDeleted;
+      $Ausgabe.="<br>GrundbÃ¼cher aktualisiert oder gelÃ¶scht: ".$anzGrundbuecherDeleted;
+      echo "<br>GrundbÃ¼cher aktualisiert oder gelÃ¶scht: ".$anzGrundbuecherDeleted;
     }
     else {
-      $Ausgabe.="<br>Grundbücher aktualisiert: ".$anzGrundbuecherDeleted;
-      echo "<br>Grundbücher aktualisiert: ".$anzGrundbuecherDeleted;
+      $Ausgabe.="<br>GrundbÃ¼cher aktualisiert: ".$anzGrundbuecherDeleted;
+      echo "<br>GrundbÃ¼cher aktualisiert: ".$anzGrundbuecherDeleted;
     }
 
-    # Wenn historische_loeschen=0, werden alle in der Fortführungsdatei als historisch gekennzeichnete Grundbücher im aktuellen Bestand auch als historisch gekennzeichnet.
+    # Wenn historische_loeschen=0, werden alle in der FortfÃ¼hrungsdatei als historisch gekennzeichnete GrundbÃ¼cher im aktuellen Bestand auch als historisch gekennzeichnet.
     if (!$this->historische_loeschen) {
       $ret=$this->database->setGrundbuecherHist();
       if ($ret[0] AND DBWRITE) {
@@ -3897,82 +3898,82 @@ class ALB {
       }
     }
 
-    # Einfügen aller neuen Grundbuecher, außer den historischen
-    # wenn historische_loeschen=1 werden trotzdem nur die neuen und geänderten übernommen,
+    # EinfÃ¼gen aller neuen Grundbuecher, auÃŸer den historischen
+    # wenn historische_loeschen=1 werden trotzdem nur die neuen und geÃ¤nderten Ã¼bernommen,
     # denn die historischen sind ja im Bestand schon vorhanden und als solche gekennzeichnet
     $ret=$this->database->insertNeueGrundbuecher();
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Einfügen der neuen Grundbuecher in function insertNeueGrundbuecher alb.php line: '.__LINE__;
+      $errmsg ='<br>Abbruch beim EinfÃ¼gen der neuen Grundbuecher in function insertNeueGrundbuecher alb.php line: '.__LINE__;
       $errmsg.='<br>'.$ret[1];
       return $errmsg;
     }
-    # Differenz aus den nach dem Löschen wieder neu eingetragenen und den vorher gelöschten Grundbüchern
-    # Entspricht der Anzahl an neu im Bestand eingetragenen Grundbüchern
+    # Differenz aus den nach dem LÃ¶schen wieder neu eingetragenen und den vorher gelÃ¶schten GrundbÃ¼chern
+    # Entspricht der Anzahl an neu im Bestand eingetragenen GrundbÃ¼chern
     $anzGrundbuecherNeu=$this->database->getAffectedRows($ret[1])-$anzGrundbuecherDeleted;
-    $Ausgabe.="<br>Grundbücher Neu: ".$anzGrundbuecherNeu;
-    echo "<br>Grundbücher Neu: ".$anzGrundbuecherNeu;
+    $Ausgabe.="<br>GrundbÃ¼cher Neu: ".$anzGrundbuecherNeu;
+    echo "<br>GrundbÃ¼cher Neu: ".$anzGrundbuecherNeu;
 
     /*
-    * Löschen aller Grundstuecke, für die Änderungsdaten vorliegen
+    * LÃ¶schen aller Grundstuecke, fÃ¼r die Ã„nderungsdaten vorliegen
     */
     $ret=$this->database->deleteGrundstueckeByGrundbuecher($this->historische_loeschen);
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Löschen der Grundstücke mit Änderungen';
+      $errmsg ='<br>Abbruch beim LÃ¶schen der GrundstÃ¼cke mit Ã„nderungen';
       $errmsg.=' in function deleteGrundstueckeByGrundbuecher alb.php line: '.__LINE__;
       $errmsg.='<br>'.$ret[1];
       return $errmsg;
     }
     $anzGrundstueckeHist=$this->database->getAffectedRows($ret[1]);
-    $Ausgabe.="<br>Grundstücke mit Änderungsdaten gelöscht: ".$anzGrundstueckeHist;
-    echo "<br>Grundstücke mit Änderungsdaten gelöscht: ".$anzGrundstueckeHist;
+    $Ausgabe.="<br>GrundstÃ¼cke mit Ã„nderungsdaten gelÃ¶scht: ".$anzGrundstueckeHist;
+    echo "<br>GrundstÃ¼cke mit Ã„nderungsdaten gelÃ¶scht: ".$anzGrundstueckeHist;
     /*
-     * Löschen aller Buchungen, für die Änderungsdaten vorliegen
+     * LÃ¶schen aller Buchungen, fÃ¼r die Ã„nderungsdaten vorliegen
      */
     $ret=$this->database->deleteBuchungenByGrundbuecher($this->historische_loeschen);
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Löschen der Buchungen mit Änderungen';
+      $errmsg ='<br>Abbruch beim LÃ¶schen der Buchungen mit Ã„nderungen';
       $errmsg.=' in function deleteBuchungenByGrundbuecher alb.php line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
     $anzBuchungenHist=$this->database->getAffectedRows($ret[1]);
-    $Ausgabe.="<br>Buchungen mit Änderungsdaten gelöscht: ".$anzBuchungenHist;
-    echo "<br>Buchungen mit Änderungsdaten gelöscht: ".$anzBuchungenHist;
+    $Ausgabe.="<br>Buchungen mit Ã„nderungsdaten gelÃ¶scht: ".$anzBuchungenHist;
+    echo "<br>Buchungen mit Ã„nderungsdaten gelÃ¶scht: ".$anzBuchungenHist;
 
     /*
-     * Löschen aller Zuordnungen von Eigentümern, für die Änderungsdaten vorliegen
+     * LÃ¶schen aller Zuordnungen von EigentÃ¼mern, fÃ¼r die Ã„nderungsdaten vorliegen
      */
     $ret=$this->database->deleteEigentuemerByGrundbuecher($this->historische_loeschen);
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Löschen der Eigentümer auf Grundbuchblättern';
+      $errmsg ='<br>Abbruch beim LÃ¶schen der EigentÃ¼mer auf GrundbuchblÃ¤ttern';
       $errmsg.=' in function deleteEigentuemerByGrundbuecher katasterp.php line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
     $anzEigentuemerHist=$this->database->getAffectedRows($ret[1]);
-    $Ausgabe.="<br>Eigentümer mit Änderungsdaten gelöscht: ".$anzEigentuemerHist;
-    echo "<br>Eigentümer mit Änderungsdaten gelöscht: ".$anzEigentuemerHist;
+    $Ausgabe.="<br>EigentÃ¼mer mit Ã„nderungsdaten gelÃ¶scht: ".$anzEigentuemerHist;
+    echo "<br>EigentÃ¼mer mit Ã„nderungsdaten gelÃ¶scht: ".$anzEigentuemerHist;
 
     /* ############################################### Aktualisieren der Bestandsdaten
     * 1 Aktualisieren aller bestehenden Bestandsdaten
     * 1.1. Aktualisierung der Grundstucksdaten
-    * 1.1.1 Einfügen neuer Grundstuecke
-    * Es wird davon ausgegangen, dass zu Grundbüchern, die als historisch gekennzeichneten wurden, keine Grundstücke, Buchungen
-    * oder Eigentümer in der Fortführungsdatei aufgelistet sind.
+    * 1.1.1 EinfÃ¼gen neuer Grundstuecke
+    * Es wird davon ausgegangen, dass zu GrundbÃ¼chern, die als historisch gekennzeichneten wurden, keine GrundstÃ¼cke, Buchungen
+    * oder EigentÃ¼mer in der FortfÃ¼hrungsdatei aufgelistet sind.
     */
     $ret=$this->database->insertNewGrundstuecke();
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Hinfügen neuer Grundstücke in function';
+      $errmsg ='<br>Abbruch beim HinfÃ¼gen neuer GrundstÃ¼cke in function';
       $errmsg.=' insertNewGrundstuecke alb.php line: '.__LINE__.'<br>'.$ret[1];
       echo $errmsg;
       return $errmsg;
     }
     $anzGrundstueckeNeu=$this->database->getAffectedRows($ret[1])-$anzGrundstueckeDelete;
-    $Ausgabe.="<br>Grundstücke Neu: ".$anzGrundstueckeNeu;
-    echo "<br>Grundstücke Neu: ".$anzGrundstueckeNeu;
+    $Ausgabe.="<br>GrundstÃ¼cke Neu: ".$anzGrundstueckeNeu;
+    echo "<br>GrundstÃ¼cke Neu: ".$anzGrundstueckeNeu;
 
-    # 1.2 Einfügen der neuen Eintragungen für die Buchungen
+    # 1.2 EinfÃ¼gen der neuen Eintragungen fÃ¼r die Buchungen
     $ret=$this->database->insertNewBuchungen();
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Hinfügen neuer Buchungen in function';
+      $errmsg ='<br>Abbruch beim HinfÃ¼gen neuer Buchungen in function';
       $errmsg.=' insertNewBuchungen alb.php line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
@@ -3980,13 +3981,13 @@ class ALB {
     $Ausgabe.="<br>Buchungen Neu: ".$anzBuchungenNeu-$anzBuchungenUpdate;
     echo "<br>Buchungen Neu: ".$anzBuchungenNeu-$anzBuchungenUpdate;
 
-    # 1.3 Aktualisieren der Eigentümer Zuordnungen.
+    # 1.3 Aktualisieren der EigentÃ¼mer Zuordnungen.
     # 1.3.1 Aktualisierung der Adressdaten von schon vorhandenen Eigentuemern
-    #       Bezirk, Blatt und NamensNr von bestehender Eigentümertabelle wird mit neuer Eigentümertabelle gleichgesetzt
-    #       und alle Felder der dazugehörigen Einträge zu Namen durch die neue Namen überschieben.
+    #       Bezirk, Blatt und NamensNr von bestehender EigentÃ¼mertabelle wird mit neuer EigentÃ¼mertabelle gleichgesetzt
+    #       und alle Felder der dazugehÃ¶rigen EintrÃ¤ge zu Namen durch die neue Namen Ã¼berschieben.
     $ret=$this->database->updateEigentuemer();
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Aktualisieren der Eigentümer und Namen in function';
+      $errmsg ='<br>Abbruch beim Aktualisieren der EigentÃ¼mer und Namen in function';
       $errmsg.=' updateEigentuemer alb.php line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
@@ -3995,24 +3996,24 @@ class ALB {
     echo "<br>Namen Aktualisiert: ".$anzNamenUpdate;
 
     # 1.3.2. Finden von schon vorhandenen Namen im Grundbestand und Kennzeichnen in neuer Tabelle
-    # A) Übernahme der alten lfdNr für Namen in die Tabelle der neue Namen
-    #    In den Fällen wo alle 4 Namensteile der alten und der neuen Namenstabelle identisch sind
-    #    wird die alte lfd_Nr für Namen in die neue Tabelle zwischengespeichert
+    # A) Ãœbernahme der alten lfdNr fÃ¼r Namen in die Tabelle der neue Namen
+    #    In den FÃ¤llen wo alle 4 Namensteile der alten und der neuen Namenstabelle identisch sind
+    #    wird die alte lfd_Nr fÃ¼r Namen in die neue Tabelle zwischengespeichert
     $ret=$this->database->updateLfdNrName();
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Übernehmen der alten lfdNr für die neue Tabelle';
+      $errmsg ='<br>Abbruch beim Ãœbernehmen der alten lfdNr fÃ¼r die neue Tabelle';
       $errmsg.=' updateLfdNrNamen alb.php line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
     $anzNamenVorhanden=$this->database->getAffectedRows($ret[1]);
-    $Ausgabe.="<br>Namen Übernommen: ".$anzNamenVorhanden;
-    echo "<br>Namen Übernommen: ".$anzNamenVorhanden;
+    $Ausgabe.="<br>Namen Ãœbernommen: ".$anzNamenVorhanden;
+    echo "<br>Namen Ãœbernommen: ".$anzNamenVorhanden;
 
-    # 1.3.3. Anhängen aller neuen Namen an die Namenstabelle des Grundbestands
-    #        Es sind alle die Namen neu, für die im vorhergehenden Schritt keine Übereinstimmungen gefunden wurden.
+    # 1.3.3. AnhÃ¤ngen aller neuen Namen an die Namenstabelle des Grundbestands
+    #        Es sind alle die Namen neu, fÃ¼r die im vorhergehenden Schritt keine Ãœbereinstimmungen gefunden wurden.
     $ret=$this->database->insertNewNamen();
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Hinzufügen neuer Namen';
+      $errmsg ='<br>Abbruch beim HinzufÃ¼gen neuer Namen';
       $errmsg.=' insertNewNamen alb.php line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
@@ -4020,250 +4021,250 @@ class ALB {
     $Ausgabe.="<br>Namen Neu: ".$anzNamenNeu;
     echo "<br>Namen Neu: ".$anzNamenNeu;
 
-    # 1.3.4. Jetzt werden die Nummern, die über Autonummer in der Grundbestandstabelle für die neuen Namen vergeben wurden
-    #        durch wiederholen von Schritt A zurück in die neue Namenstabelle geschrieben.
-    #        In der neuen Namentabelle haben jetzt alle neue Namen und alle schon vorhandene Namen eine Nummer im Fortführungsbestand
+    # 1.3.4. Jetzt werden die Nummern, die Ã¼ber Autonummer in der Grundbestandstabelle fÃ¼r die neuen Namen vergeben wurden
+    #        durch wiederholen von Schritt A zurÃ¼ck in die neue Namenstabelle geschrieben.
+    #        In der neuen Namentabelle haben jetzt alle neue Namen und alle schon vorhandene Namen eine Nummer im FortfÃ¼hrungsbestand
     #        und eine Nummer im Grundbestand
     $ret=$this->database->updateLfdNrName();
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Übernehmen der alten lfdNr für die neue Tabelle';
+      $errmsg ='<br>Abbruch beim Ãœbernehmen der alten lfdNr fÃ¼r die neue Tabelle';
       $errmsg.=' updateLfdNrName alb.php line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
 
-    # 1.3.5 Übernahme der neuen Eigentümerdaten in den Grundbestand
-    #       die lfd_Nr für die Namen im Bestand werden aus der Spalte lfd_Nr_alt entnommen
+    # 1.3.5 Ãœbernahme der neuen EigentÃ¼merdaten in den Grundbestand
+    #       die lfd_Nr fÃ¼r die Namen im Bestand werden aus der Spalte lfd_Nr_alt entnommen
 
     $ret=$this->database->insertNewEigentuemer();
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Hinzufügen neuer Namen';
+      $errmsg ='<br>Abbruch beim HinzufÃ¼gen neuer Namen';
       $errmsg.=' insertNewEigentuemer alb.php line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
     $anzEigentuemerNeu=$this->database->getAffectedRows($ret[1])-$anzEigentuemerUpdate;
-    $Ausgabe.="<br>Eigentümerdaten hinzugefügt: ".$anzEigentuemerNeu;
-    echo "<br>Eigentümerdaten hinzugefügt: ".$anzEigentuemerNeu;
+    $Ausgabe.="<br>EigentÃ¼merdaten hinzugefÃ¼gt: ".$anzEigentuemerNeu;
+    echo "<br>EigentÃ¼merdaten hinzugefÃ¼gt: ".$anzEigentuemerNeu;
 
     /*
-     *    Flurstücksdaten
+     *    FlurstÃ¼cksdaten
      */
-    /* 2. Aktualisieren der Flurstücksdaten
-     *    Der Übersicht halber werden zunächst alle Einträge von historisch gewordenen
-     *    Flurstücken gelöscht (wenn historische_loeschen=1 ist).
-     *    Im nachhinein werden weitere Löschanfragen ausgeführt,
-     *    z.B. vor dem Eintragen neuer Adressen, die auch zusammen mit dem Löschvorgang für
-     *    historische Flurstücke hätten durchgeführt werden können.
+    /* 2. Aktualisieren der FlurstÃ¼cksdaten
+     *    Der Ãœbersicht halber werden zunÃ¤chst alle EintrÃ¤ge von historisch gewordenen
+     *    FlurstÃ¼cken gelÃ¶scht (wenn historische_loeschen=1 ist).
+     *    Im nachhinein werden weitere LÃ¶schanfragen ausgefÃ¼hrt,
+     *    z.B. vor dem Eintragen neuer Adressen, die auch zusammen mit dem LÃ¶schvorgang fÃ¼r
+     *    historische FlurstÃ¼cke hÃ¤tten durchgefÃ¼hrt werden kÃ¶nnen.
      */
-    $Ausgabe.="<br><i>Flurstücke</i>";
-    echo "<br><i>Flurstücke</i>";
+    $Ausgabe.="<br><i>FlurstÃ¼cke</i>";
+    echo "<br><i>FlurstÃ¼cke</i>";
 
     if ($this->historische_loeschen) {
-      # 2.1 Löschen aller historischen Flurstücke und der dazugehörigen Daten
-      # 2.1.1 Löschen aller historischen Flurstücke
-      # alle Flurstücke, die in der Änderungsdatei mit einem Status 'H' eingelesen wurden
-      # werden in dem vorhandenen Datenbestand gelöscht.
+      # 2.1 LÃ¶schen aller historischen FlurstÃ¼cke und der dazugehÃ¶rigen Daten
+      # 2.1.1 LÃ¶schen aller historischen FlurstÃ¼cke
+      # alle FlurstÃ¼cke, die in der Ã„nderungsdatei mit einem Status 'H' eingelesen wurden
+      # werden in dem vorhandenen Datenbestand gelÃ¶scht.
       $ret=$this->database->deleteHistFlurstuecke();
       if ($ret[0] AND DBWRITE) {
-        $errmsg ='<br>Abbruch beim Löschen historischer Flurstücke';
+        $errmsg ='<br>Abbruch beim LÃ¶schen historischer FlurstÃ¼cke';
         $errmsg.=' alb.php deleteHistFlurstuecke line: '.__LINE__.'<br>'.$ret[1];
         return $errmsg;
       }
       $anzFlurstueckeHist=$this->database->getAffectedRows($ret[1]);
-      $Ausgabe.="<br>hist. Flurstücke Gelöscht: ".$anzFlurstueckeHist;
-      echo "<br>hist. Flurstücke Gelöscht: ".$anzFlurstueckeHist;
+      $Ausgabe.="<br>hist. FlurstÃ¼cke GelÃ¶scht: ".$anzFlurstueckeHist;
+      echo "<br>hist. FlurstÃ¼cke GelÃ¶scht: ".$anzFlurstueckeHist;
 
-      # 2.1.2 Löschen der Zuordnungen zum Bestand in g_Buchungen
+      # 2.1.2 LÃ¶schen der Zuordnungen zum Bestand in g_Buchungen
       $ret=$this->database->deleteBuchungenByHistFlurstuecke();
       if ($ret[0] AND DBWRITE) {
-        $errmsg ='<br>Abbruch beim Löschen historischer Buchungen';
+        $errmsg ='<br>Abbruch beim LÃ¶schen historischer Buchungen';
         $errmsg.=' alb.php, deleteHistBuchungen line: '.__LINE__.'<br>'.$ret[1];
         return $errmsg;
       }
       $anzBuchungenHist=$this->database->getAffectedRows($ret[1]);
-      $Ausgabe.="<br>hist. Buchungen Gelöscht: ".$anzBuchungenHist;
-      echo "<br>hist. Buchungen Gelöscht: ".$anzBuchungenHist;
+      $Ausgabe.="<br>hist. Buchungen GelÃ¶scht: ".$anzBuchungenHist;
+      echo "<br>hist. Buchungen GelÃ¶scht: ".$anzBuchungenHist;
 
-      # 2.1.3 Löschen der Zuordnungen zu Adressen
+      # 2.1.3 LÃ¶schen der Zuordnungen zu Adressen
       $ret=$this->database->deleteHistAdressen();
       if ($ret[0] AND DBWRITE) {
-        $errmsg ='<br>Abbruch beim Löschen historischer Adressen';
+        $errmsg ='<br>Abbruch beim LÃ¶schen historischer Adressen';
         $errmsg.=' alb.php, deleteHistAdressen line: '.__LINE__.'<br>'.$ret[1];
         return $errmsg;
       }
       $anzAdressenHist=$this->database->getAffectedRows($ret[1]);
-      $Ausgabe.="<br>hist. Adressen Gelöscht: ".$anzAdressenHist;
-      echo "<br>hist. Adressen Gelöscht: ".$anzAdressenHist;
+      $Ausgabe.="<br>hist. Adressen GelÃ¶scht: ".$anzAdressenHist;
+      echo "<br>hist. Adressen GelÃ¶scht: ".$anzAdressenHist;
 
-      # 2.1.4 Löschen der historischen Zuordnungen zu Anlieger
+      # 2.1.4 LÃ¶schen der historischen Zuordnungen zu Anlieger
       $ret=$this->database->deleteHistAnlieger();
       if ($ret[0] AND DBWRITE) {
-        $errmsg ='<br>Abbruch beim Löschen historischer Anlieger';
+        $errmsg ='<br>Abbruch beim LÃ¶schen historischer Anlieger';
         $errmsg.=' alb.php, deleteHistAnlieger line: '.__LINE__.'<br>'.$ret[1];
         return $errmsg;
       }
       $anzAnliegerHist=$this->database->getAffectedRows($ret[1]);
-      $Ausgabe.="<br>hist. Anlieger Gelöscht: ".$anzAnliegerHist;
-      echo "<br>hist. Anlieger Gelöscht: ".$anzAnliegerHist;
+      $Ausgabe.="<br>hist. Anlieger GelÃ¶scht: ".$anzAnliegerHist;
+      echo "<br>hist. Anlieger GelÃ¶scht: ".$anzAnliegerHist;
 
-      # 2.1.5 Löschen der historischen Zuordnung zu Baulasten
+      # 2.1.5 LÃ¶schen der historischen Zuordnung zu Baulasten
       $ret=$this->database->deleteHistBaulasten();
       if ($ret[0] AND DBWRITE) {
-        $errmsg ='<br>Abbruch beim Löschen historischer Baulasten';
+        $errmsg ='<br>Abbruch beim LÃ¶schen historischer Baulasten';
         $errmsg.=' alb.php, deleteHistBaulasten line: '.__LINE__.'<br>'.$ret[1];
         return $errmsg;
       }
       $anzBaulastenHist=$this->database->getAffectedRows($ret[1]);
-      $Ausgabe.="<br>hist. Baulasten Gelöscht: ".$anzBaulastenHist;
-      echo "<br>hist. Baulasten Gelöscht: ".$anzBaulastenHist;
+      $Ausgabe.="<br>hist. Baulasten GelÃ¶scht: ".$anzBaulastenHist;
+      echo "<br>hist. Baulasten GelÃ¶scht: ".$anzBaulastenHist;
 
-      # 2.1.6 Löschen der Zuordnung zu Hinweisen zum Flurstück
+      # 2.1.6 LÃ¶schen der Zuordnung zu Hinweisen zum FlurstÃ¼ck
       $ret=$this->database->deleteHistHinweise();
       if ($ret[0] AND DBWRITE) {
-        $errmsg ='<br>Abbruch beim Löschen historischer Hinweise';
+        $errmsg ='<br>Abbruch beim LÃ¶schen historischer Hinweise';
         $errmsg.=' alb.php, deleteHistHinweise line: '.__LINE__.'<br>'.$ret[1];
         return $errmsg;
       }
       $anzHinweiseZFlstHist=$this->database->getAffectedRows($ret[1]);
-      $Ausgabe.="<br>hist. Hinweise zum Flurstück Gelöscht: ".$anzHinweiseZFlstHist;
-      echo "<br>hist. Hinweise zum Flurstück Gelöscht: ".$anzHinweiseZFlstHist;
+      $Ausgabe.="<br>hist. Hinweise zum FlurstÃ¼ck GelÃ¶scht: ".$anzHinweiseZFlstHist;
+      echo "<br>hist. Hinweise zum FlurstÃ¼ck GelÃ¶scht: ".$anzHinweiseZFlstHist;
 
-      # 2.1.7 Löschen der Zuordnung zur Flurstückshistorie
-      # 2.1.7.1 Löschen aller Vorgänger von historischen Flurstücke in x_f_Historie
-      #         Dies ist nur eine Änderung der eingelesenen Informationen
+      # 2.1.7 LÃ¶schen der Zuordnung zur FlurstÃ¼ckshistorie
+      # 2.1.7.1 LÃ¶schen aller VorgÃ¤nger von historischen FlurstÃ¼cke in x_f_Historie
+      #         Dies ist nur eine Ã„nderung der eingelesenen Informationen
       #         wird nicht in der Ausgabe gelistet
       $ret=$this->database->deleteTempHistVorgaenger();
       if ($ret[0] AND DBWRITE) {
-        $errmsg ='<br>Abbruch beim Löschen der temporär eingelesenen Vorgänger von historischen Flurstücken';
+        $errmsg ='<br>Abbruch beim LÃ¶schen der temporÃ¤r eingelesenen VorgÃ¤nger von historischen FlurstÃ¼cken';
         $errmsg.=' alb.php, deleteTempHistVorgaenger line: '.__LINE__.'<br>'.$ret[1];
         return $errmsg;
       }
 
-      # 2.1.7.2 Löschen aller Einträge in f_Historie bei denen die Nachfolger historische Flurstücke sind
+      # 2.1.7.2 LÃ¶schen aller EintrÃ¤ge in f_Historie bei denen die Nachfolger historische FlurstÃ¼cke sind
       $ret=$this->database->deleteHistHistorie();
       if ($ret[0] AND DBWRITE) {
-        $errmsg ='<br>Abbruch beim Löschen der historischen Einträge in der Historien Tabelle';
+        $errmsg ='<br>Abbruch beim LÃ¶schen der historischen EintrÃ¤ge in der Historien Tabelle';
         $errmsg.=' alb.php, deleteHistHistorie line: '.__LINE__.'<br>'.$ret[1];
         return $errmsg;
       }
       $anzHistorieHist=$this->database->getAffectedRows($ret[1]);
-      $Ausgabe.="<br>hist. Historiebeziehungen Gelöscht: ".$anzHistorieHist;
-      echo "<br>hist. Historiebeziehungen Gelöscht: ".$anzHistorieHist;
+      $Ausgabe.="<br>hist. Historiebeziehungen GelÃ¶scht: ".$anzHistorieHist;
+      echo "<br>hist. Historiebeziehungen GelÃ¶scht: ".$anzHistorieHist;
 
-      # 2.1.8 Löschen der Zuordnung zu Klassifizierungen von historischen Flurstuecken
+      # 2.1.8 LÃ¶schen der Zuordnung zu Klassifizierungen von historischen Flurstuecken
       $ret=$this->database->deleteHistKlassifizierungen();
       if ($ret[0] AND DBWRITE) {
-        $errmsg ='<br>Abbruch beim Löschen der historischen Klassifizierungen';
+        $errmsg ='<br>Abbruch beim LÃ¶schen der historischen Klassifizierungen';
         $errmsg.=' alb.php, deleteHistKlassifizierungen line: '.__LINE__.'<br>'.$ret[1];
         return $errmsg;
       }
       $anzKlassifizierungenHist=$this->database->getAffectedRows($ret[1]);
-      $Ausgabe.="<br>hist. Klassifizierungen Gelöscht: ".$anzKlassifizierungenHist;
-      echo "<br>hist. Klassifizierungen Gelöscht: ".$anzKlassifizierungenHist;
+      $Ausgabe.="<br>hist. Klassifizierungen GelÃ¶scht: ".$anzKlassifizierungenHist;
+      echo "<br>hist. Klassifizierungen GelÃ¶scht: ".$anzKlassifizierungenHist;
 
-      # 2.1.9 Löschen der Zuordnung zu Lagebezeichnungen von historischen Flurstuecken
+      # 2.1.9 LÃ¶schen der Zuordnung zu Lagebezeichnungen von historischen Flurstuecken
       $ret=$this->database->deleteHistLagen();
       if ($ret[0] AND DBWRITE) {
-        $errmsg ='<br>Abbruch beim Löschen der historischen Lagen';
+        $errmsg ='<br>Abbruch beim LÃ¶schen der historischen Lagen';
         $errmsg.=' alb.php, deleteHistLagen line: '.__LINE__.'<br>'.$ret[1];
         return $errmsg;
       }
       $anzLagebezeichnungenHist=$this->database->getAffectedRows($ret[1]);
-      $Ausgabe.="<br>hist. Lagebezeichnungen Gelöscht: ".$anzLagebezeichnungenHist;
-      echo "<br>hist. Lagebezeichnungen Gelöscht: ".$anzLagebezeichnungenHist;
+      $Ausgabe.="<br>hist. Lagebezeichnungen GelÃ¶scht: ".$anzLagebezeichnungenHist;
+      echo "<br>hist. Lagebezeichnungen GelÃ¶scht: ".$anzLagebezeichnungenHist;
 
-      # 2.1.10 Löschen der Zuordnung zu Nutzungen von historischen Flurstuecken
+      # 2.1.10 LÃ¶schen der Zuordnung zu Nutzungen von historischen Flurstuecken
       $ret=$this->database->deleteHistNutzungen();
       if ($ret[0] AND DBWRITE) {
-        $errmsg ='<br>Abbruch beim Löschen der historischen Nutzungen';
+        $errmsg ='<br>Abbruch beim LÃ¶schen der historischen Nutzungen';
         $errmsg.=' alb.php, deleteHistNutzungen line: '.__LINE__.'<br>'.$ret[1];
         return $errmsg;
       }
       $anzNutzungenHist=$this->database->getAffectedRows($ret[1]);
-      $Ausgabe.="<br>hist. Nutzungen Gelöscht: ".$anzNutzungenHist;
-      echo "<br>hist. Nutzungen Gelöscht: ".$anzNutzungenHist;
+      $Ausgabe.="<br>hist. Nutzungen GelÃ¶scht: ".$anzNutzungenHist;
+      echo "<br>hist. Nutzungen GelÃ¶scht: ".$anzNutzungenHist;
 
-      # 2.1.11 Löschen der Zuordnung zu Texten von historischen Flurstuecken
+      # 2.1.11 LÃ¶schen der Zuordnung zu Texten von historischen Flurstuecken
       $ret=$this->database->deleteHistTexte();
       if ($ret[0] AND DBWRITE) {
-        $errmsg ='<br>Abbruch beim Löschen der historischen Texte';
+        $errmsg ='<br>Abbruch beim LÃ¶schen der historischen Texte';
         $errmsg.=' alb.php, deleteHistTexte line: '.__LINE__.'<br>'.$ret[1];
         return $errmsg;
       }
       $anzTexteHist=$this->database->getAffectedRows($ret[1]);
-      $Ausgabe.="<br>hist. Texte Gelöscht: ".$anzTexteHist;
-      echo "<br>hist. Texte Gelöscht: ".$anzTexteHist;
+      $Ausgabe.="<br>hist. Texte GelÃ¶scht: ".$anzTexteHist;
+      echo "<br>hist. Texte GelÃ¶scht: ".$anzTexteHist;
 
-      # 2.1.12 Löschen der Zuordnung zu Verfahren von historischen Flurstuecken
+      # 2.1.12 LÃ¶schen der Zuordnung zu Verfahren von historischen Flurstuecken
       $ret=$this->database->deleteHistVerfahren();
       if ($ret[0] AND DBWRITE) {
-        $errmsg ='<br>Abbruch beim Löschen der historischen Verfahren';
+        $errmsg ='<br>Abbruch beim LÃ¶schen der historischen Verfahren';
         $errmsg.=' alb.php, deleteHistVerfahren line: '.__LINE__.'<br>'.$ret[1];
         return $errmsg;
       }
       $anzVerfahrenHist=$this->database->getAffectedRows($ret[1]);
-      $Ausgabe.="<br>hist. Verfahrenszuordnungen Gelöscht: ".$anzVerfahrenHist;
-      echo "<br>hist. Verfahrenszuordnungen Gelöscht: ".$anzVerfahrenHist;
+      $Ausgabe.="<br>hist. Verfahrenszuordnungen GelÃ¶scht: ".$anzVerfahrenHist;
+      echo "<br>hist. Verfahrenszuordnungen GelÃ¶scht: ".$anzVerfahrenHist;
     }
     else {
       /*
-       * Kennzeichnen der historischen Flurstücke als historisch
+       * Kennzeichnen der historischen FlurstÃ¼cke als historisch
        */
       $ret=$this->database->setFlurstueckeHist();
       if ($ret[0] AND DBWRITE) {
-        $errmsg ='<br>Abbruch beim Kennzeichnen der historisch gewordenen Flurstücken in function setFlurstueckeHist() alb.php line: '.__LINE__;
+        $errmsg ='<br>Abbruch beim Kennzeichnen der historisch gewordenen FlurstÃ¼cken in function setFlurstueckeHist() alb.php line: '.__LINE__;
         $errmsg.='<br>'.$ret[1];
         return $errmsg;
       }
-    } # end of historische Flurstücke sollen nicht gelöscht werden
+    } # end of historische FlurstÃ¼cke sollen nicht gelÃ¶scht werden
 
-    # 2.2 Aktualisieren der vorhandenen Flurstücke und dessen Angaben
-    # 2.2.1 Aktualisieren der Tabelle mit den Flurstücken
-    # 2.2.1.1 Abfrage der Anzahl der nicht historischen neuen Flurstücke
+    # 2.2 Aktualisieren der vorhandenen FlurstÃ¼cke und dessen Angaben
+    # 2.2.1 Aktualisieren der Tabelle mit den FlurstÃ¼cken
+    # 2.2.1.1 Abfrage der Anzahl der nicht historischen neuen FlurstÃ¼cke
     $ret=$this->database->getAnzNewFlurstuecke();
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Abfragen der Anzahl der neuen Flurstücke';
+      $errmsg ='<br>Abbruch beim Abfragen der Anzahl der neuen FlurstÃ¼cke';
       $errmsg.=' alb.php, getAnzNewFlurstuecke line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
     $anzTempFlurst=$ret[1];
 
-    # 2.2.1.2 Abfrage der Anzahl der vorhandenen Flurstücke vor dem Update
+    # 2.2.1.2 Abfrage der Anzahl der vorhandenen FlurstÃ¼cke vor dem Update
     $ret=$this->database->getAnzFlurstuecke();
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Abfragen der Anzahl der bestehenden Flurstücke';
+      $errmsg ='<br>Abbruch beim Abfragen der Anzahl der bestehenden FlurstÃ¼cke';
       $errmsg.=' alb.php, getAnzNewFlurstuecke line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
     $anzFlurstAlt=$ret[1];
 
-    # 2.2.1.3 Aktualisieren der Flurstückstabelle
+    # 2.2.1.3 Aktualisieren der FlurstÃ¼ckstabelle
     $ret=$this->database->replaceFlurstuecke($this->historische_loeschen);
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Aktualisieren der bestehenden Flurstückstabelle';
+      $errmsg ='<br>Abbruch beim Aktualisieren der bestehenden FlurstÃ¼ckstabelle';
       $errmsg.=' alb.php, replaceFlurstuecke line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
 
-    # 2.2.1.4 Abfragen der Anzahl Flurstücke nach der Aktualisierung
+    # 2.2.1.4 Abfragen der Anzahl FlurstÃ¼cke nach der Aktualisierung
     $ret=$this->database->getAnzFlurstuecke();
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Abfragen der Anzahl der bestehenden Flurstücke';
+      $errmsg ='<br>Abbruch beim Abfragen der Anzahl der bestehenden FlurstÃ¼cke';
       $errmsg.=' alb.php, getAnzNewFlurstuecke line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
     $anzFlurstNeu=($ret[1]-$anzFlurstAlt);
-    $Ausgabe.="<br>Flurstücke Neu: ".$anzFlurstNeu;
-    echo "<br>Flurstücke Neu: ".$anzFlurstNeu;
+    $Ausgabe.="<br>FlurstÃ¼cke Neu: ".$anzFlurstNeu;
+    echo "<br>FlurstÃ¼cke Neu: ".$anzFlurstNeu;
 
     $anzFlurstUpdate=($anzTempFlurst-$anzFlurstNeu);
-    $Ausgabe.="<br>Flurstücke Aktualisiert: ".$anzFlurstUpdate;
-    echo "<br>Flurstücke Aktualisiert: ".$anzFlurstUpdate;
+    $Ausgabe.="<br>FlurstÃ¼cke Aktualisiert: ".$anzFlurstUpdate;
+    echo "<br>FlurstÃ¼cke Aktualisiert: ".$anzFlurstUpdate;
 
-    # 2.2.2 Aktualisieren der Flurstückshistorie
-    # Löschen der Historien, die durch neue überschrieben werden.
+    # 2.2.2 Aktualisieren der FlurstÃ¼ckshistorie
+    # LÃ¶schen der Historien, die durch neue Ã¼berschrieben werden.
     $ret=$this->database->deleteNewHistorien();
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Löschen der bestehenden Historien, die ersetzt werden sollen.';
+      $errmsg ='<br>Abbruch beim LÃ¶schen der bestehenden Historien, die ersetzt werden sollen.';
       $errmsg.=' alb.php, insertNewHistorien line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
@@ -4271,7 +4272,7 @@ class ALB {
     $Ausgabe.="<br>Historiebeziehungen aktualisiert: ".$anzHistorieUpdate;
     echo "<br>Historiebeziehungen aktualisiert: ".$anzHistorieUpdate;
 
-    # Einfügen aller neuen Historienbeziehungen
+    # EinfÃ¼gen aller neuen Historienbeziehungen
     $ret=$this->database->insertNewHistorien();
     if ($ret[0] AND DBWRITE) {
       $errmsg ='<br>Abbruch beim Einlesen und Aktualisieren der bestehenden Historien';
@@ -4282,22 +4283,22 @@ class ALB {
     $Ausgabe.="<br>Historiebeziehungen Neu: ".$anzHistorieNeu;
     echo "<br>Historiebeziehungen Neu: ".$anzHistorieNeu;
 
-    # 2.2.3 Aktualisieren der Nutzungen auf Flurstücken
-    # 2.2.3.1 Löschen aller Nutzungsarteneinträge für Flurstücke, zu denen neue Nutzungen angegeben wurden
+    # 2.2.3 Aktualisieren der Nutzungen auf FlurstÃ¼cken
+    # 2.2.3.1 LÃ¶schen aller NutzungsarteneintrÃ¤ge fÃ¼r FlurstÃ¼cke, zu denen neue Nutzungen angegeben wurden
     $ret=$this->database->deleteOldNutzungen($this->historische_loeschen);
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Löschen der unaktuellen Nutzungen';
+      $errmsg ='<br>Abbruch beim LÃ¶schen der unaktuellen Nutzungen';
       $errmsg.=' alb.php, deleteOldNutzungen line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
     $anzNutzungenAlt=$this->database->getAffectedRows($ret[1]);
-    $Ausgabe.="<br>alte Nutzungen Gelöscht: ".$anzNutzungenAlt;
-    echo "<br>alte Nutzungen Gelöscht: ".$anzNutzungenAlt;
+    $Ausgabe.="<br>alte Nutzungen GelÃ¶scht: ".$anzNutzungenAlt;
+    echo "<br>alte Nutzungen GelÃ¶scht: ".$anzNutzungenAlt;
 
     # 2.2.3.2 Eintragen aller neuen Nutzungsarten
     $ret=$this->database->insertNewNutzungen();
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Einfügen der neuen Nutzungen';
+      $errmsg ='<br>Abbruch beim EinfÃ¼gen der neuen Nutzungen';
       $errmsg.=' alb.php, insertNewNutzungen line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
@@ -4306,21 +4307,21 @@ class ALB {
     echo "<br>Nutzungen Neu: ".$anzNutzungenNeu;
 
     # 2.2.4 Aktualisieren der Adressen
-    # 2.2.4.1 Löschen aller Adresseinträge von vorhandenen Flurstücke mit Änderungen
+    # 2.2.4.1 LÃ¶schen aller AdresseintrÃ¤ge von vorhandenen FlurstÃ¼cke mit Ã„nderungen
     $ret=$this->database->deleteOldAdressen($this->historische_loeschen);
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Löschen alter Adressen';
+      $errmsg ='<br>Abbruch beim LÃ¶schen alter Adressen';
       $errmsg.=' alb.php, deleteOldAdressen line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
     $anzAdressenAlt=$this->database->getAffectedRows($ret[1]);
-    $Ausgabe.="<br>alte Adressen Gelöscht: ".$anzAdressenAlt;
-    echo "<br>alte Adressen Gelöscht: ".$anzAdressenAlt;
+    $Ausgabe.="<br>alte Adressen GelÃ¶scht: ".$anzAdressenAlt;
+    echo "<br>alte Adressen GelÃ¶scht: ".$anzAdressenAlt;
 
     # 2.2.4.2 Eintragen aller neuen Adressen
     $ret=$this->database->insertNewAdressen();
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Einfügen neuer Adressen';
+      $errmsg ='<br>Abbruch beim EinfÃ¼gen neuer Adressen';
       $errmsg.=' alb.php, insertNewAdressen line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
@@ -4329,21 +4330,21 @@ class ALB {
     echo "<br>Adressen Neu: ".$anzAdressenNeu;
 
     # 2.2.5 Aktualisieren der Lagebezeichnungen
-    # 2.2.5.1 Löschen der Einträge in f_Lage, dessen FlurstKennz in x_f_Lage vorhanden sind
+    # 2.2.5.1 LÃ¶schen der EintrÃ¤ge in f_Lage, dessen FlurstKennz in x_f_Lage vorhanden sind
     $ret=$this->database->deleteOldLagen($this->historische_loeschen);
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Löschen unaktueller Lagebezeichnungen';
+      $errmsg ='<br>Abbruch beim LÃ¶schen unaktueller Lagebezeichnungen';
       $errmsg.=' alb.php, deleteOldLagen line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
     $anzLageAlt=$this->database->getAffectedRows($ret[1]);
-    $Ausgabe.="<br>alte Lagebezeichnungen Gelöscht: ".$anzLageAlt;
-    echo "<br>alte Lagebezeichnungen Gelöscht: ".$anzLageAlt;
+    $Ausgabe.="<br>alte Lagebezeichnungen GelÃ¶scht: ".$anzLageAlt;
+    echo "<br>alte Lagebezeichnungen GelÃ¶scht: ".$anzLageAlt;
 
-    # 2.2.5.2 Einfügen aller Einträge aus x_f_Lage in f_Lage
+    # 2.2.5.2 EinfÃ¼gen aller EintrÃ¤ge aus x_f_Lage in f_Lage
     $ret=$this->database->insertNewLagen();
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Einfügen neuer Lagen';
+      $errmsg ='<br>Abbruch beim EinfÃ¼gen neuer Lagen';
       $errmsg.=' alb.php, insertNewLagen line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
@@ -4351,34 +4352,34 @@ class ALB {
     $Ausgabe.="<br>Lagebezeichnungen Neu: ".$anzLageNeu;
     echo "<br>Lagebezeichnungen Neu: ".$anzLageNeu;
 
-    /*# 2.2.5.3 Löschen aller Lagebezeichnungen für Flurstücke, die mindestens einen Adresseintrag haben
+    /*# 2.2.5.3 LÃ¶schen aller Lagebezeichnungen fÃ¼r FlurstÃ¼cke, die mindestens einen Adresseintrag haben
     $ret=$this->database->deleteAddressLagen();
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Löschen von Lagen, die Adressen haben';
+      $errmsg ='<br>Abbruch beim LÃ¶schen von Lagen, die Adressen haben';
       $errmsg.=' alb.php, deleteAddressLagen line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
     $anzLageAdr=$this->database->getAffectedRows($ret[1]);
-    $Ausgabe.="<br>Lagebez. wegen vorh. Adresse Gelöscht: ".$anzLageAdr;
-    echo "<br>Lagebez. wegen vorh. Adresse Gelöscht: ".$anzLageAdr;
+    $Ausgabe.="<br>Lagebez. wegen vorh. Adresse GelÃ¶scht: ".$anzLageAdr;
+    echo "<br>Lagebez. wegen vorh. Adresse GelÃ¶scht: ".$anzLageAdr;
     */
 
     # 2.2.6 Aktualisieren der Verfahrenszuordnungen
-    # 2.2.6.1 Löschen der Einträge in f_Verfahren, dessen FlurstKennz in x_f_Verfahren vorhanden sind
+    # 2.2.6.1 LÃ¶schen der EintrÃ¤ge in f_Verfahren, dessen FlurstKennz in x_f_Verfahren vorhanden sind
     $ret=$this->database->deleteOldVerfahren($this->historische_loeschen);
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Löschen unaktueller Verfahrenszuordnungen';
+      $errmsg ='<br>Abbruch beim LÃ¶schen unaktueller Verfahrenszuordnungen';
       $errmsg.=' alb.php, deleteOldVerfahren line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
     $anzVerfahrenAlt=$this->database->getAffectedRows($ret[1]);
-    $Ausgabe.="<br>alte Verfahrenszuordnungen Gelöscht: ".$anzVerfahrenAlt;
-    echo "<br>alte Verfahrenszuordnungen Gelöscht: ".$anzVerfahrenAlt;
+    $Ausgabe.="<br>alte Verfahrenszuordnungen GelÃ¶scht: ".$anzVerfahrenAlt;
+    echo "<br>alte Verfahrenszuordnungen GelÃ¶scht: ".$anzVerfahrenAlt;
 
     # 2.2.6.2 Eintragen aller neuen Verfahrenszuordnungen
     $ret=$this->database->insertNewVerfahren();
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Einfügen neuer Verfahrenszuordnungen';
+      $errmsg ='<br>Abbruch beim EinfÃ¼gen neuer Verfahrenszuordnungen';
       $errmsg.=' alb.php, insertNewVerfahren line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
@@ -4387,21 +4388,21 @@ class ALB {
     echo "<br>Verfahrenszuordnungen Neu: ".$anzVerfahrenNeu;
 
     # 2.2.7 Aktualisieren der Baulastenzuordnungen
-    # 2.2.7.1 Löschen der Einträge in f_Baulasten, dessen FlurstKennz in x_f_Baulasten vorhanden sind
+    # 2.2.7.1 LÃ¶schen der EintrÃ¤ge in f_Baulasten, dessen FlurstKennz in x_f_Baulasten vorhanden sind
     $ret=$this->database->deleteOldBaulasten($this->historische_loeschen);
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Löschen unaktueller Baulastenzuordnungen';
+      $errmsg ='<br>Abbruch beim LÃ¶schen unaktueller Baulastenzuordnungen';
       $errmsg.=' alb.php, deleteOldBaulasten line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
     $anzBaulastenAlt=$this->database->getAffectedRows($ret[1]);
-    $Ausgabe.="<br>alte Baulastenzuordnungen Gelöscht: ".$anzBaulastenAlt;
-    echo "<br>alte Baulastenzuordnungen Gelöscht: ".$anzBaulastenAlt;
+    $Ausgabe.="<br>alte Baulastenzuordnungen GelÃ¶scht: ".$anzBaulastenAlt;
+    echo "<br>alte Baulastenzuordnungen GelÃ¶scht: ".$anzBaulastenAlt;
 
     # 2.2.7.2 Eintragen aller neuen Baulastenzuordnungen
     $ret=$this->database->insertNewBaulasten();
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Einfügen neuer Baulastenzuordnungen';
+      $errmsg ='<br>Abbruch beim EinfÃ¼gen neuer Baulastenzuordnungen';
       $errmsg.=' alb.php, insertNewBaulasten line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
@@ -4410,21 +4411,21 @@ class ALB {
     echo "<br>Baulastenzuordnungen Neu: ".$anzBaulastenNeu;
 
     # 2.2.8 Aktualisieren der Hinweisezuordnungen
-    # 2.2.8.1 Löschen der Einträge in f_Hinweise, dessen FlurstKennz in x_f_Hinweise vorhanden sind
+    # 2.2.8.1 LÃ¶schen der EintrÃ¤ge in f_Hinweise, dessen FlurstKennz in x_f_Hinweise vorhanden sind
     $ret=$this->database->deleteOldHinweise($this->historische_loeschen);
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Löschen unaktueller Hinweisezuordnungen';
+      $errmsg ='<br>Abbruch beim LÃ¶schen unaktueller Hinweisezuordnungen';
       $errmsg.=' alb.php, deleteOldHinweise line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
     $anzHinweiseAlt=$this->database->getAffectedRows($ret[1]);
-    $Ausgabe.="<br>alte Hinweisezuordnungen Gelöscht: ".$anzHinweiseAlt;
-    echo "<br>alte Hinweisezuordnungen Gelöscht: ".$anzHinweiseAlt;
+    $Ausgabe.="<br>alte Hinweisezuordnungen GelÃ¶scht: ".$anzHinweiseAlt;
+    echo "<br>alte Hinweisezuordnungen GelÃ¶scht: ".$anzHinweiseAlt;
 
     # 2.2.8.2 Eintragen aller neuen Hinweisezuordnungen
     $ret=$this->database->insertNewHinweise();
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Einfügen neuer Hinweisezuordnungen';
+      $errmsg ='<br>Abbruch beim EinfÃ¼gen neuer Hinweisezuordnungen';
       $errmsg.=' alb.php, insertNewHinweise line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
@@ -4433,21 +4434,21 @@ class ALB {
     echo "<br>Hinweisezuordnungen Neu: ".$anzHinweiseNeu;
 
     # 2.2.9 Aktualisieren der Klassifizierungenzuordnungen
-    # 2.2.9.1 Löschen der Einträge in f_Klassifizierungen, dessen FlurstKennz in x_f_Klassifizierungen vorhanden sind
+    # 2.2.9.1 LÃ¶schen der EintrÃ¤ge in f_Klassifizierungen, dessen FlurstKennz in x_f_Klassifizierungen vorhanden sind
     $ret=$this->database->deleteOldKlassifizierungen($this->historische_loeschen);
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Löschen unaktueller Klassifizierungenzuordnungen';
+      $errmsg ='<br>Abbruch beim LÃ¶schen unaktueller Klassifizierungenzuordnungen';
       $errmsg.=' alb.php, deleteOldKlassifizierungen line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
     $anzKlassifizierungenAlt=$this->database->getAffectedRows($ret[1]);
-    $Ausgabe.="<br>alte Klassifizierungenzuordnungen Gelöscht: ".$anzKlassifizierungenAlt;
-    echo "<br>alte Klassifizierungenzuordnungen Gelöscht: ".$anzKlassifizierungenAlt;
+    $Ausgabe.="<br>alte Klassifizierungenzuordnungen GelÃ¶scht: ".$anzKlassifizierungenAlt;
+    echo "<br>alte Klassifizierungenzuordnungen GelÃ¶scht: ".$anzKlassifizierungenAlt;
 
     # 2.2.9.2 Eintragen aller neuen Klassifizierungenzuordnungen
     $ret=$this->database->insertNewKlassifizierungen();
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Einfügen neuer Klassifizierungenzuordnungen';
+      $errmsg ='<br>Abbruch beim EinfÃ¼gen neuer Klassifizierungenzuordnungen';
       $errmsg.=' alb.php, insertNewKlassifizierungen line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
@@ -4456,21 +4457,21 @@ class ALB {
     echo "<br>Klassifizierungenzuordnungen Neu: ".$anzKlassifizierungenNeu;
 
     # 2.2.10 Aktualisieren der Textezuordnungen
-    # 2.2.10.1 Löschen der Einträge in f_Texte, dessen FlurstKennz in x_f_Texte vorhanden sind
+    # 2.2.10.1 LÃ¶schen der EintrÃ¤ge in f_Texte, dessen FlurstKennz in x_f_Texte vorhanden sind
     $ret=$this->database->deleteOldTexte($this->historische_loeschen);
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Löschen unaktueller Textezuordnungen';
+      $errmsg ='<br>Abbruch beim LÃ¶schen unaktueller Textezuordnungen';
       $errmsg.=' alb.php, deleteOldTexte line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
     $anzTexteAlt=$this->database->getAffectedRows($ret[1]);
-    $Ausgabe.="<br>alte Textezuordnungen Gelöscht: ".$anzTexteAlt;
-    echo "<br>alte Textezuordnungen Gelöscht: ".$anzTexteAlt;
+    $Ausgabe.="<br>alte Textezuordnungen GelÃ¶scht: ".$anzTexteAlt;
+    echo "<br>alte Textezuordnungen GelÃ¶scht: ".$anzTexteAlt;
 
     # 2.2.10.2 Eintragen aller neuen Textezuordnungen
     $ret=$this->database->insertNewTexte();
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Einfügen neuer Textezuordnungen';
+      $errmsg ='<br>Abbruch beim EinfÃ¼gen neuer Textezuordnungen';
       $errmsg.=' alb.php, insertNewTexte line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
@@ -4479,21 +4480,21 @@ class ALB {
     echo "<br>Textezuordnungen Neu: ".$anzTexteNeu;
 
     # 2.2.11 Aktualisieren der Anliegerzuordnungen
-    # 2.2.11.1 Löschen der Einträge in f_Anlieger, dessen FlurstKennz in x_f_Anlieger vorhanden sind
+    # 2.2.11.1 LÃ¶schen der EintrÃ¤ge in f_Anlieger, dessen FlurstKennz in x_f_Anlieger vorhanden sind
     $ret=$this->database->deleteOldAnlieger($this->historische_loeschen);
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Löschen unaktueller Anliegerzuordnungen';
+      $errmsg ='<br>Abbruch beim LÃ¶schen unaktueller Anliegerzuordnungen';
       $errmsg.=' alb.php, deleteOldAnlieger line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
     $anzAnliegerAlt=$this->database->getAffectedRows($ret[1]);
-    $Ausgabe.="<br>alte Anliegerzuordnungen Gelöscht: ".$anzAnliegerAlt;
-    echo "<br>alte Anliegerzuordnungen Gelöscht: ".$anzAnliegerAlt;
+    $Ausgabe.="<br>alte Anliegerzuordnungen GelÃ¶scht: ".$anzAnliegerAlt;
+    echo "<br>alte Anliegerzuordnungen GelÃ¶scht: ".$anzAnliegerAlt;
 
     # 2.2.11.2 Eintragen aller neuen Anliegerzuordnungen
     $ret=$this->database->insertNewAnlieger();
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Einfügen neuer Anliegerzuordnungen';
+      $errmsg ='<br>Abbruch beim EinfÃ¼gen neuer Anliegerzuordnungen';
       $errmsg.=' alb.php, insertNewAnlieger line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
@@ -4502,9 +4503,9 @@ class ALB {
     echo "<br>Anliegerzuordnungen Neu: ".$anzAnliegerNeu;
 
     #############################################
-    # 3. Aktualisieren der Tabellen mit Entschlüsselungen
-    $Ausgabe.="<br><i>Entschlüsselungen</i>";
-    echo "<br><i>Entschlüsselungen</i>";
+    # 3. Aktualisieren der Tabellen mit EntschlÃ¼sselungen
+    $Ausgabe.="<br><i>EntschlÃ¼sselungen</i>";
+    echo "<br><i>EntschlÃ¼sselungen</i>";
 
     # Aktualisierung Katasteraemter
     $ret=$this->database->getAnzKatasteraemter();
@@ -4527,32 +4528,32 @@ class ALB {
       return $errmsg;
     }
     $anzKatasteraemter=($ret[1]-$anzKatasteraemterAlt);
-    $Ausgabe.="<br>Katasteraemter Geändert/Neu: ".$anzKatasteraemter;
-    echo "<br>Katasteraemter Geändert/Neu: ".$anzKatasteraemter;
+    $Ausgabe.="<br>Katasteraemter GeÃ¤ndert/Neu: ".$anzKatasteraemter;
+    echo "<br>Katasteraemter GeÃ¤ndert/Neu: ".$anzKatasteraemter;
 
     # Aktualisierung Forstaemter
     $ret=$this->database->getAnzForstaemter();
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Abfragen der Anzahl der bestehenden Forstämter';
+      $errmsg ='<br>Abbruch beim Abfragen der Anzahl der bestehenden ForstÃ¤mter';
       $errmsg.=' alb.php, getAnzForstaemter line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
     $anzForstaemterAlt=$ret[1];
     $ret=$this->database->replaceForstaemter();
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Aktualisieren der Forstämter';
+      $errmsg ='<br>Abbruch beim Aktualisieren der ForstÃ¤mter';
       $errmsg.=' alb.php, replaceForstaemter line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
     $ret=$this->database->getAnzForstaemter();
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Abfragen der Anzahl der Forstämter nach Aktualisierung';
+      $errmsg ='<br>Abbruch beim Abfragen der Anzahl der ForstÃ¤mter nach Aktualisierung';
       $errmsg.=' alb.php, getAnzForstaemter line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
     $anzForstaemter=($ret[1]-$anzForstaemterAlt);
-    $Ausgabe.="<br>Forstämter Geändert/Neu: ".$anzForstaemter;
-    echo "<br>Forstämter Geändert/Neu: ".$anzForstaemter;
+    $Ausgabe.="<br>ForstÃ¤mter GeÃ¤ndert/Neu: ".$anzForstaemter;
+    echo "<br>ForstÃ¤mter GeÃ¤ndert/Neu: ".$anzForstaemter;
 
     # Aktualisierung Gemarkungen
     $ret=$this->database->getAnzGemarkungen();
@@ -4575,8 +4576,8 @@ class ALB {
       return $errmsg;
     }
     $anzGemarkungen=($ret[1]-$anzGemarkungenAlt);
-    $Ausgabe.="<br>Gemarkungen Geändert/Neu: ".$anzGemarkungen;
-    echo "<br>Gemarkungen Geändert/Neu: ".$anzGemarkungen;
+    $Ausgabe.="<br>Gemarkungen GeÃ¤ndert/Neu: ".$anzGemarkungen;
+    echo "<br>Gemarkungen GeÃ¤ndert/Neu: ".$anzGemarkungen;
 
     # Aktualisierung Grundbuchbezirke
     $ret=$this->database->getAnzGrundbuchbezirke();
@@ -4599,8 +4600,8 @@ class ALB {
       return $errmsg;
     }
     $anzGrundbuchbezirke=($ret[1]-$anzGrundbuchbezirkeAlt);
-    $Ausgabe.="<br>Grundbuchbezirke Geändert/Neu: ".$anzGrundbuchbezirke;
-    echo "<br>Grundbuchbezirke Geändert/Neu: ".$anzGrundbuchbezirke;
+    $Ausgabe.="<br>Grundbuchbezirke GeÃ¤ndert/Neu: ".$anzGrundbuchbezirke;
+    echo "<br>Grundbuchbezirke GeÃ¤ndert/Neu: ".$anzGrundbuchbezirke;
 
     # Aktualisierung Kreise
     $ret=$this->database->getAnzKreise();
@@ -4623,8 +4624,8 @@ class ALB {
       return $errmsg;
     }
     $anzKreise=($ret[1]-$anzKreiseAlt);
-    $Ausgabe.="<br>Kreise Geändert/Neu: ".$anzKreise;
-    echo "<br>Kreise Geändert/Neu: ".$anzKreise;
+    $Ausgabe.="<br>Kreise GeÃ¤ndert/Neu: ".$anzKreise;
+    echo "<br>Kreise GeÃ¤ndert/Neu: ".$anzKreise;
 
     # Aktualisierung Gemeinden
     $ret=$this->database->getAnzGemeinden();
@@ -4647,8 +4648,8 @@ class ALB {
       return $errmsg;
     }
     $anzGemeinden=($ret[1]-$anzGemeindenAlt);
-    $Ausgabe.="<br>Gemeinden Geändert/Neu: ".$anzGemeinden;
-    echo "<br>Gemeinden Geändert/Neu: ".$anzGemeinden;
+    $Ausgabe.="<br>Gemeinden GeÃ¤ndert/Neu: ".$anzGemeinden;
+    echo "<br>Gemeinden GeÃ¤ndert/Neu: ".$anzGemeinden;
 
     # Aktualisierung Strassen
     $ret=$this->database->getAnzStrassen();
@@ -4671,8 +4672,8 @@ class ALB {
       return $errmsg;
     }
     $anzStrassen=($ret[1]-$anzStrassenAlt);
-    $Ausgabe.="<br>Strassen Geändert/Neu: ".$anzStrassen;
-    echo "<br>Strassen Geändert/Neu: ".$anzStrassen;
+    $Ausgabe.="<br>Strassen GeÃ¤ndert/Neu: ".$anzStrassen;
+    echo "<br>Strassen GeÃ¤ndert/Neu: ".$anzStrassen;
 
     # Aktualisierung Amtsgerichte
     $ret=$this->database->getAnzAmtsgerichte();
@@ -4695,8 +4696,8 @@ class ALB {
       return $errmsg;
     }
     $anzAmtsgerichte=($ret[1]-$anzAmtsgerichteAlt);
-    $Ausgabe.="<br>Amtsgerichte Geändert/Neu: ".$anzAmtsgerichte;
-    echo "<br>Amtsgerichte Geändert/Neu: ".$anzAmtsgerichte;
+    $Ausgabe.="<br>Amtsgerichte GeÃ¤ndert/Neu: ".$anzAmtsgerichte;
+    echo "<br>Amtsgerichte GeÃ¤ndert/Neu: ".$anzAmtsgerichte;
 
     # Aktualisierung Eigentuemerarten
     $ret=$this->database->getAnzEigentuemerarten();
@@ -4719,8 +4720,8 @@ class ALB {
       return $errmsg;
     }
     $anzEigentuemerarten=($ret[1]-$anzEigentuemerartenAlt);
-    $Ausgabe.="<br>Eigentuemerarten Geändert/Neu: ".$anzEigentuemerarten;
-    echo "<br>Eigentuemerarten Geändert/Neu: ".$anzEigentuemerarten;
+    $Ausgabe.="<br>Eigentuemerarten GeÃ¤ndert/Neu: ".$anzEigentuemerarten;
+    echo "<br>Eigentuemerarten GeÃ¤ndert/Neu: ".$anzEigentuemerarten;
 
     # Aktualisierung Buchungsarten
     $ret=$this->database->getAnzBuchungsarten();
@@ -4743,8 +4744,8 @@ class ALB {
       return $errmsg;
     }
     $anzBuchungsarten=($ret[1]-$anzBuchungsartenAlt);
-    $Ausgabe.="<br>Buchungsarten Geändert/Neu: ".$anzBuchungsarten;
-    echo "<br>Buchungsarten Geändert/Neu: ".$anzBuchungsarten;
+    $Ausgabe.="<br>Buchungsarten GeÃ¤ndert/Neu: ".$anzBuchungsarten;
+    echo "<br>Buchungsarten GeÃ¤ndert/Neu: ".$anzBuchungsarten;
 
     # Aktualisierung Finanzaemter
     $ret=$this->database->getAnzFinanzaemter();
@@ -4767,8 +4768,8 @@ class ALB {
       return $errmsg;
     }
     $anzFinanzaemter=($ret[1]-$anzFinanzaemterAlt);
-    $Ausgabe.="<br>Finanzaemter Geändert/Neu: ".$anzFinanzaemter;
-    echo "<br>Finanzaemter Geändert/Neu: ".$anzFinanzaemter;
+    $Ausgabe.="<br>Finanzaemter GeÃ¤ndert/Neu: ".$anzFinanzaemter;
+    echo "<br>Finanzaemter GeÃ¤ndert/Neu: ".$anzFinanzaemter;
 
     # Aktualisierung Hinweise
     $ret=$this->database->getAnzHinweise();
@@ -4791,8 +4792,8 @@ class ALB {
       return $errmsg;
     }
     $anzHinweise=($ret[1]-$anzHinweiseAlt);
-    $Ausgabe.="<br>Hinweise Geändert/Neu: ".$anzHinweise;
-    echo "<br>Hinweise Geändert/Neu: ".$anzHinweise;
+    $Ausgabe.="<br>Hinweise GeÃ¤ndert/Neu: ".$anzHinweise;
+    echo "<br>Hinweise GeÃ¤ndert/Neu: ".$anzHinweise;
 
     # Aktualisierung Nutzungsarten
     $ret=$this->database->getAnzNutzungsarten();
@@ -4815,8 +4816,8 @@ class ALB {
       return $errmsg;
     }
     $anzNutzungsarten=($ret[1]-$anzNutzungsartenAlt);
-    $Ausgabe.="<br>Nutzungsarten Geändert/Neu: ".$anzNutzungsarten;
-    echo "<br>Nutzungsarten Geändert/Neu: ".$anzNutzungsarten;
+    $Ausgabe.="<br>Nutzungsarten GeÃ¤ndert/Neu: ".$anzNutzungsarten;
+    echo "<br>Nutzungsarten GeÃ¤ndert/Neu: ".$anzNutzungsarten;
 
     # Aktualisierung Klassifizierungen
     $ret=$this->database->getAnzKlassifizierungen();
@@ -4839,8 +4840,8 @@ class ALB {
       return $errmsg;
     }
     $anzKlassifizierungen=($ret[1]-$anzKlassifizierungenAlt);
-    $Ausgabe.="<br>Klassifizierungen Geändert/Neu: ".$anzKlassifizierungen;
-    echo "<br>Klassifizierungen Geändert/Neu: ".$anzKlassifizierungen;
+    $Ausgabe.="<br>Klassifizierungen GeÃ¤ndert/Neu: ".$anzKlassifizierungen;
+    echo "<br>Klassifizierungen GeÃ¤ndert/Neu: ".$anzKlassifizierungen;
 
     # Aktualisierung AusfuehrendeStellen
     $ret=$this->database->getAnzAusfuehrendeStellen();
@@ -4863,8 +4864,8 @@ class ALB {
       return $errmsg;
     }
     $anzAusfuehrendeStellen=($ret[1]-$anzAusfuehrendeStellenAlt);
-    $Ausgabe.="<br>AusfuehrendeStellen Geändert/Neu: ".$anzAusfuehrendeStellen;
-    echo "<br>AusfuehrendeStellen Geändert/Neu: ".$anzAusfuehrendeStellen;
+    $Ausgabe.="<br>AusfuehrendeStellen GeÃ¤ndert/Neu: ".$anzAusfuehrendeStellen;
+    echo "<br>AusfuehrendeStellen GeÃ¤ndert/Neu: ".$anzAusfuehrendeStellen;
 
     # Aktualisierung BemerkungenZumVerfahren
     $ret=$this->database->getAnzBemerkungenZumVerfahren();
@@ -4887,25 +4888,25 @@ class ALB {
       return $errmsg;
     }
     $anzBemerkungenZumVerfahren=($ret[1]-$anzBemerkungenZumVerfahrenAlt);
-    $Ausgabe.="<br>BemerkungenZumVerfahren Geändert/Neu: ".$anzBemerkungenZumVerfahren;
-    echo "<br>BemerkungenZumVerfahren Geändert/Neu: ".$anzBemerkungenZumVerfahren;
+    $Ausgabe.="<br>BemerkungenZumVerfahren GeÃ¤ndert/Neu: ".$anzBemerkungenZumVerfahren;
+    echo "<br>BemerkungenZumVerfahren GeÃ¤ndert/Neu: ".$anzBemerkungenZumVerfahren;
 
-    ######## Ende mit Fortführung der Entschlüsselungstabellen
+    ######## Ende mit FortfÃ¼hrung der EntschlÃ¼sselungstabellen
 
     $Ausgabe.='<p>Dauer: '.DATE("i",time()-$starttime)."min : ".DATE("s",time()-$starttime)."s";
     $this->Protokoll_Aktualisieren=$Ausgabe;
 
-    # Auffüllen der Zusatztabelle z_Fluren
+    # AuffÃ¼llen der Zusatztabelle z_Fluren
     $ret=$this->database->updateFluren();
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<br>Abbruch beim Einfügen der Fluren in function GrundausstattungAnlegen in alb.php line: '.__LINE__;
+      $errmsg ='<br>Abbruch beim EinfÃ¼gen der Fluren in function GrundausstattungAnlegen in alb.php line: '.__LINE__;
       $errmsg.='<br>'.$ret[1];
       return $errmsg;
     }
     $anzFluren=$this->database->getAffectedRows($ret[1]);
-    $Ausgabe.="<br>Fluren nach Fortführung gesamt: ".$anzFluren;
-    echo "<br>Fluren nach Fortführung gesamt: ".$anzFluren;
+    $Ausgabe.="<br>Fluren nach FortfÃ¼hrung gesamt: ".$anzFluren;
+    echo "<br>Fluren nach FortfÃ¼hrung gesamt: ".$anzFluren;
 
-    echo "<br>...Fortführung beendet.";
+    echo "<br>...FortfÃ¼hrung beendet.";
   }
 }

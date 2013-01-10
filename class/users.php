@@ -1,6 +1,6 @@
 <?php
 ###################################################################
-# kvwmap - Kartenserver für Kreisverwaltungen                     #
+# kvwmap - Kartenserver fÃ¼r Kreisverwaltungen                     #
 ###################################################################
 # Lizenz                                                          #
 #                                                                 #
@@ -45,7 +45,7 @@
 ##############################
 # class_account
 class account {
-  # Klasse für die Abrechnung und Statistik von Zugriffen
+  # Klasse fÃ¼r die Abrechnung und Statistik von Zugriffen
   
   var $database;
   
@@ -65,7 +65,7 @@ class account {
   }
   
   function getStatistik($nutzer,$nutzung,$stelle,$zeitraum,$day_d,$week_w,$month_d,$month_w,$month_m,$year_m,$year_w,$year_d,$day_e1,$day_e2,$month_e1,$month_e2,$year_e1,$year_e2){
-    # Ausführen der einzelnen Funktionen für 
+    # AusfÃ¼hren der einzelnen Funktionen fÃ¼r 
     # die Statistik zur Anfrage
     $BezeichnungStelle = new stelle($stelle,$this->database);
     $UserName = new user('','',$this->database);
@@ -186,7 +186,7 @@ class account {
 
   function getAccessToLayer($nutzung,$zeitraum,$date1,$date2,$case,$era,$date,$year,$id,$id_2){
     # Abfrage der Anzahl der Zugriffe auf die Layer 
-    # in Abhängigkeit von Stelle, Nutzer und Zeitraums
+    # in AbhÃ¤ngigkeit von Stelle, Nutzer und Zeitraums
     $sql ='SELECT c2l.layer_id,'.$case.',count(c.time_id) AS NumberOfAccess,l.Name AS lName';
       if ($nutzung=='stelle') {
         $sql.=' ,s.Bezeichnung';
@@ -245,7 +245,7 @@ class account {
   
   function getAccessToCSV($nutzung,$zeitraum,$date1,$date2,$case,$era,$date,$year,$id,$id_2){
     # Abfrage der Anzahl der ALB-CSV-Exporte 
-    # in Abhängigkeit von Stelle, Nutzer und Zeitraum
+    # in AbhÃ¤ngigkeit von Stelle, Nutzer und Zeitraum
     $sql ='SELECT u_consumeCSV.art,'.$case.',count(u_consumeCSV.time_id) AS NumberOfAccess, sum(numdatasets) as datasets';
       if ($nutzung=='stelle') {
         $sql.=' ,s.Bezeichnung';
@@ -302,7 +302,7 @@ class account {
   
   function getAccessToALB($nutzung,$zeitraum,$date1,$date2,$case,$era,$date,$year,$id,$id_2){
     # Abfrage der Anzahl der ALB-PDF-Exporte 
-    # in Abhängigkeit von Stelle, Nutzer und Zeitraum
+    # in AbhÃ¤ngigkeit von Stelle, Nutzer und Zeitraum
     $sql ='SELECT u_consumeALB.format,'.$case.',count(u_consumeALB.time_id) AS NumberOfAccess, sum(numpages) as pages';
       if ($nutzung=='stelle') {
         $sql.=' ,s.Bezeichnung';
@@ -359,7 +359,7 @@ class account {
   
   function getAccessToALK($nutzung,$zeitraum,$date1,$date2,$case,$era,$date,$year,$id,$id_2){
     # Abfrage der Anzahl der PDF-Exporte mit Druckrahmen 
-    # in Abhängigkeit von Stelle, Nutzer und Zeitraum
+    # in AbhÃ¤ngigkeit von Stelle, Nutzer und Zeitraum
     $sql ='SELECT u_consumeALK.druckrahmen_id,'.$case.',count(u_consumeALK.time_id) AS NumberOfAccess,';
     if(LAYER_IDS_DOP) $sql.='concat(druckrahmen.Name, \' \',ifnull(l.Name, \'\')) AS druckrahmenname';
     else $sql.='druckrahmen.Name AS druckrahmenname';
@@ -444,7 +444,7 @@ class account {
   } # END of function getAllAccess 
         
   function epoch(){
-    # Abfragen, für welchen Zeitraum die statistische Abfrage möglich ist 
+    # Abfragen, fÃ¼r welchen Zeitraum die statistische Abfrage mÃ¶glich ist 
     $sql ='SELECT day(MIN(time_id)) AS min_d, month(MIN(time_id)) AS min_m, year(MIN(time_id)) AS min_y' .
     $sql.=' , day(MAX(time_id)) AS max_d, month(MAX(time_id)) AS max_m, year(MAX(time_id)) AS max_y';
     $sql.=' FROM `u_consume2layer`';
@@ -468,8 +468,8 @@ class account {
 # class_user #
 class user extends user_core{
   # todo
-  # Beim Anlegen eines neuen Benutzers müssen die Einstellungen für die Karte
-  # aus der Stellenbeschreibung als Anfangswerte übernommen werden
+  # Beim Anlegen eines neuen Benutzers mÃ¼ssen die Einstellungen fÃ¼r die Karte
+  # aus der Stellenbeschreibung als Anfangswerte Ã¼bernommen werden
 
   var $id;
   var $Name;
@@ -513,7 +513,7 @@ class user extends user_core{
   }
 
 	function setRolle($stelle_id) {
-    # Abfragen und zuweisen der Einstellungen für die Rolle
+    # Abfragen und zuweisen der Einstellungen fÃ¼r die Rolle
     $rolle=new rolle($this->id,$stelle_id,$this->database);
     if ($rolle->readSettings()) {
       $this->rolle=$rolle;
@@ -532,7 +532,7 @@ class user extends user_core{
           $user['ID'][]=$rs['ID'];
           $user['Bezeichnung'][]=$rs['Name'].', '.$rs['Vorname'];
       }
-    // Sortieren der User unter Berücksichtigung von Umlauten
+    // Sortieren der User unter BerÃ¼cksichtigung von Umlauten
     $sorted_arrays = umlaute_sortieren($user['Bezeichnung'], $user['ID']);
     $user['Bezeichnung'] = $sorted_arrays['array'];
     $user['ID'] = $sorted_arrays['second_array'];
@@ -553,7 +553,7 @@ class user extends user_core{
           $user['Bezeichnung'][]=$rs['Name'].', '.$rs['Vorname'];
           $user['email'][]=$rs['email'];
         }
-        // Sortieren der User unter Berücksichtigung von Umlauten
+        // Sortieren der User unter BerÃ¼cksichtigung von Umlauten
         $sorted_arrays = umlaute_sortieren($user['Bezeichnung'], $user['ID']);
         $sorted_arrays2 = umlaute_sortieren($user['Bezeichnung'], $user['email']);
         $user['Bezeichnung'] = $sorted_arrays['array'];
@@ -603,12 +603,12 @@ class user extends user_core{
     if ($stelle_ID>0) {
       $sql.=' AND s.ID='.$stelle_ID;
     }
-    # Zeiteinschränkung
+    # ZeiteinschrÃ¤nkung
     $sql.=' AND (';
-    # Zeiteinschränkung wird berücksichtigt
+    # ZeiteinschrÃ¤nkung wird berÃ¼cksichtigt
     $sql.='("'.date('Y-m-d h:i:s').'" >= s.start AND "'.date('Y-m-d h:i:s').'" <= s.stop)';
     $sql.=' OR ';
-    # Zeiteinschränkung wird nicht berücksichtigt.
+    # ZeiteinschrÃ¤nkung wird nicht berÃ¼cksichtigt.
     $sql.='(s.start="0000-00-00 00:00:00" AND s.stop="0000-00-00 00:00:00")';
     $sql.=')';
     $sql.=' ORDER BY Bezeichnung';
@@ -624,7 +624,7 @@ class user extends user_core{
   }
 
   function updateStelleID($stelle_id) {
-    # sezten der aktuell für den Nutzer eingestellten Stelle
+    # sezten der aktuell fÃ¼r den Nutzer eingestellten Stelle
     $sql ='UPDATE user SET stelle_id='.$stelle_id.' WHERE ID='.$this->id;
     $this->debug->write("<p>file:users.php class:user->setStelle - Setzen der aktuellen Stelle<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
@@ -634,9 +634,9 @@ class user extends user_core{
 
   function setStelle($stelle_id,$formvars) {
     # Speicherung dass der User diese Stelle als letztes genutzt hat    
-    # setzen der Werte, die aktuell für die Nutzung der Stelle durch den Nutzer gelten sollen.
+    # setzen der Werte, die aktuell fÃ¼r die Nutzung der Stelle durch den Nutzer gelten sollen.
     $this->updateStelleID($stelle_id);
-    # zerlegen der Variable für die Kartengröße
+    # zerlegen der Variable fÃ¼r die KartengrÃ¶ÃŸe
     $teil=explode('x',$formvars['mapsize']);
     $nImageWidth=$teil[0];
     $nImageHeight=$teil[1];
@@ -644,8 +644,8 @@ class user extends user_core{
     if ($formvars['nZoomFactor']=='' OR $formvars['nZoomFactor']==0) {
       $formvars['nZoomFactor']=2;
     }
-    # Reduzierung der eingestellten Kartenausdehnung auf die in der Stelle vorgegebene maximal mögliche
-    # Berücksichtigen des Verhältnisses aus Höhe und Breite des Kartenfensters bei der Festlegung des Maximalen Extents
+    # Reduzierung der eingestellten Kartenausdehnung auf die in der Stelle vorgegebene maximal mÃ¶gliche
+    # BerÃ¼cksichtigen des VerhÃ¤ltnisses aus HÃ¶he und Breite des Kartenfensters bei der Festlegung des Maximalen Extents
     # Zerhacken des String, in dem die neue Kartenausdehnung steht
     $newMinMaxPoints=explode(',',$formvars['newExtent']);
     $newMinPoint=explode(' ',trim($newMinMaxPoints[0]));
@@ -656,7 +656,7 @@ class user extends user_core{
     $formvars['language']=$language_charset['0'];
     $formvars['charset']=$language_charset['1'];
 
-    # Eintragen der neuen Einstellungen für die Rolle
+    # Eintragen der neuen Einstellungen fÃ¼r die Rolle
     if($formvars['gui'] != '' AND $formvars['mapsize'] != ''){
       $sql ='UPDATE rolle SET nZoomFactor='.$formvars['nZoomFactor'].',nImageWidth='.$nImageWidth;
       $sql.=',nImageHeight='.$nImageHeight.',gui="'.$formvars['gui'].'"';
@@ -695,18 +695,18 @@ class user extends user_core{
       
       $sql.=' WHERE stelle_id='.$stelle_id.' AND user_id='.$this->id;
       #echo $sql;
-      $this->debug->write("<p>file:users.php class:user->setStelle - Setzen der Einstellungen für die Rolle<br>".$sql,4);
+      $this->debug->write("<p>file:users.php class:user->setStelle - Setzen der Einstellungen fÃ¼r die Rolle<br>".$sql,4);
       $query=mysql_query($sql,$this->database->dbConn);
       if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-      $this->debug->write('Neue Werte für Rolle eingestellt: '.$formvars['nZoomFactor'].', '.$formvars['mapsize'],4);
+      $this->debug->write('Neue Werte fÃ¼r Rolle eingestellt: '.$formvars['nZoomFactor'].', '.$formvars['mapsize'],4);
     }
     return 1;
   }
   
   function checkstelle(){
-    # Funktion wird nach Änderungen im Nutzer- und Stelleneditor aufgerufen und überprüft
+    # Funktion wird nach Ã„nderungen im Nutzer- und Stelleneditor aufgerufen und Ã¼berprÃ¼ft
     # ob die letzte Stellen_ID leer ist und ob die letzte Stellen_ID nicht mehr zu den dem Nutzer
-    # zugeordneten Stellen gehört. Die letzte Stellen_ID wird in beiden Fällen auf die erste von den
+    # zugeordneten Stellen gehÃ¶rt. Die letzte Stellen_ID wird in beiden FÃ¤llen auf die erste von den
     # dem Nutzer zugeordneten Stellen gesetzt.
     $stellen= $this->getStellen(0);
     if(count($stellen['ID']) > 0){
@@ -743,7 +743,7 @@ class user extends user_core{
     $sql ='SELECT * FROM user WHERE ID='.$id;
     $ret=$this->database->execSQL($sql,4, 0);
     if ($ret[0]) {
-      $ret[1].='<br>Die Abfrage konnte nicht ausgeführt werden.'.$ret[1];
+      $ret[1].='<br>Die Abfrage konnte nicht ausgefÃ¼hrt werden.'.$ret[1];
     }
     else {
       if (mysql_num_rows($ret[1])>0) {
@@ -762,7 +762,7 @@ class user extends user_core{
     $sql ="SELECT * FROM user WHERE login_name='".$login."'";
     $ret=$this->database->execSQL($sql,4, 0);
     if ($ret[0]) {
-      $ret[1].='<br>Die Abfrage konnte nicht ausgeführt werden.'.$ret[1];
+      $ret[1].='<br>Die Abfrage konnte nicht ausgefÃ¼hrt werden.'.$ret[1];
     }
     else {
       if (mysql_num_rows($ret[1])>0) {
@@ -777,7 +777,7 @@ class user extends user_core{
 
   function checkUserDaten($userdaten) {
     $Meldung='';
-    # Prüfen ob die user_id schon existiert
+    # PrÃ¼fen ob die user_id schon existiert
     if ($userdaten['id']!='') {
       $ret=$this->exist($userdaten['id']);
       if ($ret[0]) {
@@ -796,7 +796,7 @@ class user extends user_core{
     if($userdaten['changepasswd'] == 1){
       if ($userdaten['password1']=='') { $Meldung.='<br>Die erste Passwordeingabe fehlt.'; }
       if ($userdaten['password2']=='') { $Meldung.='<br>Die Passwordwiederholung fehlt.'; }
-      if ($userdaten['password1']!=$userdaten['password2']) { $Meldung.='<br>Die Passwörter stimmen nicht überein.'; }
+      if ($userdaten['password1']!=$userdaten['password2']) { $Meldung.='<br>Die PasswÃ¶rter stimmen nicht Ã¼berein.'; }
     }
     if ($userdaten['phon']!='' AND strlen($userdaten['phon'])<3) { $Meldung.='<br>Die Telefonnummer ist zu kurz.'; }
     if ($userdaten['email']!='') { $Meldung.=emailcheck($userdaten['email']); }
@@ -861,7 +861,7 @@ class user extends user_core{
         $ret[1].='<br>Die Benutzerdaten konnten nicht eingetragen werden.<br>'.$ret[1];
       }
       else {
-        # Abfrage erfolgreich durchgeführt, übergeben der user_id zur Rückgabe der Funktion
+        # Abfrage erfolgreich durchgefÃ¼hrt, Ã¼bergeben der user_id zur RÃ¼ckgabe der Funktion
         $rs=mysql_fetch_array($ret[1]);
         $ret[1]=$rs['ID'];
       }
@@ -900,14 +900,14 @@ class user extends user_core{
   /**
   * Aktualisiert das Passwort und setzt ein neuen Zeitstempel
   * 
-  * Diese Funktion trägt für den Benutzer in diesem Objekt ein neues Passwort ein und setzt als Datum das aktuelle Datum.
+  * Diese Funktion trÃ¤gt fÃ¼r den Benutzer in diesem Objekt ein neues Passwort ein und setzt als Datum das aktuelle Datum.
   * 
-  * Reihenfolge: Übersichtssatz - Kommentar - Tags.
+  * Reihenfolge: Ãœbersichtssatz - Kommentar - Tags.
   * 
   * @param string password Einzutragendes Password als Text
-  * @return array liefert zweidimensionales Array zurück,
-  *                 Wenn array[0]=0 enthält array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
-  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthält eine Fehlermeldung.
+  * @return array liefert zweidimensionales Array zurÃ¼ck,
+  *                 Wenn array[0]=0 enthÃ¤lt array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
+  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthÃ¤lt eine Fehlermeldung.
   * @see    NeuAnlegen(), Aendern(), Loeschen(), $user, $rolle, $stelle
   */  
   function setNewPassword($password) {
@@ -923,19 +923,19 @@ class user extends user_core{
     return $ret;
   } 
 
-  function Löschen($user_id) {
+  function LÃ¶schen($user_id) {
     $sql ='DELETE FROM user';
     $sql.=' WHERE ID = '.$user_id;
     $ret=$this->database->execSQL($sql,4, 0);
     if ($ret[0]) {
-      $ret[1].='<br>Der Benutzer konnte nicht gelöscht werden.<br>'.$ret[1];
+      $ret[1].='<br>Der Benutzer konnte nicht gelÃ¶scht werden.<br>'.$ret[1];
     }
     else {
       $sql ='ALTER TABLE `user` PACK_KEYS =0 CHECKSUM =0 DELAY_KEY_WRITE =0';
       $sql.=' AUTO_INCREMENT =1';
       $ret=$this->database->execSQL($sql,4, 0);
       if ($ret[0]) {
-        $ret[1].='<br>Das Autoincrement für die Tabelle Benutzer konnte nicht zurückgesetzt werden.<br>'.$ret[1];
+        $ret[1].='<br>Das Autoincrement fÃ¼r die Tabelle Benutzer konnte nicht zurÃ¼ckgesetzt werden.<br>'.$ret[1];
       }
     }
     return $ret;
@@ -996,7 +996,7 @@ class rolle extends rolle_core{
 	}
 	
 	function save_csv_attribute_selection($name, $attributes){
-		# alle anderen Listen unter dem Namen löschen 
+		# alle anderen Listen unter dem Namen lÃ¶schen 
 		$this->delete_csv_attribute_selection($name);
 		$sql = 'INSERT INTO rolle_csv_attributes (user_id, stelle_id, name, attributes) VALUES ('.$this->user_id.', '.$this->stelle_id.', "'.$name.'", "'.$attributes.'");';
 		$this->debug->write("<p>file:users.php class:rolle->save_search - Speichern einer Attributauswahl:",4);
@@ -1012,7 +1012,7 @@ class rolle extends rolle_core{
 	}
 
 	function save_search($attributes, $formvars){
-		# alle anderen Suchabfragen unter dem Namen löschen 
+		# alle anderen Suchabfragen unter dem Namen lÃ¶schen 
 		$this->delete_search($formvars['search_name'], $formvars['selected_layer_id']);
 		for($i = 0; $i < count($attributes['name']); $i++){
 			if($formvars['value_'.$attributes['name'][$i]] != '' OR $formvars['operator_'.$attributes['name'][$i]] == 'IS NULL' OR $formvars['operator_'.$attributes['name'][$i]] == 'IS NOT NULL'){
@@ -1096,7 +1096,7 @@ class rolle extends rolle_core{
     for($i = 0; $i < count($rollenlayerset); $i++){
       if($formvars['thema_rolle'.$rollenlayerset[$i]['id']] == 0){   
         $mapdb->deleteRollenLayer($rollenlayerset[$i]['id']);
-        # auch die Klassen und styles löschen
+        # auch die Klassen und styles lÃ¶schen
         foreach($rollenlayerset[$i]['Class'] as $class){
           $mapdb->delete_Class($class['Class_ID']);
           foreach($class['Style'] as $style){
@@ -1155,7 +1155,7 @@ class rolle extends rolle_core{
     for($i = 0; $i < count($rollenlayerset); $i++){
       if($formvars['thema'.$rollenlayerset[$i]['Layer_ID']] == 0){   
         $mapdb->deleteRollenLayer($rollenlayerset[$i]['id']);
-        # auch die Klassen und styles löschen
+        # auch die Klassen und styles lÃ¶schen
         foreach($rollenlayerset[$i]['Class'] as $class){
           $mapdb->delete_Class($class['Class_ID']);
           foreach($class['Style'] as $style){
@@ -1168,7 +1168,7 @@ class rolle extends rolle_core{
   }
 
   function setQueryStatus($formvars) {
-    # Eintragen des query_status=1 für Layer, die für die Abfrage selektiert wurden
+    # Eintragen des query_status=1 fÃ¼r Layer, die fÃ¼r die Abfrage selektiert wurden
     for ($i=0;$i<count($this->layerset);$i++) {
       if ($formvars['qLayer'.$this->layerset[$i]['Layer_ID']] == 1) {
         $query_status=1;
@@ -1189,7 +1189,7 @@ class rolle extends rolle_core{
   }
 
   function setClassStatus($formvars) {
-    # Eintragen des showclasses=1 für Klassen, die angezeigt werden sollen
+    # Eintragen des showclasses=1 fÃ¼r Klassen, die angezeigt werden sollen
     for ($i=0;$i<count($this->layerset);$i++) {
       if ($formvars['classes_'.$this->layerset[$i]['Layer_ID']] != ''){
         if ($formvars['classes_'.$this->layerset[$i]['Layer_ID']] == 1) {
@@ -1208,7 +1208,7 @@ class rolle extends rolle_core{
   }
 
   function setGroupStatus($formvars) {
-    # Eintragen des group_status=1 für Gruppen, die angezeigt werden sollen
+    # Eintragen des group_status=1 fÃ¼r Gruppen, die angezeigt werden sollen
     for ($i=0;$i<count($this->groupset);$i++) {
       if($formvars['group_'.$this->groupset[$i]['id']] !== NULL){
         if ($formvars['group_'.$this->groupset[$i]['id']] == 1) {
@@ -1224,10 +1224,10 @@ class rolle extends rolle_core{
         $this->database->execSQL($sql,4, $this->loglevel);
       }
     }
-    /*for ($i=0;$i<count($this->layerset);$i++) {										# hat bewirkt, dass als abfragbar markierte Layer, deren Gruppe zugeklappt ist, nicht abfragbar waren -> ist eigetnlich überflüssig
+    /*for ($i=0;$i<count($this->layerset);$i++) {										# hat bewirkt, dass als abfragbar markierte Layer, deren Gruppe zugeklappt ist, nicht abfragbar waren -> ist eigetnlich Ã¼berflÃ¼ssig
     $tempgroup = $this->read_Group($this->layerset[$i]['Gruppe']);
       if($tempgroup['status'] == 0){
-        # Setzen des layer_status und des query_status= 2 für Layer, deren Gruppe nicht angezeigt wird
+        # Setzen des layer_status und des query_status= 2 fÃ¼r Layer, deren Gruppe nicht angezeigt wird
         if($formvars['qLayer'.$this->layerset[$i]['Layer_ID']] != 0){
           $formvars['qLayer'.$this->layerset[$i]['Layer_ID']] = 2;
         }
@@ -1249,37 +1249,37 @@ class rolle extends rolle_core{
 
 
   function setSize($mapsize) {
-    # setzen der Werte, die aktuell für die Nutzung der Stelle durch den Nutzer gelten sollen.
+    # setzen der Werte, die aktuell fÃ¼r die Nutzung der Stelle durch den Nutzer gelten sollen.
     $teil=explode('x',$mapsize);
     $nImageWidth=$teil[0];
     $nImageHeight=$teil[1];
     $sql ='UPDATE rolle SET nImageWidth='.$nImageWidth;
     $sql.=',nImageHeight='.$nImageHeight.' WHERE stelle_id='.$this->stelle_id.' AND user_id='.$this->user_id;
-    $this->debug->write("<p>file:users.php class:user->setStelle - Setzen der Einstellungen für die Rolle",4);
+    $this->debug->write("<p>file:users.php class:user->setStelle - Setzen der Einstellungen fÃ¼r die Rolle",4);
     $this->database->execSQL($sql,4, $this->loglevel);
-    $this->debug->write('Neue Werte für Rolle eingestellt: '.$formvars['nZoomFactor'].', '.$formvars['mapsize'],4);
+    $this->debug->write('Neue Werte fÃ¼r Rolle eingestellt: '.$formvars['nZoomFactor'].', '.$formvars['mapsize'],4);
     return 1;
   }
 
   function setRollen($user_id,$stellen) {
-    # trägt die Stellen für einen Benutzer ein.
+    # trÃ¤gt die Stellen fÃ¼r einen Benutzer ein.
     $sql ='INSERT IGNORE INTO rolle (user_id,stelle_id) VALUES ('.$user_id.','.$stellen[0].')';
     for ($i=1;$i<count($stellen);$i++) {
       $sql.=',('.$user_id.','.$stellen[$i].')';
     }
     #echo '<br>'.$sql;
-    $this->debug->write("<p>file:users.php class:rolle function:setRollen - Einfügen neuen Rollen:<br>".$sql,4);
+    $this->debug->write("<p>file:users.php class:rolle function:setRollen - EinfÃ¼gen neuen Rollen:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
     if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
     return 1;
   }
 
   function deleteRollen($user_id,$stellen) {
-    # löscht die übergebenen Stellen für einen Benutzer.
+    # lÃ¶scht die Ã¼bergebenen Stellen fÃ¼r einen Benutzer.
     for ($i=0;$i<count($stellen);$i++) {
       $sql ='DELETE FROM `rolle` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stellen[$i];
       #echo '<br>'.$sql;
-      $this->debug->write("<p>file:users.php class:rolle function:deleteRollen - Löschen der Rollen:<br>".$sql,4);
+      $this->debug->write("<p>file:users.php class:rolle function:deleteRollen - LÃ¶schen der Rollen:<br>".$sql,4);
       $query=mysql_query($sql,$this->database->dbConn);
       if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
     }
@@ -1288,7 +1288,7 @@ class rolle extends rolle_core{
 
 
   function setMenue($user_id,$stellen) {
-    # trägt die Menuepunkte der übergebenen Stellenids für einen Benutzer ein.
+    # trÃ¤gt die Menuepunkte der Ã¼bergebenen Stellenids fÃ¼r einen Benutzer ein.
     for ($i=0;$i<count($stellen);$i++) {
       $sql ='INSERT IGNORE INTO u_menue2rolle SELECT '.$user_id.', '.$stellen[$i].', menue_id, 0';
       $sql.=' FROM u_menue2stelle';
@@ -1302,13 +1302,13 @@ class rolle extends rolle_core{
   }
 
   function deleteMenue($user_id,$stellen,$menues) {
-    # löscht die Menuepunkte der übergebenen Stellen für einen Benutzer.
+    # lÃ¶scht die Menuepunkte der Ã¼bergebenen Stellen fÃ¼r einen Benutzer.
     if($menues == 0){
       for ($i=0;$i<count($stellen);$i++) {
-      # löscht alle Menuepunkte der Stelle
+      # lÃ¶scht alle Menuepunkte der Stelle
         $sql ='DELETE FROM `u_menue2rolle` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stellen[$i];
         #echo '<br>'.$sql;
-        $this->debug->write("<p>file:users.php class:stelle function:deleteMenue - Löschen der Menuepunkte der Stelle:<br>".$sql,4);
+        $this->debug->write("<p>file:users.php class:stelle function:deleteMenue - LÃ¶schen der Menuepunkte der Stelle:<br>".$sql,4);
       $query=mysql_query($sql,$this->database->dbConn);
       if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
       }
@@ -1319,7 +1319,7 @@ class rolle extends rolle_core{
           $sql ='DELETE FROM `u_menue2rolle` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stellen[$i];
           $sql.=' AND `menue_id` = '.$menues[$j];
           #echo '<br>'.$sql;
-          $this->debug->write("<p>file:users.php class:rolle function:deleteMenue - Löschen der Menuepunkte der Rollen:<br>".$sql,4);
+          $this->debug->write("<p>file:users.php class:rolle function:deleteMenue - LÃ¶schen der Menuepunkte der Rollen:<br>".$sql,4);
           $query=mysql_query($sql,$this->database->dbConn);
           if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
   
@@ -1334,7 +1334,7 @@ class rolle extends rolle_core{
             while($rs=mysql_fetch_array($query)) {
                 $sql ='DELETE FROM `u_menue2rolle` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stellen[$i].' AND `menue_id` = '.$rs[0];
                 #echo '<br>'.$sql;
-              $this->debug->write("<p>file:users.php class:rolle->deleteMenue - Löschen von Menuepunkten zur Rolle:<br>".$sql,4);
+              $this->debug->write("<p>file:users.php class:rolle->deleteMenue - LÃ¶schen von Menuepunkten zur Rolle:<br>".$sql,4);
               $query1=mysql_query($sql,$this->database->dbConn);
               if ($query1==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
             }
@@ -1356,7 +1356,7 @@ class rolle extends rolle_core{
   }
 
   function setGroups($user_id,$stellen, $open) {
-    # trägt die Gruppen der übergebenen Stellenids für einen Benutzer ein.
+    # trÃ¤gt die Gruppen der Ã¼bergebenen Stellenids fÃ¼r einen Benutzer ein.
     for ($i=0;$i<count($stellen);$i++) {
       $sql ='INSERT IGNORE INTO u_groups2rolle SELECT DISTINCT '.$user_id.', '.$stellen[$i].', u_groups.id, '.$open;
       $sql.=' FROM `used_layer`, `layer`, `u_groups`';
@@ -1372,11 +1372,11 @@ class rolle extends rolle_core{
   }
 
   function deleteGroups($user_id,$stellen) {
-    # löscht die Gruppen der übergebenen Stellen für einen Benutzer.
+    # lÃ¶scht die Gruppen der Ã¼bergebenen Stellen fÃ¼r einen Benutzer.
     for ($i=0;$i<count($stellen);$i++) {
       $sql ='DELETE FROM `u_groups2rolle` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stellen[$i];
       #echo '<br>'.$sql;
-      $this->debug->write("<p>file:users.php class:rolle function:deleteGroups - Löschen der Gruppen der Rollen:<br>".$sql,4);
+      $this->debug->write("<p>file:users.php class:rolle function:deleteGroups - LÃ¶schen der Gruppen der Rollen:<br>".$sql,4);
       $query=mysql_query($sql,$this->database->dbConn);
       if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
     }
@@ -1384,10 +1384,10 @@ class rolle extends rolle_core{
   }
 
   function updateGroups($user_id,$stelle_id, $layer_id) {
-    # überprüft anHand der übergebenen layer_id ob die entsprechende Gruppe in u_groups2rolle überflüssig ist.
+    # Ã¼berprÃ¼ft anHand der Ã¼bergebenen layer_id ob die entsprechende Gruppe in u_groups2rolle Ã¼berflÃ¼ssig ist.
     $sql ='SELECT Gruppe FROM layer WHERE layer.layer_id = '.$layer_id;
     #echo '<br>'.$sql;
-    $this->debug->write("<p>file:users.php class:rolle function:updateGroups - überprüft anHand der übergebenen layer_id ob die entsprechende Gruppe in u_groups2rolle überflüssig ist:<br>".$sql,4);
+    $this->debug->write("<p>file:users.php class:rolle function:updateGroups - Ã¼berprÃ¼ft anHand der Ã¼bergebenen layer_id ob die entsprechende Gruppe in u_groups2rolle Ã¼berflÃ¼ssig ist:<br>".$sql,4);
   $query=mysql_query($sql,$this->database->dbConn);
   if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
   $rs = mysql_fetch_array($query);
@@ -1397,14 +1397,14 @@ class rolle extends rolle_core{
   $sql.='r2ul.user_id = '.$user_id.' AND ';
   $sql.='r2ul.stelle_id = '.$stelle_id;
   #echo '<br>'.$sql;
-  $this->debug->write("<p>file:users.php class:rolle function:updateGroups - überprüft anHand der übergebenen layer_id ob die entsprechende Gruppe in u_groups2rolle überflüssig ist:<br>".$sql,4);
+  $this->debug->write("<p>file:users.php class:rolle function:updateGroups - Ã¼berprÃ¼ft anHand der Ã¼bergebenen layer_id ob die entsprechende Gruppe in u_groups2rolle Ã¼berflÃ¼ssig ist:<br>".$sql,4);
   $query=mysql_query($sql,$this->database->dbConn);
   if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
   $rs = mysql_fetch_array($query);
   if(!$rs[0]){
     $sql ='DELETE FROM `u_groups2rolle` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stelle_id.' AND `id` = '.$gruppe_id;
       #echo '<br>'.$sql;
-      $this->debug->write("<p>file:users.php class:rolle function:deleteGroups - Löschen der Gruppen der Rollen:<br>".$sql,4);
+      $this->debug->write("<p>file:users.php class:rolle function:deleteGroups - LÃ¶schen der Gruppen der Rollen:<br>".$sql,4);
       $query=mysql_query($sql,$this->database->dbConn);
       if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
   }
@@ -1421,7 +1421,7 @@ class rolle extends rolle_core{
 
   function setLayer($user_id, $stellen, $active) {
     #
-    # trägt die Layer der entsprehenden Rollen für einen Benutzer ein.
+    # trÃ¤gt die Layer der entsprehenden Rollen fÃ¼r einen Benutzer ein.
     for ($i=0;$i<count($stellen);$i++) {
       $sql ='INSERT IGNORE INTO u_rolle2used_layer SELECT '.$user_id.', used_layer.Stelle_ID, used_layer.Layer_ID, "'.$active.'", "0", "1","0"';
       $sql.=' FROM `used_layer`';
@@ -1434,7 +1434,7 @@ class rolle extends rolle_core{
   }
 
   function deleteLayer($user_id,$stellen,$layer) {
-    # löscht die Layer der übergebenen Stellen für einen Benutzer.
+    # lÃ¶scht die Layer der Ã¼bergebenen Stellen fÃ¼r einen Benutzer.
     for ($i=0;$i<count($stellen);$i++) {
       for ($j=0;$j<count($layer);$j++) {
         $sql ='DELETE FROM `u_rolle2used_layer` WHERE `stelle_id` = '.$stellen[$i];
@@ -1445,7 +1445,7 @@ class rolle extends rolle_core{
           $sql.=' AND `layer_id` = '.$layer[$j];
       }
         #echo '<br>'.$sql;
-        $this->debug->write("<p>file:users.php class:rolle function:deleteLayer - Löschen der Layer der Rollen:<br>".$sql,4);
+        $this->debug->write("<p>file:users.php class:rolle function:deleteLayer - LÃ¶schen der Layer der Rollen:<br>".$sql,4);
         $query=mysql_query($sql,$this->database->dbConn);
         if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
       }
@@ -1458,13 +1458,13 @@ class rolle extends rolle_core{
   }
 
   function hideMenue($hide) {
-    # speichern des Zustandes des Menües
-    # hide=0 Menü ist zu sehen
-    # hide=1 Menü wird nicht angezeigt
+    # speichern des Zustandes des MenÃ¼es
+    # hide=0 MenÃ¼ ist zu sehen
+    # hide=1 MenÃ¼ wird nicht angezeigt
     $sql ="UPDATE rolle SET hidemenue='".$hide."'";
     $sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
     #echo $sql;
-    $this->debug->write("<p>file:users.php class:rolle function:hideMenue - Speichern der Einstellungen zum Menü in der Rolle:",4);
+    $this->debug->write("<p>file:users.php class:rolle function:hideMenue - Speichern der Einstellungen zum MenÃ¼ in der Rolle:",4);
     $this->database->execSQL($sql,4, $this->loglevel);
     return 1;
   }
@@ -1476,7 +1476,7 @@ class rolle extends rolle_core{
     $sql ="UPDATE rolle SET hidelegend='".$hide."'";
     $sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
     #echo $sql;
-    $this->debug->write("<p>file:users.php class:rolle function:hideMenue - Speichern der Einstellungen zum Menü in der Rolle:",4);
+    $this->debug->write("<p>file:users.php class:rolle function:hideMenue - Speichern der Einstellungen zum MenÃ¼ in der Rolle:",4);
     $this->database->execSQL($sql,4, $this->loglevel);
     return 1;
   }
@@ -1497,7 +1497,7 @@ class rolle extends rolle_core{
     if ($suchantrnr!='') { $sql.='suchantrnr="'.$suchantrnr.'",'; }
     $sql .= 'user_id = '.$this->user_id;
     $sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-    $this->debug->write("<p>file:users.php class:rolle->setNachweisSuchparameter - Setzen der aktuellen Parameter für die Nachweissuche",4);
+    $this->debug->write("<p>file:users.php class:rolle->setNachweisSuchparameter - Setzen der aktuellen Parameter fÃ¼r die Nachweissuche",4);
     $this->database->execSQL($sql,4, 1);
     return 1;
   }
@@ -1513,7 +1513,7 @@ class rolle extends rolle_core{
     if ($markgn!='') { $sql.='markgn="'.$markgn.'",'; }
     $sql .= 'user_id = '.$this->user_id;
     $sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-    $this->debug->write("<p>file:users.php class:rolle->setNachweisAnzeigeparameter - Setzen der aktuellen Anzeigeparameter für die Nachweissuche",4);
+    $this->debug->write("<p>file:users.php class:rolle->setNachweisAnzeigeparameter - Setzen der aktuellen Anzeigeparameter fÃ¼r die Nachweissuche",4);
     $this->database->execSQL($sql,4, 1);
     return 1;
   }
@@ -1522,7 +1522,7 @@ class rolle extends rolle_core{
     $sql ='SELECT *,CONCAT(showffr,showkvz,showgn,showan) AS art_einblenden';
     $sql.=',CONCAT(markffr,markkvz,markgn) AS art_markieren FROM rolle_nachweise';
     $sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-    $this->debug->write("<p>file:users.php class:user->getNachweisParameter - Abfragen der aktuellen Parameter für die Nachweissuche<br>".$sql,4);
+    $this->debug->write("<p>file:users.php class:user->getNachweisParameter - Abfragen der aktuellen Parameter fÃ¼r die Nachweissuche<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
     if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     if (mysql_num_rows($query)==0) {
@@ -1591,14 +1591,14 @@ class rolle extends rolle_core{
     if ($queryret[0]) {
       # Fehler bei Datenbankanfrage
       $ret[0]=1;
-      $ret[1]='<br>Fehler beim Löschen des Kommentares zum Kartenausschnitt.<br>'.$ret[1];
+      $ret[1]='<br>Fehler beim LÃ¶schen des Kommentares zum Kartenausschnitt.<br>'.$ret[1];
     }
   }
 
   function setConsumeALB($time,$format,$log_number,$wz,$pagecount) {
     if (LOG_CONSUME_ACTIVITY==1) {
       for($i = 0; $i < count($log_number); $i++){
-        # function setzt eine ALB-PDF-EXportaktivität
+        # function setzt eine ALB-PDF-EXportaktivitÃ¤t
         $sql ='INSERT INTO u_consumeALB SET';
         $sql.=' user_id='.$this->user_id;
         $sql.=', stelle_id='.$this->stelle_id;
@@ -1611,13 +1611,13 @@ class rolle extends rolle_core{
         $ret=$this->database->execSQL($sql,4, 1);
         if ($ret[0]) {
           # Fehler bei Datenbankanfrage
-          $errmsg.='<br>Die Verbraucheraktivität konnte nicht eingetragen werden.<br>'.$ret[1];
+          $errmsg.='<br>Die VerbraucheraktivitÃ¤t konnte nicht eingetragen werden.<br>'.$ret[1];
         }
       }
     }
     else {
       $ret[0]=0;
-      $ret[1]='<br>Funktion zur Speicherung der Verbraucheraktivitäten ist ausgeschaltet (LOG_CONSUME_ACTIVITY).';
+      $ret[1]='<br>Funktion zur Speicherung der VerbraucheraktivitÃ¤ten ist ausgeschaltet (LOG_CONSUME_ACTIVITY).';
     }
     return $ret;
   }
@@ -1634,12 +1634,12 @@ class rolle extends rolle_core{
       $ret=$this->database->execSQL($sql,4, 1);
       if ($ret[0]) {
         # Fehler bei Datenbankanfrage
-        $errmsg.='<br>Die Verbraucheraktivität konnte nicht eingetragen werden.<br>'.$ret[1];
+        $errmsg.='<br>Die VerbraucheraktivitÃ¤t konnte nicht eingetragen werden.<br>'.$ret[1];
       }
     }
     else {
       $ret[0]=0;
-      $ret[1]='<br>Funktion zur Speicherung der Verbraucheraktivitäten ist ausgeschaltet (LOG_CONSUME_ACTIVITY).';
+      $ret[1]='<br>Funktion zur Speicherung der VerbraucheraktivitÃ¤ten ist ausgeschaltet (LOG_CONSUME_ACTIVITY).';
     }
     return $ret;
   }
@@ -1678,7 +1678,7 @@ class stelle extends stelle_core{
   # getstellendaten($stellendaten)
   # getLayer($LayerName)
   # isFunctionAllowed($functionname)
-  # Löschen()
+  # LÃ¶schen()
   # NeueStelleAnlegen($stellendaten)
   # readDefaultValues()
   # setAktivLayer($formvars)
@@ -1694,31 +1694,31 @@ class stelle extends stelle_core{
     $this->readDefaultValues();
   }
 
-  function Löschen() {
+  function LÃ¶schen() {
     $sql ='DELETE FROM stelle';
     $sql.=' WHERE ID = '.$this->id;
     $ret=$this->database->execSQL($sql,4, 0);
     if ($ret[0]) {
-      $ret[1].='<br>Die Stelle konnte nicht gelöscht werden.<br>'.$ret[1];
+      $ret[1].='<br>Die Stelle konnte nicht gelÃ¶scht werden.<br>'.$ret[1];
     }
     return $ret;
   }
 
   function deleteMenue($menues) {
     if($menues == 0){
-    # löscht alle Menuepunkte der Stelle
+    # lÃ¶scht alle Menuepunkte der Stelle
       $sql ='DELETE FROM `u_menue2stelle` WHERE `stelle_id` = '.$this->id;
       #echo '<br>'.$sql;
-      $this->debug->write("<p>file:users.php class:stelle function:deleteMenue - Löschen der Menuepunkte der Stelle:<br>".$sql,4);
+      $this->debug->write("<p>file:users.php class:stelle function:deleteMenue - LÃ¶schen der Menuepunkte der Stelle:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
     if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
     }
     else{
-      # löscht die übergebenen Menuepunkte der Stelle
+      # lÃ¶scht die Ã¼bergebenen Menuepunkte der Stelle
       for ($i=0;$i<count($menues);$i++) {
         $sql ='DELETE FROM `u_menue2stelle` WHERE `stelle_id` = '.$this->id.' AND `menue_id` = '.$menues[$i];
         #echo '<br>'.$sql;
-        $this->debug->write("<p>file:users.php class:stelle function:deleteMenue - Löschen der Menuepunkte der Stelle:<br>".$sql,4);
+        $this->debug->write("<p>file:users.php class:stelle function:deleteMenue - LÃ¶schen der Menuepunkte der Stelle:<br>".$sql,4);
         $query=mysql_query($sql,$this->database->dbConn);
         if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
         
@@ -1733,7 +1733,7 @@ class stelle extends stelle_core{
           while($rs=mysql_fetch_array($query)) {
             $sql ='DELETE FROM `u_menue2stelle` WHERE `stelle_id` = '.$this->id.' AND `menue_id` = '.$rs[0];
             #echo '<br>'.$sql;
-          $this->debug->write("<p>file:users.php class:stelle->deleteMenue - Löschen von Menuepunkten zur Stelle:<br>".$sql,4);
+          $this->debug->write("<p>file:users.php class:stelle->deleteMenue - LÃ¶schen von Menuepunkten zur Stelle:<br>".$sql,4);
           $query1=mysql_query($sql,$this->database->dbConn);
           if ($query1==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
           }
@@ -1746,25 +1746,25 @@ class stelle extends stelle_core{
 
   function deleteLayer($layer) {
     if($layer == 0){
-    # löscht alle Layer der Stelle
+    # lÃ¶scht alle Layer der Stelle
       $sql ='DELETE FROM `used_layer` WHERE `Stelle_ID` = '.$this->id;
-      $this->debug->write("<p>file:users.php class:stelle function:deleteLayer - Löschen der Layer der Stelle:<br>".$sql,4);
+      $this->debug->write("<p>file:users.php class:stelle function:deleteLayer - LÃ¶schen der Layer der Stelle:<br>".$sql,4);
     	$query=mysql_query($sql,$this->database->dbConn);
     	if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
     	$sql ='DELETE FROM `layer_attributes2stelle` WHERE `stelle_id` = '.$this->id;
-      $this->debug->write("<p>file:users.php class:stelle function:deleteLayer - Löschen der Layer der Stelle:<br>".$sql,4);
+      $this->debug->write("<p>file:users.php class:stelle function:deleteLayer - LÃ¶schen der Layer der Stelle:<br>".$sql,4);
     	$query=mysql_query($sql,$this->database->dbConn);
     	if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
     }
     else{
-      # löscht die übergebenen Layer der Stelle
+      # lÃ¶scht die Ã¼bergebenen Layer der Stelle
       for ($i=0;$i<count($layer);$i++) {
         $sql ='DELETE FROM `used_layer` WHERE `Stelle_ID` = '.$this->id.' AND `Layer_ID` = '.$layer[$i];
-        $this->debug->write("<p>file:users.php class:stelle function:deleteLayer - Löschen der Layer der Stelle:<br>".$sql,4);
+        $this->debug->write("<p>file:users.php class:stelle function:deleteLayer - LÃ¶schen der Layer der Stelle:<br>".$sql,4);
         $query=mysql_query($sql,$this->database->dbConn);
         if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
         $sql ='DELETE FROM `layer_attributes2stelle` WHERE `stelle_id` = '.$this->id.' AND `layer_id` = '.$layer[$i];
-        $this->debug->write("<p>file:users.php class:stelle function:deleteLayer - Löschen der Layer der Stelle:<br>".$sql,4);
+        $this->debug->write("<p>file:users.php class:stelle function:deleteLayer - LÃ¶schen der Layer der Stelle:<br>".$sql,4);
         $query=mysql_query($sql,$this->database->dbConn);
         if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
       }
@@ -1859,7 +1859,7 @@ class stelle extends stelle_core{
         $ret[1].='<br>Die Stellendaten konnten nicht eingetragen werden.<br>'.$ret[1];
       }
       else {
-        # Abfrage erfolgreich durchgeführt, übergeben der stelle_id zur Rückgabe der Funktion
+        # Abfrage erfolgreich durchgefÃ¼hrt, Ã¼bergeben der stelle_id zur RÃ¼ckgabe der Funktion
         $rs=mysql_fetch_array($ret[1]);
         $ret[1]=$rs['ID'];
       }
@@ -1868,7 +1868,7 @@ class stelle extends stelle_core{
   }
 
   function Aendern($stellendaten) {
-    # Stelle ändern
+    # Stelle Ã¤ndern
     $sql ='UPDATE stelle SET';
     if($stellendaten['id'] != ''){
       $sql.=' ID='.$stellendaten['id'].', ';
@@ -1946,14 +1946,14 @@ class stelle extends stelle_core{
   }
 
   function getFunktionen() {
-    # Abfragen der Funktionen, die in der Stelle ausgeführt werden dürfen
+    # Abfragen der Funktionen, die in der Stelle ausgefÃ¼hrt werden dÃ¼rfen
     $sql ='SELECT f.id,f.bezeichnung,f2s.erlaubt FROM u_funktionen AS f,u_funktion2stelle AS f2s';
     $sql.=' WHERE f.id=f2s.funktion_id AND f2s.stelle_id='.$this->id.' ORDER BY bezeichnung';
     $this->debug->write("<p>file:users.php class:stelle->getFunktionen - Fragt die Funktionen der Stelle ab:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
     if ($query==0) {
       $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4);
-      $errmsg='Fehler bei der Abfrage der Funktionen für die Stelle';
+      $errmsg='Fehler bei der Abfrage der Funktionen fÃ¼r die Stelle';
     }
     else {
       while($rs=mysql_fetch_array($query)) {
@@ -1982,7 +1982,7 @@ class stelle extends stelle_core{
     $query=mysql_query($sql,$this->database->dbConn);
     if ($query==0) {
       $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4);
-      $errmsg='Fehler bei der Ueberpruefung des Menuepunkts für die Stelle';
+      $errmsg='Fehler bei der Ueberpruefung des Menuepunkts fÃ¼r die Stelle';
     }
     else{
       $rs=mysql_fetch_array($query);
@@ -2004,10 +2004,10 @@ class stelle extends stelle_core{
         $anzFlurstKennz=count($ret[1]);
         if ($anzFlurstKennz==0) {
           $ret[0]=1;
-          $ret[1]="Sie haben keine Berechtigung zur Ansicht diese(s)r Flurstücke(s)";
+          $ret[1]="Sie haben keine Berechtigung zur Ansicht diese(s)r FlurstÃ¼cke(s)";
         }
       }
-      # ret[0] = 1 wenn Fehler in Datenbankabfrage oder keine FlurstKennz zurück
+      # ret[0] = 1 wenn Fehler in Datenbankabfrage oder keine FlurstKennz zurÃ¼ck
       # ret[1] = Fehlermeldung oder Liste FlurstKennz
     }
     else{
@@ -2017,7 +2017,7 @@ class stelle extends stelle_core{
   }
 
   function addMenue($menue_ids) {
-    # Hinzufügen von Menuepunkten zur Stelle
+    # HinzufÃ¼gen von Menuepunkten zur Stelle
     $sql ='SELECT MAX(menue_order) FROM u_menue2stelle WHERE stelle_id = '.$this->id;
     $this->debug->write("<p>file:users.php class:stelle->addMenue - Lesen der maximalen menue_order der Menuepunkte der Stelle:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
@@ -2031,7 +2031,7 @@ class stelle extends stelle_core{
     for ($i=0;$i<count($menue_ids);$i++) {
       $sql ="INSERT IGNORE INTO u_menue2stelle ( `stelle_id` , `menue_id` , `menue_order` ) VALUES ('".$this->id."', '".$menue_ids[$i]."', '".$count."')";
       $count++;
-      $this->debug->write("<p>file:users.php class:stelle->addMenue - Hinzufügen von Menuepunkten zur Stelle:<br>".$sql,4);
+      $this->debug->write("<p>file:users.php class:stelle->addMenue - HinzufÃ¼gen von Menuepunkten zur Stelle:<br>".$sql,4);
       $query=mysql_query($sql,$this->database->dbConn);
       if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
       
@@ -2045,7 +2045,7 @@ class stelle extends stelle_core{
         while($rs=mysql_fetch_array($query)) {
           $sql ="INSERT IGNORE INTO u_menue2stelle ( `stelle_id` , `menue_id` , `menue_order` ) VALUES ('".$this->id."', '".$rs[0]."', '".$count."')";
           $count++;
-          $this->debug->write("<p>file:users.php class:stelle->addMenue - Hinzufügen von Menuepunkten zur Stelle:<br>".$sql,4);
+          $this->debug->write("<p>file:users.php class:stelle->addMenue - HinzufÃ¼gen von Menuepunkten zur Stelle:<br>".$sql,4);
           $query1=mysql_query($sql,$this->database->dbConn);
           if ($query1==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
         }
@@ -2066,7 +2066,7 @@ class stelle extends stelle_core{
     $sql .=' AND menueebene = 2';
     $sql .=' AND u_menue2stelle.menue_id = u_menues.id';
     $sql .= ' ORDER BY menue_order';
-    $this->debug->write("<p>file:users.php class:stelle->getsubMenues - Lesen der UnterMenuepunkte eines Menüpunktes:<br>".$sql,4);
+    $this->debug->write("<p>file:users.php class:stelle->getsubMenues - Lesen der UnterMenuepunkte eines MenÃ¼punktes:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
     if ($query==0) {
       $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
@@ -2160,11 +2160,11 @@ class stelle extends stelle_core{
   }
 
   function addFunctions($function_ids){
-    # Hinzufügen von Funktionen zur Stelle
+    # HinzufÃ¼gen von Funktionen zur Stelle
     for ($i=0;$i<count($function_ids);$i++) {  
       $sql ='INSERT IGNORE INTO u_funktion2stelle ( `funktion_id` , `stelle_id` , `erlaubt`)';
       $sql.="VALUES ('".$function_ids[$i]."', '".$this->id."', '1')";
-      $this->debug->write("<p>file:users.php class:stelle->addFunctions - Hinzufügen von Funktionen zur Stelle:<br>".$sql,4);
+      $this->debug->write("<p>file:users.php class:stelle->addFunctions - HinzufÃ¼gen von Funktionen zur Stelle:<br>".$sql,4);
       $query=mysql_query($sql,$this->database->dbConn);
       if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
     }
@@ -2182,10 +2182,10 @@ class stelle extends stelle_core{
   }
 
   function addLayer($layer_ids, $drawingorder) {
-    # Hinzufügen von Layern zur Stelle
+    # HinzufÃ¼gen von Layern zur Stelle
     for ($i=0;$i<count($layer_ids);$i++) {
       $sql = "SELECT queryable, template, transparency, drawingorder, minscale, maxscale, offsite FROM layer WHERE Layer_ID = ".$layer_ids[$i];
-      $this->debug->write("<p>file:users.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
+      $this->debug->write("<p>file:users.php class:stelle->addLayer - HinzufÃ¼gen von Layern zur Stelle:<br>".$sql,4);
       $query=mysql_query($sql,$this->database->dbConn);
       $rs = mysql_fetch_array($query);
       $queryable = $rs['queryable'];
@@ -2202,7 +2202,7 @@ class stelle extends stelle_core{
       $sql ='INSERT IGNORE INTO used_layer ( `Stelle_ID` , `Layer_ID` , `queryable` , `drawingorder` , `minscale` , `maxscale` , `offsite` , `transparency`, `Filter` , `template` , `header` , `footer` , `symbolscale` )';
       $sql.="VALUES ('".$this->id."', '".$layer_ids[$i]."', '".$queryable."', '".$drawingorder."', '".$minscale."', '".$maxscale."', '".$offsite."' , ".$transparency.", NULL,'".$template."' , NULL , NULL , NULL)";
       #echo $sql.'<br>';
-      $this->debug->write("<p>file:users.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
+      $this->debug->write("<p>file:users.php class:stelle->addLayer - HinzufÃ¼gen von Layern zur Stelle:<br>".$sql,4);
       $query=mysql_query($sql,$this->database->dbConn);
       if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
     }
@@ -2288,7 +2288,7 @@ class stelle extends stelle_core{
           $layer['drawingorder'][]=$rs['drawingorder'];
         }
         if($order == 'Name'){
-          // Sortieren der Layer unter Berücksichtigung von Umlauten
+          // Sortieren der Layer unter BerÃ¼cksichtigung von Umlauten
           $sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
           $layer['ID'] = $sorted_arrays['second_array'];
           $sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['drawingorder']);
@@ -2320,7 +2320,7 @@ class stelle extends stelle_core{
           $layer['ID'][]=$rs['Layer_ID'];
           $layer['Bezeichnung'][]=$rs['Name'];
         }
-        // Sortieren der User unter Berücksichtigung von Umlauten
+        // Sortieren der User unter BerÃ¼cksichtigung von Umlauten
         $sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
         $layer['Bezeichnung'] = $sorted_arrays['array'];
         $layer['ID'] = $sorted_arrays['second_array'];
@@ -2342,7 +2342,7 @@ class stelle extends stelle_core{
     }
     if($user_id != NULL){
 			$sql .= ' UNION ';
-			$sql .= 'SELECT -id as Layer_ID, concat(substring( `Name` FROM 1 FOR locate( ")", `Name` ))," -Suchergebnis-"), -1, " ", `connection` FROM rollenlayer';
+			$sql .= 'SELECT -id as Layer_ID, concat(substring( `Name` FROM 1 FOR locate( ")", `Name` )), CASE WHEN Typ = "search" THEN " -Suchergebnis-" ELSE " -Shape-Import-" END), -1, " ", `connection` FROM rollenlayer';
 			$sql .= ' WHERE stelle_id = '.$this->id.' AND user_id = '.$user_id.' AND connectiontype = 6';
     }
 
@@ -2374,7 +2374,7 @@ class stelle extends stelle_core{
 		      if($conn->port == '')$conn->port = '5432';
         	$fp = @fsockopen($conn->host, $conn->port, $errno, $errstr, 0.1);
         	if(!$fp){			# keine Verbindung --> Layer ausschalten
-  					#$this->Fehlermeldung = $errstr.' für Layer: '.$rs['Name'].'<br>';
+  					#$this->Fehlermeldung = $errstr.' fÃ¼r Layer: '.$rs['Name'].'<br>';
   					continue;
         	}
         }
@@ -2384,7 +2384,7 @@ class stelle extends stelle_core{
         $layer['Gruppe'][]=$rs['Gruppe'];
         $layer['Gruppenname'][]=$rs['Gruppenname'];
       }
-      // Sortieren der User unter Berücksichtigung von Umlauten
+      // Sortieren der User unter BerÃ¼cksichtigung von Umlauten
       $sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
       $layer['Bezeichnung'] = $sorted_arrays['array'];
       $layer['ID'] = $sorted_arrays['second_array'];
@@ -2393,11 +2393,11 @@ class stelle extends stelle_core{
   }
 
   function addAktivLayer($layerid) {
-    # Hinzufügen der Layer als aktive Layer
+    # HinzufÃ¼gen der Layer als aktive Layer
     for ($i=0;$i<count($layerid);$i++) {
       $sql ='UPDATE used_layer SET aktivStatus="1"';
       $sql.=' WHERE Stelle_ID='.$this->id.' AND Layer_ID='.$layerid[$i];
-      $this->debug->write("<p>file:users.php class:stelle->addAktivLayer - Hinzufügen von aktiven Layern zur Stelle:<br>".$sql,4);
+      $this->debug->write("<p>file:users.php class:stelle->addAktivLayer - HinzufÃ¼gen von aktiven Layern zur Stelle:<br>".$sql,4);
       $query=mysql_query($sql,$this->database->dbConn);
       if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
     }
@@ -2424,7 +2424,7 @@ class stelle extends stelle_core{
   }
 
   function setQueryStatus($formvars) {
-    # Eintragen des query_status=1 für Layer, die für die Abfrage selektiert wurden
+    # Eintragen des query_status=1 fÃ¼r Layer, die fÃ¼r die Abfrage selektiert wurden
     $layerset=$this->getLayer('');
     for ($i=0;$i<count($layerset);$i++) {
       if ($formvars['qLayer'.$layerset[$i]['Layer_ID']]) {
@@ -2533,7 +2533,7 @@ class stelle extends stelle_core{
   }
   
   function set_attributes_privileges($formvars, $attributes){
-  	# erst alles löschen zu diesem Layer und Stelle
+  	# erst alles lÃ¶schen zu diesem Layer und Stelle
     $sql = 'DELETE FROM layer_attributes2stelle WHERE ';
     $sql.= 'layer_id = '.$formvars['selected_layer_id'].' AND ';
     $sql.= 'stelle_id = '.$this->id;
@@ -2612,7 +2612,7 @@ class stelle extends stelle_core{
           $user['Bezeichnung'][]=$rs['Name'].', '.$rs['Vorname'];
           $user['email'][]=$rs['email'];
         }
-        // Sortieren der User unter Berücksichtigung von Umlauten
+        // Sortieren der User unter BerÃ¼cksichtigung von Umlauten
         $sorted_arrays = umlaute_sortieren($user['Bezeichnung'], $user['ID']);
         $sorted_arrays2 = umlaute_sortieren($user['Bezeichnung'], $user['email']);
         $user['Bezeichnung'] = $sorted_arrays['array'];

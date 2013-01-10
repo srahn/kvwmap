@@ -21,7 +21,7 @@
         <td>&nbsp;</td>
         <th align="left"><a href="index.php?go=Layer_Anzeigen&order=Layer_ID"><?php echo $this->strID; ?></a></th>
         <th align="left"><a href="index.php?go=Layer_Anzeigen&order=Name"><?php echo $this->strName; ?></a></th>
-        <th align="left"><a href="index.php?go=Layer_Anzeigen&order=Gruppe"><?php echo $this->strGroup; ?></a></th>
+        <th align="left"><a href="index.php?go=Layer_Anzeigen&order=Gruppenname"><?php echo $this->strGroup; ?></a></th>
         <td>&nbsp;</td>
         <td>&nbsp;</td>
       </tr>

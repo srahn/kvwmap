@@ -263,7 +263,7 @@ class GUI extends GUI_core{
 					$sql = 'SELECT x(the_geom), y(the_geom) FROM (SELECT transform(pointn(foo.linestring, foo.count1), '.$this->user->rolle->epsg_code.') AS the_geom
 					FROM (SELECT generate_series(1, npoints(foo4.linestring)) AS count1, foo4.linestring FROM (
 					SELECT GeometryN(foo2.linestring, foo2.count2) as linestring FROM (
-					SELECT generate_series(1, NumGeometries(foo5.linestring)) AS count2, foo5.linestring FROM (SELECT linefrompoly(intersection(the_geom, '.$extent.')) AS linestring '.$fromwhere.') foo5) foo2
+					SELECT generate_series(1, NumGeometries(foo5.linestring)) AS count2, foo5.linestring FROM (SELECT st_multi(linefrompoly(intersection(the_geom, '.$extent.'))) AS linestring '.$fromwhere.') foo5) foo2
 					) foo4) foo
 					WHERE (foo.count1 + 1) <= npoints(foo.linestring)) foo3 LIMIT 10000';
 				}
@@ -283,7 +283,13 @@ class GUI extends GUI_core{
 		$this->user->rolle->readSettings();
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$mapDB->nurAktiveLayerOhneRequires = true;
-		$layer = $mapDB->get_Layer($this->formvars['layer_id']);
+		if($this->formvars['layer_id'] > 0){
+			$layer = $mapDB->get_Layer($this->formvars['layer_id']);
+		}
+		else{
+			$rollenlayer = $mapDB->read_RollenLayer(-$this->formvars['layer_id'], NULL);
+			$layer = $rollenlayer[0];
+		}
 		$offset = 0;
 		if($layer['connectiontype'] == MS_POSTGIS){
 			$layerdb = $mapDB->getlayerdatabase($layer['Layer_ID'], $this->Stelle->pgdbhost);
@@ -291,17 +297,18 @@ class GUI extends GUI_core{
     	if(in_array($data_attributes['geomtype'][$data_attributes['the_geom']] , array('MULTIPOLYGON', 'POLYGON', 'GEOMETRY'))){
     		$offset = 1;
     	}
-			$select = str_replace(' from ', ', '.$data_attributes['table_alias_name'][$data_attributes['the_geom']].'.oid as exclude_oid'.' from ', strtolower($mapDB->getSelectFromData($layer['Data'])));
+    	$select = strtolower($mapDB->getSelectFromData($layer['Data']));
+			if($this->formvars['layer_id'] > 0)$select = str_replace(' from ', ', '.$data_attributes['table_alias_name'][$data_attributes['the_geom']].'.oid as exclude_oid'.' from ', $select);		# bei Rollenlayern nicht machen
 			$extent = 'Transform(geomfromtext(\'POLYGON(('.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layer['epsg_code'].')';				
 			$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects(the_geom, '.$extent.') ';
-			if($this->formvars['oid']){
+			if($this->formvars['layer_id'] > 0 AND $this->formvars['oid']){
 				$fromwhere .= 'AND exclude_oid != '.$this->formvars['oid'];
 			}
 			# LINE / POLYGON
 			$sql = 'SELECT x(the_geom), y(the_geom) FROM (SELECT transform(pointn(foo.linestring, foo.count1), '.$this->user->rolle->epsg_code.') AS the_geom
 					FROM (SELECT generate_series(1, npoints(foo4.linestring)) AS count1, foo4.linestring FROM (
 					SELECT CASE WHEN GeometryN(foo2.linestring, foo2.count2) IS NULL THEN foo2.linestring ELSE GeometryN(foo2.linestring, foo2.count2) END as linestring FROM (
-					SELECT generate_series(1, CASE WHEN NumGeometries(foo5.linestring) IS NULL THEN 1 ELSE NumGeometries(foo5.linestring) END) AS count2, foo5.linestring FROM (SELECT linefrompoly(intersection(the_geom, '.$extent.')) AS linestring '.$fromwhere.') foo5) foo2
+					SELECT generate_series(1, NumGeometries(foo5.linestring)) AS count2, foo5.linestring FROM (SELECT st_multi(linefrompoly(intersection(the_geom, '.$extent.'))) AS linestring '.$fromwhere.') foo5) foo2
 					) foo4) foo
 					WHERE (foo.count1 + '.$offset.') <= npoints(foo.linestring)) foo3 LIMIT 10000';
 			#echo $sql;
@@ -1721,7 +1728,7 @@ class GUI extends GUI_core{
       $this->scaleMap($this->formvars['nScale']);
     }
     elseif($this->formvars['oid'] != '') {
-      $this->point = $pointeditor->getpoint($this->formvars['oid'], $this->formvars['tablename'], $this->formvars['columnname']);
+      $this->point = $pointeditor->getpoint($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname']);
       if($this->point['pointx'] != ''){
         $this->formvars['loc_x']=$this->point['pointx'];
         $this->formvars['loc_y']=$this->point['pointy'];
@@ -1755,7 +1762,7 @@ class GUI extends GUI_core{
       return;
     }
     else{
-      $ret = $pointeditor->eintragenPunkt($this->formvars['loc_x'],$this->formvars['loc_y'], $this->formvars['oid'], $this->formvars['tablename'], $this->formvars['columnname'], $this->formvars['dimension']);
+      $ret = $pointeditor->eintragenPunkt($this->formvars['loc_x'],$this->formvars['loc_y'], $this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], $this->formvars['dimension']);
       if ($ret[0]) { # fehler beim eintrag
           $this->Meldung=$ret[1];
       }
@@ -2232,6 +2239,9 @@ class GUI extends GUI_core{
       if($layerdb->host != ''){
         $connectionstring.=' host='.$layerdb->host;
       }
+    	if($layerdb->port != ''){
+        $connectionstring.=' port='.$layerdb->port;
+      }
       $this->formvars['connection'] = $connectionstring;
       $this->formvars['epsg_code'] = $layerset[0]['epsg_code'];
       $this->formvars['transparency'] = 60;
@@ -2425,16 +2435,16 @@ class GUI extends GUI_core{
     $pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
     if($this->formvars['oid'] != '') {
     	if($layerset[0]['schema'] != ''){
-    		$this->formvars['tablename'] = $layerset[0]['schema'].'.'.$this->formvars['tablename'];
+    		$this->formvars['layer_tablename'] = $layerset[0]['schema'].'.'.$this->formvars['layer_tablename'];
     	}
-      $this->point = $pointeditor->getpoint($this->formvars['oid'], $this->formvars['tablename'], $this->formvars['columnname']);
+      $this->point = $pointeditor->getpoint($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname']);
       $rect = ms_newRectObj();
       $rect->minx = $this->point['pointx']-100;
       $rect->maxx = $this->point['pointx']+100;
       $rect->miny = $this->point['pointy']-100;
       $rect->maxy = $this->point['pointy']+100;
       #---------- Punkt-Rollenlayer erzeugen --------#
-      $datastring =$this->formvars['columnname']." from (select oid, ".$this->formvars['columnname']." from ".$this->formvars['tablename'];
+      $datastring =$this->formvars['layer_columnname']." from (select oid, ".$this->formvars['layer_columnname']." from ".$this->formvars['layer_tablename'];
       $datastring.=" WHERE oid = '".$this->formvars['oid']."'";
       $datastring.=") as foo using unique oid using srid=".$layerset[0]['epsg_code'];
       $legendentext=$layerset[0]['Name'];
@@ -2459,6 +2469,12 @@ class GUI extends GUI_core{
         $connectionstring.=' password='.$layerdb->passwd;
       }
       $connectionstring.=' dbname='.$layerdb->dbName;
+    	if($layerdb->host != ''){
+        $connectionstring.=' host='.$layerdb->host;
+      }
+      if($layerdb->port != ''){
+        $connectionstring.=' port='.$layerdb->port;
+      }
       $this->formvars['connection'] = $connectionstring;
       $this->formvars['epsg_code'] = $layerset[0]['epsg_code'];
       $this->formvars['transparency'] = 60;
@@ -3663,7 +3679,7 @@ class GUI extends GUI_core{
     if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
     $style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
     $RGB=explode(" ",$dbStyle['outlinecolor']);
-    $style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+    $style->outlinecolor->setRGB(intval($RGB[0]),intval($RGB[1]),intval($RGB[2]));
     if($dbStyle['backgroundcolor']!='') {
       $RGB=explode(" ",$dbStyle['backgroundcolor']);
       $style->backgroundcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);

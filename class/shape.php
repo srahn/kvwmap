@@ -48,7 +48,7 @@ class shape {
 				$file = $firstfile[0];
 				if(file_exists(UPLOADPATH.$file.'.dbf') OR file_exists(UPLOADPATH.$file.'.DBF')){
 					$tablename = strtolower($file).rand(0,1000000);
-		      $command = POSTGRESBINPATH.'shp2pgsql -I -s '.$formvars['epsg'].' -c '.UPLOADPATH.$file.' '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' > '.UPLOADPATH.$file.'.sql'; 
+		      $command = POSTGRESBINPATH.'shp2pgsql -I -s '.$formvars['epsg'].' -W LATIN1 -c '.UPLOADPATH.$file.' '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' > '.UPLOADPATH.$file.'.sql'; 
 		      exec($command);
 		      #echo $command;
 		      exec(POSTGRESBINPATH.'psql -f '.UPLOADPATH.$file.'.sql '.$pgdatabase->dbName.' '.$pgdatabase->user);
@@ -289,7 +289,7 @@ class shape {
   function simple_shp_import_speichern($formvars, $database){
   	$this->formvars = $formvars;
     if(file_exists(UPLOADPATH.$this->formvars['dbffile'])){      
-      $command = POSTGRESBINPATH.'shp2pgsql -W UTF-8 '.$this->formvars['table_option'].' ';
+      $command = POSTGRESBINPATH.'shp2pgsql -W LATIN1 '.$this->formvars['table_option'].' ';
       if($this->formvars['srid'] != ''){
         $command .= '-s '.$this->formvars['srid'].' ';
       }

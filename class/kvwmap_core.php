@@ -1,7 +1,7 @@
 <?php
 ###################################################################
 ###################################################################
-# kvwmap - Kartenserver für Kreisverwaltungen                     #
+# kvwmap - Kartenserver fÃ¼r Kreisverwaltungen                     #
 # Lizenz                                                          #
 #                                                                 #
 # Copyright (C) 2008  Peter Korduan                               #
@@ -26,12 +26,12 @@
 ###################################################################
 
 ################################################################################
-# Klassenbibliothek für die Internet-GIS Anwendung der Kreisverwaltung Doberan #
+# Klassenbibliothek fÃ¼r die Internet-GIS Anwendung der Kreisverwaltung Doberan #
 ################################################################################
 # Liste der Klassen:
 ########################################
 # GUI - Das Programm
-# debugfile - Klasse für die Debugdatei
+# debugfile - Klasse fÃ¼r die Debugdatei
 # LogFile
 # FormObj
 # selectFormObject extends FormObject
@@ -40,7 +40,7 @@
 ########################################
 
 ###############################################################
-# Klasse für die Funktionen der graphische Benutzeroberfläche #
+# Klasse fÃ¼r die Funktionen der graphische BenutzeroberflÃ¤che #
 ###############################################################
 # Klasse GUI #
 ##############
@@ -56,10 +56,10 @@ class GUI_core {
     # Debugdatei setzen
     global $debug;
     $this->debug=$debug;
-    # Logdatei für Mysql setzen
+    # Logdatei fÃ¼r Mysql setzen
     global $log_mysql;
     $this->log_mysql=$log_mysql;
-    # Logdatei für PostgreSQL setzten
+    # Logdatei fÃ¼r PostgreSQL setzten
     global $log_postgres;
     $this->log_postgres=$log_postgres;
     # layout Templatedatei zur Anzeige der Daten
@@ -71,19 +71,19 @@ class GUI_core {
   }
   
   /**
-  * Laden der Daten für das Map-Objekt aus Variablen, der Datenbank und/oder einer Map-Datei.
+  * Laden der Daten fÃ¼r das Map-Objekt aus Variablen, der Datenbank und/oder einer Map-Datei.
   *
-  * Diese Funktion ließt die Werte, die notwendig sind um die Karte zu konfigurieren. Die Quellen werden in Abhängigkeit vom Parameter $loadMapSource aus Variablen, aus einer Datenbank oder aus einem MapFile
+  * Diese Funktion lieÃŸt die Werte, die notwendig sind um die Karte zu konfigurieren. Die Quellen werden in AbhÃ¤ngigkeit vom Parameter $loadMapSource aus Variablen, aus einer Datenbank oder aus einem MapFile
   *
-  * Reihenfolge: Übersichtssatz - Kommentar - Tags.
+  * Reihenfolge: Ãœbersichtssatz - Kommentar - Tags.
   *
-  * @param  string  $loadMapSource Art der Quelle, aus der die Werte für das Map-Objekt gelesen werden sollen
-  *                 Mögliche Werte zur Zeit:
-  *                 Post: Werte werden aus Variablen gelesen, die über Post mitgeschickt wurden
-  *                        Dabei werden einige defaultmäßig zu setzende Parameter aus dem angegebenen MapFile gelesen.
-  *                 File: Die Werte für das Map-Objekt werden aus einer Map-Datei gelesen
-  *                 DataBase: Dies ist der Standardfall. Die Werte für das Map-Objekt werden aus der Datenbank gelesen.
-  * @return boolean liefert derzeit immer true zurück.
+  * @param  string  $loadMapSource Art der Quelle, aus der die Werte fÃ¼r das Map-Objekt gelesen werden sollen
+  *                 MÃ¶gliche Werte zur Zeit:
+  *                 Post: Werte werden aus Variablen gelesen, die Ã¼ber Post mitgeschickt wurden
+  *                        Dabei werden einige defaultmÃ¤ÃŸig zu setzende Parameter aus dem angegebenen MapFile gelesen.
+  *                 File: Die Werte fÃ¼r das Map-Objekt werden aus einer Map-Datei gelesen
+  *                 DataBase: Dies ist der Standardfall. Die Werte fÃ¼r das Map-Objekt werden aus der Datenbank gelesen.
+  * @return boolean liefert derzeit immer true zurÃ¼ck.
   * @see    db_mapObj(), $map
   */
   function loadMap($loadMapSource) {
@@ -268,7 +268,7 @@ class GUI_core {
         $map->imagecolor->setRGB(255,255,255);
         $map->maxsize = 4096;
         
-	# setzen der Kartenausdehnung über die letzten Benutzereinstellungen
+	# setzen der Kartenausdehnung Ã¼ber die letzten Benutzereinstellungen
 	if ($this->user->rolle->oGeorefExt->minx==0 OR $this->user->rolle->oGeorefExt->minx=='') {
 	  echo "Richten Sie mit phpMyAdmin in der kvwmap Datenbank eine Referenzkarte, eine Stelle, einen Benutzer und eine Rolle ein ";
 	  echo "<br>(Tabellen referenzkarten, stelle, user, rolle) ";
@@ -279,7 +279,7 @@ class GUI_core {
 	  $map->setextent($this->user->rolle->oGeorefExt->minx,$this->user->rolle->oGeorefExt->miny,$this->user->rolle->oGeorefExt->maxx,$this->user->rolle->oGeorefExt->maxy);
         }
 
-        # setzen der Kartenausdehnung über die letzten Benutzereinstellungen
+        # setzen der Kartenausdehnung Ã¼ber die letzten Benutzereinstellungen
         if ($this->user->rolle->oGeorefExt->minx==0 OR $this->user->rolle->oGeorefExt->minx=='') {
           echo "Richten Sie mit phpMyAdmin in der kvwmap Datenbank eine Referenzkarte, eine Stelle, einen Benutzer und eine Rolle ein ";
           echo "<br>(Tabellen referenzkarten, stelle, user, rolle) ";
@@ -426,7 +426,7 @@ class GUI_core {
         if($this->class_load_level == ''){
           $this->class_load_level = 1;
         }
-        $layer = $mapDB->read_Layer($this->class_load_level);     # 2 = für alle Layer die Klassen laden, 1 = nur für aktive Layer laden, 0 = keine Klassen laden
+        $layer = $mapDB->read_Layer($this->class_load_level);     # 2 = fÃ¼r alle Layer die Klassen laden, 1 = nur fÃ¼r aktive Layer laden, 0 = keine Klassen laden
         $rollenlayer = $mapDB->read_RollenLayer();
         $layerset = array_merge($layer, $rollenlayer);
         $mapDB->anzLayer=count($layerset);
@@ -469,7 +469,7 @@ class GUI_core {
           $layer->set('name', $layerset[$i]['Name']);
 
           //---- wenn die Layer einer eingeklappten Gruppe nicht in der Karte //
-          //---- dargestellt werden sollen, muß hier bei aktivStatus != 1 //
+          //---- dargestellt werden sollen, muÃŸ hier bei aktivStatus != 1 //
           //---- der layer_status auf 0 gesetzt werden//
           if($layerset[$i]['aktivStatus'] == 0){
             $layer->set('status', 0);
@@ -498,7 +498,7 @@ class GUI_core {
           	if(!$fp){			# keine Verbindung --> Layer ausschalten
           		$layer->set('status', 0);
           		$layer->setMetaData('queryStatus', 0);
-    					$this->Fehlermeldung = $errstr.' für Layer: '.$layerset[$i]['Name'].'<br>';
+    					$this->Fehlermeldung = $errstr.' fÃ¼r Layer: '.$layerset[$i]['Name'].'<br>';
           	}
           }
 
@@ -570,10 +570,10 @@ class GUI_core {
               		$layerset[$i]['connection'] = $layerset[$i]['printconnection']; 		# wenn es eine Druck-Connection gibt, wird diese verwendet
               	}
               	else{
-                	//$layerset[$i]['connection'] .= '&mapfactor='.$this->map_factor;			# bei WMS-Layern wird der map_factor durchgeschleift (für die eigenen WMS) erstmal rausgenommen, weil einige WMS-Server der zusätzliche Parameter mapfactor stört
+                	//$layerset[$i]['connection'] .= '&mapfactor='.$this->map_factor;			# bei WMS-Layern wird der map_factor durchgeschleift (fÃ¼r die eigenen WMS) erstmal rausgenommen, weil einige WMS-Server der zusÃ¤tzliche Parameter mapfactor stÃ¶rt
               	}
               }
-              if($layerset[$i]['connectiontype'] == 6)$layerset[$i]['connection'] .= " options='-c client_encoding=".MYSQL_CHARSET."'";		# z.B. für Klassen mit Umlauten
+              if($layerset[$i]['connectiontype'] == 6)$layerset[$i]['connection'] .= " options='-c client_encoding=".MYSQL_CHARSET."'";		# z.B. fÃ¼r Klassen mit Umlauten
               $layer->set('connection', $layerset[$i]['connection']);
             }
             if ($layerset[$i]['connectiontype']>0) {
@@ -619,7 +619,7 @@ class GUI_core {
                 $layer->set('data', $layerset[$i]['Data']);
               }
   
-              # Setzen der Templatedateien für die Sachdatenanzeige inclt. Footer und Header.
+              # Setzen der Templatedateien fÃ¼r die Sachdatenanzeige inclt. Footer und Header.
               # Template (Body der Anzeige)
               if ($layerset[$i]['template']!='') {
                 $layer->set('template',$layerset[$i]['template']);
@@ -777,7 +777,7 @@ class GUI_core {
         $klasse -> settext($classset[$j]['text']);
       }
       # setzen eines oder mehrerer Styles
-      # Änderung am 12.07.2005 Korduan
+      # Ã„nderung am 12.07.2005 Korduan
       for ($k=0;$k<count($classset[$j]['Style']);$k++) {
         $dbStyle=$classset[$j]['Style'][$k];
 				if (MAPSERVERVERSION < 600) {
@@ -829,7 +829,7 @@ class GUI_core {
         }
 
         if($this->map_factor != '' and $layerset['Datentyp'] != 8){ 
-          # Skalierung der Stylegröße, wenn map_factor gesetzt und nicht vom Type Chart
+          # Skalierung der StylegrÃ¶ÃŸe, wenn map_factor gesetzt und nicht vom Type Chart
           $style->set('size', $dbStyle['size']*$this->map_factor);
         }
         else{
@@ -917,10 +917,10 @@ class GUI_core {
         if ($dbStyle['offsety']!='') {
           $style->set('offsety', $dbStyle['offsety']);
         }
-      } # Ende Schleife für mehrere Styles
+      } # Ende Schleife fÃ¼r mehrere Styles
 
       # setzen eines oder mehrerer Labels
-      # Änderung am 12.07.2005 Korduan
+      # Ã„nderung am 12.07.2005 Korduan
       for ($k=0;$k<count($classset[$j]['Label']);$k++) {
         $dbLabel=$classset[$j]['Label'][$k];
         if (MAPSERVERVERSION < 600) { 
@@ -965,7 +965,7 @@ class GUI_core {
           $klasse->label->set('size',$dbLabel['size']);
           $klasse->label->set('minsize',$dbLabel['minsize']);
           $klasse->label->set('maxsize',$dbLabel['maxsize']);
-          # Skalierung der Labelschriftgröße, wenn map_factor gesetzt
+          # Skalierung der LabelschriftgrÃ¶ÃŸe, wenn map_factor gesetzt
           if($this->map_factor != ''){
             $klasse->label->set('minsize',$dbLabel['minsize']*$this->map_factor);
             $klasse->label->set('maxsize',$dbLabel['size']*$this->map_factor);
@@ -1053,7 +1053,7 @@ class GUI_core {
           $label->size = $dbLabel['size'];
           $label->minsize = $dbLabel['minsize'];
           $label->maxsize = $dbLabel['maxsize'];
-          # Skalierung der Labelschriftgröße, wenn map_factor gesetzt
+          # Skalierung der LabelschriftgrÃ¶ÃŸe, wenn map_factor gesetzt
           if($this->map_factor != ''){
             $label->minsize = $dbLabel['minsize']*$this->map_factor;
             $label->maxsize = $dbLabel['size']*$this->map_factor;
@@ -1101,7 +1101,7 @@ class GUI_core {
           }
           $klasse->addLabel($label);
         } # ende mapserver >=600
-      } # ende Schleife für mehrere Label
+      } # ende Schleife fÃ¼r mehrere Label
     } # end of Schleife Class
   }
 
@@ -1178,13 +1178,13 @@ class GUI_core {
     # Zerlegung der Input Koordinaten in linke obere und rechte untere Ecke
     # echo ('formvars[INPUT_COORD]: '.$this->formvars['INPUT_COORD']);
     $corners=explode(';',$this->formvars['INPUT_COORD']);
-    # Auslesen der ersten übergebenen Koordinate
+    # Auslesen der ersten Ã¼bergebenen Koordinate
     $lo=explode(',',$corners[0]);
     $minx=$lo[0];
     $maxy=$lo[1];
-    # Abfrage, ob eine oder zwei Koordinaten übergeben wurden
+    # Abfrage, ob eine oder zwei Koordinaten Ã¼bergeben wurden
     if (count($corners)==1) {
-      # es wurde nur ein Punkt übergeben zum zoomen
+      # es wurde nur ein Punkt Ã¼bergeben zum zoomen
       #echo '<br>Zoom zum Punkt.';
       $zoom='point';
     }
@@ -1195,11 +1195,11 @@ class GUI_core {
       $miny=$ru[1];
       $maxx=$ru[0];
       if ($minx==$maxx AND $miny==$maxy) {
-        # Das Rechteck hat die Kantenlänge 0 deshalb zoom auf Punkt
+        # Das Rechteck hat die KantenlÃ¤nge 0 deshalb zoom auf Punkt
         $zoom='point';
       }
       else {
-        # zoom auf Rechteck wegen Kantenlänge > 0
+        # zoom auf Rechteck wegen KantenlÃ¤nge > 0
         $zoom='rectangle';
       }
     }
@@ -1216,7 +1216,7 @@ class GUI_core {
       else{
         #---------- Punkt-Rollenlayer erzeugen --------#
         $legendentext ="Koordinate: ".$minx." ".$maxy;
-        if(strpos($minx, '°') !== false){
+        if(strpos($minx, 'Â°') !== false){
 	      	$minx = dms2dec($minx);
 	      	$maxy = dms2dec($maxy);
 	      }
@@ -1276,7 +1276,7 @@ class GUI_core {
         $this->user->rolle->set_one_Group($this->user->id, $this->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
         $this->loadMap('DataBase');
 
-        # hier wurden Weltkoordinaten übergeben
+        # hier wurden Weltkoordinaten Ã¼bergeben
         $this->pixwidth = ($this->map->extent->maxx - $this->map->extent->minx)/$this->map->width;
         $pixel_x = ($minx-$this->map->extent->minx)/$this->pixwidth;
         $pixel_y = ($this->map->extent->maxy-$maxy)/$this->pixwidth;
@@ -1297,7 +1297,7 @@ class GUI_core {
        	$oPixelExt->setextent($minx,$miny,$maxx,$maxy); 
         $this->map->zoomrectangle($oPixelExt,$this->map->width,$this->map->height,$this->map->extent);
         # Nochmal Zoomen auf die Mitte mit Faktor 1, damit der Ausschnitt in den erlaubten Bereich
-        # verschoben wird, falls er ausserhalb liegt, zoompoint berücksichtigt das, zoomrectangle nicht.
+        # verschoben wird, falls er ausserhalb liegt, zoompoint berÃ¼cksichtigt das, zoomrectangle nicht.
         # Berechnung der Bildmitte
         $oPixelPos=ms_newPointObj();
         $oPixelPos->setXY($this->map->width/2,$this->map->height/2);
@@ -1320,7 +1320,7 @@ class GUI_core {
   }
 	
 	/**
-	 * transformiert die gegebenen Koordinaten von wgs in das System der Stelle und speichert den Kartenextent für die Rolle
+	 * transformiert die gegebenen Koordinaten von wgs in das System der Stelle und speichert den Kartenextent fÃ¼r die Rolle
 	 */
 	function setMapExtent() {
     if (MAPSERVERVERSION < 600) {
@@ -1352,7 +1352,7 @@ class GUI_core {
     }
   }
 
-  # Zeichnet die Kartenelemente Hauptkarte, Legende, Maßstab und Referenzkarte
+  # Zeichnet die Kartenelemente Hauptkarte, Legende, MaÃŸstab und Referenzkarte
   # drawMap #
   function drawMap() {	
     if(MINSCALE != '' AND $this->map_factor == '' AND $this->map_scaledenom < MINSCALE){
@@ -1364,7 +1364,7 @@ class GUI_core {
     $this->img['hauptkarte'] = IMAGEURL.$filename;
     $this->debug->write("Name der Hauptkarte: ".$this->img['hauptkarte'],4);
     
-		# Ausblenden der Layer in der Legende, die im aktuellen Maßstab nicht gezeichnet werden sollen
+		# Ausblenden der Layer in der Legende, die im aktuellen MaÃŸstab nicht gezeichnet werden sollen
     for ($i=0;$i<$this->map->numlayers;$i++) {
       $layer=$this->map->getLayer($i);
       $layerhiddenflag = '0';
@@ -1414,7 +1414,7 @@ class GUI_core {
       $this->layerhiddenstring .= $layer->getMetaData('Layer_ID').' '.$layerhiddenflag.' ';
     }
 
-    # Erstellen des Maßstabes
+    # Erstellen des MaÃŸstabes
 	  $this->switchScaleUnitIfNecessary();
     $img_scalebar = $this->map->drawScaleBar();
     $filename = $this->user->id.'_'.rand(0, 1000000).'.png';
@@ -1502,7 +1502,7 @@ class GUI_core {
 
   # Ausgabe der Seite
   function output() {
-    # bisher gibt es folgenden verschiedenen Dokumente die angezeigt werden können
+    # bisher gibt es folgenden verschiedenen Dokumente die angezeigt werden kÃ¶nnen
     global $html;
     $html['style']=$this->style;
     switch ($this->mime_type) {
@@ -1545,7 +1545,7 @@ class GUI_core {
 } # end of class GUI
 
 ##########################
-# Klasse für Debug-Datei #
+# Klasse fÃ¼r Debug-Datei #
 ##########################
 # Klasse debugfile #
 ####################
@@ -1573,9 +1573,9 @@ class debugfile {
     if ($level>=DEBUG_LEVEL) {
       $ret=@fwrite($this->fp,"\n<br>".$msg);
       if (!$ret) {
-        $this->Fehlermeldung ='In die Debugdatei '.$this->filename.' läßt sich nicht schreiben.';
-        $this->Fehlermeldung.='<br>Das kann daran liegen, dass für den WebServer, in dem kvwmap läuft, keine Schreibrechte gesetzt sind.';
-        $this->Fehlermeldung.='<br>Prüfen Sie die Rechte der Datei!';
+        $this->Fehlermeldung ='In die Debugdatei '.$this->filename.' lÃ¤ÃŸt sich nicht schreiben.';
+        $this->Fehlermeldung.='<br>Das kann daran liegen, dass fÃ¼r den WebServer, in dem kvwmap lÃ¤uft, keine Schreibrechte gesetzt sind.';
+        $this->Fehlermeldung.='<br>PrÃ¼fen Sie die Rechte der Datei!';
         include(LAYOUTPATH."snippets/Fehlermeldung.php");
         exit;
       }
@@ -1588,7 +1588,7 @@ class debugfile {
   }
 }
 ############################################
-# Klasse für das Loggen von SQL-Statements #
+# Klasse fÃ¼r das Loggen von SQL-Statements #
 ############################################
 # Klasse LogFile #
 ##################
@@ -1606,13 +1606,13 @@ class LogFile {
   #
   ################################################################################
 
-  # öffnet die Logdatei
+  # Ã¶ffnet die Logdatei
   function LogFile($filename,$format,$title,$headline) {
     $this->name=$filename;
     $this->fp=fopen($filename,"a");
     $this->format=$format;
     if ($format=="html") {
-      # fügt HEML header ein zum loggen in einer HTML-Datei
+      # fÃ¼gt HEML header ein zum loggen in einer HTML-Datei
       # Wenn title gesetzt ist wird er als Titel im header gesetzt, sonst default.
       if ($title=="") { $title=="Logdatei"; }
       fwrite($this->fp,"<html>\n<head>\n<title>".$title."</title>\n</head>\n<body>");
@@ -1626,9 +1626,9 @@ class LogFile {
       }
     }
     if (!$ret) {
-      $this->Fehlermeldung ='In die Logdatei '.$this->name.' läßt sich nicht schreiben.';
-      $this->Fehlermeldung.='<br>Das kann daran liegen, dass für den WebServer, in dem kvwmap läuft, keine Schreibrechte gesetzt sind.';
-      $this->Fehlermeldung.='<br>Prüfen Sie die Rechte der Datei!';
+      $this->Fehlermeldung ='In die Logdatei '.$this->name.' lÃ¤ÃŸt sich nicht schreiben.';
+      $this->Fehlermeldung.='<br>Das kann daran liegen, dass fÃ¼r den WebServer, in dem kvwmap lÃ¤uft, keine Schreibrechte gesetzt sind.';
+      $this->Fehlermeldung.='<br>PrÃ¼fen Sie die Rechte der Datei!';
       include(LAYOUTPATH."snippets/Fehlermeldung.php");
       exit;
     }
@@ -1724,7 +1724,7 @@ class db_mapObj_core {
     $this->Layer = array();
     $this->disabled_classes = $this->read_disabled_classes();
     while ($rs=mysql_fetch_array($query)) {
-      if($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivStatus'] != '0')){    # bei withclasses == 2 werden für alle Layer die Klassen geladen, bei withclasses == 1 werden die Klassen nur dann geladen, wenn der Layer aktiv ist
+      if($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivStatus'] != '0')){    # bei withclasses == 2 werden fÃ¼r alle Layer die Klassen geladen, bei withclasses == 1 werden die Klassen nur dann geladen, wenn der Layer aktiv ist
         $rs['Class']=$this->read_Classes($rs['Layer_ID'], $this->disabled_classes);
       }
       $this->Layer[]=$rs;
@@ -1821,8 +1821,8 @@ class db_mapObj_core {
   }
 
 
-  # Änderung am 12.07.2005 von 1.4.4 nach 1.4.5, Korduan
-  # Einer Klasse können nun mehrere Labels zugeordnet werden
+  # Ã„nderung am 12.07.2005 von 1.4.4 nach 1.4.5, Korduan
+  # Einer Klasse kÃ¶nnen nun mehrere Labels zugeordnet werden
   # Abfrage der Labels nicht mehr aus Tabelle classes sondern aus u_labels2classes
   function read_Label($Class_ID) {
     $sql ='SELECT * FROM labels AS l,u_labels2classes AS l2c';

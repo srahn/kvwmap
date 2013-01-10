@@ -39,7 +39,10 @@ function send(){
   </tr>
   <? if($this->new_entry != true){ ?>
   <tr> 
-    <td align="center"> <input type="button" name="senden" value="Senden" onclick="send();"> </td>
+    <td align="center">
+    	<input type="button" name="senden" value="Speichern" onclick="send();"><br><br>
+    	<a href="index.php?go=Layer-Suche&go_plus=Suchen&selected_layer_id=<?php echo $this->formvars['layer_id']; ?>&value_<?php echo $this->formvars['layer_tablename']; ?>_oid=<?php echo $this->formvars['oid']; ?>">Sachdatenanzeige</a>
+    </td>
   </tr>
   <? }else{ ?>
   <tr>
@@ -53,8 +56,8 @@ function send(){
 </table>
 <INPUT TYPE="HIDDEN" NAME="dimension" VALUE="<?php echo $this->formvars['dimension']; ?>">
 <INPUT TYPE="HIDDEN" NAME="layer_id" VALUE="<?php echo $this->formvars['layer_id']; ?>">
-<INPUT TYPE="HIDDEN" NAME="columnname" VALUE="<?php echo $this->formvars['columnname']; ?>">
-<INPUT TYPE="HIDDEN" NAME="tablename" VALUE="<?php echo $this->formvars['tablename']; ?>">
+<INPUT TYPE="HIDDEN" NAME="layer_columnname" VALUE="<?php echo $this->formvars['layer_columnname']; ?>">
+<INPUT TYPE="HIDDEN" NAME="layer_tablename" VALUE="<?php echo $this->formvars['layer_tablename']; ?>">
 <INPUT TYPE="hidden" NAME="fromwhere" VALUE="">
 <INPUT TYPE="HIDDEN" NAME="oid" VALUE="<?php echo $this->formvars['oid']; ?>">
 <INPUT TYPE="HIDDEN" NAME="scale" VALUE="<?php echo $scale; ?>"> 
