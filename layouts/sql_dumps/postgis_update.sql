@@ -1100,8 +1100,12 @@ CREATE OR REPLACE VIEW public.bw_boris_view AS
    LEFT JOIN alb_v_gemeinden g ON bw.gemeinde = g.gemeinde
    LEFT JOIN alb_v_gemarkungen gm ON bw.gemarkung = gm.gemkgschl;
 
-
-
-
-
-
+-- ändert die Spalte kategorie_id der Tabelle q_notizen auf den Datentyp integer und indiziert Fremdschlüssel in q_notizen und q_notiz_kategorie2stelle
+ALTER TABLE q_notizen ADD COLUMN temp integer;
+UPDATE q_notizen SET temp = kategorie_id::integer;
+ALTER TABLE q_notizen DROP COLUMN kategorie_id;
+ALTER TABLE q_notizen RENAME COLUMN temp TO kategorie_id;
+CREATE INDEX q_notizen_kategorie_id_idx ON q_notizen USING btree (kategorie_id);
+CREATE INDEX q_notiz_kategorie2stelle_stelle_idx ON q_notiz_kategorie2stelle USING btree (stelle);
+CREATE INDEX q_notiz_kategorie2stelle_kat_id_idx ON q_notiz_kategorie2stelle USING btree (stelle);
+ALTER TABLE q_notiz_kategorie2stelle ADD CONSTRAINT q_notiz_kategorie2stelle_pkey PRIMARY KEY(stelle, kat_id);

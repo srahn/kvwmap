@@ -24,6 +24,8 @@
 	$worldprintheight = $this->Document->activeframe[0]["mapheight"] * $this->formvars['printscale'] * 0.0003526;
 	$printwidth = round($worldprintwidth/$scale);
 	$printheight = round($worldprintheight/$scale);
+	$halfprintheight = $printheight/2;
+	$halfprintwidth = $printwidth/2;
 		
 #	echo('formvars[pathx]: '.$this->formvars["pathx"].', formvars[pathy]: '.$this->formvars["pathy"]);
 #	echo('formvars[loc_x]: '.$this->formvars["loc_x"].', formvars[loc_y]: '.$this->formvars["loc_y"]);
@@ -31,11 +33,11 @@
 #
 # Positionsanzeigetext ausserhalb der Anzeigeflaeche bei Start
 #
-	$text_y=$this->formvars['center_y'];
-	$text_x=$this->formvars['center_x'];
+	$pixel_y=($this->formvars['center_y']-$this->map->extent->miny)/$scale;
+	$pixel_x=($this->formvars['center_x']-$this->map->extent->minx)/$scale;
 	$angle = $this->formvars['angle'];
-	$pos_x = round($text_x-$printwidth/2);
-	$pos_y = round($text_y-$printheight/2);;
+	$pos_x = round($pixel_x-$printwidth/2);
+	$pos_y = round($pixel_y-$printheight/2);
 ?>
 
 <!-- ----------------------- formular-variabeln fuer navigation ---------------------- -->
@@ -61,14 +63,13 @@
 
 <SCRIPT type="text/ecmascript"><!--
 
-  function sendBWlocation(loc_x,loc_y) {
-      document.GUI.loc_x.value    = loc_x;
-      document.GUI.loc_y.value    = loc_y;
-  }
+	var scale = <? echo $scale; ?>;
+	var minx = <? echo $this->map->extent->minx; ?>;
+	var miny = <? echo $this->map->extent->miny; ?>;
   
   function sendcenterlocation(center_x,center_y) {
-      document.GUI.center_x.value    = center_x;
-      document.GUI.center_y.value    = center_y;
+      document.GUI.center_x.value = (center_x*scale)+minx;
+      document.GUI.center_y.value = (center_y*scale)+miny;
   }
   
   function sendworldprintvalues(worldprintwidth,worldprintheight){
@@ -164,7 +165,9 @@ $svg='<?xml version="1.0"?>
 	var moved  = false;
 	var doing = "'.$this->user->rolle->getSelectedButton().'";
 	var highlighted  = "yellow";
-	var cmd   = ""; 
+	var cmd   = "";
+	var width = '.$printwidth.';
+	var height = '.$printheight.';
 
 function startup() {
 //	focus_NAV();
@@ -173,12 +176,25 @@ function startup() {
 	focus_FS();
 	draw_pgon_on();
 	redraw();
+	alignbuttons(width, height);
 }
 
 // ------------------------------------------------------------------------------------
 // --------------------------scripte fuer die NAVigation-------------------------------
 // ------------------------------------------------------------------------------------
 '.$SVGvars_navscript.'
+
+function go_previous(){
+  document.getElementById("canvas").setAttribute("cursor", "wait");
+  top.document.GUI.CMD.value  = "previous";
+  top.document.GUI.submit();
+}
+
+function go_next(){
+  document.getElementById("canvas").setAttribute("cursor", "wait");
+  top.document.GUI.CMD.value  = "next";
+  top.document.GUI.submit();
+}
 
 function zoomin(){
 	doing = "zoomin"; 
@@ -309,18 +325,11 @@ function draw_pgon_on() {
 }
 
 function draw_pgon_off() {
-  document.getElementById("canvas_FS").setAttribute("cursor", "text");
+  document.getElementById("canvas_FS").setAttribute("cursor", "crosshair");
   document.getElementById("text0").style.setProperty("fill",highlighted, "");
- // document.getElementById("pgon0").style.setProperty("fill","ghostwhite", "");
- // document.getElementById("pgon1").style.setProperty("fill","ghostwhite", "");
- // document.getElementById("pgon2").style.setProperty("fill","ghostwhite", "");
 	polygon_draw=false;
 	// formularfelder + position der bodenwert-textanzeige loeschen
   client_x = ""; client_y = "";
-	var obj = document.getElementById("bodenwert");
-	obj.setAttribute("x", 0);
-	obj.setAttribute("y", 0);
-  //top.sendBWlocation(client_x,client_y);
 }
 
 // ------------------------texteinfuegepunkt setzen-----------------------------
@@ -332,32 +341,82 @@ function choose(evt) {
   client_y = resy - evt.clientY;
   		
   if(top.document.GUI.printscale.value != ""){
-  	top.setprintextent("true");
-	  worldprintwidth = '.$this->Document->activeframe[0]["mapwidth"].' * top.document.GUI.printscale.value * 0.00035277;
-	  worldprintheight = '.$this->Document->activeframe[0]["mapheight"].' * top.document.GUI.printscale.value * 0.00035277;
-	  width = worldprintwidth/scale;
-	  height = worldprintheight/scale;
-	  
-		// position der bodenwert-tesxtanzeige zuordnen
+  	top.setprintextent("true");	  
+  	worldprintwidth = '.$this->Document->activeframe[0]["mapwidth"].' * top.document.GUI.printscale.value * 0.00035277;
+		worldprintheight = '.$this->Document->activeframe[0]["mapheight"].' * top.document.GUI.printscale.value * 0.00035277;
+		width = worldprintwidth/scale;
+		height = worldprintheight/scale;
 		posx = Math.round(client_x-width/2);
 		posy = Math.round(client_y-height/2);
+		var obj3 = document.getElementById("auswahl");
+		var obj2 = document.getElementById("auswahl2");
 		var obj = document.getElementById("rechteck");
-		obj.setAttribute("x", posx);
-		obj.setAttribute("y", posy);
+		obj2.setAttribute("transform", "translate("+posx+" "+posy+")");
+		obj3.setAttribute("transform", "rotate("+top.document.GUI.angle.value+" "+client_x+" "+client_y+")");
 		obj.setAttribute("width", Math.round(width));
 		obj.setAttribute("height", Math.round(height));
-		obj.setAttribute("transform", "rotate("+top.document.GUI.angle.value+" "+client_x+" "+client_y+")");
-		
-				  		
-				  		
-		// auswahl an formular uebergeben
-	  //top.sendBWlocation(Math.round(client_x-width/2),Math.round(client_y-height/2));
+		alignbuttons(width, height);
 	  top.sendcenterlocation(client_x,client_y);
 	  top.sendworldprintvalues(worldprintwidth, worldprintheight);
   }
   else{
   	alert("Bitte geben Sie einen Druckmassstab ein");
   }
+}
+
+function alignbuttons(width, height){
+	document.getElementById("poly_right").setAttribute("transform", "translate("+width+" "+height/2+")");
+	document.getElementById("poly_left").setAttribute("transform", "translate(0 "+height/2+")");
+	document.getElementById("poly_up").setAttribute("transform", "translate("+width/2+" "+height+")");
+	document.getElementById("poly_down").setAttribute("transform", "translate("+width/2+" 0)");
+}
+
+function activate(evt){
+	evt.target.setAttribute("style", "-moz-user-select: none;opacity:1;fill:rgb(192,192,255);stroke:black;stroke-width:2");
+}
+
+function deactivate(evt){
+	evt.target.setAttribute("style", "-moz-user-select: none;opacity:0.01;fill:rgb(192,192,255);stroke:black;stroke-width:2");
+}
+
+function right(){
+	var obj = document.getElementById("auswahl2");
+	currenttranslate = obj.getAttributeNS(null, "transform").slice(10,-1).split(\' \');
+	currenttranslate[0] = parseFloat(currenttranslate[0]) + width;
+  newtranslate = "translate(" + currenttranslate.join(\' \') + ")";
+  obj.setAttributeNS(null, "transform", newtranslate);
+	top.document.GUI.center_x.value = parseFloat(top.document.GUI.center_x.value) + parseFloat(top.document.GUI.worldprintwidth.value);
+	document.getElementById("poly_right").setAttribute("style", "-moz-user-select: none;opacity:0.01;fill:rgb(192,192,255);stroke:black;stroke-width:2"); 
+}
+
+function left(){
+	var obj = document.getElementById("auswahl2");
+	currenttranslate = obj.getAttributeNS(null, "transform").slice(10,-1).split(\' \');
+	currenttranslate[0] = parseFloat(currenttranslate[0]) - width;
+  newtranslate = "translate(" + currenttranslate.join(\' \') + ")";
+  obj.setAttributeNS(null, "transform", newtranslate);
+	top.document.GUI.center_x.value = parseFloat(top.document.GUI.center_x.value) - parseFloat(top.document.GUI.worldprintwidth.value);
+	document.getElementById("poly_left").setAttribute("style", "-moz-user-select: none;opacity:0.01;fill:rgb(192,192,255);stroke:black;stroke-width:2"); 
+}
+
+function up(){
+	var obj = document.getElementById("auswahl2");
+	currenttranslate = obj.getAttributeNS(null, "transform").slice(10,-1).split(\' \');
+	currenttranslate[1] = parseFloat(currenttranslate[1]) + height;
+  newtranslate = "translate(" + currenttranslate.join(\' \') + ")";
+  obj.setAttributeNS(null, "transform", newtranslate);
+	top.document.GUI.center_y.value = parseFloat(top.document.GUI.center_y.value) + parseFloat(top.document.GUI.worldprintheight.value);
+	document.getElementById("poly_up").setAttribute("style", "-moz-user-select: none;opacity:0.01;fill:rgb(192,192,255);stroke:black;stroke-width:2"); 
+}
+
+function down(){
+	var obj = document.getElementById("auswahl2");
+	currenttranslate = obj.getAttributeNS(null, "transform").slice(10,-1).split(\' \');
+	currenttranslate[1] = parseFloat(currenttranslate[1]) - height;
+  newtranslate = "translate(" + currenttranslate.join(\' \') + ")";
+  obj.setAttributeNS(null, "transform", newtranslate);
+	top.document.GUI.center_y.value = parseFloat(top.document.GUI.center_y.value) - parseFloat(top.document.GUI.worldprintheight.value);
+	document.getElementById("poly_down").setAttribute("style", "-moz-user-select: none;opacity:0.01;fill:rgb(192,192,255);stroke:black;stroke-width:2"); 
 }
 
 // ----------------------------pgon zeichnen---------------------------------
@@ -424,10 +483,7 @@ function restart()
 
   <defs>
 '.$SVGvars_defs.'
-	<g id="auswahl">			   		   				
-  	<rect id="rechteck" x="'.$pos_x.'" y="'.$pos_y.'" transform="rotate('.$angle.' '.$text_x.' '.$text_y.')" rx="0" ry="0" width="'.$printwidth.'" height="'.$printheight.'" style="fill:rgb(192,192,255);stroke:black;stroke-width:2;fill-opacity:0.2">  		
-  	</rect>
-	</g>
+	
   </defs>
   <rect id="background" style="fill:white" width="100%" height="100%"/>
 	<g id="moveGroup" transform="translate(0 0)">
@@ -435,14 +491,25 @@ function restart()
 			<animate attributeName="opacity" begin="0s" dur="4s" fill="freeze" keyTimes="0; 0.25; 0.5; 0.75; 1" repeatCount="indefinite" values="1;1;0;1;1"/>
 		</text>
 	  <image xlink:href="'.$bg_pic.'" height="100%" width="100%" y="0" x="0"/>
-	  <g id="cartesian" transform="translate(0,'.$res_y.') scale(1,-1)">
-	    <polygon points="" id="polygon" style="fill-opacity:0.5;fill:rgb(192,192,255);stroke:blue;stroke-width:2"/>
-	  	<use id="bodenwert" xlink:href="#auswahl"/>
-	  </g>
+	</g>
+	<g id="cartesian" transform="translate(0,'.$res_y.') scale(1,-1)">
+    <polygon points="" id="polygon" style="fill-opacity:0.5;fill:rgb(192,192,255);stroke:blue;stroke-width:2"/>
   </g>
   <rect id="canvas_FS" cursor="crosshair" onmousedown="task(evt)" onmousemove="hide_tooltip();" width="100%" height="100%" opacity="0" fill="cornflowerblue" visibility="visible"/>
   <rect id="canvas" cursor="crosshair" onmousedown="mousedown(evt)" onmousemove="mousemove(evt);hide_tooltip();" onmouseup="mouseup(evt);" fill="yellow" width="100%" height="100%" opacity="0" visibility="hidden"/>
-    <g id="buttons_NAV" cursor="pointer" onmouseout="hide_tooltip()" onmousedown="focus_NAV();hide_tooltip()">
+  <g id="cartesian" transform="translate(0,'.$res_y.') scale(1,-1)">
+    <polygon points="" id="polygon" style="fill-opacity:0.5;fill:rgb(192,192,255);stroke:blue;stroke-width:2"/>
+  	<g id="auswahl" transform="rotate('.$angle.' '.$pixel_x.' '.$pixel_y.')">
+		<g id="auswahl2" transform="translate('.$pos_x.' '.$pos_y.')">			   		   				
+	  	<rect id="rechteck" x="0" y="0" rx="0" ry="0" width="'.$printwidth.'" height="'.$printheight.'" style="fill:none;stroke:black;stroke-width:2;"></rect>
+	  	<polygon points="0,15 15,0 0,-15 0,15" id="poly_right" onmouseover="activate(evt);" onmouseout="deactivate(evt);" onmouseup="right();" style="opacity:0.01;fill:rgb(192,192,255);stroke:blue;stroke-width:2"/>
+	  	<polygon points="0,15 -15,0 0,-15 0,15" id="poly_left" onmouseover="activate(evt);" onmouseout="deactivate(evt);" onmouseup="left();" style="opacity:0.01;fill:rgb(192,192,255);stroke:blue;stroke-width:2"/>
+	  	<polygon points="-15,0 0,15 15,0 -15,0" id="poly_up" onmouseover="activate(evt);" onmouseout="deactivate(evt);" onmouseup="up();" style="opacity:0.01;fill:rgb(192,192,255);stroke:blue;stroke-width:2"/>
+	  	<polygon points="-15,0 0,-15 15,0 -15,0" id="poly_down" onmouseover="activate(evt);" onmouseout="deactivate(evt);" onmouseup="down();" style="opacity:0.01;fill:rgb(192,192,255);stroke:blue;stroke-width:2"/>
+  	</g>
+	</g>
+  </g>
+  <g id="buttons_NAV" cursor="pointer" onmouseout="hide_tooltip()" onmousedown="focus_NAV();hide_tooltip()">
 '.$SVGvars_navbuttons.'
 		</g>
 

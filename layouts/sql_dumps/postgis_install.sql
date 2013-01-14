@@ -457,7 +457,7 @@ WITH OIDS;
 CREATE TABLE q_notizen
 (
   notiz text,
-  kategorie_id varchar(100),
+  kategorie_id integer,
   person varchar(100),
   datum date
 ) 
@@ -488,7 +488,12 @@ CREATE TABLE q_notiz_kategorie2stelle
   anlegen bool NOT NULL DEFAULT false,
   aendern bool DEFAULT false
 ) 
-WITHOUT OIDS;
+WITH OIDS;
+
+CREATE INDEX q_notizen_kategorie_id_idx ON q_notizen USING btree (kategorie_id);
+CREATE INDEX q_notiz_kategorie2stelle_stelle_idx ON q_notiz_kategorie2stelle USING btree (stelle);
+CREATE INDEX q_notiz_kategorie2stelle_kat_id_idx ON q_notiz_kategorie2stelle USING btree (stelle);
+ALTER TABLE q_notiz_kategorie2stelle ADD CONSTRAINT q_notiz_kategorie2stelle_pkey PRIMARY KEY(stelle, kat_id);
 
 
 --#####################

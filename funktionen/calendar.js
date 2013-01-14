@@ -245,6 +245,7 @@ function CalendarJS() {
 	    		m = "0"+m;
 	    	}
 	    	field.value=d+"."+m+"."+y;
+	    	field.onchange();
 	    },
 	
 	this.timeTrigger = function(){

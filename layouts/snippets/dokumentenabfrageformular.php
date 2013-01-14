@@ -112,19 +112,19 @@ else {
         <? if(NACHWEIS_PRIMARY_ATTRIBUTE != 'rissnummer'){ ?>
         <tr>
           <td colspan="2">          Antragsnummer<br>
-  					<input type="text" name="suchstammnr" value="<?php echo $this->formvars['suchstammnr']; ?>" size="<?php echo STAMMNUMMERMAXLENGTH; ?>" maxlength="<?php echo STAMMNUMMERMAXLENGTH; ?>">
+  					<input type="text" name="suchstammnr" value="<?php echo $this->formvars['suchstammnr']; ?>" size="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>" maxlength="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>">
  					</td>    
         </tr>
         <? } ?>
         <tr>
           <td colspan="2">          Rissnummer<br>
-  					<input type="text" name="suchrissnr" value="<?php echo $this->formvars['suchrissnr']; ?>" size="<?php echo STAMMNUMMERMAXLENGTH; ?>" maxlength="<?php echo STAMMNUMMERMAXLENGTH; ?>">
+  					<input type="text" name="suchrissnr" value="<?php echo $this->formvars['suchrissnr']; ?>" size="<?php echo RISSUMMERMAXLENGTH; ?>" maxlength="<?php echo RISSUMMERMAXLENGTH; ?>">
  					</td>    
         </tr>
         <? if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){ ?>
         <tr>
           <td colspan="2">          Antragsnummer<br>
-  					<input type="text" name="suchstammnr" value="<?php echo $this->formvars['suchstammnr']; ?>" size="<?php echo STAMMNUMMERMAXLENGTH; ?>" maxlength="<?php echo STAMMNUMMERMAXLENGTH; ?>">
+  					<input type="text" name="suchstammnr" value="<?php echo $this->formvars['suchstammnr']; ?>" size="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>" maxlength="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>">
  					</td>    
         </tr>
         <? } ?>

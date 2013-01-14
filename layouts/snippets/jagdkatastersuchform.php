@@ -2,13 +2,8 @@
 <!--
 
 function save(){
-	if(document.GUI.search_name.value == '' && document.GUI.search_nummer.value == ''){
-		alert("Geben Sie entweder einen Namen oder eine laufende Nummer an.");
-	}
-	else{
-		document.GUI.go_plus.value = 'Suchen';
-		document.GUI.submit();
-	}
+	document.GUI.go_plus.value = 'Suchen';
+	document.GUI.submit();
 }
 
 function update_form(art){

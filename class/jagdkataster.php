@@ -75,7 +75,6 @@ class jagdkataster {
   	if($formvars['search_art']!='' AND $formvars['search_art']!='ejb' AND $formvars['search_art']!='gjb' AND $formvars['search_status']!='both'){
 	  	$sql.= ' AND status = \''.$formvars['search_status'].'\'';
 	  }	  	
-  	$sql.= ' LIMIT 100';
   	#echo $sql;
   	$ret = $this->database->execSQL($sql, 4, 0);
 		while($rs = pg_fetch_array($ret[1])){

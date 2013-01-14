@@ -475,7 +475,12 @@ class Nachweis {
   }
 
   function buildNachweisNr($primary, $secondary){
-  	return $secondary.str_pad($primary, STAMMNUMMERMAXLENGTH-strlen($secondary),'0',STR_PAD_LEFT);
+  	if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){
+  		return $secondary.str_pad($primary, RISSUMMERMAXLENGTH-strlen($secondary),'0',STR_PAD_LEFT);
+  	}
+  	else{
+  		return $secondary.str_pad($primary, ANTRAGSNUMMERMAXLENGTH-strlen($secondary),'0',STR_PAD_LEFT);
+  	}
   }
   
   function dokumentenDateiHochladen($flurid,$nr,$artname,$quelldatei,$zieldateiname) {

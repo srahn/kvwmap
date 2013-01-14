@@ -33,7 +33,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
               case 'indiv_nr' : {
                 ?>
             Individuelle Nummer in Gemarkung/Flur: <?php echo $this->formvars['suchgemarkungflurid']; ?>
-                mit Antragsnummer: <?php echo str_pad(intval($this->formvars['suchstammnr']),STAMMNUMMERMAXLENGTH,'0',STR_PAD_LEFT); ?>
+                mit Antragsnummer: <?php echo str_pad(intval($this->formvars['suchstammnr']),ANTRAGSNUMMERMAXLENGTH,'0',STR_PAD_LEFT); ?>
                 mit Rissnummer: <?php echo $this->formvars['suchrissnr']; ?>
                 mit Fortführung: <?php echo $this->formvars['suchfortf']; ?>
                 von <?php
@@ -123,11 +123,11 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
           <td><?php echo $this->formvars['id']=$this->nachweis->Dokumente[$i]['id']; ?></td>
           <td><div align="center"><?php echo $this->formvars['flurid']=$this->nachweis->Dokumente[$i]['flurid']; ?></div></td>
           <? if(NACHWEIS_PRIMARY_ATTRIBUTE != 'rissnummer'){ ?>  
-          <td><div align="center"><?php echo $this->formvars['stammnr']=str_pad($this->nachweis->Dokumente[$i]['stammnr'],STAMMNUMMERMAXLENGTH,'0',STR_PAD_LEFT); ?></div></td>
+          <td><div align="center"><?php echo $this->formvars['stammnr']=str_pad($this->nachweis->Dokumente[$i]['stammnr'],ANTRAGSNUMMERMAXLENGTH,'0',STR_PAD_LEFT); ?></div></td>
           <? } ?>
-          <td><div align="center"><?php echo $this->formvars['rissnummer']=str_pad($this->nachweis->Dokumente[$i]['rissnummer'],STAMMNUMMERMAXLENGTH,'0',STR_PAD_LEFT); ?></div></td>
+          <td><div align="center"><?php echo $this->formvars['rissnummer']=str_pad($this->nachweis->Dokumente[$i]['rissnummer'],RISSUMMERMAXLENGTH,'0',STR_PAD_LEFT); ?></div></td>
           <? if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){ ?>
-          <td><div align="center"><?php echo $this->formvars['stammnr']=str_pad($this->nachweis->Dokumente[$i]['stammnr'],STAMMNUMMERMAXLENGTH,'0',STR_PAD_LEFT); ?></div></td>
+          <td><div align="center"><?php echo $this->formvars['stammnr']=str_pad($this->nachweis->Dokumente[$i]['stammnr'],ANTRAGSNUMMERMAXLENGTH,'0',STR_PAD_LEFT); ?></div></td>
           <? } ?>
           <td><div align="center"> 
               <?php if ($this->formvars['art']=$this->nachweis->Dokumente[$i]['art']=='100'){?>

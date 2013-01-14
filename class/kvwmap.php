@@ -2211,7 +2211,7 @@ class GUI extends GUI_core{
       
       $datastring = $this->formvars['layer_columnname']." from (".$select;
       $datastring.=") as foo using unique oid using srid=".$layerset[0]['epsg_code'];
-      $legendentext=$layerset[0]['Name'];
+      $legendentext = $layerset[0]['Name']." (".date('d.m. H:i',time()).")";
 
       $group = $dbmap->getGroupbyName('Suchergebnis');
       if($group != ''){
@@ -2447,7 +2447,7 @@ class GUI extends GUI_core{
       $datastring =$this->formvars['layer_columnname']." from (select oid, ".$this->formvars['layer_columnname']." from ".$this->formvars['layer_tablename'];
       $datastring.=" WHERE oid = '".$this->formvars['oid']."'";
       $datastring.=") as foo using unique oid using srid=".$layerset[0]['epsg_code'];
-      $legendentext=$layerset[0]['Name'];
+      $legendentext = $layerset[0]['Name']." (".date('d.m. H:i',time()).")";
       $group = $dbmap->getGroupbyName('Suchergebnis');
       if($group != ''){
         $groupid = $group['id'];
@@ -2641,10 +2641,8 @@ class GUI extends GUI_core{
   }
 
   function jagdbezirke_auswaehlen_suchen(){
-    if($this->formvars['search_name'] OR $this->formvars['search_nummer']){
-      $jagdkataster = new jagdkataster($this->pgdatabase);
-      $this->jagdbezirke = $jagdkataster->suchen($this->formvars);
-    }
+    $jagdkataster = new jagdkataster($this->pgdatabase);
+    $this->jagdbezirke = $jagdkataster->suchen($this->formvars);
     $this->jagdbezirke_auswaehlen();
   }
 
@@ -3203,9 +3201,6 @@ class GUI extends GUI_core{
       $rect->maxy = $this->Document->ausschnitt[0]['center_y'] + $height/2;
       $rand = 10;
       $this->map->setextent($rect->minx-$rand,$rect->miny-$rand,$rect->maxx+$rand,$rect->maxy+$rand);
-      # Ausschnittsmittelpunkt setzen
-      $this->formvars['center_x'] = $this->map->width/2;
-      $this->formvars['center_y'] = $this->map->height/2;
       # Druckmaßstab setzen
       $this->formvars['printscale'] = $this->Document->ausschnitt[0]['print_scale'];
       # Drehwinkel setzen
@@ -3215,28 +3210,11 @@ class GUI extends GUI_core{
     # Wenn Navigiert werden soll, wird eine eventuell schon gesetzte Position
     # in Weltkoordinaten umgerechnet und danach wieder zurück.
     if ($this->formvars['CMD']!='') {
-      if ($this->formvars['center_x']!='') {
-        # Umrechnen der Textposition(loc_xy) in Weltkoordinaten
-        $this->DruckWeltkoordinaten=$this->pixel2weltKoord($this->formvars['center_x'],$this->formvars['center_y']);
-        $this->navMap($this->formvars['CMD']);
-        $this->saveMap('');
-        $currenttime=date('Y-m-d H:i:s',time());
-        $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-        $this->drawMap();
-        $this->user->rolle->readSettings();
-        # Zurückrechnen der Weltkoordinaten in Bildkoordinaten
-        $this->DruckBildkoordinaten=$this->welt2pixelKoord($this->DruckWeltkoordinaten);
-        $this->formvars['center_x']=$this->DruckBildkoordinaten['x'];
-        $this->formvars['center_y']=$this->DruckBildkoordinaten['y'];
-      }
-      else {
-        # Nur Navigieren
-        $this->navMap($this->formvars['CMD']);
-        $this->saveMap('');
-        $currenttime=date('Y-m-d H:i:s',time());
-        $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-        $this->drawMap();
-      }
+    	$this->navMap($this->formvars['CMD']);
+      $this->saveMap('');
+      $currenttime=date('Y-m-d H:i:s',time());
+      $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
+      $this->drawMap();
     }
     else {
       $this->saveMap('');
@@ -3397,7 +3375,6 @@ class GUI extends GUI_core{
       $this->loadMap('DataBase');
     }
     $this->map->selectOutputFormat('jpeg');
-    $DruckWeltkoordinaten=$this->pixel2weltKoord($this->formvars['center_x'],$this->formvars['center_y']);
     $breite = $this->formvars['worldprintwidth']/2;
     $höhe = $this->formvars['worldprintheight']/2;
 
@@ -3408,10 +3385,10 @@ class GUI extends GUI_core{
       $bboxwidth = cos($alpha) * $diag;
       $alpha2 = $gamma - deg2rad(abs($this->formvars['angle']));
       $bboxheight = cos($alpha2) * $diag;
-      $minx = $DruckWeltkoordinaten[0]->x - $bboxwidth;
-      $miny = $DruckWeltkoordinaten[0]->y - $bboxheight;
-      $maxx = $DruckWeltkoordinaten[0]->x + $bboxwidth;
-      $maxy = $DruckWeltkoordinaten[0]->y + $bboxheight;
+      $minx = $this->formvars['center_x'] - $bboxwidth;
+      $miny = $this->formvars['center_y'] - $bboxheight;
+      $maxx = $this->formvars['center_x'] + $bboxwidth;
+      $maxy = $this->formvars['center_y'] + $bboxheight;
 
       $widthratio = $bboxwidth / $breite;
       $heightratio = $bboxheight / $höhe;
@@ -3420,10 +3397,10 @@ class GUI extends GUI_core{
       $this->map->set('height', $this->Document->activeframe[0]['mapheight'] * $heightratio * $this->map_factor);
     }
     else{
-      $minx = $DruckWeltkoordinaten[0]->x - $this->formvars['worldprintwidth']/2;
-      $miny = $DruckWeltkoordinaten[0]->y - $this->formvars['worldprintheight']/2;
-      $maxx = $DruckWeltkoordinaten[0]->x + $this->formvars['worldprintwidth']/2;
-      $maxy = $DruckWeltkoordinaten[0]->y + $this->formvars['worldprintheight']/2;
+      $minx = $this->formvars['center_x'] - $this->formvars['worldprintwidth']/2;
+      $miny = $this->formvars['center_y'] - $this->formvars['worldprintheight']/2;
+      $maxx = $this->formvars['center_x'] + $this->formvars['worldprintwidth']/2;
+      $maxy = $this->formvars['center_y'] + $this->formvars['worldprintheight']/2;
       $this->map->set('width', $this->Document->activeframe[0]['mapwidth']*$this->map_factor);
       $this->map->set('height', $this->Document->activeframe[0]['mapheight']*$this->map_factor);
     }
@@ -3457,8 +3434,8 @@ class GUI extends GUI_core{
     $this->user->rolle->nImageHeight = $this->map->height;
     # Lagebezeichnung
     $flur=new Flur('','','',$this->pgdatabase);
-    $bildmitte['rw']=$DruckWeltkoordinaten[0]->x;
-    $bildmitte['hw']=$DruckWeltkoordinaten[0]->y;
+    $bildmitte['rw']=$this->formvars['center_x'];
+    $bildmitte['hw']=$this->formvars['center_y'];
     $this->lagebezeichnung = $flur->getBezeichnungFromPosition($bildmitte, $this->user->rolle->epsg_code);
     # Übersichtskarte
     if($this->Document->activeframe[0]['refmapfile']){
@@ -4792,12 +4769,11 @@ class GUI extends GUI_core{
     }
     if($fast == true){			# schnelle Druckausgabe ohne Druckausschnittswahl
     	$this->formvars['printscale'] = round($this->map_scaledenom);
-    	$this->formvars['center_x'] = $this->map->width/2;
-    	$this->formvars['center_y'] = $this->map->height/2;    	
+    	$this->formvars['center_x'] = $this->map->extent->maxx-$this->map->extent->minx;
+    	$this->formvars['center_y'] = $this->map->extent->maxy-$this->map->extent->miny;    	
     	$this->formvars['worldprintwidth'] = $this->Docu->activeframe[0]['mapwidth'] * $this->formvars['printscale'] * 0.0003526;
     	$this->formvars['worldprintheight'] = $this->Docu->activeframe[0]['mapheight'] * $this->formvars['printscale'] * 0.0003526;
     }
-    $DruckWeltkoordinaten=$this->pixel2weltKoord($this->formvars['center_x'],$this->formvars['center_y']);
     #echo $this->formvars['center_x'].'<br>';
     #echo $this->formvars['center_y'].'<br>';
     #echo $this->formvars['worldprintwidth'].'<br>';
@@ -4812,20 +4788,20 @@ class GUI extends GUI_core{
       $bboxwidth = cos($alpha) * $diag;
       $alpha2 = $gamma - deg2rad(abs($this->formvars['angle']));
       $bboxheight = cos($alpha2) * $diag;
-      $minx = $DruckWeltkoordinaten[0]->x - $bboxwidth;
-      $miny = $DruckWeltkoordinaten[0]->y - $bboxheight;
-      $maxx = $DruckWeltkoordinaten[0]->x + $bboxwidth;
-      $maxy = $DruckWeltkoordinaten[0]->y + $bboxheight;
+      $minx = $this->formvars['center_x'] - $bboxwidth;
+      $miny = $this->formvars['center_y'] - $bboxheight;
+      $maxx = $this->formvars['center_x'] + $bboxwidth;
+      $maxy = $this->formvars['center_y'] + $bboxheight;
       $widthratio = $bboxwidth / $breite;
       $heightratio = $bboxheight / $höhe;
       $this->map->set('width', $this->Docu->activeframe[0]['mapwidth'] * $widthratio * $this->map_factor);
       $this->map->set('height', $this->Docu->activeframe[0]['mapheight'] * $heightratio * $this->map_factor);
     }
     else{
-      $minx = $DruckWeltkoordinaten[0]->x - $this->formvars['worldprintwidth']/2;
-      $miny = $DruckWeltkoordinaten[0]->y - $this->formvars['worldprintheight']/2;
-      $maxx = $DruckWeltkoordinaten[0]->x + $this->formvars['worldprintwidth']/2;
-      $maxy = $DruckWeltkoordinaten[0]->y + $this->formvars['worldprintheight']/2;
+      $minx = $this->formvars['center_x'] - $this->formvars['worldprintwidth']/2;
+      $miny = $this->formvars['center_y'] - $this->formvars['worldprintheight']/2;
+      $maxx = $this->formvars['center_x'] + $this->formvars['worldprintwidth']/2;
+      $maxy = $this->formvars['center_y'] + $this->formvars['worldprintheight']/2;
       $this->map->set('width', $this->Docu->activeframe[0]['mapwidth']*$this->map_factor);
       $this->map->set('height', $this->Docu->activeframe[0]['mapheight']*$this->map_factor);
     }
@@ -5004,8 +4980,8 @@ class GUI extends GUI_core{
     # Lagebezeichnung
     if(LAGEBEZEICHNUNGSART == 'Flurbezeichnung'){
 	    $flur = new Flur('','','',$this->pgdatabase);
-	    $bildmitte['rw']=$DruckWeltkoordinaten[0]->x;
-	    $bildmitte['hw']=$DruckWeltkoordinaten[0]->y;
+	    $bildmitte['rw']=$this->formvars['center_x'];
+	    $bildmitte['hw']=$this->formvars['center_y'];
 	    $this->lagebezeichnung = $flur->getBezeichnungFromPosition($bildmitte, $this->user->rolle->epsg_code);
     }
 
