@@ -2126,7 +2126,7 @@ z.B. MS_MAXIMAGESIZE_DEFAULT=2048 oder MS_MAXSYMBOLS=64 (In der neuesten
 </dd><dd> Weiterer Nachteil bei Version 0.2: Das Modul postgis-lib:1.0.6
  ist ohne proj Unterstützung kompiliert. Selbst von das proj-lib Modul 
 für fgs installiert ist, kann postgis trotzdem keine transformationen 
-rechnen. Der SQL Befehl transform() funktioniert nicht und somit auch 
+rechnen. Der SQL Befehl st_transform() funktioniert nicht und somit auch 
 keine Koordinatentransformationen mit PostGIS on-the-fly. (Hat nichts 
 mit MapServer zu tun. Der transformiert fleißig mit Proj) Wenn man 
 kvwmap mit Layern in unterschiedlichen EPSG-Codes verwenden möchte, dann

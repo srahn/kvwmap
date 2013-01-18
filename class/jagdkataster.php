@@ -41,8 +41,8 @@ class jagdkataster {
   }
 
   function zoomTojagdbezirk($oid, $border) {
-  	$sql = 'SELECT MIN(XMIN(ENVELOPE(TRANSFORM(the_geom, '.$this->clientepsg.')))) AS minx, MAX(XMAX(ENVELOPE(TRANSFORM(the_geom, '.$this->clientepsg.')))) AS maxx';
-    $sql.= ', MIN(YMIN(ENVELOPE(TRANSFORM(the_geom, '.$this->clientepsg.')))) AS miny, MAX(YMAX(ENVELOPE(TRANSFORM(the_geom, '.$this->clientepsg.')))) AS maxy';
+  	$sql = 'SELECT MIN(st_xmin(st_envelope(st_transform(the_geom, '.$this->clientepsg.')))) AS minx, MAX(st_xmax(st_envelope(st_transform(the_geom, '.$this->clientepsg.')))) AS maxx';
+    $sql.= ', MIN(st_ymin(st_envelope(st_transform(the_geom, '.$this->clientepsg.')))) AS miny, MAX(st_ymax(st_envelope(st_transform(the_geom, '.$this->clientepsg.')))) AS maxy';
     $sql.= ' FROM jagdbezirke WHERE oid = '.$oid;
     $ret = $this->database->execSQL($sql, 4, 0);
 		$rs = pg_fetch_array($ret[1]);
@@ -147,7 +147,7 @@ class jagdkataster {
   	if($valid[0] == 't'){
 			if($oid != ''){
 				$sql = "UPDATE jagdbezirke SET";
-				if($umring != ''){$sql.= " the_geom = Transform(GeometryFromText('".$umring."', ".$this->clientepsg."), ".$this->layerepsg."),";}
+				if($umring != ''){$sql.= " the_geom = st_transform(GeometryFromText('".$umring."', ".$this->clientepsg."), ".$this->layerepsg."),";}
 				$sql.= " name = '".$name."',";
 				$sql.= " flaeche = ".$flaeche.",";
 				$sql.= " jb_zuordnung = '".$jb_zuordnung."',";
@@ -158,7 +158,7 @@ class jagdkataster {
 			else{
 				if($umring != ''){
 					$sql = "INSERT INTO jagdbezirke (id, the_geom, name, art, flaeche, jb_zuordnung, status)";
-					$sql.= " VALUES('".$nummer."', Transform(GeometryFromText('".$umring."', ".$this->clientepsg."), ".$this->layerepsg."), '".$name."', '".$art."', ".$flaeche.", '".$jb_zuordnung."', '".$status."')";
+					$sql.= " VALUES('".$nummer."', st_transform(GeometryFromText('".$umring."', ".$this->clientepsg."), ".$this->layerepsg."), '".$name."', '".$art."', ".$flaeche.", '".$jb_zuordnung."', '".$status."')";
 				}
 				else{
 					$sql = "INSERT INTO jagdbezirke (id, name, art, flaeche, jb_zuordnung, status)";
@@ -181,7 +181,7 @@ class jagdkataster {
   }
 
 	function getjagdbezirk($oid){
-		$sql = "SELECT oid, *, assvg(Transform(the_geom, ".$this->clientepsg."), 0, 8) AS svggeom, astext(Transform(the_geom, ".$this->clientepsg.")) AS wktgeom FROM jagdbezirke WHERE oid = ".$oid;
+		$sql = "SELECT oid, *, assvg(st_transform(the_geom, ".$this->clientepsg."), 0, 8) AS svggeom, astext(st_transform(the_geom, ".$this->clientepsg.")) AS wktgeom FROM jagdbezirke WHERE oid = ".$oid;
 		#echo $sql;
 		$ret = $this->database->execSQL($sql, 4, 0);
 		$jagdbezirk = pg_fetch_array($ret[1]);
@@ -263,12 +263,12 @@ class jagdkataster {
 		else{				# ein Jagdbezirk
 			$oids[] = $formvars['oid']; 
 		}
-		$sql = "SELECT f.land*10000 + f.gemarkungsnummer as gemkgschl, f.flurnummer as flur, f.zaehler, f.nenner, g.bezeichnung as gemkgname, f.flurstueckskennzeichen as flurstkennz, st_area(f.wkb_geometry) AS flurstflaeche, st_area(st_intersection(f.wkb_geometry, transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS."))) AS schnittflaeche, jagdbezirke.name, jagdbezirke.art, f.amtlicheflaeche AS albflaeche";
+		$sql = "SELECT f.land*10000 + f.gemarkungsnummer as gemkgschl, f.flurnummer as flur, f.zaehler, f.nenner, g.bezeichnung as gemkgname, f.flurstueckskennzeichen as flurstkennz, st_area(f.wkb_geometry) AS flurstflaeche, st_area(st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS."))) AS schnittflaeche, jagdbezirke.name, jagdbezirke.art, f.amtlicheflaeche AS albflaeche";
 		$sql.= " FROM alkis.ax_gemarkung AS g, jagdbezirke, alkis.ax_flurstueck AS f";
 		$sql.= " WHERE f.gemarkungsnummer = g.gemarkungsnummer";
 		$sql.= " AND jagdbezirke.oid IN (".implode(',', $oids).")";
-		$sql.= " AND f.wkb_geometry && transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.") AND st_intersects(f.wkb_geometry, transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS."))";
-		$sql.= " AND st_area(st_intersection(f.wkb_geometry, transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS."))) > 1";
+		$sql.= " AND f.wkb_geometry && st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.") AND st_intersects(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS."))";
+		$sql.= " AND st_area(st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS."))) > 1";
 		$sql.= " ORDER BY jagdbezirke.name";
 		#echo $sql;
 		$ret = $this->database->execSQL($sql, 4, 0);
@@ -314,10 +314,10 @@ class jagdkataster {
       }
       else {
       	if($type == 'wkt'){
-        	$sql ="SELECT astext(memgeomunion(the_geom)) FROM (select o.objnr as oid,o.the_geom from alkobj_e_fla AS o,alknflst as f";
+        	$sql ="SELECT astext(st_union(the_geom)) FROM (select o.objnr as oid,o.the_geom from alkobj_e_fla AS o,alknflst as f";
       	}
       	elseif($type == 'svg'){
-      		$sql ="SELECT assvg(memgeomunion(the_geom),0,8) FROM (select o.objnr as oid,o.the_geom from alkobj_e_fla AS o,alknflst as f";
+      		$sql ="SELECT assvg(st_union(the_geom),0,8) FROM (select o.objnr as oid,o.the_geom from alkobj_e_fla AS o,alknflst as f";
       	}
     		$sql.=" WHERE o.objnr=f.objnr AND f.flurstkennz IN ('".$this->FlurstListe[0]."'";
     		for ($i = 1; $i < count($this->FlurstListe); $i++) {

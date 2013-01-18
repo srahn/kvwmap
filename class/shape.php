@@ -368,10 +368,10 @@ class shape {
     	$select = substr($sql, 0, strrpos(strtolower($sql), 'from'));
     	$rest = substr($sql, strrpos(strtolower($sql), 'from'));
     	if(strpos($select, ' '.$this->attributes['the_geom']) !== false){		// nur the_geom muss ersetzt werden
-    		$select = str_replace($this->attributes['the_geom'], 'TRANSFORM('.$this->attributes['the_geom'].', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);
+    		$select = str_replace($this->attributes['the_geom'], 'st_transform('.$this->attributes['the_geom'].', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);
     	}
     	else{																																// table.the_geom muss ersetzt werden
-    		$select = str_replace($the_geom, 'TRANSFORM('.$the_geom.', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);
+    		$select = str_replace($the_geom, 'st_transform('.$the_geom.', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);
     	}
     	$sql = $select.$rest;
     }
@@ -383,7 +383,7 @@ class shape {
   	}
   	# über Polygon einschränken
     if($this->formvars['newpathwkt']){
-    	$sql.= " AND Transform(".$the_geom.", ".$user->rolle->epsg_code.") && GeomFromText('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code.") AND ST_INTERSECTS(Transform(".$the_geom.", ".$user->rolle->epsg_code."), GeomFromText('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."))";
+    	$sql.= " AND st_transform(".$the_geom.", ".$user->rolle->epsg_code.") && st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code.") AND ST_INTERSECTS(st_transform(".$the_geom.", ".$user->rolle->epsg_code."), st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."))";
     }
     # Filter
     $filter = $mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id);

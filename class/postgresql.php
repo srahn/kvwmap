@@ -23,7 +23,7 @@
 # pkorduan@gmx.de peter.korduan@auf.uni-rostock.de                #
 ###################################################################
 ##################################################
-# Klasse Datenbank für ALB Modell und PostgreSQL #
+# Klasse Datenbank fï¿½r ALB Modell und PostgreSQL #
 ##################################################
 class pgdatabase extends pgdatabase_core {
   var $ist_Fortfuehrung;
@@ -35,7 +35,7 @@ class pgdatabase extends pgdatabase_core {
   var $commentsign;
   var $blocktransaction;
 
-  # Für eine Liste der verfügbaren Funktionen siehe:
+  # Fï¿½r eine Liste der verfï¿½gbaren Funktionen siehe:
   # https://kvwmap.geoinformatik.uni-rostock.de/PHPDoc/apidoc/pgdatabase.html
   # Liste ggf. mit https://kvwmap.geoinformatik.uni-rostock.de/PHPDoc/ aktualisieren
 
@@ -51,9 +51,9 @@ class pgdatabase extends pgdatabase_core {
     $this->type='postgresql';
     $this->commentsign='--';
     # Wenn dieser Parameter auf 1 gesetzt ist werden alle Anweisungen
-    # START TRANSACTION, ROLLBACK und COMMIT unterdrückt, so daß alle anderen SQL
-    # Anweisungen nicht in Transactionsblöcken ablaufen.
-    # Kann zur Steigerung der Geschwindigkeit von großen Datenbeständen verwendet werden
+    # START TRANSACTION, ROLLBACK und COMMIT unterdrï¿½ckt, so daï¿½ alle anderen SQL
+    # Anweisungen nicht in Transactionsblï¿½cken ablaufen.
+    # Kann zur Steigerung der Geschwindigkeit von groï¿½en Datenbestï¿½nden verwendet werden
     # Vorsicht: Wenn Fehler beim Einlesen passieren, ist der Datenbestand inkonsistent
     # und der Einlesevorgang muss wiederholt werden bis er fehlerfrei durchgelaufen ist.
     # Dazu Fehlerausschriften bearchten.
@@ -84,7 +84,7 @@ class pgdatabase extends pgdatabase_core {
 	}
 
   function transformPoly($polygon,$curSRID,$newSRID) {
-    $sql ="SELECT astext(TRANSFORM(GeomFromText('".$polygon."', ".$curSRID."), ".$newSRID."))";
+    $sql ="SELECT st_astext(st_transform(st_geomfromtext('".$polygon."', ".$curSRID."), ".$newSRID."))";
     $ret=$this->execSQL($sql, 4, 0);
     if($ret[0] == 0){
       $rs=pg_fetch_array($ret[1]);
@@ -94,7 +94,7 @@ class pgdatabase extends pgdatabase_core {
 
 	function transformPoint($point, $curSRID, $newSRID, $coordtype){
 		$sql ="SELECT X(point) AS x, Y(point) AS y";
-    $sql.=" FROM (SELECT TRANSFORM(GeomFromText('POINT(".$point.")',".$curSRID."),".$newSRID.") AS point) AS foo";
+    $sql.=" FROM (SELECT st_transform(st_geomfromtext('POINT(".$point.")',".$curSRID."),".$newSRID.") AS point) AS foo";
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
       $rs=pg_fetch_array($ret[1]);
@@ -205,7 +205,7 @@ class pgdatabase extends pgdatabase_core {
         $constraints = $this->pg_table_constraints($tablename);
         $enumstring = '';
 	      if($fieldtype != 'geometry'){
-	        # testen ob es für ein Attribut ein constraint gibt, das wie enum wirkt
+	        # testen ob es fï¿½r ein Attribut ein constraint gibt, das wie enum wirkt
 	        for($j = 0; $j < count($constraints); $j++){
 	          if(strpos($constraints[$j], '('.$fieldname.')')){
 	            $options = explode("'", $constraints[$j]);
@@ -226,7 +226,7 @@ class pgdatabase extends pgdatabase_core {
         # nullable
         $fields['nullable'][] = $attr_info['is_nullable']; 
         
-        # Länge des Feldes
+        # Lï¿½nge des Feldes
         if($attr_info['numeric_precision'] != ''){
         	$fields['length'][] = $attr_info['numeric_precision'];
         }
@@ -234,7 +234,7 @@ class pgdatabase extends pgdatabase_core {
         	$fields['length'][] = $attr_info['character_maximum_length'];
       	}        
         
-        # Länge des Dezimalteils eines numeric-Feldes
+        # Lï¿½nge des Dezimalteils eines numeric-Feldes
         $fields['decimal_length'][] = $attr_info['numeric_scale'];
         
         # Default-Wert
@@ -433,7 +433,7 @@ class pgdatabase extends pgdatabase_core {
 
   function getfrom($query){
   	if(substr_count(strtolower($query), ' from ') > 1){
-  		# wenn Sub-Selects vorhanden sind, müssen from und where in der Hauptabfrage groß geschrieben sein
+  		# wenn Sub-Selects vorhanden sind, mï¿½ssen from und where in der Hauptabfrage groï¿½ geschrieben sein
   		$whereposition = strpos($query, ' WHERE ');
 	    if($whereposition != false){
 	      $withoutwhere = substr($query, 0, $whereposition);
@@ -479,7 +479,7 @@ class pgdatabase extends pgdatabase_core {
       $rs = pg_fetch_row($ret[1]);
       $tablename = $rs[0];
     }
-    else{     # Tabellenname läßt sich nicht eindeutig identifizieren (entweder durch Umbenennung oder weil es mehrere Tabellen mit diesem Attribut gibt)
+    else{     # Tabellenname lï¿½ï¿½t sich nicht eindeutig identifizieren (entweder durch Umbenennung oder weil es mehrere Tabellen mit diesem Attribut gibt)
       $klammerstartpos = strrpos($fieldstring, '(');
       if($klammerstartpos !== false){
         return NULL;
@@ -546,14 +546,14 @@ class pgdatabase extends pgdatabase_core {
   }
 
   function updatepolygon($wkt_string, $srid, $poly_id){
-    $sql = 'UPDATE u_polygon SET the_geom = transform(GeomFromText(\''.$wkt_string.'\','.$srid.'), '.EPSGCODE.') WHERE id = '.$poly_id;
+    $sql = 'UPDATE u_polygon SET the_geom = st_transform(st_geomfromtext(\''.$wkt_string.'\','.$srid.'), '.EPSGCODE.') WHERE id = '.$poly_id;
     #echo $sql;
     $ret = $this->execSQL($sql, 4, 0);
     return $ret;
   }
 
   function insertpolygon($wkt_string, $srid){
-    $sql = 'INSERT into u_polygon (the_geom) VALUES (transform(GeomFromText(\''.$wkt_string.'\','.$srid.'), '.EPSGCODE.'))';
+    $sql = 'INSERT into u_polygon (the_geom) VALUES (st_transform(st_geomfromtext(\''.$wkt_string.'\','.$srid.'), '.EPSGCODE.'))';
     #echo $sql;
     $ret = $this->execSQL($sql, 4, 0);
     $sql = 'SELECT currval(\'u_polygon_id_seq\')';
@@ -563,7 +563,7 @@ class pgdatabase extends pgdatabase_core {
   }
 
   function selectPolyAsSVG($poly_id, $srid){
-    $sql = "SELECT asSVG(transform(the_geom, ".$srid.")) FROM u_polygon WHERE id='".$poly_id."'";
+    $sql = "SELECT st_assvg(st_transform(the_geom, ".$srid.")) FROM u_polygon WHERE id='".$poly_id."'";
     $ret=$this->execSQL($sql,4, 0);
     $rs= pg_fetch_row($ret[1]);
     $poly=$rs[0];
@@ -571,7 +571,7 @@ class pgdatabase extends pgdatabase_core {
   }
 
   function selectPolyAsText($poly_id, $srid){
-    $sql = "SELECT asText(transform(the_geom, ".$srid.")) FROM u_polygon WHERE id='".$poly_id."'";
+    $sql = "SELECT st_astext(st_transform(the_geom, ".$srid.")) FROM u_polygon WHERE id='".$poly_id."'";
     $ret=$this->execSQL($sql,4, 0);
     $rs= pg_fetch_row($ret[1]);
     $poly=$rs[0];
@@ -579,7 +579,7 @@ class pgdatabase extends pgdatabase_core {
   }
 
   function getpolygon($poly_id, $srid){
-    $sql = 'SELECT transform(the_geom, '.$srid.') from u_polygon WHERE id = '.$poly_id;
+    $sql = 'SELECT st_transform(the_geom, '.$srid.') from u_polygon WHERE id = '.$poly_id;
     $ret = $this->execSQL($sql, 4, 0);
     if($ret[0]==0){
       $poly = pg_fetch_array($ret[1]);
@@ -588,8 +588,8 @@ class pgdatabase extends pgdatabase_core {
   }
 
   function getPolygonBBox($id, $srid) {
-    $sql ='SELECT XMIN(EXTENT(transform(the_geom, '.$srid.'))) AS minx,YMIN(EXTENT(transform(the_geom, '.$srid.'))) AS miny';
-    $sql.=',XMAX(EXTENT(transform(the_geom, '.$srid.'))) AS maxx,YMAX(EXTENT(transform(the_geom, '.$srid.'))) AS maxy';
+    $sql ='SELECT st_xmin(st_extent(st_transform(the_geom, '.$srid.'))) AS minx,st_ymin(st_extent(st_transform(the_geom, '.$srid.'))) AS miny';
+    $sql.=',st_xmax(st_extent(st_transform(the_geom, '.$srid.'))) AS maxx,st_ymax(st_extent(st_transform(the_geom, '.$srid.'))) AS maxy';
     $sql.=' FROM u_polygon ';
     $sql.='WHERE id='.$id;
     $ret=$this->execSQL($sql,4, 0);
@@ -618,8 +618,8 @@ class pgdatabase extends pgdatabase_core {
   }
 
 	function getWKTBBox($wkt, $fromsrid, $tosrid) {
-    $sql ="SELECT XMIN(geom) AS minx, YMIN(geom) AS miny, XMAX(geom) AS maxx, YMAX(geom) AS maxy ";
-    $sql.=" FROM (select EXTENT(transform(geomfromtext('".$wkt."', ".$fromsrid."), ".$tosrid.")) as geom) as foo";
+    $sql ="SELECT st_xmin(geom) AS minx, st_ymin(geom) AS miny, st_xmax(geom) AS maxx, st_ymax(geom) AS maxy ";
+    $sql.=" FROM (select st_extent(st_transform(st_geomfromtext('".$wkt."', ".$fromsrid."), ".$tosrid.")) as geom) as foo";
     $ret=$this->execSQL($sql,4, 0);
     if($ret[0] == 0){
       $rect= ms_newRectObj();
@@ -634,7 +634,7 @@ class pgdatabase extends pgdatabase_core {
     global $supportedSRIDs;
     $sql ="SELECT spatial_ref_sys.srid, srtext, alias FROM spatial_ref_sys ";
     $sql.="LEFT JOIN spatial_ref_sys_alias ON spatial_ref_sys_alias.srid = spatial_ref_sys.srid";
-    # Wenn zu unterstützende SRIDs angegeben sind, ist die Abfrage diesbezüglich eingeschränkt
+    # Wenn zu unterstï¿½tzende SRIDs angegeben sind, ist die Abfrage diesbezï¿½glich eingeschrï¿½nkt
     $anzSupportedSRIDs = count($supportedSRIDs);
     if ($anzSupportedSRIDs > 0) {
       $sql.=" WHERE auth_srid IN (".$supportedSRIDs[0];
@@ -817,21 +817,21 @@ class pgdatabase extends pgdatabase_core {
   }
 
   /**
-  * Löschen der Grundbücher
+  * Lï¿½schen der Grundbï¿½cher
   *
-  * Diese Funktion löscht alle zu aktualisierenden Grundbücher aus der Tabelle alb_grundbuecher.
+  * Diese Funktion lï¿½scht alle zu aktualisierenden Grundbï¿½cher aus der Tabelle alb_grundbuecher.
   *
-  * Reihenfolge: Übersichtssatz - Kommentar - Tags.
+  * Reihenfolge: ï¿½bersichtssatz - Kommentar - Tags.
   *
-  * @param  string  $historische_loeschen Wenn der Parameter auf 1 gestetzt ist, werden die in der temporären Tabelle alb_x_grundbuecher als historisch gekennzeichneten Grundbuecher im Bestand gelöscht.
-  * @return array liefert zweidimensionales Array zurück,
-  *                 Wenn array[0]=0 enthält array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
-  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthält eine Fehlermeldung.
+  * @param  string  $historische_loeschen Wenn der Parameter auf 1 gestetzt ist, werden die in der temporï¿½ren Tabelle alb_x_grundbuecher als historisch gekennzeichneten Grundbuecher im Bestand gelï¿½scht.
+  * @return array liefert zweidimensionales Array zurï¿½ck,
+  *                 Wenn array[0]=0 enthï¿½lt array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
+  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthï¿½lt eine Fehlermeldung.
   * @see    setGrundbuecherHist(),insertGrundbuecher(), $postgres, $alb
   */
   function deleteGrundbuecher($historische_loeschen) {
     $sql ="DELETE FROM alb_grundbuecher";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=" USING alb_".$this->tableprefix."grundbuecher";
     }
@@ -844,15 +844,15 @@ class pgdatabase extends pgdatabase_core {
   }
 
   /**
-  * Kennzeichnet Grundbücher als historisch
+  * Kennzeichnet Grundbï¿½cher als historisch
   *
-  * Diese Funktion kennzeichnet alle Grundbücher im Bestand als historisch, die in der Fortführungsdatei als solche gekennzeichnet waren.
+  * Diese Funktion kennzeichnet alle Grundbï¿½cher im Bestand als historisch, die in der Fortfï¿½hrungsdatei als solche gekennzeichnet waren.
   *
-  * Reihenfolge: Übersichtssatz - Kommentar - Tags.
+  * Reihenfolge: ï¿½bersichtssatz - Kommentar - Tags.
   *
-  * @return array liefert zweidimensionales Array zurück,
-  *                 Wenn array[0]=0 enthält array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
-  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthält eine Fehlermeldung.
+  * @return array liefert zweidimensionales Array zurï¿½ck,
+  *                 Wenn array[0]=0 enthï¿½lt array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
+  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthï¿½lt eine Fehlermeldung.
   * @see    deleteGrundbuecher(),insertGrundbuecher(), $postgres, $alb
   */
   function setGrundbuecherHist() {
@@ -863,8 +863,8 @@ class pgdatabase extends pgdatabase_core {
     return $this->execSQL($sql, 4, 0);
   }
 
-  # 2006-07-04 pk (Statement geändert für das ignorieren von Doppelten Werten)
-  # 2006-09-06 pk bugfix Buchungsart angehängt
+  # 2006-07-04 pk (Statement geï¿½ndert fï¿½r das ignorieren von Doppelten Werten)
+  # 2006-09-06 pk bugfix Buchungsart angehï¿½ngt
   function insertGrundstueck($Bezirk,$Blatt,$BVNR,$Buchungsart) {
     $sql ="INSERT INTO alb_".$this->tableprefix."g_grundstuecke (";
     $sql.="SELECT '".$Bezirk."','".$Blatt."','".$BVNR."','".$Buchungsart."'";
@@ -874,21 +874,21 @@ class pgdatabase extends pgdatabase_core {
   }
 
   /**
-  * Löschen der Grundstücke der zu ändernden Grundbücher
+  * Lï¿½schen der Grundstï¿½cke der zu ï¿½ndernden Grundbï¿½cher
   *
-  * Diese Funktion löscht alle Grundstuecke von zu aktualisierenden Grundbüchern in der Tabelle alb_g_grundstuecke.
+  * Diese Funktion lï¿½scht alle Grundstuecke von zu aktualisierenden Grundbï¿½chern in der Tabelle alb_g_grundstuecke.
   *
-  * Reihenfolge: Übersichtssatz - Kommentar - Tags.
+  * Reihenfolge: ï¿½bersichtssatz - Kommentar - Tags.
   *
-  * @param  string  $historische_loeschen Wenn der Parameter auf 1 gestetzt ist, werden die in der temporären Tabelle als historisch gekennzeichneten Grundbücher für Löschung der Grundstücke verwendet.
-  * @return array liefert zweidimensionales Array zurück,
-  *                 Wenn array[0]=0 enthält array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
-  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthält eine Fehlermeldung.
+  * @param  string  $historische_loeschen Wenn der Parameter auf 1 gestetzt ist, werden die in der temporï¿½ren Tabelle als historisch gekennzeichneten Grundbï¿½cher fï¿½r Lï¿½schung der Grundstï¿½cke verwendet.
+  * @return array liefert zweidimensionales Array zurï¿½ck,
+  *                 Wenn array[0]=0 enthï¿½lt array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
+  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthï¿½lt eine Fehlermeldung.
   * @see    insertGrundstueck(), updateGrundstueck(), $postgres, $alb
   */
   function deleteGrundstueckeByGrundbuecher($historische_loeschen) {
     $sql ="DELETE FROM alb_g_grundstuecke";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=" USING alb_".$this->tableprefix."grundbuecher";
     }
@@ -915,7 +915,7 @@ class pgdatabase extends pgdatabase_core {
     $sql.=",anteil=alb_".$this->tableprefix."g_grundstuecke.anteil";
     $sql.=",auftplannr=alb_".$this->tableprefix."g_grundstuecke.auftplannr";
     $sql.=",sondereigentum=alb_".$this->tableprefix."g_grundstuecke.sondereigentum";
-#Eingefügt 11.04.2006 H. Riedel
+#Eingefï¿½gt 11.04.2006 H. Riedel
     $sql.=" FROM alb_".$this->tableprefix."g_grundstuecke";
     $sql.=" WHERE alb_g_grundstuecke.bezirk=alb_".$this->tableprefix."g_grundstuecke.bezirk";
     $sql.=" AND TRIM(alb_g_grundstuecke.blatt) LIKE TRIM(alb_".$this->tableprefix."g_grundstuecke.blatt)";
@@ -925,7 +925,7 @@ class pgdatabase extends pgdatabase_core {
 
   function deleteNewGrundstuecke() {
     $sql ="DELETE FROM alb_g_grundstuecke";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=" USING alb_".$this->tableprefix."g_grundstuecke";
     }
@@ -995,8 +995,8 @@ class pgdatabase extends pgdatabase_core {
   }
   
   function getBuchungenFromGrundbuchALKIS($FlurstKennz,$Bezirk,$Blatt,$keine_historischen) {
-  	// max(namensnummer.beschriebderrechtsgemeinschaft) weil es bei einer Buchung mit Zusatz zum Eigentümer einen weiteren Eintrag mit diesem Zusatz in ax_namensnummer gibt
-  	// ohne Aggregation würden sonst 2 Buchungen von der Abfrage zurückgeliefert werden 
+  	// max(namensnummer.beschriebderrechtsgemeinschaft) weil es bei einer Buchung mit Zusatz zum Eigentï¿½mer einen weiteren Eintrag mit diesem Zusatz in ax_namensnummer gibt
+  	// ohne Aggregation wï¿½rden sonst 2 Buchungen von der Abfrage zurï¿½ckgeliefert werden 
     $sql ="SELECT DISTINCT bezirk.schluesselgesamt AS bezirk, blatt.buchungsblattnummermitbuchstabenerweiterung AS blatt, buchung.laufendenummer AS bvnr, buchung.buchungsart, ba.bezeichner as bezeichnung, f.flurstueckskennzeichen as flurstkennz, buchung.zaehler::text||buchung.nenner::text as anteil, buchung.nummerimaufteilungsplan as auftplannr, buchung.beschreibungdessondereigentums as sondereigentum, max(namensnummer.beschriebderrechtsgemeinschaft) as zusatz_eigentuemer"; 
 		$sql.=" FROM alkis.ax_flurstueck f, alkis.alkis_beziehungen flst2buchung, alkis.ax_buchungsstelle buchung, alkis.ax_buchungsstelle_buchungsart ba, alkis.alkis_beziehungen buchung2blatt, alkis.ax_buchungsblattbezirk bezirk, alkis.ax_buchungsblatt blatt, alkis.alkis_beziehungen blatt2namensnummer, alkis.ax_namensnummer namensnummer";
 		$sql.=" WHERE flst2buchung.beziehungsart::text = 'istGebucht'::text AND f.gml_id = flst2buchung.beziehung_von AND flst2buchung.beziehung_zu = buchung.gml_id AND buchung2blatt.beziehungsart::text = 'istBestandteilVon'::text AND buchung2blatt.beziehung_von = buchung.gml_id AND buchung2blatt.beziehung_zu = blatt.gml_id AND blatt.land = bezirk.land AND blatt.bezirk = bezirk.bezirk AND buchung.buchungsart = ba.wert AND blatt2namensnummer.beziehungsart::text = 'istBestandteilVon'::text AND blatt2namensnummer.beziehung_zu = blatt.gml_id AND blatt2namensnummer.beziehung_von = namensnummer.gml_id";
@@ -1028,7 +1028,7 @@ class pgdatabase extends pgdatabase_core {
 
   function deleteNewBuchungen() {
     $sql ="DELETE FROM alb_g_buchungen";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=" USING alb_".$this->tableprefix."g_buchungen";
     }
@@ -1040,21 +1040,21 @@ class pgdatabase extends pgdatabase_core {
   }
 
   /**
-  * Löschen der Buchungen der zu ändernden Grundbücher
+  * Lï¿½schen der Buchungen der zu ï¿½ndernden Grundbï¿½cher
   *
-  * Diese Funktion löscht alle Buchungen von zu aktualisierenden Grundbüchern in der Tabelle alb_g_buchungen.
+  * Diese Funktion lï¿½scht alle Buchungen von zu aktualisierenden Grundbï¿½chern in der Tabelle alb_g_buchungen.
   *
-  * Reihenfolge: Übersichtssatz - Kommentar - Tags.
+  * Reihenfolge: ï¿½bersichtssatz - Kommentar - Tags.
   *
-  * @param  boolean  $historische_loeschen Wenn der Parameter auf 1 gestetzt ist, werden die in der temporären Tabelle als historisch gekennzeichneten Grundbücher für Löschung der Buchungen verwendet.
-  * @return array liefert zweidimensionales Array zurück,
-  *                 Wenn array[0]=0 enthält array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
-  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthält eine Fehlermeldung.
+  * @param  boolean  $historische_loeschen Wenn der Parameter auf 1 gestetzt ist, werden die in der temporï¿½ren Tabelle als historisch gekennzeichneten Grundbï¿½cher fï¿½r Lï¿½schung der Buchungen verwendet.
+  * @return array liefert zweidimensionales Array zurï¿½ck,
+  *                 Wenn array[0]=0 enthï¿½lt array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
+  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthï¿½lt eine Fehlermeldung.
   * @see    insertBuchung(), deleteBuchungenByFlurstuecke, $postgres, $alb
   */
   function deleteBuchungenByGrundbuecher($historische_loeschen) {
     $sql ="DELETE FROM alb_g_buchungen";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=" USING alb_".$this->tableprefix."grundbuecher";
     }
@@ -1068,7 +1068,7 @@ class pgdatabase extends pgdatabase_core {
 
   function deleteBuchungenByHistFlurstuecke() {
     $sql ="DELETE FROM alb_g_buchungen";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=" USING alb_".$this->tableprefix."flurstuecke";
     }
@@ -1105,7 +1105,7 @@ class pgdatabase extends pgdatabase_core {
 
   function is_FlurstKennz($FlurstKennz){
     $sql ="SELECT flurstkennz as FlurstKennz FROM alb_flurstuecke WHERE flurstkennz = '".$FlurstKennz."'";
-    $this->debug->write("<p><b>kataster flurstueck->is_FlurstKennz Abfragen ob FlurstKennz gültig:</b><br>".$sql,4);
+    $this->debug->write("<p><b>kataster flurstueck->is_FlurstKennz Abfragen ob FlurstKennz gï¿½ltig:</b><br>".$sql,4);
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret[0]=0; }
     if (pg_num_rows($ret[1])==1) {
@@ -1116,7 +1116,7 @@ class pgdatabase extends pgdatabase_core {
 
   function is_FlurstZaehler($KennzTeil){
     $sql ="SELECT flurstkennz AS FlurstKennz FROM alb_flurstuecke WHERE flurstkennz LIKE '".$KennzTeil."%'";
-    $this->debug->write("<p><b>kataster flurstueck->is_FlurstZaehler Abfrage ob FlurstKennz mit Zaehler gültig:</b><br>".$sql,4);
+    $this->debug->write("<p><b>kataster flurstueck->is_FlurstZaehler Abfrage ob FlurstKennz mit Zaehler gï¿½ltig:</b><br>".$sql,4);
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     while ($rs=pg_fetch_array($ret[1])) {
@@ -1252,13 +1252,13 @@ class pgdatabase extends pgdatabase_core {
   }
 
   function getGemeindeName($Gemeinde){
-    $this->debug->write("<br>postgres.php->database->getGemeindeName, Abfrage des Maximalen umschließenden Rechtecks um die Gemeinde",4);
+    $this->debug->write("<br>postgres.php->database->getGemeindeName, Abfrage des Maximalen umschlieï¿½enden Rechtecks um die Gemeinde",4);
     $sql ='SELECT g.gemeindename AS name FROM alb_v_gemeinden AS g';
     $sql.=' WHERE g.gemeinde = '.$Gemeinde;
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) {
-      $ret[1]='Fehler beim Abfragen des Umschließenden Rechtecks um die Gemeinde.<br>'.$ret[1];
+      $ret[1]='Fehler beim Abfragen des Umschlieï¿½enden Rechtecks um die Gemeinde.<br>'.$ret[1];
     }
     else {
       $rs=pg_fetch_array($ret[1]);
@@ -1277,7 +1277,7 @@ class pgdatabase extends pgdatabase_core {
   }
 
    function getFlstKoordinaten($FlurstKennz) {
-    $sql = "SELECT AsText(o.the_geom) AS koordinaten FROM alkobj_e_fla AS o,alknflst AS f";
+    $sql = "SELECT st_astext(o.the_geom) AS koordinaten FROM alkobj_e_fla AS o,alknflst AS f";
     $sql.=" WHERE o.objnr=f.objnr AND f.flurstkennz='".$FlurstKennz."'";
     #echo $sql;
     return $this->execSQL($sql, 4, 0);
@@ -1326,7 +1326,7 @@ class pgdatabase extends pgdatabase_core {
 	}
 
   function getFlurstuecksListe($GemID,$GemkgID,$FlurID,$order, $historical = false){
-    # Änderungen in Groß/Kleinschreibung 2006-01-02 pk
+    # ï¿½nderungen in Groï¿½/Kleinschreibung 2006-01-02 pk
     $sql ="SELECT *,SUBSTRING(flurstkennz,12,5) AS zaehler,SUBSTRING(flurstkennz,18,3) AS nenner";
     if($historical == 1){
     	$sql.=" FROM alb_flurstuecke WHERE status = 'H'";
@@ -1388,8 +1388,8 @@ class pgdatabase extends pgdatabase_core {
     		$HausNr = '';
     	}
     	if(strpos($HausNr, ', ') !== false){							# wenn mehrere Hausnummern:					1, 2, 3a, 4
-    		$HausNr = str_replace(", ", "','", $HausNr);		# Hochkommas dazwischen hinzufügen: 1','2','3a','4
-    		$sql.=" AND gemeinde||'-'||strasse||'-'||TRIM(".HAUSNUMMER_TYPE."(hausnr)) IN ('".$HausNr."')";		# und noch die äußeren:      			 '1','2','3a','4'
+    		$HausNr = str_replace(", ", "','", $HausNr);		# Hochkommas dazwischen hinzufï¿½gen: 1','2','3a','4
+    		$sql.=" AND gemeinde||'-'||strasse||'-'||TRIM(".HAUSNUMMER_TYPE."(hausnr)) IN ('".$HausNr."')";		# und noch die ï¿½uï¿½eren:      			 '1','2','3a','4'
     	}
     	else{
       	$sql.=" AND gemeinde||'-'||strasse||'-'||TRIM(".HAUSNUMMER_TYPE."(hausnr))='".$HausNr."'";
@@ -1422,8 +1422,8 @@ class pgdatabase extends pgdatabase_core {
     		$HausNr = '';
     	}
     	if(strpos($HausNr, ', ') !== false){							# wenn mehrere Hausnummern:					1, 2, 3a, 4
-    		$HausNr = str_replace(", ", "','", $HausNr);		# Hochkommas dazwischen hinzufügen: 1','2','3a','4
-    		$sql.=" AND g.schluesselgesamt||'-'||l.lage||'-'||TRIM(".HAUSNUMMER_TYPE."(l.hausnummer)) IN ('".$HausNr."')";		# und noch die äußeren:      			 '1','2','3a','4'
+    		$HausNr = str_replace(", ", "','", $HausNr);		# Hochkommas dazwischen hinzufï¿½gen: 1','2','3a','4
+    		$sql.=" AND g.schluesselgesamt||'-'||l.lage||'-'||TRIM(".HAUSNUMMER_TYPE."(l.hausnummer)) IN ('".$HausNr."')";		# und noch die ï¿½uï¿½eren:      			 '1','2','3a','4'
     	}
     	else{
       	$sql.=" AND g.schluesselgesamt||'-'||l.lage||'-'||TRIM(".HAUSNUMMER_TYPE."(l.hausnummer))='".$HausNr."'";
@@ -1506,29 +1506,29 @@ class pgdatabase extends pgdatabase_core {
   }
 
   /**
-  * Löschen und neu Einfügen der Flurstücke, für die Änderungen vorhanden sind
+  * Lï¿½schen und neu Einfï¿½gen der Flurstï¿½cke, fï¿½r die ï¿½nderungen vorhanden sind
   *
-  * Diese Funktion löscht alle Flurstücke in der Tabelle alb_flurstuecke, die in alb_x_flurstuecke stehen.
-  * und fügt alle Flurstücke aus Änderungsdatei wieder ein, außer die historischen, denn die sind schon drin, oder sollen nicht rein.
+  * Diese Funktion lï¿½scht alle Flurstï¿½cke in der Tabelle alb_flurstuecke, die in alb_x_flurstuecke stehen.
+  * und fï¿½gt alle Flurstï¿½cke aus ï¿½nderungsdatei wieder ein, auï¿½er die historischen, denn die sind schon drin, oder sollen nicht rein.
   *
-  * Reihenfolge: Übersichtssatz - Kommentar - Tags.
+  * Reihenfolge: ï¿½bersichtssatz - Kommentar - Tags.
   *
-  * @param  boolean $historische_loeschen Wenn diese Variable auf 0 gesetzt ist, werden die historischen Flurstücke im aktuellen Bestand nicht gelöscht.
-  * @return array liefert zweidimensionales Array zurück,
-  *                 Wenn array[0]=0 enthält array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
-  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthält eine Fehlermeldung.
+  * @param  boolean $historische_loeschen Wenn diese Variable auf 0 gesetzt ist, werden die historischen Flurstï¿½cke im aktuellen Bestand nicht gelï¿½scht.
+  * @return array liefert zweidimensionales Array zurï¿½ck,
+  *                 Wenn array[0]=0 enthï¿½lt array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
+  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthï¿½lt eine Fehlermeldung.
   * @see    updateFlurstueck(), insertFlurstueck(), $postgres, $alb
   */
   function replaceFlurstuecke() {
-    # löschen aller Flurstuecke in der ALB Datenbank zu den neue Angaben existieren.
+    # lï¿½schen aller Flurstuecke in der ALB Datenbank zu den neue Angaben existieren.
     $sql ="DELETE FROM alb_flurstuecke";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=" USING alb_".$this->tableprefix."flurstuecke";
     }
     $sql.=" WHERE alb_flurstuecke.flurstkennz=alb_".$this->tableprefix."flurstuecke.flurstkennz";
-    if (!$historische_loeschen) { // Wenn historische nicht gelöscht werden sollen
-      // Flurstücke, die in der Tabelle alb_x_flurstücke mit status H ausgestattet sind werden in alb_flurstücke nicht gelöscht.
+    if (!$historische_loeschen) { // Wenn historische nicht gelï¿½scht werden sollen
+      // Flurstï¿½cke, die in der Tabelle alb_x_flurstï¿½cke mit status H ausgestattet sind werden in alb_flurstï¿½cke nicht gelï¿½scht.
       $sql.=" AND alb_".$this->tableprefix."flurstuecke.status != 'H'";
     }
     $ret=$this->execSQL($sql, 4, 0);
@@ -1536,7 +1536,7 @@ class pgdatabase extends pgdatabase_core {
       return $ret;
     }
     else {
-      # Einfügen aller Flurstücke, die neu sind oder geändert.
+      # Einfï¿½gen aller Flurstï¿½cke, die neu sind oder geï¿½ndert.
       $sql ="INSERT INTO alb_flurstuecke SELECT * FROM alb_".$this->tableprefix."flurstuecke";
       $sql.=" WHERE alb_".$this->tableprefix."flurstuecke.status='0'";
       $sql.=" OR alb_".$this->tableprefix."flurstuecke.status='2'";
@@ -1565,20 +1565,20 @@ class pgdatabase extends pgdatabase_core {
   }
 
   /**
-  * Löschen der Flurstücke, die historisch sind
+  * Lï¿½schen der Flurstï¿½cke, die historisch sind
   *
-  * Diese Funktion löscht alle historischen Flurstücke in der Tabelle alb_flurstuecke, die in alb_x_flurstuecke mit 'H' gekennzeichnet sind.
+  * Diese Funktion lï¿½scht alle historischen Flurstï¿½cke in der Tabelle alb_flurstuecke, die in alb_x_flurstuecke mit 'H' gekennzeichnet sind.
   *
-  * Reihenfolge: Übersichtssatz - Kommentar - Tags.
+  * Reihenfolge: ï¿½bersichtssatz - Kommentar - Tags.
   *
-  * @return array liefert zweidimensionales Array zurück,
-  *                 Wenn array[0]=0 enthält array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
-  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthält eine Fehlermeldung.
+  * @return array liefert zweidimensionales Array zurï¿½ck,
+  *                 Wenn array[0]=0 enthï¿½lt array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
+  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthï¿½lt eine Fehlermeldung.
   * @see    updateFlurstueck(), insertFlurstueck(), $postgres, $alb
   */
   function deleteHistFlurstuecke() {
     $sql ="DELETE FROM alb_flurstuecke";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=" USING alb_".$this->tableprefix."flurstuecke";
     }
@@ -1588,15 +1588,15 @@ class pgdatabase extends pgdatabase_core {
   }
 
   /**
-  * Setzt den Status von historischen Flurstücken auf 'H'
+  * Setzt den Status von historischen Flurstï¿½cken auf 'H'
   *
-  * Diese Funktion setzt alle Flurstücke in der Tabelle alb_flurstuecke auf Status = 'H', die in der Fortführung als historisch angegeben sind.
+  * Diese Funktion setzt alle Flurstï¿½cke in der Tabelle alb_flurstuecke auf Status = 'H', die in der Fortfï¿½hrung als historisch angegeben sind.
   *
-  * Reihenfolge: Übersichtssatz - Kommentar - Tags.
+  * Reihenfolge: ï¿½bersichtssatz - Kommentar - Tags.
   *
-  * @return array liefert zweidimensionales Array zurück,
-  *                 Wenn array[0]=0 enthält array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
-  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthält eine Fehlermeldung.
+  * @return array liefert zweidimensionales Array zurï¿½ck,
+  *                 Wenn array[0]=0 enthï¿½lt array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
+  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthï¿½lt eine Fehlermeldung.
   * @see    updateFlurstueck(), insertFlurstueck(), $postgres, $alb
   */
   function setFlurstueckeHist() {
@@ -1676,10 +1676,10 @@ class pgdatabase extends pgdatabase_core {
       $sql.=", '".$FlurstKennz[$i]."'";
     }
     $sql.=")";
-    $this->debug->write("<p>postgresql.php getFlurstuecksKennzByGemeindeIDs() Abfragen erlaubten Flurstückskennzeichen nach Gemeindeids:<br>".$sql,4);
+    $this->debug->write("<p>postgresql.php getFlurstuecksKennzByGemeindeIDs() Abfragen erlaubten Flurstï¿½ckskennzeichen nach Gemeindeids:<br>".$sql,4);
     $query=pg_query($sql);
     if ($query==0) {
-      $ret[0]=1; $ret[1]="Fehler bei der Abfrage der zur Anzeige erlaubten Flurstücke";
+      $ret[0]=1; $ret[1]="Fehler bei der Abfrage der zur Anzeige erlaubten Flurstï¿½cke";
       $this->debug->write("<br>Abbruch in postgresql.php getFlurstuecksKennzByGemeindeIDs Zeile: ".__LINE__."<br>sql: ".$sql,4);
       return $ret;
     }
@@ -1701,10 +1701,10 @@ class pgdatabase extends pgdatabase_core {
       $sql.=", '".$FlurstKennz[$i]."'";
     }
     $sql.=")";
-    $this->debug->write("<p>postgresql.php getFlurstuecksKennzByGemeindeIDs() Abfragen erlaubten Flurstückskennzeichen nach Gemeindeids:<br>".$sql,4);
+    $this->debug->write("<p>postgresql.php getFlurstuecksKennzByGemeindeIDs() Abfragen erlaubten Flurstï¿½ckskennzeichen nach Gemeindeids:<br>".$sql,4);
     $query=pg_query($sql);
     if ($query==0) {
-      $ret[0]=1; $ret[1]="Fehler bei der Abfrage der zur Anzeige erlaubten Flurstücke";
+      $ret[0]=1; $ret[1]="Fehler bei der Abfrage der zur Anzeige erlaubten Flurstï¿½cke";
       $this->debug->write("<br>Abbruch in postgresql.php getFlurstuecksKennzByGemeindeIDs Zeile: ".__LINE__."<br>sql: ".$sql,4);
       return $ret;
     }
@@ -1726,7 +1726,7 @@ class pgdatabase extends pgdatabase_core {
       case "Kreis" : {
         $sql.=" AND SUBSTRING(gk.gemeinde,1,5)=".$Wert;
       } break;
-     # Der Fall Amt wird zur Zeit nicht unterstützt, weil er in keiner Tabelle in postgres enthalten ist.
+     # Der Fall Amt wird zur Zeit nicht unterstï¿½tzt, weil er in keiner Tabelle in postgres enthalten ist.
      # case "Amt" : {
      #   $sql.=" AND g.AMT_LANG_I=".$Wert;
      # } break;
@@ -1735,10 +1735,10 @@ class pgdatabase extends pgdatabase_core {
       } break;
     }
     $sql.=" ORDER BY f.flurstkennz";
-    $this->debug->write("<p>alb.php getFlurstKennzByRaumbezug() Abfragen der Einschränkungen des Raumbezuges für ALB Daten:<br>".$sql,4);
+    $this->debug->write("<p>alb.php getFlurstKennzByRaumbezug() Abfragen der Einschrï¿½nkungen des Raumbezuges fï¿½r ALB Daten:<br>".$sql,4);
     $query=pg_query($sql);
     if ($query==0) {
-      $ret[0]=1; $ret[1]="Fehler bei der Abfrage der zur Anzeige erlaubten Flurstücke";
+      $ret[0]=1; $ret[1]="Fehler bei der Abfrage der zur Anzeige erlaubten Flurstï¿½cke";
       $this->debug->write("<br>Abbruch in alb.php getFlurstKennzByRaumbezug Zeile: ".__LINE__."<br>sql: ".$sql,4);
       return $ret;
     }
@@ -1781,21 +1781,21 @@ class pgdatabase extends pgdatabase_core {
   }
 
  /**
-  * Löscht die Hinweise zu Flurstücken für die Änderungen vorhanden sind
+  * Lï¿½scht die Hinweise zu Flurstï¿½cken fï¿½r die ï¿½nderungen vorhanden sind
   *
-  * Diese Funktion löscht alle Hinweise in der Tabelle alb_f_hinweise, die an Flurstücke in Tabelle alb_x_flurstuecke gebunden sind.
+  * Diese Funktion lï¿½scht alle Hinweise in der Tabelle alb_f_hinweise, die an Flurstï¿½cke in Tabelle alb_x_flurstuecke gebunden sind.
   *
-  * Reihenfolge: Übersichtssatz - Kommentar - Tags.
+  * Reihenfolge: ï¿½bersichtssatz - Kommentar - Tags.
   *
-  * @param  boolean $historische_loeschen Wenn diese Variable auf 0 gesetzt ist, werden die Hinweise zu historischen Flurstücken im aktuellen Bestand nicht gelöscht.
-  * @return array liefert zweidimensionales Array zurück,
-  *                 Wenn array[0]=0 enthält array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
-  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthält eine Fehlermeldung.
+  * @param  boolean $historische_loeschen Wenn diese Variable auf 0 gesetzt ist, werden die Hinweise zu historischen Flurstï¿½cken im aktuellen Bestand nicht gelï¿½scht.
+  * @return array liefert zweidimensionales Array zurï¿½ck,
+  *                 Wenn array[0]=0 enthï¿½lt array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
+  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthï¿½lt eine Fehlermeldung.
   * @see    insertNewHinweise(), insertHinweise(), getHinweise(), $postgres, $alb
   */
   function deleteOldHinweise() {
     $sql ="DELETE FROM alb_f_hinweise";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
     #12.10.2006 H. Riedel
 #      $sql.=" USING alb_".$this->tableprefix."f_hinweise";
@@ -1804,8 +1804,8 @@ class pgdatabase extends pgdatabase_core {
     #12.10.2006 H. Riedel
 #    $sql.=" WHERE alb_f_hinweise.flurstkennz=alb_".$this->tableprefix."f_hinweise.flurstkennz";
     $sql.=" WHERE alb_f_hinweise.flurstkennz=alb_".$this->tableprefix."flurstuecke.flurstkennz";
-    if (!$historische_loeschen) { // Wenn historische nicht gelöscht werden sollen
-      // Flurstücke, die in der Tabelle alb_x_flurstücke mit status H ausgestattet sind werden nicht berücksichtigt.
+    if (!$historische_loeschen) { // Wenn historische nicht gelï¿½scht werden sollen
+      // Flurstï¿½cke, die in der Tabelle alb_x_flurstï¿½cke mit status H ausgestattet sind werden nicht berï¿½cksichtigt.
       $sql.=" AND alb_".$this->tableprefix."flurstuecke.status != 'H'";
     }
     return $this->execSQL($sql, 4, 0);
@@ -1833,8 +1833,8 @@ class pgdatabase extends pgdatabase_core {
   }
 
   function getStrassen($FlurstKennz) {
-    # Abfrage der Adressenangabe zum Flurstück
-    # 1. Abfragen der Strassen die am Flurstück liegen
+    # Abfrage der Adressenangabe zum Flurstï¿½ck
+    # 1. Abfragen der Strassen die am Flurstï¿½ck liegen
     $sql ="SELECT DISTINCT gem.gemeindename,str.strasse,str.strassenname";
     $sql.=" FROM alb_f_adressen AS adr,alb_v_gemeinden AS gem,alb_v_strassen AS str";
     $sql.=" WHERE adr.gemeinde=gem.gemeinde AND adr.strasse=str.strasse";
@@ -1856,8 +1856,8 @@ class pgdatabase extends pgdatabase_core {
   }
   
   function getStrassenALKIS($FlurstKennz) {
-    # Abfrage der Adressenangabe zum Flurstück
-    # 1. Abfragen der Strassen die am Flurstück liegen
+    # Abfrage der Adressenangabe zum Flurstï¿½ck
+    # 1. Abfragen der Strassen die am Flurstï¿½ck liegen
     $sql ="SELECT DISTINCT g.bezeichnung as gemeindename, l.lage as strasse, s.bezeichnung as strassenname";
     $sql.=" FROM alkis.ax_flurstueck as f, alkis.ax_gemeinde as g, alkis.alkis_beziehungen v";
     $sql.=" JOIN alkis.ax_lagebezeichnungmithausnummer l ON v.beziehung_zu=l.gml_id";
@@ -1986,7 +1986,7 @@ class pgdatabase extends pgdatabase_core {
 
   function deleteHistAdressen() {
     $sql ="DELETE FROM alb_f_adressen";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=" USING alb_".$this->tableprefix."flurstuecke";
     }
@@ -1996,31 +1996,31 @@ class pgdatabase extends pgdatabase_core {
   }
 
  /**
-  * Löscht die Adressen von Flurstücken für die Änderungen vorhanden sind
+  * Lï¿½scht die Adressen von Flurstï¿½cken fï¿½r die ï¿½nderungen vorhanden sind
   *
-  * Diese Funktion löscht alle Adressen in der Tabelle alb_f_adressen, die an Flurstücke in Tabelle alb_x_flurstuecke gebunden sind.
+  * Diese Funktion lï¿½scht alle Adressen in der Tabelle alb_f_adressen, die an Flurstï¿½cke in Tabelle alb_x_flurstuecke gebunden sind.
   *
-  * Reihenfolge: Übersichtssatz - Kommentar - Tags.
+  * Reihenfolge: ï¿½bersichtssatz - Kommentar - Tags.
   *
-  * @param  boolean $historische_loeschen Wenn diese Variable auf 0 gesetzt ist, werden die Adressen von historischen Flurstücke im aktuellen Bestand nicht gelöscht.
-  * @return array liefert zweidimensionales Array zurück,
-  *                 Wenn array[0]=0 enthält array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
-  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthält eine Fehlermeldung.
+  * @param  boolean $historische_loeschen Wenn diese Variable auf 0 gesetzt ist, werden die Adressen von historischen Flurstï¿½cke im aktuellen Bestand nicht gelï¿½scht.
+  * @return array liefert zweidimensionales Array zurï¿½ck,
+  *                 Wenn array[0]=0 enthï¿½lt array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
+  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthï¿½lt eine Fehlermeldung.
   * @see    insertNewAdressen(), deleteHistAdressen(), insertAdresse(), $postgres, $alb
   */
   function deleteOldAdressen() {
     $sql ="DELETE FROM alb_f_adressen";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
-# 08.02.2007 H.Riedel, unvollständiges löschen der Adressen aus alb_f_adressen
+# 08.02.2007 H.Riedel, unvollstï¿½ndiges lï¿½schen der Adressen aus alb_f_adressen
 #      $sql.=" USING alb_".$this->tableprefix."f_adressen";
       $sql.=" USING alb_".$this->tableprefix."flurstuecke";
     }
-# 08.02.2007 H.Riedel, unvollständiges löschen der Adressen aus alb_f_adressen
+# 08.02.2007 H.Riedel, unvollstï¿½ndiges lï¿½schen der Adressen aus alb_f_adressen
 #   $sql.=" WHERE alb_f_adressen.flurstkennz=alb_".$this->tableprefix."f_adressen.flurstkennz";
     $sql.=" WHERE alb_f_adressen.flurstkennz=alb_".$this->tableprefix."flurstuecke.flurstkennz";
-    if (!$historische_loeschen) { // Wenn historische nicht gelöscht werden sollen
-      // Flurstücke, die in der Tabelle alb_x_flurstücke mit status H ausgestattet sind werden nicht berücksichtigt.
+    if (!$historische_loeschen) { // Wenn historische nicht gelï¿½scht werden sollen
+      // Flurstï¿½cke, die in der Tabelle alb_x_flurstï¿½cke mit status H ausgestattet sind werden nicht berï¿½cksichtigt.
       $sql.=" AND alb_".$this->tableprefix."flurstuecke.status != 'H'";
     }
     return $this->execSQL($sql, 4, 0);
@@ -2034,7 +2034,7 @@ class pgdatabase extends pgdatabase_core {
   }
 
   function getLage($FlurstKennz) {
-    # liefert die Lage des Flurstückes
+    # liefert die Lage des Flurstï¿½ckes
     $sql = "SELECT lagebezeichnung FROM alb_f_lage WHERE flurstkennz = '".$FlurstKennz."'";
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0]) {
@@ -2054,7 +2054,7 @@ class pgdatabase extends pgdatabase_core {
   }
   
    function getLageALKIS($FlurstKennz) {
-    # liefert die Lage des Flurstückes
+    # liefert die Lage des Flurstï¿½ckes
     $sql = "SELECT l.unverschluesselt, s.bezeichnung";
 		$sql.= " FROM alkis.ax_flurstueck as f, alkis.alkis_beziehungen v";
 		$sql.= " JOIN alkis.ax_lagebezeichnungohnehausnummer l ON l.gml_id=v.beziehung_zu";
@@ -2087,7 +2087,7 @@ class pgdatabase extends pgdatabase_core {
 
   function deleteAddressLagen() {
     $sql ="DELETE FROM alb_f_lage";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=" USING alb_f_adressen";
     }
@@ -2097,7 +2097,7 @@ class pgdatabase extends pgdatabase_core {
 
   function deleteHistLagen() {
     $sql ="DELETE FROM alb_f_lage";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=" USING alb_".$this->tableprefix."flurstuecke";
     }
@@ -2107,31 +2107,31 @@ class pgdatabase extends pgdatabase_core {
   }
 
  /**
-  * Löscht die Lagebezeichnungen von Flurstücken für die Änderungen vorhanden sind
+  * Lï¿½scht die Lagebezeichnungen von Flurstï¿½cken fï¿½r die ï¿½nderungen vorhanden sind
   *
-  * Diese Funktion löscht alle Lagebezeichnungen in der Tabelle alb_f_lage, die an Flurstücke in Tabelle alb_x_flurstuecke gebunden sind.
+  * Diese Funktion lï¿½scht alle Lagebezeichnungen in der Tabelle alb_f_lage, die an Flurstï¿½cke in Tabelle alb_x_flurstuecke gebunden sind.
   *
-  * Reihenfolge: Übersichtssatz - Kommentar - Tags.
+  * Reihenfolge: ï¿½bersichtssatz - Kommentar - Tags.
   *
-  * @param  boolean $historische_loeschen Wenn diese Variable auf 0 gesetzt ist, werden die Lagebezeichnungen von historischen Flurstücke im aktuellen Bestand nicht gelöscht.
-  * @return array liefert zweidimensionales Array zurück,
-  *                 Wenn array[0]=0 enthält array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
-  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthält eine Fehlermeldung.
+  * @param  boolean $historische_loeschen Wenn diese Variable auf 0 gesetzt ist, werden die Lagebezeichnungen von historischen Flurstï¿½cke im aktuellen Bestand nicht gelï¿½scht.
+  * @return array liefert zweidimensionales Array zurï¿½ck,
+  *                 Wenn array[0]=0 enthï¿½lt array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
+  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthï¿½lt eine Fehlermeldung.
   * @see    deleteHistLagen(), insertLage(), insertNewLagen(), getLage(), $postgres, $alb
   */
   function deleteOldLagen() {
     $sql ="DELETE FROM alb_f_lage";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
-# 08.02.2007 H.Riedel, unvollständiges löschen der Lagebezeichnungen aus alb_f_lage
+# 08.02.2007 H.Riedel, unvollstï¿½ndiges lï¿½schen der Lagebezeichnungen aus alb_f_lage
 #      $sql.=" USING alb_".$this->tableprefix."f_lage";
       $sql.=" USING alb_".$this->tableprefix."flurstuecke";
     }
-# 08.02.2007 H.Riedel, unvollständiges löschen der Lagebezeichnungen aus alb_f_lage
+# 08.02.2007 H.Riedel, unvollstï¿½ndiges lï¿½schen der Lagebezeichnungen aus alb_f_lage
 #    $sql.=" WHERE alb_f_lage.flurstkennz=alb_".$this->tableprefix."f_lage.flurstkennz";
     $sql.=" WHERE alb_f_lage.flurstkennz=alb_".$this->tableprefix."flurstuecke.flurstkennz";
-    if (!$historische_loeschen) { // Wenn historische nicht gelöscht werden sollen
-      // Flurstücke, die in der Tabelle alb_x_flurstücke mit status H ausgestattet sind werden nicht berücksichtigt.
+    if (!$historische_loeschen) { // Wenn historische nicht gelï¿½scht werden sollen
+      // Flurstï¿½cke, die in der Tabelle alb_x_flurstï¿½cke mit status H ausgestattet sind werden nicht berï¿½cksichtigt.
       $sql.=" AND alb_".$this->tableprefix."flurstuecke.status != 'H'";
     }
     return $this->execSQL($sql, 4, 0);
@@ -2154,7 +2154,7 @@ class pgdatabase extends pgdatabase_core {
       # keine Eintragungen zu Nutzungen gefunden
       return $queryret;
     }
-    # Nutzungen zum Flurstück wurden erfolgreich abgefragt
+    # Nutzungen zum Flurstï¿½ck wurden erfolgreich abgefragt
     while($rs=pg_fetch_array($queryret[1])) {
       $Nutzungen[]=$rs;
     }
@@ -2164,12 +2164,12 @@ class pgdatabase extends pgdatabase_core {
   }
   
   function getNutzungALKIS($FlurstKennz) {
-    $sql ="SELECT round(area(intersection(n.wkb_geometry,f.wkb_geometry))::numeric,1) AS flaeche, c.class as nutzungskennz, m.title||' - '||c.label as bezeichnung, n.info, n.zustand, n.name, m.gruppe,c.label, c.blabla";
+    $sql ="SELECT round(st_area(st_intersection(n.wkb_geometry,f.wkb_geometry))::numeric,1) AS flaeche, c.class as nutzungskennz, case when c.label is null then m.title else m.title||' - '||c.label end as bezeichnung, n.info, n.zustand, n.name, m.gruppe,c.label, c.blabla";
 		$sql.=" FROM alkis.ax_flurstueck f, alkis.nutzung n";
 		$sql.=" JOIN alkis.nutzung_meta m ON m.nutz_id=n.nutz_id";
 		$sql.=" LEFT JOIN alkis.nutzung_class c ON c.nutz_id=n.nutz_id AND c.class=n.class";
 		$sql.=" WHERE st_intersects(n.wkb_geometry,f.wkb_geometry) = true";
-		$sql.=" AND area(intersection(n.wkb_geometry,f.wkb_geometry)) > 0.05";
+		$sql.=" AND st_area(st_intersection(n.wkb_geometry,f.wkb_geometry)) > 0.05";
 		$sql.=" AND f.flurstueckskennzeichen = '".$FlurstKennz."'";
 		#echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
@@ -2177,7 +2177,7 @@ class pgdatabase extends pgdatabase_core {
       # keine Eintragungen zu Nutzungen gefunden
       return $queryret;
     }
-    # Nutzungen zum Flurstück wurden erfolgreich abgefragt
+    # Nutzungen zum Flurstï¿½ck wurden erfolgreich abgefragt
     while($rs=pg_fetch_array($queryret[1])) {
       $Nutzungen[]=$rs;
     }
@@ -2188,7 +2188,7 @@ class pgdatabase extends pgdatabase_core {
 
   function deleteHistNutzungen() {
     $sql ="DELETE FROM alb_f_nutzungen";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=" USING alb_".$this->tableprefix."flurstuecke";
     }
@@ -2203,31 +2203,31 @@ class pgdatabase extends pgdatabase_core {
   }
 
  /**
-  * Löscht die Nutzungsarten von Flurstücken für die Änderungen vorhanden sind
+  * Lï¿½scht die Nutzungsarten von Flurstï¿½cken fï¿½r die ï¿½nderungen vorhanden sind
   *
-  * Diese Funktion löscht alle Nutzungen in der Tabelle alb_f_nutzungen, die an Flurstücke in Tabelle alb_x_flurstuecke gebunden sind.
+  * Diese Funktion lï¿½scht alle Nutzungen in der Tabelle alb_f_nutzungen, die an Flurstï¿½cke in Tabelle alb_x_flurstuecke gebunden sind.
   *
-  * Reihenfolge: Übersichtssatz - Kommentar - Tags.
+  * Reihenfolge: ï¿½bersichtssatz - Kommentar - Tags.
   *
-  * @param  boolean $historische_loeschen Wenn diese Variable auf 0 gesetzt ist, werden die Nutzungen von historischen Flurstücke im aktuellen Bestand nicht gelöscht.
-  * @return array liefert zweidimensionales Array zurück,
-  *                 Wenn array[0]=0 enthält array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
-  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthält eine Fehlermeldung.
+  * @param  boolean $historische_loeschen Wenn diese Variable auf 0 gesetzt ist, werden die Nutzungen von historischen Flurstï¿½cke im aktuellen Bestand nicht gelï¿½scht.
+  * @return array liefert zweidimensionales Array zurï¿½ck,
+  *                 Wenn array[0]=0 enthï¿½lt array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
+  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthï¿½lt eine Fehlermeldung.
   * @see    insertNewNutzungen(), insertNutzung(), deleteHistNutzung(), $postgres, $alb
   */
   function deleteOldNutzungen($historische_loeschen) {
     $sql ="DELETE FROM alb_f_nutzungen";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
-# 08.02.2007 H.Riedel, unvollständiges löschen der Nutzungsarten aus alb_f_nutzungen
+# 08.02.2007 H.Riedel, unvollstï¿½ndiges lï¿½schen der Nutzungsarten aus alb_f_nutzungen
 #      $sql.=" USING alb_".$this->tableprefix."f_nutzungen";
       $sql.=" USING alb_".$this->tableprefix."flurstuecke";
     }
-# 08.02.2007 H.Riedel, unvollständiges löschen der Nutzungsarten aus alb_f_nutzungen
+# 08.02.2007 H.Riedel, unvollstï¿½ndiges lï¿½schen der Nutzungsarten aus alb_f_nutzungen
 #    $sql.=" WHERE alb_f_nutzungen.flurstkennz=alb_".$this->tableprefix."f_nutzungen.flurstkennz";
     $sql.=" WHERE alb_f_nutzungen.flurstkennz=alb_".$this->tableprefix."flurstuecke.flurstkennz";
-    if (!$historische_loeschen) { // Wenn historische nicht gelöscht werden sollen
-      // Flurstücke, die in der Tabelle alb_x_flurstücke mit status H ausgestattet sind werden nicht berücksichtigt.
+    if (!$historische_loeschen) { // Wenn historische nicht gelï¿½scht werden sollen
+      // Flurstï¿½cke, die in der Tabelle alb_x_flurstï¿½cke mit status H ausgestattet sind werden nicht berï¿½cksichtigt.
       $sql.=" AND alb_".$this->tableprefix."flurstuecke.status != 'H'";
     }
     return $this->execSQL($sql, 4, 0);
@@ -2246,31 +2246,31 @@ class pgdatabase extends pgdatabase_core {
   }
 
  /**
-  * Löscht die Klassifizierungen von Flurstücken für die Änderungen vorhanden sind
+  * Lï¿½scht die Klassifizierungen von Flurstï¿½cken fï¿½r die ï¿½nderungen vorhanden sind
   *
-  * Diese Funktion löscht alle Klassifizierungen in der Tabelle alb_f_klassifizierungen, die an Flurstücke in Tabelle alb_x_flurstuecke gebunden sind.
+  * Diese Funktion lï¿½scht alle Klassifizierungen in der Tabelle alb_f_klassifizierungen, die an Flurstï¿½cke in Tabelle alb_x_flurstuecke gebunden sind.
   *
-  * Reihenfolge: Übersichtssatz - Kommentar - Tags.
+  * Reihenfolge: ï¿½bersichtssatz - Kommentar - Tags.
   *
-  * @param  boolean $historische_loeschen Wenn diese Variable auf 0 gesetzt ist, werden die Klassifizierungen von historischen Flurstücken im aktuellen Bestand nicht gelöscht.
-  * @return array liefert zweidimensionales Array zurück,
-  *                 Wenn array[0]=0 enthält array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
-  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthält eine Fehlermeldung.
+  * @param  boolean $historische_loeschen Wenn diese Variable auf 0 gesetzt ist, werden die Klassifizierungen von historischen Flurstï¿½cken im aktuellen Bestand nicht gelï¿½scht.
+  * @return array liefert zweidimensionales Array zurï¿½ck,
+  *                 Wenn array[0]=0 enthï¿½lt array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
+  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthï¿½lt eine Fehlermeldung.
   * @see    insertNewKlassifizierungen(), insertKlassifizierung(), getKlassifizierung(), $postgres, $alb
   */
   function deleteOldKlassifizierungen() {
     $sql ="DELETE FROM alb_f_klassifizierungen";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
-# 08.02.2007 H.Riedel, unvollständiges löschen der Klassifizierungen aus alb_f_klassifizierungen
+# 08.02.2007 H.Riedel, unvollstï¿½ndiges lï¿½schen der Klassifizierungen aus alb_f_klassifizierungen
 #      $sql.=" USING alb_".$this->tableprefix."f_klassifizierungen";
       $sql.=" USING alb_".$this->tableprefix."flurstuecke";
     }
-# 08.02.2007 H.Riedel, unvollständiges löschen der Klassifizierungen aus alb_f_klassifizierungen
+# 08.02.2007 H.Riedel, unvollstï¿½ndiges lï¿½schen der Klassifizierungen aus alb_f_klassifizierungen
 #    $sql.=" WHERE alb_f_klassifizierungen.flurstkennz=alb_".$this->tableprefix."f_klassifizierungen.flurstkennz";
     $sql.=" WHERE alb_f_klassifizierungen.flurstkennz=alb_".$this->tableprefix."flurstuecke.flurstkennz";
-    if (!$historische_loeschen) { // Wenn historische nicht gelöscht werden sollen
-      // Flurstücke, die in der Tabelle alb_x_flurstücke mit status H ausgestattet sind werden nicht berücksichtigt.
+    if (!$historische_loeschen) { // Wenn historische nicht gelï¿½scht werden sollen
+      // Flurstï¿½cke, die in der Tabelle alb_x_flurstï¿½cke mit status H ausgestattet sind werden nicht berï¿½cksichtigt.
       $sql.=" AND alb_".$this->tableprefix."flurstuecke.status != 'H'";
     }
     return $this->execSQL($sql, 4, 0);
@@ -2288,7 +2288,7 @@ class pgdatabase extends pgdatabase_core {
       }
       $sql ="SELECT flurstkennz, SUM(flaeche) as summe FROM alb_f_klassifizierungen AS k";
       $sql.=" WHERE tabkenn = '32' AND k.flurstkennz='".$FlurstKennz."' GROUP BY flurstkennz";
-      $this->debug->write("<br>kataster.php->flurstueck->getKlassifizierung Abfrage der Flächensumme zu Klassifizierungen zum Flurstück<br>".$sql,4);
+      $this->debug->write("<br>kataster.php->flurstueck->getKlassifizierung Abfrage der Flï¿½chensumme zu Klassifizierungen zum Flurstï¿½ck<br>".$sql,4);
       $ret=$this->execSQL($sql, 4, 0);
       if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
       $rs=pg_fetch_array($ret[1]);
@@ -2299,14 +2299,14 @@ class pgdatabase extends pgdatabase_core {
   }
   
   function getEMZfromALK($FlurstKennz){
-	  $sql = "select DISTINCT intersection(k.the_geom,intersection(o.the_geom,f.the_geom)) AS intersection_geom,round(area(intersection(k.the_geom,intersection(o.the_geom,f.the_geom)))) as flaeche,substring(t.label from 18 for 3) AS wert,t.label, area(f.the_geom) as flstflaeche, o.objart";
+	  $sql = "select DISTINCT st_intersection(k.the_geom,st_intersection(o.the_geom,f.the_geom)) AS st_intersection_geom,round(st_area(st_intersection(k.the_geom,st_intersection(o.the_geom,f.the_geom)))) as flaeche,substring(t.label from 18 for 3) AS wert,t.label, area(f.the_geom) as flstflaeche, o.objart";
 		$sql.=" FROM alkobj_e_fla as o, alkobj_e_fla as f, alkobj_e_fla as k, alknflst as fl, alkobj_t_pkt as t";
 		$sql.=" WHERE o.the_geom && f.the_geom and o.the_geom && k.the_geom";
 		$sql.=" AND fl.flurstkennz = '".$FlurstKennz."'" ;
 		$sql.=" AND fl.objnr = f.objnr";
 		$sql.=" AND (o.objart = '222' OR o.objart = '223')";
 		$sql.=" AND k.objart='901'";
-		$sql.=" AND area(intersection(k.the_geom,intersection(o.the_geom,f.the_geom))) > 1";
+		$sql.=" AND st_area(st_intersection(k.the_geom,st_intersection(o.the_geom,f.the_geom))) > 1";
 		$sql.=" AND o.objnr=t.objnr ORDER BY o.objart";
 		$ret=$this->execSQL($sql, 4, 0);
     if($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
@@ -2332,31 +2332,31 @@ class pgdatabase extends pgdatabase_core {
   }
 
  /**
-  * Löscht die Texte von Flurstücken für die Änderungen vorhanden sind
+  * Lï¿½scht die Texte von Flurstï¿½cken fï¿½r die ï¿½nderungen vorhanden sind
   *
-  * Diese Funktion löscht alle Texte in der Tabelle alb_f_texte, die an Flurstücke in Tabelle alb_x_flurstuecke gebunden sind.
+  * Diese Funktion lï¿½scht alle Texte in der Tabelle alb_f_texte, die an Flurstï¿½cke in Tabelle alb_x_flurstuecke gebunden sind.
   *
-  * Reihenfolge: Übersichtssatz - Kommentar - Tags.
+  * Reihenfolge: ï¿½bersichtssatz - Kommentar - Tags.
   *
-  * @param  boolean $historische_loeschen Wenn diese Variable auf 0 gesetzt ist, werden die Texte von historischen Flurstücken im aktuellen Bestand nicht gelöscht.
-  * @return array liefert zweidimensionales Array zurück,
-  *                 Wenn array[0]=0 enthält array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
-  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthält eine Fehlermeldung.
+  * @param  boolean $historische_loeschen Wenn diese Variable auf 0 gesetzt ist, werden die Texte von historischen Flurstï¿½cken im aktuellen Bestand nicht gelï¿½scht.
+  * @return array liefert zweidimensionales Array zurï¿½ck,
+  *                 Wenn array[0]=0 enthï¿½lt array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
+  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthï¿½lt eine Fehlermeldung.
   * @see    insertNewTexte(), insertText(), deleteHistTexte(), $postgres, $alb
   */
   function deleteOldTexte() {
     $sql ="DELETE FROM alb_f_texte";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
-# 08.02.2007 H.Riedel, unvollständiges löschen der Texte aus alb_f_texte
+# 08.02.2007 H.Riedel, unvollstï¿½ndiges lï¿½schen der Texte aus alb_f_texte
 #      $sql.=" USING alb_".$this->tableprefix."f_texte";
       $sql.=" USING alb_".$this->tableprefix."flurstuecke";
     }
-# 08.02.2007 H.Riedel, unvollständiges löschen der Texte aus alb_f_texte
+# 08.02.2007 H.Riedel, unvollstï¿½ndiges lï¿½schen der Texte aus alb_f_texte
 #    $sql.=" WHERE alb_f_texte.flurstkennz=alb_".$this->tableprefix."f_texte.flurstkennz";
     $sql.=" WHERE alb_f_texte.flurstkennz=alb_".$this->tableprefix."flurstuecke.flurstkennz";
-    if (!$historische_loeschen) { // Wenn historische nicht gelöscht werden sollen
-      // Flurstücke, die in der Tabelle alb_x_flurstücke mit status H ausgestattet sind werden nicht berücksichtigt.
+    if (!$historische_loeschen) { // Wenn historische nicht gelï¿½scht werden sollen
+      // Flurstï¿½cke, die in der Tabelle alb_x_flurstï¿½cke mit status H ausgestattet sind werden nicht berï¿½cksichtigt.
       $sql.=" AND alb_".$this->tableprefix."flurstuecke.status != 'H'";
     }
     return $this->execSQL($sql, 4, 0);
@@ -2364,7 +2364,7 @@ class pgdatabase extends pgdatabase_core {
 
   function deleteHistTexte() {
     $sql ="DELETE FROM alb_f_texte";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=" USING alb_".$this->tableprefix."flurstuecke";
     }
@@ -2388,31 +2388,31 @@ class pgdatabase extends pgdatabase_core {
   }
 
  /**
-  * Löscht die Anliegerinformationen von Flurstücken für die Änderungen vorhanden sind
+  * Lï¿½scht die Anliegerinformationen von Flurstï¿½cken fï¿½r die ï¿½nderungen vorhanden sind
   *
-  * Diese Funktion löscht alle Anliegerinformationen in der Tabelle alb_f_anlieger, die an Flurstücke in Tabelle alb_x_flurstuecke gebunden sind.
+  * Diese Funktion lï¿½scht alle Anliegerinformationen in der Tabelle alb_f_anlieger, die an Flurstï¿½cke in Tabelle alb_x_flurstuecke gebunden sind.
   *
-  * Reihenfolge: Übersichtssatz - Kommentar - Tags.
+  * Reihenfolge: ï¿½bersichtssatz - Kommentar - Tags.
   *
-  * @param  boolean $historische_loeschen Wenn diese Variable auf 0 gesetzt ist, werden die Anlieger von historischen Flurstücken im aktuellen Bestand nicht gelöscht.
-  * @return array liefert zweidimensionales Array zurück,
-  *                 Wenn array[0]=0 enthält array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
-  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthält eine Fehlermeldung.
+  * @param  boolean $historische_loeschen Wenn diese Variable auf 0 gesetzt ist, werden die Anlieger von historischen Flurstï¿½cken im aktuellen Bestand nicht gelï¿½scht.
+  * @return array liefert zweidimensionales Array zurï¿½ck,
+  *                 Wenn array[0]=0 enthï¿½lt array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
+  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthï¿½lt eine Fehlermeldung.
   * @see    insertNewAnlieger(), insertAnlieger(), deleteHistAnlieger(), $postgres, $alb
   */
   function deleteOldAnlieger() {
     $sql ="DELETE FROM alb_f_anlieger";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
-# 08.02.2007 H.Riedel, unvollständiges löschen der Anlieger aus alb_f_anlieger
+# 08.02.2007 H.Riedel, unvollstï¿½ndiges lï¿½schen der Anlieger aus alb_f_anlieger
 #      $sql.=" USING alb_".$this->tableprefix."f_anlieger";
       $sql.=" USING alb_".$this->tableprefix."flurstuecke";
     }
-# 08.02.2007 H.Riedel, unvollständiges löschen der Anlieger aus alb_f_anlieger
+# 08.02.2007 H.Riedel, unvollstï¿½ndiges lï¿½schen der Anlieger aus alb_f_anlieger
 #    $sql.=" WHERE alb_f_anlieger.flurstkennz=alb_".$this->tableprefix."f_anlieger.flurstkennz";
     $sql.=" WHERE alb_f_anlieger.flurstkennz=alb_".$this->tableprefix."flurstuecke.flurstkennz";
-    if (!$historische_loeschen) { // Wenn historische nicht gelöscht werden sollen
-      // Flurstücke, die in der Tabelle alb_x_flurstücke mit status H ausgestattet sind werden nicht berücksichtigt.
+    if (!$historische_loeschen) { // Wenn historische nicht gelï¿½scht werden sollen
+      // Flurstï¿½cke, die in der Tabelle alb_x_flurstï¿½cke mit status H ausgestattet sind werden nicht berï¿½cksichtigt.
       $sql.=" AND alb_".$this->tableprefix."flurstuecke.status != 'H'";
     }
     return $this->execSQL($sql, 4, 0);
@@ -2420,7 +2420,7 @@ class pgdatabase extends pgdatabase_core {
 
   function deleteHistAnlieger() {
     $sql ="DELETE FROM alb_f_anlieger";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=" USING alb_".$this->tableprefix."flurstuecke";
     }
@@ -2456,7 +2456,7 @@ class pgdatabase extends pgdatabase_core {
 
   function deleteHistBaulasten() {
     $sql ="DELETE FROM alb_f_baulasten";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=" USING alb_".$this->tableprefix."flurstuecke";
     }
@@ -2471,31 +2471,31 @@ class pgdatabase extends pgdatabase_core {
   }
 
  /**
-  * Löscht die Baulasteneinträge von Flurstücken für die Änderungen vorhanden sind
+  * Lï¿½scht die Baulasteneintrï¿½ge von Flurstï¿½cken fï¿½r die ï¿½nderungen vorhanden sind
   *
-  * Diese Funktion löscht alle Baulasteneinträge in der Tabelle alb_f_baulasten, die an Flurstücke in Tabelle alb_x_flurstuecke gebunden sind.
+  * Diese Funktion lï¿½scht alle Baulasteneintrï¿½ge in der Tabelle alb_f_baulasten, die an Flurstï¿½cke in Tabelle alb_x_flurstuecke gebunden sind.
   *
-  * Reihenfolge: Übersichtssatz - Kommentar - Tags.
+  * Reihenfolge: ï¿½bersichtssatz - Kommentar - Tags.
   *
-  * @param  boolean $historische_loeschen Wenn diese Variable auf 0 gesetzt ist, werden die Baulasteneinträge von historischen Flurstücke im aktuellen Bestand nicht gelöscht.
-  * @return array liefert zweidimensionales Array zurück,
-  *                 Wenn array[0]=0 enthält array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
-  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthält eine Fehlermeldung.
+  * @param  boolean $historische_loeschen Wenn diese Variable auf 0 gesetzt ist, werden die Baulasteneintrï¿½ge von historischen Flurstï¿½cke im aktuellen Bestand nicht gelï¿½scht.
+  * @return array liefert zweidimensionales Array zurï¿½ck,
+  *                 Wenn array[0]=0 enthï¿½lt array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
+  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthï¿½lt eine Fehlermeldung.
   * @see    insertNewBaulasten(), insertBaulast(), deleteHistBaulasten(), $postgres, $alb
   */
   function deleteOldBaulasten() {
     $sql ="DELETE FROM alb_f_baulasten";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
-# 08.02.2007 H.Riedel, unvollständiges löschen der Baulasten aus alb_f_baulasten
+# 08.02.2007 H.Riedel, unvollstï¿½ndiges lï¿½schen der Baulasten aus alb_f_baulasten
 #      $sql.=" USING alb_".$this->tableprefix."f_baulasten";
       $sql.=" USING alb_".$this->tableprefix."flurstuecke";
     }
-# 08.02.2007 H.Riedel, unvollständiges löschen der Baulasten aus alb_f_baulasten
+# 08.02.2007 H.Riedel, unvollstï¿½ndiges lï¿½schen der Baulasten aus alb_f_baulasten
 #    $sql.=" WHERE alb_f_baulasten.flurstkennz=alb_".$this->tableprefix."f_baulasten.flurstkennz";
     $sql.=" WHERE alb_f_baulasten.flurstkennz=alb_".$this->tableprefix."flurstuecke.flurstkennz";
-    if (!$historische_loeschen) { // Wenn historische nicht gelöscht werden sollen
-      // Flurstücke, die in der Tabelle alb_x_flurstücke mit status H ausgestattet sind werden nicht berücksichtigt.
+    if (!$historische_loeschen) { // Wenn historische nicht gelï¿½scht werden sollen
+      // Flurstï¿½cke, die in der Tabelle alb_x_flurstï¿½cke mit status H ausgestattet sind werden nicht berï¿½cksichtigt.
       $sql.=" AND alb_".$this->tableprefix."flurstuecke.status != 'H'";
     }
     return $this->execSQL($sql, 4, 0);
@@ -2514,21 +2514,21 @@ class pgdatabase extends pgdatabase_core {
   }
 
  /**
-  * Löscht die Verfahrensangaben von Flurstücken für die Änderungen vorhanden sind
+  * Lï¿½scht die Verfahrensangaben von Flurstï¿½cken fï¿½r die ï¿½nderungen vorhanden sind
   *
-  * Diese Funktion löscht alle Verfahrensangaben in der Tabelle alb_f_verfahren, die an Flurstücke in Tabelle alb_x_flurstuecke gebunden sind.
+  * Diese Funktion lï¿½scht alle Verfahrensangaben in der Tabelle alb_f_verfahren, die an Flurstï¿½cke in Tabelle alb_x_flurstuecke gebunden sind.
   *
-  * Reihenfolge: Übersichtssatz - Kommentar - Tags.
+  * Reihenfolge: ï¿½bersichtssatz - Kommentar - Tags.
   *
-  * @param  boolean $historische_loeschen Wenn diese Variable auf 0 gesetzt ist, werden die Verfahren von historischen Flurstücke im aktuellen Bestand nicht gelöscht.
-  * @return array liefert zweidimensionales Array zurück,
-  *                 Wenn array[0]=0 enthält array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
-  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthält eine Fehlermeldung.
+  * @param  boolean $historische_loeschen Wenn diese Variable auf 0 gesetzt ist, werden die Verfahren von historischen Flurstï¿½cke im aktuellen Bestand nicht gelï¿½scht.
+  * @return array liefert zweidimensionales Array zurï¿½ck,
+  *                 Wenn array[0]=0 enthï¿½lt array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
+  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthï¿½lt eine Fehlermeldung.
   * @see    insertNewVerfahren(), deleteHistVerfahren(), getVerfahren(), insertVerfahren(), $postgres, $alb
   */
   function deleteOldVerfahren() {
     $sql ="DELETE FROM alb_f_verfahren";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
     #12.10.2006 H. Riedel
 #      $sql.=" USING alb_".$this->tableprefix."f_verfahren";
@@ -2537,8 +2537,8 @@ class pgdatabase extends pgdatabase_core {
     #12.10.2006 H. Riedel
 #    $sql.=" WHERE alb_f_verfahren.flurstkennz=alb_".$this->tableprefix."f_verfahren.flurstkennz";
     $sql.=" WHERE alb_f_verfahren.flurstkennz=alb_".$this->tableprefix."flurstuecke.flurstkennz";
-    if (!$historische_loeschen) { // Wenn historische nicht gelöscht werden sollen
-      // Flurstücke, die in der Tabelle alb_x_flurstücke mit status H ausgestattet sind werden nicht berücksichtigt.
+    if (!$historische_loeschen) { // Wenn historische nicht gelï¿½scht werden sollen
+      // Flurstï¿½cke, die in der Tabelle alb_x_flurstï¿½cke mit status H ausgestattet sind werden nicht berï¿½cksichtigt.
       $sql.=" AND alb_".$this->tableprefix."flurstuecke.status != 'H'";
     }
     return $this->execSQL($sql, 4, 0);
@@ -2563,7 +2563,7 @@ class pgdatabase extends pgdatabase_core {
 
   function deleteHistVerfahren() {
     $sql ="DELETE FROM alb_f_verfahren";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=" USING alb_".$this->tableprefix."flurstuecke";
     }
@@ -2634,7 +2634,7 @@ class pgdatabase extends pgdatabase_core {
 
   function deleteNewHistorien() {
     $sql ="DELETE FROM alb_f_historie";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=" USING alb_".$this->tableprefix."f_historie";
     }
@@ -2650,7 +2650,7 @@ class pgdatabase extends pgdatabase_core {
 
   function deleteHistHistorie() {
     $sql ="DELETE FROM alb_f_historie";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=" USING alb_".$this->tableprefix."flurstuecke";
     }
@@ -2661,7 +2661,7 @@ class pgdatabase extends pgdatabase_core {
 
   function deleteTempHistVorgaenger() {
     $sql ="DELETE FROM alb_".$this->tableprefix."f_historie";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=" USING alb_".$this->tableprefix."flurstuecke";
     }
@@ -2679,7 +2679,7 @@ class pgdatabase extends pgdatabase_core {
   }
 
   function getEigentuemerliste($FlurstKennz,$Bezirk,$Blatt,$BVNR) {
-    # 28.11.2006 H.Riedel, Eigentümerart hinzugefügt
+    # 28.11.2006 H.Riedel, Eigentï¿½merart hinzugefï¿½gt
     # $sql = "SELECT e.namensnr,n.name1,n.name2,n.name3,n.name4,e.anteilsverhaeltnis AS Anteil";
     $sql = "SELECT e.namensnr,n.lfd_nr_name,n.name1,n.name2,n.name3,n.name4,e.anteilsverhaeltnis AS anteil,e.eigentuemerart AS Art";
     $sql.= " FROM alb_g_eigentuemer AS e,alb_g_namen AS n,alb_g_grundstuecke AS g,alb_g_buchungen AS b";
@@ -2796,7 +2796,7 @@ class pgdatabase extends pgdatabase_core {
 
   function deleteNewEigentuemer() {
     $sql ="DELETE FROM alb_g_eigentuemer";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=" USING alb_".$this->tableprefix."g_eigentuemer";
     }
@@ -2807,21 +2807,21 @@ class pgdatabase extends pgdatabase_core {
   }
 
   /**
-  * Löschen der Zuordnungen der Eigentümer zu Grundbüchern, die zu ändern sind
+  * Lï¿½schen der Zuordnungen der Eigentï¿½mer zu Grundbï¿½chern, die zu ï¿½ndern sind
   *
-  * Diese Funktion löscht alle Zuordnungen von Eigentümern zu Grundbüchern in der Tabelle alb_g_eigentuemer, die aktualisiert werden sollen.
+  * Diese Funktion lï¿½scht alle Zuordnungen von Eigentï¿½mern zu Grundbï¿½chern in der Tabelle alb_g_eigentuemer, die aktualisiert werden sollen.
   *
-  * Reihenfolge: Übersichtssatz - Kommentar - Tags.
+  * Reihenfolge: ï¿½bersichtssatz - Kommentar - Tags.
   *
-  * @param  string  $historische_loeschen Wenn der Parameter auf 1 gestetzt ist, werden die in der temporären Tabelle als historisch gekennzeichneten Grundbücher für Löschung der Eigentümerzuordnung verwendet.
-  * @return array liefert zweidimensionales Array zurück,
-  *                 Wenn array[0]=0 enthält array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
-  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthält eine Fehlermeldung.
+  * @param  string  $historische_loeschen Wenn der Parameter auf 1 gestetzt ist, werden die in der temporï¿½ren Tabelle als historisch gekennzeichneten Grundbï¿½cher fï¿½r Lï¿½schung der Eigentï¿½merzuordnung verwendet.
+  * @return array liefert zweidimensionales Array zurï¿½ck,
+  *                 Wenn array[0]=0 enthï¿½lt array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
+  *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthï¿½lt eine Fehlermeldung.
   * @see    insertEigentuemer(), updateEigentuemer(), $postgres, $alb
   */
   function deleteEigentuemerByGrundbuecher($historische_loeschen) {
     $sql ="DELETE FROM alb_g_eigentuemer";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=" USING alb_".$this->tableprefix."grundbuecher";
     }
@@ -2837,7 +2837,7 @@ class pgdatabase extends pgdatabase_core {
     $sql ="UPDATE alb_g_namen SET";
     $sql.=" name1=alb_".$this->tableprefix."g_namen.name1,name2=alb_".$this->tableprefix."g_namen.name2";
     $sql.=",name3=alb_".$this->tableprefix."g_namen.name3,name4=alb_".$this->tableprefix."g_namen.name4";
-#Eingefügt 11.04.2006 H. Riedel
+#Eingefï¿½gt 11.04.2006 H. Riedel
     $sql.=" FROM alb_g_eigentuemer, alb_".$this->tableprefix."g_namen, alb_".$this->tableprefix."g_eigentuemer";
     $sql.=" WHERE alb_g_eigentuemer.namensNr=alb_".$this->tableprefix."g_eigentuemer.namensNr";
     $sql.=" AND TRIM(alb_g_eigentuemer.blatt) = TRIM(alb_".$this->tableprefix."g_eigentuemer.blatt)";
@@ -2852,7 +2852,7 @@ class pgdatabase extends pgdatabase_core {
       $sql ="UPDATE alb_g_eigentuemer SET";
       $sql.=" eigentuemerart=alb_".$this->tableprefix."g_eigentuemer.eigentuemerart";
       $sql.=",anteilsverhaeltnis=alb_".$this->tableprefix."g_eigentuemer.anteilsverhaeltnis";
-#Eingefügt 11.04.2006 H. Riedel
+#Eingefï¿½gt 11.04.2006 H. Riedel
       $sql.=" FROM alb_g_namen, alb_".$this->tableprefix."g_namen, alb_".$this->tableprefix."g_eigentuemer";
       $sql.=" WHERE alb_g_eigentuemer.namensNr=alb_".$this->tableprefix."g_eigentuemer.namensNr";
       $sql.=" AND TRIM(alb_g_eigentuemer.blatt) = TRIM(alb_".$this->tableprefix."g_eigentuemer.blatt)";
@@ -2897,15 +2897,15 @@ class pgdatabase extends pgdatabase_core {
   }
 
   function insertNewNamen() {
-    # Abfragen der letzten laufenden Nummern für Namen
+    # Abfragen der letzten laufenden Nummern fï¿½r Namen
     $ret=$this->getLastLfdNrName();
     if ($ret[0]==0) {
       $lastLfdNrName=$ret[1];
-      # Setzen der fortlaufenden Sequenz für lfd_nr_name
+      # Setzen der fortlaufenden Sequenz fï¿½r lfd_nr_name
       $ret=$this->setSequenzLfdNrName($lastLfdNrName);
       if ($ret[0]==0) {
-        # Einfügen der neuen Namen aus temporärer Tabelle in Bestand
-        # fortlaufende Nummer wird über sequenz automatisch weitergezählt
+        # Einfï¿½gen der neuen Namen aus temporï¿½rer Tabelle in Bestand
+        # fortlaufende Nummer wird ï¿½ber sequenz automatisch weitergezï¿½hlt
         $sql ="INSERT INTO alb_g_namen (name1,name2,name3,name4)";
         $sql.=" SELECT name1,name2,name3,name4 FROM alb_".$this->tableprefix."g_namen";
         $sql.=" WHERE lfd_nr_name_alt = 0";
@@ -2916,7 +2916,7 @@ class pgdatabase extends pgdatabase_core {
   }
 
   function getNamen($n1,$n2,$n3,$n4,$bezirk,$blatt,$gemkgschl,$flur,$limitAnzahl,$limitStart,$caseSensitive, $order) {
-    # pg unterstützt mit LIKE CASE SENSITIVEN Stringvergleiche
+    # pg unterstï¿½tzt mit LIKE CASE SENSITIVEN Stringvergleiche
     $name[1]=$n1; $name[2]=$n2; $name[3]=$n3; $name[4]=$n4;
     $sql ="SELECT DISTINCT n.lfd_nr_name,name1,name2,name3,name4,e.bezirk,e.blatt,e.namensnr";
     $sql.=" FROM alb_g_namen AS n,alb_g_eigentuemer AS e, alb_grundbuecher as gb";
@@ -3055,7 +3055,7 @@ class pgdatabase extends pgdatabase_core {
 
   function updateLfdNrName() {
     $sql ="UPDATE alb_".$this->tableprefix."g_namen SET lfd_nr_name_alt=alb_g_namen.lfd_nr_name";
-#Eingefügt 11.04.2006 H. Riedel
+#Eingefï¿½gt 11.04.2006 H. Riedel
     $sql.=" FROM alb_g_namen";
     $sql.=" WHERE alb_g_namen.name4=alb_".$this->tableprefix."g_namen.name4 AND alb_g_namen.name3=alb_".$this->tableprefix."g_namen.name3";
     $sql.=" AND alb_g_namen.name2=alb_".$this->tableprefix."g_namen.name2 AND alb_g_namen.name1=alb_".$this->tableprefix."g_namen.name1";
@@ -3082,7 +3082,7 @@ class pgdatabase extends pgdatabase_core {
 
   function replaceKatasteraemter() {
     $sql ="DELETE FROM alb_v_katasteraemter";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=" USING alb_".$this->tableprefix."v_katasteraemter";
     }
@@ -3137,7 +3137,7 @@ class pgdatabase extends pgdatabase_core {
 
   function replaceForstaemter() {
     $sql ="DELETE FROM alb_v_forstaemter";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=" USING alb_".$this->tableprefix."v_forstaemter";
     }
@@ -3191,7 +3191,7 @@ class pgdatabase extends pgdatabase_core {
 
   function replaceFinanzaemter() {
     $sql ='DELETE FROM alb_v_finanzaemter';
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=' USING alb_'.$this->tableprefix.'v_finanzaemter';
     }
@@ -3275,7 +3275,7 @@ class pgdatabase extends pgdatabase_core {
   
   function replaceAmtsgerichte() {
     $sql ="DELETE FROM alb_v_amtsgerichte";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=" USING alb_".$this->tableprefix."v_amtsgerichte";
     }
@@ -3308,7 +3308,7 @@ class pgdatabase extends pgdatabase_core {
 
   function replaceAusfuehrendeStellen() {
     $sql ='DELETE FROM alb_v_ausfuehrendestellen';
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=' USING alb_'.$this->tableprefix.'v_ausfuehrendestellen';
     }
@@ -3356,7 +3356,7 @@ class pgdatabase extends pgdatabase_core {
 
   function replaceKreise() {
     $sql ="DELETE FROM alb_v_kreise";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=" USING alb_".$this->tableprefix."v_kreise";
     }
@@ -3389,7 +3389,7 @@ class pgdatabase extends pgdatabase_core {
 
   function replaceGemeinden() {
     $sql ="DELETE FROM alb_v_gemeinden";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=" USING alb_".$this->tableprefix."v_gemeinden";
     }
@@ -3455,7 +3455,7 @@ class pgdatabase extends pgdatabase_core {
 
   function replaceGemarkungen() {
     $sql ="DELETE FROM alb_v_gemarkungen";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=" USING alb_".$this->tableprefix."v_gemarkungen";
     }
@@ -3648,7 +3648,7 @@ class pgdatabase extends pgdatabase_core {
 
   function replaceGrundbuchbezirke() {
     $sql ="DELETE FROM alb_v_grundbuchbezirke";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=" USING alb_".$this->tableprefix."v_grundbuchbezirke";
     }
@@ -3683,7 +3683,7 @@ class pgdatabase extends pgdatabase_core {
   function replaceStrassen() {
     # 2006-01-23
     $sql ="DELETE FROM alb_v_strassen";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=" USING alb_".$this->tableprefix."v_strassen";
     }
@@ -3717,7 +3717,7 @@ class pgdatabase extends pgdatabase_core {
 
   function replaceEigentuemerArten() {
     $sql ='DELETE FROM alb_v_eigentuemerarten';
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=' USING alb_'.$this->tableprefix.'v_eigentuemerarten';
     }
@@ -3750,7 +3750,7 @@ class pgdatabase extends pgdatabase_core {
 
   function replaceBuchungsarten() {
     $sql ='DELETE FROM alb_v_buchungsarten';
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=' USING alb_'.$this->tableprefix.'v_buchungsarten';
     }
@@ -3783,7 +3783,7 @@ class pgdatabase extends pgdatabase_core {
 
   function replaceHinweise() {
     $sql ='DELETE FROM alb_v_hinweise';
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=' USING alb_'.$this->tableprefix.'v_hinweise';
     }
@@ -3800,7 +3800,7 @@ class pgdatabase extends pgdatabase_core {
 
   function deleteHistHinweise() {
     $sql ="DELETE FROM alb_f_hinweise";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=" USING alb_".$this->tableprefix."flurstuecke";
     }
@@ -3829,7 +3829,7 @@ class pgdatabase extends pgdatabase_core {
 
   function replaceNutzungsarten() {
     $sql ="DELETE FROM alb_v_nutzungsarten";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=" USING alb_".$this->tableprefix."v_nutzungsarten";
     }
@@ -3863,7 +3863,7 @@ class pgdatabase extends pgdatabase_core {
 
   function replaceKlassifizierungen() {
     $sql ='DELETE FROM alb_v_klassifizierungen';
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=' USING alb_'.$this->tableprefix.'v_klassifizierungen';
     }
@@ -3880,7 +3880,7 @@ class pgdatabase extends pgdatabase_core {
 
   function deleteHistKlassifizierungen() {
     $sql ="DELETE FROM alb_f_klassifizierungen";
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=" USING alb_".$this->tableprefix."flurstuecke";
     }
@@ -3908,7 +3908,7 @@ class pgdatabase extends pgdatabase_core {
 
   function replaceBemerkungenZumVerfahren() {
     $sql ='DELETE FROM alb_v_bemerkgzumverfahren';
-    #Eingefügt 11.04.2006 H. Riedel
+    #Eingefï¿½gt 11.04.2006 H. Riedel
     if(POSTGRESVERSION >= '810'){
       $sql.=' USING alb_'.$this->tableprefix.'v_bemerkgzumverfahren';
     }
@@ -3945,28 +3945,28 @@ class pgdatabase extends pgdatabase_core {
     return $anzahl;
   }
 
-  # Funktion zum Auffüllen einer temporären Tabelle mit Einträgen aller Adressen, die in der ALK und ALB vorkommen.
+  # Funktion zum Auffï¿½llen einer temporï¿½ren Tabelle mit Eintrï¿½gen aller Adressen, die in der ALK und ALB vorkommen.
   function updateTempAdressTable() {
     # 2006-01-02 pk
     # Leeren der Tabelle
     $sql ='TRUNCATE alb_tmp_adressen';
-    $this->debug->write('<br>postgres.php: updateAdressTable<br>Löschen der temporären Adresstabelle<br>'.$sql,4);
+    $this->debug->write('<br>postgres.php: updateAdressTable<br>Lï¿½schen der temporï¿½ren Adresstabelle<br>'.$sql,4);
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { return 'Abbruch in '.$PHP_SELF.' updateAdressTable() Zeile: '.__LINE__.'<br>'.$sql; }
 
-    # Abfragen aller Adressen aus dem ALB (alb_f_adressen) und schreiben in temporäre Tabelle
+    # Abfragen aller Adressen aus dem ALB (alb_f_adressen) und schreiben in temporï¿½re Tabelle
     $sql ="INSERT INTO alb_tmp_adressen (SELECT DISTINCT 'ALB' AS quelle,g.gemeinde,g.gemeindename,s.strasse,s.strassenname,TRIM(a.hausnr) AS hausnr";
     $sql.=" FROM alb_f_adressen AS a,alb_v_gemeinden AS g,alb_v_strassen AS s";
     $sql.=" WHERE a.gemeinde=g.gemeinde AND a.strasse=s.strasse AND a.gemeinde = s.gemeinde)";
-    $this->debug->write('<br>postgres.php updateAdressTable<br>Auffüllen der temporären Adresstabelle mit Adressen des ALB<br>'.$sql,4);
+    $this->debug->write('<br>postgres.php updateAdressTable<br>Auffï¿½llen der temporï¿½ren Adresstabelle mit Adressen des ALB<br>'.$sql,4);
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { return 'Abbruch in '.$PHP_SELF.' updateAdressTable() Zeile: '.__LINE__.'<br>'.$sql; }
 
-    # aller Adressen aus der ALK (alknhaus) und schreiben in temporäre Tabelle
+    # aller Adressen aus der ALK (alknhaus) und schreiben in temporï¿½re Tabelle
     $sql ="INSERT INTO alb_tmp_adressen (SELECT DISTINCT 'ALK' AS quelle,h.gemeinde,g.gemeindename,h.strasse,s.strassenname,h.hausnr";
     $sql.=" FROM alknhaus AS h, alb_v_gemeinden AS g, alb_v_strassen AS s";
     $sql.=" WHERE h.gemeinde=g.gemeinde AND h.gemeinde=s.gemeinde AND h.strasse=s.strasse)";
-    $this->debug->write('<br>postgres.php updateAdressTable<br>Auffüllen der temporären Adresstabelle mit Adressen der ALK<br>'.$sql,4);
+    $this->debug->write('<br>postgres.php updateAdressTable<br>Auffï¿½llen der temporï¿½ren Adresstabelle mit Adressen der ALK<br>'.$sql,4);
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { return 'Abbruch in '.$PHP_SELF.' updateAdressTable() Zeile: '.__LINE__.'<br>'.$sql; }
   }
@@ -3979,7 +3979,7 @@ class pgdatabase extends pgdatabase_core {
     $sql.=" WHERE hfl.folie='011'";
     # $sql.=" AND hfl.the_geom && GeometryFromText('".$PolygonWKTString."',".EPSGCODE.")";
     if ($PolygonWKTString!='') {
-      $sql.=" AND NOT Disjoint(hfl.the_geom,GeometryFromText('".$PolygonWKTString."',".EPSGCODE."))";
+      $sql.=" AND st_intersects(hfl.the_geom,GeometryFromText('".$PolygonWKTString."',".EPSGCODE."))";
     }
     $sql.=" AND hfl.objnr=alkh.objnr AND alkh.gemeinde=a.gemeinde AND alkh.strasse=a.strasse AND alkh.hausnr=a.hausnr";
     if ($GemID!='') {
@@ -3991,7 +3991,7 @@ class pgdatabase extends pgdatabase_core {
     $sql.=" WHERE ffl.folie='001'";
     # $sql.=" AND ffl.the_geom && GeometryFromText('".$PolygonWKTString."',".EPSGCODE.")";
     if ($PolygonWKTString!='') {
-      $sql.=" AND NOT Disjoint(ffl.the_geom,GeometryFromText('".$PolygonWKTString."',".EPSGCODE."))";
+      $sql.=" AND st_intersects(ffl.the_geom,GeometryFromText('".$PolygonWKTString."',".EPSGCODE."))";
     }
     $sql.=" AND ffl.objnr=alkf.objnr AND alkf.flurstkennz=albf.flurstkennz";
     $sql.=" AND albf.gemeinde=a.gemeinde AND albf.strasse=a.strasse AND albf.hausnr=a.hausnr";
@@ -4030,7 +4030,7 @@ class pgdatabase extends pgdatabase_core {
     $sql.=" WHERE alkfl.folie='011'";
     # $sql.=" AND alkfl.the_geom && GeometryFromText('".$PolygonWKTString."',".EPSGCODE.")";
     if ($PolygonWKTString!='') {
-      $sql.=" AND NOT Disjoint(alkfl.the_geom,GeometryFromText('".$PolygonWKTString."',".EPSGCODE."))";
+      $sql.=" AND st_intersects(alkfl.the_geom,GeometryFromText('".$PolygonWKTString."',".EPSGCODE."))";
     }
     $sql.=" AND alk.objnr=alkfl.objnr AND alk.gemeinde=s.gemeinde AND alk.strasse=s.strasse";
     if ($GemID!='') {
@@ -4103,7 +4103,7 @@ class pgdatabase extends pgdatabase_core {
     $sql ="SELECT gemeinde,strasse,strassenname,gemkgname FROM (";
     # Subselect zum Zusammenfassen und Sortieren der Bestandteile der Abfrage
     $sql.="SELECT DISTINCT gemeinde,strasse,strassenname,ordertext,gemkgname FROM (";
-    # Abfage zum Einfügen der leeren Auswahlzeile
+    # Abfage zum Einfï¿½gen der leeren Auswahlzeile
     $sql.="SELECT -1 AS gemeinde,'-1' AS strasse,'--Auswahl--' AS strassenname, 'aaa' AS ordertext, '' as gemkgname";
     $sql.=" UNION";
     # Abfrage der Strassen aus dem ALB-Bestand
@@ -4121,7 +4121,7 @@ class pgdatabase extends pgdatabase_core {
     $i = 0;
     while ($rs=pg_fetch_array($queryret[1])) {
     	if($namen[$i-1] == $rs['strassenname'] AND $Liste['StrID'][$i-1] == $rs['strasse']){
-    		# Strasse doppelt drin -> überspringen
+    		# Strasse doppelt drin -> ï¿½berspringen
     		$i = $i-1;
     	}
     	else{
@@ -4165,7 +4165,7 @@ class pgdatabase extends pgdatabase_core {
     $i = 0;
     while ($rs=pg_fetch_array($queryret[1])) {
     	if($namen[$i-1] == $rs['strassenname'] AND $Liste['StrID'][$i-1] == $rs['strasse']){
-    		# Strasse doppelt drin -> überspringen
+    		# Strasse doppelt drin -> ï¿½berspringen
     		$i = $i-1;
     	}
     	else{
@@ -4193,7 +4193,7 @@ class pgdatabase extends pgdatabase_core {
     $sql ="SELECT gemeinde,strasse,strassenname,gemkgname, gemkgschl FROM (";
     # Subselect zum Zusammenfassen und Sortieren der Bestandteile der Abfrage
     $sql.="SELECT DISTINCT gemeinde,strasse,strassenname,ordertext,gemkgname, gemkgschl FROM (";
-    # Abfage zum Einfügen der leeren Auswahlzeile
+    # Abfage zum Einfï¿½gen der leeren Auswahlzeile
     $sql.="SELECT -1 AS gemeinde,'-1' AS strasse,'--Auswahl--' AS strassenname, 'aaa' AS ordertext, '' as gemkgname, 0 as gemkgschl";
     $sql.=" UNION";
     # Abfrage der Strassen aus dem ALB-Bestand
@@ -4211,7 +4211,7 @@ class pgdatabase extends pgdatabase_core {
     $i = 0;
     while ($rs=pg_fetch_array($queryret[1])) {
     	if($namen[$i-1] == $rs['strassenname'] AND $Liste['StrID'][$i-1] == $rs['strasse']){
-    		# Strasse doppelt drin -> überspringen
+    		# Strasse doppelt drin -> ï¿½berspringen
     		$i = $i-1;
     	}
     	else{
@@ -4314,9 +4314,9 @@ class pgdatabase extends pgdatabase_core {
 ##########################################################################
   #2005-11-30_pk
   function getMERfromFlurstuecke($flurstkennz, $epsgcode) {
-    $this->debug->write("<br>postgres.php->database->getMERfromFlurstuecke, Abfrage des Maximalen umschließenden Rechtecks um die Flurstücke",4);
-    $sql ="SELECT MIN(XMIN(ENVELOPE(TRANSFORM(o.the_geom, ".$epsgcode.")))) AS minx,MAX(XMAX(ENVELOPE(TRANSFORM(o.the_geom, ".$epsgcode.")))) AS maxx";
-    $sql.=",MIN(YMIN(ENVELOPE(TRANSFORM(o.the_geom, ".$epsgcode.")))) AS miny,MAX(YMAX(ENVELOPE(TRANSFORM(o.the_geom, ".$epsgcode.")))) AS maxy";
+    $this->debug->write("<br>postgres.php->database->getMERfromFlurstuecke, Abfrage des Maximalen umschlieï¿½enden Rechtecks um die Flurstï¿½cke",4);
+    $sql ="SELECT MIN(st_xmin(st_envelope(st_transform(o.the_geom, ".$epsgcode.")))) AS minx,MAX(st_xmax(st_envelope(st_transform(o.the_geom, ".$epsgcode.")))) AS maxx";
+    $sql.=",MIN(st_ymin(st_envelope(st_transform(o.the_geom, ".$epsgcode.")))) AS miny,MAX(st_ymax(st_envelope(st_transform(o.the_geom, ".$epsgcode.")))) AS maxy";
     $sql.=" FROM alkobj_e_fla as o,alknflst AS f";
     $sql.=" WHERE o.objnr=f.objnr";
     $anzflst=count($flurstkennz);
@@ -4329,13 +4329,13 @@ class pgdatabase extends pgdatabase_core {
     }
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) {
-      $ret[1]='Fehler beim Abfragen des Umschließenden Rechtecks um die Flurstücke.<br>'.$ret[1];
+      $ret[1]='Fehler beim Abfragen des Umschlieï¿½enden Rechtecks um die Flurstï¿½cke.<br>'.$ret[1];
     }
     else {
       $rs=pg_fetch_array($ret[1]);
       if ($rs['minx']==0) {
         $ret[0]=1;
-        $ret[1]='Flurstück nicht in Postgres Datenbank '.$this->dbName.' vorhanden.';
+        $ret[1]='Flurstï¿½ck nicht in Postgres Datenbank '.$this->dbName.' vorhanden.';
       }
       else {
         $ret[1]=$rs;
@@ -4345,9 +4345,9 @@ class pgdatabase extends pgdatabase_core {
   }
   
   function getMERfromFlurstueckeALKIS($flurstkennz, $epsgcode) {
-    $this->debug->write("<br>postgres.php->database->getMERfromFlurstuecke, Abfrage des Maximalen umschließenden Rechtecks um die Flurstücke",4);
-    $sql ="SELECT MIN(XMIN(ENVELOPE(TRANSFORM(wkb_geometry, ".$epsgcode.")))) AS minx,MAX(XMAX(ENVELOPE(TRANSFORM(wkb_geometry, ".$epsgcode.")))) AS maxx";
-    $sql.=",MIN(YMIN(ENVELOPE(TRANSFORM(wkb_geometry, ".$epsgcode.")))) AS miny,MAX(YMAX(ENVELOPE(TRANSFORM(wkb_geometry, ".$epsgcode.")))) AS maxy";
+    $this->debug->write("<br>postgres.php->database->getMERfromFlurstuecke, Abfrage des Maximalen umschlieï¿½enden Rechtecks um die Flurstï¿½cke",4);
+    $sql ="SELECT MIN(st_xmin(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS minx,MAX(st_xmax(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS maxx";
+    $sql.=",MIN(st_ymin(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS miny,MAX(st_ymax(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS maxy";
     $sql.=" FROM alkis.ax_flurstueck AS f";
     $sql.=" WHERE 1=1";
     $anzflst=count($flurstkennz);
@@ -4360,13 +4360,13 @@ class pgdatabase extends pgdatabase_core {
     }
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) {
-      $ret[1]='Fehler beim Abfragen des Umschließenden Rechtecks um die Flurstücke.<br>'.$ret[1];
+      $ret[1]='Fehler beim Abfragen des Umschlieï¿½enden Rechtecks um die Flurstï¿½cke.<br>'.$ret[1];
     }
     else {
       $rs=pg_fetch_array($ret[1]);
       if ($rs['minx']==0) {
         $ret[0]=1;
-        $ret[1]='Flurstück nicht in Postgres Datenbank '.$this->dbName.' vorhanden.';
+        $ret[1]='Flurstï¿½ck nicht in Postgres Datenbank '.$this->dbName.' vorhanden.';
       }
       else {
         $ret[1]=$rs;
@@ -4377,9 +4377,9 @@ class pgdatabase extends pgdatabase_core {
 
   # 2006-01-31 pk
   function getMERfromGebaeude($Gemeinde,$Strasse,$Hausnr, $epsgcode){
-    $this->debug->write("<br>postgres.php->database->getMERfromGebaeude, Abfrage des Maximalen umschließenden Rechtecks um die Gebaeude",4);
-    $sql ="SELECT MIN(XMIN(ENVELOPE(TRANSFORM(o.the_geom, ".$epsgcode.")))) AS minx,MAX(XMAX(ENVELOPE(TRANSFORM(o.the_geom, ".$epsgcode.")))) AS maxx";
-    $sql.=",MIN(YMIN(ENVELOPE(TRANSFORM(o.the_geom, ".$epsgcode.")))) AS miny,MAX(YMAX(ENVELOPE(TRANSFORM(o.the_geom, ".$epsgcode.")))) AS maxy";
+    $this->debug->write("<br>postgres.php->database->getMERfromGebaeude, Abfrage des Maximalen umschlieï¿½enden Rechtecks um die Gebaeude",4);
+    $sql ="SELECT MIN(st_xmin(st_envelope(st_transform(o.the_geom, ".$epsgcode.")))) AS minx,MAX(st_xmax(st_envelope(st_transform(o.the_geom, ".$epsgcode.")))) AS maxx";
+    $sql.=",MIN(st_ymin(st_envelope(st_transform(o.the_geom, ".$epsgcode.")))) AS miny,MAX(st_ymax(st_envelope(st_transform(o.the_geom, ".$epsgcode.")))) AS maxy";
     $sql.=" FROM alkobj_e_fla as o,alknhaus AS h";
     $sql.=" WHERE o.objnr=h.objnr";
     if ($Hausnr!='') {
@@ -4396,7 +4396,7 @@ class pgdatabase extends pgdatabase_core {
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) {
-      $ret[1]='Fehler beim Abfragen des Umschließenden Rechtecks um die Gebäude.<br>'.$ret[1];
+      $ret[1]='Fehler beim Abfragen des Umschlieï¿½enden Rechtecks um die Gebï¿½ude.<br>'.$ret[1];
     }
     else {
       $rs=pg_fetch_array($ret[1]);
@@ -4412,9 +4412,9 @@ class pgdatabase extends pgdatabase_core {
   }
   
   function getMERfromGebaeudeALKIS($Gemeinde,$Strasse,$Hausnr, $epsgcode) {
-    $this->debug->write("<br>postgres.php->database->getMERfromGebaeude, Abfrage des Maximalen umschließenden Rechtecks um die Gebaeude",4);
-    $sql ="SELECT MIN(XMIN(ENVELOPE(TRANSFORM(wkb_geometry, ".$epsgcode.")))) AS minx,MAX(XMAX(ENVELOPE(TRANSFORM(wkb_geometry, ".$epsgcode.")))) AS maxx";
-    $sql.=",MIN(YMIN(ENVELOPE(TRANSFORM(wkb_geometry, ".$epsgcode.")))) AS miny,MAX(YMAX(ENVELOPE(TRANSFORM(wkb_geometry, ".$epsgcode.")))) AS maxy";
+    $this->debug->write("<br>postgres.php->database->getMERfromGebaeude, Abfrage des Maximalen umschlieï¿½enden Rechtecks um die Gebaeude",4);
+    $sql ="SELECT MIN(st_xmin(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS minx,MAX(st_xmax(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS maxx";
+    $sql.=",MIN(st_ymin(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS miny,MAX(st_ymax(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS maxy";
     $sql.=" FROM alkis.ax_gemeinde gem, alkis.ax_gebaeude g";
     $sql.=" LEFT JOIN alkis.alkis_beziehungen v ON g.gml_id=v.beziehung_von"; 
 		$sql.=" LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON v.beziehung_zu=l.gml_id";
@@ -4435,7 +4435,7 @@ class pgdatabase extends pgdatabase_core {
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) {
-      $ret[1]='Fehler beim Abfragen des Umschließenden Rechtecks um die Gebäude.<br>'.$ret[1];
+      $ret[1]='Fehler beim Abfragen des Umschlieï¿½enden Rechtecks um die Gebï¿½ude.<br>'.$ret[1];
     }
     else {
       $rs=pg_fetch_array($ret[1]);
@@ -4452,16 +4452,16 @@ class pgdatabase extends pgdatabase_core {
 
   # 2006-01-31 pk
   function getMERfromGemeinde($Gemeinde, $epsgcode) {
-    $this->debug->write("<br>postgres.php->database->getMERfromGemeinde, Abfrage des Maximalen umschließenden Rechtecks um die Gemeinde",4);
-    $sql ="SELECT MIN(XMIN(ENVELOPE(TRANSFORM(o.the_geom, ".$epsgcode.")))) AS minx,MAX(XMAX(ENVELOPE(TRANSFORM(o.the_geom, ".$epsgcode.")))) AS maxx";
-    $sql.=",MIN(YMIN(ENVELOPE(TRANSFORM(o.the_geom, ".$epsgcode.")))) AS miny,MAX(YMAX(ENVELOPE(TRANSFORM(o.the_geom, ".$epsgcode.")))) AS maxy";
+    $this->debug->write("<br>postgres.php->database->getMERfromGemeinde, Abfrage des Maximalen umschlieï¿½enden Rechtecks um die Gemeinde",4);
+    $sql ="SELECT MIN(st_xmin(st_envelope(st_transform(o.the_geom, ".$epsgcode.")))) AS minx,MAX(st_xmax(st_envelope(st_transform(o.the_geom, ".$epsgcode.")))) AS maxx";
+    $sql.=",MIN(st_ymin(st_envelope(st_transform(o.the_geom, ".$epsgcode.")))) AS miny,MAX(st_ymax(st_envelope(st_transform(o.the_geom, ".$epsgcode.")))) AS maxy";
     $sql.=" FROM alkobj_e_fla as o,alknflur AS fl,alb_v_gemarkungen AS g";
     $sql.=" WHERE o.objnr=fl.objnr AND fl.gemkgschl::integer=g.gemkgschl";
     $sql.=" AND g.gemeinde=".$Gemeinde;
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) {
-      $ret[1]='Fehler beim Abfragen des Umschließenden Rechtecks um die Gemeinde.<br>'.$ret[1];
+      $ret[1]='Fehler beim Abfragen des Umschlieï¿½enden Rechtecks um die Gemeinde.<br>'.$ret[1];
     }
     else {
       $rs=pg_fetch_array($ret[1]);
@@ -4478,15 +4478,15 @@ class pgdatabase extends pgdatabase_core {
 
   # 2006-02-01 pk
   function getMERfromGemarkung($Gemkgschl, $epsgcode) {
-    $this->debug->write("<br>postgres.php->database->getMERfromGemarkung, Abfrage des Maximalen umschließenden Rechtecks um die Gemarkung",4);
-    $sql ="SELECT MIN(XMIN(ENVELOPE(TRANSFORM(o.the_geom, ".$epsgcode.")))) AS minx,MAX(XMAX(ENVELOPE(TRANSFORM(o.the_geom, ".$epsgcode.")))) AS maxx";
-    $sql.=",MIN(YMIN(ENVELOPE(TRANSFORM(o.the_geom, ".$epsgcode.")))) AS miny,MAX(YMAX(ENVELOPE(TRANSFORM(o.the_geom, ".$epsgcode.")))) AS maxy";
+    $this->debug->write("<br>postgres.php->database->getMERfromGemarkung, Abfrage des Maximalen umschlieï¿½enden Rechtecks um die Gemarkung",4);
+    $sql ="SELECT MIN(st_xmin(st_envelope(st_transform(o.the_geom, ".$epsgcode.")))) AS minx,MAX(st_xmax(st_envelope(st_transform(o.the_geom, ".$epsgcode.")))) AS maxx";
+    $sql.=",MIN(st_ymin(st_envelope(st_transform(o.the_geom, ".$epsgcode.")))) AS miny,MAX(st_ymax(st_envelope(st_transform(o.the_geom, ".$epsgcode.")))) AS maxy";
     $sql.=" FROM alkobj_e_fla as o,alknflur AS fl";
     $sql.=" WHERE o.objnr=fl.objnr AND CAST(fl.gemkgschl AS Integer)=".$Gemkgschl;
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) {
-      $ret[1]='Fehler beim Abfragen des Umschließenden Rechtecks um die Gemarkung.<br>'.$ret[1];
+      $ret[1]='Fehler beim Abfragen des Umschlieï¿½enden Rechtecks um die Gemarkung.<br>'.$ret[1];
     }
     else {
       $rs=pg_fetch_array($ret[1]);
@@ -4503,16 +4503,16 @@ class pgdatabase extends pgdatabase_core {
 
   # 2006-02-01 pk
   function getMERfromFlur($Gemarkung,$Flur, $epsgcode) {
-    $this->debug->write("<br>postgres.php->database->getMERfromFlur, Abfrage des Maximalen umschließenden Rechtecks um die Flur",4);
-    $sql ="SELECT MIN(XMIN(ENVELOPE(TRANSFORM(o.the_geom, ".$epsgcode.")))) AS minx,MAX(XMAX(ENVELOPE(TRANSFORM(o.the_geom, ".$epsgcode.")))) AS maxx";
-    $sql.=",MIN(YMIN(ENVELOPE(TRANSFORM(o.the_geom, ".$epsgcode.")))) AS miny,MAX(YMAX(ENVELOPE(TRANSFORM(o.the_geom, ".$epsgcode.")))) AS maxy";
+    $this->debug->write("<br>postgres.php->database->getMERfromFlur, Abfrage des Maximalen umschlieï¿½enden Rechtecks um die Flur",4);
+    $sql ="SELECT MIN(st_xmin(st_envelope(st_transform(o.the_geom, ".$epsgcode.")))) AS minx,MAX(st_xmax(st_envelope(st_transform(o.the_geom, ".$epsgcode.")))) AS maxx";
+    $sql.=",MIN(st_ymin(st_envelope(st_transform(o.the_geom, ".$epsgcode.")))) AS miny,MAX(st_ymax(st_envelope(st_transform(o.the_geom, ".$epsgcode.")))) AS maxy";
     $sql.=" FROM alkobj_e_fla as o,alknflur AS fl";
     $sql.=" WHERE o.objnr=fl.objnr AND fl.gemkgschl='".$Gemarkung."'";
     $sql.=" AND fl.flur='".$Flur."'";
     # echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) {
-      $ret[1]='Fehler beim Abfragen des Umschließenden Rechtecks um die Flur.<br>'.$ret[1];
+      $ret[1]='Fehler beim Abfragen des Umschlieï¿½enden Rechtecks um die Flur.<br>'.$ret[1];
     }
     else {
       $rs=pg_fetch_array($ret[1]);
@@ -4673,7 +4673,7 @@ class pgdatabase extends pgdatabase_core {
 
   function insertMetadata($md) {
     #2005-11-29_pk
-    #$this->begintransaction(); funzt so nicht, da in Transaktion nicht die zukünftige id des Datensatzes abgefragt werden kann
+    #$this->begintransaction(); funzt so nicht, da in Transaktion nicht die zukï¿½nftige id des Datensatzes abgefragt werden kann
     #$mdfileid,$mdlang,$mddatest,$mdcontact,$spatrepinfo,$refsysinfo,$mdextinfo,$dataidinfo,$continfo,$distinfo,$idtype,$restitle,$datalang,$idabs,$themekeywords,$placekeywords,$tpcat,$reseddate,$validfrom,$validtill,$westbl,$eastbl,$southbl,$northbl,$identcode,$rporgname,$postcode,$city,$delpoint,$adminarea,$country,$linkage,$servicetype,$spatialtype,$serviceversion,$vector_scale,$databinding,$solution,$status,$onlinelinke,$cyclus,$sparefsystem,$sformat,$sformatversion,$download,$onlinelink,$accessrights
     $sql ="INSERT INTO md_metadata";
     $sql.=" (mdfileid,mdlang,mddatest,mdcontact,spatrepinfo,refsysinfo,mdextinfo,dataidinfo";
@@ -4715,7 +4715,7 @@ class pgdatabase extends pgdatabase_core {
           $sql.=" VALUES ('".$keywordids[$i]."','".$metadata_id."')";
           $ret=$this->execSQL($sql, 4, 0);
           if ($ret[0]) {
-            $errmsg.='<br>Fehler beim Eintragen des Schlüsselwörter zum Metadatensatz.';
+            $errmsg.='<br>Fehler beim Eintragen des Schlï¿½sselwï¿½rter zum Metadatensatz.';
           }
         }
         $keywordids=explode(",",$md['selectedplacekeywordids']);
@@ -4724,7 +4724,7 @@ class pgdatabase extends pgdatabase_core {
           $sql.=" VALUES ('".$keywordids[$i]."','".$metadata_id."')";
           $ret=$this->execSQL($sql, 4, 0);
           if ($ret[0]) {
-            $errmsg.='<br>Fehler beim Eintragen des Schlüsselwortes zum Metadatensatz.';
+            $errmsg.='<br>Fehler beim Eintragen des Schlï¿½sselwortes zum Metadatensatz.';
           }
         }
       } # end of erfolgreiches Abfragen der Metadatenid
@@ -4786,12 +4786,12 @@ class pgdatabase extends pgdatabase_core {
       $sql.=" AND validfrom <= '".$md['biswann']."'";
     }
     if ($md['northbl']!='') {
-      # Umringspolygon für die Suche in der Datenbank aus den übergebenen Koordinaten zusammensetzen
+      # Umringspolygon fï¿½r die Suche in der Datenbank aus den ï¿½bergebenen Koordinaten zusammensetzen
       $md['umring'] ='POLYGON(('.$md['eastbl'].' '.$md['southbl'].','.$md['westbl'].' '.$md['southbl'];
       $md['umring'].=','.$md['westbl'].' '.$md['northbl'].','.$md['eastbl'].' '.$md['northbl'];
       $md['umring'].=','.$md['eastbl'].' '.$md['southbl'].'))';
-      # sql-Teil für räumliche Abfrage bilden
-      $sql.=" AND the_geom && GeometryFromText('".$md['umring']."',".EPSGCODE.") AND NOT Disjoint(the_geom,GeometryFromText('".$md['umring']."',".EPSGCODE."))";
+      # sql-Teil fï¿½r rï¿½umliche Abfrage bilden
+      $sql.=" AND the_geom && GeometryFromText('".$md['umring']."',".EPSGCODE.") AND st_intersects(the_geom,GeometryFromText('".$md['umring']."',".EPSGCODE."))";
     }
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
@@ -4817,7 +4817,7 @@ class pgdatabase extends pgdatabase_core {
   }
 
   function getKeywords($id,$keyword,$keytyp,$thesaname,$metadata_id,$order) {
-    # letzte Änderung 2005-11-29 pk
+    # letzte ï¿½nderung 2005-11-29 pk
     if (is_array($id)) { $idliste=$id; }  else { $idliste=array($id); }
     $anzid=count($idliste);
     $sql ="SELECT k.id,k.keyword,k.keytyp,k.thesaname FROM md_keywords AS k";
@@ -4847,7 +4847,7 @@ class pgdatabase extends pgdatabase_core {
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) {
       # Fehler beim Abfragen in Datenbank
-      $ret[1]='\nAuf Grund eines Datenbankfehlers konnten die Schlagwörter nicht abgefragt werden!\n'.$ret[1];
+      $ret[1]='\nAuf Grund eines Datenbankfehlers konnten die Schlagwï¿½rter nicht abgefragt werden!\n'.$ret[1];
     }
     else {
       while($rs=pg_fetch_array($ret[1])) {
@@ -4889,7 +4889,7 @@ class pgdatabase extends pgdatabase_core {
   }
 
 ##################################################
-# Funktionen für administrative Grenzen
+# Funktionen fï¿½r administrative Grenzen
 ##################################################
   function truncateAdmKreise() {
     $sql ="TRUNCATE adm_landkreise";
@@ -4915,7 +4915,7 @@ class pgdatabase extends pgdatabase_core {
 # Werden in der postgis-Datenbank z.Z. nicht verwendet
 
   function getFilteredUsedLayer($layername) {
-    # liefert die id´s der Zuordnung zwischen Layern und Stellen (used_layer_id),
+    # liefert die idï¿½s der Zuordnung zwischen Layern und Stellen (used_layer_id),
     # die mit einem Polygon gefiltert werden sollen
     $sql ="SELECT DISTINCT ul.used_layer_id,l.data,ul.stelle_id FROM polygon AS p, polygon_used_layer AS pul";
     $sql.=", used_layer AS ul, layer AS l WHERE p.polygon_id = pul.polygon_id";
@@ -4926,7 +4926,7 @@ class pgdatabase extends pgdatabase_core {
 
   function getFilterPolygons($used_layer_id) {
     # liefert Shapdateinamen und Namen des Polygons mit denen ein Filter
-    # für used_layer_id berechnet werden soll
+    # fï¿½r used_layer_id berechnet werden soll
     $sql ="SELECT p.polygonname,p.datei,p.feldname FROM polygon AS p, polygon_used_layer AS pul";
     $sql.=" WHERE p.polygon_id = pul.polygon_id";
     $sql.=" AND pul.used_layer_id=".$used_layer_id;
@@ -4957,7 +4957,7 @@ class pgdatabase extends pgdatabase_core {
   }
 
   function rollbacktransaction() {
-    # Rückgängigmachung aller bisherigen Änderungen in der Transaktion
+    # Rï¿½ckgï¿½ngigmachung aller bisherigen ï¿½nderungen in der Transaktion
     # und Abbrechen der Transaktion
     # rolls back the current transaction and causes all the updates
     # made by the transaction to be discarded
@@ -4968,7 +4968,7 @@ class pgdatabase extends pgdatabase_core {
   }
 
   function committransaction() {
-    # Gültigmachen und Beenden der Transaktion
+    # Gï¿½ltigmachen und Beenden der Transaktion
     # commits the current transaction. All changes made by the transaction
     # become visible to others and are guaranteed to be durable if a crash occurs
     if ($this->blocktransaction==0) {

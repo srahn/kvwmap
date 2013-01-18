@@ -268,15 +268,15 @@ class GUI_core {
         $map->imagecolor->setRGB(255,255,255);
         $map->maxsize = 4096;
         
-	# setzen der Kartenausdehnung über die letzten Benutzereinstellungen
-	if ($this->user->rolle->oGeorefExt->minx==0 OR $this->user->rolle->oGeorefExt->minx=='') {
-	  echo "Richten Sie mit phpMyAdmin in der kvwmap Datenbank eine Referenzkarte, eine Stelle, einen Benutzer und eine Rolle ein ";
-	  echo "<br>(Tabellen referenzkarten, stelle, user, rolle) ";
-	  echo "<br>oder wenden Sie sich an ihren Systemverwalter.";
-	  exit;
-	}
-	else {
-	  $map->setextent($this->user->rolle->oGeorefExt->minx,$this->user->rolle->oGeorefExt->miny,$this->user->rolle->oGeorefExt->maxx,$this->user->rolle->oGeorefExt->maxy);
+				# setzen der Kartenausdehnung über die letzten Benutzereinstellungen
+				if ($this->user->rolle->oGeorefExt->minx==0 OR $this->user->rolle->oGeorefExt->minx=='') {
+				  echo "Richten Sie mit phpMyAdmin in der kvwmap Datenbank eine Referenzkarte, eine Stelle, einen Benutzer und eine Rolle ein ";
+				  echo "<br>(Tabellen referenzkarten, stelle, user, rolle) ";
+				  echo "<br>oder wenden Sie sich an ihren Systemverwalter.";
+				  exit;
+				}
+				else {
+				  $map->setextent($this->user->rolle->oGeorefExt->minx,$this->user->rolle->oGeorefExt->miny,$this->user->rolle->oGeorefExt->maxx,$this->user->rolle->oGeorefExt->maxy);
         }
 
         # setzen der Kartenausdehnung über die letzten Benutzereinstellungen
@@ -795,7 +795,7 @@ class GUI_core {
                 
         if (MAPSERVERVERSION >= 620) {
 	        if($dbStyle['geomtransform'] != '') {
-	          $style->setGeomTransform($dbStyle['geomtransform']);
+	          $style->setGeomst_transform($dbStyle['geomtransform']);
 	        }
           if ($dbStyle['pattern']!='') {
             $style->setPattern(explode(' ',$dbStyle['pattern']));
@@ -1220,7 +1220,7 @@ class GUI_core {
 	      	$minx = dms2dec($minx);
 	      	$maxy = dms2dec($maxy);
 	      }
-        $datastring ="the_geom from (select geomfromtext('POINT(".$minx." ".$maxy.")', ".$this->user->rolle->epsg_code.") as the_geom, 1 as oid) as foo using unique oid using srid=".$this->user->rolle->epsg_code;
+        $datastring ="the_geom from (select st_geomfromtext('POINT(".$minx." ".$maxy.")', ".$this->user->rolle->epsg_code.") as the_geom, 1 as oid) as foo using unique oid using srid=".$this->user->rolle->epsg_code;
         $group = $this->mapDB->getGroupbyName('Suchergebnis');
         if($group != ''){
           $groupid = $group['id'];
@@ -1343,7 +1343,7 @@ class GUI_core {
 	}
 
 	function BBoxinExtent($geom){
-    $sql = "SELECT geomfromtext('POLYGON((".$this->map->extent->minx." ".$this->map->extent->miny.", ".$this->map->extent->maxx." ".$this->map->extent->miny.", ".$this->map->extent->maxx." ".$this->map->extent->maxy.", ".$this->map->extent->minx." ".$this->map->extent->maxy.", ".$this->map->extent->minx." ".$this->map->extent->miny."))', ".$this->user->rolle->epsg_code.") && TRANSFORM(".$geom.", ".$this->user->rolle->epsg_code.")";
+    $sql = "SELECT st_geomfromtext('POLYGON((".$this->map->extent->minx." ".$this->map->extent->miny.", ".$this->map->extent->maxx." ".$this->map->extent->miny.", ".$this->map->extent->maxx." ".$this->map->extent->maxy.", ".$this->map->extent->minx." ".$this->map->extent->maxy.", ".$this->map->extent->minx." ".$this->map->extent->miny."))', ".$this->user->rolle->epsg_code.") && st_transform(".$geom.", ".$this->user->rolle->epsg_code.")";
     #echo $sql;
     $ret = $this->pgdatabase->execSQL($sql,4, 0);
     if(!$ret[0]) {

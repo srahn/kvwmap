@@ -197,7 +197,7 @@ CREATE INDEX gaz_begriffe_gist ON gaz_begriffe USING GIST (wgs_geom GIST_GEOMETR
 -- DROP FUNCTION linen(geometry, int4);
 CREATE OR REPLACE FUNCTION linen(geometry, int4)
   RETURNS geometry AS
-  $BODY$SELECT GeomFromText('LINESTRING('||X(pointn(linefrompoly($1),$2))||' '||Y(pointn(linefrompoly($1),$2))||','||X(pointn(linefrompoly($1),$2+1))||' '||Y(pointn(linefrompoly($1),$2+1))||')',srid($1))$BODY$
+  $BODY$SELECT st_geomfromtext('LINESTRING('||X(pointn(linefrompoly($1),$2))||' '||Y(pointn(linefrompoly($1),$2))||','||X(pointn(linefrompoly($1),$2+1))||' '||Y(pointn(linefrompoly($1),$2+1))||')',srid($1))$BODY$
   LANGUAGE 'sql' IMMUTABLE STRICT;
 
 COMMENT ON FUNCTION linen(geometry, int4) IS 'Liefert die n-te Linien innerhalb eines Polygon als Geometry zurück';
@@ -229,8 +229,8 @@ CREATE OR REPLACE FUNCTION snapline(geometry, geometry)
 
 COMMENT ON FUNCTION snapline(geometry, geometry) IS 'Liefert die einzelne Kante eines LINESTRINGS mit der Geometry1, welche am dichtesten am Punkt mit der Geometrie 2 liegt als Geometry';
 -- Beispiel zur Abfrage der Gebäudekante des gegebenen Objektes, welches am dichtesten zum gegebenen Punkt liegt und dessen Azimutwinkel.
--- SELECT AsText(snapline(linefrompoly(the_geom),GeomFromText('Point(4516219.4 6013803.0)',2398))) AS Segment
--- ,azimuth(pointn(snapline(linefrompoly(the_geom),GeomFromText('Point(4516219.4 6013803.0)',2398)),1),pointn(snapline(linefrompoly(the_geom),GeomFromText('Point(4516219.4 6013803.0)',2398)),2)) AS winkel
+-- SELECT AsText(snapline(linefrompoly(the_geom),st_geomfromtext('Point(4516219.4 6013803.0)',2398))) AS Segment
+-- ,azimuth(pointn(snapline(linefrompoly(the_geom),st_geomfromtext('Point(4516219.4 6013803.0)',2398)),1),pointn(snapline(linefrompoly(the_geom),st_geomfromtext('Point(4516219.4 6013803.0)',2398)),2)) AS winkel
 -- FROM alkobj_e_fla WHERE objnr = 'D0009O1'
 
 --###########################

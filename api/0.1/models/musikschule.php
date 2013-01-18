@@ -6,7 +6,7 @@ class Musikschule extends Databaserelation {
   function findByRadius($lat, $lng, $radius, $limit) {
     $radius_in_meter = $radius * 1000;
 	if ($limit == '') $limit = 10;
-	$sql  = "SELECT name, abkuerzung, Y(the_geom) AS latitude, X(the_geom) AS longitude, ST_distance(transform(GeometryFromText('POINT(".$lng." ".$lat.")',4326),25833),transform(the_geom,25833)) AS distance FROM ".$this->dbschema.".musikschulstandorte WHERE ST_distance(transform(GeometryFromText('POINT(".$lng." ".$lat.")',4326),25833),transform(the_geom,25833)) < ".$radius_in_meter;
+	$sql  = "SELECT name, abkuerzung, Y(the_geom) AS latitude, X(the_geom) AS longitude, ST_distance(st_transform(GeometryFromText('POINT(".$lng." ".$lat.")',4326),25833),transform(the_geom,25833)) AS distance FROM ".$this->dbschema.".musikschulstandorte WHERE ST_distance(st_transform(GeometryFromText('POINT(".$lng." ".$lat.")',4326),25833),transform(the_geom,25833)) < ".$radius_in_meter;
 	$sql .= " ORDER BY distance LIMIT ".$limit;
 	#echo $sql;
 	$data = $this->findBySQL($sql);

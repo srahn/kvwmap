@@ -1061,3 +1061,11 @@ ALTER TABLE `rollenlayer` ADD `Typ` ENUM('search','import') NOT NULL DEFAULT 'se
 
 ALTER TABLE `styles` ADD `pattern` VARCHAR(255) NULL;
 ALTER TABLE `styles` ADD `geomtransform` VARCHAR(20) NULL;
+
+ALTER TABLE u_attributfilter2used_layer CHANGE operator operator ENUM('=','!=','>','<','like','IS','IN','Within','Intersects','st_within','st_intersects') NOT NULL;
+UPDATE u_attributfilter2used_layer SET operator='st_within' WHERE operator='Within';
+UPDATE u_attributfilter2used_layer SET operator='st_intersects' WHERE operator='Intersects';
+ALTER TABLE u_attributfilter2used_layer CHANGE operator operator ENUM('=','!=','>','<','like','IS','IN','st_within','st_intersects') NOT NULL;
+
+update used_layer set Filter = replace(Filter, 'Within','st_within');
+update used_layer set Filter = replace(Filter, 'Intersects','st_intersects');

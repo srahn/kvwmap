@@ -1,6 +1,6 @@
 <?php
 ###################################################################
-# kvwmap - Kartenserver für Kreisverwaltungen                     #
+# kvwmap - Kartenserver fï¿½r Kreisverwaltungen                     #
 ###################################################################
 # Lizenz                                                          #
 #                                                                 # 
@@ -42,11 +42,11 @@ class polygoneditor {
   
   function zoomTopolygon($oid, $tablename, $columnname,  $border) {
   	# Eine Variante mit der nur einmal transformiert wird
-  	$sql ="SELECT xmin(bbox) AS minx,ymin(bbox) AS miny,xmax(bbox) AS maxx,ymax(bbox) AS maxy";
-  	$sql.=" FROM (SELECT box2D(Transform(".$columnname.", ".$this->clientepsg.")) as bbox";
+  	$sql ="SELECT st_xmin(bbox) AS minx,st_ymin(bbox) AS miny,st_xmax(bbox) AS maxx,st_ymax(bbox) AS maxy";
+  	$sql.=" FROM (SELECT box2D(st_transform(".$columnname.", ".$this->clientepsg.")) as bbox";
   	$sql.=" FROM ".$tablename." WHERE oid = '".$oid."') AS foo";
-#  	$sql = 'SELECT MIN(XMIN(ENVELOPE(Transform(the_geom, '.$this->clientepsg.')))) AS minx, MAX(XMAX(ENVELOPE(Transform(the_geom, '.$this->clientepsg.')))) AS maxx';
-#    $sql.= ', MIN(YMIN(ENVELOPE(Transform(the_geom, '.$this->clientepsg.')))) AS miny, MAX(YMAX(ENVELOPE(Transform(the_geom, '.$this->clientepsg.')))) AS maxy';
+#  	$sql = 'SELECT MIN(st_xmin(st_envelope(st_transform(the_geom, '.$this->clientepsg.')))) AS minx, MAX(st_xmax(st_envelope(st_transform(the_geom, '.$this->clientepsg.')))) AS maxx';
+#    $sql.= ', MIN(st_ymin(st_envelope(st_transform(the_geom, '.$this->clientepsg.')))) AS miny, MAX(st_ymax(st_envelope(st_transform(the_geom, '.$this->clientepsg.')))) AS maxy';
 #    $sql.= " FROM ".$tablename." WHERE oid = '".$oid."';";
     $ret = $this->database->execSQL($sql, 4, 0);
 		$rs = pg_fetch_array($ret[1]);
@@ -72,11 +72,11 @@ class polygoneditor {
       $ret[0]=1;
     }
     else{
-    	$sql = "SELECT isvalid(SnapToGrid(geomfromtext('".$newpathwkt."'), 0.0001))";
+    	$sql = "SELECT st_isvalid(ST_SnapToGrid(st_geomfromtext('".$newpathwkt."'), 0.0001))";
     	$ret = $this->database->execSQL($sql, 4, 0);
     	$valid = pg_fetch_row($ret[1]);
 			if($valid[0] == 'f'){
-				$sql = "SELECT st_isvalidreason(SnapToGrid(geomfromtext('".$newpathwkt."'), 0.0001))";
+				$sql = "SELECT st_isvalidreason(ST_SnapToGrid(st_geomfromtext('".$newpathwkt."'), 0.0001))";
 				$ret = $this->database->execSQL($sql, 4, 0);
     		$reason = pg_fetch_row($ret[1]);
 				$ret[1]='\nDie Geometrie des Polygons ist fehlerhaft und kann nicht gespeichert werden: \n'.$reason[0];
@@ -87,7 +87,7 @@ class polygoneditor {
   }
   
   function eintragenFlaeche($umring, $oid, $tablename, $columnname){  	
-		$sql = "UPDATE ".$tablename." SET ".$columnname." = Transform(GeometryFromText('".$umring."',".$this->clientepsg."),".$this->layerepsg.") WHERE oid = ".$oid;
+		$sql = "UPDATE ".$tablename." SET ".$columnname." = st_transform(GeometryFromText('".$umring."',".$this->clientepsg."),".$this->layerepsg.") WHERE oid = ".$oid;
 		$ret = $this->database->execSQL($sql, 4, 1);
 		if ($ret[0]) {
       # Fehler beim Eintragen in Datenbank
@@ -97,7 +97,7 @@ class polygoneditor {
   }
 	
 	function getpolygon($oid, $tablename, $columnname, $extent){
-		$sql = "SELECT assvg(Transform(".$columnname.",".$this->clientepsg."), 0, 8) AS svggeom, astext(Transform(".$columnname.",".$this->clientepsg.")) AS wktgeom FROM ".$tablename." WHERE oid = ".$oid;
+		$sql = "SELECT st_assvg(st_transform(".$columnname.",".$this->clientepsg."), 0, 8) AS svggeom, st_astext(st_transform(".$columnname.",".$this->clientepsg.")) AS wktgeom FROM ".$tablename." WHERE oid = ".$oid;
 		$ret = $this->database->execSQL($sql, 4, 0);
 		$polygon = pg_fetch_array($ret[1]);
 		$polygon['svggeom'] = transformCoordsSVG($polygon['svggeom']); 

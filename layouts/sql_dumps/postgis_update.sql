@@ -535,7 +535,7 @@ alter table n_nachweise alter column blattnummer type varchar;
 -- DROP FUNCTION linefrompoly(geometry); 
 CREATE OR REPLACE FUNCTION linefrompoly(geometry)
   RETURNS geometry AS
-  $BODY$SELECT GeomFromText(replace(replace(replace(asText($1),'MULTIPOLYGON','LINESTRING'),'(((','('),')))',')'),srid($1))$BODY$
+  $BODY$SELECT st_geomfromtext(replace(replace(replace(asText($1),'MULTIPOLYGON','LINESTRING'),'(((','('),')))',')'),srid($1))$BODY$
   LANGUAGE 'sql' IMMUTABLE STRICT;
 ALTER FUNCTION linefrompoly(geometry) OWNER TO postgres;
 COMMENT ON FUNCTION linefrompoly(geometry) IS 'Liefert eine LINESTRING Gemetrie von einer MULTIPOLYGON oder POLYGON Geometrie zurück';
@@ -545,7 +545,7 @@ COMMENT ON FUNCTION linefrompoly(geometry) IS 'Liefert eine LINESTRING Gemetrie 
 -- DROP FUNCTION linen(geometry, int4);
 CREATE OR REPLACE FUNCTION linen(geometry, int4)
   RETURNS geometry AS
-  $BODY$SELECT GeomFromText('LINESTRING('||X(pointn(linefrompoly($1),$2))||' '||Y(pointn(linefrompoly($1),$2))||','||X(pointn(linefrompoly($1),$2+1))||' '||Y(pointn(linefrompoly($1),$2+1))||')',srid($1))$BODY$
+  $BODY$SELECT st_geomfromtext('LINESTRING('||X(pointn(linefrompoly($1),$2))||' '||Y(pointn(linefrompoly($1),$2))||','||X(pointn(linefrompoly($1),$2+1))||' '||Y(pointn(linefrompoly($1),$2+1))||')',srid($1))$BODY$
   LANGUAGE 'sql' IMMUTABLE STRICT;
 ALTER FUNCTION linen(geometry, int4) OWNER TO postgres;
 COMMENT ON FUNCTION linen(geometry, int4) IS 'Liefert die n-te Linien innerhalb eines Polygon als Geometry zurück';
@@ -578,8 +578,8 @@ ALTER FUNCTION snapline(geometry, geometry) OWNER TO postgres;
 COMMENT ON FUNCTION snapline(geometry, geometry) IS 'Liefert die einzelne Kante eines LINESTRINGS mit der Geometry1, welche am dichtesten am Punkt mit der Geometrie 2 liegt als Geometry';
 
 -- Beispiel zur Abfrage der Gebäudekante des gegebenen Objektes, welches am dichtesten zum gegebenen Punkt liegt und dessen Azimutwinkel.
--- SELECT AsText(snapline(linefrompoly(the_geom),GeomFromText('Point(4516219.4 6013803.0)',2398))) AS Segment
--- ,azimuth(pointn(snapline(linefrompoly(the_geom),GeomFromText('Point(4516219.4 6013803.0)',2398)),1),pointn(snapline(linefrompoly(the_geom),GeomFromText('Point(4516219.4 6013803.0)',2398)),2)) AS winkel
+-- SELECT AsText(snapline(linefrompoly(the_geom),st_geomfromtext('Point(4516219.4 6013803.0)',2398))) AS Segment
+-- ,azimuth(pointn(snapline(linefrompoly(the_geom),st_geomfromtext('Point(4516219.4 6013803.0)',2398)),1),pointn(snapline(linefrompoly(the_geom),st_geomfromtext('Point(4516219.4 6013803.0)',2398)),2)) AS winkel
 -- FROM alkobj_e_fla WHERE objnr = 'D0009O1'
 
 --# Anlegen der Tabellen für die Fachscale Anliegerbeiträge
@@ -918,7 +918,7 @@ ALTER TABLE bw_zonen ADD CONSTRAINT enforce_geotype_the_geom CHECK (geometrytype
 
 INSERT INTO bw_zonen 
 SELECT oid, zonennr, standort, richtwertdefinition, gemeinde_id, NULL, NULL, NULL, NULL, 1234, NULL, NULL, bodenwert, datum, 
-NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, Transform(the_geom, 25833) FROM bw_bodenrichtwertzonen;
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, st_transform(the_geom, 25833) FROM bw_bodenrichtwertzonen;
 
 set add_missing_from = on;  -- war bei mir notwendig zu setzen sonst Fehlermeldung "Missing FROM-clause entry for table ..." H.S.
 
@@ -943,7 +943,7 @@ WHERE bw_bodenrichtwertzonen.erschliessungsart = 'ohne'
 AND old_oid = bw_bodenrichtwertzonen.oid;
 
 UPDATE bw_zonen SET 
-textposition = Transform(bw_bodenrichtwertzonen.textposition, 25833)
+textposition = st_transform(bw_bodenrichtwertzonen.textposition, 25833)
 WHERE old_oid = bw_bodenrichtwertzonen.oid;
 
 -- Daten aus alter Tabelle übertragen --

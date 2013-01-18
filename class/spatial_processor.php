@@ -1,6 +1,6 @@
 <?php
 ###################################################################
-# kvwmap - Kartenserver für Kreisverwaltungen                     #
+# kvwmap - Kartenserver fï¿½r Kreisverwaltungen                     #
 ###################################################################
 # Lizenz                                                          #
 #                                                                 # 
@@ -24,7 +24,7 @@
 # Kontakt:                                                        #
 # pkorduan@gmx.de peter.korduan@auf.uni-rostock.de                #
 ###################################################################
-#  spatial_processor.php  Klasse zur Ausführung von geometrischen Funktionen       #
+#  spatial_processor.php  Klasse zur Ausfï¿½hrung von geometrischen Funktionen       #
 ###################################################################
 
 
@@ -46,7 +46,7 @@ class spatial_processor {
   }
   
   function split_multi_geometries($wktgeom, $layer_epsg, $client_epsg){
-  	$sql = "select ST_geometryN(transform(geometryfromtext('".$wktgeom."', ".$client_epsg."), ".$layer_epsg."),"; 
+  	$sql = "select ST_geometryN(st_transform(geometryfromtext('".$wktgeom."', ".$client_epsg."), ".$layer_epsg."),"; 
 		$sql.= "generate_series(1, ST_NumGeometries(geometryfromtext('".$wktgeom."', ".$client_epsg."))))";
 		$ret = $this->pgdatabase->execSQL($sql,4, 0);
 		if (!$ret[0]) {
@@ -59,16 +59,16 @@ class spatial_processor {
   
   function union($geom_1, $geom_2, $type){
   	if($type == 'wkt'){
-  		//$sql = "SELECT AsText(validize_polygon(GeomUnion(GeomFromText('".$geom_1."'), GeomFromText('".$geom_2."'))))";
-  		$sql = "SELECT AsText(SnapToGrid(GeomUnion(SnapToGrid(GeomFromText('".$geom_1."'), 0.0001), SnapToGrid(GeomFromText('".$geom_2."'), 0.0001)), 0.0001))";
+  		//$sql = "SELECT st_astext(validize_polygon(st_union(st_geomfromtext('".$geom_1."'), st_geomfromtext('".$geom_2."'))))";
+  		$sql = "SELECT st_astext(ST_SnapToGrid(st_union(ST_SnapToGrid(st_geomfromtext('".$geom_1."'), 0.0001), ST_SnapToGrid(st_geomfromtext('".$geom_2."'), 0.0001)), 0.0001))";
   	}
   	else{
-  		//$sql = "SELECT AsSVG(validize_polygon(GeomUnion(GeomFromText('".$geom_1."'), GeomFromText('".$geom_2."'))),0,8)";
-  		$sql = "SELECT AsSVG(SnapToGrid(GeomUnion(SnapToGrid(GeomFromText('".$geom_1."'), 0.0001), SnapToGrid(GeomFromText('".$geom_2."'), 0.0001)), 0.0001),0,8)";
+  		//$sql = "SELECT st_assvg(validize_polygon(st_union(st_geomfromtext('".$geom_1."'), st_geomfromtext('".$geom_2."'))),0,8)";
+  		$sql = "SELECT st_assvg(ST_SnapToGrid(st_union(ST_SnapToGrid(st_geomfromtext('".$geom_1."'), 0.0001), ST_SnapToGrid(st_geomfromtext('".$geom_2."'), 0.0001)), 0.0001),0,8)";
   	}
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
-      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgefï¿½hrt werden!\n'.$ret[1];
     }
     else {
     	$rs = pg_fetch_array($ret[1]);
@@ -78,15 +78,15 @@ class spatial_processor {
   
   function difference($geom_1, $geom_2, $type){
   	if($type == 'wkt'){
-  		$sql = "SELECT Astext(SnapToGrid(Difference(SnapToGrid(GeomFromText('".$geom_1."'), 0.0001), SnapToGrid(GeomFromText('".$geom_2."'), 0.0001)), 0.0001))";
+  		$sql = "SELECT st_astext(ST_SnapToGrid(Difference(ST_SnapToGrid(st_geomfromtext('".$geom_1."'), 0.0001), ST_SnapToGrid(st_geomfromtext('".$geom_2."'), 0.0001)), 0.0001))";
   	}
   	else{
-  		$sql = "SELECT AsSVG(SnapToGrid(Difference(SnapToGrid(GeomFromText('".$geom_1."'), 0.0001), SnapToGrid(GeomFromText('".$geom_2."'), 0.0001)), 0.0001),0,8)";
+  		$sql = "SELECT st_assvg(ST_SnapToGrid(Difference(ST_SnapToGrid(st_geomfromtext('".$geom_1."'), 0.0001), ST_SnapToGrid(st_geomfromtext('".$geom_2."'), 0.0001)), 0.0001),0,8)";
   	}
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
   	#return $sql;
     if ($ret[0]) {
-      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgefï¿½hrt werden!\n'.$ret[1];
     }
     else {
     	$rs = pg_fetch_array($ret[1]);
@@ -95,10 +95,10 @@ class spatial_processor {
   }
   
   function area($geom, $unit){
-  	$sql = "SELECT round(Area(GeomFromText('".$geom."'))::numeric, 2)";
+  	$sql = "SELECT round(st_area(st_geomfromtext('".$geom."'))::numeric, 2)";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
-      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgefï¿½hrt werden!\n'.$ret[1];
     }
     else {
     	$rs = pg_fetch_array($ret[1]);
@@ -111,10 +111,10 @@ class spatial_processor {
   }
   
 	function length($geom){
-  	$sql = "SELECT round(Length(GeomFromText('".$geom."'))::numeric, 2)";
+  	$sql = "SELECT round(st_length(st_geomfromtext('".$geom."'))::numeric, 2)";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
-      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgefï¿½hrt werden!\n'.$ret[1];
     }
     else {
     	$rs = pg_fetch_array($ret[1]);
@@ -158,7 +158,7 @@ class spatial_processor {
 		    # Transformation des aktuellen Kartenausschnittes
 		    # in das Koordinatensystem des aktuellen EPSG-Codes
 		    # Geg:	curExtent ... Koordinaten des aktuellen Ausschnittes (ms_newRectObj)
-		    #				curSRID		...	Ursprüngliche SRID (EPSG-Code als int)
+		    #				curSRID		...	Ursprï¿½ngliche SRID (EPSG-Code als int)
 		    #				newSRID		...	Neue SRID (EPSG-Code als int) 
 		    $curExtent=$this->rolle->oGeorefExt;
 		    $curSRID=$this->rolle->epsg_code;
@@ -237,7 +237,6 @@ class spatial_processor {
 				else{
 					$result = $this->area($polywkt2, $formvars['unit']);
 				}
-        $this->debug->write("Operation Flächenberechnung beendet.\n",4);
 			}break;
 			
 			case 'length':{
@@ -265,7 +264,6 @@ class spatial_processor {
 				else{
 					$result = $this->union($polywkt1, $polywkt2, $formvars['resulttype']);
 				}
-        $this->debug->write("Operation add_geometry beendet.\n",4);
 			}break;
 			
 			case 'subtract_geometry':{
@@ -302,7 +300,7 @@ class spatial_processor {
     $lo=explode(',',$corners[0]); # linke obere Ecke in Bildkoordinaten von links oben gesehen
     $ru=explode(',',$corners[1]); # reche untere Ecke des Auswahlbereiches in Bildkoordinaten von links oben gesehen
     $width=$this->rolle->pixsize*($ru[0]-$lo[0]); # Breite des Auswahlbereiches in m
-    $height=$this->rolle->pixsize*($ru[1]-$lo[1]); # Höhe des Auswahlbereiches in m
+    $height=$this->rolle->pixsize*($ru[1]-$lo[1]); # Hï¿½he des Auswahlbereiches in m
     #echo 'Abfragerechteck im Bild: '.$lo[0].' '.$lo[1].' '.$ru[0].' '.$ru[1];
     # linke obere Ecke im Koordinatensystem in m
     $minx=$this->rolle->oGeorefExt->minx+$this->rolle->pixsize*$lo[0]; # x Wert
@@ -320,14 +318,14 @@ class spatial_processor {
   		$geom_1 = $this->pointfrompolygon($geom_1);
   	}
   	if($type == 'wkt'){
-  		$sql = "select astext(buffer(GeomFromText('".$geom_1."'), ".$width."))";
+  		$sql = "select st_astext(buffer(st_geomfromtext('".$geom_1."'), ".$width."))";
   	}
   	else{
-  		$sql = "select assvg(buffer(GeomFromText('".$geom_1."'), ".$width."),0,5)";
+  		$sql = "select st_assvg(buffer(st_geomfromtext('".$geom_1."'), ".$width."),0,5)";
   	}
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
-      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgefï¿½hrt werden!\n'.$ret[1];
     }
     else {
     	$rs = pg_fetch_array($ret[1]);
@@ -337,14 +335,14 @@ class spatial_processor {
   
   function buffer_ring($geom_1, $type, $width){
   	if($type == 'wkt'){
-  		$sql = "select astext(Difference(buffer(GeomFromText('".$geom_1."'), ".$width."), GeomFromText('".$geom_1."')))";
+  		$sql = "select st_astext(Difference(buffer(st_geomfromtext('".$geom_1."'), ".$width."), st_geomfromtext('".$geom_1."')))";
   	}
   	else{
-  		$sql = "select assvg(Difference(buffer(GeomFromText('".$geom_1."'), ".$width."), GeomFromText('".$geom_1."')),0,5)";
+  		$sql = "select st_assvg(Difference(buffer(st_geomfromtext('".$geom_1."'), ".$width."), st_geomfromtext('".$geom_1."')),0,5)";
   	}
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
-      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgefï¿½hrt werden!\n'.$ret[1];
     }
     else {
     	$rs = pg_fetch_array($ret[1]);
@@ -363,13 +361,13 @@ class spatial_processor {
   		$sql = "SELECT '".$point."'";
   	}																				# wkt liefert nur den Punkt, svg die Linie
   	else{
-  		$sql = "select assvg(snapline(linefrompoly(the_geom),GeomFromText('".$point."',2398)),0,5) AS Segment ";
+  		$sql = "select st_assvg(snapline(linefrompoly(the_geom),st_geomfromtext('".$point."',2398)),0,5) AS Segment ";
   	}
  		$sql .= $fromwhere;
-  	$sql .= " AND within(GeomFromText('".$point."',2398), the_geom)"; 	
+  	$sql .= " AND st_within(st_geomfromtext('".$point."',2398), the_geom)"; 	
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
-      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgefÃ¼hrt werden!\n'.$ret[1];
     }
     else {
     	$rs = pg_fetch_array($ret[1]);
@@ -398,11 +396,11 @@ class spatial_processor {
     switch ($layerset[0]['connectiontype']){
     	case 6 : {
 	      #Abfrage eines postgislayers
-	      # Aktueller EPSG in der die Abfrage ausgeführt wurde
+	      # Aktueller EPSG in der die Abfrage ausgefï¿½hrt wurde
 	      $client_epsg=$this->rolle->epsg_code;
 	      # EPSG-Code des Layers der Abgefragt werden soll
 	      $layer_epsg=$layerset[0]['epsg_code'];
-	      # Bildung der Where-Klausel für die räumliche Abfrage mit der searchbox
+	      # Bildung der Where-Klausel fï¿½r die rï¿½umliche Abfrage mit der searchbox
 	      $searchbox_wkt ="POLYGON((";
 	      $searchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->miny-$rand).",";
 	      $searchbox_wkt.=strval($rect->maxx+$rand)." ".strval($rect->miny-$rand).",";
@@ -417,54 +415,54 @@ class spatial_processor {
 	      # Wenn das Koordinatenssystem des Views anders ist als vom Layer wird die Suchbox und die Suchgeometrie
 	      # in epsg des layers transformiert
 	      if ($client_epsg!=$layer_epsg) {
-	        $sql_where =" AND ".$columnname." && Transform(GeomFromText('".$searchbox_wkt."',".$client_epsg."),".$layer_epsg.")";
+	        $sql_where =" AND ".$columnname." && st_transform(st_geomfromtext('".$searchbox_wkt."',".$client_epsg."),".$layer_epsg.")";
 	      }
 	      else {
-	        $sql_where =" AND ".$columnname." && GeomFromText('".$searchbox_wkt."',".$client_epsg.")";
+	        $sql_where =" AND ".$columnname." && st_geomfromtext('".$searchbox_wkt."',".$client_epsg.")";
 	      }
 	      
 	      # Wenn es sich bei der Suche um eine punktuelle Suche handelt, wird die where Klausel um eine
-	      # Umkreissuche mit dem Suchradius weiter eingeschränkt.
+	      # Umkreissuche mit dem Suchradius weiter eingeschrï¿½nkt.
 	      if ($rect->minx==$rect->maxx AND $rect->miny==$rect->maxy) {
 	        # Behandlung der Suchanfrage mit Punkt, exakte Suche im Kreis
 	        if ($client_epsg!=$layer_epsg) {
-	          $sql_where.=" AND DISTANCE(".$columnname.",Transform(GeomFromText('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."),".$layer_epsg."))";
+	          $sql_where.=" AND st_distance(".$columnname.",st_transform(st_geomfromtext('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."),".$layer_epsg."))";
 	        }
 	        else {
-	          $sql_where.=" AND DISTANCE(".$columnname.",GeomFromText('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."))";
+	          $sql_where.=" AND st_distance(".$columnname.",st_geomfromtext('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."))";
 	        }
 	        $sql_where.=" <= 0";
 	      }
 	      else {
 	        # Behandlung der Suchanfrage mit Rechteck, exakte Suche im Rechteck
 	        if ($client_epsg!=$layer_epsg) {
-	          $sql_where.=" AND NOT DISJOINT(".$columnname.",Transform(GeomFromText('".$searchbox_wkt."',".$client_epsg."),".$layer_epsg."))";
+	          $sql_where.=" AND st_intersects(".$columnname.",st_transform(st_geomfromtext('".$searchbox_wkt."',".$client_epsg."),".$layer_epsg."))";
 	        }
 	        else {
-	          $sql_where.=" AND NOT DISJOINT(".$columnname.",GeomFromText('".$searchbox_wkt."',".$client_epsg."))";
+	          $sql_where.=" AND st_intersects(".$columnname.",st_geomfromtext('".$searchbox_wkt."',".$client_epsg."))";
 	        }
 	      }
-	      # 2006-06-12 sr   Filter zur Where-Klausel hinzugefügt
+	      # 2006-06-12 sr   Filter zur Where-Klausel hinzugefï¿½gt
 	      if($layerset[0]['Filter'] != ''){
 	        $sql_where .= " AND ".$layerset[0]['Filter'];
 	      }
-	      # Ersetzen des Platzhalters für die räumliche Einschränkung der Sachdatenabfrage
+	      # Ersetzen des Platzhalters fï¿½r die rï¿½umliche Einschrï¿½nkung der Sachdatenabfrage
 	      # durch die Geometrie des Abfragefensters
 	   
 	   			   
 	 			if($fromwhere != ''){
 	 				if ($client_epsg!=$layer_epsg) {
-		        $sql = "SELECT astext(Transform(memgeomunion(".$columnname."),".$client_epsg.")) AS geomwkt ".$fromwhere." ".$sql_where;
+		        $sql = "SELECT st_astext(st_transform(st_union(".$columnname."),".$client_epsg.")) AS geomwkt ".$fromwhere." ".$sql_where;
 		      }
 		      else {
-		        $sql = "SELECT astext(memgeomunion(".$columnname.")) AS geomwkt ".$fromwhere." ".$sql_where;
+		        $sql = "SELECT st_astext(st_union(".$columnname.")) AS geomwkt ".$fromwhere." ".$sql_where;
 		      }  
 	 			}
 	   
 	   		# order by wieder einbauen
         $sql .= $layerset[0]['attributes']['orderby'];
 	   
-	      # Anhängen des Begrenzers zur Einschränkung der Anzahl der Ergebniszeilen
+	      # Anhï¿½ngen des Begrenzers zur Einschrï¿½nkung der Anzahl der Ergebniszeilen
 	      $sql.=' LIMIT '.MAXQUERYROWS;
 	      $ret=$this->pgdatabase->execSQL($sql,4, 0);
 	      #echo $sql;
@@ -691,7 +689,7 @@ class spatial_processor {
   }
   
   function composeMultipolygonWKTStringFromGML($gml, $geom_attribute){
-  	if($geom_attribute != ''){			# Attribut welches die Geometrie repräsentiert (erforderlich, wenn es mehrere Geometrien pro Feature gibt)
+  	if($geom_attribute != ''){			# Attribut welches die Geometrie reprï¿½sentiert (erforderlich, wenn es mehrere Geometrien pro Feature gibt)
 	  	$start = strpos($gml, '<'.$geom_attribute.'>');
 	  	$end = strpos($gml, '</'.$geom_attribute.'>');
 	  	$geom = substr($gml, $start, $end-$start);
@@ -717,7 +715,7 @@ class spatial_processor {
       }
       $wkt_polygon[$i-1] .= ')\')';
     }
-    $sql = "SELECT astext(st_union(ARRAY[".implode(',', $wkt_polygon)."]))";
+    $sql = "SELECT st_astext(st_union(ARRAY[".implode(',', $wkt_polygon)."]))";
   	$ret=$this->pgdatabase->execSQL($sql,4, 0);
   	if(!$ret[0]){
   		$rs=pg_fetch_array($ret[1]);

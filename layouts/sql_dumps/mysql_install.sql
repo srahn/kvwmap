@@ -218,10 +218,10 @@ CREATE TABLE layer_attributes (
 CREATE TABLE `u_attributfilter2used_layer` (
   `Stelle_ID` int(11) NOT NULL,
   `Layer_ID` int(11) NOT NULL,
-  `attributname` varchar(255) collate latin1_german2_ci NOT NULL,
+  `attributname` varchar(255) NOT NULL,
   `attributvalue` text collate latin1_german2_ci NOT NULL,
-  `operator` enum('=','!=','>','<','like','IS','IN','Within','Intersects') collate latin1_german2_ci NOT NULL,
-  `type` varchar(255) collate latin1_german2_ci NOT NULL,
+  `operator` enum('=','!=','>','<','like','IS','IN','st_within','st_intersects') NOT NULL,
+  `type` varchar(255) NOT NULL,
   PRIMARY KEY  (`Stelle_ID`,`Layer_ID`,`attributname`)
 );
 

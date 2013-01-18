@@ -6,7 +6,7 @@ class Schulstandort extends Databaserelation {
   function findByRadius($lat, $lng, $radius, $schulform, $limit) {
     $radius_in_meter = $radius * 1000;
     if ($limit == '') $limit = 10;
-    $sql  = "SELECT id, nr_nach_kultusmin_mv, schulname, strasse_und_hausnummer, plz||' '||ort AS adresse, Y(the_geom) AS latitude, X(the_geom) AS longitude, schulform, ST_distance(transform(GeometryFromText('POINT(".$lng." ".$lat.")',4326),25833),transform(the_geom,25833)) AS distance FROM ".$this->dbschema.".schulstandorte WHERE ST_distance(transform(GeometryFromText('POINT(".$lng." ".$lat.")',4326),25833),transform(the_geom,25833)) < ".$radius_in_meter;
+    $sql  = "SELECT id, nr_nach_kultusmin_mv, schulname, strasse_und_hausnummer, plz||' '||ort AS adresse, Y(the_geom) AS latitude, X(the_geom) AS longitude, schulform, ST_distance(st_transform(GeometryFromText('POINT(".$lng." ".$lat.")',4326),25833),transform(the_geom,25833)) AS distance FROM ".$this->dbschema.".schulstandorte WHERE ST_distance(st_transform(GeometryFromText('POINT(".$lng." ".$lat.")',4326),25833),transform(the_geom,25833)) < ".$radius_in_meter;
     if ($schulform != '') {
       $sql .= "AND schulform = '".$schulform."'";
     }

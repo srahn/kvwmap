@@ -50,10 +50,10 @@ class pointeditor {
   
   function eintragenPunkt($pointx, $pointy, $oid, $tablename, $columnname, $dimension){
   	if($dimension == 3){  	
-			$sql = "UPDATE ".$tablename." SET ".$columnname." = Transform(GeometryFromText('POINT(".$pointx." ".$pointy." 0)',".$this->clientepsg."),".$this->layerepsg.") WHERE oid = ".$oid;
+			$sql = "UPDATE ".$tablename." SET ".$columnname." = st_transform(GeometryFromText('POINT(".$pointx." ".$pointy." 0)',".$this->clientepsg."),".$this->layerepsg.") WHERE oid = ".$oid;
   	}
   	else{
-  		$sql = "UPDATE ".$tablename." SET ".$columnname." = Transform(GeometryFromText('POINT(".$pointx." ".$pointy.")',".$this->clientepsg."),".$this->layerepsg.") WHERE oid = ".$oid;
+  		$sql = "UPDATE ".$tablename." SET ".$columnname." = st_transform(GeometryFromText('POINT(".$pointx." ".$pointy.")',".$this->clientepsg."),".$this->layerepsg.") WHERE oid = ".$oid;
   	}
 		$ret = $this->database->execSQL($sql, 4, 1);
 		if ($ret[0]) {
@@ -64,7 +64,7 @@ class pointeditor {
   }
 	
 	function getpoint($oid, $tablename, $columnname){
-		$sql = "SELECT x(Transform(".$columnname.",".$this->clientepsg.")) AS pointx, y(Transform(".$columnname.",".$this->clientepsg.")) AS pointy FROM ".$tablename." WHERE oid = ".$oid;
+		$sql = "SELECT x(st_transform(".$columnname.",".$this->clientepsg.")) AS pointx, y(st_transform(".$columnname.",".$this->clientepsg.")) AS pointy FROM ".$tablename." WHERE oid = ".$oid;
 		$ret = $this->database->execSQL($sql, 4, 0);
 		$point = pg_fetch_array($ret[1]);
 		return $point;

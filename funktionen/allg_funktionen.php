@@ -198,7 +198,7 @@ if(!function_exists('imagerotate')){
 }
 
  
-function transform($x,$y,$from_epsg,$to_epsg) {
+function st_transform($x,$y,$from_epsg,$to_epsg) {
 	#$x = 12.099281283333;
 	#$y = 54.075214183333;
   $point = ms_newPointObj();

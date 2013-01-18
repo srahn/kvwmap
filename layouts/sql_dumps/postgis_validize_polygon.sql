@@ -4,7 +4,7 @@
 
 CREATE OR REPLACE FUNCTION polyfromline(geometry)
   RETURNS geometry AS
-$BODY$SELECT geomfromtext(replace(replace(replace(replace(replace(replace(replace(asText($1),'MULTILINESTRING','MULTIPOLYGON'),'LINESTRING','MULTIPOLYGON'), '((', '('), '))', ')'), '(', '((('), ')', ')))'), '))),(((', ')),(('), srid($1))$BODY$
+$BODY$SELECT st_geomfromtext(replace(replace(replace(replace(replace(replace(replace(asText($1),'MULTILINESTRING','MULTIPOLYGON'),'LINESTRING','MULTIPOLYGON'), '((', '('), '))', ')'), '(', '((('), ')', ')))'), '))),(((', ')),(('), srid($1))$BODY$
   LANGUAGE 'sql' IMMUTABLE STRICT
   COST 100;
 COMMENT ON FUNCTION polyfromline(geometry) IS 'Liefert eine MULTIPOLYGON Gemetrie von einer MULTILINESTRING oder LINESTRING Geometrie zurück';

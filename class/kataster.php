@@ -179,8 +179,8 @@ class Festpunkte {
   # 2006-02-19 pk koordinaten durch the_geom ersetzt
   function getBBoxAsRectObj($Festpunkte) {
     if (is_array($Festpunkte)) { $Liste=$Festpunkte;  } else { $Liste=array($Festpunkte); }
-    $sql ="SELECT round(xmin(extent(the_geom))) as xmin,round(ymin(extent(the_geom))) as ymin";
-    $sql.=",round(xmax(extent(the_geom))) as xmax, round(ymax(extent(the_geom))) as ymax";
+    $sql ="SELECT round(st_xmin(extent(the_geom))) as xmin,round(st_ymin(extent(the_geom))) as ymin";
+    $sql.=",round(st_xmax(extent(the_geom))) as xmax, round(st_ymax(extent(the_geom))) as ymax";
     $sql.=" FROM fp_punkte WHERE pkz IN ('".$Liste[0]."'";
     for ($i=1;$i<count($Liste);$i++) {
       $sql.=",'".$Liste[$i]."'";

@@ -37,6 +37,7 @@ function update_require_attribute(attributes, k,layer_id, value){
 	}
 }
 
+
 function show_details(oid){
 	document.GUI.go.value = 'Layer-Suche_Suchen';
 	document.GUI.search.value = 'true';
@@ -166,24 +167,106 @@ function update_gebietstyp(){
 									$j = 0;?>
 					</td>
 					<td>Gemeindekennzahl:</td>
-					<td><input readonly="true" <? $this->qlayerset[$i]['attributes']['name'][$j] = 'gemkz'; echo ' type="text" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?></td>
+					<td>
+						<?  $j = 24;
+							$attributes['name'][$j] = 'gemkz';
+							for($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++){
+								if($attributes['enum_value'][$j][$k][$e] == $layer['shape'][$k][$attributes['name'][$j]]){
+									$auswahlfeld_output = $attributes['enum_output'][$j][$k][$e];
+									$auswahlfeld_output_laenge=strlen($auswahlfeld_output)+1;
+									break;
+								}
+							}
+              echo '<input readonly id="'.$attributes['name'][$j].'_'.$k.'" style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;" size="'.$auswahlfeld_output_laenge.'" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$auswahlfeld_output.'">';
+              $auswahlfeld_output = '';
+              $auswahlfeld_output_laenge = ''; 
+					 ?>
+					</td>
 					<td rowspan="4"><span style="background-color: <? echo BG_GLEHEADER; ?>" class="titel">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bebauungsplandaten&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td>
 				</tr>
 				<tr>
 					<td>Amt:</td>
-					<td><input readonly="true" <? $this->qlayerset[$i]['attributes']['name'][$j] = 'amt'; echo ' type="text" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?></td>
+					<td>
+					<?  $j = 26;
+							$attributes['name'][$j] = 'amt';
+							for($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++){
+								if($attributes['enum_value'][$j][$k][$e] == $layer['shape'][$k][$attributes['name'][$j]]){
+									$auswahlfeld_output = $attributes['enum_output'][$j][$k][$e];
+									$auswahlfeld_output_laenge=strlen($auswahlfeld_output)+1;
+									break;
+								}
+							}
+              echo '<input readonly id="'.$attributes['name'][$j].'_'.$k.'" style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;" size="'.$auswahlfeld_output_laenge.'" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$auswahlfeld_output.'">';
+              $auswahlfeld_output = '';
+              $auswahlfeld_output_laenge = ''; 
+					 ?>
+					</td>
 					<td>Zentrale Orte:</td>
-					<td><input readonly="true" <? $this->qlayerset[$i]['attributes']['name'][$j] = 'zentrort'; echo ' type="text" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?></td>
+					<td>
+						<?  $j = 27;
+							$attributes['name'][$j] = 'zentrort';
+							for($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++){
+								if($attributes['enum_value'][$j][$k][$e] == $layer['shape'][$k][$attributes['name'][$j]]){
+									$auswahlfeld_output = $attributes['enum_output'][$j][$k][$e];
+									$auswahlfeld_output_laenge=strlen($auswahlfeld_output)+1;
+									break;
+								}
+							}
+              echo '<input readonly id="'.$attributes['name'][$j].'_'.$k.'" style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;" size="'.$auswahlfeld_output_laenge.'" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$auswahlfeld_output.'">';
+              $auswahlfeld_output = '';
+              $auswahlfeld_output_laenge = ''; 
+					 ?>
+					</td>
 				</tr>
 				<tr>
 					<td>Kreis:</td>
-					<td><input readonly="true" <? $this->qlayerset[$i]['attributes']['name'][$j] = 'kreis'; echo ' type="text" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?></td>
+					<td>
+					<?  $j = 28;
+							$attributes['name'][$j] = 'kreis';
+							for($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++){
+								if($attributes['enum_value'][$j][$k][$e] == $layer['shape'][$k][$attributes['name'][$j]]){
+									$auswahlfeld_output = $attributes['enum_output'][$j][$k][$e];
+									break;
+								}
+							}
+              echo '<input readonly id="'.$attributes['name'][$j].'_'.$k.'" style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;" size="33" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$auswahlfeld_output.'">';
+              $auswahlfeld_output = '';
+              $auswahlfeld_output_laenge = ''; 
+					 ?>
+					</td>
 					<td>Stadt-Umland-Raum:</td>
-					<td><input readonly="true" <? $this->qlayerset[$i]['attributes']['name'][$j] = 'ordraum'; echo ' type="text" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?></td>
+					<td>
+					<?  $j = 29;
+							$attributes['name'][$j] = 'sur';
+							for($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++){
+								if($attributes['enum_value'][$j][$k][$e] == $layer['shape'][$k][$attributes['name'][$j]]){
+									$auswahlfeld_output = $attributes['enum_output'][$j][$k][$e];
+									$auswahlfeld_output_laenge=strlen($auswahlfeld_output)+1;
+									break;
+								}
+							}
+              echo '<input readonly id="'.$attributes['name'][$j].'_'.$k.'" style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;" size="'.$auswahlfeld_output_laenge.'" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$auswahlfeld_output.'">';
+              $auswahlfeld_output = '';
+              $auswahlfeld_output_laenge = ''; 
+					 ?>
+					</td>
 				</tr>
 				<tr>
 					<td>Planungsregion:</td>
-					<td><input readonly="true" <? $this->qlayerset[$i]['attributes']['name'][$j] = 'planungsregion'; echo ' type="text" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?></td>
+					<td>
+						<?  $j = 30;
+							$attributes['name'][$j] = 'pr';
+							for($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++){
+								if($attributes['enum_value'][$j][$k][$e] == $layer['shape'][$k][$attributes['name'][$j]]){
+									$auswahlfeld_output = $attributes['enum_output'][$j][$k][$e];
+									break;
+								}
+							}
+              echo '<input readonly id="'.$attributes['name'][$j].'_'.$k.'" style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;" size="33" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$auswahlfeld_output.'">';
+              $auswahlfeld_output = '';
+              $auswahlfeld_output_laenge = ''; 
+					 ?>
+					</td>
 				</tr>
 			</table>
 		</td>

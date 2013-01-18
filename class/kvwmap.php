@@ -254,16 +254,16 @@ class GUI extends GUI_core{
       	}
 				$layerdb = $mapDB->getlayerdatabase($layer[$i]['Layer_ID'], $this->Stelle->pgdbhost);
 				$select = $mapDB->getSelectFromData($layer[$i]['Data']);
-				$extent = 'Transform(geomfromtext(\'POLYGON(('.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layer[$i]['epsg_code'].')';				
+				$extent = 'st_transform(st_geomfromtext(\'POLYGON(('.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layer[$i]['epsg_code'].')';				
 				$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects(the_geom, '.$extent.')';
 				if($layer[$i]['Datentyp'] == 0){	# POINT
-					$sql = 'SELECT x(the_geom), y(the_geom) FROM (SELECT Transform(the_geom, '.$this->user->rolle->epsg_code.') as the_geom '.$fromwhere.') foo LIMIT 10000';
+					$sql = 'SELECT x(the_geom), y(the_geom) FROM (SELECT st_transform(the_geom, '.$this->user->rolle->epsg_code.') as the_geom '.$fromwhere.') foo LIMIT 10000';
 				}
 				else{	# LINE / POLYGON
-					$sql = 'SELECT x(the_geom), y(the_geom) FROM (SELECT transform(pointn(foo.linestring, foo.count1), '.$this->user->rolle->epsg_code.') AS the_geom
+					$sql = 'SELECT x(the_geom), y(the_geom) FROM (SELECT st_transform(pointn(foo.linestring, foo.count1), '.$this->user->rolle->epsg_code.') AS the_geom
 					FROM (SELECT generate_series(1, npoints(foo4.linestring)) AS count1, foo4.linestring FROM (
 					SELECT GeometryN(foo2.linestring, foo2.count2) as linestring FROM (
-					SELECT generate_series(1, NumGeometries(foo5.linestring)) AS count2, foo5.linestring FROM (SELECT st_multi(linefrompoly(intersection(the_geom, '.$extent.'))) AS linestring '.$fromwhere.') foo5) foo2
+					SELECT generate_series(1, NumGeometries(foo5.linestring)) AS count2, foo5.linestring FROM (SELECT st_multi(linefrompoly(st_intersection(the_geom, '.$extent.'))) AS linestring '.$fromwhere.') foo5) foo2
 					) foo4) foo
 					WHERE (foo.count1 + 1) <= npoints(foo.linestring)) foo3 LIMIT 10000';
 				}
@@ -299,16 +299,16 @@ class GUI extends GUI_core{
     	}
     	$select = strtolower($mapDB->getSelectFromData($layer['Data']));
 			if($this->formvars['layer_id'] > 0)$select = str_replace(' from ', ', '.$data_attributes['table_alias_name'][$data_attributes['the_geom']].'.oid as exclude_oid'.' from ', $select);		# bei Rollenlayern nicht machen
-			$extent = 'Transform(geomfromtext(\'POLYGON(('.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layer['epsg_code'].')';				
+			$extent = 'st_transform(st_geomfromtext(\'POLYGON(('.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layer['epsg_code'].')';				
 			$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects(the_geom, '.$extent.') ';
 			if($this->formvars['layer_id'] > 0 AND $this->formvars['oid']){
 				$fromwhere .= 'AND exclude_oid != '.$this->formvars['oid'];
 			}
 			# LINE / POLYGON
-			$sql = 'SELECT x(the_geom), y(the_geom) FROM (SELECT transform(pointn(foo.linestring, foo.count1), '.$this->user->rolle->epsg_code.') AS the_geom
+			$sql = 'SELECT x(the_geom), y(the_geom) FROM (SELECT st_transform(pointn(foo.linestring, foo.count1), '.$this->user->rolle->epsg_code.') AS the_geom
 					FROM (SELECT generate_series(1, npoints(foo4.linestring)) AS count1, foo4.linestring FROM (
 					SELECT CASE WHEN GeometryN(foo2.linestring, foo2.count2) IS NULL THEN foo2.linestring ELSE GeometryN(foo2.linestring, foo2.count2) END as linestring FROM (
-					SELECT generate_series(1, NumGeometries(foo5.linestring)) AS count2, foo5.linestring FROM (SELECT st_multi(linefrompoly(intersection(the_geom, '.$extent.'))) AS linestring '.$fromwhere.') foo5) foo2
+					SELECT generate_series(1, NumGeometries(foo5.linestring)) AS count2, foo5.linestring FROM (SELECT st_multi(linefrompoly(st_intersection(the_geom, '.$extent.'))) AS linestring '.$fromwhere.') foo5) foo2
 					) foo4) foo
 					WHERE (foo.count1 + '.$offset.') <= npoints(foo.linestring)) foo3 LIMIT 10000';
 			#echo $sql;
@@ -559,7 +559,7 @@ class GUI extends GUI_core{
   			
   			case 'text' : {								#  ein Textfeld soll nur mit dem ersten Wert aufgefüllt werden
   				$rs = pg_fetch_array($ret[1]);
-        	$html = utf8_encode($rs['output']);
+        	$html = $rs['output'];
   			}break;
       }
       echo $html;
@@ -1012,8 +1012,8 @@ class GUI extends GUI_core{
 	                      		$style->set('maxsize', 2*$style->width);
 	                      	}
 	                      	else{
-														$style->set('size', 3);					# size und maxsize bei Linien und Polygonlayern immer auf 2 setzen, damit man was in der Legende erkennt 
-	                      		$style->set('maxsize', 3);
+														$style->set('size', 2);					# size und maxsize bei Linien und Polygonlayern immer auf 2 setzen, damit man was in der Legende erkennt 
+	                      		$style->set('maxsize', 2);
 	                      	}
 	                      }
 	                      else{
@@ -3636,6 +3636,15 @@ class GUI extends GUI_core{
     if (MAPSERVERVERSION < 500 AND $dbStyle['sizeitem']!='') {
       $style->sizeitem = $dbStyle['sizeitem'];
     }
+  	if(MAPSERVERVERSION >= 620) {
+    	if($dbStyle['geomtransform'] != '') {
+      	$style->setGeomst_transform($dbStyle['geomtransform']);
+      }
+      if($dbStyle['pattern']!='') {
+      	$style->setPattern(explode(' ',$dbStyle['pattern']));
+        $style->linecap = 'butt';
+      }
+    }
     #######################################################
     if($layer->type > 0){
     	$symbol = $map->getSymbolObjectById($style->symbol);
@@ -3644,8 +3653,8 @@ class GUI extends GUI_core{
     		$style->set('maxsize', 2*$style->width);
     	}
     	else{
-				$style->set('size', 2);					# size und maxsize bei Linien und Polygonlayern immer auf 2 setzen, damit man was in der Legende erkennt 
-    		$style->set('maxsize', 2);
+				if($dbStyle['size'] < 2)$style->set('size', 2);					# size und maxsize bei Linien und Polygonlayern immer auf 2 setzen, damit man was in der Legende erkennt 
+    		if($dbStyle['maxsize'] < 2)$style->set('maxsize', 2);
     	}
     }
     else{
@@ -3661,7 +3670,7 @@ class GUI extends GUI_core{
       $RGB=explode(" ",$dbStyle['backgroundcolor']);
       $style->backgroundcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
     }
-
+		
     $image = $klasse->createLegendIcon(25,18);
     $filename = $this->map_saveWebImage($image,'jpeg');
     $newname = $this->user->id.basename($filename);
@@ -5951,10 +5960,10 @@ class GUI extends GUI_core{
           if($layerset[0]['attributes']['name'][$i] == $layerset[0]['attributes']['the_geom']){
           	# Suche im Suchpolygon
           	if($this->formvars['newpathwkt'] != ''){
-							$sql_where.=' AND st_intersects('.$layerset[0]['attributes']['the_geom'].', (Transform(geomfromtext(\''.$this->formvars['newpathwkt'].'\', '.$this->user->rolle->epsg_code.'), '.$layerset[0]['epsg_code'].')))';          		
+							$sql_where.=' AND st_intersects('.$layerset[0]['attributes']['the_geom'].', (st_transform(st_geomfromtext(\''.$this->formvars['newpathwkt'].'\', '.$this->user->rolle->epsg_code.'), '.$layerset[0]['epsg_code'].')))';          		
           	}
           	# Suche nur im Stellen-Extent
-            $sql_where.=' AND ('.$layerset[0]['attributes']['the_geom'].' && Transform(geomfromtext(\'POLYGON(('.$this->Stelle->MaxGeorefExt->minx.' '.$this->Stelle->MaxGeorefExt->miny.', '.$this->Stelle->MaxGeorefExt->maxx.' '.$this->Stelle->MaxGeorefExt->miny.', '.$this->Stelle->MaxGeorefExt->maxx.' '.$this->Stelle->MaxGeorefExt->maxy.', '.$this->Stelle->MaxGeorefExt->minx.' '.$this->Stelle->MaxGeorefExt->maxy.', '.$this->Stelle->MaxGeorefExt->minx.' '.$this->Stelle->MaxGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layerset[0]['epsg_code'].') OR '.$layerset[0]['attributes']['the_geom'].' IS NULL)';
+            $sql_where.=' AND ('.$layerset[0]['attributes']['the_geom'].' && st_transform(st_geomfromtext(\'POLYGON(('.$this->Stelle->MaxGeorefExt->minx.' '.$this->Stelle->MaxGeorefExt->miny.', '.$this->Stelle->MaxGeorefExt->maxx.' '.$this->Stelle->MaxGeorefExt->miny.', '.$this->Stelle->MaxGeorefExt->maxx.' '.$this->Stelle->MaxGeorefExt->maxy.', '.$this->Stelle->MaxGeorefExt->minx.' '.$this->Stelle->MaxGeorefExt->maxy.', '.$this->Stelle->MaxGeorefExt->minx.' '.$this->Stelle->MaxGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layerset[0]['epsg_code'].') OR '.$layerset[0]['attributes']['the_geom'].' IS NULL)';
           }
         }
         $distinctpos = strpos(strtolower($newpath), 'distinct');
@@ -6413,15 +6422,15 @@ class GUI extends GUI_core{
             if($this->formvars['geomtype'] == 'POINT'){
               if($this->formvars['loc_x'] != ''){
                 if($this->formvars['dimension'] == 3){
-                  $sql .= "Transform(geomfromtext('POINT(".$this->formvars['loc_x']." ".$this->formvars['loc_y']." 0)', ".$client_epsg."), ".$layer_epsg."), ";
+                  $sql .= "st_transform(st_geomfromtext('POINT(".$this->formvars['loc_x']." ".$this->formvars['loc_y']." 0)', ".$client_epsg."), ".$layer_epsg."), ";
                 }
                 else{
-                  $sql .= "Transform(geomfromtext('POINT(".$this->formvars['loc_x']." ".$this->formvars['loc_y'].")', ".$client_epsg."), ".$layer_epsg."), ";
+                  $sql .= "st_transform(st_geomfromtext('POINT(".$this->formvars['loc_x']." ".$this->formvars['loc_y'].")', ".$client_epsg."), ".$layer_epsg."), ";
                 }
               }
             }
             elseif($this->formvars['newpathwkt'] != ''){
-              $sql .= "Transform(geomfromtext('".$this->formvars['newpathwkt']."', ".$client_epsg."), ".$layer_epsg."), ";
+              $sql .= "st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$client_epsg."), ".$layer_epsg."), ";
             }   
           }
         }
@@ -10704,10 +10713,10 @@ class GUI extends GUI_core{
             # Wenn das Koordinatenssystem des Views anders ist als vom Layer wird die Suchbox und die Suchgeometrie
             # in epsg des layers transformiert
             if ($client_epsg!=$layer_epsg) {
-              $sql_where =" AND ".$the_geom." && Transform(GeomFromText('".$searchbox_wkt."',".$client_epsg."),".$layer_epsg.")";
+              $sql_where =" AND ".$the_geom." && st_transform(st_geomfromtext('".$searchbox_wkt."',".$client_epsg."),".$layer_epsg.")";
             }
             else {
-              $sql_where =" AND ".$the_geom." && GeomFromText('".$searchbox_wkt."',".$client_epsg.")";
+              $sql_where =" AND ".$the_geom." && st_geomfromtext('".$searchbox_wkt."',".$client_epsg.")";
             }
 
             # Wenn es sich bei der Suche um eine punktuelle Suche handelt, wird die where Klausel um eine
@@ -10715,20 +10724,20 @@ class GUI extends GUI_core{
             if ($rect->minx==$rect->maxx AND $rect->miny==$rect->maxy AND $this->querypolygon == '') {
               # Behandlung der Suchanfrage mit Punkt, exakte Suche im Kreis
               if ($client_epsg!=$layer_epsg) {
-                $sql_where.=" AND DISTANCE(".$the_geom.",Transform(GeomFromText('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."),".$layer_epsg."))";
+                $sql_where.=" AND st_distance(".$the_geom.",st_transform(st_geomfromtext('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."),".$layer_epsg."))";
               }
               else {
-                $sql_where.=" AND DISTANCE(".$the_geom.",GeomFromText('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."))";
+                $sql_where.=" AND st_distance(".$the_geom.",st_geomfromtext('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."))";
               }
               $sql_where.=" <= ".$rand;
             }
             else {
               # Behandlung der Suchanfrage mit Rechteck, exakte Suche im Rechteck
               if ($client_epsg!=$layer_epsg) {
-                $sql_where.=" AND st_intersects(".$the_geom.",Transform(GeomFromText('".$searchbox_wkt."',".$client_epsg."),".$layer_epsg."))";
+                $sql_where.=" AND st_intersects(".$the_geom.",st_transform(st_geomfromtext('".$searchbox_wkt."',".$client_epsg."),".$layer_epsg."))";
               }
               else {
-                $sql_where.=" AND st_intersects(".$the_geom.",GeomFromText('".$searchbox_wkt."',".$client_epsg."))";
+                $sql_where.=" AND st_intersects(".$the_geom.",st_geomfromtext('".$searchbox_wkt."',".$client_epsg."))";
               }
             }
             # 2006-06-12 sr   Filter zur Where-Klausel hinzugefügt
@@ -11276,10 +11285,10 @@ class GUI extends GUI_core{
       # Wenn das Koordinatenssystem des Views anders ist als vom Layer wird die Suchbox und die Suchgeometrie
       # in epsg des layers transformiert
       if ($client_epsg!=$layer_epsg) {
-        $sql_where =" AND ".$the_geom." && Transform(GeomFromText('".$searchbox_wkt."',".$client_epsg."),".$layer_epsg.")";
+        $sql_where =" AND ".$the_geom." && st_transform(st_geomfromtext('".$searchbox_wkt."',".$client_epsg."),".$layer_epsg.")";
       }
       else {
-        $sql_where =" AND ".$the_geom." && GeomFromText('".$searchbox_wkt."',".$client_epsg.")";
+        $sql_where =" AND ".$the_geom." && st_geomfromtext('".$searchbox_wkt."',".$client_epsg.")";
       }
 
       # Wenn es sich bei der Suche um eine punktuelle Suche handelt, wird die where Klausel um eine
@@ -11287,26 +11296,26 @@ class GUI extends GUI_core{
       if ($rect->minx==$rect->maxx AND $rect->miny==$rect->maxy AND $this->querypolygon == '') {
         # Behandlung der Suchanfrage mit Punkt, exakte Suche im Kreis
         if ($client_epsg!=$layer_epsg) {
-          $sql_where.=" AND DISTANCE(".$the_geom.",Transform(GeomFromText('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."),".$layer_epsg."))";
+          $sql_where.=" AND st_distance(".$the_geom.",st_transform(st_geomfromtext('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."),".$layer_epsg."))";
         }
         else {
-          $sql_where.=" AND DISTANCE(".$the_geom.",GeomFromText('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."))";
+          $sql_where.=" AND st_distance(".$the_geom.",st_geomfromtext('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."))";
         }
         $sql_where.=" <= ".$rand;
       }
       else {
         # Behandlung der Suchanfrage mit Rechteck, exakte Suche im Rechteck
         if ($client_epsg!=$layer_epsg) {
-          $sql_where.=" AND st_intersects(".$the_geom.",Transform(GeomFromText('".$searchbox_wkt."',".$client_epsg."),".$layer_epsg."))";
+          $sql_where.=" AND st_intersects(".$the_geom.",st_transform(st_geomfromtext('".$searchbox_wkt."',".$client_epsg."),".$layer_epsg."))";
         }
         else {
-          $sql_where.=" AND st_intersects(".$the_geom.",GeomFromText('".$searchbox_wkt."',".$client_epsg."))";
+          $sql_where.=" AND st_intersects(".$the_geom.",st_geomfromtext('".$searchbox_wkt."',".$client_epsg."))";
         }
       }
       
       # SVG-Geometrie abfragen für highlighting
       if($this->user->rolle->highlighting == '1'){
-        $pfad = "asSVG(transform(".$the_geom.", ".$client_epsg."), 0, 8) AS highlight_geom, ".$pfad;
+        $pfad = "st_assvg(st_transform(".$the_geom.", ".$client_epsg."), 0, 8) AS highlight_geom, ".$pfad;
       }
       
       # 2006-06-12 sr   Filter zur Where-Klausel hinzugefügt
@@ -12041,8 +12050,8 @@ class GUI extends GUI_core{
 
 	function zoomToGeom($geom,$border) {
     # Berechnen des Randes in Abhängigkeit vom Parameter border gegeben in Prozent
-    $sql.="SELECT XMIN(EXTENT('".$geom."')) AS minx,YMIN(EXTENT('".$geom."')) AS miny";
-		$sql.=",XMAX(EXTENT('".$geom."')) AS maxx,YMAX(EXTENT('".$geom."')) AS maxy";
+    $sql.="SELECT st_xmin(st_extent('".$geom."')) AS minx,st_ymin(st_extent('".$geom."')) AS miny";
+		$sql.=",st_xmax(st_extent('".$geom."')) AS maxx,st_ymax(st_extent('".$geom."')) AS maxy";
 		$ret=$this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
       $ret[1].='Fehler bei der Abfrage der Boundingbox! \n';
@@ -12145,7 +12154,7 @@ class GUI extends GUI_core{
 		}
 
     # Erzeugen des Abfragestatements für den maximalen Extent aus dem Data String
-    $sql ='SELECT extent(transform('.$this->attributes['the_geom'].','.$this->user->rolle->epsg_code.')) AS extent FROM (SELECT ';
+    $sql ='SELECT st_extent(st_transform('.$this->attributes['the_geom'].','.$this->user->rolle->epsg_code.')) AS extent FROM (SELECT ';
     $sql.=$subquery;
     $sql.=') AS fooForMaxLayerExtent';
     #echo $sql;
@@ -12188,8 +12197,8 @@ class GUI extends GUI_core{
 	    $map = ms_newMapObj('');
 	    $layerdb = $mapDB->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
 	    # Auf den Datensatz zoomen
-	    $sql ="SELECT xmin(bbox) AS minx,ymin(bbox) AS miny,xmax(bbox) AS maxx,ymax(bbox) AS maxy";
-	    $sql.=" FROM (SELECT box2D(Transform(".$layerset['attributes']['the_geom'].", ".$this->user->rolle->epsg_code.")) as bbox";
+	    $sql ="SELECT st_xmin(bbox) AS minx,st_ymin(bbox) AS miny,st_xmax(bbox) AS maxx,st_ymax(bbox) AS maxy";
+	    $sql.=" FROM (SELECT box2D(st_transform(".$layerset['attributes']['the_geom'].", ".$this->user->rolle->epsg_code.")) as bbox";
 	    $sql.=" FROM ".$tablename." WHERE oid = '".$oid."') AS foo";
 	    $ret = $layerdb->execSQL($sql, 4, 0);
 	    $rs = pg_fetch_array($ret[1]);
@@ -12961,8 +12970,8 @@ class db_mapObj extends db_mapObj_core{
   }
 
 	function zoomToDatasets($oids, $tablename, $columnname, $border, $layerdb, $client_epsg) {
-  	$sql ="SELECT xmin(bbox) AS minx,ymin(bbox) AS miny,xmax(bbox) AS maxx,ymax(bbox) AS maxy";
-  	$sql.=" FROM (SELECT box2D(Transform(memgeomunion(".$columnname."), ".$client_epsg.")) as bbox";
+  	$sql ="SELECT st_xmin(bbox) AS minx,st_ymin(bbox) AS miny,st_xmax(bbox) AS maxx,st_ymax(bbox) AS maxy";
+  	$sql.=" FROM (SELECT box2D(st_transform(st_union(".$columnname."), ".$client_epsg.")) as bbox";
   	$sql.=" FROM ".$tablename." WHERE oid IN (";
   	for($i = 0; $i < count($oids); $i++){
     	$sql .= "'".$oids[$i]."',";

@@ -210,11 +210,11 @@ function setlayers(selected_options){
 					  </td>
 					  <td align="center">
 					  	<select class="select" style="width:90px" name="operator_'.$this->attributes['name'][$the_geom_index[$i]].'">
-					  		<option value="Intersects" ';
-					  		if($this->formvars['operator_'.$this->attributes['name'][$the_geom_index[$i]]] == 'Intersects'){echo 'selected';}
+					  		<option value="st_intersects" ';
+					  		if($this->formvars['operator_'.$this->attributes['name'][$the_geom_index[$i]]] == 'st_intersects'){echo 'selected';}
 					  		echo ' >Intersects</option>
-								<option value="Within" ';
-					  		if($this->formvars['operator_'.$this->attributes['name'][$the_geom_index[$i]]] == 'Within'){echo 'selected';}
+								<option value="st_within" ';
+					  		if($this->formvars['operator_'.$this->attributes['name'][$the_geom_index[$i]]] == 'st_within'){echo 'selected';}
 								echo ' >Within</option>
 					  	</select>
 					  </td>

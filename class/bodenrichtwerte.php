@@ -49,8 +49,8 @@ class bodenrichtwertzone {
   
   function getBBoxAsRectObj($oid) {
     # ermittelt die Boundingbox der Bodenrichtwertzone $oid
-    $sql ='SELECT XMIN(EXTENT(Transform(the_geom, '.$this->client_epsg.'))) AS minx,YMIN(EXTENT(Transform(the_geom, '.$this->client_epsg.'))) AS miny';
-    $sql.=',XMAX(EXTENT(Transform(the_geom, '.$this->client_epsg.'))) AS maxx,YMAX(EXTENT(Transform(the_geom, '.$this->client_epsg.'))) AS maxy';
+    $sql ='SELECT st_xmin(st_extent(st_transform(the_geom, '.$this->client_epsg.'))) AS minx,st_ymin(st_extent(st_transform(the_geom, '.$this->client_epsg.'))) AS miny';
+    $sql.=',st_xmax(st_extent(st_transform(the_geom, '.$this->client_epsg.'))) AS maxx,st_ymax(st_extent(st_transform(the_geom, '.$this->client_epsg.'))) AS maxy';
     $sql.=' FROM bw_zonen WHERE oid='.$oid;
     #echo $sql;
     $ret=$this->database->execSQL($sql,4, 0);
@@ -99,8 +99,8 @@ class bodenrichtwertzone {
     # Es muss ein gültiges Polygon vorhanden sein.
     $this->debug->write('file:bodenrichtwerte.php class:bodenrichtwerte function:getBodenrichtwertzonen<br>Abfragen des Umrings und der Textpunkte aus<br>PostGIS:',4);
     $sql ="SELECT *,";
-    $sql.=" asText(Transform(the_geom, ".$this->client_epsg.")) AS wkt_umring, asSVG(Transform(the_geom, ".$this->client_epsg.")) AS svg_umring,";
-    $sql .=" asText(Transform(textposition, ".$this->client_epsg.")) AS wkt_textposition";
+    $sql.=" asText(st_transform(the_geom, ".$this->client_epsg.")) AS wkt_umring, asSVG(st_transform(the_geom, ".$this->client_epsg.")) AS svg_umring,";
+    $sql .=" asText(st_transform(textposition, ".$this->client_epsg.")) AS wkt_textposition";
     $sql.=" FROM bw_zonen";
     $sql.=" WHERE 1=1";
     if ($oid!='') {
@@ -235,8 +235,8 @@ class bodenrichtwertzone {
     if($formvars['verfahrensgrund']){$sql.= ",'".$formvars['verfahrensgrund']."' ";}
     if($formvars['verfahrensgrund_zusatz']){$sql.= ",'".$formvars['verfahrensgrund_zusatz']."' ";}
     if($formvars['bemerkungen']){$sql.= ",'".$formvars['bemerkungen']."' ";}	
-  	$sql.=",Transform(GeometryFromText('".$formvars['umring']."',".$this->client_epsg."), ".$this->layer_epsg.")";
-    $sql.=",Transform(GeometryFromText('".$formvars['textposition']."',".$this->client_epsg."), ".$this->layer_epsg."))";
+  	$sql.=",st_transform(GeometryFromText('".$formvars['umring']."',".$this->client_epsg."), ".$this->layer_epsg.")";
+    $sql.=",st_transform(GeometryFromText('".$formvars['textposition']."',".$this->client_epsg."), ".$this->layer_epsg."))";
     # echo $sql;
     $ret=$this->database->execSQL($sql,4, 1);
     if ($ret[0]) {
@@ -294,8 +294,8 @@ class bodenrichtwertzone {
     $sql.= "verfahrensgrund = '".$formvars['verfahrensgrund']."', ";
     $sql.= "verfahrensgrund_zusatz = '".$formvars['verfahrensgrund_zusatz']."', ";
     if($formvars['bemerkungen']){$sql.= "bemerkungen = '".$formvars['bemerkungen']."', ";}
-    $sql.= "the_geom = Transform(GeometryFromText('".$formvars['umring']."',".$this->client_epsg."), ".$this->layer_epsg.")";
-    $sql.= ", textposition = Transform(GeometryFromText('".$formvars['textposition']."',".$this->client_epsg."), ".$this->layer_epsg.")";
+    $sql.= "the_geom = st_transform(GeometryFromText('".$formvars['umring']."',".$this->client_epsg."), ".$this->layer_epsg.")";
+    $sql.= ", textposition = st_transform(GeometryFromText('".$formvars['textposition']."',".$this->client_epsg."), ".$this->layer_epsg.")";
     $sql.=" WHERE oid=".$oid;
     #echo $sql;
     $ret=$this->database->execSQL($sql,4, 1);

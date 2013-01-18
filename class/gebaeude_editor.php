@@ -42,7 +42,7 @@ class gebaeude_editor {
   }
   
   function gebaeude_aendern($oid, $point, $gemeinde, $strasse, $nummer, $zusatz, $kommentar){
-  	$sql = "SELECT astext(the_geom) FROM alkobj_e_fla AS o WHERE (o.folie = '011' OR o.folie = '084') AND within(GeomFromText('".$point."',2398), the_geom)";
+  	$sql = "SELECT astext(the_geom) FROM alkobj_e_fla AS o WHERE (o.folie = '011' OR o.folie = '084') AND within(st_geomfromtext('".$point."',2398), the_geom)";
   	$ret=$this->database->execSQL($sql,4, 1);
     if (!$ret[0]) {
     	$rs = pg_fetch_array($ret[1]);
@@ -54,9 +54,9 @@ class gebaeude_editor {
 		$sql.="nummer = ".$nummer.", ";
 		$sql.="zusatz = '".$zusatz."', ";
 		$sql.="kommentar = '".$kommentar."', ";
-		$sql.="rechtswert = x(geomfromtext('".$point."')), ";
-		$sql.="hochwert = y(geomfromtext('".$point."')), ";
-    $sql.="the_geom = geomfromtext('".$geom."', 2398) ";
+		$sql.="rechtswert = x(st_geomfromtext('".$point."')), ";
+		$sql.="hochwert = y(st_geomfromtext('".$point."')), ";
+    $sql.="the_geom = st_geomfromtext('".$geom."', 2398) ";
     $sql.="WHERE oid = ".$oid;
     # echo $sql;
     $ret=$this->database->execSQL($sql,4, 1);
@@ -69,7 +69,7 @@ class gebaeude_editor {
   }
   
   function eintragenNeuesGebaeude($point, $gemeinde, $strasse, $nummer, $zusatz, $kommentar) {
-  	$sql = "SELECT astext(the_geom) FROM alkobj_e_fla AS o WHERE (o.folie = '011' OR o.folie = '084') AND within(GeomFromText('".$point."',2398), the_geom)";
+  	$sql = "SELECT astext(the_geom) FROM alkobj_e_fla AS o WHERE (o.folie = '011' OR o.folie = '084') AND within(st_geomfromtext('".$point."',2398), the_geom)";
   	$ret=$this->database->execSQL($sql,4, 1);
     if (!$ret[0]) {
     	$rs = pg_fetch_array($ret[1]);
@@ -77,7 +77,7 @@ class gebaeude_editor {
     }
   	 
     $sql ="INSERT INTO gebaeude_hausnummern (gemeinde, strasse, nummer, zusatz, kommentar, rechtswert, hochwert, the_geom)";
-    $sql.=" VALUES (".$gemeinde.", ".$strasse.", ".$nummer.", '".$zusatz."', '".$kommentar."', x(geomfromtext('".$point."')), y(geomfromtext('".$point."')), geomfromtext('".$geom."', 2398))";
+    $sql.=" VALUES (".$gemeinde.", ".$strasse.", ".$nummer.", '".$zusatz."', '".$kommentar."', x(st_geomfromtext('".$point."')), y(st_geomfromtext('".$point."')), st_geomfromtext('".$geom."', 2398))";
     # echo $sql;
     $ret=$this->database->execSQL($sql,4, 1);
     if ($ret[0]) {
@@ -90,7 +90,7 @@ class gebaeude_editor {
   
   function load_gebaeude($oid){
   	$sql = "SELECT gemeinde, strasse, nummer, zusatz, kommentar, ";
-  	$sql.= "assvg(snapline(linefrompoly(the_geom),GeomFromText('POINT('||rechtswert||' '||hochwert||')',2398)),0,5) AS segment FROM gebaeude_hausnummern AS gh WHERE gh.oid = ".$oid." AND within(GeomFromText('POINT('||rechtswert||' '||hochwert||')',2398), the_geom)";
+  	$sql.= "assvg(snapline(linefrompoly(the_geom),st_geomfromtext('POINT('||rechtswert||' '||hochwert||')',2398)),0,5) AS segment FROM gebaeude_hausnummern AS gh WHERE gh.oid = ".$oid." AND within(st_geomfromtext('POINT('||rechtswert||' '||hochwert||')',2398), the_geom)";
   	#echo $sql;
   	$ret=$this->database->execSQL($sql,4, 0);
     if (!$ret[0]) {

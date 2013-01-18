@@ -64,7 +64,7 @@ class rok {
  	
   
   function getExtentFromRokNrBplan($roknr, $border, $epsg) {
-		$sql = "SELECT XMIN(EXTENT(TRANSFORM(the_geom,".$epsg."))) AS minx,YMIN(EXTENT(TRANSFORM(the_geom, ".$epsg."))) as miny,XMAX(EXTENT(TRANSFORM(the_geom, ".$epsg."))) AS maxx,YMAX(EXTENT(TRANSFORM(the_geom, ".$epsg."))) AS maxy FROM rok_edit.rok_geltungsbereiche WHERE roknr = '".$roknr."'";
+		$sql = "SELECT st_xmin(st_extent(st_transform(the_geom,".$epsg."))) AS minx,st_ymin(st_extent(st_transform(the_geom, ".$epsg."))) as miny,st_xmax(st_extent(st_transform(the_geom, ".$epsg."))) AS maxx,st_ymax(st_extent(st_transform(the_geom, ".$epsg."))) AS maxy FROM rok_edit.rok_geltungsbereiche WHERE roknr = '".$roknr."'";
 		#echo $sql;
 	    $ret = $this->database->execSQL($sql, 4, 0);
 		$rs = pg_fetch_array($ret[1]);
@@ -83,7 +83,7 @@ class rok {
 	}
 	
 	function getExtentFromRokNrFplan($gkz, $border, $epsg) {
-		$sql = "SELECT XMIN(EXTENT(TRANSFORM(the_geom,".$epsg."))) AS minx,YMIN(EXTENT(TRANSFORM(the_geom, ".$epsg."))) as miny,XMAX(EXTENT(TRANSFORM(the_geom, ".$epsg."))) AS maxx,YMAX(EXTENT(TRANSFORM(the_geom, ".$epsg."))) AS maxy FROM kataster.adm_gem09 WHERE gemnr = '".$gkz."'";
+		$sql = "SELECT st_xmin(st_extent(st_transform(the_geom,".$epsg."))) AS minx,st_ymin(st_extent(st_transform(the_geom, ".$epsg."))) as miny,st_xmax(st_extent(st_transform(the_geom, ".$epsg."))) AS maxx,st_ymax(st_extent(st_transform(the_geom, ".$epsg."))) AS maxy FROM kataster.adm_gem09 WHERE gemnr = '".$gkz."'";
 		#echo $sql;
 	    $ret = $this->database->execSQL($sql, 4, 0);
 		$rs = pg_fetch_array($ret[1]);

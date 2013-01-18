@@ -552,7 +552,7 @@ if ($goNotExecutedInIncludeCases) {
 		$GUI->zoomtojagdbezirk();
 	  }break;
 	  
-	  # Jagdbezirke Suchen
+	  # Jagdbezirke Suchenflurst
 	  case 'jagdbezirke_auswaehlen_Suchen' : {
 		$GUI->jagdbezirke_auswaehlen_suchen();
 	  }break;

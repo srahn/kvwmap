@@ -371,7 +371,7 @@ class notiz {
 
   function getNotizen($oid,$kategorie,$person,$vondatum,$bisdatum) {
     $this->debug->write('<br>file:metadaten.php class:notiz function getNotizen<br>Abfragen der Daten zu Notizen in<br>PostGIS',4);
-    $sql ="SELECT oid,notiz,kategorie_id,person,datum,AsText(transform(the_geom, ".$this->client_epsg.")) AS textgeom, AsSVG(transform(the_geom, ".$this->client_epsg.")) AS svggeom FROM q_notizen WHERE (1=1)";
+    $sql ="SELECT oid,notiz,kategorie_id,person,datum,AsText(st_transform(the_geom, ".$this->client_epsg.")) AS textgeom, AsSVG(st_transform(the_geom, ".$this->client_epsg.")) AS svggeom FROM q_notizen WHERE (1=1)";
     if ($oid!='' AND $oid!=0) {
       $sql.=" AND oid=".$oid;
     }
@@ -430,7 +430,7 @@ class notiz {
     $this->debug->write('<br>file:metadaten.php class:notiz function aktualisierenNotiz<br>Aktualisieren der Daten zu einer Notiz in<br>PostGIS',4);
     $sql ="UPDATE q_notizen SET notiz='".$formvars['notiz']."',kategorie_id='".$formvars['kategorie_id']."'";
     $sql.=",person='".$formvars['person']."',datum='".date("Y-m-d",time())."'";
-    $sql.=",the_geom=TRANSFORM(GeometryFromText('".$formvars['textposition']."', ".$this->client_epsg."),".EPSGCODE.")";
+    $sql.=",the_geom=st_transform(GeometryFromText('".$formvars['textposition']."', ".$this->client_epsg."),".EPSGCODE.")";
     $sql.=" WHERE oid=".$oid;
     $ret=$this->database->execSQL($sql,4, 1);
     if ($ret[0]) {

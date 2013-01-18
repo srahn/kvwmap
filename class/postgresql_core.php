@@ -78,8 +78,8 @@ class pgdatabase_core {
     $sql ="SELECT round(CAST (X(min) AS numeric),5) AS minx, round(CAST (Y(min) AS numeric),5) AS miny";
     $sql.=", round(CAST (X(max) AS numeric),5) AS maxx, round(CAST (Y(max) AS numeric),5) AS maxy";
     $sql.=" FROM (SELECT";
-    $sql.=" TRANSFORM(GeomFromText('POINT(".$curExtent->minx." ".$curExtent->miny.")',".$curSRID."),".$newSRID.") AS min";
-    $sql.=" ,TRANSFORM(GeomFromText('POINT(".$curExtent->maxx." ".$curExtent->maxy.")',".$curSRID."),".$newSRID.") AS max";
+    $sql.=" st_transform(st_geomfromtext('POINT(".$curExtent->minx." ".$curExtent->miny.")',".$curSRID."),".$newSRID.") AS min";
+    $sql.=" ,st_transform(st_geomfromtext('POINT(".$curExtent->maxx." ".$curExtent->maxy.")',".$curSRID."),".$newSRID.") AS max";
     $sql.=") AS foo";
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
