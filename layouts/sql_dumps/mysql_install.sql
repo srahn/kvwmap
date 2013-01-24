@@ -596,6 +596,7 @@ CREATE TABLE rolle (
   `scrollposition` INT( 11 ) NOT NULL DEFAULT '0',
   `result_color` INT( 11 ) NULL DEFAULT '1',
   `always_draw` BOOLEAN NULL,
+  `runningcoords` BOOLEAN NOT NULL DEFAULT 0,
   PRIMARY KEY  (user_id,stelle_id)
 );
 

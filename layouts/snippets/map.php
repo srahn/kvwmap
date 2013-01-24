@@ -179,6 +179,12 @@ if($this->formvars['gps_follow'] == ''){
 			          </td>
 			        </tr>
 			        <? } ?>
+			        <tr style="background-color: <? echo BG_MENUETOP; if($this->user->rolle->runningcoords == '0'){echo ';display:none';} ?>">
+			        	<td width="100px">
+			          	<b>&nbsp;<?php echo $strCoordinates; ?></b>&nbsp;
+			          </td>
+			        	<td colspan="2" width="80%"><input type="text" style="border:0px;background-color:transparent" name="runningcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?></td>
+			        </tr>
 			        <tr id="showcoords" style="display:none">
 			        	<td width="100px">
 			          	<b>&nbsp;<?php echo $strShowCoordinates; ?></b>&nbsp;
@@ -247,7 +253,7 @@ if($this->formvars['gps_follow'] == ''){
             <br>
             &nbsp;
             <a href="index.php?go=reset_querys"><img src="graphics/tool_info.png" border="0" alt="Informationsabfrage." title="Informationsabfrage | Hier klicken, um alle Abfragehaken zu entfernen" width="17"></a>
-            <a href="index.php?go=reset_layers"><img src="graphics/layer.png" border="0" alt="Themensteuerung." title="Themensteuerung | Hier klicken, um alle Layer zu deaktivieren" width="20" height="20"></a><br>
+            <a href="index.php?go=reset_layers"><img src="graphics/layer.png" border="0" alt="Themensteuerung." title="Themensteuerung | Hier klicken, um alle Themen zu deaktivieren" width="20" height="20"></a><br>
           <div id="scrolldiv" onscroll="document.GUI.scrollposition.value = this.scrollTop;" style="width:230; height:<?php echo $legendheight; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
             <div onclick="document.GUI.legendtouched.value = 1;" id="legend"><? echo $this->legende; ?></div>
           </div>

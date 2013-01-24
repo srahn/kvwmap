@@ -13,29 +13,34 @@ for($i = 0; $i < count($layerset); $i++){
 }
 $SVGvars_querytooltipscript .= '
 
-		var oldmousey, oldmousex, mousey, mousex, tooltipstate = "ready_for_request", counter = 0;
+		var oldmousey, oldmousex, mousey, mousex, tooltipstate = "ready_for_request", counter = 0, prevent;
 		var maxwidth = 0;
 		var xpos = 5;
 		var ypos = 0;
 				
 		function hidetooltip(evt){
-			var tooltipgroup = document.getElementById("tooltipgroup");
-			var tooltipcontent = document.getElementById("tooltipcontent");
-			var tooltip = document.getElementById("querytooltip");
 			mousex = evt.clientX;
 			mousey = evt.clientY;
-			if(oldmousex == undefined || Math.abs(oldmousex-mousex) > 3 || Math.abs(oldmousey-mousey) > 3){			// Maus bewegen
-				tooltipgroup.setAttribute(\'visibility\', \'hidden\');
-				top.document.GUI.result.value = "";				
-				while(tooltipcontent.childNodes.length > 0){
-					tooltipcontent.removeChild(tooltipcontent.firstChild);
+			if(oldmousex == undefined || Math.abs(oldmousex-mousex) > 1 || Math.abs(oldmousey-mousey) > 1){			// Maus bewegen
+				if(prevent != 1 && (oldmousex == undefined || Math.abs(oldmousex-mousex) > 30 || Math.abs(oldmousey-mousey) > 30)){			// Maus bewegen
+					cleartooltip();
 				}
-				ypos = 0;
-				maxwidth = 0;
-				var obj = document.getElementById("highlight")
-				obj.setAttribute("d", "");
 				tooltipstate = "ready_for_request";
 			}
+		}
+		
+		function cleartooltip(){
+			var tooltipgroup = document.getElementById("tooltipgroup");
+			var tooltipcontent = document.getElementById("tooltipcontent");
+			var obj = document.getElementById("highlight")
+			tooltipgroup.setAttribute(\'visibility\', \'hidden\');
+			top.document.GUI.result.value = "";				
+			while(tooltipcontent.childNodes.length > 0){
+				tooltipcontent.removeChild(tooltipcontent.firstChild);
+			}
+			ypos = 0;
+			maxwidth = 0;
+			obj.setAttribute("d", "");
 		}
 			
 		function showtooltip(result){
@@ -46,6 +51,7 @@ $SVGvars_querytooltipscript .= '
 			var tooltipframe = document.getElementById("frame");
 			var tooltipgroup = document.getElementById("tooltipgroup");
 			var tooltipcontent = document.getElementById("tooltipcontent");
+			cleartooltip();
 			var res = result.split("||| ");
 			// Highlighting-Geometrie
 			if(res[1] != "" && res[1] != undefined){
@@ -172,6 +178,7 @@ $SVGvars_querytooltipscript .= '
 		function settext(text, x, y){
 			var tooltipcontent = document.getElementById("tooltipcontent");
 			var newtext = document.getElementById("querytooltip").cloneNode(true);
+			var link = 0;
 			newtext.setAttribute("id", "newtext"+ypos);
 			newtext.setAttribute("x", x);
 		  newtext.setAttribute("y", y);
@@ -182,6 +189,16 @@ $SVGvars_querytooltipscript .= '
 			var offsetx = x;
 			var lines = text.split("~");
 			for(l = 0; l < lines.length; l++){
+				if(lines[l].slice(0, 8) == "<a xlink"){
+					link = document.createElementNS("http://www.w3.org/2000/svg", "a");
+					link.setAttribute("xlink:href", "http://www.google.de");
+					link.setAttribute("target", "_blank");
+					linktext = document.createElementNS("http://www.w3.org/2000/svg", "text");
+					var nodText = document.createTextNode("Text");
+					linktext.appendChild(nodText);
+					link.appendChild(linktext);
+					break;
+				}
 				tspan1 = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
 		    if(l > 0){
 		    	tspan1.setAttribute("dy", offsety);
@@ -191,6 +208,9 @@ $SVGvars_querytooltipscript .= '
 		    newtext.appendChild(tspan1);
 			}
 			tooltipcontent.appendChild(newtext);
+			if(link != 0){
+				tooltipcontent.appendChild(link);
+			}
 			return newtext;
 		}
 
@@ -209,7 +229,7 @@ $SVGvars_querytooltipscript .= '
 						showtooltip(top.document.GUI.result.value);
 						tooltipstate = "response_received";
 					}
-					if(tooltipstate == "ready_for_request"){			// wenn Maus bewegt wurde --> neuer Request
+					if(tooltipstate == "ready_for_request" && prevent != 1){			// wenn Maus bewegt wurde --> neuer Request
 						tooltipstate = "request_sent";
 						for(i = 0; i < layerset.length; i++){
 							if(layerset[i] != undefined && layerset[i].checked){

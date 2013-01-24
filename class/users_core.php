@@ -303,6 +303,7 @@ class rolle_core {
     $this->scrollposition=$rs['scrollposition'];
     $this->result_color=$rs['result_color'];
     $this->always_draw=$rs['always_draw'];
+    $this->runningcoords=$rs['runningcoords'];
     $buttons = explode(',', $rs['buttons']);
     $this->back = in_array('back', $buttons);
     $this->forward = in_array('forward', $buttons);

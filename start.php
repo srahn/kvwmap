@@ -1,5 +1,5 @@
 <?php
-# Objekt für graphische Benutzeroberfläche erzeugen
+# Objekt fÃ¼r graphische BenutzeroberflÃ¤che erzeugen
 if($_REQUEST['go'] == 'getMap_ajax'){
 	$GUI=new GUI_core("map.php","main.css","html");
 }
@@ -7,12 +7,12 @@ else{
 	$GUI=new GUI("map.php","main.css","html");
 }
 
-# Übergabe aller Formularvariablen an die Benutzeroberfläche an formvars
-# Dabei wird unterschieden zwischen Aufrufen über das Internet oder von der Komandozeile aus
+# Ãœbergabe aller Formularvariablen an die BenutzeroberflÃ¤che an formvars
+# Dabei wird unterschieden zwischen Aufrufen Ã¼ber das Internet oder von der Komandozeile aus
 if (is_array($argc) AND $argc[1]!='') {
- # Aufruf des PHP-Skriptes über die Komandozeile (CLI)
+ # Aufruf des PHP-Skriptes Ã¼ber die Komandozeile (CLI)
  # Wenn die Variable argc > 0 ist, wurde die Datei von der Komandozeile aus aufgerufen
- # in dem Fall können die übergebenen Parameter hier der formvars-Variable übergeben werden.
+ # in dem Fall kÃ¶nnen die Ã¼bergebenen Parameter hier der formvars-Variable Ã¼bergeben werden.
  $arg['go']=$argv[1];
  $arg['ist_Fortfuehrung']=$argv[2];
  $arg['WLDGE_lokal']=$argv[3];
@@ -20,14 +20,14 @@ if (is_array($argc) AND $argc[1]!='') {
  $GUI->formvars=$arg;
 }
 else {
-  # Übergeben der Variablen aus den Post oder Get Aufrufen
-  # normaler Aufruf des PHP-Skriptes über Apache oder CGI  
+  # Ãœbergeben der Variablen aus den Post oder Get Aufrufen
+  # normaler Aufruf des PHP-Skriptes Ã¼ber Apache oder CGI  
   #$GUI->formvars=stripScript($_REQUEST);
   $GUI->formvars=$_REQUEST;
 }
 
 ####################################
-# Übergeben der Datenbank an die GUI
+# Ãœbergeben der Datenbank an die GUI
 $GUI->database=$GISdb;
 
 #################################################################################
@@ -39,28 +39,28 @@ if ($GUI->formvars['disableDbWrite']=='1') {
 else {
 	define('DBWRITE',DEFAULTDBWRITE);
 }
-if (!DBWRITE) { echo '<br>Das Schreiben in die Datenbank wird unterdrückt!'; }
+if (!DBWRITE) { echo '<br>Das Schreiben in die Datenbank wird unterdrÃ¼ckt!'; }
 
-# Öffnen der Datenbankverbindung zur Kartenverwaltung (MySQL)
+# Ã–ffnen der Datenbankverbindung zur Kartenverwaltung (MySQL)
 if (!$GUI->database->open()) {
-  # Prüfen ob eine neue Datenbank angelegt werden soll
+  # PrÃ¼fen ob eine neue Datenbank angelegt werden soll
   if ($GUI->formvars['go']=='install-mysql-db') {
     # Anlegen der neuen Datenbank
     # Herstellen der Verbindung mit defaultwerten
     $GUI->dbConn=mysql_connect('localhost','kvwmap','kvwmap');
-    $GUI->debug->write("MySQL Datenbank mit ID: ".$GUI->dbConn." und Name: mysql auswählen.",4);
-    # Auswählen der Datenbank mysql
+    $GUI->debug->write("MySQL Datenbank mit ID: ".$GUI->dbConn." und Name: mysql auswÃ¤hlen.",4);
+    # AuswÃ¤hlen der Datenbank mysql
     mysql_select_db('mysql',$GUI->dbConn);
-    # Erzeugen der leeren Datenbank für kvwmap
+    # Erzeugen der leeren Datenbank fÃ¼r kvwmap
     $sql = 'CREATE DATABASE '.$GUI->database->dbName.' CHARACTER SET latin1 COLLATE latin1_german2_ci';
     $GUI->database->execSQL($sql,4,0);
-    # Anlegen der leeren Tabellen für kvwmap
+    # Anlegen der leeren Tabellen fÃ¼r kvwmap
     if ($GUI->formvars['install-GUI']) {
       # Demo Daten in Datenbank schreiben
       $sql = file_get_contents(LAYOUTPATH.'sql_dumps/mysql_setup_GUI.sql');     
       $GUI->database->execSQL($sql,4,0);
     }
-    # Abfrage ob Zugang zur neuen Datenbank jetzt möglich
+    # Abfrage ob Zugang zur neuen Datenbank jetzt mÃ¶glich
     if (mysql_select_db($GUI->database->dbName,$GUI->dbConn)) {
       $debug->write("Verbindung zur MySQL Datenbank erfolgreich hergestellt.",4);
     }
@@ -71,7 +71,7 @@ if (!$GUI->database->open()) {
       echo '<br>User: '.$GUI->database->user;
      # echo '<br>Passwd: '.$GUI->database->passwd;
       echo '<br>Datenbankname: '.$GUI->database->dbName;
-      echo '<p>Das kann folgende Gründe haben:<lu>';
+      echo '<p>Das kann folgende GrÃ¼nde haben:<lu>';
       echo '<li>Der Datenbankserver ist gerade nicht erreichbar.</li>';
       echo '<li>Die Angaben zum Host, Benutzer und Password in der config.php sind falsch.</li>';
       echo '<li>Die Angaben zum Host, Benutzer und Password in der Tabelle mysql.users sind falsch.</li>';
@@ -86,7 +86,7 @@ if (!$GUI->database->open()) {
     echo '<br>User: '.$GUI->database->user;
    # echo '<br>Passwd: '.$GUI->database->passwd;
     echo '<br>Datenbankname: '.$GUI->database->dbName;
-    echo '<p>Das kann folgende Gründe haben:<lu>';
+    echo '<p>Das kann folgende GrÃ¼nde haben:<lu>';
     echo '<li>Die Datenbank existiert noch nicht.';
     echo '<br><a href="index.php?go=install-mysql-db">Leere Datenbank jetzt anlegen</a>';
     echo '<br><a href="index.php?go=install-mysql-db&install-GUI=1">Datenbank mit Demodaten jetzt anlegen</a></li>';
@@ -102,7 +102,7 @@ else {
 }
 
 
-# Angeben, dass die Texte in latin1 zurückgegeben werden sollen
+# Angeben, dass die Texte in latin1 zurÃ¼ckgegeben werden sollen
 $GUI->database->execSQL("SET NAMES '".MYSQL_CHARSET."'",0,0);
 
 
@@ -110,7 +110,7 @@ $GUI->database->execSQL("SET NAMES '".MYSQL_CHARSET."'",0,0);
 # aktuellen Benutzer abfragen
 $login_name = $_SESSION['login_name'];
 
-# öffnen der Datenbankverbindung zur Benutzerdatenbank
+# Ã¶ffnen der Datenbankverbindung zur Benutzerdatenbank
 if (!$userDb->open()) {
   echo 'Die Verbindung zur Benutzerdatenbank konnte mit folgenden Daten nicht hergestellt werden:';
   echo '<br>Host: '.$userDb->host;
@@ -141,11 +141,11 @@ if (isset($GUI->formvars['newPassword'])) {
 	if ($GUI->Fehlermeldung=='') {
 		$GUI->user->setNewPassword($GUI->formvars['newPassword']);
 		$GUI->user->password_setting_time=date('Y-m-d H:i:s',time());
-		$GUI->Fehlermeldung='Password ist erfolgreich geändert worden.';
+		$GUI->Fehlermeldung='Password ist erfolgreich geÃ¤ndert worden.';
 		#$GUI->formvars['newPassword'];
 	}
   else {
-  	$GUI->Fehlermeldung=urlencode('<font color="red">'.$GUI->Fehlermeldung.'!<br>Vorschlag für ein neues Password: <b>'.createRandomPassword(8).'</b></font><br>');
+  	$GUI->Fehlermeldung=urlencode('<font color="red">'.$GUI->Fehlermeldung.'!<br>Vorschlag fÃ¼r ein neues Password: <b>'.createRandomPassword(8).'</b></font><br>');
 	  $GUI->formvars['go']='logout';
   }
 }
@@ -156,49 +156,49 @@ if (isset($GUI->formvars['newPassword'])) {
 #    Die zuletzt genutzte Stellen_ID wird aus der Datenbank gelesen und verwendet
 #    sollte dabei ein Fehler auftreten oder keine Zahl > 0 enthalten sein wird der
 #    in der Konstante DEFAULTSTELLE gesetzte Wert verwendet.
-# 2) Stellen_ID ist neu gesetzt worden, ein Stellenwechsel wird durchgeführt
+# 2) Stellen_ID ist neu gesetzt worden, ein Stellenwechsel wird durchgefÃ¼hrt
 #    Ist user dazu berechtigt, wird diese neue Stelle in Datenbank eingetragen,
-#    sonst wird wieder alte Stelle für Stelle_ID verwendet und das Formular zur
+#    sonst wird wieder alte Stelle fÃ¼r Stelle_ID verwendet und das Formular zur
 #    Stellenauswahl mit Fehlermeldung angezeigt.
 
-# zuletzt verwendete Stellen_ID für user aus Datenbank abfragen
+# zuletzt verwendete Stellen_ID fÃ¼r user aus Datenbank abfragen
 $alteStelle=$GUI->user->getLastStelle();
 $neueStelle=$GUI->formvars['Stelle_ID'];
 if ($alteStelle==0 OR $alteStelle=='') { $alteStelle==DEFAULTSTELLE; }
 # Abfragen, ob Stelle_ID in Formular neu gesetzt wurde
 if ($neueStelle>0 AND $GUI->formvars['go']!='Abbrechen') {
-  # Stellen_ID wurde in Formular neu ausgewählt deshalb versuchen in die Stelle zu wechseln
+  # Stellen_ID wurde in Formular neu ausgewÃ¤hlt deshalb versuchen in die Stelle zu wechseln
   if ($GUI->user->StellenZugriff($neueStelle)>0 OR $neueStelle==DEFAULTSTELLE) {
-    # Nutzer darf laut Zuordnung zu den Stellen in die gewünschte Stelle wechseln
+    # Nutzer darf laut Zuordnung zu den Stellen in die gewÃ¼nschte Stelle wechseln
     # Setzen der Stellen_ID als zuletzt benutzt
     if ($GUI->user->setStelle($neueStelle,$GUI->formvars)) {
       $Stelle_ID=$neueStelle;
     }
     else {
       $Stelle_ID=$alteStelle;
-      $GUI->Fehlermeldung='Fehler beim Wechseln der Stelle. Prüfen Sie die Angaben.';
+      $GUI->Fehlermeldung='Fehler beim Wechseln der Stelle. PrÃ¼fen Sie die Angaben.';
       if($GUI->formvars['go'] == 'OWS'){
         $GUI->formvars['go_plus'] = 'Exception';
       }
       else{
-        $GUI->formvars['go']='Stelle Wählen';
+        $GUI->formvars['go']='Stelle WÃ¤hlen';
       }
     }
   }
   else {
-    # Nutzer ist nicht berechtigt in die gewünschte Stelle zu wechseln
+    # Nutzer ist nicht berechtigt in die gewÃ¼nschte Stelle zu wechseln
     $Stelle_ID=$alteStelle;
-    $GUI->Fehlermeldung='Sie haben keine Berechtigung zum Zugriff auf die gewählte neue Stelle.';
+    $GUI->Fehlermeldung='Sie haben keine Berechtigung zum Zugriff auf die gewÃ¤hlte neue Stelle.';
     if($GUI->formvars['go'] == 'OWS'){
       $GUI->formvars['go_plus'] = 'Exception';
     }
     else{
-      $GUI->formvars['go']='Stelle Wählen';
+      $GUI->formvars['go']='Stelle WÃ¤hlen';
     }
   }
 }
 else {
-  # Stelle_ID wurde nicht in Formular neu ausgewählt,
+  # Stelle_ID wurde nicht in Formular neu ausgewÃ¤hlt,
   # zuletzt verwendete Stelle des Nutzers verwenden
   $Stelle_ID=$alteStelle;
 }
@@ -211,19 +211,19 @@ else{
 	$GUI->Stelle=new stelle($Stelle_ID,$userDb);
 }
 
-# Prüfung ob Client-IP-Adressen nach Vorgabe aus der Configurationsdatei überhaupt geprüft werden sollen
+# PrÃ¼fung ob Client-IP-Adressen nach Vorgabe aus der Configurationsdatei Ã¼berhaupt geprÃ¼ft werden sollen
 if (CHECK_CLIENT_IP) {
-	$GUI->debug->write('<br>Es wird geprüft ob IP-Adressprüfung in der Stelle durchgeführt werden muss.',4);
-	#echo 'Es wird geprüft ob IP-Adressprüfung in der Stelle durchgefürht werden muss.';
-	# Prüfen ob IP in dieser Stelle geprüft werden muss
+	$GUI->debug->write('<br>Es wird geprÃ¼ft ob IP-AdressprÃ¼fung in der Stelle durchgefÃ¼hrt werden muss.',4);
+	#echo 'Es wird geprÃ¼ft ob IP-AdressprÃ¼fung in der Stelle durchgefÃ¼rht werden muss.';
+	# PrÃ¼fen ob IP in dieser Stelle geprÃ¼ft werden muss
 	if ($GUI->Stelle->checkClientIpIsOn()) {
-		#echo '<br>IP-Adresse des Clients wird in dieser Stelle geprüft.';
-    $GUI->debug->write('<br>IP-Adresse des Clients wird in dieser Stelle geprüft.',4);
+		#echo '<br>IP-Adresse des Clients wird in dieser Stelle geprÃ¼ft.';
+    $GUI->debug->write('<br>IP-Adresse des Clients wird in dieser Stelle geprÃ¼ft.',4);
 		# Remote_Address mit ips des Users vergleichen
 	  if ($GUI->user->clientIpIsValide(getenv('REMOTE_ADDR'))==false) {
-	  	# Remote_Addr stimmt nicht mit den ips des Users überein
+	  	# Remote_Addr stimmt nicht mit den ips des Users Ã¼berein
 	  	# bzw. ist nicht innerhalb eines angegebenen Subnetzes
-	    # Nutzer ist nicht berechtigt in die gewünschte Stelle zu wechseln
+	    # Nutzer ist nicht berechtigt in die gewÃ¼nschte Stelle zu wechseln
 	    $Stelle_ID=$alteStelle;
       $GUI->Stelle=new stelle($Stelle_ID,$userDb);
 	    $GUI->Fehlermeldung='Sie haben keine Berechtigung von dem Rechner mit der IP: '.getenv('REMOTE_ADDR'). ' auf die Stelle zuzugreifen.';
@@ -231,33 +231,33 @@ if (CHECK_CLIENT_IP) {
 	      $GUI->formvars['go_plus'] = 'Exception';
 	    }
 	    else{
-	      $GUI->formvars['go']='Stelle Wählen';
+	      $GUI->formvars['go']='Stelle WÃ¤hlen';
 	    }
 		}
-	} # end of IP-Adressen werden in der Stelle geprüft
-} # End of IP-Adressenprüfung verfügbar
+	} # end of IP-Adressen werden in der Stelle geprÃ¼ft
+} # End of IP-AdressenprÃ¼fung verfÃ¼gbar
 
-# Püfung ob das Alter der Passwörter in der Stelle geprüft werden müssen
+# PÃ¼fung ob das Alter der PasswÃ¶rter in der Stelle geprÃ¼ft werden mÃ¼ssen
 if ($GUI->Stelle->checkPasswordAge==true) {
-	# Das Alter des Passwortes des Nutzers muß geprüft werden
+	# Das Alter des Passwortes des Nutzers muÃŸ geprÃ¼ft werden
 	$remainingDays=checkPasswordAge($GUI->user->password_setting_time,$GUI->Stelle->allowedPasswordAge);
 	#echo 'Verbleibende Tage '.$remainingDays;
 	if ($remainingDays<=0) {
 		# Der Geltungszeitraum des Passwortes ist abgelaufen
-    $GUI->Fehlermeldung.='Das Passwort des Nutzers '.$GUI->user->login_name.' ist in der Stelle '.$GUI->Stelle->Bezeichnung.' abgelaufen. Passwörter haben in dieser Stelle nur eine Gütligkeit von '.$GUI->Stelle->allowedPasswordAge.' Monaten. Geben Sie ein neues Passwort ein und notieren Sie es sich.';
+    $GUI->Fehlermeldung.='Das Passwort des Nutzers '.$GUI->user->login_name.' ist in der Stelle '.$GUI->Stelle->Bezeichnung.' abgelaufen. PasswÃ¶rter haben in dieser Stelle nur eine GÃ¼tligkeit von '.$GUI->Stelle->allowedPasswordAge.' Monaten. Geben Sie ein neues Passwort ein und notieren Sie es sich.';
     if($GUI->formvars['go'] == 'OWS'){
-    	 $GUI->Fehlermeldung.=' Melden Sie sich unter '.URL.' mit Ihrem alten Password an. Daraufhin werden Sie aufgefordert ein neues Passwort einzugeben. Ist dies erfolgt, können Sie diesen Dienst weiter nutzen.';
+    	 $GUI->Fehlermeldung.=' Melden Sie sich unter '.URL.' mit Ihrem alten Password an. Daraufhin werden Sie aufgefordert ein neues Passwort einzugeben. Ist dies erfolgt, kÃ¶nnen Sie diesen Dienst weiter nutzen.';
       $GUI->formvars['go_plus'] = 'Exception';
     }
     else{
-    	# Setzen eines zufälligen Passwortes
+    	# Setzen eines zufÃ¤lligen Passwortes
     	$newPassword='xxx';
     	$GUI->formvars['go']='logout';
     }
   }
 }
 
-# Abfragen der Einstellungen des Benutzers in der ausgewählten Stelle
+# Abfragen der Einstellungen des Benutzers in der ausgewÃ¤hlten Stelle
 # Rollendaten zuweisen
 $GUI->user->setRolle($Stelle_ID);
 #echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language.' CharSet: '.$GUI->user->rolle->charset;
@@ -265,7 +265,7 @@ $GUI->user->setRolle($Stelle_ID);
 $GUI->loadMultiLingualText($GUI->user->rolle->language,$GUI->user->rolle->charset);
 
 ##############################################################################
-# Übergeben der Datenbank für die raumbezogenen Daten (PostgreSQL mit PostGIS)
+# Ãœbergeben der Datenbank fÃ¼r die raumbezogenen Daten (PostgreSQL mit PostGIS)
 if ($pgdbname=='') {
   # pgdbname ist leer, die Informationen zur Verbindung mit der PostGIS Datenbank
   # mit Geometriedaten werden aus der Tabelle stelle
@@ -282,9 +282,9 @@ if ($pgdbname=='') {
   $PostGISdb->passwd=$GUI->Stelle->pgdbpasswd;
 }
 if ($PostGISdb->dbName!='') {
-  # Übergeben der GIS-Datenbank für GIS-Daten an die GUI
+  # Ãœbergeben der GIS-Datenbank fÃ¼r GIS-Daten an die GUI
   $GUI->pgdatabase=$PostGISdb;
-  # Übergeben der GIS-Datenbank für die Bauaktendaten an die GUI
+  # Ãœbergeben der GIS-Datenbank fÃ¼r die Bauaktendaten an die GUI
   $GUI->baudatabase=$PostGISdb;
   
   if (!$GUI->pgdatabase->open()) {
@@ -301,26 +301,9 @@ if ($PostGISdb->dbName!='') {
   }
 }
 
-####################################################################################
-# Übergeben der ALKIS Datenbank für die raumbezogenen Daten (PostgreSQL mit PostGIS)
-# Version 1.6.5
-if ($ALKISdb->dbName!='') {
-  $GUI->ALKISdb=$ALKISdb;
-	if (!$GUI->ALKISdb->open()) {
-		echo 'Die Verbindung zur ALKIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden:';
-		echo '<br>Host: '.$GUI->ALKISdb->host;
-		echo '<br>User: '.$GUI->ALKISdb->user;
-    # echo '<br>Passwd: '.$GUI->ALKISdb->passwd;
-		echo '<br>Datenbankname: '.$GUI->ALKISdb->dbName;
-		exit;
-	}
-	else {
-	  $debug->write("Verbindung zur ALKIS-Datenbank erfolgreich hergestellt.",4);        
-	}
-}
 
 ##############################################################
-# Übergeben der Gazetteer Datenbank (PostgreSQL mit PostGIS)
+# Ãœbergeben der Gazetteer Datenbank (PostgreSQL mit PostGIS)
 # Version 1.6.6
 if ($Gazdb->dbName!='') {
 	$GUI->Gazdb=$Gazdb;
@@ -343,7 +326,7 @@ $debug->write('Stelle_ID: '.$GUI->Stelle->id,4);
 $debug->write('Stellenbezeichnung: '.$GUI->Stelle->Bezeichnung,4);
 $debug->write('Host_ID: '.getenv("REMOTE_ADDR"),4); 
 
-# Umrechnen der für die Stelle eingetragenen Koordinaten in das aktuelle System der Rolle
+# Umrechnen der fÃ¼r die Stelle eingetragenen Koordinaten in das aktuelle System der Rolle
 # wenn die EPSG-Codes voneinander abweichen
 if ($GUI->Stelle->epsg_code!=$GUI->user->rolle->epsg_code) {
   # Umrechnen der maximalen Kartenausdehnung der Stelle
@@ -353,14 +336,14 @@ if ($GUI->Stelle->epsg_code!=$GUI->user->rolle->epsg_code) {
 }
 
 if($_SESSION['login_routines'] == true){
-# hier befinden sich Routinen, die beim einloggen des Nutzers einmalig durchgeführt werden
-	# Löschen der Rollenlayer
+# hier befinden sich Routinen, die beim einloggen des Nutzers einmalig durchgefÃ¼hrt werden
+	# LÃ¶schen der Rollenlayer
 	if(DELETE_ROLLENLAYER == 'true'){
 		$mapdb = new db_mapObj($GUI->Stelle->id, $GUI->user->id);
 		$rollenlayerset = $mapdb->read_RollenLayer(NULL, 'search');
     for($i = 0; $i < count($rollenlayerset); $i++){   
       $mapdb->deleteRollenLayer($rollenlayerset[$i]['id']);
-      # auch die Klassen und styles löschen
+      # auch die Klassen und styles lÃ¶schen
       foreach($rollenlayerset[$i]['Class'] as $class){
         $mapdb->delete_Class($class['Class_ID']);
         foreach($class['Style'] as $style){
@@ -376,7 +359,7 @@ if(isset($_FILES)) {
 	foreach ($_FILES AS $datei) {
 		$name = strtolower(basename($datei['name']));
 		if(strpos($name,'.php') OR strpos($name,'.phtml') OR strpos($name,'.php3')) {
-			echo 'PHP Dateien dürfen nicht hochgeladen werden. Auch nicht '.$datei['name'];
+			echo 'PHP Dateien dÃ¼rfen nicht hochgeladen werden. Auch nicht '.$datei['name'];
 			move_uploaded_file($datei['tmp_name'],LOGPATH.'AusfuehrbareDatei_vom'.date('d.m.Y',time()).'_stelleID'.$GUI->Stelle->id.'_userID'.$GUI->user->id.'_'.$datei['name'].'.txt');
 			unset($_FILES);
 			exit;

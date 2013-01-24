@@ -1069,3 +1069,5 @@ ALTER TABLE u_attributfilter2used_layer CHANGE operator operator ENUM('=','!=','
 
 update used_layer set Filter = replace(Filter, 'Within','st_within');
 update used_layer set Filter = replace(Filter, 'Intersects','st_intersects');
+
+ALTER TABLE `rolle` ADD `runningcoords` BOOLEAN NOT NULL DEFAULT '0';

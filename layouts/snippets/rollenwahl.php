@@ -127,6 +127,10 @@
 			</select>
 		</td>
   </tr>
+  <tr>
+    <td align="right"><?php echo $strRunningCoords;; ?>:&nbsp;</td>
+    <td><input name="runningcoords" type="checkbox" value="1" <? if($this->user->rolle->runningcoords == '1'){echo 'checked="true"';} ?> ></td>
+  </tr>
   <tr align="center">
     <td align="right"><?php echo $strLanguage; ?>:&nbsp;</td>
     <td align="left">

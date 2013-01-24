@@ -2955,14 +2955,11 @@ class GUI extends GUI_core{
     $this->Document->activeframe = $this->Document->load_frames($this->Stelle->id, $frameid);
     $this->Document->selectedframe = $this->Document->load_frames(NULL, $this->formvars['aktiverRahmen']);
     if($this->Document->selectedframe != NULL){
-      $this->formvars['center_x'] = 300;
-      $this->formvars['center_y'] = 300;
-      $this->formvars['printscale'] = 5000;
       $ratio = $this->Document->selectedframe[0]['mapwidth']/$this->Document->selectedframe[0]['mapheight'];
       $this->formvars['worldprintwidth'] = $this->Document->selectedframe[0]['mapwidth'] * $this->formvars['printscale'] * 0.0003526;
       $this->formvars['worldprintheight'] = $this->Document->selectedframe[0]['mapheight'] * $this->formvars['printscale'] * 0.0003526;
 			$this->formvars['map_factor'] = 1;
-      $this->previewfile = $this->createMapPDF($this->formvars['aktiverRahmen'], true);
+      $this->previewfile = $this->createMapPDF($this->formvars['aktiverRahmen'], true, true);
 
       # Fonts auslesen
       $this->document->fonts = searchdir(PDFCLASSPATH.'fonts/', true);
@@ -4776,10 +4773,11 @@ class GUI extends GUI_core{
     if($this->map->selectOutputFormat('jpeg_print') == 1){
       $this->map->selectOutputFormat('jpeg');
     }
-    if($fast == true){			# schnelle Druckausgabe ohne Druckausschnittswahl
+    if($fast == true){			# schnelle Druckausgabe ohne Druckausschnittswahl, beim Schnelldruck und im Druckrahmeneditor
+    	$this->formvars['referencemap'] = 1;
     	$this->formvars['printscale'] = round($this->map_scaledenom);
-    	$this->formvars['center_x'] = $this->map->extent->maxx-$this->map->extent->minx;
-    	$this->formvars['center_y'] = $this->map->extent->maxy-$this->map->extent->miny;    	
+    	$this->formvars['center_x'] = $this->map->extent->minx + ($this->map->extent->maxx-$this->map->extent->minx)/2;
+    	$this->formvars['center_y'] = $this->map->extent->miny + ($this->map->extent->maxy-$this->map->extent->miny)/2;    	
     	$this->formvars['worldprintwidth'] = $this->Docu->activeframe[0]['mapwidth'] * $this->formvars['printscale'] * 0.0003526;
     	$this->formvars['worldprintheight'] = $this->Docu->activeframe[0]['mapheight'] * $this->formvars['printscale'] * 0.0003526;
     }
@@ -10207,10 +10205,10 @@ class GUI extends GUI_core{
     # Liste der Formularelementnamen, die betroffen sind in der Reihenfolge,
     # wie die Spalten in der Abfrage
     $select ="nZoomFactor,gui,CONCAT(nImageWidth,'x',nImageHeight) AS mapsize";
-    $select.=",CONCAT(minx,' ',miny,',',maxx,' ',maxy) AS newExtent,epsg_code,fontsize_gle,highlighting";
+    $select.=",CONCAT(minx,' ',miny,',',maxx,' ',maxy) AS newExtent,epsg_code,fontsize_gle,highlighting,runningcoords";
     $from ='rolle';
     $where ="stelle_id='+this.form.Stelle_ID.value+' AND user_id=".$this->user->id;
-    $StellenFormObj->addJavaScript("onchange","ahah('".URL.APPLVERSION."index.php','go=getRow&select=".urlencode($select)."&from=".$from."&where=".$where."',new Array(nZoomFactor,gui,mapsize,newExtent,epsg_code,fontsize_gle,highlighting));");
+    $StellenFormObj->addJavaScript("onchange","ahah('".URL.APPLVERSION."index.php','go=getRow&select=".urlencode($select)."&from=".$from."&where=".$where."',new Array(nZoomFactor,gui,mapsize,newExtent,epsg_code,fontsize_gle,highlighting,runningcoords));");
     #echo URL.APPLVERSION."index.php?go=getRow&select=".urlencode($select)."&from=".$from."&where=stelle_id=3 AND user_id=7";
     $StellenFormObj->outputHTML();
     $this->StellenForm=$StellenFormObj;
@@ -11361,14 +11359,16 @@ class GUI extends GUI_core{
     # Tooltip-Abfrage
     if($this->show_query_tooltip == true){
       for($i = 0; $i < count($this->qlayerset); $i++) {
-        $anzObj = count($this->qlayerset[$i]['shape']);
+      	$layer = $this->qlayerset[$i];
+ 				$attributes = $layer['attributes'];
+        $anzObj = count($layer['shape']);
         for($k = 0; $k < $anzObj; $k++) {
           $attribcount = 0;
-          for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
-            if($this->qlayerset[$i]['attributes']['tooltip'][$j]){
-            	switch ($this->qlayerset[$i]['attributes']['form_element_type'][$j]){
+          for($j = 0; $j < count($attributes['name']); $j++){
+            if($attributes['tooltip'][$j]){
+            	switch ($attributes['form_element_type'][$j]){
 				        case 'Dokument' : {
-				        	$filename = explode('&', $this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]);
+				        	$filename = explode('&', $layer['shape'][$k][$attributes['name'][$j]]);
 				        	if(file_exists($filename[0])){
 				        		$info = pathinfo($filename[0]);
 										if(in_array(strtolower($info['extension']), array('jpg', 'png', 'gif'))){
@@ -11377,21 +11377,36 @@ class GUI extends GUI_core{
 										}
 				        	}
 				        }break;
+				        case 'Link': {
+		              $attribcount++;
+									if($layer['shape'][$k][$attributes['name'][$j]]!='') {
+										$link = '<a xlink:href="'.$layer['shape'][$k][$attributes['name'][$j]].'" class="link" target="_blank" style="font-size: '.$this->user->rolle->fontsize_gle.'px">';
+										if($attributes['options'][$j] != ''){
+											$link .= $attributes['options'][$j];
+										}
+										else{
+											$link .= basename($layer['shape'][$k][$attributes['name'][$j]]);
+										}
+										$link .= '</a>';
+									}
+									$links .= $link.' ';
+								} break;
 				        default : {
-		              if($this->qlayerset[$i]['attributes']['alias'][$j] != ''){
-		                $output .=  $this->qlayerset[$i]['attributes']['alias'][$j].': ';
+		              if($attributes['alias'][$j] != ''){
+		                $output .=  $attributes['alias'][$j].': ';
 		              }
 		              else{
-		                $output .= $this->qlayerset[$i]['attributes']['name'][$j].': ';
+		                $output .= $attributes['name'][$j].': ';
 		              }
 		              $attribcount++;
-		              $output .= $this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]].'  ';
+		              $output .= $layer['shape'][$k][$attributes['name'][$j]].'  ';
 		              $output .= '~';
 				        }
             	}
             }
           }
-          # Bild-URLs anfügen
+          # Links und Bild-URLs anfügen
+          $output .= $links;
       		$output .= $pictures;
       		$pictures = '';
           $output .= '|| ';
@@ -12168,10 +12183,10 @@ class GUI extends GUI_core{
 	    #var_dump($coords);
 	    $sw=explode(' ',$coords[0]);
 	    $ne=explode(' ',$coords[1]);
-	    $minx=$sw[0];
-	    $miny=$sw[1];
-	    $maxx=$ne[0];
-	    $maxy=$ne[1];
+	    $minx=$sw[0]-10;
+	    $miny=$sw[1]-10;
+	    $maxx=$ne[0]+10;
+	    $maxy=$ne[1]+10;
 	    #echo 'box:'.$minx.' '.$miny.','.$maxx.' '.$maxy;
 	    $this->map->setextent($minx,$miny,$maxx,$maxy);
 	    # damit nicht außerhalb des Stellen-Extents gezoomt wird

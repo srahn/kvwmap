@@ -36,6 +36,7 @@ function druck(){
 }
 
 function preview(){
+	document.GUI.target = '';
 	if(document.GUI.printextent.value == 'false'){
 		alert("Bitte aktualisieren Sie den Druckausschnitt durch Klick in die Maßstabseingabe und dann [Enter].");
 	}
@@ -61,6 +62,7 @@ function preview(){
 }
 
 function save(){
+	document.GUI.target = '';
 	if(document.GUI.name.value == ''){
 		alert("Bitte geben Sie einen Namen für den Druckausschnitt an.");
 	}
@@ -86,6 +88,7 @@ function save(){
 }
 
 function load(){
+	document.GUI.target = '';
 	if(document.GUI.druckausschnitt.value == ''){
 		alert("Bitte wählen Sie einen Druckausschnitt aus.");
 	}
@@ -95,6 +98,7 @@ function load(){
 }
 
 function remove(){
+	document.GUI.target = '';
 	if(document.GUI.druckausschnitt.value == ''){
 		alert("Bitte wählen Sie einen Druckausschnitt aus.");
 	}
@@ -138,7 +142,7 @@ function remove(){
     </td>
     <td valign="top" align="right" colspan="3">
     	<?php echo $strPrintFrame; ?>
-    	<select name="aktiverRahmen" onchange="document.GUI.submit()">
+    	<select name="aktiverRahmen" onchange="document.GUI.go.value='Druckausschnittswahl';document.GUI.target = '';document.GUI.submit()">
             <?  
             for($i = 0; $i < count($this->Document->frames); $i++){            	
               echo ($this->Document->activeframe[0]['id']<>$this->Document->frames[$i]['id']) ? '<option value="'.$this->Document->frames[$i]['id'].'">'.$this->Document->frames[$i]['Name'].'</option>' : '<option value="'.$this->Document->frames[$i]['id'].'" selected>'.$this->Document->frames[$i]['Name'].'</option>';

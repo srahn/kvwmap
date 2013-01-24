@@ -226,7 +226,7 @@ function addfreetext(){
         	<td colspan=8 align="left">
         		<? if($this->previewfile){ ?>
         			<div id="preview_div" onmouseout="document.getElementById('coords').style.visibility='hidden';" onmousemove="image_coords(event)" style="width:595px;height:<? echo $preview_height; ?>px;background-image:url('<? echo $this->previewfile; ?>');">
-        				<div id="coords" style="background-color: white;width:65px;visibility: hidden;position:relative;border: 1px solid black">
+        				<div id="coords" style="background-color: white;width:70px;visibility: hidden;position:relative;border: 1px solid black">
         					&nbsp;x:&nbsp;<input type="text" id="posx" size="3" style="border:none"><br>
         					&nbsp;y:&nbsp;<input type="text" id="posy" size="3" style="border:none">
         				</div>

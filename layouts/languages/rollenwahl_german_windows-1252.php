@@ -8,6 +8,7 @@
   $strMapExtent="Aktuelle Kartenausdehnung";
   $strMapProjection="1.Kartenprojektion (EPSG-Code)";
   $strSecondMapProjection="2.Kartenprojektion (EPSG-Code)";
+  $strRunningCoords="mitlaufende Koordinaten";
   $strMapSize="Kartenfenstergr&ouml;&szlig;e";
   $strTask="Stelle";
   $strTitleRoleSelection="Auswahl der Arbeitsstelle";

@@ -8,6 +8,7 @@
   $strMapExtent="Map Extent";
   $strMapProjection="1.Map Projection (EPSG-Code)";
   $strSecondMapProjection="2.Map Projection (EPSG-Code)";
+  $strRunningCoords="Coordinates";
   $strMapSize="Map Size";
   $strTask="Task";
   $strTitleRoleSelection="Role Selection";

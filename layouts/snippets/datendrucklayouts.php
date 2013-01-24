@@ -114,7 +114,7 @@ function save_layout(){
     <td >
       <table width=100% cellpadding="2" cellspacing="2" style="border:1px solid #C3C7C3">
       	<tr>
-          <td class="bold" colspan=3 style="border-bottom:1px solid #C3C7C3">&nbsp;Layer-Auswahl</td>
+          <td class="bold" colspan=3 style="border-bottom:1px solid #C3C7C3">&nbsp;Themen-Auswahl</td>
         </tr>
       	<tr>
 		      <td colspan="5"> 
