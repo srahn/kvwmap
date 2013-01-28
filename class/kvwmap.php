@@ -11380,16 +11380,9 @@ class GUI extends GUI_core{
 				        case 'Link': {
 		              $attribcount++;
 									if($layer['shape'][$k][$attributes['name'][$j]]!='') {
-										$link = '<a xlink:href="'.$layer['shape'][$k][$attributes['name'][$j]].'" class="link" target="_blank" style="font-size: '.$this->user->rolle->fontsize_gle.'px">';
-										if($attributes['options'][$j] != ''){
-											$link .= $attributes['options'][$j];
-										}
-										else{
-											$link .= basename($layer['shape'][$k][$attributes['name'][$j]]);
-										}
-										$link .= '</a>';
+										$link = 'xlink:'.$layer['shape'][$k][$attributes['name'][$j]];
 									}
-									$links .= $link.' ';
+									$links .= $link.'~';
 								} break;
 				        default : {
 		              if($attributes['alias'][$j] != ''){

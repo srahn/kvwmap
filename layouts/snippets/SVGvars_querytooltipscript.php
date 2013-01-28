@@ -72,7 +72,7 @@ $SVGvars_querytooltipscript .= '
 			for(i = 1; i < objects.length; i++){
 				if(objects[i] != ""){
 					var elements = objects[i].split("| ");
-					texts[i] = settext(elements[0]+".", xpos, ypos);									// Sachdaten
+					texts[i] = settext(elements[0], xpos, ypos);									// Sachdaten
 					texts[i].setAttribute(\'visibility\', \'visible\');
 					box[i] = texts[i].getBBox();																	// BBox berechnen
 					ypos = ypos + box[i].height;
@@ -178,6 +178,7 @@ $SVGvars_querytooltipscript .= '
 		function settext(text, x, y){
 			var tooltipcontent = document.getElementById("tooltipcontent");
 			var newtext = document.getElementById("querytooltip").cloneNode(true);
+			newgroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
 			var link = 0;
 			newtext.setAttribute("id", "newtext"+ypos);
 			newtext.setAttribute("x", x);
@@ -189,12 +190,11 @@ $SVGvars_querytooltipscript .= '
 			var offsetx = x;
 			var lines = text.split("~");
 			for(l = 0; l < lines.length; l++){
-				if(lines[l].slice(0, 8) == "<a xlink"){
-					link = document.createElementNS("http://www.w3.org/2000/svg", "a");
-					link.setAttribute("xlink:href", "http://www.google.de");
-					link.setAttribute("target", "_blank");
+				if(lines[l].slice(0, 6) == "xlink:"){
+					link = document.getElementById("link0").cloneNode(true);
+					link.setAttribute("xlink:href", lines[l].slice(6));
 					linktext = document.createElementNS("http://www.w3.org/2000/svg", "text");
-					var nodText = document.createTextNode("Text");
+					var nodText = document.createTextNode(lines[l].slice(6));
 					linktext.appendChild(nodText);
 					link.appendChild(linktext);
 					break;
@@ -207,11 +207,14 @@ $SVGvars_querytooltipscript .= '
 		    tspan1.appendChild(document.createTextNode(lines[l]));
 		    newtext.appendChild(tspan1);
 			}
-			tooltipcontent.appendChild(newtext);
+			newgroup.appendChild(newtext);
 			if(link != 0){
-				tooltipcontent.appendChild(link);
+				ypos = y+(i+1)*16;
+				link.setAttribute("transform", "translate("+x+" "+ypos+")");
+				newgroup.appendChild(link);
 			}
-			return newtext;
+			tooltipcontent.appendChild(newgroup);
+			return newgroup;
 		}
 
 		function cleartext(object){
