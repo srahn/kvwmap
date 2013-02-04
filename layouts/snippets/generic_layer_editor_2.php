@@ -57,6 +57,13 @@ function selectall(layer_id){
 	}
 }
 
+function zoom2wkt(wkt, epsg){
+	document.GUI.epsg = epsg;
+	document.GUI.wkt = wkt;
+	document.GUI.go.value = 'zoom2wkt';
+	document.GUI.submit();
+}
+
 function zoomto_datasets(layer_id, tablename, columnname){
 	go = 'false';
 	checkbox_name_obj = document.getElementsByName('checkbox_names_'+layer_id);
@@ -434,7 +441,7 @@ function set_changed_flag(flag){
 <?					}
 						elseif($layer['shape'][$k]['geom']){		# bei WFS-Layern
 ?>
-							&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="index.php?go=zoom2wkt&wkt=<? echo $layer['shape'][$k]['geom']; ?>&epsg=<? echo $layer['epsg_code']; ?>"><? echo $strMapZoom; ?></a>&nbsp;&nbsp;&nbsp;
+							&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:zoom2wkt('<? echo $layer['shape'][$k]['geom']; ?>', '<? echo $layer['epsg_code']; ?>');"><? echo $strMapZoom; ?></a>&nbsp;&nbsp;&nbsp;
 <?															
 						}
 								if($privileg == 1 AND !$lock[$k]) {
@@ -647,7 +654,8 @@ function set_changed_flag(flag){
 </table>
 
 
-
+<inpit type="text" name="wkt" value="">
+<inpit type="text" name="epsg" value="">
 <input type="hidden" name="checkbox_names_<? echo $layer['Layer_ID']; ?>" value="<? echo $checkbox_names; ?>">
 <input type="hidden" name="orderby<? echo $layer['Layer_ID']; ?>" id="orderby<? echo $layer['Layer_ID']; ?>" value="<? echo $this->formvars['orderby'.$layer['Layer_ID']]; ?>">
 

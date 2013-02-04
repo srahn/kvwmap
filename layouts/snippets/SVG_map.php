@@ -1291,7 +1291,7 @@ $svg.='
 		<g id="tooltipgroup" onmouseover="prevent=1;" onmouseout="prevent=0;">
     	<rect id="frame" width="0" height="20" rx="5" ry="5" style="fill-opacity:0.8;fill:rgb(255,255,215);stroke:rgb(0,0,0);stroke-width:1.5"/>
     	<text id="querytooltip" x="100" y="100" style="text-anchor:start;fill:rgb(0,0,0);stroke:none;font-size:10px;font-family:Arial;font-weight:bold"></text>
-    	<a xlink:href="http://www.google.de" onclick="window.open(this.xlink:href, \'Zweitfenster\', \'width=300,height=400,left=100,top=200\')" xlink:show="new" id="link0" style="text-anchor:start;fill:rgb(0,0,200);stroke:none;font-size:10px;font-family:Arial;font-weight:bold"></a>
+    	<text id="link0" cursor="pointer" onmousedown="top.document.body.style.cursor=\'pointer\';" onmousemove="top.document.body.style.cursor=\'pointer\';" style="text-anchor:start;fill:rgb(0,0,200);stroke:none;font-size:10px;font-family:Arial;font-weight:bold"></text>
 			<g id="tooltipcontent">
 			</g>	
     </g>

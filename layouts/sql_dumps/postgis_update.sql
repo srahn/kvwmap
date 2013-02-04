@@ -1109,3 +1109,23 @@ CREATE INDEX q_notizen_kategorie_id_idx ON q_notizen USING btree (kategorie_id);
 CREATE INDEX q_notiz_kategorie2stelle_stelle_idx ON q_notiz_kategorie2stelle USING btree (stelle);
 CREATE INDEX q_notiz_kategorie2stelle_kat_id_idx ON q_notiz_kategorie2stelle USING btree (stelle);
 ALTER TABLE q_notiz_kategorie2stelle ADD CONSTRAINT q_notiz_kategorie2stelle_pkey PRIMARY KEY(stelle, kat_id);
+
+-- verlängert die Spalten name in den ALB Tabellen
+DROP VIEW alb_eigentuemer;
+
+ALTER TABLE alb_g_namen ALTER COLUMN name1 TYPE character varying(60);
+ALTER TABLE alb_g_namen ALTER COLUMN name2 TYPE character varying(60);
+ALTER TABLE alb_g_namen ALTER COLUMN name3 TYPE character varying(60);
+ALTER TABLE alb_g_namen ALTER COLUMN name4 TYPE character varying(60);
+
+ALTER TABLE alb_x_g_namen ALTER COLUMN name1 TYPE character varying(60);
+ALTER TABLE alb_x_g_namen ALTER COLUMN name2 TYPE character varying(60);
+ALTER TABLE alb_x_g_namen ALTER COLUMN name3 TYPE character varying(60);
+ALTER TABLE alb_x_g_namen ALTER COLUMN name4 TYPE character varying(60);
+
+CREATE OR REPLACE VIEW alb_eigentuemer AS 
+ SELECT a.flurstkennz, c.name1, c.name2, c.name3, c.name4
+   FROM alb_g_buchungen a, alb_g_eigentuemer b, alb_g_namen c
+  WHERE a.blatt::text = b.blatt::text AND a.bezirk = b.bezirk AND b.lfd_nr_name = c.lfd_nr_name;
+
+ALTER TABLE alb_eigentuemer OWNER TO kvwmap;

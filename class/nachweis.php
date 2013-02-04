@@ -763,7 +763,7 @@ class Nachweis {
         else {
           # Suche nach einer einzelnen Nachweis_id
           # echo '<br>Suche nach einer einzelnen ID.';
-          $sql ="SELECT n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring, st_assvg(st_transform(n.the_geom, ".$this->client_epsg.")) AS svg_umring,v.name AS vermst,n2d.dokumentart_id as andere_art FROM n_vermstelle AS v, n_nachweise AS n";
+          $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring, st_assvg(st_transform(n.the_geom, ".$this->client_epsg.")) AS svg_umring,v.name AS vermst,n2d.dokumentart_id as andere_art FROM n_vermstelle AS v, n_nachweise AS n";
           $sql.=" LEFT JOIN n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id";
           $sql.=" WHERE CAST(n.vermstelle AS integer)=v.id AND n.id=".$id;
           #echo $sql;
@@ -785,7 +785,7 @@ class Nachweis {
       } break;
       
       case "MergeIDs" : {
-        $sql ="SELECT n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring, st_assvg(st_transform(n.the_geom, ".$this->client_epsg.")) AS svg_umring,v.name AS vermst,n2d.dokumentart_id as andere_art FROM n_vermstelle AS v, n_nachweise AS n";
+        $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring, st_assvg(st_transform(n.the_geom, ".$this->client_epsg.")) AS svg_umring,v.name AS vermst,n2d.dokumentart_id as andere_art FROM n_vermstelle AS v, n_nachweise AS n";
         $sql.=" LEFT JOIN n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id";
         $sql.=" WHERE CAST(n.vermstelle AS integer)=v.id AND n.id=".$idselected[0];
         #echo $sql;
@@ -795,7 +795,7 @@ class Nachweis {
           $errmsg.=$ret[1];
         }
         else { # Datenbankabfrage war fehlerfrei
-        	$sql ="SELECT st_astext(st_union(st_transform(n.the_geom, ".$this->client_epsg."))) AS wkt_umring, st_assvg(st_union(st_transform(n.the_geom, ".$this->client_epsg."))) AS svg_umring, st_union(st_transform(n.the_geom, ".$this->client_epsg.")) as geom";
+        	$sql ="SELECT distinct st_astext(st_union(st_transform(n.the_geom, ".$this->client_epsg."))) AS wkt_umring, st_assvg(st_union(st_transform(n.the_geom, ".$this->client_epsg."))) AS svg_umring, st_union(st_transform(n.the_geom, ".$this->client_epsg.")) as geom";
 					$sql.=" FROM n_nachweise AS n";
 	        $sql.=" WHERE 1=1";
 	        if ($idselected[0]!=0) {
@@ -822,7 +822,7 @@ class Nachweis {
       } break;
       
       case "multibleIDs" : {
-        $sql ="SELECT n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS andere_art, d.art AS andere_art_name";
+        $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS andere_art, d.art AS andere_art_name";
           $sql.=" FROM n_vermstelle AS v, n_nachweise AS n";
           $sql.=" LEFT JOIN n_nachweise2dokumentarten n2d"; 
 					$sql.=" 		LEFT JOIN n_dokumentarten d ON n2d.dokumentart_id = d.id";
@@ -894,7 +894,7 @@ class Nachweis {
           # Suchparameter sind g�ltig
           # Suche nach individueller Nummer
           #echo '<br>Suche nach individueller Nummer.';
-          $sql ="SELECT n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS andere_art, d.art AS andere_art_name";
+          $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS andere_art, d.art AS andere_art_name";
           $sql.=" FROM n_vermstelle AS v, n_nachweise AS n";
           $sql.=" LEFT JOIN n_nachweise2dokumentarten n2d"; 
 					$sql.=" 		LEFT JOIN n_dokumentarten d ON n2d.dokumentart_id = d.id";
@@ -978,7 +978,7 @@ class Nachweis {
           # Suche mit Suchpolygon
           #echo '<br>Suche mit Suchpolygon.';
           $this->debug->write('Abfragen der Nachweise die das Polygon schneiden',4);
-          $sql ="SELECT n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS andere_art, d.art AS andere_art_name";
+          $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS andere_art, d.art AS andere_art_name";
           $sql.=" FROM n_vermstelle AS v, n_nachweise AS n";
           $sql.=" LEFT JOIN n_nachweise2dokumentarten n2d"; 
 					$sql.=" 		LEFT JOIN n_dokumentarten d ON n2d.dokumentart_id = d.id";
@@ -1024,7 +1024,7 @@ class Nachweis {
         # Suche nach Antragsnummer
         # echo '<br>Suche nach Antragsnummer.';
         $this->debug->write('Abfragen der Nachweise die zum Antrag geh�ren',4);
-        $sql ="SELECT n.*,v.name AS vermst, n2d.dokumentart_id AS andere_art, d.art AS andere_art_name";
+        $sql ="SELECT distinct n.*,v.name AS vermst, n2d.dokumentart_id AS andere_art, d.art AS andere_art_name";
         $sql.=" FROM n_nachweise2antraege AS n2a, n_vermstelle AS v, n_nachweise AS n";
         $sql.=" LEFT JOIN n_nachweise2dokumentarten n2d"; 
 				$sql.=" 		LEFT JOIN n_dokumentarten d ON n2d.dokumentart_id = d.id";

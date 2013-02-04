@@ -180,6 +180,7 @@ $SVGvars_querytooltipscript .= '
 			var newtext = document.getElementById("querytooltip").cloneNode(true);
 			newgroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
 			var link = 0;
+			var links = new Array();
 			newtext.setAttribute("id", "newtext"+ypos);
 			newtext.setAttribute("x", x);
 		  newtext.setAttribute("y", y);
@@ -192,12 +193,11 @@ $SVGvars_querytooltipscript .= '
 			for(l = 0; l < lines.length; l++){
 				if(lines[l].slice(0, 6) == "xlink:"){
 					link = document.getElementById("link0").cloneNode(true);
-					link.setAttribute("xlink:href", lines[l].slice(6));
-					linktext = document.createElementNS("http://www.w3.org/2000/svg", "text");
-					var nodText = document.createTextNode(lines[l].slice(6));
-					linktext.appendChild(nodText);
-					link.appendChild(linktext);
-					break;
+					link.setAttribute("onclick", "window.parent.open(\'"+lines[l].slice(6)+"\', \'_blank\')");
+					var nodText = document.createTextNode(basename(lines[l].slice(6)));
+					link.appendChild(nodText);
+					links.push(link);
+					continue;
 				}
 				tspan1 = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
 		    if(l > 0){
@@ -208,15 +208,21 @@ $SVGvars_querytooltipscript .= '
 		    newtext.appendChild(tspan1);
 			}
 			newgroup.appendChild(newtext);
-			if(link != 0){
-				ypos = y+(i+1)*16;
-				link.setAttribute("transform", "translate("+x+" "+ypos+")");
-				newgroup.appendChild(link);
+			for(li = 0; li < links.length; li++){
+				var ypos = y+(l-1-links.length+li)*16;
+				links[li].setAttribute("transform", "translate("+x+" "+ypos+")");
+				newgroup.appendChild(links[li]);
 			}
 			tooltipcontent.appendChild(newgroup);
 			return newgroup;
 		}
 
+		
+		function basename(path) {
+    	return path.replace( /.*\//, "" );
+		}
+		
+		
 		function cleartext(object){
 			while(object.childNodes.length > 0){
 				object.removeChild(object.firstChild);

@@ -146,10 +146,10 @@ if($this->formvars['gps_follow'] == ''){
         				<td colspan="3" style="border-style:solid; border-width:1px; border-color:#aaaaaa;">
         					<table width="100%" border="0" cellpadding="0" cellspacing="0">
 						        <tr style="background-color: <? echo BG_MENUETOP; ?>;">
-						          <td width="150px" height="30">
+						          <td width="30%" height="30">
 						          	&nbsp;<b><?php echo $strMapScale; ?>&nbsp;1:&nbsp;</b><input type="text" id="scale" name="nScale" size="5" value="<?php echo round($this->map_scaledenom); ?>">
 						          </td>
-						          <td align="center">
+						          <td width="40%" align="center">
 						          	<? if($this->map->width > 700) {
 						          		echo '<div id="lagebezeichnung">';
 						          		if($this->Lagebezeichung!=''){
@@ -160,7 +160,7 @@ if($this->formvars['gps_follow'] == ''){
 						          <? }else{ ?>
 						          <td>&nbsp;</td>
 						          <? } ?>
-						          <td width="210px" align="right">
+						          <td width="30%" align="right">
 						            <img id="scalebar" alt="Maßstabsleiste" src="<? echo $this->img['scalebar']; ?>">
 						          </td>
 						        </tr>

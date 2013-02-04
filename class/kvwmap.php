@@ -2307,107 +2307,108 @@ class GUI extends GUI_core{
     $layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
     $polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
     if($this->formvars['oid'] != ''){
-      # Layer erzeugen
-      $data = $dbmap->getData($this->formvars['layer_id']);
-      $select = $dbmap->getSelectFromData($data);
-      $orderbyposition = strpos(strtolower($select), 'order by');
-      if($orderbyposition !== false){
-        $select = substr($select, 0, $orderbyposition);
-      }
-      if(strpos(strtolower($select), 'oid') === false){
-				$select = str_replace('*', '*, oid', $select);
-      	$select = str_replace($this->formvars['layer_columnname'], 'oid, '.$this->formvars['layer_columnname'], $select);
-      }
-      
-      if(strpos(strtolower($select), ' where ') === false){
-        $select .= " WHERE ";
-      }
-      else{
-        $select .= " AND ";
-      }
-      $oid = 'oid';
-      $explosion = explode(',', $select);							# wenn im Data sowas wie tabelle.oid vorkommt, soll das anstatt oid verwendet werden
-      for($i = 0; $i < count($explosion); $i++){
-      	if(strpos(strtolower($explosion[$i]), '.oid') !== false){
-      			$oid = str_replace('select ', '', strtolower($explosion[$i]));
-      		break;		
-      	}
-      }
-      $select .= $oid." = '".$this->formvars['oid']."'";
-      
-      $datastring = $this->formvars['layer_columnname']." from (".$select;
-      $datastring.=") as foo using unique oid using srid=".$layerset[0]['epsg_code'];
-      $legendentext = $layerset[0]['Name']." (".date('d.m. H:i',time()).")";
-
-      $group = $dbmap->getGroupbyName('Suchergebnis');
-      if($group != ''){
-        $groupid = $group['id'];
-      }
-      else{
-        $groupid = $dbmap->newGroup('Suchergebnis');
-      }
-
-      $this->formvars['user_id'] = $this->user->id;
-      $this->formvars['stelle_id'] = $this->Stelle->id;
-      $this->formvars['aktivStatus'] = 1;
-      $this->formvars['Name'] = $legendentext;
-      $this->formvars['Gruppe'] = $groupid;
-      $this->formvars['Typ'] = 'search';
-      $this->formvars['Datentyp'] = 2;
-      $this->formvars['Data'] = $datastring;
-      $this->formvars['connectiontype'] = 6;
-      $this->formvars['labelitem'] = $layerset[0]['labelitem'];
-      $connectionstring ='user='.$layerdb->user;
-      if($layerdb->passwd != ''){
-        $connectionstring.=' password='.$layerdb->passwd;
-      }
-      $connectionstring.=' dbname='.$layerdb->dbName;
-      if($layerdb->host != ''){
-        $connectionstring.=' host='.$layerdb->host;
-      }
-      if($layerdb->port != ''){
-        $connectionstring.=' port='.$layerdb->port;
-      }
-      $this->formvars['connection'] = $connectionstring;
-      $this->formvars['epsg_code'] = $layerset[0]['epsg_code'];
-      $this->formvars['transparency'] = 60;
-      
-      $layer_id = $dbmap->newRollenLayer($this->formvars);
-      
-      if($this->formvars['selektieren'] == 'false'){      # highlighten (mit der ausgewählten Farbe)
-      	$color = $this->user->rolle->readcolor();
-        $classdata[0] = '';
-        $classdata[1] = -$layer_id;
-        $classdata[2] = '';
-        $classdata[3] = 0;
-        $class_id = $dbmap->new_Class($classdata);
-        $this->formvars['class'] = $class_id;
-        $style['colorred'] = $color['red'];
-		    $style['colorgreen'] = $color['green'];
-		    $style['colorblue'] = $color['blue'];
-        $style['outlinecolorred'] = 0;
-        $style['outlinecolorgreen'] = 0;
-        $style['outlinecolorblue'] = 0;
-        $style['size'] = 1;
-        $style['symbol'] = NULL;
-        $style['symbolname'] = NULL;
-        $style['backgroundcolor'] = NULL;
-        $style['minsize'] = NULL;
-        $style['maxsize'] = 100000;
-        if (MAPSERVERVERSION > '500') {
-        	$style['angle'] = 360;
-        }
-        $style_id = $dbmap->new_Style($style);
-        $dbmap->addStyle2Class($class_id, $style_id, 0);          # den Style der Klasse zuordnen
-      }
-      else{         # selektieren (eigenen Style verwenden)
-        //$class_id =  $dbmap->getClassFromObject($this->formvars['layer_tablename'], $this->formvars['oid'], $this->formvars['layer_id']);
-        $class_id =  $dbmap->getClassFromObject($select, $this->formvars['layer_id']);
-        $this->formvars['class'] = $dbmap->copyClass($class_id, -$layer_id);
-        $this->user->rolle->setOneLayer($this->formvars['layer_id'], 0);
-      }
-      
-      $this->user->rolle->set_one_Group($this->user->id, $this->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
+    	if($this->formvars['selektieren'] != 'zoomonly'){
+	      # Layer erzeugen
+	      $data = $dbmap->getData($this->formvars['layer_id']);
+	      $select = $dbmap->getSelectFromData($data);
+	      $orderbyposition = strpos(strtolower($select), 'order by');
+	      if($orderbyposition !== false){
+	        $select = substr($select, 0, $orderbyposition);
+	      }
+	      if(strpos(strtolower($select), 'oid') === false){
+					$select = str_replace('*', '*, oid', $select);
+	      	$select = str_replace($this->formvars['layer_columnname'], 'oid, '.$this->formvars['layer_columnname'], $select);
+	      }
+	      
+	      if(strpos(strtolower($select), ' where ') === false){
+	        $select .= " WHERE ";
+	      }
+	      else{
+	        $select .= " AND ";
+	      }
+	      $oid = 'oid';
+	      $explosion = explode(',', $select);							# wenn im Data sowas wie tabelle.oid vorkommt, soll das anstatt oid verwendet werden
+	      for($i = 0; $i < count($explosion); $i++){
+	      	if(strpos(strtolower($explosion[$i]), '.oid') !== false){
+	      			$oid = str_replace('select ', '', strtolower($explosion[$i]));
+	      		break;		
+	      	}
+	      }
+	      $select .= $oid." = '".$this->formvars['oid']."'";
+	      
+	      $datastring = $this->formvars['layer_columnname']." from (".$select;
+	      $datastring.=") as foo using unique oid using srid=".$layerset[0]['epsg_code'];
+	      $legendentext = $layerset[0]['Name']." (".date('d.m. H:i',time()).")";
+	
+	      $group = $dbmap->getGroupbyName('Suchergebnis');
+	      if($group != ''){
+	        $groupid = $group['id'];
+	      }
+	      else{
+	        $groupid = $dbmap->newGroup('Suchergebnis');
+	      }
+	
+	      $this->formvars['user_id'] = $this->user->id;
+	      $this->formvars['stelle_id'] = $this->Stelle->id;
+	      $this->formvars['aktivStatus'] = 1;
+	      $this->formvars['Name'] = $legendentext;
+	      $this->formvars['Gruppe'] = $groupid;
+	      $this->formvars['Typ'] = 'search';
+	      $this->formvars['Datentyp'] = 2;
+	      $this->formvars['Data'] = $datastring;
+	      $this->formvars['connectiontype'] = 6;
+	      $this->formvars['labelitem'] = $layerset[0]['labelitem'];
+	      $connectionstring ='user='.$layerdb->user;
+	      if($layerdb->passwd != ''){
+	        $connectionstring.=' password='.$layerdb->passwd;
+	      }
+	      $connectionstring.=' dbname='.$layerdb->dbName;
+	      if($layerdb->host != ''){
+	        $connectionstring.=' host='.$layerdb->host;
+	      }
+	      if($layerdb->port != ''){
+	        $connectionstring.=' port='.$layerdb->port;
+	      }
+	      $this->formvars['connection'] = $connectionstring;
+	      $this->formvars['epsg_code'] = $layerset[0]['epsg_code'];
+	      $this->formvars['transparency'] = 60;
+	      
+	      $layer_id = $dbmap->newRollenLayer($this->formvars);
+	      
+	      if($this->formvars['selektieren'] == 'false'){      # highlighten (mit der ausgewählten Farbe)
+	      	$color = $this->user->rolle->readcolor();
+	        $classdata[0] = '';
+	        $classdata[1] = -$layer_id;
+	        $classdata[2] = '';
+	        $classdata[3] = 0;
+	        $class_id = $dbmap->new_Class($classdata);
+	        $this->formvars['class'] = $class_id;
+	        $style['colorred'] = $color['red'];
+			    $style['colorgreen'] = $color['green'];
+			    $style['colorblue'] = $color['blue'];
+	        $style['outlinecolorred'] = 0;
+	        $style['outlinecolorgreen'] = 0;
+	        $style['outlinecolorblue'] = 0;
+	        $style['size'] = 1;
+	        $style['symbol'] = NULL;
+	        $style['symbolname'] = NULL;
+	        $style['backgroundcolor'] = NULL;
+	        $style['minsize'] = NULL;
+	        $style['maxsize'] = 100000;
+	        if (MAPSERVERVERSION > '500') {
+	        	$style['angle'] = 360;
+	        }
+	        $style_id = $dbmap->new_Style($style);
+	        $dbmap->addStyle2Class($class_id, $style_id, 0);          # den Style der Klasse zuordnen
+	      }
+	      else{         # selektieren (eigenen Style verwenden)
+	        //$class_id =  $dbmap->getClassFromObject($this->formvars['layer_tablename'], $this->formvars['oid'], $this->formvars['layer_id']);
+	        $class_id =  $dbmap->getClassFromObject($select, $this->formvars['layer_id']);
+	        $this->formvars['class'] = $dbmap->copyClass($class_id, -$layer_id);
+	        $this->user->rolle->setOneLayer($this->formvars['layer_id'], 0);
+	      } 
+	      $this->user->rolle->set_one_Group($this->user->id, $this->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
+    	}
       $this->loadMap('DataBase');
       # Polygon abfragen und Extent setzen
       $rect = $polygoneditor->zoomTopolygon($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], 10);
@@ -5777,17 +5778,19 @@ class GUI extends GUI_core{
       $this->formvars['selected_layer_id'] = $this->formvars['id'];
     }
 
-		if($this->formvars['connectiontype'] == 6 AND $this->formvars['pfad'] != ''){
-			#---------- Speichern der Layerattribute -------------------
-	    $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-	    $layerdb->setClientEncoding();
-	    $path = $this->formvars['pfad'];
-	    $attributes = $mapDB->load_attributes($layerdb, $path);
-	    $mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes);
-	    $mapDB->delete_old_attributes($this->formvars['selected_layer_id'], $attributes);
-	    #---------- Speichern der Layerattribute -------------------
+		if($this->formvars['connectiontype'] == 6){
+			if($this->formvars['pfad'] != ''){
+				#---------- Speichern der Layerattribute -------------------
+		    $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+		    $layerdb->setClientEncoding();
+		    $path = $this->formvars['pfad'];
+		    $attributes = $mapDB->load_attributes($layerdb, $path);
+		    $mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes);
+		    #---------- Speichern der Layerattribute -------------------
+			}
+			$mapDB->delete_old_attributes($this->formvars['selected_layer_id'], $attributes);
 		}
-
+		
     $name = @array_values($this->formvars['name']);
     $expression = @array_values($this->formvars['expression']);
     $order = @array_values($this->formvars['order']);
@@ -11381,8 +11384,8 @@ class GUI extends GUI_core{
 		              $attribcount++;
 									if($layer['shape'][$k][$attributes['name'][$j]]!='') {
 										$link = 'xlink:'.$layer['shape'][$k][$attributes['name'][$j]];
+										$links .= $link.'~';
 									}
-									$links .= $link.'~';
 								} break;
 				        default : {
 		              if($attributes['alias'][$j] != ''){
@@ -13455,12 +13458,15 @@ class db_mapObj extends db_mapObj_core{
   }
   
   function delete_old_attributes($layer_id, $attributes){
-  	$sql = "DELETE FROM layer_attributes WHERE layer_id = ".$layer_id." AND name NOT IN (";
-  	for($i = 0; $i < count($attributes['name']); $i++){
-  		$sql .= "'".$attributes['name'][$i]."',";
+  	$sql = "DELETE FROM layer_attributes WHERE layer_id = ".$layer_id;
+  	if($attributes){
+  		$sql.= " AND name NOT IN (";
+	  	for($i = 0; $i < count($attributes['name']); $i++){
+	  		$sql .= "'".$attributes['name'][$i]."',";
+	  	}
+	  	$sql = substr($sql, 0, -1);
+	  	$sql .=")";
   	}
-  	$sql = substr($sql, 0, -1);
-  	$sql .=")";
   	#echo $sql.'<br><br>';
   	$this->debug->write("<p>file:kvwmap class:db_mapObj->delete_old_attributes - Löschen von alten Layerattributen:<br>".$sql,4);
     $query=mysql_query($sql);

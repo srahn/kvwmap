@@ -279,8 +279,8 @@ class database {
     $user_id = mysql_fetch_row($query);
     $id = $user_id[0];
     
-    $sql = "INSERT INTO `rolle` (`user_id`,`stelle_id`,`nImageWidth`,`nImageHeight`,`minx`,`miny`,`maxx`,`maxy`,`nZoomFactor`,`selectedButton`,`epsg_code`,`active_frame`,`last_time_id`,`gui`,`language`,`charset`,`hidemenue`,`fontsize_gle`,`highlighting`)
-                    SELECT ".$id.", ".$gast_stelle.", '800', '600', minxmax, minymax, maxxmax, maxymax, '2', 'zoomin', epsg_code, ".DEFAULT_DRUCKRAHMEN_ID." , '0000-00-00 00:00:00', 'gui.php', 'german', 'windows-1252', '0', '13', '0' FROM stelle WHERE ID = ".$gast_stelle;
+    $sql = "INSERT INTO `rolle` (`user_id`,`stelle_id`,`nImageWidth`,`nImageHeight`,`minx`,`miny`,`maxx`,`maxy`,`nZoomFactor`,`selectedButton`,`epsg_code`,`active_frame`,`last_time_id`,`language`,`charset`,`hidemenue`,`fontsize_gle`,`highlighting`)
+                    SELECT ".$id.", ".$gast_stelle.", '800', '600', minxmax, minymax, maxxmax, maxymax, '2', 'zoomin', epsg_code, ".DEFAULT_DRUCKRAHMEN_ID." , '0000-00-00 00:00:00', 'german', 'windows-1252', '0', '13', '0' FROM stelle WHERE ID = ".$gast_stelle;
     $query = mysql_query($sql);
     
     $sql = "INSERT INTO `u_groups2rolle` (`user_id`,`stelle_id`,`id`,`status`) SELECT ".$id.", ".$gast_stelle.", id, '0' FROM u_groups";
