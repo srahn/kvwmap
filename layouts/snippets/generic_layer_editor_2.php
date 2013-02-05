@@ -58,8 +58,8 @@ function selectall(layer_id){
 }
 
 function zoom2wkt(wkt, epsg){
-	document.GUI.epsg = epsg;
-	document.GUI.wkt = wkt;
+	document.GUI.epsg.value = epsg;
+	document.GUI.wkt.value = wkt;
 	document.GUI.go.value = 'zoom2wkt';
 	document.GUI.submit();
 }
@@ -654,8 +654,8 @@ function set_changed_flag(flag){
 </table>
 
 
-<inpit type="text" name="wkt" value="">
-<inpit type="text" name="epsg" value="">
+<input type="hidden" name="wkt" value=""><!-- für den WFS Kartenzoom -->
+<input type="hidden" name="epsg" value=""><!-- für den WFS Kartenzoom -->
 <input type="hidden" name="checkbox_names_<? echo $layer['Layer_ID']; ?>" value="<? echo $checkbox_names; ?>">
 <input type="hidden" name="orderby<? echo $layer['Layer_ID']; ?>" id="orderby<? echo $layer['Layer_ID']; ?>" value="<? echo $this->formvars['orderby'.$layer['Layer_ID']]; ?>">
 

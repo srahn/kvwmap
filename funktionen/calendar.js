@@ -33,17 +33,25 @@ function CalendarJS() {
     this.parEl = null;
  
         this.init = function( elementid, initDate ) {
-            this.now = initDate?initDate:new Date();
-            this.date = this.now.getDate();
-            this.month = this.mm = this.now.getMonth();
-            this.year = this.yy = this.now.getFullYear();
-            this.monthCell.appendChild(document.createTextNode( this.monthname[this.mm]+"\u00a0"+this.yy ));
-            this.tableHead = this.createTableHead();
-            this.tableFoot = this.createTableFoot();
-            this.attributefield = document.getElementById(elementid);
-            this.parEl = document.getElementsByName('calendar_'+elementid)[0].parentNode;
-            this.show();
-            if (!initDate) this.checkDate();
+        	if(document.getElementById(elementid).calendar != true){
+        		document.getElementById(elementid).calendar = true;
+	        	value = document.getElementById(elementid).value;
+	        	if(value != ''){
+	        		dateElements = value.split('.');
+	        		initDate = new Date(dateElements[2],dateElements[1]-1,dateElements[0]);
+	        	}
+	            this.now = initDate?initDate:new Date();
+	            this.date = this.now.getDate();
+	            this.month = this.mm = this.now.getMonth();
+	            this.year = this.yy = this.now.getFullYear();
+	            this.monthCell.appendChild(document.createTextNode( this.monthname[this.mm]+"\u00a0"+this.yy ));
+	            this.tableHead = this.createTableHead();
+	            this.tableFoot = this.createTableFoot();
+	            this.attributefield = document.getElementById(elementid);
+	            this.parEl = document.getElementsByName('calendar_'+elementid)[0].parentNode;
+	            this.show();
+	            if (!initDate) this.checkDate();
+        	}
         },
  
         this.checkDate = function() {
@@ -245,6 +253,7 @@ function CalendarJS() {
 	    		m = "0"+m;
 	    	}
 	    	field.value=d+"."+m+"."+y;
+	    	field.calendar = false;
 	    	field.onchange();
 	    },
 	
