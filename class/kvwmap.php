@@ -14537,7 +14537,7 @@ class Menue {
     if ($this->language != 'german') {
       $sql.='`name_'.$this->language.'_'.$this->charset.'` AS ';
     }
-    $sql.=' name FROM u_menues WHERE obermenue = '.$menue_id.' AND menueebene = 2 ORDER BY name';
+    $sql.=' name FROM u_menues WHERE obermenue = '.$menue_id.' AND menueebene = 2 ORDER BY `order`, name';
     $this->debug->write("<p>file:kvwmap class:Menue - Lesen aller OberMenüs:<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) {
