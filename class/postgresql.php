@@ -1326,7 +1326,6 @@ class pgdatabase extends pgdatabase_core {
 	}
 
   function getFlurstuecksListe($GemID,$GemkgID,$FlurID,$order, $historical = false){
-    # �nderungen in Gro�/Kleinschreibung 2006-01-02 pk
     $sql ="SELECT *,SUBSTRING(flurstkennz,12,5) AS zaehler,SUBSTRING(flurstkennz,18,3) AS nenner";
     if($historical == 1){
     	$sql.=" FROM alb_flurstuecke WHERE status = 'H'";
@@ -1337,12 +1336,13 @@ class pgdatabase extends pgdatabase_core {
     if ($GemkgID>0) {
       $sql.=" AND gemkgschl= ".$GemkgID;
     }
-    if ($FlurID!='') {
+    if ($FlurID!='-1') {
       $sql.=" AND flurnr='".$FlurID."'";
     }
     if ($order!='') {
       $sql.=" ORDER BY ".$order;
     }
+    #echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
     while ($rs=pg_fetch_array($queryret[1])) {
       $Liste['FlstID'][]=$rs['flurstkennz'];

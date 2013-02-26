@@ -5,13 +5,13 @@
 #                                                                  #
 ####################################################################
 # aktuelle Versionsnummer
-define('VERSION','1.10.0');
+define('VERSION','1.11.0');
 define('APPLVERSION','kvwmap_'.VERSION.'/');
 # Bezeichnung der MySQL-Datenbank mit den Benutzerdaten
 $dbname='kvwmapdb';
 # Wenn der pgdbname leer gelassen wird, wird versucht die Information
 # für die Verbindung zur PostGIS-Datenbank aus der Tabelle Stelle zu lesen.
-$pgdbname='kvwmapsp';	
+$pgdbname='';	# ACHTUNG: nicht setzen, sonst sind die Eigentümer in der Demostelle zu sehen!!!
 #$pgdbname='alkis_25833';
 
 ########################## Metadaten zum Landkreis
@@ -28,8 +28,8 @@ define('POSTANSCHRIFT_ORT', '');
 # definiert, ob Nutzername im ALB-Auszug 30 angezeigt wird, oder nicht
 define('BEARBEITER', 'false');			# true/false					# Version 1.7.2
 # Gutachterausschuss BORIS
-#define('GUTACHTERAUSSCHUSS', '12345 NVP');								# Version 1.7.3			# in Version 1.7.5 wieder gelöscht
-$gutachterausschuesse = array('12345', '6789');       # Version 1.7.5
+define('GUTACHTERAUSSCHUSS', '12345');								# Version 1.7.3			# in Version 1.7.5 wieder gelöscht	# seit Version 1.11 wieder da
+#$gutachterausschuesse = array('12345', '6789');       # Version 1.7.5		# in Version 1.11 gelöscht
 # katasterführende Stellen ALB
 # bei zwei katasterführenden Stellen in einer kvwmap-DB (Nur für Adressänderungen wichtig, sonst auskommentieren)
 # erste Stelle bis einschließlich GBBZ-Schlüssel, zweite Stelle bis einschließlich GBBZ-Schlüssel, ....
@@ -77,7 +77,7 @@ define('TITLE_DRUCKEN','Druckausschnittswahl');             # Version 1.6.6
 define('TITLE_KARTE','Karte anzeigen');                     # Version 1.6.6
 define('TITLE_NOTIZEN','neue Notiz');                       # Version 1.6.6
 define('TITLE_HILFE','Hilfe');                  						# Version 1.6.6
-define('TITLE_OPTIONEN','Stelle w&auml;hlen');										# Version 1.7.3
+define('TITLE_OPTIONEN','Optionen');										# Version 1.7.3
 define('TITLE_SCHNELLDRUCK','schnelle Druckausgabe');					# Version 1.7.5
 # Schalter für die PopUp-Funktion des Menüs
 define('POPUPMENUE','false');          # true / false
@@ -145,7 +145,9 @@ define('LOGPATH',INSTALLPATH.'www/logs/');
 # Shapepath [Pfad zum Shapefileverzeichnis]
 define('SHAPEPATH',INSTALLPATH.'www/var/data/');
 # Custom-Shapepath [Name des Verzeichnisses, in dem die von den Usern hochgeladenen SHPs liegen (muss im SHAPEPATH liegen)]
-define('CUSTOM_SHAPEPATH', 'custom_shps/');							# Version 1.7.4
+#define('CUSTOM_SHAPEPATH', 'custom_shps/');							# Version 1.7.4		# in Version 1.11.0 gelöscht
+# ein extra Schema in der PG-DB, in der die Tabellen der Nutzer Shapes angelegt werden
+define('CUSTOM_SHAPE_SCHEMA', 'custom_shapes');					# Version 1.11.0
 define('REFERENCEMAPPATH',SHAPEPATH.'referencemaps/');
 define('NACHWEISDOCPATH',SHAPEPATH.'nachweise/');
 # Dateiname und Pfad der Festpunkte, mit der die Tabelle der Festpunkte aktualisiert werden soll
@@ -199,7 +201,7 @@ define('EPSGCODE','2398'); # Krassowski, Pulkowo 42, Gauß Krüger 3° Streifen 4 (
 #define('EPSGCODE','2399'); # Krassowski, Pulkowo 42, Gauß Krüger 3° Streifen 5 (15°)
 
 # Unterstützte SRIDs, nur diese stehen zur Auswahl bei der Stellenwahl
-$supportedSRIDs = array(4326,2397,2398,2399,31466,31467,31468,31469,32648,25832,25833,325833,35833,32633,325833,15833,900913);                    # Version 1.6.8
+$supportedSRIDs = array(4326,2397,2398,2399,31466,31467,31468,31469,32648,25832,25833,325833,35833,32633,325833,15833,900913,28992);                    # Version 1.6.8
 
 # Name der Stopwortdatei
 define('STOPWORDFILE',SHAPEPATH.'gazetteer/top10000de.txt');
@@ -231,13 +233,18 @@ define('WASSERZEICHEN',WAPPENPATH.'wappen_wz.jpg');
 define ('LAYOUTPATH',WWWROOT.APPLVERSION.'layouts/');
 define ('SNIPPETS',LAYOUTPATH.'snippets/');
 define('CLASSPATH',WWWROOT.APPLVERSION.'class/');
+define('PLUGINS',WWWROOT.APPLVERSION.'plugins/');		# Version 1.11
 define('TEMPTABLEPREFIX','x_');
 # Default Templates für Sachdatenanzeige
 define('DEFAULTTEMPLATE',' ');
 define('DEFAULTHEADER',' ');
 define('DEFAULTFOOTER',' ');
 # Erlaubte maximale Länge der Stammnummer in der Fachschale Nachweisverwaltung
-define('STAMMNUMMERMAXLENGTH',8);
+#define('STAMMNUMMERMAXLENGTH',8);																											# in Version 1.11.0 gelöscht
+# Erlaubte maximale Länge der Rissnummer in der Fachschale Nachweisverwaltung
+define('RISSUMMERMAXLENGTH',8);																													# Version 1.11.0
+# Erlaubte maximale Länge der Antragsnummer in der Fachschale Nachweisverwaltung
+define('ANTRAGSNUMMERMAXLENGTH',8);																											# Version 1.11.0
 # maximale Anzahl der in einer Sachdatenabfrage zurückgelieferten Zeilen.
 define('MAXQUERYROWS',10);
 
@@ -247,6 +254,9 @@ define('BLATTNUMMERMAXLENGTH',4);                         # Version 1.6.7
 # das primäre Ordnungskriterium der Nachweisverwaltung: rissnummer/stammnr
 define('NACHWEIS_PRIMARY_ATTRIBUTE', 'rissnummer');			# Version 1.10.0
 
+# das zusätzliche Ordnungskriterium der Nachweisverwaltung (kann bei eindeutigem primärem leer gelassen werden): fortfuehrung
+define('NACHWEIS_SECONDARY_ATTRIBUTE', '');			# Version 1.11.0
+
 # PostgreSQL Server Version                         # Version 1.6.4
 define('POSTGRESVERSION', '804');                   # Version 1.6.4   (800 == 8.0)
 
@@ -254,13 +264,13 @@ define('POSTGRESVERSION', '804');                   # Version 1.6.4   (800 == 8.
 define('MYSQLVERSION', '500');                   # Version 1.6.4   (4.1.0 == 410)
 
 # Mapserver Version                             # Version 1.6.8
-define('MAPSERVERVERSION', 542);              # Version 1.6.8     (5.0.2 == 502)
+define('MAPSERVERVERSION', '542');              # Version 1.6.8     (5.0.2 == 502)
 
 # PHP-Version
 define('PHPVERSION', '450');										# Version 1.7.1  (5.2.0 == 520)
 
 # Schalter für die mobile Variante
-define('MOBILE', 'true');                                  # Version 1.6.7 (noch in Entwicklung)
+define('MOBILE', 'false');                                  # Version 1.6.7 (noch in Entwicklung)
 
 # Pfad zur GPS-Logdatei                         # Version 1.7.0
 define('GPSPATH', SHAPEPATH.'gpsulog.txt');
@@ -271,7 +281,7 @@ define('GPSPATH', SHAPEPATH.'gpsulog.txt');
 define('SYNC_PATH', SHAPEPATH.'synchro/');
 
 # Faktor für die Einstellung der Druckqualität (MAPFACTOR * 72 dpi)     # Version 1.6.0
-define('MAPFACTOR', 4);                                                # Version 1.6.0
+define('MAPFACTOR', 3);                                                # Version 1.6.0
 
 # Standarddruckrahmen für die schnelle Druckausgabe						# Version 1.7.4
 define('DEFAULT_DRUCKRAHMEN_ID', 42);													# Version 1.7.4
@@ -334,7 +344,7 @@ define("LAYER_ID_JAGDBEZIRKE", '432');				# Version 1.10.0
 define("DEFAULTMAPFILE",SHAPEPATH.'MapFiles/defaultmapfile_dev.map');
 # Wenn SAVEMAPFILE leer ist, wird sie nicht gespeichert.
 # Achtung, wenn die cgi-bin/mapserv ohne Authentifizierung und der Pfad zu save_mapfile.map bekannt ist, kann jeder die Karten des letzten Aufrufs in kvwmap über mapserv?map=<pfad zu save_map.map abfragen. Und wenn wfs zugelassen ist auch die Sachdaten dazu runterladen. Diese Konstante sollte nur zu debug-Zwecken eingeschaltet bleiben.
-define("SAVEMAPFILE",LOGPATH.'');                                # Version 1.11.0 
+#define("SAVEMAPFILE",LOGPATH.'save_mapfile.map');                                # Version 1.11.0 
 define("REFMAPFILE",SHAPEPATH.'MapFiles/refmapfile.map');
 # Ort der Datei, in der die Meldungen beim Debugen geschrieben werden
 define('DEBUGFILE',LOGPATH.VERSION.'_'.$_SESSION['login_name'].'_debug.htm');
@@ -382,7 +392,6 @@ define('DELETE_ROLLENLAYER', 'true');   # true / false                          
 define('SHOW_MAP_IMAGE', 'true');       # true / false                            # Version 1.6.7
 
 
-
 ############################# Klassenbibliotheken lesen
 # laden der Klassenbibliotheken
 include (CLASSPATH.'kvwmap_core.php');							# Version 1.7.6
@@ -421,7 +430,7 @@ if($_REQUEST['go'] != 'getMap_ajax'){								# Version 1.7.6    (die folgenden K
 	include (CLASSPATH.'lineeditor.php');               # Version 1.7.0
 	include (CLASSPATH.'wfs.php');                      # Version 1.7.0
 	include (CLASSPATH.'synchronisation.php');          # Version 1.7.0
-	include (CLASSPATH.'rok.php');          						# Version 1.7.1
+	#include (CLASSPATH.'rok.php');          						# Version 1.7.1		in Version 1.11 gelöscht
 	include (CLASSPATH.'tif.php');          						# Version 1.7.2
 	include (CLASSPATH.'gpx.php');          						# Version 1.7.4
 	include (CLASSPATH.'datendrucklayout.php');         # Version 1.7.5
@@ -429,6 +438,15 @@ if($_REQUEST['go'] != 'getMap_ajax'){								# Version 1.7.6    (die folgenden K
 	include (CLASSPATH.'uko.php');          						# Version 1.8.0
 }																											# Version 1.7.6
 include (WWWROOT.APPLVERSION.'funktionen/allg_funktionen.php');		# In Version 1.7.3 angepasst
+
+############################ kvwmap-plugins #################		# Version 1.11
+#																																# Version 1.11
+#$kvwmap_plugins[] = bauleitplanung;														# Version 1.11
+#$kvwmap_plugins[] = bevoelkerung;															# Version 1.11
+#$kvwmap_plugins[] = gewaesser;																	# Version 1.11
+#																																# Version 1.11
+#############################################################		# Version 1.11
+
 
 ################################ Erweiterungen laden
 # PHP-Extensions laden
@@ -455,16 +473,16 @@ if (LOG_LEVEL>0) {
 define ('INFO1','Prüfen Sie ob Ihr Datenbankmodell aktuell ist.');
 
 # Character Set der MySQL-Datenbank
-define(MYSQL_CHARSET,'latin1');													# Version 1.7.6
-define(POSTGRES_CHARSET,'LATIN1');												# Version 1.8.0
+define(MYSQL_CHARSET,'UTF8');													# Version 1.7.6		# in Version 1.11.0 auf UTF8 gesetzt
+define(POSTGRES_CHARSET,'UTF8');											# Version 1.8.0		# in Version 1.11.0 auf UTF8 gesetzt
 
 
 ################################ Datenbankangaben setzen######################		
 # Datenbank für die Nutzerdaten (mysql)
 $userDb=new database();
 $userDb->host='localhost';
-$userDb->user='kvwmap';
-$userDb->passwd='didpvku';
+$userDb->user='';
+$userDb->passwd='';
 $userDb->dbName=$dbname;
 
 $GISdb = $userDb; 																			# Version 1.7.6
@@ -478,8 +496,8 @@ if ($pgdbname!='') {
   	$PostGISdb=new pgdatabase();												# Version 1.7.6
 	}																											# Version 1.7.6
   $PostGISdb->host='localhost';
-  $PostGISdb->user='fgs';
-  $PostGISdb->passwd='fgs';
+  $PostGISdb->user='';
+  $PostGISdb->passwd='';
   $PostGISdb->dbName=$pgdbname;
 }
 
@@ -665,9 +683,6 @@ define("WCS_DESCRIPTION","Sample OWS for MapServer OGC Web Services Workshop.  E
 # /WCS_Capabilities/Service/metadataLink/@xlink:href
 define("WCS_METADATALINK_HREF" "http://localhost/ms_ogc_workshop/index.html");
 */
-$conf_files = searchdir(WWWROOT.APPLVERSION.'conf/', true);
-for($i = 0; $i < count($conf_files); $i++){
-  include($conf_files[$i]);
-}
+
 
 ?>

@@ -174,13 +174,9 @@ $GUI->requeststring = $QUERY_STRING;
 ####################################################################
 #echo 'go: '.$go;
 #var_dump($GUI->formvars);
-$index_include_file='custom/index.php';
-$goNotExecutedInIncludeCases=true;
-if (file_exists($index_include_file)) {
-  include($index_include_file);
-}
-if ($goNotExecutedInIncludeCases) {
-	switch($GUI->go) {
+$GUI->loadPlugins();
+if($GUI->goNotExecutedInPlugins){
+	switch($go){
 		case 'ALB_ALK_Tabellen_leeren' : {
 			$GUI->checkCaseAllowed($go);
 	    $GUI->truncateAlbAlkTables();
@@ -189,14 +185,6 @@ if ($goNotExecutedInIncludeCases) {
   	 
 		case 'Multi_Geometrien_splitten' : {
 		  $GUI->split_multi_geometries();
-		}break;
-
-		case 'bevoelkerung_bericht' : {
-		  $GUI->bevoelkerung_bericht();
-		}break;
-		
-		case 'bevoelkerung_bericht_Bericht erstellen' : {
-		  $GUI->bevoelkerung_bericht_erstellen();
 		}break;
 
 		case 'reset_layers' : {
@@ -252,22 +240,6 @@ if ($goNotExecutedInIncludeCases) {
 		$GUI->output();
 	  } break;
 
-	  case 'delete_bplan' : {
-		$GUI->delete_bplan();
-	  } break;
-	  
-	  case 'delete_fplan' : {
-		$GUI->delete_fplan();
-	  } break;
-	  
-	  case 'zoomtobplan' : {
-		$GUI->zoomtobplan();
-	  } break;
-	  
-	  case 'zoomtofplan' : {
-		$GUI->zoomtofplan();
-	  } break;
-
 	  # auslesen der Layer vom mobilen Client
 	  case 'import_layer' : {
 		$GUI->checkCaseAllowed($go);
@@ -293,12 +265,6 @@ if ($goNotExecutedInIncludeCases) {
 	  # liefert die options für ein Selectfeld für abhängige Attribute
 	  case 'get_select_list' : {
 		$GUI->get_select_list();
-	  } break;
-
-	  # CASE für Testzwecke der postgresql-Datenbankanfragens
-	  case 'loadDenkmale_laden' : {
-		$GUI->loadDenkmale_laden();
-		$GUI->output();
 	  } break;
 	  
 	  # Kartenbild anzeigen

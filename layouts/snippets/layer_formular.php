@@ -279,6 +279,12 @@ else {
 		      		<input name="datenherr" type="text" value="<?php echo $this->formvars['datenherr']; ?>" size="25" maxlength="100">
 		  		</td>
 		  	</tr>
+		  	<tr>
+		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strMetaLink; ?></th>
+		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+		      		<input name="metalink" type="text" value="<?php echo $this->formvars['metalink']; ?>" size="25" maxlength="255">
+		  		</td>
+		  	</tr>
 		 	</table>
 		  <br>
 		  	

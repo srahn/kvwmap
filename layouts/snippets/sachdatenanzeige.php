@@ -184,20 +184,24 @@ if ($anzLayer==0) {
 	<?php
 	$this->found = 'false';
 }
-for ($i=0;$i<$anzLayer;$i++) {
-   if ($this->qlayerset[$i]['template']=='') {
+for($i=0;$i<$anzLayer;$i++){
+	if ($this->qlayerset[$i]['template']=='') {
    	if(GLEVIEW == '2'){
     	include(SNIPPETS.'generic_layer_editor_2.php');			# Attribute zeilenweise
    	}
    	else{
    		include(SNIPPETS.'generic_layer_editor.php');				# Attribute spaltenweise
    	}
-   }
-   else {
-   	 if (is_file(SNIPPETS.$this->qlayerset[$i]['template'])) {
-   	 	 include(SNIPPETS.$this->qlayerset[$i]['template']);
-   	 }
-   	 else {
+	}
+	else{
+		if(is_file(SNIPPETS.$this->qlayerset[$i]['template'])){
+   		include(SNIPPETS.$this->qlayerset[$i]['template']);
+    }
+		else{
+			if(file_exists(PLUGINS.$this->qlayerset[$i]['template'])){
+				include(PLUGINS.$this->qlayerset[$i]['template']);			# Pluginviews
+			}
+   	 	else {
    	 	 #Version 1.6.5 pk 2007-04-17
    	 	 echo '<p>Das in den stellenbezogenen Layereigenschaften angegebene Templatefile:';
    	 	 echo '<br><b>'.SNIPPETS.$this->qlayerset[$i]['template'].'</b>';
@@ -206,6 +210,7 @@ for ($i=0;$i<$anzLayer;$i++) {
    	 	 #echo '<p><a href="index.php?go=Layer2Stelle_Editor&selected_layer_id='.$this->qlayerset[$i]['Layer_ID'].'&selected_stelle_id='.$this->Stelle->id.'&stellen_name='.$this->Stelle->Bezeichnung.'">zum Stellenbezogener Layereditor</a> (nur mit Berechtigung mÃ¶glich)';
    	 }
    }
+	}
 
    if($this->qlayerset[$i]['connectiontype'] == MS_POSTGIS AND $this->qlayerset[$i]['count'] > 1){
 	   # BlÃ¤tterfunktion

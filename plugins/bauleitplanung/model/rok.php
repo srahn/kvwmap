@@ -1,6 +1,6 @@
 <?php
 ###################################################################
-# kvwmap - Kartenserver für Kreisverwaltungen                     #
+# kvwmap - Kartenserver fÃ¼r Kreisverwaltungen                     #
 ###################################################################
 # Lizenz                                                          #
 #                                                                 # 
@@ -36,17 +36,41 @@ class rok {
     $this->database = $database;
   }
   
-  function delete_bplan($oid){
-  	$success = true;
-  	$sql = "DELETE FROM tblb_plan_neu WHERE oid = ".$oid;
+  function delete_bplan($plan_id){
+  	$sql = "DELETE FROM b_plan_stammdaten WHERE plan_id = ".$plan_id.';';
+  	$sql.= "DELETE FROM b_plan_gebiete WHERE plan_id = ".$plan_id.';';
+  	$sql.= "DELETE FROM b_plan_sondergebiete WHERE plan_id = ".$plan_id.';';
   	#echo $sql;
   	$ret = $this->database->execSQL($sql,4, 1);
     if ($ret[0]) {
-     showAlert('Löschen fehlgeschlagen');
+     showAlert('LÃ¶schen fehlgeschlagen');
     }
     else{
-    	showAlert('Löschen erfolgreich');
+    	showAlert('LÃ¶schen erfolgreich');
     }
+  }
+  
+  function copy_bplan($plan_id){
+  	$sql = "BEGIN;";
+  	$sql.= "INSERT INTO b_plan_stammdaten (gkz, art, pl_nr, gemeinde_alt, geltungsbereich, bezeichnung, aktuell, lfd_rok_nr, aktenzeichen, kap_gemziel, kap_nachstell, datumeing, datumzust, datumabl, datumgenehm, datumbeka, datumaufh, erteilteaufl, ert_hinweis, ert_bemerkungen) ";
+  	$sql.= "SELECT gkz, art, pl_nr, gemeinde_alt, geltungsbereich, bezeichnung, aktuell, lfd_rok_nr, aktenzeichen, kap_gemziel, kap_nachstell, datumeing, datumzust, datumabl, datumgenehm, datumbeka, datumaufh, erteilteaufl, ert_hinweis, ert_bemerkungen FROM b_plan_stammdaten ";
+  	$sql.= "WHERE plan_id = ".$plan_id;
+  	$ret = $this->database->execSQL($sql,4, 1);
+  	$new_oid = pg_last_oid($ret[1]);
+  	$sql = "SELECT plan_id FROM b_plan_stammdaten WHERE oid = ".$new_oid;
+  	$ret = $this->database->execSQL($sql, 4, 0);
+		$rs = pg_fetch_array($ret[1]);
+		$sql = "INSERT INTO b_plan_gebiete SELECT ".$rs['plan_id'].", gebietstyp, flaeche, kap_gemziel, kap_nachstell, konkretisierung FROM b_plan_gebiete WHERE plan_id = ".$plan_id.";";
+		$sql.= "INSERT INTO b_plan_sondergebiete SELECT ".$rs['plan_id'].", gebietstyp, flaeche, kap1_gemziel, kap1_nachstell, kap2_gemziel, kap2_nachstell, konkretisierung FROM b_plan_sondergebiete WHERE plan_id = ".$plan_id.";";
+		$sql.= "COMMIT;"; 
+		$ret = $this->database->execSQL($sql, 4, 0);
+  	if ($ret[0]) {
+     showAlert('Kopieren fehlgeschlagen');
+    }
+    else{
+    	showAlert('Kopieren erfolgreich');
+    }
+    return $new_oid;
   }
   
   function delete_fplan($oid){
@@ -55,10 +79,10 @@ class rok {
   	#echo $sql;
   	$ret = $this->database->execSQL($sql,4, 1);
     if ($ret[0]) {
-     showAlert('Löschen fehlgeschlagen');
+     showAlert('LÃ¶schen fehlgeschlagen');
     }
     else{
-    	showAlert('Löschen erfolgreich');
+    	showAlert('LÃ¶schen erfolgreich');
     }
   }
  	

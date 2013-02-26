@@ -57,22 +57,13 @@ function go_back(){
 	document.GUI.submit();
 }
 
-function save_as_new_dataset(){
-	form_fieldstring = document.GUI.form_field_names.value+'';
-	form_fields = form_fieldstring.split('|');
-	for(i = 0; i < form_fields.length-1; i++){
-		fieldstring = form_fields[i]+'';
-		field = fieldstring.split(';');
-		if(document.getElementsByName(fieldstring)[0] != undefined && field[4] != 'Dokument' && document.getElementsByName(fieldstring)[0].readOnly == false && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
-			alert('Das Feld '+document.getElementsByName(fieldstring)[0].title+' erfordert eine Eingabe.');
-			return;
-		}
-	}
-	document.GUI.go.value = 'neuer_Layer_Datensatz_speichern';
+function copy_dataset(plan_id){
+	document.GUI.plan_id.value = plan_id;
+	document.GUI.go.value = 'copy_bplan';
 	document.GUI.submit();
 }
 
-function delete_dataset(oid){
+function delete_dataset(plan_id){
 	really = confirm('Wollen Sie diesen Datensatz wirklich löschen?');
 	if(really){
 		if((document.GUI.details.value != 'true' && document.GUI.value_b_plan_stammdaten_oid.value == '') || (document.GUI.details.value == 'true' && document.GUI.value_b_plan_stammdaten_oid.value != '')){		// Trefferliste vorhanden -> wieder zurück zur Trefferliste
@@ -81,7 +72,7 @@ function delete_dataset(oid){
 			document.GUI.value_b_plan_stammdaten_oid.value = '';
 			document.GUI.offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value = document.GUI._offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value;
 		}
-		document.GUI.oid.value = oid;
+		document.GUI.plan_id.value = plan_id;
 		document.GUI.go.value = 'delete_bplan';
 		document.GUI.submit();
 	}
@@ -102,6 +93,8 @@ function update_planart(){
 	}
 	else{
 		document.getElementById('kap').style.display = 'none';
+		document.getElementById('kap_value1').value = '';
+		document.getElementById('kap_value2').value = '';
 	}
 }
 
@@ -285,6 +278,7 @@ function update_gebietstyp(){
   			<tr>
   				<td width="130px">Planbezeichnung:</td>
   				<?
+  					$j = 6;
   					$this->qlayerset[$i]['attributes']['name'][$j] = 'bezeichnung'; 
   					$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'|'; 
   				?>
@@ -293,6 +287,7 @@ function update_gebietstyp(){
   			<tr>
   				<td>Plannummer:</td>
   				<?
+  					$j = 3;
   					$this->qlayerset[$i]['attributes']['name'][$j] = 'pl_nr';
   					$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'|';
   				?>
@@ -326,6 +321,7 @@ function update_gebietstyp(){
 					</td>
 					<td>Plan-ID:</td>
   				<?
+  					$j = 0;
   					$this->qlayerset[$i]['attributes']['name'][$j] = 'plan_id';
   					$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'|';
   				?>
@@ -334,6 +330,7 @@ function update_gebietstyp(){
   			<tr>
   				<td>ROK-Nr.</td>
   				<?
+  					$j = 8;
   					$this->qlayerset[$i]['attributes']['name'][$j] = 'lfd_rok_nr';
   					$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'|';
   				?>
@@ -361,6 +358,7 @@ function update_gebietstyp(){
   			<tr>
   				<td>Gemeindename alt:</td>
   				<?
+  					$j = 4;
   					$this->qlayerset[$i]['attributes']['name'][$j] = 'gemeinde_alt';
   					$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'|';
   				?>
@@ -370,6 +368,7 @@ function update_gebietstyp(){
   			<tr>
   				<td>Geltungsbereich [ha]:</td>
   				<?
+  					$j = 5;
   					$this->qlayerset[$i]['attributes']['name'][$j] = 'geltungsbereich';
   					$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'|';
   				?>
@@ -379,16 +378,18 @@ function update_gebietstyp(){
 							<tr id="kap" <? if($layer['shape'][$k]['art'] != 'Innenbereichssatzung' && $layer['shape'][$k]['art'] != 'Außenbereichssatzung')echo ' style="display: none"'; ?>>
 								<td>Gemeindeziel:&nbsp;</td>
 			  				<?
+			  					$j = 10;
 			  					$this->qlayerset[$i]['attributes']['name'][$j] = 'kap_gemziel';
 			  					$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'|';
 			  				?>
-								<td width="60px"><input <? echo ' type="text" style="width: 40px" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?></td>
+								<td width="60px"><input <? echo ' type="text" style="width: 40px" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'" id="kap_value1" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?></td>
 								<td>nach Stell.:&nbsp;</td>
 			  				<?
+			  					$j = 11;
 			  					$this->qlayerset[$i]['attributes']['name'][$j] = 'kap_nachstell';
 			  					$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'|';
 			  				?>
-								<td><input <? echo ' type="text" style="width: 40px" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?></td>
+								<td><input <? echo ' type="text" style="width: 40px" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'" id="kap_value2" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">'; ?></td>
 							</tr>
 						</table>
 					</td>
@@ -641,6 +642,7 @@ function update_gebietstyp(){
   			<tr>
 					<td>Maßgaben:
 					<?
+						$j = 18;
 						$this->qlayerset[$i]['attributes']['name'][$j] = 'erteilteaufl';
 						$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'|';
 					 echo '<textarea style="width: 300px;font-size: '.$this->user->rolle->fontsize_gle.'px" style="font-family: Arial, Verdana, Helvetica, sans-serif;"';
@@ -650,6 +652,7 @@ function update_gebietstyp(){
 				<tr>
 					<td>Hinweise:
 					<?
+						$j = 19;
 						$this->qlayerset[$i]['attributes']['name'][$j] = 'ert_hinweis';
 						$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'|';
 					 echo '<textarea style="width: 300px;font-size: '.$this->user->rolle->fontsize_gle.'px" style="font-family: Arial, Verdana, Helvetica, sans-serif;"';
@@ -659,6 +662,7 @@ function update_gebietstyp(){
 				<tr>
 					<td>Bemerkungen:
 					<?
+						$j = 20;
 						$this->qlayerset[$i]['attributes']['name'][$j] = 'ert_bemerkungen';
 						$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'|';
 					 echo '<textarea style="width: 300px;font-size: '.$this->user->rolle->fontsize_gle.'px" style="font-family: Arial, Verdana, Helvetica, sans-serif;"';
@@ -683,8 +687,8 @@ function update_gebietstyp(){
   <tr align="center"> 
     <td>
     	<input type="button" class="button" name="savebutton" value="<? echo $strSave; ?>" onclick="save();">&nbsp;&nbsp;
-    	<input type="button" class="button" name="savebutton2" value="Als neuen Datensatz speichern" onclick="save_as_new_dataset();">&nbsp;&nbsp;
-    	<input type="button" class="button" name="deletebutton" value="Löschen" onclick="delete_dataset(<? echo $this->qlayerset[$i]['shape'][$k]['b_plan_stammdaten_oid']; ?>);">&nbsp;&nbsp;
+    	<input type="button" class="button" name="savebutton2" value="Datensatz kopieren" onclick="copy_dataset(<? echo $this->qlayerset[$i]['shape'][$k]['plan_id']; ?>);">&nbsp;&nbsp;
+    	<input type="button" class="button" name="deletebutton" value="Löschen" onclick="delete_dataset(<? echo $this->qlayerset[$i]['shape'][$k]['plan_id']; ?>);">&nbsp;&nbsp;
     	<input type="button" class="button" name="mapbutton" value="In die Karte" onclick="zoomto('<? echo $this->qlayerset[$i]['shape'][$k]['lfd_rok_nr']; ?>');">
     </td>
   </tr>
@@ -705,24 +709,32 @@ function update_gebietstyp(){
 			<tr>
 				<td><b>Gemeinde:</b></td>
 				<td><b>ROK-Nr:</b></td>
+				<td width="300px"><b>Planart:</b></td>
   			<td width="300px"><b>Planbezeichnung:</b></td>
   			<td><b>Plan-Nr:</b></td>
   			<td><b>aktuell:</b></td>
   			<td></td>
   		</tr>
 	<?	for($k=0;$k<$anzObj;$k++) { ?>
-				<tr>
-					<? $this->qlayerset[$i]['attributes']['name'][$j] = 'gemeinde'; ?>
+				<tr <?
+					$j = 7;$this->qlayerset[$i]['attributes']['name'][$j] = 'aktuell';
+					if($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]] == 1){
+						echo 'style="font-weight:bold;background-color:lightsteelblue"';
+					} 
+					?>><?
+					$j = 25;$this->qlayerset[$i]['attributes']['name'][$j] = 'gemeinde'; ?>
 					<td valign="top"><a href="javascript:show_details(<? echo $this->qlayerset[$i]['shape'][$k]['b_plan_stammdaten_oid']; ?>);"><? echo htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]); ?></a></td>
-					<? $this->qlayerset[$i]['attributes']['name'][$j] = 'lfd_rok_nr'; ?>
+					<? $j = 8;$this->qlayerset[$i]['attributes']['name'][$j] = 'lfd_rok_nr'; ?>
 					<td valign="top"><a href="javascript:show_details(<? echo $this->qlayerset[$i]['shape'][$k]['b_plan_stammdaten_oid']; ?>);"><? echo htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]); ?></a></td>
-					<? $this->qlayerset[$i]['attributes']['name'][$j] = 'bezeichnung'; ?>
+					<? $j = 2;$this->qlayerset[$i]['attributes']['name'][$j] = 'art'; ?>
 					<td valign="top"><a href="javascript:show_details(<? echo $this->qlayerset[$i]['shape'][$k]['b_plan_stammdaten_oid']; ?>);"><? echo htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]); ?></a></td>
-					<? $this->qlayerset[$i]['attributes']['name'][$j] = 'pl_nr'; ?>
+					<? $j = 6;$this->qlayerset[$i]['attributes']['name'][$j] = 'bezeichnung'; ?>
 					<td valign="top"><a href="javascript:show_details(<? echo $this->qlayerset[$i]['shape'][$k]['b_plan_stammdaten_oid']; ?>);"><? echo htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]); ?></a></td>
-					<? $this->qlayerset[$i]['attributes']['name'][$j] = 'aktuell'; ?>
+					<? $j = 3;$this->qlayerset[$i]['attributes']['name'][$j] = 'pl_nr'; ?>
 					<td valign="top"><a href="javascript:show_details(<? echo $this->qlayerset[$i]['shape'][$k]['b_plan_stammdaten_oid']; ?>);"><? echo htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]); ?></a></td>
-					<td valign="top"><a href="javascript:delete_dataset(<? echo $this->qlayerset[$i]['shape'][$k]['b_plan_stammdaten_oid']; ?>);">löschen</a></td>
+					<? $j = 7;$this->qlayerset[$i]['attributes']['name'][$j] = 'aktuell'; ?>
+					<td valign="top"><a href="javascript:show_details(<? echo $this->qlayerset[$i]['shape'][$k]['b_plan_stammdaten_oid']; ?>);"><? echo htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]); ?></a></td>
+					<td valign="top"><a href="javascript:delete_dataset(<? echo $this->qlayerset[$i]['shape'][$k]['plan_id']; ?>);">löschen</a></td>
   			</tr>
 	<?	} ?>
 		</table>
@@ -746,7 +758,7 @@ else {
 <input type="hidden" value="1" name="changed_<? echo $layer['shape'][$k][$attributes['table_name'][$attributes['name'][0]].'_oid']; ?>">
 <input name="search" type="hidden" value="true">
 <input type="hidden" name="details" value="<? echo $this->formvars['details']; ?>">
-<input type="hidden" name="oid" value="">
+<input type="hidden" name="plan_id" value="">
 <input type="hidden" name="roknr" value="">
 <? if($this->new_entry != true){ ?>
 <input type="hidden" name="selected_layer_id" value="">

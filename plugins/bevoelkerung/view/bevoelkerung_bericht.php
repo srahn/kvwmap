@@ -5,7 +5,7 @@ if($this->go == 'bevoelkerung_bericht_Bericht erstellen'){
   $pdf=new Cezpdf();
   $pdf->selectFont(PDFCLASSPATH.'fonts/Helvetica.afm');
   $y = 825;
-  $pdf->addText(45, $y-=30, 18, 'Bevölkerungsprognose - Bericht');
+  $pdf->addText(45, $y-=30, 18, utf8_decode('Bevölkerungsprognose - Bericht'));
   $ueberschriften = array('Einwohner pro Landkreis', 'Einwohnerdichte pro Landkreis', 'Einwohner pro Altersgruppe', 'Durchschnittsalter pro Landkreis', 'Zusammengefasste Geburtenziffer', 'Bevölkerungsbewegung');
   $formvars_chosen_layer_id = array(465, 465, 551, 466, 94, 524);
   $formvars_chartvalue = array('einwohner2009', 'einwohnerproqkm2009', 'einwohner2009', 'durchschnittsalter2009', 'geburtenziffer', 'rueckgang');
@@ -34,7 +34,7 @@ if($this->go == 'bevoelkerung_bericht_Bericht erstellen'){
         $pageid=$pdf->newPage();
         $y = 825;
       }
-      $pdf->addText(45, $y-=30, 14, $ueberschriften[$i]);
+      $pdf->addText(45, $y-=30, 14, utf8_decode($ueberschriften[$i]));
 			$y = $y-$height*500/$width-12;			
 			$pdf->addJpegFromFile($dateiname,45,$y,500); 
 		}

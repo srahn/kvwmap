@@ -59,4 +59,5 @@
   $strDocument_path="Dokumente Ordner";
   $strDescribtion="Kurzbeschreibung";
   $strDataOwner="Datenherr";
+  $strMetaLink="Metadatenlink";
 ?>  

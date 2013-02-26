@@ -5,15 +5,22 @@
 
 
 	<?  
-		if($this->formvars['selected_layer_id'] AND $this->Fehler == ''){
+	if($this->formvars['selected_layer_id'] AND $this->Fehler == ''){
 			$i = 0;
 		if($this->qlayerset[$i]['template']==''){
 	   	include(SNIPPETS.'generic_layer_editor_2_embedded.php');
 		}
-	  else{
-	  	include(SNIPPETS.$this->qlayerset[$i]['template']);			# falls man mal ein eigenes Subformular einbinden will  	 
-	  }			
-		}?>
+		else{																																		# falls man mal ein eigenes Subformular einbinden will
+		  if(is_file(SNIPPETS.$this->qlayerset[$i]['template'])){
+		   	include(SNIPPETS.$this->qlayerset[$i]['template']);
+		  }
+			else{
+				if(file_exists(PLUGINS.$this->qlayerset[$i]['template'])){
+					include(PLUGINS.$this->qlayerset[$i]['template']);			# Pluginviews
+				}
+			}  	 
+	  }		
+	}?>
 	
 	<table width="100%" border="0" cellpadding="2" cellspacing="0">
 		<tr align="center"> 

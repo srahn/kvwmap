@@ -511,7 +511,8 @@ CREATE TABLE `layer` (
   `logconsume` enum('0','1') collate latin1_german2_ci NOT NULL default '0',
   `processing` varchar(255) collate latin1_german2_ci default NULL,
   `kurzbeschreibung` TEXT NULL,
-	`datenherr` VARCHAR( 100 ) NULL,
+  `datenherr` VARCHAR( 100 ) NULL,
+  `metalink` VARCHAR( 255 ) NULL,
   PRIMARY KEY  (`Layer_ID`),
   KEY `Gruppe` (`Gruppe`)
 );

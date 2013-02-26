@@ -175,6 +175,11 @@ a.black {
 	TEXT-DECORATION:none
 }
 
+a.black2 {
+	color: black; 
+	TEXT-DECORATION:none
+}
+
 #layer {
   border:1px solid gray;
   margin:20px 10px 0px 10px;

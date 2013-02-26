@@ -162,29 +162,34 @@
    ?></table>
 
 <?
-	if($this->formvars['selected_layer_id'] AND $this->Fehler == ''){
-		$i = 0;		
-		if ($this->qlayerset[$i]['template']=='') {
-	   	if(GLEVIEW == '2'){
-	    	include(SNIPPETS.'generic_layer_editor_2.php');			# Attribute zeilenweise
-	   	}
-	   	else{
-	   		include(SNIPPETS.'generic_layer_editor.php');				# Attribute spaltenweise
-	   	}
-	   }
-	   else {
-	   	 if (is_file(SNIPPETS.$this->qlayerset[$i]['template'])) {
-	   	 	 include(SNIPPETS.$this->qlayerset[$i]['template']);
-	   	 }
-	   	 else {
-	   	 	 #Version 1.6.5 pk 2007-04-17
-	   	 	 echo '<p>Das in den stellenbezogenen Layereigenschaften angegebene Templatefile:';
-	   	 	 echo '<br><b>'.SNIPPETS.$this->qlayerset[$i]['template'].'</b>';
-	   	 	 echo '<br>kann nicht gefunden werden. Überprüfen Sie ob der angegebene Dateiname richtig ist oder eventuell Leerzeichen angegeben sind.';
-	   	 	 echo ' Die Templatezuordnung für die Sachdatenanzeige ändern Sie über Stellen anzeigen, ändern, Layer bearbeiten, stellenbezogen bearbeiten.';
-	   	 	 #echo '<p><a href="index.php?go=Layer2Stelle_Editor&selected_layer_id='.$this->qlayerset[$i]['Layer_ID'].'&selected_stelle_id='.$this->Stelle->id.'&stellen_name='.$this->Stelle->Bezeichnung.'">zum Stellenbezogener Layereditor</a> (nur mit Berechtigung möglich)';
-	   	 }
-	   }
+if($this->formvars['selected_layer_id'] AND $this->Fehler == ''){
+	$i = 0;	
+	if($this->qlayerset[$i]['template']==''){
+		if(GLEVIEW == '2'){
+			include(SNIPPETS.'generic_layer_editor_2.php');			# Attribute zeilenweise
+		}
+		else{
+			include(SNIPPETS.'generic_layer_editor.php');				# Attribute spaltenweise
+		}
+	}
+	else{
+		if(is_file(SNIPPETS.$this->qlayerset[$i]['template'])){
+			include(SNIPPETS.$this->qlayerset[$i]['template']);
+		}
+		else{
+			if(file_exists(PLUGINS.$this->qlayerset[$i]['template'])){
+				include(PLUGINS.$this->qlayerset[$i]['template']);			# Pluginviews
+			}
+			else{
+	   		#Version 1.6.5 pk 2007-04-17
+	   	 	echo '<p>Das in den stellenbezogenen Layereigenschaften angegebene Templatefile:';
+	   	 	echo '<br><b>'.SNIPPETS.$this->qlayerset[$i]['template'].'</b>';
+	   	 	echo '<br>kann nicht gefunden werden. Überprüfen Sie ob der angegebene Dateiname richtig ist oder eventuell Leerzeichen angegeben sind.';
+	   	 	echo ' Die Templatezuordnung für die Sachdatenanzeige ändern Sie über Stellen anzeigen, ändern, Layer bearbeiten, stellenbezogen bearbeiten.';
+	   	 	#echo '<p><a href="index.php?go=Layer2Stelle_Editor&selected_layer_id='.$this->qlayerset[$i]['Layer_ID'].'&selected_stelle_id='.$this->Stelle->id.'&stellen_name='.$this->Stelle->Bezeichnung.'">zum Stellenbezogener Layereditor</a> (nur mit Berechtigung möglich)';
+			}
+		}
+	}
 		
 ?>
 <table width="100%" border="0" cellpadding="2" cellspacing="0">

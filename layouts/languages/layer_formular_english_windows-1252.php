@@ -58,6 +58,7 @@
   $strDocument_path="Document Path";
   $strDescribtion="Short Description";
   $strDataOwner="Data-Owner";
+  $strMetaLink="Metadata-Link";
   
   
   

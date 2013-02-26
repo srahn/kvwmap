@@ -209,7 +209,26 @@ class GUI extends GUI_core{
     # mime_type html, pdf
     if (isset ($mime_type)) $this->mime_type=$mime_type;
   }
- 
+
+  function loadPlugins(){
+  	global $kvwmap_plugins;
+	  $this->goNotExecutedInPlugins = false;
+  	$plugins = scandir(PLUGINS, 1);
+  	$code = '
+		switch($this->go){';
+			for($i = 0; $i < count($plugins)-2; $i++){
+				if(in_array($plugins[$i], $kvwmap_plugins)){
+					$code.= file_get_contents(PLUGINS.$plugins[$i].'/control/index.php');
+				}
+			}
+			$code.= '
+			default : {
+				$this->goNotExecutedInPlugins = true;
+			}		
+		}';
+		eval($code);
+  }
+  
   function truncateAlbAlkTables(){
   	echo 'ALB und ALK Tabellen werden geleert<br>';
  		echo 'mit Befehl:<br>';
@@ -374,86 +393,6 @@ class GUI extends GUI_core{
     $this->saveMap('');
 		$this->output(); 
 	}
-	
-	function bevoelkerung_bericht(){
-    $this->main='bevoelkerung_bericht.php';
-    $this->output();
-	}
-	
-	function bevoelkerung_bericht_erstellen(){
-		$this->main='bevoelkerung_bericht.php';
-    $this->output();
-	}
-	
-	function delete_bplan(){
-		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-    $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-		$rok = new rok($layerdb);
-		$rok->delete_bplan($this->formvars['oid']);
-		if($this->formvars['value_tblb_plan_neu_oid'] == ''){
-			$this->GenerischeSuche_Suchen();		# Trefferliste wieder anzeigen
-		}
-		else{
-			$this->loadMap('DataBase');					# Karte anzeigen
-			$currenttime=date('Y-m-d H:i:s',time());
-	    $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-	    $this->drawMap();
-	    $this->saveMap('');
-	    $this->output();
-		}
-	}
-	
-	function delete_fplan(){
-		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-    $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-		$rok = new rok($layerdb);
-		$rok->delete_fplan($this->formvars['oid']);
-		if($this->formvars['value_tblf_plan_oid'] == ''){
-			$this->GenerischeSuche_Suchen();		# Trefferliste wieder anzeigen
-		}
-		else{
-			$this->loadMap('DataBase');					# Karte anzeigen
-			$currenttime=date('Y-m-d H:i:s',time());
-	    $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-	    $this->drawMap();
-	    $this->saveMap('');
-	    $this->output();
-		}
-	}
-	
-  function zoomtobplan(){
-    $rok = new rok($this->pgdatabase);
-    $rect = $rok->getExtentFromRokNrBplan($this->formvars['roknr'], 10, $this->user->rolle->epsg_code);
-    $this->loadMap('DataBase');
-    if ($rect->minx!=0 and $rect->miny!=0 and $rect->maxx!=0 and $rect->maxy!=0) {
-      $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);	  
-		}
-		else {
-		  $this->Fehlermeldung='Es konnte kein Geltungsbereich mit ROK-Nr. = '.$this->formvars['roknr'].' gefunden werden.';
-		}
-    $currenttime=date('Y-m-d H:i:s',time());
-    $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-    $this->drawMap();
-    $this->saveMap('');
-    $this->output();
-  }
-  
-  function zoomtofplan(){
-    $rok = new rok($this->pgdatabase);
-    $rect = $rok->getExtentFromRokNrFplan($this->formvars['gkz'], 10, $this->user->rolle->epsg_code);
-    $this->loadMap('DataBase');
-    if ($rect->minx!=0 and $rect->miny!=0 and $rect->maxx!=0 and $rect->maxy!=0) {
-      $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);	  
-		}
-		else {
-		  $this->Fehlermeldung='Es konnte keine Gemeinde mit GKZ = '.$this->formvars['gkz'].' gefunden werden.';
-		}
-    $currenttime=date('Y-m-d H:i:s',time());
-    $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-    $this->drawMap();
-    $this->saveMap('');
-    $this->output();
-  }
 
   function import_layer(){
     if($this->formvars['neuladen']){
@@ -964,11 +903,21 @@ class GUI extends GUI_core{
                   $legend .=  '<img title="'.$current_group[$j]->Name.'" src="graphics/map.png" align="center">&nbsp;';
                 }
               }
+              if($current_group[$j]->getMetaData('metalink') != ''){
+              	$legend .= '<a ';
+              	if(substr($current_group[$j]->getMetaData('metalink'), 0, 10) != 'javascript'){
+              		$legend .= 'target="_blank"';
+              	}
+              	$legend .= ' class="black2" href="'.$current_group[$j]->getMetaData('metalink').'">';
+              }
               $legend .= '<font ';
               if($current_group[$j]->minscaledenom != -1 AND $current_group[$j]->maxscaledenom != -1){
               	$legend .= 'title="'.$current_group[$j]->minscaledenom.' - '.$current_group[$j]->maxscaledenom.'"';
               }
               $legend .=' size="2">'.html_umlaute($current_group[$j]->name).'</font>';
+                        	if($current_group[$j]->getMetaData('metalink') != ''){
+              	$legend .= '</a>';
+              }
               # Bei eingeschalteten Layern kann man auf die maximale Ausdehnung des Layers zoomen
               if ($current_group[$j]->status == 1) {
                 if ($current_group[$j]->connectiontype==6) {
@@ -6334,8 +6283,9 @@ class GUI extends GUI_core{
             $name_array=explode('.',basename($_FILES[$form_fields[$i]]['name']));
             $datei_name=$name_array[0];
             $datei_erweiterung=array_pop($name_array);
-            if($layerset[0]['document_path'] == '')$layerset[0]['document_path'] = CUSTOM_IMAGE_PATH; 
-            $nachDatei = $layerset[0]['document_path'].rand(0, 1000000).'.'.$datei_erweiterung;
+            if($layerset[0]['document_path'] == '')$layerset[0]['document_path'] = CUSTOM_IMAGE_PATH;
+            $currenttime = date('Y-m-d_H_i_s',time());
+            $nachDatei = $layerset[0]['document_path'].$currenttime.'-'.rand(0, 1000000).'.'.$datei_erweiterung; 
             # Bild in das Datenverzeichnis kopieren
             if (move_uploaded_file($_FILES[$form_fields[$i]]['tmp_name'],$nachDatei)) {
               //echo '<br>Lade '.$_FILES[$form_fields[$i]]['tmp_name'].' nach '.$nachDatei.' hoch';
@@ -8272,7 +8222,7 @@ class GUI extends GUI_core{
       $this->formvars['selstellen']=$this->selected_user->getStellen(0);
     }
     # Abfragen aller möglichen Stellen
-    $this->formvars['stellen']=$this->Stelle->getStellen(0);
+    $this->formvars['stellen']=$this->Stelle->getStellen('Bezeichnung');
     $this->output();
   }
 
@@ -10262,7 +10212,7 @@ class GUI extends GUI_core{
     else $GemkgListe=$Gemarkung->getGemarkungListe(array($GemID),array($GemkgID),'');
     if(count($GemkgListe['GemkgID']) > 0){
       # Die Gemarkung ist ausgewählt und gültig aber Flur leer, zoom auf Gemarkung
-      if ($FlurID==0 OR $FlurID=='-1') {
+      if($FlurID==0 OR $FlurID=='-1'){
         $this->loadMap('DataBase');
         $this->zoomToALKGemarkung($GemkgID,10);				# ALKIS TODO
         $currenttime=date('Y-m-d H:i:s',time());
@@ -10272,13 +10222,23 @@ class GUI extends GUI_core{
       }
       else {
         # ist Gemarkung und Flur ausgefüllt aber keine Angabe zum Flurstück, zoom auf Flur
-        if (($FlstID=='' AND $FlstNr=='') OR $FlstID=='-1') {
-          $this->loadMap('DataBase');
-          $this->zoomToALKFlur($GemID,$GemkgID,$FlurID,10);			# ALKIS TODO
-          $currenttime=date('Y-m-d H:i:s',time());
-          $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-          $this->drawMap();
-          $this->saveMap('');
+        if(($FlstID=='' AND $FlstNr=='') OR ($FlstID=='-1')){
+        	if($this->formvars['ALK_Suche'] == 1){
+	          $this->loadMap('DataBase');
+	          $this->zoomToALKFlur($GemID,$GemkgID,$FlurID,10);			# ALKIS TODO
+	          $currenttime=date('Y-m-d H:i:s',time());
+	          $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
+	          $this->drawMap();
+	          $this->saveMap('');
+        	}
+	        else{			# Anzeige der Flurstuecke der Flur
+	      		$FlstNr=new flurstueck('',$this->pgdatabase);
+	      		$FlstNrListe=$FlstNr->getFlstListe($GemID,$GemkgID,$FlurID,'flurstkennz', $this->formvars['historical']);
+		        $FLstID=$FlstNrListe['FlstID'][0];
+		        $FlstID = $FlstNrListe['FlstID'];
+	          $FlurstKennz = array_values(array_unique($FlstID));
+	          $this->flurstAnzeige($FlurstKennz);
+	      	}
         }
         else {
           # es existiert eine Angabe zum Flurstück
@@ -10400,7 +10360,8 @@ class GUI extends GUI_core{
                 $datei_name=$name_array[0];
                 $datei_erweiterung=array_pop($name_array);
                 $doc_path = $mapdb->getDocument_Path($layer_id);
-                $nachDatei = $doc_path.rand(0, 1000000).'.'.$datei_erweiterung;
+                $currenttime = date('Y-m-d_H_i_s',time());
+                $nachDatei = $doc_path.$currenttime.'-'.rand(0, 1000000).'.'.$datei_erweiterung;
                 $eintrag = $nachDatei."&original_name=".$_FILES[$form_fields[$i]]['name'];
                 if($datei_name == 'delete')$eintrag = '';
                 # Bild in das Datenverzeichnis kopieren
@@ -13673,7 +13634,8 @@ class db_mapObj extends db_mapObj_core{
     $sql .= "querymap = '".$formvars['querymap']."',";
     $sql .= "processing = '".$formvars['processing']."',";
     $sql .= "kurzbeschreibung = '".$formvars['kurzbeschreibung']."',";
-    $sql .= "datenherr = '".$formvars['datenherr']."'";
+    $sql .= "datenherr = '".$formvars['datenherr']."',";
+    $sql .= "metalink = '".addslashes($formvars['metalink'])."'";
     $sql .= " WHERE Layer_ID = ".$formvars['selected_layer_id'];
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->updateLayer - Aktualisieren eines Layers:<br>".$sql,4);
@@ -13693,7 +13655,7 @@ class db_mapObj extends db_mapObj_core{
       if($formvars['id'] != ''){
         $sql.="`Layer_ID`, ";
       }
-      $sql.= "`Name`, `Datentyp`, `Gruppe`, `pfad`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`) VALUES(";
+      $sql.= "`Name`, `Datentyp`, `Gruppe`, `pfad`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`) VALUES(";
       if($formvars['id'] != ''){
         $sql.="'".$formvars['id']."', ";
       }
@@ -13769,7 +13731,8 @@ class db_mapObj extends db_mapObj_core{
       $sql .= "'".$formvars['querymap']."', ";
       $sql .= "'".$formvars['processing']."', ";
       $sql .= "'".$formvars['kurzbeschreibung']."', ";
-      $sql .= "'".$formvars['datenherr']."'";
+      $sql .= "'".$formvars['datenherr']."', ";
+      $sql .= "'".addslashes($formvars['metalink'])."'";
       $sql .= ")";
 
     }

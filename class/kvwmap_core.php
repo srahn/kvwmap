@@ -86,6 +86,12 @@ class GUI_core {
   * @return boolean liefert derzeit immer true zurück.
   * @see    db_mapObj(), $map
   */
+  
+  function loadPlugins(){
+  	// nix machen bei nur Kartennavigation
+  	$this->goNotExecutedInPlugins = true;
+  }
+  
   function loadMap($loadMapSource) {
     $this->debug->write("<p>Funktion: loadMap('".$loadMapSource."','".$connStr."')",4);
     switch ($loadMapSource) {
@@ -454,6 +460,7 @@ class GUI_core {
           $layer->setMetaData('wms_auth_username', $layerset[$i]['wms_auth_username']);
 					$layer->setMetaData('wms_auth_password', '{'.$layerset[$i]['wms_auth_password'].'}');
 					$layer->setMetaData('wms_auth_type', 'any');
+					$layer->setMetaData('metalink', $layerset[$i]['metalink']);
 
           if($layerset[$i]['Class'][0]['Name'] != ''){
             $layer->setMetaData('layer_has_classes', 1);
@@ -1702,7 +1709,7 @@ class db_mapObj_core {
   }
 
   function read_Layer($withClasses) {
-    $sql ='SELECT DISTINCT rl.*,ul.*, l.Layer_ID, l.Name, l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem, l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem, l.tolerance, l.toleranceunits, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version, l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,g.*, gr.*';
+    $sql ='SELECT DISTINCT rl.*,ul.*, l.Layer_ID, l.Name, l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem, l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem, l.tolerance, l.toleranceunits, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version, l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, g.*, gr.*';
     $sql.=' FROM u_rolle2used_layer AS rl,used_layer AS ul,layer AS l, u_groups AS g, u_groups2rolle as gr';
     $sql.=' WHERE rl.stelle_id=ul.Stelle_ID AND rl.layer_id=ul.Layer_ID AND l.Layer_ID=ul.Layer_ID';
     $sql.=' AND (ul.minscale != -1 OR ul.minscale IS NULL) AND l.Gruppe = g.id AND rl.stelle_ID='.$this->Stelle_ID.' AND rl.user_id='.$this->User_ID;
