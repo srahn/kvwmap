@@ -329,13 +329,6 @@ INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@
 # eine Layer-Gruppe anlegen
 INSERT INTO `u_groups` (`id`, `Gruppenname`) VALUES (1, 'Administrativ');
 
-
-# einen Polygon-Layer anlegen
-INSERT INTO `layer` (`Layer_ID`, `Name`, `Datentyp`, `Gruppe`, `pfad`, `Data`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `logconsume`) VALUES 
-(1, 'Frei Polygon', 2, '1', 'SELECT kommentar, the_geom FROM frei_polygon WHERE 1=1', 'the_geom from frei_polygon', '', '', '', '', 0, 0, '', 'user=kvwmap password=kvwmap dbname=kvwmapsp168', 6, 'id', '', 3, 'meters', '2398', '', '1', 'EPSG:2398', '', '1.1.0', 'image/png', 60, '0');
-
-INSERT INTO `classes` (`Class_ID`, `Name`, `Layer_ID`, `Expression`, `drawingorder`, `text`) VALUES 
-(1, 'alle', 1, '', 1, NULL);
-
-INSERT INTO `styles` (`Style_ID`, `symbol`, `symbolname`, `size`, `color`, `backgroundcolor`, `outlinecolor`, `minsize`, `maxsize`, `angle`, `angleitem`, `width`, `sizeitem`) VALUES 
-(1, NULL, NULL, 1, '82 121 248', NULL, '0 0 0', NULL, NULL, NULL, '', NULL, NULL);
+# Einen ersten Druckrahmen erzeugen
+INSERT INTO `druckrahmen` (`Name`, `headsrc`, `headposx`, `headposy`, `headwidth`, `headheight`, `mapposx`, `mapposy`, `mapwidth`, `mapheight`, `refmapsrc`, `refmapfile`, `refmapposx`, `refmapposy`, `refmapwidth`, `refmapheight`, `refposx`, `refposy`, `refwidth`, `refheight`, `refzoom`, `dateposx`, `dateposy`, `datesize`, `scaleposx`, `scaleposy`, `scalesize`, `oscaleposx`, `oscaleposy`, `oscalesize`, `gemarkungposx`, `gemarkungposy`, `gemarkungsize`, `flurposx`, `flurposy`, `flursize`, `legendposx`, `legendposy`, `legendsize`, `arrowposx`, `arrowposy`, `arrowlength`, `userposx`, `userposy`, `usersize`, `watermarkposx`, `watermarkposy`, `watermark`, `watermarksize`, `watermarkangle`, `watermarktransparency`, `format`, `preis`, `font_date`, `font_scale`, `font_gemarkung`, `font_flur`, `font_oscale`, `font_legend`, `font_watermark`, `font_user`) VALUES
+('A4-hoch-leer', 'A4-hoch.jpg', 0, 0, 595, 842, 44, 50, 511, 714, '', NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 503, 784, 11, 422, 74, 0, 422, 87, 0, 238, 54, 0, 238, 64, 0, 58, 50, 0, 540, 770, 0, 140, 800, 0, 155, 155, '', 120, 45, 77, 'A4hoch', 0, '/home/fgs/fgs/apps/PDFClass/fonts/Courier-Bold.afm', '/home/fgs/fgs/apps/PDFClass/fonts/Courier-Bold.afm', '/home/fgs/fgs/apps/PDFClass/fonts/Courier-Bold.afm', '/home/fgs/fgs/apps/PDFClass/fonts/Courier-Bold.afm', NULL, '/home/fgs/fgs/apps/PDFClass/fonts/Courier-Bold.afm', '/home/fgs/fgs/apps/PDFClass/fonts/Courier-Bold.afm', '/home/fgs/fgs/apps/PDFClass/fonts/Courier-Bold.afm');
