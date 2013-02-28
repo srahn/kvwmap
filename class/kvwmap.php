@@ -5046,7 +5046,7 @@ class GUI extends GUI_core{
   
   function substituteFreitext($text){
   	$text = str_replace('$stelle', $this->Stelle->Bezeichnung, $text);
-  	$text = str_replace('$user', $this->user->Name, $text);
+  	$text .= str_replace('$user', $this->user->Name, $text);
   	return $text;
   }
 

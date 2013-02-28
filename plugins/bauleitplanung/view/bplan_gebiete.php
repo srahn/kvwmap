@@ -36,8 +36,8 @@
 			<table class="tgle" border="1">
 			  <tbody class="gle">
 <?		$trans_oid = explode('|', $layer['shape'][$k]['lock']);
-			if($layer['shape'][$k]['lock'] == 'bereits übertragen' OR $trans_oid[1] != '' AND $layer['shape'][$k][$attributes['table_name'][$attributes['name'][0]].'_oid'] == $trans_oid[1]){
-				echo '<tr><td colspan="2" align="center"><span class="red">Dieser Datensatz wurde bereits übertragen und kann nicht bearbeitet werden.</span></td></tr>';
+			if($layer['shape'][$k]['lock'] == 'bereits Ã¼bertragen' OR $trans_oid[1] != '' AND $layer['shape'][$k][$attributes['table_name'][$attributes['name'][0]].'_oid'] == $trans_oid[1]){
+				echo '<tr><td colspan="2" align="center"><span class="red">Dieser Datensatz wurde bereits Ã¼bertragen und kann nicht bearbeitet werden.</span></td></tr>';
 				$lock[$k] = true;
 			}
 			for($j = 0; $j < count($attributes['name']); $j++){
@@ -115,7 +115,7 @@
 
 									case 'Auswahlfeld' : case 'Auswahlfeld_not_saveable' : {
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
-										  if(is_array($attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
+										  if(is_array($attributes['dependent_options'][$j])){		# mehrere DatensÃ¤tze und ein abhÃ¤ngiges Auswahlfeld --> verschiedene AuswahlmÃ¶glichkeiten
 												for($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++){
 													if($attributes['enum_value'][$j][$k][$e] == $layer['shape'][$k][$attributes['name'][$j]]){
 														$auswahlfeld_output = $attributes['enum_output'][$j][$k][$e];
@@ -150,7 +150,7 @@
 											}
 											echo 'id="'.$attributes['name'][$j].'_'.$k.'" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'">';
 											echo '<option value="">-- '.$this->strPleaseSelect.' --</option>';
-											if(is_array($attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
+											if(is_array($attributes['dependent_options'][$j])){		# mehrere DatensÃ¤tze und ein abhÃ¤ngiges Auswahlfeld --> verschiedene AuswahlmÃ¶glichkeiten
 												for($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++){
 													echo '<option ';
 													if($attributes['enum_value'][$j][$k][$e] == $layer['shape'][$k][$attributes['name'][$j]] OR ($attributes['enum_value'][$j][$k][$e] != '' AND $attributes['enum_value'][$j][$k][$e] == $this->formvars[$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j]])){
@@ -340,7 +340,7 @@
 			  							}
 			  							echo '</td><td>';
 			  							if($attributes['privileg'][$j] != '0' AND !$lock[$k]){
-			  								echo '<a href="javascript:delete_document(\''.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'\');">Dokument <br>löschen</a>';
+			  								echo '<a href="javascript:delete_document(\''.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'\');">Dokument <br>lÃ¶schen</a>';
 			  							}
 											echo '</td></tr></table>';
 											echo '<input type="hidden" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].'_alt'.';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$layer['shape'][$k][$attributes['name'][$j]].'">';
@@ -406,7 +406,7 @@
 										}
 									} break;
 
-									case 'Fläche': {
+									case 'FlÃ¤che': {
 										echo '<input onchange="set_changed_flag(document.GUI.changed_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" id="custom_area" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$attributes['alias'][$j].'" ';
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
 											echo ' readonly style="font-size: '.$this->user->rolle->fontsize_gle.'px;background-color:#e8e3da;"';
@@ -418,7 +418,7 @@
 									}break;
 									
 									case 'Zahl': {
-										# bei Zahlen Tausendertrennzeichen einfügen 
+										# bei Zahlen Tausendertrennzeichen einfÃ¼gen 
 										$value = tausenderTrenner($layer['shape'][$k][$attributes['name'][$j]]);
 										echo '<input onchange="set_changed_flag(document.GUI.changed_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$attributes['alias'][$j].'" ';
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){

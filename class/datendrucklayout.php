@@ -55,7 +55,7 @@ class ddl {
     for($j = 0; $j < count($this->layout['texts']); $j++){
     	if($this->layout['type'] == 0 OR $this->layout['texts'][$j]['type'] == 1){		# entweder Layout ist vom seitenweisen Typ oder die Texte sind feststehend
 	      $this->pdf->selectFont($this->layout['texts'][$j]['font']);
-	      $freitext = explode(';', $this->layout['texts'][$j]['text']);
+	      $freitext = explode(';', $this->substituteFreitext($this->layout['texts'][$j]['text']));
 	      $anzahlzeilen = count($freitext);
 	      $alpha = $this->layout['texts'][$j]['angle'];
 	      for($z = 0; $z < $anzahlzeilen; $z++){
@@ -76,6 +76,12 @@ class ddl {
 	      }
 	    }
 	  }
+  }
+  
+	function substituteFreitext($text){
+  	$text = str_replace('$stelle', $this->Stelle->Bezeichnung, $text);
+  	$text = str_replace('$user', $this->user->Name, $text);
+  	return $text;
   }
   
   function createDataPDF($attributes, $selected_layer_id, $layout, $result, $stelle, $user){
@@ -107,7 +113,7 @@ class ddl {
 		    for($j = 0; $j < count($this->layout['texts']); $j++){
 		    	if($this->layout['texts'][$j]['type'] == 0){		# Layout ist vom Untereinander-Typ und die Texte sind fortlaufend
 			      $this->pdf->selectFont($this->layout['texts'][$j]['font']);
-			      $freitext = explode(';', $this->layout['texts'][$j]['text']);
+			      $freitext = explode(';', $this->substituteFreitext($this->layout['texts'][$j]['text']));
 			      $anzahlzeilen = count($freitext);
 			      $alpha = $this->layout['texts'][$j]['angle'];
 			      for($z = 0; $z < $anzahlzeilen; $z++){
