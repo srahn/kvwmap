@@ -441,6 +441,7 @@ include (WWWROOT.APPLVERSION.'funktionen/allg_funktionen.php');		# In Version 1.
 
 ############################ kvwmap-plugins #################		# Version 1.11
 #																																# Version 1.11
+$kvwmap_plugins = array();																			# Version 1.11
 #$kvwmap_plugins[] = bauleitplanung;														# Version 1.11
 #$kvwmap_plugins[] = bevoelkerung;															# Version 1.11
 #$kvwmap_plugins[] = gewaesser;																	# Version 1.11
