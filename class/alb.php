@@ -612,7 +612,7 @@ class ALB {
     header("Content-disposition:  inline; filename=Flurstuecke.csv");
     header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
     header('Pragma: public');
-    print $csv;
+    print utf8_decode($csv);
   }
 
   function export_flurst_csv($flurstuecke, $formvars){
@@ -910,7 +910,7 @@ class ALB {
     header("Content-disposition:  inline; filename=Flurstuecke.csv");
     header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
     header('Pragma: public');
-    print $csv;
+    print utf8_decode($csv);
   }
   
 
