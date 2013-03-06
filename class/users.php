@@ -1789,6 +1789,7 @@ class stelle extends stelle_core{
   }
     
   function NeueStelleAnlegen($stellendaten) {
+  	$_files = $_FILES;
     # Neue Stelle anlegen
     $sql ='INSERT INTO stelle SET';
     if($stellendaten['id'] != ''){
@@ -1820,13 +1821,13 @@ class stelle extends stelle_core{
     $sql.=', ows_fees= "'.$stellendaten['ows_fees'].'"';
     $sql.=', ows_srs= "'.$stellendaten['ows_srs'].'"';
     if($stellendaten['wappen']){
-      $sql.=', wappen="'.$_FILES['wappen']['name'].'"';
+      $sql.=', wappen="'.$_files['wappen']['name'].'"';
     }
     elseif($stellendaten['wappen_save']){
       $sql.=', wappen="'.$stellendaten['wappen_save'].'"';
     }
     if($stellendaten['wasserzeichen']){
-      $sql.=', wasserzeichen="'.$_FILES['wasserzeichen']['name'].'"';
+      $sql.=', wasserzeichen="'.$_files['wasserzeichen']['name'].'"';
     }
     elseif($stellendaten['wasserzeichen_save']){
       $sql.=', wasserzeichen="'.$stellendaten['wasserzeichen_save'].'"';
@@ -1905,10 +1906,10 @@ class stelle extends stelle_core{
     $sql.=', ows_fees= "'.$stellendaten['ows_fees'].'"';
     $sql.=', ows_srs= "'.$stellendaten['ows_srs'].'"';
     if($stellendaten['wappen']){
-      $sql.=', wappen="'.$_FILES['wappen']['name'].'"';
+      $sql.=', wappen="'.$_files['wappen']['name'].'"';
     }
     if($stellendaten['wasserzeichen']){
-      $sql.=', wasserzeichen="'.$_FILES['wasserzeichen']['name'].'"';
+      $sql.=', wasserzeichen="'.$_files['wasserzeichen']['name'].'"';
     }
     $sql.=', check_password_age="';
     if ($stellendaten['checkPasswordAge']=='1') {

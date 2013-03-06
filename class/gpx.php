@@ -42,15 +42,15 @@ class gpx {
   
 	function gpx_import($formvars){
 		$this->formvars = $formvars;
-    if($_FILES['gpxfile']['name']){     # eine GPXdatei wurde ausgewählt
-      $this->formvars['gpxfile'] = $_FILES['gpxfile']['name'];
-      $folder = basename($_FILES['gpxfile']['name'], '.gpx').'/';
+    if($_files['gpxfile']['name']){     # eine GPXdatei wurde ausgewählt
+      $this->formvars['gpxfile'] = $_files['gpxfile']['name'];
+      $folder = basename($_files['gpxfile']['name'], '.gpx').'/';
       if(file_exists(UPLOADPATH.$folder))exec('rm -R '.UPLOADPATH.$folder);											# altes Verzeichnis löschen
       mkdir(UPLOADPATH.$folder);
-      $nachDatei = UPLOADPATH.$folder.$_FILES['gpxfile']['name'];
-      if(move_uploaded_file($_FILES['gpxfile']['tmp_name'],$nachDatei)){
+      $nachDatei = UPLOADPATH.$folder.$_files['gpxfile']['name'];
+      if(move_uploaded_file($_files['gpxfile']['tmp_name'],$nachDatei)){
 				#exec('gpx2shp '.$nachDatei);																														# über Programm gpx2shp (http://sourceforge.jp/projects/gpx2shp/downloads/13458/gpx2shp-0.69.tar.gz/)
-				#$file = basename($_FILES['gpxfile']['name'], '.gpx').'_trk'.'.dbf';										#
+				#$file = basename($_files['gpxfile']['name'], '.gpx').'_trk'.'.dbf';										#
 				
 				exec(OGR_BINPATH.'ogr2ogr -f "ESRI Shapefile" '.UPLOADPATH.$folder.' '.$nachDatei);			# über ogr2ogr
 				#echo OGR_BINPATH.'ogr2ogr -f "ESRI Shapefile" '.UPLOADPATH.$folder.' '.$nachDatei;

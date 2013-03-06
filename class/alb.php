@@ -1554,7 +1554,7 @@ class ALB {
 	                  $Eigentuemerliste[$i]->Name_bearb = $Eigentuemerliste[$i]->Name;
 	                  $Eigentuemerliste[$i]->Name_bearb[0] = str_replace(',,,', '', $Eigentuemerliste[$i]->Name_bearb[0]);
 	                  $Eigentuemerliste[$i]->Name_bearb[0] = str_replace(',,', ',', $Eigentuemerliste[$i]->Name_bearb[0]);
-	                  if(mb_substr($Eigentuemerliste[$i]->Name_bearb[0], strlen($Eigentuemerliste[$i]->Name_bearb[0])-1,'utf8') == ','){
+	                  if(mb_substr($Eigentuemerliste[$i]->Name_bearb[0], 0, strlen($Eigentuemerliste[$i]->Name_bearb[0])-1,'utf8') == ','){
 	                    $Eigentuemerliste[$i]->Name_bearb[0] = mb_substr($Eigentuemerliste[$i]->Name_bearb[0], 0, strlen($Eigentuemerliste[$i]->Name_bearb[0])-1,'utf8');
 	                  }
 	                  # ---------------------------

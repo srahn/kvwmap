@@ -38,11 +38,12 @@ class uko{
   
   
 	function uko_importieren($formvars, $username, $database){
+		$_files = $_FILES;
 		$this->formvars = $formvars;
-    if($_FILES['ukofile']['name']){     # eine UKOdatei wurde ausgewählt
-      $this->formvars['ukofile'] = $_FILES['ukofile']['name'];
-      $nachDatei = UPLOADPATH.$_FILES['ukofile']['name'];
-      if(move_uploaded_file($_FILES['ukofile']['tmp_name'],$nachDatei)){
+    if($_files['ukofile']['name']){     # eine UKOdatei wurde ausgewählt
+      $this->formvars['ukofile'] = $_files['ukofile']['name'];
+      $nachDatei = UPLOADPATH.$_files['ukofile']['name'];
+      if(move_uploaded_file($_files['ukofile']['tmp_name'],$nachDatei)){
 				$ukofile = file($nachDatei);
 				for($i = 0; $i < count($ukofile); $i++){
 					if(strpos($ukofile[$i], 'KOO') !== false){
@@ -50,7 +51,7 @@ class uko{
 					}
 				}
 				$polygon = 'MULTIPOLYGON((('.implode(',', $coords).')))';
-				$sql = "INSERT INTO uko_polygon (username, dateiname, the_geom) VALUES('".$username."', '".$_FILES['ukofile']['name']."', geometryfromtext('".$polygon."', (select srid from geometry_columns where f_table_name = 'uko_polygon')))";
+				$sql = "INSERT INTO uko_polygon (username, dateiname, the_geom) VALUES('".$username."', '".$_files['ukofile']['name']."', geometryfromtext('".$polygon."', (select srid from geometry_columns where f_table_name = 'uko_polygon')))";
 				$ret = $database->execSQL($sql,4, 1);
 				if ($ret[0])$this->success = false;
         else $this->success = true;

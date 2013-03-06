@@ -371,10 +371,10 @@ function in_subnet($ip,$net) {
 	return 0;
 }
 
-function stripScript($_REQUEST) {
+function stripScript($request) {
 	# Definition von Tags, die gestripped werde sollen
 	$search = array('@<script[^>]*?>.*?</script>@si');
-	foreach($_REQUEST AS $key => $value) {
+	foreach($request AS $key => $value) {
 		if (is_array($value)) {
 			$ret[$key]=stripScript($value);
 		}

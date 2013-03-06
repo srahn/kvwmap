@@ -762,7 +762,7 @@ if($GUI->goNotExecutedInPlugins){
 	  case 'Druckrahmen_Freitexthinzufuegen' : {
 		$GUI->checkCaseAllowed('Druckrahmen');
 		  $GUI->druckrahmen_init();
-		  $GUI->Document->update_frame($GUI->formvars, $_FILES);
+		  $GUI->Document->update_frame($GUI->formvars, $_files);
 		  $GUI->Document->addfreetext($GUI->formvars);
 		  $GUI->druckrahmen_load();
 		$GUI->output();
@@ -771,7 +771,7 @@ if($GUI->goNotExecutedInPlugins){
 	  case 'Druckrahmen_Freitextloeschen' : {
 		$GUI->checkCaseAllowed('Druckrahmen');
 		$GUI->druckrahmen_init();
-		$GUI->Document->update_frame($GUI->formvars, $_FILES);
+		$GUI->Document->update_frame($GUI->formvars, $_files);
 		$GUI->Document->removefreetext($GUI->formvars);
 		$GUI->druckrahmen_load();
 		$GUI->output();
@@ -788,7 +788,7 @@ if($GUI->goNotExecutedInPlugins){
 	  case 'Druckrahmen_als neuen Rahmen speichern' : {
 		$GUI->checkCaseAllowed('Druckrahmen');
 		$GUI->druckrahmen_init();
-		$GUI->formvars['aktiverRahmen'] = $GUI->Document->save_frame($GUI->formvars, $_FILES, $GUI->Stelle->id);
+		$GUI->formvars['aktiverRahmen'] = $GUI->Document->save_frame($GUI->formvars, $_files, $GUI->Stelle->id);
 		$GUI->druckrahmen_load();
 		$GUI->output();
 	  } break;
@@ -796,7 +796,7 @@ if($GUI->goNotExecutedInPlugins){
 	  case 'Druckrahmen_Änderungen Speichern' : {
 		$GUI->checkCaseAllowed('Druckrahmen');
 		$GUI->druckrahmen_init();
-		$GUI->Document->update_frame($GUI->formvars, $_FILES);
+		$GUI->Document->update_frame($GUI->formvars, $_files);
 		$GUI->druckrahmen_load();
 		$GUI->output();
 	  } break;
@@ -1520,10 +1520,10 @@ if($GUI->goNotExecutedInPlugins){
 
 	  # Die Werte zum Eintragen von neuen Documenten in die DB werden an "nachweisFormSenden"
 	  case 'Nachweisformular_Senden' : {
-		$GUI->formvars['Bilddatei']=$_FILES['Bilddatei']['tmp_name'];
-		$GUI->formvars['Bilddatei_name']=$_FILES['Bilddatei']['name'];
-		$GUI->formvars['Bilddatei_size']=$_FILES['Bilddatei']['size'];
-		$GUI->formvars['Bilddatei_type']=$_FILES['Bilddatei']['type'];
+		$GUI->formvars['Bilddatei']=$_files['Bilddatei']['tmp_name'];
+		$GUI->formvars['Bilddatei_name']=$_files['Bilddatei']['name'];
+		$GUI->formvars['Bilddatei_size']=$_files['Bilddatei']['size'];
+		$GUI->formvars['Bilddatei_type']=$_files['Bilddatei']['type'];
 		$GUI->nachweisFormSenden();
 	  } break;
 

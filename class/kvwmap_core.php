@@ -960,8 +960,13 @@ class GUI_core {
           if(MAPSERVERVERSION > 500 AND $layerset['labelangleitem']!=''){
             $klasse->label->setbinding(MS_LABEL_BINDING_ANGLE, $layerset['labelangleitem']);
           }
-          if ($dbLabel['autoangle']==1) {
-            $klasse->label->set('autoangle',$dbLabel['autoangle']);
+        	if($dbLabel['autoangle']==1) {
+            if(MAPSERVERVERSION >= 600){
+	          	$klasse->label->set('anglemode', MS_AUTO);
+	          }
+	          else{
+	          	$klasse->label->set('autoangle',$dbLabel['autoangle']);
+            }
           }
           if ($dbLabel['buffer']!='') {
             $klasse->label->set('buffer',$dbLabel['buffer']);
@@ -1047,9 +1052,14 @@ class GUI_core {
           $label->angle = $dbLabel['angle'];
           if($layerset['labelangleitem']!=''){
             $label->setBinding(MS_LABEL_BINDING_ANGLE, $layerset['labelangleitem']);
-          }
-          if ($dbLabel['autoangle']==1) {
-            $label->autoangle = $dbLabel['autoangle'];
+          }          
+        	if($dbLabel['autoangle']==1) {
+            if(MAPSERVERVERSION >= 600){
+            	$label->set('anglemode', MS_AUTO);
+            }
+            else{
+            	$label->autoangle = $dbLabel['autoangle'];
+            }
           }
           if ($dbLabel['buffer']!='') {
             $label->buffer = $dbLabel['buffer'];

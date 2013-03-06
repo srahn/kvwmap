@@ -40,9 +40,10 @@ class shape {
   }
   
   function create_shape_rollenlayer($formvars, $stelle, $user, $database, $pgdatabase){
-  	if($_FILES['zipfile']['name']){     # eine Zipdatei wurde ausgewählt
-      $nachDatei = UPLOADPATH.$_FILES['zipfile']['name'];
-      if(move_uploaded_file($_FILES['zipfile']['tmp_name'],$nachDatei)){
+  	$_files = $_FILES;
+  	if($_files['zipfile']['name']){     # eine Zipdatei wurde ausgewählt
+      $nachDatei = UPLOADPATH.$_files['zipfile']['name'];
+      if(move_uploaded_file($_files['zipfile']['tmp_name'],$nachDatei)){
 				$files = unzip($nachDatei, false, false, true);
 				$firstfile = explode('.', $files[0]);
 				$file = $firstfile[0];
@@ -261,11 +262,12 @@ class shape {
   }
   
   function shp_import($formvars){
+  	$_files = $_FILES;
     $this->formvars = $formvars;
-    if($_FILES['zipfile']['name']){     # eine Zipdatei wurde ausgewählt
-      $this->formvars['zipfile'] = $_FILES['zipfile']['name'];
-      $nachDatei = UPLOADPATH.$_FILES['zipfile']['name'];
-      if(move_uploaded_file($_FILES['zipfile']['tmp_name'],$nachDatei)){
+    if($_files['zipfile']['name']){     # eine Zipdatei wurde ausgewählt
+      $this->formvars['zipfile'] = $_files['zipfile']['name'];
+      $nachDatei = UPLOADPATH.$_files['zipfile']['name'];
+      if(move_uploaded_file($_files['zipfile']['tmp_name'],$nachDatei)){
         $files = unzip($nachDatei, false, false, true);
         $firstfile = explode('.', $files[0]);
         $file = $firstfile[0].'.dbf';

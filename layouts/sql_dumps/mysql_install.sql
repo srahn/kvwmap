@@ -732,6 +732,8 @@ CREATE TABLE `styles` (
   `sizeitem` varchar(255) collate latin1_german2_ci default NULL,
   `offsetx` INT( 11 ) NULL ,
   `offsety` INT( 11 ) NULL,
+  `pattern` VARCHAR(255) NULL,
+  `geomtransform` VARCHAR(20) NULL,
   PRIMARY KEY  (`Style_ID`)
 );
 

@@ -62,6 +62,11 @@
     		}
     		$restheight = $restheight - $image_tile_size;
     	}    	
+    	
+    	#$image = imagecreatefromstring($resultimage);
+     	#$fpg = fopen('/home/fgs/fgs/test/test_gesamt.png', "w");
+     	#fwrite($fpg, $image);
+    	
 	    if($format == 'image/png'){
 	      imagepng($resultimage);
 	    }

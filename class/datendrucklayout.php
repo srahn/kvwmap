@@ -237,7 +237,7 @@ class ddl {
     return $dateipfad.$dateiname;
 	}
 
-	function save_layout($formvars, $attributes, $_FILES, $stelle_id){
+	function save_layout($formvars, $attributes, $_files, $stelle_id){
     if($formvars['name']){
     	for($i = 0; $i< count($formvars); $i++){
     		if($formvars[key($formvars)] == NULL)$formvars[key($formvars)] = 'NULL';
@@ -260,10 +260,10 @@ class ddl {
       $sql .= ", `font_date` = '".$formvars['font_date']."'";
       $sql .= ", `font_user` = '".$formvars['font_user']."'";
       $sql .= ", `type` = ".$formvars['type'];
-      if($_FILES['bgsrc']['name']){
-        $nachDatei = DRUCKRAHMEN_PATH.$_FILES['bgsrc']['name'];
-        if (move_uploaded_file($_FILES['bgsrc']['tmp_name'],$nachDatei)) {
-          $sql .= ", `bgsrc` = '".$_FILES['bgsrc']['name']."'";
+      if($_files['bgsrc']['name']){
+        $nachDatei = DRUCKRAHMEN_PATH.$_files['bgsrc']['name'];
+        if (move_uploaded_file($_files['bgsrc']['tmp_name'],$nachDatei)) {
+          $sql .= ", `bgsrc` = '".$_files['bgsrc']['name']."'";
         }
       }
       else{
@@ -321,7 +321,8 @@ class ddl {
     return $lastddl_id;
   } 
   
-  function update_layout($formvars, $attributes, $_FILES){
+  function update_layout($formvars, $attributes, $_files){
+  	$_files = $_FILES;
     if($formvars['name']){
     	for($i = 0; $i< count($formvars); $i++){
     		if($formvars[key($formvars)] == NULL)$formvars[key($formvars)] = 'NULL';
@@ -344,10 +345,10 @@ class ddl {
       $sql .= ", `font_date` = '".$formvars['font_date']."'";
       $sql .= ", `font_user` = '".$formvars['font_user']."'";
       $sql .= ", `type` = ".$formvars['type'];
-      if($_FILES['bgsrc']['name']){
-        $nachDatei = DRUCKRAHMEN_PATH.$_FILES['bgsrc']['name'];
-        if (move_uploaded_file($_FILES['bgsrc']['tmp_name'],$nachDatei)) {
-          $sql .= ", `bgsrc` = '".$_FILES['bgsrc']['name']."'";
+      if($_files['bgsrc']['name']){
+        $nachDatei = DRUCKRAHMEN_PATH.$_files['bgsrc']['name'];
+        if (move_uploaded_file($_files['bgsrc']['tmp_name'],$nachDatei)) {
+          $sql .= ", `bgsrc` = '".$_files['bgsrc']['name']."'";
         }
       }
       else{
@@ -420,6 +421,7 @@ class ddl {
     if($layer_id AND $stelle_id){
     	$sql.= ', ddl2stelle WHERE ddl2stelle.ddl_id = datendrucklayouts.id';
     	$sql .= ' AND layer_id = '.$layer_id;
+    	$sql .= ' AND ddl2stelle.stelle_id = '.$stelle_id;
     }
     $sql .= ' ORDER BY name';
     #echo $sql.'<br>';

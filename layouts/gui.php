@@ -1,3 +1,4 @@
+<?php header('Content-Type: text/html; charset=utf-8'); ?> 
 <HTML><HEAD><TITLE><? echo TITLE; ?></TITLE>
 <META http-equiv=Content-Type content="text/html; charset=UTF-8">
 <? # die Funktionen, die hier mal standen, sind in folgende Datei ausgelagert worden 
