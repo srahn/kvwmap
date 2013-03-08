@@ -39,7 +39,7 @@
 	$SVG_begin ='<?xml version="1.0"?>
 	<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
 	  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-	<svg width="'.$res_x.'" height="'.$res_y.'" zoomAndPan="enable" onload="startup()" onmousemove="top.coords2(evt)"
+	<svg width="'.$res_x.'" height="'.$res_y.'" zoomAndPan="enable" onload="startup()" onmousemove="top.coords_anzeige(evt)"
 	  xmlns="http://www.w3.org/2000/svg" version="1.1"
 	  xmlns:xlink="http://www.w3.org/1999/xlink">
 	';

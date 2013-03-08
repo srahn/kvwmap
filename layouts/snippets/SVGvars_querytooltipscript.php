@@ -109,7 +109,7 @@ $SVGvars_querytooltipscript .= '
 		}				
 			
 		function mouse_move(evt){
-			top.coords2(evt);
+			top.coords_anzeige(evt);
 		 	if(doing == "ppquery"){
 		 		hidetooltip(evt);
 		 	}
