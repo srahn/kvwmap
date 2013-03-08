@@ -6372,7 +6372,7 @@ class GUI extends GUI_core{
             $sql.= "'".$this->Stelle->Bezeichnung."', ";
           }
           elseif($table['type'][$i] != 'Text_not_saveable' AND $table['type'][$i] != 'Auswahlfeld_not_saveable' AND $table['type'][$i] != 'SubFormPK' AND $table['type'][$i] != 'SubFormFK' AND $this->formvars[$table['formfield'][$i]] != ''){
-	          if($table['type'][$i] == 'Zahl'){                       # Typ "Zahl"
+          	if($table['type'][$i] == 'Zahl'){                       # Typ "Zahl"
 	            $this->formvars[$table['formfield'][$i]] = str_replace(' ', '', $this->formvars[$table['formfield'][$i]]);		# bei Zahlen das Leerzeichen (Tausendertrenner) entfernen
 	          }
             $sql.= "'".addslashes($this->formvars[$table['formfield'][$i]])."', ";      # Typ "normal"
