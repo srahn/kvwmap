@@ -1,6 +1,6 @@
 <?php
 ###################################################################
-# kvwmap - Kartenserver f�r Kreisverwaltungen                     #
+# kvwmap - Kartenserver für Kreisverwaltungen                     #
 ###################################################################
 # Lizenz                                                          #
 #                                                                 # 
@@ -82,59 +82,59 @@ class Nachweis {
   
   function changeDokument($formvars) {
     #2005-11-25_pk
-    echo '�nderung des Dokumentes mit der id: '.$formvars['id'];
+    #echo 'Änderung des Dokumentes mit der id: '.$formvars['id'];
 
     # 1. Starten der Transaktion
     $this->database->begintransaction();        
 
-    # 2. Pr�fen der Eingabewerte
+    # 2. Prüfen der Eingabewerte
     $ret=$this->pruefeEingabedaten($formvars['datum'],$formvars['VermStelle'],$formvars['art'],$formvars['gueltigkeit'],$formvars['stammnr'],$formvars['rissnummer'],$formvars['fortfuehrung'],$formvars['Blattformat'],$formvars['Blattnr'],$formvars['changeDocument'],$formvars['Bilddatei_name'],$formvars['pathlength'],$formvars['umring']);
     if ($ret[0]) {
       # Fehler bei den Eingabewerten entdeckt.  
-      #echo '<br>Ergebnis der Pr�fung: '.$ret;
+      #echo '<br>Ergebnis der Prüfung: '.$ret;
       $errmsg=$ret[1];
     }
     else {
-      echo '<br>Eingabewerte gepr�ft.';
-      # 3. Abfragen des Namens der zu �ndernden Dokumentendatei
+      #echo '<br>Eingabewerte geprüft.';
+      # 3. Abfragen des Namens der zu ändernden Dokumentendatei
       $ret=$this->getDocLocation($formvars['id']);
       if ($ret[0]) {
-        # Abfrage des Namens der zu �ndernden Dokumentendatei nicht erfolgreich
+        # Abfrage des Namens der zu ändernden Dokumentendatei nicht erfolgreich
         $errmsg=$ret[1];
       }
       else {
         # Name der alten Dokumentendatei gefunden
         $doclocation=$ret[1];
-        echo '<br>Speicherort der alten Dokumentendatei: '.$doclocation.' abgefragt.';
+        #echo '<br>Speicherort der alten Dokumentendatei: '.$doclocation.' abgefragt.';
         if ($formvars['changeDocument']==0) {
-          # Verwenden der vorhandenen Datei f�r die Bildung des neuen Dateinamens
-          # unter dem die Datei nach der Sachdaten�nderung gespeichert werden soll
+          # Verwenden der vorhandenen Datei für die Bildung des neuen Dateinamens
+          # unter dem die Datei nach der Sachdatenänderung gespeichert werden soll
           $formvars['Bilddatei_name']=$doclocation;
         }
         # Zusammensetzen des Dateinamen unter dem das Dokument gespeichert werden soll
         $formvars['zieldateiname']=$this->getZielDateiName($formvars);
 
-        # 4. �ndern der Eintragung in der Datenbank
+        # 4. Ändern der Eintragung in der Datenbank
         $ret=$this->aktualisierenDokument($formvars['id'],$formvars['datum'],$formvars['flurid'],$formvars['VermStelle'],$formvars['art'],$formvars['andere_art'],$formvars['gueltigkeit'],$formvars['stammnr'],$formvars['Blattformat'],$formvars['Blattnr'],$formvars['rissnummer'],$formvars['fortfuehrung'],$formvars['bemerkungen'],$formvars['umring'],$formvars['artname'].'/'.$formvars['zieldateiname']);
         if ($ret[0]) {
           # Aktualisierungsvorgang in der Datenbank nicht erfolgreich
           $errmsg=$ret[1];
         }
         else {
-          # 5. �nderung erfolgreich, �berschreiben der alten durch die neue Datei
-          echo '<br>Eintragung in Datenbank ge�ndert.';
-          # Unterscheidung ob auch die Datei ge�ndert werden soll
+          # 5. Änderung erfolgreich, überschreiben der alten durch die neue Datei
+          #echo '<br>Eintragung in Datenbank geändert.';
+          # Unterscheidung ob auch die Datei geändert werden soll
           if ($formvars['changeDocument']) {
-            # Datei soll auch ge�ndert werden.
-            # 5.1 L�schen der bestehenden Bilddatei auf dem Server
+            # Datei soll auch geändert werden.
+            # 5.1 Löschen der bestehenden Bilddatei auf dem Server
             $ret=$this->dokumentenDateiLoeschen($doclocation);
             if ($ret!='') {
-              # Alte Datei konnte nicht gel�scht werden   
+              # Alte Datei konnte nicht gelöscht werden   
               $errmsg=$ret;
             }
             else {
-              # 5.2 L�schen der alten Datei war erfolgreich
-              echo '<br>Alte Datei: '.$doclocation.' gel�scht';
+              # 5.2 Löschen der alten Datei war erfolgreich
+              #echo '<br>Alte Datei: '.$doclocation.' gelöscht';
               # Speichern der neuen Bilddatei auf dem Server
               $ret=$this->dokumentenDateiHochladen($formvars['flurid'],$this->buildNachweisNr($formvars[NACHWEIS_PRIMARY_ATTRIBUTE], $formvars[NACHWEIS_SECONDARY_ATTRIBUTE]),$formvars['artname'],$formvars['Bilddatei'],$formvars['zieldateiname']);
               if ($ret!='') {
@@ -143,24 +143,24 @@ class Nachweis {
               }
               else {
                 # 6. Speicherung der neuen Bilddatei war erfolgreich
-                echo '<br>Neue Datei:'.$this->zieldateiname.' auf den Server geladen.';
-                # Erfolgreiches abschlie�en der Transaktion
+                #echo '<br>Neue Datei:'.$this->zieldateiname.' auf den Server geladen.';
+                # Erfolgreiches abschließen der Transaktion
                 $this->database->committransaction();
                 $ret[0]=0;
-                $ret[1]='�nderung des Datenbankeintrages und der Datei erfolgreich.';
+                $ret[1]='Änderung des Datenbankeintrages und der Datei erfolgreich.';
               } # end of Speicherung der neuen Bilddatei
-            } # end of L�schen der alten Datei
+            } # end of Löschen der alten Datei
           } # end of eine neue Datei soll hochgeladen werden
           else {
             # vorhandene Datei soll nicht durch neu hochgeladene Datei ersetzt werden
-            # Pr�fen, ob sich der Speicherort auf Grund von ge�nderten Sachdaten �ndern muss
+            # Prüfen, ob sich der Speicherort auf Grund von geänderten Sachdaten ändern muss
             # $doclocation... alter Speicherort
             # Zusammensetzen des neuen Speicherortes
             $zieldatei=NACHWEISDOCPATH.$formvars['flurid'].'/'.$this->buildNachweisNr($formvars[NACHWEIS_PRIMARY_ATTRIBUTE], $formvars[NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$formvars['artname'].'/'.$formvars['zieldateiname'];
             if ($doclocation!=$zieldatei) {
-              echo '<br>Speicherort der Datei muss ge�ndert werden.';
-              echo '<br>von:&nbsp; '.$doclocation;
-              echo '<br>nach: '.$zieldatei; 
+              #echo '<br>Speicherort der Datei muss geändert werden.';
+              #echo '<br>von:&nbsp; '.$doclocation;
+              #echo '<br>nach: '.$zieldatei; 
               # Datei muss an neuen Speicherort.
               # Speichern der Bilddatei unter neuem Pfad und Namen auf dem Server
               $ret=$this->dokumentenDateiHochladen($formvars['flurid'],$this->buildNachweisNr($formvars[NACHWEIS_PRIMARY_ATTRIBUTE], $formvars[NACHWEIS_SECONDARY_ATTRIBUTE]),$formvars['artname'],$doclocation,$formvars['zieldateiname']);
@@ -170,53 +170,53 @@ class Nachweis {
               }
               else {
                 # vorhandene Datei wurde an neuen Ort geschrieben
-                echo '<br>Alte Dateian an neuen Ort:'.$zieldatei.' geschrieben.';
-                # 7 L�schen der bestehenden Bilddatei auf dem Server
+                #echo '<br>Alte Dateian an neuen Ort:'.$zieldatei.' geschrieben.';
+                # 7 Löschen der bestehenden Bilddatei auf dem Server
                 $ret=$this->dokumentenDateiLoeschen($doclocation);
                 if ($ret!='') {
-                  # Alte Datei konnte nicht gel�scht werden   
+                  # Alte Datei konnte nicht gelöscht werden   
                   $errmsg=$ret;
                 }
                 else {
-                  # 7.1 L�schen der alten Datei war erfolgreich
-                  # Test ob Verzeichnisse leer, dann l�schen
+                  # 7.1 Löschen der alten Datei war erfolgreich
+                  # Test ob Verzeichnisse leer, dann löschen
                   $directory = dirname($doclocation);
 		              if(is_dir_empty($directory)){
 		              	rmdir($directory);
-		              	echo '<br>Altes Verzeichnis: '.$directory.' gel�scht';
+		              	#echo '<br>Altes Verzeichnis: '.$directory.' gelöscht';
 		              	$directory = dirname($directory);
 		              	if(is_dir_empty($directory)){
 		              		rmdir($directory);
-		              		echo '<br>Altes Verzeichnis: '.$directory.' gel�scht';
+		              		#echo '<br>Altes Verzeichnis: '.$directory.' gelöscht';
 		              		$directory = dirname($directory);
 			              	if(is_dir_empty($directory)){
 			              		rmdir($directory);
-			              		echo '<br>Altes Verzeichnis: '.$directory.' gel�scht';
+			              		#echo '<br>Altes Verzeichnis: '.$directory.' gelöscht';
 			              	}
 		              	}
 		              }
-                  echo '<br>Alte Datei: '.$doclocation.' gel�scht';
+                  #echo '<br>Alte Datei: '.$doclocation.' gelöscht';
                   # 7.2 Umspeicherung der neuen Bilddatei war erfolgreich
-                  # Erfolgreiches abschlie�en der Transaktion
+                  # Erfolgreiches abschließen der Transaktion
                   $this->database->committransaction();
                   $ret[0]=0;
-                  $ret[1]='�nderung des Datenbankeintrages und der Datei erfolgreich.';
+                  $ret[1]='Änderung des Datenbankeintrages und der Datei erfolgreich.';
                 }
               }
             }
             else {
-              # Erfolgreiches abschlie�en der Transaktion
+              # Erfolgreiches abschließen der Transaktion
               $this->database->committransaction();
               $ret[0]=0;
-              $ret[1]='�nderung des Datenbankeintrags ohne �nderung des Speicherortes der Datei erfolgreich.';
+              $ret[1]='Änderung des Datenbankeintrags ohne Änderung des Speicherortes der Datei erfolgreich.';
             }
           } # end of keine neue hochgeladene Datei
-        } # end of Eintragen der �nderung in Datenbank
+        } # end of Eintragen der Änderung in Datenbank
       } # end of alter Speicherort erfolgreich ermittelt
-    } # end of Pr�fung der Eingabewerte ok
+    } # end of Prüfung der Eingabewerte ok
     if ($errmsg!='') {
-      # Es ist eine Fehlermeldung aufgetreten die Transaktion wird r�ckg�ngig gemacht.
-      # Die �nderung in der Datenbank wird wieder zur�ckgenommen.
+      # Es ist eine Fehlermeldung aufgetreten die Transaktion wird rückgüngig gemacht.
+      # Die Änderung in der Datenbank wird wieder zurückgenommen.
       $this->database->rollbacktransaction();
       $ret[0]=1;
       $ret[1]=$errmsg; 
@@ -241,7 +241,7 @@ class Nachweis {
     $ret=$this->database->execSQL($sql,4, 0);    
     if (!$ret[0]) {
       $rs=pg_fetch_array($ret[1]);
-      echo 'Anzahl: '.$rs['anzahl'];
+      #echo 'Anzahl: '.$rs['anzahl'];
     }
     return $anzahl;
   }
@@ -319,12 +319,12 @@ class Nachweis {
   
   function pruefeEingabedaten($datum, $VermStelle, $art, $gueltigkeit, $stammnr, $rissnummer, $fortfuehrung, $Blattformat, $Blattnr, $changeDocument,$Bilddatei_name, $pathlength, $umring) {
     #echo '<br>Starten der Funktion zum testen der Eingabedaten.';
-    # Test: wurde das Polgon f�r den raumbezug festgelegt?
+    # Test: wurde das Polgon für den raumbezug festgelegt?
     if ($umring == ''){
-      $errmsg.='Bitte legen Sie das Polygon f�r den einzuarbeitenden Nachweis fest! \n';
+      $errmsg.='Bitte legen Sie das Polygon für den einzuarbeitenden Nachweis fest! \n';
     }
         
-    # Test:  Sind die X-Y-Werte als Arrays �begeben worden?
+    # Test:  Sind die X-Y-Werte als Arrays übegeben worden?
     if (@is_array($pathy)!=1 OR @is_array($pathx)!=1){
       $errmasg.='X-Y-Koordinaten wurden nicht oder falsch gesetzt! \n';
     }
@@ -360,7 +360,7 @@ class Nachweis {
           $errmsg.= 'Datum ist nicht korrekt angegeben! \n' ;
         }
 
-        # pr�fen ob Datum in Zukunft
+        # prüfen ob Datum in Zukunft
         $realtime=time();
         $Zeit=mktime(0, 0, 0, $Monat, $Tag, $Jahr);
         if ($realtime < $Zeit) {
@@ -382,7 +382,7 @@ class Nachweis {
     }
     # Test der Dokumentenart  
     if ($art==''){
-        $errmsg.='Bitte w�hlen Sie die Art des einzugebenden Dokuments aus! \n';
+        $errmsg.='Bitte wählen Sie die Art des einzugebenden Dokuments aus! \n';
     }
     else{
       $nums = array ("100","010","001","111");
@@ -391,12 +391,12 @@ class Nachweis {
       }
     }
     if ($gueltigkeit==''){
-      $errmsg.='Bitte w�hlen Sie die G�ltigkeit des einzugebenden Dokuments aus! \n';
+      $errmsg.='Bitte wählen Sie die Gültigkeit des einzugebenden Dokuments aus! \n';
     }
     else{
       $nums = array("1","0");
       if (!in_array($gueltigkeit,$nums)){
-        $errmsg.='Die Angabe �ber die G�ltigkeit des Dokuments ist nicht korrekt! \n';
+        $errmsg.='Die Angabe über die Gültigkeit des Dokuments ist nicht korrekt! \n';
       }
     }
     # Testen der Stammnummer
@@ -414,7 +414,7 @@ class Nachweis {
 	        }
 	      }
 	      if ($strenthalten==1) {
-	        $errmsg.='Ung�ltige Zeichen bei der Antragsnummer ! \n';
+	        $errmsg.='Ungültige Zeichen bei der Antragsnummer ! \n';
 	      }
 	    }
     }
@@ -433,14 +433,14 @@ class Nachweis {
 	        }
 	      }
 	      if ($strenthalten==1) {
-	        $errmsg.='Ung�ltige Zeichen bei der Rissnummer ! \n';
+	        $errmsg.='Ungültige Zeichen bei der Rissnummer ! \n';
 	      }
 	    }
     }
   # Testen der Fortfuehrung
     if(NACHWEIS_SECONDARY_ATTRIBUTE == 'fortfuehrung'){
     	if($fortfuehrung == '' OR $fortfuehrung < 1860 OR $fortfuehrung > date('Y')){
-	      $errmsg.='Bitte geben Sie das Fortf�hrungsjahr korrekt ein! \n';
+	      $errmsg.='Bitte geben Sie das Fortführungsjahr korrekt ein! \n';
 	    }
     }
     # Test der Blattnummer
@@ -462,7 +462,7 @@ class Nachweis {
     }
     # Test der Bilddatei 
     if($changeDocument AND $Bilddatei_name==''){
-      $errmsg.='Bitte w�hlen Sie die Bilddatei aus! ';
+      $errmsg.='Bitte wählen Sie die Bilddatei aus! ';
     }
     if ($errmsg!='') {
       $ret[0]=1;
@@ -485,7 +485,7 @@ class Nachweis {
   
   function dokumentenDateiHochladen($flurid,$nr,$artname,$quelldatei,$zieldateiname) {
     #2005-11-24_pk
-    # Speicherort f�r die Nachweisdatei bestimmen
+    # Speicherort für die Nachweisdatei bestimmen
     $pfad=NACHWEISDOCPATH.$flurid.'/';
     if (!is_dir($pfad)) {
       mkdir ($pfad, 0777);
@@ -515,44 +515,44 @@ class Nachweis {
     if (file_exists($doclocation)) {
       $erfolg=unlink($doclocation);
       if (!$erfolg){  
-        $errmsg.= 'Die Datei konnte nicht gel�scht werden, weil sie nicht existiert oder keine Zugriffsrechte bestehen! ';      
+        $errmsg.= 'Die Datei konnte nicht gelöscht werden, weil sie nicht existiert oder keine Zugriffsrechte bestehen! ';      
       }
       else {
-        #echo '<br>Datei: '.$doclocation.' gel�scht.';
+        #echo '<br>Datei: '.$doclocation.' gelöscht.';
       }
     }
     return $errmsg;
   }
 
   function nachweiseLoeschen($id,$loeschenDateien) {
-    # L�schen von Nachweisen in Datenbank und eventuelle auch die dazugeh�rigen Dateien
+    # Löschen von Nachweisen in Datenbank und eventuelle auch die dazugehörigen Dateien
     $errmsg='';
     $msg='';
-    # Pr�fe ob es ein oder mehrere ids sind zum L�schen
+    # Prüfe ob es ein oder mehrere ids sind zum Löschen
     if (is_array($id)) { $idListe=$id; } else { $idListe=array($id); }
     $anzahlIDs=count($idListe);
-    # Parameter, mit dem der L�schvorgang abgebrochen werden kann
+    # Parameter, mit dem der Löschvorgang abgebrochen werden kann
     $loeschenabbrechen=0;
-    # L�sche die Nachweise eventuell mit samt Dateien von 1 bis n
+    # Lösche die Nachweise eventuell mit samt Dateien von 1 bis n
     for ($i=0;$i<$anzahlIDs;$i++) {
-      # Sollen auch die Dateien zu den Nachweisen auf dem Server gel�scht werden
+      # Sollen auch die Dateien zu den Nachweisen auf dem Server gelöscht werden
       if ($loeschenDateien) {
         # Abfragen des Namens der Datei zum Nachweis
         $ret=$this->getNachweise($idListe[$i],'','','','','','','','bySingleID','','');
         if ($ret=='') {
           # Abfrage war erfolgreich
-          # Es wurde ein Eintrag in Datenbank gefunden, das l�schen der Datei kann erfolgen
-          # Abfrage, ob die Datei �berhaupt existiert
+          # Es wurde ein Eintrag in Datenbank gefunden, das löschen der Datei kann erfolgen
+          # Abfrage, ob die Datei überhaupt existiert
           $nachweisDatei=NACHWEISDOCPATH.$this->Dokumente[0]['flurid'].'/'.$this->buildNachweisNr($this->Dokumente[0][NACHWEIS_PRIMARY_ATTRIBUTE], $this->Dokumente[0][NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$this->Dokumente[0]['link_datei'];
           if (file_exists($nachweisDatei)) {
-            # Datei existiert und kann jetzt im Filesystem gel�scht werden
+            # Datei existiert und kann jetzt im Filesystem gelöscht werden
             if (unlink($nachweisDatei)) {
-              # Datei wurde erfolgreich gel�scht
-              $msg.='Datei '.$nachweisDatei.' wurde erfolgreich gel�scht.';
+              # Datei wurde erfolgreich gelöscht
+              $msg.='Datei '.$nachweisDatei.' wurde erfolgreich gelöscht.';
             }
             else {
-              # Datei konnte nicht gel�scht werden
-              $errmsg.='Datei konnte nicht vom Server gel�scht werden. Wahrscheinlich fehlende Zugriffsrechte.';
+              # Datei konnte nicht gelöscht werden
+              $errmsg.='Datei konnte nicht vom Server gelöscht werden. Wahrscheinlich fehlende Zugriffsrechte.';
               $loeschenabbrechen=1;              
             }
           }
@@ -568,18 +568,18 @@ class Nachweis {
           $loeschenabbrechen=1;
         }
       }
-      # Wenn keine Fehler aufgetreten sind, l�schen des Datenbankeintrages des Nachweises.
+      # Wenn keine Fehler aufgetreten sind, löschen des Datenbankeintrages des Nachweises.
       if ($errmsg=='') {
       	$sql="DELETE FROM n_nachweise2dokumentarten WHERE nachweis_id = ".$idListe[$i].";";
         $sql.="DELETE FROM n_nachweise WHERE id=".$idListe[$i];
         $ret=$this->database->execSQL($sql,4, 1);
         if ($ret[0]==0) {
-          # Datensatz erfolgreich gel�scht
-          $msg.='Nachweis mit ID:'.$idListe[$i].' erfolgreich gel�scht.';
+          # Datensatz erfolgreich gelöscht
+          $msg.='Nachweis mit ID:'.$idListe[$i].' erfolgreich gelöscht.';
         }
         else {
-          # Fehler beim l�schen des Datensatzes
-          $errmsg.='Nachweisdokument konnte in Datenbank nicht gel�scht wurde.';
+          # Fehler beim löschen des Datensatzes
+          $errmsg.='Nachweisdokument konnte in Datenbank nicht gelöscht wurde.';
           $errmsg.=$ret[1];
           $loeschenabbrechen=1;
         }
@@ -600,7 +600,7 @@ class Nachweis {
   function eintragenNeuesDokument($datum,$flurid,$VermStelle,$art,$andere_art,$gueltigkeit,$stammnr,$blattformat,$blattnr,$rissnummer,$fortf,$bemerkungen,$zieldatei,$umring) {
     #2005-11-24_pk
     if($fortf == '')$fortf = 'NULL';
-    $this->debug->write('Einf�gen der Metadaten zum neuen Nachweisdokument in die Sachdatenbank',4);
+    $this->debug->write('Einfügen der Metadaten zum neuen Nachweisdokument in die Sachdatenbank',4);
     $sql ="INSERT INTO n_nachweise (flurid,stammnr,art,blattnummer,datum,vermstelle,gueltigkeit,format,link_datei,the_geom,fortfuehrung,rissnummer,bemerkungen)";
     $sql.=" VALUES (".$flurid.",'".trim($stammnr)."','".$art."','".trim($blattnr)."','".$datum."'";
     $sql.=",'".$VermStelle."','".$gueltigkeit."','".$blattformat."','".$zieldatei."',st_transform(GeometryFromText('".$umring."', ".$this->client_epsg."), (select srid from geometry_columns where f_table_name = 'n_nachweise'))";
@@ -657,7 +657,7 @@ class Nachweis {
     #echo 'Indiv-nr: '.$flurid.'-'.$stammnr;
     $gemarkung=intval(substr($flurid,0,6));
     $flur=substr($flurid,6,9);
-    # �berpr�fen, ob die gegebenen Suchparameter ausreichend und g�ltig sind
+    # Überprüfen, ob die gegebenen Suchparameter ausreichend und gültig sind
     if ($gemarkung=='') {
       $errmsg.='\nFehler: Es ist keine Gemarkungsnummer angegeben worden.';
     }
@@ -670,7 +670,7 @@ class Nachweis {
   
   function pruefeSuchParameterSingleID($id) {
     #echo 'Single ID: '.$id;
-    # �berpr�fen, ob die gegebenen Suchparameter ausreichend und g�ltig sind
+    # Überprüfen, ob die gegebenen Suchparameter ausreichend und gültig sind
     if ($id=='') {
       $errmsg.='\nFehler: Es ist keine DokumentenID angegeben worden.';
     }
@@ -691,7 +691,7 @@ class Nachweis {
     else {
       $rs=pg_fetch_array($query);
       if ($rs[0]!='t') {
-        $errmsg.='\nFehler: Die Geometry des Suchpolygons ist ung�ltig.';
+        $errmsg.='\nFehler: Die Geometry des Suchpolygons ist ungültig.';
       }
     }
     if ($errmsg!='') { $ret[0]=1; $ret[1]=$errmsg; }
@@ -700,7 +700,7 @@ class Nachweis {
   
   function pruefeAnzeigedaten($stammnr,$f,$k,$g,$abfrage_art,$antr_nr){
     if ($abfrage_art==''){
-      $errmsg.='Bitte w�hlen Sie die Art der Recherche! \n';
+      $errmsg.='Bitte wählen Sie die Art der Recherche! \n';
     }
     
     else{
@@ -724,7 +724,7 @@ class Nachweis {
         else {
           $stammnr=intval($stammnr);
           if ($stammnr==0) {
-              $errmsg.='Die Stammnummer mu� ungleich 0 sein! \n';
+              $errmsg.='Die Stammnummer muß ungleich 0 sein! \n';
           }
         }
       }
@@ -745,19 +745,19 @@ class Nachweis {
   
   function getNachweise($id,$polygon,$FlurID,$stammnr,$rissnr,$fortf,$art_einblenden,$richtung,$abfrage_art,$order,$antr_nr, $datum = NULL, $VermStelle = NULL) {
     # Die Funktion liefert die Nachweise nach verschiedenen Suchverfahren.
-    # Vor dem Suchen nach Nachweisen werden jeweils die Suchparameter �berpr�ft    
+    # Vor dem Suchen nach Nachweisen werden jeweils die Suchparameter überprüft    
     if (is_array($id)) { $idListe=$id; } else { $idListe=array($id); }
     $idselected=array_keys($idListe);
     #echo 'Suche nach Verfahren: '.$abfrage_art;
     # Unterscheidung der Suchverfahren.
     switch ($abfrage_art) {
       case "bySingleID" : {
-        # Pr�fen der Suchparameter
-        # Es muss mindestens eine ID �bergeben worden sein.
-        #echo 'Pr�fen mit id:'.$id;
+        # Prüfen der Suchparameter
+        # Es muss mindestens eine ID übergeben worden sein.
+        #echo 'Prüfen mit id:'.$id;
         $ret=$this->pruefeSuchParameterSingleID($id);
         if ($ret[0]) {
-          # Fehler, der Parameter ist nicht vollst�ndig oder ung�ltig
+          # Fehler, der Parameter ist nicht vollständig oder ungültig
           $errmsg=$ret[1];
         }
         else {
@@ -883,15 +883,15 @@ class Nachweis {
       } break;
       
       case "indiv_nr" : {
-        # Pr�fen der Suchparameter
-        # Es mussen mindestens die Flur_id und die stammnr �bergeben worden sein.
+        # Prüfen der Suchparameter
+        # Es mussen mindestens die Flur_id und die stammnr übergeben worden sein.
         $ret=$this->pruefeSuchParameterIndivNr($FlurID,$stammnr);
         if ($ret[0]) {
-          # Fehler, die Parameter sind nicht vollst�ndig oder ung�ltig
+          # Fehler, die Parameter sind nicht vollständig oder ungültig
           $errmsg=$ret[1];
         }
         else {
-          # Suchparameter sind g�ltig
+          # Suchparameter sind gültig
           # Suche nach individueller Nummer
           #echo '<br>Suche nach individueller Nummer.';
           $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS andere_art, d.art AS andere_art_name";
@@ -967,11 +967,11 @@ class Nachweis {
       } break;
 
       case "poly" : {
-        # Pr�fen der Suchparameter
-        # Es muss ein g�ltiges Polygon vorhanden sein.
+        # Prüfen der Suchparameter
+        # Es muss ein gültiges Polygon vorhanden sein.
         $ret=$this->pruefeSuchParameterPolygon($polygon);
         if ($ret[0]) {
-          # Fehler, die Parameter sind nicht vollst�ndig oder ung�ltig
+          # Fehler, die Parameter sind nicht vollstündig oder ungültig
           $errmsg=$ret[1];
         }
         else {
@@ -1023,7 +1023,7 @@ class Nachweis {
       case "antr_nr" : {
         # Suche nach Antragsnummer
         # echo '<br>Suche nach Antragsnummer.';
-        $this->debug->write('Abfragen der Nachweise die zum Antrag geh�ren',4);
+        $this->debug->write('Abfragen der Nachweise die zum Antrag gehören',4);
         $sql ="SELECT distinct n.*,v.name AS vermst, n2d.dokumentart_id AS andere_art, d.art AS andere_art_name";
         $sql.=" FROM n_nachweise2antraege AS n2a, n_vermstelle AS v, n_nachweise AS n";
         $sql.=" LEFT JOIN n_nachweise2dokumentarten n2d"; 
@@ -1068,7 +1068,7 @@ class Nachweis {
   }
   
   function getNachw2Antr($antr_nr){
-    # Funktion liefert alle recherchierten Nachweis-ID�s zur�ck, die zu einer 
+    # Funktion liefert alle recherchierten Nachweis-IDs zurück, die zu einer 
     # Antragsnummer abgelegt wurde.
     $sql="SELECT * FROM n_nachweise2antraege WHERE antrag_id='".$antr_nr."'";
     # echo '<br>'.$sql;
@@ -1093,7 +1093,7 @@ class Nachweis {
   }
   
   function pruefe_Auftrag_hinzufuegen_entfernen($antr_nr){
-    # Funktion dient zum Pr�fen der Eingaben beim Arbeitsschritt Auftrag_hinzuf�gen oder Auftrag_entfernen
+    # Funktion dient zum Prüfen der Eingaben beim Arbeitsschritt Auftrag_hinzufügen oder Auftrag_entfernen
     $strenthalten=0;
     if($antr_nr==''){
       $errmsg.='Fehler bei der Angabe der Antragsnummer: '.$antr_nr;
@@ -1103,7 +1103,7 @@ class Nachweis {
       $sql.=" WHERE antrag_id ='".$antr_nr."'";
       $queryret=$this->database->execSQL($sql,4, 0);
       if ($queryret[0]) {
-        $errmsg.='Fehler bei der Abfrage ob schon Nachweise zum Auftrag geh�ren!';
+        $errmsg.='Fehler bei der Abfrage ob schon Nachweise zum Auftrag gehören!';
       }
       else {
         if (pg_num_rows($queryret[1])==''){
@@ -1120,7 +1120,7 @@ class Nachweis {
   
   function zum_Auftrag_hinzufuegen($antrag_id,$nachweis_id){
     #echo '<br>Start der Funktion zum_Autrag_hinzufuegen';
-    # Umsortierung der �bergebenen ids
+    # Umsortierung der übergebenen ids
     $idselected=array_keys($nachweis_id);
     for ($i=0;$i<count($idselected);$i++) {
       # Abfragen ob die Zuordnung schon existiert.
@@ -1133,7 +1133,7 @@ class Nachweis {
       else {
         # 
         if (pg_num_rows($ret[1])>0) {
-          # Die Zuordnung existiert schon, nicht neu hinzuf�gen
+          # Die Zuordnung existiert schon, nicht neu hinzufügen
           #echo '<br>Dokument mit id: '.$idselected[$i].' ist schon zu Antrag id: '.$antrag_id.' zugeordnet.';
         }
         else {
@@ -1155,13 +1155,13 @@ class Nachweis {
       $ret[0]=1; $ret[1]=$errmsg;
     }
     else {
-      $ret[0]=0; $ret[1]='\nNachweise erfolgreich zum Auftrag hinzugef�gt.';
+      $ret[0]=0; $ret[1]='\nNachweise erfolgreich zum Auftrag hinzugefügt.';
     }
     return $ret;
   }
 
   function aus_Auftrag_entfernen($antr_nr,$id){
-    #Funktion l�scht Nachweise, die unter einer Antragsnummer recherchiert wurde. 
+    #Funktion löscht Nachweise, die unter einer Antragsnummer recherchiert wurde. 
     $idselected=array_keys ($id);
     for ($i=0;$i<count($idselected);$i++) {
       $sql ="DELETE FROM n_nachweise2antraege";
@@ -1173,7 +1173,7 @@ class Nachweis {
       }
       else{
         $ret[1]='\nDokumente erfolgreich aus Antrag entfernt!';
-        echo '<br>Dokument mit id: '.$idselected[$i].' aus Antrag id: '.$antrag_id.' entfernt.';
+        #echo '<br>Dokument mit id: '.$idselected[$i].' aus Antrag id: '.$antrag_id.' entfernt.';
       }
     }
     return $ret; 

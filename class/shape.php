@@ -48,7 +48,7 @@ class shape {
 				$firstfile = explode('.', $files[0]);
 				$file = $firstfile[0];
 				if(file_exists(UPLOADPATH.$file.'.dbf') OR file_exists(UPLOADPATH.$file.'.DBF')){
-					$tablename = strtolower($file).rand(0,1000000);
+					$tablename = 'a'.strtolower($file).rand(1,1000000);
 		      $command = POSTGRESBINPATH.'shp2pgsql -I -s '.$formvars['epsg'].' -W LATIN1 -c '.UPLOADPATH.$file.' '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' > '.UPLOADPATH.$file.'.sql'; 
 		      exec($command);
 		      #echo $command;

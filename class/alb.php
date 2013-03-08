@@ -148,6 +148,7 @@ class ALB {
 				        $csv .= ';';
 				      }
             if($formvars['klassifizierung']){
+            	$emzges = 0;
 			      	$csv .= '"';
 			        for($j = 0; $j < count($flst->Klassifizierung)-1; $j++){
 			          if($j > 0)$csv .= " \n ";
@@ -416,6 +417,7 @@ class ALB {
 	        $csv .= ';';
 	      }
 			if($formvars['klassifizierung']){
+				$emzges = 0;
       	$csv .= '"';
         for($j = 0; $j < count($flst->Klassifizierung)-1; $j++){
           if($j > 0)$csv .= " \n ";
@@ -713,6 +715,7 @@ class ALB {
       }
       if($formvars['klassifizierung']){
       	$csv .= '"';
+      	$emzges = 0;
         for($j = 0; $j < count($flst->Klassifizierung)-1; $j++){
           if($j > 0)$csv .= "\n";
           $csv .= $flst->Klassifizierung[$j]['flaeche'].'m² '.$flst->Klassifizierung[$j]['tabkenn'].'-'.$flst->Klassifizierung[$j]['klass'].' '.$flst->Klassifizierung[$j]['bezeichnung'].' ';

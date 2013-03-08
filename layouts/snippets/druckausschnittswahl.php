@@ -9,7 +9,7 @@ function setprintextent(wert){
 	document.GUI.printextent.value = wert;
 }
 
-function druck(){
+function druck_pdf(){
 	if(document.GUI.printextent.value == 'false'){
 		alert("Bitte aktualisieren Sie den Druckausschnitt durch Klick in die Maßstabseingabe und dann [Enter].");
 	}
@@ -132,7 +132,7 @@ function remove(){
   <tr align="center"> 
     <td colspan="4"> 
       <input class="button" type="button" name="vorschau" value="<?php echo $strButtonPrintPreview; ?>" onclick="preview();">
-      <input class="button" type="button" name="drucken" value="<?php echo $strButtonPrint; ?>" onclick="druck();">
+      <input class="button" type="button" name="drucken" value="<?php echo $strButtonPrint; ?>" onclick="druck_pdf();">
       <br><br>
     </td>
   </tr>

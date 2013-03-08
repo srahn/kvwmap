@@ -708,10 +708,10 @@ function update_gebietstyp(){
 		<table border="1" cellpadding="2" style="border-collapse: collapse;">
 			<tr>
 				<td><b>Gemeinde:</b></td>
-				<td><b>ROK-Nr:</b></td>
 				<td width="300px"><b>Planart:</b></td>
-  			<td width="300px"><b>Planbezeichnung:</b></td>
-  			<td><b>Plan-Nr:</b></td>
+				<td><b>Plan-Nr:</b></td>
+				<td width="300px"><b>Planbezeichnung:</b></td>
+				<td><b>ROK-Nr:</b></td>
   			<td><b>aktuell:</b></td>
   			<td></td>
   		</tr>
@@ -724,13 +724,13 @@ function update_gebietstyp(){
 					?>><?
 					$j = 25;$this->qlayerset[$i]['attributes']['name'][$j] = 'gemeinde'; ?>
 					<td valign="top"><a href="javascript:show_details(<? echo $this->qlayerset[$i]['shape'][$k]['b_plan_stammdaten_oid']; ?>);"><? echo htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]); ?></a></td>
-					<? $j = 8;$this->qlayerset[$i]['attributes']['name'][$j] = 'lfd_rok_nr'; ?>
-					<td valign="top"><a href="javascript:show_details(<? echo $this->qlayerset[$i]['shape'][$k]['b_plan_stammdaten_oid']; ?>);"><? echo htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]); ?></a></td>
 					<? $j = 2;$this->qlayerset[$i]['attributes']['name'][$j] = 'art'; ?>
+					<td valign="top"><a href="javascript:show_details(<? echo $this->qlayerset[$i]['shape'][$k]['b_plan_stammdaten_oid']; ?>);"><? echo htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]); ?></a></td>
+					<? $j = 3;$this->qlayerset[$i]['attributes']['name'][$j] = 'pl_nr'; ?>
 					<td valign="top"><a href="javascript:show_details(<? echo $this->qlayerset[$i]['shape'][$k]['b_plan_stammdaten_oid']; ?>);"><? echo htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]); ?></a></td>
 					<? $j = 6;$this->qlayerset[$i]['attributes']['name'][$j] = 'bezeichnung'; ?>
 					<td valign="top"><a href="javascript:show_details(<? echo $this->qlayerset[$i]['shape'][$k]['b_plan_stammdaten_oid']; ?>);"><? echo htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]); ?></a></td>
-					<? $j = 3;$this->qlayerset[$i]['attributes']['name'][$j] = 'pl_nr'; ?>
+					<? $j = 8;$this->qlayerset[$i]['attributes']['name'][$j] = 'lfd_rok_nr'; ?>
 					<td valign="top"><a href="javascript:show_details(<? echo $this->qlayerset[$i]['shape'][$k]['b_plan_stammdaten_oid']; ?>);"><? echo htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]); ?></a></td>
 					<? $j = 7;$this->qlayerset[$i]['attributes']['name'][$j] = 'aktuell'; ?>
 					<td valign="top"><a href="javascript:show_details(<? echo $this->qlayerset[$i]['shape'][$k]['b_plan_stammdaten_oid']; ?>);"><? echo htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]); ?></a></td>

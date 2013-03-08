@@ -44,6 +44,7 @@ $response .='&nbsp;|&nbsp;<a href="javascript:resizemap2window();" >Gr&ouml;&szl
 ^update_legend(\''.$this->layerhiddenstring.'\')';
 
 ob_end_clean();
+header('Content-Type: text/html; charset=utf-8');
 echo $response;
 
 ?>
