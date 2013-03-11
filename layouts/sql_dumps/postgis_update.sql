@@ -1129,3 +1129,8 @@ CREATE OR REPLACE VIEW alb_eigentuemer AS
   WHERE a.blatt::text = b.blatt::text AND a.bezirk = b.bezirk AND b.lfd_nr_name = c.lfd_nr_name;
 
 ALTER TABLE alb_eigentuemer OWNER TO kvwmap;
+
+
+----# Änderungen von 1.11.0 nach 1.12.0
+
+ALTER TABLE public.n_nachweise2antraege ALTER COLUMN antrag_id TYPE character varying(11);

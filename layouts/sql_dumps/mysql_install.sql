@@ -637,7 +637,7 @@ CREATE TABLE rolle_nachweise (
   suchrissnr varchar(20) NOT NULL,
   suchfortf int(4) NULL,
   suchpolygon text,
-  suchantrnr varchar(8) NOT NULL default '',
+  suchantrnr varchar(11) NOT NULL default '',
   showffr char(1) NOT NULL default '0',
   showkvz char(1) NOT NULL default '0',
   showgn char(1) NOT NULL default '0',

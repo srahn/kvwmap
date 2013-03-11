@@ -1073,3 +1073,7 @@ update used_layer set Filter = replace(Filter, 'Intersects','st_intersects');
 ALTER TABLE `rolle` ADD `runningcoords` BOOLEAN NOT NULL DEFAULT '0';
 
 ALTER TABLE `layer` ADD `metalink` VARCHAR(255) NULL;
+
+
+
+ALTER TABLE `rolle_nachweise` CHANGE `suchantrnr` `suchantrnr` VARCHAR(11) NOT NULL DEFAULT '';

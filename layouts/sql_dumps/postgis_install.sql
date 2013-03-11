@@ -684,7 +684,7 @@ ALTER TABLE public.n_nachweise ADD COLUMN bemerkungen text;
 -- Zuordnung der Nachweise zu den Antraegen
 CREATE TABLE n_nachweise2antraege (
     nachweis_id integer,
-    antrag_id character varying(8)
+    antrag_id character varying(11)
 );
 ALTER TABLE n_nachweise2antraege
   ADD CONSTRAINT n_nachweise2antraege_pkey PRIMARY KEY(nachweis_id, antrag_id);

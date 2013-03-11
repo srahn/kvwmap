@@ -11851,6 +11851,12 @@ class GUI extends GUI_core{
     $this->loadMap('DataBase');
     # zu 2)
     $this->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
+  	if(MAPSERVERVERSION >= 600 ) {
+			$this->map_scaledenom = $this->map->scaledenom;
+		}
+		else {
+			$this->map_scaledenom = $this->map->scale;
+		}
   }
 
   function zoomToALKGebaeude($Gemeinde,$Strasse,$StrName,$Hausnr,$border) {
@@ -11984,6 +11990,12 @@ class GUI extends GUI_core{
 	    $this->loadMap('DataBase');
 	    # zu 2)
 	    $this->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
+	    if(MAPSERVERVERSION >= 600 ) {
+				$this->map_scaledenom = $this->map->scaledenom;
+			}
+			else {
+				$this->map_scaledenom = $this->map->scale;
+			}
     }
     return $ret;
   }

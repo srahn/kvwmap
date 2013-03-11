@@ -720,30 +720,32 @@ function read_colors($database){
 }
 
 function delete_files($target, $exceptions, $output){
-   $sourcedir = opendir($target);
-   while(false !== ($filename = readdir($sourcedir)))
-   {
-       if(!in_array($filename, $exceptions))
-       {
-           if($output)
-           { echo "Processing: ".$target."/".$filename."<br>"; }
-           if(is_dir($target."/".$filename))
-           {
-               // recurse subdirectory; call of function recursive
-               delete_files($target."/".$filename, $exceptions,0);
-           }
-           else if(is_file($target."/".$filename))
-           {
-               // unlink file
-               unlink($target."/".$filename);
-           }
-       }
-   }
-   closedir($sourcedir);
-   if(rmdir($target))
-   { return true; }
-   else
-   { return false; }
+	if(is_dir($target)){
+	   $sourcedir = opendir($target);
+	   while(false !== ($filename = readdir($sourcedir)))
+	   {
+	       if(!in_array($filename, $exceptions))
+	       {
+	           if($output)
+	           { echo "Processing: ".$target."/".$filename."<br>"; }
+	           if(is_dir($target."/".$filename))
+	           {
+	               // recurse subdirectory; call of function recursive
+	               delete_files($target."/".$filename, $exceptions,0);
+	           }
+	           else if(is_file($target."/".$filename))
+	           {
+	               // unlink file
+	               unlink($target."/".$filename);
+	           }
+	       }
+	   }
+	   closedir($sourcedir);
+	   if(rmdir($target))
+	   { return true; }
+	   else
+	   { return false; }
+	}
 }
 
 function str_space($string, $split_length = 1) {
