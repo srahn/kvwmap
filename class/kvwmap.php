@@ -1795,6 +1795,16 @@ class GUI extends GUI_core{
           $this->debug->write("<p>file:kvwmap :LineEditor_Senden :",4);
           $ret = $layerdb->execSQL($sql,4, 1);
         }
+        elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'Länge'){
+          $sql = "UPDATE ".$this->formvars['layer_tablename']." SET ".$this->attributes['name'][$i]." = '".$this->formvars['linelength']."' WHERE oid = '".$this->formvars['oid']."'";
+          $this->debug->write("<p>file:kvwmap :LineEditor_Senden :",4);
+          $ret = $layerdb->execSQL($sql,4, 1);
+        }
+        elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'User'){
+          $sql = "UPDATE ".$this->formvars['layer_tablename']." SET ".$this->attributes['name'][$i]." = '".$this->user->Vorname." ".$this->user->Name."' WHERE oid = '".$this->formvars['oid']."'";
+          $this->debug->write("<p>file:kvwmap :LineEditor_Senden :",4);
+          $ret = $layerdb->execSQL($sql,4, 1);
+        }
       }
       $umring = $this->formvars['newpathwkt'];
       $ret = $lineeditor->eintragenLinie($umring, $this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname']);
@@ -6584,6 +6594,7 @@ class GUI extends GUI_core{
     $this->ddl->fonts = $this->ddl->get_fonts();
     if($this->formvars['selected_layer_id']){
       $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+      $layerdb->setClientEncoding();
       $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
       $this->ddl->layouts = $this->ddl->load_layouts(NULL, NULL, $this->formvars['selected_layer_id']);
     }
@@ -6604,6 +6615,7 @@ class GUI extends GUI_core{
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->ddl=$ddl;
     $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+    $layerdb->setClientEncoding();
     $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
 		$this->formvars['aktivesLayout'] = $this->ddl->save_layout($this->formvars, $this->attributes, $_files, $this->Stelle->id);
 		$this->sachdaten_druck_editor();
@@ -6615,6 +6627,7 @@ class GUI extends GUI_core{
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->ddl=$ddl;
     $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+    $layerdb->setClientEncoding();
     $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
     $this->ddl->update_layout($this->formvars, $this->attributes, $_files);
 		$this->sachdaten_druck_editor();
@@ -6640,6 +6653,7 @@ class GUI extends GUI_core{
     $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->ddl=$ddl;
     $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+    $layerdb->setClientEncoding();
     $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
     $this->ddl->update_layout($this->formvars, $this->attributes, $_files);
     $this->ddl->addfreetext($this->formvars);
@@ -6652,6 +6666,7 @@ class GUI extends GUI_core{
     $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->ddl=$ddl;
     $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+    $layerdb->setClientEncoding();
     $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
     $this->ddl->update_layout($this->formvars, $this->attributes, $_files);
     $this->ddl->removefreetext($this->formvars);
@@ -6661,6 +6676,7 @@ class GUI extends GUI_core{
 	function sachdaten_druck_editor_preview($selectedlayout){
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+    $layerdb->setClientEncoding();
     $attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
     # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
 		$attributes = $mapDB->add_attribute_values($attributes, $layerdb, NULL, true);
@@ -6690,6 +6706,7 @@ class GUI extends GUI_core{
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$this->ddl = new ddl($this->database);
     $layerdb = $mapDB->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
+    $layerdb->setClientEncoding();
     $path = $mapDB->getPath($this->formvars['chosen_layer_id']);
     $privileges = $this->Stelle->get_attributes_privileges($this->formvars['chosen_layer_id']);
     $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
@@ -6746,6 +6763,7 @@ class GUI extends GUI_core{
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$this->ddl = new ddl($this->database);
     $layerdb = $mapDB->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
+    $layerdb->setClientEncoding();
     $path = $mapDB->getPath($this->formvars['chosen_layer_id']);
     $privileges = $this->Stelle->get_attributes_privileges($this->formvars['chosen_layer_id']);
     $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
@@ -7665,6 +7683,7 @@ class GUI extends GUI_core{
       $this->formvars['minymax'] = $this->stellendaten['minymax'];
       $this->formvars['maxxmax'] = $this->stellendaten['maxxmax'];
       $this->formvars['maxymax'] = $this->stellendaten['maxymax'];
+      $this->formvars['epsg_code'] = $this->stellendaten['epsg_code'];
       $this->formvars['Referenzkarte_ID'] = $this->stellendaten['Referenzkarte_ID'];
       $this->formvars['start'] = $this->stellendaten['start'];
       $this->formvars['stop'] = $this->stellendaten['stop'];
@@ -7707,6 +7726,8 @@ class GUI extends GUI_core{
     $this->formvars['layer']=$mapDB->getall_Layer('Name');
     # Abfragen aller möglichen User
     $this->formvars['users']=$this->user->getall_Users('Name');
+    # Abfragen aller möglichen EPSG-Codes
+    $this->epsg_codes = read_epsg_codes($this->pgdatabase);
     $this->output();
   }
 

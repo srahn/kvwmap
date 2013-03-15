@@ -291,7 +291,7 @@ class database {
 
 
     $sql = "INSERT INTO `u_rolle2used_layer` ( `user_id` , `stelle_id` , `layer_id` , `aktivStatus` , `queryStatus` , `showclasses` , `logconsume` ) ";
-    $sql.= "SELECT ".$id.", ".$gast_stelle.", Layer_ID, start_aktiv, 0, 1, 0 FROM used_layer WHERE Stelle_ID=".$gast_stelle;
+    $sql.= "SELECT ".$id.", ".$gast_stelle.", Layer_ID, start_aktiv, start_aktiv, 1, 0 FROM used_layer WHERE Stelle_ID=".$gast_stelle;
 		$query = mysql_query($sql);
 		
     $sql = "UPDATE u_groups2rolle, u_rolle2used_layer, layer SET u_groups2rolle.status = 1 ";

@@ -101,6 +101,25 @@ else {
               y&nbsp;<input name="maxymax" type="text" value="<?php echo $this->formvars['maxymax']; ?>" size="15" maxlength="100">
           </td>
         </tr>
+        <tr>
+        	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strEpsgCode; ?></th>
+		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+		      		<select name="epsg_code">
+		      			<option value=""><?php echo $this->strPleaseSelect; ?></option>
+		      			<? 
+		      			for($i = 0; $i < count($this->epsg_codes); $i++){
+		      				if($this->formvars['epsg_code'] == $this->epsg_codes[$i]['srid']){
+		      					echo '<option selected';
+		      				}
+		      				else{
+		      					echo '<option';
+		      				}
+		      				echo ' value="'.$this->epsg_codes[$i]['srid'].'">'.$this->epsg_codes[$i]['srid'].': '.$this->epsg_codes[$i]['srtext'].'</option>';
+		      			}
+		      			?>	      			
+		      		</select>
+		  		</td>
+        </tr>
 				<tr>
           <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strStart; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">

@@ -40,4 +40,5 @@
   $strAllowedPasswordAge="Allowed age of passwords in this task, if checked (in months)";
   $strStart="Start";
   $strStop="Stop";
+  $strEpsgCode="EPSG-Code";
 ?>  

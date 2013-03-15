@@ -652,6 +652,11 @@ if($GUI->goNotExecutedInPlugins){
 		$GUI->checkCaseAllowed($go);
 		$GUI->StatistikAuswahl();
 	  }break;
+	  
+	  case 'StatistikAuswahl_Stelle' : {
+		$GUI->checkCaseAllowed($go);
+		$GUI->StatistikAuswahl();
+	  }break;
 
 	  # 2006-04-03 CG
 	  case 'StatistikAuswahl_anzeigen' : {

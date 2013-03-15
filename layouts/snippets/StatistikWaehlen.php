@@ -271,6 +271,7 @@ function display(id) {
         <tr> 
           <td align="center">&nbsp;</td>
           <td colspan="2" align="center">&nbsp;</td>
+      <? if($this->formvars['go'] != 'StatistikAuswahl_Stelle'){ ?>
         <tr> 
           <td align="center">&nbsp;</td>
           <th colspan="2" align="center"><strong>Nutzer:</strong></th>
@@ -284,32 +285,15 @@ function display(id) {
               <option value="<?php echo $this->UserID=$this->UserDaten[$i]['ID']; ?>" <?php if ($this->formvars['nutzer']==$this->UserDaten[$i]['ID']) { ?> selected<?php } ?>><?php echo $this->UserDaten[$i]['Name'].', '.$this->UserDaten[$i]['Vorname']; ?></option>
               <?php  
            }  ?>
-            </select></td>
+            </select>
+          </td>
+        </tr>
+      <? } ?>
       </table></td>
   </tr>
   <tr> 
     <td ><hr align="center" color="#000000" size="1"></td>
   </tr>
-  <tr> 
-    <td align="center" ><table width="100%" border="0" cellspacing="0" cellpadding="0">
-        <tr> 
-          <td align="center">&nbsp;</td>
-          <td align="center">&nbsp;</td>
-          <td align="right" > <img src="<?php echo GRAPHICSPATH;?>ikon_i.gif" onMouseOver="stm(Text[2],Style[0])" onmouseout="htm()"></td>
-        </tr>
-        <tr> 
-          <td align="center">Säulendiagramm</td>
-          <td align="center" colspan="2">Kreisdiagramm</td>
-        </tr>
-        <tr> 
-          <td align="center" ><input type="radio" name="chart" value="bar" <?php if ($this->formvars['chart']=='' OR $this->formvars['chart']=='bar') { ?> checked<?php } ?>></td>
-          <td align="center" colspan="2"><input type="radio" name="chart" value="pie" <?php if ( $this->formvars['chart']=='pie') { ?> checked<?php } ?>></td>
-        </tr>
-      </table></td>
-  </tr>
-  <tr> 
-    <td align="center" ><hr align="center" color="#000000" size="1"></td>
-  <tr> 
     <td align="center" ><input type="submit" name="go_plus" value="anzeigen"></td>
   </tr>
 </table>

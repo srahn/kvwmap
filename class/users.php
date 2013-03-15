@@ -361,7 +361,7 @@ class account {
     # Abfrage der Anzahl der PDF-Exporte mit Druckrahmen 
     # in Abhängigkeit von Stelle, Nutzer und Zeitraum
     $sql ='SELECT u_consumeALK.druckrahmen_id,'.$case.',count(u_consumeALK.time_id) AS NumberOfAccess,';
-    if(LAYER_IDS_DOP) $sql.='concat(druckrahmen.Name, \' \',ifnull(l.Name, \'\')) AS druckrahmenname';
+    if(LAYER_IDS_DOP) $sql.='c2l.layer_id, concat(druckrahmen.Name, \' \',ifnull(l.Name, \'\')) AS druckrahmenname';
     else $sql.='druckrahmen.Name AS druckrahmenname';
     $sql.=', druckrahmen.format AS Druckformat, druckrahmen.preis AS Preis';
       if ($nutzung=='stelle') {
@@ -410,14 +410,40 @@ class account {
       $sql.=' AND u_consumeALK.user_id = u.ID AND u.ID='.$id_2;
       $sql.=' GROUP BY (CONCAT('.$groupby.'u_consumeALK.druckrahmen_id,u_consumeALK.stelle_id,u_consumeALK.user_id)) ORDER BY Bezeichnung,druckrahmen.Name,u.Name';  
     } 
-    #echo $sql;
+    #echo $sql.'<br><br>';
     $this->debug->write("<p>file:kvwmap class:account->getAccessToALK:<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
     while($rs=mysql_fetch_array($query)) {
-          $NumbOfAccessUser[]=$rs;
+        $NumbOfAccess[]=$rs;
+        $sql ='SELECT u_consumeALK.time_id, concat(u.Vorname, " ", u.Name) as Name';
+		    $sql.=' FROM druckrahmen, user AS u, stelle AS s, u_consumeALK';
+		    if(LAYER_IDS_DOP) $sql.=' LEFT JOIN u_consume2layer c2l LEFT JOIN layer l ON l.Layer_ID = c2l.layer_id ON c2l.time_id = u_consumeALK.time_id AND c2l.user_id = u_consumeALK.user_id AND c2l.stelle_id = u_consumeALK.stelle_id AND c2l.layer_id IN ('.LAYER_IDS_DOP.')';
+		    $sql.=' WHERE u_consumeALK.druckrahmen_id = druckrahmen.id';				    
+	      if ($zeitraum=='month' OR $zeitraum=='week')  {
+	        $sql.=' AND '.$era.'(u_consumeALK.time_id)='.$date.' AND YEAR(u_consumeALK.time_id)='.$year;
+	      }
+	      if ($zeitraum=='day'){
+	        $sql.=' AND ('.$era.'(u_consumeALK.time_id))="'.$date.'"';       
+	      }
+	      if ($zeitraum=='era') {
+	        $sql.=' AND ((DATE(u_consumeALK.time_id)) BETWEEN "'.$date1.'"  AND "'.$date2.'")';      
+	      }    
+	      $sql.=' AND u_consumeALK.stelle_id = s.ID';
+	      $sql.=' AND u_consumeALK.user_id = u.ID';  
+		    $sql.= ' AND druckrahmen.id='.$rs['druckrahmen_id'].' AND u_consumeALK.stelle_id='.$rs['stelle_id'];
+		    if($rs['layer_id'] != '') $sql.= ' AND c2l.layer_id='.$rs['layer_id'];
+		    #echo $sql.'<br><br>';
+		    $this->debug->write("<p>file:kvwmap class:account->getAccessToALK:<br>".$sql,4);
+		    $query_array[]=mysql_query($sql);
+		    if ($query_array[count($query_array)-1]==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+		    $NumbOfAccessTimeIDs = array();
+		    while($rs=mysql_fetch_array($query_array[count($query_array)-1])) {
+		        $NumbOfAccessTimeIDs[]=$rs;
+		    }
+		    $NumbOfAccess[count($NumbOfAccess)-1]['time_ids'] = $NumbOfAccessTimeIDs;
       }
-    return $NumbOfAccessUser;       
+    return $NumbOfAccess;       
   } #END of function getAccessToALK
   
   function getLayer($logged){
@@ -1269,10 +1295,8 @@ class rolle extends rolle_core{
 
   function setRollen($user_id,$stellen) {
     # trägt die Stellen für einen Benutzer ein.
-    $sql ='INSERT IGNORE INTO rolle (user_id,stelle_id) VALUES ('.$user_id.','.$stellen[0].')';
-    for ($i=1;$i<count($stellen);$i++) {
-      $sql.=',('.$user_id.','.$stellen[$i].')';
-    }
+    $sql ='INSERT IGNORE INTO rolle (user_id, stelle_id, epsg_code) ';
+    $sql.= 'SELECT '.$user_id.', ID, epsg_code FROM stelle WHERE ID IN ('.implode($stellen, ',').')';
     #echo '<br>'.$sql;
     $this->debug->write("<p>file:users.php class:rolle function:setRollen - Einfügen neuen Rollen:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
@@ -1803,6 +1827,7 @@ class stelle extends stelle_core{
     $sql.=', minymax= "'.$stellendaten['minymax'].'"';
     $sql.=', maxxmax= "'.$stellendaten['maxxmax'].'"';
     $sql.=', maxymax= "'.$stellendaten['maxymax'].'"';
+    $sql.=', epsg_code= "'.$stellendaten['epsg_code'].'"';
     $sql.=', start= "'.$stellendaten['start'].'"';
     $sql.=', stop= "'.$stellendaten['stop'].'"';
     if ($stellendaten['pgdbhost']!='') {
@@ -1888,6 +1913,7 @@ class stelle extends stelle_core{
     $sql.=', minymax= "'.$stellendaten['minymax'].'"';
     $sql.=', maxxmax= "'.$stellendaten['maxxmax'].'"';
     $sql.=', maxymax= "'.$stellendaten['maxymax'].'"';
+    $sql.=', epsg_code= "'.$stellendaten['epsg_code'].'"';
     $sql.=', start= "'.$stellendaten['start'].'"';
     $sql.=', stop= "'.$stellendaten['stop'].'"';
     if ($stellendaten['pgdbhost']!='') {

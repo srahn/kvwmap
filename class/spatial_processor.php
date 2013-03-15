@@ -119,7 +119,7 @@ class spatial_processor {
     else {
     	$rs = pg_fetch_array($ret[1]);
     }
-    return $rs[0];
+    return $rs[0].'^'.$rs[0];
   }
   
   function process_query($formvars){

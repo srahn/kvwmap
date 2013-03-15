@@ -103,6 +103,9 @@
 							<option value="User" ';
 				  		if($this->attributes['form_element_type'][$i] == 'User'){echo 'selected';}
 				  		echo ' >User</option>
+				  		<option value="UserID" ';
+				  		if($this->attributes['form_element_type'][$i] == 'UserID'){echo 'selected';}
+				  		echo ' >UserID</option>
 				  		<option value="Stelle" ';
 				  		if($this->attributes['form_element_type'][$i] == 'Stelle'){echo 'selected';}
 				  		echo ' >Stelle</option>
@@ -117,7 +120,10 @@
 				  		echo ' >dynamischer Link</option>
 							<option value="Fläche" ';
 				  		if($this->attributes['form_element_type'][$i] == 'Fläche'){echo 'selected';}
-				  		echo ' >Fläche</option>';
+				  		echo ' >Fläche</option>
+				  		<option value="Länge" ';
+				  		if($this->attributes['form_element_type'][$i] == 'Länge'){echo 'selected';}
+				  		echo ' >Länge</option>';
 				  	}
 				  	echo'
 				  	</select>

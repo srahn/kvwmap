@@ -40,4 +40,5 @@
   $strAllowedPasswordAge="Erlaubtes Alter von Passwörtern, wenn es geprüft wird (in Monaten)";
   $strStart="Start";
   $strStop="Stop";
+  $strEpsgCode="EPSG-Code";
 ?>

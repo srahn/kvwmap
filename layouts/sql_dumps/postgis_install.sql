@@ -821,7 +821,7 @@ ALTER TABLE fp_punkte_temp DROP CONSTRAINT enforce_srid_the_geom;
 CREATE TABLE fp_punkte2antraege
 (
   pkz char(16) NOT NULL,
-  antrag_nr varchar(8) NOT NULL,
+  antrag_nr varchar(11) NOT NULL,
   zeitstempel timestamp,
   CONSTRAINT fp_punkte2antraege_pkey PRIMARY KEY (pkz, antrag_nr)
 ) 

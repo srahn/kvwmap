@@ -7,6 +7,16 @@ function georg(){
 	top.document.GUI.submit();
 }
 
+function popup(id){
+	if(document.getElementById(id).style.display == 'none'){
+		document.getElementById(id).style.display = '';
+	}
+	else{
+		document.getElementById(id).style.display = 'none';
+	}
+}
+
+
 //-->
 </script>
 
@@ -166,9 +176,21 @@ function georg(){
 		          						for ($i=0;$i<count($this->account->ALKNumbOfAccess);$i++) {
 					  							?>
 		            					<tr bgcolor="<?php if ($i%2!=0) { echo 'FFFFFF'; } else { echo 'EBEBEB'; } ?>">
-		                					<td><?php echo $this->account->ALKNumbOfAccess[$i]['druckrahmenname']; ?></td>
+		                					<td><a href="javascript:popup('alk<? echo $i; ?>');"><?php echo $this->account->ALKNumbOfAccess[$i]['druckrahmenname']; ?></a></td>
 		                					<td><?php echo $this->account->ALKNumbOfAccess[$i]['Druckformat']; ?></td>
 		                					<td><?php echo $this->account->ALKNumbOfAccess[$i]['NumberOfAccess']; ?></td>
+		              					</tr>
+		              					<tr id="alk<? echo $i; ?>" style="display:none">
+		              						<td>
+		              							<table>
+		              								<? for($j = 0; $j < count($this->account->ALKNumbOfAccess[$i]['time_ids']); $j++){ ?>
+		              								<tr>
+		              									<td><? echo $this->account->ALKNumbOfAccess[$i]['time_ids'][$j]['time_id']; ?></td>
+		              									<td><? echo $this->account->ALKNumbOfAccess[$i]['time_ids'][$j]['Name']; ?></td>
+		              								</tr>
+		              								<? } ?>
+		              							</table>
+		              						</td>
 		              					</tr>
 		            				<? } ?>
 		            			<? } ?>

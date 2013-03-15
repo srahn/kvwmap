@@ -130,7 +130,8 @@ class esaf {
           $rest = '';
         }
         $namensnr = str_pad(str_pad($explosion[0], 4, '0', STR_PAD_LEFT).$rest, 16, '.00');
-        fwrite($fp, '4'.$this->eigentuemerliste[$i]['bezirk'].'-'.$this->eigentuemerliste[$i]['blatt'].' '.$this->eigentuemerliste[$i]['pruefzeichen'].'; ; '.$namensnr.'  ; ; '.$this->eigentuemerliste[$i]['art'].'; '.$this->eigentuemerliste[$i]['name1'].'# '.$this->eigentuemerliste[$i]['name2'].'# '.$this->eigentuemerliste[$i]['neu_name3'].'# '.$this->eigentuemerliste[$i]['neu_name4'].';0D0A'.chr(10));
+        $data = utf8_decode('4'.$this->eigentuemerliste[$i]['bezirk'].'-'.$this->eigentuemerliste[$i]['blatt'].' '.$this->eigentuemerliste[$i]['pruefzeichen'].'; ; '.$namensnr.'  ; ; '.$this->eigentuemerliste[$i]['art'].'; '.$this->eigentuemerliste[$i]['name1'].'# '.$this->eigentuemerliste[$i]['name2'].'# '.$this->eigentuemerliste[$i]['neu_name3'].'# '.$this->eigentuemerliste[$i]['neu_name4'].';0D0A'.chr(10));
+        fwrite($fp, $data);
       }
 
       exec(ZIP_PATH.' '.IMAGEPATH.$folder.' '.IMAGEPATH.$folder.'/*'); # Ordner zippen
