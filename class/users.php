@@ -396,7 +396,7 @@ class account {
       if ($zeitraum=='era') {
         $sql.=' AND ((DATE(u_consumeALK.time_id)) BETWEEN "'.$date1.'"  AND "'.$date2.'")';      
       }
-    if(LAYER_IDS_DOP) $groupby = 'c2l.layer_id, ';    
+    if(LAYER_IDS_DOP) $groupby = 'ifnull(c2l.layer_id, ""), ';    
     if ($case=='u_consumeALK.stelle_id'){
       $sql.=' AND u_consumeALK.stelle_id = s.ID AND s.ID='.$id;
       $sql.=' GROUP BY (CONCAT('.$groupby.'u_consumeALK.druckrahmen_id,u_consumeALK.stelle_id)) ORDER BY druckrahmen.Name';
