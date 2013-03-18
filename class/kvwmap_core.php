@@ -1261,6 +1261,9 @@ class GUI_core {
         if($this->pgdatabase->host != ''){
 		      $connectionstring.=' host='.$this->pgdatabase->host;
 		    }
+      	if($this->pgdatabase->port != ''){
+	        $connectionstring.=' port='.$this->pgdatabase->port;
+	      }
         $connectionstring.=' dbname='.$this->pgdatabase->dbName;
         $this->formvars['connection'] = $connectionstring;
         $this->formvars['epsg_code'] = $this->user->rolle->epsg_code;

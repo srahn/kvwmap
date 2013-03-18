@@ -7,6 +7,38 @@
 ###################################################################
 #
 ?>
+	
+	<script language="JavaScript">
+		var hasSVGSupport = false;
+		var useVBMethod = false;
+	
+		if(navigator.mimeTypes != null && navigator.mimeTypes.length > 0){
+			if(navigator.mimeTypes["image/svg-xml"] != null)	hasSVGSupport = true;
+		}
+		else{
+		  useVBMethod = true;
+		}
+	</script>
+
+	<script language="VBScript">
+		' VB Script method to detect SVG viewer in IE
+		' this will not be run by browsers with no support for VB Script
+		On Error Resume Next
+		If useVBMethod = true Then
+    	hasSVGSupport = IsObject(CreateObject("Adobe.SVGCtl"))
+		End If
+	</script>
+	
+	<script language="JavaScript">
+		if (hasSVGSupport == true) {
+		// alles ok, nix machen
+		}
+		else{
+			document.write('Ihr Browser hat keine SVG-Unterst&uuml;tzung. Bitte installieren Sie den <a target="_blank" href="http://www.adobe.com/svg/viewer/install/">Adobe SVG Viewer</a> oder verwenden Sie den Firefox Browser.');
+		}
+	</script>
+		   
+		   
   <SCRIPT type="text/ecmascript"><!--
 
   function go_cmd(cmd)   {
@@ -1318,4 +1350,7 @@ echo'
 #echo '<EMBED align="center" SRC="'.TEMPPATH_REL.$svgfile.'" TYPE="image/svg+xml" width="'.$res_x.'" height="'.$res_y.'" PLUGINSPAGE="http://www.adobe.com/svg/viewer/install/"/>';
 # echo '<iframe src="'.TEMPPATH_REL.$svgfile.'" width="'.$res_x.'" height="'.$res_y.'" name="map"></iframe>';
 echo '<script src="funktionen/Embed.js" language="JavaScript" type="text/javascript"></script>';
+
 ?>
+
+		

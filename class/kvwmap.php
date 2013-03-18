@@ -5253,6 +5253,10 @@ class GUI extends GUI_core{
     else {
       $this->titel='Bodenrichtwertzone Ändern';
     }
+    if($this->formvars['go'] == 'Bodenrichtwertformular_Anzeige'){
+    	$this->titel='Bodenrichtwertzone Anzeigen';
+      $this->formvars['loc_y'] = $this->formvars['loc_x'] = $this->formvars['pathwkt'] = $this->formvars['newpath'] = $this->formvars['newpathwkt'] = '';
+    }
     $layer = $this->user->rolle->getLayer(LAYERNAME_BODENRICHTWERTE);
     $this->formvars['boris_layer_id'] = $layer[0]['Layer_ID'];
     $this->main="bodenrichtwerterfassung_vboris.php";
@@ -7209,6 +7213,9 @@ class GUI extends GUI_core{
 	        if(in_array($attributes['type'][$j], array('numeric', 'float4', 'float8'))){
 	        	$result[$i][$attributes['name'][$j]] = str_replace('.', ",", $result[$i][$attributes['name'][$j]]);	
 	        }
+	        $result[$i][$attributes['name'][$j]] = str_replace(';', ",", $result[$i][$attributes['name'][$j]]);
+	        $result[$i][$attributes['name'][$j]] = str_replace(chr(10), " ", $result[$i][$attributes['name'][$j]]);
+	        $result[$i][$attributes['name'][$j]] = str_replace(chr(13), "", $result[$i][$attributes['name'][$j]]);
 	        $csv .= $result[$i][$attributes['name'][$j]].'";';
       	}
       }
@@ -7967,6 +7974,9 @@ class GUI extends GUI_core{
     $this->account = new account($this->database);
     $this->user2 = new user(0,'',$this->database);
     $this->stellendaten=$this->Stelle->getStellen('Bezeichnung');
+    if($this->formvars['go'] == 'StatistikAuswahl_Stelle'){
+    	$this->stellendaten=$this->user->getStellen('Bezeichnung');
+    }
     $this->UserDaten=$this->user2->getUserDaten('','','Name');
     $this->titel='Auswahl zur Statistik';
     $this->main='StatistikWaehlen.php';

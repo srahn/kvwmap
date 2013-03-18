@@ -295,9 +295,35 @@ class account {
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
     while($rs=mysql_fetch_array($query)) {
-          $NumbOfAccessUser[]=$rs;
+          $NumbOfAccess[]=$rs;
+          $sql ='SELECT u_consumeCSV.time_id, concat(u.Vorname, " ", u.Name) as Name';
+			    $sql.=' FROM user AS u, stelle AS s, u_consumeCSV';
+			    if(LAYER_IDS_DOP) $sql.=' LEFT JOIN u_consume2layer c2l LEFT JOIN layer l ON l.Layer_ID = c2l.layer_id ON c2l.time_id = u_consumeCSV.time_id AND c2l.user_id = u_consumeCSV.user_id AND c2l.stelle_id = u_consumeCSV.stelle_id AND c2l.layer_id IN ('.LAYER_IDS_DOP.')';
+			    $sql.=' WHERE 1=1';				    
+		      if ($zeitraum=='month' OR $zeitraum=='week')  {
+		        $sql.=' AND '.$era.'(u_consumeCSV.time_id)='.$date.' AND YEAR(u_consumeCSV.time_id)='.$year;
+		      }
+		      if ($zeitraum=='day'){
+		        $sql.=' AND ('.$era.'(u_consumeCSV.time_id))="'.$date.'"';       
+		      }
+		      if ($zeitraum=='era') {
+		        $sql.=' AND ((DATE(u_consumeCSV.time_id)) BETWEEN "'.$date1.'"  AND "'.$date2.'")';      
+		      }    
+		      $sql.=' AND u_consumeCSV.stelle_id = s.ID';
+		      $sql.=' AND u_consumeCSV.user_id = u.ID';  
+			    $sql.= ' AND art="'.$rs['art'].'" AND u_consumeCSV.stelle_id='.$rs['stelle_id'];
+			    if($rs['layer_id'] != '') $sql.= ' AND c2l.layer_id='.$rs['layer_id'];
+			    #echo $sql.'<br><br>';
+			    $this->debug->write("<p>file:kvwmap class:account->getAccessToCSV:<br>".$sql,4);
+			    $query_array[]=mysql_query($sql);
+			    if ($query_array[count($query_array)-1]==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+			    $NumbOfAccessTimeIDs = array();
+			    while($rs=mysql_fetch_array($query_array[count($query_array)-1])) {
+			        $NumbOfAccessTimeIDs[]=$rs;
+			    }
+			    $NumbOfAccess[count($NumbOfAccess)-1]['time_ids'] = $NumbOfAccessTimeIDs;
       }
-    return $NumbOfAccessUser;       
+    return $NumbOfAccess;       
   } #END of function getAccessToCSV
   
   function getAccessToALB($nutzung,$zeitraum,$date1,$date2,$case,$era,$date,$year,$id,$id_2){
@@ -349,12 +375,39 @@ class account {
       $sql.=' GROUP BY (CONCAT(u_consumeALB.format,u_consumeALB.stelle_id,u_consumeALB.user_id)) ORDER BY format';  
     } 
     $this->debug->write("<p>file:kvwmap class:account->getAccessToALB:<br>".$sql,4);
+    #echo $sql.'<br><br>';
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
     while($rs=mysql_fetch_array($query)) {
-          $NumbOfAccessUser[]=$rs;
+          $NumbOfAccess[]=$rs;
+          $sql ='SELECT u_consumeALB.time_id, concat(u.Vorname, " ", u.Name) as Name';
+			    $sql.=' FROM user AS u, stelle AS s, u_consumeALB';
+			    if(LAYER_IDS_DOP) $sql.=' LEFT JOIN u_consume2layer c2l LEFT JOIN layer l ON l.Layer_ID = c2l.layer_id ON c2l.time_id = u_consumeALB.time_id AND c2l.user_id = u_consumeALB.user_id AND c2l.stelle_id = u_consumeALB.stelle_id AND c2l.layer_id IN ('.LAYER_IDS_DOP.')';
+			    $sql.=' WHERE 1=1';				    
+		      if ($zeitraum=='month' OR $zeitraum=='week')  {
+		        $sql.=' AND '.$era.'(u_consumeALB.time_id)='.$date.' AND YEAR(u_consumeALB.time_id)='.$year;
+		      }
+		      if ($zeitraum=='day'){
+		        $sql.=' AND ('.$era.'(u_consumeALB.time_id))="'.$date.'"';       
+		      }
+		      if ($zeitraum=='era') {
+		        $sql.=' AND ((DATE(u_consumeALB.time_id)) BETWEEN "'.$date1.'"  AND "'.$date2.'")';      
+		      }    
+		      $sql.=' AND u_consumeALB.stelle_id = s.ID';
+		      $sql.=' AND u_consumeALB.user_id = u.ID';  
+			    $sql.= ' AND format='.$rs['format'].' AND u_consumeALB.stelle_id='.$rs['stelle_id'];
+			    if($rs['layer_id'] != '') $sql.= ' AND c2l.layer_id='.$rs['layer_id'];
+			    #echo $sql.'<br><br>';
+			    $this->debug->write("<p>file:kvwmap class:account->getAccessToALB:<br>".$sql,4);
+			    $query_array[]=mysql_query($sql);
+			    if ($query_array[count($query_array)-1]==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+			    $NumbOfAccessTimeIDs = array();
+			    while($rs=mysql_fetch_array($query_array[count($query_array)-1])) {
+			        $NumbOfAccessTimeIDs[]=$rs;
+			    }
+			    $NumbOfAccess[count($NumbOfAccess)-1]['time_ids'] = $NumbOfAccessTimeIDs;
       }
-    return $NumbOfAccessUser;       
+    return $NumbOfAccess;       
   } #END of function getAccessToALB
   
   function getAccessToALK($nutzung,$zeitraum,$date1,$date2,$case,$era,$date,$year,$id,$id_2){

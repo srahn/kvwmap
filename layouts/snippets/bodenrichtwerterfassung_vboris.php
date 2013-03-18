@@ -401,8 +401,10 @@ function update_require_attribute(attributes, layer_id, value){
 						  		</table>
 								</td>
 								<td width="100%" align="right" valign="top">
+									<? if($this->formvars['go'] != 'Bodenrichtwertformular_Anzeige'){ ?>
 									<input type="checkbox" name="always_draw" value="1" <?if($always_draw == 1 OR $always_draw == 'true')echo 'checked'; ?>>&nbsp;weiterzeichnen&nbsp;&nbsp;
 									<input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang
+									<? } ?>
 								</td>
 							</tr>
 						</table>
@@ -545,6 +547,7 @@ function update_require_attribute(attributes, layer_id, value){
 			  		</select> 
 			  	</td>
 			  </tr>
+			  <? if($this->formvars['go'] != 'Bodenrichtwertformular_Anzeige'){ ?>
 			  <tr> 
 			    <td height="40" colspan="3" align="left">
 			    	<table border="0">
@@ -555,6 +558,7 @@ function update_require_attribute(attributes, layer_id, value){
 			      </table>
 			    </td>
 			  </tr>
+			  <? } ?>
 			</table>
 		</td>
 	</tr>

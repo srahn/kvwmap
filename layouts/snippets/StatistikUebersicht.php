@@ -181,7 +181,7 @@ function popup(id){
 		                					<td><?php echo $this->account->ALKNumbOfAccess[$i]['NumberOfAccess']; ?></td>
 		              					</tr>
 		              					<tr id="alk<? echo $i; ?>" style="display:none">
-		              						<td>
+		              						<td colspan="3">
 		              							<table>
 		              								<? for($j = 0; $j < count($this->account->ALKNumbOfAccess[$i]['time_ids']); $j++){ ?>
 		              								<tr>
@@ -244,9 +244,21 @@ function popup(id){
 		          						for ($i=0;$i<count($this->account->ALBNumbOfAccess);$i++) {
 					  							?>
 		            					<tr bgcolor="<?php if ($i%2!=0) { echo 'FFFFFF'; } else { echo 'EBEBEB'; } ?>">
-		                					<td><?php echo $this->account->ALBNumbOfAccess[$i]['format']; ?></td>
+		                					<td><a href="javascript:popup('alb<? echo $i; ?>');"><?php echo $this->account->ALBNumbOfAccess[$i]['format']; ?></a></td>
 		                					<td><?php echo $this->account->ALBNumbOfAccess[$i]['NumberOfAccess']; ?></td>
 		                					<td><?php echo $this->account->ALBNumbOfAccess[$i]['pages']; ?></td>
+		              					</tr>
+		              					<tr id="alb<? echo $i; ?>" style="display:none">
+		              						<td colspan="3">
+		              							<table>
+		              								<? for($j = 0; $j < count($this->account->ALBNumbOfAccess[$i]['time_ids']); $j++){ ?>
+		              								<tr>
+		              									<td><? echo $this->account->ALBNumbOfAccess[$i]['time_ids'][$j]['time_id']; ?></td>
+		              									<td><? echo $this->account->ALBNumbOfAccess[$i]['time_ids'][$j]['Name']; ?></td>
+		              								</tr>
+		              								<? } ?>
+		              							</table>
+		              						</td>
 		              					</tr>
 		            				<? } ?>
 		            			<? } ?>
@@ -300,9 +312,21 @@ function popup(id){
 		          						for ($i=0;$i<count($this->account->CSVNumbOfAccess);$i++) {
 					  							?>
 		            					<tr bgcolor="<?php if ($i%2!=0) { echo 'FFFFFF'; } else { echo 'EBEBEB'; } ?>">
-		                					<td><?php echo $this->account->CSVNumbOfAccess[$i]['art']; ?></td>
+		                					<td><a href="javascript:popup('csv<? echo $i; ?>');"><?php echo $this->account->CSVNumbOfAccess[$i]['art']; ?></a></td>
 		                					<td><?php echo $this->account->CSVNumbOfAccess[$i]['NumberOfAccess']; ?></td>
 		                					<td><?php echo $this->account->CSVNumbOfAccess[$i]['datasets']; ?></td>
+		              					</tr>
+		              					<tr id="csv<? echo $i; ?>" style="display:none">
+		              						<td colspan="3">
+		              							<table>
+		              								<? for($j = 0; $j < count($this->account->CSVNumbOfAccess[$i]['time_ids']); $j++){ ?>
+		              								<tr>
+		              									<td><? echo $this->account->CSVNumbOfAccess[$i]['time_ids'][$j]['time_id']; ?></td>
+		              									<td><? echo $this->account->CSVNumbOfAccess[$i]['time_ids'][$j]['Name']; ?></td>
+		              								</tr>
+		              								<? } ?>
+		              							</table>
+		              						</td>
 		              					</tr>
 		            				<? } ?>
 		            			<? } ?>
@@ -314,9 +338,9 @@ function popup(id){
 		     			</td>
 		     			</tr>
 		     			
-		     			<tr>
+		     			<!--tr>
 		     				<td colspan="2" align="center"><input type="button" name="georg_export" value="Georg-Datei erzeugen" onclick="georg();"></td>
-		     			</tr>
+		     			</tr-->
 
 						  <tr>
 						    <td align="center" colspan="2"><hr color="#000000" size="1"></td>

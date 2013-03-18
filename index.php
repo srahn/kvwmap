@@ -1046,6 +1046,11 @@ if($GUI->goNotExecutedInPlugins){
 		$GUI->titel='Bodenrichtwerterfassung';
 		$GUI->bodenRichtWertErfassung();
 	  } break;
+	  
+	  case 'Bodenrichtwertformular_Anzeige' : {
+		$GUI->titel='Bodenrichtwertanzeige';
+		$GUI->aendernBodenRichtWert();
+	  } break;
 
 	  case 'Bodenrichtwertformular_Aendern' : {
 		$GUI->checkCaseAllowed('Bodenrichtwertformular');
