@@ -6539,8 +6539,8 @@ class GUI extends GUI_core{
           }
 			    elseif($oldscale!=$this->formvars['nScale'] AND $this->formvars['nScale'] != '') {
 			      $this->scaleMap($this->formvars['nScale']);
-			    }
-          if($this->geomtype == 'POLYGON' OR $this->geomtype == 'MULTIPOLYGON' OR $this->geomtype == 'GEOMETRY' OR $this->geomtype == 'MULTILINESTRING'){
+			    }																																									# Achtung: evtl. Bug-Report wegen fehlendem $this->geomtype == 'LINESTRING'
+          if($this->geomtype == 'POLYGON' OR $this->geomtype == 'MULTIPOLYGON' OR $this->geomtype == 'GEOMETRY' OR $this->geomtype == 'LINESTRING' OR $this->geomtype == 'MULTILINESTRING'){
             #-----Polygoneditor und Linieneditor---#
             # aktuellen Kartenausschnitt laden
             $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
