@@ -3148,6 +3148,9 @@ class GUI extends GUI_core{
       $rect->maxy = $this->Document->ausschnitt[0]['center_y'] + $height/2;
       $rand = 10;
       $this->map->setextent($rect->minx-$rand,$rect->miny-$rand,$rect->maxx+$rand,$rect->maxy+$rand);
+      # Position setzen
+      $this->formvars['center_x'] = $this->Document->ausschnitt[0]['center_x'];
+      $this->formvars['center_y'] = $this->Document->ausschnitt[0]['center_y']; 
       # Druckmaßstab setzen
       $this->formvars['printscale'] = $this->Document->ausschnitt[0]['print_scale'];
       # Drehwinkel setzen
@@ -3180,8 +3183,7 @@ class GUI extends GUI_core{
   function druckausschnitt_speichern($loadmapsource){
     $this->loadMap($loadmapsource);
     $this->Document = new Document($this->database);
-    $this->DruckWeltkoordinaten=$this->pixel2weltKoord($this->formvars['center_x'],$this->formvars['center_y']);
-    $this->Document->save_ausschnitt($this->Stelle->id, $this->user->id, $this->formvars['name'], $this->DruckWeltkoordinaten[0]->x, $this->DruckWeltkoordinaten[0]->y, $this->formvars['printscale'], $this->formvars['angle'], $this->formvars['aktiverRahmen']);
+    $this->Document->save_ausschnitt($this->Stelle->id, $this->user->id, $this->formvars['name'], $this->formvars['center_x'], $this->formvars['center_y'], $this->formvars['printscale'], $this->formvars['angle'], $this->formvars['aktiverRahmen']);
     $this->druckausschnittswahl($loadmapsource);
   }
 
