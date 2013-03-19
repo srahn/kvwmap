@@ -948,7 +948,8 @@ function emzversteckt(k){
         <? if($privileg['eigentuemer']){ ?>
         <a href="javascript:send_selected_flurst('Flurstuecks-CSV-Export', 'Eigentümer', '', '');">CSV-Export Eigent&uuml;mer</a>&nbsp;|&nbsp;
         <? } ?>
-        <a href="javascript:send_selected_flurst('Flurstuecks-CSV-Export', 'Nutzungsarten', '', '');">CSV-Export NA</a>
+        <a href="javascript:send_selected_flurst('Flurstuecks-CSV-Export', 'Nutzungsarten', '', '');">CSV-Export NA</a>&nbsp;|&nbsp;
+        <a href="javascript:send_selected_flurst('Flurstuecks-CSV-Export', 'Klassifizierung', '', '');">CSV-Export Klassifizierung</a>
   		  </td>
 		</tr>
 		<tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">

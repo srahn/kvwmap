@@ -1133,6 +1133,6 @@ ALTER TABLE alb_eigentuemer OWNER TO kvwmap;
 
 ----# Änderungen von 1.11.0 nach 1.12.0
 
-ALTER TABLE public.n_nachweise2antraege ALTER COLUMN antrag_id TYPE character varying(11);
+ALTER TABLE n_nachweise2antraege ALTER COLUMN antrag_id TYPE character varying(11);
 
-ALTER TABLE public.fp_punkte2antraege ALTER COLUMN antrag_nr TYPE character varying(11);
+ALTER TABLE fp_punkte2antraege ALTER COLUMN antrag_nr TYPE character varying(11);

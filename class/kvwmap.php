@@ -4703,6 +4703,10 @@ class GUI extends GUI_core{
       		$ALB->export_eigentuemer_csv($flurstuecke, $this->formvars);
       		$this->user->rolle->setConsumeCSV($currenttime,'Eigentümer',count($flurstuecke));
       	}break;
+      	case 'Klassifizierung' : {
+      		$ALB->export_klassifizierung_csv($flurstuecke, $this->formvars);
+      		$this->user->rolle->setConsumeCSV($currenttime,'Klassifizierung',count($flurstuecke));
+      	}break;
       }
     }
   }

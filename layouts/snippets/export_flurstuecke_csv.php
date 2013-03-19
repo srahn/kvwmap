@@ -143,7 +143,7 @@ function delete_selection(){
 			    if($privileg['grundbuchbezirkschl']){ echo '<input  name="grundbuchbezirkschl" type="checkbox" '; if($this->formvars['grundbuchbezirkschl'] == 'true') echo 'checked'; echo '>Grundbuchbezirkschlüssel<br>';}
 			    if($privileg['hinweis']){ echo '<input  name="hinweis" type="checkbox" '; if($this->formvars['hinweis'] == 'true') echo 'checked'; echo '>Hinweis<br>';}
 			    if($privileg['lagebezeichnung']){ echo '<input  name="lagebezeichnung" type="checkbox" '; if($this->formvars['lagebezeichnung'] == 'true') echo 'checked'; echo '>Lage<br>';}
-			    if($privileg['klassifizierung']){ echo '<input  name="klassifizierung" type="checkbox" '; if($this->formvars['klassifizierung'] == 'true') echo 'checked'; echo '>Klassifizierung<br>';}
+			    if($this->formvars['formnummer'] != 'Klassifizierung' AND $privileg['klassifizierung']){ echo '<input  name="klassifizierung" type="checkbox" '; if($this->formvars['klassifizierung'] == 'true') echo 'checked'; echo '>Klassifizierung<br>';}
 			    if($privileg['kreisname']){ echo '<input  name="kreisname" type="checkbox" '; if($this->formvars['kreisname'] == 'true') echo 'checked'; echo '>Kreisname<br>';}
 			    if($privileg['kreisid']){ echo '<input  name="kreisid" type="checkbox" '; if($this->formvars['kreisid'] == 'true') echo 'checked'; echo '>Kreisschlüssel<br>';}
 			    if($this->formvars['formnummer'] != 'Nutzungsarten' AND $privileg['nutzung']){ echo '<input  name="nutzung" type="checkbox" '; if($this->formvars['nutzung'] == 'true') echo 'checked'; echo '>Nutzung<br>';}
