@@ -152,13 +152,13 @@ class ddl {
 									if($attributes['enum_value'][$j][$e] == $result[$i][$attributes['name'][$j]]){
 										$auswahlfeld_output = $attributes['enum_output'][$j][$e];
 										$auswahlfeld_output_laenge=strlen($auswahlfeld_output);
-										$data = array(array($attributes['name'][$j] => $auswahlfeld_output));
+										$data = array(array($attributes['name'][$j] => utf8_decode($auswahlfeld_output)));
 										break;
 									}
-									else $data = array(array($attributes['name'][$j] => $result[$i][$attributes['name'][$j]]));
+									else $data = array(array($attributes['name'][$j] => utf8_decode($result[$i][$attributes['name'][$j]])));
 								}
 								if(count($attributes['enum_value'][$j]) == 0){	
-									$data = array(array($attributes['name'][$j] => $result[$i][$attributes['name'][$j]]));
+									$data = array(array($attributes['name'][$j] => utf8_decode($result[$i][$attributes['name'][$j]])));
 								}
 							}break;
 							default: {
