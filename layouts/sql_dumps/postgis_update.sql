@@ -1136,3 +1136,7 @@ ALTER TABLE alb_eigentuemer OWNER TO kvwmap;
 ALTER TABLE n_nachweise2antraege ALTER COLUMN antrag_id TYPE character varying(11);
 
 ALTER TABLE fp_punkte2antraege ALTER COLUMN antrag_nr TYPE character varying(11);
+
+ALTER TABLE public.jagdbezirke ADD COLUMN verzicht boolean;
+ALTER TABLE public.jagdbezirke ALTER COLUMN verzicht SET NOT NULL;
+ALTER TABLE public.jagdbezirke ALTER COLUMN verzicht SET DEFAULT false;

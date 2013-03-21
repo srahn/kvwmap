@@ -3,7 +3,7 @@
 
 
 function update_form(art){
-	if(art == 'jbe' || art == 'jbf' || art == 'agf' || art == 'atf' || art == 'slf'){
+	if(art == 'jbe' || art == 'jbf' || art == 'agf' || art == 'atf' || art == 'apf'){
 		document.getElementById('zuordnung').style.display = '';
 		document.getElementById('status').style.display = '';
 		document.getElementById('lfdnr').style.display = 'none';
@@ -104,7 +104,7 @@ function save(){
 			  			<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'jbf'){echo 'selected';} ?> value="jbf">Jagdbezirksfreie Fläche</option>
 			  			<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'agf'){echo 'selected';} ?> value="agf">Angliederungsfläche</option>
 			  			<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'atf'){echo 'selected';} ?> value="atf">Abtrennungsfläche</option>
-			  			<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'slf'){echo 'selected';} ?> value="slf">Schmalfläche</option>
+			  			<option <? if($this->qlayerset[$i]['shape'][$j]['art'] == 'apf'){echo 'selected';} ?> value="apf">Anpachtfläche</option>
 			  		</select>
 			  		<?
 			  		$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';art;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j]['oid'].';Text;1|';
@@ -125,7 +125,7 @@ function save(){
           </td>
         </tr>
 
-        <tr id="lfdnr" width="100%" style="display:<? if(in_array($this->qlayerset[$i]['shape'][$j]['art'], array('jbe', 'jbf', 'agf', 'atf', 'slf'))){ echo 'none';}else{echo '';} ?>">
+        <tr id="lfdnr" width="100%" style="display:<? if(in_array($this->qlayerset[$i]['shape'][$j]['art'], array('jbe', 'jbf', 'agf', 'atf', 'apf'))){ echo 'none';}else{echo '';} ?>">
           <td bgcolor="<?php echo BG_DEFAULT ?>"><b>lfd. Nr. Condition</b></td>
           <td valign="top">
           	<input type="text" name="<? echo $this->qlayerset[$i]['Layer_ID'].';id;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j]['oid'].';Text;1'; ?>" value="<? echo $this->qlayerset[$i]['shape'][$j]['id']; ?>">
@@ -135,7 +135,7 @@ function save(){
           </td>
         </tr>
 
-        <tr id="zuordnung" width="100%" style="display:<? if(in_array($this->qlayerset[$i]['shape'][$j]['art'], array('jbe', 'jbf', 'agf', 'atf', 'slf'))){ echo '';}else{echo 'none';} ?>">
+        <tr id="zuordnung" width="100%" style="display:<? if(in_array($this->qlayerset[$i]['shape'][$j]['art'], array('jbe', 'jbf', 'agf', 'atf', 'apf'))){ echo '';}else{echo 'none';} ?>">
           <td bgcolor="<?php echo BG_DEFAULT ?>"><b>Zuordnung (lfd. Nr. EJB)</b></td>
           <td valign="top">
           	<input type="text" name="<? echo $this->qlayerset[$i]['Layer_ID'].';jb_zuordnung;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j]['oid'].';Text;1'; ?>" value="<? echo $this->qlayerset[$i]['shape'][$j]['jb_zuordnung']; ?>">
@@ -144,7 +144,7 @@ function save(){
 			  		?>
           </td>
         </tr>
-        <tr id="status" width="100%" style="display:<? if(in_array($this->qlayerset[$i]['shape'][$j]['art'], array('jbe', 'jbf', 'agf', 'atf', 'slf'))){ echo '';}else{echo 'none';} ?>">
+        <tr id="status" width="100%" style="display:<? if(in_array($this->qlayerset[$i]['shape'][$j]['art'], array('jbe', 'jbf', 'agf', 'atf', 'apf'))){ echo '';}else{echo 'none';} ?>">
           <td bgcolor="<?php echo BG_DEFAULT ?>"><b>Status</b></td>
           <td valign="top">
           	<select name="<? echo $this->qlayerset[$i]['Layer_ID'].';status;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j]['oid'].';Text;1'; ?>">

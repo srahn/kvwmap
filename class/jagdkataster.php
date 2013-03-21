@@ -74,7 +74,11 @@ class jagdkataster {
   	}
   	if($formvars['search_art']!='' AND $formvars['search_art']!='ejb' AND $formvars['search_art']!='gjb' AND $formvars['search_status']!='both'){
 	  	$sql.= ' AND status = \''.$formvars['search_status'].'\'';
-	  }	  	
+	  }
+  	if($formvars['search_art']=='ejb' AND $formvars['search_verzicht']!='both'){
+	  	$sql.= ' AND verzicht = \''.$formvars['search_verzicht'].'\'';
+	  }
+	  if($formvars['order'] != '')$sql.= ' order by '.$formvars['order'];	  	
   	#echo $sql;
   	$ret = $this->database->execSQL($sql, 4, 0);
 		while($rs = pg_fetch_array($ret[1])){
@@ -137,7 +141,7 @@ class jagdkataster {
     return $ret;
   }
 
-  function eintragenNeueFlaeche($umring, $nummer, $name, $art, $flaeche, $jb_zuordnung, $status, $oid = ''){
+  function eintragenNeueFlaeche($umring, $nummer, $name, $art, $flaeche, $jb_zuordnung, $status, $verzicht, $oid = ''){
   	$valid[0] = 't';
   	if($umring != ''){
 	  	$sql = "SELECT IsValid(GeometryFromText('".$umring."', ".$this->clientepsg."))";
@@ -152,17 +156,18 @@ class jagdkataster {
 				$sql.= " flaeche = ".$flaeche.",";
 				$sql.= " jb_zuordnung = '".$jb_zuordnung."',";
 				$sql.= " status = '".$status."',";
+				$sql.= " verzicht = '".$verzicht."',";
 				$sql.= " art = '".$art."'";
 				$sql.= " WHERE oid = ".$oid;
 			}
 			else{
 				if($umring != ''){
-					$sql = "INSERT INTO jagdbezirke (id, the_geom, name, art, flaeche, jb_zuordnung, status)";
-					$sql.= " VALUES('".$nummer."', st_transform(GeometryFromText('".$umring."', ".$this->clientepsg."), ".$this->layerepsg."), '".$name."', '".$art."', ".$flaeche.", '".$jb_zuordnung."', '".$status."')";
+					$sql = "INSERT INTO jagdbezirke (id, the_geom, name, art, flaeche, jb_zuordnung, status, verzicht)";
+					$sql.= " VALUES('".$nummer."', st_transform(GeometryFromText('".$umring."', ".$this->clientepsg."), ".$this->layerepsg."), '".$name."', '".$art."', ".$flaeche.", '".$jb_zuordnung."', '".$status."', '".$verzicht."')";
 				}
 				else{
-					$sql = "INSERT INTO jagdbezirke (id, name, art, flaeche, jb_zuordnung, status)";
-					$sql.= " VALUES('".$nummer."', '".$name."', '".$art."', ".$flaeche.", '".$jb_zuordnung."', '".$status."')";
+					$sql = "INSERT INTO jagdbezirke (id, name, art, flaeche, jb_zuordnung, status, verzicht)";
+					$sql.= " VALUES('".$nummer."', '".$name."', '".$art."', ".$flaeche.", '".$jb_zuordnung."', '".$status."', '".$verzicht."')";
 				}
 			}
 			#echo $sql;

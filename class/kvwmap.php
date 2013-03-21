@@ -2600,6 +2600,31 @@ class GUI extends GUI_core{
     $this->output();
   }
 
+  function jagdbezirke_auswaehlen_suchen_csv(){
+  	$jagdkataster = new jagdkataster($this->pgdatabase);
+    $this->jagdbezirke = $jagdkataster->suchen($this->formvars);
+    $anz = count($this->jagdbezirke);
+    for($i = 0; $i < $anz; $i++) {          	
+    	if($this->jagdbezirke[$i]['art']=='ejb' OR $this->jagdbezirke[$i]['art']=='gjb'){
+    		$csv.= $this->jagdbezirke[$i]['id'].';';
+    	}
+    	else{
+    		$csv.= $this->jagdbezirke[$i]['jb_zuordnung'].';'; 
+    	}
+    	$csv.= $this->jagdbezirke[$i]['name'].';';
+      $csv.= "'".$this->jagdbezirke[$i]['flaeche']."';";
+      $csv.= $this->jagdbezirke[$i]['art'].';';
+      $csv.= chr(10); 
+    }
+    $csv = 'lfd. Nummer;Name;Fläche;Typ'.chr(10).$csv;
+    ob_end_clean();
+    header("Content-type: application/vnd.ms-excel");
+    header("Content-disposition:  inline; filename=Flurstuecke.csv");
+    header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+    header('Pragma: public');
+    print utf8_decode($csv);
+  }
+  
   function jagdbezirke_auswaehlen_suchen(){
     $jagdkataster = new jagdkataster($this->pgdatabase);
     $this->jagdbezirke = $jagdkataster->suchen($this->formvars);
@@ -2691,7 +2716,7 @@ class GUI extends GUI_core{
     }
     else{
       $umring = $this->formvars['newpathwkt'];
-      $ret = $jagdkataster->eintragenNeueFlaeche($umring, $this->formvars['nummer'], $this->formvars['name'], $this->formvars['art'], $this->formvars['area'], $this->formvars['jb_zuordnung'], $this->formvars['status'], $this->formvars['oid']);
+      $ret = $jagdkataster->eintragenNeueFlaeche($umring, $this->formvars['nummer'], $this->formvars['name'], $this->formvars['art'], $this->formvars['area'], $this->formvars['jb_zuordnung'], $this->formvars['status'], $this->formvars['verzicht'], $this->formvars['oid']);
       if ($ret[0]) { # fehler beim eintrag
           $this->Meldung=$ret[1];
       }

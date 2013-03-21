@@ -522,7 +522,12 @@ if($GUI->goNotExecutedInPlugins){
 	  case 'jagdbezirke_auswaehlen_Suchen' : {
 		$GUI->jagdbezirke_auswaehlen_suchen();
 	  }break;
-
+	  
+	  # Jagdbezirke Suchenflurst
+	  case 'jagdbezirke_auswaehlen_Suchen_csv' : {
+		$GUI->jagdbezirke_auswaehlen_suchen_csv();
+	  }break;
+	  
 	  # Jagdbezirke Suchen
 	  case 'jagdbezirke_auswaehlen' : {
 		$GUI->jagdbezirke_auswaehlen();

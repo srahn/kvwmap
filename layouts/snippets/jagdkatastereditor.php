@@ -53,7 +53,7 @@ function buildwktpolygonfromsvgpath(svgpath){
 }
 
 function update_form(art){
-	if(art == 'jbe' || art == 'jbf' || art == 'jbe' || art == 'agf' || art == 'atf' || art == 'slf'){
+	if(art == 'jbe' || art == 'jbf' || art == 'jbe' || art == 'agf' || art == 'atf' || art == 'apf'){
 		document.getElementById('zuordnung').style.display = '';
 		document.getElementById('status').style.display = '';
 		document.GUI.nummer.value = '';
@@ -88,8 +88,8 @@ function update_form(art){
       </div></td>
   </tr>
   <tr>
-    <td rowspan="9">&nbsp;</td>
-    <td colspan="2" rowspan="9">
+    <td rowspan="10">&nbsp;</td>
+    <td colspan="2" rowspan="10">
       <?php
 				include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php')
 			?>
@@ -116,19 +116,19 @@ function update_form(art){
   			<option <? if($this->jagdbezirk['art'] == 'jbf' OR $this->formvars['art'] == 'jbf'){echo 'selected';} ?> value="jbf">Jagdbezirksfreie Fläche</option>
   			<option <? if($this->jagdbezirk['art'] == 'agf' OR $this->formvars['art'] == 'agf'){echo 'selected';} ?> value="agf">Angliederungsfläche</option>
   			<option <? if($this->jagdbezirk['art'] == 'atf' OR $this->formvars['art'] == 'atf'){echo 'selected';} ?> value="atf">Abtrennungsfläche</option>
-  			<option <? if($this->jagdbezirk['art'] == 'slf' OR $this->formvars['art'] == 'slf'){echo 'selected';} ?> value="slf">Schmalfläche</option>
+  			<option <? if($this->jagdbezirk['art'] == 'apf' OR $this->formvars['art'] == 'apf'){echo 'selected';} ?> value="apf">Anpachtfläche</option>
   		</select>
   	</td>
   </tr>
-  <tr id="lfdnr" width="100%" style="display:<? if(in_array($this->jagdbezirk['art'], array('jbe', 'jbf', 'agf', 'atf', 'slf')) OR in_array($this->formvars['art'], array('jbe', 'jbf', 'agf', 'atf', 'slf'))){ echo 'none';}else{echo '';} ?>">
+  <tr id="lfdnr" width="100%" style="display:<? if(in_array($this->jagdbezirk['art'], array('jbe', 'jbf', 'agf', 'atf', 'apf')) OR in_array($this->formvars['art'], array('jbe', 'jbf', 'agf', 'atf', 'apf'))){ echo 'none';}else{echo '';} ?>">
   	<td>lfd.-Nummer:<br><input type="text" name="nummer" value="<? echo $this->jagdbezirk['id'] ? $this->jagdbezirk['id']: $this->formvars['nummer']; ?>"></td>
   </tr>
-  <tr id="zuordnung" width="100%" style="display:<? if(in_array($this->jagdbezirk['art'], array('jbe', 'jbf', 'agf', 'atf', 'slf')) OR in_array($this->formvars['art'], array('jbe', 'jbf', 'agf', 'atf', 'slf'))){ echo '';}else{echo 'none';} ?>">
+  <tr id="zuordnung" width="100%" style="display:<? if(in_array($this->jagdbezirk['art'], array('jbe', 'jbf', 'agf', 'atf', 'apf')) OR in_array($this->formvars['art'], array('jbe', 'jbf', 'agf', 'atf', 'apf'))){ echo '';}else{echo 'none';} ?>">
     <td>Zuordnung:<br>
     	<input type="text" name="jb_zuordnung" value="<? echo $this->jagdbezirk['jb_zuordnung'] ? $this->jagdbezirk['jb_zuordnung']: $this->formvars['jb_zuordnung']; ?>">
     </td>
   </tr>
-  <tr id="status" width="100%" style="display:<? if(in_array($this->jagdbezirk['art'], array('jbe', 'jbf', 'agf', 'atf', 'slf')) OR in_array($this->formvars['art'], array('jbe', 'jbf', 'agf', 'atf', 'slf'))){ echo '';}else{echo 'none';} ?>">
+  <tr id="status" width="100%" style="display:<? if(in_array($this->jagdbezirk['art'], array('jbe', 'jbf', 'agf', 'atf', 'apf')) OR in_array($this->formvars['art'], array('jbe', 'jbf', 'agf', 'atf', 'apf'))){ echo '';}else{echo 'none';} ?>">
     <td>Status<br>
     	<select name="status">
     		<option value="0" <? if($this->jagdbezirk['status'] == 'f' OR $this->formvars['status'] == 'f'){echo 'selected="true"';} ?>>aktuell</option>
@@ -136,11 +136,19 @@ function update_form(art){
     	</select>
     </td>
   </tr>
+  <tr id="verzicht" width="100%" style="display:<? if($this->jagdbezirk['art'] == 'ejb' OR $this->formvars['art'] == 'ejb'){ echo '';}else{echo 'none';} ?>">
+    <td>Verzicht gem. §3<br>
+    	<select name="verzicht">
+    		<option value="0" <? if($this->jagdbezirk['verzicht'] == 'f' OR $this->formvars['verzicht'] == 'f'){echo 'selected="true"';} ?>>nein</option>
+    		<option value="1" <? if($this->jagdbezirk['verzicht'] == 't' OR $this->formvars['verzicht'] == 't'){echo 'selected="true"';} ?>>ja</option>
+    	</select>
+    </td>
+  </tr>
   <tr>
     <td><hr align="center" noshade></td>
   </tr>
   <tr>
-  	<td>Geometrie übernehmen von:<br>
+  	<td>Geometrie Übernehmen von:<br>
   		<select name="layer_id" onchange="document.GUI.submit();">
   			<option value="">--- Auswahl ---</option>
   			<?

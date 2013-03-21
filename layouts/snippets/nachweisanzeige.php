@@ -125,7 +125,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
           <? if(NACHWEIS_PRIMARY_ATTRIBUTE != 'rissnummer'){ ?>  
           <td><div align="center"><?php echo $this->formvars['stammnr']=str_pad($this->nachweis->Dokumente[$i]['stammnr'],ANTRAGSNUMMERMAXLENGTH,'0',STR_PAD_LEFT); ?></div></td>
           <? } ?>
-          <td><div align="center"><?php echo $this->formvars['rissnummer']=str_pad($this->nachweis->Dokumente[$i]['rissnummer'],RISSUMMERMAXLENGTH,'0',STR_PAD_LEFT); ?></div></td>
+          <td><div align="center"><?php echo $this->formvars['rissnummer']=str_pad($this->nachweis->Dokumente[$i]['rissnummer'],RISSNUMMERMAXLENGTH,'0',STR_PAD_LEFT); ?></div></td>
           <? if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){ ?>
           <td><div align="center"><?php echo $this->formvars['stammnr']=str_pad($this->nachweis->Dokumente[$i]['stammnr'],ANTRAGSNUMMERMAXLENGTH,'0',STR_PAD_LEFT); ?></div></td>
           <? } ?>

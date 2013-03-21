@@ -1,17 +1,29 @@
 <script language="JavaScript">
 <!--
 
-function save(){
+function search(order){
+	document.GUI.order.value = order;
 	document.GUI.go_plus.value = 'Suchen';
 	document.GUI.submit();
 }
 
+function csv_export(){
+	document.GUI.go.value = 'jagdbezirke_auswaehlen_Suchen_csv';
+	document.GUI.submit();
+}
+
 function update_form(art){
-	if(art == 'jbe' || art == 'jbf' || art == 'agf' || art == 'atf' || art == 'slf'){
+	if(art == 'jbe' || art == 'jbf' || art == 'agf' || art == 'atf'){
 		document.getElementById('status').style.display = '';
 	}
 	else{
 		document.getElementById('status').style.display = 'none';
+	}
+	if(art == 'ejb'){
+		document.getElementById('verzicht').style.display = '';
+	}
+	else{
+		document.getElementById('verzicht').style.display = 'none';
 	}
 }
 
@@ -68,11 +80,11 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   			<option <? if($this->formvars['search_art'] == 'jbf'){echo 'selected';} ?> value="jbf">Jagdbezirksfreie Fläche</option>
   			<option <? if($this->formvars['search_art'] == 'agf'){echo 'selected';} ?> value="agf">Angliederungsfläche</option>
   			<option <? if($this->formvars['search_art'] == 'atf'){echo 'selected';} ?> value="atf">Abtrennungsfläche</option>
-  			<option <? if($this->formvars['search_art'] == 'slf'){echo 'selected';} ?> value="slf">Schmalfläche</option>
+  			<option <? if($this->formvars['search_art'] == 'apf'){echo 'selected';} ?> value="apf">Anpachtfläche</option>
   		</select>
 		</td>
   </tr>
-  <tr id="status" style="display:<? if(in_array($this->formvars['search_art'], array('jbe', 'jbf', 'agf', 'atf', 'slf'))){ echo '';}else{echo 'none';} ?>" >
+  <tr id="status" style="display:<? if(in_array($this->formvars['search_art'], array('jbe', 'jbf', 'agf', 'atf'))){ echo '';}else{echo 'none';} ?>" >
     <td align="right"><strong>Status:</strong></td>
     <td>
     	<select name="search_status">
@@ -80,7 +92,17 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   			<option <? if($this->formvars['search_status'] == 'true'){echo 'selected';} ?> value="true">historisch</option>
   			<option <? if($this->formvars['search_status'] == 'both'){echo 'selected';} ?> value="both">alle</option>
   		</select>
-	</td>
+		</td>
+  </tr>
+  <tr id="verzicht" style="display:<? if($this->formvars['search_art'] == 'ejb'){ echo '';}else{echo 'none';} ?>" >
+    <td align="right"><strong>Verzicht gem. §3:</strong></td>
+    <td>
+    	<select name="search_verzicht">
+  			<option <? if($this->formvars['search_verzicht'] == 'false'){echo 'selected';} ?> value="false">nein</option>
+  			<option <? if($this->formvars['search_verzicht'] == 'true'){echo 'selected';} ?> value="true">ja</option>
+  			<option <? if($this->formvars['search_verzicht'] == 'both'){echo 'selected';} ?> value="both">alle</option>
+  		</select>
+		</td>
   </tr>
   <tr>
   	<td colspan="2"><em>Zur nicht exakten Suche geben Sie den Platzhalter % ein.</em></td>
@@ -95,8 +117,9 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 			<br>
 			<input type="hidden" name="go" value="jagdbezirke_auswaehlen">
 			<input type="hidden" name="go_plus" value="">
-			<input type="submit" onclick="save();" style="width: 0px;height: 0px;border: none">
-			<input type="button" name="suchen" value="Suchen" onclick="javascript:save();" tabindex="6">
+			<input type="hidden" name="order" value="">
+			<input type="submit" onclick="search('');" style="width: 0px;height: 0px;border: none">
+			<input type="button" name="suchen" value="Suchen" onclick="javascript:search('');" tabindex="6">
 			<!-- &nbsp;<input type="submit" name="abbrechen" value="Abbrechen">&nbsp;<input type="reset" name="reset" value="Zur&uuml;cksetzen"> -->
 			<br>
    	</td>
@@ -113,10 +136,10 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 		<table border="1" cellpadding="3" cellspacing="0">
       <tr bgcolor="<?php echo BG_DEFAULT ?>">
       	<td></td>
-        <td align="center"><strong>lfd. Nummer</strong></td>
-        <td align="center"><strong>Name</strong></td>
-        <td align="center"><strong>Fläche</strong></td>
-        <td align="center"><strong>Typ</strong></td>
+        <td align="center"><strong><a href="javascript:search('id');">lfd. Nummer</a></strong></td>
+        <td align="center"><strong><a href="javascript:search('name');">Name</a></strong></td>
+        <td align="center"><strong><a href="javascript:search('flaeche');">Fläche</a></strong></td>
+        <td align="center"><strong><a href="javascript:search('art');">Typ</a></strong></td>
         <td align="center">&nbsp;</td>
         <td align="center">&nbsp;</td>
         <td align="center">&nbsp;</td>
@@ -143,10 +166,13 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 	  }
 	  ?>
 	  </table>
-	  <table cellpadding="3" cellspacing="0">
+	  <table width="100%" border="0" cellpadding="3" cellspacing="0">
 	  	<tr>
       	<td width="30" valign="top" align="center" valign="bottom"><img src="<? echo GRAPHICSPATH?>pfeil_unten-rechts.gif"></td>
       	<td height="29" valign="bottom" colspan="5"><a href="javascript:intersect_flurst();">enthaltene Flurstücke</a>&nbsp;&nbsp;<b>! Achtung dies kann u.U. sehr lange dauern !</b>&nbsp;&nbsp;</td>
+      </tr>
+      <tr>
+      	<td colspan="6" align="center"><a href="javascript:csv_export();">CSV-Export</a></td>
       </tr>
     </table></td>
   </tr><?php

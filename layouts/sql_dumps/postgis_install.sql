@@ -257,7 +257,8 @@ CREATE TABLE jagdbezirke
   concode varchar(5),
   conname varchar(40),
   jb_zuordnung varchar(10),
-	status boolean,
+  status boolean,
+  verzicht boolean NOT NULL DEFAULT false,
   CONSTRAINT jagdbezirke_pkey PRIMARY KEY (oid)
 ) 
 WITH OIDS;

@@ -313,6 +313,7 @@ function startup(){';
 
 function sendpath(cmd, pathx, pathy){
 	document.getElementById("waitingimage").style.setProperty("visibility","visible", "");
+	document.getElementById("waiting_animation").beginElement();
 	top.sendpath(cmd, pathx, pathy);
 }
 
@@ -401,6 +402,7 @@ function moveback(evt){
 	// Navigation wieder erlauben
 	top.document.GUI.stopnavigation.value = 0;
 	document.getElementById("waitingimage").style.visibility = "hidden";
+	document.getElementById("waiting_animation").endElement();
 	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("xlink:href", "")\', 200);		// Firefox 4 
 }
 
@@ -1304,7 +1306,7 @@ $svg.='
 	    <use xlink:href="#line" transform="rotate(300,0,0)" style="opacity:.8333"/>
 	    <use xlink:href="#line" transform="rotate(330,0,0)" style="opacity:.9166"/>
 	    
-	    <animateTransform attributeName="transform" attributeType="XML" type="rotate" begin="0s" dur="1s" repeatCount="indefinite" calcMode="discrete"
+	    <animateTransform id="waiting_animation" attributeName="transform" attributeType="XML" type="rotate" begin="indefinite" dur="1s" repeatCount="indefinite" calcMode="discrete"
 	    keyTimes="0;.0833;.166;.25;.3333;.4166;.5;.5833;.6666;.75;.8333;.9166;1"
 	    values="0,0,0;30,0,0;60,0,0;90,0,0;120,0,0;150,0,0;180,0,0;210,0,0;240,0,0;270,0,0;300,0,0;330,0,0;360,0,0"/>
     </g>
