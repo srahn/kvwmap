@@ -293,7 +293,7 @@ class bodenrichtwertzone {
   	if($formvars['bodenart']){$sql.= "bodenart = '".$formvars['bodenart']."', ";}
     $sql.= "verfahrensgrund = '".$formvars['verfahrensgrund']."', ";
     $sql.= "verfahrensgrund_zusatz = '".$formvars['verfahrensgrund_zusatz']."', ";
-    if($formvars['bemerkungen']){$sql.= "bemerkungen = '".$formvars['bemerkungen']."', ";}
+    $sql.= "bemerkungen = '".$formvars['bemerkungen']."', ";
     $sql.= "the_geom = st_transform(GeometryFromText('".$formvars['umring']."',".$this->client_epsg."), ".$this->layer_epsg.")";
     $sql.= ", textposition = st_transform(GeometryFromText('".$formvars['textposition']."',".$this->client_epsg."), ".$this->layer_epsg.")";
     $sql.=" WHERE oid=".$oid;
