@@ -350,10 +350,12 @@ class ALB {
 			          if($alkemz[$kl]['objart'] == '222'){
 			          	$emzges_222 = $emzges_222 + $emz;
 			          	$flaeche_222 = $flaeche_222 + $alkemz[$kl]['flaeche'];
+			          	$objart = 'Ackerland ';
 			          }
 			          if($alkemz[$kl]['objart'] == '223'){
 			          	$emzges_223 = $emzges_223 + $emz;
 			          	$flaeche_223 = $flaeche_223 + $alkemz[$kl]['flaeche'];
+			          	$objart = 'Grünland ';
 			          }
 			          if(strlen($alkemz[$kl]['label'])==20) {
 			            $label1=substr(substr($alkemz[$kl]['label'],4),0,-6);
@@ -370,7 +372,7 @@ class ALB {
 			            $label3=ltrim(substr($alkemz[$kl]['label'],-12,3),"0");
 			            $label4='W';
 			          }
-			          $csv .= $label1.' '.$label2.'/'.$label3.' '.$label4.';';
+			          $csv .= utf8_encode($objart.$label1.' '.$label2.'/'.$label3.' '.$label4.';');
 			          $csv .= round($alkemz[$kl]['flaeche']).';';
 			          $csv .= $emz;
 		      		}

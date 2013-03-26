@@ -204,6 +204,38 @@ class jagdkataster {
 		return pg_last_oid($ret[1]);
 	}
 
+	function getEigentuemerListe($formvars){
+		if($formvars['oid'] == ''){		# mehrere Jagdbezirke
+			$checkbox_names = explode('|', $formvars['checkbox_names']);
+	    for($i = 0; $i < count($checkbox_names); $i++){
+	      if($formvars[$checkbox_names[$i]] == 'on'){
+	        $element = explode('_', $checkbox_names[$i]);     #  check_oid
+	        $oids[] = $element[1];
+	      }
+	    }
+		}
+		else{				# ein Jagdbezirk
+			$oids[] = $formvars['oid']; 
+		}
+		$sql = "SELECT round((sum(flaeche)*100/j_flaeche*(st_area(st_memunion(the_geom_inter))/st_area(st_memunion(the_geom))))::numeric, 2) as anteil_alb, round((st_area(st_memunion(the_geom_inter))*100/j_flaeche)::numeric, 2) as anteil_alk, round(sum(flaeche)*(st_area(st_memunion(the_geom_inter))/st_area(st_memunion(the_geom)))::numeric, 2) AS albflaeche, eigentuemer";
+		$sql.= " FROM(SELECT distinct area(jagdbezirke.the_geom) as j_flaeche, alb.flaeche, array_to_string(array(";
+		$sql.= " select rtrim(name1,',') from alb_g_eigentuemer ee, alb_g_namen nn";
+		$sql.= " where ee.lfd_nr_name=nn.lfd_nr_name and ee.bezirk=e.bezirk and ee.blatt=e.blatt";
+		$sql.= " order by rtrim(name1,',')),' || ') as eigentuemer, st_intersection(alkobj_e_fla.the_geom, jagdbezirke.the_geom) as the_geom_inter, alkobj_e_fla.the_geom";
+		$sql.= " FROM alknflst, alkobj_e_fla, jagdbezirke, alb_flurstuecke AS alb, alb_g_namen n, alb_g_eigentuemer e, alb_g_buchungen b";
+		$sql.= " WHERE alknflst.objnr = alkobj_e_fla.objnr AND jagdbezirke.oid IN (".implode(',', $oids).") AND alkobj_e_fla.the_geom && jagdbezirke.the_geom";
+		$sql.= " AND intersects(alkobj_e_fla.the_geom, jagdbezirke.the_geom) AND st_area(st_intersection(alkobj_e_fla.the_geom, jagdbezirke.the_geom)) > 1";
+		$sql.= " AND alb.flurstkennz = alknflst.flurstkennz AND e.lfd_nr_name=n.lfd_nr_name AND e.bezirk=b.bezirk";
+		$sql.= " AND e.blatt=b.blatt AND b.flurstkennz=alb.flurstkennz) as foo";
+		$sql.= " group by eigentuemer, j_flaeche";
+		#echo $sql;
+		$ret = $this->database->execSQL($sql, 4, 0);
+		while($rs = pg_fetch_array($ret[1])){
+			$eigentuemer[] = $rs;
+		}
+		return $eigentuemer;
+	}
+	
 	function getIntersectedFlurst($formvars){
 		if($formvars['oid'] == ''){		# mehrere Jagdbezirke
 			$checkbox_names = explode('|', $formvars['checkbox_names']);

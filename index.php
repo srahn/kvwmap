@@ -555,6 +555,11 @@ if($GUI->goNotExecutedInPlugins){
 	  }break;
 
 	  # Jagdkatastereditor
+	  case 'jagdkatastereditor_Eigentuemer_Listen' : {
+		$GUI->jagdkatastereditor_listeigentuemer();
+	  }break;
+	  
+	  # Jagdkatastereditor
 	  case 'jagdkatastereditor_Flurstuecke_Listen' : {
 		$GUI->jagdkatastereditor_listflurst();
 	  }break;
@@ -770,45 +775,49 @@ if($GUI->goNotExecutedInPlugins){
 	  } break;
 
 	  case 'Druckrahmen_Freitexthinzufuegen' : {
-		$GUI->checkCaseAllowed('Druckrahmen');
+	  	$_files = $_FILES;
+			$GUI->checkCaseAllowed('Druckrahmen');
 		  $GUI->druckrahmen_init();
 		  $GUI->Document->update_frame($GUI->formvars, $_files);
 		  $GUI->Document->addfreetext($GUI->formvars);
 		  $GUI->druckrahmen_load();
-		$GUI->output();
+			$GUI->output();
 	  } break;
 
 	  case 'Druckrahmen_Freitextloeschen' : {
-		$GUI->checkCaseAllowed('Druckrahmen');
-		$GUI->druckrahmen_init();
-		$GUI->Document->update_frame($GUI->formvars, $_files);
-		$GUI->Document->removefreetext($GUI->formvars);
-		$GUI->druckrahmen_load();
-		$GUI->output();
+	  	$_files = $_FILES;
+			$GUI->checkCaseAllowed('Druckrahmen');
+			$GUI->druckrahmen_init();
+			$GUI->Document->update_frame($GUI->formvars, $_files);
+			$GUI->Document->removefreetext($GUI->formvars);
+			$GUI->druckrahmen_load();
+			$GUI->output();
 	  } break;
 
 	  case 'Druckrahmen_übernehmen >>' : {
-		$GUI->checkCaseAllowed('Druckrahmen');
-		$GUI->druckrahmen_init();
-		$GUI->Document->add_frame2stelle($GUI->formvars['aktiverRahmen'], $GUI->formvars['stelle']);
-		$GUI->druckrahmen_load();
-		$GUI->output();
+			$GUI->checkCaseAllowed('Druckrahmen');
+			$GUI->druckrahmen_init();
+			$GUI->Document->add_frame2stelle($GUI->formvars['aktiverRahmen'], $GUI->formvars['stelle']);
+			$GUI->druckrahmen_load();
+			$GUI->output();
 	  } break;
 
 	  case 'Druckrahmen_als neuen Rahmen speichern' : {
-		$GUI->checkCaseAllowed('Druckrahmen');
-		$GUI->druckrahmen_init();
-		$GUI->formvars['aktiverRahmen'] = $GUI->Document->save_frame($GUI->formvars, $_files, $GUI->Stelle->id);
-		$GUI->druckrahmen_load();
-		$GUI->output();
+	  	$_files = $_FILES;
+			$GUI->checkCaseAllowed('Druckrahmen');
+			$GUI->druckrahmen_init();
+			$GUI->formvars['aktiverRahmen'] = $GUI->Document->save_frame($GUI->formvars, $_files, $GUI->Stelle->id);
+			$GUI->druckrahmen_load();
+			$GUI->output();
 	  } break;
 
 	  case 'Druckrahmen_Änderungen Speichern' : {
-		$GUI->checkCaseAllowed('Druckrahmen');
-		$GUI->druckrahmen_init();
-		$GUI->Document->update_frame($GUI->formvars, $_files);
-		$GUI->druckrahmen_load();
-		$GUI->output();
+	  	$_files = $_FILES;
+			$GUI->checkCaseAllowed('Druckrahmen');
+			$GUI->druckrahmen_init();
+			$GUI->Document->update_frame($GUI->formvars, $_files);
+			$GUI->druckrahmen_load();
+			$GUI->output();
 	  } break;
 
 	  case 'Druckrahmen_Löschen' : {
@@ -1535,11 +1544,12 @@ if($GUI->goNotExecutedInPlugins){
 
 	  # Die Werte zum Eintragen von neuen Documenten in die DB werden an "nachweisFormSenden"
 	  case 'Nachweisformular_Senden' : {
-		$GUI->formvars['Bilddatei']=$_files['Bilddatei']['tmp_name'];
-		$GUI->formvars['Bilddatei_name']=$_files['Bilddatei']['name'];
-		$GUI->formvars['Bilddatei_size']=$_files['Bilddatei']['size'];
-		$GUI->formvars['Bilddatei_type']=$_files['Bilddatei']['type'];
-		$GUI->nachweisFormSenden();
+	  	$_files = $_FILES;
+			$GUI->formvars['Bilddatei']=$_files['Bilddatei']['tmp_name'];
+			$GUI->formvars['Bilddatei_name']=$_files['Bilddatei']['name'];
+			$GUI->formvars['Bilddatei_size']=$_files['Bilddatei']['size'];
+			$GUI->formvars['Bilddatei_type']=$_files['Bilddatei']['type'];
+			$GUI->nachweisFormSenden();
 	  } break;
 
 	  case 'Nachweisloeschen':{
@@ -1837,7 +1847,7 @@ if($GUI->goNotExecutedInPlugins){
       $GUI->loadMap('DataBase');
       $GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
       $GUI->drawMap();
-      $GUI->saveMap('');
+     	$GUI->saveMap('');
       $GUI->output();
 	  }break;
 	}

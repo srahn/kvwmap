@@ -299,7 +299,7 @@ function set_changed_flag(flag){
 	  <td>
 	    <div id="datensatz">
 	    <input type="hidden" value="" name="changed_<? echo $layer['shape'][$k][$attributes['table_name'][$attributes['name'][0]].'_oid']; ?>"> 
-	    <table class="tgle" border="0" cellpadding="6" cellspacing="6">
+	    <table class="tgle" <? if($attributes['group'][0] != ''){echo 'border="0" cellpadding="6" cellspacing="0"';}else{echo 'border="1"';} ?>>
 	      <thead class="gle">
 	        <th colspan="2" style="background-color:<? echo BG_GLEHEADER; ?>;">
 			  <? if($this->new_entry != true AND $this->formvars['printversion'] == ''){ ?>
@@ -321,7 +321,7 @@ function set_changed_flag(flag){
 			  <? } ?>
 		    </th>
 		  </thead>
-          <tbody >
+          <tbody <? if($attributes['group'][0] == '')echo 'class="gle"'; ?>>
 <?		$trans_oid = explode('|', $layer['shape'][$k]['lock']);
 			if($layer['shape'][$k]['lock'] == 'bereits übertragen' OR $trans_oid[1] != '' AND $layer['shape'][$k][$attributes['table_name'][$attributes['name'][0]].'_oid'] == $trans_oid[1]){
 				echo '<tr><td colspan="2" align="center"><span class="red">Dieser Datensatz wurde bereits übertragen und kann nicht bearbeitet werden.</span></td></tr>';
@@ -334,22 +334,19 @@ function set_changed_flag(flag){
 				if($this->new_entry == true AND $attributes['default'][$j] != '' AND $layer['shape'][$k][$attributes['name'][$j]] == ''){		# Default-Werte setzen
 					$layer['shape'][$k][$attributes['name'][$j]] = $attributes['default'][$j];
 				}
-				if($attributes['privileg'][$j] == '0' AND $attributes['form_element_type'][$j] == 'Auswahlfeld' OR $attributes['type'][$j] == 'not_saveable'){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar
+				if(($attributes['privileg'][$j] == '0' AND $attributes['form_element_type'][$j] == 'Auswahlfeld') OR ($attributes['form_element_type'][$j] == 'Text' AND $attributes['type'][$j] == 'not_saveable')){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar
 					$attributes['form_element_type'][$j] .= '_not_saveable';
 				}
 				if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
 					if($attributes['type'][$j] != 'geometry'){
 						
-	/*neu*/			if($j == 0){
+							if($attributes['group'][$j] != $attributes['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Tabelle beginnen
 								echo '<tr><td colspan="2"><table width="100%" class="tgle" border="2"><tbody class="gle">';
 							}
-							if($j == 3){
-								echo '</table></td></tr>';
-								echo '<tr><td colspan="2"><table width="100%" class="tgle" border="2"><tbody class="gle">';
-							}
-
 						
-							echo '<tr><td width="35%" valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';
+							echo '<tr><td ';
+							if($attributes['group'][0] != '')echo 'width="25%"';
+							echo ' valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';
 							if($attributes['privileg'][$j] != '0' AND !$lock[$k]){
 								$this->editable = 'true';
 							}
@@ -378,7 +375,7 @@ function set_changed_flag(flag){
 							  echo '><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div id="calendar"><a name="calendar_'.$attributes['name'][$j].'_'.$k.'"></div></td>';
 							}
 							echo '</td></tr></table>';
-							echo '</td><td width="100%">';
+							echo '</td><td>';
 			  			if($attributes['constraints'][$j] != ''){
 			  				if($attributes['privileg'][$j] == '0' OR $lock[$k]){
 			  					$size = 1.3*strlen($layer['shape'][$k][$attributes['name'][$j]]);
@@ -404,9 +401,9 @@ function set_changed_flag(flag){
 								</tr>
 							';
 			  			
-	/*neu*/			if($j == count($attributes['name'])-1){
+			  			if($attributes['group'][$j] != $attributes['group'][$j+1]){		# wenn die nächste Gruppe anders ist, Tabelle schliessen
 								echo '</table></td></tr>';
-							}
+			  			}
 			  			
 							if($attributes['privileg'][$j] >= '0'){
 								$this->form_field_names .= $layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'|';
@@ -423,13 +420,14 @@ function set_changed_flag(flag){
 			  		}
 					}
 				}
-				 if($this->new_entry != true AND $this->formvars['printversion'] == ''){ ?>
-				 
-				 <tr><td colspan="2"><table width="100%" class="tgle" border="2"><tbody class="gle">
+				if($this->new_entry != true AND $this->formvars['printversion'] == ''){
+					if($attributes['group'][0] != ''){ ?>
+						<tr><td colspan="2"><table width="100%" class="tgle" border="2"><tbody class="gle">
+					<? } ?>
 				 
 					<tr>
 						<? if($layer['querymaps'][$k] != ''){ ?>
-						<td width="35%" bgcolor="<? echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;" align="center"><img style="border:1px solid grey" src="<? echo $layer['querymaps'][$k]; ?>"></td>
+						<td <? if($attributes['group'][0] != '')echo 'width="25%"'; ?> bgcolor="<? echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;" align="center"><img style="border:1px solid grey" src="<? echo $layer['querymaps'][$k]; ?>"></td>
 						<? } else { ?>
 			    	    <td bgcolor="<? echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;">&nbsp;</td>
 			    	    <? } ?>
@@ -482,9 +480,10 @@ function set_changed_flag(flag){
 ?>
 			    </tr>
 			    
-			    </table></td></tr>
-			    
-<? }
+			    <? if($attributes['group'][0] != ''){ ?>
+								</table></td></tr>
+					<? }		    
+	}
 
 				if($privileg == 1) {
 					if($this->new_entry == true){

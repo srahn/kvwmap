@@ -313,7 +313,7 @@ class antrag {
       
       if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){
       	$FFR[$i]['Riss-Nummer']=$rs['flurid'].'/'.$rs['rissnummer'];
-      	$FFR[$i]['Antrags-Nummer']=str_pad($rs['stammnr'],RISSUMMERMAXLENGTH,'0',STR_PAD_LEFT);
+      	$FFR[$i]['Antrags-Nummer']=str_pad($rs['stammnr'],RISSNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
       }
       else{
       	$FFR[$i]['Antrags-Nummer']=$rs['flurid'].'/'.str_pad($rs['stammnr'],ANTRAGSNUMMERMAXLENGTH,'0',STR_PAD_LEFT);

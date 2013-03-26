@@ -2783,6 +2783,15 @@ class GUI extends GUI_core{
     $this->output();
   }
   
+	function jagdkatastereditor_listeigentuemer(){
+    $this->main='jagdkataster_eigentuemerlist.php';
+    $this->titel='Eigentümer im Jagdbezirk '.$this->formvars['name'];
+    $this->jagdkataster = new jagdkataster($this->pgdatabase);
+    if(ALKIS){$this->eigentuemer = $this->jagdkataster->getEigentuemerListeALKIS($this->formvars);}
+    else{$this->eigentuemer = $this->jagdkataster->getEigentuemerListe($this->formvars);}
+    $this->output();
+  }
+  
   function jagdkatastereditor_listpaechter(){
     $this->main='jagdkataster_paechterlist.php';
     $this->titel='P&auml;chter im Jagdbezirk '.$this->formvars['name'].'';
@@ -3544,7 +3553,7 @@ class GUI extends GUI_core{
           }
           $newlegendimage = imagecreatetruecolor($width+$size*0.55*$this->map_factor,$height);
           $backgroundColor = ImageColorAllocate ($newlegendimage, 255, 255, 255);
-          imagefill ($newlegendimage, 0, 0, $backgroundColor);
+          imagefilledrectangle($newlegendimage, 0, 0, imagesx($newlegendimage), imagesy($newlegendimage), $backgroundColor);
           ImageCopy($newlegendimage, $layernameimage, 0, 0, 0, 0, imagesx($layernameimage), $size*3.3*$this->map_factor);
           if($layerset[$i]['showclasses']){
             ImageCopy($newlegendimage, $classimage, 0, $size*3.3*$this->map_factor, 0, 0, imagesx($classimage), imagesy($classimage));
@@ -3560,7 +3569,7 @@ class GUI extends GUI_core{
     }
     $newlegendimage = imagecreatetruecolor(imagesx($legendimage)+$size*0.55*$this->map_factor,$size*3*$this->map_factor+imagesy($legendimage)+$size*0.55*$this->map_factor);
     $backgroundColor = ImageColorAllocate ($newlegendimage, 255, 255, 255);
-    imagefill ($newlegendimage, 0, 0, $backgroundColor);
+    imagefilledrectangle($newlegendimage, 0, 0, imagesx($newlegendimage), imagesy($newlegendimage), $backgroundColor);
     ImageCopy($newlegendimage, $legendimage, $size*0.55*$this->map_factor, $size*3*$this->map_factor, 0, 0, imagesx($legendimage), imagesy($legendimage));
     $legendimage = $newlegendimage;
     $black = ImageColorAllocate ($legendimage, 0, 0, 0);
@@ -13874,12 +13883,13 @@ class db_mapObj extends db_mapObj_core{
       $sql.= 'form_element_type = "'.$formvars['form_element_'.$attributes['name'][$i]].'", ';
       $sql.= 'options = "'.addslashes($formvars['options_'.$attributes['name'][$i]]).'", ';
       $sql.= 'tooltip = "'.addslashes($formvars['tooltip_'.$attributes['name'][$i]]).'", ';
+      $sql.= '`group` = "'.addslashes($formvars['group_'.$attributes['name'][$i]]).'", ';
       if($formvars['mandatory_'.$attributes['name'][$i]] == ''){
       	$formvars['mandatory_'.$attributes['name'][$i]] = 'NULL';
       }
       $sql.= 'mandatory = '.$formvars['mandatory_'.$attributes['name'][$i]].', ';
       $sql.= 'alias = "'.$formvars['alias_'.$attributes['name'][$i]].'" ';
-      $sql.= 'ON DUPLICATE KEY UPDATE name = "'.$attributes['name'][$i].'", form_element_type = "'.$formvars['form_element_'.$attributes['name'][$i]].'", options = "'.addslashes($formvars['options_'.$attributes['name'][$i]]).'", tooltip = "'.addslashes($formvars['tooltip_'.$attributes['name'][$i]]).'", alias = "'.$formvars['alias_'.$attributes['name'][$i]].'", mandatory = '.$formvars['mandatory_'.$attributes['name'][$i]].' ';
+      $sql.= 'ON DUPLICATE KEY UPDATE name = "'.$attributes['name'][$i].'", form_element_type = "'.$formvars['form_element_'.$attributes['name'][$i]].'", options = "'.addslashes($formvars['options_'.$attributes['name'][$i]]).'", tooltip = "'.addslashes($formvars['tooltip_'.$attributes['name'][$i]]).'", `group` = "'.addslashes($formvars['group_'.$attributes['name'][$i]]).'", alias = "'.$formvars['alias_'.$attributes['name'][$i]].'", mandatory = '.$formvars['mandatory_'.$attributes['name'][$i]].' ';
       $this->debug->write("<p>file:kvwmap class:Document->save_attributes :",4);
       $database->execSQL($sql,4, 1);
     }
@@ -13943,6 +13953,7 @@ class db_mapObj extends db_mapObj_core{
     	$attributes['alias'][$i]= $rs['alias'];
     	$attributes['alias'][$attributes['name'][$i]]= $rs['alias'];
     	$attributes['tooltip'][$i]= $rs['tooltip'];
+    	$attributes['group'][$i]= $rs['group'];
     	$attributes['mandatory'][$i]= $rs['mandatory'];
     	$i++;
     }

@@ -118,7 +118,7 @@ else {
         <? } ?>
         <tr>
           <td colspan="2">          Rissnummer<br>
-  					<input type="text" name="suchrissnr" value="<?php echo $this->formvars['suchrissnr']; ?>" size="<?php echo RISSUMMERMAXLENGTH; ?>" maxlength="<?php echo RISSUMMERMAXLENGTH; ?>">
+  					<input type="text" name="suchrissnr" value="<?php echo $this->formvars['suchrissnr']; ?>" size="<?php echo RISSNUMMERMAXLENGTH; ?>" maxlength="<?php echo RISSNUMMERMAXLENGTH; ?>">
  					</td>    
         </tr>
         <? if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){ ?>

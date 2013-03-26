@@ -476,7 +476,7 @@ class Nachweis {
 
   function buildNachweisNr($primary, $secondary){
   	if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){
-  		return $secondary.str_pad($primary, RISSUMMERMAXLENGTH,'0',STR_PAD_LEFT);
+  		return $secondary.str_pad($primary, RISSNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
   	}
   	else{
   		return $secondary.str_pad($primary, ANTRAGSNUMMERMAXLENGTH,'0',STR_PAD_LEFT);

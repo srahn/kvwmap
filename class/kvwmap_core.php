@@ -256,9 +256,9 @@ class GUI_core {
         else{
         	$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
         }
-
+        
         # Allgemeine Parameter
-        $map->setSize($this->user->rolle->nImageWidth,$this->user->rolle->nImageHeight);
+        #$map->setSize($this->user->rolle->nImageWidth,$this->user->rolle->nImageHeight);
         $map->set('resolution',96);
         if($this->user->rolle->epsg_code == '4326'){
         	$map->set('units',MS_DD);
@@ -284,17 +284,11 @@ class GUI_core {
 				else {
 				  $map->setextent($this->user->rolle->oGeorefExt->minx,$this->user->rolle->oGeorefExt->miny,$this->user->rolle->oGeorefExt->maxx,$this->user->rolle->oGeorefExt->maxy);
         }
-
-        # setzen der Kartenausdehnung über die letzten Benutzereinstellungen
-        if ($this->user->rolle->oGeorefExt->minx==0 OR $this->user->rolle->oGeorefExt->minx=='') {
-          echo "Richten Sie mit phpMyAdmin in der kvwmap Datenbank eine Referenzkarte, eine Stelle, einen Benutzer und eine Rolle ein ";
-          echo "<br>(Tabellen referenzkarten, stelle, user, rolle) ";
-          echo "<br>oder wenden Sie sich an ihren Systemverwalter.";
-          exit;
-        }
-        else {
-          $map->setextent($this->user->rolle->oGeorefExt->minx,$this->user->rolle->oGeorefExt->miny,$this->user->rolle->oGeorefExt->maxx,$this->user->rolle->oGeorefExt->maxy);
-        }
+        
+        $map->setSize($this->user->rolle->nImageWidth,$this->user->rolle->nImageHeight);
+        
+        # Bug-Workaround wegen bleibender Mapserver-Fehlermeldungen
+        $map->setextent($this->user->rolle->oGeorefExt->minx,$this->user->rolle->oGeorefExt->miny,$this->user->rolle->oGeorefExt->maxx,$this->user->rolle->oGeorefExt->maxy);
         
         # OWS Metadaten
 
@@ -436,7 +430,7 @@ class GUI_core {
         $rollenlayer = $mapDB->read_RollenLayer();
         $layerset = array_merge($layer, $rollenlayer);
         $mapDB->anzLayer=count($layerset);
-
+        
         for($i=0;$i<$mapDB->anzLayer;$i++) {
           $layer = ms_newLayerObj($map);
           $layer->setMetaData('wfs_request_method', 'GET');
@@ -749,7 +743,7 @@ class GUI_core {
             $this->loadclasses($layer, $layerset[$i], $classset, $map);
           } # Ende Layer ist aktiv
         } # end of Schleife layer
-        
+                
         $this->map=$map;
 				if (MAPSERVERVERSION >= 600 ) {
 					$this->map_scaledenom = $map->scaledenom;

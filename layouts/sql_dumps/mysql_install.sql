@@ -207,6 +207,7 @@ CREATE TABLE layer_attributes (
   options text,
   alias varchar(255) default NULL,
   tooltip varchar(255) default NULL,
+  `group` VARCHAR( 255 ) DEFAULT NULL,
   `mandatory` BOOL NULL,
   `order` int(11) default NULL,
   PRIMARY KEY  (layer_id,`name`)

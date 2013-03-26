@@ -1082,3 +1082,5 @@ ALTER TABLE `layer` ADD `metalink` VARCHAR(255) NULL;
 ALTER TABLE `rolle_nachweise` CHANGE `suchantrnr` `suchantrnr` VARCHAR(11) NOT NULL DEFAULT '';
 
 ALTER TABLE `layer_attributes` CHANGE `form_element_type` `form_element_type` ENUM('Text','Textfeld','Auswahlfeld','Geometrie','SubFormPK','SubFormFK','SubFormEmbeddedPK','Time','Dokument','Link','User','Stelle','Fläche','dynamicLink','Zahl','UserID','Länge') NOT NULL DEFAULT 'Text';
+
+ALTER TABLE `layer_attributes` ADD `group` VARCHAR( 255 ) NULL DEFAULT NULL AFTER `tooltip`;

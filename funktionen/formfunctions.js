@@ -2,7 +2,7 @@
 <!--
 
   function addOptions(selectObj,insertObj) {
-    // Diese Funktion fügt alle in selectObj selektierten Optionen zum insertObj hinzu.
+    // Diese Funktion fÃ¼gt alle in selectObj selektierten Optionen zum insertObj hinzu.
 	insertObjLengthStart=insertObj.length;
     for(i=0; i<selectObj.length; i++) {
 	  if (selectObj.options[i].selected) {
@@ -12,7 +12,7 @@
 	  }
     }
 	if (insertObjLengthStart==insertObj.length) {
-	  alert('Erst Schlagwörter im rechten Feld auswählen!');
+	  alert('Erst SchlagwÃ¶rter im rechten Feld auswÃ¤hlen!');
 	}
  }
  
@@ -40,13 +40,13 @@
 	    alert('Die linke Liste ist leer!');
 	  }
 	  else {
-	    alert('Erst Schlagwörter im linken Feld auswählen!');
+	    alert('Erst SchlagwÃ¶rter im linken Feld auswÃ¤hlen!');
 	  } 
 	}
   }
 
   function setBBoxFromMap(pathx,pathy,pixsize,minx,miny,westbl,eastbl,southbl,northbl) {
-    // Diese übergibt die Weltkoordinaten der BBox, die sie mit pixel2weltkoord() berechnen lässt an die
+    // Diese Ã¼bergibt die Weltkoordinaten der BBox, die sie mit pixel2weltkoord() berechnen lÃ¤sst an die
 	// Formularfelder der Metadatenbbox
 	x=pathx.split(","); y=pathy.split(",");
     if (x.length<2) {	

@@ -88,8 +88,8 @@ function update_form(art){
       </div></td>
   </tr>
   <tr>
-    <td rowspan="10">&nbsp;</td>
-    <td colspan="2" rowspan="10">
+    <td rowspan="12">&nbsp;</td>
+    <td colspan="2" rowspan="12">
       <?php
 				include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php')
 			?>
@@ -123,12 +123,12 @@ function update_form(art){
   <tr id="lfdnr" width="100%" style="display:<? if(in_array($this->jagdbezirk['art'], array('jbe', 'jbf', 'agf', 'atf', 'apf')) OR in_array($this->formvars['art'], array('jbe', 'jbf', 'agf', 'atf', 'apf'))){ echo 'none';}else{echo '';} ?>">
   	<td>lfd.-Nummer:<br><input type="text" name="nummer" value="<? echo $this->jagdbezirk['id'] ? $this->jagdbezirk['id']: $this->formvars['nummer']; ?>"></td>
   </tr>
-  <tr id="zuordnung" width="100%" style="display:<? if(in_array($this->jagdbezirk['art'], array('jbe', 'jbf', 'agf', 'atf', 'apf')) OR in_array($this->formvars['art'], array('jbe', 'jbf', 'agf', 'atf', 'apf'))){ echo '';}else{echo 'none';} ?>">
+  <tr id="zuordnung" width="100%" style="visibility:<? if(in_array($this->jagdbezirk['art'], array('jbe', 'jbf', 'agf', 'atf', 'apf')) OR in_array($this->formvars['art'], array('jbe', 'jbf', 'agf', 'atf', 'apf'))){ echo 'visible';}else{echo 'hidden';} ?>">
     <td>Zuordnung:<br>
     	<input type="text" name="jb_zuordnung" value="<? echo $this->jagdbezirk['jb_zuordnung'] ? $this->jagdbezirk['jb_zuordnung']: $this->formvars['jb_zuordnung']; ?>">
     </td>
   </tr>
-  <tr id="status" width="100%" style="display:<? if(in_array($this->jagdbezirk['art'], array('jbe', 'jbf', 'agf', 'atf', 'apf')) OR in_array($this->formvars['art'], array('jbe', 'jbf', 'agf', 'atf', 'apf'))){ echo '';}else{echo 'none';} ?>">
+  <tr id="status" width="100%" style="visibility:<? if(in_array($this->jagdbezirk['art'], array('jbe', 'jbf', 'agf', 'atf', 'apf')) OR in_array($this->formvars['art'], array('jbe', 'jbf', 'agf', 'atf', 'apf'))){ echo 'visible';}else{echo 'hidden';} ?>">
     <td>Status<br>
     	<select name="status">
     		<option value="0" <? if($this->jagdbezirk['status'] == 'f' OR $this->formvars['status'] == 'f'){echo 'selected="true"';} ?>>aktuell</option>
@@ -136,7 +136,7 @@ function update_form(art){
     	</select>
     </td>
   </tr>
-  <tr id="verzicht" width="100%" style="display:<? if($this->jagdbezirk['art'] == 'ejb' OR $this->formvars['art'] == 'ejb'){ echo '';}else{echo 'none';} ?>">
+  <tr id="verzicht" width="100%" style="visibility:<? if($this->jagdbezirk['art'] == 'ejb' OR $this->formvars['art'] == 'ejb'){ echo 'visible';}else{echo 'hidden';} ?>">
     <td>Verzicht gem. §3<br>
     	<select name="verzicht">
     		<option value="0" <? if($this->jagdbezirk['verzicht'] == 'f' OR $this->formvars['verzicht'] == 'f'){echo 'selected="true"';} ?>>nein</option>

@@ -42,7 +42,7 @@
 	}
 
 	function addOptionsWithIndex(selectObj,insertObj,hiddenObj,mode,index) {
-    // Diese Funktion fügt alle im Selectfeld selectObj selektierten Optionen im Selectfeld insertObj an der mit index definierten Position ein.
+    // Diese Funktion fÃ¼gt alle im Selectfeld selectObj selektierten Optionen im Selectfeld insertObj an der mit index definierten Position ein.
 		var insertObjLengthStart = insertObj.length;
 		//------- erst den Rest entfernen und dabei die entfernten merken
 		saveOptionsObj = insertObj.cloneNode(true);
@@ -54,19 +54,19 @@
 			substractOptions(insertObj,hiddenObj,mode);
 		}
 		
-		//------- dann die neuen Optionen einfügen
+		//------- dann die neuen Optionen einfÃ¼gen
 		addOptions(selectObj,insertObj,hiddenObj,mode);
 		
 		if(index < insertObjLengthStart){
-			//------- und dann den Rest wieder anhängen
+			//------- und dann den Rest wieder anhÃ¤ngen
 			addOptions(saveOptionsObj,insertObj,hiddenObj,mode);
 		}
   }
 
   function addOptions(selectObj,insertObj,hiddenObj,mode) {
-    // Diese Funktion fügt alle im Selectfeld selectObj selektierten Optionen zum Selectfeld insertObj hinzu.
-    // Und füllt das Hiddenfield hiddenObj mit den selektierten Values auf
-    // hiddenObj.value enthält eine mit Komma getrennte Liste der ausgewählten Werte
+    // Diese Funktion fÃ¼gt alle im Selectfeld selectObj selektierten Optionen zum Selectfeld insertObj hinzu.
+    // Und fÃ¼llt das Hiddenfield hiddenObj mit den selektierten Values auf
+    // hiddenObj.value enthÃ¤lt eine mit Komma getrennte Liste der ausgewÃ¤hlten Werte
 		insertObjLengthStart=insertObj.length;
     for(i=0; i<selectObj.length; i++) {
 	  	if (selectObj.options[i].selected) {
@@ -86,7 +86,7 @@
 	  	}
     }
 		if (insertObjLengthStart==insertObj.length) {
-		  alert('Erst Schlagwörter im rechten Feld auswählen!');
+		  alert('Erst SchlagwÃ¶rter im rechten Feld auswÃ¤hlen!');
 		}
   }
  
@@ -126,7 +126,7 @@
 	    	alert('Die linke Liste ist leer!');
 	  	}
 	  	else {
-	    	alert('Erst Schlagwörter im linken Feld auswählen!');
+	    	alert('Erst SchlagwÃ¶rter im linken Feld auswÃ¤hlen!');
 	  	} 
 		}
   }

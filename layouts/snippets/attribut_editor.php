@@ -55,6 +55,8 @@
 						<td>&nbsp;</td>
 						<td align="center"><b>Tooltip</b></td>
 						<td>&nbsp;</td>
+						<td align="center"><b>Gruppe</b></td>
+						<td>&nbsp;</td>
 						<td align="center"><b>Suche-Pflicht</b></td>
 					</tr>
 			';
@@ -148,6 +150,10 @@
 				  <td>&nbsp;</td>
 				  <td>
 				  	<input class="input" name="tooltip_'.$this->attributes['name'][$i].'" type="text" value="'.$this->attributes['tooltip'][$i].'">
+				  </td>
+				  <td>&nbsp;</td>
+				  <td>
+				  	<input class="input" name="group_'.$this->attributes['name'][$i].'" type="text" value="'.$this->attributes['group'][$i].'">
 				  </td>
 					<td>&nbsp;</td>
 				  <td>
