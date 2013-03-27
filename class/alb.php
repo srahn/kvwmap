@@ -2337,7 +2337,7 @@ class ALB {
 # 23.11.2006 H. Riedel, if-Schleife bzgl. Gemarkungsausgabe anpassen
           if ($buchungen[$b-1]['gemkgname'] != $buchungen[$b]['gemkgname']) {
 #            $pdf->addText($col1b,$row-=36,$fontSize,'Gemarkung  '.$flst->GemkgName);
-            $pdf->addText($col10,$row-=24,$fontSize,'Gemarkung  '.$flst->GemkgName);
+            $pdf->addText($col10,$row-=24,$fontSize,'Gemarkung  '.utf8_decode($flst->GemkgName));
 #         $pdf->addText($col0,$row-=24,$fontSize,'BVNR Art GMKG   FLR FLURST-NR    P');
       $pdf->addText($col1,$row-=24,$fontSize,'BVNR Art GMKG   FLR FLURST-NR    P');
 #         $pdf->addText($col9-10,$row,$fontSize,'Fläche');
@@ -2557,7 +2557,7 @@ class ALB {
             $this->ALBAuszug_SeitenKopf($pdf,NULL,$Ueberschrift,'Bestand',$seite,$row,$fontSize,$BestandStr,$AktualitaetsNr);
           }
           if($buchungen[$b-1]['gemkgname'] != $buchungen[$b]['gemkgname']) {
-            $pdf->addText($col10,$row-=36,$fontSize,'Gemarkung  '.$flst->GemkgName);
+            $pdf->addText($col10,$row-=36,$fontSize,'Gemarkung  '.utf8_decode($flst->GemkgName));
             $pdf->addText($col1,$row-=24,$fontSize,'BVNR Art GMKG   FLR FLURST-NR    P');
             $pdf->addText($col64,$row,$fontSize,'Fläche');
           }
