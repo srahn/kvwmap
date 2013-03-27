@@ -258,7 +258,8 @@ class GUI_core {
         }
         
         # Allgemeine Parameter
-        #$map->setSize($this->user->rolle->nImageWidth,$this->user->rolle->nImageHeight);
+        $map->set('width',$this->user->rolle->nImageWidth);
+        $map->set('height',$this->user->rolle->nImageHeight);
         $map->set('resolution',96);
         if($this->user->rolle->epsg_code == '4326'){
         	$map->set('units',MS_DD);
@@ -284,11 +285,6 @@ class GUI_core {
 				else {
 				  $map->setextent($this->user->rolle->oGeorefExt->minx,$this->user->rolle->oGeorefExt->miny,$this->user->rolle->oGeorefExt->maxx,$this->user->rolle->oGeorefExt->maxy);
         }
-        
-        $map->setSize($this->user->rolle->nImageWidth,$this->user->rolle->nImageHeight);
-        
-        # Bug-Workaround wegen bleibender Mapserver-Fehlermeldungen
-        $map->setextent($this->user->rolle->oGeorefExt->minx,$this->user->rolle->oGeorefExt->miny,$this->user->rolle->oGeorefExt->maxx,$this->user->rolle->oGeorefExt->maxy);
         
         # OWS Metadaten
 
