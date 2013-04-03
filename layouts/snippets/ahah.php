@@ -5,7 +5,7 @@ $ahah = '
 
 function ahah(url, data, target, action){
 	for (k=0; k < target.length; ++k) {
-		if(target[k] != null && target[k].type != "text" && target[k].type != "hidden" && target[k].type != "checkbox" && target[k].innerHTML == ""){
+		if(target[k] != null && target[k].tagName == "DIV" && target[k].innerHTML == ""){
 			target[k].innerHTML = \'<img src="graphics/ajax-loader.gif">\';
 		}
 	}
