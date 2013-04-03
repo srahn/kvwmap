@@ -107,7 +107,7 @@ if($this->formvars['gps_follow'] == ''){
       <div id="map">
       <table bgcolor="#FFFFFF" border="0" cellpadding="0" cellspacing="0">
         <tr bgcolor="#FFFFFF" align="center">
-          <td colspan="3">
+          <td>
             <input type="hidden" name="go" value="neu Laden">
             <INPUT TYPE="hidden" NAME="minx" VALUE="<?php echo $this->map->extent->minx; ?>">
             <INPUT TYPE="hidden" NAME="miny" VALUE="<?php echo $this->map->extent->miny; ?>">
@@ -143,7 +143,7 @@ if($this->formvars['gps_follow'] == ''){
         	<td width="100%">
         		<table width="100%" border="0" cellpadding="0" cellspacing="1">
         			<tr>
-        				<td colspan="3" style="border-style:solid; border-width:1px; border-color:#aaaaaa;">
+        				<td width="100%" colspan="3" style="border-style:solid; border-width:1px; border-color:#aaaaaa;">
         					<table width="100%" border="0" cellpadding="0" cellspacing="0">
 						        <tr style="background-color: <? echo BG_MENUETOP; ?>;">
 						          <td width="30%" height="30">

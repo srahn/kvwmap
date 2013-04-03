@@ -431,6 +431,8 @@ class shape {
       #rmdir(IMAGEPATH.$folder);         # Ordner löschen
       $sql = 'DROP TABLE '.$temp_table;		# temp. Tabelle wieder löschen
       $ret = $layerdb->execSQL($sql,4, 0);
+      $currenttime=date('Y-m-d H:i:s',time());
+    	$user->rolle->setConsumeShape($currenttime,$this->formvars['selected_layer_id'],$count);
       return $this->formvars['filename'];
     }
     else{

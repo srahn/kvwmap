@@ -217,7 +217,7 @@ class jagdkataster {
 		else{				# ein Jagdbezirk
 			$oids[] = $formvars['oid']; 
 		}
-		$sql = "SELECT round((sum(flaeche)*100/j_flaeche*(st_area(st_memunion(the_geom_inter))/st_area(st_memunion(the_geom))))::numeric, 2) as anteil_alb, round((st_area(st_memunion(the_geom_inter))*100/j_flaeche)::numeric, 2) as anteil_alk, round(sum(flaeche)*(st_area(st_memunion(the_geom_inter))/st_area(st_memunion(the_geom)))::numeric, 2) AS albflaeche, eigentuemer";
+		$sql = "SELECT round((st_area(st_memunion(the_geom_inter))*100/j_flaeche)::numeric, 2) as anteil_alk, round(sum(flaeche)*(st_area(st_memunion(the_geom_inter))/st_area(st_memunion(the_geom)))::numeric, 2) AS albflaeche, eigentuemer";
 		$sql.= " FROM(SELECT distinct area(jagdbezirke.the_geom) as j_flaeche, alb.flaeche, array_to_string(array(";
 		$sql.= " select rtrim(name1,',') from alb_g_eigentuemer ee, alb_g_namen nn";
 		$sql.= " where ee.lfd_nr_name=nn.lfd_nr_name and ee.bezirk=e.bezirk and ee.blatt=e.blatt";
@@ -231,8 +231,10 @@ class jagdkataster {
 		#echo $sql;
 		$ret = $this->database->execSQL($sql, 4, 0);
 		while($rs = pg_fetch_array($ret[1])){
+			$summe = $summe + $rs['albflaeche'];
 			$eigentuemer[] = $rs;
 		}
+		$eigentuemer['albsumme'] = $summe;
 		return $eigentuemer;
 	}
 	

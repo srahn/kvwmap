@@ -214,6 +214,13 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
       </tr>
   <?php
   for ($i=0;$i<count($this->namen);$i++) {
+  	
+  	$this->namen[$i]['name1'] = str_replace(',,,', '', $this->namen[$i]['name1']);
+		$this->namen[$i]['name1'] = str_replace(',,', ',', $this->namen[$i]['name1']);
+		if(substr($this->namen[$i]['name1'], strlen($this->namen[$i]['name1'])-1) == ',') {
+			$this->namen[$i]['name1'] = substr($this->namen[$i]['name1'], 0, strlen($this->namen[$i]['name1'])-1);
+		}
+  	
   ?>
       <tr>
       	<td><input type="checkbox" name="check_grundbuch" value="<? echo $this->namen[$i]['bezirk'].'-'.$this->namen[$i]['blatt']; ?>"></td>

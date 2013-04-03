@@ -16,4 +16,6 @@
   $strButtonSaveAs="Als neuen Nutzer eintragen";
   $strTitle="Benutzerdaten Editor";
   $strAllowedIps="erlaubte IP-Adressen";
+  $strStart="Start";
+  $strStop="Stop";
 ?>  

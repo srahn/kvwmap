@@ -64,7 +64,7 @@ function zoom2wkt(wkt, epsg){
 	document.GUI.submit();
 }
 
-function zoomto_datasets(layer_id, tablename, columnname){
+function check_for_selection(layer_id){
 	go = 'false';
 	checkbox_name_obj = document.getElementsByName('checkbox_names_'+layer_id);
 	checkbox_name_string = checkbox_name_obj[0].value;
@@ -76,8 +76,15 @@ function zoomto_datasets(layer_id, tablename, columnname){
 	}
 	if(go == 'false'){
 		alert('Es wurde kein Datensatz ausgewählt.');
+		return false;
 	}
 	else{
+		return true;
+	}
+}
+
+function zoomto_datasets(layer_id, tablename, columnname){
+	if(check_for_selection(layer_id)){
 		document.GUI.chosen_layer_id.value = layer_id;
 		document.GUI.layer_tablename.value = tablename;
 		document.GUI.layer_columnname.value = columnname;
@@ -87,19 +94,7 @@ function zoomto_datasets(layer_id, tablename, columnname){
 }
 
 function delete_datasets(layer_id){
-	go = 'false';
-	checkbox_name_obj = document.getElementsByName('checkbox_names_'+layer_id);
-	checkbox_name_string = checkbox_name_obj[0].value;
-	checkbox_names = checkbox_name_string.split('|');
-	for(i = 0; i < checkbox_names.length; i++){
-		if(document.getElementsByName(checkbox_names[i])[0] != undefined && document.getElementsByName(checkbox_names[i])[0].checked == true){
-			go = 'true';
-		}
-	}
-	if(go == 'false'){
-		alert('Es wurde kein Datensatz ausgewählt.');
-	}
-	else{
+	if(check_for_selection(layer_id)){
 		if(confirm('Wollen Sie die ausgewählten Datensätze wirklich löschen?')){
 			document.GUI.chosen_layer_id.value = layer_id;
 			document.GUI.go.value = 'Layer_Datensaetze_Loeschen';
@@ -132,6 +127,15 @@ function shape_export_all(layer_id, anzahl){
 	document.GUI.submit();
 }
 
+function shape_export(layer_id){
+	if(check_for_selection(layer_id)){
+		document.GUI.chosen_layer_id.value = layer_id;
+		document.GUI.go_backup.value = document.GUI.go.value;
+		document.GUI.go.value = 'SHP_Export';
+		document.GUI.submit();
+	}
+}
+
 function select_this_dataset(layer_id, n){
 	var k = 0;
 	obj = document.getElementById(layer_id+'_'+k);
@@ -144,19 +148,7 @@ function select_this_dataset(layer_id, n){
 }
 
 function csv_export(layer_id){
-	go = 'false';
-	checkbox_name_obj = document.getElementsByName('checkbox_names_'+layer_id);
-	checkbox_name_string = checkbox_name_obj[0].value;
-	checkbox_names = checkbox_name_string.split('|');
-	for(i = 0; i < checkbox_names.length; i++){
-		if(document.getElementsByName(checkbox_names[i])[0] != undefined && document.getElementsByName(checkbox_names[i])[0].checked == true){
-			go = 'true';
-		}
-	}
-	if(go == 'false'){
-		alert('Es wurde kein Datensatz ausgewählt.');
-	}
-	else{
+	if(check_for_selection(layer_id)){
 		document.GUI.chosen_layer_id.value = layer_id;
 		document.GUI.go_backup.value = document.GUI.go.value;
 		document.GUI.go.value = 'generischer_csv_export';
@@ -165,19 +157,7 @@ function csv_export(layer_id){
 }
 
 function print_data(layer_id){
-	go = 'false';
-	checkbox_name_obj = document.getElementsByName('checkbox_names_'+layer_id);
-	checkbox_name_string = checkbox_name_obj[0].value;
-	checkbox_names = checkbox_name_string.split('|');
-	for(i = 0; i < checkbox_names.length; i++){
-		if(document.getElementsByName(checkbox_names[i])[0] != undefined && document.getElementsByName(checkbox_names[i])[0].checked == true){
-			go = 'true';
-		}
-	}
-	if(go == 'false'){
-		alert('Es wurde kein Datensatz ausgewählt.');
-	}
-	else{
+	if(check_for_selection(layer_id)){
 		document.GUI.chosen_layer_id.value = layer_id;
 		document.GUI.go_backup.value = document.GUI.go.value;
 		document.GUI.go.value = 'generischer_sachdaten_druck';
@@ -204,22 +184,7 @@ function change_charttype(layer_id){
 }
 
 function create_chart(layer_id){
-	go = 'false';
-	if(document.getElementsByName('charttype_'+layer_id)[0].value == 'mirrorbar' && ((document.getElementsByName('chartsplit_'+layer_id)[0].value == '') || (document.getElementsByName('chartvalue_'+layer_id)[0].value == ''))){
-		return;
-	}
-	checkbox_name_obj = document.getElementsByName('checkbox_names_'+layer_id);
-	checkbox_name_string = checkbox_name_obj[0].value;
-	checkbox_names = checkbox_name_string.split('|');
-	for(i = 0; i < checkbox_names.length; i++){
-		if(document.getElementsByName(checkbox_names[i])[0] != undefined && document.getElementsByName(checkbox_names[i])[0].checked == true){
-			go = 'true';
-		}
-	}
-	if(go == 'false'){
-		alert('Es wurde kein Datensatz ausgewählt.');
-	}
-	else{
+	if(check_for_selection(layer_id)){
 		document.GUI.target = "_blank";
 		document.GUI.chosen_layer_id.value = layer_id;
 		document.GUI.width.value = 700;
@@ -554,6 +519,7 @@ function set_changed_flag(flag){
 						&bull;&nbsp;<a href="javascript:delete_datasets(<?php echo $layer['Layer_ID']; ?>);"><? echo $strdelete; ?></a><br>
 					<?}?>
 						&bull;&nbsp;<a id="csv_link" href="javascript:csv_export(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCSVExport; ?></a><br>
+						&bull;&nbsp;<a id="shape_link" href="javascript:shape_export(<?php echo $layer['Layer_ID']; ?>);"><? echo $strShapeExport; ?></a><br>
 					<? if($layer['layouts']){ ?>
 						&bull;&nbsp;<a id="print_link" href="javascript:print_data(<?php echo $layer['Layer_ID']; ?>);"><? echo $strPrint; ?></a>
 					<? } ?>

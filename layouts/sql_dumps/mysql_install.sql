@@ -15,6 +15,15 @@
 -- Setzen des Charactersets
 -- ALTER DATABASE `@mysql_dbname` CHARACTER SET latin1 COLLATE latin1_german2_ci;
 
+CREATE TABLE `u_consumeShape` (
+  `user_id` int(11) NOT NULL,
+  `stelle_id` int(11) NOT NULL,
+  `time_id` datetime NOT NULL default '0000-00-00 00:00:00',
+  `layer_id` int(11) NOT NULL,
+  `numdatasets` int(11) default NULL,
+  PRIMARY KEY  (`user_id`,`stelle_id`,`time_id`)
+) ;
+
 CREATE TABLE `rolle_csv_attributes` (
   `user_id` int(11) NOT NULL,
   `stelle_id` int(11) NOT NULL,
@@ -22,7 +31,6 @@ CREATE TABLE `rolle_csv_attributes` (
   `attributes` text NOT NULL,
   PRIMARY KEY (`user_id`,`stelle_id`,`name`)
 );
-
 
 
 CREATE TABLE `u_consumeCSV` (
@@ -854,6 +862,8 @@ CREATE TABLE user (
   Namenszusatz VARCHAR( 50 ) NULL,
   passwort varchar(32) NOT NULL default '',
   password_setting_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `start` DATE NOT NULL DEFAULT '0000-00-00',
+  `stop` DATE NOT NULL DEFAULT '0000-00-00',
   ips text NULL,
   Funktion enum('admin','user', 'gast') NOT NULL default 'user',
   stelle_id int(11) default NULL,

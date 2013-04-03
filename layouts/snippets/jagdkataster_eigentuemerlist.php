@@ -24,11 +24,11 @@
         <td class="bold">ALB-Fläche</td>
       </tr>
       <?php 
-      for ($i = 0; $i < count($this->eigentuemer); $i++) { ?>
+      for ($i = 0; $i < count($this->eigentuemer)-1; $i++) { ?>
       <tr bgcolor="#E6E6F0">
       	<? if(!$this->formvars['oid']){ ?><td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><? echo $this->flurstuecke[$i]['name']; ?></td><? } ?>        
         <td width="49%"><? echo $this->eigentuemer[$i]['eigentuemer']; ?></td>
-        <td width="17%"><? echo $this->eigentuemer[$i]['anteil_alb']; ?> %</td>
+        <td width="17%"><? echo round($this->eigentuemer[$i]['albflaeche']*100/$this->eigentuemer['albsumme'], 2); ?> %</td>
         <td width="17%"><? echo $this->eigentuemer[$i]['anteil_alk']; ?> %</td>
         <td width="17%"><? echo $this->eigentuemer[$i]['albflaeche']; ?></td>
       </tr>

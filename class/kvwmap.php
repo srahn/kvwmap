@@ -3160,7 +3160,12 @@ class GUI extends GUI_core{
     $this->titel='Druckausschnitt wählen';
     $this->main="druckausschnittswahl.php";
     # aktuellen Kartenausschnitt laden + zeichnen!
-    $this->loadMap($loadmapsource);
+  	if($this->formvars['neuladen']){
+      $this->changeMap();
+    }
+    else{
+      $this->loadMap($loadmapsource);
+    }
     #echo '<br>Karte geladen: ';
     # aktuellen Druckkopf laden
     $this->Document=new Document($this->database);
@@ -5994,6 +5999,7 @@ class GUI extends GUI_core{
         
         # 2008-10-22 sr   Filter zur Where-Klausel hinzugefügt
         if($layerset[0]['Filter'] != ''){
+        	$layerset[0]['Filter'] = str_replace('$userid', $this->user->id, $layerset[0]['Filter']);
           $sql_where .= " AND ".$layerset[0]['Filter'];
         }
         
@@ -6396,7 +6402,7 @@ class GUI extends GUI_core{
         $sql = "INSERT INTO ".$table['tablename']." (";
         for($i = 0; $i < count($table['attributname']); $i++){
           if(($table['type'][$i] != 'Text_not_saveable' AND $table['type'][$i] != 'Auswahlfeld_not_saveable' AND $table['type'][$i] != 'SubFormPK' AND $table['type'][$i] != 'SubFormFK' AND $this->formvars[$table['formfield'][$i]] != '') 
-          OR $table['type'][$i] == 'Time' OR $table['type'][$i] == 'User' OR $table['type'][$i] == 'Stelle' OR $table['type'][$i] == 'Geometrie'){
+          OR $table['type'][$i] == 'Time' OR $table['type'][$i] == 'User' OR $table['type'][$i] == 'UserID' OR $table['type'][$i] == 'Stelle' OR $table['type'][$i] == 'Geometrie'){
             if($table['type'][$i] == 'Geometrie'){
               if($this->formvars['geomtype'] == 'POINT' AND $this->formvars['loc_x'] != ''){
                 $sql .= $table['attributname'][$i].", ";
@@ -6421,6 +6427,9 @@ class GUI extends GUI_core{
           }
           elseif($table['type'][$i] == 'User'){                       # Typ "User"
             $sql.= "'".$this->user->Vorname." ".$this->user->Name."', ";
+          }
+        	elseif($table['type'][$i] == 'UserID'){                       # Typ "UserID"
+            $sql.= "'".$this->user->id."', ";
           }
         	elseif($table['type'][$i] == 'Stelle'){                       # Typ "Stelle"
             $sql.= "'".$this->Stelle->Bezeichnung."', ";
@@ -7197,20 +7206,23 @@ class GUI extends GUI_core{
     if($this->formvars['all'] != 'true'){                     // nur ausgewählte Datensätze abfragen
       $checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
       # Daten abfragen
+      $element = explode(';', $checkbox_names[0]);   #  check;table_alias;table;oid
+      $where = " AND ".$element[1].".oid IN (";
       for($i = 0; $i < count($checkbox_names); $i++){
         if($this->formvars[$checkbox_names[$i]] == 'on'){
           $element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
-          $sql = $newpath." AND ".$element[1].".oid = '".$element[3]."'";
-          $sql.= $orderby;
-          #echo $sql.'<br><br>';
-          $this->debug->write("<p>file:kvwmap class:generic_csv_export :",4);
-          $ret = $layerdb->execSQL($sql,4, 1);
-          if (!$ret[0]) {
-            while ($rs=pg_fetch_array($ret[1])) {
-              $result[] = $rs;
-            }
-          }
+          $where = $where."'".$element[3]."',";
         }
+      }
+      $where .= "0)";
+      $sql.= $newpath.$where.$orderby;
+      #echo $sql.'<br><br>';
+      $this->debug->write("<p>file:kvwmap class:generic_csv_export :",4);
+      $ret = $layerdb->execSQL($sql,4, 1);
+      if (!$ret[0]) {
+      	while ($rs=pg_fetch_array($ret[1])) {
+        	$result[] = $rs;
+      	}
       }
     }
     else{                                           // alle Treffer abfragen
@@ -7261,6 +7273,9 @@ class GUI extends GUI_core{
       }
       $csv .= chr(10);
     }
+    
+    $currenttime=date('Y-m-d H:i:s',time());
+    $this->user->rolle->setConsumeCSV($currenttime,$this->formvars['chosen_layer_id'],count($result));
 
     ob_end_clean();
     header("Content-type: application/vnd.ms-excel");
@@ -7408,6 +7423,25 @@ class GUI extends GUI_core{
 	    if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
 	      $this->formvars['fromwhere'] .= ' where (1=1)';
 	    }
+	    ###################### über Checkboxen aus der Sachdatenanzeige des GLE ausgewählt ###############
+	    $anzahl = 0;
+      $checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
+      # Daten abfragen
+      $element = explode(';', $checkbox_names[0]);   #  check;table_alias;table;oid
+      $where = " AND ".$element[1].".oid IN (";
+      for($i = 0; $i < count($checkbox_names); $i++){
+        if($this->formvars[$checkbox_names[$i]] == 'on'){
+          $element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
+          $where = $where."'".$element[3]."',";
+          $anzahl++;
+        }
+      }
+      $where .= "0)";
+      if($anzahl > 0){
+      	$this->formvars['sql_'.$this->formvars['selected_layer_id']] = $where.$orderby;
+      	$this->formvars['anzahl'] = $anzahl;
+      }
+			####################################################################################################
     }
     if($this->formvars['CMD']== 'Full_Extent' OR $this->formvars['CMD'] == 'recentre' OR $this->formvars['CMD'] == 'zoomin' OR $this->formvars['CMD'] == 'zoomout' OR $this->formvars['CMD'] == 'previous' OR $this->formvars['CMD'] == 'next') {
       $this->navMap($this->formvars['CMD']);
@@ -8299,6 +8333,8 @@ class GUI extends GUI_core{
       $this->formvars['loginname']=$this->userdaten[0]['login_name'];
       $this->formvars['Namenszusatz']=$this->userdaten[0]['Namenszusatz'];
       $this->formvars['password_setting_time']=$this->userdaten[0]['password_setting_time'];
+      $this->formvars['start']=$this->userdaten[0]['start'];
+      $this->formvars['stop']=$this->userdaten[0]['stop'];
       $this->formvars['ips']=$this->userdaten[0]['ips'];
       $this->formvars['phon']=$this->userdaten[0]['phon'];
       $this->formvars['email']=$this->userdaten[0]['email'];
@@ -8343,7 +8379,7 @@ class GUI extends GUI_core{
       # Fehler bei der Formulareingabe
       $this->Meldung=$ret[1];
     }
-    else {
+    else{
       $ret=$this->user->NeuAnlegen($this->formvars);
       if ($ret[0]) {
         # Fehler beim Eintragen der Benutzerdaten
@@ -10476,6 +10512,10 @@ class GUI extends GUI_core{
               $sql = "UPDATE ".$tablename." SET ".$attributname." = '".$this->user->Vorname." ".$this->user->Name."' WHERE oid = '".$oid."'";
               $this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
             } break;
+            case 'UserID' : {
+              $sql = "UPDATE ".$tablename." SET ".$attributname." = '".$this->user->id."' WHERE oid = '".$oid."'";
+              $this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
+            } break;
             case 'Stelle' : {
               $sql = "UPDATE ".$tablename." SET ".$attributname." = '".$this->Stelle->Bezeichnung."' WHERE oid = '".$oid."'";
               $this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
@@ -10791,6 +10831,7 @@ class GUI extends GUI_core{
             }
             # 2006-06-12 sr   Filter zur Where-Klausel hinzugefügt
             if($layerset[$i]['Filter'] != ''){
+            	$layerset[$i]['Filter'] = str_replace('$userid', $this->user->id, $layerset[$i]['Filter']);
               $sql_where .= " AND ".$layerset[$i]['Filter'];
             }
             

@@ -294,7 +294,7 @@ function popup(id){
 		                    <tr bgcolor="#FFFFFF">
 		                      <td width="33%"><strong>Export-Art</strong></td>
 		                      <td width="33%"><strong>Anzahl der Exporte</strong></td>
-		                      <td width="33%"><strong>Anzahl der Flurstücke</strong></td>
+		                      <td width="33%"><strong>Anzahl der Datensätze</strong></td>
 		                    </tr>
 		                    <tr bgcolor="#FFFFFF">
 		                      <td colspan="13"><hr></td>
@@ -337,6 +337,76 @@ function popup(id){
 		       		</ul>
 		     			</td>
 		     			</tr>
+		     			
+		     			
+		     		<? if ($this->formvars['nutzung']=='stelle') { ?>
+				    <tr>
+			      	<td colspan="2"><li>Shape-Exporte der Stelle: <?php echo $this->account->Bezeichnung;?></li></td>
+			      </tr>
+			      <? }elseif($this->formvars['nutzung']=='nutzer'){ ?>
+			    	<tr>
+			        <td colspan="2"><li>Shape-Exporte durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> </li></td>
+			      <tr>
+			      <? }elseif($this->formvars['nutzung']=='stelle_nutzer' ){ ?>
+			      <tr>
+				      <td colspan="2"><li>Shape-Exporte durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> über
+				          die Stelle: <?php echo $this->account->Bezeichnung ;?></li>
+				      </td>
+				    </tr>
+				   <? } ?>
+		        <tr>
+		          <td colspan="2"><ul>
+		              <table width="90%" border="1" cellspacing="3" cellpadding="0">
+		                <tr>
+		                <td>
+		                	<table width="100%" border="0" cellpadding="5" cellspacing="0">
+		                    <tr bgcolor="#FFFFFF">
+		                      <td width="33%"><strong>Layer-ID</strong></td>
+		                      <td width="33%"><strong>Anzahl der Exporte</strong></td>
+		                      <td width="33%"><strong>Anzahl der Datensätze</strong></td>
+		                    </tr>
+		                    <tr bgcolor="#FFFFFF">
+		                      <td colspan="13"><hr></td>
+		                    </tr>
+		                    <?php
+												//$accessarray=$this->account->ALKNumbOfAccessUserStelleM;
+												if ( count($this->account->ShapeNumbOfAccess)==0 ) { ?>
+		                    	<tr>
+		                      	<td align="center" colspan="2">
+		                        	<?php  echo 'Es wurden keine Einträge in der Datenbank gefunden!'; ?>
+		                      	</td>
+		                      <?php
+												}
+												else {
+		          						for ($i=0;$i<count($this->account->ShapeNumbOfAccess);$i++) {
+					  							?>
+		            					<tr bgcolor="<?php if ($i%2!=0) { echo 'FFFFFF'; } else { echo 'EBEBEB'; } ?>">
+		                					<td><a href="javascript:popup('Shape<? echo $i; ?>');"><?php echo $this->account->ShapeNumbOfAccess[$i]['layer_id']; ?></a></td>
+		                					<td><?php echo $this->account->ShapeNumbOfAccess[$i]['NumberOfAccess']; ?></td>
+		                					<td><?php echo $this->account->ShapeNumbOfAccess[$i]['datasets']; ?></td>
+		              					</tr>
+		              					<tr id="Shape<? echo $i; ?>" style="display:none">
+		              						<td colspan="3">
+		              							<table>
+		              								<? for($j = 0; $j < count($this->account->ShapeNumbOfAccess[$i]['time_ids']); $j++){ ?>
+		              								<tr>
+		              									<td><? echo $this->account->ShapeNumbOfAccess[$i]['time_ids'][$j]['time_id']; ?></td>
+		              									<td><? echo $this->account->ShapeNumbOfAccess[$i]['time_ids'][$j]['Name']; ?></td>
+		              								</tr>
+		              								<? } ?>
+		              							</table>
+		              						</td>
+		              					</tr>
+		            				<? } ?>
+		            			<? } ?>
+		            		</table>
+		          		</td>
+		          		</tr>
+		         		</table>
+		       		</ul>
+		     			</td>
+		     			</tr>
+		     			
 		     			
 		     			<!--tr>
 		     				<td colspan="2" align="center"><input type="button" name="georg_export" value="Georg-Datei erzeugen" onclick="georg();"></td>

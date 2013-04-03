@@ -1084,3 +1084,15 @@ ALTER TABLE `rolle_nachweise` CHANGE `suchantrnr` `suchantrnr` VARCHAR(11) NOT N
 ALTER TABLE `layer_attributes` CHANGE `form_element_type` `form_element_type` ENUM('Text','Textfeld','Auswahlfeld','Geometrie','SubFormPK','SubFormFK','SubFormEmbeddedPK','Time','Dokument','Link','User','Stelle','Fläche','dynamicLink','Zahl','UserID','Länge') NOT NULL DEFAULT 'Text';
 
 ALTER TABLE `layer_attributes` ADD `group` VARCHAR( 255 ) NULL DEFAULT NULL AFTER `tooltip`;
+
+ALTER TABLE `user` ADD `start` DATE NOT NULL DEFAULT '0000-00-00' AFTER `password_setting_time`;
+ALTER TABLE `user` ADD `stop` DATE NOT NULL DEFAULT '0000-00-00' AFTER `start`;
+
+CREATE TABLE `u_consumeShape` (
+  `user_id` int(11) NOT NULL,
+  `stelle_id` int(11) NOT NULL,
+  `time_id` datetime NOT NULL default '0000-00-00 00:00:00',
+  `layer_id` int(11) NOT NULL,
+  `numdatasets` int(11) default NULL,
+  PRIMARY KEY  (`user_id`,`stelle_id`,`time_id`)
+) ;

@@ -766,14 +766,16 @@ class ALB {
 	        $csv .= ';';
 	      }
 				      
-        			$csv .= '\''.$Eigentuemerliste[$e]->Nr.'\';';
-              $anzNamenszeilen = count($Eigentuemerliste[$e]->Name);
-              for($n=0;$n<$anzNamenszeilen;$n++) {
-                $csv .= $Eigentuemerliste[$e]->Name[$n].';';
-              }
-              $csv .= chr(10);
-            }
-          }
+	        $csv .= '\''.$Eigentuemerliste[$e]->Nr.'\'';
+          if($Eigentuemerliste[$e]->Anteil !=''){$csv .= '  zu '.$Eigentuemerliste[$e]->Anteil;}
+          $csv .= ';';
+	        $anzNamenszeilen = count($Eigentuemerliste[$e]->Name);
+	        for($n=0;$n<$anzNamenszeilen;$n++) {
+	        	$csv .= $Eigentuemerliste[$e]->Name[$n].';';
+	        }
+	        $csv .= chr(10);
+        }
+       }
       }
       $csv .= chr(10);
     }

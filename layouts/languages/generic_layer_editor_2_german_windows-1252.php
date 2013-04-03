@@ -5,6 +5,7 @@
  $strdelete="löschen";
  $strSelectedDatasets="ausgewählte Datensätze";
  $strCSVExport="in CSV-Datei exportieren";
+ $strShapeExport="in Shape-Datei exportieren";
  $strCSVExportAll="alle Treffer in CSV-Datei exportieren";
  $strSHPExportAll="alle Treffer in SHP-Datei exportieren";
  $strMapSelect="selektieren";

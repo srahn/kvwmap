@@ -11,10 +11,13 @@
 	<script language="JavaScript">
 		var hasSVGSupport = false;
 		var useVBMethod = false;
-	
-		if(navigator.mimeTypes != null && navigator.mimeTypes.length > 0){
-			if(navigator.mimeTypes["image/svg-xml"] != null)	hasSVGSupport = true;
-		}
+
+		if(navigator.appName != 'Microsoft Internet Explorer'){
+			hasSVGSupport = true;
+		}	
+//		if(navigator.mimeTypes != null && navigator.mimeTypes.length > 0){
+//			if(navigator.mimeTypes["image/svg-xml"] != null)	hasSVGSupport = true;
+//		}
 		else{
 		  useVBMethod = true;
 		}

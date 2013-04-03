@@ -158,6 +158,25 @@ function remove(){
       include(LAYOUTPATH.'snippets/SVG_druckausschnittswahl.php');
     ?>
     </td>
+    <td valign="top">
+      <table cellspacing=0 cellpadding=2 border=0 style="border:1px solid #C3C7C3;">
+        <tr align="center">
+          <td>Verfügbare Themen:</td>
+        </tr>
+        <tr align="left">
+          <td>
+          <div align="center"><input type="submit" class="button" name="neuladen" value="neu Laden"></div>
+          <br>
+        	<div style="width:230; height:<?php echo $this->map->height-59; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
+	          &nbsp;
+	          <img src="graphics/tool_info_2.png" alt="Informationsabfrage" title="Informationsabfrage" width="17">&nbsp;
+	          <img src="graphics/layer.png" alt="Themensteuerung" title="Themensteuerung" width="20" height="20"><br>
+	          <div id="legend_div"><? echo $this->legende; ?></div>
+	        </div>
+          </td>
+        </tr>
+      </table>
+     </td>
   </tr>
 
   <tr align="center"> 

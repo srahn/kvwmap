@@ -1271,7 +1271,7 @@ if($GUI->goNotExecutedInPlugins){
 
 		case 'Style_Label_Editor' : {
 			$GUI->checkCaseAllowed($go);
-		$GUI->StyleLabelEditor();
+			$GUI->StyleLabelEditor();
 	  } break;
 
 	  case 'Layereditor' : {

@@ -79,6 +79,14 @@ else {
     <td style="border-bottom:1px solid #C3C7C3"><input name="password2" <?php if ($this->formvars['selected_user_id']>0)echo'disabled="true"';?> type="password" size="10" maxlength="30"></td>
   </tr>
   <tr>
+    <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strStart;?></th>
+    <td style="border-bottom:1px solid #C3C7C3"><input name="start" type="text" size="25" maxlength="100" value="<? echo $this->formvars['start']; ?>"></td>
+  </tr>
+  <tr>
+    <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strStop;?></th>
+    <td style="border-bottom:1px solid #C3C7C3"><input name="stop" type="text" size="25" maxlength="100" value="<? echo $this->formvars['stop']; ?>"></td>
+  </tr>
+  <tr>
     <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strAllowedIps;?></th>
     <td style="border-bottom:1px solid #C3C7C3"><input name="ips" type="text" size="25" maxlength="100" value="<? echo $this->formvars['ips']; ?>"></td>
   </tr>

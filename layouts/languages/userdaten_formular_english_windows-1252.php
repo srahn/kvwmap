@@ -16,5 +16,7 @@
   $strButtonSaveAs="Save new user";
   $strTitle="User's data editor";
   $strAllowedIps="allowed IP-Adresses";
+  $strStart="Start";
+  $strStop="Stop";
   
 ?>  
