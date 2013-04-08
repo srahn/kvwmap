@@ -436,7 +436,7 @@ class GUI_core {
           $layer->setMetaData('wms_group_title',$layerset[$i]['Gruppenname']);
           $layer->setMetaData('wms_queryable',$layerset[$i]['queryable']);
           $layer->setMetaData('wms_format',$layerset[$i]['wms_format']);
-          $layer->setMetaData('ows_version',$layerset[$i]['wms_server_version']);
+          $layer->setMetaData('ows_server_version',$layerset[$i]['wms_server_version']);
           $layer->setMetaData('ows_srs',$layerset[$i]['ows_srs']);
           $layer->setMetaData('wms_connectiontimeout',$layerset[$i]['wms_connectiontimeout']);
           $layer->setMetaData('selectiontype',$layerset[$i]['selectiontype']);

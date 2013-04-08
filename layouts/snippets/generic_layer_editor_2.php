@@ -306,11 +306,16 @@ function set_changed_flag(flag){
 					if($attributes['type'][$j] != 'geometry'){
 						
 							if($attributes['group'][$j] != $attributes['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Tabelle beginnen
-								echo '<tr><td colspan="2"><table width="100%" class="tgle" border="2"><tbody class="gle">';
+								echo '<tr>
+												<td colspan="2">
+													<table  class="tgle" border="2"><tbody class="gle">
+														<tr>
+															<td bgcolor="'.BG_GLEATTRIBUTE.'" colspan="2"><b>'.$attributes['group'][$j].'</b></td>
+														</tr>';
 							}
 						
 							echo '<tr><td ';
-							if($attributes['group'][0] != '')echo 'width="25%"';
+							if($attributes['group'][0] != '')echo 'width="10%"';
 							echo ' valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';
 							if($attributes['privileg'][$j] != '0' AND !$lock[$k]){
 								$this->editable = 'true';
@@ -318,7 +323,10 @@ function set_changed_flag(flag){
 							if($attributes['alias'][$j] == ''){
 								$attributes['alias'][$j] = $attributes['name'][$j];
 							}
-							echo '<table width="100%"><tr><td>';
+							echo '<table ';
+							if($attributes['group'][0] != '')echo 'width="225px"';
+							else echo 'width="100%";';
+							echo '><tr><td>';
 							if($attributes['form_element_type'][$j] != 'SubFormPK' AND $attributes['form_element_type'][$j] != 'SubFormEmbeddedPK'){
 								echo '<a style="font-size: '.$this->user->rolle->fontsize_gle.'px" title="Sortieren nach '.$attributes['alias'][$j].'" href="javascript:change_orderby(\''.$attributes['name'][$j].'\', '.$layer['Layer_ID'].');">
 							 					'.$attributes['alias'][$j].'</a>';
@@ -392,9 +400,9 @@ function set_changed_flag(flag){
 				 
 					<tr>
 						<? if($layer['querymaps'][$k] != ''){ ?>
-						<td <? if($attributes['group'][0] != '')echo 'width="25%"'; ?> bgcolor="<? echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;" align="center"><img style="border:1px solid grey" src="<? echo $layer['querymaps'][$k]; ?>"></td>
+						<td <? if($attributes['group'][0] != '')echo 'width="225px"'; ?> bgcolor="<? echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;" align="center"><img style="border:1px solid grey" src="<? echo $layer['querymaps'][$k]; ?>"></td>
 						<? } else { ?>
-			    	    <td bgcolor="<? echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;">&nbsp;</td>
+			    	    <td <? if($attributes['group'][0] != '')echo 'width="225px"'; ?> bgcolor="<? echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;">&nbsp;</td>
 			    	    <? } ?>
 			    	    <td style="padding-top:5px; padding-bottom:5px;">&nbsp;&nbsp;
 <?						

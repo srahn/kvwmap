@@ -181,7 +181,7 @@ a.black2 {
 }
 
 #layer {
-  border:1px solid gray;
+  /*border:1px solid gray;*/
   margin:20px 10px 0px 10px;
   font:italic 120px verdana, arial, helvetica, sans-serif;
 }

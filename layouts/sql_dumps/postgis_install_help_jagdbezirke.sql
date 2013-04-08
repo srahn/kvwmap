@@ -15,7 +15,8 @@ CREATE TABLE jagdbezirke
   concode character varying(5), -- entspricht tbJagdbezirk.BCode in condition
   conname character varying(40), -- entspricht tbJagdbezirk.BBezeichnung in condition
   jb_zuordnung character varying(10),
-  status boolean
+  status boolean,
+  verzicht boolean NOT NULL DEFAULT false,
 )
 WITH (
   OIDS=TRUE

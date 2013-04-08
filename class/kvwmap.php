@@ -6579,6 +6579,17 @@ class GUI extends GUI_core{
         $this->geomtype = $this->qlayerset[0]['attributes']['geomtype'][$this->qlayerset[0]['attributes']['the_geom']];
         if($this->geomtype != ''){
           $this->loadMap('DataBase');
+        	if($this->formvars['layer_id'] != '' AND $this->formvars['oid'] != '' AND $this->formvars['tablename'] != '' AND $this->formvars['columnname'] != ''){			# das ist die Sachen vom "Mutter"-Layer
+        		$layerdb = $this->mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+        		$rect = $this->mapDB->zoomToDatasets(array($this->formvars['oid']), $this->formvars['tablename'], $this->formvars['columnname'], 10, $layerdb, $this->user->rolle->epsg_code);
+			      $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);		# Zoom auf den "Mutter"-Datensatz
+				    if (MAPSERVERVERSION > 600) {
+							$this->map_scaledenom = $this->map->scaledenom;
+						}
+						else {
+							$this->map_scaledenom = $this->map->scale;
+						}
+        	}
           $oldscale=round($this->map_scaledenom);
           if($this->formvars['CMD']!='') {
             $this->navMap($this->formvars['CMD']);
@@ -10777,11 +10788,6 @@ class GUI extends GUI_core{
               default : $pixsize=$this->user->rolle->pixsize;
             }
             $rand=$layerset[$i]['tolerance']*$pixsize;
-            $searchbox_minx=strval($rect->minx-$rand);
-            $searchbox_miny=strval($rect->miny-$rand);
-            $searchbox_maxx=strval($rect->maxx+$rand);
-            $searchbox_maxy=strval($rect->maxy+$rand);
-
 
             # Aktueller EPSG in der die Abfrage ausgeführt wurde
             $client_epsg=$this->user->rolle->epsg_code;
@@ -10789,11 +10795,11 @@ class GUI extends GUI_core{
             $layer_epsg=$layerset[$i]['epsg_code'];
             # Bildung der Where-Klausel für die räumliche Abfrage mit der searchbox
             $searchbox_wkt ="POLYGON((";
-            $searchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->miny-$rand).",";
-            $searchbox_wkt.=strval($rect->maxx+$rand)." ".strval($rect->miny-$rand).",";
-            $searchbox_wkt.=strval($rect->maxx+$rand)." ".strval($rect->maxy+$rand).",";
-            $searchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->maxy+$rand).",";
-            $searchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->miny-$rand)."))";
+            $searchbox_wkt.=strval($rect->minx)." ".strval($rect->miny).",";
+            $searchbox_wkt.=strval($rect->maxx)." ".strval($rect->miny).",";
+            $searchbox_wkt.=strval($rect->maxx)." ".strval($rect->maxy).",";
+            $searchbox_wkt.=strval($rect->minx)." ".strval($rect->maxy).",";
+            $searchbox_wkt.=strval($rect->minx)." ".strval($rect->miny)."))";
 
             if($this->querypolygon != ''){
               $searchbox_wkt = $this->querypolygon;
@@ -11005,7 +11011,9 @@ class GUI extends GUI_core{
               case 'meters' : $pixsize=1; break;
               default : $pixsize=$this->user->rolle->pixsize;
             }
-            $rand=$layerset[$i]['tolerance']*$pixsize;
+            if($rect->minx == $rect->maxx AND $rect->miny == $rect->maxy){
+            	$rand=$layerset[$i]['tolerance']*$pixsize;
+            }
             $projFROM = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);
             $projTO = ms_newprojectionobj("init=epsg:".$layerset[$i]['epsg_code']);
             $rect->project($projFROM, $projTO);
@@ -11343,23 +11351,13 @@ class GUI extends GUI_core{
         }
       }
 
-      # Unterscheidung ob mit Suchradius oder ohne gesucht wird
-      if ($this->formvars['searchradius']>0) {
-        $layerset[$i]['toleranceunits']='meters';
-        $layerset[$i]['tolerance']=$this->formvars['searchradius'];
-      }
       switch ($layerset[$i]['toleranceunits']) {
         case 'pixels' : $pixsize=$this->user->rolle->pixsize; break;
         case 'meters' : $pixsize=1; break;
         default : $pixsize=$this->user->rolle->pixsize;
       }
       $rand=$layerset[$i]['tolerance']*$pixsize;
-      $searchbox_minx=strval($rect->minx-$rand);
-      $searchbox_miny=strval($rect->miny-$rand);
-      $searchbox_maxx=strval($rect->maxx+$rand);
-      $searchbox_maxy=strval($rect->maxy+$rand);
-
-
+      
       # Aktueller EPSG in der die Abfrage ausgeführt wurde
       $client_epsg=$this->user->rolle->epsg_code;
       # EPSG-Code des Layers der Abgefragt werden soll
@@ -11383,9 +11381,7 @@ class GUI extends GUI_core{
       }
 
       # Wenn es sich bei der Suche um eine punktuelle Suche handelt, wird die where Klausel um eine
-      # Umkreissuche mit dem Suchradius weiter eingeschränkt.
-      if ($rect->minx==$rect->maxx AND $rect->miny==$rect->maxy AND $this->querypolygon == '') {
-        # Behandlung der Suchanfrage mit Punkt, exakte Suche im Kreis
+      if($rect->minx==$rect->maxx AND $rect->miny==$rect->maxy AND $this->querypolygon == ''){
         if ($client_epsg!=$layer_epsg) {
           $sql_where.=" AND st_distance(".$the_geom.",st_transform(st_geomfromtext('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."),".$layer_epsg."))";
         }
@@ -11393,15 +11389,6 @@ class GUI extends GUI_core{
           $sql_where.=" AND st_distance(".$the_geom.",st_geomfromtext('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."))";
         }
         $sql_where.=" <= ".$rand;
-      }
-      else {
-        # Behandlung der Suchanfrage mit Rechteck, exakte Suche im Rechteck
-        if ($client_epsg!=$layer_epsg) {
-          $sql_where.=" AND st_intersects(".$the_geom.",st_transform(st_geomfromtext('".$searchbox_wkt."',".$client_epsg."),".$layer_epsg."))";
-        }
-        else {
-          $sql_where.=" AND st_intersects(".$the_geom.",st_geomfromtext('".$searchbox_wkt."',".$client_epsg."))";
-        }
       }
       
       # SVG-Geometrie abfragen für highlighting
@@ -13611,7 +13598,7 @@ class db_mapObj extends db_mapObj_core{
 		}
 		$filename = rand(0, 1000000).'.sql';
 		$fp = fopen(IMAGEPATH.$filename, 'w');
-		fwrite($fp, $sql);
+		fwrite($fp, utf8_decode($sql));
 		return $filename;
 	}
 

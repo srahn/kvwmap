@@ -402,11 +402,11 @@ class spatial_processor {
 	      $layer_epsg=$layerset[0]['epsg_code'];
 	      # Bildung der Where-Klausel f�r die r�umliche Abfrage mit der searchbox
 	      $searchbox_wkt ="POLYGON((";
-	      $searchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->miny-$rand).",";
-	      $searchbox_wkt.=strval($rect->maxx+$rand)." ".strval($rect->miny-$rand).",";
-	      $searchbox_wkt.=strval($rect->maxx+$rand)." ".strval($rect->maxy+$rand).",";
-	      $searchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->maxy+$rand).",";
-	      $searchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->miny-$rand)."))";
+	      $searchbox_wkt.=strval($rect->minx)." ".strval($rect->miny).",";
+	      $searchbox_wkt.=strval($rect->maxx)." ".strval($rect->miny).",";
+	      $searchbox_wkt.=strval($rect->maxx)." ".strval($rect->maxy).",";
+	      $searchbox_wkt.=strval($rect->minx)." ".strval($rect->maxy).",";
+	      $searchbox_wkt.=strval($rect->minx)." ".strval($rect->miny)."))";
 	      
 	      if($columnname == ''){
 	      	$columnname = 'the_geom';
@@ -431,7 +431,7 @@ class spatial_processor {
 	        else {
 	          $sql_where.=" AND st_distance(".$columnname.",st_geomfromtext('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."))";
 	        }
-	        $sql_where.=" <= 0";
+	        $sql_where.=" <= ".$rand;
 	      }
 	      else {
 	        # Behandlung der Suchanfrage mit Rechteck, exakte Suche im Rechteck
