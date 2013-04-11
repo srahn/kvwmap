@@ -5800,7 +5800,9 @@ class GUI extends GUI_core{
 		    $mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes);
 		    #---------- Speichern der Layerattribute -------------------
 			}
-			//$mapDB->delete_old_attributes($this->formvars['selected_layer_id'], $attributes);
+			if($this->formvars['pfad'] == '' OR $attributes != NULL){
+				$mapDB->delete_old_attributes($this->formvars['selected_layer_id'], $attributes);
+			}
 		}
 		
     $name = @array_values($this->formvars['name']);
