@@ -1795,6 +1795,16 @@ class GUI extends GUI_core{
           $this->debug->write("<p>file:kvwmap :LineEditor_Senden :",4);
           $ret = $layerdb->execSQL($sql,4, 1);
         }
+        elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'Länge'){
+          $sql = "UPDATE ".$this->formvars['layer_tablename']." SET ".$this->attributes['name'][$i]." = '".$this->formvars['linelength']."' WHERE oid = '".$this->formvars['oid']."'";
+          $this->debug->write("<p>file:kvwmap :LineEditor_Senden :",4);
+          $ret = $layerdb->execSQL($sql,4, 1);
+        }
+        elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'User'){
+          $sql = "UPDATE ".$this->formvars['layer_tablename']." SET ".$this->attributes['name'][$i]." = '".$this->user->Vorname." ".$this->user->Name."' WHERE oid = '".$this->formvars['oid']."'";
+          $this->debug->write("<p>file:kvwmap :LineEditor_Senden :",4);
+          $ret = $layerdb->execSQL($sql,4, 1);
+        }
       }
       $umring = $this->formvars['newpathwkt'];
       $ret = $lineeditor->eintragenLinie($umring, $this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname']);
@@ -2590,6 +2600,31 @@ class GUI extends GUI_core{
     $this->output();
   }
 
+  function jagdbezirke_auswaehlen_suchen_csv(){
+  	$jagdkataster = new jagdkataster($this->pgdatabase);
+    $this->jagdbezirke = $jagdkataster->suchen($this->formvars);
+    $anz = count($this->jagdbezirke);
+    for($i = 0; $i < $anz; $i++) {          	
+    	if($this->jagdbezirke[$i]['art']=='ejb' OR $this->jagdbezirke[$i]['art']=='gjb'){
+    		$csv.= $this->jagdbezirke[$i]['id'].';';
+    	}
+    	else{
+    		$csv.= $this->jagdbezirke[$i]['jb_zuordnung'].';'; 
+    	}
+    	$csv.= $this->jagdbezirke[$i]['name'].';';
+      $csv.= "'".$this->jagdbezirke[$i]['flaeche']."';";
+      $csv.= $this->jagdbezirke[$i]['art'].';';
+      $csv.= chr(10); 
+    }
+    $csv = 'lfd. Nummer;Name;Fläche;Typ'.chr(10).$csv;
+    ob_end_clean();
+    header("Content-type: application/vnd.ms-excel");
+    header("Content-disposition:  inline; filename=Flurstuecke.csv");
+    header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+    header('Pragma: public');
+    print utf8_decode($csv);
+  }
+  
   function jagdbezirke_auswaehlen_suchen(){
     $jagdkataster = new jagdkataster($this->pgdatabase);
     $this->jagdbezirke = $jagdkataster->suchen($this->formvars);
@@ -2681,7 +2716,7 @@ class GUI extends GUI_core{
     }
     else{
       $umring = $this->formvars['newpathwkt'];
-      $ret = $jagdkataster->eintragenNeueFlaeche($umring, $this->formvars['nummer'], $this->formvars['name'], $this->formvars['art'], $this->formvars['area'], $this->formvars['jb_zuordnung'], $this->formvars['status'], $this->formvars['oid']);
+      $ret = $jagdkataster->eintragenNeueFlaeche($umring, $this->formvars['nummer'], $this->formvars['name'], $this->formvars['art'], $this->formvars['area'], $this->formvars['jb_zuordnung'], $this->formvars['status'], $this->formvars['verzicht'], $this->formvars['oid']);
       if ($ret[0]) { # fehler beim eintrag
           $this->Meldung=$ret[1];
       }
@@ -2745,6 +2780,15 @@ class GUI extends GUI_core{
     $this->jagdkataster = new jagdkataster($this->pgdatabase);
     if(ALKIS){$this->flurstuecke = $this->jagdkataster->getIntersectedFlurstALKIS($this->formvars);}
     else{$this->flurstuecke = $this->jagdkataster->getIntersectedFlurst($this->formvars);}
+    $this->output();
+  }
+  
+	function jagdkatastereditor_listeigentuemer(){
+    $this->main='jagdkataster_eigentuemerlist.php';
+    $this->titel='Eigentümer im Jagdbezirk '.$this->formvars['name'];
+    $this->jagdkataster = new jagdkataster($this->pgdatabase);
+    if(ALKIS){$this->eigentuemer = $this->jagdkataster->getEigentuemerListeALKIS($this->formvars);}
+    else{$this->eigentuemer = $this->jagdkataster->getEigentuemerListe($this->formvars);}
     $this->output();
   }
   
@@ -3116,7 +3160,12 @@ class GUI extends GUI_core{
     $this->titel='Druckausschnitt wählen';
     $this->main="druckausschnittswahl.php";
     # aktuellen Kartenausschnitt laden + zeichnen!
-    $this->loadMap($loadmapsource);
+  	if($this->formvars['neuladen']){
+      $this->changeMap();
+    }
+    else{
+      $this->loadMap($loadmapsource);
+    }
     #echo '<br>Karte geladen: ';
     # aktuellen Druckkopf laden
     $this->Document=new Document($this->database);
@@ -3509,7 +3558,7 @@ class GUI extends GUI_core{
           }
           $newlegendimage = imagecreatetruecolor($width+$size*0.55*$this->map_factor,$height);
           $backgroundColor = ImageColorAllocate ($newlegendimage, 255, 255, 255);
-          imagefill ($newlegendimage, 0, 0, $backgroundColor);
+          imagefilledrectangle($newlegendimage, 0, 0, imagesx($newlegendimage), imagesy($newlegendimage), $backgroundColor);
           ImageCopy($newlegendimage, $layernameimage, 0, 0, 0, 0, imagesx($layernameimage), $size*3.3*$this->map_factor);
           if($layerset[$i]['showclasses']){
             ImageCopy($newlegendimage, $classimage, 0, $size*3.3*$this->map_factor, 0, 0, imagesx($classimage), imagesy($classimage));
@@ -3525,7 +3574,7 @@ class GUI extends GUI_core{
     }
     $newlegendimage = imagecreatetruecolor(imagesx($legendimage)+$size*0.55*$this->map_factor,$size*3*$this->map_factor+imagesy($legendimage)+$size*0.55*$this->map_factor);
     $backgroundColor = ImageColorAllocate ($newlegendimage, 255, 255, 255);
-    imagefill ($newlegendimage, 0, 0, $backgroundColor);
+    imagefilledrectangle($newlegendimage, 0, 0, imagesx($newlegendimage), imagesy($newlegendimage), $backgroundColor);
     ImageCopy($newlegendimage, $legendimage, $size*0.55*$this->map_factor, $size*3*$this->map_factor, 0, 0, imagesx($legendimage), imagesy($legendimage));
     $legendimage = $newlegendimage;
     $black = ImageColorAllocate ($legendimage, 0, 0, 0);
@@ -4373,6 +4422,7 @@ class GUI extends GUI_core{
   }
 
   function ordneFestpunktSkizzen() {
+  	$_files = $_FILES;
     ####################################################
     # 1) Verschieben von Dateien, die zu Festpunkten zugeordnet waren,
     # aber jetzt neu zu anderen pkz zugeordnet werden sollen (aus oberen Formularteil)
@@ -4417,8 +4467,8 @@ class GUI extends GUI_core{
     #################################################################
     # 2) Kopieren der hochgeladenen Dateien an die Speicherplätze, die den PKZ entsprechen.
     # Variable $_FILES
-    $uploadedFiles=array_values($_FILES);
-    $uploadedFilesPKZ=array_keys($_FILES);
+    $uploadedFiles=array_values($_files);
+    $uploadedFilesPKZ=array_keys($_files);
     $anzUploadedFiles=count($uploadedFiles);
     for ($i=0;$i<$anzUploadedFiles;$i++) {
       if ($uploadedFiles[$i]['tmp_name']!='') {
@@ -4692,6 +4742,10 @@ class GUI extends GUI_core{
       		$ALB->export_eigentuemer_csv($flurstuecke, $this->formvars);
       		$this->user->rolle->setConsumeCSV($currenttime,'Eigentümer',count($flurstuecke));
       	}break;
+      	case 'Klassifizierung' : {
+      		$ALB->export_klassifizierung_csv($flurstuecke, $this->formvars);
+      		$this->user->rolle->setConsumeCSV($currenttime,'Klassifizierung',count($flurstuecke));
+      	}break;
       }
     }
   }
@@ -4946,6 +5000,8 @@ class GUI extends GUI_core{
 
     # Hinzufügen des Hintergrundbildes als Druckrahmen
     $pdf->addJpegFromFile(DRUCKRAHMEN_PATH.basename($this->Docu->activeframe[0]['headsrc']),$this->Docu->activeframe[0]['headposx'],$this->Docu->activeframe[0]['headposy'],$this->Docu->activeframe[0]['headwidth']);
+    
+    //$pdf->addJpegFromFile('/home/fgs/fgs/test/test_gesamt.jpg',0,0,9600);
 
     # Hinzufügen der vom MapServer produzierten Karte
     $pdf->addJpegFromFile(IMAGEPATH.basename($this->img['hauptkarte']),$this->Docu->activeframe[0]['mapposx'],$this->Docu->activeframe[0]['mapposy'],$this->Docu->activeframe[0]['mapwidth'], $this->Docu->activeframe[0]['mapheight']);
@@ -5241,6 +5297,10 @@ class GUI extends GUI_core{
     }
     else {
       $this->titel='Bodenrichtwertzone Ändern';
+    }
+    if($this->formvars['go'] == 'Bodenrichtwertformular_Anzeige'){
+    	$this->titel='Bodenrichtwertzone Anzeigen';
+      $this->formvars['loc_y'] = $this->formvars['loc_x'] = $this->formvars['pathwkt'] = $this->formvars['newpath'] = $this->formvars['newpathwkt'] = '';
     }
     $layer = $this->user->rolle->getLayer(LAYERNAME_BODENRICHTWERTE);
     $this->formvars['boris_layer_id'] = $layer[0]['Layer_ID'];
@@ -5739,7 +5799,9 @@ class GUI extends GUI_core{
 		    $mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes);
 		    #---------- Speichern der Layerattribute -------------------
 			}
-			$mapDB->delete_old_attributes($this->formvars['selected_layer_id'], $attributes);
+			if($this->formvars['pfad'] == '' OR $attributes != NULL){
+				$mapDB->delete_old_attributes($this->formvars['selected_layer_id'], $attributes);
+			}
 		}
 		
     $name = @array_values($this->formvars['name']);
@@ -5939,6 +6001,7 @@ class GUI extends GUI_core{
         
         # 2008-10-22 sr   Filter zur Where-Klausel hinzugefügt
         if($layerset[0]['Filter'] != ''){
+        	$layerset[0]['Filter'] = str_replace('$userid', $this->user->id, $layerset[0]['Filter']);
           $sql_where .= " AND ".$layerset[0]['Filter'];
         }
         
@@ -6200,7 +6263,8 @@ class GUI extends GUI_core{
   }
 
 	function dokument_loeschen(){
-		$_FILES[$this->formvars['document_attributename']]['name'] = 'delete';
+		$_files = $_FILES;
+		$_files[$this->formvars['document_attributename']]['name'] = 'delete';
 		$this->sachdaten_speichern();
 	}
 
@@ -6262,6 +6326,7 @@ class GUI extends GUI_core{
   }
 
   function neuer_Layer_Datensatz_speichern(){
+  	$_files = $_FILES;
     $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
     $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
@@ -6280,21 +6345,21 @@ class GUI extends GUI_core{
 
         # Prüfen ob ein neues Bild angegebeben wurde
         if($element[4] == 'Dokument'){
-          if($_FILES[$form_fields[$i]]['name']){
+          if($_files[$form_fields[$i]]['name']){
             # Dateiname erzeugen
-            $name_array=explode('.',basename($_FILES[$form_fields[$i]]['name']));
+            $name_array=explode('.',basename($_files[$form_fields[$i]]['name']));
             $datei_name=$name_array[0];
             $datei_erweiterung=array_pop($name_array);
             if($layerset[0]['document_path'] == '')$layerset[0]['document_path'] = CUSTOM_IMAGE_PATH;
             $currenttime = date('Y-m-d_H_i_s',time());
             $nachDatei = $layerset[0]['document_path'].$currenttime.'-'.rand(0, 1000000).'.'.$datei_erweiterung; 
             # Bild in das Datenverzeichnis kopieren
-            if (move_uploaded_file($_FILES[$form_fields[$i]]['tmp_name'],$nachDatei)) {
-              //echo '<br>Lade '.$_FILES[$form_fields[$i]]['tmp_name'].' nach '.$nachDatei.' hoch';
-              $this->formvars[$form_fields[$i]] = $nachDatei."&original_name=".$_FILES[$form_fields[$i]]['name'];
+            if (move_uploaded_file($_files[$form_fields[$i]]['tmp_name'],$nachDatei)) {
+              //echo '<br>Lade '.$_files[$form_fields[$i]]['tmp_name'].' nach '.$nachDatei.' hoch';
+              $this->formvars[$form_fields[$i]] = $nachDatei."&original_name=".$_files[$form_fields[$i]]['name'];
             } # ende von Datei wurde erfolgreich in Datenverzeichnis kopiert
             else {
-              echo '<br>Datei: '.$_FILES[$form_fields[$i]]['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
+              echo '<br>Datei: '.$_files[$form_fields[$i]]['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
             }
           } # ende vom Fall, dass ein neues Dokument hochgeladen wurde
         }
@@ -6339,7 +6404,7 @@ class GUI extends GUI_core{
         $sql = "INSERT INTO ".$table['tablename']." (";
         for($i = 0; $i < count($table['attributname']); $i++){
           if(($table['type'][$i] != 'Text_not_saveable' AND $table['type'][$i] != 'Auswahlfeld_not_saveable' AND $table['type'][$i] != 'SubFormPK' AND $table['type'][$i] != 'SubFormFK' AND $this->formvars[$table['formfield'][$i]] != '') 
-          OR $table['type'][$i] == 'Time' OR $table['type'][$i] == 'User' OR $table['type'][$i] == 'Stelle' OR $table['type'][$i] == 'Geometrie'){
+          OR $table['type'][$i] == 'Time' OR $table['type'][$i] == 'User' OR $table['type'][$i] == 'UserID' OR $table['type'][$i] == 'Stelle' OR $table['type'][$i] == 'Geometrie'){
             if($table['type'][$i] == 'Geometrie'){
               if($this->formvars['geomtype'] == 'POINT' AND $this->formvars['loc_x'] != ''){
                 $sql .= $table['attributname'][$i].", ";
@@ -6364,6 +6429,9 @@ class GUI extends GUI_core{
           }
           elseif($table['type'][$i] == 'User'){                       # Typ "User"
             $sql.= "'".$this->user->Vorname." ".$this->user->Name."', ";
+          }
+        	elseif($table['type'][$i] == 'UserID'){                       # Typ "UserID"
+            $sql.= "'".$this->user->id."', ";
           }
         	elseif($table['type'][$i] == 'Stelle'){                       # Typ "Stelle"
             $sql.= "'".$this->Stelle->Bezeichnung."', ";
@@ -6513,6 +6581,17 @@ class GUI extends GUI_core{
         $this->geomtype = $this->qlayerset[0]['attributes']['geomtype'][$this->qlayerset[0]['attributes']['the_geom']];
         if($this->geomtype != ''){
           $this->loadMap('DataBase');
+        	if($this->formvars['layer_id'] != '' AND $this->formvars['oid'] != '' AND $this->formvars['tablename'] != '' AND $this->formvars['columnname'] != ''){			# das ist die Sachen vom "Mutter"-Layer
+        		$layerdb = $this->mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+        		$rect = $this->mapDB->zoomToDatasets(array($this->formvars['oid']), $this->formvars['tablename'], $this->formvars['columnname'], 10, $layerdb, $this->user->rolle->epsg_code);
+			      $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);		# Zoom auf den "Mutter"-Datensatz
+				    if (MAPSERVERVERSION > 600) {
+							$this->map_scaledenom = $this->map->scaledenom;
+						}
+						else {
+							$this->map_scaledenom = $this->map->scale;
+						}
+        	}
           $oldscale=round($this->map_scaledenom);
           if($this->formvars['CMD']!='') {
             $this->navMap($this->formvars['CMD']);
@@ -6520,8 +6599,8 @@ class GUI extends GUI_core{
           }
 			    elseif($oldscale!=$this->formvars['nScale'] AND $this->formvars['nScale'] != '') {
 			      $this->scaleMap($this->formvars['nScale']);
-			    }
-          if($this->geomtype == 'POLYGON' OR $this->geomtype == 'MULTIPOLYGON' OR $this->geomtype == 'GEOMETRY' OR $this->geomtype == 'MULTILINESTRING'){
+			    }																																									# Achtung: evtl. Bug-Report wegen fehlendem $this->geomtype == 'LINESTRING'
+          if($this->geomtype == 'POLYGON' OR $this->geomtype == 'MULTIPOLYGON' OR $this->geomtype == 'GEOMETRY' OR $this->geomtype == 'LINESTRING' OR $this->geomtype == 'MULTILINESTRING'){
             #-----Polygoneditor und Linieneditor---#
             # aktuellen Kartenausschnitt laden
             $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
@@ -6581,6 +6660,7 @@ class GUI extends GUI_core{
     $this->ddl->fonts = $this->ddl->get_fonts();
     if($this->formvars['selected_layer_id']){
       $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+      $layerdb->setClientEncoding();
       $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
       $this->ddl->layouts = $this->ddl->load_layouts(NULL, NULL, $this->formvars['selected_layer_id']);
     }
@@ -6596,22 +6676,26 @@ class GUI extends GUI_core{
 	}
 	
 	function sachdaten_druck_editor_speichern(){
+		$_files = $_FILES;
 		$ddl=new ddl($this->database);
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->ddl=$ddl;
     $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+    $layerdb->setClientEncoding();
     $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
-		$this->formvars['aktivesLayout'] = $this->ddl->save_layout($this->formvars, $this->attributes, $_FILES, $this->Stelle->id);
+		$this->formvars['aktivesLayout'] = $this->ddl->save_layout($this->formvars, $this->attributes, $_files, $this->Stelle->id);
 		$this->sachdaten_druck_editor();
 	}
 	
 	function sachdaten_druck_editor_aendern(){
+		$_files = $_FILES;
 		$ddl=new ddl($this->database);
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->ddl=$ddl;
     $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+    $layerdb->setClientEncoding();
     $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
-    $this->ddl->update_layout($this->formvars, $this->attributes, $_FILES);
+    $this->ddl->update_layout($this->formvars, $this->attributes, $_files);
 		$this->sachdaten_druck_editor();
 	}
 	
@@ -6630,23 +6714,27 @@ class GUI extends GUI_core{
 	}
 	
 	function sachdaten_druck_editor_Freitexthinzufuegen(){
+		$_files = $_FILES;
 		$ddl=new ddl($this->database);
     $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->ddl=$ddl;
     $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+    $layerdb->setClientEncoding();
     $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
-    $this->ddl->update_layout($this->formvars, $this->attributes, $_FILES);
+    $this->ddl->update_layout($this->formvars, $this->attributes, $_files);
     $this->ddl->addfreetext($this->formvars);
 		$this->sachdaten_druck_editor();
 	}
 	
 	function sachdaten_druck_editor_Freitextloeschen(){
+		$_files = $_FILES;
 		$ddl=new ddl($this->database);
     $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->ddl=$ddl;
     $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+    $layerdb->setClientEncoding();
     $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
-    $this->ddl->update_layout($this->formvars, $this->attributes, $_FILES);
+    $this->ddl->update_layout($this->formvars, $this->attributes, $_files);
     $this->ddl->removefreetext($this->formvars);
 		$this->sachdaten_druck_editor();
 	}
@@ -6654,6 +6742,7 @@ class GUI extends GUI_core{
 	function sachdaten_druck_editor_preview($selectedlayout){
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+    $layerdb->setClientEncoding();
     $attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
     # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
 		$attributes = $mapDB->add_attribute_values($attributes, $layerdb, NULL, true);
@@ -6683,6 +6772,7 @@ class GUI extends GUI_core{
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$this->ddl = new ddl($this->database);
     $layerdb = $mapDB->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
+    $layerdb->setClientEncoding();
     $path = $mapDB->getPath($this->formvars['chosen_layer_id']);
     $privileges = $this->Stelle->get_attributes_privileges($this->formvars['chosen_layer_id']);
     $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
@@ -6739,6 +6829,7 @@ class GUI extends GUI_core{
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$this->ddl = new ddl($this->database);
     $layerdb = $mapDB->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
+    $layerdb->setClientEncoding();
     $path = $mapDB->getPath($this->formvars['chosen_layer_id']);
     $privileges = $this->Stelle->get_attributes_privileges($this->formvars['chosen_layer_id']);
     $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
@@ -7128,20 +7219,23 @@ class GUI extends GUI_core{
     if($this->formvars['all'] != 'true'){                     // nur ausgewählte Datensätze abfragen
       $checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
       # Daten abfragen
+      $element = explode(';', $checkbox_names[0]);   #  check;table_alias;table;oid
+      $where = " AND ".$element[1].".oid IN (";
       for($i = 0; $i < count($checkbox_names); $i++){
         if($this->formvars[$checkbox_names[$i]] == 'on'){
           $element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
-          $sql = $newpath." AND ".$element[1].".oid = '".$element[3]."'";
-          $sql.= $orderby;
-          #echo $sql.'<br><br>';
-          $this->debug->write("<p>file:kvwmap class:generic_csv_export :",4);
-          $ret = $layerdb->execSQL($sql,4, 1);
-          if (!$ret[0]) {
-            while ($rs=pg_fetch_array($ret[1])) {
-              $result[] = $rs;
-            }
-          }
+          $where = $where."'".$element[3]."',";
         }
+      }
+      $where .= "0)";
+      $sql.= $newpath.$where.$orderby;
+      #echo $sql.'<br><br>';
+      $this->debug->write("<p>file:kvwmap class:generic_csv_export :",4);
+      $ret = $layerdb->execSQL($sql,4, 1);
+      if (!$ret[0]) {
+      	while ($rs=pg_fetch_array($ret[1])) {
+        	$result[] = $rs;
+      	}
       }
     }
     else{                                           // alle Treffer abfragen
@@ -7184,11 +7278,17 @@ class GUI extends GUI_core{
 	        if(in_array($attributes['type'][$j], array('numeric', 'float4', 'float8'))){
 	        	$result[$i][$attributes['name'][$j]] = str_replace('.', ",", $result[$i][$attributes['name'][$j]]);	
 	        }
+	        $result[$i][$attributes['name'][$j]] = str_replace(';', ",", $result[$i][$attributes['name'][$j]]);
+	        $result[$i][$attributes['name'][$j]] = str_replace(chr(10), " ", $result[$i][$attributes['name'][$j]]);
+	        $result[$i][$attributes['name'][$j]] = str_replace(chr(13), "", $result[$i][$attributes['name'][$j]]);
 	        $csv .= $result[$i][$attributes['name'][$j]].'";';
       	}
       }
       $csv .= chr(10);
     }
+    
+    $currenttime=date('Y-m-d H:i:s',time());
+    $this->user->rolle->setConsumeCSV($currenttime,$this->formvars['chosen_layer_id'],count($result));
 
     ob_end_clean();
     header("Content-type: application/vnd.ms-excel");
@@ -7336,6 +7436,25 @@ class GUI extends GUI_core{
 	    if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
 	      $this->formvars['fromwhere'] .= ' where (1=1)';
 	    }
+	    ###################### über Checkboxen aus der Sachdatenanzeige des GLE ausgewählt ###############
+	    $anzahl = 0;
+      $checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
+      # Daten abfragen
+      $element = explode(';', $checkbox_names[0]);   #  check;table_alias;table;oid
+      $where = " AND ".$element[1].".oid IN (";
+      for($i = 0; $i < count($checkbox_names); $i++){
+        if($this->formvars[$checkbox_names[$i]] == 'on'){
+          $element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
+          $where = $where."'".$element[3]."',";
+          $anzahl++;
+        }
+      }
+      $where .= "0)";
+      if($anzahl > 0){
+      	$this->formvars['sql_'.$this->formvars['selected_layer_id']] = $where.$orderby;
+      	$this->formvars['anzahl'] = $anzahl;
+      }
+			####################################################################################################
     }
     if($this->formvars['CMD']== 'Full_Extent' OR $this->formvars['CMD'] == 'recentre' OR $this->formvars['CMD'] == 'zoomin' OR $this->formvars['CMD'] == 'zoomout' OR $this->formvars['CMD'] == 'previous' OR $this->formvars['CMD'] == 'next') {
       $this->navMap($this->formvars['CMD']);
@@ -7414,23 +7533,24 @@ class GUI extends GUI_core{
   }
 
   function StelleAendern() {
+  	$_files = $_FILES;
     if (!$this->formvars['bezeichnung'] or !$this->formvars['Referenzkarte_ID']) {
       # Fehler bei der Formulareingabe
       $this->Meldung=$ret[1];
     }
     else {
-      if($_FILES['wappen']['name']){
+      if($_files['wappen']['name']){
         $this->formvars['wappen'] = 'wappen';
-        $nachDatei = WWWROOT.APPLVERSION.WAPPENPATH.$_FILES['wappen']['name'];
-        if (move_uploaded_file($_FILES['wappen']['tmp_name'],$nachDatei)) {
-            #echo '<br>Lade '.$_FILES['Wappen']['tmp_name'].' nach '.$nachDatei.' hoch';
+        $nachDatei = WWWROOT.APPLVERSION.WAPPENPATH.$_files['wappen']['name'];
+        if (move_uploaded_file($_files['wappen']['tmp_name'],$nachDatei)) {
+            #echo '<br>Lade '.$_files['Wappen']['tmp_name'].' nach '.$nachDatei.' hoch';
         }
       }
-      if($_FILES['wasserzeichen']['name']){
+      if($_files['wasserzeichen']['name']){
         $this->formvars['wasserzeichen'] = 'wasserzeichen';
-        $nachDatei = WWWROOT.APPLVERSION.WAPPENPATH.$_FILES['wasserzeichen']['name'];
-        if (move_uploaded_file($_FILES['wasserzeichen']['tmp_name'],$nachDatei)) {
-            #echo '<br>Lade '.$_FILES['wasserzeichen']['tmp_name'].' nach '.$nachDatei.' hoch';
+        $nachDatei = WWWROOT.APPLVERSION.WAPPENPATH.$_files['wasserzeichen']['name'];
+        if (move_uploaded_file($_files['wasserzeichen']['tmp_name'],$nachDatei)) {
+            #echo '<br>Lade '.$_files['wasserzeichen']['tmp_name'].' nach '.$nachDatei.' hoch';
         }
       }
       $stelleid = $this->formvars['selected_stelle_id'];
@@ -7567,16 +7687,17 @@ class GUI extends GUI_core{
   }
 
   function StelleAnlegen() {
+  	$_files = $_FILES;
     if (!$this->formvars['bezeichnung'] or !$this->formvars['Referenzkarte_ID']) {
       # Fehler bei der Formulareingabe
       showAlert('Füllen Sie alle mit * gekennzeichneten Formularfelder aus.');
     }
     else {
-      if($_FILES['wappen']['name']){
+      if($_files['wappen']['name']){
         $this->formvars['wappen'] = 'wappen';
-        $nachDatei = WWWROOT.APPLVERSION.WAPPENPATH.$_FILES['wappen']['name'];
-        if (move_uploaded_file($_FILES['wappen']['tmp_name'],$nachDatei)) {
-            #echo '<br>Lade '.$_FILES['Wappen']['tmp_name'].' nach '.$nachDatei.' hoch';
+        $nachDatei = WWWROOT.APPLVERSION.WAPPENPATH.$_files['wappen']['name'];
+        if (move_uploaded_file($_files['wappen']['tmp_name'],$nachDatei)) {
+            #echo '<br>Lade '.$_files['Wappen']['tmp_name'].' nach '.$nachDatei.' hoch';
         }
       }
       $ret=$this->Stelle->NeueStelleAnlegen($this->formvars);
@@ -7656,6 +7777,7 @@ class GUI extends GUI_core{
       $this->formvars['minymax'] = $this->stellendaten['minymax'];
       $this->formvars['maxxmax'] = $this->stellendaten['maxxmax'];
       $this->formvars['maxymax'] = $this->stellendaten['maxymax'];
+      $this->formvars['epsg_code'] = $this->stellendaten['epsg_code'];
       $this->formvars['Referenzkarte_ID'] = $this->stellendaten['Referenzkarte_ID'];
       $this->formvars['start'] = $this->stellendaten['start'];
       $this->formvars['stop'] = $this->stellendaten['stop'];
@@ -7698,6 +7820,8 @@ class GUI extends GUI_core{
     $this->formvars['layer']=$mapDB->getall_Layer('Name');
     # Abfragen aller möglichen User
     $this->formvars['users']=$this->user->getall_Users('Name');
+    # Abfragen aller möglichen EPSG-Codes
+    $this->epsg_codes = read_epsg_codes($this->pgdatabase);
     $this->output();
   }
 
@@ -7937,6 +8061,9 @@ class GUI extends GUI_core{
     $this->account = new account($this->database);
     $this->user2 = new user(0,'',$this->database);
     $this->stellendaten=$this->Stelle->getStellen('Bezeichnung');
+    if($this->formvars['go'] == 'StatistikAuswahl_Stelle'){
+    	$this->stellendaten=$this->user->getStellen('Bezeichnung');
+    }
     $this->UserDaten=$this->user2->getUserDaten('','','Name');
     $this->titel='Auswahl zur Statistik';
     $this->main='StatistikWaehlen.php';
@@ -8219,6 +8346,8 @@ class GUI extends GUI_core{
       $this->formvars['loginname']=$this->userdaten[0]['login_name'];
       $this->formvars['Namenszusatz']=$this->userdaten[0]['Namenszusatz'];
       $this->formvars['password_setting_time']=$this->userdaten[0]['password_setting_time'];
+      $this->formvars['start']=$this->userdaten[0]['start'];
+      $this->formvars['stop']=$this->userdaten[0]['stop'];
       $this->formvars['ips']=$this->userdaten[0]['ips'];
       $this->formvars['phon']=$this->userdaten[0]['phon'];
       $this->formvars['email']=$this->userdaten[0]['email'];
@@ -8263,7 +8392,7 @@ class GUI extends GUI_core{
       # Fehler bei der Formulareingabe
       $this->Meldung=$ret[1];
     }
-    else {
+    else{
       $ret=$this->user->NeuAnlegen($this->formvars);
       if ($ret[0]) {
         # Fehler beim Eintragen der Benutzerdaten
@@ -10014,6 +10143,7 @@ class GUI extends GUI_core{
   }
 
   function ALB_Aenderung() {
+  	$_files = $_FILES;
     # Funktion zur Änderung der ALB Information in den Datenbanken von kvwmap
     # Es wird unterschieden in die Art der Datenbank, wo die Daten rein sollen
     # und in die Art der Fortführung (Grundausstattung oder Fortführung)
@@ -10024,7 +10154,7 @@ class GUI extends GUI_core{
     }
     else {
       # Die Datei wird mit dem Formular über die Methode Post übermittelt
-      $WLDGE_Datei=$_FILES['WLDGE_Datei'];
+      $WLDGE_Datei=$_files['WLDGE_Datei'];
     }
 
     # Datei steht zum Einlesen bereit, ALB Daten können geändert werden
@@ -10335,6 +10465,7 @@ class GUI extends GUI_core{
   }
 
   function sachdaten_speichern(){
+  	$_files = $_FILES;
     $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $form_fields = explode('|', $this->formvars['form_field_names']);
     $success = true;
@@ -10359,19 +10490,19 @@ class GUI extends GUI_core{
           switch($formtype) {
             case 'Dokument' : {
               # Prüfen ob ein neues Bild angegebeben wurde
-              if($_FILES[$form_fields[$i]]['name']){
+              if($_files[$form_fields[$i]]['name']){
                 # Dateiname erzeugen
-                $name_array=explode('.',basename($_FILES[$form_fields[$i]]['name']));
+                $name_array=explode('.',basename($_files[$form_fields[$i]]['name']));
                 $datei_name=$name_array[0];
                 $datei_erweiterung=array_pop($name_array);
                 $doc_path = $mapdb->getDocument_Path($layer_id);
                 $currenttime = date('Y-m-d_H_i_s',time());
                 $nachDatei = $doc_path.$currenttime.'-'.rand(0, 1000000).'.'.$datei_erweiterung;
-                $eintrag = $nachDatei."&original_name=".$_FILES[$form_fields[$i]]['name'];
+                $eintrag = $nachDatei."&original_name=".$_files[$form_fields[$i]]['name'];
                 if($datei_name == 'delete')$eintrag = '';
                 # Bild in das Datenverzeichnis kopieren
-                if (move_uploaded_file($_FILES[$form_fields[$i]]['tmp_name'],$nachDatei) OR $datei_name == 'delete') {
-                  #echo '<br>Lade '.$_FILES[$form_fields[$i]]['tmp_name'].' nach '.$nachDatei.' hoch';
+                if (move_uploaded_file($_files[$form_fields[$i]]['tmp_name'],$nachDatei) OR $datei_name == 'delete') {
+                  #echo '<br>Lade '.$_files[$form_fields[$i]]['tmp_name'].' nach '.$nachDatei.' hoch';
                   # Wenn eine alte Datei existiert, die nicht so heißt wie die neue --> löschen
                   $old = $this->formvars[str_replace(';Dokument;', ';Dokument_alt;', $form_fields[$i])];
                   if ($old != '' AND $old != $eintrag) {
@@ -10382,7 +10513,7 @@ class GUI extends GUI_core{
                   $this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
                 } # ende von Datei wurde erfolgreich in Datenverzeichnis kopiert
                 else {
-                  echo '<br>Datei: '.$_FILES[$form_fields[$i]]['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
+                  echo '<br>Datei: '.$_files[$form_fields[$i]]['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
                 }
               } # ende vom Fall, dass ein neues Dokument hochgeladen wurde
             } break; # ende case Bild
@@ -10392,6 +10523,10 @@ class GUI extends GUI_core{
             } break;
             case 'User' : {
               $sql = "UPDATE ".$tablename." SET ".$attributname." = '".$this->user->Vorname." ".$this->user->Name."' WHERE oid = '".$oid."'";
+              $this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
+            } break;
+            case 'UserID' : {
+              $sql = "UPDATE ".$tablename." SET ".$attributname." = '".$this->user->id."' WHERE oid = '".$oid."'";
               $this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
             } break;
             case 'Stelle' : {
@@ -10655,11 +10790,6 @@ class GUI extends GUI_core{
               default : $pixsize=$this->user->rolle->pixsize;
             }
             $rand=$layerset[$i]['tolerance']*$pixsize;
-            $searchbox_minx=strval($rect->minx-$rand);
-            $searchbox_miny=strval($rect->miny-$rand);
-            $searchbox_maxx=strval($rect->maxx+$rand);
-            $searchbox_maxy=strval($rect->maxy+$rand);
-
 
             # Aktueller EPSG in der die Abfrage ausgeführt wurde
             $client_epsg=$this->user->rolle->epsg_code;
@@ -10667,11 +10797,11 @@ class GUI extends GUI_core{
             $layer_epsg=$layerset[$i]['epsg_code'];
             # Bildung der Where-Klausel für die räumliche Abfrage mit der searchbox
             $searchbox_wkt ="POLYGON((";
-            $searchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->miny-$rand).",";
-            $searchbox_wkt.=strval($rect->maxx+$rand)." ".strval($rect->miny-$rand).",";
-            $searchbox_wkt.=strval($rect->maxx+$rand)." ".strval($rect->maxy+$rand).",";
-            $searchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->maxy+$rand).",";
-            $searchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->miny-$rand)."))";
+            $searchbox_wkt.=strval($rect->minx)." ".strval($rect->miny).",";
+            $searchbox_wkt.=strval($rect->maxx)." ".strval($rect->miny).",";
+            $searchbox_wkt.=strval($rect->maxx)." ".strval($rect->maxy).",";
+            $searchbox_wkt.=strval($rect->minx)." ".strval($rect->maxy).",";
+            $searchbox_wkt.=strval($rect->minx)." ".strval($rect->miny)."))";
 
             if($this->querypolygon != ''){
               $searchbox_wkt = $this->querypolygon;
@@ -10709,6 +10839,7 @@ class GUI extends GUI_core{
             }
             # 2006-06-12 sr   Filter zur Where-Klausel hinzugefügt
             if($layerset[$i]['Filter'] != ''){
+            	$layerset[$i]['Filter'] = str_replace('$userid', $this->user->id, $layerset[$i]['Filter']);
               $sql_where .= " AND ".$layerset[$i]['Filter'];
             }
             
@@ -10882,7 +11013,9 @@ class GUI extends GUI_core{
               case 'meters' : $pixsize=1; break;
               default : $pixsize=$this->user->rolle->pixsize;
             }
-            $rand=$layerset[$i]['tolerance']*$pixsize;
+            if($rect->minx == $rect->maxx AND $rect->miny == $rect->maxy){
+            	$rand=$layerset[$i]['tolerance']*$pixsize;
+            }
             $projFROM = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);
             $projTO = ms_newprojectionobj("init=epsg:".$layerset[$i]['epsg_code']);
             $rect->project($projFROM, $projTO);
@@ -11095,22 +11228,23 @@ class GUI extends GUI_core{
   }
 
   function layerfromMapfile_load($formvars){
-    if($_FILES['mapfile']['name']){           # eine einzelne Mapdatei wurde ausgewählt
-    $nachDatei = UPLOADPATH.$_FILES['mapfile']['name'];
+  	$_files = $_FILES;
+    if($_files['mapfile']['name']){           # eine einzelne Mapdatei wurde ausgewählt
+    $nachDatei = UPLOADPATH.$_files['mapfile']['name'];
     $this->formvars['mapfile'] = $nachDatei;
-      if(move_uploaded_file($_FILES['mapfile']['tmp_name'],$nachDatei)){
-        #echo '<br>Lade '.$_FILES['mapfile']['tmp_name'].' nach '.$nachDatei.' hoch';
+      if(move_uploaded_file($_files['mapfile']['tmp_name'],$nachDatei)){
+        #echo '<br>Lade '.$_files['mapfile']['tmp_name'].' nach '.$nachDatei.' hoch';
         $this->mapobject = ms_newMapObj($nachDatei);
         for($i = 0; $i < $this->mapobject->numlayers; $i++){
           $this->layers[] = $this->mapobject->getLayer($i);
         }
       }
     }
-    elseif($_FILES['zipfile']['name']){     # eine Zipdatei wurde ausgewählt
-    $this->formvars['zipfile'] = $_FILES['zipfile']['name'];
-    $nachDatei = UPLOADPATH.$_FILES['zipfile']['name'];
-      if(move_uploaded_file($_FILES['zipfile']['tmp_name'],$nachDatei)){
-        #echo '<br>Lade '.$_FILES['zipfile']['tmp_name'].' nach '.$nachDatei.' hoch';
+    elseif($_files['zipfile']['name']){     # eine Zipdatei wurde ausgewählt
+    $this->formvars['zipfile'] = $_files['zipfile']['name'];
+    $nachDatei = UPLOADPATH.$_files['zipfile']['name'];
+      if(move_uploaded_file($_files['zipfile']['tmp_name'],$nachDatei)){
+        #echo '<br>Lade '.$_files['zipfile']['tmp_name'].' nach '.$nachDatei.' hoch';
         # ersten Ordner im Archiv finden
         exec('unzip -l '.$nachDatei.' -d '.UPLOADPATH, $output);
         $line = $output[3];
@@ -11219,23 +11353,13 @@ class GUI extends GUI_core{
         }
       }
 
-      # Unterscheidung ob mit Suchradius oder ohne gesucht wird
-      if ($this->formvars['searchradius']>0) {
-        $layerset[$i]['toleranceunits']='meters';
-        $layerset[$i]['tolerance']=$this->formvars['searchradius'];
-      }
       switch ($layerset[$i]['toleranceunits']) {
         case 'pixels' : $pixsize=$this->user->rolle->pixsize; break;
         case 'meters' : $pixsize=1; break;
         default : $pixsize=$this->user->rolle->pixsize;
       }
       $rand=$layerset[$i]['tolerance']*$pixsize;
-      $searchbox_minx=strval($rect->minx-$rand);
-      $searchbox_miny=strval($rect->miny-$rand);
-      $searchbox_maxx=strval($rect->maxx+$rand);
-      $searchbox_maxy=strval($rect->maxy+$rand);
-
-
+      
       # Aktueller EPSG in der die Abfrage ausgeführt wurde
       $client_epsg=$this->user->rolle->epsg_code;
       # EPSG-Code des Layers der Abgefragt werden soll
@@ -11259,9 +11383,7 @@ class GUI extends GUI_core{
       }
 
       # Wenn es sich bei der Suche um eine punktuelle Suche handelt, wird die where Klausel um eine
-      # Umkreissuche mit dem Suchradius weiter eingeschränkt.
-      if ($rect->minx==$rect->maxx AND $rect->miny==$rect->maxy AND $this->querypolygon == '') {
-        # Behandlung der Suchanfrage mit Punkt, exakte Suche im Kreis
+      if($rect->minx==$rect->maxx AND $rect->miny==$rect->maxy AND $this->querypolygon == ''){
         if ($client_epsg!=$layer_epsg) {
           $sql_where.=" AND st_distance(".$the_geom.",st_transform(st_geomfromtext('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."),".$layer_epsg."))";
         }
@@ -11269,15 +11391,6 @@ class GUI extends GUI_core{
           $sql_where.=" AND st_distance(".$the_geom.",st_geomfromtext('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."))";
         }
         $sql_where.=" <= ".$rand;
-      }
-      else {
-        # Behandlung der Suchanfrage mit Rechteck, exakte Suche im Rechteck
-        if ($client_epsg!=$layer_epsg) {
-          $sql_where.=" AND st_intersects(".$the_geom.",st_transform(st_geomfromtext('".$searchbox_wkt."',".$client_epsg."),".$layer_epsg."))";
-        }
-        else {
-          $sql_where.=" AND st_intersects(".$the_geom.",st_geomfromtext('".$searchbox_wkt."',".$client_epsg."))";
-        }
       }
       
       # SVG-Geometrie abfragen für highlighting
@@ -13487,7 +13600,7 @@ class db_mapObj extends db_mapObj_core{
 		}
 		$filename = rand(0, 1000000).'.sql';
 		$fp = fopen(IMAGEPATH.$filename, 'w');
-		fwrite($fp, $sql);
+		fwrite($fp, utf8_decode($sql));
 		return $filename;
 	}
 
@@ -13800,12 +13913,13 @@ class db_mapObj extends db_mapObj_core{
       $sql.= 'form_element_type = "'.$formvars['form_element_'.$attributes['name'][$i]].'", ';
       $sql.= 'options = "'.addslashes($formvars['options_'.$attributes['name'][$i]]).'", ';
       $sql.= 'tooltip = "'.addslashes($formvars['tooltip_'.$attributes['name'][$i]]).'", ';
+      $sql.= '`group` = "'.addslashes($formvars['group_'.$attributes['name'][$i]]).'", ';
       if($formvars['mandatory_'.$attributes['name'][$i]] == ''){
       	$formvars['mandatory_'.$attributes['name'][$i]] = 'NULL';
       }
       $sql.= 'mandatory = '.$formvars['mandatory_'.$attributes['name'][$i]].', ';
       $sql.= 'alias = "'.$formvars['alias_'.$attributes['name'][$i]].'" ';
-      $sql.= 'ON DUPLICATE KEY UPDATE name = "'.$attributes['name'][$i].'", form_element_type = "'.$formvars['form_element_'.$attributes['name'][$i]].'", options = "'.addslashes($formvars['options_'.$attributes['name'][$i]]).'", tooltip = "'.addslashes($formvars['tooltip_'.$attributes['name'][$i]]).'", alias = "'.$formvars['alias_'.$attributes['name'][$i]].'", mandatory = '.$formvars['mandatory_'.$attributes['name'][$i]].' ';
+      $sql.= 'ON DUPLICATE KEY UPDATE name = "'.$attributes['name'][$i].'", form_element_type = "'.$formvars['form_element_'.$attributes['name'][$i]].'", options = "'.addslashes($formvars['options_'.$attributes['name'][$i]]).'", tooltip = "'.addslashes($formvars['tooltip_'.$attributes['name'][$i]]).'", `group` = "'.addslashes($formvars['group_'.$attributes['name'][$i]]).'", alias = "'.$formvars['alias_'.$attributes['name'][$i]].'", mandatory = '.$formvars['mandatory_'.$attributes['name'][$i]].' ';
       $this->debug->write("<p>file:kvwmap class:Document->save_attributes :",4);
       $database->execSQL($sql,4, 1);
     }
@@ -13869,6 +13983,7 @@ class db_mapObj extends db_mapObj_core{
     	$attributes['alias'][$i]= $rs['alias'];
     	$attributes['alias'][$attributes['name'][$i]]= $rs['alias'];
     	$attributes['tooltip'][$i]= $rs['tooltip'];
+    	$attributes['group'][$i]= $rs['group'];
     	$attributes['mandatory'][$i]= $rs['mandatory'];
     	$i++;
     }
@@ -14732,7 +14847,7 @@ class Document {
     $this->database->execSQL($sql,4, 1);
   }
 
-  function save_frame($formvars, $_FILES, $stelle_id){
+  function save_frame($formvars, $_files, $stelle_id){
     if($formvars['Name']){
       $frames = $this->load_frames($this->Stelle->id, NULL);
       for($i = 0; $i < count($frames); $i++){
@@ -14803,40 +14918,40 @@ class Document {
       if($formvars['font_user']){$sql .= ", `font_user` = '".$formvars['font_user']."'";}
       if($formvars['font_watermark']){$sql .= ", `font_watermark` = '".$formvars['font_watermark']."'";}
 
-      if($_FILES['headsrc']['name']){
-        $nachDatei = DRUCKRAHMEN_PATH.$_FILES['headsrc']['name'];
-        if (move_uploaded_file($_FILES['headsrc']['tmp_name'],$nachDatei)) {
-            //echo '<br>Lade '.$_FILES['headsrc']['tmp_name'].' nach '.$nachDatei.' hoch';
-          $sql .= ", `headsrc` = '".$_FILES['headsrc']['name']."'";
+      if($_files['headsrc']['name']){
+        $nachDatei = DRUCKRAHMEN_PATH.$_files['headsrc']['name'];
+        if (move_uploaded_file($_files['headsrc']['tmp_name'],$nachDatei)) {
+            //echo '<br>Lade '.$_files['headsrc']['tmp_name'].' nach '.$nachDatei.' hoch';
+          $sql .= ", `headsrc` = '".$_files['headsrc']['name']."'";
         }
         else {
-            //echo '<br>Datei: '.$_FILES['headsrc']['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
+            //echo '<br>Datei: '.$_files['headsrc']['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
         }
       }
       else{
         $sql .= ", `headsrc` = '".$formvars['headsrc_save']."'";
       }
-      if($_FILES['refmapsrc']['name']){
-        $nachDatei = DRUCKRAHMEN_PATH.$_FILES['refmapsrc']['name'];
-        if (move_uploaded_file($_FILES['refmapsrc']['tmp_name'],$nachDatei)) {
-            //echo '<br>Lade '.$_FILES['headsrc']['tmp_name'].' nach '.$nachDatei.' hoch';
-          $sql .= ", `refmapsrc` = '".$_FILES['refmapsrc']['name']."'";
+      if($_files['refmapsrc']['name']){
+        $nachDatei = DRUCKRAHMEN_PATH.$_files['refmapsrc']['name'];
+        if (move_uploaded_file($_files['refmapsrc']['tmp_name'],$nachDatei)) {
+            //echo '<br>Lade '.$_files['headsrc']['tmp_name'].' nach '.$nachDatei.' hoch';
+          $sql .= ", `refmapsrc` = '".$_files['refmapsrc']['name']."'";
         }
         else {
-            //echo '<br>Datei: '.$_FILES['headsrc']['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
+            //echo '<br>Datei: '.$_files['headsrc']['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
         }
       }
       else{
         $sql .= ", `refmapsrc` = '".$formvars['refmapsrc_save']."'";
       }
-      if($_FILES['refmapfile']['name']){
-        $nachDatei = DRUCKRAHMEN_PATH.$_FILES['refmapfile']['name'];
-        if (move_uploaded_file($_FILES['refmapfile']['tmp_name'],$nachDatei)) {
-            //echo '<br>Lade '.$_FILES['headsrc']['tmp_name'].' nach '.$nachDatei.' hoch';
-          $sql .= ", `refmapfile` = '".$_FILES['refmapfile']['name']."'";
+      if($_files['refmapfile']['name']){
+        $nachDatei = DRUCKRAHMEN_PATH.$_files['refmapfile']['name'];
+        if (move_uploaded_file($_files['refmapfile']['tmp_name'],$nachDatei)) {
+            //echo '<br>Lade '.$_files['headsrc']['tmp_name'].' nach '.$nachDatei.' hoch';
+          $sql .= ", `refmapfile` = '".$_files['refmapfile']['name']."'";
         }
         else {
-            //echo '<br>Datei: '.$_FILES['headsrc']['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
+            //echo '<br>Datei: '.$_files['headsrc']['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
         }
       }
       else{
@@ -14872,7 +14987,7 @@ class Document {
     return $lastdruckrahmen_id;
   }
 
-  function update_frame($formvars, $_FILES){
+  function update_frame($formvars, $_files){
     if($formvars['Name']){
       $formvars['cent'] = str_pad ($formvars['cent'], 2, "0", STR_PAD_RIGHT);
       $preis = $formvars['euro'] * 100 + $formvars['cent'];
@@ -14936,36 +15051,36 @@ class Document {
       $sql .= ", `font_user` = '".$formvars['font_user']."'";
       $sql .= ", `font_watermark` = '".$formvars['font_watermark']."'";
 
-      if($_FILES['headsrc']['name']){
-        $nachDatei = DRUCKRAHMEN_PATH.$_FILES['headsrc']['name'];
-        if (move_uploaded_file($_FILES['headsrc']['tmp_name'],$nachDatei)) {
-            //echo '<br>Lade '.$_FILES['Wappen']['tmp_name'].' nach '.$nachDatei.' hoch';
-          $sql .= ", `headsrc` = '".$_FILES['headsrc']['name']."'";
+      if($_files['headsrc']['name']){
+        $nachDatei = DRUCKRAHMEN_PATH.$_files['headsrc']['name'];
+        if (move_uploaded_file($_files['headsrc']['tmp_name'],$nachDatei)) {
+            //echo '<br>Lade '.$_files['Wappen']['tmp_name'].' nach '.$nachDatei.' hoch';
+          $sql .= ", `headsrc` = '".$_files['headsrc']['name']."'";
           #echo $sql;
         }
         else {
-            //echo '<br>Datei: '.$_FILES['Wappen']['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
+            //echo '<br>Datei: '.$_files['Wappen']['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
           }
       }
-      if($_FILES['refmapsrc']['name']){
-        $nachDatei = DRUCKRAHMEN_PATH.$_FILES['refmapsrc']['name'];
-        if (move_uploaded_file($_FILES['refmapsrc']['tmp_name'],$nachDatei)) {
-            //echo '<br>Lade '.$_FILES['Wappen']['tmp_name'].' nach '.$nachDatei.' hoch';
-          $sql .= ", `refmapsrc` = '".$_FILES['refmapsrc']['name']."'";
+      if($_files['refmapsrc']['name']){
+        $nachDatei = DRUCKRAHMEN_PATH.$_files['refmapsrc']['name'];
+        if (move_uploaded_file($_files['refmapsrc']['tmp_name'],$nachDatei)) {
+            //echo '<br>Lade '.$_files['Wappen']['tmp_name'].' nach '.$nachDatei.' hoch';
+          $sql .= ", `refmapsrc` = '".$_files['refmapsrc']['name']."'";
           #echo $sql;
         }
         else {
-            //echo '<br>Datei: '.$_FILES['Wappen']['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
+            //echo '<br>Datei: '.$_files['Wappen']['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
           }
       }
-      if($_FILES['refmapfile']['name']){
-        $nachDatei = DRUCKRAHMEN_PATH.$_FILES['refmapfile']['name'];
-        if (move_uploaded_file($_FILES['refmapfile']['tmp_name'],$nachDatei)) {
-            //echo '<br>Lade '.$_FILES['headsrc']['tmp_name'].' nach '.$nachDatei.' hoch';
-          $sql .= ", `refmapfile` = '".$_FILES['refmapfile']['name']."'";
+      if($_files['refmapfile']['name']){
+        $nachDatei = DRUCKRAHMEN_PATH.$_files['refmapfile']['name'];
+        if (move_uploaded_file($_files['refmapfile']['tmp_name'],$nachDatei)) {
+            //echo '<br>Lade '.$_files['headsrc']['tmp_name'].' nach '.$nachDatei.' hoch';
+          $sql .= ", `refmapfile` = '".$_files['refmapfile']['name']."'";
         }
         else {
-            //echo '<br>Datei: '.$_FILES['headsrc']['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
+            //echo '<br>Datei: '.$_files['headsrc']['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
         }
       }
       $sql .= " WHERE `id` =".$formvars['aktiverRahmen'];
