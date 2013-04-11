@@ -5796,10 +5796,11 @@ class GUI extends GUI_core{
 		    $layerdb->setClientEncoding();
 		    $path = $this->formvars['pfad'];
 		    $attributes = $mapDB->load_attributes($layerdb, $path);
+		    print_r($attributes);
 		    $mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes);
 		    #---------- Speichern der Layerattribute -------------------
 			}
-			$mapDB->delete_old_attributes($this->formvars['selected_layer_id'], $attributes);
+			//$mapDB->delete_old_attributes($this->formvars['selected_layer_id'], $attributes);
 		}
 		
     $name = @array_values($this->formvars['name']);

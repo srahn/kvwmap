@@ -149,6 +149,7 @@ class pgdatabase extends pgdatabase_core {
       $frompos = $fromposition;
       $attributesstring = substr($select, $offset, $frompos-$offset);
       $fieldstring = explode(',', $attributesstring);
+      
       for($i = 0; $i < pg_num_fields($ret[1]); $i++){
         # Attributname
         $fieldname = pg_field_name($ret[1], $i);
@@ -353,7 +354,6 @@ class pgdatabase extends pgdatabase_core {
           for($j = 1; $j < pg_num_fields($ret[1]); $j++){
             $columns .= ', '.$tablename.pg_field_name($ret[1], $j);
           }
-          # Version 1.6.5 pk 2007-04-17
           $query = str_replace(trim($column[$i]), $columns, $query);
         }
       }

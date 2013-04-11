@@ -308,7 +308,7 @@ function set_changed_flag(flag){
 							if($attributes['group'][$j] != $attributes['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Tabelle beginnen
 								echo '<tr>
 												<td colspan="2">
-													<table  class="tgle" border="2"><tbody class="gle">
+													<table class="tgle" border="2"><tbody class="gle">
 														<tr>
 															<td bgcolor="'.BG_GLEATTRIBUTE.'" colspan="2"><b>'.$attributes['group'][$j].'</b></td>
 														</tr>';
@@ -324,7 +324,7 @@ function set_changed_flag(flag){
 								$attributes['alias'][$j] = $attributes['name'][$j];
 							}
 							echo '<table ';
-							if($attributes['group'][0] != '')echo 'width="225px"';
+							if($attributes['group'][0] != '')echo 'width="200px"';
 							else echo 'width="100%";';
 							echo '><tr><td>';
 							if($attributes['form_element_type'][$j] != 'SubFormPK' AND $attributes['form_element_type'][$j] != 'SubFormEmbeddedPK'){
@@ -400,9 +400,9 @@ function set_changed_flag(flag){
 				 
 					<tr>
 						<? if($layer['querymaps'][$k] != ''){ ?>
-						<td <? if($attributes['group'][0] != '')echo 'width="225px"'; ?> bgcolor="<? echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;" align="center"><img style="border:1px solid grey" src="<? echo $layer['querymaps'][$k]; ?>"></td>
+						<td <? if($attributes['group'][0] != '')echo 'width="200px"'; ?> bgcolor="<? echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;" align="center"><img style="border:1px solid grey" src="<? echo $layer['querymaps'][$k]; ?>"></td>
 						<? } else { ?>
-			    	    <td <? if($attributes['group'][0] != '')echo 'width="225px"'; ?> bgcolor="<? echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;">&nbsp;</td>
+			    	    <td <? if($attributes['group'][0] != '')echo 'width="200px"'; ?> bgcolor="<? echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;">&nbsp;</td>
 			    	    <? } ?>
 			    	    <td style="padding-top:5px; padding-bottom:5px;">&nbsp;&nbsp;
 <?						
