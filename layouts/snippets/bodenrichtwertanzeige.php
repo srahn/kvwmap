@@ -298,7 +298,7 @@ function change_orderby(attribute, layer_id){
 							}
 							echo '</td></tr></table>';
 							echo '</td><td>';
-			  			if($this->qlayerset[$i]['attributes']['constraints'][$j] != ''){
+			  			if($this->qlayerset[$i]['attributes']['constraints'][$j] != '' AND $this->qlayerset[$i]['attributes']['constraints'][$j] != 'PRIMARY KEY'){
 			  				if($this->qlayerset[$i]['attributes']['privileg'][$j] == '0' OR $lock[$k]){
 			  					$size = 1.3*strlen($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]);
 									echo '<input readonly style="background-color:#e8e3da;" size="'.$size.'" type="text" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].';'.$this->qlayerset[$i]['attributes']['type'][$j].'" value="'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]].'">';

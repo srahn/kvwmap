@@ -147,6 +147,15 @@ function select_this_dataset(layer_id, n){
 	document.getElementById(layer_id+'_'+n).checked = true;
 }
 
+function use_for_new_dataset(layer_id){
+	if(check_for_selection(layer_id)){
+		document.GUI.chosen_layer_id.value = layer_id;
+		document.GUI.go_backup.value = document.GUI.go.value;
+		document.GUI.go.value = 'neuer_Layer_Datensatz';
+		document.GUI.submit();
+	}
+}
+
 function csv_export(layer_id){
 	if(check_for_selection(layer_id)){
 		document.GUI.chosen_layer_id.value = layer_id;
@@ -275,6 +284,9 @@ function set_changed_flag(flag){
 			        <span style="color:<? echo TXT_GLEHEADER; ?>;"><? echo $strSelectThisDataset; ?></span>
 			      </td>
 			      <td align="right">
+			      	<? if($layer['privileg'] > '0'){ ?>
+			        	<a href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);use_for_new_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>)" title="<? echo $strUseForNewDataset; ?>"><img src="<? echo GRAPHICSPATH; ?>use_for_dataset.png" border="0"></a>&nbsp;&nbsp;
+			        <? } ?>
 			      	<a id="uko_<? echo $layer['Layer_ID'].'_'.$k; ?>" style="visibility:hidden" href="" title="<? echo $strUKOExportThis; ?>"><img src="<? echo GRAPHICSPATH; ?>datensatz_exportieren_uko.png" border="0"></a>&nbsp;&nbsp;
 			        <a href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);csv_export(<? echo $layer['Layer_ID']; ?>);" title="<? echo $strCSVExportThis; ?>"><img src="<? echo GRAPHICSPATH; ?>datensatz_exportieren_csv.png" border="0"></a>&nbsp;&nbsp;
 			        <? if($layer['privileg'] == '2'){ ?>
@@ -349,7 +361,7 @@ function set_changed_flag(flag){
 							}
 							echo '</td></tr></table>';
 							echo '</td><td>';
-			  			if($attributes['constraints'][$j] != ''){
+			  			if($attributes['constraints'][$j] != '' AND $attributes['constraints'][$j] != 'PRIMARY KEY'){
 			  				if($attributes['privileg'][$j] == '0' OR $lock[$k]){
 			  					$size = 1.3*strlen($layer['shape'][$k][$attributes['name'][$j]]);
 									echo '<input readonly style="background-color:#e8e3da;" size="'.$size.'" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$layer['shape'][$k][$attributes['name'][$j]].'">';
@@ -373,8 +385,8 @@ function set_changed_flag(flag){
 									</td>
 								</tr>
 							';
-			  			
-			  			if($attributes['group'][$j] != $attributes['group'][$j+1]){		# wenn die nächste Gruppe anders ist, Tabelle schliessen
+
+			  			if($attributes['group'][$j] != $attributes['group'][$j+1] OR ($attributes['group'][$j] != '' AND $attributes['type'][$j+1] == 'geometry' AND $attributes['name'][$j+2] == NULL)){		# wenn die nächste Gruppe anders ist (oder das nächste Attribut eine Geometrie und auch das letzte Attribut), Tabelle schliessen
 								echo '</table></td></tr>';
 			  			}
 			  			

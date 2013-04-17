@@ -16,6 +16,7 @@
  $strSelectThisDataset="select dataset";
  $strNoMatch="No objects found in this layer!";
  $strDeleteThisDataset="delete dataset";
+ $strUseForNewDataset="use for new dataset";
  $strCSVExportThis="export dataset into CSV";
  $strShowPK="show";
  $strNewPK="new";

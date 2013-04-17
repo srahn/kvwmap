@@ -18,6 +18,7 @@
  $strDeleteThisDataset="Datensatz löschen";
  $strCSVExportThis="Datensatz in CSV exportieren";
  $strUKOExportThis="Geometrie ins UKO-Format exportieren";
+ $strUseForNewDataset="Für neuen Datensatz verwenden";
  $strShowPK="anzeigen";
  $strNewPK="neu";
  $strShowFK="anzeigen";

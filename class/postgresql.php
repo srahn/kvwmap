@@ -204,30 +204,29 @@ class pgdatabase extends pgdatabase_core {
         
         # Constraints
         $constraints = $this->pg_table_constraints($tablename);
-        $enumstring = '';
+        $constraintstring = '';
 	      if($fieldtype != 'geometry'){
-	        # testen ob es fï¿½r ein Attribut ein constraint gibt, das wie enum wirkt
+	        # testen ob es für ein Attribut ein constraint gibt, das wie enum wirkt
 	        for($j = 0; $j < count($constraints); $j++){
 	          if(strpos($constraints[$j], '('.$fieldname.')')){
 	            $options = explode("'", $constraints[$j]);
 	            for($k = 0; $k < count($options); $k++){
 	              if($k%2 == 1){
 	                if($k > 1){
-	                  $enumstring.= ",";
+	                  $constraintstring.= ",";
 	                }
-	                $enumstring.= "'".$options[$k]."'";
+	                $constraintstring.= "'".$options[$k]."'";
 	              }
 	            }
 	          }
 	        }
 	      }
-	      $fields['constraints'][] = $enumstring; 
-        
+	              
         $attr_info = $this->get_attribute_information($tablename, $fields['real_name'][$fieldname]);
         # nullable
         $fields['nullable'][] = $attr_info['is_nullable']; 
         
-        # Lï¿½nge des Feldes
+        # Länge des Feldes
         if($attr_info['numeric_precision'] != ''){
         	$fields['length'][] = $attr_info['numeric_precision'];
         }
@@ -235,11 +234,18 @@ class pgdatabase extends pgdatabase_core {
         	$fields['length'][] = $attr_info['character_maximum_length'];
       	}        
         
-        # Lï¿½nge des Dezimalteils eines numeric-Feldes
+        # Länge des Dezimalteils eines numeric-Feldes
         $fields['decimal_length'][] = $attr_info['numeric_scale'];
         
         # Default-Wert
         $fields['default'][] = $attr_info['column_default'];
+        
+        # Primary Key
+        if($attr_info['indisprimary'] == 't'){
+        	$constraintstring = 'PRIMARY KEY';
+        }
+        
+        $fields['constraints'][] = $constraintstring;
         
       }
       
@@ -258,7 +264,10 @@ class pgdatabase extends pgdatabase_core {
      
   function get_attribute_information($tablename, $columnname){
   	if($columnname != '' AND $tablename != ''){
-  		$sql = "SELECT is_nullable, character_maximum_length, column_default, numeric_precision, numeric_scale, pg_get_serial_sequence('".$tablename."', '".$columnname."') as serial FROM information_schema.columns WHERE column_name = '".$columnname."' AND table_name = '".$tablename."' AND table_schema = '".$this->schema."'";
+  		$sql = "SELECT is_nullable, character_maximum_length, column_default, numeric_precision, numeric_scale, indisprimary, pg_get_serial_sequence('".$tablename."', '".$columnname."') as serial ";
+  		$sql.= "FROM information_schema.columns, pg_index, pg_class, pg_attribute ";
+  		$sql.= "WHERE column_name = '".$columnname."' AND table_name = '".$tablename."' AND table_schema = '".$this->schema."' ";
+  		$sql.= "AND pg_class.oid = '".$tablename."'::regclass AND indrelid = pg_class.oid AND pg_attribute.attrelid = pg_class.oid AND pg_attribute.attnum = any(pg_index.indkey) AND attname = column_name";
   		$ret1 = $this->execSQL($sql, 4, 0);
 	  	if($ret1[0]==0){
 	      $attr_info = pg_fetch_assoc($ret1[1]);

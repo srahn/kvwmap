@@ -1091,8 +1091,8 @@ ALTER TABLE `user` ADD `stop` DATE NOT NULL DEFAULT '0000-00-00' AFTER `start`;
 CREATE TABLE `u_consumeShape` (
   `user_id` int(11) NOT NULL,
   `stelle_id` int(11) NOT NULL,
-  `time_id` datetime NOT NULL default '0000-00-00 00:00:00',
+  `time_id` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   `layer_id` int(11) NOT NULL,
-  `numdatasets` int(11) default NULL,
-  PRIMARY KEY  (`user_id`,`stelle_id`,`time_id`)
-) ;
+  `numdatasets` int(11) DEFAULT NULL,
+  PRIMARY KEY (`user_id`,`stelle_id`,`time_id`)
+);

@@ -101,6 +101,9 @@ function zoomto(gkz){
 	$j = 0;
 	$k = 0;
 	$this->editable = 'true';
+	$layer = $this->qlayerset[$i];
+ 	$attributes = $layer['attributes'];
+	$this->editable = 'true';
 ?>
   
 <table border="0" cellspacing="0" cellpadding="0">
@@ -1063,7 +1066,7 @@ else {
     <?php   
   }
 ?>
-
+<input type="hidden" value="1" name="changed_<? echo $layer['shape'][$k][$attributes['table_name'][$attributes['name'][0]].'_oid']; ?>">
 <input name="search" type="hidden" value="true">
 <input type="hidden" name="details" value="<? echo $this->formvars['details']; ?>">
 <input type="hidden" name="oid" value="">

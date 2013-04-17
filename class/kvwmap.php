@@ -5796,7 +5796,6 @@ class GUI extends GUI_core{
 		    $layerdb->setClientEncoding();
 		    $path = $this->formvars['pfad'];
 		    $attributes = $mapDB->load_attributes($layerdb, $path);
-		    print_r($attributes);
 		    $mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes);
 		    #---------- Speichern der Layerattribute -------------------
 			}
@@ -6540,6 +6539,12 @@ class GUI extends GUI_core{
     $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->titel='neuen Datensatz einfügen';
     $this->main='new_layer_data.php';
+    
+    if($this->formvars['chosen_layer_id']){			# von einer Sachdatenanzeige übergebene Formvars
+    	$this->formvars['CMD'] = '';
+    	$this->formvars['selected_layer_id'] = $this->formvars['chosen_layer_id'];
+    }
+    
     if($this->formvars['selected_layer_id']){
       $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
       if($layerset[0]['privileg'] > 0){   # überprüfen, ob Recht zum Erstellen von neuen Datensätzen gesetzt ist
@@ -6548,6 +6553,28 @@ class GUI extends GUI_core{
         $layerdb->setClientEncoding();
         $privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
         $layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
+        
+        ######### von einer Sachdatenanzeige übergebene Formvars #######
+	      if($this->formvars['chosen_layer_id']){			
+		    	$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
+		      for($i = 0; $i < count($checkbox_names); $i++){
+		        if($this->formvars[$checkbox_names[$i]] == 'on'){
+		        	$element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
+		          $oid = $element[3];
+		        }
+		      }
+		      $form_fields = explode('|', $this->formvars['form_field_names']);
+		      for($i = 0; $i < count($form_fields); $i++){
+			      if($form_fields[$i] != ''){
+			        $element = explode(';', $form_fields[$i]);
+			        if($element[3] == $oid AND $layerset[0]['attributes']['constraints'][$element[1]] != 'PRIMARY KEY'){		# Primärschlüssel werden nicht mitübergeben
+				        $element[3] = '';
+				        $this->formvars[implode(';', $element)] = $this->formvars[$form_fields[$i]];
+			        }
+			      }
+		      }
+		    }
+		    ######### von einer Sachdatenanzeige übergebene Formvars #######
 
         if($privileges == NULL){    # kein Eintrag -> alle Attribute lesbar
           for($j = 0; $j < count($layerset[0]['attributes']['name']); $j++){
@@ -6582,7 +6609,7 @@ class GUI extends GUI_core{
         $this->geomtype = $this->qlayerset[0]['attributes']['geomtype'][$this->qlayerset[0]['attributes']['the_geom']];
         if($this->geomtype != ''){
           $this->loadMap('DataBase');
-        	if($this->formvars['layer_id'] != '' AND $this->formvars['oid'] != '' AND $this->formvars['tablename'] != '' AND $this->formvars['columnname'] != ''){			# das ist die Sachen vom "Mutter"-Layer
+        	if($this->formvars['layer_id'] != '' AND $this->formvars['oid'] != '' AND $this->formvars['tablename'] != '' AND $this->formvars['columnname'] != ''){			# das sind die Sachen vom "Mutter"-Layer
         		$layerdb = $this->mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
         		$rect = $this->mapDB->zoomToDatasets(array($this->formvars['oid']), $this->formvars['tablename'], $this->formvars['columnname'], 10, $layerdb, $this->user->rolle->epsg_code);
 			      $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);		# Zoom auf den "Mutter"-Datensatz
@@ -13348,7 +13375,7 @@ class db_mapObj extends db_mapObj_core{
   function add_attribute_values($attributes, $database, $query_result, $withvalues = true){
     # Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
     for($i = 0; $i < count($attributes['name']); $i++){
-      if($attributes['constraints'][$i] != ''){  # das sind die Auswahlmöglichkeiten, die durch die Tabellendefinition in Postgres fest vorgegeben sind
+      if($attributes['constraints'][$i] != '' AND $attributes['constraints'][$i] != 'PRIMARY KEY'){  # das sind die Auswahlmöglichkeiten, die durch die Tabellendefinition in Postgres fest vorgegeben sind
       	$attributes['enum_value'][$i] = explode(',', str_replace("'", "", $attributes['constraints'][$i]));
       	$attributes['enum_output'][$i] = $attributes['enum_value'][$i];
       }
@@ -13973,6 +14000,7 @@ class db_mapObj extends db_mapObj_core{
     	$attributes['geomtype'][$i]= $rs['geometrytype'];
     	$attributes['geomtype'][$rs['name']]= $rs['geometrytype'];
     	$attributes['constraints'][$i]= $rs['constraints'];
+    	$attributes['constraints'][$rs['real_name']]= $rs['constraints'];
     	$attributes['nullable'][$i]= $rs['nullable'];
     	$attributes['length'][$i]= $rs['length'];
     	$attributes['decimal_length'][$i]= $rs['decimal_length'];
