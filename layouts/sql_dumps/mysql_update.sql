@@ -1096,3 +1096,6 @@ CREATE TABLE `u_consumeShape` (
   `numdatasets` int(11) DEFAULT NULL,
   PRIMARY KEY (`user_id`,`stelle_id`,`time_id`)
 );
+
+
+ALTER TABLE `layer` ADD `maintable` VARCHAR( 255 ) NULL DEFAULT NULL AFTER `pfad`;

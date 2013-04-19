@@ -60,4 +60,5 @@
   $strDescribtion="Kurzbeschreibung";
   $strDataOwner="Datenherr";
   $strMetaLink="Metadatenlink";
+  $strMaintable="Haupttabelle";
 ?>  

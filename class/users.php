@@ -2727,7 +2727,8 @@ class stelle extends stelle_core{
 			$from = substr($withoutwhere, $fromposition);
 
 			$attributesstring = substr($path, $offset, $fromposition-$offset);
-			$fieldstring = explode(',', $attributesstring);
+			//$fieldstring = explode(',', $attributesstring);
+			$fieldstring = get_select_parts($attributesstring);
 			$count = count($fieldstring);
 			for($i = 0; $i < $count; $i++){
 				if(strpos(strtolower($fieldstring[$i]), ' as ')){   # Ausdruck AS attributname

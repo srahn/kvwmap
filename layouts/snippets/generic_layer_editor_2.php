@@ -285,12 +285,12 @@ function set_changed_flag(flag){
 			      </td>
 			      <td align="right">
 			      	<? if($layer['privileg'] > '0'){ ?>
-			        	<a href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);use_for_new_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>)" title="<? echo $strUseForNewDataset; ?>"><img src="<? echo GRAPHICSPATH; ?>use_for_dataset.png" border="0"></a>&nbsp;&nbsp;
+			        	<a href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);use_for_new_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>)" title="<? echo $strUseForNewDataset; ?>"><img style="border:1px solid #aaaaaa" src="<? echo GRAPHICSPATH; ?>use_for_dataset.png" border="0"></a>&nbsp;&nbsp;
 			        <? } ?>
-			      	<a id="uko_<? echo $layer['Layer_ID'].'_'.$k; ?>" style="visibility:hidden" href="" title="<? echo $strUKOExportThis; ?>"><img src="<? echo GRAPHICSPATH; ?>datensatz_exportieren_uko.png" border="0"></a>&nbsp;&nbsp;
-			        <a href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);csv_export(<? echo $layer['Layer_ID']; ?>);" title="<? echo $strCSVExportThis; ?>"><img src="<? echo GRAPHICSPATH; ?>datensatz_exportieren_csv.png" border="0"></a>&nbsp;&nbsp;
+			      	<a id="uko_<? echo $layer['Layer_ID'].'_'.$k; ?>" style="visibility:hidden" href="" title="<? echo $strUKOExportThis; ?>"><img style="border:1px solid #aaaaaa" src="<? echo GRAPHICSPATH; ?>datensatz_exportieren_uko.png" border="0"></a>&nbsp;&nbsp;
+			        <a href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);csv_export(<? echo $layer['Layer_ID']; ?>);" title="<? echo $strCSVExportThis; ?>"><img style="border:1px solid #aaaaaa" src="<? echo GRAPHICSPATH; ?>datensatz_exportieren_csv.png" border="0"></a>&nbsp;&nbsp;
 			        <? if($layer['privileg'] == '2'){ ?>
-			        	<a href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);delete_datasets(<?php echo $layer['Layer_ID']; ?>);" title="<? echo $strDeleteThisDataset; ?>"><img src="<? echo GRAPHICSPATH; ?>datensatz_loeschen.png" border="0"></a>
+			        	<a href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);delete_datasets(<?php echo $layer['Layer_ID']; ?>);" title="<? echo $strDeleteThisDataset; ?>"><img style="border:1px solid #aaaaaa" src="<? echo GRAPHICSPATH; ?>datensatz_loeschen.png" border="0"></a>
 			        <? } ?>
 			      </td>
 			    </tr>

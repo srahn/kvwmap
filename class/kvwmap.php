@@ -5000,8 +5000,6 @@ class GUI extends GUI_core{
 
     # Hinzufügen des Hintergrundbildes als Druckrahmen
     $pdf->addJpegFromFile(DRUCKRAHMEN_PATH.basename($this->Docu->activeframe[0]['headsrc']),$this->Docu->activeframe[0]['headposx'],$this->Docu->activeframe[0]['headposy'],$this->Docu->activeframe[0]['headwidth']);
-    
-    //$pdf->addJpegFromFile('/home/fgs/fgs/test/test_gesamt.jpg',0,0,9600);
 
     # Hinzufügen der vom MapServer produzierten Karte
     $pdf->addJpegFromFile(IMAGEPATH.basename($this->img['hauptkarte']),$this->Docu->activeframe[0]['mapposx'],$this->Docu->activeframe[0]['mapposy'],$this->Docu->activeframe[0]['mapwidth'], $this->Docu->activeframe[0]['mapheight']);
@@ -5750,7 +5748,7 @@ class GUI extends GUI_core{
 				$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 				$path = $this->formvars['pfad'];
 				$attributes = $mapDB->load_attributes($layerdb, $path);
-				$mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes);
+				$mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes, $this->formvars['maintable']);
 				$mapDB->delete_old_attributes($this->formvars['selected_layer_id'], $attributes);
 				#---------- Speichern der Layerattribute -------------------
 			}
@@ -5796,7 +5794,7 @@ class GUI extends GUI_core{
 		    $layerdb->setClientEncoding();
 		    $path = $this->formvars['pfad'];
 		    $attributes = $mapDB->load_attributes($layerdb, $path);
-		    $mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes);
+		    $mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes, $this->formvars['maintable']);
 		    #---------- Speichern der Layerattribute -------------------
 			}
 			if($this->formvars['pfad'] == '' OR $attributes != NULL){
@@ -11323,7 +11321,7 @@ class GUI extends GUI_core{
       $anzLayer=count($layerset);
     }
     else{
-      echo 'Bitte w%E4hlen Sie einen Layer zur Sachdatenabfrage aus.~';
+      echo 'Bitte wählen Sie einen Layer zur Sachdatenabfrage aus.~';
     }
     $map=ms_newMapObj('');
     $map->set('shapepath', SHAPEPATH);
@@ -13542,7 +13540,7 @@ class db_mapObj extends db_mapObj_core{
     return $attributes;
   }
   
-  function save_postgis_attributes($layer_id, $attributes){
+  function save_postgis_attributes($layer_id, $attributes, $maintable){
   	for($i = 0; $i < count($attributes['name']); $i++){
   		$sql = "INSERT INTO layer_attributes SET ";
 	  	$sql.= "layer_id = ".$layer_id.", ";
@@ -13571,6 +13569,13 @@ class db_mapObj extends db_mapObj_core{
 	  	$sql.= "`default` = '".$attributes['default'][$i]."', ";
 	  	$sql.= "`order` = ".$i;
 	  	$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>".$sql,4);
+	    $query=mysql_query($sql);
+	    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+  	}
+  	
+  	if($maintable == ''){
+  		$sql = "UPDATE layer SET maintable = '".$attributes['all_table_names'][0]."' WHERE Layer_ID = ".$layer_id;
+  		$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>".$sql,4);
 	    $query=mysql_query($sql);
 	    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
   	}
@@ -13747,6 +13752,7 @@ class db_mapObj extends db_mapObj_core{
     $sql .= "Datentyp = '".$formvars['Datentyp']."', ";
     $sql .= "Gruppe = '".$formvars['Gruppe']."', ";
     $sql .= "pfad = '".$formvars['pfad']."', ";
+    $sql .= "maintable = '".$formvars['maintable']."', ";
     $sql .= "Data = '".$formvars['Data']."', ";
     $sql .= "`schema` = '".$formvars['schema']."', ";
     $sql .= "document_path = '".$formvars['document_path']."', ";
@@ -13813,7 +13819,7 @@ class db_mapObj extends db_mapObj_core{
       if($formvars['id'] != ''){
         $sql.="`Layer_ID`, ";
       }
-      $sql.= "`Name`, `Datentyp`, `Gruppe`, `pfad`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`) VALUES(";
+      $sql.= "`Name`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`) VALUES(";
       if($formvars['id'] != ''){
         $sql.="'".$formvars['id']."', ";
       }
@@ -13825,6 +13831,12 @@ class db_mapObj extends db_mapObj_core{
       }
       else{
         $sql .= "'".$formvars['pfad']."', ";
+      }
+    	if($formvars['maintable'] == ''){
+        $sql .= "NULL, ";
+      }
+      else{
+        $sql .= "'".$formvars['maintable']."', ";
       }
       if($formvars['Data'] == ''){
         $sql .= "NULL, ";
@@ -14165,7 +14177,8 @@ class db_mapObj extends db_mapObj_core{
         $exp = str_replace('ne', '!=', $exp);
 
 				# wenn im Data sowas wie "tabelle.attribut" vorkommt, soll das anstatt dem "attribut" aus der Expression verwendet werden        
-        $attributes = explode(',', substr($select, 0, strpos(strtolower($select), ' from ')));							
+        //$attributes = explode(',', substr($select, 0, strpos(strtolower($select), ' from ')));
+        $attributes = get_select_parts(substr($select, 0, strpos(strtolower($select), ' from ')));							
         $exp_parts = explode(' ', $exp);
         for($k = 0; $k < count($exp_parts); $k++){
 	      	for($j = 0; $j < count($attributes); $j++){

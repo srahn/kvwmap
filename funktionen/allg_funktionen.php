@@ -662,8 +662,8 @@ function searchdir($path, $recursive){
             $dirlist[] = $file;
           }
           elseif($recursive == true){ 
-            	$result = searchdir($file . '/', true) ;
-            	$dirlist = array_merge($dirlist,$result) ;
+            $result = searchdir($file . '/', true) ;
+            $dirlist = array_merge($dirlist,$result) ;
           }
         }
       }
@@ -671,27 +671,24 @@ function searchdir($path, $recursive){
     }
     sort($dirlist);
     return ($dirlist);
-  }
-
-function getAttributesfromSelect($select){
-  echo $select;
-  $select = substr($select,0,strpos(strtolower($select), ' from '));
-  $attribute = explode(',', $select);
-  for($i = 0; $i < count($attribute); $i++){
-    $rest = strrchr($attribute[$i], ' ');
-    if(strlen($rest) > 1){
-      $attribute[$i] = $rest;
-    }
-    $attribute[$i] = trim($attribute[$i]);
-    $explosion = explode('.', $attribute[$i]);
-    $attribute[$i] = array_pop($explosion);
-  }
-  if($attribute[0] != ''){
-    return $attribute;
-  }
-  else return NULL;
 }
 
+
+function get_select_parts($select){
+	$column = explode(',', $select);
+  for($i = 0; $i < count($column); $i++){
+  	$klammerauf = substr_count($column[$i], '(');
+  	$klammerzu = substr_count($column[$i], ')');
+  	if($klammerauf > $klammerzu){			# mehr Klammern auf als zu --> hier wurde eine Funktion oder eine Unterabfrage mit Kommas verwendet
+  		$column[$i] = $column[$i].', '.$column[$i+1];
+  		array_splice($column, $i+1, 1);
+  		break; 
+  	}
+  }
+  return $column;
+}
+
+  
 function microtime_float(){
    list($usec, $sec) = explode(" ", microtime());
    return ((float)$usec + (float)$sec);

@@ -148,7 +148,8 @@ class pgdatabase extends pgdatabase_core {
     if($ret[0]==0){
       $frompos = $fromposition;
       $attributesstring = substr($select, $offset, $frompos-$offset);
-      $fieldstring = explode(',', $attributesstring);
+      //$fieldstring = explode(',', $attributesstring);
+      $fieldstring = get_select_parts($attributesstring);
       
       for($i = 0; $i < pg_num_fields($ret[1]); $i++){
         # Attributname
@@ -156,7 +157,7 @@ class pgdatabase extends pgdatabase_core {
         $fields['name'][] = $fieldname;
 
         # "richtiger" Name in der Tabelle
-        $name_pair = $this->check_real_attribute_name($fieldstring[$i]);
+        $name_pair = $this->check_real_attribute_name($fieldstring[$i], $fieldname);
         if($name_pair != ''){
           $fields['real_name'][$name_pair['name']] = $name_pair['real_name'];
         }
@@ -257,6 +258,7 @@ class pgdatabase extends pgdatabase_core {
 	      }
 	      $fields['all_table_names'] = $all_table_names;
       }
+            
       return $fields;
     }
     else return NULL;
@@ -333,7 +335,7 @@ class pgdatabase extends pgdatabase_core {
       return true;
     }
   }
-
+  
   function eliminate_star($query, $offset){
   	if(substr_count(strtolower($query), ' from ') > 1){
   		$whereposition = strpos($query, ' WHERE ');
@@ -352,7 +354,8 @@ class pgdatabase extends pgdatabase_core {
   	}
     $select = substr($query, $offset, $fromposition-$offset);
     $from = substr($query, $fromposition);
-    $column = explode(',', $select);
+    //$column = explode(',', $select);
+    $column = get_select_parts($select);
     for($i = 0; $i < count($column); $i++){
       if(strpos($column[$i], '*') !== false){
         $sql .= "SELECT ".$column[$i]." ".$from." LIMIT 0";
@@ -370,18 +373,18 @@ class pgdatabase extends pgdatabase_core {
     return $query;
   }
 
-  function check_real_attribute_name($fieldstring){
+  function check_real_attribute_name($fieldstring, $fieldname){
 	    # testen ob Attributname durch 'as' umbenannt wurde
-	    if(strpos(strtolower($fieldstring), ' as ')){
+	    if(strpos(strtolower($fieldstring), ' as '.$fieldname)){
 	      $fieldstring = trim($fieldstring);
 	      $explosion = explode(' ', $fieldstring);
 	      $klammerstartpos = strrpos($explosion[0], '(');
-	      # eine Funktion wurde auf das Attribut angewendet
-	      if($klammerstartpos !== false){
+	      if($klammerstartpos !== false){										# eine Funktion wurde auf das Attribut angewendet
 	        $klammerendpos = strpos($explosion[0], ')');
 	        if($klammerendpos){
 	        	$name_pair['real_name'] = substr($explosion[0], $klammerstartpos+1, $klammerendpos-$klammerstartpos-1);
 	        	$name_pair['name'] = $explosion[count($explosion)-1];
+	        	$name_pair['no_real_attribute'] = true;
 	        }
 	      }
 	      elseif(strpos(strtolower($fieldstring), '||')){		# irgendwas zusammengesetztes mit ||

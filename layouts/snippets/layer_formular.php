@@ -103,6 +103,12 @@ else {
 		  		</td>
 		  	</tr>
 		  	<tr>
+		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strMaintable; ?></th>
+		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+		      		<input name="maintable" type="text" value="<?php echo $this->formvars['maintable']; ?>" size="25" maxlength="100">
+		  		</td>
+		  	</tr>
+		  	<tr>
 		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strSchema; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<input name="schema" type="text" value="<?php echo $this->formvars['schema']; ?>" size="25" maxlength="100">

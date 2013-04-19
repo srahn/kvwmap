@@ -308,7 +308,7 @@
 									case 'Fläche': {
 										echo '<input onchange="set_changed_flag(document.GUI.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" id="custom_area" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$attributes['alias'][$j].'" ';
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
-											echo ' readonly style="font-size: '.$this->user->rolle->fontsize_gle.'px;background-color:#e8e3da;"';
+											echo ' readonly style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;"';
 										}
 										else{
 											echo ' style="font-size: '.$this->user->rolle->fontsize_gle.'px;"';
@@ -319,7 +319,7 @@
 									case 'Länge': {
 										echo '<input onchange="set_changed_flag(document.GUI.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" id="custom_length" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$attributes['alias'][$j].'" ';
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
-											echo ' readonly style="font-size: '.$this->user->rolle->fontsize_gle.'px;background-color:#e8e3da;"';
+											echo ' readonly style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;"';
 										}
 										else{
 											echo ' style="font-size: '.$this->user->rolle->fontsize_gle.'px;"';

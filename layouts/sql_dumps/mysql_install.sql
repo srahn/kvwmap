@@ -482,6 +482,7 @@ CREATE TABLE `layer` (
   `Datentyp` tinyint(4) NOT NULL default '2',
   `Gruppe` int(11) NOT NULL default '0',
   `pfad` text collate latin1_german2_ci,
+  `maintable` VARCHAR( 255 ) NULL DEFAULT NULL,
   `Data` text collate latin1_german2_ci,
   `schema` varchar(50) collate latin1_german2_ci default NULL,
   `document_path` text collate latin1_german2_ci,

@@ -59,6 +59,7 @@
   $strDescribtion="Short Description";
   $strDataOwner="Data-Owner";
   $strMetaLink="Metadata-Link";
+  $strMaintable="Main Table";
   
   
   
