@@ -160,6 +160,19 @@ function save(){
 			  		?>
           </td>
         </tr>
+        
+        <tr id="verzicht" width="100%" style="display:<? if(in_array($this->qlayerset[$i]['shape'][$j]['art'], array('ejb'))){ echo '';}else{echo 'none';} ?>">
+          <td bgcolor="<?php echo BG_DEFAULT ?>"><b>Verzicht gem. §3</b></td>
+          <td valign="top">
+          	<select name="<? echo $this->qlayerset[$i]['Layer_ID'].';verzicht;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j]['oid'].';Text;1'; ?>">
+          		<option <? if($this->qlayerset[$i]['shape'][$j]['verzicht'] == 'f'){echo 'selected';} ?> value="0">nein</option>
+  						<option <? if($this->qlayerset[$i]['shape'][$j]['verzicht'] == 't'){echo 'selected';} ?> value="1">ja</option>
+          	</select>
+          	<?
+			  		$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';verzicht;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j]['oid'].';Text;1|';
+			  		?>
+          </td>
+        </tr>
 
         <tr width="100%">
           <td valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
@@ -257,4 +270,5 @@ if(!$this->jagd_hiddenfields){
 <input name="search_name" type="hidden" value="<?php echo $this->formvars['search_name']; ?>">
 <input name="search_art" type="hidden" value="<?php echo $this->formvars['search_art']; ?>">
 <input name="search_status" type="hidden" value="<?php echo $this->formvars['search_status']; ?>">
+<input name="search_verzicht" type="hidden" value="<?php echo $this->formvars['search_verzicht']; ?>">
 <? } ?>

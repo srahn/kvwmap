@@ -2606,10 +2606,10 @@ class GUI extends GUI_core{
     $anz = count($this->jagdbezirke);
     for($i = 0; $i < $anz; $i++) {          	
     	if($this->jagdbezirke[$i]['art']=='ejb' OR $this->jagdbezirke[$i]['art']=='gjb'){
-    		$csv.= $this->jagdbezirke[$i]['id'].';';
+    		$csv.= "'".$this->jagdbezirke[$i]['id']."';";
     	}
     	else{
-    		$csv.= $this->jagdbezirke[$i]['jb_zuordnung'].';'; 
+    		$csv.= "'".$this->jagdbezirke[$i]['jb_zuordnung']."';"; 
     	}
     	$csv.= $this->jagdbezirke[$i]['name'].';';
       $csv.= "'".$this->jagdbezirke[$i]['flaeche']."';";
@@ -10828,6 +10828,13 @@ class GUI extends GUI_core{
             $searchbox_wkt.=strval($rect->maxx)." ".strval($rect->maxy).",";
             $searchbox_wkt.=strval($rect->minx)." ".strval($rect->maxy).",";
             $searchbox_wkt.=strval($rect->minx)." ".strval($rect->miny)."))";
+            
+            $loosesearchbox_wkt ="POLYGON((";
+            $loosesearchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->miny-$rand).",";
+            $loosesearchbox_wkt.=strval($rect->maxx+$rand)." ".strval($rect->miny-$rand).",";
+            $loosesearchbox_wkt.=strval($rect->maxx+$rand)." ".strval($rect->maxy+$rand).",";
+            $loosesearchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->maxy+$rand).",";
+            $loosesearchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->miny-$rand)."))";
 
             if($this->querypolygon != ''){
               $searchbox_wkt = $this->querypolygon;
@@ -10836,10 +10843,10 @@ class GUI extends GUI_core{
             # Wenn das Koordinatenssystem des Views anders ist als vom Layer wird die Suchbox und die Suchgeometrie
             # in epsg des layers transformiert
             if ($client_epsg!=$layer_epsg) {
-              $sql_where =" AND ".$the_geom." && st_transform(st_geomfromtext('".$searchbox_wkt."',".$client_epsg."),".$layer_epsg.")";
+              $sql_where =" AND ".$the_geom." && st_transform(st_geomfromtext('".$loosesearchbox_wkt."',".$client_epsg."),".$layer_epsg.")";
             }
             else {
-              $sql_where =" AND ".$the_geom." && st_geomfromtext('".$searchbox_wkt."',".$client_epsg.")";
+              $sql_where =" AND ".$the_geom." && st_geomfromtext('".$loosesearchbox_wkt."',".$client_epsg.")";
             }
 
             # Wenn es sich bei der Suche um eine punktuelle Suche handelt, wird die where Klausel um eine
@@ -10892,7 +10899,7 @@ class GUI extends GUI_core{
 	            $sql = '';
 	            for($g = 0; $g < count($geoms); $g++){
 	            	if($g > 0)$sql .= " UNION ";
-	            	$sql .= "SELECT ".$pfad." AND the_geom && ('".$geoms[$g]."') AND (st_intersects(the_geom, ('".$geoms[$g]."')) OR the_geom = ('".$geoms[$g]."'))";
+	            	$sql .= "SELECT ".$pfad." AND ".$the_geom." && ('".$geoms[$g]."') AND (st_intersects(".$the_geom.", ('".$geoms[$g]."')) OR ".$the_geom." = ('".$geoms[$g]."'))";
 	            }
             }
             else{
@@ -11391,21 +11398,21 @@ class GUI extends GUI_core{
       # EPSG-Code des Layers der Abgefragt werden soll
       $layer_epsg=$layerset[$i]['epsg_code'];
       # Bildung der Where-Klausel für die räumliche Abfrage mit der searchbox
-      $searchbox_wkt ="POLYGON((";
-      $searchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->miny-$rand).",";
-      $searchbox_wkt.=strval($rect->maxx+$rand)." ".strval($rect->miny-$rand).",";
-      $searchbox_wkt.=strval($rect->maxx+$rand)." ".strval($rect->maxy+$rand).",";
-      $searchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->maxy+$rand).",";
-      $searchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->miny-$rand)."))";
+      $loosesearchbox_wkt ="POLYGON((";
+      $loosesearchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->miny-$rand).",";
+      $loosesearchbox_wkt.=strval($rect->maxx+$rand)." ".strval($rect->miny-$rand).",";
+      $loosesearchbox_wkt.=strval($rect->maxx+$rand)." ".strval($rect->maxy+$rand).",";
+      $loosesearchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->maxy+$rand).",";
+      $loosesearchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->miny-$rand)."))";
 
 
       # Wenn das Koordinatenssystem des Views anders ist als vom Layer wird die Suchbox und die Suchgeometrie
       # in epsg des layers transformiert
       if ($client_epsg!=$layer_epsg) {
-        $sql_where =" AND ".$the_geom." && st_transform(st_geomfromtext('".$searchbox_wkt."',".$client_epsg."),".$layer_epsg.")";
+        $sql_where =" AND ".$the_geom." && st_transform(st_geomfromtext('".$loosesearchbox_wkt."',".$client_epsg."),".$layer_epsg.")";
       }
       else {
-        $sql_where =" AND ".$the_geom." && st_geomfromtext('".$searchbox_wkt."',".$client_epsg.")";
+        $sql_where =" AND ".$the_geom." && st_geomfromtext('".$loosesearchbox_wkt."',".$client_epsg.")";
       }
 
       # Wenn es sich bei der Suche um eine punktuelle Suche handelt, wird die where Klausel um eine

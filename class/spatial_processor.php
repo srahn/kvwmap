@@ -318,10 +318,10 @@ class spatial_processor {
   		$geom_1 = $this->pointfrompolygon($geom_1);
   	}
   	if($type == 'wkt'){
-  		$sql = "select st_astext(buffer(st_geomfromtext('".$geom_1."'), ".$width."))";
+  		$sql = "select st_astext(st_buffer(st_geomfromtext('".$geom_1."'), ".$width."))";
   	}
   	else{
-  		$sql = "select st_assvg(buffer(st_geomfromtext('".$geom_1."'), ".$width."),0,5)";
+  		$sql = "select st_assvg(st_buffer(st_geomfromtext('".$geom_1."'), ".$width."),0,5)";
   	}
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {

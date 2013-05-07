@@ -154,7 +154,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
         <td align="center"><?php echo $this->jagdbezirke[$i]['name']; ?></td>
       	<td align="center"><?php echo $this->jagdbezirke[$i]['flaeche']; ?></td>
         <td align="center"><?php echo $this->jagdbezirke[$i]['art']; ?></td>
-        <td align="center"><a href="index.php?go=jagdbezirk_show_data&oid=<? echo $this->jagdbezirke[$i]['oid'] ?>&search_nummer=<? echo $this->formvars['search_nummer']; ?>&search_name=<? echo $this->formvars['search_name']; ?>&search_art=<? echo $this->formvars['search_art']; ?>&search_status=<? echo $this->formvars['search_status']; ?>">Sachdatenanzeige</a></td>
+        <td align="center"><a href="index.php?go=jagdbezirk_show_data&oid=<? echo $this->jagdbezirke[$i]['oid'] ?>&search_nummer=<? echo $this->formvars['search_nummer']; ?>&search_name=<? echo $this->formvars['search_name']; ?>&search_art=<? echo $this->formvars['search_art']; ?>&search_status=<? echo $this->formvars['search_status']; ?>&search_verzicht=<? echo $this->formvars['search_verzicht']; ?>">Sachdatenanzeige</a></td>
         <td align="center"><a href="index.php?go=zoomtojagdbezirk&oid=<? echo $this->jagdbezirke[$i]['oid'] ?>&nummer=<? echo $this->jagdbezirke[$i]['id'] ?>">zur Karte</a></td>
         <td align="center">
         	<? if($this->Stelle->isFunctionAllowed('Jagdkataster')){ ?>

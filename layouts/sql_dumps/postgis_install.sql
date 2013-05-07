@@ -307,16 +307,13 @@ WITH OIDS;
 
 --# View zu den Jagdbezirken
 
-CREATE OR REPLACE VIEW jagdbezirk_paechter AS 
- SELECT jb.oid, jb.id, jb.name, jb.art, jb.flaeche, 
-        CASE
-            WHEN count(jpb.paechterid) = 0 THEN 'keine condition-Daten'::text
-            ELSE count(jpb.paechterid)::text || ' P&auml;chter    (anzeigen ->)'::text
-        END AS anzahl_paechter, jpb.bezirkid, jb.concode, jb.the_geom
+CREATE OR REPLACE VIEW jagdbezirk_paechter AS
+ SELECT jb.oid, jb.id, jb.name, jb.art, jb.flaeche, jpb.bezirkid, jb.concode, jb.jb_zuordnung, jb.status, jb.verzicht, jb.the_geom
    FROM jagdbezirke jb
-   LEFT JOIN jagdpaechter2bezirke jpb ON jb.concode::text = jpb.paechterid::text
-  GROUP BY jb.oid, jb.id, jb.name, jb.art, jb.flaeche, jpb.bezirkid, jb.concode, jb.the_geom;
-
+   LEFT JOIN jagdpaechter2bezirke jpb ON jb.concode::text = jpb.bezirkid::text
+  GROUP BY jb.oid, jb.id, jb.name, jb.art, jb.flaeche, jpb.bezirkid, jb.concode, jb.jb_zuordnung, jb.status, jb.verzicht, jb.the_geom;
+  
+  
 --# Tabelle zur Speicherung der Bauleitplanungsänderungen
 
 CREATE TABLE bp_aenderungen

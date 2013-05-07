@@ -75,7 +75,7 @@ class jagdkataster {
   	if($formvars['search_art']!='' AND $formvars['search_art']!='ejb' AND $formvars['search_art']!='gjb' AND $formvars['search_status']!='both'){
 	  	$sql.= ' AND status = \''.$formvars['search_status'].'\'';
 	  }
-  	if($formvars['search_art']=='ejb' AND $formvars['search_verzicht']!='both'){
+  	if($formvars['search_art']=='ejb' AND $formvars['search_verzicht']!='both' AND $formvars['search_verzicht']!=''){
 	  	$sql.= ' AND verzicht = \''.$formvars['search_verzicht'].'\'';
 	  }
 	  if($formvars['order'] != '')$sql.= ' order by '.$formvars['order'];	  	

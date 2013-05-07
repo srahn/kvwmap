@@ -26,4 +26,5 @@
   $strX="R";  
   $strY="H";
   $strMap="Koort";
+  $strMapSize="Grött anpassen";
 ?>
