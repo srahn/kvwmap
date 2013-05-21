@@ -13,6 +13,11 @@ function getsubmenues(){
 	ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=getsubmenues&menue_id='+menue_id, new Array(document.getElementById('submenue_div')), "");
 }
 
+function getlayer(){
+	group_id = document.GUI.allgroups.options[document.GUI.allgroups.selectedIndex].value;
+	ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=getlayerfromgroup&group_id='+group_id, new Array(document.getElementById('alllayer_div')), "");
+}
+
 function getInsertIndex(insertObj, id, order){
 	// diese Funktion ermittelt den index, an dem ein Element aus einem anderen Selectfeld mit der Reihenfolge 'order' eingefügt werden muss
 	// (die Order wird hier in Selectfeldern im Attribut 'id' gespeichert)
@@ -423,7 +428,7 @@ else {
               <table border="0" cellspacing="0" cellpadding="0">
                 <tr valign="top">
                     <td>
-                      <select name="selectedlayer" size="4" multiple style="width:160px">
+                      <select name="selectedlayer" size="8" multiple style="width:160px">
                       <?
                       for($i=0; $i < count($this->formvars['sellayer']["Bezeichnung"]); $i++){
                           echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['sellayer']["Bezeichnung"][$i]).' value="'.$this->formvars['sellayer']["ID"][$i].'">'.$this->formvars['sellayer']["Bezeichnung"][$i].'</option>';
@@ -436,12 +441,20 @@ else {
                       <input type="button" name="substractPlaces" value="&gt;&gt;" onClick=substractOptions(document.GUI.selectedlayer,document.GUI.sellayer,'value')>
                     </td>
                     <td>
+											<select name="allgroups" size="4" onchange="getlayer();" style="width:160px">
+                      <? for($i=0; $i < count($this->formvars['groups']); $i++){
+                          echo '<option title="'.str_replace(' ', '&nbsp;', $this->formvars['groups'][$i]["Gruppenname"]).'" value="'.$this->formvars['groups'][$i]["id"].'">'.$this->formvars['groups'][$i]["Gruppenname"].'</option>';
+                         }
+                      ?>
+                      </select>                    
+                    	<div id="alllayer_div">
                       <select name="alllayer" size="4" multiple style="width:160px">
                       <? for($i=0; $i < count($this->formvars['layer']["Bezeichnung"]); $i++){
                           echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['layer']["Bezeichnung"][$i]).' value="'.$this->formvars['layer']["ID"][$i].'">'.$this->formvars['layer']["Bezeichnung"][$i].'</option>';
                            }
                       ?>
                       </select>
+                      </div>                    
                     </td>
                 </tr>
               </table>

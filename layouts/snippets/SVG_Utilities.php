@@ -1573,16 +1573,16 @@ function mouseup(evt){
 	}
 	
 	function linelength(){
-		length = top.document.getElementById("custom_length");
-		if(length == undefined){						// wenn es ein Laenge-Attribut gibt, wird das verwendet, ansonsten die normale Laengenanzeige
-			length = top.document.GUI.linelength;
+		length1 = top.document.getElementById("custom_length");
+		if(length1 == undefined){						// wenn es ein Laenge-Attribut gibt, wird das verwendet, ansonsten die normale Laengenanzeige
+			length1 = top.document.GUI.linelength;
 		}
 	  if(top.document.GUI.newpathwkt.value != ""){
-	  	top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&geotype=line&path1="+top.document.GUI.newpathwkt.value+"&operation=length&layer_id="+top.document.GUI.layer_id.value, new Array(top.document.GUI.linelength, length), "");
+	  	top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&geotype=line&path1="+top.document.GUI.newpathwkt.value+"&operation=length&layer_id="+top.document.GUI.layer_id.value, new Array(top.document.GUI.linelength, length1), "");
 	  }
 	  else{
 	  	if(top.document.GUI.newpath.value != ""){
-	  		top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&geotype=line&path2="+top.document.GUI.newpath.value+"&operation=length&layer_id="+top.document.GUI.layer_id.value, new Array(top.document.GUI.linelength, length), "");
+	  		top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&geotype=line&path2="+top.document.GUI.newpath.value+"&operation=length&layer_id="+top.document.GUI.layer_id.value, new Array(top.document.GUI.linelength, length1), "");
 	  	}
 	  	else{
 	  		top.document.GUI.linelength.value = "0.0";

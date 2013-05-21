@@ -28,39 +28,6 @@ function popup(id){
   <tr>
     <td>
     	<table width="100%" border="0" cellspacing="0" cellpadding="2">
-      	<tr>
-        	<td colspan="2"><hr color="#000000" size="2"></td>
-        </tr>
-      	<tr>
-        	<td colspan="2">Zeitraum f&uuml;r Auswertung: von <?php echo $this->account->epoch['min_d'].'-'.$this->account->epoch['min_m'].'-'.$this->account->epoch['min_y']; ?>
-            bis <?php echo $this->account->epoch['max_d'].'-'.$this->account->epoch['max_m'].'-'.$this->account->epoch['max_y']; ?>
-          </td>
-        </tr>
-        <tr>
-          <td colspan="2"><hr color="#000000" size="1"></td>
-        </tr>
-        <tr>
-          <td colspan="2"><b>Zusammenfassung: </b></td>
-        </tr>
-        <tr>
-          <td width="50%"><li>Anzahl der Layer :</li></td>
-          <td width="50%"><?php echo $this->account->getLayer['layers']; ?></td>
-        </tr>
-				<tr>
-          <td width="50%"><li>Anzahl der geloggten Layer :</li></td>
-          <td width="50%"><?php echo $this->account->getLoggedLayer['layers']; ?></td>
-        </tr>
-        <tr>
-          <td width="50%"><li>Anzahl der Zugriffe auf alle Layer:</li></td>
-          <td width="50%"><?php echo $this->account->allLayerAccess['allAccess']; ?></td>
-        </tr>
-        <tr>
-          <td width="50%"><li>Anzahl aller Zugriffe des Kartenfensters:</li></td>
-          <td width="50%"><?php echo $this->account->allAccess['allAccess']; ?></td>
-        </tr>
-				<tr>
-          <td colspan="2" align="center"><hr color="#00000" size="1"></td>
-        </tr>
 	    <?php
 			if ($this->formvars['zeitraum']=='month') { ?>
 				<tr>
@@ -412,9 +379,6 @@ function popup(id){
 		     				<td colspan="2" align="center"><input type="button" name="georg_export" value="Georg-Datei erzeugen" onclick="georg();"></td>
 		     			</tr-->
 
-						  <tr>
-						    <td align="center" colspan="2"><hr color="#000000" size="1"></td>
-						  <tr>
 						    <td align="center" colspan="2"> <input name="zurueck" type="submit" value="Zurück"> </td>
 						  </tr>
 						  <tr>

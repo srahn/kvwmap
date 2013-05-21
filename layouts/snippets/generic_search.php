@@ -160,18 +160,13 @@ function showsearches(){
 }
 
 function showmap(){
-	if(document.getElementById('map2').style.display == 'none'){
-		document.getElementById('map1').style.borderTop="1px solid #C3C7C3";
-		document.getElementById('map1').style.borderLeft="1px solid #C3C7C3";
-		document.getElementById('map1').style.borderRight="1px solid #C3C7C3";
-		document.getElementById('map2').style.display = '';
+	if(document.GUI.map_flag.value == 0){
 		document.GUI.map_flag.value = 1;
 	}
 	else{
-		document.getElementById('map1').style.border="none";
-		document.getElementById('map2').style.display = 'none';
 		document.GUI.map_flag.value = '';
 	}
+	document.GUI.submit();
 }
 
 function save_search(){
@@ -275,9 +270,10 @@ function delete_search(){
   
   <? if($this->formvars['columnname'] != ''){ ?>
   <tr>
-    <td id="map1"><a href="javascript:showmap();">Suche räumlich eingrenzen...</a>&nbsp;</td>
+    <td id="map1" <? if($this->formvars['map_flag'] != ''){echo 'style="border-top: 1px solid #C3C7C3;border-left: 1px solid #C3C7C3;border-right: 1px solid #C3C7C3"';} ?>><a href="javascript:showmap();">Suche räumlich eingrenzen...</a>&nbsp;</td>
   </tr>
-  <tr id="map2" style="display:none"> 
+  <? if($this->formvars['map_flag'] != ''){ ?>
+  <tr id="map2"> 
     <td align="right" style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3">
     	Geometrie übernehmen von: 
   		<select name="layer_id" onchange="document.GUI.submit();">
@@ -294,10 +290,9 @@ function delete_search(){
 			?>
     </td>
   </tr>
-  <? } ?>
+  <? }} ?>
   
   <? if($this->selected_search != ''){echo '<script type="text/javascript">showsearches();</script>';} ?>
-  <? if($this->formvars['map_flag'] != ''){echo '<script type="text/javascript">showmap();</script>';} ?>
   <tr> 
     <td colspan="5">
       <table align="center" border="0" cellspacing="0" cellpadding="0">

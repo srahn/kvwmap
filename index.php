@@ -336,6 +336,11 @@ if($GUI->goNotExecutedInPlugins){
 	  case 'getsubmenues' : {
 		$GUI->get_sub_menues();
 	  } break;
+	  
+	  # Layer zu einer Gruppe abfragen
+	  case 'getlayerfromgroup' : {
+		$GUI->getlayerfromgroup();
+	  } break;
 
 	  # Legende erzeugen
 	  case 'get_legend' : {

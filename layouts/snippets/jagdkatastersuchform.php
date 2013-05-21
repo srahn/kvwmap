@@ -19,7 +19,7 @@ function update_form(art){
 	else{
 		document.getElementById('status').style.display = 'none';
 	}
-	if(art == 'ejb'){
+	if(art == 'ejb' || art == 'ajb'){
 		document.getElementById('verzicht').style.display = '';
 	}
 	else{
@@ -71,7 +71,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
     <td>
     	<select name="search_art" onchange="update_form(this.value);">
     		<option value="">Alle</option>
-  			<option <? if($this->formvars['search_art'] == 'ejb'){echo 'selected';} ?> value="ejb">Eigenjagdbezirk</option>
+  			<option <? if($this->formvars['search_art'] == 'ejb'){echo 'selected';} ?> value="ejb">EJB im Verfahren</option>
   			<option <? if($this->formvars['search_art'] == 'ajb'){echo 'selected';} ?> value="ajb">Abgerundeter Eigenjagdbezirk</option>
   			<option <? if($this->formvars['search_art'] == 'gjb'){echo 'selected';} ?> value="gjb">Gemeinschaftlicher Jagdbezirk</option>
   			<option <? if($this->formvars['search_art'] == 'tjb'){echo 'selected';} ?> value="tjb">Teiljagdbezirk</option>
@@ -80,6 +80,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   			<option <? if($this->formvars['search_art'] == 'jbf'){echo 'selected';} ?> value="jbf">Jagdbezirksfreie Fläche</option>
   			<option <? if($this->formvars['search_art'] == 'agf'){echo 'selected';} ?> value="agf">Angliederungsfläche</option>
   			<option <? if($this->formvars['search_art'] == 'atf'){echo 'selected';} ?> value="atf">Abtrennungsfläche</option>
+  			<option <? if($this->formvars['search_art'] == 'atv'){echo 'selected';} ?> value="atv">Abtrennungsfläche durch Verzicht</option>
   			<option <? if($this->formvars['search_art'] == 'apf'){echo 'selected';} ?> value="apf">Anpachtfläche</option>
   		</select>
 		</td>
@@ -94,7 +95,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   		</select>
 		</td>
   </tr>
-  <tr id="verzicht" style="display:<? if($this->formvars['search_art'] == 'ejb'){ echo '';}else{echo 'none';} ?>" >
+  <tr id="verzicht" style="display:<? if(in_array($this->formvars['search_art'], array('ejb', 'ajb'))){ echo '';}else{echo 'none';} ?>" >
     <td align="right"><strong>Verzicht gem. §3:</strong></td>
     <td>
     	<select name="search_verzicht">
@@ -150,10 +151,24 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   ?>
       <tr>
       	<td align="center"><input type="checkbox" name="check_<? echo $this->jagdbezirke[$i]['oid'] ?>"></td>
-        <td align="center"><?php if ($this->jagdbezirke[$i]['art']=='ejb' OR $this->jagdbezirke[$i]['art']=='gjb') { echo $this->jagdbezirke[$i]['id']; } else { echo $this->jagdbezirke[$i]['jb_zuordnung']; } ?></td>
+        <td align="center"><?php if ($this->jagdbezirke[$i]['art']=='ejb' OR $this->jagdbezirke[$i]['art']=='ajb' OR $this->jagdbezirke[$i]['art']=='gjb') { echo $this->jagdbezirke[$i]['id']; } else { echo $this->jagdbezirke[$i]['jb_zuordnung']; } ?></td>
         <td align="center"><?php echo $this->jagdbezirke[$i]['name']; ?></td>
       	<td align="center"><?php echo $this->jagdbezirke[$i]['flaeche']; ?></td>
-        <td align="center"><?php echo $this->jagdbezirke[$i]['art']; ?></td>
+        <td align="center">
+        <?php 
+  	if($this->jagdbezirke[$i]['art'] == 'ejb'){echo 'EJB im Verfahren';}
+  	if($this->jagdbezirke[$i]['art'] == 'ajb'){echo 'Abgerundeter Eigenjagdbezirk';}
+  	if($this->jagdbezirke[$i]['art'] == 'gjb'){echo 'Gemeinschaftlicher Jagdbezirk';}
+  	if($this->jagdbezirke[$i]['art'] == 'tjb'){echo 'Teiljagdbezirk';}
+  	if($this->jagdbezirke[$i]['art'] == 'sf'){echo 'Sonderfläche';}
+  	if($this->jagdbezirke[$i]['art'] == 'jbe'){echo 'Enklave';}
+  	if($this->jagdbezirke[$i]['art'] == 'jbf'){echo 'Jagdbezirksfreie Fläche';}
+  	if($this->jagdbezirke[$i]['art'] == 'agf'){echo 'Angliederungsfläche';}
+  	if($this->jagdbezirke[$i]['art'] == 'atf'){echo 'Abtrennungsfläche';}
+  	if($this->jagdbezirke[$i]['art'] == 'atv'){echo 'Abtrennungsfläche durch Verzicht';}
+  	if($this->jagdbezirke[$i]['art'] == 'apf'){echo 'Anpachtfläche';}
+        ?>
+        </td>
         <td align="center"><a href="index.php?go=jagdbezirk_show_data&oid=<? echo $this->jagdbezirke[$i]['oid'] ?>&search_nummer=<? echo $this->formvars['search_nummer']; ?>&search_name=<? echo $this->formvars['search_name']; ?>&search_art=<? echo $this->formvars['search_art']; ?>&search_status=<? echo $this->formvars['search_status']; ?>&search_verzicht=<? echo $this->formvars['search_verzicht']; ?>">Sachdatenanzeige</a></td>
         <td align="center"><a href="index.php?go=zoomtojagdbezirk&oid=<? echo $this->jagdbezirke[$i]['oid'] ?>&nummer=<? echo $this->jagdbezirke[$i]['id'] ?>">zur Karte</a></td>
         <td align="center">

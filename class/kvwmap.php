@@ -775,6 +775,16 @@ class GUI extends GUI_core{
     }
     echo '</select>';
   }
+  
+	function getlayerfromgroup(){
+    $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+    $layer = $mapDB->get_layersfromgroup($this->formvars['group_id']);
+    echo '<select name="alllayer" size="4" multiple style="width:160px">';
+    for($i=0; $i < count($layer["Bezeichnung"]); $i++){
+      echo '<option selected value="'.$layer["ID"][$i].'">'.$layer["Bezeichnung"][$i].'</option>';
+    }
+    echo '</select>';
+  }
 
   function get_legend(){
     # Änderungen in den Gruppen werden gesetzt
@@ -1461,11 +1471,12 @@ class GUI extends GUI_core{
 		$this->layerdaten = $mapDB->get_postgis_layers(NULL);
 		for($i = 0; $i < count($this->layerdaten['ID']); $i++){
 			$layer = $mapDB->get_Layer($this->layerdaten['ID'][$i]);
-			if($layer['pfad'] != ''){
+			if($layer['pfad'] != '' AND strpos($layer['connection'], 'host') === false){
 				$this->param['str1'].= 'Layer: '.$layer['Name'].'<br>';
+				echo 'Layer: '.$layer['Name'].'<br>';
 				$layerdb = $mapDB->getlayerdatabase($layer['Layer_ID'], $this->Stelle->pgdbhost);
 	    	$attributes = $mapDB->load_attributes($layerdb, $layer['pfad']);
-	    	$mapDB->save_postgis_attributes($layer['Layer_ID'], $attributes);
+	    	$mapDB->save_postgis_attributes($layer['Layer_ID'], $attributes, '');
 	    	$mapDB->delete_old_attributes($layer['Layer_ID'], $attributes);
 			}
 		}
@@ -5767,12 +5778,14 @@ class GUI extends GUI_core{
 				# Styles übernehmen (in u_styles2classes eintragen)
 				$styles = $mapDB->read_Styles($ID[$i]);
 				for($j = 0; $j < count($styles); $j++){
-					$mapDB->addStyle2Class($class_id, $styles[$j]['style_id'], $styles[$j]['drawingorder']);
+					$style_id = $mapDB->new_Style($styles[$j]);
+					$mapDB->addStyle2Class($class_id, $style_id, $styles[$j]['drawingorder']);
 				}
 				# Labels übernehmen (in u_labels2classes eintragen)
 				$labels = $mapDB->read_Label($ID[$i]);
 				for($j = 0; $j < count($labels); $j++){
-					$mapDB->addLabel2Class($class_id, $labels[$j]['label_id']);
+					$label_id = $mapDB->new_Label($labels[$j]);
+					$mapDB->addLabel2Class($class_id, $label_id);
 				}
 			}
 		}
@@ -5989,7 +6002,7 @@ class GUI extends GUI_core{
         $j = 0;
         foreach($layerset[0]['attributes']['all_table_names'] as $tablename){
           if($layerset[0]['attributes']['oids'][$j]){     # hat Tabelle oids?
-            $pfad = $layerset[0]['attributes']['all_alias_table_names'][$j].'.oid AS '.$tablename.'_oid, '.$pfad;
+            $pfad = $layerset[0]['attributes']['table_alias_name'][$tablename].'.oid AS '.$tablename.'_oid, '.$pfad;
             if($this->formvars['value_'.$tablename.'_oid']){
               $sql_where .= ' AND '.$tablename.'_oid = '.$this->formvars['value_'.$tablename.'_oid'];
             }
@@ -6170,34 +6183,36 @@ class GUI extends GUI_core{
     	$this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, NULL, $this->formvars['selected_group_id']);	
     }
     if($this->formvars['selected_layer_id']){
-    	################# Map ###############################################
-    	$this->loadMap('DataBase');
-	    $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
-	    if($this->formvars['layer_id'] == '')$this->formvars['layer_id'] = $this->formvars['selected_layer_id']; 
-	    # Geometrie-Übernahme-Layer:
-	    # Spaltenname und from-where abfragen
-	    $data = $this->mapDB->getData($this->formvars['layer_id']);
-	    #echo $data;
+    	if($this->formvars['layer_id'] == '')$this->formvars['layer_id'] = $this->formvars['selected_layer_id'];
+    	$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
+    	$data = $mapdb->getData($this->formvars['layer_id']);
 	    $data_explosion = explode(' ', $data);
 	    $this->formvars['columnname'] = $data_explosion[0];
-	    $select = $this->mapDB->getSelectFromData($data);
-	    # order by rausnehmen
-	  	$orderbyposition = strpos(strtolower($select), 'order by');
-	  	if($orderbyposition !== false){
-		  	$select = substr($select, 0, $orderbyposition);
-	  	}
-	    $this->formvars['fromwhere'] = 'from ('.$select.') as foo where 1=1';
-	    if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
-	      $this->formvars['fromwhere'] .= ' where (1=1)';
-	    } 
-	    if($this->formvars['CMD']== 'Full_Extent' OR $this->formvars['CMD'] == 'recentre' OR $this->formvars['CMD'] == 'zoomin' OR $this->formvars['CMD'] == 'zoomout' OR $this->formvars['CMD'] == 'previous' OR $this->formvars['CMD'] == 'next') {
-	      $this->navMap($this->formvars['CMD']);
-	    }
-	    $this->saveMap('');
-	    $currenttime=date('Y-m-d H:i:s',time());
-	    $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-	    $this->drawMap();
-    	########################################################################
+    	if($this->formvars['map_flag'] != ''){
+	    	################# Map ###############################################
+	    	$this->loadMap('DataBase');
+		    $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
+		    # Geometrie-Übernahme-Layer:
+		    # Spaltenname und from-where abfragen
+		    $select = $this->mapDB->getSelectFromData($data);
+		    # order by rausnehmen
+		  	$orderbyposition = strpos(strtolower($select), 'order by');
+		  	if($orderbyposition !== false){
+			  	$select = substr($select, 0, $orderbyposition);
+		  	}
+		    $this->formvars['fromwhere'] = 'from ('.$select.') as foo where 1=1';
+		    if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
+		      $this->formvars['fromwhere'] .= ' where (1=1)';
+		    } 
+		    if($this->formvars['CMD']== 'Full_Extent' OR $this->formvars['CMD'] == 'recentre' OR $this->formvars['CMD'] == 'zoomin' OR $this->formvars['CMD'] == 'zoomout' OR $this->formvars['CMD'] == 'previous' OR $this->formvars['CMD'] == 'next') {
+		      $this->navMap($this->formvars['CMD']);
+		    }
+		    $this->saveMap('');
+		    $currenttime=date('Y-m-d H:i:s',time());
+		    $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
+		    $this->drawMap();
+	    	########################################################################
+    	}    	
       $this->formvars['anzahl'] = MAXQUERYROWS;
       $layerset=$this->user->rolle->getLayer($this->formvars['selected_layer_id']);
       $this->formvars['selected_group_id'] = $layerset[0]['Gruppe']; 
@@ -7241,6 +7256,13 @@ class GUI extends GUI_core{
 	  	$orderby = ' '.substr($newpath, $orderbyposition);
 	  	$newpath = substr($newpath, 0, $orderbyposition);
   	}
+  	
+  	# group by rausnehmen
+		$groupbyposition = strpos(strtolower($newpath), 'group by');
+		if($groupbyposition !== false){
+			$groupby = ' '.substr($newpath, $groupbyposition);
+			$newpath = substr($newpath, 0, $groupbyposition);
+  	}
 
     if($this->formvars['all'] != 'true'){                     // nur ausgewählte Datensätze abfragen
       $checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
@@ -7254,7 +7276,8 @@ class GUI extends GUI_core{
         }
       }
       $where .= "0)";
-      $sql.= $newpath.$where.$orderby;
+            
+      $sql.= $newpath.$where.$groupby.$orderby;
       #echo $sql.'<br><br>';
       $this->debug->write("<p>file:kvwmap class:generic_csv_export :",4);
       $ret = $layerdb->execSQL($sql,4, 1);
@@ -7844,6 +7867,7 @@ class GUI extends GUI_core{
     # Abfragen aller möglichen Layer
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->formvars['layer']=$mapDB->getall_Layer('Name');
+    $this->formvars['groups']=$mapDB->getall_Groups('Gruppenname');
     # Abfragen aller möglichen User
     $this->formvars['users']=$this->user->getall_Users('Name');
     # Abfragen aller möglichen EPSG-Codes
@@ -10777,7 +10801,7 @@ class GUI extends GUI_core{
               $j = 0;
               foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
                 if($layerset[$i]['attributes']['oids'][$j]){      # hat Tabelle oids?
-                  $pfad = $layerset[$i]['attributes']['all_alias_table_names'][$j].'.oid AS '.$tablename.'_oid, '.$pfad;
+                  $pfad = $layerset[$i]['attributes']['table_alias_name'][$tablename].'.oid AS '.$tablename.'_oid, '.$pfad;
                 }
                 $j++;
               }
@@ -14011,7 +14035,7 @@ class db_mapObj extends db_mapObj_core{
     	if($rs['tablename'])$attributes['table_name'][$rs['name']] = $rs['tablename']; 
     	if($rs['table_alias_name'])$attributes['table_alias_name'][$i]= $rs['table_alias_name'];
     	if($rs['table_alias_name'])$attributes['table_alias_name'][$rs['name']]= $rs['table_alias_name'];
-    	#$attributes['table_alias_name'][$rs['tablename']]= $rs['table_alias_name'];
+    	$attributes['table_alias_name'][$rs['tablename']]= $rs['table_alias_name'];
     	$attributes['type'][$i]= $rs['type'];
     	if($rs['type'] == 'geometry'){
     		$attributes['the_geom'] = $rs['name'];
@@ -14035,10 +14059,9 @@ class db_mapObj extends db_mapObj_core{
     	$attributes['mandatory'][$i]= $rs['mandatory'];
     	$i++;
     }
-    
     if($attributes['table_name'] != NULL){   
       $attributes['all_table_names'] = array_unique($attributes['table_name']);
-      $attributes['all_alias_table_names'] = array_values(array_unique($attributes['table_alias_name']));
+      //$attributes['all_alias_table_names'] = array_values(array_unique($attributes['table_alias_name']));
       foreach($attributes['all_table_names'] as $tablename){
         $attributes['oids'][] = $layerdb->check_oid($tablename);   # testen ob Tabelle oid hat
       }
@@ -14110,6 +14133,22 @@ class db_mapObj extends db_mapObj_core{
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
     $layer = mysql_fetch_array($query);
+    return $layer;
+  }
+  
+	function get_layersfromgroup($group_id ){
+    $sql ='SELECT * FROM layer WHERE Gruppe = '.$group_id;
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->get_Layerfromgroup - Lesen der Layer einer Gruppe:<br>".$sql,4);
+    $query=mysql_query($sql);
+    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+		while($rs=mysql_fetch_array($query)) {
+    	$layer['ID'][]=$rs['Layer_ID'];
+      $layer['Bezeichnung'][]=$rs['Name'];
+    }
+    // Sortieren der Layer unter Berücksichtigung von Umlauten
+    $sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
+    $layer['Bezeichnung'] = $sorted_arrays['array'];
+    $layer['ID'] = $sorted_arrays['second_array'];
     return $layer;
   }
 	
@@ -14266,23 +14305,23 @@ class db_mapObj extends db_mapObj_core{
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
 
-    # Einträge in u_styles2classes mitlöschen
+    # Einträge in u_styles2classes und evtl. die Styles mitlöschen
     $styles = $this->read_Styles($class_id);
     for($i = 0; $i < count($styles); $i++){
-      $sql = 'DELETE FROM u_styles2classes WHERE class_id = '.$class_id.' AND style_id = '.$styles[$i]['style_id'];
-      #echo $sql;
-      $this->debug->write("<p>file:kvwmap class:db_mapObj->delete_Class - Löschen einer Klasse:<br>".$sql,4);
-      $query=mysql_query($sql);
-      if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
+    	$this->removeStyle2Class($class_id, $styles[$i]['style_id']);
+      $other_classes = $this->get_classes2style($styles[$i]['style_id']);
+      if($other_classes == NULL){
+      	$this->delete_Style($styles[$i]['style_id']);
+      }
     }
-    # Einträge in u_labels2classes mitlöschen
+    # Einträge in u_labels2classes und evtl. die Labels mitlöschen
     $labels = $this->read_Label($class_id);
     for($i = 0; $i < count($labels); $i++){
-      $sql = 'DELETE FROM u_labels2classes WHERE class_id = '.$class_id.' AND label_id = '.$labels[$i]['label_id'];
-      #echo $sql;
-      $this->debug->write("<p>file:kvwmap class:db_mapObj->delete_Class - Löschen einer Klasse:<br>".$sql,4);
-      $query=mysql_query($sql);
-      if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
+    	$this->removeLabel2Class($class_id, $labels[$i]['label_id']);
+    	$other_classes = $this->get_classes2label($labels[$i]['label_id']);
+    	if($other_classes == NULL){
+      	$this->delete_Label($labels[$i]['label_id']);
+    	}
     }
   }
 
@@ -14301,12 +14340,18 @@ class db_mapObj extends db_mapObj_core{
       if($style['symbol']){$sql.= "symbol = '".$style['symbol']."', ";}
       if($style['symbolname']){$sql.= "symbolname = '".$style['symbolname']."', ";}
       if($style['size']){$sql.= "size = '".$style['size']."'";}
+    	if($style['color']){$sql.= ", color = '".$style['color']."'";}
       if($style['colorred']){$sql.= ", color = '".$style['colorred']." ".$style['colorgreen']." ".$style['colorblue']."'";}
+    	if($style['backgroundcolor'] !== NULL){$sql.= ", backgroundcolor = '".$style['backgroundcolor']."'";}
       if($style['backgroundcolorred'] !== NULL){$sql.= ", backgroundcolor = '".$style['backgroundcolorred']." ".$style['backgroundcolorgreen']." ".$style['backgroundcolorblue']."'";}
+    	if($style['outlinecolor'] !== NULL){$sql.= ", outlinecolor = '".$style['outlinecolor']."'";}
       if($style['outlinecolorred'] !== NULL){$sql.= ", outlinecolor = '".$style['outlinecolorred']." ".$style['outlinecolorgreen']." ".$style['outlinecolorblue']."'";}
       if($style['minsize']){$sql.= ", minsize = '".$style['minsize']."'";}
       if($style['maxsize']){$sql.= ", maxsize = '".$style['maxsize']."'";}
       if($style['angle']){$sql.= ", angle = '".$style['angle']."'";}
+    	if($style['width']){$sql.= ", width = '".$style['width']."'";}
+    	if($style['minwidth']){$sql.= ", minwidth = '".$style['minwidth']."'";}
+    	if($style['maxwidth']){$sql.= ", maxwidth = '".$style['maxwidth']."'";}
     }
     else{
     # Styleobjekt wird übergeben
@@ -14514,34 +14559,65 @@ class db_mapObj extends db_mapObj_core{
   }
 
   function new_Label($label){
-    # labelobjekt wird übergeben
-    $sql = "INSERT INTO labels SET ";
-    if($label->type){$sql.= "type = '".$label->type."', ";}
-    if($label->font){$sql.= "font = '".$label->font."', ";}
-    if($label->size){$sql.= "size = '".$label->size."', ";}
-    if($label->color){$sql.= "color = '".$label->color->red." ".$label->color->green." ".$label->color->blue."', ";}
-    if($label->shadowcolor){$sql.= "shadowcolor = '".$label->shadowcolor->red." ".$label->shadowcolor->green." ".$label->shadowcolor->blue."', ";}
-    if($label->shadowsizex){$sql.= "shadowsizex = '".$label->shadowsizex."', ";}
-    if($label->shadowsizey){$sql.= "shadowsizey = '".$label->shadowsizey."', ";}
-    if($label->backgroundcolor){$sql.= "backgroundcolor = '".$label->backgroundcolor->red." ".$label->backgroundcolor->green." ".$label->backgroundcolor->blue."', ";}
-    if($label->backgroundshadowcolor){$sql.= "backgroundshadowcolor = '".$label->backgroundshadowcolor->red." ".$label->backgroundshadowcolor->green." ".$label->backgroundshadowcolor->blue."', ";}
-    if($label->backgroundshadowsizex){$sql.= "backgroundshadowsizex = '".$label->backgroundshadowsizex."', ";}
-    if($label->backgroundshadowsizey){$sql.= "backgroundshadowsizey = '".$label->backgroundshadowsizey."', ";}
-    if($label->outlinecolor){$sql.= "outlinecolor = '".$label->outlinecolor->red." ".$label->outlinecolor->green." ".$label->outlinecolor->blue."', ";}
-    if($label->position){$sql.= "position = '".$label->position."', ";}
-    if($label->offsetx){$sql.= "offsetx = '".$label->offsetx."', ";}
-    if($label->offsety){$sql.= "offsety = '".$label->offsety."', ";}
-    if($label->angle){$sql.= "angle = '".$label->angle."', ";}
-    if($label->autoangle){$sql.= "autoangle = '".$label->autoangle."', ";}
-    if($label->buffer){$sql.= "buffer = '".$label->buffer."', ";}
-    if($label->antialias){$sql.= "antialias = '".$label->antialias."', ";}
-    if($label->minfeaturesize){$sql.= "minfeaturesize = '".$label->minfeaturesize."', ";}
-    if($label->maxfeaturesize){$sql.= "maxfeaturesize = '".$label->maxfeaturesize."', ";}
-    if($label->partials){$sql.= "partials = '".$label->partials."', ";}
-    if($label->wrap){$sql.= "wrap = '".$label->wrap."', ";}
-    if($label->the_force){$sql.= "the_force = '".$label->the_force."', ";}
-    if($label->minsize){$sql.= "minsize = '".$label->minsize."', ";}
-    if($label->maxsize){$sql.= "maxsize = '".$label->maxsize."'";}
+  	if(is_array($label)){
+  	$sql = "INSERT INTO labels SET ";
+	    if($label[type]){$sql.= "type = '".$label[type]."', ";}
+	    if($label[font]){$sql.= "font = '".$label[font]."', ";}
+	    if($label[size]){$sql.= "size = '".$label[size]."', ";}
+	    if($label[color]){$sql.= "color = '".$label[color]."', ";}
+	    if($label[shadowcolor]){$sql.= "shadowcolor = '".$label[shadowcolor]."', ";}
+	    if($label[shadowsizex]){$sql.= "shadowsizex = '".$label[shadowsizex]."', ";}
+	    if($label[shadowsizey]){$sql.= "shadowsizey = '".$label[shadowsizey]."', ";}
+	    if($label[backgroundcolor]){$sql.= "backgroundcolor = '".$label[backgroundcolor]."', ";}
+	    if($label[backgroundshadowcolor]){$sql.= "backgroundshadowcolor = '".$label[backgroundshadowcolor]."', ";}
+	    if($label[backgroundshadowsizex]){$sql.= "backgroundshadowsizex = '".$label[backgroundshadowsizex]."', ";}
+	    if($label[backgroundshadowsizey]){$sql.= "backgroundshadowsizey = '".$label[backgroundshadowsizey]."', ";}
+	    if($label[outlinecolor]){$sql.= "outlinecolor = '".$label[outlinecolor]."', ";}
+	    if($label[position]){$sql.= "position = '".$label[position]."', ";}
+	    if($label[offsetx]){$sql.= "offsetx = '".$label[offsetx]."', ";}
+	    if($label[offsety]){$sql.= "offsety = '".$label[offsety]."', ";}
+	    if($label[angle]){$sql.= "angle = '".$label[angle]."', ";}
+	    if($label[autoangle]){$sql.= "autoangle = '".$label[autoangle]."', ";}
+	    if($label[buffer]){$sql.= "buffer = '".$label[buffer]."', ";}
+	    if($label[antialias]){$sql.= "antialias = '".$label[antialias]."', ";}
+	    if($label[minfeaturesize]){$sql.= "minfeaturesize = '".$label[minfeaturesize]."', ";}
+	    if($label[maxfeaturesize]){$sql.= "maxfeaturesize = '".$label[maxfeaturesize]."', ";}
+	    if($label[partials]){$sql.= "partials = '".$label[partials]."', ";}
+	    if($label[wrap]){$sql.= "wrap = '".$label[wrap]."', ";}
+	    if($label[the_force]){$sql.= "the_force = '".$label[the_force]."', ";}
+	    if($label[minsize]){$sql.= "minsize = '".$label[minsize]."', ";}
+	    if($label[maxsize]){$sql.= "maxsize = '".$label[maxsize]."'";}
+  	}
+  	else{
+	    # labelobjekt wird übergeben
+	    $sql = "INSERT INTO labels SET ";
+	    if($label->type){$sql.= "type = '".$label->type."', ";}
+	    if($label->font){$sql.= "font = '".$label->font."', ";}
+	    if($label->size){$sql.= "size = '".$label->size."', ";}
+	    if($label->color){$sql.= "color = '".$label->color->red." ".$label->color->green." ".$label->color->blue."', ";}
+	    if($label->shadowcolor){$sql.= "shadowcolor = '".$label->shadowcolor->red." ".$label->shadowcolor->green." ".$label->shadowcolor->blue."', ";}
+	    if($label->shadowsizex){$sql.= "shadowsizex = '".$label->shadowsizex."', ";}
+	    if($label->shadowsizey){$sql.= "shadowsizey = '".$label->shadowsizey."', ";}
+	    if($label->backgroundcolor){$sql.= "backgroundcolor = '".$label->backgroundcolor->red." ".$label->backgroundcolor->green." ".$label->backgroundcolor->blue."', ";}
+	    if($label->backgroundshadowcolor){$sql.= "backgroundshadowcolor = '".$label->backgroundshadowcolor->red." ".$label->backgroundshadowcolor->green." ".$label->backgroundshadowcolor->blue."', ";}
+	    if($label->backgroundshadowsizex){$sql.= "backgroundshadowsizex = '".$label->backgroundshadowsizex."', ";}
+	    if($label->backgroundshadowsizey){$sql.= "backgroundshadowsizey = '".$label->backgroundshadowsizey."', ";}
+	    if($label->outlinecolor){$sql.= "outlinecolor = '".$label->outlinecolor->red." ".$label->outlinecolor->green." ".$label->outlinecolor->blue."', ";}
+	    if($label->position){$sql.= "position = '".$label->position."', ";}
+	    if($label->offsetx){$sql.= "offsetx = '".$label->offsetx."', ";}
+	    if($label->offsety){$sql.= "offsety = '".$label->offsety."', ";}
+	    if($label->angle){$sql.= "angle = '".$label->angle."', ";}
+	    if($label->autoangle){$sql.= "autoangle = '".$label->autoangle."', ";}
+	    if($label->buffer){$sql.= "buffer = '".$label->buffer."', ";}
+	    if($label->antialias){$sql.= "antialias = '".$label->antialias."', ";}
+	    if($label->minfeaturesize){$sql.= "minfeaturesize = '".$label->minfeaturesize."', ";}
+	    if($label->maxfeaturesize){$sql.= "maxfeaturesize = '".$label->maxfeaturesize."', ";}
+	    if($label->partials){$sql.= "partials = '".$label->partials."', ";}
+	    if($label->wrap){$sql.= "wrap = '".$label->wrap."', ";}
+	    if($label->the_force){$sql.= "the_force = '".$label->the_force."', ";}
+	    if($label->minsize){$sql.= "minsize = '".$label->minsize."', ";}
+	    if($label->maxsize){$sql.= "maxsize = '".$label->maxsize."'";}
+  	}
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->new_Style - Erzeugen eines Styles:<br>".$sql,4);
     $query=mysql_query($sql);
@@ -14549,6 +14625,18 @@ class db_mapObj extends db_mapObj_core{
     return mysql_insert_id();
   }
 
+	function get_classes2label($label_id){
+		$sql = 'SELECT class_id FROM u_labels2classes WHERE Label_ID = '.$label_id;
+		#echo $sql;
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->get_classes2label - Abfragen der Klassen, die ein Label benutzen:<br>".$sql,4);
+    $query=mysql_query($sql);
+    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
+    while($rs=mysql_fetch_array($query)) {
+      $classes[]=$rs[0];
+    }
+    return $classes;
+	}
+  
   function addLabel2Class($class_id, $label_id){
     $sql = 'INSERT INTO u_labels2classes VALUES ('.$class_id.', '.$label_id.')';
     #echo $sql;

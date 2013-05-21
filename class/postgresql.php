@@ -254,7 +254,7 @@ class pgdatabase extends pgdatabase_core {
 	      $all_table_names = array_unique($all_table_names);
 	      foreach($all_table_names as $tablename){
 	        $fields['oids'][] = $this->check_oid($tablename);   # testen ob Tabelle oid hat
-	        $fields['all_alias_table_names'][] = $this->get_table_alias($tablename, $fromposition, $withoutwhere);
+	        //$fields['all_alias_table_names'][] = $this->get_table_alias($tablename, $fromposition, $withoutwhere);
 	      }
 	      $fields['all_table_names'] = $all_table_names;
       }

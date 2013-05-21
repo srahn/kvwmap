@@ -71,10 +71,10 @@ class account {
 		$UserName = new user('','',$this->database);
 
 		$this->epoch=$this->epoch();
-		$this->getLayer=$this->getLayer('');
-		$this->getLoggedLayer=$this->getLayer(1);
-		$this->allLayerAccess=$this->getAllAccess('2layer');
-		$this->allAccess=$this->getAllAccess('');
+		#$this->getLayer=$this->getLayer('');
+		#$this->getLoggedLayer=$this->getLayer(1);
+		#$this->allLayerAccess=$this->getAllAccess('2layer');
+		#$this->allAccess=$this->getAllAccess('');
 
 		$day_d=str_pad($day_d, 2, "0", STR_PAD_LEFT);
 		$month_d=str_pad($month_d, 2, "0", STR_PAD_LEFT);

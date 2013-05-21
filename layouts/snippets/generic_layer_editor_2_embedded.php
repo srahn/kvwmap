@@ -31,14 +31,14 @@
 	$dimension = '';
 	$privileg = '';
 	for ($k=0;$k<$anzObj;$k++) {
-		$checkbox_name .= 'check;'.$attributes['table_alias_name'][$attributes['name'][0]].';'.$attributes['table_name'][$attributes['name'][0]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][0]].'_oid'];
+		$checkbox_name .= 'check;'.$attributes['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'];
 ?>
 	<tr>
 		<td>
 			<table class="tgle" border="1">
 			  <tbody class="gle">
 <?		$trans_oid = explode('|', $layer['shape'][$k]['lock']);
-			if($layer['shape'][$k]['lock'] == 'bereits übertragen' OR $trans_oid[1] != '' AND $layer['shape'][$k][$attributes['table_name'][$attributes['name'][0]].'_oid'] == $trans_oid[1]){
+			if($layer['shape'][$k]['lock'] == 'bereits übertragen' OR $trans_oid[1] != '' AND $layer['shape'][$k][$layer['maintable'].'_oid'] == $trans_oid[1]){
 				echo '<tr><td colspan="2" align="center"><span class="red">Dieser Datensatz wurde bereits übertragen und kann nicht bearbeitet werden.</span></td></tr>';
 				$lock[$k] = true;
 			}

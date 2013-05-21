@@ -267,12 +267,12 @@ function set_changed_flag(flag){
 	$dimension = '';
 	$privileg = '';
 	for ($k=0;$k<$anzObj;$k++) {
-		$checkbox_names .= 'check;'.$attributes['table_alias_name'][$attributes['name'][0]].';'.$attributes['table_name'][$attributes['name'][0]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][0]].'_oid'].'|';
+		$checkbox_names .= 'check;'.$attributes['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].'|';
 ?>
 	<tr>
 	  <td>
 	    <div id="datensatz">
-	    <input type="hidden" value="" name="changed_<? echo $layer['shape'][$k][$attributes['table_name'][$attributes['name'][0]].'_oid']; ?>"> 
+	    <input type="hidden" value="" name="changed_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
 	    <table class="tgle" <? if($attributes['group'][0] != ''){echo 'border="0" cellpadding="6" cellspacing="0"';}else{echo 'border="1"';} ?>>
 	      <thead class="gle">
 	        <th colspan="2" style="background-color:<? echo BG_GLEHEADER; ?>;">
@@ -280,7 +280,7 @@ function set_changed_flag(flag){
 			  <table width="100%">
 			    <tr>
 			      <td>
-			        <input id="<? echo $layer['Layer_ID'].'_'.$k; ?>" type="checkbox" name="check;<? echo $attributes['table_alias_name'][$attributes['name'][0]].';'.$attributes['table_name'][$attributes['name'][0]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][0]].'_oid']; ?>">&nbsp;
+			        <input id="<? echo $layer['Layer_ID'].'_'.$k; ?>" type="checkbox" name="check;<? echo $attributes['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>">&nbsp;
 			        <span style="color:<? echo TXT_GLEHEADER; ?>;"><? echo $strSelectThisDataset; ?></span>
 			      </td>
 			      <td align="right">
@@ -300,7 +300,7 @@ function set_changed_flag(flag){
 		  </thead>
           <tbody <? if($attributes['group'][0] == '')echo 'class="gle"'; ?>>
 <?		$trans_oid = explode('|', $layer['shape'][$k]['lock']);
-			if($layer['shape'][$k]['lock'] == 'bereits übertragen' OR $trans_oid[1] != '' AND $layer['shape'][$k][$attributes['table_name'][$attributes['name'][0]].'_oid'] == $trans_oid[1]){
+			if($layer['shape'][$k]['lock'] == 'bereits übertragen' OR $trans_oid[1] != '' AND $layer['shape'][$k][$layer['maintable'].'_oid'] == $trans_oid[1]){
 				echo '<tr><td colspan="2" align="center"><span class="red">Dieser Datensatz wurde bereits übertragen und kann nicht bearbeitet werden.</span></td></tr>';
 				$lock[$k] = true;
 			}
