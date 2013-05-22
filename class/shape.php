@@ -365,7 +365,7 @@ class shape {
     	$the_geom = $this->attributes['the_geom'];
     }
     
-    # Transformieren von the_geom im Select-Teil
+		# Transformieren von the_geom im Select-Teil
     if($this->formvars['epsg']){
     	$select = substr($sql, 0, strrpos(strtolower($sql), 'from'));
     	$rest = substr($sql, strrpos(strtolower($sql), 'from'));
