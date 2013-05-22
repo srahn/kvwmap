@@ -40,14 +40,15 @@ class shape {
   }
   
   function create_shape_rollenlayer($formvars, $stelle, $user, $database, $pgdatabase){
-  	if($_FILES['zipfile']['name']){     # eine Zipdatei wurde ausgewählt
-      $nachDatei = UPLOADPATH.$_FILES['zipfile']['name'];
-      if(move_uploaded_file($_FILES['zipfile']['tmp_name'],$nachDatei)){
+  	$_files = $_FILES;
+  	if($_files['zipfile']['name']){     # eine Zipdatei wurde ausgewählt
+      $nachDatei = UPLOADPATH.$_files['zipfile']['name'];
+      if(move_uploaded_file($_files['zipfile']['tmp_name'],$nachDatei)){
 				$files = unzip($nachDatei, false, false, true);
 				$firstfile = explode('.', $files[0]);
 				$file = $firstfile[0];
 				if(file_exists(UPLOADPATH.$file.'.dbf') OR file_exists(UPLOADPATH.$file.'.DBF')){
-					$tablename = strtolower($file).rand(0,1000000);
+					$tablename = 'a'.strtolower($file).rand(1,1000000);
 		      $command = POSTGRESBINPATH.'shp2pgsql -I -s '.$formvars['epsg'].' -W LATIN1 -c '.UPLOADPATH.$file.' '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' > '.UPLOADPATH.$file.'.sql'; 
 		      exec($command);
 		      #echo $command;
@@ -261,11 +262,12 @@ class shape {
   }
   
   function shp_import($formvars){
+  	$_files = $_FILES;
     $this->formvars = $formvars;
-    if($_FILES['zipfile']['name']){     # eine Zipdatei wurde ausgewählt
-      $this->formvars['zipfile'] = $_FILES['zipfile']['name'];
-      $nachDatei = UPLOADPATH.$_FILES['zipfile']['name'];
-      if(move_uploaded_file($_FILES['zipfile']['tmp_name'],$nachDatei)){
+    if($_files['zipfile']['name']){     # eine Zipdatei wurde ausgewählt
+      $this->formvars['zipfile'] = $_files['zipfile']['name'];
+      $nachDatei = UPLOADPATH.$_files['zipfile']['name'];
+      if(move_uploaded_file($_files['zipfile']['tmp_name'],$nachDatei)){
         $files = unzip($nachDatei, false, false, true);
         $firstfile = explode('.', $files[0]);
         $file = $firstfile[0].'.dbf';
@@ -367,11 +369,12 @@ class shape {
     if($this->formvars['epsg']){
     	$select = substr($sql, 0, strrpos(strtolower($sql), 'from'));
     	$rest = substr($sql, strrpos(strtolower($sql), 'from'));
-    	if(strpos($select, ' '.$this->attributes['the_geom']) !== false){		// nur the_geom muss ersetzt werden
-    		$select = str_replace($this->attributes['the_geom'], 'st_transform('.$this->attributes['the_geom'].', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);
-    	}
-    	else{																																// table.the_geom muss ersetzt werden
+    	if(strpos($select, '.'.$this->attributes['the_geom']) !== false){		// table.the_geom muss ersetzt werden
     		$select = str_replace($the_geom, 'st_transform('.$the_geom.', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);
+    	}
+    	else{		// nur the_geom muss ersetzt werden
+    		$select = str_replace(', '.$this->attributes['the_geom'], ', st_transform('.$this->attributes['the_geom'].', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);
+    		$select = str_replace(','.$this->attributes['the_geom'], ',st_transform('.$this->attributes['the_geom'].', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);
     	}
     	$sql = $select.$rest;
     }
@@ -380,6 +383,12 @@ class shape {
   	if($orderbyposition !== false){
 	  	$orderby = ' '.substr($sql, $orderbyposition);
 	  	$sql = substr($sql, 0, $orderbyposition);
+  	}
+		# group by rausnehmen
+		$groupbyposition = strpos(strtolower($sql), 'group by');
+		if($groupbyposition !== false){
+			$groupby = ' '.substr($sql, $groupbyposition);
+			$sql = substr($sql, 0, $groupbyposition);
   	}
   	# über Polygon einschränken
     if($this->formvars['newpathwkt']){
@@ -399,7 +408,7 @@ class shape {
 	    	if($this->formvars['epsg']){
 	    		$where = str_replace('), '.$layerset[0]['epsg_code'].')', '), '.$this->formvars['epsg'].')', $where);		# die räumliche Einschränkung das Such-SQLs auf den neuen EPSG-Code anpassen
 	    	}
-	    	$sql = "SELECT * FROM (".$sql.") as query WHERE 1=1 AND ".$where;
+	    	$sql = "SELECT * FROM (".$sql.$groupby.") as query WHERE 1=1 AND ".$where;
 	    }
 	    else{
 	    	$sql = $sql." AND ".$where;
@@ -429,6 +438,8 @@ class shape {
       #rmdir(IMAGEPATH.$folder);         # Ordner löschen
       $sql = 'DROP TABLE '.$temp_table;		# temp. Tabelle wieder löschen
       $ret = $layerdb->execSQL($sql,4, 0);
+      $currenttime=date('Y-m-d H:i:s',time());
+    	$user->rolle->setConsumeShape($currenttime,$this->formvars['selected_layer_id'],$count);
       return $this->formvars['filename'];
     }
     else{
