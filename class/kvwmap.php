@@ -10853,39 +10853,31 @@ class GUI extends GUI_core{
             $searchbox_wkt.=strval($rect->minx)." ".strval($rect->maxy).",";
             $searchbox_wkt.=strval($rect->minx)." ".strval($rect->miny)."))";
             
-            $loosesearchbox_wkt ="POLYGON((";
-            $loosesearchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->miny-$rand).",";
-            $loosesearchbox_wkt.=strval($rect->maxx+$rand)." ".strval($rect->miny-$rand).",";
-            $loosesearchbox_wkt.=strval($rect->maxx+$rand)." ".strval($rect->maxy+$rand).",";
-            $loosesearchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->maxy+$rand).",";
-            $loosesearchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->miny-$rand)."))";
-
             if($this->querypolygon != ''){
               $searchbox_wkt = $this->querypolygon;
             }
 
-            # Wenn das Koordinatenssystem des Views anders ist als vom Layer wird die Suchbox und die Suchgeometrie
-            # in epsg des layers transformiert
-            if ($client_epsg!=$layer_epsg) {
-              $sql_where =" AND ".$the_geom." && st_transform(st_geomfromtext('".$loosesearchbox_wkt."',".$client_epsg."),".$layer_epsg.")";
-            }
-            else {
-              $sql_where =" AND ".$the_geom." && st_geomfromtext('".$loosesearchbox_wkt."',".$client_epsg.")";
-            }
-
-            # Wenn es sich bei der Suche um eine punktuelle Suche handelt, wird die where Klausel um eine
-            # Umkreissuche mit dem Suchradius weiter eingeschränkt.
+            # ---------- punktuelle Suche ---------- #
             if ($rect->minx==$rect->maxx AND $rect->miny==$rect->maxy AND $this->querypolygon == '') {
+            	$loosesearchbox_wkt ="POLYGON((";
+	            $loosesearchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->miny-$rand).",";
+	            $loosesearchbox_wkt.=strval($rect->maxx+$rand)." ".strval($rect->miny-$rand).",";
+	            $loosesearchbox_wkt.=strval($rect->maxx+$rand)." ".strval($rect->maxy+$rand).",";
+	            $loosesearchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->maxy+$rand).",";
+	            $loosesearchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->miny-$rand)."))";
               # Behandlung der Suchanfrage mit Punkt, exakte Suche im Kreis
               if ($client_epsg!=$layer_epsg) {
+              	$sql_where =" AND ".$the_geom." && st_transform(st_geomfromtext('".$loosesearchbox_wkt."',".$client_epsg."),".$layer_epsg.")";
                 $sql_where.=" AND st_distance(".$the_geom.",st_transform(st_geomfromtext('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."),".$layer_epsg."))";
               }
               else {
+              	$sql_where =" AND ".$the_geom." && st_geomfromtext('".$loosesearchbox_wkt."',".$client_epsg.")";
                 $sql_where.=" AND st_distance(".$the_geom.",st_geomfromtext('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."))";
               }
               $sql_where.=" <= ".$rand;
             }
-            else {
+            # ---------- Suche über Polygon ---------- #
+            else {		
               # Behandlung der Suchanfrage mit Rechteck, exakte Suche im Rechteck
               if ($client_epsg!=$layer_epsg) {
                 $sql_where.=" AND st_intersects(".$the_geom.",st_transform(st_geomfromtext('".$searchbox_wkt."',".$client_epsg."),".$layer_epsg."))";
@@ -10894,7 +10886,7 @@ class GUI extends GUI_core{
                 $sql_where.=" AND st_intersects(".$the_geom.",st_geomfromtext('".$searchbox_wkt."',".$client_epsg."))";
               }
             }
-            # 2006-06-12 sr   Filter zur Where-Klausel hinzugefügt
+            # Filter zur Where-Klausel hinzufügen
             if($layerset[$i]['Filter'] != ''){
             	$layerset[$i]['Filter'] = str_replace('$userid', $this->user->id, $layerset[$i]['Filter']);
               $sql_where .= " AND ".$layerset[$i]['Filter'];
@@ -13605,7 +13597,7 @@ class db_mapObj extends db_mapObj_core{
   	}
   	
   	if($maintable == ''){
-  		$sql = "UPDATE layer SET maintable = '".$attributes['all_table_names'][0]."' WHERE Layer_ID = ".$layer_id;
+  		$sql = "UPDATE layer SET maintable = '".$attributes['all_table_names'][0]."' WHERE maintable = '' AND Layer_ID = ".$layer_id;
   		$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>".$sql,4);
 	    $query=mysql_query($sql);
 	    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
