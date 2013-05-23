@@ -391,15 +391,15 @@ function update_require_attribute(attributes, layer_id, value){
 									        echo $verfahren->html;
 									       
 									        if($this->formvars['verfahrensgrund'] == 'San'){
-									        	$FormatWerte = array('kein', 'SU', 'SB');
+									        	$FormatWerte = array('', 'SU', 'SB');
 									        	$FormatBez = array('kein', 'SU', 'SB');
 									        }
 									        elseif($this->formvars['verfahrensgrund'] == 'Entw'){
-									        	$FormatWerte = array('kein', 'EU', 'EB');
+									        	$FormatWerte = array('', 'EU', 'EB');
 									        	$FormatBez = array('kein', 'EU', 'EB');
 									        }
 									        else{
-									        	$FormatWerte = array('kein');
+									        	$FormatWerte = array('');
 									        	$FormatBez = array('kein');
 									        } 
 									        $verfahren = new FormObject('verfahrensgrund_zusatz','select',$FormatWerte,array($this->formvars['verfahrensgrund_zusatz']),$FormatBez,1,$maxlenght,$multiple,NULL);
