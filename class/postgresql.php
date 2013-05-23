@@ -267,9 +267,8 @@ class pgdatabase extends pgdatabase_core {
   function get_attribute_information($tablename, $columnname){
   	if($columnname != '' AND $tablename != ''){
   		$sql = "SELECT is_nullable, character_maximum_length, column_default, numeric_precision, numeric_scale, indisprimary, pg_get_serial_sequence('".$tablename."', '".$columnname."') as serial ";
-  		$sql.= "FROM information_schema.columns, pg_index, pg_class, pg_attribute ";
+  		$sql.= "FROM information_schema.columns LEFT JOIN pg_class LEFT JOIN pg_index ON indrelid = pg_class.oid LEFT JOIN pg_attribute ON pg_attribute.attrelid = pg_class.oid ON pg_class.oid = table_name::regclass AND pg_attribute.attnum = any(pg_index.indkey) AND attname = column_name ";
   		$sql.= "WHERE column_name = '".$columnname."' AND table_name = '".$tablename."' AND table_schema = '".$this->schema."' ";
-  		$sql.= "AND pg_class.oid = '".$tablename."'::regclass AND indrelid = pg_class.oid AND pg_attribute.attrelid = pg_class.oid AND pg_attribute.attnum = any(pg_index.indkey) AND attname = column_name";
   		$ret1 = $this->execSQL($sql, 4, 0);
 	  	if($ret1[0]==0){
 	      $attr_info = pg_fetch_assoc($ret1[1]);
