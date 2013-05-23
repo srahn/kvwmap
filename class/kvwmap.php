@@ -10880,10 +10880,10 @@ class GUI extends GUI_core{
             else {		
               # Behandlung der Suchanfrage mit Rechteck, exakte Suche im Rechteck
               if ($client_epsg!=$layer_epsg) {
-                $sql_where.=" AND st_intersects(".$the_geom.",st_transform(st_geomfromtext('".$searchbox_wkt."',".$client_epsg."),".$layer_epsg."))";
+                $sql_where =" AND st_intersects(".$the_geom.",st_transform(st_geomfromtext('".$searchbox_wkt."',".$client_epsg."),".$layer_epsg."))";
               }
               else {
-                $sql_where.=" AND st_intersects(".$the_geom.",st_geomfromtext('".$searchbox_wkt."',".$client_epsg."))";
+                $sql_where =" AND st_intersects(".$the_geom.",st_geomfromtext('".$searchbox_wkt."',".$client_epsg."))";
               }
             }
             # Filter zur Where-Klausel hinzufügen
