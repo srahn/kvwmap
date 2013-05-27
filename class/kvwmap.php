@@ -6480,11 +6480,17 @@ class GUI extends GUI_core{
           if($this->formvars['embedded'] == ''){
             $ret = $layerdb->execSQL($sql,4, 1);
             if(!$ret[0]){
-              $this->formvars['value_'.$table['tablename'].'_oid'] = pg_last_oid($ret[1]);
+            	if(pg_affected_rows($ret[1]) > 0){
+              	$this->formvars['value_'.$table['tablename'].'_oid'] = pg_last_oid($ret[1]);
+            	}
+            	else{
+            		$result = pg_fetch_row($ret[1]);
+            		$ret[0] = 1;
+            	}
             }
           }
           else{
-            @$ret = $layerdb->execSQL($sql,4, 1);
+            $ret = $layerdb->execSQL($sql,4, 1);
             if(!$ret[0]){
               $last_oid = pg_last_oid($ret[1]);
             }
@@ -6523,12 +6529,12 @@ class GUI extends GUI_core{
     }
     else{
       if($success == false){
-        showAlert('Eintrag fehlgeschlagen');
+        showAlert('Eintrag fehlgeschlagen.\n'.$result[0]);
         $this->neuer_Layer_Datensatz();
       }
       else{
         if($this->formvars['close_window'] == ""){
-          showAlert('Eintrag erfolgreich');
+          showAlert('Eintrag erfolgreich.');
         }
         if($this->formvars['weiter_erfassen'] == 1){
         	$this->formvars['firstpoly'] = '';

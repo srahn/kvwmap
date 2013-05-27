@@ -430,7 +430,8 @@ class shape {
       $this->formvars['layer_name'] = str_replace('/', '_', $this->formvars['layer_name']);
       $folder = 'shp_Export_'.$this->formvars['layer_name'].rand(0,10000);
       mkdir(IMAGEPATH.$folder);                       # Ordner erzeugen
-      $command = POSTGRESBINPATH.'pgsql2shp -u '.$layerdb->user;
+      $command = 'export PGCLIENTENCODING=LATIN1;';
+      $command.= POSTGRESBINPATH.'pgsql2shp -u '.$layerdb->user;
       if($layerdb->passwd != '')$command.= ' -P '.$layerdb->passwd;
       $command.= ' -f '.IMAGEPATH.$folder.'/'.$this->formvars['layer_name'].' '.$layerdb->dbName.' '.$temp_table; 
       exec($command);

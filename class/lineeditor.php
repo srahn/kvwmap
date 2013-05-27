@@ -88,11 +88,17 @@ class lineeditor {
   
   function eintragenLinie($line, $oid, $tablename, $columnname){  	
 		$sql = "UPDATE ".$tablename." SET ".$columnname." = st_transform(GeometryFromText('".$line."',".$this->clientepsg."),".$this->layerepsg.") WHERE oid = ".$oid;
-		$ret = $this->database->execSQL($sql, 4, 1);
-		if ($ret[0]) {
-      # Fehler beim Eintragen in Datenbank
-      $ret[1]='\nAuf Grund eines Datenbankfehlers konnte die Linie nicht eingetragen werden!\n'.$ret[1];
-    }
+		$ret = $this->database->execSQL($sql, 4, 1);    
+  	if(!$ret[0]){
+			if(pg_affected_rows($ret[1]) == 0){
+      	$ret[0] = 1;
+      	$result = pg_fetch_row($ret[1]);
+      	$ret[1]='Eintrag nicht erfolgreich.\n'.$result[0];
+			}
+		}
+		else{
+			$ret[1]='\nAuf Grund eines Datenbankfehlers konnte die Linie nicht eingetragen werden!\n';
+		}
     return $ret;
   }
 	
