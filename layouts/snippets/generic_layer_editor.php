@@ -4,7 +4,6 @@
 
 //-->
 </script>
-
 <h2><? echo $this->qlayerset[$i]['Name'] ?></h2>
 <?
   $anzObj = count($this->qlayerset[$i]['shape']);

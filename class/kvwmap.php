@@ -6453,7 +6453,7 @@ class GUI extends GUI_core{
           	if($table['type'][$i] == 'Zahl'){                       # Typ "Zahl"
 	            $this->formvars[$table['formfield'][$i]] = str_replace(' ', '', $this->formvars[$table['formfield'][$i]]);		# bei Zahlen das Leerzeichen (Tausendertrenner) entfernen
 	          }
-            $sql.= "'".addslashes($this->formvars[$table['formfield'][$i]])."', ";      # Typ "normal"
+            $sql.= "'".$this->formvars[$table['formfield'][$i]]."', ";      # Typ "normal"
           }
           elseif($table['type'][$i] == 'Geometrie'){                    # Typ "Geometrie"
             if($this->formvars['geomtype'] == 'POINT'){
@@ -10601,7 +10601,7 @@ class GUI extends GUI_core{
                   $sql = "UPDATE ".$tablename." SET ".$attributname." = NULL WHERE oid = '".$oid."'";
                 }
                 else{
-                  $sql = "UPDATE ".$tablename." SET ".$attributname." = '".addslashes($this->formvars[$form_fields[$i]])."' WHERE oid = '".$oid."'";
+                  $sql = "UPDATE ".$tablename." SET ".$attributname." = '".$this->formvars[$form_fields[$i]]."' WHERE oid = '".$oid."'";
                 }
                 $this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
               }
@@ -11579,7 +11579,7 @@ class GUI extends GUI_core{
     $layer=ms_newLayerObj($this->map);
     $datastring ="the_geom from (select o.objnr as oid,o.the_geom from alkobj_e_fla AS o,alknflur as fl";
     $datastring.=",alb_v_gemarkungen AS g WHERE o.objnr=fl.objnr AND fl.gemkgschl::integer=g.gemkgschl";
-    $datastring.=" AND g.gemeinde=".$Gemeinde;
+    $datastring.=" AND g.gemeinde=".(int)$Gemeinde;
     $datastring.=") as foo using unique oid using srid=".EPSGCODE;
     $legendentext ="Gemeinde: ".$GemObj->getGemeindeName($Gemeinde);
     $layer->set('data',$datastring);
@@ -12052,7 +12052,7 @@ class GUI extends GUI_core{
 		      $datastring.=" AND gem.schluesselgesamt||'-'||l.lage||'-'||TRIM(LOWER(l.hausnummer)) IN ('".$Hausnr."')";
 		    }
 	    	else{
-			    $datastring.=" AND gem.schluesselgesamt=".$Gemeinde;
+			    $datastring.=" AND gem.schluesselgesamt=".(int)$Gemeinde;
 			    if ($Strasse!='') {
 			      $datastring.=" AND l.lage='".$Strasse."'";
 			    }
@@ -12068,7 +12068,7 @@ class GUI extends GUI_core{
 		      $datastring.=" AND h.gemeinde||'-'||h.strasse||'-'||TRIM(LOWER(h.hausnr)) IN ('".$Hausnr."')";
 		    }
 	    	else{
-			    $datastring.=" AND h.gemeinde=".$Gemeinde;
+			    $datastring.=" AND h.gemeinde=".(int)$Gemeinde;
 			    if ($Strasse!='') {
 			      $datastring.=" AND h.strasse='".$Strasse."'";
 			    }
@@ -13603,7 +13603,7 @@ class db_mapObj extends db_mapObj_core{
   	}
   	
   	if($maintable == ''){
-  		$sql = "UPDATE layer SET maintable = '".$attributes['all_table_names'][0]."' WHERE maintable = '' AND Layer_ID = ".$layer_id;
+  		$sql = "UPDATE layer SET maintable = '".$attributes['all_table_names'][0]."' WHERE (maintable IS NULL OR maintable = '') AND Layer_ID = ".$layer_id;
   		$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>".$sql,4);
 	    $query=mysql_query($sql);
 	    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
@@ -13796,7 +13796,7 @@ class db_mapObj extends db_mapObj_core{
       $sql .= "labelminscale = ".$formvars['labelminscale'].", ";
     }
     $sql .= "labelrequires = '".$formvars['labelrequires']."', ";
-    $sql .= "`connection` = '".addslashes($formvars['connection'])."', ";
+    $sql .= "`connection` = '".$formvars['connection']."', ";
     $sql .= "`printconnection` = '".$formvars['printconnection']."', ";
     $sql .= "connectiontype = '".$formvars['connectiontype']."', ";
     $sql .= "classitem = '".$formvars['classitem']."', ";
@@ -13828,7 +13828,7 @@ class db_mapObj extends db_mapObj_core{
     $sql .= "processing = '".$formvars['processing']."',";
     $sql .= "kurzbeschreibung = '".$formvars['kurzbeschreibung']."',";
     $sql .= "datenherr = '".$formvars['datenherr']."',";
-    $sql .= "metalink = '".addslashes($formvars['metalink'])."'";
+    $sql .= "metalink = '".$formvars['metalink']."'";
     $sql .= " WHERE Layer_ID = ".$formvars['selected_layer_id'];
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->updateLayer - Aktualisieren eines Layers:<br>".$sql,4);
@@ -13931,7 +13931,7 @@ class db_mapObj extends db_mapObj_core{
       $sql .= "'".$formvars['processing']."', ";
       $sql .= "'".$formvars['kurzbeschreibung']."', ";
       $sql .= "'".$formvars['datenherr']."', ";
-      $sql .= "'".addslashes($formvars['metalink'])."'";
+      $sql .= "'".$formvars['metalink']."'";
       $sql .= ")";
 
     }
@@ -13980,15 +13980,15 @@ class db_mapObj extends db_mapObj_core{
       $sql.= 'layer_id = '.$formvars['selected_layer_id'].', ';
       $sql.= 'name = "'.$attributes['name'][$i].'", ';
       $sql.= 'form_element_type = "'.$formvars['form_element_'.$attributes['name'][$i]].'", ';
-      $sql.= 'options = "'.addslashes($formvars['options_'.$attributes['name'][$i]]).'", ';
-      $sql.= 'tooltip = "'.addslashes($formvars['tooltip_'.$attributes['name'][$i]]).'", ';
-      $sql.= '`group` = "'.addslashes($formvars['group_'.$attributes['name'][$i]]).'", ';
+      $sql.= 'options = "'.$formvars['options_'.$attributes['name'][$i]].'", ';
+      $sql.= 'tooltip = "'.$formvars['tooltip_'.$attributes['name'][$i]].'", ';
+      $sql.= '`group` = "'.$formvars['group_'.$attributes['name'][$i]].'", ';
       if($formvars['mandatory_'.$attributes['name'][$i]] == ''){
       	$formvars['mandatory_'.$attributes['name'][$i]] = 'NULL';
       }
       $sql.= 'mandatory = '.$formvars['mandatory_'.$attributes['name'][$i]].', ';
       $sql.= 'alias = "'.$formvars['alias_'.$attributes['name'][$i]].'" ';
-      $sql.= 'ON DUPLICATE KEY UPDATE name = "'.$attributes['name'][$i].'", form_element_type = "'.$formvars['form_element_'.$attributes['name'][$i]].'", options = "'.addslashes($formvars['options_'.$attributes['name'][$i]]).'", tooltip = "'.addslashes($formvars['tooltip_'.$attributes['name'][$i]]).'", `group` = "'.addslashes($formvars['group_'.$attributes['name'][$i]]).'", alias = "'.$formvars['alias_'.$attributes['name'][$i]].'", mandatory = '.$formvars['mandatory_'.$attributes['name'][$i]].' ';
+      $sql.= 'ON DUPLICATE KEY UPDATE name = "'.$attributes['name'][$i].'", form_element_type = "'.$formvars['form_element_'.$attributes['name'][$i]].'", options = "'.$formvars['options_'.$attributes['name'][$i]].'", tooltip = "'.$formvars['tooltip_'.$attributes['name'][$i]].'", `group` = "'.$formvars['group_'.$attributes['name'][$i]].'", alias = "'.$formvars['alias_'.$attributes['name'][$i]].'", mandatory = '.$formvars['mandatory_'.$attributes['name'][$i]].' ';
       $this->debug->write("<p>file:kvwmap class:Document->save_attributes :",4);
       $database->execSQL($sql,4, 1);
     }
@@ -15218,7 +15218,7 @@ class Document {
             //echo '<br>Datei: '.$_files['headsrc']['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
         }
       }
-      $sql .= " WHERE `id` =".$formvars['aktiverRahmen'];
+      $sql .= " WHERE `id` =".(int)$formvars['aktiverRahmen'];
       $this->debug->write("<p>file:kvwmap class:Document->update_frame :",4);
       $this->database->execSQL($sql,4, 1);
 

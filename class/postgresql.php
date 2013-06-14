@@ -810,7 +810,7 @@ class pgdatabase extends pgdatabase_core {
   function updateGrundbuch($Bezirk,$Blatt,$Zusatz_Eigentuemer,$Bestandsflaeche) {
     $sql ="UPDATE alb_".$this->tableprefix."grundbuecher SET bezirk='".$Bezirk."'";
     if ($Zusatz_Eigentuemer!="") { $sql.=",zusatz_eigentuemer='".$Zusatz_Eigentuemer."'"; }
-    if ($Bestandsflaeche!="")    { $sql.=",bestandsflaeche=".$Bestandsflaeche;            }
+    if ($Bestandsflaeche!="")    { $sql.=",bestandsflaeche=".(int)$Bestandsflaeche;            }
     $sql.=" WHERE bezirk='".$Bezirk."' AND TRIM(blatt) LIKE '".$Blatt."'";
     return $this->execSQL($sql, 4, 0);
   }
@@ -1407,7 +1407,7 @@ class pgdatabase extends pgdatabase_core {
     	}
     }
     else{
-    	$sql.=" AND gemeinde=".$GemeindeSchl;
+    	$sql.=" AND gemeinde=".(int)$GemeindeSchl;
     	$sql.=" AND strasse='".$StrassenSchl."'";
     }
     #echo $sql;
@@ -1441,7 +1441,7 @@ class pgdatabase extends pgdatabase_core {
     	}
     }
     else{
-    	$sql.=" AND g.schluesselgesamt=".$GemeindeSchl;
+    	$sql.=" AND g.schluesselgesamt=".(int)$GemeindeSchl;
     	$sql.=" AND l.lage='".$StrassenSchl."'";
     }
     #echo $sql;
@@ -1735,14 +1735,14 @@ class pgdatabase extends pgdatabase_core {
     $sql.=")";
     switch ($Raumbezug) {
       case "Kreis" : {
-        $sql.=" AND SUBSTRING(gk.gemeinde,1,5)=".$Wert;
+        $sql.=" AND SUBSTRING(gk.gemeinde,1,5)=".(int)$Wert;
       } break;
      # Der Fall Amt wird zur Zeit nicht unterst�tzt, weil er in keiner Tabelle in postgres enthalten ist.
      # case "Amt" : {
-     #   $sql.=" AND g.AMT_LANG_I=".$Wert;
+     #   $sql.=" AND g.AMT_LANG_I=".(int)$Wert;
      # } break;
       case "Gemeinde" : {
-        $sql.=" AND gk.gemeinde=".$Wert;
+        $sql.=" AND gk.gemeinde=".(int)$Wert;
       } break;
     }
     $sql.=" ORDER BY f.flurstkennz";
@@ -2697,7 +2697,7 @@ class pgdatabase extends pgdatabase_core {
     $sql.= " WHERE e.lfd_nr_name=n.lfd_nr_name AND e.bezirk = g.bezirk AND e.blatt=g.blatt";
     $sql.= " AND g.bezirk=b.bezirk AND g.blatt=b.blatt AND g.bvnr=b.bvnr";
     if ($Bezirk!="") {
-      $sql.=" AND b.bezirk=".$Bezirk;
+      $sql.=" AND b.bezirk=".(int)$Bezirk;
     }
     if ($Blatt!="") {
       $sql.=" AND b.blatt='".$Blatt."'";
@@ -2759,7 +2759,7 @@ class pgdatabase extends pgdatabase_core {
 		$sql.= " AND namensnummer2person.beziehung_von = namensnummer.gml_id";
 		$sql.= " AND namensnummer2person.beziehung_zu = person.gml_id";
     if ($Bezirk!="") {
-      $sql.=" AND bezirk.schluesselgesamt=".$Bezirk;
+      $sql.=" AND bezirk.schluesselgesamt=".(int)$Bezirk;
     }
     if ($Blatt!="") {
       $sql.=" AND blatt.buchungsblattnummermitbuchstabenerweiterung='".$Blatt."'";
@@ -2882,7 +2882,7 @@ class pgdatabase extends pgdatabase_core {
 
   function updateName($lfd_Nr_Name,$Satzunterart,$Namen) {
     $sql ="UPDATE alb_".$this->tableprefix."g_namen SET name".$Satzunterart."='".$Namen."'";
-    $sql.=" WHERE lfd_nr_name=".$lfd_Nr_Name;
+    $sql.=" WHERE lfd_nr_name=".(int)$lfd_Nr_Name;
     return $this->execSQL($sql, 4, 0);
   }
 
@@ -2940,7 +2940,7 @@ class pgdatabase extends pgdatabase_core {
 		$sql.=" AND gb.aktualitaetsnr NOT LIKE 'hist'";
     for ($i=1;$i<5;$i++) {
       if ($name[$i]!='%%') {
-      	$name[$i]=addslashes($name[$i]);
+      	$name[$i]=$name[$i];
         if ($caseSensitive) {
           $sql.=" AND name".$i." LIKE '".$name[$i]."'";
         }
@@ -3020,7 +3020,7 @@ class pgdatabase extends pgdatabase_core {
     if($name[4] != '%%')$sql.=" AND (postleitzahlpostzustellung LIKE '".$name[4]."' OR lower(postleitzahlpostzustellung||' '||ort_post) LIKE lower('".$name[4]."'))";
 
     if($bezirk!='') {
-      $sql.=" AND bezirk.schluesselgesamt=".$bezirk;
+      $sql.=" AND bezirk.schluesselgesamt=".(int)$bezirk;
     }
     if($blatt != ''){
       $sql.=" AND blatt.buchungsblattnummermitbuchstabenerweiterung= '".$blatt."'";
@@ -3271,7 +3271,7 @@ class pgdatabase extends pgdatabase_core {
     $sql ="SELECT DISTINCT gb.amtsgericht AS schluessel,a.name FROM alb_g_buchungen AS b,alb_flurstuecke AS f";
     $sql.=",alb_v_grundbuchbezirke AS gb,alb_v_amtsgerichte AS a";
     $sql.=" WHERE gb.grundbuchbezschl=b.bezirk AND b.flurstkennz=f.flurstkennz";
-    $sql.=" AND gb.amtsgericht=a.amtsgericht AND f.gemkgschl=".$GemkgSchl;
+    $sql.=" AND gb.amtsgericht=a.amtsgericht AND f.gemkgschl=".(int)$GemkgSchl;
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0]) {
       $ret[0]=1;
@@ -3351,7 +3351,7 @@ class pgdatabase extends pgdatabase_core {
   }
 
   function getKreisName($KreisSchl) {
-    $sql = "SELECT kreisname AS kreisname FROM alb_v_kreise WHERE kreis =".$KreisSchl;
+    $sql = "SELECT kreisname AS kreisname FROM alb_v_kreise WHERE kreis =".(int)$KreisSchl;
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0]) {
       $ret[0]=1;
@@ -3433,7 +3433,7 @@ class pgdatabase extends pgdatabase_core {
   }
 
   function getGemarkungName($GemkgSchl) {
-    $sql ="SELECT gemkgname FROM alb_v_gemarkungen WHERE gemkgschl=".$GemkgSchl;
+    $sql ="SELECT gemkgname FROM alb_v_gemarkungen WHERE gemkgschl=".(int)$GemkgSchl;
     $this->debug->write("<p>postgres.sql getGemarkungName Abfragen des Gemarkungsnamen:<br>".$sql,4);
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0]) {
@@ -3994,7 +3994,7 @@ class pgdatabase extends pgdatabase_core {
     }
     $sql.=" AND hfl.objnr=alkh.objnr AND alkh.gemeinde=a.gemeinde AND alkh.strasse=a.strasse AND alkh.hausnr=a.hausnr";
     if ($GemID!='') {
-      $sql.=" AND alkh.gemeinde=".$GemID;
+      $sql.=" AND alkh.gemeinde=".(int)$GemID;
     }
     $sql.=" UNION";
     $sql.=" SELECT a.quelle,a.gemeinde,a.strasse,a.strassenname,a.hausnr";
@@ -4007,7 +4007,7 @@ class pgdatabase extends pgdatabase_core {
     $sql.=" AND ffl.objnr=alkf.objnr AND alkf.flurstkennz=albf.flurstkennz";
     $sql.=" AND albf.gemeinde=a.gemeinde AND albf.strasse=a.strasse AND albf.hausnr=a.hausnr";
     if ($GemID!='') {
-      $sql.=" AND albf.gemeinde=".$GemID;
+      $sql.=" AND albf.gemeinde=".(int)$GemID;
     }
     if ($order!='') {
       $sql.=' ORDER BY '.$order;
@@ -4045,7 +4045,7 @@ class pgdatabase extends pgdatabase_core {
     }
     $sql.=" AND alk.objnr=alkfl.objnr AND alk.gemeinde=s.gemeinde AND alk.strasse=s.strasse";
     if ($GemID!='') {
-      $sql.=" AND alk.gemeinde=".$GemID;
+      $sql.=" AND alk.gemeinde=".(int)$GemID;
     }
     if ($StrID!='') {
       $sql.=" AND alk.strasse='".$StrID."'";
@@ -4056,7 +4056,7 @@ class pgdatabase extends pgdatabase_core {
     # Anfang
     $sql.=" SELECT '".$GemID."-".$StrID."-'||alb.hausnr AS id, ".HAUSNUMMER_TYPE."(alb.hausnr) AS nrtext,alb.hausnr AS ordernr FROM alb_f_adressen AS alb, alb_flurstuecke as f WHERE (1=1) AND f.flurstkennz = alb.flurstkennz AND f.status != 'H' ";
     if ($GemID!='') {
-      $sql.=" AND alb.gemeinde=".$GemID;
+      $sql.=" AND alb.gemeinde=".(int)$GemID;
     }
     if ($StrID!='') {
       $sql.=" AND alb.strasse='".$StrID."'";
@@ -4090,7 +4090,7 @@ class pgdatabase extends pgdatabase_core {
     $sql.=" AND l.lage = lpad(s.lage,5,'0')";
     $sql.=" WHERE v.beziehung_von=f.gml_id AND v.beziehungsart='weistAuf' AND g.gemeinde = l.gemeinde";
     if ($GemID!='') {
-      $sql.=" AND g.schluesselgesamt=".$GemID;
+      $sql.=" AND g.schluesselgesamt=".(int)$GemID;
     }
     if ($StrID!='') {
       $sql.=" AND l.lage='".$StrID."'";
@@ -4122,7 +4122,7 @@ class pgdatabase extends pgdatabase_core {
     $sql.=" FROM alb_f_adressen AS a,alb_v_strassen AS s, alb_flurstuecke as f, alb_v_gemarkungen as g";
     $sql.=" WHERE f.status != 'H' AND f.flurstkennz = a.flurstkennz AND g.gemkgschl = f.gemkgschl AND a.gemeinde=s.gemeinde AND a.strasse=s.strasse";
     if ($GemID!='') {
-      $sql.=" AND a.gemeinde=".$GemID;
+      $sql.=" AND a.gemeinde=".(int)$GemID;
     }
     $sql.=") AS foo ORDER BY gemeinde,ordertext";
     $sql.=") AS foofoo";
@@ -4164,10 +4164,10 @@ class pgdatabase extends pgdatabase_core {
     $sql.=" WHERE v.beziehung_von=f.gml_id AND v.beziehungsart='weistAuf' AND g.gemeinde = l.gemeinde";
     $sql.=" AND f.gemarkungsnummer = gem.gemarkungsnummer";
     if ($GemID!='') {
-      $sql.=" AND g.schluesselgesamt=".$GemID;
+      $sql.=" AND g.schluesselgesamt=".(int)$GemID;
     }
     if ($GemkgID!='') {
-      $sql.=" AND f.land*10000 + f.gemarkungsnummer=".$GemkgID;
+      $sql.=" AND f.land*10000 + f.gemarkungsnummer=".(int)$GemkgID;
     }
     $sql.=" ORDER BY gemeinde, strassenname";
     #echo $sql;
@@ -4212,7 +4212,7 @@ class pgdatabase extends pgdatabase_core {
     $sql.=" FROM alb_f_adressen AS a,alb_v_strassen AS s, alb_flurstuecke as f, alb_v_gemarkungen as g";
     $sql.=" WHERE f.flurstkennz = a.flurstkennz AND g.gemkgschl = f.gemkgschl AND a.gemeinde=s.gemeinde AND a.strasse=s.strasse";
     if ($GemkgID!='') {
-      $sql.=" AND g.gemkgschl=".$GemkgID;
+      $sql.=" AND g.gemkgschl=".(int)$GemkgID;
     }
     $sql.=") AS foo ORDER BY gemeinde,ordertext";
     $sql.=") AS foofoo";
@@ -4271,7 +4271,7 @@ class pgdatabase extends pgdatabase_core {
     	$sql.="WHERE status != 'H'";
     }
     if ($GemkgID>0) {
-      $sql.=" AND gemkgschl=".$GemkgID;
+      $sql.=" AND gemkgschl=".(int)$GemkgID;
     }
     if ($FlurID[0]>0) {
       $sql.=" AND gemkgschl || flurnr IN (".$FlurID[0];
@@ -4297,7 +4297,7 @@ class pgdatabase extends pgdatabase_core {
     $sql.=",schluesselgesamt AS GemFlurID FROM alkis.ax_gemarkungsteilflur WHERE 1=1 ";
     
     if ($GemkgID>0) {
-      $sql.=" AND land*10000 + gemarkung=".$GemkgID;
+      $sql.=" AND land*10000 + gemarkung=".(int)$GemkgID;
     }
     if ($FlurID[0]>0) {
       $sql.=" AND schluesselgesamt IN (".$FlurID[0];
@@ -4399,7 +4399,7 @@ class pgdatabase extends pgdatabase_core {
       $sql.=" AND h.gemeinde||'-'||h.strasse||'-'||TRIM(LOWER(h.hausnr)) IN ('".$Hausnr."')";
     }
     else{
-	    $sql.=" AND h.gemeinde=".$Gemeinde;
+	    $sql.=" AND h.gemeinde=".(int)$Gemeinde;
 	    if ($Strasse!='') {
 	      $sql.=" AND h.strasse='".$Strasse."'";
 	    }
@@ -4438,7 +4438,7 @@ class pgdatabase extends pgdatabase_core {
       $sql.=" AND gem.schluesselgesamt||'-'||l.lage||'-'||TRIM(LOWER(l.hausnummer)) IN ('".$Hausnr."')";
     }
     else{
-	    $sql.=" AND gem.schluesselgesamt=".$Gemeinde;
+	    $sql.=" AND gem.schluesselgesamt=".(int)$Gemeinde;
 	    if ($Strasse!='') {
 	      $sql.=" AND l.lage='".$Strasse."'";
 	    }
@@ -4468,7 +4468,7 @@ class pgdatabase extends pgdatabase_core {
     $sql.=",MIN(st_ymin(st_envelope(st_transform(o.the_geom, ".$epsgcode.")))) AS miny,MAX(st_ymax(st_envelope(st_transform(o.the_geom, ".$epsgcode.")))) AS maxy";
     $sql.=" FROM alkobj_e_fla as o,alknflur AS fl,alb_v_gemarkungen AS g";
     $sql.=" WHERE o.objnr=fl.objnr AND fl.gemkgschl::integer=g.gemkgschl";
-    $sql.=" AND g.gemeinde=".$Gemeinde;
+    $sql.=" AND g.gemeinde=".(int)$Gemeinde;
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) {
@@ -4493,7 +4493,7 @@ class pgdatabase extends pgdatabase_core {
     $sql ="SELECT MIN(st_xmin(st_envelope(st_transform(o.the_geom, ".$epsgcode.")))) AS minx,MAX(st_xmax(st_envelope(st_transform(o.the_geom, ".$epsgcode.")))) AS maxx";
     $sql.=",MIN(st_ymin(st_envelope(st_transform(o.the_geom, ".$epsgcode.")))) AS miny,MAX(st_ymax(st_envelope(st_transform(o.the_geom, ".$epsgcode.")))) AS maxy";
     $sql.=" FROM alkobj_e_fla as o,alknflur AS fl";
-    $sql.=" WHERE o.objnr=fl.objnr AND CAST(fl.gemkgschl AS Integer)=".$Gemkgschl;
+    $sql.=" WHERE o.objnr=fl.objnr AND CAST(fl.gemkgschl AS Integer)=".(int)$Gemkgschl;
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) {
@@ -4762,10 +4762,10 @@ class pgdatabase extends pgdatabase_core {
     $sql.=",tpcat='".$md['tpcat']."',reseddate='".$md['reseddate']."',validfrom='".$md['validfrom']."'";
     $sql.=",validtill='".$md['validtill']."',westbl='".$md['westbl']."',eastbl='".$md['eastbl']."'";
     $sql.=",southbl='".$md['southbl']."',northbl='".$md['northbl']."',identcode='".$md['identcode']."'";
-    $sql.=",rporgname='".$md['rporgname']."',postcode=".$md['postcode'].",city='".$md['city']."'";
+    $sql.=",rporgname='".$md['rporgname']."',postcode=".(int)$md['postcode'].",city='".$md['city']."'";
     $sql.=",delpoint='".$md['delpoint']."',adminarea='".$md['adminarea']."',country='".$md['country']."'";
     $sql.=",linkage='".$md['linkage']."',servicetype='".$md['servicetype']."',spatialtype='".$md['spatialtype']."'";
-    $sql.=",serviceversion='".$md['serviceversion']."',vector_scale=".$md['vector_scale'];
+    $sql.=",serviceversion='".$md['serviceversion']."',vector_scale=".(int)$md['vector_scale'];
     $sql.=",databinding='".$md['databinding']."',solution='".$md['solution']."',status='".$md['status']."'";
     $sql.=",onlinelinke='".$md['onlinelinke']."',cyclus='".$md['cyclus']."',sparefsystem='".$md['sparefsystem']."'";
     $sql.=",sformat='".$md['sformat']."',sformatversion='".$md['sformatversion']."',download='".$md['download']."'";
@@ -4833,7 +4833,7 @@ class pgdatabase extends pgdatabase_core {
     $anzid=count($idliste);
     $sql ="SELECT k.id,k.keyword,k.keytyp,k.thesaname FROM md_keywords AS k";
     if ($metadata_id!='') {
-      $sql.=",md_keywords2metadata AS k2m WHERE k2m.keyword_id=k.id AND k2m.metadata_id=".$metadata_id;
+      $sql.=",md_keywords2metadata AS k2m WHERE k2m.keyword_id=k.id AND k2m.metadata_id=".(int)$metadata_id;
     }
     else {
       $sql.=" WHERE (1=1)";
@@ -4884,10 +4884,10 @@ class pgdatabase extends pgdatabase_core {
   function getMetadata($md) {
     $sql ="SELECT oid,* FROM md_metadata WHERE (1=1)";
     if ($md['oid']!='') {
-      $sql.=" AND oid=".$md['oid'];
+      $sql.=" AND oid=".(int)$md['oid'];
     }
     if ($md['mdfileid']!='') {
-      $sql.=" AND mdfileid=".$md['mdfileid'];
+      $sql.=" AND mdfileid=".(int)$md['mdfileid'];
     }
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {

@@ -373,7 +373,7 @@ class notiz {
     $this->debug->write('<br>file:metadaten.php class:notiz function getNotizen<br>Abfragen der Daten zu Notizen in<br>PostGIS',4);
     $sql ="SELECT oid,notiz,kategorie_id,person,datum,AsText(st_transform(the_geom, ".$this->client_epsg.")) AS textgeom, AsSVG(st_transform(the_geom, ".$this->client_epsg.")) AS svggeom FROM q_notizen WHERE (1=1)";
     if ($oid!='' AND $oid!=0) {
-      $sql.=" AND oid=".$oid;
+      $sql.=" AND oid=".(int)$oid;
     }
     if ($kategorie!='') {
       $sql.=" AND kategorie_id='".$kategorie."'";
@@ -431,7 +431,7 @@ class notiz {
     $sql ="UPDATE q_notizen SET notiz='".$formvars['notiz']."',kategorie_id='".$formvars['kategorie_id']."'";
     $sql.=",person='".$formvars['person']."',datum='".date("Y-m-d",time())."'";
     $sql.=",the_geom=st_transform(GeometryFromText('".$formvars['textposition']."', ".$this->client_epsg."),".EPSGCODE.")";
-    $sql.=" WHERE oid=".$oid;
+    $sql.=" WHERE oid=".(int)$oid;
     $ret=$this->database->execSQL($sql,4, 1);
     if ($ret[0]) {
       # Fehler beim Eintragen in Datenbank
@@ -443,7 +443,7 @@ class notiz {
   function NotizLoeschen($oid) {
     $this->debug->write('<br>file:metadaten.php class:notiz function NotizLoeschen<br>Löschen einer Notiz in<br>PostGIS',4);
     $sql ="DELETE FROM q_notizen";
-    $sql.=" WHERE oid=".$oid;
+    $sql.=" WHERE oid=".(int)$oid;
     $ret=$this->database->execSQL($sql,4, 1);
     if ($ret[0]) {
       # Fehler beim Eintragen in Datenbank
@@ -455,7 +455,7 @@ class notiz {
   function NotizKat___($kategorie){
     $this->debug->write('<br>file:metadaten.php class:notiz function NotizKatbearbeiten<br>Abfragen der Rechte pro Stelle für eine Kategorie<br>PostGIS',4);
     $sql ="SELECT * FROM q_notiz_kategorie2stelle";
-    $sql.=" WHERE kat_id=".$kategorie;
+    $sql.=" WHERE kat_id=".(int)$kategorie;
     #echo $sql;
     $ret=$this->database->execSQL($sql,4, 1);
     while($rs=pg_fetch_array($ret)) {

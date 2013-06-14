@@ -31,7 +31,7 @@ include(WWWROOT.APPLVERSION.'funktionen/gui_functions.php');
           </td>
             
             <td align="center" valign="top" background="<?php echo GRAPHICSPATH; ?>bg.gif"> <?php
-              $this->debug->write("Include <b>".LAYOUTPATH."snippets/".$this->main."</b> in gui.php",4);
+              $this->debug->write("Include <b>".$this->main."</b> in gui.php",4);
 				      if(file_exists($this->main)){
 				      	include($this->main);			# Pluginviews
 				      }

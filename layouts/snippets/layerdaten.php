@@ -1,3 +1,14 @@
+<?
+
+if(!function_exists('mb_substr')){		# Workaround, falls es die Funktion nicht gibt
+	function mb_substr($str, $start, $length, $enc = NULL){
+		return substr($str, $start, $length);
+	}
+}
+
+?>
+
+
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
     <td><strong><font size="+1"><?php echo $this->titel; ?></font></strong></td>

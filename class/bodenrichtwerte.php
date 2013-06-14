@@ -104,7 +104,7 @@ class bodenrichtwertzone {
     $sql.=" FROM bw_zonen";
     $sql.=" WHERE 1=1";
     if ($oid!='') {
-      $sql.=" AND oid=".$oid;
+      $sql.=" AND oid=".(int)$oid;
     }
     $ret=$this->database->execSQL($sql,4, 0);    
     if ($ret[0]) {
@@ -255,16 +255,16 @@ class bodenrichtwertzone {
   	$formvars['oertliche_bezeichnung'] = str_replace(chr(13), '', $formvars['oertliche_bezeichnung']);
     $this->debug->write('<br>file:bodenrichtwerte.php class:bodenrichtwertzone function aktualisierenZone<br>Einfügen der Daten zu einer Richtwertzone in<br>PostGIS',4);
     $sql = "UPDATE bw_zonen SET ";
-    if($formvars['gemeinde']){$sql.= "gemeinde = ".$formvars['gemeinde'].", ";}
-    if($formvars['gemarkung']){$sql.= "gemarkung = ".$formvars['gemarkung'].", ";}
+    if($formvars['gemeinde']){$sql.= "gemeinde = ".(int)$formvars['gemeinde'].", ";}
+    if($formvars['gemarkung']){$sql.= "gemarkung = ".(int)$formvars['gemarkung'].", ";}
     if($formvars['ortsteilname']){$sql.= "ortsteilname = '".$formvars['ortsteilname']."', ";}
-    if($formvars['postleitzahl']){$sql.= "postleitzahl = ".$formvars['postleitzahl'].", ";}
+    if($formvars['postleitzahl']){$sql.= "postleitzahl = ".(int)$formvars['postleitzahl'].", ";}
     if($formvars['zonentyp']){$sql.= "zonentyp = '".$formvars['zonentyp']."', ";}
     if($formvars['gutachterausschuss']){$sql.= "gutachterausschuss = '".$formvars['gutachterausschuss']."', ";}
-    if($formvars['bodenrichtwertnummer']){$sql.= "bodenrichtwertnummer = ".$formvars['bodenrichtwertnummer'].", ";}
+    if($formvars['bodenrichtwertnummer']){$sql.= "bodenrichtwertnummer = ".(int)$formvars['bodenrichtwertnummer'].", ";}
     if($formvars['oertliche_bezeichnung']){$sql.= "oertliche_bezeichnung = '".$formvars['oertliche_bezeichnung']."', ";}
-    if($formvars['bodenrichtwert']){$sql.= "bodenrichtwert = ".$formvars['bodenrichtwert'].", ";}
-  	if($formvars['bedarfswert']){$sql.= "bedarfswert = ".$formvars['bedarfswert'].", ";}
+    if($formvars['bodenrichtwert']){$sql.= "bodenrichtwert = ".(int)$formvars['bodenrichtwert'].", ";}
+  	if($formvars['bedarfswert']){$sql.= "bedarfswert = ".(int)$formvars['bedarfswert'].", ";}
     if($formvars['stichtag']){$sql.= "stichtag = '31.12.".$formvars['stichtag']."', ";}
     if($formvars['basiskarte']){$sql.="basiskarte = '".$formvars['basiskarte']."', ";}
     if($formvars['entwicklungszustand']){$sql.= "entwicklungszustand = '".$formvars['entwicklungszustand']."', ";}
@@ -273,18 +273,18 @@ class bodenrichtwertzone {
     if($formvars['ergaenzende_nutzung']){$sql.= "ergaenzende_nutzung = '".$formvars['ergaenzende_nutzung']."', ";}
     if($formvars['bauweise']){$sql.= "bauweise = '".$formvars['bauweise']."', ";}
     if($formvars['geschosszahl']){$sql.= "geschosszahl = '".$formvars['geschosszahl']."', ";}
-    if($formvars['grundflaechenzahl'] == '')$formvars['grundflaechenzahl'] = 'NULL';
-    $sql.= "grundflaechenzahl = ".$formvars['grundflaechenzahl'].", ";
-    if($formvars['geschossflaechenzahl'] == '')$formvars['geschossflaechenzahl'] = 'NULL';
-    $sql.= "geschossflaechenzahl = ".$formvars['geschossflaechenzahl'].", ";
-    if($formvars['baumassenzahl'] == '')$formvars['baumassenzahl'] = 'NULL';
-    $sql.= "baumassenzahl = ".$formvars['baumassenzahl'].", ";
-    if($formvars['flaeche'] == '')$formvars['flaeche'] = 'NULL';
-    $sql.= "flaeche = ".$formvars['flaeche'].", ";
-    if($formvars['tiefe'] == '')$formvars['tiefe'] = 'NULL';
-    $sql.= "tiefe = ".$formvars['tiefe'].", ";
-    if($formvars['breite'] == '')$formvars['breite'] = 'NULL';
-    $sql.= "breite = ".$formvars['breite'].", ";
+    if($formvars['grundflaechenzahl'] == '')$sql.= "grundflaechenzahl = NULL, ";
+    else $sql.= "grundflaechenzahl = '".$formvars['grundflaechenzahl']."', ";
+    if($formvars['geschossflaechenzahl'] == '')$sql.= "geschossflaechenzahl = NULL, ";
+    else $sql.= "geschossflaechenzahl = '".$formvars['geschossflaechenzahl']."', ";
+    if($formvars['baumassenzahl'] == '')$sql.= "baumassenzahl = NULL, ";
+    else $sql.= "baumassenzahl = '".$formvars['baumassenzahl']."', ";
+    if($formvars['flaeche'] == '')$sql.= "flaeche = NULL, ";
+    else $sql.= "flaeche = '".$formvars['flaeche']."', ";
+    if($formvars['tiefe'] == '')$sql.= "tiefe = NULL, ";
+    else $sql.= "tiefe = '".$formvars['tiefe']."', ";
+    if($formvars['breite'] == '')$sql.= "breite = NULL, ";
+    else $sql.= "breite = '".$formvars['breite']."', ";
     if($formvars['wegeerschliessung']){$sql.= "wegeerschliessung = '".$formvars['wegeerschliessung']."', ";}
   	if($formvars['erschliessung']){$sql.= "erschliessung = '".$formvars['erschliessung']."', ";}
   	if($formvars['ackerzahl']){$sql.= "ackerzahl = '".$formvars['ackerzahl']."', ";}
@@ -296,7 +296,7 @@ class bodenrichtwertzone {
     $sql.= "bemerkungen = '".$formvars['bemerkungen']."', ";
     $sql.= "the_geom = st_transform(GeometryFromText('".$formvars['umring']."',".$this->client_epsg."), ".$this->layer_epsg.")";
     $sql.= ", textposition = st_transform(GeometryFromText('".$formvars['textposition']."',".$this->client_epsg."), ".$this->layer_epsg.")";
-    $sql.=" WHERE oid=".$oid;
+    $sql.=" WHERE oid=".(int)$oid;
     #echo $sql;
     $ret=$this->database->execSQL($sql,4, 1);
     if ($ret[0]) {

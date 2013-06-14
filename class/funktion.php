@@ -66,7 +66,7 @@ class funktion {
   function NeuAnlegen($formvars){
   	$sql = "INSERT INTO u_funktionen SET ";
   	if($formvars['id']){
-  		$sql.= "id = ".$formvars['id']."," ;
+  		$sql.= "id = ".(int)$formvars['id']."," ;
   	}
   	$sql.= "bezeichnung = '".$formvars['bezeichnung']."'";
   	$ret=$this->database->execSQL($sql,4, 1);
@@ -75,17 +75,17 @@ class funktion {
   }
   
   function Aendern($formvars){
-  	$sql = "UPDATE u_funktionen SET id = ".$formvars['id'].", bezeichnung = '".$formvars['bezeichnung']."' ";
-  	$sql.= "WHERE id = ".$formvars['selected_function_id'];
+  	$sql = "UPDATE u_funktionen SET id = ".(int)$formvars['id'].", bezeichnung = '".$formvars['bezeichnung']."' ";
+  	$sql.= "WHERE id = ".(int)$formvars['selected_function_id'];
   	$ret=$this->database->execSQL($sql,4, 1);
   }
   
   function Loeschen($formvars){
   	$sql = "DELETE FROM u_funktionen ";
-  	$sql.= "WHERE id = ".$formvars['selected_function_id'];
+  	$sql.= "WHERE id = ".(int)$formvars['selected_function_id'];
   	$ret=$this->database->execSQL($sql,4, 1);
   	$sql = "DELETE FROM u_funktion2stelle ";
-  	$sql.= "WHERE funktion_id = ".$formvars['selected_function_id'];
+  	$sql.= "WHERE funktion_id = ".(int)$formvars['selected_function_id'];
   	$ret=$this->database->execSQL($sql,4, 1);
   }
     

@@ -571,7 +571,7 @@ class Nachweis {
       # Wenn keine Fehler aufgetreten sind, löschen des Datenbankeintrages des Nachweises.
       if ($errmsg=='') {
       	$sql="DELETE FROM n_nachweise2dokumentarten WHERE nachweis_id = ".$idListe[$i].";";
-        $sql.="DELETE FROM n_nachweise WHERE id=".$idListe[$i];
+        $sql.="DELETE FROM n_nachweise WHERE id=".(int)$idListe[$i];
         $ret=$this->database->execSQL($sql,4, 1);
         if ($ret[0]==0) {
           # Datensatz erfolgreich gelöscht
@@ -626,7 +626,7 @@ class Nachweis {
     $sql="UPDATE n_nachweise SET flurid='".$flurid."', stammnr='".trim($stammnr)."', art='".$art."'";
     $sql.=",blattnummer='".trim($Blattnr)."', datum='".$datum."', vermstelle='".$VermStelle."'";
     $sql.=",gueltigkeit='".$gueltigkeit."', format='".$Blattformat."',the_geom=st_transform(GeometryFromText('".$umring."', ".$this->client_epsg."), (select srid from geometry_columns where f_table_name = 'n_nachweise')), link_datei='".$zieldateiname."'";
-    $sql.=",fortfuehrung=".$fortf.",rissnummer='".$rissnr."',bemerkungen='".$bemerkungen."'";
+    $sql.=",fortfuehrung=".(int)$fortf.",rissnummer='".$rissnr."',bemerkungen='".$bemerkungen."'";
     $sql.=" WHERE id = ".$id;
     #echo $sql;
     $ret=$this->database->execSQL($sql,4, 1);
@@ -765,7 +765,7 @@ class Nachweis {
           # echo '<br>Suche nach einer einzelnen ID.';
           $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring, st_assvg(st_transform(n.the_geom, ".$this->client_epsg.")) AS svg_umring,v.name AS vermst,n2d.dokumentart_id as andere_art FROM n_vermstelle AS v, n_nachweise AS n";
           $sql.=" LEFT JOIN n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id";
-          $sql.=" WHERE CAST(n.vermstelle AS integer)=v.id AND n.id=".$id;
+          $sql.=" WHERE CAST(n.vermstelle AS integer)=v.id AND n.id=".(int)$id;
           #echo $sql;
           $this->debug->write("<br>nachweis.php getNachweise Abfragen der Nachweisdokumente.<br>",4);
           $ret=$this->database->execSQL($sql,4, 0);
@@ -787,7 +787,7 @@ class Nachweis {
       case "MergeIDs" : {
         $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring, st_assvg(st_transform(n.the_geom, ".$this->client_epsg.")) AS svg_umring,v.name AS vermst,n2d.dokumentart_id as andere_art FROM n_vermstelle AS v, n_nachweise AS n";
         $sql.=" LEFT JOIN n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id";
-        $sql.=" WHERE CAST(n.vermstelle AS integer)=v.id AND n.id=".$idselected[0];
+        $sql.=" WHERE CAST(n.vermstelle AS integer)=v.id AND n.id=".(int)$idselected[0];
         #echo $sql;
         $this->debug->write("<br>nachweis.php getNachweise Abfragen der Nachweisdokumente.<br>",4);
         $ret=$this->database->execSQL($sql,4, 0);
@@ -845,7 +845,7 @@ class Nachweis {
           $sql.=" AND n.rissnummer='".$rissnr."'";
         }
       	if($fortf!=''){
-          $sql.=" AND n.fortfuehrung=".$fortf;
+          $sql.=" AND n.fortfuehrung=".(int)$fortf;
         }
         if (substr($art_einblenden,0,1)) { $art[]='100'; }
         if (substr($art_einblenden,1,1)) { $art[]='010'; }
@@ -922,7 +922,7 @@ class Nachweis {
 	          $sql.=" AND n.rissnummer='".$rissnr."'";
 	        }
 	      	if($fortf!=''){
-	          $sql.=" AND n.fortfuehrung=".$fortf;
+	          $sql.=" AND n.fortfuehrung=".(int)$fortf;
 	        }
           if($datum != ''){
             $sql.=" AND n.datum = '".$datum."'";
@@ -1125,7 +1125,7 @@ class Nachweis {
     for ($i=0;$i<count($idselected);$i++) {
       # Abfragen ob die Zuordnung schon existiert.
       $sql ="SELECT * FROM n_nachweise2antraege";
-      $sql.=" WHERE nachweis_id=".$idselected[$i]." AND antrag_id='".$antrag_id."'";
+      $sql.=" WHERE nachweis_id=".(int)$idselected[$i]." AND antrag_id='".$antrag_id."'";
       $ret=$this->database->execSQL($sql,4, 0);
       if ($ret[0]) { # Fehler bei der Abfrage
         $errmsg='\nFehler beim Abfragen, ob Eintrag existiert.';

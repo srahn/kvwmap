@@ -72,7 +72,6 @@ CREATE TABLE n_dokumentarten
    art character varying(100)
 ) 
 WITH OIDS;
-ALTER TABLE n_dokumentarten OWNER TO kvwmap;
 
 -- Tabelle für die Zuordnung von Nachweisen zu anderen Dokumentarten
 
@@ -82,7 +81,6 @@ CREATE TABLE n_nachweise2dokumentarten
    dokumentart_id integer NOT NULL
 ) 
 WITH OIDS;
-ALTER TABLE n_nachweise2dokumentarten OWNER TO kvwmap;
 
 -- Tabelle für Metainformationen
 
@@ -2214,9 +2212,9 @@ ALTER TABLE ONLY alb_x_v_strassen
      ergaenzende_nutzung character varying(30),
      bauweise character varying(2),
      geschosszahl character varying(9),
-     grundflaechenzahl real,
-     geschossflaechenzahl real,
-     baumassenzahl real,
+     grundflaechenzahl character varying(9),
+     geschossflaechenzahl character varying(11),
+     baumassenzahl character varying(9),
      flaeche character varying(12),
      tiefe character varying(8),
      breite character varying(8),

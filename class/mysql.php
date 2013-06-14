@@ -102,7 +102,7 @@ class database {
 # getLage($FlurstKennz) {
 # getNutzung($FlurstKennz) {
 # getPruefKZ($FlurstKennz) {
-# getRow($table,$colname,$value) {
+# getRow($select,$from,$where) {
 # getStrassen($FlurstKennz) {
 # getStrassenListe($GemID,$extent,$order)
 # getVerfahren($FlurstKennz) {
@@ -225,7 +225,7 @@ class database {
   }
 
   function login_user($username, $passwort){
-  	$sql = "SELECT login_name FROM user WHERE login_name = BINARY('".$username."') AND passwort = '".md5($passwort)."'";
+  	$sql = "SELECT login_name FROM user WHERE login_name = BINARY('".addslashes($username)."') AND passwort = '".md5($passwort)."'";
   	$sql.=' AND (("'.date('Y-m-d h:i:s').'" >= start AND "'.date('Y-m-d h:i:s').'" <= stop)';
     $sql.=' OR ';
     $sql.='(start="0000-00-00 00:00:00" AND stop="0000-00-00 00:00:00"))';		# Zeiteinschränkung wird nicht berücksichtigt.
@@ -294,7 +294,7 @@ class database {
 
 
     $sql = "INSERT INTO `u_rolle2used_layer` ( `user_id` , `stelle_id` , `layer_id` , `aktivStatus` , `queryStatus` , `showclasses` , `logconsume` ) ";
-    $sql.= "SELECT ".$id.", ".$gast_stelle.", Layer_ID, start_aktiv, start_aktiv, 1, 0 FROM used_layer WHERE Stelle_ID=".$gast_stelle;
+    $sql.= "SELECT ".$id.", ".$gast_stelle.", Layer_ID, start_aktiv, start_aktiv, 1, 0 FROM used_layer WHERE Stelle_ID=".(int)$gast_stelle;
 		$query = mysql_query($sql);
 		
     $sql = "UPDATE u_groups2rolle, u_rolle2used_layer, layer SET u_groups2rolle.status = 1 ";
@@ -313,6 +313,9 @@ class database {
   }
 
   function getRow($select,$from,$where) {
+    $select = str_replace("\'x\'","'x'",$select);
+    $select = str_replace("\' \'","' '",$select);
+    $select = str_replace("\',\'","','",$select);
 		$sql = "SELECT ".$select;
     $sql.= " FROM ".$from;
     $sql.= " WHERE ".$where;
@@ -453,7 +456,7 @@ class database {
     # für layer_id und stelle_id in Tabelle used_layer berechnet werden soll
     $sql ="SELECT p.polygonname,p.datei,p.feldname FROM polygon AS p, u_polygon2used_layer AS pul";
     $sql.=" WHERE p.polygon_id = pul.polygon_id";
-    $sql.=" AND pul.layer_id=".$layer_id." AND pul.stelle_id=".$stelle_id;
+    $sql.=" AND pul.layer_id=".(int)$layer_id." AND pul.stelle_id=".(int)$stelle_id;
     return $this->execSQL($sql, 4, 0);
   }
 
@@ -465,7 +468,7 @@ class database {
 
   function setFilter($layer_id,$stelle_id,$filter) {
     $sql ="UPDATE used_layer SET Filter='".$filter."'";
-    $sql.=" WHERE layer_id=".$layer_id." AND stelle_id=".$stelle_id;
+    $sql.=" WHERE layer_id=".(int)$layer_id." AND stelle_id=".(int)$stelle_id;
     return $this->execSQL($sql, 4, 0);
   }
 
@@ -573,6 +576,7 @@ class database {
     # (lesend immer, aber schreibend nur mit DBWRITE=1)
     if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
       $query=mysql_query($sql,$this->dbConn);
+      #echo $sql;
       if ($query==0) {
         $ret[0]=1;
         $ret[1]="<b>Fehler bei SQL Anweisung:</b><br>".$sql."<br>".mysql_error($query);

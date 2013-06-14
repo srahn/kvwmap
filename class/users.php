@@ -2205,6 +2205,7 @@ class stelle extends stelle_core{
 	function isMenueAllowed($menuename){
 		$sql = "SELECT distinct a.* from u_menues as a, u_menue2stelle as b ";
 		$sql.= "WHERE links LIKE 'index.php?go=".$menuename."%' AND b.menue_id = a.id AND b.stelle_id = ".$this->id;
+		#echo $sql;
 		$this->debug->write("<p>file:users.php class:stelle->isMenueAllowed - Guckt ob der Menuepunkt der Stelle zugeordnet ist:<br>".$sql,4);
 		$query=mysql_query($sql,$this->database->dbConn);
 		if ($query==0) {

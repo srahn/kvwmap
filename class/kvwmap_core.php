@@ -1513,6 +1513,9 @@ class GUI_core {
 
   # Ausgabe der Seite
   function output() {
+	  foreach($this->formvars as $key => $value){
+	  	if(is_string($value))$this->formvars[$key] = stripslashes($value);
+	  }
     # bisher gibt es folgenden verschiedenen Dokumente die angezeigt werden können
     global $html;
     $html['style']=$this->style;

@@ -66,7 +66,7 @@ CREATE TABLE fp_punkte_temp
   vermarkt int4 DEFAULT 0
 ) 
 WITH OIDS;
-ALTER TABLE fp_punkte_temp OWNER TO kvwmap;
+
 SELECT AddGeometryColumn('public', 'fp_punkte_temp','koordinaten',2398,'POINT', 3);
 CREATE INDEX fp_punkte_temp_koordinaten_gist ON fp_punkte_temp USING GIST (koordinaten GIST_GEOMETRY_OPS);
 
@@ -325,7 +325,6 @@ CREATE TABLE bau_akten
   dummy varchar(1)
 ) 
 WITH OIDS;
-ALTER TABLE bau_akten OWNER TO kvwmap;
 
 --# Hinzufügen der Tabellen bau_verfahrensart und bau_vorhaben, in denen die zur Auswahl stehenden Werte für das Vorhaben und die Verfahrensart bei der Bauauskunftssuche gespeichert sind
 CREATE TABLE bau_verfahrensart
@@ -351,7 +350,6 @@ CREATE TABLE bau_gemarkungen
   schluessel int8 NOT NULL
 ) 
 WITH OIDS;
-ALTER TABLE bau_gemarkungen OWNER TO kvwmap;
 
 --# 2006-02-03
 
@@ -420,7 +418,6 @@ CREATE TABLE u_polygon
   CONSTRAINT u_polygon_pkey PRIMARY KEY (id)
 ) 
 WITH OIDS;
-ALTER TABLE u_polygon OWNER TO kvwmap;
 
 SELECT AddGeometryColumn('public', 'u_polygon','the_geom',2398,'MULTIPOLYGON', 2);
 CREATE INDEX u_polygon_the_geom_gist ON u_polygon USING GIST (the_geom GIST_GEOMETRY_OPS);
@@ -441,7 +438,6 @@ CREATE TABLE bp_aenderungen
   CONSTRAINT bp_aenderungen_pkey PRIMARY KEY (id)
 ) 
 WITH OIDS;
-ALTER TABLE bp_aenderungen OWNER TO kvwmap;
 
 SELECT AddGeometryColumn('public', 'bp_aenderungen','the_geom',2398,'POLYGON', 2);
 CREATE INDEX bp_aenderungen_the_geom_gist ON bp_aenderungen USING GIST (the_geom GIST_GEOMETRY_OPS);
@@ -658,9 +654,6 @@ CREATE TABLE shp_import_tables
   tabellenname character varying(255) NOT NULL
 ) 
 WITH OIDS;
-ALTER TABLE shp_import_tables OWNER TO kvwmap;
-
-
 
 ----# Änderungen von 1.6.6 nach 1.6.7
 
@@ -745,7 +738,6 @@ CREATE TABLE n_dokumentarten
    art character varying(100)
 ) 
 WITH OIDS;
-ALTER TABLE n_dokumentarten OWNER TO kvwmap;
 
 -- Tabelle für die Zuordnung von Nachweisen zu anderen Dokumentarten
 
@@ -755,7 +747,6 @@ CREATE TABLE n_nachweise2dokumentarten
    dokumentart_id integer NOT NULL
 ) 
 WITH OIDS;
-ALTER TABLE n_nachweise2dokumentarten OWNER TO kvwmap;
 
 -- Tabelle für die Aliasnamen der Koordinatensysteme
 CREATE TABLE spatial_ref_sys_alias
@@ -1128,9 +1119,6 @@ CREATE OR REPLACE VIEW alb_eigentuemer AS
    FROM alb_g_buchungen a, alb_g_eigentuemer b, alb_g_namen c
   WHERE a.blatt::text = b.blatt::text AND a.bezirk = b.bezirk AND b.lfd_nr_name = c.lfd_nr_name;
 
-ALTER TABLE alb_eigentuemer OWNER TO kvwmap;
-
-
 ----# Änderungen von 1.11.0 nach 1.12.0
 
 ALTER TABLE n_nachweise2antraege ALTER COLUMN antrag_id TYPE character varying(11);
@@ -1146,3 +1134,18 @@ CREATE VIEW jagdbezirk_paechter AS
    FROM jagdbezirke jb
    LEFT JOIN jagdpaechter2bezirke jpb ON jb.concode::text = jpb.bezirkid::text
   GROUP BY jb.oid, jb.id, jb.name, jb.art, jb.flaeche, jpb.bezirkid, jb.concode, jb.jb_zuordnung, jb.status, jb.verzicht, jb.the_geom;
+  
+ 
+DROP VIEW public.bw_boris_view;
+
+ALTER TABLE public.bw_zonen ALTER COLUMN grundflaechenzahl TYPE varchar(9);
+
+ALTER TABLE public.bw_zonen ALTER COLUMN geschossflaechenzahl TYPE varchar(11);
+
+ALTER TABLE public.bw_zonen ALTER COLUMN baumassenzahl TYPE varchar(9);
+
+CREATE OR REPLACE VIEW public.bw_boris_view AS 
+ SELECT bw.oid, 13 AS landesschluessel, bw.gemeinde, g.gemeindename, gm.gemkgname, bw.ortsteilname, bw.postleitzahl, bw.zonentyp, bw.gutachterausschuss, bw.bodenrichtwertnummer, bw.oertliche_bezeichnung, bw.bodenrichtwert, round(bw.bodenrichtwert::double precision) AS bw_darstellung, bw.stichtag, bw.bedarfswert, 25833 AS bezug, x(bw.textposition) AS rechtswert, y(bw.textposition) AS hochwert, bw.basiskarte, bw.entwicklungszustand, bw.beitragszustand, bw.nutzungsart, bw.ergaenzende_nutzung, bw.bauweise, bw.geschosszahl, bw.grundflaechenzahl, bw.geschossflaechenzahl, bw.baumassenzahl, bw.flaeche, bw.tiefe, bw.breite, bw.wegeerschliessung, bw.erschliessungsverhaeltnisse, bw.ackerzahl, bw.gruenlandzahl, bw.aufwuchs, bw.verfahrensgrund, bw.verfahrensgrund_zusatz, bw.bemerkungen, 0 AS umdart, ('http://pfad/zur/umrechungstabelle/tabelle'::text || bw.stichtag) || '.pdf'::text AS urt, bw.textposition, bw.the_geom
+   FROM bw_zonen bw
+   LEFT JOIN alb_v_gemeinden g ON bw.gemeinde = g.gemeinde
+   LEFT JOIN alb_v_gemarkungen gm ON bw.gemarkung = gm.gemkgschl;

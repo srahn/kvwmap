@@ -115,7 +115,7 @@ class jagdkataster {
   }
 
 	function getjagdbezirkfrompaechter($paechterid){
-		$sql = "SELECT jb.oid, jb.id, jb.name, jb.art FROM jagdpaechter2bezirke as jpb, jagdbezirke jb WHERE CAST(jpb.bezirkid AS text) = jb.concode AND jpb.paechterid = ".$paechterid;
+		$sql = "SELECT jb.oid, jb.id, jb.name, jb.art FROM jagdpaechter2bezirke as jpb, jagdbezirke jb WHERE CAST(jpb.bezirkid AS text) = jb.concode AND jpb.paechterid = ".(int)$paechterid;
 		#echo $sql;
 		$ret = $this->database->execSQL($sql, 4, 0);
 		while($rs = pg_fetch_array($ret[1])){
@@ -130,7 +130,7 @@ class jagdkataster {
 			$sql.= " id = '".$id."',";
 			$sql.= " name = '".$name."',";
 			$sql.= " art = '".$art."'";
-			$sql.= " WHERE oid = ".$oid;
+			$sql.= " WHERE oid = ".(int)$oid;
 		}
 		#echo $sql;
 		$ret = $this->database->execSQL($sql, 4, 1);
@@ -153,12 +153,12 @@ class jagdkataster {
 				$sql = "UPDATE jagdbezirke SET";
 				if($umring != ''){$sql.= " the_geom = st_transform(GeometryFromText('".$umring."', ".$this->clientepsg."), ".$this->layerepsg."),";}
 				$sql.= " name = '".$name."',";
-				$sql.= " flaeche = ".$flaeche.",";
+				$sql.= " flaeche = ".(float)$flaeche.",";
 				$sql.= " jb_zuordnung = '".$jb_zuordnung."',";
 				$sql.= " status = '".$status."',";
 				$sql.= " verzicht = '".$verzicht."',";
 				$sql.= " art = '".$art."'";
-				$sql.= " WHERE oid = ".$oid;
+				$sql.= " WHERE oid = ".(int)$oid;
 			}
 			else{
 				if($umring != ''){
@@ -186,7 +186,7 @@ class jagdkataster {
   }
 
 	function getjagdbezirk($oid){
-		$sql = "SELECT oid, *, assvg(st_transform(the_geom, ".$this->clientepsg."), 0, 8) AS svggeom, astext(st_transform(the_geom, ".$this->clientepsg.")) AS wktgeom FROM jagdbezirke WHERE oid = ".$oid;
+		$sql = "SELECT oid, *, assvg(st_transform(the_geom, ".$this->clientepsg."), 0, 8) AS svggeom, astext(st_transform(the_geom, ".$this->clientepsg.")) AS wktgeom FROM jagdbezirke WHERE oid = ".(int)$oid;
 		#echo $sql;
 		$ret = $this->database->execSQL($sql, 4, 0);
 		$jagdbezirk = pg_fetch_array($ret[1]);
@@ -194,12 +194,12 @@ class jagdkataster {
 	}
 
 	function deletejagdbezirk($oid){
-		$sql = "DELETE FROM jagdbezirke WHERE oid = ".$oid;
+		$sql = "DELETE FROM jagdbezirke WHERE oid = ".(int)$oid;
 		$ret = $this->database->execSQL($sql, 4, 1);
 	}
 	
 	function copyjagdbezirk($oid){
-		$sql = "INSERT INTO jagdbezirke SELECT * FROM jagdbezirke WHERE oid = ".$oid;
+		$sql = "INSERT INTO jagdbezirke SELECT * FROM jagdbezirke WHERE oid = ".(int)$oid;
 		$ret = $this->database->execSQL($sql, 4, 1);
 		return pg_last_oid($ret[1]);
 	}

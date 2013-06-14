@@ -23,6 +23,9 @@ else {
   # Übergeben der Variablen aus den Post oder Get Aufrufen
   # normaler Aufruf des PHP-Skriptes über Apache oder CGI  
   #$GUI->formvars=stripScript($_REQUEST);
+  foreach($_REQUEST as $key => $value){
+  	if(is_string($value))$_REQUEST[$key] = addslashes($value);
+  }
   $GUI->formvars=$_REQUEST;
 }
 

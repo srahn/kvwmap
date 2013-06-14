@@ -583,7 +583,7 @@ class antrag {
   }
   
   function antrag_aendern($antr_nr,$VermStelle,$verm_art,$datum) {
-    $sql ="UPDATE n_antraege SET vermstelle=".$VermStelle.",vermart=".$verm_art.",datum='".$datum."'";
+    $sql ="UPDATE n_antraege SET vermstelle=".(int)$VermStelle.",vermart=".(int)$verm_art.",datum='".$datum."'";
     $sql.=" WHERE antr_nr='".$antr_nr_a."'";
     $queryret=$this->database->execSQL($sql,4, 1);
     if ($queryret[0]) {

@@ -258,14 +258,14 @@ class textdocument {
   }
   
   function deleteDocToGeoname($doc_id) {
-    $sql ="DELETE FROM doc_doc2geoname WHERE doc_id=".$doc_id;
+    $sql ="DELETE FROM doc_doc2geoname WHERE doc_id=".(int)$doc_id;
     $queryret=$this->database->execSQL($sql, 4, 0);   
   }
   
   function updateDocumentProperties($doc_id,$filename) {
     $sql ="UPDATE doc_documents";
     $sql.=" SET filelastmodified='".date("Y-m-d H:i:s",filemtime($this->searchpath.$filename))."'";
-    $sql.=" WHERE id=".$doc_id;
+    $sql.=" WHERE id=".(int)$doc_id;
     $queryret=$this->database->execSQL($sql, 4, 0);   
   }
   

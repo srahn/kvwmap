@@ -70,7 +70,7 @@ class bauleitplanung {
   }
   
   function FlaecheLoeschen($id, $loeschuser, $loeschdatum){
-  	$sql = "UPDATE bp_aenderungen SET loeschdatum = '".$loeschdatum."', loeschusername = '".$loeschuser."' WHERE id = ".$id;
+  	$sql = "UPDATE bp_aenderungen SET loeschdatum = '".$loeschdatum."', loeschusername = '".$loeschuser."' WHERE id = ".(int)$id;
   	# echo $sql;
     $ret=$this->database->execSQL($sql,4, 1);
     if ($ret[0]) {

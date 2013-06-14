@@ -373,6 +373,7 @@ class shape {
     		$select = str_replace($the_geom, 'st_transform('.$the_geom.', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);
     	}
     	else{		// nur the_geom muss ersetzt werden
+    		$select = str_replace(',  '.$this->attributes['the_geom'], ', st_transform('.$this->attributes['the_geom'].', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);    		
     		$select = str_replace(', '.$this->attributes['the_geom'], ', st_transform('.$this->attributes['the_geom'].', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);
     		$select = str_replace(','.$this->attributes['the_geom'], ',st_transform('.$this->attributes['the_geom'].', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);
     	}
@@ -415,10 +416,10 @@ class shape {
 	    }
   	}
     $sql.= $orderby;
-    $temp_table = 'public.shp_export_'.rand(1, 10000);
-    $sql = 'CREATE TABLE '.$temp_table.' AS '.$sql;		# temporäre Tabelle erzeugen, damit das/die Schema/ta berücksichtigt werden
+    $temp_table = 'shp_export_'.rand(1, 10000);
+    $sql = 'CREATE TABLE public.'.$temp_table.' AS '.$sql;		# temporäre Tabelle erzeugen, damit das/die Schema/ta berücksichtigt werden
     $ret = $layerdb->execSQL($sql,4, 0);
-    $sql = 'SELECT * FROM '.$temp_table;
+    $sql = 'SELECT * FROM public.'.$temp_table;
     $ret = $layerdb->execSQL($sql,4, 0);
     if (!$ret[0]) {
       $count = pg_num_rows($ret[1]);
@@ -428,11 +429,16 @@ class shape {
       $this->formvars['layer_name'] = str_replace('(', '_', $this->formvars['layer_name']);
       $this->formvars['layer_name'] = str_replace(')', '_', $this->formvars['layer_name']);
       $this->formvars['layer_name'] = str_replace('/', '_', $this->formvars['layer_name']);
+      $this->formvars['layer_name'] = str_replace('[', '_', $this->formvars['layer_name']);
+      $this->formvars['layer_name'] = str_replace(']', '_', $this->formvars['layer_name']);
       $folder = 'shp_Export_'.$this->formvars['layer_name'].rand(0,10000);
       mkdir(IMAGEPATH.$folder);                       # Ordner erzeugen
-      $command = 'export PGCLIENTENCODING=LATIN1;';
-      $command.= POSTGRESBINPATH.'pgsql2shp -u '.$layerdb->user;
+      $fp = fopen(IMAGEPATH.$folder.'/'.$this->formvars['layer_name'].'.cpg', 'w');
+			fwrite($fp, 'UTF-8');
+			fclose($fp);
+      $command = POSTGRESBINPATH.'pgsql2shp -u '.$layerdb->user;
       if($layerdb->passwd != '')$command.= ' -P '.$layerdb->passwd;
+    	if($layerdb->port != '')$command.=' -p '.$layerdb->port;
       $command.= ' -f '.IMAGEPATH.$folder.'/'.$this->formvars['layer_name'].' '.$layerdb->dbName.' '.$temp_table; 
       exec($command);
       #echo $command;

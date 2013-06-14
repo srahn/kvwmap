@@ -28,8 +28,8 @@ define('POSTANSCHRIFT_ORT', '');
 # definiert, ob Nutzername im ALB-Auszug 30 angezeigt wird, oder nicht
 define('BEARBEITER', 'false');			# true/false					# Version 1.7.2
 # Gutachterausschuss BORIS
-define('GUTACHTERAUSSCHUSS', '12345');								# Version 1.7.3			# in Version 1.7.5 wieder gelöscht	# seit Version 1.11 wieder da
-#$gutachterausschuesse = array('12345', '6789');       # Version 1.7.5		# in Version 1.11 gelöscht
+define('GUTACHTERAUSSCHUSS', '12345');								# Version 1.7.3			# in Version 1.7.5 wieder gelöscht	# seit Version 1.11.0 wieder da
+#$gutachterausschuesse = array('12345', '6789');       # Version 1.7.5		# in Version 1.11.0 gelöscht
 # katasterführende Stellen ALB
 # bei zwei katasterführenden Stellen in einer kvwmap-DB (Nur für Adressänderungen wichtig, sonst auskommentieren)
 # erste Stelle bis einschließlich GBBZ-Schlüssel, zweite Stelle bis einschließlich GBBZ-Schlüssel, ....
@@ -233,7 +233,7 @@ define('WASSERZEICHEN',WAPPENPATH.'wappen_wz.jpg');
 define ('LAYOUTPATH',WWWROOT.APPLVERSION.'layouts/');
 define ('SNIPPETS',LAYOUTPATH.'snippets/');
 define('CLASSPATH',WWWROOT.APPLVERSION.'class/');
-define('PLUGINS',WWWROOT.APPLVERSION.'plugins/');		# Version 1.11
+define('PLUGINS',WWWROOT.APPLVERSION.'plugins/');		# Version 1.11.0
 define('TEMPTABLEPREFIX','x_');
 # Default Templates für Sachdatenanzeige
 define('DEFAULTTEMPLATE',' ');
@@ -430,7 +430,7 @@ if($_REQUEST['go'] != 'getMap_ajax'){								# Version 1.7.6    (die folgenden K
 	include (CLASSPATH.'lineeditor.php');               # Version 1.7.0
 	include (CLASSPATH.'wfs.php');                      # Version 1.7.0
 	include (CLASSPATH.'synchronisation.php');          # Version 1.7.0
-	#include (CLASSPATH.'rok.php');          						# Version 1.7.1		in Version 1.11 gelöscht
+	#include (CLASSPATH.'rok.php');          						# Version 1.7.1		in Version 1.11.0 gelöscht
 	include (CLASSPATH.'tif.php');          						# Version 1.7.2
 	include (CLASSPATH.'gpx.php');          						# Version 1.7.4
 	include (CLASSPATH.'datendrucklayout.php');         # Version 1.7.5
@@ -439,14 +439,14 @@ if($_REQUEST['go'] != 'getMap_ajax'){								# Version 1.7.6    (die folgenden K
 }																											# Version 1.7.6
 include (WWWROOT.APPLVERSION.'funktionen/allg_funktionen.php');		# In Version 1.7.3 angepasst
 
-############################ kvwmap-plugins #################		# Version 1.11
-#																																# Version 1.11
-$kvwmap_plugins = array();																			# Version 1.11
-#$kvwmap_plugins[] = bauleitplanung;														# Version 1.11
-#$kvwmap_plugins[] = bevoelkerung;															# Version 1.11
-#$kvwmap_plugins[] = gewaesser;																	# Version 1.11
-#																																# Version 1.11
-#############################################################		# Version 1.11
+############################ kvwmap-plugins #################		# Version 1.11.0
+#																																# Version 1.11.0
+$kvwmap_plugins = array();																			# Version 1.11.0
+#$kvwmap_plugins[] = 'bauleitplanung';														# Version 1.11.0
+#$kvwmap_plugins[] = 'bevoelkerung';															# Version 1.11.0
+#$kvwmap_plugins[] = 'gewaesser';																	# Version 1.11.0
+#																																# Version 1.11.0
+#############################################################		# Version 1.11.0
 
 
 ################################ Erweiterungen laden
