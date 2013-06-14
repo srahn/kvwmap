@@ -23,6 +23,8 @@ function druck_pdf(){
 					document.GUI.target = '_blank';
 					document.GUI.go.value = 'Druckausschnittswahl_Drucken';
 					document.GUI.submit();
+					document.GUI.go.value = 'Druckausschnittswahl';
+					document.GUI.target = '';
 				}
 				else{
 					alert("Bitte wählen Sie einen Druckausschnitt aus.");
@@ -235,7 +237,7 @@ function remove(){
 <? if($this->formvars['loadmapsource'] == 'Post'){ ?>
 	<input type="hidden" name="go" value="Externer_Druck">	
 <? }else{ ?>
-	<input type="hidden" name="go" value="Druckausschnittswahl">
+	<input type="text" name="go" value="Druckausschnittswahl">
 <? } ?>
 
 <input type="hidden" name="mapwidth" value="<?php echo $this->Document->activeframe[0]['mapwidth']; ?>">
