@@ -2310,7 +2310,7 @@ class pgdatabase extends pgdatabase_core {
   }
   
   function getEMZfromALK($FlurstKennz){
-	  $sql = "select DISTINCT st_intersection(k.the_geom,st_intersection(o.the_geom,f.the_geom)) AS st_intersection_geom,round(st_area(st_intersection(k.the_geom,st_intersection(o.the_geom,f.the_geom)))) as flaeche,substring(t.label from 18 for 3) AS wert,t.label, area(f.the_geom) as flstflaeche, o.objart";
+	  $sql = "select DISTINCT st_intersection(k.the_geom,st_intersection(o.the_geom,f.the_geom)) AS st_intersection_geom,round(st_area(st_intersection(k.the_geom,st_intersection(o.the_geom,f.the_geom)))) as flaeche,substring(t.label from 18 for 3) AS wert,'0000'||substring(t.label from 5) AS label, area(f.the_geom) as flstflaeche, o.objart";
 		$sql.=" FROM alkobj_e_fla as o, alkobj_e_fla as f, alkobj_e_fla as k, alknflst as fl, alkobj_t_pkt as t";
 		$sql.=" WHERE o.the_geom && f.the_geom and o.the_geom && k.the_geom";
 		$sql.=" AND fl.flurstkennz = '".$FlurstKennz."'" ;
