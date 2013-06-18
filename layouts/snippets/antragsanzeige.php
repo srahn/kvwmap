@@ -1,4 +1,5 @@
 <table width="0%" border="0" cellpadding="5" cellspacing="0">
+	<tr><td></td></tr>
   <tr> 
     <td bgcolor="<?php echo BG_FORM ?>"><div align="center"><strong><font size="+1"><?php echo $this->titel; ?></font></strong> 
       </div></td>
@@ -56,28 +57,7 @@
   </tr>
   <tr> 
     <td bgcolor="<?php echo BG_FORM ?>">
-			<SCRIPT TYPE="text/javascript">
-			
-			<!--
-			function submitting(this_value)
-			{
-			if (this_value=="Uebergabeprotokoll_Erzeugen"){
-				for(var i = 0; i < <?php echo count ($this->antrag->antragsliste); ?>; ++i)
-				{
-					if (document.GUI.antr_selected[i].checked){
-						var selected_antr = document.GUI.antr_selected[i].value;
-					}
-				}
-				window.open('index.php?go=Antraganzeige&go_plus=Uebergabeprotokoll_Erzeugen&antr_selected='+selected_antr,'_blank');
-			}
-			else {
-				document.GUI.submit();
-			}
-			}
-			
-			-->
-			</SCRIPT>
-    	<select name="go_plus" onChange="submitting(this.value)"> 
+    	<select name="go_plus" onChange="document.GUI.submit();"> 
         <option value="">---</option>
        <?php if($this->Stelle->isFunctionAllowed('Antraganzeige_Zugeordnete_Dokumente_Anzeigen')) { ?>
         <option value="Zugeordnete_Dokumente_Anzeigen"<?php if ($this->formvars['antr_verarbeitung']=='erzeugen') { ?> selected<?php } ?>>Zugeordnete Dokumente Anzeigen</option>
@@ -92,6 +72,16 @@
       </select>
       <input type="hidden" name="go" value="Antraganzeige">
       <input type="hidden" name="file" value="1">
+      <input type="hidden" name="Lfd" value="1">
+ 			<input type="hidden" name="Riss-Nummer" value="1"> 
+ 			<input type="hidden" name="Antrags-Nummer" value="1"> 
+			<input type="hidden" name="FFR" value="1">
+			<input type="hidden" name="KVZ" value="1">
+			<input type="hidden" name="GN" value="1">
+			<input type="hidden" name="andere" value="1"> 
+			<input type="hidden" name="Datum" value="1">
+			<input type="hidden" name="Datei" value="1">
+ 			<input type="hidden" name="gemessendurch" value="1">
     </td>
   </tr>
 </table>

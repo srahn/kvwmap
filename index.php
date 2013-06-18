@@ -1526,8 +1526,16 @@ if($GUI->goNotExecutedInPlugins){
 	  } break;
 
 	  case 'Antraganzeige_Uebergabeprotokoll_Erzeugen' : {
-		$GUI->erzeugenUebergabeprotokollNachweise($GUI->formvars['antr_selected']);
-	  } break;
+			$GUI->erzeugenUebergabeprotokollNachweise($GUI->formvars['antr_selected']);
+	  }break;
+	  
+	  case 'Antraganzeige_Uebergabeprotokoll_Erzeugen_PDF' : {
+			$GUI->erzeugenUebergabeprotokollNachweise_PDF();
+	  }break;
+	  
+	  case 'Antraganzeige_Uebergabeprotokoll_Erzeugen_CSV' : {
+			$GUI->erzeugenUebergabeprotokollNachweise_CSV();
+	  }break;
 
 	  case 'Antraganzeige_Rechercheergebnis_in_Ordner_zusammenstellen' : {
 		$ret=$GUI->DokumenteZumAntragInOrdnerZusammenstellen();

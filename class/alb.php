@@ -661,19 +661,19 @@ class ALB {
 						          	$emzges_223 = $emzges_223 + $emz;
 						          	$flaeche_223 = $flaeche_223 + $alkemz[$j]['flaeche'];
 						          }
-						          if (strlen($alkemz[$j]['label'])==20) {
-						            $label1=mb_substr(mb_substr($alkemz[$j]['label'],4,'utf8'),0,-6,'utf8');
-						            $label2=ltrim(mb_substr(trim(mb_substr($alkemz[$j]['label'],-6,6,'utf8')),0,3,'utf8'),"0");
-						            $label3=ltrim(mb_substr($alkemz[$j]['label'],-3,3,'utf8'),"0");
-						          } elseif (strlen($alkemz[$j]['label'])==23) {
-						            $label1=mb_substr(mb_substr($alkemz[$j]['label'],4,'utf8'),0,-9,'utf8');
-						            $label2=ltrim(mb_substr(trim(mb_substr($alkemz[$j]['label'],-9,6,'utf8')),0,3,'utf8'),"0");
-						            $label3=ltrim(mb_substr($alkemz[$j]['label'],-6,3,'utf8'),"0");
-						            $label4=mb_substr($alkemz[$j]['label'],-3,3,'utf8');
-						          } elseif (strlen($alkemz[$j]['label'])==29) {
-						            $label1=mb_substr(mb_substr($alkemz[$j]['label'],4,'utf8'),0,-15,'utf8');
-						            $label2=ltrim(mb_substr(trim(mb_substr($alkemz[$j]['label'],-15,6,'utf8')),0,3,'utf8'),"0");
-						            $label3=ltrim(mb_substr($alkemz[$j]['label'],-12,3,'utf8'),"0");
+						          if(strlen($alkemz[$kl]['label'])==20) {
+						            $label1=substr(substr($alkemz[$kl]['label'],4),0,-6);
+						            $label2=ltrim(substr(trim(substr($alkemz[$kl]['label'],-6,6)),0,3),"0");
+						            $label3=ltrim(substr($alkemz[$kl]['label'],-3,3),"0");
+						          } elseif (strlen($alkemz[$kl]['label'])==23) {
+						            $label1=substr(substr($alkemz[$kl]['label'],4),0,-9);
+						            $label2=ltrim(substr(trim(substr($alkemz[$kl]['label'],-9,6)),0,3),"0");
+						            $label3=ltrim(substr($alkemz[$kl]['label'],-6,3),"0");
+						            $label4=substr($alkemz[$kl]['label'],-3,3);
+						          } elseif (strlen($alkemz[$kl]['label'])==29) {
+						            $label1=substr(substr($alkemz[$kl]['label'],4),0,-15);
+						            $label2=ltrim(substr(trim(substr($alkemz[$kl]['label'],-15,6)),0,3),"0");
+						            $label3=ltrim(substr($alkemz[$kl]['label'],-12,3),"0");
 						            $label4='W';
 						          }
 					            $csv .= round($alkemz[$j]['flaeche']).' m² '; 
@@ -682,7 +682,7 @@ class ALB {
 					          }
 				            $nichtgeschaetzt=round($flst->ALB_Flaeche-$flaeche_222-$flaeche_223);
 				            if($nichtgeschaetzt>0){
-			          			$csv .=  'nicht geschätzt: '.$nichtgeschaetzt." m² \n";
+			          			$csv .=  utf8_encode('nicht geschätzt: '.$nichtgeschaetzt." m² \n");
 			          		}
 			        			if($emzges_222 > 0){
 			        				$BWZ_222 = round($emzges_222/$flaeche_222*100);
@@ -690,7 +690,7 @@ class ALB {
 			          		}
 			        			if($emzges_223 > 0){
 			        				$BWZ_223 = round($emzges_223/$flaeche_223*100);
-			        				$csv .= ' Grünland gesamt: EMZ '.$emzges_223.' , BWZ '.$BWZ_223;
+			        				$csv .= utf8_encode(' Grünland gesamt: EMZ '.$emzges_223.' , BWZ '.$BWZ_223);
 										}
 				        	}
 				        }
@@ -932,19 +932,19 @@ class ALB {
 			          	$emzges_223 = $emzges_223 + $emz;
 			          	$flaeche_223 = $flaeche_223 + $alkemz[$j]['flaeche'];
 			          }
-			          if (strlen($alkemz[$j]['label'])==20) {
-			            $label1=mb_substr(mb_substr($alkemz[$j]['label'],4,'utf8'),0,-6,'utf8');
-			            $label2=ltrim(mb_substr(trim(mb_substr($alkemz[$j]['label'],-6,6,'utf8')),0,3,'utf8'),"0");
-			            $label3=ltrim(mb_substr($alkemz[$j]['label'],-3,3,'utf8'),"0");
-			          } elseif (strlen($alkemz[$j]['label'])==23) {
-			            $label1=mb_substr(mb_substr($alkemz[$j]['label'],4,'utf8'),0,-9,'utf8');
-			            $label2=ltrim(mb_substr(trim(mb_substr($alkemz[$j]['label'],-9,6,'utf8')),0,3,'utf8'),"0");
-			            $label3=ltrim(mb_substr($alkemz[$j]['label'],-6,3,'utf8'),"0");
-			            $label4=mb_substr($alkemz[$j]['label'],-3,3,'utf8');
-			          } elseif (strlen($alkemz[$j]['label'])==29) {
-			            $label1=mb_substr(mb_substr($alkemz[$j]['label'],4,'utf8'),0,-15,'utf8');
-			            $label2=ltrim(mb_substr(trim(mb_substr($alkemz[$j]['label'],-15,6,'utf8')),0,3,'utf8'),"0");
-			            $label3=ltrim(mb_substr($alkemz[$j]['label'],-12,3,'utf8'),"0");
+		          	if(strlen($alkemz[$kl]['label'])==20) {
+			            $label1=substr(substr($alkemz[$kl]['label'],4),0,-6);
+			            $label2=ltrim(substr(trim(substr($alkemz[$kl]['label'],-6,6)),0,3),"0");
+			            $label3=ltrim(substr($alkemz[$kl]['label'],-3,3),"0");
+			          } elseif (strlen($alkemz[$kl]['label'])==23) {
+			            $label1=substr(substr($alkemz[$kl]['label'],4),0,-9);
+			            $label2=ltrim(substr(trim(substr($alkemz[$kl]['label'],-9,6)),0,3),"0");
+			            $label3=ltrim(substr($alkemz[$kl]['label'],-6,3),"0");
+			            $label4=substr($alkemz[$kl]['label'],-3,3);
+			          } elseif (strlen($alkemz[$kl]['label'])==29) {
+			            $label1=substr(substr($alkemz[$kl]['label'],4),0,-15);
+			            $label2=ltrim(substr(trim(substr($alkemz[$kl]['label'],-15,6)),0,3),"0");
+			            $label3=ltrim(substr($alkemz[$kl]['label'],-12,3),"0");
 			            $label4='W';
 			          }
 		            $csv .= round($alkemz[$j]['flaeche']).' m² '; 
@@ -953,7 +953,7 @@ class ALB {
 		          }
 	            $nichtgeschaetzt=round($flst->ALB_Flaeche-$flaeche_222-$flaeche_223);
 	            if($nichtgeschaetzt>0){
-          			$csv .=  'nicht geschätzt: '.$nichtgeschaetzt." m² \n";
+          			$csv .=  utf8_encode('nicht geschätzt: '.$nichtgeschaetzt." m² \n");
           		}
         			if($emzges_222 > 0){
         				$BWZ_222 = round($emzges_222/$flaeche_222*100);
@@ -961,7 +961,7 @@ class ALB {
           		}
         			if($emzges_223 > 0){
         				$BWZ_223 = round($emzges_223/$flaeche_223*100);
-        				$csv .= ' Grünland gesamt: EMZ '.$emzges_223.' , BWZ '.$BWZ_223;
+        				$csv .= utf8_encode(' Grünland gesamt: EMZ '.$emzges_223.' , BWZ '.$BWZ_223);
 							}
 	        	}
 	        }
@@ -1229,19 +1229,19 @@ class ALB {
 			          	$emzges_223 = $emzges_223 + $emz;
 			          	$flaeche_223 = $flaeche_223 + $alkemz[$j]['flaeche'];
 			          }
-			          if (strlen($alkemz[$j]['label'])==20) {
-			            $label1=mb_substr(mb_substr($alkemz[$j]['label'],4,'utf8'),0,-6,'utf8');
-			            $label2=ltrim(mb_substr(trim(mb_substr($alkemz[$j]['label'],-6,6,'utf8')),0,3,'utf8'),"0");
-			            $label3=ltrim(mb_substr($alkemz[$j]['label'],-3,3,'utf8'),"0");
-			          } elseif (strlen($alkemz[$j]['label'])==23) {
-			            $label1=mb_substr(mb_substr($alkemz[$j]['label'],4,'utf8'),0,-9,'utf8');
-			            $label2=ltrim(mb_substr(trim(mb_substr($alkemz[$j]['label'],-9,6,'utf8')),0,3,'utf8'),"0");
-			            $label3=ltrim(mb_substr($alkemz[$j]['label'],-6,3,'utf8'),"0");
-			            $label4=mb_substr($alkemz[$j]['label'],-3,3,'utf8');
-			          } elseif (strlen($alkemz[$j]['label'])==29) {
-			            $label1=mb_substr(mb_substr($alkemz[$j]['label'],4,'utf8'),0,-15,'utf8');
-			            $label2=ltrim(mb_substr(trim(mb_substr($alkemz[$j]['label'],-15,6,'utf8')),0,3,'utf8'),"0");
-			            $label3=ltrim(mb_substr($alkemz[$j]['label'],-12,3,'utf8'),"0");
+		          	if(strlen($alkemz[$kl]['label'])==20) {
+			            $label1=substr(substr($alkemz[$kl]['label'],4),0,-6);
+			            $label2=ltrim(substr(trim(substr($alkemz[$kl]['label'],-6,6)),0,3),"0");
+			            $label3=ltrim(substr($alkemz[$kl]['label'],-3,3),"0");
+			          } elseif (strlen($alkemz[$kl]['label'])==23) {
+			            $label1=substr(substr($alkemz[$kl]['label'],4),0,-9);
+			            $label2=ltrim(substr(trim(substr($alkemz[$kl]['label'],-9,6)),0,3),"0");
+			            $label3=ltrim(substr($alkemz[$kl]['label'],-6,3),"0");
+			            $label4=substr($alkemz[$kl]['label'],-3,3);
+			          } elseif (strlen($alkemz[$kl]['label'])==29) {
+			            $label1=substr(substr($alkemz[$kl]['label'],4),0,-15);
+			            $label2=ltrim(substr(trim(substr($alkemz[$kl]['label'],-15,6)),0,3),"0");
+			            $label3=ltrim(substr($alkemz[$kl]['label'],-12,3),"0");
 			            $label4='W';
 			          }
 		            $csv .= round($alkemz[$j]['flaeche']).' m² '; 
@@ -1250,7 +1250,7 @@ class ALB {
 		          }
 	            $nichtgeschaetzt=round($flst->ALB_Flaeche-$flaeche_222-$flaeche_223);
 	            if($nichtgeschaetzt>0){
-          			$csv .=  'nicht geschätzt: '.$nichtgeschaetzt." m² \n";
+          			$csv .=  utf8_encode('nicht geschätzt: '.$nichtgeschaetzt." m² \n");
           		}
         			if($emzges_222 > 0){
         				$BWZ_222 = round($emzges_222/$flaeche_222*100);
@@ -1258,7 +1258,7 @@ class ALB {
           		}
         			if($emzges_223 > 0){
         				$BWZ_223 = round($emzges_223/$flaeche_223*100);
-        				$csv .= ' Grünland gesamt: EMZ '.$emzges_223.' , BWZ '.$BWZ_223;
+        				$csv .= utf8_encode(' Grünland gesamt: EMZ '.$emzges_223.' , BWZ '.$BWZ_223);
 							}
 	        	}
 	        }
@@ -1778,6 +1778,21 @@ class ALB {
           }
           */
 
+        	if($row<120) {
+            # Seitenumbruch
+            $seite++;
+            # aktuelle Seite abschließen
+            $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
+            # neue Seite beginnen
+            $pageid=$pdf->newPage();
+            $pagecount[$f] = $pagecount[$f] + 1;
+            if ($wasserzeichen) {
+            	$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
+            }
+            $row=825; # 812 -> 825 2007-04-02 Schmidt
+          	$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+          }
+          
           # Freier Text zum Flurstück
           if (count($flst->FreiText)>0) {
             $pdf->addText($col0,$row-=24,$fontSize,'Zusätzliche Angaben');
@@ -1818,7 +1833,21 @@ class ALB {
 
           # Verfahren
           $anzVerfahren=count($flst->Verfahren);
-          for ($i=0;$i<$anzVerfahren;$i++) {
+          for ($i=0;$i<$anzVerfahren;$i++){
+	          if($row<120) {
+	            # Seitenumbruch
+	            $seite++;
+	            # aktuelle Seite abschließen
+	            $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
+	            # neue Seite beginnen
+	            $pageid=$pdf->newPage();
+	            $pagecount[$f] = $pagecount[$f] + 1;
+	            if ($wasserzeichen) {
+	            	$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
+	            }
+	            $row=825; # 812 -> 825 2007-04-02 Schmidt
+	          	$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+	          }
             $pdf->addText($col0,$row-=24,$fontSize,'Ausführende Stelle');
             $pdf->addText($col2_1,$row,$fontSize,$flst->Verfahren[$i]['ausfstelleid']);
             $AusfStelleName=zeilenumbruch($flst->Verfahren[$i]['ausfstellename'],40);

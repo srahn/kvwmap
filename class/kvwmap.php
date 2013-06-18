@@ -8995,34 +8995,76 @@ class GUI extends GUI_core{
       showAlert('Wählen Sie bitte eine Antragsnummer aus! ');
     }
     else {
-      $antrag = new antrag($antr_nr,$this->pgdatabase);
-      # 2006-01-26
-      # Frage aller Vorgänge zum Antrag ab
-      $ret=$antrag->getFFR();
+      $this->antrag = new antrag($antr_nr,$this->pgdatabase);
+      $ret=$this->antrag->getFFR($this->formvars);
       if ($ret[0]) {
         $this->Fehlermeldung=$ret[1];
         # Abbruch mit Fehlermeldung und Rücksprung in Auswahl
         $this->Antraege_Anzeigen();
       }
-      else {
-        # Erzeugen des Übergabeprotokolls mit der Zuordnung der Nachweise zum gewählten Auftrag als PDF-Dokument
-        # Ausgabe der Flurstücksdaten im PDF Format
-        include (PDFCLASSPATH."class.ezpdf.php");
-        $pdf=new Cezpdf();
-        $pdf=$antrag->erzeugenUbergabeprotokoll();
-        $this->pdf=$pdf;
-
-        $dateipfad=IMAGEPATH;
-        $currenttime = date('Y-m-d_H:i:s',time());
-        $name = umlaute_umwandeln($this->user->Name);
-        $dateiname = $name.'-'.$currenttime.'.pdf';
-        $this->outputfile = $dateiname;
-        $fp=fopen($dateipfad.$dateiname,'wb');
-        fwrite($fp,$this->pdf->ezOutput());
-        fclose($fp);
-
-        $this->mime_type='pdf';
+      else{
+      	$this->main = 'uebergabeprotokoll.php';
+      	$this->titel = 'Übergabeprotokoll zusammenstellen';
         $this->output();
+      }
+    }
+  }
+  
+  function erzeugenUebergabeprotokollNachweise_PDF(){
+  	# Erzeugen des Übergabeprotokolls mit der Zuordnung der Nachweise zum gewählten Auftrag als PDF-Dokument
+  	if($this->formvars['antr_selected'] == ''){
+      $this->Antraege_Anzeigen();
+      showAlert('Wählen Sie bitte eine Antragsnummer aus! ');
+    }
+    else {
+      $this->antrag = new antrag($this->formvars['antr_selected'],$this->pgdatabase);
+      $ret=$this->antrag->getFFR($this->formvars);
+      if ($ret[0]) {
+        $this->Fehlermeldung=$ret[1];
+        # Abbruch mit Fehlermeldung und Rücksprung in Auswahl
+        $this->Antraege_Anzeigen();
+      }
+      else{
+		    include (PDFCLASSPATH."class.ezpdf.php");
+		    $pdf=new Cezpdf();
+		    $pdf=$this->antrag->erzeugenUbergabeprotokoll_PDF($this->formvars);
+		    $this->pdf=$pdf;
+		    $dateipfad=IMAGEPATH;
+		    $currenttime = date('Y-m-d_H:i:s',time());
+		    $name = umlaute_umwandeln($this->user->Name);
+		    $dateiname = $name.'-'.$currenttime.'.pdf';
+		    $this->outputfile = $dateiname;
+		    $fp=fopen($dateipfad.$dateiname,'wb');
+		    fwrite($fp,$this->pdf->ezOutput());
+		    fclose($fp);
+		    $this->mime_type='pdf';
+		    $this->output();
+      }
+    }
+  }
+  
+  function erzeugenUebergabeprotokollNachweise_CSV(){
+  	# Erzeugen des Übergabeprotokolls mit der Zuordnung der Nachweise zum gewählten Auftrag als CSV-Dokument
+  	if($this->formvars['antr_selected'] == ''){
+      $this->Antraege_Anzeigen();
+      showAlert('Wählen Sie bitte eine Antragsnummer aus! ');
+    }
+    else {
+      $this->antrag = new antrag($this->formvars['antr_selected'],$this->pgdatabase);
+      $ret=$this->antrag->getFFR($this->formvars);
+      if ($ret[0]) {
+        $this->Fehlermeldung=$ret[1];
+        # Abbruch mit Fehlermeldung und Rücksprung in Auswahl
+        $this->Antraege_Anzeigen();
+      }
+      else{
+		    $csv=$this->antrag->erzeugenUbergabeprotokoll_CSV($this->formvars);
+		    ob_end_clean();
+		    header("Content-type: application/vnd.ms-excel");
+		    header("Content-disposition:  inline; filename=Übergabeprotokoll_".date('Y-m-d_G-i-s').".csv");
+		    header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+		    header('Pragma: public');
+		    print utf8_decode($csv);
       }
     }
   }

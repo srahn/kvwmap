@@ -181,7 +181,7 @@ class antrag {
     return $errmsg;     
   }  
   
-  function erzeugenUbergabeprotokoll() {
+  function erzeugenUbergabeprotokoll_PDF() {
     $pdf=new Cezpdf();
     $tmp = array('b'=>'Times-Bold.afm','i'=>'Times-Italic.afm','bi'=>'Times-BoldItalic.afm');
     $row=800;
@@ -237,6 +237,21 @@ class antrag {
     }
     return $pdf;
   }
+  
+  function erzeugenUbergabeprotokoll_CSV(){
+  	# Überschriften
+  	foreach($this->FFR[0] as $key=>$value){
+  		$csv .= $key.';';
+  		next($this->FFR[0]);
+  	}
+  	$csv.= chr(10);
+  	# Daten
+  	for($i=0; $i < count($this->FFR); $i++){
+  		$csv .= implode(';', $this->FFR[$i]);
+  		$csv.= chr(10);
+    }
+    return $csv;
+  }
     
   function getAntraege($id,$nr,$richtung,$order) {
     $sql ="SELECT a.*,a.vermstelle,va.art AS vermart,vs.name AS vermst";
@@ -287,7 +302,7 @@ class antrag {
     return $ret;
   }
     
-  function getFFR() {
+  function getFFR($formvars) {
     # Abfrage der Vorgänge, die zu einem Auftrag zugeordnet sind
     # Ein Vorgang umfasst alle FFR, GN, KVZ mit gleicher flurid und stammnr
     # Die Abfrage liefert für jeden Vorgang eine Datenzeile zurück
@@ -302,6 +317,7 @@ class antrag {
     $sql ="SELECT DISTINCT n.flurid,n.stammnr,n.rissnummer";
     $sql.=" FROM n_nachweise AS n, n_nachweise2antraege AS n2a";
     $sql.=" WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
+    if($formvars['order'] != '')$sql.=" ORDER BY ".$formvars['order'];
     #echo $sql;
     $ret=$this->database->execSQL($sql,4, 0);    
     if ($ret[0]) { return $ret[1]; }
@@ -309,46 +325,65 @@ class antrag {
     $i=0;
     while($rs=pg_fetch_array($query_id)) {
       # Setzen der laufenden Nummer der Vorgänge
-      $FFR[$i]['Lfd']=$i+1;
+      if($formvars['Lfd'])$FFR[$i]['Lfd']=$i+1;
       
       if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){
-      	$FFR[$i]['Riss-Nummer']=$rs['flurid'].'/'.$rs['rissnummer'];
-      	$FFR[$i]['Antrags-Nummer']=str_pad($rs['stammnr'],RISSNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
+      	if($formvars['Riss-Nummer'])$FFR[$i]['Riss-Nummer']=$rs['flurid'].'/'.$rs['rissnummer'];
+      	if($formvars['Antrags-Nummer'])$FFR[$i]['Antrags-Nummer']=str_pad($rs['stammnr'],RISSNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
       }
       else{
-      	$FFR[$i]['Antrags-Nummer']=$rs['flurid'].'/'.str_pad($rs['stammnr'],ANTRAGSNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
-      	$FFR[$i]['Riss-Nummer']=$rs['rissnummer'];
+      	if($formvars['Antrags-Nummer'])$FFR[$i]['Antrags-Nummer']=$rs['flurid'].'/'.str_pad($rs['stammnr'],ANTRAGSNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
+      	if($formvars['Riss-Nummer'])$FFR[$i]['Riss-Nummer']=$rs['rissnummer'];
       }
 
       # Abfrage der Anzahl der FFR zum Vorgang
-      $ret=$this->getAnzFFR($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
-      if ($ret[0]) { return $ret; }
-      $FFR[$i]['FFR']=$ret[1];      
+      if($formvars['FFR']){
+      	$ret=$this->getAnzFFR($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
+      	if ($ret[0]) { return $ret; }
+      	$FFR[$i]['FFR']=$ret[1];
+      }      
       
       # Abfrage der Anzahl der KVZ zum Vorgang
-      $ret=$this->getAnzKVZ($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
-      if ($ret[0]) { return $ret; }
-      $FFR[$i]['KVZ']=$ret[1];
+      if($formvars['KVZ']){
+	      $ret=$this->getAnzKVZ($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
+	      if ($ret[0]) { return $ret; }
+	      $FFR[$i]['KVZ']=$ret[1];
+      }
       
       # Abfrage der Anzahl der GN zum Vorgang
-      $ret=$this->getAnzGN($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
-      if ($ret[0]) { return $ret; }
-      $FFR[$i]['GN']=$ret[1];
+      if($formvars['GN']){
+	      $ret=$this->getAnzGN($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
+	      if ($ret[0]) { return $ret; }
+	      $FFR[$i]['GN']=$ret[1];
+      }
       
       # Abfrage der Anzahl der anderen Dokumente zum Vorgang
-      $ret=$this->getAnzAndere($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
-      if ($ret[0]) { return $ret; }
-      $FFR[$i]['andere']=$ret[1];            
+      if($formvars['andere']){
+	      $ret=$this->getAnzAndere($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
+	      if ($ret[0]) { return $ret; }
+	      $FFR[$i]['andere']=$ret[1];
+      }            
             
       # Abfrage der Datumsangaben im Vorgang
-      $ret=$this->getDatum($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
-      if ($ret[0]) { return $ret; }
-      $FFR[$i]['Datum']=$ret[1];
+      if($formvars['Datum']){
+	      $ret=$this->getDatum($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
+	      if ($ret[0]) { return $ret; }
+	      $FFR[$i]['Datum']=$ret[1];
+      }
+      
+    	# Abfrage der Dateinamen im Vorgang
+      if($formvars['Datei']){
+	      $ret=$this->getDatei($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
+	      if ($ret[0]) { return $ret; }
+	      $FFR[$i]['Datei']=$ret[1];
+      }
 
       # Abfrage der Vermessungsstellen im Vorgang
-      $ret=$this->getVermessungsStellen($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
-      if ($ret[0]) { return $ret; }
-      $FFR[$i]['gemessen durch']=utf8_decode($ret[1]); 
+      if($formvars['gemessendurch']){
+	      $ret=$this->getVermessungsStellen($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
+	      if ($ret[0]) { return $ret; }
+	      $FFR[$i]['gemessen durch']=utf8_decode($ret[1]); 
+      }
             
       # Abfrage der Gültigkeiten der Dokumente im Vorgang
       $ret=$this->getGueltigkeit($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
@@ -380,6 +415,25 @@ class antrag {
     }     
     return $ret;  
   }
+  
+	function getDatei($flurid,$nr,$secondary) {
+    $this->debug->write('<br>nachweis.php getDatei Abfragen der Dateien zu einem Vorgang in der Nachweisführung.',4);
+    # Abfragen der Datum zu einem Vorgang in der Nachweisführung
+    $sql.="SELECT DISTINCT n.link_datei FROM n_nachweise AS n";
+    $sql.=" WHERE n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
+    if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
+    $ret=$this->database->execSQL($sql,4, 0);
+    if (!$ret[0]) {
+      $rs=pg_fetch_array($ret[1]);
+      $datei=$rs['link_datei'];  
+      while($rs=pg_fetch_array($ret[1])) {
+        $datei.=', '.$rs['link_datei'];
+      }
+      $ret[1]=$datei;
+    }     
+    return $ret;  
+  }
+  
   function getGueltigkeit($flurid,$nr,$secondary) {
     $this->debug->write('<br>nachweis.php getDatum Abfragen der Gueltigkeit der Dokumente in einem Vorgang in der Nachweisführung.',4);
     # Abfragen der Gueltigkeit der Dokumente in einem Vorgang in der Nachweisführung.
