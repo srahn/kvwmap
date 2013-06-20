@@ -2412,7 +2412,7 @@ class stelle extends stelle_core{
 	function addLayer($layer_ids, $drawingorder) {
 		# Hinzufügen von Layern zur Stelle
 		for ($i=0;$i<count($layer_ids);$i++) {
-			$sql = "SELECT queryable, template, transparency, drawingorder, minscale, maxscale, offsite FROM layer WHERE Layer_ID = ".$layer_ids[$i];
+			$sql = "SELECT queryable, template, transparency, drawingorder, minscale, maxscale, offsite, privileg FROM layer WHERE Layer_ID = ".$layer_ids[$i];
 			$this->debug->write("<p>file:users.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 			$query=mysql_query($sql,$this->database->dbConn);
 			$rs = mysql_fetch_array($query);
@@ -2426,9 +2426,16 @@ class stelle extends stelle_core{
 			$minscale = $rs['minscale'];
 			$maxscale = $rs['maxscale'];
 			$offsite = $rs['offsite'];
-
-			$sql ='INSERT IGNORE INTO used_layer ( `Stelle_ID` , `Layer_ID` , `queryable` , `drawingorder` , `minscale` , `maxscale` , `offsite` , `transparency`, `Filter` , `template` , `header` , `footer` , `symbolscale` )';
-			$sql.="VALUES ('".$this->id."', '".$layer_ids[$i]."', '".$queryable."', '".$drawingorder."', '".$minscale."', '".$maxscale."', '".$offsite."' , ".$transparency.", NULL,'".$template."' , NULL , NULL , NULL)";
+			$privileg = $rs['privileg'];
+			$sql ='INSERT IGNORE INTO used_layer ( `Stelle_ID` , `Layer_ID` , `queryable` , `drawingorder` , `minscale` , `maxscale` , `offsite` , `transparency`, `Filter` , `template` , `header` , `footer` , `symbolscale`, `privileg` )';
+			$sql.="VALUES ('".$this->id."', '".$layer_ids[$i]."', '".$queryable."', '".$drawingorder."', '".$minscale."', '".$maxscale."', '".$offsite."' , ".$transparency.", NULL,'".$template."' , NULL , NULL , NULL, '".$privileg."')";
+			#echo $sql.'<br>';
+			$this->debug->write("<p>file:users.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
+			$query=mysql_query($sql,$this->database->dbConn);
+			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+			
+			$sql = "INSERT IGNORE INTO layer_attributes2stelle (layer_id, attributename, stelle_id, privileg) ";
+			$sql.= "SELECT ".$layer_ids[$i].", name, ".$this->id.", privileg FROM layer_attributes WHERE layer_id = ".$layer_ids[$i]." AND privileg IS NOT NULL";
 			#echo $sql.'<br>';
 			$this->debug->write("<p>file:users.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 			$query=mysql_query($sql,$this->database->dbConn);

@@ -3879,6 +3879,7 @@ class pgdatabase extends pgdatabase_core {
       $sql.=' USING alb_'.$this->tableprefix.'v_klassifizierungen';
     }
     $sql.=' WHERE alb_v_klassifizierungen.klass = alb_'.$this->tableprefix.'v_klassifizierungen.klass';
+    $sql.=' AND alb_v_klassifizierungen.tabkenn = alb_'.$this->tableprefix.'v_klassifizierungen.tabkenn';
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) {
       return $ret;

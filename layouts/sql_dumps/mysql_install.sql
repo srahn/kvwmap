@@ -218,6 +218,7 @@ CREATE TABLE layer_attributes (
   `group` VARCHAR( 255 ) DEFAULT NULL,
   `mandatory` BOOL NULL,
   `order` int(11) default NULL,
+  `privileg` BOOLEAN NULL DEFAULT '0',
   PRIMARY KEY  (layer_id,`name`)
 );
 
@@ -523,6 +524,7 @@ CREATE TABLE `layer` (
   `kurzbeschreibung` TEXT NULL,
   `datenherr` VARCHAR( 100 ) NULL,
   `metalink` VARCHAR( 255 ) NULL,
+  `privileg` ENUM( '0', '1', '2' ) NOT NULL DEFAULT '0',
   PRIMARY KEY  (`Layer_ID`),
   KEY `Gruppe` (`Gruppe`)
 );

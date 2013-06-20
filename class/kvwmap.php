@@ -7559,30 +7559,38 @@ class GUI extends GUI_core{
     $this->titel='Rechteverwaltung der Layerattribute';
     $this->main='attribut_privileges_form.php';
     $this->stellendaten=$this->Stelle->getStellen('Bezeichnung');
-    # Als Vorauswahl wird immer die aktuelle Stelle gewählt
-    # the current task id is used as default
-    if($this->formvars['stelle'] == '') {
-      $this->formvars['stelle'] = $this->Stelle->id;
+    if($this->formvars['stelle'] != ''){
+    	$this->stelle = new stelle($this->formvars['stelle'], $this->database);
+    	$this->layerdaten = $this->stelle->getLayers(NULL, 'Name');
     }
-    $stelle = new stelle($this->formvars['stelle'], $this->database);
-    $this->layerdaten = $stelle->getLayers(NULL, 'Name');
+    else{    
+    	$this->layerdaten = $mapdb->getall_Layer('Name');
+    }    
     if($this->formvars['selected_layer_id'] != ''){
-      $this->layer = $stelle->getLayer($this->formvars['selected_layer_id']);
-      $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-      $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
-      $this->attributes_privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
+    	$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+    	$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
+    	if($this->formvars['stelle'] != ''){
+      	$this->layer = $this->stelle->getLayer($this->formvars['selected_layer_id']);
+      	$this->attributes_privileges = $this->stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
+    	}
+    	else{
+    		$this->layer[0] = $mapdb->get_Layer($this->formvars['selected_layer_id']);
+    	}
     }
     $this->output();
   }
 
   function layer_attributes_privileges_save(){
+  	$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
+    $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+    $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
     if($this->formvars['stelle'] != '' AND $this->formvars['selected_layer_id'] != ''){
-      $this->loadMap('DataBase');
       $stelle = new stelle($this->formvars['stelle'], $this->database);
-      $layerdb = $this->mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-      $this->attributes = $this->mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
       $stelle->set_attributes_privileges($this->formvars, $this->attributes);
       $stelle->set_layer_privileges($this->formvars['selected_layer_id'], $this->formvars['privileg']);
+    }
+    elseif($this->formvars['selected_layer_id'] != ''){
+      $mapdb->set_default_layer_privileges($this->formvars, $this->attributes);
     }
     $this->layer_attributes_privileges();
   }
@@ -13672,12 +13680,12 @@ class db_mapObj extends db_mapObj_core{
 		$sql .= 'SET @group_id = 1;'.chr(10);
 		$sql .= 'SET @connection = \'user=xxxx password=xxxx dbname=kvwmapsp\';'.chr(10).chr(10);
 		for($i = 0; $i < count($layer_ids); $i++){
-			$layer = $database->create_insert_dump('layer', '', 'SELECT `Name`, `Datentyp`, \'@group_id\' AS `Gruppe`, `pfad`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, wms_auth_username, wms_auth_password, `wfs_geom`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `datenherr` FROM layer WHERE Layer_ID='.$layer_ids[$i]);
+			$layer = $database->create_insert_dump('layer', '', 'SELECT `Name`, `Datentyp`, \'@group_id\' AS `Gruppe`, `pfad`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, wms_auth_username, wms_auth_password, `wfs_geom`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `privileg` FROM layer WHERE Layer_ID='.$layer_ids[$i]);
 			$sql .= $layer['insert'][0];
 			$last_layer_id = '@last_layer_id'.$layer_ids[$i];
 			$sql .= chr(10).'SET '.$last_layer_id.'=LAST_INSERT_ID();'.chr(10);
 			$classes = $database->create_insert_dump('classes', 'Class_ID', 'SELECT `Class_ID`, `Name`, \''.$last_layer_id.'\' AS `Layer_ID`, `Expression`, `drawingorder`, `text` FROM classes WHERE Layer_ID='.$layer_ids[$i]);
-			$layer_attributes = $database->create_insert_dump('layer_attributes', '', 'SELECT \''.$last_layer_id.'\' AS `layer_id`, `name`, real_name, tablename, table_alias_name, `type`, geometrytype, constraints, nullable, length, form_element_type, options, alias, tooltip, `order` FROM layer_attributes WHERE layer_id = '.$layer_ids[$i]);
+			$layer_attributes = $database->create_insert_dump('layer_attributes', '', 'SELECT \''.$last_layer_id.'\' AS `layer_id`, `name`, real_name, tablename, table_alias_name, `type`, geometrytype, constraints, nullable, length, form_element_type, options, alias, tooltip, `order`, `privileg` FROM layer_attributes WHERE layer_id = '.$layer_ids[$i]);
 			for($j = 0; $j < count($layer_attributes['insert']); $j++){
 				$sql .= $layer_attributes['insert'][$j].chr(10);
 			}
@@ -14097,6 +14105,7 @@ class db_mapObj extends db_mapObj_core{
     	$attributes['tooltip'][$i]= $rs['tooltip'];
     	$attributes['group'][$i]= $rs['group'];
     	$attributes['mandatory'][$i]= $rs['mandatory'];
+    	$attributes['privileg'][$i]= $rs['privileg'];
     	$i++;
     }
     if($attributes['table_name'] != NULL){   
@@ -14175,6 +14184,23 @@ class db_mapObj extends db_mapObj_core{
     $layer = mysql_fetch_array($query);
     return $layer;
   }
+  
+	function set_default_layer_privileges($formvars, $attributes){
+		for($i = 0; $i < count($attributes['type']); $i++){
+			if($formvars['privileg_'.$attributes['name'][$i]] == '')$formvars['privileg_'.$attributes['name'][$i]] = 'NULL';
+			$sql = 'UPDATE layer_attributes SET ';
+			$sql.= 'privileg = '.$formvars['privileg_'.$attributes['name'][$i]];
+			$sql.= ' WHERE layer_id = '.$formvars['selected_layer_id'].' AND name = "'.$attributes['name'][$i].'"';
+			$this->debug->write("<p>file:users.php class:stelle->set_default_layer_privileges - Speichern des Layerrechte zur Stelle:<br>".$sql,4);
+			$query=mysql_query($sql);
+			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+			$sql = 'UPDATE layer SET privileg = "'.$formvars['privileg'].'" WHERE ';
+			$sql.= 'Layer_ID = '.$formvars['selected_layer_id'];
+			$this->debug->write("<p>file:users.php class:stelle->set_default_layer_privileges - Speichern der Layerrechte zur Stelle:<br>".$sql,4);
+			$query=mysql_query($sql);
+			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		}
+	}
   
 	function get_layersfromgroup($group_id ){
     $sql ='SELECT * FROM layer WHERE Gruppe = '.$group_id;
