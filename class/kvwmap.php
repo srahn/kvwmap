@@ -1687,6 +1687,12 @@ class GUI extends GUI_core{
         $rect->miny = $this->point['pointy']-100;
         $rect->maxy = $this->point['pointy']+100;
         $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
+      	if (MAPSERVERVERSION > 600) {
+					$this->map_scaledenom = $this->map->scaledenom;
+				}
+				else {
+					$this->map_scaledenom = $this->map->scale;
+				}
       }
     }
     $this->saveMap('');
@@ -1752,6 +1758,12 @@ class GUI extends GUI_core{
         if($this->formvars['zoom'] != 'false'){
           $rect = $lineeditor->zoomToLine($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], 10);
           $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
+        	if (MAPSERVERVERSION > 600) {
+						$this->map_scaledenom = $this->map->scaledenom;
+					}
+					else {
+						$this->map_scaledenom = $this->map->scale;
+					}
         }
       }
     }
@@ -1844,6 +1856,12 @@ class GUI extends GUI_core{
         if($this->formvars['zoom'] != 'false'){
           $rect = $polygoneditor->zoomTopolygon($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], 10);
           $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
+        	if (MAPSERVERVERSION > 600) {
+						$this->map_scaledenom = $this->map->scaledenom;
+					}
+					else {
+						$this->map_scaledenom = $this->map->scale;
+					}
         }
       }
     }
