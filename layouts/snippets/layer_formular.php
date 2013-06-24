@@ -345,7 +345,7 @@ else {
 		  	</tr>
 		  </table>
 		  <br>
-    
+    	<a name="stellenzuweisung"></a>
       <table border="0" cellspacing="0" cellpadding="3" style="border:1px solid <?php echo BG_DEFAULT ?>">
 		  	<tr align="center">
 		  		<th bgcolor="<?php echo BG_DEFAULT ?>" width="570" style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strTasks; ?></th>
@@ -374,6 +374,15 @@ else {
           </td>
         </tr>
       </table>
+      <br>
+      
+      <table cellspacing="0" cellpadding="5" border="0">
+			<tr>
+	  		<td align="right">
+	  			<input type="button" name="dummy" onclick="location.href='index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>'" value="<?php echo $strPrivileges; ?>">
+	  		</td>
+	  	</tr>
+			</table>
       		  
 		  <br>
 		  <table border="0" cellspacing="0" cellpadding="3" style="border:1px solid <?php echo BG_DEFAULT ?>">

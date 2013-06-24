@@ -61,4 +61,5 @@
   $strDataOwner="Datenherr";
   $strMetaLink="Metadatenlink";
   $strMaintable="Haupttabelle";
+  $strPrivileges="Rechte festlegen";
 ?>  

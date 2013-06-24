@@ -51,7 +51,7 @@ class spatial_processor {
 		$ret = $this->pgdatabase->execSQL($sql,4, 0);
 		if (!$ret[0]) {
       while($rs=pg_fetch_row($ret[1])) {
-        $geoms[]=$rs[0];
+        $geoms[]=$rs;
       }
       return $geoms;
     }

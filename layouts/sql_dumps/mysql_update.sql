@@ -1103,3 +1103,4 @@ ALTER TABLE `layer` ADD `maintable` VARCHAR( 255 ) NULL DEFAULT NULL AFTER `pfad
 ALTER TABLE `layer` ADD `privileg` ENUM( '0', '1', '2' ) NOT NULL DEFAULT '0';
 
 ALTER TABLE `layer_attributes` ADD `privileg` BOOLEAN NULL DEFAULT '0';
+ALTER TABLE `layer_attributes` ADD `query_tooltip` BOOLEAN NULL DEFAULT '0';

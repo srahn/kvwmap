@@ -364,11 +364,30 @@ class GUI extends GUI_core{
 		$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 		$spatial_processor = new spatial_processor($this->user->rolle, $this->database, $layerdb);
 		$single_geoms = $spatial_processor->split_multi_geometries($this->formvars['newpathwkt'], $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+		$this->split_datasets($this->formvars['selected_layer_id'], array('oid'), array($this->formvars['oid']), array($this->formvars['layer_columnname']), $single_geoms, $mapdb);
+		$this->loadMap('DataBase');					# Karte anzeigen
+		$currenttime=date('Y-m-d H:i:s',time());
+    $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
+    $this->drawMap();
+    $this->saveMap('');
+		$this->output(); 
+	}
+	
+	function split_datasets($layer_id, $id_names, $id_values, $update_columns, $update_values, $mapdb){
+		# Diese Funktion teilt einen über die Arrays $id_names und $id_values bestimmten Datensatz in einem Layer auf x neue Datensätze auf.
+		# Jeder Datensatz unterscheidet sich in den Attributen, die über das Array $update_columns definiert werden, von den anderen.
+		# D.h. der Datensatz wird x-mal kopiert und alle Attribute in $update_columns auf den entsprechenden Wert im Array $update_values gesetzt.
+		# Wie oft das passiert, hängt von der Größe des Arrays $update_values ab.
+		# Außerdem wird dieses Splitting rekursiv auf den über SubformPK- oder embeddedPK verknüpften Layern durchgeführt. 
+		
+		$layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
+		$layerdb = $mapdb->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+		$layerattributes = $mapdb->read_layer_attributes($this->formvars['layer_id'], $layerdb, NULL);
 		
 		# Attribute, die eine Sequenz haben weglassen
-		$sql = "SELECT column_name FROM information_schema.columns WHERE table_name = '".$this->formvars['layer_tablename']."' AND table_schema = '".$layerdb->schema."' ";
+		$sql = "SELECT column_name FROM information_schema.columns WHERE table_name = '".$layerset[0]['maintable']."' AND table_schema = '".$layerdb->schema."' ";
 		$sql.= "AND column_name NOT IN (SELECT pg_attribute.attname FROM pg_class a, pg_class b, pg_attribute "; 
-		$sql.= "WHERE a.relname = '".$this->formvars['layer_tablename']."' AND pg_attribute.attrelid = a.oid "; 
+		$sql.= "WHERE a.relname = '".$layerset[0]['maintable']."' AND pg_attribute.attrelid = a.oid "; 
 		$sql.= "AND b.relkind = 'S' and b.relname = a.relname||'_'||pg_attribute.attname||'_seq')";
 		$ret=$layerdb->execSQL($sql,4, 0);
 		if(!$ret[0]){
@@ -377,21 +396,60 @@ class GUI extends GUI_core{
 			}
 		}
 		
-		for($i = 0; $i < count($single_geoms); $i++){
-			$sql = "INSERT INTO ".$this->formvars['layer_tablename']." (".implode(',', $attributes).") SELECT ".implode(',', $attributes)." FROM ".$this->formvars['layer_tablename']." WHERE oid = ".$this->formvars['oid'];
+		for($i = 0; $i < count($update_values); $i++){
+			$sql = "INSERT INTO ".$layerset[0]['maintable']." (".implode(',', $attributes).") SELECT ".implode(',', $attributes)." FROM ".$layerset[0]['maintable']." WHERE ";
+			for($n = 0; $n < count($id_names); $n++){
+				$sql.= $id_names[$n]." = '".$id_values[$n]."' AND ";
+			}
+			$sql.= "1=1"; 
 			$ret = $layerdb->execSQL($sql,4, 0);
 			$new_oid = pg_last_oid($ret[1]);
-			$sql = "UPDATE ".$this->formvars['layer_tablename']." SET ".$this->formvars['layer_columnname']." = '".$single_geoms[$i]."' WHERE oid = ".$new_oid;
-			$ret = $layerdb->execSQL($sql,4, 0);
+			$new_oids[] = $new_oid;
+			for($u = 0; $u < count($update_columns); $u++){
+				$sql = "UPDATE ".$layerset[0]['maintable']." SET ".$update_columns[$u]." = '".$update_values[$i][$u]."' WHERE oid = ".$new_oid;
+				$ret = $layerdb->execSQL($sql,4, 0);
+			}
+			
+			$j = 0;
+			for($l = 0; $l < count($layerattributes['name']); $l++){
+	    	if(in_array($attributes['form_element_type'][$l], array('SubFormEmbeddedPK', 'SubFormPK'))){
+					$options = explode(';', $attributes['options'][$l]);  
+	        $subform = explode(',', $options[0]);  
+	        $subform_layerid = $subform[0];
+	        if($attributes['form_element_type'][$l] == 'SubFormEmbeddedPK')$minus = 1;
+	        else $minus = 0;
+	        for($k = 1; $k < count($subform)-$minus; $k++){
+	        	$subform_pks = $subform[$k];																																# das sind die Namen der SubformPK-Schlüssel
+	        }
+	        $sql = "SELECT ".implode(',', $subform_pks)." FROM ".$layerset[0]['maintable']." WHERE ";			# die Werte der SubformPK-Schlüssel aus dem alten Datensatz abfragen
+	        for($n = 0; $n < count($id_names); $n++){
+						$sql.= $id_names[$n]." = '".$id_values[$n]."' AND ";
+					}
+					$sql.= "1=1";
+	    		$ret=$layerdb->execSQL($sql,4, 0);
+					if(!$ret[0]){
+						$pkvalues=pg_fetch_row($ret[1]);
+					}
+	    		$sql = "SELECT ".implode(',', $subform_pks)." FROM ".$layerset[0]['maintable']." WHERE ";			# die Werte der SubformPK-Schlüssel aus den neuen Datensätzen abfragen
+	        $sql.= "oid IN (".implode(',', $new_oids).")";
+	    		$ret=$layerdb->execSQL($sql,4, 0);
+					if(!$ret[0]){
+						while($rs=pg_fetch_row($ret[1])){
+							$update_values[] = $rs;
+						}
+					}					
+	        $j++;
+	        $this->split_datasets($subform_layerid, $subform_pks, $pkvalues, $subform_pks, $update_values, $mapdb);
+	    	}
+	    }
+			
 		}
-		$sql = "DELETE FROM ".$this->formvars['layer_tablename']." WHERE oid = ".$this->formvars['oid'];
-		$ret = $layerdb->execSQL($sql,4, 0);
-		$this->loadMap('DataBase');					# Karte anzeigen
-		$currenttime=date('Y-m-d H:i:s',time());
-    $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-    $this->drawMap();
-    $this->saveMap('');
-		$this->output(); 
+		$sql = "DELETE FROM ".$layerset[0]['maintable']." WHERE ";
+		for($n = 0; $n < count($id_names); $n++){
+			$sql.= $id_names[$n]." = '".$id_values[$n]."' AND ";
+		}
+		$sql.= "1=1";
+		$ret = $layerdb->execSQL($sql,4, 0);	
 	}
 
   function import_layer(){
@@ -5793,6 +5851,7 @@ class GUI extends GUI_core{
   }
 
   function LayerAendern(){
+  	$this->formvars['pfad'] = stripslashes($this->formvars['pfad']);
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $mapDB->updateLayer($this->formvars);
     $old_layer_id = $this->formvars['selected_layer_id'];
@@ -7558,24 +7617,12 @@ class GUI extends GUI_core{
     $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->titel='Rechteverwaltung der Layerattribute';
     $this->main='attribut_privileges_form.php';
-    $this->stellendaten=$this->Stelle->getStellen('Bezeichnung');
-    if($this->formvars['stelle'] != ''){
-    	$this->stelle = new stelle($this->formvars['stelle'], $this->database);
-    	$this->layerdaten = $this->stelle->getLayers(NULL, 'Name');
-    }
-    else{    
-    	$this->layerdaten = $mapdb->getall_Layer('Name');
-    }    
+   	$this->layerdaten = $mapdb->getall_Layer('Name');    
     if($this->formvars['selected_layer_id'] != ''){
     	$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
     	$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
-    	if($this->formvars['stelle'] != ''){
-      	$this->layer = $this->stelle->getLayer($this->formvars['selected_layer_id']);
-      	$this->attributes_privileges = $this->stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
-    	}
-    	else{
-    		$this->layer[0] = $mapdb->get_Layer($this->formvars['selected_layer_id']);
-    	}
+    	$this->stellen = $mapdb->get_stellen_from_layer($this->formvars['selected_layer_id']);
+    	$this->layer[0] = $mapdb->get_Layer($this->formvars['selected_layer_id']);
     }
     $this->output();
   }
@@ -7587,7 +7634,7 @@ class GUI extends GUI_core{
     if($this->formvars['stelle'] != '' AND $this->formvars['selected_layer_id'] != ''){
       $stelle = new stelle($this->formvars['stelle'], $this->database);
       $stelle->set_attributes_privileges($this->formvars, $this->attributes);
-      $stelle->set_layer_privileges($this->formvars['selected_layer_id'], $this->formvars['privileg']);
+      $stelle->set_layer_privileges($this->formvars['selected_layer_id'], $this->formvars['privileg'.$this->formvars['stelle']]);
     }
     elseif($this->formvars['selected_layer_id'] != ''){
       $mapdb->set_default_layer_privileges($this->formvars, $this->attributes);
@@ -14106,6 +14153,7 @@ class db_mapObj extends db_mapObj_core{
     	$attributes['group'][$i]= $rs['group'];
     	$attributes['mandatory'][$i]= $rs['mandatory'];
     	$attributes['privileg'][$i]= $rs['privileg'];
+    	$attributes['query_tooltip'][$i]= $rs['query_tooltip'];
     	$i++;
     }
     if($attributes['table_name'] != NULL){   
@@ -14190,6 +14238,12 @@ class db_mapObj extends db_mapObj_core{
 			if($formvars['privileg_'.$attributes['name'][$i]] == '')$formvars['privileg_'.$attributes['name'][$i]] = 'NULL';
 			$sql = 'UPDATE layer_attributes SET ';
 			$sql.= 'privileg = '.$formvars['privileg_'.$attributes['name'][$i]];
+			if($formvars['tooltip_'.$attributes['name'][$i]] == 'on'){
+				$sql.= ', query_tooltip = 1';
+			}
+			else{
+				$sql.= ', query_tooltip = 0';
+			}
 			$sql.= ' WHERE layer_id = '.$formvars['selected_layer_id'].' AND name = "'.$attributes['name'][$i].'"';
 			$this->debug->write("<p>file:users.php class:stelle->set_default_layer_privileges - Speichern des Layerrechte zur Stelle:<br>".$sql,4);
 			$query=mysql_query($sql);

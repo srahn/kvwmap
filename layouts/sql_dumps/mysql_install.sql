@@ -219,6 +219,7 @@ CREATE TABLE layer_attributes (
   `mandatory` BOOL NULL,
   `order` int(11) default NULL,
   `privileg` BOOLEAN NULL DEFAULT '0',
+  `query_tooltip` BOOLEAN NULL DEFAULT '0',
   PRIMARY KEY  (layer_id,`name`)
 );
 

@@ -60,6 +60,7 @@
   $strDataOwner="Data-Owner";
   $strMetaLink="Metadata-Link";
   $strMaintable="Main Table";
+  $strPrivileges="Set Privileges";
   
   
   

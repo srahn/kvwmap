@@ -2434,8 +2434,8 @@ class stelle extends stelle_core{
 			$query=mysql_query($sql,$this->database->dbConn);
 			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 			
-			$sql = "INSERT IGNORE INTO layer_attributes2stelle (layer_id, attributename, stelle_id, privileg) ";
-			$sql.= "SELECT ".$layer_ids[$i].", name, ".$this->id.", privileg FROM layer_attributes WHERE layer_id = ".$layer_ids[$i]." AND privileg IS NOT NULL";
+			$sql = "INSERT IGNORE INTO layer_attributes2stelle (layer_id, attributename, stelle_id, privileg, tooltip) ";
+			$sql.= "SELECT ".$layer_ids[$i].", name, ".$this->id.", privileg, query_tooltip FROM layer_attributes WHERE layer_id = ".$layer_ids[$i]." AND privileg IS NOT NULL";
 			#echo $sql.'<br>';
 			$this->debug->write("<p>file:users.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 			$query=mysql_query($sql,$this->database->dbConn);
@@ -2541,7 +2541,7 @@ class stelle extends stelle_core{
 		$sql .=' AND layer.Layer_ID = used_layer.Layer_ID';
 		$sql .=' AND used_layer.queryable = \'1\'';
 		if($privileg != NULL){
-			$sql .=' AND privileg >= "'.$privileg.'"';
+			$sql .=' AND used_layer.privileg >= "'.$privileg.'"';
 		}
 		$sql .= ' ORDER BY Name';
 		#echo $sql;
@@ -2570,7 +2570,7 @@ class stelle extends stelle_core{
 		$sql .=' AND layer.Layer_ID = used_layer.Layer_ID';
 		$sql .=' AND used_layer.queryable = \'1\'';
 		if($privileg != NULL){
-			$sql .=' AND privileg >= "'.$privileg.'"';
+			$sql .=' AND used_layer.privileg >= "'.$privileg.'"';
 		}
 		if($group_id != NULL){
 			$sql .=' AND u_groups.id = '.$group_id;
@@ -2783,8 +2783,8 @@ class stelle extends stelle_core{
 				$sql.= 'layer_id = '.$formvars['selected_layer_id'].', ';
 				$sql.= 'stelle_id = '.$this->id.', ';
 				$sql.= 'attributename = "'.$attributes['name'][$i].'", ';
-				$sql.= 'privileg = '.$formvars['privileg_'.$attributes['name'][$i]];
-				if($formvars['tooltip_'.$attributes['name'][$i]] == 'on'){
+				$sql.= 'privileg = '.$formvars['privileg_'.$attributes['name'][$i].$this->id];
+				if($formvars['tooltip_'.$attributes['name'][$i].$this->id] == 'on'){
 					$sql.= ', tooltip = 1';
 				}
 				else{
