@@ -105,6 +105,8 @@ function suche(){
 		alert(nogo);
 	}
 	else{
+		document.getElementById('loader').style.display = '';
+		setTimeout('document.getElementById(\'loaderimg\').src=\'graphics/ajax-loader.gif\'', 50)
 		document.GUI.go_plus.value = 'Suchen';
 		document.GUI.submit();
 	}
@@ -384,6 +386,9 @@ function delete_search(){
                 <td align="center" colspan="5"><br>
                 	<input class="button" type="button" name="suchen" onclick="suche();" value="Suchen">
                 </td>
+              </tr>
+              <tr>
+              	<td height="30" valign="bottom" align="center" colspan="5" id="loader" style="display:none"><img id="loaderimg" src="graphics/ajax-loader.gif"></td>
               </tr><?php
       }
     } 

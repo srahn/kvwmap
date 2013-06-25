@@ -5,7 +5,7 @@
 <script type="text/javascript">
 <!--
 
-Text[1]=["Hilfe:","Auf dieser Seite können Sie festlegen, welche Rechte eine Stelle beim Zugriff auf einen	bestimmten Layer haben soll.<br><br> Auf Layerebene gibt es 3 verschiedene Privilegien, die Sie der Stelle zuordnen können. Die niedrigste ist 'Lesen und bearbeiten'. Mit dieser Stufe kann der Layer nur abgefragt werden. Mit der zweiten Stufe lassen sich neue Datensätze erzeugen und mit der dritten Stufe außerdem vorhandene Datensätze löschen.<br><br> Darüberhinaus können Sie der Stelle attributbezogene Rechte zuweisen. Ist ein Attribut 'nicht sichtbar', so taucht es in der Sachdatenabfrage nicht auf. Ist ein Attribut lesbar, so erscheint es in der Abfrage. Soll ein Attribut editierbar sein, so wählt man hier das Privileg 'editierbar'. Beim Geometrie-Attribut 'the_geom' gilt: Ist dieses Attribut nicht sichtbar, so kann man auch nicht von der Sachdatenanzeige in die Karte auf das Objekt zoomen. Dafür muß es mindestens lesbar sein.<br>Damit ein Attribut in der Layer-Suche als Suchoption zur Verfügung steht, muss es ebenfalls mindestens lesbar sein.<br><br>Wenn Sie keine Stelle auswählen, können Sie Default-Rechte für den Layer festlegen, die dann bei der Stellenzuweisung des Layers verwendet werden."]
+Text[1]=["Hilfe:","Auf dieser Seite können Sie festlegen, welche Rechte eine Stelle beim Zugriff auf einen	bestimmten Layer haben soll.<br><br> Auf Layerebene gibt es 3 verschiedene Privilegien, die Sie der Stelle zuordnen können. Die niedrigste ist 'Lesen und bearbeiten'. Mit dieser Stufe kann der Layer nur abgefragt werden. Mit der zweiten Stufe lassen sich neue Datensätze erzeugen und mit der dritten Stufe außerdem vorhandene Datensätze löschen.<br><br> Darüberhinaus können Sie der Stelle attributbezogene Rechte zuweisen. Ist ein Attribut 'nicht sichtbar', so taucht es in der Sachdatenabfrage nicht auf. Ist ein Attribut lesbar, so erscheint es in der Abfrage. Soll ein Attribut editierbar sein, so wählt man hier das Privileg 'editierbar'. Beim Geometrie-Attribut 'the_geom' gilt: Ist dieses Attribut nicht sichtbar, so kann man auch nicht von der Sachdatenanzeige in die Karte auf das Objekt zoomen. Dafür muß es mindestens lesbar sein.<br>Damit ein Attribut in der Layer-Suche als Suchoption zur Verfügung steht, muss es ebenfalls mindestens lesbar sein.<br><br>Auf der linken Seite können Sie die Default-Rechte für den Layer festlegen, die dann bei der Stellenzuweisung des Layers verwendet werden."]
 
 
 
@@ -15,6 +15,22 @@ function set_all(attribute_names, stelle, value){
 	for(i = 0; i < names.length-1; i++){
 		element = document.getElementsByName('privileg_'+names[i]+stelle);
 		element[0].value = value;
+	}
+}
+
+function get_from_default(attribute_names, stelle){
+	element1 = document.getElementsByName('privileg'+stelle);
+	element2 = document.getElementsByName('privileg');
+	element1[0].value = element2[0].value;
+	attribute_names = attribute_names+'';
+	names = attribute_names.split('|');
+	for(i = 0; i < names.length-1; i++){
+		element1 = document.getElementsByName('privileg_'+names[i]+stelle);
+		element2 = document.getElementsByName('privileg_'+names[i]);
+		element1[0].value = element2[0].value;
+		tooltip1 = document.getElementsByName('tooltip_'+names[i]+stelle);
+		tooltip2 = document.getElementsByName('tooltip_'+names[i]);
+		tooltip1[0].checked = tooltip2[0].checked;
 	}
 }
 

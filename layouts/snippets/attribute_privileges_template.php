@@ -2,7 +2,7 @@
 			<table>
   			<tr>
 			  	<td colspan="4" width="100%">
-			  		<table width="100%">
+			  		<table border="0" cellspacing="0" cellpadding="0" width="100%">
 			  			<tr>
 			  				<? if($this->stelle->id != '' AND $this->layer[0]['Name'] != ''){ ?>
 						  	<td height="50px" valign="top" align="center"><b><span style="font-size:15px"><? echo $this->stelle->Bezeichnung; ?></span></b></td>
@@ -120,7 +120,12 @@
 						if(count($this->attributes) > 0){
 							echo '
 							<tr>
-			 					<td align="center" colspan="4"><br><br><input class="button" type="button" onclick="save(\''.$this->stelle->id.'\');" name="speichern" value="speichern">
+								<td colspan="5" height="40px" align="center" valign="middle">';
+							if($this->stelle->id != '' AND $this->layer[0]['Name'] != '')echo '<a href="javascript:get_from_default(\''.$attribute_names.'\', '.$this->stelle->id.');">Default-Rechte übernehmen</a>';
+							echo '</td>
+							</tr>
+							<tr>
+			 					<td align="center" colspan="5"><input class="button" type="button" onclick="save(\''.$this->stelle->id.'\');" name="speichern" value="speichern">
 			 					</td>
 			 				</tr>
 			 				<tr>

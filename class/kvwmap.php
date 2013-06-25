@@ -380,76 +380,90 @@ class GUI extends GUI_core{
 		# Wie oft das passiert, hängt von der Größe des Arrays $update_values ab.
 		# Außerdem wird dieses Splitting rekursiv auf den über SubformPK- oder embeddedPK verknüpften Layern durchgeführt. 
 		
-		$layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
-		$layerdb = $mapdb->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-		$layerattributes = $mapdb->read_layer_attributes($this->formvars['layer_id'], $layerdb, NULL);
+		$layerset = $this->user->rolle->getLayer($layer_id);
+		$layerdb = $mapdb->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
+		$layerattributes = $mapdb->read_layer_attributes($layer_id, $layerdb, NULL);
 		
-		# Attribute, die eine Sequenz haben weglassen
+		# Attribute, die kopiert werden sollen ermitteln
 		$sql = "SELECT column_name FROM information_schema.columns WHERE table_name = '".$layerset[0]['maintable']."' AND table_schema = '".$layerdb->schema."' ";
-		$sql.= "AND column_name NOT IN (SELECT pg_attribute.attname FROM pg_class a, pg_class b, pg_attribute "; 
-		$sql.= "WHERE a.relname = '".$layerset[0]['maintable']."' AND pg_attribute.attrelid = a.oid "; 
-		$sql.= "AND b.relkind = 'S' and b.relname = a.relname||'_'||pg_attribute.attname||'_seq')";
+				
 		$ret=$layerdb->execSQL($sql,4, 0);
 		if(!$ret[0]){
 			while ($rs=pg_fetch_row($ret[1])){
-				$attributes[] = $rs[0];
+				if($layerattributes['constraints'][$rs[0]] != 'PRIMARY KEY') $attributes[] = $rs[0];
 			}
 		}
-		
+				
 		for($i = 0; $i < count($update_values); $i++){
 			$sql = "INSERT INTO ".$layerset[0]['maintable']." (".implode(',', $attributes).") SELECT ".implode(',', $attributes)." FROM ".$layerset[0]['maintable']." WHERE ";
 			for($n = 0; $n < count($id_names); $n++){
 				$sql.= $id_names[$n]." = '".$id_values[$n]."' AND ";
 			}
-			$sql.= "1=1"; 
+			$sql.= "1=1 RETURNING oid"; 
+			#echo $sql.'<br>';
 			$ret = $layerdb->execSQL($sql,4, 0);
-			$new_oid = pg_last_oid($ret[1]);
-			$new_oids[] = $new_oid;
-			for($u = 0; $u < count($update_columns); $u++){
-				$sql = "UPDATE ".$layerset[0]['maintable']." SET ".$update_columns[$u]." = '".$update_values[$i][$u]."' WHERE oid = ".$new_oid;
-				$ret = $layerdb->execSQL($sql,4, 0);
+			$new_oids = array();
+			if(!$ret[0]){
+				while($rs=pg_fetch_row($ret[1])){
+					$new_oids[] = $rs[0];
+					$all_new_oids[] = $rs[0];
+				}
 			}
+			if($new_oids[0] != ''){			# nur updaten, wenn auch was eingetragen wurde
+				for($u = 0; $u < count($update_columns); $u++){
+					$sql = "UPDATE ".$layerset[0]['maintable']." SET ".$update_columns[$u]." = '".$update_values[$i][$u]."' WHERE oid IN (".implode(',', $new_oids).")";
+					$ret = $layerdb->execSQL($sql,4, 0);
+				}
+			}
+		}
 			
+		if($all_new_oids[0] != ''){			# nur weitermachen, wenn auch was eingetragen wurde
 			$j = 0;
 			for($l = 0; $l < count($layerattributes['name']); $l++){
-	    	if(in_array($attributes['form_element_type'][$l], array('SubFormEmbeddedPK', 'SubFormPK'))){
-					$options = explode(';', $attributes['options'][$l]);  
+	    	if(in_array($layerattributes['form_element_type'][$l], array('SubFormEmbeddedPK', 'SubFormPK'))){
+	    		$subform_pks = array();
+	    		$pkvalues = array();
+	    		$subform_pks = array();
+	    		$next_update_values = array();;
+					$options = explode(';', $layerattributes['options'][$l]);  
 	        $subform = explode(',', $options[0]);  
 	        $subform_layerid = $subform[0];
-	        if($attributes['form_element_type'][$l] == 'SubFormEmbeddedPK')$minus = 1;
+	        if($layerattributes['form_element_type'][$l] == 'SubFormEmbeddedPK')$minus = 1;
 	        else $minus = 0;
 	        for($k = 1; $k < count($subform)-$minus; $k++){
-	        	$subform_pks = $subform[$k];																																# das sind die Namen der SubformPK-Schlüssel
+	        	$subform_pks[] = $subform[$k];																																# das sind die Namen der SubformPK-Schlüssel
 	        }
 	        $sql = "SELECT ".implode(',', $subform_pks)." FROM ".$layerset[0]['maintable']." WHERE ";			# die Werte der SubformPK-Schlüssel aus dem alten Datensatz abfragen
 	        for($n = 0; $n < count($id_names); $n++){
 						$sql.= $id_names[$n]." = '".$id_values[$n]."' AND ";
 					}
 					$sql.= "1=1";
+					#echo $sql.'<br>';
 	    		$ret=$layerdb->execSQL($sql,4, 0);
 					if(!$ret[0]){
 						$pkvalues=pg_fetch_row($ret[1]);
 					}
 	    		$sql = "SELECT ".implode(',', $subform_pks)." FROM ".$layerset[0]['maintable']." WHERE ";			# die Werte der SubformPK-Schlüssel aus den neuen Datensätzen abfragen
-	        $sql.= "oid IN (".implode(',', $new_oids).")";
+	        $sql.= "oid IN (".implode(',', $all_new_oids).")";
+	        #echo $sql.'<br>';
 	    		$ret=$layerdb->execSQL($sql,4, 0);
 					if(!$ret[0]){
 						while($rs=pg_fetch_row($ret[1])){
-							$update_values[] = $rs;
+							$next_update_values[] = $rs;
 						}
 					}					
-	        $j++;
-	        $this->split_datasets($subform_layerid, $subform_pks, $pkvalues, $subform_pks, $update_values, $mapdb);
-	    	}
-	    }
-			
+	        $j++;     	           
+	        $this->split_datasets($subform_layerid, $subform_pks, $pkvalues, $subform_pks, $next_update_values, $mapdb);
+		    }
+			}
+			$sql = "DELETE FROM ".$layerset[0]['maintable']." WHERE ";
+			for($n = 0; $n < count($id_names); $n++){
+				$sql.= $id_names[$n]." = '".$id_values[$n]."' AND ";
+			}
+			$sql.= "1=1";#
+			#echo $sql.'<br>';
+			$ret = $layerdb->execSQL($sql,4, 0);
 		}
-		$sql = "DELETE FROM ".$layerset[0]['maintable']." WHERE ";
-		for($n = 0; $n < count($id_names); $n++){
-			$sql.= $id_names[$n]." = '".$id_values[$n]."' AND ";
-		}
-		$sql.= "1=1";
-		$ret = $layerdb->execSQL($sql,4, 0);	
 	}
 
   function import_layer(){
@@ -2680,6 +2694,12 @@ class GUI extends GUI_core{
     $rect = $jagdkataster->zoomTojagdbezirk($this->formvars['oid'], 10);
     $this->loadMap('DataBase');
     $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
+  	if(MAPSERVERVERSION >= 600 ) {
+			$this->map_scaledenom = $this->map->scaledenom;
+		}
+		else {
+			$this->map_scaledenom = $this->map->scale;
+		}
     $currenttime=date('Y-m-d H:i:s',time());
     $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
     $this->drawMap();
@@ -2759,6 +2779,12 @@ class GUI extends GUI_core{
     	$this->titel='Jagdbezirk bearbeiten';
       $rect = $jagdkataster->zoomTojagdbezirk($this->formvars['oid'], 10);
       $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
+	    if(MAPSERVERVERSION >= 600 ) {
+				$this->map_scaledenom = $this->map->scaledenom;
+			}
+			else {
+				$this->map_scaledenom = $this->map->scale;
+			}
       $this->jagdbezirk = $jagdkataster->getjagdbezirk($this->formvars['oid']);
       $this->formvars['newpathwkt'] = $this->jagdbezirk['wktgeom'];
       $this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
@@ -2773,6 +2799,12 @@ class GUI extends GUI_core{
       $randx=($jagdkataster->extent->maxx-$jagdkataster->extent->minx)* 20/100;
       $randy=($jagdkataster->extent->maxy-$jagdkataster->extent->miny)* 20/100;
       $this->map->setextent($jagdkataster->extent->minx-$randx,$jagdkataster->extent->miny-$randy,$jagdkataster->extent->maxx+$randx,$jagdkataster->extent->maxy+$randy);
+	    if(MAPSERVERVERSION >= 600 ) {
+				$this->map_scaledenom = $this->map->scaledenom;
+			}
+			else {
+				$this->map_scaledenom = $this->map->scale;
+			}
       $this->formvars['newpathwkt'] = $jagdkataster->flurstgeometryWKT;
       $this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
       $this->formvars['newpath'] = $jagdkataster->flurstgeometrySVG;
@@ -3284,6 +3316,12 @@ class GUI extends GUI_core{
       $rect->maxy = $this->Document->ausschnitt[0]['center_y'] + $height/2;
       $rand = 10;
       $this->map->setextent($rect->minx-$rand,$rect->miny-$rand,$rect->maxx+$rand,$rect->maxy+$rand);
+	    if(MAPSERVERVERSION >= 600 ) {
+				$this->map_scaledenom = $this->map->scaledenom;
+			}
+			else {
+				$this->map_scaledenom = $this->map->scale;
+			}
       # Position setzen
       $this->formvars['center_x'] = $this->Document->ausschnitt[0]['center_x'];
       $this->formvars['center_y'] = $this->Document->ausschnitt[0]['center_y']; 
@@ -3491,6 +3529,12 @@ class GUI extends GUI_core{
     }
 
     $this->map->setextent($minx,$miny,$maxx,$maxy);
+  	if(MAPSERVERVERSION >= 600 ) {
+			$this->map_scaledenom = $this->map->scaledenom;
+		}
+		else {
+			$this->map_scaledenom = $this->map->scale;
+		}
     $currenttime=date('Y-m-d H:i:s',time());
     $this->user->rolle->setConsumeActivity($currenttime,'print_preview',$this->user->rolle->last_time_id);
     $this->drawMap();
@@ -4090,6 +4134,12 @@ class GUI extends GUI_core{
       $randy=($rect->maxy-$rect->miny)*$border/100;
       # Setzen der neuen Kartenausdehnung.
       $this->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
+    	if(MAPSERVERVERSION >= 600 ) {
+				$this->map_scaledenom = $this->map->scaledenom;
+			}
+			else {
+				$this->map_scaledenom = $this->map->scale;
+			}
     }
   }
 
@@ -5373,6 +5423,12 @@ class GUI extends GUI_core{
       $randy=($rect->maxy-$rect->miny)*$border/100;
       # Setzen der neuen Kartenausdehnung.
       $this->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
+    	if(MAPSERVERVERSION >= 600 ) {
+				$this->map_scaledenom = $this->map->scaledenom;
+			}
+			else {
+				$this->map_scaledenom = $this->map->scale;
+			}
     }
   }
 
@@ -5870,6 +5926,7 @@ class GUI extends GUI_core{
 
   function LayerAendern(){
   	$this->formvars['pfad'] = stripslashes($this->formvars['pfad']);
+  	$this->formvars['Data'] = stripslashes($this->formvars['Data']);
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $mapDB->updateLayer($this->formvars);
     $old_layer_id = $this->formvars['selected_layer_id'];
@@ -5878,17 +5935,22 @@ class GUI extends GUI_core{
     }
 
 		if($this->formvars['connectiontype'] == 6){
-			if($this->formvars['pfad'] != ''){
-				#---------- Speichern der Layerattribute -------------------
-		    $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-		    $layerdb->setClientEncoding();
-		    $path = $this->formvars['pfad'];
-		    $attributes = $mapDB->load_attributes($layerdb, $path);
-		    $mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes, $this->formvars['maintable']);
-		    #---------- Speichern der Layerattribute -------------------
+			if($this->formvars['connection'] != ''){
+				if($this->formvars['pfad'] != ''){
+					#---------- Speichern der Layerattribute -------------------
+			    $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+			    $layerdb->setClientEncoding();
+			    $path = $this->formvars['pfad'];
+			    $attributes = $mapDB->load_attributes($layerdb, $path);
+			    $mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes, $this->formvars['maintable']);
+			    #---------- Speichern der Layerattribute -------------------
+				}
+				if($this->formvars['pfad'] == '' OR $attributes != NULL){
+					$mapDB->delete_old_attributes($this->formvars['selected_layer_id'], $attributes);
+				}
 			}
-			if($this->formvars['pfad'] == '' OR $attributes != NULL){
-				$mapDB->delete_old_attributes($this->formvars['selected_layer_id'], $attributes);
+			else{
+				showAlert('Keine connection angegeben.');
 			}
 		}
 		
@@ -8863,6 +8925,12 @@ class GUI extends GUI_core{
 	function zoom2wkt(){
     $rect = $this->pgdatabase->getWKTBBox($this->formvars['wkt'], $this->formvars['epsg'], $this->user->rolle->epsg_code);
     $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
+		if(MAPSERVERVERSION >= 600 ) {
+			$this->map_scaledenom = $this->map->scaledenom;
+		}
+		else {
+			$this->map_scaledenom = $this->map->scale;
+		}
   }
 
 # 2006-03-20 pk
@@ -8879,6 +8947,12 @@ class GUI extends GUI_core{
       $this->user->rolle->set_last_time_id($storetime);
       $this->user->rolle->newtime = $storetime;
       $this->map->setextent($ret[1]['minx'],$ret[1]['miny'],$ret[1]['maxx'],$ret[1]['maxy']);
+    	if(MAPSERVERVERSION >= 600 ) {
+				$this->map_scaledenom = $this->map->scaledenom;
+			}
+			else {
+				$this->map_scaledenom = $this->map->scale;
+			}
       #echo '<br>gewechselt auf Einstellung von:'.$this->consumetime;
     }
     $this->saveMap('');
@@ -8920,6 +8994,12 @@ class GUI extends GUI_core{
     }
     $this->user->rolle->set_last_time_id($prevtime);
     $this->map->setextent($ret[1]['minx'],$ret[1]['miny'],$ret[1]['maxx'],$ret[1]['maxy']);
+  	if(MAPSERVERVERSION >= 600 ) {
+			$this->map_scaledenom = $this->map->scaledenom;
+		}
+		else {
+			$this->map_scaledenom = $this->map->scale;
+		}
   }
 
   # 2006-03-20 pk
@@ -8951,6 +9031,12 @@ class GUI extends GUI_core{
     }
     $this->user->rolle->set_last_time_id($ret[1]['time_id']);
     $this->map->setextent($ret[1]['minx'],$ret[1]['miny'],$ret[1]['maxx'],$ret[1]['maxy']);
+  	if(MAPSERVERVERSION >= 600 ) {
+			$this->map_scaledenom = $this->map->scaledenom;
+		}
+		else {
+			$this->map_scaledenom = $this->map->scale;
+		}
   }
 
   # 2006-03-20 pk
@@ -10771,6 +10857,12 @@ class GUI extends GUI_core{
   else{
     $rect = ms_newRectObj();
     $rect->setextent($this->formvars['rectminx'],$this->formvars['rectminy'],$this->formvars['rectmaxx'],$this->formvars['rectmaxy']);
+  	if(MAPSERVERVERSION >= 600 ) {
+			$this->map_scaledenom = $this->map->scaledenom;
+		}
+		else {
+			$this->map_scaledenom = $this->map->scale;
+		}
   }
   $this->loadMap('DataBase');
   $this->Sachdatenanzeige($rect);
@@ -11689,6 +11781,12 @@ class GUI extends GUI_core{
     }
     # zu 2)
     $this->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
+  	if(MAPSERVERVERSION >= 600 ) {
+			$this->map_scaledenom = $this->map->scaledenom;
+		}
+		else {
+			$this->map_scaledenom = $this->map->scale;
+		}
     # zu 3)
     $GemObj=new Gemeinde($Gemeinde,$this->pgdatabase);
     $layer=ms_newLayerObj($this->map);
@@ -11765,6 +11863,12 @@ class GUI extends GUI_core{
       $randy=($rect->maxy-$rect->miny)*$border/100;
     }
     $this->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
+  	if(MAPSERVERVERSION >= 600 ) {
+			$this->map_scaledenom = $this->map->scaledenom;
+		}
+		else {
+			$this->map_scaledenom = $this->map->scale;
+		}
   }
 
   function zoomToGemarkung($GemID,$GemkgID,$border) {
@@ -11801,6 +11905,12 @@ class GUI extends GUI_core{
       $randy=($rect->maxy-$rect->miny)*$border/100;
     }
     $this->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
+  	if(MAPSERVERVERSION >= 600 ) {
+			$this->map_scaledenom = $this->map->scaledenom;
+		}
+		else {
+			$this->map_scaledenom = $this->map->scale;
+		}
   }
 
   function zoomToALKGemarkung($Gemkgschl,$border) {
@@ -11824,6 +11934,12 @@ class GUI extends GUI_core{
     }
     # zu 2)
     $this->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
+  	if(MAPSERVERVERSION >= 600 ) {
+			$this->map_scaledenom = $this->map->scaledenom;
+		}
+		else {
+			$this->map_scaledenom = $this->map->scale;
+		}
     # zu 3)
     $GemkgObj=new Gemarkung($Gemkgschl,$this->pgdatabase);
     $layer=ms_newLayerObj($this->map);
@@ -11886,6 +12002,12 @@ class GUI extends GUI_core{
     }
     # zu 2)
     $this->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
+  	if(MAPSERVERVERSION >= 600 ) {
+			$this->map_scaledenom = $this->map->scaledenom;
+		}
+		else {
+			$this->map_scaledenom = $this->map->scale;
+		}
     # zu 3)
     $GemkgObj=new Gemarkung($GemkgID,$this->pgdatabase);
     $layer=ms_newLayerObj($this->map);
@@ -11968,6 +12090,12 @@ class GUI extends GUI_core{
       $randy=($rect->maxy-$rect->miny)*$border/100;
     }
     $this->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
+  	if(MAPSERVERVERSION >= 600 ) {
+			$this->map_scaledenom = $this->map->scaledenom;
+		}
+		else {
+			$this->map_scaledenom = $this->map->scale;
+		}
   }
 
   function zoomToFlurst($FlurstListe,$border) {
@@ -12013,6 +12141,12 @@ class GUI extends GUI_core{
         $randy=($rect->maxy-$rect->miny)*$border/100;
       }
       $this->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
+	    if(MAPSERVERVERSION >= 600 ) {
+				$this->map_scaledenom = $this->map->scaledenom;
+			}
+			else {
+				$this->map_scaledenom = $this->map->scale;
+			}
     }
   }
 
@@ -12151,6 +12285,12 @@ class GUI extends GUI_core{
     
 	    # zu 2)
 	    $this->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
+	    if(MAPSERVERVERSION >= 600 ) {
+				$this->map_scaledenom = $this->map->scaledenom;
+			}
+			else {
+				$this->map_scaledenom = $this->map->scale;
+			}
 	    # zu 3)
 	    $layer=ms_newLayerObj($this->map);
 	    if(ALKIS){
@@ -12312,6 +12452,12 @@ class GUI extends GUI_core{
       $randy=($rect->maxy-$rect->miny)*$border/100;
     }
     $this->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
+  	if(MAPSERVERVERSION >= 600 ) {
+			$this->map_scaledenom = $this->map->scaledenom;
+		}
+		else {
+			$this->map_scaledenom = $this->map->scale;
+		}
     # Aktiviere Gebäude und Flurstückslayer
     $geblayer=$this->map->getLayerByName('Gebaeude');
     $geblayer->set('status',MS_ON);
@@ -12366,7 +12512,12 @@ class GUI extends GUI_core{
       # Setzen der neuen Kartenausdehnung.
       #var_dump($this->map->extent);
       $this->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
-      #var_dump($this->map->extent);
+	    if(MAPSERVERVERSION >= 600 ) {
+				$this->map_scaledenom = $this->map->scaledenom;
+			}
+			else {
+				$this->map_scaledenom = $this->map->scale;
+			}
     }
   }
 
@@ -12385,7 +12536,12 @@ class GUI extends GUI_core{
       # Setzen der neuen Kartenausdehnung.
       #var_dump($this->map->extent);
       $this->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
-      #var_dump($this->map->extent);
+	    if(MAPSERVERVERSION >= 600 ) {
+				$this->map_scaledenom = $this->map->scaledenom;
+			}
+			else {
+				$this->map_scaledenom = $this->map->scale;
+			}
     }
   }
 
@@ -13723,6 +13879,12 @@ class db_mapObj extends db_mapObj_core{
 	    $query=mysql_query($sql);
 	    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
   	}
+  	
+  	# den PRIMARY KEY constraint rausnehmen, falls der tablename nicht der maintable entspricht
+  	$sql = "UPDATE layer_attributes, layer SET constraints = '' WHERE layer_attributes.layer_id = ".$layer_id." AND layer.Layer_ID = ".$layer_id." AND constraints = 'PRIMARY KEY' AND tablename != maintable";
+  	$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>".$sql,4);
+	  $query=mysql_query($sql);
+	  if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }	
   }
   
   function delete_old_attributes($layer_id, $attributes){
