@@ -61,6 +61,7 @@
   $strMetaLink="Metadata-Link";
   $strMaintable="Main Table";
   $strPrivileges="Set Privileges";
+  $strAlias="Alias";
   
   
   

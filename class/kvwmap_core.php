@@ -463,7 +463,13 @@ class GUI_core {
           $layer->set('dump', 0);
           $layer->set('type',$layerset[$i]['Datentyp']);
           $layer->set('group',$layerset[$i]['Gruppenname']);
-          $layer->set('name', $layerset[$i]['Name']);
+                    
+          if($layerset[$i]['alias'] != '' AND $this->Stelle->useLayerAliases){
+          	$layer->set('name', $layerset[$i]['alias']);
+          }
+          else{
+          	$layer->set('name', $layerset[$i]['Name']);
+        	}
 
           //---- wenn die Layer einer eingeklappten Gruppe nicht in der Karte //
           //---- dargestellt werden sollen, muß hier bei aktivStatus != 1 //
@@ -1070,34 +1076,34 @@ class GUI_core {
           if ($dbLabel['position']!='') {
             switch ($dbLabel['position']){
               case '0' :{
-                $label->position = MS_UL;
+                $label->set('position', MS_UL);
               }break;
               case '1' :{
-                $label->position = MS_LR;
+                $label->set('position', MS_LR);
               }break;
               case '2' :{
-                $label->position = MS_UR;
+                $label->set('position', MS_UR);
               }break;
               case '3' :{
-                $label->position = MS_LL;
+                $label->set('position', MS_LL);
               }break;
               case '4' :{
-                $label->position = MS_CR;
+                $label->set('position', MS_CR);
               }break;
               case '5' :{
-                $label->position = MS_CL;
+                $label->set('position', MS_CL);
               }break;
               case '6' :{
-                $label->position = MS_UC;
+                $label->set('position', MS_UC);
               }break;
               case '7' :{
-                $label->position = MS_LC;
+                $label->set('position', MS_LC);
               }break;
               case '8' :{
-                $label->position = MS_CC;
+                $label->set('position', MS_CC);
               }break;
               case '9' :{
-                $label->position = MS_AUTO;
+                $label->set('position', MS_AUTO);
               }break;
             }
           }
@@ -1366,7 +1372,7 @@ class GUI_core {
   # Zeichnet die Kartenelemente Hauptkarte, Legende, Maßstab und Referenzkarte
   # drawMap #
   function drawMap() {	
-    if(MINSCALE != '' AND $this->map_factor == '' AND $this->map_scaledenom < MINSCALE){
+    if($this->main == 'map.php' AND MINSCALE != '' AND $this->map_factor == '' AND $this->map_scaledenom < MINSCALE){
       $this->scaleMap(MINSCALE);
     }		
     $this->image_map = $this->map->draw() OR die($this->reset_layers());   
@@ -1716,7 +1722,7 @@ class db_mapObj_core {
   }
 
   function read_Layer($withClasses) {
-    $sql ='SELECT DISTINCT rl.*,ul.*, l.Layer_ID, l.Name, l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem, l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem, l.tolerance, l.toleranceunits, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version, l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, g.*, gr.*';
+    $sql ='SELECT DISTINCT rl.*,ul.*, l.Layer_ID, l.Name, l.alias, l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem, l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem, l.tolerance, l.toleranceunits, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version, l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, g.*, gr.*';
     $sql.=' FROM u_rolle2used_layer AS rl,used_layer AS ul,layer AS l, u_groups AS g, u_groups2rolle as gr';
     $sql.=' WHERE rl.stelle_id=ul.Stelle_ID AND rl.layer_id=ul.Layer_ID AND l.Layer_ID=ul.Layer_ID';
     $sql.=' AND (ul.minscale != -1 OR ul.minscale IS NULL) AND l.Gruppe = g.id AND rl.stelle_ID='.$this->Stelle_ID.' AND rl.user_id='.$this->User_ID;

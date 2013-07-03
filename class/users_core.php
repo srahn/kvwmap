@@ -592,6 +592,7 @@ class stelle_core {
     $this->check_client_ip=$rs["check_client_ip"];
     $this->checkPasswordAge=$rs["check_password_age"];
     $this->allowedPasswordAge=$rs["allowed_password_age"];
+    $this->useLayerAliases=$rs["use_layer_aliases"];
   }
 
   function checkClientIpIsOn() {

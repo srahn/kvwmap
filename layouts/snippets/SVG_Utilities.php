@@ -119,6 +119,9 @@
 	var measuring  = false;
 	var deactivated_foreign_vertex = 0;
 	var geomload = '.$geomload.';		// Geometrie wird das erste Mal geladen, diese Variable verhindert den Weiterzeichnenmodus
+	var root = document.documentElement;
+	var mousewheelloop = 0;
+	var stopnavigation = false;
 	';
 
 	$polygonANDpoint = '
@@ -327,7 +330,9 @@
       top.document.GUI.CMD.value  = "Full_Extent";
       top.document.GUI.submit();
   }
-  function sendpath(cmd,navX,navY)   {
+  function sendpath(cmd,navX,navY){
+  	document.getElementById("waitingimage").style.setProperty("visibility","visible", "");
+		document.getElementById("waiting_animation").beginElement();
     // navX[0] enthaelt den Rechtswert des ersten gesetzte Punktes im Bild in Pixeln
     // von links nach rechts gerechnet
     // navY[0] enthaelt den Hochwert des ersten Punktes im Bild in Pixeln
@@ -414,7 +419,67 @@
   	}
  	}
 
+ 	function mousewheelzoom(){
+		var g = document.getElementById("moveGroup");
+		zx = g.getCTM().inverse();
+		pathx[0] = Math.round(zx.e);
+		pathy[0] = Math.round(zx.f);
+		pathx[2] = Math.round(zx.e + resx*zx.a); 
+		pathy[2] = Math.round(zx.f + resy*zx.a);
+		sendpath("zoomin_box", pathx, pathy);
+	}
+	
+	function mousewheelchange(evt){
+		if(!evt)evt = window.event; // For IE
+		if(top.document.GUI.stopnavigation.value == 0){
+			window.clearTimeout(mousewheelloop);
+			if(evt.preventDefault){
+				evt.preventDefault();
+			}else{ // IE fix
+	    	evt.returnValue = false;
+	    };
+			if(evt.wheelDelta)
+				delta = evt.wheelDelta / 3600; // Chrome/Safari
+			else
+				delta = evt.detail / -90; // Mozilla
+			var z = 1 + delta*5;
+			var g = document.getElementById("moveGroup");
+			var p = getEventPoint(evt);
+			if(p.x > 0 && p.y > 0){
+				p = p.matrixTransform(g.getCTM().inverse());
+				var k = root.createSVGMatrix().translate(p.x, p.y).scale(z).translate(-p.x, -p.y);
+				setCTM(g, g.getCTM().multiply(k));
+				mousewheelloop = window.setTimeout("mousewheelzoom()", 400);
+			}
+		}
+	}
+	
+	function setCTM(element, matrix) {
+		var s = "matrix(" + matrix.a + "," + matrix.b + "," + matrix.c + "," + matrix.d + "," + matrix.e + "," + matrix.f + ")";
+		element.setAttribute("transform", s);
+	}
+	
+	function getEventPoint(evt) {
+		var p = root.createSVGPoint();
+		p.x = evt.clientX;
+		p.y = evt.clientY;
+		if(top.navigator.userAgent.toLowerCase().indexOf("msie") >= 0){
+			p.x = p.x - (top.document.body.clientWidth - resx)/2;
+	    p.y = p.y - 30;
+		}
+		return p;
+	}
+ 	
 	function startup(){
+		if(window.addEventListener){
+			if(navigator.userAgent.toLowerCase().indexOf(\'webkit\') >= 0)
+				window.addEventListener(\'mousewheel\', mousewheelchange, false); // Chrome/Safari
+			else
+	  		window.addEventListener(\'DOMMouseScroll\', mousewheelchange, false);
+	  }
+	  else{
+			top.document.getElementById("map").onmousewheel = mousewheelchange;
+		}
 		if(measurefunctions == true){
 			get_measure_path();
 			redrawPL();
@@ -2714,6 +2779,26 @@ $measurefunctions = '
 				<use id="pointposition" xlink:href="#crosshair_blue" x="-500" y="-500"/>
 				<circle id="startvertex" cx="-500" cy="-500" r="2" style="fill:blue;stroke:blue;stroke-width:2"/>
 			</g>
+	  </g>
+	  <g id="waitingimage" style="visibility:hidden" transform="translate('.$res_xm.', '.$res_ym.') scale(0.3 0.3)">
+			<g>
+		    <line id="line" x1="-165" y1="0" x2="-115" y2="0" stroke="#111" stroke-width="30" style="stroke-linecap:round"/>
+		    <use xlink:href="#line" transform="rotate(30,0,0)" style="opacity:.0833"/>
+		    <use xlink:href="#line" transform="rotate(60,0,0)" style="opacity:.166"/>
+		    <use xlink:href="#line" transform="rotate(90,0,0)" style="opacity:.25"/>
+		    <use xlink:href="#line" transform="rotate(120,0,0)" style="opacity:.3333"/>
+		    <use xlink:href="#line" transform="rotate(150,0,0)" style="opacity:.4166"/>
+		    <use xlink:href="#line" transform="rotate(180,0,0)" style="opacity:.5"/>
+		    <use xlink:href="#line" transform="rotate(210,0,0)" style="opacity:.5833"/>
+		    <use xlink:href="#line" transform="rotate(240,0,0)" style="opacity:.6666"/>
+		    <use xlink:href="#line" transform="rotate(270,0,0)" style="opacity:.75"/>
+		    <use xlink:href="#line" transform="rotate(300,0,0)" style="opacity:.8333"/>
+		    <use xlink:href="#line" transform="rotate(330,0,0)" style="opacity:.9166"/>
+		    
+		    <animateTransform id="waiting_animation" attributeName="transform" attributeType="XML" type="rotate" begin="indefinite" dur="1s" repeatCount="indefinite" calcMode="discrete"
+		    keyTimes="0;.0833;.166;.25;.3333;.4166;.5;.5833;.6666;.75;.8333;.9166;1"
+		    values="0,0,0;30,0,0;60,0,0;90,0,0;120,0,0;150,0,0;180,0,0;210,0,0;240,0,0;270,0,0;300,0,0;330,0,0;360,0,0"/>
+	    </g>
 	  </g>
 	  <rect id="canvas" cursor="crosshair" onmousedown="mousedown(evt);" onmousemove="mousemove(evt);hide_tooltip();" onmouseup="mouseup(evt);" width="100%" height="100%" opacity="0" visibility="visible"/>
 		<g id="vertices" transform="translate(0,'.$res_y.') scale(1,-1)">

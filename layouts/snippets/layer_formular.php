@@ -55,6 +55,12 @@ else {
 		  		</td>
 		  	</tr>
 		  	<tr>
+		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strAlias; ?></th>
+		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+		      		<input name="alias" type="text" value="<?php echo $this->formvars['alias']; ?>" size="25" maxlength="100">
+		  		</td>
+		  	</tr>
+		  	<tr>
 		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDataType; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<select name="Datentyp">

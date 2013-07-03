@@ -349,7 +349,7 @@ function mousewheelchange(evt){
 		if(p.x > 0 && p.y > 0){
 			p = p.matrixTransform(g.getCTM().inverse());
 			var k = root.createSVGMatrix().translate(p.x, p.y).scale(z).translate(-p.x, -p.y);
-			setCTM(g, g.getCTM().multiply(k));
+			setCTM(g, g.getCTM().multiply(k)); 
 			mousewheelloop = window.setTimeout("mousewheelzoom()", 400);
 		}
 	}

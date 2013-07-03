@@ -74,8 +74,8 @@ CREATE TABLE `datendrucklayouts` (
 CREATE TABLE `ddl_elemente` (
 `ddl_id` INT( 11 ) NOT NULL ,
 `name` VARCHAR( 255 ) NOT NULL ,
-`xpos` INT( 11 ) NULL ,
-`ypos` INT( 11 ) NULL ,
+`xpos` REAL NULL ,
+`ypos` REAL NULL ,
 `width` INT( 11 ) NULL ,
 `border` BOOL NULL ,
 `font` VARCHAR( 255 ) NULL ,
@@ -211,7 +211,7 @@ CREATE TABLE layer_attributes (
   length int(11) default NULL,
   `decimal_length` INT( 11 ) NULL,
   `default` VARCHAR( 255 ) NULL,
-  form_element_type enum('Text','Textfeld','Auswahlfeld','Geometrie','SubFormPK','SubFormFK','SubFormEmbeddedPK','Time','Dokument','Link','User','Stelle','Fläche','dynamicLink','Zahl','UserID','Länge') NOT NULL default 'Text',
+  form_element_type enum('Text','Textfeld','Auswahlfeld','Checkbox', 'Geometrie','SubFormPK','SubFormFK','SubFormEmbeddedPK','Time','Dokument','Link','User','Stelle','Fläche','dynamicLink','Zahl','UserID','Länge') NOT NULL default 'Text',
   options text,
   alias varchar(255) default NULL,
   tooltip varchar(255) default NULL,
@@ -480,7 +480,8 @@ CREATE TABLE u_labels2classes (
 
 CREATE TABLE `layer` (
   `Layer_ID` int(11) NOT NULL auto_increment,
-  `Name` varchar(255) collate latin1_german2_ci NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `alias` VARCHAR( 255 ) NULL DEFAULT NULL,
   `Datentyp` tinyint(4) NOT NULL default '2',
   `Gruppe` int(11) NOT NULL default '0',
   `pfad` text collate latin1_german2_ci,
@@ -705,6 +706,7 @@ CREATE TABLE stelle (
   check_client_ip ENUM('0','1') NOT NULL DEFAULT '0',
   check_password_age ENUM('0','1') NOT NULL DEFAULT '0',
   allowed_password_age TINYINT NOT NULL DEFAULT '6',
+  use_layer_aliases ENUM( '0', '1' ) NOT NULL DEFAULT '0',
   PRIMARY KEY  (ID)
 );
 

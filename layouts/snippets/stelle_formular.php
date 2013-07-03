@@ -507,10 +507,16 @@ else {
           <td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strCheckPasswordAge; ?></td>
         </tr>
         <tr>
-          <td align="right">
+          <td align="right" style="border-bottom:1px solid #C3C7C3">
             <input name="allowedPasswordAge" type="text" size="1" value="<?php echo $this->formvars['allowedPasswordAge']; ?>">
           </td>
-          <td colspan="2" align="left"><?php echo $strAllowedPasswordAge; ?></td>
+          <td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strAllowedPasswordAge; ?></td>
+        </tr>
+        <tr>
+          <td align="right" style="border-bottom:1px solid #C3C7C3">
+            <input name="use_layer_aliases" type="checkbox" value="1" <? if ($this->formvars['use_layer_aliases']) { ?> checked<? } ?>>
+          </td>
+          <td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strUseLayerAliases; ?></td>
         </tr>  
     </table>
   </td>

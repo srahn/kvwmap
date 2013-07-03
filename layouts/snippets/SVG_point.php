@@ -3,7 +3,7 @@
 	$svgfile  = $randomnumber.'SVG_dokumentenformular.svg';
 	include(LAYOUTPATH.'snippets/SVG_Utilities.php');
 ?>
-
+<div id="map">
 <!-- ----------------------- formular-variabeln fuer navigation ---------------------- -->
 	<INPUT TYPE="HIDDEN" NAME="CMD" VALUE="">
 	<INPUT TYPE="HIDDEN" NAME="INPUT_TYPE" VALUE="">
@@ -45,6 +45,7 @@
 	<input name="last_doing" type="hidden" value="<? echo $this->formvars['last_doing']; ?>">
 	<input type="hidden" name="str_pathx" value="<? echo $this->formvars['str_pathx']; ?>">
   <input type="hidden" name="str_pathy" value="<? echo $this->formvars['str_pathy']; ?>">
+  <input type="hidden" name="stopnavigation" value="0">
   
 <?php
 #
@@ -105,3 +106,4 @@ echo'
 # echo '<iframe src="'.TEMPPATH_REL.$svgfile.'" width="'.$res_x.'" height="'.$res_y.'" name="map"></iframe>';
 echo '<script src="funktionen/Embed.js" language="JavaScript" type="text/javascript"></script>';
 ?>
+</div>

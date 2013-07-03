@@ -237,13 +237,14 @@ function remove(){
 <? if($this->formvars['loadmapsource'] == 'Post'){ ?>
 	<input type="hidden" name="go" value="Externer_Druck">	
 <? }else{ ?>
-	<input type="text" name="go" value="Druckausschnittswahl">
+	<input type="hidden" name="go" value="Druckausschnittswahl">
 <? } ?>
 
 <input type="hidden" name="mapwidth" value="<?php echo $this->Document->activeframe[0]['mapwidth']; ?>">
 <input type="hidden" name="mapheight" value="<?php echo $this->Document->activeframe[0]['mapheight']; ?>">
 <input type="hidden" name="printextent" value="">
 <input type="hidden" name="map_factor" value="<? echo $this->formvars['map_factor'] ?>">
+<input type="hidden" name="stopnavigation" value="0">
 
 <!-- für den externen Druck -->
 <input type="hidden" name="post_width" value="<? echo $this->formvars['post_width'] ?>">

@@ -2066,6 +2066,14 @@ class stelle extends stelle_core{
 		else {
 			$sql.='6';
 		}
+		$sql.=', use_layer_aliases="';
+		if ($stellendaten['use_layer_aliases']=='1') {
+			$sql.='1';
+		}
+		else {
+			$sql.='0';
+		}
+		$sql.='"';
 		# Abfrage starten
 		$ret=$this->database->execSQL($sql,4, 0);
 		if ($ret[0]) {
@@ -2146,6 +2154,14 @@ class stelle extends stelle_core{
 		else {
 			$sql.='6';
 		}
+		$sql.=', use_layer_aliases="';
+		if ($stellendaten['use_layer_aliases']=='1') {
+			$sql.='1';
+		}
+		else {
+			$sql.='0';
+		}
+		$sql.='"';
 		$sql.=' WHERE ID = '.$this->id;
 		#echo $sql;
 		# Abfrage starten

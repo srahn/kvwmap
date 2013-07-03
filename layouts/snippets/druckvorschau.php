@@ -13,6 +13,40 @@ function goback(){
 	document.GUI.go_plus.value = '';
 	document.GUI.submit();
 }
+
+function activate(evt){
+	if(!evt)evt = window.event; // For IE
+	id = (evt.target) ? evt.target.id : evt.srcElement.id;
+	if(id){
+		document.GUI.active_freetext.value = id;
+		freetext = document.getElementById(id);
+		document.GUI.startx.value = (evt.clientX - document.getElementById('main').offsetLeft) - parseInt(freetext.style.left);
+		document.GUI.starty.value = (evt.clientY - document.getElementById('main').offsetTop) - parseInt(freetext.style.top);
+	}
+}
+
+function deactivate(){
+	document.GUI.active_freetext.value = '';
+}
+
+function mousemove(evt){
+	if(!evt)evt = window.event; // For IE
+	if(document.GUI.active_freetext.value != ''){
+		//evt.preventDefault();
+		freetext = document.getElementById(document.GUI.active_freetext.value);
+		freetext.style.border='2px dashed grey';
+		freetext.style.cursor='move';
+		freetext.style.left = (evt.clientX - document.getElementById('main').offsetLeft - document.GUI.startx.value) + 'px';
+		freetext.style.top = (evt.clientY - document.getElementById('main').offsetTop - document.GUI.starty.value) + 'px';
+	}
+}
+
+function preventflickering(evt){
+	if(!evt)evt = window.event; // For IE
+	if(document.GUI.active_freetext.value != ''){
+		evt.preventDefault();
+	}
+}
   
 //-->
 </script>
@@ -33,7 +67,7 @@ function goback(){
     </td>
   </tr>
 </table>
-
+<div id="main" style="position: relative; left:0px; top:0px;" onmousedown="preventflickering(event);" onmousemove="mousemove(event);">
 <table border="0" width="<? echo $this->Document->width; ?>" cellspacing="0" cellpadding="0">
 	<tr>
 		<td align="left">
@@ -41,6 +75,14 @@ function goback(){
 		</td>
 	</tr>
 </table>
+
+
+<div onmouseover="this.style.border='2px dotted grey'; this.style.cursor='move';" onmouseout="this.style.border='none';" onmousedown="activate(event);" onmouseup="deactivate();" title="Freitext" id="text" class="" style="background: url(graphics/leer.gif) repeat;; position: absolute; visibility: visible; left: 111px; top: 111px; padding:3px">
+	<textarea style="border: none; background-color:transparent; font-size: 8px; font-family: Arial, Helvetica;">Hallo hallo test test</textarea>
+</div>
+
+</div>
+
 <table>
 	<tr>
   	<td>&nbsp;</td>
@@ -55,6 +97,9 @@ function goback(){
   	<td>&nbsp;</td>
   </tr>
 </table>
+<input type="text" name="active_freetext" value="">
+<input type="text" name="startx" value="">
+<input type="text" name="starty" value="">
 <input type="hidden" name="vorschauzoom" value="<? echo $this->formvars['vorschauzoom']; ?>">
 <input type="hidden" name="go_plus" value="">
 <input type="hidden" name="worldprintwidth" value="<? echo $this->formvars['worldprintwidth'] ?>">

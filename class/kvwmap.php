@@ -549,6 +549,7 @@ class GUI extends GUI_core{
   function get_select_list(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+    $layerdb->setClientEncoding();
     $attributenames[0] = $this->formvars['attribute'];
     $attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
     $req_start = strpos(strtolower($attributes['options'][0]), "<requires>");
@@ -5186,7 +5187,29 @@ class GUI extends GUI_core{
         $b = cos(deg2rad($alpha)) * $h;
         $posx = $this->Docu->activeframe[0]['texts'][$j]['posx'] + $a;
         $posy = $this->Docu->activeframe[0]['texts'][$j]['posy'] - $b;
-        $pdf->addText($posx,$posy,$this->Docu->activeframe[0]['texts'][$j]['size'],utf8_decode($freitext[$i]), -1 * $alpha);
+        
+      	if($posx < 0){		# rechtsbündig
+      		$posx = $pdf->ez['pageWidth'] + $posx;
+      		$justification = 'right';
+      		$orientation = 'left';
+      		$data = array(array(1 => utf8_decode($freitext[$i])));
+      		$pdf->ezSetY($posy+$this->Docu->activeframe[0]['texts'][$j]['size']);
+	      	$pdf->ezTable($data, NULL, NULL, 
+	      	array('xOrientation'=>$orientation, 
+								'xPos'=>$posx, 
+								#'width'=>$this->layout['elements'][$attributes['name'][$j]]['width'], 
+								#'maxWidth'=>$this->layout['elements'][$attributes['name'][$j]]['width'], 
+								'fontSize' => $this->Docu->activeframe[0]['texts'][$j]['size'], 
+								'showHeadings'=>0, 
+								'shaded'=>0, 
+								'cols'=>array(1 => array('justification'=>$justification)),
+								'showLines'=>0
+								)
+	      	);
+				}
+				else{
+        	$pdf->addText($posx,$posy,$this->Docu->activeframe[0]['texts'][$j]['size'],utf8_decode($freitext[$i]), -1 * $alpha);
+				}
       }
     }
 
@@ -5484,10 +5507,14 @@ class GUI extends GUI_core{
         $this->formvars['fromwhere'] .= ' where (1=1)';
       }
     }
+    $oldscale=round($this->map_scaledenom);
     if ($this->formvars['CMD']!='') {
       # Nur Navigieren
       $this->navMap($this->formvars['CMD']);
       $this->user->rolle->saveDrawmode($this->formvars['always_draw']);
+    }
+    elseif($oldscale!=$this->formvars['nScale'] AND $this->formvars['nScale'] != '') {
+      $this->scaleMap($this->formvars['nScale']);
     }
     $this->saveMap('');
   	if($this->formvars['CMD'] != 'previous' AND $this->formvars['CMD'] != 'next'){
@@ -6591,6 +6618,9 @@ class GUI extends GUI_core{
           elseif($table['type'][$i] != 'Text_not_saveable' AND $table['type'][$i] != 'Auswahlfeld_not_saveable' AND $table['type'][$i] != 'SubFormPK' AND $table['type'][$i] != 'SubFormFK' AND $this->formvars[$table['formfield'][$i]] != ''){
           	if($table['type'][$i] == 'Zahl'){                       # Typ "Zahl"
 	            $this->formvars[$table['formfield'][$i]] = str_replace(' ', '', $this->formvars[$table['formfield'][$i]]);		# bei Zahlen das Leerzeichen (Tausendertrenner) entfernen
+	          }
+	          if($table['type'][$i] == 'Checkbox' AND $this->formvars[$table['formfield'][$i]] == ''){                       # Typ "Checkbox"
+	          	$this->formvars[$table['formfield'][$i]] = 'f';
 	          }
             $sql.= "'".$this->formvars[$table['formfield'][$i]]."', ";      # Typ "normal"
           }
@@ -7990,6 +8020,7 @@ class GUI extends GUI_core{
       $this->formvars['alb_raumbezug_wert'] = $this->stellendaten['alb_raumbezug_wert'];
       $this->formvars['checkPasswordAge'] = $this->stellendaten['check_password_age'];
       $this->formvars['allowedPasswordAge'] = $this->stellendaten['allowed_password_age'];
+      $this->formvars['use_layer_aliases'] = $this->stellendaten['use_layer_aliases'];
       $this->formvars['selmenues'] = $Stelle->getMenue(0);
       $Stelle->getFunktionen();
       $this->formvars['selfunctions'] = $Stelle->funktionen['array'];
@@ -10767,7 +10798,6 @@ class GUI extends GUI_core{
                   }
                   # Dateiname in der Datentabelle aktualisieren
                   $sql = "UPDATE ".$tablename." SET ".$attributname." = '".$eintrag."' WHERE oid = '".$oid."'";
-                  $this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
                 } # ende von Datei wurde erfolgreich in Datenverzeichnis kopiert
                 else {
                   echo '<br>Datei: '.$_files[$form_fields[$i]]['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
@@ -10776,22 +10806,22 @@ class GUI extends GUI_core{
             } break; # ende case Bild
             case 'Time' : {
               $sql = "UPDATE ".$tablename." SET ".$attributname." = '".date('Y-m-d G:i:s')."' WHERE oid = '".$oid."'";
-              $this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
             } break;
             case 'User' : {
               $sql = "UPDATE ".$tablename." SET ".$attributname." = '".$this->user->Vorname." ".$this->user->Name."' WHERE oid = '".$oid."'";
-              $this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
             } break;
             case 'UserID' : {
               $sql = "UPDATE ".$tablename." SET ".$attributname." = '".$this->user->id."' WHERE oid = '".$oid."'";
-              $this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
             } break;
             case 'Stelle' : {
               $sql = "UPDATE ".$tablename." SET ".$attributname." = '".$this->Stelle->Bezeichnung."' WHERE oid = '".$oid."'";
-              $this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
             } break;
             case 'Geometrie' : {
               # nichts machen
+            } break;
+            case 'Checkbox' : {
+            	if($this->formvars[$form_fields[$i]] == '')$this->formvars[$form_fields[$i]] = 'f';
+              $sql = "UPDATE ".$tablename." SET ".$attributname." = '".$this->formvars[$form_fields[$i]]."' WHERE oid = '".$oid."'";
             } break;
             default : {
               if($tablename AND $formtype != 'Text_not_saveable' AND $formtype != 'Auswahlfeld_not_saveable' AND $formtype != 'SubFormPK' AND $formtype != 'SubFormFK' AND $formtype != 'SubFormEmbeddedPK' AND $attributname != 'the_geom'){
@@ -10804,7 +10834,6 @@ class GUI extends GUI_core{
                 else{
                   $sql = "UPDATE ".$tablename." SET ".$attributname." = '".$this->formvars[$form_fields[$i]]."' WHERE oid = '".$oid."'";
                 }
-                $this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
               }
             } # end of default case
           } # end of switch for type
@@ -10812,6 +10841,7 @@ class GUI extends GUI_core{
           #if($filter != ''){							# erstmal wieder rausgenommen, weil der Filter sich auf Attribute beziehen kann, die zu anderen Tabellen gehören
           #  $sql .= " AND ".$filter;
           #}
+          $this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
           $ret = $layerdb->execSQL($sql,4, 1);
           
           if ($ret[0]) {
@@ -11026,21 +11056,23 @@ class GUI extends GUI_core{
             #  $pfad = substr(trim($newpath), 7);
             #}
 
+            /*
 						if(strpos(strtolower($pfad), 'as the_geom') !== false){
               $the_geom = 'query.the_geom';
             }
             else{
+            */
             	if($layerset[$i]['attributes']['the_geom'] == ''){					# Geometriespalte ist nicht geladen, da auf "nicht sichtbar" gesetzt --> aus Data holen
             		$data_attributes = $this->mapDB->getDataAttributes($layerdb, $layerset[$i]['Layer_ID']);
             		$layerset[$i]['attributes']['the_geom'] = $data_attributes['the_geom'];
             	}
-              if($layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']]){
+              /*if($layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']]){
                 $the_geom = $layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$layerset[$i]['attributes']['the_geom'];
               }
-              else{
+              else{*/
                 $the_geom = $layerset[$i]['attributes']['the_geom'];
-              }
-            }
+            //  }
+            //} 
 
             # Unterscheidung ob mit Suchradius oder ohne gesucht wird
             if ($this->formvars['searchradius']>0) {
@@ -11113,12 +11145,12 @@ class GUI extends GUI_core{
             		$fromposition = strpos(strtolower($pfad), ' from ');
             	}
             	$new_pfad = $the_geom." ".substr($pfad, $fromposition);
-            	if($the_geom == 'query.the_geom'){
+            	#if($the_geom == 'query.the_geom'){
 	              $sql = "SELECT * FROM (SELECT ".$new_pfad.") as query WHERE 1=1 ".$sql_where;
-	            }
-	            else{
-	              $sql = "SELECT ".$new_pfad." ".$sql_where;
-	            }
+	            #}
+	            #else{
+	            #  $sql = "SELECT ".$new_pfad." ".$sql_where;
+	            #}
 	            $ret=$layerdb->execSQL($sql,4, 0);
 	            if(!$ret[0]){
 	            	while($rs=pg_fetch_array($ret[1])){
@@ -11132,7 +11164,7 @@ class GUI extends GUI_core{
 	            }
             }
             else{
-	            if($the_geom == 'query.the_geom'){
+	            #if($the_geom == 'query.the_geom'){
 	            	# group by wieder einbauen
 								if($layerset[$i]['attributes']['groupby'] != ''){
 									$pfad .= $layerset[$i]['attributes']['groupby'];
@@ -11145,8 +11177,8 @@ class GUI extends GUI_core{
 									}
 		          	}
 	              $sql = "SELECT * FROM (SELECT ".$pfad.") as query WHERE 1=1 ".$sql_where;
-	            }
-	            else{
+	            #}
+	            /*else{
 	              $sql = "SELECT ".$pfad." ".$sql_where;
 	              # group by wieder einbauen
 								if($layerset[$i]['attributes']['groupby'] != ''){
@@ -11159,7 +11191,7 @@ class GUI extends GUI_core{
 												$j++;
 									}
 		          	}
-	            }
+	            }*/
             }
             		        
 		        # order by 
@@ -11599,21 +11631,23 @@ class GUI extends GUI_core{
       }
       $pfad = substr(trim($path), 7);
 
-      if(strpos(strtolower($pfad), 'as the_geom') !== false){
+      /*if(strpos(strtolower($pfad), 'as the_geom') !== false){
         $the_geom = 'query.the_geom';
       }
-      else{
+      else{*/
       	if($layerset[$i]['attributes']['the_geom'] == ''){					# Geometriespalte ist nicht geladen, da auf "nicht sichtbar" gesetzt --> aus Data holen
       		$data_attributes = $this->mapDB->getDataAttributes($layerdb, $layerset[$i]['Layer_ID']);
       		$layerset[$i]['attributes']['the_geom'] = $data_attributes['the_geom'];
       	}
-        if($layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']]){
+        /*if($layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']]){
           $the_geom = $layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$layerset[$i]['attributes']['the_geom'];
         }
-        else{
+        else{*/
           $the_geom = $layerset[$i]['attributes']['the_geom'];
-        }
-      }
+      //  }
+      //}
+      
+      //$the_geom = $layerset[$i]['attributes']['the_geom'];
 
       switch ($layerset[$i]['toleranceunits']) {
         case 'pixels' : $pixsize=$this->user->rolle->pixsize; break;
@@ -11657,19 +11691,20 @@ class GUI extends GUI_core{
       
       # SVG-Geometrie abfragen für highlighting
       if($this->user->rolle->highlighting == '1'){
-        $pfad = "st_assvg(st_transform(".$the_geom.", ".$client_epsg."), 0, 8) AS highlight_geom, ".$pfad;
+        $pfad = "st_assvg(st_transform(".$layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$the_geom.", ".$client_epsg."), 0, 8) AS highlight_geom, ".$pfad;
       }
       
       # 2006-06-12 sr   Filter zur Where-Klausel hinzugefügt
       if($layerset[$i]['Filter'] != ''){
         $sql_where .= " AND ".$layerset[$i]['Filter'];
       }
-      if($the_geom == 'query.the_geom'){
+      #if($the_geom == 'query.the_geom'){
         $sql = "SELECT * FROM (SELECT ".$pfad.") as query WHERE 1=1 ".$sql_where;
-      }
+      /*}
       else{
         $sql = "SELECT ".$pfad." ".$sql_where;
       }
+      */
             
       # group by wieder einbauen
     	if($layerset[$i]['attributes']['groupby'] != ''){
@@ -12776,7 +12811,7 @@ class GUI extends GUI_core{
   # Zeichnet die Kartenelemente Hauptkarte, Legende, Maßstab und Referenzkarte
   # drawMap #
   function drawMap() {
-    if(MINSCALE != '' AND $this->map_factor == '' AND $this->map_scaledenom < MINSCALE){
+    if($this->main == 'map.php' AND MINSCALE != '' AND $this->map_factor == '' AND $this->map_scaledenom < MINSCALE){
       $this->scaleMap(MINSCALE);
     }    
     $this->image_map = $this->map->draw() OR die($this->layer_error_handling());    
@@ -14055,6 +14090,7 @@ class db_mapObj extends db_mapObj_core{
       $sql.="Layer_ID = ".$formvars['id'].", ";
     }
     $sql .= "Name = '".$formvars['Name']."', ";
+    $sql .= "alias = '".$formvars['alias']."', ";
     $sql .= "Datentyp = '".$formvars['Datentyp']."', ";
     $sql .= "Gruppe = '".$formvars['Gruppe']."', ";
     $sql .= "pfad = '".$formvars['pfad']."', ";
@@ -14125,11 +14161,12 @@ class db_mapObj extends db_mapObj_core{
       if($formvars['id'] != ''){
         $sql.="`Layer_ID`, ";
       }
-      $sql.= "`Name`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`) VALUES(";
+      $sql.= "`Name`, `alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`) VALUES(";
       if($formvars['id'] != ''){
         $sql.="'".$formvars['id']."', ";
       }
       $sql .= "'".$formvars['Name']."', ";
+      $sql .= "'".$formvars['alias']."', ";
       $sql .= "'".$formvars['Datentyp']."', ";
       $sql .= "'".$formvars['Gruppe']."', ";
       if($formvars['pfad'] == ''){

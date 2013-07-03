@@ -1,3 +1,4 @@
+<div id="map">
 <?php
  
 #
@@ -168,11 +169,20 @@ $svg='<?xml version="1.0"?>
 	var cmd   = "";
 	var width = '.$printwidth.';
 	var height = '.$printheight.';
+	var root = document.documentElement;
+	var mousewheelloop = 0;
+	var stopnavigation = false;
 
 function startup() {
-//	focus_NAV();
-//	document.getElementById("'.$this->user->rolle->getSelectedButton().'0").style.setProperty("fill",highlighted,"");
-//	'.$this->user->rolle->getSelectedButton().'();
+	if(window.addEventListener){
+		if(navigator.userAgent.toLowerCase().indexOf(\'webkit\') >= 0)
+			window.addEventListener(\'mousewheel\', mousewheelchange, false); // Chrome/Safari
+		else
+  		window.addEventListener(\'DOMMouseScroll\', mousewheelchange, false);
+  }
+  else{
+		top.document.getElementById("map").onmousewheel = mousewheelchange;
+	}
 	focus_FS();
 	draw_pgon_on();
 	redraw();
@@ -183,6 +193,57 @@ function startup() {
 // --------------------------scripte fuer die NAVigation-------------------------------
 // ------------------------------------------------------------------------------------
 '.$SVGvars_navscript.'
+
+ 	function mousewheelzoom(){
+		var g = document.getElementById("moveGroup");
+		zx = g.getCTM().inverse();
+		pathx[0] = Math.round(zx.e);
+		pathy[0] = Math.round(zx.f);
+		pathx[2] = Math.round(zx.e + resx*zx.a); 
+		pathy[2] = Math.round(zx.f + resy*zx.a);
+		top.sendpath("zoomin_box", pathx, pathy);
+	}
+	
+	function mousewheelchange(evt){
+		if(!evt)evt = window.event; // For IE
+		if(top.document.GUI.stopnavigation.value == 0){
+			window.clearTimeout(mousewheelloop);
+			if(evt.preventDefault){
+				evt.preventDefault();
+			}else{ // IE fix
+	    	evt.returnValue = false;
+	    };
+			if(evt.wheelDelta)
+				delta = evt.wheelDelta / 3600; // Chrome/Safari
+			else
+				delta = evt.detail / -90; // Mozilla
+			var z = 1 + delta*5;
+			var g = document.getElementById("moveGroup");
+			var p = getEventPoint(evt);
+			if(p.x > 0 && p.y > 0){
+				p = p.matrixTransform(g.getCTM().inverse());
+				var k = root.createSVGMatrix().translate(p.x, p.y).scale(z).translate(-p.x, -p.y);
+				setCTM(g, g.getCTM().multiply(k));
+				mousewheelloop = window.setTimeout("mousewheelzoom()", 400);
+			}
+		}
+	}
+	
+	function setCTM(element, matrix) {
+		var s = "matrix(" + matrix.a + "," + matrix.b + "," + matrix.c + "," + matrix.d + "," + matrix.e + "," + matrix.f + ")";
+		element.setAttribute("transform", s);
+	}
+	
+	function getEventPoint(evt) {
+		var p = root.createSVGPoint();
+		p.x = evt.clientX;
+		p.y = evt.clientY;
+		if(top.navigator.userAgent.toLowerCase().indexOf("msie") >= 0){
+			p.x = p.x - (top.document.body.clientWidth - resx)/2;
+	    p.y = p.y - 30;
+		}
+		return p;
+	}
 
 function go_previous(){
   document.getElementById("canvas").setAttribute("cursor", "wait");
@@ -566,3 +627,4 @@ echo'
 # echo '<iframe src="'.TEMPPATH_REL.$svgfile.'" width="'.$res_x.'" height="'.$res_y.'" name="map"></iframe>';
 echo '<script src="funktionen/Embed.js" language="JavaScript" type="text/javascript"></script>';
 ?>
+</div>

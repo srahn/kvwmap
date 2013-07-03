@@ -4,6 +4,12 @@
  * nicht gefunden wurden, nicht verstanden wurden oder zu umfrangreich waren.
  */
 
+if(!function_exists('mb_strrpos')){		# Workaround, falls es die Funktion nicht gibt
+	function mb_strrpos($str, $search, $offset = 0, $encoding){
+		return strrpos($str, $search, $offset);
+	}
+}
+
 if(!function_exists('mb_substr')){		# Workaround, falls es die Funktion nicht gibt
 	function mb_substr($str, $start, $length, $enc = NULL){
 		return substr($str, $start, $length);

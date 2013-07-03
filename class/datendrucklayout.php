@@ -265,7 +265,7 @@ class ddl {
       else $sql .= ", `usersize` = NULL";
       $sql .= ", `font_date` = '".$formvars['font_date']."'";
       $sql .= ", `font_user` = '".$formvars['font_user']."'";
-      if($formvars['type'])$sql .= ", `type` = ".(int)$formvars['type'];
+      if($formvars['type'] != '')$sql .= ", `type` = ".(int)$formvars['type'];
       else $sql .= ", `type` = NULL";
       if($_files['bgsrc']['name']){
         $nachDatei = DRUCKRAHMEN_PATH.$_files['bgsrc']['name'];
@@ -289,8 +289,8 @@ class ddl {
 				if($attributes['type'][$i] != 'geometry'){
 					$sql = "REPLACE INTO ddl_elemente SET ddl_id = ".$lastddl_id;
 					$sql.= " ,name = '".$attributes['name'][$i]."'";
-					$sql.= " ,xpos = ".(int)$formvars['posx_'.$attributes['name'][$i]];
-					$sql.= " ,ypos = ".(int)$formvars['posy_'.$attributes['name'][$i]];
+					$sql.= " ,xpos = ".(real)$formvars['posx_'.$attributes['name'][$i]];
+					$sql.= " ,ypos = ".(real)$formvars['posy_'.$attributes['name'][$i]];
 					if($formvars['width_'.$attributes['name'][$i]])$sql.= " ,width = ".(int)$formvars['width_'.$attributes['name'][$i]];
 					else $sql.= " ,width = NULL";
 					if($formvars['border_'.$attributes['name'][$i]])$sql.= " ,border = ".(int)$formvars['border_'.$attributes['name'][$i]];
@@ -302,6 +302,11 @@ class ddl {
 	        $this->database->execSQL($sql,4, 1);
 				}
 			}
+			
+			$sql = "DELETE FROM ddl_elemente WHERE ((xpos IS NULL AND ypos IS NULL) OR (xpos = 0 AND ypos = 0) OR (xpos > 595 AND ypos > 842)) AND ddl_id = ".$lastddl_id;
+			#echo $sql;
+      $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
+      $this->database->execSQL($sql,4, 1);
 
       for($i = 0; $i < $formvars['textcount']; $i++){
         $formvars['text'.$i] = str_replace(chr(10), ';', $formvars['text'.$i]);
@@ -378,16 +383,14 @@ class ddl {
       $lastddl_id = mysql_insert_id();
 
 			for($i = 0; $i < count($attributes['name']); $i++){
-				if($formvars['border_'.$attributes['name'][$i]] == '')$formvars['border_'.$attributes['name'][$i]] = 'NULL';
-				if($formvars['width_'.$attributes['name'][$i]] == '')$formvars['width_'.$attributes['name'][$i]] = 'NULL';
 				if($attributes['type'][$i] != 'geometry'){
 					$sql = "REPLACE INTO ddl_elemente SET ddl_id = ".(int)$formvars['aktivesLayout'];
 					$sql.= " ,name = '".$attributes['name'][$i]."'";
-					$sql.= " ,xpos = ".(int)$formvars['posx_'.$attributes['name'][$i]];
-					$sql.= " ,ypos = ".(int)$formvars['posy_'.$attributes['name'][$i]];
-					if($formvars['width_'.$attributes['name'][$i]])$sql.= " ,width = ".(int)$formvars['width_'.$attributes['name'][$i]];
+					$sql.= " ,xpos = ".(real)$formvars['posx_'.$attributes['name'][$i]];
+					$sql.= " ,ypos = ".(real)$formvars['posy_'.$attributes['name'][$i]];
+					if($formvars['width_'.$attributes['name'][$i]] != '')$sql.= " ,width = ".(int)$formvars['width_'.$attributes['name'][$i]];
 					else $sql.= " ,width = NULL";
-					if($formvars['border_'.$attributes['name'][$i]])$sql.= " ,border = ".(int)$formvars['border_'.$attributes['name'][$i]];
+					if($formvars['border_'.$attributes['name'][$i]] != '')$sql.= " ,border = ".(int)$formvars['border_'.$attributes['name'][$i]];
 					else $sql.= " ,border = NULL";
 					$sql.= " ,font = '".$formvars['font_'.$attributes['name'][$i]]."'";
 					$sql.= " ,fontsize = ".(int)$formvars['fontsize_'.$attributes['name'][$i]];

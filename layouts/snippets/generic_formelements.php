@@ -78,6 +78,16 @@
 											}
 										}
 									}break;
+									
+									case 'Checkbox' : {
+										echo '<input type="checkbox" title="'.$attributes['alias'][$j].'" cols="45" onchange="set_changed_flag(document.GUI.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')"';
+										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
+											echo ' readonly style="border:0px;background-color:transparent;"';
+										}
+										echo 'value="t" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'"';
+										if($dataset[$attributes['name'][$j]] == 't')echo 'checked=true';
+										echo '>';
+									}break;
 
 									case 'SubFormPK' : {
 										echo '<input style="font-size: '.$this->user->rolle->fontsize_gle.'px"';

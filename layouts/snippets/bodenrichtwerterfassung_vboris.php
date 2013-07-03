@@ -410,7 +410,8 @@ function update_require_attribute(attributes, layer_id, value){
 									  </tr>
 						  		</table>
 								</td>
-								<td width="100%" align="right" valign="top">
+								<td width="50%" align="left" valign="top">&nbsp;<b>Maßstab&nbsp;1:&nbsp;</b><input type="text" id="scale" name="nScale" size="5" value="<?php echo round($this->map->scaledenom); ?>"></td>
+								<td width="50%" align="right" valign="top">
 									<? if($this->formvars['go'] != 'Bodenrichtwertformular_Anzeige'){ ?>
 									<input type="checkbox" name="always_draw" value="1" <?if($always_draw == 1 OR $always_draw == 'true')echo 'checked'; ?>>&nbsp;weiterzeichnen&nbsp;&nbsp;
 									<input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang

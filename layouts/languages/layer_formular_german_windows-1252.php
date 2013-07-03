@@ -62,4 +62,5 @@
   $strMetaLink="Metadatenlink";
   $strMaintable="Haupttabelle";
   $strPrivileges="Rechte festlegen";
+  $strAlias="Aliasname";
 ?>  

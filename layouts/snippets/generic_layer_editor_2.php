@@ -314,18 +314,18 @@ function set_changed_flag(flag){
 				if(($attributes['privileg'][$j] == '0' AND $attributes['form_element_type'][$j] == 'Auswahlfeld') OR ($attributes['form_element_type'][$j] == 'Text' AND $attributes['type'][$j] == 'not_saveable')){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar
 					$attributes['form_element_type'][$j] .= '_not_saveable';
 				}
+				
+				if($attributes['group'][$j] != $attributes['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Tabelle beginnen
+					echo '<tr>
+									<td colspan="2">
+										<table class="tgle" border="2"><tbody class="gle">
+											<tr>
+												<td bgcolor="'.BG_GLEATTRIBUTE.'" colspan="2"><b>'.$attributes['group'][$j].'</b></td>
+											</tr>';
+				}
+				
 				if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
 					if($attributes['type'][$j] != 'geometry'){
-						
-							if($attributes['group'][$j] != $attributes['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Tabelle beginnen
-								echo '<tr>
-												<td colspan="2">
-													<table class="tgle" border="2"><tbody class="gle">
-														<tr>
-															<td bgcolor="'.BG_GLEATTRIBUTE.'" colspan="2"><b>'.$attributes['group'][$j].'</b></td>
-														</tr>';
-							}
-						
 							echo '<tr><td ';
 							if($attributes['group'][0] != '')echo 'width="10%"';
 							echo ' valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';
@@ -405,7 +405,7 @@ function set_changed_flag(flag){
 			  		}
 					}
 				}
-				if($this->new_entry != true AND $this->formvars['printversion'] == ''){
+				if($columnname != '' AND $this->new_entry != true AND $this->formvars['printversion'] == ''){
 					if($attributes['group'][0] != ''){ ?>
 						<tr><td colspan="2"><table width="100%" class="tgle" border="2"><tbody class="gle">
 					<? } ?>

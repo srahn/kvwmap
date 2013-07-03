@@ -1099,8 +1099,15 @@ CREATE TABLE `u_consumeShape` (
 
 
 ALTER TABLE `layer` ADD `maintable` VARCHAR( 255 ) NULL DEFAULT NULL AFTER `pfad`;
-
+ALTER TABLE `layer` ADD `alias` VARCHAR( 255 ) NULL DEFAULT NULL AFTER `Name`;
 ALTER TABLE `layer` ADD `privileg` ENUM( '0', '1', '2' ) NOT NULL DEFAULT '0';
 
 ALTER TABLE `layer_attributes` ADD `privileg` BOOLEAN NULL DEFAULT '0';
 ALTER TABLE `layer_attributes` ADD `query_tooltip` BOOLEAN NULL DEFAULT '0';
+
+ALTER TABLE `layer_attributes` CHANGE `form_element_type` `form_element_type` ENUM( 'Text', 'Textfeld', 'Auswahlfeld', 'Checkbox', 'Geometrie', 'SubFormPK', 'SubFormFK', 'SubFormEmbeddedPK', 'Time', 'Dokument', 'Link', 'User', 'Stelle', 'Fläche', 'dynamicLink', 'Zahl', 'UserID', 'Länge' ) NOT NULL DEFAULT 'Text';
+
+ALTER TABLE `stelle` ADD `use_layer_aliases` ENUM( '0', '1' ) NOT NULL DEFAULT '0';
+
+ALTER TABLE `ddl_elemente` CHANGE `xpos` `xpos` REAL NULL DEFAULT NULL;
+ALTER TABLE `ddl_elemente` CHANGE `ypos` `ypos` REAL NULL DEFAULT NULL;

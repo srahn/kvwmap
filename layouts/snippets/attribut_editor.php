@@ -90,6 +90,9 @@
 				  		<option value="Auswahlfeld" ';
 				  		if($this->attributes['form_element_type'][$i] == 'Auswahlfeld'){echo 'selected';}
 				  		echo ' >Auswahlfeld</option>
+				  		<option value="Checkbox" ';
+				  		if($this->attributes['form_element_type'][$i] == 'Checkbox'){echo 'selected';}
+				  		echo ' >Checkbox</option>
 				  		<option value="SubFormPK" ';
 				  		if($this->attributes['form_element_type'][$i] == 'SubFormPK'){echo 'selected';}
 				  		echo ' >SubFormPK</option>

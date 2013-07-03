@@ -41,4 +41,5 @@
   $strStart="Start";
   $strStop="Stop";
   $strEpsgCode="EPSG-Code";
+  $strUseLayerAliases="Layer-Aliasnamen verwenden";
 ?>
