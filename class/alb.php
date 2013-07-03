@@ -625,7 +625,7 @@ class ALB {
 			        for($j = 0; $j < count($flst->Klassifizierung)-1; $j++){
 			          if($j > 0)$csv .= " \n ";
 			          $csv .= $flst->Klassifizierung[$j]['flaeche'].'m² '.$flst->Klassifizierung[$j]['tabkenn'].'-'.$flst->Klassifizierung[$j]['klass'].' '.$flst->Klassifizierung[$j]['bezeichnung'].' ';
-			          $wert=mb_substr($flst->Klassifizierung[$j]['angaben'],mb_strrpos($flst->Klassifizierung[$j]['angaben'],'/','utf8')+1,'utf8');
+			          $wert=mb_substr($flst->Klassifizierung[$j]['angaben'],mb_strrpos($flst->Klassifizierung[$j]['angaben'],'/','utf8')+1, 999,'utf8');
 			          $emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
 			          if($flst->Klassifizierung[$j]['tabkenn'] =='32' AND $flst->Klassifizierung[$j]['angaben'] !='') {
 			            $csv .= "'".$flst->Klassifizierung[$j]['angaben']."'";
@@ -896,7 +896,7 @@ class ALB {
         for($j = 0; $j < count($flst->Klassifizierung)-1; $j++){
           if($j > 0)$csv .= " \n ";
           $csv .= $flst->Klassifizierung[$j]['flaeche'].'m² '.$flst->Klassifizierung[$j]['tabkenn'].'-'.$flst->Klassifizierung[$j]['klass'].' '.$flst->Klassifizierung[$j]['bezeichnung'].' ';
-          $wert=mb_substr($flst->Klassifizierung[$j]['angaben'],mb_strrpos($flst->Klassifizierung[$j]['angaben'],'/','utf8')+1,'utf8');
+          $wert=mb_substr($flst->Klassifizierung[$j]['angaben'],mb_strrpos($flst->Klassifizierung[$j]['angaben'],'/','utf8')+1, 999, 'utf8');
           $emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
           if($flst->Klassifizierung[$j]['tabkenn'] =='32' AND $flst->Klassifizierung[$j]['angaben'] !='') {
             $csv .= "'".$flst->Klassifizierung[$j]['angaben']."'";
@@ -1193,7 +1193,7 @@ class ALB {
         for($j = 0; $j < count($flst->Klassifizierung)-1; $j++){
           if($j > 0)$csv .= "\n";
           $csv .= $flst->Klassifizierung[$j]['flaeche'].'m² '.$flst->Klassifizierung[$j]['tabkenn'].'-'.$flst->Klassifizierung[$j]['klass'].' '.$flst->Klassifizierung[$j]['bezeichnung'].' ';
-          $wert=mb_substr($flst->Klassifizierung[$j]['angaben'],mb_strrpos($flst->Klassifizierung[$j]['angaben'],'/','utf8')+1,'utf8');
+          $wert=mb_substr($flst->Klassifizierung[$j]['angaben'],mb_strrpos($flst->Klassifizierung[$j]['angaben'],'/','utf8')+1, 999, 'utf8');
           $emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
           if($flst->Klassifizierung[$j]['tabkenn'] =='32' AND $flst->Klassifizierung[$j]['angaben'] !='') {
             $csv .= "'".$flst->Klassifizierung[$j]['angaben']."'";
@@ -1989,7 +1989,7 @@ class ALB {
 	                    $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 	                  }
 	                  $pdf->addText($col1,$row-=12,$fontSize,utf8_decode(mb_substr($zusatzeigentuemertext,0,$positiontrenner,'utf8')));
-	                  $zusatzeigentuemertext=mb_substr($zusatzeigentuemertext,$positiontrenner+1,'utf8');
+	                  $zusatzeigentuemertext=mb_substr($zusatzeigentuemertext,$positiontrenner+1, 999, 'utf8');
 	                }
 	                $pdf->addText($col1,$row-=12,$fontSize,utf8_decode($zusatzeigentuemertext));
 	              }
@@ -2096,7 +2096,7 @@ class ALB {
 	                    $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 	                  }
 	                  $pdf->addText($col1,$row-=12,$fontSize,utf8_decode(mb_substr($zusatzeigentuemertext,0,$positiontrenner,'utf8')));
-	                  $zusatzeigentuemertext=mb_substr($zusatzeigentuemertext,$positiontrenner+1,'utf8');
+	                  $zusatzeigentuemertext=mb_substr($zusatzeigentuemertext,$positiontrenner+1, 999,'utf8');
 	                }
 	                $pdf->addText($col1,$row-=12,$fontSize,utf8_decode($zusatzeigentuemertext));
 	              }
@@ -2337,7 +2337,7 @@ class ALB {
                     $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Bestand',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
                   }
                   $pdf->addText($col1,$row-=12,$fontSize,utf8_decode(mb_substr($zusatzeigentuemertext,0,$positiontrenner,'utf8')));
-                  $zusatzeigentuemertext=mb_substr($zusatzeigentuemertext,$positiontrenner+1,'utf8');
+                  $zusatzeigentuemertext=mb_substr($zusatzeigentuemertext,$positiontrenner+1, 999, 'utf8');
                 }
                 $pdf->addText($col1,$row-=12,$fontSize,utf8_decode($zusatzeigentuemertext));
               }
@@ -2561,7 +2561,7 @@ class ALB {
               $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Bestand',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
             }
             $pdf->addText($col1,$row-=12,$fontSize,utf8_decode(mb_substr($zusatzeigentuemertext,0,$positiontrenner,'utf8')));
-            $zusatzeigentuemertext=mb_substr($zusatzeigentuemertext,$positiontrenner+1,'utf8');
+            $zusatzeigentuemertext=mb_substr($zusatzeigentuemertext,$positiontrenner+1, 999, 'utf8');
           }
           $pdf->addText($col1,$row-=12,$fontSize,utf8_decode($zusatzeigentuemertext));
         }
