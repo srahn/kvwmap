@@ -317,6 +317,7 @@ CREATE TABLE `druckrahmen` (
   `watermarksize` int(11) default NULL,
   `watermarkangle` int(11) default NULL,
   `watermarktransparency` int(11) default NULL,
+  `variable_freetexts` BOOLEAN NULL DEFAULT NULL,
   `format` varchar(10) NOT NULL default 'A4hoch',
   `preis` int(11) default NULL,
   `font_date` varchar(255) default NULL,

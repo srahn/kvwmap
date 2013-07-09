@@ -390,7 +390,8 @@ class pgdatabase extends pgdatabase_core {
 	      	$explosion2 = explode('||', $fieldstring);
 	      	for($i = 0; $i < count($explosion2); $i++){
 	      		if(strpos($explosion2[$i], "'") === false){
-	      			$name_pair['real_name'] = $explosion2[$i];
+	      			$realname = explode('.', $explosion2[$i]);
+	      			$name_pair['real_name'] = $realname[count($realname)-1];
 	          	$name_pair['name'] = $explosion[count($explosion)-1];
 	          	$name_pair['no_real_attribute'] = true;
 	          	break;

@@ -283,6 +283,29 @@ function save_layout(){
         </tr>
  <?  		}	
     	}
+    	if($this->attributes['the_geom'] != ''){ ?>
+    		<tr>
+        	<td class="bold" align="left" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="8" onclick="toggle('<? echo $this->attributes['the_geom']; ?>');">
+        	<? if($this->ddl->selectedlayout[0]['elements'][$this->attributes['the_geom']]['xpos'] == ''){ ?>
+        		<img id="img_<? echo $this->attributes['the_geom']; ?>" src="<? echo GRAPHICSPATH.'plus.gif'?>">&nbsp;<? echo $this->attributes['the_geom']; ?>
+        	<? }else{ ?>
+        		<img id="img_<? echo $this->attributes['the_geom']; ?>" src="<? echo GRAPHICSPATH.'minus.gif'?>">&nbsp;<? echo $this->attributes['the_geom']; ?>
+        	<? } ?>
+        	</td>
+        </tr>
+        <tr id="tr1_<? echo $this->attributes['the_geom']; ?>" <? if($this->ddl->selectedlayout[0]['elements'][$this->attributes['the_geom']]['xpos'] == ''){echo 'style="display:none"';} ?>>
+        	<td>&nbsp;&nbsp;&nbsp;x:</td>
+        	<td><input type="text" class="input" title="negative Werte bewirken eine rechtsbündige Ausrichtung" name="posx_<? echo $this->attributes['the_geom']; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->attributes['the_geom']]['xpos']; ?>" size="5"></td>
+					<td width="60px">&nbsp;Breite:</td>
+					<td><input class="input"  type="text" name="width_<? echo $this->attributes['the_geom']; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->attributes['the_geom']]['width']; ?>" size="5"></td>
+					<td colspan="3"></td>
+        </tr>
+        <tr id="tr2_<? echo $this->attributes['the_geom']; ?>" <? if($this->ddl->selectedlayout[0]['elements'][$this->attributes['the_geom']]['xpos'] == ''){echo 'style="display:none"';} ?>>
+        	<td>&nbsp;&nbsp;&nbsp;y:</td>
+        	<td><input type="text" class="input" name="posy_<? echo $this->attributes['the_geom']; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->attributes['the_geom']]['ypos']; ?>" size="5"></td>
+        	<td colspan="5">&nbsp;</td>
+        </tr>	
+<?   	}
  		} ?>
         
         <tr>

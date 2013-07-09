@@ -485,7 +485,8 @@ function addfreetext(){
 	      <? } ?>
 	      
 	      <tr>
-          <td style="border-top:2px solid #C3C7C3" colspan=8 align="left">&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:addfreetext();">Freitext hinzufügen</a></td>
+          <td style="border-top:2px solid #C3C7C3" colspan="4" align="left">&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:addfreetext();">Freitext hinzufügen</a></td>
+          <td style="border-top:2px solid #C3C7C3" colspan="4" align="right"><input type="checkbox" name="variable_freetexts" value="1" <? if($this->Document->selectedframe[0]['variable_freetexts'] == 1) echo 'checked=true'; ?>>&nbsp;variable Freitexte&nbsp;</td>
         </tr>        
         
         <tr>

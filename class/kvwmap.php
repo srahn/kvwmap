@@ -5053,73 +5053,73 @@ class GUI extends GUI_core{
     	case "A5hoch" : {
         # Erzeugen neue pdf-Klasse
         $pdf=new Cezpdf('A5', 'portrait');
-        $height = 595;
+        $this->Docu->height = 595;
       } break;
 
       case "A5quer" : {
         # Erzeugen neue pdf-Klasse
         $pdf=new Cezpdf('A5', 'landscape');
-        $height = 420;
+        $this->Docu->height = 420;
       } break;
     	
       case "A4hoch" : {
         # Erzeugen neue pdf-Klasse
         $pdf=new Cezpdf();
-        $height = 842;
+        $this->Docu->height = 842;
       } break;
 
       case "A4quer" : {
         # Erzeugen neue pdf-Klasse
         $pdf=new Cezpdf('A4', 'landscape');
-        $height = 595;
+        $this->Docu->height = 595;
       } break;
 
       case "A3hoch" : {
         # Erzeugen neue pdf-Klasse
         $pdf=new Cezpdf('A3', 'portrait');
-        $height = 1191;
+        $this->Docu->height = 1191;
       } break;
 
       case "A3quer" : {
        # Erzeugen neue pdf-Klasse
         $pdf=new Cezpdf('A3','landscape');
-        $height = 842;
+        $this->Docu->height = 842;
       } break;
 
       case "A2hoch" : {
         # Erzeugen neue pdf-Klasse
         $pdf=new Cezpdf('A2', 'portrait');
-        $height = 1684;
+        $this->Docu->height = 1684;
       } break;
 
       case "A2quer" : {
         # Erzeugen neue pdf-Klasse
         $pdf=new Cezpdf('A2', 'landscape');
-        $height = 1191;
+        $this->Docu->height = 1191;
       } break;
 
       case "A1hoch" : {
         # Erzeugen neue pdf-Klasse
         $pdf=new Cezpdf('A1', 'portrait');
-        $height = 2384;
+        $this->Docu->height = 2384;
       } break;
 
       case "A1quer" : {
        # Erzeugen neue pdf-Klasse
         $pdf=new Cezpdf('A1','landscape');
-        $height = 1684;
+        $this->Docu->height = 1684;
       } break;
 
       case "A0hoch" : {
         # Erzeugen neue pdf-Klasse
         $pdf=new Cezpdf('A0', 'portrait');
-        $height = 3370;
+        $this->Docu->height = 3370;
       } break;
 
       case "A0quer" : {
        # Erzeugen neue pdf-Klasse
         $pdf=new Cezpdf('A0','landscape');
-        $height = 2384;
+        $this->Docu->height = 2384;
       } break;
     }
 
@@ -5210,6 +5210,26 @@ class GUI extends GUI_core{
 				else{
         	$pdf->addText($posx,$posy,$this->Docu->activeframe[0]['texts'][$j]['size'],utf8_decode($freitext[$i]), -1 * $alpha);
 				}
+      }
+    }
+    
+    # variable Freitexte
+  	for($j = 1; $j <= $this->formvars['last_freetext_id']; $j++){
+      $pdf->selectFont(PDFCLASSPATH.'fonts/Helvetica.afm');
+      if($this->formvars['freetext'.$j] != ''){
+        $this->formvars['freetext'.$j] = str_replace(chr(10), ';', $this->formvars['freetext'.$j]);
+        $this->formvars['freetext'.$j] = str_replace(chr(13), '', $this->formvars['freetext'.$j]);
+      	$freitext = explode(';', $this->formvars['freetext'.$j]);
+      	$anzahlzeilen = count($freitext);
+      	for($i = 0; $i < $anzahlzeilen; $i++){
+      		$h = $i * 12 * 1.25;
+      		if(strpos($this->Docu->activeframe[0]['format'], 'quer') !== false)$height = 420;			# das ist die Höhe des Vorschaubildes
+      		else $height = 842;																																		# das ist die Höhe des Vorschaubildes
+      		$ratio = $height/$this->Docu->height;
+      		$posx = ($this->formvars['freetext_posx'.$j]+3)/$ratio;
+      		$posy = ($this->formvars['freetext_posy'.$j]+3-$height+12*$ratio)/$ratio*-1 - $h;
+       		$pdf->addText($posx,$posy,12,utf8_decode($freitext[$i]), 0);
+      	}
       }
     }
 
@@ -6867,7 +6887,7 @@ class GUI extends GUI_core{
   }
 
 	function sachdaten_druck_editor(){
-		$ddl=new ddl($this->database);
+		$ddl=new ddl($this->database, $this);
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->ddl=$ddl;
     $this->stellendaten=$this->user->getStellen('Bezeichnung');
@@ -6957,6 +6977,7 @@ class GUI extends GUI_core{
 	
 	function sachdaten_druck_editor_preview($selectedlayout){
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
     $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
     $layerdb->setClientEncoding();
     $attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
@@ -6971,7 +6992,7 @@ class GUI extends GUI_core{
 	    	}
 	    }
     }
-    $pdf_file = $this->ddl->createDataPDF($attributes, $this->formvars['selected_layer_id'], $selectedlayout, $result, $this->Stelle, $this->user); 
+    $pdf_file = $this->ddl->createDataPDF($layerdb, $layerset, $attributes, $this->formvars['selected_layer_id'], $selectedlayout, NULL, $result, $this->Stelle, $this->user); 
     # in jpg umwandeln
     $currenttime = date('Y-m-d_H_i_s',time());
     exec(IMAGEMAGICKPATH.'convert '.$pdf_file.' -resize 595 '.dirname($pdf_file).'/'.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg');
@@ -6986,7 +7007,8 @@ class GUI extends GUI_core{
 
 	function generischer_sachdaten_druck(){
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-		$this->ddl = new ddl($this->database);
+		$this->ddl = new ddl($this->database, $this);
+		$layerset = $this->user->rolle->getLayer($this->formvars['chosen_layer_id']);
     $layerdb = $mapDB->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
     $layerdb->setClientEncoding();
     $path = $mapDB->getPath($this->formvars['chosen_layer_id']);
@@ -7007,6 +7029,7 @@ class GUI extends GUI_core{
       if($this->formvars[$checkbox_names[$i]] == 'on'){
         $element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
         $sql = $newpath." AND ".$element[1].".oid = ".$element[3];
+        $oids[] = $element[3];
         #echo $sql.'<br><br>';
         $this->debug->write("<p>file:kvwmap class:generischer_sachdaten_druck :",4);
         $ret = $layerdb->execSQL($sql,4, 1);
@@ -7024,7 +7047,7 @@ class GUI extends GUI_core{
     if($this->formvars['aktivesLayout'] != ''){
     	$this->ddl->selectedlayout = $this->ddl->load_layouts(NULL, $this->formvars['aktivesLayout'], NULL);
 	    # PDF erzeugen
-	    $pdf_file = $this->ddl->createDataPDF($attributes, $this->formvars['chosen_layer_id'], $this->ddl->selectedlayout[0], $result, $this->Stelle, $this->user);
+	    $pdf_file = $this->ddl->createDataPDF($layerdb, $layerset, $attributes, $this->formvars['chosen_layer_id'], $this->ddl->selectedlayout[0], $oids, $result, $this->Stelle, $this->user);
 	    # in jpg umwandeln
 	    $currenttime = date('Y-m-d_H_i_s',time());
 	    exec(IMAGEMAGICKPATH.'convert '.$pdf_file.' -resize 595 '.dirname($pdf_file).'/'.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg');
@@ -7043,7 +7066,8 @@ class GUI extends GUI_core{
 	
 	function generischer_sachdaten_druck_drucken(){
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-		$this->ddl = new ddl($this->database);
+		$this->ddl = new ddl($this->database, $this);
+		$layerset = $this->user->rolle->getLayer($this->formvars['chosen_layer_id']);
     $layerdb = $mapDB->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
     $layerdb->setClientEncoding();
     $path = $mapDB->getPath($this->formvars['chosen_layer_id']);
@@ -7064,6 +7088,7 @@ class GUI extends GUI_core{
       if($this->formvars[$checkbox_names[$i]] == 'on'){
         $element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
         $sql = $newpath." AND ".$element[1].".oid = ".$element[3];
+        $oids[] = $element[3];
         #echo $sql.'<br><br>';
         $this->debug->write("<p>file:kvwmap class:generischer_sachdaten_druck :",4);
         $ret = $layerdb->execSQL($sql,4, 1);
@@ -7078,7 +7103,7 @@ class GUI extends GUI_core{
     if($this->formvars['aktivesLayout'] != ''){
     	$this->ddl->selectedlayout = $this->ddl->load_layouts(NULL, $this->formvars['aktivesLayout'], NULL);
 	    # PDF erzeugen
-	    $this->outputfile = basename($this->ddl->createDataPDF($attributes, $this->formvars['chosen_layer_id'], $this->ddl->selectedlayout[0], $result, $this->Stelle, $this->user));
+	    $this->outputfile = basename($this->ddl->createDataPDF($layerdb, $layerset, $attributes, $this->formvars['chosen_layer_id'], $this->ddl->selectedlayout[0], $oids, $result, $this->Stelle, $this->user));
     }
     $this->mime_type='pdf';
     $this->output();
@@ -15382,6 +15407,8 @@ class Document {
       if($formvars['watermarksize']){$sql .= ", `watermarksize` = ".$formvars['watermarksize'];}
       if($formvars['watermarkangle']){$sql .= ", `watermarkangle` = ".$formvars['watermarkangle'];}
       if($formvars['watermarktransparency']){$sql .= ", `watermarktransparency` = '".$formvars['watermarktransparency']."'";}
+      if($formvars['variable_freetexts'] != 1)$formvars['variable_freetexts'] = 0;
+      $sql .= ", `variable_freetexts` = ".$formvars['variable_freetexts'];
       if($formvars['format']){$sql .= ", `format` = '".$formvars['format']."'";}
       if($preis){$sql .= ", `preis` = '".$preis."'";}
       if($formvars['font_date']){$sql .= ", `font_date` = '".$formvars['font_date']."'";}
@@ -15515,6 +15542,8 @@ class Document {
       $sql .= ", `watermarksize` = '".$formvars['watermarksize']."'";
       $sql .= ", `watermarkangle` = '".$formvars['watermarkangle']."'";
       $sql .= ", `watermarktransparency` = '".$formvars['watermarktransparency']."'";
+      if($formvars['variable_freetexts'] != 1)$formvars['variable_freetexts'] = 0;
+      $sql .= ", `variable_freetexts` = ".$formvars['variable_freetexts'];
       $sql .= ", `format` = '".$formvars['format']."'";
       $sql .= ", `preis` = '".$preis."'";
       $sql .= ", `font_date` = '".$formvars['font_date']."'";

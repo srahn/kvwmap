@@ -1111,3 +1111,5 @@ ALTER TABLE `stelle` ADD `use_layer_aliases` ENUM( '0', '1' ) NOT NULL DEFAULT '
 
 ALTER TABLE `ddl_elemente` CHANGE `xpos` `xpos` REAL NULL DEFAULT NULL;
 ALTER TABLE `ddl_elemente` CHANGE `ypos` `ypos` REAL NULL DEFAULT NULL;
+
+ALTER TABLE `druckrahmen` ADD `variable_freetexts` BOOLEAN NULL DEFAULT NULL AFTER `watermarktransparency`;

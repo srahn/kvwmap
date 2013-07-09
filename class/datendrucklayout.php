@@ -30,10 +30,11 @@
 
 class ddl {
     
-  function ddl($database) {
+  function ddl($database, $gui = NULL) {
     global $debug;
     $this->debug=$debug;
     $this->database = $database;
+    $this->gui = $gui;
   }
   
   function add_static_elements(){
@@ -84,30 +85,38 @@ class ddl {
   	return $text;
   }
   
-  function createDataPDF($attributes, $selected_layer_id, $layout, $result, $stelle, $user){
+  function createDataPDF($layerdb, $layerset, $attributes, $selected_layer_id, $layout, $oids, $result, $stelle, $user){
   	$this->layout = $layout;
   	$this->Stelle = $stelle;
   	$this->user = $user;
   	$this->maxy = 0;
   	$this->miny = 1000000;
+  	$i_on_page = -1;
   	$datasetcount_on_page = 0;
 		# Einbinden der PDF Klassenbibliotheken
     include (PDFCLASSPATH."class.ezpdf.php");
     # Erzeugen neue pdf-Klasse
     $this->pdf=new Cezpdf();
     $this->add_static_elements();
+    if($this->layout['elements'][$attributes['the_geom']]['xpos'] > 0){		# wenn ein Geometriebild angezeigt werden soll -> loadmap()
+    	$this->gui->loadmap('DataBase');
+    }
     for($i = 0; $i < count($result); $i++){
+    	$i_on_page++;
     	$new_dataset = true;
-    	$this->yoffset_onpage = $this->maxy - $this->miny;
     	if($this->layout['type'] == 0 AND $i > 0){		# neue Seite beim seitenweisen Typ und neuem Datensatz 
     		$this->pdf->newPage();
     		$this->add_static_elements();
     	}
-	    if($this->layout['type'] == 1  AND $this->miny - $datasetcount_on_page * ($this->maxy-$this->miny+5) < 50){		# neue Seite beim Untereinander-Typ und Seitenüberlauf
+	    if($datasetcount_on_page > 0 AND $this->layout['type'] == 1  AND $this->miny < $this->yoffset_onpage/$datasetcount_on_page + 50){		# neue Seite beim Untereinander-Typ und Seitenüberlauf
 				$datasetcount_on_page = 0;
+				$i_on_page = 0;
+				$this->maxy = 0;
+  			$this->miny = 1000000;
 				$this->pdf->newPage();
 				$this->add_static_elements();
-			}		
+			}
+			$this->yoffset_onpage = $this->maxy - $this->miny;			# der Offset mit dem die Elemente beim Untereinander-Typ nach unten versetzt werden
 			# fortlaufende Freitexte
 			if($this->layout['type'] == 1){
 		    for($j = 0; $j < count($this->layout['texts']); $j++){
@@ -123,14 +132,14 @@ class ddl {
 			        $posx = $this->layout['texts'][$j]['posx'] + $a;
 			        $y = $this->layout['texts'][$j]['posy'] - $b;
 			        # beim ersten Datensatz die Gesamthoehe der Elemente eines Datensatzes ermitteln 
-		      		if($i == 0){
+		      		if($i_on_page == 0){
 		      			if($this->maxy < $y)$this->maxy = $y;		# beim ersten Datensatz das maxy ermitteln
 		      		}
 		      		if($new_dataset){
 	  						$this->miny = 10000;
 	  						$new_dataset = false;
 		      		}
-			        if($i > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben
+			        if($i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben
 		      			$y = $y - $this->yoffset_onpage-18;
 		      		}
 			        $width = $this->pdf->getTextWidth($this->layout['texts'][$j]['size'], $freitext[$z]);
@@ -185,12 +194,12 @@ class ddl {
 						$ypos = $this->layout['elements'][$attributes['name'][$j]]['ypos'];
 						$zeilenhoehe = $this->layout['elements'][$attributes['name'][$j]]['fontsize'];      		      		
 	      		$y = $ypos+$zeilenhoehe+5;
-	      		if($this->layout['type'] == 1 AND $i > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben
+	      		if($this->layout['type'] == 1 AND $i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben
 	      			$y = $y - $this->yoffset_onpage-18;
 	      		}	
 	      		$this->pdf->ezSetY($y);
 	      		# beim jedem Datensatz die Gesamthoehe der Elemente des Datensatzes ermitteln
-	      		if($i == 0){
+	      		if($i_on_page == 0){
 	      			if($this->maxy < $y)$this->maxy = $y;		# beim ersten Datensatz das maxy ermitteln
 	      		}
 	      		if($new_dataset){
@@ -222,6 +231,28 @@ class ddl {
 									'cols'=>array($attributes['name'][$j]=>array('justification'=>$justification)),
 									'showLines'=>$this->layout['elements'][$attributes['name'][$j]]['border']));
 					}
+      	}
+      	elseif($attributes['name'][$j] == $attributes['the_geom'] AND $this->layout['elements'][$attributes['name'][$j]]['xpos'] > 0){		# Geometrie
+      		if($oids[$i] != ''){
+      			$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->gui->user->rolle->epsg_code);
+      			$rect = $polygoneditor->zoomTopolygon($oids[$i], $attributes['table_name'][$attributes['the_geom']], $attributes['the_geom'], 10);
+      			$this->gui->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
+      		}
+      		$this->gui->map->set('width', 400);
+        	$this->gui->map->set('height', 400);
+      		if($this->gui->map->selectOutputFormat('jpeg_print') == 1){
+			      $this->gui->map->selectOutputFormat('jpeg');
+			    }
+      		$image_map = $this->gui->map->draw();
+			    $filename = $this->gui->map_saveWebImage($image_map,'jpeg');
+			    $newname = $this->user->id.basename($filename);
+			    rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
+			    $y = $this->layout['elements'][$attributes['name'][$j]]['ypos'];    
+			    if($this->layout['type'] == 1 AND $i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben
+      			$y = $y - $this->yoffset_onpage-18;
+      		}
+			    $this->pdf->addJpegFromFile(IMAGEPATH.$newname, $this->layout['elements'][$attributes['name'][$j]]['xpos'], $y, $this->layout['elements'][$attributes['name'][$j]]['width']);
+			    if($this->miny > $y)$this->miny = $y;
       	}
       }
       $datasetcount_on_page++;
@@ -286,21 +317,19 @@ class ddl {
 
 			for($i = 0; $i < count($attributes['name']); $i++){
 				if($formvars['font_'.$attributes['name'][$i]] == 'NULL')$formvars['font_'.$attributes['name'][$i]] = NULL;
-				if($attributes['type'][$i] != 'geometry'){
-					$sql = "REPLACE INTO ddl_elemente SET ddl_id = ".$lastddl_id;
-					$sql.= " ,name = '".$attributes['name'][$i]."'";
-					$sql.= " ,xpos = ".(real)$formvars['posx_'.$attributes['name'][$i]];
-					$sql.= " ,ypos = ".(real)$formvars['posy_'.$attributes['name'][$i]];
-					if($formvars['width_'.$attributes['name'][$i]])$sql.= " ,width = ".(int)$formvars['width_'.$attributes['name'][$i]];
-					else $sql.= " ,width = NULL";
-					if($formvars['border_'.$attributes['name'][$i]])$sql.= " ,border = ".(int)$formvars['border_'.$attributes['name'][$i]];
-					else $sql.= " ,border = NULL";
-					$sql.= " ,font = '".$formvars['font_'.$attributes['name'][$i]]."'";
-					$sql.= " ,fontsize = ".(int)$formvars['fontsize_'.$attributes['name'][$i]];
-					#echo $sql;
-	        $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
-	        $this->database->execSQL($sql,4, 1);
-				}
+				$sql = "REPLACE INTO ddl_elemente SET ddl_id = ".$lastddl_id;
+				$sql.= " ,name = '".$attributes['name'][$i]."'";
+				$sql.= " ,xpos = ".(real)$formvars['posx_'.$attributes['name'][$i]];
+				$sql.= " ,ypos = ".(real)$formvars['posy_'.$attributes['name'][$i]];
+				if($formvars['width_'.$attributes['name'][$i]])$sql.= " ,width = ".(int)$formvars['width_'.$attributes['name'][$i]];
+				else $sql.= " ,width = NULL";
+				if($formvars['border_'.$attributes['name'][$i]])$sql.= " ,border = ".(int)$formvars['border_'.$attributes['name'][$i]];
+				else $sql.= " ,border = NULL";
+				$sql.= " ,font = '".$formvars['font_'.$attributes['name'][$i]]."'";
+				$sql.= " ,fontsize = ".(int)$formvars['fontsize_'.$attributes['name'][$i]];
+				#echo $sql;
+        $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
+        $this->database->execSQL($sql,4, 1);
 			}
 			
 			$sql = "DELETE FROM ddl_elemente WHERE ((xpos IS NULL AND ypos IS NULL) OR (xpos = 0 AND ypos = 0) OR (xpos > 595 AND ypos > 842)) AND ddl_id = ".$lastddl_id;
@@ -383,21 +412,19 @@ class ddl {
       $lastddl_id = mysql_insert_id();
 
 			for($i = 0; $i < count($attributes['name']); $i++){
-				if($attributes['type'][$i] != 'geometry'){
-					$sql = "REPLACE INTO ddl_elemente SET ddl_id = ".(int)$formvars['aktivesLayout'];
-					$sql.= " ,name = '".$attributes['name'][$i]."'";
-					$sql.= " ,xpos = ".(real)$formvars['posx_'.$attributes['name'][$i]];
-					$sql.= " ,ypos = ".(real)$formvars['posy_'.$attributes['name'][$i]];
-					if($formvars['width_'.$attributes['name'][$i]] != '')$sql.= " ,width = ".(int)$formvars['width_'.$attributes['name'][$i]];
-					else $sql.= " ,width = NULL";
-					if($formvars['border_'.$attributes['name'][$i]] != '')$sql.= " ,border = ".(int)$formvars['border_'.$attributes['name'][$i]];
-					else $sql.= " ,border = NULL";
-					$sql.= " ,font = '".$formvars['font_'.$attributes['name'][$i]]."'";
-					$sql.= " ,fontsize = ".(int)$formvars['fontsize_'.$attributes['name'][$i]];
-					#echo $sql;
-	        $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
-	        $this->database->execSQL($sql,4, 1);
-				}
+				$sql = "REPLACE INTO ddl_elemente SET ddl_id = ".(int)$formvars['aktivesLayout'];
+				$sql.= " ,name = '".$attributes['name'][$i]."'";
+				$sql.= " ,xpos = ".(real)$formvars['posx_'.$attributes['name'][$i]];
+				$sql.= " ,ypos = ".(real)$formvars['posy_'.$attributes['name'][$i]];
+				if($formvars['width_'.$attributes['name'][$i]] != '')$sql.= " ,width = ".(int)$formvars['width_'.$attributes['name'][$i]];
+				else $sql.= " ,width = NULL";
+				if($formvars['border_'.$attributes['name'][$i]] != '')$sql.= " ,border = ".(int)$formvars['border_'.$attributes['name'][$i]];
+				else $sql.= " ,border = NULL";
+				$sql.= " ,font = '".$formvars['font_'.$attributes['name'][$i]]."'";
+				$sql.= " ,fontsize = ".(int)$formvars['fontsize_'.$attributes['name'][$i]];
+				#echo $sql;
+        $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
+        $this->database->execSQL($sql,4, 1);
 			}
 			$sql = "DELETE FROM ddl_elemente WHERE ((xpos IS NULL AND ypos IS NULL) OR (xpos = 0 AND ypos = 0) OR (xpos > 595 AND ypos > 842)) AND ddl_id = ".(int)$formvars['aktivesLayout'];
 			#echo $sql;

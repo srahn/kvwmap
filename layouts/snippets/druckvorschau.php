@@ -14,10 +14,38 @@ function goback(){
 	document.GUI.submit();
 }
 
-function activate(evt){
+function addfreetext(){
+	newfreetext = document.getElementById('text').cloneNode(true);
+	newfreetext.id = parseInt(document.GUI.last_freetext_id.value) + 1;
+	document.GUI.last_freetext_id.value = newfreetext.id;
+	newfreetext.style.display = '';
+	newfreetext.childNodes[0].name = 'freetext' + newfreetext.id;
+	newfreetext.childNodes[1].name = 'freetext_posx' + newfreetext.id;
+	newfreetext.childNodes[2].name = 'freetext_posy' + newfreetext.id;
+	document.getElementById('main').appendChild(newfreetext);
+}
+
+function delete_freetext(object){
+	document.getElementById('main').removeChild(object.parentNode);
+}
+
+function start_resize(evt){
+	if(!evt)evt = window.event; // For IE
+	id = (evt.target) ? evt.target.parentNode.id : evt.srcElement.parentNode.id;
+	if(id){
+		document.GUI.action.value = 'resize';
+		document.GUI.active_freetext.value = id;
+		freetext = document.getElementById(id);
+		document.GUI.startx.value = parseInt(freetext.style.left);
+		document.GUI.starty.value = parseInt(freetext.style.top);
+	}
+}
+
+function start_move(evt){
 	if(!evt)evt = window.event; // For IE
 	id = (evt.target) ? evt.target.id : evt.srcElement.id;
 	if(id){
+		document.GUI.action.value = 'move';
 		document.GUI.active_freetext.value = id;
 		freetext = document.getElementById(id);
 		document.GUI.startx.value = (evt.clientX - document.getElementById('main').offsetLeft) - parseInt(freetext.style.left);
@@ -32,12 +60,24 @@ function deactivate(){
 function mousemove(evt){
 	if(!evt)evt = window.event; // For IE
 	if(document.GUI.active_freetext.value != ''){
-		//evt.preventDefault();
-		freetext = document.getElementById(document.GUI.active_freetext.value);
-		freetext.style.border='2px dashed grey';
-		freetext.style.cursor='move';
-		freetext.style.left = (evt.clientX - document.getElementById('main').offsetLeft - document.GUI.startx.value) + 'px';
-		freetext.style.top = (evt.clientY - document.getElementById('main').offsetTop - document.GUI.starty.value) + 'px';
+		if(document.GUI.action.value == 'move'){
+			//evt.preventDefault();
+			freetext = document.getElementById(document.GUI.active_freetext.value);
+			freetext.style.border='2px dashed grey';
+			freetext.style.cursor='move';
+			freetext.childNodes[1].value = (evt.clientX - document.getElementById('main').offsetLeft - document.GUI.startx.value);
+			freetext.childNodes[2].value = (evt.clientY - document.getElementById('main').offsetTop - document.GUI.starty.value);
+			freetext.style.left = freetext.childNodes[1].value + 'px';
+			freetext.style.top =  freetext.childNodes[2].value + 'px';
+		}
+		if(document.GUI.action.value == 'resize'){
+			//evt.preventDefault();
+			freetext = document.getElementById(document.GUI.active_freetext.value).firstChild;
+			freetext.parentNode.style.cursor='se-resize';
+			freetext.parentNode.style.border='2px dashed grey';
+			freetext.style.width = (evt.clientX - document.getElementById('main').offsetLeft - document.GUI.startx.value);
+			freetext.style.height = (evt.clientY - document.getElementById('main').offsetTop - document.GUI.starty.value);
+		}
 	}
 }
 
@@ -51,7 +91,7 @@ function preventflickering(evt){
 //-->
 </script>
 
-<?php
+<?
 	if ($this->Meldung=='') {
 	  $bgcolor=BG_FORM;
 	}
@@ -67,8 +107,8 @@ function preventflickering(evt){
     </td>
   </tr>
 </table>
-<div id="main" style="position: relative; left:0px; top:0px;" onmousedown="preventflickering(event);" onmousemove="mousemove(event);">
-<table border="0" width="<? echo $this->Document->width; ?>" cellspacing="0" cellpadding="0">
+<div id="main" style="width:595; position: relative; left:0px; top:0px;" onmousedown="preventflickering(event);" onmousemove="mousemove(event);">
+<table border="0" cellspacing="0" cellpadding="0">
 	<tr>
 		<td align="left">
 			<img width="595" src="<? echo $this->previewfile ?>">
@@ -76,14 +116,30 @@ function preventflickering(evt){
 	</tr>
 </table>
 
-
-<div onmouseover="this.style.border='2px dotted grey'; this.style.cursor='move';" onmouseout="this.style.border='none';" onmousedown="activate(event);" onmouseup="deactivate();" title="Freitext" id="text" class="" style="background: url(graphics/leer.gif) repeat;; position: absolute; visibility: visible; left: 111px; top: 111px; padding:3px">
-	<textarea style="border: none; background-color:transparent; font-size: 8px; font-family: Arial, Helvetica;">Hallo hallo test test</textarea>
-</div>
-
+<? 
+      	if(strpos($this->Docu->activeframe[0]['format'], 'quer') !== false)$height = 420;			# das ist die Höhe des Vorschaubildes
+      	else $height = 842;																																		# das ist die Höhe des Vorschaubildes
+      	$ratio = $height/$this->Docu->height;
+      	$size = 12*$ratio;
+      	$posx = 200;
+      	$posy = 200;
+?>
+	<div onmouseover="this.style.border='2px dotted grey'; this.lastChild.style.display=''; this.lastChild.previousSibling.style.display=''; this.style.cursor='move';" onmouseout="this.style.border='none'; this.lastChild.style.display='none'; this.lastChild.previousSibling.style.display='none';" onmousedown="start_move(event);" onmouseup="deactivate();" title="Freitext" id="text" style="display:none; background: url(graphics/leer.gif) repeat;; position: absolute; visibility: visible; left: <? echo $posx; ?>px; top: <? echo $posy; ?>px; padding:3px"><textarea name="freetext" style="overflow: hidden; resize: none; width: 150px; height: 70px; border: none; background-color:transparent; font-size: <? echo $size; ?>px; font-family: Helvetica; font-weight: bold;">hier Text eingegeben...</textarea><input type="hidden" name="freetext_posx" value="<? echo $posx; ?>"><input type="hidden" name="freetext_posy" value="<? echo $posy; ?>">
+		<!-- obiges und unteres muss so hintereinander stehen, sonst gibt es zwischen den Elementen noch Textelemente -->
+		<img title="Freitext löschen" onclick="delete_freetext(this);" onmouseover="this.style.cursor='pointer';" style="display: none; position: absolute; bottom:3px; left:0px" src="graphics/symbol_delete.gif"><img title="Größe ändern" onmousedown="start_resize(event);" onmouseout="this.style.cursor='default';" onmouseup="deactivate();" onmouseover="this.style.cursor='se-resize';" style="display: none; position: absolute; bottom:0px; right:0px" src="graphics/resize.gif"></div>
 </div>
 
 <table>
+<? if($this->Docu->activeframe[0]['variable_freetexts']){ ?>
+	<tr>
+  	<td>&nbsp;</td>
+  </tr>
+	<tr align="center"> 
+    <td colspan="2"> 
+      <input class="button" type="button" value="Freitext hinzufügen" onclick="addfreetext();">
+    </td>
+  </tr>
+<? } ?>
 	<tr>
   	<td>&nbsp;</td>
   </tr>
@@ -97,9 +153,11 @@ function preventflickering(evt){
   	<td>&nbsp;</td>
   </tr>
 </table>
-<input type="text" name="active_freetext" value="">
-<input type="text" name="startx" value="">
-<input type="text" name="starty" value="">
+<input type="hidden" name="action" value="">
+<input type="hidden" name="last_freetext_id" value="0">
+<input type="hidden" name="active_freetext" value="">
+<input type="hidden" name="startx" value="">
+<input type="hidden" name="starty" value="">
 <input type="hidden" name="vorschauzoom" value="<? echo $this->formvars['vorschauzoom']; ?>">
 <input type="hidden" name="go_plus" value="">
 <input type="hidden" name="worldprintwidth" value="<? echo $this->formvars['worldprintwidth'] ?>">
