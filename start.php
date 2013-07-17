@@ -279,10 +279,11 @@ if ($pgdbname=='') {
   else{
   	$PostGISdb=new pgdatabase();
   }
-  $PostGISdb->host=$GUI->Stelle->pgdbhost;
-  $PostGISdb->dbName=$GUI->Stelle->pgdbname;
-  $PostGISdb->user=$GUI->Stelle->pgdbuser;
-  $PostGISdb->passwd=$GUI->Stelle->pgdbpasswd;
+  $PostGISdb->host = $GUI->Stelle->pgdbhost;
+  $PostGISdb->dbName = $GUI->Stelle->pgdbname;
+  $PostGISdb->user = $GUI->Stelle->pgdbuser;
+  $PostGISdb->passwd = $GUI->Stelle->pgdbpasswd;
+  $PostGISdb->port = $GUI->Stelle->port;  
 }
 if ($PostGISdb->dbName!='') {
   # Übergeben der GIS-Datenbank für GIS-Daten an die GUI

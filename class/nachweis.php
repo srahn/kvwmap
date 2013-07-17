@@ -653,17 +653,7 @@ class Nachweis {
     return $ret; 
   }
   
-  function pruefeSuchParameterIndivNr($flurid,$stammnr) {
-    #echo 'Indiv-nr: '.$flurid.'-'.$stammnr;
-    $gemarkung=intval(substr($flurid,0,6));
-    $flur=substr($flurid,6,9);
-    # Überprüfen, ob die gegebenen Suchparameter ausreichend und gültig sind
-    if ($gemarkung=='') {
-      $errmsg.='\nFehler: Es ist keine Gemarkungsnummer angegeben worden.';
-    }
-    if (!is_integer($gemarkung)) {
-      $errmsg.='\nFehler: Die Gemarkungsnummer ist keine ganze Zahl.';
-    }
+  function pruefeSuchParameterIndivNr($stammnr) {
     if ($errmsg!='') { $ret[0]=1; $ret[1]=$errmsg; }
     return $ret;
   }
@@ -884,8 +874,8 @@ class Nachweis {
       
       case "indiv_nr" : {
         # Prüfen der Suchparameter
-        # Es mussen mindestens die Flur_id und die stammnr übergeben worden sein.
-        $ret=$this->pruefeSuchParameterIndivNr($FlurID,$stammnr);
+        # Es muss mindestens die stammnr übergeben worden sein.
+        $ret=$this->pruefeSuchParameterIndivNr($stammnr);
         if ($ret[0]) {
           # Fehler, die Parameter sind nicht vollständig oder ungültig
           $errmsg=$ret[1];

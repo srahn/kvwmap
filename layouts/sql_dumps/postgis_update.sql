@@ -1149,3 +1149,5 @@ CREATE OR REPLACE VIEW public.bw_boris_view AS
    FROM bw_zonen bw
    LEFT JOIN alb_v_gemeinden g ON bw.gemeinde = g.gemeinde
    LEFT JOIN alb_v_gemarkungen gm ON bw.gemarkung = gm.gemkgschl;
+   
+ALTER TABLE uko_polygon ADD COLUMN userid integer;

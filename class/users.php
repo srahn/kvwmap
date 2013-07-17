@@ -2484,7 +2484,7 @@ class stelle extends stelle_core{
 			$sql .= ', transparency = NULL';
 		}
 		$sql .= ', postlabelcache = "'.$formvars['postlabelcache'].'"';
-		$sql .= ', Filter = "'.addslashes($formvars['Filter']).'"';
+		$sql .= ', Filter = "'.$formvars['Filter'].'"';
 		$sql .= ', template = "'.$formvars['template'].'"';
 		$sql .= ', header = "'.$formvars['header'].'"';
 		$sql .= ', footer = "'.$formvars['footer'].'"';

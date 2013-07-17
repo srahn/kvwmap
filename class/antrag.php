@@ -207,7 +207,7 @@ class antrag {
     $title='';
     # Konfiguration der Tabelle
     # Allgemeine Einstellungen für die ganze Tabelle
-    $options=array('xPos'=>'left','xOrientation'=>'right','rowGap'=>$rowGap,'colGap'=>$colGap,'showLines'=>2 ,'width'=>550,'showHeadings'=>1,'fontSize'=>13, 'shaded'=>0);
+    $options=array('xPos'=>'left','xOrientation'=>'right','rowGap'=>$rowGap,'colGap'=>$colGap,'showLines'=>2 ,'width'=>550,'showHeadings'=>1,'fontSize'=>12, 'shaded'=>0);
     # Individuelle Einstellungen für die Spalten.
     $options['cols']['Lfd']=array('justification'=>'centre');
     $options['cols']['Riss-Nummer']=array('justification'=>'centre');
@@ -247,8 +247,12 @@ class antrag {
   	$csv.= chr(10);
   	# Daten
   	for($i=0; $i < count($this->FFR); $i++){
-  		$csv .= implode(';', $this->FFR[$i]);
-  		$csv.= chr(10);
+  		$dateien = explode(', ', $this->FFR[$i]['Datei']);
+  		foreach($dateien as $datei){
+  			$this->FFR[$i]['Datei'] = $datei;
+  			$csv .= implode(';', $this->FFR[$i]);
+  			$csv.= chr(10);
+  		}
     }
     return $csv;
   }

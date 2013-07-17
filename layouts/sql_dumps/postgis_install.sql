@@ -27,7 +27,8 @@ CREATE SCHEMA custom_shapes;	-- kann auch anders heißen, ist der config.php über
 CREATE TABLE uko_polygon
 (
   id serial NOT NULL,
-  username character varying(25)
+  username character varying(25),
+  userid integer
 )
 WITH OIDS;
 select AddGeometryColumn ('public','uko_polygon','the_geom',2398,'GEOMETRY',2);  -- oder 2399

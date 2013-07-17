@@ -75,9 +75,9 @@ function transformCoordsSVG($path){
     	$newsvgcoords[] = $last_startcoordy;
     }
   }
-  $svgresult = '';
-  for($i = 0; $i < count($newsvgcoords); $i++){
-    $svgresult .= $newsvgcoords[$i].' ';
+  $svgresult = 'M';
+  for($i = 1; $i < count($newsvgcoords); $i++){
+    $svgresult .= ' '.$newsvgcoords[$i];
   }
   return $svgresult;
 }

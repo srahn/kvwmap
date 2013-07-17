@@ -646,7 +646,7 @@ class GUI_core {
                 #$layer->set('classitem','id');
               }
               # Setzen des Filters
-              if($layerset[$i]['Filter']!=''){
+              if($layerset[$i]['Filter'] != ''){
               	$layerset[$i]['Filter'] = str_replace('$userid', $this->user->id, $layerset[$i]['Filter']);
                if (substr($layerset[$i]['Filter'],0,1)=='(') {
                  $expr=$layerset[$i]['Filter'];

@@ -1922,7 +1922,7 @@ class GUI extends GUI_core{
   }
 
   function PolygonEditor(){
-    $this->main='PolygonEditor.php';
+   	$this->main='PolygonEditor.php';
     $this->titel='Geometrie bearbeiten';
     # aktuellen Kartenausschnitt laden
     $this->loadMap('DataBase');
@@ -6480,6 +6480,7 @@ class GUI extends GUI_core{
         $oids[] = $element[3];
         #echo $sql.'<br>';
         if($filter != ''){
+        	$filter = str_replace('$userid', $this->user->id, $filter);
         	$sql .= " AND ".$filter;
         }
         $ret = $layerdb->execSQL($sql,4, 1);
@@ -6984,7 +6985,8 @@ class GUI extends GUI_core{
     # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
 		$attributes = $mapDB->add_attribute_values($attributes, $layerdb, NULL, true);
     # Testdaten erzeugen
-    for($i = 0; $i < 5; $i++){
+		if($selectedlayout['type'] == 1)$count = 5;else $count = 1;		# nur beim Untereinandertyp mehrere Datensätze erzeugen
+    for($i = 0; $i < $count; $i++){
 	    for($j = 0; $j < count($attributes['name']); $j++){
 	    	if($attributes['type'][$j] != 'geometry' ){
 	    		if($attributes['alias'][$j] == '')$attributes['alias'][$j] = $attributes['name'][$j];
@@ -7565,7 +7567,7 @@ class GUI extends GUI_core{
     $this->titel='UKO-Import';
     $this->main='uko_import.php';
     $this->uko = new uko();
-    $this->uko->uko_importieren($this->formvars, $this->user->Name, $this->pgdatabase);
+    $this->uko->uko_importieren($this->formvars, $this->user->Name, $this->user->id, $this->pgdatabase);
     $this->output();
   }
 	
@@ -8903,7 +8905,9 @@ class GUI extends GUI_core{
     if($this->formvars['flur'] == ''){
     	$this->formvars['flur'] = '%%%';
     }
-    $this->formvars['suchgemarkungflurid']=str_pad(intval(trim($this->formvars['gemarkung'])),6,'0',STR_PAD_LEFT).str_pad(trim($this->formvars['flur']),3,'0',STR_PAD_LEFT);
+    if($this->formvars['gemarkung'] != '' AND $this->formvars['gemarkung'] != 13){
+    	$this->formvars['suchgemarkungflurid']=str_pad(intval(trim($this->formvars['gemarkung'])),6,'0',STR_PAD_LEFT).str_pad(trim($this->formvars['flur']),3,'0',STR_PAD_LEFT);
+    }
     $this->user->rolle->setNachweisSuchparameter($this->formvars['suchffr'],$this->formvars['suchkvz'],$this->formvars['suchgn'], $this->formvars['suchan'], $this->formvars['abfrageart'],$this->formvars['suchgemarkungflurid'],$this->formvars['suchstammnr'],$this->formvars['suchrissnr'],$this->formvars['suchfortf'],$this->formvars['suchpolygon'],$this->formvars['suchantrnr']);
     # Die Anzeigeparameter werden so gesetzt, daß genau das gezeigt wird, wonach auch gesucht wurde.
     # bzw. was als Suchparameter im Formular angegeben wurde.
@@ -11721,6 +11725,7 @@ class GUI extends GUI_core{
       
       # 2006-06-12 sr   Filter zur Where-Klausel hinzugefügt
       if($layerset[$i]['Filter'] != ''){
+      	$layerset[$i]['Filter'] = str_replace('$userid', $this->user->id, $layerset[$i]['Filter']);
         $sql_where .= " AND ".$layerset[$i]['Filter'];
       }
       #if($the_geom == 'query.the_geom'){

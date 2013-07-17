@@ -99,6 +99,7 @@ class ddl {
     $this->pdf=new Cezpdf();
     $this->add_static_elements();
     if($this->layout['elements'][$attributes['the_geom']]['xpos'] > 0){		# wenn ein Geometriebild angezeigt werden soll -> loadmap()
+    	$this->gui->map_factor = MAPFACTOR;
     	$this->gui->loadmap('DataBase');
     }
     for($i = 0; $i < count($result); $i++){
@@ -238,8 +239,8 @@ class ddl {
       			$rect = $polygoneditor->zoomTopolygon($oids[$i], $attributes['table_name'][$attributes['the_geom']], $attributes['the_geom'], 10);
       			$this->gui->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
       		}
-      		$this->gui->map->set('width', 400);
-        	$this->gui->map->set('height', 400);
+      		$this->gui->map->set('width', $this->layout['elements'][$attributes['name'][$j]]['width']*MAPFACTOR);
+        	$this->gui->map->set('height', $this->layout['elements'][$attributes['name'][$j]]['width']*MAPFACTOR);
       		if($this->gui->map->selectOutputFormat('jpeg_print') == 1){
 			      $this->gui->map->selectOutputFormat('jpeg');
 			    }
@@ -247,7 +248,10 @@ class ddl {
 			    $filename = $this->gui->map_saveWebImage($image_map,'jpeg');
 			    $newname = $this->user->id.basename($filename);
 			    rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
-			    $y = $this->layout['elements'][$attributes['name'][$j]]['ypos'];    
+			    $y = $this->layout['elements'][$attributes['name'][$j]]['ypos'];
+      		if($i_on_page == 0){
+	      		if($this->maxy < $y+$this->layout['elements'][$attributes['name'][$j]]['width'])$this->maxy = $y+$this->layout['elements'][$attributes['name'][$j]]['width'];		# beim ersten Datensatz das maxy ermitteln
+	      	}    
 			    if($this->layout['type'] == 1 AND $i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben
       			$y = $y - $this->yoffset_onpage-18;
       		}

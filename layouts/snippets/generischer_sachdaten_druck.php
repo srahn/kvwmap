@@ -52,7 +52,7 @@ function back(){
         </tr>
         <tr>
           <td>
-            &nbsp;<select class="select" name="aktivesLayout" onchange="document.GUI.submit()">
+            &nbsp;<select class="select" name="aktivesLayout" onchange="document.GUI.go_plus.value = '';document.GUI.submit()">
             <option value="">--- bitte wählen ---</option>
             <?  
             for($i = 0; $i < count($this->ddl->layouts); $i++){

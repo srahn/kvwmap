@@ -445,6 +445,7 @@ class spatial_processor {
 	      }
 	      # 2006-06-12 sr   Filter zur Where-Klausel hinzugef�gt
 	      if($layerset[0]['Filter'] != ''){
+	      	$layerset[0]['Filter'] = str_replace('$userid', $this->rolle->user_id, $layerset[0]['Filter']);
 	        $sql_where .= " AND ".$layerset[0]['Filter'];
 	      }
 	      # Ersetzen des Platzhalters f�r die r�umliche Einschr�nkung der Sachdatenabfrage

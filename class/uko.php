@@ -37,7 +37,7 @@ class uko{
   }
   
   
-	function uko_importieren($formvars, $username, $database){
+	function uko_importieren($formvars, $username, $userid, $database){
 		$_files = $_FILES;
 		$this->formvars = $formvars;
     if($_files['ukofile']['name']){     # eine UKOdatei wurde ausgewählt
@@ -52,6 +52,7 @@ class uko{
 				}
 				$polygon = 'MULTIPOLYGON((('.implode(',', $coords).')))';
 				$sql = "INSERT INTO uko_polygon (username, dateiname, the_geom) VALUES('".$username."', '".$_files['ukofile']['name']."', geometryfromtext('".$polygon."', (select srid from geometry_columns where f_table_name = 'uko_polygon')))";
+				$sql = "INSERT INTO uko_polygon (username, userid, dateiname, the_geom) VALUES('".$username."', ".$userid.", '".$_files['ukofile']['name']."', geometryfromtext('".$polygon."', (select srid from geometry_columns where f_table_name = 'uko_polygon')))";
 				$ret = $database->execSQL($sql,4, 1);
 				if ($ret[0])$this->success = false;
         else $this->success = true;
