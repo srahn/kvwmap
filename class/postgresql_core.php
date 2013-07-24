@@ -46,7 +46,6 @@ class pgdatabase_core {
     # und der Einlesevorgang muss wiederholt werden bis er fehlerfrei durchgelaufen ist.
     # Dazu Fehlerausschriften bearchten.
     $this->blocktransaction=0;
-    if($this->port == '')$this->port = 5432;
   }
 
 
@@ -54,6 +53,7 @@ class pgdatabase_core {
 # database Funktionen
 ###########################################################
   function open() {
+  	if($this->port == '')$this->port = 5432;
     $this->debug->write("<br>Datenbankverbindung öffnen: Datenbank: ".$this->dbName." User: ".$this->user." Passwd: ".$this->passwd,4);
     $this->dbConn=pg_connect('dbname='.$this->dbName.' port='.$this->port.' user='.$this->user.' password='.$this->passwd.' host='.$this->host);
     $this->debug->write("Datenbank mit Connection_ID: ".$this->dbConn." geöffnet.",4);

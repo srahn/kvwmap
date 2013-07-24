@@ -909,10 +909,12 @@ class GUI_core {
         }
         if ($dbStyle['outlinecolor']!='') {
           $RGB=explode(" ",$dbStyle['outlinecolor']);
+        	if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
           $style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
         }
         if ($dbStyle['backgroundcolor']!='') {
           $RGB=explode(" ",$dbStyle['backgroundcolor']);
+        	if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
           $style->backgroundcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
         }
         if ($dbStyle['offsetx']!='') {
@@ -1036,7 +1038,7 @@ class GUI_core {
             $label->shadowsizex = $dbLabel['shadowsizex'];
             $label->shadowsizey = $dbLabel['shadowsizey'];
           }
-          if ($dbLabel['backgroundcolor']!='') {
+          /*if ($dbLabel['backgroundcolor']!='') {
             $RGB=explode(" ",$dbLabel['backgroundcolor']);
             $label->backgroundcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
           }
@@ -1045,7 +1047,7 @@ class GUI_core {
             $label->backgroundshadowcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
             $label->backgroundshadowsizex = $dbLabel['backgroundshadowsizex'];
             $label->backgroundshadowsizey = $dbLabel['backgroundshadowsizey'];
-          }
+          }*/
           $label->angle = $dbLabel['angle'];
           if($layerset['labelangleitem']!=''){
             $label->setBinding(MS_LABEL_BINDING_ANGLE, $layerset['labelangleitem']);

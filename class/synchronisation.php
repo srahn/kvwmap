@@ -45,7 +45,7 @@ class synchro {
 			$attributes = $mapDB->read_layer_attributes($export_layerset[$i]['Layer_ID'], $layerdb, NULL);
 			$currenttime=date('Y-m-d_H-i-s',time());
     	$this->trans_id[$i] = $this->user->id."_".$currenttime."_".$export_layerset[$i]['Layer_ID'];
-    	$where = " WHERE WITHIN(st_transform(".$attributes['all_table_names'][0].".".$attributes['the_geom'].", ".$this->user->rolle->epsg_code."), st_geomfromtext('".$formvars['newpathwkt']."', ".$this->user->rolle->epsg_code."))";
+    	$where = " WHERE ST_WITHIN(st_transform(".$attributes['all_table_names'][0].".".$attributes['the_geom'].", ".$this->user->rolle->epsg_code."), st_geomfromtext('".$formvars['newpathwkt']."', ".$this->user->rolle->epsg_code."))";
 			if($this->export_layer_table_data($mapDB, $this->trans_id[$i], $attributes, $layerdb, $export_layerset[$i]['Layer_ID'], $where, $formvars['leeren'], $formvars['mitbildern'], $formvars['username'], $formvars['passwort'])){
 				$this->commands[] = POSTGRESBINPATH."psql -U ".$this->database->user." -f ".SYNC_PATH.$this->trans_id[$i].".sql ".$this->database->dbName;
 				$this->commands = array_reverse($this->commands);		# Die Reihenfolge der Datenimporte muss umgedreht werden, damit erst die übergeordneten Tabellen eingespielt werden und dann die abhängigen (ansonsten könnte es sein, dass abhängige Tabellen auf Grund eines Delete Cascade-Constraints wieder gelöscht werden)

@@ -58,7 +58,6 @@ class pgdatabase extends pgdatabase_core {
     # und der Einlesevorgang muss wiederholt werden bis er fehlerfrei durchgelaufen ist.
     # Dazu Fehlerausschriften bearchten.
     $this->blocktransaction=0;
-    if($this->port == '')$this->port = 5432;
   }
 
   function getFlurstByNutzungen($gemkgschl, $nutzung, $anzahl){
