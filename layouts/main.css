@@ -91,6 +91,7 @@ a.infobox span
     text-decoration:none; 
 }
 
+
 a.infobox:hover span, a.infobox:focus span, a.infobox:active span {
 	visibility:visible; 
   border:1px solid steelblue; 
