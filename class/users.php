@@ -2190,7 +2190,7 @@ class stelle extends stelle_core{
 
 	function getFunktionen() {
 		# Abfragen der Funktionen, die in der Stelle ausgeführt werden dürfen
-		$sql ='SELECT f.id,f.bezeichnung,f2s.erlaubt FROM u_funktionen AS f,u_funktion2stelle AS f2s';
+		$sql ='SELECT f.id,f.bezeichnung, 1 as erlaubt FROM u_funktionen AS f,u_funktion2stelle AS f2s';
 		$sql.=' WHERE f.id=f2s.funktion_id AND f2s.stelle_id='.$this->id.' ORDER BY bezeichnung';
 		$this->debug->write("<p>file:users.php class:stelle->getFunktionen - Fragt die Funktionen der Stelle ab:<br>".$sql,4);
 		$query=mysql_query($sql,$this->database->dbConn);
@@ -2406,8 +2406,8 @@ class stelle extends stelle_core{
 	function addFunctions($function_ids){
 		# Hinzufügen von Funktionen zur Stelle
 		for ($i=0;$i<count($function_ids);$i++) {
-			$sql ='INSERT IGNORE INTO u_funktion2stelle ( `funktion_id` , `stelle_id` , `erlaubt`)';
-			$sql.="VALUES ('".$function_ids[$i]."', '".$this->id."', '1')";
+			$sql ='INSERT IGNORE INTO u_funktion2stelle ( `funktion_id` , `stelle_id`)';
+			$sql.="VALUES ('".$function_ids[$i]."', '".$this->id."')";
 			$this->debug->write("<p>file:users.php class:stelle->addFunctions - Hinzufügen von Funktionen zur Stelle:<br>".$sql,4);
 			$query=mysql_query($sql,$this->database->dbConn);
 			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
@@ -2794,7 +2794,7 @@ class stelle extends stelle_core{
 		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		# dann Attributrechte eintragen
 		for($i = 0; $i < count($attributes['type']); $i++){
-			if($formvars['privileg_'.$attributes['name'][$i]] !== ''){
+			if($formvars['privileg_'.$attributes['name'][$i].$this->id] !== ''){
 				$sql = 'INSERT INTO layer_attributes2stelle SET ';
 				$sql.= 'layer_id = '.$formvars['selected_layer_id'].', ';
 				$sql.= 'stelle_id = '.$this->id.', ';

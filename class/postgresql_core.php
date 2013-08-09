@@ -75,8 +75,8 @@ class pgdatabase_core {
   }
   
   function transformRect($curExtent,$curSRID,$newSRID) {
-    $sql ="SELECT round(CAST (X(min) AS numeric),5) AS minx, round(CAST (Y(min) AS numeric),5) AS miny";
-    $sql.=", round(CAST (X(max) AS numeric),5) AS maxx, round(CAST (Y(max) AS numeric),5) AS maxy";
+    $sql ="SELECT round(CAST (st_x(min) AS numeric),5) AS minx, round(CAST (st_y(min) AS numeric),5) AS miny";
+    $sql.=", round(CAST (st_x(max) AS numeric),5) AS maxx, round(CAST (st_y(max) AS numeric),5) AS maxy";
     $sql.=" FROM (SELECT";
     $sql.=" st_transform(st_geomfromtext('POINT(".$curExtent->minx." ".$curExtent->miny.")',".$curSRID."),".$newSRID.") AS min";
     $sql.=" ,st_transform(st_geomfromtext('POINT(".$curExtent->maxx." ".$curExtent->maxy.")',".$curSRID."),".$newSRID.") AS max";

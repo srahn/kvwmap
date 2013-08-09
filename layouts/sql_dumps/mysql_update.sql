@@ -1113,3 +1113,6 @@ ALTER TABLE `ddl_elemente` CHANGE `xpos` `xpos` REAL NULL DEFAULT NULL;
 ALTER TABLE `ddl_elemente` CHANGE `ypos` `ypos` REAL NULL DEFAULT NULL;
 
 ALTER TABLE `druckrahmen` ADD `variable_freetexts` BOOLEAN NULL DEFAULT NULL AFTER `watermarktransparency`;
+
+DELETE FROM `u_funktion2stelle` WHERE erlaubt = 0;
+ALTER TABLE `u_funktion2stelle` DROP  `erlaubt`;

@@ -48,12 +48,12 @@ class shape {
 				$firstfile = explode('.', $files[0]);
 				$file = $firstfile[0];
 				if(file_exists(UPLOADPATH.$file.'.dbf') OR file_exists(UPLOADPATH.$file.'.DBF')){
-					$tablename = 'a'.strtolower($file).rand(1,1000000);
-		      $command = POSTGRESBINPATH.'shp2pgsql -I -s '.$formvars['epsg'].' -W LATIN1 -c '.UPLOADPATH.$file.' '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' > '.UPLOADPATH.$file.'.sql'; 
+					$tablename = 'a'.strtolower(umlaute_umwandeln($file)).rand(1,1000000);
+		      $command = POSTGRESBINPATH.'shp2pgsql -I -s '.$formvars['epsg'].' -W LATIN1 -c "'.UPLOADPATH.$file.'" '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' > "'.UPLOADPATH.$file.'.sql"'; 
 		      exec($command);
-		      #echo $command;
-		      exec(POSTGRESBINPATH.'psql -f '.UPLOADPATH.$file.'.sql '.$pgdatabase->dbName.' '.$pgdatabase->user);
-		      #echo POSTGRESBINPATH.'psql -f '.UPLOADPATH.$file.'.sql '.$pgdatabase->dbName.' '.$pgdatabase->user;
+		     	#echo $command;
+		      exec(POSTGRESBINPATH.'psql -f "'.UPLOADPATH.$file.'.sql" '.$pgdatabase->dbName.' '.$pgdatabase->user);
+		      #echo POSTGRESBINPATH.'psql -f "'.UPLOADPATH.$file.'.sql" '.$pgdatabase->dbName.' '.$pgdatabase->user;
 		      $sql = 'SELECT count(*) FROM '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename;
 		      $ret = $pgdatabase->execSQL($sql,4, 0);
 		      if(!$ret[0]){
@@ -402,7 +402,7 @@ class shape {
     }
 		# Where-Klausel aus Sachdatenabfrage-SQL anhängen
   	if($this->formvars['sql_'.$this->formvars['selected_layer_id']]){
-  		$where = substr($this->formvars['sql_'.$this->formvars['selected_layer_id']], strrpos(strtolower($this->formvars['sql_'.$this->formvars['selected_layer_id']]), 'where')+5);
+  		$where = substr(stripslashes($this->formvars['sql_'.$this->formvars['selected_layer_id']]), strrpos(strtolower(stripslashes($this->formvars['sql_'.$this->formvars['selected_layer_id']])), 'where')+5);
   		$orderbyposition = strpos(strtolower($where), 'order by');
   		if($orderbyposition)$where = substr($where, 0, $orderbyposition);
 	    if(strpos($where, 'query.') !== false){

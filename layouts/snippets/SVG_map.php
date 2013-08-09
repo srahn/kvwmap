@@ -695,7 +695,14 @@ function mousedown(evt){
 	   break;
 	   case "measure":
 	    if (measuring){
-	      addpoint(evt);
+	    	client_x = evt.clientX;
+			  client_y = resy - evt.clientY;
+			  if(client_x == pathx[pathx.length-1] && client_y == pathy[pathy.length-1]){
+			  	recentre();		// Streckenmessung bei Doppelklick beenden
+			  }
+			  else{
+	      	addpoint(evt);
+	      }
 	    }
 	    else {
 	      startMeasure(evt);
@@ -1053,8 +1060,10 @@ function showMeasurement(evt){
 
 function addpoint(evt){
   // neuen eckpunkt abgreifen
-	pathx.push(evt.clientX);
-	pathy.push(resy - evt.clientY);
+  client_x = evt.clientX;
+	client_y = resy - evt.clientY;
+	pathx.push(client_x);
+	pathy.push(client_y);
 	pathx_world.push(top.format_number(evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value), false));
 	pathy_world.push(top.format_number(top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value), false));
   redrawPL();

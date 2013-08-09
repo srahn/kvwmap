@@ -46,8 +46,8 @@ class spatial_processor {
   }
   
   function split_multi_geometries($wktgeom, $layer_epsg, $client_epsg){
-  	$sql = "select ST_geometryN(st_transform(geometryfromtext('".$wktgeom."', ".$client_epsg."), ".$layer_epsg."),"; 
-		$sql.= "generate_series(1, ST_NumGeometries(geometryfromtext('".$wktgeom."', ".$client_epsg."))))";
+  	$sql = "select ST_geometryN(st_transform(st_geomfromtext('".$wktgeom."', ".$client_epsg."), ".$layer_epsg."),"; 
+		$sql.= "generate_series(1, ST_NumGeometries(st_geomfromtext('".$wktgeom."', ".$client_epsg."))))";
 		$ret = $this->pgdatabase->execSQL($sql,4, 0);
 		if (!$ret[0]) {
       while($rs=pg_fetch_row($ret[1])) {

@@ -5936,7 +5936,7 @@ class GUI extends GUI_core{
 			if($this->formvars['connectiontype'] == 6 AND $this->formvars['pfad'] != ''){
 				#---------- Speichern der Layerattribute -------------------
 				$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-				$path = $this->formvars['pfad'];
+				$path = stripslashes($this->formvars['pfad']);
 				$attributes = $mapDB->load_attributes($layerdb, $path);
 				$mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes, $this->formvars['maintable']);
 				$mapDB->delete_old_attributes($this->formvars['selected_layer_id'], $attributes);
@@ -7490,7 +7490,7 @@ class GUI extends GUI_core{
       }
     }
     else{                                           // alle Treffer abfragen
-      $sql = $this->formvars['sql_'.$this->formvars['chosen_layer_id']];
+      $sql = stripslashes($this->formvars['sql_'.$this->formvars['chosen_layer_id']]);
       $this->debug->write("<p>file:kvwmap class:generic_csv_export :",4);
       $ret = $layerdb->execSQL($sql,4, 1);
       if (!$ret[0]) {
@@ -14184,6 +14184,8 @@ class db_mapObj extends db_mapObj_core{
     if(is_array($layerdata)){
       $formvars = $layerdata;   # formvars wurden übergeben
 
+      $formvars['pfad'] = stripslashes($formvars['pfad']);
+      $formvars['Data'] = stripslashes($formvars['Data']);
       $formvars['pfad'] = str_replace ( "'", "''", $formvars['pfad']);
       $formvars['Data'] = str_replace ( "'", "''", $formvars['Data']);
 
@@ -14704,21 +14706,21 @@ class db_mapObj extends db_mapObj_core{
   function new_Style($style){
     if(is_array($style)){
       $sql = "INSERT INTO styles SET ";
-      if($style['symbol']){$sql.= "symbol = '".$style['symbol']."', ";}
-      if($style['symbolname']){$sql.= "symbolname = '".$style['symbolname']."', ";}
-      if($style['size']){$sql.= "size = '".$style['size']."'";}
-    	if($style['color']){$sql.= ", color = '".$style['color']."'";}
-      if($style['colorred']){$sql.= ", color = '".$style['colorred']." ".$style['colorgreen']." ".$style['colorblue']."'";}
-    	if($style['backgroundcolor'] !== NULL){$sql.= ", backgroundcolor = '".$style['backgroundcolor']."'";}
+      if($style['color']){$sql.= "color = '".$style['color']."'";}
+      if($style['colorred']){$sql.= "color = '".$style['colorred']." ".$style['colorgreen']." ".$style['colorblue']."'";}
+      if($style['symbol']){$sql.= ", symbol = '".$style['symbol']."'";}
+      if($style['symbolname']){$sql.= ", symbolname = '".$style['symbolname']."'";}
+      if($style['size']){$sql.= ", size = '".$style['size']."'";}
+      if($style['backgroundcolor'] !== NULL){$sql.= ", backgroundcolor = '".$style['backgroundcolor']."'";}
       if($style['backgroundcolorred'] !== NULL){$sql.= ", backgroundcolor = '".$style['backgroundcolorred']." ".$style['backgroundcolorgreen']." ".$style['backgroundcolorblue']."'";}
-    	if($style['outlinecolor'] !== NULL){$sql.= ", outlinecolor = '".$style['outlinecolor']."'";}
+      if($style['outlinecolor'] !== NULL){$sql.= ", outlinecolor = '".$style['outlinecolor']."'";}
       if($style['outlinecolorred'] !== NULL){$sql.= ", outlinecolor = '".$style['outlinecolorred']." ".$style['outlinecolorgreen']." ".$style['outlinecolorblue']."'";}
       if($style['minsize']){$sql.= ", minsize = '".$style['minsize']."'";}
       if($style['maxsize']){$sql.= ", maxsize = '".$style['maxsize']."'";}
       if($style['angle']){$sql.= ", angle = '".$style['angle']."'";}
-    	if($style['width']){$sql.= ", width = '".$style['width']."'";}
-    	if($style['minwidth']){$sql.= ", minwidth = '".$style['minwidth']."'";}
-    	if($style['maxwidth']){$sql.= ", maxwidth = '".$style['maxwidth']."'";}
+      if($style['width']){$sql.= ", width = '".$style['width']."'";}
+      if($style['minwidth']){$sql.= ", minwidth = '".$style['minwidth']."'";}
+      if($style['maxwidth']){$sql.= ", maxwidth = '".$style['maxwidth']."'";}
     }
     else{
     # Styleobjekt wird übergeben

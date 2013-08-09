@@ -762,7 +762,6 @@ CREATE TABLE `styles` (
 CREATE TABLE u_funktion2stelle (
   funktion_id int(11) NOT NULL default '0',
   stelle_id int(11) NOT NULL default '0',
-  erlaubt enum('0','1') NOT NULL default '1',
   PRIMARY KEY  (funktion_id,stelle_id)
 );
 
