@@ -316,11 +316,19 @@ function set_changed_flag(flag){
 				}
 				
 				if($attributes['group'][$j] != $attributes['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Tabelle beginnen
+					$explosion = explode(';', $attributes['group'][$j]);
+					if($explosion[1] != '')$collapsed = true;else $collapsed = false;
+					$groupname = $explosion[0];
 					echo '<tr>
 									<td colspan="2">
-										<table class="tgle" border="2"><tbody class="gle">
+										<table width="100%" id="colgroup'.$j.'" class="tgle" '; if(!$collapsed)echo 'style="display:none"'; echo ' border="2"><tbody width="100%" class="gle">
 											<tr>
-												<td bgcolor="'.BG_GLEATTRIBUTE.'" colspan="2"><b>'.$attributes['group'][$j].'</b></td>
+												<td width="100%" bgcolor="'.BG_GLEATTRIBUTE.'" colspan="2">&nbsp;<a href="#" onclick="javascript:document.getElementById(\'group'.$j.'\').style.display=\'\';document.getElementById(\'colgroup'.$j.'\').style.display=\'none\';"><img border="0" src="'.GRAPHICSPATH.'/plus.gif"></a>&nbsp;<b>'.$groupname.'</b></td>
+											</tr>
+										</table>
+										<table class="tgle" id="group'.$j.'" '; if($collapsed)echo 'style="display:none"'; echo 'border="2"><tbody class="gle">
+											<tr>
+												<td bgcolor="'.BG_GLEATTRIBUTE.'" colspan="2">&nbsp;<a href="#" onclick="javascript:document.getElementById(\'group'.$j.'\').style.display=\'none\';document.getElementById(\'colgroup'.$j.'\').style.display=\'\';"><img border="0" src="'.GRAPHICSPATH.'/minus.gif"></a>&nbsp;<b>'.$groupname.'</b></td>
 											</tr>';
 				}
 				

@@ -949,12 +949,11 @@ class GUI extends GUI_core{
                   
                   if($current_group[$j]->getMetaData('selectiontype') == 'radio'){
                     $legend .=  'type="radio" ';
-                    $legend .=  ' onClick="updateThema(document.GUI.thema'.$current_group[$j]->getMetaData('Layer_ID').',document.GUI.qLayer'.$current_group[$j]->getMetaData('Layer_ID').', document.GUI.radiolayers_'.$group_id.')"';
-                    $radiolayers[$group_id] .= $current_group[$j]->getMetaData('Layer_ID').'|';
+                    $legend .=  ' onClick="if(event.preventDefault){event.preventDefault();}else{event.returnValue = false;};" onMouseDown="updateThema(event, document.GUI.thema'.$current_group[$j]->getMetaData('Layer_ID').',document.GUI.qLayer'.$current_group[$j]->getMetaData('Layer_ID').', document.GUI.radiolayers_'.$group_id.')"';
                   }
                   else{
                     $legend .=  'type="checkbox" ';
-                    $legend .=  ' onClick="updateThema(document.GUI.thema'.$current_group[$j]->getMetaData('Layer_ID').',document.GUI.qLayer'.$current_group[$j]->getMetaData('Layer_ID').', \'\')"';
+                    $legend .=  ' onClick="updateThema(event, document.GUI.thema'.$current_group[$j]->getMetaData('Layer_ID').',document.GUI.qLayer'.$current_group[$j]->getMetaData('Layer_ID').', \'\')"';
                   }
                   
                   $legend .=  ' name="qLayer'.$current_group[$j]->getMetaData('Layer_ID').'" value="1" ';
@@ -970,12 +969,12 @@ class GUI extends GUI_core{
                 $legend .=  '<input id="thema'.$current_group[$j]->getMetaData('Layer_ID').'" ';
                 if($current_group[$j]->getMetaData('selectiontype') == 'radio'){
                   $legend .=  'type="radio" ';
-                  $legend .=  ' onClick="updateQuery(document.GUI.thema'.$current_group[$j]->getMetaData('Layer_ID').',document.GUI.qLayer'.$current_group[$j]->getMetaData('Layer_ID').', document.GUI.radiolayers_'.$group_id.')"';
+                  $legend .=  ' onClick="if(event.preventDefault){event.preventDefault();}else{event.returnValue = false;};" onMouseDown="updateQuery(event, document.GUI.thema'.$current_group[$j]->getMetaData('Layer_ID').',document.GUI.qLayer'.$current_group[$j]->getMetaData('Layer_ID').', document.GUI.radiolayers_'.$group_id.')"';
                   $radiolayers[$group_id] .= $current_group[$j]->getMetaData('Layer_ID').'|';
                 }
                 else{
                   $legend .=  'type="checkbox" ';
-                  $legend .=  ' onClick="updateQuery(document.GUI.thema'.$current_group[$j]->getMetaData('Layer_ID').',document.GUI.qLayer'.$current_group[$j]->getMetaData('Layer_ID').', \'\')"';
+                  $legend .=  ' onClick="updateQuery(event, document.GUI.thema'.$current_group[$j]->getMetaData('Layer_ID').',document.GUI.qLayer'.$current_group[$j]->getMetaData('Layer_ID').', \'\')"';
                 }
                 $legend .=  'title="Thema ein/ausschalten" name="thema'.$current_group[$j]->getMetaData('Layer_ID').'" value="1" ';
                 if($current_group[$j]->status == 1){

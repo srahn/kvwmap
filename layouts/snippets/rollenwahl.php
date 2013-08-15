@@ -84,7 +84,6 @@
     <td align="right"><?php echo $strMapProjection; ?>:&nbsp;</td>
     <td align="left">
       <select name="epsg_code" onchange="ahah('<? echo URL.APPLVERSION; ?>index.php','go=spatial_processing&newSRID='+this.form.epsg_code.value+'&operation=transform&resulttype=wkt',new Array(newExtent), '');">
-		    <option value="">--<?php echo $this->strChoose; ?>--</option>
 		    <?
   			for($i = 0; $i < count($this->epsg_codes); $i++){
   				echo '<option';

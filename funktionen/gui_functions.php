@@ -10,57 +10,59 @@ function onload_functions(){
 	}
 }
 
-function updateThema(thema, query, radiolayers){
+function updateThema(event, thema, query, radiolayers){
   if(query.checked == true){
     thema.checked = true;
-	  if(radiolayers != '' && radiolayers.value != ''){
-	  	radiolayerstring = radiolayers.value+'';
-	  	radiolayer = radiolayerstring.split('|');
-	  	for(i = 0; i < radiolayer.length-1; i++){
-	  		document.getElementById('thema'+radiolayer[i]).checked = false;
-	  		if(document.getElementById('thema'+radiolayer[i]) != thema){
-	  			document.getElementById('thema'+radiolayer[i]).status1 = false;
-	  		}
-	  		if(document.getElementById('qLayer'+radiolayer[i]) != undefined){
-	  			document.getElementById('qLayer'+radiolayer[i]).checked = false;
-	  		}
-	  	}
-	  	if(thema.status1 == undefined || thema.status1 == false){
-	  		thema.checked = true;
-	  		thema.status1 = true;
-	  		query.checked = true;
-	  	}
-	  	else{
-	  		thema.status1 = false;
-	  	}
-	  } 
+  }
+  if(radiolayers != '' && radiolayers.value != ''){
+    	if(event.preventDefault){
+		event.preventDefault();
+	}else{ // IE fix
+		event.returnValue = false;
+	};
+	radiolayerstring = radiolayers.value+'';
+	radiolayer = radiolayerstring.split('|');
+	for(i = 0; i < radiolayer.length-1; i++){
+		if(document.getElementById('thema'+radiolayer[i]) != thema){
+			document.getElementById('thema'+radiolayer[i]).checked = false;
+			if(document.getElementById('qLayer'+radiolayer[i]) != undefined){
+				document.getElementById('qLayer'+radiolayer[i]).checked = false;
+  			}
+		}
+		else{
+			query.checked = !query.checked;
+			if(query.checked == true){
+			    thema.checked = true;
+  			}
+  		}
+	}
   }  
 }
 
-function updateQuery(thema, query, radiolayers){
+function updateQuery(event, thema, query, radiolayers){
   if(query){
     if(thema.checked == false){
       query.checked = false;
     }
   }
-  if(radiolayers != '' && radiolayers.value != ''){
+  if(radiolayers != '' && radiolayers.value != ''){  
+  	if(event.preventDefault){
+		event.preventDefault();
+	}else{ // IE fix
+		event.returnValue = false;
+	};
   	radiolayerstring = radiolayers.value+'';
   	radiolayer = radiolayerstring.split('|');
   	for(i = 0; i < radiolayer.length-1; i++){
-  		document.getElementById('thema'+radiolayer[i]).checked = false;
   		if(document.getElementById('thema'+radiolayer[i]) != thema){
-  			document.getElementById('thema'+radiolayer[i]).status1 = false;
+  			document.getElementById('thema'+radiolayer[i]).checked = false;
+  		}
+  		else{
+  			thema.checked = !thema.checked;
   		}
   		if(document.getElementById('qLayer'+radiolayer[i]) != undefined){
   			document.getElementById('qLayer'+radiolayer[i]).checked = false;
   		}
-  	}
-  	if(thema.status1 == undefined || thema.status1 == false){
-  		thema.checked = true;
-  		thema.status1 = true;
-  	}
-  	else{
-  		thema.status1 = false;
   	}
   }
 }
