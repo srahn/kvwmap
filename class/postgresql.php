@@ -1566,7 +1566,7 @@ class pgdatabase extends pgdatabase_core {
     if ($BauBlock!="")  { $sql.=",baublock='".$BauBlock."'"; }
     if ($KoorRW!="")    {
       $sql.=",koorrw=".$KoorRW;
-      $sql.=",the_geom=GeometryFromText('POINT(".$KoorRW." ".$KoorHW.")',".EPSGCODE.")";
+      $sql.=",the_geom=st_geometryfromtext('POINT(".$KoorRW." ".$KoorHW.")',".EPSGCODE.")";
     }
     if ($KoorHW!="")    { $sql.=",koorhw=".$KoorHW;          }
     if ($Forstamt!="")  { $sql.=",forstamt=".$Forstamt;      }
@@ -3989,9 +3989,9 @@ class pgdatabase extends pgdatabase_core {
     $sql ="SELECT a.quelle,a.gemeinde,a.strasse,a.strassenname,a.hausnr";
     $sql.=" FROM alb_tmp_adressen AS a,alknhaus AS alkh,alkobj_e_fla AS hfl";
     $sql.=" WHERE hfl.folie='011'";
-    # $sql.=" AND hfl.the_geom && GeometryFromText('".$PolygonWKTString."',".EPSGCODE.")";
+    # $sql.=" AND hfl.the_geom && st_geometryfromtext('".$PolygonWKTString."',".EPSGCODE.")";
     if ($PolygonWKTString!='') {
-      $sql.=" AND st_intersects(hfl.the_geom,GeometryFromText('".$PolygonWKTString."',".EPSGCODE."))";
+      $sql.=" AND st_intersects(hfl.the_geom,st_geometryfromtext('".$PolygonWKTString."',".EPSGCODE."))";
     }
     $sql.=" AND hfl.objnr=alkh.objnr AND alkh.gemeinde=a.gemeinde AND alkh.strasse=a.strasse AND alkh.hausnr=a.hausnr";
     if ($GemID!='') {
@@ -4001,9 +4001,9 @@ class pgdatabase extends pgdatabase_core {
     $sql.=" SELECT a.quelle,a.gemeinde,a.strasse,a.strassenname,a.hausnr";
     $sql.=" FROM alkobj_e_fla AS ffl, alknflst AS alkf, alb_f_adressen AS albf, alb_tmp_adressen AS a";
     $sql.=" WHERE ffl.folie='001'";
-    # $sql.=" AND ffl.the_geom && GeometryFromText('".$PolygonWKTString."',".EPSGCODE.")";
+    # $sql.=" AND ffl.the_geom && st_geometryfromtext('".$PolygonWKTString."',".EPSGCODE.")";
     if ($PolygonWKTString!='') {
-      $sql.=" AND st_intersects(ffl.the_geom,GeometryFromText('".$PolygonWKTString."',".EPSGCODE."))";
+      $sql.=" AND st_intersects(ffl.the_geom,st_geometryfromtext('".$PolygonWKTString."',".EPSGCODE."))";
     }
     $sql.=" AND ffl.objnr=alkf.objnr AND alkf.flurstkennz=albf.flurstkennz";
     $sql.=" AND albf.gemeinde=a.gemeinde AND albf.strasse=a.strasse AND albf.hausnr=a.hausnr";
@@ -4040,9 +4040,9 @@ class pgdatabase extends pgdatabase_core {
     $sql.=" SELECT '".$GemID."-".$StrID."-'||TRIM(".HAUSNUMMER_TYPE."(alk.hausnr)) AS id,".HAUSNUMMER_TYPE."(alk.hausnr) AS nrtext,alk.hausnr AS ordernr";
     $sql.=" FROM alknhaus AS alk,alkobj_e_fla AS alkfl,alb_v_strassen AS s";
     $sql.=" WHERE alkfl.folie='011'";
-    # $sql.=" AND alkfl.the_geom && GeometryFromText('".$PolygonWKTString."',".EPSGCODE.")";
+    # $sql.=" AND alkfl.the_geom && st_geometryfromtext('".$PolygonWKTString."',".EPSGCODE.")";
     if ($PolygonWKTString!='') {
-      $sql.=" AND st_intersects(alkfl.the_geom,GeometryFromText('".$PolygonWKTString."',".EPSGCODE."))";
+      $sql.=" AND st_intersects(alkfl.the_geom,st_geometryfromtext('".$PolygonWKTString."',".EPSGCODE."))";
     }
     $sql.=" AND alk.objnr=alkfl.objnr AND alk.gemeinde=s.gemeinde AND alk.strasse=s.strasse";
     if ($GemID!='') {
@@ -4707,7 +4707,7 @@ class pgdatabase extends pgdatabase_core {
     $sql.=",'".$md['solution']."','".$md['status']."','".$md['onlinelinke']."'";
     $sql.=",'".$md['cyclus']."','".$md['sparefsystem']."','".$md['sformat']."'";
     $sql.=",'".$md['sformatversion']."','".$md['download']."','".$md['onlinelink']."'";
-    $sql.=",'".$md['accessrights']."',GeometryFromText('".$md['umring']."',".EPSGCODE."))";
+    $sql.=",'".$md['accessrights']."',st_geometryfromtext('".$md['umring']."',".EPSGCODE."))";
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) {
       $errmsg.='Fehler beim Eintragen der Metadaten in die Datenbank.<br>'.$ret[1];
@@ -4803,7 +4803,7 @@ class pgdatabase extends pgdatabase_core {
       $md['umring'].=','.$md['westbl'].' '.$md['northbl'].','.$md['eastbl'].' '.$md['northbl'];
       $md['umring'].=','.$md['eastbl'].' '.$md['southbl'].'))';
       # sql-Teil f�r r�umliche Abfrage bilden
-      $sql.=" AND the_geom && GeometryFromText('".$md['umring']."',".EPSGCODE.") AND st_intersects(the_geom,GeometryFromText('".$md['umring']."',".EPSGCODE."))";
+      $sql.=" AND the_geom && st_geometryfromtext('".$md['umring']."',".EPSGCODE.") AND st_intersects(the_geom,st_geometryfromtext('".$md['umring']."',".EPSGCODE."))";
     }
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {

@@ -437,8 +437,8 @@ class Festpunkte {
     $sql.="UPDATE ".$this->tabellenname." SET rw=replace(rw,',','.'), hw=replace(hw,',','.'), hoe=replace(hoe,',','.'); ";
 
     # Auffüllen der Geometriespalten aus den Angaben zu Rechts-, Hochwert und Höhe
-    $sql.="UPDATE ".$this->tabellenname." SET the_geom=force_3D(GeometryFromText('POINT('||rw||' '||hw||' '||hoe||')', 2398)) WHERE substring(rw from 0 for 2) = '4'; ";
-    $sql.="UPDATE ".$this->tabellenname." SET the_geom=force_3D(GeometryFromText('POINT('||rw||' '||hw||' '||hoe||')', 2399)) WHERE substring(rw from 0 for 2) = '5'; ";
+    $sql.="UPDATE ".$this->tabellenname." SET the_geom=force_3D(st_geometryfromtext('POINT('||rw||' '||hw||' '||hoe||')', 2398)) WHERE substring(rw from 0 for 2) = '4'; ";
+    $sql.="UPDATE ".$this->tabellenname." SET the_geom=force_3D(st_geometryfromtext('POINT('||rw||' '||hw||' '||hoe||')', 2399)) WHERE substring(rw from 0 for 2) = '5'; ";
 
     # Selektieren der Punktarten aus den Punktkennzeichen
     $sql.="UPDATE ".$this->tabellenname." SET art=CAST(substring(pkz from '-(.)-') AS int); ";
@@ -484,8 +484,8 @@ class Festpunkte {
     if ($minx!='') {
       # zusammensetzen des Rechtecks
       # fehlt hier noch
-      $sql.=" WHERE the_geom && GeometryFromText('xxxx',".EPSG_CODE.")";
-      $sql.=" AND  NOT Disjoint(position,GeometryFromText('xxxx',".EPSG_CODE."))";
+      $sql.=" WHERE the_geom && st_geometryfromtext('xxxx',".EPSG_CODE.")";
+      $sql.=" AND  NOT Disjoint(position,st_geometryfromtext('xxxx',".EPSG_CODE."))";
     }
     $this->debug->write("<p>kataster.php->Festpunkte->ladenFehlerellipsendatei",4);
     $ret=$this->database->execSQL($sql,4, 0);

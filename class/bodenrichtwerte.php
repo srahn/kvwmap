@@ -235,8 +235,8 @@ class bodenrichtwertzone {
     if($formvars['verfahrensgrund']){$sql.= ",'".$formvars['verfahrensgrund']."' ";}
     if($formvars['verfahrensgrund_zusatz']){$sql.= ",'".$formvars['verfahrensgrund_zusatz']."' ";}
     if($formvars['bemerkungen']){$sql.= ",'".$formvars['bemerkungen']."' ";}	
-  	$sql.=",st_transform(GeometryFromText('".$formvars['umring']."',".$this->client_epsg."), ".$this->layer_epsg.")";
-    $sql.=",st_transform(GeometryFromText('".$formvars['textposition']."',".$this->client_epsg."), ".$this->layer_epsg."))";
+  	$sql.=",st_transform(st_geometryfromtext('".$formvars['umring']."',".$this->client_epsg."), ".$this->layer_epsg.")";
+    $sql.=",st_transform(st_geometryfromtext('".$formvars['textposition']."',".$this->client_epsg."), ".$this->layer_epsg."))";
     # echo $sql;
     $ret=$this->database->execSQL($sql,4, 1);
     if ($ret[0]) {
@@ -294,8 +294,8 @@ class bodenrichtwertzone {
     $sql.= "verfahrensgrund = '".$formvars['verfahrensgrund']."', ";
     $sql.= "verfahrensgrund_zusatz = '".$formvars['verfahrensgrund_zusatz']."', ";
     $sql.= "bemerkungen = '".$formvars['bemerkungen']."', ";
-    $sql.= "the_geom = st_transform(GeometryFromText('".$formvars['umring']."',".$this->client_epsg."), ".$this->layer_epsg.")";
-    $sql.= ", textposition = st_transform(GeometryFromText('".$formvars['textposition']."',".$this->client_epsg."), ".$this->layer_epsg.")";
+    $sql.= "the_geom = st_transform(st_geometryfromtext('".$formvars['umring']."',".$this->client_epsg."), ".$this->layer_epsg.")";
+    $sql.= ", textposition = st_transform(st_geometryfromtext('".$formvars['textposition']."',".$this->client_epsg."), ".$this->layer_epsg.")";
     $sql.=" WHERE oid=".(int)$oid;
     #echo $sql;
     $ret=$this->database->execSQL($sql,4, 1);

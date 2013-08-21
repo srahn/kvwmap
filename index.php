@@ -679,6 +679,10 @@ if($GUI->goNotExecutedInPlugins){
 	  case 'StatistikAuswahl_anzeigen' : {
 		$GUI->StatistikAuswahlErgebnis();
 	  }break;
+	  
+	  case 'StatistikAuswahl_Stelle_anzeigen' : {
+	  	$GUI->StatistikAuswahlErgebnis();
+	  }break;
 
 	  # 2006-03-20 pk
 	  case 'Kartenkommentar_Formular' : {

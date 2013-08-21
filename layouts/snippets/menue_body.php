@@ -153,12 +153,11 @@
                   <tr>
                     <td valign="top">
                       <div id="menue'.$this->Menue->Menueoption[$i]['id'].'" class="menu" style="background-color: '.BG_MENUETOP.'; position: relative; visibility: visible; left: 0px; top: 0px; z-index:3">';
-                      echo '<img id="image_'.$this->Menue->Menueoption[$i]['id'].'" src="'.GRAPHICSPATH.'menue_top_open.gif" width="17" height="17" border="0">';
                       if(AJAX_MENUE == 'true'){
-                      	echo '<a href="javascript:changemenue('.$this->Menue->Menueoption[$i]['id'].');" class="black">'.$this->Menue->Menueoption[$i]['name'].'</a>';
+                      	echo '<a href="javascript:changemenue('.$this->Menue->Menueoption[$i]['id'].');" class="black"><img id="image_'.$this->Menue->Menueoption[$i]['id'].'" src="'.GRAPHICSPATH.'menue_top_open.gif" width="17" height="17" border="0">'.$this->Menue->Menueoption[$i]['name'].'</a>';
                       }
                       else{
-                      	echo '<a href="'.$this->Menue->Menueoption[$i]['links'].'&id='.$this->Menue->Menueoption[$i]['id'].'&status=off" class="black">'.$this->Menue->Menueoption[$i]['name'].'</a>';
+                      	echo '<a href="'.$this->Menue->Menueoption[$i]['links'].'&id='.$this->Menue->Menueoption[$i]['id'].'&status=off" class="black"><img id="image_'.$this->Menue->Menueoption[$i]['id'].'" src="'.GRAPHICSPATH.'menue_top_open.gif" width="17" height="17" border="0">'.$this->Menue->Menueoption[$i]['name'].'</a>';
                       }
               }
             }

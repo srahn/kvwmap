@@ -6461,8 +6461,7 @@ class GUI extends GUI_core{
   }
 
 	function dokument_loeschen(){
-		$_files = $_FILES;
-		$_files[$this->formvars['document_attributename']]['name'] = 'delete';
+		$_FILES[$this->formvars['document_attributename']]['name'] = 'delete';
 		$this->sachdaten_speichern();
 	}
 

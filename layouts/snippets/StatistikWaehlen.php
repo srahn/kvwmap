@@ -309,5 +309,5 @@ function display(id) {
 </table>
 -->
 
-<input type="hidden" name="go" value="StatistikAuswahl">
+<input type="hidden" name="go" value="<? echo $this->formvars['go']; ?>">
 	  

@@ -402,7 +402,7 @@ function popup(id){
 	</tr>
 </table>
 
-<input type="hidden" name="go" value="StatistikAuswahl">
+<input type="hidden" name="go" value="<? echo $this->formvars['go']; ?>">
   <input type="hidden" name="order" value="<?php echo $this->formvars['order']; ?>">
   <input type="hidden" name="nutzer" value="<?php echo $this->formvars['nutzer']; ?>">
   <input type="hidden" name="nutzung" value="<?php echo $this->formvars['nutzung']; ?>">

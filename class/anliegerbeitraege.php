@@ -53,12 +53,12 @@ class anliegerbeitraege {
   }
   
   function eintragenNeueStrasse($umring){
-    $sql = "SELECT IsValid(GeometryFromText('".$umring."', ".$this->clientepsg."))";
+    $sql = "SELECT IsValid(st_geometryfromtext('".$umring."', ".$this->clientepsg."))";
     $ret = $this->database->execSQL($sql, 4, 0);
     $valid = pg_fetch_array($ret[1]);
     if($valid[0] == 't'){
       $sql = "INSERT INTO anliegerbeitraege_strassen (the_geom)";
-      $sql.= " VALUES(st_transform(GeometryFromText('".$umring."', ".$this->clientepsg."), ".$this->layerepsg."))";
+      $sql.= " VALUES(st_transform(st_geometryfromtext('".$umring."', ".$this->clientepsg."), ".$this->layerepsg."))";
       $ret = $this->database->execSQL($sql, 4, 1);
       if ($ret[0]) {
         # Fehler beim Eintragen in Datenbank
@@ -74,13 +74,13 @@ class anliegerbeitraege {
   }
   
   function eintragenNeueBereiche($umring){
-    $sql = "SELECT IsValid(GeometryFromText('".$umring."', ".$this->clientepsg."))";
+    $sql = "SELECT IsValid(st_geometryfromtext('".$umring."', ".$this->clientepsg."))";
     $ret = $this->database->execSQL($sql, 4, 0);
     $valid = pg_fetch_array($ret[1]);
     if($valid[0] == 't'){
-      $sql = "INSERT INTO anliegerbeitraege_bereiche (the_geom, flaeche) select * from (select Intersection(st_transform(GeometryFromText('".$umring."', ".$this->clientepsg."), ".$this->layerepsg."),alk.the_geom) as bereich, round(area(Intersection(st_transform(GeometryFromText('".$umring."', ".$this->clientepsg."), ".$this->layerepsg."),alk.the_geom)) ::numeric, 2) as flaeche ";
+      $sql = "INSERT INTO anliegerbeitraege_bereiche (the_geom, flaeche) select * from (select Intersection(st_transform(st_geometryfromtext('".$umring."', ".$this->clientepsg."), ".$this->layerepsg."),alk.the_geom) as bereich, round(area(Intersection(st_transform(st_geometryfromtext('".$umring."', ".$this->clientepsg."), ".$this->layerepsg."),alk.the_geom)) ::numeric, 2) as flaeche ";
       $sql.= "from alkobj_e_fla as alk, alknflst "; 
-      $sql.= "where st_transform(GeometryFromText('".$umring."', ".$this->clientepsg."), ".$this->layerepsg.") && alk.the_geom AND alknflst.objnr = alk.objnr) as foo ";
+      $sql.= "where st_transform(st_geometryfromtext('".$umring."', ".$this->clientepsg."), ".$this->layerepsg.") && alk.the_geom AND alknflst.objnr = alk.objnr) as foo ";
       $sql.= "WHERE flaeche > 0 ";
       $sql.= "AND (GeometryType(bereich) = 'POLYGON' OR GeometryType(bereich) = 'MULTIPOLYGON')";
       $ret = $this->database->execSQL($sql, 4, 1);

@@ -87,7 +87,7 @@ class polygoneditor {
   }
   
   function eintragenFlaeche($umring, $oid, $tablename, $columnname){  	
-		$sql = "UPDATE ".$tablename." SET ".$columnname." = st_transform(GeometryFromText('".$umring."',".$this->clientepsg."),".$this->layerepsg.") WHERE oid = ".$oid;
+		$sql = "UPDATE ".$tablename." SET ".$columnname." = st_transform(st_geometryfromtext('".$umring."',".$this->clientepsg."),".$this->layerepsg.") WHERE oid = ".$oid;
 		$ret = $this->database->execSQL($sql, 4, 1);
 		if(!$ret[0]){
 			if(pg_affected_rows($ret[1]) == 0){

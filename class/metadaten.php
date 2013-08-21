@@ -411,12 +411,12 @@ class notiz {
     $this->debug->write('<br>file:metadaten.php class:notiz function eintragenNeueNotiz<br>Einfügen der Daten zu einer Notiz in<br>PostGIS',4);
     $sql ="INSERT INTO q_notizen (notiz,kategorie_id,person,datum,the_geom)";
     $sql.=" VALUES ('".$formvars['notiz']."','".$formvars['kategorie_id']."','".$formvars['person']."','".date("Y-m-d",time())."'";
-    #$sql.=",GeometryFromText('".$formvars['textposition']."',".EPSGCODE."))";
+    #$sql.=",st_geometryfromtext('".$formvars['textposition']."',".EPSGCODE."))";
     # seit 2006-06-21 wird von dem epsg-code des Viewers in den epsg code der Datenlayer transformiert
     # der epsg-code des Views ist an die Rolle gebunden und wird aus Datenbank abgefragt
     # als epsg-code der Tabelle Notiz wird die Konstante EPSGCODE aus config.php genommen.
     $formvars['epsg_nach']=EPSGCODE;
-    $sql.=",transform(GeometryFromText('".$formvars['textposition']."',".$formvars['epsg_von']."),".$formvars['epsg_nach']."))";
+    $sql.=",transform(st_geometryfromtext('".$formvars['textposition']."',".$formvars['epsg_von']."),".$formvars['epsg_nach']."))";
     #echo $sql;
     $ret=$this->database->execSQL($sql,4, 1);
     if ($ret[0]) {
@@ -430,7 +430,7 @@ class notiz {
     $this->debug->write('<br>file:metadaten.php class:notiz function aktualisierenNotiz<br>Aktualisieren der Daten zu einer Notiz in<br>PostGIS',4);
     $sql ="UPDATE q_notizen SET notiz='".$formvars['notiz']."',kategorie_id='".$formvars['kategorie_id']."'";
     $sql.=",person='".$formvars['person']."',datum='".date("Y-m-d",time())."'";
-    $sql.=",the_geom=st_transform(GeometryFromText('".$formvars['textposition']."', ".$this->client_epsg."),".EPSGCODE.")";
+    $sql.=",the_geom=st_transform(st_geometryfromtext('".$formvars['textposition']."', ".$this->client_epsg."),".EPSGCODE.")";
     $sql.=" WHERE oid=".(int)$oid;
     $ret=$this->database->execSQL($sql,4, 1);
     if ($ret[0]) {

@@ -144,14 +144,14 @@ class jagdkataster {
   function eintragenNeueFlaeche($umring, $nummer, $name, $art, $flaeche, $jb_zuordnung, $status, $verzicht, $oid = ''){
   	$valid[0] = 't';
   	if($umring != ''){
-	  	$sql = "SELECT IsValid(GeometryFromText('".$umring."', ".$this->clientepsg."))";
+	  	$sql = "SELECT IsValid(st_geometryfromtext('".$umring."', ".$this->clientepsg."))";
 	  	$ret = $this->database->execSQL($sql, 4, 0);
 	  	$valid = pg_fetch_array($ret[1]);
   	}
   	if($valid[0] == 't'){
 			if($oid != ''){
 				$sql = "UPDATE jagdbezirke SET";
-				if($umring != ''){$sql.= " the_geom = st_transform(GeometryFromText('".$umring."', ".$this->clientepsg."), ".$this->layerepsg."),";}
+				if($umring != ''){$sql.= " the_geom = st_transform(st_geometryfromtext('".$umring."', ".$this->clientepsg."), ".$this->layerepsg."),";}
 				$sql.= " name = '".$name."',";
 				$sql.= " flaeche = ".(float)$flaeche.",";
 				$sql.= " jb_zuordnung = '".$jb_zuordnung."',";
@@ -163,7 +163,7 @@ class jagdkataster {
 			else{
 				if($umring != ''){
 					$sql = "INSERT INTO jagdbezirke (id, the_geom, name, art, flaeche, jb_zuordnung, status, verzicht)";
-					$sql.= " VALUES('".$nummer."', st_transform(GeometryFromText('".$umring."', ".$this->clientepsg."), ".$this->layerepsg."), '".$name."', '".$art."', ".$flaeche.", '".$jb_zuordnung."', '".$status."', '".$verzicht."')";
+					$sql.= " VALUES('".$nummer."', st_transform(st_geometryfromtext('".$umring."', ".$this->clientepsg."), ".$this->layerepsg."), '".$name."', '".$art."', ".$flaeche.", '".$jb_zuordnung."', '".$status."', '".$verzicht."')";
 				}
 				else{
 					$sql = "INSERT INTO jagdbezirke (id, name, art, flaeche, jb_zuordnung, status, verzicht)";

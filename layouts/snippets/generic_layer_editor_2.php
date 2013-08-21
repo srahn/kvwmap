@@ -150,6 +150,9 @@ function select_this_dataset(layer_id, n){
 function use_for_new_dataset(layer_id){
 	if(check_for_selection(layer_id)){
 		document.GUI.chosen_layer_id.value = layer_id;
+		document.GUI.pathwkt.value = '';
+		document.GUI.newpathwkt.value = '';
+		document.GUI.newpath.value = '';
 		document.GUI.go_backup.value = document.GUI.go.value;
 		document.GUI.go.value = 'neuer_Layer_Datensatz';
 		document.GUI.submit();
@@ -241,10 +244,13 @@ function set_changed_flag(flag){
  $attributes = $layer['attributes'];
  $size = 61;
  $select_width = ''; 
+ if($layer['alias'] != '' AND $this->Stelle->useLayerAliases){
+	$layer['Name'] = $layer['alias'];
+ }
 ?>
 <div id="layer">
 
-<h2><? echo $layer['Name'] ?></h2>
+<h2><? echo $layer['Name']; ?></h2>
 <?
 	$doit = false;
   $anzObj = count($layer['shape']);
@@ -321,14 +327,14 @@ function set_changed_flag(flag){
 					$groupname = $explosion[0];
 					echo '<tr>
 									<td colspan="2">
-										<table width="100%" id="colgroup'.$j.'" class="tgle" '; if(!$collapsed)echo 'style="display:none"'; echo ' border="2"><tbody width="100%" class="gle">
+										<table width="100%" id="colgroup'.$j.'_'.$k.'" class="tgle" '; if(!$collapsed)echo 'style="display:none"'; echo ' border="2"><tbody width="100%" class="gle">
 											<tr>
-												<td width="100%" bgcolor="'.BG_GLEATTRIBUTE.'" colspan="2">&nbsp;<a href="#" onclick="javascript:document.getElementById(\'group'.$j.'\').style.display=\'\';document.getElementById(\'colgroup'.$j.'\').style.display=\'none\';"><img border="0" src="'.GRAPHICSPATH.'/plus.gif"></a>&nbsp;<b>'.$groupname.'</b></td>
+												<td width="100%" bgcolor="'.BG_GLEATTRIBUTE.'" colspan="2">&nbsp;<a href="javascript:void(0);" onclick="javascript:document.getElementById(\'group'.$j.'_'.$k.'\').style.display=\'\';document.getElementById(\'colgroup'.$j.'_'.$k.'\').style.display=\'none\';"><img border="0" src="'.GRAPHICSPATH.'/plus.gif"></a>&nbsp;<b>'.$groupname.'</b></td>
 											</tr>
 										</table>
-										<table class="tgle" id="group'.$j.'" '; if($collapsed)echo 'style="display:none"'; echo 'border="2"><tbody class="gle">
+										<table class="tgle" id="group'.$j.'_'.$k.'" '; if($collapsed)echo 'style="display:none"'; echo 'border="2"><tbody class="gle">
 											<tr>
-												<td bgcolor="'.BG_GLEATTRIBUTE.'" colspan="2">&nbsp;<a href="#" onclick="javascript:document.getElementById(\'group'.$j.'\').style.display=\'none\';document.getElementById(\'colgroup'.$j.'\').style.display=\'\';"><img border="0" src="'.GRAPHICSPATH.'/minus.gif"></a>&nbsp;<b>'.$groupname.'</b></td>
+												<td bgcolor="'.BG_GLEATTRIBUTE.'" colspan="2">&nbsp;<a href="javascript:void(0);" onclick="javascript:document.getElementById(\'group'.$j.'_'.$k.'\').style.display=\'none\';document.getElementById(\'colgroup'.$j.'_'.$k.'\').style.display=\'\';"><img border="0" src="'.GRAPHICSPATH.'/minus.gif"></a>&nbsp;<b>'.$groupname.'</b></td>
 											</tr>';
 				}
 				
