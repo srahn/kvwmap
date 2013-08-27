@@ -58,7 +58,7 @@ function save(stelle){
 			  </tr>
 				<tr>
 					<td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3"> 
-			      <select style="width:250px" size="1" class="select" name="selected_layer_id" onchange="document.GUI.submit();">
+			      <select style="width:250px" size="1" class="select" name="selected_layer_id" onchange="document.GUI.scrollposition.value=0;document.GUI.submit();">
 			      	<option value="">----------- Bitte wählen -----------</option>
 			        <?
 			    		for($i = 0; $i < count($this->layerdaten['ID']); $i++){
@@ -99,7 +99,7 @@ function save(stelle){
 						 	 $width = 280*$stellenanzahl;
 						 	 if($width > 840)$width = 840; ?>
 					<td valign="top">
-						<div style="border:1px solid black; width:<? echo $width; ?>px; float:right; overflow:auto; overflow-y:hidden">
+						<div id="stellendiv" style="border:1px solid black; width:<? echo $width; ?>px; float:right; overflow:auto; overflow-y:hidden" onscroll="document.GUI.scrollposition.value = this.scrollLeft;">
 							<table border="1" style="border-collapse:collapse" cellspacing="0" cellpadding="10">
 								<tr>
 							<?
@@ -133,8 +133,15 @@ function save(stelle){
   <? } ?>
 </table>
 
+<input type="hidden" name="scrollposition" value="<? echo $this->formvars['scrollposition']; ?>">
 <input type="hidden" name="go" value="Layerattribut-Rechteverwaltung">
 <input type="hidden" name="go_plus" value="">
 <input type="hidden" name="stelle" value="">
+
+<script type="text/javascript">
+
+	document.getElementById("stellendiv").scrollLeft="<? echo $this->formvars['scrollposition']; ?>"
+
+</script>
 
 

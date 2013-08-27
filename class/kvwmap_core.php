@@ -1538,7 +1538,7 @@ class GUI_core {
         # laden des Menues der Stelle und der Rolle
         $this->Menue->loadMenue($this->Stelle->id, $this->user->id);
         $this->Menue->get_menue_width($this->Stelle->id);
-        if (basename($this->user->rolle->gui)=='') {
+        if (basename($this->user->rolle->gui)=='' OR !LAYOUTPATH.$this->user->rolle->gui) {
           $this->user->rolle->gui='gui.php';
         }
         include (LAYOUTPATH.$this->user->rolle->gui);

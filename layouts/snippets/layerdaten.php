@@ -70,7 +70,7 @@
       <tr onMouseover="this.bgColor='<?php echo BG_TR; ?>'" onMouseout="this.bgColor=''">
         <td>&nbsp;</td>
         <td><?php echo $this->layerdaten['ID'][$i]; ?>&nbsp;&nbsp;</td>
-        <td><?php echo $this->layerdaten['Bezeichnung'][$i]; ?></td>
+        <td><?php echo $this->layerdaten['Bezeichnung'][$i]; if($this->layerdaten['alias'][$i])echo ' ('.$this->layerdaten['alias'][$i].')';?></td>
         <td><?php echo $this->layerdaten['Gruppe'][$i]; ?></td>
         <td>&nbsp;<a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->layerdaten['ID'][$i]; ?>"><?php echo $this->strChange; ?></a></td>
         <td>&nbsp;&nbsp;<a href="javascript:Bestaetigung('index.php?go=Layer_Löschen&selected_layer_id=<? echo $this->layerdaten['ID'][$i]; ?>&order=<? echo $this->formvars['order']; ?>','Wollen Sie Layer <?php echo $this->layerdaten['Bezeichnung'][$i]; ?> wirklich löschen?')"><?php echo $this->strDelete; ?></a></td>        

@@ -53,7 +53,7 @@
 						<td>&nbsp;</td>
 						<td align="center"><b>Aliasname</b></td>
 						<td>&nbsp;</td>
-						<td align="center"><b>Tooltip</b></td>
+						<td align="center"><b>Erläuterungen</b></td>
 						<td>&nbsp;</td>
 						<td align="center"><b>Gruppe</b></td>
 						<td>&nbsp;</td>

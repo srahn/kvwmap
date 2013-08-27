@@ -130,6 +130,9 @@
 			 				</tr>
 			 				<tr>
 			 					<td>&nbsp;</td>
+			 				</tr>
+			 				<tr>
+			 					<td height="40px" align="center" colspan="5"><b><span style="font-size:15px">'.$this->stelle->Bezeichnung.'</span></b></td>
 			 				</tr>';
 						}
 					} 
