@@ -3605,18 +3605,16 @@ class GUI extends GUI_core{
   }
 
   function createlegend($size){
-    $lg = $this->map->legend;
-    $lg->set("keysizex", $size*1.8*$this->map_factor);
-    $lg->set("keysizey", $size*1.8*$this->map_factor);
-    $lg->set("keyspacingx", $size*4*$this->map_factor);
-    $lg->set("keyspacingy", $size*0.83*$this->map_factor);
-    $lg->label->set("size", $size*$this->map_factor);
-    $lg->label->set("position", MS_LR);
-    $lg->label->set("offsetx", $size*-3.3*$this->map_factor);
-    $lg->label->set("offsety", -1*$size*$this->map_factor);
-    $lg->label->color->setRGB(0,0,0);
-    $lg->outlinecolor->setRGB(0,0,0);
-    $this->map->legend = $lg;
+    $this->map->legend->set("keysizex", $size*1.8*$this->map_factor);
+    $this->map->legend->set("keysizey", $size*1.8*$this->map_factor);
+    $this->map->legend->set("keyspacingx", $size*4*$this->map_factor);
+    $this->map->legend->set("keyspacingy", $size*0.83*$this->map_factor);
+    $this->map->legend->label->set("size", $size*$this->map_factor);
+    $this->map->legend->label->set("position", MS_LR);
+    $this->map->legend->label->set("offsetx", $size*-3.3*$this->map_factor);
+    $this->map->legend->label->set("offsety", -1*$size*$this->map_factor);
+    $this->map->legend->label->color->setRGB(0,0,0);
+    $this->map->legend->outlinecolor->setRGB(0,0,0);
     $legendmapDB = new db_mapObj($this->Stelle->id, $this->user->id);
     $legendmapDB->nurAktiveLayer = 0;
     $layerset = $legendmapDB->read_Layer(1);
