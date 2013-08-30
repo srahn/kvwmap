@@ -6639,7 +6639,7 @@ class GUI extends GUI_core{
 	          if($table['type'][$i] == 'Checkbox' AND $this->formvars[$table['formfield'][$i]] == ''){                       # Typ "Checkbox"
 	          	$this->formvars[$table['formfield'][$i]] = 'f';
 	          }
-            $sql.= "'".$this->formvars[$table['formfield'][$i]]."', ";      # Typ "normal"
+            $sql.= "'".pg_escape_string(stripslashes($this->formvars[$table['formfield'][$i]]))."', ";      # Typ "normal"
           }
           elseif($table['type'][$i] == 'Geometrie'){                    # Typ "Geometrie"
             if($this->formvars['geomtype'] == 'POINT'){
@@ -10857,7 +10857,7 @@ class GUI extends GUI_core{
                   $sql = "UPDATE ".$tablename." SET ".$attributname." = NULL WHERE oid = '".$oid."'";
                 }
                 else{
-                  $sql = "UPDATE ".$tablename." SET ".$attributname." = '".$this->formvars[$form_fields[$i]]."' WHERE oid = '".$oid."'";
+                  $sql = "UPDATE ".$tablename." SET ".$attributname." = '".pg_escape_string(stripslashes($this->formvars[$form_fields[$i]]))."' WHERE oid = '".$oid."'";
                 }
               }
             } # end of default case
