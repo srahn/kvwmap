@@ -459,7 +459,7 @@ class GUI_core {
           else{
             $layer->setMetaData('layer_has_classes', 0);
           }
-          $layer->setMetaData("wms_extent",$bb->minx.' '.$bb->miny.' '.$bb->maxx.' '.$bb->maxy);
+          #$layer->setMetaData("wms_extent",$bb->minx.' '.$bb->miny.' '.$bb->maxx.' '.$bb->maxy);
 
           $layer->set('dump', 0);
           $layer->set('type',$layerset[$i]['Datentyp']);

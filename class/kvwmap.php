@@ -12631,8 +12631,10 @@ class GUI extends GUI_core{
 		# Abfragen der Datenbankverbindung des Layers
     $layerdb=$this->mapDB->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
     
-  	$data_attributes = $this->mapDB->getDataAttributes($layerdb, $layer_id);
-  	$this->attributes['the_geom'] = $data_attributes['the_geom'];
+  	#$data_attributes = $this->mapDB->getDataAttributes($layerdb, $layer_id);
+	  	#$this->attributes['the_geom'] = $data_attributes['the_geom'];
+	  	$explosion = explode(' ', $data);
+  	$this->attributes['the_geom'] = $explosion[0];
 
 		# Filter berücksichtigen
 		$filter = $this->mapDB->getFilter($layer_id, $this->Stelle->id);
