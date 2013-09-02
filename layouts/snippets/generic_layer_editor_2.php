@@ -419,7 +419,7 @@ function set_changed_flag(flag){
 			  		}
 					}
 				}
-				if($columnname != '' AND $this->new_entry != true AND $this->formvars['printversion'] == ''){
+				if(($columnname != '' OR $layer['shape'][$k]['geom'] != '') AND $this->new_entry != true AND $this->formvars['printversion'] == ''){
 					if($attributes['group'][0] != ''){ ?>
 						<tr><td colspan="2"><table width="100%" class="tgle" border="2"><tbody class="gle">
 					<? } ?>
