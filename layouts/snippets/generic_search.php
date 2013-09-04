@@ -73,16 +73,16 @@ function suche(){
 				if($this->attributes['alias'][$i] == ''){
 					$this->attributes['alias'][$i] = $this->attributes['name'][$i];
 				}		?>
-				if(document.GUI.value_<?php echo $this->attributes['name'][$i]; ?>.value == ''){
-					nogo = 'Das Feld <?php echo $this->attributes['alias'][$i]; ?> ist ein Such-Pflichtfeld und muss ausgefüllt werden.';
+				if(document.GUI.value_<? echo $this->attributes['name'][$i]; ?>.value == ''){
+					nogo = 'Das Feld <? echo $this->attributes['alias'][$i]; ?> ist ein Such-Pflichtfeld und muss ausgefüllt werden.';
 				}
 	<?	} ?>
-			test = document.GUI.value_<?php echo $this->attributes['name'][$i]; ?>.value + '';
-			if(test.search(/%/) > -1 && document.GUI.operator_<?php echo $this->attributes['name'][$i]; ?>.value == 'IN'){
+			test = document.GUI.value_<? echo $this->attributes['name'][$i]; ?>.value + '';
+			if(test.search(/%/) > -1 && document.GUI.operator_<? echo $this->attributes['name'][$i]; ?>.value == 'IN'){
 				nogo = 'Der Platzhalter % darf nur bei der Suche mit ähnlich oder nicht ähnlich verwendet werden.';
 			}
 	<? 	if(strpos($this->attributes['type'][$i], 'time') !== false OR $this->attributes['type'][$i] == 'date'){ ?>
-				test = document.GUI.value_<?php echo $this->attributes['name'][$i]; ?>.value + '';
+				test = document.GUI.value_<? echo $this->attributes['name'][$i]; ?>.value + '';
 				if(test != ''){
 					if(!checkDate(test)){
 						nogo = 'Das Datum hat das falsche Format';
@@ -193,9 +193,9 @@ function delete_search(){
   
 //-->
 </script>
-<table border="0" cellpadding="5" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
+<table border="0" cellpadding="5" cellspacing="2" bgcolor="<? echo $bgcolor; ?>">
   <tr align="center"> 
-    <td colspan="5"><strong><font size="+1"><?php echo $this->titel; ?></font></strong></td>
+    <td colspan="5"><strong><font size="+1"><? echo $this->titel; ?></font></strong></td>
   </tr>
   <tr>
     <td>&nbsp;</td>
@@ -205,7 +205,7 @@ function delete_search(){
   </tr>
   <tr> 
     <td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3" colspan="5"> 
-      <select style="width:250px" size="1" class="select" name="selected_group_id" onchange="document.GUI.selected_layer_id.value='';document.GUI.submit();" <?php if(count($this->layergruppen['ID'])==0){ echo 'disabled';}?>>
+      <select style="width:250px" size="1" class="select" name="selected_group_id" onchange="document.GUI.selected_layer_id.value='';document.GUI.submit();" <? if(count($this->layergruppen['ID'])==0){ echo 'disabled';}?>>
         <option value="">  -- <? echo $this->strPleaseSelect; ?> --  </option>
         <?
         for($i = 0; $i < count($this->layergruppen['ID']); $i++){         
@@ -224,7 +224,7 @@ function delete_search(){
   </tr>
   <tr> 
     <td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3" colspan="5"> 
-      <select style="width:250px" size="1" class="select" name="selected_layer_id" onchange="document.GUI.submit();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
+      <select style="width:250px" size="1" class="select" name="selected_layer_id" onchange="document.GUI.submit();" <? if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
         <option value="">  -- <? echo $this->strPleaseSelect; ?> --  </option>
         <?
         for($i = 0; $i < count($this->layerdaten['ID']); $i++){         
@@ -287,7 +287,7 @@ function delete_search(){
   				}
   			?>
   		</select>
-  		<?php
+  		<?
 				include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php')
 			?>
     </td>
@@ -306,12 +306,12 @@ function delete_search(){
             <td align="center"><b>Operator</b></td>
             <td>&nbsp;&nbsp;</td>
             <td align="center"><b>Wert</b></td>
-          </tr><?php
+          </tr><?
 
       for($i = 0; $i < count($this->attributes['name']); $i++){
         if($this->attributes['type'][$i] != 'geometry'){
           ?><tr>
-            <td><?php
+            <td><?
               if($this->attributes['alias'][$i] != ''){
                 echo $this->attributes['alias'][$i];
               }
@@ -326,7 +326,7 @@ function delete_search(){
           ?></td>
             <td>&nbsp;&nbsp;</td>
             <td>
-              <select class="select" style="width:75px" <? if(count($this->attributes['enum_value'][$i]) == 0){ ?>onchange="operatorchange('<?php echo $this->attributes['name'][$i]; ?>');" id="operator_<?php echo $this->attributes['name'][$i]; ?>" <? } ?> name="operator_<?php echo $this->attributes['name'][$i]; ?>">
+              <select class="select" style="width:75px" <? if(count($this->attributes['enum_value'][$i]) == 0){ ?>onchange="operatorchange('<? echo $this->attributes['name'][$i]; ?>');" id="operator_<? echo $this->attributes['name'][$i]; ?>" <? } ?> name="operator_<? echo $this->attributes['name'][$i]; ?>">
                 <option title="Der Suchbegriff muss exakt so in der Datenbank stehen" value="=" <? if($this->formvars['operator_'.$this->attributes['name'][$i]] == '='){ echo 'selected';} ?> >=</option>
                 <option title="Der Suchbegriff kommt so NICHT in der Datenbank vor" value="!=" <? if($this->formvars['operator_'.$this->attributes['name'][$i]] == '!='){ echo 'selected';} ?> >!=</option>
                 <option title="'kleiner als': nur bei Zahlen verwenden!" value="<" <? if($this->formvars['operator_'.$this->attributes['name'][$i]] == '<'){ echo 'selected';} ?> ><</option>
@@ -340,36 +340,49 @@ function delete_search(){
               </select>
             </td>
             <td>&nbsp;&nbsp;</td>
-            <td align="left"><?php
-               if($this->attributes['form_element_type'][$i] == 'Auswahlfeld'){
+            <td align="left"><?
+            	switch ($this->attributes['form_element_type'][$i]) {
+            		case 'Auswahlfeld' : {
                   ?><select class="select" 
                   <?
                   	if($this->attributes['req_by'][$i] != ''){
 											echo 'onchange="update_require_attribute(\''.$this->attributes['req_by'][$i].'\','.$this->formvars['selected_layer_id'].', this.value);" ';
 										}
 									?> 
-                  	id="value_<?php echo $this->attributes['name'][$i]; ?>" name="value_<?php echo $this->attributes['name'][$i]; ?>"><?echo "\n"; ?>
-                      <option value="">-- <? echo $this->strPleaseSelect; ?> --</option><?php echo "\n";
+                  	id="value_<? echo $this->attributes['name'][$i]; ?>" name="value_<? echo $this->attributes['name'][$i]; ?>"><?echo "\n"; ?>
+                      <option value="">-- <? echo $this->strChoose; ?> --</option><? echo "\n";
                       if(is_array($this->attributes['enum_value'][$i][0])){
                       	$this->attributes['enum_value'][$i] = $this->attributes['enum_value'][$i][0];
                       	$this->attributes['enum_output'][$i] = $this->attributes['enum_output'][$i][0];
                       }
                     for($o = 0; $o < count($this->attributes['enum_value'][$i]); $o++){
                       ?>
-                      <option <? if($this->formvars['value_'.$this->attributes['name'][$i]] == $this->attributes['enum_value'][$i][$o]){ echo 'selected';} ?> value="<?php echo $this->attributes['enum_value'][$i][$o]; ?>"><?php echo $this->attributes['enum_output'][$i][$o]; ?></option><?php echo "\n";
+                      <option <? if($this->formvars['value_'.$this->attributes['name'][$i]] == $this->attributes['enum_value'][$i][$o]){ echo 'selected';} ?> value="<? echo $this->attributes['enum_value'][$i][$o]; ?>"><? echo $this->attributes['enum_output'][$i][$o]; ?></option><? echo "\n";
                     } ?>
                     </select>
-                    <input class="input" size="9" id="value2_<?php echo $this->attributes['name'][$i]; ?>" name="value2_<?php echo $this->attributes['name'][$i]; ?>" type="hidden" value="<?php echo $this->formvars['value2_'.$this->attributes['name'][$i]]; ?>">
-                    <?php
-                }
-                else { 
+                    <input class="input" size="9" id="value2_<? echo $this->attributes['name'][$i]; ?>" name="value2_<? echo $this->attributes['name'][$i]; ?>" type="hidden" value="<? echo $this->formvars['value2_'.$this->attributes['name'][$i]]; ?>">
+                    <?
+                }break;
+                
+                case 'Checkbox' : {
+                  ?><select class="select" id="value_<? echo $this->attributes['name'][$i]; ?>" name="value_<? echo $this->attributes['name'][$i]; ?>"><?echo "\n"; ?>
+                      <option value="">-- <? echo $this->strChoose; ?> --</option><? echo "\n"; ?>
+                      <option <? if($this->formvars['value_'.$this->attributes['name'][$i]] == 't'){ echo 'selected';} ?> value="t">ja</option><? echo "\n"; ?>
+                      <option <? if($this->formvars['value_'.$this->attributes['name'][$i]] == 'f'){ echo 'selected';} ?> value="f">nein</option><? echo "\n"; ?>
+                    </select>
+                    <input class="input" size="9" id="value2_<? echo $this->attributes['name'][$i]; ?>" name="value2_<? echo $this->attributes['name'][$i]; ?>" type="hidden" value="<? echo $this->formvars['value2_'.$this->attributes['name'][$i]]; ?>">
+                    <?
+                }break;
+                
+		default : { 
                   ?>
-                  <input class="input" size="<? if($this->formvars['value2_'.$this->attributes['name'][$i]] != ''){echo '9';}else{echo '24';} ?>" id="value_<?php echo $this->attributes['name'][$i]; ?>" name="value_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo $this->formvars['value_'.$this->attributes['name'][$i]]; ?>">
-                  &nbsp;<input class="input" size="9" id="value2_<?php echo $this->attributes['name'][$i]; ?>" name="value2_<?php echo $this->attributes['name'][$i]; ?>" type="<? if($this->formvars['value2_'.$this->attributes['name'][$i]] != ''){echo 'text';}else{echo 'hidden';} ?>" value="<?php echo $this->formvars['value2_'.$this->attributes['name'][$i]]; ?>">
-                  <?php
+                  <input class="input" size="<? if($this->formvars['value2_'.$this->attributes['name'][$i]] != ''){echo '9';}else{echo '24';} ?>" id="value_<? echo $this->attributes['name'][$i]; ?>" name="value_<? echo $this->attributes['name'][$i]; ?>" type="text" value="<? echo $this->formvars['value_'.$this->attributes['name'][$i]]; ?>">
+                  &nbsp;<input class="input" size="9" id="value2_<? echo $this->attributes['name'][$i]; ?>" name="value2_<? echo $this->attributes['name'][$i]; ?>" type="<? if($this->formvars['value2_'.$this->attributes['name'][$i]] != ''){echo 'text';}else{echo 'hidden';} ?>" value="<? echo $this->formvars['value2_'.$this->attributes['name'][$i]]; ?>">
+                  <?
                }
+      				}
            ?></td>
-          </tr><?php
+          </tr><?
         }
       }
       if(count($this->attributes) > 0){
@@ -389,7 +402,7 @@ function delete_search(){
               </tr>
               <tr>
               	<td height="30" valign="bottom" align="center" colspan="5" id="loader" style="display:none"><img id="loaderimg" src="graphics/ajax-loader.gif"></td>
-              </tr><?php
+              </tr><?
       }
     } 
       ?>
@@ -407,7 +420,7 @@ function delete_search(){
 <input type="hidden" name="titel" value="<? echo $this->formvars['titel'] ?>">
 <input type="hidden" name="map_flag" value="<? echo $this->formvars['map_flag']; ?>">
 <input type="hidden" name="area" value="">
-<INPUT TYPE="HIDDEN" NAME="columnname" VALUE="<?php echo $this->formvars['columnname']; ?>">
+<INPUT TYPE="HIDDEN" NAME="columnname" VALUE="<? echo $this->formvars['columnname']; ?>">
 <INPUT TYPE="HIDDEN" NAME="fromwhere" VALUE="<? echo $this->formvars['fromwhere']; ?>">
 <input type="hidden" name="always_draw" value="<? echo $always_draw; ?>">
 
