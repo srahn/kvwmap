@@ -168,8 +168,8 @@ function update_require_attribute(attributes, layer_id, value){
 												    </td>
 												    <td colspan="2"> 
 												      <?php 
-												        $FormatWerte = array('', '1', '3', '2');
-												        $FormatBez = array('-- Bitte wählen --', 'EB-/KB-frei', 'EB-/KB-pflichtig und abgabenpflichtig', 'EB-/KB-frei und abgabenpflichtig'); 
+												        $FormatWerte = array('', '1', '2', '3');
+												        $FormatBez = array('-- Bitte wählen --', 'EB-/KB-frei', 'EB-/KB-frei und abgabenpflichtig', 'EB-/KB-pflichtig und abgabenpflichtig');
 												        $zustand = new FormObject('beitragszustand','select',$FormatWerte,array($this->formvars['beitragszustand']),$FormatBez,1,$maxlenght,$multiple,146);
 												        $zustand->OutputHTML();
 												        echo $zustand->html;
@@ -321,8 +321,8 @@ function update_require_attribute(attributes, layer_id, value){
 									    </td>
 									    <td colspan="2">
 									      <?php 
-									        $FormatWerte = array('', 'I', 'I-II', 'II', 'II-III', 'III', 'III-IV', 'IV', 'IV-V', 'V', 'V-VI', 'VI','VI-VII','VII','VII-VIII','VIII','VIII-IX','IX','IX-X','X','X-XI','XI','XI-XII');
-									        $FormatBez = array('-- Bitte wählen --', 'I', 'I-II', 'II', 'II-III', 'III', 'III-IV', 'IV', 'IV-V', 'V', 'V-VI', 'VI','VI-VII','VII','VII-VIII','VIII','VIII-IX','IX','IX-X','X','X-XI','XI','XI-XII');  
+									        $FormatWerte = array('', 'I', 'I-II', 'I-III', 'II', 'II-III', 'III', 'III-IV', 'III-V', 'IV', 'IV-V', 'V', 'V-VI', 'VI','VI-VII','VII','VII-VIII','VIII','VIII-IX','IX','IX-X','X','X-XI','XI','XI-XII');
+									        $FormatBez = array('-- Bitte wählen --', 'I', 'I-II', 'I-III', 'II', 'II-III', 'III', 'III-IV', 'III-V', 'IV', 'IV-V', 'V', 'V-VI', 'VI','VI-VII','VII','VII-VIII','VIII','VIII-IX','IX','IX-X','X','X-XI','XI','XI-XII');
 									        $geschosszahl = new FormObject('geschosszahl','select',$FormatWerte,array($this->formvars['geschosszahl']),$FormatBez,1,$maxlenght,$multiple,146);
 									        $geschosszahl->OutputHTML();
 									        echo $geschosszahl->html;
@@ -518,8 +518,8 @@ function update_require_attribute(attributes, layer_id, value){
 						    </td>
 						    <td colspan="3"> 
 						      <?php 
-						        $FormatWerte = array('', 'Plangebiet', 'ortsüblich erschlossen', 'Gewerbegebiet', 'Sanierungsgebiet', 'Ackerland', 'Grünland');
-						        $FormatBez = array('-- Bitte wählen --', 'Plangebiet', 'ortsüblich erschlossen', 'Gewerbegebiet', 'Sanierungsgebiet', 'Ackerland', 'Grünland'); 
+						        $FormatWerte = array('', 'Plangebiet', 'ortsüblich erschlossen', 'Gewerbegebiet', 'Sanierungsgebiet', 'Ackerland', 'Grünland', 'forstwirtschaftliche Fläche');
+						        $FormatBez = array('-- Bitte wählen --', 'Plangebiet', 'ortsüblich erschlossen', 'Gewerbegebiet', 'Sanierungsgebiet', 'Ackerland', 'Grünland', 'forstwirtschaftliche Fläche');
 						        $zonentyp = new FormObject('zonentyp','select',$FormatWerte,array($this->formvars['zonentyp']),$FormatBez,1,$maxlenght,$multiple,158);
 						        $zonentyp->OutputHTML();
 						        echo $zonentyp->html;
