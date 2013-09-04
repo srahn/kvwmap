@@ -1,6 +1,6 @@
 <?php
   $this->strID="ID";
-  $this->strChoose="Bitte Wählen";
+  $this->strChoose="Auswahl";
   $this->strChange="Ändern";
   $this->strDelete="Löschen";
   $this->strDeleteWarningMessage="Wollen Sie wirklich Löschen?";
