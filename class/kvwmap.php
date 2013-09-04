@@ -727,6 +727,7 @@ class GUI extends GUI_core{
   function add_style(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $style = array();
+    $style['color'] = '0 0 0';
     $style['size'] = 1;
     $style['maxsize'] = 1;
     if (MAPSERVERVERSION > '500') {
