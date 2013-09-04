@@ -106,7 +106,7 @@ function selectgroupquery(group){
     if(query){
       query.checked = check;
       thema = document.getElementById("thema"+layers[i]);
-      updateThema(thema, query, '');
+      updateThema('', thema, query, '');
     }
   }
 }
@@ -121,7 +121,7 @@ function selectgroupthema(group){
     if(thema && thema.type == 'checkbox'){
       thema.checked = check;
       query = document.getElementById("qLayer"+layers[i]);
-      updateQuery(thema, query, '');
+      updateQuery('', thema, query, '');
     }
   }
 }
