@@ -146,7 +146,20 @@ if($this->formvars['gps_follow'] == ''){
         					<table width="100%" border="0" cellpadding="0" cellspacing="0">
 						        <tr style="background-color: <? echo BG_MENUETOP; ?>;">
 						          <td width="30%" height="30">
-						          	&nbsp;<b><?php echo $strMapScale; ?>&nbsp;1:&nbsp;</b><input type="text" id="scale" name="nScale" size="5" value="<?php echo round($this->map_scaledenom); ?>">
+									<div style="width:150px; position:relative" onmouseover="document.getElementById('scales').style.display='inline-block';" onmouseout="document.getElementById('scales').style.display='none';">
+										&nbsp;<b><?php echo $strMapScale; ?>&nbsp;1:&nbsp;</b><input type="text" id="scale" name="nScale" style="width:58px" value="<?php echo round($this->map_scaledenom); ?>">
+										<div id="scales" style="display:none; position:absolute; left:56px; top:22px; width: 78px; vertical-align:top; overflow:hidden; border:solid grey 1px;">
+											<select size="7" style="padding:4px; margin:-2px -17px -4px -4px;" onclick="document.GUI.nScale.value=this.value; document.getElementById('scales').style.display='none'; document.GUI.submit();">
+												<option onmouseover="this.selected = true;" value="1000000">1:&nbsp;&nbsp;1000000</option>
+												<option onmouseover="this.selected = true;" value="250000">1:&nbsp;&nbsp;250000</option>
+												<option onmouseover="this.selected = true;" value="100000">1:&nbsp;&nbsp;100000</option>
+												<option onmouseover="this.selected = true;" value="50000">1:&nbsp;&nbsp;50000</option>
+												<option onmouseover="this.selected = true;" value="10000">1:&nbsp;&nbsp;10000</option>
+												<option onmouseover="this.selected = true;" value="5000">1:&nbsp;&nbsp;5000</option>
+												<option onmouseover="this.selected = true;" value="1000">1:&nbsp;&nbsp;1000</option>
+											</select>
+										</div>
+									</div>
 						          </td>
 						          <td width="40%" align="center">
 						          	<? if($this->map->width > 700) {
@@ -163,7 +176,7 @@ if($this->formvars['gps_follow'] == ''){
 						            <img id="scalebar" alt="Maßstabsleiste" src="<? echo $this->img['scalebar']; ?>">
 						          </td>
 						        </tr>
-						    	</table>
+						    </table>
 						  	</td>
 						  </tr>
 						  <? if($this->map->width < 700) { ?>
