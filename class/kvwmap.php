@@ -14857,8 +14857,8 @@ class db_mapObj extends db_mapObj_core{
     $sql ="UPDATE styles SET ";
     if($formvars["symbol"]){$sql.="symbol = '".$formvars["symbol"]."',";}else{$sql.="symbol = NULL,";}
     $sql.="symbolname = '".$formvars["symbolname"]."',";
-    if($formvars["size"]){$sql.="size = '".$formvars["size"]."',";}
-    if($formvars["color"]){$sql.="color = '".$formvars["color"]."',";}
+    if($formvars["size"] != ''){$sql.="size = '".$formvars["size"]."',";}else{$sql.="size = NULL,";}
+    if($formvars["color"] != ''){$sql.="color = '".$formvars["color"]."',";}else{$sql.="color = NULL,";}
     if($formvars["backgroundcolor"] != ''){$sql.="backgroundcolor = '".$formvars["backgroundcolor"]."',";}else{$sql.="backgroundcolor = NULL,";}
     if($formvars["outlinecolor"] != ''){$sql.="outlinecolor = '".$formvars["outlinecolor"]."',";}else{$sql.="outlinecolor = NULL,";}
     if($formvars["minsize"] != ''){$sql.="minsize = '".$formvars["minsize"]."',";}else{$sql.="minsize = NULL,";}
