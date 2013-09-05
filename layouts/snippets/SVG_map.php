@@ -1120,7 +1120,6 @@ function selectPoint(evt) {
 function startPoint(evt) {
   dragging  = true;
   var alle = pathx.length;
-	top.document.GUI.INPUT_COORD.value  = boxx+" "+alle;
   for(var i = 0; i < alle; ++i){
     pathx.pop();
     pathy.pop();
