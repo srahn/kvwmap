@@ -3625,7 +3625,7 @@ class GUI extends GUI_core{
       $layer = $this->map->getlayer($i);
       $layer->set('status', 0);
     }
-    $scale = $this->map_scaledenom * $this->map_factor;
+    $scale = $this->map_scaledenom * $this->map_factor / 1.414;
     $legendimage = imagecreatetruecolor(1,1);
     $backgroundColor = ImageColorAllocate($legendimage, 255, 255, 255);
     imagefill ($legendimage, 0, 0, $backgroundColor);
@@ -4973,6 +4973,14 @@ class GUI extends GUI_core{
     }
 
     $this->map->setextent($minx,$miny,$maxx,$maxy);
+    
+    if(MAPSERVERVERSION >= 600 ) {
+    		$this->map_scaledenom = $this->map->scaledenom;
+    	}
+    	else {
+    		$this->map_scaledenom = $this->map->scale;
+	}
+    
     $currenttime=date('Y-m-d H:i:s',time());
     # loggen der Druckausgabe
     if($preview == true){
