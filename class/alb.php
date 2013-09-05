@@ -2243,7 +2243,7 @@ class ALB {
 		    	}
         }
       }
-      $pdf->addText($col0,$row-=12,$fontSize,$amt);
+	  $pdf->addText($col0,$row-=12,$fontSize,utf8_decode($amt));
     }
     if(LANDKREIS != '')$pdf->addText($col42,$row-=12,$fontSize,utf8_decode(LANDKREIS));
     if(STRASSE != '')$pdf->addText($col42,$row-=12,$fontSize,utf8_decode(STRASSE));
