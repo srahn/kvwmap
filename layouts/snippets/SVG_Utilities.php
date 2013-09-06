@@ -337,6 +337,7 @@
       submit();
   }
   function sendpath(cmd,navX,navY){
+    top.document.GUI.stopnavigation.value = 1;
     // navX[0] enthaelt den Rechtswert des ersten gesetzte Punktes im Bild in Pixeln
     // von links nach rechts gerechnet
     // navY[0] enthaelt den Hochwert des ersten Punktes im Bild in Pixeln
@@ -469,7 +470,7 @@
 		p.y = evt.clientY;
 		if(top.navigator.userAgent.toLowerCase().indexOf("msie") >= 0){
 			p.x = p.x - (top.document.body.clientWidth - resx)/2;
-	    p.y = p.y - 30;
+	    		p.y = p.y - (top.document.body.clientHeight - resy)/2;
 		}
 		return p;
 	}
@@ -593,6 +594,7 @@
 
 	// -------------------------mausinteraktionen auf canvas------------------------------
 	function mousedown(evt){
+	  if(top.document.GUI.stopnavigation.value == 0){
 		if(mouse_coords_type == "image"){					// Bildkoordinaten (Standardfall)
 			client_x = evt.clientX;
 	  	client_y = resy - evt.clientY;
@@ -692,6 +694,7 @@
 		if(polygonfunctions){
 			redrawsecondpolygon();
 		}
+	}
   }
 
 
