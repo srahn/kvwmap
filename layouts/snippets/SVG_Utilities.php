@@ -855,6 +855,23 @@ function mouseup(evt){
 	coord_input_functions = true;
 
 	function coord_input(){
+		doing = top.document.GUI.last_doing.value;
+		if(doing == "recentre" || doing == "zoomout" || doing == "zoomin"){
+			if(polygonfunctions){
+				add_polygon();
+				highlightbyid(\'pgon0\');
+			}
+			else{
+				if(linefunctions){
+					add_line();
+					highlightbyid(\'line0\');
+				}
+				else{
+					draw_point();
+					highlightbyid(\'text0\');
+				}
+			}
+		}
 		coord = prompt("Koordinateneingabe:", Math.round(minx+(maxx-minx)/2)+" "+Math.round(miny+(maxy-miny)/2))+"";
 		coords1 = coord.split(" ");
 		mouse_coords_type = "world";
