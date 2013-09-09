@@ -135,6 +135,7 @@
 	$SVGvars_navscript = '
 
 	function submit(){
+		top.document.GUI.stopnavigation.value = 1;
 		document.getElementById("waitingimage").style.setProperty("visibility","visible", "");
 		document.getElementById("waiting_animation").beginElement();
 		top.document.GUI.submit();
@@ -337,7 +338,6 @@
       submit();
   }
   function sendpath(cmd,navX,navY){
-    top.document.GUI.stopnavigation.value = 1;
     // navX[0] enthaelt den Rechtswert des ersten gesetzte Punktes im Bild in Pixeln
     // von links nach rechts gerechnet
     // navY[0] enthaelt den Hochwert des ersten Punktes im Bild in Pixeln
