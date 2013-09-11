@@ -678,16 +678,19 @@ class spatial_processor {
   }
   
   function transformCoordsSVG($path){
-    $part = explode('||',$path);
-    # SVG Part
-    $svgresult = transformCoordsSVG($part[0]);
-    if(count($part) > 1){
-      $result = $svgresult.'||'.$part[1];
-    }
-    else{
-      $result = $svgresult;
-    }
-    return $result;
+	if($path != ''){
+		$part = explode('||',$path);
+		# SVG Part
+		$svgresult = transformCoordsSVG($part[0]);
+		if(count($part) > 1){
+		  $result = $svgresult.'||'.$part[1];
+		}
+		else{
+		  $result = $svgresult;
+		}
+		return $result;
+	}
+	else return NULL;
   }
   
   function composeMultipolygonWKTStringFromGML($gml, $geom_attribute){
