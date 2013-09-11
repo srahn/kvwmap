@@ -1,6 +1,6 @@
 <?php
 ###################################################################
-# kvwmap - Kartenserver für Kreisverwaltungen                     #
+# kvwmap - Kartenserver fÃ¼r Kreisverwaltungen                     #
 ###################################################################
 # Lizenz                                                          #
 #                                                                 # 
@@ -63,7 +63,7 @@ class bodenrichtwertzone {
       $rect= ms_newRectObj();
       # Abfragen und zuordnen der Koordinaten der Box
       $rs=pg_fetch_array($ret[1]);
-      # Wenn die Box eine Kantenlänge von 0 hat, wird sie etwas aufgeweitet um 100m.
+      # Wenn die Box eine KantenlÃ¤nge von 0 hat, wird sie etwas aufgeweitet um 100m.
       if ($rs['maxx']-$rs['minx']==0) {
         $rs['maxx']=$rs['maxx']+100;
         $rs['minx']=$rs['minx']-100;        
@@ -80,7 +80,7 @@ class bodenrichtwertzone {
   }
 
   function deleteBodenrichtwertzonen($oidliste){
-    $this->debug->write('file:bodenrichtwerte.php class:bodenrichtwerte function:deleteBodenrichtwertzonen<br>Löschen von Bodenrichtwertzonen aus<br>PostGIS:',4);
+    $this->debug->write('file:bodenrichtwerte.php class:bodenrichtwerte function:deleteBodenrichtwertzonen<br>LÃ¶schen von Bodenrichtwertzonen aus<br>PostGIS:',4);
     $sql ="DELETE FROM bw_zonen";
     $sql.=" WHERE oid IN (".$oidliste[0];
     for ($i=1;$i<count($oidliste);$i++) {
@@ -89,14 +89,14 @@ class bodenrichtwertzone {
     $sql.=")";
     $ret=$this->database->execSQL($sql,4, 1);    
     if ($ret[0]) {
-      $ret[1]='Fehler beim Löschen der Bodenrichtwerte in der Datenbank.<br>'.$ret[1];
+      $ret[1]='Fehler beim LÃ¶schen der Bodenrichtwerte in der Datenbank.<br>'.$ret[1];
     }
     return $ret;
   }
   
   function getBodenrichtwertzonen($oid){
-    # Prüfen der Suchparameter
-    # Es muss ein gültiges Polygon vorhanden sein.
+    # PrÃ¼fen der Suchparameter
+    # Es muss ein gÃ¼ltiges Polygon vorhanden sein.
     $this->debug->write('file:bodenrichtwerte.php class:bodenrichtwerte function:getBodenrichtwertzonen<br>Abfragen des Umrings und der Textpunkte aus<br>PostGIS:',4);
     $sql ="SELECT *,";
     $sql.=" st_asText(st_transform(the_geom, ".$this->client_epsg.")) AS wkt_umring, st_asSVG(st_transform(the_geom, ".$this->client_epsg.")) AS svg_umring,";
@@ -121,7 +121,7 @@ class bodenrichtwertzone {
   }
   
   function getStichtage() {
-    # Liefert alle bisher für Bodenrichtwertzonen erfassten Stichtage
+    # Liefert alle bisher fÃ¼r Bodenrichtwertzonen erfassten Stichtage
     $sql ='SELECT DISTINCT stichtag FROM bw_zonen ORDER BY stichtag DESC';
     $ret=$this->database->execSQL($sql,4, 0);
     if ($ret[0]) {
@@ -145,7 +145,7 @@ class bodenrichtwertzone {
       $ret[0]=1;
     }
     if ($formvars['textposition']=='') {
-      $ret[1].='\nGeben Sie die Position für die Textanzeige an.';
+      $ret[1].='\nGeben Sie die Position fÃ¼r die Textanzeige an.';
       $ret[0]=1;
     }
     if ($formvars['bodenrichtwert']=='') {
@@ -166,7 +166,7 @@ class bodenrichtwertzone {
   	$formvars['baumassenzahl'] = str_replace(',', '.', $formvars['baumassenzahl']);
   	$formvars['oertliche_bezeichnung'] = str_replace(chr(10), '', $formvars['oertliche_bezeichnung']);
   	$formvars['oertliche_bezeichnung'] = str_replace(chr(13), '', $formvars['oertliche_bezeichnung']);
-    $this->debug->write('<br>file:bodenrichtwerte.php class:bodenrichtwertzone function eintragenNeueZone<br>Einfügen der Daten zu einer Richtwertzone in<br>PostGIS',4);
+    $this->debug->write('<br>file:bodenrichtwerte.php class:bodenrichtwertzone function eintragenNeueZone<br>EinfÃ¼gen der Daten zu einer Richtwertzone in<br>PostGIS',4);
   	$sql ="INSERT INTO bw_zonen (";
   	if($formvars['stichtag']){$sql.= "stichtag";} 
 		if($formvars['gemeinde']){$sql.= ",gemeinde";} 
@@ -253,7 +253,7 @@ class bodenrichtwertzone {
     	$formvars['baumassenzahl'] = str_replace(',', '.', $formvars['baumassenzahl']);
     	$formvars['oertliche_bezeichnung'] = str_replace(chr(10), '', $formvars['oertliche_bezeichnung']);
     	$formvars['oertliche_bezeichnung'] = str_replace(chr(13), '', $formvars['oertliche_bezeichnung']);
-      $this->debug->write('<br>file:bodenrichtwerte.php class:bodenrichtwertzone function aktualisierenZone<br>Einfügen der Daten zu einer Richtwertzone in<br>PostGIS',4);
+      $this->debug->write('<br>file:bodenrichtwerte.php class:bodenrichtwertzone function aktualisierenZone<br>EinfÃ¼gen der Daten zu einer Richtwertzone in<br>PostGIS',4);
       $sql = "UPDATE bw_zonen SET ";
       if($formvars['gemeinde']){$sql.= "gemeinde = ".(int)$formvars['gemeinde'].", ";}
       if($formvars['gemarkung']){$sql.= "gemarkung = ".(int)$formvars['gemarkung'].", ";}
@@ -309,7 +309,7 @@ class bodenrichtwertzone {
   }
   
   function copyZonenToNewStichtag($oldStichtag,$newStichtag) {
-    # Prüfen der Eingangsparameter
+    # PrÃ¼fen der Eingangsparameter
     if ($oldStichtag=='') {
       $errmsg='Es wurde kein alter Stichtag angegeben.';      
     }
@@ -323,7 +323,7 @@ class bodenrichtwertzone {
       $ret[0]=1; $ret[1]=$errmsg;
     }
     else {
-      # SQL-Einfügeanfrage stellen
+      # SQL-EinfÃ¼geanfrage stellen
       $this->debug->write('Kopieren der Zonen von einem Stichtag zu einem neuen.',4);
       $sql.="INSERT INTO bw_zonen";
       $sql.=" SELECT gemeinde, gemarkung, ortsteilname, postleitzahl, zonentyp, gutachterausschuss, bodenrichtwertnummer, oertliche_bezeichnung, bodenrichtwert, '".$newStichtag."', basiskarte, entwicklungszustand, beitragszustand, nutzungsart, ergaenzende_nutzung, bauweise, geschosszahl, grundflaechenzahl, geschossflaechenzahl, baumassenzahl, flaeche, tiefe, breite, wegeerschliessung, ackerzahl, gruenlandzahl, aufwuchs, verfahrensgrund, verfahrensgrund_zusatz, bemerkungen, textposition, the_geom";

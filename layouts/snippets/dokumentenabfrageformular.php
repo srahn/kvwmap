@@ -101,12 +101,12 @@ else {
           <td>Flur</td>
         </tr>
         <tr>
-          <td>
+          <td width="80px">
           	<input type="text" name="gemarkung1" value="13" style="width:23px"  maxlength="2">
           	<input type="text" name="gemarkung2" value="<?php echo substr($this->formvars['gemarkung'], 2, 4); ?>" style="width:46px" maxlength="6">
           	<input type="hidden" name="gemarkung" value="">
           </td>
-          <td><input type="text" name="flur" value="<?php echo $this->formvars['flur']; ?>" size="3" maxlength="3">
+          <td align="left "><input type="text" name="flur" value="<?php echo $this->formvars['flur']; ?>" size="3" maxlength="3">
           </td>
         </tr>
         <? if(NACHWEIS_PRIMARY_ATTRIBUTE != 'rissnummer'){ ?>

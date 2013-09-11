@@ -248,7 +248,7 @@ function change_orderby(attribute, layer_id){
 			      </td>
 			      <td align="right">
 			        <a href="#" title="<? echo $strCSVExportThis; ?>"><img src="<? echo GRAPHICSPATH; ?>datensatz_exportieren_csv.png" border="0"></a>&nbsp;&nbsp;
-			        <a href="javascript:Bestaetigung('index.php?go=Bodenrichtwertzone_Loeschen&oid=<?php echo $this->qlayerset[$i]['shape'][$k][$tablename.'_oid']; ?>','Wollen Sie den Richtwert mit der Nummer <?php echo $rs['bodenrichtwert']; ?> wirklich löschen?')" title="Richtwert löschen"><img src="<? echo GRAPHICSPATH; ?>datensatz_loeschen.png" border="0"></a>
+			        <a href="javascript:Bestaetigung('index.php?go=Bodenrichtwertzone_Loeschen&oid=<?php echo $this->qlayerset[$i]['shape'][$k]['oid']; ?>','Wollen Sie den Richtwert mit der Nummer <?php echo $rs['bodenrichtwertnummer']; ?> wirklich löschen?')" title="Richtwert löschen"><img src="<? echo GRAPHICSPATH; ?>datensatz_loeschen.png" border="0"></a>
 			      </td>
 			    </tr>
 			  </table>

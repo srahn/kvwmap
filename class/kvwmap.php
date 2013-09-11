@@ -276,15 +276,15 @@ class GUI extends GUI_core{
 				$extent = 'st_transform(st_geomfromtext(\'POLYGON(('.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layer[$i]['epsg_code'].')';				
 				$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects(the_geom, '.$extent.')';
 				if($layer[$i]['Datentyp'] == 0){	# POINT
-					$sql = 'SELECT x(the_geom), y(the_geom) FROM (SELECT st_transform(the_geom, '.$this->user->rolle->epsg_code.') as the_geom '.$fromwhere.') foo LIMIT 10000';
+					$sql = 'SELECT st_x(the_geom), st_y(the_geom) FROM (SELECT st_transform(the_geom, '.$this->user->rolle->epsg_code.') as the_geom '.$fromwhere.') foo LIMIT 10000';
 				}
 				else{	# LINE / POLYGON
-					$sql = 'SELECT x(the_geom), y(the_geom) FROM (SELECT st_transform(pointn(foo.linestring, foo.count1), '.$this->user->rolle->epsg_code.') AS the_geom
-					FROM (SELECT generate_series(1, npoints(foo4.linestring)) AS count1, foo4.linestring FROM (
-					SELECT GeometryN(foo2.linestring, foo2.count2) as linestring FROM (
-					SELECT generate_series(1, NumGeometries(foo5.linestring)) AS count2, foo5.linestring FROM (SELECT st_multi(linefrompoly(st_intersection(the_geom, '.$extent.'))) AS linestring '.$fromwhere.') foo5) foo2
+					$sql = 'SELECT st_x(the_geom), st_y(the_geom) FROM (SELECT st_transform(st_pointn(foo.linestring, foo.count1), '.$this->user->rolle->epsg_code.') AS the_geom
+					FROM (SELECT generate_series(1, st_npoints(foo4.linestring)) AS count1, foo4.linestring FROM (
+					SELECT st_GeometryN(foo2.linestring, foo2.count2) as linestring FROM (
+					SELECT generate_series(1, st_NumGeometries(foo5.linestring)) AS count2, foo5.linestring FROM (SELECT st_multi(linefrompoly(st_intersection(the_geom, '.$extent.'))) AS linestring '.$fromwhere.') foo5) foo2
 					) foo4) foo
-					WHERE (foo.count1 + 1) <= npoints(foo.linestring)) foo3 LIMIT 10000';
+					WHERE (foo.count1 + 1) <= st_npoints(foo.linestring)) foo3 LIMIT 10000';
 				}
 				#echo $sql;
 				$ret=$layerdb->execSQL($sql,4, 0);
@@ -324,12 +324,12 @@ class GUI extends GUI_core{
 				$fromwhere .= 'AND exclude_oid != '.$this->formvars['oid'];
 			}
 			# LINE / POLYGON
-			$sql = 'SELECT x(the_geom), y(the_geom) FROM (SELECT st_transform(pointn(foo.linestring, foo.count1), '.$this->user->rolle->epsg_code.') AS the_geom
-					FROM (SELECT generate_series(1, npoints(foo4.linestring)) AS count1, foo4.linestring FROM (
-					SELECT CASE WHEN GeometryN(foo2.linestring, foo2.count2) IS NULL THEN foo2.linestring ELSE GeometryN(foo2.linestring, foo2.count2) END as linestring FROM (
-					SELECT generate_series(1, NumGeometries(foo5.linestring)) AS count2, foo5.linestring FROM (SELECT st_multi(linefrompoly(st_intersection(the_geom, '.$extent.'))) AS linestring '.$fromwhere.') foo5) foo2
+			$sql = 'SELECT st_x(the_geom), st_y(the_geom) FROM (SELECT st_transform(st_pointn(foo.linestring, foo.count1), '.$this->user->rolle->epsg_code.') AS the_geom
+					FROM (SELECT generate_series(1, st_npoints(foo4.linestring)) AS count1, foo4.linestring FROM (
+					SELECT CASE WHEN st_GeometryN(foo2.linestring, foo2.count2) IS NULL THEN foo2.linestring ELSE st_GeometryN(foo2.linestring, foo2.count2) END as linestring FROM (
+					SELECT generate_series(1, st_NumGeometries(foo5.linestring)) AS count2, foo5.linestring FROM (SELECT st_multi(linefrompoly(st_intersection(the_geom, '.$extent.'))) AS linestring '.$fromwhere.') foo5) foo2
 					) foo4) foo
-					WHERE (foo.count1 + '.$offset.') <= npoints(foo.linestring)) foo3 LIMIT 10000';
+					WHERE (foo.count1 + '.$offset.') <= st_npoints(foo.linestring)) foo3 LIMIT 10000';
 			#echo $sql;
 			$ret=$layerdb->execSQL($sql,4, 0);
       if(!$ret[0]){
@@ -10023,7 +10023,7 @@ class GUI extends GUI_core{
     $back=$VermStObj->getVermStelleListe();
     if ($back[0]=='') {
       # Fehlerfreie Datenabfrage
-      $FormObjVermStelle=new FormObject('VermStelle','select',$back[1]['id'],array($VermStelle),$back[1]['name'],1,0,0,NULL);
+      $FormObjVermStelle=new FormObject('VermStelle','select',$back[1]['id'],array($VermStelle),$back[1]['name'],1,0,0,200);
     }
     else {
       $FormObjVermStelle=new FormObject('VermStelle','text',array($back[0]),'','',25,255,0,NULL);
