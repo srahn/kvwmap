@@ -22,6 +22,8 @@ function addfreetext(){
 	newfreetext.childNodes[0].name = 'freetext' + newfreetext.id;
 	newfreetext.childNodes[1].name = 'freetext_posx' + newfreetext.id;
 	newfreetext.childNodes[2].name = 'freetext_posy' + newfreetext.id;
+	newfreetext.childNodes[3].name = 'freetext_width' + newfreetext.id;
+	newfreetext.childNodes[4].name = 'freetext_height' + newfreetext.id;
 	document.getElementById('main').appendChild(newfreetext);
 }
 
@@ -74,9 +76,11 @@ function mousemove(evt){
 			//evt.preventDefault();
 			freetext = document.getElementById(document.GUI.active_freetext.value).firstChild;
 			freetext.parentNode.style.cursor='se-resize';
-			freetext.parentNode.style.border='2px dashed grey';
-			freetext.style.width = (evt.clientX - document.getElementById('main').offsetLeft - document.GUI.startx.value);
-			freetext.style.height = (evt.clientY - document.getElementById('main').offsetTop - document.GUI.starty.value);
+			freetext.parentNode.style.border='2px dashed grey';			
+			freetext.parentNode.childNodes[3].value = (evt.clientX - document.getElementById('main').offsetLeft - document.GUI.startx.value);
+			freetext.parentNode.childNodes[4].value = (evt.clientY - document.getElementById('main').offsetTop - document.GUI.starty.value);
+			freetext.style.width = freetext.parentNode.childNodes[3].value;
+			freetext.style.height = freetext.parentNode.childNodes[4].value;
 		}
 	}
 }
@@ -124,7 +128,7 @@ function preventflickering(evt){
       	$posx = 200;
       	$posy = 200;
 ?>
-	<div onmouseover="this.style.border='2px dotted grey'; this.lastChild.style.display=''; this.lastChild.previousSibling.style.display=''; this.style.cursor='move';" onmouseout="this.style.border='none'; this.lastChild.style.display='none'; this.lastChild.previousSibling.style.display='none';" onmousedown="start_move(event);" onmouseup="deactivate();" title="Freitext" id="text" style="display:none; background: url(graphics/leer.gif) repeat;; position: absolute; visibility: visible; left: <? echo $posx; ?>px; top: <? echo $posy; ?>px; padding:3px"><textarea name="freetext" style="overflow: hidden; resize: none; width: 150px; height: 70px; border: none; background-color:transparent; font-size: <? echo $size; ?>px; font-family: Helvetica; font-weight: bold;">hier Text eingegeben...</textarea><input type="hidden" name="freetext_posx" value="<? echo $posx; ?>"><input type="hidden" name="freetext_posy" value="<? echo $posy; ?>">
+	<div onmouseover="this.style.border='2px dotted grey'; this.lastChild.style.display=''; this.lastChild.previousSibling.style.display=''; this.style.cursor='move';" onmouseout="this.style.border='1px solid black'; this.lastChild.style.display='none'; this.lastChild.previousSibling.style.display='none';" onmousedown="start_move(event);" onmouseup="deactivate();" title="Freitext" id="text" style="display:none; background-color: white; border: 1px solid black; position: absolute; visibility: visible; left: <? echo $posx; ?>px; top: <? echo $posy; ?>px; padding:3px"><textarea name="freetext" style="overflow: hidden; resize: none; width: 150px; height: 70px; border: none; background-color:transparent; font-size: <? echo $size; ?>px; font-family: Helvetica; font-weight: bold;">hier Text eingegeben...</textarea><input type="hidden" name="freetext_posx" value="<? echo $posx; ?>"><input type="hidden" name="freetext_posy" value="<? echo $posy; ?>"><input type="hidden" name="freetext_width" value="150"><input type="hidden" name="freetext_height" value="70">
 		<!-- obiges und unteres muss so hintereinander stehen, sonst gibt es zwischen den Elementen noch Textelemente -->
 		<img title="Freitext löschen" onclick="delete_freetext(this);" onmouseover="this.style.cursor='pointer';" style="display: none; position: absolute; bottom:3px; left:0px" src="graphics/symbol_delete.gif"><img title="Größe ändern" onmousedown="start_resize(event);" onmouseout="this.style.cursor='default';" onmouseup="deactivate();" onmouseover="this.style.cursor='se-resize';" style="display: none; position: absolute; bottom:0px; right:0px" src="graphics/resize.gif"></div>
 </div>
