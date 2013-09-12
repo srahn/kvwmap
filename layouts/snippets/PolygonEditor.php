@@ -66,11 +66,11 @@ function buildwktpolygonfromsvgpath(svgpath){
 
 <table style="border:1px solid gray;" width="760" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr> 
-    <td align="center" colspan="3"><strong><font size="+1"><a name="geoedit_anchor"><?php echo $this->titel; ?></a></font></strong></td>
+    <td align="center" colspan="5"><strong><font size="+1"><a name="geoedit_anchor"><?php echo $this->titel; ?></a></font></strong></td>
   </tr>
   <tr> 
     <td rowspan="7">&nbsp;</td>
-    <td colspan="2" rowspan="7"> 
+    <td colspan="4" rowspan="7"> 
       <?php
 				include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php');
 			?>
@@ -83,7 +83,7 @@ function buildwktpolygonfromsvgpath(svgpath){
   	<td><? echo $strGeomFrom; ?>:<br>
   		<select name="layer_id" onchange="document.GUI.no_load.value='true';document.GUI.submit();">
   			<?
-  				for($i = 0; $i < count($this->queryable_vector_layers['ID']); $i++){
+				for($i = 0; $i < count($this->queryable_vector_layers['ID']); $i++){
   					echo '<option';
   					if($this->formvars['layer_id'] == $this->queryable_vector_layers['ID'][$i]){echo ' selected';}
   					echo ' value="'.$this->queryable_vector_layers['ID'][$i].'">'.$this->queryable_vector_layers['Bezeichnung'][$i].'</option>';
@@ -116,6 +116,12 @@ function buildwktpolygonfromsvgpath(svgpath){
   <tr>
   	<td>&nbsp;</td>
   	<td>&nbsp;<b>Maßstab&nbsp;1:&nbsp;</b><input type="text" id="scale" name="nScale" size="5" value="<?php echo round($this->map->scaledenom); ?>"></td>
+	<? if($this->user->rolle->runningcoords != '0'){ ?>
+	<td><b>&nbsp;<?php echo $this->strCoordinates; ?>:</b>&nbsp;</td>
+	<td><input type="text" style="border:0px;background-color:transparent" name="runningcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?></td>
+	<? }else{ ?>
+	<td colspan="2"></td>
+	<? } ?>
   	<td align="right">
   		<input type="checkbox" name="always_draw" value="1" <?if($always_draw == 1 OR $always_draw == 'true')echo 'checked'; ?>>&nbsp;weiterzeichnen&nbsp;&nbsp;
   		<input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang

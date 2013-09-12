@@ -1,6 +1,5 @@
 <?php
   $strAvailableLayer="Verfügbare&nbsp;Themen";
-  $strCoordinates="Koordinaten";
   $strShowCoordinates="Koordinatenabfrage";
   $strLoadNew="Neu Laden";
   $strMapImageURL="Bild speichern";

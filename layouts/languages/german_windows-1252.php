@@ -19,4 +19,5 @@
  $this->strEnter="Start";
  $this->strReset="Zurücksetzen";
  $this->strSaveMapViewCommittMassage="Kartenausschnitt wurde gespeichert";
+ $this->strCoordinates = "Koordinaten";
 ?>

@@ -27,11 +27,11 @@ function send(){
 
 <table style="border:1px solid gray;" width="760" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr> 
-    <td align="center" colspan="3"><strong><font size="+1"><a name="geoedit_anchor"><?php echo $this->titel; ?></a></font></strong></td>
+    <td align="center" colspan="5"><strong><font size="+1"><a name="geoedit_anchor"><?php echo $this->titel; ?></a></font></strong></td>
   </tr>
   <tr> 
     <td rowspan="2">&nbsp;</td>
-    <td colspan="2" rowspan="2"> 
+    <td colspan="4" rowspan="2"> 
       <?php
 				include(LAYOUTPATH.'snippets/SVG_point.php')
 			?>
@@ -52,6 +52,12 @@ function send(){
   <tr>
   	<td>&nbsp;</td>
   	<td>&nbsp;<b>Maßstab&nbsp;1:&nbsp;</b><input type="text" id="scale" name="nScale" size="5" value="<?php echo round($this->map_scaledenom); ?>"></td>
+	<? if($this->user->rolle->runningcoords != '0'){ ?>
+	<td><b>&nbsp;<?php echo $this->strCoordinates; ?>:</b>&nbsp;</td>
+	<td><input type="text" style="border:0px;background-color:transparent" name="runningcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?></td>
+	<? }else{ ?>
+	<td colspan="2"></td>
+	<? } ?>
   </tr>
 </table>
 <INPUT TYPE="HIDDEN" NAME="dimension" VALUE="<?php echo $this->formvars['dimension']; ?>">

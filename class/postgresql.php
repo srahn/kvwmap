@@ -92,7 +92,7 @@ class pgdatabase extends pgdatabase_core {
   }
 
 	function transformPoint($point, $curSRID, $newSRID, $coordtype){
-		$sql ="SELECT X(point) AS x, Y(point) AS y";
+		$sql ="SELECT st_X(point) AS x, st_Y(point) AS y";
     $sql.=" FROM (SELECT st_transform(st_geomfromtext('POINT(".$point.")',".$curSRID."),".$newSRID.") AS point) AS foo";
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {

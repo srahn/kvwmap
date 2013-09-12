@@ -193,7 +193,7 @@ if($this->formvars['gps_follow'] == ''){
 			        <? } ?>
 			        <tr style="background-color: <? echo BG_MENUETOP; if($this->user->rolle->runningcoords == '0'){echo ';display:none';} ?>">
 			        	<td width="100px">
-			          	<b>&nbsp;<?php echo $strCoordinates; ?></b>&nbsp;
+			          	<b>&nbsp;<?php echo $this->strCoordinates; ?></b>&nbsp;
 			          </td>
 			        	<td colspan="2" width="80%"><input type="text" style="border:0px;background-color:transparent" name="runningcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?></td>
 			        </tr>
