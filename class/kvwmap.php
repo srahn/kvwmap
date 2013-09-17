@@ -5219,32 +5219,6 @@ class GUI extends GUI_core{
       }
     }
     
-    # variable Freitexte
-    for($j = 1; $j <= $this->formvars['last_freetext_id']; $j++){
-      $pdf->selectFont(PDFCLASSPATH.'fonts/Helvetica.afm');
-      if(strpos($this->Docu->activeframe[0]['format'], 'quer') !== false)$height = 420;			# das ist die Höhe des Vorschaubildes
-      else $height = 842;																																		# das ist die Höhe des Vorschaubildes
-      $ratio = $height/$this->Docu->height;
-      if($this->formvars['freetext'.$j] != ''){      
-      	$posx = ($this->formvars['freetext_posx'.$j]+3)/$ratio;
-      	$posy = ($this->formvars['freetext_posy'.$j]+3-$height+12*$ratio)/$ratio*-1;
-      	$width = ($this->formvars['freetext_width'.$j]+3)/$ratio;
-      	$height = ($this->formvars['freetext_height'.$j]+3)/$ratio;
-      	$pdf->setColor(1,1,1);
-      	$pdf->filledRectangle($posx-4, $posy-$height+15, $width, $height);
-      	$pdf->setColor(0,0,0);
-      	$pdf->Rectangle($posx-4, $posy-$height+15, $width, $height);
-      
-        $this->formvars['freetext'.$j] = str_replace(chr(10), ';', $this->formvars['freetext'.$j]);
-        $this->formvars['freetext'.$j] = str_replace(chr(13), '', $this->formvars['freetext'.$j]);
-      	$freitext = explode(';', $this->formvars['freetext'.$j]);
-      	$anzahlzeilen = count($freitext);
-      	for($i = 0; $i < $anzahlzeilen; $i++){
-      		$h = $i * 12 * 1.25;
-       		$pdf->addText($posx,$posy-$h,12,utf8_decode($freitext[$i]), 0);
-      	}      	
-      }
-    }
 
     # Legende
     if($this->Docu->activeframe[0]['legendsize'] > 0){
@@ -5275,6 +5249,34 @@ class GUI extends GUI_core{
       $pdf->setColor(1,1,1);
       $pdf->polygon($pdata,3,1);
     }
+    
+    # variable Freitexte
+        for($j = 1; $j <= $this->formvars['last_freetext_id']; $j++){
+          $pdf->selectFont(PDFCLASSPATH.'fonts/Helvetica.afm');
+          if(strpos($this->Docu->activeframe[0]['format'], 'quer') !== false)$height = 420;			# das ist die Höhe des Vorschaubildes
+          else $height = 842;																																		# das ist die Höhe des Vorschaubildes
+          $ratio = $height/$this->Docu->height;
+          if($this->formvars['freetext'.$j] != ''){      
+          	$posx = ($this->formvars['freetext_posx'.$j]+1)/$ratio;
+          	$posy = ($this->formvars['freetext_posy'.$j]+1-$height)/$ratio*-1;
+          	$boxwidth = ($this->formvars['freetext_width'.$j]+6)/$ratio;
+          	$boxheight = ($this->formvars['freetext_height'.$j]+8)/$ratio;
+          	$pdf->setColor(1,1,1);
+          	$pdf->filledRectangle($posx, $posy-$boxheight, $boxwidth, $boxheight);
+          	$pdf->setColor(0,0,0);
+          	$pdf->Rectangle($posx, $posy-$boxheight, $boxwidth, $boxheight);
+          
+            $this->formvars['freetext'.$j] = str_replace(chr(10), ';', $this->formvars['freetext'.$j]);
+            $this->formvars['freetext'.$j] = str_replace(chr(13), '', $this->formvars['freetext'.$j]);
+          	$freitext = explode(';', $this->formvars['freetext'.$j]);
+          	$anzahlzeilen = count($freitext);
+          	for($i = 0; $i < $anzahlzeilen; $i++){
+          		$h = $i * 12 * 1.25;
+           		$pdf->addText($posx+4,$posy-$h-14,12,utf8_decode($freitext[$i]), 0);
+          	}      	
+          }
+    }
+    
     $this->pdf=$pdf;
 
     $dateipfad=IMAGEPATH;

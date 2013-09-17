@@ -2175,7 +2175,7 @@ class pgdatabase extends pgdatabase_core {
   }
   
   function getNutzungALKIS($FlurstKennz) {
-    $sql ="SELECT round(st_area(st_intersection(n.wkb_geometry,f.wkb_geometry))::numeric,1) AS flaeche, c.class as nutzungskennz, case when c.label is null then m.title else m.title||' - '||c.label end as bezeichnung, n.info, n.zustand, n.name, m.gruppe,c.label, c.blabla";
+    $sql ="SELECT round(st_area(st_intersection(n.wkb_geometry,f.wkb_geometry))::numeric,0) AS flaeche, c.class as nutzungskennz, case when c.label is null then m.title else m.title||' - '||c.label end as bezeichnung, n.info, n.zustand, n.name, m.gruppe,c.label, c.blabla";
 		$sql.=" FROM alkis.ax_flurstueck f, alkis.nutzung n";
 		$sql.=" JOIN alkis.nutzung_meta m ON m.nutz_id=n.nutz_id";
 		$sql.=" LEFT JOIN alkis.nutzung_class c ON c.nutz_id=n.nutz_id AND c.class=n.class";
