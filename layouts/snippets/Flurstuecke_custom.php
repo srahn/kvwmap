@@ -633,6 +633,7 @@ function emzversteckt(k){
 			          } else {
 			            echo $flst->Verfahren[$j][verfbemerkung];
 			          }
+			          if($flst->Verfahren[$j]['verfbemid'] == 10) echo '</span>';
 			          ?>
 		        	  </td>
 			      	</tr>

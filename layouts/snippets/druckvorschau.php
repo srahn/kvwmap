@@ -38,8 +38,10 @@ function start_resize(evt){
 		document.GUI.action.value = 'resize';
 		document.GUI.active_freetext.value = id;
 		freetext = document.getElementById(id);
-		document.GUI.startx.value = parseInt(freetext.style.left);
-		document.GUI.starty.value = parseInt(freetext.style.top);
+		document.GUI.startx.value = evt.clientX;
+		document.GUI.starty.value = evt.clientY;
+		document.GUI.startheight.value = parseInt(freetext.firstChild.style.height);
+		document.GUI.startwidth.value = parseInt(freetext.firstChild.style.width);
 	}
 }
 
@@ -76,9 +78,9 @@ function mousemove(evt){
 			//evt.preventDefault();
 			freetext = document.getElementById(document.GUI.active_freetext.value).firstChild;
 			freetext.parentNode.style.cursor='se-resize';
-			freetext.parentNode.style.border='2px dashed grey';			
-			freetext.parentNode.childNodes[3].value = (evt.clientX - document.getElementById('main').offsetLeft - document.GUI.startx.value);
-			freetext.parentNode.childNodes[4].value = (evt.clientY - document.getElementById('main').offsetTop - document.GUI.starty.value);
+			freetext.parentNode.style.border='2px dashed grey';						
+			freetext.parentNode.childNodes[3].value = parseInt(document.GUI.startwidth.value) + parseInt(evt.clientX) - parseInt(document.GUI.startx.value);			
+			freetext.parentNode.childNodes[4].value = parseInt(document.GUI.startheight.value) + parseInt(evt.clientY) - parseInt(document.GUI.starty.value);
 			freetext.style.width = freetext.parentNode.childNodes[3].value;
 			freetext.style.height = freetext.parentNode.childNodes[4].value;
 		}
@@ -115,7 +117,7 @@ function preventflickering(evt){
 <table border="0" cellspacing="0" cellpadding="0">
 	<tr>
 		<td align="left">
-			<img width="595" src="<? echo $this->previewfile ?>">
+			<img width="595" style="border:1px solid black" src="<? echo $this->previewfile ?>">
 		</td>
 	</tr>
 </table>
@@ -162,6 +164,8 @@ function preventflickering(evt){
 <input type="hidden" name="active_freetext" value="">
 <input type="hidden" name="startx" value="">
 <input type="hidden" name="starty" value="">
+<input type="hidden" name="startheight" value="">
+<input type="hidden" name="startwidth" value="">
 <input type="hidden" name="vorschauzoom" value="<? echo $this->formvars['vorschauzoom']; ?>">
 <input type="hidden" name="go_plus" value="">
 <input type="hidden" name="worldprintwidth" value="<? echo $this->formvars['worldprintwidth'] ?>">

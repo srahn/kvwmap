@@ -344,7 +344,9 @@ define("LAYER_ID_JAGDBEZIRKE", '432');				# Version 1.10.0
 define("DEFAULTMAPFILE",SHAPEPATH.'MapFiles/defaultmapfile_dev.map');
 # Wenn SAVEMAPFILE leer ist, wird sie nicht gespeichert.
 # Achtung, wenn die cgi-bin/mapserv ohne Authentifizierung und der Pfad zu save_mapfile.map bekannt ist, kann jeder die Karten des letzten Aufrufs in kvwmap über mapserv?map=<pfad zu save_map.map abfragen. Und wenn wfs zugelassen ist auch die Sachdaten dazu runterladen. Diese Konstante sollte nur zu debug-Zwecken eingeschaltet bleiben.
-#define("SAVEMAPFILE",LOGPATH.'save_mapfile.map');                                # Version 1.11.0 
+#define("SAVEMAPFILE",LOGPATH.'save_mapfile.map');                                # Version 1.11.0
+# SAVEMAPFILE darf nicht fehlen, aber leer sein.
+define("SAVEMAPFILE",'');                                
 define("REFMAPFILE",SHAPEPATH.'MapFiles/refmapfile.map');
 # Ort der Datei, in der die Meldungen beim Debugen geschrieben werden
 define('DEBUGFILE',LOGPATH.VERSION.'_'.$_SESSION['login_name'].'_debug.htm');

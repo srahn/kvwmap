@@ -4,20 +4,26 @@
 ?>
 
 
-  <iframe style="border:none;"  src="<?php echo $this->qlayerset[$i][GetFeatureInfoRequest]; ?>" width="90%" height="500">
+  <!--iframe style="border:none;"  src="<?php echo $this->qlayerset[$i][GetFeatureInfoRequest]; ?>" width="90%" height="500">
     Wenn Sie dies hier lesen können, unterstützt Ihr Browser keine iframes.
-  </iframe>
+  </iframe-->
 
 
 
 <?php
-/*
-  $response=file_get_contents($this->qlayerset[$i][GetFeatureInfoRequest]);
+
+  if (substr($this->qlayerset[$i][GetFeatureInfoRequest],0,7) != 'http://'){
+	$this->qlayerset[$i][GetFeatureInfoRequest] = 'http://'.$this->qlayerset[$i][GetFeatureInfoRequest];
+  }
+
+  $response = file_get_contents($this->qlayerset[$i][GetFeatureInfoRequest]);
+  if(strpos(strtolower($response), 'charset=utf-8') === false) $response = utf8_encode($response);
+  $response = str_replace('css', '', $response);
   if ($response=='') {
     ?><br>An dieser Position konnten zu diesem Layer keine Objekte gefunden werden.<br><?php
   }
   else {
     echo $response;
   }
-*/
+
 ?>

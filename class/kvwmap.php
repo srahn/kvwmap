@@ -11317,7 +11317,12 @@ class GUI extends GUI_core{
 
             $bbox=ms_newRectObj();
             $bbox->setextent($this->map->extent->minx,$this->map->extent->miny,$this->map->extent->maxx,$this->map->extent->maxy);
-            $bbox->project($projFROM, $projTO);
+            
+            $bbox = $this->pgdatabase->transformRect($bbox,$this->user->rolle->epsg_code,$layerset[$i]['epsg_code']);            
+            $bbox = $bbox[1];
+            
+            #$bbox->project($projFROM, $projTO);
+            #echo $bbox->minx.','.$bbox->miny.','.$bbox->maxx.','.$bbox->maxy.'<br>';
 
             $request .='&BBOX='.$bbox->minx.','.$bbox->miny.','.$bbox->maxx.','.$bbox->maxy;
             $request .='&WIDTH='.$this->user->rolle->nImageWidth.'&HEIGHT='.$this->user->rolle->nImageHeight;
