@@ -2881,7 +2881,7 @@ class GUI extends GUI_core{
       }
       $csv .= ';';
       $csv .= $this->flurstuecke[$i]['albflaeche'].';';
-      $csv .= $this->flurstuecke[$i]['anteil'].';';
+      $csv .= str_replace('.', ',', $this->flurstuecke[$i]['anteil']).';';
      	$csv .= chr(10);  
     }
     $csv = 'Gemarkung;Flur;Zähler/Nenner;Eigentümer;Flst-Fläche(ALB);Anteil'.chr(10).$csv;
