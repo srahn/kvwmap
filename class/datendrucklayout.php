@@ -37,7 +37,7 @@ class ddl {
     $this->gui = $gui;
   }
   
-  function add_static_elements(){
+  function add_static_elements($i){
 		# Hintergrundbild    
 		if($this->layout['bgsrc']){
     	$this->pdf->addJpegFromFile(DRUCKRAHMEN_PATH.basename($this->layout['bgsrc']),$this->layout['bgposx'],$this->layout['bgposy'],$this->layout['bgwidth']);
@@ -56,7 +56,7 @@ class ddl {
     for($j = 0; $j < count($this->layout['texts']); $j++){
     	if($this->layout['type'] == 0 OR $this->layout['texts'][$j]['type'] == 1){		# entweder Layout ist vom seitenweisen Typ oder die Texte sind feststehend
 	      $this->pdf->selectFont($this->layout['texts'][$j]['font']);
-	      $freitext = explode(';', $this->substituteFreitext($this->layout['texts'][$j]['text']));
+	      $freitext = explode(';', $this->substituteFreitext($this->layout['texts'][$j]['text'], $i));
 	      $anzahlzeilen = count($freitext);
 	      $alpha = $this->layout['texts'][$j]['angle'];
 	      for($z = 0; $z < $anzahlzeilen; $z++){
@@ -79,15 +79,41 @@ class ddl {
 	  }
   }
   
-	function substituteFreitext($text){
+  function substituteFreitext($text, $i){
   	$text = str_replace('$stelle', $this->Stelle->Bezeichnung, $text);
   	$text = str_replace('$user', $this->user->Name, $text);
+	for($j = 0; $j < count($this->attributes['name']); $j++){
+		$text = str_replace('$'.$this->attributes['name'][$j], $this->get_result_value_output($i, $j), $text);
+	}
   	return $text;
+  }
+  
+  function get_result_value_output($i, $j){		# $i ist der result-counter, $j ist der attribute-counter
+	switch ($this->attributes['form_element_type'][$j]){
+		case 'Auswahlfeld' : {
+			for($e = 0; $e < count($this->attributes['enum_value'][$j]); $e++){
+				if($this->attributes['enum_value'][$j][$e] == $this->result[$i][$this->attributes['name'][$j]]){
+					$output = utf8_decode($this->attributes['enum_output'][$j][$e]);
+					break;
+				}
+				else $output = utf8_decode($this->result[$i][$this->attributes['name'][$j]]);
+			}
+			if(count($this->attributes['enum_value'][$j]) == 0){	
+				$output = utf8_decode($this->result[$i][$this->attributes['name'][$j]]);
+			}
+		}break;
+		default: {
+			$output = utf8_decode($this->result[$i][$this->attributes['name'][$j]]);
+		}break;
+	}
+	return $output;
   }
   
   function createDataPDF($layerdb, $layerset, $attributes, $selected_layer_id, $layout, $oids, $result, $stelle, $user){
   	$this->layout = $layout;
   	$this->Stelle = $stelle;
+	$this->attributes = $attributes;
+	$this->result = $result;
   	$this->user = $user;
   	$this->maxy = 0;
   	$this->miny = 1000000;
@@ -97,7 +123,7 @@ class ddl {
     include (PDFCLASSPATH."class.ezpdf.php");
     # Erzeugen neue pdf-Klasse
     $this->pdf=new Cezpdf();
-    $this->add_static_elements();
+    $this->add_static_elements(0);
     if($this->layout['elements'][$attributes['the_geom']]['xpos'] > 0){		# wenn ein Geometriebild angezeigt werden soll -> loadmap()
     	$this->gui->map_factor = MAPFACTOR;
     	$this->gui->loadmap('DataBase');
@@ -107,7 +133,7 @@ class ddl {
     	$new_dataset = true;
     	if($this->layout['type'] == 0 AND $i > 0){		# neue Seite beim seitenweisen Typ und neuem Datensatz 
     		$this->pdf->newPage();
-    		$this->add_static_elements();
+    		$this->add_static_elements($i);
     	}
 	    if($datasetcount_on_page > 0 AND $this->layout['type'] == 1  AND $this->miny < $this->yoffset_onpage/$datasetcount_on_page + 50){		# neue Seite beim Untereinander-Typ und Seitenüberlauf
 				$datasetcount_on_page = 0;
@@ -115,7 +141,7 @@ class ddl {
 				$this->maxy = 0;
   			$this->miny = 1000000;
 				$this->pdf->newPage();
-				$this->add_static_elements();
+				$this->add_static_elements($i);
 			}
 			$this->yoffset_onpage = $this->maxy - $this->miny;			# der Offset mit dem die Elemente beim Untereinander-Typ nach unten versetzt werden
 			# fortlaufende Freitexte
@@ -123,7 +149,7 @@ class ddl {
 		    for($j = 0; $j < count($this->layout['texts']); $j++){
 		    	if($this->layout['texts'][$j]['type'] == 0){		# Layout ist vom Untereinander-Typ und die Texte sind fortlaufend
 			      $this->pdf->selectFont($this->layout['texts'][$j]['font']);
-			      $freitext = explode(';', $this->substituteFreitext($this->layout['texts'][$j]['text']));
+			      $freitext = explode(';', $this->substituteFreitext($this->layout['texts'][$j]['text'], $i));
 			      $anzahlzeilen = count($freitext);
 			      $alpha = $this->layout['texts'][$j]['angle'];
 			      for($z = 0; $z < $anzahlzeilen; $z++){
@@ -162,25 +188,7 @@ class ddl {
       	if($attributes['type'][$j] != 'geometry' && $this->layout['elements'][$attributes['name'][$j]]['fontsize'] > 0){
       		$this->pdf->selectFont($this->layout['elements'][$attributes['name'][$j]]['font']);
 					if($result[$i][$attributes['name'][$j]] != ''){
-						switch ($attributes['form_element_type'][$j]){
-							case 'Auswahlfeld' : {
-								for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
-									if($attributes['enum_value'][$j][$e] == $result[$i][$attributes['name'][$j]]){
-										$auswahlfeld_output = $attributes['enum_output'][$j][$e];
-										$auswahlfeld_output_laenge=strlen($auswahlfeld_output);
-										$data = array(array($attributes['name'][$j] => utf8_decode($auswahlfeld_output)));
-										break;
-									}
-									else $data = array(array($attributes['name'][$j] => utf8_decode($result[$i][$attributes['name'][$j]])));
-								}
-								if(count($attributes['enum_value'][$j]) == 0){	
-									$data = array(array($attributes['name'][$j] => utf8_decode($result[$i][$attributes['name'][$j]])));
-								}
-							}break;
-							default: {
-								$data = array(array($attributes['name'][$j] => utf8_decode($result[$i][$attributes['name'][$j]])));
-							}break;
-						}
+						$data = array(array($attributes['name'][$j] => $this->get_result_value_output($i, $j)));
 						# Zeilenumbruch berücksichtigen
 						$text = $result[$i][$attributes['name'][$j]];
 						$size = $this->layout['elements'][$attributes['name'][$j]]['fontsize'];

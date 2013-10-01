@@ -249,9 +249,9 @@ function save_layout(){
     		<tr>
         	<td class="bold" align="left" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="8" onclick="toggle('<? echo $this->attributes['name'][$i]; ?>');">
         	<? if($this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['xpos'] == ''){ ?>
-        		<img id="img_<? echo $this->attributes['name'][$i]; ?>" src="<? echo GRAPHICSPATH.'plus.gif'?>">&nbsp;<? echo $this->attributes['alias'][$i]; ?>
+        		<img id="img_<? echo $this->attributes['name'][$i]; ?>" src="<? echo GRAPHICSPATH.'plus.gif'?>">&nbsp;<? echo $this->attributes['alias'][$i].' ($'.$this->attributes['name'][$i].')'; ?>
         	<? }else{ ?>
-        		<img id="img_<? echo $this->attributes['name'][$i]; ?>" src="<? echo GRAPHICSPATH.'minus.gif'?>">&nbsp;<? echo $this->attributes['alias'][$i]; ?>
+        		<img id="img_<? echo $this->attributes['name'][$i]; ?>" src="<? echo GRAPHICSPATH.'minus.gif'?>">&nbsp;<? echo $this->attributes['alias'][$i].' ($'.$this->attributes['name'][$i].')'; ?>
         	<? } ?>
         	</td>
         </tr>
