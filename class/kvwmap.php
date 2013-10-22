@@ -7566,22 +7566,30 @@ class GUI extends GUI_core{
   function uko_export(){
   	$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-    $this->uko = new uko();
+    $this->uko = new uko($this->pgdatabase);
     $this->uko->uko_export($this->formvars, $layerdb);
   }
 	
-	function uko_import(){
-		$this->titel='UKO-Import';
+  function uko_import(){
+	$this->titel='UKO-Import';
     $this->main='uko_import.php';
-    $this->uko = new uko();
+    $this->uko = new uko($this->pgdatabase);
     $this->output();
   }
   
   function uko_import_importieren(){
     $this->titel='UKO-Import';
     $this->main='uko_import.php';
-    $this->uko = new uko();
-    $this->uko->uko_importieren($this->formvars, $this->user->Name, $this->user->id, $this->pgdatabase);
+    $this->uko = new uko($this->pgdatabase);
+    $id = $this->uko->uko_importieren($this->formvars, $this->user->Name, $this->user->id, $this->pgdatabase);
+	if($this->uko->success == true){
+		$this->main='map.php';
+		$this->loadMap('DataBase');
+		$this->zoomToPolygon('uko_polygon', $id, 20, $this->uko->srid);
+		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
+		$this->drawMap();
+		$this->saveMap('');
+	}
     $this->output();
   }
 	
@@ -8196,7 +8204,7 @@ class GUI extends GUI_core{
           if ($poly_id != '' AND $showpolygon == true){
             $PolygonAsSVG = $this->pgdatabase->selectPolyAsSVG($poly_id, $this->user->rolle->epsg_code);
             $PolygonAsSVG = transformCoordsSVG($PolygonAsSVG);    				
-            $this->zoomToPolygon($poly_id,20, $this->user->rolle->epsg_code);
+            $this->zoomToPolygon('u_polygon', $poly_id,20, $this->user->rolle->epsg_code);
             $this->user->rolle->saveSettings($this->map->extent);
             $this->user->rolle->readSettings();
             $this->formvars['newpath'] = $PolygonAsSVG;
@@ -12588,7 +12596,7 @@ class GUI extends GUI_core{
     # Abfragen der Ausdehnung des Umringes des Nachweises
     $ret=$nachweis->getBBoxAsRectObj($nachweis->document['id'],'nachweis');
     if ($ret[0]) {
-      # Fehler bei der Abfrag der BoundingBox
+      # Fehler bei der Abfrage der BoundingBox
       # Es erfolgt keine Änderung der aktuellen Ausdehnung
     }
     else {
@@ -12608,11 +12616,10 @@ class GUI extends GUI_core{
     }
   }
 
-  function zoomToPolygon($poly_id,$border, $srid) {
-    # Abfragen der Ausdehnung des Umringes des Nachweises
-    $ret=$this->pgdatabase->getPolygonBBox($poly_id, $srid);
+  function zoomToPolygon($table, $poly_id,$border, $srid) {
+    $ret=$this->pgdatabase->getPolygonBBox($table, $poly_id, $srid);
     if ($ret[0]) {
-      # Fehler bei der Abfrag der BoundingBox
+      # Fehler bei der Abfrage der BoundingBox
       # Es erfolgt keine Änderung der aktuellen Ausdehnung
     }
     else {

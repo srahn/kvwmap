@@ -432,16 +432,18 @@ class shape {
       $this->formvars['layer_name'] = str_replace('[', '_', $this->formvars['layer_name']);
       $this->formvars['layer_name'] = str_replace(']', '_', $this->formvars['layer_name']);
       $folder = 'shp_Export_'.$this->formvars['layer_name'].rand(0,10000);
-      mkdir(IMAGEPATH.$folder);                       # Ordner erzeugen
-      $fp = fopen(IMAGEPATH.$folder.'/'.$this->formvars['layer_name'].'.cpg', 'w');
-			fwrite($fp, 'UTF-8');
-			fclose($fp);
+	  $old = umask(0);
+      mkdir(IMAGEPATH.$folder, 0777);                       # Ordner erzeugen
+	  umask($old); 
       $command = POSTGRESBINPATH.'pgsql2shp -u '.$layerdb->user;
-      if($layerdb->passwd != '')$command.= ' -P '.$layerdb->passwd;
-    	if($layerdb->port != '')$command.=' -p '.$layerdb->port;
+      if($layerdb->passwd != '')$command.= ' -P "'.$layerdb->passwd.'"';
+      if($layerdb->port != '')$command.=' -p '.$layerdb->port;
       $command.= ' -f '.IMAGEPATH.$folder.'/'.$this->formvars['layer_name'].' '.$layerdb->dbName.' '.$temp_table; 
       exec($command);
       #echo $command;
+	  $fp = fopen(IMAGEPATH.$folder.'/'.$this->formvars['layer_name'].'.cpg', 'w');
+	  fwrite($fp, 'UTF-8');
+	  fclose($fp);
       exec(ZIP_PATH.' '.IMAGEPATH.$folder.' '.IMAGEPATH.$folder.'/*'); # Ordner zippen
       #echo ZIP_PATH.' '.IMAGEPATH.$folder.' '.IMAGEPATH.$folder.'/*';
       $this->formvars['filename'] = TEMPPATH_REL.$folder.'.zip';

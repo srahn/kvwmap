@@ -31,39 +31,51 @@
 class uko{
     
 
-  function uko() {
+  function uko($database) {
     global $debug;
     $this->debug=$debug;
+	$this->srid = $this->getsrid($database);
   }
   
+  function getsrid($database){
+	$sql = "select srid from geometry_columns where f_table_name = 'uko_polygon'";
+	$ret = $database->execSQL($sql,4, 1);
+	if(!$ret[0]){
+		$rs=pg_fetch_array($ret[1]);
+		return $rs[0];
+	}
+  }
   
 	function uko_importieren($formvars, $username, $userid, $database){
 		$_files = $_FILES;
 		$this->formvars = $formvars;
-    if($_files['ukofile']['name']){     # eine UKOdatei wurde ausgewählt
-      $this->formvars['ukofile'] = $_files['ukofile']['name'];
-      $nachDatei = UPLOADPATH.$_files['ukofile']['name'];
-      if(move_uploaded_file($_files['ukofile']['tmp_name'],$nachDatei)){
-				$ukofile = file($nachDatei);
-				for($i = 0; $i < count($ukofile); $i++){
-					if(strpos($ukofile[$i], 'KOO') !== false){
-						$coords[] = substr($ukofile[$i], 4);
-					}
+		if($_files['ukofile']['name']){     # eine UKOdatei wurde ausgewählt
+		  $this->formvars['ukofile'] = $_files['ukofile']['name'];
+		  $nachDatei = UPLOADPATH.$_files['ukofile']['name'];
+		  if(move_uploaded_file($_files['ukofile']['tmp_name'],$nachDatei)){
+			$ukofile = file($nachDatei);
+			for($i = 0; $i < count($ukofile); $i++){
+				if(strpos($ukofile[$i], 'KOO') !== false){
+					$coords[] = substr($ukofile[$i], 4);
 				}
-				$polygon = 'MULTIPOLYGON((('.implode(',', $coords).')))';
-				$sql = "INSERT INTO uko_polygon (username, dateiname, the_geom) VALUES('".$username."', '".$_files['ukofile']['name']."', st_geomfromtext('".$polygon."', (select srid from geometry_columns where f_table_name = 'uko_polygon')))";
-				$sql = "INSERT INTO uko_polygon (username, userid, dateiname, the_geom) VALUES('".$username."', ".$userid.", '".$_files['ukofile']['name']."', st_geomfromtext('".$polygon."', (select srid from geometry_columns where f_table_name = 'uko_polygon')))";
-				$ret = $database->execSQL($sql,4, 1);
-				if ($ret[0])$this->success = false;
-        else $this->success = true;
-      }
-    }
-  }
+			}
+			$polygon = 'MULTIPOLYGON((('.implode(',', $coords).')))';
+			$sql = "INSERT INTO uko_polygon (username, userid, dateiname, the_geom) VALUES('".$username."', ".$userid.", '".$_files['ukofile']['name']."', st_geomfromtext('".$polygon."', ".$this->srid.")) RETURNING id";
+			$ret = $database->execSQL($sql,4, 1);
+			if ($ret[0])$this->success = false;
+			else {
+				$this->success = true;
+				$rs=pg_fetch_array($ret[1]);
+				return $rs[0];
+			}
+		  }
+		}
+	}
   
   function uko_export($formvars, $layerdb){
     $folder = 'uko_Export_'.$formvars['selected_layer_id'].rand(0,10000);
     mkdir(IMAGEPATH.$folder);                       # Ordner erzeugen
-    $sql = "select numgeometries(".$formvars['layer_columnname'].") from ".$formvars['layer_tablename']." WHERE oid = ".$formvars['oid'];
+    $sql = "select st_numgeometries(".$formvars['layer_columnname'].") from ".$formvars['layer_tablename']." WHERE oid = ".$formvars['oid'];
     $ret = $layerdb->execSQL($sql,4, 1);
     if(!$ret[0]){
     	$rs=pg_fetch_array($ret[1]);
@@ -78,9 +90,9 @@ class uko{
     		$geom = $formvars['layer_columnname'];
     	}
     	else{
-    		$geom = 'GeometryN('.$formvars['layer_columnname'].', '.$i.')';
+    		$geom = 'st_GeometryN('.$formvars['layer_columnname'].', '.$i.')';
     	}
-	    $sql = "SELECT replace(replace(astext(pointn(ExteriorRing($geom), generate_series(1,npoints(".$formvars['layer_columnname'].")))), 'POINT(', 'KOO '), ')', '') as coords";
+	    $sql = "SELECT replace(replace(st_astext(st_pointn(st_ExteriorRing($geom), generate_series(1,st_npoints(".$formvars['layer_columnname'].")))), 'POINT(', 'KOO '), ')', '') as coords";
 			$sql.= " From ".$formvars['layer_tablename']." WHERE oid = ".$formvars['oid'];
 	    #echo $sql;
 	    $ret = $layerdb->execSQL($sql,4, 1);
@@ -112,13 +124,13 @@ class uko{
       readfile(IMAGEPATH.$folder.'.zip');
     }
     else{
-    	ob_end_clean();
+      ob_end_clean();
       header("Content-type: text/uko");
       header("Content-Disposition: attachment; filename=".$filenames[0]);
       header('Expires: 0');
       header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
       header('Pragma: public');
-   		readfile(IMAGEPATH.$folder.'/'.$filenames[0]);
+   	  readfile(IMAGEPATH.$folder.'/'.$filenames[0]);
     } 
   }
  

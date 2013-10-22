@@ -598,10 +598,10 @@ class pgdatabase extends pgdatabase_core {
     return $poly[0];
   }
 
-  function getPolygonBBox($id, $srid) {
+  function getPolygonBBox($table, $id, $srid) {
     $sql ='SELECT st_xmin(st_extent(st_transform(the_geom, '.$srid.'))) AS minx,st_ymin(st_extent(st_transform(the_geom, '.$srid.'))) AS miny';
     $sql.=',st_xmax(st_extent(st_transform(the_geom, '.$srid.'))) AS maxx,st_ymax(st_extent(st_transform(the_geom, '.$srid.'))) AS maxy';
-    $sql.=' FROM u_polygon ';
+    $sql.=' FROM '.$table.' ';
     $sql.='WHERE id='.$id;
     $ret=$this->execSQL($sql,4, 0);
     if ($ret[0]) {
