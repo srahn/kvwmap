@@ -8975,7 +8975,7 @@ class GUI extends GUI_core{
     # zwischenspeichern des vorherigen Maßstabs
     $oldscale=round($this->map_scaledenom);
     # Zoom auf den in der Referenzkarte ausgewählten Ausschnitt
-    if ($this->formvars['refmap_x']!=0) {
+    if ($this->formvars['refmap_x'] > 0) {
       $this->zoomToRefExt();
     }
     else {
