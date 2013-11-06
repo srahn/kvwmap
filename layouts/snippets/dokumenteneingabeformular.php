@@ -1,4 +1,4 @@
-
+<script type="text/javascript" src="funktionen/calendar.js"></script>
 <script type="text/javascript">
 <!--
 
@@ -168,7 +168,7 @@ else {
     <td colspan="2"><hr align="center" noshade></td>
   </tr>
   <tr> 
-    <td>Blattnummer:</td>
+    <td width="80px">Blattnummer:</td>
     <td>
   		<input name="Blattnr" type="text" value="<?php echo $this->formvars['Blattnr']; ?>" size="<?php echo BLATTNUMMERMAXLENGTH; ?>" maxlength="<?php echo BLATTNUMMERMAXLENGTH; ?>">
  		</td>
@@ -181,15 +181,18 @@ else {
  	</tr>
  	<tr> 
     <td colspan="2">Bemerkungen:
-  		<textarea name="bemerkungen"><?php echo $this->formvars['bemerkungen']; ?></textarea>
+  		<textarea style="width:85%" name="bemerkungen"><?php echo $this->formvars['bemerkungen']; ?></textarea>
  		</td>
  	</tr>
   <tr> 
     <td colspan="2">&nbsp;</td>
   </tr>
   <tr> 
-    <td>Datum:<br> <font size="1"><em>(1989-05-31)</em></font></td>
-    <td><input name="datum" type="text" value="<?php echo $this->formvars['datum']; ?>" size="10" maxlength="50"></td>
+    <td>Datum:</td>
+    <td>
+		<a href="javascript:;" title=" (TT.MM.JJJJ) " onclick="new CalendarJS().init('datum')"><img src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar"><a name="calendar_datum"></a></div>
+		<input name="datum" id="datum" type="text" onchange="" value="<?php echo $this->formvars['datum']; ?>" size="10" maxlength="50">
+	</td>
   </tr>
   <tr> 
     <td colspan="2">&nbsp;</td>

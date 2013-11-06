@@ -1683,14 +1683,15 @@ class rolle extends rolle_core{
 		return 1;
 	}
 
-	function setNachweisSuchparameter($suchffr,$suchkvz,$suchgn,$suchan,$abfrageart,$suchgemarkungflurid,$stammnr,$suchrissnr,$suchfortf,$suchpolygon,$suchantrnr) {
+	function setNachweisSuchparameter($suchffr,$suchkvz,$suchgn,$suchan,$abfrageart,$suchgemarkung,$suchflur,$stammnr,$suchrissnr,$suchfortf,$suchpolygon,$suchantrnr) {
 		$sql ='UPDATE rolle_nachweise SET ';
 		if ($suchffr!='') { $sql.='suchffr="'.$suchffr.'",'; }else{$sql.='suchffr="0",';}
 		if ($suchkvz!='') { $sql.='suchkvz="'.$suchkvz.'",'; }else{$sql.='suchkvz="0",';}
 		if ($suchgn!='') { $sql.='suchgn="'.$suchgn.'",'; }else{$sql.='suchgn="0",';}
 		if ($suchan!='') { $sql.='suchan="'.$suchan.'",'; }else{$sql.='suchan="0",';}
 		if ($abfrageart!='') { $sql.='abfrageart="'.$abfrageart.'",'; }
-		$sql.='suchgemarkungflurid="'.$suchgemarkungflurid.'",';
+		$sql.='suchgemarkung="'.$suchgemarkung.'",';
+		$sql.='suchflur="'.$suchflur.'",';
 		$sql.='suchstammnr="'.$stammnr.'",';
 		$sql.='suchrissnr="'.$suchrissnr.'",';
 		if($suchfortf == '')$suchfortf = 'NULL';
@@ -1732,8 +1733,6 @@ class rolle extends rolle_core{
 		}
 		else {
 			$rs=mysql_fetch_array($query);
-			$rs['gemarkung']=intval(substr($rs['suchgemarkungflurid'],0,6));
-			$rs['flur']=substr($rs['suchgemarkungflurid'],6,9);
 		}
 		return $rs;
 	}

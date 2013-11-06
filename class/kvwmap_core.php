@@ -244,12 +244,12 @@ class GUI_core {
 
       # lade Karte von Datenbank
       case 'DataBase' : {
-				if (MAPSERVERVERSION < 600) {
+		if (MAPSERVERVERSION < 600) {
           $map = ms_newMapObj(DEFAULTMAPFILE);
         }
-				else {
-				  $map = new mapObj(DEFAULTMAPFILE);
-				}
+		else {
+			$map = new mapObj(DEFAULTMAPFILE);
+		}
         if($this->formvars['go'] == 'getMap_ajax'){
         	$mapDB = new db_mapObj_core($this->Stelle->id,$this->user->id);
         }

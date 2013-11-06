@@ -1607,7 +1607,7 @@ if($GUI->goNotExecutedInPlugins){
 		$GUI->savedformvars=$GUI->user->rolle->getNachweisParameter();
 		$GUI->formvars=array_merge($GUI->savedformvars,$GUI->formvars);
 		$GUI->nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
-		$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkungflurid'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr']);
+		$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'],$GUI->formvars['datum'], $GUI->formvars['VermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['datum2'], $GUI->formvars['suchflur']);
 		if($ret!=''){
 		  $GUI->nachweisAnzeige();
 		  showAlert($ret);

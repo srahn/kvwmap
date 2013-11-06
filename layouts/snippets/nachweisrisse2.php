@@ -21,17 +21,16 @@
     $nr= $this->nachweis->buildNachweisNr($this->qlayerset[$i]['shape'][$j][NACHWEIS_PRIMARY_ATTRIBUTE], $this->qlayerset[$i]['shape'][$j][NACHWEIS_SECONDARY_ATTRIBUTE]);
     $oid=$this->qlayerset[$i]['shape'][$j]['oid'];
     $id=$this->qlayerset[$i]['shape'][$j]['id'];
-    $flurid=$this->qlayerset[$i]['shape'][$j]['flurid'];
-    $gemarkid=substr($flurid,2,4);
-    $flur=substr($flurid,6,3);
+    $flur=$this->qlayerset[$i]['shape'][$j]['flur'];
+    $gemarkid=$this->qlayerset[$i]['shape'][$j]['gemarkung'];
     $flurid=$gemarkid."-".$flur;
     $art=$this->qlayerset[$i]['shape'][$j]['art'];
-
+	
     while (strlen($stammnr) < 8)
     {
       $stammnr="0".$stammnr;
     }
-$dname=NACHWEISDOCPATH.$this->qlayerset[$i]['shape'][$j]['flurid']."/".$nr."/".$this->qlayerset[$i]['shape'][$j]['link_datei'];
+$dname=NACHWEISDOCPATH.$gemarkid.$flur."/".$nr."/".$this->qlayerset[$i]['shape'][$j]['link_datei'];
     ?>
   <tr>
 	<td><b><?php echo $this->qlayerset[$i]['shape'][$j][NACHWEIS_PRIMARY_ATTRIBUTE]; ?></b></td>

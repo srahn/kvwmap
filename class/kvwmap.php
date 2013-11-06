@@ -8924,13 +8924,7 @@ class GUI extends GUI_core{
     if ($this->formvars['abfrageart']=='poly') {
       $this->formvars['suchpolygon'] = $this->formvars['newpathwkt'];
     }
-    if($this->formvars['flur'] == ''){
-    	$this->formvars['flur'] = '%%%';
-    }
-    if($this->formvars['gemarkung'] != '' AND $this->formvars['gemarkung'] != 13){
-    	$this->formvars['suchgemarkungflurid']=str_pad(intval(trim($this->formvars['gemarkung'])),6,'0',STR_PAD_LEFT).str_pad(trim($this->formvars['flur']),3,'0',STR_PAD_LEFT);
-    }
-    $this->user->rolle->setNachweisSuchparameter($this->formvars['suchffr'],$this->formvars['suchkvz'],$this->formvars['suchgn'], $this->formvars['suchan'], $this->formvars['abfrageart'],$this->formvars['suchgemarkungflurid'],$this->formvars['suchstammnr'],$this->formvars['suchrissnr'],$this->formvars['suchfortf'],$this->formvars['suchpolygon'],$this->formvars['suchantrnr']);
+    $this->user->rolle->setNachweisSuchparameter($this->formvars['suchffr'],$this->formvars['suchkvz'],$this->formvars['suchgn'], $this->formvars['suchan'], $this->formvars['abfrageart'],$this->formvars['suchgemarkung'],$this->formvars['suchflur'],$this->formvars['suchstammnr'],$this->formvars['suchrissnr'],$this->formvars['suchfortf'],$this->formvars['suchpolygon'],$this->formvars['suchantrnr']);
     # Die Anzeigeparameter werden so gesetzt, daß genau das gezeigt wird, wonach auch gesucht wurde.
     # bzw. was als Suchparameter im Formular angegeben wurde.
     $this->user->rolle->setNachweisAnzeigeparameter($this->formvars['suchffr'],$this->formvars['suchkvz'],$this->formvars['suchgn'],$this->formvars['suchan'],$this->formvars['suchffr'],$this->formvars['suchkvz'],$this->formvars['suchgn']);
@@ -8940,7 +8934,7 @@ class GUI extends GUI_core{
     $this->nachweis = new Nachweis($this->pgdatabase, $this->user->rolle->epsg_code);
     # Suchparameter in Ordnung
     # Recherchieren nach den Nachweisen
-    $ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkungflurid'],$this->formvars['suchstammnr'],$this->formvars['suchrissnr'],$this->formvars['suchfortf'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr'], $this->formvars['datum'], $this->formvars['VermStelle']);
+    $ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkung'],$this->formvars['suchstammnr'],$this->formvars['suchrissnr'],$this->formvars['suchfortf'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr'], $this->formvars['datum'], $this->formvars['VermStelle'], $this->formvars['gueltigkeit'], $this->formvars['datum2'], $this->formvars['suchflur']);
     #$this->nachweis->getAnzahlNachweise($this->formvars['suchpolygon']);
     if($ret!=''){
       # Fehler bei der Recherche im Datenbestand
@@ -9733,6 +9727,9 @@ class GUI extends GUI_core{
     $currenttime=date('Y-m-d H:i:s',time());
     $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
     $this->drawMap();
+	
+	if($this->formvars['Gemarkung'] == '')$this->formvars['Gemarkung'] = $this->Lagebezeichung['gemkgschl'];
+	if($this->formvars['Flur'] == '')$this->formvars['Flur'] = $this->Lagebezeichung['flur'];
     
     # Abfragen der Gemarkungen
     $GemeindenStelle=$this->Stelle->getGemeindeIDs();
@@ -9942,11 +9939,25 @@ class GUI extends GUI_core{
       $this->titel='Dokumentenrecherche ändern';
     }
     $this->main="dokumentenabfrageformular.php";
-    # Gemeindedaten laden
-    $GemObj=new gemeinde(0,$this->database);
+    
+	# Gemeindedaten laden
+    #$GemObj=new gemeinde(0,$this->database);
     #$Gemeindeliste=$GemObj->getGemeindeListe(Array(), "g.Gemeindename");
     # Formularobjekt für Gemeinde bilden
-    $this->GemFormObj=new FormObject("gemeinde_id","select",$Gemeindeliste["ID"],$this->formvars['gemeinde_id'],$Gemeindeliste["Name"],1,0,0,NULL);
+    #$this->GemFormObj=new FormObject("gemeinde_id","select",$Gemeindeliste["ID"],$this->formvars['gemeinde_id'],$Gemeindeliste["Name"],1,0,0,NULL);
+			
+	# Abfragen der Gemarkungen
+    $GemeindenStelle=$this->Stelle->getGemeindeIDs();
+    $Gemeinde=new gemeinde('',$this->pgdatabase);
+    if(ALKIS){$GemListe=$Gemeinde->getGemeindeListeALKIS($GemeindenStelle, 'bezeichnung');}
+    else{$GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle, 'GemeindeName');}
+    $Gemarkung=new gemarkung('',$this->pgdatabase);
+    if(ALKIS){$GemkgListe=$Gemarkung->getGemarkungListeALKIS($GemListe['ID'],'','gmk.bezeichnung');}
+    else{$GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'','gmk.GemkgName');}
+    # Erzeugen des Formobjektes für die Gemarkungsauswahl
+    $this->GemkgFormObj=new FormObject("suchgemarkung","select",$GemkgListe['GemkgID'],$this->formvars['suchgemarkung'],$GemkgListe['Bezeichnung'],"1","","",NULL);
+	$this->GemkgFormObj->insertOption('',0,'--Auswahl--',0);
+			
     # erzeugen des Formularobjektes für die VermessungsStellen
     $this->FormObjVermStelle=$this->getFormObjVermStelle($this->formvars['VermStelle']);
     $this->FormObjVermStelle->insertOption('', NULL, '--- Auswahl ---', 0);    
@@ -9957,6 +9968,7 @@ class GUI extends GUI_core{
       $this->navMap($this->formvars['CMD']);
       $this->user->rolle->saveDrawmode($this->formvars['always_draw']);
     }
+	
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
     # Spaltenname und from-where abfragen
   	if(!$this->formvars['layer_id']){
@@ -9984,6 +9996,7 @@ class GUI extends GUI_core{
     $currenttime=date('Y-m-d H:i:s',time());
     $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
     $this->drawMap();
+			
     $this->output();
 
 //    # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank

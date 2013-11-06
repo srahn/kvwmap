@@ -733,7 +733,7 @@ class Nachweis {
     return $errmsg;
   }
   
-  function getNachweise($id,$polygon,$FlurID,$stammnr,$rissnr,$fortf,$art_einblenden,$richtung,$abfrage_art,$order,$antr_nr, $datum = NULL, $VermStelle = NULL) {
+  function getNachweise($id,$polygon,$gemarkung,$stammnr,$rissnr,$fortf,$art_einblenden,$richtung,$abfrage_art,$order,$antr_nr, $datum = NULL, $VermStelle = NULL, $gueltigkeit = NULL, $datum2 = NULL, $flur = NULL) {
     # Die Funktion liefert die Nachweise nach verschiedenen Suchverfahren.
     # Vor dem Suchen nach Nachweisen werden jeweils die Suchparameter überprüft    
     if (is_array($id)) { $idListe=$id; } else { $idListe=array($id); }
@@ -756,6 +756,7 @@ class Nachweis {
           $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring, st_assvg(st_transform(n.the_geom, ".$this->client_epsg.")) AS svg_umring,v.name AS vermst,n2d.dokumentart_id as andere_art FROM n_vermstelle AS v, n_nachweise AS n";
           $sql.=" LEFT JOIN n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id";
           $sql.=" WHERE CAST(n.vermstelle AS integer)=v.id AND n.id=".(int)$id;
+		  if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
           #echo $sql;
           $this->debug->write("<br>nachweis.php getNachweise Abfragen der Nachweisdokumente.<br>",4);
           $ret=$this->database->execSQL($sql,4, 0);
@@ -778,6 +779,7 @@ class Nachweis {
         $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring, st_assvg(st_transform(n.the_geom, ".$this->client_epsg.")) AS svg_umring,v.name AS vermst,n2d.dokumentart_id as andere_art FROM n_vermstelle AS v, n_nachweise AS n";
         $sql.=" LEFT JOIN n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id";
         $sql.=" WHERE CAST(n.vermstelle AS integer)=v.id AND n.id=".(int)$idselected[0];
+		if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
         #echo $sql;
         $this->debug->write("<br>nachweis.php getNachweise Abfragen der Nachweisdokumente.<br>",4);
         $ret=$this->database->execSQL($sql,4, 0);
@@ -788,6 +790,7 @@ class Nachweis {
         	$sql ="SELECT distinct st_astext(st_union(st_transform(n.the_geom, ".$this->client_epsg."))) AS wkt_umring, st_assvg(st_union(st_transform(n.the_geom, ".$this->client_epsg."))) AS svg_umring, st_union(st_transform(n.the_geom, ".$this->client_epsg.")) as geom";
 					$sql.=" FROM n_nachweise AS n";
 	        $sql.=" WHERE 1=1";
+			if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
 	        if ($idselected[0]!=0) {
 	          $sql.=" AND n.id IN ('".$idselected[0]."'";
 	          for ($i=1;$i<count($idselected);$i++) {
@@ -813,11 +816,16 @@ class Nachweis {
       
       case "multibleIDs" : {
         $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS andere_art, d.art AS andere_art_name";
-          $sql.=" FROM n_vermstelle AS v, n_nachweise AS n";
+          $sql.=" FROM n_vermstelle AS v";
+		  if($gemarkung != '' AND $flur != ''){
+			$sql.=", alkobj_e_fla as alko, alknflur";
+		  }
+		  $sql.=" , n_nachweise AS n";
           $sql.=" LEFT JOIN n_nachweise2dokumentarten n2d"; 
 					$sql.=" 		LEFT JOIN n_dokumentarten d ON n2d.dokumentart_id = d.id";
 					$sql.=" ON n2d.nachweis_id = n.id";
         $sql.=" WHERE CAST(n.vermstelle AS integer)=v.id";
+		if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
         if ($idselected[0]!=0) {
           $sql.=" AND n.id IN ('".$idselected[0]."'";
           for ($i=1;$i<count($idselected);$i++) {
@@ -825,8 +833,8 @@ class Nachweis {
           }
           $sql.=")";
         }
-        if($FlurID!=''){
-          $sql.=" AND n.flurid='".$FlurID."'";
+        if($gemarkung != '' AND $flur != ''){
+		  $sql.=" AND alko.objnr = alknflur.objnr AND alknflur.gemkgschl = ".$gemarkung." AND alknflur.flur = '".str_pad($flur,3,'0',STR_PAD_LEFT)."' AND st_intersects(st_transform(alko.the_geom, (select srid from geometry_columns where f_table_name = 'n_nachweise')), n.the_geom)";
         }
         if($stammnr!=''){
           $sql.=" AND n.stammnr='".$stammnr."'";
@@ -885,11 +893,16 @@ class Nachweis {
           # Suche nach individueller Nummer
           #echo '<br>Suche nach individueller Nummer.';
           $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS andere_art, d.art AS andere_art_name";
-          $sql.=" FROM n_vermstelle AS v, n_nachweise AS n";
+          $sql.=" FROM n_vermstelle AS v";
+		  if($gemarkung != '' AND $flur != ''){
+			$sql.=", alkobj_e_fla as alko, alknflur";
+		  }
+		  $sql.=" , n_nachweise AS n";
           $sql.=" LEFT JOIN n_nachweise2dokumentarten n2d"; 
 					$sql.=" 		LEFT JOIN n_dokumentarten d ON n2d.dokumentart_id = d.id";
 					$sql.=" ON n2d.nachweis_id = n.id";
           $sql.=" WHERE CAST(n.vermstelle AS integer)=v.id";
+		  if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
           if ($idselected[0]!=0) {
             $sql.=" AND n.id IN ('".$idselected[0]."'";
             for ($i=1;$i<count($idselected);$i++) {
@@ -897,14 +910,9 @@ class Nachweis {
             }
             $sql.=")";
           }
-          if($FlurID!=''){
-          	if(strpos($FlurID, '%')){
-          		$sql.=" AND n.flurid::text LIKE '".$FlurID."'";
-          	}
-          	else{
-            	$sql.=" AND n.flurid='".$FlurID."'";
-          	}
-          }
+          if($gemarkung != '' AND $flur != ''){
+			$sql.=" AND alko.objnr = alknflur.objnr AND alknflur.gemkgschl = ".$gemarkung." AND alknflur.flur = '".str_pad($flur,3,'0',STR_PAD_LEFT)."' AND st_intersects(st_transform(alko.the_geom, (select srid from geometry_columns where f_table_name = 'n_nachweise')), n.the_geom)";
+		  }
           if($stammnr!=''){
             $sql.=" AND n.stammnr='".$stammnr."'";
           }
@@ -915,7 +923,12 @@ class Nachweis {
 	          $sql.=" AND n.fortfuehrung=".(int)$fortf;
 	        }
           if($datum != ''){
-            $sql.=" AND n.datum = '".$datum."'";
+			if($datum2 != ''){
+				$sql.=" AND n.datum between '".$datum."' AND '".$datum2."'";
+			}
+			else{
+				$sql.=" AND n.datum = '".$datum."'";
+			}
           }
           if($VermStelle!=''){
             $sql.=" AND n.vermstelle = '".$VermStelle."'";
@@ -975,6 +988,7 @@ class Nachweis {
 					$sql.=" ON n2d.nachweis_id = n.id";
  					$sql.=" WHERE CAST(n.vermstelle AS integer)=v.id";
           $sql.=" AND st_intersects(st_transform(st_geometryfromtext('".$polygon."',".$this->client_epsg."), (select srid from geometry_columns where f_table_name = 'n_nachweise')),the_geom)";
+		  if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
           
           if (substr($art_einblenden,0,1)) { $art[]='100'; }
           if (substr($art_einblenden,1,1)) { $art[]='010'; }
@@ -1021,6 +1035,7 @@ class Nachweis {
 				$sql.=" ON n2d.nachweis_id = n.id";
         $sql.=" WHERE CAST(n.vermstelle AS integer)=v.id AND n.id=n2a.nachweis_id";
         $sql.=" AND n2a.antrag_id='".$antr_nr."'";
+		if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
         if (substr($art_einblenden,0,1)) { $art[]='100'; }
         if (substr($art_einblenden,1,1)) { $art[]='010'; }
         if (substr($art_einblenden,2,1)) { $art[]='001'; }

@@ -1,10 +1,31 @@
 
+<script type="text/javascript" src="funktionen/calendar.js"></script>
+<script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
+<DIV id="TipLayer" style="visibility:hidden;position:absolute;z-index:1000;top:-100"></DIV>
+<SCRIPT src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></SCRIPT>
 <script type="text/javascript">
 <!--
 
+Text[1]=["Achtung:","Bei Auswahl von Gemarkung und Flur erfolgt eine räumliche Suche über die aktuelle Flurgeometrie."]
+
 function save(){
 	art = document.getElementsByName('abfrageart');
-	document.GUI.gemarkung.value = document.GUI.gemarkung1.value + document.GUI.gemarkung2.value; 
+	if(document.GUI.suchgemarkung.value == '' && (document.GUI.suchflur.value != '' || document.GUI.suchrissnr.value != '' || document.GUI.suchfortf.value != '')){
+		alert('Bitte geben Sie die Gemarkung an.');
+		return;
+	}
+	if(document.GUI.suchgemarkung.value != '' && document.GUI.suchflur.value == ''){
+		alert('Bitte geben Sie Gemarkung und Flur an.');
+		return;
+	}
+	if(document.GUI.VermStelle.value != '' && document.GUI.suchgemarkung.value == '' && document.GUI.suchstammnr.value == '' && document.GUI.suchrissnr.value == '' && document.GUI.datum.value == '' && document.GUI.suchfortf.value == ''){
+		alert('Bitte geben Sie eine Gemarkung und Flur, eine Antragsnummer, eine Rissnummer, ein Datum oder eine Fortführung an.');
+		return;
+	}
+	if(document.GUI.suchgemarkung.value == '' && document.GUI.suchstammnr.value == '' && document.GUI.datum.value == ''){
+		alert('Bitte geben Sie Suchparameter an.');
+		return;
+	}
 	if(art[1].checked == true && document.GUI.newpathwkt.value == ''){
 		if(document.GUI.newpath.value == ''){
 			alert('Geben Sie ein Polygon an.');
@@ -42,6 +63,11 @@ function buildwktpolygonfromsvgpath(svgpath){
 	wkt = wkt+"))";
 	return wkt;
 }	
+
+function updateGemarkungsauswahl(){
+	document.GUI.gemschl.value = document.GUI.gemschl1.value+document.GUI.gemschl2.value;
+	selectbyString(document.GUI.suchgemarkung, document.GUI.gemschl.value);
+}
   
 //-->
 </script>
@@ -61,8 +87,8 @@ else {
     </div></td>
   </tr>
   <tr> 
-    <td rowspan="17">&nbsp;</td>
-    <td rowspan="17"> 
+    <td rowspan="16">&nbsp;</td>
+    <td rowspan="16"> 
       <?php
 				include(LAYOUTPATH.'snippets/SVG_polygon_box_query_area.php')
 			?>
@@ -70,77 +96,89 @@ else {
     <td></td>
   </tr>
   <tr> 
-    <td>Recherche nach folgenden Dokumenten:</td>
+    <td colspan="2">Recherche nach folgenden Dokumenten:</td>
   </tr>
   <tr> 
-    <td><input type="checkbox" name="suchffr" value="1"<?php if ($this->formvars['suchffr']) { ?> checked<?php } ?>>&nbsp;Fortführungsriss&nbsp;(FFR) </td>
+    <td colspan="2"><input type="checkbox" name="suchffr" value="1"<?php if ($this->formvars['suchffr']) { ?> checked<?php } ?>>&nbsp;Fortführungsriss&nbsp;(FFR) </td>
   </tr>
   <tr> 
-    <td><input type="checkbox" name="suchkvz" value="1"<?php if ($this->formvars['suchkvz']) { ?> checked<?php } ?>>&nbsp;Koordinatenverzeichnis&nbsp;(KVZ)</td>
+    <td colspan="2"><input type="checkbox" name="suchkvz" value="1"<?php if ($this->formvars['suchkvz']) { ?> checked<?php } ?>>&nbsp;Koordinatenverzeichnis&nbsp;(KVZ)</td>
   </tr>
   <tr> 
-    <td><input type="checkbox" name="suchgn" value="1"<?php if ($this->formvars['suchgn']) { ?> checked<?php } ?>>&nbsp;Grenzniederschrift&nbsp;(GN)</td>
+    <td colspan="2"><input type="checkbox" name="suchgn" value="1"<?php if ($this->formvars['suchgn']) { ?> checked<?php } ?>>&nbsp;Grenzniederschrift&nbsp;(GN)</td>
   </tr>
   <tr> 
-    <td><input type="checkbox" name="suchan" value="1"<?php if ($this->formvars['suchan']) { ?> checked<?php } ?>>&nbsp;Andere&nbsp;</td>
+    <td width="20%"><input type="checkbox" name="suchan" value="1"<?php if ($this->formvars['suchan']) { ?> checked<?php } ?>>&nbsp;Andere&nbsp;</td>
+  </tr>
+  <tr>
+	<td>&nbsp;Gültigkeit:
+		<select name="gueltigkeit">
+			<option value="">--- Auswahl ---</option>
+			<option value="1">gültige Nachweise</option>
+			<option value="0">ungültige Nachweise</option>
+		</select>
+	</td>
   </tr>
   <tr> 
-    <td><hr align="center" noshade></td>
+    <td colspan="2"><hr align="center" noshade></td>
   </tr>
   <tr> 
     <td>Auswahlverfahren:</td>
   </tr>
   <tr> 
-    <td><strong>&nbsp;Individuelle Nummer:<br>
-    </strong>
+    <td colspan="2">
       <table border="0" cellspacing="0" cellpadding="2">
         <tr>
-          <td rowspan="7"><input type="radio" name="abfrageart" value="indiv_nr" <?php if ($this->formvars['abfrageart']=='indiv_nr') { ?> checked<?php } ?>>
+          <td rowspan="7" valign="top"><input type="radio" name="abfrageart" value="indiv_nr" <?php if ($this->formvars['abfrageart']=='indiv_nr') { ?> checked<?php } ?>>
           </td>
-          <td>Gemarkung&nbsp;</td>
-          <td>Flur</td>
         </tr>
+		<tr><td colspan="3"><strong>Individuelle Nummer<br></strong></td></tr>
         <tr>
-          <td width="80px">
-          	<input type="text" name="gemarkung1" value="13" style="width:23px"  maxlength="2">
-          	<input type="text" name="gemarkung2" value="<?php echo substr($this->formvars['gemarkung'], 2, 4); ?>" style="width:46px" maxlength="6">
-          	<input type="hidden" name="gemarkung" value="">
+          <td colspan="3">
+			Gemarkung:<br>
+			<input name="gemschl1" type="text" value="13" style="width:23px" onkeyup="updateGemarkungsauswahl();">
+			<input name="gemschl2" type="text" value="<? echo substr($this->formvars['suchgemarkung'], 2, 4); ?>" style="width:46px" onkeyup="updateGemarkungsauswahl();">
+			<input name="gemschl" type="hidden" value="<? echo $this->formvars['suchgemarkung']; ?>">
+			<?php 
+			  $this->GemkgFormObj->outputHTML();
+			  echo $this->GemkgFormObj->html;
+			 ?>
           </td>
-          <td align="left "><input type="text" name="flur" value="<?php echo $this->formvars['flur']; ?>" size="3" maxlength="3">
+		</tr>
+		<tr>
+          <td align="left" colspan="3">Flur:&nbsp;&nbsp;&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>ikon_i.gif" onMouseOver="stm(Text[1],Style[0])" onmouseout="htm()"><br><input type="text" name="suchflur" value="<?php echo $this->formvars['suchflur']; ?>" size="3" maxlength="3">
           </td>
         </tr>
+		<tr>
         <? if(NACHWEIS_PRIMARY_ATTRIBUTE != 'rissnummer'){ ?>
-        <tr>
-          <td colspan="2">          Antragsnummer<br>
+          <td align="left">          Antragsnummer<br>
   					<input type="text" name="suchstammnr" value="<?php echo $this->formvars['suchstammnr']; ?>" size="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>" maxlength="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>">
  					</td>    
-        </tr>
         <? } ?>
-        <tr>
-          <td colspan="2">          Rissnummer<br>
+          <td align="left">          Rissnummer<br>
   					<input type="text" name="suchrissnr" value="<?php echo $this->formvars['suchrissnr']; ?>" size="<?php echo RISSNUMMERMAXLENGTH; ?>" maxlength="<?php echo RISSNUMMERMAXLENGTH; ?>">
  					</td>    
-        </tr>
         <? if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){ ?>
-        <tr>
-          <td colspan="2">          Antragsnummer<br>
+          <td align="left">          Antragsnummer<br>
   					<input type="text" name="suchstammnr" value="<?php echo $this->formvars['suchstammnr']; ?>" size="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>" maxlength="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>">
  					</td>    
-        </tr>
         <? } ?>
-        <tr>
-          <td colspan="2">          Fortfuehrung<br>
-  					<input type="text" name="suchfortf" value="<?php echo $this->formvars['suchfortf']; ?>" size="4" maxlength="4">
- 					</td>    
+          <td width="50%" align="left">          Fortführungsjahr<br>
+			<input type="text" name="suchfortf" value="<?php echo $this->formvars['suchfortf']; ?>" size="4" maxlength="4">
+		  </td>    
         </tr>
         <tr> 
-			    <td colspan="2">
-			    		Datum:<font size="1"><em>(1989-05-31)</em></font><br>
-			    		<input name="datum" type="text" value="<?php echo $this->formvars['datum']; ?>" size="10" maxlength="50">
+			    <td colspan="3">
+			    		Datum:<br>
+						<a href="javascript:;" title=" (TT.MM.JJJJ) " onclick="new CalendarJS().init('datum')"><img src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar"><a name="calendar_datum"></a></div>
+			    		<input id="datum" name="datum" type="text" onchange="if(document.GUI.datum2.value=='')document.GUI.datum2.value=this.value" value="<?php echo $this->formvars['datum']; ?>" size="10" maxlength="50">
+						&nbsp;bis&nbsp;
+						<a href="javascript:;" title=" (TT.MM.JJJJ) " onclick="new CalendarJS().init('datum2')"><img src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar"><a name="calendar_datum2"></a></div>
+			    		<input id="datum2" name="datum2" type="text" onchange="" value="<?php echo $this->formvars['datum2']; ?>" size="10" maxlength="50">
 			    </td>
 			  </tr>
 			  <tr>
-			    <td colspan="2">Vermessungsstelle:<br> 
+			    <td colspan="3">Vermessungsstelle:<br> 
 			      <?php
 	              $this->FormObjVermStelle->outputHTML();
 	              echo $this->FormObjVermStelle->html;
@@ -151,20 +189,12 @@ else {
     </td>
   </tr>
   <tr> 
-  
-    <td>
-      <strong>&nbsp;Suchpolygon/-fenster:</strong></td>
+    <td height="35px" colspan="2"><input type="radio" name="abfrageart" value="poly" <?php if ($this->formvars['abfrageart']=='poly' OR $this->formvars['abfrageart']=='') { ?> checked<?php } ?>> 
+   <strong>Auswahl im Kartenausschnitt über Suchpolygon</strong></td>
   </tr>
   <tr> 
-    <td><input type="radio" name="abfrageart" value="poly" <?php if ($this->formvars['abfrageart']=='poly' OR $this->formvars['abfrageart']=='') { ?> checked<?php } ?>> 
-   <em>Auswahl im Kartenausschnitt</em></td>
-  </tr>
-  <tr> 
-    <td>
-      <strong>&nbsp;Vorbereitungsnummer:</strong></td>
-  </tr>
-  <tr> 
-    <td><input type="radio" name="abfrageart" value="antr_nr" <?php if ($this->formvars['abfrageart']=='antr_nr') { ?> checked<?php } ?>>
+    <td colspan="2"><input type="radio" name="abfrageart" value="antr_nr" <?php if ($this->formvars['abfrageart']=='antr_nr') { ?> checked<?php } ?>>
+		<strong>Vorbereitungsnummer:</strong>
       <?php $this->FormObjAntr_nr->outputHTML();
         echo $this->FormObjAntr_nr->html;?>
     </td>
@@ -173,7 +203,7 @@ else {
   	<td>&nbsp;</td>
   </tr>
   <tr>
-  	<td>Geometrie übernehmen von:<br>
+  	<td colspan="2">Geometrie übernehmen von:<br>
   		<select name="layer_id" onchange="document.GUI.submit();">
   			<option value="">--- Auswahl ---</option>
   			<?
@@ -187,10 +217,10 @@ else {
   	</td>
   </tr>
   <tr> 
-    <td><hr align="center" noshade></td>
+    <td colspan="2"><hr align="center" noshade></td>
   </tr>
   <tr> 
-    <td align="left"> <input type="reset" name="go_reset" value="Zurücksetzen">&nbsp;<input type="button" name="senden" value="Senden" onclick="save();"> </td>
+    <td align="center" colspan="2"><input type="button" name="senden" value="Suchen" onclick="save();"> </td>
   </tr>
   <tr>
   	<td></td>

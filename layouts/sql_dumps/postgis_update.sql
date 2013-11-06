@@ -1151,3 +1151,29 @@ CREATE OR REPLACE VIEW public.bw_boris_view AS
    LEFT JOIN alb_v_gemarkungen gm ON bw.gemarkung = gm.gemkgschl;
    
 ALTER TABLE uko_polygon ADD COLUMN userid integer;
+
+
+
+----# Änderungen von 1.12.0 nach 1.13.0
+
+
+update n_nachweise set datum = split_part(datum, '-', 1)||'-'||split_part(datum, '-', 2)||'-01' WHERE split_part(datum, '-', 3) = '00';
+update n_nachweise set datum = split_part(datum, '-', 1)||'-01'||split_part(datum, '-', 3) WHERE split_part(datum, '-', 2) = '00';
+update n_nachweise set datum = substr(datum, 1, 4)||'-'||substr(datum, 5) WHERE character_length(split_part(datum, '-', 1)) = 6;
+update n_nachweise set datum = split_part(datum, '-', 1)||'01-01' WHERE split_part(datum, '-', 2) = '0101';
+
+
+CREATE OR REPLACE FUNCTION chartodate(value character varying)
+  RETURNS date AS
+$BODY$
+SELECT CAST($1 AS date);
+
+$BODY$
+  LANGUAGE 'sql' IMMUTABLE STRICT;
+
+
+ALTER TABLE n_nachweise
+   ALTER COLUMN datum TYPE date USING chartodate(datum);
+
+
+DROP FUNCTION chartodate(character varying);

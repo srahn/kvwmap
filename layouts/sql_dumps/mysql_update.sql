@@ -1075,7 +1075,6 @@ ALTER TABLE `rolle` ADD `runningcoords` BOOLEAN NOT NULL DEFAULT '0';
 ALTER TABLE `layer` ADD `metalink` VARCHAR(255) NULL;
 
 
-
 #------------------------------------------------------------------------------------------
 # Änderung von 1.11.0 zu 1.12.0
 
@@ -1116,3 +1115,12 @@ ALTER TABLE `druckrahmen` ADD `variable_freetexts` BOOLEAN NULL DEFAULT NULL AFT
 
 DELETE FROM `u_funktion2stelle` WHERE erlaubt = 0;
 ALTER TABLE `u_funktion2stelle` DROP  `erlaubt`;
+
+#------------------------------------------------------------------------------------------
+# Änderung von 1.12.0 zu 1.13.0
+#
+ALTER TABLE `rolle` CHANGE `gui` `gui` VARCHAR(100) NOT NULL DEFAULT 'gui.php';
+
+ALTER TABLE `rolle_nachweise` CHANGE `suchgemarkungflurid` `suchgemarkung` VARCHAR( 10 ) NOT NULL DEFAULT '';
+
+ALTER TABLE `rolle_nachweise` ADD `suchflur` VARCHAR( 3 ) NOT NULL AFTER `suchgemarkung`;

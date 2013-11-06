@@ -660,7 +660,7 @@ CREATE TABLE n_nachweise (
     id serial NOT NULL PRIMARY KEY,
     flurid integer NOT NULL,
     blattnummer character varying NOT NULL,
-    datum character varying,
+    datum date,
     vermstelle character varying,
     gueltigkeit integer,
     link_datei character varying,
