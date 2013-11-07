@@ -1354,11 +1354,11 @@ function mouseup(evt){
 			svg_path = top.document.GUI.newpath.value+"";
 			components = svg_path.split(" ");
 			new_svg_path = "M";
-			for(i = 1; i < components.length; i++){
+			for(i = 1; i < components.length+1; i++){
 				if(vertex_id[2] == i-2){
 					new_svg_path = new_svg_path + " " + x_world + " " + y_world;
 				}
-				new_svg_path = new_svg_path + " " + components[i];
+				if(components[i] != undefined)new_svg_path = new_svg_path + " " + components[i];
 			}
 			top.document.GUI.newpath.value = new_svg_path;
 
@@ -1637,24 +1637,26 @@ function mouseup(evt){
 			circle[i].setAttribute("style","fill: #FF0000");
 			circle[i].setAttribute("id", "vertex_"+i);
 			parent.appendChild(circle[i]);
-			// Zwischenlinien
-			line[i] = linie1.cloneNode(true);
-			line[i].setAttribute("x1", components[i]);
-			line[i].setAttribute("y1", components[i+1]);
-			line[i].setAttribute("x2", components[i+2]);
-			line[i].setAttribute("y2", components[i+3]);
-			line[i].setAttribute("style","stroke: #FF0000");
-			line[i].setAttribute("opacity", "0.01");
-			line[i].setAttribute("id", "line_new_"+i);
-			parent2.appendChild(line[i]);
-			// Zwischenpunkte
-			circle2[i] = kreis1.cloneNode(true);
-			circle2[i].setAttribute("cx", parseInt(components[i])-(parseInt(components[i])-parseInt(components[i+2]))/2);
-			circle2[i].setAttribute("cy", parseInt(components[i+1])-(parseInt(components[i+1])-parseInt(components[i+3]))/2);
-			circle2[i].setAttribute("style","fill: #FF0000");
-			circle2[i].setAttribute("opacity", "0.01");
-			circle2[i].setAttribute("id", "vertex_new_"+i);
-			parent2.appendChild(circle2[i]);
+			if(i+3 < components.length && components[i+2] != "M"){	// zwischen Linienzuegen keine Punkte und Linien setzen
+				// Zwischenlinien
+				line[i] = linie1.cloneNode(true);
+				line[i].setAttribute("x1", components[i]);
+				line[i].setAttribute("y1", components[i+1]);
+				line[i].setAttribute("x2", components[i+2]);
+				line[i].setAttribute("y2", components[i+3]);
+				line[i].setAttribute("style","stroke: #FF0000");
+				line[i].setAttribute("opacity", "0.01");
+				line[i].setAttribute("id", "line_new_"+i);
+				parent2.appendChild(line[i]);
+				// Zwischenpunkte
+				circle2[i] = kreis1.cloneNode(true);
+				circle2[i].setAttribute("cx", parseInt(components[i])-(parseInt(components[i])-parseInt(components[i+2]))/2);
+				circle2[i].setAttribute("cy", parseInt(components[i+1])-(parseInt(components[i+1])-parseInt(components[i+3]))/2);
+				circle2[i].setAttribute("style","fill: #FF0000");
+				circle2[i].setAttribute("opacity", "0.01");
+				circle2[i].setAttribute("id", "vertex_new_"+i);
+				parent2.appendChild(circle2[i]);
+			}
 			if(components[i+2] == "M" || components[i+2] == ""){
 				// den neuen Eckpunkt hinten
 				circle2[i] = kreis1.cloneNode(true);
@@ -2886,11 +2888,11 @@ $measurefunctions = '
 				<circle id="startvertex" cx="-500" cy="-500" r="2" style="fill:blue;stroke:blue;stroke-width:2"/>
 			</g>
 			<rect id="canvas" cursor="crosshair" onmousedown="mousedown(evt);" onmousemove="mousemove(evt);hide_tooltip();" onmouseup="mouseup(evt);" width="100%" height="100%" opacity="0" visibility="visible"/>
-			<g id="foreignvertices" transform="translate(0,'.$res_y.') scale(1,-1)">
-			</g>
 			<g id="in_between_vertices" transform="translate(0,'.$res_y.') scale(1,-1)">			
 			</g>
 			<g id="vertices" transform="translate(0,'.$res_y.') scale(1,-1)">			
+			</g>
+			<g id="foreignvertices" transform="translate(0,'.$res_y.') scale(1,-1)">
 			</g>
 	  </g>
 	  <g id="waitingimage" style="visibility:hidden" transform="translate('.$res_xm.', '.$res_ym.') scale(0.3 0.3)">
@@ -2986,7 +2988,7 @@ $measurefunctions = '
 							379.5,218 378.5,139 357.5,138 260.5,91"
 						transform="matrix(1 0 0 1 0 0) scale(0.05)"
 						 style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
-					<rect id="pgon0" onmouseover="show_tooltip(\''.$strDrawPolygon.'\',evt.clientX,evt.clientY)" x="0" y="0" width="25" height="25" fill="none" opacity="0.2"/>
+					<rect id="pgon0" onmouseover="show_tooltip(\''.$strDrawPolygon.'\',evt.clientX,evt.clientY)" x="0" y="0" width="25" height="25" opacity="0.2"/>
 				</g>
 
 				<g id="pgon_subtr" onmousedown="draw_pgon_on();subtr_polygon();highlightbyid(\'pgon_subtr0\');" transform="translate(78 0 )">
@@ -3000,7 +3002,7 @@ $measurefunctions = '
 							379.5,218 378.5,139 357.5,138 260.5,91"
 						transform="matrix(1 0 0 1 0 0) scale(0.05)"
 						 style="fill:rgb(244,244,244);stroke:rgb(0,0,0);stroke-width:25"/>
-					<rect id="pgon_subtr0" onmouseover="show_tooltip(\''.$strCutByPolygon.'\',evt.clientX,evt.clientY)" x="0" y="0" width="25" height="25" fill="none" opacity="0.2"/>
+					<rect id="pgon_subtr0" onmouseover="show_tooltip(\''.$strCutByPolygon.'\',evt.clientX,evt.clientY)" x="0" y="0" width="25" height="25" opacity="0.2"/>
 				</g>
 		';
 		$last_x = 78;
