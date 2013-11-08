@@ -283,10 +283,12 @@ for($i=0;$i<$anzLayer;$i++){
 
   <?
   	if($this->search == true){			# wenn man von der Suche kam -> Hidden Felder zum Speichern der Suchparameter
-  		echo '<input name="go" type="hidden" value="Layer-Suche_Suchen">
-  					<input name="search" type="hidden" value="true">
+		if($this->last_query != '')echo '<input name="go" type="hidden" value="get_last_query">';
+		else echo '<input name="go" type="hidden" value="Layer-Suche_Suchen">';
+		echo '		<input name="search" type="hidden" value="true">
   					<input name="selected_layer_id" type="hidden" value="'.$this->formvars['selected_layer_id'].'">
-  					<input id="offset_'.$this->formvars['selected_layer_id'].'" name="offset_'.$this->formvars['selected_layer_id'].'" type="hidden" value="'.$this->formvars['offset_'.$this->formvars['selected_layer_id']].'">';
+  					<input id="offset_'.$this->formvars['selected_layer_id'].'" name="offset_'.$this->formvars['selected_layer_id'].'" type="hidden" value="'.$this->formvars['offset_'.$this->formvars['selected_layer_id']].'">
+					<input name="sql_'.$this->formvars['selected_layer_id'].'" type="hidden" value="'.$this->qlayerset[0]['sql'].'">';
 
   		if(is_array($this->qlayerset[0]['attributes']['all_table_names'])){
   			foreach($this->qlayerset[0]['attributes']['all_table_names'] as $tablename){
@@ -302,7 +304,6 @@ for($i=0;$i<$anzLayer;$i++){
 						<input name="value_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars['value_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
 						<input name="value2_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars['value2_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
 						<input name="operator_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars['operator_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
-						<input name="sql_'.$this->formvars['selected_layer_id'].'" type="hidden" value="'.$this->qlayerset[0]['sql'].'">
 					';
 	  		}
 	  	}
@@ -311,7 +312,8 @@ for($i=0;$i<$anzLayer;$i++){
 	  	}
   	}
   	else{
-  		echo '<input name="go" type="hidden" value="Sachdaten">';
+		if($this->last_query != '')echo '<input name="go" type="hidden" value="get_last_query">';
+		else echo '<input name="go" type="hidden" value="Sachdaten">';
   	}
 
   if($this->found != 'false' AND $this->formvars['printversion'] == ''){

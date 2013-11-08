@@ -178,12 +178,16 @@ $GUI->requeststring = $QUERY_STRING;
 #var_dump($GUI->formvars);
 $GUI->loadPlugins();
 if($GUI->goNotExecutedInPlugins){
-	switch($go){
+	if($go == 'get_last_query'){
+		$GUI->last_query = $GUI->user->rolle->get_last_query();
+		$go = $GUI->last_query['go'];
+	}
+	switch($go){	
 		case 'ALB_ALK_Tabellen_leeren' : {
 			$GUI->checkCaseAllowed($go);
-	    $GUI->truncateAlbAlkTables();
-	    $GUI->output();
-  	} break;
+			$GUI->truncateAlbAlkTables();
+			$GUI->output();
+		} break;
   	 
 		case 'Multi_Geometrien_splitten' : {
 		  $GUI->split_multi_geometries();

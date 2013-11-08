@@ -6103,9 +6103,12 @@ class GUI extends GUI_core{
   }
 
   function GenerischeSuche_Suchen(){
+	if($this->last_query != ''){
+		$this->formvars['selected_layer_id'] = $this->last_query['layer_ids'][0];
+	}
     $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
     switch ($layerset[0]['connectiontype']) {
-      case MS_POSTGIS : {
+      case MS_POSTGIS : {	  
         $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
         $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
         $layerdb->setClientEncoding();
@@ -6236,10 +6239,10 @@ class GUI extends GUI_core{
                 
         # order by 
         if($this->formvars['orderby'.$layerset[0]['Layer_ID']] != ''){									# Fall 1: im GLE soll nach einem Attribut sortiert werden
-          $sql .= ' ORDER BY '.$this->formvars['orderby'.$layerset[0]['Layer_ID']];
+          $sql_order = ' ORDER BY '.$this->formvars['orderby'.$layerset[0]['Layer_ID']];
         }
         elseif($layerset[0]['attributes']['orderby'] != ''){										# Fall 2: der Layer hat im Pfad ein ORDER BY
-        	$sql .= $layerset[0]['attributes']['orderby'];
+        	$sql_order = $layerset[0]['attributes']['orderby'];
         }
         else{																																						# Fall 3: standardmäßig wird nach den oids sortiert
 	        $j = 0;
@@ -6254,9 +6257,14 @@ class GUI extends GUI_core{
 	      	}
 	      	if($komma == ''){$sql_order = '';}
         }      	
-      	
-      	$layerset[0]['sql'] = $sql;
-        
+      	        
+		if($this->last_query != ''){
+			$sql = $this->last_query[$layerset[0]['Layer_ID']]['sql'];
+			if($this->formvars['orderby'.$layerset[0]['Layer_ID']] == '')$sql_order = $this->last_query[$layerset[0]['Layer_ID']]['orderby'];
+			$this->formvars['anzahl'] = $this->last_query[$layerset[0]['Layer_ID']]['limit'];
+			if($this->formvars['offset_'.$layerset[0]['Layer_ID']] == '')$this->formvars['offset_'.$layerset[0]['Layer_ID']] = $this->last_query[$layerset[0]['Layer_ID']]['offset'];
+		}
+		
         if($this->formvars['embedded_subformPK'] == ''){
         	if($this->formvars['anzahl'] == ''){
 	          $this->formvars['anzahl'] = MAXQUERYROWS;
@@ -6265,7 +6273,11 @@ class GUI extends GUI_core{
         	if($this->formvars['offset_'.$layerset[0]['Layer_ID']] != ''){
           	$sql_limit.=' OFFSET '.$this->formvars['offset_'.$layerset[0]['Layer_ID']];
         	}
+			$this->user->rolle->delete_last_query();
+			$this->user->rolle->save_last_query('Layer-Suche_Suchen', $this->formvars['selected_layer_id'], $sql, $sql_order, $this->formvars['anzahl'], $this->formvars['offset_'.$layerset[0]['Layer_ID']]);
         }
+		
+		$layerset[0]['sql'] = $sql;
     
         #echo $sql;
         $ret=$layerdb->execSQL($sql.$sql_order.$sql_limit,4, 0);
@@ -10968,6 +10980,12 @@ class GUI extends GUI_core{
 
  # 2006-07-26 pk
  function SachdatenAnzeige($rect) {
+	if($this->last_query != ''){
+		foreach($this->last_query['layer_ids'] as $layer_id){
+			$this->formvars['qLayer'.$layer_id] = 1;
+		}
+	}
+	$this->user->rolle->delete_last_query();
     if(is_string($rect)){
       $this->querypolygon = $rect;
     }
@@ -11257,27 +11275,34 @@ class GUI extends GUI_core{
 		          	}
 	            }*/
             }
-            		        
-		        # order by 
-		        if($this->formvars['orderby'.$layerset[$i]['Layer_ID']] != ''){									# Fall 1: im GLE soll nach einem Attribut sortiert werden
-		          $sql .= ' ORDER BY '.$this->formvars['orderby'.$layerset[$i]['Layer_ID']];
-		        }
-		        elseif($layerset[$i]['attributes']['orderby'] != ''){														# Fall 2: der Layer hat im Pfad ein ORDER BY
-		        	$sql .= $layerset[$i]['attributes']['orderby'];
-		        }
-		        elseif($layerset[$i]['template'] == ''){																				# Fall 3: standardmäßig wird nach den oids sortiert
-			        $j = 0;
-			        $komma = '';
-			        $sql_order = ' ORDER BY ';
-			        foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-								if($layerset[$i]['attributes']['oids'][$j]){      # hat Tabelle oids?
-									$sql_order .= $komma.$tablename.'_oid ';
-									$komma = ',';
-								}
-								$j++;
-			      	}
-			      	if($komma == ''){$sql_order = '';}
-		        }
+			
+			# order by 
+			if($this->formvars['orderby'.$layerset[$i]['Layer_ID']] != ''){									# Fall 1: im GLE soll nach einem Attribut sortiert werden
+			  $sql_order = ' ORDER BY '.$this->formvars['orderby'.$layerset[$i]['Layer_ID']];
+			}
+			elseif($layerset[$i]['attributes']['orderby'] != ''){														# Fall 2: der Layer hat im Pfad ein ORDER BY
+				$sql_order = $layerset[$i]['attributes']['orderby'];
+			}
+			elseif($layerset[$i]['template'] == ''){																				# Fall 3: standardmäßig wird nach den oids sortiert
+				$j = 0;
+				$komma = '';
+				$sql_order = ' ORDER BY ';
+				foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
+							if($layerset[$i]['attributes']['oids'][$j]){      # hat Tabelle oids?
+								$sql_order .= $komma.$tablename.'_oid ';
+								$komma = ',';
+							}
+							$j++;
+				}
+				if($komma == ''){$sql_order = '';}
+			}
+			
+			if($this->last_query != ''){
+				$sql = $this->last_query[$layerset[$i]['Layer_ID']]['sql'];
+				if($this->formvars['orderby'.$layerset[$i]['Layer_ID']] == '')$sql_order = $this->last_query[$layerset[$i]['Layer_ID']]['orderby'];
+				$this->formvars['anzahl'] = $this->last_query[$layerset[$i]['Layer_ID']]['limit'];
+				if($this->formvars['offset_'.$layerset[$i]['Layer_ID']] == '')$this->formvars['offset_'.$layerset[$i]['Layer_ID']] = $this->last_query[$layerset[$i]['Layer_ID']]['offset'];
+			}
 
             # Anhängen des Begrenzers zur Einschränkung der Anzahl der Ergebniszeilen
             if($this->formvars['anzahl'] == ''){
@@ -11287,8 +11312,11 @@ class GUI extends GUI_core{
             if($this->formvars['offset_'.$layerset[$i]['Layer_ID']] != ''){
               $sql_limit.=' OFFSET '.$this->formvars['offset_'.$layerset[$i]['Layer_ID']];
             }
-                                              
+
             $layerset[$i]['sql'] = $sql;
+						
+			$this->user->rolle->save_last_query('Sachdaten', $layerset[$i]['Layer_ID'], $sql, $sql_order, $this->formvars['anzahl'], $this->formvars['offset_'.$layerset[$i]['Layer_ID']]);
+			
             $ret=$layerdb->execSQL($sql.$sql_order.$sql_limit,4, 0);
             if (!$ret[0]) {
               while ($rs=pg_fetch_array($ret[1])) {

@@ -15,6 +15,17 @@
 -- Setzen des Charactersets
 -- ALTER DATABASE `@mysql_dbname` CHARACTER SET latin1 COLLATE latin1_german2_ci;
 
+CREATE TABLE  `rolle_last_query` (
+  `user_id` INT( 11 ) NOT NULL ,
+  `stelle_id` INT( 11 ) NOT NULL ,
+  `go` VARCHAR( 50 ) NOT NULL ,
+  `layer_id` INT( 11 ) NOT NULL ,
+  `sql` TEXT NOT NULL ,
+  `orderby` TEXT NULL ,
+  `limit` INT( 11 ) NULL ,
+  `offset` INT( 11 ) NULL
+);
+
 CREATE TABLE `u_consumeShape` (
   `user_id` int(11) NOT NULL,
   `stelle_id` int(11) NOT NULL,
