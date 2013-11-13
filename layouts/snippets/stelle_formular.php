@@ -18,20 +18,21 @@ function getlayer(){
 	ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=getlayerfromgroup&group_id='+group_id, new Array(document.getElementById('alllayer_div')), "");
 }
 
-function getInsertIndex(insertObj, id, order){
+function getInsertIndex(insertObj, id, order, start){
 	// diese Funktion ermittelt den index, an dem ein Element aus einem anderen Selectfeld mit der Reihenfolge 'order' eingefügt werden muss
 	// (die Order wird hier in Selectfeldern im Attribut 'id' gespeichert)
 	// (Man muss hier unterscheiden zwischen 1. der Menüorder - die wird in der id gespeichert und
-	// 																			 2. dem eigentlichen index i im Selectfeld)		
+	// 																			 2. dem eigentlichen index i im Selectfeld)	
+	// start ist der index i, bei dem die Suche startet
 	ordersplit = order.split('_');
-	for(i=0; i<insertObj.length; i++) {
+	for(i=start; i<insertObj.length; i++) {
 		if(insertObj.options[i].value == id){
-			return -i;			// Obermenü ist bereits vorhanden -> index negieren
+			return -i;			// Menü ist bereits vorhanden -> index negieren
 		}
 		options_order_string = insertObj.options[i].id + "";
 		options_order_split = options_order_string.split('_');
-		if(parseInt(options_order_split[0]) > parseInt(ordersplit)){
-			//alert(options_order_split[0] + ' - ' + ordersplit[0]);
+		if(start > 0)alert(options_order_split[0] + ' - ' + ordersplit[0]);
+		if(parseInt(options_order_split[0]) > parseInt(ordersplit[0])){
 			return i;
 		}
 	}
@@ -40,16 +41,20 @@ function getInsertIndex(insertObj, id, order){
 
 function addMenues(){
 	// index ermitteln
-	index = getInsertIndex(document.GUI.selectedmenues, document.GUI.allmenues.options[document.GUI.allmenues.selectedIndex].value, document.GUI.allmenues.options[document.GUI.allmenues.selectedIndex].id);
+	index = getInsertIndex(document.GUI.selectedmenues, document.GUI.allmenues.options[document.GUI.allmenues.selectedIndex].value, document.GUI.allmenues.options[document.GUI.allmenues.selectedIndex].id, 0);
 	if(index >= 0){
 		addOptionsWithIndex(document.GUI.allmenues,document.GUI.selectedmenues,document.GUI.selmenues,'value', index);		// Obermenü hinzufügen
+		if(document.GUI.submenues.length > 0){
+			addOptionsWithIndex(document.GUI.submenues,document.GUI.selectedmenues,document.GUI.selmenues,'value', index+1);	// wenn vorhanden, Untermenüs hinzufügen
+		}
 	}
-	else{
-		index = -1 * index;																																																// index negativ -> nur Untermenü hinzufügen
+	else{					// Obermenue ist bereits vorhanden
+		index = -1 * index + 1;				// index für die Untermenüs ermitteln, beginnend beim index des Obermenues
+		submenueindex = getInsertIndex(document.GUI.selectedmenues, document.GUI.submenues.options[document.GUI.submenues.selectedIndex].value, document.GUI.submenues.options[document.GUI.submenues.selectedIndex].id, index);
+		if(submenueindex > 0){
+			addOptionsWithIndex(document.GUI.submenues,document.GUI.selectedmenues,document.GUI.selmenues,'value', submenueindex);		// Untermenüs hinzufügen
+		}
 	} 
-	if(document.GUI.submenues.length > 0){
-		addOptionsWithIndex(document.GUI.submenues,document.GUI.selectedmenues,document.GUI.selmenues,'value', index+1);	// wenn vorhanden, Untermenü hinzufügen
-	}
 }
 
 //-->
@@ -302,8 +307,8 @@ else {
                       <select name="selectedmenues" size="8" multiple style="width:160px">
                       <?
                       for($i=0; $i < count($this->formvars['selmenues']["Bezeichnung"]); $i++){
-                          echo '<option id="'.$this->formvars['selmenues']["ORDER"][$i].'_sel_'.$i.'" title="'.str_replace(' ', '&nbsp;', $this->formvars['selmenues']["Bezeichnung"][$i]).'" value="'.$this->formvars['selmenues']["ID"][$i].'">'.$this->formvars['selmenues']["Bezeichnung"][$i].'</option>';
-                         }
+                        echo '<option id="'.$this->formvars['selmenues']["ORDER"][$i].'_sel_'.$this->formvars['selmenues']["menueebene"][$i].'_'.$i.'" title="'.str_replace(' ', '&nbsp;', $this->formvars['selmenues']["Bezeichnung"][$i]).'" value="'.$this->formvars['selmenues']["ID"][$i].'">'.$this->formvars['selmenues']["Bezeichnung"][$i].'</option>';
+                      }
                       ?>
                       </select>
                     </td>
@@ -315,7 +320,7 @@ else {
                       <?php echo $strAvailable; ?><br>
                       <select name="allmenues" size="4" onchange="getsubmenues();" style="width:160px">
                       <? for($i=0; $i < count($this->formvars['menues']["Bezeichnung"]); $i++){
-                          echo '<option id="'.$this->formvars['menues']["ORDER"][$i].'_all_'.$i.'" title="'.str_replace(' ', '&nbsp;', $this->formvars['menues']["Bezeichnung"][$i]).'" value="'.$this->formvars['menues']["ID"][$i].'">'.$this->formvars['menues']["Bezeichnung"][$i].'</option>';
+                          echo '<option id="'.$this->formvars['menues']["ORDER"][$i].'_all_'.$this->formvars['menues']["menueebene"][$i].'_'.$i.'" title="'.str_replace(' ', '&nbsp;', $this->formvars['menues']["Bezeichnung"][$i]).'" value="'.$this->formvars['menues']["ID"][$i].'">'.$this->formvars['menues']["Bezeichnung"][$i].'</option>';
                            }
                       ?>
                       </select>
