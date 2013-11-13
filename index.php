@@ -725,6 +725,9 @@ if($GUI->goNotExecutedInPlugins){
 	  # 2006-01-26 pk
 	  case 'Flurstueck_Anzeigen' : {
 		$GUI->checkCaseAllowed($go);
+		if($GUI->last_query != ''){
+			$GUI->formvars['FlurstKennz'] = $GUI->last_query[$GUI->last_query['layer_ids'][0]]['sql'];
+		}
 		$explodedFlurstKennz = explode(';',$GUI->formvars['FlurstKennz']);
 		$GUI->flurstAnzeige($explodedFlurstKennz);
 		$GUI->output();

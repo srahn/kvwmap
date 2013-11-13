@@ -10801,7 +10801,7 @@ class GUI extends GUI_core{
       $FlurstKennzListe=$ret[1];
       $anzFlurst=count($FlurstKennzListe);
     }
-
+	
     $this->mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $layer = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
     $privileges = $this->Stelle->get_attributes_privileges($layer[0]['Layer_ID']);
@@ -10821,6 +10821,9 @@ class GUI extends GUI_core{
     }
     $this->qlayerset[] = $layer[0];
     $this->main = $layer[0]['template'];
+	
+	$this->user->rolle->delete_last_query();
+	$this->user->rolle->save_last_query('Flurstueck_Anzeigen', $layer[0]['Layer_ID'], implode(';', $FlurstKennzListe), NULL, NULL, NULL);
 
     for ($i=0;$i<$anzFlurst;$i++) {
       $this->qlayerset[0]['shape'][$i]['flurstkennz'] = $FlurstKennzListe[$i];
