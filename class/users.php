@@ -2401,6 +2401,7 @@ class stelle extends stelle_core{
 			while($rs=mysql_fetch_array($query)) {
 				$menue['ID'][]=$rs['menue_id'];
 				$menue['ORDER'][]=$rs['order'];
+				$menue['menueebene'][]=$rs['menueebene'];
 				if($rs['menueebene'] == 2){
 					$menue['Bezeichnung'][]='&nbsp;&nbsp;-->&nbsp;'.$rs['name'];
 				}

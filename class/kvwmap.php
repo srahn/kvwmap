@@ -845,7 +845,7 @@ class GUI extends GUI_core{
     $submenues = $this->Menue->getsubmenues($this->formvars['menue_id']);
     echo '<select name="submenues" size="4" multiple style="width:160px">';
     for($i=0; $i < count($submenues["Bezeichnung"]); $i++){
-      echo '<option selected value="'.$submenues["ID"][$i].'">&nbsp;&nbsp;-->&nbsp;'.$submenues["Bezeichnung"][$i].'</option>';
+      echo '<option selected id="'.$submenues["ORDER"][$i].'_all_'.$submenues["menueebene"][$i].'_'.$i.'" value="'.$submenues["ID"][$i].'">&nbsp;&nbsp;-->&nbsp;'.$submenues["Bezeichnung"][$i].'</option>';
     }
     echo '</select>';
   }
@@ -15202,7 +15202,7 @@ class Menue {
     if ($this->language != 'german') {
       $sql.='`name_'.$this->language.'_'.$this->charset.'` AS ';
     }
-    $sql.=' name, `order` FROM u_menues WHERE menueebene = 1 ORDER BY `order`';
+    $sql.=' name, `order`, menueebene FROM u_menues WHERE menueebene = 1 ORDER BY `order`';
     $this->debug->write("<p>file:kvwmap class:Menue - Lesen aller OberMenüs:<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) {
@@ -15213,6 +15213,7 @@ class Menue {
           $menues['ID'][]=$rs['id'];
           $menues['Bezeichnung'][]=$rs['name'];
           $menues['ORDER'][]=$rs['order'];
+		  $menues['menueebene'][]=$rs['menueebene'];
       }
       return $menues;
     }
@@ -15223,7 +15224,7 @@ class Menue {
     if ($this->language != 'german') {
       $sql.='`name_'.$this->language.'_'.$this->charset.'` AS ';
     }
-    $sql.=' name FROM u_menues WHERE obermenue = '.$menue_id.' AND menueebene = 2 ORDER BY `order`, name';
+    $sql.=' name, `order`, menueebene FROM u_menues WHERE obermenue = '.$menue_id.' AND menueebene = 2 ORDER BY `order`, name';
     $this->debug->write("<p>file:kvwmap class:Menue - Lesen aller OberMenüs:<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) {
@@ -15233,6 +15234,8 @@ class Menue {
     while($rs=mysql_fetch_array($query)) {
           $menues['ID'][]=$rs['id'];
           $menues['Bezeichnung'][]=$rs['name'];
+		  $menues['ORDER'][]=$rs['order'];
+		  $menues['menueebene'][]=$rs['menueebene'];
       }
       return $menues;
     }
