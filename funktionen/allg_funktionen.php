@@ -601,6 +601,7 @@ function umlaute_umwandeln($name){
   $name = str_replace(':', '', $name);
   $name = str_replace('/', '-', $name);
   $name = str_replace(' ', '', $name);
+  $name = str_replace('-', '_', $name);
   return $name;
 }
 

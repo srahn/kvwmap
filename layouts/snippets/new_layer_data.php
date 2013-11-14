@@ -165,12 +165,7 @@
 if($this->formvars['selected_layer_id'] AND $this->Fehler == ''){
 	$i = 0;	
 	if($this->qlayerset[$i]['template']==''){
-		if(GLEVIEW == '2'){
-			include(SNIPPETS.'generic_layer_editor_2.php');			# Attribute zeilenweise
-		}
-		else{
-			include(SNIPPETS.'generic_layer_editor.php');				# Attribute spaltenweise
-		}
+		include(SNIPPETS.'generic_layer_editor_2.php');			# Attribute zeilenweise
 	}
 	else{
 		if(is_file(SNIPPETS.$this->qlayerset[$i]['template'])){

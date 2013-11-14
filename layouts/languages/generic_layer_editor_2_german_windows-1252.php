@@ -1,5 +1,5 @@
 <?php
- $strEditGeom="Geometrie bearbeiten";
+ $strEditGeom="Geometrie&nbsp;bearbeiten";
  $strMapZoom="Kartenausschnitt";
  $strSelectAll="alle auswählen";
  $strdelete="löschen";
