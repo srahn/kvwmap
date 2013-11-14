@@ -31,7 +31,6 @@ function getInsertIndex(insertObj, id, order, start){
 		}
 		options_order_string = insertObj.options[i].id + "";
 		options_order_split = options_order_string.split('_');
-		if(start > 0)alert(options_order_split[0] + ' - ' + ordersplit[0]);
 		if(parseInt(options_order_split[0]) > parseInt(ordersplit[0])){
 			return i;
 		}
