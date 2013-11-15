@@ -218,7 +218,7 @@ class antrag {
     $options['cols']['andere']=array('justification'=>'centre');
     $options['cols']['Datum']=array('justification'=>'left','width'=>80);
     $options['cols']['gemessen durch']=array('justification'=>'left');
-    #$options['cols']['Bemerkung']=array('justification'=>'left','width'=>100);
+    $options['cols'][utf8_decode('Gültigkeit')]=array('justification'=>'centre','width'=>60);
     $pdf->ezSetY($rowtab);
     $pdf->ezTable($tabledata[0],$cols,$title,$options);
     $zahl=$anzTab+1;
@@ -241,7 +241,7 @@ class antrag {
   function erzeugenUbergabeprotokoll_CSV(){
   	# Überschriften
   	foreach($this->FFR[0] as $key=>$value){
-  		$csv .= $key.';';
+  		$csv .= utf8_encode($key).';';
   		next($this->FFR[0]);
   	}
   	$csv.= chr(10);
@@ -250,7 +250,7 @@ class antrag {
   		$dateien = explode(', ', $this->FFR[$i]['Datei']);
   		foreach($dateien as $datei){
   			$this->FFR[$i]['Datei'] = $datei;
-  			$csv .= implode(';', $this->FFR[$i]);
+  			$csv .= utf8_encode(implode(';', $this->FFR[$i]));
   			$csv.= chr(10);
   		}
     }
@@ -390,10 +390,11 @@ class antrag {
       }
             
       # Abfrage der Gültigkeiten der Dokumente im Vorgang
-      $ret=$this->getGueltigkeit($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
-      if ($ret[0]) { return $ret; }
-      #$FFR[$i]['Bemerkung']=$ret[1]; 
-      #var_dump($FFR[$i]);
+	  if($formvars['Gueltigkeit']){
+		$ret=$this->getGueltigkeit($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
+		if ($ret[0]) { return $ret; }
+		$FFR[$i][utf8_decode('Gültigkeit')]=utf8_decode($ret[1]); 
+	  }
       $i++;
     }
     $ret[0]=0;
@@ -454,7 +455,7 @@ class antrag {
       }
       else {
         # keine ungültigen Dokumente enthalten.
-        $ret[1]='';
+        $ret[1]='alle gültig';
       }
     }     
     return $ret;  
