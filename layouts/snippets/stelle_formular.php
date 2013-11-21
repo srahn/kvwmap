@@ -18,6 +18,17 @@ function getlayer(){
 	ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=getlayerfromgroup&group_id='+group_id, new Array(document.getElementById('alllayer_div')), "");
 }
 
+function select_layer(){
+	groupid = document.GUI.allgroups.options[document.GUI.allgroups.selectedIndex].value;
+	selectObj = document.GUI.selectedlayer;
+	for(i = 0; i < selectObj.length; i++){
+		id_string = selectObj.options[i].id + "";
+		id_split = id_string.split('_');
+		if(id_split[1] == groupid)selectObj.options[i].selected = true;
+		else selectObj.options[i].selected = false;
+	}
+}
+
 function select_submenues(){
 	selectObj = document.GUI.selectedmenues;
 	index = selectObj.selectedIndex;
@@ -451,7 +462,7 @@ else {
                       <select name="selectedlayer" size="10" multiple style="width:200px">
                       <?
                       for($i=0; $i < count($this->formvars['sellayer']["Bezeichnung"]); $i++){
-                          echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['sellayer']["Bezeichnung"][$i]).' value="'.$this->formvars['sellayer']["ID"][$i].'">'.$this->formvars['sellayer']["Bezeichnung"][$i].'</option>';
+                          echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['sellayer']["Bezeichnung"][$i]).' id="'.$this->formvars['sellayer']["ID"][$i].'_'.$this->formvars['sellayer']["Gruppe"][$i].'" value="'.$this->formvars['sellayer']["ID"][$i].'">'.$this->formvars['sellayer']["Bezeichnung"][$i].'</option>';
                          }
                       ?>
                       </select>
@@ -461,7 +472,7 @@ else {
                       <input type="button" name="substractPlaces" value="&gt;&gt;" onClick=substractOptions(document.GUI.selectedlayer,document.GUI.sellayer,'value')>
                     </td>
                     <td>
-											<select name="allgroups" size="5" onchange="getlayer();" style="width:200px">
+											<select name="allgroups" size="5" onchange="getlayer();select_layer();" style="width:200px">
 												<option value=""> - alle - </option>
                       <? for($i=0; $i < count($this->formvars['groups']); $i++){
                           echo '<option title="'.str_replace(' ', '&nbsp;', $this->formvars['groups'][$i]["Gruppenname"]).'" value="'.$this->formvars['groups'][$i]["id"].'">'.$this->formvars['groups'][$i]["Gruppenname"].'</option>';

@@ -2546,7 +2546,7 @@ class stelle extends stelle_core{
 
 	function getLayers($group, $order = NULL) {
 		# Lesen der Layer zur Stelle
-		$sql ='SELECT layer.Layer_ID, Name, used_layer.drawingorder FROM used_layer, layer, u_groups';
+		$sql ='SELECT layer.Layer_ID, layer.Gruppe, Name, used_layer.drawingorder FROM used_layer, layer, u_groups';
 		$sql .=' WHERE stelle_id = '.$this->id;
 		$sql .=' AND layer.Gruppe = u_groups.id';
 		$sql .=' AND layer.Layer_ID = used_layer.Layer_ID';
@@ -2567,14 +2567,17 @@ class stelle extends stelle_core{
 				$layer['ID'][]=$rs['Layer_ID'];
 				$layer['Bezeichnung'][]=$rs['Name'];
 				$layer['drawingorder'][]=$rs['drawingorder'];
+				$layer['Gruppe'][]=$rs['Gruppe'];
 			}
 			if($order == 'Name'){
 				// Sortieren der Layer unter Berücksichtigung von Umlauten
 				$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
+				$layer['Bezeichnung'] = $sorted_arrays['array'];
 				$layer['ID'] = $sorted_arrays['second_array'];
 				$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['drawingorder']);
-				$layer['Bezeichnung'] = $sorted_arrays['array'];
 				$layer['drawingorder'] = $sorted_arrays['second_array'];
+				$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['Gruppe']);
+				$layer['Gruppe'] = $sorted_arrays['second_array'];
 			}
 		}
 		return $layer;
