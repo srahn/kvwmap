@@ -1587,6 +1587,12 @@ class rolle extends rolle_core{
 			$sql.=' WHERE used_layer.Stelle_ID = '.$stellen[$i];
 			$sql.=' AND used_layer.Layer_ID = layer.Layer_ID';
 			$sql.=' AND layer.Gruppe = u_groups.id';
+			$sql.=' UNION';
+			$sql.=' SELECT DISTINCT '.$user_id.', '.$stellen[$i].', u_groups2.id, '.$open;
+			$sql.=' FROM `used_layer`, `layer`, `u_groups`, `u_groups` as `u_groups2`';
+			$sql.=' WHERE used_layer.Stelle_ID = '.$stellen[$i];
+			$sql.=' AND used_layer.Layer_ID = layer.Layer_ID';
+			$sql.=' AND layer.Gruppe = u_groups.id AND u_groups.obergruppe = u_groups2.id';
 			#echo '<br>Gruppen: '.$sql;
 			$this->debug->write("<p>file:users.php class:rolle function:setGroups - Setzen der Gruppen der Rollen:<br>".$sql,4);
 			$query=mysql_query($sql,$this->database->dbConn);
