@@ -18,7 +18,8 @@ function startup(){
 function update_legend(layerhiddenstring){
 	parts = layerhiddenstring.split(' ');
 	for(j = 0; j < parts.length-1; j=j+2){
-		if((document.getElementsByName('pseudothema'+parts[j])[0] != undefined && parts[j+1] == 0) || (document.getElementsByName('pseudothema'+parts[j])[0] == undefined && parts[j+1] == 1)){
+		if((document.getElementsByName('pseudothema'+parts[j])[0] != undefined && parts[j+1] == 0) || 
+			(document.getElementsByName('pseudothema'+parts[j])[0] == undefined && parts[j+1] == 1)){
 			legende = document.getElementById('legend');
 			ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=get_legend', new Array(legende), "");
 			break;
@@ -26,13 +27,31 @@ function update_legend(layerhiddenstring){
 	}
 }
 
-function getlegend(group, layer, fremde){
-	legende = document.getElementById('legend');
-	if(group != ''){
-		ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=get_legend&'+group.name+'='+group.value+'&nurFremdeLayer='+fremde, new Array(legende), "");
+function getlegend(groupid, layerid, fremde){
+	groupdiv = document.getElementById('groupdiv_'+groupid);
+	if(layerid == ''){														// eine Gruppe wurde auf- oder zugeklappt
+		group = document.getElementById('group_'+groupid);
+		if(group.value == 0){												// eine Gruppe wurde aufgeklappt -> Layerstruktur per Ajax holen
+			group.value = 1;
+			ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=get_group_legend&'+group.name+'='+group.value+'&group='+groupid+'&nurFremdeLayer='+fremde, new Array(groupdiv), "");
+		}
+		else{																// eine Gruppe wurde zugeklappt -> Layerstruktur nur verstecken
+			group.value = 0;
+			layergroupdiv = document.getElementById('layergroupdiv_'+groupid);
+			groupimg = document.getElementById('groupimg_'+groupid);
+			layergroupdiv.style.display = 'none';			
+			groupimg.src = 'graphics/plus.gif';
+		}
 	}
-	if(layer != ''){
-		ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=get_legend&'+layer.name+'='+layer.value+'&nurFremdeLayer='+fremde, new Array(legende), "");
+	else{																	// eine Klasse wurde auf- oder zugeklappt
+		layer = document.getElementById('classes_'+layerid);
+		if(layer.value == 0){
+			layer.value = 1;
+		}
+		else{
+			layer.value = 0;
+		}
+		ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=get_group_legend&'+layer.name+'='+layer.value+'&group='+groupid+'&nurFremdeLayer='+fremde, new Array(groupdiv), "");
 	}
 }
 
@@ -267,7 +286,10 @@ if($this->formvars['gps_follow'] == ''){
             <a href="index.php?go=reset_querys"><img src="graphics/tool_info.png" border="0" alt="Informationsabfrage." title="Informationsabfrage | Hier klicken, um alle Abfragehaken zu entfernen" width="17"></a>
             <a href="index.php?go=reset_layers"><img src="graphics/layer.png" border="0" alt="Themensteuerung." title="Themensteuerung | Hier klicken, um alle Themen zu deaktivieren" width="20" height="20"></a><br>
           <div id="scrolldiv" onscroll="document.GUI.scrollposition.value = this.scrollTop;" style="width:230; height:<?php echo $legendheight; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
-            <div onclick="document.GUI.legendtouched.value = 1;" id="legend"><? echo $this->legende; ?></div>
+					<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
+          <div onclick="document.GUI.legendtouched.value = 1;" id="legend">
+						<? echo $this->legende; ?>
+					</div>
           </div>
             </td>
           </tr>

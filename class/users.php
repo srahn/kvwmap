@@ -1350,34 +1350,28 @@ class rolle extends rolle_core{
 		# Eintragen des Status der Layer, 1 angezeigt oder 0 nicht.
 		for ($i=0;$i<count($this->layerset);$i++) {
 			#echo $i.' '.$this->layerset[$i]['Layer_ID'].' '.$formvars['thema'.$this->layerset[$i]['Layer_ID']].'<br>';
-			if ($formvars['thema'.$this->layerset[$i]['Layer_ID']]==1) {
-				$aktiv_status=1;
-			}
-			elseif($formvars['thema'.$this->layerset[$i]['Layer_ID']]==2) {
-				$aktiv_status=2;
-			}
-			else{
-				$aktiv_status=0;
-			}
-			$sql ='UPDATE u_rolle2used_layer SET aktivStatus="'.$aktiv_status.'"';
-			$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-			$sql.=' AND layer_id='.$this->layerset[$i]['Layer_ID'];
-			$this->debug->write("<p>file:users.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
-			$this->database->execSQL($sql,4, $this->loglevel);
-
-			#Anne
-			#neu eintragen der deaktiven Klassen
-			if($aktiv_status!=0){
-				$sql = 'SELECT Class_ID FROM classes WHERE Layer_ID='.$this->layerset[$i]['Layer_ID'].';';
-				$query = mysql_query($sql);
-				while($row = @mysql_fetch_array($query)){
-					if($formvars['class'.$row['Class_ID']]=='0'){
-						$sql2 = 'REPLACE INTO u_rolle2used_class (user_id, stelle_id, class_id) VALUES ('.$this->user_id.', '.$this->stelle_id.', '.$row['Class_ID'].');';
-						$this->database->execSQL($sql2,4, $this->loglevel);
-					}
-					elseif ($formvars['class'.$row['Class_ID']]=='1'){
-						$sql1 = 'DELETE FROM u_rolle2used_class WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND class_id='.$row['Class_ID'].';';
-						$this->database->execSQL($sql1,4, $this->loglevel);
+			$aktiv_status = $formvars['thema'.$this->layerset[$i]['Layer_ID']];
+			if(isset($aktiv_status)){
+				$sql ='UPDATE u_rolle2used_layer SET aktivStatus="'.$aktiv_status.'"';
+				$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+				$sql.=' AND layer_id='.$this->layerset[$i]['Layer_ID'];
+				$this->debug->write("<p>file:users.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
+				$this->database->execSQL($sql,4, $this->loglevel);
+				
+				#Anne
+				#neu eintragen der deaktiven Klassen
+				if($aktiv_status!=0){
+					$sql = 'SELECT Class_ID FROM classes WHERE Layer_ID='.$this->layerset[$i]['Layer_ID'].';';
+					$query = mysql_query($sql);
+					while($row = @mysql_fetch_array($query)){
+						if($formvars['class'.$row['Class_ID']]=='0'){
+							$sql2 = 'REPLACE INTO u_rolle2used_class (user_id, stelle_id, class_id) VALUES ('.$this->user_id.', '.$this->stelle_id.', '.$row['Class_ID'].');';
+							$this->database->execSQL($sql2,4, $this->loglevel);
+						}
+						elseif ($formvars['class'.$row['Class_ID']]=='1'){
+							$sql1 = 'DELETE FROM u_rolle2used_class WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND class_id='.$row['Class_ID'].';';
+							$this->database->execSQL($sql1,4, $this->loglevel);
+						}
 					}
 				}
 			}

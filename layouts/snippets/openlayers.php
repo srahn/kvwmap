@@ -56,31 +56,6 @@ function saveMapSettings() {
 	}, 2);
 }
 
-function toggle_vertices(){	
-	document.getElementById("vertices").SVGtoggle_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-}
-
-function update_legend(layerhiddenstring){
-	parts = layerhiddenstring.split(' ');
-	for(j = 0; j < parts.length-1; j=j+2){
-		if((document.getElementsByName('pseudothema'+parts[j])[0] != undefined && parts[j+1] == 0) || (document.getElementsByName('pseudothema'+parts[j])[0] == undefined && parts[j+1] == 1)){
-			legende = document.getElementById('legend');
-			ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=get_legend', new Array(legende), "");
-			break;
-		}
-	}
-}
-
-function getlegend(group, layer, fremde){
-	legende = document.getElementById('legend');
-	if(group != ''){
-		ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=get_legend&'+group.name+'='+group.value+'&nurFremdeLayer='+fremde, new Array(legende), "");
-	}
-	if(layer != ''){
-		ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=get_legend&'+layer.name+'='+layer.value+'&nurFremdeLayer='+fremde, new Array(legende), "");
-	}
-}
-
 
 function resizemap2window() {
   if(typeof(window.innerWidth) == 'number'){
@@ -290,6 +265,7 @@ if($this->formvars['gps_follow'] == ''){
             <a href="index.php?go=reset_querys"><img src="graphics/tool_info.png" border="0" alt="Informationsabfrage." title="Informationsabfrage | Hier klicken, um alle Abfragehaken zu entfernen" width="17"></a>
             <a href="index.php?go=reset_layers"><img src="graphics/layer.png" border="0" alt="Themensteuerung." title="Themensteuerung | Hier klicken, um alle Layer zu deaktivieren" width="20" height="20"></a><br>
           <div id="scrolldiv" onscroll="document.GUI.scrollposition.value = this.scrollTop;" style="width:230; height:<?php echo $legendheight; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
+						<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
             <div onclick="document.GUI.legendtouched.value = 1;" id="legend"><? echo $this->legende; ?></div>
           </div>
             </td>

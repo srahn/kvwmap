@@ -253,6 +253,8 @@ CREATE TABLE `u_attributfilter2used_layer` (
 CREATE TABLE `u_groups` (
   `id` int(11) NOT NULL auto_increment,
   `Gruppenname` varchar(255) NOT NULL,
+  `obergruppe` INT( 11 ) NULL,
+  `order` INT( 11 ) NULL,
   PRIMARY KEY  (`id`)
 );
 

@@ -348,9 +348,15 @@ if($GUI->goNotExecutedInPlugins){
 		$GUI->getlayerfromgroup();
 	  } break;
 
-	  # Legende erzeugen
+	  # Legende für eine Gruppe erzeugen
+	  case 'get_group_legend' : {
+			$GUI->get_group_legend();
+	  } break;
+		
+		# Legende erzeugen
 	  case 'get_legend' : {
-		$GUI->get_legend();
+			$GUI->loadMap('DataBase');
+			echo $GUI->create_dynamic_legend();
 	  } break;
 
 	  # GPS-Position auslesen
@@ -1857,7 +1863,7 @@ if($GUI->goNotExecutedInPlugins){
 	  } break;
 
 		case 'getMap_ajax' : {   
-      $GUI->formvars['nurAktiveLayer'] = true;		
+      $GUI->formvars['nurAufgeklappteLayer'] = true;		
       $GUI->loadMap('DataBase');		
       $GUI->navMap($GUI->formvars['CMD']);
       $GUI->saveMap('');    

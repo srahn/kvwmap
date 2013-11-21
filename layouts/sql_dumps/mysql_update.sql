@@ -1135,3 +1135,8 @@ CREATE TABLE  `rolle_last_query` (
   `limit` INT( 11 ) NULL ,
   `offset` INT( 11 ) NULL
 );
+
+ALTER TABLE  `u_groups` ADD  `obergruppe` INT( 11 ) NULL;
+ALTER TABLE  `u_groups` ADD  `order` INT( 11 ) NULL;
+
+update `u_rolle2used_layer` set `aktivStatus` = '0' where `aktivStatus` = '';
