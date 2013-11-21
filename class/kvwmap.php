@@ -843,9 +843,9 @@ class GUI extends GUI_core{
   function get_sub_menues(){
     $this->Menue = new menue($this->user->rolle->language,$this->user->rolle->charset);
     $submenues = $this->Menue->getsubmenues($this->formvars['menue_id']);
-    echo '<select name="submenues" size="4" multiple style="width:160px">';
+    echo '<select name="submenues" size="5" multiple style="width:200px">';
     for($i=0; $i < count($submenues["Bezeichnung"]); $i++){
-      echo '<option selected id="'.$submenues["ORDER"][$i].'_all_'.$submenues["menueebene"][$i].'_'.$i.'" value="'.$submenues["ID"][$i].'">&nbsp;&nbsp;-->&nbsp;'.$submenues["Bezeichnung"][$i].'</option>';
+      echo '<option selected title="'.$submenues["Bezeichnung"][$i].'" id="'.$submenues["ORDER"][$i].'_all_'.$submenues["menueebene"][$i].'_'.$i.'" value="'.$submenues["ID"][$i].'">&nbsp;&nbsp;-->&nbsp;'.$submenues["Bezeichnung"][$i].'</option>';
     }
     echo '</select>';
   }
@@ -853,9 +853,9 @@ class GUI extends GUI_core{
 	function getlayerfromgroup(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $layer = $mapDB->get_layersfromgroup($this->formvars['group_id']);
-    echo '<select name="alllayer" size="4" multiple style="width:160px">';
+    echo '<select name="alllayer" size="5" multiple style="width:200px">';
     for($i=0; $i < count($layer["Bezeichnung"]); $i++){
-      echo '<option selected value="'.$layer["ID"][$i].'">'.$layer["Bezeichnung"][$i].'</option>';
+      echo '<option selected title="'.str_replace(' ', '&nbsp;', $layer["Bezeichnung"][$i]).'" value="'.$layer["ID"][$i].'">'.$layer["Bezeichnung"][$i].'</option>';
     }
     echo '</select>';
   }
@@ -14790,7 +14790,8 @@ class db_mapObj extends db_mapObj_core{
 	}
   
 	function get_layersfromgroup($group_id ){
-    $sql ='SELECT * FROM layer WHERE Gruppe = '.$group_id;
+    $sql ='SELECT * FROM layer';
+		if($group_id != '')$sql.=' WHERE Gruppe = '.$group_id;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->get_Layerfromgroup - Lesen der Layer einer Gruppe:<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }

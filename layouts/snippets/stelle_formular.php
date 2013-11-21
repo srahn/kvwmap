@@ -18,6 +18,21 @@ function getlayer(){
 	ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=getlayerfromgroup&group_id='+group_id, new Array(document.getElementById('alllayer_div')), "");
 }
 
+function select_submenues(){
+	selectObj = document.GUI.selectedmenues;
+	index = selectObj.selectedIndex;
+	id_string = selectObj.options[index].id + "";
+	id_split = id_string.split('_');
+	if(id_split[2] == '1'){
+		for(i = index+1; i < selectObj.length; i++){
+			id_string = selectObj.options[i].id + "";
+			id_split = id_string.split('_');
+			if(id_split[2] == '2')selectObj.options[i].selected = true;
+			if(id_split[2] == '1')return;
+		}
+	}
+}
+
 function getInsertIndex(insertObj, id, order, start){
 	// diese Funktion ermittelt den index, an dem ein Element aus einem anderen Selectfeld mit der Reihenfolge 'order' eingefügt werden muss
 	// (die Order wird hier in Selectfeldern im Attribut 'id' gespeichert)
@@ -304,7 +319,7 @@ else {
                 <tr valign="top">
                     <td><?php echo $strAssigned; ?><br>
 
-                      <select name="selectedmenues" size="8" multiple style="width:160px">
+                      <select name="selectedmenues" size="10" onchange="select_submenues();" multiple style="width:200px">
                       <?
                       for($i=0; $i < count($this->formvars['selmenues']["Bezeichnung"]); $i++){
                         echo '<option id="'.$this->formvars['selmenues']["ORDER"][$i].'_sel_'.$this->formvars['selmenues']["menueebene"][$i].'_'.$i.'" title="'.str_replace(' ', '&nbsp;', $this->formvars['selmenues']["Bezeichnung"][$i]).'" value="'.$this->formvars['selmenues']["ID"][$i].'">'.$this->formvars['selmenues']["Bezeichnung"][$i].'</option>';
@@ -318,14 +333,14 @@ else {
                     </td>
                     <td>
                       <?php echo $strAvailable; ?><br>
-                      <select name="allmenues" size="4" onchange="getsubmenues();" style="width:160px">
+                      <select name="allmenues" size="5" onchange="getsubmenues();" style="width:200px">
                       <? for($i=0; $i < count($this->formvars['menues']["Bezeichnung"]); $i++){
                           echo '<option id="'.$this->formvars['menues']["ORDER"][$i].'_all_'.$this->formvars['menues']["menueebene"][$i].'_'.$i.'" title="'.str_replace(' ', '&nbsp;', $this->formvars['menues']["Bezeichnung"][$i]).'" value="'.$this->formvars['menues']["ID"][$i].'">'.$this->formvars['menues']["Bezeichnung"][$i].'</option>';
                            }
                       ?>
                       </select>
                       <div id="submenue_div">
-                      	<select name="submenues" size="4" multiple style="width:160px">
+                      	<select name="submenues" size="5" multiple style="width:200px">
                       	</select>
                       </div>
                     </td>
@@ -349,7 +364,7 @@ else {
               <table border="0" cellspacing="0" cellpadding="0">
                 <tr valign="top">
                     <td>
-                      <select name="selectedfunctions" size="4" multiple style="width:160px">
+                      <select name="selectedfunctions" size="5" multiple style="width:200px">
                       <?
                       for($i=0; $i < count($this->formvars['selfunctions']); $i++){
                           echo '<option title="'.str_replace(' ', '&nbsp;', $this->formvars['selfunctions'][$i]["bezeichnung"]).'" value="'.$this->formvars['selfunctions'][$i]["id"].'">'.$this->formvars['selfunctions'][$i]["bezeichnung"].'</option>';
@@ -362,7 +377,7 @@ else {
                       <input type="button" name="substractPlaces" value="&gt;&gt;" onClick=substractOptions(document.GUI.selectedfunctions,document.GUI.selfunctions,'value')>
                     </td>
                     <td>
-                      <select name="allfunctions" size="4" multiple style="width:160px">
+                      <select name="allfunctions" size="5" multiple style="width:200px">
                       <? for($i=0; $i < count($this->formvars['functions']); $i++){
                           echo '<option title="'.str_replace(' ', '&nbsp;', $this->formvars['functions'][$i]["bezeichnung"]).'" value="'.$this->formvars['functions'][$i]["id"].'">'.$this->formvars['functions'][$i]["bezeichnung"].'</option>';
                            }
@@ -389,7 +404,7 @@ else {
               <table border="0" cellspacing="0" cellpadding="0">
                 <tr valign="top">
                     <td>
-                      <select name="selectedframes" size="4" multiple style="width:160px">
+                      <select name="selectedframes" size="5" multiple style="width:200px">
                       <?
                       for($i=0; $i < count($this->formvars['selframes']); $i++){
                           echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['selframes'][$i]["Name"]).' value="'.$this->formvars['selframes'][$i]["id"].'">'.$this->formvars['selframes'][$i]["Name"].'</option>';
@@ -402,7 +417,7 @@ else {
                       <input type="button" name="substractPlaces" value="&gt;&gt;" onClick=substractOptions(document.GUI.selectedframes,document.GUI.selframes,'value')>
                     </td>
                     <td>
-                      <select name="allframes" size="4" multiple style="width:160px">
+                      <select name="allframes" size="5" multiple style="width:200px">
                       <? for($i=0; $i < count($this->formvars['frames']); $i++){
                           echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['frames'][$i]["Name"]).'  value="'.$this->formvars['frames'][$i]["id"].'">'.$this->formvars['frames'][$i]["Name"].'</option>';
                            }
@@ -433,7 +448,7 @@ else {
               <table border="0" cellspacing="0" cellpadding="0">
                 <tr valign="top">
                     <td>
-                      <select name="selectedlayer" size="8" multiple style="width:160px">
+                      <select name="selectedlayer" size="10" multiple style="width:200px">
                       <?
                       for($i=0; $i < count($this->formvars['sellayer']["Bezeichnung"]); $i++){
                           echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['sellayer']["Bezeichnung"][$i]).' value="'.$this->formvars['sellayer']["ID"][$i].'">'.$this->formvars['sellayer']["Bezeichnung"][$i].'</option>';
@@ -446,14 +461,15 @@ else {
                       <input type="button" name="substractPlaces" value="&gt;&gt;" onClick=substractOptions(document.GUI.selectedlayer,document.GUI.sellayer,'value')>
                     </td>
                     <td>
-											<select name="allgroups" size="4" onchange="getlayer();" style="width:160px">
+											<select name="allgroups" size="5" onchange="getlayer();" style="width:200px">
+												<option value=""> - alle - </option>
                       <? for($i=0; $i < count($this->formvars['groups']); $i++){
                           echo '<option title="'.str_replace(' ', '&nbsp;', $this->formvars['groups'][$i]["Gruppenname"]).'" value="'.$this->formvars['groups'][$i]["id"].'">'.$this->formvars['groups'][$i]["Gruppenname"].'</option>';
                          }
                       ?>
                       </select>                    
                     	<div id="alllayer_div">
-                      <select name="alllayer" size="4" multiple style="width:160px">
+                      <select name="alllayer" size="5" multiple style="width:200px">
                       <? for($i=0; $i < count($this->formvars['layer']["Bezeichnung"]); $i++){
                           echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['layer']["Bezeichnung"][$i]).' value="'.$this->formvars['layer']["ID"][$i].'">'.$this->formvars['layer']["Bezeichnung"][$i].'</option>';
                            }
@@ -481,7 +497,7 @@ else {
               <table border="0" cellspacing="0" cellpadding="0">
                 <tr valign="top">
                     <td>
-                      <select name="selectedusers" size="4" multiple style="width:160px">
+                      <select name="selectedusers" size="5" multiple style="width:200px">
                       <?
                       for($i=0; $i < count($this->formvars['selusers']["Bezeichnung"]); $i++){
                           echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['selusers']["Bezeichnung"][$i]).' value="'.$this->formvars['selusers']["ID"][$i].'">'.$this->formvars['selusers']["Bezeichnung"][$i].'</option>';
@@ -494,7 +510,7 @@ else {
                       <input type="button" name="substractPlaces" value="&gt;&gt;" onClick=substractOptions(document.GUI.selectedusers,document.GUI.selusers,'value')>
                     </td>
                     <td>
-                      <select name="allusers" size="4" multiple style="width:160px">
+                      <select name="allusers" size="5" multiple style="width:200px">
                       <? for($i=0; $i < count($this->formvars['users']["Bezeichnung"]); $i++){
                           echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['users']["Bezeichnung"][$i]).' value="'.$this->formvars['users']["ID"][$i].'">'.$this->formvars['users']["Bezeichnung"][$i].'</option>';
                            }

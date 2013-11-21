@@ -1,4 +1,4 @@
-﻿<?php
+<?php
   $strTitle="Stelleneditor";
   $strAsteriskRequired="Werte mit * mussen eingetragen werden";
   $strDataBankID="Datenbank ID";
@@ -26,7 +26,7 @@
   $strALBReferencingRegion="ALB_Raumbezug";
   $strALBReferencingRegionKey="ALB_Raumbezugschlüssel";
   $strMenuPoint="Menüpunkte";
-  $strAssigned="Zugeordnete";
+  $strAssigned="zugeordnete";
   $strAvailable="verfügbare";
   $strLayer="Layer";
   $strEdit="bearbeiten";
