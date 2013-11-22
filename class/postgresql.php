@@ -1387,8 +1387,22 @@ class pgdatabase extends pgdatabase_core {
     }
     return $Liste;
   }
-  
-  
+	
+	function getFlurstueckByLatLng($latitude, $longitude) {
+		if (ALKIS) {
+			$sql  = "SELECT flst.land, flst.kreis, flst.gemeinde, flst.gemarkungsnummer, gemkg.bezeichnung AS gemarkungname, flst.flurnummer, flst.zaehler, flst.nenner, lpad(flst.land::text,2,'0')||lpad(flst.gemarkungsnummer::text,4,'0')||'-'||lpad(flst.flurnummer::text,3,'0')||'-'||lpad(flst.zaehler::text,5,'0')||'/'||CASE WHEN flst.nenner IS NULL THEN '000' ELSE lpad(flst.nenner::text,3,'0') END||'.00' AS flurstkennz, flst.flurstueckskennzeichen, flst.zaehler::text||CASE WHEN flst.nenner IS NULL THEN '' ELSE '/'||flst.nenner::text END AS flurstuecksnummer FROM alkis.ax_flurstueck AS flst, alkis.ax_gemarkung AS gemkg WHERE (flst.land::text||lpad(flst.gemarkungsnummer::text,4,'0'))::integer = gemkg.schluesselgesamt AND flst.gemarkungsnummer = gemkg.gemarkungsnummer AND ST_within(ST_transform(ST_GeomFromText('POINT(".$longitude." ".$latitude.")', 4326), ST_srid(flst.wkb_geometry)), flst.wkb_geometry);";
+		}
+		else {
+		# Achtung hier ist die Spalte gemarkungname mit '' belegt	
+			$sql  = "SELECT *, lpad(land::text,2,'0')||lpad(gemarkungsnummer::text,4,'0')||lpad(flurnummer::text,3,'0')||lpad(zaehler::text,5,'0')||CASE WHEN nenner=0 THEN '____' ELSE lpad(nenner::text,4,'0') END||'_' AS flurstueckskennzeichen, zaehler::text||CASE WHEN nenner IS NULL THEN '' ELSE '/'||nenner::text END AS flurstuecksnummer FROM (SELECT substr(alknflst.flurstkennz::text, 1, 2)::integer AS land, NULL AS kreis, NULL AS gemeinde, '' AS gemarkungname, substr(alknflst.flurstkennz::text, 3, 4)::integer AS gemarkungsnummer, substr(alknflst.flurstkennz::text, 8, 3)::integer AS flurnummer, substr(alknflst.flurstkennz::text, 12, 5)::integer AS zaehler, substr(alknflst.flurstkennz::text, 18, 3)::integer AS nenner, alknflst.flurstkennz
+   FROM alkobj_e_fla, alknflst
+  WHERE alknflst.objnr::text = alkobj_e_fla.objnr::text AND ST_within(ST_transform(ST_GeomFromText('POINT(".$longitude." ".$latitude.")', 4326), ST_srid(the_geom)), the_geom)) AS flurstuecke";
+		}
+		#echo $sql.'<br>';
+    $queryret = $this->execSQL($sql, 4, 0);
+		$rs = pg_fetch_array($queryret[1]);		
+		return $rs;
+	}
 
   function getFlurstKennzListeByGemSchlByStrSchl($GemeindeSchl,$StrassenSchl,$HausNr) {
     $sql ="SELECT alb_f_adressen.flurstkennz FROM alb_f_adressen, alb_flurstuecke";
@@ -4324,6 +4338,7 @@ class pgdatabase extends pgdatabase_core {
 ##########################################################################
 # ALK Funktionen
 ##########################################################################
+
   #2005-11-30_pk
   function getMERfromFlurstuecke($flurstkennz, $epsgcode) {
     $this->debug->write("<br>postgres.php->database->getMERfromFlurstuecke, Abfrage des Maximalen umschlie�enden Rechtecks um die Flurst�cke",4);

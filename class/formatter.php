@@ -1,0 +1,29 @@
+<?php
+class formatter {
+	
+  # Konstruktor
+  function formatter($data, $format) {
+		$this->data = $data;
+		$this->format = $format;
+  }
+	
+	function output() {
+		eval("\$output = \$this->output_".$this->format."();");
+		return $output;
+	}
+	
+	function output_dump() {
+		return var_dump($this->data);
+	}
+	
+	function output_json() {
+		header('Content-Type: application/json; charset=utf-8');
+		$this->data ? $json = json_encode($this->data) : $json = '{}';
+		return $json;
+	}
+	
+	function output_print_r() {
+		return print_r($this->data, true);
+	}
+}
+?>

@@ -48,6 +48,7 @@ class GUI_core {
 	var $scaleUnitSwitchScale=239210;
   var $map_scaledenom;
   var $map_factor='';
+	var $formatter;
 	
   ###################### Liste der Funktionen ####################################
 
@@ -1528,6 +1529,7 @@ class GUI_core {
     # bisher gibt es folgenden verschiedenen Dokumente die angezeigt werden können
     global $html;
     $html['style']=$this->style;
+
     switch ($this->mime_type) {
       case 'printversion' : {
         include (LAYOUTPATH.'snippets/printversion.php');
@@ -1563,6 +1565,13 @@ class GUI_core {
           $this->pdf->ezStream();
         }
       } break;
+			default : {
+				if ($this->formvars['format'] != '') {
+					include('formatter.php');
+					$this->formatter = new formatter($this->qlayerset, $this->formvars['format']);
+		    	echo $this->formatter->output();				
+				}
+			}
     }
   } # end of function output
 } # end of class GUI

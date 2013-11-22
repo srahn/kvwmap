@@ -2939,6 +2939,27 @@ class flurstueck {
   	$rs = $this->database->getFlurstByNutzungen($gemkgschl, $nutzung, $anzahl);
     return $rs;
   }
+	
+	function getFlurstByLatLng($latitude, $longitude) {
+		$rs = Array();
+		if ($latitude != '' or $longitude != '') {
+			$rs = $this->database->getFlurstueckByLatLng($latitude, $longitude);
+	    $this->Zaehler = $rs['zaehler'];
+	    $this->Nenner = $rs['nenner'];
+	    $this->FlurstNr = $this->Zaehler;
+	    if(ALKIS)$this->Flurstkennz_alt = $rs['flurstkennz'];
+	    if ($this->Nenner != '') { $this->FlurstNr .= "/".$this->Nenner; }
+	    $this->KreisID = $rs['kreis'];
+	#    $this->KreisName=$rs['kreisname'];
+	    $this->GemeindeID = $rs['gemeinde'];
+	#    $this->GemeindeName=$rs['gemeindename'];
+	    $this->GemkgSchl = $rs['gemarkungsnummer'];
+	#    $this->GemkgName=$rs['gemkgname'];
+	    $this->FlurID = $rs['flurnummer'];
+	#    $this->FlurNr = $rs['flurnr'];
+		}
+		return $rs;
+	}
 
 }# end of class Flurstueck
 

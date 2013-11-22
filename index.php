@@ -1783,6 +1783,11 @@ if($GUI->goNotExecutedInPlugins){
 		$GUI->flurstSuchen();
 		$GUI->output();
 	  } break;
+		
+		case "Flurstueck_Suchen_By_LatLng" : {
+			$GUI->flurstSuchenByLatLng();
+			$GUI->output();
+		} break;
 
 	  case "Hausnummernkorrektur" : {
 		$ALB=new ALB($GUI->database);

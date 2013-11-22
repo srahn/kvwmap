@@ -106,6 +106,7 @@ class GUI extends GUI_core{
   # festpunkteZeigen()
   # festpunkteZuAuftragSenden
   # flurstSuchen()
+	# flurstSuchenByLatLng
   # flurstAnzeige($FlurstKennz)
   # flurstwahl()
   # getFormObjGemGemkgFlur($Gemeinde,$Gemarkung,$Flur)
@@ -10776,6 +10777,29 @@ class GUI extends GUI_core{
       $this->flurstwahl();
     }
   } # ende function flurstSuchen
+	
+	function flurstSuchenByLatLng() {
+    $flurstueck = new flurstueck('',$this->pgdatabase);
+		if ($this->formvars['version'] == '1.0') {
+			$result= $flurstueck->getFlurstByLatLng($this->formvars['latitude'], $this->formvars['longitude']);
+			$this->qlayerset['landId'] = $result['land'];
+			$this->qlayerset['kreisId'] = $result['kreis'];
+			$this->qlayerset['gemeindId'] = $result['gemeinde'];
+			$this->qlayerset['gemarkungId'] = $result['gemarkungsnummer'];
+			$this->qlayerset['gemarkungName'] = $result['gemarkungname'];
+			$this->qlayerset['flurId'] = $result['flurnummer'];			
+			$this->qlayerset['flurstueckId'] = $result['flurstkennz'];
+			$this->qlayerset['flurstueckNummer'] = $result['flurstuecksnummer'];
+			$this->mime_type = 'formatter';
+			
+		}
+		else {
+			$this->loadMap('DataBase');
+      $this->user->rolle->newtime = $this->user->rolle->last_time_id;
+      $this->drawMap();
+     	$this->saveMap('');			
+		}	
+	} # ende function flurstSuchenByLatLng
 
   function flurstAnzeige($FlurstKennzListe) {
     # 2006-01-26 pk

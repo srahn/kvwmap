@@ -2973,7 +2973,7 @@ $measurefunctions = '
 							98.6784 C104.503 99.1631 119.583 106.53 123.756 104.003 C131.237 99.4715 127.702
 							105.026 130.236 95.2056 C132.77 85.3855 153.245 92.3923 153.245 92.3923 z"
 						transform="matrix(1 0 0 1 0 0) translate(2 2) scale(0.042)" style="fill:rgb(0,0,0)"/>
-	        <rect id="new0" onmouseover="show_tooltip(\''.$strDeletePolygon.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="1" ry="1" width="25" height="25" fill="none" opacity="0.2"/>
+	        <rect id="new0" onmouseover="show_tooltip(\''.$strDeletePolygon.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="1" ry="1" width="25" height="25" opacity="0.2"/>
 	      </g>
 	      
 	      <g id="undo" onmousedown="deletelast(evt);" transform="translate(26 0)">
@@ -2989,7 +2989,7 @@ $measurefunctions = '
 							transform="matrix(1 0 0 1 0 0) scale(0.05)"
 							 style="fill:none;stroke:rgb(0,0,0);stroke-width:30"/>
 					</g>
-	        <rect id="undo0" onmouseover="show_tooltip(\''.$strUndo.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="1" ry="1" width="25" height="25" transform="translate(0 0)" fill="none" opacity="0.2"/>
+	        <rect id="undo0" onmouseover="show_tooltip(\''.$strUndo.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="1" ry="1" width="25" height="25" transform="translate(0 0)" opacity="0.2"/>
 	      </g>
 
 				<g id="pgon" onmousedown="draw_pgon_on();add_polygon();highlightbyid(\'pgon0\');" transform="translate(52 0 )">
@@ -3003,7 +3003,7 @@ $measurefunctions = '
 							379.5,218 378.5,139 357.5,138 260.5,91"
 						transform="matrix(1 0 0 1 0 0) scale(0.05)"
 						 style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
-					<rect id="pgon0" onmouseover="show_tooltip(\''.$strDrawPolygon.'\',evt.clientX,evt.clientY)" x="0" y="0" width="25" height="25" fill="none" opacity="0.2"/>
+					<rect id="pgon0" onmouseover="show_tooltip(\''.$strDrawPolygon.'\',evt.clientX,evt.clientY)" x="0" y="0" width="25" height="25" opacity="0.2"/>
 				</g>
 
 				<g id="pgon_subtr" onmousedown="draw_pgon_on();subtr_polygon();highlightbyid(\'pgon_subtr0\');" transform="translate(78 0 )">
@@ -3017,7 +3017,7 @@ $measurefunctions = '
 							379.5,218 378.5,139 357.5,138 260.5,91"
 						transform="matrix(1 0 0 1 0 0) scale(0.05)"
 						 style="fill:rgb(244,244,244);stroke:rgb(0,0,0);stroke-width:25"/>
-					<rect id="pgon_subtr0" onmouseover="show_tooltip(\''.$strCutByPolygon.'\',evt.clientX,evt.clientY)" x="0" y="0" width="25" height="25" fill="none" opacity="0.2"/>
+					<rect id="pgon_subtr0" onmouseover="show_tooltip(\''.$strCutByPolygon.'\',evt.clientX,evt.clientY)" x="0" y="0" width="25" height="25" opacity="0.2"/>
 				</g>
 		';
 		$last_x = 78;
