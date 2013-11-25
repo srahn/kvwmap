@@ -352,7 +352,7 @@ class GUI extends GUI_core{
 	function resizeMap2Window(){
 		$width = $this->formvars['width']-490;
 		if($this->user->rolle->hideMenue == 1){$width = $width + 195;}
-		if($this->user->rolle->hideLegend == 1){$width = $width + 210;}
+		if($this->user->rolle->hideLegend == 1){$width = $width + 240;}
 		$height = $this->formvars['height']-140;
 		$this->user->rolle->setSize($width.'x'.$height);
 		$this->user->rolle->readSettings();
@@ -883,8 +883,8 @@ class GUI extends GUI_core{
     $groupname = $this->groupset[$group_id]['Gruppenname'];
 	  $groupstatus = $this->groupset[$group_id]['status'];
     $legend .=  '
-	  <div id="groupdiv_'.$group_id.'">
-      <table cellspacing="0" cellpadding="0" border="0"><tr><td>
+	  <div id="groupdiv_'.$group_id.'" style="width:100%">
+      <table cellspacing="0" cellpadding="0" border="0" style="width:100%"><tr><td>
       <input id="group_'.$group_id.'" name="group_'.$group_id.'" type="hidden" value="'.$groupstatus.'">
       <a href="javascript:getlegend(\''.$group_id.'\', \'\', document.GUI.nurFremdeLayer.value)">
         <img border="0" id="groupimg_'.$group_id.'" src="graphics/';
@@ -901,11 +901,11 @@ class GUI extends GUI_core{
 		else{
 			$legend .=  '<b><font color="firebrick" size="2">'.html_umlaute($groupname).'</font></b><br>';
 		}
-		$legend .= '</td></tr><tr><td><div id="layergroupdiv_'.$group_id.'"><table cellspacing="0" cellpadding="0">';
+		$legend .= '</td></tr><tr><td style="width:100%"><div id="layergroupdiv_'.$group_id.'" style="width:100%"><table cellspacing="0" cellpadding="0" style="width:100%">';
 		$layercount = count($this->groups_with_layers[$group_id]);
     if($groupstatus == 1){		# Gruppe aufgeklappt
 			for($u = 0; $u < count($this->groupset[$group_id]['untergruppen']); $u++){			# die Untergruppen rekursiv durchlaufen
-				$legend .= '<tr><td><table cellspacing="0" cellpadding="0"><tr><td>&nbsp;&nbsp;&nbsp;</td><td>';
+				$legend .= '<tr><td style="width:100%"><table cellspacing="0" cellpadding="0" style="width:100%"><tr><td>&nbsp;&nbsp;&nbsp;</td><td style="width:100%">';
 				$legend .= $this->create_group_legend($this->groupset[$group_id]['untergruppen'][$u]);
 				$legend .= '</td></tr></table></td></tr>';
 			}

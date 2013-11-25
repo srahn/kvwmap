@@ -15,47 +15,6 @@ function startup(){
 	document.getElementById("map").SVGstartup();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 }
 
-function update_legend(layerhiddenstring){
-	parts = layerhiddenstring.split(' ');
-	for(j = 0; j < parts.length-1; j=j+2){
-		if((document.getElementsByName('pseudothema'+parts[j])[0] != undefined && parts[j+1] == 0) || 
-			(document.getElementsByName('pseudothema'+parts[j])[0] == undefined && parts[j+1] == 1)){
-			legende = document.getElementById('legend');
-			ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=get_legend', new Array(legende), "");
-			break;
-		}
-	}
-}
-
-function getlegend(groupid, layerid, fremde){
-	groupdiv = document.getElementById('groupdiv_'+groupid);
-	if(layerid == ''){														// eine Gruppe wurde auf- oder zugeklappt
-		group = document.getElementById('group_'+groupid);
-		if(group.value == 0){												// eine Gruppe wurde aufgeklappt -> Layerstruktur per Ajax holen
-			group.value = 1;
-			ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=get_group_legend&'+group.name+'='+group.value+'&group='+groupid+'&nurFremdeLayer='+fremde, new Array(groupdiv), "");
-		}
-		else{																// eine Gruppe wurde zugeklappt -> Layerstruktur nur verstecken
-			group.value = 0;
-			layergroupdiv = document.getElementById('layergroupdiv_'+groupid);
-			groupimg = document.getElementById('groupimg_'+groupid);
-			layergroupdiv.style.display = 'none';			
-			groupimg.src = 'graphics/plus.gif';
-		}
-	}
-	else{																	// eine Klasse wurde auf- oder zugeklappt
-		layer = document.getElementById('classes_'+layerid);
-		if(layer.value == 0){
-			layer.value = 1;
-		}
-		else{
-			layer.value = 0;
-		}
-		ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=get_group_legend&'+layer.name+'='+layer.value+'&group='+groupid+'&nurFremdeLayer='+fremde, new Array(groupdiv), "");
-	}
-}
-
-
 function resizemap2window() {
   if(typeof(window.innerWidth) == 'number'){
     width = window.innerWidth;
@@ -83,6 +42,25 @@ function showMapImage(){
   document.getElementById('MapImageLink').href='index.php?go=showMapImage&svg_string='+document.GUI.svg_string.value;
 }
 
+<? if (!ie_check()){ ?>					// Firefox, Chrome
+
+function switchlegend(){
+	if(document.getElementById('legenddiv').className == 'slidinglegend'){
+		document.getElementById('legenddiv').className = 'normallegend';
+		ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=changeLegendDisplay&hide=0', new Array(), "");
+		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>maximize.png';
+		document.getElementById('LegendMinMax').title="Legende verstecken";
+	}
+	else{
+		document.getElementById('legenddiv').className = 'slidinglegend';
+		ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=changeLegendDisplay&hide=1', new Array(), "");
+		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>minimize.png';
+		document.getElementById('LegendMinMax').title="Legende zeigen";
+	}
+}
+
+<? }else{ ?>						// IE
+
 function switchlegend(){
 	if(document.getElementById('legendTable').style.display == 'none'){
 		document.getElementById('legendTable').style.display='';
@@ -97,6 +75,8 @@ function switchlegend(){
 		document.getElementById('LegendMinMax').title="Legende zeigen";
 	}
 }
+
+<? } ?>
 
 </script>
 
@@ -260,42 +240,42 @@ if($this->formvars['gps_follow'] == ''){
       </div>
       </td>
       <td valign="top">
-      	<table width="100%" border="0" cellpadding="0" cellspacing="0">
-			    <tr>
-			      <td bgcolor="<?php echo BG_DEFAULT ?>" align="left"><?php
-			        if ($this->user->rolle->hideLegend) {
-			        	$display = 'none';
-			          ?><a id="linkLegend" href="javascript:switchlegend()"><img title="Legende zeigen" id="LegendMinMax" src="<?php  echo GRAPHICSPATH; ?>minimize.png" border="0"></a><?php
-			        }
-			        else {
-			        	?><a id="linkLegend" href="javascript:switchlegend()"><img title="Legende verstecken" id="LegendMinMax" src="<?php  echo GRAPHICSPATH; ?>maximize.png" border="0"></a><?php
-			        }
-			      ?></td>
-			    </tr>
-				</table>
-        <table id="legendTable" style="display:<? echo $display; ?>" cellspacing=0 cellpadding=2 border=0>
-          <tr align="center">
-            <td><?php echo $strAvailableLayer; ?>:</td>
-          </tr>
-          <tr align="left">
-            <td><!-- bgcolor=#e3e3e6 -->
-            <div align="center"><?php # 2007-12-30 pk
-            ?><input type="submit" class="button" name="senden" value="<?php echo $strLoadNew; ?>" class="send" tabindex="1"></div>
-            <br>
-            &nbsp;
-            <a href="index.php?go=reset_querys"><img src="graphics/tool_info.png" border="0" alt="Informationsabfrage." title="Informationsabfrage | Hier klicken, um alle Abfragehaken zu entfernen" width="17"></a>
-            <a href="index.php?go=reset_layers"><img src="graphics/layer.png" border="0" alt="Themensteuerung." title="Themensteuerung | Hier klicken, um alle Themen zu deaktivieren" width="20" height="20"></a><br>
-          <div id="scrolldiv" onscroll="document.GUI.scrollposition.value = this.scrollTop;" style="width:230; height:<?php echo $legendheight; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
-					<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
-          <div onclick="document.GUI.legendtouched.value = 1;" id="legend">
-						<? echo $this->legende; ?>
-					</div>
-          </div>
-            </td>
-          </tr>
-        </table>
-
-
-        </td>
+				<div id="legenddiv" <? if (!ie_check() AND $this->user->rolle->hideLegend)echo 'class="slidinglegend"'; else echo 'class="normallegend"'; ?>>
+					<table width="100%" border="0" cellpadding="0" cellspacing="0">
+						<tr>
+							<td bgcolor="<?php echo BG_DEFAULT ?>" align="left"><?php
+								if ($this->user->rolle->hideLegend) {
+									if (ie_check()){$display = 'none';}
+									?><a id="linkLegend" href="javascript:switchlegend()"><img title="Legende zeigen" id="LegendMinMax" src="<?php  echo GRAPHICSPATH; ?>minimize.png" border="0"></a><?php
+								}
+								else {
+									?><a id="linkLegend" href="javascript:switchlegend()"><img title="Legende verstecken" id="LegendMinMax" src="<?php  echo GRAPHICSPATH; ?>maximize.png" border="0"></a><?php
+								}
+							?></td>
+						</tr>
+					</table>
+					<table id="legendTable" style="display: <? echo $display; ?>" cellspacing=0 cellpadding=2 border=0>
+						<tr align="center">
+							<td><?php echo $strAvailableLayer; ?>:</td>
+						</tr>
+						<tr align="left">
+							<td><!-- bgcolor=#e3e3e6 -->
+							<div align="center"><?php # 2007-12-30 pk
+							?><input type="submit" class="button" name="senden" value="<?php echo $strLoadNew; ?>" class="send" tabindex="1"></div>
+							<br>
+							&nbsp;
+							<a href="index.php?go=reset_querys"><img src="graphics/tool_info.png" border="0" alt="Informationsabfrage." title="Informationsabfrage | Hier klicken, um alle Abfragehaken zu entfernen" width="17"></a>
+							<a href="index.php?go=reset_layers"><img src="graphics/layer.png" border="0" alt="Themensteuerung." title="Themensteuerung | Hier klicken, um alle Themen zu deaktivieren" width="20" height="20"></a><br>
+						<div id="scrolldiv" onscroll="document.GUI.scrollposition.value = this.scrollTop;" style="width:240; height:<?php echo $legendheight; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
+						<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
+						<div onclick="document.GUI.legendtouched.value = 1;" id="legend">
+							<? echo $this->legende; ?>
+						</div>
+						</div>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</td>
     </tr>
   </table>

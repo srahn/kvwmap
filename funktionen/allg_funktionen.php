@@ -4,6 +4,16 @@
  * nicht gefunden wurden, nicht verstanden wurden oder zu umfrangreich waren.
  */
 
+function ie_check(){
+	$browser = $_SERVER['HTTP_USER_AGENT'];
+	if (preg_match("/MSIE/i", $browser)){
+			return TRUE;
+	}
+	else{
+			return FALSE;
+	}
+} 
+ 
 if(!function_exists('mb_strrpos')){		# Workaround, falls es die Funktion nicht gibt
 	function mb_strrpos($str, $search, $offset = 0, $encoding){
 		return strrpos($str, $search, $offset);

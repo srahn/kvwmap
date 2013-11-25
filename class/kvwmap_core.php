@@ -91,6 +91,19 @@ class GUI_core {
   	// nix machen bei nur Kartennavigation
   	$this->goNotExecutedInPlugins = true;
   }
+	
+	function list_subgroups($groupid){
+		if($groupid != ''){
+			$group = $this->groupset[$groupid];
+			if($group['untergruppen'] != ''){
+				foreach($group['untergruppen'] as $untergruppe){
+					$subgroups = $this->list_subgroups($untergruppe);
+				}
+				return $groupid.','.$subgroups;
+			}
+			else return $groupid;
+		}
+	}
   
   function loadMap($loadMapSource) {
     $this->debug->write("<p>Funktion: loadMap('".$loadMapSource."','".$connStr."')",4);
@@ -388,7 +401,7 @@ class GUI_core {
 
         # Groups
         if($this->formvars['nurAufgeklappteLayer'] == ''){
-	        $this->groupset=$mapDB->read_Groups($this->formvars['group']);
+	        $this->groupset=$mapDB->read_Groups();
         }
 
         # Layer
@@ -398,7 +411,7 @@ class GUI_core {
         if($this->class_load_level == ''){
           $this->class_load_level = 1;
         }
-        $layer = $mapDB->read_Layer($this->class_load_level, $this->formvars['group']);     # class_load_level: 2 = für alle Layer die Klassen laden, 1 = nur für aktive Layer laden, 0 = keine Klassen laden
+        $layer = $mapDB->read_Layer($this->class_load_level, $this->list_subgroups($this->formvars['group']));     # class_load_level: 2 = für alle Layer die Klassen laden, 1 = nur für aktive Layer laden, 0 = keine Klassen laden
         $rollenlayer = $mapDB->read_RollenLayer();
         $layerset = array_merge($layer, $rollenlayer);
         $layerset['anzLayer'] = count($layerset);
@@ -1655,15 +1668,15 @@ class db_mapObj_core {
     }
     return $Layer;
   }
-
-  function read_Layer($withClasses, $group = NULL){
+	
+  function read_Layer($withClasses, $groups = NULL){
     $sql ='SELECT DISTINCT rl.*,ul.*, l.Layer_ID, l.Name, l.alias, l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem, l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem, l.tolerance, l.toleranceunits, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version, l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, g.*';
     $sql.=' FROM u_rolle2used_layer AS rl,used_layer AS ul,layer AS l, u_groups AS g, u_groups2rolle as gr';
     $sql.=' WHERE rl.stelle_id=ul.Stelle_ID AND rl.layer_id=ul.Layer_ID AND l.Layer_ID=ul.Layer_ID';
     $sql.=' AND (ul.minscale != -1 OR ul.minscale IS NULL) AND l.Gruppe = g.id AND rl.stelle_ID='.$this->Stelle_ID.' AND rl.user_id='.$this->User_ID;
     $sql.=' AND gr.id = g.id AND gr.stelle_id='.$this->Stelle_ID.' AND gr.user_id='.$this->User_ID;
-		if($group != NULL){
-			$sql.=' AND (g.id = '.$group.' OR g.obergruppe = '.$group.')';
+		if($groups != NULL){
+			$sql.=' AND g.id IN ('.$groups.')';
 		}
     if ($this->nurAufgeklappteLayer) {
       $sql.=' AND (rl.aktivStatus != "0" OR gr.status != "0" OR requires != "")';
@@ -1692,11 +1705,10 @@ class db_mapObj_core {
 
   
 
-  function read_Groups($groupid = NULL) {
+  function read_Groups() {
     $sql ='SELECT g2r.*, g.Gruppenname, obergruppe FROM u_groups AS g, u_groups2rolle AS g2r ';
     $sql.=' WHERE g2r.stelle_ID='.$this->Stelle_ID.' AND g2r.user_id='.$this->User_ID;
     $sql.=' AND g2r.id = g.id';
-		if($groupid != NULL)$sql .= ' AND (g.id = '.$groupid.' OR g.obergruppe = '.$groupid.')';
 		$sql.=' ORDER BY `order`';
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Groups - Lesen der Gruppen der Rolle:<br>".$sql,4);
     $query=mysql_query($sql);
