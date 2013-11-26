@@ -97,9 +97,9 @@ class GUI_core {
 			$group = $this->groupset[$groupid];
 			if($group['untergruppen'] != ''){
 				foreach($group['untergruppen'] as $untergruppe){
-					$subgroups = $this->list_subgroups($untergruppe);
+					$subgroups .= ', '.$this->list_subgroups($untergruppe);
 				}
-				return $groupid.','.$subgroups;
+				return $groupid.$subgroups;
 			}
 			else return $groupid;
 		}

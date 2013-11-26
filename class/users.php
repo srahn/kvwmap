@@ -1579,24 +1579,21 @@ class rolle extends rolle_core{
 		return 1;
 	}
 
-	function setGroups($user_id,$stellen, $open) {
-		# trägt die Gruppen der übergebenen Stellenids für einen Benutzer ein.
-		for ($i=0;$i<count($stellen);$i++) {
-			$sql ='INSERT IGNORE INTO u_groups2rolle SELECT DISTINCT '.$user_id.', '.$stellen[$i].', u_groups.id, '.$open;
-			$sql.=' FROM `used_layer`, `layer`, `u_groups`';
-			$sql.=' WHERE used_layer.Stelle_ID = '.$stellen[$i];
-			$sql.=' AND used_layer.Layer_ID = layer.Layer_ID';
-			$sql.=' AND layer.Gruppe = u_groups.id';
-			$sql.=' UNION';
-			$sql.=' SELECT DISTINCT '.$user_id.', '.$stellen[$i].', u_groups2.id, '.$open;
-			$sql.=' FROM `used_layer`, `layer`, `u_groups`, `u_groups` as `u_groups2`';
-			$sql.=' WHERE used_layer.Stelle_ID = '.$stellen[$i];
-			$sql.=' AND used_layer.Layer_ID = layer.Layer_ID';
-			$sql.=' AND layer.Gruppe = u_groups.id AND u_groups.obergruppe = u_groups2.id';
-			#echo '<br>Gruppen: '.$sql;
-			$this->debug->write("<p>file:users.php class:rolle function:setGroups - Setzen der Gruppen der Rollen:<br>".$sql,4);
-			$query=mysql_query($sql,$this->database->dbConn);
-			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+	function setGroups($user_id, $stellen, $layerids, $open) {
+		# trägt die Gruppen und Obergruppen der übergebenen Stellenids und Layerids für einen Benutzer ein.
+		for($i = 0; $i < count($stellen); $i++) {
+			for($j = 0; $j < count($layerids); $j++){
+				$sql ='INSERT IGNORE INTO u_groups2rolle SELECT DISTINCT '.$user_id.', '.$stellen[$i].', u_groups.id, '.$open;
+				$sql.=' FROM (SELECT @id AS id, @id := IF(@id IS NOT NULL, (SELECT obergruppe FROM u_groups WHERE id = @id), NULL) AS obergruppe';
+				$sql.='       FROM u_groups, (SELECT @id := (SELECT Gruppe FROM layer where layer.Layer_ID = '.$layerids[$j].')) AS vars';
+				$sql.='       WHERE @id IS NOT NULL';
+				$sql.='	    ) AS dat';
+				$sql.='	JOIN u_groups ON dat.id = u_groups.id';
+				#echo '<br>Gruppen: '.$sql;
+				$this->debug->write("<p>file:users.php class:rolle function:setGroups - Setzen der Gruppen der Rollen:<br>".$sql,4);
+				$query=mysql_query($sql,$this->database->dbConn);
+				if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+			}
 		}
 		return 1;
 	}
@@ -1614,15 +1611,25 @@ class rolle extends rolle_core{
 	}
 
 	function updateGroups($user_id,$stelle_id, $layer_id) {
-		# überprüft anHand der übergebenen layer_id ob die entsprechende Gruppe in u_groups2rolle überflüssig ist.
-		$sql ='SELECT Gruppe FROM layer WHERE layer.layer_id = '.$layer_id;
+		# überprüft anHand der übergebenen layer_id ob die entsprechende Gruppe und deren Obergruppen in u_groups2rolle überflüssig sind
+		#
+		# Abfragen der Gruppe und der Obergruppen
+		$sql ='SELECT DISTINCT u_groups.id';
+		$sql.=' FROM (SELECT @id AS id, @id := IF(@id IS NOT NULL, (SELECT obergruppe FROM u_groups WHERE id = @id), NULL) AS obergruppe';
+		$sql.='       FROM u_groups, (SELECT @id := (SELECT Gruppe FROM layer where layer.Layer_ID = '.$layer_id.')) AS vars';
+		$sql.='       WHERE @id IS NOT NULL';
+		$sql.='	    ) AS dat';
+		$sql.='	JOIN u_groups ON dat.id = u_groups.id';
 		#echo '<br>'.$sql;
 		$this->debug->write("<p>file:users.php class:rolle function:updateGroups - überprüft anHand der übergebenen layer_id ob die entsprechende Gruppe in u_groups2rolle überflüssig ist:<br>".$sql,4);
 		$query=mysql_query($sql,$this->database->dbConn);
 		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-		$rs = mysql_fetch_array($query);
-		$gruppe_id = $rs[0];
-		$sql ='SELECT layer.Layer_ID FROM layer, u_rolle2used_layer AS r2ul WHERE Gruppe = '.$gruppe_id.' AND ';
+		while($rs = mysql_fetch_array($query)) {
+			$gruppen_ids[] = $rs[0];
+		}
+		
+		# Test ob Layer in den Gruppen vorhanden sind
+		$sql ='SELECT DISTINCT Gruppe FROM layer, u_rolle2used_layer AS r2ul WHERE Gruppe IN ('.implode(',', $gruppen_ids).') AND ';
 		$sql.='r2ul.layer_id = layer.Layer_ID AND ';
 		$sql.='r2ul.user_id = '.$user_id.' AND ';
 		$sql.='r2ul.stelle_id = '.$stelle_id;
@@ -1630,10 +1637,29 @@ class rolle extends rolle_core{
 		$this->debug->write("<p>file:users.php class:rolle function:updateGroups - überprüft anHand der übergebenen layer_id ob die entsprechende Gruppe in u_groups2rolle überflüssig ist:<br>".$sql,4);
 		$query=mysql_query($sql,$this->database->dbConn);
 		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-		$rs = mysql_fetch_array($query);
-		if(!$rs[0]){
-			$sql ='DELETE FROM `u_groups2rolle` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stelle_id.' AND `id` = '.$gruppe_id;
-			#echo '<br>'.$sql;
+		while($rs = mysql_fetch_array($query)){
+			$rs_layer[$rs['Gruppe']] = $rs['Gruppe'];		# ein Array mit den GruppenIDs, die noch Layer haben
+		}
+		
+		# Test ob Untergruppen in den Gruppen vorhanden sind
+		$sql ='SELECT u_groups.id FROM u_groups, u_groups2rolle as r2g WHERE u_groups.id NOT IN ('.implode(',', $gruppen_ids).') AND u_groups.obergruppe IN ('.implode(',', $gruppen_ids).') AND ';
+		$sql.='r2g.id = u_groups.id AND ';
+		$sql.='r2g.user_id = '.$user_id.' AND ';
+		$sql.='r2g.stelle_id = '.$stelle_id;
+		#echo '<br>'.$sql;
+		$this->debug->write("<p>file:users.php class:rolle function:updateGroups - überprüft anHand der übergebenen layer_id ob die entsprechende Gruppe in u_groups2rolle überflüssig ist:<br>".$sql,4);
+		$query=mysql_query($sql,$this->database->dbConn);
+		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		$rs_subgroups = mysql_fetch_array($query);
+		
+		if($rs_layer[$gruppen_ids[0]] == ''){					# wenn die erste Gruppe, also die Gruppe des Layers keine Layer hat, diese löschen
+			$sql ='DELETE FROM `u_groups2rolle` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stelle_id.' AND `id` = '.$gruppen_ids[0].';';
+			if($rs_layer == '' AND !$rs_subgroups[0]){				# wenn darüberhinaus keine Layer oder Untergruppen in den Gruppen darüber vorhanden sind, diese auch löschen
+				$sql ='DELETE FROM `u_groups2rolle` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stelle_id.' AND `id` IN ('.implode(',', $gruppen_ids).');';
+				$this->debug->write("<p>file:users.php class:rolle function:deleteGroups - Löschen der Gruppen der Rollen:<br>".$sql,4);
+				$query=mysql_query($sql,$this->database->dbConn);
+				if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+			}
 			$this->debug->write("<p>file:users.php class:rolle function:deleteGroups - Löschen der Gruppen der Rollen:<br>".$sql,4);
 			$query=mysql_query($sql,$this->database->dbConn);
 			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }

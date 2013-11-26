@@ -6260,7 +6260,7 @@ class GUI extends GUI_core{
       $stelle->addLayer(array($this->formvars['selected_layer_id']), 0);
       $users = $stelle->getUser();
       for($j = 0; $j < count($users['ID']); $j++){
-        $this->user->rolle->setGroups($users['ID'][$j], array($stellen[$i]), 0); # Hinzufügen der Layergruppen der selektierten Layer zur Rolle
+        $this->user->rolle->setGroups($users['ID'][$j], array($stellen[$i]), array($this->formvars['selected_layer_id']), 0); # Hinzufügen der Layergruppen der selektierten Layer zur Rolle
         $this->user->rolle->setLayer($users['ID'][$j], array($stellen[$i]), 0); # Hinzufügen der Layer zur Rolle
       }
     }
@@ -8108,7 +8108,7 @@ class GUI extends GUI_core{
       for($i=0; $i<count($selectedusers); $i++){
         $this->user->rolle->setRollen($selectedusers[$i],$new_stelle_id); # Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
         $this->user->rolle->setMenue($selectedusers[$i],$new_stelle_id); # Hinzufügen der selectierten Obermenüs zur Rolle
-        $this->user->rolle->setGroups($selectedusers[$i], $new_stelle_id, 0); # Hinzufügen der Layergruppen der selektierten Layer zur Rolle
+        $this->user->rolle->setGroups($selectedusers[$i], $new_stelle_id, $layer, 0); # Hinzufügen der Layergruppen der selektierten Layer zur Rolle
         $this->user->rolle->setLayer($selectedusers[$i], $new_stelle_id, 0); # Hinzufügen der Layer zur Rolle
         $this->selected_user = new user(0,$selectedusers[$i],$this->user->database);
         $this->selected_user->checkstelle();
@@ -8248,7 +8248,7 @@ class GUI extends GUI_core{
         for($i=0; $i<count($users); $i++){
           $this->user->rolle->setRollen($users[$i],$neue_stelle_id);
           $this->user->rolle->setMenue($users[$i],$neue_stelle_id);
-          $this->user->rolle->setGroups($users[$i], $neue_stelle_id, 0);
+          $this->user->rolle->setGroups($users[$i], $neue_stelle_id, $layer, 0);
           $this->user->rolle->setLayer($users[$i], $neue_stelle_id, 0);
           $this->selected_user = new user(0,$users[$i],$this->user->database);
           $this->selected_user->checkstelle();
@@ -8919,8 +8919,12 @@ class GUI extends GUI_core{
         $stellen = explode(', ',$this->formvars['selstellen']);
         $this->user->rolle->setRollen($neue_user_id,$stellen);
         $this->user->rolle->setMenue($neue_user_id,$stellen);
-        $this->user->rolle->setGroups($neue_user_id, $stellen, 0);
         $this->user->rolle->setLayer($neue_user_id, $stellen, 0);
+				for($i = 0; $i < count($stellen); $i++){
+					$stelle = new stelle($stellen[$i], $this->database);
+					$layers = $stelle->getLayers(NULL);
+					$this->user->rolle->setGroups($neue_user_id, array($stellen[$i]), $layers['ID'], 0);
+				}
         if ($ret[0]) {
           $this->Meldung=$ret[1];
         }
@@ -8947,8 +8951,12 @@ class GUI extends GUI_core{
       }
       $this->user->rolle->setRollen($this->formvars['selected_user_id'],$stellen);
       $this->user->rolle->setMenue($this->formvars['selected_user_id'],$stellen);
-      $this->user->rolle->setGroups($this->formvars['selected_user_id'], $stellen, 0);
       $this->user->rolle->setLayer($this->formvars['selected_user_id'], $stellen, 0);
+			for($i = 0; $i < count($stellen); $i++){
+				$stelle = new stelle($stellen[$i], $this->database);
+				$layers = $stelle->getLayers(NULL);
+				$this->user->rolle->setGroups($this->formvars['selected_user_id'], array($stellen[$i]), $layers['ID'], 0);
+			}
       $this->selected_user=new user(0,$this->formvars['selected_user_id'],$this->user->database);
       # Löschen der in der Selectbox entfernten Stellen
       $userstellen =  $this->selected_user->getStellen(0);
@@ -14712,6 +14720,7 @@ class db_mapObj extends db_mapObj_core{
           $layer['ID'][]=$rs['Layer_ID'];
           $layer['Bezeichnung'][]=$rs['Name'];
           $layer['Gruppe'][]=$rs['Gruppenname'];
+					$layer['GruppeID'][]=$rs['Gruppe'];
           $layer['Kurzbeschreibung'][]=$rs['kurzbeschreibung'];
           $layer['Datenherr'][]=$rs['datenherr'];
           $layer['alias'][]=$rs['alias'];
@@ -14721,6 +14730,8 @@ class db_mapObj extends db_mapObj_core{
       $sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
       $layer['Bezeichnung'] = $sorted_arrays['array'];
       $layer['ID'] = $sorted_arrays['second_array'];
+			$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['GruppeID']);
+			$layer['GruppeID'] = $sorted_arrays['second_array'];
     }
     return $layer;
   }
@@ -14849,7 +14860,7 @@ class db_mapObj extends db_mapObj_core{
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
     while($rs=mysql_fetch_array($query)) {
-          $groups[]=$rs;
+          $groups[$rs['id']] = $rs;
       }
     return $groups;
   }
