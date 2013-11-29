@@ -6477,18 +6477,14 @@ class GUI extends GUI_core{
         elseif($layerset[0]['attributes']['orderby'] != ''){										# Fall 2: der Layer hat im Pfad ein ORDER BY
         	$sql_order = $layerset[0]['attributes']['orderby'];
         }
-        else{																																						# Fall 3: standardmäßig wird nach den oids sortiert
+        else{																																						# Fall 3: standardmäßig wird nach der oid sortiert
 	        $j = 0;
-	        $komma = '';
-	        $sql_order = ' ORDER BY ';
 	        foreach($layerset[0]['attributes']['all_table_names'] as $tablename){
-						if($layerset[0]['attributes']['oids'][$j]){      # hat Tabelle oids?
-							$sql_order .= $komma.$tablename.'_oid ';
-							$komma = ',';
+						if($tablename == $layerset[0]['maintable'] AND $layerset[0]['attributes']['oids'][$j]){      # hat die Haupttabelle oids?
+							$sql_order = ' ORDER BY '.$layerset[0]['maintable'].'_oid ';
 						}
 						$j++;
 	      	}
-	      	if($komma == ''){$sql_order = '';}
         }      	
       	        
 		if($this->last_query != ''){
@@ -11527,20 +11523,16 @@ class GUI extends GUI_core{
 			elseif($layerset[$i]['attributes']['orderby'] != ''){														# Fall 2: der Layer hat im Pfad ein ORDER BY
 				$sql_order = $layerset[$i]['attributes']['orderby'];
 			}
-			elseif($layerset[$i]['template'] == ''){																				# Fall 3: standardmäßig wird nach den oids sortiert
+			elseif($layerset[$i]['template'] == ''){																				# Fall 3: standardmäßig wird nach der oid sortiert
 				$j = 0;
-				$komma = '';
-				$sql_order = ' ORDER BY ';
 				foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-							if($layerset[$i]['attributes']['oids'][$j]){      # hat Tabelle oids?
-								$sql_order .= $komma.$tablename.'_oid ';
-								$komma = ',';
-							}
-							$j++;
+					if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['attributes']['oids'][$j]){      # hat die Haupttabelle oids?
+						$sql_order = ' ORDER BY '.$layerset[$i]['maintable'].'_oid ';
+					}
+					$j++;
 				}
-				if($komma == ''){$sql_order = '';}
 			}
-			
+						
 			if($this->last_query != ''){
 				$sql = $this->last_query[$layerset[$i]['Layer_ID']]['sql'];
 				if($this->formvars['orderby'.$layerset[$i]['Layer_ID']] == '')$sql_order = $this->last_query[$layerset[$i]['Layer_ID']]['orderby'];
