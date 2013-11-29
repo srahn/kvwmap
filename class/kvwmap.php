@@ -350,10 +350,10 @@ class GUI extends GUI_core{
 	}
 
 	function resizeMap2Window(){
-		$width = $this->formvars['width']-490;
+		$width = $this->formvars['width']-475;
 		if($this->user->rolle->hideMenue == 1){$width = $width + 195;}
-		if($this->user->rolle->hideLegend == 1){$width = $width + 240;}
-		$height = $this->formvars['height']-140;
+		if($this->user->rolle->hideLegend == 1){$width = $width + 244;}
+		$height = $this->formvars['height']-152;
 		$this->user->rolle->setSize($width.'x'.$height);
 		$this->user->rolle->readSettings();
 	}

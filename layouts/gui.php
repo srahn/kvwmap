@@ -17,8 +17,7 @@ include(WWWROOT.APPLVERSION.'funktionen/gui_functions.php');
         <tr> 
             <td colspan="2"><?php
           $this->debug->write("Include <b>".LAYOUTPATH."snippets/".HEADER."</b> in gui.php",4);    
-    
-       include(LAYOUTPATH."snippets/".HEADER); 
+					include(LAYOUTPATH."snippets/".HEADER); 
        ?></td>
           </tr>
           <tr> 
@@ -44,8 +43,7 @@ include(WWWROOT.APPLVERSION.'funktionen/gui_functions.php');
           <tr> 
             <td colspan="2"><?php
               $this->debug->write("Include <b>".LAYOUTPATH."snippets/".FOOTER."</b> in gui.php",4);    
-
-       include(LAYOUTPATH."snippets/".FOOTER); ?></td>
+							include(LAYOUTPATH."snippets/".FOOTER); ?></td>
           </tr>
         </table>
         </form> 

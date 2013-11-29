@@ -48,11 +48,20 @@
       document.GUI.CMD.value  = cmd;
       document.GUI.submit();
   }
+	
+	if(navigator.userAgent.toLowerCase().indexOf('firefox') >= 0){
+		var browser = 'firefox';
+	}
+	else{
+		if(navigator.userAgent.toLowerCase().indexOf('chrome') >= 0) var browser = 'chrome';
+		else var browser = 'other';
+	}
+	
    
   function submit(input_coord, cmd){
-  	if((navigator.userAgent.toLowerCase().indexOf('firefox') >= 0) && document.GUI.legendtouched.value == 0){
+  	if((browser == 'firefox') && document.GUI.legendtouched.value == 0){
   		svgdoc = document.SVG.getSVGDocument();	
-			var mapimg = svgdoc.getElementById("mapimg2");
+			var mapimg = svgdoc.getElementById("mapimg2");			
 			var scalebar = document.getElementById("scalebar");
 			var refmap = document.getElementById("refmap");
 			var scale = document.getElementById("scale");
@@ -377,7 +386,7 @@ function init(){
 		//document.getElementById("mapimg2").addEventListener("load", function(evt) { moveback(); }, false);
 	}
 	else{
-		document.getElementById("mapimg2").addEventListener("load", function(evt) { moveback(evt); }, false);
+		document.getElementById("mapimg2").addEventListener("load", function(evt) { moveback(evt); }, true);
 	}
 	if(window.addEventListener){
 		if(navigator.userAgent.toLowerCase().indexOf(\'webkit\') >= 0)

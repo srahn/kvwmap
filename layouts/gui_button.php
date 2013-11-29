@@ -17,8 +17,8 @@ include(WWWROOT.APPLVERSION.'funktionen/gui_functions.php');
         <table style="border-style:solid; border-width:1px; border-color:#CCCCCC;" cellpadding="0" cellspacing="2">
           <tr>
             <td colspan="2"><?php
-             $this->debug->write("Include <b>".LAYOUTPATH."snippets/header.php</b> in gui.php",4);
-             include(LAYOUTPATH."snippets/header.php");
+          $this->debug->write("Include <b>".LAYOUTPATH."snippets/".HEADER."</b> in gui.php",4);    
+					include(LAYOUTPATH."snippets/".HEADER); 
           ?></td>
           </tr>
           <tr>
@@ -40,8 +40,8 @@ include(WWWROOT.APPLVERSION.'funktionen/gui_functions.php');
           </tr>
           <tr>
             <td colspan="2"><?php
-             $this->debug->write("Include <b>".LAYOUTPATH."snippets/footer.php</b> in gui.php",4);
-             include(LAYOUTPATH."snippets/footer.php"); ?>
+             $this->debug->write("Include <b>".LAYOUTPATH."snippets/".FOOTER."</b> in gui.php",4);    
+						 include(LAYOUTPATH."snippets/".FOOTER); ?></td>
             </td>
           </tr>
         </table>
