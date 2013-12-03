@@ -36,8 +36,8 @@ class rok {
     $this->database = $database;
   }
   
-	function update_bplan_from_rok(){
-		$gebiet2rok_table = array(	1 => 'wohngebiet',				#"Wohngebiet"
+	function update_bplan_from_rok($plan_id){
+		$gebiet2rok_table = array(	1 => 'wohngebiet',				#"Wohngebiet"													
 																2 => 'wohngebiet',	      #"spez. Wohnen"
 																3 => 'mischgebiet',	      #"Mischgebiet"
 																4 => 'gewerbegebiet',	      #"Gewerbegebiet"
@@ -63,18 +63,20 @@ class rok {
 																25 => 'so_hafen',	      #"Wirtschaftshafen"
 																26 => 'so_hafen',	      #"Hafen"
 																27 => 'so_gesundheit',	      #"Gesundheitswesen"
-																28 => 'so_erneuerbare_energie',	      #"#erneuerbare Energie"
+																28 => 'so_erneuerbare_energie',	      #"erneuerbare Energie"
 																29 => 'so_einzelhandel',	      #"Einzelhandel"
 																30 => 'so_bildung_wissenschaft',	      #"Bildungswesen"
 																31 => 'so_beherbergung',	      #"Beherbergung"
-																32 => 'so_beherbergung',	      #"Wochenendhaus"
+																32 => 'so_beherbergung',	      #"Wochenendhaus"										
 																33 => 'so_wohnen_ferienwohnen',	      #"Wohnen+Ferienwohnen"
 																35 => 'so_beherbergung',	      #"Camping und Caravan"
 															);
 															
-		$gebiet2rok_konkret array(13 => array('Aufschüttung'),								#'Aufschüttung'
-															14 => array('Abgrabung' 'Bergsenkung')			#'Abgrabung'
-															);
+		$gebiet2rok_konkret = array(1 => array('NULL'),														#"Wohngebiet"			hier muss die Konkretisierung leer sein
+																13 => array('Aufschüttung'),								#'Aufschüttung'
+																14 => array('Abgrabung', 'Bergsenkung'),			#'Abgrabung'
+																32 => array('NULL')																#"Wochenendhaus"		hier muss die Konkretisierung leer sein
+																);
 															
 		$konkret2rok_konkret = array(	1	=> array('betreutes Wohnen'),      
 																	2	=> array('altersgerechtes Wohnen'),
@@ -96,7 +98,7 @@ class rok {
 																	18 => array('Abfallbehandlung - Rechtskraft', 'Abfallbehandlung - Planung'),			#'Abfallbehandlung'
 																	19 => array('Abfallentsorgung - Rechtskraft', 'Abfallentsorgung - Planung'), 			#'Abfallentsorgung'
 																	20 => array('Straßenverkehrsflächen - Rechtskraft', 'Straßenverkehrsflächen - Planung'), 										#'Straßenverkehrsfläche'
-																	22 => array('Schienenverkehrsflächen - Rechtskraft' 'Straßenverkehrsflächen - Planung'),										#'Straßenverkehrsfläche'
+																	22 => array('Schienenverkehrsflächen - Rechtskraft', 'Straßenverkehrsflächen - Planung'),										#'Straßenverkehrsfläche'
 																	23 => array('Flugplatz und Flughafen - Rechtskraft', 'Flugplatz und Flughafen - Planung', 'Hubschrauberlandeplatz - Rechtskraft', 'Hubschrauberlandeplatz - Planung', 'Sonderlandeplatz - Rechtskraft', 'Sonderlandeplatz - Planung'),		#'Luftverkehrsfläche'
 																	24 => array('Umschlagplatz - Rechtskraft', 'Umschlagplatz - Planung'),																		#'Umschlagplatz'
 																	25 => array('Verkehrseinrichtung - Rechtskraft', 'Verkehrseinrichtung - Planung'),												#'Verkehrseinrichtung'
@@ -165,7 +167,7 @@ class rok {
 																	88 => array('Kita'),
 																	89 => array('Krippe'),
 																	90 => array('Hort'),
-																	91 => array('Hotel'
+																	91 => array('Hotel'),
 																	92 => array('Ferienhaus'),				#'Ferienhäuser'
 																	93 => array('Pension'),
 																	94 => array('Gasthof/Gastronomie'),
@@ -173,23 +175,72 @@ class rok {
 																	96 => array('Campingplatz'),
 																	97 => array('Zeltplatz'),
 																	98 => array('Caravanplatz/Wohnmobil'),
-																	99 => array('sonstige Versorgung - Rechtskraft', 'sonstige Versorgung - Planung'), 					#'sonst. Versorgung'
-																	#100	      'EKZ/Fachmarktzentrum'							? hier gibt es im ROK keine Konkretisierungen, wie ist hier vorzugehen?
-																	#101	      'Lebensmittelmarkt'
-																	#102	      'Möbelmarkt'
-																	#103	      'Baumarkt/Gartencenter'
-																	#104	      'Sonst. Einzelhandel'
-																	105 => array('Jugendherberge'),
-																	106	      'Landwirtschaftsfläche'
-																	107	      'Rinderhaltung'
-																	108	      'Schweinehaltung'
-																	109	      'Geflügelhaltung'
-																	110	      'Schafhaltung'
-																	111	      'Ziegenhaltung'
-																	112	      'Pferdehaltung/Gestüt'
-																	113	      'Fischzucht'
-																	114	      'Sonstige Tierhaltung/Zucht'
-);
+																	99 => array('Fl. für Landwirtschaft - Rechtskraft', 'Fl. für Landwirtschaft - Planung'), 					#'Landwirtschaft/Acker'
+																	100 => array('Tierhaltungsanlage Rinder - Rechtskraft', 'Tierhaltungsanlage Rinder - Planung', 'Tierhaltungsanlage Schweine - Rechtskraft', 'Tierhaltungsanlage Schweine - Planung', 'Tierhaltungsanlage Geflügel - Rechtskraft', 'Tierhaltungsanlage Geflügel - Planung', 'Tierhaltungsanlage Schafe - Rechtskraft', 'Tierhaltungsanlage Schafe - Planung', 'Tierhaltungsanlage Ziegen - Rechtskraft', 'Tierhaltungsanlage Ziegen - Planung', 'Tierhaltungsanlage Pferde / Gestüt - Rechtskraft', 'Tierhaltungsanlage Pferde / Gestüt - Planung', 'Fischzucht - Rechtskraft', 'Fischzucht - Planung', 'sonstige Zucht-/Tierhaltungsanlage - Rechtskraft', 'sonstige Zucht-/Tierhaltungsanlage - Planung'),		# 'Tierhaltung'
+																	101 => array('Altlast'),
+																	102 => array('Ablagerungen - Rechtskraft', 'Ablagerungen - Planung'),			#Ablagerung
+																	103 => array('sonstige Versorgung - Rechtskraft', 'sonstige Versorgung - Planung'), 					#'sonst. Versorgung'
+																	104 => array('Wald'),
+																	105 => array('Aufforstung'),
+																	106 => array('Tierklinik'),
+																	107 => array('Geldinstitut')
+																);
+		# Gebiete aktualisieren
+		$sql = "SELECT * FROM b_plan_gebiete WHERE plan_id = ".$plan_id;
+		$ret = $this->database->execSQL($sql, 4, 0);
+		while($gebiet = pg_fetch_array($ret[1])){
+			$sql = "SELECT round((st_area(st_union(rok.shape))/10000)::numeric, 2) FROM b_plan_stammdaten as sd, rok_edit.".$gebiet2rok_table[$gebiet['gebietstyp']]." as rok ";
+			$sql.= "WHERE sd.plan_id = ".$plan_id." AND rok.roknr = sd.lfd_rok_nr ";
+			if($gebiet2rok_konkret[$gebiet['gebietstyp']] != ''){
+				if($gebiet2rok_konkret[$gebiet['gebietstyp']][0] == 'NULL'){
+					$sql .= "AND rok.konkretisierung IS NULL ";
+				}
+				else{
+					$sql .= "AND rok.konkretisierung IN ('".implode("','", $gebiet2rok_konkret[$gebiet['gebietstyp']])."') ";
+				}
+			}
+			if($konkret2rok_konkret[$gebiet['konkretisierung']] != ''){
+				$sql .= "AND rok.konkretisierung IN ('".implode("','", $konkret2rok_konkret[$gebiet['konkretisierung']])."') ";
+			}
+			#echo $sql.'<br>';
+			$ret1 = $this->database->execSQL($sql, 4, 0);
+			$flaeche = pg_fetch_array($ret1[1]);
+			if($flaeche[0] != ''){
+				$sql = "UPDATE b_plan_gebiete SET flaeche = ".$flaeche[0]." ";
+				$sql.= "WHERE b_plan_gebiete.plan_id = ".$plan_id." ";
+				$sql.= "AND b_plan_gebiete.gebietstyp = ".$gebiet['gebietstyp']." ";
+				if($gebiet['konkretisierung'] != ''){
+					$sql.= "AND b_plan_gebiete.konkretisierung = ".$gebiet['konkretisierung']." ";
+				}
+			}			
+			#echo $sql.'<br>';
+			$ret2 = $this->database->execSQL($sql,4, 1);
+		}
+
+		# Sondergebiete aktualisieren
+		$sql = "SELECT * FROM b_plan_sondergebiete WHERE plan_id = ".$plan_id;
+		$ret = $this->database->execSQL($sql, 4, 0);
+		while($gebiet = pg_fetch_array($ret[1])){
+			$sql = "SELECT round((st_area(st_union(rok.shape))/10000)::numeric, 2) FROM b_plan_stammdaten as sd, rok_edit.".$gebiet2rok_table[$gebiet['gebietstyp']]." as rok ";
+			$sql.= "WHERE sd.plan_id = ".$plan_id." AND rok.roknr = sd.lfd_rok_nr ";
+			if($konkret2rok_konkret[$gebiet['konkretisierung']] != ''){
+				$sql .= "AND rok.konkretisierung IN ('".implode("','", $konkret2rok_konkret[$gebiet['konkretisierung']])."') ";
+			}
+			#echo $sql.'<br>';
+			$ret1 = $this->database->execSQL($sql, 4, 0);
+			$flaeche = pg_fetch_array($ret1[1]);
+			if($flaeche[0] != ''){
+				$sql = "UPDATE b_plan_sondergebiete SET flaeche = ".$flaeche[0]." ";
+				$sql.= "WHERE b_plan_sondergebiete.plan_id = ".$plan_id." ";
+				$sql.= "AND b_plan_sondergebiete.gebietstyp = ".$gebiet['gebietstyp']." ";
+				if($gebiet['konkretisierung'] != ''){
+					$sql.= "AND b_plan_sondergebiete.konkretisierung = ".$gebiet['konkretisierung']." ";
+				}
+			}			
+			#echo $sql.'<br>';
+			$ret2 = $this->database->execSQL($sql,4, 1);
+		}
+		
 	}
 	
   function delete_bplan($plan_id){
@@ -244,7 +295,7 @@ class rok {
  	
   
   function getExtentFromRokNrBplan($roknr, $border, $epsg) {
-		$sql = "SELECT st_xmin(st_extent(st_transform(the_geom,".$epsg."))) AS minx,st_ymin(st_extent(st_transform(the_geom, ".$epsg."))) as miny,st_xmax(st_extent(st_transform(the_geom, ".$epsg."))) AS maxx,st_ymax(st_extent(st_transform(the_geom, ".$epsg."))) AS maxy FROM rok_edit.rok_geltungsbereiche WHERE roknr = '".$roknr."'";
+		$sql = "SELECT st_xmin(st_extent(st_transform(the_geom,".$epsg."))) AS minx,st_ymin(st_extent(st_transform(the_geom, ".$epsg."))) as miny,st_xmax(st_extent(st_transform(the_geom, ".$epsg."))) AS maxx,st_ymax(st_extent(st_transform(the_geom, ".$epsg."))) AS maxy FROM rok.rok_geltungsbereiche WHERE roknr = '".$roknr."'";
 		#echo $sql;
 	    $ret = $this->database->execSQL($sql, 4, 0);
 		$rs = pg_fetch_array($ret[1]);

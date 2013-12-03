@@ -8,8 +8,8 @@
   <tr>
     <td colspan="2" align="center">
       <div style="position: relative; visibility: visible; left: 0px; top: 0px">
-  <? 
-        $this->debug->write("Include Wappen <b>".WAPPENPATH.$this->Stelle->getWappen()."</b> in menue.php",4); 
+  <?
+        $this->debug->write("Include Wappen <b>".WAPPENPATH.$this->Stelle->getWappen()."</b> in menue.php",4);
   ?>
               <img src="<? echo WAPPENPATH.$this->Stelle->getWappen(); ?>" alt="Wappen" align="middle"></td>
       </div>
@@ -17,7 +17,7 @@
   </tr>
 <?php
        }
-  if ($this->img['referenzkarte']!='' AND MENU_REFMAP == "oben") { 
+  if ($this->img['referenzkarte']!='' AND MENU_REFMAP == "oben") {
     ?>
   <tr>
     <td><input type="image" id="refmap" name="refmap" src="<?php echo $this->img['referenzkarte']; ?>" alt="Referenzkarte" align="right" hspace="0"></td>
@@ -51,7 +51,7 @@
             if($this->Menue->Menueoption[$i - $count1]['status']==1){
               echo'
                       <tr>
-                        <td> 
+                        <td>
                           <img src="'.GRAPHICSPATH.'leer.gif" width="13" height="1" border="0">
 												</td>
 												<td>';
@@ -60,7 +60,7 @@
                         if ($this->Menue->Menueoption[$i]['target']=='confirm') {
                             ?>javascript:Bestaetigung('<?
                         }
-                        echo $this->Menue->Menueoption[$i]['links']; 
+                        echo $this->Menue->Menueoption[$i]['links'];
                         if ($this->Menue->Menueoption[$i]['target']=='confirm') {
                             ?>','Diese Aktion wirklich ausführen?')<?
                             $this->Menue->Menueoption[$i]['target']='';
@@ -70,7 +70,7 @@
                             ?> target="<? echo $this->Menue->Menueoption[$i]['target']; ?>"<?
                         }
                         ?>><?
-                          
+
                 echo        $this->Menue->Menueoption[$i]['name'].'</a>
                         </td>
                       </tr>
@@ -80,12 +80,12 @@
               echo'
                       <tr>
                         <td>';
-              ?> 
+              ?>
                           <a href="<?
                         if ($this->Menue->Menueoption[$i]['target']=='confirm') {
                             ?>javascript:Bestaetigung('<?
                         }
-                        echo $this->Menue->Menueoption[$i]['links']; 
+                        echo $this->Menue->Menueoption[$i]['links'];
                         if ($this->Menue->Menueoption[$i]['target']=='confirm') {
                             ?>','Diese Aktion wirklich ausführen?')<?
                             $this->Menue->Menueoption[$i]['target']='';
@@ -95,7 +95,7 @@
                             ?> target="<? echo $this->Menue->Menueoption[$i]['target']; ?>"<?
                         }
                         ?>><?
-                          
+
                 echo          $this->Menue->Menueoption[$i]['name'].'</a>
                         </td>
                       </tr>
@@ -125,25 +125,41 @@
               	if(POPUPMENUE == 'true'){
                   echo'
                   <tr>
-                    <td valign="top" onmouseover="popup(\'menue'.$this->Menue->Menueoption[$i]['id'].'\')" onmouseout="popdown(\'menue'.$this->Menue->Menueoption[$i]['id'].'\')">
-                      <div id="menue'.$this->Menue->Menueoption[$i]['id'].'" class="" style="background-color: '.BG_MENUETOP.';position: relative; visibility: visible; left: 0px; top: 0px; z-index:3">';
+                    <td valign="top" onmouseover="popup(\'menue'.$this->Menue->Menueoption[$i]['id'].'\')" onmouseout="popdown(\'menue'.$this->Menue->Menueoption[$i]['id'].'\')">';
                       if(AJAX_MENUE == 'true'){
-                      	echo '<a href="javascript:changemenue('.$this->Menue->Menueoption[$i]['id'].');" class="black"><img id="image_'.$this->Menue->Menueoption[$i]['id'].'" src="'.GRAPHICSPATH.'menue_top.gif" width="17" height="17" border="0">'.$this->Menue->Menueoption[$i]['name'].'</a>';
+                      	echo '<a href="javascript:changemenue('.$this->Menue->Menueoption[$i]['id'].');" class="black">';
                       }
                       else{
-                      	echo '<a href="'.$this->Menue->Menueoption[$i]['links'].'&id='.$this->Menue->Menueoption[$i]['id'].'&status=on" class="black"><img id="image_'.$this->Menue->Menueoption[$i]['id'].'" src="'.GRAPHICSPATH.'menue_top.gif" width="17" height="17" border="0">'.$this->Menue->Menueoption[$i]['name'].'</a>';
+                      	echo '<a href="'.$this->Menue->Menueoption[$i]['links'].'&id='.$this->Menue->Menueoption[$i]['id'].'&status=on" class="black">';
+                      }
+                      echo '
+                      <div id="menue'.$this->Menue->Menueoption[$i]['id'].'" class="" style="background-color: '.BG_MENUETOP.';position: relative; visibility: visible; left: 0px; top: 0px; z-index:3">
+                      <img id="image_'.$this->Menue->Menueoption[$i]['id'].'" src="'.GRAPHICSPATH.'menue_top.gif" width="17" height="17" border="0">';
+                      if(AJAX_MENUE == 'true'){
+                      	echo $this->Menue->Menueoption[$i]['name'];
+                      }
+                      else{
+                      	echo $this->Menue->Menueoption[$i]['name'];
                       }
               	}
               	else{
-              	  echo'
+              	  echo '
                   <tr>
-                    <td valign="top">
-                      <div id="menue'.$this->Menue->Menueoption[$i]['id'].'" class="menu" style="background-color: '.BG_MENUETOP.'; position: relative; visibility: visible; left: 0px; top: 0px; z-index:3">';
+                    <td valign="top">';
                       if(AJAX_MENUE == 'true'){
-                      	echo '<a href="javascript:changemenue('.$this->Menue->Menueoption[$i]['id'].');" class="black"><img id="image_'.$this->Menue->Menueoption[$i]['id'].'" src="'.GRAPHICSPATH.'menue_top.gif" width="17" height="17" border="0">'.$this->Menue->Menueoption[$i]['name'].'</a>';
+                      	echo '<a href="javascript:changemenue('.$this->Menue->Menueoption[$i]['id'].');" class="black">';
                       }
                       else{
-                      	echo '<a href="'.$this->Menue->Menueoption[$i]['links'].'&id='.$this->Menue->Menueoption[$i]['id'].'&status=on" class="black"><img id="image_'.$this->Menue->Menueoption[$i]['id'].'" src="'.GRAPHICSPATH.'menue_top.gif" width="17" height="17" border="0">'.$this->Menue->Menueoption[$i]['name'].'</a>';
+                      	echo '<a href="'.$this->Menue->Menueoption[$i]['links'].'&id='.$this->Menue->Menueoption[$i]['id'].'&status=on" class="black">';
+                      }
+                      echo '
+                      <div id="menue'.$this->Menue->Menueoption[$i]['id'].'" class="menu" style="background-color: '.BG_MENUETOP.'; position: relative; visibility: visible; left: 0px; top: 0px; z-index:3">
+                      <img id="image_'.$this->Menue->Menueoption[$i]['id'].'" src="'.GRAPHICSPATH.'menue_top.gif" width="17" height="17" border="0">';
+                      if(AJAX_MENUE == 'true'){
+                      	echo $this->Menue->Menueoption[$i]['name'];
+                      }
+                      else{
+                      	echo $this->Menue->Menueoption[$i]['name'];
                       }
 
               	}
@@ -151,13 +167,21 @@
               else{
                 echo'
                   <tr>
-                    <td valign="top">
-                      <div id="menue'.$this->Menue->Menueoption[$i]['id'].'" class="menu" style="background-color: '.BG_MENUETOP.'; position: relative; visibility: visible; left: 0px; top: 0px; z-index:3">';
+                    <td valign="top">';
                       if(AJAX_MENUE == 'true'){
-                      	echo '<a href="javascript:changemenue('.$this->Menue->Menueoption[$i]['id'].');" class="black"><img id="image_'.$this->Menue->Menueoption[$i]['id'].'" src="'.GRAPHICSPATH.'menue_top_open.gif" width="17" height="17" border="0">'.$this->Menue->Menueoption[$i]['name'].'</a>';
+                      	echo '<a href="javascript:changemenue('.$this->Menue->Menueoption[$i]['id'].');" class="black">';
                       }
                       else{
-                      	echo '<a href="'.$this->Menue->Menueoption[$i]['links'].'&id='.$this->Menue->Menueoption[$i]['id'].'&status=off" class="black"><img id="image_'.$this->Menue->Menueoption[$i]['id'].'" src="'.GRAPHICSPATH.'menue_top_open.gif" width="17" height="17" border="0">'.$this->Menue->Menueoption[$i]['name'].'</a>';
+                      	echo '<a href="'.$this->Menue->Menueoption[$i]['links'].'&id='.$this->Menue->Menueoption[$i]['id'].'&status=off" class="black">';
+                      }
+                      echo '
+                      <div id="menue'.$this->Menue->Menueoption[$i]['id'].'" class="menu" style="background-color: '.BG_MENUETOP.'; position: relative; visibility: visible; left: 0px; top: 0px; z-index:3">
+                      <img id="image_'.$this->Menue->Menueoption[$i]['id'].'" src="'.GRAPHICSPATH.'menue_top_open.gif" width="17" height="17" border="0">';
+                      if(AJAX_MENUE == 'true'){
+                      	echo $this->Menue->Menueoption[$i]['name'];
+                      }
+                      else{
+                      	echo $this->Menue->Menueoption[$i]['name'];
                       }
               }
             }
@@ -165,20 +189,21 @@
               echo'
                 <tr>
                   <td colspan="2" style="background-color: '.BG_MENUETOP.';">
+                    <a href="'.$this->Menue->Menueoption[$i]['links'].'" target="'.$this->Menue->Menueoption[$i]['target'].'" class="red">
                     <div id="menue'.$this->Menue->Menueoption[$i]['id'].'" class="" style="position: relative; visibility: visible; left: 0px; top: 0px; z-index:3">
-                    <img src="'.GRAPHICSPATH.'leer.gif" width="17" height="17" border="0"><a href="'.$this->Menue->Menueoption[$i]['links'].'" target="'.$this->Menue->Menueoption[$i]['target'].'" class="red">'.$this->Menue->Menueoption[$i]['name'].'</a>';
+                    <img src="'.GRAPHICSPATH.'leer.gif" width="17" height="17" border="0">'.$this->Menue->Menueoption[$i]['name'];
             }
-              $last=1; 
+              $last=1;
           }
         }
         if($last == 2){
           echo'
                 </table>
-            </div>  
+            </div>
         ';
         }
-        echo '</div>';
-        $i=0; 
+        echo '</div></a>';
+        $i=0;
         ?>
     </td>
   </tr>
@@ -187,26 +212,26 @@
     	<img src="<? //echo GRAPHICSPATH; ?>leer.gif" width="17" height="17" border="0"><strong><a href="help/Dokumentation.htm" target="_blank" title="Hilfe" class="red"><?php echo $strHelp; ?></a></strong>
     </td-->
   </tr><?php
-  if ($this->img['referenzkarte']!='' AND MENU_REFMAP !="oben") { 
+  if ($this->img['referenzkarte']!='' AND MENU_REFMAP !="oben") {
     ?><tr>
     <td colspan="2" ><input id="refmap" type="image" name="refmap" src="<?php echo $this->img['referenzkarte']; ?>" alt="Referenzkarte" align="right" hspace="0"></td>
   </tr><?php } ?>
   <tr>
     <td colspan="2" align="center">
-      <div style="position: relative; visibility: visible; left: 0px; top: 0px"> 
+      <div style="position: relative; visibility: visible; left: 0px; top: 0px">
         <table border="0" cellspacing="0" cellpadding="0">
-          <tr> 
-            <td valign="top" align="center"> <input name="button" type="button" class="button" onClick="showMapParameter()" value="<?php echo $strMapInfo; ?>"> 
+          <tr>
+            <td valign="top" align="center"> <input name="button" type="button" class="button" onClick="showMapParameter()" value="<?php echo $strMapInfo; ?>">
               <br/>
               <br/> </td>
           </tr>
           <?php
        if (MENU_WAPPEN=="unten") {
 ?>
-          <tr> 
-            <td valign="top" align="center"> 
-              <? 
-        $this->debug->write("Include Wappen <b>".WAPPENPATH.$this->Stelle->getWappen()."</b> in menue.php",4); 
+          <tr>
+            <td valign="top" align="center">
+              <?
+        $this->debug->write("Include Wappen <b>".WAPPENPATH.$this->Stelle->getWappen()."</b> in menue.php",4);
   ?>
               <img src="<? echo WAPPENPATH.$this->Stelle->getWappen(); ?>" alt="Wappen" align="middle"></td>
           </tr>

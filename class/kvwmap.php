@@ -6477,22 +6477,22 @@ class GUI extends GUI_core{
         elseif($layerset[0]['attributes']['orderby'] != ''){										# Fall 2: der Layer hat im Pfad ein ORDER BY
         	$sql_order = $layerset[0]['attributes']['orderby'];
         }
-        else{																																						# Fall 3: standardmäßig wird nach der oid sortiert
-	        $j = 0;
-	        foreach($layerset[0]['attributes']['all_table_names'] as $tablename){
-						if($tablename == $layerset[0]['maintable'] AND $layerset[0]['attributes']['oids'][$j]){      # hat die Haupttabelle oids?
-							$sql_order = ' ORDER BY '.$layerset[0]['maintable'].'_oid ';
-						}
-						$j++;
-	      	}
-        }      	
+        																																						# standardmäßig wird nach der oid sortiert
+				$j = 0;
+				foreach($layerset[0]['attributes']['all_table_names'] as $tablename){
+					if($tablename == $layerset[0]['maintable'] AND $layerset[0]['attributes']['oids'][$j]){      # hat die Haupttabelle oids, dann wird immer ein order by oid gemacht, sonst ist die Sortierung nicht eindeutig
+						if($sql_order == '')$sql_order = ' ORDER BY '.$layerset[0]['maintable'].'_oid ';
+						else $sql_order .= ', '.$layerset[0]['maintable'].'_oid ';
+					}
+					$j++;
+				}    	
       	        
-		if($this->last_query != ''){
-			$sql = $this->last_query[$layerset[0]['Layer_ID']]['sql'];
-			if($this->formvars['orderby'.$layerset[0]['Layer_ID']] == '')$sql_order = $this->last_query[$layerset[0]['Layer_ID']]['orderby'];
-			$this->formvars['anzahl'] = $this->last_query[$layerset[0]['Layer_ID']]['limit'];
-			if($this->formvars['offset_'.$layerset[0]['Layer_ID']] == '')$this->formvars['offset_'.$layerset[0]['Layer_ID']] = $this->last_query[$layerset[0]['Layer_ID']]['offset'];
-		}
+				if($this->last_query != ''){
+					$sql = $this->last_query[$layerset[0]['Layer_ID']]['sql'];
+					if($this->formvars['orderby'.$layerset[0]['Layer_ID']] == '')$sql_order = $this->last_query[$layerset[0]['Layer_ID']]['orderby'];
+					$this->formvars['anzahl'] = $this->last_query[$layerset[0]['Layer_ID']]['limit'];
+					if($this->formvars['offset_'.$layerset[0]['Layer_ID']] == '')$this->formvars['offset_'.$layerset[0]['Layer_ID']] = $this->last_query[$layerset[0]['Layer_ID']]['offset'];
+				}
 		
         if($this->formvars['embedded_subformPK'] == ''){
         	if($this->formvars['anzahl'] == ''){
@@ -11516,18 +11516,19 @@ class GUI extends GUI_core{
 	            }*/
             }
 			
-			# order by 
+			# order by
 			if($this->formvars['orderby'.$layerset[$i]['Layer_ID']] != ''){									# Fall 1: im GLE soll nach einem Attribut sortiert werden
 			  $sql_order = ' ORDER BY '.$this->formvars['orderby'.$layerset[$i]['Layer_ID']];
 			}
 			elseif($layerset[$i]['attributes']['orderby'] != ''){														# Fall 2: der Layer hat im Pfad ein ORDER BY
 				$sql_order = $layerset[$i]['attributes']['orderby'];
 			}
-			elseif($layerset[$i]['template'] == ''){																				# Fall 3: standardmäßig wird nach der oid sortiert
+			if($layerset[$i]['template'] == ''){																				# standardmäßig wird nach der oid sortiert
 				$j = 0;
 				foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-					if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['attributes']['oids'][$j]){      # hat die Haupttabelle oids?
-						$sql_order = ' ORDER BY '.$layerset[$i]['maintable'].'_oid ';
+					if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['attributes']['oids'][$j]){      # hat die Haupttabelle oids, dann wird immer ein order by oid gemacht, sonst ist die Sortierung nicht eindeutig
+						if($sql_order == '')$sql_order = ' ORDER BY '.$layerset[$i]['maintable'].'_oid ';
+						else $sql_order .= ', '.$layerset[$i]['maintable'].'_oid ';
 					}
 					$j++;
 				}
