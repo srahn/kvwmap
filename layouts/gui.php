@@ -29,7 +29,7 @@ include(WWWROOT.APPLVERSION.'funktionen/gui_functions.php');
           </td>
             
             <td align="center" valign="top" background="<?php echo GRAPHICSPATH; ?>bg.gif">
-							<div style=" position: relative; overflow: hidden"><?php
+							<div style=" position: relative; overflow: hidden; "><?php
               $this->debug->write("Include <b>".$this->main."</b> in gui.php",4);
 				      if(file_exists($this->main)){
 				      	include($this->main);			# Pluginviews

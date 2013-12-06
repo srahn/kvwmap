@@ -415,7 +415,9 @@ class GUI_core {
         $rollenlayer = $mapDB->read_RollenLayer();
         $layerset = array_merge($layer, $rollenlayer);
         $layerset['anzLayer'] = count($layerset);
-        
+        unset($this->layers_of_group);		# falls loadmap zweimal aufgerufen wird
+				unset($this->groups_with_layers);	# falls loadmap zweimal aufgerufen wird
+				
         for($i=0; $i < $layerset['anzLayer']; $i++){
 					if($layerset[$i]['alias'] == '' OR !$this->Stelle->useLayerAliases){
 						$layerset[$i]['alias'] = $layerset[$i]['Name'];			# kann vielleicht auch in read_layer gesetzt werden
@@ -712,7 +714,7 @@ class GUI_core {
           } # Ende Layer ist aktiv
         } # end of Schleife layer
         
-		$this->layerset = $layerset;        
+				$this->layerset = $layerset;        
         $this->map=$map;
 				if (MAPSERVERVERSION >= 600 ) {
 					$this->map_scaledenom = $map->scaledenom;

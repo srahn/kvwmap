@@ -8,7 +8,7 @@ var nn6 = (dom&&!ie5)? 1:0
 var sNav = (nn4||nn6||ie4||ie5)? 1:0
 var cssFilters = ((ua.indexOf("MSIE 5.5")>=0||ua.indexOf("MSIE 6")>=0)&&ua.indexOf("Opera")<0)? 1:0
 var Style=[],Text=[],Count=0,sbw=0,move=0,hs="",mx,my,scl,sct,ww,wh,obj,sl,st,ih,iw,vl,hl,sv,evlh,evlw,tbody
-var HideTip = "eval(obj+sv+hl+';'+obj+sl+'=0;'+obj+st+'=-800')"
+var HideTip = "eval(obj+sv+hl+';')"
 var doc_root = ((ie5&&ua.indexOf("Opera")<0||ie4)&&document.compatMode=="CSS1Compat")? "document.documentElement":"document.body"
 var PX = (nn6)? "px" :"" 
 
@@ -139,23 +139,7 @@ function stm(t,s) {
 
 function MoveTip(e) {
 	if(move) {
-		var X,Y,MouseX = eval(mx),MouseY = eval(my); tbody.Height = parseInt(eval(obj+ih)+3)
-		tbody.wiw = parseInt(eval(ww+"+"+scl)); tbody.wih = parseInt(eval(wh+"+"+sct))
-		switch(tbody.Pos) {
-			case "left" : X=MouseX-tbody.Width-tbody.Xpos; Y=MouseY+tbody.Ypos; break
-			case "center": X=MouseX-(tbody.Width/2); Y=MouseY+tbody.Ypos; break
-			case "float": X=tbody.Xpos+eval(scl); Y=tbody.Ypos+eval(sct); break	
-			case "fixed": X=tbody.Xpos; Y=tbody.Ypos; break		
-			default: X=MouseX+tbody.Xpos; Y=MouseY+tbody.Ypos
-		}
 
-		if(tbody.wiw<tbody.Width+X) X = tbody.wiw-tbody.Width
-		if(tbody.wih<tbody.Height+Y+sbw) {
-			if(tbody.Pos=="float"||tbody.Pos=="fixed") Y = tbody.wih-tbody.Height-sbw
-			else Y = MouseY-tbody.Height
-		}
-		if(X<0) X=0 
-		eval(obj+sl+"=X+PX;"+obj+st+"=Y+PX")
 		ViewTip()
 	}
 }

@@ -165,9 +165,7 @@
 								</tr>
 							';
 
-			  			if($attributes['group'][$j] != $attributes['group'][$j+1] OR ($attributes['group'][$j] != '' AND $attributes['type'][$j+1] == 'geometry' AND $attributes['name'][$j+2] == NULL)){		# wenn die nächste Gruppe anders ist (oder das nächste Attribut eine Geometrie und auch das letzte Attribut), Tabelle schliessen
-								echo '</table></td></tr>';
-			  			}
+			  			
 			  			
 							if($attributes['privileg'][$j] >= '0'){
 								$this->form_field_names .= $layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'|';
@@ -182,6 +180,9 @@
 			  			$nullable = $attributes['nullable'][$j];
 			  			$this->form_field_names .= $layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';Geometrie;'.$attributes['nullable'][$j].'|';
 			  		}
+					}
+					if($attributes['group'][$j] != $attributes['group'][$j+1]){		# wenn die nächste Gruppe anders ist, Tabelle schliessen
+						echo '</table></td></tr>';
 					}
 				}
 				if(($columnname != '' OR $layer['shape'][$k]['geom'] != '') AND $this->new_entry != true AND $this->formvars['printversion'] == ''){

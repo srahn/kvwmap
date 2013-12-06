@@ -1,7 +1,6 @@
 
 <script type="text/javascript" src="funktionen/calendar.js"></script>
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
-<DIV id="TipLayer" style="visibility:hidden;position:absolute;z-index:1000;top:-100"></DIV>
 <SCRIPT src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></SCRIPT>
 <script type="text/javascript">
 <!--
@@ -10,21 +9,23 @@ Text[1]=["Achtung:","Bei Auswahl von Gemarkung und Flur erfolgt eine räumliche 
 
 function save(){
 	art = document.getElementsByName('abfrageart');
-	if(document.GUI.suchgemarkung.value == '' && (document.GUI.suchflur.value != '' || document.GUI.suchrissnr.value != '' || document.GUI.suchfortf.value != '')){
-		alert('Bitte geben Sie die Gemarkung an.');
-		return;
-	}
-	if(document.GUI.suchgemarkung.value != '' && document.GUI.suchflur.value == ''){
-		alert('Bitte geben Sie Gemarkung und Flur an.');
-		return;
-	}
-	if(document.GUI.VermStelle.value != '' && document.GUI.suchgemarkung.value == '' && document.GUI.suchstammnr.value == '' && document.GUI.suchrissnr.value == '' && document.GUI.datum.value == '' && document.GUI.suchfortf.value == ''){
-		alert('Bitte geben Sie eine Gemarkung und Flur, eine Antragsnummer, eine Rissnummer, ein Datum oder eine Fortführung an.');
-		return;
-	}
-	if(document.GUI.suchgemarkung.value == '' && document.GUI.suchstammnr.value == '' && document.GUI.datum.value == ''){
-		alert('Bitte geben Sie Suchparameter an.');
-		return;
+	if(art[0].checked == true){
+		if(document.GUI.suchgemarkung.value == '' && (document.GUI.suchflur.value != '' || document.GUI.suchrissnr.value != '' || document.GUI.suchfortf.value != '')){
+			alert('Bitte geben Sie die Gemarkung an.');
+			return;
+		}
+		if(document.GUI.suchgemarkung.value != '' && document.GUI.suchflur.value == ''){
+			alert('Bitte geben Sie Gemarkung und Flur an.');
+			return;
+		}
+		if(document.GUI.VermStelle.value != '' && document.GUI.suchgemarkung.value == '' && document.GUI.suchstammnr.value == '' && document.GUI.suchrissnr.value == '' && document.GUI.datum.value == '' && document.GUI.suchfortf.value == ''){
+			alert('Bitte geben Sie eine Gemarkung und Flur, eine Antragsnummer, eine Rissnummer, ein Datum oder eine Fortführung an.');
+			return;
+		}
+		if(document.GUI.suchgemarkung.value == '' && document.GUI.suchstammnr.value == '' && document.GUI.datum.value == ''){
+			alert('Bitte geben Sie Suchparameter an.');
+			return;
+		}
 	}
 	if(art[1].checked == true && document.GUI.newpathwkt.value == ''){
 		if(document.GUI.newpath.value == ''){
@@ -146,7 +147,11 @@ else {
           </td>
 		</tr>
 		<tr>
-          <td align="left" colspan="3">Flur:&nbsp;&nbsp;&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>ikon_i.gif" onMouseOver="stm(Text[1],Style[0])" onmouseout="htm()"><br><input type="text" name="suchflur" value="<?php echo $this->formvars['suchflur']; ?>" size="3" maxlength="3">
+          <td align="left" colspan="3">Flur:&nbsp;&nbsp;&nbsp;&nbsp;
+						<div style="position: relative">
+						<img src="<?php echo GRAPHICSPATH;?>ikon_i.gif" onMouseOver="stm(Text[1],Style[0])" onmouseout="htm()"><br><input type="text" name="suchflur" value="<?php echo $this->formvars['suchflur']; ?>" size="3" maxlength="3">
+						<DIV id="TipLayer" style="visibility:hidden;position:absolute;z-index:1000;left: -50px"></DIV>
+						</div>
           </td>
         </tr>
 		<tr>

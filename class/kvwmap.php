@@ -3114,10 +3114,11 @@ class GUI extends GUI_core{
       }
       $csv .= ';';
       $csv .= $this->flurstuecke[$i]['albflaeche'].';';
+			$csv .= str_replace('.', ',', round($this->flurstuecke[$i]['schnittflaeche'], 2)).';';
       $csv .= str_replace('.', ',', $this->flurstuecke[$i]['anteil']).';';
      	$csv .= chr(10);  
     }
-    $csv = 'Gemarkung;Flur;Zähler/Nenner;Eigentümer;Flst-Fläche(ALB);Anteil'.chr(10).$csv;
+    $csv = 'Gemarkung;Flur;Zähler/Nenner;Eigentümer;Flst-Fläche(ALB);Anteil m²;Anteil %'.chr(10).$csv;
     ob_end_clean();
     header("Content-type: application/vnd.ms-excel");
     header("Content-disposition:  inline; filename=Flurstuecke.csv");
@@ -8032,9 +8033,12 @@ class GUI extends GUI_core{
     $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
     $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
     if($this->formvars['stelle'] != '' AND $this->formvars['selected_layer_id'] != ''){
-      $stelle = new stelle($this->formvars['stelle'], $this->database);
-      $stelle->set_attributes_privileges($this->formvars, $this->attributes);
-      $stelle->set_layer_privileges($this->formvars['selected_layer_id'], $this->formvars['privileg'.$this->formvars['stelle']]);
+			$stellen = explode('|', $this->formvars['stelle']);
+			foreach($stellen as $stelleid){
+				$stelle = new stelle($stelleid, $this->database);
+				$stelle->set_attributes_privileges($this->formvars, $this->attributes);
+				$stelle->set_layer_privileges($this->formvars['selected_layer_id'], $this->formvars['privileg'.$stelleid]);
+			}
     }
     elseif($this->formvars['selected_layer_id'] != ''){
       $mapdb->set_default_layer_privileges($this->formvars, $this->attributes);
@@ -11008,6 +11012,7 @@ class GUI extends GUI_core{
             if($this->formvars['ALK_Suche'] == 1){
             	$this->loadMap('DataBase');
 		          $this->zoomToALKFlurst($FlurstKennz,10);				# ALKIS TODO
+							if($this->formvars['go_next'] != '')header('location: index.php?go='.$this->formvars['go_next']);
 		          $currenttime=date('Y-m-d H:i:s',time());
 		          $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
 		          $this->drawMap();
@@ -13465,6 +13470,7 @@ class GUI extends GUI_core{
 	        if($ret[0]){
 	        	$this->zoomToALKFlurst($FlurstKennz,100);
 	        }
+					if($this->formvars['go_next'] != '')header('location: index.php?go='.$this->formvars['go_next']);
 	        $currenttime=date('Y-m-d H:i:s',time());
           $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
           $this->drawMap();

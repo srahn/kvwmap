@@ -94,3 +94,4 @@ if ($this->Fehlermeldung!='') {
 <input type="hidden" name="selFlstID" value="<? echo $this->formvars['selFlstID']; ?>">
 <input name="historical" type="hidden" value="<? echo $this->formvars['historical']; ?>">
 <input name="ALK_Suche" type="hidden" value="<? echo $this->formvars['ALK_Suche']; ?>">
+<input name="go_next" type="hidden" value="<? echo $this->formvars['go_next']; ?>">
