@@ -35,17 +35,12 @@ td {
 
 .menu a{ 
     font-size: 10pt;
-   -moz-transition-property: text-shadow;
-   -moz-transition-duration: 0.1s;
-   -moz-transition-delay: 0s;
 }
 
 .menu a:hover { 
-    font-size: 10pt;
-     text-shadow: #808080 3px 3px 5px;
-   -moz-transition-property: text-shadow;
-   -moz-transition-duration: 0.4s;
-   -moz-transition-delay: 0s;
+   text-shadow: #808080 3px 3px 5px;
+   transition: all 0.4s ease;
+   -webkit-transition: all 0.4s ease;
 }
 
 .normallegend {
@@ -192,15 +187,22 @@ a.green {
 	TEXT-DECORATION: none; 
 }
 
-a.black {
+span.black {
 	color: black;
 	font-weight: bold; 
 	TEXT-DECORATION:none
 }
 
-a.black2 {
+
+span.black:hover {
+	text-shadow: #808080 3px 3px 5px;
+	transition: all 0.4s ease;
+	-webkit-transition: all 0.4s ease;
+}
+
+
+a.metalink {
 	color: black; 
-	TEXT-DECORATION:none
 }
 
 #layer {

@@ -52,7 +52,7 @@ class GUI_core {
   ###################### Liste der Funktionen ####################################
 
   # Konstruktor
-  function GUI_core($main,$style,$mime_type) {
+  function GUI_core() {
     # Debugdatei setzen
     global $debug;
     $this->debug=$debug;
@@ -62,12 +62,6 @@ class GUI_core {
     # Logdatei für PostgreSQL setzten
     global $log_postgres;
     $this->log_postgres=$log_postgres;
-    # layout Templatedatei zur Anzeige der Daten
-    if ($main!="") $this->main=$main;
-    # style Stylesheetdatei
-    if (isset($style)) $this->style=$style;
-    # mime_type html, pdf
-    if (isset ($mime_type)) $this->mime_type=$mime_type;
   }
   
   /**
@@ -1473,8 +1467,6 @@ class GUI_core {
 	  	if(is_string($value))$this->formvars[$key] = stripslashes($value);
 	  }
     # bisher gibt es folgenden verschiedenen Dokumente die angezeigt werden können
-    global $html;
-    $html['style']=$this->style;
     switch ($this->mime_type) {
       case 'printversion' : {
         include (LAYOUTPATH.'snippets/printversion.php');

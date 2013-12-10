@@ -1,10 +1,10 @@
 <?php
 # Objekt für graphische Benutzeroberfläche erzeugen
 if($_REQUEST['go'] == 'getMap_ajax'){
-	$GUI=new GUI_core("map.php","main.css","html");
+	$GUI=new GUI_core();
 }
 else{
-	$GUI=new GUI("map.php","main.css","html");
+	$GUI=new GUI("map.php", "main.css", "html");
 }
 
 # Übergabe aller Formularvariablen an die Benutzeroberfläche an formvars

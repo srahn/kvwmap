@@ -5,7 +5,7 @@
 #                                                                  #
 ####################################################################
 # aktuelle Versionsnummer
-define('VERSION','1.11.0');
+define('VERSION','1.13.0');
 define('APPLVERSION','kvwmap_'.VERSION.'/');
 # Bezeichnung der MySQL-Datenbank mit den Benutzerdaten
 $dbname='kvwmapdb';
@@ -47,9 +47,8 @@ define('ALKIS', false);																# Version 1.8.0
 
 
 ########################## Layout-Vorgaben
-# Schalter für die neue Legende
-#define('NEW_LEGEND', 'true');                               # Version 1.6.7			in Version 1.7.3 wieder gelöscht
-
+# Hier kann eine eigene css-Datei, die im Ordner layouts/custom liegen muss, angegeben werden. Sie wird zusätzlich zur main.css geladen.
+define('CUSTOM_STYLE', ''); 																# Version 1.13
 # definiert, ob der Polygoneditor nach einem Neuladen
 # der Seite immer in den Modus "Polygon zeichnen" wechselt
 define('ALWAYS_DRAW', 'true');     #true/false             # Version 1.6.9

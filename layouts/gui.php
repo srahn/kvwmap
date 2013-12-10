@@ -5,6 +5,9 @@ include(WWWROOT.APPLVERSION.'funktionen/gui_functions.php');
 ?>
 <link rel="shortcut icon" href="graphics/wappen/favicon.ico">
 <link rel="stylesheet" href="<?php echo 'layouts/'.$this->style; ?>">
+<? if(CUSTOM_STYLE != ''){ ?>
+<link rel="stylesheet" href="<?php echo 'layouts/custom/'.CUSTOM_STYLE; ?>">
+<? } ?>
 <?php include(WWWROOT.APPLVERSION.'funktionen/msgboxes.php'); ?>
 </HEAD>
 <BODY onload="onload_functions();"> <!-- leftmargin="5" topmargin="5" bgcolor="#FFFFFF" link="#FF0000" alink="#FF9999" vlink="#663333"> -->

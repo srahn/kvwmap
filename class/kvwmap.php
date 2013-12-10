@@ -192,7 +192,7 @@ class GUI extends GUI_core{
   # berücksichtigen und zu vereinheitlichen.
 
   # Konstruktor
-  function GUI($main,$style,$mime_type) {
+  function GUI($main, $style, $mime_type) {
     # Debugdatei setzen
     global $debug;
     $this->debug=$debug;
@@ -204,7 +204,7 @@ class GUI extends GUI_core{
     $this->log_postgres=$log_postgres;
     # layout Templatedatei zur Anzeige der Daten
     if ($main!="") $this->main=$main;
-    # style Stylesheetdatei
+    # Stylesheetdatei
     if (isset($style)) $this->style=$style;
     # mime_type html, pdf
     if (isset ($mime_type)) $this->mime_type=$mime_type;
@@ -564,6 +564,7 @@ class GUI extends GUI_core{
       switch($this->formvars['type']) {
   			case 'select-one' : {					# ein Auswahlfeld soll mit den Optionen aufgefüllt werden 
       		$html = '>';			# Workaround für dummen IE Bug
+			$html .= '<option value="">-- Auswahl --</option>';
       		while($rs = pg_fetch_array($ret[1])){
         		$html .= '<option value="'.$rs['value'].'">'.$rs['output'].'</option>';
       		}
@@ -973,7 +974,7 @@ class GUI extends GUI_core{
 								if(substr($layer['metalink'], 0, 10) != 'javascript'){
 									$legend .= 'target="_blank"';
 								}
-								$legend .= ' class="black2" href="'.$layer['metalink'].'">';
+								$legend .= ' class="metalink" href="'.$layer['metalink'].'">';
 							}
 							$legend .= '<font ';
 							if($layer['minscale'] != -1 AND $layer['maxscale'] > 0){
