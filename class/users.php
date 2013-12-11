@@ -875,6 +875,12 @@ class user extends user_core{
 			else{
 				$sql.=',runningcoords="0"';
 			}
+			if($formvars['singlequery'] != ''){
+				$sql.=',singlequery="1"';
+			}
+			else{
+				$sql.=',singlequery="0"';
+			}
 			if($formvars['back']){$buttons .= 'back,';}
 			if($formvars['forward']){$buttons .= 'forward,';}
 			if($formvars['zoomin']){$buttons .= 'zoomin,';}

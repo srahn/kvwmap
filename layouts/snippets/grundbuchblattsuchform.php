@@ -20,6 +20,19 @@ function backto_namesearch(){
 	document.GUI.submit();	
 }
 
+function showimport(){
+	if(document.getElementById('import2').style.display == 'none'){
+		document.getElementById('import1').style.borderTop="1px solid #C3C7C3";
+		document.getElementById('import1').style.borderLeft="1px solid #C3C7C3";
+		document.getElementById('import1').style.borderRight="1px solid #C3C7C3";
+		document.getElementById('import2').style.display = '';
+	}
+	else{
+		document.getElementById('import1').style.border="none";
+		document.getElementById('import2').style.display = 'none';
+	}
+}
+
 -->
 </script>
 
@@ -33,7 +46,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 
 ?><p>
 
-<table border="0" cellpadding="0" cellspacing="2">
+<table border="0" cellpadding="5" cellspacing="2">
 
   <tr>
     <td align="right">&nbsp;</td>
@@ -96,6 +109,17 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   	</td>
   </tr>
   <? } ?>
+	<tr>
+		<td id="import1" colspan="4" align="center"><a href="javascript:showimport();">Import Grundbuchblattliste...</a></td>
+	</tr>
+	<tr id="import2" style="display:none">
+		<td colspan="4" style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3">
+			<table>
+				<td><input name="importliste" type="file" value="" style="width: 340px" tabindex="2"></td>
+				<td><input type="submit" class="button" value="Laden"></td>
+			</table>
+		</td>
+	</tr>
   <tr>
     <td colspan="3" align="center">&nbsp;</td>
   </tr>

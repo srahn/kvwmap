@@ -876,6 +876,7 @@ class GUI extends GUI_core{
 				$legend .= $this->create_group_legend($group['id']);
 			}
 		}
+		$legend .= '<input type="hidden" name="layers" value="'.$this->layer_id_string.'">';
 		return $legend;
   }
 	
@@ -932,13 +933,24 @@ class GUI extends GUI_core{
 							if($layer['queryable'] == 1 AND !$this->formvars['nurFremdeLayer']){
 								$legend .=  '<input id="qLayer'.$layer['Layer_ID'].'" title="Abfrage ein/ausschalten" ';
 								
-								if($layer['selectiontype'] == 'radio'){
+								if($this->user->rolle->singlequery){			# singlequery-Modus
 									$legend .=  'type="radio" ';
-									$legend .=  ' onClick="if(event.preventDefault){event.preventDefault();}else{event.returnValue = false;};" onMouseDown="updateThema(event, document.getElementById(\'thema'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), document.GUI.radiolayers_'.$group_id.')"';
+									if($layer['selectiontype'] == 'radio'){
+										$legend .=  ' onClick="if(event.preventDefault){event.preventDefault();}else{event.returnValue = false;};" onMouseDown="updateThema(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), document.GUI.radiolayers_'.$group_id.', document.GUI.layers)"';
+									}
+									else{
+										$legend .=  ' onClick="if(event.preventDefault){event.preventDefault();}else{event.returnValue = false;};" onMouseDown="updateThema(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), \'\', document.GUI.layers)"';
+									}
 								}
-								else{
-									$legend .=  'type="checkbox" ';
-									$legend .=  ' onClick="updateThema(event, document.getElementById(\'thema'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), \'\')"';
+								else{			# normaler Modus
+									if($layer['selectiontype'] == 'radio'){
+										$legend .=  'type="radio" ';
+										$legend .=  ' onClick="if(event.preventDefault){event.preventDefault();}else{event.returnValue = false;};" onMouseDown="updateThema(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), document.GUI.radiolayers_'.$group_id.', \'\')"';
+									}								
+									else{
+										$legend .=  'type="checkbox" ';
+										$legend .=  ' onClick="updateThema(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), \'\', \'\')"';
+									}
 								}
 								
 								$legend .=  ' name="qLayer'.$layer['Layer_ID'].'" value="1" ';
@@ -954,15 +966,15 @@ class GUI extends GUI_core{
 							
 							$legend .=  '<input type="hidden" name="thema'.$layer['Layer_ID'].'" value="0">';
 							
-							$legend .=  '<input id="thema'.$layer['Layer_ID'].'" ';
+							$legend .=  '<input id="thema_'.$layer['Layer_ID'].'" ';
 							if($layer['selectiontype'] == 'radio'){
 								$legend .=  'type="radio" ';
-								$legend .=  ' onClick="if(event.preventDefault){event.preventDefault();}else{event.returnValue = false;};" onMouseDown="updateQuery(event, document.getElementById(\'thema'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), document.GUI.radiolayers_'.$group_id.')"';
+								$legend .=  ' onClick="if(event.preventDefault){event.preventDefault();}else{event.returnValue = false;};" onMouseDown="updateQuery(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), document.GUI.radiolayers_'.$group_id.')"';
 								$radiolayers[$group_id] .= $layer['Layer_ID'].'|';
 							}
 							else{
 								$legend .=  'type="checkbox" ';
-								$legend .=  ' onClick="updateQuery(event, document.getElementById(\'thema'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), \'\')"';
+								$legend .=  ' onClick="updateQuery(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), \'\')"';
 							}
 							$legend .=  'title="Thema ein/ausschalten" name="thema'.$layer['Layer_ID'].'" value="1" ';
 							if($layer['aktivStatus'] == 1){
@@ -1853,6 +1865,14 @@ class GUI extends GUI_core{
     $gbliste['bezeichnung'] = $sorted_arrays['array'];
     $gbliste['beides'] = $sorted_arrays['second_array'];
     $this->gbliste = $gbliste;
+		####### Import ###########
+		$_files = $_FILES;
+    if($_files['importliste']['name']){
+			$importliste = file($_files['importliste']['tmp_name'], FILE_IGNORE_NEW_LINES);
+			$this->formvars['selBlatt'] = implode(', ', $importliste);
+			$this->formvars['Bezirk'] = substr($importliste[0], 0, 6);
+		}
+		##########################
     if($this->formvars['Bezirk'] != ''){
     	if($this->formvars['selBlatt'])$this->selblattliste = explode(', ',$this->formvars['selBlatt']);
     	$this->blattliste = $grundbuch->getGrundbuchblattliste($this->formvars['Bezirk']);
@@ -13194,19 +13214,22 @@ class GUI extends GUI_core{
     	$this->titel='Flurstückssuche';
     }
     $this->main='flurstueckssuche.php';
-    # Unterscheidung ob die Flurstückssuche von neuem beginnt oder schon Werte vorausgewählt wurden
-    if ($this->formvars['aktualisieren']=='Neu') {
-      $GemID=0; $GemkgID=0; $FlurID=0; $FlstID=0; $FlstNr='';
-    }
-    else {
-      # Übernahme der Formularwerte für die Einstellung der Auswahlmaske
-      $GemID=$this->formvars['GemID'];
-      $GemkgID=$this->formvars['GemkgID'];
-      $FlurID=$this->formvars['FlurID'];
-      $FlstID=$this->formvars['FlstID'];
-      $FlstNr=$this->formvars['FlstNr'];
-      $selFlstID = explode(', ',$this->formvars['selFlstID']);
-    }
+    ####### Import ###########
+		$_files = $_FILES;
+    if($_files['importliste']['name']){
+			$importliste = file($_files['importliste']['tmp_name'], FILE_IGNORE_NEW_LINES);
+			$this->formvars['selFlstID'] = implode(', ', $importliste);
+			$this->formvars['GemkgID'] = substr($importliste[0], 0, 6);
+			$this->formvars['FlurID'] = substr($importliste[0], 7, 3);
+		}
+		##########################
+		# Übernahme der Formularwerte für die Einstellung der Auswahlmaske
+		$GemID=$this->formvars['GemID'];
+		$GemkgID=$this->formvars['GemkgID'];
+		$FlurID=$this->formvars['FlurID'];
+		$FlstID=$this->formvars['FlstID'];
+		$FlstNr=$this->formvars['FlstNr'];
+		$selFlstID = explode(', ',$this->formvars['selFlstID']);
     #$this->searchInExtent=$this->formvars['searchInExtent'];
     # Abfragen für welche Gemeinden die Stelle Zugriffsrechte hat
     # GemeindenStelle wird eine Liste mit ID´s der Gemeinden zugewiesen, die zur Stelle gehören

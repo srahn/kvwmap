@@ -420,6 +420,7 @@ class GUI_core {
 					if($layerset[$i]['requires'] == ''){
 						$this->layers_of_group[$layerset[$i]['Gruppe']][] = $layerset[$i]['Layer_ID'];				# die Layer-IDs in einer Gruppe
 					}
+					$this->layer_id_string .= $layerset[$i]['Layer_ID'].'|';							# alle Layer-IDs hintereinander in einem String
 											
 					if($layerset[$i]['requires'] != ''){
 						$lastlayer = $layerset[$i-1];

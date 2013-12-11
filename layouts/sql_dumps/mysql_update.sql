@@ -1140,3 +1140,5 @@ ALTER TABLE  `u_groups` ADD  `obergruppe` INT( 11 ) NULL;
 ALTER TABLE  `u_groups` ADD  `order` INT( 11 ) NULL;
 
 update `u_rolle2used_layer` set `aktivStatus` = '0' where `aktivStatus` = '';
+
+ALTER TABLE  `rolle` ADD  `singlequery` BOOLEAN NOT NULL DEFAULT  '0';

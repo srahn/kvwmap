@@ -21,5 +21,6 @@
   $strSearchColor="Result-Color";
   $strPolish="Polish";
   $strCoordType="Coordinate Presentation";
+	$strSingleQuery="only one layer queryable";
   
 ?>  
