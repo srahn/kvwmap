@@ -7,7 +7,17 @@ function toggle_vertices(){
 }
 
 function send(){
-	if(document.GUI.bodenrichtwert.value == ''){alert('Bitte geben Sie einen Bodenrichtwert an.');exit();}
+	if(document.GUI.verfahrensgrund.value == 'San'){
+		if(document.GUI.bodenrichtwert.value == '' && document.GUI.brwu.value == '' && document.GUI.brws.value == '' && document.GUI.brwb.value == ''){alert('Bitte geben Sie einen Bodenrichtwert, einen SanU-, SanS- oder SanB-Wert an.');exit();}
+	}
+	else{
+		if(document.GUI.verfahrensgrund.value == 'Entw'){
+			if(document.GUI.bodenrichtwert.value == '' && document.GUI.brwu.value == '' && document.GUI.brwb.value == ''){alert('Bitte geben Sie einen Bodenrichtwert, einen EU- oder EB-Wert an.');exit();}
+		}
+		else{
+			if(document.GUI.bodenrichtwert.value == ''){alert('Bitte geben Sie einen Bodenrichtwert an.');exit();}
+		}
+	}
 	if(document.GUI.stichtag.value == ''){alert('Bitte geben Sie einen Stichtag an.');exit();}
 	if(document.GUI.gemeinde.value == ''){alert('Bitte geben Sie eine Gemeinde an.');exit();}
 	if(document.GUI.gemarkung.value == ''){alert('Bitte geben Sie eine Gemarkung an.');exit();}
@@ -19,18 +29,17 @@ function send(){
 	if(document.GUI.nutzungsart.value == ''){alert('Bitte geben Sie eine Nutzungsart an.');exit();}
 	if(document.GUI.newpathwkt.value == ''){
 		if(document.GUI.newpath.value == ''){
-			alert('Geben Sie ein Polygon an.');
+			alert('Geben Sie ein Polygon an.');exit();
 		}
 		else{
 			document.GUI.newpathwkt.value = buildwktpolygonfromsvgpath(document.GUI.newpath.value);
-			document.GUI.go_plus.value = 'Senden';
-			document.GUI.submit();
 		}
 	}
-	else{
-		document.GUI.go_plus.value = 'Senden';
-		document.GUI.submit();
+	if(document.GUI.loc_x.value == '' && document.GUI.loc_y.value == ''){
+		alert('Geben Sie die Position für die Textanzeige an.');exit();
 	}
+	document.GUI.go_plus.value = 'Senden';
+	document.GUI.submit();
 }
 
 function add_options(select, options, firstoption){
@@ -42,11 +51,27 @@ function add_options(select, options, firstoption){
 
 function update_verfahren(){
 	document.GUI.verfahrensgrund_zusatz.length = 0;
+	document.getElementById('U').style.display = 'none';
+	document.getElementById('B').style.display = 'none';
+	document.getElementById('SanU').style.display = 'none';
+	document.getElementById('SanS').style.display = 'none';
+	document.getElementById('SanB').style.display = 'none';
+	document.getElementById('EU').style.display = 'none';
+	document.getElementById('EB').style.display = 'none';
 	if(document.GUI.verfahrensgrund.value == 'Entw'){
 		add_options(document.GUI.verfahrensgrund_zusatz, new Array('EU', 'EB'), 'kein');
+		document.getElementById('U').style.display = '';
+		document.getElementById('B').style.display = '';
+		document.getElementById('EU').style.display = '';
+		document.getElementById('EB').style.display = '';
 	}
 	if(document.GUI.verfahrensgrund.value == 'San'){
 		add_options(document.GUI.verfahrensgrund_zusatz, new Array('SU', 'SB'), 'kein');
+		document.getElementById('U').style.display = '';
+		document.getElementById('B').style.display = '';
+		document.getElementById('SanU').style.display = '';
+		document.getElementById('SanS').style.display = '';
+		document.getElementById('SanB').style.display = '';
 	}
 }
 
@@ -455,6 +480,37 @@ function update_require_attribute(attributes, layer_id, value){
 						      <input name="bodenrichtwert" type="text" id="bodenrichtwert" value="<?php echo $this->formvars['bodenrichtwert']; ?>" size="5" maxlength="5">
 						    </td>
 						  </tr>
+							<tr id="U" <? if($this->formvars['verfahrensgrund'] != 'San' AND $this->formvars['verfahrensgrund'] != 'Entw')echo 'style="display: none"'; ?>> 
+						    <td id="EU" colspan="2" <? if($this->formvars['verfahrensgrund'] == 'San')echo 'style="display: none"'; ?>>
+						    	EU [&euro;/m&sup2;]:
+						    </td>
+								<td id="SanU" colspan="2" <? if($this->formvars['verfahrensgrund'] == 'Entw')echo 'style="display: none"'; ?>>
+						    	SanU [&euro;/m&sup2;]:
+						    </td>
+						    <td> 
+						      <input name="brwu" type="text" id="brwu" value="<?php echo $this->formvars['brwu']; ?>" size="5" maxlength="5">
+						    </td>
+						  </tr>
+							<tr id="SanS" <? if($this->formvars['verfahrensgrund'] != 'San')echo 'style="display: none"'; ?>> 
+						    <td colspan="2">
+						    	SanS [&euro;/m&sup2;]:
+						    </td>
+						    <td> 
+						      <input name="brws" type="text" id="brws" value="<?php echo $this->formvars['brws']; ?>" size="5" maxlength="5">
+						    </td>
+						  </tr>
+							<tr id="B" <? if($this->formvars['verfahrensgrund'] != 'San' AND $this->formvars['verfahrensgrund'] != 'Entw')echo 'style="display: none"'; ?>> 
+						    <td id="EB" colspan="2" <? if($this->formvars['verfahrensgrund'] == 'San')echo 'style="display: none"'; ?>>
+						    	EB [&euro;/m&sup2;]:
+						    </td>
+								<td id="SanB" colspan="2" <? if($this->formvars['verfahrensgrund'] == 'Entw')echo 'style="display: none"'; ?>>
+						    	SanB [&euro;/m&sup2;]:
+						    </td>
+						    <td> 
+						      <input name="brwb" type="text" id="brwb" value="<?php echo $this->formvars['brwb']; ?>" size="5" maxlength="5">
+						    </td>
+						  </tr>					
+							
 						  <tr> 
 						    <td>
 						    	Stichtag:

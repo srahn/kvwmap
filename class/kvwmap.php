@@ -5832,43 +5832,33 @@ class GUI extends GUI_core{
     $layer = $this->user->rolle->getLayer(LAYERNAME_BODENRICHTWERTE);
     $bodenrichtwertzone=new bodenrichtwertzone($this->pgdatabase, $layer[0]['epsg_code'], $this->user->rolle->epsg_code);
 
-    # 1. Prüfen der Eingabewerte
-    #echo '<br>Prüfen der Eingabewerte.';
-    $ret=$bodenrichtwertzone->pruefeBWEingabedaten($this->formvars);
-    if ($ret[0]) {
-      # Es wurde ein oder mehrere Fehler bei den Eingabewerten gefunden
-      $this->Meldung=$ret[1];
-    }
-    else {
-      # Eingabewerte fehlerfrei
-      if ($this->formvars['oid']=='') {
-        # 2. eintragenNeueZone
-        $ret=$bodenrichtwertzone->eintragenNeueZone($this->formvars);
-        if ($ret[0]) {
-          # 2.1 eintrageung fehlerhaft
-          $this->Meldung=$ret[1];
-        }
-        else {
-          #  2.2 eintragung erfolgreich
-          $alertmsg='\nBodenrichtwertzone erfolgreich in die Datenbank eingetragen.'.
-          $this->formvars['pathx']='';    $this->formvars['loc_x']='';
-          $this->formvars['pathy']='';    $this->formvars['loc_y']='';
-          $this->formvars['umring']='';   $this->formvars['textposition']='';
-        }
-      }
-      else {
-        # 3. aktualisierenZone
-        $ret=$bodenrichtwertzone->aktualisierenZone($this->formvars['oid'],$this->formvars);
-        if ($ret[0]) {
-          # 3.1 eintrageung fehlerhaft
-          $this->Meldung=$ret[1];
-        }
-        else {
-          # 3.2 Aktualisierung erfolgreich
-          $alertmsg='\nBodenrichtwertzone erfolgreich in die Datenbank aktualisiert.';
-        }
-      }
-    }
+		if ($this->formvars['oid']=='') {
+			# 2. eintragenNeueZone
+			$ret=$bodenrichtwertzone->eintragenNeueZone($this->formvars);
+			if ($ret[0]) {
+				# 2.1 eintrageung fehlerhaft
+				$this->Meldung=$ret[1];
+			}
+			else {
+				#  2.2 eintragung erfolgreich
+				$alertmsg='\nBodenrichtwertzone erfolgreich in die Datenbank eingetragen.'.
+				$this->formvars['pathx']='';    $this->formvars['loc_x']='';
+				$this->formvars['pathy']='';    $this->formvars['loc_y']='';
+				$this->formvars['umring']='';   $this->formvars['textposition']='';
+			}
+		}
+		else {
+			# 3. aktualisierenZone
+			$ret=$bodenrichtwertzone->aktualisierenZone($this->formvars['oid'],$this->formvars);
+			if ($ret[0]) {
+				# 3.1 eintrageung fehlerhaft
+				$this->Meldung=$ret[1];
+			}
+			else {
+				# 3.2 Aktualisierung erfolgreich
+				$alertmsg='\nBodenrichtwertzone erfolgreich in die Datenbank aktualisiert.';
+			}
+		}
     $this->bodenRichtWertErfassung();
   }
 

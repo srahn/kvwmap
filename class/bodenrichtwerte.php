@@ -136,28 +136,6 @@ class bodenrichtwertzone {
     }
     return $ret;
   }
-  
-  function pruefeBWEingabedaten($formvars) {
-    $ret[0]=0;
-    # Abfragen ob umring ein geschlossenes Polygon ist & weitere formular-variabeln belegt sind. 
-    if ($formvars['umring']=='') {
-      $ret[1]='\nGeben Sie einen Umring an.';
-      $ret[0]=1;
-    }
-    if ($formvars['textposition']=='') {
-      $ret[1].='\nGeben Sie die Position für die Textanzeige an.';
-      $ret[0]=1;
-    }
-    if ($formvars['bodenrichtwert']=='') {
-      $ret[1].='\nGeben Sie den Bodenwert an.';
-      $ret[0]=1;
-    }
-    if ($formvars['stichtag']=='' OR !(intval($formvars['stichtag']) > 1900)) {
-      $ret[1].='\nGeben Sie die 4-stellige Jahreszahl des Stichtags an.';
-      $ret[0]=1;
-    }
-    return $ret;
-  }
 
   function eintragenNeueZone($formvars) {
   	$formvars['bodenrichtwert'] = str_replace(',', '.', $formvars['bodenrichtwert']);
@@ -178,6 +156,9 @@ class bodenrichtwertzone {
 		if($formvars['bodenrichtwertnummer']){$sql.= ",bodenrichtwertnummer";} 
 		if($formvars['oertliche_bezeichnung']){$sql.= ",oertliche_bezeichnung";} 
 		if($formvars['bodenrichtwert']){$sql.= ",bodenrichtwert";}
+		if($formvars['brwu']){$sql.= ",brwu";}
+		if($formvars['brws']){$sql.= ",brws";}
+		if($formvars['brwb']){$sql.= ",brwb";}		
   	if($formvars['bedarfswert']){$sql.= ",bedarfswert";} 
 		if($formvars['basiskarte']){$sql.=",basiskarte";} 
 		if($formvars['entwicklungszustand']){$sql.= ",entwicklungszustand";} 
@@ -212,6 +193,9 @@ class bodenrichtwertzone {
     if($formvars['bodenrichtwertnummer']){$sql.= ",".$formvars['bodenrichtwertnummer'];}
     if($formvars['oertliche_bezeichnung']){$sql.= ",'".$formvars['oertliche_bezeichnung']."' ";}
     if($formvars['bodenrichtwert']){$sql.= ",".$formvars['bodenrichtwert'];}
+		if($formvars['brwu']){$sql.= ",".$formvars['brwu'];}
+		if($formvars['brws']){$sql.= ",".$formvars['brws'];}
+		if($formvars['brwb']){$sql.= ",".$formvars['brwb'];}
   	if($formvars['bedarfswert']){$sql.= ",".$formvars['bedarfswert'];}
     if($formvars['basiskarte']){$sql.= ",'".$formvars['basiskarte']."' ";}
     if($formvars['entwicklungszustand']){$sql.= ",'".$formvars['entwicklungszustand']."' ";}
@@ -263,7 +247,14 @@ class bodenrichtwertzone {
       if($formvars['gutachterausschuss']){$sql.= "gutachterausschuss = '".$formvars['gutachterausschuss']."', ";}
       if($formvars['bodenrichtwertnummer']){$sql.= "bodenrichtwertnummer = ".(int)$formvars['bodenrichtwertnummer'].", ";}
       if($formvars['oertliche_bezeichnung']){$sql.= "oertliche_bezeichnung = '".$formvars['oertliche_bezeichnung']."', ";}
-      if($formvars['bodenrichtwert']){$sql.= "bodenrichtwert = ".(float)$formvars['bodenrichtwert'].", ";}
+      if($formvars['bodenrichtwert'] == '')$sql.= "bodenrichtwert = NULL, ";
+			else $sql.= "bodenrichtwert = ".(float)$formvars['bodenrichtwert'].", ";
+			if($formvars['brwu'] == '')$sql.= "brwu = NULL, ";
+			else $sql.= "brwu = ".(float)$formvars['brwu'].", ";
+			if($formvars['brws'] == '')$sql.= "brws = NULL, ";
+			else $sql.= "brws = ".(float)$formvars['brws'].", ";
+			if($formvars['brwb'] == '')$sql.= "brwb = NULL, ";
+			else $sql.= "brwb = ".(float)$formvars['brwb'].", ";
     	if($formvars['bedarfswert']){$sql.= "bedarfswert = ".(float)$formvars['bedarfswert'].", ";}
       if($formvars['stichtag']){$sql.= "stichtag = '31.12.".$formvars['stichtag']."', ";}
       if($formvars['basiskarte']){$sql.="basiskarte = '".$formvars['basiskarte']."', ";}
@@ -326,7 +317,7 @@ class bodenrichtwertzone {
       # SQL-Einfügeanfrage stellen
       $this->debug->write('Kopieren der Zonen von einem Stichtag zu einem neuen.',4);
       $sql.="INSERT INTO bw_zonen";
-      $sql.=" SELECT gemeinde, gemarkung, ortsteilname, postleitzahl, zonentyp, gutachterausschuss, bodenrichtwertnummer, oertliche_bezeichnung, bodenrichtwert, '".$newStichtag."', basiskarte, entwicklungszustand, beitragszustand, nutzungsart, ergaenzende_nutzung, bauweise, geschosszahl, grundflaechenzahl, geschossflaechenzahl, baumassenzahl, flaeche, tiefe, breite, wegeerschliessung, ackerzahl, gruenlandzahl, aufwuchs, verfahrensgrund, verfahrensgrund_zusatz, bemerkungen, textposition, the_geom";
+      $sql.=" SELECT gemeinde, gemarkung, ortsteilname, postleitzahl, zonentyp, gutachterausschuss, bodenrichtwertnummer, oertliche_bezeichnung, bodenrichtwert, '".$newStichtag."', basiskarte, entwicklungszustand, beitragszustand, nutzungsart, ergaenzende_nutzung, bauweise, geschosszahl, grundflaechenzahl, geschossflaechenzahl, baumassenzahl, flaeche, tiefe, breite, wegeerschliessung, ackerzahl, gruenlandzahl, aufwuchs, verfahrensgrund, verfahrensgrund_zusatz, bemerkungen, textposition, the_geom, erschliessungsverhaeltnisse, bedarfswert, bodenart, brwu, brws, brwb";
       $sql.=" FROM bw_zonen WHERE stichtag = '".$oldStichtag."'";
       $ret=$this->database->execSQL($sql,4, 1);
       if ($ret[0]) {
