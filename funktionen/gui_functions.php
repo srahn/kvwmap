@@ -13,8 +13,8 @@ function onload_functions(){
 function update_legend(layerhiddenstring){
 	parts = layerhiddenstring.split(' ');
 	for(j = 0; j < parts.length-1; j=j+2){
-		if((document.getElementsByName('pseudothema'+parts[j])[0] != undefined && parts[j+1] == 0) || 
-			(document.getElementsByName('pseudothema'+parts[j])[0] == undefined && parts[j+1] == 1)){
+		if((document.getElementById('thema_'+parts[j]) != undefined && document.getElementById('thema_'+parts[j]).disabled && parts[j+1] == 0) || 	// wenn Layer nicht sichtbar war und jetzt sichtbar ist
+			(document.getElementById('thema_'+parts[j]) != undefined && !document.getElementById('thema_'+parts[j]).disabled && parts[j+1] == 1)){		// oder andersrum
 			legende = document.getElementById('legend');
 			ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=get_legend', new Array(legende), "");
 			break;
@@ -110,15 +110,16 @@ function updateQuery(event, thema, query, radiolayers){
   }
   if(radiolayers != '' && radiolayers.value != ''){  
   	if(event.preventDefault){
-		event.preventDefault();
-	}else{ // IE fix
-		event.returnValue = false;
-	};
+			event.preventDefault();
+		}else{ // IE fix
+			event.returnValue = false;
+		};
   	radiolayerstring = radiolayers.value+'';
   	radiolayer = radiolayerstring.split('|');
   	for(i = 0; i < radiolayer.length-1; i++){
   		if(document.getElementById('thema_'+radiolayer[i]) != thema){
   			document.getElementById('thema_'+radiolayer[i]).checked = false;
+				document.getElementById('thema'+radiolayer[i]).value = 0;		// damit nicht sichtbare Radiolayers ausgeschaltet werden
   		}
   		else{
   			thema.checked = !thema.checked;

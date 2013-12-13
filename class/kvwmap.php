@@ -963,8 +963,8 @@ class GUI extends GUI_core{
 							if ($layer['queryable'] != 1){
 								$legend .=  '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
 							}
-							
-							$legend .=  '<input type="hidden" name="thema'.$layer['Layer_ID'].'" value="0">';
+							// die sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen, welches immer den value 0 hat, damit sie beim Neuladen ausgeschaltet werden können, denn eine nicht angehakte Checkbox/Radiobutton wird ja nicht übergeben
+							$legend .=  '<input type="hidden" id="thema'.$layer['Layer_ID'].'" name="thema'.$layer['Layer_ID'].'" value="0">';
 							
 							$legend .=  '<input id="thema_'.$layer['Layer_ID'].'" ';
 							if($layer['selectiontype'] == 'radio'){
@@ -1095,12 +1095,36 @@ class GUI extends GUI_core{
 									<td>
 										&nbsp;&nbsp;';
 						if($layer['queryable'] == 1){
-							$legend .=  '<input type="checkbox" name="pseudoqLayer'.$layer['Layer_ID'].'" disabled>';
+							$legend .=  '<input ';
+							if($layer['selectiontype'] == 'radio'){
+								$legend .=  'type="radio" ';
+							}
+							else{
+								$legend .=  'type="checkbox" ';
+							}
+							if($layer['queryStatus'] == 1){
+								$legend .=  'checked="true"';
+							}
+							$legend .=' type="checkbox" name="pseudoqLayer'.$layer['Layer_ID'].'" disabled>';
 						}
-						else{
+						$legend .=  '<img border="0" src="graphics/leer.gif" width="1">';
+						if($layer['queryable'] != 1){
 							$legend .=  '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
 						}
-						$legend .=  '<input type="checkbox" name="pseudothema'.$layer['Layer_ID'].'" disabled>
+						// die nicht sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen nur bei Radiolayern, damit sie beim Neuladen ausgeschaltet werden können, denn ein disabledtes input-Feld wird ja nicht übergeben
+						$legend .=  '<input type="hidden" id="thema'.$layer['Layer_ID'].'" name="thema'.$layer['Layer_ID'].'" value="'.$layer['aktivStatus'].'">';
+						$legend .=  '<input ';
+						if($layer['selectiontype'] == 'radio'){
+							$legend .=  'type="radio" ';
+							$radiolayers[$group_id] .= $layer['Layer_ID'].'|';
+						}
+						else{
+							$legend .=  'type="checkbox" ';
+						}
+						if($layer['aktivStatus'] == 1){
+							$legend .=  'checked="true" ';
+						}
+						$legend .= 'id="thema_'.$layer['Layer_ID'].'" name="thema'.$layer['Layer_ID'].'" disabled="true">
 						<font color="gray" ';
 						if($layer['minscale'] != -1 AND $layer['maxscale'] != -1){
 							$legend .= 'title="'.$layer['minscale'].' - '.$layer['maxscale'].'"';
@@ -1113,8 +1137,7 @@ class GUI extends GUI_core{
 							}
 							$legend .=  '>';
 						}
-						$legend .=  '<input type="hidden" name="thema'.$layer['Layer_ID'].'" value="'.$layer['aktivStatus'].'"
-								</td>
+						$legend .=  '</td>
 								</tr>';
 					}
 				}
