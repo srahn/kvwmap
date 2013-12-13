@@ -1674,7 +1674,7 @@ class db_mapObj_core {
     if ($this->nurFremdeLayer){			# entweder fremde (mit host=...) Postgis-Layer oder aktive nicht-Postgis-Layer
     	$sql.=' AND (l.connection like "%host=%" AND l.connection NOT like "%host=localhost%" OR l.connectiontype != 6 AND rl.aktivStatus != "0")';
     }
-    $sql.=' ORDER BY l.Gruppe, ul.drawingorder DESC';
+    $sql.=' ORDER BY ul.drawingorder ASC';
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Layer - Lesen der Layer der Rolle:<br>".$sql,4);
     $query=mysql_query($sql);

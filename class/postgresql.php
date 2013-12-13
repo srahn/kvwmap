@@ -97,9 +97,17 @@ class pgdatabase extends pgdatabase_core {
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
       $rs=pg_fetch_array($ret[1]);
-      if($coordtype == 'dms' AND $rs['x'] < 361){
-      	$rs['x'] = dec2dms($rs['x']);
-      	$rs['y'] = dec2dms($rs['y']);
+      if($coordtype != 'dec' AND $rs['x'] < 361){
+				switch ($coordtype) {
+					case 'dms' :
+	      		$rs['x'] = dec2dms($rs['x']);
+	      		$rs['y'] = dec2dms($rs['y']);
+						break;
+					case 'dmin' :
+	      		$rs['x'] = dec2dmin($rs['x']);
+	      		$rs['y'] = dec2dmin($rs['y']);
+						break;
+				}
       }
       else{
       	if($newSRID == 4326){

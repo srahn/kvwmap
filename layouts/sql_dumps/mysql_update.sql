@@ -1140,3 +1140,7 @@ ALTER TABLE  `u_groups` ADD  `obergruppe` INT( 11 ) NULL;
 ALTER TABLE  `u_groups` ADD  `order` INT( 11 ) NULL;
 
 update `u_rolle2used_layer` set `aktivStatus` = '0' where `aktivStatus` = '';
+
+ALTER TABLE `rolle` CHANGE `coordtype` `coordtype` ENUM('dec', 'dms', 'dmin') NOT NULL DEFAULT  'dec';
+
+ALTER TABLE  `druckfreitexte` CHANGE  `text`  `text` TEXT DEFAULT NULL;	
