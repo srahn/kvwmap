@@ -19,7 +19,7 @@ class formatter {
 	function output_json() {
 		header('Content-Type: application/json; charset=utf-8');
 		$this->data ? $json = json_encode($this->data) : $json = '{}';
-		return $json;
+		return utf8_decode($json);
 	}
 	
 	function output_print_r() {

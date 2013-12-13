@@ -6372,9 +6372,9 @@ class GUI extends GUI_core{
   }
 
   function GenerischeSuche_Suchen(){
-	if($this->last_query != ''){
-		$this->formvars['selected_layer_id'] = $this->last_query['layer_ids'][0];
-	}
+		if($this->last_query != ''){
+			$this->formvars['selected_layer_id'] = $this->last_query['layer_ids'][0];
+		}
     $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
     switch ($layerset[0]['connectiontype']) {
       case MS_POSTGIS : {	  
@@ -6456,10 +6456,16 @@ class GUI extends GUI_core{
           }
           # räumliche Einschränkung
           if($layerset[0]['attributes']['name'][$i] == $layerset[0]['attributes']['the_geom']){
-          	# Suche im Suchpolygon
           	if($this->formvars['newpathwkt'] != ''){
-							$sql_where.=' AND st_intersects('.$layerset[0]['attributes']['the_geom'].', (st_transform(st_geomfromtext(\''.$this->formvars['newpathwkt'].'\', '.$this->user->rolle->epsg_code.'), '.$layerset[0]['epsg_code'].')))';          		
-          	}
+							if (strpos(strtolower($this->formvars['newpathwkt']), 'polygon') !== false) {
+								# Suche im Suchpolygon
+								$sql_where.=' AND st_intersects('.$layerset[0]['attributes']['the_geom'].', (st_transform(st_geomfromtext(\''.$this->formvars['newpathwkt'].'\', '.$this->user->rolle->epsg_code.'), '.$layerset[0]['epsg_code'].')))';  
+							}
+							if (strpos(strtolower($this->formvars['newpathwkt']), 'point') !== false) {
+								# Suche an Punktkoordinaten mit übergebener SRID
+								$sql_where.=" AND st_within(st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$this->formvars['epsg_code']."), ".$layerset[0]['epsg_code']."), ".$layerset[0]['attributes']['the_geom'].")";
+							}
+						}
           	# Suche nur im Stellen-Extent
             $sql_where.=' AND ('.$layerset[0]['attributes']['the_geom'].' && st_transform(st_geomfromtext(\'POLYGON(('.$this->Stelle->MaxGeorefExt->minx.' '.$this->Stelle->MaxGeorefExt->miny.', '.$this->Stelle->MaxGeorefExt->maxx.' '.$this->Stelle->MaxGeorefExt->miny.', '.$this->Stelle->MaxGeorefExt->maxx.' '.$this->Stelle->MaxGeorefExt->maxy.', '.$this->Stelle->MaxGeorefExt->minx.' '.$this->Stelle->MaxGeorefExt->maxy.', '.$this->Stelle->MaxGeorefExt->minx.' '.$this->Stelle->MaxGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layerset[0]['epsg_code'].') OR '.$layerset[0]['attributes']['the_geom'].' IS NULL)';
           }
@@ -11070,16 +11076,16 @@ class GUI extends GUI_core{
     $flurstueck = new flurstueck('',$this->pgdatabase);
 		if ($this->formvars['version'] == '1.0') {
 			$result= $flurstueck->getFlurstByLatLng($this->formvars['latitude'], $this->formvars['longitude']);
-			$this->qlayerset['landId'] = $result['land'];
-			$this->qlayerset['kreisId'] = $result['kreis'];
-			$this->qlayerset['gemeindId'] = $result['gemeinde'];
-			$this->qlayerset['gemarkungId'] = $result['gemarkungsnummer'];
-			$this->qlayerset['gemarkungName'] = $result['gemarkungname'];
-			$this->qlayerset['flurId'] = $result['flurnummer'];			
-			$this->qlayerset['flurstueckId'] = $result['flurstkennz'];
-			$this->qlayerset['flurstueckNummer'] = $result['flurstuecksnummer'];
-			$this->mime_type = 'formatter';
-			
+			$layerset['landId'] = $result['land'];
+			$layerset['kreisId'] = $result['kreis'];
+			$layerset['gemeindId'] = $result['gemeinde'];
+			$layerset['gemarkungId'] = $result['gemarkungsnummer'];
+			$layerset['gemarkungName'] = $result['gemarkungname'];
+			$layerset['flurId'] = $result['flurnummer'];			
+			$layerset['flurstueckId'] = $result['flurstkennz'];
+			$layerset['flurstueckNummer'] = $result['flurstuecksnummer'];
+			$this->qlayerset[0]['shape'][0] = $layerset;
+			$this->mime_type = 'formatter';			
 		}
 		else {
 			$this->loadMap('DataBase');
