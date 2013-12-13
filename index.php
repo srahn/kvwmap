@@ -1011,6 +1011,11 @@ if($GUI->goNotExecutedInPlugins){
 	  case 'Zeige_Flurstuecke_zu_Namen' : {
 		$GUI->flurstuecksAnzeigeByNamen();
 	  } break;
+		
+		case "Suche_Flurstueck_zu_LatLng" : {
+			$GUI->flurstSuchenByLatLng();
+			$GUI->output();
+		} break;
 
 	  case 'Sachdaten_Festpunkte zu Auftrag Hinzufügen' : {
 		$GUI->festpunkteZuAuftragFormular();
@@ -1797,11 +1802,6 @@ if($GUI->goNotExecutedInPlugins){
 		$GUI->output();
 	  } break;
 		
-		case "Flurstueck_Suchen_By_LatLng" : {
-			$GUI->flurstSuchenByLatLng();
-			$GUI->output();
-		} break;
-
 	  case "Hausnummernkorrektur" : {
 		$ALB=new ALB($GUI->database);
 		$ALB->HausNrTextKorrektur();

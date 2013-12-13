@@ -1461,7 +1461,32 @@ class GUI_core {
 			}
 		}
 		return $Flurbezeichnung;
-  } 
+  }
+	
+	# extrahiert die Daten aus qlayerset in ein Array
+	function qlayersetParamStrip() {
+		$result = array();
+		# Nehme ersten layerset
+		$layerset = $this->qlayerset[0]['shape'];
+		# Durchlaufe alle gefundenen Datensätze im Layerset
+		foreach ($layerset AS $record) {
+			$data = array();
+			if ($this->formvars['selectors'] != '') {
+				$selectors = explode(',', $this->formvars['selectors']);
+				foreach ($selectors AS $selector) {
+					$selector = trim($selector);
+					$data[$selector] = $record[$selector]; 
+				}
+			}
+			else {
+				$data = $record;
+			}
+			$result[] = $data;
+		}
+		if (count($result) == 1) $result = $result[0];
+		if (count($result) == 1) $result = $result[0];
+		return $result;
+	}
 
   # Ausgabe der Seite
   function output() {
@@ -1469,6 +1494,7 @@ class GUI_core {
 	  	if(is_string($value))$this->formvars[$key] = stripslashes($value);
 	  }
     # bisher gibt es folgenden verschiedenen Dokumente die angezeigt werden können
+		if ($this->formvars['mime_type'] != '') $this->mime_type = $this->formvars['mime_type'];
 
     switch ($this->mime_type) {
       case 'printversion' : {
@@ -1508,8 +1534,8 @@ class GUI_core {
 			default : {
 				if ($this->formvars['format'] != '') {
 					include('formatter.php');
-					$this->formatter = new formatter($this->qlayerset, $this->formvars['format']);
-		    	echo $this->formatter->output();				
+					$this->formatter = new formatter($this->qlayersetParamStrip(), $this->formvars['format']);
+		    	echo utf8_encode($this->formatter->output());
 				}
 			}
     }
