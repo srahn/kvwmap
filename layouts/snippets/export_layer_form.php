@@ -1,16 +1,6 @@
 <script type="text/javascript">
 <!--
 
-function getlegend(group, layer, fremde){
-	legende = document.getElementById('legend');
-	if(group != ''){
-		ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=get_legend&'+group.name+'='+group.value+'&nurFremdeLayer='+fremde, new Array(legend_div));
-	}
-	if(layer != ''){
-		ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=get_legend&'+layer.name+'='+layer.value+'&nurFremdeLayer='+fremde, new Array(legend_div), "");
-	}
-}
-
 function setfields(){
 	if(document.GUI.mitbildern.checked == true){
 		document.GUI.username.disabled = false;
@@ -106,6 +96,7 @@ function buildwktpolygonfromsvgpath(svgpath){
 				          		&nbsp;
 				          		<img src="graphics/lock.gif" alt="Datensätze sperren" title="ausgelesene Datensätze werden gesperrt" height="20">
 				          		<br>
+											<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
 				          	<div id="legend_div"><? echo $this->legende; ?></div>
 				        	</div>
 			          </td>

@@ -1,16 +1,6 @@
 <script type="text/javascript">
 <!--
 
-function getlegend(group, layer){
-	legende = document.getElementById('legend');
-	if(group != ''){
-		ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=get_legend&'+group.name+'='+group.value, new Array(legend_div));
-	}
-	if(layer != ''){
-		ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=get_legend&'+layer.name+'='+layer.value, new Array(legend_div), "");
-	}
-}
-
 function change_layer(){
 	document.GUI.class1.disabled = true;
 	document.getElementById('style_div').innerHTML = '';
@@ -429,6 +419,7 @@ function browser_check(){
 				          &nbsp;
 				          <img src="graphics/tool_info_2.png" alt="Informationsabfrage" title="Informationsabfrage" width="17">&nbsp;
 				          <img src="graphics/layer.png" alt="Themensteuerung" title="Themensteuerung" width="20" height="20"><br>
+									<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
 				          <div id="legend_div"><? echo $this->legende; ?></div>
 				        </div>
 			          </td>

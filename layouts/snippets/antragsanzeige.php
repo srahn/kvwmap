@@ -82,6 +82,7 @@
 			<input type="hidden" name="Datum" value="1">
 			<input type="hidden" name="Datei" value="1">
  			<input type="hidden" name="gemessendurch" value="1">
+			<input type="hidden" name="Gueltigkeit" value="1">
     </td>
   </tr>
 </table>

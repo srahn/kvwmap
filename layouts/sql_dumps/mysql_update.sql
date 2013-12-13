@@ -1124,3 +1124,23 @@ ALTER TABLE `rolle` CHANGE `gui` `gui` VARCHAR(100) NOT NULL DEFAULT 'gui.php';
 ALTER TABLE `rolle_nachweise` CHANGE `suchgemarkungflurid` `suchgemarkung` VARCHAR( 10 ) NOT NULL DEFAULT '';
 
 ALTER TABLE `rolle_nachweise` ADD `suchflur` VARCHAR( 3 ) NOT NULL AFTER `suchgemarkung`;
+
+CREATE TABLE  `rolle_last_query` (
+  `user_id` INT( 11 ) NOT NULL ,
+  `stelle_id` INT( 11 ) NOT NULL ,
+  `go` VARCHAR( 50 ) NOT NULL ,
+  `layer_id` INT( 11 ) NOT NULL ,
+  `sql` TEXT NOT NULL ,
+  `orderby` TEXT NULL ,
+  `limit` INT( 11 ) NULL ,
+  `offset` INT( 11 ) NULL
+);
+
+ALTER TABLE  `u_groups` ADD  `obergruppe` INT( 11 ) NULL;
+ALTER TABLE  `u_groups` ADD  `order` INT( 11 ) NULL;
+
+update `u_rolle2used_layer` set `aktivStatus` = '0' where `aktivStatus` = '';
+
+ALTER TABLE `rolle` CHANGE `coordtype` `coordtype` ENUM('dec', 'dms', 'dmin') NOT NULL DEFAULT  'dec';
+
+ALTER TABLE  `druckfreitexte` CHANGE  `text`  `text` TEXT DEFAULT NULL;	

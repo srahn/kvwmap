@@ -1179,6 +1179,34 @@ class rolle extends rolle_core{
 		$this->loglevel = 0;
 	}
 
+	function save_last_query($go, $layer_id, $query, $sql_order, $limit, $offset){
+		if($limit == '')$limit = 'NULL';
+		if($offset == '')$offset = 'NULL';
+		$sql = "INSERT INTO rolle_last_query (user_id, stelle_id, go, layer_id, `sql`, orderby, `limit`, `offset`) VALUES (";
+		$sql.= $this->user_id.", ".$this->stelle_id.", '".$go."', ".$layer_id.", '".addslashes($query)."', '".$sql_order."', ".$limit.", ".$offset.")";
+		$this->debug->write("<p>file:users.php class:rolle->save_last_query - Speichern der letzten Abfrage:",4);
+		$this->database->execSQL($sql,4, $this->loglevel);
+	}
+	
+	function delete_last_query(){
+		$sql = "DELETE FROM rolle_last_query WHERE user_id = ".$this->user_id." AND stelle_id = ".$this->stelle_id;
+		$this->debug->write("<p>file:users.php class:rolle->delete_last_query - Löschen der letzten Abfrage:",4);
+		$this->database->execSQL($sql,4, $this->loglevel);
+	}
+	
+	function get_last_query(){
+		$sql = "SELECT * FROM rolle_last_query WHERE user_id = ".$this->user_id." AND stelle_id = ".$this->stelle_id;
+		$this->debug->write("<p>file:users.php class:rolle->get_last_query - Abfragen der letzten Abfrage:<br>".$sql,4);
+		$query=mysql_query($sql,$this->database->dbConn);
+		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		while ($rs=mysql_fetch_assoc($query)) {
+			$last_query['go'] = $rs['go'];
+			$last_query['layer_ids'][] = $rs['layer_id'];
+			$last_query[$rs['layer_id']] = $rs;
+		}
+		return $last_query;
+	}
+	
 	function get_csv_attribute_selections(){
 		$sql = 'SELECT name FROM rolle_csv_attributes WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' ORDER BY name';
 		$this->debug->write("<p>file:users.php class:rolle->get_csv_attribute_selections - Abfragen der gespeicherten CSV-Attributlisten der Rolle:<br>".$sql,4);
@@ -1322,34 +1350,28 @@ class rolle extends rolle_core{
 		# Eintragen des Status der Layer, 1 angezeigt oder 0 nicht.
 		for ($i=0;$i<count($this->layerset);$i++) {
 			#echo $i.' '.$this->layerset[$i]['Layer_ID'].' '.$formvars['thema'.$this->layerset[$i]['Layer_ID']].'<br>';
-			if ($formvars['thema'.$this->layerset[$i]['Layer_ID']]==1) {
-				$aktiv_status=1;
-			}
-			elseif($formvars['thema'.$this->layerset[$i]['Layer_ID']]==2) {
-				$aktiv_status=2;
-			}
-			else{
-				$aktiv_status=0;
-			}
-			$sql ='UPDATE u_rolle2used_layer SET aktivStatus="'.$aktiv_status.'"';
-			$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-			$sql.=' AND layer_id='.$this->layerset[$i]['Layer_ID'];
-			$this->debug->write("<p>file:users.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
-			$this->database->execSQL($sql,4, $this->loglevel);
-
-			#Anne
-			#neu eintragen der deaktiven Klassen
-			if($aktiv_status!=0){
-				$sql = 'SELECT Class_ID FROM classes WHERE Layer_ID='.$this->layerset[$i]['Layer_ID'].';';
-				$query = mysql_query($sql);
-				while($row = @mysql_fetch_array($query)){
-					if($formvars['class'.$row['Class_ID']]=='0'){
-						$sql2 = 'REPLACE INTO u_rolle2used_class (user_id, stelle_id, class_id) VALUES ('.$this->user_id.', '.$this->stelle_id.', '.$row['Class_ID'].');';
-						$this->database->execSQL($sql2,4, $this->loglevel);
-					}
-					elseif ($formvars['class'.$row['Class_ID']]=='1'){
-						$sql1 = 'DELETE FROM u_rolle2used_class WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND class_id='.$row['Class_ID'].';';
-						$this->database->execSQL($sql1,4, $this->loglevel);
+			$aktiv_status = $formvars['thema'.$this->layerset[$i]['Layer_ID']];
+			if(isset($aktiv_status)){
+				$sql ='UPDATE u_rolle2used_layer SET aktivStatus="'.$aktiv_status.'"';
+				$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+				$sql.=' AND layer_id='.$this->layerset[$i]['Layer_ID'];
+				$this->debug->write("<p>file:users.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
+				$this->database->execSQL($sql,4, $this->loglevel);
+				
+				#Anne
+				#neu eintragen der deaktiven Klassen
+				if($aktiv_status!=0){
+					$sql = 'SELECT Class_ID FROM classes WHERE Layer_ID='.$this->layerset[$i]['Layer_ID'].';';
+					$query = mysql_query($sql);
+					while($row = @mysql_fetch_array($query)){
+						if($formvars['class'.$row['Class_ID']]=='0'){
+							$sql2 = 'REPLACE INTO u_rolle2used_class (user_id, stelle_id, class_id) VALUES ('.$this->user_id.', '.$this->stelle_id.', '.$row['Class_ID'].');';
+							$this->database->execSQL($sql2,4, $this->loglevel);
+						}
+						elseif ($formvars['class'.$row['Class_ID']]=='1'){
+							$sql1 = 'DELETE FROM u_rolle2used_class WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND class_id='.$row['Class_ID'].';';
+							$this->database->execSQL($sql1,4, $this->loglevel);
+						}
 					}
 				}
 			}
@@ -1565,6 +1587,12 @@ class rolle extends rolle_core{
 			$sql.=' WHERE used_layer.Stelle_ID = '.$stellen[$i];
 			$sql.=' AND used_layer.Layer_ID = layer.Layer_ID';
 			$sql.=' AND layer.Gruppe = u_groups.id';
+			$sql.=' UNION';
+			$sql.=' SELECT DISTINCT '.$user_id.', '.$stellen[$i].', u_groups2.id, '.$open;
+			$sql.=' FROM `used_layer`, `layer`, `u_groups`, `u_groups` as `u_groups2`';
+			$sql.=' WHERE used_layer.Stelle_ID = '.$stellen[$i];
+			$sql.=' AND used_layer.Layer_ID = layer.Layer_ID';
+			$sql.=' AND layer.Gruppe = u_groups.id AND u_groups.obergruppe = u_groups2.id';
 			#echo '<br>Gruppen: '.$sql;
 			$this->debug->write("<p>file:users.php class:rolle function:setGroups - Setzen der Gruppen der Rollen:<br>".$sql,4);
 			$query=mysql_query($sql,$this->database->dbConn);
@@ -2373,6 +2401,7 @@ class stelle extends stelle_core{
 			while($rs=mysql_fetch_array($query)) {
 				$menue['ID'][]=$rs['menue_id'];
 				$menue['ORDER'][]=$rs['order'];
+				$menue['menueebene'][]=$rs['menueebene'];
 				if($rs['menueebene'] == 2){
 					$menue['Bezeichnung'][]='&nbsp;&nbsp;-->&nbsp;'.$rs['name'];
 				}
@@ -2517,7 +2546,7 @@ class stelle extends stelle_core{
 
 	function getLayers($group, $order = NULL) {
 		# Lesen der Layer zur Stelle
-		$sql ='SELECT layer.Layer_ID, Name, used_layer.drawingorder FROM used_layer, layer, u_groups';
+		$sql ='SELECT layer.Layer_ID, layer.Gruppe, Name, used_layer.drawingorder FROM used_layer, layer, u_groups';
 		$sql .=' WHERE stelle_id = '.$this->id;
 		$sql .=' AND layer.Gruppe = u_groups.id';
 		$sql .=' AND layer.Layer_ID = used_layer.Layer_ID';
@@ -2538,14 +2567,17 @@ class stelle extends stelle_core{
 				$layer['ID'][]=$rs['Layer_ID'];
 				$layer['Bezeichnung'][]=$rs['Name'];
 				$layer['drawingorder'][]=$rs['drawingorder'];
+				$layer['Gruppe'][]=$rs['Gruppe'];
 			}
 			if($order == 'Name'){
 				// Sortieren der Layer unter Berücksichtigung von Umlauten
 				$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
+				$layer['Bezeichnung'] = $sorted_arrays['array'];
 				$layer['ID'] = $sorted_arrays['second_array'];
 				$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['drawingorder']);
-				$layer['Bezeichnung'] = $sorted_arrays['array'];
 				$layer['drawingorder'] = $sorted_arrays['second_array'];
+				$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['Gruppe']);
+				$layer['Gruppe'] = $sorted_arrays['second_array'];
 			}
 		}
 		return $layer;

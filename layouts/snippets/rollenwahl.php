@@ -123,6 +123,7 @@
 			<select name="coordtype">
         <option value="dec" <?php if ($this->user->rolle->coordtype=="dec") { echo "selected"; } ?>>Dezimal</option>
         <option value="dms" <?php if ($this->user->rolle->coordtype=="dms") { echo "selected"; } ?>>Grad,Minuten,Sekunden</option>
+        <option value="dmin" <?php if ($this->user->rolle->coordtype=="dmin") { echo "selected"; } ?>>Grad Dezimalminuten</option>				
 			</select>
 		</td>
   </tr>

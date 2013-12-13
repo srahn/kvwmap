@@ -1177,3 +1177,11 @@ ALTER TABLE n_nachweise
 
 
 DROP FUNCTION chartodate(character varying);
+
+
+
+UPDATE bw_zonen SET zonentyp = 'Ackerlandflächen' WHERE zonentyp = 'Ackerland';
+UPDATE bw_zonen SET zonentyp = 'Forstflächen' WHERE zonentyp = 'forstwirtschaftliche Fläche';
+UPDATE bw_zonen SET zonentyp = 'Gewerbeflächen' WHERE zonentyp = 'Gewerbegebiet';
+UPDATE bw_zonen SET zonentyp = 'Sanierungsflächen' WHERE zonentyp = 'Sanierungsgebiet';
+UPDATE bw_zonen SET zonentyp = 'Grünlandflächen' WHERE zonentyp = 'Grünland';

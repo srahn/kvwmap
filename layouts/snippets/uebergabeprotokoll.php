@@ -16,7 +16,7 @@ function create_protocol(){
 -->
 </SCRIPT>
 
-<table width="950px" border="0" cellpadding="5" cellspacing="0">
+<table width="1035px" border="0" cellpadding="5" cellspacing="0">
 	<tr><td></td></tr>
   <tr> 
     <td align="center" bgcolor="<?php echo BG_FORM ?>"><strong><font size="+1"><?php echo $this->titel; ?></font></strong></td>
@@ -44,6 +44,7 @@ function create_protocol(){
           <td width="60px" <? if($this->formvars['Datum'] != 1) echo 'bgcolor="#EBEBEB"'; ?>><strong>Datum</strong><input type="checkbox" onchange="document.GUI.submit();" value="1" name="Datum" <? if($this->formvars['Datum'] == 1)echo 'checked=true;'; ?>></td>
           <td width="55px" <? if($this->formvars['Datei'] != 1) echo 'bgcolor="#EBEBEB"'; ?>><strong>Datei</strong><input type="checkbox" onchange="document.GUI.submit();" value="1" name="Datei" <? if($this->formvars['Datei'] == 1)echo 'checked=true;'; ?>></td>
           <td width="130px" <? if($this->formvars['gemessendurch'] != 1) echo 'bgcolor="#EBEBEB"'; ?>><strong>gemessen durch</strong><input type="checkbox" onchange="document.GUI.submit();" value="1" name="gemessendurch" <? if($this->formvars['gemessendurch'] == 1)echo 'checked=true;'; ?>></td>
+		  <td width="85px" <? if($this->formvars['Gueltigkeit'] != 1) echo 'bgcolor="#EBEBEB"'; ?>><strong>Gültigkeit</strong><input type="checkbox" onchange="document.GUI.submit();" value="1" name="Gueltigkeit" <? if($this->formvars['Gueltigkeit'] == 1)echo 'checked=true;'; ?>></td>
         </tr>
         <? for($i=0; $i < count($this->antrag->FFR); $i++){ ?>
         <tr bgcolor="#ffffff"> 
@@ -57,6 +58,7 @@ function create_protocol(){
           <td align="center" <? if($this->formvars['Datum'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['Datum']; ?></td>
           <td align="center" <? if($this->formvars['Datei'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['Datei']; ?></td>
           <td align="center" <? if($this->formvars['gemessendurch'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['gemessen durch']; ?></td>
+		  <td align="center" <? if($this->formvars['Gueltigkeit'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['Gueltigkeit']; ?></td>
         </tr>
         <? }?>
       </table>

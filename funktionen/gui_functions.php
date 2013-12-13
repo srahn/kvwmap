@@ -10,6 +10,46 @@ function onload_functions(){
 	}
 }
 
+function update_legend(layerhiddenstring){
+	parts = layerhiddenstring.split(' ');
+	for(j = 0; j < parts.length-1; j=j+2){
+		if((document.getElementsByName('pseudothema'+parts[j])[0] != undefined && parts[j+1] == 0) || 
+			(document.getElementsByName('pseudothema'+parts[j])[0] == undefined && parts[j+1] == 1)){
+			legende = document.getElementById('legend');
+			ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=get_legend', new Array(legende), "");
+			break;
+		}
+	}
+}
+
+function getlegend(groupid, layerid, fremde){
+	groupdiv = document.getElementById('groupdiv_'+groupid);
+	if(layerid == ''){														// eine Gruppe wurde auf- oder zugeklappt
+		group = document.getElementById('group_'+groupid);
+		if(group.value == 0){												// eine Gruppe wurde aufgeklappt -> Layerstruktur per Ajax holen
+			group.value = 1;
+			ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=get_group_legend&'+group.name+'='+group.value+'&group='+groupid+'&nurFremdeLayer='+fremde, new Array(groupdiv), "");
+		}
+		else{																// eine Gruppe wurde zugeklappt -> Layerstruktur nur verstecken
+			group.value = 0;
+			layergroupdiv = document.getElementById('layergroupdiv_'+groupid);
+			groupimg = document.getElementById('groupimg_'+groupid);
+			layergroupdiv.style.display = 'none';			
+			groupimg.src = 'graphics/plus.gif';
+		}
+	}
+	else{																	// eine Klasse wurde auf- oder zugeklappt
+		layer = document.getElementById('classes_'+layerid);
+		if(layer.value == 0){
+			layer.value = 1;
+		}
+		else{
+			layer.value = 0;
+		}
+		ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=get_group_legend&'+layer.name+'='+layer.value+'&group='+groupid+'&nurFremdeLayer='+fremde, new Array(groupdiv), "");
+	}
+}
+
 function updateThema(event, thema, query, radiolayers){
   if(query.checked == true){
     thema.checked = true;
@@ -65,27 +105,6 @@ function updateQuery(event, thema, query, radiolayers){
   		}
   	}
   }
-}
-
-
-function updategroup(group){
-  if(group.value == 0){
-    group.value = 1;
-  }
-  else{
-    group.value = 0;
-  }
-  getlegend(group, '', document.GUI.nurFremdeLayer.value);
-}
-
-function updateclasses(layer){
-  if(layer.value == 0){
-    layer.value = 1;
-  }
-  else{
-    layer.value = 0;
-  }
-  getlegend('', layer, document.GUI.nurFremdeLayer.value);
 }
 
 function selectgroupquery(group){

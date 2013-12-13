@@ -416,7 +416,7 @@ class notiz {
     # der epsg-code des Views ist an die Rolle gebunden und wird aus Datenbank abgefragt
     # als epsg-code der Tabelle Notiz wird die Konstante EPSGCODE aus config.php genommen.
     $formvars['epsg_nach']=EPSGCODE;
-    $sql.=",transform(st_geometryfromtext('".$formvars['textposition']."',".$formvars['epsg_von']."),".$formvars['epsg_nach']."))";
+    $sql.=",st_transform(st_geometryfromtext('".$formvars['textposition']."',".$formvars['epsg_von']."),".$formvars['epsg_nach']."))";
     #echo $sql;
     $ret=$this->database->execSQL($sql,4, 1);
     if ($ret[0]) {

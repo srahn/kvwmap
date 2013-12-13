@@ -103,6 +103,14 @@ function dec2dms($number){
 	return $degrees."°".$minutes."'".$seconds.'"';
 }
 
+function dec2dmin($number){
+	# convert decimal degree value to degree and decimal minutes
+	$part1 = explode('.', $number);
+	$degrees = $part1[0];
+	$minutes = ('0.'.$part1[1]) * 60;
+	return $degrees."°".round($minutes,3);
+} 
+
 function allocateImageColors($image, $colors) {
 	$imageColors = Array();
 	foreach($colors AS $colorName => $rgbValues) {
@@ -601,6 +609,7 @@ function umlaute_umwandeln($name){
   $name = str_replace(':', '', $name);
   $name = str_replace('/', '-', $name);
   $name = str_replace(' ', '', $name);
+  $name = str_replace('-', '_', $name);
   return $name;
 }
 

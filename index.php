@@ -178,12 +178,16 @@ $GUI->requeststring = $QUERY_STRING;
 #var_dump($GUI->formvars);
 $GUI->loadPlugins();
 if($GUI->goNotExecutedInPlugins){
-	switch($go){
+	if($go == 'get_last_query'){
+		$GUI->last_query = $GUI->user->rolle->get_last_query();
+		$go = $GUI->last_query['go'];
+	}
+	switch($go){	
 		case 'ALB_ALK_Tabellen_leeren' : {
 			$GUI->checkCaseAllowed($go);
-	    $GUI->truncateAlbAlkTables();
-	    $GUI->output();
-  	} break;
+			$GUI->truncateAlbAlkTables();
+			$GUI->output();
+		} break;
   	 
 		case 'Multi_Geometrien_splitten' : {
 		  $GUI->split_multi_geometries();
@@ -344,9 +348,15 @@ if($GUI->goNotExecutedInPlugins){
 		$GUI->getlayerfromgroup();
 	  } break;
 
-	  # Legende erzeugen
+	  # Legende für eine Gruppe erzeugen
+	  case 'get_group_legend' : {
+			$GUI->get_group_legend();
+	  } break;
+		
+		# Legende erzeugen
 	  case 'get_legend' : {
-		$GUI->get_legend();
+			$GUI->loadMap('DataBase');
+			echo $GUI->create_dynamic_legend();
 	  } break;
 
 	  # GPS-Position auslesen
@@ -721,6 +731,9 @@ if($GUI->goNotExecutedInPlugins){
 	  # 2006-01-26 pk
 	  case 'Flurstueck_Anzeigen' : {
 		$GUI->checkCaseAllowed($go);
+		if($GUI->last_query != ''){
+			$GUI->formvars['FlurstKennz'] = $GUI->last_query[$GUI->last_query['layer_ids'][0]]['sql'];
+		}
 		$explodedFlurstKennz = explode(';',$GUI->formvars['FlurstKennz']);
 		$GUI->flurstAnzeige($explodedFlurstKennz);
 		$GUI->output();
@@ -1855,7 +1868,7 @@ if($GUI->goNotExecutedInPlugins){
 	  } break;
 
 		case 'getMap_ajax' : {   
-      $GUI->formvars['nurAktiveLayer'] = true;		
+      $GUI->formvars['nurAufgeklappteLayer'] = true;		
       $GUI->loadMap('DataBase');		
       $GUI->navMap($GUI->formvars['CMD']);
       $GUI->saveMap('');    

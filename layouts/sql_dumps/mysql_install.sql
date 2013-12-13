@@ -15,6 +15,17 @@
 -- Setzen des Charactersets
 -- ALTER DATABASE `@mysql_dbname` CHARACTER SET latin1 COLLATE latin1_german2_ci;
 
+CREATE TABLE  `rolle_last_query` (
+  `user_id` INT( 11 ) NOT NULL ,
+  `stelle_id` INT( 11 ) NOT NULL ,
+  `go` VARCHAR( 50 ) NOT NULL ,
+  `layer_id` INT( 11 ) NOT NULL ,
+  `sql` TEXT NOT NULL ,
+  `orderby` TEXT NULL ,
+  `limit` INT( 11 ) NULL ,
+  `offset` INT( 11 ) NULL
+);
+
 CREATE TABLE `u_consumeShape` (
   `user_id` int(11) NOT NULL,
   `stelle_id` int(11) NOT NULL,
@@ -242,6 +253,8 @@ CREATE TABLE `u_attributfilter2used_layer` (
 CREATE TABLE `u_groups` (
   `id` int(11) NOT NULL auto_increment,
   `Gruppenname` varchar(255) NOT NULL,
+  `obergruppe` INT( 11 ) NULL,
+  `order` INT( 11 ) NULL,
   PRIMARY KEY  (`id`)
 );
 
@@ -598,7 +611,7 @@ CREATE TABLE rolle (
   selectedButton varchar(20) NOT NULL default 'zoomin',
   epsg_code varchar(6) default '2398',
   epsg_code2 varchar(6) NULL,
-  coordtype ENUM( 'dec', 'dms' ) NOT NULL DEFAULT 'dec',
+  coordtype ENUM( 'dec', 'dms', 'dmin' ) NOT NULL DEFAULT 'dec',
   active_frame int(11) NOT NULL default '0',  
   last_time_id DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
   gui varchar(100) collate latin1_german2_ci NOT NULL default 'gui.php',
