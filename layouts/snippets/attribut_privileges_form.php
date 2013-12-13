@@ -1,5 +1,4 @@
 
-<DIV id="TipLayer" style="visibility:hidden;position:absolute;z-index:1000;top:-100"></DIV>
 <SCRIPT src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></SCRIPT>
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
@@ -10,29 +9,38 @@ Text[1]=["Hilfe:","Auf dieser Seite können Sie festlegen, welche Rechte eine St
 
 
 function set_all(attribute_names, stelle, value){
-	attribute_names = attribute_names+'';
 	names = attribute_names.split('|');
-	for(i = 0; i < names.length-1; i++){
+	for(i = 0; i < names.length; i++){
 		element = document.getElementsByName('privileg_'+names[i]+stelle);
 		element[0].value = value;
 	}
 }
 
-function get_from_default(attribute_names, stelle){
-	element1 = document.getElementsByName('privileg'+stelle);
-	element2 = document.getElementsByName('privileg');
-	element1[0].value = element2[0].value;
-	attribute_names = attribute_names+'';
-	names = attribute_names.split('|');
-	for(i = 0; i < names.length-1; i++){
-		element1 = document.getElementsByName('privileg_'+names[i]+stelle);
-		element2 = document.getElementsByName('privileg_'+names[i]);
-		element1[0].value = element2[0].value;
-		tooltip1 = document.getElementsByName('tooltip_'+names[i]+stelle);
-		tooltip2 = document.getElementsByName('tooltip_'+names[i]);
-		tooltip1[0].checked = tooltip2[0].checked;
+function get_from_default(attribute_names, stellen){
+	really = true;
+	stelle = stellen.split('|');
+	if(stelle.length > 1){
+		really = confirm('Wollen Sie die Default-Rechte wirklich allen Stellen zuweisen?');
+	}
+	if(really){
+		for(j = 0; j < stelle.length; j++){
+			element1 = document.getElementsByName('privileg'+stelle[j]);
+			element2 = document.getElementsByName('privileg');
+			element1[0].value = element2[0].value;
+			names = attribute_names.split('|');
+			for(i = 0; i < names.length; i++){
+				element1 = document.getElementsByName('privileg_'+names[i]+stelle[j]);
+				element2 = document.getElementsByName('privileg_'+names[i]);
+				element1[0].value = element2[0].value;
+				tooltip1 = document.getElementsByName('tooltip_'+names[i]+stelle[j]);
+				tooltip2 = document.getElementsByName('tooltip_'+names[i]);
+				tooltip1[0].checked = tooltip2[0].checked;
+			}
+		}
+		save(stellen);
 	}
 }
+
 
 function save(stelle){
 	document.GUI.stelle.value = stelle;
@@ -75,12 +83,15 @@ function save(stelle){
 			</table>
   	</td>
   </tr>
-  <tr>
+  <? if($this->layer[0]['Name'] != ''){ ?>
+	<tr>
   	<td>
-  		<img src="<?php echo GRAPHICSPATH;?>ikon_i.gif" onMouseOver="stm(Text[1],Style[0])" onmouseout="htm()">
+			<div style="position:relative;">
+				<img src="<?php echo GRAPHICSPATH;?>ikon_i.gif" onMouseOver="stm(Text[1],Style[0])" onmouseout="htm()">
+				<DIV id="TipLayer" style="visibility:hidden;position:absolute;z-index:1000;"></DIV>
+			</div>
   	</td>
   </tr>
-  <? if($this->layer[0]['Name'] != ''){ ?>
   <tr>
   	<td>
   		<table>

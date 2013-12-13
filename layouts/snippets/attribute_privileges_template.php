@@ -60,12 +60,12 @@
 						else{
 							$noentry = false;
 						}
+						$attributenames = implode('|', $this->attributes['name']);
 			    	for($i = 0; $i < count($this->attributes['type']); $i++){
 			    		if($this->stelle->id == ''){
 			    			$this->attributes_privileges[$this->attributes['name'][$i]] = $this->attributes['privileg'][$i]; 	# die default-Rechte kommen aus layer_attributes
 			    			$this->attributes_privileges['tooltip_'.$this->attributes['name'][$i]] = $this->attributes['query_tooltip'][$i]; 	# die default-Rechte kommen aus layer_attributes
 			    		}
-			    		$attribute_names .= $this->attributes['name'][$i].'|';
 							echo '
 							<tr>
 							  <td align="center">
@@ -107,7 +107,8 @@
 							  </td>';} echo '
 							  <td>&nbsp;</td>
 							  <td align="center">
-							  	<select class="select" style="width:100px" name="" onchange="set_all(\''.$attribute_names.'\', \''.$this->stelle->id.'\', this.value);"">
+							  	<select class="select" style="width:100px" name="" onchange="set_all(\''.$attributenames.'\', \''.$this->stelle->id.'\', this.value);"">
+										<option value=""> - Auswahl - </option>
 							  		<option value="">nicht sichtbar</option>
 							  		<option value="0">lesen</option>
 							  		<option value="1">editieren</option>
@@ -121,7 +122,12 @@
 							echo '
 							<tr>
 								<td colspan="5" height="40px" align="center" valign="middle">';
-							if($this->stelle->id != '' AND $this->layer[0]['Name'] != '')echo '<a href="javascript:get_from_default(\''.$attribute_names.'\', '.$this->stelle->id.');">Default-Rechte übernehmen</a>';
+							if($this->stelle->id != '' AND $this->layer[0]['Name'] != ''){
+								echo '<a href="javascript:get_from_default(\''.$attributenames.'\', \''.$this->stelle->id.'\');">Default-Rechte übernehmen</a>';
+							}
+							else{
+								echo '<a href="javascript:get_from_default(\''.$attributenames.'\', \''.implode('|', $this->stellen['ID']).'\');">Default-Rechte allen Stellen zuweisen</a>';
+							}
 							echo '</td>
 							</tr>
 							<tr>

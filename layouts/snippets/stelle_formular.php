@@ -57,7 +57,6 @@ function getInsertIndex(insertObj, id, order, start){
 		}
 		options_order_string = insertObj.options[i].id + "";
 		options_order_split = options_order_string.split('_');
-		if(start > 0)alert(options_order_split[0] + ' - ' + ordersplit[0]);
 		if(parseInt(options_order_split[0]) > parseInt(ordersplit[0])){
 			return i;
 		}
@@ -474,15 +473,15 @@ else {
                     <td>
 											<select name="allgroups" size="5" onchange="getlayer();select_layer();" style="width:200px">
 												<option value=""> - alle - </option>
-                      <? for($i=0; $i < count($this->formvars['groups']); $i++){
-                          echo '<option title="'.str_replace(' ', '&nbsp;', $this->formvars['groups'][$i]["Gruppenname"]).'" value="'.$this->formvars['groups'][$i]["id"].'">'.$this->formvars['groups'][$i]["Gruppenname"].'</option>';
+                      <? foreach($this->formvars['groups'] as $group){
+                          echo '<option title="'.str_replace(' ', '&nbsp;', $group["Gruppenname"]).'" value="'.$group["id"].'">'.$group["Gruppenname"].'</option>';
                          }
                       ?>
                       </select>                    
                     	<div id="alllayer_div">
                       <select name="alllayer" size="5" multiple style="width:200px">
                       <? for($i=0; $i < count($this->formvars['layer']["Bezeichnung"]); $i++){
-                          echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['layer']["Bezeichnung"][$i]).' value="'.$this->formvars['layer']["ID"][$i].'">'.$this->formvars['layer']["Bezeichnung"][$i].'</option>';
+                          echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['layer']["Bezeichnung"][$i]).' id="'.$this->formvars['layer']["ID"][$i].'_'.$this->formvars['layer']["GruppeID"][$i].'" value="'.$this->formvars['layer']["ID"][$i].'">'.$this->formvars['layer']["Bezeichnung"][$i].'</option>';
                            }
                       ?>
                       </select>

@@ -1,9 +1,11 @@
-<div id="TipLayer" style="visibility:hidden;position:absolute;z-index:1000;top:-100"></div><?php
+<?php
  # 2008-01-12 pkvvm
   include(LAYOUTPATH.'languages/layer_formular_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
  ?><script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <script src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
+
+Text[0]=["Hilfe:","Wendet eine Prozessierungsanweisung für den Layer an. Die unterstützen Anweisungen hängen vom Layertyp und dem verwendeten Treiber ab. Es gibt Anweisungen für Attribute, Connection Pooling, OGR Styles und Raster. siehe Beschreibung zum Layerattribut PROCESSING unter: http://www.mapserver.org/mapfile/layer.html. Mehrere Prozessinganweisungen werden hier eingegeben getrennt durch Semikolon. z.B. CHART_SIZE=60;CHART_TYPE=pie für die Darstellung eines Tortendiagramms des Typs MS_LAYER_CHART"]
 
   function testConnection() {
     if (document.getElementById('connectiontype').value == 7) {
@@ -83,14 +85,14 @@ else {
 		      		<select name="Gruppe">
 		      			<option value=""><?php echo $this->strPleaseSelect; ?></option>
 		      			<? 
-		      			for($i = 0; $i < count($this->Groups); $i++){
-		      				if($this->formvars['Gruppe'] == $this->Groups[$i]['id']){
+		      			foreach($this->Groups as $group){
+		      				if($this->formvars['Gruppe'] == $group['id']){
 		      					echo '<option selected';
 		      				}
 		      				else{
 		      					echo '<option';
 		      				}
-		      				echo ' value="'.$this->Groups[$i]['id'].'">'.$this->Groups[$i]['id'].' - '.$this->Groups[$i]['Gruppenname'].'</option>';
+		      				echo ' value="'.$group['id'].'">'.$group['id'].' - '.$group['Gruppenname'].'</option>';
 		      			}
 		      			?>	      			
 		      		</select>
@@ -273,10 +275,10 @@ else {
 		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strProcessing; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		    	  <input name="processing" type="text" value="<?php echo $this->formvars['processing']; ?>" size="25" maxlength="255">
-		    	  <script type="text/javascript">
-						  Text[0]=["Hilfe:","Wendet eine Prozessierungsanweisung für den Layer an. Die unterstützen Anweisungen hängen vom Layertyp und dem verwendeten Treiber ab. Es gibt Anweisungen für Attribute, Connection Pooling, OGR Styles und Raster. siehe Beschreibung zum Layerattribut PROCESSING unter: http://www.mapserver.org/mapfile/layer.html. Mehrere Prozessinganweisungen werden hier eingegeben getrennt durch Semikolon. z.B. CHART_SIZE=60;CHART_TYPE=pie für die Darstellung eines Tortendiagramms des Typs MS_LAYER_CHART"]
-						</script>
-		    	  <img src="<?php echo GRAPHICSPATH;?>ikon_i.gif" onMouseOver="stm(Text[0],Style[0])" onmouseout="htm()">
+						<img src="<?php echo GRAPHICSPATH;?>ikon_i.gif" onMouseOver="stm(Text[0],Style[0])" onmouseout="htm()">
+						<div>
+							<div id="TipLayer" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+						</div>
 		    	</td>
 		  	</tr>
 		  	<tr>

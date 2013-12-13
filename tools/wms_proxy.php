@@ -20,7 +20,7 @@
     if(!format)$format = $_REQUEST['format'];
     
     for($i = 0; $i < count($_REQUEST); $i++){
-    	if(in_array(strtolower($params[$i]), array('service', 'version', 'request', 'layers', 'format', 'srs', 'styles'))){
+			if(in_array(strtolower($params[$i]), array('service', 'version', 'request', 'layers', 'format', 'srs', 'styles', 'query_layers', 'x', 'y'))){
     		$url.='&'.$params[$i].'='.$_REQUEST[$params[$i]];
     	}
     }

@@ -1,8 +1,6 @@
 <SCRIPT src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></SCRIPT>
-<DIV id="TipLayer" style="visibility:hidden;position:absolute;z-index:1000;top:-100"></DIV>
 <script type="text/javascript">
 Text[1]=["Tipp:","Durch die Auswahl zwischen Stelle und Nutzer kann die Statistik so angepasst werden, dass die Zugriffe pro Layer und Stelle oder die Zugriffe pro Layer und Nutzer angezeigt werden können. Wählt man hierbei Stelle und Nutzer aus, werden die Zugriffe pro Layer durch den Nutzer über eine bestimmt Stelle angezeigt."]
-Text[2]=["Tipp:","An dieser Stelle kann die graphische Ausgabe der Zugriffe in einem entsprechenden Diagramm gewählt werden."]
 
 function display(id) {
   if (id=="tablemonth") {
@@ -251,7 +249,12 @@ function display(id) {
         <tr> 
           <td>&nbsp; </td>
           <td>&nbsp;</td>
-          <td align="right" ><img src="<?php echo GRAPHICSPATH;?>ikon_i.gif" onMouseOver="stm(Text[1],Style[0])" onmouseout="htm()"></td>
+          <td align="right" >
+						<div>
+							<img src="<?php echo GRAPHICSPATH;?>ikon_i.gif" onMouseOver="stm(Text[1],Style[0])" onmouseout="htm()">
+							<DIV id="TipLayer" style="visibility:hidden;position:absolute;z-index:1000;"></DIV>
+						</div>
+					</td>
         </tr>
         <tr> 
           <td align="center" >&nbsp; </td>

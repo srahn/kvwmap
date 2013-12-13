@@ -193,7 +193,7 @@ class GUI extends GUI_core{
   # berücksichtigen und zu vereinheitlichen.
 
   # Konstruktor
-  function GUI($main,$style,$mime_type) {
+  function GUI($main, $style, $mime_type) {
     # Debugdatei setzen
     global $debug;
     $this->debug=$debug;
@@ -205,7 +205,7 @@ class GUI extends GUI_core{
     $this->log_postgres=$log_postgres;
     # layout Templatedatei zur Anzeige der Daten
     if ($main!="") $this->main=$main;
-    # style Stylesheetdatei
+    # Stylesheetdatei
     if (isset($style)) $this->style=$style;
     # mime_type html, pdf
     if (isset ($mime_type)) $this->mime_type=$mime_type;
@@ -351,10 +351,10 @@ class GUI extends GUI_core{
 	}
 
 	function resizeMap2Window(){
-		$width = $this->formvars['width']-490;
+		$width = $this->formvars['width']-475;
 		if($this->user->rolle->hideMenue == 1){$width = $width + 195;}
-		if($this->user->rolle->hideLegend == 1){$width = $width + 210;}
-		$height = $this->formvars['height']-140;
+		if($this->user->rolle->hideLegend == 1){$width = $width + 244;}
+		$height = $this->formvars['height']-152;
 		$this->user->rolle->setSize($width.'x'.$height);
 		$this->user->rolle->readSettings();
 	}
@@ -565,6 +565,7 @@ class GUI extends GUI_core{
       switch($this->formvars['type']) {
   			case 'select-one' : {					# ein Auswahlfeld soll mit den Optionen aufgefüllt werden 
       		$html = '>';			# Workaround für dummen IE Bug
+			$html .= '<option value="">-- Auswahl --</option>';
       		while($rs = pg_fetch_array($ret[1])){
         		$html .= '<option value="'.$rs['value'].'">'.$rs['output'].'</option>';
       		}
@@ -876,6 +877,7 @@ class GUI extends GUI_core{
 				$legend .= $this->create_group_legend($group['id']);
 			}
 		}
+		$legend .= '<input type="hidden" name="layers" value="'.$this->layer_id_string.'">';
 		return $legend;
   }
 	
@@ -884,8 +886,8 @@ class GUI extends GUI_core{
     $groupname = $this->groupset[$group_id]['Gruppenname'];
 	  $groupstatus = $this->groupset[$group_id]['status'];
     $legend .=  '
-	  <div id="groupdiv_'.$group_id.'">
-      <table cellspacing="0" cellpadding="0" border="0"><tr><td>
+	  <div id="groupdiv_'.$group_id.'" style="width:100%">
+      <table cellspacing="0" cellpadding="0" border="0" style="width:100%"><tr><td>
       <input id="group_'.$group_id.'" name="group_'.$group_id.'" type="hidden" value="'.$groupstatus.'">
       <a href="javascript:getlegend(\''.$group_id.'\', \'\', document.GUI.nurFremdeLayer.value)">
         <img border="0" id="groupimg_'.$group_id.'" src="graphics/';
@@ -902,11 +904,11 @@ class GUI extends GUI_core{
 		else{
 			$legend .=  '<b><font color="firebrick" size="2">'.html_umlaute($groupname).'</font></b><br>';
 		}
-		$legend .= '</td></tr><tr><td><div id="layergroupdiv_'.$group_id.'"><table cellspacing="0" cellpadding="0">';
+		$legend .= '</td></tr><tr><td style="width:100%"><div id="layergroupdiv_'.$group_id.'" style="width:100%"><table cellspacing="0" cellpadding="0" style="width:100%">';
 		$layercount = count($this->groups_with_layers[$group_id]);
     if($groupstatus == 1){		# Gruppe aufgeklappt
 			for($u = 0; $u < count($this->groupset[$group_id]['untergruppen']); $u++){			# die Untergruppen rekursiv durchlaufen
-				$legend .= '<tr><td><table cellspacing="0" cellpadding="0"><tr><td>&nbsp;&nbsp;&nbsp;</td><td>';
+				$legend .= '<tr><td style="width:100%"><table cellspacing="0" cellpadding="0" style="width:100%"><tr><td>&nbsp;&nbsp;&nbsp;</td><td style="width:100%">';
 				$legend .= $this->create_group_legend($this->groupset[$group_id]['untergruppen'][$u]);
 				$legend .= '</td></tr></table></td></tr>';
 			}
@@ -932,13 +934,24 @@ class GUI extends GUI_core{
 							if($layer['queryable'] == 1 AND !$this->formvars['nurFremdeLayer']){
 								$legend .=  '<input id="qLayer'.$layer['Layer_ID'].'" title="Abfrage ein/ausschalten" ';
 								
-								if($layer['selectiontype'] == 'radio'){
+								if($this->user->rolle->singlequery){			# singlequery-Modus
 									$legend .=  'type="radio" ';
-									$legend .=  ' onClick="if(event.preventDefault){event.preventDefault();}else{event.returnValue = false;};" onMouseDown="updateThema(event, document.getElementById(\'thema'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), document.GUI.radiolayers_'.$group_id.')"';
+									if($layer['selectiontype'] == 'radio'){
+										$legend .=  ' onClick="if(event.preventDefault){event.preventDefault();}else{event.returnValue = false;};" onMouseDown="updateThema(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), document.GUI.radiolayers_'.$group_id.', document.GUI.layers)"';
+									}
+									else{
+										$legend .=  ' onClick="if(event.preventDefault){event.preventDefault();}else{event.returnValue = false;};" onMouseDown="updateThema(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), \'\', document.GUI.layers)"';
+									}
 								}
-								else{
-									$legend .=  'type="checkbox" ';
-									$legend .=  ' onClick="updateThema(event, document.getElementById(\'thema'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), \'\')"';
+								else{			# normaler Modus
+									if($layer['selectiontype'] == 'radio'){
+										$legend .=  'type="radio" ';
+										$legend .=  ' onClick="if(event.preventDefault){event.preventDefault();}else{event.returnValue = false;};" onMouseDown="updateThema(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), document.GUI.radiolayers_'.$group_id.', \'\')"';
+									}								
+									else{
+										$legend .=  'type="checkbox" ';
+										$legend .=  ' onClick="updateThema(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), \'\', \'\')"';
+									}
 								}
 								
 								$legend .=  ' name="qLayer'.$layer['Layer_ID'].'" value="1" ';
@@ -951,18 +964,18 @@ class GUI extends GUI_core{
 							if ($layer['queryable'] != 1){
 								$legend .=  '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
 							}
+							// die sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen, welches immer den value 0 hat, damit sie beim Neuladen ausgeschaltet werden können, denn eine nicht angehakte Checkbox/Radiobutton wird ja nicht übergeben
+							$legend .=  '<input type="hidden" id="thema'.$layer['Layer_ID'].'" name="thema'.$layer['Layer_ID'].'" value="0">';
 							
-							$legend .=  '<input type="hidden" name="thema'.$layer['Layer_ID'].'" value="0">';
-							
-							$legend .=  '<input id="thema'.$layer['Layer_ID'].'" ';
+							$legend .=  '<input id="thema_'.$layer['Layer_ID'].'" ';
 							if($layer['selectiontype'] == 'radio'){
 								$legend .=  'type="radio" ';
-								$legend .=  ' onClick="if(event.preventDefault){event.preventDefault();}else{event.returnValue = false;};" onMouseDown="updateQuery(event, document.getElementById(\'thema'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), document.GUI.radiolayers_'.$group_id.')"';
+								$legend .=  ' onClick="if(event.preventDefault){event.preventDefault();}else{event.returnValue = false;};" onMouseDown="updateQuery(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), document.GUI.radiolayers_'.$group_id.')"';
 								$radiolayers[$group_id] .= $layer['Layer_ID'].'|';
 							}
 							else{
 								$legend .=  'type="checkbox" ';
-								$legend .=  ' onClick="updateQuery(event, document.getElementById(\'thema'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), \'\')"';
+								$legend .=  ' onClick="updateQuery(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), \'\')"';
 							}
 							$legend .=  'title="Thema ein/ausschalten" name="thema'.$layer['Layer_ID'].'" value="1" ';
 							if($layer['aktivStatus'] == 1){
@@ -974,7 +987,7 @@ class GUI extends GUI_core{
 								if(substr($layer['metalink'], 0, 10) != 'javascript'){
 									$legend .= 'target="_blank"';
 								}
-								$legend .= ' class="black2" href="'.$layer['metalink'].'">';
+								$legend .= ' class="metalink" href="'.$layer['metalink'].'">';
 							}
 							$legend .= '<font ';
 							if($layer['minscale'] != -1 AND $layer['maxscale'] > 0){
@@ -1083,12 +1096,36 @@ class GUI extends GUI_core{
 									<td>
 										&nbsp;&nbsp;';
 						if($layer['queryable'] == 1){
-							$legend .=  '<input type="checkbox" name="pseudoqLayer'.$layer['Layer_ID'].'" disabled>';
+							$legend .=  '<input ';
+							if($layer['selectiontype'] == 'radio'){
+								$legend .=  'type="radio" ';
+							}
+							else{
+								$legend .=  'type="checkbox" ';
+							}
+							if($layer['queryStatus'] == 1){
+								$legend .=  'checked="true"';
+							}
+							$legend .=' type="checkbox" name="pseudoqLayer'.$layer['Layer_ID'].'" disabled>';
 						}
-						else{
+						$legend .=  '<img border="0" src="graphics/leer.gif" width="1">';
+						if($layer['queryable'] != 1){
 							$legend .=  '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
 						}
-						$legend .=  '<input type="checkbox" name="pseudothema'.$layer['Layer_ID'].'" disabled>
+						// die nicht sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen nur bei Radiolayern, damit sie beim Neuladen ausgeschaltet werden können, denn ein disabledtes input-Feld wird ja nicht übergeben
+						$legend .=  '<input type="hidden" id="thema'.$layer['Layer_ID'].'" name="thema'.$layer['Layer_ID'].'" value="'.$layer['aktivStatus'].'">';
+						$legend .=  '<input ';
+						if($layer['selectiontype'] == 'radio'){
+							$legend .=  'type="radio" ';
+							$radiolayers[$group_id] .= $layer['Layer_ID'].'|';
+						}
+						else{
+							$legend .=  'type="checkbox" ';
+						}
+						if($layer['aktivStatus'] == 1){
+							$legend .=  'checked="true" ';
+						}
+						$legend .= 'id="thema_'.$layer['Layer_ID'].'" name="thema'.$layer['Layer_ID'].'" disabled="true">
 						<font color="gray" ';
 						if($layer['minscale'] != -1 AND $layer['maxscale'] != -1){
 							$legend .= 'title="'.$layer['minscale'].' - '.$layer['maxscale'].'"';
@@ -1101,8 +1138,7 @@ class GUI extends GUI_core{
 							}
 							$legend .=  '>';
 						}
-						$legend .=  '<input type="hidden" name="thema'.$layer['Layer_ID'].'" value="'.$layer['aktivStatus'].'"
-								</td>
+						$legend .=  '</td>
 								</tr>';
 					}
 				}
@@ -1853,6 +1889,14 @@ class GUI extends GUI_core{
     $gbliste['bezeichnung'] = $sorted_arrays['array'];
     $gbliste['beides'] = $sorted_arrays['second_array'];
     $this->gbliste = $gbliste;
+		####### Import ###########
+		$_files = $_FILES;
+    if($_files['importliste']['name']){
+			$importliste = file($_files['importliste']['tmp_name'], FILE_IGNORE_NEW_LINES);
+			$this->formvars['selBlatt'] = implode(', ', $importliste);
+			$this->formvars['Bezirk'] = substr($importliste[0], 0, 6);
+		}
+		##########################
     if($this->formvars['Bezirk'] != ''){
     	if($this->formvars['selBlatt'])$this->selblattliste = explode(', ',$this->formvars['selBlatt']);
     	$this->blattliste = $grundbuch->getGrundbuchblattliste($this->formvars['Bezirk']);
@@ -3115,10 +3159,11 @@ class GUI extends GUI_core{
       }
       $csv .= ';';
       $csv .= $this->flurstuecke[$i]['albflaeche'].';';
+			$csv .= str_replace('.', ',', round($this->flurstuecke[$i]['schnittflaeche'], 2)).';';
       $csv .= str_replace('.', ',', $this->flurstuecke[$i]['anteil']).';';
      	$csv .= chr(10);  
     }
-    $csv = 'Gemarkung;Flur;Zähler/Nenner;Eigentümer;Flst-Fläche(ALB);Anteil'.chr(10).$csv;
+    $csv = 'Gemarkung;Flur;Zähler/Nenner;Eigentümer;Flst-Fläche(ALB);Anteil m²;Anteil %'.chr(10).$csv;
     ob_end_clean();
     header("Content-type: application/vnd.ms-excel");
     header("Content-disposition:  inline; filename=Flurstuecke.csv");
@@ -5811,43 +5856,33 @@ class GUI extends GUI_core{
     $layer = $this->user->rolle->getLayer(LAYERNAME_BODENRICHTWERTE);
     $bodenrichtwertzone=new bodenrichtwertzone($this->pgdatabase, $layer[0]['epsg_code'], $this->user->rolle->epsg_code);
 
-    # 1. Prüfen der Eingabewerte
-    #echo '<br>Prüfen der Eingabewerte.';
-    $ret=$bodenrichtwertzone->pruefeBWEingabedaten($this->formvars);
-    if ($ret[0]) {
-      # Es wurde ein oder mehrere Fehler bei den Eingabewerten gefunden
-      $this->Meldung=$ret[1];
-    }
-    else {
-      # Eingabewerte fehlerfrei
-      if ($this->formvars['oid']=='') {
-        # 2. eintragenNeueZone
-        $ret=$bodenrichtwertzone->eintragenNeueZone($this->formvars);
-        if ($ret[0]) {
-          # 2.1 eintrageung fehlerhaft
-          $this->Meldung=$ret[1];
-        }
-        else {
-          #  2.2 eintragung erfolgreich
-          $alertmsg='\nBodenrichtwertzone erfolgreich in die Datenbank eingetragen.'.
-          $this->formvars['pathx']='';    $this->formvars['loc_x']='';
-          $this->formvars['pathy']='';    $this->formvars['loc_y']='';
-          $this->formvars['umring']='';   $this->formvars['textposition']='';
-        }
-      }
-      else {
-        # 3. aktualisierenZone
-        $ret=$bodenrichtwertzone->aktualisierenZone($this->formvars['oid'],$this->formvars);
-        if ($ret[0]) {
-          # 3.1 eintrageung fehlerhaft
-          $this->Meldung=$ret[1];
-        }
-        else {
-          # 3.2 Aktualisierung erfolgreich
-          $alertmsg='\nBodenrichtwertzone erfolgreich in die Datenbank aktualisiert.';
-        }
-      }
-    }
+		if ($this->formvars['oid']=='') {
+			# 2. eintragenNeueZone
+			$ret=$bodenrichtwertzone->eintragenNeueZone($this->formvars);
+			if ($ret[0]) {
+				# 2.1 eintrageung fehlerhaft
+				$this->Meldung=$ret[1];
+			}
+			else {
+				#  2.2 eintragung erfolgreich
+				$alertmsg='\nBodenrichtwertzone erfolgreich in die Datenbank eingetragen.'.
+				$this->formvars['pathx']='';    $this->formvars['loc_x']='';
+				$this->formvars['pathy']='';    $this->formvars['loc_y']='';
+				$this->formvars['umring']='';   $this->formvars['textposition']='';
+			}
+		}
+		else {
+			# 3. aktualisierenZone
+			$ret=$bodenrichtwertzone->aktualisierenZone($this->formvars['oid'],$this->formvars);
+			if ($ret[0]) {
+				# 3.1 eintrageung fehlerhaft
+				$this->Meldung=$ret[1];
+			}
+			else {
+				# 3.2 Aktualisierung erfolgreich
+				$alertmsg='\nBodenrichtwertzone erfolgreich in die Datenbank aktualisiert.';
+			}
+		}
     $this->bodenRichtWertErfassung();
   }
 
@@ -6261,7 +6296,7 @@ class GUI extends GUI_core{
       $stelle->addLayer(array($this->formvars['selected_layer_id']), 0);
       $users = $stelle->getUser();
       for($j = 0; $j < count($users['ID']); $j++){
-        $this->user->rolle->setGroups($users['ID'][$j], array($stellen[$i]), 0); # Hinzufügen der Layergruppen der selektierten Layer zur Rolle
+        $this->user->rolle->setGroups($users['ID'][$j], array($stellen[$i]), array($this->formvars['selected_layer_id']), 0); # Hinzufügen der Layergruppen der selektierten Layer zur Rolle
         $this->user->rolle->setLayer($users['ID'][$j], array($stellen[$i]), 0); # Hinzufügen der Layer zur Rolle
       }
     }
@@ -6478,26 +6513,22 @@ class GUI extends GUI_core{
         elseif($layerset[0]['attributes']['orderby'] != ''){										# Fall 2: der Layer hat im Pfad ein ORDER BY
         	$sql_order = $layerset[0]['attributes']['orderby'];
         }
-        else{																																						# Fall 3: standardmäßig wird nach den oids sortiert
-	        $j = 0;
-	        $komma = '';
-	        $sql_order = ' ORDER BY ';
-	        foreach($layerset[0]['attributes']['all_table_names'] as $tablename){
-						if($layerset[0]['attributes']['oids'][$j]){      # hat Tabelle oids?
-							$sql_order .= $komma.$tablename.'_oid ';
-							$komma = ',';
-						}
-						$j++;
-	      	}
-	      	if($komma == ''){$sql_order = '';}
-        }      	
+        																																						# standardmäßig wird nach der oid sortiert
+				$j = 0;
+				foreach($layerset[0]['attributes']['all_table_names'] as $tablename){
+					if($tablename == $layerset[0]['maintable'] AND $layerset[0]['attributes']['oids'][$j]){      # hat die Haupttabelle oids, dann wird immer ein order by oid gemacht, sonst ist die Sortierung nicht eindeutig
+						if($sql_order == '')$sql_order = ' ORDER BY '.$layerset[0]['maintable'].'_oid ';
+						else $sql_order .= ', '.$layerset[0]['maintable'].'_oid ';
+					}
+					$j++;
+				}    	
       	        
-		if($this->last_query != ''){
-			$sql = $this->last_query[$layerset[0]['Layer_ID']]['sql'];
-			if($this->formvars['orderby'.$layerset[0]['Layer_ID']] == '')$sql_order = $this->last_query[$layerset[0]['Layer_ID']]['orderby'];
-			$this->formvars['anzahl'] = $this->last_query[$layerset[0]['Layer_ID']]['limit'];
-			if($this->formvars['offset_'.$layerset[0]['Layer_ID']] == '')$this->formvars['offset_'.$layerset[0]['Layer_ID']] = $this->last_query[$layerset[0]['Layer_ID']]['offset'];
-		}
+				if($this->last_query != ''){
+					$sql = $this->last_query[$layerset[0]['Layer_ID']]['sql'];
+					if($this->formvars['orderby'.$layerset[0]['Layer_ID']] == '')$sql_order = $this->last_query[$layerset[0]['Layer_ID']]['orderby'];
+					$this->formvars['anzahl'] = $this->last_query[$layerset[0]['Layer_ID']]['limit'];
+					if($this->formvars['offset_'.$layerset[0]['Layer_ID']] == '')$this->formvars['offset_'.$layerset[0]['Layer_ID']] = $this->last_query[$layerset[0]['Layer_ID']]['offset'];
+				}
 		
         if($this->formvars['embedded_subformPK'] == ''){
         	if($this->formvars['anzahl'] == ''){
@@ -8037,9 +8068,12 @@ class GUI extends GUI_core{
     $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
     $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
     if($this->formvars['stelle'] != '' AND $this->formvars['selected_layer_id'] != ''){
-      $stelle = new stelle($this->formvars['stelle'], $this->database);
-      $stelle->set_attributes_privileges($this->formvars, $this->attributes);
-      $stelle->set_layer_privileges($this->formvars['selected_layer_id'], $this->formvars['privileg'.$this->formvars['stelle']]);
+			$stellen = explode('|', $this->formvars['stelle']);
+			foreach($stellen as $stelleid){
+				$stelle = new stelle($stelleid, $this->database);
+				$stelle->set_attributes_privileges($this->formvars, $this->attributes);
+				$stelle->set_layer_privileges($this->formvars['selected_layer_id'], $this->formvars['privileg'.$stelleid]);
+			}
     }
     elseif($this->formvars['selected_layer_id'] != ''){
       $mapdb->set_default_layer_privileges($this->formvars, $this->attributes);
@@ -8109,7 +8143,7 @@ class GUI extends GUI_core{
       for($i=0; $i<count($selectedusers); $i++){
         $this->user->rolle->setRollen($selectedusers[$i],$new_stelle_id); # Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
         $this->user->rolle->setMenue($selectedusers[$i],$new_stelle_id); # Hinzufügen der selectierten Obermenüs zur Rolle
-        $this->user->rolle->setGroups($selectedusers[$i], $new_stelle_id, 0); # Hinzufügen der Layergruppen der selektierten Layer zur Rolle
+        $this->user->rolle->setGroups($selectedusers[$i], $new_stelle_id, $layer, 0); # Hinzufügen der Layergruppen der selektierten Layer zur Rolle
         $this->user->rolle->setLayer($selectedusers[$i], $new_stelle_id, 0); # Hinzufügen der Layer zur Rolle
         $this->selected_user = new user(0,$selectedusers[$i],$this->user->database);
         $this->selected_user->checkstelle();
@@ -8249,7 +8283,7 @@ class GUI extends GUI_core{
         for($i=0; $i<count($users); $i++){
           $this->user->rolle->setRollen($users[$i],$neue_stelle_id);
           $this->user->rolle->setMenue($users[$i],$neue_stelle_id);
-          $this->user->rolle->setGroups($users[$i], $neue_stelle_id, 0);
+          $this->user->rolle->setGroups($users[$i], $neue_stelle_id, $layer, 0);
           $this->user->rolle->setLayer($users[$i], $neue_stelle_id, 0);
           $this->selected_user = new user(0,$users[$i],$this->user->database);
           $this->selected_user->checkstelle();
@@ -8920,8 +8954,12 @@ class GUI extends GUI_core{
         $stellen = explode(', ',$this->formvars['selstellen']);
         $this->user->rolle->setRollen($neue_user_id,$stellen);
         $this->user->rolle->setMenue($neue_user_id,$stellen);
-        $this->user->rolle->setGroups($neue_user_id, $stellen, 0);
         $this->user->rolle->setLayer($neue_user_id, $stellen, 0);
+				for($i = 0; $i < count($stellen); $i++){
+					$stelle = new stelle($stellen[$i], $this->database);
+					$layers = $stelle->getLayers(NULL);
+					$this->user->rolle->setGroups($neue_user_id, array($stellen[$i]), $layers['ID'], 0);
+				}
         if ($ret[0]) {
           $this->Meldung=$ret[1];
         }
@@ -8948,8 +8986,12 @@ class GUI extends GUI_core{
       }
       $this->user->rolle->setRollen($this->formvars['selected_user_id'],$stellen);
       $this->user->rolle->setMenue($this->formvars['selected_user_id'],$stellen);
-      $this->user->rolle->setGroups($this->formvars['selected_user_id'], $stellen, 0);
       $this->user->rolle->setLayer($this->formvars['selected_user_id'], $stellen, 0);
+			for($i = 0; $i < count($stellen); $i++){
+				$stelle = new stelle($stellen[$i], $this->database);
+				$layers = $stelle->getLayers(NULL);
+				$this->user->rolle->setGroups($this->formvars['selected_user_id'], array($stellen[$i]), $layers['ID'], 0);
+			}
       $this->selected_user=new user(0,$this->formvars['selected_user_id'],$this->user->database);
       # Löschen der in der Selectbox entfernten Stellen
       $userstellen =  $this->selected_user->getStellen(0);
@@ -11005,6 +11047,7 @@ class GUI extends GUI_core{
             if($this->formvars['ALK_Suche'] == 1){
             	$this->loadMap('DataBase');
 		          $this->zoomToALKFlurst($FlurstKennz,10);				# ALKIS TODO
+							if($this->formvars['go_next'] != '')header('location: index.php?go='.$this->formvars['go_next']);
 		          $currenttime=date('Y-m-d H:i:s',time());
 		          $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
 		          $this->drawMap();
@@ -11536,27 +11579,24 @@ class GUI extends GUI_core{
 	            }*/
             }
 			
-			# order by 
+			# order by
 			if($this->formvars['orderby'.$layerset[$i]['Layer_ID']] != ''){									# Fall 1: im GLE soll nach einem Attribut sortiert werden
 			  $sql_order = ' ORDER BY '.$this->formvars['orderby'.$layerset[$i]['Layer_ID']];
 			}
 			elseif($layerset[$i]['attributes']['orderby'] != ''){														# Fall 2: der Layer hat im Pfad ein ORDER BY
 				$sql_order = $layerset[$i]['attributes']['orderby'];
 			}
-			elseif($layerset[$i]['template'] == ''){																				# Fall 3: standardmäßig wird nach den oids sortiert
+			if($layerset[$i]['template'] == ''){																				# standardmäßig wird nach der oid sortiert
 				$j = 0;
-				$komma = '';
-				$sql_order = ' ORDER BY ';
 				foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-							if($layerset[$i]['attributes']['oids'][$j]){      # hat Tabelle oids?
-								$sql_order .= $komma.$tablename.'_oid ';
-								$komma = ',';
-							}
-							$j++;
+					if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['attributes']['oids'][$j]){      # hat die Haupttabelle oids, dann wird immer ein order by oid gemacht, sonst ist die Sortierung nicht eindeutig
+						if($sql_order == '')$sql_order = ' ORDER BY '.$layerset[$i]['maintable'].'_oid ';
+						else $sql_order .= ', '.$layerset[$i]['maintable'].'_oid ';
+					}
+					$j++;
 				}
-				if($komma == ''){$sql_order = '';}
 			}
-			
+						
 			if($this->last_query != ''){
 				$sql = $this->last_query[$layerset[$i]['Layer_ID']]['sql'];
 				if($this->formvars['orderby'.$layerset[$i]['Layer_ID']] == '')$sql_order = $this->last_query[$layerset[$i]['Layer_ID']]['orderby'];
@@ -13211,19 +13251,22 @@ class GUI extends GUI_core{
     	$this->titel='Flurstückssuche';
     }
     $this->main='flurstueckssuche.php';
-    # Unterscheidung ob die Flurstückssuche von neuem beginnt oder schon Werte vorausgewählt wurden
-    if ($this->formvars['aktualisieren']=='Neu') {
-      $GemID=0; $GemkgID=0; $FlurID=0; $FlstID=0; $FlstNr='';
-    }
-    else {
-      # Übernahme der Formularwerte für die Einstellung der Auswahlmaske
-      $GemID=$this->formvars['GemID'];
-      $GemkgID=$this->formvars['GemkgID'];
-      $FlurID=$this->formvars['FlurID'];
-      $FlstID=$this->formvars['FlstID'];
-      $FlstNr=$this->formvars['FlstNr'];
-      $selFlstID = explode(', ',$this->formvars['selFlstID']);
-    }
+    ####### Import ###########
+		$_files = $_FILES;
+    if($_files['importliste']['name']){
+			$importliste = file($_files['importliste']['tmp_name'], FILE_IGNORE_NEW_LINES);
+			$this->formvars['selFlstID'] = implode(', ', $importliste);
+			$this->formvars['GemkgID'] = substr($importliste[0], 0, 6);
+			$this->formvars['FlurID'] = substr($importliste[0], 7, 3);
+		}
+		##########################
+		# Übernahme der Formularwerte für die Einstellung der Auswahlmaske
+		$GemID=$this->formvars['GemID'];
+		$GemkgID=$this->formvars['GemkgID'];
+		$FlurID=$this->formvars['FlurID'];
+		$FlstID=$this->formvars['FlstID'];
+		$FlstNr=$this->formvars['FlstNr'];
+		$selFlstID = explode(', ',$this->formvars['selFlstID']);
     #$this->searchInExtent=$this->formvars['searchInExtent'];
     # Abfragen für welche Gemeinden die Stelle Zugriffsrechte hat
     # GemeindenStelle wird eine Liste mit ID´s der Gemeinden zugewiesen, die zur Stelle gehören
@@ -13488,6 +13531,7 @@ class GUI extends GUI_core{
 	        if($ret[0]){
 	        	$this->zoomToALKFlurst($FlurstKennz,100);
 	        }
+					if($this->formvars['go_next'] != '')header('location: index.php?go='.$this->formvars['go_next']);
 	        $currenttime=date('Y-m-d H:i:s',time());
           $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
           $this->drawMap();
@@ -14736,6 +14780,7 @@ class db_mapObj extends db_mapObj_core{
           $layer['ID'][]=$rs['Layer_ID'];
           $layer['Bezeichnung'][]=$rs['Name'];
           $layer['Gruppe'][]=$rs['Gruppenname'];
+					$layer['GruppeID'][]=$rs['Gruppe'];
           $layer['Kurzbeschreibung'][]=$rs['kurzbeschreibung'];
           $layer['Datenherr'][]=$rs['datenherr'];
           $layer['alias'][]=$rs['alias'];
@@ -14745,6 +14790,8 @@ class db_mapObj extends db_mapObj_core{
       $sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
       $layer['Bezeichnung'] = $sorted_arrays['array'];
       $layer['ID'] = $sorted_arrays['second_array'];
+			$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['GruppeID']);
+			$layer['GruppeID'] = $sorted_arrays['second_array'];
     }
     return $layer;
   }
@@ -14873,7 +14920,7 @@ class db_mapObj extends db_mapObj_core{
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
     while($rs=mysql_fetch_array($query)) {
-          $groups[]=$rs;
+          $groups[$rs['id']] = $rs;
       }
     return $groups;
   }

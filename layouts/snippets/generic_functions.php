@@ -18,13 +18,13 @@ function checknumbers(input, type, length, decimal_length){
 		mit_leerz = parts[0].length;
 		length = parseInt(length) - parseInt(decimal_length);
 		if(length != '' &&  ohne_leerz > length){
-			alert('Für dieses Feld sind maximal '+length+' Vorkommastellen erlaubt.');
+			alert('FÃ¼r dieses Feld sind maximal '+length+' Vorkommastellen erlaubt.');
 			parts[0] = parts[0].substring(0, length - ohne_leerz + mit_leerz);
 		}
 		val = parts[0];
 		if(parts[1] != undefined){
 			if(decimal_length != '' && parts[1].length > parseInt(decimal_length)){
-				alert('Für dieses Feld sind maximal '+decimal_length+' Nachkommastellen erlaubt.');
+				alert('FÃ¼r dieses Feld sind maximal '+decimal_length+' Nachkommastellen erlaubt.');
 				parts[1] = parts[1].substring(0, decimal_length);
 			}
 			val = val+'.'+parts[1];
@@ -71,7 +71,7 @@ function check_for_selection(layer_id){
 		}
 	}
 	if(go == 'false'){
-		alert('Es wurde kein Datensatz ausgewählt.');
+		alert('Es wurde kein Datensatz ausgewÃ¤hlt.');
 		return false;
 	}
 	else{
@@ -91,7 +91,7 @@ function zoomto_datasets(layer_id, tablename, columnname){
 
 function delete_datasets(layer_id){
 	if(check_for_selection(layer_id)){
-		if(confirm('Wollen Sie die ausgewählten Datensätze wirklich löschen?')){
+		if(confirm('Wollen Sie die ausgewÃ¤hlten DatensÃ¤tze wirklich lÃ¶schen?')){
 			document.GUI.chosen_layer_id.value = layer_id;
 			document.GUI.go.value = 'Layer_Datensaetze_Loeschen';
 			document.GUI.submit();
@@ -100,7 +100,7 @@ function delete_datasets(layer_id){
 }
 
 function delete_document(attributename){
-	if(confirm('Wollen Sie das ausgewählte Dokument wirklich löschen?')){
+	if(confirm('Wollen Sie das ausgewÃ¤hlte Dokument wirklich lÃ¶schen?')){
 		document.GUI.document_attributename.value = attributename; 
 		document.GUI.go.value = 'Dokument_Loeschen';
 		document.GUI.submit();

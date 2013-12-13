@@ -21,6 +21,7 @@
   $strSearchColor="Suchergebnis-Farbe";
   $strPolish="Polnisch";
   $strCoordType="Koordinatendarstellung";
+	$strSingleQuery="nur ein Thema abfragbar";
   
   
 ?>

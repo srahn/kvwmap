@@ -47,7 +47,8 @@ function ahahDone(url, target, req, action) {
 						target[i].src = responsevalues[i];
 					break;
 					case "xlink:href":
-						target[i].setAttribute("xlink:href", responsevalues[i]);	
+						//target[i].setAttribute("xlink:href", responsevalues[i]);	
+						target[i].setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", responsevalues[i]);
 					break;
 					case "points":
 						target[i].setAttribute("points", responsevalues[i]);	

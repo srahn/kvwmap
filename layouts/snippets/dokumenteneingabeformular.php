@@ -83,10 +83,10 @@ else {
        
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
-    <td colspan="5"><strong><font size="+1"><?php echo $this->titel; ?></font></strong></td>
+    <td colspan="8"><strong><font size="+1"><?php echo $this->titel; ?></font></strong></td>
   </tr>
   <tr> 
-    <td colspan="5">
+    <td colspan="8">
       <table border="0" align="right" cellpadding="5" cellspacing="0">
         <tr> 
           <td>Dokument<?php 
@@ -130,7 +130,7 @@ else {
   </tr>
   <tr> 
     <td rowspan="20">&nbsp; </td>
-    <td rowspan="20" colspan="2"> 
+    <td rowspan="20" colspan="5"> 
       <?php
  				include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php')
 			?>
@@ -263,6 +263,13 @@ else {
   <tr>
   	<td>&nbsp;</td> 
     <td><?php if ($this->formvars[NACHWEIS_PRIMARY_ATTRIBUTE]!='') { ?><a href="index.php?go=Nachweisanzeige">&lt;&lt;&nbsp;zur&uuml;ck&nbsp;zum&nbsp;Rechercheergebnis</a><?php } ?></td>
+		<td></td>
+	<? if($this->user->rolle->runningcoords != '0'){ ?>
+	<td width="100px"><b>&nbsp;<?php echo $this->strCoordinates; ?>:</b>&nbsp;</td>
+	<td><input type="text" style="border:0px;background-color:transparent" name="runningcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?></td>
+	<? }else{ ?>
+	<td colspan="2"></td>
+	<? } ?>
     <td align="right"><input type="checkbox" name="always_draw" value="1" <?if($always_draw == 1 OR $always_draw == 'true')echo 'checked'; ?>>&nbsp;weiterzeichnen&nbsp;&nbsp;</td>
     <td colspan="2" align="center">
     	<table border="0">

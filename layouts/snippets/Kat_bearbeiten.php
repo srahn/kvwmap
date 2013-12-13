@@ -30,13 +30,20 @@ function hinzufuegen(){
 	document.GUI.submit();
 }
 </script>
-<br><br> <DIV id="TipLayer" style="visibility:hidden;position:absolute;z-index:1000;top:-100"></DIV>
+<br><br> 
 <strong><font size="+2"><?php echo $strTitle; ?></font></strong>
 <br><br>
  <table align="center" border="0" cellspacing="5" cellpadding="0">
   <tr align="center">
     <td align="center"><table width="100%" align="center" border="1" cellpadding="5" cellspacing="0" rules="groups">
-	<tr><td><img src="<?php echo GRAPHICSPATH;?>/ikon_i.gif" align="right" onMouseOver="stm(Text[3],Style[0])" onmouseout="htm()"> </td></tr>
+	<tr>
+		<td>
+			<div>
+				<img src="<?php echo GRAPHICSPATH;?>/ikon_i.gif" align="right" onMouseOver="stm(Text[3],Style[0])" onmouseout="htm()">
+				<DIV id="TipLayer" style="visibility:hidden;position:absolute;z-index:1000;"></DIV>
+			</div>
+		</td>
+	</tr>
 	<tr><td><br>
 	<table align="center" border="0" cellspacing="0" cellpadding="0">
 	<tr>

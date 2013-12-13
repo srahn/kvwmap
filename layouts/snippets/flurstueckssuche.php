@@ -15,6 +15,19 @@ function updateGemarkungsauswahl(){
 	}
 }
 
+function showimport(){
+	if(document.getElementById('import2').style.display == 'none'){
+		document.getElementById('import1').style.borderTop="1px solid #C3C7C3";
+		document.getElementById('import1').style.borderLeft="1px solid #C3C7C3";
+		document.getElementById('import1').style.borderRight="1px solid #C3C7C3";
+		document.getElementById('import2').style.display = '';
+	}
+	else{
+		document.getElementById('import1').style.border="none";
+		document.getElementById('import2').style.display = 'none';
+	}
+}
+
 -->
 </script>
 
@@ -25,7 +38,7 @@ if ($this->Fehlermeldung!='') {
   include(LAYOUTPATH."snippets/Fehlermeldung.php");
 }
 ?><p>
-<table border="0" cellspacing="2" cellpadding="0">
+<table border="0" cellpadding="5" cellspacing="2">
 <!--
   <tr>
     <td>&nbsp;</td>
@@ -47,17 +60,11 @@ if ($this->Fehlermeldung!='') {
     <td align="right"><strong><?php echo $strGemkgGem; ?>:&nbsp;</strong></td>
     <td colspan="3"><?php echo $this->FormObject["Gemarkungen"]->html; ?></td>
   </tr>
-  <tr align="center">
-    <td colspan="4">&nbsp;</td>
-  </tr>
   <tr>
     <td align="right"><strong><?php echo $strFlur; ?>:&nbsp;</strong></td>
     <td colspan="3"><?php
      echo $this->FormObject["Fluren"]->html;
    ?></td>
-  </tr>
-  <tr align="center">
-    <td colspan="4">&nbsp;</td>
   </tr>
   <tr>
     <td align="right"><strong><?php echo $strFst; ?>:&nbsp;</strong></td>
@@ -76,16 +83,19 @@ if ($this->Fehlermeldung!='') {
     	<?php echo $this->FormObject["FlstNr"]->html; ?>
     </td>
   </tr>
+	<tr>
+		<td id="import1" colspan="4" align="center"><a href="javascript:showimport();">Import Flurstücksliste...</a></td>
+	</tr>
+	<tr id="import2" style="display:none">
+		<td colspan="4" style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3">
+			<table width="100%" cellpadding="0" cellspacing="0">
+				<td><input name="importliste" type="file" value="" style="width: 340px" tabindex="2"></td>
+				<td><input type="submit" class="button" value="Laden"></td>
+			</table>
+		</td>
+	</tr>
   <tr align="center">
-    <td colspan="4">&nbsp;</td>
-  </tr>
-  <tr align="center">
-    <td align="right">&nbsp;
-<!--
-      <input type="submit" name="aktualisieren" value="<?php echo $strClear; ?>">
--->
-    </td>
-    <td align="left" colspan="3">
+    <td align="center" colspan="4">
       <input type="hidden" name="go_plus" id="go_plus" value="">
       <input type="button" name="dummy" value="<?php echo $strSearch; ?>" onclick="submitWithValue('GUI','go_plus','Suchen')">
    </td>
@@ -94,3 +104,4 @@ if ($this->Fehlermeldung!='') {
 <input type="hidden" name="selFlstID" value="<? echo $this->formvars['selFlstID']; ?>">
 <input name="historical" type="hidden" value="<? echo $this->formvars['historical']; ?>">
 <input name="ALK_Suche" type="hidden" value="<? echo $this->formvars['ALK_Suche']; ?>">
+<input name="go_next" type="hidden" value="<? echo $this->formvars['go_next']; ?>">

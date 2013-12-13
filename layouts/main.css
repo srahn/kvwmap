@@ -1,8 +1,8 @@
 body {  
 	font-family: Arial, Verdana, Helvetica, sans-serif;
 	BACKGROUND:white;
-	margin-left:5px;
-	margin-top:5px;
+	margin-left:0px;
+	margin-top:0px;
 }
 
 h1 {  
@@ -35,18 +35,37 @@ td {
 
 .menu a{ 
     font-size: 10pt;
-   -moz-transition-property: text-shadow;
-   -moz-transition-duration: 0.1s;
-   -moz-transition-delay: 0s;
 }
 
 .menu a:hover { 
-    font-size: 10pt;
-     text-shadow: #808080 3px 3px 5px;
-   -moz-transition-property: text-shadow;
-   -moz-transition-duration: 0.4s;
-   -moz-transition-delay: 0s;
+   text-shadow: #808080 3px 3px 5px;
+   transition: all 0.4s ease;
+   -webkit-transition: all 0.4s ease;
 }
+
+.normallegend {
+  position:relative;
+  display: inline;
+}
+
+.slidinglegend {
+  position:absolute;
+  border-left:1px solid #CCCCCC;
+  background-image: url(../graphics/bg.gif);
+  transform: translate3d(-17px,0px,0px);
+  transition: all 0.4s ease;
+  -webkit-transform: translate3d(-17px,0px,0px);
+  -webkit-transition: all 0.3s ease;
+}
+
+.slidinglegend:hover {
+  transform: translate3d(-245px,0px,0px);
+  transition: all 0.4s ease;
+  -webkit-transform: translate3d(-245px,0px,0px);
+  -webkit-transition: all 0.3s ease;
+}
+
+
 
 h2 {  
 	font-size: 12pt; 
@@ -168,15 +187,22 @@ a.green {
 	TEXT-DECORATION: none; 
 }
 
-a.black {
+span.black {
 	color: black;
 	font-weight: bold; 
 	TEXT-DECORATION:none
 }
 
-a.black2 {
+
+span.black:hover {
+	text-shadow: #808080 3px 3px 5px;
+	transition: all 0.4s ease;
+	-webkit-transition: all 0.4s ease;
+}
+
+
+a.metalink {
 	color: black; 
-	TEXT-DECORATION:none
 }
 
 #layer {

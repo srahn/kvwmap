@@ -1144,3 +1144,5 @@ update `u_rolle2used_layer` set `aktivStatus` = '0' where `aktivStatus` = '';
 ALTER TABLE `rolle` CHANGE `coordtype` `coordtype` ENUM('dec', 'dms', 'dmin') NOT NULL DEFAULT  'dec';
 
 ALTER TABLE  `druckfreitexte` CHANGE  `text`  `text` TEXT DEFAULT NULL;	
+
+ALTER TABLE  `rolle` ADD  `singlequery` BOOLEAN NOT NULL DEFAULT  '0';

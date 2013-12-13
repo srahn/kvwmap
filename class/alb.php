@@ -707,8 +707,8 @@ class ALB {
 				      }
 				      if ($formvars['hinweis']){ $csv .= $flst->Hinweis['bezeichnung'].';';}
 				      if ($formvars['baulasten']){
-				        for($b=0; $b < count($flst->Baulasten); $b++) {
-				          $csv .= " ".$flst->Baulasten[$b]['blattnr'];
+				        for($bl=0; $bl < count($flst->Baulasten); $bl++) {
+				          $csv .= " ".$flst->Baulasten[$bl]['blattnr'];
 				        }
 				        $csv .= ';';
 				      }

@@ -2230,7 +2230,10 @@ ALTER TABLE ONLY alb_x_v_strassen
      the_geom geometry,
      erschliessungsverhaeltnisse integer,
      bedarfswert real,
-     bodenart character varying(6)
+     bodenart character varying(6),
+     brwu real,
+     brws real,
+     brwb real
  )
  WITH OIDS;
  

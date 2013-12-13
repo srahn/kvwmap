@@ -5,6 +5,9 @@ include(WWWROOT.APPLVERSION.'funktionen/gui_functions.php');
 ?>
 <link rel="shortcut icon" href="graphics/wappen/favicon.ico">
 <link rel="stylesheet" href="<?php echo 'layouts/'.$this->style; ?>">
+<? if(CUSTOM_STYLE != ''){ ?>
+<link rel="stylesheet" href="<?php echo 'layouts/custom/'.CUSTOM_STYLE; ?>">
+<? } ?>
 <?php include(WWWROOT.APPLVERSION.'funktionen/msgboxes.php'); ?>
 </HEAD>
 <BODY onload="onload_functions();"> <!-- leftmargin="5" topmargin="5" bgcolor="#FFFFFF" link="#FF0000" alink="#FF9999" vlink="#663333"> -->
@@ -17,8 +20,7 @@ include(WWWROOT.APPLVERSION.'funktionen/gui_functions.php');
         <tr> 
             <td colspan="2"><?php
           $this->debug->write("Include <b>".LAYOUTPATH."snippets/".HEADER."</b> in gui.php",4);    
-    
-       include(LAYOUTPATH."snippets/".HEADER); 
+					include(LAYOUTPATH."snippets/".HEADER); 
        ?></td>
           </tr>
           <tr> 
@@ -29,7 +31,8 @@ include(WWWROOT.APPLVERSION.'funktionen/gui_functions.php');
        include(LAYOUTPATH."snippets/menue_switch.php"); ?>
           </td>
             
-            <td align="center" valign="top" background="<?php echo GRAPHICSPATH; ?>bg.gif"> <?php
+            <td align="center" valign="top" background="<?php echo GRAPHICSPATH; ?>bg.gif">
+							<div style=" position: relative; overflow: hidden; "><?php
               $this->debug->write("Include <b>".$this->main."</b> in gui.php",4);
 				      if(file_exists($this->main)){
 				      	include($this->main);			# Pluginviews
@@ -37,13 +40,13 @@ include(WWWROOT.APPLVERSION.'funktionen/gui_functions.php');
 				      else{ 	    
 				      	include(LAYOUTPATH."snippets/".$this->main);		# normale snippets
 				      } ?>
+							</div>
       			</td>
           </tr>
           <tr> 
             <td colspan="2"><?php
               $this->debug->write("Include <b>".LAYOUTPATH."snippets/".FOOTER."</b> in gui.php",4);    
-
-       include(LAYOUTPATH."snippets/".FOOTER); ?></td>
+							include(LAYOUTPATH."snippets/".FOOTER); ?></td>
           </tr>
         </table>
         </form> 

@@ -420,6 +420,9 @@
 				else{
 					top.document.GUI.split.style.visibility = "hidden";
 				}
+				if(top.document.GUI.last_doing.value == "split_lines"){
+					split_lines();
+				}
 	  	}
   	}
  	}
@@ -706,7 +709,7 @@ function mousemove(evt){
 	if(top.document.GUI.last_doing.value == "vertex_edit" && selected_vertex != undefined && selected_vertex != ""){
 		move_vertex(evt, selected_vertex, "image");
 	}
-	if(top.document.GUI.last_doing.value == "split_lines"){
+	if(top.document.GUI.last_doing.value == "split_lines" && pathx_second.length < 2){
 		client_x = evt.clientX;
   	client_y = resy - evt.clientY;
   	world_x = (client_x * scale) + minx;
@@ -1024,7 +1027,9 @@ function mouseup(evt){
 			top.document.GUI.pathwkt.value = buildwktlinefromsvgpath(top.document.GUI.newpath.value);
 		}
 		else{
-			top.document.GUI.pathwkt.value = top.document.GUI.newpathwkt.value;
+			if(top.document.GUI.newpathwkt.value != ""){
+				top.document.GUI.pathwkt.value = top.document.GUI.newpathwkt.value;
+			}
 		}
 		if(top.document.GUI.secondline.value == "true"){
 			applylines();
@@ -1054,11 +1059,6 @@ function mouseup(evt){
 	}
 
 	function split_lines(){
-		var length = poly_pathx_second.length;
-		for(i = 0; i < length; i++ ){
-			poly_pathx_second.pop();
-			poly_pathy_second.pop();
-		}
 		if(top.document.GUI.pathwkt.value == "" && top.document.GUI.newpath.value != ""){
 			top.document.GUI.pathwkt.value = buildwktlinefromsvgpath(top.document.GUI.newpath.value);
 		}
