@@ -72,10 +72,10 @@ class rok {
 																35 => 'so_beherbergung',	      #"Camping und Caravan"
 															);
 															
-		$gebiet2rok_konkret = array(1 => array('NULL'),														#"Wohngebiet"			hier muss die Konkretisierung leer sein
+		$gebiet2rok_konkret = array(1 => array('WA', 'WR', 'WS'),														#"Wohngebiet"			
 																13 => array('Aufschüttung'),								#'Aufschüttung'
 																14 => array('Abgrabung', 'Bergsenkung'),			#'Abgrabung'
-																32 => array('NULL')																#"Wochenendhaus"		hier muss die Konkretisierung leer sein
+																32 => array('Wochenendhaus', 'Wochenendplatzgebiet')																#"Wochenendhaus"
 																);
 															
 		$konkret2rok_konkret = array(	1	=> array('betreutes Wohnen'),      
@@ -90,20 +90,6 @@ class rok {
 																	10 => array('Post'),
 																	11 => array('Feuerwehr'),
 																	12 => array('Rettungswache'),
-																	13 => array('Stromversorgung - Rechtskraft', 'Stromversorgung - Planung'),	      #'Stromversorgung'
-																	14 => array('Gasversorgung - Rechtskraft', 'Gasversorgung - Planung'),						#'Gasversorgung'
-																	15 => array('Wärmeversorgung - Rechtskraft', 'Wärmeversorgung - Planung'),				#'Wärmeversorgung'
-																	16 => array('Wasserversorgung - Rechtskraft', 'Wasserversorgung - Planung'),			#'Wasserversorgung'
-																	17 => array('Abwasserentsorgung - Rechtskraft', 'Abwasserentsorgung - Planung'),	#'Abwasserentsorgung'
-																	18 => array('Abfallbehandlung - Rechtskraft', 'Abfallbehandlung - Planung'),			#'Abfallbehandlung'
-																	19 => array('Abfallentsorgung - Rechtskraft', 'Abfallentsorgung - Planung'), 			#'Abfallentsorgung'
-																	20 => array('Straßenverkehrsflächen - Rechtskraft', 'Straßenverkehrsflächen - Planung'), 										#'Straßenverkehrsfläche'
-																	22 => array('Schienenverkehrsflächen - Rechtskraft', 'Straßenverkehrsflächen - Planung'),										#'Straßenverkehrsfläche'
-																	23 => array('Flugplatz und Flughafen - Rechtskraft', 'Flugplatz und Flughafen - Planung', 'Hubschrauberlandeplatz - Rechtskraft', 'Hubschrauberlandeplatz - Planung', 'Sonderlandeplatz - Rechtskraft', 'Sonderlandeplatz - Planung'),		#'Luftverkehrsfläche'
-																	24 => array('Umschlagplatz - Rechtskraft', 'Umschlagplatz - Planung'),																		#'Umschlagplatz'
-																	25 => array('Verkehrseinrichtung - Rechtskraft', 'Verkehrseinrichtung - Planung'),												#'Verkehrseinrichtung'
-																	26 => array('Grünfläche - Rechtskraft', 'Grünfläche - Planung'),																					#'Grünflächen'
-																	27 => array('Kompensationsfläche - Rechtskraft', 'Kompensationsfläche - Planung'),	      								#'Ausgleichs-, Kompensations- und Entwicklungsflächen'
 																	28 => array('Sportplatz'),
 																	29 => array('Sporthalle'),
 																	30 => array('Spielplatz'),
@@ -127,11 +113,11 @@ class rok {
 																	48 => array('Kanuverleih'),
 																	49 => array('Wasserwanderrastplatz'),
 																	50 => array('Seebrücke'),
-																	#51	      'Altenheim'											? hier gibt es im ROK keine Konkretisierungen, wie ist hier vorzugehen?
-																	#52	      'Altenpflegeheim'
-																	#53	      'Behinderteneinrichtung'
-																	#54	      'Hospiz'
-																	#55	      'soziale Zwecke allg.'
+																	51 => array('Altenwohnheim'),	      					#'Altenheim'											
+																	52 => array('Altenpflegeheim'),
+																	53 => array('Behinderteneinrichtung'),
+																	54 => array('Hospiz'),
+																	55 => array('soziale Zwecke allgem.'),            	            #'soziale Zwecke allg.'
 																	56 => array('Theater'),
 																	57 => array('Oper'),
 																	58 => array('Musical'),
@@ -156,10 +142,6 @@ class rok {
 																	77 => array('Therapie'),
 																	78 => array('Wellness'),
 																	79 => array('Gesundheitshaus'),
-																	80 => array('Solarenergie - Rechtskraft', 'Solarenergie - Planung'),	      #'Photovoltaik/Solar'
-																	81 => array('Windenergie - Rechtskraft', 'Windenergie - Planung'),				#'Windenergie'
-																	82 => array('Biomasseanlage - Rechtskraft', 'Biomasseanlage - Planung'),					#'Biomasse'
-																	83 => array('sonstige erneuerbare Energie - Rechtskraft', 'sonstige erneuerbare Energie - Planung'),				#'sonstige Erneuerbare Energie'
 																	84 => array('Schule'),
 																	85 => array('Hochschule'),
 																	86 => array('Fachhochschule'),
@@ -175,16 +157,37 @@ class rok {
 																	96 => array('Campingplatz'),
 																	97 => array('Zeltplatz'),
 																	98 => array('Caravanplatz/Wohnmobil'),
-																	99 => array('Fl. für Landwirtschaft - Rechtskraft', 'Fl. für Landwirtschaft - Planung'), 					#'Landwirtschaft/Acker'
-																	100 => array('Tierhaltungsanlage Rinder - Rechtskraft', 'Tierhaltungsanlage Rinder - Planung', 'Tierhaltungsanlage Schweine - Rechtskraft', 'Tierhaltungsanlage Schweine - Planung', 'Tierhaltungsanlage Geflügel - Rechtskraft', 'Tierhaltungsanlage Geflügel - Planung', 'Tierhaltungsanlage Schafe - Rechtskraft', 'Tierhaltungsanlage Schafe - Planung', 'Tierhaltungsanlage Ziegen - Rechtskraft', 'Tierhaltungsanlage Ziegen - Planung', 'Tierhaltungsanlage Pferde / Gestüt - Rechtskraft', 'Tierhaltungsanlage Pferde / Gestüt - Planung', 'Fischzucht - Rechtskraft', 'Fischzucht - Planung', 'sonstige Zucht-/Tierhaltungsanlage - Rechtskraft', 'sonstige Zucht-/Tierhaltungsanlage - Planung'),		# 'Tierhaltung'
-																	101 => array('Altlast'),
-																	102 => array('Ablagerungen - Rechtskraft', 'Ablagerungen - Planung'),			#Ablagerung
-																	103 => array('sonstige Versorgung - Rechtskraft', 'sonstige Versorgung - Planung'), 					#'sonst. Versorgung'
 																	104 => array('Wald'),
 																	105 => array('Aufforstung'),
 																	106 => array('Tierklinik'),
 																	107 => array('Geldinstitut')
 																);
+																
+		$konkret2rok_themennr = array(13 => array(70110, 70115),	      #'Stromversorgung'
+																	14 => array(70210, 70215),						#'Gasversorgung'
+																	15 => array(70310, 70315),				#'Wärmeversorgung'
+																	16 => array(70410, 70415),			#'Wasserversorgung'
+																	17 => array(70510, 70515),	#'Abwasserentsorgung'
+																	18 => array(70610, 70615),			#'Abfallbehandlung'
+																	19 => array(70710, 70715), 			#'Abfallentsorgung'
+																	20 => array(6030010, 6030015), 										#'Straßenverkehrsfläche'
+																	22 => array(6050010, 6050015),										#'Schienenverkehrsfläche'
+																	23 => array(6060010, 6060015, 6060110, 6060115, 6060210, 6060215),		#'Luftverkehrsfläche'
+																	24 => array(6070010, 6070015),																		#'Umschlagplatz'
+																	25 => array(6080010, 6080015),												#'Verkehrseinrichtung'
+																	26 => array(90110, 90115),																					#'Grünflächen'
+																	27 => array(90210, 90215),	      								#'Ausgleichs-, Kompensations- und Entwicklungsflächen'
+																	80 => array(1043010, 1043015),	      #'Photovoltaik/Solar'
+																	81 => array(1043110, 1043115),				#'Windenergie'
+																	82 => array(1043210, 1043215),					#'Biomasse'
+																	83 => array(1043310, 1043315),				#'sonstige Erneuerbare Energie'
+																	99 => array(12010110, 12010115), 					#'Landwirtschaft/Acker'
+																	100 => array(12010210, 12010215, 12010310, 12010315, 12010410, 12010415, 12010510, 12010515, 12010610, 12010615, 12010710, 12010715, 12010810, 12010815, 12010910, 12010915),		# 'Tierhaltung'
+																	101 => array(70810),
+																	102 => array(70910, 70915),			#Ablagerung
+																	103 => array(71010, 71015) 					#'sonst. Versorgung'
+																);
+		
 		# Gebiete aktualisieren
 		$sql = "SELECT * FROM b_plan_gebiete WHERE plan_id = ".$plan_id;
 		$ret = $this->database->execSQL($sql, 4, 0);
@@ -201,6 +204,9 @@ class rok {
 			}
 			if($konkret2rok_konkret[$gebiet['konkretisierung']] != ''){
 				$sql .= "AND rok.konkretisierung IN ('".implode("','", $konkret2rok_konkret[$gebiet['konkretisierung']])."') ";
+			}
+			if($konkret2rok_themennr[$gebiet['konkretisierung']] != ''){
+				$sql .= "AND rok.themennr IN (".implode(",", $konkret2rok_themennr[$gebiet['konkretisierung']]).") ";
 			}
 			#echo $sql.'<br>';
 			$ret1 = $this->database->execSQL($sql, 4, 0);
@@ -225,6 +231,9 @@ class rok {
 			$sql.= "WHERE sd.plan_id = ".$plan_id." AND rok.roknr = sd.lfd_rok_nr ";
 			if($konkret2rok_konkret[$gebiet['konkretisierung']] != ''){
 				$sql .= "AND rok.konkretisierung IN ('".implode("','", $konkret2rok_konkret[$gebiet['konkretisierung']])."') ";
+			}
+			if($konkret2rok_themennr[$gebiet['konkretisierung']] != ''){
+				$sql .= "AND rok.themennr IN (".implode(",", $konkret2rok_themennr[$gebiet['konkretisierung']]).") ";
 			}
 			#echo $sql.'<br>';
 			$ret1 = $this->database->execSQL($sql, 4, 0);
@@ -295,7 +304,7 @@ class rok {
  	
   
   function getExtentFromRokNrBplan($roknr, $border, $epsg) {
-		$sql = "SELECT st_xmin(st_extent(st_transform(the_geom,".$epsg."))) AS minx,st_ymin(st_extent(st_transform(the_geom, ".$epsg."))) as miny,st_xmax(st_extent(st_transform(the_geom, ".$epsg."))) AS maxx,st_ymax(st_extent(st_transform(the_geom, ".$epsg."))) AS maxy FROM rok.rok_geltungsbereiche WHERE roknr = '".$roknr."'";
+		$sql = "SELECT st_xmin(st_extent(st_transform(shape,".$epsg."))) AS minx,st_ymin(st_extent(st_transform(shape, ".$epsg."))) as miny,st_xmax(st_extent(st_transform(shape, ".$epsg."))) AS maxx,st_ymax(st_extent(st_transform(shape, ".$epsg."))) AS maxy FROM rok_edit.bpl_geltungsbereiche WHERE roknr = '".$roknr."'";
 		#echo $sql;
 	    $ret = $this->database->execSQL($sql, 4, 0);
 		$rs = pg_fetch_array($ret[1]);
