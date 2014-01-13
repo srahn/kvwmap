@@ -596,61 +596,16 @@ function backto(go){
         ?>&GemkgID=<?php echo $flst->GemkgSchl; ?>&FlurID=<?php echo $flst->FlurID;
         ?>&FlstID=<?php echo $flst->FlurstKennz; ?>">zur Flurstückssuche</a> |
         <a href="index.php?go=Adresse_Auswaehlen&searchInExtent=<?php echo $this->searchInExtent;
-        ?>&GemID=<?php echo $this->formvars['GemID'];
+        ?>&GemID=<?php echo $flst->GemeindeID;
         ?>&StrID=<?php echo $this->formvars['StrID'];
         ?>&HausID=<?php echo $this->formvars['HausID'];
-        ?>">zur Adresssuche</a> |
-        <a href="index.php?go=Namen_Auswaehlen&name1=<?php echo $this->formvars['name1'];
-        ?>&name2=<?php echo $this->formvars['name2'];
-        ?>&name3=<?php echo $this->formvars['name3'];
-        ?>&name4=<?php echo $this->formvars['name4'];
-        ?>">zur Namensuche</a>
-        <? if($flst->Status != 'H'){
-        		$forall = true; 
-        ?>
+        ?>">zur Adresssuche</a>
            |
           <a href="index.php?go=ZoomToFlst&FlurstKennz=<?php echo $flst->FlurstKennz; ?>">Kartenausschnitt</a>
-          | <a href="index.php?go=showFlurstuckKoordinaten&FlurstKennz=<?php echo $flst->FlurstKennz; ?>" target="_blank">Koordinaten</a>
           </td>
           </tr>
           <tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
-          <td colspan="2">
-          <a href="index.php?go=ALB_Anzeige&FlurstKennz=<?php echo $flst->FlurstKennz; ?>&formnummer=30&wz=1" target="_blank">ALB-Auszug&nbsp;30&nbsp;mit&nbsp;WZ</a>
-          <?php
-          $this->getFunktionen();
-          if ($this->Stelle->funktionen['ALB-Auszug 35']['erlaubt']) { ?>
-          | <a href="index.php?go=ALB_Anzeige&FlurstKennz=<?php echo $flst->FlurstKennz; ?>&formnummer=35&wz=1" target="_blank">ALB-Auszug&nbsp;35&nbsp;mit&nbsp;WZ</a>
-          <?php }
-          if ($this->Stelle->funktionen['ALB-Auszug 40']['erlaubt']) { ?>
-          | <a href="index.php?go=ALB_Anzeige&FlurstKennz=<?php echo $flst->FlurstKennz; ?>&formnummer=40&wz=1" target="_blank">ALB-Auszug&nbsp;40&nbsp;mit&nbsp;WZ</a>
-          <?php } ?>
-          </td>
-          </tr>
-          <tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
-          <td colspan="2">
-          <?php
-          if ($this->Stelle->funktionen['ohneWasserzeichen']['erlaubt']) { ?>
-          <a href="index.php?go=ALB_Anzeige&FlurstKennz=<?php echo $flst->FlurstKennz; ?>&formnummer=30&wz=0" target="_blank">ALB-Auszug&nbsp;30&nbsp;ohne&nbsp;WZ</a>
-          <?php } ?>
-          <?php
-          if ($this->Stelle->funktionen['ALB-Auszug 35']['erlaubt'] AND $this->Stelle->funktionen['ohneWasserzeichen']['erlaubt']) { ?>
-          | <a href="index.php?go=ALB_Anzeige&FlurstKennz=<?php echo $flst->FlurstKennz; ?>&formnummer=35&wz=0" target="_blank">ALB-Auszug&nbsp;35&nbsp;ohne&nbsp;WZ</a>
-          <?php }
-          if ($this->Stelle->funktionen['ALB-Auszug 40']['erlaubt'] AND $this->Stelle->funktionen['ohneWasserzeichen']['erlaubt']) { ?>
-          | <a href="index.php?go=ALB_Anzeige&FlurstKennz=<?php echo $flst->FlurstKennz; ?>&formnummer=40&wz=0" target="_blank">ALB-Auszug&nbsp;40&nbsp;ohne&nbsp;WZ</a>
-          <?php } ?>
-        	<? }
-        	 else{ ?>
-        	 	</td>
-          </tr>
-          <tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
-          <td colspan="2">
-        	 	<a href="index.php?go=ALB_Anzeige&FlurstKennz=<?php echo $flst->FlurstKennz; ?>&formnummer=30&wz=1" target="_blank">ALB-Auszug&nbsp;30&nbsp;mit&nbsp;WZ</a>
-        	<? if ($this->Stelle->funktionen['ohneWasserzeichen']['erlaubt']) { ?>
-          	| <a href="index.php?go=ALB_Anzeige&FlurstKennz=<?php echo $flst->FlurstKennz; ?>&formnummer=30&wz=0" target="_blank">ALB-Auszug&nbsp;30&nbsp;ohne&nbsp;WZ</a>
-          <?php } ?>
-        	 <? } ?>
-        </td>
+          <td colspan="2">          
         </tr>
 
       </table>
@@ -684,36 +639,6 @@ function backto(go){
         <b>Für alle ausgewählten Flurstücke:</b><br>
       </td>
     </tr>
-    <? if($forall == true){ ?>
-      <tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
-          <td colspan="2">
-              <a href="javascript:send_selected_flurst('ALB_Anzeige', 30, 1, '_blank');">ALB-Auszug&nbsp;30&nbsp;mit&nbsp;WZ</a>
-            <?php
-            if ($this->Stelle->funktionen['ALB-Auszug 35']['erlaubt']) { ?>
-              | <a href="javascript:send_selected_flurst('ALB_Anzeige', 35, 1, '_blank');">ALB-Auszug&nbsp;35&nbsp;mit&nbsp;WZ</a>
-            <?php }
-            if ($this->Stelle->funktionen['ALB-Auszug 40']['erlaubt']) { ?>
-              | <a href="javascript:send_selected_flurst('ALB_Anzeige', 40, 1, '_blank');">ALB-Auszug&nbsp;40&nbsp;mit&nbsp;WZ</a>
-            <?php } ?>
-          </td>
-      </tr>
-      <tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
-          <td colspan="2">
-            <?php
-            $this->getFunktionen();
-            if ($this->Stelle->funktionen['ohneWasserzeichen']['erlaubt']) { ?>
-                <a href="javascript:send_selected_flurst('ALB_Anzeige', 30, 0, '_blank');">ALB-Auszug&nbsp;30&nbsp;ohne&nbsp;WZ</a>
-            <?php } ?>
-            <?php
-            if ($this->Stelle->funktionen['ALB-Auszug 35']['erlaubt'] AND $this->Stelle->funktionen['ohneWasserzeichen']['erlaubt']) { ?>
-                | <a href="javascript:send_selected_flurst('ALB_Anzeige', 35, 0, '_blank');">ALB-Auszug&nbsp;35&nbsp;ohne&nbsp;WZ</a>
-            <?php }
-            if ($this->Stelle->funktionen['ALB-Auszug 40']['erlaubt'] AND $this->Stelle->funktionen['ohneWasserzeichen']['erlaubt']) { ?>
-                | <a href="javascript:send_selected_flurst('ALB_Anzeige', 40, 0, '_blank');">ALB-Auszug&nbsp;40&nbsp;ohne&nbsp;WZ</a>
-            <?php } ?>
-          </td>
-      </tr>
-    <? } ?>
     <tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
       <td colspan="2">
         <a href="javascript:browser_switch('Flurstuecks-CSV-Export');">CSV-Export</a>&nbsp;|&nbsp;

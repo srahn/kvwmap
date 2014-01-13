@@ -765,6 +765,10 @@ CREATE TABLE `styles` (
   `offsety` INT( 11 ) NULL,
   `pattern` VARCHAR(255) NULL,
   `geomtransform` VARCHAR(20) NULL,
+	`gap` INT( 11 ) NULL ,
+	`linecap` VARCHAR( 8 ) NULL ,
+	`linejoin` VARCHAR( 5 ) NULL ,
+	`linejoinmaxsize` INT( 11 ) NULL,
   PRIMARY KEY  (`Style_ID`)
 );
 

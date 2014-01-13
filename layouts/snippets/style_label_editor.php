@@ -2,7 +2,7 @@
 <!--
 
 function change_layer(){
-	document.GUI.class1.disabled = true;
+	document.GUI.class_1.disabled = true;
 	document.getElementById('style_div').innerHTML = '';
 	document.getElementById('label_div').innerHTML = '';
 	document.getElementById('selected_style_div').innerHTML = '';
@@ -19,7 +19,7 @@ function change_class(){
 	document.GUI.selected_label_id.value = '';
 	document.getElementById('selected_style_div').innerHTML = '';
 	document.getElementById('selected_label_div').innerHTML = '';
-	class_id = document.GUI.class1.options[document.GUI.class1.selectedIndex].value;
+	class_id = document.GUI.class_1.options[document.GUI.class_1.selectedIndex].value;
 	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
 	document.GUI.selected_class_id.value = class_id;
 	ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=getstyles_labels&class_id='+class_id+'&layer_id='+layer_id, new Array(document.getElementById('style_div'), document.getElementById('label_div')), "");
@@ -48,7 +48,7 @@ function get_label(label_id){
 }
 
 function add_label(){
-	class_id = document.GUI.class1.options[document.GUI.class1.selectedIndex].value;
+	class_id = document.GUI.class_1.options[document.GUI.class_1.selectedIndex].value;
 	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
 	label_id = document.GUI.selected_label_id.value;
 	ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=add_label&label_id='+label_id+'&class_id='+class_id+'&layer_id='+layer_id, new Array(document.getElementById('label_div')), "");
@@ -60,13 +60,13 @@ function delete_label(label_id){
 		document.GUI.selected_label_id.value = '';	
 	}
 	selected_label_id = document.GUI.selected_label_id.value;
-	class_id = document.GUI.class1.options[document.GUI.class1.selectedIndex].value;
+	class_id = document.GUI.class_1.options[document.GUI.class_1.selectedIndex].value;
 	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
 	ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=delete_label&selected_label_id='+selected_label_id+'&label_id='+label_id+'&class_id='+class_id+'&layer_id='+layer_id, new Array(document.getElementById('label_div')), "");
 }
 
 function add_style(){
-	class_id = document.GUI.class1.options[document.GUI.class1.selectedIndex].value;
+	class_id = document.GUI.class_1.options[document.GUI.class_1.selectedIndex].value;
 	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
 	style_id = document.GUI.selected_style_id.value;
 	ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=add_style&style_id='+style_id+'&class_id='+class_id+'&layer_id='+layer_id, new Array(document.getElementById('style_div')), "");
@@ -78,28 +78,28 @@ function delete_style(style_id){
 		document.GUI.selected_style_id.value = '';	
 	}
 	selected_style_id = document.GUI.selected_style_id.value;
-	class_id = document.GUI.class1.options[document.GUI.class1.selectedIndex].value;
+	class_id = document.GUI.class_1.options[document.GUI.class_1.selectedIndex].value;
 	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
 	ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=delete_style&selected_style_id='+selected_style_id+'&style_id='+style_id+'&class_id='+class_id+'&layer_id='+layer_id, new Array(document.getElementById('style_div')), "");
 }
 
 function moveup_style(style_id){
 	selected_style_id = document.GUI.selected_style_id.value;
-	class_id = document.GUI.class1.options[document.GUI.class1.selectedIndex].value;
+	class_id = document.GUI.class_1.options[document.GUI.class_1.selectedIndex].value;
 	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
 	ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=moveup_style&selected_style_id='+selected_style_id+'&style_id='+style_id+'&class_id='+class_id+'&layer_id='+layer_id, new Array(document.getElementById('style_div')), "");	
 }
 
 function movedown_style(style_id){
 	selected_style_id = document.GUI.selected_style_id.value;
-	class_id = document.GUI.class1.options[document.GUI.class1.selectedIndex].value;
+	class_id = document.GUI.class_1.options[document.GUI.class_1.selectedIndex].value;
 	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
 	ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=movedown_style&selected_style_id='+selected_style_id+'&style_id='+style_id+'&class_id='+class_id+'&layer_id='+layer_id, new Array(document.getElementById('style_div')), "");	
 }
 
 function save_style(style_id){
 	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
-	class_id = document.GUI.class1.options[document.GUI.class1.selectedIndex].value
+	class_id = document.GUI.class_1.options[document.GUI.class_1.selectedIndex].value
 	data = 'go=save_style&class_id='+class_id;
 	data+= '&style_id='+style_id;
 	data+= '&layer_id='+layer_id;
@@ -122,12 +122,16 @@ function save_style(style_id){
 	data+= '&offsety='+document.GUI.style_offsety.value;
   data+= '&pattern='+document.GUI.style_pattern.value;
   data+= '&geomtransform='+document.GUI.style_geomtransform.value;  
+	data+= '&gap='+document.GUI.style_gap.value;
+	data+= '&linecap='+document.GUI.style_linecap.value;
+	data+= '&linejoin='+document.GUI.style_linejoin.value;
+	data+= '&linejoinmaxsize='+document.GUI.style_linejoinmaxsize.value;
 	ahah('<? echo URL.APPLVERSION; ?>index.php', data, new Array(document.getElementById('style_div'), document.getElementById('selected_style_div')), "");
 }
 
 function save_label(label_id){
 	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
-	class_id = document.GUI.class1.options[document.GUI.class1.selectedIndex].value
+	class_id = document.GUI.class_1.options[document.GUI.class_1.selectedIndex].value
 	data = 'go=save_label&class_id='+class_id;
 	data+= '&label_id='+label_id;
 	data+= '&layer_id='+layer_id;
@@ -211,7 +215,7 @@ function browser_check(){
 			    </td>
 			    <td style="border-bottom:1px solid #C3C7C3;" colspan="2">
 			    	<div id="classes_div"> 
-			      <select style="width:200px" size="4" class="select" name="class1" onchange="change_class();" <?php if(count($this->allclassdaten)==0){ echo 'disabled';}?>>
+			      <select style="width:200px" size="4" class="select" name="class_1" onchange="change_class();" <?php if(count($this->allclassdaten)==0){ echo 'disabled';}?>>
 			        <?
 			    		for($i = 0; $i < count($this->allclassdaten); $i++){
 			    			echo '<option';

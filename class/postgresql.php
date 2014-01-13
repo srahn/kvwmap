@@ -3036,8 +3036,8 @@ class pgdatabase extends pgdatabase_core {
 		$sql.= " AND namensnummer2person.beziehung_von = namensnummer.gml_id";
 		$sql.= " AND namensnummer2person.beziehung_zu = person.gml_id";
 		$sql.= " AND person2anschrift.beziehungsart::text = 'hat'::text";
-    if($name[1] != '%%')$sql.=" AND (lower(nachnameoderfirma) LIKE lower('".$name[1]."') OR lower(vorname) LIKE lower('".$name[1]."'))";
-    if($name[2] != '%%')$sql.=" AND (lower(geburtsname) LIKE lower('".$name[2]."') OR geburtsdatum LIKE '".$name[2]."')";
+    if($name[1] != '%%')$sql.=" AND lower(nachnameoderfirma||', '||vorname) LIKE lower('".$name[1]."') ";
+    if($name[2] != '%%')$sql.=" AND lower(geburtsname||', '||geburtsdatum) LIKE lower('".$name[2]."') ";
     if($name[3] != '%%')$sql.=" AND (lower(strasse) LIKE lower('".$name[3]."') OR lower(strasse||' '||hausnummer) LIKE lower('".$name[3]."'))";
     if($name[4] != '%%')$sql.=" AND (postleitzahlpostzustellung LIKE '".$name[4]."' OR lower(postleitzahlpostzustellung||' '||ort_post) LIKE lower('".$name[4]."'))";
 
@@ -4101,12 +4101,10 @@ class pgdatabase extends pgdatabase_core {
     # 2006-01-31
     $order='ordernr';
     # Abfragen der Hausnummern
-    $sql ="SELECT id,nrtext,ordernr FROM (";
+    $sql ="SELECT id,nrtext, to_number(ordernr, '999999') as ordernr FROM (";
     $sql.="SELECT DISTINCT CASE WHEN TRIM(nr)='' THEN 'ohne' ELSE LOWER(id) END AS id, CASE WHEN TRIM(nr)='' THEN 'ohne Nr' ELSE TRIM(nr) END AS nrtext";
     $sql.=",(CASE WHEN TRIM(ordernr)='' THEN '0' ELSE SPLIT_PART(TRIM(ordernr),' ',1) END) as ordernr FROM (";
-    $sql.="SELECT '-1' AS id,'--Auswahl--' AS nr, '-1' AS ordernr";
-    $sql.=" UNION";
-    $sql.=" SELECT DISTINCT '".$GemID."-".$StrID."-'||TRIM(".HAUSNUMMER_TYPE."(l.hausnummer)) AS id, ".HAUSNUMMER_TYPE."(l.hausnummer) AS nrtext, l.hausnummer AS ordernr";
+    $sql.=" SELECT DISTINCT '".$GemID."-".$StrID."-'||TRIM(".HAUSNUMMER_TYPE."(l.hausnummer)) AS id, ".HAUSNUMMER_TYPE."(l.hausnummer) AS nr, l.hausnummer AS ordernr";
     $sql.=" FROM alkis.ax_flurstueck as f, alkis.ax_gemeinde as g, alkis.alkis_beziehungen v";
     $sql.=" JOIN alkis.ax_lagebezeichnungmithausnummer l ON v.beziehung_zu=l.gml_id";
     $sql.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde";
@@ -4118,8 +4116,8 @@ class pgdatabase extends pgdatabase_core {
     if ($StrID!='') {
       $sql.=" AND l.lage='".$StrID."'";
     }
-    $sql.=") AS foo ORDER BY ".$order;
-    $sql.=") AS foofoo";
+    $sql.=") AS foo ";
+    $sql.=") AS foofoo ORDER BY ".$order;
     #echo $sql;
     $this->debug->write("<p>postgres getHausNrListe Abfragen der Strassendaten:<br>".$sql,4);
     $queryret=$this->execSQL($sql, 4, 0);
