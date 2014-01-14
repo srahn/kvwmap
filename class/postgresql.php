@@ -418,7 +418,7 @@ class pgdatabase extends pgdatabase_core {
 	      return $name_pair;
 	    }
 	    else{
-	      return '';
+	      return NULL;
 	    }
   }
 
