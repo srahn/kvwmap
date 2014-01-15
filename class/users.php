@@ -2822,7 +2822,7 @@ class stelle extends stelle_core{
 			for($i = 0; $i < $count; $i++){
 				if(strpos(strtolower($fieldstring[$i]), ' as ')){   # Ausdruck AS attributname
 					$explosion = explode(' as ', strtolower($fieldstring[$i]));
-					$attributename = trim($explosion[1]);
+					$attributename = array_pop($explosion);
 				}
 				else{   # tabellenname.attributname oder attributname
 					$explosion = explode('.', strtolower($fieldstring[$i]));

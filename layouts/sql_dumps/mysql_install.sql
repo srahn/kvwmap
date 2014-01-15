@@ -87,6 +87,7 @@ CREATE TABLE `ddl_elemente` (
 `name` VARCHAR( 255 ) NOT NULL ,
 `xpos` REAL NULL ,
 `ypos` REAL NULL ,
+`offset_attribute` VARCHAR( 255 ) NULL,
 `width` INT( 11 ) NULL ,
 `border` BOOL NULL ,
 `font` VARCHAR( 255 ) NULL ,
@@ -360,6 +361,7 @@ CREATE TABLE `druckfreitexte` (
   `text` text NULL,
   `posx` int(11) NOT NULL,
   `posy` int(11) NOT NULL,
+	`offset_attribute` VARCHAR( 255 ) NULL,
   `size` int(11) NOT NULL,
   `font` varchar(255) NOT NULL,
   `angle` int(11) default NULL,
@@ -765,6 +767,10 @@ CREATE TABLE `styles` (
   `offsety` INT( 11 ) NULL,
   `pattern` VARCHAR(255) NULL,
   `geomtransform` VARCHAR(20) NULL,
+	`gap` INT( 11 ) NULL ,
+	`linecap` VARCHAR( 8 ) NULL ,
+	`linejoin` VARCHAR( 5 ) NULL ,
+	`linejoinmaxsize` INT( 11 ) NULL,
   PRIMARY KEY  (`Style_ID`)
 );
 

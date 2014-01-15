@@ -37,24 +37,28 @@ class ddl {
     $this->gui = $gui;
   }
   
-  function add_static_elements($i){
+  function add_static_elements($offsetx, $offsety){
 		# Hintergrundbild    
 		if($this->layout['bgsrc']){
-    	$this->pdf->addJpegFromFile(DRUCKRAHMEN_PATH.basename($this->layout['bgsrc']),$this->layout['bgposx'],$this->layout['bgposy'],$this->layout['bgwidth']);
+    	$this->pdf->addJpegFromFile(DRUCKRAHMEN_PATH.basename($this->layout['bgsrc']),$this->layout['bgposx']+$offsetx,$this->layout['bgposy']-$offsety,$this->layout['bgwidth']);
 		}
     # Datum
     if($this->layout['datesize']){
     	$this->pdf->selectFont($this->layout['font_date']);
-    	$this->pdf->addText($this->layout['dateposx'],$this->layout['dateposy'],$this->layout['datesize'],date("d.m.Y"));
+    	$this->pdf->addText($this->layout['dateposx']+$offsetx,$this->layout['dateposy']-$offsety,$this->layout['datesize'],date("d.m.Y"));
     }
     # Nutzer
     if($this->layout['usersize']){
     	$this->pdf->selectFont($this->layout['font_user']);
-    	$this->pdf->addText($this->layout['userposx'],$this->layout['userposy'],$this->layout['usersize'], utf8_decode('Stelle: '.$this->Stelle->Bezeichnung.', Nutzer: '.$this->user->Name));
+    	$this->pdf->addText($this->layout['userposx']+$offsetx,$this->layout['userposy']-$offsety,$this->layout['usersize'], utf8_decode('Stelle: '.$this->Stelle->Bezeichnung.', Nutzer: '.$this->user->Name));
     }
-    # feste Freitexte
+  }
+	
+	function add_freetexts($i, $offsetx, $offsety){
+		# feste Freitexte
     for($j = 0; $j < count($this->layout['texts']); $j++){
-    	if($this->layout['type'] == 0 OR $this->layout['texts'][$j]['type'] == 1){		# entweder Layout ist vom seitenweisen Typ oder die Texte sind feststehend
+			# der Freitext wurde noch nicht geschrieben und entweder Layout ist vom seitenweisen Typ oder der Text ist feststehend
+    	if($this->layout['texts'][$j]['written'] != true AND ($this->layout['type'] == 0 OR $this->layout['texts'][$j]['type'] == 1)){
 	      $this->pdf->selectFont($this->layout['texts'][$j]['font']);
 	      $freitext = explode(';', $this->substituteFreitext($this->layout['texts'][$j]['text'], $i));
 	      $anzahlzeilen = count($freitext);
@@ -64,7 +68,15 @@ class ddl {
 	        $a = sin(deg2rad($alpha)) * $h;
 	        $b = cos(deg2rad($alpha)) * $h;
 	        $posx = $this->layout['texts'][$j]['posx'] + $a;
-	        $posy = $this->layout['texts'][$j]['posy'] - $b;
+					$ypos = $this->layout['texts'][$j]['posy'];
+					$offset_attribute = $this->layout['texts'][$j]['offset_attribute'];
+					if($offset_attribute != ''){			# ist ein offset_attribute gesetzt
+						if($this->layout['offset_attributes'][$offset_attribute] != ''){		# dieses Attribut wurde auch schon geschrieben, d.h. dessen y-Position ist bekannt -> Freitext relativ dazu setzen
+							$ypos = $this->layout['offset_attributes'][$offset_attribute] - $ypos;
+						}
+						else continue;			# der Freitext ist abhängig aber das Attribut noch nicht geschrieben, Freitext kann noch nicht geschrieben werden
+					}
+	        $posy = $ypos - $b;
 	        $width = $this->pdf->getTextWidth($this->layout['texts'][$j]['size'], $freitext[$z]);
 	        if($posx < 0){
 	        	$posx = 595 + $posx - $width;
@@ -73,79 +85,251 @@ class ddl {
 	        else{
 	        	$justification = 'left';
 	        }
-	        $this->pdf->addTextWrap($posx,$posy,$width,$this->layout['texts'][$j]['size'],utf8_decode($freitext[$z]),$justification,-1 * $alpha);
+	        $this->pdf->addTextWrap($posx+$offsetx,$posy-$offsety,$width,$this->layout['texts'][$j]['size'],utf8_decode($freitext[$z]),$justification,-1 * $alpha);
+					$this->layout['texts'][$j]['written'] = true;
 	      }
 	    }
 	  }
-  }
+	}
+	
+	function add_attribute_elements($selected_layer_id, $attributes, $attributenames, $offsetx, $offsety, $i, $i_on_page, $preview){
+		# $attributes ist das gesamte Attribute-Objekt
+		# $attributenames ist ein Array der Attributnamen, die geschrieben werden sollen
+		for($j = 0; $j < count($attributes['name']); $j++){
+			$wordwrapoffset = 1;
+			if(in_array($attributes['name'][$j], $attributenames)){
+				if($attributes['type'][$j] != 'geometry'){
+					switch ($attributes['form_element_type'][$j]){
+						case 'SubFormPK' : case 'SubFormEmbeddedPK' : {
+							if($this->layout['elements'][$attributes['name'][$j]]['font'] != ''){
+								# da ein eingebettetes Layout zu einem Seitenüberlauf führen kann, müssen davor alle festen Freitexte geschrieben werden, die geschrieben werden können
+								# d.h. alle, deren Position nicht abhängig vom einem Attribut ist und alle deren Position abhängig ist und das Attribut schon geschrieben wurde
+								$this->add_freetexts($i, $offsetx, $offsety);			#  feste Freitexte hinzufügen
+								# Parameter saven ##
+								$layerid_save = $selected_layer_id;
+								$layoutid_save = $this->layout['id'];
+								####################
+								$this->gui->formvars['selected_layer_id'] = $this->gui->formvars['chosen_layer_id'] = $attributes['subform_layer_id'][$j];
+								$sublayout = $this->layout['elements'][$attributes['name'][$j]]['font'];								
+								$offx = $this->layout['elements'][$attributes['name'][$j]]['xpos'] + $offsetx;
+								$ypos = $this->layout['elements'][$attributes['name'][$j]]['ypos'];
+								if($this->layout['elements'][$attributes['name'][$j]]['offset_attribute'] != ''){			# ist ein offset_attribute gesetzt, relative y-Position berechnen
+									$ypos = $this->layout[offset_attributes][$this->layout['elements'][$attributes['name'][$j]]['offset_attribute']] - $ypos;
+								}
+								$offy = 842 - $ypos - $offsety;
+								if($preview){
+									$sublayoutobject = $this->load_layouts(NULL, $sublayout, NULL, NULL);
+									# den letzten y-Wert dieses Elements in das Offset-Array schreiben
+									$this->layout['offset_attributes'][$attributes['name'][$j]] = $this->gui->sachdaten_druck_editor_preview($sublayoutobject[0], $this->pdf, $offx, $offy);
+								}
+								else{
+									$this->gui->formvars['embedded_dataPDF'] = true;
+									for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){			# die Suchparameter für die Layersuche
+										$this->gui->formvars['value_'.$this->attributes['subform_pkeys'][$j][$p]] = $this->result[$i][$attributes['subform_pkeys'][$j][$p]];
+										$this->gui->formvars['operator_'.$this->attributes['subform_pkeys'][$j][$p]] = '=';
+									}							
+									$this->gui->GenerischeSuche_Suchen();
+									$this->gui->formvars['aktivesLayout'] = $sublayout;
+									# den letzten y-Wert dieses Elements in das Offset-Array schreiben
+									$this->layout['offset_attributes'][$attributes['name'][$j]] = $this->gui->generischer_sachdaten_druck_drucken($this->pdf, $offx, $offy);
+								}
+								# Saves wieder setzen
+								$this->gui->formvars['selected_layer_id'] = $layerid_save;
+								$this->gui->formvars['chosen_layer_id'] = $layerid_save;
+								$this->gui->formvars['aktivesLayout'] = $layoutid_save;
+							}
+						}break;
+						
+						default : {
+							$this->pdf->selectFont($this->layout['elements'][$attributes['name'][$j]]['font']);
+							if($this->layout['elements'][$attributes['name'][$j]]['fontsize'] > 0 AND $this->result[$i][$attributes['name'][$j]] != ''){
+								$data = array(array($attributes['name'][$j] => $this->get_result_value_output($i, $j)));
+								# Zeilenumbruch berücksichtigen
+								$text = $this->result[$i][$attributes['name'][$j]];
+								$size = $this->layout['elements'][$attributes['name'][$j]]['fontsize'];
+								$textwidth = $this->pdf->getTextWidth($size, $text);
+								$width = $this->layout['elements'][$attributes['name'][$j]]['width'];
+								if($width != '' AND $textwidth/$width > 1){ 
+									while($text != ''){
+										$text = $this->pdf->addTextWrap(-100, -100, $width, $size, utf8_decode($text));
+										$wordwrapoffset++;
+									} 
+									$wordwrapoffset--;
+								}
+								$ypos = $this->layout['elements'][$attributes['name'][$j]]['ypos'];
+								if($this->layout['elements'][$attributes['name'][$j]]['offset_attribute'] != ''){			# ist ein offset_attribute gesetzt, relative y-Position berechnen
+									$ypos = $this->layout['offset_attributes'][$this->layout['elements'][$attributes['name'][$j]]['offset_attribute']] - $ypos;
+								}
+								$zeilenhoehe = $this->layout['elements'][$attributes['name'][$j]]['fontsize'];      		      		
+								$x = $this->layout['elements'][$attributes['name'][$j]]['xpos'] + $offsetx;
+								$y = $ypos+$zeilenhoehe+5 - $offsety;
+								if($this->layout['type'] != 0 AND $i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben
+									$y = $y - $this->yoffset_onpage-18;
+								}	
+								$this->pdf->ezSetY($y);
+								# beim jedem Datensatz die Gesamthoehe der Elemente des Datensatzes ermitteln
+								if($i_on_page == 0){
+									if($this->maxy < $y)$this->maxy = $y;		# beim ersten Datensatz das maxy ermitteln
+								}      			
+								if($this->miny > $y-$wordwrapoffset*$zeilenhoehe)$this->miny = $y-$wordwrapoffset*$zeilenhoehe;		# miny ist die unterste y-Position das aktuellen Datensatzes 
+
+								if($x < 0){
+									$x = 595 + $x;
+									$justification = 'right';
+									$orientation = 'left';
+								}
+								else{
+									$justification = 'left';
+									$orientation = 'right';
+								}
+								if($this->layout['elements'][$attributes['name'][$j]]['border'] == ''){
+									$this->layout['elements'][$attributes['name'][$j]]['border'] = 0;
+								}
+								$this->pdf->ezTable($data, NULL, NULL, 
+								array('xOrientation'=>$orientation, 
+											'xPos'=>$x, 
+											'width'=>$this->layout['elements'][$attributes['name'][$j]]['width'], 
+											'maxWidth'=>$this->layout['elements'][$attributes['name'][$j]]['width'], 
+											'fontSize'=>$this->layout['elements'][$attributes['name'][$j]]['fontsize'], 
+											'showHeadings'=>0, 
+											'shaded'=>0, 
+											'cols'=>array($attributes['name'][$j]=>array('justification'=>$justification)),
+											'showLines'=>$this->layout['elements'][$attributes['name'][$j]]['border']));
+								# den y-Wert dieses Elements in das Offset-Array schreiben
+								$this->layout['offset_attributes'][$attributes['name'][$j]] = $y - 18;
+							}
+						}
+					}
+				}
+				elseif($attributes['name'][$j] == $attributes['the_geom'] AND $this->layout['elements'][$attributes['name'][$j]]['xpos'] > 0){		# Geometrie
+					if($oids[$i] != ''){
+						$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->gui->user->rolle->epsg_code);
+						$rect = $polygoneditor->zoomTopolygon($oids[$i], $attributes['table_name'][$attributes['the_geom']], $attributes['the_geom'], 10);
+						$this->gui->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
+					}
+					$this->gui->map->set('width', $this->layout['elements'][$attributes['name'][$j]]['width']*MAPFACTOR);
+					$this->gui->map->set('height', $this->layout['elements'][$attributes['name'][$j]]['width']*MAPFACTOR);
+					if($this->gui->map->selectOutputFormat('jpeg_print') == 1){
+						$this->gui->map->selectOutputFormat('jpeg');
+					}
+					$image_map = $this->gui->map->draw();
+					$filename = $this->gui->map_saveWebImage($image_map,'jpeg');
+					$newname = $this->user->id.basename($filename);
+					rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
+					$x = $this->layout['elements'][$attributes['name'][$j]]['xpos'] + $offsetx;
+					$y = $this->layout['elements'][$attributes['name'][$j]]['ypos'] - $offsety;
+					if($i_on_page == 0){
+						if($this->maxy < $y+$this->layout['elements'][$attributes['name'][$j]]['width'])$this->maxy = $y+$this->layout['elements'][$attributes['name'][$j]]['width'];		# beim ersten Datensatz das maxy ermitteln
+					}    
+					if($this->layout['type'] != 0 AND $i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben
+						$y = $y - $this->yoffset_onpage-18;
+					}
+					$this->pdf->addJpegFromFile(IMAGEPATH.$newname, $x, $y, $this->layout['elements'][$attributes['name'][$j]]['width']);
+					if($this->miny > $y)$this->miny = $y;
+				}
+			}
+		}
+	}
   
   function substituteFreitext($text, $i){
   	$text = str_replace('$stelle', $this->Stelle->Bezeichnung, $text);
   	$text = str_replace('$user', $this->user->Name, $text);
-	for($j = 0; $j < count($this->attributes['name']); $j++){
-		$text = str_replace('$'.$this->attributes['name'][$j], $this->get_result_value_output($i, $j), $text);
-	}
+		for($j = 0; $j < count($this->attributes['name']); $j++){
+			$text = str_replace('$'.$this->attributes['name'][$j], $this->get_result_value_output($i, $j), $text);
+		}
   	return $text;
   }
   
   function get_result_value_output($i, $j){		# $i ist der result-counter, $j ist der attribute-counter
-	switch ($this->attributes['form_element_type'][$j]){
-		case 'Auswahlfeld' : {
-			for($e = 0; $e < count($this->attributes['enum_value'][$j]); $e++){
-				if($this->attributes['enum_value'][$j][$e] == $this->result[$i][$this->attributes['name'][$j]]){
-					$output = utf8_decode($this->attributes['enum_output'][$j][$e]);
-					break;
+		switch ($this->attributes['form_element_type'][$j]){
+			case 'Auswahlfeld' : {
+				for($e = 0; $e < count($this->attributes['enum_value'][$j]); $e++){
+					if($this->attributes['enum_value'][$j][$e] == $this->result[$i][$this->attributes['name'][$j]]){
+						$output = utf8_decode($this->attributes['enum_output'][$j][$e]);
+						break;
+					}
+					else $output = utf8_decode($this->result[$i][$this->attributes['name'][$j]]);
 				}
-				else $output = utf8_decode($this->result[$i][$this->attributes['name'][$j]]);
-			}
-			if(count($this->attributes['enum_value'][$j]) == 0){	
+				if(count($this->attributes['enum_value'][$j]) == 0){	
+					$output = utf8_decode($this->result[$i][$this->attributes['name'][$j]]);
+				}
+			}break;
+			default: {
 				$output = utf8_decode($this->result[$i][$this->attributes['name'][$j]]);
-			}
-		}break;
-		default: {
-			$output = utf8_decode($this->result[$i][$this->attributes['name'][$j]]);
-		}break;
-	}
+			}break;
+		}
 	return $output;
   }
   
-  function createDataPDF($layerdb, $layerset, $attributes, $selected_layer_id, $layout, $oids, $result, $stelle, $user){
+  function createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $selected_layer_id, $layout, $oids, $result, $stelle, $user, $preview = NULL){
+		# Für einen ausgewählten Layer wird das übergebene Result-Set nach den Vorgaben des übergebenen Layouts in ein PDF geschrieben
+		# Werden $pdfobject, $offsetx und $offsety übergeben, wird kein neues PDF-Objekt erzeugt, sondern das übergebene PDF-Objekt eines übergeordneten Layers+Layout verwendet (eingebettete Layouts)
   	$this->layout = $layout;
   	$this->Stelle = $stelle;
-	$this->attributes = $attributes;
-	$this->result = $result;
+		$this->attributes = $attributes;
+		$this->result = $result;
   	$this->user = $user;
   	$this->maxy = 0;
   	$this->miny = 1000000;
   	$i_on_page = -1;
   	$datasetcount_on_page = 0;
-		# Einbinden der PDF Klassenbibliotheken
-    include (PDFCLASSPATH."class.ezpdf.php");
-    # Erzeugen neue pdf-Klasse
-    $this->pdf=new Cezpdf();
-    $this->add_static_elements(0);
+		if($pdfobject == NULL){
+			include (PDFCLASSPATH."class.ezpdf.php");				# Einbinden der PDF Klassenbibliotheken
+			$this->pdf=new Cezpdf();			# neues PDF-Objekt erzeugen
+		}
+		else{
+			$this->pdf = $pdfobject;			# ein PDF-Objekt wurde aus einem übergeordneten Druckrahmen/Layer übergeben
+		}
     if($this->layout['elements'][$attributes['the_geom']]['xpos'] > 0){		# wenn ein Geometriebild angezeigt werden soll -> loadmap()
     	$this->gui->map_factor = MAPFACTOR;
     	$this->gui->loadmap('DataBase');
     }
+		$this->add_static_elements($offsetx, $offsety);
     for($i = 0; $i < count($result); $i++){
     	$i_on_page++;
-    	$new_dataset = true;
     	if($this->layout['type'] == 0 AND $i > 0){		# neue Seite beim seitenweisen Typ und neuem Datensatz 
     		$this->pdf->newPage();
-    		$this->add_static_elements($i);
-    	}
-	    if($datasetcount_on_page > 0 AND $this->layout['type'] == 1  AND $this->miny < $this->yoffset_onpage/$datasetcount_on_page + 50){		# neue Seite beim Untereinander-Typ und Seitenüberlauf
+				$this->add_static_elements($offsetx, $offsety);
+				$newpage = true;
+    	}			
+	    if($datasetcount_on_page > 0 AND $this->layout['type'] != 0 AND $this->miny < $this->yoffset_onpage/$datasetcount_on_page + 50){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
 				$datasetcount_on_page = 0;
 				$i_on_page = 0;
 				$this->maxy = 0;
   			$this->miny = 1000000;
+				$offsety = 50;
 				$this->pdf->newPage();
-				$this->add_static_elements($i);
+				$this->add_static_elements($offsetx, $offsety);
+				$newpage = true;
 			}
 			$this->yoffset_onpage = $this->maxy - $this->miny;			# der Offset mit dem die Elemente beim Untereinander-Typ nach unten versetzt werden
+			
+			################# Daten schreiben ###############
+			$offset_attributes = array();
+			for($j = 0; $j < count($this->attributes['name']); $j++){
+				if($this->layout['elements'][$this->attributes['name'][$j]]['offset_attribute'] != ''){
+					$offset_attributes[] = $this->layout['elements'][$this->attributes['name'][$j]]['offset_attribute'];			# Offset-Attribute ermitteln
+				}
+			}
+			$other_attributes = array_diff($this->attributes['name'], $offset_attributes);
+			# erst die offset-Attribute schreiben
+      $this->add_attribute_elements($selected_layer_id, $this->attributes, $offset_attributes, $offsetx, $offsety, $i, $i_on_page, $preview);
+			# dann die restlichen Attribute schreiben, denn die können ja relativ zu den offset-Attributen positioniert sein
+      $this->add_attribute_elements($selected_layer_id, $this->attributes, $other_attributes, $offsetx, $offsety, $i, $i_on_page, $preview);
+			################# Daten schreiben ###############
+			
+			################# Freitexte schreiben ###############
+			if($this->layout['type'] == 0){		
+    		$this->add_freetexts($i, $offsetx, $offsety);			# beim seitenweisen Typ, feste Freitexte hinzufügen
+    	}
+			
+			if($this->layout['type'] != 0 AND ($i == 0 OR $newpage)){		
+				$this->add_freetexts($i, $offsetx, $offsety);			# beim Untereinander-Typ - einmal am Anfang oder bei einer neuen Seite -> feste Freitexte hinzufügen
+				$newpage = false;																	# Beim Untereinandertyp macht es aber eigentlich wenig Sinn abhängige Positionierungen für Freitexte zu definieren
+			}
+			
 			# fortlaufende Freitexte
-			if($this->layout['type'] == 1){
+			if($this->layout['type'] != 0){
 		    for($j = 0; $j < count($this->layout['texts']); $j++){
 		    	if($this->layout['texts'][$j]['type'] == 0){		# Layout ist vom Untereinander-Typ und die Texte sind fortlaufend
 			      $this->pdf->selectFont($this->layout['texts'][$j]['font']);
@@ -156,19 +340,22 @@ class ddl {
 			        $h = $z * $this->layout['texts'][$j]['size'] * 1.25;
 			        $a = sin(deg2rad($alpha)) * $h;
 			        $b = cos(deg2rad($alpha)) * $h;
-			        $posx = $this->layout['texts'][$j]['posx'] + $a;
-			        $y = $this->layout['texts'][$j]['posy'] - $b;
+			        $posx = $this->layout['texts'][$j]['posx'] + $a + $offsetx;
+							$ypos = $this->layout['texts'][$j]['posy'];
+							if($this->layout['texts'][$j]['offset_attribute'] != ''){			# ist ein offset_attribute gesetzt, relative y-Position berechnen
+								$ypos = $this->layout['offset_attributes'][$this->layout['texts'][$j]['offset_attribute']] - $ypos;
+							}
+			        $y = $ypos - $b - $offsety;
 			        # beim ersten Datensatz die Gesamthoehe der Elemente eines Datensatzes ermitteln 
 		      		if($i_on_page == 0){
 		      			if($this->maxy < $y)$this->maxy = $y;		# beim ersten Datensatz das maxy ermitteln
 		      		}
-		      		if($new_dataset){
-	  						$this->miny = 10000;
-	  						$new_dataset = false;
-		      		}
 			        if($i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben
 		      			$y = $y - $this->yoffset_onpage-18;
 		      		}
+							$zeilenhoehe = $this->layout['texts'][$j]['size'];
+							$wordwrapoffset = 0; #  ??? müsste eigentlich hier auch für mehrere Zeilen im Freitext gesetzt werden
+							if($this->miny > $y-$wordwrapoffset*$zeilenhoehe)$this->miny = $y-$wordwrapoffset*$zeilenhoehe;		# miny ist die unterste y-Position das aktuellen Datensatzes 
 			        $width = $this->pdf->getTextWidth($this->layout['texts'][$j]['size'], $freitext[$z]);
 			        if($posx < 0){
 			        	$posx = 595 + $posx - $width;
@@ -181,103 +368,24 @@ class ddl {
 			      }
 			    }
 			  }
-			}			
-			# Daten schreiben
-      for($j = 0; $j < count($attributes['name']); $j++){
-      	$wordwrapoffset = 0;
-      	if($attributes['type'][$j] != 'geometry' && $this->layout['elements'][$attributes['name'][$j]]['fontsize'] > 0){
-      		$this->pdf->selectFont($this->layout['elements'][$attributes['name'][$j]]['font']);
-					if($result[$i][$attributes['name'][$j]] != ''){
-						$data = array(array($attributes['name'][$j] => $this->get_result_value_output($i, $j)));
-						# Zeilenumbruch berücksichtigen
-						$text = $result[$i][$attributes['name'][$j]];
-						$size = $this->layout['elements'][$attributes['name'][$j]]['fontsize'];
-						$textwidth = $this->pdf->getTextWidth($size, $text);
-						$width = $this->layout['elements'][$attributes['name'][$j]]['width'];
-						if($width != '' AND $textwidth/$width > 1){ 
-							while($text != ''){
-								$text = $this->pdf->addTextWrap(-100, -100, $width, $size, utf8_decode($text));
-								$wordwrapoffset++;
-							} 
-						}
-						$ypos = $this->layout['elements'][$attributes['name'][$j]]['ypos'];
-						$zeilenhoehe = $this->layout['elements'][$attributes['name'][$j]]['fontsize'];      		      		
-	      		$y = $ypos+$zeilenhoehe+5;
-	      		if($this->layout['type'] == 1 AND $i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben
-	      			$y = $y - $this->yoffset_onpage-18;
-	      		}	
-	      		$this->pdf->ezSetY($y);
-	      		# beim jedem Datensatz die Gesamthoehe der Elemente des Datensatzes ermitteln
-	      		if($i_on_page == 0){
-	      			if($this->maxy < $y)$this->maxy = $y;		# beim ersten Datensatz das maxy ermitteln
-	      		}
-	      		if($new_dataset){
-  						$this->miny = 10000;
-  						$new_dataset = false;
-	      		} 
-      			if($this->miny > $y-$wordwrapoffset*$zeilenhoehe)$this->miny = $y-$wordwrapoffset*$zeilenhoehe;		# miny ist die unterste y-Position das aktuellen Datensatzes 
-	      			
-	      		if($this->layout['elements'][$attributes['name'][$j]]['xpos'] < 0){
-	      			$this->layout['elements'][$attributes['name'][$j]]['xpos'] = 595 + $this->layout['elements'][$attributes['name'][$j]]['xpos'];
-	      			$justification = 'right';
-	      			$orientation = 'left';
-	      		}
-	      		else{
-	      			$justification = 'left';
-	      			$orientation = 'right';
-	      		}
-	      		if($this->layout['elements'][$attributes['name'][$j]]['border'] == ''){
-	      			$this->layout['elements'][$attributes['name'][$j]]['border'] = 0;
-	      		}
-	      		$this->pdf->ezTable($data, NULL, NULL, 
-	      		array('xOrientation'=>$orientation, 
-									'xPos'=>$this->layout['elements'][$attributes['name'][$j]]['xpos'], 
-									'width'=>$this->layout['elements'][$attributes['name'][$j]]['width'], 
-									'maxWidth'=>$this->layout['elements'][$attributes['name'][$j]]['width'], 
-									'fontSize'=>$this->layout['elements'][$attributes['name'][$j]]['fontsize'], 
-									'showHeadings'=>0, 
-									'shaded'=>0, 
-									'cols'=>array($attributes['name'][$j]=>array('justification'=>$justification)),
-									'showLines'=>$this->layout['elements'][$attributes['name'][$j]]['border']));
-					}
-      	}
-      	elseif($attributes['name'][$j] == $attributes['the_geom'] AND $this->layout['elements'][$attributes['name'][$j]]['xpos'] > 0){		# Geometrie
-      		if($oids[$i] != ''){
-      			$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->gui->user->rolle->epsg_code);
-      			$rect = $polygoneditor->zoomTopolygon($oids[$i], $attributes['table_name'][$attributes['the_geom']], $attributes['the_geom'], 10);
-      			$this->gui->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
-      		}
-      		$this->gui->map->set('width', $this->layout['elements'][$attributes['name'][$j]]['width']*MAPFACTOR);
-        	$this->gui->map->set('height', $this->layout['elements'][$attributes['name'][$j]]['width']*MAPFACTOR);
-      		if($this->gui->map->selectOutputFormat('jpeg_print') == 1){
-			      $this->gui->map->selectOutputFormat('jpeg');
-			    }
-      		$image_map = $this->gui->map->draw();
-			    $filename = $this->gui->map_saveWebImage($image_map,'jpeg');
-			    $newname = $this->user->id.basename($filename);
-			    rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
-			    $y = $this->layout['elements'][$attributes['name'][$j]]['ypos'];
-      		if($i_on_page == 0){
-	      		if($this->maxy < $y+$this->layout['elements'][$attributes['name'][$j]]['width'])$this->maxy = $y+$this->layout['elements'][$attributes['name'][$j]]['width'];		# beim ersten Datensatz das maxy ermitteln
-	      	}    
-			    if($this->layout['type'] == 1 AND $i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben
-      			$y = $y - $this->yoffset_onpage-18;
-      		}
-			    $this->pdf->addJpegFromFile(IMAGEPATH.$newname, $this->layout['elements'][$attributes['name'][$j]]['xpos'], $y, $this->layout['elements'][$attributes['name'][$j]]['width']);
-			    if($this->miny > $y)$this->miny = $y;
-      	}
-      }
+			}
+			################# Freitexte schreiben ###############
       $datasetcount_on_page++;
     }
-    $dateipfad=IMAGEPATH;
-    $currenttime = date('Y-m-d_H_i_s',time());
-    $name = umlaute_umwandeln($this->user->Name);    
-    $dateiname = $name.'-'.$currenttime.'.pdf';
-    $this->outputfile = $dateiname;
-    $fp=fopen($dateipfad.$dateiname,'wb');
-    fwrite($fp,$this->pdf->ezOutput());
-    fclose($fp);
-    return $dateipfad.$dateiname;
+		if($pdfobject == NULL){		# nur wenn kein PDF-Objekt aus einem übergeordneten Layer übergeben wurde, PDF erzeugen
+			$dateipfad=IMAGEPATH;
+			$currenttime = date('Y-m-d_H_i_s',time());
+			$name = umlaute_umwandeln($this->user->Name);    
+			$dateiname = $name.'-'.$currenttime.'.pdf';
+			$this->outputfile = $dateiname;
+			$fp=fopen($dateipfad.$dateiname,'wb');
+			fwrite($fp,$this->pdf->ezOutput());
+			fclose($fp);
+			return $dateipfad.$dateiname;
+		}
+		else{
+			return $this->miny;		# der letzte y-Wert wird zurückgeliefert, um nachfolgende Elemente darunter zu setzen
+		}
 	}
 
 	function save_layout($formvars, $attributes, $_files, $stelle_id){
@@ -333,6 +441,8 @@ class ddl {
 				$sql.= " ,name = '".$attributes['name'][$i]."'";
 				$sql.= " ,xpos = ".(real)$formvars['posx_'.$attributes['name'][$i]];
 				$sql.= " ,ypos = ".(real)$formvars['posy_'.$attributes['name'][$i]];
+				if($formvars['offset_attribute_'.$attributes['name'][$i]])$sql.= " ,offset_attribute = '".$formvars['offset_attribute_'.$attributes['name'][$i]]."'";
+				else $sql.= " ,offset_attribute = NULL";
 				if($formvars['width_'.$attributes['name'][$i]])$sql.= " ,width = ".(int)$formvars['width_'.$attributes['name'][$i]];
 				else $sql.= " ,width = NULL";
 				if($formvars['border_'.$attributes['name'][$i]])$sql.= " ,border = ".(int)$formvars['border_'.$attributes['name'][$i]];
@@ -359,6 +469,8 @@ class ddl {
         else $sql .= ", `posx` = NULL";
         if($formvars['textposy'.$i])$sql .= ", `posy` = ".(int)$formvars['textposy'.$i];
         else $sql .= ", `posy` = NULL";
+				if($formvars['textoffset_attribute'.$i])$sql .= ", `offset_attribute` = '".$formvars['textoffset_attribute'.$i]."'";
+        else $sql .= ", `offset_attribute` = NULL";
         if($formvars['textsize'.$i])$sql .= ", `size` = ".(int)$formvars['textsize'.$i];
         else $sql .= ", `size` = NULL";
         if($formvars['textangle'.$i])$sql .= ", `angle` = ".(int)$formvars['textangle'.$i];
@@ -428,6 +540,8 @@ class ddl {
 				$sql.= " ,name = '".$attributes['name'][$i]."'";
 				$sql.= " ,xpos = ".(real)$formvars['posx_'.$attributes['name'][$i]];
 				$sql.= " ,ypos = ".(real)$formvars['posy_'.$attributes['name'][$i]];
+				if($formvars['offset_attribute_'.$attributes['name'][$i]])$sql.= " ,offset_attribute = '".$formvars['offset_attribute_'.$attributes['name'][$i]]."'";
+				else $sql.= " ,offset_attribute = NULL";
 				if($formvars['width_'.$attributes['name'][$i]] != '')$sql.= " ,width = ".(int)$formvars['width_'.$attributes['name'][$i]];
 				else $sql.= " ,width = NULL";
 				if($formvars['border_'.$attributes['name'][$i]] != '')$sql.= " ,border = ".(int)$formvars['border_'.$attributes['name'][$i]];
@@ -453,6 +567,8 @@ class ddl {
         else $sql .= ", `posx` = NULL";
         if($formvars['textposy'.$i])$sql .= ", `posy` = ".(int)$formvars['textposy'.$i];
         else $sql .= ", `posy` = NULL";
+				if($formvars['textoffset_attribute'.$i])$sql .= ", `offset_attribute` = '".$formvars['textoffset_attribute'.$i]."'";
+        else $sql .= ", `offset_attribute` = NULL";
         if($formvars['textsize'.$i])$sql .= ", `size` = ".(int)$formvars['textsize'.$i];
         else $sql .= ", `size` = NULL";
         if($formvars['textangle'.$i])$sql .= ", `angle` = ".(int)$formvars['textangle'.$i];
@@ -469,7 +585,7 @@ class ddl {
     }
   }
  	
- 	function load_layouts($stelle_id, $ddl_id, $layer_id){
+ 	function load_layouts($stelle_id, $ddl_id, $layer_id, $types){
     $sql = 'SELECT DISTINCT datendrucklayouts.* FROM datendrucklayouts';
     if($ddl_id AND !$stelle_id){$sql .= ' WHERE datendrucklayouts.id ='.$ddl_id;}
     if($stelle_id AND !$layer_id AND !$ddl_id){
@@ -489,6 +605,9 @@ class ddl {
     	$sql .= ' AND layer_id = '.$layer_id;
     	$sql .= ' AND ddl2stelle.stelle_id = '.$stelle_id;
     }
+		if($types != NULL){
+			$sql .= ' AND type IN ('.implode(',', $types).')';
+		}
     $sql .= ' ORDER BY name';
     #echo $sql.'<br>';
     $this->debug->write("<p>file:kvwmap class:ddl->load_layouts :<br>".$sql,4);

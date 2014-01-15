@@ -731,8 +731,6 @@ class GUI_core {
       if ($classset[$j]['Name']!='') {
         $klasse -> set('name',$classset[$j]['Name']);
       }
-      #Anne
-      $klasse->set('title', $classset[$j]['Class_ID']);
       if($classset[$j]['Status']=='1'){
       	$klasse->set('status', MS_ON);
       }
@@ -763,12 +761,24 @@ class GUI_core {
                 
         if (MAPSERVERVERSION >= 620) {
 	        if($dbStyle['geomtransform'] != '') {
-	          $style->setGeomst_transform($dbStyle['geomtransform']);
+	          $style->setGeomTransform($dbStyle['geomtransform']);
 	        }
           if ($dbStyle['pattern']!='') {
             $style->setPattern(explode(' ',$dbStyle['pattern']));
             $style->linecap = 'butt';
           }
+					if($dbStyle['gap'] != '') {
+	          $style->set('gap', $dbStyle['gap']);
+	        }
+					if($dbStyle['linecap'] != '') {
+	          $style->set('linecap', constant(MS_CJC_.strtoupper($dbStyle['linecap'])));
+	        }
+					if($dbStyle['linejoin'] != '') {
+	          $style->set('linejoin', constant(MS_CJC_.strtoupper($dbStyle['linejoin'])));
+	        }
+					if($dbStyle['linejoinmaxsize'] != '') {
+	          $style->set('linejoinmaxsize', $dbStyle['linejoinmaxsize']);
+	        }
         }  
                 
         if($this->map_factor != ''){
@@ -994,8 +1004,10 @@ class GUI_core {
           $RGB=explode(" ",$dbLabel['color']);
           if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
           $label->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
-          $RGB=explode(" ",$dbLabel['outlinecolor']);
-          $label->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+          if($dbLabel['outlinecolor'] != ''){
+						$RGB=explode(" ",$dbLabel['outlinecolor']);
+						$label->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+					}
           if ($dbLabel['shadowcolor']!='') {
             $RGB=explode(" ",$dbLabel['shadowcolor']);
             $label->shadowcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
@@ -1239,21 +1251,25 @@ class GUI_core {
         $classdata[2] = '';
         $classdata[3] = 0;
         $class_id = $this->mapDB->new_Class($classdata);
-
-        $style['colorred'] = 255;
-        $style['colorgreen'] = 255;
-        $style['colorblue'] = 128;
-        $style['outlinecolorred'] = 0;
-        $style['outlinecolorgreen'] = 0;
-        $style['outlinecolorblue'] = 0;
-        $style['size'] = 10;
-        $style['symbol'] = 25;
-        $style['symbolname'] = NULL;
-        $style['backgroundcolor'] = NULL;
-        $style['minsize'] = NULL;
-        $style['maxsize'] = 100000;
-        $style['angle'] = 360;
-        $style_id = $this->mapDB->new_Style($style);
+				
+				if(defined('ZOOM2COORD_STYLE_ID') AND ZOOM2COORD_STYLE_ID != ''){
+					$style_id = $this->mapDB->copyStyle(ZOOM2COORD_STYLE_ID);
+				}
+				else{
+					$style['colorred'] = 255;
+					$style['colorgreen'] = 255;
+					$style['colorblue'] = 128;
+					$style['outlinecolorred'] = 0;
+					$style['outlinecolorgreen'] = 0;
+					$style['outlinecolorblue'] = 0;
+					$style['size'] = 10;
+					$style['symbolname'] = 'circle';
+					$style['backgroundcolor'] = NULL;
+					$style['minsize'] = NULL;
+					$style['maxsize'] = 100000;
+					$style['angle'] = 360;
+					$style_id = $this->mapDB->new_Style($style);
+				}
 
         $this->mapDB->addStyle2Class($class_id, $style_id, 0);          # den Style der Klasse zuordnen
         $this->user->rolle->set_one_Group($this->user->id, $this->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen

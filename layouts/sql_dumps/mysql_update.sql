@@ -1146,3 +1146,12 @@ ALTER TABLE `rolle` CHANGE `coordtype` `coordtype` ENUM('dec', 'dms', 'dmin') NO
 ALTER TABLE  `druckfreitexte` CHANGE  `text`  `text` TEXT DEFAULT NULL;	
 
 ALTER TABLE  `rolle` ADD  `singlequery` BOOLEAN NOT NULL DEFAULT  '0';
+
+ALTER TABLE  `styles` ADD  `gap` INT( 11 ) NULL ,
+ADD  `linecap` VARCHAR( 8 ) NULL ,
+ADD  `linejoin` VARCHAR( 5 ) NULL ,
+ADD  `linejoinmaxsize` INT( 11 ) NULL;
+
+ALTER TABLE  `ddl_elemente` ADD  `offset_attribute` VARCHAR( 255 ) NULL AFTER  `ypos`;
+
+ALTER TABLE  `druckfreitexte` ADD  `offset_attribute` VARCHAR( 255 ) NULL AFTER  `posy`;
