@@ -1,5 +1,5 @@
 <?php
-	$stelleId = 3; # wenn keine Authentifizierung sein soll, Layer zu Gaststelle zuweisen und hier die Gaststelle auswählen
+	$stelleId = 50; # wenn keine Authentifizierung sein soll, Layer zu Gaststelle zuweisen und hier die Gaststelle auswählen
 	$layerId = 455; # Gemeinden
 	$selectors = "gemnr, name, lk_nr, email, ansprechpartner";
 	
