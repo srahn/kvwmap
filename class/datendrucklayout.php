@@ -37,7 +37,7 @@ class ddl {
     $this->gui = $gui;
   }
   
-  function add_static_elements($i, $offsetx, $offsety){
+  function add_static_elements($offsetx, $offsety){
 		# Hintergrundbild    
 		if($this->layout['bgsrc']){
     	$this->pdf->addJpegFromFile(DRUCKRAHMEN_PATH.basename($this->layout['bgsrc']),$this->layout['bgposx']+$offsetx,$this->layout['bgposy']-$offsety,$this->layout['bgwidth']);
@@ -52,9 +52,13 @@ class ddl {
     	$this->pdf->selectFont($this->layout['font_user']);
     	$this->pdf->addText($this->layout['userposx']+$offsetx,$this->layout['userposy']-$offsety,$this->layout['usersize'], utf8_decode('Stelle: '.$this->Stelle->Bezeichnung.', Nutzer: '.$this->user->Name));
     }
-    # feste Freitexte
+  }
+	
+	function add_freetexts($i, $offsetx, $offsety){
+		# feste Freitexte
     for($j = 0; $j < count($this->layout['texts']); $j++){
-    	if($this->layout['type'] == 0 OR $this->layout['texts'][$j]['type'] == 1){		# entweder Layout ist vom seitenweisen Typ oder die Texte sind feststehend
+			# der Freitext wurde noch nicht geschrieben und entweder Layout ist vom seitenweisen Typ oder der Text ist feststehend
+    	if($this->layout['texts'][$j]['written'] != true AND ($this->layout['type'] == 0 OR $this->layout['texts'][$j]['type'] == 1)){
 	      $this->pdf->selectFont($this->layout['texts'][$j]['font']);
 	      $freitext = explode(';', $this->substituteFreitext($this->layout['texts'][$j]['text'], $i));
 	      $anzahlzeilen = count($freitext);
@@ -65,8 +69,12 @@ class ddl {
 	        $b = cos(deg2rad($alpha)) * $h;
 	        $posx = $this->layout['texts'][$j]['posx'] + $a;
 					$ypos = $this->layout['texts'][$j]['posy'];
-					if($this->layout['texts'][$j]['offset_attribute'] != ''){			# ist ein offset_attribute gesetzt, relative y-Position berechnen
-						$ypos = $this->layout['offset_attributes'][$this->layout['texts'][$j]['offset_attribute']] - $ypos;
+					$offset_attribute = $this->layout['texts'][$j]['offset_attribute'];
+					if($offset_attribute != ''){			# ist ein offset_attribute gesetzt
+						if($this->layout['offset_attributes'][$offset_attribute] != ''){		# dieses Attribut wurde auch schon geschrieben, d.h. dessen y-Position ist bekannt -> Freitext relativ dazu setzen
+							$ypos = $this->layout['offset_attributes'][$offset_attribute] - $ypos;
+						}
+						else continue;			# der Freitext ist abhängig aber das Attribut noch nicht geschrieben, Freitext kann noch nicht geschrieben werden
 					}
 	        $posy = $ypos - $b;
 	        $width = $this->pdf->getTextWidth($this->layout['texts'][$j]['size'], $freitext[$z]);
@@ -78,10 +86,11 @@ class ddl {
 	        	$justification = 'left';
 	        }
 	        $this->pdf->addTextWrap($posx+$offsetx,$posy-$offsety,$width,$this->layout['texts'][$j]['size'],utf8_decode($freitext[$z]),$justification,-1 * $alpha);
+					$this->layout['texts'][$j]['written'] = true;
 	      }
 	    }
 	  }
-  }
+	}
 	
 	function add_attribute_elements($selected_layer_id, $attributes, $attributenames, $offsetx, $offsety, $i, $i_on_page, $preview){
 		# $attributes ist das gesamte Attribute-Objekt
@@ -93,6 +102,9 @@ class ddl {
 					switch ($attributes['form_element_type'][$j]){
 						case 'SubFormPK' : case 'SubFormEmbeddedPK' : {
 							if($this->layout['elements'][$attributes['name'][$j]]['font'] != ''){
+								# da ein eingebettetes Layout zu einem Seitenüberlauf führen kann, müssen davor alle festen Freitexte geschrieben werden, die geschrieben werden können
+								# d.h. alle, deren Position nicht abhängig vom einem Attribut ist und alle deren Position abhängig ist und das Attribut schon geschrieben wurde
+								$this->add_freetexts($i, $offsetx, $offsety);			#  feste Freitexte hinzufügen
 								# Parameter saven ##
 								$layerid_save = $selected_layer_id;
 								$layoutid_save = $this->layout['id'];
@@ -161,8 +173,8 @@ class ddl {
 								}      			
 								if($this->miny > $y-$wordwrapoffset*$zeilenhoehe)$this->miny = $y-$wordwrapoffset*$zeilenhoehe;		# miny ist die unterste y-Position das aktuellen Datensatzes 
 
-								if($this->layout['elements'][$attributes['name'][$j]]['xpos'] < 0){
-									$this->layout['elements'][$attributes['name'][$j]]['xpos'] = 595 + $this->layout['elements'][$attributes['name'][$j]]['xpos'];
+								if($x < 0){
+									$x = 595 + $x;
 									$justification = 'right';
 									$orientation = 'left';
 								}
@@ -272,11 +284,13 @@ class ddl {
     	$this->gui->map_factor = MAPFACTOR;
     	$this->gui->loadmap('DataBase');
     }
+		$this->add_static_elements($offsetx, $offsety);
     for($i = 0; $i < count($result); $i++){
     	$i_on_page++;
-    	$new_dataset = true;
     	if($this->layout['type'] == 0 AND $i > 0){		# neue Seite beim seitenweisen Typ und neuem Datensatz 
-    		$this->pdf->newPage();											# die statischen Elemente werden erst nach den Daten hinzugefügt
+    		$this->pdf->newPage();
+				$this->add_static_elements($offsetx, $offsety);
+				$newpage = true;
     	}			
 	    if($datasetcount_on_page > 0 AND $this->layout['type'] != 0 AND $this->miny < $this->yoffset_onpage/$datasetcount_on_page + 50){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
 				$datasetcount_on_page = 0;
@@ -284,25 +298,35 @@ class ddl {
 				$this->maxy = 0;
   			$this->miny = 1000000;
 				$offsety = 50;
-				$this->pdf->newPage();											# die statischen Elemente werden erst nach den Daten hinzugefügt
+				$this->pdf->newPage();
+				$this->add_static_elements($offsetx, $offsety);
+				$newpage = true;
 			}
 			$this->yoffset_onpage = $this->maxy - $this->miny;			# der Offset mit dem die Elemente beim Untereinander-Typ nach unten versetzt werden
-				
+			
+			################# Daten schreiben ###############
 			$offset_attributes = array();
-		
 			for($j = 0; $j < count($this->attributes['name']); $j++){
 				if($this->layout['elements'][$this->attributes['name'][$j]]['offset_attribute'] != ''){
-					$offset_attributes[] = $this->layout['elements'][$this->attributes['name'][$j]]['offset_attribute'];
+					$offset_attributes[] = $this->layout['elements'][$this->attributes['name'][$j]]['offset_attribute'];			# Offset-Attribute ermitteln
 				}
 			}
-			
 			$other_attributes = array_diff($this->attributes['name'], $offset_attributes);
-					
 			# erst die offset-Attribute schreiben
       $this->add_attribute_elements($selected_layer_id, $this->attributes, $offset_attributes, $offsetx, $offsety, $i, $i_on_page, $preview);
-			
 			# dann die restlichen Attribute schreiben, denn die können ja relativ zu den offset-Attributen positioniert sein
       $this->add_attribute_elements($selected_layer_id, $this->attributes, $other_attributes, $offsetx, $offsety, $i, $i_on_page, $preview);
+			################# Daten schreiben ###############
+			
+			################# Freitexte schreiben ###############
+			if($this->layout['type'] == 0){		
+    		$this->add_freetexts($i, $offsetx, $offsety);			# beim seitenweisen Typ, feste Freitexte hinzufügen
+    	}
+			
+			if($this->layout['type'] != 0 AND ($i == 0 OR $newpage)){		
+				$this->add_freetexts($i, $offsetx, $offsety);			# beim Untereinander-Typ - einmal am Anfang oder bei einer neuen Seite -> feste Freitexte hinzufügen
+				$newpage = false;																	# Beim Untereinandertyp macht es aber eigentlich wenig Sinn abhängige Positionierungen für Freitexte zu definieren
+			}
 			
 			# fortlaufende Freitexte
 			if($this->layout['type'] != 0){
@@ -345,15 +369,9 @@ class ddl {
 			    }
 			  }
 			}
-			if($this->layout['type'] == 0 AND $i > 0){		
-    		$this->add_static_elements($i, $offsetx, $offsety);			# bei einer neuen Seite beim seitenweisen Typ, statische Elemente hinzufügen
-    	}
-			if($datasetcount_on_page > 0 AND $this->layout['type'] != 0 AND $this->miny < $this->yoffset_onpage/$datasetcount_on_page + 50){		
-				$this->add_static_elements($i, $offsetx, $offsety);			# bei einer neuen Seite beim Untereinander-Typ, statische Elemente hinzufügen
-			}
+			################# Freitexte schreiben ###############
       $datasetcount_on_page++;
     }
-		$this->add_static_elements(0, $offsetx, $offsety);
 		if($pdfobject == NULL){		# nur wenn kein PDF-Objekt aus einem übergeordneten Layer übergeben wurde, PDF erzeugen
 			$dateipfad=IMAGEPATH;
 			$currenttime = date('Y-m-d_H_i_s',time());
