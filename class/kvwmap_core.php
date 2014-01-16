@@ -800,7 +800,7 @@ class GUI_core {
                 
         if (MAPSERVERVERSION >= 620) {
 	        if($dbStyle['geomtransform'] != '') {
-	          $style->setGeomst_transform($dbStyle['geomtransform']);
+	          $style->setGeomtransform($dbStyle['geomtransform']);
 	        }
           if ($dbStyle['pattern']!='') {
             $style->setPattern(explode(' ',$dbStyle['pattern']));
