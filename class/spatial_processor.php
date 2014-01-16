@@ -78,10 +78,10 @@ class spatial_processor {
   
   function difference($geom_1, $geom_2, $type){
   	if($type == 'wkt'){
-  		$sql = "SELECT st_astext(ST_SnapToGrid(st_Difference(ST_SnapToGrid(st_geomfromtext('".$geom_1."'), 0.0001), ST_SnapToGrid(st_geomfromtext('".$geom_2."'), 0.0001)), 0.0001))";
+  		$sql = "SELECT st_astext(ST_SnapToGrid(st_difference(ST_SnapToGrid(st_geomfromtext('".$geom_1."'), 0.0001), ST_SnapToGrid(st_geomfromtext('".$geom_2."'), 0.0001)), 0.0001))";
   	}
   	else{
-  		$sql = "SELECT st_assvg(ST_SnapToGrid(st_Difference(ST_SnapToGrid(st_geomfromtext('".$geom_1."'), 0.0001), ST_SnapToGrid(st_geomfromtext('".$geom_2."'), 0.0001)), 0.0001),0,8)";
+  		$sql = "SELECT st_assvg(ST_SnapToGrid(st_difference(ST_SnapToGrid(st_geomfromtext('".$geom_1."'), 0.0001), ST_SnapToGrid(st_geomfromtext('".$geom_2."'), 0.0001)), 0.0001),0,8)";
   	}
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
   	#return $sql;
@@ -336,10 +336,10 @@ class spatial_processor {
   
   function buffer_ring($geom_1, $type, $width){
   	if($type == 'wkt'){
-  		$sql = "select st_astext(st_Difference(buffer(st_geomfromtext('".$geom_1."'), ".$width."), st_geomfromtext('".$geom_1."')))";
+  		$sql = "select st_astext(st_difference(st_buffer(st_geomfromtext('".$geom_1."'), ".$width."), st_geomfromtext('".$geom_1."')))";
   	}
   	else{
-  		$sql = "select st_assvg(st_Difference(buffer(st_geomfromtext('".$geom_1."'), ".$width."), st_geomfromtext('".$geom_1."')),0,5)";
+  		$sql = "select st_assvg(st_difference(st_buffer(st_geomfromtext('".$geom_1."'), ".$width."), st_geomfromtext('".$geom_1."')),0,5)";
   	}
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {

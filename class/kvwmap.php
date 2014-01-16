@@ -1857,7 +1857,7 @@ class GUI extends GUI_core{
       }
     }
     # Spaltenname und from-where abfragen
-    $data = $this->mapDB->getData($this->formvars['selected_layer_id']);
+    $data = $this->mapDB->getData($this->formvars['layer_id']);
     $data_explosion = explode(' ', $data);
     $this->formvars['columnname'] = $data_explosion[0];
     $select = $this->mapDB->getSelectFromData($data);
