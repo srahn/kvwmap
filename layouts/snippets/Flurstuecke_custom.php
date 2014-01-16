@@ -101,6 +101,9 @@ function emzversteckt(k){
 	  <br>
 
   	<?
+		
+		$privileg = array();
+		
   	for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
   		if($this->qlayerset[$i]['attributes']['privileg'][$this->qlayerset[$i]['attributes']['name'][$j]] != ''){
   			$privileg[$this->qlayerset[$i]['attributes']['name'][$j]] = true;

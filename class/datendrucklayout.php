@@ -161,7 +161,17 @@ class ddl {
 									$ypos = $this->layout['offset_attributes'][$this->layout['elements'][$attributes['name'][$j]]['offset_attribute']] - $ypos;
 								}
 								$zeilenhoehe = $this->layout['elements'][$attributes['name'][$j]]['fontsize'];      		      		
-								$x = $this->layout['elements'][$attributes['name'][$j]]['xpos'] + $offsetx;
+								$x = $this->layout['elements'][$attributes['name'][$j]]['xpos'];
+								if($x < 0){
+									$x = 595 + $x;
+									$justification = 'right';
+									$orientation = 'left';
+								}
+								else{
+									$justification = 'left';
+									$orientation = 'right';
+								}
+								$x = $x + $offsetx;
 								$y = $ypos+$zeilenhoehe+5 - $offsety;
 								if($this->layout['type'] != 0 AND $i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben
 									$y = $y - $this->yoffset_onpage-18;
@@ -173,15 +183,6 @@ class ddl {
 								}      			
 								if($this->miny > $y-$wordwrapoffset*$zeilenhoehe)$this->miny = $y-$wordwrapoffset*$zeilenhoehe;		# miny ist die unterste y-Position das aktuellen Datensatzes 
 
-								if($x < 0){
-									$x = 595 + $x;
-									$justification = 'right';
-									$orientation = 'left';
-								}
-								else{
-									$justification = 'left';
-									$orientation = 'right';
-								}
 								if($this->layout['elements'][$attributes['name'][$j]]['border'] == ''){
 									$this->layout['elements'][$attributes['name'][$j]]['border'] = 0;
 								}
