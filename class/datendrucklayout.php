@@ -196,8 +196,8 @@ class ddl {
 											'shaded'=>0, 
 											'cols'=>array($attributes['name'][$j]=>array('justification'=>$justification)),
 											'showLines'=>$this->layout['elements'][$attributes['name'][$j]]['border']));
-								# den y-Wert dieses Elements in das Offset-Array schreiben
-								$this->layout['offset_attributes'][$attributes['name'][$j]] = $y - 18;
+								# den unteren y-Wert dieses Elements in das Offset-Array schreiben
+								$this->layout['offset_attributes'][$attributes['name'][$j]] = round($this->pdf->y);
 							}
 						}
 					}
