@@ -2193,10 +2193,10 @@ class stelle extends stelle_core{
 		$sql.=', ows_fees= "'.$stellendaten['ows_fees'].'"';
 		$sql.=', ows_srs= "'.$stellendaten['ows_srs'].'"';
 		if($stellendaten['wappen']){
-			$sql.=', wappen="'.$_files['wappen']['name'].'"';
+			$sql.=', wappen="'.$stellendaten['wappen'].'"';
 		}
 		if($stellendaten['wasserzeichen']){
-			$sql.=', wasserzeichen="'.$_files['wasserzeichen']['name'].'"';
+			$sql.=', wasserzeichen="'.$stellendaten['wasserzeichen'].'"';
 		}
 		$sql.=', check_password_age="';
 		if ($stellendaten['checkPasswordAge']=='1') {
@@ -2680,15 +2680,15 @@ class stelle extends stelle_core{
 						if($connection[$j] != ''){
 							$value = explode('=', $connection[$j]);
 							if(strtolower($value[0]) == 'host'){
-								$conn->host = $value[1];
+								$host = $value[1];
 							}
 							if(strtolower($value[0]) == 'port'){
-								$conn->port = $value[1];
+								$port = $value[1];
 							}
 						}
 					}
-					if($conn->port == '')$conn->port = '5432';
-					$fp = @fsockopen($conn->host, $conn->port, $errno, $errstr, 0.1);
+					if($port == '')$port = '5432';
+					$fp = @fsockopen($host, $port, $errno, $errstr, 0.1);
 					if(!$fp){			# keine Verbindung --> Layer ausschalten
 						#$this->Fehlermeldung = $errstr.' für Layer: '.$rs['Name'].'<br>';
 						continue;

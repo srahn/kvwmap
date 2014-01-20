@@ -3085,7 +3085,7 @@ class GUI extends GUI_core{
       }
     }
     $this->main='druckrahmen.php';
-    $this->titel='Druckrahmenverwaltung';
+    $this->titel='Kartendruck-Layouteditor';
   }
 
   function druckrahmen_load_html() {
@@ -7851,7 +7851,7 @@ class GUI extends GUI_core{
     }
     else {
       if($_files['wappen']['name']){
-        $this->formvars['wappen'] = 'wappen';
+        $this->formvars['wappen'] = $_files['wappen']['name'];
         $nachDatei = WWWROOT.APPLVERSION.WAPPENPATH.$_files['wappen']['name'];
         if (move_uploaded_file($_files['wappen']['tmp_name'],$nachDatei)) {
             #echo '<br>Lade '.$_files['Wappen']['tmp_name'].' nach '.$nachDatei.' hoch';
@@ -7910,30 +7910,6 @@ class GUI extends GUI_core{
         $this->selected_user = new user(0,$selectedusers[$i],$this->user->database);
         $this->selected_user->checkstelle();
       }
-      /* Löschen der in der Selectbox entfernten Menues
-      $stellenmenues = $Stelle->getMenue(0);
-      for($i = 0; $i < count($stellenmenues['ID']); $i++){
-        $found = false;
-        for($j = 0; $j < count($menues); $j++){
-          if($menues[$j] == $stellenmenues['ID'][$i]){
-            $found = true;
-          }
-        }
-        if($found == false){
-          $deletemenues[] = $stellenmenues['ID'][$i];
-        }
-      }
-      if($deletemenues != 0){
-        $Stelle->deleteMenue($deletemenues);
-        for($i = 0; $i < count($deletemenues); $i++){
-          $menue_id = array($deletemenues[$i]);
-          for($j = 0; $j < count($users['ID']); $j++){
-            $this->user->rolle->deleteMenue($users['ID'][$j], $stelle_id, $menue_id);
-          }
-        }
-      }
-    # /Löschen der in der Selectbox entfernten Menues
-    */
 
     # Löschen der in der Selectbox entfernten Layer
       $stellenlayer = $Stelle->getLayers(NULL);
@@ -8005,7 +7981,7 @@ class GUI extends GUI_core{
     }
     else {
       if($_files['wappen']['name']){
-        $this->formvars['wappen'] = 'wappen';
+        $this->formvars['wappen'] = $_files['wappen']['name'];
         $nachDatei = WWWROOT.APPLVERSION.WAPPENPATH.$_files['wappen']['name'];
         if (move_uploaded_file($_files['wappen']['tmp_name'],$nachDatei)) {
             #echo '<br>Lade '.$_files['Wappen']['tmp_name'].' nach '.$nachDatei.' hoch';
@@ -8077,6 +8053,7 @@ class GUI extends GUI_core{
     $this->titel='Stellen Editor';
     $this->main='stelle_formular.php';
     $document = new Document($this->database);
+		$ddl = new ddl($this->database, $this);
     # Abfragen der Stellendaten wenn eine stelle_id zur Änderung selektiert ist
     if ($this->formvars['selected_stelle_id']>0) {
       $Stelle = new stelle($this->formvars['selected_stelle_id'],$this->user->database);
@@ -8116,6 +8093,7 @@ class GUI extends GUI_core{
       $Stelle->getFunktionen();
       $this->formvars['selfunctions'] = $Stelle->funktionen['array'];
       $this->formvars['selframes'] = $document->load_frames($this->formvars['selected_stelle_id'], NULL);
+			$this->formvars['sellayouts'] = $ddl->load_layouts($this->formvars['selected_stelle_id'], NULL, NULL, NULL);
       $this->formvars['sellayer'] = $Stelle->getLayers(NULL, 'Name');
       $this->formvars['selusers'] = $Stelle->getUser();
     }
@@ -8125,8 +8103,10 @@ class GUI extends GUI_core{
     # Abfragen aller möglichen Funktionen
     $funktion = new funktion($this->database);
     $this->formvars['functions'] = $funktion->getFunktionen(NULL, 'bezeichnung');
-    # Abfragen aller möglichen Druckrahmen
+    # Abfragen aller möglichen Kartendruck-Layouts
     $this->formvars['frames'] = $document->load_frames(NULL, NULL);
+		# Abfragen aller möglichen Datendruck-Layouts
+    $this->formvars['layouts'] = $ddl->load_layouts(NULL, NULL, NULL, NULL);
     # Abfragen aller möglichen Layer
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->formvars['layer']=$mapDB->getall_Layer('Name');

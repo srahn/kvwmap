@@ -403,7 +403,7 @@ else {
           <th align="right" style="border-bottom:1px solid #C3C7C3">
             <table border="0" cellspacing="0" cellpadding="0">
               <tr>
-                  <th align="right">Druckrahmen</th>
+                  <th align="right">Kartendruck-Layouts</th>
                 </tr>
                 <tr>
                   <td align="right">&nbsp;</td>
@@ -430,6 +430,46 @@ else {
                       <select name="allframes" size="5" multiple style="width:200px">
                       <? for($i=0; $i < count($this->formvars['frames']); $i++){
                           echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['frames'][$i]["Name"]).'  value="'.$this->formvars['frames'][$i]["id"].'">'.$this->formvars['frames'][$i]["Name"].'</option>';
+                           }
+                      ?>
+                      </select>
+                    </td>
+                </tr>
+              </table>
+          </td>
+        </tr>
+				
+				<tr>
+          <th align="right" style="border-bottom:1px solid #C3C7C3">
+            <table border="0" cellspacing="0" cellpadding="0">
+              <tr>
+                  <th align="right">Datendruck-Layouts</th>
+                </tr>
+                <tr>
+                  <td align="right">&nbsp;</td>
+                </tr>
+            </table>
+          </th>
+          <td colspan=2 valign="top" style="border-bottom:1px solid #C3C7C3">
+              <table border="0" cellspacing="0" cellpadding="0">
+                <tr valign="top">
+                    <td>
+                      <select name="selectedlayouts" size="5" multiple style="width:200px">
+                      <?
+                      for($i=0; $i < count($this->formvars['sellayouts']); $i++){
+                          echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['sellayouts'][$i]["name"]).' value="'.$this->formvars['sellayouts'][$i]["id"].'">'.$this->formvars['sellayouts'][$i]["name"].'</option>';
+                         }
+                      ?>
+                      </select>
+                    </td>
+                    <td align="center" valign="middle" width="1">
+                      <input type="button" name="addPlaces" value="&lt;&lt;" onClick=addOptions(document.GUI.alllayouts,document.GUI.selectedlayouts,document.GUI.sellayouts,'value')>
+                      <input type="button" name="substractPlaces" value="&gt;&gt;" onClick=substractOptions(document.GUI.selectedlayouts,document.GUI.sellayouts,'value')>
+                    </td>
+                    <td>
+                      <select name="alllayouts" size="5" multiple style="width:200px">
+                      <? for($i=0; $i < count($this->formvars['layouts']); $i++){
+                          echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['layouts'][$i]["name"]).'  value="'.$this->formvars['layouts'][$i]["id"].'">'.$this->formvars['layouts'][$i]["name"].'</option>';
                            }
                       ?>
                       </select>
@@ -585,6 +625,12 @@ else {
           echo ', '.$this->formvars['selframes'][$i]["id"];
         }
       ?>">      
+<input type="hidden" name="sellayouts" value="<?
+        echo $this->formvars['sellayouts'][0]["id"];
+        for($i=1; $i < count($this->formvars['sellayouts']); $i++){
+          echo ', '.$this->formvars['sellayouts'][$i]["id"];
+        }
+      ?>">
 <input type="hidden" name="sellayer" value="<?
         echo $this->formvars['sellayer']["ID"][0];
         for($i=1; $i < count($this->formvars['sellayer']["Bezeichnung"]); $i++){

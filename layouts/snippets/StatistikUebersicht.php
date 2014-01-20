@@ -123,7 +123,7 @@ function popup(id){
 		                <td>
 		                	<table width="100%" border="0" cellpadding="5" cellspacing="0">
 		                    <tr bgcolor="#FFFFFF">
-		                      <td width="40%"><strong>Druckrahmen</strong></td>
+		                      <td width="40%"><strong>Drucklayout</strong></td>
 		                      <td width="27%"><strong>Format</strong></td>
 		                      <td width="33%"><strong>Anzahl der ALK-Drucke</strong></td>
 		                    </tr>

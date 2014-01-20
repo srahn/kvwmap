@@ -151,7 +151,7 @@ function addfreetext(){
     <td >
       <table width=100% cellpadding="2" cellspacing="2" style="border:1px solid #C3C7C3">
         <tr>
-          <td class="bold" colspan=2 style="border-bottom:1px solid #C3C7C3">&nbsp;Druckrahmenauswahl</td>
+          <td class="bold" colspan=2 style="border-bottom:1px solid #C3C7C3">&nbsp;Layoutauswahl</td>
           <td class="bold" style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3">&nbsp;Stelle</td>
         </tr>
         <tr>
@@ -194,10 +194,10 @@ function addfreetext(){
     <td>
       <table width=605 border=0 cellpadding="2" cellspacing="2" style="border:1px solid #C3C7C3">
         <tr>
-          <td class="bold" style="border-bottom:1px solid #C3C7C3" colspan=8 >&nbsp;Druckrahmendaten</td>
+          <td class="bold" style="border-bottom:1px solid #C3C7C3" colspan=8 >&nbsp;Layoutdaten</td>
         </tr>
         <tr>
-        	<td class="bold" align="center" style="border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Druckkopf&nbsp;</td>
+        	<td class="bold" align="center" style="border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Hintergrundbild&nbsp;</td>
         	<td class="bold" align="center" style="border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Referenzkartenhintergrund&nbsp;</td>
         </tr>
         <tr>
@@ -241,7 +241,7 @@ function addfreetext(){
           <td style="border-bottom:1px solid #C3C7C3" colspan=8>&nbsp;</td>
         </tr>
         <tr>
-          <td width="50%" style="border-bottom:1px solid #C3C7C3" colspan=4>&nbsp;<b>Druckkopf:</b> <? echo $this->Document->selectedframe[0]['headsrc'] ?></td>
+          <td width="50%" style="border-bottom:1px solid #C3C7C3" colspan=4>&nbsp;<b>Hintergrund:</b> <? echo $this->Document->selectedframe[0]['headsrc'] ?></td>
           <td width="50%" style="border-bottom:1px solid #C3C7C3" colspan=4>&nbsp;wählen:&nbsp;<input class="button" type="file" name="headsrc" size="10"></td>
         </tr>
         <tr>
@@ -567,7 +567,7 @@ function addfreetext(){
   
   <tr align="center"> 
     <td colspan="3"> 
-    <input class="button" type="button" name="go_plus" value="Rahmen löschen" onclick="Bestaetigung('index.php?go=Druckrahmen_Löschen&selected_frame_id=<? echo $this->Document->selectedframe[0]['id']; ?>', 'Wollen Sie diesen Druckrahmen wirklich löschen?');">&nbsp;<input class="button" type="submit" name="go_plus" value="Änderungen Speichern">&nbsp;<input class="button" type="submit" name="go_plus" value="als neuen Rahmen speichern">
+    <input class="button" type="button" name="go_plus" value="Layout löschen" onclick="Bestaetigung('index.php?go=Druckrahmen_Löschen&selected_frame_id=<? echo $this->Document->selectedframe[0]['id']; ?>', 'Wollen Sie dieses Layout wirklich löschen?');">&nbsp;<input class="button" type="submit" name="go_plus" value="Änderungen Speichern">&nbsp;<input class="button" type="submit" name="go_plus" value="als neues Layout speichern">
     </td>
   </tr>
   
