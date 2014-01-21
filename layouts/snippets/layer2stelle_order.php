@@ -23,7 +23,7 @@
       	echo '
       	<tr>
       		<td style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3">&nbsp;'.$this->layers['Bezeichnung'][$i].'</td>
-      		<td style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3" align="center"><input size="7" type="text" name="drawingorder_layer'.$this->layers['ID'][$i].'" value="'.$this->layers['drawingorder'][$i].'"</td>
+      		<td style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3" align="center"><input size="7" type="text" name="drawingorder_layer'.$this->layers['ID'][$i].'" value="'.$this->layers['drawingorder'][$i].'"></td>
       		<td style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3" align="center"><a href="index.php?go=Layer2Stelle_Editor&selected_layer_id='.$this->layers['ID'][$i].'&selected_stelle_id='.$this->formvars['selected_stelle_id'].'&stellen_name='.$this->selected_stelle->Bezeichnung.'">'.$this->strChange.'</a></td>
       		<td style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3;border-right:1px solid #C3C7C3" align="center"><a href="index.php?go=Layereditor&selected_layer_id='.$this->layers['ID'][$i].'">'.$this->strChange.'</a></td>
       	</tr>

@@ -2604,12 +2604,15 @@ class stelle extends stelle_core{
 			if($order == 'Name'){
 				// Sortieren der Layer unter Berücksichtigung von Umlauten
 				$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
-				$layer['Bezeichnung'] = $sorted_arrays['array'];
-				$layer['ID'] = $sorted_arrays['second_array'];
+				$sorted_layer['Bezeichnung'] = $sorted_arrays['array'];
+				$sorted_layer['ID'] = $sorted_arrays['second_array'];
+				
 				$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['drawingorder']);
-				$layer['drawingorder'] = $sorted_arrays['second_array'];
+				$sorted_layer['drawingorder'] = $sorted_arrays['second_array'];
+				
 				$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['Gruppe']);
-				$layer['Gruppe'] = $sorted_arrays['second_array'];
+				$sorted_layer['Gruppe'] = $sorted_arrays['second_array'];
+				$layer = $sorted_layer;
 			}
 		}
 		return $layer;

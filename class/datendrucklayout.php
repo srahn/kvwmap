@@ -609,7 +609,7 @@ class ddl {
 		if($types != NULL){
 			$sql .= ' AND type IN ('.implode(',', $types).')';
 		}
-    $sql .= ' ORDER BY name';
+    $sql .= ' ORDER BY layer_id, name';
     #echo $sql.'<br>';
     $this->debug->write("<p>file:kvwmap class:ddl->load_layouts :<br>".$sql,4);
     $query=mysql_query($sql);
@@ -700,6 +700,12 @@ class ddl {
     $this->debug->write("<p>file:kvwmap class:ddl->add_layout2stelle :",4);
     $this->database->execSQL($sql,4, 1);
   }
+	
+	function removelayouts($stelleid){
+		$sql ="DELETE FROM ddl2stelle WHERE stelle_id = ".$stelleid;
+    $this->debug->write("<p>file:kvwmap class:ddl->removelayouts :",4);
+    $this->database->execSQL($sql,4, 1);
+	}
  
  	function get_fonts(){
  		$fonts = searchdir(PDFCLASSPATH.'fonts/', true);

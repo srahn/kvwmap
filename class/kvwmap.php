@@ -274,16 +274,17 @@ class GUI extends GUI_core{
       	}
 				$layerdb = $mapDB->getlayerdatabase($layer[$i]['Layer_ID'], $this->Stelle->pgdbhost);
 				$select = $mapDB->getSelectFromData($layer[$i]['Data']);
+				$data_attributes = $mapDB->getDataAttributes($layerdb, $layer[$i]['Layer_ID']);
 				$extent = 'st_transform(st_geomfromtext(\'POLYGON(('.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layer[$i]['epsg_code'].')';				
-				$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects(the_geom, '.$extent.')';
+				$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects('.$data_attributes['the_geom'].', '.$extent.')';
 				if($layer[$i]['Datentyp'] == 0){	# POINT
-					$sql = 'SELECT st_x(the_geom), st_y(the_geom) FROM (SELECT st_transform(the_geom, '.$this->user->rolle->epsg_code.') as the_geom '.$fromwhere.') foo LIMIT 10000';
+					$sql = 'SELECT st_x(the_geom), st_y(the_geom) FROM (SELECT st_transform('.$data_attributes['the_geom'].', '.$this->user->rolle->epsg_code.') as '.$data_attributes['the_geom'].' '.$fromwhere.') foo LIMIT 10000';
 				}
 				else{	# LINE / POLYGON
-					$sql = 'SELECT st_x(the_geom), st_y(the_geom) FROM (SELECT st_transform(st_pointn(foo.linestring, foo.count1), '.$this->user->rolle->epsg_code.') AS the_geom
+					$sql = 'SELECT st_x('.$data_attributes['the_geom'].'), st_y('.$data_attributes['the_geom'].') FROM (SELECT st_transform(st_pointn(foo.linestring, foo.count1), '.$this->user->rolle->epsg_code.') AS the_geom
 					FROM (SELECT generate_series(1, st_npoints(foo4.linestring)) AS count1, foo4.linestring FROM (
 					SELECT st_GeometryN(foo2.linestring, foo2.count2) as linestring FROM (
-					SELECT generate_series(1, st_NumGeometries(foo5.linestring)) AS count2, foo5.linestring FROM (SELECT st_multi(linefrompoly(st_intersection(the_geom, '.$extent.'))) AS linestring '.$fromwhere.') foo5) foo2
+					SELECT generate_series(1, st_NumGeometries(foo5.linestring)) AS count2, foo5.linestring FROM (SELECT st_multi(linefrompoly(st_intersection('.$data_attributes['the_geom'].', '.$extent.'))) AS linestring '.$fromwhere.') foo5) foo2
 					) foo4) foo
 					WHERE (foo.count1 + 1) <= st_npoints(foo.linestring)) foo3 LIMIT 10000';
 				}
@@ -320,7 +321,7 @@ class GUI extends GUI_core{
     	$select = strtolower($mapDB->getSelectFromData($layer['Data']));
 			if($this->formvars['layer_id'] > 0)$select = str_replace(' from ', ', '.$data_attributes['table_alias_name'][$data_attributes['the_geom']].'.oid as exclude_oid'.' from ', $select);		# bei Rollenlayern nicht machen
 			$extent = 'st_transform(st_geomfromtext(\'POLYGON(('.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layer['epsg_code'].')';				
-			$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects(the_geom, '.$extent.') ';
+			$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects('.$data_attributes['the_geom'].', '.$extent.') ';
 			if($this->formvars['layer_id'] > 0 AND $this->formvars['oid']){
 				$fromwhere .= 'AND exclude_oid != '.$this->formvars['oid'];
 			}
@@ -328,7 +329,7 @@ class GUI extends GUI_core{
 			$sql = 'SELECT st_x(the_geom), st_y(the_geom) FROM (SELECT st_transform(st_pointn(foo.linestring, foo.count1), '.$this->user->rolle->epsg_code.') AS the_geom
 					FROM (SELECT generate_series(1, st_npoints(foo4.linestring)) AS count1, foo4.linestring FROM (
 					SELECT CASE WHEN st_GeometryN(foo2.linestring, foo2.count2) IS NULL THEN foo2.linestring ELSE st_GeometryN(foo2.linestring, foo2.count2) END as linestring FROM (
-					SELECT generate_series(1, st_NumGeometries(foo5.linestring)) AS count2, foo5.linestring FROM (SELECT st_multi(linefrompoly(st_intersection(the_geom, '.$extent.'))) AS linestring '.$fromwhere.') foo5) foo2
+					SELECT generate_series(1, st_NumGeometries(foo5.linestring)) AS count2, foo5.linestring FROM (SELECT st_multi(linefrompoly(st_intersection('.$data_attributes['the_geom'].', '.$extent.'))) AS linestring '.$fromwhere.') foo5) foo2
 					) foo4) foo
 					WHERE (foo.count1 + '.$offset.') <= st_npoints(foo.linestring)) foo3 LIMIT 10000';
 			#echo $sql;
@@ -5192,9 +5193,9 @@ class GUI extends GUI_core{
     # Freitexte
     for($j = 0; $j < count($this->Docu->activeframe[0]['texts']); $j++){
       $pdf->selectFont($this->Docu->activeframe[0]['texts'][$j]['font']);
-      if($this->Docu->activeframe[0]['texts'][$j]['text'] == '' AND $this->formvars['freetext'.$this->Docu->activeframe[0]['texts'][$j]['id']] != ''){    // ein Freitext hat keinen Text aber in der Druckausschnittswahl wurde ein Text vom Nutzer eingefügt
-        $this->formvars['freetext'.$this->Docu->activeframe[0]['texts'][$j]['id']] = str_replace(chr(10), ';', $this->formvars['freetext'.$this->Docu->activeframe[0]['texts'][$j]['id']]);
-        $this->formvars['freetext'.$this->Docu->activeframe[0]['texts'][$j]['id']] = str_replace(chr(13), '', $this->formvars['freetext'.$this->Docu->activeframe[0]['texts'][$j]['id']]);
+      if($this->Docu->activeframe[0]['texts'][$j]['text'] == '' AND $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']] != ''){    // ein Freitext hat keinen Text aber in der Druckausschnittswahl wurde ein Text vom Nutzer eingefügt
+        $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']] = str_replace(chr(10), ';', $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']]);
+        $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']] = str_replace(chr(13), '', $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']]);
         $this->Docu->activeframe[0]['texts'][$j]['text'] = $this->formvars['freetext'.$this->Docu->activeframe[0]['texts'][$j]['id']];
       }
       $freitext = explode(';', $this->substituteFreitext($this->Docu->activeframe[0]['texts'][$j]['text']));
@@ -7858,7 +7859,7 @@ class GUI extends GUI_core{
         }
       }
       if($_files['wasserzeichen']['name']){
-        $this->formvars['wasserzeichen'] = 'wasserzeichen';
+        $this->formvars['wasserzeichen'] = $_files['wasserzeichen']['name'];
         $nachDatei = WWWROOT.APPLVERSION.WAPPENPATH.$_files['wasserzeichen']['name'];
         if (move_uploaded_file($_files['wasserzeichen']['tmp_name'],$nachDatei)) {
             #echo '<br>Lade '.$_files['wasserzeichen']['tmp_name'].' nach '.$nachDatei.' hoch';
@@ -7881,6 +7882,7 @@ class GUI extends GUI_core{
       $menues = explode(', ',$this->formvars['selmenues']);
       $functions = explode(', ',$this->formvars['selfunctions']);
       $frames = explode(', ',$this->formvars['selframes']);
+			$layouts = explode(', ',$this->formvars['sellayouts']);
       $layer = explode(', ',$this->formvars['sellayer']);
       $selectedusers = explode(', ',$this->formvars['selusers']);
       $users= $Stelle->getUser();
@@ -7896,10 +7898,17 @@ class GUI extends GUI_core{
         $new_stelle->addFunctions($functions, 0); # Hinzufügen der Funktionen zur Stelle
       }
       $document = new Document($this->database);
-      $document->removeFrames($new_stelleid);   // Entfernen aller Druckrahmen der Stelle
+      $document->removeFrames($new_stelleid);   // Entfernen aller Kartendruck-Layouts der Stelle
       if($frames[0] != NULL){
         for($i = 0; $i < count($frames); $i++){
-          $document->add_frame2stelle($frames[$i], $new_stelleid); # Hinzufügen der Druckrahmen zur Stelle
+          $document->add_frame2stelle($frames[$i], $new_stelleid); # Hinzufügen der Kartendruck-Layouts zur Stelle
+        }
+      }
+			$ddl = new ddl($this->database, $this);
+      $ddl->removelayouts($new_stelleid);   // Entfernen aller Datendruck-Layouts der Stelle
+      if($layouts[0] != NULL){
+        for($i = 0; $i < count($layouts); $i++){
+          $ddl->add_layout2stelle($layouts[$i], $new_stelleid); # Hinzufügen der Datendruck-Layouts zur Stelle
         }
       }
       for($i=0; $i<count($selectedusers); $i++){
@@ -14529,9 +14538,9 @@ class db_mapObj extends db_mapObj_core{
     if($order == 'Bezeichnung'){
       // Sortieren der Layer unter Berücksichtigung von Umlauten
       $sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
-      $layer['Bezeichnung'] = $sorted_arrays['array'];
       $layer['ID'] = $sorted_arrays['second_array'];
 			$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['GruppeID']);
+			$layer['Bezeichnung'] = $sorted_arrays['array'];
 			$layer['GruppeID'] = $sorted_arrays['second_array'];
     }
     return $layer;

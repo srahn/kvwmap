@@ -457,7 +457,7 @@ else {
                       <select name="selectedlayouts" size="5" multiple style="width:200px">
                       <?
                       for($i=0; $i < count($this->formvars['sellayouts']); $i++){
-                          echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['sellayouts'][$i]["name"]).' value="'.$this->formvars['sellayouts'][$i]["id"].'">'.$this->formvars['sellayouts'][$i]["name"].'</option>';
+                          echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['sellayouts'][$i]["name"]).' value="'.$this->formvars['sellayouts'][$i]["id"].'">['.$this->formvars['sellayouts'][$i]["layer_id"].'] '.$this->formvars['sellayouts'][$i]["name"].'</option>';
                          }
                       ?>
                       </select>
@@ -469,7 +469,7 @@ else {
                     <td>
                       <select name="alllayouts" size="5" multiple style="width:200px">
                       <? for($i=0; $i < count($this->formvars['layouts']); $i++){
-                          echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['layouts'][$i]["name"]).'  value="'.$this->formvars['layouts'][$i]["id"].'">'.$this->formvars['layouts'][$i]["name"].'</option>';
+                          echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['layouts'][$i]["name"]).'  value="'.$this->formvars['layouts'][$i]["id"].'">['.$this->formvars['layouts'][$i]["layer_id"].'] '.$this->formvars['layouts'][$i]["name"].'</option>';
                            }
                       ?>
                       </select>
