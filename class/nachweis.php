@@ -285,31 +285,10 @@ class Nachweis {
 			$result = 'invalid';
 			return $result;
 		}
-  	$sql = "SELECT alknflur.gemkgschl, alknflur.flur FROM alkobj_e_fla, alknflur WHERE alknflur.objnr = alkobj_e_fla.objnr AND st_intersects(the_geom, st_transform(st_geomfromtext('".$polygon."', ".$epsg."), ".EPSGCODE."))";
-  	$ret=$this->database->execSQL($sql,4, 1);
+  	$ret=$this->database->check_poly_in_flur($polygon, $epsg);
   	$result = 'f';	
   	while($rs = pg_fetch_row($ret[1])){
   		if($gemarkung == $rs[0] AND $flur == ltrim($rs[1], '0')){
-  			$result = 't';
-  			break;
-  		}
-  	}
-  	return $result;
-  }
-  
-	function check_poly_in_flurALKIS($polygon, $flur, $gemarkung, $epsg){
-  	$sql = "SELECT st_isvalid(st_geomfromtext('".$polygon."', ".$epsg."))";
-  	$ret=$this->database->execSQL($sql,4, 1);
-  	$rs = pg_fetch_row($ret[1]);
-		if($rs[0] == 'f'){
-			$result = 'invalid';
-			return $result;
-		}
-  	$sql = "SELECT f.land * 10000 + f.gemarkungsnummer, f.flurnummer FROM alkis.ax_flurstueck f WHERE st_intersects(wkb_geometry, st_transform(st_geomfromtext('".$polygon."', ".$epsg."), ".EPSGCODE_ALKIS."))";
-  	$ret=$this->database->execSQL($sql,4, 1);
-  	$result = 'f';	
-  	while($rs = pg_fetch_row($ret[1])){
-  		if($gemarkung == $rs[0] AND $flur == $rs[1]){
   			$result = 't';
   			break;
   		}

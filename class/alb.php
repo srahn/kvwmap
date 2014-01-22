@@ -1397,8 +1397,7 @@ class ALB {
   }
 
   function getFlurstKennzByGemeindeIDs($Gemeinde_IDs, $FlurstKennz) {
-    if(ALKIS)$ret = $this->database->getFlurstuecksKennzByGemeindeIDsALKIS($Gemeinde_IDs, $FlurstKennz);
-    else $ret = $this->database->getFlurstuecksKennzByGemeindeIDs($Gemeinde_IDs, $FlurstKennz);
+    $ret = $this->database->getFlurstuecksKennzByGemeindeIDs($Gemeinde_IDs, $FlurstKennz);
     return $ret;
   }
 

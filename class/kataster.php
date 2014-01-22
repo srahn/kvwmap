@@ -731,22 +731,15 @@ class Flur extends Flur_core{
     $this->LayerName=LAYERNAME_FLUR;
   }
 
-  function getFlurListe($GemkgID,$FlurID,$order, $historical = false) {
+  function getFlurListe($GemkgID,$FlurID, $historical = false) {
     # Abfragen der Fluren
-    $Liste=$this->database->getFlurenListeByGemkgIDByFlurID($GemkgID,$FlurID,$order, $historical);
+    $Liste=$this->database->getFlurenListeByGemkgIDByFlurID($GemkgID,$FlurID, $historical);
     return $Liste;
   }
   
-  function getFlurListeALKIS($GemkgID,$FlurID,$order, $historical = false) {
+  function getFlurListeALK($GemkgID, $historical = false) {
     # Abfragen der Fluren
-    $Liste=$this->database->getFlurenListeByGemkgIDByFlurIDALKIS($GemkgID,$FlurID,$order, $historical);
-    return $Liste;
-  }
-  
-  
-  function getFlurListeALK($GemkgID,$order, $historical = false) {
-    # Abfragen der Fluren
-    $Liste=$this->database->getFlurenListeByGemkgIDByFlurIDALK($GemkgID,$order, $historical);
+    $Liste=$this->database->getFlurenListeByGemkgIDByFlurIDALK($GemkgID, $historical);
     return $Liste;
   }
 
@@ -870,8 +863,7 @@ class adresse {
 
   function getFlurstKennzListe() {
     # liefert FlurstKennz zur Adressangaben aus dem ALB Bestand
-    if(ALKIS)$ret=$this->database->getFlurstKennzListeByGemSchlByStrSchlALKIS($this->GemeindeSchl,$this->StrassenSchl,$this->HausNr);
-    else $ret=$this->database->getFlurstKennzListeByGemSchlByStrSchl($this->GemeindeSchl,$this->StrassenSchl,$this->HausNr);
+    $ret=$this->database->getFlurstKennzListeByGemSchlByStrSchl($this->GemeindeSchl,$this->StrassenSchl,$this->HausNr);
     if ($ret[0]) {
       $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4);
       return 0;
@@ -887,20 +879,18 @@ class adresse {
     #$this->database->updateTempAdressTable();
   }
 
-  function getStrassenListe($GemID,$extent,$order) {
+  function getStrassenListe($GemID,$extent) {
     # Funktion liefert eine Liste der Strassen innerhalb der GemID und ggf. des extent
     $PolygonWKTString=rectObj2WKTPolygon($extent);
-    if(ALKIS)$StrassenListe=$this->database->getStrassenListeALKIS($GemID,'',$PolygonWKTString,$order);
-    else $StrassenListe=$this->database->getStrassenListe($GemID,$PolygonWKTString,$order);
+    $StrassenListe=$this->database->getStrassenListe($GemID,'', $PolygonWKTString);
     # liefert Array mit Arrays mit StrID und Name zurück
     return $StrassenListe;
   }
   
-  function getStrassenListeByGemkg($GemkgID,$extent,$order) {
+  function getStrassenListeByGemkg($GemkgID,$extent) {
     # Funktion liefert eine Liste der Strassen innerhalb der GemID und ggf. des extent
     $PolygonWKTString=rectObj2WKTPolygon($extent);
-    if(ALKIS)$StrassenListe=$this->database->getStrassenListeALKIS('',$GemkgID,$PolygonWKTString,$order);
-    else $StrassenListe=$this->database->getStrassenListeByGemkg($GemkgID,$PolygonWKTString,$order);
+    $StrassenListe=$this->database->getStrassenListeByGemkg($GemkgID,$PolygonWKTString);
     # liefert Array mit Arrays mit StrID und Name zurück
     return $StrassenListe;
   }
@@ -956,10 +946,8 @@ class adresse {
     # 2006-01-11 pk
     # Funktion liefert die Hausnummern zu einer GemID, StrID Kombination
     # und bei Bedarf auch im angegebenen extent zurück
-    # Wenn mysql ausgewählt wurde ist die Einschränkung über ein extent nicht berücksichtigt.
     $PolygonWKTString=rectObj2WKTPolygon($extent);
-    if(ALKIS)$HausNrListe=$this->database->getHausNrListeALKIS($GemID,$StrID,$HausNr,$PolygonWKTString,$order);
-    else $HausNrListe=$this->database->getHausNrListe($GemID,$StrID,$HausNr,$PolygonWKTString,$order);
+    $HausNrListe=$this->database->getHausNrListe($GemID,$StrID,$HausNr,$PolygonWKTString,$order);
     # liefert ein Array mit HausNr und Nr_Quelle jeweils mit einem Array für die Listen zurück
     return $HausNrListe;
   }
@@ -978,8 +966,7 @@ class adresse {
   }
   
 	function getStrNamefromID($GemID,$StrID) {
-    if(ALKIS)$ret=$this->database->getStrNameByIDALKIS($GemID,$StrID);
-    else $ret=$this->database->getStrNameByID($GemID,$StrID);
+    $ret=$this->database->getStrNameByID($GemID,$StrID);
     if ($ret[0]==0 AND count($ret[1])>0) {
       # liefert die erste gefundene Strasse zurück
       return $ret[1];
@@ -1580,16 +1567,11 @@ class gemeinde {
     return $Name;
   }
 
-  function getGemeindeListe($Gemeinden,$order) {
-    	$GemeindeListe=$this->database->getGemeindeListeByKreisGemeinden($Gemeinden,$order);
+  function getGemeindeListe($Gemeinden) {
+    $GemeindeListe=$this->database->getGemeindeListeByKreisGemeinden($Gemeinden);
     return $GemeindeListe;
   }
   
-  function getGemeindeListeALKIS($Gemeinden,$order) {
-  	$GemeindeListe=$this->database->getGemeindeListeByKreisGemeindenALKIS($Gemeinden,$order);
-    return $GemeindeListe;
-  }
-
   function getGemeindeListeByExtent($extent) {
     # Hier könnte später eine Unterteilung in die Abfrage der Gemeinden im Kartenausschnitt aus
     # Shape-Datei oder
@@ -1889,18 +1871,12 @@ class gemarkung {
     return $rs['GemeindeSchl'];
   }
 
-  function getGemarkungListe($GemID,$GemkgID,$order) {
+  function getGemarkungListe($GemID,$GemkgID) {
     # Abfragen der Gemarkungen mit seinen GemeindeNamen
-    $Liste=$this->database->getGemeindeListeByGemIDByGemkgSchl($GemID,$GemkgID,$order);
+    $Liste=$this->database->getGemeindeListeByGemIDByGemkgSchl($GemID,$GemkgID);
     return $Liste;
   }
   
-  function getGemarkungListeALKIS($GemID,$GemkgID,$order) {
-    # Abfragen der Gemarkungen mit seinen GemeindeNamen
-    $Liste=$this->database->getGemeindeListeByGemIDByGemkgSchlALKIS($GemID,$GemkgID,$order);
-    return $Liste;
-  }
-
   function getGemarkungListeByExtent($extent) {
     # Abfragen der Gemarkungen, die im aktuellen Ausschnitt zu sehen sind.
     $map=ms_newMapObj('');
@@ -2088,7 +2064,7 @@ class grundstueck {
 ####################
 # Klasse Grundbuch #
 ####################
-class grundbuch {
+class grundbuch_alkis {
   var $Bezirk;
   var $Blatt;
   ###################### Liste der Funktionen ####################################
@@ -2097,7 +2073,7 @@ class grundbuch {
   #
   ################################################################################
 
-  function grundbuch($Bezirk,$Blatt,$database) {
+  function grundbuch_alkis($Bezirk,$Blatt,$database) {
     global $debug;
     $this->debug=$debug;
     $this->Bezirk=$Bezirk;
@@ -2106,8 +2082,7 @@ class grundbuch {
   }
 
   function getBuchungen($flurstkennz,$bvnr,$erbaurechtshinweise,$keine_historischen) {
-    if(ALKIS)$ret=$this->database->getBuchungenFromGrundbuchALKIS('',$this->Bezirk,$this->Blatt,$keine_historischen);
-    else $ret=$this->database->getBuchungenFromGrundbuch('',$this->Bezirk,$this->Blatt,$keine_historischen);
+    $ret=$this->database->getBuchungenFromGrundbuch('',$this->Bezirk,$this->Blatt,$keine_historischen);
     if ($ret[0]) {
       $ret[1]='Fehler bei der Datenbank abfrage<br>'.$ret[1];
     }
@@ -2116,28 +2091,15 @@ class grundbuch {
       $buchungen=$ret[1];
       $anzBuchungen=count($buchungen);
       for($i=0;$i<$anzBuchungen;$i++) {
-        if(ALKIS){
-        	$buchungenret=$this->database->getGemarkungNameALKIS(substr($buchungen[$i]['flurstkennz'],0,6));
-	        $buchungen[$i]['gemkgname']=$buchungenret[1];
-	        $buchungen[$i]['flur']=intval(substr($buchungen[$i]['flurstkennz'],6,3));
-	        $buchungen[$i]['zaehler']=intval(substr($buchungen[$i]['flurstkennz'],9,5));
-	        $buchungen[$i]['nenner']=intval(substr($buchungen[$i]['flurstkennz'],14,6));
-	        $buchungen[$i]['flurstuecksnr']=$buchungen[$i]['zaehler'];
-	        if ($buchungen[$i]['nenner']>0) {
-	          $buchungen[$i]['flurstuecksnr'].='/'.$buchungen[$i]['nenner'];
-	        }
-        }
-        else{
-        	$buchungenret=$this->database->getGemarkungName(substr($buchungen[$i]['flurstkennz'],0,6));
-	        $buchungen[$i]['gemkgname']=$buchungenret[1];
-	        $buchungen[$i]['flur']=intval(substr($buchungen[$i]['flurstkennz'],7,3));
-	        $buchungen[$i]['zaehler']=intval(substr($buchungen[$i]['flurstkennz'],11,5));
-	        $buchungen[$i]['nenner']=intval(substr($buchungen[$i]['flurstkennz'],17,3));
-	        $buchungen[$i]['flurstuecksnr']=$buchungen[$i]['zaehler'];
-	        if ($buchungen[$i]['nenner']>0) {
-	          $buchungen[$i]['flurstuecksnr'].='/'.$buchungen[$i]['nenner'];
-	        }
-        }
+				$buchungenret=$this->database->getGemarkungName(substr($buchungen[$i]['flurstkennz'],0,6));
+				$buchungen[$i]['gemkgname']=$buchungenret[1];
+				$buchungen[$i]['flur']=intval(substr($buchungen[$i]['flurstkennz'],6,3));
+				$buchungen[$i]['zaehler']=intval(substr($buchungen[$i]['flurstkennz'],9,5));
+				$buchungen[$i]['nenner']=intval(substr($buchungen[$i]['flurstkennz'],14,6));
+				$buchungen[$i]['flurstuecksnr']=$buchungen[$i]['zaehler'];
+				if ($buchungen[$i]['nenner']>0) {
+					$buchungen[$i]['flurstuecksnr'].='/'.$buchungen[$i]['nenner'];
+				}
       }
       $ret[1]=$buchungen;
     }
@@ -2164,18 +2126,15 @@ class grundbuch {
   }
 
   function getGrundbuchbezirksliste(){
-  	if(ALKIS)return $this->database->getGrundbuchbezirkslisteALKIS();
-  	else return $this->database->getGrundbuchbezirksliste();
+  	return $this->database->getGrundbuchbezirksliste();
   }
 
   function getGrundbuchbezirkslisteByGemkgIDs($gemkg_ids){
-  	if(ALKIS)return $this->database->getGrundbuchbezirkslisteByGemkgIDsALKIS($gemkg_ids);
-  	else return $this->database->getGrundbuchbezirkslisteByGemkgIDs($gemkg_ids);
+  	return $this->database->getGrundbuchbezirkslisteByGemkgIDs($gemkg_ids);
   }
   
   function getGrundbuchblattliste($bezirk){
-  	if(ALKIS)return $this->database->getGrundbuchblattlisteALKIS($bezirk);
-  	else return $this->database->getGrundbuchblattliste($bezirk);
+  	return $this->database->getGrundbuchblattliste($bezirk);
   }
 }
 
@@ -2183,7 +2142,7 @@ class grundbuch {
 ################
 #-> Flurstueck #
 ################
-class flurstueck {
+class flurstueck_alkis {
   var $Amtsgericht;
   var $FlurstKennz;
   var $Infotext;
@@ -2249,7 +2208,7 @@ class flurstueck {
   #
   ################################################################################
 
-  function flurstueck($FlurstKennz,$database) {
+  function flurstueck_alkis($FlurstKennz,$database) {
     global $debug;
     $this->debug=$debug;
     $this->database=$database;
@@ -2308,16 +2267,14 @@ class flurstueck {
     if ($this->FlurstKennz=="") { return 0; }
     $this->debug->write("<br>kataster.php->flurstueck->getBuchungen Abfrage der Buchungen zum Flurstück auf dem Grundbuch<br>",4);
     #$ret=$this->database->getBuchungen($this->FlurstKennz);
-    if(ALKIS)$ret=$this->database->getBuchungenFromGrundbuchALKIS($this->FlurstKennz,$Bezirk,$Blatt,$keine_historischen);
-    else $ret=$this->database->getBuchungenFromGrundbuch($this->FlurstKennz,$Bezirk,$Blatt,$keine_historischen);
+    $ret=$this->database->getBuchungenFromGrundbuch($this->FlurstKennz,$Bezirk,$Blatt,$keine_historischen);
     return $ret[1];
   }
 
   function getGrundbuecher() {
     if ($this->FlurstKennz=="") { return 0; }
     $this->debug->write("<br>kataster.php->flurstueck->getGrundbuecher Abfrage der Angaben zum Grundbuch auf dem das Flurstück gebucht ist<br>",4);
-    if(ALKIS)$ret=$this->database->getGrundbuecherALKIS($this->FlurstKennz);
-    else $ret=$this->database->getGrundbuecher($this->FlurstKennz);
+    $ret=$this->database->getGrundbuecher($this->FlurstKennz);
     return $ret[1];
   }
 
@@ -2327,106 +2284,6 @@ class flurstueck {
     if(ALKIS){}		#ALKIS TODO
     else $ret=$this->database->getHinweise($this->FlurstKennz);
     return $ret[1];
-  }
-
-  function getTableDef() {
-/*
-    $def = array(
-      array("AOBJID","C",7),
-      array("OBJART","C",4),
-      array("AKT","C",2),
-      array("BL","C",2),
-      array("GM","C",4),
-      array("FL","C",3),
-      array("FZ","C",5),
-      array("FN","C",3),
-      array("FF","C",2),
-      array("INFOTEXT","C",21),
-      array("ID","N",11,0),
-      array("FKZ","C",23),
-      array("GEMKGSCHL","N",6,0),
-      array("FLURNR","N",3,0),
-      array("ZAEHLER","N",5,0),
-      array("NENNER","N",3,0),
-      array("FLURSTNR","C",9),
-      array("FLURSTBEZ","C",15)
-    );
-#CREATE TABLE `ALK_Flurst` (
-#  `AOBJID` varchar(7),
-#  `OBJART` varchar(4),
-#  `AKT` varchar(2),
-#  `BL` varchar(2),
-#  `GM` varchar(4),
-#  `FL` varchar(3),
-#  `FZ` varchar(5),
-#  `FN` varchar(3),
-#  `FF` varchar(2),
-#  `INFOTEXT` varchar(21) default NULL,
-#  `ID` int(11) NOT NULL default '0',
-#  `FKZ` varchar(23) NOT NULL default '',
-#  `GEMKGSCHL` int(6) NOT NULL default '0',
-#  `FLURNR` int(3) NOT NULL default '0',
-#  `ZAEHLER` int(5) NOT NULL default '0',
-#  `NENNER` int(3) NOT NULL default '0',
-#  `FLURSTNR` varchar(9) NOT NULL default '',
-#  `FLURSTBEZ` varchar(15) NOT NULL default '',
-#  PRIMARY KEY  (`ID`),
-#  KEY `GemkgSchl` (`GEMKGSCHL`),
-#  KEY `Zaehler` (`ZAEHLER`),
-#  KEY `Nenner` (`NENNER`),
-#  KEY `FlurNr` (`FLURNR`),
-#  KEY `FlurstKennz` (`FKZ`)
-#) ENGINE=MyISAM;
-
-*/    $def = array(
-      array("OBJGR","N",6,0),
-      array("OBJID","C",8),
-      array("FOLIE","N",6,0),
-      array("OBJART","N",6,0),
-      array("TEXTART","C",255),
-      array("INFOART","N",6,0),
-      array("INFOTEXT","C",21),
-      array("AKTUAL","N",6,0),
-      array("QUELLE","N",6,0),
-      array("ID","N",11,0),
-      array("FKZ","C",23),
-      array("GEMKGSCHL","N",6,0),
-      array("FLURNR","N",3,0),
-      array("ZAEHLER","N",5,0),
-      array("NENNER","N",3,0),
-      array("FLURSTNR","C",9),
-      array("FLURSTBEZ","C",15)
-    );
-
-# Dazugehörige Tabellendefinition in Datenbank
-#CREATE TABLE `ALK_Flurst` (
-#  `OBJGR` smallint(6) default NULL,
-#  `OBJID` varchar(255) NOT NULL default '',
-#  `FOLIE` smallint(6) default NULL,
-#  `OBJART` smallint(6) default NULL,
-#  `TEXTART` varchar(255) default NULL,
-#  `INFOART` smallint(6) default NULL,
-#  `INFOTEXT` varchar(21) default NULL,
-#  `AKTUAL` smallint(6) default NULL,
-#  `QUELLE` smallint(6) default NULL,
-#  `ID` int(11) NOT NULL default '0',
-#  `FKZ` varchar(23) NOT NULL default '',
-#  `GEMKGSCHL` int(6) NOT NULL default '0',
-#  `FLURNR` int(3) NOT NULL default '0',
-#  `ZAEHLER` int(5) NOT NULL default '0',
-#  `NENNER` int(3) NOT NULL default '0',
-#  `FLURSTNR` varchar(9) NOT NULL default '',
-#  `FLURSTBEZ` varchar(15) NOT NULL default '',
-#  PRIMARY KEY  (`ID`),
-#  KEY `GemkgSchl` (`GEMKGSCHL`),
-#  KEY `Zaehler` (`ZAEHLER`),
-#  KEY `Nenner` (`NENNER`),
-#  KEY `FlurNr` (`FLURNR`),
-#  KEY `FlurstKennz` (`FKZ`)
-#) ENGINE=MyISAM;
-
-    $this->tabdef=$def;
-    return $def;
   }
 
   function getColNames() {
@@ -2480,8 +2337,7 @@ class flurstueck {
       return $Eigentuemerliste;
     }
     $this->debug->write("<p>kataster flurstueck->getEigentuemerliste Abfragen der Flurstücksdaten aus dem ALK Bestand:<br>",4);
-    if(ALKIS)$ret=$this->database->getEigentuemerlisteALKIS($this->FlurstKennz,$Bezirk,$Blatt,$BVNR);
-    else $ret=$this->database->getEigentuemerliste($this->FlurstKennz,$Bezirk,$Blatt,$BVNR);
+    $ret=$this->database->getEigentuemerliste($this->FlurstKennz,$Bezirk,$Blatt,$BVNR);
     if ($ret[0] AND DBWRITE) {
       $Grundbuch = new grundbuch("","",$this->debug);
       $Eigentuemerliste[0] = new eigentuemer($Grundbuch,"");
@@ -2514,8 +2370,7 @@ class flurstueck {
 
   function getGrundbuchbezirk() {
     if ($this->FlurstKennz=="") { return 0; }
-    if(ALKIS)$ret=$this->database->getGrundbuchbezirkeALKIS($this->FlurstKennz);
-    else $ret=$this->database->getGrundbuchbezirke($this->FlurstKennz);
+    $ret=$this->database->getGrundbuchbezirke($this->FlurstKennz);
     return $ret;
   }
 
@@ -2577,8 +2432,7 @@ class flurstueck {
       $ret[1]=array("schluessel"=>"", "name"=>"Im Grundbuch nicht gebucht");
     }
     else {
-      if(ALKIS)$ret=$this->database->getAmtsgerichtbyBezirkALKIS($this->Grundbuchbezirk);
-      else $ret=$this->database->getAmtsgerichtbyFlurst($this->FlurstKennz);
+      $ret=$this->database->getAmtsgerichtby($this->FlurstKennz, $this->Grundbuchbezirk);
     }  
     return $ret[1];
   }
@@ -2593,8 +2447,7 @@ class flurstueck {
   }
 
   function getFlurID() {
-  	if(ALKIS)return substr($this->FlurstKennz,6,3);
-    else return substr($this->FlurstKennz,7,3);
+  	return substr($this->FlurstKennz,6,3);
   }
 
   function FKZ_Format($format) {
@@ -2645,21 +2498,18 @@ class flurstueck {
   }
 
   function getLage() {
-    if(ALKIS)$ret=$this->database->getLageALKIS($this->FlurstKennz);
-    else $ret=$this->database->getLage($this->FlurstKennz);
+    $ret=$this->database->getLage($this->FlurstKennz);
     $this->debug->write("<br>kataster.php flurstueck->getLage() Abfrage der Lagebezeichnung zum Flurstück:",4);
     return $ret[1];
   }
 
   function getAdresse() {
     $this->debug->write("<br>kataster.php flurstueck->getAdresse() Abfragen der Strassen zum Flurstück:",4);
-		if(ALKIS)$ret=$this->database->getStrassenALKIS($this->FlurstKennz);
-		else $ret=$this->database->getStrassen($this->FlurstKennz);
+		$ret=$this->database->getStrassen($this->FlurstKennz);
     $Strassen=$ret[1];
     for ($i=0;$i<count($Strassen);$i++) {
       $this->debug->write("<br>kataster.php flurstueck->getAdresse() Abfragen der Hausnummern zu den Strassen zum Flurstück:",4);
-      if(ALKIS)$ret=$this->database->getHausNummernALKIS($this->FlurstKennz,$Strassen[$i]['strasse']);
-      else $ret=$this->database->getHausNummern($this->FlurstKennz,$Strassen[$i]['strasse']);
+      $ret=$this->database->getHausNummern($this->FlurstKennz,$Strassen[$i]['strasse']);
       $HausNr=$ret[1];
       natsort($HausNr);
       $HausNr = array_values($HausNr);
@@ -2673,8 +2523,7 @@ class flurstueck {
   
   function getNutzung() {
     if ($this->FlurstKennz=="") { return 0; }
-    if(ALKIS)$ret=$this->database->getNutzungALKIS($this->FlurstKennz);
-    else $ret=$this->database->getNutzung($this->FlurstKennz);
+    $ret=$this->database->getNutzung($this->FlurstKennz);
     if ($ret[0] AND DBWRITE) { return 0; }
     return $ret[1];
   }
@@ -2760,8 +2609,7 @@ class flurstueck {
 
   function readALB_Data($FlurstKennz) {
     $this->debug->write("<p>kataster.php flurstueck->readALB_Data (vom Flurstück)",4);
-    if(ALKIS)$ret=$this->database->getALBDataALKIS($FlurstKennz);
-    else $ret=$this->database->getALBData($FlurstKennz);
+    $ret=$this->database->getALBData($FlurstKennz);
     if ($ret[0] AND DBWRITE) {
       $errmsg ='<p>kvwmap readALB_Data Abfragen der ALB-Flurstücksdaten';
       $errmsg.='in line: '.__LINE__.'<br>'.$ret[1];
@@ -2828,18 +2676,13 @@ class flurstueck {
     }
   }
 
-	function getFlstListeALK($GemID,$GemkgID,$FlurID,$order, $historical = false) {
-		$Liste=$this->database->getFlurstuecksListeALK($GemID,$GemkgID,$FlurID,$order, $historical);
+	function getFlstListeALK($GemID,$GemkgID,$FlurID, $historical = false) {
+		$Liste=$this->database->getFlurstuecksListeALK($GemID,$GemkgID,$FlurID, $historical);
 		return $Liste;
 	}
 
-  function getFlstListe($GemID,$GemkgID,$FlurID,$order, $historical = false) {
-    $Liste=$this->database->getFlurstuecksListe($GemID,$GemkgID,$FlurID,$order, $historical);
-    return $Liste;
-  }
-  
-  function getFlstListeALKIS($GemID,$GemkgID,$FlurID,$order, $historical = false) {
-    $Liste=$this->database->getFlurstuecksListeALKIS($GemID,$GemkgID,$FlurID,$order, $historical);
+  function getFlstListe($GemID,$GemkgID,$FlurID, $historical = false) {
+    $Liste=$this->database->getFlurstuecksListe($GemID,$GemkgID,$FlurID, $historical);
     return $Liste;
   }
 
@@ -2899,15 +2742,14 @@ class flurstueck {
   	$Flurstuecke = array();
   	for($i = 0; $i < count($gbarray); $i++){
   		$gb = explode('-', $gbarray[$i]);
-  		if(ALKIS)$Flurst = $this->database->getFlurstueckeByGrundbuchblattALKIS($gb[0], $gb[1]);
-  		else $Flurst = $this->database->getFlurstueckeByGrundbuchblatt($gb[0], $gb[1]);
+  		$Flurst = $this->database->getFlurstueckeByGrundbuchblatt($gb[0], $gb[1]);
   		$Flurstuecke = array_merge($Flurstuecke, $Flurst);
   	}
     return $Flurstuecke;
   }
 
-  function getNamen($name1,$name2,$name3,$name4,$bezirk,$blatt,$gemkgschl,$flur,$limitAnzahl,$limitStart,$caseSensitive, $order) {
-    if ($name1=='' AND $name2=='' AND $name3=='' AND $name4=='' AND $bezirk=='') {
+  function getNamen($formvars,$gemkgschl) {
+    if ($formvars['name1']=='' AND $formvars['name2']=='' AND $formvars['name3']=='' AND $formvars['name4']=='' AND $formvars['name5']=='' AND $formvars['name6']=='' AND $formvars['name7']=='' AND $formvars['name8']=='') {
       $ret[0]=1;
       $ret[1]='<br>Geben Sie mindestens einen Suchbegriff ein!';
     }
@@ -2915,8 +2757,7 @@ class flurstueck {
     	if($blatt != ''){
     		$blatt = str_pad($blatt, 5, '0', STR_PAD_LEFT);
     	}
-      if(ALKIS)$ret=$this->database->getNamenALKIS($name1,$name2,$name3,$name4,$bezirk,$blatt,$gemkgschl,$flur,$limitAnzahl,$limitStart,$caseSensitive, $order);
-      else $ret=$this->database->getNamen($name1,$name2,$name3,$name4,$bezirk,$blatt,$gemkgschl,$flur,$limitAnzahl,$limitStart,$caseSensitive, $order);
+      $ret=$this->database->getNamen($formvars, $gemkgschl);
       if ($ret[0]) {
         $ret[1]='<br>Fehler bei der Abfrage der Eigentümernamen.'.$ret[1];
       }

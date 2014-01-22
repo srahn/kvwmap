@@ -1601,11 +1601,9 @@ class GUI extends GUI_core{
     $GemeindenStelle=$this->Stelle->getGemeindeIDs();
     if($GemeindenStelle != ''){   // Stelle ist auf Gemeinden eingeschränkt
       $Gemeinde=new gemeinde('',$this->pgdatabase);
-      if(ALKIS)$GemListe=$Gemeinde->getGemeindeListeALKIS($GemeindenStelle,'bezeichnung');
-    	else $GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle,'GemeindeName');
+      $GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle);
       $Gemarkung=new gemarkung('',$this->pgdatabase);
-      if(ALKIS)$GemkgListe=$Gemarkung->getGemarkungListeALKIS($GemListe['ID'],'','');
-      else$GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'','');
+      $GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'');
       $gbliste = $grundbuch->getGrundbuchbezirkslisteByGemkgIDs($GemkgListe['GemkgID']);
     }
     else{
@@ -2868,8 +2866,7 @@ class GUI extends GUI_core{
 
   function jagdkatastereditor_listflurst_csv(){
   	$this->jagdkataster = new jagdkataster($this->pgdatabase);
-  	if(ALKIS){$this->flurstuecke = $this->jagdkataster->getIntersectedFlurstALKIS($this->formvars);}
-    else{$this->flurstuecke = $this->jagdkataster->getIntersectedFlurst($this->formvars);}
+  	$this->flurstuecke = $this->jagdkataster->getIntersectedFlurst($this->formvars);
   	for($i = 0; $i < count($this->flurstuecke); $i++){          	
     	$csv .= $this->flurstuecke[$i]['gemkgname'].';';
       $csv .= $this->flurstuecke[$i]['flur'].';';
@@ -2897,8 +2894,7 @@ class GUI extends GUI_core{
     if($this->formvars['oid'])$this->titel='Im Jagdbezirk '.$this->formvars['name'].' enthaltene Flurstücke';
     else $this->titel='Enthaltene Flurstücke in Jagdbezirken';
     $this->jagdkataster = new jagdkataster($this->pgdatabase);
-    if(ALKIS){$this->flurstuecke = $this->jagdkataster->getIntersectedFlurstALKIS($this->formvars);}
-    else{$this->flurstuecke = $this->jagdkataster->getIntersectedFlurst($this->formvars);}
+    $this->flurstuecke = $this->jagdkataster->getIntersectedFlurst($this->formvars);
     $this->output();
   }
   
@@ -2906,8 +2902,7 @@ class GUI extends GUI_core{
     $this->main='jagdkataster_eigentuemerlist.php';
     $this->titel='Eigentümer im Jagdbezirk '.$this->formvars['name'];
     $this->jagdkataster = new jagdkataster($this->pgdatabase);
-    if(ALKIS){$this->eigentuemer = $this->jagdkataster->getEigentuemerListeALKIS($this->formvars);}
-    else{$this->eigentuemer = $this->jagdkataster->getEigentuemerListe($this->formvars);}
+    $this->eigentuemer = $this->jagdkataster->getEigentuemerListe($this->formvars);
     $this->output();
   }
   
@@ -2991,12 +2986,10 @@ class GUI extends GUI_core{
     $GemeindenStelle=$this->Stelle->getGemeindeIDs();
     $Gemeinde=new gemeinde('',$this->pgdatabase);
     # Abfrage der Gemeinde Namen
-    if(ALKIS)$GemListe=$Gemeinde->getGemeindeListeALKIS($GemeindenStelle, 'bezeichnung');
-    else $GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle, 'GemeindeName');
+    $GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle);
     # Abfragen der Gemarkungen zur Gemeinde
     $Gemarkung=new gemarkung('',$this->pgdatabase);
-    if(ALKIS)$this->GemkgListe=$Gemarkung->getGemarkungListeALKIS($GemListe['ID'],'','gmk.bezeichnung');
-    else $this->GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'','gmk.GemkgName');
+    $this->GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'');
     $this->main='bauauskunftsuche.php';
     $this->titel='Bauauskunftsuche';
   }
@@ -4243,18 +4236,16 @@ class GUI extends GUI_core{
       if($GemeindenStelle != NULL){
         $Gemeinde=new gemeinde('',$this->pgdatabase);
         # Auswahl aller Gemeinden der Stelle
-        if(ALKIS)$GemListe=$Gemeinde->getGemeindeListeALKIS($GemeindenStelle, 'bezeichnung');
-        else $GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle, 'GemeindeName');
+        $GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle);
         # Abfragen der Gemarkungen mit dazugehörigen Namen der Gemeinden
         $Gemarkung=new gemarkung('',$this->pgdatabase);
-        if(ALKIS)$GemkgListe=$Gemarkung->getGemarkungListeALKIS($GemListe['ID'],'','gmk.bezeichnung');
-        else $GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'','gmk.GemkgName');
+				$GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'');
       }
     }
 
     # 2006-02-01 pk
     $flurstueck=new flurstueck('',$this->pgdatabase);
-    $ret=$flurstueck->getNamen('%'.$this->formvars['name1'].'%','%'.$this->formvars['name2'].'%','%'.$this->formvars['name3'].'%','%'.$this->formvars['name4'].'%',$this->formvars['bezirk'],$this->formvars['blatt'],$GemkgListe['GemkgID'], $this->formvars['FlurID'], $this->formvars['anzahl'], $this->formvars['offset'],$this->formvars['caseSensitive'], $this->formvars['order']);
+		$ret=$flurstueck->getNamen($this->formvars,$GemkgListe['GemkgID']);
     if ($ret[0]) {
       $this->Fehlermeldung='<br>Es konnten keine Namen abgefragt werden'.$ret[1];
       $this->namenWahl();
@@ -4265,16 +4256,14 @@ class GUI extends GUI_core{
         $this->Fehlermeldung='<br>Es konnten keine Namen gefunden werden, bitte ändern Sie die Anfrage!';
       }
       else {
-        $ret=$flurstueck->getNamen('%'.$this->formvars['name1'].'%','%'.$this->formvars['name2'].'%','%'.$this->formvars['name3'].'%','%'.$this->formvars['name4'].'%',$this->formvars['bezirk'],$this->formvars['blatt'],$GemkgListe['GemkgID'],$this->formvars['FlurID'],'','',$this->formvars['caseSensitive'], $this->formvars['order']);
-        $this->anzNamenGesamt=count($ret[1]);
+        $this->anzNamenGesamt=count($this->namen);
 
         if($this->formvars['withflurst'] == 'on'){
           for($i = 0; $i < count($this->namen); $i++){
             $ret[1] = $flurstueck->getFlurstByGrundbuecher(array($this->namen[$i]['bezirk'].'-'.$this->namen[$i]['blatt']));
             $this->namen[$i]['flurstuecke'] = $ret[1];
             for($j = 0; $j < count($this->namen[$i]['flurstuecke']); $j++){
-              if(ALKIS)$ret = $this->pgdatabase->getALBDataALKIS($this->namen[$i]['flurstuecke'][$j]);
-              else $ret = $this->pgdatabase->getALBData($this->namen[$i]['flurstuecke'][$j]);
+              $ret = $this->pgdatabase->getALBData($this->namen[$i]['flurstuecke'][$j]);
               $this->namen[$i]['alb_data'][$j] = $ret[1];
             }
           }
@@ -4379,14 +4368,12 @@ class GUI extends GUI_core{
     $GemeindenStelle=$this->Stelle->getGemeindeIDs();
     $Gemeinde=new gemeinde('',$this->pgdatabase);
     # Auswahl aller Gemeinden der Stelle
-    if(ALKIS)$GemListe=$Gemeinde->getGemeindeListeALKIS($GemeindenStelle, 'bezeichnung');
-    else $GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle, 'GemeindeName');
+		$GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle);
 
     # Abfragen der Gemarkungen mit dazugehörigen Namen der Gemeinden
     $GemkgID=$this->formvars['GemkgID'];
     $Gemarkung=new gemarkung('',$this->pgdatabase);
-    if(ALKIS)$GemkgListe=$Gemarkung->getGemarkungListeALKIS($GemListe['ID'],'','gmk.bezeichnung');
-    else $GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'','gmk.GemkgName');
+    $GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'');
     // Sortieren der Gemarkungen unter Berücksichtigung von Umlauten
     $sorted_arrays = umlaute_sortieren($GemkgListe['Bezeichnung'], $GemkgListe['GemkgID']);
     $GemkgListe['Bezeichnung'] = $sorted_arrays['array'];
@@ -4400,8 +4387,7 @@ class GUI extends GUI_core{
     # Abragen der Fluren zur Gemarkung
     if($GemkgID > 0){
     	$Flur=new Flur('','','',$this->pgdatabase);
-    	if(ALKIS)$FlurListe=$Flur->getFlurListeALKIS($GemkgID,'','gemarkungsteilflur');
-    	else $FlurListe=$Flur->getFlurListe($GemkgID,'','FlurNr');
+			$FlurListe=$Flur->getFlurListe($GemkgID,'');
     	# Erzeugen des Formobjektes für die Flurauswahl
     	if (count($FlurListe['FlurID'])==1) { $FlurID=$FlurListe['FlurID'][0]; }
     }
@@ -5530,14 +5516,12 @@ class GUI extends GUI_core{
     $bodenrichtwertzone=new bodenrichtwertzone($this->pgdatabase, $layer[0]['epsg_code'], $this->user->rolle->epsg_code);
     # Formularobjekt für Gemeinde bilden
     $GemObj=new gemeinde(0,$this->pgdatabase);
-  	if(ALKIS){$Gemeindeliste=$GemObj->getGemeindeListeALKIS(array(), 'bezeichnung');}
-    else{$Gemeindeliste=$GemObj->getGemeindeListe(array(), 'g.GemeindeName');}
+  	$Gemeindeliste=$GemObj->getGemeindeListe(array());
     $this->GemFormObj=new FormObject("gemeinde","select",$Gemeindeliste["ID"],$this->formvars['gemeinde'],$Gemeindeliste["Name"],1,0,0,158);
     $this->GemFormObj->addJavaScript('onchange', "update_require_attribute('gemarkung', ".$this->formvars['boris_layer_id'].", this.value);");
     # Formularobjekt für Gemarkung bilden
     $GemkgObj = new gemarkung(0,$this->pgdatabase);
-  	if(ALKIS){$gemarkungsliste=$GemkgObj->getGemarkungListeALKIS(array($this->formvars['gemeinde']),array(),'gmk.bezeichnung');}
-    else{$gemarkungsliste=$GemkgObj->getGemarkungListe(array($this->formvars['gemeinde']),array(),'gmk.GemkgName');}
+  	$gemarkungsliste=$GemkgObj->getGemarkungListe(array($this->formvars['gemeinde']),array());
     $this->GemkgFormObj=new FormObject('gemarkung','select',$gemarkungsliste['GemkgID'],$this->formvars['gemarkung'],$gemarkungsliste['Name'],1,0,0,158);
     
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
@@ -9373,8 +9357,7 @@ class GUI extends GUI_core{
 
 	function check_nachweis_poly(){
 		$this->nachweis = new Nachweis($this->pgdatabase, $this->user->rolle->epsg_code);
-		if(ALKIS){echo $this->nachweis->check_poly_in_flurALKIS($this->formvars['umring'], $this->formvars['flur'], $this->formvars['gemkgschl'], $this->user->rolle->epsg_code);}
-		else{echo $this->nachweis->check_poly_in_flur($this->formvars['umring'], $this->formvars['flur'], $this->formvars['gemkgschl'], $this->user->rolle->epsg_code);}
+		echo $this->nachweis->check_poly_in_flur($this->formvars['umring'], $this->formvars['flur'], $this->formvars['gemkgschl'], $this->user->rolle->epsg_code);
 	}
 
   function nachweisFormSenden() {
@@ -9773,11 +9756,9 @@ class GUI extends GUI_core{
     # Abfragen der Gemarkungen
     $GemeindenStelle=$this->Stelle->getGemeindeIDs();
     $Gemeinde=new gemeinde('',$this->pgdatabase);
-    if(ALKIS){$GemListe=$Gemeinde->getGemeindeListeALKIS($GemeindenStelle, 'bezeichnung');}
-    else{$GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle, 'GemeindeName');}
+    $GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle);
     $Gemarkung=new gemarkung('',$this->pgdatabase);
-    if(ALKIS){$GemkgListe=$Gemarkung->getGemarkungListeALKIS($GemListe['ID'],'','gmk.bezeichnung');}
-    else{$GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'','gmk.GemkgName');}
+    $GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'');
         
     # Erzeugen des Formobjektes für die Gemarkungsauswahl
     $this->GemkgFormObj=new FormObject("Gemarkung","select",$GemkgListe['GemkgID'],$this->formvars['Gemarkung'],$GemkgListe['Bezeichnung'],"1","","",NULL);
@@ -9988,14 +9969,12 @@ class GUI extends GUI_core{
 	# Abfragen der Gemarkungen
     $GemeindenStelle=$this->Stelle->getGemeindeIDs();
     $Gemeinde=new gemeinde('',$this->pgdatabase);
-    if(ALKIS){$GemListe=$Gemeinde->getGemeindeListeALKIS($GemeindenStelle, 'bezeichnung');}
-    else{$GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle, 'GemeindeName');}
+    $GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle);
     $Gemarkung=new gemarkung('',$this->pgdatabase);
-    if(ALKIS){$GemkgListe=$Gemarkung->getGemarkungListeALKIS($GemListe['ID'],'','gmk.bezeichnung');}
-    else{$GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'','gmk.GemkgName');}
+    $GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'');
     # Erzeugen des Formobjektes für die Gemarkungsauswahl
     $this->GemkgFormObj=new FormObject("suchgemarkung","select",$GemkgListe['GemkgID'],$this->formvars['suchgemarkung'],$GemkgListe['Bezeichnung'],"1","","",NULL);
-	$this->GemkgFormObj->insertOption('',0,'--Auswahl--',0);
+		$this->GemkgFormObj->insertOption('',0,'--Auswahl--',0);
 			
     # erzeugen des Formularobjektes für die VermessungsStellen
     $this->FormObjVermStelle=$this->getFormObjVermStelle($this->formvars['VermStelle']);
@@ -10734,8 +10713,7 @@ class GUI extends GUI_core{
     #$this->searchInExtent=$this->formvars['searchInExtent'];
     $Gemarkung=new gemarkung('',$this->pgdatabase);
     # abfragen, ob es sich um eine gültige GemarkungsID handelt
-    if(ALKIS)$GemkgListe=$Gemarkung->getGemarkungListeALKIS(array($GemID),array($GemkgID),'');
-    else $GemkgListe=$Gemarkung->getGemarkungListe(array($GemID),array($GemkgID),'');
+    $GemkgListe=$Gemarkung->getGemarkungListe(array($GemID),array($GemkgID));
     if(count($GemkgListe['GemkgID']) > 0){
       # Die Gemarkung ist ausgewählt und gültig aber Flur leer, zoom auf Gemarkung
       if($FlurID==0 OR $FlurID=='-1'){
@@ -10873,8 +10851,8 @@ class GUI extends GUI_core{
     $this->qlayerset[] = $layer[0];
     $this->main = $layer[0]['template'];
 	
-	$this->user->rolle->delete_last_query();
-	$this->user->rolle->save_last_query('Flurstueck_Anzeigen', $layer[0]['Layer_ID'], implode(';', $FlurstKennzListe), NULL, NULL, NULL);
+		$this->user->rolle->delete_last_query();
+		$this->user->rolle->save_last_query('Flurstueck_Anzeigen', $layer[0]['Layer_ID'], implode(';', $FlurstKennzListe), NULL, NULL, NULL);
 
     for ($i=0;$i<$anzFlurst;$i++) {
       $this->qlayerset[0]['shape'][$i]['flurstkennz'] = $FlurstKennzListe[$i];
@@ -13024,13 +13002,11 @@ class GUI extends GUI_core{
     $GemeindenStelle=$this->Stelle->getGemeindeIDs();
     $Gemeinde=new gemeinde('',$this->pgdatabase);
     # Abfrage der Gemeinde Namen
-    if(ALKIS)$GemListe=$Gemeinde->getGemeindeListeALKIS($GemeindenStelle,'bezeichnung');
-    else $GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle,'GemeindeName');
+    $GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle);
     # Abfragen der Gemarkungen zur Gemeinde
     $Gemarkung=new gemarkung('',$this->pgdatabase);
     # Auswahl nur über die zulässigen Gemeinden
-    if(ALKIS)$GemkgListe=$Gemarkung->getGemarkungListeALKIS($GemListe['ID'],'','gmk.bezeichnung');
-    else $GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'','gmk.GemkgName');
+    $GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'');
     // Sortieren der Gemarkungen unter Berücksichtigung von Umlauten
     $sorted_arrays = umlaute_sortieren($GemkgListe['Bezeichnung'], $GemkgListe['GemkgID']);
     $GemkgListe['Bezeichnung'] = $sorted_arrays['array'];
@@ -13051,12 +13027,10 @@ class GUI extends GUI_core{
       if ($GemkgID==0) { $GemkgID=$GemkgListe['GemkgID'][0]; }
       $Flur=new Flur('','','',$this->pgdatabase);
     	if($this->formvars['ALK_Suche'] == 1){
-    		if(ALKIS)$FlurListe=$Flur->getFlurListeALKIS($GemkgID,'','gemarkungsteilflur', $this->formvars['historical']);
-      	else $FlurListe=$Flur->getFlurListeALK($GemkgID,'flurid', $this->formvars['historical']);
+    		$FlurListe=$Flur->getFlurListeALK($GemkgID, $this->formvars['historical']);
     	}
     	else{
-    		if(ALKIS)$FlurListe=$Flur->getFlurListeALKIS($GemkgID,'','gemarkungsteilflur', $this->formvars['historical']);
-    		else $FlurListe=$Flur->getFlurListe($GemkgID,'','FlurNr', $this->formvars['historical']);
+    		$FlurListe=$Flur->getFlurListe($GemkgID,'', $this->formvars['historical']);
     	}
       # Erzeugen des Formobjektes für die Flurauswahl
       if (count($FlurListe['FlurID'])==1) { $FlurID=$FlurListe['FlurID'][0]; }
@@ -13073,12 +13047,10 @@ class GUI extends GUI_core{
         # $FlstNrListe=$FlstNr->getFlstListe($GemID,$GemkgID,$FlurID,$FlstNrExtentListe,'FKZ');
         if ($FlurID==0) { $FlurID=$FlurListe['FlurID'][0]; }
         if($this->formvars['ALK_Suche'] == 1){
-        	if(ALKIS)$FlstNrListe=$FlstNr->getFlstListeALKIS($GemID,$GemkgID,$FlurID,'flurstueckskennzeichen', $this->formvars['historical']);
-        	else $FlstNrListe=$FlstNr->getFlstListeALK($GemID,$GemkgID,$FlurID,'flurstkennz', $this->formvars['historical']);
+        	$FlstNrListe=$FlstNr->getFlstListeALK($GemID,$GemkgID,$FlurID, $this->formvars['historical']);
         }
         else{
-        	if(ALKIS)$FlstNrListe=$FlstNr->getFlstListeALKIS($GemID,$GemkgID,$FlurID,'flurstueckskennzeichen', $this->formvars['historical']);
-        	else $FlstNrListe=$FlstNr->getFlstListe($GemID,$GemkgID,$FlurID,'flurstkennz', $this->formvars['historical']);
+        	$FlstNrListe=$FlstNr->getFlstListe($GemID,$GemkgID,$FlurID, $this->formvars['historical']);
         }
         # Erzeugen des Formobjektes für die Flurstücksauswahl
         if (count($FlstNrListe['FlstID'])==1){
@@ -13145,8 +13117,7 @@ class GUI extends GUI_core{
     $Gemeinde=new gemeinde('',$this->pgdatabase);
     # 2006-01-02 pk
     $GemeindenStelle=$this->Stelle->getGemeindeIDs();
-    if(ALKIS)$GemListe=$Gemeinde->getGemeindeListeALKIS($GemeindenStelle, 'Name');
-    else $GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle, 'Name');
+    $GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle);
     # Wenn nur eine Gemeinde zur Auswahl steht, wird diese gewählt
     # Verhalten so, als würde die Gemeinde vorher gewählt worden sein.
     if (count($GemListe['ID'])==1) {
@@ -13155,8 +13126,7 @@ class GUI extends GUI_core{
     
     # Abfragen der Gemarkungen zur Gemeinde
     $Gemarkung=new gemarkung('',$this->pgdatabase);
-    if(ALKIS)$GemkgListe=$Gemarkung->getGemarkungListeALKIS($GemListe['ID'],'','gmk.bezeichnung');
-    else $GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'','gmk.GemkgName');
+    $GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'');
     // Sortieren der Gemarkungen unter Berücksichtigung von Umlauten
     $sorted_arrays = umlaute_sortieren($GemkgListe['Bezeichnung'], $GemkgListe['GemkgID']);
     $GemkgListe['Bezeichnung'] = $sorted_arrays['array'];
@@ -13179,16 +13149,15 @@ class GUI extends GUI_core{
     $GemFormObj->outputHTML();
     # Wenn Gemeinde gewählt wurde, oder nur eine zur Auswahl stand, Auswahlliste für Strassen erzeugen
     if ($GemFormObj->selected OR $GemkgFormObj->selected){
-    	if($GemFormObj->selected)$StrassenListe=$Adresse->getStrassenListe($GemID,'','StrassenName');
-    	elseif($GemkgFormObj->selected)$StrassenListe=$Adresse->getStrassenListeByGemkg($GemkgID,'','StrassenName');
+    	if($GemFormObj->selected)$StrassenListe=$Adresse->getStrassenListe($GemID,'');
+    	elseif($GemkgFormObj->selected)$StrassenListe=$Adresse->getStrassenListeByGemkg($GemkgID,'');
       $StrSelected[0]=$StrID;
       # Erzeugen des Formobjektes für die Strassenauswahl
       $StrFormObj=new selectFormObject("StrID","select",$StrassenListe['StrID'],$StrSelected,$StrassenListe['Name'],"1","","",NULL);
       # Unterscheidung ob Strasse ausgewählt wurde
       if ($StrFormObj->selected){
       	if($GemID == -1){
-		    	if(ALKIS)$Gemeinde = $Gemarkung->getGemarkungListeALKIS(NULL, array($this->formvars['GemkgID']), NULL);
-		    	else $Gemeinde = $Gemarkung->getGemarkungListe(NULL, array($this->formvars['GemkgID']), NULL);
+					$Gemeinde = $Gemarkung->getGemarkungListe(NULL, array($this->formvars['GemkgID']), NULL);
 		    	$GemID = $Gemeinde['gemeinde'][0];
 		    }
         $HausNrListe=$Adresse->getHausNrListe($GemID,$StrID,'','','hausnr*1,ASCII(REVERSE(hausnr)),quelle');
@@ -13238,8 +13207,7 @@ class GUI extends GUI_core{
     $GemID=$this->formvars['GemID'];
     if($GemID == -1){
     	$Gemarkung=new gemarkung('',$this->pgdatabase);
-    	if(ALKIS)$Gemeinde = $Gemarkung->getGemarkungListeALKIS(NULL, array($this->formvars['GemkgID']), NULL);
-    	else $Gemeinde = $Gemarkung->getGemarkungListe(NULL, array($this->formvars['GemkgID']), NULL);
+    	$Gemeinde = $Gemarkung->getGemarkungListe(NULL, array($this->formvars['GemkgID']));
     	$GemID = $Gemeinde['gemeinde'][0];
     }
     if ($GemID!='-1') {
