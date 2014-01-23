@@ -1324,9 +1324,10 @@ class rolle extends rolle_core{
 		}
 	}
 
-	function resetLayers(){
+	function resetLayers($layer_id){
 		$sql ="UPDATE u_rolle2used_layer SET aktivStatus='0'";
 		$sql.=" WHERE user_id=".$this->user_id." AND stelle_id=".$this->stelle_id;
+		if($layer_id != '')$sql.=" AND layer_id = ".$layer_id;
 		$this->debug->write("<p>file:users.php class:rolle->resetLayers - resetten aller aktiven Layer zur Rolle:",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 		$mapdb = new db_mapObj($this->stelle_id, $this->user_id);
@@ -1345,9 +1346,10 @@ class rolle extends rolle_core{
 		}
 	}
 
-	function resetQuerys(){
+	function resetQuerys($layer_id){
 		$sql ="UPDATE u_rolle2used_layer SET queryStatus='0'";
 		$sql.=" WHERE user_id=".$this->user_id." AND stelle_id=".$this->stelle_id;
+		if($layer_id != '')$sql.=" AND layer_id = ".$layer_id;
 		$this->debug->write("<p>file:users.php class:rolle->resetQuerys - resetten aller aktiven Layer zur Rolle:",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}

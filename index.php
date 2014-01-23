@@ -194,21 +194,21 @@ if($GUI->goNotExecutedInPlugins){
 		}break;
 
 		case 'reset_layers' : {
-		$GUI->reset_layers();
-		$GUI->loadMap('DataBase');
-		$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-		$GUI->drawMap();
-		$GUI->saveMap('');
-		$GUI->output();
+			$GUI->reset_layers($GUI->formvars['layer_id']);
+			$GUI->loadMap('DataBase');
+			$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+			$GUI->drawMap();
+			$GUI->saveMap('');
+			$GUI->output();
 	  } break;
 	  
 	  case 'reset_querys' : {
-		$GUI->reset_querys();
-		$GUI->loadMap('DataBase');
-		$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-		$GUI->drawMap();
-		$GUI->saveMap('');
-		$GUI->output();
+			$GUI->reset_querys();
+			$GUI->loadMap('DataBase');
+			$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+			$GUI->drawMap();
+			$GUI->saveMap('');
+			$GUI->output();
 	  } break;
 
 		case 'zoom2coord' : {

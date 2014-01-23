@@ -342,13 +342,13 @@ class GUI extends GUI_core{
 		} 
 	}
 
-	function reset_layers(){
-		$this->user->rolle->resetLayers();
-		$this->user->rolle->resetQuerys();
+	function reset_layers($layer_id){
+		$this->user->rolle->resetLayers($layer_id);
+		$this->user->rolle->resetQuerys($layer_id);
 	}
 	
 	function reset_querys(){
-		$this->user->rolle->resetQuerys();
+		$this->user->rolle->resetQuerys('');
 	}
 
 	function resizeMap2Window(){
@@ -12933,15 +12933,27 @@ class GUI extends GUI_core{
     $this->map->zoompoint(1,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
     $this->saveMap('');
   }
-
-
+	
 	function layer_error_handling(){
-		return '<br><br>Eines der Themen ist fehlerhaft. Klicken Sie <a href="index.php?go=reset_layers">auf Neu starten</a> um alle Themen auszuschalten.';
+		global $errors;
+		foreach($errors as $error){
+			if(strpos($error, 'named') !== false){
+				$start = strpos($error, '\'')+1;
+				$end = strpos($error, '\'', $start);
+				$length = $end - $start;
+				$layername = substr($error, $start, $length);
+				$layer = $this->user->rolle->getLayer($layername);
+				break;
+			}
+		}
+		restore_error_handler();
+		return '<br><br>Das Thema "'.$layername.'" ist fehlerhaft. Klicken Sie <a href="index.php?go=reset_layers&layer_id='.$layer[0]['Layer_ID'].'">hier</a> um das Thema auszuschalten.';
 	}
 
   # Zeichnet die Kartenelemente Hauptkarte, Legende, Maßstab und Referenzkarte
   # drawMap #
   function drawMap() {
+		set_error_handler("MapserverErrorHandler");		// ist in allg_funktionen.php definiert
     if($this->main == 'map.php' AND MINSCALE != '' AND $this->map_factor == '' AND $this->map_scaledenom < MINSCALE){
       $this->scaleMap(MINSCALE);
     }    

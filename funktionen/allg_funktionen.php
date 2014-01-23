@@ -3,7 +3,20 @@
  * Funktionenumfang nicht existieren, in älteren Versionen nicht existiert haben,
  * nicht gefunden wurden, nicht verstanden wurden oder zu umfrangreich waren.
  */
-
+ 
+$errors = array();
+ 
+function MapserverErrorHandler($errno, $errstr, $errfile, $errline){
+	global $errors;
+	if(!(error_reporting() & $errno)){
+		// This error code is not included in error_reporting
+		return;
+	}
+	$errors[] = $errstr;
+	/* Don't execute PHP internal error handler */
+	return true;
+}
+ 
 function ie_check(){
 	$browser = $_SERVER['HTTP_USER_AGENT'];
 	if (preg_match("/MSIE/i", $browser)){
