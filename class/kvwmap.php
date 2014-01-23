@@ -12937,6 +12937,7 @@ class GUI extends GUI_core{
 	function layer_error_handling(){
 		global $errors;
 		foreach($errors as $error){
+			echo '<br>'.$error.'<br>';
 			if(strpos($error, 'named') !== false){
 				$start = strpos($error, '\'')+1;
 				$end = strpos($error, '\'', $start);

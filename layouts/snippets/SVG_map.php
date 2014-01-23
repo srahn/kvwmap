@@ -59,9 +59,11 @@
 	
    
   function submit(input_coord, cmd){
-  	if((browser == 'firefox') && document.GUI.legendtouched.value == 0){
+  	//if((browser == 'firefox') && document.GUI.legendtouched.value == 0){
+		if(document.GUI.legendtouched.value == 0){
   		svgdoc = document.SVG.getSVGDocument();	
-			var mapimg = svgdoc.getElementById("mapimg2");			
+			if(browser == 'firefox')var mapimg = svgdoc.getElementById("mapimg2");			
+			else var mapimg = svgdoc.getElementById("mapimg");
 			var scalebar = document.getElementById("scalebar");
 			var refmap = document.getElementById("refmap");
 			var scale = document.getElementById("scale");
@@ -93,6 +95,9 @@
   			''
   		), 			 
   		"xlink:href^src^src^setvalue^sethtml^setvalue^setvalue^setvalue^setvalue^setvalue^sethtml^points^execute_function^execute_function");
+			
+			if(browser != 'firefox')moveback();
+			
   		document.GUI.INPUT_COORD.value = '';
   		document.GUI.CMD.value = '';
   	}
@@ -100,6 +105,10 @@
   		document.GUI.submit();
   	}
   }
+	
+	function moveback(){	
+		document.getElementById("svghelp").SVGmoveback();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+	}
 
   function sendpath(cmd,pathx,pathy)   {;
 		document.GUI.stopnavigation.value = 1;
@@ -386,7 +395,7 @@ function init(){
 		//document.getElementById("mapimg2").addEventListener("load", function(evt) { moveback(); }, false);
 	}
 	else{
-		document.getElementById("mapimg2").addEventListener("load", function(evt) { moveback(evt); }, true);
+		document.getElementById("mapimg2").addEventListener("load", function(evt) { moveback_ff(evt); }, true);
 	}
 	if(window.addEventListener){
 		if(navigator.userAgent.toLowerCase().indexOf(\'webkit\') >= 0)
@@ -401,7 +410,9 @@ function init(){
 
 top.document.getElementById("map").SVGstartup = startup;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
-function moveback(evt){
+top.document.getElementById("svghelp").SVGmoveback = moveback;
+
+function moveback_ff(evt){
 	document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");
 	document.getElementById("mapimg").setAttribute("xlink:href", document.getElementById("mapimg2").getAttribute("xlink:href"));
 	// Redlining-Sachen loeschen
@@ -413,9 +424,25 @@ function moveback(evt){
 	hidetooltip(evt);
 	// Navigation wieder erlauben
 	top.document.GUI.stopnavigation.value = 0;
-	document.getElementById("waitingimage").style.visibility = "hidden";
+	document.getElementById("waitingimage").style.setProperty("visibility", "hidden");
 	document.getElementById("waiting_animation").endElement();
 	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("xlink:href", "")\', 200);		// Firefox 4 
+}
+
+function moveback(evt){
+	document.getElementById("mapimg").setAttribute("xlink:href", "");
+	document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");
+	// Redlining-Sachen loeschen
+	while(child = document.getElementById("redlining").firstChild){
+  	document.getElementById("redlining").removeChild(child);
+	}
+	// Tooltip refreshen
+	oldmousex = undefined;
+	hidetooltip(evt);
+	// Navigation wieder erlauben
+	top.document.GUI.stopnavigation.value = 0;
+	document.getElementById("waitingimage").style.setProperty("visibility", "hidden");
+	document.getElementById("waiting_animation").endElement();
 }
 
 function go_previous(){
@@ -1326,12 +1353,12 @@ $svg.='
 	    <use xlink:href="#line" transform="rotate(300,0,0)" style="opacity:.8333"/>
 	    <use xlink:href="#line" transform="rotate(330,0,0)" style="opacity:.9166"/>
 	    
-	    <animateTransform id="waiting_animation" attributeName="transform" attributeType="XML" type="rotate" begin="indefinite" dur="1s" repeatCount="indefinite" calcMode="discrete"
+	    <animateTransform id="waiting_animation" attributeName="transform" attributeType="XML" type="rotate" begin="indefinite" end="indefinite" dur="1s" repeatCount="indefinite" calcMode="discrete"
 	    keyTimes="0;.0833;.166;.25;.3333;.4166;.5;.5833;.6666;.75;.8333;.9166;1"
 	    values="0,0,0;30,0,0;60,0,0;90,0,0;120,0,0;150,0,0;180,0,0;210,0,0;240,0,0;270,0,0;300,0,0;330,0,0;360,0,0"/>
     </g>
   </g>
-  <g id="mapimg2_group">
+	<g id="mapimg2_group">
   	<image id="mapimg2" xlink:href="" height="100%" width="100%" y="0" x="0"/>
   </g>
 	

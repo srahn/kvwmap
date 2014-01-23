@@ -19,6 +19,10 @@ $SVGvars_querytooltipscript .= '
 		var ypos = 0;
 				
 		function hidetooltip(evt){
+			if(evt == undefined){
+				cleartooltip();
+				return;
+			}
 			mousex = evt.clientX;
 			mousey = evt.clientY;
 			if(oldmousex == undefined || Math.abs(oldmousex-mousex) > 1 || Math.abs(oldmousey-mousey) > 1){			// Maus bewegen

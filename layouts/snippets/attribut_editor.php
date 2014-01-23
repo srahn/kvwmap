@@ -152,7 +152,7 @@
 					</td>
 				  <td>&nbsp;</td>
 				  <td>
-				  	<input class="input" name="tooltip_'.$this->attributes['name'][$i].'" type="text" value="'.$this->attributes['tooltip'][$i].'">
+				  	<input class="input" name="tooltip_'.$this->attributes['name'][$i].'" type="text" value="'.htmlspecialchars($this->attributes['tooltip'][$i]).'">
 				  </td>
 				  <td>&nbsp;</td>
 				  <td>
