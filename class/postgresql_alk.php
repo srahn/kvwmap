@@ -342,7 +342,7 @@ class pgdatabase extends pgdatabase_alkis{
     return $ret;
   }
 	
-	function getStrassenListe($GemID,'', $PolygonWKTString) {
+	function getStrassenListe($GemID,$GemkgID, $PolygonWKTString) {
     # 2006-01-30
     # Abfragen der Strassen
     $sql ="SELECT gemeinde,strasse,strassenname,gemkgname FROM (";
