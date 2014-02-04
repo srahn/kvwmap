@@ -2,7 +2,7 @@
 <META http-equiv=Content-Type content="text/html; charset=UTF-8">
 <? # die Funktionen, die hier mal standen, sind in folgende Datei ausgelagert worden 
 include(WWWROOT.APPLVERSION.'funktionen/gui_functions.php');
-$this->formvars['anzahl'] = MAXQUERYROWS;
+if(!$this->formvars['anzahl'])$this->formvars['anzahl'] = MAXQUERYROWS;
 include(SNIPPETS.'sachdatenanzeige_functions.php'); 
 include(SNIPPETS.'generic_functions.php'); 
 include(WWWROOT.APPLVERSION.'funktionen/formserializer.js');
@@ -20,11 +20,11 @@ include(WWWROOT.APPLVERSION.'funktionen/formserializer.js');
     <tr>
       <td align="center" valign="top">
 			<form name="GUI2" enctype="multipart/form-data" method="post" action="index.php" id="GUI2">
-				<div id="overlaydiv" style="display:none;width:700px;height:720px;left:150px;top:150px;position:absolute;z-index: 1000">
-					<div id="dragdiv" align="right" onmousedown="dragstart(document.getElementById('overlaydiv'))" style="cursor:default; background-color:<? echo BG_DEFAULT; ?>; border: 1px solid #CCCCCC;width:700px;height:20px;position:relative;">
+				<div id="overlaydiv" style="display:none;width:700px;height:720px;left:150px;top:150px;position:absolute;z-index: 1000;-moz-box-shadow: 12px 10px 14px #777;-webkit-box-shadow: 12px 10px 14px #777;box-shadow: 12px 10px 14px #777;">
+					<div id="dragdiv" align="right" onmousedown="dragstart(document.getElementById('overlaydiv'))" style="cursor:default; background-color:<? echo BG_DEFAULT; ?>; border: 1px solid #bbbbbb;width:700px;height:20px;position:relative;">
 						<a href="javascript:deactivate_overlay();" title="Schließen"><img style="border:none" src="<? echo GRAPHICSPATH."exit.png"; ?>"></img></a>
 					</div>
-					<div id="querydiv" style="border: 1px solid #CCCCCC;width:700px;height:700px;position:relative;overflow: auto;"></div>
+					<div id="querydiv" style="border: 1px solid #bbbbbb;width:700px;height:700px;position:relative;overflow: auto;"></div>
 				</div>
 			</form>
       <form name="GUI" enctype="multipart/form-data" method="post" action="index.php" id="GUI">

@@ -97,12 +97,12 @@
 										echo ' size="40" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$dataset[$attributes['name'][$j]].'">';
 										if($this->new_entry != true){
 											if($dataset[$attributes['name'][$j]] != ''){
-												echo '&nbsp;<a href="index.php?go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
+												echo '&nbsp;<a href="javascript:query_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
 												for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
 													echo '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$dataset[$attributes['subform_pkeys'][$j][$p]];
 													echo '&operator_'.$attributes['subform_pkeys'][$j][$p].'==';
 												}
-												echo 	'"';
+												echo 	'\')"';
 												if($attributes['no_new_window'][$j] != true){
 													echo 	' target="_blank"';
 												}
@@ -149,12 +149,12 @@
 										echo ' type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$dataset[$attributes['name'][$j]].'">';
 										if($this->new_entry != true){
 											if($dataset[$attributes['name'][$j]] != ''){
-												echo '&nbsp;<a href="index.php?go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
+												echo '&nbsp;<a href="javascript:query_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
 												for($f = 0; $f < count($attribute_foreign_keys); $f++){
 													echo '&value_'.$attribute_foreign_keys[$f].'='.$dataset[$attribute_foreign_keys[$f]];
 													echo '&operator_'.$attribute_foreign_keys[$f].'==';
 												}
-												echo 	'"';
+												echo 	'\')"';
 												if($attributes['no_new_window'][$j] != true){
 													echo 	' target="_blank"';
 												}

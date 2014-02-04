@@ -424,11 +424,11 @@ class GUI_core {
 					$this->layer_id_string .= $layerset[$i]['Layer_ID'].'|';							# alle Layer-IDs hintereinander in einem String
 											
 					if($layerset[$i]['requires'] != ''){
-						$lastlayer = $layerset[$i-1];
+						$nextlayer = $layerset[$i+1];
 						$requires=explode('[',str_replace(']','[',$layerset[$i]['requires']));
-						if($requires[1] == $lastlayer['Name']){													// wenn der Layer aus dem requires-Eintrag mit dem vorhergehenden Layer übereinstimmt
-							$layerset[$i]['aktivStatus'] = $lastlayer['aktivStatus'];
-							$layerset[$i]['showclasses'] = $lastlayer['showclasses'];
+						if($requires[1] == $nextlayer['Name']){													// wenn der Layer aus dem requires-Eintrag mit dem nachfolgenden Layer übereinstimmt
+							$layerset[$i]['aktivStatus'] = $nextlayer['aktivStatus'];
+							$layerset[$i]['showclasses'] = $nextlayer['showclasses'];
 						}
 					}
 					

@@ -6263,13 +6263,12 @@ class GUI extends GUI_core{
         	if($this->formvars['offset_'.$layerset[0]['Layer_ID']] != ''){
           	$sql_limit.=' OFFSET '.$this->formvars['offset_'.$layerset[0]['Layer_ID']];
         	}
-			$this->user->rolle->delete_last_query();
-			$this->user->rolle->save_last_query('Layer-Suche_Suchen', $this->formvars['selected_layer_id'], $sql, $sql_order, $this->formvars['anzahl'], $this->formvars['offset_'.$layerset[0]['Layer_ID']]);
+				$this->user->rolle->delete_last_query();
+				$this->user->rolle->save_last_query('Layer-Suche_Suchen', $this->formvars['selected_layer_id'], $sql, $sql_order, $this->formvars['anzahl'], $this->formvars['offset_'.$layerset[0]['Layer_ID']]);
         }
 		
-		$layerset[0]['sql'] = $sql;
+				$layerset[0]['sql'] = $sql;
     
-        #echo $sql;
         $ret=$layerdb->execSQL($sql.$sql_order.$sql_limit,4, 0);
         if (!$ret[0]) {
           while ($rs=pg_fetch_array($ret[1])) {

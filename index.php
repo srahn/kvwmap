@@ -1206,7 +1206,7 @@ if($GUI->goNotExecutedInPlugins){
 	  } break;
 
 	  case 'Layer-Suche_Suchen' : {
-		$GUI->GenerischeSuche_Suchen();
+			$GUI->GenerischeSuche_Suchen();
 	  } break;
 
 	  case 'Layer-Suche' : {

@@ -74,7 +74,7 @@
 								if($this->formvars['no_new_window'] != true){
 									echo 	' target="_blank"';
 								}
-				echo ' href="index.php?go=Layer-Suche_Suchen&selected_layer_id='.$this->qlayerset[$i]['Layer_ID'].'&value_'.$this->qlayerset[$i]['maintable'].'_oid='.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['maintable'].'_oid'].'">'.$output.'</a></td>
+				echo ' href="javascript:query_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$this->qlayerset[$i]['Layer_ID'].'&value_'.$this->qlayerset[$i]['maintable'].'_oid='.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['maintable'].'_oid'].'\')">'.$output.'</a></td>
 							</tr>';
 			}
 						

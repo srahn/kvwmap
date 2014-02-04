@@ -67,6 +67,15 @@ function query_submit(gui){
 	<? } ?>
 }
 
+function query_link(data){
+	<? if($this->user->rolle->gui == 'gui2.php'){ ?>
+	ahah("<? echo URL.APPLVERSION.'index.php'; ?>", data+"&mime_type=embedded_html", new Array(document.getElementById('querydiv'), '', ''), "sethtml^execute_function^execute_function");	
+	document.GUI.CMD.value = "";
+	<? }else{ ?>
+	window.location.href = 'index.php?'+data;
+	<? } ?>
+}
+
 function update_legend(layerhiddenstring){
 	parts = layerhiddenstring.split(' ');
 	for(j = 0; j < parts.length-1; j=j+2){
