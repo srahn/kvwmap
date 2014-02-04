@@ -8,6 +8,63 @@ function onload_functions(){
 	if(document.getElementById('scrolldiv') != undefined){
 		document.getElementById('scrolldiv').scrollTop = <? echo $this->user->rolle->scrollposition; ?>;
 	}
+	document.onmousemove = drag;
+  document.onmouseup = dragstop;
+}
+
+var dragobjekt = null;
+
+// Position, an der das Objekt angeklickt wurde.
+var dragx = 0;
+var dragy = 0;
+
+// Mausposition
+var posx = 0;
+var posy = 0;
+
+
+function dragstart(element){
+  dragobjekt = element;
+  dragx = posx - dragobjekt.offsetLeft;
+  dragy = posy - dragobjekt.offsetTop;
+}
+
+
+function dragstop(){
+  dragobjekt=null;
+}
+
+
+function drag(event) {
+  posx = document.all ? window.event.clientX : event.screenX;
+  posy = document.all ? window.event.clientY : event.screenY;
+  if(dragobjekt != null){				
+		if(!event){	// IE sucks
+			event = window.event;
+			event.returnValue = false;
+		}
+		else event.preventDefault();
+    dragobjekt.style.left = (posx - dragx) + "px";
+    dragobjekt.style.top = (posy - dragy) + "px";
+  }
+}
+
+function activate_overlay(){
+	document.getElementById('overlaydiv').style.display='';
+}
+
+function deactivate_overlay(){
+	document.getElementById('overlaydiv').style.display='none';
+}
+
+function query_submit(gui){
+	<? if($this->user->rolle->gui == 'gui2.php'){ ?>
+	formdata = formSerialize(gui);
+	ahah("<? echo URL.APPLVERSION.'index.php'; ?>", formdata+"&mime_type=embedded_html", new Array(document.getElementById('querydiv'), '', ''), "sethtml^execute_function^execute_function");	
+	document.GUI.CMD.value = "";
+	<? }else{ ?>
+	document.GUI.submit();
+	<? } ?>
 }
 
 function update_legend(layerhiddenstring){

@@ -8,7 +8,7 @@
 		echo 'window.close();';
 	}
  ?>
-
+ 
 function checknumbers(input, type, length, decimal_length){
 	if(type == 'numeric' || type == 'float4' || type == 'float8'){
 		var val = input.value.replace(/[a-zA-Z]/g, '');
@@ -34,9 +34,9 @@ function checknumbers(input, type, length, decimal_length){
   	}
   }
 	if(type == 'int2' || type == 'int4' || type == 'int8'){
-  	if(input.value.search(/[^-\d]/g) != -1 || input.value.search(/.-/g) != -1){
+  	if(input.value.search(/[-\d]/g) != -1 || input.value.search(/.-/g) != -1){
   		alert('Es sind nur ganzzahlige Angaben erlaubt!');
-  		var val = input.value.replace(/[^-\d]/g, '');
+  		var val = input.value.replace(/[-\d]/g, '');
   		val = val.replace(/-/g, '');
   		input.value = val;
   	}
@@ -54,10 +54,10 @@ function selectall(layer_id){
 }
 
 function zoom2wkt(wkt, epsg){
-	document.GUI.epsg.value = epsg;
-	document.GUI.wkt.value = wkt;
-	document.GUI.go.value = 'zoom2wkt';
-	document.GUI.submit();
+	gui.epsg.value = epsg;
+	gui.wkt.value = wkt;
+	gui.go.value = 'zoom2wkt';
+	gui.submit();
 }
 
 function check_for_selection(layer_id){
@@ -81,54 +81,54 @@ function check_for_selection(layer_id){
 
 function zoomto_datasets(layer_id, tablename, columnname){
 	if(check_for_selection(layer_id)){
-		document.GUI.chosen_layer_id.value = layer_id;
-		document.GUI.layer_tablename.value = tablename;
-		document.GUI.layer_columnname.value = columnname;
-		document.GUI.go.value = 'zoomto_selected_datasets';
-		document.GUI.submit();
+		gui.chosen_layer_id.value = layer_id;
+		gui.layer_tablename.value = tablename;
+		gui.layer_columnname.value = columnname;
+		gui.go.value = 'zoomto_selected_datasets';
+		gui.submit();
 	}
 }
 
 function delete_datasets(layer_id){
 	if(check_for_selection(layer_id)){
 		if(confirm('Wollen Sie die ausgewählten Datensätze wirklich löschen?')){
-			document.GUI.chosen_layer_id.value = layer_id;
-			document.GUI.go.value = 'Layer_Datensaetze_Loeschen';
-			document.GUI.submit();
+			gui.chosen_layer_id.value = layer_id;
+			gui.go.value = 'Layer_Datensaetze_Loeschen';
+			gui.submit();
 		}
 	}
 }
 
 function delete_document(attributename){
 	if(confirm('Wollen Sie das ausgewählte Dokument wirklich löschen?')){
-		document.GUI.document_attributename.value = attributename; 
-		document.GUI.go.value = 'Dokument_Loeschen';
-		document.GUI.submit();
+		gui.document_attributename.value = attributename; 
+		gui.go.value = 'Dokument_Loeschen';
+		gui.submit();
 	}
 }
 
 function csv_export_all(layer_id){
-	document.GUI.all.value = 'true';
-	document.GUI.chosen_layer_id.value = layer_id;
-	document.GUI.go_backup.value = document.GUI.go.value;
-	document.GUI.go.value = 'generischer_csv_export';
-	document.GUI.submit();
+	gui.all.value = 'true';
+	gui.chosen_layer_id.value = layer_id;
+	gui.go_backup.value = gui.go.value;
+	gui.go.value = 'generischer_csv_export';
+	gui.submit();
 }
 
 function shape_export_all(layer_id, anzahl){
-	document.GUI.chosen_layer_id.value = layer_id;
-	document.GUI.anzahl.value = anzahl;
-	document.GUI.go_backup.value = document.GUI.go.value;
-	document.GUI.go.value = 'SHP_Export';
-	document.GUI.submit();
+	gui.chosen_layer_id.value = layer_id;
+	gui.anzahl.value = anzahl;
+	gui.go_backup.value = gui.go.value;
+	gui.go.value = 'SHP_Export';
+	gui.submit();
 }
 
 function shape_export(layer_id){
 	if(check_for_selection(layer_id)){
-		document.GUI.chosen_layer_id.value = layer_id;
-		document.GUI.go_backup.value = document.GUI.go.value;
-		document.GUI.go.value = 'SHP_Export';
-		document.GUI.submit();
+		gui.chosen_layer_id.value = layer_id;
+		gui.go_backup.value = gui.go.value;
+		gui.go.value = 'SHP_Export';
+		gui.submit();
 	}
 }
 
@@ -145,31 +145,31 @@ function select_this_dataset(layer_id, n){
 
 function use_for_new_dataset(layer_id){
 	if(check_for_selection(layer_id)){
-		document.GUI.chosen_layer_id.value = layer_id;
-		document.GUI.pathwkt.value = '';
-		document.GUI.newpathwkt.value = '';
-		document.GUI.newpath.value = '';
-		document.GUI.go_backup.value = document.GUI.go.value;
-		document.GUI.go.value = 'neuer_Layer_Datensatz';
-		document.GUI.submit();
+		gui.chosen_layer_id.value = layer_id;
+		gui.pathwkt.value = '';
+		gui.newpathwkt.value = '';
+		gui.newpath.value = '';
+		gui.go_backup.value = gui.go.value;
+		gui.go.value = 'neuer_Layer_Datensatz';
+		gui.submit();
 	}
 }
 
 function csv_export(layer_id){
 	if(check_for_selection(layer_id)){
-		document.GUI.chosen_layer_id.value = layer_id;
-		document.GUI.go_backup.value = document.GUI.go.value;
-		document.GUI.go.value = 'generischer_csv_export';
-		document.GUI.submit();
+		gui.chosen_layer_id.value = layer_id;
+		gui.go_backup.value = gui.go.value;
+		gui.go.value = 'generischer_csv_export';
+		gui.submit();
 	}
 }
 
 function print_data(layer_id){
 	if(check_for_selection(layer_id)){
-		document.GUI.chosen_layer_id.value = layer_id;
-		document.GUI.go_backup.value = document.GUI.go.value;
-		document.GUI.go.value = 'generischer_sachdaten_druck';
-		document.GUI.submit();
+		gui.chosen_layer_id.value = layer_id;
+		gui.go_backup.value = gui.go.value;
+		gui.go.value = 'generischer_sachdaten_druck';
+		gui.submit();
 	}
 }
 
@@ -193,13 +193,13 @@ function change_charttype(layer_id){
 
 function create_chart(layer_id){
 	if(check_for_selection(layer_id)){
-		document.GUI.target = "_blank";
-		document.GUI.chosen_layer_id.value = layer_id;
-		document.GUI.width.value = 700;
-		document.GUI.go_backup.value = document.GUI.go.value;
-		document.GUI.go.value = 'generisches_sachdaten_diagramm';
-		document.GUI.submit();
-		document.GUI.target = "";
+		gui.target = "_blank";
+		gui.chosen_layer_id.value = layer_id;
+		gui.width.value = 700;
+		gui.go_backup.value = gui.go.value;
+		gui.go.value = 'generisches_sachdaten_diagramm';
+		gui.submit();
+		gui.target = "";
 	}
 }
 
@@ -215,8 +215,8 @@ function update_require_attribute(attributes, k,layer_id, value){
 }
 
 function change_orderby(attribute, layer_id){
-	if(document.GUI.go_backup.value != ''){
-		document.GUI.go.value = document.GUI.go_backup.value;
+	if(gui.go_backup.value != ''){
+		gui.go.value = gui.go_backup.value;
 	}
 	if(document.getElementById('orderby'+layer_id).value == attribute){
 		document.getElementById('orderby'+layer_id).value = attribute+' DESC';
@@ -224,7 +224,7 @@ function change_orderby(attribute, layer_id){
 	else{
 		document.getElementById('orderby'+layer_id).value = attribute;
 	}
-	document.GUI.submit();
+	gui.submit();
 }
 
 function set_changed_flag(flag){

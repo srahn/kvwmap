@@ -109,8 +109,8 @@
 	function moveback(){	
 		document.getElementById("svghelp").SVGmoveback();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 	}
-
-  function sendpath(cmd,pathx,pathy)   {;
+	
+  function sendpath(cmd,pathx,pathy)   {
 		document.GUI.stopnavigation.value = 1;
     path  = "";
     switch(cmd) 
@@ -170,14 +170,14 @@
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "ppquery";
-      document.GUI.submit();
+			query_submit(document.GUI);
      break;
      case "ppquery_box":
       top.document.GUI.searchradius.value = "";
       path = pathx[0]+","+pathy[0]+";"+pathx[2]+","+pathy[2];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "ppquery";
-      document.GUI.submit();
+      query_submit(document.GUI);
      break;
      case "pquery_polygon":
       path = pathx[0]+","+pathy[0]+";"+pathx[2]+","+pathy[2];
@@ -236,7 +236,7 @@ chmod(IMAGEPATH.$svgfile, 0666);
 $svg='<?xml version="1.0"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
   "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg id="svgmap" zoomAndPan="" width="'.$res_x.'" height="'.$res_y.'" onload="init();" onmousemove="mouse_move(evt);" 
+<svg id="svgmap" zoomAndPan="" width="'.$res_x.'" height="'.$res_y.'" onload="init();" onmousemove="mouse_move(evt);top.drag(evt);" 
   xmlns="http://www.w3.org/2000/svg" version="1.1"
   xmlns:xlink="http://www.w3.org/1999/xlink">
 <title> kvwmap </title><desc> kvwmap - WebGIS application - kvwmap.sourceforge.net </desc>
@@ -286,7 +286,7 @@ $svg='<?xml version="1.0"?>
 	var last_x = 0;
   		
   ';
-
+	
 if($_SESSION['mobile'] == 'true'){
 	$svg.= '  
   function update_gps_position(){
@@ -336,6 +336,12 @@ function sendpath(cmd, pathx, pathy){
 	document.getElementById("waitingimage").style.setProperty("visibility","visible", "");
 	document.getElementById("waiting_animation").beginElement();
 	top.sendpath(cmd, pathx, pathy);
+}
+
+function stopwaiting(){
+	top.document.GUI.stopnavigation.value = 0;
+	document.getElementById("waitingimage").style.setProperty("visibility","hidden", "");
+	document.getElementById("waiting_animation").endElement();
 }
 
 function mousewheelzoom(){
@@ -410,6 +416,8 @@ function init(){
 
 top.document.getElementById("map").SVGstartup = startup;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
+top.document.getElementById("svghelp").SVGstopwaiting = stopwaiting;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+
 top.document.getElementById("svghelp").SVGmoveback = moveback;
 
 function moveback_ff(evt){
@@ -423,9 +431,7 @@ function moveback_ff(evt){
 	oldmousex = undefined;
 	hidetooltip(evt);
 	// Navigation wieder erlauben
-	top.document.GUI.stopnavigation.value = 0;
-	document.getElementById("waitingimage").style.setProperty("visibility", "hidden");
-	document.getElementById("waiting_animation").endElement();
+	stopwaiting();
 	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("xlink:href", "")\', 200);		// Firefox 4 
 }
 
@@ -440,9 +446,7 @@ function moveback(evt){
 	oldmousex = undefined;
 	hidetooltip(evt);
 	// Navigation wieder erlauben
-	top.document.GUI.stopnavigation.value = 0;
-	document.getElementById("waitingimage").style.setProperty("visibility", "hidden");
-	document.getElementById("waiting_animation").endElement();
+	stopwaiting();
 }
 
 function go_previous(){

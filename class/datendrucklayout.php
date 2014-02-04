@@ -45,66 +45,73 @@ class ddl {
     # Datum
     if($this->layout['datesize']){
     	$this->pdf->selectFont($this->layout['font_date']);
-    	$this->pdf->addText($this->layout['dateposx']+$offsetx,$this->layout['dateposy']-$offsety,$this->layout['datesize'],date("d.m.Y"));
+			$x = $this->layout['dateposx'];
+			$y = $this->layout['dateposy'] - $offsety;
+			$this->putText(date("d.m.Y"), $this->layout['datesize'], NULL, $x, $y, $offsetx);
     }
     # Nutzer
     if($this->layout['usersize']){
-    	$this->pdf->selectFont($this->layout['font_user']);
-    	$this->pdf->addText($this->layout['userposx']+$offsetx,$this->layout['userposy']-$offsety,$this->layout['usersize'], utf8_decode('Stelle: '.$this->Stelle->Bezeichnung.', Nutzer: '.$this->user->Name));
+    	$this->pdf->selectFont($this->layout['font_user']);			
+			$x = $this->layout['userposx'];
+			$y = $this->layout['userposy'] - $offsety;
+			$this->putText(utf8_decode('Stelle: '.$this->Stelle->Bezeichnung.', Nutzer: '.$this->user->Name), $this->layout['usersize'], NULL, $x, $y, $offsetx);
     }
   }
 	
-	function add_freetexts($i, $offsetx, $offsety){
-		# feste Freitexte
+	function add_freetexts($i, $i_on_page, $offsetx, $offsety, $type){	
+		if(count($this->remaining_freetexts) == 0)return;
     for($j = 0; $j < count($this->layout['texts']); $j++){
-			# der Freitext wurde noch nicht geschrieben und entweder Layout ist vom seitenweisen Typ oder der Text ist feststehend
-    	if($this->layout['texts'][$j]['written'] != true AND ($this->layout['type'] == 0 OR $this->layout['texts'][$j]['type'] == 1)){
-	      $this->pdf->selectFont($this->layout['texts'][$j]['font']);
-	      $freitext = explode(';', $this->substituteFreitext($this->layout['texts'][$j]['text'], $i));
-	      $anzahlzeilen = count($freitext);
-	      $alpha = $this->layout['texts'][$j]['angle'];
-	      for($z = 0; $z < $anzahlzeilen; $z++){
-	        $h = $z * $this->layout['texts'][$j]['size'] * 1.25;
-	        $a = sin(deg2rad($alpha)) * $h;
-	        $b = cos(deg2rad($alpha)) * $h;
-	        $posx = $this->layout['texts'][$j]['posx'] + $a;
+			# der Freitext wurde noch nicht geschrieben und ist entweder ein fester Freitext oder ein fortlaufender
+    	if(in_array($this->layout['texts'][$j]['id'], $this->remaining_freetexts)){
+				if(($type == 'fixed' AND ($this->layout['type'] == 0 OR $this->layout['texts'][$j]['type'] == 1)) OR ($type == 'running' AND $this->layout['type'] != 0 AND $this->layout['texts'][$j]['type'] == 0)){
+					$this->pdf->selectFont($this->layout['texts'][$j]['font']);								
+					$x = $this->layout['texts'][$j]['posx'];
 					$ypos = $this->layout['texts'][$j]['posy'];
 					$offset_attribute = $this->layout['texts'][$j]['offset_attribute'];
 					if($offset_attribute != ''){			# ist ein offset_attribute gesetzt
 						if($this->layout['offset_attributes'][$offset_attribute] != ''){		# dieses Attribut wurde auch schon geschrieben, d.h. dessen y-Position ist bekannt -> Freitext relativ dazu setzen
 							$ypos = $this->layout['offset_attributes'][$offset_attribute] - $ypos;
+						}						
+						else{
+							$remaining_freetexts[] = $this->layout['texts'][$j]['id'];
+							continue;			# der Freitext ist abhängig aber das Attribut noch nicht geschrieben, Freitext merken und überspringen
 						}
-						else continue;			# der Freitext ist abhängig aber das Attribut noch nicht geschrieben, Freitext kann noch nicht geschrieben werden
 					}
-	        $posy = $ypos - $b;
-	        $width = $this->pdf->getTextWidth($this->layout['texts'][$j]['size'], $freitext[$z]);
-	        if($posx < 0){
-	        	$posx = 595 + $posx - $width;
-	        	$justification = 'right';
-	        }
-	        else{
-	        	$justification = 'left';
-	        }
-	        $this->pdf->addTextWrap($posx+$offsetx,$posy-$offsety,$width,$this->layout['texts'][$j]['size'],utf8_decode($freitext[$z]),$justification,-1 * $alpha);
-					$this->layout['texts'][$j]['written'] = true;
-	      }
-	    }
+					$y = $ypos - $offsety;
+					if($type == 'running'){	# fortlaufende Freitexte
+						if($i_on_page == 0){
+							if($this->maxy < $y)$this->maxy = $y;		# beim ersten Datensatz das maxy ermitteln
+						}
+						if($i_on_page > 0){		# bei allen darauffolgenden den y-Wert um Offset verschieben
+							$y = $y - $this->yoffset_onpage-22;
+						}
+					}
+					$text = utf8_decode($this->substituteFreitext($this->layout['texts'][$j]['text'], $i));
+					$this->putText($text, $this->layout['texts'][$j]['size'], NULL, $x, $y, $offsetx);
+				}
+				else{
+					$remaining_freetexts[] = $this->layout['texts'][$j]['id'];
+				}
+			}
 	  }
+		return $remaining_freetexts;
 	}
 	
 	function add_attribute_elements($selected_layer_id, $attributes, $attributenames, $offsetx, $offsety, $i, $i_on_page, $preview){
 		# $attributes ist das gesamte Attribute-Objekt
 		# $attributenames ist ein Array der Attributnamen, die geschrieben werden sollen
+		# es wird ein Array mit den Attributnamen zurückgegeben, die nicht gschrieben werden konnten
 		for($j = 0; $j < count($attributes['name']); $j++){
 			$wordwrapoffset = 1;
 			if(in_array($attributes['name'][$j], $attributenames)){
+				# da ein Attribut zu einem Seitenüberlauf führen kann, müssen davor alle festen Freitexte geschrieben werden, die geschrieben werden können
+				# d.h. alle, deren Position nicht abhängig vom einem Attribut ist und alle deren Position abhängig ist und das Attribut schon geschrieben wurde
+				# aber nur beim ersten Datensatz
+				if($i == 0)$this->remaining_freetexts = $this->add_freetexts($i, NULL, $offsetx, $offsety, 'fixed');			#  beim ersten Datensatz feste Freitexte hinzufügen
 				if($attributes['type'][$j] != 'geometry'){
 					switch ($attributes['form_element_type'][$j]){
 						case 'SubFormPK' : case 'SubFormEmbeddedPK' : {
 							if($this->layout['elements'][$attributes['name'][$j]]['font'] != ''){
-								# da ein eingebettetes Layout zu einem Seitenüberlauf führen kann, müssen davor alle festen Freitexte geschrieben werden, die geschrieben werden können
-								# d.h. alle, deren Position nicht abhängig vom einem Attribut ist und alle deren Position abhängig ist und das Attribut schon geschrieben wurde
-								$this->add_freetexts($i, $offsetx, $offsety);			#  feste Freitexte hinzufügen
 								# Parameter saven ##
 								$layerid_save = $selected_layer_id;
 								$layoutid_save = $this->layout['id'];
@@ -113,9 +120,21 @@ class ddl {
 								$sublayout = $this->layout['elements'][$attributes['name'][$j]]['font'];								
 								$offx = $this->layout['elements'][$attributes['name'][$j]]['xpos'] + $offsetx;
 								$ypos = $this->layout['elements'][$attributes['name'][$j]]['ypos'];
-								if($this->layout['elements'][$attributes['name'][$j]]['offset_attribute'] != ''){			# ist ein offset_attribute gesetzt, relative y-Position berechnen
-									$ypos = $this->layout[offset_attributes][$this->layout['elements'][$attributes['name'][$j]]['offset_attribute']] - $ypos;
+								
+								#### relative Positionierung über Offset-Attribut ####
+								$offset_attribute = $this->layout['elements'][$attributes['name'][$j]]['offset_attribute'];
+								if($offset_attribute != ''){			# es ist ein offset_attribute gesetzt
+									$offset_value = $this->layout[offset_attributes][$offset_attribute];
+									if($offset_value != ''){
+										$ypos = $offset_value - $ypos;			# Offset wurde auch schon bestimmt, relative y-Position berechnen
+									}
+									else{
+										$remaining_attributes[] = $attributes['name'][$j];	# Offset wurde noch nicht bestimmt, Attribut merken und überspringen
+										continue 2; 
+									}
 								}
+								#### relative Positionierung über Offset-Attribut ####
+								
 								$offy = 842 - $ypos - $offsety;
 								if($preview){
 									$sublayoutobject = $this->load_layouts(NULL, $sublayout, NULL, NULL);
@@ -142,7 +161,7 @@ class ddl {
 						
 						default : {
 							$this->pdf->selectFont($this->layout['elements'][$attributes['name'][$j]]['font']);
-							if($this->layout['elements'][$attributes['name'][$j]]['fontsize'] > 0 AND $this->result[$i][$attributes['name'][$j]] != ''){
+							if($this->layout['elements'][$attributes['name'][$j]]['fontsize'] > 0){
 								$data = array(array($attributes['name'][$j] => $this->get_result_value_output($i, $j)));
 								# Zeilenumbruch berücksichtigen
 								$text = $this->result[$i][$attributes['name'][$j]];
@@ -157,47 +176,42 @@ class ddl {
 									$wordwrapoffset--;
 								}
 								$ypos = $this->layout['elements'][$attributes['name'][$j]]['ypos'];
-								if($this->layout['elements'][$attributes['name'][$j]]['offset_attribute'] != ''){			# ist ein offset_attribute gesetzt, relative y-Position berechnen
-									$ypos = $this->layout['offset_attributes'][$this->layout['elements'][$attributes['name'][$j]]['offset_attribute']] - $ypos;
+								
+								#### relative Positionierung über Offset-Attribut ####
+								$offset_attribute = $this->layout['elements'][$attributes['name'][$j]]['offset_attribute'];
+								if($offset_attribute != ''){			# es ist ein offset_attribute gesetzt
+									$offset_value = $this->layout[offset_attributes][$offset_attribute];
+									if($offset_value != ''){
+										$ypos = $offset_value - $ypos;			# Offset wurde auch schon bestimmt, relative y-Position berechnen
+									}
+									else{
+										$remaining_attributes[] = $attributes['name'][$j];	# Offset wurde noch nicht bestimmt, Attribut merken und überspringen
+										continue 2; 
+									}
 								}
+								#### relative Positionierung über Offset-Attribut ####									
+								
 								$zeilenhoehe = $this->layout['elements'][$attributes['name'][$j]]['fontsize'];      		      		
-								$x = $this->layout['elements'][$attributes['name'][$j]]['xpos'];
-								if($x < 0){
-									$x = 595 + $x;
-									$justification = 'right';
-									$orientation = 'left';
-								}
-								else{
-									$justification = 'left';
-									$orientation = 'right';
-								}
-								$x = $x + $offsetx;
-								$y = $ypos+$zeilenhoehe+5 - $offsety;
+								$x = $this->layout['elements'][$attributes['name'][$j]]['xpos'];								
+								$y = $ypos - $offsety;
 								if($this->layout['type'] != 0 AND $i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben
-									$y = $y - $this->yoffset_onpage-18;
+									$y = $y - $this->yoffset_onpage-22;
 								}	
-								$this->pdf->ezSetY($y);
 								# beim jedem Datensatz die Gesamthoehe der Elemente des Datensatzes ermitteln
 								if($i_on_page == 0){
 									if($this->maxy < $y)$this->maxy = $y;		# beim ersten Datensatz das maxy ermitteln
-								}      			
-								if($this->miny > $y-$wordwrapoffset*$zeilenhoehe)$this->miny = $y-$wordwrapoffset*$zeilenhoehe;		# miny ist die unterste y-Position das aktuellen Datensatzes 
-
-								if($this->layout['elements'][$attributes['name'][$j]]['border'] == ''){
-									$this->layout['elements'][$attributes['name'][$j]]['border'] = 0;
 								}
-								$this->pdf->ezTable($data, NULL, NULL, 
-								array('xOrientation'=>$orientation, 
-											'xPos'=>$x, 
-											'width'=>$this->layout['elements'][$attributes['name'][$j]]['width'], 
-											'maxWidth'=>$this->layout['elements'][$attributes['name'][$j]]['width'], 
-											'fontSize'=>$this->layout['elements'][$attributes['name'][$j]]['fontsize'], 
-											'showHeadings'=>0, 
-											'shaded'=>0, 
-											'cols'=>array($attributes['name'][$j]=>array('justification'=>$justification)),
-											'showLines'=>$this->layout['elements'][$attributes['name'][$j]]['border']));
+											
+								$text = $this->get_result_value_output($i, $j);
+								$width = $this->layout['elements'][$attributes['name'][$j]]['width'];
+								
+								#$y = $this->pdf->ezText($text, $this->layout['elements'][$attributes['name'][$j]]['fontsize'], array('aleft'=>$x,	'right'=>$right, 'justification'=>'full'));
+								$y = $this->putText($text, $zeilenhoehe, $width, $x, $y, $offsetx);
+								
+								if($this->miny > $y)$this->miny = $y;		# miny ist die unterste y-Position das aktuellen Datensatzes 
+								
 								# den unteren y-Wert dieses Elements in das Offset-Array schreiben
-								$this->layout['offset_attributes'][$attributes['name'][$j]] = round($this->pdf->y);
+								$this->layout['offset_attributes'][$attributes['name'][$j]] = $y;
 							}
 						}
 					}
@@ -223,18 +237,38 @@ class ddl {
 						if($this->maxy < $y+$this->layout['elements'][$attributes['name'][$j]]['width'])$this->maxy = $y+$this->layout['elements'][$attributes['name'][$j]]['width'];		# beim ersten Datensatz das maxy ermitteln
 					}    
 					if($this->layout['type'] != 0 AND $i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben
-						$y = $y - $this->yoffset_onpage-18;
+						$y = $y - $this->yoffset_onpage-22;
 					}
 					$this->pdf->addJpegFromFile(IMAGEPATH.$newname, $x, $y, $this->layout['elements'][$attributes['name'][$j]]['width']);
 					if($this->miny > $y)$this->miny = $y;
 				}
 			}
 		}
+		return $remaining_attributes;
+	}
+	
+	function putText($text, $fontsize, $width, $x, $y, $offsetx){		
+		if($x < 0){		# rechtsbündig
+			$x = 595 + $x;
+			$x = $x + $offsetx;
+			$options = array('aright'=>$x, 'justification'=>'right');
+		}
+		else{							# linksbündig
+			if($width != '')$right = 595 - $width - $x + 20;
+			else $right = NULL;
+			$x = $x + $offsetx;
+			$options = array('aleft'=>$x, 'right'=>$right, 'justification'=>'full');
+		}
+		$fh = $this->pdf->getFontHeight($fontsize);
+		$y = $y + $fh;
+		$this->pdf->ezSetY($y);    			
+		return $this->pdf->ezText($text, $fontsize, $options);
 	}
   
   function substituteFreitext($text, $i){
   	$text = str_replace('$stelle', $this->Stelle->Bezeichnung, $text);
   	$text = str_replace('$user', $this->user->Name, $text);
+		$text = str_replace(';', chr(10), $text);
 		for($j = 0; $j < count($this->attributes['name']); $j++){
 			$text = str_replace('$'.$this->attributes['name'][$j], $this->get_result_value_output($i, $j), $text);
 		}
@@ -242,6 +276,7 @@ class ddl {
   }
   
   function get_result_value_output($i, $j){		# $i ist der result-counter, $j ist der attribute-counter
+		if($this->result[$i][$attributes['name'][$j]] == '')$this->result[$i][$attributes['name'][$j]] = ' ';		# wenns der result-value leer ist, ein Leerzeichen setzen, wegen der relativen Positionierung
 		switch ($this->attributes['form_element_type'][$j]){
 			case 'Auswahlfeld' : {
 				for($e = 0; $e < count($this->attributes['enum_value'][$j]); $e++){
@@ -281,6 +316,7 @@ class ddl {
 		else{
 			$this->pdf = $pdfobject;			# ein PDF-Objekt wurde aus einem übergeordneten Druckrahmen/Layer übergeben
 		}
+		$this->pdf->ezSetMargins(30,20,0,0);
     if($this->layout['elements'][$attributes['the_geom']]['xpos'] > 0){		# wenn ein Geometriebild angezeigt werden soll -> loadmap()
     	$this->gui->map_factor = MAPFACTOR;
     	$this->gui->loadmap('DataBase');
@@ -304,73 +340,25 @@ class ddl {
 				$newpage = true;
 			}
 			$this->yoffset_onpage = $this->maxy - $this->miny;			# der Offset mit dem die Elemente beim Untereinander-Typ nach unten versetzt werden
+			$this->layout['offset_attributes'] = array();
+			
+			for($j = 0; $j < count($this->layout['texts']); $j++){
+				$this->remaining_freetexts[] = $this->layout['texts'][$j]['id'];		# zum Anfang sind alle Freitexte noch zu schreiben
+			}
 			
 			################# Daten schreiben ###############
-			$offset_attributes = array();
-			for($j = 0; $j < count($this->attributes['name']); $j++){
-				if($this->layout['elements'][$this->attributes['name'][$j]]['offset_attribute'] != ''){
-					$offset_attributes[] = $this->layout['elements'][$this->attributes['name'][$j]]['offset_attribute'];			# Offset-Attribute ermitteln
-				}
-			}
-			$other_attributes = array_diff($this->attributes['name'], $offset_attributes);
-			# erst die offset-Attribute schreiben
-      $this->add_attribute_elements($selected_layer_id, $this->attributes, $offset_attributes, $offsetx, $offsety, $i, $i_on_page, $preview);
-			# dann die restlichen Attribute schreiben, denn die können ja relativ zu den offset-Attributen positioniert sein
-      $this->add_attribute_elements($selected_layer_id, $this->attributes, $other_attributes, $offsetx, $offsety, $i, $i_on_page, $preview);
+			$remaining_attributes = $this->attributes['name'];		# zum Anfang sind alle Attribute noch zu schreiben
+			$test = 0;
+			while($test < 100 AND count($remaining_attributes) > 0){
+				$remaining_attributes = $this->add_attribute_elements($selected_layer_id, $this->attributes, $remaining_attributes, $offsetx, $offsety, $i, $i_on_page, $preview);	# übrig sind die, die noch nicht geschrieben wurden, weil sie abhängig sind
+				$test++;
+			}			
 			################# Daten schreiben ###############
 			
-			################# Freitexte schreiben ###############
-			if($this->layout['type'] == 0){		
-    		$this->add_freetexts($i, $offsetx, $offsety);			# beim seitenweisen Typ, feste Freitexte hinzufügen
-    	}
-			
-			if($this->layout['type'] != 0 AND ($i == 0 OR $newpage)){		
-				$this->add_freetexts($i, $offsetx, $offsety);			# beim Untereinander-Typ - einmal am Anfang oder bei einer neuen Seite -> feste Freitexte hinzufügen
-				$newpage = false;																	# Beim Untereinandertyp macht es aber eigentlich wenig Sinn abhängige Positionierungen für Freitexte zu definieren
-			}
-			
-			# fortlaufende Freitexte
-			if($this->layout['type'] != 0){
-		    for($j = 0; $j < count($this->layout['texts']); $j++){
-		    	if($this->layout['texts'][$j]['type'] == 0){		# Layout ist vom Untereinander-Typ und die Texte sind fortlaufend
-			      $this->pdf->selectFont($this->layout['texts'][$j]['font']);
-			      $freitext = explode(';', $this->substituteFreitext($this->layout['texts'][$j]['text'], $i));
-			      $anzahlzeilen = count($freitext);
-			      $alpha = $this->layout['texts'][$j]['angle'];
-			      for($z = 0; $z < $anzahlzeilen; $z++){
-			        $h = $z * $this->layout['texts'][$j]['size'] * 1.25;
-			        $a = sin(deg2rad($alpha)) * $h;
-			        $b = cos(deg2rad($alpha)) * $h;
-			        $posx = $this->layout['texts'][$j]['posx'] + $a + $offsetx;
-							$ypos = $this->layout['texts'][$j]['posy'];
-							if($this->layout['texts'][$j]['offset_attribute'] != ''){			# ist ein offset_attribute gesetzt, relative y-Position berechnen
-								$ypos = $this->layout['offset_attributes'][$this->layout['texts'][$j]['offset_attribute']] - $ypos;
-							}
-			        $y = $ypos - $b - $offsety;
-			        # beim ersten Datensatz die Gesamthoehe der Elemente eines Datensatzes ermitteln 
-		      		if($i_on_page == 0){
-		      			if($this->maxy < $y)$this->maxy = $y;		# beim ersten Datensatz das maxy ermitteln
-		      		}
-			        if($i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben
-		      			$y = $y - $this->yoffset_onpage-18;
-		      		}
-							$zeilenhoehe = $this->layout['texts'][$j]['size'];
-							$wordwrapoffset = 0; #  ??? müsste eigentlich hier auch für mehrere Zeilen im Freitext gesetzt werden
-							if($this->miny > $y-$wordwrapoffset*$zeilenhoehe)$this->miny = $y-$wordwrapoffset*$zeilenhoehe;		# miny ist die unterste y-Position das aktuellen Datensatzes 
-			        $width = $this->pdf->getTextWidth($this->layout['texts'][$j]['size'], $freitext[$z]);
-			        if($posx < 0){
-			        	$posx = 595 + $posx - $width;
-			        	$justification = 'right';
-			        }
-			        else{
-			        	$justification = 'left';
-			        }
-			        $this->pdf->addTextWrap($posx,$y,$width,$this->layout['texts'][$j]['size'],utf8_decode($freitext[$z]),$justification,-1 * $alpha);
-			      }
-			    }
-			  }
-			}
-			################# Freitexte schreiben ###############
+			################# fortlaufende Freitexte schreiben ###############
+			# (die festen Freitexte werden vor jedem Attribut geschrieben, da ein Attribut zu einem Seitenüberlauf führen können)
+			$this->remaining_freetexts = $this->add_freetexts($i, $i_on_page, $offsetx, $offsety, 'running');
+			################# fortlaufende Freitexte schreiben ###############
       $datasetcount_on_page++;
     }
 		if($pdfobject == NULL){		# nur wenn kein PDF-Objekt aus einem übergeordneten Layer übergeben wurde, PDF erzeugen

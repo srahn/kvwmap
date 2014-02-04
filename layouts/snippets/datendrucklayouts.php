@@ -438,9 +438,6 @@ function save_layout(){
 	        	<td style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3"><input type="text" class="input" title="negative Werte bewirken eine rechtsbündige Ausrichtung" name="textposx<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['texts'][$i]['posx'] ?>" size="5"></td>	        	
 	        	<td rowspan="4" style="border-top:2px solid #C3C7C3;border-right:1px solid #C3C7C3" colspan=3>
 	        		<textarea class="input" name="text<? echo $i ?>" cols="37" rows="6"><? echo $this->ddl->selectedlayout[0]['texts'][$i]['text'] ?></textarea>
-	        		<? if($this->ddl->selectedlayout[0]['type'] == 1){ ?>
-	        		<input type="checkbox" value="1" name="texttype<? echo $i ?>" <? if($this->ddl->selectedlayout[0]['texts'][$i]['type'] == 1)echo 'checked="true"'; ?>> fixiert
-	        		<? } ?>
 	        	</td>
 	        	<td style="border-top:2px solid #C3C7C3;" colspan=2 align="left">
 	        		<select title="Schriftart" name="textfont<? echo $i ?>">
@@ -481,7 +478,14 @@ function save_layout(){
 								?>
 							</select>
 						</td>
-	        	<td align="right"><a href="javascript:Bestaetigung('index.php?go=sachdaten_druck_editor_Freitextloeschen&freitext_id=<? echo $this->ddl->selectedlayout[0]['texts'][$i]['id'] ?>&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&aktivesLayout=<? echo $this->formvars['aktivesLayout']; ?>', 'Wollen Sie den Freitext wirklich löschen?');">löschen&nbsp;</a></td>
+	        	<td align="left">
+							<? if($this->ddl->selectedlayout[0]['type'] != 0){ ?>
+	        		<input type="checkbox" value="1" name="texttype<? echo $i ?>" <? if($this->ddl->selectedlayout[0]['texts'][$i]['type'] == 1)echo 'checked="true"'; ?>> fixiert
+	        		<? } ?>
+						</td>
+						<td align="right">
+							<a href="javascript:Bestaetigung('index.php?go=sachdaten_druck_editor_Freitextloeschen&freitext_id=<? echo $this->ddl->selectedlayout[0]['texts'][$i]['id'] ?>&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&aktivesLayout=<? echo $this->formvars['aktivesLayout']; ?>', 'Wollen Sie den Freitext wirklich löschen?');">löschen&nbsp;</a>
+						</td>
 	        </tr>
 	      <? } ?>
 	      <tr>

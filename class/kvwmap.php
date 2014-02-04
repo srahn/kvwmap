@@ -10993,8 +10993,13 @@ class GUI extends GUI_core{
     $rect = $this->formvars['querypolygon'];
   }
   else{
-    $rect = ms_newRectObj();
-    $rect->setextent($this->formvars['rectminx'],$this->formvars['rectminy'],$this->formvars['rectmaxx'],$this->formvars['rectmaxy']);
+		if($this->formvars['rectminx'] != ''){
+			$rect = ms_newRectObj();
+			$rect->setextent($this->formvars['rectminx'],$this->formvars['rectminy'],$this->formvars['rectmaxx'],$this->formvars['rectmaxy']);
+		}
+		else{
+			$rect = $this->create_query_rect($this->formvars['INPUT_COORD']);
+		}
   	if(MAPSERVERVERSION >= 600 ) {
 			$this->map_scaledenom = $this->map->scaledenom;
 		}
@@ -11308,30 +11313,30 @@ class GUI extends GUI_core{
 	            }*/
             }
 			
-			# order by
-			if($this->formvars['orderby'.$layerset[$i]['Layer_ID']] != ''){									# Fall 1: im GLE soll nach einem Attribut sortiert werden
-			  $sql_order = ' ORDER BY '.$this->formvars['orderby'.$layerset[$i]['Layer_ID']];
-			}
-			elseif($layerset[$i]['attributes']['orderby'] != ''){														# Fall 2: der Layer hat im Pfad ein ORDER BY
-				$sql_order = $layerset[$i]['attributes']['orderby'];
-			}
-			if($layerset[$i]['template'] == ''){																				# standardmäßig wird nach der oid sortiert
-				$j = 0;
-				foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-					if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['attributes']['oids'][$j]){      # hat die Haupttabelle oids, dann wird immer ein order by oid gemacht, sonst ist die Sortierung nicht eindeutig
-						if($sql_order == '')$sql_order = ' ORDER BY '.$layerset[$i]['maintable'].'_oid ';
-						else $sql_order .= ', '.$layerset[$i]['maintable'].'_oid ';
-					}
-					$j++;
-				}
-			}
-						
-			if($this->last_query != ''){
-				$sql = $this->last_query[$layerset[$i]['Layer_ID']]['sql'];
-				if($this->formvars['orderby'.$layerset[$i]['Layer_ID']] == '')$sql_order = $this->last_query[$layerset[$i]['Layer_ID']]['orderby'];
-				$this->formvars['anzahl'] = $this->last_query[$layerset[$i]['Layer_ID']]['limit'];
-				if($this->formvars['offset_'.$layerset[$i]['Layer_ID']] == '')$this->formvars['offset_'.$layerset[$i]['Layer_ID']] = $this->last_query[$layerset[$i]['Layer_ID']]['offset'];
-			}
+						# order by
+						if($this->formvars['orderby'.$layerset[$i]['Layer_ID']] != ''){									# Fall 1: im GLE soll nach einem Attribut sortiert werden
+							$sql_order = ' ORDER BY '.$this->formvars['orderby'.$layerset[$i]['Layer_ID']];
+						}
+						elseif($layerset[$i]['attributes']['orderby'] != ''){														# Fall 2: der Layer hat im Pfad ein ORDER BY
+							$sql_order = $layerset[$i]['attributes']['orderby'];
+						}
+						if($layerset[$i]['template'] == ''){																				# standardmäßig wird nach der oid sortiert
+							$j = 0;
+							foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
+								if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['attributes']['oids'][$j]){      # hat die Haupttabelle oids, dann wird immer ein order by oid gemacht, sonst ist die Sortierung nicht eindeutig
+									if($sql_order == '')$sql_order = ' ORDER BY '.$layerset[$i]['maintable'].'_oid ';
+									else $sql_order .= ', '.$layerset[$i]['maintable'].'_oid ';
+								}
+								$j++;
+							}
+						}
+									
+						if($this->last_query != ''){
+							$sql = $this->last_query[$layerset[$i]['Layer_ID']]['sql'];
+							if($this->formvars['orderby'.$layerset[$i]['Layer_ID']] == '')$sql_order = $this->last_query[$layerset[$i]['Layer_ID']]['orderby'];
+							$this->formvars['anzahl'] = $this->last_query[$layerset[$i]['Layer_ID']]['limit'];
+							if($this->formvars['offset_'.$layerset[$i]['Layer_ID']] == '')$this->formvars['offset_'.$layerset[$i]['Layer_ID']] = $this->last_query[$layerset[$i]['Layer_ID']]['offset'];
+						}
 
             # Anhängen des Begrenzers zur Einschränkung der Anzahl der Ergebniszeilen
             if($this->formvars['anzahl'] == ''){
@@ -11344,7 +11349,7 @@ class GUI extends GUI_core{
 
             $layerset[$i]['sql'] = $sql;
 						
-			$this->user->rolle->save_last_query('Sachdaten', $layerset[$i]['Layer_ID'], $sql, $sql_order, $this->formvars['anzahl'], $this->formvars['offset_'.$layerset[$i]['Layer_ID']]);
+						$this->user->rolle->save_last_query('Sachdaten', $layerset[$i]['Layer_ID'], $sql, $sql_order, $this->formvars['anzahl'], $this->formvars['offset_'.$layerset[$i]['Layer_ID']]);
 			
             $ret=$layerdb->execSQL($sql.$sql_order.$sql_limit,4, 0);
             if (!$ret[0]) {
@@ -12877,9 +12882,8 @@ class GUI extends GUI_core{
   	}
   }
 
-  function queryMap() {
-    # Abfragebereich berechnen
-    $corners=explode(';',$this->formvars['INPUT_COORD']);
+	function create_query_rect($input_coords){
+		$corners=explode(';', $input_coords);
     if(count($corners) < 3){
       $lo=explode(',',$corners[0]); # linke obere Ecke in Bildkoordinaten von links oben gesehen
       $ru=explode(',',$corners[1]); # reche untere Ecke des Auswahlbereiches in Bildkoordinaten von links oben gesehen
@@ -12905,6 +12909,12 @@ class GUI extends GUI_core{
       $polygon .= $coordx[0].' '.$coordy[0].'))';
       $rect = $polygon;
     }
+		return $rect;
+	}
+	
+  function queryMap() {
+    # Abfragebereich berechnen
+		$rect = $this->create_query_rect($this->formvars['INPUT_COORD']);
     if($this->show_query_tooltip == true){
       $this->tooltip_query($rect);
     }
@@ -14690,7 +14700,7 @@ class db_mapObj extends db_mapObj_core{
 	      	}
 	      }
 	      $exp = implode(' ', $exp_parts);
-        $sql = $select." AND ".$exp;
+				$sql = $select." AND (".$exp.")";
         $this->debug->write("<p>file:kvwmap class:db_mapObj->getClassFromObject - Lesen einer Klasse eines Objektes:<br>".$sql,4);
         $query=pg_query($sql);
         if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
@@ -15367,12 +15377,11 @@ class Document {
     	$sql .= ' AND druckrahmen.id ='.$frameid;
     }
     $sql .= ' ORDER BY Name';
-    #echo $sql.'<br>';
-    $this->debug->write("<p>file:kvwmap class:Document->load_frames :<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    #echo $sql.'<br>';		
+		$ret1 = $this->database->execSQL($sql, 4, 1);					
+  	if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     $i = 0;
-    while($rs=mysql_fetch_array($query)){
+    while($rs=mysql_fetch_array($ret1[1])){
       $frames[] = $rs;
       $frames[0]['bilder'] = $this->load_bilder($rs['id']);
       $frames[0]['texts'] = $this->load_texts($rs['id']);
