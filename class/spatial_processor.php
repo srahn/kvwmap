@@ -107,7 +107,7 @@ class spatial_processor {
     	$rs[0] = $rs[0]/10000;
     	$rs[0] = round($rs[0],1);
     }
-    return $rs[0].'^'.$rs[0];
+    return $rs[0].'~'.$rs[0];
   }
   
 	function length($geom){
@@ -119,7 +119,7 @@ class spatial_processor {
     else {
     	$rs = pg_fetch_array($ret[1]);
     }
-    return $rs[0].'^'.$rs[0];
+    return $rs[0].'~'.$rs[0];
   }
   
   function process_query($formvars){

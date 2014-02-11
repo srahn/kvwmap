@@ -11,7 +11,6 @@ include(WWWROOT.APPLVERSION.'funktionen/gui_functions.php');
 <?php include(WWWROOT.APPLVERSION.'funktionen/msgboxes.php'); ?>
 </HEAD>
 <BODY onload="onload_functions();"> <!-- leftmargin="5" topmargin="5" bgcolor="#FFFFFF" link="#FF0000" alink="#FF9999" vlink="#663333"> -->
-	<a name="oben"></a>
   <table width="900" align="center" border="0" cellspacing="0" cellpadding="0">
     <tr>
       <td align="center" valign="top">      
@@ -53,4 +52,7 @@ include(WWWROOT.APPLVERSION.'funktionen/gui_functions.php');
       </td>
     </tr>
 </table>
+<script type="text/javascript">
+	currentform = document.GUI;
+</script>
 </BODY></HTML>

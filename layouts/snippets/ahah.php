@@ -34,9 +34,9 @@ function ahahDone(url, target, req, action) {
     	response = response.replace(/\r/,"");
 	    //Behandlung des Zielformelements als ein Array
 	    //Zerlegung des Resultes für den Fall, dass es mehrere Responsvalues sind
-	    responsevalues = response.split("^");
+	    responsevalues = response.split("~");
 			if(action == undefined)action = "";
-			actions = action.split("^");
+			actions = action.split("~");
 	    for (i=0; i < target.length; ++i) {
 				if(actions[i] == undefined)actions[i] = action;
 				switch (actions[i]) {

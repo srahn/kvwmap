@@ -715,7 +715,7 @@ class GUI extends GUI_core{
 
   function get_styles_labels(){
     $this->get_styles();
-    echo '^';
+    echo '~';
     $this->get_labels();
   }
 
@@ -723,7 +723,7 @@ class GUI extends GUI_core{
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $mapDB->save_Style($this->formvars);
     $this->get_styles();
-    echo '^';
+    echo '~';
     $this->get_style();
   }
 
@@ -815,7 +815,7 @@ class GUI extends GUI_core{
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $mapDB->save_Label($this->formvars);
     $this->get_labels();
-    echo '^';
+    echo '~';
     $this->get_label();
   }
 
@@ -1160,8 +1160,8 @@ class GUI extends GUI_core{
     $gps->readPosition();
     // transformiere in gewünschtes Koordinatensystem
     $point=transform($gps->lon,$gps->lat,'4326',$this->formvars['srs']);
-    // Ausgabe der Koordinaten im Format Rechtswert^Hochwert
-    echo $point->x.'^'.$point->y;
+    // Ausgabe der Koordinaten im Format Rechtswert~Hochwert
+    echo $point->x.'~'.$point->y;
  }
 
   function export_ESAF64(){
@@ -6347,12 +6347,14 @@ class GUI extends GUI_core{
 
     $i = 0;
     $this->search = true;
-		if($this->formvars['embedded_dataPDF']){
-			for($k = 0; $k < count($this->qlayerset[$i]['shape']); $k++){
-				$checkbox_names[$k] = 'check;'.$layerset[0]['attributes']['table_alias_name'][$this->qlayerset[$i]['maintable']].';'.$this->qlayerset[$i]['maintable'].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['maintable'].'_oid'];
-				$this->formvars[$checkbox_names[$k]] = 'on';
+		if($this->formvars['embedded_dataPDF']){			# wenn diese Suche für ein eingebettetes Drucklayout ist und Treffer da sind -> Checkboxen simulieren
+			if(count($this->qlayerset[$i]['shape']) > 0){
+				for($k = 0; $k < count($this->qlayerset[$i]['shape']); $k++){
+					$checkbox_names[$k] = 'check;'.$layerset[0]['attributes']['table_alias_name'][$this->qlayerset[$i]['maintable']].';'.$this->qlayerset[$i]['maintable'].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['maintable'].'_oid'];
+					$this->formvars[$checkbox_names[$k]] = 'on';
+				}
+				$this->formvars['checkbox_names_'.$this->formvars['selected_layer_id']] = implode('|', $checkbox_names);
 			}
-			$this->formvars['checkbox_names_'.$this->formvars['selected_layer_id']] = implode('|', $checkbox_names);
 		}
     elseif($this->formvars['embedded_subformPK'] != ''){
       header('Content-type: text/html; charset=UTF-8');      
@@ -6540,7 +6542,7 @@ class GUI extends GUI_core{
       switch ($attributes['form_element_type'][0]){
         case 'SubFormEmbeddedPK' : {
           $this->formvars['embedded_subformPK'] = true;
-          echo '^';
+          echo '~';
           $this->GenerischeSuche_Suchen();
         }break;
       }
@@ -6729,12 +6731,12 @@ class GUI extends GUI_core{
             if($rs['oid'] == $last_oid){$html .= 'selected ';}
             $html .= 'value="'.$rs['value'].'">'.$rs['output'].'</option>';
           }
-          echo '^'.$html;
+          echo '~'.$html;
         }break;
         
         case 'SubFormEmbeddedPK' : {
           $this->formvars['embedded_subformPK'] = true;
-          echo '^';
+          echo '~';
           $this->GenerischeSuche_Suchen();
         }break;
       }
@@ -10972,7 +10974,7 @@ class GUI extends GUI_core{
       switch ($attributes['form_element_type'][0]){
         case 'SubFormEmbeddedPK' : {
           $this->formvars['embedded_subformPK'] = true;
-          echo '^';
+          echo '~';
           $this->GenerischeSuche_Suchen();
         }break;
       }
@@ -11526,7 +11528,7 @@ class GUI extends GUI_core{
     $first=1;
     while (list($key, $val) = each($ret[1])) {
       if (!$first) {
-        echo "^";
+        echo "~";
       }
       echo $val;
       $first=0;
@@ -11719,7 +11721,7 @@ class GUI extends GUI_core{
       $anzLayer=count($layerset);
     }
     else{
-      echo 'Bitte wählen Sie einen Layer zur Sachdatenabfrage aus.~';
+      echo 'Bitte wählen Sie einen Layer zur Sachdatenabfrage aus.##';
     }
     $map=ms_newMapObj('');
     $map->set('shapepath', SHAPEPATH);
@@ -11894,7 +11896,7 @@ class GUI extends GUI_core{
 		              $attribcount++;
 									if($layer['shape'][$k][$attributes['name'][$j]]!='') {
 										$link = 'xlink:'.$layer['shape'][$k][$attributes['name'][$j]];
-										$links .= $link.'~';
+										$links .= $link.'##';
 									}
 								} break;
 				        default : {
@@ -11906,7 +11908,7 @@ class GUI extends GUI_core{
 		              }
 		              $attribcount++;
 		              $output .= $layer['shape'][$k][$attributes['name'][$j]].'  ';
-		              $output .= '~';
+		              $output .= '##';
 				        }
             	}
             }

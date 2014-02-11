@@ -1534,8 +1534,8 @@ class GUI_core {
         }
         include (LAYOUTPATH.$this->user->rolle->gui);
       } break;
-			case 'embedded_html' : {
-				include (LAYOUTPATH.'snippets/embedded_html.php');
+			case 'overlay_html' : {
+				include (LAYOUTPATH.'snippets/overlay.php');
 			} break;
       case 'map_ajax' : {
 				$this->debug->write("Include <b>".LAYOUTPATH."snippets/map_ajax.php</b> in kvwmap.php function output()",4);

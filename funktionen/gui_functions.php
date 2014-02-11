@@ -4,24 +4,43 @@ function ImageLoadFailed(id) {
   document.getElementById(id).innerHTML = '';
 }
 
+var currentform;
+
 function onload_functions(){
 	if(document.getElementById('scrolldiv') != undefined){
 		document.getElementById('scrolldiv').scrollTop = <? echo $this->user->rolle->scrollposition; ?>;
 	}
 	document.onmousemove = drag;
   document.onmouseup = dragstop;
+	document.onmousedown = stop;	
 }
 
 var dragobjekt = null;
+var resizeobjekt = null;
+var resizetype = null;
 
 // Position, an der das Objekt angeklickt wurde.
 var dragx = 0;
 var dragy = 0;
+var resizex = 0;
+var resizey = 0;
+// Breite und Hoehe
+var width = 0;
+var height = 0;
 
 // Mausposition
 var posx = 0;
 var posy = 0;
 
+function stop(event){
+	if(dragobjekt != null || resizeobjekt != null){		// markieren von Elementen verhindern, falls Mauszeiger aus Overlay gezogen wird
+		if(event.preventDefault){
+			event.preventDefault();
+		}else{ // IE fix
+			event.returnValue = false;
+		};
+	}
+}
 
 function dragstart(element){
   dragobjekt = element;
@@ -29,23 +48,69 @@ function dragstart(element){
   dragy = posy - dragobjekt.offsetTop;
 }
 
+function resizestart(element, type){
+	resizeobjekt = element;
+	resizetype = type;
+	dragx = posx - resizeobjekt.parentNode.offsetLeft;
+  dragy = posy - resizeobjekt.parentNode.offsetTop;
+  resizex = posx;
+  resizey = posy;
+	width = parseInt(resizeobjekt.offsetWidth);		// da style.width auf 100% steht
+	height = parseInt(resizeobjekt.style.height);
+}
+
 
 function dragstop(){
-  dragobjekt=null;
+  dragobjekt = null;
+	resizeobjekt = null;
 }
 
 
 function drag(event) {
-  posx = document.all ? window.event.clientX : event.screenX;
-  posy = document.all ? window.event.clientY : event.screenY;
+	if(!event)event = window.event; // IE sucks
+  posx =  event.screenX;
+  posy = event.screenY;
   if(dragobjekt != null){				
-		if(!event){	// IE sucks
-			event = window.event;
-			event.returnValue = false;
-		}
-		else event.preventDefault();
     dragobjekt.style.left = (posx - dragx) + "px";
     dragobjekt.style.top = (posy - dragy) + "px";
+  }
+	if(resizeobjekt != null){				
+		switch(resizetype) {
+			case "se":
+				resizeobjekt.style.width = width + (posx - resizex) + "px";
+				resizeobjekt.style.height = height + (posy - resizey) + "px";
+			break;
+			case "ne":
+				resizeobjekt.style.width = width + (posx - resizex) + "px";
+				resizeobjekt.style.height = height - (posy - resizey) + "px";
+				resizeobjekt.parentNode.style.top = (posy - dragy) + "px";
+			break;
+			case "nw":
+				resizeobjekt.style.width = width - (posx - resizex) + "px";
+				resizeobjekt.style.height = height - (posy - resizey) + "px";
+				resizeobjekt.parentNode.style.left = (posx - dragx) + "px";
+				resizeobjekt.parentNode.style.top = (posy - dragy) + "px";
+			break;
+			case "sw":
+				resizeobjekt.style.width = width - (posx - resizex) + "px";
+				resizeobjekt.style.height = height + (posy - resizey) + "px";
+				resizeobjekt.parentNode.style.left = (posx - dragx) + "px";
+			break;
+			case "s":
+				resizeobjekt.style.height = height + (posy - resizey) + "px";
+			break;
+			case "n":
+				resizeobjekt.style.height = height - (posy - resizey) + "px";
+				resizeobjekt.parentNode.style.top = (posy - dragy) + "px";
+			break;
+			case "w":
+				resizeobjekt.style.width = width - (posx - resizex) + "px";
+				resizeobjekt.parentNode.style.left = (posx - dragx) + "px";
+			break;
+			case "e":
+				resizeobjekt.style.width = width + (posx - resizex) + "px";
+			break;
+		}
   }
 }
 
@@ -57,19 +122,21 @@ function deactivate_overlay(){
 	document.getElementById('overlaydiv').style.display='none';
 }
 
-function query_submit(gui){
+function overlay_submit(gui){
+	// diese Funktion macht im Overlay-Modus einen ajax-Request mit den Formulardaten des uebergebenen Formularobjektes, ansonsten einen normalen Submit
 	<? if($this->user->rolle->gui == 'gui2.php'){ ?>
 	formdata = formSerialize(gui);
-	ahah("<? echo URL.APPLVERSION.'index.php'; ?>", formdata+"&mime_type=embedded_html", new Array(document.getElementById('querydiv'), '', ''), "sethtml^execute_function^execute_function");	
+	ahah("<? echo URL.APPLVERSION.'index.php'; ?>", formdata+"&mime_type=overlay_html", new Array(document.getElementById('contentdiv'), '', ''), "sethtml~execute_function~execute_function");	
 	document.GUI.CMD.value = "";
 	<? }else{ ?>
 	document.GUI.submit();
 	<? } ?>
 }
 
-function query_link(data){
+function overlay_link(data){
+	// diese Funktion macht im Overlay-Modus einen ajax-Request mit den übergebenen Daten, ansonsten wird das Ganze wie ein normaler Link aufgerufen
 	<? if($this->user->rolle->gui == 'gui2.php'){ ?>
-	ahah("<? echo URL.APPLVERSION.'index.php'; ?>", data+"&mime_type=embedded_html", new Array(document.getElementById('querydiv'), '', ''), "sethtml^execute_function^execute_function");	
+	ahah("<? echo URL.APPLVERSION.'index.php'; ?>", data+"&mime_type=overlay_html", new Array(document.getElementById('contentdiv'), '', ''), "sethtml~execute_function~execute_function");	
 	document.GUI.CMD.value = "";
 	<? }else{ ?>
 	window.location.href = 'index.php?'+data;

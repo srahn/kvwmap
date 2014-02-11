@@ -34,9 +34,9 @@ function checknumbers(input, type, length, decimal_length){
   	}
   }
 	if(type == 'int2' || type == 'int4' || type == 'int8'){
-  	if(input.value.search(/[-\d]/g) != -1 || input.value.search(/.-/g) != -1){
+  	if(input.value.search(/[^-\d]/g) != -1 || input.value.search(/.-/g) != -1){
   		alert('Es sind nur ganzzahlige Angaben erlaubt!');
-  		var val = input.value.replace(/[-\d]/g, '');
+  		var val = input.value.replace(/[^-\d]/g, '');
   		val = val.replace(/-/g, '');
   		input.value = val;
   	}
@@ -54,10 +54,10 @@ function selectall(layer_id){
 }
 
 function zoom2wkt(wkt, epsg){
-	gui.epsg.value = epsg;
-	gui.wkt.value = wkt;
-	gui.go.value = 'zoom2wkt';
-	gui.submit();
+	currentform.epsg.value = epsg;
+	currentform.wkt.value = wkt;
+	currentform.go.value = 'zoom2wkt';
+	currentform.submit();
 }
 
 function check_for_selection(layer_id){
@@ -81,54 +81,54 @@ function check_for_selection(layer_id){
 
 function zoomto_datasets(layer_id, tablename, columnname){
 	if(check_for_selection(layer_id)){
-		gui.chosen_layer_id.value = layer_id;
-		gui.layer_tablename.value = tablename;
-		gui.layer_columnname.value = columnname;
-		gui.go.value = 'zoomto_selected_datasets';
-		gui.submit();
+		currentform.chosen_layer_id.value = layer_id;
+		currentform.layer_tablename.value = tablename;
+		currentform.layer_columnname.value = columnname;
+		currentform.go.value = 'zoomto_selected_datasets';
+		currentform.submit();
 	}
 }
 
 function delete_datasets(layer_id){
 	if(check_for_selection(layer_id)){
 		if(confirm('Wollen Sie die ausgewählten Datensätze wirklich löschen?')){
-			gui.chosen_layer_id.value = layer_id;
-			gui.go.value = 'Layer_Datensaetze_Loeschen';
-			gui.submit();
+			currentform.chosen_layer_id.value = layer_id;
+			currentform.go.value = 'Layer_Datensaetze_Loeschen';
+			currentform.submit();
 		}
 	}
 }
 
 function delete_document(attributename){
 	if(confirm('Wollen Sie das ausgewählte Dokument wirklich löschen?')){
-		gui.document_attributename.value = attributename; 
-		gui.go.value = 'Dokument_Loeschen';
-		gui.submit();
+		currentform.document_attributename.value = attributename; 
+		currentform.go.value = 'Dokument_Loeschen';
+		currentform.submit();
 	}
 }
 
 function csv_export_all(layer_id){
-	gui.all.value = 'true';
-	gui.chosen_layer_id.value = layer_id;
-	gui.go_backup.value = gui.go.value;
-	gui.go.value = 'generischer_csv_export';
-	gui.submit();
+	currentform.all.value = 'true';
+	currentform.chosen_layer_id.value = layer_id;
+	currentform.go_backup.value = currentform.go.value;
+	currentform.go.value = 'generischer_csv_export';
+	currentform.submit();
 }
 
 function shape_export_all(layer_id, anzahl){
-	gui.chosen_layer_id.value = layer_id;
-	gui.anzahl.value = anzahl;
-	gui.go_backup.value = gui.go.value;
-	gui.go.value = 'SHP_Export';
-	gui.submit();
+	currentform.chosen_layer_id.value = layer_id;
+	currentform.anzahl.value = anzahl;
+	currentform.go_backup.value = currentform.go.value;
+	currentform.go.value = 'SHP_Export';
+	currentform.submit();
 }
 
 function shape_export(layer_id){
 	if(check_for_selection(layer_id)){
-		gui.chosen_layer_id.value = layer_id;
-		gui.go_backup.value = gui.go.value;
-		gui.go.value = 'SHP_Export';
-		gui.submit();
+		currentform.chosen_layer_id.value = layer_id;
+		currentform.go_backup.value = currentform.go.value;
+		currentform.go.value = 'SHP_Export';
+		currentform.submit();
 	}
 }
 
@@ -145,31 +145,31 @@ function select_this_dataset(layer_id, n){
 
 function use_for_new_dataset(layer_id){
 	if(check_for_selection(layer_id)){
-		gui.chosen_layer_id.value = layer_id;
-		gui.pathwkt.value = '';
-		gui.newpathwkt.value = '';
-		gui.newpath.value = '';
-		gui.go_backup.value = gui.go.value;
-		gui.go.value = 'neuer_Layer_Datensatz';
-		gui.submit();
+		currentform.chosen_layer_id.value = layer_id;
+		currentform.pathwkt.value = '';
+		currentform.newpathwkt.value = '';
+		currentform.newpath.value = '';
+		currentform.go_backup.value = currentform.go.value;
+		currentform.go.value = 'neuer_Layer_Datensatz';
+		currentform.submit();
 	}
 }
 
 function csv_export(layer_id){
 	if(check_for_selection(layer_id)){
-		gui.chosen_layer_id.value = layer_id;
-		gui.go_backup.value = gui.go.value;
-		gui.go.value = 'generischer_csv_export';
-		gui.submit();
+		currentform.chosen_layer_id.value = layer_id;
+		currentform.go_backup.value = currentform.go.value;
+		currentform.go.value = 'generischer_csv_export';
+		currentform.submit();
 	}
 }
 
 function print_data(layer_id){
 	if(check_for_selection(layer_id)){
-		gui.chosen_layer_id.value = layer_id;
-		gui.go_backup.value = gui.go.value;
-		gui.go.value = 'generischer_sachdaten_druck';
-		gui.submit();
+		currentform.chosen_layer_id.value = layer_id;
+		currentform.go_backup.value = currentform.go.value;
+		currentform.go.value = 'generischer_sachdaten_druck';
+		currentform.submit();
 	}
 }
 
@@ -193,13 +193,13 @@ function change_charttype(layer_id){
 
 function create_chart(layer_id){
 	if(check_for_selection(layer_id)){
-		gui.target = "_blank";
-		gui.chosen_layer_id.value = layer_id;
-		gui.width.value = 700;
-		gui.go_backup.value = gui.go.value;
-		gui.go.value = 'generisches_sachdaten_diagramm';
-		gui.submit();
-		gui.target = "";
+		currentform.target = "_blank";
+		currentform.chosen_layer_id.value = layer_id;
+		currentform.width.value = 700;
+		currentform.go_backup.value = currentform.go.value;
+		currentform.go.value = 'generisches_sachdaten_diagramm';
+		currentform.submit();
+		currentform.target = "";
 	}
 }
 
@@ -215,8 +215,8 @@ function update_require_attribute(attributes, k,layer_id, value){
 }
 
 function change_orderby(attribute, layer_id){
-	if(gui.go_backup.value != ''){
-		gui.go.value = gui.go_backup.value;
+	if(currentform.go_backup.value != ''){
+		currentform.go.value = currentform.go_backup.value;
 	}
 	if(document.getElementById('orderby'+layer_id).value == attribute){
 		document.getElementById('orderby'+layer_id).value = attribute+' DESC';
@@ -224,7 +224,7 @@ function change_orderby(attribute, layer_id){
 	else{
 		document.getElementById('orderby'+layer_id).value = attribute;
 	}
-	gui.submit();
+	currentform.submit();
 }
 
 function set_changed_flag(flag){

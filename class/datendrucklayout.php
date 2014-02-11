@@ -106,8 +106,7 @@ class ddl {
 			if(in_array($attributes['name'][$j], $attributenames)){
 				# da ein Attribut zu einem Seitenüberlauf führen kann, müssen davor alle festen Freitexte geschrieben werden, die geschrieben werden können
 				# d.h. alle, deren Position nicht abhängig vom einem Attribut ist und alle deren Position abhängig ist und das Attribut schon geschrieben wurde
-				# aber nur beim ersten Datensatz
-				if($i == 0)$this->remaining_freetexts = $this->add_freetexts($i, NULL, $offsetx, $offsety, 'fixed');			#  beim ersten Datensatz feste Freitexte hinzufügen
+				$this->remaining_freetexts = $this->add_freetexts($i, NULL, $offsetx, $offsety, 'fixed');			#  feste Freitexte hinzufügen
 				if($attributes['type'][$j] != 'geometry'){
 					switch ($attributes['form_element_type'][$j]){
 						case 'SubFormPK' : case 'SubFormEmbeddedPK' : {
@@ -343,7 +342,7 @@ class ddl {
 			$this->layout['offset_attributes'] = array();
 			
 			for($j = 0; $j < count($this->layout['texts']); $j++){
-				$this->remaining_freetexts[] = $this->layout['texts'][$j]['id'];		# zum Anfang sind alle Freitexte noch zu schreiben
+				$this->remaining_freetexts[] = $this->layout['texts'][$j]['id'];		# zu Beginn jedes Datensatzes sind alle Freitexte noch zu schreiben
 			}
 			
 			################# Daten schreiben ###############

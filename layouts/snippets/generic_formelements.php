@@ -2,7 +2,7 @@
 								$dataset = $layer['shape'][$k];								# der aktuelle Datensatz
 								switch ($attributes['form_element_type'][$j]){
 									case 'Textfeld' : {
-										echo '<textarea title="'.$attributes['alias'][$j].'" cols="45" onchange="set_changed_flag(gui.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')"';
+										echo '<textarea title="'.$attributes['alias'][$j].'" cols="45" onchange="set_changed_flag(currentform.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')"';
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
 											echo ' readonly style="border:0px;background-color:transparent;font-family:arial,verdana,helvetica,sans-serif;font-size: '.$this->user->rolle->fontsize_gle.'px;"';
 										}
@@ -39,10 +39,10 @@
 										else{
 											echo '<select title="'.$attributes['alias'][$j].'" style="'.$select_width.'font-size: '.$this->user->rolle->fontsize_gle.'px"';
 											if($attributes['req_by'][$j] != ''){
-												echo 'onchange="update_require_attribute(\''.$attributes['req_by'][$j].'\', '.$k.','.$layer['Layer_ID'].', this.value);set_changed_flag(gui.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" ';
+												echo 'onchange="update_require_attribute(\''.$attributes['req_by'][$j].'\', '.$k.','.$layer['Layer_ID'].', this.value);set_changed_flag(currentform.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" ';
 											}
 											else{
-												echo 'onchange="set_changed_flag(gui.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')"';
+												echo 'onchange="set_changed_flag(currentform.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')"';
 											}
 											echo 'id="'.$attributes['name'][$j].'_'.$k.'" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'">';
 											echo '<option value="">-- '.$this->strPleaseSelect.' --</option>';
@@ -80,7 +80,7 @@
 									}break;
 									
 									case 'Checkbox' : {
-										echo '<input type="checkbox" title="'.$attributes['alias'][$j].'" cols="45" onchange="set_changed_flag(gui.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')"';
+										echo '<input type="checkbox" title="'.$attributes['alias'][$j].'" cols="45" onchange="set_changed_flag(currentform.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')"';
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
 											echo ' readonly style="border:0px;background-color:transparent;"';
 										}
@@ -97,7 +97,7 @@
 										echo ' size="40" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$dataset[$attributes['name'][$j]].'">';
 										if($this->new_entry != true){
 											if($dataset[$attributes['name'][$j]] != ''){
-												echo '&nbsp;<a href="javascript:query_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
+												echo '&nbsp;<a href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
 												for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
 													echo '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$dataset[$attributes['subform_pkeys'][$j][$p]];
 													echo '&operator_'.$attributes['subform_pkeys'][$j][$p].'==';
@@ -149,7 +149,7 @@
 										echo ' type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$dataset[$attributes['name'][$j]].'">';
 										if($this->new_entry != true){
 											if($dataset[$attributes['name'][$j]] != ''){
-												echo '&nbsp;<a href="javascript:query_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
+												echo '&nbsp;<a href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
 												for($f = 0; $f < count($attribute_foreign_keys); $f++){
 													echo '&value_'.$attribute_foreign_keys[$f].'='.$dataset[$attribute_foreign_keys[$f]];
 													echo '&operator_'.$attribute_foreign_keys[$f].'==';
@@ -213,7 +213,7 @@
 													if($attributes['no_new_window'][$j] != true){
 														echo 	' target="_blank"';
 													}
-													echo ' href="" onclick="this.href=\'index.php?go=neuer_Layer_Datensatz';
+													echo ' href="javascript:overlay_link(\'go=neuer_Layer_Datensatz';
 													for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
 														echo '&attributenames['.$p.']='.$attributes['subform_pkeys'][$j][$p];
 														echo '&values['.$p.']=\'+document.getElementById(\''.$attributes['subform_pkeys'][$j][$p].'_'.$k.'\').value+\'';
@@ -222,7 +222,7 @@
 													echo '&oid='.$dataset[$attributes['table_name'][$attributes['subform_pkeys'][$j][0]].'_oid'];			# die oid des Datensatzes und die Layer-ID wird mit übergeben, für evtl. Zoom auf den Datensatz
 													echo '&tablename='.$attributes['table_name'][$attributes['the_geom']];											# dito
 													echo '&columnname='.$attributes['the_geom'];																								# dito
-													echo '&selected_layer_id='.$attributes['subform_layer_id'][$j].'\'">&nbsp;'.$strNewEmbeddedPK.'</a></td></tr></table>';
+													echo '&selected_layer_id='.$attributes['subform_layer_id'][$j].'\')">&nbsp;'.$strNewEmbeddedPK.'</a></td></tr></table>';
 												}
 											}
 										}
@@ -257,7 +257,7 @@
 
 										}
 										if($attributes['privileg'][$j] != '0' AND !$lock[$k]){
-											echo '<input onchange="set_changed_flag(gui.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" style="font-size: '.$this->user->rolle->fontsize_gle.'px" size="43" type="file" onchange="this.title=this.value;" accept="image/*" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'">';
+											echo '<input onchange="set_changed_flag(currentform.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" style="font-size: '.$this->user->rolle->fontsize_gle.'px" size="43" type="file" onchange="this.title=this.value;" accept="image/*" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'">';
 										}
 										else{
 											echo '&nbsp;';
@@ -276,7 +276,7 @@
 											echo '</a><br>';
 										}
 										if($attributes['privileg'][$j] != '0' OR $lock[$k]){
-											echo '<input onchange="set_changed_flag(gui.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" style="font-size: '.$this->user->rolle->fontsize_gle.'px" size="61" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.htmlspecialchars($dataset[$attributes['name'][$j]]).'">';
+											echo '<input onchange="set_changed_flag(currentform.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" style="font-size: '.$this->user->rolle->fontsize_gle.'px" size="61" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.htmlspecialchars($dataset[$attributes['name'][$j]]).'">';
 										}else{
 											echo '<input type="hidden" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.htmlspecialchars($dataset[$attributes['name'][$j]]).'">';
 										}
@@ -317,7 +317,7 @@
 									} break;
 
 									case 'Fläche': {
-										echo '<input onchange="set_changed_flag(gui.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" id="custom_area" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$attributes['alias'][$j].'" ';
+										echo '<input onchange="set_changed_flag(currentform.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" id="custom_area" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$attributes['alias'][$j].'" ';
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
 											echo ' readonly style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;"';
 										}
@@ -328,7 +328,7 @@
 									}break;
 									
 									case 'Länge': {
-										echo '<input onchange="set_changed_flag(gui.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" id="custom_length" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$attributes['alias'][$j].'" ';
+										echo '<input onchange="set_changed_flag(currentform.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" id="custom_length" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$attributes['alias'][$j].'" ';
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
 											echo ' readonly style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;"';
 										}
@@ -341,7 +341,7 @@
 									case 'Zahl': {
 										# bei Zahlen Tausendertrennzeichen einfügen 
 										$value = tausenderTrenner($dataset[$attributes['name'][$j]]);
-										echo '<input onchange="set_changed_flag(gui.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$attributes['alias'][$j].'" ';
+										echo '<input onchange="set_changed_flag(currentform.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$attributes['alias'][$j].'" ';
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
 											echo ' readonly style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;"';
 										}
@@ -359,7 +359,7 @@
 									
 									default : {
 										$value = $dataset[$attributes['name'][$j]];
-										echo '<input onchange="set_changed_flag(gui.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$attributes['alias'][$j].'" ';
+										echo '<input onchange="set_changed_flag(currentform.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$attributes['alias'][$j].'" ';
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
 											echo ' readonly style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;"';
 										}

@@ -71,7 +71,7 @@ function buildwktpolygonfromsvgpath(svgpath){
   <tr> 
     <td rowspan="7">&nbsp;</td>
     <td colspan="4" rowspan="7"> 
-      <?php
+      <?
 				include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php');
 			?>
     </td>

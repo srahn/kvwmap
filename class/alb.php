@@ -3705,8 +3705,11 @@ class ALB {
                   else {
                     $g_Grundstuecke++;
                   }
+								 }																																													# angepasst wegen WLDGE-Datei der WVG
+								 $FlurstKennz_altZ=$FlurstKennzZ;																														# angepasst wegen WLDGE-Datei der WVG
+								 $FlurstKennzZ=mb_substr($ze,1,23,'utf8');																									# angepasst wegen WLDGE-Datei der WVG
+								 if ($BuchungsKennz!=$BuchungsKennz_alt or $FlurstKennzZ!=$FlurstKennz_altZ) {							# angepasst wegen WLDGE-Datei der WVG
                   # Buchung des Flurstücks auf dem Grundstück
-                  $FlurstKennz=mb_substr($ze,1,23,'utf8');
                   $ErbbaurechtsHinw='';
                   $ret=$this->database->insertBuchung($FlurstKennz,$Bezirk,$Blatt,$BVNR,$ErbbaurechtsHinw);
                   if ($ret[0] AND DBWRITE) {

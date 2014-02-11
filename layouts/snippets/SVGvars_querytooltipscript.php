@@ -193,7 +193,7 @@ $SVGvars_querytooltipscript .= '
 			var tspan1;
 			var offsety = 16;
 			var offsetx = x;
-			var lines = text.split("~");
+			var lines = text.split("##");
 			for(l = 0; l < lines.length; l++){
 				if(lines[l].slice(0, 6) == "xlink:"){
 					link = document.getElementById("link0").cloneNode(true);

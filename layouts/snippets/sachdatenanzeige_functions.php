@@ -5,47 +5,59 @@ if($this->formvars['anzahl'] == ''){$this->formvars['anzahl'] = 0;}
 <script type="text/javascript">
 <!--
 
-<? if($this->user->rolle->gui == 'gui2.php'){ ?>
-	var gui = document.GUI2;
-<? }else{ ?>
-	var gui = document.GUI;
-<? } ?>
+	var geom_not_null = false;
 
+	function scrolltop(){
+		<? if($this->user->rolle->gui == 'gui2.php'){ ?>
+		document.getElementById('contentdiv').scrollTop = 0;
+		<? }else{ ?>
+		window.scrollTo(0,0);
+		<? } ?>
+	}
+	
+	function scrollbottom(){
+		<? if($this->user->rolle->gui == 'gui2.php'){ ?>
+		document.getElementById('contentdiv').scrollTop = document.getElementById('contentdiv').scrollHeight;
+		<? }else{ ?>
+		window.scrollTo(0, document.body.scrollHeight);
+		<? } ?>
+	}
+	
 	function nextquery(offset){
-		gui.target = '';
-		if(gui.go_backup.value != ''){
-			gui.go.value = gui.go_backup.value;
+		currentform.target = '';
+		if(currentform.go_backup.value != ''){
+			currentform.go.value = currentform.go_backup.value;
 		}
 		obj = document.getElementById(offset);
 		if(obj.value == '' || obj.value == undefined){
 			obj.value = 0;
 		}
 		obj.value = parseInt(obj.value) + <? echo $this->formvars['anzahl']; ?>;
-		query_submit(gui);
+		overlay_submit(currentform);
 	}
 
 	function prevquery(offset){
-		gui.target = '';
-		if(gui.go_backup.value != ''){
-			gui.go.value = gui.go_backup.value;
+		currentform.target = '';
+		if(currentform.go_backup.value != ''){
+			currentform.go.value = currentform.go_backup.value;
 		}
 		obj = document.getElementById(offset);
 		if(obj.value == '' || obj.value == undefined){
 			obj.value = 0;
 		}
 		obj.value = parseInt(obj.value) - <? echo $this->formvars['anzahl']; ?>;
-		query_submit(gui);
+		overlay_submit(currentform);
 	}
 
 	function back(){
-		gui.go.value = 'Layer-Suche';
-		gui.submit();
+		currentform.go.value = 'Layer-Suche';
+		currentform.submit();
 	}
 
 	function druck(){
-		gui.target = '_blank';
-		gui.printversion.value = 'true';
-		gui.submit();
+		currentform.target = '_blank';
+		currentform.printversion.value = 'true';
+		currentform.submit();
 	}
 
 	function checkDate(string){
@@ -64,9 +76,9 @@ if($this->formvars['anzahl'] == ''){$this->formvars['anzahl'] = 0;}
     	return false;
     }
 	}
-
+	
 	function save(){
-  	form_fieldstring = gui.form_field_names.value+'';
+  	form_fieldstring = currentform.form_field_names.value+'';
   	form_fields = form_fieldstring.split('|');
   	for(i = 0; i < form_fields.length-1; i++){
   		fieldstring = form_fields[i]+'';
@@ -80,11 +92,41 @@ if($this->formvars['anzahl'] == ''){$this->formvars['anzahl'] = 0;}
   			return;
   		}
   	}
-  	gui.go.value = 'Sachdaten_speichern';
+  	currentform.go.value = 'Sachdaten_speichern';
   	<? if($this->formvars['close_after_saving']){ ?>
-  		gui.close_window.value='true';
+  		currentform.close_window.value='true';
   	<?}?>
-  	query_submit(gui);
+  	overlay_submit(currentform);
+	}
+	
+	function save_new_dataset(){
+		if((geom_not_null && currentform.newpath.value == '' && currentform.loc_x == undefined) || (geom_not_null && currentform.loc_x != undefined && currentform.loc_x.value == '')){ 
+			alert('Sie haben keine Geometrie angegeben.');
+			return;
+		}
+  	form_fieldstring = currentform.form_field_names.value+'';
+  	form_fields = form_fieldstring.split('|');
+  	for(i = 0; i < form_fields.length; i++){
+  		fieldstring = form_fields[i]+'';
+  		field = fieldstring.split(';'); 
+  		if(document.getElementsByName(fieldstring)[0] != undefined && field[4] != 'Dokument' && field[4] != 'SubFormFK' && (document.getElementsByName(fieldstring)[0].readOnly != true) && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
+  			if(field[4] == 'TextFK'){
+			  	alert('Neuer Datensatz nicht im abhängigen Layer!\nGeben Sie neue Datensätze nur über den übergeordneten Layer ein.');
+				}else{
+			  	alert('Das Feld '+document.getElementsByName(fieldstring)[0].title+' erfordert eine Eingabe.');
+			  }
+  			return;
+  		}
+  		if(document.getElementsByName(fieldstring)[0] != undefined && field[6] == 'date' && field[4] != 'Time' && document.getElementsByName(fieldstring)[0].value != '' && !checkDate(document.getElementsByName(fieldstring)[0].value)){
+  			alert('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
+  			return;
+  		}
+  	}
+  	currentform.go.value = 'neuer_Layer_Datensatz_speichern';
+  	<? if($this->formvars['close_after_saving']){ ?>
+  		currentform.close_window.value='true';
+  	<?}?> 
+  	overlay_submit(currentform);
 	}
 
 	function subdelete_data(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data){

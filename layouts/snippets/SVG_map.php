@@ -94,7 +94,7 @@
   			'',
   			''
   		), 			 
-  		"xlink:href^src^src^setvalue^sethtml^setvalue^setvalue^setvalue^setvalue^setvalue^sethtml^points^execute_function^execute_function");
+  		"xlink:href~src~src~setvalue~sethtml~setvalue~setvalue~setvalue~setvalue~setvalue~sethtml~points~execute_function~execute_function");
 			
 			if(browser != 'firefox')moveback();
 			
@@ -170,14 +170,14 @@
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "ppquery";
-			query_submit(document.GUI);
+			overlay_submit(document.GUI);
      break;
      case "ppquery_box":
       top.document.GUI.searchradius.value = "";
       path = pathx[0]+","+pathy[0]+";"+pathx[2]+","+pathy[2];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "ppquery";
-      query_submit(document.GUI);
+      overlay_submit(document.GUI);
      break;
      case "pquery_polygon":
       path = pathx[0]+","+pathy[0]+";"+pathx[2]+","+pathy[2];
@@ -283,6 +283,9 @@ $svg='<?xml version="1.0"?>
 	var root = document.documentElement;
 	var mousewheelloop = 0;
 	var stopnavigation = false;
+	var currentTheta = 0;
+  var thetaDelta = 6; // The amount to rotate the square about every 16.7 milliseconds, in degrees.
+	var requestAnimationFrameID;
 	var last_x = 0;
   		
   ';
@@ -334,14 +337,34 @@ function startup(){';
 
 function sendpath(cmd, pathx, pathy){
 	document.getElementById("waitingimage").style.setProperty("visibility","visible", "");
-	document.getElementById("waiting_animation").beginElement();
+	//document.getElementById("waiting_animation").beginElement();
+	requestAnimationFrameID = requestAnimationFrame(doAnim); // Start the loop.
 	top.sendpath(cmd, pathx, pathy);
+}
+
+if (!window.requestAnimationFrame){ 
+	window.requestAnimationFrame = ( function(){
+		return window.webkitRequestAnimationFrame ||
+		window.mozRequestAnimationFrame ||
+		window.oRequestAnimationFrame ||
+		window.msRequestAnimationFrame ||
+		function( /* function FrameRequestCallback */ callback, /* DOMElement Element */ element ) {
+			window.setTimeout( callback, 1000 / 60 );
+		};	 
+	})();
+}
+
+function doAnim() {
+	if(currentTheta%30 == 0)document.getElementById("waitingimage").setAttribute("transform", "translate('.$res_xm.', '.$res_ym.') scale(0.3 0.3) rotate(" + currentTheta + ")"); 
+	currentTheta += thetaDelta;  
+	requestAnimationFrameID = requestAnimationFrame(doAnim); 
 }
 
 function stopwaiting(){
 	top.document.GUI.stopnavigation.value = 0;
 	document.getElementById("waitingimage").style.setProperty("visibility","hidden", "");
-	document.getElementById("waiting_animation").endElement();
+	//document.getElementById("waiting_animation").endElement();
+	cancelAnimationFrame(requestAnimationFrameID);
 }
 
 function mousewheelzoom(){
@@ -397,20 +420,18 @@ function getEventPoint(evt) {
 
 function init(){
 	startup();
-	if(navigator.appName == "Adobe SVG Viewer"){
+	if(top.browser == "other"){
 		//document.getElementById("mapimg2").addEventListener("load", function(evt) { moveback(); }, false);
 	}
 	else{
 		document.getElementById("mapimg2").addEventListener("load", function(evt) { moveback_ff(evt); }, true);
 	}
 	if(window.addEventListener){
-		if(navigator.userAgent.toLowerCase().indexOf(\'webkit\') >= 0)
-			window.addEventListener(\'mousewheel\', mousewheelchange, false); // Chrome/Safari
-		else
-  		window.addEventListener(\'DOMMouseScroll\', mousewheelchange, false);
+			window.addEventListener(\'mousewheel\', mousewheelchange, false); // Chrome/Safari//IE9
+  		window.addEventListener(\'DOMMouseScroll\', mousewheelchange, false);		//Firefox
   }
-  else{
-		top.document.getElementById("map").onmousewheel = mousewheelchange;
+  else{	
+		top.document.getElementById("map").onmousewheel = mousewheelchange;		// <=IE8
 	}
 }
 
@@ -1342,7 +1363,7 @@ if($_SESSION['mobile'] == 'true'){
 $svg.='
     </g>
   </g>
-	<g id="waitingimage" style="visibility:hidden" transform="translate('.$res_xm.', '.$res_ym.') scale(0.3 0.3)">
+	<g id="waitingimage" currentTheta="0" style="visibility:hidden" transform="translate('.$res_xm.', '.$res_ym.') scale(0.3 0.3)">
 		<g>
 	    <line id="line" x1="-165" y1="0" x2="-115" y2="0" stroke="#111" stroke-width="30" style="stroke-linecap:round"/>
 	    <use xlink:href="#line" transform="rotate(30,0,0)" style="opacity:.0833"/>
@@ -1357,9 +1378,9 @@ $svg.='
 	    <use xlink:href="#line" transform="rotate(300,0,0)" style="opacity:.8333"/>
 	    <use xlink:href="#line" transform="rotate(330,0,0)" style="opacity:.9166"/>
 	    
-	    <animateTransform id="waiting_animation" attributeName="transform" attributeType="XML" type="rotate" begin="indefinite" end="indefinite" dur="1s" repeatCount="indefinite" calcMode="discrete"
+	    <!--animateTransform id="waiting_animation" attributeName="transform" attributeType="XML" type="rotate" begin="indefinite" end="indefinite" dur="1s" repeatCount="indefinite" calcMode="discrete"
 	    keyTimes="0;.0833;.166;.25;.3333;.4166;.5;.5833;.6666;.75;.8333;.9166;1"
-	    values="0,0,0;30,0,0;60,0,0;90,0,0;120,0,0;150,0,0;180,0,0;210,0,0;240,0,0;270,0,0;300,0,0;330,0,0;360,0,0"/>
+	    values="0,0,0;30,0,0;60,0,0;90,0,0;120,0,0;150,0,0;180,0,0;210,0,0;240,0,0;270,0,0;300,0,0;330,0,0;360,0,0"/-->
     </g>
   </g>
 	<g id="mapimg2_group">

@@ -5,11 +5,11 @@
 	include(SNIPPETS.'sachdatenanzeige_functions.php'); 
 	
  ?>
-
+	<a name="oben"></a>
   <br/>
   <h2><u>Sachdaten:</u></h2>
   <table border="0" cellpadding="10" cellspacing="0" width="100%">
-  	<tr><td align="right"><a href="#unten"><img title="nach unten" src="<? echo GRAPHICSPATH; ?>pfeil.gif" width="11" height="11" border="0"></a></td></tr>
+  	<tr><td align="right"><a href="javascript:scrollbottom();"><img title="nach unten" src="<? echo GRAPHICSPATH; ?>pfeil.gif" width="11" height="11" border="0"></a></td></tr>
   </table>
 <?php
 $anzLayer=count($this->qlayerset);
@@ -90,7 +90,7 @@ for($i=0;$i<$anzLayer;$i++){
     <tr>
     	<td>&nbsp;</td>
       <td align="center" width="100%"><input type="button" class="button" name="savebutton" value="<? echo $strSave; ?>" onclick="save();">&nbsp;<input class="button" type="reset" value="Zurücksetzen"></td>
-      <td align="right"><a href="#oben"><img title="nach oben" src="<? echo GRAPHICSPATH; ?>pfeil2.gif" width="11" height="11" border="0"></a></td>
+      <td align="right"><a href="javascript:scrolltop();"><img title="nach oben" src="<? echo GRAPHICSPATH; ?>pfeil2.gif" width="11" height="11" border="0"></a></td>
     </tr>
   </table>
 <?
@@ -100,7 +100,7 @@ for($i=0;$i<$anzLayer;$i++){
     <tr>
     	<td>&nbsp;</td>
       <td>&nbsp;</td>
-      <td align="right"><a href="#oben"><img title="nach oben" src="<? echo GRAPHICSPATH; ?>pfeil2.gif" width="11" height="11" border="0"></a></td>
+      <td align="right"><a href="javascript:scrolltop();"><img title="nach oben" src="<? echo GRAPHICSPATH; ?>pfeil2.gif" width="11" height="11" border="0"></a></td>
     </tr>
   </table>
 <?	}
