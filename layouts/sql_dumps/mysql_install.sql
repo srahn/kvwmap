@@ -629,6 +629,7 @@ CREATE TABLE rolle (
   `always_draw` BOOLEAN NULL,
   `runningcoords` BOOLEAN NOT NULL DEFAULT 0,
   `singlequery` BOOLEAN NOT NULL DEFAULT 0,
+	`querymode` BOOLEAN NOT NULL DEFAULT  0,
   PRIMARY KEY  (user_id,stelle_id)
 );
 

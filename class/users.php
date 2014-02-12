@@ -862,25 +862,15 @@ class user extends user_core{
 			$sql.=',language="'.$formvars['language'].'"';
 			$sql.=',charset="'.$formvars['charset'].'"';
 			if($formvars['fontsize_gle'])$sql.=',fontsize_gle="'.$formvars['fontsize_gle'].'"';
-			if($formvars['highlighting'] != ''){
-				$sql.=',highlighting="1"';
-			}
-			else{
-				$sql.=',highlighting="0"';
-			}
+			if($formvars['highlighting'] != '')	$sql.=',highlighting="1"';
+			else $sql.=',highlighting="0"';
 			$sql.=',result_color="'.$formvars['result_color'].'"';
-			if($formvars['runningcoords'] != ''){
-				$sql.=',runningcoords="1"';
-			}
-			else{
-				$sql.=',runningcoords="0"';
-			}
-			if($formvars['singlequery'] != ''){
-				$sql.=',singlequery="1"';
-			}
-			else{
-				$sql.=',singlequery="0"';
-			}
+			if($formvars['runningcoords'] != '') $sql.=',runningcoords="1"';
+			else	$sql.=',runningcoords="0"';
+			if($formvars['singlequery'] != '') $sql.=',singlequery="1"';
+			else $sql.=',singlequery="0"';
+			if($formvars['querymode'] != '') $sql.=',querymode="1"';
+			else $sql.=',querymode="0"';
 			if($formvars['back']){$buttons .= 'back,';}
 			if($formvars['forward']){$buttons .= 'forward,';}
 			if($formvars['zoomin']){$buttons .= 'zoomin,';}
@@ -1324,26 +1314,58 @@ class rolle extends rolle_core{
 		}
 	}
 
+	function getRollenLayer($LayerName) {
+    $sql ='SELECT l.*, -l.id as Layer_ID FROM rollenlayer AS l';
+    $sql.=' WHERE l.stelle_id = '.$this->stelle_id.' AND l.user_id = '.$this->user_id;
+    if ($LayerName!='') {
+      $sql.=' AND (l.Name LIKE "'.$LayerName.'" ';
+      if(is_numeric($LayerName)){
+        $sql.='OR l.id = "'.$LayerName.'")';
+      }
+      else{
+        $sql.=')';
+      }
+    }
+    #echo $sql.'<br>';
+    $this->debug->write("<p>file:users.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
+    $query=mysql_query($sql,$this->database->dbConn);
+    if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+    while ($rs=mysql_fetch_array($query)) {
+      $layer[]=$rs;
+    }
+    return $layer;
+  }
+	
 	function resetLayers($layer_id){
+		$mapdb = new db_mapObj($this->stelle_id, $this->user_id);
 		$sql ="UPDATE u_rolle2used_layer SET aktivStatus='0'";
 		$sql.=" WHERE user_id=".$this->user_id." AND stelle_id=".$this->stelle_id;
-		if($layer_id != '')$sql.=" AND layer_id = ".$layer_id;
-		$this->debug->write("<p>file:users.php class:rolle->resetLayers - resetten aller aktiven Layer zur Rolle:",4);
-		$this->database->execSQL($sql,4, $this->loglevel);
-		$mapdb = new db_mapObj($this->stelle_id, $this->user_id);
-		$rollenlayerset = $mapdb->read_RollenLayer();
-		for($i = 0; $i < count($rollenlayerset); $i++){
-			if($formvars['thema_rolle'.$rollenlayerset[$i]['id']] == 0){
-				$mapdb->deleteRollenLayer($rollenlayerset[$i]['id']);
-				# auch die Klassen und styles löschen
-				foreach($rollenlayerset[$i]['Class'] as $class){
-					$mapdb->delete_Class($class['Class_ID']);
-					foreach($class['Style'] as $style){
-						$mapdb->delete_Style($style['Style_ID']);
+		if($layer_id != ''){
+			if($layer_id > 0){
+				$sql.=" AND layer_id = ".$layer_id;					# 1 normaler Layer soll deaktiviert werden
+			}
+			else{
+				$mapdb->deleteRollenLayer(-$layer_id);			# 1 Rollenlayer soll deaktiviert=gelöscht werden
+				return;
+			}
+		}
+		else{
+			$rollenlayerset = $mapdb->read_RollenLayer();					# wenn alle Layer deaktiviert werden sollen, auch alle Rollenlayer löschen
+			for($i = 0; $i < count($rollenlayerset); $i++){
+				if($formvars['thema_rolle'.$rollenlayerset[$i]['id']] == 0){
+					$mapdb->deleteRollenLayer($rollenlayerset[$i]['id']);
+					# auch die Klassen und styles löschen
+					foreach($rollenlayerset[$i]['Class'] as $class){
+						$mapdb->delete_Class($class['Class_ID']);
+						foreach($class['Style'] as $style){
+							$mapdb->delete_Style($style['Style_ID']);
+						}
 					}
 				}
 			}
 		}
+		$this->debug->write("<p>file:users.php class:rolle->resetLayers - resetten aller aktiven Layer zur Rolle:",4);
+		$this->database->execSQL($sql,4, $this->loglevel);		
 	}
 
 	function resetQuerys($layer_id){

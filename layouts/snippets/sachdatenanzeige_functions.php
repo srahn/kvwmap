@@ -8,7 +8,7 @@ if($this->formvars['anzahl'] == ''){$this->formvars['anzahl'] = 0;}
 	var geom_not_null = false;
 
 	function scrolltop(){
-		<? if($this->user->rolle->gui == 'gui2.php'){ ?>
+		<? if($this->user->rolle->querymode == 1){ ?>
 		document.getElementById('contentdiv').scrollTop = 0;
 		<? }else{ ?>
 		window.scrollTo(0,0);
@@ -16,7 +16,7 @@ if($this->formvars['anzahl'] == ''){$this->formvars['anzahl'] = 0;}
 	}
 	
 	function scrollbottom(){
-		<? if($this->user->rolle->gui == 'gui2.php'){ ?>
+		<? if($this->user->rolle->querymode == 1){ ?>
 		document.getElementById('contentdiv').scrollTop = document.getElementById('contentdiv').scrollHeight;
 		<? }else{ ?>
 		window.scrollTo(0, document.body.scrollHeight);

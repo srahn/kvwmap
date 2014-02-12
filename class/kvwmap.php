@@ -12955,6 +12955,7 @@ class GUI extends GUI_core{
 				$length = $end - $start;
 				$layername = substr($error, $start, $length);
 				$layer = $this->user->rolle->getLayer($layername);
+				if($layer == NULL)$layer = $this->user->rolle->getRollenLayer($layername);
 				break;
 			}
 		}

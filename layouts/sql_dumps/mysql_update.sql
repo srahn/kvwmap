@@ -1146,6 +1146,7 @@ ALTER TABLE `rolle` CHANGE `coordtype` `coordtype` ENUM('dec', 'dms', 'dmin') NO
 ALTER TABLE  `druckfreitexte` CHANGE  `text`  `text` TEXT DEFAULT NULL;	
 
 ALTER TABLE  `rolle` ADD  `singlequery` BOOLEAN NOT NULL DEFAULT  '0';
+ALTER TABLE  `rolle` ADD  `querymode` BOOLEAN NOT NULL DEFAULT  '0';
 
 ALTER TABLE  `styles` ADD  `gap` INT( 11 ) NULL ,
 ADD  `linecap` VARCHAR( 8 ) NULL ,

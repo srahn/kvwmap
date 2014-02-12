@@ -125,7 +125,7 @@ function deactivate_overlay(){
 
 function overlay_submit(gui){
 	// diese Funktion macht im Overlay-Modus einen ajax-Request mit den Formulardaten des uebergebenen Formularobjektes, ansonsten einen normalen Submit
-	<? if($this->user->rolle->gui == 'gui2.php'){ ?>
+	<? if($this->user->rolle->querymode == 1){ ?>
 	formdata = formSerialize(gui);
 	ahah("<? echo URL.APPLVERSION.'index.php'; ?>", formdata+"&mime_type=overlay_html", new Array(document.getElementById('contentdiv'), '', ''), "sethtml~execute_function~execute_function");	
 	document.GUI.CMD.value = "";
@@ -136,7 +136,7 @@ function overlay_submit(gui){
 
 function overlay_link(data){
 	// diese Funktion macht im Overlay-Modus einen ajax-Request mit den übergebenen Daten, ansonsten wird das Ganze wie ein normaler Link aufgerufen
-	<? if($this->user->rolle->gui == 'gui2.php'){ ?>
+	<? if($this->user->rolle->querymode == 1){ ?>
 	ahah("<? echo URL.APPLVERSION.'index.php'; ?>", data+"&mime_type=overlay_html", new Array(document.getElementById('contentdiv'), '', ''), "sethtml~execute_function~execute_function");	
 	document.GUI.CMD.value = "";
 	<? }else{ ?>
