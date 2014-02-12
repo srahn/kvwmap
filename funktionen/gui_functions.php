@@ -119,6 +119,7 @@ function activate_overlay(){
 }
 
 function deactivate_overlay(){
+	document.getElementById('contentdiv').scrollTop = 0;
 	document.getElementById('overlaydiv').style.display='none';
 }
 

@@ -37,7 +37,7 @@
 		// alles ok, nix machen
 		}
 		else{
-			document.write('Ihr Browser hat keine SVG-Unterst&uuml;tzung. Bitte installieren Sie den <a target="_blank" href="http://www.adobe.com/svg/viewer/install/">Adobe SVG Viewer</a> oder verwenden Sie den Firefox Browser.');
+			document.write('Ihr Browser hat keine SVG-Unterst&uuml;tzung. Bitte installieren Sie den <a target="_blank" href="http://www.adobe.com/devnet/svg/adobe-svg-viewer-download-area.html">Adobe SVG Viewer</a> oder verwenden Sie den Firefox Browser.');
 		}
 	</script>
 		   
@@ -352,6 +352,12 @@ if (!window.requestAnimationFrame){
 			window.setTimeout( callback, 1000 / 60 );
 		};	 
 	})();
+}
+
+if (!window.cancelAnimationFrame){
+	window.cancelAnimationFrame = function(id) {
+		clearTimeout(id);
+	};
 }
 
 function doAnim() {
