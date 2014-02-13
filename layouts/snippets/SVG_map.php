@@ -94,7 +94,7 @@
   			'',
   			''
   		), 			 
-  		"xlink:href~src~src~setvalue~sethtml~setvalue~setvalue~setvalue~setvalue~setvalue~sethtml~points~execute_function~execute_function");
+  		new Array("xlink:href", "src", "src", "setvalue", "sethtml", "setvalue", "setvalue", "setvalue", "setvalue", "setvalue", "sethtml", "points", "execute_function", "execute_function"));
 			
 			if(browser != 'firefox')moveback();
 			
@@ -215,7 +215,6 @@
   include(LAYOUTPATH.'snippets/SVGvars_querytooltipscript.php');   # zuweisen von: $SVGvars_tooltipscript
   include(LAYOUTPATH.'snippets/SVGvars_tooltipscript.php');   # zuweisen von: $SVGvars_tooltipscript 
   include(LAYOUTPATH.'snippets/SVGvars_tooltipblank.php');    # zuweisen von: $SVGvars_tooltipblank
- 	include(LAYOUTPATH.'snippets/ahah.php');
   $bg_pic   = $this->img['hauptkarte'];
   $res_x    = $this->map->width;
   $res_y    = $this->map->height;
@@ -1039,7 +1038,7 @@ function toggle_vertices(){
 
 function add_vertices(){
 	get_vertices_loop = window.setInterval("get_vertices()", 200);
-	top.ahah("'.URL.APPLVERSION.'index.php", "go=getSVG_vertices&scale="+top.document.getElementById("scale").value, new Array(top.document.GUI.vertices), "setvalue");
+	top.ahah("'.URL.APPLVERSION.'index.php", "go=getSVG_vertices&scale="+top.document.getElementById("scale").value, new Array(top.document.GUI.vertices), new Array("setvalue"));
 }
 
 function get_vertices(){

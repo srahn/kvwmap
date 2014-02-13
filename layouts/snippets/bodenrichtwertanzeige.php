@@ -183,7 +183,7 @@ function update_require_attribute(attributes, k,layer_id, value){
 		type = document.getElementById(attribute[i]+'_'+k).type;
 		if(type == 'text'){action = 'setvalue'};
 		if(type == 'select-one'){action = 'sethtml'};
-		ahah("<? echo URL.APPLVERSION; ?>index.php", "go=get_select_list&layer_id="+layer_id+"&attribute="+attribute[i]+"&value="+value+"&type="+type, new Array(document.getElementById(attribute[i]+'_'+k)), action);
+		ahah("<? echo URL.APPLVERSION; ?>index.php", "go=get_select_list&layer_id="+layer_id+"&attribute="+attribute[i]+"&value="+value+"&type="+type, new Array(document.getElementById(attribute[i]+'_'+k)), new Array(action));
 	}
 }
 
@@ -378,7 +378,7 @@ function change_orderby(attribute, layer_id){
 											if($this->qlayerset[$i]['attributes']['subform_layer_id'][$j] != ''){
 												if($this->qlayerset[$i]['attributes']['subform_layer_privileg'][$j] > 0){
 													if($this->qlayerset[$i]['attributes']['embedded'][$j] == true){
-														echo '<a href="javascript:ahah(\''.URL.APPLVERSION.'index.php\', \'go=neuer_Layer_Datensatz&selected_layer_id='.$this->qlayerset[$i]['attributes']['subform_layer_id'][$j].'&embedded=true&fromobject=subform'.$this->qlayerset[$i]['Layer_ID'].'_'.$k.'_'.$j.'&targetobject='.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'&targetlayer_id='.$this->qlayerset[$i]['Layer_ID'].'&targetattribute='.$this->qlayerset[$i]['attributes']['name'][$j].'\', new Array(document.getElementById(\'subform'.$this->qlayerset[$i]['Layer_ID'].'_'.$k.'_'.$j.'\')), \'sethtml\');clearsubforms();">&nbsp;neu</a>';
+														echo '<a href="javascript:ahah(\''.URL.APPLVERSION.'index.php\', \'go=neuer_Layer_Datensatz&selected_layer_id='.$this->qlayerset[$i]['attributes']['subform_layer_id'][$j].'&embedded=true&fromobject=subform'.$this->qlayerset[$i]['Layer_ID'].'_'.$k.'_'.$j.'&targetobject='.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'&targetlayer_id='.$this->qlayerset[$i]['Layer_ID'].'&targetattribute='.$this->qlayerset[$i]['attributes']['name'][$j].'\', new Array(document.getElementById(\'subform'.$this->qlayerset[$i]['Layer_ID'].'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'));clearsubforms();">&nbsp;neu</a>';
 														echo '<div style="display:inline" id="subform'.$this->qlayerset[$i]['Layer_ID'].'_'.$k.'_'.$j.'"></div>';
 													}
 													else{
@@ -515,7 +515,7 @@ function change_orderby(attribute, layer_id){
 													}
 													$data .= '&preview_attribute='.$this->qlayerset[$i]['attributes']['preview_attribute'][$j];
 													echo '&data='.str_replace('&', '<und>', $data);
-													echo '&selected_layer_id='.$this->qlayerset[$i]['attributes']['subform_layer_id'][$j].'&embedded=true&fromobject=subform'.$this->qlayerset[$i]['Layer_ID'].'_'.$k.'_'.$j.'&targetobject='.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'&targetlayer_id='.$this->qlayerset[$i]['Layer_ID'].'&targetattribute='.$this->qlayerset[$i]['attributes']['name'][$j].'\', new Array(document.getElementById(\'subform'.$this->qlayerset[$i]['Layer_ID'].'_'.$k.'_'.$j.'\')), \'sethtml\');clearsubforms();">&nbsp;<? echo $strNewEmbeddedPK; ?></a></td></tr></table>';
+													echo '&selected_layer_id='.$this->qlayerset[$i]['attributes']['subform_layer_id'][$j].'&embedded=true&fromobject=subform'.$this->qlayerset[$i]['Layer_ID'].'_'.$k.'_'.$j.'&targetobject='.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'&targetlayer_id='.$this->qlayerset[$i]['Layer_ID'].'&targetattribute='.$this->qlayerset[$i]['attributes']['name'][$j].'\', new Array(document.getElementById(\'subform'.$this->qlayerset[$i]['Layer_ID'].'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'));clearsubforms();">&nbsp;<? echo $strNewEmbeddedPK; ?></a></td></tr></table>';
 													echo '<div style="display:inline" id="subform'.$this->qlayerset[$i]['Layer_ID'].'_'.$k.'_'.$j.'"></div>';
 												}
 												else{
@@ -595,7 +595,7 @@ function change_orderby(attribute, layer_id){
 											$href = str_replace('$'.$explosion2[0], $this->qlayerset[$i]['shape'][$k][$explosion2[0]], $href);
 										}
 										if($explosion[2] == 'embedded'){
-											echo '<a href="javascript:if(document.getElementById(\'dynamicLink'.$this->qlayerset[$i]['Layer_ID'].'_'.$k.'_'.$j.'\').innerHTML != \'\'){clearsubform(\'dynamicLink'.$this->qlayerset[$i]['Layer_ID'].'_'.$k.'_'.$j.'\');} else {ahah(\''.$href.'\', \'\', new Array(document.getElementById(\'dynamicLink'.$this->qlayerset[$i]['Layer_ID'].'_'.$k.'_'.$j.'\')), \'sethtml\')}">';
+											echo '<a href="javascript:if(document.getElementById(\'dynamicLink'.$this->qlayerset[$i]['Layer_ID'].'_'.$k.'_'.$j.'\').innerHTML != \'\'){clearsubform(\'dynamicLink'.$this->qlayerset[$i]['Layer_ID'].'_'.$k.'_'.$j.'\');} else {ahah(\''.$href.'\', \'\', new Array(document.getElementById(\'dynamicLink'.$this->qlayerset[$i]['Layer_ID'].'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'))}">';
 											echo $alias;
 											echo '</a><br>';
 											echo '<div style="display:inline" id="dynamicLink'.$this->qlayerset[$i]['Layer_ID'].'_'.$k.'_'.$j.'"></div>';

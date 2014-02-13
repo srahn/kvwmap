@@ -1,3 +1,7 @@
+<?php
+  include(LAYOUTPATH.'snippets/ahah.php');
+  echo $ahah;
+?>
 <script language="javascript" type="text/javascript">
 
 function ImageLoadFailed(id) {
@@ -127,7 +131,7 @@ function overlay_submit(gui){
 	// diese Funktion macht im Overlay-Modus einen ajax-Request mit den Formulardaten des uebergebenen Formularobjektes, ansonsten einen normalen Submit
 	<? if($this->user->rolle->querymode == 1){ ?>
 	formdata = formSerialize(gui);
-	ahah("<? echo URL.APPLVERSION.'index.php'; ?>", formdata+"&mime_type=overlay_html", new Array(document.getElementById('contentdiv'), '', ''), "sethtml~execute_function~execute_function");	
+	ahah("<? echo URL.APPLVERSION.'index.php'; ?>", formdata+"&mime_type=overlay_html", new Array(document.getElementById('contentdiv'), '', ''), new Array("sethtml", "execute_function", "execute_function"));	
 	document.GUI.CMD.value = "";
 	<? }else{ ?>
 	document.GUI.submit();

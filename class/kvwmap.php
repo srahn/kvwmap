@@ -11764,7 +11764,25 @@ class GUI extends GUI_core{
       if(!$show){
         return NULL;
       }
-      $pfad = substr(trim($path), 7);
+      
+			$distinctpos = strpos(strtolower($path), 'distinct');
+			if($distinctpos !== false && $distinctpos < 10){
+				$pfad = substr(trim($path), $distinctpos+8);
+				$distinct = true;
+			}
+			else{
+				$pfad = substr(trim($path), 7);
+			}
+			$j = 0;
+			foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
+				if($layerset[$i]['attributes']['oids'][$j]){      # hat Tabelle oids?
+					$pfad = $layerset[$i]['attributes']['table_alias_name'][$tablename].'.oid AS '.$tablename.'_oid, '.$pfad;
+				}
+				$j++;
+			}
+			if($distinct == true){
+				$pfad = 'DISTINCT '.$pfad;
+			}
 
       /*if(strpos(strtolower($pfad), 'as the_geom') !== false){
         $the_geom = 'query.the_geom';
@@ -11783,46 +11801,52 @@ class GUI extends GUI_core{
       //}
       
       //$the_geom = $layerset[$i]['attributes']['the_geom'];
+				
+				# Aktueller EPSG in der die Abfrage ausgeführt wurde
+				$client_epsg=$this->user->rolle->epsg_code;
+				# EPSG-Code des Layers der Abgefragt werden soll
+				$layer_epsg=$layerset[$i]['epsg_code'];
+				
+			if($rect->minx != ''){		################ Kartenabfrage ################
+				$showdata = 'true';
+				switch ($layerset[$i]['toleranceunits']) {
+					case 'pixels' : $pixsize=$this->user->rolle->pixsize; break;
+					case 'meters' : $pixsize=1; break;
+					default : $pixsize=$this->user->rolle->pixsize;
+				}
+				$rand=$layerset[$i]['tolerance']*$pixsize;
+				# Bildung der Where-Klausel für die räumliche Abfrage mit der searchbox
+				$loosesearchbox_wkt ="POLYGON((";
+				$loosesearchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->miny-$rand).",";
+				$loosesearchbox_wkt.=strval($rect->maxx+$rand)." ".strval($rect->miny-$rand).",";
+				$loosesearchbox_wkt.=strval($rect->maxx+$rand)." ".strval($rect->maxy+$rand).",";
+				$loosesearchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->maxy+$rand).",";
+				$loosesearchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->miny-$rand)."))";
 
-      switch ($layerset[$i]['toleranceunits']) {
-        case 'pixels' : $pixsize=$this->user->rolle->pixsize; break;
-        case 'meters' : $pixsize=1; break;
-        default : $pixsize=$this->user->rolle->pixsize;
-      }
-      $rand=$layerset[$i]['tolerance']*$pixsize;
-      
-      # Aktueller EPSG in der die Abfrage ausgeführt wurde
-      $client_epsg=$this->user->rolle->epsg_code;
-      # EPSG-Code des Layers der Abgefragt werden soll
-      $layer_epsg=$layerset[$i]['epsg_code'];
-      # Bildung der Where-Klausel für die räumliche Abfrage mit der searchbox
-      $loosesearchbox_wkt ="POLYGON((";
-      $loosesearchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->miny-$rand).",";
-      $loosesearchbox_wkt.=strval($rect->maxx+$rand)." ".strval($rect->miny-$rand).",";
-      $loosesearchbox_wkt.=strval($rect->maxx+$rand)." ".strval($rect->maxy+$rand).",";
-      $loosesearchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->maxy+$rand).",";
-      $loosesearchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->miny-$rand)."))";
+				# Wenn das Koordinatenssystem des Views anders ist als vom Layer wird die Suchbox und die Suchgeometrie
+				# in epsg des layers transformiert
+				if ($client_epsg!=$layer_epsg) {
+					$sql_where =" AND ".$the_geom." && st_transform(st_geomfromtext('".$loosesearchbox_wkt."',".$client_epsg."),".$layer_epsg.")";
+				}
+				else {
+					$sql_where =" AND ".$the_geom." && st_geomfromtext('".$loosesearchbox_wkt."',".$client_epsg.")";
+				}
 
-
-      # Wenn das Koordinatenssystem des Views anders ist als vom Layer wird die Suchbox und die Suchgeometrie
-      # in epsg des layers transformiert
-      if ($client_epsg!=$layer_epsg) {
-        $sql_where =" AND ".$the_geom." && st_transform(st_geomfromtext('".$loosesearchbox_wkt."',".$client_epsg."),".$layer_epsg.")";
-      }
-      else {
-        $sql_where =" AND ".$the_geom." && st_geomfromtext('".$loosesearchbox_wkt."',".$client_epsg.")";
-      }
-
-      # Wenn es sich bei der Suche um eine punktuelle Suche handelt, wird die where Klausel um eine
-      if($rect->minx==$rect->maxx AND $rect->miny==$rect->maxy AND $this->querypolygon == ''){
-        if ($client_epsg!=$layer_epsg) {
-          $sql_where.=" AND st_distance(".$the_geom.",st_transform(st_geomfromtext('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."),".$layer_epsg."))";
-        }
-        else {
-          $sql_where.=" AND st_distance(".$the_geom.",st_geomfromtext('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."))";
-        }
-        $sql_where.=" <= ".$rand;
-      }
+				# Wenn es sich bei der Suche um eine punktuelle Suche handelt, wird die where Klausel um eine
+				if($rect->minx==$rect->maxx AND $rect->miny==$rect->maxy AND $this->querypolygon == ''){
+					if ($client_epsg!=$layer_epsg) {
+						$sql_where.=" AND st_distance(".$the_geom.",st_transform(st_geomfromtext('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."),".$layer_epsg."))";
+					}
+					else {
+						$sql_where.=" AND st_distance(".$the_geom.",st_geomfromtext('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."))";
+					}
+					$sql_where.=" <= ".$rand;
+				}
+			}
+			else{		################ mouseover auf Datensatz in Sachdatenanzeige ################
+				$showdata = 'false';
+				$sql_where = " AND ".$layerset[$i]['maintable']."_oid = ".$this->formvars['oid'];
+			}
       
       # SVG-Geometrie abfragen für highlighting
       if($this->user->rolle->highlighting == '1'){
@@ -11922,7 +11946,7 @@ class GUI extends GUI_core{
       }
       # highlighting-Geometrie anfügen
       $output .= '||| '.$this->qlayerset[0]['shape'][0]['highlight_geom'];
-      echo umlaute_javascript(umlaute_html($output));
+      echo umlaute_javascript(umlaute_html($output)).'~showtooltip(top.document.GUI.result.value, '.$showdata.');';
     }
   }
 
@@ -12884,33 +12908,35 @@ class GUI extends GUI_core{
   }
 
 	function create_query_rect($input_coords){
-		$corners=explode(';', $input_coords);
-    if(count($corners) < 3){
-      $lo=explode(',',$corners[0]); # linke obere Ecke in Bildkoordinaten von links oben gesehen
-      $ru=explode(',',$corners[1]); # reche untere Ecke des Auswahlbereiches in Bildkoordinaten von links oben gesehen
-      $width=$this->user->rolle->pixsize*($ru[0]-$lo[0]); # Breite des Auswahlbereiches in m
-      $height=$this->user->rolle->pixsize*($ru[1]-$lo[1]); # Höhe des Auswahlbereiches in m
-      #echo 'Abfragerechteck im Bild: '.$lo[0].' '.$lo[1].' '.$ru[0].' '.$ru[1];
-      # linke obere Ecke im Koordinatensystem in m
-      $minx=$this->user->rolle->oGeorefExt->minx+$this->user->rolle->pixsize*$lo[0]; # x Wert
-      $miny=$this->user->rolle->oGeorefExt->miny+$this->user->rolle->pixsize*($this->user->rolle->nImageHeight-$ru[1]); # y Wert
-      $maxx=$minx+$width;
-      $maxy=$miny+$height;
-      $rect=ms_newRectObj();
-      $rect->setextent($minx,$miny,$maxx,$maxy);
-    }
-    else{
-      $polygon = 'POLYGON((';
-      for($i = 0; $i < count($corners); $i++){
-        $coord = explode(',',$corners[$i]);
-        $coordx[$i] = $this->user->rolle->oGeorefExt->minx+$this->user->rolle->pixsize*$coord[0];
-        $coordy[$i] = $this->user->rolle->oGeorefExt->miny+$this->user->rolle->pixsize*($coord[1]);
-        $polygon .= $coordx[$i].' '.$coordy[$i].',';
-      }
-      $polygon .= $coordx[0].' '.$coordy[0].'))';
-      $rect = $polygon;
-    }
-		return $rect;
+		if($input_coords != ''){
+			$corners=explode(';', $input_coords);
+			if(count($corners) < 3){
+				$lo=explode(',',$corners[0]); # linke obere Ecke in Bildkoordinaten von links oben gesehen
+				$ru=explode(',',$corners[1]); # reche untere Ecke des Auswahlbereiches in Bildkoordinaten von links oben gesehen
+				$width=$this->user->rolle->pixsize*($ru[0]-$lo[0]); # Breite des Auswahlbereiches in m
+				$height=$this->user->rolle->pixsize*($ru[1]-$lo[1]); # Höhe des Auswahlbereiches in m
+				#echo 'Abfragerechteck im Bild: '.$lo[0].' '.$lo[1].' '.$ru[0].' '.$ru[1];
+				# linke obere Ecke im Koordinatensystem in m
+				$minx=$this->user->rolle->oGeorefExt->minx+$this->user->rolle->pixsize*$lo[0]; # x Wert
+				$miny=$this->user->rolle->oGeorefExt->miny+$this->user->rolle->pixsize*($this->user->rolle->nImageHeight-$ru[1]); # y Wert
+				$maxx=$minx+$width;
+				$maxy=$miny+$height;
+				$rect=ms_newRectObj();
+				$rect->setextent($minx,$miny,$maxx,$maxy);
+			}
+			else{
+				$polygon = 'POLYGON((';
+				for($i = 0; $i < count($corners); $i++){
+					$coord = explode(',',$corners[$i]);
+					$coordx[$i] = $this->user->rolle->oGeorefExt->minx+$this->user->rolle->pixsize*$coord[0];
+					$coordy[$i] = $this->user->rolle->oGeorefExt->miny+$this->user->rolle->pixsize*($coord[1]);
+					$polygon .= $coordx[$i].' '.$coordy[$i].',';
+				}
+				$polygon .= $coordx[0].' '.$coordy[0].'))';
+				$rect = $polygon;
+			}
+			return $rect;
+		}
 	}
 	
   function queryMap() {

@@ -2,7 +2,6 @@
 	$randomnumber = rand(0, 1000000);
 	$svgfile  = $randomnumber.'SVG_dokumentenformular.svg';
 	include(LAYOUTPATH.'snippets/SVG_Utilities.php');
-  echo $ahah;
 ?>
 
 <div id="map">

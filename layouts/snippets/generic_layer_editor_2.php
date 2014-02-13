@@ -42,9 +42,13 @@
 ?>
 	<tr>
 	  <td>
-	    <div id="datensatz">
+	    <div id="datensatz" 
+			<? if($this->user->rolle->querymode == 1){ ?>
+			onmouseenter="ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=tooltip_query&querylayer_id=<? echo $layer['Layer_ID']; ?>&oid=<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>', new Array(top.document.GUI.result, ''), new Array('setvalue', 'execute_function'));"
+			<? } ?>
+			>
 	    <input type="hidden" value="" name="changed_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
-	    <table class="tgle" <? if($attributes['group'][0] != ''){echo 'border="0" cellpadding="6" cellspacing="0"';}else{echo 'border="1"';} ?>>
+	    <table id="dstable" class="tgle" <? if($attributes['group'][0] != ''){echo 'border="0" cellpadding="6" cellspacing="0"';}else{echo 'border="1"';} ?>>
 	      <thead class="gle">
 	        <th colspan="2" style="background-color:<? echo BG_GLEHEADER; ?>;">
 			  <? if($this->new_entry != true AND $this->formvars['printversion'] == ''){ ?>
@@ -289,8 +293,8 @@
  ?>
 			</tbody>
 			</table>
-			<br>
 			</div>
+			<br>
 		</td>
 	</tr>
 <?

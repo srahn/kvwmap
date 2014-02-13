@@ -34,7 +34,7 @@
   		// data_r += '&'+form_fields[i]+'='+document.getElementsByName(form_fields[i])[0].value;
   	// }
   	// data = 'go=Sachdaten_speichern&selected_layer_id='+layer_id+'&fromobject='+fromobject+'&targetobject='+targetobject+'&targetlayer_id='+targetlayer_id+'&targetattribute='+targetattribute+'&data='+data+'&form_field_names='+form_fieldstring+'&embedded=true' + data_r;
-		// ahah('<? echo URL.APPLVERSION; ?>index.php', data, new Array(document.getElementById(fromobject), document.getElementById(targetobject)), 'sethtml');
+		// ahah('<? echo URL.APPLVERSION; ?>index.php', data, new Array(document.getElementById(fromobject), document.getElementById(targetobject)), new Array('sethtml'));
 	// }
 	
 	//function subsave_new_layer_data(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data){
@@ -61,7 +61,7 @@
   		// data_r += '&'+form_fields[i]+'='+document.getElementsByName(form_fields[i])[0].value;
   	// }
   	// data = 'go=neuer_Layer_Datensatz_speichern&selected_layer_id='+layer_id+'&fromobject='+fromobject+'&targetobject='+targetobject+'&targetlayer_id='+targetlayer_id+'&targetattribute='+targetattribute+'&data='+data+'&form_field_names='+form_fieldstring+'&embedded=true' + data_r;
-		// ahah('<? echo URL.APPLVERSION; ?>index.php', data, new Array(document.getElementById(fromobject), document.getElementById(targetobject)), 'sethtml');
+		// ahah('<? echo URL.APPLVERSION; ?>index.php', data, new Array(document.getElementById(fromobject), document.getElementById(targetobject)), new Array('sethtml'));
 	// }
 	  
 //-->

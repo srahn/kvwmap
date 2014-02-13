@@ -97,7 +97,12 @@
 	for ($k=0;$k<$anzObj;$k++) {
 		$checkbox_names .= 'check;'.$attributes['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].'|';
 ?>
-	<tr>
+	<input type="hidden" value="" name="changed_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
+	<tr 
+	<? if($this->user->rolle->querymode == 1){ ?>
+		onmouseenter="ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=tooltip_query&querylayer_id=<? echo $layer['Layer_ID']; ?>&oid=<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>', new Array(top.document.GUI.result, ''), new Array('setvalue', 'execute_function'));"
+	<? } ?>
+	>
 		<td style="background-color:<? echo BG_GLEHEADER; ?>;">
 		  <? if($this->new_entry != true AND $this->formvars['printversion'] == ''){ ?>
 		  <table>

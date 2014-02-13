@@ -2636,7 +2636,7 @@ $vertex_catch_functions = '
 
 	function add_foreign_vertices(){
 		get_vertices_loop = window.setInterval("get_foreign_vertices()", 200);
-		top.ahah("'.URL.APPLVERSION.'index.php", "go=getSVG_foreign_vertices&layer_id="+top.currentform.layer_id.value+"&oid="+top.currentform.oid.value, new Array(top.currentform.vertices), "setvalue");
+		top.ahah("'.URL.APPLVERSION.'index.php", "go=getSVG_foreign_vertices&layer_id="+top.currentform.layer_id.value+"&oid="+top.currentform.oid.value, new Array(top.currentform.vertices), new Array("setvalue"));
 	}
 
 	function remove_foreign_vertices(){

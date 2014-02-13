@@ -19,6 +19,10 @@ function stopwaiting(){
 	document.getElementById("svghelp").SVGstopwaiting();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 }
 
+function showtooltip(result, showdata){
+	document.getElementById("svghelp").SVGshowtooltip(result, showdata);			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+}
+
 function resizemap2window() {
   if(typeof(window.innerWidth) == 'number'){
     width = window.innerWidth;

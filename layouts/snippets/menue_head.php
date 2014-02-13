@@ -1,9 +1,3 @@
-<?php
-  # 2008-01-11 pk
-  include(LAYOUTPATH.'snippets/ahah.php');
-  echo $ahah;    
-?>
-
 <script type="text/javascript">
 function Bestaetigung(link,text) {
   Check = confirm(text);
