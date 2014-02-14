@@ -120,6 +120,8 @@ function drag(event) {
 
 function activate_overlay(){
 	document.getElementById('overlaydiv').style.display='';
+	svgdoc = document.SVG.getSVGDocument();	
+	svgdoc.getElementById('polygon').setAttribute("points", "");
 }
 
 function deactivate_overlay(){

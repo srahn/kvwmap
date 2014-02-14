@@ -143,27 +143,27 @@
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "pquery";
-      document.GUI.submit();
+      overlay_submit(document.GUI, true);
      break;
      case "pquery_box":
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "pquery";
-      document.GUI.submit();
+      overlay_submit(document.GUI, true);
      break;
      case "touchquery_point":
      	top.document.GUI.searchradius.value = "";
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "touchquery";
-      document.GUI.submit();
+      overlay_submit(document.GUI, true);
      break;
      case "touchquery_box":
      	top.document.GUI.searchradius.value = "";
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "touchquery";
-      document.GUI.submit();
+      overlay_submit(document.GUI, true);
      break;
      case "ppquery_point":
       top.document.GUI.searchradius.value = "";
@@ -183,7 +183,7 @@
       path = pathx[0]+","+pathy[0]+";"+pathx[2]+","+pathy[2];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "pquery";
-      document.GUI.submit();
+      overlay_submit(document.GUI, true);
      break;
      case "polygonquery":
      	for(i = 0; i < pathx.length-1; i++){
@@ -192,7 +192,7 @@
      	path = path+pathx[i]+","+pathy[i];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "polygonquery";
-      document.GUI.submit();
+      overlay_submit(document.GUI, true);
      break;
      default:
       path = pathx[0]+","+pathy[0];
@@ -336,7 +336,6 @@ function startup(){';
 
 function sendpath(cmd, pathx, pathy){
 	document.getElementById("waitingimage").style.setProperty("visibility","visible", "");
-	//document.getElementById("waiting_animation").beginElement();
 	requestAnimationFrameID = requestAnimationFrame(doAnim); // Start the loop.
 	top.sendpath(cmd, pathx, pathy);
 }

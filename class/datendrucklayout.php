@@ -97,7 +97,7 @@ class ddl {
 		return $remaining_freetexts;
 	}
 	
-	function add_attribute_elements($selected_layer_id, $attributes, $attributenames, $offsetx, $offsety, $i, $i_on_page, $preview){
+	function add_attribute_elements($selected_layer_id, $layerdb, $attributes, $attributenames, $oids, $offsetx, $offsety, $i, $i_on_page, $preview){
 		# $attributes ist das gesamte Attribute-Objekt
 		# $attributenames ist ein Array der Attributnamen, die geschrieben werden sollen
 		# es wird ein Array mit den Attributnamen zurückgegeben, die nicht gschrieben werden konnten
@@ -349,7 +349,7 @@ class ddl {
 			$remaining_attributes = $this->attributes['name'];		# zum Anfang sind alle Attribute noch zu schreiben
 			$test = 0;
 			while($test < 100 AND count($remaining_attributes) > 0){
-				$remaining_attributes = $this->add_attribute_elements($selected_layer_id, $this->attributes, $remaining_attributes, $offsetx, $offsety, $i, $i_on_page, $preview);	# übrig sind die, die noch nicht geschrieben wurden, weil sie abhängig sind
+				$remaining_attributes = $this->add_attribute_elements($selected_layer_id, $layerdb, $this->attributes, $remaining_attributes, $oids, $offsetx, $offsety, $i, $i_on_page, $preview);	# übrig sind die, die noch nicht geschrieben wurden, weil sie abhängig sind
 				$test++;
 			}			
 			################# Daten schreiben ###############
