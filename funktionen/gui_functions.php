@@ -127,25 +127,25 @@ function deactivate_overlay(){
 	document.getElementById('overlaydiv').style.display='none';
 }
 
-function overlay_submit(gui){
-	// diese Funktion macht im Overlay-Modus einen ajax-Request mit den Formulardaten des uebergebenen Formularobjektes, ansonsten einen normalen Submit
-	<? if($this->user->rolle->querymode == 1){ ?>
-	formdata = formSerialize(gui);
-	ahah("<? echo URL.APPLVERSION.'index.php'; ?>", formdata+"&mime_type=overlay_html", new Array(document.getElementById('contentdiv'), '', ''), new Array("sethtml", "execute_function", "execute_function"));	
-	document.GUI.CMD.value = "";
-	<? }else{ ?>
-	document.GUI.submit();
-	<? } ?>
+function overlay_submit(gui, start){
+	// diese Funktion macht beim Fenstermodus und einer Kartenabfrage oder einem Aufruf aus dem Overlay-Fenster einen ajax-Request mit den Formulardaten des uebergebenen Formularobjektes, ansonsten einen normalen Submit
+	if(1 == <? echo $this->user->rolle->querymode; ?> && start || gui.name == 'GUI2'){
+		formdata = formSerialize(gui);
+		ahah("<? echo URL.APPLVERSION.'index.php'; ?>", formdata+"&mime_type=overlay_html", new Array(document.getElementById('contentdiv'), '', ''), new Array("sethtml", "execute_function", "execute_function"));	
+		document.GUI.CMD.value = "";
+	}else{
+		document.GUI.submit();
+	}
 }
 
 function overlay_link(data){
-	// diese Funktion macht im Overlay-Modus einen ajax-Request mit den übergebenen Daten, ansonsten wird das Ganze wie ein normaler Link aufgerufen
-	<? if($this->user->rolle->querymode == 1){ ?>
-	ahah("<? echo URL.APPLVERSION.'index.php'; ?>", data+"&mime_type=overlay_html", new Array(document.getElementById('contentdiv'), '', ''), "sethtml~execute_function~execute_function");	
-	document.GUI.CMD.value = "";
-	<? }else{ ?>
-	window.location.href = 'index.php?'+data;
-	<? } ?>
+	// diese Funktion macht bei Aufruf aus dem Overlay-Fenster einen ajax-Request mit den übergebenen Daten, ansonsten wird das Ganze wie ein normaler Link aufgerufen
+	if(currentform.name == 'GUI2'){
+		ahah("<? echo URL.APPLVERSION.'index.php'; ?>", data+"&mime_type=overlay_html", new Array(document.getElementById('contentdiv'), '', ''), "sethtml~execute_function~execute_function");	
+		document.GUI.CMD.value = "";
+	}else{
+		window.location.href = 'index.php?'+data;
+	}
 }
 
 function update_legend(layerhiddenstring){

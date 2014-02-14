@@ -123,7 +123,7 @@ $SVGvars_querytooltipscript .= '
 		 	}
 		}		
 				
-		window.setInterval("tooltip_query()", 200);
+		window.setInterval("tooltip_query()", 50);
 		
 		function cleartext(object){
 			while(object.childNodes.length > 0){

@@ -30,6 +30,7 @@
 	<input name="gps_pos" type="hidden" value="<? echo $this->formvars['gps_pos'] ?>">
 	<input name="pathx_second" type="hidden" value="<?php echo $this->formvars['pathx_second']; ?>">
 	<input name="pathy_second" type="hidden" value="<?php echo $this->formvars['pathy_second']; ?>">
+	<input type="hidden" name="svghelp" id="svghelp">
 	<?
 	if($this->formvars['last_button'] == '' or $this->formvars['last_doing'] == ''){
 		$this->formvars['last_button'] = 'recentre0';

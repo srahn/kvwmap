@@ -2,6 +2,19 @@
  # 2008-01-24 pkvvm
   include(LAYOUTPATH.'languages/SVG_Utilities_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
  ?>
+ 
+<script language="JavaScript">
+
+	function update_geometry(){
+		document.getElementById("svghelp").SVGupdate_geometry();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+	}
+	
+	function show_foreign_vertices(){
+		document.getElementById("svghelp").SVGshow_foreign_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+	}
+
+</script>
+ 
 <?php
 
 	include(LAYOUTPATH.'snippets/SVGvars_navbuttons.php'); 		# zuweisen von: $SVGvars_navbuttons
@@ -122,6 +135,9 @@
 	var root = document.documentElement;
 	var mousewheelloop = 0;
 	var stopnavigation = false;
+	var currentTheta = 0;
+  var thetaDelta = 6; // The amount to rotate the square about every 16.7 milliseconds, in degrees.
+	var requestAnimationFrameID;
 	';
 
 	$polygonANDpoint = '
@@ -137,8 +153,26 @@
 	function submit(){
 		top.currentform.stopnavigation.value = 1;
 		document.getElementById("waitingimage").style.setProperty("visibility","visible", "");
-		document.getElementById("waiting_animation").beginElement();
-		top.overlay_submit(top.currentform);
+		requestAnimationFrameID = requestAnimationFrame(doAnim); // Start the loop.
+		top.overlay_submit(top.currentform, false);
+	}
+	
+	function doAnim() {
+		if(currentTheta%30 == 0)document.getElementById("waitingimage").setAttribute("transform", "translate('.$res_xm.', '.$res_ym.') scale(0.3 0.3) rotate(" + currentTheta + ")"); 
+		currentTheta += thetaDelta;  
+		requestAnimationFrameID = requestAnimationFrame(doAnim); 
+	}
+	
+	if (!window.requestAnimationFrame){ 
+		window.requestAnimationFrame = ( function(){
+			return window.webkitRequestAnimationFrame ||
+			window.mozRequestAnimationFrame ||
+			window.oRequestAnimationFrame ||
+			window.msRequestAnimationFrame ||
+			function( /* function FrameRequestCallback */ callback, /* DOMElement Element */ element ) {
+				window.setTimeout( callback, 1000 / 60 );
+			};	 
+		})();
 	}
 	
 	function go_previous(){
@@ -478,15 +512,13 @@
 		return p;
 	}
  	
-	function startup(){
+	function startup(){		
 		if(window.addEventListener){
-			if(navigator.userAgent.toLowerCase().indexOf(\'webkit\') >= 0)
-				window.addEventListener(\'mousewheel\', mousewheelchange, false); // Chrome/Safari
-			else
-	  		window.addEventListener(\'DOMMouseScroll\', mousewheelchange, false);
-	  }
-	  else{
-			top.document.getElementById("map").onmousewheel = mousewheelchange;
+			window.addEventListener(\'mousewheel\', mousewheelchange, false); // Chrome/Safari//IE9
+  		window.addEventListener(\'DOMMouseScroll\', mousewheelchange, false);		//Firefox
+		}
+		else{	
+			top.document.getElementById("map").onmousewheel = mousewheelchange;		// <=IE8
 		}
 		if(measurefunctions == true){
 			get_measure_path();
@@ -637,21 +669,21 @@
 			case "draw_second_line":
 				addlinepoint_second(world_x, world_y);
 				if(top.currentform.secondline.value == "true"){
-					top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=add&geotype=line&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result), "");
+					top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=add&geotype=line&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
 				}
 				redrawsecondline();
 			break;
 			case "delete_lines":
 				addpoint_second(world_x, world_y);
 				if(top.currentform.secondpoly.value == "true"){
-					top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=subtract&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result), "");
+					top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=subtract&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
 				}
 				redrawsecondline();
 			break;
 			case "split_lines":
 				addlinepoint_second(world_x, world_y);
 				if(top.currentform.secondline.value == "true"){
-					top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&geotype=line&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=subtract&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result), "");
+					top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&geotype=line&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=subtract&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
 				}
 				redrawsecondline();
 			break;
@@ -663,13 +695,13 @@
 			case "draw_second_polygon":
 				addpoint_second(world_x, world_y);
 				if(top.currentform.secondpoly.value == "true"){
-					top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=add&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result), "");
+					top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=add&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
 				}
 			break;
 			case "subtract_polygon":
 				addpoint_second(world_x, world_y);
 				if(top.currentform.secondpoly.value == "true"){
-					top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=subtract&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result), "");
+					top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=subtract&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
 				}
 			break;
 			case "add_geom":
@@ -757,7 +789,7 @@ function mouseup(evt){
 		endPoint(evt);
 		top.currentform.secondpoly.value = "true";
 		if(top.currentform.last_doing.value == "add_geom"){
-			top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&input_coord="+top.currentform.INPUT_COORD.value+"&operation=add_geometry&resulttype=svgwkt&fromwhere="+top.currentform.fromwhere.value+"&columnname="+top.currentform.columnname.value+"&layer_id="+top.currentform.layer_id.value,new Array(top.currentform.result), "");
+			top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&input_coord="+top.currentform.INPUT_COORD.value+"&operation=add_geometry&resulttype=svgwkt&fromwhere="+top.currentform.fromwhere.value+"&columnname="+top.currentform.columnname.value+"&layer_id="+top.currentform.layer_id.value,new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
 			if(polygonfunctions == true){
 				top.currentform.firstpoly.value = "true";
 			}
@@ -767,7 +799,7 @@ function mouseup(evt){
 		}
 		else{
 			if(top.currentform.last_doing.value == "subtract_geom"){
-				top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&input_coord="+top.currentform.INPUT_COORD.value+"&operation=subtract_geometry&resulttype=svgwkt&fromwhere="+top.currentform.fromwhere.value+"&columnname="+top.currentform.columnname.value+"&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result), "");
+				top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&input_coord="+top.currentform.INPUT_COORD.value+"&operation=subtract_geometry&resulttype=svgwkt&fromwhere="+top.currentform.fromwhere.value+"&columnname="+top.currentform.columnname.value+"&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
 			}
 		}
 	}
@@ -926,7 +958,7 @@ function mouseup(evt){
 
 	linefunctions = true;
 
-	window.setInterval("update_geometry()", 100);
+	top.document.getElementById("svghelp").SVGupdate_geometry = update_geometry;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
 	function update_geometry(){
 		if(top.currentform.secondline.value == "true" || top.currentform.secondpoly.value == "true"){
@@ -1140,7 +1172,7 @@ function mouseup(evt){
 					top.currentform.pathy_second.value = str.substring(0, str.lastIndexOf(";"));
 					path_second = buildsvglinepath(pathx_second,pathy_second);
 					if(top.currentform.secondline.value == "true"){
-						top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=add&geotype=line&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result), "");
+						top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=add&geotype=line&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
 					}
 					redrawsecondline();
 				}
@@ -1787,12 +1819,12 @@ function mouseup(evt){
 			top.currentform.secondpoly.value = true;
 			top.currentform.firstpoly.value = true;
 		  if(top.currentform.newpathwkt.value != ""){
-		  	top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+top.currentform.newpathwkt.value+"&width="+buffer+"&operation=buffer&resulttype=svgwkt", new Array(top.currentform.result), "");
+		  	top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+top.currentform.newpathwkt.value+"&width="+buffer+"&operation=buffer&resulttype=svgwkt", new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
 		  }
 		  else{
 		  	if(top.currentform.newpath.value != ""){
 		  		newpath = buildwktpolygonfromsvgpath(top.currentform.newpath.value);
-		  		top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+newpath+"&width="+buffer+"&operation=buffer&resulttype=svgwkt", new Array(top.currentform.result), "");
+		  		top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+newpath+"&width="+buffer+"&operation=buffer&resulttype=svgwkt", new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
 		  	}
 		  }
 		}
@@ -1834,7 +1866,7 @@ function mouseup(evt){
 
 	polygonfunctions = true;
 
-	window.setInterval("update_geometry()", 100);
+	top.document.getElementById("svghelp").SVGupdate_geometry = update_geometry;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
 	function update_geometry(){
 		if(top.currentform.secondpoly.value == "true"){
@@ -2483,11 +2515,11 @@ function mouseup(evt){
 					top.currentform.pathy_second.value = str.substring(0, str.lastIndexOf(";"));
 					path_second = buildsvgpath(pathx_second,pathy_second);
 					if(top.currentform.last_doing.value == "draw_second_polygon"){
-						top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=add&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result), "");
+						top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=add&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
 					}
 					else{
 						if(top.currentform.last_doing.value == "subtract_polygon"){				
-							top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=subtract&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result), "");
+							top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=subtract&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
 						}
 					}
 					redrawsecondpolygon();
@@ -2627,16 +2659,15 @@ $vertex_catch_functions = '
 
 	function toggle_vertices(){
 		if(top.currentform.punktfang.checked){
-			add_foreign_vertices();
+			request_foreign_vertices();
 		}
 		else{
 			remove_foreign_vertices();
 		}
 	}
 
-	function add_foreign_vertices(){
-		get_vertices_loop = window.setInterval("get_foreign_vertices()", 200);
-		top.ahah("'.URL.APPLVERSION.'index.php", "go=getSVG_foreign_vertices&layer_id="+top.currentform.layer_id.value+"&oid="+top.currentform.oid.value, new Array(top.currentform.vertices), new Array("setvalue"));
+	function request_foreign_vertices(){
+		top.ahah("'.URL.APPLVERSION.'index.php", "go=getSVG_foreign_vertices&layer_id="+top.currentform.layer_id.value+"&oid="+top.currentform.oid.value, new Array(top.currentform.vertices, ""), new Array("setvalue", "execute_function"));
 	}
 
 	function remove_foreign_vertices(){
@@ -2683,11 +2714,12 @@ $vertex_catch_functions = '
 	  	mousedown(position);
 			mouse_coords_type = "image";
 		}  
-	}	
+	}
 
-	function get_foreign_vertices(){
+	top.document.getElementById("svghelp").SVGshow_foreign_vertices = show_foreign_vertices;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+
+	function show_foreign_vertices(){
 		if(top.currentform.vertices.value != ""){
-			window.clearInterval(get_vertices_loop);
 			var parent = document.getElementById("foreignvertices");
 			circle = new Array();
 			var kreis1 = document.getElementById("kreis3");
@@ -2927,9 +2959,9 @@ $measurefunctions = '
 		    <use xlink:href="#line" transform="rotate(300,0,0)" style="opacity:.8333"/>
 		    <use xlink:href="#line" transform="rotate(330,0,0)" style="opacity:.9166"/>
 		    
-		    <animateTransform id="waiting_animation" attributeName="transform" attributeType="XML" type="rotate" begin="indefinite" dur="1s" repeatCount="indefinite" calcMode="discrete"
+		    <!--animateTransform id="waiting_animation" attributeName="transform" attributeType="XML" type="rotate" begin="indefinite" dur="1s" repeatCount="indefinite" calcMode="discrete"
 		    keyTimes="0;.0833;.166;.25;.3333;.4166;.5;.5833;.6666;.75;.8333;.9166;1"
-		    values="0,0,0;30,0,0;60,0,0;90,0,0;120,0,0;150,0,0;180,0,0;210,0,0;240,0,0;270,0,0;300,0,0;330,0,0;360,0,0"/>
+		    values="0,0,0;30,0,0;60,0,0;90,0,0;120,0,0;150,0,0;180,0,0;210,0,0;240,0,0;270,0,0;300,0,0;330,0,0;360,0,0"/-->
 	    </g>
 	  </g>
 	  <g id="templates">

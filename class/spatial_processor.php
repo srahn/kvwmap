@@ -289,8 +289,11 @@ class spatial_processor {
 			}break;
 			
 		}
-		if($formvars['resulttype'] != 'wkt' AND $formvars['operation'] != 'area' AND $formvars['operation'] != 'length'){
-			$result = $this->transformCoordsSVG($result);
+		if(!in_array($formvars['operation'], array('area', 'length', 'transformPoint', 'transform'))){
+			if($formvars['resulttype'] != 'wkt'){
+				$result = $this->transformCoordsSVG($result);
+			}
+			$result .= '~update_geometry();';
 		}
 		echo $result;
 	}

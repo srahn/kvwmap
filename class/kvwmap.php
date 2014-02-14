@@ -294,6 +294,7 @@ class GUI extends GUI_core{
         	while ($rs=pg_fetch_array($ret[1])){
           	echo $rs[0].' '.$rs[1].'|';
           }
+					echo '~show_vertices();';
         }
 			}
 		} 
@@ -338,6 +339,7 @@ class GUI extends GUI_core{
       	while ($rs=pg_fetch_array($ret[1])){
         	echo $rs[0].' '.$rs[1].'|';
         }
+				echo '~show_foreign_vertices();';
       }
 		} 
 	}
@@ -9359,6 +9361,7 @@ class GUI extends GUI_core{
 	function check_nachweis_poly(){
 		$this->nachweis = new Nachweis($this->pgdatabase, $this->user->rolle->epsg_code);
 		echo $this->nachweis->check_poly_in_flur($this->formvars['umring'], $this->formvars['flur'], $this->formvars['gemkgschl'], $this->user->rolle->epsg_code);
+		echo '~check_poly();';
 	}
 
   function nachweisFormSenden() {

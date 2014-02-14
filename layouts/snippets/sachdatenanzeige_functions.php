@@ -6,6 +6,14 @@ if($this->formvars['anzahl'] == ''){$this->formvars['anzahl'] = 0;}
 <!--
 
 	var geom_not_null = false;
+	
+	function update_geometry(){
+		document.getElementById("svghelp").SVGupdate_geometry();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+	}
+	
+	function show_foreign_vertices(){
+		document.getElementById("svghelp").SVGshow_foreign_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+	}
 
 	function scrolltop(){
 		<? if($this->user->rolle->querymode == 1){ ?>
@@ -33,7 +41,7 @@ if($this->formvars['anzahl'] == ''){$this->formvars['anzahl'] = 0;}
 			obj.value = 0;
 		}
 		obj.value = parseInt(obj.value) + <? echo $this->formvars['anzahl']; ?>;
-		overlay_submit(currentform);
+		overlay_submit(currentform, false);
 	}
 
 	function prevquery(offset){
@@ -46,7 +54,7 @@ if($this->formvars['anzahl'] == ''){$this->formvars['anzahl'] = 0;}
 			obj.value = 0;
 		}
 		obj.value = parseInt(obj.value) - <? echo $this->formvars['anzahl']; ?>;
-		overlay_submit(currentform);
+		overlay_submit(currentform, false);
 	}
 
 	function back(){
@@ -96,7 +104,7 @@ if($this->formvars['anzahl'] == ''){$this->formvars['anzahl'] = 0;}
   	<? if($this->formvars['close_after_saving']){ ?>
   		currentform.close_window.value='true';
   	<?}?>
-  	overlay_submit(currentform);
+  	overlay_submit(currentform, false);
 	}
 	
 	function save_new_dataset(){
@@ -126,7 +134,7 @@ if($this->formvars['anzahl'] == ''){$this->formvars['anzahl'] = 0;}
   	<? if($this->formvars['close_after_saving']){ ?>
   		currentform.close_window.value='true';
   	<?}?> 
-  	overlay_submit(currentform);
+  	overlay_submit(currentform, false);
 	}
 
 	function subdelete_data(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data){

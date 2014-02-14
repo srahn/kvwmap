@@ -170,14 +170,14 @@
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "ppquery";
-			overlay_submit(document.GUI);
+			overlay_submit(document.GUI, true);
      break;
      case "ppquery_box":
       top.document.GUI.searchradius.value = "";
       path = pathx[0]+","+pathy[0]+";"+pathx[2]+","+pathy[2];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "ppquery";
-      overlay_submit(document.GUI);
+      overlay_submit(document.GUI, true);
      break;
      case "pquery_polygon":
       path = pathx[0]+","+pathy[0]+";"+pathx[2]+","+pathy[2];
@@ -1027,23 +1027,23 @@ function polygonarea(evt){
 
 top.document.getElementById("vertices").SVGtoggle_vertices = toggle_vertices;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
+top.document.getElementById("vertices").SVGshow_vertices = show_vertices;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+
 function toggle_vertices(){
 	if(top.document.GUI.punktfang.checked){
-		add_vertices();
+		request_vertices();
 	}
 	else{
 		remove_vertices();
 	}
 }
 
-function add_vertices(){
-	get_vertices_loop = window.setInterval("get_vertices()", 200);
-	top.ahah("'.URL.APPLVERSION.'index.php", "go=getSVG_vertices&scale="+top.document.getElementById("scale").value, new Array(top.document.GUI.vertices), new Array("setvalue"));
+function request_vertices(){
+	top.ahah("'.URL.APPLVERSION.'index.php", "go=getSVG_vertices&scale="+top.document.getElementById("scale").value, new Array(top.document.GUI.vertices, ""), new Array("setvalue", "execute_function"));
 }
 
-function get_vertices(){
+function show_vertices(){
 	if(top.document.GUI.vertices.value != ""){
-		window.clearInterval(get_vertices_loop);
 		var parent = document.getElementById("vertices");
 		circle = new Array();
 		kreis1 = document.getElementById("kreis");
