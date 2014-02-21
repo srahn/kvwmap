@@ -17,6 +17,7 @@ if($this->user->rolle->querymode == 1){				# im Fenstermodus müssen diese Javasc
 <? include(WWWROOT.APPLVERSION.'funktionen/msgboxes.php'); ?>
 </HEAD>
 <BODY onload="onload_functions();">
+	<a name="oben"></a>
   <table width="900" align="center" border="0" cellspacing="0" cellpadding="0">
     <tr>
       <td align="center" valign="top">

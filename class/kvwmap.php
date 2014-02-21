@@ -6257,7 +6257,7 @@ class GUI extends GUI_core{
 					if($this->formvars['offset_'.$layerset[0]['Layer_ID']] == '')$this->formvars['offset_'.$layerset[0]['Layer_ID']] = $this->last_query[$layerset[0]['Layer_ID']]['offset'];
 				}
 		
-        if($this->formvars['embedded_subformPK'] == ''){
+        if($this->formvars['embedded_subformPK'] == '' AND $this->formvars['embedded'] == '' AND $this->formvars['embedded_dataPDF'] == ''){
         	if($this->formvars['anzahl'] == ''){
 	          $this->formvars['anzahl'] = MAXQUERYROWS;
 	        }
@@ -6265,8 +6265,8 @@ class GUI extends GUI_core{
         	if($this->formvars['offset_'.$layerset[0]['Layer_ID']] != ''){
           	$sql_limit.=' OFFSET '.$this->formvars['offset_'.$layerset[0]['Layer_ID']];
         	}
-				$this->user->rolle->delete_last_query();
-				$this->user->rolle->save_last_query('Layer-Suche_Suchen', $this->formvars['selected_layer_id'], $sql, $sql_order, $this->formvars['anzahl'], $this->formvars['offset_'.$layerset[0]['Layer_ID']]);
+					$this->user->rolle->delete_last_query();
+					$this->user->rolle->save_last_query('Layer-Suche_Suchen', $this->formvars['selected_layer_id'], $sql, $sql_order, $this->formvars['anzahl'], $this->formvars['offset_'.$layerset[0]['Layer_ID']]);
         }
 		
 				$layerset[0]['sql'] = $sql;
@@ -13362,10 +13362,11 @@ class FormObject {
   #
   ################################################################################
 
-  function FormObject($name,$type,$value,$selectedValue,$label,$size,$maxlenght,$multiple, $width) {
+  function FormObject($name,$type,$value,$selectedValue,$label,$size,$maxlenght,$multiple, $width, $disabled = NULL) {
     if (!is_array($selectedValue)) { $selectedValue=array($selectedValue); }
     $this->type=$type;
     $this->width=$width;
+		$this->disabled=$disabled;
     switch ($type) {
       case "select" : {
         if($value){
@@ -13457,6 +13458,9 @@ class FormObject {
         $this->html ="<select name='".$this->select["name"]."' size='".$this->select["size"]."' ";
         if($this->width > 0){
           $this->html.="style='width:".$this->width."px'";
+        }
+				if($this->disabled){
+          $this->html.=' disabled="true" ';
         }
         if ($this->select["multiple"]) {
           $this->html.=" multiple";

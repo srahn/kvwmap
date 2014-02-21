@@ -224,7 +224,7 @@ function change_orderby(attribute, layer_id){
 	else{
 		document.getElementById('orderby'+layer_id).value = attribute;
 	}
-	currentform.submit();
+	overlay_submit(currentform);
 }
 
 function set_changed_flag(flag){

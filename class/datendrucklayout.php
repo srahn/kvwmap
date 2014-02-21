@@ -62,16 +62,17 @@ class ddl {
 		if(count($this->remaining_freetexts) == 0)return;
     for($j = 0; $j < count($this->layout['texts']); $j++){
 			# der Freitext wurde noch nicht geschrieben und ist entweder ein fester Freitext oder ein fortlaufender
-    	if(in_array($this->layout['texts'][$j]['id'], $this->remaining_freetexts)){
+    	if(in_array($this->layout['texts'][$j]['id'], $this->remaining_freetexts) AND $this->layout['texts'][$j]['posy'] > 0){	# nur Freitexte mit einem y-Wert werden geschrieben
 				if(($type == 'fixed' AND ($this->layout['type'] == 0 OR $this->layout['texts'][$j]['type'] == 1)) OR ($type == 'running' AND $this->layout['type'] != 0 AND $this->layout['texts'][$j]['type'] == 0)){
 					$this->pdf->selectFont($this->layout['texts'][$j]['font']);								
 					$x = $this->layout['texts'][$j]['posx'];
 					$ypos = $this->layout['texts'][$j]['posy'];
 					$offset_attribute = $this->layout['texts'][$j]['offset_attribute'];
 					if($offset_attribute != ''){			# ist ein offset_attribute gesetzt
-						if($this->layout['offset_attributes'][$offset_attribute] != ''){		# dieses Attribut wurde auch schon geschrieben, d.h. dessen y-Position ist bekannt -> Freitext relativ dazu setzen
-							$ypos = $this->layout['offset_attributes'][$offset_attribute] - $ypos;
-						}						
+						$offset_value = $this->layout['offset_attributes'][$offset_attribute];
+						if($offset_value != ''){																							# dieses Attribut wurde auch schon geschrieben, d.h. dessen y-Position ist bekannt -> Freitext relativ dazu setzen
+							$ypos = $this->handlePageOverflow($offset_attribute, $offset_value, $ypos);		# Seitenüberläufe berücksichtigen
+						}
 						else{
 							$remaining_freetexts[] = $this->layout['texts'][$j]['id'];
 							continue;			# der Freitext ist abhängig aber das Attribut noch nicht geschrieben, Freitext merken und überspringen
@@ -88,6 +89,8 @@ class ddl {
 					}
 					$text = utf8_decode($this->substituteFreitext($this->layout['texts'][$j]['text'], $i));
 					$this->putText($text, $this->layout['texts'][$j]['size'], NULL, $x, $y, $offsetx);
+					# falls in eine alte Seite geschrieben wurde, zurückkehren
+					$this->pdf->closeObject();
 				}
 				else{
 					$remaining_freetexts[] = $this->layout['texts'][$j]['id'];
@@ -97,13 +100,10 @@ class ddl {
 		return $remaining_freetexts;
 	}
 	
-	function add_attribute_elements($selected_layer_id, $layerdb, $attributes, $attributenames, $oids, $offsetx, $offsety, $i, $i_on_page, $preview){
-		# $attributes ist das gesamte Attribute-Objekt
-		# $attributenames ist ein Array der Attributnamen, die geschrieben werden sollen
-		# es wird ein Array mit den Attributnamen zurückgegeben, die nicht gschrieben werden konnten
+	function add_attribute_elements($selected_layer_id, $layerdb, $attributes, $oids, $offsetx, $offsety, $i, $i_on_page, $preview){
 		for($j = 0; $j < count($attributes['name']); $j++){
 			$wordwrapoffset = 1;
-			if(in_array($attributes['name'][$j], $attributenames)){
+			if(in_array($attributes['name'][$j], $this->remaining_attributes) AND $this->layout['elements'][$attributes['name'][$j]]['ypos'] > 0){		# wenn Attribut noch nicht geschrieben wurde und einen y-Wert hat
 				# da ein Attribut zu einem Seitenüberlauf führen kann, müssen davor alle festen Freitexte geschrieben werden, die geschrieben werden können
 				# d.h. alle, deren Position nicht abhängig vom einem Attribut ist und alle deren Position abhängig ist und das Attribut schon geschrieben wurde
 				$this->remaining_freetexts = $this->add_freetexts($i, NULL, $offsetx, $offsety, 'fixed');			#  feste Freitexte hinzufügen
@@ -124,11 +124,14 @@ class ddl {
 								$offset_attribute = $this->layout['elements'][$attributes['name'][$j]]['offset_attribute'];
 								if($offset_attribute != ''){			# es ist ein offset_attribute gesetzt
 									$offset_value = $this->layout[offset_attributes][$offset_attribute];
-									if($offset_value != ''){
-										$ypos = $offset_value - $ypos;			# Offset wurde auch schon bestimmt, relative y-Position berechnen
+									if($offset_value != ''){		# Offset wurde auch schon bestimmt, relative y-Position berechnen
+										$ypos = $this->handlePageOverflow($offset_attribute, $offset_value, $ypos);		# Seitenüberläufe berücksichtigen
 									}
-									else{
-										$remaining_attributes[] = $attributes['name'][$j];	# Offset wurde noch nicht bestimmt, Attribut merken und überspringen
+									else{															# Offset noch nicht da, überspringen
+										# Saves wieder setzen
+										$this->gui->formvars['selected_layer_id'] = $layerid_save;
+										$this->gui->formvars['chosen_layer_id'] = $layerid_save;
+										$this->gui->formvars['aktivesLayout'] = $layoutid_save;
 										continue 2; 
 									}
 								}
@@ -151,6 +154,8 @@ class ddl {
 									# den letzten y-Wert dieses Elements in das Offset-Array schreiben
 									$this->layout['offset_attributes'][$attributes['name'][$j]] = $this->gui->generischer_sachdaten_druck_drucken($this->pdf, $offx, $offy);
 								}
+								$this->layout['page_id'][$attributes['name'][$j]] = $this->pdf->currentContents;		# und die Page-ID merken, in der das Attribut beendet wurde								
+								$this->pdf->closeObject();			# falls in eine alte Seite geschrieben wurde, zurückkehren
 								# Saves wieder setzen
 								$this->gui->formvars['selected_layer_id'] = $layerid_save;
 								$this->gui->formvars['chosen_layer_id'] = $layerid_save;
@@ -161,30 +166,16 @@ class ddl {
 						default : {
 							$this->pdf->selectFont($this->layout['elements'][$attributes['name'][$j]]['font']);
 							if($this->layout['elements'][$attributes['name'][$j]]['fontsize'] > 0){
-								$data = array(array($attributes['name'][$j] => $this->get_result_value_output($i, $j)));
-								# Zeilenumbruch berücksichtigen
-								$text = $this->result[$i][$attributes['name'][$j]];
-								$size = $this->layout['elements'][$attributes['name'][$j]]['fontsize'];
-								$textwidth = $this->pdf->getTextWidth($size, $text);
-								$width = $this->layout['elements'][$attributes['name'][$j]]['width'];
-								if($width != '' AND $textwidth/$width > 1){ 
-									while($text != ''){
-										$text = $this->pdf->addTextWrap(-100, -100, $width, $size, utf8_decode($text));
-										$wordwrapoffset++;
-									} 
-									$wordwrapoffset--;
-								}
 								$ypos = $this->layout['elements'][$attributes['name'][$j]]['ypos'];
-								
 								#### relative Positionierung über Offset-Attribut ####
 								$offset_attribute = $this->layout['elements'][$attributes['name'][$j]]['offset_attribute'];
 								if($offset_attribute != ''){			# es ist ein offset_attribute gesetzt
-									$offset_value = $this->layout[offset_attributes][$offset_attribute];
-									if($offset_value != ''){
-										$ypos = $offset_value - $ypos;			# Offset wurde auch schon bestimmt, relative y-Position berechnen
+									$offset_value = $this->layout['offset_attributes'][$offset_attribute];
+									if($offset_value != ''){		# Offset wurde auch schon bestimmt, relative y-Position berechnen
+										$ypos = $this->handlePageOverflow($offset_attribute, $offset_value, $ypos);		# Seitenüberläufe berücksichtigen
 									}
 									else{
-										$remaining_attributes[] = $attributes['name'][$j];	# Offset wurde noch nicht bestimmt, Attribut merken und überspringen
+										#$remaining_attributes[] = $attributes['name'][$j];	# Offset wurde noch nicht bestimmt, Attribut merken und überspringen
 										continue 2; 
 									}
 								}
@@ -204,13 +195,13 @@ class ddl {
 								$text = $this->get_result_value_output($i, $j);
 								$width = $this->layout['elements'][$attributes['name'][$j]]['width'];
 								
-								#$y = $this->pdf->ezText($text, $this->layout['elements'][$attributes['name'][$j]]['fontsize'], array('aleft'=>$x,	'right'=>$right, 'justification'=>'full'));
 								$y = $this->putText($text, $zeilenhoehe, $width, $x, $y, $offsetx);
-								
+																
 								if($this->miny > $y)$this->miny = $y;		# miny ist die unterste y-Position das aktuellen Datensatzes 
 								
-								# den unteren y-Wert dieses Elements in das Offset-Array schreiben
-								$this->layout['offset_attributes'][$attributes['name'][$j]] = $y;
+								$this->layout['offset_attributes'][$attributes['name'][$j]] = $y;					# den unteren y-Wert dieses Elements in das Offset-Array schreiben
+								$this->layout['page_id'][$attributes['name'][$j]] = $this->pdf->currentContents;		# und die Page-ID merken, in der das Attribut beendet wurde
+								$this->pdf->closeObject();									# falls in eine alte Seite geschrieben wurde, zurückkehren
 							}
 						}
 					}
@@ -241,9 +232,37 @@ class ddl {
 					$this->pdf->addJpegFromFile(IMAGEPATH.$newname, $x, $y, $this->layout['elements'][$attributes['name'][$j]]['width']);
 					if($this->miny > $y)$this->miny = $y;
 				}
+				unset($this->remaining_attributes[$attributes['name'][$j]]);		# das Attribut aus den remaining_attributes entfernen
 			}
 		}
-		return $remaining_attributes;
+	}
+	
+	function handlePageOverflow($offset_attribute, $offset_value, $ypos){
+		if($this->layout['page_id'][$offset_attribute] != end($this->pdf->ezPages)){
+			$backto_oldpage = true;															# das Offset-Attribut wurde auf einer der vorigen Seiten beendet -> zu dieser Seite zurückkehren
+		}
+		if($offset_value - $ypos < 20){	# Seitenüberlauf
+			$offset_value = 842 + $offset_value - 20 - 30;	# Offsetwert so anpassen, dass er für die neue Seite passt
+			if($backto_oldpage){
+				$this->pdf->reopenObject($this->getNextPage($this->layout['page_id'][$offset_attribute]));		# die nächste Seite der Seite des Offset-Attributes nehmen
+			}
+			else{
+				$this->pdf->ezNewPage();			# eine neue Seite beginnen
+			}
+		}
+		elseif($backto_oldpage){
+			$this->pdf->reopenObject($this->layout['page_id'][$offset_attribute]);		# die Seite des Offset-Attributes nehmen
+		}
+		$ypos = $offset_value - $ypos;
+		return $ypos;
+	}
+	
+	function getNextPage($pageid){
+		for($i = 1; $i <= count($this->pdf->ezPages); $i++){
+			if($this->pdf->ezPages[$i] == $pageid){
+				return $this->pdf->ezPages[$i+1];
+			}
+		}
 	}
 	
 	function putText($text, $fontsize, $width, $x, $y, $offsetx){		
@@ -275,7 +294,7 @@ class ddl {
   }
   
   function get_result_value_output($i, $j){		# $i ist der result-counter, $j ist der attribute-counter
-		if($this->result[$i][$attributes['name'][$j]] == '')$this->result[$i][$attributes['name'][$j]] = ' ';		# wenns der result-value leer ist, ein Leerzeichen setzen, wegen der relativen Positionierung
+		if($this->result[$i][$this->attributes['name'][$j]] == '')$this->result[$i][$this->attributes['name'][$j]] = ' ';		# wenns der result-value leer ist, ein Leerzeichen setzen, wegen der relativen Positionierung
 		switch ($this->attributes['form_element_type'][$j]){
 			case 'Auswahlfeld' : {
 				for($e = 0; $e < count($this->attributes['enum_value'][$j]); $e++){
@@ -306,11 +325,13 @@ class ddl {
   	$this->user = $user;
   	$this->maxy = 0;
   	$this->miny = 1000000;
+		if($offsety)$this->miny = 842 - $offsety;
   	$i_on_page = -1;
   	$datasetcount_on_page = 0;
 		if($pdfobject == NULL){
 			include (PDFCLASSPATH."class.ezpdf.php");				# Einbinden der PDF Klassenbibliotheken
 			$this->pdf=new Cezpdf();			# neues PDF-Objekt erzeugen
+			$this->pdf->current_page_id = $this->pdf->getFirstPageId();
 		}
 		else{
 			$this->pdf = $pdfobject;			# ein PDF-Objekt wurde aus einem übergeordneten Druckrahmen/Layer übergeben
@@ -346,10 +367,12 @@ class ddl {
 			}
 			
 			################# Daten schreiben ###############
-			$remaining_attributes = $this->attributes['name'];		# zum Anfang sind alle Attribute noch zu schreiben
+			for($j = 0; $j < count($this->attributes['name']); $j++){
+				$this->remaining_attributes[$this->attributes['name'][$j]] = $this->attributes['name'][$j];		# zum Anfang sind alle Attribute noch zu schreiben
+			}
 			$test = 0;
-			while($test < 100 AND count($remaining_attributes) > 0){
-				$remaining_attributes = $this->add_attribute_elements($selected_layer_id, $layerdb, $this->attributes, $remaining_attributes, $oids, $offsetx, $offsety, $i, $i_on_page, $preview);	# übrig sind die, die noch nicht geschrieben wurden, weil sie abhängig sind
+			while($test < 100 AND count($this->remaining_attributes) > 0){
+				$this->add_attribute_elements($selected_layer_id, $layerdb, $this->attributes, $oids, $offsetx, $offsety, $i, $i_on_page, $preview);	# übrig sind die, die noch nicht geschrieben wurden, weil sie abhängig sind
 				$test++;
 			}			
 			################# Daten schreiben ###############

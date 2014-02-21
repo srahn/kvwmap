@@ -16,19 +16,19 @@ if($this->formvars['anzahl'] == ''){$this->formvars['anzahl'] = 0;}
 	}
 
 	function scrolltop(){
-		<? if($this->user->rolle->querymode == 1){ ?>
-		document.getElementById('contentdiv').scrollTop = 0;
-		<? }else{ ?>
-		window.scrollTo(0,0);
-		<? } ?>
+		if(currentform.name == 'GUI2'){
+			document.getElementById('contentdiv').scrollTop = 0;
+		}else{
+			window.scrollTo(0,0);
+		}
 	}
 	
 	function scrollbottom(){
-		<? if($this->user->rolle->querymode == 1){ ?>
-		document.getElementById('contentdiv').scrollTop = document.getElementById('contentdiv').scrollHeight;
-		<? }else{ ?>
-		window.scrollTo(0, document.body.scrollHeight);
-		<? } ?>
+		if(currentform.name == 'GUI2'){
+			document.getElementById('contentdiv').scrollTop = document.getElementById('contentdiv').scrollHeight;
+		}else{
+			window.scrollTo(0, document.body.scrollHeight);
+		}
 	}
 	
 	function nextquery(offset){

@@ -57,7 +57,7 @@
   case 'zoomtobplan' : {
   	include(PLUGINS.'bauleitplanung/model/rok.php');
 		$rok = new rok($this->pgdatabase);
-    $rect = $rok->getExtentFromRokNrBplan($this->formvars['roknr'], 10, $this->user->rolle->epsg_code);
+    $rect = $rok->getExtentFromRokNrBplan($this->formvars['roknr'], $this->formvars['art'], 10, $this->user->rolle->epsg_code);
     $this->loadMap('DataBase');
     if ($rect->minx!=0 and $rect->miny!=0 and $rect->maxx!=0 and $rect->maxy!=0) {
       $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);	  

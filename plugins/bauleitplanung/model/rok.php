@@ -37,7 +37,7 @@ class rok {
   }
   
 	function update_bplan_from_rok($plan_id){
-		$gebiet2rok_table = array(	1 => 'wohngebiet',				#"Wohngebiet"													
+		$gebiet2rok_table = array(	1 => 'wohngebiet',				#"Wohngebiet"
 																2 => 'wohngebiet',	      #"spez. Wohnen"
 																3 => 'mischgebiet',	      #"Mischgebiet"
 																4 => 'gewerbegebiet',	      #"Gewerbegebiet"
@@ -67,18 +67,18 @@ class rok {
 																29 => 'so_einzelhandel',	      #"Einzelhandel"
 																30 => 'so_bildung_wissenschaft',	      #"Bildungswesen"
 																31 => 'so_beherbergung',	      #"Beherbergung"
-																32 => 'so_beherbergung',	      #"Wochenendhaus"										
+																32 => 'so_beherbergung',	      #"Wochenendhaus"
 																33 => 'so_wohnen_ferienwohnen',	      #"Wohnen+Ferienwohnen"
 																35 => 'so_beherbergung',	      #"Camping und Caravan"
 															);
-															
-		$gebiet2rok_konkret = array(1 => array('WA', 'WR', 'WS'),														#"Wohngebiet"			
+
+		$gebiet2rok_konkret = array(1 => array('WA','WB', 'WR', 'WS'),														#"Wohngebiet"
 																13 => array('Aufschüttung'),								#'Aufschüttung'
 																14 => array('Abgrabung', 'Bergsenkung'),			#'Abgrabung'
 																32 => array('Wochenendhaus', 'Wochenendplatzgebiet')																#"Wochenendhaus"
 																);
-															
-		$konkret2rok_konkret = array(	1	=> array('betreutes Wohnen'),      
+
+		$konkret2rok_konkret = array(	1	=> array('betreutes Wohnen'),
 																	2	=> array('altersgerechtes Wohnen'),
 																	3	=> array('Mehrgenerationenhaus'),
 																	4	=> array('Altenwohnheim'),
@@ -113,7 +113,7 @@ class rok {
 																	48 => array('Kanuverleih'),
 																	49 => array('Wasserwanderrastplatz'),
 																	50 => array('Seebrücke'),
-																	51 => array('Altenwohnheim'),	      					#'Altenheim'											
+																	51 => array('Altenwohnheim'),	      					#'Altenheim'
 																	52 => array('Altenpflegeheim'),
 																	53 => array('Behinderteneinrichtung'),
 																	54 => array('Hospiz'),
@@ -160,9 +160,14 @@ class rok {
 																	104 => array('Wald'),
 																	105 => array('Aufforstung'),
 																	106 => array('Tierklinik'),
-																	107 => array('Geldinstitut')
+																	107 => array('Geldinstitut'),
+																	108 => array('EKZ/Fachmarktzentrum'),
+																	109 => array('Lebensmittelmarkt'),
+																	110 => array('Möbelmarkt'),
+																	111 => array('Baumarkt/GartenCenter'),
+																	112 => array('sonst. Einzelhandel')
 																);
-																
+
 		$konkret2rok_themennr = array(13 => array(70110, 70115),	      #'Stromversorgung'
 																	14 => array(70210, 70215),						#'Gasversorgung'
 																	15 => array(70310, 70315),				#'Wärmeversorgung'
@@ -187,7 +192,6 @@ class rok {
 																	102 => array(70910, 70915),			#Ablagerung
 																	103 => array(71010, 71015) 					#'sonst. Versorgung'
 																);
-		
 		# Gebiete aktualisieren
 		$sql = "SELECT * FROM b_plan_gebiete WHERE plan_id = ".$plan_id;
 		$ret = $this->database->execSQL($sql, 4, 0);
@@ -250,6 +254,19 @@ class rok {
 			$ret2 = $this->database->execSQL($sql,4, 1);
 		}
 		
+		# Fläche des Geltungsbereichs aktualisieren
+		$sql = "SELECT round((st_area(shape)/10000)::numeric, 2) FROM rok_edit.bpl_geltungsbereiche as rok, b_plan_stammdaten as sd ";
+		$sql.= "WHERE sd.plan_id = ".$plan_id." AND rok.roknr = sd.lfd_rok_nr ";
+		#echo $sql.'<br>';
+		$ret1 = $this->database->execSQL($sql, 4, 0);
+		$flaeche = pg_fetch_array($ret1[1]);
+		if($flaeche[0] != ''){
+			$sql = "UPDATE b_plan_stammdaten SET geltungsbereich = ".$flaeche[0]." ";
+			$sql.= "WHERE plan_id = ".$plan_id." ";
+		}			
+		#echo $sql.'<br>';
+		$ret2 = $this->database->execSQL($sql,4, 1);
+		
 	}
 	
   function delete_bplan($plan_id){
@@ -303,10 +320,13 @@ class rok {
   }
  	
   
-  function getExtentFromRokNrBplan($roknr, $border, $epsg) {
-		$sql = "SELECT st_xmin(st_extent(st_transform(shape,".$epsg."))) AS minx,st_ymin(st_extent(st_transform(shape, ".$epsg."))) as miny,st_xmax(st_extent(st_transform(shape, ".$epsg."))) AS maxx,st_ymax(st_extent(st_transform(shape, ".$epsg."))) AS maxy FROM rok_edit.bpl_geltungsbereiche WHERE roknr = '".$roknr."'";
+  function getExtentFromRokNrBplan($roknr, $art, $border, $epsg) {
+		if(in_array($art, array("B-Plan", "vb-Plan", "Einzelvorhaben", "BImSchG"))) $table = "rok_edit.bpl_geltungsbereiche";
+		if(in_array($art, array("Innenbereichssatzung", "Außenbereichssatzung"))) $table = "rok_edit.satzungen ";
+		if(in_array($art, array("Planungsanzeige"))) $table = "rok_edit.plananzeigen";
+		$sql = "SELECT st_xmin(st_extent(st_transform(shape,".$epsg."))) AS minx,st_ymin(st_extent(st_transform(shape, ".$epsg."))) as miny,st_xmax(st_extent(st_transform(shape, ".$epsg."))) AS maxx,st_ymax(st_extent(st_transform(shape, ".$epsg."))) AS maxy FROM ".$table." WHERE roknr = '".$roknr."'";
 		#echo $sql;
-	    $ret = $this->database->execSQL($sql, 4, 0);
+	  $ret = $this->database->execSQL($sql, 4, 0);
 		$rs = pg_fetch_array($ret[1]);
 		$rect = ms_newRectObj();
     $rect->minx=$rs['minx'];
@@ -325,7 +345,7 @@ class rok {
 	function getExtentFromRokNrFplan($gkz, $border, $epsg) {
 		$sql = "SELECT st_xmin(st_extent(st_transform(the_geom,".$epsg."))) AS minx,st_ymin(st_extent(st_transform(the_geom, ".$epsg."))) as miny,st_xmax(st_extent(st_transform(the_geom, ".$epsg."))) AS maxx,st_ymax(st_extent(st_transform(the_geom, ".$epsg."))) AS maxy FROM kataster.adm_gem09 WHERE gemnr = '".$gkz."'";
 		#echo $sql;
-	    $ret = $this->database->execSQL($sql, 4, 0);
+	  $ret = $this->database->execSQL($sql, 4, 0);
 		$rs = pg_fetch_array($ret[1]);
 		$rect = ms_newRectObj();
     $rect->minx=$rs['minx'];

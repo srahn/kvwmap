@@ -152,7 +152,6 @@ for($i=0;$i<$anzLayer;$i++){
 			if($this->last_query != '')echo '<input name="go" type="hidden" value="get_last_query">';
 			else echo '<input name="go" type="hidden" value="Sachdaten">';
   	}
-echo $this->formvars['printversion'];
   if($this->found != 'false' AND $this->formvars['printversion'] == ''){
   ?>
   <a href="javascript:druck();"><? echo $strDataPrint; ?></a>

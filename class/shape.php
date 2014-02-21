@@ -49,11 +49,13 @@ class shape {
 				$file = $firstfile[0];
 				if(file_exists(UPLOADPATH.$file.'.dbf') OR file_exists(UPLOADPATH.$file.'.DBF')){
 					$tablename = 'a'.strtolower(umlaute_umwandeln($file)).rand(1,1000000);
-		      $command = POSTGRESBINPATH.'shp2pgsql -I -s '.$formvars['epsg'].' -W LATIN1 -c "'.UPLOADPATH.$file.'" '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' > "'.UPLOADPATH.$file.'.sql"'; 
+		      $command = POSTGRESBINPATH.'shp2pgsql -g the_geom -I -s '.$formvars['epsg'].' -W LATIN1 -c "'.UPLOADPATH.$file.'" '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' > "'.UPLOADPATH.$file.'.sql"'; 
 		      exec($command);
 		     	#echo $command;
-		      exec(POSTGRESBINPATH.'psql -f "'.UPLOADPATH.$file.'.sql" '.$pgdatabase->dbName.' '.$pgdatabase->user);
-		      #echo POSTGRESBINPATH.'psql -f "'.UPLOADPATH.$file.'.sql" '.$pgdatabase->dbName.' '.$pgdatabase->user;
+					$command = POSTGRESBINPATH.'psql -f "'.UPLOADPATH.$file.'.sql" '.$pgdatabase->dbName.' '.$pgdatabase->user;
+					if($pgdatabase->passwd != '')$command = 'export PGPASSWORD='.$pgdatabase->passwd.'; '.$command;
+		      exec($command);
+		     	#echo $command;
 		      $sql = 'SELECT count(*) FROM '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename;
 		      $ret = $pgdatabase->execSQL($sql,4, 0);
 		      if(!$ret[0]){
@@ -162,10 +164,10 @@ class shape {
         }
       }
       if($this->formvars['table_option'] == '-u') {
-        $command = POSTGRESBINPATH.'shp2pgsql -A "'.$alterstring.'" -a ';
+        $command = POSTGRESBINPATH.'shp2pgsql -g the_geom -A "'.$alterstring.'" -a ';
       }
       else {
-        $command = POSTGRESBINPATH.'shp2pgsql -A "'.$alterstring.'" '.$this->formvars['table_option'].' ';
+        $command = POSTGRESBINPATH.'shp2pgsql -g the_geom -A "'.$alterstring.'" '.$this->formvars['table_option'].' ';
       }
       if($this->formvars['srid'] != ''){
         $command .= '-s '.$this->formvars['srid'].' ';
@@ -242,8 +244,11 @@ class shape {
         fclose($newsql);
       }
       
-      exec(POSTGRESBINPATH.'psql -f '.UPLOADPATH.$this->formvars['table_name'].'.sql '.$database->dbName.' -U '.$database->user);
-      #echo POSTGRESBINPATH.'psql -f '.UPLOADPATH.$this->formvars['table_name'].'.sql '.$database->dbName.' -U '.$database->user;
+			$command = POSTGRESBINPATH.'psql -f '.UPLOADPATH.$this->formvars['table_name'].'.sql '.$database->dbName.' -U '.$database->user;
+			if($database->passwd != '')$command = 'export PGPASSWORD='.$database->passwd.'; '.$command;
+      exec($command);
+      #echo $command;
+			
       $sql = 'SELECT count(*) FROM '.$this->formvars['table_name'];
       $ret = $database->execSQL($sql,4, 0);
       if (!$ret[0]) {
@@ -291,7 +296,7 @@ class shape {
   function simple_shp_import_speichern($formvars, $database){
   	$this->formvars = $formvars;
     if(file_exists(UPLOADPATH.$this->formvars['dbffile'])){      
-      $command = POSTGRESBINPATH.'shp2pgsql -W LATIN1 '.$this->formvars['table_option'].' ';
+      $command = POSTGRESBINPATH.'shp2pgsql -g the_geom -W LATIN1 '.$this->formvars['table_option'].' ';
       if($this->formvars['srid'] != ''){
         $command .= '-s '.$this->formvars['srid'].' ';
       }
@@ -301,8 +306,11 @@ class shape {
       $command.= UPLOADPATH.$this->formvars['dbffile'].' '.$this->formvars['table_name'].' > '.UPLOADPATH.$this->formvars['table_name'].'.sql'; 
       exec($command);
       #echo $command;
-      exec(POSTGRESBINPATH.'psql -f '.UPLOADPATH.$this->formvars['table_name'].'.sql '.$database->dbName.' '.$database->user);
-      #echo POSTGRESBINPATH.'psql -f '.UPLOADPATH.$this->formvars['table_name'].'.sql '.$database->dbName.' '.$database->user;
+			
+			$command = POSTGRESBINPATH.'psql -f '.UPLOADPATH.$this->formvars['table_name'].'.sql '.$database->dbName.' '.$database->user;
+			if($database->passwd != '')$command = 'export PGPASSWORD='.$database->passwd.'; '.$command;
+      exec($command);
+      #echo $command;
       $sql = 'SELECT count(*) FROM '.$this->formvars['table_name'];
       $ret = $database->execSQL($sql,4, 0);
       if (!$ret[0]) {
