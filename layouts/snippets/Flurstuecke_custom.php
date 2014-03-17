@@ -101,9 +101,12 @@ function emzversteckt(k){
 	  <br>
 
   	<?
+		
+		$privileg_ = array();
+		
   	for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
   		if($this->qlayerset[$i]['attributes']['privileg'][$this->qlayerset[$i]['attributes']['name'][$j]] != ''){
-  			$privileg[$this->qlayerset[$i]['attributes']['name'][$j]] = true;
+  			$privileg_[$this->qlayerset[$i]['attributes']['name'][$j]] = true;
   			if($j > 0){ $attribute .= ';';}
   			$attribute .= $this->qlayerset[$i]['attributes']['name'][$j];
   		}
@@ -167,81 +170,81 @@ function emzversteckt(k){
 			    	  <td align="left">
 					  	<table border="0" cellspacing="0" cellpadding="2">
 
-					      	<? if($privileg['flurstkennz']){ ?>
+					      	<? if($privileg_['flurstkennz']){ ?>
 					        <tr>
 					          <td align="right"><strong>Flurst&uuml;ck&nbsp;</strong></td>
 					          <td> <b><? echo $flst->FlurstNr; ?></b>&nbsp;(<?php echo $flst->FlurstKennz; ?>)</td>
 					        </tr>
 					        <? }
-							$both = ($privileg['gemkgname'] AND $privileg['gemkgschl']);
-							if($privileg['gemkgname'] OR $privileg['gemkgschl']){
+							$both = ($privileg_['gemkgname'] AND $privileg_['gemkgschl']);
+							if($privileg_['gemkgname'] OR $privileg_['gemkgschl']){
 					        ?>
 					        <tr>
 					          <td align="right"><strong>Gemarkung&nbsp;</strong></td>
-					          <td><?php if($privileg['gemkgname']){echo $flst->GemkgName;} ?> <?php if($both){ echo '('.$flst->GemkgSchl.')';} elseif($privileg['gemkgschl']){ echo $flst->GemkgSchl;}?></td>
+					          <td><?php if($privileg_['gemkgname']){echo $flst->GemkgName;} ?> <?php if($both){ echo '('.$flst->GemkgSchl.')';} elseif($privileg_['gemkgschl']){ echo $flst->GemkgSchl;}?></td>
 					        </tr>
 					        <? }
-				        	if($privileg['flurnr']){ ?>
+				        	if($privileg_['flurnr']){ ?>
 					        <tr>
 					          <td height="20" align="right"><strong>Flur&nbsp;</strong></td>
 					          <td><?php echo $flst->FlurNr; ?></td>
 					        </tr>
 					        <? }
-				        	$both = ($privileg['gemeinde'] AND $privileg['gemeindename']);
-			        		if($privileg['gemeinde'] OR $privileg['gemeindename']){
+				        	$both = ($privileg_['gemeinde'] AND $privileg_['gemeindename']);
+			        		if($privileg_['gemeinde'] OR $privileg_['gemeindename']){
 					        ?>
 					        <tr>
 					          <td align="right"><strong>Gemeinde&nbsp;</strong></td>
-					          <td><?php if($privileg['gemeindename']){ echo $flst->GemeindeName;} ?> <?php if($both){ echo '('.$flst->GemeindeID.')';} elseif($privileg['gemeinde']){ echo $flst->GemeindeID;} ?></td>
+					          <td><?php if($privileg_['gemeindename']){ echo $flst->GemeindeName;} ?> <?php if($both){ echo '('.$flst->GemeindeID.')';} elseif($privileg_['gemeinde']){ echo $flst->GemeindeID;} ?></td>
 					        </tr>
 					        <? }
-			        		$both = ($privileg['kreisname'] AND $privileg['kreisid']);
-			        		if($privileg['kreisname'] OR $privileg['kreisid']){
+			        		$both = ($privileg_['kreisname'] AND $privileg_['kreisid']);
+			        		if($privileg_['kreisname'] OR $privileg_['kreisid']){
 					        ?>
 					        <tr>
 					          <td align="right"><strong>Kreis&nbsp;</strong></td>
-					          <td><?php if($privileg['kreisname']){ echo $flst->KreisName;} ?> <?php if($both){echo '('.$flst->KreisID.')';} elseif($privileg['kreisid']){ echo $flst->KreisID;} ?></td>
+					          <td><?php if($privileg_['kreisname']){ echo $flst->KreisName;} ?> <?php if($both){echo '('.$flst->KreisID.')';} elseif($privileg_['kreisid']){ echo $flst->KreisID;} ?></td>
 					        </tr>
 							<? }
-							$both = ($privileg['finanzamtname'] AND $privileg['finanzamt']);
-							if($privileg['finanzamtname'] OR $privileg['finanzamt']){
+							$both = ($privileg_['finanzamtname'] AND $privileg_['finanzamt']);
+							if($privileg_['finanzamtname'] OR $privileg_['finanzamt']){
 							?>
 					        <tr>
 					          <td align="right"><strong> Finanzamt&nbsp;</strong></td>
-					          <td><?php if($privileg['finanzamtname']){ echo $flst->FinanzamtName;} ?> <?php if($both){echo '('.$flst->FinanzamtSchl.')';} elseif($privileg['finanzamt']){ echo $flst->FinanzamtSchl; } ?></td>
+					          <td><?php if($privileg_['finanzamtname']){ echo $flst->FinanzamtName;} ?> <?php if($both){echo '('.$flst->FinanzamtSchl.')';} elseif($privileg_['finanzamt']){ echo $flst->FinanzamtSchl; } ?></td>
 					        </tr>
 							<? }
-							$both = ($privileg['forstname'] AND $privileg['forstschluessel']);
-							if($privileg['forstname'] OR $privileg['forstschluessel']){
+							$both = ($privileg_['forstname'] AND $privileg_['forstschluessel']);
+							if($privileg_['forstname'] OR $privileg_['forstschluessel']){
 							?>
 					        <tr>
 					          <td align="right"><strong>Forstamt&nbsp;</strong></td>
-					          <td><?php if($privileg['forstname']){echo $flst->Forstamt['name'];} ?> <?php if($both){echo '(00'.$flst->Forstamt['schluessel'].')';} elseif($privileg['forstschluessel']){ echo '00'.$flst->Forstamt['schluessel'];} ?></td>
+					          <td><?php if($privileg_['forstname']){echo $flst->Forstamt['name'];} ?> <?php if($both){echo '(00'.$flst->Forstamt['schluessel'].')';} elseif($privileg_['forstschluessel']){ echo '00'.$flst->Forstamt['schluessel'];} ?></td>
 					        </tr>
 							<? }
-							if($privileg['flaeche']){ ?>
+							if($privileg_['flaeche']){ ?>
 					        <tr>
 					          <td align="right"><strong>Fl&auml;che&nbsp;</strong></td>
 					          <td><?php echo $flst->ALB_Flaeche; ?>m&sup2;</td>
 					        </tr>
 							<? }
-							$both = ($privileg['amtsgerichtname'] AND $privileg['amtsgerichtnr']);
-							if($privileg['amtsgerichtname'] OR $privileg['amtsgerichtnr']){
+							$both = ($privileg_['amtsgerichtname'] AND $privileg_['amtsgerichtnr']);
+							if($privileg_['amtsgerichtname'] OR $privileg_['amtsgerichtnr']){
 							?>
 							<tr>
 					          <td align="right"><b>Amtsgericht:</b>&nbsp;</td>
-					          <td><?php if($privileg['amtsgerichtnr']){echo $flst->Amtsgericht['schluessel'];} ?>&nbsp;&nbsp;<?php if($privileg['amtsgerichtname']){ echo $flst->Amtsgericht['name'];} ?></td>
+					          <td><?php if($privileg_['amtsgerichtnr']){echo $flst->Amtsgericht['schluessel'];} ?>&nbsp;&nbsp;<?php if($privileg_['amtsgerichtname']){ echo $flst->Amtsgericht['name'];} ?></td>
 					        </tr>
 					        <? }
-				        	$both = ($privileg['grundbuchbezirkname'] AND $privileg['grundbuchbezirkschl']);
-							if($privileg['grundbuchbezirkname'] OR $privileg['grundbuchbezirkschl']){
+				        	$both = ($privileg_['grundbuchbezirkname'] AND $privileg_['grundbuchbezirkschl']);
+							if($privileg_['grundbuchbezirkname'] OR $privileg_['grundbuchbezirkschl']){
 							?>
 					        <tr>
 					          <td align="right"><b>Grundbuchbezirk:</b>&nbsp;</td>
-					          <td><?php if($privileg['grundbuchbezirkschl']){ echo $flst->Grundbuchbezirk['schluessel'];} ?>&nbsp;&nbsp;<?php if($privileg['grundbuchbezirkname']){ echo $flst->Grundbuchbezirk['name'];} ?></td>
+					          <td><?php if($privileg_['grundbuchbezirkschl']){ echo $flst->Grundbuchbezirk['schluessel'];} ?>&nbsp;&nbsp;<?php if($privileg_['grundbuchbezirkname']){ echo $flst->Grundbuchbezirk['name'];} ?></td>
 					        </tr>
 							<? }
-							if($privileg['lagebezeichnung']){ ?>
+							if($privileg_['lagebezeichnung']){ ?>
 					        <tr>
 					          <td align="right" valign="top"><strong>Lage:&nbsp;</strong></td>
 					          <td>
@@ -264,31 +267,31 @@ function emzversteckt(k){
 					          </td>
 					        </tr>
 							<? }
-							if($privileg['entsteh']){ ?>
+							if($privileg_['entsteh']){ ?>
 					        <tr>
 					          <td align="right"><strong>Entstehung&nbsp;</strong></td>
 					          <td><?php echo $flst->Entstehung; ?></td>
 					        </tr>
 							<? }
-							if($privileg['letzff']){ ?>
+							if($privileg_['letzff']){ ?>
 					        <tr>
 					          <td align="right"><strong>Fortf&uuml;hrung&nbsp;</strong></td>
 					          <td><?php echo $flst->LetzteFF; ?></td>
 					        </tr>
 							<? }
-							if($privileg['karte']){ ?>
+							if($privileg_['karte']){ ?>
 					        <tr>
 					          <td align="right"><strong> Flurkarte/Ri&szlig;&nbsp;</strong></td>
 			    		      <td><?php echo $flst->Flurkarte; ?></td>
 					        </tr>
 			                <? }
-			                if($privileg['status']){ ?>
+			                if($privileg_['status']){ ?>
 			                <tr>
 			                 <td align="right"><strong> Status&nbsp;</strong></td>
         			         <td><?php if ($flst->Status=="H") { echo "historisches"; } else { echo "aktuelles"; } echo " Flurst&uuml;ck (".$flst->Status.")"; ?></td>
 			                </tr>
 			        <? } ?>
-			        <?php if ($privileg['vorgaenger'] AND $flst->Vorgaenger != '') { ?>
+			        <?php if ($privileg_['vorgaenger'] AND $flst->Vorgaenger != '') { ?>
 					<tr>
 				  	  <td align="right" valign="top"><strong>Vorg&auml;nger</strong></td>
 				  	  <td>
@@ -309,7 +312,7 @@ function emzversteckt(k){
 				      </td>
 					</tr>
 					<? } ?>
-					<?php if ($privileg['nachfolger'] AND $flst->Nachfolger != '') { ?>
+					<?php if ($privileg_['nachfolger'] AND $flst->Nachfolger != '') { ?>
 					<tr>
 				  	  <td align="right" valign="top"><strong>Nachfolger</strong></td>
 				  	  <td>
@@ -409,7 +412,7 @@ function emzversteckt(k){
 			  </tr>
 
         <?php
-        if($privileg['klassifizierung']){
+        if($privileg_['klassifizierung']){
         	if($flst->Klassifizierung[0]['tabkenn']!=''){ ?>
 		        <tr>
 		          <td colspan="2">
@@ -529,7 +532,7 @@ function emzversteckt(k){
 	        }
         } ?>
 
-			  <?php if ($privileg['freitext'] AND count($flst->FreiText)>0) { ?>
+			  <?php if ($privileg_['freitext'] AND count($flst->FreiText)>0) { ?>
 			  <tr>
 			    <td colspan="2">
 			      <table border="0" cellspacing="0" cellpadding="2">
@@ -547,7 +550,7 @@ function emzversteckt(k){
 				</td>
 			  </tr>
 			  <?php } ?>
-			  <?php if ($privileg['hinweis'] AND $flst->Hinweis[0]['hinwzflst']!='') { ?>
+			  <?php if ($privileg_['hinweis'] AND $flst->Hinweis[0]['hinwzflst']!='') { ?>
 			  <tr>
 			  	<td colspan="2">
 			  	  <table border="0" cellspacing="0" cellpadding="2">
@@ -565,7 +568,7 @@ function emzversteckt(k){
     			</td>
   			  </tr>
 			  <?php } ?>
-			  <?php if ($privileg['baulasten'] != '' AND count($flst->Baulasten)>0) { ?>
+			  <?php if ($privileg_['baulasten'] != '' AND count($flst->Baulasten)>0) { ?>
 			  <tr>
 			    <td colspan="2">
 		    	  <table border="0" cellspacing="0" cellpadding="2">
@@ -583,13 +586,13 @@ function emzversteckt(k){
 			  </tr>
 			  <?php } ?>
 			  <?php
-			  if (($privileg['verfahren'] OR $privileg['ausfstelle']) AND $flst->Verfahren[0]['flurstkennz']!='') {
+			  if (($privileg_['verfahren'] OR $privileg_['ausfstelle']) AND $flst->Verfahren[0]['flurstkennz']!='') {
 				  for($j = 0; $j < count($flst->Verfahren); $j++){
 				  ?>
 			  <tr>
 			  	<td colspan="2">
 		  		  <table border="0" cellspacing="0" cellpadding="2">
-		  		  <?php if ($privileg['ausfstelle'])
+		  		  <?php if ($privileg_['ausfstelle'])
 		  		  { ?>
 			      	<tr valign="top">
 		        	  <td align="right"><strong>Ausf&uuml;hrende&nbsp;Stelle</strong></td>
@@ -612,7 +615,7 @@ function emzversteckt(k){
 		        	  </td>
 			        </tr>
 			      <?php }
-		      	  if ($privileg['verfahren']){
+		      	  if ($privileg_['verfahren']){
 		      	   if ($flst->Verfahren[$j]['verfnr']!='') { ?>
 			      	<tr valign="top">
 		        	  <td align="right"><strong>Verfahren</strong></td>
@@ -645,7 +648,7 @@ function emzversteckt(k){
 			  </tr>
 				  <? } ?>
 			  <? } ?>
-			  <?php if ($privileg['nutzung']){ ?>
+			  <?php if ($privileg_['nutzung']){ ?>
 			  <tr>
 			  	<td colspan="2">
 			      <table border="0" cellspacing="0" cellpadding="2">
@@ -685,7 +688,7 @@ function emzversteckt(k){
 			    </td>
 			  </tr>
 			  <? } ?>
-			  <? if($privileg['eigentuemer']){?>
+			  <? if($privileg_['eigentuemer']){?>
 			  <tr>
 				<td colspan="2">
 		    	  <table border="0" cellspacing="0" cellpadding="2">
@@ -695,7 +698,7 @@ function emzversteckt(k){
 				    <? for ($g=0;$g<count($flst->Grundbuecher);$g++) {
 			   		$flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
 				    for ($b=0;$b<count($flst->Buchungen);$b++) {
-				      	if($privileg['bestandsnr']){
+				      	if($privileg_['bestandsnr']){
                             $BestandStr ='<a href="index.php?go=Grundbuchblatt_Auswaehlen_Suchen&selBlatt='.$flst->Buchungen[$b]['bezirk'].'-'.$flst->Buchungen[$b]['blatt'].'">'.$flst->Buchungen[$b]['bezirk'].'-'.intval($flst->Buchungen[$b]['blatt']).'</a>';
                             $BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
                             $BestandStr.=' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
@@ -946,7 +949,7 @@ function emzversteckt(k){
 		<tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
 		  <td colspan="2">
         <a href="javascript:send_selected_flurst('Flurstuecks-CSV-Export', 'Flurstück', '', '');">CSV-Export FST</a>&nbsp;|&nbsp;
-        <? if($privileg['eigentuemer']){ ?>
+        <? if($privileg_['eigentuemer']){ ?>
         <a href="javascript:send_selected_flurst('Flurstuecks-CSV-Export', 'Eigentümer', '', '');">CSV-Export Eigent&uuml;mer</a>&nbsp;|&nbsp;
         <? } ?>
         <a href="javascript:send_selected_flurst('Flurstuecks-CSV-Export', 'Nutzungsarten', '', '');">CSV-Export NA</a>&nbsp;|&nbsp;

@@ -37,7 +37,7 @@
 		// alles ok, nix machen
 		}
 		else{
-			document.write('Ihr Browser hat keine SVG-Unterst&uuml;tzung. Bitte installieren Sie den <a target="_blank" href="http://www.adobe.com/svg/viewer/install/">Adobe SVG Viewer</a> oder verwenden Sie den Firefox Browser.');
+			document.write('Ihr Browser hat keine SVG-Unterst&uuml;tzung. Bitte installieren Sie den <a target="_blank" href="http://www.adobe.com/devnet/svg/adobe-svg-viewer-download-area.html">Adobe SVG Viewer</a> oder verwenden Sie den Firefox Browser.');
 		}
 	</script>
 		   
@@ -59,9 +59,11 @@
 	
    
   function submit(input_coord, cmd){
-  	if((browser == 'firefox') && document.GUI.legendtouched.value == 0){
+  	//if((browser == 'firefox') && document.GUI.legendtouched.value == 0){
+		if(document.GUI.legendtouched.value == 0){
   		svgdoc = document.SVG.getSVGDocument();	
-			var mapimg = svgdoc.getElementById("mapimg2");			
+			if(browser == 'firefox')var mapimg = svgdoc.getElementById("mapimg2");			
+			else var mapimg = svgdoc.getElementById("mapimg");
 			var scalebar = document.getElementById("scalebar");
 			var refmap = document.getElementById("refmap");
 			var scale = document.getElementById("scale");
@@ -92,7 +94,10 @@
   			'',
   			''
   		), 			 
-  		"xlink:href^src^src^setvalue^sethtml^setvalue^setvalue^setvalue^setvalue^setvalue^sethtml^points^execute_function^execute_function");
+  		new Array("xlink:href", "src", "src", "setvalue", "sethtml", "setvalue", "setvalue", "setvalue", "setvalue", "setvalue", "sethtml", "points", "execute_function", "execute_function"));
+			
+			if(browser != 'firefox')moveback();
+			
   		document.GUI.INPUT_COORD.value = '';
   		document.GUI.CMD.value = '';
   	}
@@ -100,8 +105,12 @@
   		document.GUI.submit();
   	}
   }
-
-  function sendpath(cmd,pathx,pathy)   {;
+	
+	function moveback(){	
+		document.getElementById("svghelp").SVGmoveback();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+	}
+	
+  function sendpath(cmd,pathx,pathy)   {
 		document.GUI.stopnavigation.value = 1;
     path  = "";
     switch(cmd) 
@@ -134,47 +143,47 @@
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "pquery";
-      document.GUI.submit();
+      overlay_submit(document.GUI, true);
      break;
      case "pquery_box":
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "pquery";
-      document.GUI.submit();
+      overlay_submit(document.GUI, true);
      break;
      case "touchquery_point":
      	top.document.GUI.searchradius.value = "";
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "touchquery";
-      document.GUI.submit();
+      overlay_submit(document.GUI, true);
      break;
      case "touchquery_box":
      	top.document.GUI.searchradius.value = "";
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "touchquery";
-      document.GUI.submit();
+      overlay_submit(document.GUI, true);
      break;
      case "ppquery_point":
       top.document.GUI.searchradius.value = "";
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "ppquery";
-      document.GUI.submit();
+			overlay_submit(document.GUI, true);
      break;
      case "ppquery_box":
       top.document.GUI.searchradius.value = "";
       path = pathx[0]+","+pathy[0]+";"+pathx[2]+","+pathy[2];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "ppquery";
-      document.GUI.submit();
+      overlay_submit(document.GUI, true);
      break;
      case "pquery_polygon":
       path = pathx[0]+","+pathy[0]+";"+pathx[2]+","+pathy[2];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "pquery";
-      document.GUI.submit();
+      overlay_submit(document.GUI, true);
      break;
      case "polygonquery":
      	for(i = 0; i < pathx.length-1; i++){
@@ -183,7 +192,7 @@
      	path = path+pathx[i]+","+pathy[i];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "polygonquery";
-      document.GUI.submit();
+      overlay_submit(document.GUI, true);
      break;
      default:
       path = pathx[0]+","+pathy[0];
@@ -206,7 +215,6 @@
   include(LAYOUTPATH.'snippets/SVGvars_querytooltipscript.php');   # zuweisen von: $SVGvars_tooltipscript
   include(LAYOUTPATH.'snippets/SVGvars_tooltipscript.php');   # zuweisen von: $SVGvars_tooltipscript 
   include(LAYOUTPATH.'snippets/SVGvars_tooltipblank.php');    # zuweisen von: $SVGvars_tooltipblank
- 	include(LAYOUTPATH.'snippets/ahah.php');
   $bg_pic   = $this->img['hauptkarte'];
   $res_x    = $this->map->width;
   $res_y    = $this->map->height;
@@ -227,7 +235,7 @@ chmod(IMAGEPATH.$svgfile, 0666);
 $svg='<?xml version="1.0"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
   "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg id="svgmap" zoomAndPan="" width="'.$res_x.'" height="'.$res_y.'" onload="init();" onmousemove="mouse_move(evt);" 
+<svg id="svgmap" zoomAndPan="" width="'.$res_x.'" height="'.$res_y.'" onload="init();" onmousemove="mouse_move(evt);top.drag(evt);" 
   xmlns="http://www.w3.org/2000/svg" version="1.1"
   xmlns:xlink="http://www.w3.org/1999/xlink">
 <title> kvwmap </title><desc> kvwmap - WebGIS application - kvwmap.sourceforge.net </desc>
@@ -274,10 +282,13 @@ $svg='<?xml version="1.0"?>
 	var root = document.documentElement;
 	var mousewheelloop = 0;
 	var stopnavigation = false;
+	var currentTheta = 0;
+  var thetaDelta = 6; // The amount to rotate the square about every 16.7 milliseconds, in degrees.
+	var requestAnimationFrameID;
 	var last_x = 0;
   		
   ';
-
+	
 if($_SESSION['mobile'] == 'true'){
 	$svg.= '  
   function update_gps_position(){
@@ -325,8 +336,39 @@ function startup(){';
 
 function sendpath(cmd, pathx, pathy){
 	document.getElementById("waitingimage").style.setProperty("visibility","visible", "");
-	document.getElementById("waiting_animation").beginElement();
+	requestAnimationFrameID = requestAnimationFrame(doAnim); // Start the loop.
 	top.sendpath(cmd, pathx, pathy);
+}
+
+if (!window.requestAnimationFrame){ 
+	window.requestAnimationFrame = ( function(){
+		return window.webkitRequestAnimationFrame ||
+		window.mozRequestAnimationFrame ||
+		window.oRequestAnimationFrame ||
+		window.msRequestAnimationFrame ||
+		function( /* function FrameRequestCallback */ callback, /* DOMElement Element */ element ) {
+			window.setTimeout( callback, 1000 / 60 );
+		};	 
+	})();
+}
+
+if (!window.cancelAnimationFrame){
+	window.cancelAnimationFrame = function(id) {
+		clearTimeout(id);
+	};
+}
+
+function doAnim() {
+	if(currentTheta%30 == 0)document.getElementById("waitingimage").setAttribute("transform", "translate('.$res_xm.', '.$res_ym.') scale(0.3 0.3) rotate(" + currentTheta + ")"); 
+	currentTheta += thetaDelta;  
+	requestAnimationFrameID = requestAnimationFrame(doAnim); 
+}
+
+function stopwaiting(){
+	top.document.GUI.stopnavigation.value = 0;
+	document.getElementById("waitingimage").style.setProperty("visibility","hidden", "");
+	//document.getElementById("waiting_animation").endElement();
+	cancelAnimationFrame(requestAnimationFrameID);
 }
 
 function mousewheelzoom(){
@@ -382,26 +424,28 @@ function getEventPoint(evt) {
 
 function init(){
 	startup();
-	if(navigator.appName == "Adobe SVG Viewer"){
+	if(top.browser == "other"){
 		//document.getElementById("mapimg2").addEventListener("load", function(evt) { moveback(); }, false);
 	}
 	else{
-		document.getElementById("mapimg2").addEventListener("load", function(evt) { moveback(evt); }, true);
+		document.getElementById("mapimg2").addEventListener("load", function(evt) { moveback_ff(evt); }, true);
 	}
 	if(window.addEventListener){
-		if(navigator.userAgent.toLowerCase().indexOf(\'webkit\') >= 0)
-			window.addEventListener(\'mousewheel\', mousewheelchange, false); // Chrome/Safari
-		else
-  		window.addEventListener(\'DOMMouseScroll\', mousewheelchange, false);
+			window.addEventListener(\'mousewheel\', mousewheelchange, false); // Chrome/Safari//IE9
+  		window.addEventListener(\'DOMMouseScroll\', mousewheelchange, false);		//Firefox
   }
-  else{
-		top.document.getElementById("map").onmousewheel = mousewheelchange;
+  else{	
+		top.document.getElementById("map").onmousewheel = mousewheelchange;		// <=IE8
 	}
 }
 
 top.document.getElementById("map").SVGstartup = startup;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
-function moveback(evt){
+top.document.getElementById("svghelp").SVGstopwaiting = stopwaiting;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+
+top.document.getElementById("svghelp").SVGmoveback = moveback;
+
+function moveback_ff(evt){
 	document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");
 	document.getElementById("mapimg").setAttribute("xlink:href", document.getElementById("mapimg2").getAttribute("xlink:href"));
 	// Redlining-Sachen loeschen
@@ -412,10 +456,22 @@ function moveback(evt){
 	oldmousex = undefined;
 	hidetooltip(evt);
 	// Navigation wieder erlauben
-	top.document.GUI.stopnavigation.value = 0;
-	document.getElementById("waitingimage").style.visibility = "hidden";
-	document.getElementById("waiting_animation").endElement();
+	stopwaiting();
 	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("xlink:href", "")\', 200);		// Firefox 4 
+}
+
+function moveback(evt){
+	document.getElementById("mapimg").setAttribute("xlink:href", "");
+	document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");
+	// Redlining-Sachen loeschen
+	while(child = document.getElementById("redlining").firstChild){
+  	document.getElementById("redlining").removeChild(child);
+	}
+	// Tooltip refreshen
+	oldmousex = undefined;
+	hidetooltip(evt);
+	// Navigation wieder erlauben
+	stopwaiting();
 }
 
 function go_previous(){
@@ -970,23 +1026,23 @@ function polygonarea(evt){
 
 top.document.getElementById("vertices").SVGtoggle_vertices = toggle_vertices;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
+top.document.getElementById("vertices").SVGshow_vertices = show_vertices;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+
 function toggle_vertices(){
 	if(top.document.GUI.punktfang.checked){
-		add_vertices();
+		request_vertices();
 	}
 	else{
 		remove_vertices();
 	}
 }
 
-function add_vertices(){
-	get_vertices_loop = window.setInterval("get_vertices()", 200);
-	top.ahah("'.URL.APPLVERSION.'index.php", "go=getSVG_vertices&scale="+top.document.getElementById("scale").value, new Array(top.document.GUI.vertices), "setvalue");
+function request_vertices(){
+	top.ahah("'.URL.APPLVERSION.'index.php", "go=getSVG_vertices&scale="+top.document.getElementById("scale").value, new Array(top.document.GUI.vertices, ""), new Array("setvalue", "execute_function"));
 }
 
-function get_vertices(){
+function show_vertices(){
 	if(top.document.GUI.vertices.value != ""){
-		window.clearInterval(get_vertices_loop);
 		var parent = document.getElementById("vertices");
 		circle = new Array();
 		kreis1 = document.getElementById("kreis");
@@ -1311,7 +1367,7 @@ if($_SESSION['mobile'] == 'true'){
 $svg.='
     </g>
   </g>
-	<g id="waitingimage" style="visibility:hidden" transform="translate('.$res_xm.', '.$res_ym.') scale(0.3 0.3)">
+	<g id="waitingimage" currentTheta="0" style="visibility:hidden" transform="translate('.$res_xm.', '.$res_ym.') scale(0.3 0.3)">
 		<g>
 	    <line id="line" x1="-165" y1="0" x2="-115" y2="0" stroke="#111" stroke-width="30" style="stroke-linecap:round"/>
 	    <use xlink:href="#line" transform="rotate(30,0,0)" style="opacity:.0833"/>
@@ -1326,12 +1382,12 @@ $svg.='
 	    <use xlink:href="#line" transform="rotate(300,0,0)" style="opacity:.8333"/>
 	    <use xlink:href="#line" transform="rotate(330,0,0)" style="opacity:.9166"/>
 	    
-	    <animateTransform id="waiting_animation" attributeName="transform" attributeType="XML" type="rotate" begin="indefinite" dur="1s" repeatCount="indefinite" calcMode="discrete"
+	    <!--animateTransform id="waiting_animation" attributeName="transform" attributeType="XML" type="rotate" begin="indefinite" end="indefinite" dur="1s" repeatCount="indefinite" calcMode="discrete"
 	    keyTimes="0;.0833;.166;.25;.3333;.4166;.5;.5833;.6666;.75;.8333;.9166;1"
-	    values="0,0,0;30,0,0;60,0,0;90,0,0;120,0,0;150,0,0;180,0,0;210,0,0;240,0,0;270,0,0;300,0,0;330,0,0;360,0,0"/>
+	    values="0,0,0;30,0,0;60,0,0;90,0,0;120,0,0;150,0,0;180,0,0;210,0,0;240,0,0;270,0,0;300,0,0;330,0,0;360,0,0"/-->
     </g>
   </g>
-  <g id="mapimg2_group">
+	<g id="mapimg2_group">
   	<image id="mapimg2" xlink:href="" height="100%" width="100%" y="0" x="0"/>
   </g>
 	

@@ -1,8 +1,6 @@
 <?php
 # 2007-12-30 pk
   include(LAYOUTPATH.'languages/map_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
-	include(LAYOUTPATH.'snippets/ahah.php');
-  echo $ahah;
 	
 $userProjection = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);
 $wgsProjection = ms_newprojectionobj("init=epsg:4326");

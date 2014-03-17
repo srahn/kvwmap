@@ -8,7 +8,7 @@
 		echo 'window.close();';
 	}
  ?>
-
+ 
 function checknumbers(input, type, length, decimal_length){
 	if(type == 'numeric' || type == 'float4' || type == 'float8'){
 		var val = input.value.replace(/[a-zA-Z]/g, '');
@@ -54,10 +54,10 @@ function selectall(layer_id){
 }
 
 function zoom2wkt(wkt, epsg){
-	document.GUI.epsg.value = epsg;
-	document.GUI.wkt.value = wkt;
-	document.GUI.go.value = 'zoom2wkt';
-	document.GUI.submit();
+	currentform.epsg.value = epsg;
+	currentform.wkt.value = wkt;
+	currentform.go.value = 'zoom2wkt';
+	currentform.submit();
 }
 
 function check_for_selection(layer_id){
@@ -81,54 +81,54 @@ function check_for_selection(layer_id){
 
 function zoomto_datasets(layer_id, tablename, columnname){
 	if(check_for_selection(layer_id)){
-		document.GUI.chosen_layer_id.value = layer_id;
-		document.GUI.layer_tablename.value = tablename;
-		document.GUI.layer_columnname.value = columnname;
-		document.GUI.go.value = 'zoomto_selected_datasets';
-		document.GUI.submit();
+		currentform.chosen_layer_id.value = layer_id;
+		currentform.layer_tablename.value = tablename;
+		currentform.layer_columnname.value = columnname;
+		currentform.go.value = 'zoomto_selected_datasets';
+		currentform.submit();
 	}
 }
 
 function delete_datasets(layer_id){
 	if(check_for_selection(layer_id)){
 		if(confirm('Wollen Sie die ausgewählten Datensätze wirklich löschen?')){
-			document.GUI.chosen_layer_id.value = layer_id;
-			document.GUI.go.value = 'Layer_Datensaetze_Loeschen';
-			document.GUI.submit();
+			currentform.chosen_layer_id.value = layer_id;
+			currentform.go.value = 'Layer_Datensaetze_Loeschen';
+			currentform.submit();
 		}
 	}
 }
 
 function delete_document(attributename){
 	if(confirm('Wollen Sie das ausgewählte Dokument wirklich löschen?')){
-		document.GUI.document_attributename.value = attributename; 
-		document.GUI.go.value = 'Dokument_Loeschen';
-		document.GUI.submit();
+		currentform.document_attributename.value = attributename; 
+		currentform.go.value = 'Dokument_Loeschen';
+		currentform.submit();
 	}
 }
 
 function csv_export_all(layer_id){
-	document.GUI.all.value = 'true';
-	document.GUI.chosen_layer_id.value = layer_id;
-	document.GUI.go_backup.value = document.GUI.go.value;
-	document.GUI.go.value = 'generischer_csv_export';
-	document.GUI.submit();
+	currentform.all.value = 'true';
+	currentform.chosen_layer_id.value = layer_id;
+	currentform.go_backup.value = currentform.go.value;
+	currentform.go.value = 'generischer_csv_export';
+	currentform.submit();
 }
 
 function shape_export_all(layer_id, anzahl){
-	document.GUI.chosen_layer_id.value = layer_id;
-	document.GUI.anzahl.value = anzahl;
-	document.GUI.go_backup.value = document.GUI.go.value;
-	document.GUI.go.value = 'SHP_Export';
-	document.GUI.submit();
+	currentform.chosen_layer_id.value = layer_id;
+	currentform.anzahl.value = anzahl;
+	currentform.go_backup.value = currentform.go.value;
+	currentform.go.value = 'SHP_Export';
+	currentform.submit();
 }
 
 function shape_export(layer_id){
 	if(check_for_selection(layer_id)){
-		document.GUI.chosen_layer_id.value = layer_id;
-		document.GUI.go_backup.value = document.GUI.go.value;
-		document.GUI.go.value = 'SHP_Export';
-		document.GUI.submit();
+		currentform.chosen_layer_id.value = layer_id;
+		currentform.go_backup.value = currentform.go.value;
+		currentform.go.value = 'SHP_Export';
+		currentform.submit();
 	}
 }
 
@@ -145,31 +145,31 @@ function select_this_dataset(layer_id, n){
 
 function use_for_new_dataset(layer_id){
 	if(check_for_selection(layer_id)){
-		document.GUI.chosen_layer_id.value = layer_id;
-		document.GUI.pathwkt.value = '';
-		document.GUI.newpathwkt.value = '';
-		document.GUI.newpath.value = '';
-		document.GUI.go_backup.value = document.GUI.go.value;
-		document.GUI.go.value = 'neuer_Layer_Datensatz';
-		document.GUI.submit();
+		currentform.chosen_layer_id.value = layer_id;
+		currentform.pathwkt.value = '';
+		currentform.newpathwkt.value = '';
+		currentform.newpath.value = '';
+		currentform.go_backup.value = currentform.go.value;
+		currentform.go.value = 'neuer_Layer_Datensatz';
+		currentform.submit();
 	}
 }
 
 function csv_export(layer_id){
 	if(check_for_selection(layer_id)){
-		document.GUI.chosen_layer_id.value = layer_id;
-		document.GUI.go_backup.value = document.GUI.go.value;
-		document.GUI.go.value = 'generischer_csv_export';
-		document.GUI.submit();
+		currentform.chosen_layer_id.value = layer_id;
+		currentform.go_backup.value = currentform.go.value;
+		currentform.go.value = 'generischer_csv_export';
+		currentform.submit();
 	}
 }
 
 function print_data(layer_id){
 	if(check_for_selection(layer_id)){
-		document.GUI.chosen_layer_id.value = layer_id;
-		document.GUI.go_backup.value = document.GUI.go.value;
-		document.GUI.go.value = 'generischer_sachdaten_druck';
-		document.GUI.submit();
+		currentform.chosen_layer_id.value = layer_id;
+		currentform.go_backup.value = currentform.go.value;
+		currentform.go.value = 'generischer_sachdaten_druck';
+		currentform.submit();
 	}
 }
 
@@ -193,13 +193,13 @@ function change_charttype(layer_id){
 
 function create_chart(layer_id){
 	if(check_for_selection(layer_id)){
-		document.GUI.target = "_blank";
-		document.GUI.chosen_layer_id.value = layer_id;
-		document.GUI.width.value = 700;
-		document.GUI.go_backup.value = document.GUI.go.value;
-		document.GUI.go.value = 'generisches_sachdaten_diagramm';
-		document.GUI.submit();
-		document.GUI.target = "";
+		currentform.target = "_blank";
+		currentform.chosen_layer_id.value = layer_id;
+		currentform.width.value = 700;
+		currentform.go_backup.value = currentform.go.value;
+		currentform.go.value = 'generisches_sachdaten_diagramm';
+		currentform.submit();
+		currentform.target = "";
 	}
 }
 
@@ -210,13 +210,13 @@ function update_require_attribute(attributes, k,layer_id, value){
 		type = document.getElementById(attribute[i]+'_'+k).type;
 		if(type == 'text'){action = 'setvalue'};
 		if(type == 'select-one'){action = 'sethtml'};
-		ahah("<? echo URL.APPLVERSION; ?>index.php", "go=get_select_list&layer_id="+layer_id+"&attribute="+attribute[i]+"&value="+value+"&type="+type, new Array(document.getElementById(attribute[i]+'_'+k)), action);
+		ahah("<? echo URL.APPLVERSION; ?>index.php", "go=get_select_list&layer_id="+layer_id+"&attribute="+attribute[i]+"&value="+value+"&type="+type, new Array(document.getElementById(attribute[i]+'_'+k)), new Array(action));
 	}
 }
 
 function change_orderby(attribute, layer_id){
-	if(document.GUI.go_backup.value != ''){
-		document.GUI.go.value = document.GUI.go_backup.value;
+	if(currentform.go_backup.value != ''){
+		currentform.go.value = currentform.go_backup.value;
 	}
 	if(document.getElementById('orderby'+layer_id).value == attribute){
 		document.getElementById('orderby'+layer_id).value = attribute+' DESC';
@@ -224,7 +224,7 @@ function change_orderby(attribute, layer_id){
 	else{
 		document.getElementById('orderby'+layer_id).value = attribute;
 	}
-	document.GUI.submit();
+	overlay_submit(currentform);
 }
 
 function set_changed_flag(flag){

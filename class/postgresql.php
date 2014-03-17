@@ -23,9 +23,9 @@
 # pkorduan@gmx.de peter.korduan@auf.uni-rostock.de                #
 ###################################################################
 ##################################################
-# Klasse Datenbank fï¿½r ALB Modell und PostgreSQL #
+# Klasse Datenbank für ALB Modell und PostgreSQL #
 ##################################################
-class pgdatabase extends pgdatabase_core {
+class pgdatabase_alkis extends pgdatabase_core {
   var $ist_Fortfuehrung;
   var $debug;
   var $loglevel;
@@ -35,11 +35,11 @@ class pgdatabase extends pgdatabase_core {
   var $commentsign;
   var $blocktransaction;
 
-  # Fï¿½r eine Liste der verfï¿½gbaren Funktionen siehe:
+  # Für eine Liste der verfügbaren Funktionen siehe:
   # https://kvwmap.geoinformatik.uni-rostock.de/PHPDoc/apidoc/pgdatabase.html
   # Liste ggf. mit https://kvwmap.geoinformatik.uni-rostock.de/PHPDoc/ aktualisieren
 
-  function pgdatabase() {
+  function pgdatabase_alkis() {
     global $debug;
     $this->debug=$debug;
     $this->loglevel=LOG_LEVEL;
@@ -783,23 +783,8 @@ class pgdatabase extends pgdatabase_core {
     $sql.=" WHERE alb_".$this->tableprefix."grundbuecher.aktualitaetsnr NOT LIKE 'hist'";
     return $this->execSQL($sql, 4, 0);
   }
-
-  function getGrundbuecher($FlurstKennz) {
-    $sql ="SELECT DISTINCT gb.bezirk,gb.blatt,gb.zusatz_eigentuemer";
-    $sql.=" FROM alb_g_buchungen AS b,alb_grundbuecher AS gb";
-    $sql.=" WHERE b.bezirk=gb.bezirk AND b.blatt=gb.blatt";
-    $sql.=" AND gb.aktualitaetsnr NOT LIKE 'hist'";
-    $sql.=" AND b.flurstkennz='".$FlurstKennz."' ORDER BY gb.bezirk,gb.blatt";
-    $ret=$this->execSQL($sql, 4, 0);
-    if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    while($rs=pg_fetch_array($ret[1])) {
-      $Grundbuch[]=$rs;
-    }
-    $ret[1]=$Grundbuch;
-    return $ret;
-  }
   
-  function getGrundbuecherALKIS($FlurstKennz) {
+  function getGrundbuecher($FlurstKennz) {
     $sql ="SELECT distinct bezirk.schluesselgesamt AS bezirk, blatt.buchungsblattnummermitbuchstabenerweiterung AS blatt";
 		$sql.=" FROM alkis.ax_flurstueck f, alkis.alkis_beziehungen flst2buchung, alkis.ax_buchungsstelle buchung, alkis.alkis_beziehungen buchung2blatt, alkis.ax_buchungsblattbezirk bezirk, alkis.ax_buchungsblatt blatt";   
 		$sql.=" WHERE flst2buchung.beziehungsart::text = 'istGebucht'::text AND f.gml_id = flst2buchung.beziehung_von AND flst2buchung.beziehung_zu = buchung.gml_id";
@@ -983,37 +968,8 @@ class pgdatabase extends pgdatabase_core {
     $ret[1]=$Buchung;
     return $ret;
   }
-
-  function getBuchungenFromGrundbuch($FlurstKennz,$Bezirk,$Blatt,$keine_historischen) {
-    # 28.11.2006 H.Riedel, AktualitaetsNr hinzugefuegt
-    # $sql ="SELECT b.bezirk,b.blatt,gb.pruefzeichen,b.bvnr,g.buchungsart,ba.bezeichnung,b.flurstkennz";
-    $sql ="SELECT b.bezirk,b.blatt,gb.pruefzeichen,b.bvnr,g.buchungsart,ba.bezeichnung,b.flurstkennz,gb.aktualitaetsnr, g.anteil, g.auftplannr, g.sondereigentum, b.erbbaurechtshinw ,gb.zusatz_eigentuemer";
-    $sql.=" FROM alb_g_buchungen AS b,alb_g_grundstuecke AS g, alb_v_buchungsarten AS ba,alb_grundbuecher AS gb";
-    $sql.=" WHERE b.bezirk=g.bezirk AND b.blatt=g.blatt AND b.bvnr=g.bvnr";
-    $sql.=" AND b.bezirk=gb.bezirk AND b.blatt=gb.blatt AND g.buchungsart=ba.buchungsart";
-    if ($keine_historischen) {
-      $sql.=" AND gb.aktualitaetsnr NOT LIKE 'hist'";
-    }
-    if ($Bezirk!='') {
-      $sql.=" AND gb.bezirk='".$Bezirk."'";
-    }
-    if ($Blatt!='') {
-      $sql.=" AND gb.blatt='".$Blatt."'";
-    }
-    if ($FlurstKennz!='') {
-      $sql.=" AND b.flurstkennz='".$FlurstKennz."'";
-    }
-    $sql.=" ORDER BY b.bezirk,b.blatt,b.bvnr,b.flurstkennz";
-    $ret=$this->execSQL($sql, 4, 0);
-    if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    while($rs=pg_fetch_array($ret[1])) {
-      $Buchung[]=$rs;
-    }
-    $ret[1]=$Buchung;
-    return $ret;
-  }
   
-  function getBuchungenFromGrundbuchALKIS($FlurstKennz,$Bezirk,$Blatt,$keine_historischen) {
+  function getBuchungenFromGrundbuch($FlurstKennz,$Bezirk,$Blatt,$keine_historischen) {
   	// max(namensnummer.beschriebderrechtsgemeinschaft) weil es bei einer Buchung mit Zusatz zum Eigentï¿½mer einen weiteren Eintrag mit diesem Zusatz in ax_namensnummer gibt
   	// ohne Aggregation wï¿½rden sonst 2 Buchungen von der Abfrage zurï¿½ckgeliefert werden 
     $sql ="SELECT DISTINCT bezirk.schluesselgesamt AS bezirk, blatt.buchungsblattnummermitbuchstabenerweiterung AS blatt, buchung.laufendenummer AS bvnr, buchung.buchungsart, ba.bezeichner as bezeichnung, f.flurstueckskennzeichen as flurstkennz, buchung.zaehler::text||buchung.nenner::text as anteil, buchung.nummerimaufteilungsplan as auftplannr, buchung.beschreibungdessondereigentums as sondereigentum, max(namensnummer.beschriebderrechtsgemeinschaft) as zusatz_eigentuemer"; 
@@ -1150,41 +1106,8 @@ class pgdatabase extends pgdatabase_core {
     $sql.=" VALUES ('".$FlurstKennz."','".$GemkgSchl."','".$FlurNr."','".$Pruefzeichen."')";
     return $this->execSQL($sql, 4, 0);
   }
-
-
-  function getGemeindeListeByGemIDByGemkgSchl($GemID,$GemkgID,$order){
-    $sql ="SELECT DISTINCT gmk.gemkgschl AS GemkgID,gmk.gemkgname AS Name,gem.gemeindename, gem.gemeinde";
-    $sql.=" FROM alb_v_gemarkungen AS gmk,alb_v_gemeinden AS gem WHERE gmk.gemeinde=gem.gemeinde";
-    if ($GemID[0]!='') {
-      $sql.=" AND gmk.Gemeinde IN (".$GemID[0];
-      for ($i=1;$i<count($GemID);$i++) {
-        $sql.=",".$GemID[$i];
-      }
-      $sql.=")";
-    }
-    if ($GemkgID[0]!='') {
-      $sql.=" AND gmk.GemkgSchl IN (".$GemkgID[0];
-      for ($i=1;$i<count($GemkgID);$i++) {
-        $sql.=",".$GemkgID[$i];
-      }
-      $sql.=")";
-    }
-    if ($order!='') {
-      $sql.=" ORDER BY ".$order;
-    }
-    #echo $sql;
-    $queryret=$this->execSQL($sql, 4, 0);
-    if ($queryret==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    while ($rs=pg_fetch_array($queryret[1])) {
-      $Liste['GemkgID'][]=$rs['gemkgid'];
-      $Liste['Name'][]=$rs['name'];
-      $Liste['gemeinde'][]=$rs['gemeinde'];
-      $Liste['Bezeichnung'][]=$rs['name']." (".$rs['gemkgid'].") ".$rs['gemeindename'];
-    }
-    return $Liste;
-  }
-  
-  function getGemeindeListeByGemIDByGemkgSchlALKIS($GemID,$GemkgID,$order){
+ 
+  function getGemeindeListeByGemIDByGemkgSchl($GemID,$GemkgID){
     $sql ="SELECT DISTINCT gmk.schluesselgesamt AS GemkgID,gmk.bezeichnung AS Name,gem.bezeichnung as gemeindename, gem.schluesselgesamt as gemeinde";
     $sql.=" FROM alkis.ax_gemarkung AS gmk, alkis.ax_gemeinde AS gem, alkis.gemeinde_gemarkung as g_g ";
     $sql.="WHERE g_g.gemeinde=gem.gemeinde AND g_g.gemarkung=gmk.gemarkungsnummer";
@@ -1202,9 +1125,7 @@ class pgdatabase extends pgdatabase_core {
       }
       $sql.=")";
     }
-    if ($order!='') {
-      $sql.=" ORDER BY ".$order;
-    }
+    $sql.=" ORDER BY gmk.bezeichnung";
     #echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
@@ -1216,36 +1137,8 @@ class pgdatabase extends pgdatabase_core {
     }
     return $Liste;
   }
-  
-  
-
-  function getGemeindeListeByKreisGemeinden($Gemeinden,$order){
-    # 2006-01-26 pk
-    $sql ="SELECT DISTINCT g.gemeinde AS id,g.gemeindename AS name";
-    $sql.=" FROM alb_v_gemeinden AS g WHERE 1=1";
-    if (is_array($Gemeinden)) {
-      if ($Gemeinden[0]['ID']!=0 AND $Gemeinden[0]['ID']!='') {
-        $sql.=" AND g.gemeinde IN (".$Gemeinden[0]['ID'];
-        for ($i=1;$i<count($Gemeinden);$i++) {
-          $sql.=",".$Gemeinden[$i]['ID'];
-        }
-        $sql.=")";
-      }
-    }
-    if ($order!='') {
-      $sql.=" ORDER BY ".$order;
-    }
-    #echo $sql;
-    $ret=$this->execSQL($sql, 4, 0);
-    if ($ret==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    while ($rs=pg_fetch_array($ret[1])) {
-      $GemeindeListe['ID'][]=$rs['id'];
-      $GemeindeListe['Name'][]=$rs['name'];
-    }
-    return $GemeindeListe;
-  }
-  
-  function getGemeindeListeByKreisGemeindenALKIS($Gemeinden,$order){
+    
+  function getGemeindeListeByKreisGemeinden($Gemeinden){
     $sql ="SELECT DISTINCT g.schluesselgesamt AS id, g.bezeichnung AS name";
     $sql.=" FROM alkis.ax_gemeinde AS g WHERE 1=1";
     if (is_array($Gemeinden)) {
@@ -1257,9 +1150,7 @@ class pgdatabase extends pgdatabase_core {
         $sql.=")";
       }
     }
-    if ($order!='') {
-      $sql.=" ORDER BY ".$order;
-    }
+    $sql.=" ORDER BY bezeichnung";
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
@@ -1322,57 +1213,11 @@ class pgdatabase extends pgdatabase_core {
     return $ret;
   }
 
-	function getFlurstuecksListeALK($GemID,$GemkgID,$FlurID,$order, $historical = false){
-		$sql ="SELECT *,SUBSTRING(flurstkennz,12,5) AS zaehler,SUBSTRING(flurstkennz,18,3) AS nenner";
-    $sql.=" FROM alknflst WHERE 1=1";
-    if ($GemkgID>0) {
-      $sql.=" AND gemkgschl= '".$GemkgID."'";
-    }
-    if ($FlurID!='') {
-      $sql.=" AND SUBSTRING(flurstkennz,8,3)='".$FlurID."'";
-    }
-    if ($order!='') {
-      $sql.=" ORDER BY ".$order;
-    }
-    $queryret=$this->execSQL($sql, 4, 0);
-    while ($rs=pg_fetch_array($queryret[1])) {
-      $Liste['FlstID'][]=$rs['flurstkennz'];
-      $FlstNr=intval($rs['zaehler']);
-      if ($rs['nenner']!='000') { $FlstNr.="/".intval($rs['nenner']); }
-      $Liste['FlstNr'][]=$FlstNr;
-    }
-    return $Liste;
+	function getFlurstuecksListeALK($GemID,$GemkgID,$FlurID, $historical = false){			# kann nach der ALKIS-Umstellung gelöscht werden und die Aufrufe durch getFlurstuecksListe ersetzt werden
+		return $this->getFlurstuecksListe($GemID,$GemkgID,$FlurID, $historical);
 	}
-
-  function getFlurstuecksListe($GemID,$GemkgID,$FlurID,$order, $historical = false){
-    $sql ="SELECT *,SUBSTRING(flurstkennz,12,5) AS zaehler,SUBSTRING(flurstkennz,18,3) AS nenner";
-    if($historical == 1){
-    	$sql.=" FROM alb_flurstuecke WHERE status = 'H'";
-    }
-    else{
-    	$sql.=" FROM alb_flurstuecke WHERE status != 'H'";
-    }
-    if ($GemkgID>0) {
-      $sql.=" AND gemkgschl= ".$GemkgID;
-    }
-    if ($FlurID!='-1') {
-      $sql.=" AND flurnr='".$FlurID."'";
-    }
-    if ($order!='') {
-      $sql.=" ORDER BY ".$order;
-    }
-    #echo $sql;
-    $queryret=$this->execSQL($sql, 4, 0);
-    while ($rs=pg_fetch_array($queryret[1])) {
-      $Liste['FlstID'][]=$rs['flurstkennz'];
-      $FlstNr=intval($rs['zaehler']);
-      if ($rs['nenner']!='000') { $FlstNr.="/".intval($rs['nenner']); }
-      $Liste['FlstNr'][]=$FlstNr;
-    }
-    return $Liste;
-  }
   
-  function getFlurstuecksListeALKIS($GemID,$GemkgID,$FlurID,$order, $historical = false){
+  function getFlurstuecksListe($GemID,$GemkgID,$FlurID, $historical = false){
     //$sql ="SELECT land||gemarkungsnummer||'-'||lpad(flurnummer, 3, '0')||'-'||lpad(zaehler, 5, '0')||'/'||case when nenner IS NULL THEN '000.00' ELSE lpad(nenner, 3, '0')||'.00' END as flurstkennz, zaehler, nenner";
     $sql ="SELECT flurstueckskennzeichen as flurstkennz, zaehler, nenner";
     $sql.=" FROM alkis.ax_flurstueck WHERE 1=1";
@@ -1382,9 +1227,7 @@ class pgdatabase extends pgdatabase_core {
     if ($FlurID!='') {
       $sql.=" AND flurnummer=".intval($FlurID);
     }
-    if ($order!='') {
-      $sql.=" ORDER BY ".$order;
-    }
+    $sql.=" ORDER BY flurstueckskennzeichen";
     #echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
     while ($rs=pg_fetch_array($queryret[1])) {
@@ -1411,39 +1254,8 @@ class pgdatabase extends pgdatabase_core {
 		$rs = pg_fetch_array($queryret[1]);		
 		return $rs;
 	}
-
-  function getFlurstKennzListeByGemSchlByStrSchl($GemeindeSchl,$StrassenSchl,$HausNr) {
-    $sql ="SELECT alb_f_adressen.flurstkennz FROM alb_f_adressen, alb_flurstuecke";
-    $sql.=" WHERE alb_flurstuecke.flurstkennz = alb_f_adressen.flurstkennz";
-    $sql.=" AND status != 'H'";
-    if ($HausNr!='') {
-    	if($HausNr == 'ohne'){
-    		$HausNr = '';
-    	}
-    	if(strpos($HausNr, ', ') !== false){							# wenn mehrere Hausnummern:					1, 2, 3a, 4
-    		$HausNr = str_replace(", ", "','", $HausNr);		# Hochkommas dazwischen hinzufï¿½gen: 1','2','3a','4
-    		$sql.=" AND gemeinde||'-'||strasse||'-'||TRIM(".HAUSNUMMER_TYPE."(hausnr)) IN ('".$HausNr."')";		# und noch die ï¿½uï¿½eren:      			 '1','2','3a','4'
-    	}
-    	else{
-      	$sql.=" AND gemeinde||'-'||strasse||'-'||TRIM(".HAUSNUMMER_TYPE."(hausnr))='".$HausNr."'";
-    	}
-    }
-    else{
-    	$sql.=" AND gemeinde=".(int)$GemeindeSchl;
-    	$sql.=" AND strasse='".$StrassenSchl."'";
-    }
-    #echo $sql;
-    $ret=$this->execSQL($sql, 4, 0);
-    if ($ret[0]==0) {
-      while($rs=pg_fetch_array($ret[1])) {
-        $FlurstKennz[]=$rs['flurstkennz'];
-      }
-      $ret[1]=$FlurstKennz;
-    }
-    return $ret;
-  }
   
-  function getFlurstKennzListeByGemSchlByStrSchlALKIS($GemeindeSchl,$StrassenSchl,$HausNr) {
+  function getFlurstKennzListeByGemSchlByStrSchl($GemeindeSchl,$StrassenSchl,$HausNr) {
   	$sql.=" SELECT f.flurstueckskennzeichen as flurstkennz";
     $sql.=" FROM alkis.ax_flurstueck as f, alkis.ax_gemeinde as g, alkis.alkis_beziehungen v";
     $sql.=" JOIN alkis.ax_lagebezeichnungmithausnummer l ON v.beziehung_zu=l.gml_id";
@@ -1503,21 +1315,8 @@ class pgdatabase extends pgdatabase_core {
     }
     return $ret;
   }
-
-	function getFlurstueckeByGrundbuchblatt($bezirk, $blatt) {
-    $sql ="SELECT DISTINCT b.flurstkennz FROM alb_g_buchungen AS b";
-    $sql.=" WHERE b.bezirk = ".$bezirk." AND b.blatt = '".$blatt."'";
-    $ret=$this->execSQL($sql, 4, 0);
-    if ($ret[0]==0) {
-      while($rs=pg_fetch_array($ret[1])) {
-        $FlurstKennz[]=$rs['flurstkennz'];
-      }
-      $ret[1]=$FlurstKennz;
-    }
-    return $FlurstKennz;
-  }
   
-  function getFlurstueckeByGrundbuchblattALKIS($bezirk, $blatt) {
+  function getFlurstueckeByGrundbuchblatt($bezirk, $blatt) {
     $sql ="SELECT DISTINCT f.flurstueckskennzeichen as flurstkennz";
 		$sql.=" FROM alkis.ax_flurstueck f, alkis.alkis_beziehungen flst2buchung, alkis.ax_buchungsstelle buchung, alkis.alkis_beziehungen buchung2blatt, alkis.ax_buchungsblattbezirk bezirk, alkis.ax_buchungsblatt blatt";  
 		$sql.=" WHERE flst2buchung.beziehungsart::text = 'istGebucht'::text";
@@ -1638,31 +1437,8 @@ class pgdatabase extends pgdatabase_core {
     $sql.=" AND alb_".$this->tableprefix."flurstuecke.status = 'H'";
   	return $this->execSQL($sql, 4, 0);
   }
-
-  function getALBData($FlurstKennz) {
-    $sql ="SELECT f.flurnr,f.pruefzeichen,f.status,f.entsteh,f.letzff,f.flaeche,f.aktunr,f.karte,f.baublock";
-	  $sql.=",f.koorrw,f.koorhw,f.forstamt,SUBSTRING(f.flurstkennz FROM 12 FOR 5) AS zaehler,SUBSTRING(f.flurstkennz FROM 18 FOR 3) AS nenner";
-	  $sql.=",k.kreis AS kreisid,k.kreisname AS kreisname,gk.gemkgschl,gk.gemkgname,g.gemeinde,g.gemeindename";
-	  $sql.=",fa.finanzamt,fa.name AS finanzamtname FROM alb_v_kreise AS k,alb_v_gemeinden AS g,alb_v_gemarkungen AS gk";
-	  $sql.=",alb_flurstuecke AS f LEFT JOIN alb_v_finanzaemter AS fa ON f.finanzamt=fa.finanzamt";
-	  $sql.=" WHERE CAST(f.gemkgschl AS text)=CAST(gk.gemkgschl AS text)";
-	  $sql.=" AND SUBSTRING(CAST(gk.gemeinde AS text) FROM 1 FOR 5) = CAST(k.kreis AS text) AND gk.gemeinde=g.gemeinde";
-	  $sql.=" AND f.flurstkennz='".$FlurstKennz."'";
-    #echo $sql; 
-    $queryret=$this->execSQL($sql, 4, 0);
-    if ($queryret[0]) {
-      $ret[0]=0;
-      $ret[1]=$queryret[1];
-    }
-    else {
-      $ret[0]=0;
-      $rs=pg_fetch_array($queryret[1]);
-      $ret[1]=$rs;
-    }
-    return $ret;
-  }
   
-  function getALBDataALKIS($FlurstKennz) {
+  function getALBData($FlurstKennz) {
     $sql ="SELECT lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, zaehler, nenner, k.schluesselgesamt AS kreisid, k.bezeichnung as kreisname, f.land::text||f.gemarkungsnummer::text as gemkgschl, g_g.gemarkungsname as gemkgname, g.schluesselgesamt as gemeinde, g_g.gemeindename";
 	  //$sql.=",f.pruefzeichen,f.status,f.entsteh,f.letzff,f.aktunr,f.karte,f.baublock,f.koorrw,f.koorhw,f.forstamt,fa.finanzamt,fa.name AS finanzamtname,";
 	  $sql.=" FROM alkis.ax_kreisregion AS k, alkis.ax_gemeinde as g, alkis.gemeinde_gemarkung AS g_g, alkis.ax_flurstueck AS f";
@@ -1696,33 +1472,8 @@ class pgdatabase extends pgdatabase_core {
     }
     return $ret;
   }
-
-  function getFlurstuecksKennzByGemeindeIDs($Gemeinde_ID, $FlurstKennz){
-    $sql ="SELECT f.flurstkennz FROM alb_flurstuecke AS f, alb_v_gemarkungen AS gk";
-    $sql.=" WHERE f.gemkgschl=gk.gemkgschl AND gk.gemeinde IN ('".$Gemeinde_ID[0]['ID']."'";
-    for($i = 1; $i < count($Gemeinde_ID); $i++){
-      $sql .= ", '".$Gemeinde_ID[$i]['ID']."'";
-    }
-    $sql .= ")";
-    $sql.=" AND f.flurstkennz IN ('".$FlurstKennz[0]."'";
-    for ($i=1;$i<count($FlurstKennz);$i++) {
-      $sql.=", '".$FlurstKennz[$i]."'";
-    }
-    $sql.=")";
-    $this->debug->write("<p>postgresql.php getFlurstuecksKennzByGemeindeIDs() Abfragen erlaubten Flurstï¿½ckskennzeichen nach Gemeindeids:<br>".$sql,4);
-    $query=pg_query($sql);
-    if ($query==0) {
-      $ret[0]=1; $ret[1]="Fehler bei der Abfrage der zur Anzeige erlaubten Flurstï¿½cke";
-      $this->debug->write("<br>Abbruch in postgresql.php getFlurstuecksKennzByGemeindeIDs Zeile: ".__LINE__."<br>sql: ".$sql,4);
-      return $ret;
-    }
-    while($rs=pg_fetch_array($query)) {
-      $ret[1][]=$rs["flurstkennz"];
-    }
-    return $ret;
-  }
   
-  function getFlurstuecksKennzByGemeindeIDsALKIS($Gemeinde_ID, $FlurstKennz){
+  function getFlurstuecksKennzByGemeindeIDs($Gemeinde_ID, $FlurstKennz){
     $sql ="SELECT f.flurstueckskennzeichen as flurstkennz FROM alkis.ax_flurstueck AS f, alkis.gemeinde_gemarkung AS g_g";
     $sql.=" WHERE f.gemarkungsnummer=g_g.gemarkung AND g_g.gemeinde IN ('".$Gemeinde_ID[0]['ID']."'";
     for($i = 1; $i < count($Gemeinde_ID); $i++){
@@ -1864,31 +1615,8 @@ class pgdatabase extends pgdatabase_core {
     $sql.=" VALUES ('".$FlurstKennz."','".$Gemeinde."','".$Strasse."','".$HausNr."')";
     return $this->execSQL($sql, 4, 0);
   }
-
-  function getStrassen($FlurstKennz) {
-    # Abfrage der Adressenangabe zum Flurstï¿½ck
-    # 1. Abfragen der Strassen die am Flurstï¿½ck liegen
-    $sql ="SELECT DISTINCT gem.gemeindename,str.strasse,str.strassenname";
-    $sql.=" FROM alb_f_adressen AS adr,alb_v_gemeinden AS gem,alb_v_strassen AS str";
-    $sql.=" WHERE adr.gemeinde=gem.gemeinde AND adr.strasse=str.strasse";
-    $sql.=" AND str.gemeinde=gem.gemeinde";
-    $sql.=" AND adr.flurstkennz = '".$FlurstKennz."'";
-    $queryret=$this->execSQL($sql, 4, 0);
-    if ($queryret[0]) {
-      $ret[0]=1;
-      $ret[1]=$queryret[1];
-    }
-    else {
-      $ret[0]=0;
-      while($rs=pg_fetch_array($queryret[1])) {
-        $Strassen[]=$rs;
-      }
-      $ret[1]=$Strassen;
-    }
-    return $ret;
-  }
   
-  function getStrassenALKIS($FlurstKennz) {
+  function getStrassen($FlurstKennz) {
     # Abfrage der Adressenangabe zum Flurstï¿½ck
     # 1. Abfragen der Strassen die am Flurstï¿½ck liegen
     $sql ="SELECT DISTINCT g.bezeichnung as gemeindename, l.lage as strasse, s.bezeichnung as strassenname";
@@ -1931,25 +1659,8 @@ class pgdatabase extends pgdatabase_core {
     }
     return $ret;
   }
-  
+    
 	function getStrNameByID($GemID,$StrID) {
-    $sql ="SELECT DISTINCT strassenname FROM alb_v_strassen WHERE gemeinde= ".$GemID;
-    $sql.=" AND strasse = '".$StrID."'";
-    $queryret=$this->execSQL($sql, 4, 0);
-    if ($queryret[0]) {
-      $ret[0]=1;
-      $ret[1]=$queryret[1];
-    }
-    else {
-      $ret[0]=0;
-      $rs=pg_fetch_array($queryret[1]);
-      $StrID=$rs[0];
-      $ret[1]=$StrID;
-    }
-    return $ret;
-  }
-  
-	function getStrNameByIDALKIS($GemID,$StrID) {
     $sql ="SELECT bezeichnung FROM alkis.ax_lagebezeichnungkatalogeintrag WHERE schluesselgesamt = '".$GemID.str_pad($StrID, 5, '0', STR_PAD_LEFT)."'";
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0]) {
@@ -1964,31 +1675,8 @@ class pgdatabase extends pgdatabase_core {
     }
     return $ret;
   }
-
-  function getHausNummern($FlurstKennz,$Strasse) {
-    # Abfragen der Hausnummern zu den jeweiligen Strassen
-    $sql ="SELECT DISTINCT ".HAUSNUMMER_TYPE."(adr.hausnr) AS hausnr";
-    $sql.=" FROM alb_f_adressen AS adr,alb_v_gemeinden AS gem,alb_v_strassen AS str";
-    $sql.=" WHERE adr.gemeinde=gem.gemeinde AND adr.strasse=str.strasse";
-    $sql.=" AND str.strasse = '".$Strasse."'";
-    $sql.=" AND adr.flurstkennz = '".$FlurstKennz."'";
-    #echo $sql;
-    $queryret=$this->execSQL($sql, 4, 0);
-    if ($queryret[0]) {
-      $ret[0]=1;
-      $ret[1]=$queryret[1];
-    }
-    else {
-      $ret[0]=0;
-      while($rs=pg_fetch_array($queryret[1])) {
-        $HausNr[]=$rs[0];
-      }
-      $ret[1]=$HausNr;
-    }
-    return $ret;
-  }
   
-  function getHausNummernALKIS($FlurstKennz,$Strasse) {
+  function getHausNummern($FlurstKennz,$Strasse) {
     # Abfragen der Hausnummern zu den jeweiligen Strassen
     $sql ="SELECT DISTINCT ".HAUSNUMMER_TYPE."(l.hausnummer) AS hausnr";
     $sql.=" FROM alkis.ax_flurstueck as f, alkis.alkis_beziehungen v";
@@ -2065,28 +1753,8 @@ class pgdatabase extends pgdatabase_core {
     $sql.=" VALUES ('".$FlurstKennz."','".$lfdNr."','".$Lage."')";
     return $this->execSQL($sql, 4, 0);
   }
-
-  function getLage($FlurstKennz) {
-    # liefert die Lage des Flurstï¿½ckes
-    $sql = "SELECT lagebezeichnung FROM alb_f_lage WHERE flurstkennz = '".$FlurstKennz."'";
-    $queryret=$this->execSQL($sql, 4, 0);
-    if ($queryret[0]) {
-      $ret[0]=1;
-      $ret[1]=$queryret[1];
-    }
-    else {
-      $ret[0]=0;
-      if (pg_num_rows($queryret[1])>0) {
-        while($rs=pg_fetch_array($queryret[1])) {
-          $Lage[]= $rs['lagebezeichnung'];
-        }
-      }
-      $ret[1]=$Lage;
-    }
-    return $ret;
-  }
   
-   function getLageALKIS($FlurstKennz) {
+   function getLage($FlurstKennz) {
     # liefert die Lage des Flurstï¿½ckes
     $sql = "SELECT l.unverschluesselt, s.bezeichnung";
 		$sql.= " FROM alkis.ax_flurstueck as f, alkis.alkis_beziehungen v";
@@ -2176,27 +1844,8 @@ class pgdatabase extends pgdatabase_core {
     $sql.=" VALUES ('".$FlurstKennz."','".$Nutzungsart."','".$NutzungFlaeche."')";
     return $this->execSQL($sql, 4, 0);
   }
-
-  function getNutzung($FlurstKennz) {
-    $sql ="SELECT nutz.flaeche AS flaeche,'21-' || nutz.nutzungsart AS nutzungskennz";
-    $sql.=",art.bezeichnung,art.abkuerzung FROM";
-    $sql.=" alb_f_nutzungen AS nutz,alb_v_nutzungsarten AS art WHERE nutz.nutzungsart=art.nutzungsart";
-    $sql.=" AND flurstkennz = '".$FlurstKennz."'";
-    $queryret=$this->execSQL($sql, 4, 0);
-    if ($queryret[0] OR pg_num_rows($queryret[1])==0) {
-      # keine Eintragungen zu Nutzungen gefunden
-      return $queryret;
-    }
-    # Nutzungen zum Flurstï¿½ck wurden erfolgreich abgefragt
-    while($rs=pg_fetch_array($queryret[1])) {
-      $Nutzungen[]=$rs;
-    }
-    $ret[0]=0;
-    $ret[1]=$Nutzungen;
-    return $ret;
-  }
   
-  function getNutzungALKIS($FlurstKennz) {
+  function getNutzung($FlurstKennz) {
     $sql ="SELECT round(st_area(st_intersection(n.wkb_geometry,f.wkb_geometry))::numeric,0) AS flaeche, c.class as nutzungskennz, case when c.label is null then m.title else m.title||' - '||c.label end as bezeichnung, n.info, n.zustand, n.name, m.gruppe,c.label, c.blabla";
 		$sql.=" FROM alkis.ax_flurstueck f, alkis.nutzung n";
 		$sql.=" JOIN alkis.nutzung_meta m ON m.nutz_id=n.nutz_id";
@@ -2710,59 +2359,8 @@ class pgdatabase extends pgdatabase_core {
     $sql.=" WHERE bezirk='".$Bezirk."' AND blatt='".$Blatt."' AND namensnr='".$NamensNr."'))";
     return $this->execSQL($sql, 4, 0);
   }
-
-  function getEigentuemerliste($FlurstKennz,$Bezirk,$Blatt,$BVNR) {
-    # 28.11.2006 H.Riedel, Eigentï¿½merart hinzugefï¿½gt
-    # $sql = "SELECT e.namensnr,n.name1,n.name2,n.name3,n.name4,e.anteilsverhaeltnis AS Anteil";
-    $sql = "SELECT e.namensnr,n.lfd_nr_name,n.name1,n.name2,n.name3,n.name4,e.anteilsverhaeltnis AS anteil,e.eigentuemerart AS Art";
-    $sql.= " FROM alb_g_eigentuemer AS e,alb_g_namen AS n,alb_g_grundstuecke AS g,alb_g_buchungen AS b";
-    $sql.= " WHERE e.lfd_nr_name=n.lfd_nr_name AND e.bezirk = g.bezirk AND e.blatt=g.blatt";
-    $sql.= " AND g.bezirk=b.bezirk AND g.blatt=b.blatt AND g.bvnr=b.bvnr";
-    if ($Bezirk!="") {
-      $sql.=" AND b.bezirk=".(int)$Bezirk;
-    }
-    if ($Blatt!="") {
-      $sql.=" AND b.blatt='".$Blatt."'";
-    }
-    if ($BVNR!="") {
-      $sql.=" AND b.bvnr='".$BVNR."'";
-    }
-    $sql.= " AND b.flurstkennz = '".$FlurstKennz."' ORDER BY namensnr;";
-    $ret=$this->execSQL($sql, 4, 0);
-    if ($ret[0] OR pg_num_rows($ret[1])==0) { return $ret; }
-    while ($rs=pg_fetch_array($ret[1])) {
-      $Grundbuch = new grundbuch("","",$this->debug);
-      
-      $part = explode('.', $rs['namensnr']);
-      if($part[1] != ''){
-      	$part[1] = intval($part[1]);
-      }
-      $rs['namensnr'] = implode('.', $part);
-      
-      $Eigentuemer = new eigentuemer($Grundbuch,$rs['namensnr']);
-
-      $Eigentuemer->lfd_nr=$rs['lfd_nr_name'];
-
-      $plztest = explode('     ', $rs['name3']);
-      if($plztest[1] != ''){
-        $plztest[1] = '  PLZPF '.trim($plztest[1]);
-        $plztest[2] = 'PF '.trim($plztest[2]);
-        $rs['name3'] = implode('   ', $plztest);
-      }
-
-      $Eigentuemer->Name[]=$rs['name1'];
-      $Eigentuemer->Name[] = $rs['name2'];
-      $Eigentuemer->Name[] = $rs['name3'];
-      $Eigentuemer->Name[] = $rs['name4'];
-      $Eigentuemer->Anteil=$rs['anteil'];
-      $Eigentuemerliste[]=$Eigentuemer;
-    }
-    $retListe[0]=0;
-    $retListe[1]=$Eigentuemerliste;
-    return $retListe;
-  }
   
-  function getEigentuemerlisteALKIS($FlurstKennz,$Bezirk,$Blatt,$BVNR) {
+  function getEigentuemerliste($FlurstKennz,$Bezirk,$Blatt,$BVNR) {
     $sql = "SELECT distinct namensnummer.laufendenummernachdin1421 AS namensnr, person.nachnameoderfirma, person.vorname, person.akademischergrad, person.geburtsname, person.geburtsdatum, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, eigentuemerart as Art, namensnummer.zaehler||'/'||namensnummer.nenner as anteil";
 		$sql.= " FROM alkis.ax_flurstueck f, alkis.alkis_beziehungen flst2buchung, alkis.ax_buchungsstelle buchung,alkis.alkis_beziehungen buchung2blatt,alkis.ax_buchungsblattbezirk bezirk,alkis.ax_buchungsblatt blatt,alkis.alkis_beziehungen blatt2namensnummer,alkis.ax_namensnummer namensnummer,alkis.alkis_beziehungen namensnummer2person,alkis.ax_person person";
 		$sql.= " LEFT JOIN alkis.alkis_beziehungen person2anschrift ON person2anschrift.beziehung_von = person.gml_id AND person2anschrift.beziehungsart::text = 'hat'::text";
@@ -2947,77 +2545,23 @@ class pgdatabase extends pgdatabase_core {
     }
     return $ret;
   }
-
-  function getNamen($n1,$n2,$n3,$n4,$bezirk,$blatt,$gemkgschl,$flur,$limitAnzahl,$limitStart,$caseSensitive, $order) {
-    # pg unterstï¿½tzt mit LIKE CASE SENSITIVEN Stringvergleiche
-    $name[1]=$n1; $name[2]=$n2; $name[3]=$n3; $name[4]=$n4;
-    $sql ="SELECT DISTINCT n.lfd_nr_name,name1,name2,name3,name4,e.bezirk,e.blatt,e.namensnr";
-    $sql.=" FROM alb_g_namen AS n,alb_g_eigentuemer AS e, alb_grundbuecher as gb";
-    if ($gemkgschl>0) {
-      $sql.=",alb_g_buchungen AS b";
-    }
-    $sql.=" WHERE n.lfd_nr_name=e.lfd_nr_name";
-    $sql.=" AND gb.bezirk = e.bezirk"; 
-		$sql.=" AND gb.blatt = e.blatt";
-		$sql.=" AND gb.aktualitaetsnr NOT LIKE 'hist'";
-    for ($i=1;$i<5;$i++) {
-      if ($name[$i]!='%%') {
-      	$name[$i]=$name[$i];
-        if ($caseSensitive) {
-          $sql.=" AND name".$i." LIKE '".$name[$i]."'";
-        }
-        else {
-          $sql.=" AND lower(name".$i.") LIKE lower('".$name[$i]."')";
-        }
-      }
-    }
-    if($bezirk!='') {
-      $sql.=" AND e.bezirk = ".$bezirk;
-    }
-    if($blatt != ''){
-      $sql.=" AND e.blatt = '".$blatt."'";
-    }   
-    if ($gemkgschl>0) {
-      $sql.=" AND e.bezirk=b.bezirk AND e.blatt=b.blatt";
-      $sql.=" AND (b.flurstkennz LIKE ";
-      $sql.=" '".$gemkgschl[0]."%'";
-      for($i = 1; $i < count($gemkgschl); $i++){
-        $sql.=" OR b.flurstkennz LIKE '".$gemkgschl[$i]."%'";
-      }
-      $sql.=")";
-    }    
-    if ($flur>0) {
-      $sql.=" AND e.bezirk=b.bezirk AND e.blatt=b.blatt";
-      $sql.=" AND substring(TRIM(b.flurstkennz) from 8 for 3) = '".$flur."'";
-    }
-    if($order != ''){
-    	$sql.=" ORDER BY ".$order;
-    }
-    if ($limitStart!='' OR $limitAnzahl!='') {
-      $sql.=" LIMIT ";
-      if ($limitStart!='' AND $limitAnzahl!='') {
-        $sql.=$limitAnzahl." OFFSET ".$limitStart;
-      }
-      if ($limitStart!='' AND $limitAnzahl=='') {
-        $sql.=" ALL OFFSET ".$limitStart;
-      }
-      if ($limitStart=='' AND $limitAnzahl!='') {
-        $sql.=$limitAnzahl;
-      }
-    }
-    #echo $sql;
-    $ret=$this->execSQL($sql, 4, 0);
-    if ($ret[0]==0) {
-      while($rs=pg_fetch_array($ret[1])) {
-        $namen[]=$rs;
-      }
-      $ret[1]=$namen;
-    }
-    return $ret;
-  }
   
-  function getNamenALKIS($n1,$n2,$n3,$n4,$bezirk,$blatt,$gemkgschl,$flur,$limitAnzahl,$limitStart,$caseSensitive, $order) {
-    $name[1]=$n1; $name[2]=$n2; $name[3]=$n3; $name[4]=$n4;    
+  function getNamen($formvars, $bezirk){
+    $n1 = '%'.$formvars['name1'].'%';
+		$n2 = '%'.$formvars['name2'].'%';
+		$n3 = '%'.$formvars['name3'].'%';
+		$n4 = '%'.$formvars['name4'].'%';
+		$n5 = '%'.$formvars['name5'].'%';
+		$n6 = '%'.$formvars['name6'].'%';
+		$n7 = '%'.$formvars['name7'].'%';
+		$n8 = '%'.$formvars['name8'].'%';		
+		$blatt = $this->formvars['blatt'];
+		$flur = $this->formvars['FlurID'];
+		$limitAnzahl = $this->formvars['anzahl'];
+		$limitStart = $this->formvars['offset'];
+		$caseSensitive = $this->formvars['caseSensitive'];
+		$order = $this->formvars['order'];
+			
     $sql = "SELECT distinct namensnummer.laufendenummernachdin1421 AS lfd_nr_name, person.nachnameoderfirma, person.vorname, person.akademischergrad, person.geburtsname, person.geburtsdatum, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, blatt.buchungsblattnummermitbuchstabenerweiterung as blatt, bezirk.schluesselgesamt as bezirk";
 		$sql.= " FROM alkis.ax_flurstueck f, alkis.alkis_beziehungen flst2buchung, alkis.ax_buchungsstelle buchung,alkis.alkis_beziehungen buchung2blatt,alkis.ax_buchungsblattbezirk bezirk,alkis.ax_buchungsblatt blatt,alkis.alkis_beziehungen blatt2namensnummer,alkis.ax_namensnummer namensnummer,alkis.alkis_beziehungen namensnummer2person,alkis.ax_person person";
 		$sql.= " LEFT JOIN alkis.alkis_beziehungen person2anschrift ON person2anschrift.beziehung_von = person.gml_id";
@@ -3036,10 +2580,15 @@ class pgdatabase extends pgdatabase_core {
 		$sql.= " AND namensnummer2person.beziehung_von = namensnummer.gml_id";
 		$sql.= " AND namensnummer2person.beziehung_zu = person.gml_id";
 		$sql.= " AND person2anschrift.beziehungsart::text = 'hat'::text";
-    if($name[1] != '%%')$sql.=" AND lower(nachnameoderfirma||', '||vorname) LIKE lower('".$name[1]."') ";
-    if($name[2] != '%%')$sql.=" AND lower(geburtsname||', '||geburtsdatum) LIKE lower('".$name[2]."') ";
-    if($name[3] != '%%')$sql.=" AND (lower(strasse) LIKE lower('".$name[3]."') OR lower(strasse||' '||hausnummer) LIKE lower('".$name[3]."'))";
-    if($name[4] != '%%')$sql.=" AND (postleitzahlpostzustellung LIKE '".$name[4]."' OR lower(postleitzahlpostzustellung||' '||ort_post) LIKE lower('".$name[4]."'))";
+		
+    if($n1 != '%%')$sql.=" AND lower(nachnameoderfirma) LIKE lower('".$n1."') ";
+		if($n2 != '%%')$sql.=" AND lower(vorname) LIKE lower('".$n2."') ";
+		if($n3 != '%%')$sql.=" AND lower(geburtsname) LIKE lower('".$n3."') ";
+		if($n4 != '%%')$sql.=" AND lower(geburtsdatum) LIKE lower('".$n4."') ";
+		if($n5 != '%%')$sql.=" AND lower(strasse) LIKE lower('".$n5."') ";
+		if($n6 != '%%')$sql.=" AND lower(hausnummer) LIKE lower('".$n6."') ";
+		if($n7 != '%%')$sql.=" AND lower(postleitzahlpostzustellung) LIKE lower('".$n7."') ";
+		if($n8 != '%%')$sql.=" AND lower(ort_post) LIKE lower('".$n8."') ";
 
     if($bezirk!='') {
       $sql.=" AND bezirk.schluesselgesamt=".(int)$bezirk;
@@ -3254,25 +2803,8 @@ class pgdatabase extends pgdatabase_core {
     $sql.=" alb_".$this->tableprefix."v_amtsgerichte WHERE amtsgericht='".$Amtsgericht."'))";
     return $this->execSQL($sql, 4, 0);
   }
-
-	function getAmtsgerichtbyFlurst($flurstkennz){
-		$sql ="SELECT DISTINCT gb.amtsgericht AS schluessel,a.name FROM alb_g_buchungen AS b,alb_flurstuecke AS f";
-    $sql.=",alb_v_grundbuchbezirke AS gb,alb_v_amtsgerichte AS a";
-    $sql.=" WHERE gb.grundbuchbezschl=b.bezirk AND b.flurstkennz=f.flurstkennz";
-    $sql.=" AND gb.amtsgericht=a.amtsgericht AND f.flurstkennz='".$flurstkennz."'";
-    $queryret=$this->execSQL($sql, 4, 0);
-    if ($queryret[0]) {
-      $ret[0]=1;
-      $ret[1]=$queryret[1];
-    }
-    else {
-      $ret[0]=0;
-      $ret[1]=pg_fetch_array($queryret[1]);
-    }
-    return $ret;
-	}
 	
-	function getAmtsgerichtbyBezirkALKIS($bezirk){
+	function getAmtsgerichtby($flurstkennz, $bezirk){
 		$sql ="SELECT a.bezeichnung as name, a.stelle as schluessel";
 		$sql.=" FROM alkis.ax_buchungsblattbezirk b , alkis.ax_dienststelle a";
 		$sql.=" WHERE b.land=a.land AND b.stelle=a.stelle AND a.stellenart=1000";
@@ -3453,24 +2985,8 @@ class pgdatabase extends pgdatabase_core {
     $sql.=" alb_".$this->tableprefix."v_gemarkungen WHERE gemkgschl=".$GemkgSchl."))";
     return $this->execSQL($sql, 4, 0);
   }
-
-  function getGemarkungName($GemkgSchl) {
-    $sql ="SELECT gemkgname FROM alb_v_gemarkungen WHERE gemkgschl=".(int)$GemkgSchl;
-    $this->debug->write("<p>postgres.sql getGemarkungName Abfragen des Gemarkungsnamen:<br>".$sql,4);
-    $queryret=$this->execSQL($sql, 4, 0);
-    if ($queryret[0]) {
-      $ret[0]=1;
-      $ret[1]=$queryret[1];
-    }
-    else {
-      $ret[0]=0;
-      $rs=pg_fetch_array($queryret[1]);
-      $ret[1]=$rs['gemkgname'];
-    }
-    return $ret;
-  }
   
-  function getGemarkungNameALKIS($GemkgSchl) {
+  function getGemarkungName($GemkgSchl) {
     $sql ="SELECT bezeichnung as gemkgname FROM alkis.ax_gemarkung WHERE land*10000 + gemarkungsnummer = ".$GemkgSchl;
     $this->debug->write("<p>postgres.sql getGemarkungName Abfragen des Gemarkungsnamen:<br>".$sql,4);
     $queryret=$this->execSQL($sql, 4, 0);
@@ -3534,19 +3050,8 @@ class pgdatabase extends pgdatabase_core {
     }
     return $ret;
   }
-
-	function getGrundbuchblattliste($bezirk){
-		$sql = "SELECT * FROM alb_grundbuecher WHERE bezirk = ".$bezirk." AND aktualitaetsnr != 'hist' ORDER BY blatt";
-		$ret=$this->execSQL($sql, 4, 0);
-    if ($ret[0]==0) {
-    	while($rs=pg_fetch_array($ret[1])){
-      	$liste['blatt'][]=$rs['blatt'];
-    	}
-    }
-    return $liste;
-	}
 	
-	function getGrundbuchblattlisteALKIS($bezirk){
+	function getGrundbuchblattliste($bezirk){
 		$sql = "SELECT buchungsblattnummermitbuchstabenerweiterung as blatt FROM alkis.ax_buchungsblatt WHERE land*10000 + bezirk = ".$bezirk." ORDER BY blatt";
 		$ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
@@ -3556,21 +3061,8 @@ class pgdatabase extends pgdatabase_core {
     }
     return $liste;
 	}
-
-  function getGrundbuchbezirksliste(){
-  	$sql ="SELECT * FROM alb_v_grundbuchbezirke";
-    $ret=$this->execSQL($sql, 4, 0);
-    if ($ret[0]==0) {
-    	while($rs=pg_fetch_array($ret[1])){
-      	$liste['schluessel'][]=$rs['grundbuchbezschl'];
-      	$liste['bezeichnung'][]=$rs['bezeichnung'];
-      	$liste['beides'][]=$rs['bezeichnung'].' ('.$rs['grundbuchbezschl'].')';
-    	}
-    }
-    return $liste;
-  }
   
-  function getGrundbuchbezirkslisteALKIS(){
+  function getGrundbuchbezirksliste(){
   	$sql ="SELECT schluesselgesamt as grundbuchbezschl, bezeichnung FROM alkis.ax_buchungsblattbezirk";
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
@@ -3582,29 +3074,8 @@ class pgdatabase extends pgdatabase_core {
     }
     return $liste;
   }
-
-  function getGrundbuchbezirkslisteByGemkgIDs($gemkg_ids){
-  	$sql = "SELECT DISTINCT g.* FROM alb_v_grundbuchbezirke as g, alb_g_buchungen as b, alb_flurstuecke AS f ";
-		$sql.= "WHERE b.bezirk = g.grundbuchbezschl ";
-		$sql.= "AND f.flurstkennz = b.flurstkennz ";
-		$sql.= "AND f.gemkgschl IN (".$gemkg_ids[0];
-		for($i = 1; $i < count($gemkg_ids); $i++){
-			$sql.= ",".$gemkg_ids[$i];
-		}
-		$sql.= ")";
-		#echo $sql;
-		$ret=$this->execSQL($sql, 4, 0);
-    if ($ret[0]==0) {
-    	while($rs=pg_fetch_array($ret[1])){
-      	$liste['schluessel'][]=$rs['grundbuchbezschl'];
-      	$liste['bezeichnung'][]=$rs['bezeichnung'];
-      	$liste['beides'][]=$rs['bezeichnung'].' ('.$rs['grundbuchbezschl'].')';
-    	}
-    }
-    return $liste;
-  }
   
-  function getGrundbuchbezirkslisteByGemkgIDsALKIS($gemkg_ids) {
+  function getGrundbuchbezirkslisteByGemkgIDs($gemkg_ids) {
 		$sql ="SELECT DISTINCT bezirk.schluesselgesamt as grundbuchbezschl, bezirk.bezeichnung";
 		$sql.=" FROM alkis.ax_flurstueck f, alkis.alkis_beziehungen flst2buchung, alkis.ax_buchungsstelle buchung, alkis.alkis_beziehungen buchung2blatt, alkis.ax_buchungsblattbezirk bezirk, alkis.ax_buchungsblatt blatt";  
 		$sql.=" WHERE flst2buchung.beziehungsart::text = 'istGebucht'::text";
@@ -3626,31 +3097,8 @@ class pgdatabase extends pgdatabase_core {
     }
     return $liste;
   }
-  
-
+    
   function getGrundbuchbezirke($FlurstKennz) {
-		$sql ="SELECT b.bezirk AS Schluessel,g.bezeichnung AS Name FROM alb_g_buchungen AS b,alb_v_grundbuchbezirke AS g, alb_grundbuecher AS gb";
-    $sql.=" WHERE b.bezirk=g.grundbuchbezschl AND b.flurstkennz = '".$FlurstKennz."'";
-    $sql.=" AND b.bezirk=gb.bezirk AND b.blatt=gb.blatt";
-    $sql.=" AND gb.aktualitaetsnr NOT LIKE 'hist'";
-    $ret=$this->execSQL($sql, 4, 0);
-    if ($ret[0]) {
-      $Bezirk['Name']="nicht gefunden";
-      $Bezirk['Schluessel']="0";
-    }
-    else {
-      if (pg_num_rows($ret[1])==0) {
-        $Bezirk['Name']="nicht gefunden";
-        $Bezirk['Schluessel']="0";
-      }
-      else {
-        $Bezirk=pg_fetch_array($ret[1]);
-      }
-    }
-    return $Bezirk;
-  }
-  
-  function getGrundbuchbezirkeALKIS($FlurstKennz) {
 		$sql ="SELECT bezirk.schluesselgesamt as Schluessel, bezirk.bezeichnung AS Name";
 		$sql.=" FROM alkis.ax_flurstueck f, alkis.alkis_beziehungen flst2buchung, alkis.ax_buchungsstelle buchung, alkis.alkis_beziehungen buchung2blatt, alkis.ax_buchungsblattbezirk bezirk, alkis.ax_buchungsblatt blatt";  
 		$sql.=" WHERE flst2buchung.beziehungsart::text = 'istGebucht'::text";
@@ -4046,58 +3494,8 @@ class pgdatabase extends pgdatabase_core {
     }
     return $Liste;
   }
-
-  function getHausNrListe($GemID,$StrID,$HausNr,$PolygonWKTString,$order) {
-    # 2006-01-31
-    $order='ordernr';
-    # Abfragen der Hausnummern
-    $sql ="SELECT id,nrtext,ordernr FROM (";
-    # Subselect zum Zusammenfassen und Sortieren der Bestandteile der Abfrage
-    $sql.="SELECT DISTINCT CASE WHEN TRIM(nr)='' THEN 'ohne' ELSE LOWER(id) END AS id, CASE WHEN TRIM(nr)='' THEN 'ohne Nr' ELSE TRIM(nr) END AS nrtext";
-    $sql.=",CAST (CASE WHEN TRIM(ordernr)='' THEN '0' ELSE SPLIT_PART(TRIM(ordernr),' ',1) END AS numeric) as ordernr FROM (";
-    # Abfrage der leeren Auswahlzeile
-    $sql.="SELECT '-1' AS id,'--Auswahl--' AS nr, '-1' AS ordernr";
-    $sql.=" UNION";
-    # Abfrage der Hausnummern aus dem ALK-Bestand
-    $sql.=" SELECT '".$GemID."-".$StrID."-'||TRIM(".HAUSNUMMER_TYPE."(alk.hausnr)) AS id,".HAUSNUMMER_TYPE."(alk.hausnr) AS nrtext,alk.hausnr AS ordernr";
-    $sql.=" FROM alknhaus AS alk,alkobj_e_fla AS alkfl,alb_v_strassen AS s";
-    $sql.=" WHERE alkfl.folie='011'";
-    # $sql.=" AND alkfl.the_geom && st_geometryfromtext('".$PolygonWKTString."',".EPSGCODE.")";
-    if ($PolygonWKTString!='') {
-      $sql.=" AND st_intersects(alkfl.the_geom,st_geometryfromtext('".$PolygonWKTString."',".EPSGCODE."))";
-    }
-    $sql.=" AND alk.objnr=alkfl.objnr AND alk.gemeinde=s.gemeinde AND alk.strasse=s.strasse";
-    if ($GemID!='') {
-      $sql.=" AND alk.gemeinde=".(int)$GemID;
-    }
-    if ($StrID!='') {
-      $sql.=" AND alk.strasse='".$StrID."'";
-    }
-    # Ende
-    $sql.=" UNION";
-    # Abfrage der Hausnummern aus dem ALB-Bestand
-    # Anfang
-    $sql.=" SELECT '".$GemID."-".$StrID."-'||alb.hausnr AS id, ".HAUSNUMMER_TYPE."(alb.hausnr) AS nrtext,alb.hausnr AS ordernr FROM alb_f_adressen AS alb, alb_flurstuecke as f WHERE (1=1) AND f.flurstkennz = alb.flurstkennz AND f.status != 'H' ";
-    if ($GemID!='') {
-      $sql.=" AND alb.gemeinde=".(int)$GemID;
-    }
-    if ($StrID!='') {
-      $sql.=" AND alb.strasse='".$StrID."'";
-    }
-    # ende
-    $sql.=") AS foo ORDER BY ".$order;
-    $sql.=") AS foofoo";
-    #echo $sql;
-    $this->debug->write("<p>postgres getHausNrListe Abfragen der Strassendaten:<br>".$sql,4);
-    $queryret=$this->execSQL($sql, 4, 0);
-    while ($rs=pg_fetch_array($queryret[1])) {
-      $Liste['HausID'][]=$rs['id'];
-      $Liste['HausNr'][]=$rs['nrtext'];
-    }
-    return $Liste;
-  }
   
-  function getHausNrListeALKIS($GemID,$StrID,$HausNr,$PolygonWKTString,$order) {
+  function getHausNrListe($GemID,$StrID,$HausNr,$PolygonWKTString,$order) {
     # 2006-01-31
     $order='ordernr';
     # Abfragen der Hausnummern
@@ -4127,54 +3525,8 @@ class pgdatabase extends pgdatabase_core {
     }
     return $Liste;
   }
-  
-
-  function getStrassenListe($GemID,$PolygonWKTString,$order) {
-    # 2006-01-30
-    # Abfragen der Strassen
-    $sql ="SELECT gemeinde,strasse,strassenname,gemkgname FROM (";
-    # Subselect zum Zusammenfassen und Sortieren der Bestandteile der Abfrage
-    $sql.="SELECT DISTINCT gemeinde,strasse,strassenname,ordertext,gemkgname FROM (";
-    # Abfage zum Einfï¿½gen der leeren Auswahlzeile
-    $sql.="SELECT -1 AS gemeinde,'-1' AS strasse,'--Auswahl--' AS strassenname, 'aaa' AS ordertext, '' as gemkgname";
-    $sql.=" UNION";
-    # Abfrage der Strassen aus dem ALB-Bestand
-    $sql.=" SELECT s.gemeinde,s.strasse,s.strassenname,s.strassenname AS ordertext, g.gemkgname";
-    $sql.=" FROM alb_f_adressen AS a,alb_v_strassen AS s, alb_flurstuecke as f, alb_v_gemarkungen as g";
-    $sql.=" WHERE f.status != 'H' AND f.flurstkennz = a.flurstkennz AND g.gemkgschl = f.gemkgschl AND a.gemeinde=s.gemeinde AND a.strasse=s.strasse";
-    if ($GemID!='') {
-      $sql.=" AND a.gemeinde=".(int)$GemID;
-    }
-    $sql.=") AS foo ORDER BY gemeinde,ordertext";
-    $sql.=") AS foofoo";
-    #echo $sql;
-    $this->debug->write("<p>postgres getStrassenListe Abfragen der Strassendaten:<br>".$sql,4);
-    $queryret=$this->execSQL($sql, 4, 0);
-    $i = 0;
-    while ($rs=pg_fetch_array($queryret[1])) {
-    	if($namen[$i-1] == $rs['strassenname'] AND $Liste['StrID'][$i-1] == $rs['strasse']){
-    		# Strasse doppelt drin -> ï¿½berspringen
-    		$i = $i-1;
-    	}
-    	else{
-	      $Liste['Gemeinde'][]=$rs['gemeinde'];
-	      $Liste['StrID'][]=$rs['strasse'];
-	      $Liste['Gemarkung'][]=$rs['gemkgname'];
-	      $namen[]=$rs['strassenname'];		# eigentlichen Strassennamen sichern
-	      if($Liste['Name'][$i-1] == $rs['strassenname']){
-	      	$Liste['Name'][$i-1]=$Liste['Name'][$i-1].' ('.$Liste['Gemarkung'][$i-1].')';
-	      	$Liste['Name'][$i]=$rs['strassenname'].' ('.$rs['gemkgname'].')';
-	      }
-	      else{
-	      	$Liste['Name'][]=$rs['strassenname'];
-	      }
-    	}
-      $i++;
-    }
-    return $Liste;
-  }
-  
-  function getStrassenListeALKIS($GemID,$GemkgID,$PolygonWKTString,$order) {
+    
+  function getStrassenListe($GemID,$GemkgID,$PolygonWKTString) {
   	$sql ="SELECT -1 AS gemeinde,'-1' AS strasse,'--Auswahl--' AS strassenname, '' as gemkgname";
     $sql.=" UNION";
     $sql.=" SELECT DISTINCT g.gemeinde, l.lage as strasse, s.bezeichnung as strassenname, gem.bezeichnung as gemkgname";
@@ -4218,102 +3570,15 @@ class pgdatabase extends pgdatabase_core {
     return $Liste;
   }
   
+	function getStrassenListeByGemkg($GemkgID,$PolygonWKTString){					# kann nach der ALKIS-Umstellung gelöscht werden und die Aufrufe durch getStrassenListe ersetzt werden
+		return $this->getStrassenListe('',$GemkgID,$PolygonWKTString);		
+	}
     
-  function getStrassenListeByGemkg($GemkgID,$PolygonWKTString,$order) {
-    # 2006-01-30
-    # Abfragen der Strassen
-    $sql ="SELECT gemeinde,strasse,strassenname,gemkgname, gemkgschl FROM (";
-    # Subselect zum Zusammenfassen und Sortieren der Bestandteile der Abfrage
-    $sql.="SELECT DISTINCT gemeinde,strasse,strassenname,ordertext,gemkgname, gemkgschl FROM (";
-    # Abfage zum Einfï¿½gen der leeren Auswahlzeile
-    $sql.="SELECT -1 AS gemeinde,'-1' AS strasse,'--Auswahl--' AS strassenname, 'aaa' AS ordertext, '' as gemkgname, 0 as gemkgschl";
-    $sql.=" UNION";
-    # Abfrage der Strassen aus dem ALB-Bestand
-    $sql.=" SELECT s.gemeinde,s.strasse,s.strassenname,s.strassenname AS ordertext, g.gemkgname, g.gemkgschl";
-    $sql.=" FROM alb_f_adressen AS a,alb_v_strassen AS s, alb_flurstuecke as f, alb_v_gemarkungen as g";
-    $sql.=" WHERE f.flurstkennz = a.flurstkennz AND g.gemkgschl = f.gemkgschl AND a.gemeinde=s.gemeinde AND a.strasse=s.strasse";
-    if ($GemkgID!='') {
-      $sql.=" AND g.gemkgschl=".(int)$GemkgID;
-    }
-    $sql.=") AS foo ORDER BY gemeinde,ordertext";
-    $sql.=") AS foofoo";
-    #echo $sql;
-    $this->debug->write("<p>postgres getStrassenListe Abfragen der Strassendaten:<br>".$sql,4);
-    $queryret=$this->execSQL($sql, 4, 0);
-    $i = 0;
-    while ($rs=pg_fetch_array($queryret[1])) {
-    	if($namen[$i-1] == $rs['strassenname'] AND $Liste['StrID'][$i-1] == $rs['strasse']){
-    		# Strasse doppelt drin -> ï¿½berspringen
-    		$i = $i-1;
-    	}
-    	else{
-	      $Liste['Gemeinde'][]=$rs['gemeinde'];
-	      $Liste['StrID'][]=$rs['strasse'];
-	      $Liste['Gemarkung'][]=$rs['gemkgname'];
-	      $namen[]=$rs['strassenname'];		# eigentlichen Strassennamen sichern
-	      if($Liste['Name'][$i-1] == $rs['strassenname']){
-	      	$Liste['Name'][$i-1]=$Liste['Name'][$i-1].' ('.$Liste['Gemarkung'][$i-1].')';
-	      	$Liste['Name'][$i]=$rs['strassenname'].' ('.$rs['gemkgname'].')';
-	      }
-	      else{
-	      	$Liste['Name'][]=$rs['strassenname'];
-	      }
-    	}
-      $i++;
-    }
-    return $Liste;
-  }
-
-	function getFlurenListeByGemkgIDByFlurIDALK($GemkgID,$order, $historical = false){
-    $sql ="SELECT DISTINCT SUBSTRING(flurstkennz,8,3) AS flurid";
-    $sql.=",gemkgschl || SUBSTRING(flurstkennz,8,3) AS gemflurid FROM alknflst WHERE 1=1";
-    if ($GemkgID>0) {
-      $sql.=" AND gemkgschl= '".$GemkgID."'";
-    }
-    if ($order!='') {
-      $sql.=" ORDER BY ".$order;
-    }
-    $queryret=$this->execSQL($sql, 4, 0);
-    while ($rs=pg_fetch_array($queryret[1])) {
-      $Liste['FlurID'][]=$rs['flurid'];
-      $Liste['Name'][]=intval($rs['flurid']);
-      $Liste['GemFlurID'][]=$rs['gemflurid'];
-    }
-    return $Liste;
-  }
-
-  function getFlurenListeByGemkgIDByFlurID($GemkgID,$FlurID,$order, $historical = false){
-    $sql ="SELECT DISTINCT flurnr AS FlurID,flurnr AS Name";
-    $sql.=",gemkgschl || flurnr AS GemFlurID FROM alb_flurstuecke ";
-    if($historical == 1){
-    	$sql.="WHERE status = 'H'";
-    }
-    else{
-    	$sql.="WHERE status != 'H'";
-    }
-    if ($GemkgID>0) {
-      $sql.=" AND gemkgschl=".(int)$GemkgID;
-    }
-    if ($FlurID[0]>0) {
-      $sql.=" AND gemkgschl || flurnr IN (".$FlurID[0];
-      for ($i=1;$i<count($FlurID);$i++) {
-      $sql.=",".$FlurID[$i];
-      }
-      $sql.=")";
-    }
-    if ($order!='') {
-      $sql.=" ORDER BY ".$order;
-    }
-    $queryret=$this->execSQL($sql, 4, 0);
-    while ($rs=pg_fetch_array($queryret[1])) {
-      $Liste['FlurID'][]=$rs['flurid'];
-      $Liste['Name'][]=intval($rs['name']);
-      $Liste['GemFlurID'][]=$rs['gemflurid'];
-    }
-    return $Liste;
+	function getFlurenListeByGemkgIDByFlurIDALK($GemkgID, $historical = false){		# kann nach der ALKIS-Umstellung gelöscht werden und die Aufrufe durch getFlurenListeByGemkgIDByFlurID ersetzt werden
+    return $this->getFlurenListeByGemkgIDByFlurID($GemkgID,'', $historical);
   }
   
-  function getFlurenListeByGemkgIDByFlurIDALKIS($GemkgID,$FlurID,$order, $historical = false){
+  function getFlurenListeByGemkgIDByFlurID($GemkgID,$FlurID, $historical = false){
     $sql ="SELECT lpad(gemarkungsteilflur::text, 3, '0') AS FlurID, lpad(gemarkungsteilflur::text, 3, '0') AS Name";
     $sql.=",schluesselgesamt AS GemFlurID FROM alkis.ax_gemarkungsteilflur WHERE 1=1 ";
     
@@ -4327,9 +3592,7 @@ class pgdatabase extends pgdatabase_core {
       }
       $sql.=")";
     }
-    if ($order!='') {
-      $sql.=" ORDER BY ".$order;
-    }
+    $sql.=" ORDER BY gemarkungsteilflur";
     #echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
     while ($rs=pg_fetch_array($queryret[1])) {
@@ -4339,6 +3602,54 @@ class pgdatabase extends pgdatabase_core {
     }
     return $Liste;
   }
+	
+	function getIntersectedFlurstWithJagdbezirke($oids){
+		$sql = "SELECT f.land*10000 + f.gemarkungsnummer as gemkgschl, f.flurnummer as flur, f.zaehler, f.nenner, g.bezeichnung as gemkgname, f.flurstueckskennzeichen as flurstkennz, st_area(f.wkb_geometry) AS flurstflaeche, st_area(st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS."))) AS schnittflaeche, jagdbezirke.name, jagdbezirke.art, f.amtlicheflaeche AS albflaeche";
+		$sql.= " FROM alkis.ax_gemarkung AS g, jagdbezirke, alkis.ax_flurstueck AS f";
+		$sql.= " WHERE f.gemarkungsnummer = g.gemarkungsnummer";
+		$sql.= " AND jagdbezirke.oid IN (".implode(',', $oids).")";
+		$sql.= " AND f.wkb_geometry && st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.") AND st_intersects(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS."))";
+		$sql.= " AND st_area(st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS."))) > 1";
+		$sql.= " ORDER BY jagdbezirke.name";
+		return $this->execSQL($sql, 4, 0);
+	}
+	
+	function getEigentuemerListeFromJagdbezirke($oids){
+		$sql = "SELECT round((st_area(st_memunion(the_geom_inter))*100/j_flaeche)::numeric, 2) as anteil_alk, round((sum(flaeche)*(st_area(st_memunion(the_geom_inter))/st_area(st_memunion(the_geom))))::numeric, 2) AS albflaeche, eigentuemer";
+		$sql.= " FROM(SELECT distinct st_area(jagdbezirke.the_geom) as j_flaeche, f.amtlicheflaeche as flaeche, array_to_string(array(";
+		$sql.= "SELECT distinct person.nachnameoderfirma||', '||person.vorname as name";
+		$sql.= " FROM alkis.ax_flurstueck ff, alkis.alkis_beziehungen flst2buchung, alkis.ax_buchungsstelle buchung,alkis.alkis_beziehungen buchung2blatt,alkis.ax_buchungsblattbezirk bezirk,alkis.ax_buchungsblatt blatt,alkis.alkis_beziehungen blatt2namensnummer,alkis.ax_namensnummer namensnummer,alkis.alkis_beziehungen namensnummer2person,alkis.ax_person person";
+		$sql.= " LEFT JOIN alkis.alkis_beziehungen person2anschrift ON person2anschrift.beziehung_von = person.gml_id AND person2anschrift.beziehungsart::text = 'hat'::text";
+		$sql.= " LEFT JOIN alkis.ax_anschrift anschrift ON person2anschrift.beziehung_zu = anschrift.gml_id ";
+		$sql.= " WHERE f.flurstueckskennzeichen = ff.flurstueckskennzeichen";
+		$sql.= " AND flst2buchung.beziehungsart::text = 'istGebucht'::text";
+		$sql.= " AND ff.gml_id = flst2buchung.beziehung_von";
+		$sql.= " AND flst2buchung.beziehung_zu = buchung.gml_id";
+		$sql.= " AND buchung2blatt.beziehungsart::text = 'istBestandteilVon'::text"; 
+		$sql.= " AND buchung2blatt.beziehung_von = buchung.gml_id";
+		$sql.= " AND buchung2blatt.beziehung_zu = blatt.gml_id";
+		$sql.= " AND blatt.land = bezirk.land AND blatt.bezirk = bezirk.bezirk";
+		$sql.= " AND blatt2namensnummer.beziehungsart::text = 'istBestandteilVon'::text"; 
+		$sql.= " AND blatt2namensnummer.beziehung_zu = blatt.gml_id";
+		$sql.= " AND blatt2namensnummer.beziehung_von = namensnummer.gml_id";
+		$sql.= " AND namensnummer2person.beziehungsart::text = 'benennt'::text";   
+		$sql.= " AND namensnummer2person.beziehung_von = namensnummer.gml_id";
+		$sql.= " AND namensnummer2person.beziehung_zu = person.gml_id";
+		$sql.= " order by name),' || ') as eigentuemer,";
+		$sql.= " st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.")) AS the_geom_inter, f.wkb_geometry as the_geom";		
+		$sql.= " FROM alkis.ax_gemarkung AS g, jagdbezirke, alkis.ax_flurstueck AS f";
+		$sql.= " WHERE f.gemarkungsnummer = g.gemarkungsnummer";
+		$sql.= " AND jagdbezirke.oid IN (".implode(',', $oids).")";
+		$sql.= " AND f.wkb_geometry && st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.") AND st_intersects(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS."))";
+		$sql.= " AND st_area(st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS."))) > 1) as foo";
+		$sql.= " group by eigentuemer, j_flaeche";
+		return $this->execSQL($sql, 4, 0);
+	}
+	
+	function check_poly_in_flur($polygon, $epsg){
+		$sql = "SELECT f.land * 10000 + f.gemarkungsnummer, f.flurnummer FROM alkis.ax_flurstueck f WHERE st_intersects(wkb_geometry, st_transform(st_geomfromtext('".$polygon."', ".$epsg."), ".EPSGCODE_ALKIS."))";
+  	return $this->execSQL($sql,4, 1);
+	}
   
 
 ##########################################################################

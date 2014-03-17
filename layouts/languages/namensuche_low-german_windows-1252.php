@@ -1,9 +1,13 @@
 ﻿<?php
- $strTitle="Egendömer dörchschnöckern";
- $strName1="Naam, Vörnaam Geburtsnaam/Firma";
- $strName2="geburen am/Firmentosatz";
- $strName3="Stroat Husnummer";
- $strName4="PLZ Uurt";
+ $strTitle="Egendömer dörchschnöckern"; 
+ $strName1="Naam/Firma";
+ $strName2="Vörnaam";
+ $strName3="Geburtsnaam";
+ $strName4="geburen am/Firmentosatz";
+ $strName5="Stroat";
+ $strName6="Husnummer";
+ $strName7="PLZ";
+ $strName8="Uurt";
  $strGbbez="Grundbookbezirk";
  $strGbbl="Grundbookblatt";
  $strGemkg="Gemorkung (Gemeend)";

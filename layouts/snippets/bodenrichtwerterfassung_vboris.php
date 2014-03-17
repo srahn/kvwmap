@@ -8,11 +8,24 @@ function toggle_vertices(){
 
 function send(){
 	if(document.GUI.verfahrensgrund.value == 'San'){
-		if(document.GUI.bodenrichtwert.value == '' && document.GUI.brwu.value == '' && document.GUI.brws.value == '' && document.GUI.brwb.value == ''){alert('Bitte geben Sie einen Bodenrichtwert, einen SanU-, SanS- oder SanB-Wert an.');exit();}
+		if(document.GUI.bodenrichtwert.value == '' && document.GUI.brwu.value == '' && document.GUI.brws.value == '' && document.GUI.brwb.value == ''){
+			alert('Bitte geben Sie einen Bodenrichtwert oder San-Werte (SanU-, SanS-,SanB) an.');exit();
+		}
+		if(document.GUI.bodenrichtwert.value != '' && (document.GUI.brwu.value != '' || document.GUI.brws.value != '' || document.GUI.brwb.value != '')){
+			alert('Sie haben einen San-Wert angegeben. In diesem Fall darf kein Bodenrichtwert angegeben werden.');exit();
+		}
+		if(document.GUI.brws.value != '' && document.GUI.brwu.value == ''){
+			alert('Sie haben einen SanS-Wert angegeben. Bitte geben Sie auch einen SanU-Wert an.');exit();
+		}
 	}
 	else{
 		if(document.GUI.verfahrensgrund.value == 'Entw'){
-			if(document.GUI.bodenrichtwert.value == '' && document.GUI.brwu.value == '' && document.GUI.brwb.value == ''){alert('Bitte geben Sie einen Bodenrichtwert, einen EU- oder EB-Wert an.');exit();}
+			if(document.GUI.bodenrichtwert.value == '' && document.GUI.brwu.value == '' && document.GUI.brwb.value == ''){
+				alert('Bitte geben Sie einen Bodenrichtwert, einen EU- oder EB-Wert an.');exit();
+			}
+			if(document.GUI.bodenrichtwert.value != '' && (document.GUI.brwu.value != '' || document.GUI.brwb.value != '')){
+				alert('Sie haben einen E-Wert angegeben. In diesem Fall darf kein Bodenrichtwert angegeben werden.');exit();
+			}
 		}
 		else{
 			if(document.GUI.bodenrichtwert.value == ''){alert('Bitte geben Sie einen Bodenrichtwert an.');exit();}
@@ -114,7 +127,7 @@ function update_require_attribute(attributes, layer_id, value){
 	// attributes ist eine Liste von zu aktualisierenden Attributen und value der ausgewaehlte Wert
 	attribute = attributes.split(',');
 	for(i = 0; i < attribute.length; i++){
-		ahah("<? echo URL.APPLVERSION; ?>index.php", "go=get_select_list&layer_id="+layer_id+"&attribute="+attribute[i]+"&value="+value+"&type=select-one", new Array(document.getElementsByName(attribute[i])[0]), 'sethtml');
+		ahah("<? echo URL.APPLVERSION; ?>index.php", "go=get_select_list&layer_id="+layer_id+"&attribute="+attribute[i]+"&value="+value+"&type=select-one", new Array(document.getElementsByName(attribute[i])[0]), new Array('sethtml'));
 	}
 }
 
@@ -427,7 +440,7 @@ function update_require_attribute(attributes, layer_id, value){
 									        	$FormatWerte = array('');
 									        	$FormatBez = array('kein');
 									        } 
-									        $verfahren = new FormObject('verfahrensgrund_zusatz','select',$FormatWerte,array($this->formvars['verfahrensgrund_zusatz']),$FormatBez,1,$maxlenght,$multiple,NULL);
+									        $verfahren = new FormObject('verfahrensgrund_zusatz','select',$FormatWerte,array($this->formvars['verfahrensgrund_zusatz']),$FormatBez,1,$maxlenght,$multiple,NULL, true);
 									        $verfahren->OutputHTML();
 									        echo $verfahren->html;
 									      ?>  

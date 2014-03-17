@@ -11,8 +11,20 @@ function toggle_vertices(){
 	document.getElementById("vertices").SVGtoggle_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 }
 
+function show_vertices(){	
+	document.getElementById("vertices").SVGshow_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+}
+
 function startup(){
 	document.getElementById("map").SVGstartup();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+}
+
+function stopwaiting(){
+	document.getElementById("svghelp").SVGstopwaiting();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+}
+
+function showtooltip(result, showdata){
+	document.getElementById("svghelp").SVGshowtooltip(result, showdata);			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 }
 
 function resizemap2window() {
@@ -132,6 +144,7 @@ if($this->formvars['gps_follow'] == ''){
             <input type="hidden" name="vertices" id="vertices" value="">
             <input type="hidden" name="legendtouched" value="0">
             <input type="hidden" name="stopnavigation" value="0">
+						<input type="hidden" name="svghelp" id="svghelp">
     <?php
         include(LAYOUTPATH.'snippets/SVG_map.php');
     ?>
@@ -147,8 +160,8 @@ if($this->formvars['gps_follow'] == ''){
 						          <td width="30%" height="30">
 									<div style="width:150px; position:relative" onmouseover="document.getElementById('scales').style.display='inline-block';" onmouseout="document.getElementById('scales').style.display='none';">
 										&nbsp;<b><?php echo $strMapScale; ?>&nbsp;1:&nbsp;</b><input type="text" id="scale" autocomplete="off" name="nScale" style="width:58px" value="<?php echo round($this->map_scaledenom); ?>">
-										<div id="scales" style="display:none; position:absolute; left:56px; top:-117px; width: 78px; vertical-align:top; overflow:hidden; border:solid grey 1px;">
-											<select size="7" style="padding:4px; margin:-2px -17px -4px -4px;" onclick="document.GUI.nScale.value=this.value; document.getElementById('scales').style.display='none'; document.GUI.submit();">
+										<div id="scales" style="display:none; position:absolute; left:56px; bottom:21px; width: 78px; vertical-align:top; overflow:hidden; border:solid grey 1px;">
+											<select size="8" style="padding:4px; margin:-2px -17px -4px -4px;" onclick="document.GUI.nScale.value=this.value; document.getElementById('scales').style.display='none'; document.GUI.submit();">
 												<option onmouseover="this.selected = true;" value="1000000">1:&nbsp;&nbsp;1000000</option>
 												<option onmouseover="this.selected = true;" value="250000">1:&nbsp;&nbsp;250000</option>
 												<option onmouseover="this.selected = true;" value="100000">1:&nbsp;&nbsp;100000</option>
@@ -156,6 +169,7 @@ if($this->formvars['gps_follow'] == ''){
 												<option onmouseover="this.selected = true;" value="10000">1:&nbsp;&nbsp;10000</option>
 												<option onmouseover="this.selected = true;" value="5000">1:&nbsp;&nbsp;5000</option>
 												<option onmouseover="this.selected = true;" value="1000">1:&nbsp;&nbsp;1000</option>
+												<option onmouseover="this.selected = true;" value="500">1:&nbsp;&nbsp;500</option>
 											</select>
 										</div>
 									</div>

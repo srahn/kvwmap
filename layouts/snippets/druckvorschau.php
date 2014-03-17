@@ -189,7 +189,7 @@ function preventflickering(evt){
 
 <? # Durchschleifen der vom Nutzer eingegebenen Freitexte 
 	 for($j = 0; $j < count($this->Docu->activeframe[0]['texts']); $j++){		?>			
-			<input type="hidden" name="freetext<? echo $this->Docu->activeframe[0]['texts'][$j]['id']; ?>" value="<? echo $this->formvars['freetext'.$this->Docu->activeframe[0]['texts'][$j]['id']]; ?>">
+			<input type="hidden" name="freetext_<? echo $this->Docu->activeframe[0]['texts'][$j]['id']; ?>" value="<? echo $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']]; ?>">
 <? } ?>
 
 <? if($this->formvars['loadmapsource'] == 'Post'){ ?>

@@ -1397,8 +1397,7 @@ class ALB {
   }
 
   function getFlurstKennzByGemeindeIDs($Gemeinde_IDs, $FlurstKennz) {
-    if(ALKIS)$ret = $this->database->getFlurstuecksKennzByGemeindeIDsALKIS($Gemeinde_IDs, $FlurstKennz);
-    else $ret = $this->database->getFlurstuecksKennzByGemeindeIDs($Gemeinde_IDs, $FlurstKennz);
+    $ret = $this->database->getFlurstuecksKennzByGemeindeIDs($Gemeinde_IDs, $FlurstKennz);
     return $ret;
   }
 
@@ -3706,8 +3705,11 @@ class ALB {
                   else {
                     $g_Grundstuecke++;
                   }
+								 }																																													# angepasst wegen WLDGE-Datei der WVG
+								 $FlurstKennz_altZ=$FlurstKennzZ;																														# angepasst wegen WLDGE-Datei der WVG
+								 $FlurstKennzZ=mb_substr($ze,1,23,'utf8');																									# angepasst wegen WLDGE-Datei der WVG
+								 if ($BuchungsKennz!=$BuchungsKennz_alt or $FlurstKennzZ!=$FlurstKennz_altZ) {							# angepasst wegen WLDGE-Datei der WVG
                   # Buchung des Flurstücks auf dem Grundstück
-                  $FlurstKennz=mb_substr($ze,1,23,'utf8');
                   $ErbbaurechtsHinw='';
                   $ret=$this->database->insertBuchung($FlurstKennz,$Bezirk,$Blatt,$BVNR,$ErbbaurechtsHinw);
                   if ($ret[0] AND DBWRITE) {
@@ -4422,7 +4424,8 @@ class ALB {
     /*
     * Löschen aller Grundstuecke, für die Änderungsdaten vorliegen
     */
-    $ret=$this->database->deleteGrundstueckeByGrundbuecher($this->historische_loeschen);
+    #$ret=$this->database->deleteGrundstueckeByGrundbuecher($this->historische_loeschen);				# angepasst wegen WVG-WLDGE-Datei
+		$ret=$this->database->deleteNewGrundstuecke();
     if ($ret[0] AND DBWRITE) {
       $errmsg ='<br>Abbruch beim Löschen der Grundstücke mit Änderungen';
       $errmsg.=' in function deleteGrundstueckeByGrundbuecher alb.php line: '.__LINE__;
@@ -4435,7 +4438,8 @@ class ALB {
     /*
      * Löschen aller Buchungen, für die Änderungsdaten vorliegen
      */
-    $ret=$this->database->deleteBuchungenByGrundbuecher($this->historische_loeschen);
+    #$ret=$this->database->deleteBuchungenByGrundbuecher($this->historische_loeschen);					# angepasst wegen WVG-WLDGE-Datei
+		$ret=$this->database->deleteNewBuchungen();
     if ($ret[0] AND DBWRITE) {
       $errmsg ='<br>Abbruch beim Löschen der Buchungen mit Änderungen';
       $errmsg.=' in function deleteBuchungenByGrundbuecher alb.php line: '.__LINE__.'<br>'.$ret[1];
@@ -4448,7 +4452,8 @@ class ALB {
     /*
      * Löschen aller Zuordnungen von Eigentümern, für die Änderungsdaten vorliegen
      */
-    $ret=$this->database->deleteEigentuemerByGrundbuecher($this->historische_loeschen);
+    #$ret=$this->database->deleteEigentuemerByGrundbuecher($this->historische_loeschen);
+		$ret=$this->database->deleteNewEigentuemer();																								# angepasst wegen WVG-WLDGE-Datei
     if ($ret[0] AND DBWRITE) {
       $errmsg ='<br>Abbruch beim Löschen der Eigentümer auf Grundbuchblättern';
       $errmsg.=' in function deleteEigentuemerByGrundbuecher katasterp.php line: '.__LINE__.'<br>'.$ret[1];

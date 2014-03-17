@@ -27,6 +27,7 @@
 	<input name="secondpoly" type="hidden" value="<?php echo $this->formvars['secondpoly']; ?>">
 	<input name="pathx_second" type="hidden" value="<?php echo $this->formvars['pathx_second']; ?>">
 	<input name="pathy_second" type="hidden" value="<?php echo $this->formvars['pathy_second']; ?>">
+	<input type="hidden" name="svghelp" id="svghelp">
 	<?
 	if($this->formvars['last_button'] == '' or $this->formvars['last_doing'] == ''){
 		$this->formvars['last_button'] = 'pgon0';
@@ -124,8 +125,8 @@ echo'
   <input type="hidden" name="hoehe1" value = "'.$res_y.'">
 ';
 #                  >>> object-tag: wmode="transparent" (hoehere anforderungen beim rendern!) <<<
-//echo '<EMBED align="center" SRC="'.TEMPPATH_REL.$svgfile.'" TYPE="image/svg+xml" width="'.$res_x.'" height="'.$res_y.'" PLUGINSPAGE="http://www.adobe.com/svg/viewer/install/"/>';
+echo '<EMBED align="center" SRC="'.TEMPPATH_REL.$svgfile.'" TYPE="image/svg+xml" width="'.$res_x.'" height="'.$res_y.'" PLUGINSPAGE="http://www.adobe.com/svg/viewer/install/"/>';
 # echo '<iframe src="'.TEMPPATH_REL.$svgfile.'" width="'.$res_x.'" height="'.$res_y.'" name="map"></iframe>';
-echo '<script src="funktionen/Embed.js" language="JavaScript" type="text/javascript"></script>';
+#echo '<script src="funktionen/Embed.js" language="JavaScript" type="text/javascript"></script>';
 ?>
 </div>

@@ -217,14 +217,14 @@ function remove(){
 		for($j = 0; $j < count($this->Document->activeframe[0]['texts']); $j++){
       if($this->Document->activeframe[0]['texts'][$j]['text'] == ''){
       	# falls man von der Vorschau zurück gekommen ist
-      	$this->formvars['freetext'.$this->Document->activeframe[0]['texts'][$j]['id']] = str_replace(';', chr(10), $this->formvars['freetext'.$this->Document->activeframe[0]['texts'][$j]['id']]);
+      	$this->formvars['freetext_'.$this->Document->activeframe[0]['texts'][$j]['id']] = str_replace(';', chr(10), $this->formvars['freetext_'.$this->Document->activeframe[0]['texts'][$j]['id']]);
 	?>
 					<tr>
 				  	<td colspan="2">Freitext <? echo $j+1; ?>:</td>
 				  </tr>
 				  <tr>
 				  	<td colspan="2">
-				  		<textarea name="freetext<? echo $this->Document->activeframe[0]['texts'][$j]['id']; ?>" cols="40" rows="2"><? echo $this->formvars['freetext'.$this->Document->activeframe[0]['texts'][$j]['id']]; ?></textarea>
+				  		<textarea name="freetext_<? echo $this->Document->activeframe[0]['texts'][$j]['id']; ?>" cols="40" rows="2"><? echo $this->formvars['freetext_'.$this->Document->activeframe[0]['texts'][$j]['id']]; ?></textarea>
 				  	</td>
 				  </tr>
 	<?

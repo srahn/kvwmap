@@ -862,25 +862,15 @@ class user extends user_core{
 			$sql.=',language="'.$formvars['language'].'"';
 			$sql.=',charset="'.$formvars['charset'].'"';
 			if($formvars['fontsize_gle'])$sql.=',fontsize_gle="'.$formvars['fontsize_gle'].'"';
-			if($formvars['highlighting'] != ''){
-				$sql.=',highlighting="1"';
-			}
-			else{
-				$sql.=',highlighting="0"';
-			}
+			if($formvars['highlighting'] != '')	$sql.=',highlighting="1"';
+			else $sql.=',highlighting="0"';
 			$sql.=',result_color="'.$formvars['result_color'].'"';
-			if($formvars['runningcoords'] != ''){
-				$sql.=',runningcoords="1"';
-			}
-			else{
-				$sql.=',runningcoords="0"';
-			}
-			if($formvars['singlequery'] != ''){
-				$sql.=',singlequery="1"';
-			}
-			else{
-				$sql.=',singlequery="0"';
-			}
+			if($formvars['runningcoords'] != '') $sql.=',runningcoords="1"';
+			else	$sql.=',runningcoords="0"';
+			if($formvars['singlequery'] != '') $sql.=',singlequery="1"';
+			else $sql.=',singlequery="0"';
+			if($formvars['querymode'] != '') $sql.=',querymode="1"';
+			else $sql.=',querymode="0"';
 			if($formvars['back']){$buttons .= 'back,';}
 			if($formvars['forward']){$buttons .= 'forward,';}
 			if($formvars['zoomin']){$buttons .= 'zoomin,';}
@@ -1324,30 +1314,64 @@ class rolle extends rolle_core{
 		}
 	}
 
-	function resetLayers(){
+	function getRollenLayer($LayerName) {
+    $sql ='SELECT l.*, -l.id as Layer_ID FROM rollenlayer AS l';
+    $sql.=' WHERE l.stelle_id = '.$this->stelle_id.' AND l.user_id = '.$this->user_id;
+    if ($LayerName!='') {
+      $sql.=' AND (l.Name LIKE "'.$LayerName.'" ';
+      if(is_numeric($LayerName)){
+        $sql.='OR l.id = "'.$LayerName.'")';
+      }
+      else{
+        $sql.=')';
+      }
+    }
+    #echo $sql.'<br>';
+    $this->debug->write("<p>file:users.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
+    $query=mysql_query($sql,$this->database->dbConn);
+    if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+    while ($rs=mysql_fetch_array($query)) {
+      $layer[]=$rs;
+    }
+    return $layer;
+  }
+	
+	function resetLayers($layer_id){
+		$mapdb = new db_mapObj($this->stelle_id, $this->user_id);
 		$sql ="UPDATE u_rolle2used_layer SET aktivStatus='0'";
 		$sql.=" WHERE user_id=".$this->user_id." AND stelle_id=".$this->stelle_id;
-		$this->debug->write("<p>file:users.php class:rolle->resetLayers - resetten aller aktiven Layer zur Rolle:",4);
-		$this->database->execSQL($sql,4, $this->loglevel);
-		$mapdb = new db_mapObj($this->stelle_id, $this->user_id);
-		$rollenlayerset = $mapdb->read_RollenLayer();
-		for($i = 0; $i < count($rollenlayerset); $i++){
-			if($formvars['thema_rolle'.$rollenlayerset[$i]['id']] == 0){
-				$mapdb->deleteRollenLayer($rollenlayerset[$i]['id']);
-				# auch die Klassen und styles löschen
-				foreach($rollenlayerset[$i]['Class'] as $class){
-					$mapdb->delete_Class($class['Class_ID']);
-					foreach($class['Style'] as $style){
-						$mapdb->delete_Style($style['Style_ID']);
+		if($layer_id != ''){
+			if($layer_id > 0){
+				$sql.=" AND layer_id = ".$layer_id;					# 1 normaler Layer soll deaktiviert werden
+			}
+			else{
+				$mapdb->deleteRollenLayer(-$layer_id);			# 1 Rollenlayer soll deaktiviert=gelöscht werden
+				return;
+			}
+		}
+		else{
+			$rollenlayerset = $mapdb->read_RollenLayer();					# wenn alle Layer deaktiviert werden sollen, auch alle Rollenlayer löschen
+			for($i = 0; $i < count($rollenlayerset); $i++){
+				if($formvars['thema_rolle'.$rollenlayerset[$i]['id']] == 0){
+					$mapdb->deleteRollenLayer($rollenlayerset[$i]['id']);
+					# auch die Klassen und styles löschen
+					foreach($rollenlayerset[$i]['Class'] as $class){
+						$mapdb->delete_Class($class['Class_ID']);
+						foreach($class['Style'] as $style){
+							$mapdb->delete_Style($style['Style_ID']);
+						}
 					}
 				}
 			}
 		}
+		$this->debug->write("<p>file:users.php class:rolle->resetLayers - resetten aller aktiven Layer zur Rolle:",4);
+		$this->database->execSQL($sql,4, $this->loglevel);		
 	}
 
-	function resetQuerys(){
+	function resetQuerys($layer_id){
 		$sql ="UPDATE u_rolle2used_layer SET queryStatus='0'";
 		$sql.=" WHERE user_id=".$this->user_id." AND stelle_id=".$this->stelle_id;
+		if($layer_id != '')$sql.=" AND layer_id = ".$layer_id;
 		$this->debug->write("<p>file:users.php class:rolle->resetQuerys - resetten aller aktiven Layer zur Rolle:",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
@@ -2193,10 +2217,10 @@ class stelle extends stelle_core{
 		$sql.=', ows_fees= "'.$stellendaten['ows_fees'].'"';
 		$sql.=', ows_srs= "'.$stellendaten['ows_srs'].'"';
 		if($stellendaten['wappen']){
-			$sql.=', wappen="'.$_files['wappen']['name'].'"';
+			$sql.=', wappen="'.$stellendaten['wappen'].'"';
 		}
 		if($stellendaten['wasserzeichen']){
-			$sql.=', wasserzeichen="'.$_files['wasserzeichen']['name'].'"';
+			$sql.=', wasserzeichen="'.$stellendaten['wasserzeichen'].'"';
 		}
 		$sql.=', check_password_age="';
 		if ($stellendaten['checkPasswordAge']=='1') {
@@ -2604,12 +2628,15 @@ class stelle extends stelle_core{
 			if($order == 'Name'){
 				// Sortieren der Layer unter Berücksichtigung von Umlauten
 				$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
-				$layer['Bezeichnung'] = $sorted_arrays['array'];
-				$layer['ID'] = $sorted_arrays['second_array'];
+				$sorted_layer['Bezeichnung'] = $sorted_arrays['array'];
+				$sorted_layer['ID'] = $sorted_arrays['second_array'];
+				
 				$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['drawingorder']);
-				$layer['drawingorder'] = $sorted_arrays['second_array'];
+				$sorted_layer['drawingorder'] = $sorted_arrays['second_array'];
+				
 				$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['Gruppe']);
-				$layer['Gruppe'] = $sorted_arrays['second_array'];
+				$sorted_layer['Gruppe'] = $sorted_arrays['second_array'];
+				$layer = $sorted_layer;
 			}
 		}
 		return $layer;
@@ -2680,15 +2707,15 @@ class stelle extends stelle_core{
 						if($connection[$j] != ''){
 							$value = explode('=', $connection[$j]);
 							if(strtolower($value[0]) == 'host'){
-								$conn->host = $value[1];
+								$host = $value[1];
 							}
 							if(strtolower($value[0]) == 'port'){
-								$conn->port = $value[1];
+								$port = $value[1];
 							}
 						}
 					}
-					if($conn->port == '')$conn->port = '5432';
-					$fp = @fsockopen($conn->host, $conn->port, $errno, $errstr, 0.1);
+					if($port == '')$port = '5432';
+					$fp = @fsockopen($host, $port, $errno, $errstr, 0.1);
 					if(!$fp){			# keine Verbindung --> Layer ausschalten
 						#$this->Fehlermeldung = $errstr.' für Layer: '.$rs['Name'].'<br>';
 						continue;

@@ -13,39 +13,33 @@ function save(){
 		}
 	}
 	if(document.GUI.newpathwkt.value != ''){
-		ahah("<? echo URL.APPLVERSION; ?>index.php", "go=check_nachweis_poly&umring="+document.GUI.newpathwkt.value+"&flur="+document.GUI.Flur.value+"&gemkgschl="+document.GUI.Gemarkung.value, new Array(top.document.GUI.result2), "");
-		document.GUI.check.value = 'checking';
+		ahah("<? echo URL.APPLVERSION; ?>index.php", "go=check_nachweis_poly&umring="+document.GUI.newpathwkt.value+"&flur="+document.GUI.Flur.value+"&gemkgschl="+document.GUI.Gemarkung.value, new Array(top.document.GUI.result2, ""), new Array("setvalue", "execute_function"));
 	}
 }
 
 function check_poly(){
-	if(document.GUI.check.value == 'checking'){
-		if(document.GUI.result2.value == 'invalid'){
-			alert('Achtung! Das Polygon ist fehlerhaft. Bitte korrigieren.');
+	if(document.GUI.result2.value == 'invalid'){
+		alert('Achtung! Das Polygon ist fehlerhaft. Bitte korrigieren.');
+		document.GUI.check.value = '';
+	}
+	else{
+		if(document.GUI.result2.value == 'f'){
 			document.GUI.check.value = '';
-		}
-		else{
-			if(document.GUI.result2.value == 'f'){
-				document.GUI.check.value = '';
-				conf = confirm('Achtung! Das Polygon liegt nicht in der angegebenen Flur.\nTrotzdem Speichern?');
-				if(conf == true){
-					document.GUI.go_plus.value = 'Senden';
-					document.GUI.submit();
-				}
-				else{
-					return;
-				}
-			}
-			if(document.GUI.result2.value == 't'){
-				window.clearInterval(polycheck);
+			conf = confirm('Achtung! Das Polygon liegt nicht in der angegebenen Flur.\nTrotzdem Speichern?');
+			if(conf == true){
 				document.GUI.go_plus.value = 'Senden';
 				document.GUI.submit();
 			}
+			else{
+				return;
+			}
+		}
+		if(document.GUI.result2.value == 't'){
+			document.GUI.go_plus.value = 'Senden';
+			document.GUI.submit();
 		}
 	}
 }
-
-var polycheck = window.setInterval("check_poly()", 500);
 
 function buildwktpolygonfromsvgpath(svgpath){
 	var koords;

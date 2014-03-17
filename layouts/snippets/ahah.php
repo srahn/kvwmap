@@ -23,7 +23,7 @@ function ahah(url, data, target, action){
   }
 }  
 
-function ahahDone(url, target, req, action) {
+function ahahDone(url, targets, req, actions) {
   if (req.readyState == 4) { // only if req is "loaded"
     if(req.status == 200) { // only if "OK"
 			var found = false;
@@ -34,67 +34,66 @@ function ahahDone(url, target, req, action) {
     	response = response.replace(/\r/,"");
 	    //Behandlung des Zielformelements als ein Array
 	    //Zerlegung des Resultes für den Fall, dass es mehrere Responsvalues sind
-	    responsevalues = response.split("^");
-			if(action == undefined)action = "";
-			actions = action.split("^");
-	    for (i=0; i < target.length; ++i) {
-				if(actions[i] == undefined)actions[i] = action;
+	    responsevalues = response.split("~");
+			if(actions == undefined || actions == "")actions = new Array();
+	    for (i=0; i < targets.length; ++i) {
+				if(actions[i] == undefined)actions[i] = "";
 				switch (actions[i]) {
 					case "execute_function":
 						eval(responsevalues[i]);
 					break;
 					case "src":
-						target[i].src = responsevalues[i];
+						targets[i].src = responsevalues[i];
 					break;
 					case "xlink:href":
-						//target[i].setAttribute("xlink:href", responsevalues[i]);	
-						target[i].setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", responsevalues[i]);
+						//targets[i].setAttribute("xlink:href", responsevalues[i]);	
+						targets[i].setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", responsevalues[i]);
 					break;
 					case "points":
-						target[i].setAttribute("points", responsevalues[i]);	
+						targets[i].setAttribute("points", responsevalues[i]);	
 					break;
 				  case "sethtml":
-						if(target[i] != undefined){
-				    	target[i].innerHTML = responsevalues[i];
-							target[i].outerHTML = target[i].outerHTML;		// Bug-Workaround fuer den IE beim setzen eines select-Objekts
+						if(targets[i] != undefined){
+				    	targets[i].innerHTML = responsevalues[i];
+							targets[i].outerHTML = targets[i].outerHTML;		// Bug-Workaround fuer den IE beim setzen eines select-Objekts
 						}
 				  break;
 					case "setvalue":
-						target[i].value = responsevalues[i];
+						targets[i].value = responsevalues[i];
 				  break;
 				  default :{
-						if(target[i] != null){
-				    	if (target[i].value == undefined) {
-				    		target[i].innerHTML = responsevalues[i];
+						if(targets[i] != null){
+				    	if (targets[i].value == undefined) {
+				    		targets[i].innerHTML = responsevalues[i];
 				    	}
 				    	else{
-								if(target[i].type == "checkbox"){
+								if(targets[i].type == "checkbox"){
 									if(responsevalues[i] == "1"){
-										target[i].checked = "true";
+										targets[i].checked = "true";
 									}
 									else{
-										target[i].checked = "";
+										targets[i].checked = "";
 									}
 								}
-				    		if(target[i].type == "select-one") {
+				    		if(targets[i].type == "select-one") {
 									found = false;
-				    			for (j = 0; j < target[i].length; ++j) {
-				    				if (target[i].options[j].value == responsevalues[i]) {
-				    					target[i].options[j].selected = true;
+				    			for (j = 0; j < targets[i].length; ++j) {
+				    				if (targets[i].options[j].value == responsevalues[i]) {
+				    					targets[i].options[j].selected = true;
 											found = true;
 				    				}
 				    			}
 									if(found == false){		// wenns nicht dabei ist, wirds hinten rangehangen
-										target[i].options[target[i].length] = new Option(responsevalues[i], responsevalues[i]);
-										target[i].options[target[i].length-1].selected = true;
+										targets[i].options[targets[i].length] = new Option(responsevalues[i], responsevalues[i]);
+										targets[i].options[targets[i].length-1].selected = true;
 									}
 				    		}
 				    	  else {
-									if(target[i].type == "select-multiple") {
-										target[i].innerHTML = responsevalues[i];
+									if(targets[i].type == "select-multiple") {
+										targets[i].innerHTML = responsevalues[i];
 									}
 									else{
-				      	  	target[i].value = responsevalues[i];
+				      	  	targets[i].value = responsevalues[i];
 									}
 				    	  }
 				    	}
@@ -104,7 +103,7 @@ function ahahDone(url, target, req, action) {
 	    }	      	
     } 
     else{
-    	target.value =" AHAH Error:"+ req.status + " " +req.statusText;
+    	//target.value =" AHAH Error:"+ req.status + " " +req.statusText;
     	//alert(target.value);
     }
   }

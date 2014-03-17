@@ -1,128 +1,69 @@
 <?php
  # 2008-01-12 pkvvm
   include(LAYOUTPATH.'languages/new_layer_data_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
+	
+	include(SNIPPETS.'sachdatenanzeige_functions.php'); 
  ?>
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
 <!--
-
-	var geom_not_null = false;
-
-	function checkDate(string){
-    var split = string.split(".");
-    var day = parseInt(split[0], 10);
-    var month = parseInt(split[1], 10);
-    var year = parseInt(split[2], 10);
-    var check = new Date(year, month-1, day);
-    var day2 = check.getDate();
-    var year2 = check.getFullYear();
-    var month2 = check.getMonth()+1;
-    if(year2 == year && month == month2 && day == day2){
-    	return true;
-    }
-    else{
-    	return false;
-    }
-	}
-
-	function save(){
-		if((geom_not_null && document.GUI.newpath.value == '' && document.GUI.loc_x == undefined) || (geom_not_null && document.GUI.loc_x != undefined && document.GUI.loc_x.value == '')){ 
-			alert('Sie haben keine Geometrie angegeben.');
-			return;
-		}
-  	form_fieldstring = document.GUI.form_field_names.value+'';
-  	form_fields = form_fieldstring.split('|');
-  	for(i = 0; i < form_fields.length; i++){
-  		fieldstring = form_fields[i]+'';
-  		field = fieldstring.split(';'); 
-  		if(document.getElementsByName(fieldstring)[0] != undefined && field[4] != 'Dokument' && field[4] != 'SubFormFK' && (document.getElementsByName(fieldstring)[0].readOnly != true) && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
-  			if(field[4] == 'TextFK'){
-			  	alert('Neuer Datensatz nicht im abhängigen Layer!\nGeben Sie neue Datensätze nur über den übergeordneten Layer ein.');
-				}else{
-			  	alert('Das Feld '+document.getElementsByName(fieldstring)[0].title+' erfordert eine Eingabe.');
-			  }
-  			return;
-  		}
-  		if(document.getElementsByName(fieldstring)[0] != undefined && field[6] == 'date' && field[4] != 'Time' && document.getElementsByName(fieldstring)[0].value != '' && !checkDate(document.getElementsByName(fieldstring)[0].value)){
-  			alert('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
-  			return;
-  		}
-  	}
-  	document.GUI.go.value = 'neuer_Layer_Datensatz_speichern';
-  	<? if($this->formvars['close_after_saving']){ ?>
-  		document.GUI.close_window.value='true';
-  	<?}?> 
-  	document.GUI.submit();
-	}
 	
-	function subsave_data(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data){
+	// die Funktionen stehen eigentlich schon in sachdatenanzeige_functions.php...
+	
+	//function subsave_data(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data){
 		// layer_id ist die von dem Layer, in dem ein neuer Datensatz gespeichert werden soll
 		// fromobject ist die id von dem div, welches das Formular zur Eingabe des neuen Datensatzes enthaelt
 		// targetobject ist die id von dem Objekt im Hauptformular, welches nach Speicherung des neuen Datensatzes aktualisiert werden soll
 		// targetlayer_id ist die von dem Layer, zu dem das targetobject gehoert
 		// targetattribute ist das Attribut, zu dem das targetobject gehoert
 		// data ist ein string, der weitere benötigte KVPs enthalten kann (durch <und> getrennt)
-		data_r = data.replace(/<und>/g, "&");
-  	form_fieldstring = document.getElementById('sub_'+layer_id+'_form_field_names').value;
-  	form_fields = form_fieldstring.split('|');
-  	for(i = 0; i < form_fields.length-1; i++){
-  		fieldstring = form_fields[i]+'';
-  		field = fieldstring.split(';'); 
-  		if(document.getElementsByName(fieldstring)[0] != undefined && document.getElementsByName(fieldstring)[0].readOnly == false && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
-  			alert('Das Feld '+document.getElementsByName(fieldstring)[0].title+' erfordert eine Eingabe.');
-  			return;
-  		}
-  		if(document.getElementsByName(fieldstring)[0] != undefined && field[6] == 'date' && field[4] != 'Time' && document.getElementsByName(fieldstring)[0].value != '' && !checkDate(document.getElementsByName(fieldstring)[0].value)){
-  			alert('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
-  			return;
-  		}
-  		data_r += '&'+form_fields[i]+'='+document.getElementsByName(form_fields[i])[0].value;
-  	}
-  	data = 'go=Sachdaten_speichern&selected_layer_id='+layer_id+'&fromobject='+fromobject+'&targetobject='+targetobject+'&targetlayer_id='+targetlayer_id+'&targetattribute='+targetattribute+'&data='+data+'&form_field_names='+form_fieldstring+'&embedded=true' + data_r;
-		ahah('<? echo URL.APPLVERSION; ?>index.php', data, new Array(document.getElementById(fromobject), document.getElementById(targetobject)), 'sethtml');
-	}
+		// data_r = data.replace(/<und>/g, "&");
+  	// form_fieldstring = document.getElementById('sub_'+layer_id+'_form_field_names').value;
+  	// form_fields = form_fieldstring.split('|');
+  	// for(i = 0; i < form_fields.length-1; i++){
+  		// fieldstring = form_fields[i]+'';
+  		// field = fieldstring.split(';'); 
+  		// if(document.getElementsByName(fieldstring)[0] != undefined && document.getElementsByName(fieldstring)[0].readOnly == false && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
+  			// alert('Das Feld '+document.getElementsByName(fieldstring)[0].title+' erfordert eine Eingabe.');
+  			// return;
+  		// }
+  		// if(document.getElementsByName(fieldstring)[0] != undefined && field[6] == 'date' && field[4] != 'Time' && document.getElementsByName(fieldstring)[0].value != '' && !checkDate(document.getElementsByName(fieldstring)[0].value)){
+  			// alert('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
+  			// return;
+  		// }
+  		// data_r += '&'+form_fields[i]+'='+document.getElementsByName(form_fields[i])[0].value;
+  	// }
+  	// data = 'go=Sachdaten_speichern&selected_layer_id='+layer_id+'&fromobject='+fromobject+'&targetobject='+targetobject+'&targetlayer_id='+targetlayer_id+'&targetattribute='+targetattribute+'&data='+data+'&form_field_names='+form_fieldstring+'&embedded=true' + data_r;
+		// ahah('<? echo URL.APPLVERSION; ?>index.php', data, new Array(document.getElementById(fromobject), document.getElementById(targetobject)), new Array('sethtml'));
+	// }
 	
-	function subsave_new_layer_data(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data){
+	//function subsave_new_layer_data(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data){
 		// layer_id ist die von dem Layer, in dem ein neuer Datensatz gespeichert werden soll
 		// fromobject ist die id von dem div, welches das Formular zur Eingabe des neuen Datensatzes enthaelt
 		// targetobject ist die id von dem Objekt im Hauptformular, welches nach Speicherung des neuen Datensatzes aktualisiert werden soll
 		// targetlayer_id ist die von dem Layer, zu dem das targetobject gehoert
 		// targetattribute ist das Attribut, zu dem das targetobject gehoert
 		// data ist ein string, der weitere benötigte KVPs enthalten kann (durch <und> getrennt)
-		data_r = data.replace(/<und>/g, "&");
-  	form_fieldstring = document.getElementById('sub_'+layer_id+'_form_field_names').value;
-  	form_fields = form_fieldstring.split('|');
-  	for(i = 0; i < form_fields.length-1; i++){
-  		fieldstring = form_fields[i]+'';
-  		field = fieldstring.split(';'); 
-  		if(document.getElementsByName(fieldstring)[0] != undefined && document.getElementsByName(fieldstring)[0].readOnly == false && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
-  			alert('Das Feld '+document.getElementsByName(fieldstring)[0].title+' erfordert eine Eingabe.');
-  			return;
-  		}
-  		if(document.getElementsByName(fieldstring)[0] != undefined && field[6] == 'date' && field[4] != 'Time' && document.getElementsByName(fieldstring)[0].value != '' && !checkDate(document.getElementsByName(fieldstring)[0].value)){
-  			alert('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
-  			return;
-  		}
-  		data_r += '&'+form_fields[i]+'='+document.getElementsByName(form_fields[i])[0].value;
-  	}
-  	data = 'go=neuer_Layer_Datensatz_speichern&selected_layer_id='+layer_id+'&fromobject='+fromobject+'&targetobject='+targetobject+'&targetlayer_id='+targetlayer_id+'&targetattribute='+targetattribute+'&data='+data+'&form_field_names='+form_fieldstring+'&embedded=true' + data_r;
-		ahah('<? echo URL.APPLVERSION; ?>index.php', data, new Array(document.getElementById(fromobject), document.getElementById(targetobject)), 'sethtml');
-	}
-	
-	function clearsubforms(){
-		alldivs = document.getElementsByTagName('div');
-		for(i = 0; i < alldivs.length; i++){
-			id = alldivs[i].id + '';
-			if(id.substr(0, 7) == 'subform'){
-				alldivs[i].innerHTML = '';
-			}
-		}
-	}
-	
-	function clearsubform(subformid){
-		document.getElementById(subformid).innerHTML = '';
-	}
-  
+		// data_r = data.replace(/<und>/g, "&");
+  	// form_fieldstring = document.getElementById('sub_'+layer_id+'_form_field_names').value;
+  	// form_fields = form_fieldstring.split('|');
+  	// for(i = 0; i < form_fields.length-1; i++){
+  		// fieldstring = form_fields[i]+'';
+  		// field = fieldstring.split(';'); 
+  		// if(document.getElementsByName(fieldstring)[0] != undefined && document.getElementsByName(fieldstring)[0].readOnly == false && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
+  			// alert('Das Feld '+document.getElementsByName(fieldstring)[0].title+' erfordert eine Eingabe.');
+  			// return;
+  		// }
+  		// if(document.getElementsByName(fieldstring)[0] != undefined && field[6] == 'date' && field[4] != 'Time' && document.getElementsByName(fieldstring)[0].value != '' && !checkDate(document.getElementsByName(fieldstring)[0].value)){
+  			// alert('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
+  			// return;
+  		// }
+  		// data_r += '&'+form_fields[i]+'='+document.getElementsByName(form_fields[i])[0].value;
+  	// }
+  	// data = 'go=neuer_Layer_Datensatz_speichern&selected_layer_id='+layer_id+'&fromobject='+fromobject+'&targetobject='+targetobject+'&targetlayer_id='+targetlayer_id+'&targetattribute='+targetattribute+'&data='+data+'&form_field_names='+form_fieldstring+'&embedded=true' + data_r;
+		// ahah('<? echo URL.APPLVERSION; ?>index.php', data, new Array(document.getElementById(fromobject), document.getElementById(targetobject)), new Array('sethtml'));
+	// }
+	  
 //-->
 </script>
 
@@ -190,7 +131,7 @@ if($this->formvars['selected_layer_id'] AND $this->Fehler == ''){
 <table width="100%" border="0" cellpadding="2" cellspacing="0">
 	<tr align="center"> 
   	<td>
-  		<input type="button" name="go_plus" value="<? echo $strSave; ?>" onclick="save();">&nbsp;&nbsp;&nbsp;&nbsp;
+  		<input type="button" name="go_plus" value="<? echo $strSave; ?>" onclick="save_new_dataset();">&nbsp;&nbsp;&nbsp;&nbsp;
   		<input type="checkbox" name="weiter_erfassen" value="1" <? if($this->formvars['weiter_erfassen'] == 1)echo 'checked="true"'; ?>>und einen weiteren Datensatz erfassen
   	</td>
 	</tr>

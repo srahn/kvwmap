@@ -65,8 +65,6 @@
 	$randomnumber = rand(0, 1000000);
 	$svgfile  = $randomnumber.'SVG_dokumentenformular.svg';
 		
-  echo $ahah;
-
 #
 # zusammenstellen der SVG
 #

@@ -147,6 +147,10 @@
     <td align="right"><?php echo $strSingleQuery; ?>:&nbsp;</td>
     <td><input name="singlequery" type="checkbox" value="1" <? if($this->user->rolle->singlequery == '1'){echo 'checked="true"';} ?> ></td>
   </tr>
+	<tr>
+    <td align="right"><?php echo $strQuerymode; ?>:&nbsp;</td>
+    <td><input name="querymode" type="checkbox" value="1" <? if($this->user->rolle->querymode == '1'){echo 'checked="true"';} ?> ></td>
+  </tr>
   <tr>
     <td align="right"><?php echo $strFontSizeGLE; ?>:&nbsp;</td>
     <td><input name="fontsize_gle" type="text" value="<?php echo $this->user->rolle->fontsize_gle; ?>" size="2" maxlength="2"></td>

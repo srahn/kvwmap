@@ -17,8 +17,14 @@ $SVGvars_querytooltipscript .= '
 		var maxwidth = 0;
 		var xpos = 5;
 		var ypos = 0;
+		
+		top.document.getElementById("svghelp").SVGshowtooltip = showtooltip;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 				
 		function hidetooltip(evt){
+			if(evt == undefined){
+				cleartooltip();
+				return;
+			}
 			mousex = evt.clientX;
 			mousey = evt.clientY;
 			if(oldmousex == undefined || Math.abs(oldmousex-mousex) > 1 || Math.abs(oldmousey-mousey) > 1){			// Maus bewegen
@@ -43,7 +49,7 @@ $SVGvars_querytooltipscript .= '
 			obj.setAttribute("d", "");
 		}
 			
-		function showtooltip(result){
+		function showtooltip(result, showdata){
 			var box = new Array();																					// array mit den BBoxen der Sachdatentexte
 			var texts = new Array();																				// array mit den Sachdatentexten
 			var pics = new Array;																						// array mit den Bildern	
@@ -61,51 +67,53 @@ $SVGvars_querytooltipscript .= '
 				var obj = document.getElementById("highlight")
 				obj.setAttribute("d", geom);
 			}
-			var objects = res[0].split("|| ");
-			var layername = settext(objects[0], xpos, ypos);									// Layername
-			layername.setAttribute(\'visibility\', \'visible\');
-			box[0] = layername.getBBox();																	// BBox berechnen
-			ypos = ypos + box[0].height + 4;
-			if(maxwidth < box[0].width){
-				maxwidth = box[0].width + 6;
-			}
-			for(i = 1; i < objects.length; i++){
-				if(objects[i] != ""){
-					var elements = objects[i].split("| ");
-					texts[i] = settext(elements[0], xpos, ypos);									// Sachdaten
-					texts[i].setAttribute(\'visibility\', \'visible\');
-					box[i] = texts[i].getBBox();																	// BBox berechnen
-					ypos = ypos + box[i].height;
-					if(maxwidth < box[i].width){
-						maxwidth = box[i].width + 6;
-					}
-					var anzahl_bilder = elements.length-1;
-					for(j = 1; j < elements.length; j++){
-						pics[i] = new Array();
-						pics[i][j] = document.createElementNS("http://www.w3.org/2000/svg", "image");
-						pics[i][j].setAttributeNS(null, "id", "pic_"+i+j);
-						pics[i][j].setAttributeNS(null, "height", "100");
-						pics[i][j].setAttributeNS(null, "width", "140");
-						pics[i][j].setAttributeNS(null, "preserveAspectRatio" , "xMinYMin meet");
-						pics[i][j].setAttributeNS(null, "x", xpos);
-						pics[i][j].setAttributeNS(null, "y", ypos);
-						pics[i][j].setAttributeNS(null, "opacity", 1);
-						pics[i][j].setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", elements[j]);
-				    tooltipcontent.appendChild(pics[i][j]);
-						ypos = ypos + 110;
-						if(maxwidth < 140){
-							maxwidth = 140;
-						}
-					}
-					ypos = ypos + 12;
+			if(showdata){		// Daten nur anzeigen, wenn ueber die Karte abgefragt wurde
+				var objects = res[0].split("|| ");
+				var layername = settext(objects[0], xpos, ypos);									// Layername
+				layername.setAttribute(\'visibility\', \'visible\');
+				box[0] = layername.getBBox();																	// BBox berechnen
+				ypos = ypos + box[0].height + 4;
+				if(maxwidth < box[0].width){
+					maxwidth = box[0].width + 6;
 				}
+				for(i = 1; i < objects.length; i++){
+					if(objects[i] != ""){
+						var elements = objects[i].split("| ");
+						texts[i] = settext(elements[0], xpos, ypos);									// Sachdaten
+						texts[i].setAttribute(\'visibility\', \'visible\');
+						box[i] = texts[i].getBBox();																	// BBox berechnen
+						ypos = ypos + box[i].height;
+						if(maxwidth < box[i].width){
+							maxwidth = box[i].width + 6;
+						}
+						var anzahl_bilder = elements.length-1;
+						for(j = 1; j < elements.length; j++){
+							pics[i] = new Array();
+							pics[i][j] = document.createElementNS("http://www.w3.org/2000/svg", "image");
+							pics[i][j].setAttributeNS(null, "id", "pic_"+i+j);
+							pics[i][j].setAttributeNS(null, "height", "100");
+							pics[i][j].setAttributeNS(null, "width", "140");
+							pics[i][j].setAttributeNS(null, "preserveAspectRatio" , "xMinYMin meet");
+							pics[i][j].setAttributeNS(null, "x", xpos);
+							pics[i][j].setAttributeNS(null, "y", ypos);
+							pics[i][j].setAttributeNS(null, "opacity", 1);
+							pics[i][j].setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", elements[j]);
+							tooltipcontent.appendChild(pics[i][j]);
+							ypos = ypos + 110;
+							if(maxwidth < 140){
+								maxwidth = 140;
+							}
+						}
+						ypos = ypos + 12;
+					}
+				}
+				tooltipframe.setAttribute("x", xpos-8);
+				tooltipframe.setAttribute("y", -20); 				
+				tooltipframe.setAttribute("width", maxwidth + 8);
+				tooltipframe.setAttribute("height", ypos + 6);
+				updatetooltipposition(tooltipgroup);															// Tooltipposition updaten
+				tooltipgroup.setAttribute(\'visibility\', \'visible\');
 			}
-			tooltipframe.setAttribute("x", xpos-8);
-			tooltipframe.setAttribute("y", -20); 				
-			tooltipframe.setAttribute("width", maxwidth + 8);
-			tooltipframe.setAttribute("height", ypos + 6);
-			updatetooltipposition(tooltipgroup);															// Tooltipposition updaten
-		 	tooltipgroup.setAttribute(\'visibility\', \'visible\');
 		}				
 			
 		function mouse_move(evt){
@@ -115,7 +123,7 @@ $SVGvars_querytooltipscript .= '
 		 	}
 		}		
 				
-		window.setInterval("tooltip_query()", 200);
+		window.setInterval("tooltip_query()", 50);
 		
 		function cleartext(object){
 			while(object.childNodes.length > 0){
@@ -189,7 +197,7 @@ $SVGvars_querytooltipscript .= '
 			var tspan1;
 			var offsety = 16;
 			var offsetx = x;
-			var lines = text.split("~");
+			var lines = text.split("##");
 			for(l = 0; l < lines.length; l++){
 				if(lines[l].slice(0, 6) == "xlink:"){
 					link = document.getElementById("link0").cloneNode(true);
@@ -234,10 +242,6 @@ $SVGvars_querytooltipscript .= '
 			var querylayer_id;
 			if(doing == "ppquery"){ 
 				if(Math.abs(oldmousex-mousex) < 1 && Math.abs(oldmousey-mousey) < 1){		// Maus stillhalten
-					if(top.document.GUI.result.value != "" && tooltipstate == "request_sent"){
-						showtooltip(top.document.GUI.result.value);
-						tooltipstate = "response_received";
-					}
 					if(tooltipstate == "ready_for_request" && prevent != 1){			// wenn Maus bewegt wurde --> neuer Request
 						tooltipstate = "request_sent";
 						for(i = 0; i < layerset.length; i++){
@@ -248,7 +252,7 @@ $SVGvars_querytooltipscript .= '
 						}
 						counter++;
 						path = mousex+","+mousey+";"+mousex+","+mousey;
-					  top.ahah("'.URL.APPLVERSION.'index.php", "go=tooltip_query&INPUT_COORD="+path+"&CMD=ppquery"+querylayer+"&querylayer_id="+querylayer_id+"&counter="+counter, new Array(top.document.GUI.result), "");
+					  top.ahah("'.URL.APPLVERSION.'index.php", "go=tooltip_query&INPUT_COORD="+path+"&CMD=ppquery"+querylayer+"&querylayer_id="+querylayer_id+"&counter="+counter, new Array(top.document.GUI.result, \'\'), new Array(\'setvalue\', \'execute_function\'));
 					}
 				}
 				oldmousex = mousex;

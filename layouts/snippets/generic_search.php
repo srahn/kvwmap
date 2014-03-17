@@ -143,7 +143,7 @@ function update_require_attribute(attributes, layer_id, value){
 	// attributes ist eine Liste von zu aktualisierenden Attribut, k die Nummer des Datensatzes und value der ausgewaehlte Wert
 	attribute = attributes.split(',');
 	for(i = 0; i < attribute.length; i++){
-		ahah("<? echo URL.APPLVERSION; ?>index.php", "go=get_select_list&layer_id="+layer_id+"&attribute="+attribute[i]+"&value="+value+"&type=select-one", new Array(document.getElementById('value_'+attribute[i])), 'sethtml');
+		ahah("<? echo URL.APPLVERSION; ?>index.php", "go=get_select_list&layer_id="+layer_id+"&attribute="+attribute[i]+"&value="+value+"&type=select-one", new Array(document.getElementById('value_'+attribute[i])), new Array('sethtml'));
 	}
 }
 

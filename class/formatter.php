@@ -30,6 +30,13 @@ class formatter {
 		return utf8_decode($jsonp);
 	}	
 	
+	function output_jsonp() {
+		header('Content-Type: application/json; charset=utf-8');
+		$this->data ? $json = json_encode($this->data) : $json = '{}';
+		$jsonp = "{$this->callback}($json)";
+		return utf8_decode($jsonp);
+  }    
+	
 	function output_print_r() {
 		return print_r($this->data, true);
 	}
