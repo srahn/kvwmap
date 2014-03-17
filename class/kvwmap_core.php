@@ -1550,7 +1550,7 @@ class GUI_core {
 			default : {
 				if ($this->formvars['format'] != '') {
 					include('formatter.php');
-					$this->formatter = new formatter($this->qlayersetParamStrip(), $this->formvars['format']);
+					$this->formatter = new formatter($this->qlayersetParamStrip(), $this->formvars['format'], $this->formvars['callback']);
 		    	echo utf8_encode($this->formatter->output());
 				}
 			}
