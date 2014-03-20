@@ -150,6 +150,13 @@ function overlay_link(data){
 	}
 }
 
+function datecheck(value){
+	dateElements = value.split('.');
+	var date1 = new Date(dateElements[2],dateElements[1]-1,dateElements[0]);
+	if(date1 == 'Invalid Date')return false;
+	else return date1;
+}
+
 function update_legend(layerhiddenstring){
 	parts = layerhiddenstring.split(' ');
 	for(j = 0; j < parts.length-1; j=j+2){

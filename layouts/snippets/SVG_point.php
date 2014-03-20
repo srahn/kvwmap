@@ -103,8 +103,8 @@ echo'
   <input type="hidden" name="hoehe1" value = "'.$res_y.'">
 ';
 #                  >>> object-tag: wmode="transparent" (hoehere anforderungen beim rendern!) <<<
-//echo '<EMBED align="center" SRC="'.TEMPPATH_REL.$svgfile.'" TYPE="image/svg+xml" width="'.$res_x.'" height="'.$res_y.'" PLUGINSPAGE="http://www.adobe.com/svg/viewer/install/"/>';
+echo '<EMBED align="center" SRC="'.TEMPPATH_REL.$svgfile.'" TYPE="image/svg+xml" width="'.$res_x.'" height="'.$res_y.'" PLUGINSPAGE="http://www.adobe.com/svg/viewer/install/"/>';
 # echo '<iframe src="'.TEMPPATH_REL.$svgfile.'" width="'.$res_x.'" height="'.$res_y.'" name="map"></iframe>';
-echo '<script src="funktionen/Embed.js" language="JavaScript" type="text/javascript"></script>';
+# echo '<script src="funktionen/Embed.js" language="JavaScript" type="text/javascript"></script>';
 ?>
 </div>

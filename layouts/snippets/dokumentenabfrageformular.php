@@ -7,6 +7,7 @@
 
 Text[1]=["Achtung:","Bei Auswahl von Gemarkung und Flur erfolgt eine räumliche Suche über die aktuelle Flurgeometrie."]
 
+
 function save(){
 	art = document.getElementsByName('abfrageart');
 	if(art[0].checked == true){
@@ -14,17 +15,35 @@ function save(){
 			alert('Bitte geben Sie die Gemarkung an.');
 			return;
 		}
-		if(document.GUI.suchgemarkung.value != '' && document.GUI.suchflur.value == ''){
-			alert('Bitte geben Sie Gemarkung und Flur an.');
+		if(document.GUI.sVermStelle.value != '' && document.GUI.suchgemarkung.value == '' && document.GUI.suchstammnr.value == '' && document.GUI.suchrissnr.value == '' && document.GUI.sdatum.value == '' && document.GUI.suchfortf.value == ''){
+			alert('Bitte geben Sie eine Gemarkung, eine Antragsnummer, eine Rissnummer, ein Datum oder eine Fortführung an.');
 			return;
 		}
-		if(document.GUI.VermStelle.value != '' && document.GUI.suchgemarkung.value == '' && document.GUI.suchstammnr.value == '' && document.GUI.suchrissnr.value == '' && document.GUI.datum.value == '' && document.GUI.suchfortf.value == ''){
-			alert('Bitte geben Sie eine Gemarkung und Flur, eine Antragsnummer, eine Rissnummer, ein Datum oder eine Fortführung an.');
-			return;
-		}
-		if(document.GUI.suchgemarkung.value == '' && document.GUI.suchstammnr.value == '' && document.GUI.datum.value == ''){
+		if(document.GUI.suchgemarkung.value == '' && document.GUI.suchstammnr.value == '' && document.GUI.sdatum.value == ''){
 			alert('Bitte geben Sie Suchparameter an.');
 			return;
+		}
+		if(document.GUI.sdatum.value != ''){
+			date1 = datecheck(document.GUI.sdatum.value);
+			if(!date1){
+				alert('Das Datum muss im Format TT.MM.JJJJ angegeben werden.');
+				return;
+			}
+			if(document.GUI.sdatum2.value != ''){
+				date2 = datecheck(document.GUI.sdatum2.value);
+				if(!date2){
+					alert('Das Datum muss im Format TT.MM.JJJJ angegeben werden.');
+					return;
+				}
+				if(date2 < date1){
+					alert('Das zweite Datum muss zeitlich nach dem ersten liegen.');
+					return;
+				}
+			}
+			else{
+				alert('Bitte geben Sie ein zweites Datum ein.');
+				return;
+			}
 		}
 	}
 	if(art[1].checked == true && document.GUI.newpathwkt.value == ''){
@@ -149,7 +168,7 @@ else {
 		<tr>
           <td align="left" colspan="3">Flur:&nbsp;&nbsp;&nbsp;&nbsp;
 						<div style="position: relative">
-						<img src="<?php echo GRAPHICSPATH;?>ikon_i.gif" onMouseOver="stm(Text[1],Style[0])" onmouseout="htm()"><br><input type="text" name="suchflur" value="<?php echo $this->formvars['suchflur']; ?>" size="3" maxlength="3">
+						<img src="<?php echo GRAPHICSPATH;?>ikon_i.gif" onMouseOver="stm(Text[1],Style[0], document.getElementById('TipLayer'))" onmouseout="htm()"><br><input type="text" name="suchflur" value="<?php echo $this->formvars['suchflur']; ?>" size="3" maxlength="3">
 						<DIV id="TipLayer" style="visibility:hidden;position:absolute;z-index:1000;left: -50px"></DIV>
 						</div>
           </td>
@@ -175,11 +194,11 @@ else {
         <tr> 
 			    <td colspan="3">
 			    		Datum:<br>
-						<a href="javascript:;" title=" (TT.MM.JJJJ) " onclick="new CalendarJS().init('datum')"><img src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar"><a name="calendar_datum"></a></div>
-			    		<input id="datum" name="datum" type="text" onchange="if(document.GUI.datum2.value=='')document.GUI.datum2.value=this.value" value="<?php echo $this->formvars['datum']; ?>" size="10" maxlength="50">
+						<a href="javascript:;" title=" (TT.MM.JJJJ) " onclick="new CalendarJS().init('sdatum')"><img src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar"><a name="calendar_sdatum"></a></div>
+			    		<input id="sdatum" name="sdatum" type="text" onchange="if(document.GUI.sdatum2.value=='')document.GUI.sdatum2.value=this.value" value="<?php echo $this->formvars['sdatum']; ?>" size="10" maxlength="50">
 						&nbsp;bis&nbsp;
-						<a href="javascript:;" title=" (TT.MM.JJJJ) " onclick="new CalendarJS().init('datum2')"><img src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar"><a name="calendar_datum2"></a></div>
-			    		<input id="datum2" name="datum2" type="text" onchange="" value="<?php echo $this->formvars['datum2']; ?>" size="10" maxlength="50">
+						<a href="javascript:;" title=" (TT.MM.JJJJ) " onclick="new CalendarJS().init('sdatum2')"><img src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar"><a name="calendar_sdatum2"></a></div>
+			    		<input id="sdatum2" name="sdatum2" type="text" onchange="" value="<?php echo $this->formvars['sdatum2']; ?>" size="10" maxlength="50">
 			    </td>
 			  </tr>
 			  <tr>

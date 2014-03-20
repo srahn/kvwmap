@@ -6,6 +6,9 @@
 <script type="text/javascript">
 
 Text[0]=["Hilfe:","Wendet eine Prozessierungsanweisung für den Layer an. Die unterstützen Anweisungen hängen vom Layertyp und dem verwendeten Treiber ab. Es gibt Anweisungen für Attribute, Connection Pooling, OGR Styles und Raster. siehe Beschreibung zum Layerattribut PROCESSING unter: http://www.mapserver.org/mapfile/layer.html. Mehrere Prozessinganweisungen werden hier eingegeben getrennt durch Semikolon. z.B. CHART_SIZE=60;CHART_TYPE=pie für die Darstellung eines Tortendiagramms des Typs MS_LAYER_CHART"]
+Text[1]=["Hilfe:","Die Haupttabelle ist diejenige der im Query-SQL-Statement abgefragten Tabellen, die die oid liefern soll.<br><br>Die Haupttabelle muss oids besitzen, diese müssen allerdings nicht im SQL angegeben werden.<br><br>Ist das Feld Haupttabelle leer, wird der Name der Haupttabelle automatisch eingetragen. Bei einer Layerdefinition über mehrere Tabellen hinweg kann es sein, dass kvwmap die falsche Tabelle als Haupttabelle auswählt. In diesem Fall kann hier händisch die gewünschte Tabelle eingetragen werden. Achtung: Wenn die Tabellennamen im Query-SQL geändert werden, muss auch der Eintrag im Feld Haupttabelle angepasst werden!"]
+Text[2]=["Hilfe:","Das Query-SQL ist das SQL-Statement, welches für die Sachdatenabfrage verwendet wird. Es kann eine beliebige Abfrage auf Tabellen oder Sichten sein, eine WHERE-Bedingung ist aber erforderlich. Der Schemaname wird hier nicht angegeben, sondern im Feld 'Schema'"]
+Text[3]=["Hilfe:","Das Data-Feld wird vom Mapserver für die Kartendarstellung verwendet (siehe Mapserver-Doku). Etwaige Schemanamen müssen hier angegeben werden."]
 
   function testConnection() {
     if (document.getElementById('connectiontype').value == 7) {
@@ -100,22 +103,25 @@ else {
 		  	</tr>
 		  	<tr>
 		  		<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPath; ?></th>
-		  		<td>
-		  			<textarea name="pfad" cols="33" rows="4"><? echo $this->formvars['pfad'] ?></textarea>
+		  		<td colspan=2 valign="top" style="border-bottom:1px solid #C3C7C3">
+		  			<textarea name="pfad" cols="33" rows="4"><? echo $this->formvars['pfad'] ?></textarea>&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>ikon_i.gif" onMouseOver="stm(Text[2], Style[0], document.getElementById('TipLayer3'))" onmouseout="htm()">
+						<div id="TipLayer3" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 		  		</td>
 		  	</tr>
 		  	<tr>
 		  		<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strData; ?></th>
-		  		<td>
-		  			<textarea name="Data" cols="33" rows="4"><? echo $this->formvars['Data'] ?></textarea>
+		  		<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+		  			<textarea name="Data" cols="33" rows="4"><? echo $this->formvars['Data'] ?></textarea>&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>ikon_i.gif" onMouseOver="stm(Text[3], Style[0], document.getElementById('TipLayer4'))" onmouseout="htm()">
+						<div id="TipLayer4" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 		  		</td>
 		  	</tr>
-		  	<tr>
-		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strMaintable; ?></th>
-		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-		      		<input name="maintable" type="text" value="<?php echo $this->formvars['maintable']; ?>" size="25" maxlength="100">
-		  		</td>
-		  	</tr>
+				<tr>
+					<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strMaintable; ?></th>
+					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+						<input name="maintable" type="text" value="<?php echo $this->formvars['maintable']; ?>" size="25" maxlength="100">&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>ikon_i.gif" onMouseOver="stm(Text[1], Style[0], document.getElementById('TipLayer1'))" onmouseout="htm()">
+						<div id="TipLayer1" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+					</td>
+				</tr>
 		  	<tr>
 		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strSchema; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
@@ -172,7 +178,7 @@ else {
 		  	</tr>
 		  	<tr>
 		  		<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strConnection; ?></th>
-		  		<td>
+		  		<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		  			<textarea id="connection" name="connection" cols="33" rows="2"><? echo $this->formvars['connection'] ?></textarea>
 		  			<input type="button"  onclick="testConnection();" value="Test"
 		  			<? if(in_array($this->formvars['connectiontype'], array(7,9))){ ?>
@@ -185,7 +191,7 @@ else {
 		  	</tr>
 		  	<tr>
 		  		<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPrintConnection; ?></th>
-		  		<td>
+		  		<td style="border-bottom:1px solid #C3C7C3">
 		  			<textarea name="printconnection" cols="33" rows="2"><? echo $this->formvars['printconnection'] ?></textarea>
 		  		</td>
 		  	</tr>
@@ -275,15 +281,13 @@ else {
 		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strProcessing; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		    	  <input name="processing" type="text" value="<?php echo $this->formvars['processing']; ?>" size="25" maxlength="255">
-						<img src="<?php echo GRAPHICSPATH;?>ikon_i.gif" onMouseOver="stm(Text[0],Style[0])" onmouseout="htm()">
-						<div>
-							<div id="TipLayer" style="visibility:hidden;position:absolute;z-index:1000;"></div>
-						</div>
+						<img src="<?php echo GRAPHICSPATH;?>ikon_i.gif" onMouseOver="stm(Text[0], Style[0], document.getElementById('TipLayer2'))" onmouseout="htm()">
+						<div id="TipLayer2" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 		    	</td>
 		  	</tr>
 		  	<tr>
 		  		<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDescribtion; ?></th>
-		  		<td>
+		  		<td style="border-bottom:1px solid #C3C7C3">
 		  			<textarea name="kurzbeschreibung" cols="33" rows="2"><? echo $this->formvars['kurzbeschreibung'] ?></textarea>
 		  		</td>
 		  	</tr>

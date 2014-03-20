@@ -48,9 +48,6 @@ function set_richtung(richtung){
 <input type="hidden" name="go" value="Nachweisanzeige">
 <input type="hidden" name="order" value="<? echo $this->formvars['order']; ?>">
 <input type="hidden" name="richtung" value="<? echo $this->formvars['richtung']; ?>">
-<input type="hidden" name="datum" value="<? echo $this->formvars['datum']; ?>">
-<input type="hidden" name="datum2" value="<? echo $this->formvars['datum2']; ?>">
-<input type="hidden" name="VermStelle" value="<? echo $this->formvars['VermStelle']; ?>">
 	
 <table width="0%" border="0" cellpadding="5" cellspacing="0">
   <tr> 
@@ -228,7 +225,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
           <td width="16"><a target="_blank" onmouseover="ahah('<? echo URL.APPLVERSION.'index.php'; ?>', 'go=document_vorschau&id=<?php echo $this->nachweis->Dokumente[$i]['id']; ?>', new Array(document.getElementById('vorschau')), new Array('sethtml'));" href="index.php?go=document_anzeigen&ohnesession=1&id=<?php echo $this->nachweis->Dokumente[$i]['id']; ?>&file=1" title="Ansicht"><img src="graphics/button_ansicht.png" border="0"></a></td>
           <td width="15">
           	<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten')){ ?>
-          	<a href="index.php?go=Nachweisformular&id=<?php echo $this->nachweis->Dokumente[$i]['id'];?>" title="bearbeiten"><img src="graphics/button_edit.png" border="0"></a></td>
+          	<a href="index.php?go=Nachweisformular&id=<?php echo $this->nachweis->Dokumente[$i]['id'];?>&order=<? echo $this->formvars['order'] ?>" title="bearbeiten"><img src="graphics/button_edit.png" border="0"></a></td>
           	<? } ?>
           <td width="30">
           	<? if($this->Stelle->isFunctionAllowed('Nachweisloeschen')){ ?>

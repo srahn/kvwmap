@@ -727,7 +727,7 @@ function get_select_parts($select){
   	if($klammerauf > $klammerzu){			# mehr Klammern auf als zu --> hier wurde eine Funktion oder eine Unterabfrage mit Kommas verwendet
   		$column[$i] = $column[$i].', '.$column[$i+1];
   		array_splice($column, $i+1, 1);
-  		break; 
+			$i--;							# und nochmal prüfen, falls mehrere Kommas drin sind
   	}
   }
   return $column;

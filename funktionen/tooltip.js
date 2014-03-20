@@ -1,3 +1,4 @@
+var object;
 var ua = navigator.userAgent 
 var ps = navigator.productSub
 var dom = (document.getElementById)? 1:0  
@@ -12,18 +13,12 @@ var HideTip = "eval(obj+sv+hl+';')"
 var doc_root = ((ie5&&ua.indexOf("Opera")<0||ie4)&&document.compatMode=="CSS1Compat")? "document.documentElement":"document.body"
 var PX = (nn6)? "px" :"" 
 
-if(sNav) {
-	window.onresize = ReloadTip
-	document.onmousemove = MoveTip
-	if(nn4) document.captureEvents(Event.MOUSEMOVE) 
-}	
 if(nn4||nn6) {
 	mx = "e.pageX"
 	my = "e.pageY"
 	scl = "window.pageXOffset"
 	sct = "window.pageYOffset"	
 	if(nn4) {
-		obj = "document.TipLayer."
 		sl = "left"
 		st = "top"
 		ih = "clip.height"
@@ -32,10 +27,8 @@ if(nn4||nn6) {
 		hl = "'hide'"
 		sv = "visibility="
 	}
-	else obj = "document.getElementById('TipLayer')."
 } 
 if(ie4||ie5) {
-	obj = "TipLayer."
 	mx = "event.x"
 	my = "event.y"
 	scl = "eval(doc_root).scrollLeft"
@@ -73,7 +66,8 @@ function applyCssFilter(){
 	}
 }
 
-function stm(t,s) {
+function stm(t,s, obj) {
+	object = obj;
   if(sNav) {
   	if(t.length<2||s.length<25) {
 		var ErrorNotice = "DHTML TIP MESSAGE VERSION 1.2 ERROR NOTICE.\n"
@@ -107,94 +101,17 @@ function stm(t,s) {
 		ap="STYLE='padding:"+s[17]+"px "+s[17]+"px "+s[17]+"px "+s[17]+"px'"}
 		var closeLink=(hs=="sticky")? "<TD ALIGN='right'><FONT SIZE='"+s[12]+"' FACE='"+s[8]+"'><A HREF='javascript:void(0)' ONCLICK='stickyhide()' STYLE='text-decoration:none;color:"+s[0]+"'><B>Close</B></A></FONT></TD>":""
 		var title=(t[0]||hs=="sticky")? "<TABLE WIDTH='100%' BORDER='0' CELLPADDING='0' CELLSPACING='0'><TR><TD "+titTxtAli+"><FONT SIZE='"+s[12]+"' FACE='"+s[8]+"' "+titCol+"><B>"+t[0]+"</B></FONT></TD>"+closeLink+"</TR></TABLE>" : ""
-		var txt="<TABLE "+titBgImg+" "+ab+" WIDTH='"+s[14]+"' BORDER='0' CELLPADDING='"+s[16]+"' CELLSPACING='0' "+titBgCol+" ><TR><TD>"+title+"<TABLE WIDTH='100%' "+add_height+" BORDER='0' CELLPADDING='"+s[17]+"' CELLSPACING='0' "+txtBgCol+" "+txtBgImg+"><TR><TD "+txtTxtAli+" "+ap+" VALIGN='top'><FONT SIZE='"+s[13]+"' FACE='"+s[9]+"' "+txtCol +">"+t[1]+"</FONT></TD></TR></TABLE></TD></TR></TABLE>"
-		if(nn4) {
-			with(eval(obj+"document")) {
-				open()
-				write(txt)
-				close()
-			}
-		}
-		else eval(obj+"innerHTML=txt")
-		tbody = {
-			Pos:s[10].toLowerCase(), 
-			Xpos:s[18],
-			Ypos:s[19], 
-			Transition:s[20],
-			Duration:s[21], 
-			Alpha:s[22],
-			ShadowType:s[23].toLowerCase(),
-			ShadowColor:s[24],
-			Width:parseInt(eval(obj+iw)+3+sbw)
-		}
-		if(ie4) { 
-			TipLayer.style.width = s[14]
-	 		tbody.Width = s[14]
-		}
-		Count=0	
-		move=1
+		var txt="<TABLE "+titBgImg+" "+ab+" WIDTH='"+s[14]+"' BORDER='0' CELLPADDING='"+s[16]+"' CELLSPACING='0' "+titBgCol+" ><TR><TD>"+title+"<TABLE WIDTH='100%' "+add_height+" BORDER='0' CELLPADDING='"+s[17]+"' CELLSPACING='0' "+txtBgCol+" "+txtBgImg+"><TR><TD "+txtTxtAli+" "+ap+" VALIGN='top'><FONT SIZE='"+s[13]+"' FACE='"+s[9]+"' "+txtCol +">"+t[1]+"</FONT></TD></TR></TABLE></TD></TR></TABLE>"		
+		
+		object.innerHTML = txt;
+		object.style.visibility = 'visible';
  	 }
   }
 }
 
-function MoveTip(e) {
-	if(move) {
-
-		ViewTip()
-	}
-}
-
-function ViewTip() {
-  	Count++
-	if(Count == 1) {
-		if(cssFilters&&FiltersEnabled) {	
-			for(Index=28; Index<31; Index++) { TipLayer.filters[Index].enabled = 0 }
-			for(s=0; s<28; s++) { if(TipLayer.filters[s].status == 2) TipLayer.filters[s].stop() }
-			if(tbody.Transition == 51) tbody.Transition = parseInt(Math.random()*50)
-			var applyTrans = (tbody.Transition>-1&&tbody.Transition<24&&tbody.Duration>0)? 1:0
-			var advFilters = (tbody.Transition>23&&tbody.Transition<51&&tbody.Duration>0)? 1:0
-			var which = (applyTrans)?0:(advFilters)? tbody.Transition-23:0 
-			if(tbody.Alpha>0&&tbody.Alpha<100) {
-	  			TipLayer.filters[28].enabled = 1
-	  			TipLayer.filters[28].opacity = tbody.Alpha
-			}
-			if(tbody.ShadowColor&&tbody.ShadowType == "simple") {
-	  			TipLayer.filters[29].enabled = 1
-	  			TipLayer.filters[29].color = tbody.ShadowColor
-			}
-			else if(tbody.ShadowColor&&tbody.ShadowType == "complex") {
-	  			TipLayer.filters[30].enabled = 1
-	  			TipLayer.filters[30].color = tbody.ShadowColor
-			}
-			if(applyTrans||advFilters) {
-				eval(obj+sv+hl)
-	  			if(applyTrans) TipLayer.filters[0].transition = tbody.Transition
-	  			TipLayer.filters[which].duration = tbody.Duration 
-	  			TipLayer.filters[which].apply()
-			}
-		}
- 		eval(obj+sv+vl)
-		if(cssFilters&&FiltersEnabled&&(applyTrans||advFilters)) TipLayer.filters[which].play()
-		if(hs == "sticky") move=0
-  	}
-}
-
-function stickyhide() {
-	eval(HideTip)
-}
-
-function ReloadTip() {
-	 if(nn4&&(evlw!=eval(ww)||evlh!=eval(wh))) location.reload()
-	 else if(hs == "sticky") eval(HideTip)
-}
 
 function htm() {
-	if(sNav) {
-		if(hs!="keep") {
-			move=0; 
-			if(hs!="sticky") eval(HideTip)
-		}	
-	} 
+	object.style.visibility = 'hidden';
 }
 
 var FiltersEnabled = 0 // if your not going to use transitions or filters in any of the tips set this to 0

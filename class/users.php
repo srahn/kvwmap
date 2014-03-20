@@ -1767,7 +1767,7 @@ class rolle extends rolle_core{
 		return 1;
 	}
 
-	function setNachweisSuchparameter($suchffr,$suchkvz,$suchgn,$suchan,$abfrageart,$suchgemarkung,$suchflur,$stammnr,$suchrissnr,$suchfortf,$suchpolygon,$suchantrnr) {
+	function setNachweisSuchparameter($suchffr,$suchkvz,$suchgn,$suchan,$abfrageart,$suchgemarkung,$suchflur,$stammnr,$suchrissnr,$suchfortf,$suchpolygon,$suchantrnr, $sdatum, $sdatum2, $svermstelle) {
 		$sql ='UPDATE rolle_nachweise SET ';
 		if ($suchffr!='') { $sql.='suchffr="'.$suchffr.'",'; }else{$sql.='suchffr="0",';}
 		if ($suchkvz!='') { $sql.='suchkvz="'.$suchkvz.'",'; }else{$sql.='suchkvz="0",';}
@@ -1782,6 +1782,11 @@ class rolle extends rolle_core{
 		$sql.='suchfortf='.$suchfortf.',';
 		if ($suchpolygon!='') { $sql.='suchpolygon="'.$suchpolygon.'",'; }
 		if ($suchantrnr!='') { $sql.='suchantrnr="'.$suchantrnr.'",'; }
+		
+		$sql.='sdatum="'.$sdatum.'",';
+		$sql.='sdatum2="'.$sdatum2.'",';
+		if ($svermstelle!='') { $sql.='sVermStelle='.$svermstelle.','; }else{$sql.='sVermStelle= NULL,' ;}
+		
 		$sql .= 'user_id = '.$this->user_id;
 		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 		$this->debug->write("<p>file:users.php class:rolle->setNachweisSuchparameter - Setzen der aktuellen Parameter für die Nachweissuche",4);

@@ -87,13 +87,13 @@ class pgdatabase extends pgdatabase_alkis{
 		$name[2] = '%'.$formvars['name2'].'%';
 		$name[3] = '%'.$formvars['name3'].'%';
 		$name[4] = '%'.$formvars['name4'].'%';
-		$bezirk = $this->formvars['bezirk'];
-		$blatt = $this->formvars['blatt'];
-		$flur = $this->formvars['FlurID'];
-		$limitAnzahl = $this->formvars['anzahl'];
-		$limitStart = $this->formvars['offset'];
-		$caseSensitive = $this->formvars['caseSensitive'];
-		$order = $this->formvars['order'];
+		$bezirk = $formvars['bezirk'];
+		$blatt = $formvars['blatt'];
+		$flur = $formvars['FlurID'];
+		$limitAnzahl = $formvars['anzahl'];
+		$limitStart = $formvars['offset'];
+		$caseSensitive = $formvars['caseSensitive'];
+		$order = $formvars['order'];
     $sql ="SELECT DISTINCT n.lfd_nr_name,name1,name2,name3,name4,e.bezirk,e.blatt,e.namensnr";
     $sql.=" FROM alb_g_namen AS n,alb_g_eigentuemer AS e, alb_grundbuecher as gb";
     if ($gemkgschl>0) {
