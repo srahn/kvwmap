@@ -151,6 +151,7 @@ $GUI->requeststring = $QUERY_STRING;
 # NotizKategorie_loeschen
 # Metadaten_Auswaehlen
 # OWS
+# pack_and_mail
 # sendeDokument
 # sendImage
 # sendeFestpunktskizze
@@ -166,6 +167,7 @@ $GUI->requeststring = $QUERY_STRING;
 # Stellen_Anzeigen
 # Suche_Flurstuecke_zu_Namen
 # tmp_Adr_Tabelle_Aktualisieren
+# upload_temp_file
 # Versiegelung
 # WMS_Export
 # WMS_Export_Senden
@@ -182,7 +184,21 @@ if($GUI->goNotExecutedInPlugins){
 		$GUI->last_query = $GUI->user->rolle->get_last_query();
 		$go = $GUI->last_query['go'];
 	}
-	switch($go){	
+	switch($go){
+		case 'upload_temp_file' : {
+			$GUI->checkCaseAllowed($go);			
+			$GUI->qlayerset[0]['shape'][0] = $GUI->uploadTempFile(); 
+			$GUI->output();
+			break;
+		}
+		
+		case 'pack_and_mail' : {
+			$GUI->checkCaseAllowed($go);			
+			$GUI->qlayerset[0]['shape'][0] = $GUI->packAndMail(); 
+			$GUI->output();
+			break;
+		}
+			
 		case 'ALB_ALK_Tabellen_leeren' : {
 			$GUI->checkCaseAllowed($go);
 			$GUI->truncateAlbAlkTables();
