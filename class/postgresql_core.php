@@ -53,8 +53,8 @@ class pgdatabase_core {
 # database Funktionen
 ###########################################################
   function open() {
-  	if($this->port == '')$this->port = 5432;
-    $this->debug->write("<br>Datenbankverbindung öffnen: Datenbank: ".$this->dbName." User: ".$this->user." Passwd: ".$this->passwd,4);
+  	if($this->port == '') $this->port = 5432;
+    $this->debug->write("<br>Datenbankverbindung öffnen: Datenbank: ".$this->dbName." User: ".$this->user,4);
     $this->dbConn=pg_connect('dbname='.$this->dbName.' port='.$this->port.' user='.$this->user.' password='.$this->passwd.' host='.$this->host);
     $this->debug->write("Datenbank mit Connection_ID: ".$this->dbConn." geöffnet.",4);
     # $this->version = pg_version($this->dbConn); geht erst mit PHP 5
