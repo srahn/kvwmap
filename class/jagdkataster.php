@@ -243,10 +243,7 @@ class jagdkataster {
 		while($rs = pg_fetch_array($ret[1])){
 			$rs['anteil'] = round($rs['schnittflaeche'] * 100 / $rs['flurstflaeche'], 2);
 			$rs['albflaeche'] = round($rs['albflaeche'], 2);
-      if ($rs['nenner']!='') {
-        $rs['nenner']="/".$rs['nenner'];
-      }
-			$rs['zaehlernenner'] = $rs['zaehler'].$rs['nenner'];
+      $rs['zaehlernenner'] = $rs['zaehler'].'/'.$rs['nenner'];
 			
 			# --- Eigentümer ---
 			$flst = new flurstueck($rs['flurstkennz'], $this->database);

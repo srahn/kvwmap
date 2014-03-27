@@ -890,10 +890,10 @@ class Nachweis {
             $sql.=")";
           }
           if($gemarkung != ''){
-						$sql.=" AND alko.objnr = alknflur.objnr AND alknflur.gemkgschl = ".$gemarkung;
+						$sql.=" AND alko.objnr = alknflur.objnr AND alknflur.gemkgschl = ".$gemarkung." AND st_intersects(st_transform(alko.the_geom, (select srid from geometry_columns where f_table_name = 'n_nachweise')), n.the_geom)";
 					}
 					if($flur != ''){
-						$sql.=" AND alknflur.flur = '".str_pad($flur,3,'0',STR_PAD_LEFT)."' AND st_intersects(st_transform(alko.the_geom, (select srid from geometry_columns where f_table_name = 'n_nachweise')), n.the_geom)";
+						$sql.=" AND alknflur.flur = '".str_pad($flur,3,'0',STR_PAD_LEFT)."' ";
 					}
           if($stammnr!=''){
             $sql.=" AND n.stammnr='".$stammnr."'";

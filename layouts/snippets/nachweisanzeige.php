@@ -72,21 +72,22 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
             switch ($this->formvars['abfrageart']) {
               case 'indiv_nr' : {  ?>
             Individuelle Nummer <?
-				if($this->formvars['gueltigkeit'] == 1){ echo ' (nur gültige) '; }
-				if($this->formvars['gueltigkeit'] == '0'){ echo ' (nur ungültige) '; }
-				if($this->formvars['gueltigkeit'] == ''){ echo ' (alle) '; }
-				if($this->formvars['suchgemarkung'] != '' AND $this->formvars['suchflur'] != '')echo 'in Gemarkung/Flur: '.$this->formvars['suchgemarkung'].'-'.str_pad($this->formvars['suchflur'],3,'0',STR_PAD_LEFT);
+								if($this->formvars['gueltigkeit'] == 1){ echo ' (nur gültige) '; }
+								if($this->formvars['gueltigkeit'] == '0'){ echo ' (nur ungültige) '; }
+								if($this->formvars['gueltigkeit'] == ''){ echo ' (alle) '; }
+								if($this->formvars['suchgemarkung'] != '') echo 'in Gemarkung: '.$this->formvars['suchgemarkung'];
+								if($this->formvars['suchflur'] != '') echo ' in Flur: '.str_pad($this->formvars['suchflur'],3,'0',STR_PAD_LEFT);
                 if($this->formvars['suchstammnr'] != '')echo ' mit Antragsnummer: '.str_pad(intval($this->formvars['suchstammnr']),ANTRAGSNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
                 if($this->formvars['suchrissnr'] != '')echo ' mit Rissnummer: '.$this->formvars['suchrissnr'];
                 if($this->formvars['suchfortf'] != '')echo ' mit Fortführung: '.$this->formvars['suchfortf'];
-				if($this->formvars['datum'] != '')echo ' von '.$this->formvars['datum'];
-				if($this->formvars['datum2'] != '')echo ' bis '.$this->formvars['datum2'];
-				if($this->formvars['VermStelle'] != '')echo ' von Vermessungsstelle '.$this->formvars['VermStelle']; ?>
+								if($this->formvars['datum'] != '')echo ' von '.$this->formvars['datum'];
+								if($this->formvars['datum2'] != '')echo ' bis '.$this->formvars['datum2'];
+								if($this->formvars['VermStelle'] != '')echo ' von Vermessungsstelle '.$this->formvars['VermStelle']; ?>
                 aus <?
                 if ($this->formvars['suchffr']){ echo ' FFR, '; }
                 if ($this->formvars['suchkvz']){ echo ' KVZ, '; }
                 if ($this->formvars['suchgn']){ echo ' GN, '; }
-				if ($this->formvars['suchan']){ echo ' andere'; }
+								if ($this->formvars['suchan']){ echo ' andere'; }
               } break;
               case 'antr_nr' : { 
                 ?>Vorbereitungsnummer - <?php echo $this->formvars['suchantrnr'];
