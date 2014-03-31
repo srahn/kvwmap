@@ -42,7 +42,7 @@ function hideMenue() {
 	// löscht den HTML-Inhalt der Menütabelle,
 	// schiebt dadurch die Spalte der GUI auf minimale Breite zusammen und
 	// hinterläßt einen Link zum wieder einblenden des Menüs auf showMenue()
-  ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=hideMenueWithAjax', new Array(), "");
+  ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=hideMenueWithAjax', new Array("", ""), new Array("", "execute_function"));
 	document.all.menueTable.innerHTML='';
 	document.all.imgMinMax.src='<?php echo GRAPHICSPATH; ?>maximize.png';
 	document.all.linkMinMax.href="javascript:showMenue()";
@@ -54,7 +54,7 @@ function showMenue() {
   // läd den Content der Menütabelle über AJAX vom Server nach,
   // löscht die aktuelle Tabelle mit dem Link auf das Nachladen des Menüs und
   // fügt das Menü in die Spalte der GUI wieder ein.
-  ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=getMenueWithAjax&menuebodyfile=<? echo $this->menuebodyfile; ?>', new Array(document.all.menueTable), "");
+  ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=getMenueWithAjax&menuebodyfile=<? echo $this->menuebodyfile; ?>', new Array(document.all.menueTable, ""), new Array("", "execute_function"));
   document.all.linkMinMax.href="javascript:hideMenue()";
   document.all.imgMinMax.src='<?php echo GRAPHICSPATH; ?>minimize.png';
   document.all.linkMinMax.title="Menü verstecken";

@@ -4,10 +4,8 @@
 <META http-equiv=Content-Type content="text/html; charset=UTF-8">
 <?
 include(WWWROOT.APPLVERSION.'funktionen/gui_functions.php');
-if($this->user->rolle->querymode == 1){				# im Fenstermodus müssen diese Javascript-Funktionen schon da sein, sonst werden sie nicht ausgeführt
-	if(!$this->formvars['anzahl'])$this->formvars['anzahl'] = MAXQUERYROWS;
-	include(SNIPPETS.'sachdatenanzeige_functions.php'); 
-	include(SNIPPETS.'generic_functions.php'); 
+if($this->user->rolle->querymode == 1){	
+	#if(!$this->formvars['anzahl'])$this->formvars['anzahl'] = MAXQUERYROWS;
 	include(WWWROOT.APPLVERSION.'funktionen/formserializer.js');
 }
 ?>

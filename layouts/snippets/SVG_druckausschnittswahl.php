@@ -578,7 +578,7 @@ function restart()
 
 			<g id="text" onmousedown="draw_pgon_off();" transform="translate(0 0 )">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
         	<set attributeName="filter" begin="text.mousedown" dur="0s" fill="freeze" to="none"/>
 					<set attributeName="filter" begin="text.mouseup;text.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
 				</rect>
@@ -590,7 +590,7 @@ function restart()
 	    		
 	    <g id="mapscale" onmousedown="get_map_scale();" transform="translate(26 0 )">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
         	<set attributeName="filter" begin="mapscale.mousedown" dur="0s" fill="freeze" to="none"/>
 					<set attributeName="filter" begin="mapscale.mouseup;mapscale.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
 				</rect>

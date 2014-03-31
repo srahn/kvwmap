@@ -725,6 +725,7 @@ if($GUI->goNotExecutedInPlugins){
 
 	  #2006-01-03 pk
 	  case 'Grundbuchblatt_Auswaehlen_Suchen' : {
+		$GUI->checkCaseAllowed('Grundbuchblatt_Auswaehlen');
 		$GUI->grundbuchblattSuchen();
 	  } break;
 

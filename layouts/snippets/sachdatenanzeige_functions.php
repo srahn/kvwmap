@@ -3,19 +3,18 @@ if($this->formvars['anzahl'] == ''){$this->formvars['anzahl'] = 0;}
 ?>
 
 <script type="text/javascript">
-<!--
 
 	var geom_not_null = false;
 	
-	function update_geometry(){
+	update_geometry = function(){
 		document.getElementById("svghelp").SVGupdate_geometry();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 	}
 	
-	function show_foreign_vertices(){
+	show_foreign_vertices = function(){
 		document.getElementById("svghelp").SVGshow_foreign_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 	}
 
-	function scrolltop(){
+	scrolltop = function(){
 		if(currentform.name == 'GUI2'){
 			document.getElementById('contentdiv').scrollTop = 0;
 		}else{
@@ -23,7 +22,7 @@ if($this->formvars['anzahl'] == ''){$this->formvars['anzahl'] = 0;}
 		}
 	}
 	
-	function scrollbottom(){
+	scrollbottom = function(){
 		if(currentform.name == 'GUI2'){
 			document.getElementById('contentdiv').scrollTop = document.getElementById('contentdiv').scrollHeight;
 		}else{
@@ -31,7 +30,7 @@ if($this->formvars['anzahl'] == ''){$this->formvars['anzahl'] = 0;}
 		}
 	}
 	
-	function nextquery(offset){
+	nextquery = function(offset){
 		currentform.target = '';
 		if(currentform.go_backup.value != ''){
 			currentform.go.value = currentform.go_backup.value;
@@ -44,7 +43,7 @@ if($this->formvars['anzahl'] == ''){$this->formvars['anzahl'] = 0;}
 		overlay_submit(currentform, false);
 	}
 
-	function prevquery(offset){
+	prevquery = function(offset){
 		currentform.target = '';
 		if(currentform.go_backup.value != ''){
 			currentform.go.value = currentform.go_backup.value;
@@ -57,18 +56,18 @@ if($this->formvars['anzahl'] == ''){$this->formvars['anzahl'] = 0;}
 		overlay_submit(currentform, false);
 	}
 
-	function back(){
+	back = function(){
 		currentform.go.value = 'Layer-Suche';
 		currentform.submit();
 	}
 
-	function druck(){
+	druck = function(){
 		currentform.target = '_blank';
 		currentform.printversion.value = 'true';
 		currentform.submit();
 	}
 
-	function checkDate(string){
+	checkDate = function(string){
     var split = string.split(".");
     var day = parseInt(split[0], 10);
     var month = parseInt(split[1], 10);
@@ -85,7 +84,7 @@ if($this->formvars['anzahl'] == ''){$this->formvars['anzahl'] = 0;}
     }
 	}
 	
-	function save(){
+	save = function(){
   	form_fieldstring = currentform.form_field_names.value+'';
   	form_fields = form_fieldstring.split('|');
   	for(i = 0; i < form_fields.length-1; i++){
@@ -107,7 +106,7 @@ if($this->formvars['anzahl'] == ''){$this->formvars['anzahl'] = 0;}
   	overlay_submit(currentform, false);
 	}
 	
-	function save_new_dataset(){
+	save_new_dataset = function(){
 		if((geom_not_null && currentform.newpath.value == '' && currentform.loc_x == undefined) || (geom_not_null && currentform.loc_x != undefined && currentform.loc_x.value == '')){ 
 			alert('Sie haben keine Geometrie angegeben.');
 			return;
@@ -137,7 +136,7 @@ if($this->formvars['anzahl'] == ''){$this->formvars['anzahl'] = 0;}
   	overlay_submit(currentform, false);
 	}
 
-	function subdelete_data(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data){
+	subdelete_data = function(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data){
 		// layer_id ist die von dem Layer, in dem der Datensatz geloescht werden soll
 		// fromobject ist die id von dem div, welches das Formular des Datensatzes enthaelt
 		// targetobject ist die id von dem Objekt im Hauptformular, welches nach Loeschung des Datensatzes aktualisiert werden soll
@@ -151,7 +150,7 @@ if($this->formvars['anzahl'] == ''){$this->formvars['anzahl'] = 0;}
 		ahah('<? echo URL.APPLVERSION; ?>index.php', data, new Array(document.getElementById(fromobject), document.getElementById(targetobject)), new Array('sethtml'));
 	}
 
-	function subsave_data(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data){
+	subsave_data = function(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data){
 		// layer_id ist die von dem Layer, in dem der Datensatz gespeichert werden soll
 		// fromobject ist die id von dem div, welches das Formular des Datensatzes enthaelt
 		// targetobject ist die id von dem Objekt im Hauptformular, welches nach Speicherung des Datensatzes aktualisiert werden soll
@@ -178,7 +177,7 @@ if($this->formvars['anzahl'] == ''){$this->formvars['anzahl'] = 0;}
 		ahah('<? echo URL.APPLVERSION; ?>index.php', data, new Array(document.getElementById(fromobject), document.getElementById(targetobject)), new Array('sethtml'));
 	}
 
-	function subsave_new_layer_data(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data){
+	subsave_new_layer_data = function(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data){
 		// layer_id ist die von dem Layer, in dem ein neuer Datensatz gespeichert werden soll
 		// fromobject ist die id von dem div, welches das Formular zur Eingabe des neuen Datensatzes enthaelt
 		// targetobject ist die id von dem Objekt im Hauptformular, welches nach Speicherung des neuen Datensatzes aktualisiert werden soll
@@ -207,7 +206,7 @@ if($this->formvars['anzahl'] == ''){$this->formvars['anzahl'] = 0;}
 		ahah('<? echo URL.APPLVERSION; ?>index.php', data, new Array(document.getElementById(fromobject), document.getElementById(targetobject)), new Array('sethtml'));
 	}
 
-	function clearsubforms(){
+	clearsubforms = function(){
 		alldivs = document.getElementsByTagName('div');
 		for(i = 0; i < alldivs.length; i++){
 			id = alldivs[i].id + '';
@@ -217,9 +216,8 @@ if($this->formvars['anzahl'] == ''){$this->formvars['anzahl'] = 0;}
 		}
 	}
 
-	function clearsubform(subformid){
+	clearsubform = function(subformid){
 		document.getElementById(subformid).innerHTML = '';
 	}
 
-//-->
 </script>

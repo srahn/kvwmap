@@ -32,6 +32,7 @@
 	<input name="select_line" type="hidden" value="<?php echo $this->formvars['select_line']; ?>">
 	<input name="pathx_second" type="hidden" value="<?php echo $this->formvars['pathx_second']; ?>">
 	<input name="pathy_second" type="hidden" value="<?php echo $this->formvars['pathy_second']; ?>">
+	<input type="hidden" name="svghelp" id="svghelp">
 	<?
 	if($this->formvars['last_button'] == '' or $this->formvars['last_doing'] == ''){
 		$this->formvars['last_button'] = 'line0';

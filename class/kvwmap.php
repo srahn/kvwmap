@@ -1696,10 +1696,12 @@ class GUI extends GUI_core{
     $this->Menue->get_menue_width($this->Stelle->id);
     $this->user->rolle->hideMenue(0);
     include(LAYOUTPATH."snippets/".$this->formvars['menuebodyfile']);
+		echo '~resizemap2window();';
   }
 
   function hideMenueWithAjax() {
     $this->user->rolle->hideMenue(1);
+		echo '~resizemap2window();';
   }
 
   function changemenue($id, $status){
@@ -1724,6 +1726,7 @@ class GUI extends GUI_core{
   
   function changeLegendDisplay(){
   	$this->user->rolle->changeLegendDisplay($this->formvars['hide']);
+		echo '~resizemap2window();';
   }
 
   function googlemaps(){

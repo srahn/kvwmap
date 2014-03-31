@@ -14,7 +14,7 @@ if ($nexttime!='') {
 else {
   # deaktivieren der nextfunktion und ausgrauen des Button
   $mouseupfunction='';
-  $nextbuttoncolor='200, 200, 200';
+  $nextbuttoncolor='190, 190, 190';
 }
 if ($prevtime!='' AND $this->prevtime!='0000-00-00 00:00:00') {
   # eine schonmal geladene Karte wird angezeigt.
@@ -35,7 +35,7 @@ else {
 		$previous ='
       <g id="previous" transform="translate('.$last_x.' 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
           <set attributeName="filter" begin="previous0.mousedown" dur="0s" fill="freeze" to="none"/>
           <set attributeName="filter" begin="previous0.mouseup;previous0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
         </rect>
@@ -52,7 +52,7 @@ else {
 		$next ='
       <g id="next" transform="translate('.$last_x.' 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
           <set attributeName="filter" begin="next0.mousedown" dur="0s" fill="freeze" to="none"/>
           <set attributeName="filter" begin="next0.mouseup;next0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
         </rect>
@@ -71,7 +71,7 @@ else {
 		$zoomin ='
       <g id="zoomin" transform="translate('.$last_x.' 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
           <set attributeName="filter" begin="zoomin0.mousedown" dur="0s" fill="freeze" to="none"/>
           <set attributeName="filter" begin="zoomin0.mouseup;zoomin0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
         </rect>
@@ -97,7 +97,7 @@ else {
 		$zoomout ='
       <g id="zoomout" transform="translate('.$last_x.' 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
           <set attributeName="filter" begin="zoomout0.mousedown" dur="0s" fill="freeze" to="none"/>
           <set attributeName="filter" begin="zoomout0.mouseup;zoomout0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
         </rect>
@@ -121,7 +121,7 @@ else {
 		$zoomall ='
       <g id="zoomall" transform="translate('.$last_x.' 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
           <set attributeName="filter" begin="zoomall0.mousedown" dur="0s" fill="freeze" to="none"/>
           <set attributeName="filter" begin="zoomall0.mouseup;zoomall0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
         </rect>
@@ -147,7 +147,7 @@ else {
 		$recentre ='
       <g id="recentre" transform="translate('.$last_x.' 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
           <set attributeName="filter" begin="recentre0.mousedown" dur="0s" fill="freeze" to="none"/>
           <set attributeName="filter" begin="recentre0.mouseup;recentre0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
         </rect>
@@ -165,7 +165,7 @@ else {
 		$coords1 ='
       <g id="coords1" transform="translate('.$last_x.' 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
           <set attributeName="filter" begin="coords1.mousedown" dur="0s" fill="freeze" to="none"/>
           <set attributeName="filter" begin="coords1.mouseup;coords1.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
         </rect>
@@ -183,7 +183,7 @@ else {
 		$ppquery ='
       <g id="ppquery" transform="translate('.$last_x.' 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
           <set attributeName="filter" begin="ppquery0.mousedown" dur="0s" fill="freeze" to="none"/>
           <set attributeName="filter" begin="ppquery0.mouseup;ppquery0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
         </rect>
@@ -200,7 +200,7 @@ else {
 		$touchquery ='
 			<g id="touchquery" transform="translate('.$last_x.' 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
           <set attributeName="filter" begin="touchquery0.mousedown" dur="0s" fill="freeze" to="none"/>
           <set attributeName="filter" begin="touchquery0.mouseup;touchquery0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
         </rect>
@@ -232,7 +232,7 @@ else {
 		$pquery ='
       <g id="pquery" transform="translate('.$last_x.' 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
           <set attributeName="filter" begin="pquery0.mousedown" dur="0s" fill="freeze" to="none"/>
           <set attributeName="filter" begin="pquery0.mouseup;pquery0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
         </rect>
@@ -250,7 +250,7 @@ else {
 		$polygonquery ='
 			<g id="polygonquery" transform="translate('.$last_x.' 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
           <set attributeName="filter" begin="polygonquery0.mousedown" dur="0s" fill="freeze" to="none"/>
           <set attributeName="filter" begin="polygonquery0.mouseup;polygonquery0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
         </rect>
@@ -271,7 +271,7 @@ else {
 		global $last_x;
 		$dist ='
       <g id="dist" transform="translate('.$last_x.' 0)">
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
           <set attributeName="filter" begin="measure0.mousedown" dur="0s" fill="freeze" to="none"/>
           <set attributeName="filter" begin="measure0.mouseup;measure0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
         </rect>
@@ -291,7 +291,7 @@ else {
 		$freepolygon ='
 			<g id="freepolygon" transform="translate('.$last_x.' 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
           <set attributeName="filter" begin="freepolygon0.mousedown" dur="0s" fill="freeze" to="none"/>
           <set attributeName="filter" begin="freepolygon0.mouseup;freepolygon0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
         </rect>
@@ -311,7 +311,7 @@ else {
 		$freetext ='
 			<g id="freetext" transform="translate('.$last_x.' 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
           <set attributeName="filter" begin="freetext0.mousedown" dur="0s" fill="freeze" to="none"/>
           <set attributeName="filter" begin="freetext0.mouseup;freetext0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
         </rect>
@@ -328,7 +328,7 @@ else {
 		$freearrow ='
 			<g id="freepolygon" transform="translate('.$last_x.' 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
           <set attributeName="filter" begin="freearrow0.mousedown" dur="0s" fill="freeze" to="none"/>
           <set attributeName="filter" begin="freearrow0.mouseup;freearrow0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
         </rect>
@@ -345,7 +345,7 @@ else {
 		global $last_x;
 		$mobile .= '
 		<g id="gps" transform="translate('.$last_x.' 0)">
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
           <set attributeName="filter" begin="gps0.mousedown" dur="0s" fill="freeze" to="none"/>
           <set attributeName="filter" begin="gps0.mouseup;gps0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
         </rect>
