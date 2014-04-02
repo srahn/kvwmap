@@ -1696,12 +1696,12 @@ class GUI extends GUI_core{
     $this->Menue->get_menue_width($this->Stelle->id);
     $this->user->rolle->hideMenue(0);
     include(LAYOUTPATH."snippets/".$this->formvars['menuebodyfile']);
-		echo '~resizemap2window();';
+		echo '~if(typeof resizemap2window != "undefined")resizemap2window();';
   }
 
   function hideMenueWithAjax() {
     $this->user->rolle->hideMenue(1);
-		echo '~resizemap2window();';
+		echo '~if(typeof resizemap2window != "undefined")resizemap2window();';
   }
 
   function changemenue($id, $status){
@@ -1756,6 +1756,7 @@ class GUI extends GUI_core{
   }
 
   function PointEditor(){
+		$this->reduce_mapwidth(0);
     $this->main='PointEditor.php';
     $this->titel='Geometrie bearbeiten';
     # aktuellen Kartenausschnitt laden
@@ -1823,6 +1824,7 @@ class GUI extends GUI_core{
   }
 
   function LineEditor(){
+		$this->reduce_mapwidth(100);
     $this->main='LineEditor.php';
     $this->titel='Geometrie bearbeiten';
     # aktuellen Kartenausschnitt laden
@@ -1932,6 +1934,7 @@ class GUI extends GUI_core{
   }
 
   function PolygonEditor(){
+		$this->reduce_mapwidth(100);
    	$this->main='PolygonEditor.php';
     $this->titel='Geometrie bearbeiten';
     # aktuellen Kartenausschnitt laden
@@ -2589,6 +2592,7 @@ class GUI extends GUI_core{
   }
 
   function Anliegerbeiträge_editor(){
+		$this->reduce_mapwidth(100);
     $this->main='anliegerbeitraege_editor.php';
     $this->titel='Anliegerbeiträge';
     # aktuellen Kartenausschnitt laden + zeichnen!
@@ -2747,6 +2751,7 @@ class GUI extends GUI_core{
   }
 
   function jagdkatastereditor(){
+		$this->reduce_mapwidth(100);
     $this->main='jagdkatastereditor.php';
     $this->titel='Jagdbezirk anlegen';
     $this->loadMap('DataBase');
@@ -3274,6 +3279,7 @@ class GUI extends GUI_core{
   }
 
   function druckausschnittswahl($loadmapsource){
+		$this->reduce_mapwidth(10);
     $this->titel='Druckausschnitt wählen';
     $this->main="druckausschnittswahl.php";
     # aktuellen Kartenausschnitt laden + zeichnen!
@@ -5499,6 +5505,7 @@ class GUI extends GUI_core{
   }
 
   function bodenRichtWertErfassung() {
+		$this->reduce_mapwidth(100);
     if ($this->formvars['oid']=='') {
       $this->titel='Bodenrichtwerterfassung';
     }
@@ -5728,6 +5735,7 @@ class GUI extends GUI_core{
   }
 
   function nachweisAenderungsformular() {
+		$this->reduce_mapwidth(100);
     #2005-11-25_pk
     # Anzeige des Formulars zum Eintragen neuer/Ändern vorhandener Metadaten zu einem Nachweisdokument
     # (FFR, KVZ oder GN)
@@ -6409,6 +6417,7 @@ class GUI extends GUI_core{
 	    $this->formvars['columnname'] = $data_explosion[0];
     	if($this->formvars['map_flag'] != ''){
 	    	################# Map ###############################################
+				$this->reduce_mapwidth(100);
 	    	$this->loadMap('DataBase');
 		    $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
 		    # Geometrie-Übernahme-Layer:
@@ -6776,6 +6785,7 @@ class GUI extends GUI_core{
   }
 
   function neuer_Layer_Datensatz(){
+		$this->reduce_mapwidth(150);
     $this->layerdaten = $this->Stelle->getqueryablePostgisLayers(1);
     $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->titel='neuen Datensatz einfügen';
@@ -7714,6 +7724,7 @@ class GUI extends GUI_core{
   }
 
   function shp_export(){
+		$this->reduce_mapwidth(10);
     $this->titel='Shape-Export';
     if($this->formvars['chosen_layer_id'] != '')$this->formvars['selected_layer_id'] = $this->formvars['chosen_layer_id'];		# aus der Sachdatenanzeige des GLE
     $this->main='shape_export.php';
@@ -9703,6 +9714,7 @@ class GUI extends GUI_core{
 	}
 
   function nachweisFormAnzeige($nachweis = NULL) {
+		$this->reduce_mapwidth(100);
     # letzte Änderung 2006-01-23 pk
     # Anzeige des Formulars zum Eintragen neuer/Ändern vorhandener Metadaten zu einem Nachweisdokument
     # (FFR, KVZ oder GN)
@@ -9953,10 +9965,16 @@ class GUI extends GUI_core{
     $this->output();
   }
 
-# Die function bestaetigung($nachfrage_quelle,$entscheidung)
-# wurde am 2006-01-30 gelöscht weil nicht mehr benutzt
+	function reduce_mapwidth($reduction){		
+		$width = $this->user->rolle->nImageWidth;
+		$width = $width - $reduction;
+		if($this->user->rolle->hideMenue == 1){$width = $width - 195;}
+		if($this->user->rolle->hideLegend == 1){$width = $width - 244;}
+		$this->user->rolle->nImageWidth = $width;
+	}
 
   function rechercheFormAnzeigen() {
+		$this->reduce_mapwidth(200);
     # 2006-01-23 pk
     $this->menue='menue.php';
     # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank

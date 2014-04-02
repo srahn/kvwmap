@@ -862,8 +862,8 @@ if($GUI->goNotExecutedInPlugins){
 	  } break;
 
 	  case 'Druckausschnittswahl' : {
-		$GUI->formvars['loadmapsource'] = 'DataBase';
-		$GUI->druckausschnittswahl($GUI->formvars['loadmapsource']);
+			$GUI->formvars['loadmapsource'] = 'DataBase';
+			$GUI->druckausschnittswahl($GUI->formvars['loadmapsource']);
 	  } break;
 
 	  case 'Druckausschnittswahl_Vorschau' : {
@@ -1086,7 +1086,7 @@ if($GUI->goNotExecutedInPlugins){
 	  } break;
 
 	  case 'Bodenrichtwertformular' : {
-		$GUI->checkCaseAllowed('Bodenrichtwertformular');
+		$GUI->checkCaseAllowed('Bodenrichtwertformular');		
 		$GUI->titel='Bodenrichtwerterfassung';
 		$GUI->bodenRichtWertErfassung();
 	  } break;
@@ -1230,12 +1230,12 @@ if($GUI->goNotExecutedInPlugins){
 		$GUI->dokument_loeschen();
 	  } break;
 
-	  case 'neuer_Layer_Datensatz' : {
-		$GUI->neuer_Layer_Datensatz();
+	  case 'neuer_Layer_Datensatz' : {			
+			$GUI->neuer_Layer_Datensatz();
 	  } break;
 
 	  case 'neuer_Layer_Datensatz_speichern' : {
-		$GUI->neuer_Layer_Datensatz_speichern();
+			$GUI->neuer_Layer_Datensatz_speichern();
 	  } break;
 
 	  case 'generischer_csv_export' : {
@@ -1648,7 +1648,7 @@ if($GUI->goNotExecutedInPlugins){
 	  # für Fortführungsrisse, Koordinatenverzeichnisse und Grenzniederschriften
 
 	  case 'Nachweisformular' : {
-		$GUI->checkCaseAllowed($go);
+		$GUI->checkCaseAllowed($go);		
 		# Unterscheidung ob vorhandene Dokumente geändert werden sollen oder neu eingegeben
 		if ($GUI->formvars['id']!='') {
 		  # Ein Nachweis soll geändert werden

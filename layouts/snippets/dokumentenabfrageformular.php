@@ -152,7 +152,7 @@ else {
           <td rowspan="7" valign="top"><input type="radio" name="abfrageart" value="indiv_nr" <?php if ($this->formvars['abfrageart']=='indiv_nr') { ?> checked<?php } ?>>
           </td>
         </tr>
-		<tr><td colspan="3"><strong>Individuelle Nummer<br></strong></td></tr>
+		<tr><td colspan="3"><strong>Auswahl über Attribute<br></strong></td></tr>
         <tr>
           <td colspan="3">
 			Gemarkung:<br>
