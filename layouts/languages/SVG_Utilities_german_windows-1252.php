@@ -12,5 +12,6 @@
   $strSetGPSPosition="GPS Position setzen";
   $strRuler="Streckenmessung";
   $strBuffer="Puffer hinzufuegen";
+	$strBufferedLine="gepufferte Linie hinzufuegen";
   
 ?>  

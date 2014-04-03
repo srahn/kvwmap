@@ -209,6 +209,18 @@ class spatial_processor {
 				}
 			}break;
 		
+			case 'add_buffered_line':{
+				if($formvars['width'] == ''){$formvars['width'] = 50;}
+				if($formvars['resulttype'] == 'svgwkt'){
+					$result = $this->add_buffered_line($polywkt1, $polywkt2, 'svg', $formvars['width']);
+					$result .= '||';
+					$result .= $this->add_buffered_line($polywkt1, $polywkt2, 'wkt', $formvars['width']);
+				}
+				else{
+					$result = $this->add_buffered_line($polywkt1, $polywkt2, $formvars['resulttype'], $formvars['width']);
+				}
+			}break;
+		
 			case 'add':{
 				if($formvars['resulttype'] == 'svgwkt'){
 					$result = $this->union($polywkt1, $polywkt2, 'svg');
@@ -353,6 +365,32 @@ class spatial_processor {
     }
     return $rs[0];
   }
+	
+	function add_buffered_line($geom_1, $geom_2, $type, $width){
+  	if(substr_count($geom_2, ',') == 0){			# wenn Linestring nur aus einem Eckpunkt besteht -> in POINT umwandeln -> Kreis entsteht
+  		$geom_2 = $this->pointfrommultilinestring($geom_2);
+  	}
+		if($geom_1 == ''){
+			$geom_1 = $geom_2;
+		}
+  	if($type == 'wkt'){
+  		//$sql = "SELECT st_astext(validize_polygon(st_union(st_geomfromtext('".$geom_1."'), st_geomfromtext('".$geom_2."'))))";
+  		$sql = "SELECT st_astext(ST_SnapToGrid(st_union(ST_SnapToGrid(st_geomfromtext('".$geom_1."'), 0.0001), ST_SnapToGrid(st_buffer(st_geomfromtext('".$geom_2."'), ".$width."), 0.0001)), 0.0001))";
+  	}
+  	else{
+  		//$sql = "SELECT st_assvg(validize_polygon(st_union(st_geomfromtext('".$geom_1."'), st_geomfromtext('".$geom_2."'))),0,8)";
+  		$sql = "SELECT st_assvg(ST_SnapToGrid(st_union(ST_SnapToGrid(st_geomfromtext('".$geom_1."'), 0.0001), ST_SnapToGrid(st_buffer(st_geomfromtext('".$geom_2."'), ".$width."), 0.0001)), 0.0001),0,8)";
+  	}
+  	$ret = $this->pgdatabase->execSQL($sql,4, 0);
+    if ($ret[0]) {
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
+    }
+    else {
+    	$rs = pg_fetch_array($ret[1]);
+    }
+    return $rs[0];
+  }
+	
   
   function get_closest_line($input_coord, $type, $fromwhere){
   	$coord1 = explode(';',$input_coord);
@@ -503,6 +541,12 @@ class spatial_processor {
 	function pointfrompolygon($polygeom){
 		$parts = explode(',', $polygeom);
 		$point = str_replace('POLYGON(', 'POINT', $parts[0]).')';
+		return $point;
+	}
+	
+	function pointfrommultilinestring($linegeom){
+		$parts = explode(')', $linegeom);
+		$point = str_replace('MULTILINESTRING(', 'POINT', $parts[0]).')';
 		return $point;
 	}
 	

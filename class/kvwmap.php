@@ -11421,9 +11421,11 @@ class GUI extends GUI_core{
             $request = $request.'&REQUEST=GetFeatureInfo&SERVICE=WMS';
 
             # Anzufragenden Layernamen
-            $reqStr=explode('&',strstr(strtolower($request),'layers='));
-            $layerStr=explode('=',$reqStr[0]);
-            $request .='&QUERY_LAYERS='.$layerStr[1];
+						if(strpos(strtolower($request), 'query_layers') === false){
+							$reqStr=explode('&',strstr(strtolower($request),'layers='));
+							$layerStr=explode('=',$reqStr[0]);
+							$request .='&QUERY_LAYERS='.$layerStr[1];
+						}
 
             # Boundingbox im System des Layers anhängen
             $projFROM = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);

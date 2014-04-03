@@ -1,6 +1,6 @@
 <?php
-/* hier befindet sich ein lose Sammlung von Funktionen, die so oder ähnlich im php
- * Funktionenumfang nicht existieren, in älteren Versionen nicht existiert haben,
+/* hier befindet sich ein lose Sammlung von Funktionen, die so oder Ã¤hnlich im php
+ * Funktionenumfang nicht existieren, in Ã¤lteren Versionen nicht existiert haben,
  * nicht gefunden wurden, nicht verstanden wurden oder zu umfrangreich waren.
  */
  
@@ -93,7 +93,7 @@ function transformCoordsSVG($path){
       $newsvgcoords[] = -1 * $svgcoords[$i+1];
       $i++;
     }
-    if($svgcoords[$i] == 'Z'){			# neuere Postgis-Versionen liefern bei asSVG ein Z zum Schließen des Rings anstatt der Startkoordinate
+    if($svgcoords[$i] == 'Z'){			# neuere Postgis-Versionen liefern bei asSVG ein Z zum SchlieÃŸen des Rings anstatt der Startkoordinate
     	$newsvgcoords[] = $last_startcoordx;
     	$newsvgcoords[] = $last_startcoordy;
     }
@@ -106,7 +106,7 @@ function transformCoordsSVG($path){
 }
 
 function dms2dec($number){
-	$part1 = explode('°', $number);
+	$part1 = explode('Â°', $number);
 	$degrees = $part1[0];
 	$part2 = explode("'", $part1[1]);
 	$minutes = $part2[0];
@@ -123,7 +123,7 @@ function dec2dms($number){
 	$part2 = explode('.', $minutes);
 	$minutes = $part2[0];
 	$seconds = round(('0.'.$part2[1]) * 60);
-	return $degrees."°".$minutes."'".$seconds.'"';
+	return $degrees."Â°".$minutes."'".$seconds.'"';
 }
 
 function dec2dmin($number){
@@ -131,7 +131,7 @@ function dec2dmin($number){
 	$part1 = explode('.', $number);
 	$degrees = $part1[0];
 	$minutes = ('0.'.$part1[1]) * 60;
-	return $degrees."°".round($minutes,3);
+	return $degrees."Â°".round($minutes,3);
 } 
 
 function allocateImageColors($image, $colors) {
@@ -240,7 +240,7 @@ if(!function_exists('imagerotate')){
       }
     }
     else{
-    	echo 'Kann temporäre Bilddateien nicht anlegen.';
+    	echo 'Kann temporÃ¤re Bilddateien nicht anlegen.';
     	return $source_image;
     }
 	}
@@ -267,50 +267,50 @@ function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
 }
 
 /**
-* Prüft ob ein Passwort ein gutes Passwort ist.
+* PrÃ¼ft ob ein Passwort ein gutes Passwort ist.
 * 
-* Diese Funktion prüft die Länge, Anzahl wiederholter Zeichen und einfachheit von Passwörtern
+* Diese Funktion prÃ¼ft die LÃ¤nge, Anzahl wiederholter Zeichen und einfachheit von PasswÃ¶rtern
 * Code wurde abgeleitet von http://scripts.franciscocharrua.com/check-password.php und
-* http://www.vbforums.com/showthread.php?p=2347960 und wurde stark verändert und ergänzt.
+* http://www.vbforums.com/showthread.php?p=2347960 und wurde stark verÃ¤ndert und ergÃ¤nzt.
 * Vielen Dank trotzdem an die Autoren.
 * 
-* Reihenfolge: Übersichtssatz - Kommentar - Tags.
+* Reihenfolge: Ãœbersichtssatz - Kommentar - Tags.
 * 
-* @param string password Zu prüfendes Password als Text
+* @param string password Zu prÃ¼fendes Password als Text
 * @return string Fehlermeldung zur Beschreibung, was an dem Password schlecht ist, oder leerer String, wenn Password gut ist.
 * @see    createRandomPassword(), checkPasswordAge, $GUI, $user, $stelle
 */
 function isPasswordValide($oldPassword,$newPassword,$newPassword2) {
   $password_errors = array();
   
-  # Prüft ob überhaupt ein neues Password eingegeben wurde (leerer String)
+  # PrÃ¼ft ob Ã¼berhaupt ein neues Password eingegeben wurde (leerer String)
   if (strlen($newPassword)==0 OR strlen($newPassword2)==0) {
   	$password_errors[] = "ist leer oder dessen Wiederholung";
   }
   else {
-    # Prüft ob neues Passwort nicht vieleicht genau dem alten Passwort entspricht
+    # PrÃ¼ft ob neues Passwort nicht vieleicht genau dem alten Passwort entspricht
     if ($oldPassword==$newPassword)
-      $password_errors[] = "muß sich vom alten unterscheiden";
+      $password_errors[] = "muÃŸ sich vom alten unterscheiden";
 
-    # Prüft ob neues Passwort der Wiederholung entspricht
+    # PrÃ¼ft ob neues Passwort der Wiederholung entspricht
     if ($newPassword!=$newPassword2)
-      $password_errors[] = "muß mit der Wiederholung übereinstimmen";
+      $password_errors[] = "muÃŸ mit der Wiederholung Ã¼bereinstimmen";
     
-	  # Prüft die Länge des Passwortes
+	  # PrÃ¼ft die LÃ¤nge des Passwortes
 	  $strlen = strlen($newPassword);
 	  if($strlen <= 5) {
 	    $password_errors[] = "ist zu kurz";
 	  }
   
-	  # Prüft die Anzahl unterschiedlicher Zeichen
+	  # PrÃ¼ft die Anzahl unterschiedlicher Zeichen
 	  $count_chars = count_chars($newPassword, 3);
 	  if(strlen($count_chars) < $strlen / 2) {
 	    $password_errors[] = "hat zu viele gleiche Zeichen";
 	  }
 	  
-	  # Prüft die Verwendung von Sonderzeichen
+	  # PrÃ¼ft die Verwendung von Sonderzeichen
 	  $strength = 0;
-	  $patterns = array('#[a-z]#','#[A-Z]#','#[0-9]#','/[¬!"£$%^&*()`{}\[\]:@~;\'#<>?,.\/\\-=_+\|]/');
+	  $patterns = array('#[a-z]#','#[A-Z]#','#[0-9]#','/[Â¬!"Â£$%^&*()`{}\[\]:@~;\'#<>?,.\/\\-=_+\|]/');
 	  foreach($patterns as $pattern) {
 	  	if(preg_match($pattern,$newPassword,$matches)) {
 	      $strength++;
@@ -326,7 +326,7 @@ function isPasswordValide($oldPassword,$newPassword,$newPassword2) {
 	  }
   }
     
-  //Zusammenstellung der Fehlermeldung, wenn kein Fehler vorlag Rückgabe eines leeren Strings
+  //Zusammenstellung der Fehlermeldung, wenn kein Fehler vorlag RÃ¼ckgabe eines leeren Strings
   $return_string = "";
   $anzErrors=count($password_errors);
   for($i=0;$i<$anzErrors;$i++) {
@@ -345,13 +345,13 @@ function isPasswordValide($oldPassword,$newPassword,$newPassword2) {
 }
 
 /**
-* Erzeugen eines zufälligen Passwortes
+* Erzeugen eines zufÃ¤lligen Passwortes
 * 
-* Diese Funktion erzeugt ein zufälliges sicheres Password. Die Funktion wurde von Totally PHP übernommen und mit zusätzlichen Zeichen versehen
+* Diese Funktion erzeugt ein zufÃ¤lliges sicheres Password. Die Funktion wurde von Totally PHP Ã¼bernommen und mit zusÃ¤tzlichen Zeichen versehen
 * siehe: http://www.totallyphp.co.uk/code/create_a_random_password.htm
 * Vielen Dank an den Autor. 
 * 
-* Reihenfolge: Übersichtssatz - Kommentar - Tags.
+* Reihenfolge: Ãœbersichtssatz - Kommentar - Tags.
 * 
 * @return string ein achtstelliges Password
 * @see    isPasswordValide(), checkPasswordAge, $GUI, $user, $stelle
@@ -364,7 +364,7 @@ function createRandomPassword($passwordLength) {
   $chars[0]= "abcdefghijkmnopqrstuvwxyz";
   $chars[1]= "ABCDEFGHIJKMNOPQRSTUVWXYZ";
   $chars[2]= "0234567890234567890234567";
-  $chars[3]= "()_+*-.:,;!§$%&=#()_+*-.:";
+  $chars[3]= "()_+*-.:,;!Â§$%&=#()_+*-.:";
   $password='';
   $charListNumbers=array();
   $charListNumber=rand(0,3);
@@ -444,7 +444,7 @@ function isTag($word) {
 }
 
 function drawColorBox($color,$outlinecolor) {
-  # Funktion liefert eine Box als überlagerte Div in html,
+  # Funktion liefert eine Box als Ã¼berlagerte Div in html,
   # die die Farbe $color und die Border $outlinecolor hat.
   $c=explode(' ',trim($color));
   $bgcolor='#';
@@ -514,7 +514,7 @@ if (!function_exists('str_split')) {
 }
 
 function unzip($src_file, $dest_dir=false, $create_zip_name_dir=true, $overwrite=true){
-	# 1. Methode über unzip (nur Linux)
+	# 1. Methode Ã¼ber unzip (nur Linux)
 	$output = array();
 	$entries = NULL;
 	exec('export LD_LIBRARY_PATH=;unzip -l "'.$src_file.'" -d '.dirname($src_file), $output);
@@ -525,7 +525,7 @@ function unzip($src_file, $dest_dir=false, $create_zip_name_dir=true, $overwrite
 	if($entries != NULL){
 		exec('export LD_LIBRARY_PATH=;unzip -o "'.$src_file.'" -d '.dirname($src_file));
 	}
-	# 2. Methode über php_zip Extension
+	# 2. Methode Ã¼ber php_zip Extension
 	else{
 	  if ($zip = zip_open($src_file)){
 	    if ($zip){
@@ -558,46 +558,46 @@ function unzip($src_file, $dest_dir=false, $create_zip_name_dir=true, $overwrite
 }
 
 function html_umlaute($string){
-	$string = str_replace('ä', '&auml;', $string);
-	$string = str_replace('ü', '&uuml;', $string);
-	$string = str_replace('ö', '&ouml;', $string);
-	$string = str_replace('Ä', '&Auml;', $string);
-	$string = str_replace('Ü', '&Uuml;', $string);
-	$string = str_replace('Ö', '&Ouml;', $string);
-	$string = str_replace('ß', '&szlig;', $string);
-	$string = str_replace('ø', '&oslash;', $string);
-	$string = str_replace('æ', '&aelig;', $string);
+	$string = str_replace('Ã¤', '&auml;', $string);
+	$string = str_replace('Ã¼', '&uuml;', $string);
+	$string = str_replace('Ã¶', '&ouml;', $string);
+	$string = str_replace('Ã„', '&Auml;', $string);
+	$string = str_replace('Ãœ', '&Uuml;', $string);
+	$string = str_replace('Ã–', '&Ouml;', $string);
+	$string = str_replace('ÃŸ', '&szlig;', $string);
+	$string = str_replace('Ã¸', '&oslash;', $string);
+	$string = str_replace('Ã¦', '&aelig;', $string);
 	return $string;
 }
 
 function umlaute_html($string){
-	$string = str_replace('&auml;', 'ä', $string);
-	$string = str_replace('&uuml;', 'ü', $string);
-	$string = str_replace('&ouml;', 'ö', $string);
-	$string = str_replace('&Auml;', 'Ä', $string);
-	$string = str_replace('&Uuml;', 'Ü', $string);
-	$string = str_replace('&Ouml;', 'Ö', $string);
-	$string = str_replace('&szlig;', 'ß', $string);
-	$string = str_replace('&oslash;', 'ø', $string);
-	$string = str_replace('&aelig;', 'æ', $string);
+	$string = str_replace('&auml;', 'Ã¤', $string);
+	$string = str_replace('&uuml;', 'Ã¼', $string);
+	$string = str_replace('&ouml;', 'Ã¶', $string);
+	$string = str_replace('&Auml;', 'Ã„', $string);
+	$string = str_replace('&Uuml;', 'Ãœ', $string);
+	$string = str_replace('&Ouml;', 'Ã–', $string);
+	$string = str_replace('&szlig;', 'ÃŸ', $string);
+	$string = str_replace('&oslash;', 'Ã¸', $string);
+	$string = str_replace('&aelig;', 'Ã¦', $string);
 	$string = str_replace('&nbsp;', ' ', $string);
 	return $string;
 }
 
 function umlaute_sortieren($array, $second_array){
-	// Diese Funktion sortiert das Array $array unter Berücksichtigung von Umlauten.
-	// Zusätzlich läßt sich ein zweites Array $second_array übergeben, welches genauso viele 
-	// Elemente haben muß wie das erste und dessen Elemente entsprechend der Sortierung des
+	// Diese Funktion sortiert das Array $array unter BerÃ¼cksichtigung von Umlauten.
+	// ZusÃ¤tzlich lÃ¤ÃŸt sich ein zweites Array $second_array Ã¼bergeben, welches genauso viele 
+	// Elemente haben muÃŸ wie das erste und dessen Elemente entsprechend der Sortierung des
 	// ersten Arrays angeordnet werden, dadurch bleiben die Index-Beziehungen beider Arrays erhalten.
-	// Außerdem werden alle Array-Elemente unabhängig von Groß/Kleinschreibung sortiert. 
+	// AuÃŸerdem werden alle Array-Elemente unabhÃ¤ngig von GroÃŸ/Kleinschreibung sortiert. 
 	if(is_array($array)){
 		$oldarray = $array;
 		for($i = 0; $i < count($array); $i++){
 			$array[$i] = strtoupper($array[$i]);
-	  	$array[$i] = str_replace('Ä', 'A', $array[$i]);
-	  	$array[$i] = str_replace('Ü', 'U', $array[$i]);
-	  	$array[$i] = str_replace('Ö', 'O', $array[$i]);
-	  	$array[$i] = str_replace('ß', 's', $array[$i]);
+	  	$array[$i] = str_replace('Ã„', 'A', $array[$i]);
+	  	$array[$i] = str_replace('Ãœ', 'U', $array[$i]);
+	  	$array[$i] = str_replace('Ã–', 'O', $array[$i]);
+	  	$array[$i] = str_replace('ÃŸ', 's', $array[$i]);
 		}
 		@asort($array);
 		if($second_array != NULL){
@@ -621,13 +621,13 @@ function umlaute_sortieren($array, $second_array){
 }
 
 function umlaute_umwandeln($name){ 
-  $name = str_replace('ä', 'ae', $name);
-  $name = str_replace('ü', 'ue', $name);
-  $name = str_replace('ö', 'oe', $name);
-  $name = str_replace('Ä', 'Ae', $name);
-  $name = str_replace('Ü', 'Ue', $name);
-  $name = str_replace('Ö', 'Oe', $name);
-  $name = str_replace('ß', 'ss', $name);
+  $name = str_replace('Ã¤', 'ae', $name);
+  $name = str_replace('Ã¼', 'ue', $name);
+  $name = str_replace('Ã¶', 'oe', $name);
+  $name = str_replace('Ã„', 'Ae', $name);
+  $name = str_replace('Ãœ', 'Ue', $name);
+  $name = str_replace('Ã–', 'Oe', $name);
+  $name = str_replace('ÃŸ', 'ss', $name);
   $name = str_replace('.', '', $name);
   $name = str_replace(':', '', $name);
   $name = str_replace('/', '-', $name);
@@ -637,14 +637,14 @@ function umlaute_umwandeln($name){
 }
 
 function umlaute_javascript($text){
-	$text = str_replace("ä", "%E4", $text);
-	$text = str_replace("ö", "%F6", $text);
-	$text = str_replace("ü", "%FC", $text);
-	$text = str_replace("Ä", "%C4", $text);
-	$text = str_replace("Ö", "%D6", $text);
-	$text = str_replace("Ü", "%DC", $text);
-	$text = str_replace("ß", "%DF", $text);
-	$text = str_replace("²", "%B2", $text);
+	$text = str_replace("Ã¤", "%E4", $text);
+	$text = str_replace("Ã¶", "%F6", $text);
+	$text = str_replace("Ã¼", "%FC", $text);
+	$text = str_replace("Ã„", "%C4", $text);
+	$text = str_replace("Ã–", "%D6", $text);
+	$text = str_replace("Ãœ", "%DC", $text);
+	$text = str_replace("ÃŸ", "%DF", $text);
+	$text = str_replace("Â²", "%B2", $text);
 	return $text;
 }
 
@@ -727,7 +727,7 @@ function get_select_parts($select){
   	if($klammerauf > $klammerzu){			# mehr Klammern auf als zu --> hier wurde eine Funktion oder eine Unterabfrage mit Kommas verwendet
   		$column[$i] = $column[$i].', '.$column[$i+1];
   		array_splice($column, $i+1, 1);
-			$i--;							# und nochmal prüfen, falls mehrere Kommas drin sind
+			$i--;							# und nochmal prÃ¼fen, falls mehrere Kommas drin sind
   	}
   }
   return $column;
@@ -831,23 +831,23 @@ function ArtCode2Abk($code) {
   return $abk;
 }
 
-########### Funktion wandelt UNIX Zeichen in DOS Zeichen um für Konvertierung WLDGE-Dateien
+########### Funktion wandelt UNIX Zeichen in DOS Zeichen um fÃ¼r Konvertierung WLDGE-Dateien
 function unix2dos($text) {
    $search  = array ("{", "|", "}", "~","'","[","\\","]","@"); 
-   $replace = array ("ä", "ö", "ü", "ß","\"","Ä","Ö","Ü","§");
+   $replace = array ("Ã¤", "Ã¶", "Ã¼", "ÃŸ","\"","Ã„","Ã–","Ãœ","Â§");
    return str_replace($search, $replace, $text);
 }
 
 function ANSII2DOS($text) {
   $search  = array ('"',chr(132),chr(142),chr(148),chr(153),chr(129),chr(154),chr(225)); 
-  $replace = array ('\'','ä','Ä','ö','Ö','ü','Ü','ß');
+  $replace = array ('\'','Ã¤','Ã„','Ã¶','Ã–','Ã¼','Ãœ','ÃŸ');
   return str_replace($search, $replace, $text);
 }
 
 function convertDBFCodePage($filename) {
   $dbfid=dbase_open ($filename,2);
   if ($dbfid==0) {
-    echo "<b>Fehler beim öffnen der dbf-Tabelle!</b>";
+    echo "<b>Fehler beim Ã¶ffnen der dbf-Tabelle!</b>";
     return 0;
   }  
   echo "<br>Beginne mit schreiben der Tabelle ".$filename."...";
@@ -858,7 +858,7 @@ function convertDBFCodePage($filename) {
       $dbfrs[$j]=trim(ANSII2DOS($dbfrs[$j]));
       echo $dbfrs[$j]." ";
     }
-    # Löschen des letzten Arrayelements (deleted)
+    # LÃ¶schen des letzten Arrayelements (deleted)
     array_pop($dbfrs);
     if (!dbase_replace_record($dbfid,$dbfrs,$i)) {
       echo "<br><b>Fehler beim umschreiben der dbf-Tabelle in Zeile ".$i."!</b>";
@@ -869,7 +869,7 @@ function convertDBFCodePage($filename) {
   dbase_close ($dbfid);
 }
 
-# Funktion bricht $text in Wörtern in ein Array von Zeilen der Länge $laenge um 
+# Funktion bricht $text in WÃ¶rtern in ein Array von Zeilen der LÃ¤nge $laenge um 
 # Beispiel: 
 # $block=zeilenumbruch('Dies ist ein Beilspiel.',12);
 # echo $block[0]; # liefert "Dies ist ein"
@@ -891,7 +891,7 @@ function zeilenumbruch($text,$laenge) {
 }
 
 function runLenComp($liste) {
-  # Funktion führt eine Lauflängenkodierung des Arrays aus
+  # Funktion fÃ¼hrt eine LauflÃ¤ngenkodierung des Arrays aus
   # und komprimiert somit das Array von Einzelwerten
   # array runLenComp(array array);
   # von den vorkommenden ganzen Zahlen werden von-bis Intervalle gebildet
@@ -902,15 +902,15 @@ function runLenComp($liste) {
   $intervalwidth=0;
   for ($i=1;$i<$anz;$i++) {
     if ($liste[$i]==$liste[$i-1]+1) {
-      # der nächste Wert ist eins größer im gleichen Intervall 
+      # der nÃ¤chste Wert ist eins grÃ¶ÃŸer im gleichen Intervall 
       $intervalwidth++;
-      # wenn das letzte Element erreicht ist Intervall schließen
+      # wenn das letzte Element erreicht ist Intervall schlieÃŸen
       if ($i==$anz-1) {
         $comp.='-'.$liste[$i];
       }
     }
     else {
-      # der nächste Wert ist mehr als eins größer, Intervallende
+      # der nÃ¤chste Wert ist mehr als eins grÃ¶ÃŸer, Intervallende
       # wenn das Interval bis hierhin nur 1 war wird das Ende nicht geschrieben
       # sonst wird das Intervalende geschrieben.
       if ($intervalwidth>1) {
@@ -924,7 +924,7 @@ function runLenComp($liste) {
   return $comp;
 }
 
-#**** Funktion, die prüft, ob Datum sinnvoll ist.
+#**** Funktion, die prÃ¼ft, ob Datum sinnvoll ist.
 
 function date_ok($date) {
 
@@ -958,7 +958,7 @@ function date_ok($date) {
 
    /* Numerische Operationen */
 
-   //Datum sollte möglich sein
+   //Datum sollte mÃ¶glich sein
 
    if($ok == True)
    {
@@ -974,7 +974,7 @@ function date_ok($date) {
        settype($tm, "integer");
        settype($td, "integer");
 
-       #if($yy>2037) $ok = False;  // Sonst ausserhalb des Gültigkeitsbereiches des Timestamps, siehe auch PHP-Manual "date()".
+       #if($yy>2037) $ok = False;  // Sonst ausserhalb des GÃ¼ltigkeitsbereiches des Timestamps, siehe auch PHP-Manual "date()".
 
 
        if(($max_day<$dd)||(1>$dd)) $ok =False;;
@@ -1005,11 +1005,11 @@ function date_ok($date) {
 function split_edbs_file($pfad,$filename) {
   # Funktion teilt eine EDBS Datei in einzelne Dateien
   # Jeder Auftrag wird in eine separate Datei geschrieben
-  # Öffnen der EDBS Datei
+  # Ã–ffnen der EDBS Datei
   $fp=fopen($pfad.$filename,'r');
   $i=1;
   $fpteil=fopen($pfad.'EDBS_teil_'.$i.'.edbs','w');
-  echo '<p>Öffne EDBS_teil_'.$i.'.edbs<br>';
+  echo '<p>Ã–ffne EDBS_teil_'.$i.'.edbs<br>';
   $zaehler=0;
   while (!feof($fp)) {
     $zaehler++;
@@ -1018,32 +1018,32 @@ function split_edbs_file($pfad,$filename) {
     # Schreiben der Zeile in aktuell offene Teildatei
     fwrite($fpteil,$line);
     echo ' *';
-    # Wenn die Zeile den String zur Beendigung des Auftrages enthält, Datei schließen und neue unter neuen namen Öffnen
+    # Wenn die Zeile den String zur Beendigung des Auftrages enthÃ¤lt, Datei schlieÃŸen und neue unter neuen namen Ã–ffnen
     if (ereg('EDBS00240000AEND000000  0000',$line)>0 AND $zaehler>250000) {
       $zaehler=0;
-      # Schließen der Datei
+      # SchlieÃŸen der Datei
       fclose ($fpteil);
       $i++;
       $fpteil=fopen($pfad.'EDBS_teil_'.$i.'.edbs','w');
-      echo '<p>Öffne EDBS_teil_'.$i.'.edbs<br>';
+      echo '<p>Ã–ffne EDBS_teil_'.$i.'.edbs<br>';
     }
   }
   fclose($fp);
 }
 
 ############################################################################
-# Prüft eine E-Mail adresse auf richtige schreibweise
+# PrÃ¼ft eine E-Mail adresse auf richtige schreibweise
 ############################################################################
 function emailcheck($email) {
   $Meldung='';
-  # enthält die Adresse ein Leerzeichen?
+  # enthÃ¤lt die Adresse ein Leerzeichen?
   if (strstr(trim($email)," ")) {
-    $Meldung.='<br>E-Mail enthält Leerzeichen.';
+    $Meldung.='<br>E-Mail enthÃ¤lt Leerzeichen.';
   }
   
   # hat die Adresse ein @
   if (!strstr($email,"@")) {
-    $Meldung.='<br>E-Mail enthält kein @.';
+    $Meldung.='<br>E-Mail enthÃ¤lt kein @.';
   }
   
   $postfix=strlen(strrchr($email,"."))-1;
@@ -1063,16 +1063,16 @@ function buildExpressionString($str) {
   # man neheme das erste Intervall
   # Zerlege es in Anfang und Ende
   $grenzen=explode('-',$intervalle[0]);
-  # Teste ob es überhaupt ein Ende gibt, oder nur einen einzelnen Wert
+  # Teste ob es Ã¼berhaupt ein Ende gibt, oder nur einen einzelnen Wert
   if (count($grenzen)==1) {
-    # Wenn ja, wird die erste einschränkung geschrieben.
+    # Wenn ja, wird die erste einschrÃ¤nkung geschrieben.
     $expr.='[ID]='.$grenzen[0];
   }
   else {
-    # Wenn es Anfang und Ende gibt, müssen zwei Bedingungen geschrieben werden
+    # Wenn es Anfang und Ende gibt, mÃ¼ssen zwei Bedingungen geschrieben werden
     $expr.='([ID]>'.$grenzen[0].' AND [ID]<'.$grenzen[1].')';
   }
-  # weiter geht es mit den nächsten Intervallen
+  # weiter geht es mit den nÃ¤chsten Intervallen
   for ($i=1;$i<$anzInt;$i++) {
     # wieder Zerlegen in Anfang und Ende
     $grenzen=explode('-',$intervalle[$i]);
@@ -1116,7 +1116,7 @@ function getArrayOfChars() {
 	}
 
 	for ($i=65; $i<=90; $i++) {
-	  $characterNumbers[]=$i; # Großbuchstaben
+	  $characterNumbers[]=$i; # GroÃŸbuchstaben
 	}
 	for ($i=97; $i<=122; $i++) {
 	  $characterNumbers[]=$i; # Kleinbuchstaben

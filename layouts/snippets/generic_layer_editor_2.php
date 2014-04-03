@@ -43,7 +43,7 @@
 	<tr>
 	  <td>
 	    <div id="datensatz" 
-			<? if($this->user->rolle->querymode == 1){ ?>
+			<? if($this->new_entry != true AND $this->user->rolle->querymode == 1){ ?>
 			onmouseenter="ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=tooltip_query&querylayer_id=<? echo $layer['Layer_ID']; ?>&oid=<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>', new Array(top.document.GUI.result, ''), new Array('setvalue', 'execute_function'));"
 			<? } ?>
 			>

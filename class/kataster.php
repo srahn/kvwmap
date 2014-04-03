@@ -561,7 +561,7 @@ class Festpunkte {
     else {
       $this->debug->write('Abfragen der Festpunkte:',4);
       if (PUNKTDATEINAME=='alk') {
-        $sql ="SELECT p.nbz||'-'||p.pat||'-'||p.pnr AS pkz,p.nbz,p.pat AS art,p.pnr,asText(o.the_geom) AS wkt_the_geom";
+        $sql ="SELECT p.nbz||'-'||p.pat||'-'||p.pnr AS pkz,p.nbz,p.pat AS art,p.pnr,st_asText(o.the_geom) AS wkt_the_geom";
         $sql.=" FROM alknpunkt AS p,alkobj_e_pkt AS o";
         if ($antrag_nr!='') {
           $sql.=",fp_punkte2antraege AS p2a";
@@ -616,7 +616,7 @@ class Festpunkte {
         }
       } # ende Datenquelle für Festpunkte alk-Tabellen
       else {
-        $sql ="SELECT p.*,asText(p.the_geom) AS wkt_the_geom FROM ".$this->tabellenname." AS p";
+        $sql ="SELECT p.*,st_asText(p.the_geom) AS wkt_the_geom FROM ".$this->tabellenname." AS p";
         if ($antrag_nr!='') {
           $sql.=",fp_punkte2antraege AS p2a";
         }

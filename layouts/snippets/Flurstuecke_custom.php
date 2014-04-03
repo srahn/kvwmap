@@ -480,10 +480,10 @@ emzversteckt = function(k){
 				            $label3=ltrim(substr($alkemz[$j]['label'],-6,3),"0");
 				            $label4=substr($alkemz[$j]['label'],-3,3);
 				          } elseif (strlen($alkemz[$j]['label'])==29) {
-				            $label1=substr(substr($alkemz[$j]['label'],4),0,-15);
+				            $label1='('.rtrim(substr(substr($alkemz[$j]['label'],4),0,-15)).')';
 				            $label2=ltrim(substr(trim(substr($alkemz[$j]['label'],-15,6)),0,3),"0");
 				            $label3=ltrim(substr($alkemz[$j]['label'],-12,3),"0");
-				            $label4='W';
+				            $label4='';
 				          }
 		            	?>
 		            <tr>
