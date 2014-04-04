@@ -536,6 +536,7 @@
 				top.currentform.last_button.value = "pgon0";
 				if(top.currentform.secondpoly.value == "started" || top.currentform.secondpoly.value == "true"){	// am zweiten Polygon oder an einer gepufferten Linie wird weitergezeichnet
 					if(top.currentform.last_doing2.value == "add_buffered_line")top.currentform.last_button.value = "buffer1";
+					if(top.currentform.last_doing2.value == "add_parallel_polygon")top.currentform.last_button.value = "buffer2";
 					if(top.currentform.last_doing2.value == "subtract_polygon")top.currentform.last_button.value = "pgon_subtr0";
 					top.currentform.last_doing.value = top.currentform.last_doing2.value;
 					if(pathx_second.length == 1){				// ersten Punkt darstellen
@@ -724,6 +725,14 @@
 				top.currentform.secondpoly.value = "true";
 				top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=add_buffered_line&width="+top.currentform.bufferwidth.value+"&geotype=line&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
 			break;
+			case "add_parallel_polygon":
+				addlinepoint_second(world_x, world_y);
+				if(pathx_second.length > 1){
+					top.currentform.firstpoly.value = "true";
+					top.currentform.secondpoly.value = true;
+					top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=add_parallel_polygon&width="+top.currentform.bufferwidth.value+"&geotype=line&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
+				}				
+			break;			
 
 			case "measure":
 		    if (measuring){
@@ -859,6 +868,7 @@ function mouseup(evt){
 			if(bufferfunctions == true){
 		  	document.getElementById("buffer0").style.setProperty("fill","ghostwhite", "");
 				document.getElementById("buffer1").style.setProperty("fill","ghostwhite", "");
+				document.getElementById("buffer2").style.setProperty("fill","ghostwhite", "");
 		  }
 		  if(flurstuecksqueryfunctions == true){
 		  	document.getElementById("ppquery0").style.setProperty("fill","ghostwhite", "");
@@ -1847,22 +1857,40 @@ function mouseup(evt){
 
 		function add_buffer(){
 			buffer = prompt("Breite des Puffers in Metern:", "10");
-			top.currentform.secondpoly.value = true;
-			top.currentform.firstpoly.value = true;
-		  if(top.currentform.newpathwkt.value != ""){
-		  	top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+top.currentform.newpathwkt.value+"&width="+buffer+"&operation=buffer&resulttype=svgwkt", new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
-		  }
-		  else{
-		  	if(top.currentform.newpath.value != ""){
-		  		newpath = buildwktpolygonfromsvgpath(top.currentform.newpath.value);
-		  		top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+newpath+"&width="+buffer+"&operation=buffer&resulttype=svgwkt", new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
-		  	}
-		  }
+			if(buffer){
+				top.currentform.secondpoly.value = true;
+				top.currentform.firstpoly.value = true;
+				if(top.currentform.newpathwkt.value != ""){
+					top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+top.currentform.newpathwkt.value+"&width="+buffer+"&operation=buffer&resulttype=svgwkt", new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
+				}
+				else{
+					if(top.currentform.newpath.value != ""){
+						newpath = buildwktpolygonfromsvgpath(top.currentform.newpath.value);
+						top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+newpath+"&width="+buffer+"&operation=buffer&resulttype=svgwkt", new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
+					}
+				}
+			}
 		}
 		
 		function add_buffered_line(){
 			top.currentform.last_doing.value = "add_buffered_line";
 			top.currentform.bufferwidth.value = prompt("Breite des Puffers in Metern:", top.currentform.bufferwidth.value);
+			if(top.currentform.pathwkt.value == "" && top.currentform.newpath.value != ""){
+				top.currentform.pathwkt.value = buildwktpolygonfromsvgpath(top.currentform.newpath.value);
+			}
+			else{
+				if(top.currentform.newpathwkt.value != ""){
+					top.currentform.pathwkt.value = top.currentform.newpathwkt.value;
+				}
+			}
+		  if(top.currentform.secondpoly.value == "true"){
+				applypolygons();
+			}
+		}
+		
+		function add_parallel_polygon(){
+			top.currentform.last_doing.value = "add_parallel_polygon";
+			top.currentform.bufferwidth.value = prompt("Breite des Polygons in Metern:", top.currentform.bufferwidth.value);
 			if(top.currentform.pathwkt.value == "" && top.currentform.newpath.value != ""){
 				top.currentform.pathwkt.value = buildwktpolygonfromsvgpath(top.currentform.newpath.value);
 			}
@@ -2573,6 +2601,19 @@ function mouseup(evt){
 					top.currentform.pathy_second.value = str.substring(0, str.lastIndexOf(";"));
 					path_second = buildsvglinepath(pathx_second, pathy_second);
 					top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=add_buffered_line&width="+top.currentform.bufferwidth.value+"&geotype=line&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
+					redrawsecondpolygon();
+				}
+			break;
+			case "add_parallel_polygon":
+				if(pathx_second.length > 2){
+					pathx_second.pop();
+					pathy_second.pop();
+					str = top.currentform.pathx_second.value;
+					top.currentform.pathx_second.value = str.substring(0, str.lastIndexOf(";"));
+					str = top.currentform.pathy_second.value;
+					top.currentform.pathy_second.value = str.substring(0, str.lastIndexOf(";"));
+					path_second = buildsvglinepath(pathx_second, pathy_second);
+					top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=add_parallel_polygon&width="+top.currentform.bufferwidth.value+"&geotype=line&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
 					redrawsecondpolygon();
 				}
 			break;
@@ -3354,7 +3395,7 @@ $measurefunctions = '
     return $flurstquerybuttons;
   }
   
-  function bufferbuttons($strBuffer, $strBufferedLine){
+  function bufferbuttons($strBuffer, $strBufferedLine, $strParallelPolygon){
   	global $last_x;
   	$last_x += 26;
     $bufferbuttons = '
@@ -3390,6 +3431,21 @@ $measurefunctions = '
 					 style="fill:rgb(164,164,164);stroke:rgb(0,0,0);stroke-width:21"/>
 				<polyline points="503 281 242 389 367 577 462 486" transform="translate(2.5 -17) scale(0.050) rotate(88 197 419)" style="fill:none;stroke-dasharray:2,2;stroke:black;stroke-width:15"/>
         <rect id="buffer1" onmouseover="show_tooltip(\''.$strBufferedLine.'\',evt.clientX,evt.clientY)" onmousedown="add_buffered_line();hide_tooltip();highlightbyid(\'buffer1\');" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
+      </g>';
+			$last_x += 26;
+		$bufferbuttons .= '
+      <g id="parallel_polygon" transform="translate('.$last_x.' 0)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+          <set attributeName="filter" begin="buffer2.mousedown" dur="0s" fill="freeze" to="none"/>
+          <set attributeName="filter" begin="buffer2.mouseup;buffer2.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+        </rect>
+				<polyline points="476 285 677 517" transform="translate(0 -41) scale(0.070) rotate(94 197 419)" style="fill:none;stroke:#4A4A4A;stroke-width:20"/>
+        <polygon
+					points="574 546 647 483 506 320 433 383 574 546"
+					transform="translate(0 -41) scale(0.070) rotate(94 197 419)"
+					 style="fill:rgb(164,164,164);stroke:rgb(0,0,0);stroke-width:20"/>
+        <rect id="buffer2" onmouseover="show_tooltip(\''.$strParallelPolygon.'\',evt.clientX,evt.clientY)" onmousedown="add_parallel_polygon();hide_tooltip();highlightbyid(\'buffer2\');" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
       </g>';
     return $bufferbuttons;
   }

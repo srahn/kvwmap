@@ -10,4 +10,5 @@
   $strRuler="Ruler";
   $strBuffer="Create Buffer";
 	$strBufferedLine="add buffered line";
+	$strParallelPolygon="add parallel polygon";
 ?>  

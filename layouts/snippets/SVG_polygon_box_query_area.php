@@ -80,7 +80,7 @@ $svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmous
 $svg .= polygonbuttons($strUndo, $strDeletePolygon, $strDrawPolygon, $strCutByPolygon);
 $svg .= boxbuttons();
 $svg .= flurstquerybuttons();
-$svg .= bufferbuttons($strBuffer);
+$svg .= bufferbuttons($strBuffer, $strBufferedLine, $strParallelPolygon);
 $svg .= vertex_edit_buttons($strCornerPoint);
 $svg .= '</g>';
 $svg .= $SVG_end;

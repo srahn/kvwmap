@@ -100,7 +100,7 @@ $svg .= $navbuttons;
 $svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate(0 26)">';
 $svg .= polygonbuttons($strUndo, $strDeletePolygon, $strDrawPolygon, $strCutByPolygon);
 $svg .= flurstquerybuttons();
-$svg .= bufferbuttons($strBuffer, $strBufferedLine);
+$svg .= bufferbuttons($strBuffer, $strBufferedLine, $strParallelPolygon);
 $svg .= vertex_edit_buttons($strCornerPoint);
 $svg .= coord_input_buttons();
 if($_SESSION['mobile'] == 'true'){

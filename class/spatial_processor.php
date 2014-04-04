@@ -127,7 +127,7 @@ class spatial_processor {
 		if($formvars['path2'] != ''){
       $this->debug->write("path2:".$formvars['path2']."\n",4);
 			if($formvars['geotype'] == 'line'){
-				$polywkt2 = $this->composeMultilineWKTStringFromSVGPath($formvars['path2']);
+				$polywkt2 = $this->composeLineWKTStringFromSVGPath($formvars['path2']);
 			}
 			else{
 				$polywkt2 = $this->composeMultipolygonWKTStringFromSVGPath($formvars['path2']);
@@ -218,6 +218,18 @@ class spatial_processor {
 				}
 				else{
 					$result = $this->add_buffered_line($polywkt1, $polywkt2, $formvars['resulttype'], $formvars['width']);
+				}
+			}break;
+			
+			case 'add_parallel_polygon':{
+				if($formvars['width'] == ''){$formvars['width'] = 50;}
+				if($formvars['resulttype'] == 'svgwkt'){
+					$result = $this->add_parallel_polygon($polywkt1, $polywkt2, 'svg', $formvars['width']);
+					$result .= '||';
+					$result .= $this->add_parallel_polygon($polywkt1, $polywkt2, 'wkt', $formvars['width']);
+				}
+				else{
+					$result = $this->add_parallel_polygon($polywkt1, $polywkt2, $formvars['resulttype'], $formvars['width']);
 				}
 			}break;
 		
@@ -368,10 +380,10 @@ class spatial_processor {
 	
 	function add_buffered_line($geom_1, $geom_2, $type, $width){
   	if(substr_count($geom_2, ',') == 0){			# wenn Linestring nur aus einem Eckpunkt besteht -> in POINT umwandeln -> Kreis entsteht
-  		$geom_2 = $this->pointfrommultilinestring($geom_2);
+  		$geom_2 = $this->pointfromlinestring($geom_2);
   	}
 		if($geom_1 == ''){
-			$geom_1 = $geom_2;
+			$geom_1 = 'GEOMETRYCOLLECTION EMPTY';
 		}
   	if($type == 'wkt'){
   		//$sql = "SELECT st_astext(validize_polygon(st_union(st_geomfromtext('".$geom_1."'), st_geomfromtext('".$geom_2."'))))";
@@ -391,6 +403,30 @@ class spatial_processor {
     return $rs[0];
   }
 	
+	function add_parallel_polygon($geom_1, $geom_2, $type, $width){
+		if($geom_1 == ''){
+			$geom_1 = 'GEOMETRYCOLLECTION EMPTY';
+		}
+  	if($type == 'wkt'){
+  		//$sql = "SELECT st_astext(validize_polygon(st_union(st_geomfromtext('".$geom_1."'), st_geomfromtext('".$geom_2."'))))";
+  		//$sql = "SELECT st_astext(ST_SnapToGrid(st_union(ST_SnapToGrid(st_geomfromtext('".$geom_1."'), 0.0001), st_concavehull(st_union(ST_SnapToGrid(st_geomfromtext('".$geom_2."'), 0.0001), ST_SnapToGrid(st_offsetcurve(st_geomfromtext('".$geom_2."'), ".$width."), 0.0001)), 0.96)), 0.0001))";
+			$sql = "SELECT st_astext(ST_SnapToGrid(st_union(ST_SnapToGrid(st_geomfromtext('".$geom_1."'), 0.0001), geom), 0.0001)) FROM st_dump((SELECT ST_Polygonize(st_union(ST_Boundary(ST_Buffer(the_geom, ".$width.", 'endcap=flat join=round')), the_geom)) AS buffer_sides FROM (SELECT ST_GeomFromText('".$geom_2."') AS the_geom) AS table1));";
+  	}
+  	else{
+  		//$sql = "SELECT st_assvg(validize_polygon(st_union(st_geomfromtext('".$geom_1."'), st_geomfromtext('".$geom_2."'))),0,8)";
+  		//$sql = "SELECT st_assvg(ST_SnapToGrid(st_union(ST_SnapToGrid(st_geomfromtext('".$geom_1."'), 0.0001), st_concavehull(st_union(ST_SnapToGrid(st_geomfromtext('".$geom_2."'), 0.0001), ST_SnapToGrid(st_offsetcurve(st_geomfromtext('".$geom_2."'), ".$width."), 0.0001)), 0.96)), 0.0001),0,8)";
+			$sql = "SELECT st_assvg(ST_SnapToGrid(st_union(ST_SnapToGrid(st_geomfromtext('".$geom_1."'), 0.0001), geom), 0.0001),0,8) FROM st_dump((SELECT ST_Polygonize(st_union(ST_Boundary(ST_Buffer(the_geom, ".$width.", 'endcap=flat join=round')), the_geom)) AS buffer_sides FROM (SELECT ST_GeomFromText('".$geom_2."') AS the_geom) AS table1));";
+  	}
+  	$ret = $this->pgdatabase->execSQL($sql,4, 0);
+    if ($ret[0]) {
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
+    }
+    else {
+    	$rs = pg_fetch_array($ret[1]);
+    }
+    return $rs[0];
+  }
+
   
   function get_closest_line($input_coord, $type, $fromwhere){
   	$coord1 = explode(';',$input_coord);
@@ -544,9 +580,9 @@ class spatial_processor {
 		return $point;
 	}
 	
-	function pointfrommultilinestring($linegeom){
+	function pointfromlinestring($linegeom){
 		$parts = explode(')', $linegeom);
-		$point = str_replace('MULTILINESTRING(', 'POINT', $parts[0]).')';
+		$point = str_replace('LINESTRING', 'POINT', $parts[0]).')';
 		return $point;
 	}
 	
@@ -721,6 +757,28 @@ class spatial_processor {
       }
     }
     $WKT .= ')';
+    return $WKT;
+  }
+	
+	function composeLineWKTStringFromSVGPath($path){
+  	$WKT = 'LINESTRING';
+    $explosion = explode('M', $path);
+    for($i = 0; $i < count($explosion); $i++){
+      if($explosion[$i] != ''){
+        if($i > 1){
+          $WKT .= ',';
+        }
+        $WKT .= '(';
+        $polygon = explode(' ', $explosion[$i]);
+        $WKT .= $polygon[1].' '.$polygon[2];
+        for($j = 3; $j < count($polygon)-1; $j=$j+2){
+          if($polygon[$j] != ''){
+            $WKT .= ','.$polygon[$j].' '.$polygon[$j+1];
+          }
+        }
+        $WKT .= ')';
+      }
+    }
     return $WKT;
   }
   
