@@ -2226,8 +2226,6 @@ ALTER TABLE ONLY alb_x_v_strassen
      verfahrensgrund character varying(4),
      verfahrensgrund_zusatz character varying(2),
      bemerkungen character varying(256),
-     textposition geometry,
-     the_geom geometry,
      erschliessungsverhaeltnisse integer,
      bedarfswert real,
      bodenart character varying(6),
