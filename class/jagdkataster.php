@@ -241,7 +241,7 @@ class jagdkataster {
 		}
 		$ret = $this->database->getIntersectedFlurstWithJagdbezirke($oids);
 		while($rs = pg_fetch_array($ret[1])){
-			$rs['anteil'] = round($rs['schnittflaeche'] * 100 / $rs['flurstflaeche'], 2);
+			$rs['anteil'] = round($rs['schnittflaeche'] * 100 / $rs['albflaeche'], 2);
 			$rs['albflaeche'] = round($rs['albflaeche'], 2);
       $rs['zaehlernenner'] = $rs['zaehler'].'/'.$rs['nenner'];
 			
