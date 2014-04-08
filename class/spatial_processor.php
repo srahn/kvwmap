@@ -274,7 +274,7 @@ class spatial_processor {
 			}break;
 			
 			case 'add_geometry':{
-				$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['layer_id'], $formvars['fromwhere'], $formvars['columnname']);
+				$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['layer_id'], $formvars['fromwhere'], $formvars['columnname']);
 				if($querygeometryWKT == ''){
 					break;
 				}
@@ -292,7 +292,7 @@ class spatial_processor {
 			}break;
 			
 			case 'subtract_geometry':{
-				$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['layer_id'], $formvars['fromwhere'], $formvars['columnname']);
+				$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['layer_id'], $formvars['fromwhere'], $formvars['columnname']);
 				if($querygeometryWKT == ''){
 					break;
 				}
@@ -322,17 +322,18 @@ class spatial_processor {
 		echo $result;
 	}
 	
-	function queryMap($input_coord, $layer_id, $fromwhere, $columnname) {
+	function queryMap($input_coord, $pixsize, $layer_id, $fromwhere, $columnname) {
+		# pixsize wird übergeben, weil sie aus dem Geometrieeditor anders sein kann, da es dort eine andere Kartengröße geben kann
     # Abfragebereich berechnen
     $corners=explode(';',$input_coord);
     $lo=explode(',',$corners[0]); # linke obere Ecke in Bildkoordinaten von links oben gesehen
     $ru=explode(',',$corners[1]); # reche untere Ecke des Auswahlbereiches in Bildkoordinaten von links oben gesehen
-    $width=$this->rolle->pixsize*($ru[0]-$lo[0]); # Breite des Auswahlbereiches in m
-    $height=$this->rolle->pixsize*($ru[1]-$lo[1]); # H�he des Auswahlbereiches in m
+    $width=$pixsize*($ru[0]-$lo[0]); # Breite des Auswahlbereiches in m
+    $height=$pixsize*($ru[1]-$lo[1]); # H�he des Auswahlbereiches in m
     #echo 'Abfragerechteck im Bild: '.$lo[0].' '.$lo[1].' '.$ru[0].' '.$ru[1];
     # linke obere Ecke im Koordinatensystem in m
-    $minx=$this->rolle->oGeorefExt->minx+$this->rolle->pixsize*$lo[0]; # x Wert
-    $miny=$this->rolle->oGeorefExt->miny+$this->rolle->pixsize*($this->rolle->nImageHeight-$ru[1]); # y Wert
+    $minx=$this->rolle->oGeorefExt->minx+$pixsize*$lo[0]; # x Wert
+    $miny=$this->rolle->oGeorefExt->miny+$pixsize*($this->rolle->nImageHeight-$ru[1]); # y Wert
     $maxx=$minx+$width;
     $maxy=$miny+$height;
     $rect=ms_newRectObj();
