@@ -1160,3 +1160,9 @@ ADD  `sdatum2` VARCHAR( 10 ) NULL AFTER  `sdatum` ,
 ADD  `sVermStelle` INT( 11 ) NULL AFTER  `sdatum2`;
 
 ALTER TABLE  `druckfreitexte` ADD  `offset_attribute` VARCHAR( 255 ) NULL AFTER  `posy`;
+
+#------------------------------------------------------------------------------------------
+# Änderung von 1.13.0 zu 1.14.0
+#
+
+ALTER TABLE  `layer_attributes` CHANGE  `form_element_type`  `form_element_type` ENUM(  'Text',  'Textfeld',  'Auswahlfeld',  'Checkbox',  'Geometrie',  'SubFormPK',  'SubFormFK',  'SubFormEmbeddedPK',  'Time',  'Dokument',  'Link',  'User',  'Stelle',  'Fläche',  'dynamicLink',  'Zahl',  'UserID',  'Länge',  'mailto' ) NOT NULL DEFAULT  'Text';

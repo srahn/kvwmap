@@ -117,7 +117,7 @@ function buildwktlinefromsvgpath(svgpath){
   	<td>&nbsp;<b>Maßstab&nbsp;1:&nbsp;</b><input type="text" id="scale" name="nScale" size="5" value="<?php echo round($this->map_scaledenom); ?>"></td>
 	<? if($this->user->rolle->runningcoords != '0'){ ?>
 	<td><b>&nbsp;<?php echo $this->strCoordinates; ?>:</b>&nbsp;</td>
-	<td><input type="text" style="border:0px;background-color:transparent" name="runningcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?></td>
+	<td><input type="text" style="width:190px;border:0px;background-color:transparent" name="runningcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?></td>
 	<? }else{ ?>
 	<td colspan="2"></td>
 	<? } ?>

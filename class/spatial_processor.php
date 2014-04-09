@@ -121,6 +121,24 @@ class spatial_processor {
     }
     return $rs[0].'~'.$rs[0];
   }
+	
+	function translate($geom, $type, $x, $y){
+  	if($type == 'wkt'){
+  		$sql = "SELECT st_astext(st_translate(st_geomfromtext('".$geom."'), ".$x.", ".$y."))";
+  	}
+  	else{
+  		$sql = "SELECT st_assvg(st_translate(st_geomfromtext('".$geom."'), ".$x.", ".$y."),0,8)";
+  	}
+  	$ret = $this->pgdatabase->execSQL($sql,4, 0);
+  	#return $sql;
+    if ($ret[0]) {
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
+    }
+    else {
+    	$rs = pg_fetch_array($ret[1]);
+    }
+    return $rs[0];
+  }
   
   function process_query($formvars){
   	$formvars['fromwhere'] = stripslashes($formvars['fromwhere']);
@@ -183,6 +201,17 @@ class spatial_processor {
 				}
 				else{
 					$result = $this->get_closest_line($polywkt1, $formvars['resulttype'], $formvars['fromwhere']);
+				}
+			}break;
+			
+			case 'translate':{
+				if($formvars['resulttype'] == 'svgwkt'){
+					$result = $this->translate($polywkt1, 'svg', $formvars['translate_x'], $formvars['translate_y']);
+					$result .= '||';
+					$result .= $this->translate($polywkt1, 'wkt', $formvars['translate_x'], $formvars['translate_y']);
+				}
+				else{
+					$result = $this->translate($polywkt1, $formvars['resulttype'], $formvars['translate_x'], $formvars['translate_y']);
 				}
 			}break;
 			

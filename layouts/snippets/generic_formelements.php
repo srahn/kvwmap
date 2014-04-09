@@ -315,6 +315,24 @@
 											echo '</a><br>';
 										}
 									} break;
+									
+									case 'mailto': {
+										if ($dataset[$attributes['name'][$j]]!='') {
+											echo '<a class="link" target="_blank" style="font-size: '.$this->user->rolle->fontsize_gle.'px" href="mailto:'.$dataset[$attributes['name'][$j]].'">';
+											if($attributes['options'][$j] != ''){
+												echo $attributes['options'][$j];
+											}
+											else{
+												echo basename($dataset[$attributes['name'][$j]]);
+											}
+											echo '</a><br>';
+										}
+										if($attributes['privileg'][$j] != '0' OR $lock[$k]){
+											echo '<input onchange="set_changed_flag(currentform.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" style="font-size: '.$this->user->rolle->fontsize_gle.'px" size="61" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.htmlspecialchars($dataset[$attributes['name'][$j]]).'">';
+										}else{
+											echo '<input type="hidden" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.htmlspecialchars($dataset[$attributes['name'][$j]]).'">';
+										}
+									} break;
 
 									case 'Fläche': {
 										echo '<input onchange="set_changed_flag(currentform.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" id="custom_area" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$attributes['alias'][$j].'" ';

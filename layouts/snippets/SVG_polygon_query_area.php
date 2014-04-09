@@ -25,6 +25,7 @@
 	<input name="result" type="hidden" value="">
 	<input name="firstpoly" type="hidden" value="<?php echo $this->formvars['firstpoly']; ?>">
 	<input name="secondpoly" type="hidden" value="<?php echo $this->formvars['secondpoly']; ?>">
+	<input name="secondline" type="hidden" value="<?php echo $this->formvars['secondline']; ?>">
 	<input name="pathx_second" type="hidden" value="<?php echo $this->formvars['pathx_second']; ?>">
 	<input name="pathy_second" type="hidden" value="<?php echo $this->formvars['pathy_second']; ?>">
 	<input type="hidden" name="svghelp" id="svghelp">
@@ -83,6 +84,7 @@ $svg .= $vertex_catch_functions;# Punktfangfunktionen
 $svg .= $flurstqueryfunctions;	# Funktionen zum Hinzufügen und Entfernen von Polygonen
 $svg .= $coord_input_functions;	# Funktionen zum Eingeben von Koordinaten
 $svg .= $bufferfunctions;				# Funktionen zum Erzeugen eines Puffers
+$svg .= $transformfunctions;		# Funktionen zum Transformieren (Verschieben, ...) der Geometrie
 $svg .= $measurefunctions;
 if($_SESSION['mobile'] == 'true'){
 	$svg .= $gps_functions;
@@ -101,6 +103,7 @@ $svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmous
 $svg .= polygonbuttons($strUndo, $strDeletePolygon, $strDrawPolygon, $strCutByPolygon);
 $svg .= flurstquerybuttons();
 $svg .= bufferbuttons($strBuffer, $strBufferedLine, $strParallelPolygon);
+$svg .= transform_buttons($strMoveGeometry);
 $svg .= vertex_edit_buttons($strCornerPoint);
 $svg .= coord_input_buttons();
 if($_SESSION['mobile'] == 'true'){
