@@ -216,6 +216,7 @@ class GUI extends GUI_core{
 	function uploadTempFile() {
 		$this->mime_type = "formatter";
 		if ($this->formvars['format'] == '') $this->formvars['format'] = "json";
+    if ($this->formvars['content_type'] == '') $this->formvars['content_type'] = "text/html";
 
 		# pruefe Version
 		if ($this->formvars['version'] != "1.0.0")
