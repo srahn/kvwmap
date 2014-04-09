@@ -30,6 +30,7 @@
 	<input name="pathx_second" type="hidden" value="<?php echo $this->formvars['pathx_second']; ?>">
 	<input name="pathy_second" type="hidden" value="<?php echo $this->formvars['pathy_second']; ?>">
 	<input type="hidden" name="svghelp" id="svghelp">
+	<input type="hidden" name="bufferwidth" value="<?php echo $this->formvars['bufferwidth']; ?>">
 	<?
 	if($this->formvars['last_button'] == '' or $this->formvars['last_doing'] == ''){
 		$this->formvars['last_button'] = 'pgon0';
@@ -38,6 +39,7 @@
 	?>
 	<input name="last_button" type="hidden" value="<? echo $this->formvars['last_button']; ?>">
 	<input name="last_doing" type="hidden" value="<? echo $this->formvars['last_doing']; ?>">
+	<input name="last_doing2" type="hidden" value="<? echo $this->formvars['last_doing2']; ?>">
 	<input name="lastcoordx" type="hidden" value="">
 	<input name="lastcoordy" type="hidden" value="">
 	<input type="hidden" name="stopnavigation" value="0">
@@ -79,7 +81,7 @@ $svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmous
 $svg .= polygonbuttons($strUndo, $strDeletePolygon, $strDrawPolygon, $strCutByPolygon);
 $svg .= boxbuttons();
 $svg .= flurstquerybuttons();
-$svg .= bufferbuttons($strBuffer);
+$svg .= bufferbuttons($strBuffer, $strBufferedLine, $strParallelPolygon);
 $svg .= vertex_edit_buttons($strCornerPoint);
 $svg .= '</g>';
 $svg .= $SVG_end;

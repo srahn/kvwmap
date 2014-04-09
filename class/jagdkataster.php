@@ -115,7 +115,7 @@ class jagdkataster {
   }
 
 	function getjagdbezirkfrompaechter($paechterid){
-		$sql = "SELECT jb.oid, jb.id, jb.name, jb.art FROM jagdpaechter2bezirke as jpb, jagdbezirke jb WHERE CAST(jpb.bezirkid AS text) = jb.concode AND jpb.paechterid = ".(int)$paechterid;
+		$sql = "SELECT jb.oid, jb.id, jb.name, jb.art FROM jagdpaechter2bezirke as jpb, jagdbezirke jb WHERE CAST(jpb.bezirkid AS text) = jb.concode AND jpb.paechterid = ".sprintf("%.0f", $paechterid);
 		#echo $sql;
 		$ret = $this->database->execSQL($sql, 4, 0);
 		while($rs = pg_fetch_array($ret[1])){
@@ -130,7 +130,7 @@ class jagdkataster {
 			$sql.= " id = '".$id."',";
 			$sql.= " name = '".$name."',";
 			$sql.= " art = '".$art."'";
-			$sql.= " WHERE oid = ".(int)$oid;
+			$sql.= " WHERE oid = ".sprintf("%.0f", $oid);
 		}
 		#echo $sql;
 		$ret = $this->database->execSQL($sql, 4, 1);
@@ -158,7 +158,7 @@ class jagdkataster {
 				$sql.= " status = '".$status."',";
 				$sql.= " verzicht = '".$verzicht."',";
 				$sql.= " art = '".$art."'";
-				$sql.= " WHERE oid = ".(int)$oid;
+				$sql.= " WHERE oid = ".sprintf("%.0f", $oid);
 			}
 			else{
 				if($umring != ''){
@@ -186,7 +186,7 @@ class jagdkataster {
   }
 
 	function getjagdbezirk($oid){
-		$sql = "SELECT oid, *, st_assvg(st_transform(the_geom, ".$this->clientepsg."), 0, 8) AS svggeom, st_astext(st_transform(the_geom, ".$this->clientepsg.")) AS wktgeom FROM jagdbezirke WHERE oid = ".(int)$oid;
+		$sql = "SELECT oid, *, st_assvg(st_transform(the_geom, ".$this->clientepsg."), 0, 8) AS svggeom, st_astext(st_transform(the_geom, ".$this->clientepsg.")) AS wktgeom FROM jagdbezirke WHERE oid = ".sprintf("%.0f", $oid);
 		#echo $sql;
 		$ret = $this->database->execSQL($sql, 4, 0);
 		$jagdbezirk = pg_fetch_array($ret[1]);
@@ -194,12 +194,12 @@ class jagdkataster {
 	}
 
 	function deletejagdbezirk($oid){
-		$sql = "DELETE FROM jagdbezirke WHERE oid = ".(int)$oid;
+		$sql = "DELETE FROM jagdbezirke WHERE oid = ".sprintf("%.0f", $oid);
 		$ret = $this->database->execSQL($sql, 4, 1);
 	}
 	
 	function copyjagdbezirk($oid){
-		$sql = "INSERT INTO jagdbezirke SELECT * FROM jagdbezirke WHERE oid = ".(int)$oid;
+		$sql = "INSERT INTO jagdbezirke SELECT * FROM jagdbezirke WHERE oid = ".sprintf("%.0f", $oid);
 		$ret = $this->database->execSQL($sql, 4, 1);
 		return pg_last_oid($ret[1]);
 	}
@@ -241,12 +241,9 @@ class jagdkataster {
 		}
 		$ret = $this->database->getIntersectedFlurstWithJagdbezirke($oids);
 		while($rs = pg_fetch_array($ret[1])){
-			$rs['anteil'] = round($rs['schnittflaeche'] * 100 / $rs['flurstflaeche'], 2);
+			$rs['anteil'] = round($rs['schnittflaeche'] * 100 / $rs['albflaeche'], 2);
 			$rs['albflaeche'] = round($rs['albflaeche'], 2);
-      if ($rs['nenner']!='') {
-        $rs['nenner']="/".$rs['nenner'];
-      }
-			$rs['zaehlernenner'] = $rs['zaehler'].$rs['nenner'];
+      $rs['zaehlernenner'] = $rs['zaehler'].'/'.$rs['nenner'];
 			
 			# --- Eigentümer ---
 			$flst = new flurstueck($rs['flurstkennz'], $this->database);

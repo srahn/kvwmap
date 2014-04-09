@@ -12,6 +12,12 @@ function save(){
 			document.GUI.newpathwkt.value = buildwktpolygonfromsvgpath(document.GUI.newpath.value);
 		}
 	}
+	if(document.GUI.datum.value != ''){
+		if(!datecheck(document.GUI.datum.value)){
+			alert('Das Datum muss im Format TT.MM.JJJJ angegeben werden.');
+			return;
+		}
+	}
 	if(document.GUI.newpathwkt.value != ''){
 		ahah("<? echo URL.APPLVERSION; ?>index.php", "go=check_nachweis_poly&umring="+document.GUI.newpathwkt.value+"&flur="+document.GUI.Flur.value+"&gemkgschl="+document.GUI.Gemarkung.value, new Array(top.document.GUI.result2, ""), new Array("setvalue", "execute_function"));
 	}
@@ -256,7 +262,7 @@ else {
   </tr>
   <tr>
   	<td>&nbsp;</td> 
-    <td><?php if ($this->formvars[NACHWEIS_PRIMARY_ATTRIBUTE]!='') { ?><a href="index.php?go=Nachweisanzeige">&lt;&lt;&nbsp;zur&uuml;ck&nbsp;zum&nbsp;Rechercheergebnis</a><?php } ?></td>
+    <td><?php if ($this->formvars[NACHWEIS_PRIMARY_ATTRIBUTE]!='') { ?><a href="index.php?go=Nachweisanzeige&order=<? echo $this->formvars['order']; ?>">&lt;&lt;&nbsp;zur&uuml;ck&nbsp;zum&nbsp;Rechercheergebnis</a><?php } ?></td>
 		<td></td>
 	<? if($this->user->rolle->runningcoords != '0'){ ?>
 	<td width="100px"><b>&nbsp;<?php echo $this->strCoordinates; ?>:</b>&nbsp;</td>
@@ -280,6 +286,7 @@ else {
 			<INPUT TYPE="HIDDEN" NAME="fromwhere" VALUE="<? echo $this->formvars['fromwhere']; ?>">
 			<INPUT TYPE="hidden" NAME="result2" VALUE="">
 			<INPUT TYPE="hidden" NAME="check" VALUE="">
+			<input type="hidden" name="order" value="<?php echo $this->formvars['order']; ?>">
     </td>
   </tr>
 </table>

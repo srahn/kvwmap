@@ -54,7 +54,7 @@ class polygoneditor {
     $rect->minx=$rs['minx']; 
     $rect->maxx=$rs['maxx'];
     $rect->miny=$rs['miny']; 
-    $rect->maxy=$rs['maxy'];
+    $rect->maxy=$rs['maxy'];		
     $randx=($rect->maxx-$rect->minx)*$border/100;
     $randy=($rect->maxy-$rect->miny)*$border/100;
     $rect->minx -= $randx;

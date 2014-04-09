@@ -87,13 +87,13 @@ class pgdatabase extends pgdatabase_alkis{
 		$name[2] = '%'.$formvars['name2'].'%';
 		$name[3] = '%'.$formvars['name3'].'%';
 		$name[4] = '%'.$formvars['name4'].'%';
-		$bezirk = $this->formvars['bezirk'];
-		$blatt = $this->formvars['blatt'];
-		$flur = $this->formvars['FlurID'];
-		$limitAnzahl = $this->formvars['anzahl'];
-		$limitStart = $this->formvars['offset'];
-		$caseSensitive = $this->formvars['caseSensitive'];
-		$order = $this->formvars['order'];
+		$bezirk = $formvars['bezirk'];
+		$blatt = $formvars['blatt'];
+		$flur = $formvars['FlurID'];
+		$limitAnzahl = $formvars['anzahl'];
+		$limitStart = $formvars['offset'];
+		$caseSensitive = $formvars['caseSensitive'];
+		$order = $formvars['order'];
     $sql ="SELECT DISTINCT n.lfd_nr_name,name1,name2,name3,name4,e.bezirk,e.blatt,e.namensnr";
     $sql.=" FROM alb_g_namen AS n,alb_g_eigentuemer AS e, alb_grundbuecher as gb";
     if ($gemkgschl>0) {
@@ -483,7 +483,7 @@ class pgdatabase extends pgdatabase_alkis{
   }
 	
 	function getIntersectedFlurstWithJagdbezirke($oids){
-		$sql = "SELECT alb.gemkgschl, gemkgname, alb.flurstkennz, st_area(alkobj_e_fla.the_geom) AS flurstflaeche, st_area(st_intersection(alkobj_e_fla.the_geom, jagdbezirke.the_geom)) AS schnittflaeche, jagdbezirke.name, jagdbezirke.art, alb.flaeche AS albflaeche";
+		$sql = "SELECT alb.gemkgschl, gemkgname, alb.flurstkennz, alb.flurnr as flur, substring(alb.flurstkennz from 12 for 5) as zaehler, substring(alb.flurstkennz from 18 for 3) as nenner, st_area(alkobj_e_fla.the_geom) AS flurstflaeche, round(st_area(st_intersection(alkobj_e_fla.the_geom, jagdbezirke.the_geom)) * (alb.flaeche/st_area(alkobj_e_fla.the_geom))) AS schnittflaeche, jagdbezirke.name, jagdbezirke.art, alb.flaeche AS albflaeche";
 		$sql.= " FROM alb_v_gemarkungen, alknflst, alkobj_e_fla, jagdbezirke, alb_flurstuecke AS alb";
 		$sql.= " WHERE alb_v_gemarkungen.gemkgschl = CAST(alknflst.gemkgschl AS integer) AND alknflst.objnr = alkobj_e_fla.objnr";
 		$sql.= " AND jagdbezirke.oid IN (".implode(',', $oids).")";

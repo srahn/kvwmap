@@ -38,11 +38,7 @@ var posy = 0;
 
 function stop(event){
 	if(dragobjekt != null || resizeobjekt != null){		// markieren von Elementen verhindern, falls Mauszeiger aus Overlay gezogen wird
-		if(event.preventDefault){
-			event.preventDefault();
-		}else{ // IE fix
-			event.returnValue = false;
-		};
+		preventDefault(event);
 	}
 }
 
@@ -150,6 +146,13 @@ function overlay_link(data){
 	}
 }
 
+function datecheck(value){
+	dateElements = value.split('.');
+	var date1 = new Date(dateElements[2],dateElements[1]-1,dateElements[0]);
+	if(date1 == 'Invalid Date')return false;
+	else return date1;
+}
+
 function update_legend(layerhiddenstring){
 	parts = layerhiddenstring.split(' ');
 	for(j = 0; j < parts.length-1; j=j+2){
@@ -196,11 +199,7 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers){
     thema.checked = true;
   }
   if(groupradiolayers != '' && groupradiolayers.value != ''){
-    if(event.preventDefault){
-			event.preventDefault();
-		}else{ // IE fix
-			event.returnValue = false;
-		};
+    preventDefault(event);
 		groupradiolayerstring = groupradiolayers.value+'';			// die Radiolayer innerhalb einer Gruppe
 		radiolayer = groupradiolayerstring.split('|');
 		for(i = 0; i < radiolayer.length-1; i++){
@@ -211,6 +210,7 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers){
 				}
 				else{
 					query.checked = !status;
+					query.checked2 = query.checked;		// den check-Status hier nochmal merken, damit man ihn bei allen Click-Events setzen kann, sonst setzt z.B. Chrome den immer wieder zurueck
 					if(query.checked == true){
 						thema.checked = true;
 					}
@@ -219,11 +219,7 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers){
 		}
 	}
 	if(queryradiolayers != '' && queryradiolayers.value != ''){
-    if(event.preventDefault){
-			event.preventDefault();
-		}else{ // IE fix
-			event.returnValue = false;
-		};
+    preventDefault(event);
 		queryradiolayerstring = queryradiolayers.value+'';			// die Radiobuttons für die Abfrage, wenn singlequery-Modus aktiviert
 		radiolayer = queryradiolayerstring.split('|');
 		for(i = 0; i < radiolayer.length-1; i++){
@@ -233,6 +229,7 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers){
 				}
 				else{
 					query.checked = !status;
+					query.checked2 = query.checked;		// den check-Status hier nochmal merken, damit man ihn bei allen Click-Events setzen kann, sonst setzt z.B. Chrome den immer wieder zurueck
 					if(query.checked == true){
 						thema.checked = true;
 					}
@@ -249,11 +246,7 @@ function updateQuery(event, thema, query, radiolayers){
     }
   }
   if(radiolayers != '' && radiolayers.value != ''){  
-  	if(event.preventDefault){
-			event.preventDefault();
-		}else{ // IE fix
-			event.returnValue = false;
-		};
+  	preventDefault(event);
   	radiolayerstring = radiolayers.value+'';
   	radiolayer = radiolayerstring.split('|');
   	for(i = 0; i < radiolayer.length-1; i++){
@@ -263,12 +256,22 @@ function updateQuery(event, thema, query, radiolayers){
   		}
   		else{
   			thema.checked = !thema.checked;
+				thema.checked2 = thema.checked;		// den check-Status hier nochmal merken, damit man ihn bei allen Click-Events setzen kann, sonst setzt z.B. Chrome den immer wieder zurueck
   		}
   		if(document.getElementById('qLayer'+radiolayer[i]) != undefined){
   			document.getElementById('qLayer'+radiolayer[i]).checked = false;
   		}
   	}
   }
+}
+
+function preventDefault(e){
+	if(e.preventDefault){
+		e.preventDefault();
+	}else{ // IE fix
+		e.returnValue = false;
+	};
+	return false;
 }
 
 function selectgroupquery(group){
@@ -295,13 +298,19 @@ function selectgroupquery(group){
 }
 
 function selectgroupthema(group){
-  value = group.value+"";
-  layers = value.split(",");
-  test = document.getElementById("thema_"+layers[0]);
-  check = !test.checked;
-  for(i = 0; i < layers.length; i++){
+  var value = group.value+"";
+  var layers = value.split(",");
+	var check;
+  for(i = 0; i < layers.length; i++){			// erst den ersten checkbox-Layer suchen und den check-Status merken
     thema = document.getElementById("thema_"+layers[i]);
     if(thema && thema.type == 'checkbox'){
+			check = !thema.checked;
+			break;
+    }
+  }
+	for(i = 0; i < layers.length; i++){
+    thema = document.getElementById("thema_"+layers[i]);
+    if(thema && (!check || thema.type == 'checkbox')){		// entweder alle Layer sollen ausgeschaltet werden oder es ist ein checkbox-Layer
       thema.checked = check;
       query = document.getElementById("qLayer"+layers[i]);
       updateQuery('', thema, query, '');

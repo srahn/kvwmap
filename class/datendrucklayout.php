@@ -179,6 +179,9 @@ class ddl {
 										continue 2; 
 									}
 								}
+								elseif($this->layout['type'] == 0 AND $this->pdf->getFirstPageId() != end($this->pdf->ezPages)){
+									$this->pdf->reopenObject($this->pdf->getFirstPageId());		# zurück zur ersten Seite bei seitenweisem Typ und allen absolut positionierten Attributen, wenn erforderlich
+								}
 								#### relative Positionierung über Offset-Attribut ####									
 								
 								$zeilenhoehe = $this->layout['elements'][$attributes['name'][$j]]['fontsize'];      		      		
@@ -208,8 +211,19 @@ class ddl {
 				}
 				elseif($attributes['name'][$j] == $attributes['the_geom'] AND $this->layout['elements'][$attributes['name'][$j]]['xpos'] > 0){		# Geometrie
 					if($oids[$i] != ''){
-						$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->gui->user->rolle->epsg_code);
-						$rect = $polygoneditor->zoomTopolygon($oids[$i], $attributes['table_name'][$attributes['the_geom']], $attributes['the_geom'], 10);
+						if($attributes['geomtype'][$attributes['the_geom']] == 'POINT'){
+							$pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->gui->user->rolle->epsg_code);							
+							$point = $pointeditor->getpoint($oids[$i], $attributes['table_name'][$attributes['the_geom']], $attributes['the_geom']);
+							$rect = ms_newRectObj();
+							$rect->minx = $point['pointx']-100;
+							$rect->maxx = $point['pointx']+100;
+							$rect->miny = $point['pointy']-100;
+							$rect->maxy = $point['pointy']+100;
+						}
+						else{
+							$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->gui->user->rolle->epsg_code);
+							$rect = $polygoneditor->zoomTopolygon($oids[$i], $attributes['table_name'][$attributes['the_geom']], $attributes['the_geom'], 10);
+						}
 						$this->gui->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
 					}
 					$this->gui->map->set('width', $this->layout['elements'][$attributes['name'][$j]]['width']*MAPFACTOR);
@@ -331,7 +345,6 @@ class ddl {
 		if($pdfobject == NULL){
 			include (PDFCLASSPATH."class.ezpdf.php");				# Einbinden der PDF Klassenbibliotheken
 			$this->pdf=new Cezpdf();			# neues PDF-Objekt erzeugen
-			$this->pdf->current_page_id = $this->pdf->getFirstPageId();
 		}
 		else{
 			$this->pdf = $pdfobject;			# ein PDF-Objekt wurde aus einem übergeordneten Druckrahmen/Layer übergeben

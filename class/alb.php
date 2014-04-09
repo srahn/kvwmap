@@ -68,7 +68,7 @@ class ALB {
     if($formvars['status']){ $csv .= 'Status;';}
     if($formvars['vorgaenger']){ $csv .= 'Vorgaenger;';}
     if($formvars['nachfolger']){ $csv .= 'Nachfolger;';}
-    $csv .= utf8_encode('Klassifizierung-ALB;Klass-Fläche-ALB;EMZ-ALB;Klassifizierung-ALK;Klass-Fläche-ALK;EMZ-ALK;');
+    $csv .= utf8_encode('Klassifizierung-ALB;Klass-Fläche-ALB;EMZ-ALB;Klassifizierung-ALK;Klass-Fläche-ALK;EMZ-ALK;gesamt;');
     if($formvars['freitext']){ $csv .= 'Freitext;';}
     if($formvars['hinweis']){ $csv .= 'Hinweis;';}
     if($formvars['baulasten']){ $csv .= 'Baulasten;';}
@@ -282,11 +282,12 @@ class ALB {
 				$emzges_222 = 0; $emzges_223 = 0;
         $flaeche_222 = 0; $flaeche_223 = 0;
 
-	      for($kl = 0; $kl < count($alkemz)+1; $kl++){
+	      for($kl = 0; $kl < count($alkemz)+2; $kl++){
 	      	if($kl == count($alkemz)){              
 		      	$nichtgeschaetzt=round($flst->ALB_Flaeche-$flaeche_222-$flaeche_223);
+						if($nichtgeschaetzt <= 0)continue;
 	      	}
-		      if($nichtgeschaetzt > 0 OR $kl < count($alkemz)){
+		      if($nichtgeschaetzt > 0 OR $kl < count($alkemz)+2){
 		      	if($formvars['flurstkennz']){ $csv .= $flst->FlurstKennz.';';}
 			      if($formvars['flurstkennz']){ $csv .= "'".$flst->FlurstNr."';";}
 			      if($formvars['gemkgname']){ $csv .= $flst->GemkgName.';';}
@@ -366,11 +367,11 @@ class ALB {
 			            $label2=ltrim(substr(trim(substr($alkemz[$kl]['label'],-9,6)),0,3),"0");
 			            $label3=ltrim(substr($alkemz[$kl]['label'],-6,3),"0");
 			            $label4=substr($alkemz[$kl]['label'],-3,3);
-			          } elseif (strlen($alkemz[$kl]['label'])==29) {
-			            $label1=substr(substr($alkemz[$kl]['label'],4),0,-15);
-			            $label2=ltrim(substr(trim(substr($alkemz[$kl]['label'],-15,6)),0,3),"0");
-			            $label3=ltrim(substr($alkemz[$kl]['label'],-12,3),"0");
-			            $label4='W';
+			          } elseif (strlen($alkemz[$kl]['label'])==29) {									
+									$label1='('.rtrim(substr(substr($alkemz[$kl]['label'],4),0,-15)).')';
+				          $label2=ltrim(substr(trim(substr($alkemz[$kl]['label'],-15,6)),0,3),"0");
+				          $label3=ltrim(substr($alkemz[$kl]['label'],-12,3),"0");
+				          $label4='';
 			          }
 			          $csv .= utf8_encode($objart.$label1.' '.$label2.'/'.$label3.' '.$label4.';');
 			          $csv .= round($alkemz[$kl]['flaeche']).';';
@@ -380,6 +381,21 @@ class ALB {
 			          if($nichtgeschaetzt>0){
 			          	$csv .= utf8_encode('nicht geschätzt: ;'.$nichtgeschaetzt.';');
 			          }
+								else{
+									$csv .= ';;';
+								}
+			        }
+							$csv .= ';';
+							if($kl == count($alkemz)+1){              
+								$csv .= ';;';
+			          if($emzges_222 > 0){
+									$BWZ_222 = round($emzges_222/$flaeche_222*100);
+									$csv .= ' Ackerland gesamt: EMZ '.$emzges_222.' , BWZ '.$BWZ_222." ";
+								}
+								if($emzges_223 > 0){
+									$BWZ_223 = round($emzges_223/$flaeche_223*100);
+									$csv .= utf8_encode(' Grünland gesamt: EMZ '.$emzges_223.' , BWZ '.$BWZ_223);
+								}
 			        }
 		        }
 		        //////////////////////

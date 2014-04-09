@@ -1155,4 +1155,8 @@ ADD  `linejoinmaxsize` INT( 11 ) NULL;
 
 ALTER TABLE  `ddl_elemente` ADD  `offset_attribute` VARCHAR( 255 ) NULL AFTER  `ypos`;
 
+ALTER TABLE  `rolle_nachweise` ADD  `sdatum` VARCHAR( 10 ) NULL AFTER  `suchantrnr` ,
+ADD  `sdatum2` VARCHAR( 10 ) NULL AFTER  `sdatum` ,
+ADD  `sVermStelle` INT( 11 ) NULL AFTER  `sdatum2`;
+
 ALTER TABLE  `druckfreitexte` ADD  `offset_attribute` VARCHAR( 255 ) NULL AFTER  `posy`;

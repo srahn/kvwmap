@@ -17,7 +17,7 @@ if ($nexttime!='') {
 else {
   # deaktivieren der nextfunktion und ausgrauen des Button
   $mouseupfunction='';
-  $nextbuttoncolor='200, 200, 200';
+  $nextbuttoncolor='190, 190, 190';
 }
 if ($prevtime!='' AND $this->prevtime!='0000-00-00 00:00:00') {
   # eine schonmal geladene Karte wird angezeigt.
@@ -35,7 +35,7 @@ $SVGvars_navbuttons = '
 
 			<g id="previous" transform="translate(0 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
           <set attributeName="filter" begin="previous0.mousedown" dur="0s" fill="freeze" to="none"/>
           <set attributeName="filter" begin="previous0.mouseup;previous0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
         </rect>
@@ -46,7 +46,7 @@ $SVGvars_navbuttons = '
 
       <g id="next" transform="translate(26 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
           <set attributeName="filter" begin="next0.mousedown" dur="0s" fill="freeze" to="none"/>
           <set attributeName="filter" begin="next0.mouseup;next0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
         </rect>
@@ -59,7 +59,7 @@ $SVGvars_navbuttons = '
 
       <g id="zoomin" transform="translate(52 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
         	<set attributeName="filter" begin="zoomin0.mousedown" dur="0s" fill="freeze" to="none"/>
 					<set attributeName="filter" begin="zoomin0.mouseup;zoomin0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
 				</rect>
@@ -79,7 +79,7 @@ $SVGvars_navbuttons = '
 
       <g id="zoomout" transform="translate(78 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
         	<set attributeName="filter" begin="zoomout0.mousedown" dur="0s" fill="freeze" to="none"/>
 					<set attributeName="filter" begin="zoomout0.mouseup;zoomout0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
 				</rect>
@@ -97,7 +97,7 @@ $SVGvars_navbuttons = '
 
       <g id="zoomall" transform="translate(104 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
         	<set attributeName="filter" begin="zoomall0.mousedown" dur="0s" fill="freeze" to="none"/>
 					<set attributeName="filter" begin="zoomall0.mouseup;zoomall0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
 				</rect>
@@ -117,7 +117,7 @@ $SVGvars_navbuttons = '
 
       <g id="recentre" transform="translate(130 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
         	<set attributeName="filter" begin="recentre0.mousedown" dur="0s" fill="freeze" to="none"/>
 					<set attributeName="filter" begin="recentre0.mouseup;recentre0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
 				</rect>

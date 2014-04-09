@@ -134,9 +134,9 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 ?><p>
 <table width="100%" border="0" cellpadding="0" cellspacing="2">
   <tr>
-    <td align="right"><strong><?php echo $strName1.', '.$strName2; ?>:</strong>
+    <td align="right" width="40%"><strong><?php echo $strName1.', '.$strName2; ?>:</strong>
     </td>
-    <td><input name="name1" type="text" value="<?php echo $this->formvars['name1']; ?>" size="25" tabindex="1"></td>
+    <td width="60%"><input name="name1" type="text" value="<?php echo $this->formvars['name1']; ?>" size="25" tabindex="1"></td>
   </tr>
   <tr>
     <td width="100%" align="right"><strong><?php echo $strName3.'/'.$strName4; ?>:</strong>

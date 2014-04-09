@@ -188,11 +188,13 @@
 	}	
 
 	function zoomin(){
+		top.currentform.last_doing2.value = top.currentform.last_doing.value;
 		top.currentform.last_doing.value = "zoomin"; 
 	  document.getElementById("canvas").setAttribute("cursor", "crosshair");
 	}
 
 	function zoomout(){
+		top.currentform.last_doing2.value = top.currentform.last_doing.value;
 		top.currentform.last_doing.value = "zoomout";
 	  document.getElementById("canvas").setAttribute("cursor", "crosshair");
 	}
@@ -203,6 +205,7 @@
 	}
 
 	function recentre(){
+		top.currentform.last_doing2.value = top.currentform.last_doing.value;
 		top.currentform.last_doing.value = "recentre";
 	  document.getElementById("canvas").setAttribute("cursor", "move");
 		if(measurefunctions == true){
@@ -462,6 +465,7 @@
  	}
 
  	function mousewheelzoom(){
+		top.currentform.last_doing2.value = top.currentform.last_doing.value;
 		var g = document.getElementById("moveGroup");
 		zx = g.getCTM().inverse();
 		pathx[0] = Math.round(zx.e);
@@ -528,10 +532,13 @@
 			update_gps_position();
 		}
 		if(polygonfunctions == true){
-			if(top.currentform.always_draw.checked && !geomload){		// bei "weiterzeichnen" in den Polygonzeichnen-Modus gehen  
+			if(top.currentform.always_draw.checked && !geomload){		// "weiterzeichnen"
 				top.currentform.last_button.value = "pgon0";
-				if(top.currentform.secondpoly.value == "started" || top.currentform.secondpoly.value == "true"){	// am zweiten Polygon wird weitergezeichnet
-					top.currentform.last_doing.value = "draw_second_polygon";
+				if(top.currentform.secondpoly.value == "started" || top.currentform.secondpoly.value == "true"){	// am zweiten Polygon oder an einer gepufferten Linie wird weitergezeichnet
+					if(top.currentform.last_doing2.value == "add_buffered_line")top.currentform.last_button.value = "buffer1";
+					if(top.currentform.last_doing2.value == "add_parallel_polygon")top.currentform.last_button.value = "buffer2";
+					if(top.currentform.last_doing2.value == "subtract_polygon")top.currentform.last_button.value = "pgon_subtr0";
+					top.currentform.last_doing.value = top.currentform.last_doing2.value;
 					if(pathx_second.length == 1){				// ersten Punkt darstellen
 						document.getElementById("startvertex").setAttribute("cx", (pathx_second[0]-minx)/scale);
 						document.getElementById("startvertex").setAttribute("cy", (pathy_second[0]-miny)/scale);
@@ -712,6 +719,20 @@
 			break;
 			case "vertex_edit":				// nix machen
 			break;
+			case "add_buffered_line":
+				addlinepoint_second(world_x, world_y);
+				top.currentform.firstpoly.value = "true";
+				top.currentform.secondpoly.value = "true";
+				top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=add_buffered_line&width="+top.currentform.bufferwidth.value+"&geotype=line&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
+			break;
+			case "add_parallel_polygon":
+				addlinepoint_second(world_x, world_y);
+				if(pathx_second.length > 1){
+					top.currentform.firstpoly.value = "true";
+					top.currentform.secondpoly.value = true;
+					top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=add_parallel_polygon&width="+top.currentform.bufferwidth.value+"&geotype=line&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
+				}				
+			break;			
 
 			case "measure":
 		    if (measuring){
@@ -846,6 +867,8 @@ function mouseup(evt){
 		  }
 			if(bufferfunctions == true){
 		  	document.getElementById("buffer0").style.setProperty("fill","ghostwhite", "");
+				document.getElementById("buffer1").style.setProperty("fill","ghostwhite", "");
+				document.getElementById("buffer2").style.setProperty("fill","ghostwhite", "");
 		  }
 		  if(flurstuecksqueryfunctions == true){
 		  	document.getElementById("ppquery0").style.setProperty("fill","ghostwhite", "");
@@ -884,7 +907,52 @@ function mouseup(evt){
 	  	document.getElementById("canvas").setAttribute("cursor", "crosshair");
 		}
 	}
+	
+	function buildsvglinepath(pathx, pathy){
+		svgpath = "M "+pathx[0]+" "+pathy[0];
+		for(var i = 1; i < pathx.length; ++i){
+	  	svgpath = svgpath+" "+pathx[i]+" "+pathy[i];
+	 	}
+	  return svgpath;
+	}
 
+	function buildsvgpath(pathx, pathy){
+		svgpath = "M "+pathx[0]+" "+pathy[0];
+		for(var i = 1; i < pathx.length; ++i){
+	  	svgpath = svgpath+" "+pathx[i]+" "+pathy[i];
+	 	}
+	 	svgpath = svgpath+" "+pathx[0]+" "+pathy[0];
+	  return svgpath;
+	}
+	
+	function addlinepoint_second(worldx, worldy){
+		// neuen punkt setzen
+		top.currentform.lastcoordx.value = world_x;
+		top.currentform.lastcoordy.value = world_y;
+	  pathx_second.push(world_x);
+	  pathy_second.push(world_y);
+		if(top.currentform.pathx_second.value != ""){
+			top.currentform.pathx_second.value = top.currentform.pathx_second.value+";"+world_x;
+			top.currentform.pathy_second.value = top.currentform.pathy_second.value+";"+world_y;
+		}
+		else{
+			top.currentform.pathx_second.value = world_x;
+			top.currentform.pathy_second.value = world_y;
+		}
+		if(pathx_second.length == 1){
+			document.getElementById("startvertex").setAttribute("cx", (world_x-minx)/scale);
+			document.getElementById("startvertex").setAttribute("cy", (world_y-miny)/scale);
+		}
+		else{
+			document.getElementById("startvertex").setAttribute("cx", -500);
+			document.getElementById("startvertex").setAttribute("cy", -500);
+		}
+	  path_second = buildsvglinepath(pathx_second, pathy_second);
+	  if(linefunctions && pathy_second.length > 1){
+	  	top.currentform.secondline.value = true;
+	  }
+	}
+	
 	';
 
 
@@ -990,31 +1058,19 @@ function mouseup(evt){
 		top.currentform.lastcoordy.value = world_y; 
 	  pathx.push(world_x);
 	  pathy.push(world_y);
+		if(pathx.length == 1){
+			document.getElementById("startvertex").setAttribute("cx", (world_x-minx)/scale);
+			document.getElementById("startvertex").setAttribute("cy", (world_y-miny)/scale);
+		}
+		else{
+			document.getElementById("startvertex").setAttribute("cx", -500);
+			document.getElementById("startvertex").setAttribute("cy", -500);
+		}
 	  path = buildsvglinepath(pathx,pathy);
 	  top.currentform.newpath.value = path;
 	  if(pathy.length > 1){
 	  	top.currentform.firstline.value = true;
 	  	linelength();
-	  }
-	}
-
-	function addlinepoint_second(worldx, worldy){
-		// neuen punkt setzen
-		top.currentform.lastcoordx.value = world_x;
-		top.currentform.lastcoordy.value = world_y;
-	  pathx_second.push(world_x);
-	  pathy_second.push(world_y);
-		if(top.currentform.pathx_second.value != ""){
-			top.currentform.pathx_second.value = top.currentform.pathx_second.value+";"+world_x;
-			top.currentform.pathy_second.value = top.currentform.pathy_second.value+";"+world_y;
-		}
-		else{
-			top.currentform.pathx_second.value = world_x;
-			top.currentform.pathy_second.value = world_y;
-		}
-	  path_second = buildsvglinepath(pathx_second, pathy_second);
-	  if(pathy_second.length > 1){
-	  	top.currentform.secondline.value = true;
 	  }
 	}
 
@@ -1036,7 +1092,7 @@ function mouseup(evt){
 		pixel_path = world2pixelsvg(top.currentform.newpath.value);
 	  obj.setAttribute("d", pixel_path);
 	}
-
+	
 	function redrawsecondline(){
 	 	// Line um punktepfad erweitern
 	  var obj = document.getElementById("line_first");
@@ -1116,6 +1172,8 @@ function mouseup(evt){
 		redrawsecondline();
 		top.currentform.secondline.value = false;
 		top.currentform.secondpoly.value = false;
+		top.currentform.pathx_second.value = "";
+		top.currentform.pathy_second.value = "";
 	}
 
 	function restartline(){
@@ -1227,23 +1285,6 @@ function mouseup(evt){
 		else{
 			return "";
 		}
-	}
-
-	function buildsvglinepath(pathx, pathy){
-		svgpath = "M "+pathx[0]+" "+pathy[0];
-		for(var i = 1; i < pathx.length; ++i){
-	  	svgpath = svgpath+" "+pathx[i]+" "+pathy[i];
-	 	}
-	  return svgpath;
-	}
-
-	function buildsvgpath(pathx, pathy){
-		svgpath = "M "+pathx[0]+" "+pathy[0];
-		for(var i = 1; i < pathx.length; ++i){
-	  	svgpath = svgpath+" "+pathx[i]+" "+pathy[i];
-	 	}
-	 	svgpath = svgpath+" "+pathx[0]+" "+pathy[0];
-	  return svgpath;
 	}
 
 	function world2pixelsvg(pathWelt) {
@@ -1816,17 +1857,51 @@ function mouseup(evt){
 
 		function add_buffer(){
 			buffer = prompt("Breite des Puffers in Metern:", "10");
-			top.currentform.secondpoly.value = true;
-			top.currentform.firstpoly.value = true;
-		  if(top.currentform.newpathwkt.value != ""){
-		  	top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+top.currentform.newpathwkt.value+"&width="+buffer+"&operation=buffer&resulttype=svgwkt", new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
-		  }
-		  else{
-		  	if(top.currentform.newpath.value != ""){
-		  		newpath = buildwktpolygonfromsvgpath(top.currentform.newpath.value);
-		  		top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+newpath+"&width="+buffer+"&operation=buffer&resulttype=svgwkt", new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
-		  	}
-		  }
+			if(buffer){
+				top.currentform.secondpoly.value = true;
+				top.currentform.firstpoly.value = true;
+				if(top.currentform.newpathwkt.value != ""){
+					top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+top.currentform.newpathwkt.value+"&width="+buffer+"&operation=buffer&resulttype=svgwkt", new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
+				}
+				else{
+					if(top.currentform.newpath.value != ""){
+						newpath = buildwktpolygonfromsvgpath(top.currentform.newpath.value);
+						top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+newpath+"&width="+buffer+"&operation=buffer&resulttype=svgwkt", new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
+					}
+				}
+			}
+		}
+		
+		function add_buffered_line(){
+			top.currentform.last_doing.value = "add_buffered_line";
+			top.currentform.bufferwidth.value = prompt("Breite des Puffers in Metern:", top.currentform.bufferwidth.value);
+			if(top.currentform.pathwkt.value == "" && top.currentform.newpath.value != ""){
+				top.currentform.pathwkt.value = buildwktpolygonfromsvgpath(top.currentform.newpath.value);
+			}
+			else{
+				if(top.currentform.newpathwkt.value != ""){
+					top.currentform.pathwkt.value = top.currentform.newpathwkt.value;
+				}
+			}
+		  if(top.currentform.secondpoly.value == "true"){
+				applypolygons();
+			}
+		}
+		
+		function add_parallel_polygon(){
+			top.currentform.last_doing.value = "add_parallel_polygon";
+			top.currentform.bufferwidth.value = prompt("Breite des Polygons in Metern:", top.currentform.bufferwidth.value);
+			if(top.currentform.pathwkt.value == "" && top.currentform.newpath.value != ""){
+				top.currentform.pathwkt.value = buildwktpolygonfromsvgpath(top.currentform.newpath.value);
+			}
+			else{
+				if(top.currentform.newpathwkt.value != ""){
+					top.currentform.pathwkt.value = top.currentform.newpathwkt.value;
+				}
+			}
+		  if(top.currentform.secondpoly.value == "true"){
+				applypolygons();
+			}
 		}
 
 	';
@@ -2418,15 +2493,6 @@ function mouseup(evt){
 	  obj.setAttribute("d", pixel_path_second);
 	}
 
-	function buildsvgpath(pathx, pathy){
-		svgpath = "M "+pathx[0]+" "+pathy[0];
-		for(var i = 1; i < pathx.length; ++i){
-	  	svgpath = svgpath+" "+pathx[i]+" "+pathy[i];
-	 	}
-	 	svgpath = svgpath+" "+pathx[0]+" "+pathy[0];
-	  return svgpath;
-	}
-
 	function buildwktpolygonfromsvgpath(svgpath){
 		if(svgpath != ""){
 			var koords;
@@ -2525,6 +2591,32 @@ function mouseup(evt){
 					redrawsecondpolygon();
 				}
 			break;
+			case "add_buffered_line":
+				if(pathx_second.length > 1){
+					pathx_second.pop();
+					pathy_second.pop();
+					str = top.currentform.pathx_second.value;
+					top.currentform.pathx_second.value = str.substring(0, str.lastIndexOf(";"));
+					str = top.currentform.pathy_second.value;
+					top.currentform.pathy_second.value = str.substring(0, str.lastIndexOf(";"));
+					path_second = buildsvglinepath(pathx_second, pathy_second);
+					top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=add_buffered_line&width="+top.currentform.bufferwidth.value+"&geotype=line&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
+					redrawsecondpolygon();
+				}
+			break;
+			case "add_parallel_polygon":
+				if(pathx_second.length > 2){
+					pathx_second.pop();
+					pathy_second.pop();
+					str = top.currentform.pathx_second.value;
+					top.currentform.pathx_second.value = str.substring(0, str.lastIndexOf(";"));
+					str = top.currentform.pathy_second.value;
+					top.currentform.pathy_second.value = str.substring(0, str.lastIndexOf(";"));
+					path_second = buildsvglinepath(pathx_second, pathy_second);
+					top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=add_parallel_polygon&width="+top.currentform.bufferwidth.value+"&geotype=line&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
+					redrawsecondpolygon();
+				}
+			break;
 			case "vertex_edit":
 				undo_geometry_editing();
 			break;
@@ -2533,6 +2625,7 @@ function mouseup(evt){
 
 	function restart(){
 		top.currentform.last_doing.value = "draw_polygon";
+		top.currentform.last_doing2.value = "draw_polygon";
 		textx = -1000000;
 		texty = -1000000;
 		redrawpoint();
@@ -2563,6 +2656,8 @@ function mouseup(evt){
 		  boxx.pop();
 		  boxy.pop();
 		}
+		document.getElementById("startvertex").setAttribute("cx", -500);
+		document.getElementById("startvertex").setAttribute("cy", -500);
 		redrawsecondpolygon();
 		redraw();
 	}
@@ -2577,6 +2672,8 @@ function mouseup(evt){
 		path_second = buildsvgpath(pathx_second, pathy_second);
 		redrawsecondpolygon();
 		top.currentform.secondpoly.value = false;
+		top.currentform.pathx_second.value = "";
+		top.currentform.pathy_second.value = "";
 	}
 
 	function subtr_polygon(){
@@ -2986,7 +3083,7 @@ $measurefunctions = '
 		$polygonbuttons = '
 	      <g id="new" onmousedown="restart();highlightbyid(\'pgon0\');" transform="translate(0 0 )">
 	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
 	        	<set attributeName="filter" begin="new0.mousedown" dur="0s" fill="freeze" to="none"/>
 						<set attributeName="filter" begin="new0.mouseup;new0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
 					</rect>
@@ -3012,7 +3109,7 @@ $measurefunctions = '
 	      
 	      <g id="undo" onmousedown="deletelast(evt);" transform="translate(26 0)">
 	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
 	        	<set attributeName="filter" begin="undo0.mousedown" dur="0s" fill="freeze" to="none"/>
 						<set attributeName="filter" begin="undo0.mouseup;undo0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
 					</rect>
@@ -3028,7 +3125,7 @@ $measurefunctions = '
 
 				<g id="pgon" onmousedown="draw_pgon_on();add_polygon();highlightbyid(\'pgon0\');" transform="translate(52 0 )">
 		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
 		      	<set attributeName="filter" begin="pgon0.mousedown" dur="0s" fill="freeze" to="none"/>
 						<set attributeName="filter" begin="pgon0.mouseup;pgon0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
 					</rect>
@@ -3063,7 +3160,7 @@ $measurefunctions = '
 		$gpsbuttons = '
 			<g id="gps" onmousedown="set_gps_position();" transform="translate('.$last_x.' 0 )">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
         	<set attributeName="filter" begin="gps1.mousedown" dur="0s" fill="freeze" to="none"/>
 					<set attributeName="filter" begin="gps1.mouseup;gps1.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
 				</rect>
@@ -3077,7 +3174,7 @@ $measurefunctions = '
 		$last_x += 26;
 		$gpsbuttons.= '
 			<g id="gps_f" transform="translate('.$last_x.' 0 )">
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
           <set attributeName="filter" begin="gps0.mousedown" dur="0s" fill="freeze" to="none"/>
           <set attributeName="filter" begin="gps0.mouseup;gps0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
         </rect>
@@ -3098,7 +3195,7 @@ $measurefunctions = '
 		$pointbuttons = '
 				<g id="text" onmousedown="draw_point();highlightbyid(\'text0\');" transform="translate('.$last_x.' 0 )">
 	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
 	        	<set attributeName="filter" begin="text0.mousedown" dur="0s" fill="freeze" to="none"/>
 						<set attributeName="filter" begin="text0.mouseup;text0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
 					</rect>
@@ -3119,7 +3216,7 @@ $measurefunctions = '
 		$boxbuttons = '
 				<g id="box" onmousedown="draw_box_on();highlightbyid(\'box0\');" transform="translate('.$last_x.' 0)">
 	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
 	          <set attributeName="filter" begin="box0.mousedown" dur="0s" fill="freeze" to="none"/>
 	          <set attributeName="filter" begin="box0.mouseup;box0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
 	        </rect>
@@ -3139,7 +3236,7 @@ $measurefunctions = '
 		$linebuttons = '
 				 <g id="undo" onmousedown="deletelastline(evt);" transform="translate(0 0)">
 	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
 	        	<set attributeName="filter" begin="undo0.mousedown" dur="0s" fill="freeze" to="none"/>
 						<set attributeName="filter" begin="undo0.mouseup;undo0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
 					</rect>
@@ -3155,7 +3252,7 @@ $measurefunctions = '
 
 	      <g id="new" onmousedown="restartline();highlightbyid(\'line0\');" transform="translate(26 0 )">
 	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
 	        	<set attributeName="filter" begin="new0.mousedown" dur="0s" fill="freeze" to="none"/>
 						<set attributeName="filter" begin="new0.mouseup;new0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
 					</rect>
@@ -3181,7 +3278,7 @@ $measurefunctions = '
 
 				<g id="line" onmousedown="add_line();highlightbyid(\'line0\');" transform="translate(52 0 )">
 		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
 		      	<set attributeName="filter" begin="line0.mousedown" dur="0s" fill="freeze" to="none"/>
 						<set attributeName="filter" begin="line0.mouseup;line0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
 					</rect>
@@ -3193,7 +3290,7 @@ $measurefunctions = '
 
 				<g id="line" onmousedown="delete_lines();highlightbyid(\'del0\');" transform="translate(78 0 )">
 		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
 		      	<set attributeName="filter" begin="del0.mousedown" dur="0s" fill="freeze" to="none"/>
 						<set attributeName="filter" begin="del0.mouseup;del0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
 					</rect>
@@ -3212,7 +3309,7 @@ $measurefunctions = '
 				
 				<g id="query_add" transform="translate(104 0)">
 	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
 	          <set attributeName="filter" begin="ppquery0.mousedown" dur="0s" fill="freeze" to="none"/>
 	          <set attributeName="filter" begin="ppquery0.mouseup;ppquery0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
 	        </rect>
@@ -3244,7 +3341,7 @@ $measurefunctions = '
 
 				<g id="line" onmousedown="split_lines();highlightbyid(\'split0\');" transform="translate(156 0 )">
 		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
 		      	<set attributeName="filter" begin="del0.mousedown" dur="0s" fill="freeze" to="none"/>
 						<set attributeName="filter" begin="del0.mouseup;del0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
 					</rect>
@@ -3265,7 +3362,7 @@ $measurefunctions = '
     $flurstquerybuttons = '
       <g id="query_add" transform="translate('.$last_x.' 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
           <set attributeName="filter" begin="ppquery0.mousedown" dur="0s" fill="freeze" to="none"/>
           <set attributeName="filter" begin="ppquery0.mouseup;ppquery0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
         </rect>
@@ -3298,13 +3395,13 @@ $measurefunctions = '
     return $flurstquerybuttons;
   }
   
-  function bufferbuttons($strBuffer){
+  function bufferbuttons($strBuffer, $strBufferedLine, $strParallelPolygon){
   	global $last_x;
   	$last_x += 26;
     $bufferbuttons = '
       <g id="buffer_add" transform="translate('.$last_x.' 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
           <set attributeName="filter" begin="buffer0.mousedown" dur="0s" fill="freeze" to="none"/>
           <set attributeName="filter" begin="buffer0.mouseup;buffer0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
         </rect>
@@ -3318,9 +3415,37 @@ $measurefunctions = '
 						379.5,218 378.5,139 357.5,138 260.5,91"
 					transform="translate(3 3) scale(0.04)"
 					 style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
-				<polygon points="178.579,57.7353 164.258,51.2544 178.96,44.515 176.48,49.1628 185.48,49.1628 185.48,53.1628 176.48,53.1628"
-						 style="fill:rgb(255,255,255);stroke:rgb(0,0,0);stroke-width:1.7" transform="scale(0.7) translate(-46 -154) rotate(60.992 13.3045 25.4374)"/>
         <rect id="buffer0" onmouseover="show_tooltip(\''.$strBuffer.'\',evt.clientX,evt.clientY)" onmousedown="add_buffer();hide_tooltip();highlightbyid(\'buffer0\');" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
+      </g>';
+		$last_x += 26;
+		$bufferbuttons .= '
+      <g id="buffer_add_line" transform="translate('.$last_x.' 0)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+          <set attributeName="filter" begin="buffer1.mousedown" dur="0s" fill="freeze" to="none"/>
+          <set attributeName="filter" begin="buffer1.mouseup;buffer1.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+        </rect>
+        <polygon
+					points="221 339 212 344 204 351 197 359 192 368 189 378 188 389 189 399 192 410 197 419 322 607 329 615 337 622 346 627 356 630 366 631 377 630 387 627 396 622 404 616 499 525 506 517 511 508 515 498 516 487 515 477 512 466 507 457 501 449 493 442 484 437 474 433 463 432 453 433 442 436 433 441 425 447 376 493 323 414 524 331 533 326 541 319 548 311 553 302 556 292 557 281 556 270 553 260 548 251 541 243 533 236 524 231 514 228 503 227 492 228 482 231 221 339"
+					transform="translate(2.5 -17) scale(0.050) rotate(88 197 419)"
+					 style="fill:rgb(164,164,164);stroke:rgb(0,0,0);stroke-width:21"/>
+				<polyline points="503 281 242 389 367 577 462 486" transform="translate(2.5 -17) scale(0.050) rotate(88 197 419)" style="fill:none;stroke-dasharray:2,2;stroke:black;stroke-width:15"/>
+        <rect id="buffer1" onmouseover="show_tooltip(\''.$strBufferedLine.'\',evt.clientX,evt.clientY)" onmousedown="add_buffered_line();hide_tooltip();highlightbyid(\'buffer1\');" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
+      </g>';
+			$last_x += 26;
+		$bufferbuttons .= '
+      <g id="parallel_polygon" transform="translate('.$last_x.' 0)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+          <set attributeName="filter" begin="buffer2.mousedown" dur="0s" fill="freeze" to="none"/>
+          <set attributeName="filter" begin="buffer2.mouseup;buffer2.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+        </rect>
+				<polyline points="476 285 677 517" transform="translate(0 -41) scale(0.070) rotate(94 197 419)" style="fill:none;stroke:#4A4A4A;stroke-width:20"/>
+        <polygon
+					points="574 546 647 483 506 320 433 383 574 546"
+					transform="translate(0 -41) scale(0.070) rotate(94 197 419)"
+					 style="fill:rgb(164,164,164);stroke:rgb(0,0,0);stroke-width:20"/>
+        <rect id="buffer2" onmouseover="show_tooltip(\''.$strParallelPolygon.'\',evt.clientX,evt.clientY)" onmousedown="add_parallel_polygon();hide_tooltip();highlightbyid(\'buffer2\');" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
       </g>';
     return $bufferbuttons;
   }
@@ -3331,7 +3456,7 @@ $measurefunctions = '
 		$vertex_edit_buttons ='
 			<g id="vertex_edit" transform="translate('.$last_x.' 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
           <set attributeName="filter" begin="vertex_edit1.mousedown" dur="0s" fill="freeze" to="none"/>
           <set attributeName="filter" begin="vertex_edit1.mouseup;vertex_edit1.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
         </rect>
@@ -3350,7 +3475,7 @@ $measurefunctions = '
 		$vertex_edit_buttons ='
 			<g id="vertex_edit" transform="translate('.$last_x.' 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
           <!--set attributeName="filter" begin="coord_input1.mousedown" dur="0s" fill="freeze" to="none"/-->
           <!--set attributeName="filter" begin="coord_input1.mouseup;coord_input1.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/-->
         </rect>
@@ -3367,7 +3492,7 @@ $measurefunctions = '
 		$last_x += 26;
 		$measure_buttons ='
 			<g id="dist" transform="translate('.$last_x.' 0)">
-        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
           <set attributeName="filter" begin="measure0.mousedown" dur="0s" fill="freeze" to="none"/>
           <set attributeName="filter" begin="measure0.mouseup;measure0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
         </rect>

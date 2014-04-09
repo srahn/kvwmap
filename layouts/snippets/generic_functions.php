@@ -1,6 +1,5 @@
 <script type="text/javascript" src="funktionen/calendar.js"></script>
 <script type="text/javascript">
-<!--
 
 <?
 	if($this->formvars['close_window'] != ""){
@@ -9,7 +8,7 @@
 	}
  ?>
  
-function checknumbers(input, type, length, decimal_length){
+checknumbers = function(input, type, length, decimal_length){
 	if(type == 'numeric' || type == 'float4' || type == 'float8'){
 		var val = input.value.replace(/[a-zA-Z]/g, '');
 		val = val.replace(/,/g, '.');
@@ -43,7 +42,7 @@ function checknumbers(input, type, length, decimal_length){
   }
 }
 
-function selectall(layer_id){
+selectall = function(layer_id){
 	var k = 0;
 	obj = document.getElementById(layer_id+'_'+k);
 	while(obj != undefined){
@@ -53,14 +52,14 @@ function selectall(layer_id){
 	}
 }
 
-function zoom2wkt(wkt, epsg){
+zoom2wkt = function(wkt, epsg){
 	currentform.epsg.value = epsg;
 	currentform.wkt.value = wkt;
 	currentform.go.value = 'zoom2wkt';
 	currentform.submit();
 }
 
-function check_for_selection(layer_id){
+check_for_selection = function(layer_id){
 	go = 'false';
 	checkbox_name_obj = document.getElementsByName('checkbox_names_'+layer_id);
 	checkbox_name_string = checkbox_name_obj[0].value;
@@ -79,7 +78,7 @@ function check_for_selection(layer_id){
 	}
 }
 
-function zoomto_datasets(layer_id, tablename, columnname){
+zoomto_datasets = function(layer_id, tablename, columnname){
 	if(check_for_selection(layer_id)){
 		currentform.chosen_layer_id.value = layer_id;
 		currentform.layer_tablename.value = tablename;
@@ -89,7 +88,7 @@ function zoomto_datasets(layer_id, tablename, columnname){
 	}
 }
 
-function delete_datasets(layer_id){
+delete_datasets = function(layer_id){
 	if(check_for_selection(layer_id)){
 		if(confirm('Wollen Sie die ausgewählten Datensätze wirklich löschen?')){
 			currentform.chosen_layer_id.value = layer_id;
@@ -99,7 +98,7 @@ function delete_datasets(layer_id){
 	}
 }
 
-function delete_document(attributename){
+delete_document = function(attributename){
 	if(confirm('Wollen Sie das ausgewählte Dokument wirklich löschen?')){
 		currentform.document_attributename.value = attributename; 
 		currentform.go.value = 'Dokument_Loeschen';
@@ -107,7 +106,7 @@ function delete_document(attributename){
 	}
 }
 
-function csv_export_all(layer_id){
+csv_export_all = function(layer_id){
 	currentform.all.value = 'true';
 	currentform.chosen_layer_id.value = layer_id;
 	currentform.go_backup.value = currentform.go.value;
@@ -115,7 +114,7 @@ function csv_export_all(layer_id){
 	currentform.submit();
 }
 
-function shape_export_all(layer_id, anzahl){
+shape_export_all = function(layer_id, anzahl){
 	currentform.chosen_layer_id.value = layer_id;
 	currentform.anzahl.value = anzahl;
 	currentform.go_backup.value = currentform.go.value;
@@ -123,7 +122,7 @@ function shape_export_all(layer_id, anzahl){
 	currentform.submit();
 }
 
-function shape_export(layer_id){
+shape_export = function(layer_id){
 	if(check_for_selection(layer_id)){
 		currentform.chosen_layer_id.value = layer_id;
 		currentform.go_backup.value = currentform.go.value;
@@ -132,7 +131,7 @@ function shape_export(layer_id){
 	}
 }
 
-function select_this_dataset(layer_id, n){
+select_this_dataset = function(layer_id, n){
 	var k = 0;
 	obj = document.getElementById(layer_id+'_'+k);
 	while(obj != undefined){
@@ -143,7 +142,7 @@ function select_this_dataset(layer_id, n){
 	document.getElementById(layer_id+'_'+n).checked = true;
 }
 
-function use_for_new_dataset(layer_id){
+use_for_new_dataset = function(layer_id){
 	if(check_for_selection(layer_id)){
 		currentform.chosen_layer_id.value = layer_id;
 		currentform.pathwkt.value = '';
@@ -155,7 +154,7 @@ function use_for_new_dataset(layer_id){
 	}
 }
 
-function csv_export(layer_id){
+csv_export = function(layer_id){
 	if(check_for_selection(layer_id)){
 		currentform.chosen_layer_id.value = layer_id;
 		currentform.go_backup.value = currentform.go.value;
@@ -164,7 +163,7 @@ function csv_export(layer_id){
 	}
 }
 
-function print_data(layer_id){
+print_data = function(layer_id){
 	if(check_for_selection(layer_id)){
 		currentform.chosen_layer_id.value = layer_id;
 		currentform.go_backup.value = currentform.go.value;
@@ -173,7 +172,7 @@ function print_data(layer_id){
 	}
 }
 
-function showcharts(layer_id){
+showcharts = function(layer_id){
 	if(document.getElementById('charts_'+layer_id).style.display == 'none'){
 		document.getElementById('charts_'+layer_id).style.display = '';
 	}
@@ -182,7 +181,7 @@ function showcharts(layer_id){
 	}
 }
 
-function change_charttype(layer_id){
+change_charttype = function(layer_id){
 	if(document.getElementsByName('charttype_'+layer_id)[0].value == 'mirrorbar'){
 		document.getElementById('split_'+layer_id).style.display = '';
 	}
@@ -191,7 +190,7 @@ function change_charttype(layer_id){
 	}
 }
 
-function create_chart(layer_id){
+create_chart = function(layer_id){
 	if(check_for_selection(layer_id)){
 		currentform.target = "_blank";
 		currentform.chosen_layer_id.value = layer_id;
@@ -203,7 +202,7 @@ function create_chart(layer_id){
 	}
 }
 
-function update_require_attribute(attributes, k,layer_id, value){
+update_require_attribute = function(attributes, k,layer_id, value){
 	// attributes ist eine Liste von zu aktualisierenden Attributen, k die Nummer des Datensatzes und value der ausgewaehlte Wert
 	attribute = attributes.split(',');
 	for(i = 0; i < attribute.length; i++){
@@ -214,7 +213,7 @@ function update_require_attribute(attributes, k,layer_id, value){
 	}
 }
 
-function change_orderby(attribute, layer_id){
+change_orderby = function(attribute, layer_id){
 	if(currentform.go_backup.value != ''){
 		currentform.go.value = currentform.go_backup.value;
 	}
@@ -227,10 +226,8 @@ function change_orderby(attribute, layer_id){
 	overlay_submit(currentform);
 }
 
-function set_changed_flag(flag){
+set_changed_flag = function(flag){
 	flag.value=1;
 }
 
-
-//-->
 </script>

@@ -5,13 +5,13 @@
 #                                                                  #
 ####################################################################
 # aktuelle Versionsnummer
-define('VERSION','1.13.0');
+define('VERSION','1.13');
 define('APPLVERSION','kvwmap_'.VERSION.'/');
 # Bezeichnung der MySQL-Datenbank mit den Benutzerdaten
 $dbname='kvwmapdb';
 # Wenn der pgdbname leer gelassen wird, wird versucht die Information
 # für die Verbindung zur PostGIS-Datenbank aus der Tabelle Stelle zu lesen.
-$pgdbname='';	# ACHTUNG: nicht setzen, sonst sind die Eigentümer in der Demostelle zu sehen!!!
+$pgdbname='';
 #$pgdbname='alkis_25833';
 
 ########################## Metadaten zum Landkreis

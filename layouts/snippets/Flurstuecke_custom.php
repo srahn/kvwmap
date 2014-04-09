@@ -1,14 +1,14 @@
 <script language="JavaScript" type="text/javascript">
-<!--
 
-function show_all(){
-	document.GUI.anzahl.value='10000000';
-	document.GUI.offset_<? echo $this->qlayerset[$i]['Layer_ID'] ?>.value = 0;
-	document.GUI.submit();
+
+show_all = function(){
+	currentform.anzahl.value='10000000';
+	currentform.offset_<? echo $this->qlayerset[$i]['Layer_ID'] ?>.value = 0;
+	currentform.submit();
 }
 
-function send_selected_flurst(go, formnummer, wz, target){
-	document.GUI.go_backup.value=document.GUI.go.value;
+send_selected_flurst = function(go, formnummer, wz, target){
+	currentform.go_backup.value=currentform.go.value;
   var semi = false;
   var flurstkennz = "";
   var flurstarray = document.getElementsByName("check_flurstueck");
@@ -21,34 +21,26 @@ function send_selected_flurst(go, formnummer, wz, target){
       semi = true;
     }
   }
-  document.GUI.target = '';
+  currentform.target = '';
   if(target == '_blank'){
-    document.GUI.target = '_blank';
+    currentform.target = '_blank';
   }
-  document.GUI.go.value=go;
-  document.GUI.FlurstKennz.value=flurstkennz;
-  document.GUI.formnummer.value=formnummer;
-  document.GUI.wz.value=wz;
-  document.GUI.submit();
+  currentform.go.value=go;
+  currentform.FlurstKennz.value=flurstkennz;
+  currentform.formnummer.value=formnummer;
+  currentform.wz.value=wz;
+  currentform.submit();
 }
 
-function browser_switch(go){
-  if(navigator.appName == 'Microsoft Internet Explorer'){
-    send_selected_flurst(go, '', '', '_blank');
-  }
-  else{
-    send_selected_flurst(go, '', '', '');
-  }
-}
 
-function backto(go){
-  document.GUI.go.value=go;
-  document.GUI.submit();
+backto = function(go){
+  currentform.go.value=go;
+  currentform.submit();
 }
 
 emzangezeigt = new Array();
 
-function emzversteckt(k){
+emzversteckt = function(k){
   var gkbelement='gkb'+k;
   if (emzangezeigt[k]){
   	document.getElementById(gkbelement).style.display = 'none';
@@ -61,7 +53,7 @@ function emzversteckt(k){
 }
 
 
---></script>
+</script>
 
 
 <a name="anfang"></a>
@@ -488,10 +480,10 @@ function emzversteckt(k){
 				            $label3=ltrim(substr($alkemz[$j]['label'],-6,3),"0");
 				            $label4=substr($alkemz[$j]['label'],-3,3);
 				          } elseif (strlen($alkemz[$j]['label'])==29) {
-				            $label1=substr(substr($alkemz[$j]['label'],4),0,-15);
+				            $label1='('.rtrim(substr(substr($alkemz[$j]['label'],4),0,-15)).')';
 				            $label2=ltrim(substr(trim(substr($alkemz[$j]['label'],-15,6)),0,3),"0");
 				            $label3=ltrim(substr($alkemz[$j]['label'],-12,3),"0");
-				            $label4='W';
+				            $label4='';
 				          }
 		            	?>
 		            <tr>
@@ -688,7 +680,7 @@ function emzversteckt(k){
 			    </td>
 			  </tr>
 			  <? } ?>
-			  <? if($privileg_['eigentuemer']){?>
+			  <? if($privileg_['eigentuemer'] or $privileg_['bestandsnr']){?>
 			  <tr>
 				<td colspan="2">
 		    	  <table border="0" cellspacing="0" cellpadding="2">
@@ -708,7 +700,10 @@ function emzversteckt(k){
 			      	  <td>Bestand</td>
 			      	  <td colspan="2"><? echo $BestandStr; ?></td>
 			        </tr>
-					    <? }
+					    <?
+					    
+					    }
+					    if($privileg_['eigentuemer']){
 							$Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
 					        $anzEigentuemer=count($Eigentuemerliste);
 					        for ($e=0;$e<$anzEigentuemer;$e++) { ?>
@@ -809,6 +804,7 @@ function emzversteckt(k){
                       </td>
 			        </tr>
 			     <?  }
+			       }
 			       }
 				  } ?>
 				  </table>

@@ -741,6 +741,7 @@ if($GUI->goNotExecutedInPlugins){
 
 	  #2006-01-03 pk
 	  case 'Grundbuchblatt_Auswaehlen_Suchen' : {
+		$GUI->checkCaseAllowed('Grundbuchblatt_Auswaehlen');
 		$GUI->grundbuchblattSuchen();
 	  } break;
 
@@ -877,8 +878,8 @@ if($GUI->goNotExecutedInPlugins){
 	  } break;
 
 	  case 'Druckausschnittswahl' : {
-		$GUI->formvars['loadmapsource'] = 'DataBase';
-		$GUI->druckausschnittswahl($GUI->formvars['loadmapsource']);
+			$GUI->formvars['loadmapsource'] = 'DataBase';
+			$GUI->druckausschnittswahl($GUI->formvars['loadmapsource']);
 	  } break;
 
 	  case 'Druckausschnittswahl_Vorschau' : {
@@ -1101,7 +1102,7 @@ if($GUI->goNotExecutedInPlugins){
 	  } break;
 
 	  case 'Bodenrichtwertformular' : {
-		$GUI->checkCaseAllowed('Bodenrichtwertformular');
+		$GUI->checkCaseAllowed('Bodenrichtwertformular');		
 		$GUI->titel='Bodenrichtwerterfassung';
 		$GUI->bodenRichtWertErfassung();
 	  } break;
@@ -1245,12 +1246,12 @@ if($GUI->goNotExecutedInPlugins){
 		$GUI->dokument_loeschen();
 	  } break;
 
-	  case 'neuer_Layer_Datensatz' : {
-		$GUI->neuer_Layer_Datensatz();
+	  case 'neuer_Layer_Datensatz' : {			
+			$GUI->neuer_Layer_Datensatz();
 	  } break;
 
 	  case 'neuer_Layer_Datensatz_speichern' : {
-		$GUI->neuer_Layer_Datensatz_speichern();
+			$GUI->neuer_Layer_Datensatz_speichern();
 	  } break;
 
 	  case 'generischer_csv_export' : {
@@ -1641,7 +1642,7 @@ if($GUI->goNotExecutedInPlugins){
 		$GUI->savedformvars=$GUI->user->rolle->getNachweisParameter();
 		$GUI->formvars=array_merge($GUI->savedformvars,$GUI->formvars);
 		$GUI->nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
-		$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'],$GUI->formvars['datum'], $GUI->formvars['VermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['datum2'], $GUI->formvars['suchflur']);
+		$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'],$GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur']);
 		if($ret!=''){
 		  $GUI->nachweisAnzeige();
 		  showAlert($ret);
@@ -1663,7 +1664,7 @@ if($GUI->goNotExecutedInPlugins){
 	  # für Fortführungsrisse, Koordinatenverzeichnisse und Grenzniederschriften
 
 	  case 'Nachweisformular' : {
-		$GUI->checkCaseAllowed($go);
+		$GUI->checkCaseAllowed($go);		
 		# Unterscheidung ob vorhandene Dokumente geändert werden sollen oder neu eingegeben
 		if ($GUI->formvars['id']!='') {
 		  # Ein Nachweis soll geändert werden

@@ -4,7 +4,7 @@
   $strName="Name*";
   $strDataType="Datatype*";
   $strGroup="Group";
-  $strPath="Path";
+  $strPath="Query";
   $strData="Data";
   $strTileIndex="Tileindex";
   $strTileItem="Tileitem";

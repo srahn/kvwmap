@@ -1099,16 +1099,16 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
 								if($this->user->rolle->singlequery){			# singlequery-Modus
 									$legend .=  'type="radio" ';
 									if($layer['selectiontype'] == 'radio'){
-										$legend .=  ' onClick="if(event.preventDefault){event.preventDefault();}else{event.returnValue = false;};" onMouseDown="updateThema(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), document.GUI.radiolayers_'.$group_id.', document.GUI.layers)"';
+										$legend .=  ' onClick="this.checked = this.checked2;" onMouseUp="this.checked = this.checked2;" onMouseDown="updateThema(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), document.GUI.radiolayers_'.$group_id.', document.GUI.layers)"';
 									}
 									else{
-										$legend .=  ' onClick="if(event.preventDefault){event.preventDefault();}else{event.returnValue = false;};" onMouseDown="updateThema(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), \'\', document.GUI.layers)"';
+										$legend .=  ' onClick="this.checked = this.checked2;" onMouseUp="this.checked = this.checked2;" onMouseDown="updateThema(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), \'\', document.GUI.layers)"';
 									}
 								}
 								else{			# normaler Modus
 									if($layer['selectiontype'] == 'radio'){
 										$legend .=  'type="radio" ';
-										$legend .=  ' onClick="if(event.preventDefault){event.preventDefault();}else{event.returnValue = false;};" onMouseDown="updateThema(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), document.GUI.radiolayers_'.$group_id.', \'\')"';
+										$legend .=  ' onClick="this.checked = this.checked2;" onMouseUp="this.checked = this.checked2;" onMouseDown="updateThema(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), document.GUI.radiolayers_'.$group_id.', \'\')"';
 									}								
 									else{
 										$legend .=  'type="checkbox" ';
@@ -1132,7 +1132,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
 							$legend .=  '<input id="thema_'.$layer['Layer_ID'].'" ';
 							if($layer['selectiontype'] == 'radio'){
 								$legend .=  'type="radio" ';
-								$legend .=  ' onClick="if(event.preventDefault){event.preventDefault();}else{event.returnValue = false;};" onMouseDown="updateQuery(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), document.GUI.radiolayers_'.$group_id.')"';
+								$legend .=  ' onClick="this.checked = this.checked2;" onMouseUp="this.checked = this.checked2;" onMouseDown="updateQuery(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), document.GUI.radiolayers_'.$group_id.')"';
 								$radiolayers[$group_id] .= $layer['Layer_ID'].'|';
 							}
 							else{
@@ -1854,10 +1854,12 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
     $this->Menue->get_menue_width($this->Stelle->id);
     $this->user->rolle->hideMenue(0);
     include(LAYOUTPATH."snippets/".$this->formvars['menuebodyfile']);
+		echo '~if(typeof resizemap2window != "undefined")resizemap2window();';
   }
 
   function hideMenueWithAjax() {
     $this->user->rolle->hideMenue(1);
+		echo '~if(typeof resizemap2window != "undefined")resizemap2window();';
   }
 
   function changemenue($id, $status){
@@ -1882,6 +1884,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
   
   function changeLegendDisplay(){
   	$this->user->rolle->changeLegendDisplay($this->formvars['hide']);
+		echo '~resizemap2window();';
   }
 
   function googlemaps(){
@@ -1911,6 +1914,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
   }
 
   function PointEditor(){
+		$this->reduce_mapwidth(0);
     $this->main='PointEditor.php';
     $this->titel='Geometrie bearbeiten';
     # aktuellen Kartenausschnitt laden
@@ -1978,6 +1982,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
   }
 
   function LineEditor(){
+		$this->reduce_mapwidth(100);
     $this->main='LineEditor.php';
     $this->titel='Geometrie bearbeiten';
     # aktuellen Kartenausschnitt laden
@@ -2087,6 +2092,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
   }
 
   function PolygonEditor(){
+		$this->reduce_mapwidth(100);
    	$this->main='PolygonEditor.php';
     $this->titel='Geometrie bearbeiten';
     # aktuellen Kartenausschnitt laden
@@ -2744,6 +2750,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
   }
 
   function Anliegerbeiträge_editor(){
+		$this->reduce_mapwidth(100);
     $this->main='anliegerbeitraege_editor.php';
     $this->titel='Anliegerbeiträge';
     # aktuellen Kartenausschnitt laden + zeichnen!
@@ -2902,6 +2909,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
   }
 
   function jagdkatastereditor(){
+		$this->reduce_mapwidth(100);
     $this->main='jagdkatastereditor.php';
     $this->titel='Jagdbezirk anlegen';
     $this->loadMap('DataBase');
@@ -3429,6 +3437,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
   }
 
   function druckausschnittswahl($loadmapsource){
+		$this->reduce_mapwidth(10);
     $this->titel='Druckausschnitt wählen';
     $this->main="druckausschnittswahl.php";
     # aktuellen Kartenausschnitt laden + zeichnen!
@@ -4403,9 +4412,9 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
       }
     }
 
-    # 2006-02-01 pk
+    $formvars = $this->formvars;
     $flurstueck=new flurstueck('',$this->pgdatabase);
-		$ret=$flurstueck->getNamen($this->formvars,$GemkgListe['GemkgID']);
+		$ret=$flurstueck->getNamen($formvars,$GemkgListe['GemkgID']);
     if ($ret[0]) {
       $this->Fehlermeldung='<br>Es konnten keine Namen abgefragt werden'.$ret[1];
       $this->namenWahl();
@@ -4416,7 +4425,10 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
         $this->Fehlermeldung='<br>Es konnten keine Namen gefunden werden, bitte ändern Sie die Anfrage!';
       }
       else {
-        $this->anzNamenGesamt=count($this->namen);
+				$formvars['anzahl'] = '';
+				$formvars['offset'] = '';
+				$ret=$flurstueck->getNamen($formvars,$GemkgListe['GemkgID']);
+        $this->anzNamenGesamt=count($ret[1]);
 
         if($this->formvars['withflurst'] == 'on'){
           for($i = 0; $i < count($this->namen); $i++){
@@ -5342,7 +5354,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
       if($this->Docu->activeframe[0]['texts'][$j]['text'] == '' AND $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']] != ''){    // ein Freitext hat keinen Text aber in der Druckausschnittswahl wurde ein Text vom Nutzer eingefügt
         $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']] = str_replace(chr(10), ';', $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']]);
         $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']] = str_replace(chr(13), '', $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']]);
-        $this->Docu->activeframe[0]['texts'][$j]['text'] = $this->formvars['freetext'.$this->Docu->activeframe[0]['texts'][$j]['id']];
+        $this->Docu->activeframe[0]['texts'][$j]['text'] = $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']];
       }
       $freitext = explode(';', $this->substituteFreitext($this->Docu->activeframe[0]['texts'][$j]['text']));
       $anzahlzeilen = count($freitext);
@@ -5651,6 +5663,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
   }
 
   function bodenRichtWertErfassung() {
+		$this->reduce_mapwidth(100);
     if ($this->formvars['oid']=='') {
       $this->titel='Bodenrichtwerterfassung';
     }
@@ -5880,6 +5893,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
   }
 
   function nachweisAenderungsformular() {
+		$this->reduce_mapwidth(100);
     #2005-11-25_pk
     # Anzeige des Formulars zum Eintragen neuer/Ändern vorhandener Metadaten zu einem Nachweisdokument
     # (FFR, KVZ oder GN)
@@ -5975,7 +5989,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
       $this->GemkgFormObj=new FormObject("Gemarkung","select",$GemkgListe['GemkgID'],$this->formvars['Gemarkung'],$GemkgListe['Bezeichnung'],"1","","",NULL);
 
       # erzeugen des Formularobjektes für Vermessungsstellen
-      $this->FormObjVermStelle=$this->getFormObjVermStelle($this->formvars['VermStelle']);
+      $this->FormObjVermStelle=$this->getFormObjVermStelle('VermStelle', $this->formvars['VermStelle']);
       $currenttime=date('Y-m-d H:i:s',time());
       $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
       $this->drawMap();
@@ -6561,6 +6575,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
 	    $this->formvars['columnname'] = $data_explosion[0];
     	if($this->formvars['map_flag'] != ''){
 	    	################# Map ###############################################
+				$this->reduce_mapwidth(100);
 	    	$this->loadMap('DataBase');
 		    $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
 		    # Geometrie-Übernahme-Layer:
@@ -6928,6 +6943,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
   }
 
   function neuer_Layer_Datensatz(){
+		$this->reduce_mapwidth(150);
     $this->layerdaten = $this->Stelle->getqueryablePostgisLayers(1);
     $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->titel='neuen Datensatz einfügen';
@@ -7866,6 +7882,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
   }
 
   function shp_export(){
+		$this->reduce_mapwidth(10);
     $this->titel='Shape-Export';
     if($this->formvars['chosen_layer_id'] != '')$this->formvars['selected_layer_id'] = $this->formvars['chosen_layer_id'];		# aus der Sachdatenanzeige des GLE
     $this->main='shape_export.php';
@@ -9108,7 +9125,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
     if ($this->formvars['abfrageart']=='poly') {
       $this->formvars['suchpolygon'] = $this->formvars['newpathwkt'];
     }
-    $this->user->rolle->setNachweisSuchparameter($this->formvars['suchffr'],$this->formvars['suchkvz'],$this->formvars['suchgn'], $this->formvars['suchan'], $this->formvars['abfrageart'],$this->formvars['suchgemarkung'],$this->formvars['suchflur'],$this->formvars['suchstammnr'],$this->formvars['suchrissnr'],$this->formvars['suchfortf'],$this->formvars['suchpolygon'],$this->formvars['suchantrnr']);
+    $this->user->rolle->setNachweisSuchparameter($this->formvars['suchffr'],$this->formvars['suchkvz'],$this->formvars['suchgn'], $this->formvars['suchan'], $this->formvars['abfrageart'],$this->formvars['suchgemarkung'],$this->formvars['suchflur'],$this->formvars['suchstammnr'],$this->formvars['suchrissnr'],$this->formvars['suchfortf'],$this->formvars['suchpolygon'],$this->formvars['suchantrnr'], $this->formvars['sdatum'],$this->formvars['sdatum2'], $this->formvars['sVermStelle']);
     # Die Anzeigeparameter werden so gesetzt, daß genau das gezeigt wird, wonach auch gesucht wurde.
     # bzw. was als Suchparameter im Formular angegeben wurde.
     $this->user->rolle->setNachweisAnzeigeparameter($this->formvars['suchffr'],$this->formvars['suchkvz'],$this->formvars['suchgn'],$this->formvars['suchan'],$this->formvars['suchffr'],$this->formvars['suchkvz'],$this->formvars['suchgn']);
@@ -9118,7 +9135,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
     $this->nachweis = new Nachweis($this->pgdatabase, $this->user->rolle->epsg_code);
     # Suchparameter in Ordnung
     # Recherchieren nach den Nachweisen
-    $ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkung'],$this->formvars['suchstammnr'],$this->formvars['suchrissnr'],$this->formvars['suchfortf'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr'], $this->formvars['datum'], $this->formvars['VermStelle'], $this->formvars['gueltigkeit'], $this->formvars['datum2'], $this->formvars['suchflur']);
+    $ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkung'],$this->formvars['suchstammnr'],$this->formvars['suchrissnr'],$this->formvars['suchfortf'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr'], $this->formvars['sdatum'], $this->formvars['sVermStelle'], $this->formvars['gueltigkeit'], $this->formvars['sdatum2'], $this->formvars['suchflur']);
     #$this->nachweis->getAnzahlNachweise($this->formvars['suchpolygon']);
     if($ret!=''){
       # Fehler bei der Recherche im Datenbestand
@@ -9574,23 +9591,26 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
       ##################################################
       # 1.2. Änderung eines vorhandenen Dokumentes
       $ret=$this->nachweis->changeDokument($this->formvars);
-      $this->Meldung=$ret[1];
       if ($ret[0]) {
         # Die Änderung wurde auf Grund eines Fehlers nicht durchgeführt
         # 1.3 Zurück zum Änderungsformular mit Anzeige der Fehlermeldung
         $this->nachweisFormAnzeige();
+				$this->Meldung=$ret[1];
         showAlert($this->Meldung);
       } # end of fehler bei der Änderung
       else {
+				$this->nachweisFormAnzeige();
+        showAlert($ret[1]);
+			}
       # 1.4 Zur zur Anzeige der Rechercheergebnisse mit Meldung über Erfolg der Änderung
       # 1.4.1 Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
-      $this->formvars=$this->user->rolle->getNachweisParameter();
-      $ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkungflurid'],$this->formvars['suchstammnr'],$this->formvars['suchrissnr'],$this->formvars['suchfortf'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr']);
+      #$this->formvars=$this->user->rolle->getNachweisParameter();
+      #$ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkungflurid'],$this->formvars['suchstammnr'],$this->formvars['suchrissnr'],$this->formvars['suchfortf'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr']);
       # 1.4.2 Anzeige der Rechercheergebnisse
-      $this->nachweisAnzeige();
+      #$this->nachweisAnzeige();
       # 1.4.3 Anzeige der Erfolgsmeldung
-        showAlert($this->Meldung);
-      } # end of Änderung war erfolgreich
+        #showAlert($this->Meldung);
+      #} # end of Änderung war erfolgreich
     }
     return 1;
   }
@@ -9852,6 +9872,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
 	}
 
   function nachweisFormAnzeige($nachweis = NULL) {
+		$this->reduce_mapwidth(100);
     # letzte Änderung 2006-01-23 pk
     # Anzeige des Formulars zum Eintragen neuer/Ändern vorhandener Metadaten zu einem Nachweisdokument
     # (FFR, KVZ oder GN)
@@ -9926,7 +9947,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
     $this->GemkgFormObj=new FormObject("Gemarkung","select",$GemkgListe['GemkgID'],$this->formvars['Gemarkung'],$GemkgListe['Bezeichnung'],"1","","",NULL);
 
     # erzeugen des Formularobjektes für die VermessungsStellen
-    $this->FormObjVermStelle=$this->getFormObjVermStelle($this->formvars['VermStelle']);
+    $this->FormObjVermStelle=$this->getFormObjVermStelle('VermStelle', $this->formvars['VermStelle']);
 
     # abfragen der Dokumentarten
     $nachweis = new Nachweis($this->pgdatabase, $this->user->rolle->epsg_code);
@@ -9964,7 +9985,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
     # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
     $this->formvars=$this->user->rolle->getNachweisParameter();
     $this->nachweis = new Nachweis($this->pgdatabase, $this->user->rolle->epsg_code);
-    $ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkungflurid'],$this->formvars['suchstammnr'],$this->formvars['suchrissnr'],$this->formvars['suchfortf'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr']);
+		$ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkung'],$this->formvars['suchstammnr'],$this->formvars['suchrissnr'],$this->formvars['suchfortf'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr'], $this->formvars['sdatum'], $this->formvars['sVermStelle'], $this->formvars['gueltigkeit'], $this->formvars['sdatum2'], $this->formvars['suchflur']);
     if ($ret!='') {
       $errmsg.=$ret;
     }
@@ -10011,7 +10032,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
       # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
       $this->formvars=$this->user->rolle->getNachweisParameter();
       $this->nachweis = new nachweis($this->pgdatabase, $this->user->rolle->epsg_code);
-      $ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkungflurid'],$this->formvars['suchstammnr'],$this->formvars['suchrissnr'],$this->formvars['suchfortf'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr']);
+			$ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkung'],$this->formvars['suchstammnr'],$this->formvars['suchrissnr'],$this->formvars['suchfortf'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr'], $this->formvars['sdatum'], $this->formvars['sVermStelle'], $this->formvars['gueltigkeit'], $this->formvars['sdatum2'], $this->formvars['suchflur']);
       $errmsg.=$ret[1];
       # Anzeige der Rechercheergebnisse
       $this->nachweisAnzeige();
@@ -10086,7 +10107,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
       # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
       $this->formvars=$this->user->rolle->getNachweisParameter();
       # Abfragen der Nachweise entsprechend der eingestellten Suchparameter
-      $ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkungflurid'],$this->formvars['suchstammnr'],$this->formvars['suchrissnr'],$this->formvars['suchfortf'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr']);
+			$ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkung'],$this->formvars['suchstammnr'],$this->formvars['suchrissnr'],$this->formvars['suchfortf'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr'], $this->formvars['sdatum'], $this->formvars['sVermStelle'], $this->formvars['gueltigkeit'], $this->formvars['sdatum2'], $this->formvars['suchflur']);
       if ($ret!='') {
         $this->Fehlermeldung.=$ret;
       }
@@ -10102,10 +10123,16 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
     $this->output();
   }
 
-# Die function bestaetigung($nachfrage_quelle,$entscheidung)
-# wurde am 2006-01-30 gelöscht weil nicht mehr benutzt
+	function reduce_mapwidth($reduction){		
+		$width = $this->user->rolle->nImageWidth;
+		$width = $width - $reduction;
+		if($this->user->rolle->hideMenue == 1){$width = $width - 195;}
+		if($this->user->rolle->hideLegend == 1){$width = $width - 244;}
+		$this->user->rolle->nImageWidth = $width;
+	}
 
   function rechercheFormAnzeigen() {
+		$this->reduce_mapwidth(200);
     # 2006-01-23 pk
     $this->menue='menue.php';
     # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
@@ -10139,7 +10166,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
 		$this->GemkgFormObj->insertOption('',0,'--Auswahl--',0);
 			
     # erzeugen des Formularobjektes für die VermessungsStellen
-    $this->FormObjVermStelle=$this->getFormObjVermStelle($this->formvars['VermStelle']);
+    $this->FormObjVermStelle=$this->getFormObjVermStelle('sVermStelle', $this->formvars['sVermStelle']);
     $this->FormObjVermStelle->insertOption('', NULL, '--- Auswahl ---', 0);    
     # aktuellen Kartenausschnitt laden + zeichnen!
     $this->loadMap('DataBase');
@@ -10192,7 +10219,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
   function vermessungsAntragEingabeForm(){
     $this->menue='menue.php';
     $this->main='antragsnr_eingabe_form.php';
-    $this->FormObjVermStelle=$this->getFormObjVermStelle($this->formvars['VermStelle']);
+    $this->FormObjVermStelle=$this->getFormObjVermStelle('VermStelle', $this->formvars['VermStelle']);
     $this->FormObjVermArt=$this->getFormObjVermArt($this->formvars['verm_art']);
     $this->output();
   }
@@ -10228,15 +10255,15 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
     return $ret;
   }
 
-  function getFormObjVermStelle($VermStelle) {
+  function getFormObjVermStelle($name, $VermStelle) {
     $VermStObj = new Vermessungsstelle($this->pgdatabase);
     $back=$VermStObj->getVermStelleListe();
     if ($back[0]=='') {
       # Fehlerfreie Datenabfrage
-      $FormObjVermStelle=new FormObject('VermStelle','select',$back[1]['id'],array($VermStelle),$back[1]['name'],1,0,0,200);
+      $FormObjVermStelle=new FormObject($name,'select',$back[1]['id'],array($VermStelle),$back[1]['name'],1,0,0,200);
     }
     else {
-      $FormObjVermStelle=new FormObject('VermStelle','text',array($back[0]),'','',25,255,0,NULL);
+      $FormObjVermStelle=new FormObject($name,'text',array($back[0]),'','',25,255,0,NULL);
     }
     return $FormObjVermStelle;
   }
@@ -11552,9 +11579,11 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
             $request = $request.'&REQUEST=GetFeatureInfo&SERVICE=WMS';
 
             # Anzufragenden Layernamen
-            $reqStr=explode('&',strstr(strtolower($request),'layers='));
-            $layerStr=explode('=',$reqStr[0]);
-            $request .='&QUERY_LAYERS='.$layerStr[1];
+						if(strpos(strtolower($request), 'query_layers') === false){
+							$reqStr=explode('&',strstr(strtolower($request),'layers='));
+							$layerStr=explode('=',$reqStr[0]);
+							$request .='&QUERY_LAYERS='.$layerStr[1];
+						}
 
             # Boundingbox im System des Layers anhängen
             $projFROM = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);
@@ -13754,8 +13783,14 @@ class db_mapObj extends db_mapObj_core{
     $rect->maxx=$rs['maxx'];
     $rect->miny=$rs['miny']; 
     $rect->maxy=$rs['maxy'];
-    $randx=($rect->maxx-$rect->minx)*$border/100;
-    $randy=($rect->maxy-$rect->miny)*$border/100;
+		if($rect->maxx-$rect->minx < 1){		# bei einem Punktdatensatz
+			$randx = 50;
+			$randy = 50;
+		}
+		else{
+			$randx=($rect->maxx-$rect->minx)*$border/100;
+			$randy=($rect->maxy-$rect->miny)*$border/100;
+		}
     $rect->minx -= $randx;
     $rect->miny -= $randy;
     $rect->maxx += $randx;

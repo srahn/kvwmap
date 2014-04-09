@@ -48,9 +48,6 @@ function set_richtung(richtung){
 <input type="hidden" name="go" value="Nachweisanzeige">
 <input type="hidden" name="order" value="<? echo $this->formvars['order']; ?>">
 <input type="hidden" name="richtung" value="<? echo $this->formvars['richtung']; ?>">
-<input type="hidden" name="datum" value="<? echo $this->formvars['datum']; ?>">
-<input type="hidden" name="datum2" value="<? echo $this->formvars['datum2']; ?>">
-<input type="hidden" name="VermStelle" value="<? echo $this->formvars['VermStelle']; ?>">
 	
 <table width="0%" border="0" cellpadding="5" cellspacing="0">
   <tr> 
@@ -72,33 +69,29 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
         <tr> 
           <td>Gesucht nach:<b> 
             <?php
+						if($this->formvars['gueltigkeit'] == 1){ echo ' nur gültige '; }
+						if($this->formvars['gueltigkeit'] == '0'){ echo ' nur ungültige '; }
+						if($this->formvars['gueltigkeit'] == ''){ echo ' alle '; }
+						if ($this->formvars['suchffr']){ echo ' FFR, '; }
+						if ($this->formvars['suchkvz']){ echo ' KVZ, '; }
+						if ($this->formvars['suchgn']){ echo ' GN, '; }
+						if ($this->formvars['suchan']){ echo ' andere'; }
             switch ($this->formvars['abfrageart']) {
-              case 'indiv_nr' : {  ?>
-            Individuelle Nummer <?
-				if($this->formvars['gueltigkeit'] == 1){ echo ' (nur gültige) '; }
-				if($this->formvars['gueltigkeit'] == '0'){ echo ' (nur ungültige) '; }
-				if($this->formvars['gueltigkeit'] == ''){ echo ' (alle) '; }
-				if($this->formvars['suchgemarkung'] != '' AND $this->formvars['suchflur'] != '')echo 'in Gemarkung/Flur: '.$this->formvars['suchgemarkung'].'-'.str_pad($this->formvars['suchflur'],3,'0',STR_PAD_LEFT);
+              case 'indiv_nr' : { 
+								if($this->formvars['suchgemarkung'] != '') echo ' in Gemarkung: '.$this->formvars['suchgemarkung'];
+								if($this->formvars['suchflur'] != '') echo ' in Flur: '.str_pad($this->formvars['suchflur'],3,'0',STR_PAD_LEFT);
                 if($this->formvars['suchstammnr'] != '')echo ' mit Antragsnummer: '.str_pad(intval($this->formvars['suchstammnr']),ANTRAGSNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
                 if($this->formvars['suchrissnr'] != '')echo ' mit Rissnummer: '.$this->formvars['suchrissnr'];
                 if($this->formvars['suchfortf'] != '')echo ' mit Fortführung: '.$this->formvars['suchfortf'];
-				if($this->formvars['datum'] != '')echo ' von '.$this->formvars['datum'];
-				if($this->formvars['datum2'] != '')echo ' bis '.$this->formvars['datum2'];
-				if($this->formvars['VermStelle'] != '')echo ' von Vermessungsstelle '.$this->formvars['VermStelle']; ?>
-                aus <?
-                if ($this->formvars['suchffr']){ echo ' FFR, '; }
-                if ($this->formvars['suchkvz']){ echo ' KVZ, '; }
-                if ($this->formvars['suchgn']){ echo ' GN, '; }
-				if ($this->formvars['suchan']){ echo ' andere'; }
+								if($this->formvars['datum'] != '')echo ' von '.$this->formvars['datum'];
+								if($this->formvars['datum2'] != '')echo ' bis '.$this->formvars['datum2'];
+								if($this->formvars['VermStelle'] != '')echo ' von Vermessungsstelle '.$this->formvars['VermStelle'];
               } break;
               case 'antr_nr' : { 
-                ?>Vorbereitungsnummer - <?php echo $this->formvars['suchantrnr'];
-                if ($this->formvars['suchffr']){ echo ' FFR, '; }
-                if ($this->formvars['suchkvz']){ echo ' KVZ, '; }
-                if ($this->formvars['suchgn']){ echo ' GN'; }
+                ?> aus Vorbereitungsnummer - <?php echo $this->formvars['suchantrnr'];
               } break;
               case 'poly' : {
-                ?>Suchpolygon<?php 
+                ?> in Suchpolygon<?php 
               } break;
             }
               ?></b>                </td>
@@ -228,7 +221,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
           <td width="16"><a target="_blank" onmouseover="ahah('<? echo URL.APPLVERSION.'index.php'; ?>', 'go=document_vorschau&id=<?php echo $this->nachweis->Dokumente[$i]['id']; ?>', new Array(document.getElementById('vorschau')), new Array('sethtml'));" href="index.php?go=document_anzeigen&ohnesession=1&id=<?php echo $this->nachweis->Dokumente[$i]['id']; ?>&file=1" title="Ansicht"><img src="graphics/button_ansicht.png" border="0"></a></td>
           <td width="15">
           	<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten')){ ?>
-          	<a href="index.php?go=Nachweisformular&id=<?php echo $this->nachweis->Dokumente[$i]['id'];?>" title="bearbeiten"><img src="graphics/button_edit.png" border="0"></a></td>
+          	<a href="index.php?go=Nachweisformular&id=<?php echo $this->nachweis->Dokumente[$i]['id'];?>&order=<? echo $this->formvars['order'] ?>" title="bearbeiten"><img src="graphics/button_edit.png" border="0"></a></td>
           	<? } ?>
           <td width="30">
           	<? if($this->Stelle->isFunctionAllowed('Nachweisloeschen')){ ?>

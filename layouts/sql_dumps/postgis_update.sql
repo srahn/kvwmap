@@ -1188,3 +1188,24 @@ UPDATE bw_zonen SET zonentyp = 'Grünlandflächen' WHERE zonentyp = 'Grünland';
 ALTER TABLE bw_zonen ADD COLUMN brwu real;
 ALTER TABLE bw_zonen ADD COLUMN brws real;
 ALTER TABLE bw_zonen ADD COLUMN brwb real;
+
+
+DROP VIEW bw_boris_view;
+
+CREATE OR REPLACE VIEW bw_boris_view AS 
+ SELECT bw.oid, 13 AS landesschluessel, bw.gemeinde, g.gemeindename, gm.gemkgname, bw.ortsteilname, bw.postleitzahl, bw.zonentyp, bw.gutachterausschuss, bw.bodenrichtwertnummer, bw.oertliche_bezeichnung, 
+        CASE
+            WHEN bw.brwu IS NOT NULL THEN bw.brwu
+            WHEN bw.brwb IS NOT NULL THEN bw.brwb
+            ELSE bw.bodenrichtwert
+        END AS bodenrichtwert, round(bw.bodenrichtwert::double precision) AS bw_darstellung, bw.stichtag, bw.bedarfswert, 25833 AS bezug, st_x(bw.textposition) AS rechtswert, st_y(bw.textposition) AS hochwert, bw.basiskarte, bw.entwicklungszustand, bw.beitragszustand, bw.nutzungsart, bw.ergaenzende_nutzung, bw.bauweise, bw.geschosszahl, bw.grundflaechenzahl, bw.geschossflaechenzahl, bw.baumassenzahl, bw.flaeche, bw.tiefe, bw.breite, bw.wegeerschliessung, bw.erschliessungsverhaeltnisse, bw.ackerzahl, bw.gruenlandzahl, bw.aufwuchs, bw.verfahrensgrund, 
+        CASE
+            WHEN bw.brwu IS NOT NULL AND bw.verfahrensgrund::text = 'San'::text THEN 'SU'::character varying
+            WHEN bw.brwu IS NOT NULL AND bw.verfahrensgrund::text = 'Entw'::text THEN 'EU'::character varying
+            WHEN bw.brwb IS NOT NULL AND bw.verfahrensgrund::text = 'San'::text THEN 'SB'::character varying
+            WHEN bw.brwb IS NOT NULL AND bw.verfahrensgrund::text = 'Entw'::text THEN 'EB'::character varying
+            ELSE bw.verfahrensgrund_zusatz
+        END AS verfahrensgrund_zusatz, bw.bemerkungen, 0 AS umdart, ('http://pfad/zur/umrechungstabelle/tabelle'::text || bw.stichtag) || '.pdf'::text AS urt, bw.textposition, bw.the_geom
+   FROM bw_zonen bw
+   LEFT JOIN alb_v_gemeinden g ON bw.gemeinde = g.gemeinde
+   LEFT JOIN alb_v_gemarkungen gm ON bw.gemarkung = gm.gemkgschl;

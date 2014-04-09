@@ -873,7 +873,7 @@ class Nachweis {
           #echo '<br>Suche nach individueller Nummer.';
           $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS andere_art, d.art AS andere_art_name";
           $sql.=" FROM n_vermstelle AS v";
-		  if($gemarkung != '' AND $flur != ''){
+		  if($gemarkung != ''){
 			$sql.=", alkobj_e_fla as alko, alknflur";
 		  }
 		  $sql.=" , n_nachweise AS n";
@@ -889,9 +889,12 @@ class Nachweis {
             }
             $sql.=")";
           }
-          if($gemarkung != '' AND $flur != ''){
-			$sql.=" AND alko.objnr = alknflur.objnr AND alknflur.gemkgschl = ".$gemarkung." AND alknflur.flur = '".str_pad($flur,3,'0',STR_PAD_LEFT)."' AND st_intersects(st_transform(alko.the_geom, (select srid from geometry_columns where f_table_name = 'n_nachweise')), n.the_geom)";
-		  }
+          if($gemarkung != ''){
+						$sql.=" AND alko.objnr = alknflur.objnr AND alknflur.gemkgschl = ".$gemarkung." AND st_intersects(st_transform(alko.the_geom, (select srid from geometry_columns where f_table_name = 'n_nachweise')), n.the_geom)";
+					}
+					if($flur != ''){
+						$sql.=" AND alknflur.flur = '".str_pad($flur,3,'0',STR_PAD_LEFT)."' ";
+					}
           if($stammnr!=''){
             $sql.=" AND n.stammnr='".$stammnr."'";
           }
@@ -902,12 +905,12 @@ class Nachweis {
 	          $sql.=" AND n.fortfuehrung=".(int)$fortf;
 	        }
           if($datum != ''){
-			if($datum2 != ''){
-				$sql.=" AND n.datum between '".$datum."' AND '".$datum2."'";
-			}
-			else{
-				$sql.=" AND n.datum = '".$datum."'";
-			}
+						if($datum2 != ''){
+							$sql.=" AND n.datum between '".$datum."' AND '".$datum2."'";
+						}
+						else{
+							$sql.=" AND n.datum = '".$datum."'";
+						}
           }
           if($VermStelle!=''){
             $sql.=" AND n.vermstelle = '".$VermStelle."'";
