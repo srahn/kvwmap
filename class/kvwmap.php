@@ -319,7 +319,7 @@ class GUI extends GUI_core{
     	if(in_array($data_attributes['geomtype'][$data_attributes['the_geom']] , array('MULTIPOLYGON', 'POLYGON', 'GEOMETRY'))){
     		$offset = 1;
     	}
-    	$select = strtolower($mapDB->getSelectFromData($layer['Data']));
+    	$select = $mapDB->getSelectFromData($layer['Data']);
 			if($this->formvars['layer_id'] > 0)$select = str_replace(' from ', ', '.$data_attributes['table_alias_name'][$data_attributes['the_geom']].'.oid as exclude_oid'.' from ', $select);		# bei Rollenlayern nicht machen
 			$extent = 'st_transform(st_geomfromtext(\'POLYGON(('.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layer['epsg_code'].')';				
 			$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects('.$data_attributes['the_geom'].', '.$extent.') ';
