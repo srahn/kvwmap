@@ -1814,12 +1814,21 @@ class db_mapObj_core {
       $rs['Style']=$this->read_Styles($rs['Class_ID']);
       $rs['Label']=$this->read_Label($rs['Class_ID']);
       #Anne
-      if($disabled_classes AND in_array($rs['Class_ID'], $disabled_classes)){
-      	$rs['Status'] = 0;
+      if($disabled_classes){
+				if($disabled_classes['status'][$rs['Class_ID']] == 2){
+					$rs['Status'] = 1;
+					foreach($rs['Style'] as &$style){
+						$style['outlinecolor'] = $style['color'];
+						$style['color'] = '-1 -1 -1';
+					}
+				}
+				elseif($disabled_classes['status'][$rs['Class_ID']] == '0'){
+					$rs['Status'] = 0;
+				}
+				else $rs['Status'] = 1;
       }
-      else{
-      	$rs['Status'] = 1;
-      }
+      else $rs['Status'] = 1;
+			
       $Classes[]=$rs;
     }
     return $Classes;
@@ -1827,10 +1836,11 @@ class db_mapObj_core {
   
   function read_disabled_classes(){
   	#Anne
-    $sql_classes = 'SELECT class_id FROM u_rolle2used_class WHERE user_id='.$this->User_ID.' AND stelle_id='.$this->Stelle_ID.';';
+    $sql_classes = 'SELECT class_id, status FROM u_rolle2used_class WHERE user_id='.$this->User_ID.' AND stelle_id='.$this->Stelle_ID.';';
     $query_classes=mysql_query($sql_classes);
     while($row = mysql_fetch_array($query_classes)){
-  		$classarray[] = $row['class_id'];
+  		$classarray['class_id'][] = $row['class_id'];
+			$classarray['status'][$row['class_id']] = $row['status'];
 		}
 		return $classarray;
   }

@@ -1166,3 +1166,5 @@ ALTER TABLE  `druckfreitexte` ADD  `offset_attribute` VARCHAR( 255 ) NULL AFTER 
 #
 
 ALTER TABLE  `layer_attributes` CHANGE  `form_element_type`  `form_element_type` ENUM(  'Text',  'Textfeld',  'Auswahlfeld',  'Checkbox',  'Geometrie',  'SubFormPK',  'SubFormFK',  'SubFormEmbeddedPK',  'Time',  'Dokument',  'Link',  'User',  'Stelle',  'Fläche',  'dynamicLink',  'Zahl',  'UserID',  'Länge',  'mailto' ) NOT NULL DEFAULT  'Text';
+
+ALTER TABLE  `u_rolle2used_class` ADD  `status` INT( 1 ) NOT NULL DEFAULT  0;

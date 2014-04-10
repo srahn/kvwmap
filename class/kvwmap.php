@@ -1073,11 +1073,16 @@ class GUI extends GUI_core{
 										$filename = $this->map_saveWebImage($image,'jpeg');
 										$newname = $this->user->id.basename($filename);
 										rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
-										#Anne
+										#Anne										
 										$classid = $layer['Class'][$k]['Class_ID'];
-										if($class->status=='MS_OFF'){
+										if($this->mapDB->disabled_classes['status'][$classid] == '0'){
 											$legend .= '<tr>
 													<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="hidden" size="2" name="class'.$classid.'" value="0"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img border="0" name="imgclass'.$classid.'" src="graphics/inactive.jpg"></a>&nbsp;<span class="small">'.html_umlaute($class->name).'</span></td>
+													</tr>';
+										}
+										elseif($this->mapDB->disabled_classes['status'][$classid] == 2){
+											$legend .= '<tr>
+													<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="hidden" size="2" name="class'.$classid.'" value="2"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img border="0" name="imgclass'.$classid.'" src="'.TEMPPATH_REL.$newname.'"></a>&nbsp;<span class="small">'.html_umlaute($class->name).'</span></td>
 													</tr>';
 										}
 										else{
