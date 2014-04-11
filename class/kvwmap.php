@@ -136,6 +136,7 @@ class GUI extends GUI_core{
   # notizKatbearbeiten
   # notizKategorieAenderung
   # output()
+	# packAndMail()
   # queryMap()
   # rechercheFormAnzeigen()
   # rollenwahl($Stelle_ID)
@@ -153,6 +154,7 @@ class GUI extends GUI_core{
   # suchparameterLesen()
   # saveMap($saveMapDestination)
   # SachdatenAnzeige($rect)
+	# uploadTempFile()
   # zoomToALKGebaeude($GebaeudeListe,$border)
   # zoomToALKGemeinde($GemID,$border)
   # zoomToBodenrichtwertzone($oid,$border);
@@ -210,7 +212,163 @@ class GUI extends GUI_core{
     # mime_type html, pdf
     if (isset ($mime_type)) $this->mime_type=$mime_type;
   }
+	
+	function uploadTempFile() {
+		$this->mime_type = "formatter";
+		if ($this->formvars['format'] == '') $this->formvars['format'] = "json";
+    if ($this->formvars['content_type'] == '') $this->formvars['content_type'] = "text/html";
 
+		# pruefe Version
+		if ($this->formvars['version'] != "1.0.0")
+			return array("success" => 0, "error_message" => "Geben Sie eine gültige Versionsnummer an. Derzeit wird nur die Version 1.0.0 unterstützt.");
+				
+		# pruefe ob upload erfolgreich war
+		if ($_FILES["file"]["error"] != UPLOAD_ERR_OK)
+			return array("success" => 0, "error_message" => "Fehler: " . get_upload_error_message($_FILES["file"]["error"]));
+		
+		# prüfe ob eine Datei mitgeschickt wurde
+		if ($_FILES["file"]["name"] == "")
+			return array("success" => 0, "error_message" => "Fehler: Es wurde keine Datei mitgeschickt.");
+
+		# prüfe ob die Datei klein genug ist
+		if ($_FILES["file"]["size"] > 10737418240)
+			return array("success" => 0, "error_message" => "Fehler: Die Datei ist " . formatBytes($_FILES["file"]["size"], 2) . " groß und damti größer als die zugelassenen 10 MB");
+				
+		# prüfe ob Dateiformat zulässig
+		if (!in_array($_FILES["file"]["type"], array("image/jpeg", "image/jpg", "image/jp2", "image/png", "image/gif", "application/pdf")))
+			return array("success" => 0, "error_message" => "Fehler: Der Dateityp " . $_FILES["file"]["type"] . " ist nicht zulässig. Nur die folgenden Dateitypen sind erlaubt: image/jpeg, image/jp2, image/png, image/gif, application/pdf.");
+		$pathinfo = pathinfo($_FILES["file"]["name"]);
+	  $upload_file = UPLOADPATH . basename($_FILES["file"]["tmp_name"] . "." . $pathinfo["extension"]);
+		
+		# copiere die temporäre Datei in den upload ordner 
+    if (!@copy($_FILES["file"]["tmp_name"], $upload_file))
+			return array("success" => 0, "error_message" => "Fehler: Die hochgeladene Datei konnte nicht auf dem Server gespeichert werden. Beim Kopieren vom temporären Uploadverzeichnis in das Uploadverzeichnis der Anwendung trat ein Fehler auf. Wahrscheinlich fehlen die Schreibrechte im Uploadverzeichnins für den WebServer-Nutzer.");
+
+		# sende den Namen der temporären Datei zurück
+		return array("success" => 1, "temp_file" => $upload_file);
+	}
+	
+	function packAndMail() {
+		$this->mime_type = "formatter";
+		if ($this->formvars['format'] == '') $this->formvars['format'] = "json";
+		
+		# pruefe Version
+		if ($this->formvars['version'] != "1.0.0")
+			return array("success" => 0, "error_message" => "Geben Sie eine gültige Versionsnummer an. Derzeit wird nur die Version 1.0.0 unterstützt.");
+		
+		# erzeuge eine eindeutige Nummer für diesen Antrag
+		$antrag_id = date("YmdHis") . str_pad(rand(1,99), 2, "00", STR_PAD_LEFT);
+		
+		# for test purposes all data are fake
+		# ToDo change the xml_template to the formnames from lumber jack client
+		$data = array (
+			'form' => 'catalog://kommunen/zweck/zweckverb_antrag_faellung',
+			'ID_USER' => 'MANDANTUSER',
+			'LIP_FORM_REVISION' => '-1',
+	        'DVZ_FORM_NAME' => 'Antrag auf Fällung von Einzelbäumen',
+			'DVZ_M_ID' => '0',
+	        'DVZ_FORM_ID' => 'zweckverb_antrag_faellung',
+	        'DVZ_ID_USER' => 'MD000_USR001',
+			'DVZ_ID_GROUP' => 'FMS_DEMO',
+	        'DVZ_STATUS' => '1',
+	        'zweck_name' => 'a',
+			'zweck_vorname' => 's',
+	        'zweck_strasse_hnr' => 'a',
+	        'zweck_plz' => 'a',
+			'zweck_ort' => 'a',
+	        'zweck_telefon' => 'a',
+	        'zweck_fax' => 'a',
+			'zweck_email' => 'a',
+	        'zweck_antragsteller_ist' => 'Eigentümer',
+	        'zweck_standort_strasse' => 'a',
+			'zweck_standort_flur' => 'a',
+	        'zweck_standort_flurstueck' => 'a',
+	        'zweck_standort_plz' => 'a',
+			'zweck_standort_ort' => 'a',
+	        'zweck_standort_gemeinde' => 'a',
+	        'zweck_standort_gemarkung' => 'a',
+			'zweck_bestand_anzahl' => '1',
+	        'zweck_bestand_stammumfang' => '1.00',
+	        'zweck_bestand_baumhoehe' => '1.00',
+			'zweck_bestand_baumart' => 'a',
+	        'zweck_begruendung' => 'aasd',
+					'zweck_vollmacht' => 'phph1y0hA.jpeg',
+	        'zweck_unter_ort' => 'dasda',
+			'zweck_unter_datum' => '15.10.2013',
+	        'zweck_ueberschrift' => 'entsprechend der Satzung zum Schutz des Baumbestandes in der Stadt ... bzw. der Gemeinden des Amtes ...',
+	        'DVZ_EMPF_MANDANT' => 'Demo Mandant',
+			'DVZ_EMPF_MANDANT_ZUSATZ' => '-DEMO-',
+	        'DVZ_EMPF_SACHGEB' => 'DEMO SACHGEBIET',
+	        'DVZ_EMPF_STRASSE' => 'Musterstrasse',
+			'DVZ_EMPF_PLZ' => '99999',
+	        'DVZ_EMPF_ORT' => 'Musterort',
+			'baumhoehe' => array ('5', '1', '14'),
+			'baumbild' => array('phph1y0hB.png', 'phph1y0hC.jp2', 'phph1y0hD.jpeg'),
+			'stammumfang' => array ('8', '4', '5'),
+			'baumart' => array ('Buche', 'Birke', 'Eiche')
+		);
+		# until here are fake data
+
+		# create xml file
+		$xml_file =  "Antrag_" . $antrag_id . ".xml";
+		include SHAPEPATH . "templates/xml_template_baumfaellantrag.php";		
+		$xml = new SimpleXMLElement($xml_string);
+		$xml->asXML(IMAGEPATH . $xml_file);
+
+		# create pdf file
+		$pdf_file =  "Antrag_" . $antrag_id . ".pdf";
+		copy(SHAPEPATH . "templates/pdf_template_baumfaellantrag.pdf", IMAGEPATH . $pdf_file);
+		
+		# create zip file
+		$zip_file =  "Antrag_" . $antrag_id . ".zip";
+		$zip = new ZipArchive();
+		if ($zip->open(IMAGEPATH . $zip_file, ZIPARCHIVE::CREATE)!==TRUE)
+			return array("success" => 0, "error_message" => "Fehler: Kann Zip-Datei " . IMAGEPATH . $zip_file . " nicht erzeugen.");
+		$zip->addFile(IMAGEPATH . $xml_file, $xml_file);
+		$zip->addFile(IMAGEPATH . $pdf_file, $pdf_file);
+		$zip->addFile(UPLOADPATH . $data['zweck_vollmacht'], "Vollmacht_" . $antrag_id . "." . basename($data['zweck_vollmacht']));
+		foreach ($data['baumbild'] AS $key => $value) {
+		  $zip->addFile(UPLOADPATH . $value, "Baum_" . $key . "_Bild_" . $antrag_id . "." . basename($value));
+		}
+		$zip->close();
+		
+		# create email text
+		$email_text  = "Dies ist der Text, der im Body der E-Mail steht.";
+		$email_text .= implode(", ", $data);
+		$email_recipient = "peter.korduan@gdi-service.de";
+		
+		# send email
+	
+/*
+$grenze="grenzlinie";
+$name_des_bildes=$HTTP_POST_FILES['datei']['name'];
+$headers ="MIME-Version: 1.0\r\n";
+$headers.="From: $mailaddi\n";
+$headers.="Content-Type: multipart/mixed;\n\tboundary=$grenze\n";
+$botschaft<I></I>="\n--$grenze\n";
+$botschaft.="Content-transfer-encoding: 7BIT\r\n";
+$botschaft.="Content-type: text/plain\n\n";
+$botschaft.= "Guten Tag $Vorname $Nachname. $Beruf ist ein schöner Beruf.
+Wir werden uns in Kürze unter der genannten Rufnummer
+$Telefon mit Ihnen in Verbindung setzen. \n";
+$botschaft.="\n\n";
+$botschaft.="\n--$grenze\n";
+$botschaft.="Content-Type: application/octetstream;\n\tname=$name_des_bildes\n";
+$botschaft.="Content-Transfer-Encoding: base64\n";
+$botschaft.="Content-Disposition: attachment;\n\tfilename=$name_des_bildes\n\n";
+$zeiger_auf_datei=fopen("$datei","rb");
+$inhalt_der_datei=fread($zeiger_auf_datei,filesize("$datei"));
+fclose($zeiger_auf_datei);
+$inhalt_der_datei=chunk_split(base64_encode($inhalt_der_datei));
+$botschaft.=$inhalt_der_datei;
+$botschaft.="\n\n";
+$botschaft.="--$grenze";
+mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
+*/
+
+	return array("success" => 1, "antrag_id" => $antrag_id, "xml_file" => IMAGEURL . $xml_file, "pdf_file" => IMAGEURL . $pdf_file, "zip_file" => IMAGEURL . $zip_file, "email_text" => $email_text, "email_recipient" => $email_recipient, "data:" => $data);
+	}
+	
   function loadPlugins(){
   	global $kvwmap_plugins;
 	  $this->goNotExecutedInPlugins = false;
@@ -10838,7 +10996,7 @@ class GUI extends GUI_core{
 	
 	function flurstSuchenByLatLng() {
     $flurstueck = new flurstueck('',$this->pgdatabase);
-		if ($this->formvars['version'] == '1.0') {
+		if (in_array($this->formvars['version'], array("1.0", "1.0.0"))) {
 			$result= $flurstueck->getFlurstByLatLng($this->formvars['latitude'], $this->formvars['longitude']);
 			$layerset['landId'] = $result['land'];
 			$layerset['kreisId'] = $result['kreis'];

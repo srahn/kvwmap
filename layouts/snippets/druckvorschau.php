@@ -3,6 +3,7 @@
 <!--
 
 function print(){
+		alert('druck');
 	document.GUI.target = '_blank';
 	document.GUI.go_plus.value = 'Drucken';
 	document.GUI.submit();

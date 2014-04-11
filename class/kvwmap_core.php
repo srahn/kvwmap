@@ -1490,21 +1490,23 @@ class GUI_core {
 		$result = array();
 		# Nehme ersten layerset
 		$layerset = $this->qlayerset[0]['shape'];
-		# Durchlaufe alle gefundenen Datensätze im Layerset
-		foreach ($layerset AS $record) {
-			$data = array();
-			if ($this->formvars['selectors'] != '') {
-				$selectors = explode(',', $this->formvars['selectors']);
-				foreach ($selectors AS $selector) {
-					$selector = trim($selector);
-					$data[$selector] = $record[$selector]; 
-				}
-			}
-			else {
-				$data = $record;
-			}
-			$result[] = $data;
-		}
+    if (is_array($layerset)) {
+  		# Durchlaufe alle gefundenen Datensätze im Layerset
+  		foreach ($layerset AS $record) {
+  			$data = array();
+  			if ($this->formvars['selectors'] != '') {
+  				$selectors = explode(',', $this->formvars['selectors']);
+  				foreach ($selectors AS $selector) {
+  					$selector = trim($selector);
+  					$data[$selector] = $record[$selector]; 
+  				}
+  			}
+  			else {
+  				$data = $record;
+  			}
+  			$result[] = $data;
+  		}
+    }
 		if (count($result) == 1) $result = $result[0];
 		if (count($result) == 1) $result = $result[0];
 		return $result;
@@ -1559,7 +1561,7 @@ class GUI_core {
 			default : {
 				if ($this->formvars['format'] != '') {
 					include('formatter.php');
-					$this->formatter = new formatter($this->qlayersetParamStrip(), $this->formvars['format'], $this->formvars['callback']);
+					$this->formatter = new formatter($this->qlayersetParamStrip(), $this->formvars['format'], $this->formvars['content_type'], $this->formvars['callback']);
 		    	echo utf8_encode($this->formatter->output());
 				}
 			}
