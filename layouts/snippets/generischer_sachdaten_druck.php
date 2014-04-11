@@ -6,8 +6,8 @@ function print(){
 	document.GUI.target = '_blank';
 	document.GUI.go_plus.value = 'Drucken';
 	document.GUI.submit();
-//	document.GUI.target = '';
-//	document.GUI.go_plus.value = '';
+	document.GUI.target = '';
+	document.GUI.go_plus.value = '';
 }
 
 function back(){
