@@ -357,7 +357,7 @@ class GUI extends GUI_core{
 		global $gui_widths;
 		$width = $this->formvars['width'] - $gui_widths[$this->user->rolle->gui];
 		if($this->user->rolle->hideMenue == 1){$width = $width + 195;}
-		if($this->user->rolle->hideLegend == 1){$width = $width + 244;}
+		if($this->user->rolle->hideLegend == 1){$width = $width + 254;}
 		$height = $this->formvars['height'] - HEADERHEIGHT;
 		$this->user->rolle->setSize($width.'x'.$height);
 		$this->user->rolle->readSettings();
@@ -7592,6 +7592,10 @@ class GUI extends GUI_core{
 	        if(in_array($attributes['type'][$j], array('numeric', 'float4', 'float8'))){
 	        	$result[$i][$attributes['name'][$j]] = str_replace('.', ",", $result[$i][$attributes['name'][$j]]);	
 	        }
+					if($attributes['type'][$j] == 'bool'){
+						$result[$i][$attributes['name'][$j]] = str_replace('t', "ja", $result[$i][$attributes['name'][$j]]);	
+						$result[$i][$attributes['name'][$j]] = str_replace('f', "nein", $result[$i][$attributes['name'][$j]]);
+					}
 	        $result[$i][$attributes['name'][$j]] = str_replace(';', ",", $result[$i][$attributes['name'][$j]]);
 	        $result[$i][$attributes['name'][$j]] = str_replace(chr(10), " ", $result[$i][$attributes['name'][$j]]);
 	        $result[$i][$attributes['name'][$j]] = str_replace(chr(13), "", $result[$i][$attributes['name'][$j]]);

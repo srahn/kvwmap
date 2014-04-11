@@ -195,7 +195,7 @@ class ddl {
 									if($this->maxy < $y)$this->maxy = $y;		# beim ersten Datensatz das maxy ermitteln
 								}
 											
-								$text = $this->get_result_value_output($i, $j);
+								$text = $this->get_result_value_output($i, $j, $preview);
 								$width = $this->layout['elements'][$attributes['name'][$j]]['width'];
 								
 								$y = $this->putText($text, $zeilenhoehe, $width, $x, $y, $offsetx);
@@ -302,12 +302,12 @@ class ddl {
   	$text = str_replace('$user', $this->user->Name, $text);
 		$text = str_replace(';', chr(10), $text);
 		for($j = 0; $j < count($this->attributes['name']); $j++){
-			$text = str_replace('$'.$this->attributes['name'][$j], $this->get_result_value_output($i, $j), $text);
+			$text = str_replace('$'.$this->attributes['name'][$j], $this->get_result_value_output($i, $j, true), $text);
 		}
   	return $text;
   }
   
-  function get_result_value_output($i, $j){		# $i ist der result-counter, $j ist der attribute-counter
+  function get_result_value_output($i, $j, $preview){		# $i ist der result-counter, $j ist der attribute-counter
 		if($this->result[$i][$this->attributes['name'][$j]] == '')$this->result[$i][$this->attributes['name'][$j]] = ' ';		# wenns der result-value leer ist, ein Leerzeichen setzen, wegen der relativen Positionierung
 		switch ($this->attributes['form_element_type'][$j]){
 			case 'Auswahlfeld' : {
@@ -323,6 +323,10 @@ class ddl {
 				}
 			}break;
 			default: {
+				if(!$preview AND $this->attributes['type'][$j] == 'bool'){
+					$this->result[$i][$this->attributes['name'][$j]] = str_replace('t', "ja", $this->result[$i][$this->attributes['name'][$j]]);	
+					$this->result[$i][$this->attributes['name'][$j]] = str_replace('f', "nein", $this->result[$i][$this->attributes['name'][$j]]);
+				}
 				$output = utf8_decode($this->result[$i][$this->attributes['name'][$j]]);
 			}break;
 		}
@@ -381,7 +385,9 @@ class ddl {
 			
 			################# Daten schreiben ###############
 			for($j = 0; $j < count($this->attributes['name']); $j++){
-				$this->remaining_attributes[$this->attributes['name'][$j]] = $this->attributes['name'][$j];		# zum Anfang sind alle Attribute noch zu schreiben
+				if($this->layout['elements'][$attributes['name'][$j]]['ypos'] > 0){
+					$this->remaining_attributes[$this->attributes['name'][$j]] = $this->attributes['name'][$j];		# zum Anfang sind alle Attribute noch zu schreiben
+				}
 			}
 			$test = 0;
 			while($test < 100 AND count($this->remaining_attributes) > 0){

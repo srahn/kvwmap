@@ -60,6 +60,10 @@ define('GLEVIEW', 2);                  # 1 / 2              # Version 1.6.5
 # Header und Footer
 define('HEADER', 'header.php');															# Version 1.8.0
 define('FOOTER', 'footer.php');															# Version 1.8.0
+# Headerhöhe
+define('HEADERHEIGHT', 132);																# Version 1.14
+# GUI-Breite
+$gui_widths = array('gui.php' => 475, 'gui_button.php' => 486);		# Version 1.14
 # login.php
 define('LOGIN', 'login.php');																# Version 1.8.0
 

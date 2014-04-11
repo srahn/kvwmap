@@ -157,7 +157,7 @@ if($this->formvars['gps_follow'] == ''){
         				<td width="100%" colspan="3" style="border-style:solid; border-width:1px; border-color:#aaaaaa;">
         					<table width="100%" border="0" cellpadding="0" cellspacing="0">
 						        <tr style="background-color: <? echo BG_MENUETOP; ?>;">
-						          <td width="30%" height="30">
+						          <td width="25%" height="30">
 									<div style="width:150px; position:relative" onmouseover="document.getElementById('scales').style.display='inline-block';" onmouseout="document.getElementById('scales').style.display='none';">
 										&nbsp;<b><?php echo $strMapScale; ?>&nbsp;1:&nbsp;</b><input type="text" id="scale" autocomplete="off" name="nScale" style="width:58px" value="<?php echo round($this->map_scaledenom); ?>">
 										<div id="scales" style="display:none; position:absolute; left:56px; bottom:21px; width: 78px; vertical-align:top; overflow:hidden; border:solid grey 1px;">
@@ -174,7 +174,7 @@ if($this->formvars['gps_follow'] == ''){
 										</div>
 									</div>
 						          </td>
-						          <td width="40%" align="center">
+						          <td width="50%" align="center">
 						          	<? if($this->map->width > 700) {
 						          		echo '<div id="lagebezeichnung">';
 						          		if($this->Lagebezeichung!=''){
@@ -185,8 +185,8 @@ if($this->formvars['gps_follow'] == ''){
 						          <? }else{ ?>
 						          <td>&nbsp;</td>
 						          <? } ?>
-						          <td width="30%" align="right">
-						            <img id="scalebar" alt="Maßstabsleiste" src="<? echo $this->img['scalebar']; ?>">
+						          <td width="25%" align="right">
+						            <img id="scalebar" style="margin-right:35px" alt="Maßstabsleiste" src="<? echo $this->img['scalebar']; ?>">
 						          </td>
 						        </tr>
 						    </table>
@@ -204,23 +204,29 @@ if($this->formvars['gps_follow'] == ''){
 			          </td>
 			        </tr>
 			        <? } ?>
-			        <tr style="background-color: <? echo BG_MENUETOP; if($this->user->rolle->runningcoords == '0'){echo ';display:none';} ?>">
-			        	<td width="100px">
-			          	<b>&nbsp;<?php echo $this->strCoordinates; ?></b>&nbsp;
-			          </td>
-			        	<td colspan="2" width="80%"><input type="text" style="border:0px;background-color:transparent" name="runningcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?></td>
-			        </tr>
-			        <tr id="showcoords" style="display:none">
-			        	<td width="100px">
-			          	<b>&nbsp;<?php echo $strShowCoordinates; ?></b>&nbsp;
-			          </td>
-			        	<td colspan="2" width="80%">
-			        		<input type="text" name="firstcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?>
-			        		<? if($this->user->rolle->epsg_code2 != ''){ ?>
-			        		<br><input type="text" name="secondcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code2; ?>
-			        		<? } ?>
-			        	</td>
-			        </tr>
+        			<tr>
+        				<td width="100%" colspan="3" style="border-style:solid; border-width:1px; border-color:#aaaaaa;">
+        					<table width="100%" border="0" cellpadding="0" cellspacing="0">
+			        			<tr style="background-color: <? echo BG_MENUETOP; if($this->user->rolle->runningcoords == '0'){echo ';display:none';} ?>">
+			        				<td width="100px">
+			          					<b>&nbsp;<?php echo $this->strCoordinates; ?></b>&nbsp;
+			          				</td>
+			        				<td colspan="2" width="80%"><input type="text" style="border:0px;background-color:transparent" name="runningcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?></td>
+			        			</tr>
+			        			<tr id="showcoords" style="display:none">
+			        				<td width="100px">
+			          					<b>&nbsp;<?php echo $strShowCoordinates; ?></b>&nbsp;
+			          				</td>
+			        				<td colspan="2" width="80%">
+			        					<input type="text" name="firstcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?>
+			        					<? if($this->user->rolle->epsg_code2 != ''){ ?>
+			        					<br><input type="text" name="secondcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code2; ?>
+			        					<? } ?>
+			        				</td>
+			        			</tr>
+                                		</table>
+                                	</td>
+                                </tr>
 			        <?
 			        # 2006-03-20 pk
 			        if ($this->user->rolle->newtime!='') { ?>
@@ -268,7 +274,7 @@ if($this->formvars['gps_follow'] == ''){
 							?></td>
 						</tr>
 					</table>
-					<table id="legendTable" style="display: <? echo $display; ?>" cellspacing=0 cellpadding=2 border=0>
+					<table class="table1" id="legendTable" style="display: <? echo $display; ?>" cellspacing=0 cellpadding=2 border=0>
 						<tr align="center">
 							<td><?php echo $strAvailableLayer; ?>:</td>
 						</tr>
@@ -278,9 +284,11 @@ if($this->formvars['gps_follow'] == ''){
 							?><input type="submit" class="button" name="senden" value="<?php echo $strLoadNew; ?>" class="send" tabindex="1"></div>
 							<br>
 							&nbsp;
-							<a href="index.php?go=reset_querys"><img src="graphics/tool_info.png" border="0" alt="Informationsabfrage." title="Informationsabfrage | Hier klicken, um alle Abfragehaken zu entfernen" width="17"></a>
-							<a href="index.php?go=reset_layers"><img src="graphics/layer.png" border="0" alt="Themensteuerung." title="Themensteuerung | Hier klicken, um alle Themen zu deaktivieren" width="20" height="20"></a><br>
-						<div id="scrolldiv" onscroll="document.GUI.scrollposition.value = this.scrollTop;" style="width:240; height:<?php echo $legendheight; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
+							<div id="legendcontrol">
+								<a href="index.php?go=reset_querys"><img src="graphics/tool_info.png" border="0" alt="Informationsabfrage." title="Informationsabfrage | Hier klicken, um alle Abfragehaken zu entfernen" width="17"></a>
+								<a href="index.php?go=reset_layers"><img src="graphics/layer.png" border="0" alt="Themensteuerung." title="Themensteuerung | Hier klicken, um alle Themen zu deaktivieren" width="20" height="20"></a><br>
+							</div>
+						<div id="scrolldiv" onscroll="document.GUI.scrollposition.value = this.scrollTop;" style="height:<?php echo $legendheight; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
 						<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
 						<div onclick="document.GUI.legendtouched.value = 1;" id="legend">
 							<? echo $this->legende; ?>
