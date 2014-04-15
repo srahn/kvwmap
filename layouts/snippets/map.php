@@ -158,9 +158,9 @@ if($this->formvars['gps_follow'] == ''){
         					<table width="100%" border="0" cellpadding="0" cellspacing="0">
 						        <tr style="background-color: <? echo BG_MENUETOP; ?>;">
 						          <td width="30%" height="30">
-									<div style="width:150px; position:relative" onmouseover="document.getElementById('scales').style.display='inline-block';" onmouseout="document.getElementById('scales').style.display='none';">
+									<div style="width:150px;" onmouseover="document.getElementById('scales').style.display='inline-block';" onmouseout="document.getElementById('scales').style.display='none';">
 										&nbsp;<b><?php echo $strMapScale; ?>&nbsp;1:&nbsp;</b><input type="text" id="scale" autocomplete="off" name="nScale" style="width:58px" value="<?php echo round($this->map_scaledenom); ?>">
-										<div id="scales" style="display:none; position:absolute; left:56px; bottom:21px; width: 78px; vertical-align:top; overflow:hidden; border:solid grey 1px;">
+										<div id="scales" style="display:none; position:absolute; left:56px; bottom:82px; width: 78px; vertical-align:top; overflow:hidden; border:solid grey 1px;">
 											<select size="8" style="padding:4px; margin:-2px -17px -4px -4px;" onclick="document.GUI.nScale.value=this.value; document.getElementById('scales').style.display='none'; document.GUI.submit();">
 												<option onmouseover="this.selected = true;" value="1000000">1:&nbsp;&nbsp;1000000</option>
 												<option onmouseover="this.selected = true;" value="250000">1:&nbsp;&nbsp;250000</option>
