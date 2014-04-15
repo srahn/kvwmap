@@ -253,10 +253,10 @@ class GUI extends GUI_core{
 		$this->mime_type = "formatter";
 		if ($this->formvars['format'] == '') $this->formvars['format'] = "json";
 		
-/*		# pruefe Version
+		# pruefe Version
 		if ($this->formvars['version'] != "1.0.0")
 			return array("success" => 0, "error_message" => "Geben Sie eine gültige Versionsnummer an. Derzeit wird nur die Version 1.0.0 unterstützt.");
-*/		
+		
 		# erzeuge eine eindeutige Nummer für diesen Antrag
 		$antrag_id = date("YmdHis") . str_pad(rand(1,99), 2, "00", STR_PAD_LEFT);
 		
