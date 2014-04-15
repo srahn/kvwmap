@@ -249,13 +249,14 @@ class GUI extends GUI_core{
 	}
 	
 	function packAndMail() {
+		
 		$this->mime_type = "formatter";
 		if ($this->formvars['format'] == '') $this->formvars['format'] = "json";
 		
-		# pruefe Version
+/*		# pruefe Version
 		if ($this->formvars['version'] != "1.0.0")
 			return array("success" => 0, "error_message" => "Geben Sie eine gültige Versionsnummer an. Derzeit wird nur die Version 1.0.0 unterstützt.");
-		
+*/		
 		# erzeuge eine eindeutige Nummer für diesen Antrag
 		$antrag_id = date("YmdHis") . str_pad(rand(1,99), 2, "00", STR_PAD_LEFT);
 		
@@ -265,59 +266,65 @@ class GUI extends GUI_core{
 			'form' => 'catalog://kommunen/zweck/zweckverb_antrag_faellung',
 			'ID_USER' => 'MANDANTUSER',
 			'LIP_FORM_REVISION' => '-1',
-	        'DVZ_FORM_NAME' => 'Antrag auf Fällung von Einzelbäumen',
+			'DVZ_FORM_NAME' => 'Antrag auf Fällung von Einzelbäumen',
 			'DVZ_M_ID' => '0',
-	        'DVZ_FORM_ID' => 'zweckverb_antrag_faellung',
-	        'DVZ_ID_USER' => 'MD000_USR001',
+			'DVZ_FORM_ID' => 'zweckverb_antrag_faellung',
+			'DVZ_ID_USER' => 'MD000_USR001',
 			'DVZ_ID_GROUP' => 'FMS_DEMO',
-	        'DVZ_STATUS' => '1',
-	        'zweck_name' => 'a',
+			'DVZ_STATUS' => '1',
+			'zweck_name' => 'a',
 			'zweck_vorname' => 's',
-	        'zweck_strasse_hnr' => 'a',
-	        'zweck_plz' => 'a',
+			'zweck_strasse_hnr' => 'a',
+			'zweck_plz' => 'a',
 			'zweck_ort' => 'a',
-	        'zweck_telefon' => 'a',
-	        'zweck_fax' => 'a',
+			'zweck_telefon' => 'a',
+			'zweck_fax' => 'a',
 			'zweck_email' => 'a',
-	        'zweck_antragsteller_ist' => 'Eigentümer',
-	        'zweck_standort_strasse' => 'a',
+			'zweck_antragsteller_ist' => 'Eigentümer',
+			'zweck_standort_strasse' => 'a',
 			'zweck_standort_flur' => 'a',
-	        'zweck_standort_flurstueck' => 'a',
-	        'zweck_standort_plz' => 'a',
+			'zweck_standort_flurstueck' => 'a',
+			'zweck_standort_plz' => 'a',
 			'zweck_standort_ort' => 'a',
-	        'zweck_standort_gemeinde' => 'a',
-	        'zweck_standort_gemarkung' => 'a',
+			'zweck_standort_gemeinde' => 'a',
+			'zweck_standort_gemarkung' => 'a',
 			'zweck_bestand_anzahl' => '1',
-	        'zweck_bestand_stammumfang' => '1.00',
-	        'zweck_bestand_baumhoehe' => '1.00',
+			'zweck_bestand_stammumfang' => '1.00',
+			'zweck_bestand_baumhoehe' => '1.00',
 			'zweck_bestand_baumart' => 'a',
-	        'zweck_begruendung' => 'aasd',
-					'zweck_vollmacht' => 'phph1y0hA.jpeg',
-	        'zweck_unter_ort' => 'dasda',
+			'zweck_begruendung' => 'aasd',
+			'zweck_vollmacht' => 'phph1y0hA.jpeg',
+			'zweck_unter_ort' => 'dasda',
 			'zweck_unter_datum' => '15.10.2013',
-	        'zweck_ueberschrift' => 'entsprechend der Satzung zum Schutz des Baumbestandes in der Stadt ... bzw. der Gemeinden des Amtes ...',
-	        'DVZ_EMPF_MANDANT' => 'Demo Mandant',
+			'zweck_ueberschrift' => 'entsprechend der Satzung zum Schutz des Baumbestandes in der Stadt ... bzw. der Gemeinden des Amtes ...',
+			'DVZ_EMPF_MANDANT' => 'Demo Mandant',
 			'DVZ_EMPF_MANDANT_ZUSATZ' => '-DEMO-',
-	        'DVZ_EMPF_SACHGEB' => 'DEMO SACHGEBIET',
-	        'DVZ_EMPF_STRASSE' => 'Musterstrasse',
+			'DVZ_EMPF_SACHGEB' => 'DEMO SACHGEBIET',
+			'DVZ_EMPF_STRASSE' => 'Musterstrasse',
 			'DVZ_EMPF_PLZ' => '99999',
-	        'DVZ_EMPF_ORT' => 'Musterort',
-			'baumhoehe' => array ('5', '1', '14'),
-			'baumbild' => array('phph1y0hB.png', 'phph1y0hC.jp2', 'phph1y0hD.jpeg'),
-			'stammumfang' => array ('8', '4', '5'),
-			'baumart' => array ('Buche', 'Birke', 'Eiche')
+			'DVZ_EMPF_ORT' => 'Musterort',
+			'latitude' => array(54.1, 54.2, 54.3),
+			'longitude' => array(12.1, 12.2, 12.3),
+			'treeHeight' => array (5, 1, 14),
+			'treeImage' => array('phph1y0hB.png', 'phph1y0hC.jp2', 'phph1y0hD.jpeg'),
+			'trunkPerimeter' => array (80, 140, 50),
+			'treeType' => array ('Buche', 'Birke', 'Eiche'),
+			'treetopDiameter' => array (18, 45, 24)
 		);
 		# until here are fake data
 
 		# create xml file
 		$xml_file =  "Antrag_" . $antrag_id . ".xml";
-		include SHAPEPATH . "templates/xml_template_baumfaellantrag.php";		
+		include (SHAPEPATH . "templates/xml_template_baumfaellantrag.php");
 		$xml = new SimpleXMLElement($xml_string);
 		$xml->asXML(IMAGEPATH . $xml_file);
 
 		# create pdf file
-		$pdf_file =  "Antrag_" . $antrag_id . ".pdf";
-		copy(SHAPEPATH . "templates/pdf_template_baumfaellantrag.pdf", IMAGEPATH . $pdf_file);
+		$pdf_file = 'Antrag_' . $antrag_id . '.pdf';
+	  $fp=fopen(IMAGEPATH . $pdf_file, 'wb');
+		include (SHAPEPATH . 'templates/pdf_template_baumfaellantrag.php'); // create pdf and put it in $pdf_output variable
+	  fwrite($fp, $pdf_output);
+	  fclose($fp);
 		
 		# create zip file
 		$zip_file =  "Antrag_" . $antrag_id . ".zip";
@@ -327,18 +334,17 @@ class GUI extends GUI_core{
 		$zip->addFile(IMAGEPATH . $xml_file, $xml_file);
 		$zip->addFile(IMAGEPATH . $pdf_file, $pdf_file);
 		$zip->addFile(UPLOADPATH . $data['zweck_vollmacht'], "Vollmacht_" . $antrag_id . "." . basename($data['zweck_vollmacht']));
-		foreach ($data['baumbild'] AS $key => $value) {
-		  $zip->addFile(UPLOADPATH . $value, "Baum_" . $key . "_Bild_" . $antrag_id . "." . basename($value));
+		foreach ($data['treeImage'] AS $key => $value) {
+		  $zip->addFile(UPLOADPATH . $value, $antrag_id . 'Baum_' . $key . '_Bild_' . basename($value));
 		}
 		$zip->close();
-		
+
 		# create email text
 		$email_text  = "Dies ist der Text, der im Body der E-Mail steht.";
 		$email_text .= implode(", ", $data);
 		$email_recipient = "peter.korduan@gdi-service.de";
-		
 		# send email
-	
+
 /*
 $grenze="grenzlinie";
 $name_des_bildes=$HTTP_POST_FILES['datei']['name'];
@@ -365,8 +371,9 @@ $botschaft.="\n\n";
 $botschaft.="--$grenze";
 mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
 */
-
+		
 	return array("success" => 1, "antrag_id" => $antrag_id, "xml_file" => IMAGEURL . $xml_file, "pdf_file" => IMAGEURL . $pdf_file, "zip_file" => IMAGEURL . $zip_file, "email_text" => $email_text, "email_recipient" => $email_recipient, "data:" => $data);
+
 	}
 	
   function loadPlugins(){
