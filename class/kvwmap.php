@@ -249,13 +249,14 @@ class GUI extends GUI_core{
 	}
 	
 	function packAndMail() {
+		
 		$this->mime_type = "formatter";
 		if ($this->formvars['format'] == '') $this->formvars['format'] = "json";
 		
-		# pruefe Version
+/*		# pruefe Version
 		if ($this->formvars['version'] != "1.0.0")
 			return array("success" => 0, "error_message" => "Geben Sie eine gültige Versionsnummer an. Derzeit wird nur die Version 1.0.0 unterstützt.");
-		
+*/		
 		# erzeuge eine eindeutige Nummer für diesen Antrag
 		$antrag_id = date("YmdHis") . str_pad(rand(1,99), 2, "00", STR_PAD_LEFT);
 		
@@ -265,59 +266,65 @@ class GUI extends GUI_core{
 			'form' => 'catalog://kommunen/zweck/zweckverb_antrag_faellung',
 			'ID_USER' => 'MANDANTUSER',
 			'LIP_FORM_REVISION' => '-1',
-	        'DVZ_FORM_NAME' => 'Antrag auf Fällung von Einzelbäumen',
+			'DVZ_FORM_NAME' => 'Antrag auf Fällung von Einzelbäumen',
 			'DVZ_M_ID' => '0',
-	        'DVZ_FORM_ID' => 'zweckverb_antrag_faellung',
-	        'DVZ_ID_USER' => 'MD000_USR001',
+			'DVZ_FORM_ID' => 'zweckverb_antrag_faellung',
+			'DVZ_ID_USER' => 'MD000_USR001',
 			'DVZ_ID_GROUP' => 'FMS_DEMO',
-	        'DVZ_STATUS' => '1',
-	        'zweck_name' => 'a',
+			'DVZ_STATUS' => '1',
+			'zweck_name' => 'a',
 			'zweck_vorname' => 's',
-	        'zweck_strasse_hnr' => 'a',
-	        'zweck_plz' => 'a',
+			'zweck_strasse_hnr' => 'a',
+			'zweck_plz' => 'a',
 			'zweck_ort' => 'a',
-	        'zweck_telefon' => 'a',
-	        'zweck_fax' => 'a',
+			'zweck_telefon' => 'a',
+			'zweck_fax' => 'a',
 			'zweck_email' => 'a',
-	        'zweck_antragsteller_ist' => 'Eigentümer',
-	        'zweck_standort_strasse' => 'a',
+			'zweck_antragsteller_ist' => 'Eigentümer',
+			'zweck_standort_strasse' => 'a',
 			'zweck_standort_flur' => 'a',
-	        'zweck_standort_flurstueck' => 'a',
-	        'zweck_standort_plz' => 'a',
+			'zweck_standort_flurstueck' => 'a',
+			'zweck_standort_plz' => 'a',
 			'zweck_standort_ort' => 'a',
-	        'zweck_standort_gemeinde' => 'a',
-	        'zweck_standort_gemarkung' => 'a',
+			'zweck_standort_gemeinde' => 'a',
+			'zweck_standort_gemarkung' => 'a',
 			'zweck_bestand_anzahl' => '1',
-	        'zweck_bestand_stammumfang' => '1.00',
-	        'zweck_bestand_baumhoehe' => '1.00',
+			'zweck_bestand_stammumfang' => '1.00',
+			'zweck_bestand_baumhoehe' => '1.00',
 			'zweck_bestand_baumart' => 'a',
-	        'zweck_begruendung' => 'aasd',
-					'zweck_vollmacht' => 'phph1y0hA.jpeg',
-	        'zweck_unter_ort' => 'dasda',
+			'zweck_begruendung' => 'aasd',
+			'zweck_vollmacht' => 'phph1y0hA.jpeg',
+			'zweck_unter_ort' => 'dasda',
 			'zweck_unter_datum' => '15.10.2013',
-	        'zweck_ueberschrift' => 'entsprechend der Satzung zum Schutz des Baumbestandes in der Stadt ... bzw. der Gemeinden des Amtes ...',
-	        'DVZ_EMPF_MANDANT' => 'Demo Mandant',
+			'zweck_ueberschrift' => 'entsprechend der Satzung zum Schutz des Baumbestandes in der Stadt ... bzw. der Gemeinden des Amtes ...',
+			'DVZ_EMPF_MANDANT' => 'Demo Mandant',
 			'DVZ_EMPF_MANDANT_ZUSATZ' => '-DEMO-',
-	        'DVZ_EMPF_SACHGEB' => 'DEMO SACHGEBIET',
-	        'DVZ_EMPF_STRASSE' => 'Musterstrasse',
+			'DVZ_EMPF_SACHGEB' => 'DEMO SACHGEBIET',
+			'DVZ_EMPF_STRASSE' => 'Musterstrasse',
 			'DVZ_EMPF_PLZ' => '99999',
-	        'DVZ_EMPF_ORT' => 'Musterort',
-			'baumhoehe' => array ('5', '1', '14'),
-			'baumbild' => array('phph1y0hB.png', 'phph1y0hC.jp2', 'phph1y0hD.jpeg'),
-			'stammumfang' => array ('8', '4', '5'),
-			'baumart' => array ('Buche', 'Birke', 'Eiche')
+			'DVZ_EMPF_ORT' => 'Musterort',
+			'latitude' => array(54.1, 54.2, 54.3),
+			'longitude' => array(12.1, 12.2, 12.3),
+			'treeHeight' => array (5, 1, 14),
+			'treeImage' => array('phph1y0hB.png', 'phph1y0hC.jp2', 'phph1y0hD.jpeg'),
+			'trunkPerimeter' => array (80, 140, 50),
+			'treeType' => array ('Buche', 'Birke', 'Eiche'),
+			'treetopDiameter' => array (18, 45, 24)
 		);
 		# until here are fake data
 
 		# create xml file
 		$xml_file =  "Antrag_" . $antrag_id . ".xml";
-		include SHAPEPATH . "templates/xml_template_baumfaellantrag.php";		
+		include (SHAPEPATH . "templates/xml_template_baumfaellantrag.php");
 		$xml = new SimpleXMLElement($xml_string);
 		$xml->asXML(IMAGEPATH . $xml_file);
 
 		# create pdf file
-		$pdf_file =  "Antrag_" . $antrag_id . ".pdf";
-		copy(SHAPEPATH . "templates/pdf_template_baumfaellantrag.pdf", IMAGEPATH . $pdf_file);
+		$pdf_file = 'Antrag_' . $antrag_id . '.pdf';
+	  $fp=fopen(IMAGEPATH . $pdf_file, 'wb');
+		include (SHAPEPATH . 'templates/pdf_template_baumfaellantrag.php'); // create pdf and put it in $pdf_output variable
+	  fwrite($fp, $pdf_output);
+	  fclose($fp);
 		
 		# create zip file
 		$zip_file =  "Antrag_" . $antrag_id . ".zip";
@@ -327,18 +334,17 @@ class GUI extends GUI_core{
 		$zip->addFile(IMAGEPATH . $xml_file, $xml_file);
 		$zip->addFile(IMAGEPATH . $pdf_file, $pdf_file);
 		$zip->addFile(UPLOADPATH . $data['zweck_vollmacht'], "Vollmacht_" . $antrag_id . "." . basename($data['zweck_vollmacht']));
-		foreach ($data['baumbild'] AS $key => $value) {
-		  $zip->addFile(UPLOADPATH . $value, "Baum_" . $key . "_Bild_" . $antrag_id . "." . basename($value));
+		foreach ($data['treeImage'] AS $key => $value) {
+		  $zip->addFile(UPLOADPATH . $value, $antrag_id . 'Baum_' . $key . '_Bild_' . basename($value));
 		}
 		$zip->close();
-		
+
 		# create email text
 		$email_text  = "Dies ist der Text, der im Body der E-Mail steht.";
 		$email_text .= implode(", ", $data);
 		$email_recipient = "peter.korduan@gdi-service.de";
-		
 		# send email
-	
+
 /*
 $grenze="grenzlinie";
 $name_des_bildes=$HTTP_POST_FILES['datei']['name'];
@@ -365,8 +371,9 @@ $botschaft.="\n\n";
 $botschaft.="--$grenze";
 mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
 */
-
+		
 	return array("success" => 1, "antrag_id" => $antrag_id, "xml_file" => IMAGEURL . $xml_file, "pdf_file" => IMAGEURL . $pdf_file, "zip_file" => IMAGEURL . $zip_file, "email_text" => $email_text, "email_recipient" => $email_recipient, "data:" => $data);
+
 	}
 	
   function loadPlugins(){
@@ -477,7 +484,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
     	if(in_array($data_attributes['geomtype'][$data_attributes['the_geom']] , array('MULTIPOLYGON', 'POLYGON', 'GEOMETRY'))){
     		$offset = 1;
     	}
-    	$select = strtolower($mapDB->getSelectFromData($layer['Data']));
+    	$select = $mapDB->getSelectFromData($layer['Data']);
 			if($this->formvars['layer_id'] > 0)$select = str_replace(' from ', ', '.$data_attributes['table_alias_name'][$data_attributes['the_geom']].'.oid as exclude_oid'.' from ', $select);		# bei Rollenlayern nicht machen
 			$extent = 'st_transform(st_geomfromtext(\'POLYGON(('.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layer['epsg_code'].')';				
 			$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects('.$data_attributes['the_geom'].', '.$extent.') ';
@@ -512,10 +519,11 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
 	}
 
 	function resizeMap2Window(){
-		$width = $this->formvars['width']-475;
+		global $gui_widths;
+		$width = $this->formvars['width'] - $gui_widths[$this->user->rolle->gui];
 		if($this->user->rolle->hideMenue == 1){$width = $width + 195;}
-		if($this->user->rolle->hideLegend == 1){$width = $width + 244;}
-		$height = $this->formvars['height']-152;
+		if($this->user->rolle->hideLegend == 1){$width = $width + 254;}
+		$height = $this->formvars['height'] - HEADERHEIGHT;
 		$this->user->rolle->setSize($width.'x'.$height);
 		$this->user->rolle->readSettings();
 	}
@@ -1230,11 +1238,16 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
 										$filename = $this->map_saveWebImage($image,'jpeg');
 										$newname = $this->user->id.basename($filename);
 										rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
-										#Anne
+										#Anne										
 										$classid = $layer['Class'][$k]['Class_ID'];
-										if($class->status=='MS_OFF'){
+										if($this->mapDB->disabled_classes['status'][$classid] == '0'){
 											$legend .= '<tr>
 													<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="hidden" size="2" name="class'.$classid.'" value="0"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img border="0" name="imgclass'.$classid.'" src="graphics/inactive.jpg"></a>&nbsp;<span class="small">'.html_umlaute($class->name).'</span></td>
+													</tr>';
+										}
+										elseif($this->mapDB->disabled_classes['status'][$classid] == 2){
+											$legend .= '<tr>
+													<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="hidden" size="2" name="class'.$classid.'" value="2"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img border="0" name="imgclass'.$classid.'" src="'.TEMPPATH_REL.$newname.'"></a>&nbsp;<span class="small">'.html_umlaute($class->name).'</span></td>
 													</tr>';
 										}
 										else{
@@ -7744,6 +7757,10 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
 	        if(in_array($attributes['type'][$j], array('numeric', 'float4', 'float8'))){
 	        	$result[$i][$attributes['name'][$j]] = str_replace('.', ",", $result[$i][$attributes['name'][$j]]);	
 	        }
+					if($attributes['type'][$j] == 'bool'){
+						$result[$i][$attributes['name'][$j]] = str_replace('t', "ja", $result[$i][$attributes['name'][$j]]);	
+						$result[$i][$attributes['name'][$j]] = str_replace('f', "nein", $result[$i][$attributes['name'][$j]]);
+					}
 	        $result[$i][$attributes['name'][$j]] = str_replace(';', ",", $result[$i][$attributes['name'][$j]]);
 	        $result[$i][$attributes['name'][$j]] = str_replace(chr(10), " ", $result[$i][$attributes['name'][$j]]);
 	        $result[$i][$attributes['name'][$j]] = str_replace(chr(13), "", $result[$i][$attributes['name'][$j]]);
