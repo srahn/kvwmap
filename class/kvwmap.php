@@ -512,11 +512,11 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
 	}
 
 	function resizeMap2Window(){
-		global $gui_widths;
-		$width = $this->formvars['width'] - $gui_widths[$this->user->rolle->gui];
+		global $menue_legend_widths;
+		$width = $this->formvars['width'] - $menue_legend_widths[$this->user->rolle->gui];
 		if($this->user->rolle->hideMenue == 1){$width = $width + 195;}
 		if($this->user->rolle->hideLegend == 1){$width = $width + 254;}
-		$height = $this->formvars['height'] - HEADERHEIGHT;
+		$height = $this->formvars['height'] - HEADER_FOOTER_HEIGHT;
 		$this->user->rolle->setSize($width.'x'.$height);
 		$this->user->rolle->readSettings();
 	}
