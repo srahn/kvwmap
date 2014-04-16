@@ -137,7 +137,7 @@ emzversteckt = function(k){
   </tr>
   <tr>
     <td>
-	  <div style="position:relative; top:0px; right:0px; padding:=px; border-color:<?php echo BG_DEFAULT ?>; border-width:1px; border-style:solid;">
+	  <div style="position:static; top:0px; right:0px; padding:=px; border-color:<?php echo BG_DEFAULT ?>; border-width:1px; border-style:solid;">
       <table border="0" cellspacing="0" cellpadding="0">
     	<tr>
     	  <td colspan="2">
