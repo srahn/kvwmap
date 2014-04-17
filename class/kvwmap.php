@@ -2763,11 +2763,12 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
   }
 
   function Anliegerbeiträge_editor(){
-		$this->reduce_mapwidth(100);
     $this->main='anliegerbeitraege_editor.php';
     $this->titel='Anliegerbeiträge';
     # aktuellen Kartenausschnitt laden + zeichnen!
+		$saved_scale = $this->reduce_mapwidth(100);
     $this->loadMap('DataBase');
+		$this->scaleMap($saved_scale);
     if ($this->formvars['CMD']!='') {
       $this->navMap($this->formvars['CMD']);
       $this->user->rolle->saveDrawmode($this->formvars['always_draw']);
@@ -2922,10 +2923,11 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
   }
 
   function jagdkatastereditor(){
-		$this->reduce_mapwidth(100);
     $this->main='jagdkatastereditor.php';
     $this->titel='Jagdbezirk anlegen';
+    $saved_scale = $this->reduce_mapwidth(100);
     $this->loadMap('DataBase');
+		$this->scaleMap($saved_scale);
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
   	if(!$this->formvars['layer_id']){
       $layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
@@ -3450,7 +3452,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
   }
 
   function druckausschnittswahl($loadmapsource){
-		$this->reduce_mapwidth(10);
+		$saved_scale = $this->reduce_mapwidth(10);		
     $this->titel='Druckausschnitt wählen';
     $this->main="druckausschnittswahl.php";
     # aktuellen Kartenausschnitt laden + zeichnen!
@@ -3460,6 +3462,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
     else{
       $this->loadMap($loadmapsource);
     }
+		$this->scaleMap($saved_scale);
     #echo '<br>Karte geladen: ';
     # aktuellen Druckkopf laden
     $this->Document=new Document($this->database);
@@ -5676,7 +5679,6 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
   }
 
   function bodenRichtWertErfassung() {
-		$this->reduce_mapwidth(100);
     if ($this->formvars['oid']=='') {
       $this->titel='Bodenrichtwerterfassung';
     }
@@ -5690,7 +5692,9 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
     $layer = $this->user->rolle->getLayer(LAYERNAME_BODENRICHTWERTE);
     $this->formvars['boris_layer_id'] = $layer[0]['Layer_ID'];
     $this->main="bodenrichtwerterfassung_vboris.php";
-    $this->loadMap('DataBase');
+    $saved_scale = $this->reduce_mapwidth(100);
+		$this->loadMap('DataBase');
+		$this->scaleMap($saved_scale);
     $this->Lagebezeichnung = $this->getLagebezeichnung($this->user->rolle->epsg_code);
     if($this->formvars['gemeinde'] == ''){
     	$this->formvars['gemeinde'] = $this->Lagebezeichnung['gemeinde'];
@@ -5906,7 +5910,6 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
   }
 
   function nachweisAenderungsformular() {
-		$this->reduce_mapwidth(100);
     #2005-11-25_pk
     # Anzeige des Formulars zum Eintragen neuer/Ändern vorhandener Metadaten zu einem Nachweisdokument
     # (FFR, KVZ oder GN)
@@ -5929,7 +5932,9 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
       # Abfrage war erfolgreich
       $nachweis->document=$nachweis->Dokumente[0];
       # Laden der letzten Karteneinstellung
-      $this->loadMap('DataBase');
+      $saved_scale = $this->reduce_mapwidth(100);
+			$this->loadMap('DataBase');
+			$this->scaleMap($saved_scale);
       
       $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
 	    if(!$this->formvars['layer_id']){
@@ -6588,8 +6593,9 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
 	    $this->formvars['columnname'] = $data_explosion[0];
     	if($this->formvars['map_flag'] != ''){
 	    	################# Map ###############################################
-				$this->reduce_mapwidth(100);
-	    	$this->loadMap('DataBase');
+				$saved_scale = $this->reduce_mapwidth(100);
+				$this->loadMap('DataBase');
+				$this->scaleMap($saved_scale);
 		    $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
 		    # Geometrie-Übernahme-Layer:
 		    # Spaltenname und from-where abfragen
@@ -6956,7 +6962,6 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
   }
 
   function neuer_Layer_Datensatz(){
-		$this->reduce_mapwidth(150);
     $this->layerdaten = $this->Stelle->getqueryablePostgisLayers(1);
     $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->titel='neuen Datensatz einfügen';
@@ -7030,7 +7035,9 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
 
         $this->geomtype = $this->qlayerset[0]['attributes']['geomtype'][$this->qlayerset[0]['attributes']['the_geom']];
         if($this->geomtype != ''){
-          $this->loadMap('DataBase');
+          $saved_scale = $this->reduce_mapwidth(150);
+					$this->loadMap('DataBase');
+					$this->scaleMap($saved_scale);
         	if($this->formvars['layer_id'] != '' AND $this->formvars['oid'] != '' AND $this->formvars['tablename'] != '' AND $this->formvars['columnname'] != ''){			# das sind die Sachen vom "Mutter"-Layer
         		$layerdb = $this->mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
         		$rect = $this->mapDB->zoomToDatasets(array($this->formvars['oid']), $this->formvars['tablename'], $this->formvars['columnname'], 10, $layerdb, $this->user->rolle->epsg_code);
@@ -7899,11 +7906,12 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
   }
 
   function shp_export(){
-		$this->reduce_mapwidth(10);
     $this->titel='Shape-Export';
     if($this->formvars['chosen_layer_id'] != '')$this->formvars['selected_layer_id'] = $this->formvars['chosen_layer_id'];		# aus der Sachdatenanzeige des GLE
     $this->main='shape_export.php';
-    $this->loadMap('DataBase');
+    $saved_scale = $this->reduce_mapwidth(10);
+		$this->loadMap('DataBase');
+		$this->scaleMap($saved_scale);
     $this->epsg_codes = read_epsg_codes($this->pgdatabase);
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
     $this->shape = new shape();
@@ -9889,7 +9897,6 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
 	}
 
   function nachweisFormAnzeige($nachweis = NULL) {
-		$this->reduce_mapwidth(100);
     # letzte Änderung 2006-01-23 pk
     # Anzeige des Formulars zum Eintragen neuer/Ändern vorhandener Metadaten zu einem Nachweisdokument
     # (FFR, KVZ oder GN)
@@ -9905,7 +9912,9 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
     $this->main="dokumenteneingabeformular.php";
     # 2006-01-27
     # aktuellen Kartenausschnitt laden + zeichnen!
-    $this->loadMap('DataBase');
+    $saved_scale = $this->reduce_mapwidth(100);
+		$this->loadMap('DataBase');
+		$this->scaleMap($saved_scale);
     
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
   	if(!$this->formvars['layer_id']){
@@ -10142,14 +10151,16 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
 
 	function reduce_mapwidth($reduction){		
 		$width = $this->user->rolle->nImageWidth;
+		$pixelsize = ($this->user->rolle->oGeorefExt->maxx - $this->user->rolle->oGeorefExt->minx)/($width-1);		# das width - 1 kommt daher, weil der Mapserver das auch so macht
+		$scale = round($pixelsize * 96 / 0.0254);
 		$width = $width - $reduction;
 		if($this->user->rolle->hideMenue == 1){$width = $width - 195;}
-		if($this->user->rolle->hideLegend == 1){$width = $width - 244;}
+		if($this->user->rolle->hideLegend == 1){$width = $width - 254;}
 		$this->user->rolle->nImageWidth = $width;
+		return $scale;
 	}
 
   function rechercheFormAnzeigen() {
-		$this->reduce_mapwidth(200);
     # 2006-01-23 pk
     $this->menue='menue.php';
     # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
@@ -10186,7 +10197,9 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
     $this->FormObjVermStelle=$this->getFormObjVermStelle('sVermStelle', $this->formvars['sVermStelle']);
     $this->FormObjVermStelle->insertOption('', NULL, '--- Auswahl ---', 0);    
     # aktuellen Kartenausschnitt laden + zeichnen!
-    $this->loadMap('DataBase');
+    $saved_scale = $this->reduce_mapwidth(200);
+		$this->loadMap('DataBase');
+		$this->scaleMap($saved_scale);
     if ($this->formvars['CMD']!='') {
       # Nur Navigieren
       $this->navMap($this->formvars['CMD']);
