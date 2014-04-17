@@ -38,7 +38,7 @@ function resizemap2window() {
     width = document.body.clientWidth;
     height = document.body.clientHeight;
   }
-	document.location.href='index.php?go=ResizeMap2Window&width='+width+'&height='+height;
+	document.location.href='index.php?go=ResizeMap2Window&width='+width+'&height='+height+'&nScale='+document.GUI.nScale.value;
 }
 
 function showMapImage(){ 
@@ -60,13 +60,13 @@ function switchlegend(){
 	if(document.getElementById('legenddiv').className == 'slidinglegend'){
 		document.getElementById('legenddiv').className = 'normallegend';
 		ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=changeLegendDisplay&hide=0', new Array('', ''), new Array("", "execute_function"));
-		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>maximize.png';
+		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>minimize_legend.png';
 		document.getElementById('LegendMinMax').title="Legende verstecken";
 	}
 	else{
 		document.getElementById('legenddiv').className = 'slidinglegend';
 		ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=changeLegendDisplay&hide=1', new Array('', ''), new Array("", "execute_function"));
-		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>minimize.png';
+		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>maximize_legend.png';
 		document.getElementById('LegendMinMax').title="Legende zeigen";
 	}
 }
@@ -76,13 +76,13 @@ function switchlegend(){
 function switchlegend(){
 	if(document.getElementById('legendTable').style.display == 'none'){
 		document.getElementById('legendTable').style.display='';
-		ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=changeLegendDisplay&hide=0', new Array(), "");
+		ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=changeLegendDisplay&hide=0', new Array('', ''), new Array("", "execute_function"));
 		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>maximize.png';
 		document.getElementById('LegendMinMax').title="Legende verstecken";
 	}
 	else{
 		document.getElementById('legendTable').style.display='none';
-		ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=changeLegendDisplay&hide=1', new Array(), "");
+		ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=changeLegendDisplay&hide=1', new Array('', ''), new Array("", "execute_function"));
 		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>minimize.png';
 		document.getElementById('LegendMinMax').title="Legende zeigen";
 	}
@@ -173,7 +173,7 @@ if($this->formvars['gps_follow'] == ''){
 															</select>
 														</div>
 													</div>
-													&nbsp;<b><?php echo $strMapScale; ?>&nbsp;1:&nbsp;</b><input type="text" id="scale" autocomplete="off" name="nScale" style="width:58px" value="<?php echo round($this->map_scaledenom); ?>">
+													&nbsp;<b><?php echo $this->strMapScale; ?>&nbsp;1:&nbsp;</b><input type="text" id="scale" autocomplete="off" name="nScale" style="width:58px" value="<?php echo round($this->map_scaledenom); ?>">
 												</div>
 						          </td>
 						          <td width="50%" align="center">
@@ -268,10 +268,10 @@ if($this->formvars['gps_follow'] == ''){
 							<td bgcolor="<?php echo BG_DEFAULT ?>" align="left"><?php
 								if ($this->user->rolle->hideLegend) {
 									if (ie_check()){$display = 'none';}
-									?><a id="linkLegend" href="javascript:switchlegend()"><img title="Legende zeigen" id="LegendMinMax" src="<?php  echo GRAPHICSPATH; ?>minimize.png" border="0"></a><?php
+									?><a id="linkLegend" href="javascript:switchlegend()"><img title="Legende zeigen" id="LegendMinMax" src="<?php  echo GRAPHICSPATH; ?>maximize_legend.png" border="0"></a><?php
 								}
 								else {
-									?><a id="linkLegend" href="javascript:switchlegend()"><img title="Legende verstecken" id="LegendMinMax" src="<?php  echo GRAPHICSPATH; ?>maximize.png" border="0"></a><?php
+									?><a id="linkLegend" href="javascript:switchlegend()"><img title="Legende verstecken" id="LegendMinMax" src="<?php  echo GRAPHICSPATH; ?>minimize_legend.png" border="0"></a><?php
 								}
 							?></td>
 						</tr>

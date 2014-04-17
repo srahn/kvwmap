@@ -114,7 +114,25 @@ function buildwktlinefromsvgpath(svgpath){
   <? } ?>
   <tr>
   	<td>&nbsp;</td>
-  	<td>&nbsp;<b>Maßstab&nbsp;1:&nbsp;</b><input type="text" id="scale" name="nScale" size="5" value="<?php echo round($this->map_scaledenom); ?>"></td>
+  	<td>
+			<div style="width:150px;" onmouseover="document.getElementById('scales').style.display='inline-block';" onmouseout="document.getElementById('scales').style.display='none';">
+				<div valign="top" style="height:0px; position:relative;">
+					<div id="scales" style="display:none; position:absolute; left:66px; bottom:-1px; width: 78px; vertical-align:top; overflow:hidden; border:solid grey 1px;">
+						<select size="8" style="padding:4px; margin:-2px -17px -4px -4px;" onclick="document.GUI.nScale.value=this.value; document.getElementById('scales').style.display='none'; document.GUI.submit();">
+							<option onmouseover="this.selected = true;" value="1000000">1:&nbsp;&nbsp;1000000</option>
+							<option onmouseover="this.selected = true;" value="250000">1:&nbsp;&nbsp;250000</option>
+							<option onmouseover="this.selected = true;" value="100000">1:&nbsp;&nbsp;100000</option>
+							<option onmouseover="this.selected = true;" value="50000">1:&nbsp;&nbsp;50000</option>
+							<option onmouseover="this.selected = true;" value="10000">1:&nbsp;&nbsp;10000</option>
+							<option onmouseover="this.selected = true;" value="5000">1:&nbsp;&nbsp;5000</option>
+							<option onmouseover="this.selected = true;" value="1000">1:&nbsp;&nbsp;1000</option>
+							<option onmouseover="this.selected = true;" value="500">1:&nbsp;&nbsp;500</option>
+						</select>
+					</div>
+				</div>
+				&nbsp;<b><?php echo $this->strMapScale; ?>&nbsp;1:&nbsp;</b><input type="text" id="scale" autocomplete="off" name="nScale" style="width:58px" value="<?php echo round($this->map_scaledenom); ?>">
+			</div>
+		</td>
 	<? if($this->user->rolle->runningcoords != '0'){ ?>
 	<td><b>&nbsp;<?php echo $this->strCoordinates; ?>:</b>&nbsp;</td>
 	<td><input type="text" style="width:190px;border:0px;background-color:transparent" name="runningcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?></td>

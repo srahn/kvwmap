@@ -19,4 +19,5 @@
  $this->strEnter="Enter"; 
  $this->strReset="Reset";
  $this->strSaveMapViewCommittMassage="Mapview is saved";
+ $this->strMapScale="Map scale";
 ?>

@@ -60,10 +60,10 @@ define('GLEVIEW', 2);                  # 1 / 2              # Version 1.6.5
 # Header und Footer
 define('HEADER', 'header.php');															# Version 1.8.0
 define('FOOTER', 'footer.php');															# Version 1.8.0
-# Headerhöhe
-define('HEADERHEIGHT', 132);																# Version 1.14
-# GUI-Breite
-$gui_widths = array('gui.php' => 475, 'gui_button.php' => 486);		# Version 1.14
+# Höhe von Header und Footer zusammen
+define('HEADER_FOOTER_HEIGHT', 132);																# Version 1.14
+# Breite von Menü und Legende zusammen
+$menue_legend_widths = array('gui.php' => 485, 'gui_button.php' => 486);		# Version 1.14
 # login.php
 define('LOGIN', 'login.php');																# Version 1.8.0
 
@@ -145,6 +145,9 @@ switch ($subnetaddr) {
     define('URL','http://www.gdi-service.de/');
   }
 }
+# wenn die Internetverbindung über einen Proxy hergestellt wird, kann man diesen hier angeben
+# sie wird dann z.B. bei getfeatureinfo-Abfragen berücksichtigt
+define('HTTP_PROXY' , '');																						# Version 1.14
 # -----------------Version 1.6.6 End
 define('MAPSERV_CGI_BIN',URL.'cgi-bin/mapserv');
 define('LOGPATH',INSTALLPATH.'logs/');

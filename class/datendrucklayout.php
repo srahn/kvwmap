@@ -137,7 +137,16 @@ class ddl {
 								}
 								#### relative Positionierung über Offset-Attribut ####
 								
-								$offy = 842 - $ypos - $offsety;
+								$offy = 842 - $ypos + $offsety;
+								
+								if($this->layout['type'] != 0 AND $i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben
+									$offy = $offy + $this->yoffset_onpage+22;
+								}	
+								# beim jedem Datensatz die Gesamthoehe der Elemente des Datensatzes ermitteln
+								if($i_on_page == 0){
+									if($this->maxy < 842-$offy)$this->maxy = 842-$offy;		# beim ersten Datensatz das maxy ermitteln
+								}
+								
 								if($preview){
 									$sublayoutobject = $this->load_layouts(NULL, $sublayout, NULL, NULL);
 									# den letzten y-Wert dieses Elements in das Offset-Array schreiben
@@ -154,6 +163,9 @@ class ddl {
 									# den letzten y-Wert dieses Elements in das Offset-Array schreiben
 									$this->layout['offset_attributes'][$attributes['name'][$j]] = $this->gui->generischer_sachdaten_druck_drucken($this->pdf, $offx, $offy);
 								}
+								
+								if($this->miny > $this->layout['offset_attributes'][$attributes['name'][$j]])$this->miny = $this->layout['offset_attributes'][$attributes['name'][$j]];		# miny ist die unterste y-Position das aktuellen Datensatzes 
+								
 								$this->layout['page_id'][$attributes['name'][$j]] = $this->pdf->currentContents;		# und die Page-ID merken, in der das Attribut beendet wurde								
 								$this->pdf->closeObject();			# falls in eine alte Seite geschrieben wurde, zurückkehren
 								# Saves wieder setzen

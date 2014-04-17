@@ -4,7 +4,6 @@
   $strLoadNew="Neu Laden";
   $strMapImageURL="Bild speichern";
   $strChoose="Ausschnitt laden";
-  $strMapScale="Maßstab";
   $strMapSettingsFrom="Karteneinstellungen vom";
   $strPreviousView="vorherige Ansicht";
   $strNextView="naechste Ansicht";
