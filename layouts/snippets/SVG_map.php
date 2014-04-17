@@ -446,8 +446,8 @@ top.document.getElementById("svghelp").SVGstopwaiting = stopwaiting;		// das ist
 top.document.getElementById("svghelp").SVGmoveback = moveback;
 
 function moveback_ff(evt){
-	document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");
-	document.getElementById("mapimg").setAttribute("xlink:href", document.getElementById("mapimg2").getAttribute("xlink:href"));
+	document.getElementById("mapimg2").setAttribute("style", "display:block");	
+	window.setTimeout(\'document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");document.getElementById("mapimg").setAttribute("xlink:href", document.getElementById("mapimg2").getAttribute("xlink:href"));\', 200);
 	// Redlining-Sachen loeschen
 	while(child = document.getElementById("redlining").firstChild){
   	document.getElementById("redlining").removeChild(child);
@@ -457,7 +457,8 @@ function moveback_ff(evt){
 	hidetooltip(evt);
 	// Navigation wieder erlauben
 	stopwaiting();
-	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("xlink:href", "")\', 200);		// Firefox 4 
+	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("xlink:href", "")\', 200);
+	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("style", "display:none")\', 200);
 }
 
 function moveback(evt){
@@ -1388,7 +1389,7 @@ $svg.='
     </g>
   </g>
 	<g id="mapimg2_group">
-  	<image id="mapimg2" xlink:href="" height="100%" width="100%" y="0" x="0"/>
+  	<image id="mapimg2" xlink:href="" height="100%" width="100%" y="0" x="0" style="display:none"/>
   </g>
 	
   <rect id="canvas" cursor="crosshair" onmousedown="mousedown(evt)" onmousemove="mousemove(evt);" onmouseup="mouseup(evt);" width="100%" height="100%" opacity="0"/>
