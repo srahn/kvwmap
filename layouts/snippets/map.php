@@ -38,7 +38,7 @@ function resizemap2window() {
     width = document.body.clientWidth;
     height = document.body.clientHeight;
   }
-	document.location.href='index.php?go=ResizeMap2Window&width='+width+'&height='+height;
+	document.location.href='index.php?go=ResizeMap2Window&width='+width+'&height='+height+'&nScale='+document.GUI.nScale.value;
 }
 
 function showMapImage(){ 
