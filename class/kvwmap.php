@@ -10150,6 +10150,9 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
   }
 
 	function reduce_mapwidth($reduction){		
+		# diese Funktion reduziert die Kartenbildbreite temporär für bestimmte Fachschalen, damit die Karte dort genau reinpasst
+		# vorher wird der aktuelle Maßstab ausgerechnet und von der Funktion zurückgeliefert
+		# damit kann dann nach dem loadmap ein zoomscale gemacht werden, damit der Maßstab erhalten bleibt
 		$width = $this->user->rolle->nImageWidth;
 		$pixelsize = ($this->user->rolle->oGeorefExt->maxx - $this->user->rolle->oGeorefExt->minx)/($width-1);		# das width - 1 kommt daher, weil der Mapserver das auch so macht
 		$scale = round($pixelsize * 96 / 0.0254);
