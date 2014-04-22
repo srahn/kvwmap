@@ -6,6 +6,7 @@ $dx       = $this->map->extent->maxx-$this->map->extent->minx;
 $dy       = $this->map->extent->maxy-$this->map->extent->miny;
 $pixelsize    = ($dx/$res_x+$dy/$res_y)/2;		# ist $scale in SVG_map.php
 
+#			// nix
 #			var mapimg = svgdoc.getElementById("mapimg");
 #			var scalebar = document.getElementById("scalebar");
 # 		var refmap = document.getElementById("refmapdiv");
@@ -20,8 +21,10 @@ $pixelsize    = ($dx/$res_x+$dy/$res_y)/2;		# ist $scale in SVG_map.php
 #			var polygon = svgdoc.getElementById("polygon");
 #			// nix
 #			// nix
-$response =
-$this->img['hauptkarte'].'~
+
+if($this->formvars['code2execute'] != '')$response = $this->formvars['code2execute'];
+$response .=
+'~'.$this->img['hauptkarte'].'~
 '.$this->img['scalebar'].'~
 '.$this->img['referenzkarte'].'~
 '.round($this->map_scaledenom).'~';
