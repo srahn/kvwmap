@@ -198,7 +198,8 @@ function delete_selection(){
 <input type="hidden" name="go_plus" value="Exportieren"></td>
 <input type="hidden" name="attributes" value=""></td>
 <input type="hidden" name="attributliste" value="<? echo $this->formvars['attributliste']; ?>"></td>
-<input name="querypolygon" type="hidden" value="<?php echo $this->querypolygon; ?>">
+<input name="querypolygon" type="hidden" value="<?php echo $this->formvars['querypolygon']; ?>">
+<INPUT TYPE="HIDDEN" NAME="searchradius" VALUE="<?php echo $this->formvars['searchradius']; ?>">
 <input name="rectminx" type="hidden" value="<?php echo $this->formvars['rectminx'] ? $this->formvars['rectminx'] : $this->queryrect->minx; ?>">
 <input name="rectminy" type="hidden" value="<?php echo $this->formvars['rectminy'] ? $this->formvars['rectminy'] : $this->queryrect->miny; ?>">
 <input name="rectmaxx" type="hidden" value="<?php echo $this->formvars['rectmaxx'] ? $this->formvars['rectmaxx'] : $this->queryrect->maxx; ?>">
