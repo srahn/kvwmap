@@ -5449,6 +5449,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
           	$posy = ($this->formvars['freetext_posy'.$j]+1-$height)/$ratio*-1;
           	$boxwidth = ($this->formvars['freetext_width'.$j]+6)/$ratio;
           	$boxheight = ($this->formvars['freetext_height'.$j]+8)/$ratio;
+						$fontsize = $this->formvars['freetext_fontsize'.$j]/$ratio;
           	$pdf->setColor(1,1,1);
           	$pdf->filledRectangle($posx, $posy-$boxheight, $boxwidth, $boxheight);
           	$pdf->setColor(0,0,0);
@@ -5459,8 +5460,8 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
           	$freitext = explode(';', $this->formvars['freetext'.$j]);
           	$anzahlzeilen = count($freitext);
           	for($i = 0; $i < $anzahlzeilen; $i++){
-          		$h = $i * 12 * 1.25;
-           		$pdf->addText($posx+4,$posy-$h-14,12,utf8_decode($freitext[$i]), 0);
+          		$h = $i * $fontsize * 1.25;
+           		$pdf->addText($posx+$fontsize*0.3333,$posy-$h-$fontsize*1.18, $fontsize,utf8_decode($freitext[$i]), 0);
           	}      	
           }
     }
