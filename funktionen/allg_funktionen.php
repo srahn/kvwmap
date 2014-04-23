@@ -7,7 +7,7 @@
 $errors = array();
  
 function MapserverErrorHandler($errno, $errstr, $errfile, $errline){
-	global $errors;
+	global $errors;	
 	if(!(error_reporting() & $errno)){
 		// This error code is not included in error_reporting
 		return;

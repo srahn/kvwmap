@@ -13197,20 +13197,20 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
 	
 	function layer_error_handling(){
 		global $errors;
-		foreach($errors as $error){
-			echo '<br>'.$error.'<br>';
-			if(strpos($error, 'named') !== false){
-				$start = strpos($error, '\'')+1;
-				$end = strpos($error, '\'', $start);
+		for($i = 0; $i < 2; $i++){		// es wird nach den ersten beiden Fehlern abgebrochen, da die Fehlermeldungen bei mehrmaligem Aufruf immer mehr werden...
+			$error_details .= $errors[$i].chr(10);
+			if(strpos($errors[$i], 'named') !== false){
+				$start = strpos($errors[$i], '\'')+1;
+				$end = strpos($errors[$i], '\'', $start);
 				$length = $end - $start;
-				$layername = substr($error, $start, $length);
-				$layer = $this->user->rolle->getLayer($layername);
-				if($layer == NULL)$layer = $this->user->rolle->getRollenLayer($layername);
-				break;
+				$error_layername = substr($errors[$i], $start, $length);
+				$layer = $this->user->rolle->getLayer($error_layername);
+				if($layer == NULL)$layer = $this->user->rolle->getRollenLayer($error_layername);
+				$error_layer_id = $layer[0]['Layer_ID'];
 			}
 		}
 		restore_error_handler();
-		return '<br><br>Das Thema "'.$layername.'" ist fehlerhaft. Klicken Sie <a href="index.php?go=reset_layers&layer_id='.$layer[0]['Layer_ID'].'">hier</a> um das Thema auszuschalten.';
+		include(SNIPPETS.LAYER_ERROR_PAGE);
 	}
 
   # Zeichnet die Kartenelemente Hauptkarte, Legende, Maßstab und Referenzkarte

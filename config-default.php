@@ -66,12 +66,8 @@ define('HEADER_FOOTER_HEIGHT', 132);																# Version 1.14
 $menue_legend_widths = array('gui.php' => 485, 'gui_button.php' => 486);		# Version 1.14
 # login.php
 define('LOGIN', 'login.php');																# Version 1.8.0
-
-# Google Maps Api Key, zu beschaffen für die eigenen Domain unter: http://code.google.com/intl/de/apis/maps/signup.html
-# Schlüssel für https://kvwmap.geoinformatik.uni-rostock.de)
-define('GOOGLE_API_KEY','ABQIAAAA3NVkF8JG1Orwwdy6Z6N2ghQjhy709LeHrxCbc4HTlSWWZ4JR9RShfK5WWmrk3Wm9SGzJyhwtosboyQ');
-# Schlüssel für http://localhost
-#define('GOOGLE_API_KEY','ABQIAAAA3NVkF8JG1Orwwdy6Z6N2ghT2yXp_ZAY8_ufC3CFXhHIE1NvwkxTr0pvpUqbRW25i9TOdNAALRKTbTg');
+# Seite zur Fehlerbehandlung, die durch fehlerhafte Layer verursacht werden; unterhalb von /snippets
+define('LAYER_ERROR_PAGE', 'layer_error_page.php');					# Version 1.14
 
 ### Einstellungen für das Menü
 # Da die Bezeichnungen der Menüs frei wählbar sind, muss man hier angegen
