@@ -424,12 +424,8 @@ class GUI_core {
 					$this->layer_id_string .= $layerset[$i]['Layer_ID'].'|';							# alle Layer-IDs hintereinander in einem String
 											
 					if($layerset[$i]['requires'] != ''){
-						$nextlayer = $layerset[$i+1];
-						$requires=explode('[',str_replace(']','[',$layerset[$i]['requires']));
-						if($requires[1] == $nextlayer['Name']){													// wenn der Layer aus dem requires-Eintrag mit dem nachfolgenden Layer übereinstimmt
-							$layerset[$i]['aktivStatus'] = $nextlayer['aktivStatus'];
-							$layerset[$i]['showclasses'] = $nextlayer['showclasses'];
-						}
+						$layerset[$i]['aktivStatus'] = $layerset['layer_ids'][$layerset[$i]['requires']]['aktivStatus'];
+						$layerset[$i]['showclasses'] = $layerset['layer_ids'][$layerset[$i]['requires']];
 					}
 					
 					if($this->class_load_level == 2 OR $layerset[$i]['requires'] != '' OR ($this->class_load_level == 1 AND $layerset[$i]['aktivStatus'] != 0)){      # nur wenn der Layer aktiv ist (oder ein requires-Layer), sollen seine Parameter gesetzt werden
@@ -1751,11 +1747,14 @@ class db_mapObj_core {
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
     $this->Layer = array();
     $this->disabled_classes = $this->read_disabled_classes();
+		$i = 0;
     while ($rs=mysql_fetch_array($query)) {
       if($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivStatus'] != '0')){    # bei withclasses == 2 werden für alle Layer die Klassen geladen, bei withclasses == 1 werden die Klassen nur dann geladen, wenn der Layer aktiv ist
         $rs['Class']=$this->read_Classes($rs['Layer_ID'], $this->disabled_classes);
       }
-      $this->Layer[]=$rs;
+      $this->Layer[$i]=$rs;
+			$this->Layer['layer_ids'][$rs['Layer_ID']] =& $this->Layer[$i];		# damit man mit einer Layer-ID als Schlüssel auf dieses Array zugreifen kann
+			$i++;
     }
     return $this->Layer;
   }

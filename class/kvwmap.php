@@ -6019,18 +6019,8 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
 
   function Layer2Stelle_EditorSpeichern(){
     $Stelle = new stelle($this->formvars['selected_stelle_id'],$this->user->database);
-    $this->titel='Layereigenschaften stellenbezogen';
-    $this->main='layer2stelle_formular.php';
     $Stelle->updateLayer($this->formvars);
-    $result = $Stelle->getLayer($this->formvars['selected_layer_id']);
-    $stelle_id = $this->formvars['selected_stelle_id'];
-    $layer_id = $this->formvars['selected_layer_id'];
-    $stellenname = $this->formvars['stellen_name'];
-    $this->formvars = $result[0];
-    $this->formvars['selected_stelle_id'] = $stelle_id;
-    $this->formvars['selected_layer_id'] = $layer_id;
-    $this->formvars['stellen_name'] = $stellenname;
-    $this->output();
+    $this->Layer2Stelle_Editor();
   }
 
   function Layer2Stelle_Editor(){
@@ -6038,6 +6028,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
     $this->titel='Layereigenschaften stellenbezogen';
     $this->main='layer2stelle_formular.php';
     $result = $Stelle->getLayer($this->formvars['selected_layer_id']);
+		$this->grouplayers = $Stelle->getLayers($result[0]['Gruppe'], 'Name');
     $stelle_id = $this->formvars['selected_stelle_id'];
     $layer_id = $this->formvars['selected_layer_id'];
     $stellenname = $this->formvars['stellen_name'];
@@ -7251,10 +7242,6 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
   	if($orderbyposition !== false){
 	  	$newpath = substr($newpath, 0, $orderbyposition);
   	}
-    $attributes = $mapDB->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, $privileges['attributenames']);
-    # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
-		$attributes = $mapDB->add_attribute_values($attributes, $layerdb, NULL, true);
-		$this->attributes = $attributes; 
 		$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
     # Daten abfragen
     for($i = 0; $i < count($checkbox_names); $i++){
@@ -7272,6 +7259,11 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
         }
       }
     }
+		# Attribute laden
+		$attributes = $mapDB->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, $privileges['attributenames']);
+    # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
+		$attributes = $mapDB->add_attribute_values($attributes, $layerdb, $result, true);
+		$this->attributes = $attributes; 
     # Layouts abfragen
     $this->ddl->layouts = $this->ddl->load_layouts($this->Stelle->id, NULL, $this->formvars['chosen_layer_id'], array(0,1));
     if(count($this->ddl->layouts) == 1)$this->formvars['aktivesLayout'] = $this->ddl->layouts[0]['id']; 
@@ -7310,10 +7302,6 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
   	if($orderbyposition !== false){
 	  	$newpath = substr($newpath, 0, $orderbyposition);
   	}
-    $attributes = $mapDB->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, $privileges['attributenames']);
-    # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
-		$attributes = $mapDB->add_attribute_values($attributes, $layerdb, NULL, true);
-		$this->attributes = $attributes; 
 		$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
     # Daten abfragen
     for($i = 0; $i < count($checkbox_names); $i++){
@@ -7330,7 +7318,12 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
           }
         }
       }
-    } 
+    }
+		# Attribute laden
+		$attributes = $mapDB->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, $privileges['attributenames']);
+    # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
+		$attributes = $mapDB->add_attribute_values($attributes, $layerdb, $result, true);
+		$this->attributes = $attributes; 
     # aktives Layout abfragen
     if($this->formvars['aktivesLayout'] != ''){
     	$ddl->selectedlayout = $ddl->load_layouts(NULL, $this->formvars['aktivesLayout'], NULL, NULL);

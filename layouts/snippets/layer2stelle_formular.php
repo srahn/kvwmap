@@ -98,7 +98,17 @@ else {
 		  	<tr>
 		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $stRequires; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-		      		<input name="requires" type="text" value="<?php echo $this->formvars['requires']; ?>" size="25" maxlength="100">
+		      		<!--input name="requires" type="text" value="<?php echo $this->formvars['requires']; ?>" size="25" maxlength="100"-->
+							<select name="requires">
+								<option value="">--- Auswahl ---</option>
+								<?
+									for($i = 0; $i < count($this->grouplayers['ID']); $i++){
+										echo '<option value="'.$this->grouplayers['ID'][$i].'" ';
+										if($this->formvars['requires'] == $this->grouplayers['ID'][$i])echo 'selected="true"';
+										echo ' >'.$this->grouplayers['Bezeichnung'][$i].'</option>';
+									}
+								?>
+							</select>
 		  		</td>
 		  	</tr>		
 		  	<tr>
