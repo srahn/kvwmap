@@ -253,10 +253,10 @@ class GUI extends GUI_core{
 		$this->mime_type = "formatter";
 		if ($this->formvars['format'] == '') $this->formvars['format'] = "json";
 		
-/*		# pruefe Version
+		# pruefe Version
 		if ($this->formvars['version'] != "1.0.0")
 			return array("success" => 0, "error_message" => "Geben Sie eine gültige Versionsnummer an. Derzeit wird nur die Version 1.0.0 unterstützt.");
-*/		
+		
 		# erzeuge eine eindeutige Nummer für diesen Antrag
 		$antrag_id = date("YmdHis") . str_pad(rand(1,99), 2, "00", STR_PAD_LEFT);
 		
@@ -6283,7 +6283,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
 		}
     $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
     switch ($layerset[0]['connectiontype']) {
-      case MS_POSTGIS : {	  
+      case MS_POSTGIS : {
         $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
         $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
         $layerdb->setClientEncoding();
@@ -6455,7 +6455,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
         }
 		
 				$layerset[0]['sql'] = $sql;
-    
+				#echo "Abfragestatement: ".$sql;
         $ret=$layerdb->execSQL($sql.$sql_order.$sql_limit,4, 0);
         if (!$ret[0]) {
           while ($rs=pg_fetch_array($ret[1])) {
