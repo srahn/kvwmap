@@ -872,7 +872,7 @@ CREATE TABLE used_layer (
   header varchar(255) default NULL,
   footer varchar(255) default NULL,
   symbolscale int(11) unsigned default NULL,
-  requires varchar(255) default NULL,
+  requires int(11) default NULL,
   logconsume ENUM( '0', '1' ) NOT NULL default '0',
   privileg ENUM( '0', '1', '2' ) NOT NULL DEFAULT '0',
   start_aktiv ENUM( '0', '1' ) NOT NULL DEFAULT '0',

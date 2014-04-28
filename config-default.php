@@ -206,7 +206,10 @@ define('EPSGCODE','2398'); # Krassowski, Pulkowo 42, Gauß Krüger 3° Streifen 
 #define('EPSGCODE','2399'); # Krassowski, Pulkowo 42, Gauß Krüger 3° Streifen 5 (15°)
 
 # Unterstützte SRIDs, nur diese stehen zur Auswahl bei der Stellenwahl
-$supportedSRIDs = array(4326,2397,2398,2399,31466,31467,31468,31469,32648,25832,25833,325833,35833,32633,325833,15833,900913,28992);                    # Version 1.6.8
+$supportedSRIDs = array(4326,2397,2398,2399,31466,31467,31468,31469,32648,25832,25833,35833,32633,325833,15833,900913,28992);                    # Version 1.6.8
+
+# Unterstützte Sprachen, nur diese stehen zur Auswahl bei der Stellenwahl
+$supportedLanguages = array('german', 'english');															# Version 1.14
 
 # Name der Stopwortdatei
 define('STOPWORDFILE',SHAPEPATH.'gazetteer/top10000de.txt');

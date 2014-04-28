@@ -645,6 +645,8 @@ function umlaute_javascript($text){
 	$text = str_replace("Ü", "%DC", $text);
 	$text = str_replace("ß", "%DF", $text);
 	$text = str_replace("²", "%B2", $text);
+	$text = str_replace('"', '%A8', $text);
+	$text = str_replace('&', '%26', $text);
 	return $text;
 }
 

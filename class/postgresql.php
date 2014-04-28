@@ -656,11 +656,7 @@ class pgdatabase_alkis extends pgdatabase_core {
     # Wenn zu unterstï¿½tzende SRIDs angegeben sind, ist die Abfrage diesbezï¿½glich eingeschrï¿½nkt
     $anzSupportedSRIDs = count($supportedSRIDs);
     if ($anzSupportedSRIDs > 0) {
-      $sql.=" WHERE auth_srid IN (".$supportedSRIDs[0];
-      for ($i=1;$i<$anzSupportedSRIDs;$i++) {
-        $sql.=",".$supportedSRIDs[$i];
-      }
-      $sql.=")";
+      $sql.=" WHERE auth_srid IN (".implode(',', $supportedSRIDs).")";
     }
     $sql.=" ORDER BY spatial_ref_sys.srid";
     #echo $sql;

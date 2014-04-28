@@ -32,7 +32,7 @@ if($this->user->rolle->querymode == 1){
           <td width="1%" valign="top" background="<?php echo GRAPHICSPATH."bg.gif"; ?>"> 
             <?php
               $this->debug->write("Include <b>".LAYOUTPATH."snippets/menue_switch.php</b> in gui.php",4);    
-       include(LAYOUTPATH."snippets/menue_switch.php"); ?>
+							include(LAYOUTPATH."snippets/menue_switch.php"); ?>
           </td>
             
             <td align="center" valign="top" background="<?php echo GRAPHICSPATH; ?>bg.gif">

@@ -297,21 +297,39 @@ function delete_search(){
   <? if($this->selected_search != ''){echo '<script type="text/javascript">showsearches();</script>';} ?>
   <tr> 
     <td colspan="5">
-      <table align="center" border="0" cellspacing="0" cellpadding="0">
+      <table align="center" border="0" cellspacing="0" cellpadding="3">
         <?
     if ((count($this->attributes))!=0) {
       ?><tr>
-            <td><b>Attribut</b></td>
+            <td width="20%"><b>Attribut</b></td>
             <td>&nbsp;&nbsp;</td>
-            <td align="center"><b>Operator</b></td>
+            <td width="20%" align="center"><b>Operator</b></td>
             <td>&nbsp;&nbsp;</td>
             <td align="center"><b>Wert</b></td>
           </tr><?
 
       for($i = 0; $i < count($this->attributes['name']); $i++){
         if($this->attributes['type'][$i] != 'geometry'){
+				
+					if($this->attributes['group'][$i] != $this->attributes['group'][$i-1]){		# wenn die vorige Gruppe anders ist, Tabelle beginnen
+						$explosion = explode(';', $this->attributes['group'][$i]);
+						if($explosion[1] != '')$collapsed = true;else $collapsed = false;
+						$groupname = $explosion[0];
+						echo '<tr>
+										<td colspan="5" width="100%">
+											<table cellpadding="3" cellspacing="0" width="100%" id="colgroup'.$layer['Layer_ID'].'_'.$i.'_'.$k.'"  style="'; if(!$collapsed)echo 'display:none;'; echo ' border:1px solid grey">
+												<tr>
+													<td width="100%" bgcolor="'.BG_GLEATTRIBUTE.'" colspan="2">&nbsp;<a href="javascript:void(0);" onclick="javascript:document.getElementById(\'group'.$layer['Layer_ID'].'_'.$i.'_'.$k.'\').style.display=\'\';document.getElementById(\'colgroup'.$layer['Layer_ID'].'_'.$i.'_'.$k.'\').style.display=\'none\';"><img border="0" src="'.GRAPHICSPATH.'/plus.gif"></a>&nbsp;<b>'.$groupname.'</b></td>
+												</tr>
+											</table>
+											<table cellpadding="3" cellspacing="0" width="100%"  id="group'.$layer['Layer_ID'].'_'.$i.'_'.$k.'" style="'; if($collapsed)echo 'display:none;'; echo 'border:1px solid grey">
+												<tr>
+													<td style="border-bottom:1px dotted grey" bgcolor="'.BG_GLEATTRIBUTE.'" colspan="5">&nbsp;<a href="javascript:void(0);" onclick="javascript:document.getElementById(\'group'.$layer['Layer_ID'].'_'.$i.'_'.$k.'\').style.display=\'none\';document.getElementById(\'colgroup'.$layer['Layer_ID'].'_'.$i.'_'.$k.'\').style.display=\'\';"><img border="0" src="'.GRAPHICSPATH.'/minus.gif"></a>&nbsp;<b>'.$groupname.'</b></td>
+												</tr>';
+				}
+				
           ?><tr>
-            <td><?
+            <td width="100px"><?
               if($this->attributes['alias'][$i] != ''){
                 echo $this->attributes['alias'][$i];
               }
@@ -382,8 +400,11 @@ function delete_search(){
                }
       				}
            ?></td>
-          </tr><?
+          </tr><?					
         }
+				if($this->attributes['group'][$i] != $this->attributes['group'][$i+1]){		# wenn die nächste Gruppe anders ist, Tabelle schliessen
+					echo '</table></td></tr>';
+				}
       }
       if(count($this->attributes) > 0){
         ?>  	<tr>

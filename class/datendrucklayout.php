@@ -58,7 +58,7 @@ class ddl {
     }
   }
 	
-	function add_freetexts($i, $i_on_page, $offsetx, $offsety, $type){	
+	function add_freetexts($i, $offsetx, $offsety, $type){	
 		if(count($this->remaining_freetexts) == 0)return;
     for($j = 0; $j < count($this->layout['texts']); $j++){
 			# der Freitext wurde noch nicht geschrieben und ist entweder ein fester Freitext oder ein fortlaufender
@@ -80,10 +80,10 @@ class ddl {
 					}
 					$y = $ypos - $offsety;
 					if($type == 'running'){	# fortlaufende Freitexte
-						if($i_on_page == 0){
+						if($this->i_on_page == 0){
 							if($this->maxy < $y)$this->maxy = $y;		# beim ersten Datensatz das maxy ermitteln
 						}
-						if($i_on_page > 0){		# bei allen darauffolgenden den y-Wert um Offset verschieben
+						if($this->i_on_page > 0){		# bei allen darauffolgenden den y-Wert um Offset verschieben
 							$y = $y - $this->yoffset_onpage-22;
 						}
 					}
@@ -100,13 +100,13 @@ class ddl {
 		return $remaining_freetexts;
 	}
 	
-	function add_attribute_elements($selected_layer_id, $layerdb, $attributes, $oids, $offsetx, $offsety, $i, $i_on_page, $preview){
+	function add_attribute_elements($selected_layer_id, $layerdb, $attributes, $oids, $offsetx, $offsety, $i, $preview){
 		for($j = 0; $j < count($attributes['name']); $j++){
 			$wordwrapoffset = 1;
 			if(in_array($attributes['name'][$j], $this->remaining_attributes) AND $this->layout['elements'][$attributes['name'][$j]]['ypos'] > 0){		# wenn Attribut noch nicht geschrieben wurde und einen y-Wert hat
 				# da ein Attribut zu einem Seitenüberlauf führen kann, müssen davor alle festen Freitexte geschrieben werden, die geschrieben werden können
 				# d.h. alle, deren Position nicht abhängig vom einem Attribut ist und alle deren Position abhängig ist und das Attribut schon geschrieben wurde
-				$this->remaining_freetexts = $this->add_freetexts($i, NULL, $offsetx, $offsety, 'fixed');			#  feste Freitexte hinzufügen
+				$this->remaining_freetexts = $this->add_freetexts($i, $offsetx, $offsety, 'fixed');			#  feste Freitexte hinzufügen
 				if($attributes['type'][$j] != 'geometry'){
 					switch ($attributes['form_element_type'][$j]){
 						case 'SubFormPK' : case 'SubFormEmbeddedPK' : {
@@ -139,18 +139,17 @@ class ddl {
 								
 								$offy = 842 - $ypos + $offsety;
 								
-								if($this->layout['type'] != 0 AND $i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben
+								if($this->layout['type'] != 0 AND $this->i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben
 									$offy = $offy + $this->yoffset_onpage+22;
 								}	
 								# beim jedem Datensatz die Gesamthoehe der Elemente des Datensatzes ermitteln
-								if($i_on_page == 0){
+								if($this->i_on_page == 0){
 									if($this->maxy < 842-$offy)$this->maxy = 842-$offy;		# beim ersten Datensatz das maxy ermitteln
 								}
 								
 								if($preview){
 									$sublayoutobject = $this->load_layouts(NULL, $sublayout, NULL, NULL);
-									# den letzten y-Wert dieses Elements in das Offset-Array schreiben
-									$this->layout['offset_attributes'][$attributes['name'][$j]] = $this->gui->sachdaten_druck_editor_preview($sublayoutobject[0], $this->pdf, $offx, $offy);
+									$y = $this->gui->sachdaten_druck_editor_preview($sublayoutobject[0], $this->pdf, $offx, $offy);
 								}
 								else{
 									$this->gui->formvars['embedded_dataPDF'] = true;
@@ -160,11 +159,18 @@ class ddl {
 									}							
 									$this->gui->GenerischeSuche_Suchen();
 									$this->gui->formvars['aktivesLayout'] = $sublayout;
-									# den letzten y-Wert dieses Elements in das Offset-Array schreiben
-									$this->layout['offset_attributes'][$attributes['name'][$j]] = $this->gui->generischer_sachdaten_druck_drucken($this->pdf, $offx, $offy);
+									$page_id_before_sublayout = $this->pdf->currentContents;
+									$y = $this->gui->generischer_sachdaten_druck_drucken($this->pdf, $offx, $offy);
+									$page_id_after_sublayout = $this->pdf->currentContents;
+									if($page_id_before_sublayout != $page_id_after_sublayout){
+										$this->page_overflow_by_sublayout = true;		# bei einem Seitenüberlauf, der durch ein Sublayout verursacht wurde, wird sich hier die vorhergehende Page-ID gemerkt
+										$this->page_id_before_sublayout = $page_id_before_sublayout;
+										$this->miny_on_new_page = $y;
+									}
 								}
-								
-								if($this->miny > $this->layout['offset_attributes'][$attributes['name'][$j]])$this->miny = $this->layout['offset_attributes'][$attributes['name'][$j]];		# miny ist die unterste y-Position das aktuellen Datensatzes 
+								# den letzten y-Wert dieses Elements in das Offset-Array schreiben
+								$this->layout['offset_attributes'][$attributes['name'][$j]] = $y;
+								if($this->miny > $y)$this->miny = $y;		# miny ist die unterste y-Position das aktuellen Datensatzes 
 								
 								$this->layout['page_id'][$attributes['name'][$j]] = $this->pdf->currentContents;		# und die Page-ID merken, in der das Attribut beendet wurde								
 								$this->pdf->closeObject();			# falls in eine alte Seite geschrieben wurde, zurückkehren
@@ -176,6 +182,7 @@ class ddl {
 						}break;
 						
 						default : {
+							if($this->page_overflow_by_sublayout)$this->pdf->reopenObject($this->page_id_before_sublayout);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
 							$this->pdf->selectFont($this->layout['elements'][$attributes['name'][$j]]['font']);
 							if($this->layout['elements'][$attributes['name'][$j]]['fontsize'] > 0){
 								$ypos = $this->layout['elements'][$attributes['name'][$j]]['ypos'];
@@ -199,11 +206,11 @@ class ddl {
 								$zeilenhoehe = $this->layout['elements'][$attributes['name'][$j]]['fontsize'];      		      		
 								$x = $this->layout['elements'][$attributes['name'][$j]]['xpos'];								
 								$y = $ypos - $offsety;
-								if($this->layout['type'] != 0 AND $i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben
+								if($this->layout['type'] != 0 AND $this->i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben
 									$y = $y - $this->yoffset_onpage-22;
 								}	
 								# beim jedem Datensatz die Gesamthoehe der Elemente des Datensatzes ermitteln
-								if($i_on_page == 0){
+								if($this->i_on_page == 0){
 									if($this->maxy < $y)$this->maxy = $y;		# beim ersten Datensatz das maxy ermitteln
 								}
 											
@@ -249,10 +256,10 @@ class ddl {
 					rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
 					$x = $this->layout['elements'][$attributes['name'][$j]]['xpos'] + $offsetx;
 					$y = $this->layout['elements'][$attributes['name'][$j]]['ypos'] - $offsety;
-					if($i_on_page == 0){
+					if($this->i_on_page == 0){
 						if($this->maxy < $y+$this->layout['elements'][$attributes['name'][$j]]['width'])$this->maxy = $y+$this->layout['elements'][$attributes['name'][$j]]['width'];		# beim ersten Datensatz das maxy ermitteln
 					}    
-					if($this->layout['type'] != 0 AND $i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben
+					if($this->layout['type'] != 0 AND $this->i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben
 						$y = $y - $this->yoffset_onpage-22;
 					}
 					$this->pdf->addJpegFromFile(IMAGEPATH.$newname, $x, $y, $this->layout['elements'][$attributes['name'][$j]]['width']);
@@ -323,16 +330,27 @@ class ddl {
 		if($this->result[$i][$this->attributes['name'][$j]] == '')$this->result[$i][$this->attributes['name'][$j]] = ' ';		# wenns der result-value leer ist, ein Leerzeichen setzen, wegen der relativen Positionierung
 		switch ($this->attributes['form_element_type'][$j]){
 			case 'Auswahlfeld' : {
-				for($e = 0; $e < count($this->attributes['enum_value'][$j]); $e++){
-					if($this->attributes['enum_value'][$j][$e] == $this->result[$i][$this->attributes['name'][$j]]){
-						$output = utf8_decode($this->attributes['enum_output'][$j][$e]);
-						break;
+				if(is_array($this->attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
+					for($e = 0; $e < count($this->attributes['enum_value'][$j][$i]); $e++){
+						if($this->attributes['enum_value'][$j][$i][$e] == $this->result[$i][$this->attributes['name'][$j]]){
+							$output = utf8_decode($this->attributes['enum_output'][$j][$i][$e]);
+							break;
+						}
+						else $output = utf8_decode($this->result[$i][$this->attributes['name'][$j]]);
 					}
-					else $output = utf8_decode($this->result[$i][$this->attributes['name'][$j]]);
+				}
+				else{
+					for($e = 0; $e < count($this->attributes['enum_value'][$j]); $e++){
+						if($this->attributes['enum_value'][$j][$e] == $this->result[$i][$this->attributes['name'][$j]]){
+							$output = utf8_decode($this->attributes['enum_output'][$j][$e]);
+							break;
+						}
+						else $output = utf8_decode($this->result[$i][$this->attributes['name'][$j]]);
+					}
 				}
 				if(count($this->attributes['enum_value'][$j]) == 0){	
 					$output = utf8_decode($this->result[$i][$this->attributes['name'][$j]]);
-				}
+				}			
 			}break;
 			default: {
 				if(!$preview AND $this->attributes['type'][$j] == 'bool'){
@@ -356,8 +374,9 @@ class ddl {
   	$this->maxy = 0;
   	$this->miny = 1000000;
 		if($offsety)$this->miny = 842 - $offsety;
-  	$i_on_page = -1;
-  	$datasetcount_on_page = 0;
+  	$this->i_on_page = -1;
+  	$this->datasetcount_on_page = 0;
+		$this->page_overflow_by_sublayout = false;
 		if($pdfobject == NULL){
 			include (PDFCLASSPATH."class.ezpdf.php");				# Einbinden der PDF Klassenbibliotheken
 			$this->pdf=new Cezpdf();			# neues PDF-Objekt erzeugen
@@ -371,22 +390,27 @@ class ddl {
     	$this->gui->loadmap('DataBase');
     }
 		$this->add_static_elements($offsetx, $offsety);
-    for($i = 0; $i < count($result); $i++){
-    	$i_on_page++;
+    for($i = 0; $i < count($result); $i++){		
+    	$this->i_on_page++;
+			if($this->page_overflow_by_sublayout != false){
+				$this->page_overflow_by_sublayout = false;						
+				$this->miny = $this->miny_on_new_page; 
+				$this->datasetcount_on_page = 0; # ??
+				$this->i_on_page = 1;	# ??
+				$this->maxy = 800;
+			}
     	if($this->layout['type'] == 0 AND $i > 0){		# neue Seite beim seitenweisen Typ und neuem Datensatz 
     		$this->pdf->newPage();
 				$this->add_static_elements($offsetx, $offsety);
-				$newpage = true;
     	}			
-	    if($datasetcount_on_page > 0 AND $this->layout['type'] != 0 AND $this->miny < $this->yoffset_onpage/$datasetcount_on_page + 50){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
-				$datasetcount_on_page = 0;
-				$i_on_page = 0;
+	    if($this->datasetcount_on_page > 0 AND $this->layout['type'] != 0 AND $this->miny < $this->yoffset_onpage/$this->datasetcount_on_page + 50){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
+				$this->datasetcount_on_page = 0;
+				$this->i_on_page = 0;
 				$this->maxy = 0;
   			$this->miny = 1000000;
 				$offsety = 50;
 				$this->pdf->newPage();
 				$this->add_static_elements($offsetx, $offsety);
-				$newpage = true;
 			}
 			$this->yoffset_onpage = $this->maxy - $this->miny;			# der Offset mit dem die Elemente beim Untereinander-Typ nach unten versetzt werden
 			$this->layout['offset_attributes'] = array();
@@ -403,16 +427,16 @@ class ddl {
 			}
 			$test = 0;
 			while($test < 100 AND count($this->remaining_attributes) > 0){
-				$this->add_attribute_elements($selected_layer_id, $layerdb, $this->attributes, $oids, $offsetx, $offsety, $i, $i_on_page, $preview);	# übrig sind die, die noch nicht geschrieben wurden, weil sie abhängig sind
+				$this->add_attribute_elements($selected_layer_id, $layerdb, $this->attributes, $oids, $offsetx, $offsety, $i, $preview);	# übrig sind die, die noch nicht geschrieben wurden, weil sie abhängig sind
 				$test++;
 			}			
 			################# Daten schreiben ###############
 			
 			################# fortlaufende Freitexte schreiben ###############
 			# (die festen Freitexte werden vor jedem Attribut geschrieben, da ein Attribut zu einem Seitenüberlauf führen können)
-			$this->remaining_freetexts = $this->add_freetexts($i, $i_on_page, $offsetx, $offsety, 'running');
+			$this->remaining_freetexts = $this->add_freetexts($i, $offsetx, $offsety, 'running');
 			################# fortlaufende Freitexte schreiben ###############
-      $datasetcount_on_page++;
+      $this->datasetcount_on_page++;
     }
 		if($pdfobject == NULL){		# nur wenn kein PDF-Objekt aus einem übergeordneten Layer übergeben wurde, PDF erzeugen
 			$dateipfad=IMAGEPATH;
