@@ -6,10 +6,13 @@
 
 	$kvwmap_path = "kvwmap_intern";
 	$stelleId = 50; # wenn keine Authentifizierung sein soll, Layer zu Gaststelle zuweisen und hier die Gaststelle auswählen
-	$username = lumberjack;
-	$passwort = lumbertest;	
 	$layerId = 751; # Flurstuecke
 	$selectors = "landId, kreisId, gemeindId, gemarkungId, gemarkungName, flurId, flurstueckId, flurstueckNummer";
+	$username = $_REQUEST['username'];
+	$passwort = $_REQUEST['passwort'];
+	# uncommend these two lines to give users access without mandatory username and passwort
+	#$username = 'lumberjack';
+	#$passwort = 'lumbertest';
 	
 	# default Values (if not set, we set here the default)
 	$_REQUEST['epsg_code'] == '' ? $epsg_code = 4326     : $epsg_code = $_REQUEST['epsg_code'];  # epsg_code of search point coordinates
