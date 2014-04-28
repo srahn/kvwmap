@@ -1,11 +1,11 @@
 <?php
 # examples for calls
-# http://www.gdi-service.de/kvwmap_intern/api/1.0.0/Satzungsgebiete/?latitude=53.71181&longitude=11.97404&format=json
+# http://www.meine-domain.de/kvwmap_intern/api/1.0.0/Satzungsgebiete/?latitude=53.71181&longitude=11.97404&format=json
 	$kvwmap_path = "kvwmap_intern";
 	$stelleId = 50; # wenn keine Authentifizierung sein soll, Layer zu Gaststelle zuweisen und hier die Gaststelle auswählen
 	$username = lumberjack;
 	$passwort = lumbertest;	
-	$layerId = 747; # Gemeinden
+	$layerId = 747;
 	$selectors = "id, name, type, erlaubter_durchmesser";
 	
 	# default Values (if not set, we set here the default)

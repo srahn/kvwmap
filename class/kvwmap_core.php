@@ -1498,7 +1498,7 @@ class GUI_core {
   				$selectors = explode(',', $this->formvars['selectors']);
   				foreach ($selectors AS $selector) {
   					$selector = trim($selector);
-  					$data[$selector] = $record[$selector]; 
+  					$data[$selector] = $record[strtolower($selector)]; 
   				}
   			}
   			else {
