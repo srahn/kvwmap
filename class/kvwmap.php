@@ -2769,7 +2769,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
     # aktuellen Kartenausschnitt laden + zeichnen!
 		$saved_scale = $this->reduce_mapwidth(100);
     $this->loadMap('DataBase');
-		$this->scaleMap($saved_scale);
+		if($this->formvars['CMD']=='')$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
     if ($this->formvars['CMD']!='') {
       $this->navMap($this->formvars['CMD']);
       $this->user->rolle->saveDrawmode($this->formvars['always_draw']);
@@ -2928,7 +2928,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
     $this->titel='Jagdbezirk anlegen';
     $saved_scale = $this->reduce_mapwidth(100);
     $this->loadMap('DataBase');
-		$this->scaleMap($saved_scale);
+		if($this->formvars['CMD']=='')$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
   	if(!$this->formvars['layer_id']){
       $layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
@@ -3463,7 +3463,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
     else{
       $this->loadMap($loadmapsource);
     }
-		$this->scaleMap($saved_scale);
+		if($this->formvars['CMD']=='')$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
     #echo '<br>Karte geladen: ';
     # aktuellen Druckkopf laden
     $this->Document=new Document($this->database);
@@ -5696,7 +5696,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
     $this->main="bodenrichtwerterfassung_vboris.php";
     $saved_scale = $this->reduce_mapwidth(100);
 		$this->loadMap('DataBase');
-		$this->scaleMap($saved_scale);
+		if($this->formvars['CMD']=='')$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
     $this->Lagebezeichnung = $this->getLagebezeichnung($this->user->rolle->epsg_code);
     if($this->formvars['gemeinde'] == ''){
     	$this->formvars['gemeinde'] = $this->Lagebezeichnung['gemeinde'];
@@ -5936,7 +5936,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
       # Laden der letzten Karteneinstellung
       $saved_scale = $this->reduce_mapwidth(100);
 			$this->loadMap('DataBase');
-			$this->scaleMap($saved_scale);
+			if($this->formvars['CMD']=='')$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
       
       $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
 	    if(!$this->formvars['layer_id']){
@@ -6588,7 +6588,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
 	    	################# Map ###############################################
 				$saved_scale = $this->reduce_mapwidth(100);
 				$this->loadMap('DataBase');
-				$this->scaleMap($saved_scale);
+				if($this->formvars['CMD']=='')$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
 		    $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
 		    # Geometrie-Übernahme-Layer:
 		    # Spaltenname und from-where abfragen
@@ -7030,7 +7030,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
         if($this->geomtype != ''){
           $saved_scale = $this->reduce_mapwidth(150);
 					$this->loadMap('DataBase');
-					$this->scaleMap($saved_scale);
+					if($this->formvars['CMD']=='')$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
         	if($this->formvars['layer_id'] != '' AND $this->formvars['oid'] != '' AND $this->formvars['tablename'] != '' AND $this->formvars['columnname'] != ''){			# das sind die Sachen vom "Mutter"-Layer
         		$layerdb = $this->mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
         		$rect = $this->mapDB->zoomToDatasets(array($this->formvars['oid']), $this->formvars['tablename'], $this->formvars['columnname'], 10, $layerdb, $this->user->rolle->epsg_code);
@@ -7906,7 +7906,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
     $this->main='shape_export.php';
     $saved_scale = $this->reduce_mapwidth(10);
 		$this->loadMap('DataBase');
-		$this->scaleMap($saved_scale);
+		if($this->formvars['CMD']=='')$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
     $this->epsg_codes = read_epsg_codes($this->pgdatabase);
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
     $this->shape = new shape();
@@ -9909,7 +9909,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
     # aktuellen Kartenausschnitt laden + zeichnen!
     $saved_scale = $this->reduce_mapwidth(100);
 		$this->loadMap('DataBase');
-		$this->scaleMap($saved_scale);
+		if($this->formvars['CMD']=='')$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
     
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
   	if(!$this->formvars['layer_id']){
@@ -10197,7 +10197,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
     # aktuellen Kartenausschnitt laden + zeichnen!
     $saved_scale = $this->reduce_mapwidth(200);
 		$this->loadMap('DataBase');
-		$this->scaleMap($saved_scale);
+		if($this->formvars['CMD']=='')$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
     if ($this->formvars['CMD']!='') {
       # Nur Navigieren
       $this->navMap($this->formvars['CMD']);
