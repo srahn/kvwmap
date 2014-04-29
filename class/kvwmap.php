@@ -248,7 +248,7 @@ class GUI extends GUI_core{
 		return array("success" => 1, "temp_file" => $upload_file);
 	}
 	
-	function packAndMail() {
+	function packAndMail($data) {
 		
 		$this->mime_type = "formatter";
 		if ($this->formvars['format'] == '') $this->formvars['format'] = "json";
@@ -262,7 +262,7 @@ class GUI extends GUI_core{
 		
 		# for test purposes all data are fake
 		# ToDo change the xml_template to the formnames from lumber jack client
-		$data = array (
+/*		$data = array (
 			'form' => 'catalog://kommunen/zweck/zweckverb_antrag_faellung',
 			'ID_USER' => 'MANDANTUSER',
 			'LIP_FORM_REVISION' => '-1',
@@ -312,7 +312,7 @@ class GUI extends GUI_core{
 			'treetopDiameter' => array (18, 45, 24)
 		);
 		# until here are fake data
-
+*/
 		# create xml file
 		$xml_file =  "Antrag_" . $antrag_id . ".xml";
 		include (SHAPEPATH . "templates/xml_template_baumfaellantrag.php");
@@ -334,8 +334,10 @@ class GUI extends GUI_core{
 		$zip->addFile(IMAGEPATH . $xml_file, $xml_file);
 		$zip->addFile(IMAGEPATH . $pdf_file, $pdf_file);
 		$zip->addFile(UPLOADPATH . $data['zweck_vollmacht'], "Vollmacht_" . $antrag_id . "." . basename($data['zweck_vollmacht']));
-		foreach ($data['treeImage'] AS $key => $value) {
-		  $zip->addFile(UPLOADPATH . $value, $antrag_id . 'Baum_' . $key . '_Bild_' . basename($value));
+		if (isset($data['treeImage']) AND is_array($data['treeImage'])) {
+			foreach ($data['treeImage'] AS $key => $value) {
+			  $zip->addFile(UPLOADPATH . $value, $antrag_id . 'Baum_' . $key . '_Bild_' . basename($value));
+			}
 		}
 		$zip->close();
 

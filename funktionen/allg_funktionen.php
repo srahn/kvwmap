@@ -1205,5 +1205,93 @@ function get_upload_error_message($code) {
   return $message;
 }
 
+/*
+*/
+function formvars_strip($formvars, $strip_list) {
+	$strip_array = explode(', ', $strip_list);
+	$stripped_formvars = array();
+	foreach($formvars AS $key => $value) {
+		if (!in_array($key, $strip_array)) {
+#			if (array_key_exists($key, $stripped_formvars)) {
+#				// 1. occurance of key in stripped_formvars: first_value, 2. occurance: [first_val, second_val], more occurances [first_val, second_val, third_val, ...]
+#				is_array($stripped_formvars[$key]) ? array_push($stripped_formvars[$key], $value) : $stripped_formvars[$key] = array($stripped_formvars[$key], $value);
+#			} else {
+				$stripped_formvars[$key] = $value;
+#			}
+		}
+	}
+	return $stripped_formvars;
+}
 
+/**
+* Funktion sendet e-mail mit Dateien im Anhang
+* siehe http://www.php-einfach.de/codeschnipsel_1114.php
+* @param $anhang Array mit den Elementen "name", "size" und "data" oder Array mit Elementen solcher Arrays
+* $pfad = array(); 
+* $pfad[] = "ordner/datei1.exe"; 
+* $pfad[] = "ordner/datei2.zip"; 
+* $pfad[] = "ordner/datei3.gif"; 
+* 
+* $anhang = array(); 
+* foreach($pfad AS $name) {
+*   $name = basename($name); 
+*   $size = filesize($name); 
+*   $data = implode("",file($name)); 
+*   if (function_exists("mime_content_type")) 
+*     $type = mime_content_type($name); 
+*   else 
+*     $type = "application/octet-stream"; 
+*     $anhang[] = array("name"=>$name, "size"=>$size, "type"=>$type, "data"=>$data); 
+* }
+* mail_att("empf@domain","Email mit Anhang","Im Anhang sind mehrere Datei",$anhang); 
+**/
+function mail_att($to, $subject, $message, $anhang) { 
+	$absender = "Peter Korduan";
+	$absender_mail = "peter.korduan@gdi-service.de";
+	$reply = "peter.korduan@gdi-service.de";
+
+	$mime_boundary = "-----=" . md5(uniqid(mt_rand(), 1));
+
+	$header  ="From:".$absender."<".$absender_mail.">\n";
+	$header .= "Reply-To: ".$reply."\n";
+
+	$header.= "MIME-Version: 1.0\r\n";
+	$header.= "Content-Type: multipart/mixed;\r\n";
+	$header.= " boundary=\"".$mime_boundary."\"\r\n";
+
+	$content = "This is a multi-part message in MIME format.\r\n\r\n";
+	$content.= "--".$mime_boundary."\r\n";
+	$content.= "Content-Type: text/html charset=\"iso-8859-1\"\r\n";
+	$content.= "Content-Transfer-Encoding: 8bit\r\n\r\n";
+	$content.= $message."\r\n";
+
+	//$anhang ist ein Mehrdimensionals Array 
+	//$anhang enthält mehrere Dateien 
+	if(is_array($anhang) AND is_array(current($anhang))) {
+		foreach($anhang AS $dat) { 
+			$data = chunk_split(base64_encode($dat['data']));
+			$content.= "--".$mime_boundary."\r\n"; 
+			$content.= "Content-Disposition: attachment;\r\n";
+			$content.= "\tfilename=\"".$dat['name']."\";\r\n";
+			$content.= "Content-Length: .".$dat['size'].";\r\n";
+			$content.= "Content-Type: ".$dat['type']."; name=\"".$dat['name']."\"\r\n";
+			$content.= "Content-Transfer-Encoding: base64\r\n\r\n";
+			$content.= $data."\r\n";
+		}
+		$content .= "--".$mime_boundary."--";
+	} 
+	else { //Nur 1 Datei als Anhang
+	  $data = chunk_split(base64_encode($anhang['data']));
+	  $content.= "--".$mime_boundary."\r\n";
+	  $content.= "Content-Disposition: attachment;\r\n";
+	  $content.= "\tfilename=\"".$anhang['name']."\";\r\n";
+	  $content.= "Content-Length: .".$dat['size'].";\r\n";
+	  $content.= "Content-Type: ".$anhang['type']."; name=\"".$anhang['name']."\"\r\n";
+	  $content.= "Content-Transfer-Encoding: base64\r\n\r\n";
+	  $content.= $data."\r\n";
+	}
+
+	if(@mail($to, $subject, $content, $header)) return true;
+	else return false;
+}
 ?>
