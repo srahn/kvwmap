@@ -2585,7 +2585,7 @@ class stelle extends stelle_core{
 		else{
 			$sql .= ', symbolscale = NULL';
 		}
-		$sql .= ', requires = "'.$formvars['requires'].'"';
+		if($formvars['requires'] != '')$sql .= ', requires = '.$formvars['requires'];
 		$sql .= ', start_aktiv = "'.$formvars['startaktiv'].'"';
 		$sql .= ' WHERE Stelle_ID = '.$formvars['selected_stelle_id'].' AND Layer_ID = '.$formvars['selected_layer_id'];
 		#echo $sql.'<br>';

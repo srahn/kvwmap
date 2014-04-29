@@ -761,7 +761,7 @@ CREATE TABLE `styles` (
   `outlinecolor` varchar(11) collate latin1_german2_ci default NULL,
   `minsize` int(11) unsigned default NULL,
   `maxsize` int(11) unsigned default NULL,
-  `angle` int(11) NULL,
+  `angle` varchar(11) default NULL,
   `angleitem` varchar(255) collate latin1_german2_ci NULL,
   `antialias` tinyint(1) default NULL,
   `width` int(11) default NULL,

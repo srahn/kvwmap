@@ -748,17 +748,19 @@ class GUI_core {
 				else {
 				  $style = new styleObj($klasse);
 				}
+				if($dbStyle['geomtransform'] != '') {
+					$style->updateFromString("STYLE GEOMTRANSFORM '".$dbStyle['geomtransform']."' END"); 
+				}				
 				if ($dbStyle['symbolname']!='') {
           $style -> set('symbolname',$dbStyle['symbolname']);
         }
         if ($dbStyle['symbol']>0) {
           $style->set('symbol',$dbStyle['symbol']);
-        }
-                
+        }                
         if (MAPSERVERVERSION >= 620) {
-	        if($dbStyle['geomtransform'] != '') {
-	          $style->setGeomTransform($dbStyle['geomtransform']);
-	        }
+					if($dbStyle['geomtransform'] != '') {
+						$style->setGeomTransform($dbStyle['geomtransform']);
+					}
           if ($dbStyle['pattern']!='') {
             $style->setPattern(explode(' ',$dbStyle['pattern']));
             $style->linecap = 'butt';
@@ -828,9 +830,9 @@ class GUI_core {
           }
         }
 
-        if ($dbStyle['angle']!='') {
-          $style->set('angle',$dbStyle['angle']);
-        }
+				if($dbStyle['angle'] != '') {
+					$style->updateFromString("STYLE ANGLE ".$dbStyle['angle']." END"); 		# wegen AUTO
+				}
         if ($dbStyle['angleitem']!=''){
           if(MAPSERVERVERSION < 500){
             $style->set('angleitem',$dbStyle['angleitem']);

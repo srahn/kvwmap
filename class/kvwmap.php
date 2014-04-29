@@ -520,6 +520,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
 
 	function resizeMap2Window(){
 		global $menue_legend_widths;
+		if($menue_legend_widths[$this->user->rolle->gui] == NULL)$menue_legend_widths[$this->user->rolle->gui] = 490;
 		$width = $this->formvars['width'] - $menue_legend_widths[$this->user->rolle->gui];
 		if($this->user->rolle->hideMenue == 1){$width = $width + 195;}
 		if($this->user->rolle->hideLegend == 1){$width = $width + 254;}
@@ -15212,7 +15213,7 @@ class db_mapObj extends db_mapObj_core{
     if($formvars["outlinecolor"] != ''){$sql.="outlinecolor = '".$formvars["outlinecolor"]."',";}else{$sql.="outlinecolor = NULL,";}
     if($formvars["minsize"] != ''){$sql.="minsize = '".$formvars["minsize"]."',";}else{$sql.="minsize = NULL,";}
     if($formvars["maxsize"] != ''){$sql.="maxsize = '".$formvars["maxsize"]."',";}else{$sql.="maxsize = NULL,";}
-    if($formvars["angle"] != ''){$sql.="angle = ".$formvars["angle"].",";}else{$sql.="angle = NULL,";}
+    if($formvars["angle"] != ''){$sql.="angle = '".$formvars["angle"]."',";}else{$sql.="angle = NULL,";}
     $sql.="angleitem = '".$formvars["angleitem"]."',";
     if($formvars["antialias"] != ''){$sql.="antialias = '".$formvars["antialias"]."',";}else{$sql.="antialias = NULL,";}
     if($formvars["width"] != ''){$sql.="width = '".$formvars["width"]."',";}else{$sql.="width = NULL,";}

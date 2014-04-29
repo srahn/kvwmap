@@ -1173,3 +1173,5 @@ ALTER TABLE  `used_layer` ADD  `requires_id` INT( 11 ) NULL AFTER  `requires`;
 UPDATE used_layer, layer SET requires_id = layer.Layer_ID WHERE requires != '' AND TRIM(LEADING '([' FROM SUBSTRING_INDEX(requires, ']', 1)) = layer.name;
 ALTER TABLE  `used_layer` DROP  `requires`;
 ALTER TABLE  `used_layer` CHANGE  `requires_id`  `requires` INT( 11 ) NULL DEFAULT NULL;
+
+ALTER TABLE  `styles` CHANGE  `angle`  `angle` VARCHAR( 11 ) NULL DEFAULT NULL;
