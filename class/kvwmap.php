@@ -2597,7 +2597,7 @@ class GUI extends GUI_core{
     # aktuellen Kartenausschnitt laden + zeichnen!
 		$saved_scale = $this->reduce_mapwidth(100);
     $this->loadMap('DataBase');
-		$this->scaleMap($saved_scale);
+		if($this->formvars['CMD']=='')$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
     if ($this->formvars['CMD']!='') {
       $this->navMap($this->formvars['CMD']);
       $this->user->rolle->saveDrawmode($this->formvars['always_draw']);
@@ -2756,7 +2756,7 @@ class GUI extends GUI_core{
     $this->titel='Jagdbezirk anlegen';
     $saved_scale = $this->reduce_mapwidth(100);
     $this->loadMap('DataBase');
-		$this->scaleMap($saved_scale);
+		if($this->formvars['CMD']=='')$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
   	if(!$this->formvars['layer_id']){
       $layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
@@ -3291,7 +3291,7 @@ class GUI extends GUI_core{
     else{
       $this->loadMap($loadmapsource);
     }
-		$this->scaleMap($saved_scale);
+		if($this->formvars['CMD']=='')$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
     #echo '<br>Karte geladen: ';
     # aktuellen Druckkopf laden
     $this->Document=new Document($this->database);
@@ -5523,7 +5523,7 @@ class GUI extends GUI_core{
     $this->main="bodenrichtwerterfassung_vboris.php";
     $saved_scale = $this->reduce_mapwidth(100);
 		$this->loadMap('DataBase');
-		$this->scaleMap($saved_scale);
+		if($this->formvars['CMD']=='')$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
     $this->Lagebezeichnung = $this->getLagebezeichnung($this->user->rolle->epsg_code);
     if($this->formvars['gemeinde'] == ''){
     	$this->formvars['gemeinde'] = $this->Lagebezeichnung['gemeinde'];
@@ -5763,7 +5763,7 @@ class GUI extends GUI_core{
       # Laden der letzten Karteneinstellung
       $saved_scale = $this->reduce_mapwidth(100);
 			$this->loadMap('DataBase');
-			$this->scaleMap($saved_scale);
+			if($this->formvars['CMD']=='')$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
       
       $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
 	    if(!$this->formvars['layer_id']){
@@ -6424,7 +6424,7 @@ class GUI extends GUI_core{
 	    	################# Map ###############################################
 				$saved_scale = $this->reduce_mapwidth(100);
 				$this->loadMap('DataBase');
-				$this->scaleMap($saved_scale);
+				if($this->formvars['CMD']=='')$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
 		    $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
 		    # Geometrie-Übernahme-Layer:
 		    # Spaltenname und from-where abfragen
@@ -6866,7 +6866,7 @@ class GUI extends GUI_core{
         if($this->geomtype != ''){
           $saved_scale = $this->reduce_mapwidth(150);
 					$this->loadMap('DataBase');
-					$this->scaleMap($saved_scale);
+					if($this->formvars['CMD']=='')$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
         	if($this->formvars['layer_id'] != '' AND $this->formvars['oid'] != '' AND $this->formvars['tablename'] != '' AND $this->formvars['columnname'] != ''){			# das sind die Sachen vom "Mutter"-Layer
         		$layerdb = $this->mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
         		$rect = $this->mapDB->zoomToDatasets(array($this->formvars['oid']), $this->formvars['tablename'], $this->formvars['columnname'], 10, $layerdb, $this->user->rolle->epsg_code);
@@ -7736,7 +7736,7 @@ class GUI extends GUI_core{
     $this->main='shape_export.php';
     $saved_scale = $this->reduce_mapwidth(10);
 		$this->loadMap('DataBase');
-		$this->scaleMap($saved_scale);
+		if($this->formvars['CMD']=='')$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
     $this->epsg_codes = read_epsg_codes($this->pgdatabase);
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
     $this->shape = new shape();
@@ -9739,7 +9739,7 @@ class GUI extends GUI_core{
     # aktuellen Kartenausschnitt laden + zeichnen!
     $saved_scale = $this->reduce_mapwidth(100);
 		$this->loadMap('DataBase');
-		$this->scaleMap($saved_scale);
+		if($this->formvars['CMD']=='')$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
     
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
   	if(!$this->formvars['layer_id']){
@@ -10024,7 +10024,7 @@ class GUI extends GUI_core{
     # aktuellen Kartenausschnitt laden + zeichnen!
     $saved_scale = $this->reduce_mapwidth(200);
 		$this->loadMap('DataBase');
-		$this->scaleMap($saved_scale);
+		if($this->formvars['CMD']=='')$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
     if ($this->formvars['CMD']!='') {
       # Nur Navigieren
       $this->navMap($this->formvars['CMD']);
