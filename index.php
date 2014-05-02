@@ -844,7 +844,7 @@ if($GUI->goNotExecutedInPlugins){
 			$GUI->output();
 	  } break;
 
-	  case 'Druckrahmen_als neuen Rahmen speichern' : {
+	  case 'Druckrahmen_als neues Layout speichern' : {
 	  	$_files = $_FILES;
 			$GUI->checkCaseAllowed('Druckrahmen');
 			$GUI->druckrahmen_init();
