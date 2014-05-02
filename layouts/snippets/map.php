@@ -7,6 +7,10 @@
 
 <script type="text/javascript">
 
+function zoomto(layer_id, oid, tablename, columnname){
+  location.href="index.php?go=zoomtoPolygon&oid="+oid+"&layer_tablename="+tablename+"&layer_columnname="+columnname+"&layer_id="+layer_id+"&selektieren=zoomonly";
+}
+
 function toggle_vertices(){	
 	document.getElementById("vertices").SVGtoggle_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 }
@@ -285,6 +289,70 @@ if($this->formvars['gps_follow'] == ''){
 							<div align="center"><?php # 2007-12-30 pk
 							?><input type="submit" class="button" name="senden" value="<?php echo $strLoadNew; ?>" class="send" tabindex="1"></div>
 							<br>
+							<? if(defined('LAYER_ID_SCHNELLSPRUNG') AND LAYER_ID_SCHNELLSPRUNG != ''){
+								$legendheight -= 50;
+																														?>
+							<div style="margin-left:10px">
+								<table style="border:1px solid grey">
+								<?
+									$layerset = $this->user->rolle->getLayer(LAYER_ID_SCHNELLSPRUNG);
+									$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
+									$layerdb = $mapdb->getlayerdatabase(LAYER_ID_SCHNELLSPRUNG, $this->Stelle->pgdbhost);
+									$layerdb->setClientEncoding();
+									$path = $mapdb->getPath(LAYER_ID_SCHNELLSPRUNG);
+									$privileges = $this->Stelle->get_attributes_privileges(LAYER_ID_SCHNELLSPRUNG);
+									$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
+									$this->attributes = $mapdb->read_layer_attributes(LAYER_ID_SCHNELLSPRUNG, $layerdb, $privileges['attributenames']);
+									# wenn Attributname/Wert-Paare übergeben wurden, diese im Formular einsetzen
+									for($i = 0; $i < count($this->attributes['name']); $i++){
+										$this->qlayerset['shape'][0][$this->attributes['name'][$i]] = $this->formvars['value_'.$this->attributes['name'][$i]];
+									}
+									# weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
+									$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $this->qlayerset['shape'], true);	
+								
+									for($i = 0; $i < count($this->attributes['name']); $i++){
+										if($this->attributes['name'][$i] == 'oid'){
+											echo '<tr><td>&nbsp;'.$this->attributes['alias'][$i].':</td></tr>';
+											?><tr>
+												<td align="left"><?php
+													 if($this->attributes['form_element_type'][$i] == 'Auswahlfeld'){
+															?><select class="select" 
+															<?
+																if($this->attributes['req_by'][$i] != ''){
+																	echo 'onchange="update_require_attribute(\''.$this->attributes['req_by'][$i].'\','.LAYER_ID_SCHNELLSPRUNG.', this.value);" ';
+																}
+																if($this->attributes['name'][$i] == 'oid'){
+																	echo 'onchange="zoomto('.LAYER_ID_SCHNELLSPRUNG.', this.value, \''.$layerset[0]['maintable'].'\', \''.$this->attributes['the_geom'].'\');"';
+																}
+															?> 
+																id="value_<?php echo $this->attributes['name'][$i]; ?>" name="value_<?php echo $this->attributes['name'][$i]; ?>"><?echo "\n"; ?>
+																	<option value="">-- <? echo $this->strPleaseSelect; ?> --</option><?php echo "\n";
+																	if(is_array($this->attributes['enum_value'][$i][0])){
+																		$this->attributes['enum_value'][$i] = $this->attributes['enum_value'][$i][0];
+																		$this->attributes['enum_output'][$i] = $this->attributes['enum_output'][$i][0];
+																	}
+																for($o = 0; $o < count($this->attributes['enum_value'][$i]); $o++){
+																	?>
+																	<option <? if($this->formvars['value_'.$this->attributes['name'][$i]] == $this->attributes['enum_value'][$i][$o]){ echo 'selected';} ?> value="<?php echo $this->attributes['enum_value'][$i][$o]; ?>"><?php echo $this->attributes['enum_output'][$i][$o]; ?></option><?php echo "\n";
+																} ?>
+																</select>
+																<input class="input" size="9" id="value2_<?php echo $this->attributes['name'][$i]; ?>" name="value2_<?php echo $this->attributes['name'][$i]; ?>" type="hidden" value="<?php echo $this->formvars['value2_'.$this->attributes['name'][$i]]; ?>">
+																<?php
+														}
+														else { 
+															?>
+															<input class="input" size="<? if($this->formvars['value2_'.$this->attributes['name'][$i]] != ''){echo '9';}else{echo '24';} ?>" id="value_<?php echo $this->attributes['name'][$i]; ?>" name="value_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo $this->formvars['value_'.$this->attributes['name'][$i]]; ?>">
+															&nbsp;<input class="input" size="9" id="value2_<?php echo $this->attributes['name'][$i]; ?>" name="value2_<?php echo $this->attributes['name'][$i]; ?>" type="<? if($this->formvars['value2_'.$this->attributes['name'][$i]] != ''){echo 'text';}else{echo 'hidden';} ?>" value="<?php echo $this->formvars['value2_'.$this->attributes['name'][$i]]; ?>">
+															<?php
+													 }
+											 ?></td>
+											</tr><?php
+										}
+									}
+								 ?>
+								 </table>
+							</div>
+						<? } ?>
 							&nbsp;
 							<div id="legendcontrol">
 								<a href="index.php?go=reset_querys"><img src="graphics/tool_info.png" border="0" alt="Informationsabfrage." title="Informationsabfrage | Hier klicken, um alle Abfragehaken zu entfernen" width="17"></a>

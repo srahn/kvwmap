@@ -147,7 +147,7 @@ if($this->formvars['anzahl'] == ''){$this->formvars['anzahl'] = 0;}
   	data = 'go=Layer_Datensaetze_Loeschen&chosen_layer_id='+layer_id+'&selected_layer_id='+layer_id+'&fromobject='+fromobject+'&targetobject='+targetobject+'&targetlayer_id='+targetlayer_id+'&targetattribute='+targetattribute+'&data='+data+'&embedded=true' + data_r;
   	data += '&checkbox_names_'+layer_id+'='+document.getElementsByName('checkbox_names_'+layer_id)[0].value;
 		data += '&'+document.getElementsByName('checkbox_names_'+layer_id)[0].value+'=on';
-		ahah('<? echo URL.APPLVERSION; ?>index.php', data, new Array(document.getElementById(fromobject), document.getElementById(targetobject)), new Array('sethtml'));
+		ahah('<? echo URL.APPLVERSION; ?>index.php', data, new Array(document.getElementById(fromobject), document.getElementById(targetobject)), new Array('sethtml', 'sethtml'));
 	}
 
 	subsave_data = function(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data){

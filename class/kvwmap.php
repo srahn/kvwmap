@@ -3691,21 +3691,19 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
       $miny = $this->formvars['center_y'] - $bboxheight;
       $maxx = $this->formvars['center_x'] + $bboxwidth;
       $maxy = $this->formvars['center_y'] + $bboxheight;
-
       $widthratio = $bboxwidth / $breite;
       $heightratio = $bboxheight / $höhe;
-
-      $this->map->set('width', $this->Document->activeframe[0]['mapwidth'] * $widthratio * $this->map_factor);
-      $this->map->set('height', $this->Document->activeframe[0]['mapheight'] * $heightratio * $this->map_factor);
     }
     else{
       $minx = $this->formvars['center_x'] - $this->formvars['worldprintwidth']/2;
       $miny = $this->formvars['center_y'] - $this->formvars['worldprintheight']/2;
       $maxx = $this->formvars['center_x'] + $this->formvars['worldprintwidth']/2;
       $maxy = $this->formvars['center_y'] + $this->formvars['worldprintheight']/2;
-      $this->map->set('width', $this->Document->activeframe[0]['mapwidth']*$this->map_factor);
-      $this->map->set('height', $this->Document->activeframe[0]['mapheight']*$this->map_factor);
+			$widthratio = 1;
+      $heightratio = 1;
     }
+		$this->map->set('width', $this->Document->activeframe[0]['mapwidth'] * $widthratio * $this->map_factor);
+    $this->map->set('height', $this->Document->activeframe[0]['mapheight'] * $heightratio * $this->map_factor);
 
     $this->map->setextent($minx,$miny,$maxx,$maxy);
   	if(MAPSERVERVERSION >= 600 ) {
@@ -3749,7 +3747,11 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
     if($this->Document->activeframe[0]['refmapfile']){
       $refmapfile = DRUCKRAHMEN_PATH.$this->Document->activeframe[0]['refmapfile'];
       $zoomfactor = $this->Document->activeframe[0]['refzoom'];
-      $this->Document->referencemap = $this->createReferenceMap($this->Document->activeframe[0]['refwidth']*$this->map_factor, $this->Document->activeframe[0]['refheight']*$this->map_factor, $minx, $miny, $maxx, $maxy, $zoomfactor, $refmapfile);
+			$refwidth = $this->Document->activeframe[0]['refwidth']*$this->map_factor;
+			$refheight = $this->Document->activeframe[0]['refheight']*$this->map_factor;
+			$width = $refwidth*$widthratio;
+			$height = $refheight*$heightratio;
+			$this->Document->referencemap = $this->createReferenceMap($width, $height, $refwidth, $refheight, $angle, $minx,$miny,$maxx,$maxy, $zoomfactor, $refmapfile);
     }
     # Legende rendern
     if($this->Document->activeframe[0]['legendsize'] > 0){
@@ -5132,17 +5134,17 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
       $maxy = $this->formvars['center_y'] + $bboxheight;
       $widthratio = $bboxwidth / $breite;
       $heightratio = $bboxheight / $höhe;
-      $this->map->set('width', $this->Docu->activeframe[0]['mapwidth'] * $widthratio * $this->map_factor);
-      $this->map->set('height', $this->Docu->activeframe[0]['mapheight'] * $heightratio * $this->map_factor);
     }
     else{
       $minx = $this->formvars['center_x'] - $this->formvars['worldprintwidth']/2;
       $miny = $this->formvars['center_y'] - $this->formvars['worldprintheight']/2;
       $maxx = $this->formvars['center_x'] + $this->formvars['worldprintwidth']/2;
       $maxy = $this->formvars['center_y'] + $this->formvars['worldprintheight']/2;
-      $this->map->set('width', $this->Docu->activeframe[0]['mapwidth']*$this->map_factor);
-      $this->map->set('height', $this->Docu->activeframe[0]['mapheight']*$this->map_factor);
+			$widthratio = 1;
+      $heightratio = 1;
     }
+		$this->map->set('width', $this->Docu->activeframe[0]['mapwidth'] * $widthratio * $this->map_factor);
+    $this->map->set('height', $this->Docu->activeframe[0]['mapheight'] * $heightratio * $this->map_factor);
 
     # copyright-layer aus dem Mapfile
     @$creditslayer = $this->map->getLayerByName('credits');
@@ -5239,7 +5241,11 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
     if($this->Docu->activeframe[0]['refmapfile'] AND $this->formvars['referencemap']){
       $refmapfile = DRUCKRAHMEN_PATH.$this->Docu->activeframe[0]['refmapfile'];
       $zoomfactor = $this->Docu->activeframe[0]['refzoom'];
-      $this->Docu->referencemap = $this->createReferenceMap($this->Docu->activeframe[0]['refwidth']*$this->map_factor, $this->Docu->activeframe[0]['refheight']*$this->map_factor, $minx,$miny,$maxx,$maxy, $zoomfactor,  $refmapfile);
+      $refwidth = $this->Docu->activeframe[0]['refwidth']*$this->map_factor;
+			$refheight = $this->Docu->activeframe[0]['refheight']*$this->map_factor;
+			$width = $refwidth*$widthratio;
+			$height = $refheight*$heightratio;
+			$this->Docu->referencemap = $this->createReferenceMap($width, $height, $refwidth, $refheight, $angle, $minx,$miny,$maxx,$maxy, $zoomfactor, $refmapfile);
     }
 
     # Einbinden der PDF Klassenbibliotheken
@@ -11706,7 +11712,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
     $this->main='wldgedateiauswahl.php';
   }
 
-  function createReferenceMap($width, $height, $minx, $miny, $maxx, $maxy, $zoomfactor, $refmapfile){
+  function createReferenceMap($width, $height, $refwidth, $refheight, $angle, $minx, $miny, $maxx, $maxy, $zoomfactor, $refmapfile){
     $refmap = ms_newMapObj($refmapfile);
     $refmap->set('width', $width);
     $refmap->set('height', $height);
@@ -11725,6 +11731,28 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
     }
     $image_map = $refmap->draw();
     $filename = $this->map_saveWebImage($image_map,'jpeg');
+		
+		
+    $image = imagecreatefromjpeg(IMAGEPATH.basename($filename));
+		if($angle != 0){	
+      $rotatedimage = imagerotate($image, $angle, 0);
+      $width = imagesx($rotatedimage);
+      $height = imagesy($rotatedimage);
+      $clipwidth = $refwidth;
+      $clipheight = $refheight;
+      $clipx = ($width - $clipwidth) / 2;
+      $clipy = ($height - $clipheight) / 2;
+      $image = imagecreatetruecolor($clipwidth, $clipheight);
+      ImageCopy($image, $rotatedimage, 0, 0, $clipx, $clipy, $clipwidth, $clipheight);
+		}
+		# Rahmen
+		$color = imagecolorallocate($image, 0,0,0);
+		$x1 = ($refwidth + $refwidth/$zoomfactor)/2;
+		$y1 = ($refheight + $refheight/$zoomfactor)/2;
+		$x2 = $x1 - $refwidth/$zoomfactor;
+		$y2 = $y1 - $refheight/$zoomfactor;
+		imagerectangle($image, $x1, $y1, $x2, $y2, $color);
+    imagejpeg($image, IMAGEPATH.basename($filename), 100);
     $newname = $this->user->id.basename($filename);
     rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
     $uebersichtskarte = IMAGEURL.$newname;
