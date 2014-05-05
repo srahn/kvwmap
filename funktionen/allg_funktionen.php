@@ -1216,7 +1216,12 @@ function formvars_strip($formvars, $strip_list) {
 #				// 1. occurance of key in stripped_formvars: first_value, 2. occurance: [first_val, second_val], more occurances [first_val, second_val, third_val, ...]
 #				is_array($stripped_formvars[$key]) ? array_push($stripped_formvars[$key], $value) : $stripped_formvars[$key] = array($stripped_formvars[$key], $value);
 #			} else {
-				$stripped_formvars[$key] = $value;
+				$pos = strpos($value, '[');
+				if ($pos === false) {
+					$stripped_formvars[$key] = stripslashes($value);	
+				} else {
+					$stripped_formvars[$key] = arrStrToArr($value, ',');
+				}
 #			}
 		}
 	}
@@ -1293,5 +1298,18 @@ function mail_att($to, $subject, $message, $anhang) {
 
 	if(@mail($to, $subject, $content, $header)) return true;
 	else return false;
+}
+
+/*
+* function replaced square brackets at the beginning and the end of the string and return the elements of the string as array separated by the delimmiter
+*/
+function arrStrToArr($str, $delimiter) {
+#	if(is_string($delimiter) and in_array())
+#	echo gettype($delimiter);
+	$arr = explode($delimiter, trim($str, '[]'));
+	foreach ($arr as &$value) {
+		$value = trim(trim(stripslashes($value), '[]'), '"');
+	}
+	return $arr;
 }
 ?>

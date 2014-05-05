@@ -250,6 +250,8 @@ class GUI extends GUI_core{
 	
 	function packAndMail($data) {
 		
+		#var_dump($data);
+		
 		$this->mime_type = "formatter";
 		if ($this->formvars['format'] == '') $this->formvars['format'] = "json";
 		
@@ -374,8 +376,7 @@ $botschaft.="--$grenze";
 mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
 */
 		
-	return array("success" => 1, "antrag_id" => $antrag_id, "xml_file" => IMAGEURL . $xml_file, "pdf_file" => IMAGEURL . $pdf_file, "zip_file" => IMAGEURL . $zip_file, "email_text" => $email_text, "email_recipient" => $email_recipient, "data:" => $data);
-
+	return array("success" => 1, "antrag_id" => $antrag_id, "xml_file" => IMAGEURL . $xml_file, "pdf_file" => IMAGEURL . $pdf_file, "zip_file" => IMAGEURL . $zip_file, "email_text" => $email_text, "email_recipient" => $email_recipient, "authority_processingTime" => $data['authority_processingTime'], "data:" => $data);
 	}
 	
   function loadPlugins(){
