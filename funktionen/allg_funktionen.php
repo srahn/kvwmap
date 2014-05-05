@@ -1301,7 +1301,7 @@ function mail_att($to, $subject, $message, $anhang) {
 }
 
 /*
-* function replaced square brackets at the beginning and the end of the string and return the elements of the string as array separated by the delimmiter
+* function replaced square brackets at the beginning and the end of the string and return the elements of the string as array separated by the delimmiter. The elements of the string will be replaced by slashes and timed from white spaces and "
 */
 function arrStrToArr($str, $delimiter) {
 #	if(is_string($delimiter) and in_array())
