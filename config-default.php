@@ -6,12 +6,12 @@
 ####################################################################
 # aktuelle Versionsnummer
 define('VERSION','1.13');
-define('APPLVERSION','kvwmap_'.VERSION.'/');
+define('APPLVERSION','kvwmap/');
 # Bezeichnung der MySQL-Datenbank mit den Benutzerdaten
 $dbname='kvwmapdb';
 # Wenn der pgdbname leer gelassen wird, wird versucht die Information
 # für die Verbindung zur PostGIS-Datenbank aus der Tabelle Stelle zu lesen.
-$pgdbname='';
+$pgdbname='kvwmapsp';
 #$pgdbname='alkis_25833';
 
 ########################## Metadaten zum Landkreis
@@ -125,7 +125,7 @@ define('CHECK_CLIENT_IP',true);                               # Version 1.6.9 Se
 
 ########################## Pfadeinstellungen
 # Installationspfad
-define('INSTALLPATH','/srv/www/');
+define('INSTALLPATH','/home/gisadmin/');
 define('WWWROOT',INSTALLPATH.'apps/');
 # --------------- Version 1.6.6 Start
 # diese Einstellung ermöglicht die Vergabe von mehrere Call Back Links
@@ -138,7 +138,7 @@ switch ($subnetaddr) {
     define('URL','https://andere.adresse.de/');
   } break;
   default : {
-    define('URL','http://www.gdi-service.de/');
+    define('URL','http://localhost/');
   }
 }
 # wenn die Internetverbindung über einen Proxy hergestellt wird, kann man diesen hier angeben

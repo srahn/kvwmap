@@ -12,11 +12,13 @@
 # Bei verschiedenen SQL-Anweisungen sind vorher Konstanten für die Einträge in der Datenbank zu setzen
 # Benutzer für den Zugriff auf die PostGIS-Datenbank
 SET @pg_user='kvwmap';
-SET @pg_dbname='kvwmap_msp';
+SET @pg_dbname='kvwmapsp';
 # Benutzer in der Mysql-Datenbank für den die Eintragungen vorgenommen werden sollen
 SET @user_id=1;
 # Stelle in der Mysql-Datenbank, für die die Eintragungen vorgenommen werden sollen
 SET @stelle_id=1;
+# Password für Nutzer kvwmap bei der Anmeldung an kvwmap
+SET @kvwmap_password='kvwmap';
 #!!!!!!!!!!!!!!!!!!!!!!
 # Beim Hinzufügen von Layern ist an Steller der Gruppenbezeichnung eine ID einzusetzen, die der Gruppe in der
 # Tabelle u_groups entspricht. Wer eine neue Gruppe verwenden möchte, muss die neue Gruppe auch in die Tabelle
@@ -41,7 +43,7 @@ VALUES (
 # Nutzer anlegen
 INSERT INTO `user` ( `ID` , `login_name` , `Name` , `Vorname` , `passwort` , `Funktion` , `stelle_id` , `phon` , `email` )
 VALUES (
-@user_id, 'kvwmap', 'kvwmap', 'hans', MD5(''), 'admin', '1', '', 'admin@localhost.de'
+@user_id, 'kvwmap', 'kvwmap', 'hans', MD5(@kvwmap_password), 'admin', '1', '', 'admin@localhost.de'
 );
 # Rolle zuweisen
 INSERT INTO `rolle` ( `user_id` , `stelle_id` , `nImageWidth` , `nImageHeight` , `minx` , `miny` , `maxx` , `maxy` , `nZoomFactor` , `selectedButton` , `epsg_code` )
