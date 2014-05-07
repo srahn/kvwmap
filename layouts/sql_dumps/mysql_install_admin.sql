@@ -1,45 +1,46 @@
-# SQL-Statements für die Einrichtung und Administration eines kvwmap Projektes
+# SQL-Statements fÃ¼r die Einrichtung und Administration eines kvwmap Projektes
 #
 # Voraussetzungen/Vorarbeiten
 #
 # MySQL ist installiert
 #
-# Zusätzlich ist die kvwmap-Datenbank angelegt
+# ZusÃ¤tzlich ist die kvwmap-Datenbank angelegt
 #
-# Die folgenden SQL-Statements in einem SQL-Fenster z.B. in phpMyAdmin ausführen
+# Die folgenden SQL-Statements in einem SQL-Fenster z.B. in phpMyAdmin ausfÃ¼hren
 
 #!!!!!!!!!!!!!!!!!!!
-# Bei verschiedenen SQL-Anweisungen sind vorher Konstanten für die Einträge in der Datenbank zu setzen
-# Benutzer für den Zugriff auf die PostGIS-Datenbank
+# Bei verschiedenen SQL-Anweisungen sind vorher Konstanten fÃ¼r die EintrÃ¤ge in der Datenbank zu setzen
+# Benutzer fÃ¼r den Zugriff auf die PostGIS-Datenbank
 SET @pg_user='kvwmap';
 SET @pg_dbname='kvwmapsp';
-# Benutzer in der Mysql-Datenbank für den die Eintragungen vorgenommen werden sollen
+# Benutzer in der Mysql-Datenbank fÃ¼r den die Eintragungen vorgenommen werden sollen
 SET @user_id=1;
-# Stelle in der Mysql-Datenbank, für die die Eintragungen vorgenommen werden sollen
+# Stelle in der Mysql-Datenbank, fÃ¼r die die Eintragungen vorgenommen werden sollen
 SET @stelle_id=1;
-# Password für Nutzer kvwmap bei der Anmeldung an kvwmap
+# Password fÃ¼r Nutzer kvwmap bei der Anmeldung an kvwmap
 SET @kvwmap_password='kvwmap';
 #!!!!!!!!!!!!!!!!!!!!!!
-# Beim Hinzufügen von Layern ist an Steller der Gruppenbezeichnung eine ID einzusetzen, die der Gruppe in der
-# Tabelle u_groups entspricht. Wer eine neue Gruppe verwenden möchte, muss die neue Gruppe auch in die Tabelle
+# Beim HinzufÃ¼gen von Layern ist an Steller der Gruppenbezeichnung eine ID einzusetzen, die der Gruppe in der
+# Tabelle u_groups entspricht. Wer eine neue Gruppe verwenden mÃ¶chte, muss die neue Gruppe auch in die Tabelle
 # u_groups eintragen.
 # Generell ist es mit der neuen Stellenverwaltung auch nicht mehr notwendig die Zuordnungen der Layer zu den Stellen und Rollen
-# per Hand einzutragen. Dazu nur noch den Layer in der Tabelle Layer anlegen und die Zuordnung zur Stelle über die Stellenverwaltung
+# per Hand einzutragen. Dazu nur noch den Layer in der Tabelle Layer anlegen und die Zuordnung zur Stelle Ã¼ber die Stellenverwaltung
 # vornehmen
-# Ähnliches gilt für die Menüpunkte, ein einmal in der Tabelle u_menues angelegtes Menü kann in der Stellenverwaltung zur Stellen
+# Ã„hnliches gilt fÃ¼r die MenÃ¼punkte, ein einmal in der Tabelle u_menues angelegtes MenÃ¼ kann in der Stellenverwaltung zur Stellen
 # zugeordnet werden.
 
 ################################################################################
-# Einträge für eine neu angelegte Datenbank
+# EintrÃ¤ge fÃ¼r eine neu angelegte Datenbank
 # Standardnutzer, Stelle, Rolle, Referenzkarte einrichten
-# Führen Sie hinterher am besten gleich alle Statements zum Anlegen von Menüpunkten
-# für die hier angelegten stelle=1 und user_id=1 aus
+# FÃ¼hren Sie hinterher am besten gleich alle Statements zum Anlegen von MenÃ¼punkten
+# fÃ¼r die hier angelegten stelle=1 und user_id=1 aus
 ################################################################################
 # Stelle anlegen
-INSERT INTO `stelle` ( `ID` , `Bezeichnung` , `start` , `stop` , `minxmax` , `minymax` , `maxxmax` , `maxymax` , `Referenzkarte_ID` , `Authentifizierung` , `ALB_status` , `wappen` , `alb_raumbezug` , `alb_raumbezug_wert` )
+INSERT INTO `stelle` ( `ID` , `Bezeichnung` , `start` , `stop` , `minxmax` , `minymax` , `maxxmax` , `maxymax` , `epsg_code`, `Referenzkarte_ID` , `Authentifizierung` , `ALB_status` , `wappen` , `alb_raumbezug` , `alb_raumbezug_wert` )
 VALUES (
-@stelle_id, 'Administration', '0000-00-00', '0000-00-00', '4440000', '5920000', '4560000', '6080000', '1', '1', '30', 'stz.png', '', ''
+@stelle_id, 'Administration', '0000-00-00', '0000-00-00', 602779, 5884854, 864862, 6070403, 25832, '1', '1', '30', 'Logo_GDI-Service_200x47.png', '', ''
 );
+
 # Nutzer anlegen
 INSERT INTO `user` ( `ID` , `login_name` , `Name` , `Vorname` , `passwort` , `Funktion` , `stelle_id` , `phon` , `email` )
 VALUES (
@@ -48,16 +49,16 @@ VALUES (
 # Rolle zuweisen
 INSERT INTO `rolle` ( `user_id` , `stelle_id` , `nImageWidth` , `nImageHeight` , `minx` , `miny` , `maxx` , `maxy` , `nZoomFactor` , `selectedButton` , `epsg_code` )
 VALUES (
-@user_id, @stelle_id, '500', '500', '4440000', '5920000', '4560000', '6080000', '2', 'zoomin', '2398'
+@user_id, @stelle_id, '700', '500', 602779, 5884854, 864862, 6070403, '2', 'zoomin', '25832'
 );
 # Referenzkarte eintragen
 INSERT INTO `referenzkarten` (`ID`,`Name` , `Dateiname` , `xmin` , `ymin` , `xmax` , `ymax` , `width` , `height` )
 VALUES (
- '1','Uebersichtskarte', 'uebersicht_mv.png', '4405000', '5880000', '4662000', '6070000', '205', '146'
+ '1','Uebersichtskarte', 'uebersicht_mv.png', 602779, 5884854, 864862, 6070403, '205', '146'
 );
 
 ############################################################################
-# Sicherheitskritische Anwendungsfälle Werte für go Variablen              #
+# Sicherheitskritische AnwendungsfÃ¤lle Werte fÃ¼r go Variablen              #
 ############################################################################
 INSERT INTO `u_funktionen` (`id`, `bezeichnung`, `link`) VALUES
 (1, 'ALB-Auszug 35', NULL),
@@ -84,7 +85,7 @@ INSERT INTO `u_funktionen` (`id`, `bezeichnung`, `link`) VALUES
 
 
 ####################################################################################
-# Eintragen von Berechtigungen für einen Administrator zum Ausführen von Funktionen
+# Eintragen von Berechtigungen fÃ¼r einen Administrator zum AusfÃ¼hren von Funktionen
 ####################################################################################
 # 2006-05-12
 
@@ -113,34 +114,33 @@ INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (20,@stelle_i
 INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (21,@stelle_id);
 
 
-
 ###########################
-# Einträge der Menüpunkte #
+# EintrÃ¤ge der MenÃ¼punkte #
 ###########################
-#### gegebenenfalls vorherige Einträge löschen
+#### gegebenenfalls vorherige EintrÃ¤ge lÃ¶schen
 # TRUNCATE u_menues;
 # TRUNCATE u_menue2stelle;
 
-# Setzen der Stelle, für die die Menüs eingetragen werden sollen
+# Setzen der Stelle, fÃ¼r die die MenÃ¼s eingetragen werden sollen
 SET @stelle_id=1;
-# Setzen der User_ID für die die Menüs zugeordnet werden sollen
+# Setzen der User_ID fÃ¼r die die MenÃ¼s zugeordnet werden sollen
 SET @user_id=1;
 
-# Die nachfolgenden Statements müssen in 1.5 angepasst werden
-# Alle Gruppen von Menüs sind in einer separaten Tabelle u_groups enthalten und in der Tabelle u_menues erscheinen in der Spalte
-# Gruppe nur noch die ID´s der Gruppen aus der Tabelle u_groups
-# Wer seine Tabellen dahingehend anpassen möchte muss das entsprechende Statement aus mysql_update.php ausführen.
+# Die nachfolgenden Statements mÃ¼ssen in 1.5 angepasst werden
+# Alle Gruppen von MenÃ¼s sind in einer separaten Tabelle u_groups enthalten und in der Tabelle u_menues erscheinen in der Spalte
+# Gruppe nur noch die IDÂ´s der Gruppen aus der Tabelle u_groups
+# Wer seine Tabellen dahingehend anpassen mÃ¶chte muss das entsprechende Statement aus mysql_update.php ausfÃ¼hren.
 # siehe "Erzeugen einer neuen Tabelle groups"
 
-INSERT INTO `u_menues` (name, links, obermenue, menueebene, target, `order`) VALUES ('Stelle w&auml;hlen', 'index.php?go=Stelle Wählen', 0, 1, NULL, 1);
+INSERT INTO `u_menues` (name, links, obermenue, menueebene, target, `order`) VALUES ('Stelle w&auml;hlen', 'index.php?go=Stelle WÃ¤hlen', 0, 1, NULL, 1);
 SET @last_menue_id=LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,1);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
 
 
-#### Volle Ausdehnung (Übersicht) und letzte Kartenansicht
-# Übersicht
-INSERT INTO u_menues (name, links, obermenue, menueebene, target, `order`) VALUES ('Übersicht', 'index.php?go=Full_Extent', 0, 1, NULL, 2);
+#### Volle Ausdehnung (Ãœbersicht) und letzte Kartenansicht
+# Ãœbersicht
+INSERT INTO u_menues (name, links, obermenue, menueebene, target, `order`) VALUES ('Ãœbersicht', 'index.php?go=Full_Extent', 0, 1, NULL, 2);
 SET @last_menue_id=LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,2);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
@@ -152,15 +152,15 @@ INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
 
 ##### Suchfunktionen
-# Obermenü für die Suchfunktionen
+# ObermenÃ¼ fÃ¼r die Suchfunktionen
 INSERT INTO u_menues (name, links, obermenue, menueebene, target, `order`) VALUES ('Suchen', 'index.php?go=changemenue', 0, 1, NULL, 4);
 SET @last_level1menue_id=LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_level1menue_id,10);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_level1menue_id,0);
 
 
-# Untermenüpunkte für die Suche
-# Wenn das Obermenü schon existiert hier die ID-Angeben
+# UntermenÃ¼punkte fÃ¼r die Suche
+# Wenn das ObermenÃ¼ schon existiert hier die ID-Angeben
 # SET @last_level1menue_id=<Ihre ID>;
 
 # Layersuche 
@@ -175,7 +175,7 @@ SET @last_menue_id=LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,12);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
 
-# Flurstückssuche
+# FlurstÃ¼ckssuche
 INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Flurst&uuml;cke', 'index.php?go=Flurstueck_Auswaehlen', @last_level1menue_id, 2, NULL);
 SET @last_menue_id=LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,13);
@@ -222,6 +222,12 @@ INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@
 INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Layer-Rechte', 'index.php?go=Layerattribut-Rechteverwaltung', @last_level1menue_id, 2, NULL);
 SET @last_menue_id=LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,63);
+INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
+
+# Layer-Rechteverwaltung
+INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Filterverwaltung', 'index.php?go=Filterverwaltung', @last_level1menue_id, 2, NULL);
+SET @last_menue_id=LAST_INSERT_ID();
+INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,64);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
 
 #### Nutzerverwaltung
@@ -297,12 +303,10 @@ INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
 
 # Druckausgabe
-INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Druckausgabe', 'index.php?go=ExportMapToPDF', @last_level1menue_id, 2, '_blank');
+INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Druckausgabe', 'index.php?go=Schnelle_Druckausgabe', @last_level1menue_id, 2, '_blank');
 SET @last_menue_id=LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,84);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
-
-
 
 #### Druckmanager
 INSERT INTO u_menues ( `name` , `links` , `obermenue` , `menueebene` , `target` )
@@ -314,23 +318,47 @@ INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@
 
 #### Druckrahmeneditor
 INSERT INTO u_menues ( `name` , `links` , `obermenue` , `menueebene` , `target` )
-VALUES ( 'Druckrahmeneditor', 'index.php?go=Druckrahmen', @last_level1menue_id, '2', NULL);
+VALUES ( 'Kartendrucklayouteditor', 'index.php?go=Druckrahmen', @last_level1menue_id, '2', NULL);
 SET @last_menue_id=LAST_INSERT_ID();
 INSERT INTO `u_menue2stelle` ( `stelle_id` , `menue_id` , `menue_order` )
 VALUES (@stelle_id, @last_menue_id, '89');
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
+
+INSERT INTO u_menues ( `name` , `links` , `obermenue` , `menueebene` , `target` )
+VALUES ( 'Datendrucklayouteditor', 'index.php?go=sachdaten_druck_editor', @last_level1menue_id, '2', NULL);
+SET @last_menue_id=LAST_INSERT_ID();
+INSERT INTO `u_menue2stelle` ( `stelle_id` , `menue_id` , `menue_order` )
+VALUES (@stelle_id, @last_menue_id, '90');
+INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
+
 
 #### Drucken
 INSERT INTO u_menues ( `name` , `links` , `obermenue` , `menueebene` , `target` )
 VALUES ( 'Drucken', 'index.php?go=Druckausschnittswahl', @last_level1menue_id, '2', NULL);
 SET @last_menue_id=LAST_INSERT_ID();
 INSERT INTO `u_menue2stelle` ( `stelle_id` , `menue_id` , `menue_order` )
-VALUES (@stelle_id, @last_menue_id, '90');
+VALUES (@stelle_id, @last_menue_id, '91');
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
 
 # eine Layer-Gruppe anlegen
-INSERT INTO `u_groups` (`id`, `Gruppenname`) VALUES (1, 'Administrativ');
+INSERT INTO `u_groups` (`id`, `Gruppenname`) VALUES (1, 'Hintergrundkarten');
+INSERT INTO `u_groups` (`id`, `Gruppenname`) VALUES (2, 'Verwaltungsgrenzen');
+INSERT INTO `u_groups` (`id`, `Gruppenname`) VALUES (3, 'Kataster');
+INSERT INTO `u_groups` (`id`, `Gruppenname`) VALUES (4, 'Umwelt');
+INSERT INTO `u_groups` (`id`, `Gruppenname`) VALUES (5, 'Bauen');
+INSERT INTO `u_groups` (`id`, `Gruppenname`) VALUES (6, 'Raumordnung');
+INSERT INTO `u_groups` (`id`, `Gruppenname`) VALUES (7, 'Soziales');
+INSERT INTO `u_groups` (`id`, `Gruppenname`) VALUES (8, 'Verkehr');
+INSERT INTO `u_groups` (`id`, `Gruppenname`) VALUES (9, 'Administration');
+
+# einen ersten WMS Layer anlegen
+INSERT INTO layer (`Name`, `alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`) VALUES('OSM', '', '3', '1', NULL, NULL, NULL, NULL, NULL, '', '', '', '', NULL, NULL, '', 'http://x.osm.omniscale.net/proxy/service?LAYERS=osm&STYLES=&Version=1.1.1&', '', 7, '', '', 3, 'pixels', '25832', '', '0', NULL, NULL, NULL, NULL, '', 'EPSG:25832', 'osm', '1.1.1', 'image/png', 60, '', '', '', 'radio', '0', '', '', '', '');
+INSERT IGNORE INTO used_layer ( `Stelle_ID` , `Layer_ID` , `queryable` , `drawingorder` , `minscale` , `maxscale` , `offsite` , `transparency`, `Filter` , `template` , `header` , `footer` , `symbolscale`, `privileg` )VALUES ('1', '1', '0', '', '', '', '' , NULL, NULL,'' , NULL , NULL , NULL, '0');
+INSERT IGNORE INTO u_groups2rolle SELECT DISTINCT 1, 1, u_groups.id, 1 FROM (SELECT @id AS id, @id := IF(@id IS NOT NULL, (SELECT obergruppe FROM u_groups WHERE id = @id), NULL) AS obergruppe FROM u_groups, (SELECT @id := (SELECT Gruppe FROM layer where layer.Layer_ID = 1)) AS vars WHERE @id IS NOT NULL	 ) AS dat	JOIN u_groups ON dat.id = u_groups.id;
+INSERT IGNORE INTO u_rolle2used_layer SELECT 1, used_layer.Stelle_ID, used_layer.Layer_ID, "1", "0", "1","0" FROM `used_layer` WHERE used_layer.Stelle_ID = 1;
 
 # Einen ersten Druckrahmen erzeugen
 INSERT INTO `druckrahmen` (`Name`, `headsrc`, `headposx`, `headposy`, `headwidth`, `headheight`, `mapposx`, `mapposy`, `mapwidth`, `mapheight`, `refmapsrc`, `refmapfile`, `refmapposx`, `refmapposy`, `refmapwidth`, `refmapheight`, `refposx`, `refposy`, `refwidth`, `refheight`, `refzoom`, `dateposx`, `dateposy`, `datesize`, `scaleposx`, `scaleposy`, `scalesize`, `oscaleposx`, `oscaleposy`, `oscalesize`, `gemarkungposx`, `gemarkungposy`, `gemarkungsize`, `flurposx`, `flurposy`, `flursize`, `legendposx`, `legendposy`, `legendsize`, `arrowposx`, `arrowposy`, `arrowlength`, `userposx`, `userposy`, `usersize`, `watermarkposx`, `watermarkposy`, `watermark`, `watermarksize`, `watermarkangle`, `watermarktransparency`, `format`, `preis`, `font_date`, `font_scale`, `font_gemarkung`, `font_flur`, `font_oscale`, `font_legend`, `font_watermark`, `font_user`) VALUES
 ('A4-hoch-leer', 'A4-hoch.jpg', 0, 0, 595, 842, 44, 50, 511, 714, '', NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 503, 784, 11, 422, 74, 0, 422, 87, 0, 238, 54, 0, 238, 64, 0, 58, 50, 0, 540, 770, 0, 140, 800, 0, 155, 155, '', 120, 45, 77, 'A4hoch', 0, '/home/fgs/fgs/apps/PDFClass/fonts/Courier-Bold.afm', '/home/fgs/fgs/apps/PDFClass/fonts/Courier-Bold.afm', '/home/fgs/fgs/apps/PDFClass/fonts/Courier-Bold.afm', '/home/fgs/fgs/apps/PDFClass/fonts/Courier-Bold.afm', NULL, '/home/fgs/fgs/apps/PDFClass/fonts/Courier-Bold.afm', '/home/fgs/fgs/apps/PDFClass/fonts/Courier-Bold.afm', '/home/fgs/fgs/apps/PDFClass/fonts/Courier-Bold.afm');
+SET @last_druckrahmen_id=LAST_INSERT_ID();
+INSERT INTO `druckrahmen2stelle` (`stelle_id`, `druckrahmen_id`) VALUES (@last_druckrahmen_id, @stelle_id);
