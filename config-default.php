@@ -74,7 +74,7 @@ define('LAYER_ERROR_PAGE', 'layer_error_page.php');					# Version 1.14
 # welchen Namen man für welche Aufgabe gewählt hat.
 # Hier werden die Werte aus der Spalte name der Tabelle u_menues
 # Konstanten zugewiesen um sie später beim Layout verwenden zu können
-define('TITLE','kvwmap Entwicklungsserver');             		# Version 1.7.6
+define('TITLE','Web-GIS kvwmap');             		# Version 1.7.6
 define('TITLE_DRUCKEN','Druckausschnittswahl');             # Version 1.6.6
 define('TITLE_KARTE','Karte anzeigen');                     # Version 1.6.6
 define('TITLE_NOTIZEN','neue Notiz');                       # Version 1.6.6
@@ -117,7 +117,7 @@ define('PUBLISHERNAME','Kartenserver');
 # Varianten:
 # Flurbezeichnung: bedeutet Ausgabe von Gemeinde, Gemarkung und Flur, soweit in ALK tabellen vorhanden
 # Wenn kein Wert gesetzt wird, erfolgt keine Anzeige einer Lagebezeichung
-define('LAGEBEZEICHNUNGSART', 'Flurbezeichnung');						# in Version 1.7.6 wieder eingeführt für Fälle ohne ALK
+define('LAGEBEZEICHNUNGSART', '');						# in Version 1.7.6 wieder eingeführt für Fälle ohne ALK
 
 # Erweiterung der Authentifizierung um die IP Adresse des Nutzers
 # Testet ob die IP des anfragenden Clientrechners dem Nutzer zugeordnet ist
@@ -158,7 +158,7 @@ define('NACHWEISDOCPATH',SHAPEPATH.'nachweise/');
 # Dateiname und Pfad der Festpunkte, mit der die Tabelle der Festpunkte aktualisiert werden soll
 define('PUNKTDATEINAME','festpunkte.csv');
 #define('PUNKTDATEINAME','alk');
-define('PUNKTDATEIPATH',SHAPEPATH.'Festpunkte/');
+define('PUNKTDATEIPATH',SHAPEPATH.'festpunkte/');
 define('PUNKTDATEIARCHIVPATH',PUNKTDATEIPATH.'archiv/');
 define('KVZAUSGABEDATEINAME','festpunkte.kvz');
 define('KVZKOPF', '# Datenaustauschformat M-V
@@ -166,7 +166,7 @@ define('KVZKOPF', '# Datenaustauschformat M-V
 #                                                       Z G  Z G');
 define('SKIZZEN_DATEI_TYP','tif');            # Version 1.6.8
 # Pfad zu den WLDGE Dateien
-define('WLDGEFILEPATH',SHAPEPATH.'ALB/');
+define('WLDGEFILEPATH',SHAPEPATH.'alb/');
 # Name der WLDGE Datei, die geladen werden soll
 define('WLDGEFILENAME','FF_klein.wldge');
 # Schalter zum Vergleich der Datum der Grundausstattung und Fortführung in der Datenbank und der WLDGE Dateien
@@ -181,9 +181,9 @@ define('WLDGE_DATUM_PRUEFUNG',1);
   define('WLDGE_HISTORISCHE_LOESCHEN_DEFAULT',0);             # Version 1.7.0
 
 # Pfad zum Speichern der Nachweisrecherche
-define('RECHERCHEERGEBNIS_PATH',SHAPEPATH.'Recherchierte_Antraege/');
+define('RECHERCHEERGEBNIS_PATH',SHAPEPATH.'recherchierte_antraege/');
 # Pfad zum Speichern der Kartendruck-Layouts
-define('DRUCKRAHMEN_PATH',SHAPEPATH.'Druckrahmen/');
+define('DRUCKRAHMEN_PATH',SHAPEPATH.'druckrahmen/');
 
 # Pfad zu den Funktionen
 #define('FKT_PATH',WWWROOT.APPLVERSION.'funktionen/');			# in Version 1.7.3 wieder gelöscht
@@ -217,7 +217,7 @@ define('STOPWORDFILE',SHAPEPATH.'gazetteer/top10000de.txt');
 # Imagepath
 define('IMAGEPATH',INSTALLPATH.'tmp/');
 # Pfad für selbst gemachte Bilder
-define('CUSTOM_IMAGE_PATH',SHAPEPATH.'Bilder/');                # Version 1.6.9
+define('CUSTOM_IMAGE_PATH',SHAPEPATH.'bilder/');                # Version 1.6.9
 #Cachespeicherort
 define('CACHEPATH',INSTALLPATH.'cache/');                             # Version 1.6.8
 #Cachezeit Nach welcher Zeit in Stunden sollen gecachte Dateien aktualisiert werden
@@ -350,11 +350,11 @@ define("LAYER_ID_SCHNELLSPRUNG", 749);				# Version 1.14
 
 ######################### Dateieinstellungen
 # Datei in der das MapFile als Dokumentation zur Kartenausgabe geschrieben wird
-define("DEFAULTMAPFILE",SHAPEPATH.'MapFiles/defaultmapfile_dev.map');
+define("DEFAULTMAPFILE",SHAPEPATH.'mapfiles/defaultmapfile.map');
 # Wenn SAVEMAPFILE leer ist, wird sie nicht gespeichert.
 # Achtung, wenn die cgi-bin/mapserv ohne Authentifizierung und der Pfad zu save_mapfile.map bekannt ist, kann jeder die Karten des letzten Aufrufs in kvwmap über mapserv?map=<pfad zu save_map.map abfragen. Und wenn wfs zugelassen ist auch die Sachdaten dazu runterladen. Diese Konstante sollte nur zu debug-Zwecken eingeschaltet bleiben.
 define("SAVEMAPFILE",LOGPATH.'save_mapfile.map');                                # Version 1.11.0 
-define("REFMAPFILE",SHAPEPATH.'MapFiles/refmapfile.map');
+define("REFMAPFILE",SHAPEPATH.'mapfiles/refmapfile.map');
 # Ort der Datei, in der die Meldungen beim Debugen geschrieben werden
 define('DEBUGFILE',LOGPATH.VERSION.'_'.$_SESSION['login_name'].'_debug.htm');
 # Level der Fehlermeldungen beim debuggen
