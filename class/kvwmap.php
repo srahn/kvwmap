@@ -6679,6 +6679,13 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
     $this->output();
   }
 
+	function Suchabfragen_auflisten(){
+		$this->main='list_searches.php';
+		$this->titel='Gespeicherte Suchabfragen';
+		$this->searches = $this->user->rolle->getsearches(NULL);
+		$this->output();
+	}
+	
 	function dokument_loeschen(){
 		$_FILES[$this->formvars['document_attributename']]['name'] = 'delete';
 		$this->sachdaten_speichern();
@@ -6817,7 +6824,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
     $success = true;
     foreach($tablename as $table){
       $execute = false;
-      if($table['tablename'] != ''){
+      if($table['tablename'] != '' AND $table['tablename'] == $layerset[0]['maintable']){		# nur Attribute aus der Haupttabelle werden gespeichert
         $sql = "INSERT INTO ".$table['tablename']." (";
         for($i = 0; $i < count($table['attributname']); $i++){
           if(($table['type'][$i] != 'Text_not_saveable' AND $table['type'][$i] != 'Auswahlfeld_not_saveable' AND $table['type'][$i] != 'SubFormPK' AND $table['type'][$i] != 'SubFormFK' AND $this->formvars[$table['formfield'][$i]] != '') 
@@ -11098,13 +11105,14 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
         $oid = $element[3];
         $formtype = $element[4];
         $datatype = $element[6];
+				$layerset = $this->user->rolle->getLayer($layer_id);
         if($layer_id != $old_layer_id AND $tablename != ''){
           $layerdb = $mapdb->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
           $layerdb->setClientEncoding();
           #$filter = $mapdb->getFilter($layer_id, $this->Stelle->id);		# siehe unten
           $old_layer_id = $layer_id;
         }
-        if(($this->formvars['go'] == 'Dokument_Loeschen' OR $this->formvars['changed_'.$oid] == 1 OR $this->formvars['embedded']) AND $attributname != 'oid' AND $tablename != ''){
+        if(($this->formvars['go'] == 'Dokument_Loeschen' OR $this->formvars['changed_'.$oid] == 1 OR $this->formvars['embedded']) AND $attributname != 'oid' AND $tablename != '' AND $tablename == $layerset[0]['maintable']){		# nur Attribute aus der Haupttabelle werden gespeichert
           # 2008-03-26 pk
           switch($formtype) {
             case 'Dokument' : {
@@ -14339,7 +14347,7 @@ class db_mapObj extends db_mapObj_core{
 		$sql .= 'SET @group_id = 1;'.chr(10);
 		$sql .= 'SET @connection = \'user=xxxx password=xxxx dbname=kvwmapsp\';'.chr(10).chr(10);
 		for($i = 0; $i < count($layer_ids); $i++){
-			$layer = $database->create_insert_dump('layer', '', 'SELECT `Name`, `Datentyp`, \'@group_id\' AS `Gruppe`, `pfad`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, wms_auth_username, wms_auth_password, `wfs_geom`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `privileg` FROM layer WHERE Layer_ID='.$layer_ids[$i]);
+			$layer = $database->create_insert_dump('layer', '', 'SELECT `Name`, `alias`, `Datentyp`, \'@group_id\' AS `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, wms_auth_username, wms_auth_password, `wfs_geom`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `privileg` FROM layer WHERE Layer_ID='.$layer_ids[$i]);
 			$sql .= $layer['insert'][0];
 			$last_layer_id = '@last_layer_id'.$layer_ids[$i];
 			$sql .= chr(10).'SET '.$last_layer_id.'=LAST_INSERT_ID();'.chr(10);

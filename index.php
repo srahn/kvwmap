@@ -1231,6 +1231,10 @@ if($GUI->goNotExecutedInPlugins){
 		$GUI->GenerischeSuche();
 	  } break;
 	  
+		case 'Suchabfragen_auflisten' : {
+		$GUI->Suchabfragen_auflisten();
+	  } break;
+		
 	  case 'Layer-Suche_Suchabfrage_speichern' : {
 		$GUI->GenerischeSuche();
 	  } break;

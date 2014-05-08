@@ -38,7 +38,7 @@
       	<input type="button" class="button" name="cancelbutton" value="<? echo $strCancel; ?>" onclick="clearsubform('<? echo $this->formvars['fromobject'] ?>');">
       <? }
       if($this->qlayerset[$i]['template']==''){ # wenn man ein Template für einen embeddeden Layer gesetzt hat, will man diesen Layer ja nur in der embeddeten Anzeige sehen?>
-   			<input type="button" class="button" name="extrabutton" value="Datensatz anzeigen" onclick="location.href='index.php?go=Layer-Suche_Suchen&selected_layer_id=<? echo $this->qlayerset[$i]['Layer_ID'].'&value_'.$this->qlayerset[$i]['attributes']['table_name'][$preview_attribute].'_oid='.$this->qlayerset[$i]['shape'][0][$this->qlayerset[$i]['attributes']['table_name'][$preview_attribute].'_oid']; ?>'">
+   			<input type="button" class="button" name="extrabutton" value="Datensatz anzeigen" onclick="location.href='index.php?go=Layer-Suche_Suchen&selected_layer_id=<? echo $this->qlayerset[$i]['Layer_ID'].'&value_'.$this->qlayerset[$i]['maintable'].'_oid='.$this->qlayerset[$i]['shape'][0][$this->qlayerset[$i]['maintable'].'_oid']; ?>'">
    		<? } ?>
       </td>
     </tr>

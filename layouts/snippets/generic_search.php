@@ -297,15 +297,15 @@ function delete_search(){
   <? if($this->selected_search != ''){echo '<script type="text/javascript">showsearches();</script>';} ?>
   <tr> 
     <td colspan="5">
-      <table align="center" border="0" cellspacing="0" cellpadding="3">
+      <table width="100%" align="center" border="0" cellspacing="0" cellpadding="3">
         <?
     if ((count($this->attributes))!=0) {
       ?><tr>
-            <td width="20%"><b>Attribut</b></td>
+            <td width="150px"><b>Attribut</b></td>
             <td>&nbsp;&nbsp;</td>
-            <td width="20%" align="center"><b>Operator</b></td>
+            <td width="100px" align="center"><b>Operator</b></td>
             <td>&nbsp;&nbsp;</td>
-            <td align="center"><b>Wert</b></td>
+            <td width="150px" align="left"><b>&nbsp;&nbsp;Wert</b></td>
           </tr><?
 
       for($i = 0; $i < count($this->attributes['name']); $i++){
@@ -322,14 +322,14 @@ function delete_search(){
 													<td width="100%" bgcolor="'.BG_GLEATTRIBUTE.'" colspan="2">&nbsp;<a href="javascript:void(0);" onclick="javascript:document.getElementById(\'group'.$layer['Layer_ID'].'_'.$i.'_'.$k.'\').style.display=\'\';document.getElementById(\'colgroup'.$layer['Layer_ID'].'_'.$i.'_'.$k.'\').style.display=\'none\';"><img border="0" src="'.GRAPHICSPATH.'/plus.gif"></a>&nbsp;<b>'.$groupname.'</b></td>
 												</tr>
 											</table>
-											<table cellpadding="3" cellspacing="0" width="100%"  id="group'.$layer['Layer_ID'].'_'.$i.'_'.$k.'" style="'; if($collapsed)echo 'display:none;'; echo 'border:1px solid grey">
+											<table cellpadding="3" cellspacing="0" width="100%" id="group'.$layer['Layer_ID'].'_'.$i.'_'.$k.'" style="'; if($collapsed)echo 'display:none;'; echo 'border:1px solid grey">
 												<tr>
 													<td style="border-bottom:1px dotted grey" bgcolor="'.BG_GLEATTRIBUTE.'" colspan="5">&nbsp;<a href="javascript:void(0);" onclick="javascript:document.getElementById(\'group'.$layer['Layer_ID'].'_'.$i.'_'.$k.'\').style.display=\'none\';document.getElementById(\'colgroup'.$layer['Layer_ID'].'_'.$i.'_'.$k.'\').style.display=\'\';"><img border="0" src="'.GRAPHICSPATH.'/minus.gif"></a>&nbsp;<b>'.$groupname.'</b></td>
 												</tr>';
 				}
 				
           ?><tr>
-            <td width="100px"><?
+            <td width="40%"><?
               if($this->attributes['alias'][$i] != ''){
                 echo $this->attributes['alias'][$i];
               }
@@ -343,7 +343,7 @@ function delete_search(){
               }
           ?></td>
             <td>&nbsp;&nbsp;</td>
-            <td>
+            <td width="100px">
               <select class="select" style="width:75px" <? if(count($this->attributes['enum_value'][$i]) == 0){ ?>onchange="operatorchange('<? echo $this->attributes['name'][$i]; ?>');" id="operator_<? echo $this->attributes['name'][$i]; ?>" <? } ?> name="operator_<? echo $this->attributes['name'][$i]; ?>">
                 <option title="Der Suchbegriff muss exakt so in der Datenbank stehen" value="=" <? if($this->formvars['operator_'.$this->attributes['name'][$i]] == '='){ echo 'selected';} ?> >=</option>
                 <option title="Der Suchbegriff kommt so NICHT in der Datenbank vor" value="!=" <? if($this->formvars['operator_'.$this->attributes['name'][$i]] == '!='){ echo 'selected';} ?> >!=</option>
@@ -358,7 +358,7 @@ function delete_search(){
               </select>
             </td>
             <td>&nbsp;&nbsp;</td>
-            <td align="left"><?
+            <td align="left" width="40%"><?
             	switch ($this->attributes['form_element_type'][$i]) {
             		case 'Auswahlfeld' : {
                   ?><select class="select" 
@@ -395,7 +395,7 @@ function delete_search(){
 		default : { 
                   ?>
                   <input class="input" size="<? if($this->formvars['value2_'.$this->attributes['name'][$i]] != ''){echo '9';}else{echo '24';} ?>" id="value_<? echo $this->attributes['name'][$i]; ?>" name="value_<? echo $this->attributes['name'][$i]; ?>" type="text" value="<? echo $this->formvars['value_'.$this->attributes['name'][$i]]; ?>">
-                  &nbsp;<input class="input" size="9" id="value2_<? echo $this->attributes['name'][$i]; ?>" name="value2_<? echo $this->attributes['name'][$i]; ?>" type="<? if($this->formvars['value2_'.$this->attributes['name'][$i]] != ''){echo 'text';}else{echo 'hidden';} ?>" value="<? echo $this->formvars['value2_'.$this->attributes['name'][$i]]; ?>">
+                  <input class="input" size="9" id="value2_<? echo $this->attributes['name'][$i]; ?>" name="value2_<? echo $this->attributes['name'][$i]; ?>" type="<? if($this->formvars['value2_'.$this->attributes['name'][$i]] != ''){echo 'text';}else{echo 'hidden';} ?>" value="<? echo $this->formvars['value2_'.$this->attributes['name'][$i]]; ?>">
                   <?
                }
       				}

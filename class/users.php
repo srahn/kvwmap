@@ -1260,7 +1260,9 @@ class rolle extends rolle_core{
 	}
 
 	function getsearches($layer_id){
-		$sql = 'SELECT distinct name FROM search_attributes2rolle WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND layer_id='.$layer_id.' ORDER BY name';
+		$sql = 'SELECT distinct a.name, a.layer_id, b.Name as layername FROM search_attributes2rolle as a, layer as b WHERE a.layer_id = b.Layer_ID AND user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+		if($layer_id != '') $sql.= ' AND a.layer_id='.$layer_id;
+		$sql .= ' ORDER BY b.Name, a.name';
 		$this->debug->write("<p>file:users.php class:rolle->getsearches - Abfragen der gespeicherten Suchabfragen der Rolle:<br>".$sql,4);
 		$query=mysql_query($sql,$this->database->dbConn);
 		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }

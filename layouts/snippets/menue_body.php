@@ -215,31 +215,22 @@
   if ($this->img['referenzkarte']!='' AND MENU_REFMAP !="oben") {
     ?><tr>
     <td colspan="2" ><input id="refmap" type="image" name="refmap" src="<?php echo $this->img['referenzkarte']; ?>" alt="Referenzkarte" align="right" hspace="0"></td>
-  </tr><?php } ?>
-  <tr>
-    <td colspan="2" align="center">
-      <div style="position: relative; visibility: visible; left: 0px; top: 0px">
-        <table border="0" cellspacing="0" cellpadding="0">
-          <tr>
-            <td valign="top" align="center"> <input name="button" type="button" class="button" onClick="showMapParameter()" value="<?php echo $strMapInfo; ?>">
-              <br/>
-              <br/> </td>
-          </tr>
-          <?php
-       if (MENU_WAPPEN=="unten") {
-?>
-          <tr>
-            <td valign="top" align="center">
-              <?
-        $this->debug->write("Include Wappen <b>".WAPPENPATH.$this->Stelle->getWappen()."</b> in menue.php",4);
-  ?>
-              <img src="<? echo WAPPENPATH.$this->Stelle->getWappen(); ?>" alt="Wappen" align="middle"></td>
-          </tr>
-          <?php
-       }
-?>
-        </table>
-      </div>
-      </td>
   </tr>
+	<tr>
+		<td valign="top" align="center"> <input name="button" type="button" class="button" onClick="showMapParameter()" value="<?php echo $strMapInfo; ?>">
+			<br/>
+			<br/> </td>
+	</tr>
+	<? } 
+	if (MENU_WAPPEN=="unten") {
+?>
+	<tr>
+		<td valign="top" align="center">
+			<? $this->debug->write("Include Wappen <b>".WAPPENPATH.$this->Stelle->getWappen()."</b> in menue.php",4); ?>
+			<img src="<? echo WAPPENPATH.$this->Stelle->getWappen(); ?>" alt="Wappen" align="middle">
+		</td>
+	</tr>
+		<?
+ }
+?>
 </table>
