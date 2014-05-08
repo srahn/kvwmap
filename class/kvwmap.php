@@ -248,7 +248,7 @@ class GUI extends GUI_core{
 		return array("success" => 1, "temp_file" => $upload_file);
 	}
 	
-	function packAndMail($data) {
+	function packAndMail($data, $template_prefix) {
 		
 		#var_dump($data);
 		
@@ -260,95 +260,42 @@ class GUI extends GUI_core{
 			return array("success" => 0, "error_message" => "Geben Sie eine gültige Versionsnummer an. Derzeit wird nur die Version 1.0.0 unterstützt.");
 		
 		# erzeuge eine eindeutige Nummer für diesen Antrag
-		$antrag_id = date("YmdHis") . str_pad(rand(1,99), 2, "00", STR_PAD_LEFT);
+		$antrag_id = date("YmdHis") . str_pad(rand(1, 99), 2, "00", STR_PAD_LEFT);
+
+		# create reference files
+		$ref_files = array();
+		include (SHAPEPATH . 'templates/' . $template_prefix . 'rename_reference_files.php'); // create references to uploaded files
 		
-		# for test purposes all data are fake
-		# ToDo change the xml_template to the formnames from lumber jack client
-/*		$data = array (
-			'form' => 'catalog://kommunen/zweck/zweckverb_antrag_faellung',
-			'ID_USER' => 'MANDANTUSER',
-			'LIP_FORM_REVISION' => '-1',
-			'DVZ_FORM_NAME' => 'Antrag auf Fällung von Einzelbäumen',
-			'DVZ_M_ID' => '0',
-			'DVZ_FORM_ID' => 'zweckverb_antrag_faellung',
-			'DVZ_ID_USER' => 'MD000_USR001',
-			'DVZ_ID_GROUP' => 'FMS_DEMO',
-			'DVZ_STATUS' => '1',
-			'zweck_name' => 'a',
-			'zweck_vorname' => 's',
-			'zweck_strasse_hnr' => 'a',
-			'zweck_plz' => 'a',
-			'zweck_ort' => 'a',
-			'zweck_telefon' => 'a',
-			'zweck_fax' => 'a',
-			'zweck_email' => 'a',
-			'zweck_antragsteller_ist' => 'Eigentümer',
-			'zweck_standort_strasse' => 'a',
-			'zweck_standort_flur' => 'a',
-			'zweck_standort_flurstueck' => 'a',
-			'zweck_standort_plz' => 'a',
-			'zweck_standort_ort' => 'a',
-			'zweck_standort_gemeinde' => 'a',
-			'zweck_standort_gemarkung' => 'a',
-			'zweck_bestand_anzahl' => '1',
-			'zweck_bestand_stammumfang' => '1.00',
-			'zweck_bestand_baumhoehe' => '1.00',
-			'zweck_bestand_baumart' => 'a',
-			'zweck_begruendung' => 'aasd',
-			'zweck_vollmacht' => 'phph1y0hA.jpeg',
-			'zweck_unter_ort' => 'dasda',
-			'zweck_unter_datum' => '15.10.2013',
-			'zweck_ueberschrift' => 'entsprechend der Satzung zum Schutz des Baumbestandes in der Stadt ... bzw. der Gemeinden des Amtes ...',
-			'DVZ_EMPF_MANDANT' => 'Demo Mandant',
-			'DVZ_EMPF_MANDANT_ZUSATZ' => '-DEMO-',
-			'DVZ_EMPF_SACHGEB' => 'DEMO SACHGEBIET',
-			'DVZ_EMPF_STRASSE' => 'Musterstrasse',
-			'DVZ_EMPF_PLZ' => '99999',
-			'DVZ_EMPF_ORT' => 'Musterort',
-			'latitude' => array(54.1, 54.2, 54.3),
-			'longitude' => array(12.1, 12.2, 12.3),
-			'treeHeight' => array (5, 1, 14),
-			'treeImage' => array('phph1y0hB.png', 'phph1y0hC.jp2', 'phph1y0hD.jpeg'),
-			'trunkPerimeter' => array (80, 140, 50),
-			'treeType' => array ('Buche', 'Birke', 'Eiche'),
-			'treetopDiameter' => array (18, 45, 24)
-		);
-		# until here are fake data
-*/
 		# create xml file
-		$xml_file =  "Antrag_" . $antrag_id . ".xml";
-		include (SHAPEPATH . "templates/xml_template_baumfaellantrag.php");
+		$xml_file_name =  "Antrag_" . $antrag_id . ".xml";
+		include (SHAPEPATH . 'templates/' . $template_prefix . 'xml_template.php');
 		$xml = new SimpleXMLElement($xml_string);
-		$xml->asXML(IMAGEPATH . $xml_file);
+		$xml->asXML(IMAGEPATH . $xml_file_name);
 
 		# create pdf file
-		$pdf_file = 'Antrag_' . $antrag_id . '.pdf';
-	  $fp=fopen(IMAGEPATH . $pdf_file, 'wb');
-		include (SHAPEPATH . 'templates/pdf_template_baumfaellantrag.php'); // create pdf and put it in $pdf_output variable
+		$pdf_file_name = 'Antrag_' . $antrag_id . '.pdf';
+	  $fp=fopen(IMAGEPATH . $pdf_file_name, 'wb');
+		include (SHAPEPATH . 'templates/' . $template_prefix . 'pdf_template.php'); // create pdf and put it in $pdf_output variable
 	  fwrite($fp, $pdf_output);
 	  fclose($fp);
 		
 		# create zip file
-		$zip_file =  "Antrag_" . $antrag_id . ".zip";
-		$zip = new ZipArchive();
-		if ($zip->open(IMAGEPATH . $zip_file, ZIPARCHIVE::CREATE)!==TRUE)
-			return array("success" => 0, "error_message" => "Fehler: Kann Zip-Datei " . IMAGEPATH . $zip_file . " nicht erzeugen.");
-		$zip->addFile(IMAGEPATH . $xml_file, $xml_file);
-		$zip->addFile(IMAGEPATH . $pdf_file, $pdf_file);
-		$zip->addFile(UPLOADPATH . $data['zweck_vollmacht'], "Vollmacht_" . $antrag_id . "." . basename($data['zweck_vollmacht']));
-		if (isset($data['treeImage']) AND is_array($data['treeImage'])) {
-			foreach ($data['treeImage'] AS $key => $value) {
-			  $zip->addFile(UPLOADPATH . $value, $antrag_id . 'Baum_' . $key . '_Bild_' . basename($value));
-			}
+		$zip_file_name =  'Antrag_' . $antrag_id;
+		if (file_exists(IMAGEPATH . $xml_file_name))
+			exec(ZIP_PATH . ' ' . IMAGEPATH . $zip_file_name . ' ' . IMAGEPATH . $xml_file_name);   // add xml file
+		if (file_exists(IMAGEPATH . $pdf_file_name))
+			exec(ZIP_PATH . ' ' . IMAGEPATH . $zip_file_name . ' ' . IMAGEPATH . $pdf_file_name);   // add pdf file
+		foreach($ref_files AS $ref_file) {
+			if (file_exists($ref_file))
+				exec(ZIP_PATH . ' ' . IMAGEPATH . $zip_file_name . ' ' . $ref_file); // add mandate file
 		}
-		$zip->close();
+		$zip_file_name .= '.zip';
 
-		# create email text
-		$email_text  = "Dies ist der Text, der im Body der E-Mail steht.";
-		$email_text .= implode(", ", $data);
-		$email_recipient = "peter.korduan@gdi-service.de";
+		# create email
+		$mail = array();
+		include (SHAPEPATH . 'templates/' . $template_prefix . 'email_template.php');
 		# send email
-
+		$success = mail_att($mail['from_name'], $mail['from_email'], $mail['to_email'], $mail['reply_email'], $mail['subject'], $mail['message'], $mail['attachement']);
 /*
 $grenze="grenzlinie";
 $name_des_bildes=$HTTP_POST_FILES['datei']['name'];
@@ -375,8 +322,8 @@ $botschaft.="\n\n";
 $botschaft.="--$grenze";
 mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
 */
-		
-	return array("success" => 1, "antrag_id" => $antrag_id, "xml_file" => IMAGEURL . $xml_file, "pdf_file" => IMAGEURL . $pdf_file, "zip_file" => IMAGEURL . $zip_file, "email_text" => $email_text, "email_recipient" => $email_recipient, "authority_processingTime" => $data['authority_processingTime'], "data:" => $data);
+
+	return array("success" => $success, "antrag_id" => $antrag_id, "xml_file" => IMAGEURL . $xml_file_name, "pdf_file" => IMAGEURL . $pdf_file_name, "zip_file" => IMAGEURL . $zip_file_name, "email_text" => $email_text, "email_recipient" => $email_recipient, "authority_processingTime" => $data['authority_processingTime'], "data:" => $data);
 	}
 	
   function loadPlugins(){

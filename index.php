@@ -194,8 +194,8 @@ if($GUI->goNotExecutedInPlugins){
 		
 		case 'pack_and_mail' : {
 			$GUI->checkCaseAllowed($go);
-			$strip_list = "go, go_plus, username, passwort, Stelle_ID, format, version, callback, _dc";
-			$GUI->qlayerset[0]['shape'][0] = $GUI->packAndMail(formvars_strip($GUI->formvars, $strip_list)); 
+			$strip_list = "go, go_plus, username, passwort, Stelle_ID, format, version, callback, _dc, file";
+			$GUI->qlayerset[0]['shape'][0] = $GUI->packAndMail(formvars_strip($GUI->formvars, $strip_list), 'baumfaellantrag_');
 			$GUI->output();
 			break;
 		}

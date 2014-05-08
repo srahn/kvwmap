@@ -1205,8 +1205,6 @@ function get_upload_error_message($code) {
   return $message;
 }
 
-/*
-*/
 function formvars_strip($formvars, $strip_list) {
 	$strip_array = explode(', ', $strip_list);
 	$stripped_formvars = array();
@@ -1220,7 +1218,7 @@ function formvars_strip($formvars, $strip_list) {
 				if ($pos === false) {
 					$stripped_formvars[$key] = stripslashes($value);	
 				} else {
-					$stripped_formvars[$key] = arrStrToArr($value, ',');
+					$stripped_formvars[$key] = arrStrToArr(stripslashes($value), ',');
 				}
 #			}
 		}
@@ -1250,65 +1248,48 @@ function formvars_strip($formvars, $strip_list) {
 * }
 * mail_att("empf@domain","Email mit Anhang","Im Anhang sind mehrere Datei",$anhang); 
 **/
-function mail_att($to, $subject, $message, $anhang) { 
-	$absender = "Peter Korduan";
-	$absender_mail = "peter.korduan@gdi-service.de";
-	$reply = "peter.korduan@gdi-service.de";
+function mail_att($from_name, $from_email, $to_email, $reply_email, $subject, $message, $attachement) {
+	$grenze = "---" . md5(uniqid(mt_rand(), 1)) . "---";
 
-	$mime_boundary = "-----=" . md5(uniqid(mt_rand(), 1));
+	$headers ="MIME-Version: 1.0\r\n";
+	$headers.="From: $from_email\n";
+	$headers.="Content-Type: multipart/mixed;\n\tboundary=$grenze\n";
 
-	$header  ="From:".$absender."<".$absender_mail.">\n";
-	$header .= "Reply-To: ".$reply."\n";
+	$botschaft = "\n--$grenze\n";
 
-	$header.= "MIME-Version: 1.0\r\n";
-	$header.= "Content-Type: multipart/mixed;\r\n";
-	$header.= " boundary=\"".$mime_boundary."\"\r\n";
+	$botschaft.="Content-transfer-encoding: 7BIT\r\n";
+	$botschaft.="Content-type: text/plain; charset=UTF-8\n\n";
+	$botschaft.= $message;
+	$botschaft.="\n\n";
+	$botschaft.="\n--$grenze\n";
 
-	$content = "This is a multi-part message in MIME format.\r\n\r\n";
-	$content.= "--".$mime_boundary."\r\n";
-	$content.= "Content-Type: text/html charset=\"iso-8859-1\"\r\n";
-	$content.= "Content-Transfer-Encoding: 8bit\r\n\r\n";
-	$content.= $message."\r\n";
+	$botschaft.="Content-Type: application/octetstream;\n\tname=" . basename($attachement) . "\n";
+	$botschaft.="Content-Transfer-Encoding: base64\n";
+	$botschaft.="Content-Disposition: attachment;\n\tfilename=" . basename($attachement) . "\n\n";
 
-	//$anhang ist ein Mehrdimensionals Array 
-	//$anhang enthält mehrere Dateien 
-	if(is_array($anhang) AND is_array(current($anhang))) {
-		foreach($anhang AS $dat) { 
-			$data = chunk_split(base64_encode($dat['data']));
-			$content.= "--".$mime_boundary."\r\n"; 
-			$content.= "Content-Disposition: attachment;\r\n";
-			$content.= "\tfilename=\"".$dat['name']."\";\r\n";
-			$content.= "Content-Length: .".$dat['size'].";\r\n";
-			$content.= "Content-Type: ".$dat['type']."; name=\"".$dat['name']."\"\r\n";
-			$content.= "Content-Transfer-Encoding: base64\r\n\r\n";
-			$content.= $data."\r\n";
-		}
-		$content .= "--".$mime_boundary."--";
-	} 
-	else { //Nur 1 Datei als Anhang
-	  $data = chunk_split(base64_encode($anhang['data']));
-	  $content.= "--".$mime_boundary."\r\n";
-	  $content.= "Content-Disposition: attachment;\r\n";
-	  $content.= "\tfilename=\"".$anhang['name']."\";\r\n";
-	  $content.= "Content-Length: .".$dat['size'].";\r\n";
-	  $content.= "Content-Type: ".$anhang['type']."; name=\"".$anhang['name']."\"\r\n";
-	  $content.= "Content-Transfer-Encoding: base64\r\n\r\n";
-	  $content.= $data."\r\n";
-	}
+	$zeiger_auf_datei=fopen($attachement,"rb");
+	$inhalt_der_datei=fread($zeiger_auf_datei,filesize($attachement));
+	fclose($zeiger_auf_datei);
 
-	if(@mail($to, $subject, $content, $header)) return true;
-	else return false;
+	$inhalt_der_datei=chunk_split(base64_encode($inhalt_der_datei));
+	$botschaft.=$inhalt_der_datei;
+	$botschaft.="\n\n";
+	$botschaft.="--$grenze";
+	if (@mail($to_email, $subject, $botschaft, $headers)) return 1;
+	else return 0;
 }
 
 /*
-* function replaced square brackets at the beginning and the end of the string and return the elements of the string as array separated by the delimmiter. The elements of the string will be replaced by slashes and timed from white spaces and "
+* function replaced square brackets at the beginning and the end of the string
+* and return the elements of the string as array separated by the delimmiter.
+* The elements of the string will be replaced by slashes and timed from white spaces and ".
 */
 function arrStrToArr($str, $delimiter) {
 #	if(is_string($delimiter) and in_array())
 #	echo gettype($delimiter);
 	$arr = explode($delimiter, trim($str, '[]'));
 	foreach ($arr as &$value) {
-		$value = trim(trim(stripslashes($value), '[]'), '"');
+		$value = trim(stripslashes($value), '"[]"');
 	}
 	return $arr;
 }
