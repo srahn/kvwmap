@@ -1394,11 +1394,11 @@ class rolle extends rolle_core{
 					$sql = 'SELECT Class_ID FROM classes WHERE Layer_ID='.$this->layerset[$i]['Layer_ID'].';';
 					$query = mysql_query($sql);
 					while($row = @mysql_fetch_array($query)){
-						if($formvars['class'.$row['Class_ID']]=='0'){
-							$sql2 = 'REPLACE INTO u_rolle2used_class (user_id, stelle_id, class_id) VALUES ('.$this->user_id.', '.$this->stelle_id.', '.$row['Class_ID'].');';
+						if($formvars['class'.$row['Class_ID']] == '0' OR $formvars['class'.$row['Class_ID']] == '2'){
+							$sql2 = 'REPLACE INTO u_rolle2used_class (user_id, stelle_id, class_id, status) VALUES ('.$this->user_id.', '.$this->stelle_id.', '.$row['Class_ID'].', '.$formvars['class'.$row['Class_ID']].');';
 							$this->database->execSQL($sql2,4, $this->loglevel);
 						}
-						elseif ($formvars['class'.$row['Class_ID']]=='1'){
+						elseif($formvars['class'.$row['Class_ID']] == '1'){
 							$sql1 = 'DELETE FROM u_rolle2used_class WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND class_id='.$row['Class_ID'].';';
 							$this->database->execSQL($sql1,4, $this->loglevel);
 						}
@@ -2585,7 +2585,7 @@ class stelle extends stelle_core{
 		else{
 			$sql .= ', symbolscale = NULL';
 		}
-		$sql .= ', requires = "'.$formvars['requires'].'"';
+		if($formvars['requires'] != '')$sql .= ', requires = '.$formvars['requires'];
 		$sql .= ', start_aktiv = "'.$formvars['startaktiv'].'"';
 		$sql .= ' WHERE Stelle_ID = '.$formvars['selected_stelle_id'].' AND Layer_ID = '.$formvars['selected_layer_id'];
 		#echo $sql.'<br>';

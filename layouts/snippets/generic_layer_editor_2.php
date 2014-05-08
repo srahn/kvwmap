@@ -135,7 +135,7 @@
 							if($attributes['tooltip'][$j]!='' AND $attributes['form_element_type'][$j] != 'Time'){
 							  echo '<td align="right"><a href="javascript:void(0);" title="'.$attributes['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
 							}
-							if($attributes['type'][$j] == 'date' OR $attributes['type'][$j] == 'timestamp' OR $attributes['type'][$j] == 'timestamptz'){
+							if($attributes['type'][$j] == 'date'){
 							  echo '<td align="right"><a href="javascript:;" title=" (TT.MM.JJJJ) '.$attributes['tooltip'][$j].'" ';
 							  if($attributes['privileg'][$j] == '1' AND !$lock[$k]){
 							  	echo 'onclick="new CalendarJS().init(\''.$attributes['name'][$j].'_'.$k.'\');"';

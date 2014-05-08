@@ -21,4 +21,5 @@
  $this->strSaveMapViewCommittMassage="Kartenausschnitt wurde gespeichert";
  $this->strCoordinates = "Koordinaten";
  $this->strAlias="Alias";
+ $this->strMapScale="Maßstab";
 ?>

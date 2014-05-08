@@ -81,6 +81,7 @@ $svg .= $SVGvars_navscript;			# Funktionen zur Navigation
 $svg .= $linefunctions;					# Funktionen zum Zeichnen einer Linie
 $svg .= $vertex_catch_functions;# Punktfangfunktionen
 $svg .= $coord_input_functions;	# Funktionen zum Eingeben von Koordinaten
+$svg .= $transformfunctions;		# Funktionen zum Transformieren (Verschieben, ...) der Geometrie
 $svg .= $measurefunctions;
 if($_SESSION['mobile'] == 'true'){
 	$svg .= $gps_functions;
@@ -97,6 +98,7 @@ $svg .= $canvaswithall;
 $svg .= $navbuttons;
 $svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate(0 26)">';
 $svg .= linebuttons($strUndo, $strDeleteLine, $strDrawLine, $strDelLine, $strSplitLine);
+$svg .= transform_buttons($strMoveGeometry);
 $svg .= vertex_edit_buttons($strCornerPoint);
 $svg .= coord_input_buttons();
 if($_SESSION['mobile'] == 'true'){

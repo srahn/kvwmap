@@ -14,5 +14,5 @@
   $strBuffer="Puffer hinzufuegen";
 	$strBufferedLine="gepufferte Linie hinzufuegen";
 	$strParallelPolygon="paralleles Polygon hinzufuegen";
-  
+  $strMoveGeometry="Geometrie verschieben";
 ?>  

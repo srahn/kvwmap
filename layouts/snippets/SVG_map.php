@@ -59,9 +59,9 @@
 	
    
   function submit(input_coord, cmd){
-  	//if((browser == 'firefox') && document.GUI.legendtouched.value == 0){
 		if(document.GUI.legendtouched.value == 0){
   		svgdoc = document.SVG.getSVGDocument();	
+			// nix
 			if(browser == 'firefox')var mapimg = svgdoc.getElementById("mapimg2");			
 			else var mapimg = svgdoc.getElementById("mapimg");
 			var scalebar = document.getElementById("scalebar");
@@ -77,8 +77,13 @@
 			var polygon = svgdoc.getElementById("polygon");
 			// nix
 			// nix
-  		ahah("<? echo URL.APPLVERSION.'index.php'; ?>", "go=getMap_ajax&INPUT_COORD="+input_coord+"&CMD="+cmd, 
+			
+			var code2execute;
+			if(browser != 'firefox')code2execute = 'moveback()';
+			
+  		ahah("<? echo URL.APPLVERSION.'index.php'; ?>", "go=getMap_ajax&INPUT_COORD="+input_coord+"&CMD="+cmd+"&code2execute="+code2execute, 
   		new Array(
+				'',
   			mapimg, 
   			scalebar,
   			refmap, 
@@ -92,12 +97,10 @@
   			maptime, 			
   			polygon,
   			'',
-  			''
+				''
   		), 			 
-  		new Array("xlink:href", "src", "src", "setvalue", "sethtml", "setvalue", "setvalue", "setvalue", "setvalue", "setvalue", "sethtml", "points", "execute_function", "execute_function"));
-			
-			if(browser != 'firefox')moveback();
-			
+  		new Array("execute_function", "xlink:href", "src", "src", "setvalue", "sethtml", "setvalue", "setvalue", "setvalue", "setvalue", "setvalue", "sethtml", "points", "execute_function", "execute_function"));
+						
   		document.GUI.INPUT_COORD.value = '';
   		document.GUI.CMD.value = '';
   	}
@@ -425,7 +428,6 @@ function getEventPoint(evt) {
 function init(){
 	startup();
 	if(top.browser == "other"){
-		//document.getElementById("mapimg2").addEventListener("load", function(evt) { moveback(); }, false);
 	}
 	else{
 		document.getElementById("mapimg2").addEventListener("load", function(evt) { moveback_ff(evt); }, true);
@@ -446,8 +448,9 @@ top.document.getElementById("svghelp").SVGstopwaiting = stopwaiting;		// das ist
 top.document.getElementById("svghelp").SVGmoveback = moveback;
 
 function moveback_ff(evt){
-	document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");
-	document.getElementById("mapimg").setAttribute("xlink:href", document.getElementById("mapimg2").getAttribute("xlink:href"));
+	// beim Firefox wird diese Funktion beim onload des Kartenbildes ausgefuehrt
+	document.getElementById("mapimg2").setAttribute("style", "display:block");	
+	window.setTimeout(\'document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");document.getElementById("mapimg").setAttribute("xlink:href", document.getElementById("mapimg2").getAttribute("xlink:href"));\', 200);
 	// Redlining-Sachen loeschen
 	while(child = document.getElementById("redlining").firstChild){
   	document.getElementById("redlining").removeChild(child);
@@ -457,10 +460,12 @@ function moveback_ff(evt){
 	hidetooltip(evt);
 	// Navigation wieder erlauben
 	stopwaiting();
-	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("xlink:href", "")\', 200);		// Firefox 4 
+	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("xlink:href", "")\', 200);
+	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("style", "display:none")\', 200);
 }
 
 function moveback(evt){
+	// bei allen anderen Browsern gibt es kein onload für das Kartenbild, deswegen wird diese Funktion als erstes ausgefuehrt
 	document.getElementById("mapimg").setAttribute("xlink:href", "");
 	document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");
 	// Redlining-Sachen loeschen
@@ -1388,7 +1393,7 @@ $svg.='
     </g>
   </g>
 	<g id="mapimg2_group">
-  	<image id="mapimg2" xlink:href="" height="100%" width="100%" y="0" x="0"/>
+  	<image id="mapimg2" xlink:href="" height="100%" width="100%" y="0" x="0" style="display:none"/>
   </g>
 	
   <rect id="canvas" cursor="crosshair" onmousedown="mousedown(evt)" onmousemove="mousemove(evt);" onmouseup="mouseup(evt);" width="100%" height="100%" opacity="0"/>

@@ -96,18 +96,18 @@
 		  	
 		  coorx = format_number(coorx, true);
 		  coory = format_number(coory, true);
-
-		  if(top.document.GUI.runningcoords != undefined)top.document.GUI.runningcoords.value = coorx + " / " + coory; 
 		  
 			if(top.document.GUI.lastcoordx != undefined && top.document.GUI.lastcoordx.value != ""){
 				vectorx = top.document.GUI.lastcoordx.value - coorx;
 				vectory = top.document.GUI.lastcoordy.value - coory;
 				distance = format_number(Math.sqrt(Math.pow(vectorx, 2) + Math.pow(vectory, 2)), false);
 				window.status = " R:" + coorx + " / H:" + coory + "  Entfernung: " + distance + " m    EPSG: "+'.$this->user->rolle->epsg_code.';
+				if(top.document.GUI.runningcoords != undefined)top.document.GUI.runningcoords.value = coorx + " / " + coory + "   " + distance + " m"; 
 			}
 			else{
 				window.status = " R:" + coorx + " / H:" + coory + "   EPSG: "+'.$this->user->rolle->epsg_code.';
-			}
+				if(top.document.GUI.runningcoords != undefined)top.document.GUI.runningcoords.value = coorx + " / " + coory; 
+			}			
 		}
 
 	//-->

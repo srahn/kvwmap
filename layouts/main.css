@@ -44,24 +44,45 @@ td {
 }
 
 .normallegend {
-  position:relative;
-  display: inline;
+
+}
+
+#scrolldiv{
+	width:250;
+}
+
+#legend{
+	margin-left:5px;
+}
+
+#legendcontrol{
+	margin-left:13px;
 }
 
 .slidinglegend {
   position:absolute;
   border-left:1px solid #CCCCCC;
   background-image: url(../graphics/bg.gif);
-  transform: translate3d(-17px,0px,0px);
+  transform: translate3d(-27px,0px,0px);
   transition: all 0.4s ease;
-  -webkit-transform: translate3d(-17px,0px,0px);
+  -webkit-transform: translate3d(-27px,0px,0px);
   -webkit-transition: all 0.3s ease;
 }
 
+.slidinglegend  .table1{
+  opacity: 0.0;
+	transition: all 0.4s ease;
+}
+
+.slidinglegend:hover .table1{
+  opacity: 1;
+	transition: all 0.4s ease;
+}
+
 .slidinglegend:hover {
-  transform: translate3d(-245px,0px,0px);
+  transform: translate3d(-255px,0px,0px);
   transition: all 0.4s ease;
-  -webkit-transform: translate3d(-245px,0px,0px);
+  -webkit-transform: translate3d(-255px,0px,0px);
   -webkit-transition: all 0.3s ease;
 }
 

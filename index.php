@@ -254,13 +254,14 @@ if($GUI->goNotExecutedInPlugins){
 			$GUI->getSVG_foreign_vertices();
 	  } break;
 
-	  case 'ResizeMap2Window' : {
-		$GUI->resizeMap2Window();
-		$GUI->loadMap('DataBase');
-		$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-		$GUI->drawMap();
-		$GUI->saveMap('');
-		$GUI->output();
+		case 'ResizeMap2Window' : {
+			$GUI->resizeMap2Window();
+			$GUI->loadMap('DataBase');
+			$GUI->scaleMap($GUI->formvars['nScale']);
+			$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+			$GUI->drawMap();
+			$GUI->saveMap('');
+			$GUI->output();
 	  } break;
 
 	  # auslesen der Layer vom mobilen Client
@@ -844,7 +845,7 @@ if($GUI->goNotExecutedInPlugins){
 			$GUI->output();
 	  } break;
 
-	  case 'Druckrahmen_als neuen Rahmen speichern' : {
+	  case 'Druckrahmen_als neues Layout speichern' : {
 	  	$_files = $_FILES;
 			$GUI->checkCaseAllowed('Druckrahmen');
 			$GUI->druckrahmen_init();

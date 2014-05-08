@@ -258,7 +258,7 @@ class GUI extends GUI_core{
 		# pruefe Version
 		if ($this->formvars['version'] != "1.0.0")
 			return array("success" => 0, "error_message" => "Geben Sie eine gültige Versionsnummer an. Derzeit wird nur die Version 1.0.0 unterstützt.");
-		
+
 		# erzeuge eine eindeutige Nummer für diesen Antrag
 		$antrag_id = date("YmdHis") . str_pad(rand(1, 99), 2, "00", STR_PAD_LEFT);
 
@@ -295,33 +295,7 @@ class GUI extends GUI_core{
 		$mail = array();
 		include (SHAPEPATH . 'templates/' . $template_prefix . 'email_template.php');
 		# send email
-		$success = mail_att($mail['from_name'], $mail['from_email'], $mail['to_email'], $mail['reply_email'], $mail['subject'], $mail['message'], $mail['attachement']);
-/*
-$grenze="grenzlinie";
-$name_des_bildes=$HTTP_POST_FILES['datei']['name'];
-$headers ="MIME-Version: 1.0\r\n";
-$headers.="From: $mailaddi\n";
-$headers.="Content-Type: multipart/mixed;\n\tboundary=$grenze\n";
-$botschaft<I></I>="\n--$grenze\n";
-$botschaft.="Content-transfer-encoding: 7BIT\r\n";
-$botschaft.="Content-type: text/plain\n\n";
-$botschaft.= "Guten Tag $Vorname $Nachname. $Beruf ist ein schöner Beruf.
-Wir werden uns in Kürze unter der genannten Rufnummer
-$Telefon mit Ihnen in Verbindung setzen. \n";
-$botschaft.="\n\n";
-$botschaft.="\n--$grenze\n";
-$botschaft.="Content-Type: application/octetstream;\n\tname=$name_des_bildes\n";
-$botschaft.="Content-Transfer-Encoding: base64\n";
-$botschaft.="Content-Disposition: attachment;\n\tfilename=$name_des_bildes\n\n";
-$zeiger_auf_datei=fopen("$datei","rb");
-$inhalt_der_datei=fread($zeiger_auf_datei,filesize("$datei"));
-fclose($zeiger_auf_datei);
-$inhalt_der_datei=chunk_split(base64_encode($inhalt_der_datei));
-$botschaft.=$inhalt_der_datei;
-$botschaft.="\n\n";
-$botschaft.="--$grenze";
-mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
-*/
+		$success = mail_att($mail['from_name'], $mail['from_email'], $mail['to_email'], $mail['reply_email'],  $mail['subject'], $mail['message'], $mail['attachement']);
 
 	return array("success" => $success, "antrag_id" => $antrag_id, "xml_file" => IMAGEURL . $xml_file_name, "pdf_file" => IMAGEURL . $pdf_file_name, "zip_file" => IMAGEURL . $zip_file_name, "email_text" => $email_text, "email_recipient" => $email_recipient, "authority_processingTime" => $data['authority_processingTime'], "data:" => $data);
 	}
@@ -469,11 +443,12 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
 	}
 
 	function resizeMap2Window(){
-		global $gui_widths;
-		$width = $this->formvars['width'] - $gui_widths[$this->user->rolle->gui];
+		global $menue_legend_widths;
+		if($menue_legend_widths[$this->user->rolle->gui] == NULL)$menue_legend_widths[$this->user->rolle->gui] = 490;
+		$width = $this->formvars['width'] - $menue_legend_widths[$this->user->rolle->gui];
 		if($this->user->rolle->hideMenue == 1){$width = $width + 195;}
 		if($this->user->rolle->hideLegend == 1){$width = $width + 254;}
-		$height = $this->formvars['height'] - HEADERHEIGHT;
+		$height = $this->formvars['height'] - HEADER_FOOTER_HEIGHT;
 		$this->user->rolle->setSize($width.'x'.$height);
 		$this->user->rolle->readSettings();
 	}
@@ -2713,11 +2688,12 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
   }
 
   function Anliegerbeiträge_editor(){
-		$this->reduce_mapwidth(100);
     $this->main='anliegerbeitraege_editor.php';
     $this->titel='Anliegerbeiträge';
     # aktuellen Kartenausschnitt laden + zeichnen!
+		$saved_scale = $this->reduce_mapwidth(100);
     $this->loadMap('DataBase');
+		if($this->formvars['CMD']=='')$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
     if ($this->formvars['CMD']!='') {
       $this->navMap($this->formvars['CMD']);
       $this->user->rolle->saveDrawmode($this->formvars['always_draw']);
@@ -2872,10 +2848,11 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
   }
 
   function jagdkatastereditor(){
-		$this->reduce_mapwidth(100);
     $this->main='jagdkatastereditor.php';
     $this->titel='Jagdbezirk anlegen';
+    $saved_scale = $this->reduce_mapwidth(100);
     $this->loadMap('DataBase');
+		if($this->formvars['CMD']=='')$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
   	if(!$this->formvars['layer_id']){
       $layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
@@ -3400,7 +3377,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
   }
 
   function druckausschnittswahl($loadmapsource){
-		$this->reduce_mapwidth(10);
+		$saved_scale = $this->reduce_mapwidth(10);		
     $this->titel='Druckausschnitt wählen';
     $this->main="druckausschnittswahl.php";
     # aktuellen Kartenausschnitt laden + zeichnen!
@@ -3410,6 +3387,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
     else{
       $this->loadMap($loadmapsource);
     }
+		if($this->formvars['CMD']=='')$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
     #echo '<br>Karte geladen: ';
     # aktuellen Druckkopf laden
     $this->Document=new Document($this->database);
@@ -3637,21 +3615,19 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
       $miny = $this->formvars['center_y'] - $bboxheight;
       $maxx = $this->formvars['center_x'] + $bboxwidth;
       $maxy = $this->formvars['center_y'] + $bboxheight;
-
       $widthratio = $bboxwidth / $breite;
       $heightratio = $bboxheight / $höhe;
-
-      $this->map->set('width', $this->Document->activeframe[0]['mapwidth'] * $widthratio * $this->map_factor);
-      $this->map->set('height', $this->Document->activeframe[0]['mapheight'] * $heightratio * $this->map_factor);
     }
     else{
       $minx = $this->formvars['center_x'] - $this->formvars['worldprintwidth']/2;
       $miny = $this->formvars['center_y'] - $this->formvars['worldprintheight']/2;
       $maxx = $this->formvars['center_x'] + $this->formvars['worldprintwidth']/2;
       $maxy = $this->formvars['center_y'] + $this->formvars['worldprintheight']/2;
-      $this->map->set('width', $this->Document->activeframe[0]['mapwidth']*$this->map_factor);
-      $this->map->set('height', $this->Document->activeframe[0]['mapheight']*$this->map_factor);
+			$widthratio = 1;
+      $heightratio = 1;
     }
+		$this->map->set('width', $this->Document->activeframe[0]['mapwidth'] * $widthratio * $this->map_factor);
+    $this->map->set('height', $this->Document->activeframe[0]['mapheight'] * $heightratio * $this->map_factor);
 
     $this->map->setextent($minx,$miny,$maxx,$maxy);
   	if(MAPSERVERVERSION >= 600 ) {
@@ -3695,7 +3671,11 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
     if($this->Document->activeframe[0]['refmapfile']){
       $refmapfile = DRUCKRAHMEN_PATH.$this->Document->activeframe[0]['refmapfile'];
       $zoomfactor = $this->Document->activeframe[0]['refzoom'];
-      $this->Document->referencemap = $this->createReferenceMap($this->Document->activeframe[0]['refwidth']*$this->map_factor, $this->Document->activeframe[0]['refheight']*$this->map_factor, $minx, $miny, $maxx, $maxy, $zoomfactor, $refmapfile);
+			$refwidth = $this->Document->activeframe[0]['refwidth']*$this->map_factor;
+			$refheight = $this->Document->activeframe[0]['refheight']*$this->map_factor;
+			$width = $refwidth*$widthratio;
+			$height = $refheight*$heightratio;
+			$this->Document->referencemap = $this->createReferenceMap($width, $height, $refwidth, $refheight, $angle, $minx,$miny,$maxx,$maxy, $zoomfactor, $refmapfile);
     }
     # Legende rendern
     if($this->Document->activeframe[0]['legendsize'] > 0){
@@ -5078,17 +5058,17 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
       $maxy = $this->formvars['center_y'] + $bboxheight;
       $widthratio = $bboxwidth / $breite;
       $heightratio = $bboxheight / $höhe;
-      $this->map->set('width', $this->Docu->activeframe[0]['mapwidth'] * $widthratio * $this->map_factor);
-      $this->map->set('height', $this->Docu->activeframe[0]['mapheight'] * $heightratio * $this->map_factor);
     }
     else{
       $minx = $this->formvars['center_x'] - $this->formvars['worldprintwidth']/2;
       $miny = $this->formvars['center_y'] - $this->formvars['worldprintheight']/2;
       $maxx = $this->formvars['center_x'] + $this->formvars['worldprintwidth']/2;
       $maxy = $this->formvars['center_y'] + $this->formvars['worldprintheight']/2;
-      $this->map->set('width', $this->Docu->activeframe[0]['mapwidth']*$this->map_factor);
-      $this->map->set('height', $this->Docu->activeframe[0]['mapheight']*$this->map_factor);
+			$widthratio = 1;
+      $heightratio = 1;
     }
+		$this->map->set('width', $this->Docu->activeframe[0]['mapwidth'] * $widthratio * $this->map_factor);
+    $this->map->set('height', $this->Docu->activeframe[0]['mapheight'] * $heightratio * $this->map_factor);
 
     # copyright-layer aus dem Mapfile
     @$creditslayer = $this->map->getLayerByName('credits');
@@ -5185,7 +5165,11 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
     if($this->Docu->activeframe[0]['refmapfile'] AND $this->formvars['referencemap']){
       $refmapfile = DRUCKRAHMEN_PATH.$this->Docu->activeframe[0]['refmapfile'];
       $zoomfactor = $this->Docu->activeframe[0]['refzoom'];
-      $this->Docu->referencemap = $this->createReferenceMap($this->Docu->activeframe[0]['refwidth']*$this->map_factor, $this->Docu->activeframe[0]['refheight']*$this->map_factor, $minx,$miny,$maxx,$maxy, $zoomfactor,  $refmapfile);
+      $refwidth = $this->Docu->activeframe[0]['refwidth']*$this->map_factor;
+			$refheight = $this->Docu->activeframe[0]['refheight']*$this->map_factor;
+			$width = $refwidth*$widthratio;
+			$height = $refheight*$heightratio;
+			$this->Docu->referencemap = $this->createReferenceMap($width, $height, $refwidth, $refheight, $angle, $minx,$miny,$maxx,$maxy, $zoomfactor, $refmapfile);
     }
 
     # Einbinden der PDF Klassenbibliotheken
@@ -5396,6 +5380,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
           	$posy = ($this->formvars['freetext_posy'.$j]+1-$height)/$ratio*-1;
           	$boxwidth = ($this->formvars['freetext_width'.$j]+6)/$ratio;
           	$boxheight = ($this->formvars['freetext_height'.$j]+8)/$ratio;
+						$fontsize = $this->formvars['freetext_fontsize'.$j]/$ratio;
           	$pdf->setColor(1,1,1);
           	$pdf->filledRectangle($posx, $posy-$boxheight, $boxwidth, $boxheight);
           	$pdf->setColor(0,0,0);
@@ -5406,8 +5391,8 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
           	$freitext = explode(';', $this->formvars['freetext'.$j]);
           	$anzahlzeilen = count($freitext);
           	for($i = 0; $i < $anzahlzeilen; $i++){
-          		$h = $i * 12 * 1.25;
-           		$pdf->addText($posx+4,$posy-$h-14,12,utf8_decode($freitext[$i]), 0);
+          		$h = $i * $fontsize * 1.25;
+           		$pdf->addText($posx+$fontsize*0.3333,$posy-$h-$fontsize*1.18, $fontsize,utf8_decode($freitext[$i]), 0);
           	}      	
           }
     }
@@ -5626,7 +5611,6 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
   }
 
   function bodenRichtWertErfassung() {
-		$this->reduce_mapwidth(100);
     if ($this->formvars['oid']=='') {
       $this->titel='Bodenrichtwerterfassung';
     }
@@ -5640,7 +5624,9 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
     $layer = $this->user->rolle->getLayer(LAYERNAME_BODENRICHTWERTE);
     $this->formvars['boris_layer_id'] = $layer[0]['Layer_ID'];
     $this->main="bodenrichtwerterfassung_vboris.php";
-    $this->loadMap('DataBase');
+    $saved_scale = $this->reduce_mapwidth(100);
+		$this->loadMap('DataBase');
+		if($this->formvars['CMD']=='')$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
     $this->Lagebezeichnung = $this->getLagebezeichnung($this->user->rolle->epsg_code);
     if($this->formvars['gemeinde'] == ''){
     	$this->formvars['gemeinde'] = $this->Lagebezeichnung['gemeinde'];
@@ -5856,7 +5842,6 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
   }
 
   function nachweisAenderungsformular() {
-		$this->reduce_mapwidth(100);
     #2005-11-25_pk
     # Anzeige des Formulars zum Eintragen neuer/Ändern vorhandener Metadaten zu einem Nachweisdokument
     # (FFR, KVZ oder GN)
@@ -5879,7 +5864,9 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
       # Abfrage war erfolgreich
       $nachweis->document=$nachweis->Dokumente[0];
       # Laden der letzten Karteneinstellung
-      $this->loadMap('DataBase');
+      $saved_scale = $this->reduce_mapwidth(100);
+			$this->loadMap('DataBase');
+			if($this->formvars['CMD']=='')$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
       
       $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
 	    if(!$this->formvars['layer_id']){
@@ -5963,18 +5950,8 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
 
   function Layer2Stelle_EditorSpeichern(){
     $Stelle = new stelle($this->formvars['selected_stelle_id'],$this->user->database);
-    $this->titel='Layereigenschaften stellenbezogen';
-    $this->main='layer2stelle_formular.php';
     $Stelle->updateLayer($this->formvars);
-    $result = $Stelle->getLayer($this->formvars['selected_layer_id']);
-    $stelle_id = $this->formvars['selected_stelle_id'];
-    $layer_id = $this->formvars['selected_layer_id'];
-    $stellenname = $this->formvars['stellen_name'];
-    $this->formvars = $result[0];
-    $this->formvars['selected_stelle_id'] = $stelle_id;
-    $this->formvars['selected_layer_id'] = $layer_id;
-    $this->formvars['stellen_name'] = $stellenname;
-    $this->output();
+    $this->Layer2Stelle_Editor();
   }
 
   function Layer2Stelle_Editor(){
@@ -5982,6 +5959,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
     $this->titel='Layereigenschaften stellenbezogen';
     $this->main='layer2stelle_formular.php';
     $result = $Stelle->getLayer($this->formvars['selected_layer_id']);
+		$this->grouplayers = $Stelle->getLayers($result[0]['Gruppe'], 'Name');
     $stelle_id = $this->formvars['selected_stelle_id'];
     $layer_id = $this->formvars['selected_layer_id'];
     $stellenname = $this->formvars['stellen_name'];
@@ -6538,8 +6516,9 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
 	    $this->formvars['columnname'] = $data_explosion[0];
     	if($this->formvars['map_flag'] != ''){
 	    	################# Map ###############################################
-				$this->reduce_mapwidth(100);
-	    	$this->loadMap('DataBase');
+				$saved_scale = $this->reduce_mapwidth(100);
+				$this->loadMap('DataBase');
+				if($this->formvars['CMD']=='')$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
 		    $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
 		    # Geometrie-Übernahme-Layer:
 		    # Spaltenname und from-where abfragen
@@ -6906,7 +6885,6 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
   }
 
   function neuer_Layer_Datensatz(){
-		$this->reduce_mapwidth(150);
     $this->layerdaten = $this->Stelle->getqueryablePostgisLayers(1);
     $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->titel='neuen Datensatz einfügen';
@@ -6980,7 +6958,9 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
 
         $this->geomtype = $this->qlayerset[0]['attributes']['geomtype'][$this->qlayerset[0]['attributes']['the_geom']];
         if($this->geomtype != ''){
-          $this->loadMap('DataBase');
+          $saved_scale = $this->reduce_mapwidth(150);
+					$this->loadMap('DataBase');
+					if($this->formvars['CMD']=='')$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
         	if($this->formvars['layer_id'] != '' AND $this->formvars['oid'] != '' AND $this->formvars['tablename'] != '' AND $this->formvars['columnname'] != ''){			# das sind die Sachen vom "Mutter"-Layer
         		$layerdb = $this->mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
         		$rect = $this->mapDB->zoomToDatasets(array($this->formvars['oid']), $this->formvars['tablename'], $this->formvars['columnname'], 10, $layerdb, $this->user->rolle->epsg_code);
@@ -7193,10 +7173,6 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
   	if($orderbyposition !== false){
 	  	$newpath = substr($newpath, 0, $orderbyposition);
   	}
-    $attributes = $mapDB->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, $privileges['attributenames']);
-    # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
-		$attributes = $mapDB->add_attribute_values($attributes, $layerdb, NULL, true);
-		$this->attributes = $attributes; 
 		$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
     # Daten abfragen
     for($i = 0; $i < count($checkbox_names); $i++){
@@ -7214,6 +7190,11 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
         }
       }
     }
+		# Attribute laden
+		$attributes = $mapDB->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, $privileges['attributenames']);
+    # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
+		$attributes = $mapDB->add_attribute_values($attributes, $layerdb, $result, true);
+		$this->attributes = $attributes; 
     # Layouts abfragen
     $this->ddl->layouts = $this->ddl->load_layouts($this->Stelle->id, NULL, $this->formvars['chosen_layer_id'], array(0,1));
     if(count($this->ddl->layouts) == 1)$this->formvars['aktivesLayout'] = $this->ddl->layouts[0]['id']; 
@@ -7252,10 +7233,6 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
   	if($orderbyposition !== false){
 	  	$newpath = substr($newpath, 0, $orderbyposition);
   	}
-    $attributes = $mapDB->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, $privileges['attributenames']);
-    # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
-		$attributes = $mapDB->add_attribute_values($attributes, $layerdb, NULL, true);
-		$this->attributes = $attributes; 
 		$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
     # Daten abfragen
     for($i = 0; $i < count($checkbox_names); $i++){
@@ -7272,7 +7249,12 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
           }
         }
       }
-    } 
+    }
+		# Attribute laden
+		$attributes = $mapDB->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, $privileges['attributenames']);
+    # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
+		$attributes = $mapDB->add_attribute_values($attributes, $layerdb, $result, true);
+		$this->attributes = $attributes; 
     # aktives Layout abfragen
     if($this->formvars['aktivesLayout'] != ''){
     	$ddl->selectedlayout = $ddl->load_layouts(NULL, $this->formvars['aktivesLayout'], NULL, NULL);
@@ -7849,11 +7831,12 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
   }
 
   function shp_export(){
-		$this->reduce_mapwidth(10);
     $this->titel='Shape-Export';
     if($this->formvars['chosen_layer_id'] != '')$this->formvars['selected_layer_id'] = $this->formvars['chosen_layer_id'];		# aus der Sachdatenanzeige des GLE
     $this->main='shape_export.php';
-    $this->loadMap('DataBase');
+    $saved_scale = $this->reduce_mapwidth(10);
+		$this->loadMap('DataBase');
+		if($this->formvars['CMD']=='')$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
     $this->epsg_codes = read_epsg_codes($this->pgdatabase);
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
     $this->shape = new shape();
@@ -9839,7 +9822,6 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
 	}
 
   function nachweisFormAnzeige($nachweis = NULL) {
-		$this->reduce_mapwidth(100);
     # letzte Änderung 2006-01-23 pk
     # Anzeige des Formulars zum Eintragen neuer/Ändern vorhandener Metadaten zu einem Nachweisdokument
     # (FFR, KVZ oder GN)
@@ -9855,7 +9837,9 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
     $this->main="dokumenteneingabeformular.php";
     # 2006-01-27
     # aktuellen Kartenausschnitt laden + zeichnen!
-    $this->loadMap('DataBase');
+    $saved_scale = $this->reduce_mapwidth(100);
+		$this->loadMap('DataBase');
+		if($this->formvars['CMD']=='')$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
     
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
   	if(!$this->formvars['layer_id']){
@@ -10091,15 +10075,20 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
   }
 
 	function reduce_mapwidth($reduction){		
+		# diese Funktion reduziert die Kartenbildbreite temporär für bestimmte Fachschalen, damit die Karte dort genau reinpasst
+		# vorher wird der aktuelle Maßstab ausgerechnet und von der Funktion zurückgeliefert
+		# damit kann dann nach dem loadmap ein zoomscale gemacht werden, damit der Maßstab erhalten bleibt
 		$width = $this->user->rolle->nImageWidth;
+		$pixelsize = ($this->user->rolle->oGeorefExt->maxx - $this->user->rolle->oGeorefExt->minx)/($width-1);		# das width - 1 kommt daher, weil der Mapserver das auch so macht
+		$scale = round($pixelsize * 96 / 0.0254);
 		$width = $width - $reduction;
 		if($this->user->rolle->hideMenue == 1){$width = $width - 195;}
-		if($this->user->rolle->hideLegend == 1){$width = $width - 244;}
+		if($this->user->rolle->hideLegend == 1){$width = $width - 254;}
 		$this->user->rolle->nImageWidth = $width;
+		return $scale;
 	}
 
   function rechercheFormAnzeigen() {
-		$this->reduce_mapwidth(200);
     # 2006-01-23 pk
     $this->menue='menue.php';
     # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
@@ -10136,7 +10125,9 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
     $this->FormObjVermStelle=$this->getFormObjVermStelle('sVermStelle', $this->formvars['sVermStelle']);
     $this->FormObjVermStelle->insertOption('', NULL, '--- Auswahl ---', 0);    
     # aktuellen Kartenausschnitt laden + zeichnen!
-    $this->loadMap('DataBase');
+    $saved_scale = $this->reduce_mapwidth(200);
+		$this->loadMap('DataBase');
+		if($this->formvars['CMD']=='')$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
     if ($this->formvars['CMD']!='') {
       # Nur Navigieren
       $this->navMap($this->formvars['CMD']);
@@ -11645,7 +11636,7 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
     $this->main='wldgedateiauswahl.php';
   }
 
-  function createReferenceMap($width, $height, $minx, $miny, $maxx, $maxy, $zoomfactor, $refmapfile){
+  function createReferenceMap($width, $height, $refwidth, $refheight, $angle, $minx, $miny, $maxx, $maxy, $zoomfactor, $refmapfile){
     $refmap = ms_newMapObj($refmapfile);
     $refmap->set('width', $width);
     $refmap->set('height', $height);
@@ -11664,6 +11655,28 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
     }
     $image_map = $refmap->draw();
     $filename = $this->map_saveWebImage($image_map,'jpeg');
+		
+		
+    $image = imagecreatefromjpeg(IMAGEPATH.basename($filename));
+		if($angle != 0){	
+      $rotatedimage = imagerotate($image, $angle, 0);
+      $width = imagesx($rotatedimage);
+      $height = imagesy($rotatedimage);
+      $clipwidth = $refwidth;
+      $clipheight = $refheight;
+      $clipx = ($width - $clipwidth) / 2;
+      $clipy = ($height - $clipheight) / 2;
+      $image = imagecreatetruecolor($clipwidth, $clipheight);
+      ImageCopy($image, $rotatedimage, 0, 0, $clipx, $clipy, $clipwidth, $clipheight);
+		}
+		# Rahmen
+		$color = imagecolorallocate($image, 0,0,0);
+		$x1 = ($refwidth + $refwidth/$zoomfactor)/2;
+		$y1 = ($refheight + $refheight/$zoomfactor)/2;
+		$x2 = $x1 - $refwidth/$zoomfactor;
+		$y2 = $y1 - $refheight/$zoomfactor;
+		imagerectangle($image, $x1, $y1, $x2, $y2, $color);
+    imagejpeg($image, IMAGEPATH.basename($filename), 100);
     $newname = $this->user->id.basename($filename);
     rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
     $uebersichtskarte = IMAGEURL.$newname;
@@ -13130,20 +13143,20 @@ mail(Andres_Ehmann@web.de","test mit attachements",$botschaft,$headers);
 	
 	function layer_error_handling(){
 		global $errors;
-		foreach($errors as $error){
-			echo '<br>'.$error.'<br>';
-			if(strpos($error, 'named') !== false){
-				$start = strpos($error, '\'')+1;
-				$end = strpos($error, '\'', $start);
+		for($i = 0; $i < 2; $i++){		// es wird nach den ersten beiden Fehlern abgebrochen, da die Fehlermeldungen bei mehrmaligem Aufruf immer mehr werden...
+			$error_details .= $errors[$i].chr(10);
+			if(strpos($errors[$i], 'named') !== false){
+				$start = strpos($errors[$i], '\'')+1;
+				$end = strpos($errors[$i], '\'', $start);
 				$length = $end - $start;
-				$layername = substr($error, $start, $length);
-				$layer = $this->user->rolle->getLayer($layername);
-				if($layer == NULL)$layer = $this->user->rolle->getRollenLayer($layername);
-				break;
+				$error_layername = substr($errors[$i], $start, $length);
+				$layer = $this->user->rolle->getLayer($error_layername);
+				if($layer == NULL)$layer = $this->user->rolle->getRollenLayer($error_layername);
+				$error_layer_id = $layer[0]['Layer_ID'];
 			}
 		}
 		restore_error_handler();
-		return '<br><br>Das Thema "'.$layername.'" ist fehlerhaft. Klicken Sie <a href="index.php?go=reset_layers&layer_id='.$layer[0]['Layer_ID'].'">hier</a> um das Thema auszuschalten.';
+		include(SNIPPETS.LAYER_ERROR_PAGE);
 	}
 
   # Zeichnet die Kartenelemente Hauptkarte, Legende, Maßstab und Referenzkarte
@@ -15152,7 +15165,7 @@ class db_mapObj extends db_mapObj_core{
     if($formvars["outlinecolor"] != ''){$sql.="outlinecolor = '".$formvars["outlinecolor"]."',";}else{$sql.="outlinecolor = NULL,";}
     if($formvars["minsize"] != ''){$sql.="minsize = '".$formvars["minsize"]."',";}else{$sql.="minsize = NULL,";}
     if($formvars["maxsize"] != ''){$sql.="maxsize = '".$formvars["maxsize"]."',";}else{$sql.="maxsize = NULL,";}
-    if($formvars["angle"] != ''){$sql.="angle = ".$formvars["angle"].",";}else{$sql.="angle = NULL,";}
+    if($formvars["angle"] != ''){$sql.="angle = '".$formvars["angle"]."',";}else{$sql.="angle = NULL,";}
     $sql.="angleitem = '".$formvars["angleitem"]."',";
     if($formvars["antialias"] != ''){$sql.="antialias = '".$formvars["antialias"]."',";}else{$sql.="antialias = NULL,";}
     if($formvars["width"] != ''){$sql.="width = '".$formvars["width"]."',";}else{$sql.="width = NULL,";}

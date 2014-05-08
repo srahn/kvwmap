@@ -44,7 +44,7 @@ function hideMenue() {
 	// hinterläßt einen Link zum wieder einblenden des Menüs auf showMenue()
   ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=hideMenueWithAjax', new Array("", ""), new Array("", "execute_function"));
 	document.all.menueTable.innerHTML='';
-	document.all.imgMinMax.src='<?php echo GRAPHICSPATH; ?>maximize.png';
+	document.all.imgMinMax.src='<?php echo GRAPHICSPATH; ?>maximize_menue.png';
 	document.all.linkMinMax.href="javascript:showMenue()";
 	document.all.linkMinMax.title="Menü zeigen";
 	
@@ -56,7 +56,7 @@ function showMenue() {
   // fügt das Menü in die Spalte der GUI wieder ein.
   ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=getMenueWithAjax&menuebodyfile=<? echo $this->menuebodyfile; ?>', new Array(document.all.menueTable, ""), new Array("", "execute_function"));
   document.all.linkMinMax.href="javascript:hideMenue()";
-  document.all.imgMinMax.src='<?php echo GRAPHICSPATH; ?>minimize.png';
+  document.all.imgMinMax.src='<?php echo GRAPHICSPATH; ?>minimize_menue.png';
   document.all.linkMinMax.title="Menü verstecken";
 }
 </script>
@@ -64,10 +64,10 @@ function showMenue() {
     <tr>
       <td bgcolor="<?php echo BG_DEFAULT ?>" align="right"><?php
         if ($this->user->rolle->hideMenue) {
-          ?><a id="linkMinMax" title="Menü zeigen" href="javascript:showMenue()"><img id="imgMinMax" src="<?php  echo GRAPHICSPATH; ?>maximize.png" border="0"></a><?php
+          ?><a id="linkMinMax" title="Menü zeigen" href="javascript:showMenue()"><img id="imgMinMax" src="<?php  echo GRAPHICSPATH; ?>maximize_menue.png" border="0"></a><?php
         }
         else {
-        	?><a id="linkMinMax" title="Menü verstecken" href="javascript:hideMenue()"><img id="imgMinMax" src="<?php  echo GRAPHICSPATH; ?>minimize.png" border="0"></a><?php
+        	?><a id="linkMinMax" title="Menü verstecken" href="javascript:hideMenue()"><img id="imgMinMax" src="<?php  echo GRAPHICSPATH; ?>minimize_menue.png" border="0"></a><?php
         }
       ?></td>
     </tr>

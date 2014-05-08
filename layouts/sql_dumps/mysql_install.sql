@@ -57,6 +57,7 @@ CREATE TABLE `u_rolle2used_class` (
 `user_id` int( 11 ) NOT NULL default '0',
 `stelle_id` int( 11 ) NOT NULL default '0',
 `class_id` int( 11 ) NOT NULL default '0',
+`status` INT( 1 ) NOT NULL DEFAULT  0;
 PRIMARY KEY ( `user_id` , `stelle_id` , `class_id` )
 );
 
@@ -223,7 +224,7 @@ CREATE TABLE layer_attributes (
   length int(11) default NULL,
   `decimal_length` INT( 11 ) NULL,
   `default` VARCHAR( 255 ) NULL,
-  form_element_type enum('Text','Textfeld','Auswahlfeld','Checkbox', 'Geometrie','SubFormPK','SubFormFK','SubFormEmbeddedPK','Time','Dokument','Link','User','Stelle','Fläche','dynamicLink','Zahl','UserID','Länge') NOT NULL default 'Text',
+  form_element_type enum('Text','Textfeld','Auswahlfeld','Checkbox', 'Geometrie','SubFormPK','SubFormFK','SubFormEmbeddedPK','Time','Dokument','Link','User','Stelle','Fläche','dynamicLink','Zahl','UserID','Länge','mailto') NOT NULL default 'Text',
   options text,
   alias varchar(255) default NULL,
   tooltip varchar(255) default NULL,
@@ -760,7 +761,7 @@ CREATE TABLE `styles` (
   `outlinecolor` varchar(11) collate latin1_german2_ci default NULL,
   `minsize` int(11) unsigned default NULL,
   `maxsize` int(11) unsigned default NULL,
-  `angle` int(11) NULL,
+  `angle` varchar(11) default NULL,
   `angleitem` varchar(255) collate latin1_german2_ci NULL,
   `antialias` tinyint(1) default NULL,
   `width` int(11) default NULL,
@@ -871,7 +872,7 @@ CREATE TABLE used_layer (
   header varchar(255) default NULL,
   footer varchar(255) default NULL,
   symbolscale int(11) unsigned default NULL,
-  requires varchar(255) default NULL,
+  requires int(11) default NULL,
   logconsume ENUM( '0', '1' ) NOT NULL default '0',
   privileg ENUM( '0', '1', '2' ) NOT NULL DEFAULT '0',
   start_aktiv ENUM( '0', '1' ) NOT NULL DEFAULT '0',

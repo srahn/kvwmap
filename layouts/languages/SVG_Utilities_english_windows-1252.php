@@ -1,14 +1,15 @@
 <?php
-  $strCornerPoint="Edit vertices";
-  $strCutByPolygon="Cut by polygon";
-  $strDrawPolygon="Draw polygon";
-  $strDeletePolygon="Delete polygon";
-  $strSplitLine="Split Lines";
-  $strUndo="Undo";
-  $strSetPosition="Set Position";
-  $strSetGPSPosition="Set GPS Position";
-  $strRuler="Ruler";
-  $strBuffer="Create Buffer";
+  $strCornerPoint="edit vertices";
+  $strCutByPolygon="cut by polygon";
+  $strDrawPolygon="draw polygon";
+  $strDeletePolygon="delete polygon";
+  $strSplitLine="split lines";
+  $strUndo="undo";
+  $strSetPosition="set position";
+  $strSetGPSPosition="set GPS position";
+  $strRuler="ruler";
+  $strBuffer="create buffer";
 	$strBufferedLine="add buffered line";
 	$strParallelPolygon="add parallel polygon";
+	$strMoveGeometry="move geometry";
 ?>  

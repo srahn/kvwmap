@@ -424,12 +424,8 @@ class GUI_core {
 					$this->layer_id_string .= $layerset[$i]['Layer_ID'].'|';							# alle Layer-IDs hintereinander in einem String
 											
 					if($layerset[$i]['requires'] != ''){
-						$nextlayer = $layerset[$i+1];
-						$requires=explode('[',str_replace(']','[',$layerset[$i]['requires']));
-						if($requires[1] == $nextlayer['Name']){													// wenn der Layer aus dem requires-Eintrag mit dem nachfolgenden Layer übereinstimmt
-							$layerset[$i]['aktivStatus'] = $nextlayer['aktivStatus'];
-							$layerset[$i]['showclasses'] = $nextlayer['showclasses'];
-						}
+						$layerset[$i]['aktivStatus'] = $layerset['layer_ids'][$layerset[$i]['requires']]['aktivStatus'];
+						$layerset[$i]['showclasses'] = $layerset['layer_ids'][$layerset[$i]['requires']];
 					}
 					
 					if($this->class_load_level == 2 OR $layerset[$i]['requires'] != '' OR ($this->class_load_level == 1 AND $layerset[$i]['aktivStatus'] != 0)){      # nur wenn der Layer aktiv ist (oder ein requires-Layer), sollen seine Parameter gesetzt werden
@@ -752,17 +748,19 @@ class GUI_core {
 				else {
 				  $style = new styleObj($klasse);
 				}
+				if($dbStyle['geomtransform'] != '') {
+					$style->updateFromString("STYLE GEOMTRANSFORM '".$dbStyle['geomtransform']."' END"); 
+				}				
 				if ($dbStyle['symbolname']!='') {
           $style -> set('symbolname',$dbStyle['symbolname']);
         }
         if ($dbStyle['symbol']>0) {
           $style->set('symbol',$dbStyle['symbol']);
-        }
-                
+        }                
         if (MAPSERVERVERSION >= 620) {
-	        if($dbStyle['geomtransform'] != '') {
-	          $style->setGeomTransform($dbStyle['geomtransform']);
-	        }
+					if($dbStyle['geomtransform'] != '') {
+						$style->setGeomTransform($dbStyle['geomtransform']);
+					}
           if ($dbStyle['pattern']!='') {
             $style->setPattern(explode(' ',$dbStyle['pattern']));
             $style->linecap = 'butt';
@@ -832,9 +830,9 @@ class GUI_core {
           }
         }
 
-        if ($dbStyle['angle']!='') {
-          $style->set('angle',$dbStyle['angle']);
-        }
+				if($dbStyle['angle'] != '') {
+					$style->updateFromString("STYLE ANGLE ".$dbStyle['angle']." END"); 		# wegen AUTO
+				}
         if ($dbStyle['angleitem']!=''){
           if(MAPSERVERVERSION < 500){
             $style->set('angleitem',$dbStyle['angleitem']);
@@ -1751,11 +1749,14 @@ class db_mapObj_core {
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
     $this->Layer = array();
     $this->disabled_classes = $this->read_disabled_classes();
+		$i = 0;
     while ($rs=mysql_fetch_array($query)) {
       if($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivStatus'] != '0')){    # bei withclasses == 2 werden für alle Layer die Klassen geladen, bei withclasses == 1 werden die Klassen nur dann geladen, wenn der Layer aktiv ist
         $rs['Class']=$this->read_Classes($rs['Layer_ID'], $this->disabled_classes);
       }
-      $this->Layer[]=$rs;
+      $this->Layer[$i]=$rs;
+			$this->Layer['layer_ids'][$rs['Layer_ID']] =& $this->Layer[$i];		# damit man mit einer Layer-ID als Schlüssel auf dieses Array zugreifen kann
+			$i++;
     }
     return $this->Layer;
   }
@@ -1816,12 +1817,21 @@ class db_mapObj_core {
       $rs['Style']=$this->read_Styles($rs['Class_ID']);
       $rs['Label']=$this->read_Label($rs['Class_ID']);
       #Anne
-      if($disabled_classes AND in_array($rs['Class_ID'], $disabled_classes)){
-      	$rs['Status'] = 0;
+      if($disabled_classes){
+				if($disabled_classes['status'][$rs['Class_ID']] == 2){
+					$rs['Status'] = 1;
+					foreach($rs['Style'] as &$style){
+						$style['outlinecolor'] = $style['color'];
+						$style['color'] = '-1 -1 -1';
+					}
+				}
+				elseif($disabled_classes['status'][$rs['Class_ID']] == '0'){
+					$rs['Status'] = 0;
+				}
+				else $rs['Status'] = 1;
       }
-      else{
-      	$rs['Status'] = 1;
-      }
+      else $rs['Status'] = 1;
+			
       $Classes[]=$rs;
     }
     return $Classes;
@@ -1829,10 +1839,11 @@ class db_mapObj_core {
   
   function read_disabled_classes(){
   	#Anne
-    $sql_classes = 'SELECT class_id FROM u_rolle2used_class WHERE user_id='.$this->User_ID.' AND stelle_id='.$this->Stelle_ID.';';
+    $sql_classes = 'SELECT class_id, status FROM u_rolle2used_class WHERE user_id='.$this->User_ID.' AND stelle_id='.$this->Stelle_ID.';';
     $query_classes=mysql_query($sql_classes);
     while($row = mysql_fetch_array($query_classes)){
-  		$classarray[] = $row['class_id'];
+  		$classarray['class_id'][] = $row['class_id'];
+			$classarray['status'][$row['class_id']] = $row['status'];
 		}
 		return $classarray;
   }

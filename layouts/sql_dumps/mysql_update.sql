@@ -1160,3 +1160,18 @@ ADD  `sdatum2` VARCHAR( 10 ) NULL AFTER  `sdatum` ,
 ADD  `sVermStelle` INT( 11 ) NULL AFTER  `sdatum2`;
 
 ALTER TABLE  `druckfreitexte` ADD  `offset_attribute` VARCHAR( 255 ) NULL AFTER  `posy`;
+
+#------------------------------------------------------------------------------------------
+# Änderung von 1.13.0 zu 1.14.0
+#
+
+ALTER TABLE  `layer_attributes` CHANGE  `form_element_type`  `form_element_type` ENUM(  'Text',  'Textfeld',  'Auswahlfeld',  'Checkbox',  'Geometrie',  'SubFormPK',  'SubFormFK',  'SubFormEmbeddedPK',  'Time',  'Dokument',  'Link',  'User',  'Stelle',  'Fläche',  'dynamicLink',  'Zahl',  'UserID',  'Länge',  'mailto' ) NOT NULL DEFAULT  'Text';
+
+ALTER TABLE  `u_rolle2used_class` ADD  `status` INT( 1 ) NOT NULL DEFAULT  0;
+
+ALTER TABLE  `used_layer` ADD  `requires_id` INT( 11 ) NULL AFTER  `requires`;
+UPDATE used_layer, layer SET requires_id = layer.Layer_ID WHERE requires != '' AND TRIM(LEADING '([' FROM SUBSTRING_INDEX(requires, ']', 1)) = layer.name;
+ALTER TABLE  `used_layer` DROP  `requires`;
+ALTER TABLE  `used_layer` CHANGE  `requires_id`  `requires` INT( 11 ) NULL DEFAULT NULL;
+
+ALTER TABLE  `styles` CHANGE  `angle`  `angle` VARCHAR( 11 ) NULL DEFAULT NULL;

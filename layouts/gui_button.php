@@ -36,14 +36,16 @@ if($this->user->rolle->querymode == 1){
              include(LAYOUTPATH."snippets/menue_button_switch.php"); ?>
             </td>
 
-            <td style="border-style:solid; border-width:1px; border-color:#CCCCCC;" align="center" valign="top" background="<?php echo GRAPHICSPATH."bg.gif"; ?>"> <?php
-              $this->debug->write("Include <b>".LAYOUTPATH."snippets/".$this->main."</b> in gui.php",4);
+            <td style="border-style:solid; border-width:1px; border-color:#CCCCCC;" align="center" valign="top" background="<?php echo GRAPHICSPATH."bg.gif"; ?>"> 
+							<div style=" position: relative; overflow: hidden; ">
+							<?php $this->debug->write("Include <b>".LAYOUTPATH."snippets/".$this->main."</b> in gui.php",4);
               if(file_exists($this->main)){
 				      	include($this->main);			# Pluginviews
 				      }
 				      else{ 	    
 				      	include(LAYOUTPATH."snippets/".$this->main);		# normale snippets
 				      } ?>
+							</div>
             </td>
           </tr>
           <tr>

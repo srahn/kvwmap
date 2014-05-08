@@ -6,17 +6,11 @@ function print(){
 	document.GUI.target = '_blank';
 	document.GUI.go_plus.value = 'Drucken';
 	document.GUI.submit();
-//	document.GUI.target = '';
-//	document.GUI.go_plus.value = '';
 }
 
 function back(){
 	document.GUI.target = '';
-	<? if($this->formvars['search'] == 'true'){ ?>	
-	document.GUI.go.value = 'Layer-Suche_Suchen';
-	<? }else{ ?>
-	document.GUI.go.value = 'Sachdaten';
-	<? } ?>
+	document.GUI.go.value = 'get_last_query';
 	document.GUI.go_plus.value = '';
 	document.GUI.submit();
 }
@@ -121,35 +115,6 @@ function back(){
 <?	}
 	}
 
-# Hidden-Felder um zurück zur Sachdatenanzeige zu kommen
-if($this->formvars['qLayer'.$this->formvars['chosen_layer_id']] == 1){
-	echo '<input name="qLayer'.$this->formvars['chosen_layer_id'].'" type="hidden" value="1">';
-	echo '<input id="offset_'.$this->formvars['chosen_layer_id'].'" name="offset_'.$this->formvars['chosen_layer_id'].'" type="hidden" value="'.$this->formvars['offset_'.$this->formvars['chosen_layer_id']].'">';
-	//echo '<input name="sql_'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="'.$this->qlayerset[$i]['sql'].'">';
-}
-
-if($this->formvars['search'] == 'true'){			# wenn man von der Suche kam -> Hidden Felder zum Speichern der Suchparameter
-	//echo '<input name="go" type="hidden" value="Layer-Suche_Suchen">';
-	echo '<input name="search" type="hidden" value="true">
-				<input name="selected_layer_id" type="hidden" value="'.$this->formvars['chosen_layer_id'].'">
-				<input id="offset_'.$this->formvars['chosen_layer_id'].'" name="offset_'.$this->formvars['chosen_layer_id'].'" type="hidden" value="'.$this->formvars['offset_'.$this->formvars['chosen_layer_id']].'">';
-	
-	foreach($this->attributes['all_table_names'] as $tablename){
-  	if($this->formvars['value_'.$tablename.'_oid']){
-    	echo '<input name="value_'.$tablename.'_oid" type="hidden" value="'.$this->formvars['value_'.$tablename.'_oid'].'">';
-    }
-  }
-				
-	for($j = 0; $j < count($this->attributes['type']); $j++){
-		if($this->attributes['type'][$j] != 'geometry'){
-			echo '
-				<input name="value_'.$this->attributes['name'][$j].'" type="hidden" value="'.$this->formvars['value_'.$this->attributes['name'][$j]].'">
-				<input name="value2_'.$this->attributes['name'][$j].'" type="hidden" value="'.$this->formvars['value2_'.$this->attributes['name'][$j]].'">
-				<input name="operator_'.$this->attributes['name'][$j].'" type="hidden" value="'.$this->formvars['operator_'.$this->attributes['name'][$j]].'">';
-			//echo '<input name="sql_'.$this->formvars['chosen_layer_id'].'" type="hidden" value="'.$this->qlayerset[0]['sql'].'">';
-		}
-	}
-}
 
 ?>
 

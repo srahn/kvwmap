@@ -7,6 +7,10 @@
 
 <script type="text/javascript">
 
+function zoomto(layer_id, oid, tablename, columnname){
+  location.href="index.php?go=zoomtoPolygon&oid="+oid+"&layer_tablename="+tablename+"&layer_columnname="+columnname+"&layer_id="+layer_id+"&selektieren=zoomonly";
+}
+
 function toggle_vertices(){	
 	document.getElementById("vertices").SVGtoggle_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 }
@@ -38,7 +42,7 @@ function resizemap2window() {
     width = document.body.clientWidth;
     height = document.body.clientHeight;
   }
-	document.location.href='index.php?go=ResizeMap2Window&width='+width+'&height='+height;
+	document.location.href='index.php?go=ResizeMap2Window&width='+width+'&height='+height+'&nScale='+document.GUI.nScale.value;
 }
 
 function showMapImage(){ 
@@ -60,13 +64,13 @@ function switchlegend(){
 	if(document.getElementById('legenddiv').className == 'slidinglegend'){
 		document.getElementById('legenddiv').className = 'normallegend';
 		ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=changeLegendDisplay&hide=0', new Array('', ''), new Array("", "execute_function"));
-		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>maximize.png';
+		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>minimize_legend.png';
 		document.getElementById('LegendMinMax').title="Legende verstecken";
 	}
 	else{
 		document.getElementById('legenddiv').className = 'slidinglegend';
 		ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=changeLegendDisplay&hide=1', new Array('', ''), new Array("", "execute_function"));
-		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>minimize.png';
+		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>maximize_legend.png';
 		document.getElementById('LegendMinMax').title="Legende zeigen";
 	}
 }
@@ -76,13 +80,13 @@ function switchlegend(){
 function switchlegend(){
 	if(document.getElementById('legendTable').style.display == 'none'){
 		document.getElementById('legendTable').style.display='';
-		ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=changeLegendDisplay&hide=0', new Array(), "");
+		ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=changeLegendDisplay&hide=0', new Array('', ''), new Array("", "execute_function"));
 		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>maximize.png';
 		document.getElementById('LegendMinMax').title="Legende verstecken";
 	}
 	else{
 		document.getElementById('legendTable').style.display='none';
-		ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=changeLegendDisplay&hide=1', new Array(), "");
+		ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=changeLegendDisplay&hide=1', new Array('', ''), new Array("", "execute_function"));
 		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>minimize.png';
 		document.getElementById('LegendMinMax').title="Legende zeigen";
 	}
@@ -157,24 +161,26 @@ if($this->formvars['gps_follow'] == ''){
         				<td width="100%" colspan="3" style="border-style:solid; border-width:1px; border-color:#aaaaaa;">
         					<table width="100%" border="0" cellpadding="0" cellspacing="0">
 						        <tr style="background-color: <? echo BG_MENUETOP; ?>;">
-						          <td width="30%" height="30">
-									<div style="width:150px; position:relative" onmouseover="document.getElementById('scales').style.display='inline-block';" onmouseout="document.getElementById('scales').style.display='none';">
-										&nbsp;<b><?php echo $strMapScale; ?>&nbsp;1:&nbsp;</b><input type="text" id="scale" autocomplete="off" name="nScale" style="width:58px" value="<?php echo round($this->map_scaledenom); ?>">
-										<div id="scales" style="display:none; position:absolute; left:56px; bottom:21px; width: 78px; vertical-align:top; overflow:hidden; border:solid grey 1px;">
-											<select size="8" style="padding:4px; margin:-2px -17px -4px -4px;" onclick="document.GUI.nScale.value=this.value; document.getElementById('scales').style.display='none'; document.GUI.submit();">
-												<option onmouseover="this.selected = true;" value="1000000">1:&nbsp;&nbsp;1000000</option>
-												<option onmouseover="this.selected = true;" value="250000">1:&nbsp;&nbsp;250000</option>
-												<option onmouseover="this.selected = true;" value="100000">1:&nbsp;&nbsp;100000</option>
-												<option onmouseover="this.selected = true;" value="50000">1:&nbsp;&nbsp;50000</option>
-												<option onmouseover="this.selected = true;" value="10000">1:&nbsp;&nbsp;10000</option>
-												<option onmouseover="this.selected = true;" value="5000">1:&nbsp;&nbsp;5000</option>
-												<option onmouseover="this.selected = true;" value="1000">1:&nbsp;&nbsp;1000</option>
-												<option onmouseover="this.selected = true;" value="500">1:&nbsp;&nbsp;500</option>
-											</select>
-										</div>
-									</div>
+						          <td width="25%" height="30">
+												<div style="width:150px;" onmouseover="document.getElementById('scales').style.display='inline-block';" onmouseout="document.getElementById('scales').style.display='none';">
+													<div valign="top" style="height:0px; position:relative;">
+														<div id="scales" style="display:none; position:absolute; left:56px; bottom:-1px; width: 78px; vertical-align:top; overflow:hidden; border:solid grey 1px;">
+															<select size="8" style="padding:4px; margin:-2px -17px -4px -4px;" onclick="document.GUI.nScale.value=this.value; document.getElementById('scales').style.display='none'; document.GUI.submit();">
+																<option onmouseover="this.selected = true;" value="1000000">1:&nbsp;&nbsp;1000000</option>
+																<option onmouseover="this.selected = true;" value="250000">1:&nbsp;&nbsp;250000</option>
+																<option onmouseover="this.selected = true;" value="100000">1:&nbsp;&nbsp;100000</option>
+																<option onmouseover="this.selected = true;" value="50000">1:&nbsp;&nbsp;50000</option>
+																<option onmouseover="this.selected = true;" value="10000">1:&nbsp;&nbsp;10000</option>
+																<option onmouseover="this.selected = true;" value="5000">1:&nbsp;&nbsp;5000</option>
+																<option onmouseover="this.selected = true;" value="1000">1:&nbsp;&nbsp;1000</option>
+																<option onmouseover="this.selected = true;" value="500">1:&nbsp;&nbsp;500</option>
+															</select>
+														</div>
+													</div>
+													&nbsp;<b><?php echo $this->strMapScale; ?>&nbsp;1:&nbsp;</b><input type="text" id="scale" autocomplete="off" name="nScale" style="width:58px" value="<?php echo round($this->map_scaledenom); ?>">
+												</div>
 						          </td>
-						          <td width="40%" align="center">
+						          <td width="50%" align="center">
 						          	<? if($this->map->width > 700) {
 						          		echo '<div id="lagebezeichnung">';
 						          		if($this->Lagebezeichung!=''){
@@ -185,8 +191,8 @@ if($this->formvars['gps_follow'] == ''){
 						          <? }else{ ?>
 						          <td>&nbsp;</td>
 						          <? } ?>
-						          <td width="30%" align="right">
-						            <img id="scalebar" alt="Maßstabsleiste" src="<? echo $this->img['scalebar']; ?>">
+						          <td width="25%" align="right">
+						            <img id="scalebar" style="margin-right:35px" alt="Maßstabsleiste" src="<? echo $this->img['scalebar']; ?>">
 						          </td>
 						        </tr>
 						    </table>
@@ -204,23 +210,29 @@ if($this->formvars['gps_follow'] == ''){
 			          </td>
 			        </tr>
 			        <? } ?>
-			        <tr style="background-color: <? echo BG_MENUETOP; if($this->user->rolle->runningcoords == '0'){echo ';display:none';} ?>">
-			        	<td width="100px">
-			          	<b>&nbsp;<?php echo $this->strCoordinates; ?></b>&nbsp;
-			          </td>
-			        	<td colspan="2" width="80%"><input type="text" style="border:0px;background-color:transparent" name="runningcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?></td>
-			        </tr>
-			        <tr id="showcoords" style="display:none">
-			        	<td width="100px">
-			          	<b>&nbsp;<?php echo $strShowCoordinates; ?></b>&nbsp;
-			          </td>
-			        	<td colspan="2" width="80%">
-			        		<input type="text" name="firstcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?>
-			        		<? if($this->user->rolle->epsg_code2 != ''){ ?>
-			        		<br><input type="text" name="secondcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code2; ?>
-			        		<? } ?>
-			        	</td>
-			        </tr>
+        			<tr>
+        				<td width="100%" colspan="3" style="border-style:solid; border-width:1px; border-color:#aaaaaa;">
+        					<table width="100%" border="0" cellpadding="0" cellspacing="0">
+			        			<tr style="background-color: <? echo BG_MENUETOP; if($this->user->rolle->runningcoords == '0'){echo ';display:none';} ?>">
+			        				<td width="100px">
+			          					<b>&nbsp;<?php echo $this->strCoordinates; ?></b>&nbsp;
+			          				</td>
+			        				<td colspan="2" width="80%"><input type="text" style="border:0px;background-color:transparent" name="runningcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?></td>
+			        			</tr>
+			        			<tr id="showcoords" style="display:none">
+			        				<td width="100px">
+			          					<b>&nbsp;<?php echo $strShowCoordinates; ?></b>&nbsp;
+			          				</td>
+			        				<td colspan="2" width="80%">
+			        					<input type="text" name="firstcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?>
+			        					<? if($this->user->rolle->epsg_code2 != ''){ ?>
+			        					<br><input type="text" name="secondcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code2; ?>
+			        					<? } ?>
+			        				</td>
+			        			</tr>
+                                		</table>
+                                	</td>
+                                </tr>
 			        <?
 			        # 2006-03-20 pk
 			        if ($this->user->rolle->newtime!='') { ?>
@@ -260,15 +272,15 @@ if($this->formvars['gps_follow'] == ''){
 							<td bgcolor="<?php echo BG_DEFAULT ?>" align="left"><?php
 								if ($this->user->rolle->hideLegend) {
 									if (ie_check()){$display = 'none';}
-									?><a id="linkLegend" href="javascript:switchlegend()"><img title="Legende zeigen" id="LegendMinMax" src="<?php  echo GRAPHICSPATH; ?>minimize.png" border="0"></a><?php
+									?><a id="linkLegend" href="javascript:switchlegend()"><img title="Legende zeigen" id="LegendMinMax" src="<?php  echo GRAPHICSPATH; ?>maximize_legend.png" border="0"></a><?php
 								}
 								else {
-									?><a id="linkLegend" href="javascript:switchlegend()"><img title="Legende verstecken" id="LegendMinMax" src="<?php  echo GRAPHICSPATH; ?>maximize.png" border="0"></a><?php
+									?><a id="linkLegend" href="javascript:switchlegend()"><img title="Legende verstecken" id="LegendMinMax" src="<?php  echo GRAPHICSPATH; ?>minimize_legend.png" border="0"></a><?php
 								}
 							?></td>
 						</tr>
 					</table>
-					<table id="legendTable" style="display: <? echo $display; ?>" cellspacing=0 cellpadding=2 border=0>
+					<table class="table1" id="legendTable" style="display: <? echo $display; ?>" cellspacing=0 cellpadding=2 border=0>
 						<tr align="center">
 							<td><?php echo $strAvailableLayer; ?>:</td>
 						</tr>
@@ -277,10 +289,76 @@ if($this->formvars['gps_follow'] == ''){
 							<div align="center"><?php # 2007-12-30 pk
 							?><input type="submit" class="button" name="senden" value="<?php echo $strLoadNew; ?>" class="send" tabindex="1"></div>
 							<br>
+							<? if(defined('LAYER_ID_SCHNELLSPRUNG') AND LAYER_ID_SCHNELLSPRUNG != ''){
+								$legendheight -= 50;
+																														?>
+							<div style="margin-left:10px">
+								<table style="border:1px solid grey">
+								<?
+									$layerset = $this->user->rolle->getLayer(LAYER_ID_SCHNELLSPRUNG);
+									$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
+									$layerdb = $mapdb->getlayerdatabase(LAYER_ID_SCHNELLSPRUNG, $this->Stelle->pgdbhost);
+									$layerdb->setClientEncoding();
+									$path = $mapdb->getPath(LAYER_ID_SCHNELLSPRUNG);
+									$privileges = $this->Stelle->get_attributes_privileges(LAYER_ID_SCHNELLSPRUNG);
+									$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
+									$this->attributes = $mapdb->read_layer_attributes(LAYER_ID_SCHNELLSPRUNG, $layerdb, $privileges['attributenames']);
+									# wenn Attributname/Wert-Paare übergeben wurden, diese im Formular einsetzen
+									for($i = 0; $i < count($this->attributes['name']); $i++){
+										$this->qlayerset['shape'][0][$this->attributes['name'][$i]] = $this->formvars['value_'.$this->attributes['name'][$i]];
+									}
+									# weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
+									$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $this->qlayerset['shape'], true);	
+								
+									for($i = 0; $i < count($this->attributes['name']); $i++){
+										if($this->attributes['name'][$i] == 'oid'){
+											echo '<tr><td>&nbsp;'.$this->attributes['alias'][$i].':</td></tr>';
+											?><tr>
+												<td align="left"><?php
+													 if($this->attributes['form_element_type'][$i] == 'Auswahlfeld'){
+															?><select class="select" 
+															<?
+																if($this->attributes['req_by'][$i] != ''){
+																	echo 'onchange="update_require_attribute(\''.$this->attributes['req_by'][$i].'\','.LAYER_ID_SCHNELLSPRUNG.', this.value);" ';
+																}
+																if($this->attributes['name'][$i] == 'oid'){
+																	echo 'onchange="zoomto('.LAYER_ID_SCHNELLSPRUNG.', this.value, \''.$layerset[0]['maintable'].'\', \''.$this->attributes['the_geom'].'\');"';
+																}
+															?> 
+																id="value_<?php echo $this->attributes['name'][$i]; ?>" name="value_<?php echo $this->attributes['name'][$i]; ?>"><?echo "\n"; ?>
+																	<option value="">-- <? echo $this->strPleaseSelect; ?> --</option><?php echo "\n";
+																	if(is_array($this->attributes['enum_value'][$i][0])){
+																		$this->attributes['enum_value'][$i] = $this->attributes['enum_value'][$i][0];
+																		$this->attributes['enum_output'][$i] = $this->attributes['enum_output'][$i][0];
+																	}
+																for($o = 0; $o < count($this->attributes['enum_value'][$i]); $o++){
+																	?>
+																	<option <? if($this->formvars['value_'.$this->attributes['name'][$i]] == $this->attributes['enum_value'][$i][$o]){ echo 'selected';} ?> value="<?php echo $this->attributes['enum_value'][$i][$o]; ?>"><?php echo $this->attributes['enum_output'][$i][$o]; ?></option><?php echo "\n";
+																} ?>
+																</select>
+																<input class="input" size="9" id="value2_<?php echo $this->attributes['name'][$i]; ?>" name="value2_<?php echo $this->attributes['name'][$i]; ?>" type="hidden" value="<?php echo $this->formvars['value2_'.$this->attributes['name'][$i]]; ?>">
+																<?php
+														}
+														else { 
+															?>
+															<input class="input" size="<? if($this->formvars['value2_'.$this->attributes['name'][$i]] != ''){echo '9';}else{echo '24';} ?>" id="value_<?php echo $this->attributes['name'][$i]; ?>" name="value_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo $this->formvars['value_'.$this->attributes['name'][$i]]; ?>">
+															&nbsp;<input class="input" size="9" id="value2_<?php echo $this->attributes['name'][$i]; ?>" name="value2_<?php echo $this->attributes['name'][$i]; ?>" type="<? if($this->formvars['value2_'.$this->attributes['name'][$i]] != ''){echo 'text';}else{echo 'hidden';} ?>" value="<?php echo $this->formvars['value2_'.$this->attributes['name'][$i]]; ?>">
+															<?php
+													 }
+											 ?></td>
+											</tr><?php
+										}
+									}
+								 ?>
+								 </table>
+							</div>
+						<? } ?>
 							&nbsp;
-							<a href="index.php?go=reset_querys"><img src="graphics/tool_info.png" border="0" alt="Informationsabfrage." title="Informationsabfrage | Hier klicken, um alle Abfragehaken zu entfernen" width="17"></a>
-							<a href="index.php?go=reset_layers"><img src="graphics/layer.png" border="0" alt="Themensteuerung." title="Themensteuerung | Hier klicken, um alle Themen zu deaktivieren" width="20" height="20"></a><br>
-						<div id="scrolldiv" onscroll="document.GUI.scrollposition.value = this.scrollTop;" style="width:240; height:<?php echo $legendheight; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
+							<div id="legendcontrol">
+								<a href="index.php?go=reset_querys"><img src="graphics/tool_info.png" border="0" alt="Informationsabfrage." title="Informationsabfrage | Hier klicken, um alle Abfragehaken zu entfernen" width="17"></a>
+								<a href="index.php?go=reset_layers"><img src="graphics/layer.png" border="0" alt="Themensteuerung." title="Themensteuerung | Hier klicken, um alle Themen zu deaktivieren" width="20" height="20"></a><br>
+							</div>
+						<div id="scrolldiv" onscroll="document.GUI.scrollposition.value = this.scrollTop;" style="height:<?php echo $legendheight; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
 						<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
 						<div onclick="document.GUI.legendtouched.value = 1;" id="legend">
 							<? echo $this->legende; ?>

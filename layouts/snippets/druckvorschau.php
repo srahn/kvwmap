@@ -3,7 +3,6 @@
 <!--
 
 function print(){
-		alert('druck');
 	document.GUI.target = '_blank';
 	document.GUI.go_plus.value = 'Drucken';
 	document.GUI.submit();
@@ -25,16 +24,31 @@ function addfreetext(){
 	newfreetext.childNodes[2].name = 'freetext_posy' + newfreetext.id;
 	newfreetext.childNodes[3].name = 'freetext_width' + newfreetext.id;
 	newfreetext.childNodes[4].name = 'freetext_height' + newfreetext.id;
+	newfreetext.childNodes[5].name = 'freetext_fontsize' + newfreetext.id;
 	document.getElementById('main').appendChild(newfreetext);
 }
 
 function delete_freetext(object){
-	document.getElementById('main').removeChild(object.parentNode);
+	document.getElementById('main').removeChild(object.parentNode.parentNode);
+}
+
+function reduce_fontsize(object){
+	fontsize = parseInt(object.parentNode.parentNode.childNodes[0].style.fontSize);
+	fontsize = fontsize - 1;
+	object.parentNode.parentNode.childNodes[5].value = fontsize;
+	object.parentNode.parentNode.childNodes[0].style.fontSize = fontsize + 'px';
+}
+
+function increase_fontsize(object){
+	fontsize = parseInt(object.parentNode.parentNode.childNodes[0].style.fontSize);
+	fontsize = fontsize + 1;
+	object.parentNode.parentNode.childNodes[5].value = fontsize;
+	object.parentNode.parentNode.childNodes[0].style.fontSize = fontsize + 'px';
 }
 
 function start_resize(evt){
 	if(!evt)evt = window.event; // For IE
-	id = (evt.target) ? evt.target.parentNode.id : evt.srcElement.parentNode.id;
+	id = (evt.target) ? evt.target.parentNode.parentNode.id : evt.srcElement.parentNode.parentNode.id;
 	if(id){
 		document.GUI.action.value = 'resize';
 		document.GUI.active_freetext.value = id;
@@ -127,13 +141,19 @@ function preventflickering(evt){
       	if(strpos($this->Docu->activeframe[0]['format'], 'quer') !== false)$height = 420;			# das ist die Höhe des Vorschaubildes
       	else $height = 842;																																		# das ist die Höhe des Vorschaubildes
       	$ratio = $height/$this->Docu->height;
-      	$size = 12*$ratio;
+      	$size = round(12*$ratio);
       	$posx = 200;
       	$posy = 200;
 ?>
-	<div onmouseover="this.style.border='2px dotted grey'; this.lastChild.style.display=''; this.lastChild.previousSibling.style.display=''; this.style.cursor='move';" onmouseout="this.style.border='1px solid black'; this.lastChild.style.display='none'; this.lastChild.previousSibling.style.display='none';" onmousedown="start_move(event);" onmouseup="deactivate();" title="Freitext" id="text" style="display:none; background-color: white; border: 1px solid black; position: absolute; visibility: visible; left: <? echo $posx; ?>px; top: <? echo $posy; ?>px; padding:3px"><textarea wrap="off" name="freetext" style="overflow: hidden; resize: none; width: 150px; height: 70px; border: none; background-color:transparent; font-size: <? echo $size; ?>px; font-family: Helvetica; font-weight: bold;">hier Text eingegeben...</textarea><input type="hidden" name="freetext_posx" value="<? echo $posx; ?>"><input type="hidden" name="freetext_posy" value="<? echo $posy; ?>"><input type="hidden" name="freetext_width" value="150"><input type="hidden" name="freetext_height" value="70">
+	<!-- hier wird viel mit Childs und Parents anstatt mit ids gemacht, weil das nur die Vorlage für die nachher geclonten Freitexte ist -->
+	<div onmouseover="this.style.border='2px dotted grey'; this.lastChild.style.display=''; this.style.cursor='move';" onmouseout="this.style.border='1px solid black'; this.lastChild.style.display='none';" onmousedown="start_move(event);" onmouseup="deactivate();" title="Freitext" id="text" style="display:none; background-color: white; border: 1px solid black; position: absolute; visibility: visible; left: <? echo $posx; ?>px; top: <? echo $posy; ?>px; padding:3px"><textarea wrap="off" name="freetext" style="overflow: hidden; resize: none; width: 150px; height: 70px; border: none; background-color:transparent; font-size: <? echo $size; ?>px; font-family: Helvetica;">hier Text eingegeben...</textarea><input type="hidden" name="freetext_posx" value="<? echo $posx; ?>"><input type="hidden" name="freetext_posy" value="<? echo $posy; ?>"><input type="hidden" name="freetext_width" value="150"><input type="hidden" name="freetext_height" value="70"><input type="hidden" name="freetext_fontsize" value="<? echo $size; ?>">
 		<!-- obiges und unteres muss so hintereinander stehen, sonst gibt es zwischen den Elementen noch Textelemente -->
-		<img title="Freitext löschen" onclick="delete_freetext(this);" onmouseover="this.style.cursor='pointer';" style="display: none; position: absolute; bottom:3px; left:0px" src="graphics/symbol_delete.gif"><img title="Größe ändern" onmousedown="start_resize(event);" onmouseout="this.style.cursor='default';" onmouseup="deactivate();" onmouseover="this.style.cursor='se-resize';" style="display: none; position: absolute; bottom:0px; right:0px" src="graphics/resize.gif"></div>
+		<div style="display:none; width:100%;">
+			<img title="Freitext löschen" onclick="delete_freetext(this);" onmouseover="this.style.cursor='pointer';" style="position: absolute; bottom:3px; left:0px" src="graphics/symbol_delete.gif">
+			<img title="Schrift verkleinern" onclick="reduce_fontsize(this);" onmouseover="this.style.cursor='pointer';" style="position: absolute; bottom:4px; left:20px" src="graphics/minus.gif">
+			<img title="Schrift vergrößern" onclick="increase_fontsize(this);" onmouseover="this.style.cursor='pointer';" style="position: absolute; bottom:4px; left:32px" src="graphics/plus.gif">
+			<img title="Größe ändern" onmousedown="start_resize(event);" onmouseout="this.style.cursor='default';" onmouseup="deactivate();" onmouseover="this.style.cursor='se-resize';" style="position: absolute; bottom:0px; right:0px" src="graphics/resize.gif">
+		</div></div>
 </div>
 
 <table>

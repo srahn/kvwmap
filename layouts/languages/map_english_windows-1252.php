@@ -4,7 +4,6 @@
   $strCoordinates="Coordinates";
   $strShowCoordinates="Coordinates";
   $strMapImageURL="Map Image URL";
-  $strMapScale="Map scale";
   $strMapSettingsFrom="Map settings from";
   $strPreviousView="Previous view";
   $strNextView="Next view";

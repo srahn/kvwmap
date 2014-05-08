@@ -123,6 +123,9 @@
 							<option value="dynamicLink" ';
 				  		if($this->attributes['form_element_type'][$i] == 'dynamicLink'){echo 'selected';}
 				  		echo ' >dynamischer Link</option>
+							<option value="mailto" ';
+				  		if($this->attributes['form_element_type'][$i] == 'mailto'){echo 'selected';}
+				  		echo ' >MailTo</option>
 							<option value="Fläche" ';
 				  		if($this->attributes['form_element_type'][$i] == 'Fläche'){echo 'selected';}
 				  		echo ' >Fläche</option>

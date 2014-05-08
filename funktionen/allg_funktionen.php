@@ -7,7 +7,7 @@
 $errors = array();
  
 function MapserverErrorHandler($errno, $errstr, $errfile, $errline){
-	global $errors;
+	global $errors;	
 	if(!(error_reporting() & $errno)){
 		// This error code is not included in error_reporting
 		return;
@@ -645,6 +645,8 @@ function umlaute_javascript($text){
 	$text = str_replace("Ü", "%DC", $text);
 	$text = str_replace("ß", "%DF", $text);
 	$text = str_replace("²", "%B2", $text);
+	$text = str_replace('"', '%A8', $text);
+	$text = str_replace('&', '%26', $text);
 	return $text;
 }
 

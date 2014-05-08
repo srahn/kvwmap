@@ -121,6 +121,24 @@ class spatial_processor {
     }
     return $rs[0].'~'.$rs[0];
   }
+	
+	function translate($geom, $type, $x, $y){
+  	if($type == 'wkt'){
+  		$sql = "SELECT st_astext(st_translate(st_geomfromtext('".$geom."'), ".$x.", ".$y."))";
+  	}
+  	else{
+  		$sql = "SELECT st_assvg(st_translate(st_geomfromtext('".$geom."'), ".$x.", ".$y."),0,8)";
+  	}
+  	$ret = $this->pgdatabase->execSQL($sql,4, 0);
+  	#return $sql;
+    if ($ret[0]) {
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
+    }
+    else {
+    	$rs = pg_fetch_array($ret[1]);
+    }
+    return $rs[0];
+  }
   
   function process_query($formvars){
   	$formvars['fromwhere'] = stripslashes($formvars['fromwhere']);
@@ -183,6 +201,17 @@ class spatial_processor {
 				}
 				else{
 					$result = $this->get_closest_line($polywkt1, $formvars['resulttype'], $formvars['fromwhere']);
+				}
+			}break;
+			
+			case 'translate':{
+				if($formvars['resulttype'] == 'svgwkt'){
+					$result = $this->translate($polywkt1, 'svg', $formvars['translate_x'], $formvars['translate_y']);
+					$result .= '||';
+					$result .= $this->translate($polywkt1, 'wkt', $formvars['translate_x'], $formvars['translate_y']);
+				}
+				else{
+					$result = $this->translate($polywkt1, $formvars['resulttype'], $formvars['translate_x'], $formvars['translate_y']);
 				}
 			}break;
 			
@@ -274,7 +303,7 @@ class spatial_processor {
 			}break;
 			
 			case 'add_geometry':{
-				$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['layer_id'], $formvars['fromwhere'], $formvars['columnname']);
+				$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['layer_id'], $formvars['fromwhere'], $formvars['columnname']);
 				if($querygeometryWKT == ''){
 					break;
 				}
@@ -292,7 +321,7 @@ class spatial_processor {
 			}break;
 			
 			case 'subtract_geometry':{
-				$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['layer_id'], $formvars['fromwhere'], $formvars['columnname']);
+				$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['layer_id'], $formvars['fromwhere'], $formvars['columnname']);
 				if($querygeometryWKT == ''){
 					break;
 				}
@@ -322,17 +351,18 @@ class spatial_processor {
 		echo $result;
 	}
 	
-	function queryMap($input_coord, $layer_id, $fromwhere, $columnname) {
+	function queryMap($input_coord, $pixsize, $layer_id, $fromwhere, $columnname) {
+		# pixsize wird übergeben, weil sie aus dem Geometrieeditor anders sein kann, da es dort eine andere Kartengröße geben kann
     # Abfragebereich berechnen
     $corners=explode(';',$input_coord);
     $lo=explode(',',$corners[0]); # linke obere Ecke in Bildkoordinaten von links oben gesehen
     $ru=explode(',',$corners[1]); # reche untere Ecke des Auswahlbereiches in Bildkoordinaten von links oben gesehen
-    $width=$this->rolle->pixsize*($ru[0]-$lo[0]); # Breite des Auswahlbereiches in m
-    $height=$this->rolle->pixsize*($ru[1]-$lo[1]); # H�he des Auswahlbereiches in m
+    $width=$pixsize*($ru[0]-$lo[0]); # Breite des Auswahlbereiches in m
+    $height=$pixsize*($ru[1]-$lo[1]); # H�he des Auswahlbereiches in m
     #echo 'Abfragerechteck im Bild: '.$lo[0].' '.$lo[1].' '.$ru[0].' '.$ru[1];
     # linke obere Ecke im Koordinatensystem in m
-    $minx=$this->rolle->oGeorefExt->minx+$this->rolle->pixsize*$lo[0]; # x Wert
-    $miny=$this->rolle->oGeorefExt->miny+$this->rolle->pixsize*($this->rolle->nImageHeight-$ru[1]); # y Wert
+    $minx=$this->rolle->oGeorefExt->minx+$pixsize*$lo[0]; # x Wert
+    $miny=$this->rolle->oGeorefExt->miny+$pixsize*($this->rolle->nImageHeight-$ru[1]); # y Wert
     $maxx=$minx+$width;
     $maxy=$miny+$height;
     $rect=ms_newRectObj();

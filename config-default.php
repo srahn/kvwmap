@@ -6,12 +6,12 @@
 ####################################################################
 # aktuelle Versionsnummer
 define('VERSION','1.13');
-define('APPLVERSION','kvwmap_'.VERSION.'/');
+define('APPLVERSION','kvwmap/');
 # Bezeichnung der MySQL-Datenbank mit den Benutzerdaten
 $dbname='kvwmapdb';
 # Wenn der pgdbname leer gelassen wird, wird versucht die Information
 # für die Verbindung zur PostGIS-Datenbank aus der Tabelle Stelle zu lesen.
-$pgdbname='';
+$pgdbname='kvwmapsp';
 #$pgdbname='alkis_25833';
 
 ########################## Metadaten zum Landkreis
@@ -60,21 +60,21 @@ define('GLEVIEW', 2);                  # 1 / 2              # Version 1.6.5
 # Header und Footer
 define('HEADER', 'header.php');															# Version 1.8.0
 define('FOOTER', 'footer.php');															# Version 1.8.0
+# Höhe von Header und Footer zusammen
+define('HEADER_FOOTER_HEIGHT', 132);																# Version 1.14
+# Breite von Menü und Legende zusammen
+$menue_legend_widths = array('gui.php' => 485, 'gui_button.php' => 486);		# Version 1.14
 # login.php
 define('LOGIN', 'login.php');																# Version 1.8.0
-
-# Google Maps Api Key, zu beschaffen für die eigenen Domain unter: http://code.google.com/intl/de/apis/maps/signup.html
-# Schlüssel für https://kvwmap.geoinformatik.uni-rostock.de)
-define('GOOGLE_API_KEY','ABQIAAAA3NVkF8JG1Orwwdy6Z6N2ghQjhy709LeHrxCbc4HTlSWWZ4JR9RShfK5WWmrk3Wm9SGzJyhwtosboyQ');
-# Schlüssel für http://localhost
-#define('GOOGLE_API_KEY','ABQIAAAA3NVkF8JG1Orwwdy6Z6N2ghT2yXp_ZAY8_ufC3CFXhHIE1NvwkxTr0pvpUqbRW25i9TOdNAALRKTbTg');
+# Seite zur Fehlerbehandlung, die durch fehlerhafte Layer verursacht werden; unterhalb von /snippets
+define('LAYER_ERROR_PAGE', 'layer_error_page.php');					# Version 1.14
 
 ### Einstellungen für das Menü
 # Da die Bezeichnungen der Menüs frei wählbar sind, muss man hier angegen
 # welchen Namen man für welche Aufgabe gewählt hat.
 # Hier werden die Werte aus der Spalte name der Tabelle u_menues
 # Konstanten zugewiesen um sie später beim Layout verwenden zu können
-define('TITLE','kvwmap Entwicklungsserver');             		# Version 1.7.6
+define('TITLE','Web-GIS kvwmap');             		# Version 1.7.6
 define('TITLE_DRUCKEN','Druckausschnittswahl');             # Version 1.6.6
 define('TITLE_KARTE','Karte anzeigen');                     # Version 1.6.6
 define('TITLE_NOTIZEN','neue Notiz');                       # Version 1.6.6
@@ -117,7 +117,7 @@ define('PUBLISHERNAME','Kartenserver');
 # Varianten:
 # Flurbezeichnung: bedeutet Ausgabe von Gemeinde, Gemarkung und Flur, soweit in ALK tabellen vorhanden
 # Wenn kein Wert gesetzt wird, erfolgt keine Anzeige einer Lagebezeichung
-define('LAGEBEZEICHNUNGSART', 'Flurbezeichnung');						# in Version 1.7.6 wieder eingeführt für Fälle ohne ALK
+define('LAGEBEZEICHNUNGSART', '');						# in Version 1.7.6 wieder eingeführt für Fälle ohne ALK
 
 # Erweiterung der Authentifizierung um die IP Adresse des Nutzers
 # Testet ob die IP des anfragenden Clientrechners dem Nutzer zugeordnet ist
@@ -125,7 +125,7 @@ define('CHECK_CLIENT_IP',true);                               # Version 1.6.9 Se
 
 ########################## Pfadeinstellungen
 # Installationspfad
-define('INSTALLPATH','/srv/www/');
+define('INSTALLPATH','/home/gisadmin/');
 define('WWWROOT',INSTALLPATH.'apps/');
 # --------------- Version 1.6.6 Start
 # diese Einstellung ermöglicht die Vergabe von mehrere Call Back Links
@@ -138,9 +138,12 @@ switch ($subnetaddr) {
     define('URL','https://andere.adresse.de/');
   } break;
   default : {
-    define('URL','http://www.gdi-service.de/');
+    define('URL','http://localhost/');
   }
 }
+# wenn die Internetverbindung über einen Proxy hergestellt wird, kann man diesen hier angeben
+# sie wird dann z.B. bei getfeatureinfo-Abfragen berücksichtigt
+define('HTTP_PROXY' , '');																						# Version 1.14
 # -----------------Version 1.6.6 End
 define('MAPSERV_CGI_BIN',URL.'cgi-bin/mapserv');
 define('LOGPATH',INSTALLPATH.'logs/');
@@ -155,7 +158,7 @@ define('NACHWEISDOCPATH',SHAPEPATH.'nachweise/');
 # Dateiname und Pfad der Festpunkte, mit der die Tabelle der Festpunkte aktualisiert werden soll
 define('PUNKTDATEINAME','festpunkte.csv');
 #define('PUNKTDATEINAME','alk');
-define('PUNKTDATEIPATH',SHAPEPATH.'Festpunkte/');
+define('PUNKTDATEIPATH',SHAPEPATH.'festpunkte/');
 define('PUNKTDATEIARCHIVPATH',PUNKTDATEIPATH.'archiv/');
 define('KVZAUSGABEDATEINAME','festpunkte.kvz');
 define('KVZKOPF', '# Datenaustauschformat M-V
@@ -163,7 +166,7 @@ define('KVZKOPF', '# Datenaustauschformat M-V
 #                                                       Z G  Z G');
 define('SKIZZEN_DATEI_TYP','tif');            # Version 1.6.8
 # Pfad zu den WLDGE Dateien
-define('WLDGEFILEPATH',SHAPEPATH.'ALB/');
+define('WLDGEFILEPATH',SHAPEPATH.'alb/');
 # Name der WLDGE Datei, die geladen werden soll
 define('WLDGEFILENAME','FF_klein.wldge');
 # Schalter zum Vergleich der Datum der Grundausstattung und Fortführung in der Datenbank und der WLDGE Dateien
@@ -178,9 +181,9 @@ define('WLDGE_DATUM_PRUEFUNG',1);
   define('WLDGE_HISTORISCHE_LOESCHEN_DEFAULT',0);             # Version 1.7.0
 
 # Pfad zum Speichern der Nachweisrecherche
-define('RECHERCHEERGEBNIS_PATH',SHAPEPATH.'Recherchierte_Antraege/');
+define('RECHERCHEERGEBNIS_PATH',SHAPEPATH.'recherchierte_antraege/');
 # Pfad zum Speichern der Kartendruck-Layouts
-define('DRUCKRAHMEN_PATH',SHAPEPATH.'Druckrahmen/');
+define('DRUCKRAHMEN_PATH',SHAPEPATH.'druckrahmen/');
 
 # Pfad zu den Funktionen
 #define('FKT_PATH',WWWROOT.APPLVERSION.'funktionen/');			# in Version 1.7.3 wieder gelöscht
@@ -203,7 +206,10 @@ define('EPSGCODE','2398'); # Krassowski, Pulkowo 42, Gauß Krüger 3° Streifen 
 #define('EPSGCODE','2399'); # Krassowski, Pulkowo 42, Gauß Krüger 3° Streifen 5 (15°)
 
 # Unterstützte SRIDs, nur diese stehen zur Auswahl bei der Stellenwahl
-$supportedSRIDs = array(4326,2397,2398,2399,31466,31467,31468,31469,32648,25832,25833,325833,35833,32633,325833,15833,900913,28992);                    # Version 1.6.8
+$supportedSRIDs = array(4326,2397,2398,2399,31466,31467,31468,31469,32648,25832,25833,35833,32633,325833,15833,900913,28992);                    # Version 1.6.8
+
+# Unterstützte Sprachen, nur diese stehen zur Auswahl bei der Stellenwahl
+$supportedLanguages = array('german', 'english');															# Version 1.14
 
 # Name der Stopwortdatei
 define('STOPWORDFILE',SHAPEPATH.'gazetteer/top10000de.txt');
@@ -211,7 +217,7 @@ define('STOPWORDFILE',SHAPEPATH.'gazetteer/top10000de.txt');
 # Imagepath
 define('IMAGEPATH',INSTALLPATH.'tmp/');
 # Pfad für selbst gemachte Bilder
-define('CUSTOM_IMAGE_PATH',SHAPEPATH.'Bilder/');                # Version 1.6.9
+define('CUSTOM_IMAGE_PATH',SHAPEPATH.'bilder/');                # Version 1.6.9
 #Cachespeicherort
 define('CACHEPATH',INSTALLPATH.'cache/');                             # Version 1.6.8
 #Cachezeit Nach welcher Zeit in Stunden sollen gecachte Dateien aktualisiert werden
@@ -340,14 +346,15 @@ define("LAYERNAME_BODENRICHTWERTE",'BORIS');	# Version 1.7.3
 define("LAYER_ID_ADRESSAENDERUNGEN", '162');  # Version 1.6.7
 define("LAYER_IDS_DOP", '79,80');							# Version 1.8.0
 define("LAYER_ID_JAGDBEZIRKE", '432');				# Version 1.10.0
+define("LAYER_ID_SCHNELLSPRUNG", 749);				# Version 1.14
 
 ######################### Dateieinstellungen
 # Datei in der das MapFile als Dokumentation zur Kartenausgabe geschrieben wird
-define("DEFAULTMAPFILE",SHAPEPATH.'MapFiles/defaultmapfile_dev.map');
+define("DEFAULTMAPFILE",SHAPEPATH.'mapfiles/defaultmapfile.map');
 # Wenn SAVEMAPFILE leer ist, wird sie nicht gespeichert.
 # Achtung, wenn die cgi-bin/mapserv ohne Authentifizierung und der Pfad zu save_mapfile.map bekannt ist, kann jeder die Karten des letzten Aufrufs in kvwmap über mapserv?map=<pfad zu save_map.map abfragen. Und wenn wfs zugelassen ist auch die Sachdaten dazu runterladen. Diese Konstante sollte nur zu debug-Zwecken eingeschaltet bleiben.
 define("SAVEMAPFILE",LOGPATH.'save_mapfile.map');                                # Version 1.11.0 
-define("REFMAPFILE",SHAPEPATH.'MapFiles/refmapfile.map');
+define("REFMAPFILE",SHAPEPATH.'mapfiles/refmapfile.map');
 # Ort der Datei, in der die Meldungen beim Debugen geschrieben werden
 define('DEBUGFILE',LOGPATH.VERSION.'_'.$_SESSION['login_name'].'_debug.htm');
 # Level der Fehlermeldungen beim debuggen
