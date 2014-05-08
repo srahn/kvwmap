@@ -1250,15 +1250,16 @@ function formvars_strip($formvars, $strip_list) {
 * }
 * mail_att("empf@domain","Email mit Anhang","Im Anhang sind mehrere Datei",$anhang); 
 **/
-function mail_att($from_name, $from_email, $to_email, $reply_email, $subject, $message, $attachement) {
+function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $subject, $message, $attachement) {
 	$grenze = "---" . md5(uniqid(mt_rand(), 1)) . "---";
 
 	$headers ="MIME-Version: 1.0\r\n";
-	$headers.="From: $from_email\n";
-	$headers.="Content-Type: multipart/mixed;\n\tboundary=$grenze\n";
+	$headers .= 'From: ' . $from_email . "\r\n";
+  $headers .= 'Reply-To: ' . $reply_email . "\r\n";
+  if (!empty($cc_email)) $headers .= 'Cc: ' . $cc_email . "\r\n";
+	$headers .= "Content-Type: multipart/mixed;\n\tboundary=$grenze\r\n";
 
 	$botschaft = "\n--$grenze\n";
-
 	$botschaft.="Content-transfer-encoding: 7BIT\r\n";
 	$botschaft.="Content-type: text/plain; charset=UTF-8\n\n";
 	$botschaft.= $message;
@@ -1277,6 +1278,10 @@ function mail_att($from_name, $from_email, $to_email, $reply_email, $subject, $m
 	$botschaft.=$inhalt_der_datei;
 	$botschaft.="\n\n";
 	$botschaft.="--$grenze";
+#  echo 'to_email: '.$to_email.'<br>';
+#  echo 'subject: '.$subject.'<br>';
+#  echo 'botschaft: '.$botschaft.'<br>';
+#  echo 'headers: '.$headers.'<br>';  
 	if (@mail($to_email, $subject, $botschaft, $headers)) return 1;
 	else return 0;
 }

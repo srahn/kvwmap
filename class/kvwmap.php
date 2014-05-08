@@ -295,7 +295,7 @@ class GUI extends GUI_core{
 		$mail = array();
 		include (SHAPEPATH . 'templates/' . $template_prefix . 'email_template.php');
 		# send email
-		$success = mail_att($mail['from_name'], $mail['from_email'], $mail['to_email'], $mail['reply_email'],  $mail['subject'], $mail['message'], $mail['attachement']);
+		$success = mail_att($mail['from_name'], $mail['from_email'], $mail['to_email'], $mail['cc_email'], $mail['reply_email'],  $mail['subject'], $mail['message'], $mail['attachement']);
 
 	return array("success" => $success, "antrag_id" => $antrag_id, "xml_file" => IMAGEURL . $xml_file_name, "pdf_file" => IMAGEURL . $pdf_file_name, "zip_file" => IMAGEURL . $zip_file_name, "email_text" => $email_text, "email_recipient" => $email_recipient, "authority_processingTime" => $data['authority_processingTime'], "data:" => $data);
 	}
