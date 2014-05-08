@@ -7,7 +7,7 @@
 	$kvwmap_path = "kvwmap_intern";
 	$stelleId = 50; # wenn keine Authentifizierung sein soll, Layer zu Gaststelle zuweisen und hier die Gaststelle auswählen
 	$layerId = 751; # Flurstuecke
-	$selectors = "landId, kreisId, gemeindId, gemarkungId, gemarkungName, flurId, flurstueckId, flurstueckNummer";
+	$selectors = "landId, kreisId, gemeindeId, gemeindeName, gemarkungId, gemarkungName, flurId, flurstueckId, flurstueckNummer";
 	$username = $_REQUEST['username'];
 	$passwort = $_REQUEST['passwort'];
 	# uncommend these two lines to give users access without mandatory username and passwort
