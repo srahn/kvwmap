@@ -1,12 +1,18 @@
 <?php
 # examples for calls
-# http://www.meine-domain.de/kvwmap_intern/api/1.0.0/Satzungsgebiete/?latitude=53.71181&longitude=11.97404&format=json
+# http://www.gdi-service.de/kvwmap_intern/api/1.0.0/flurstuecke/?latitude=53.71181&longitude=11.97404&format=json
+# example for response
+# {"landId":"13","kreisId":"76","gemeindId":"15","gemarkungId":"530","gemarkungName":"Rothen","flurId":"1","flurstueckId":"130530-001-00034\/001.00","flurstueckNummer":"34\/1"}
+
 	$kvwmap_path = "kvwmap_intern";
 	$stelleId = 50; # wenn keine Authentifizierung sein soll, Layer zu Gaststelle zuweisen und hier die Gaststelle auswählen
-	$username = lumberjack;
-	$passwort = lumbertest;	
-	$layerId = 747;
-	$selectors = "id, name, type, erlaubter_durchmesser";
+	$layerId = 751; # Flurstuecke
+	$selectors = "landId, kreisId, gemeindeId, gemeindeName, gemarkungId, gemarkungName, flurId, flurstueckId, flurstueckNummer";
+	$username = $_REQUEST['username'];
+	$passwort = $_REQUEST['passwort'];
+	# uncommend these two lines to give users access without mandatory username and passwort
+	#$username = 'lumberjack';
+	#$passwort = 'lumbertest';
 	
 	# default Values (if not set, we set here the default)
 	$_REQUEST['epsg_code'] == '' ? $epsg_code = 4326     : $epsg_code = $_REQUEST['epsg_code'];  # epsg_code of search point coordinates
@@ -21,6 +27,6 @@
 		$url = $url . "&callback=" . $_REQUEST['callback']; # name of the callback function in jsonp format
 	}
 
-  #echo $url;
+  #echo $url.'</br></br>';
 	echo file_get_contents($url);
 ?>

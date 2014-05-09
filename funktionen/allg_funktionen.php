@@ -1207,5 +1207,97 @@ function get_upload_error_message($code) {
   return $message;
 }
 
+function formvars_strip($formvars, $strip_list) {
+	$strip_array = explode(', ', $strip_list);
+	$stripped_formvars = array();
+	foreach($formvars AS $key => $value) {
+		if (!in_array($key, $strip_array)) {
+#			if (array_key_exists($key, $stripped_formvars)) {
+#				// 1. occurance of key in stripped_formvars: first_value, 2. occurance: [first_val, second_val], more occurances [first_val, second_val, third_val, ...]
+#				is_array($stripped_formvars[$key]) ? array_push($stripped_formvars[$key], $value) : $stripped_formvars[$key] = array($stripped_formvars[$key], $value);
+#			} else {
+				$pos = strpos($value, '[');
+				if ($pos === false) {
+					$stripped_formvars[$key] = stripslashes($value);	
+				} else {
+					$stripped_formvars[$key] = arrStrToArr(stripslashes($value), ',');
+				}
+#			}
+		}
+	}
+	return $stripped_formvars;
+}
 
+/**
+* Funktion sendet e-mail mit Dateien im Anhang
+* siehe http://www.php-einfach.de/codeschnipsel_1114.php
+* @param $anhang Array mit den Elementen "name", "size" und "data" oder Array mit Elementen solcher Arrays
+* $pfad = array(); 
+* $pfad[] = "ordner/datei1.exe"; 
+* $pfad[] = "ordner/datei2.zip"; 
+* $pfad[] = "ordner/datei3.gif"; 
+* 
+* $anhang = array(); 
+* foreach($pfad AS $name) {
+*   $name = basename($name); 
+*   $size = filesize($name); 
+*   $data = implode("",file($name)); 
+*   if (function_exists("mime_content_type")) 
+*     $type = mime_content_type($name); 
+*   else 
+*     $type = "application/octet-stream"; 
+*     $anhang[] = array("name"=>$name, "size"=>$size, "type"=>$type, "data"=>$data); 
+* }
+* mail_att("empf@domain","Email mit Anhang","Im Anhang sind mehrere Datei",$anhang); 
+**/
+function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $subject, $message, $attachement) {
+	$grenze = "---" . md5(uniqid(mt_rand(), 1)) . "---";
+
+	$headers ="MIME-Version: 1.0\r\n";
+	$headers .= 'From: ' . $from_email . "\r\n";
+  $headers .= 'Reply-To: ' . $reply_email . "\r\n";
+  if (!empty($cc_email)) $headers .= 'Cc: ' . $cc_email . "\r\n";
+	$headers .= "Content-Type: multipart/mixed;\n\tboundary=$grenze\r\n";
+
+	$botschaft = "\n--$grenze\n";
+	$botschaft.="Content-transfer-encoding: 7BIT\r\n";
+	$botschaft.="Content-type: text/plain; charset=UTF-8\n\n";
+	$botschaft.= $message;
+	$botschaft.="\n\n";
+	$botschaft.="\n--$grenze\n";
+
+	$botschaft.="Content-Type: application/octetstream;\n\tname=" . basename($attachement) . "\n";
+	$botschaft.="Content-Transfer-Encoding: base64\n";
+	$botschaft.="Content-Disposition: attachment;\n\tfilename=" . basename($attachement) . "\n\n";
+
+	$zeiger_auf_datei=fopen($attachement,"rb");
+	$inhalt_der_datei=fread($zeiger_auf_datei,filesize($attachement));
+	fclose($zeiger_auf_datei);
+
+	$inhalt_der_datei=chunk_split(base64_encode($inhalt_der_datei));
+	$botschaft.=$inhalt_der_datei;
+	$botschaft.="\n\n";
+	$botschaft.="--$grenze";
+#  echo 'to_email: '.$to_email.'<br>';
+#  echo 'subject: '.$subject.'<br>';
+#  echo 'botschaft: '.$botschaft.'<br>';
+#  echo 'headers: '.$headers.'<br>';  
+	if (@mail($to_email, $subject, $botschaft, $headers)) return 1;
+	else return 0;
+}
+
+/*
+* function replaced square brackets at the beginning and the end of the string
+* and return the elements of the string as array separated by the delimmiter.
+* The elements of the string will be replaced by slashes and timed from white spaces and ".
+*/
+function arrStrToArr($str, $delimiter) {
+#	if(is_string($delimiter) and in_array())
+#	echo gettype($delimiter);
+	$arr = explode($delimiter, trim($str, '[]'));
+	foreach ($arr as &$value) {
+		$value = trim(stripslashes($value), '"[]"');
+	}
+	return $arr;
+}
 ?>
