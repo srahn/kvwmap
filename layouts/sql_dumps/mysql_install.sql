@@ -527,6 +527,7 @@ CREATE TABLE `layer` (
   `drawingorder` int(11) default NULL,
   `minscale` int(11) default NULL,
   `maxscale` int(11) default NULL,
+	`symbolscale` INT( 11 ) default NULL,
   `offsite` varchar(11) collate latin1_german2_ci default NULL,
   `ows_srs` varchar(255) collate latin1_german2_ci NOT NULL default 'EPSG:2398',
   `wms_name` varchar(255) collate latin1_german2_ci default NULL,

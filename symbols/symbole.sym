@@ -544,13 +544,6 @@ SYMBOLSET
 		END
 #		STYLE 1 20 END
 	END
-	
-	SYMBOL 
-		NAME "test"
-		TYPE PIXMAP
-		IMAGE "custom/V-Reduzierung Tempo-30.gif"
-		TRANSPARENT 1
-	END
 
 END
 

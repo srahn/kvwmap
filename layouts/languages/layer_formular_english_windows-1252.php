@@ -45,6 +45,7 @@
   $strdrawingorder="drawingorder";
   $strminscale="minscale";
   $strmaxscale="maxscale";
+	$strsymbolscale="symbolscale";
   $stroffsite="offsite";
   $strOWSParameter="OWS-Parameters";
   $strDefaultValues="Default-Values for Task-Asignment";

@@ -349,6 +349,12 @@ else {
 		      		<input name="maxscale" type="text" value="<?php echo $this->formvars['maxscale']; ?>" size="25" maxlength="15">
 		  		</td>
 		  	</tr>
+				<tr>
+		    	<th width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strsymbolscale; ?></th>
+		    	<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
+		      		<input name="symbolscale" type="text" value="<?php echo $this->formvars['symbolscale']; ?>" size="25" maxlength="15">
+		  		</td>
+		  	</tr>
 		  	<tr>
 		    	<th width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $stroffsite; ?></th>
 		    	<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">

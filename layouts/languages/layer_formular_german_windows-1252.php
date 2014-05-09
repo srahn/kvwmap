@@ -46,6 +46,7 @@
   $strdrawingorder="Drawingorder";
   $strminscale="Minscale";
   $strmaxscale="Maxscale";
+	$strsymbolscale="Symbolscale";
   $stroffsite="Offsite";
   $strOWSParameter="OWS-Parameter";
   $strDefaultValues="Default-Werte für Stellen-Zuweisung";

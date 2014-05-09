@@ -14532,6 +14532,8 @@ class db_mapObj extends db_mapObj_core{
     $sql .= "minscale = ".$formvars['minscale'].", ";
     if($formvars['maxscale'] == ''){$formvars['maxscale'] = 'NULL';}
     $sql .= "maxscale = ".$formvars['maxscale'].", ";
+		if($formvars['symbolscale'] == ''){$formvars['symbolscale'] = 'NULL';}
+    $sql .= "symbolscale = ".$formvars['symbolscale'].", ";
     $sql .= "offsite = '".$formvars['offsite']."', ";
     $sql .= "ows_srs = '".$formvars['ows_srs']."', ";
     $sql .= "wms_name = '".$formvars['wms_name']."', ";
@@ -14635,6 +14637,8 @@ class db_mapObj extends db_mapObj_core{
       $sql .= $formvars['minscale'].", ";
       if($formvars['maxscale']==''){$formvars['maxscale']='NULL';}
       $sql .= $formvars['maxscale'].", ";
+			if($formvars['symbolscale']==''){$formvars['symbolscale']='NULL';}
+      $sql .= $formvars['symbolscale'].", ";
       $sql .= "'".$formvars['offsite']."', ";
       $sql .= "'".$formvars['ows_srs']."', ";
       $sql .= "'".$formvars['wms_name']."', ";

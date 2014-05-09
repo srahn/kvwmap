@@ -1174,4 +1174,6 @@ UPDATE used_layer, layer SET requires_id = layer.Layer_ID WHERE requires != '' A
 ALTER TABLE  `used_layer` DROP  `requires`;
 ALTER TABLE  `used_layer` CHANGE  `requires_id`  `requires` INT( 11 ) NULL DEFAULT NULL;
 
+ALTER TABLE  `layer` ADD  `symbolscale` INT( 11 ) NULL AFTER  `maxscale`;
+
 ALTER TABLE  `styles` CHANGE  `angle`  `angle` VARCHAR( 11 ) NULL DEFAULT NULL;
