@@ -263,7 +263,7 @@ else {
   <tr>
   	<td>&nbsp;</td> 
     <td><?php if ($this->formvars[NACHWEIS_PRIMARY_ATTRIBUTE]!='') { ?><a href="index.php?go=Nachweisanzeige&order=<? echo $this->formvars['order']; ?>">&lt;&lt;&nbsp;zur&uuml;ck&nbsp;zum&nbsp;Rechercheergebnis</a><?php } ?></td>
-		<td></td>
+		<td>&nbsp;<b>Maßstab&nbsp;1:&nbsp;</b><input type="text" id="scale" name="nScale" size="5" value="<?php echo round($this->map->scaledenom); ?>"></td>
 	<? if($this->user->rolle->runningcoords != '0'){ ?>
 	<td width="100px"><b>&nbsp;<?php echo $this->strCoordinates; ?>:</b>&nbsp;</td>
 	<td><input type="text" style="border:0px;background-color:transparent" name="runningcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?></td>

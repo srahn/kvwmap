@@ -2077,7 +2077,7 @@ class GUI extends GUI_core{
     $select = $this->mapDB->getSelectFromData($data);
     
     # order by rausnehmen
-  	$orderbyposition = strpos(strtolower($select), 'order by');
+  	$orderbyposition = strrpos(strtolower($select), 'order by');
   	if($orderbyposition !== false){
 	  	$select = substr($select, 0, $orderbyposition);
   	}
@@ -2160,7 +2160,7 @@ class GUI extends GUI_core{
       # Layer erzeugen
       $data = $dbmap->getData($this->formvars['chosen_layer_id']);
       $select = $dbmap->getSelectFromData($data);
-      $orderbyposition = strpos(strtolower($select), 'order by');
+      $orderbyposition = strrpos(strtolower($select), 'order by');
       if($orderbyposition !== false){
       	$orderby = substr($select, $orderbyposition);
         $select = substr($select, 0, $orderbyposition);
@@ -2341,7 +2341,7 @@ class GUI extends GUI_core{
       # Layer erzeugen
       $data = $dbmap->getData($this->formvars['layer_id']);
       $select = $dbmap->getSelectFromData($data);
-      $orderbyposition = strpos(strtolower($select), 'order by');
+      $orderbyposition = strrpos(strtolower($select), 'order by');
       if($orderbyposition !== false){
         $select = substr($select, 0, $orderbyposition);
       }
@@ -2468,7 +2468,7 @@ class GUI extends GUI_core{
 	      # Layer erzeugen
 	      $data = $dbmap->getData($this->formvars['layer_id']);
 	      $select = $dbmap->getSelectFromData($data);
-	      $orderbyposition = strpos(strtolower($select), 'order by');
+	      $orderbyposition = strrpos(strtolower($select), 'order by');
 	      if($orderbyposition !== false){
 	        $select = substr($select, 0, $orderbyposition);
 	      }
@@ -2866,7 +2866,7 @@ class GUI extends GUI_core{
 	    $select = $this->mapDB->getSelectFromData($data);
 	    
 	    # order by rausnehmen
-	  	$orderbyposition = strpos(strtolower($select), 'order by');
+	  	$orderbyposition = strrpos(strtolower($select), 'order by');
 	  	if($orderbyposition !== false){
 		  	$select = substr($select, 0, $orderbyposition);
 	  	}
@@ -5881,7 +5881,7 @@ class GUI extends GUI_core{
 		    $select = $this->mapDB->getSelectFromData($data);
 		    
 		    # order by rausnehmen
-		  	$orderbyposition = strpos(strtolower($select), 'order by');
+		  	$orderbyposition = strrpos(strtolower($select), 'order by');
 		  	if($orderbyposition !== false){
 			  	$select = substr($select, 0, $orderbyposition);
 		  	}
@@ -5893,13 +5893,14 @@ class GUI extends GUI_core{
 	    }
       
       # Ausführen von Aktionen vor der Anzeige der Karte und der Zeichnung
-      if ($this->formvars['CMD']!='') {
-        # Es soll navigiert werden
-        # Navigieren
-        $this->navMap($this->formvars['CMD']);
-        $this->user->rolle->saveSettings($this->map->extent);
-        $this->user->rolle->readSettings();
-      }
+			$oldscale=round($this->map_scaledenom);  
+			if ($this->formvars['CMD']!='') {
+				$this->navMap($this->formvars['CMD']);
+				$this->user->rolle->saveDrawmode($this->formvars['always_draw']);
+			}
+			elseif($oldscale!=$this->formvars['nScale'] AND $this->formvars['nScale'] != '') {
+				$this->scaleMap($this->formvars['nScale']);
+			}
       elseif($nachweis->document['wkt_umring'] != ''){
         # Zoom zum Polygon des Dokumentes
         $this->zoomToNachweis($nachweis,10);
@@ -6223,7 +6224,7 @@ class GUI extends GUI_core{
 		   	# $layerset[0]['attributes'] = $mapDB->add_attribute_values($layerset[0]['attributes'], $layerdb, NULL, true); kann weg, weils weiter unten steht
 
     		# order by rausnehmen
-		  	$orderbyposition = strpos(strtolower($newpath), 'order by');
+		  	$orderbyposition = strrpos(strtolower($newpath), 'order by');
 		  	if($orderbyposition !== false){
 			  	$layerset[0]['attributes']['orderby'] = ' '.substr($newpath, $orderbyposition);
 			  	$newpath = substr($newpath, 0, $orderbyposition);
@@ -6378,8 +6379,6 @@ class GUI extends GUI_core{
         	if($this->formvars['offset_'.$layerset[0]['Layer_ID']] != ''){
           	$sql_limit.=' OFFSET '.$this->formvars['offset_'.$layerset[0]['Layer_ID']];
         	}
-					$this->user->rolle->delete_last_query();
-					$this->user->rolle->save_last_query('Layer-Suche_Suchen', $this->formvars['selected_layer_id'], $sql, $sql_order, $this->formvars['anzahl'], $this->formvars['offset_'.$layerset[0]['Layer_ID']]);
         }
 		
 				$layerset[0]['sql'] = $sql;
@@ -6390,8 +6389,8 @@ class GUI extends GUI_core{
             $layerset[0]['shape'][]=$rs;
           }
           # Anzahl der Datensätze abfragen
-          $sql = "SELECT count(*) FROM (".$sql.") as foo";
-          $ret=$layerdb->execSQL($sql,4, 0);
+          $sql_count = "SELECT count(*) FROM (".$sql.") as foo";
+          $ret=$layerdb->execSQL($sql_count,4, 0);
           if (!$ret[0]) {
             $rs=pg_fetch_array($ret[1]);
             $layerset[0]['count'] = $rs[0];
@@ -6401,27 +6400,31 @@ class GUI extends GUI_core{
         # Steht an dieser Stelle, weil die Auswahlmöglichkeiten von Auswahlfeldern abhängig sein können
         $layerset[0]['attributes'] = $mapDB->add_attribute_values($layerset[0]['attributes'], $layerdb, $layerset[0]['shape']);
         
-        # Querymaps erzeugen
-        if($layerset[0]['querymap'] == 1 AND $layerset[0]['attributes']['privileg'][$layerset[0]['attributes']['the_geom']] >= '0' AND ($layerset[0]['Datentyp'] == 1 OR $layerset[0]['Datentyp'] == 2)){
-          for($k = 0; $k < count($layerset[0]['shape']); $k++){
-            $layerset[0]['querymaps'][$k] = $this->createQueryMap($layerset[0], $k);
-          }
-        }
+				if($layerset[0]['count'] != 0 AND $this->formvars['embedded_subformPK'] == '' AND $this->formvars['embedded'] == '' AND $this->formvars['embedded_dataPDF'] == ''){
+					$this->user->rolle->delete_last_query();
+					$this->user->rolle->save_last_query('Layer-Suche_Suchen', $this->formvars['selected_layer_id'], $sql, $sql_order, $this->formvars['anzahl'], $this->formvars['offset_'.$layerset[0]['Layer_ID']]);
         
-        # Datendrucklayouts abfragen
-        $ddl = new ddl($this->database);
-        $layerset[0]['layouts'] = $ddl->load_layouts($this->Stelle->id, NULL, $layerset[0]['Layer_ID'], array(0,1));
-        
-        $this->qlayerset[0]=$layerset[0];
-    
-        # wenn Attributname/Wert-Paare übergeben wurden, diese im Formular einsetzen
-        if(is_array($this->formvars['attributenames'])){
-          $attributenames = array_values($this->formvars['attributenames']);
-          $values = array_values($this->formvars['values']);
-        }
-        for($i = 0; $i < count($attributenames); $i++){
-          $this->qlayerset[0]['shape'][0][$attributenames[$i]] = $values[$i];
-        }
+					# Querymaps erzeugen
+					if($layerset[0]['querymap'] == 1 AND $layerset[0]['attributes']['privileg'][$layerset[0]['attributes']['the_geom']] >= '0' AND ($layerset[0]['Datentyp'] == 1 OR $layerset[0]['Datentyp'] == 2)){
+						for($k = 0; $k < count($layerset[0]['shape']); $k++){
+							$layerset[0]['querymaps'][$k] = $this->createQueryMap($layerset[0], $k);
+						}
+					}
+					
+					# Datendrucklayouts abfragen
+					$ddl = new ddl($this->database);
+					$layerset[0]['layouts'] = $ddl->load_layouts($this->Stelle->id, NULL, $layerset[0]['Layer_ID'], array(0,1));
+					
+					# wenn Attributname/Wert-Paare übergeben wurden, diese im Formular einsetzen
+					if(is_array($this->formvars['attributenames'])){
+						$attributenames = array_values($this->formvars['attributenames']);
+						$values = array_values($this->formvars['values']);
+					}
+					for($i = 0; $i < count($attributenames); $i++){
+						$this->layerset[0]['shape'][0][$attributenames[$i]] = $values[$i];
+					}
+				}
+				$this->qlayerset[0]=$layerset[0];
       }break;
       
       case MS_WFS : {
@@ -6524,7 +6527,7 @@ class GUI extends GUI_core{
 		    # Spaltenname und from-where abfragen
 		    $select = $this->mapDB->getSelectFromData($data);
 		    # order by rausnehmen
-		  	$orderbyposition = strpos(strtolower($select), 'order by');
+		  	$orderbyposition = strrpos(strtolower($select), 'order by');
 		  	if($orderbyposition !== false){
 			  	$select = substr($select, 0, $orderbyposition);
 		  	}
@@ -7176,7 +7179,7 @@ class GUI extends GUI_core{
     $privileges = $this->Stelle->get_attributes_privileges($this->formvars['chosen_layer_id']);
     $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
     # order by rausnehmen
-  	$orderbyposition = strpos(strtolower($newpath), 'order by');
+  	$orderbyposition = strrpos(strtolower($newpath), 'order by');
   	if($orderbyposition !== false){
 	  	$newpath = substr($newpath, 0, $orderbyposition);
   	}
@@ -7236,7 +7239,7 @@ class GUI extends GUI_core{
     $privileges = $this->Stelle->get_attributes_privileges($this->formvars['chosen_layer_id']);
     $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
     # order by rausnehmen
-  	$orderbyposition = strpos(strtolower($newpath), 'order by');
+  	$orderbyposition = strrpos(strtolower($newpath), 'order by');
   	if($orderbyposition !== false){
 	  	$newpath = substr($newpath, 0, $orderbyposition);
   	}
@@ -7286,7 +7289,7 @@ class GUI extends GUI_core{
     $privileges = $this->Stelle->get_attributes_privileges($this->formvars['chosen_layer_id']);
     $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
     # order by rausnehmen
-  	$orderbyposition = strpos(strtolower($newpath), 'order by');
+  	$orderbyposition = strrpos(strtolower($newpath), 'order by');
   	if($orderbyposition !== false){
 	  	$newpath = substr($newpath, 0, $orderbyposition);
   	}
@@ -7620,7 +7623,7 @@ class GUI extends GUI_core{
 		$attributes = $mapDB->add_attribute_values($attributes, $layerdb, NULL, true);
 		
 		# order by rausnehmen
-  	$orderbyposition = strpos(strtolower($newpath), 'order by');
+  	$orderbyposition = strrpos(strtolower($newpath), 'order by');
   	if($orderbyposition !== false){
 	  	$orderby = ' '.substr($newpath, $orderbyposition);
 	  	$newpath = substr($newpath, 0, $orderbyposition);
@@ -7860,7 +7863,7 @@ class GUI extends GUI_core{
 	    $this->formvars['columnname'] = $data_explosion[0];
 	    $select = $this->mapDB->getSelectFromData($data);
 	    # order by rausnehmen
-	  	$orderbyposition = strpos(strtolower($select), 'order by');
+	  	$orderbyposition = strrpos(strtolower($select), 'order by');
 	  	if($orderbyposition !== false){
 		  	$select = substr($select, 0, $orderbyposition);
 	  	}
@@ -8286,7 +8289,7 @@ class GUI extends GUI_core{
 	    $this->formvars['columnname'] = $data_explosion[0];
 	    $select = $this->mapDB->getSelectFromData($data);
 	    # order by rausnehmen
-	  	$orderbyposition = strpos(strtolower($select), 'order by');
+	  	$orderbyposition = strrpos(strtolower($select), 'order by');
 	  	if($orderbyposition !== false){
 		  	$select = substr($select, 0, $orderbyposition);
 	  	}
@@ -9860,7 +9863,7 @@ class GUI extends GUI_core{
 	    $select = $this->mapDB->getSelectFromData($data);
 	    
 	    # order by rausnehmen
-	  	$orderbyposition = strpos(strtolower($select), 'order by');
+	  	$orderbyposition = strrpos(strtolower($select), 'order by');
 	  	if($orderbyposition !== false){
 		  	$select = substr($select, 0, $orderbyposition);
 	  	}
@@ -9870,10 +9873,13 @@ class GUI extends GUI_core{
 	      $this->formvars['fromwhere'] .= ' where (1=1)';
 	    }
 	  }
-        
+    $oldscale=round($this->map_scaledenom);  
     if ($this->formvars['CMD']!='') {
       $this->navMap($this->formvars['CMD']);
       $this->user->rolle->saveDrawmode($this->formvars['always_draw']);
+    }
+    elseif($oldscale!=$this->formvars['nScale'] AND $this->formvars['nScale'] != '') {
+      $this->scaleMap($this->formvars['nScale']);
     }
     elseif($nachweis != '') {
       # Zoom zum Polygon des Dokumentes
@@ -10154,7 +10160,7 @@ class GUI extends GUI_core{
 	    $select = $this->mapDB->getSelectFromData($data);
 	    
 	    # order by rausnehmen
-	  	$orderbyposition = strpos(strtolower($select), 'order by');
+	  	$orderbyposition = strrpos(strtolower($select), 'order by');
 	  	if($orderbyposition !== false){
 		  	$select = substr($select, 0, $orderbyposition);
 	  	}
@@ -11171,13 +11177,12 @@ class GUI extends GUI_core{
  }
 
  # 2006-07-26 pk
- function SachdatenAnzeige($rect) {
-	if($this->last_query != ''){
-		foreach($this->last_query['layer_ids'] as $layer_id){
-			$this->formvars['qLayer'.$layer_id] = 1;
+	function SachdatenAnzeige($rect){
+		if($this->last_query != ''){
+			foreach($this->last_query['layer_ids'] as $layer_id){
+				$this->formvars['qLayer'.$layer_id] = 1;
+			}
 		}
-	}
-	$this->user->rolle->delete_last_query();
     if(is_string($rect)){
       $this->querypolygon = $rect;
     }
@@ -11280,14 +11285,14 @@ class GUI extends GUI_core{
 				    # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)  ---> steht weiter unten
 
             # order by rausnehmen
-				  	$orderbyposition = strpos(strtolower($newpath), 'order by');
+				  	$orderbyposition = strrpos(strtolower($newpath), 'order by');
 				  	if($orderbyposition !== false){
 					  	$layerset[$i]['attributes']['orderby'] = ' '.substr($newpath, $orderbyposition);
 					  	$newpath = substr($newpath, 0, $orderbyposition);
 				  	}
 				  	
 				  	# group by rausnehmen
-						$groupbyposition = strpos(strtolower($newpath), 'group by');
+						$groupbyposition = strrpos(strtolower($newpath), 'group by');
 						if($groupbyposition !== false){
 							$layerset[$i]['attributes']['groupby'] = ' '.substr($newpath, $groupbyposition);
 							$newpath = substr($newpath, 0, $groupbyposition);
@@ -11503,8 +11508,6 @@ class GUI extends GUI_core{
             }
 
             $layerset[$i]['sql'] = $sql;
-						
-						$this->user->rolle->save_last_query('Sachdaten', $layerset[$i]['Layer_ID'], $sql, $sql_order, $this->formvars['anzahl'], $this->formvars['offset_'.$layerset[$i]['Layer_ID']]);
 			
             $ret=$layerdb->execSQL($sql.$sql_order.$sql_limit,4, 0);
             if (!$ret[0]) {
@@ -11512,8 +11515,8 @@ class GUI extends GUI_core{
                 $layerset[$i]['shape'][]=$rs;
               }
               # Anzahl der Datensätze abfragen
-              $sql = "SELECT count(*) FROM (".$sql.") as foo";
-              $ret=$layerdb->execSQL($sql,4, 0);
+              $sql_count = "SELECT count(*) FROM (".$sql.") as foo";
+              $ret=$layerdb->execSQL($sql_count,4, 0);
               if (!$ret[0]) {
                 $rs=pg_fetch_array($ret[1]);
                 $layerset[$i]['count'] = $rs[0];
@@ -11522,18 +11525,22 @@ class GUI extends GUI_core{
             # Hier nach der Abfrage der Sachdaten die weiteren Attributinformationen hinzufügen
             # Steht an dieser Stelle, weil die Auswahlmöglichkeiten von Auswahlfeldern abhängig sein können
             $layerset[$i]['attributes'] = $this->mapDB->add_attribute_values($layerset[$i]['attributes'], $layerdb, $layerset[$i]['shape']);
-                        
-            # Querymaps erzeugen
-            if($layerset[$i]['querymap'] == 1 AND $layerset[$i]['attributes']['privileg'][$layerset[$i]['attributes']['the_geom']] >= '0' AND ($layerset[$i]['Datentyp'] == 1 OR $layerset[$i]['Datentyp'] == 2)){
-              for($k = 0; $k < count($layerset[$i]['shape']); $k++){
-                $layerset[$i]['querymaps'][$k] = $this->createQueryMap($layerset[$i], $k);
-              }
-            }
-            
-            # Datendrucklayouts abfragen
-            $this->ddl = new ddl($this->database);
-            $layerset[$i]['layouts'] = $this->ddl->load_layouts($this->Stelle->id, NULL, $layerset[$i]['Layer_ID'], array(0,1));
-            
+                     
+						if($layerset[$i]['count'] != 0){
+							$this->user->rolle->delete_last_query();
+							$this->user->rolle->save_last_query('Sachdaten', $layerset[$i]['Layer_ID'], $sql, $sql_order, $this->formvars['anzahl'], $this->formvars['offset_'.$layerset[$i]['Layer_ID']]);
+							
+							# Querymaps erzeugen
+							if($layerset[$i]['querymap'] == 1 AND $layerset[$i]['attributes']['privileg'][$layerset[$i]['attributes']['the_geom']] >= '0' AND ($layerset[$i]['Datentyp'] == 1 OR $layerset[$i]['Datentyp'] == 2)){
+								for($k = 0; $k < count($layerset[$i]['shape']); $k++){
+									$layerset[$i]['querymaps'][$k] = $this->createQueryMap($layerset[$i], $k);
+								}
+							}
+							
+							# Datendrucklayouts abfragen
+							$this->ddl = new ddl($this->database);
+							$layerset[$i]['layouts'] = $this->ddl->load_layouts($this->Stelle->id, NULL, $layerset[$i]['Layer_ID'], array(0,1));
+						}            
             $this->qlayerset[]=$layerset[$i];
           }  break; # ende Layer ist aus postgis
 
@@ -11919,14 +11926,14 @@ class GUI extends GUI_core{
       
 
       # order by rausnehmen
-	  	$orderbyposition = strpos(strtolower($path), 'order by');
+	  	$orderbyposition = strrpos(strtolower($path), 'order by');
 	  	if($orderbyposition !== false){
 		  	$layerset[$i]['attributes']['orderby'] = ' '.substr($path, $orderbyposition);
 		  	$path = substr($path, 0, $orderbyposition);
 	  	}
 	  	
 	  	# group by rausnehmen
-			$groupbyposition = strpos(strtolower($path), 'group by');
+			$groupbyposition = strrpos(strtolower($path), 'group by');
 			if($groupbyposition !== false){
 				$layerset[$i]['attributes']['groupby'] = ' '.substr($path, $groupbyposition);
 				$path = substr($path, 0, $groupbyposition);

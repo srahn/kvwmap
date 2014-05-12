@@ -2817,7 +2817,7 @@ $vertex_catch_functions = '
 	}
 
 	function deactivate_foreign_vertex(evt){
-		evt.target.setAttribute("opacity", "0.1");
+		evt.target.setAttribute("opacity", "0.3");
 	}
 
 	function add_foreign_vertex(evt){
@@ -2862,7 +2862,7 @@ $vertex_catch_functions = '
 				coords[1] = Math.round((coords[1] - top.currentform.miny.value)/parseFloat(top.currentform.pixelsize.value));
 				circle[i].setAttribute("cx", coords[0]);
 				circle[i].setAttribute("cy", coords[1]);
-				circle[i].setAttribute("style","fill: #FF0000");
+				circle[i].setAttribute("style","fill: #00DD00");
 				circle[i].setAttribute("id", "foreign_vertex_"+i);
 				parent.appendChild(circle[i]);
 			}
@@ -3094,7 +3094,7 @@ $measurefunctions = '
 	  <g id="templates">
 	  	<circle style="-moz-user-select: none;" id="kreis" cx="-5000" cy="-5000" r="7" opacity="0.3" onmouseover="activate_vertex(evt)" onmouseout="deactivate_vertex(evt)" onmousedown="select_vertex(evt)" onmousemove="move_vertex(evt)" onmouseup="end_vertex_move(evt)" />
 			<line stroke="#111" stroke-width="14" id="linie" x1="-5000" y1="-5000" x2="-5001" y2="-5001" opacity="0.3" onmouseover="activate_line(evt)" onmousemove="activate_line(evt)" />
-			<circle id="kreis3" cx="-5000" cy="-5000" r="7" opacity="0.1" onmouseover="activate_foreign_vertex(evt)" onmouseout="deactivate_foreign_vertex(evt)" onmouseup="add_foreign_vertex(evt)" />
+			<circle id="kreis3" cx="-5000" cy="-5000" r="7" opacity="0.3" onmouseover="activate_foreign_vertex(evt)" onmouseout="deactivate_foreign_vertex(evt)" onmouseup="add_foreign_vertex(evt)" />
 	  </g>
 	  
 
