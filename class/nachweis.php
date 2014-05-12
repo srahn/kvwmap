@@ -323,31 +323,20 @@ class Nachweis {
     # test des Datum
     if ($datum=='') {
       $errmsg.='Bitte geben Sie ein Datum an!\n';
-      
-    }
-    # test der Jahresangabe
-/*  if ($Jahr==''){
-      $errmsg.='Bitte geben Sie das Jahr an! \n';
     }
     else{
-      if (strlen($Jahr)!=4) {
-        $errmsg.='Geben sie das Jahr in der richtigen Form an. \n' ;
-      }
-      else {
-        # richtigkeit des Datums checken
-        if (checkdate($Monat, $Tag, $Jahr)==false) {
-          $errmsg.= 'Datum ist nicht korrekt angegeben! \n' ;
-        }
-
-        # prüfen ob Datum in Zukunft
-        $realtime=time();
-        $Zeit=mktime(0, 0, 0, $Monat, $Tag, $Jahr);
-        if ($realtime < $Zeit) {
-          $errmsg.='Das angegebene Datum liegt in der Zukunft! \n' ;
-        } 
-      }
-    }
-*/    
+			# richtigkeit des Datums checken
+			$explosion = explode('.', $datum);
+			if (checkdate($explosion[1], $explosion[0], $explosion[2])==false) {
+				$errmsg.= 'Datum ist nicht korrekt angegeben! \n' ;
+			}
+			# prüfen ob Datum in Zukunft
+			$realtime=time();
+			$Zeit=mktime(0, 0, 0, $explosion[1], $explosion[0], $explosion[2]);
+			if ($realtime < $Zeit) {
+				$errmsg.='Das angegebene Datum liegt in der Zukunft! \n' ;
+			} 
+    }    
     
     #Test des Blattformat
     if ($Blattformat==''){
