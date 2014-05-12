@@ -58,6 +58,16 @@ function showMapImage(){
   document.getElementById('MapImageLink').href='index.php?go=showMapImage&svg_string='+document.GUI.svg_string.value;
 }
 
+function slide_legend_in(evt){
+	document.getElementById('legenddiv').className = 'slidinglegend_slidein';
+}
+
+function slide_legend_out(evt){
+	if(window.outerWidth - evt.pageX > 100){
+		document.getElementById('legenddiv').className = 'slidinglegend_slideout';
+	}
+}
+
 <? if (!ie_check()){ ?>					// Firefox, Chrome
 
 function switchlegend(){
@@ -266,7 +276,7 @@ if($this->formvars['gps_follow'] == ''){
       </div>
       </td>
       <td valign="top">
-				<div id="legenddiv" <? if (!ie_check() AND $this->user->rolle->hideLegend)echo 'class="slidinglegend"'; else echo 'class="normallegend"'; ?>>
+				<div id="legenddiv" onmouseenter="slide_legend_in(event);" onmouseleave="slide_legend_out(event);" <? if (!ie_check() AND $this->user->rolle->hideLegend)echo 'class="slidinglegend_slideout"'; else echo 'class="normallegend"'; ?>>
 					<table width="100%" border="0" cellpadding="0" cellspacing="0">
 						<tr>
 							<td bgcolor="<?php echo BG_DEFAULT ?>" align="left"><?php
