@@ -12802,24 +12802,17 @@ class GUI extends GUI_core{
       # the_geom from tabelle, übernehmen wie es ist.
       $subquery = $data;
     }
-	
+		
 		# Abfragen der Datenbankverbindung des Layers
     $layerdb=$this->mapDB->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
     
-  	#$data_attributes = $this->mapDB->getDataAttributes($layerdb, $layer_id);
-	  	#$this->attributes['the_geom'] = $data_attributes['the_geom'];
-	  	$explosion = explode(' ', $data);
+	  $explosion = explode(' ', $data);
   	$this->attributes['the_geom'] = $explosion[0];
 
 		# Filter berücksichtigen
 		$filter = $this->mapDB->getFilter($layer_id, $this->Stelle->id);
 		if($filter != ''){
-			if(strpos(strtolower($subquery), ' where ') !== false){
-				$subquery .= ' AND '.$filter;
-			}
-			else{
-				$subquery .= ' WHERE '.$filter;
-			}
+			$subquery .= ' WHERE '.$filter;
 		}
 
     # Erzeugen des Abfragestatements für den maximalen Extent aus dem Data String
