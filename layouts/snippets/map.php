@@ -71,17 +71,17 @@ function slide_legend_out(evt){
 <? if (!ie_check()){ ?>					// Firefox, Chrome
 
 function switchlegend(){
-	if(document.getElementById('legenddiv').className == 'slidinglegend'){
+	if(document.getElementById('legenddiv').className == 'normallegend'){
+		document.getElementById('legenddiv').className = 'slidinglegend_slideout';
+		ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=changeLegendDisplay&hide=1', new Array('', ''), new Array("", "execute_function"));
+		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>maximize_legend.png';
+		document.getElementById('LegendMinMax').title="Legende zeigen";
+	}
+	else{
 		document.getElementById('legenddiv').className = 'normallegend';
 		ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=changeLegendDisplay&hide=0', new Array('', ''), new Array("", "execute_function"));
 		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>minimize_legend.png';
 		document.getElementById('LegendMinMax').title="Legende verstecken";
-	}
-	else{
-		document.getElementById('legenddiv').className = 'slidinglegend';
-		ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=changeLegendDisplay&hide=1', new Array('', ''), new Array("", "execute_function"));
-		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>maximize_legend.png';
-		document.getElementById('LegendMinMax').title="Legende zeigen";
 	}
 }
 
@@ -276,7 +276,7 @@ if($this->formvars['gps_follow'] == ''){
       </div>
       </td>
       <td valign="top">
-				<div id="legenddiv" onmouseenter="slide_legend_in(event);" onmouseleave="slide_legend_out(event);" <? if (!ie_check() AND $this->user->rolle->hideLegend)echo 'class="slidinglegend_slideout"'; else echo 'class="normallegend"'; ?>>
+				<div id="legenddiv" <? if (!ie_check() AND $this->user->rolle->hideLegend)echo 'onmouseenter="slide_legend_in(event);" onmouseleave="slide_legend_out(event);" class="slidinglegend_slideout"'; else echo 'class="normallegend"'; ?>>
 					<table width="100%" border="0" cellpadding="0" cellspacing="0">
 						<tr>
 							<td bgcolor="<?php echo BG_DEFAULT ?>" align="left"><?php
