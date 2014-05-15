@@ -11023,6 +11023,7 @@ class GUI extends GUI_core{
       }
     }
     else{
+			$this->last_query = $this->user->rolle->get_last_query();
       if($this->formvars['search']){        # man kam von der Suche   -> nochmal suchen
         $this->GenerischeSuche_Suchen();
       }
