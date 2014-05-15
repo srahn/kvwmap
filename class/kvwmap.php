@@ -2077,8 +2077,9 @@ class GUI extends GUI_core{
     $select = $this->mapDB->getSelectFromData($data);
     
     # order by rausnehmen
-  	$orderbyposition = strrpos(strtolower($select), 'order by');
-  	if($orderbyposition !== false){
+		$orderbyposition = strrpos(strtolower($select), 'order by');
+		$lastfromposition = strrpos(strtolower($select), 'from');
+		if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
 	  	$select = substr($select, 0, $orderbyposition);
   	}
     
@@ -2160,8 +2161,10 @@ class GUI extends GUI_core{
       # Layer erzeugen
       $data = $dbmap->getData($this->formvars['chosen_layer_id']);
       $select = $dbmap->getSelectFromData($data);
-      $orderbyposition = strrpos(strtolower($select), 'order by');
-      if($orderbyposition !== false){
+			
+			$orderbyposition = strrpos(strtolower($select), 'order by');
+			$lastfromposition = strrpos(strtolower($select), 'from');
+			if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
       	$orderby = substr($select, $orderbyposition);
         $select = substr($select, 0, $orderbyposition);
       }
@@ -2341,8 +2344,10 @@ class GUI extends GUI_core{
       # Layer erzeugen
       $data = $dbmap->getData($this->formvars['layer_id']);
       $select = $dbmap->getSelectFromData($data);
-      $orderbyposition = strrpos(strtolower($select), 'order by');
-      if($orderbyposition !== false){
+			
+			$orderbyposition = strrpos(strtolower($select), 'order by');
+			$lastfromposition = strrpos(strtolower($select), 'from');
+			if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
         $select = substr($select, 0, $orderbyposition);
       }
       if(strpos(strtolower($select), 'oid') === false){
@@ -2468,8 +2473,10 @@ class GUI extends GUI_core{
 	      # Layer erzeugen
 	      $data = $dbmap->getData($this->formvars['layer_id']);
 	      $select = $dbmap->getSelectFromData($data);
-	      $orderbyposition = strrpos(strtolower($select), 'order by');
-	      if($orderbyposition !== false){
+				
+				$orderbyposition = strrpos(strtolower($select), 'order by');
+				$lastfromposition = strrpos(strtolower($select), 'from');
+				if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
 	        $select = substr($select, 0, $orderbyposition);
 	      }
 	      if(strpos(strtolower($select), 'oid') === false){
@@ -2867,7 +2874,8 @@ class GUI extends GUI_core{
 	    
 	    # order by rausnehmen
 	  	$orderbyposition = strrpos(strtolower($select), 'order by');
-	  	if($orderbyposition !== false){
+			$lastfromposition = strrpos(strtolower($select), 'from');
+			if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
 		  	$select = substr($select, 0, $orderbyposition);
 	  	}
 	    
@@ -5882,7 +5890,8 @@ class GUI extends GUI_core{
 		    
 		    # order by rausnehmen
 		  	$orderbyposition = strrpos(strtolower($select), 'order by');
-		  	if($orderbyposition !== false){
+				$lastfromposition = strrpos(strtolower($select), 'from');
+				if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
 			  	$select = substr($select, 0, $orderbyposition);
 		  	}
 		    
@@ -6225,7 +6234,8 @@ class GUI extends GUI_core{
 
     		# order by rausnehmen
 		  	$orderbyposition = strrpos(strtolower($newpath), 'order by');
-		  	if($orderbyposition !== false){
+				$lastfromposition = strrpos(strtolower($newpath), 'from');
+		  	if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
 			  	$layerset[0]['attributes']['orderby'] = ' '.substr($newpath, $orderbyposition);
 			  	$newpath = substr($newpath, 0, $orderbyposition);
 		  	}
@@ -6528,7 +6538,8 @@ class GUI extends GUI_core{
 		    $select = $this->mapDB->getSelectFromData($data);
 		    # order by rausnehmen
 		  	$orderbyposition = strrpos(strtolower($select), 'order by');
-		  	if($orderbyposition !== false){
+				$lastfromposition = strrpos(strtolower($select), 'from');
+				if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
 			  	$select = substr($select, 0, $orderbyposition);
 		  	}
 		    $this->formvars['fromwhere'] = 'from ('.$select.') as foo where 1=1';
@@ -7179,8 +7190,10 @@ class GUI extends GUI_core{
     $privileges = $this->Stelle->get_attributes_privileges($this->formvars['chosen_layer_id']);
     $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
     # order by rausnehmen
-  	$orderbyposition = strrpos(strtolower($newpath), 'order by');
-  	if($orderbyposition !== false){
+		
+		$orderbyposition = strrpos(strtolower($newpath), 'order by');
+		$lastfromposition = strrpos(strtolower($newpath), 'from');
+		if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
 	  	$newpath = substr($newpath, 0, $orderbyposition);
   	}
 		$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
@@ -7240,7 +7253,8 @@ class GUI extends GUI_core{
     $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
     # order by rausnehmen
   	$orderbyposition = strrpos(strtolower($newpath), 'order by');
-  	if($orderbyposition !== false){
+		$lastfromposition = strrpos(strtolower($newpath), 'from');
+		if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
 	  	$newpath = substr($newpath, 0, $orderbyposition);
   	}
 		$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
@@ -7290,7 +7304,8 @@ class GUI extends GUI_core{
     $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
     # order by rausnehmen
   	$orderbyposition = strrpos(strtolower($newpath), 'order by');
-  	if($orderbyposition !== false){
+		$lastfromposition = strrpos(strtolower($newpath), 'from');
+		if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
 	  	$newpath = substr($newpath, 0, $orderbyposition);
   	}
     $attributes = $mapDB->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, $privileges['attributenames']);
@@ -7624,7 +7639,8 @@ class GUI extends GUI_core{
 		
 		# order by rausnehmen
   	$orderbyposition = strrpos(strtolower($newpath), 'order by');
-  	if($orderbyposition !== false){
+		$lastfromposition = strrpos(strtolower($newpath), 'from');
+		if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
 	  	$orderby = ' '.substr($newpath, $orderbyposition);
 	  	$newpath = substr($newpath, 0, $orderbyposition);
   	}
@@ -7863,8 +7879,10 @@ class GUI extends GUI_core{
 	    $this->formvars['columnname'] = $data_explosion[0];
 	    $select = $this->mapDB->getSelectFromData($data);
 	    # order by rausnehmen
-	  	$orderbyposition = strrpos(strtolower($select), 'order by');
-	  	if($orderbyposition !== false){
+			
+			$orderbyposition = strrpos(strtolower($select), 'order by');
+			$lastfromposition = strrpos(strtolower($select), 'from');
+			if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
 		  	$select = substr($select, 0, $orderbyposition);
 	  	}
 	    $this->formvars['fromwhere'] = 'from ('.$select.') as foo where 1=1';
@@ -8290,7 +8308,8 @@ class GUI extends GUI_core{
 	    $select = $this->mapDB->getSelectFromData($data);
 	    # order by rausnehmen
 	  	$orderbyposition = strrpos(strtolower($select), 'order by');
-	  	if($orderbyposition !== false){
+			$lastfromposition = strrpos(strtolower($select), 'from');
+			if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
 		  	$select = substr($select, 0, $orderbyposition);
 	  	}
 	    $this->formvars['fromwhere'] = 'from ('.$select.') as foo where 1=1';
@@ -9864,7 +9883,8 @@ class GUI extends GUI_core{
 	    
 	    # order by rausnehmen
 	  	$orderbyposition = strrpos(strtolower($select), 'order by');
-	  	if($orderbyposition !== false){
+			$lastfromposition = strrpos(strtolower($select), 'from');
+			if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
 		  	$select = substr($select, 0, $orderbyposition);
 	  	}
 	    
@@ -10161,7 +10181,8 @@ class GUI extends GUI_core{
 	    
 	    # order by rausnehmen
 	  	$orderbyposition = strrpos(strtolower($select), 'order by');
-	  	if($orderbyposition !== false){
+			$lastfromposition = strrpos(strtolower($select), 'from');
+			if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
 		  	$select = substr($select, 0, $orderbyposition);
 	  	}
 	    
@@ -11285,8 +11306,10 @@ class GUI extends GUI_core{
 				    # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)  ---> steht weiter unten
 
             # order by rausnehmen
-				  	$orderbyposition = strrpos(strtolower($newpath), 'order by');
-				  	if($orderbyposition !== false){
+						
+						$orderbyposition = strrpos(strtolower($newpath), 'order by');
+						$lastfromposition = strrpos(strtolower($newpath), 'from');
+						if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
 					  	$layerset[$i]['attributes']['orderby'] = ' '.substr($newpath, $orderbyposition);
 					  	$newpath = substr($newpath, 0, $orderbyposition);
 				  	}
@@ -11926,8 +11949,10 @@ class GUI extends GUI_core{
       
 
       # order by rausnehmen
-	  	$orderbyposition = strrpos(strtolower($path), 'order by');
-	  	if($orderbyposition !== false){
+			
+			$orderbyposition = strrpos(strtolower($path), 'order by');
+			$lastfromposition = strrpos(strtolower($path), 'from');
+			if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
 		  	$layerset[$i]['attributes']['orderby'] = ' '.substr($path, $orderbyposition);
 		  	$path = substr($path, 0, $orderbyposition);
 	  	}
