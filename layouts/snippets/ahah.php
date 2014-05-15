@@ -59,7 +59,14 @@ function ahahDone(url, targets, req, actions) {
 							
 							scripts = targets[i].getElementsByTagName("script");		// Alle script-Bloecke evaln damit diese Funktionen bekannt sind
 							for(s = 0; s < scripts.length; s++){
-								eval(scripts[s].innerHTML);
+								if(scripts[s].hasAttribute("src")){
+									var script = document.createElement("script");
+									script.setAttribute("src", scripts[s].src);
+									document.head.appendChild(script);
+								}
+								else{
+									eval(scripts[s].innerHTML);
+								}
 							}
 						}
 				  break;
