@@ -28,6 +28,28 @@
 
 class pgdatabase extends pgdatabase_alkis{
 
+	function getForstamt($FlurstKennz) {
+    $sql ="SELECT a.forstamt AS schluessel,a.name FROM alb_flurstuecke AS f,alb_v_forstaemter AS a";
+    $sql.=" WHERE f.forstamt=a.forstamt AND f.flurstkennz = '".$FlurstKennz."'";
+    $queryret=$this->execSQL($sql, 4, 0);
+    if ($queryret[0]) {
+      $ret[0]=1;
+      $ret[1]=$queryret[1];
+    }
+    else {
+      $ret[0]=0;
+      if (pg_num_rows($queryret[1])>0) {
+        $rs=pg_fetch_array($queryret[1]);
+        $Forstamt=$rs;
+      }
+      else {
+        $Forstamt['name']='ungebucht';
+      }
+      $ret[1]=$Forstamt;
+    }
+    return $ret;
+  }
+
   function getGemeindeListeByKreisGemeinden($Gemeinden){
     $sql ="SELECT DISTINCT g.gemeinde AS id,g.gemeindename AS name";
     $sql.=" FROM alb_v_gemeinden AS g WHERE 1=1";

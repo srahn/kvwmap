@@ -19,7 +19,7 @@ class wfs{
 	
 	function describe_featuretype_request(){
 		$request = $this->url.'&service=WFS&request=describefeaturetype&version='.$this->version.'&typename='.$this->typename;
-		$this->gml = file_get_contents($request);
+		$this->gml = url_get_contents($request);
 	}
 	
 	function create_filter($attributenames, $operators, $values){

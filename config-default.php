@@ -68,6 +68,8 @@ $menue_legend_widths = array('gui.php' => 485, 'gui_button.php' => 486);		# Vers
 define('LOGIN', 'login.php');																# Version 1.8.0
 # Seite zur Fehlerbehandlung, die durch fehlerhafte Layer verursacht werden; unterhalb von /snippets
 define('LAYER_ERROR_PAGE', 'layer_error_page.php');					# Version 1.14
+# Geschwindigkeit der Warteanimation (normal: 6, 0 = keine Animation)
+define('WAITING_ANIMATION_SPEED', 6);												# Version 1.14
 
 ### Einstellungen für das Menü
 # Da die Bezeichnungen der Menüs frei wählbar sind, muss man hier angegen
@@ -141,9 +143,6 @@ switch ($subnetaddr) {
     define('URL','http://localhost/');
   }
 }
-# wenn die Internetverbindung über einen Proxy hergestellt wird, kann man diesen hier angeben
-# sie wird dann z.B. bei getfeatureinfo-Abfragen berücksichtigt
-define('HTTP_PROXY' , '');																						# Version 1.14
 # -----------------Version 1.6.6 End
 define('MAPSERV_CGI_BIN',URL.'cgi-bin/mapserv');
 define('LOGPATH',INSTALLPATH.'logs/');

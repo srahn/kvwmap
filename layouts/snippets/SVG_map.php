@@ -286,7 +286,7 @@ $svg='<?xml version="1.0"?>
 	var mousewheelloop = 0;
 	var stopnavigation = false;
 	var currentTheta = 0;
-  var thetaDelta = 6; // The amount to rotate the square about every 16.7 milliseconds, in degrees.
+  var thetaDelta = '.WAITING_ANIMATION_SPEED.'; // The amount to rotate the square about every 16.7 milliseconds, in degrees.
 	var requestAnimationFrameID;
 	var last_x = 0;
   		

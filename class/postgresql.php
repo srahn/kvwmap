@@ -180,7 +180,7 @@ class pgdatabase_alkis extends pgdatabase_core {
         else{
 	        $table = $this->pg_field_table2($fieldname, $fieldstring[$i], $select);
 	        $tablename = $table['name'];
-	        if($tablename == NULL AND $name_pair['real_name'] != ''){
+					if($tablename == NULL AND $name_pair != ''){
 	          $table = $this->pg_field_table2($name_pair['real_name'], $fieldstring[$i], $select);
 	          $tablename = $table['name'];
 	        }
@@ -202,7 +202,7 @@ class pgdatabase_alkis extends pgdatabase_core {
 
         # Attributtyp
         $fieldtype = pg_field_type($ret[1], $i);
-        if($name_pair['no_real_attribute']) $fieldtype = 'not_saveable';
+				if($name_pair != '' AND $name_pair['no_real_attribute']) $fieldtype = 'not_saveable';
         $fields['type'][] = $fieldtype;
         # Geometrietyp
         if($fieldtype == 'geometry'){
@@ -1451,11 +1451,11 @@ class pgdatabase_alkis extends pgdatabase_core {
   }
   
   function getALBData($FlurstKennz) {
-    $sql ="SELECT lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, zaehler, nenner, k.schluesselgesamt AS kreisid, k.bezeichnung as kreisname, f.land::text||f.gemarkungsnummer::text as gemkgschl, g_g.gemarkungsname as gemkgname, g.schluesselgesamt as gemeinde, g_g.gemeindename";
+    $sql ="SELECT lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, zaehler, nenner, k.schluesselgesamt AS kreisid, k.bezeichnung as kreisname, f.land::text||f.gemarkungsnummer::text as gemkgschl, ppg.gemarkungsname as gemkgname, ppg.land::text||ppg.regierungsbezirk::text||ppg.kreis::text||ppg.gemeinde::text as gemeinde, ppge.gemeindename,d.stelle as finanzamt, d.bezeichnung AS finanzamtname, zeitpunktderentstehung::date as entsteh ";
 	  //$sql.=",f.pruefzeichen,f.status,f.entsteh,f.letzff,f.aktunr,f.karte,f.baublock,f.koorrw,f.koorhw,f.forstamt,fa.finanzamt,fa.name AS finanzamtname,";
-	  $sql.=" FROM alkis.ax_kreisregion AS k, alkis.ax_gemeinde as g, alkis.gemeinde_gemarkung AS g_g, alkis.ax_flurstueck AS f";
+	  $sql.="FROM alkis.ax_kreisregion AS k, alkis.pp_gemeinde as ppge, alkis.pp_gemarkung AS ppg, alkis.ax_dienststelle as d, alkis.ax_flurstueck AS f ";
 	  //$sql.="LEFT JOIN alb_v_finanzaemter AS fa ON f.finanzamt=fa.finanzamt";
-	  $sql.=" WHERE f.gemarkungsnummer=g_g.gemarkung AND f.kreis = k.kreis AND f.flurstueckskennzeichen='".$FlurstKennz."'";
+	  $sql.="WHERE f.gemarkungsnummer=ppg.gemarkung AND ppge.land = ppg.land AND ppge.gemeinde = ppg.gemeinde AND f.kreis = k.kreis AND d.stellenart = 1200 AND d.stelle::integer = ANY(f.stelle) AND f.flurstueckskennzeichen='".$FlurstKennz."'";
     #echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0]) {
@@ -1858,7 +1858,7 @@ class pgdatabase_alkis extends pgdatabase_core {
   }
   
   function getNutzung($FlurstKennz) {
-    $sql ="SELECT round(st_area(st_intersection(n.wkb_geometry,f.wkb_geometry))::numeric,0) AS flaeche, c.class as nutzungskennz, case when c.label is null then m.title else m.title||' - '||c.label end as bezeichnung, n.info, n.zustand, n.name, m.gruppe,c.label, c.blabla";
+    $sql ="SELECT round(st_area(st_intersection(n.wkb_geometry,f.wkb_geometry))::numeric * amtlicheflaeche / st_area(f.wkb_geometry)) AS flaeche, c.class as nutzungskennz, case when c.label is null then m.title else m.title||' - '||c.label end as bezeichnung, n.info, n.zustand, n.name, m.gruppe,c.label, c.blabla";
 		$sql.=" FROM alkis.ax_flurstueck f, alkis.nutzung n";
 		$sql.=" JOIN alkis.nutzung_meta m ON m.nutz_id=n.nutz_id";
 		$sql.=" LEFT JOIN alkis.nutzung_class c ON c.nutz_id=n.nutz_id AND c.class=n.class";
@@ -2713,8 +2713,8 @@ class pgdatabase_alkis extends pgdatabase_core {
   }
 
   function getForstamt($FlurstKennz) {
-    $sql ="SELECT a.forstamt AS schluessel,a.name FROM alb_flurstuecke AS f,alb_v_forstaemter AS a";
-    $sql.=" WHERE f.forstamt=a.forstamt AND f.flurstkennz = '".$FlurstKennz."'";
+    $sql ="SELECT d.stelle as schluessel, d.bezeichnung as name FROM alkis.ax_dienststelle as d, alkis.ax_flurstueck as f";
+    $sql.=" WHERE d.stellenart = 1400 AND d.stelle::integer = ANY(f.stelle) AND f.flurstueckskennzeichen = '".$FlurstKennz."'";
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0]) {
       $ret[0]=1;
@@ -3636,7 +3636,7 @@ class pgdatabase_alkis extends pgdatabase_core {
 	function getEigentuemerListeFromJagdbezirke($oids){
 		$sql = "SELECT round((st_area(st_memunion(the_geom_inter))*100/j_flaeche)::numeric, 2) as anteil_alk, round((sum(flaeche)*(st_area(st_memunion(the_geom_inter))/st_area(st_memunion(the_geom))))::numeric, 2) AS albflaeche, eigentuemer";
 		$sql.= " FROM(SELECT distinct st_area(jagdbezirke.the_geom) as j_flaeche, f.amtlicheflaeche as flaeche, array_to_string(array(";
-		$sql.= "SELECT distinct p.nachnameoderfirma||', '||p.vorname as name";
+		$sql.= "SELECT distinct array_to_string(array[p.nachnameoderfirma, p.vorname], ' ') as name ";
 		$sql.= "FROM alkis.ax_flurstueck ff ";
 		$sql.= "LEFT JOIN (alkis.alkis_beziehungen bsf LEFT JOIN alkis.alkis_beziehungen s2s ON s2s.beziehung_zu = bsf.beziehung_zu) ON ff.gml_id = bsf.beziehung_von ";
 		$sql.= "LEFT JOIN alkis.ax_buchungsstelle s ON s2s.beziehung_zu = s.gml_id OR s2s.beziehung_von = s.gml_id ";
@@ -3649,7 +3649,8 @@ class pgdatabase_alkis extends pgdatabase_core {
 		$sql.= "LEFT JOIN alkis.lk_ax_eigentuemerart w ON w.eigentuemerart = n.eigentuemerart ";
 		$sql.= "LEFT JOIN alkis.alkis_beziehungen bpn ON bpn.beziehung_von = n.gml_id ";
 		$sql.= "LEFT JOIN alkis.ax_person p ON bpn.beziehung_zu = p.gml_id ";
-		$sql.= " WHERE bsf.beziehungsart::text = 'istGebucht'::text";
+		$sql.= " WHERE f.flurstueckskennzeichen = ff.flurstueckskennzeichen";
+		$sql.= " AND bsf.beziehungsart::text = 'istGebucht'::text";
 		$sql.= " AND bgs.beziehungsart::text = 'istBestandteilVon'::text"; 
 		$sql.= " AND bng.beziehungsart::text = 'istBestandteilVon'::text"; 
 		$sql.= " AND bpn.beziehungsart::text = 'benennt'::text"; 
@@ -3663,7 +3664,7 @@ class pgdatabase_alkis extends pgdatabase_core {
 		$sql.= " group by eigentuemer, j_flaeche";
 		return $this->execSQL($sql, 4, 0);
 	}
-	
+		
 	function check_poly_in_flur($polygon, $epsg){
 		$sql = "SELECT f.land * 10000 + f.gemarkungsnummer, f.flurnummer FROM alkis.ax_flurstueck f WHERE st_intersects(wkb_geometry, st_transform(st_geomfromtext('".$polygon."', ".$epsg."), ".EPSGCODE_ALKIS."))";
   	return $this->execSQL($sql,4, 1);

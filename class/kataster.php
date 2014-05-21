@@ -2113,7 +2113,7 @@ class grundbuch_alkis {
     if (strlen($this->Bezirk)<5) {
       $errmsg.='<br>Die Bezirksnummer ist keine 6 Zeichen lang.';
     }
-    if ($this->Blatt=='' OR $this->Blatt==0) {
+    if ($this->Blatt=='' OR $this->Blatt===0) {
       $errmsg.='<br>Die Blattnummer ist leer.';
     }
     if ($errmsg!='') {
@@ -2414,8 +2414,7 @@ class flurstueck_alkis {
   function getForstamt() {
     if ($this->FlurstKennz=="") { return 0; }
     $this->debug->write("<br>kataster.php flurstuecke->getForstamt: ".$sql,4);
-    if(ALKIS) {} # ALKIS TODO
-    else $ret=$this->database->getForstamt($this->FlurstKennz);
+    $ret=$this->database->getForstamt($this->FlurstKennz);
     return $ret[1];
   }
 
@@ -2638,7 +2637,7 @@ class flurstueck_alkis {
     $this->ALB_Flaeche=$rs['flaeche'];
     $this->Status=$rs['status'];
     $this->Pruefzeichen=$rs['pruefzeichen'];
-    $this->Forstamt=$this->getForstamt();				# ALKIS TODO
+    $this->Forstamt=$this->getForstamt();	
     $this->AktualitaetsNr=$this->getAktualitaetsNr();			# ALKIS TODO
     $this->Adresse=$this->getAdresse();
     $this->Lage=$this->getLage();

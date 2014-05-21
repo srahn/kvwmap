@@ -603,6 +603,11 @@ if($GUI->goNotExecutedInPlugins){
 	  case 'jagdkatastereditor_Flurstuecke_Listen_csv' : {
 		$GUI->jagdkatastereditor_listflurst_csv();
 	  }break;
+		
+		# Jagdkatastereditor
+	  case 'jagdkatastereditor_Eigentuemer_Listen_csv' : {
+		$GUI->jagdkatastereditor_listeigentuemer_csv();
+	  }break;
 
 	  # Jagdkatastereditor
 	  case 'jagdkatastereditor_Paechter_Listen' : {

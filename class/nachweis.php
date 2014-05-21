@@ -862,15 +862,16 @@ class Nachweis {
           #echo '<br>Suche nach individueller Nummer.';
           $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS andere_art, d.art AS andere_art_name";
           $sql.=" FROM n_vermstelle AS v";
-		  if($gemarkung != ''){
-			$sql.=", alkobj_e_fla as alko, alknflur";
-		  }
-		  $sql.=" , n_nachweise AS n";
+					if($gemarkung != ''){
+						if(ALKIS)$sql.=", alkis.pp_flur as flur";
+						else $sql.=", alkobj_e_fla as alko, alknflur";
+					}
+					$sql.=" , n_nachweise AS n";
           $sql.=" LEFT JOIN n_nachweise2dokumentarten n2d"; 
 					$sql.=" 		LEFT JOIN n_dokumentarten d ON n2d.dokumentart_id = d.id";
 					$sql.=" ON n2d.nachweis_id = n.id";
           $sql.=" WHERE CAST(n.vermstelle AS integer)=v.id";
-		  if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
+					if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
           if ($idselected[0]!=0) {
             $sql.=" AND n.id IN ('".$idselected[0]."'";
             for ($i=1;$i<count($idselected);$i++) {
@@ -879,10 +880,12 @@ class Nachweis {
             $sql.=")";
           }
           if($gemarkung != ''){
-						$sql.=" AND alko.objnr = alknflur.objnr AND alknflur.gemkgschl = ".$gemarkung." AND st_intersects(st_transform(alko.the_geom, (select srid from geometry_columns where f_table_name = 'n_nachweise')), n.the_geom)";
+						if(ALKIS)$sql.=" AND flur.land*10000 + flur.gemarkung = '".$gemarkung."' AND st_intersects(st_transform(flur.the_geom, ".EPSGCODE."), n.the_geom)";
+						else $sql.=" AND alko.objnr = alknflur.objnr AND alknflur.gemkgschl = ".$gemarkung." AND st_intersects(st_transform(alko.the_geom, ".EPSGCODE."), n.the_geom)";
 					}
 					if($flur != ''){
-						$sql.=" AND alknflur.flur = '".str_pad($flur,3,'0',STR_PAD_LEFT)."' ";
+						if(ALKIS)$sql.=" AND flur.flurnummer = ".$flur." ";
+						else $sql.=" AND alknflur.flur = '".str_pad($flur,3,'0',STR_PAD_LEFT)."' ";
 					}
           if($stammnr!=''){
             $sql.=" AND n.stammnr='".$stammnr."'";

@@ -19,19 +19,7 @@
 		$this->qlayerset[$i][GetFeatureInfoRequest] = 'http://'.$this->qlayerset[$i][GetFeatureInfoRequest];
 		}
 
-		if(defined('HTTP_PROXY') AND HTTP_PROXY != ''){			# mit Proxy
-			$context_array = array(
-				'http' => array(
-						'proxy' => 'tcp://'.HTTP_PROXY,
-						'request_fulluri' => true,
-				),
-			);
-			$context = stream_context_create($context_array);	
-			$response = file_get_contents($this->qlayerset[$i][GetFeatureInfoRequest], False, $context);
-		}
-		else{
-			$response = file_get_contents($this->qlayerset[$i][GetFeatureInfoRequest]);			# ohne Proxy
-		}
+		$response = url_get_contents($this->qlayerset[$i][GetFeatureInfoRequest]);			# ohne Proxy
 		
 		if(strpos(strtolower($response), 'charset=utf-8') === false) $response = utf8_encode($response);
 		$response = str_replace('css', '', $response);

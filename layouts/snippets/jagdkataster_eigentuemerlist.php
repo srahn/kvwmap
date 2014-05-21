@@ -1,6 +1,11 @@
 <script language="JavaScript" type="text/javascript">
 <!--
 
+function csv_export(){
+	document.GUI.go.value = 'jagdkatastereditor_Eigentuemer_Listen_csv';
+	document.GUI.submit();
+}
+
 -->
 </script>
 
@@ -46,6 +51,9 @@
     <td align="center"><a href="javascript:document.GUI.go.value = 'jagdbezirke_auswaehlen_Suchen';javascript:document.GUI.submit()">zur&uuml;ck zur Trefferliste</a></td>
   </tr>
   <? } ?>
+	<tr>
+  	<td align="center"><a href="javascript:csv_export();">CSV-Export</a></td>
+  </tr>
   <tr>
   	<td align="center"><a href="javascript:hideMenue();javascript:print();">Drucken</a></td>
   </tr>

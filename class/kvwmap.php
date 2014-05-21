@@ -3013,7 +3013,26 @@ class GUI extends GUI_core{
     $this->flurstuecke = $this->jagdkataster->getIntersectedFlurst($this->formvars);
     $this->output();
   }
-  
+	
+	function jagdkatastereditor_listeigentuemer_csv(){
+  	$this->jagdkataster = new jagdkataster($this->pgdatabase);
+  	$this->eigentuemer = $this->jagdkataster->getEigentuemerListe($this->formvars);
+  	for($i = 0; $i < count($this->eigentuemer)-1; $i++){          	
+    	$csv .= $this->eigentuemer[$i]['eigentuemer'].';';
+      $csv .= str_replace('.', ',', round($this->eigentuemer[$i]['albflaeche']*100/$this->eigentuemer['albsumme'], 2)).';';
+      $csv .= str_replace('.', ',', $this->eigentuemer[$i]['anteil_alk']).';';
+      $csv .= str_replace('.', ',', $this->eigentuemer[$i]['albflaeche']).';';
+     	$csv .= chr(10);  
+    }
+    $csv = 'Eigentümer;Anteil nach ALB;Anteil nach ALK;ALB-Fläche'.chr(10).$csv;
+    ob_end_clean();
+    header("Content-type: application/vnd.ms-excel");
+    header("Content-disposition:  inline; filename=eigentuemer.csv");
+    header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+    header('Pragma: public');
+    print utf8_decode($csv);
+  }
+	
 	function jagdkatastereditor_listeigentuemer(){
     $this->main='jagdkataster_eigentuemerlist.php';
     $this->titel='Eigentümer im Jagdbezirk '.$this->formvars['name'];
@@ -14721,15 +14740,15 @@ class db_mapObj extends db_mapObj_core{
       	$attributes['length'][$i]= $rs['length'];
       	$attributes['decimal_length'][$i]= $rs['decimal_length'];
   		
-  		if(substr($rs['default'], 0, 6) == 'SELECT'){					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
-  			$ret1 = $layerdb->execSQL($rs['default'], 4, 0);					
-  			if($ret1[0]==0){
-  				$attributes['default'][$i] = array_pop(pg_fetch_row($ret1[1]));
-  			}
-  		}
-  		else{															# das sind die alten Defaultwerte ohne 'SELECT ' davor, ab Version 1.13 haben Defaultwerte immer ein SELECT, wenn man den Layer in dieser Version einmal gespeichert hat
-  			$attributes['default'][$i]= $rs['default'];
-  		}
+				if(substr($rs['default'], 0, 6) == 'SELECT'){					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
+					$ret1 = $layerdb->execSQL($rs['default'], 4, 0);					
+					if($ret1[0]==0){
+						$attributes['default'][$i] = array_pop(pg_fetch_row($ret1[1]));
+					}
+				}
+				else{															# das sind die alten Defaultwerte ohne 'SELECT ' davor, ab Version 1.13 haben Defaultwerte immer ein SELECT, wenn man den Layer in dieser Version einmal gespeichert hat
+					$attributes['default'][$i]= $rs['default'];
+				}
       	$attributes['form_element_type'][$i]= $rs['form_element_type'];
       	$attributes['form_element_type'][$rs['name']]= $rs['form_element_type'];
       	$attributes['options'][$i]= $rs['options'];
