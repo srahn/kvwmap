@@ -13,7 +13,8 @@
 	# Variablensubstitution
 	$layer = $this->qlayerset[$i];
 	$attributes = $layer['attributes'];
-	$size = 61;
+	if($this->currentform == 'document.GUI2')$size = 40;
+	else $size = 61;
 	$select_width = ''; 
 	if($layer['alias'] != '' AND $this->Stelle->useLayerAliases){
 		$layer['Name'] = $layer['alias'];
@@ -21,7 +22,15 @@
 ?>
 <div id="layer">
 
-<h2><? echo $layer['Name']; ?></h2>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+	<tr>
+		<td width="95%" align="center"><h2>&nbsp;&nbsp;<? echo $layer['Name']; ?></h2></td>
+		<td align="right">			
+			<a href="javascript:scrollbottom();"><img title="nach unten" src="<? echo GRAPHICSPATH; ?>pfeil.gif" width="11" height="11" border="0"></a>&nbsp;
+		</td>		
+	</tr>
+</table>
 <?
 	$doit = false;
   $anzObj = count($layer['shape']);
@@ -35,13 +44,14 @@
   }
   if($doit == true){
 ?>
-<table border="0" cellspacing="10" cellpadding="2">
+<table border="0" cellspacing="0" cellpadding="2">
 <?
 	for ($k=0;$k<$anzObj;$k++) {
 		$checkbox_names .= 'check;'.$attributes['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].'|';
 ?>
 	<tr>
 	  <td>
+			<img height="7" src="<? echo GRAPHICSPATH ?>leer.gif">
 	    <div id="datensatz" 
 			<? if($this->new_entry != true AND $this->user->rolle->querymode == 1){ ?>
 			onmouseenter="ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=tooltip_query&querylayer_id=<? echo $layer['Layer_ID']; ?>&oid=<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>', new Array(top.document.GUI.result, ''), new Array('setvalue', 'execute_function'));"
@@ -294,7 +304,7 @@
 			</tbody>
 			</table>
 			</div>
-			<br>
+			<img height="7" src="<? echo GRAPHICSPATH ?>leer.gif">
 		</td>
 	</tr>
 <?
@@ -318,22 +328,20 @@
 				</tr>
 				<tr>
 					<td valign="top"><? echo $strSelectedDatasets.':'; ?></td>
-					<td>
-					<? if($layer['privileg'] == '2'){ ?>
-						&bull;&nbsp;<a href="javascript:delete_datasets(<?php echo $layer['Layer_ID']; ?>);"><? echo $strdelete; ?></a><br>
-					<?}?>
-						&bull;&nbsp;<a id="csv_link" href="javascript:csv_export(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCSVExport; ?></a><br>
-						&bull;&nbsp;<a id="shape_link" href="javascript:shape_export(<?php echo $layer['Layer_ID']; ?>);"><? echo $strShapeExport; ?></a><br>
-					<? if($layer['layouts']){ ?>
-						&bull;&nbsp;<a id="print_link" href="javascript:print_data(<?php echo $layer['Layer_ID']; ?>);"><? echo $strPrint; ?></a>
-					<? } ?>
-					</td>
-				<? if($this->formvars['printversion'] == '' AND $privileg != ''){ ?>
+					<td valign="top"><? echo $strAllDatasets.':'; ?><? if ($layer['count'] > MAXQUERYROWS){	echo "&nbsp;(".$layer['count'].")"; } ?></td>					
 				</tr>
 				<tr>
-					<td>&nbsp;</td>
-					<td colspan="3">
-						&bull;&nbsp;<a href="javascript:zoomto_datasets(<?php echo $layer['Layer_ID']; ?>, '<? echo $tablename; ?>', '<? echo $columnname; ?>');"><? echo $strzoomtodatasets; ?></a>
+					<td>
+					<? if($layer['privileg'] == '2'){ ?>
+						&nbsp;&nbsp;&bull;&nbsp;<a href="javascript:delete_datasets(<?php echo $layer['Layer_ID']; ?>);"><? echo $strdelete; ?></a><br>
+					<?}?>
+						&nbsp;&nbsp;&bull;&nbsp;<a id="csv_link" href="javascript:csv_export(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCSVExport; ?></a><br>
+						&nbsp;&nbsp;&bull;&nbsp;<a id="shape_link" href="javascript:shape_export(<?php echo $layer['Layer_ID']; ?>);"><? echo $strShapeExport; ?></a><br>
+					<? if($layer['layouts']){ ?>
+						&nbsp;&nbsp;&bull;&nbsp;<a id="print_link" href="javascript:print_data(<?php echo $layer['Layer_ID']; ?>);"><? echo $strPrint; ?></a><br>
+					<? } ?>
+					<? if($privileg != ''){ ?>
+						&nbsp;&nbsp;&bull;&nbsp;<a href="javascript:zoomto_datasets(<?php echo $layer['Layer_ID']; ?>, '<? echo $tablename; ?>', '<? echo $columnname; ?>');"><? echo $strzoomtodatasets; ?></a>
 						<select name="klass_<?php echo $layer['Layer_ID']; ?>">
 							<option value="">klassifiziert nach:</option>
 							<?
@@ -344,13 +352,16 @@
 							}
 							?>
 						</select>
+					<?}?>
+					</td>
+					<td valign="top" colspan="3">
+						&nbsp;&nbsp;&bull;&nbsp;<a id="csv_link" href="javascript:csv_export_all(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCSVExport; ?></a><br>
+						&nbsp;&nbsp;&bull;&nbsp;<a id="csv_link" href="javascript:shape_export_all(<?php echo $layer['Layer_ID']; ?>, <? echo $layer['count']; ?>);"><? echo $strShapeExport; ?></a>
 					</td>
 				</tr>
-					<?}?>
 				<tr style="display:none">
-					<td>&nbsp;</td>
 					<td height="23" colspan="3">
-						&bull;&nbsp;<a href="javascript:showcharts(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCreateChart; ?></a>
+						&nbsp;&nbsp;&bull;&nbsp;<a href="javascript:showcharts(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCreateChart; ?></a>
 					</td>
 				</tr>
 				<tr id="charts_<?php echo $layer['Layer_ID']; ?>" style="display:none">
@@ -423,23 +434,7 @@
 		<?} ?>
 		</td>
 	</tr>
-	<? if($this->new_entry != true){ ?>
-	<tr>
-		<td><a id="csv_link" href="javascript:csv_export_all(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCSVExportAll; ?></a>
-		<? if ($layer['count'] > MAXQUERYROWS) {
-		  echo "&nbsp;(".$layer['count'].")";
-		   } ?>
-		&nbsp;&nbsp;<a id="csv_link" href="javascript:shape_export_all(<?php echo $layer['Layer_ID']; ?>, <? echo $layer['count']; ?>);"><? echo $strSHPExportAll; ?></a>
-		<? if ($layer['count'] > MAXQUERYROWS) {
-		  echo "&nbsp;(".$layer['count'].")";
-		   } ?>
-		</td>
-	</tr>
-	<?}
-	}?>
-	<tr>
-		<td>&nbsp;</td>
-	</tr>
+	<? } ?>
 </table>
 
 

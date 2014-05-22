@@ -93,7 +93,8 @@ td {
 
 h2 {  
 	font-size: 12pt; 
-	margin-bottom: 0px
+	margin-bottom: 0px;
+	margin-top: 0px;
 }
 
 .small {
@@ -236,8 +237,12 @@ a.metalink {
 
 #layer {
   /*border:1px solid gray;*/
-  margin:20px 10px 0px 10px;
+  margin:0px 8px 8px 8px;
   font:italic 120px verdana, arial, helvetica, sans-serif;
+}
+
+#layer  h2{
+  font-style: italic; 
 }
 
 #datensatz {

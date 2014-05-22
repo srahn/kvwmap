@@ -3,6 +3,7 @@
 		<td align="center" width="100%" valign="top" >
 			<img src="<? echo GRAPHICSPATH.'/leer.gif'; ?>" onload="currentform = document.GUI2;">
 <?
+$this->currentform = 'document.GUI2';
 include (LAYOUTPATH.'snippets/'.$this->main);
 ?>
 		</td>

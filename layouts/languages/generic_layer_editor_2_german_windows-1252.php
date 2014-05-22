@@ -4,10 +4,9 @@
  $strSelectAll="alle auswählen";
  $strdelete="löschen";
  $strSelectedDatasets="ausgewählte Datensätze";
+ $strAllDatasets="alle gefundenen Datensätze";
  $strCSVExport="in CSV-Datei exportieren";
  $strShapeExport="in Shape-Datei exportieren";
- $strCSVExportAll="alle Treffer in CSV-Datei exportieren";
- $strSHPExportAll="alle Treffer in SHP-Datei exportieren";
  $strMapSelect="selektieren";
  $strzoomtodatasets="in Karte anzeigen";
  $strPrint="drucken";

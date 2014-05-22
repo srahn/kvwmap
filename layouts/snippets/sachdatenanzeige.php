@@ -6,11 +6,6 @@
 	
  ?>
 	<a name="oben"></a>
-  <br/>
-  <h2><u>Sachdaten:</u></h2>
-  <table border="0" cellpadding="10" cellspacing="0" width="100%">
-  	<tr><td align="right"><a href="javascript:scrollbottom();"><img title="nach unten" src="<? echo GRAPHICSPATH; ?>pfeil.gif" width="11" height="11" border="0"></a></td></tr>
-  </table>
 <?php
 $anzLayer=count($this->qlayerset);
 if ($anzLayer==0) {
@@ -62,7 +57,7 @@ for($i=0;$i<$anzLayer;$i++){
 	   echo'
 	   <table border="0" cellpadding="10" width="100%" cellspacing="0">
 
-	   	<tr height="50px" valign="top">
+	   	<tr height="40px" valign="top">
 	   		<td align="right" width="38%">';
 	   		if($this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] >= $this->formvars['anzahl'] AND $this->formvars['printversion'] == ''){
 	   			echo '<a href="javascript:prevquery(\'offset_'.$this->qlayerset[$i]['Layer_ID'].'\');">'.$strBackDatasets.'&nbsp;</a>';
@@ -175,11 +170,13 @@ for($i=0;$i<$anzLayer;$i++){
 	<input name="INPUT_COORD" type="hidden" value="<?php echo $this->formvars['INPUT_COORD']; ?>">
   <INPUT TYPE="HIDDEN" NAME="searchradius" VALUE="<?php echo $this->formvars['searchradius']; ?>">
   <input name="CMD" type="hidden" value="<?php echo $this->formvars['CMD']; ?>">
+	<? if($this->currentform != 'document.GUI2'){ ?>
   <table width="100%" border="0" cellpadding="2" cellspacing="0">
     <tr bgcolor="<?php echo BG_DEFAULT ?>" align="center">
       <td><a href="index.php?searchradius=<?php echo $this->formvars['searchradius']; ?>"><? echo $strbacktomap;?></a></td>
     </tr>
   </table>
+	<? } ?>
 </div>
 <input type="hidden" name="titel" value="<? echo $this->formvars['titel'] ?>">
 <input type="hidden" name="width" value="">

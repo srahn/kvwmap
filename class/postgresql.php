@@ -2373,7 +2373,7 @@ class pgdatabase_alkis extends pgdatabase_core {
   }
   
   function getEigentuemerliste($FlurstKennz,$Bezirk,$Blatt,$BVNR) {
-    $sql = "SELECT distinct n.laufendenummernachdin1421 AS namensnr, p.nachnameoderfirma, p.vorname, p.akademischergrad, p.geburtsname, p.geburtsdatum, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, w.wert as Art, n.zaehler||'/'||n.nenner as anteil ";
+    $sql = "SELECT distinct n.laufendenummernachdin1421 AS namensnr, p.nachnameoderfirma, p.vorname, p.akademischergrad, p.geburtsname, p.geburtsdatum::date, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, w.wert as Art, n.zaehler||'/'||n.nenner as anteil ";
 		$sql.= "FROM alkis.ax_flurstueck f ";
 		$sql.= "LEFT JOIN (alkis.alkis_beziehungen bsf LEFT JOIN alkis.alkis_beziehungen s2s ON s2s.beziehung_zu = bsf.beziehung_zu) ON f.gml_id = bsf.beziehung_von ";
 		$sql.= "LEFT JOIN alkis.ax_buchungsstelle s ON s2s.beziehung_zu = s.gml_id OR s2s.beziehung_von = s.gml_id ";
@@ -2421,7 +2421,8 @@ class pgdatabase_alkis extends pgdatabase_core {
 
       $Eigentuemer->Name[0]=$rs['nachnameoderfirma'];
       if($rs['vorname'] != '')$Eigentuemer->Name[0] .= ', '.$rs['vorname']; 
-      $Eigentuemer->Name[1] = $rs['geburtsname'].' '.$rs['geburtsdatum'];
+      $Eigentuemer->Name[1] = $rs['geburtsdatum'];
+			if($rs['geburtsname'] != '')$Eigentuemer->Name[1] = 'geb. '.$rs['geburtsname'].' '.$Eigentuemer->Name[1];
       $Eigentuemer->Name[2] = $rs['strasse'].' '.$rs['hausnummer'];
       $Eigentuemer->Name[3] = $rs['postleitzahlpostzustellung'].' '.$rs['ort_post'];
       $Eigentuemer->Anteil=$rs['anteil'];
