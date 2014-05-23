@@ -6521,7 +6521,15 @@ class GUI extends GUI_core{
       if($this->formvars['printversion'] != ''){
         $this->mime_type = 'printversion';
       }
-      $this->output();
+			if($this->user->rolle->querymode == 1 AND $this->formvars['mime_type'] != 'overlay_html'){		# bei aktivierter Datenabfrage in extra Fenster und Suche aus Suchmaske (nicht aus Overlay) heraus --> Laden der Karte und Darstellung der Sachdaten im Overlay
+				$this->loadMap('DataBase');
+				$this->user->rolle->newtime = $this->user->rolle->last_time_id;
+				$this->drawMap();
+				$this->saveMap('');
+				$this->main = 'map.php';
+				$this->overlaymain = 'sachdatenanzeige.php';
+			}
+			$this->output();
     }
   }
 

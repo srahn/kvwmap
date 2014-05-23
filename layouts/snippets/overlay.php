@@ -4,10 +4,12 @@
 			<img src="<? echo GRAPHICSPATH.'/leer.gif'; ?>" onload="currentform = document.GUI2;">
 <?
 $this->currentform = 'document.GUI2';
-include (LAYOUTPATH.'snippets/'.$this->main);
+include (LAYOUTPATH.'snippets/'.$this->overlaymain);
 ?>
 		</td>
 	</tr>
 </table>
-~stopwaiting()
-~activate_overlay()
+<script language="javascript" type="text/javascript">
+	stopwaiting();	// wenn man aus der Karte abgefragt hatte, Warteanimation beenden
+	activate_overlay();
+</script>

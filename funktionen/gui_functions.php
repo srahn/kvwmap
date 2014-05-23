@@ -62,9 +62,9 @@ function resizestart(element, type){
 
 function dragstop(){
 	if(dragobjekt){
-		overlayx = parseInt(dragobjekt.style.left);
-		overlayy = parseInt(dragobjekt.style.top);
-		ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=saveOverlayPosition&overlayx='+overlayx+'&overlayy='+overlayy, new Array(''), new Array(""));
+		document.GUI.overlayx.value = parseInt(dragobjekt.style.left);
+		document.GUI.overlayy.value = parseInt(dragobjekt.style.top);
+		ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=saveOverlayPosition&overlayx='+document.GUI.overlayx.value+'&overlayy='+document.GUI.overlayy.value, new Array(''), new Array(""));
 	}
   dragobjekt = null;
 	resizeobjekt = null;
@@ -121,8 +121,8 @@ function drag(event) {
 
 function activate_overlay(){
 	overlay = document.getElementById('overlaydiv');
-	overlay.style.left = '<? echo $this->user->rolle->overlayx ?>px';
-	overlay.style.top = '<? echo $this->user->rolle->overlayy ?>px';
+	overlay.style.left = document.GUI.overlayx.value+'px';
+	overlay.style.top = document.GUI.overlayy.value+'px';
 	overlay.style.display='';
 	svgdoc = document.SVG.getSVGDocument();	
 	svgdoc.getElementById('polygon').setAttribute("points", "");
@@ -137,7 +137,7 @@ function overlay_submit(gui, start){
 	// diese Funktion macht beim Fenstermodus und einer Kartenabfrage oder einem Aufruf aus dem Overlay-Fenster einen ajax-Request mit den Formulardaten des uebergebenen Formularobjektes, ansonsten einen normalen Submit
 	if(1 == <? echo $this->user->rolle->querymode; ?> && start || gui.name == 'GUI2'){
 		formdata = formSerialize(gui);
-		ahah("<? echo URL.APPLVERSION.'index.php'; ?>", formdata+"&mime_type=overlay_html", new Array(document.getElementById('contentdiv'), '', ''), new Array("sethtml", "execute_function", "execute_function"));	
+		ahah("<? echo URL.APPLVERSION.'index.php'; ?>", formdata+"&mime_type=overlay_html", new Array(document.getElementById('contentdiv')), new Array("sethtml"));	
 		document.GUI.CMD.value = "";
 	}else{
 		document.GUI.submit();
@@ -147,7 +147,7 @@ function overlay_submit(gui, start){
 function overlay_link(data){
 	// diese Funktion macht bei Aufruf aus dem Overlay-Fenster einen ajax-Request mit den übergebenen Daten, ansonsten wird das Ganze wie ein normaler Link aufgerufen
 	if(currentform.name == 'GUI2'){
-		ahah("<? echo URL.APPLVERSION.'index.php'; ?>", data+"&mime_type=overlay_html", new Array(document.getElementById('contentdiv'), '', ''), "sethtml~execute_function~execute_function");	
+		ahah("<? echo URL.APPLVERSION.'index.php'; ?>", data+"&mime_type=overlay_html", new Array(document.getElementById('contentdiv')), new Array("sethtml"));	
 		document.GUI.CMD.value = "";
 	}else{
 		window.location.href = 'index.php?'+data;

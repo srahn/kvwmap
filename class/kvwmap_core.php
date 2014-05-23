@@ -1547,6 +1547,7 @@ class GUI_core {
         include (LAYOUTPATH.$this->user->rolle->gui);
       } break;
 			case 'overlay_html' : {
+				$this->overlaymain = $this->main;
 				include (LAYOUTPATH.'snippets/overlay.php');
 			} break;
       case 'map_ajax' : {

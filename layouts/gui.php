@@ -55,6 +55,9 @@ if($this->user->rolle->querymode == 1){
           </tr>
         </table>
         </form>
+				<script type="text/javascript">
+					currentform = document.GUI;
+				</script>
 <? if($this->user->rolle->querymode == 1){ ?>
 				<form name="GUI2" enctype="multipart/form-data" method="post" action="index.php" id="GUI2">
 					<div id="overlaydiv" style="display:none;padding:3px;left:150px;top:150px;width:auto;position:absolute;z-index: 1000;-moz-box-shadow: 12px 10px 14px #777;-webkit-box-shadow: 12px 10px 14px #777;box-shadow: 12px 10px 14px #777;">
@@ -69,14 +72,13 @@ if($this->user->rolle->querymode == 1){
 						<div id="dragdiv" align="right" onmousedown="dragstart(document.getElementById('overlaydiv'))" style="cursor:default; background-color:<? echo BG_DEFAULT; ?>; border: 1px solid #cccccc;height:20px;position:relative;">
 							<a href="javascript:deactivate_overlay();" title="Schlie&szlig;en"><img style="border:none" src="<? echo GRAPHICSPATH."exit.png"; ?>"></img></a>
 						</div>
-						<div id="contentdiv" style="background: url(<? echo GRAPHICSPATH; ?>bg.gif);border: 1px solid #cccccc;height:700px;position:relative;overflow-y: scroll;overflow-x: auto;"></div>
+						<div id="contentdiv" style="background: url(<? echo GRAPHICSPATH; ?>bg.gif);border: 1px solid #cccccc;height:700px;position:relative;overflow-y: scroll;overflow-x: auto;">
+						<? if($this->overlaymain != '')include(LAYOUTPATH.'snippets/overlay.php'); ?>
+						</div>
 					</div>
 				</form>
 <? } ?>
       </td>
     </tr>
 </table>
-<script type="text/javascript">
-	currentform = document.GUI;
-</script>
 </BODY></HTML>
