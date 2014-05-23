@@ -1824,6 +1824,10 @@ class GUI extends GUI_core{
   	$this->user->rolle->changeLegendDisplay($this->formvars['hide']);
 		echo '~resizemap2window();';
   }
+	
+	function saveOverlayPosition(){
+  	$this->user->rolle->saveOverlayPosition($this->formvars['overlayx'],$this->formvars['overlayy']);
+  }
 
   function googlemaps(){
     $this->loadMap('DataBase');

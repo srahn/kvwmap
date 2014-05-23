@@ -306,6 +306,8 @@ class rolle_core {
     $this->runningcoords=$rs['runningcoords'];
 		$this->singlequery=$rs['singlequery'];
 		$this->querymode=$rs['querymode'];
+		$this->overlayx=$rs['overlayx'];
+		$this->overlayy=$rs['overlayy'];
     $buttons = explode(',', $rs['buttons']);
     $this->back = in_array('back', $buttons);
     $this->forward = in_array('forward', $buttons);

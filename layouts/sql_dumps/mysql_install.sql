@@ -632,6 +632,8 @@ CREATE TABLE rolle (
   `runningcoords` BOOLEAN NOT NULL DEFAULT 0,
   `singlequery` BOOLEAN NOT NULL DEFAULT 0,
 	`querymode` BOOLEAN NOT NULL DEFAULT  0,
+	`overlayx` INT( 11 ) NOT NULL DEFAULT  '400',
+	`overlayy` INT( 11 ) NOT NULL DEFAULT  '150',
   PRIMARY KEY  (user_id,stelle_id)
 );
 

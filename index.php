@@ -785,6 +785,10 @@ if($GUI->goNotExecutedInPlugins){
 	  case 'changeLegendDisplay' : {
 		$GUI->changeLegendDisplay();
 	  } break;
+		
+		case 'saveOverlayPosition' : {
+		$GUI->saveOverlayPosition();
+	  } break;
 
 	  case 'Administratorfunktionen' : {
 		$GUI->checkCaseAllowed($go);

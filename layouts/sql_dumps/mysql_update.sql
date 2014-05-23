@@ -1177,3 +1177,5 @@ ALTER TABLE  `used_layer` CHANGE  `requires_id`  `requires` INT( 11 ) NULL DEFAU
 ALTER TABLE  `layer` ADD  `symbolscale` INT( 11 ) NULL AFTER  `maxscale`;
 
 ALTER TABLE  `styles` CHANGE  `angle`  `angle` VARCHAR( 11 ) NULL DEFAULT NULL;
+
+ALTER TABLE  `rolle` ADD  `overlayx` INT( 11 ) NOT NULL DEFAULT  '400', ADD  `overlayy` INT( 11 ) NOT NULL DEFAULT  '150';

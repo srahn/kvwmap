@@ -1752,7 +1752,7 @@ class rolle extends rolle_core{
 		$sql ="UPDATE rolle SET hidemenue='".$hide."'";
 		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 		#echo $sql;
-		$this->debug->write("<p>file:users.php class:rolle function:hideMenue - Speichern der Einstellungen zum Menü in der Rolle:",4);
+		$this->debug->write("<p>file:users.php class:rolle function:hideMenue - :",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 		return 1;
 	}
@@ -1764,7 +1764,16 @@ class rolle extends rolle_core{
 		$sql ="UPDATE rolle SET hidelegend='".$hide."'";
 		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 		#echo $sql;
-		$this->debug->write("<p>file:users.php class:rolle function:hideMenue - Speichern der Einstellungen zum Menü in der Rolle:",4);
+		$this->debug->write("<p>file:users.php class:rolle function:hideMenue - :",4);
+		$this->database->execSQL($sql,4, $this->loglevel);
+		return 1;
+	}
+	
+	function saveOverlayPosition($x, $y) {
+		$sql ="UPDATE rolle SET overlayx = ".$x.", overlayy=".$y;
+		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+		#echo $sql;
+		$this->debug->write("<p>file:users.php class:rolle function:saveOverlayPosition - :",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 		return 1;
 	}

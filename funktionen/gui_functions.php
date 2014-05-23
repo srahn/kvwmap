@@ -61,6 +61,11 @@ function resizestart(element, type){
 
 
 function dragstop(){
+	if(dragobjekt){
+		overlayx = parseInt(dragobjekt.style.left);
+		overlayy = parseInt(dragobjekt.style.top);
+		ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=saveOverlayPosition&overlayx='+overlayx+'&overlayy='+overlayy, new Array(''), new Array(""));
+	}
   dragobjekt = null;
 	resizeobjekt = null;
 }
@@ -70,7 +75,7 @@ function drag(event) {
 	if(!event)event = window.event; // IE sucks
   posx =  event.screenX;
   posy = event.screenY;
-  if(dragobjekt != null){				
+  if(dragobjekt != null){
     dragobjekt.style.left = (posx - dragx) + "px";
     dragobjekt.style.top = (posy - dragy) + "px";
   }
@@ -115,7 +120,10 @@ function drag(event) {
 }
 
 function activate_overlay(){
-	document.getElementById('overlaydiv').style.display='';
+	overlay = document.getElementById('overlaydiv');
+	overlay.style.left = '<? echo $this->user->rolle->overlayx ?>px';
+	overlay.style.top = '<? echo $this->user->rolle->overlayy ?>px';
+	overlay.style.display='';
 	svgdoc = document.SVG.getSVGDocument();	
 	svgdoc.getElementById('polygon').setAttribute("points", "");
 }
