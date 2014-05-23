@@ -99,6 +99,18 @@ class GUI_core {
 			else return $groupid;
 		}
 	}
+	
+	function list_uppergroups($groupid){
+		if($groupid != ''){
+			$lastgroupid = '';
+			while($groupid != '' AND $lastgroupid != $groupid){
+				$uppergroups[] = $this->groupset[$groupid]['Gruppenname'];
+				$lastgroupid = $groupid;
+				$groupid = $this->groupset[$groupid]['obergruppe'];
+			}
+			return $uppergroups;
+		}
+	}
   
   function loadMap($loadMapSource) {
     $this->debug->write("<p>Funktion: loadMap('".$loadMapSource."','".$connStr."')",4);

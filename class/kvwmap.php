@@ -6534,19 +6534,26 @@ class GUI extends GUI_core{
     }
     $this->main='generic_search.php';
     $this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, NULL);
-    $this->layergruppen['ID'] = array_values(array_unique($this->layerdaten['Gruppe']));
-    $this->layergruppen['Bezeichnung'] = array_values(array_unique($this->layerdaten['Gruppenname']));
+		$this->layergruppen['ID'] = array_values(array_unique($this->layerdaten['Gruppe']));
+		
+		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
+		$this->groupset = $mapdb->read_Groups();		
+		foreach($this->layergruppen['ID'] as $groupid){
+			$uppergroupnames = $this->list_uppergroups($groupid);
+			$this->layergruppen['Bezeichnung'][] = implode('->', array_reverse($uppergroupnames));;
+		}
+			
     // Sortieren der User unter Berücksichtigung von Umlauten
     $sorted_arrays = umlaute_sortieren($this->layergruppen['Bezeichnung'], $this->layergruppen['ID']);
     $this->layergruppen['Bezeichnung'] = $sorted_arrays['array'];
     $this->layergruppen['ID'] = $sorted_arrays['second_array'];
+		
     # wenn Gruppe ausgewählt, Einschränkung auf Layer dieser Gruppe 
     if($this->formvars['selected_group_id']){
     	$this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, NULL, $this->formvars['selected_group_id']);	
     }
     if($this->formvars['selected_layer_id']){
     	if($this->formvars['layer_id'] == '')$this->formvars['layer_id'] = $this->formvars['selected_layer_id'];
-    	$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     	$data = $mapdb->getData($this->formvars['layer_id']);
 	    $data_explosion = explode(' ', $data);
 	    $this->formvars['columnname'] = $data_explosion[0];
