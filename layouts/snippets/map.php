@@ -111,7 +111,7 @@ function switchlegend(){
 
   $res_x    = $this->map->width;
   $res_y    = $this->map->height;
-  $legendheight = $this->map->height-30;
+  $legendheight = $this->map->height-47;
   $res_xm   = $this->map->width/2;
   $res_ym   = $this->map->height/2;
   $dx       = $this->map->extent->maxx-$this->map->extent->minx;
