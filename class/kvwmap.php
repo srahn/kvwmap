@@ -383,10 +383,10 @@ class GUI extends GUI_core{
         	while ($rs=pg_fetch_array($ret[1])){
           	echo $rs[0].' '.$rs[1].'|';
           }
-					echo '~show_vertices();';
         }
 			}
-		} 
+		}
+		echo '~show_vertices();';
 	}
 	
 	function getSVG_foreign_vertices(){
