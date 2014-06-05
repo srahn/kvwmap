@@ -2688,7 +2688,7 @@ class stelle extends stelle_core{
 		return $layer;
 	}
 
-	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL){
+	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL){
 		$sql = 'SELECT layer.Layer_ID, Name, Gruppe, Gruppenname, `connection` FROM used_layer, layer, u_groups';
 		$sql .=' WHERE stelle_id = '.$this->id;
 		$sql .=' AND layer.Gruppe = u_groups.id AND (layer.connectiontype = 6 OR layer.connectiontype = 9)';
@@ -2699,6 +2699,9 @@ class stelle extends stelle_core{
 		}
 		if($group_id != NULL){
 			$sql .=' AND u_groups.id = '.$group_id;
+		}
+		if($layer_ids != NULL){
+			$sql .=' AND layer.Layer_ID IN ('.implode($layer_ids, ',').')';
 		}
 		if($user_id != NULL){
 			$sql .= ' UNION ';

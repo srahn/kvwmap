@@ -460,8 +460,8 @@ function moveback_ff(evt){
 	hidetooltip(evt);
 	// Navigation wieder erlauben
 	stopwaiting();
-	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("xlink:href", "")\', 200);
-	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("style", "display:none")\', 200);
+	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("xlink:href", "")\', 400);
+	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("style", "display:none")\', 400);
 }
 
 function moveback(evt){

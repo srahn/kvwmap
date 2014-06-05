@@ -815,6 +815,20 @@ function showAlert($text) {
   </script><?php
 }
 
+function showMessage($text) {
+  ?>
+  <script type="text/javascript">
+		var Msg = document.getElementById("message_box");
+		if(Msg == undefined){
+			document.write('<div id="message_box" class="message_box_hidden"></div>');
+			var Msg = document.getElementById("message_box");
+		}
+		Msg.className = 'message_box_visible';
+		Msg.innerHTML = "<?php echo $text; ?>";
+		setTimeout(function() {Msg.className = 'message_box_hidden';},300);
+  </script><?php
+}
+
 function ArtCode2Abk($code) {
   switch ($code) {
     case '100' : {

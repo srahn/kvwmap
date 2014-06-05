@@ -56,6 +56,9 @@ if($this->user->rolle->querymode == 1){
           </tr>
         </table>
         </form>
+				<script type="text/javascript">
+					currentform = document.GUI;
+				</script>
 <? if($this->user->rolle->querymode == 1){ ?>
 				<form name="GUI2" enctype="multipart/form-data" method="post" action="index.php" id="GUI2">
 					<div id="overlaydiv" style="display:none;padding:3px;left:150px;top:150px;width:auto;position:absolute;z-index: 1000;-moz-box-shadow: 12px 10px 14px #777;-webkit-box-shadow: 12px 10px 14px #777;box-shadow: 12px 10px 14px #777;">
@@ -77,7 +80,5 @@ if($this->user->rolle->querymode == 1){
       </td>
     </tr>
 </table>
-<script type="text/javascript">
-	currentform = document.GUI;
-</script>
+<div id="message_box" class="message_box_hidden"></div>
 </BODY></HTML>

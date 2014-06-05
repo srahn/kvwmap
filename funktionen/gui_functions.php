@@ -56,7 +56,7 @@ function resizestart(element, type){
   resizex = posx;
   resizey = posy;
 	width = parseInt(resizeobjekt.offsetWidth);		// da style.width auf 100% steht
-	height = parseInt(resizeobjekt.style.height);
+	height = parseInt(resizeobjekt.offsetHeight);	// da style.height auf 100% steht
 }
 
 

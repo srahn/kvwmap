@@ -1095,7 +1095,7 @@ class GUI extends GUI_core{
 							}
 							# Bei eingeschalteten Layern kann man auf die maximale Ausdehnung des Layers zoomen
 							if ($layer['aktivStatus'] == 1) {
-								if ($layer['connectiontype']==6 AND $layer['maxscale'] == '') {
+								if ($layer['connectiontype']==6 AND $layer['maxscale'] < 1) {
 									# Link zum Zoomen auf maximalen Extent des Layers erstmal nur für PostGIS Layer
 									$legend.='&nbsp;<a href="index.php?go=zoomToMaxLayerExtent&layer_id='.$layer['Layer_ID'].'"><img src="graphics/maxLayerExtent.gif" border="0" title="volle Layerausdehnung"></a>';
 								}
@@ -1918,7 +1918,7 @@ class GUI extends GUI_core{
           $this->Meldung=$ret[1];
       }
       else { # eintrag erfolgreich
-        showAlert('Eintrag erfolgreich!');
+        showMessage('Eintrag erfolgreich!');
       }
       $this->PointEditor();
     }
@@ -2027,7 +2027,7 @@ class GUI extends GUI_core{
         $this->formvars['firstline']="";
         $this->formvars['secondline']="";
         $this->formvars['secondpoly']="";
-        showAlert('Eintrag erfolgreich!');
+        showMessage('Eintrag erfolgreich!');
       }
       $this->formvars['CMD'] = '';
       $this->LineEditor();
@@ -2144,7 +2144,7 @@ class GUI extends GUI_core{
         $this->formvars['pathwkt']="";
         $this->formvars['firstpoly']="";
         $this->formvars['secondpoly']="";
-        showAlert('Eintrag erfolgreich!');
+        showMessage('Eintrag erfolgreich!');
       }
       $this->formvars['CMD'] = '';
       $this->PolygonEditor();
@@ -2759,7 +2759,7 @@ class GUI extends GUI_core{
       }
       else { # eintrag erfolgreich
         $this->formvars['secondpoly']="true";
-        showAlert('Eintrag erfolgreich!');
+        showMessage('Eintrag erfolgreich!');
       }
       $this->Anliegerbeiträge_editor();
     }
@@ -2785,7 +2785,7 @@ class GUI extends GUI_core{
       }
       else { # eintrag erfolgreich
         $this->formvars['secondpoly']="true";
-        showAlert('Eintrag erfolgreich!');
+        showMessage('Eintrag erfolgreich!');
       }
       $this->Anliegerbeiträge_editor();
     }
@@ -2963,7 +2963,7 @@ class GUI extends GUI_core{
         $this->formvars['pathwkt']="";
         $this->formvars['firstpoly']="";
         $this->formvars['secondpoly']="";
-        showAlert('Eintrag erfolgreich!');
+        showMessage('Eintrag erfolgreich!');
       }
       $this->jagdkatastereditor();
     }
@@ -3094,7 +3094,7 @@ class GUI extends GUI_core{
           $this->formvars['pathwkt']="";
           $this->formvars['firstpoly']="";
           $this->formvars['secondpoly']="";
-          showAlert('Eintrag erfolgreich!');
+          showMessage('Eintrag erfolgreich!');
         }
       }
     $this->bauleitplanung();
@@ -5557,7 +5557,7 @@ class GUI extends GUI_core{
           $this->formvars['firstpoly']="";
           $this->formvars['secondpoly']="";
           $this->formvars['versiegelungsgrad']="";
-          showAlert('Eintrag erfolgreich!');
+          showMessage('Eintrag erfolgreich!');
         }
       }
     $this->versiegelungsFlaechenErfassung();
@@ -6534,6 +6534,65 @@ class GUI extends GUI_core{
     }
   }
 
+	function get_quicksearch_attributes(){
+		if($this->formvars['layer_id']){   	
+      $this->formvars['anzahl'] = MAXQUERYROWS;
+			$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
+			$layerdb = $mapdb->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+			$layerdb->setClientEncoding();
+			$path = $mapdb->getPath($this->formvars['layer_id']);
+			$privileges = $this->Stelle->get_attributes_privileges($this->formvars['layer_id']);
+			$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
+			$this->attributes = $mapdb->read_layer_attributes($this->formvars['layer_id'], $layerdb, $privileges['attributenames']);
+			# weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
+			$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $this->qlayerset['shape'], true);
+			
+			for($i = 0; $i < count($this->attributes['name']); $i++){
+        if($this->attributes['quicksearch'][$i] == 1){
+          ?><tr>
+            <td width="40%">&nbsp;&nbsp;<?
+              if($this->attributes['alias'][$i] != ''){
+                echo $this->attributes['alias'][$i];
+              }
+              else{
+                echo $this->attributes['name'][$i];
+              }
+          ?>:</td>
+            <td>
+							<input type="hidden" name="operator_<? echo $this->attributes['name'][$i]; ?>" value="=">
+						</td>
+            <td align="left" width="40%"><?
+            	switch ($this->attributes['form_element_type'][$i]) {
+            		case 'Auswahlfeld' : {									# erstmal nur abhängige Auswahlfelder
+                  ?><select class="select" 
+                  <?
+                  	if($this->attributes['req_by'][$i] != ''){
+											echo 'onchange="update_require_attribute_(\''.$this->attributes['req_by'][$i].'\','.$this->formvars['layer_id'].', this.value);" ';
+										}
+										else echo 'onchange="suche();" ';
+									?> 
+                  	id="value_<? echo $this->attributes['name'][$i]; ?>" name="value_<? echo $this->attributes['name'][$i]; ?>"><?echo "\n"; ?>
+                      <option value="">-- <? echo $this->strChoose; ?> --</option><? echo "\n";
+                      if(is_array($this->attributes['enum_value'][$i][0])){
+                      	$this->attributes['enum_value'][$i] = $this->attributes['enum_value'][$i][0];
+                      	$this->attributes['enum_output'][$i] = $this->attributes['enum_output'][$i][0];
+                      }
+                    for($o = 0; $o < count($this->attributes['enum_value'][$i]); $o++){
+                      ?>
+                      <option <? if($this->formvars['value_'.$this->attributes['name'][$i]] == $this->attributes['enum_value'][$i][$o]){ echo 'selected';} ?> value="<? echo $this->attributes['enum_value'][$i][$o]; ?>"><? echo $this->attributes['enum_output'][$i][$o]; ?></option><? echo "\n";
+                    } ?>
+                    </select>
+                    <input class="input" size="9" id="value2_<? echo $this->attributes['name'][$i]; ?>" name="value2_<? echo $this->attributes['name'][$i]; ?>" type="hidden" value="<? echo $this->formvars['value2_'.$this->attributes['name'][$i]]; ?>">
+                    <?
+                }break;
+      				}
+           ?></td>
+          </tr><?					
+        }
+      }
+		}
+	}
+	
   function GenerischeSuche(){
   	if($this->formvars['titel'] == ''){
       $this->titel='Layer-Suche';
@@ -6672,7 +6731,6 @@ class GUI extends GUI_core{
     $success = true;
     $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $layerdb = $mapdb->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
-    $filter = $mapdb->getFilter($this->formvars['chosen_layer_id'], $this->Stelle->id);
     $checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
     for($i = 0; $i < count($checkbox_names); $i++){
       if($this->formvars[$checkbox_names[$i]] == 'on'){
@@ -6680,10 +6738,6 @@ class GUI extends GUI_core{
         $sql = "DELETE FROM ".$element[2]." WHERE oid = ".$element[3];
         $oids[] = $element[3];
         #echo $sql.'<br>';
-        if($filter != ''){
-        	$filter = str_replace('$userid', $this->user->id, $filter);
-        	$sql .= " AND ".$filter;
-        }
         $ret = $layerdb->execSQL($sql,4, 1);
         if ($ret[0]) {
          $success = false;
@@ -6925,7 +6979,7 @@ class GUI extends GUI_core{
       }
       else{
         if($this->formvars['close_window'] == ""){
-          showAlert('Eintrag erfolgreich.');
+          showMessage('Eintrag erfolgreich!');
         }
         if($this->formvars['weiter_erfassen'] == 1){
         	$this->formvars['firstpoly'] = '';
@@ -11184,7 +11238,7 @@ class GUI extends GUI_core{
     }
     else{
       if($this->formvars['close_window'] == ""){
-        showAlert('Änderung erfolgreich');
+        showMessage('Änderung erfolgreich');
       }
     }
     if($this->formvars['embedded'] != ''){    # wenn es ein Datensatz aus einem embedded-Formular ist, muss das entsprechende Attribut des Hauptformulars aktualisiert werden
@@ -14701,8 +14755,12 @@ class db_mapObj extends db_mapObj_core{
       	$formvars['mandatory_'.$attributes['name'][$i]] = 'NULL';
       }
       $sql.= 'mandatory = '.$formvars['mandatory_'.$attributes['name'][$i]].', ';
+			if($formvars['quicksearch_'.$attributes['name'][$i]] == ''){
+      	$formvars['quicksearch_'.$attributes['name'][$i]] = 'NULL';
+      }
+      $sql.= 'quicksearch = '.$formvars['quicksearch_'.$attributes['name'][$i]].', ';
       $sql.= 'alias = "'.$formvars['alias_'.$attributes['name'][$i]].'" ';
-      $sql.= 'ON DUPLICATE KEY UPDATE name = "'.$attributes['name'][$i].'", form_element_type = "'.$formvars['form_element_'.$attributes['name'][$i]].'", options = "'.$formvars['options_'.$attributes['name'][$i]].'", tooltip = "'.$formvars['tooltip_'.$attributes['name'][$i]].'", `group` = "'.$formvars['group_'.$attributes['name'][$i]].'", alias = "'.$formvars['alias_'.$attributes['name'][$i]].'", mandatory = '.$formvars['mandatory_'.$attributes['name'][$i]].' ';
+      $sql.= 'ON DUPLICATE KEY UPDATE name = "'.$attributes['name'][$i].'", form_element_type = "'.$formvars['form_element_'.$attributes['name'][$i]].'", options = "'.$formvars['options_'.$attributes['name'][$i]].'", tooltip = "'.$formvars['tooltip_'.$attributes['name'][$i]].'", `group` = "'.$formvars['group_'.$attributes['name'][$i]].'", alias = "'.$formvars['alias_'.$attributes['name'][$i]].'", mandatory = '.$formvars['mandatory_'.$attributes['name'][$i]].' , quicksearch = '.$formvars['quicksearch_'.$attributes['name'][$i]];
       $this->debug->write("<p>file:kvwmap class:Document->save_attributes :",4);
       $database->execSQL($sql,4, 1);
     }
@@ -14778,6 +14836,7 @@ class db_mapObj extends db_mapObj_core{
       	$attributes['tooltip'][$i]= $rs['tooltip'];
       	$attributes['group'][$i]= $rs['group'];
       	$attributes['mandatory'][$i]= $rs['mandatory'];
+				$attributes['quicksearch'][$i]= $rs['quicksearch'];
       	$attributes['privileg'][$i]= $rs['privileg'];
       	$attributes['query_tooltip'][$i]= $rs['query_tooltip'];
       	$i++;

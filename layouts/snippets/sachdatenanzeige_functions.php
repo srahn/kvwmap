@@ -103,6 +103,8 @@ if($this->formvars['anzahl'] == ''){$this->formvars['anzahl'] = 0;}
   	<? if($this->formvars['close_after_saving']){ ?>
   		currentform.close_window.value='true';
   	<?}?>
+		document.getElementById('loader').style.display = '';
+		setTimeout('document.getElementById(\'loaderimg\').src=\'graphics/ajax-loader.gif\'', 50);
   	overlay_submit(currentform, false);
 	}
 	

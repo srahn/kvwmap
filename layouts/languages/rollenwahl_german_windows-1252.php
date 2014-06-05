@@ -22,7 +22,7 @@
   $strPolish="Polnisch";
   $strCoordType="Koordinatendarstellung";
 	$strSingleQuery="nur ein Thema abfragbar";
-	$strQuerymode="Kartenabfrage in extra Fenster";
+	$strQuerymode="Sachdatenanzeige in extra Fenster";
   
   
 ?>

@@ -58,6 +58,8 @@
 						<td align="center"><b>Gruppe</b></td>
 						<td>&nbsp;</td>
 						<td align="center"><b>Suche-Pflicht</b></td>
+						<td>&nbsp;</td>
+						<td align="center"><b>Schnell-<br>suche</b></td>
 					</tr>
 			';
 
@@ -162,9 +164,15 @@
 				  	<input class="input" name="group_'.$this->attributes['name'][$i].'" type="text" value="'.$this->attributes['group'][$i].'">
 				  </td>
 					<td>&nbsp;</td>
-				  <td>
+				  <td align="center">
 				  	<input name="mandatory_'.$this->attributes['name'][$i].'" type="checkbox" value="1" ';
 				  	if($this->attributes['mandatory'][$i]) echo 'checked="true"';
+						echo '>
+				  </td>
+					<td>&nbsp;</td>
+					<td align="center">
+				  	<input name="quicksearch_'.$this->attributes['name'][$i].'" type="checkbox" value="1" ';
+				  	if($this->attributes['quicksearch'][$i]) echo 'checked="true"';
 						echo '>
 				  </td>
         </tr>';

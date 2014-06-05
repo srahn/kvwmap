@@ -185,6 +185,11 @@ if($GUI->goNotExecutedInPlugins){
 		$go = $GUI->last_query['go'];
 	}
 	switch($go){
+		
+		case 'get_quicksearch_attributes' : {
+			$GUI->get_quicksearch_attributes();
+	  } break;
+	
 		case 'upload_temp_file' : {
 			$GUI->checkCaseAllowed($go);			
 			$GUI->qlayerset[0]['shape'][0] = $GUI->uploadTempFile(); 

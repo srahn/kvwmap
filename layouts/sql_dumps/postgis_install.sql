@@ -182,7 +182,7 @@ CREATE TABLE gaz_begriffe
 ) 
 WITH OIDS;
 SELECT AddGeometryColumn('public', 'gaz_begriffe', 'wgs_geom', 4326, 'POINT', 2);
-CREATE INDEX gaz_begriffe_gist ON gaz_begriffe USING GIST (wgs_geom GIST_GEOMETRY_OPS );
+CREATE INDEX gaz_begriffe_gist ON gaz_begriffe USING GIST (wgs_geom );
 
 --###############################################################
 --# Zusätzliche Funktionen zum Selektieren von einzelnen        #
@@ -265,7 +265,7 @@ WITH OIDS;
 COMMENT ON COLUMN jagdbezirke.concode IS 'entspricht tbJagdbezirk.BCode in condition';
 COMMENT ON COLUMN jagdbezirke.conname IS 'entspricht tbJagdbezirk.BBezeichnung in condition';
 SELECT AddGeometryColumn('public', 'jagdbezirke','the_geom',2398,'MULTIPOLYGON', 2);
-CREATE INDEX jagdbezirke_the_geom_gist ON jagdbezirke USING GIST (the_geom GIST_GEOMETRY_OPS);
+CREATE INDEX jagdbezirke_the_geom_gist ON jagdbezirke USING GIST (the_geom);
 ALTER TABLE jagdbezirke DROP CONSTRAINT enforce_geotype_the_geom;
 ALTER TABLE jagdbezirke ADD CONSTRAINT enforce_geotype_the_geom CHECK (geometrytype(the_geom) = 'POLYGON'::text OR geometrytype(the_geom) = 'MULTIPOLYGON'::text OR the_geom IS NULL);
 
@@ -329,7 +329,7 @@ CREATE TABLE bp_aenderungen
 WITH OIDS;
 
 SELECT AddGeometryColumn('public', 'bp_aenderungen','the_geom',2398,'POLYGON', 2);
-CREATE INDEX bp_aenderungen_the_geom_gist ON bp_aenderungen USING GIST (the_geom GIST_GEOMETRY_OPS);
+CREATE INDEX bp_aenderungen_the_geom_gist ON bp_aenderungen USING GIST (the_geom);
 ALTER TABLE bp_aenderungen DROP CONSTRAINT enforce_geotype_the_geom;
 ALTER TABLE bp_aenderungen ADD CONSTRAINT enforce_geotype_the_geom CHECK (geometrytype(the_geom) = 'POLYGON'::text OR geometrytype(the_geom) = 'MULTIPOLYGON'::text OR the_geom IS NULL);
 
@@ -344,7 +344,7 @@ CREATE TABLE u_polygon
 WITH OIDS;
 
 SELECT AddGeometryColumn('public', 'u_polygon','the_geom',2398,'MULTIPOLYGON', 2);
-CREATE INDEX u_polygon_the_geom_gist ON u_polygon USING GIST (the_geom GIST_GEOMETRY_OPS);
+CREATE INDEX u_polygon_the_geom_gist ON u_polygon USING GIST (the_geom);
 
 
 --# Tabelle zur Speicherung der Gemarkungsnummer-zu-Gemarkungsschlüssel-Beziehung für die Bauauskunft
@@ -423,7 +423,7 @@ CREATE TABLE q_fehlerellipsen
 )
 WITH OIDS;
 SELECT AddGeometryColumn('public', 'q_fehlerellipsen','the_geom',2398,'POINT', 2);
-CREATE INDEX q_fehlerellipsen_the_geom_gist ON q_fehlerellipsen USING GIST (the_geom GIST_GEOMETRY_OPS);
+CREATE INDEX q_fehlerellipsen_the_geom_gist ON q_fehlerellipsen USING GIST (the_geom);
 
 --##################################
 --# Qualität der Flurstücksflächen #
@@ -460,7 +460,7 @@ CREATE TABLE q_notizen
 ) 
 WITH OIDS;
 SELECT AddGeometryColumn('public', 'q_notizen','the_geom',2398,'POLYGON', 2);
-CREATE INDEX q_notizen_the_geom_gist ON q_notizen USING GIST (the_geom GIST_GEOMETRY_OPS);
+CREATE INDEX q_notizen_the_geom_gist ON q_notizen USING GIST (the_geom);
 ALTER TABLE q_notizen DROP CONSTRAINT enforce_geotype_the_geom;
 -- ALTER TABLE q_notizen DROP CONSTRAINT enforce_geotype_position;
 
@@ -551,7 +551,7 @@ WITH OIDS;
 COMMENT ON TABLE md_metadata IS 'Metadatendokumente';
 
 SELECT AddGeometryColumn('public', 'md_metadata','the_geom',2398,'POLYGON', 2);
-CREATE INDEX md_metadata_the_geom_gist ON md_metadata USING GIST (the_geom GIST_GEOMETRY_OPS);
+CREATE INDEX md_metadata_the_geom_gist ON md_metadata USING GIST (the_geom);
 
 --# Diese Tabellen sind für ein normalisiertes Datenbankmodell für Metadaten geplant
 --# und werden noch nicht verwendet 
@@ -639,7 +639,7 @@ CREATE TABLE ve_versiegelung
 ) 
 WITH OIDS;
 SELECT AddGeometryColumn('public', 've_versiegelung','the_geom',2398,'POLYGON', 2);
-CREATE INDEX ve_versiegelung_the_geom_gist ON ve_versiegelung USING GIST (the_geom GIST_GEOMETRY_OPS);
+CREATE INDEX ve_versiegelung_the_geom_gist ON ve_versiegelung USING GIST (the_geom);
 ALTER TABLE ve_versiegelung DROP CONSTRAINT enforce_geotype_the_geom;
 ALTER TABLE ve_versiegelung ADD CONSTRAINT enforce_geotype_the_geom CHECK (geometrytype(the_geom) = 'POLYGON'::text OR geometrytype(the_geom) = 'MULTIPOLYGON'::text OR the_geom IS NULL);
 
@@ -670,7 +670,7 @@ CREATE TABLE n_nachweise (
 )
 WITH OIDS;
 SELECT AddGeometryColumn('public', 'n_nachweise','the_geom',2398,'POLYGON', 2);
-CREATE INDEX n_nachweise_the_geom_gist ON n_nachweise USING GIST (the_geom GIST_GEOMETRY_OPS);
+CREATE INDEX n_nachweise_the_geom_gist ON n_nachweise USING GIST (the_geom);
 ALTER TABLE n_nachweise DROP CONSTRAINT enforce_geotype_the_geom;
 ALTER TABLE n_nachweise ADD CONSTRAINT enforce_geotype_the_geom CHECK (geometrytype(the_geom) = 'POLYGON'::text OR geometrytype(the_geom) = 'MULTIPOLYGON'::text OR the_geom IS NULL);
 
@@ -735,7 +735,7 @@ CREATE TABLE fp_punkte
 ) 
 WITH OIDS;
 SELECT AddGeometryColumn('public', 'fp_punkte','the_geom',2398,'POINT', 3);
-CREATE INDEX fp_punkte_the_geom_gist ON fp_punkte USING GIST (the_geom GIST_GEOMETRY_OPS);
+CREATE INDEX fp_punkte_the_geom_gist ON fp_punkte USING GIST (the_geom);
 
 CREATE TABLE fp_punkte2
 (
@@ -769,7 +769,7 @@ CREATE TABLE fp_punkte2
 ) 
 WITH OIDS;
 SELECT AddGeometryColumn('public', 'fp_punkte2','the_geom',2399,'POINT', 3);
-CREATE INDEX fp_punkte2_the_geom_gist ON fp_punkte2 USING GIST (the_geom GIST_GEOMETRY_OPS);
+CREATE INDEX fp_punkte2_the_geom_gist ON fp_punkte2 USING GIST (the_geom);
 
 --####################################
 --# Temporäre Tabelle für Punktdatei #
@@ -806,7 +806,7 @@ CREATE TABLE fp_punkte_temp
 ) 
 WITH OIDS;
 SELECT AddGeometryColumn('public', 'fp_punkte_temp','the_geom',2398,'POINT', 3);
-CREATE INDEX fp_punkte_temp_the_geom_gist ON fp_punkte_temp USING GIST (the_geom GIST_GEOMETRY_OPS);
+CREATE INDEX fp_punkte_temp_the_geom_gist ON fp_punkte_temp USING GIST (the_geom);
 ALTER TABLE fp_punkte_temp DROP CONSTRAINT enforce_srid_the_geom;
 
 --#####################################################
@@ -853,7 +853,7 @@ CREATE TABLE gt_bohrpunkte (
     ort character varying
 );
 SELECT AddGeometryColumn('public', 'gt_bohrpunkte','bohrpunkt',2398,'POINT', 2);
-CREATE INDEX gt_bohrpunkte_bohrpunkt_gist ON gt_bohrpunkte USING GIST (bohrpunkt GIST_GEOMETRY_OPS);
+CREATE INDEX gt_bohrpunkte_bohrpunkt_gist ON gt_bohrpunkte USING GIST (bohrpunkt);
 
 -- Erdwaermesonden
 CREATE TABLE gt_erdwaermesonden (
@@ -864,7 +864,7 @@ CREATE TABLE gt_erdwaermesonden (
     ellipse_halbachse_b numeric(5,2)
 );
 SELECT AddGeometryColumn('public', 'gt_erdwaermesonden','bohrpunkt',2398,'POINT', 2);
-CREATE INDEX gt_erdwaermesonden_bohrpunkt_gist ON gt_erdwaermesonden USING GIST (bohrpunkt GIST_GEOMETRY_OPS);
+CREATE INDEX gt_erdwaermesonden_bohrpunkt_gist ON gt_erdwaermesonden USING GIST (bohrpunkt);
 
 --##################################
 --# Tabellen für die Daten des ALB #
@@ -2236,10 +2236,10 @@ ALTER TABLE ONLY alb_x_v_strassen
  WITH OIDS;
  
  SELECT AddGeometryColumn('public', 'bw_zonen','textposition',25833,'POINT', 2);
- CREATE INDEX bw_zonen_textposition_gist ON bw_zonen USING GIST (textposition GIST_GEOMETRY_OPS);
+ CREATE INDEX bw_zonen_textposition_gist ON bw_zonen USING GIST (textposition);
  
  SELECT AddGeometryColumn('public', 'bw_zonen','the_geom',25833,'GEOMETRY', 2);
- CREATE INDEX bw_zonen_the_geom_gist ON bw_zonen USING GIST (the_geom GIST_GEOMETRY_OPS);
+ CREATE INDEX bw_zonen_the_geom_gist ON bw_zonen USING GIST (the_geom);
  
  
  -- das checkconstraint aendern wg. Datenuebernahme von Multipolygonen
