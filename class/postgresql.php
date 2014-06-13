@@ -1971,22 +1971,23 @@ class pgdatabase_alkis extends pgdatabase_core {
   }
 
   function getKlassifizierung($FlurstKennz) {
-    $sql ="SELECT k.tabkenn,fk.flaeche,fk.angaben,k.klass,k.bezeichnung,k.abkuerzung";
-    $sql.=" FROM alb_f_klassifizierungen AS fk,alb_v_klassifizierungen AS k";
-    $sql.=" WHERE fk.klass=k.klass AND fk.tabkenn = k.tabkenn AND fk.flurstkennz='".$FlurstKennz."' ORDER BY tabkenn";
+    $sql ="SELECT round(st_area(st_intersection(n.wkb_geometry,f.wkb_geometry))::numeric) AS flaeche,  round(st_area(f.wkb_geometry)::numeric) as flstflaeche, n.ackerzahlodergruenlandzahl as wert, n.kulturart as objart, ";
+		$sql.=" ARRAY_TO_STRING(ARRAY[k.kurz, b.kurz, z.kurz, e1.kurz, e2.kurz, s.kurz], ' ') as label";
+    $sql.=" FROM alkis.ax_flurstueck f, alkis.ax_bodenschaetzung n ";
+		$sql.=" LEFT JOIN alkis.ax_bodenschaetzung_kulturart k ON k.wert=n.kulturart";
+		$sql.=" LEFT JOIN alkis.ax_bodenschaetzung_bodenart b ON b.wert=n.bodenart";
+		$sql.=" LEFT JOIN alkis.ax_bodenschaetzung_entstehungsartoderklimastufe e1 ON e1.wert=n.entstehungsartoderklimastufewasserverhaeltnisse[1]";
+		$sql.=" LEFT JOIN alkis.ax_bodenschaetzung_entstehungsartoderklimastufe e2 ON e2.wert=n.entstehungsartoderklimastufewasserverhaeltnisse[2]";
+		$sql.=" LEFT JOIN alkis.ax_bodenschaetzung_zustandsstufe z ON z.wert=n.zustandsstufeoderbodenstufe";
+		$sql.=" LEFT JOIN alkis.ax_bodenschaetzung_sonstigeangaben s ON k.wert=n.sonstigeangaben[1]";
+    $sql.=" WHERE st_intersects(n.wkb_geometry,f.wkb_geometry) = true AND st_area(st_intersection(n.wkb_geometry,f.wkb_geometry)) > 0.05 AND f.flurstueckskennzeichen='".$FlurstKennz."'";
+		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
     if (pg_num_rows($ret[1])>0) {
       while($rs=pg_fetch_array($ret[1])) {
         $Klassifizierung[]=$rs;
       }
-      $sql ="SELECT flurstkennz, SUM(flaeche) as summe FROM alb_f_klassifizierungen AS k";
-      $sql.=" WHERE tabkenn = '32' AND k.flurstkennz='".$FlurstKennz."' GROUP BY flurstkennz";
-      $this->debug->write("<br>kataster.php->flurstueck->getKlassifizierung Abfrage der Flï¿½chensumme zu Klassifizierungen zum Flurstï¿½ck<br>".$sql,4);
-      $ret=$this->execSQL($sql, 4, 0);
-      if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
-      $rs=pg_fetch_array($ret[1]);
-      $Klassifizierung['summe']=$rs['summe'];
     }
     $ret[1]=$Klassifizierung;
     return $ret;

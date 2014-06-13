@@ -213,6 +213,28 @@ class GUI extends GUI_core{
     if (isset ($mime_type)) $this->mime_type=$mime_type;
   }
 	
+	function autocomplete_request(){	# sql, columnname, inputvalue, inputname, resultdiv_id
+		$sql = $this->formvars['sql']." AND ".$this->formvars['columnname']." like upper(substr('".$this->formvars['inputvalue']."', 1, 1))||substr('".$this->formvars['inputvalue']."', 2, ".strlen($this->formvars['inputvalue']).")||'%' ORDER BY ".$this->formvars['columnname']." LIMIT 15";  			
+  	$ret=$this->pgdatabase->execSQL($sql,4, 1);	# bei Nutzung für GLE, gegen Layer-DB austauschen 
+		$count = pg_num_rows($ret[1]);
+		if($count == 0 OR ($count == 1 AND strtolower(array_pop(pg_fetch_row($ret[1]))) == strtolower($this->formvars['inputvalue']))){		# wenn nichts gefunden wurde oder nur ein Treffer und der dem Eingabewert entspricht
+			echo '<script type="text/javascript">
+				document.getElementById(\''.$this->formvars['resultdiv_id'].'\').style.display=\'none\';
+			</script>';
+		}
+		else{
+			pg_result_seek($ret[1], 0);
+			echo'<select size="'.$count.'" style="width: 200px;padding:4px; margin:-2px -17px -4px -4px;" onclick="document.GUI.'.$this->formvars['inputname'].'.value=this.value; document.getElementById(\''.$this->formvars['resultdiv_id'].'\').style.display=\'none\';">';
+			while($rs=pg_fetch_row($ret[1])) {
+				echo '<option onmouseover="this.selected = true;" value="'.$rs[0].'">'.$rs[0].'</option>';
+			}				
+			echo '</select>
+			<script type="text/javascript">
+				document.getElementById(\''.$this->formvars['resultdiv_id'].'\').style.display=\'block\';
+			</script>';
+		}
+	}
+	
 	function uploadTempFile() {
 		$this->mime_type = "formatter";
 		if ($this->formvars['format'] == '') $this->formvars['format'] = "json";
@@ -6546,10 +6568,10 @@ class GUI extends GUI_core{
 			$this->attributes = $mapdb->read_layer_attributes($this->formvars['layer_id'], $layerdb, $privileges['attributenames']);
 			# weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
 			$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $this->qlayerset['shape'], true);
-			
+			?><table><tr><?
 			for($i = 0; $i < count($this->attributes['name']); $i++){
         if($this->attributes['quicksearch'][$i] == 1){
-          ?><tr>
+          ?>
             <td width="40%">&nbsp;&nbsp;<?
               if($this->attributes['alias'][$i] != ''){
                 echo $this->attributes['alias'][$i];
@@ -6586,10 +6608,10 @@ class GUI extends GUI_core{
                     <?
                 }break;
       				}
-           ?></td>
-          </tr><?					
+           ?></td><?					
         }
       }
+			?></tr></table><?
 		}
 	}
 	
@@ -14613,7 +14635,7 @@ class db_mapObj extends db_mapObj_core{
       if($formvars['id'] != ''){
         $sql.="`Layer_ID`, ";
       }
-      $sql.= "`Name`, `alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`) VALUES(";
+      $sql.= "`Name`, `alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`) VALUES(";
       if($formvars['id'] != ''){
         $sql.="'".$formvars['id']."', ";
       }

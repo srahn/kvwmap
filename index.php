@@ -185,6 +185,10 @@ if($GUI->goNotExecutedInPlugins){
 		$go = $GUI->last_query['go'];
 	}
 	switch($go){
+	
+		case 'autocomplete_request' :{
+			$GUI->autocomplete_request();
+		}break;
 		
 		case 'get_quicksearch_attributes' : {
 			$GUI->get_quicksearch_attributes();

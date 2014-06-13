@@ -548,9 +548,6 @@ function restart()
   </defs>
   <rect id="background" style="fill:white" width="100%" height="100%"/>
 	<g id="moveGroup" transform="translate(0 0)">
-		<text x="'.$res_xm.'" y="'.$res_ym.'" style="opacity:1;text-anchor:middle">Kartenausschnitt wird geladen...
-			<animate attributeName="opacity" begin="0s" dur="4s" fill="freeze" keyTimes="0; 0.25; 0.5; 0.75; 1" repeatCount="indefinite" values="1;1;0;1;1"/>
-		</text>
 	  <image xlink:href="'.$bg_pic.'" height="100%" width="100%" y="0" x="0"/>
 	</g>
 	<g id="cartesian" transform="translate(0,'.$res_y.') scale(1,-1)">

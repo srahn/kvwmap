@@ -28,6 +28,28 @@
 
 class pgdatabase extends pgdatabase_alkis{
 
+	function getKlassifizierung($FlurstKennz) {
+    $sql ="SELECT k.tabkenn,fk.flaeche,fk.angaben,k.klass,k.bezeichnung,k.abkuerzung";
+    $sql.=" FROM alb_f_klassifizierungen AS fk,alb_v_klassifizierungen AS k";
+    $sql.=" WHERE fk.klass=k.klass AND fk.tabkenn = k.tabkenn AND fk.flurstkennz='".$FlurstKennz."' ORDER BY tabkenn";
+    $ret=$this->execSQL($sql, 4, 0);
+    if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
+    if (pg_num_rows($ret[1])>0) {
+      while($rs=pg_fetch_array($ret[1])) {
+        $Klassifizierung[]=$rs;
+      }
+      $sql ="SELECT flurstkennz, SUM(flaeche) as summe FROM alb_f_klassifizierungen AS k";
+      $sql.=" WHERE tabkenn = '32' AND k.flurstkennz='".$FlurstKennz."' GROUP BY flurstkennz";
+      $this->debug->write("<br>kataster.php->flurstueck->getKlassifizierung Abfrage der Fl�chensumme zu Klassifizierungen zum Flurst�ck<br>".$sql,4);
+      $ret=$this->execSQL($sql, 4, 0);
+      if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
+      $rs=pg_fetch_array($ret[1]);
+      $Klassifizierung['summe']=$rs['summe'];
+    }
+    $ret[1]=$Klassifizierung;
+    return $ret;
+  }
+
 	function getForstamt($FlurstKennz) {
     $sql ="SELECT a.forstamt AS schluessel,a.name FROM alb_flurstuecke AS f,alb_v_forstaemter AS a";
     $sql.=" WHERE f.forstamt=a.forstamt AND f.flurstkennz = '".$FlurstKennz."'";

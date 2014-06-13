@@ -77,7 +77,7 @@ function drag(event) {
   posy = event.screenY;
   if(dragobjekt != null){
     dragobjekt.style.left = (posx - dragx) + "px";
-    dragobjekt.style.top = (posy - dragy) + "px";
+    if(posy - dragy > 0)dragobjekt.style.top = (posy - dragy) + "px";
   }
 	if(resizeobjekt != null){				
 		switch(resizetype) {

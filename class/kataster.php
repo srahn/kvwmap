@@ -2248,8 +2248,7 @@ class flurstueck_alkis {
   function getKlassifizierung() {
     if ($this->FlurstKennz=="") { return 0; }
     $this->debug->write("<br>kataster.php->flurstueck->getKlassifizierung Abfrage der Klassifizierungen zum Flurstück<br>".$sql,4);
-    if(ALKIS){}		# ALKIS-TODO
-    else $ret=$this->database->getKlassifizierung($this->FlurstKennz);
+    $ret=$this->database->getKlassifizierung($this->FlurstKennz);
     if ($ret[0] AND DBWRITE) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     $Klassifizierung=$ret[1];
     return $Klassifizierung;

@@ -1,8 +1,8 @@
 
 <script language="JavaScript" type="text/javascript">
 <!--
-function send_selected_flurst(go, formnummer, wz, target){
-	document.GUI.go_backup.value=document.GUI.go.value;	
+send_selected_flurst = function(go, formnummer, wz, target){
+	currentform.go_backup.value=currentform.go.value;
   var semi = false;
   var flurstkennz = "";
   var flurstarray = document.getElementsByName("check_flurstueck");
@@ -15,29 +15,20 @@ function send_selected_flurst(go, formnummer, wz, target){
       semi = true;
     }
   }
-  document.GUI.target = '';
+  currentform.target = '';
   if(target == '_blank'){
-    document.GUI.target = '_blank';
+    currentform.target = '_blank';
   }
-  document.GUI.go.value=go;
-  document.GUI.FlurstKennz.value=flurstkennz;
-  document.GUI.formnummer.value=formnummer;
-  document.GUI.wz.value=wz;
-  document.GUI.submit();
+  currentform.go.value=go;
+  currentform.FlurstKennz.value=flurstkennz;
+  currentform.formnummer.value=formnummer;
+  currentform.wz.value=wz;
+  currentform.submit();
 }
 
-function browser_switch(go){
-  if(navigator.appName == 'Microsoft Internet Explorer'){
-    send_selected_flurst(go, '', '', '_blank');
-  }
-  else{
-    send_selected_flurst(go, '', '', '');
-  }
-}
-
-function backto(go){
-  document.GUI.go.value=go;
-  document.GUI.submit();
+backto = function(go){
+  currentform.go.value=go;
+  currentform.submit();
 }
 
 
@@ -305,28 +296,75 @@ function backto(go){
           </td>
         </tr>
 				
-        <?php if ($privileg_['klassifizierung'] AND $flst->Klassifizierung[0]['tabkenn']!='') { ?>
-        <tr>
-          <td colspan="2">
-            <table border="0" cellspacing="0" cellpadding="2">
-            <tr>
-              <td align="right"><strong>Gesetzl.&nbsp;Klassifizierung</strong></td>
-              <td align="right"><?php echo $flst->Klassifizierung[0]['flaeche']; ?> m&sup2;</td>
-              <td><?php echo $flst->Klassifizierung[0]['tabkenn'].'-'.$flst->Klassifizierung[0]['klass']; ?></td>
-              <td><?php echo $flst->Klassifizierung[0]['bezeichnung']; ?></td>
+        <? if($privileg_['klassifizierung']){
+	        	if($flst->Klassifizierung[0]['wert'] != ''){
+	        		$ratio = $flst->ALB_Flaeche/$flst->Klassifizierung[0]['flstflaeche'];
+	        ?>
+	        	<tr>
+          		<td colspan="2">
+            		<strong>Gesetzl.&nbsp;Klassifizierung Bodensch&auml;tzung</strong>
+              </td>
             </tr>
-            <? for($j = 1; $j < count($flst->Klassifizierung)-1; $j++){ ?>
             <tr>
-              <td align="right">&nbsp;</td>
-              <td align="right"><?php echo $flst->Klassifizierung[$j]['flaeche']; ?> m&sup2;</td>
-              <td><?php echo $flst->Klassifizierung[$j]['tabkenn'].'-'.$flst->Klassifizierung[$j]['klass']; ?></td>
-              <td><?php echo $flst->Klassifizierung[$j]['bezeichnung']; ?></td>
-            </tr>
-            <? } ?>
-          </table>
-          </td>
-         </tr>
-        <?php } ?>
+                  <td>
+		            <table border="0" cellspacing="0" cellpadding="2">
+                    <colgroup>
+                      <col width="120px">
+                      <col width="*">
+                      <col width="*">
+                      <col width="*">
+                    </colgroup>
+		            <?  $emzges_222 = 0; $emzges_223 = 0;
+		            	$flaeche_222 = 0; $flaeche_223 = 0;
+		            	for($j = 0; $j < count($flst->Klassifizierung); $j++){
+		            	$wert=$flst->Klassifizierung[$j]['wert'];
+				          $emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
+				          if($flst->Klassifizierung[$j]['objart'] == 1000){
+				          	$emzges_222 = $emzges_222 + $emz;
+				          	$flaeche_222 = $flaeche_222 + $flst->Klassifizierung[$j]['flaeche'];
+				          }
+				          if($flst->Klassifizierung[$j]['objart'] == 3000){
+				          	$emzges_223 = $emzges_223 + $emz;
+				          	$flaeche_223 = $flaeche_223 + $flst->Klassifizierung[$j]['flaeche'];
+				          }
+		            	?>
+		            <tr>
+		              <td></td>
+		              <td><? echo round($flst->Klassifizierung[$j]['flaeche']); ?> m&sup2&nbsp;</td>
+		              <td><? echo $flst->Klassifizierung[$j]['label']; ?></td>
+		              <td>EMZ: <? echo $emz; ?></td>
+		            </tr>
+		            <? } // end for
+		            $nichtgeschaetzt=round($flst->ALB_Flaeche-$flaeche_222-$flaeche_223);
+		            if ($nichtgeschaetzt>0) { ?>
+          				<tr>
+          					<td></td>
+          					<td colspan="3">nicht geschätzt: <? echo $nichtgeschaetzt; ?> m&sup2;</td>
+          				</tr>
+		            <? }
+        			if ($emzges_222 > 0)  {
+        					$BWZ_222 = round($emzges_222/$flaeche_222*100);
+        					?>
+          				<tr>
+          					<td></td>
+          					<td colspan="3">Ackerland gesamt: EMZ <? echo $emzges_222; ?>, BWZ <? echo $BWZ_222; ?></td>
+          				</tr>
+        			<?	}
+        			if ($emzges_223 > 0) {
+        					$BWZ_223 = round($emzges_223/$flaeche_223*100);
+        					?>
+          				<tr>
+          					<td></td>
+          					<td colspan="3">Grünland gesamt: EMZ <? echo $emzges_223; ?>, BWZ <? echo $BWZ_223; ?></td>
+          				</tr>
+        			<?	} ?>
+		          </table>
+		          </td>
+		         </tr>
+	        <?
+	        	}
+        } ?>
+				
         <?php if ($privileg_['freitext'] AND count($flst->FreiText)>0) { ?>
         <tr>
           <td colspan="2">
@@ -571,6 +609,8 @@ function backto(go){
                 <? } ?>
               </tr>
               <? if($flst->Buchungen[$b]['zusatz_eigentuemer'] != ''){
+									$flst->Buchungen[$b]['zusatz_eigentuemer'] = str_replace('zu', '<br>zu', $flst->Buchungen[$b]['zusatz_eigentuemer']);
+									$flst->Buchungen[$b]['zusatz_eigentuemer'] = str_replace('<br>zu 1/', 'zu 1/', $flst->Buchungen[$b]['zusatz_eigentuemer']);
       						echo '<tr><td></td><td colspan="2">'.$flst->Buchungen[$b]['zusatz_eigentuemer'].'</td></tr>';
       			 			} ?>
               <? }

@@ -122,6 +122,13 @@
 		document.GUI.go.value = 'Suche_Flurstuecke_zu_Grundbuechern';
 		document.GUI.submit();
 	}
+	
+	function autocomplete1(sql, columnname, inputname, resultdiv_id, inputvalue){
+		document.getElementById(resultdiv_id).style.display='none';
+		if(inputvalue.length > 2){
+			ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=autocomplete_request&sql='+sql+'&columnname='+columnname+'&inputname='+inputname+'&inputvalue='+inputvalue+'&resultdiv_id='+resultdiv_id, new Array(document.getElementById(resultdiv_id)), new Array("sethtml"));
+		}
+	}
 
 
 //-->
@@ -134,14 +141,26 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 ?><p>
 <table border="0" cellpadding="0" cellspacing="2">
   <tr>
-    <td align="right"><strong><?php echo $strName1; ?>:</strong>
-    </td>
-    <td><input name="name1" type="text" value="<?php echo $this->formvars['name1']; ?>" size="25" tabindex="1"></td>
+    <td align="right"><strong><?php echo $strName1; ?>:</strong></td>
+    <td>
+			<div style="width:150px;">				
+				<input name="name1" type="text" value="<?php echo $this->formvars['name1']; ?>" size="25" autocomplete="off" onkeyup="autocomplete1('SELECT distinct nachnameoderfirma FROM alkis.ax_person WHERE 1=1 ', 'nachnameoderfirma', 'name1', 'suggests1', this.value);" tabindex="1">
+				<div valign="top" style="height:0px; position:relative;">
+					<div id="suggests1" style="display:none; position:absolute; left:0px; top:0px; width: 150px; vertical-align:top; overflow:hidden; border:solid grey 1px;"></div>
+				</div>
+			</div>
+		</td>
   </tr>
   <tr>
-    <td align="right"><strong><?php echo $strName2; ?>:</strong>
-      </td>
-    <td><input name="name2" type="text" value="<?php echo $this->formvars['name2']; ?>" size="25" tabindex="2"></td>
+    <td align="right"><strong><?php echo $strName2; ?>:</strong></td>
+    <td>
+			<div style="width:150px;">				
+				<input name="name2" type="text" value="<?php echo $this->formvars['name2']; ?>" size="25" autocomplete="off" onkeyup="autocomplete1('SELECT distinct vorname FROM alkis.ax_person WHERE 1=1 ', 'vorname', 'name2', 'suggests2', this.value);" tabindex="1">
+				<div valign="top" style="height:0px; position:relative;">
+					<div id="suggests2" style="display:none; position:absolute; left:0px; top:0px; width: 150px; vertical-align:top; overflow:hidden; border:solid grey 1px;"></div>
+				</div>
+			</div>
+		</td>
   </tr>
   <tr>
     <td align="right"><strong><?php echo $strName3; ?>:</strong>

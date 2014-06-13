@@ -342,7 +342,7 @@
 					<? } ?>
 					<? if($privileg != ''){ ?>
 						&nbsp;&nbsp;&bull;&nbsp;<a href="javascript:zoomto_datasets(<?php echo $layer['Layer_ID']; ?>, '<? echo $tablename; ?>', '<? echo $columnname; ?>');"><? echo $strzoomtodatasets; ?></a>
-						<select name="klass_<?php echo $layer['Layer_ID']; ?>">
+						<select style="width: 130px" name="klass_<?php echo $layer['Layer_ID']; ?>">
 							<option value="">klassifiziert nach:</option>
 							<?
 							for($j = 0; $j < count($attributes['name']); $j++){
