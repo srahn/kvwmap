@@ -272,6 +272,7 @@ $svg='<?xml version="1.0"?>
   moving  = false;
   moved  = false;
   var doing = "'.$this->user->rolle->getSelectedButton().'";
+	mouse_down = false;
   var highlighted  = "yellow";
   var cmd   = ""; 
   var data="";
@@ -710,6 +711,8 @@ function world2pixelsvg(pathWelt){
 
 
 function mousedown(evt){
+	mouse_down = true;
+	cleartooltip();
 	if(top.document.GUI.stopnavigation.value == 0){
 	  switch(doing){
 	   case "previous":
@@ -820,6 +823,7 @@ function mousemove(evt){
 }
 
 function mouseup(evt){
+	mouse_down = false;
   switch(doing) 
   {
    case "measure":

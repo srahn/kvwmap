@@ -240,7 +240,7 @@ $SVGvars_querytooltipscript .= '
 		function tooltip_query(){
 			var querylayer = "";
 			var querylayer_id;
-			if(doing == "ppquery"){ 
+			if(doing == "ppquery" && mouse_down == false){ 
 				if(Math.abs(oldmousex-mousex) < 1 && Math.abs(oldmousey-mousey) < 1){		// Maus stillhalten
 					if(tooltipstate == "ready_for_request" && prevent != 1){			// wenn Maus bewegt wurde --> neuer Request
 						tooltipstate = "request_sent";
