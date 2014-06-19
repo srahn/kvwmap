@@ -57,7 +57,16 @@ emzversteckt = function(k){
 
 
 <a name="anfang"></a>
-<h2>Flurst&uuml;cke</h2>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+	<tr>
+		<td width="95%" align="center"><h2>Flurst&uuml;cke</h2></td>
+		<td align="right">			
+			<a href="javascript:scrollbottom();"><img title="nach unten" src="<? echo GRAPHICSPATH; ?>pfeil.gif" width="11" height="11" border="0"></a>&nbsp;
+		</td>		
+	</tr>
+</table>
+
 <table border="0" cellpadding="2" cellspacing="0">
 <?php
   $sql_aktalb="SELECT (max(ffzeitraum_bis)) FROM alb_fortfuehrung;";

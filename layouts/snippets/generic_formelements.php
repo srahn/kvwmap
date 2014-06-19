@@ -266,7 +266,8 @@
 
 									case 'Link': {
 										if ($dataset[$attributes['name'][$j]]!='') {
-											echo '<a class="link" target="_blank" style="font-size: '.$this->user->rolle->fontsize_gle.'px" href="'.$dataset[$attributes['name'][$j]].'">';
+											if(substr($dataset[$attributes['name'][$j]], 0, 4) == 'http')$target = '_blank';
+											echo '<a class="link" target="'.$target.'" style="font-size: '.$this->user->rolle->fontsize_gle.'px" href="'.$dataset[$attributes['name'][$j]].'">';
 											if($attributes['options'][$j] != ''){
 												echo $attributes['options'][$j];
 											}

@@ -8,7 +8,9 @@
 
 	
 	function load_search_attributes(layer_id){
-		ahah("<? echo URL.APPLVERSION; ?>index.php", "go=get_quicksearch_attributes&layer_id="+layer_id, new Array(document.getElementById('search_div')), new Array('sethtml'));
+		if(layer_id != undefined){
+			ahah("<? echo URL.APPLVERSION; ?>index.php", "go=get_quicksearch_attributes&layer_id="+layer_id, new Array(document.getElementById('search_div')), new Array('sethtml'));
+		}
 	}
 	
 	load_search_attributes();
@@ -49,6 +51,6 @@
 	</table>
 <? if($this->formvars['selected_layer_id'] != ''){ ?>
 	<script type="text/javascript">
-		load_search_attributes(<? echo $this->formvars['selected_layer_id']; ?>);
+		load_search_attributes(<? echo $this->formvars['quicksearch_layer_id']; ?>);
 	</script>
 <? } ?>

@@ -11,9 +11,10 @@ class wfs{
 	function get_feature_request($bbox, $filter, $maxfeatures){
 		$request = $this->url.'&service=WFS&request=getfeature&version='.$this->version.'&typename='.$this->typename;
 		if($bbox != ''){$request .= '&bbox='.$bbox;}
-		if($filter != ''){$request .= '&filter='.$filter;}
+		if($filter != ''){$request .= '&filter='.urlencode($filter);}
 		if($maxfeatures != ''){$request .= '&maxfeatures='.$maxfeatures;}
 		#$this->gml = utf8_decode(file_get_contents($request));
+		#echo $request;
     $this->gml = url_get_contents($request);
 	}
 	

@@ -135,7 +135,7 @@ else {
  				include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php')
 			?>
     </td>
-    <td colspan="2"><hr align="center" noshade></td>
+    <td colspan="2"><hr style="width: 290px" align="center" noshade></td>
   </tr>
     
   <tr> 

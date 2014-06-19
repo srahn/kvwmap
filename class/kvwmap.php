@@ -6371,7 +6371,7 @@ class GUI extends GUI_core{
         }
         $j = 0;
         foreach($layerset[0]['attributes']['all_table_names'] as $tablename){
-          if($layerset[0]['attributes']['oids'][$j]){     # hat Tabelle oids?
+					if($tablename == $layerset[0]['maintable'] AND $layerset[0]['attributes']['oids'][$j]){		# hat Haupttabelle oids?
             $pfad = $layerset[0]['attributes']['table_alias_name'][$tablename].'.oid AS '.$tablename.'_oid, '.$pfad;
             if($this->formvars['value_'.$tablename.'_oid']){
               $sql_where .= ' AND '.$tablename.'_oid = '.$this->formvars['value_'.$tablename.'_oid'];
@@ -6546,6 +6546,28 @@ class GUI extends GUI_core{
       }
 			if($this->user->rolle->querymode == 1 AND $this->formvars['mime_type'] != 'overlay_html'){		# bei aktivierter Datenabfrage in extra Fenster und Suche aus Suchmaske (nicht aus Overlay) heraus --> Laden der Karte und Darstellung der Sachdaten im Overlay
 				$this->loadMap('DataBase');
+				if(count($this->qlayerset[$i]['shape']) > 0 AND ($layerset[0]['attributes']['the_geom'] != '' OR $layerset[0]['shape'][0]['geom'] != '')){			# wenn was gefunden wurde und der Layer Geometrie hat, auf Datensätze zoomen
+					switch ($layerset[0]['connectiontype']) {
+						case MS_POSTGIS : {
+							for($k = 0; $k < count($this->qlayerset[$i]['shape']); $k++){
+								$oids[] = $this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['maintable'].'_oid'];
+							}
+							$rect = $mapDB->zoomToDatasets($oids, $layerset[0]['maintable'], $layerset[0]['attributes']['the_geom'], 10, $layerdb, $this->user->rolle->epsg_code);
+							$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
+							if (MAPSERVERVERSION > 600) {
+								$this->map_scaledenom = $this->map->scaledenom;
+							}
+							else {
+								$this->map_scaledenom = $this->map->scale;
+							}
+						}break;
+						case MS_WFS : {
+							$this->formvars['wkt'] = $layerset[0]['shape'][0]['geom'];
+							$this->formvars['epsg'] = $layerset[0]['epsg_code'];
+							$this->zoom2wkt();
+						}break;
+					}
+				}
 				$this->user->rolle->newtime = $this->user->rolle->last_time_id;
 				$this->drawMap();
 				$this->saveMap('');
@@ -7820,7 +7842,7 @@ class GUI extends GUI_core{
 	      $csv .= $name.';';
     	}
     }
-    $csv .= chr(10);
+    $csv .= chr(13).chr(10);
 
     # Daten schreiben
     for($i = 0; $i < count($result); $i++){
@@ -7840,7 +7862,7 @@ class GUI extends GUI_core{
 	        $csv .= $result[$i][$attributes['name'][$j]].'";';
       	}
       }
-      $csv .= chr(10);
+      $csv .= chr(13).chr(10);
     }
     
     $currenttime=date('Y-m-d H:i:s',time());
@@ -13068,8 +13090,8 @@ class GUI extends GUI_core{
   function zoomToMaxLayerExtent($layer_id) {
     # Abfragen der maximalen Ausdehnung aller Daten eines Layers
 		
-    # Abfragen des Data Statements des Layers
-    $data=$this->mapDB->getData($layer_id);
+		$layer = $this->user->rolle->getLayer($layer_id);
+		$data = $layer[0]['Data'];
     
     # suchen nach dem ersten Vorkommen von using unique
     $pos = strpos(strtolower($data),'using unique');
@@ -13097,24 +13119,20 @@ class GUI extends GUI_core{
 		}
 
     # Erzeugen des Abfragestatements für den maximalen Extent aus dem Data String
-    $sql ='SELECT st_extent(st_transform('.$this->attributes['the_geom'].','.$this->user->rolle->epsg_code.')) AS extent FROM (SELECT ';
+    $sql ='SELECT st_xmin(extent) AS minx,st_ymin(extent) AS miny,st_xmax(extent) AS maxx,st_ymax(extent) AS maxy FROM (SELECT st_transform(st_setsrid(st_extent('.$this->attributes['the_geom'].'), '.$layer[0]['epsg_code'].'), '.$this->user->rolle->epsg_code.') AS extent FROM (SELECT ';
     $sql.=$subquery;
-    $sql.=') AS fooForMaxLayerExtent';
+    $sql.=') AS fooForMaxLayerExtent) as foo';
     #echo $sql;
 
     # Abfragen der Layerausdehnung
     $ret=$layerdb->execSQL($sql,4,0);
     if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
     $rs = pg_fetch_array($ret[1]);
-    if($rs['extent'] != ''){
-	    $coords=explode(',',trim(strtolower($rs['extent']),'box()'));
-	    #var_dump($coords);
-	    $sw=explode(' ',$coords[0]);
-	    $ne=explode(' ',$coords[1]);
-	    $minx=$sw[0]-10;
-	    $miny=$sw[1]-10;
-	    $maxx=$ne[0]+10;
-	    $maxy=$ne[1]+10;
+    if($rs['minx'] != ''){			
+			$minx=$rs['minx']-10; 
+			$maxx=$rs['maxx']-10;
+			$miny=$rs['miny']+10; 
+			$maxy=$rs['maxy']+10;
 	    #echo 'box:'.$minx.' '.$miny.','.$maxx.' '.$maxy;
 	    $this->map->setextent($minx,$miny,$maxx,$maxy);
 	    # damit nicht außerhalb des Stellen-Extents gezoomt wird
@@ -13898,13 +13916,14 @@ class db_mapObj extends db_mapObj_core{
 
 	function zoomToDatasets($oids, $tablename, $columnname, $border, $layerdb, $client_epsg) {
   	$sql ="SELECT st_xmin(bbox) AS minx,st_ymin(bbox) AS miny,st_xmax(bbox) AS maxx,st_ymax(bbox) AS maxy";
-  	$sql.=" FROM (SELECT box2D(st_transform(st_union(".$columnname."), ".$client_epsg.")) as bbox";
+  	$sql.=" FROM (SELECT st_transform(ST_SetSRID(ST_Extent(".$columnname."), (select st_srid(".$columnname.") from ".$tablename." limit 1)), ".$client_epsg.") as bbox";
   	$sql.=" FROM ".$tablename." WHERE oid IN (";
   	for($i = 0; $i < count($oids); $i++){
     	$sql .= "'".$oids[$i]."',";
     }
     $sql = substr($sql, 0, -1);
 		$sql.=")) AS foo";
+		#echo $sql;
     $ret = $layerdb->execSQL($sql, 4, 0);
 		$rs = pg_fetch_array($ret[1]);
 		$rect = ms_newRectObj();
