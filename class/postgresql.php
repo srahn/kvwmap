@@ -643,8 +643,10 @@ class pgdatabase_alkis extends pgdatabase_core {
     if($ret[0] == 0){
       $rect= ms_newRectObj();
       $rs=pg_fetch_array($ret[1]);
-      $rect->minx=$rs['minx']; $rect->miny=$rs['miny'];
-      $rect->maxx=$rs['maxx']; $rect->maxy=$rs['maxy'];
+      $rect->minx=$rs['minx']-30; 
+			$rect->miny=$rs['miny']-30;
+      $rect->maxx=$rs['maxx']+30; 
+			$rect->maxy=$rs['maxy']+30;
       return $rect;
     }
   }
