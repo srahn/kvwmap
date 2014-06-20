@@ -6725,6 +6725,9 @@ class GUI extends GUI_core{
           $wfs->describe_featuretype_request();
           $wfs->parse_gml('sequence');
           $this->attributes = $wfs->get_attributes();
+					for($i = 0; $i < count($this->attributes['name']); $i++){
+	          $this->qlayerset['shape'][0][$this->attributes['name'][$i]] = $this->formvars['value_'.$this->attributes['name'][$i]];
+	        }
         }break;
       }
       # Speichern einer neuen Suchabfrage

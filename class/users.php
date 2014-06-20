@@ -2660,7 +2660,7 @@ class stelle extends stelle_core{
 	}
 
 	function getqueryablePostgisLayers($privileg){
-		$sql = 'SELECT layer.Layer_ID, Name FROM used_layer, layer, u_groups';
+		$sql = 'SELECT layer.Layer_ID, Name, alias FROM used_layer, layer, u_groups';
 		$sql .=' WHERE stelle_id = '.$this->id;
 		$sql .=' AND layer.Gruppe = u_groups.id AND layer.connectiontype = 6';
 		$sql .=' AND layer.Layer_ID = used_layer.Layer_ID';
@@ -2677,6 +2677,9 @@ class stelle extends stelle_core{
 		}
 		else{
 			while($rs=mysql_fetch_array($query)) {
+				if($rs['alias'] != '' AND $this->useLayerAliases){
+					$rs['Name'] = $rs['alias'];
+				}
 				$layer['ID'][]=$rs['Layer_ID'];
 				$layer['Bezeichnung'][]=$rs['Name'];
 			}
@@ -2689,7 +2692,7 @@ class stelle extends stelle_core{
 	}
 
 	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL){
-		$sql = 'SELECT layer.Layer_ID, Name, Gruppe, Gruppenname, `connection` FROM used_layer, layer, u_groups';
+		$sql = 'SELECT layer.Layer_ID, Name, alias, Gruppe, Gruppenname, `connection` FROM used_layer, layer, u_groups';
 		$sql .=' WHERE stelle_id = '.$this->id;
 		$sql .=' AND layer.Gruppe = u_groups.id AND (layer.connectiontype = 6 OR layer.connectiontype = 9)';
 		$sql .=' AND layer.Layer_ID = used_layer.Layer_ID';
@@ -2705,7 +2708,7 @@ class stelle extends stelle_core{
 		}
 		if($user_id != NULL){
 			$sql .= ' UNION ';
-			$sql .= 'SELECT -id as Layer_ID, concat(substring( `Name` FROM 1 FOR locate( ")", `Name` )), CASE WHEN Typ = "search" THEN " -Suchergebnis-" ELSE " -Shape-Import-" END), -1, " ", `connection` FROM rollenlayer';
+			$sql .= 'SELECT -id as Layer_ID, concat(substring( `Name` FROM 1 FOR locate( ")", `Name` )), CASE WHEN Typ = "search" THEN " -Suchergebnis-" ELSE " -Shape-Import-" END), "", -1, " ", `connection` FROM rollenlayer';
 			$sql .= ' WHERE stelle_id = '.$this->id.' AND user_id = '.$user_id.' AND connectiontype = 6';
 		}
 
@@ -2741,7 +2744,10 @@ class stelle extends stelle_core{
 						continue;
 					}
 				}
-				 
+				
+				if($rs['alias'] != '' AND $this->useLayerAliases){
+					$rs['Name'] = $rs['alias'];
+				}
 				$layer['ID'][]=$rs['Layer_ID'];
 				$layer['Bezeichnung'][]=$rs['Name'];
 				$layer['Gruppe'][]=$rs['Gruppe'];
