@@ -306,6 +306,7 @@ class rolle_core {
     $this->runningcoords=$rs['runningcoords'];
 		$this->singlequery=$rs['singlequery'];
 		$this->querymode=$rs['querymode'];
+		$this->geom_edit_first=$rs['geom_edit_first'];		
 		$this->overlayx=$rs['overlayx'];
 		$this->overlayy=$rs['overlayy'];
     $buttons = explode(',', $rs['buttons']);

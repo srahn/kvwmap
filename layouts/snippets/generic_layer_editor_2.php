@@ -47,6 +47,7 @@
 <table border="0" cellspacing="0" cellpadding="2">
 <?
 	for ($k=0;$k<$anzObj;$k++) {
+		$datapart = '';
 		$checkbox_names .= 'check;'.$attributes['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].'|';
 ?>
 	<tr>
@@ -59,9 +60,9 @@
 			>
 	    <input type="hidden" value="" name="changed_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
 	    <table id="dstable" class="tgle" <? if($attributes['group'][0] != ''){echo 'border="0" cellpadding="6" cellspacing="0"';}else{echo 'border="1"';} ?>>
+				<? if($this->new_entry != true AND $this->formvars['printversion'] == ''){ ?>
 	      <thead class="gle">
-	        <th colspan="2" style="background-color:<? echo BG_GLEHEADER; ?>;">
-			  <? if($this->new_entry != true AND $this->formvars['printversion'] == ''){ ?>
+	        <th colspan="2" style="background-color:<? echo BG_GLEHEADER; ?>;">			  
 			  <table width="100%">
 			    <tr>
 			      <td>
@@ -80,9 +81,9 @@
 			      </td>
 			    </tr>
 			  </table>
-			  <? } ?>
 		    </th>
 		  </thead>
+			<? } ?>
           <tbody <? if($attributes['group'][0] == '')echo 'class="gle"'; ?>>
 <?		$trans_oid = explode('|', $layer['shape'][$k]['lock']);
 			if($layer['shape'][$k]['lock'] == 'bereits übertragen' OR $trans_oid[1] != '' AND $layer['shape'][$k][$layer['maintable'].'_oid'] == $trans_oid[1]){
@@ -104,14 +105,14 @@
 					$explosion = explode(';', $attributes['group'][$j]);
 					if($explosion[1] != '')$collapsed = true;else $collapsed = false;
 					$groupname = $explosion[0];
-					echo '<tr>
+					$datapart .= '<tr>
 									<td colspan="2" width="100%">
-										<table width="100%" id="colgroup'.$layer['Layer_ID'].'_'.$j.'_'.$k.'" class="tgle" '; if(!$collapsed)echo 'style="display:none"'; echo ' border="2"><tbody width="100%" class="gle">
+										<table width="100%" id="colgroup'.$layer['Layer_ID'].'_'.$j.'_'.$k.'" class="tgle" '; if(!$collapsed)$datapart .= 'style="display:none"'; $datapart .= ' border="2"><tbody width="100%" class="gle">
 											<tr>
 												<td width="100%" bgcolor="'.BG_GLEATTRIBUTE.'" colspan="2">&nbsp;<a href="javascript:void(0);" onclick="javascript:document.getElementById(\'group'.$layer['Layer_ID'].'_'.$j.'_'.$k.'\').style.display=\'\';document.getElementById(\'colgroup'.$layer['Layer_ID'].'_'.$j.'_'.$k.'\').style.display=\'none\';"><img border="0" src="'.GRAPHICSPATH.'/plus.gif"></a>&nbsp;<b>'.$groupname.'</b></td>
 											</tr>
 										</table>
-										<table width="100%" class="tgle" id="group'.$layer['Layer_ID'].'_'.$j.'_'.$k.'" '; if($collapsed)echo 'style="display:none"'; echo 'border="2"><tbody class="gle">
+										<table width="100%" class="tgle" id="group'.$layer['Layer_ID'].'_'.$j.'_'.$k.'" '; if($collapsed)$datapart .= 'style="display:none"'; $datapart .= 'border="2"><tbody class="gle">
 											<tr>
 												<td bgcolor="'.BG_GLEATTRIBUTE.'" colspan="2">&nbsp;<a href="javascript:void(0);" onclick="javascript:document.getElementById(\'group'.$layer['Layer_ID'].'_'.$j.'_'.$k.'\').style.display=\'none\';document.getElementById(\'colgroup'.$layer['Layer_ID'].'_'.$j.'_'.$k.'\').style.display=\'\';"><img border="0" src="'.GRAPHICSPATH.'/minus.gif"></a>&nbsp;<b>'.$groupname.'</b></td>
 											</tr>';
@@ -119,62 +120,62 @@
 				
 				if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
 					if($attributes['type'][$j] != 'geometry'){
-							echo '<tr><td ';
-							if($attributes['group'][0] != '')echo 'width="10%"';
-							echo ' valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';
+							$datapart .= '<tr><td ';
+							if($attributes['group'][0] != '')$datapart .= 'width="10%"';
+							$datapart .= ' valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';
 							if($attributes['privileg'][$j] != '0' AND !$lock[$k]){
 								$this->editable = 'true';
 							}
 							if($attributes['alias'][$j] == ''){
 								$attributes['alias'][$j] = $attributes['name'][$j];
 							}
-							echo '<table ';
-							if($attributes['group'][0] != '')echo 'width="200px"';
-							else echo 'width="100%";';
-							echo '><tr><td>';
+							$datapart .= '<table ';
+							if($attributes['group'][0] != '')$datapart .= 'width="200px"';
+							else $datapart .= 'width="100%";';
+							$datapart .= '><tr><td>';
 							if(!in_array($attributes['form_element_type'][$j], array('SubFormPK', 'SubFormEmbeddedPK', 'SubFormFK', 'dynamicLink'))){
-								echo '<a style="font-size: '.$this->user->rolle->fontsize_gle.'px" title="Sortieren nach '.$attributes['alias'][$j].'" href="javascript:change_orderby(\''.$attributes['name'][$j].'\', '.$layer['Layer_ID'].');">
+								$datapart .= '<a style="font-size: '.$this->user->rolle->fontsize_gle.'px" title="Sortieren nach '.$attributes['alias'][$j].'" href="javascript:change_orderby(\''.$attributes['name'][$j].'\', '.$layer['Layer_ID'].');">
 							 					'.$attributes['alias'][$j].'</a>';
 							}
 							else{
-								echo '<span style="font-size: '.$this->user->rolle->fontsize_gle.'px; color:#222222;">'.$attributes['alias'][$j].'</span>';
+								$datapart .= '<span style="font-size: '.$this->user->rolle->fontsize_gle.'px; color:#222222;">'.$attributes['alias'][$j].'</span>';
 							}
 							if($attributes['nullable'][$j] == '0' AND $attributes['privileg'][$j] != '0'){
-								echo '<span title="Eingabe erforderlich">*</span>';
+								$datapart .= '<span title="Eingabe erforderlich">*</span>';
 							}
 							if($attributes['tooltip'][$j]!='' AND $attributes['form_element_type'][$j] != 'Time'){
-							  echo '<td align="right"><a href="javascript:void(0);" title="'.$attributes['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
+							  $datapart .= '<td align="right"><a href="javascript:void(0);" title="'.$attributes['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
 							}
 							if($attributes['type'][$j] == 'date'){
-							  echo '<td align="right"><a href="javascript:;" title=" (TT.MM.JJJJ) '.$attributes['tooltip'][$j].'" ';
+							  $datapart .= '<td align="right"><a href="javascript:;" title=" (TT.MM.JJJJ) '.$attributes['tooltip'][$j].'" ';
 							  if($attributes['privileg'][$j] == '1' AND !$lock[$k]){
-							  	echo 'onclick="new CalendarJS().init(\''.$attributes['name'][$j].'_'.$k.'\');"';
+							  	$datapart .= 'onclick="new CalendarJS().init(\''.$attributes['name'][$j].'_'.$k.'\');"';
 							  }
-							  echo '><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div id="calendar"><a name="calendar_'.$attributes['name'][$j].'_'.$k.'"></div></td>';
+							  $datapart .= '><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div id="calendar"><a name="calendar_'.$attributes['name'][$j].'_'.$k.'"></div></td>';
 							}
-							echo '</td></tr></table>';
-							echo '</td><td>';
+							$datapart .= '</td></tr></table>';
+							$datapart .= '</td><td>';
 			  			if($attributes['constraints'][$j] != '' AND $attributes['constraints'][$j] != 'PRIMARY KEY'){
 			  				if($attributes['privileg'][$j] == '0' OR $lock[$k]){
 			  					$size1 = 1.3*strlen($layer['shape'][$k][$attributes['name'][$j]]);
-									echo '<input readonly style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;" size="'.$size1.'" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$layer['shape'][$k][$attributes['name'][$j]].'">';
+									$datapart .= '<input readonly style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;" size="'.$size1.'" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$layer['shape'][$k][$attributes['name'][$j]].'">';
 								}
 								else{
-			  					echo '<select onchange="set_changed_flag(currentform.changed_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" title="'.$attributes['alias'][$j].'"  style="font-size: '.$this->user->rolle->fontsize_gle.'px" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'">';
+			  					$datapart .= '<select onchange="set_changed_flag(currentform.changed_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" title="'.$attributes['alias'][$j].'"  style="font-size: '.$this->user->rolle->fontsize_gle.'px" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'">';
 									for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
-										echo '<option ';
+										$datapart .= '<option ';
 										if($attributes['enum_value'][$j][$e] == $layer['shape'][$k][$attributes['name'][$j]]){
-											echo 'selected ';
+											$datapart .= 'selected ';
 										}
-										echo 'value="'.$attributes['enum_value'][$j][$e].'">'.$attributes['enum_output'][$j][$e].'</option>';
+										$datapart .= 'value="'.$attributes['enum_value'][$j][$e].'">'.$attributes['enum_output'][$j][$e].'</option>';
 									}
-									echo '</select>';
+									$datapart .= '</select>';
 			  				}
 			  			}
 			  			else{
 								include(SNIPPETS.'generic_formelements.php');
 			  			}
-			  			echo '
+			  			$datapart .= '
 									</td>
 								</tr>
 							';
@@ -196,9 +197,12 @@
 			  		}
 					}
 					if($attributes['group'][$j] != $attributes['group'][$j+1]){		# wenn die nächste Gruppe anders ist, Tabelle schliessen
-						echo '</table></td></tr>';
+						$datapart .= '</table></td></tr>';
 					}
 				}
+				
+				if($this->new_entry != true)echo $datapart;
+				
 				if(($columnname != '' OR $layer['shape'][$k]['geom'] != '') AND $this->new_entry != true AND $this->formvars['printversion'] == ''){
 					if($attributes['group'][0] != ''){ ?>
 						<tr><td colspan="2"><table width="100%" class="tgle" border="2"><tbody class="gle">
@@ -266,6 +270,7 @@
 
 				if($privileg == 1) {
 					if($this->new_entry == true){
+						if(!$this->user->rolle->geom_edit_first)echo $datapart;
 						if($nullable === '0'){ ?>
 							<script type="text/javascript">
     						geom_not_null = true;
@@ -298,6 +303,7 @@
 								</td>
 							</tr>';
 						}
+						if($this->user->rolle->geom_edit_first)echo $datapart;
 					}
 				}
  ?>

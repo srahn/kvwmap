@@ -152,6 +152,15 @@
     <td align="right"><?php echo $strQuerymode; ?>:&nbsp;</td>
     <td><input name="querymode" type="checkbox" value="1" <? if($this->user->rolle->querymode == '1'){echo 'checked="true"';} ?> ></td>
   </tr>
+	<tr align="center">
+    <td align="right"><?php echo $strNewDatasetOrder; ?>:&nbsp;</td>
+    <td align="left">
+      <select name="geom_edit_first">
+				<option value="0"<?php if($this->user->rolle->geom_edit_first == '0') { echo ' selected'; }	?>><?php echo $strGeomSecond; ?></option>
+				<option value="1"<?php if($this->user->rolle->geom_edit_first == '1') { echo ' selected'; }	?>><?php echo $strGeomFirst; ?></option>
+			</select>
+    </td>
+  </tr>
   <tr>
     <td align="right"><?php echo $strFontSizeGLE; ?>:&nbsp;</td>
     <td><input name="fontsize_gle" type="text" value="<?php echo $this->user->rolle->fontsize_gle; ?>" size="2" maxlength="2"></td>

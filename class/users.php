@@ -871,6 +871,7 @@ class user extends user_core{
 			else $sql.=',singlequery="0"';
 			if($formvars['querymode'] != '') $sql.=',querymode="1"';
 			else $sql.=',querymode="0"';
+			$sql.=',geom_edit_first="'.$formvars['geom_edit_first'].'"';
 			if($formvars['back']){$buttons .= 'back,';}
 			if($formvars['forward']){$buttons .= 'forward,';}
 			if($formvars['zoomin']){$buttons .= 'zoomin,';}

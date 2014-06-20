@@ -23,6 +23,9 @@
   $strCoordType="Koordinatendarstellung";
 	$strSingleQuery="nur ein Thema abfragbar";
 	$strQuerymode="Sachdatenanzeige in extra Fenster";
+	$strNewDatasetOrder="Reihenfolge Datensatz-Erfassung";
+	$strGeomSecond="Sachdaten zuerst";
+	$strGeomFirst="Geometrie zuerst";
   
   
 ?>

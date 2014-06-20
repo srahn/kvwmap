@@ -23,5 +23,8 @@
   $strCoordType="Coordinate Presentation";
 	$strSingleQuery="only one layer queryable";
 	$strQuerymode="show query-results in window";
+	$strNewDatasetOrder="objectcreation-order";
+	$strGeomSecond="attributes first";
+	$strGeomFirst="geometry first";
   
 ?>  

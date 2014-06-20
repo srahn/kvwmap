@@ -117,7 +117,9 @@
 	
 <?
 
-		for($j = 0; $j < count($attributes['name']); $j++){ ?>
+		for($j = 0; $j < count($attributes['name']); $j++){
+			$datapart = '';
+		?>
 	    
 <?				
 				if($layer['shape'][$k][$attributes['name'][$j]] == ''){
@@ -170,6 +172,7 @@
 			  			}
 			  			else{
 								include(SNIPPETS.'generic_formelements.php');
+								echo $datapart;
 			  			}
 			  			echo '
 									</td>

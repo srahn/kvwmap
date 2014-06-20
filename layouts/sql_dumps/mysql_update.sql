@@ -1181,3 +1181,5 @@ ALTER TABLE  `styles` CHANGE  `angle`  `angle` VARCHAR( 11 ) NULL DEFAULT NULL;
 ALTER TABLE  `rolle` ADD  `overlayx` INT( 11 ) NOT NULL DEFAULT  '400', ADD  `overlayy` INT( 11 ) NOT NULL DEFAULT  '150';
 
 ALTER TABLE  `layer_attributes` ADD  `quicksearch` BOOLEAN NULL DEFAULT NULL AFTER  `mandatory`;
+
+ALTER TABLE  `rolle` ADD  `geom_edit_first` BOOLEAN NOT NULL DEFAULT  '0' AFTER  `querymode`;
