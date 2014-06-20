@@ -2,14 +2,11 @@
   include(LAYOUTPATH.'languages/sachdatenanzeige_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
 	include(SNIPPETS.'sachdatenanzeige_functions.php'); 
  ?>
-	<br>
 	<a name="oben"></a>
 <?php
 $anzLayer=count($this->qlayerset);
 if ($anzLayer==0) {
 	?>
-<br/>
-<br/>
 <span style="font:normal 12px verdana, arial, helvetica, sans-serif; color:#FF0000;"><? echo $strNoLayer; ?></span>	<br/>
 	<?php
 	$this->found = 'false';

@@ -20,9 +20,8 @@
 		$layer['Name'] = $layer['alias'];
 	}
 ?>
+<br/>
 <div id="layer">
-
-
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 	<tr>
 		<td width="95%" align="center"><h2>&nbsp;&nbsp;<? echo $layer['Name']; ?></h2></td>
@@ -268,8 +267,9 @@
 					<? }		    
 	}
 
-				if($privileg == 1) {
-					if($this->new_entry == true){
+				
+				if($this->new_entry == true){
+					if($privileg == 1){
 						if(!$this->user->rolle->geom_edit_first)echo $datapart;
 						if($nullable === '0'){ ?>
 							<script type="text/javascript">
@@ -305,6 +305,7 @@
 						}
 						if($this->user->rolle->geom_edit_first)echo $datapart;
 					}
+					else echo $datapart;
 				}
  ?>
 			</tbody>
