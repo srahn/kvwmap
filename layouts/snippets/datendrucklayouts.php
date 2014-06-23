@@ -1,8 +1,10 @@
-
+<script src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
 <!--
 
 var counter = 0;
+
+Text[0]=["Hilfe:","In Freitexten können folgende Schlüsselwörter verwendet werden, die dann durch andere Texte ersetzt werden:<ul><li>$stelle: die aktuelle Stellenbezeichung</li><li>$user: der Name des Nutzers</li><li>$pagenumber: die aktuelle Seitennummer</li><li>$pagecount: die Gesamtseitenzahl</li><li>$<i>&lt;attributname&gt;</i>: der Wert des Attributs</li></ul>"]
 
 function image_coords(event){
 	document.getElementById('coords').style.visibility='';
@@ -428,7 +430,11 @@ function save_layout(){
 			<br>
 			<table width="597" border=0 cellpadding="3" cellspacing="0" style="border:1px solid #C3C7C3">
         <tr>
-          <td class="bold" style="border-top:2px solid #C3C7C3" colspan=8 align="center">Freitexte</td>
+          <td class="bold" style="border-top:2px solid #C3C7C3" colspan=8 align="center">
+						Freitexte
+						<img src="<?php echo GRAPHICSPATH;?>ikon_i.gif" onMouseOver="stm(Text[0], Style[0], document.getElementById('Tip1'))" onmouseout="htm()">
+						<div id="Tip1" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+					</td>
         </tr>
         <? for($i = 0; $i < count($this->ddl->selectedlayout[0]['texts']); $i++){
         		$this->ddl->selectedlayout[0]['texts'][$i]['text'] = str_replace(';', chr(10), $this->ddl->selectedlayout[0]['texts'][$i]['text']);
@@ -461,7 +467,7 @@ function save_layout(){
 	        </tr>
 	       	<tr>
 	       		<td colspan="2" valign="bottom" style="border-right:1px solid #C3C7C3">&nbsp;unterhalb&nbsp;von:</td>
-	       		<td colspan="2"><input type="text" class="input" title="Drehwinkel" name="textangle<? echo $i ?>" value="<? echo $this->ddl->selectedlayout[0]['texts'][$i]['angle'] ?>" size="5">°</td>
+	       		<td colspan="2" valign="bottom">&nbsp;Platzierung:</td>
 	        </tr>
 	        <tr>
 						<td colspan="2" valign="top" style="border-right:1px solid #C3C7C3">
@@ -478,10 +484,14 @@ function save_layout(){
 								?>
 							</select>
 						</td>
-	        	<td align="left">
-							<? if($this->ddl->selectedlayout[0]['type'] != 0){ ?>
-	        		<input type="checkbox" value="1" name="texttype<? echo $i ?>" <? if($this->ddl->selectedlayout[0]['texts'][$i]['type'] == 1)echo 'checked="true"'; ?>> fixiert
-	        		<? } ?>
+	        	<td align="left" valign="top">
+							<select style="width: 110px" name="texttype<? echo $i ?>">
+								<option value="0">normal</option>
+								<? if($this->ddl->selectedlayout[0]['type'] != 0){ ?>
+								<option value="1" <? if($this->ddl->selectedlayout[0]['texts'][$i]['type'] == 1)echo ' selected '; ?>>fixiert</option>
+								<? } ?>
+								<option value="2" <? if($this->ddl->selectedlayout[0]['texts'][$i]['type'] == 2)echo ' selected '; ?>>auf jeder Seite</option>
+							</select>
 						</td>
 						<td align="right">
 							<a href="javascript:Bestaetigung('index.php?go=sachdaten_druck_editor_Freitextloeschen&freitext_id=<? echo $this->ddl->selectedlayout[0]['texts'][$i]['id'] ?>&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&aktivesLayout=<? echo $this->formvars['aktivesLayout']; ?>', 'Wollen Sie den Freitext wirklich löschen?');">löschen&nbsp;</a>

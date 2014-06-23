@@ -58,12 +58,14 @@ class ddl {
     }
   }
 	
-	function add_freetexts($i, $offsetx, $offsety, $type){	
+	function add_freetexts($i, $offsetx, $offsety, $type, $pagenumber = NULL, $pagecount = NULL){
 		if(count($this->remaining_freetexts) == 0)return;
-    for($j = 0; $j < count($this->layout['texts']); $j++){
-			# der Freitext wurde noch nicht geschrieben und ist entweder ein fester Freitext oder ein fortlaufender
+    for($j = 0; $j < count($this->layout['texts']); $j++){		
+			# der Freitext wurde noch nicht geschrieben und ist entweder ein fester Freitext oder ein fortlaufender oder einer, der auf jeder Seite erscheinen soll
     	if(in_array($this->layout['texts'][$j]['id'], $this->remaining_freetexts) AND $this->layout['texts'][$j]['posy'] > 0){	# nur Freitexte mit einem y-Wert werden geschrieben
-				if(($type == 'fixed' AND ($this->layout['type'] == 0 OR $this->layout['texts'][$j]['type'] == 1)) OR ($type == 'running' AND $this->layout['type'] != 0 AND $this->layout['texts'][$j]['type'] == 0)){
+				if(($type == 'fixed' AND $this->layout['texts'][$j]['type'] != 2 AND ($this->layout['type'] == 0 OR $this->layout['texts'][$j]['type'] == 1)) 
+				OR ($type == 'running' AND $this->layout['type'] != 0 AND $this->layout['texts'][$j]['type'] == 0)
+				OR ($type == 'everypage' AND $this->layout['texts'][$j]['type'] == 2)){				
 					$this->pdf->selectFont($this->layout['texts'][$j]['font']);								
 					$x = $this->layout['texts'][$j]['posx'];
 					$ypos = $this->layout['texts'][$j]['posy'];
@@ -87,7 +89,7 @@ class ddl {
 							$y = $y - $this->yoffset_onpage-22;
 						}
 					}
-					$text = utf8_decode($this->substituteFreitext($this->layout['texts'][$j]['text'], $i));
+					$text = utf8_decode($this->substituteFreitext($this->layout['texts'][$j]['text'], $i, $pagenumber, $pagecount));
 					$this->putText($text, $this->layout['texts'][$j]['size'], NULL, $x, $y, $offsetx);
 					# falls in eine alte Seite geschrieben wurde, zurückkehren
 					$this->pdf->closeObject();
@@ -101,7 +103,7 @@ class ddl {
 	}
 	
 	function add_attribute_elements($selected_layer_id, $layerdb, $attributes, $oids, $offsetx, $offsety, $i, $preview){
-		for($j = 0; $j < count($attributes['name']); $j++){
+		for($j = 0; $j < count($attributes['name']); $j++){		
 			$wordwrapoffset = 1;
 			if(in_array($attributes['name'][$j], $this->remaining_attributes) AND $this->layout['elements'][$attributes['name'][$j]]['ypos'] > 0){		# wenn Attribut noch nicht geschrieben wurde und einen y-Wert hat
 				# da ein Attribut zu einem Seitenüberlauf führen kann, müssen davor alle festen Freitexte geschrieben werden, die geschrieben werden können
@@ -298,7 +300,7 @@ class ddl {
 		}
 	}
 	
-	function putText($text, $fontsize, $width, $x, $y, $offsetx){		
+	function putText($text, $fontsize, $width, $x, $y, $offsetx){	
 		if($x < 0){		# rechtsbündig
 			$x = 595 + $x;
 			$x = $x + $offsetx;
@@ -312,13 +314,15 @@ class ddl {
 		}
 		$fh = $this->pdf->getFontHeight($fontsize);
 		$y = $y + $fh;
-		$this->pdf->ezSetY($y);    			
+		$this->pdf->ezSetY($y);		
 		return $this->pdf->ezText($text, $fontsize, $options);
 	}
   
-  function substituteFreitext($text, $i){
+  function substituteFreitext($text, $i, $pagenumber, $pagecount){
   	$text = str_replace('$stelle', $this->Stelle->Bezeichnung, $text);
   	$text = str_replace('$user', $this->user->Name, $text);
+		$text = str_replace('$pagenumber', $pagenumber, $text);
+		$text = str_replace('$pagecount', $pagecount, $text);		
 		$text = str_replace(';', chr(10), $text);
 		for($j = 0; $j < count($this->attributes['name']); $j++){
 			$text = str_replace('$'.$this->attributes['name'][$j], $this->get_result_value_output($i, $j, true), $text);
@@ -439,6 +443,8 @@ class ddl {
       $this->datasetcount_on_page++;
     }
 		if($pdfobject == NULL){		# nur wenn kein PDF-Objekt aus einem übergeordneten Layer übergeben wurde, PDF erzeugen
+			# Freitexte hinzufügen, die auf jeder Seite erscheinen sollen (Seitennummerierung etc.)
+			$this->add_everypage_elements();
 			$dateipfad=IMAGEPATH;
 			$currenttime = date('Y-m-d_H_i_s',time());
 			$name = umlaute_umwandeln($this->user->Name);    
@@ -447,10 +453,20 @@ class ddl {
 			$fp=fopen($dateipfad.$dateiname,'wb');
 			fwrite($fp,$this->pdf->ezOutput());
 			fclose($fp);
-			return $dateipfad.$dateiname;
+			return $dateipfad.$dateiname;			
 		}
 		else{
 			return $this->miny;		# der letzte y-Wert wird zurückgeliefert, um nachfolgende Elemente darunter zu setzen
+		}
+	}
+	
+	function add_everypage_elements(){
+		$pages = $this->pdf->objects['3']['info']['pages'];
+		$pagecount = count($pages);
+		for($i = 0; $i < $pagecount; $i++){
+			$this->pdf->reopenObject($pages[$i]+1);		# die Page-IDs sind komischerweise alle um 1 größer
+			$this->add_freetexts(0, 0, 0, 'everypage', $i + 1, $pagecount);
+			$this->pdf->closeObject();
 		}
 	}
 
