@@ -802,7 +802,7 @@ class Nachweis {
           $sql.=")";
         }
         if($gemarkung != '' AND $flur != ''){
-		  $sql.=" AND alko.objnr = alknflur.objnr AND alknflur.gemkgschl = ".$gemarkung." AND alknflur.flur = '".str_pad($flur,3,'0',STR_PAD_LEFT)."' AND st_intersects(st_transform(alko.the_geom, (select srid from geometry_columns where f_table_name = 'n_nachweise')), n.the_geom)";
+		  $sql.=" AND alko.objnr = alknflur.objnr AND alknflur.gemkgschl = '".$gemarkung."' AND alknflur.flur = '".str_pad($flur,3,'0',STR_PAD_LEFT)."' AND st_intersects(st_transform(alko.the_geom, (select srid from geometry_columns where f_table_name = 'n_nachweise')), n.the_geom)";
         }
         if($stammnr!=''){
           $sql.=" AND n.stammnr='".$stammnr."'";
@@ -881,7 +881,7 @@ class Nachweis {
           }
           if($gemarkung != ''){
 						if(ALKIS)$sql.=" AND flur.land*10000 + flur.gemarkung = '".$gemarkung."' AND st_intersects(st_transform(flur.the_geom, ".EPSGCODE."), n.the_geom)";
-						else $sql.=" AND alko.objnr = alknflur.objnr AND alknflur.gemkgschl = ".$gemarkung." AND st_intersects(st_transform(alko.the_geom, ".EPSGCODE."), n.the_geom)";
+						else $sql.=" AND alko.objnr = alknflur.objnr AND alknflur.gemkgschl = '".$gemarkung."' AND st_intersects(st_transform(alko.the_geom, ".EPSGCODE."), n.the_geom)";
 					}
 					if($flur != ''){
 						if(ALKIS)$sql.=" AND flur.flurnummer = ".$flur." ";
