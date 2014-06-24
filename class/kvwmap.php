@@ -6281,6 +6281,7 @@ class GUI extends GUI_core{
 		if($this->last_query != ''){
 			$this->formvars['selected_layer_id'] = $this->last_query['layer_ids'][0];
 		}
+		if($this->formvars['selected_layer_id'] == '')$this->formvars['selected_layer_id'] = $this->formvars['quicksearch_layer_id'];
     $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
     switch ($layerset[0]['connectiontype']) {
       case MS_POSTGIS : {
