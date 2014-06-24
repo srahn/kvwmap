@@ -74,8 +74,8 @@ if ($this->Fehlermeldung!='') {
     	<?php echo $this->FormObject["selectedFlstNr"]->html; ?>
     </td>
     <td align="center" valign="middle" width="1">
-    	<input type="button" name="addPlaces" value="&lt;&lt;" onClick="addOptions(document.GUI.FlstID,document.GUI.selectedFlstID,document.GUI.selFlstID,'value'); blur();">
-    	<input type="button" name="substractPlaces" value="&gt;&gt;" onClick="substractOptions(document.GUI.selectedFlstID,document.GUI.selFlstID,'value'); blur();">
+    	<input type="button" name="addPlaces" value="&lt;&lt;" onClick="addOptions(document.GUI.FlstID,document.GUI.selectedFlstID,document.GUI.selFlstID,'value');">
+    	<input type="button" name="substractPlaces" value="&gt;&gt;" onClick="substractOptions(document.GUI.selectedFlstID,document.GUI.selFlstID,'value');">
     </td>
     <td align="left" width="46%">
     	<?php echo $strExist; ?>:<br>
