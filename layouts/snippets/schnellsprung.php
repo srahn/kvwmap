@@ -1,7 +1,11 @@
+<?
+	$layerset = $this->user->rolle->getLayer(LAYER_ID_SCHNELLSPRUNG);
+	if($layerset != NULL){ ?>
+
 <div style="margin-left:10px">
 	<table style="border:1px solid grey">
 	<?
-		$layerset = $this->user->rolle->getLayer(LAYER_ID_SCHNELLSPRUNG);
+		$legendheight -= 50;
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
 		$layerdb = $mapdb->getlayerdatabase(LAYER_ID_SCHNELLSPRUNG, $this->Stelle->pgdbhost);
 		$layerdb->setClientEncoding();
@@ -58,3 +62,4 @@
 	 ?>
 	 </table>
 </div>
+<? } ?>

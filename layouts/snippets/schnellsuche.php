@@ -27,6 +27,7 @@
 
 <?
 	$layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, NULL, NULL, $quicksearch_layer_ids);
+	if(count($layerdaten['ID']) > 0){
 ?>
 	<table>
 		<tr>
@@ -49,7 +50,8 @@
 			</td>
 		</tr>
 	</table>
-<? if($this->formvars['selected_layer_id'] != ''){ ?>
+<? } 
+	if($this->formvars['quicksearch_layer_id'] != ''){ ?>
 	<script type="text/javascript">
 		load_search_attributes(<? echo $this->formvars['quicksearch_layer_id']; ?>);
 	</script>

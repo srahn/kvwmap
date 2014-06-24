@@ -2814,12 +2814,28 @@ class GUI extends GUI_core{
   }
 
   function jagdbezirk_show_data(){
+		$this->mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $jagdkataster = new jagdkataster($this->pgdatabase);
     $jagdkataster->clientepsg = $this->user->rolle->epsg_code;
+		$layer = $this->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
+		
+		$privileges = $this->Stelle->get_attributes_privileges($layer[0]['Layer_ID']);
+    $layer[0]['attributes'] = $this->mapDB->read_layer_attributes($layer[0]['Layer_ID'], $this->pgdatabase, $privileges['attributenames']);
+    if($privileges == NULL){    # kein Eintrag -> alle Attribute lesbar
+      for($j = 0; $j < count($layer[0]['attributes']['name']); $j++){
+        $layer[0]['attributes']['privileg'][$j] = '0';
+        $layer[0]['attributes']['privileg'][$layer[0]['attributes']['name'][$j]] = '0';
+      }
+    }
+    else{
+      for($j = 0; $j < count($layer[0]['attributes']['name']); $j++){
+        $layer[0]['attributes']['privileg'][$j] = $privileges[$layer[0]['attributes']['name'][$j]];
+        $layer[0]['attributes']['privileg'][$layer[0]['attributes']['name'][$j]] = $privileges[$layer[0]['attributes']['name'][$j]];
+      }
+    }
+    $this->qlayerset = $layer;
     $jagdbezirk = $jagdkataster->getjagdbezirk($this->formvars['oid']);
     $this->qlayerset[0]['shape'][0] = $jagdbezirk;
-    $layerset = $this->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
-    $this->qlayerset[0]['Layer_ID'] = $layerset[0]['Layer_ID']; 
     $i = 0;
     $this->main='jagdbezirke.php';
     $this->output();
@@ -13094,6 +13110,7 @@ class GUI extends GUI_core{
     # Abfragen der maximalen Ausdehnung aller Daten eines Layers
 		
 		$layer = $this->user->rolle->getLayer($layer_id);
+		if($layer == NULL)$layer = $this->user->rolle->getRollenLayer(-$layer_id);
 		$data = $layer[0]['Data'];
     
     # suchen nach dem ersten Vorkommen von using unique

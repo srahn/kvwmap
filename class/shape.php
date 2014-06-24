@@ -53,7 +53,7 @@ class shape {
 		      exec($command);
 		     	#echo $command;
 					$command = POSTGRESBINPATH.'psql -f "'.UPLOADPATH.$file.'.sql" '.$pgdatabase->dbName.' '.$pgdatabase->user;
-					if($pgdatabase->passwd != '')$command = 'export PGPASSWORD='.$pgdatabase->passwd.'; '.$command;
+					if($pgdatabase->passwd != '')$command = 'export PGPASSWORD="'.$pgdatabase->passwd.'"; '.$command;
 		      exec($command);
 		     	#echo $command;
 		      $sql = 'SELECT count(*) FROM '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename;

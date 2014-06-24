@@ -135,7 +135,7 @@ function deactivate_overlay(){
 
 function overlay_submit(gui, start){
 	// diese Funktion macht beim Fenstermodus und einer Kartenabfrage oder einem Aufruf aus dem Overlay-Fenster einen ajax-Request mit den Formulardaten des uebergebenen Formularobjektes, ansonsten einen normalen Submit
-	if(1 == <? echo $this->user->rolle->querymode; ?> && start || gui.name == 'GUI2'){
+	if(1 == <? echo $this->user->rolle->querymode; ?> && start || gui.id == 'GUI2'){
 		formdata = formSerialize(gui);
 		ahah("<? echo URL.APPLVERSION.'index.php'; ?>", formdata+"&mime_type=overlay_html", new Array(document.getElementById('contentdiv')), new Array("sethtml"));	
 		document.GUI.CMD.value = "";

@@ -2,7 +2,7 @@
 <!--
 
 
-function update_form(art){
+update_form = function(art){
 	if(art == 'jbe' || art == 'jbf' || art == 'agf' || art == 'atf' || art == 'apf'){
 		document.getElementById('zuordnung').style.display = '';
 		document.getElementById('status').style.display = '';
@@ -15,18 +15,18 @@ function update_form(art){
 	}
 }
 
-function paechter_listen(oid, name){
-	document.GUI.go.value = 'jagdkatastereditor_Paechter_Listen';
-	document.GUI.oid.value = oid;
-	document.GUI.name.value = name;
-	document.GUI.submit();
+paechter_listen = function(oid, name){
+	currentform.go.value = 'jagdkatastereditor_Paechter_Listen';
+	currentform.oid.value = oid;
+	currentform.name.value = name;
+	currentform.submit();
 }
 
 
 <? if($this->formvars['go'] == 'jagdbezirk_show_data'){ ?>
 
 function save(){
-	form_fieldstring = document.GUI.form_field_names.value+'';
+	form_fieldstring = currentform.form_field_names.value+'';
 	form_fields = form_fieldstring.split('|');
 	for(i = 0; i < form_fields.length-1; i++){
 		fieldstring = form_fields[i]+'';
@@ -40,11 +40,11 @@ function save(){
 			return;
 		}
 	}
-	document.GUI.go.value = 'Sachdaten_speichern';
+	currentform.go.value = 'Sachdaten_speichern';
 	<? if($this->formvars['close_after_saving']){ ?>
-		document.GUI.close_window.value='true';
+		currentform.close_window.value='true';
 	<?}?>
-	document.GUI.submit();
+	overlay_submit(currentform, false);
 }
 
 <? } ?>
@@ -68,9 +68,16 @@ function save(){
   </tr>
 
 <?php
- $jagdkataster = new jagdkataster($this->pgdatabase);
- for ($j=0;$j<$anzObj;$j++) {
-   $paechterliste = $jagdkataster->get_paechter($this->qlayerset[$i]['shape'][$j]['oid']);
+	$jagdkataster = new jagdkataster($this->pgdatabase);
+	$privileg_ = array();
+	for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
+		if($this->qlayerset[$i]['attributes']['privileg'][$this->qlayerset[$i]['attributes']['name'][$j]] == '1'){
+			$privileg_[$this->qlayerset[$i]['attributes']['name'][$j]] = $this->qlayerset[$i]['attributes']['privileg'][$this->qlayerset[$i]['attributes']['name'][$j]];
+			$editable = true;
+		}
+	}
+	for ($j=0;$j<$anzObj;$j++) {
+		$paechterliste = $jagdkataster->get_paechter($this->qlayerset[$i]['shape'][$j]['oid']);
 ?>
 
 
@@ -83,11 +90,10 @@ function save(){
        <col width="30%">
        <col width="*">
       <colgroup>
-
         <tr width="100%">
           <td bgcolor="<?php echo BG_DEFAULT ?>"><b>Name Jagdbezirk</b></td>
           <td valign="top">
-          	<input type="text" name="<? echo $this->qlayerset[$i]['Layer_ID'].';name;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j]['oid'].';Text;1'; ?>" value="<? echo $this->qlayerset[$i]['shape'][$j]['name']; ?>">
+          	<input type="text" <? if($privileg_['name'] == 0)echo 'readonly'; ?> name="<? echo $this->qlayerset[$i]['Layer_ID'].';name;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j]['oid'].';Text;1'; ?>" value="<? echo $this->qlayerset[$i]['shape'][$j]['name']; ?>">
           	<?
           	$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';name;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j]['oid'].';Text;1|';
           	?>
@@ -209,17 +215,24 @@ function save(){
         <tr><td colspan="2">&nbsp;</td></tr>
         <tr>
           <td colspan="2" bgcolor="<?php echo BG_DEFAULT ?>">
-            <a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="" onclick="this.href='index.php?go=zoomtoPolygon&oid=<?php echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>&layer_tablename=jagdbezirke&layer_columnname=the_geom&layer_id=<? echo $this->qlayerset[$i]['Layer_ID'];?>&selektieren='+document.GUI.selektieren<? echo $this->qlayerset[$i]['Layer_ID'].'_'.$j; ?>.checked;">Kartenausschnitt</a>&nbsp;&nbsp;<span style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px">Selektieren</span><input type="checkbox" name="selektieren<? echo $this->qlayerset[$i]['Layer_ID'].'_'.$j; ?>" value="1">&nbsp;|&nbsp;
+            <a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="" onclick="this.href='index.php?go=zoomtoPolygon&oid=<?php echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>&layer_tablename=jagdbezirke&layer_columnname=the_geom&layer_id=<? echo $this->qlayerset[$i]['Layer_ID'];?>&selektieren='+currentform.selektieren<? echo $this->qlayerset[$i]['Layer_ID'].'_'.$j; ?>.checked;">Kartenausschnitt</a>&nbsp;&nbsp;<span style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px">Selektieren</span><input type="checkbox" name="selektieren<? echo $this->qlayerset[$i]['Layer_ID'].'_'.$j; ?>" value="1">&nbsp;|&nbsp;
             <a href="index.php?go=jagdkatastereditor_Flurstuecke_Listen&oid=<?php echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>&name=<? echo $this->qlayerset[$i]['shape'][$j]['name'] ?>&search_nummer=<? echo $this->formvars['search_nummer']; ?>&search_name=<? echo $this->formvars['search_name']; ?>&search_art=<? echo $this->formvars['search_art']; ?>">enthaltene Flurstücke</a>&nbsp;|&nbsp;
             <a href="index.php?go=jagdkatastereditor_Eigentuemer_Listen&oid=<?php echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>&name=<? echo $this->qlayerset[$i]['shape'][$j]['name'] ?>&search_nummer=<? echo $this->formvars['search_nummer']; ?>&search_name=<? echo $this->formvars['search_name']; ?>&search_art=<? echo $this->formvars['search_art']; ?>">Eigentümer auflisten</a>&nbsp;|&nbsp;
+						<? if($editable){ ?>
             <a href="index.php?go=jagdkatastereditor&oid=<?php echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>">bearbeiten</a>&nbsp;|&nbsp;
             <a href="javascript:Bestaetigung('index.php?go=jagdkatastereditor_Loeschen&oid=<?php echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>', 'Wollen Sie diesen Jagdbezirk wirklich löschen?');">löschen</a>&nbsp;|&nbsp;
             <a href="index.php?go=jagdkatastereditor_kopieren&oid=<?php echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>">kopieren</a>
+						<? } ?>
           </td>
         </tr>
+				<? if($editable){ ?>
         <tr>
         	<td colspan="2" height="40" align="center"><input type="button" name="speichernbutton" value="speichern" onclick="save();"></td>
         </tr>
+				<tr>
+					<td height="30" valign="bottom" align="center" colspan="5" id="loader" style="display:none"><img id="loaderimg" src="graphics/ajax-loader.gif"></td>
+				</tr>
+				<? } ?>
       </table>
 
     </td>
@@ -233,7 +246,7 @@ function save(){
   if ($this->formvars['oid']!='' OR $this->formvars['value_oid']!='') {
 ?>
   <tr>
-    <td align="center"><a href="javascript:document.GUI.go.value = 'jagdbezirke_auswaehlen_Suchen';javascript:document.GUI.submit()">zur&uuml;ck zur Trefferliste</a></td>
+    <td align="center"><a href="javascript:currentform.go.value = 'jagdbezirke_auswaehlen_Suchen';javascript:currentform.submit()">zur&uuml;ck zur Trefferliste</a></td>
   </tr>
 <?
   }

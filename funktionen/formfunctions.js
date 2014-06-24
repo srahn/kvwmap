@@ -3,18 +3,18 @@
 
   function addOptions(selectObj,insertObj) {
     // Diese Funktion fügt alle in selectObj selektierten Optionen zum insertObj hinzu.
-	insertObjLengthStart=insertObj.length;
+		insertObjLengthStart=insertObj.length;
     for(i=0; i<selectObj.length; i++) {
-	  if (selectObj.options[i].selected) {
-		insertObj.length++;
-		insertObj.options[insertObj.length-1].value=selectObj.options[i].value;
-		insertObj.options[insertObj.length-1].text=selectObj.options[i].text;
-	  }
+			if (selectObj.options[i].selected) {
+				insertObj.length++;
+				insertObj.options[insertObj.length-1].value=selectObj.options[i].value;
+				insertObj.options[insertObj.length-1].text=selectObj.options[i].text;
+			}
     }
-	if (insertObjLengthStart==insertObj.length) {
-	  alert('Erst Schlagwörter im rechten Feld auswählen!');
+		if (insertObjLengthStart==insertObj.length) {
+			alert('Erst Schlagwörter im rechten Feld auswählen!');
+		}
 	}
- }
  
   function substractOptions(selectObj) {
     selectObjLengthStart=selectObj.length;

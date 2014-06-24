@@ -303,7 +303,6 @@ if($this->formvars['gps_follow'] == ''){
 							?><input type="submit" class="button" name="senden" value="<?php echo $strLoadNew; ?>" class="send" tabindex="1"></div>
 							<br>
 							<? if(defined('LAYER_ID_SCHNELLSPRUNG') AND LAYER_ID_SCHNELLSPRUNG != ''){
-								$legendheight -= 50;											
 								include(SNIPPETS.'schnellsprung.php');
 								} ?>
 							&nbsp;
