@@ -72,9 +72,10 @@
 			      	<? if($layer['privileg'] > '0'){ ?>
 			        	<a href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);use_for_new_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>)" title="<? echo $strUseForNewDataset; ?>"><img style="border:1px solid #aaaaaa" src="<? echo GRAPHICSPATH; ?>use_for_dataset.png" border="0"></a>&nbsp;&nbsp;
 			        <? } ?>
+							<? if($layer['export_privileg'] == '1'){ ?>
 			      	<a id="uko_<? echo $layer['Layer_ID'].'_'.$k; ?>" style="visibility:hidden" href="" title="<? echo $strUKOExportThis; ?>"><img style="border:1px solid #aaaaaa" src="<? echo GRAPHICSPATH; ?>datensatz_exportieren_uko.png" border="0"></a>&nbsp;&nbsp;
 			        <a href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);csv_export(<? echo $layer['Layer_ID']; ?>);" title="<? echo $strCSVExportThis; ?>"><img style="border:1px solid #aaaaaa" src="<? echo GRAPHICSPATH; ?>datensatz_exportieren_csv.png" border="0"></a>&nbsp;&nbsp;
-			        <? if($layer['privileg'] == '2'){ ?>
+			        <? } if($layer['privileg'] == '2'){ ?>
 			        	<a href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);delete_datasets(<?php echo $layer['Layer_ID']; ?>);" title="<? echo $strDeleteThisDataset; ?>"><img style="border:1px solid #aaaaaa" src="<? echo GRAPHICSPATH; ?>datensatz_loeschen.png" border="0"></a>
 			        <? } ?>
 			      </td>
@@ -216,7 +217,7 @@
 			    	    <td style="padding-top:5px; padding-bottom:5px;">&nbsp;&nbsp;
 <?						
 							if($layer['shape'][$k][$attributes['the_geom']]){
-								if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY'){
+								if($layer['export_privileg'] == '1' AND ($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY')){
 ?>
 			    					&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="" onclick="this.href='index.php?go=zoomtoPolygon&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&layer_tablename=<? echo $tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>&selektieren='+currentform.selektieren<? echo $layer['Layer_ID'].'_'.$k; ?>.checked;"><? echo $strMapZoom; ?></a>&nbsp;&nbsp;&nbsp;<span style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px"><? echo $strMapSelect; ?></span><input type="checkbox" name="selektieren<? echo $layer['Layer_ID'].'_'.$k; ?>" value="1">
 			    					<script type="text/javascript">
@@ -335,16 +336,18 @@
 				</tr>
 				<tr>
 					<td valign="top"><? echo $strSelectedDatasets.':'; ?></td>
+					<? if($layer['export_privileg'] == '1'){ ?>
 					<td valign="top"><? echo $strAllDatasets.':'; ?><? if ($layer['count'] > MAXQUERYROWS){	echo "&nbsp;(".$layer['count'].")"; } ?></td>					
+					<? } ?>
 				</tr>
 				<tr>
 					<td>
 					<? if($layer['privileg'] == '2'){ ?>
 						&nbsp;&nbsp;&bull;&nbsp;<a href="javascript:delete_datasets(<?php echo $layer['Layer_ID']; ?>);"><? echo $strdelete; ?></a><br>
-					<?}?>
+					<?} if($layer['export_privileg'] == '1'){ ?>
 						&nbsp;&nbsp;&bull;&nbsp;<a id="csv_link" href="javascript:csv_export(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCSVExport; ?></a><br>
 						&nbsp;&nbsp;&bull;&nbsp;<a id="shape_link" href="javascript:shape_export(<?php echo $layer['Layer_ID']; ?>);"><? echo $strShapeExport; ?></a><br>
-					<? if($layer['layouts']){ ?>
+					<? } if($layer['layouts']){ ?>
 						&nbsp;&nbsp;&bull;&nbsp;<a id="print_link" href="javascript:print_data(<?php echo $layer['Layer_ID']; ?>);"><? echo $strPrint; ?></a><br>
 					<? } ?>
 					<? if($privileg != ''){ ?>
@@ -361,10 +364,12 @@
 						</select>
 					<?}?>
 					</td>
+					<? if($layer['export_privileg'] == '1'){ ?>
 					<td valign="top" colspan="3">
 						&nbsp;&nbsp;&bull;&nbsp;<a id="csv_link" href="javascript:csv_export_all(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCSVExport; ?></a><br>
 						&nbsp;&nbsp;&bull;&nbsp;<a id="csv_link" href="javascript:shape_export_all(<?php echo $layer['Layer_ID']; ?>, <? echo $layer['count']; ?>);"><? echo $strShapeExport; ?></a>
 					</td>
+					<? } ?>
 				</tr>
 				<tr style="display:none">
 					<td height="23" colspan="3">

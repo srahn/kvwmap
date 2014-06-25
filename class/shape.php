@@ -341,7 +341,7 @@ class shape {
   
   function shp_export($formvars, $stelle, $mapdb){
   	$this->formvars = $formvars;
-    $this->layerdaten = $stelle->getqueryablePostgisLayers(NULL);
+    $this->layerdaten = $stelle->getqueryablePostgisLayers(NULL, 1);
     if($this->formvars['selected_layer_id']){
       $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $stelle->pgdbhost);
       $path = $mapdb->getPath($this->formvars['selected_layer_id']);

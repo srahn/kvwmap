@@ -27,6 +27,9 @@ function get_from_default(attribute_names, stellen){
 			element1 = document.getElementsByName('privileg'+stelle[j]);
 			element2 = document.getElementsByName('privileg');
 			element1[0].value = element2[0].value;
+			element1 = document.getElementsByName('export_privileg'+stelle[j]);
+			element2 = document.getElementsByName('export_privileg');
+			element1[0].value = element2[0].value;
 			names = attribute_names.split('|');
 			for(i = 0; i < names.length; i++){
 				element1 = document.getElementsByName('privileg_'+names[i]+stelle[j]);

@@ -31,6 +31,23 @@
 						</table>
 					</td>
 				</tr>
+				<tr>
+			  	<td colspan="4">
+			    	<table align="center" border="0" cellspacing="2" cellpadding="2">
+			    		<tr>
+						  	<td align="center"><b>Layerexportrechte</b></td>
+						  </tr>
+						  <tr>
+						  	<td>
+						  		<select name="export_privileg<? echo $this->stelle->id; ?>">
+						  			<option <? if($this->layer[0]['export_privileg'] == '0'){echo 'selected';} ?> value="0">Export nicht erlaubt</option>
+						  			<option <? if($this->layer[0]['export_privileg'] == '1'){echo 'selected';} ?> value="1">Export erlaubt</option>
+						  		</select>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
 			  <tr>
 			  	<td>&nbsp;</td>
 			  </tr>

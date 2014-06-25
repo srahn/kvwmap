@@ -545,6 +545,7 @@ CREATE TABLE `layer` (
   `datenherr` VARCHAR( 100 ) NULL,
   `metalink` VARCHAR( 255 ) NULL,
   `privileg` ENUM( '0', '1', '2' ) NOT NULL DEFAULT '0',
+	`export_privileg` BOOLEAN NOT NULL DEFAULT  '1',
   PRIMARY KEY  (`Layer_ID`),
   KEY `Gruppe` (`Gruppe`)
 );
@@ -879,6 +880,7 @@ CREATE TABLE used_layer (
   requires int(11) default NULL,
   logconsume ENUM( '0', '1' ) NOT NULL default '0',
   privileg ENUM( '0', '1', '2' ) NOT NULL DEFAULT '0',
+	export_privileg BOOLEAN NOT NULL DEFAULT  '1',
   start_aktiv ENUM( '0', '1' ) NOT NULL DEFAULT '0',
   PRIMARY KEY (Stelle_ID, Layer_ID)
 );

@@ -26,8 +26,8 @@
 </script>
 
 <?
-	$layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, NULL, NULL, $quicksearch_layer_ids);
-	if(count($layerdaten['ID']) > 0){
+	$quicksearch_layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, NULL, NULL, $quicksearch_layer_ids);
+	if(count($quicksearch_layerdaten['ID']) > 0){
 ?>
 	<table>
 		<tr>
@@ -35,12 +35,12 @@
 				<select size="1" class="select" name="quicksearch_layer_id" onchange="load_search_attributes(this.value);">
 					<option value="">-- Schnellsuche --</option>
 					<?
-					for($i = 0; $i < count($layerdaten['ID']); $i++){         
+					for($i = 0; $i < count($quicksearch_layerdaten['ID']); $i++){         
 						echo '<option';
-						if($layerdaten['ID'][$i] == $this->formvars['selected_layer_id']){
+						if($quicksearch_layerdaten['ID'][$i] == $this->formvars['selected_layer_id']){
 							echo ' selected';
 						}
-						echo ' value="'.$layerdaten['ID'][$i].'">'.$layerdaten['Bezeichnung'][$i].'</option>';
+						echo ' value="'.$quicksearch_layerdaten['ID'][$i].'">'.$quicksearch_layerdaten['Bezeichnung'][$i].'</option>';
 					}
 				?>
 				</select>

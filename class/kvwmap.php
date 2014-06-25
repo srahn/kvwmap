@@ -8021,7 +8021,6 @@ class GUI extends GUI_core{
 		$this->loadMap('DataBase');
 		if($this->formvars['CMD']=='')$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
     $this->epsg_codes = read_epsg_codes($this->pgdatabase);
-    $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
     $this->shape = new shape();
   	if(!$this->formvars['layer_id']){
       $layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
@@ -8132,7 +8131,7 @@ class GUI extends GUI_core{
 			foreach($stellen as $stelleid){
 				$stelle = new stelle($stelleid, $this->database);
 				$stelle->set_attributes_privileges($this->formvars, $this->attributes);
-				$stelle->set_layer_privileges($this->formvars['selected_layer_id'], $this->formvars['privileg'.$stelleid]);
+				$stelle->set_layer_privileges($this->formvars['selected_layer_id'], $this->formvars['privileg'.$stelleid], $this->formvars['export_privileg'.$stelleid]);
 			}
     }
     elseif($this->formvars['selected_layer_id'] != ''){
@@ -14999,7 +14998,7 @@ class db_mapObj extends db_mapObj_core{
 			$this->debug->write("<p>file:users.php class:stelle->set_default_layer_privileges - Speichern des Layerrechte zur Stelle:<br>".$sql,4);
 			$query=mysql_query($sql);
 			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-			$sql = 'UPDATE layer SET privileg = "'.$formvars['privileg'].'" WHERE ';
+			$sql = 'UPDATE layer SET privileg = "'.$formvars['privileg'].'", export_privileg = "'.$formvars['export_privileg'].'" WHERE ';
 			$sql.= 'Layer_ID = '.$formvars['selected_layer_id'];
 			$this->debug->write("<p>file:users.php class:stelle->set_default_layer_privileges - Speichern der Layerrechte zur Stelle:<br>".$sql,4);
 			$query=mysql_query($sql);

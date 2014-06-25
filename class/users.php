@@ -2660,7 +2660,7 @@ class stelle extends stelle_core{
 		return $layer;
 	}
 
-	function getqueryablePostgisLayers($privileg){
+	function getqueryablePostgisLayers($privileg, $export_privileg = NULL){
 		$sql = 'SELECT layer.Layer_ID, Name, alias FROM used_layer, layer, u_groups';
 		$sql .=' WHERE stelle_id = '.$this->id;
 		$sql .=' AND layer.Gruppe = u_groups.id AND layer.connectiontype = 6';
@@ -2668,6 +2668,9 @@ class stelle extends stelle_core{
 		$sql .=' AND used_layer.queryable = \'1\'';
 		if($privileg != NULL){
 			$sql .=' AND used_layer.privileg >= "'.$privileg.'"';
+		}
+		if($export_privileg != NULL){
+			$sql .=' AND used_layer.export_privileg = "'.$export_privileg.'"';
 		}
 		$sql .= ' ORDER BY Name';
 		#echo $sql;
@@ -2895,8 +2898,8 @@ class stelle extends stelle_core{
 		return $newpath;
 	}
 
-	function set_layer_privileges($layer_id, $privileg){
-		$sql = 'UPDATE used_layer SET privileg = "'.$privileg.'" WHERE ';
+	function set_layer_privileges($layer_id, $privileg, $exportprivileg){
+		$sql = 'UPDATE used_layer SET privileg = "'.$privileg.'", export_privileg = "'.$exportprivileg.'" WHERE ';
 		$sql.= 'layer_id = '.$layer_id.' AND stelle_id = '.$this->id;
 		$this->debug->write("<p>file:users.php class:stelle->set_layer_privileges - Speichern der Layerrechte zur Stelle:<br>".$sql,4);
 		$query=mysql_query($sql,$this->database->dbConn);
