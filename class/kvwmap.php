@@ -6322,62 +6322,77 @@ class GUI extends GUI_core{
             $layerset[0]['attributes']['privileg'][$layerset[0]['attributes']['name'][$j]] = $privileges[$layerset[0]['attributes']['name'][$j]];
           }
         }
-        
-        for($i = 0; $i < count($layerset[0]['attributes']['name']); $i++){
-          if($this->formvars['value_'.$layerset[0]['attributes']['name'][$i]] != ''){
-            if($this->formvars['operator_'.$layerset[0]['attributes']['name'][$i]] == 'LIKE' OR $this->formvars['operator_'.$layerset[0]['attributes']['name'][$i]] == 'NOT LIKE'){
-              $sql_where .= ' AND LOWER(CAST(query.'.$layerset[0]['attributes']['name'][$i].' AS TEXT)) '.$this->formvars['operator_'.$layerset[0]['attributes']['name'][$i]].' ';
-              $sql_where.='LOWER(\''.$this->formvars['value_'.$layerset[0]['attributes']['name'][$i]].'\')';
-            }
-            else{
-              if($this->formvars['operator_'.$layerset[0]['attributes']['name'][$i]] == 'IN'){
-                $parts = explode('|', $this->formvars['value_'.$layerset[0]['attributes']['name'][$i]]);
-                for($j = 0; $j < count($parts); $j++){
-                  if(substr($parts[$j], 0, 1) != '\''){$parts[$j] = '\''.$parts[$j];}
-                  if(substr($parts[$j], -1) != '\''){$parts[$j] = $parts[$j].'\'';}
-                }
-                $instring = implode(',', $parts);
-                $sql_where .= ' AND LOWER(CAST(query.'.$layerset[0]['attributes']['name'][$i].' AS TEXT)) '.$this->formvars['operator_'.$layerset[0]['attributes']['name'][$i]].' ';
-                $sql_where .= '('.strtolower($instring).')';
-              }
-              else{
-                $sql_where .= ' AND query.'.$layerset[0]['attributes']['name'][$i].' '.$this->formvars['operator_'.$layerset[0]['attributes']['name'][$i]].' ';
-                $sql_where.='\''.$this->formvars['value_'.$layerset[0]['attributes']['name'][$i]].'\'';
-              }
-            }
-          }
-          elseif($this->formvars['operator_'.$layerset[0]['attributes']['name'][$i]] == 'IS NULL' OR $this->formvars['operator_'.$layerset[0]['attributes']['name'][$i]] == 'IS NOT NULL'){
-          	if($layerset[0]['attributes']['type'][$i] == 'bpchar' OR $layerset[0]['attributes']['type'][$i] == 'varchar' OR $layerset[0]['attributes']['type'][$i] == 'text'){
-          		if($this->formvars['operator_'.$layerset[0]['attributes']['name'][$i]] == 'IS NULL'){
-          			$sql_where .= ' AND (query.'.$layerset[0]['attributes']['name'][$i].' '.$this->formvars['operator_'.$layerset[0]['attributes']['name'][$i]].' OR query.'.$layerset[0]['attributes']['name'][$i].' = \'\') ';
-          		}
-          		else{
-          			$sql_where .= ' AND query.'.$layerset[0]['attributes']['name'][$i].' '.$this->formvars['operator_'.$layerset[0]['attributes']['name'][$i]].' AND query.'.$layerset[0]['attributes']['name'][$i].' != \'\' ';
-          		}
-          	}
-          	else{
-            	$sql_where .= ' AND query.'.$layerset[0]['attributes']['name'][$i].' '.$this->formvars['operator_'.$layerset[0]['attributes']['name'][$i]].' ';
-          	}
-          }
-          if($this->formvars['value2_'.$layerset[0]['attributes']['name'][$i]] != ''){
-            $sql_where.=' AND \''.$this->formvars['value2_'.$layerset[0]['attributes']['name'][$i]].'\'';
-          }
-          # räumliche Einschränkung
-          if($layerset[0]['attributes']['name'][$i] == $layerset[0]['attributes']['the_geom']){
-          	if($this->formvars['newpathwkt'] != ''){
-							if (strpos(strtolower($this->formvars['newpathwkt']), 'polygon') !== false) {
-								# Suche im Suchpolygon
-								$sql_where.=' AND st_intersects('.$layerset[0]['attributes']['the_geom'].', (st_transform(st_geomfromtext(\''.$this->formvars['newpathwkt'].'\', '.$this->user->rolle->epsg_code.'), '.$layerset[0]['epsg_code'].')))';  
+
+				for($m = 0; $m <= $this->formvars['searchmask_count']; $m++){
+					if($m > 0){				// es ist nicht die erste Suchmaske, sondern eine weitere hinzugefügte
+						$prefix = $m.'_';
+						$sql_where .= ' '.$this->formvars['boolean_operator_'.$m].' ';			// mit AND/OR verketten
+					}
+					else{
+						$prefix = '';
+						$sql_where .= ' AND (';		// eine äußere Klammer, dadurch die ORs darin eingeschlossen sind
+					}
+					$sql_where .= ' (1=1';			// klammern
+					for($i = 0; $i < count($layerset[0]['attributes']['name']); $i++){
+						if($this->formvars[$prefix.'value_'.$layerset[0]['attributes']['name'][$i]] != ''){
+							if($this->formvars[$prefix.'operator_'.$layerset[0]['attributes']['name'][$i]] == 'LIKE' OR $this->formvars[$prefix.'operator_'.$layerset[0]['attributes']['name'][$i]] == 'NOT LIKE'){
+								$sql_where .= ' AND LOWER(CAST(query.'.$layerset[0]['attributes']['name'][$i].' AS TEXT)) '.$this->formvars[$prefix.'operator_'.$layerset[0]['attributes']['name'][$i]].' ';
+								$sql_where.='LOWER(\''.$this->formvars[$prefix.'value_'.$layerset[0]['attributes']['name'][$i]].'\')';
 							}
-							if (strpos(strtolower($this->formvars['newpathwkt']), 'point') !== false) {
-								# Suche an Punktkoordinaten mit übergebener SRID
-								$sql_where.=" AND st_within(st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$this->formvars['epsg_code']."), ".$layerset[0]['epsg_code']."), ".$layerset[0]['attributes']['the_geom'].")";
+							else{
+								if($this->formvars[$prefix.'operator_'.$layerset[0]['attributes']['name'][$i]] == 'IN'){
+									$parts = explode('|', $this->formvars[$prefix.'value_'.$layerset[0]['attributes']['name'][$i]]);
+									for($j = 0; $j < count($parts); $j++){
+										if(substr($parts[$j], 0, 1) != '\''){$parts[$j] = '\''.$parts[$j];}
+										if(substr($parts[$j], -1) != '\''){$parts[$j] = $parts[$j].'\'';}
+									}
+									$instring = implode(',', $parts);
+									$sql_where .= ' AND LOWER(CAST(query.'.$layerset[0]['attributes']['name'][$i].' AS TEXT)) '.$this->formvars[$prefix.'operator_'.$layerset[0]['attributes']['name'][$i]].' ';
+									$sql_where .= '('.strtolower($instring).')';
+								}
+								else{
+									$sql_where .= ' AND query.'.$layerset[0]['attributes']['name'][$i].' '.$this->formvars[$prefix.'operator_'.$layerset[0]['attributes']['name'][$i]].' ';
+									$sql_where.='\''.$this->formvars[$prefix.'value_'.$layerset[0]['attributes']['name'][$i]].'\'';
+								}
 							}
 						}
-          	# Suche nur im Stellen-Extent
-            $sql_where.=' AND ('.$layerset[0]['attributes']['the_geom'].' && st_transform(st_geomfromtext(\'POLYGON(('.$this->Stelle->MaxGeorefExt->minx.' '.$this->Stelle->MaxGeorefExt->miny.', '.$this->Stelle->MaxGeorefExt->maxx.' '.$this->Stelle->MaxGeorefExt->miny.', '.$this->Stelle->MaxGeorefExt->maxx.' '.$this->Stelle->MaxGeorefExt->maxy.', '.$this->Stelle->MaxGeorefExt->minx.' '.$this->Stelle->MaxGeorefExt->maxy.', '.$this->Stelle->MaxGeorefExt->minx.' '.$this->Stelle->MaxGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layerset[0]['epsg_code'].') OR '.$layerset[0]['attributes']['the_geom'].' IS NULL)';
-          }
-        }
+						elseif($this->formvars[$prefix.'operator_'.$layerset[0]['attributes']['name'][$i]] == 'IS NULL' OR $this->formvars[$prefix.'operator_'.$layerset[0]['attributes']['name'][$i]] == 'IS NOT NULL'){
+							if($layerset[0]['attributes']['type'][$i] == 'bpchar' OR $layerset[0]['attributes']['type'][$i] == 'varchar' OR $layerset[0]['attributes']['type'][$i] == 'text'){
+								if($this->formvars[$prefix.'operator_'.$layerset[0]['attributes']['name'][$i]] == 'IS NULL'){
+									$sql_where .= ' AND (query.'.$layerset[0]['attributes']['name'][$i].' '.$this->formvars[$prefix.'operator_'.$layerset[0]['attributes']['name'][$i]].' OR query.'.$layerset[0]['attributes']['name'][$i].' = \'\') ';
+								}
+								else{
+									$sql_where .= ' AND query.'.$layerset[0]['attributes']['name'][$i].' '.$this->formvars[$prefix.'operator_'.$layerset[0]['attributes']['name'][$i]].' AND query.'.$layerset[0]['attributes']['name'][$i].' != \'\' ';
+								}
+							}
+							else{
+								$sql_where .= ' AND query.'.$layerset[0]['attributes']['name'][$i].' '.$this->formvars[$prefix.'operator_'.$layerset[0]['attributes']['name'][$i]].' ';
+							}
+						}
+						if($this->formvars['value2_'.$layerset[0]['attributes']['name'][$i]] != ''){
+							$sql_where.=' AND \''.$this->formvars['value2_'.$layerset[0]['attributes']['name'][$i]].'\'';
+						}
+						# räumliche Einschränkung
+						if($m == 0 AND $layerset[0]['attributes']['name'][$i] == $layerset[0]['attributes']['the_geom']){		// nur einmal machen, also nur bei $m == 0
+							if($this->formvars['newpathwkt'] != ''){
+								if (strpos(strtolower($this->formvars['newpathwkt']), 'polygon') !== false) {
+									# Suche im Suchpolygon
+									$spatial_sql_where =' AND st_intersects('.$layerset[0]['attributes']['the_geom'].', (st_transform(st_geomfromtext(\''.$this->formvars['newpathwkt'].'\', '.$this->user->rolle->epsg_code.'), '.$layerset[0]['epsg_code'].')))';  
+								}
+								if (strpos(strtolower($this->formvars['newpathwkt']), 'point') !== false) {
+									# Suche an Punktkoordinaten mit übergebener SRID
+									$spatial_sql_where.=" AND st_within(st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$this->formvars['epsg_code']."), ".$layerset[0]['epsg_code']."), ".$layerset[0]['attributes']['the_geom'].")";
+								}
+							}
+							# Suche nur im Stellen-Extent
+							$spatial_sql_where.=' AND ('.$layerset[0]['attributes']['the_geom'].' && st_transform(st_geomfromtext(\'POLYGON(('.$this->Stelle->MaxGeorefExt->minx.' '.$this->Stelle->MaxGeorefExt->miny.', '.$this->Stelle->MaxGeorefExt->maxx.' '.$this->Stelle->MaxGeorefExt->miny.', '.$this->Stelle->MaxGeorefExt->maxx.' '.$this->Stelle->MaxGeorefExt->maxy.', '.$this->Stelle->MaxGeorefExt->minx.' '.$this->Stelle->MaxGeorefExt->maxy.', '.$this->Stelle->MaxGeorefExt->minx.' '.$this->Stelle->MaxGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layerset[0]['epsg_code'].') OR '.$layerset[0]['attributes']['the_geom'].' IS NULL)';
+						}
+					}
+					$sql_where .= ')';		// Klammer von der boolschen Verkettung wieder zu
+				}
+				
+				$sql_where .= ')'.$spatial_sql_where;		// äußere Klammer wieder zu und räumliche Einschränkung anhängen
+				
         $distinctpos = strpos(strtolower($newpath), 'distinct');
         if($distinctpos !== false && $distinctpos < 10){
           $pfad = substr(trim($newpath), $distinctpos+8);
@@ -6654,6 +6669,31 @@ class GUI extends GUI_core{
 		}
 	}
 	
+	function GenerischeSuche_Suchmaske(){	
+		if($this->formvars['selected_layer_id']){   	
+      $layerset=$this->user->rolle->getLayer($this->formvars['selected_layer_id']);
+      switch ($layerset[0]['connectiontype']) {
+        case MS_POSTGIS : {
+          $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
+          $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+          $layerdb->setClientEncoding();
+          $path = $mapdb->getPath($this->formvars['selected_layer_id']);
+          $privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
+          $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
+          $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
+          # wenn Attributname/Wert-Paare übergeben wurden, diese im Formular einsetzen
+	        for($i = 0; $i < count($this->attributes['name']); $i++){
+	          $this->qlayerset['shape'][0][$this->attributes['name'][$i]] = $this->formvars['value_'.$this->attributes['name'][$i]];
+	        }
+          # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
+					$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $this->qlayerset['shape'], true);
+        }break;
+      }
+    }
+		$searchmask_number = $this->formvars['searchmask_number'];
+		include(SNIPPETS.'generic_search_mask.php');
+	}
+	
   function GenerischeSuche(){
   	if($this->formvars['titel'] == ''){
       $this->titel='Layer-Suche';
@@ -6752,6 +6792,7 @@ class GUI extends GUI_core{
       	$this->user->rolle->save_search($this->attributes, $this->formvars);
       	$this->formvars['searches'] = $this->formvars['search_name'];
       }
+			$this->formvars['searchmask_count'] = 0;		// darf erst nach dem speichern passieren
       # Löschen einer Suchabfrage
       if($this->formvars['go_plus'] == 'Suchabfrage_löschen'){
       	$this->user->rolle->delete_search($this->formvars['searches'], $this->formvars['selected_layer_id']);
@@ -6760,20 +6801,32 @@ class GUI extends GUI_core{
       # die Namen aller gespeicherten Suchabfragen dieser Rolle zu diesem Layer laden
     	$this->searchset=$this->user->rolle->getsearches($this->formvars['selected_layer_id']);
     	# die ausgewählte Suchabfrage laden
-    	if($this->formvars['searches'] != ''){
-    		$this->selected_search=$this->user->rolle->getsearch($this->formvars['selected_layer_id'], $this->formvars['searches']);
-    		# alle Suchparameter leeren
-    		for($i = 0; $i < count($this->attributes['name']); $i++){
-    			$this->formvars['operator_'.$this->attributes['name'][$i]] = '';
-    			$this->formvars['value_'.$this->attributes['name'][$i]] = '';
-    			$this->formvars['value2_'.$this->attributes['name'][$i]] = '';
-    		}
-    		# die gespeicherten Suchparameter setzen
-    		for($i = 0; $i < count($this->selected_search); $i++){
-    			$this->formvars['operator_'.$this->selected_search[$i]['attribute']] = $this->selected_search[$i]['operator'];
-    			$this->formvars['value_'.$this->selected_search[$i]['attribute']] = $this->selected_search[$i]['value1'];
-    			$this->formvars['value2_'.$this->selected_search[$i]['attribute']] = $this->selected_search[$i]['value2']; 
-    		}
+    	if($this->formvars['searches'] != ''){				
+    		$this->selected_search = $this->user->rolle->getsearch($this->formvars['selected_layer_id'], $this->formvars['searches']);
+				$this->formvars['searchmask_count'] = $this->selected_search[0]['searchmask_number'];
+				for($m = 0; $m <= $this->formvars['searchmask_count']; $m++){
+					if($m > 0){				// es ist nicht die erste Suchmaske, sondern eine weitere hinzugefügte
+						$prefix = $m.'_';
+					}
+					else{
+						$prefix = '';
+					}
+					# alle Suchparameter leeren
+					for($i = 0; $i < count($this->attributes['name']); $i++){
+						$this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] = '';
+						$this->formvars[$prefix.'value_'.$this->attributes['name'][$i]] = '';
+						$this->formvars[$prefix.'value2_'.$this->attributes['name'][$i]] = '';
+					}
+					# die gespeicherten Suchparameter setzen
+					for($i = 0; $i < count($this->selected_search); $i++){
+						if($this->selected_search[$i]['searchmask_number'] == $m){
+							$this->formvars['searchmask_operator'][$m] = $this->selected_search[$i]['searchmask_operator'];
+							$this->formvars[$prefix.'operator_'.$this->selected_search[$i]['attribute']] = $this->selected_search[$i]['operator'];
+							$this->formvars[$prefix.'value_'.$this->selected_search[$i]['attribute']] = $this->selected_search[$i]['value1'];
+							$this->formvars[$prefix.'value2_'.$this->selected_search[$i]['attribute']] = $this->selected_search[$i]['value2']; 
+						}
+					}
+				}
     	}
     }
     $this->output();

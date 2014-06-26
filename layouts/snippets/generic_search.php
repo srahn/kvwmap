@@ -46,21 +46,25 @@ function checkDate(string){
 }
 
 
-function operatorchange(attributname){
-	if(document.getElementById("operator_"+attributname).value == "IS NULL" || document.getElementById("operator_"+attributname).value == "IS NOT NULL"){
-		changeInputType(document.getElementById("value_"+attributname), "hidden");
+function operatorchange(attributname, searchmask_number){
+	if(searchmask_number > 0){						// es ist nicht die erste Suchmaske, sondern eine weitere hinzugefügte
+		prefix = searchmask_number+'_';
+	}
+	else prefix = '';
+	if(document.getElementById(prefix+"operator_"+attributname).value == "IS NULL" || document.getElementById(prefix+"operator_"+attributname).value == "IS NOT NULL"){
+		changeInputType(document.getElementById(prefix+"value_"+attributname), "hidden");
 	}
 	else{
-		changeInputType(document.getElementById("value_"+attributname), "text");
+		changeInputType(document.getElementById(prefix+"value_"+attributname), "text");
 	}
-	if(document.getElementById("operator_"+attributname).value == "between"){
-		changeInputType(document.getElementById("value2_"+attributname), "text");
-		document.getElementById("value_"+attributname).size = 9;
+	if(document.getElementById(prefix+"operator_"+attributname).value == "between"){
+		changeInputType(document.getElementById(prefix+"value2_"+attributname), "text");
+		document.getElementById(prefix+"value_"+attributname).size = 9;
 	}
 	else{
-		changeInputType(document.getElementById("value2_"+attributname), "hidden");
-		document.getElementById("value2_"+attributname).value = "";
-		document.getElementById("value_"+attributname).size = 24;
+		changeInputType(document.getElementById(prefix+"value2_"+attributname), "hidden");
+		document.getElementById(prefix+"value2_"+attributname).value = "";
+		document.getElementById(prefix+"value_"+attributname).size = 24;
 	}
 }
 
@@ -139,11 +143,15 @@ function buildwktpolygonfromsvgpath(svgpath){
 }
 
 
-function update_require_attribute(attributes, layer_id, value){
+function update_require_attribute(attributes, layer_id, value, searchmask_number){
 	// attributes ist eine Liste von zu aktualisierenden Attribut und value der ausgewaehlte Wert
+	if(searchmask_number > 0){						// es ist nicht die erste Suchmaske, sondern eine weitere hinzugefügte
+		prefix = searchmask_number+'_';
+	}
+	else prefix = '';
 	attribute = attributes.split(',');
 	for(i = 0; i < attribute.length; i++){
-		ahah("<? echo URL.APPLVERSION; ?>index.php", "go=get_select_list&layer_id="+layer_id+"&attribute="+attribute[i]+"&value="+value+"&type=select-one", new Array(document.getElementById('value_'+attribute[i])), new Array('sethtml'));
+		ahah("<? echo URL.APPLVERSION; ?>index.php", "go=get_select_list&layer_id="+layer_id+"&attribute="+attribute[i]+"&value="+value+"&type=select-one", new Array(document.getElementById(prefix+'value_'+attribute[i])), new Array('sethtml'));
 	}
 }
 
@@ -189,6 +197,13 @@ function delete_search(){
 	else{
 		alert('Es wurde keine Suchabfrage ausgewählt.');
 	}
+}
+
+function add_searchmask(layer_id){
+	document.GUI.searchmask_count.value = parseInt(document.GUI.searchmask_count.value) + 1;
+	newdiv = document.createElement('div');
+	document.getElementById('searchmasks').appendChild(newdiv);
+	ahah("<? echo URL.APPLVERSION; ?>index.php", "go=Layer-Suche_Suchmaske_generieren&selected_layer_id="+layer_id+"&searchmask_number="+document.GUI.searchmask_count.value, new Array(newdiv), new Array('sethtml'));
 }
   
 //-->
@@ -296,138 +311,47 @@ function delete_search(){
   
   <? if($this->selected_search != ''){echo '<script type="text/javascript">showsearches();</script>';} ?>
   <tr> 
-    <td colspan="5">
-      <table width="100%" align="center" border="0" cellspacing="0" cellpadding="3">
-        <?
-    if ((count($this->attributes))!=0) {
-      ?><tr>
-            <td width="150px"><b>Attribut</b></td>
-            <td>&nbsp;&nbsp;</td>
-            <td width="100px" align="center"><b>Operator</b></td>
-            <td>&nbsp;&nbsp;</td>
-            <td width="150px" align="left"><b>&nbsp;&nbsp;Wert</b></td>
-          </tr><?
+    <td colspan="5" id="searchmasks">
 
-      for($i = 0; $i < count($this->attributes['name']); $i++){
-        if($this->attributes['type'][$i] != 'geometry'){
-				
-					if($this->attributes['group'][$i] != $this->attributes['group'][$i-1]){		# wenn die vorige Gruppe anders ist, Tabelle beginnen
-						$explosion = explode(';', $this->attributes['group'][$i]);
-						if($explosion[1] != '')$collapsed = true;else $collapsed = false;
-						$groupname = $explosion[0];
-						echo '<tr>
-										<td colspan="5" width="100%">
-											<table cellpadding="3" cellspacing="0" width="100%" id="colgroup'.$layer['Layer_ID'].'_'.$i.'_'.$k.'"  style="'; if(!$collapsed)echo 'display:none;'; echo ' border:1px solid grey">
-												<tr>
-													<td width="100%" bgcolor="'.BG_GLEATTRIBUTE.'" colspan="2">&nbsp;<a href="javascript:void(0);" onclick="javascript:document.getElementById(\'group'.$layer['Layer_ID'].'_'.$i.'_'.$k.'\').style.display=\'\';document.getElementById(\'colgroup'.$layer['Layer_ID'].'_'.$i.'_'.$k.'\').style.display=\'none\';"><img border="0" src="'.GRAPHICSPATH.'/plus.gif"></a>&nbsp;<b>'.$groupname.'</b></td>
-												</tr>
-											</table>
-											<table cellpadding="3" cellspacing="0" width="100%" id="group'.$layer['Layer_ID'].'_'.$i.'_'.$k.'" style="'; if($collapsed)echo 'display:none;'; echo 'border:1px solid grey">
-												<tr>
-													<td style="border-bottom:1px dotted grey" bgcolor="'.BG_GLEATTRIBUTE.'" colspan="5">&nbsp;<a href="javascript:void(0);" onclick="javascript:document.getElementById(\'group'.$layer['Layer_ID'].'_'.$i.'_'.$k.'\').style.display=\'none\';document.getElementById(\'colgroup'.$layer['Layer_ID'].'_'.$i.'_'.$k.'\').style.display=\'\';"><img border="0" src="'.GRAPHICSPATH.'/minus.gif"></a>&nbsp;<b>'.$groupname.'</b></td>
-												</tr>';
-				}
-				
-          ?><tr>
-            <td width="40%"><?
-              if($this->attributes['alias'][$i] != ''){
-                echo $this->attributes['alias'][$i];
-              }
-              else{
-                echo $this->attributes['name'][$i];
-              }
-              if(strpos($this->attributes['type'][$i], 'time') !== false OR $this->attributes['type'][$i] == 'date'){
-              ?>
-                <img src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0">
-              <?
-              }
-          ?></td>
-            <td>&nbsp;&nbsp;</td>
-            <td width="100px">
-              <select class="select" style="width:75px" <? if(count($this->attributes['enum_value'][$i]) == 0){ ?>onchange="operatorchange('<? echo $this->attributes['name'][$i]; ?>');" id="operator_<? echo $this->attributes['name'][$i]; ?>" <? } ?> name="operator_<? echo $this->attributes['name'][$i]; ?>">
-                <option title="Der Suchbegriff muss exakt so in der Datenbank stehen" value="=" <? if($this->formvars['operator_'.$this->attributes['name'][$i]] == '='){ echo 'selected';} ?> >=</option>
-                <option title="Der Suchbegriff kommt so NICHT in der Datenbank vor" value="!=" <? if($this->formvars['operator_'.$this->attributes['name'][$i]] == '!='){ echo 'selected';} ?> >!=</option>
-                <option title="'kleiner als': nur bei Zahlen verwenden!" value="<" <? if($this->formvars['operator_'.$this->attributes['name'][$i]] == '<'){ echo 'selected';} ?> ><</option>
-                <option title="'größer als': nur bei Zahlen verwenden!" value=">" <? if($this->formvars['operator_'.$this->attributes['name'][$i]] == '>'){ echo 'selected';} ?> >></option>
-                <option title="Fügen Sie das %-Zeichen vor und/oder nach dem Suchbegriff für beliebige Zeichen ein" value="LIKE" <? if($this->formvars['operator_'.$this->attributes['name'][$i]] == 'LIKE'){ echo 'selected';} ?> >ähnlich</option>
-                <option title="Fügen Sie das %-Zeichen vor und/oder nach dem Suchbegriff für beliebige Zeichen ein" value="NOT LIKE" <? if($this->formvars['operator_'.$this->attributes['name'][$i]] == 'NOT LIKE'){ echo 'selected';} ?> >nicht ähnlich</option>
-                <option title="Sucht nach Datensätzen ohne Eintrag in diesem Attribut" value="IS NULL" <? if($this->formvars['operator_'.$this->attributes['name'][$i]] == 'IS NULL'){ echo 'selected';} ?> >ist leer</option>
-                <option title="Sucht nach Datensätzen mit beliebigem Eintrag in diesem Attribut" value="IS NOT NULL" <? if($this->formvars['operator_'.$this->attributes['name'][$i]] == 'IS NOT NULL'){ echo 'selected';} ?> >ist nicht leer</option>
-                <option title="Sucht nach mehreren exakten Suchbegriffen, zur Trennung '|' verwenden:  [Alt Gr] + [<]" value="IN" <? if (count($this->attributes['enum_value'][$i]) > 0){ echo 'disabled="true"'; } ?> <? if($this->formvars['operator_'.$this->attributes['name'][$i]] == 'IN'){ echo 'selected';} ?> >befindet sich in</option>
-                <option title="Sucht zwischen zwei Zahlwerten" value="between" <? if (count($this->attributes['enum_value'][$i]) > 0){ echo 'disabled="true"'; } ?> <? if($this->formvars['operator_'.$this->attributes['name'][$i]] == 'between'){ echo 'selected';} ?> >zwischen</option>
-              </select>
-            </td>
-            <td>&nbsp;&nbsp;</td>
-            <td align="left" width="40%"><?
-            	switch ($this->attributes['form_element_type'][$i]) {
-            		case 'Auswahlfeld' : {
-                  ?><select class="select" 
-                  <?
-                  	if($this->attributes['req_by'][$i] != ''){
-											echo 'onchange="update_require_attribute(\''.$this->attributes['req_by'][$i].'\','.$this->formvars['selected_layer_id'].', this.value);" ';
-										}
-									?> 
-                  	id="value_<? echo $this->attributes['name'][$i]; ?>" name="value_<? echo $this->attributes['name'][$i]; ?>"><?echo "\n"; ?>
-                      <option value="">-- <? echo $this->strChoose; ?> --</option><? echo "\n";
-                      if(is_array($this->attributes['enum_value'][$i][0])){
-                      	$this->attributes['enum_value'][$i] = $this->attributes['enum_value'][$i][0];
-                      	$this->attributes['enum_output'][$i] = $this->attributes['enum_output'][$i][0];
-                      }
-                    for($o = 0; $o < count($this->attributes['enum_value'][$i]); $o++){
-                      ?>
-                      <option <? if($this->formvars['value_'.$this->attributes['name'][$i]] == $this->attributes['enum_value'][$i][$o]){ echo 'selected';} ?> value="<? echo $this->attributes['enum_value'][$i][$o]; ?>"><? echo $this->attributes['enum_output'][$i][$o]; ?></option><? echo "\n";
-                    } ?>
-                    </select>
-                    <input class="input" size="9" id="value2_<? echo $this->attributes['name'][$i]; ?>" name="value2_<? echo $this->attributes['name'][$i]; ?>" type="hidden" value="<? echo $this->formvars['value2_'.$this->attributes['name'][$i]]; ?>">
-                    <?
-                }break;
-                
-                case 'Checkbox' : {
-                  ?><select class="select" id="value_<? echo $this->attributes['name'][$i]; ?>" name="value_<? echo $this->attributes['name'][$i]; ?>"><?echo "\n"; ?>
-                      <option value="">-- <? echo $this->strChoose; ?> --</option><? echo "\n"; ?>
-                      <option <? if($this->formvars['value_'.$this->attributes['name'][$i]] == 't'){ echo 'selected';} ?> value="t">ja</option><? echo "\n"; ?>
-                      <option <? if($this->formvars['value_'.$this->attributes['name'][$i]] == 'f'){ echo 'selected';} ?> value="f">nein</option><? echo "\n"; ?>
-                    </select>
-                    <input class="input" size="9" id="value2_<? echo $this->attributes['name'][$i]; ?>" name="value2_<? echo $this->attributes['name'][$i]; ?>" type="hidden" value="<? echo $this->formvars['value2_'.$this->attributes['name'][$i]]; ?>">
-                    <?
-                }break;
-                
-		default : { 
-                  ?>
-                  <input class="input" size="<? if($this->formvars['value2_'.$this->attributes['name'][$i]] != ''){echo '9';}else{echo '24';} ?>" id="value_<? echo $this->attributes['name'][$i]; ?>" name="value_<? echo $this->attributes['name'][$i]; ?>" type="text" value="<? echo $this->formvars['value_'.$this->attributes['name'][$i]]; ?>">
-                  <input class="input" size="9" id="value2_<? echo $this->attributes['name'][$i]; ?>" name="value2_<? echo $this->attributes['name'][$i]; ?>" type="<? if($this->formvars['value2_'.$this->attributes['name'][$i]] != ''){echo 'text';}else{echo 'hidden';} ?>" value="<? echo $this->formvars['value2_'.$this->attributes['name'][$i]]; ?>">
-                  <?
-               }
-      				}
-           ?></td>
-          </tr><?					
-        }
-				if($this->attributes['group'][$i] != $this->attributes['group'][$i+1]){		# wenn die nächste Gruppe anders ist, Tabelle schliessen
-					echo '</table></td></tr>';
-				}
+<? if(count($this->attributes) > 0){  							
+		for($m = 0; $m <= $this->formvars['searchmask_count']; $m++){ 
+			$searchmask_number = $m; 		?>
+			<div>
+			<? include(SNIPPETS.'generic_search_mask.php'); ?>
+			</div>
+<? 	}
+	} ?>
+		</td>
+  </tr>
+	<tr> 
+    <td colspan="5">
+<? if(count($this->attributes) > 0){ ?>
+						
+			<table width="100%" align="center" border="0" cellspacing="0" cellpadding="3">			
+					<tr>
+						<td><a href="javascript:add_searchmask(<? echo $this->formvars['selected_layer_id']; ?>);">und/oder...</a></td>
+					</tr>
+					<tr>
+						<td colspan="5"><br>Anzahl Treffer anzeigen:&nbsp;<input size="2" type="text" name="anzahl" value="<? echo $this->formvars['anzahl']; ?>"></td>
+					</tr>
+					<tr>
+						<td colspan="5"><br><em>Zur nicht exakten Suche verwenden Sie den <br>Operator "ähnlich" und den Platzhalter %.</em></td>
+					</tr>
+					<tr>
+						<td colspan="5"><br><em>Für Datumsangaben verwenden Sie bitte das <br>Format "TT.MM.JJJJ".</em></td>
+					</tr>
+					<tr>                
+						<td align="center" colspan="5"><br>
+							<input class="button" type="button" name="suchen" onclick="suche();" value="Suchen">
+						</td>
+					</tr>
+					<tr>
+						<td height="30" valign="bottom" align="center" colspan="5" id="loader" style="display:none"><img id="loaderimg" src="graphics/ajax-loader.gif"></td>
+					</tr>
+				</table><?
       }
-      if(count($this->attributes) > 0){
-        ?>  	<tr>
-                <td colspan="5"><br>Anzahl Treffer anzeigen:&nbsp;<input size="2" type="text" name="anzahl" value="<? echo $this->formvars['anzahl']; ?>"></td>
-              </tr>
-        			<tr>
-                <td colspan="5"><br><em>Zur nicht exakten Suche verwenden Sie den <br>Operator "ähnlich" und den Platzhalter %.</em></td>
-              </tr>
-              <tr>
-                <td colspan="5"><br><em>Für Datumsangaben verwenden Sie bitte das <br>Format "TT.MM.JJJJ".</em></td>
-              </tr>
-              <tr>                
-                <td align="center" colspan="5"><br>
-                	<input class="button" type="button" name="suchen" onclick="suche();" value="Suchen">
-                </td>
-              </tr>
-              <tr>
-              	<td height="30" valign="bottom" align="center" colspan="5" id="loader" style="display:none"><img id="loaderimg" src="graphics/ajax-loader.gif"></td>
-              </tr><?
-      }
-    } 
       ?>
-      </table></td>
+		</td>
   </tr>
   <tr> 
     <td colspan="5">&nbsp;</td>
@@ -444,4 +368,5 @@ function delete_search(){
 <INPUT TYPE="HIDDEN" NAME="columnname" VALUE="<? echo $this->formvars['columnname']; ?>">
 <INPUT TYPE="HIDDEN" NAME="fromwhere" VALUE="<? echo $this->formvars['fromwhere']; ?>">
 <input type="hidden" name="always_draw" value="<? echo $always_draw; ?>">
+<input type="hidden" name="searchmask_count" value="<? echo $this->formvars['searchmask_count']; ?>">
 

@@ -140,6 +140,8 @@ CREATE TABLE `search_attributes2rolle` (
   `operator` varchar(11)  NOT NULL,
   `value1` text ,
   `value2` text ,
+	`searchmask_number` INT( 11 ) NOT NULL DEFAULT 0, 
+	`searchmask_operator` ENUM(  'AND',  'OR' ) NULL DEFAULT NULL,
   PRIMARY KEY  (`name`,`user_id`,`stelle_id`,`layer_id`,`attribute`)
 );
 

@@ -1242,7 +1242,11 @@ if($GUI->goNotExecutedInPlugins){
 		$GUI->shp_export_exportieren();
 	  } break;
 
-	  case 'Layer-Suche_Suchen' : {
+	  case 'Layer-Suche_Suchmaske_generieren' : {
+			$GUI->GenerischeSuche_Suchmaske();
+	  } break;
+		
+		case 'Layer-Suche_Suchen' : {
 			$GUI->GenerischeSuche_Suchen();
 	  } break;
 

@@ -1187,3 +1187,5 @@ ALTER TABLE  `rolle` ADD  `geom_edit_first` BOOLEAN NOT NULL DEFAULT  '0' AFTER 
 ALTER TABLE  `used_layer` ADD  `export_privileg` BOOLEAN NOT NULL DEFAULT  '1' AFTER  `privileg`;
 
 ALTER TABLE  `layer` ADD  `export_privileg` BOOLEAN NOT NULL DEFAULT  '1';
+
+ALTER TABLE  `search_attributes2rolle` ADD  `searchmask_number` INT( 11 ) NOT NULL DEFAULT 0 , ADD  `searchmask_operator` ENUM(  'AND',  'OR' ) NULL DEFAULT NULL;

@@ -1243,11 +1243,19 @@ class rolle extends rolle_core{
 	function save_search($attributes, $formvars){
 		# alle anderen Suchabfragen unter dem Namen löschen
 		$this->delete_search($formvars['search_name'], $formvars['selected_layer_id']);
-		for($i = 0; $i < count($attributes['name']); $i++){
-			if($formvars['value_'.$attributes['name'][$i]] != '' OR $formvars['operator_'.$attributes['name'][$i]] == 'IS NULL' OR $formvars['operator_'.$attributes['name'][$i]] == 'IS NOT NULL'){
-				$sql = 'INSERT INTO search_attributes2rolle VALUES ("'.$formvars['search_name'].'", '.$this->user_id.', '.$this->stelle_id.', '.$formvars['selected_layer_id'].', "'.$attributes['name'][$i].'", "'.$formvars['operator_'.$attributes['name'][$i]].'", "'.$formvars['value_'.$attributes['name'][$i]].'", "'.$formvars['value2_'.$attributes['name'][$i]].'");';
-				$this->debug->write("<p>file:users.php class:rolle->save_search - Speichern einer Suchabfrage:",4);
-				$this->database->execSQL($sql,4, $this->loglevel);
+		for($m = 0; $m <= $formvars['searchmask_count']; $m++){
+			if($m > 0){				// es ist nicht die erste Suchmaske, sondern eine weitere hinzugefügte
+				$prefix = $m.'_';
+			}
+			else{
+				$prefix = '';
+			}
+			for($i = 0; $i < count($attributes['name']); $i++){
+				if($formvars[$prefix.'value_'.$attributes['name'][$i]] != '' OR $formvars[$prefix.'operator_'.$attributes['name'][$i]] == 'IS NULL' OR $formvars[$prefix.'operator_'.$attributes['name'][$i]] == 'IS NOT NULL'){
+					$sql = 'INSERT INTO search_attributes2rolle VALUES ("'.$formvars['search_name'].'", '.$this->user_id.', '.$this->stelle_id.', '.$formvars['selected_layer_id'].', "'.$attributes['name'][$i].'", "'.$formvars[$prefix.'operator_'.$attributes['name'][$i]].'", "'.$formvars[$prefix.'value_'.$attributes['name'][$i]].'", "'.$formvars[$prefix.'value2_'.$attributes['name'][$i]].'", '.$m.', "'.$formvars['boolean_operator_'.$m].'");';
+					$this->debug->write("<p>file:users.php class:rolle->save_search - Speichern einer Suchabfrage:",4);
+					$this->database->execSQL($sql,4, $this->loglevel);
+				}
 			}
 		}
 	}
@@ -1274,7 +1282,7 @@ class rolle extends rolle_core{
 	}
 
 	function getsearch($layer_id, $name){
-		$sql = 'SELECT * FROM search_attributes2rolle WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND layer_id='.$layer_id.' AND name = "'.$name.'"';
+		$sql = 'SELECT * FROM search_attributes2rolle WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND layer_id='.$layer_id.' AND name = "'.$name.'" ORDER BY searchmask_number DESC';
 		$this->debug->write("<p>file:users.php class:rolle->getsearch - Abfragen der gespeicherten Suchabfrage:<br>".$sql,4);
 		$query=mysql_query($sql,$this->database->dbConn);
 		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
