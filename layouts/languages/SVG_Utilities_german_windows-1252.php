@@ -1,7 +1,7 @@
 <?php
   $strCornerPoint="Eckpunkte bearbeiten";
-  $strCutByPolygon="Polygon ausschneiden";
-  $strDrawPolygon="Polygon hinzufuegen";
+  $strCutByPolygon="Freihandpolygon ausschneiden";
+  $strDrawPolygon="Freihandpolygon hinzufuegen";
   $strDeletePolygon="Polygon loeschen";
   $strDrawLine="Linie hinzufuegen";
   $strDeleteLine="alles loeschen";
@@ -13,6 +13,6 @@
   $strRuler="Streckenmessung";
   $strBuffer="Puffer hinzufuegen";
 	$strBufferedLine="gepufferte Linie hinzufuegen";
-	$strParallelPolygon="paralleles Polygon hinzufuegen";
+	$strParallelPolygon="linksseitig gepufferte Linie hinzufuegen";
   $strMoveGeometry="Geometrie verschieben";
 ?>  

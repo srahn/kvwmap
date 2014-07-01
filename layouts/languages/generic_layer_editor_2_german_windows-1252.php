@@ -24,4 +24,5 @@
  $strNewFK="neu";
  $strNewEmbeddedPK="neu";
  $strTitleGeometryEditor="Geometrie-Editor";
+ $strShowAll="alle anzeigen";
 ?>

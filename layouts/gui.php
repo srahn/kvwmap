@@ -20,22 +20,20 @@ if($this->user->rolle->querymode == 1){
     <tr>
       <td align="center" valign="top">
       <form name="GUI" enctype="multipart/form-data" method="post" action="index.php" id="GUI">
-        <table border=1 cellpadding=0 cellspacing=0 bordercolor="#FFFFFF" bordercolorlight="#CCCCCC" bordercolordark="#CCCCCC">
+        <table cellpadding=0 cellspacing=0>
         <tr> 
-            <td colspan="2"><?php
+          <td colspan="2" style="border: 1px solid; border-color: #ffffff #cccccc #bbbbbb;"><?php
           $this->debug->write("Include <b>".LAYOUTPATH."snippets/".HEADER."</b> in gui.php",4);    
 					include(LAYOUTPATH."snippets/".HEADER); 
        ?></td>
           </tr>
           <tr> 
-            
-          <td width="1%" valign="top" background="<?php echo GRAPHICSPATH."bg.gif"; ?>"> 
-            <?php
-              $this->debug->write("Include <b>".LAYOUTPATH."snippets/menue_switch.php</b> in gui.php",4);    
-							include(LAYOUTPATH."snippets/menue_switch.php"); ?>
-          </td>
-            
-            <td align="center" valign="top" background="<?php echo GRAPHICSPATH; ?>bg.gif">
+						<td width="1%" valign="top" background="<?php echo GRAPHICSPATH."bg.gif"; ?>" style="border: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC;"> 
+							<?php
+								$this->debug->write("Include <b>".LAYOUTPATH."snippets/menue_switch.php</b> in gui.php",4);    
+								include(LAYOUTPATH."snippets/menue_switch.php"); ?>
+						</td>
+            <td align="center" valign="top" background="<?php echo GRAPHICSPATH; ?>bg.gif" style="border-right: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC;">
 							<div style=" position: relative; overflow: hidden; ">
 							<?php
               $this->debug->write("Include <b>".$this->main."</b> in gui.php",4);
@@ -49,7 +47,7 @@ if($this->user->rolle->querymode == 1){
       			</td>
           </tr>
           <tr> 
-            <td colspan="2"><?php
+            <td colspan="2" style="border: 1px solid; border-color: #cccccc #cccccc #cccccc;"><?php
               $this->debug->write("Include <b>".LAYOUTPATH."snippets/".FOOTER."</b> in gui.php",4);    
 							include(LAYOUTPATH."snippets/".FOOTER); ?></td>
           </tr>

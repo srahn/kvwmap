@@ -90,7 +90,7 @@ define('MENU_WAPPEN','oben');          # oben / unten / kein
 # Position der Referenzkarte (oben/unten)                   # Version 1.6.4
 define('MENU_REFMAP','unten');          # oben / unten      # Version 1.6.4
 # Schalter für die Ajax-Funktionalität des Menüs            # Version 1.6.4
-define('AJAX_MENUE','true');          # true / false        # Version 1.6.4
+#define('AJAX_MENUE','true');          # true / false        # Version 1.6.4   # in Version 1.14 wieder gelöscht
 # Hintergrundfarbe Zeile bei Listen
 define('BG_TR','lightsteelblue');  # lightblue lightsteelblue		# Version 1.7.3
 # Hintergrundfarbe Top-Menüzeilen

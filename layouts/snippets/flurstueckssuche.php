@@ -49,7 +49,7 @@ if ($this->Fehlermeldung!='') {
   </tr>
 //-->
 	<tr>
-    <td align="right"><strong><?php echo $strGemkgschl; ?>:&nbsp;</strong></td>
+    <td align="right"><span class="fett px15"><?php echo $strGemkgschl; ?>:&nbsp;</span></td>
     <td colspan="3">
     	<input name="gemschl1" type="text" value="13" style="width:23px" onkeyup="updateGemarkungsauswahl();">
     	<input name="gemschl2" type="text" value="<? echo substr($this->formvars['GemkgID'], 2, 4); ?>" style="width:46px" onkeyup="updateGemarkungsauswahl();">
@@ -57,17 +57,17 @@ if ($this->Fehlermeldung!='') {
     </td>
   </tr>
   <tr>
-    <td align="right"><strong><?php echo $strGemkgGem; ?>:&nbsp;</strong></td>
+    <td align="right"><span class="fett px15"><?php echo $strGemkgGem; ?>:&nbsp;</span></td>
     <td colspan="3"><?php echo $this->FormObject["Gemarkungen"]->html; ?></td>
   </tr>
   <tr>
-    <td align="right"><strong><?php echo $strFlur; ?>:&nbsp;</strong></td>
+    <td align="right"><span class="fett px15"><?php echo $strFlur; ?>:&nbsp;</span></td>
     <td colspan="3"><?php
      echo $this->FormObject["Fluren"]->html;
    ?></td>
   </tr>
   <tr>
-    <td align="right"><strong><?php echo $strFst; ?>:&nbsp;</strong></td>
+    <td align="right"><span class="fett px15"><?php echo $strFst; ?>:&nbsp;</span></td>
     <td>
     <? if($this->FormObject["selectedFlstNr"]->html != ''){ ?>
     	<?php echo $strSelected; ?>:<br>

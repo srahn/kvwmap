@@ -1016,30 +1016,34 @@ class GUI extends GUI_core{
 		}
     $legend .=  '</a>';
 		if($this->group_has_active_layers[$group_id] == ''){
-			$legend .=  '<font color="firebrick" size="2">'.html_umlaute($groupname).'</font><br>';
+			$legend .=  '<span class="legend_group">'.html_umlaute($groupname).'</span><br>';
 		}
 		else{
-			$legend .=  '<b><font color="firebrick" size="2">'.html_umlaute($groupname).'</font></b><br>';
+			$legend .=  '<span class="legend_group_active_layers">'.html_umlaute($groupname).'</span><br>';
 		}
-		$legend .= '</td></tr><tr><td style="width:100%"><div id="layergroupdiv_'.$group_id.'" style="width:100%"><table cellspacing="0" cellpadding="0" style="width:100%">';
+		$legend .= '</td></tr><tr><td><div id="layergroupdiv_'.$group_id.'" style="width:100%"><table cellspacing="0" cellpadding="0">';
 		$layercount = count($this->groups_with_layers[$group_id]);
     if($groupstatus == 1){		# Gruppe aufgeklappt
 			for($u = 0; $u < count($this->groupset[$group_id]['untergruppen']); $u++){			# die Untergruppen rekursiv durchlaufen
-				$legend .= '<tr><td style="width:100%"><table cellspacing="0" cellpadding="0" style="width:100%"><tr><td>&nbsp;&nbsp;&nbsp;</td><td style="width:100%">';
+				$legend .= '<tr><td><table cellspacing="0" cellpadding="0" style="width:100%"><tr><td>&nbsp;&nbsp;&nbsp;</td><td style="width: 100%">';
 				$legend .= $this->create_group_legend($this->groupset[$group_id]['untergruppen'][$u]);
 				$legend .= '</td></tr></table></td></tr>';
 			}
 			if($layercount > 0){		# Layer vorhanden
 				$this->groups_with_layers[$group_id] = array_reverse($this->groups_with_layers[$group_id]);		# Layerreihenfolge umdrehen
 				if(!$this->formvars['nurFremdeLayer']){
-					$legend .=  '<tr><td><input name="layers_of_group_'.$group_id.'" type="hidden" value="'.implode(',', $this->layers_of_group[$group_id]).'">
-					<img border="0" src="graphics/leer.gif" width="8">
-								<a href="javascript:selectgroupquery(document.GUI.layers_of_group_'.$group_id.')">
-								<img border="0" src="graphics/pfeil.gif" title="Alle Abfragen ein/ausschalten"></a>
-								<img border="0" src="graphics/leer.gif" width="1">
-								<a href="javascript:selectgroupthema(document.GUI.layers_of_group_'.$group_id.')">
-								<img border="0" src="graphics/pfeil.gif" title="Alle Themen ein/ausschalten"></a>
-								<img border="0" src="graphics/leer.gif" width="4">alle</td></tr>';
+					$legend .=  '<tr>
+												<td align="center">
+													<input name="layers_of_group_'.$group_id.'" type="hidden" value="'.implode(',', $this->layers_of_group[$group_id]).'">
+													<a href="javascript:selectgroupquery(document.GUI.layers_of_group_'.$group_id.')"><img border="0" src="graphics/pfeil.gif" title="Alle Abfragen ein/ausschalten"></a>
+												</td>
+												<td align="center">
+													<a href="javascript:selectgroupthema(document.GUI.layers_of_group_'.$group_id.')"><img border="0" src="graphics/pfeil.gif" title="Alle Themen ein/ausschalten"></a>
+												</td>
+												<td>
+													alle
+												</td>
+											</tr>';
 				}
 				for($j = 0; $j < $layercount; $j++){
 					$layer = $this->layerset[$this->groups_with_layers[$group_id][$j]];
@@ -1047,8 +1051,8 @@ class GUI extends GUI_core{
 					# sichtbare Layer					
 					if($visible){
 						if($layer['requires'] == ''){
-							$legend .= '<tr><td>';
-							$legend .=  '&nbsp;&nbsp;';
+							$legend .= '<tr><td valign="top">';
+							#$legend .=  '&nbsp;&nbsp;';
 							if($layer['queryable'] == 1 AND !$this->formvars['nurFremdeLayer']){
 								$legend .=  '<input id="qLayer'.$layer['Layer_ID'].'" title="Abfrage ein/ausschalten" ';
 								
@@ -1078,10 +1082,7 @@ class GUI extends GUI_core{
 								}
 								$legend .=  ' >';
 							}
-							$legend .=  '<img border="0" src="graphics/leer.gif" width="1">';
-							if ($layer['queryable'] != 1){
-								$legend .=  '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
-							}
+							$legend .=  '</td><td valign="top">';
 							// die sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen, welches immer den value 0 hat, damit sie beim Neuladen ausgeschaltet werden können, denn eine nicht angehakte Checkbox/Radiobutton wird ja nicht übergeben
 							$legend .=  '<input type="hidden" id="thema'.$layer['Layer_ID'].'" name="thema'.$layer['Layer_ID'].'" value="0">';
 							
@@ -1099,7 +1100,7 @@ class GUI extends GUI_core{
 							if($layer['aktivStatus'] == 1){
 								$legend .=  'checked';
 							}
-							$legend .= ' >';
+							$legend .= ' ></td><td>';
 							if($layer['metalink'] != ''){
 								$legend .= '<a ';
 								if(substr($layer['metalink'], 0, 10) != 'javascript'){
@@ -1107,11 +1108,11 @@ class GUI extends GUI_core{
 								}
 								$legend .= ' class="metalink" href="'.$layer['metalink'].'">';
 							}
-							$legend .= '<font ';
+							$legend .= '<span ';
 							if($layer['minscale'] != -1 AND $layer['maxscale'] > 0){
 								$legend .= 'title="'.$layer['minscale'].' - '.$layer['maxscale'].'"';
 							}			  
-							$legend .=' size="2">'.html_umlaute($layer['alias']).'</font>';
+							$legend .=' class="legend_layer">'.html_umlaute($layer['alias']).'</span>';
 							if($layer['metalink'] != ''){
 								$legend .= '</a>';
 							}
@@ -1190,17 +1191,17 @@ class GUI extends GUI_core{
 										$classid = $layer['Class'][$k]['Class_ID'];
 										if($this->mapDB->disabled_classes['status'][$classid] == '0'){
 											$legend .= '<tr>
-													<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="hidden" size="2" name="class'.$classid.'" value="0"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img border="0" name="imgclass'.$classid.'" src="graphics/inactive.jpg"></a>&nbsp;<span class="small">'.html_umlaute($class->name).'</span></td>
+													<td><input type="hidden" size="2" name="class'.$classid.'" value="0"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img border="0" name="imgclass'.$classid.'" src="graphics/inactive.jpg"></a>&nbsp;<span class="small">'.html_umlaute($class->name).'</span></td>
 													</tr>';
 										}
 										elseif($this->mapDB->disabled_classes['status'][$classid] == 2){
 											$legend .= '<tr>
-													<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="hidden" size="2" name="class'.$classid.'" value="2"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img border="0" name="imgclass'.$classid.'" src="'.TEMPPATH_REL.$newname.'"></a>&nbsp;<span class="small">'.html_umlaute($class->name).'</span></td>
+													<td><input type="hidden" size="2" name="class'.$classid.'" value="2"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img border="0" name="imgclass'.$classid.'" src="'.TEMPPATH_REL.$newname.'"></a>&nbsp;<span class="small">'.html_umlaute($class->name).'</span></td>
 													</tr>';
 										}
 										else{
 											$legend .= '<tr>
-													<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="hidden" size="2" name="class'.$classid.'" value="1"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img border="0" name="imgclass'.$classid.'" src="'.TEMPPATH_REL.$newname.'"></a>&nbsp;<span class="small">'.html_umlaute($class->name).'</span></td>
+													<td><input type="hidden" size="2" name="class'.$classid.'" value="1"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img border="0" name="imgclass'.$classid.'" src="'.TEMPPATH_REL.$newname.'"></a>&nbsp;<span class="small">'.html_umlaute($class->name).'</span></td>
 													</tr>';
 										}
 									}
@@ -1217,8 +1218,7 @@ class GUI extends GUI_core{
 					if($layer['requires'] == '' AND !$visible){
 						$legend .=  '
 									<tr>
-									<td>
-										&nbsp;&nbsp;';
+										<td valign="top">';
 						if($layer['queryable'] == 1){
 							$legend .=  '<input ';
 							if($layer['selectiontype'] == 'radio'){
@@ -1232,10 +1232,7 @@ class GUI extends GUI_core{
 							}
 							$legend .=' type="checkbox" name="pseudoqLayer'.$layer['Layer_ID'].'" disabled>';
 						}
-						$legend .=  '<img border="0" src="graphics/leer.gif" width="1">';
-						if($layer['queryable'] != 1){
-							$legend .=  '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
-						}
+						$legend .=  '</td><td valign="top">';
 						// die nicht sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen nur bei Radiolayern, damit sie beim Neuladen ausgeschaltet werden können, denn ein disabledtes input-Feld wird ja nicht übergeben
 						$legend .=  '<input type="hidden" id="thema'.$layer['Layer_ID'].'" name="thema'.$layer['Layer_ID'].'" value="'.$layer['aktivStatus'].'">';
 						$legend .=  '<input ';
@@ -1249,12 +1246,12 @@ class GUI extends GUI_core{
 						if($layer['aktivStatus'] == 1){
 							$legend .=  'checked="true" ';
 						}
-						$legend .= 'id="thema_'.$layer['Layer_ID'].'" name="thema'.$layer['Layer_ID'].'" disabled="true">
-						<font color="gray" ';
+						$legend .= 'id="thema_'.$layer['Layer_ID'].'" name="thema'.$layer['Layer_ID'].'" disabled="true"></td><td>
+						<span class="legend_layer_hidden" ';
 						if($layer['minscale'] != -1 AND $layer['maxscale'] != -1){
 							$legend .= 'title="'.$layer['minscale'].' - '.$layer['maxscale'].'"';
 						}
-						$legend .= ' size="2">'.html_umlaute($layer['alias']).'</font>';
+						$legend .= ' >'.html_umlaute($layer['alias']).'</span>';
 						if($layer['queryable'] == 1){
 							$legend .=  '<input type="hidden" name="qLayer'.$layer['Layer_ID'].'"';
 							if($layer['queryStatus'] != 0){
@@ -2344,7 +2341,7 @@ class GUI extends GUI_core{
       $this->user->rolle->set_one_Group($this->user->id, $this->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
       $this->loadMap('DataBase');
       # Polygon abfragen und Extent setzen
-      $rect = $dbmap->zoomToDatasets($oids, $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], 10, $layerdb, $this->user->rolle->epsg_code);
+      $rect = $dbmap->zoomToDatasets($oids, $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], 10, $layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
       $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
 	    if (MAPSERVERVERSION > 600) {
 				$this->map_scaledenom = $this->map->scaledenom;
@@ -6584,7 +6581,7 @@ class GUI extends GUI_core{
 							for($k = 0; $k < count($this->qlayerset[$i]['shape']); $k++){
 								$oids[] = $this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['maintable'].'_oid'];
 							}
-							$rect = $mapDB->zoomToDatasets($oids, $layerset[0]['maintable'], $layerset[0]['attributes']['the_geom'], 10, $layerdb, $this->user->rolle->epsg_code);
+							$rect = $mapDB->zoomToDatasets($oids, $layerset[0]['maintable'], $layerset[0]['attributes']['the_geom'], 10, $layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
 							$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
 							if (MAPSERVERVERSION > 600) {
 								$this->map_scaledenom = $this->map->scaledenom;
@@ -7193,8 +7190,9 @@ class GUI extends GUI_core{
 					$this->loadMap('DataBase');
 					if($this->formvars['CMD']=='')$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
         	if($this->formvars['layer_id'] != '' AND $this->formvars['oid'] != '' AND $this->formvars['tablename'] != '' AND $this->formvars['columnname'] != ''){			# das sind die Sachen vom "Mutter"-Layer
+						$parentlayerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
         		$layerdb = $this->mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-        		$rect = $this->mapDB->zoomToDatasets(array($this->formvars['oid']), $this->formvars['tablename'], $this->formvars['columnname'], 10, $layerdb, $this->user->rolle->epsg_code);
+        		$rect = $this->mapDB->zoomToDatasets(array($this->formvars['oid']), $this->formvars['tablename'], $this->formvars['columnname'], 10, $layerdb, $parentlayerset[0]['epsg_code'], $this->user->rolle->epsg_code);
 			      $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);		# Zoom auf den "Mutter"-Datensatz
 				    if (MAPSERVERVERSION > 600) {
 							$this->map_scaledenom = $this->map->scaledenom;
@@ -13987,9 +13985,9 @@ class db_mapObj extends db_mapObj_core{
     $this->User_ID=$User_ID;
   }
 
-	function zoomToDatasets($oids, $tablename, $columnname, $border, $layerdb, $client_epsg) {
+	function zoomToDatasets($oids, $tablename, $columnname, $border, $layerdb, $layer_epsg, $client_epsg) {
   	$sql ="SELECT st_xmin(bbox) AS minx,st_ymin(bbox) AS miny,st_xmax(bbox) AS maxx,st_ymax(bbox) AS maxy";
-  	$sql.=" FROM (SELECT st_transform(ST_SetSRID(ST_Extent(".$columnname."), (select st_srid(".$columnname.") from ".$tablename." limit 1)), ".$client_epsg.") as bbox";
+  	$sql.=" FROM (SELECT st_transform(ST_SetSRID(ST_Extent(".$columnname."), ".$layer_epsg."), ".$client_epsg.") as bbox";
   	$sql.=" FROM ".$tablename." WHERE oid IN (";
   	for($i = 0; $i < count($oids); $i++){
     	$sql .= "'".$oids[$i]."',";

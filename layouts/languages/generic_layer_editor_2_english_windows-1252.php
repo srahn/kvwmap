@@ -22,4 +22,5 @@
  $strShowFK="show";
  $strNewFK="new";
  $strNewEmbeddedPK="new";
+ $strShowAll="show all";
 ?>

@@ -182,10 +182,10 @@
 																$datapart .= '&embedded=true';
 															}
 															$datapart .= '&targetobject='.$attributes['name'][$j].'_'.$k.'&targetlayer_id='.$layer['Layer_ID'].'&targetattribute='.$attributes['name'][$j];
-															$datapart .= '\', new Array(document.getElementById(\''.$attributes['name'][$j].'_'.$k.'\')), \'\');
+															$datapart .= '\', new Array(document.getElementById(\''.$attributes['name'][$j].'_'.$k.'\')), new Array(\'sethtml\'));
 														"';
 										}
-										$datapart .= '></div>';
+										$datapart .= '></div><table width="98%" cellspacing="0" cellpadding="2"><tr style="border: none"><td width="100%" align="right">';
 										$no_query = false;
 										for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
 											if($dataset[$attributes['subform_pkeys'][$j][$p]] == ''){
@@ -193,9 +193,15 @@
 											}
 										}
 										if($this->new_entry != true AND $no_query != true){
+											$datapart .= '<a id="show_all_'.$attributes['name'][$j].'_'.$k.'" style="font-size: '.$linksize.'px;visibility:hidden" class="buttonlink" href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
+											for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
+												$datapart .= '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$dataset[$attributes['subform_pkeys'][$j][$p]];
+												$datapart .= '&operator_'.$attributes['subform_pkeys'][$j][$p].'==';
+											}
+											$datapart .= 	'\')">'.$strShowAll.'</a>&nbsp;';												
 											if($attributes['subform_layer_privileg'][$j] > 0 AND !$lock[$k]){
 												if($attributes['embedded'][$j] == true){
-													$datapart .= '<table width="98%" cellspacing="0" cellpadding="0"><tr><td width="100%" align="right"><a href="javascript:ahah(\''.URL.APPLVERSION.'index.php\', \'go=neuer_Layer_Datensatz';
+													$datapart .= '<a class="buttonlink" href="javascript:ahah(\''.URL.APPLVERSION.'index.php\', \'go=neuer_Layer_Datensatz';
 													$data = '';
 													for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
 														$datapart .= '&attributenames['.$p.']='.$attributes['subform_pkeys'][$j][$p];
@@ -205,11 +211,11 @@
 													}
 													$data .= '&preview_attribute='.$attributes['preview_attribute'][$j];
 													$datapart .= '&data='.str_replace('&', '<und>', $data);
-													$datapart .= '&selected_layer_id='.$attributes['subform_layer_id'][$j].'&embedded=true&fromobject=subform'.$layer['Layer_ID'].'_'.$k.'_'.$j.'&targetobject='.$attributes['name'][$j].'_'.$k.'&targetlayer_id='.$layer['Layer_ID'].'&targetattribute='.$attributes['name'][$j].'\', new Array(document.getElementById(\'subform'.$layer['Layer_ID'].'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'));clearsubforms();">&nbsp;'.$strNewEmbeddedPK.'</a></td></tr></table>';
+													$datapart .= '&selected_layer_id='.$attributes['subform_layer_id'][$j].'&embedded=true&fromobject=subform'.$layer['Layer_ID'].'_'.$k.'_'.$j.'&targetobject='.$attributes['name'][$j].'_'.$k.'&targetlayer_id='.$layer['Layer_ID'].'&targetattribute='.$attributes['name'][$j].'\', new Array(document.getElementById(\'subform'.$layer['Layer_ID'].'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'));clearsubforms();">'.$strNewEmbeddedPK.'</a>';
 													$datapart .= '<div style="display:inline" id="subform'.$layer['Layer_ID'].'_'.$k.'_'.$j.'"></div>';
 												}
 												else{
-													$datapart .= '<table width="98%" cellspacing="0" cellpadding="0"><tr><td width="100%" align="right"><a ';
+													$datapart .= '<a ';
 													if($attributes['no_new_window'][$j] != true){
 														$datapart .= 	' target="_blank"';
 													}
@@ -222,10 +228,11 @@
 													$datapart .= '&oid='.$dataset[$attributes['table_name'][$attributes['subform_pkeys'][$j][0]].'_oid'];			# die oid des Datensatzes und die Layer-ID wird mit übergeben, für evtl. Zoom auf den Datensatz
 													$datapart .= '&tablename='.$attributes['table_name'][$attributes['the_geom']];											# dito
 													$datapart .= '&columnname='.$attributes['the_geom'];																								# dito
-													$datapart .= '&selected_layer_id='.$attributes['subform_layer_id'][$j].'\')">&nbsp;'.$strNewEmbeddedPK.'</a></td></tr></table>';
+													$datapart .= '&selected_layer_id='.$attributes['subform_layer_id'][$j].'\')">&nbsp;'.$strNewEmbeddedPK.'</a>';
 												}
 											}
 										}
+										$datapart .= '</td></tr></table>';
 									}break;
 
 									case 'Time': {

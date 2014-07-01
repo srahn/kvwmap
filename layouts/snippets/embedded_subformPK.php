@@ -61,15 +61,13 @@
 				}
 			}
 			if($this->formvars['embedded'] == 'true'){
-				echo '
-								<td><a href="javascript:if(document.getElementById(\'subform'.$this->qlayerset[$i]['Layer_ID'].$this->formvars['count'].'_'.$k.'\').innerHTML == \'\')ahah(\''.URL.APPLVERSION.'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$this->qlayerset[$i]['Layer_ID'].'&value_'.$this->qlayerset[$i]['maintable'].'_oid='.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['maintable'].'_oid'].'&embedded=true&fromobject=subform'.$this->qlayerset[$i]['Layer_ID'].$this->formvars['count'].'_'.$k.'&targetobject='.$this->formvars['targetobject'].'&targetlayer_id='.$this->formvars['targetlayer_id'].'&targetattribute='.$this->formvars['targetattribute'].'&data='.$this->formvars['data'].'\', new Array(document.getElementById(\'subform'.$this->qlayerset[$i]['Layer_ID'].$this->formvars['count'].'_'.$k.'\')), \'\');clearsubforms();">'.$output.'</a></td>
+				echo '<tr style="border: none">
+								<td><a href="javascript:if(document.getElementById(\'subform'.$this->qlayerset[$i]['Layer_ID'].$this->formvars['count'].'_'.$k.'\').innerHTML == \'\')ahah(\''.URL.APPLVERSION.'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$this->qlayerset[$i]['Layer_ID'].'&value_'.$this->qlayerset[$i]['maintable'].'_oid='.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['maintable'].'_oid'].'&embedded=true&fromobject=subform'.$this->qlayerset[$i]['Layer_ID'].$this->formvars['count'].'_'.$k.'&targetobject='.$this->formvars['targetobject'].'&targetlayer_id='.$this->formvars['targetlayer_id'].'&targetattribute='.$this->formvars['targetattribute'].'&data='.$this->formvars['data'].'\', new Array(document.getElementById(\'subform'.$this->qlayerset[$i]['Layer_ID'].$this->formvars['count'].'_'.$k.'\')), \'\');clearsubforms();">'.$output.'</a><div id="subform'.$this->qlayerset[$i]['Layer_ID'].$this->formvars['count'].'_'.$k.'"></div></td>
 							</tr>
-							<tr>
-								<td><div id="subform'.$this->qlayerset[$i]['Layer_ID'].$this->formvars['count'].'_'.$k.'"></div></td>
-							</tr>';
+';
 			}
 			else{
-				echo '
+				echo '<tr style="border: none">
 								<td><a ';
 								if($this->formvars['no_new_window'] != true){
 									echo 	' target="_blank"';
@@ -81,7 +79,13 @@
 		}
 ?>			    
 		</table>
-<?
+
+<?	if($anzObj > 1){ ?>
+		<script type="text/javascript">
+			document.getElementById('show_all_<? echo $this->formvars['targetobject'];?>').style.visibility = 'visible';
+		</script>
+
+<? }
 	} 
   else {
 	# nix machen
