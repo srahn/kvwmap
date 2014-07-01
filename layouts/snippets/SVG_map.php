@@ -1197,12 +1197,16 @@ function startPoint(evt) {
   for(var i = 0; i < alle; ++i){
     pathx.pop();
     pathy.pop();
+  }
+	alle = boxx.length;
+  for(var i = 0; i < alle; ++i){
     boxx.pop();
     boxy.pop();
   }
   // neuen punkt abgreifen
   clientx = evt.clientX;
   clienty = resy - evt.clientY;
+	console.log(boxx);
   pathx.push(clientx);
   pathy.push(clienty);
   redraw();
