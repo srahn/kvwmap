@@ -286,9 +286,10 @@ class database {
                     SELECT ".$id.", ".$gast_stelle.", '800', '600', minxmax, minymax, maxxmax, maxymax, '2', 'zoomin', epsg_code, ".DEFAULT_DRUCKRAHMEN_ID." , '0000-00-00 00:00:00', 'german', 'windows-1252', '0', '13', '0' FROM stelle WHERE ID = ".$gast_stelle;
     $query = mysql_query($sql);
     
-    $sql = "INSERT INTO `u_groups2rolle` (`user_id`,`stelle_id`,`id`,`status`) SELECT distinct ".$id.", ".$gast_stelle.", g.id, '0' FROM u_groups as g, layer as l, used_layer as ul";
-		$sql.= " WHERE ul.Stelle_ID = ".$gast_stelle." AND l.Layer_ID = ul.Layer_ID AND g.id = l.Gruppe";
-		$query = mysql_query($sql);
+		$stelle = new stelle($gast_stelle,$this);
+		$rolle = new rolle(NULL,$gast_stelle,$this);
+		$layers = $stelle->getLayers(NULL);
+		$rolle->setGroups($id, array($gast_stelle), $layers['ID'], '0');
 
     $sql = "INSERT INTO `u_menue2rolle` ( `user_id` , `stelle_id` , `menue_id` , `status` ) SELECT ".$id.", ".$gast_stelle.", menue_id, '0' FROM u_menue2stelle WHERE stelle_id = ".$gast_stelle;
 		$query = mysql_query($sql);
