@@ -210,7 +210,7 @@ function add_searchmask(layer_id){
 </script>
 <table border="0" cellpadding="5" cellspacing="2" bgcolor="<? echo $bgcolor; ?>">
   <tr align="center"> 
-    <td colspan="5"><strong><font size="+1"><? echo $this->titel; ?></font></strong></td>
+    <td colspan="5"><h2><? echo $this->titel; ?></h2></td>
   </tr>
   <tr>
     <td>&nbsp;</td>

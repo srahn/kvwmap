@@ -54,14 +54,20 @@ h2 {
 	margin-top: 0px;
 }
 
-input[type="text"] {
+input[type="text"]{
 	font-size: 14px;
 	font-family: SourceSansPro1;
-	height: 20px;
+	height: 21px;
+}
+
+input[type="file"] {
+	font-size: 14px;
+	font-family: SourceSansPro1;
+	height: 24px;
 }
 
 input[type="button"], input[type="reset"], input[type="submit"] {
-	height: 23px;
+	height: 24px;
 	font-size: 15px;
 	font-family: SourceSansPro1;
 	line-height : 15px;
@@ -87,6 +93,11 @@ select {
 td {  
 	font-size: 14px;
 	font-family: SourceSansPro1;
+}
+
+th {  
+	font-size: 15px;
+	font-family: SourceSansPro2;
 }
 
 

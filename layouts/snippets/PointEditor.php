@@ -25,9 +25,9 @@ function send(){
 	}
 ?>
 
-<table style="border:1px solid gray;" width="760" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
+<table width="760" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr> 
-    <td align="center" colspan="5"><strong><font size="+1"><a name="geoedit_anchor"><?php echo $this->titel; ?></a></font></strong></td>
+    <td align="center" colspan="5"><a name="geoedit_anchor"><h2><?php echo $this->titel; ?></h2></a></td>
   </tr>
   <tr> 
     <td rowspan="2">&nbsp;</td>
@@ -67,11 +67,11 @@ function send(){
 						</select>
 					</div>
 				</div>
-				&nbsp;<b><?php echo $this->strMapScale; ?>&nbsp;1:&nbsp;</b><input type="text" id="scale" autocomplete="off" name="nScale" style="width:58px" value="<?php echo round($this->map_scaledenom); ?>">
+				&nbsp;<span class="fett"><?php echo $this->strMapScale; ?>&nbsp;1:&nbsp;</span><input type="text" id="scale" autocomplete="off" name="nScale" style="width:58px" value="<?php echo round($this->map_scaledenom); ?>">
 			</div>
 		</td>
 	<? if($this->user->rolle->runningcoords != '0'){ ?>
-	<td><b>&nbsp;<?php echo $this->strCoordinates; ?>:</b>&nbsp;</td>
+	<td><span class="fett">&nbsp;<?php echo $this->strCoordinates; ?>:</span>&nbsp;</td>
 	<td><input type="text" style="border:0px;background-color:transparent" name="runningcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?></td>
 	<? }else{ ?>
 	<td colspan="2"></td>

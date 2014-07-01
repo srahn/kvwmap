@@ -141,7 +141,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 ?><p>
 <table border="0" cellpadding="0" cellspacing="2">
   <tr>
-    <td align="right"><strong><?php echo $strName1; ?>:</strong></td>
+    <td align="right"><span class="fett px15"><?php echo $strName1; ?>:</span></td>
     <td>
 			<div style="width:150px;">				
 				<input name="name1" type="text" value="<?php echo $this->formvars['name1']; ?>" size="25" autocomplete="off" onkeyup="autocomplete1('SELECT distinct nachnameoderfirma FROM alkis.ax_person WHERE 1=1 ', 'nachnameoderfirma', 'name1', 'suggests1', this.value);" tabindex="1">
@@ -152,7 +152,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 		</td>
   </tr>
   <tr>
-    <td align="right"><strong><?php echo $strName2; ?>:</strong></td>
+    <td align="right"><span class="fett px15"><?php echo $strName2; ?>:</span></td>
     <td>
 			<div style="width:150px;">				
 				<input name="name2" type="text" value="<?php echo $this->formvars['name2']; ?>" size="25" autocomplete="off" onkeyup="autocomplete1('SELECT distinct vorname FROM alkis.ax_person WHERE 1=1 ', 'vorname', 'name2', 'suggests2', this.value);" tabindex="1">
@@ -163,62 +163,62 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 		</td>
   </tr>
   <tr>
-    <td align="right"><strong><?php echo $strName3; ?>:</strong>
+    <td align="right"><span class="fett px15"><?php echo $strName3; ?>:</span>
       </td>
     <td><input name="name3" type="text" value="<?php echo $this->formvars['name3']; ?>" size="25"  tabindex="3"></td>
   </tr>
   <tr>
-    <td height="28" align="right"><strong><?php echo $strName4; ?>:</strong>
+    <td height="28" align="right"><span class="fett px15"><?php echo $strName4; ?>:</span>
       </td>
     <td><input name="name4" type="text" value="<?php echo $this->formvars['name4']; ?>" size="25"  tabindex="4"></td>
   </tr>
 	<tr>
-    <td align="right"><strong><?php echo $strName5; ?>:</strong>
+    <td align="right"><span class="fett px15"><?php echo $strName5; ?>:</span>
     </td>
     <td><input name="name5" type="text" value="<?php echo $this->formvars['name5']; ?>" size="25" tabindex="1"></td>
   </tr>
   <tr>
-    <td align="right"><strong><?php echo $strName6; ?>:</strong>
+    <td align="right"><span class="fett px15"><?php echo $strName6; ?>:</span>
       </td>
     <td><input name="name6" type="text" value="<?php echo $this->formvars['name6']; ?>" size="25" tabindex="2"></td>
   </tr>
   <tr>
-    <td align="right"><strong><?php echo $strName7; ?>:</strong>
+    <td align="right"><span class="fett px15"><?php echo $strName7; ?>:</span>
       </td>
     <td><input name="name7" type="text" value="<?php echo $this->formvars['name7']; ?>" size="25"  tabindex="3"></td>
   </tr>
   <tr>
-    <td height="28" align="right"><strong><?php echo $strName8; ?>:</strong>
+    <td height="28" align="right"><span class="fett px15"><?php echo $strName8; ?>:</span>
       </td>
     <td><input name="name8" type="text" value="<?php echo $this->formvars['name8']; ?>" size="25"  tabindex="4"></td>
   </tr>
   <tr>
-    <td height="28" align="right"><strong><?php echo $strGbbez; ?>:</strong></td>
+    <td height="28" align="right"><span class="fett px15"><?php echo $strGbbez; ?>:</span></td>
     <td><input name="bezirk" type="text" value="<?php echo $this->formvars['bezirk']; ?>" size="6"  tabindex="5"></td>
   </tr>
   <tr>
-    <td height="28" align="right"><strong><?php echo $strGbbl; ?>:</strong></td>
+    <td height="28" align="right"><span class="fett px15"><?php echo $strGbbl; ?>:</span></td>
     <td><input name="blatt" type="text" value="<?php echo $this->formvars['blatt']; ?>" size="6"  tabindex="6"></td>
   </tr>
   <tr>
-    <td height="28" align="right"><strong><?php echo $strGemkg; ?>:</strong></td>
+    <td height="28" align="right"><span class="fett px15"><?php echo $strGemkg; ?>:</span></td>
     <td><?php echo $this->GemkgFormObj->html; ?></td>
   </tr>
   <tr>
-    <td height="28" align="right"><strong><?php echo $strFlur; ?>:</strong></td>
+    <td height="28" align="right"><span class="fett px15"><?php echo $strFlur; ?>:</span></td>
     <td><?php echo $this->FlurFormObj->html; ?></td>
   </tr>
   <!--
   <tr>
-    <td><strong><?php echo $strHintCaseSens; ?></strong>&nbsp;
+    <td><span class="fett px15"><?php echo $strHintCaseSens; ?></span>&nbsp;
     <input name="caseSensitive" type="checkbox" value="1"<?php if ($this->formvars['caseSensitive']) { ?> checked<?php } ?>><tr><td colspan="2"></td>
   <tr><td colspan="2"></tr>//-->
   <tr bgcolor="#FFFFCC">
     <td colspan="2"><em><?php echo $strHintWildcard; ?>.</em></td>
   </tr>
   <tr>
-    <td colspan="1"><strong><?php echo $strShowHits; ?>:</strong><input name="anzahl" type="text" value="<?php echo $this->formvars['anzahl']; ?>" size="2" tabindex="5"></td>
-    <td colspan="1"><strong><?php echo $strShowWithFst; ?>:</strong><input name="withflurst" type="checkbox" <? if($this->formvars['withflurst'] == 'on'){echo 'checked';} ?>></td>
+    <td colspan="1"><span class="fett px15"><?php echo $strShowHits; ?>:</span><input name="anzahl" type="text" value="<?php echo $this->formvars['anzahl']; ?>" size="2" tabindex="5"></td>
+    <td colspan="1"><span class="fett px15"><?php echo $strShowWithFst; ?>:</span><input name="withflurst" type="checkbox" <? if($this->formvars['withflurst'] == 'on'){echo 'checked';} ?>></td>
   </tr>
   <tr>
    <td colspan="3" align="center">
@@ -233,22 +233,22 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
    ?>
 <tr>
     <td colspan="3" align="center">
-	<strong><br>
+	<span class="fett px15"><br>
 	<?php echo $strTotalHits; ?>: <?php echo $this->anzNamenGesamt; ?>
     <br>
     <br>
-</strong>	<table border="1" cellpadding="3" cellspacing="0">
+</span>	<table border="1" cellpadding="3" cellspacing="0">
       <tr bgcolor="<?php echo BG_DEFAULT ?>">
       	<td>&nbsp;</td>
-        <td align="center"><strong><a href="javascript:changeorder('bezirk');"><?php echo $strGbbezShort; ?></a></strong></td>
-        <td align="center"><strong><a href="javascript:changeorder('blatt');"><?php echo $strGbblShort; ?></a></strong></td>
-        <td align="left"><strong><a href="javascript:changeorder('name1');"><?php echo $strName1Short; ?></a></strong></td>
-        <td align="left"><strong><a href="javascript:changeorder('name2');"><?php echo $strName2Short; ?></a></strong></td>
-        <td align="left" bgcolor="<?php echo BG_DEFAULT ?>"><strong><a href="javascript:changeorder('name3');"><?php echo $strName3Short; ?></a></strong></td>
-        <td align="left"><strong><a href="javascript:changeorder('name4');"><?php echo $strName4Short; ?></a></strong></td>
-        <td align="center" colspan="2"><strong><?php echo $strFst; ?></strong></td>
+        <td align="center"><span class="fett px15"><a href="javascript:changeorder('bezirk');"><?php echo $strGbbezShort; ?></a></span></td>
+        <td align="center"><span class="fett px15"><a href="javascript:changeorder('blatt');"><?php echo $strGbblShort; ?></a></span></td>
+        <td align="left"><span class="fett px15"><a href="javascript:changeorder('name1');"><?php echo $strName1Short; ?></a></span></td>
+        <td align="left"><span class="fett px15"><a href="javascript:changeorder('name2');"><?php echo $strName2Short; ?></a></span></td>
+        <td align="left" bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett px15"><a href="javascript:changeorder('name3');"><?php echo $strName3Short; ?></a></span></td>
+        <td align="left"><span class="fett px15"><a href="javascript:changeorder('name4');"><?php echo $strName4Short; ?></a></span></td>
+        <td align="center" colspan="2"><span class="fett px15"><?php echo $strFst; ?></span></td>
         <? if($this->Stelle->isFunctionAllowed('Jagdkataster')){ ?>
-        <td align="center"><strong><?php echo $strHunt; ?></strong></td>
+        <td align="center"><span class="fett px15"><?php echo $strHunt; ?></span></td>
         <? } ?>
       </tr>
   <?php

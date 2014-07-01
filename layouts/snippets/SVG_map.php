@@ -1206,7 +1206,6 @@ function startPoint(evt) {
   // neuen punkt abgreifen
   clientx = evt.clientX;
   clienty = resy - evt.clientY;
-	console.log(boxx);
   pathx.push(clientx);
   pathy.push(clienty);
   redraw();

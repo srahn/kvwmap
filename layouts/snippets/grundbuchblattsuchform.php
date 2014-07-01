@@ -35,7 +35,7 @@ function showimport(){
 
 -->
 </script>
-
+<br>
 <h2><?php echo $this->titel; ?></h2>
 
 <?php if ($this->Fehlermeldung!='') {
@@ -53,13 +53,13 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
     <td>&nbsp;</td>
   </tr>
   <tr> 
-    <td align="right"><strong>Grundbuchbezirksschlüssel:</strong></td>
+    <td align="right"><span class="fett px15">Grundbuchbezirksschlüssel:</span></td>
     <td colspan="3">
     	<input name="bezirk" style="width:230px" type="text" value="<?php echo $this->formvars['bezirk']; ?>" onkeyup="updateBezirksauswahl();" size="25" tabindex="1">
     </td>
   </tr>
   <tr> 
-    <td align="right"><strong>Grundbuchbezirk:</strong></td>
+    <td align="right"><span class="fett px15">Grundbuchbezirk:</span></td>
     <td colspan="3">
     	<select style="width:230px" class="select" name="Bezirk" onchange="updateBezirksschluessel();">
     		<option value="">--- Auswahl ---</option>
@@ -75,12 +75,12 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   </tr>
   <? if($this->formvars['Bezirk'] == ''){ ?>
   <tr>
-    <td align="right"><strong>Grundbuchblatt:</strong></td>
+    <td align="right"><span class="fett px15">Grundbuchblatt:</span></td>
     <td colspan="3"><input name="Blatt" style="width:230px" type="text" value="<?php echo $this->formvars['Blatt']; ?>" size="25" tabindex="2"></td>
   </tr>
   <? }else{ ?>
   <tr>
-    <td align="right"><strong>Grundbuchblatt:</strong></td>
+    <td align="right"><span class="fett px15">Grundbuchblatt:</span></td>
     <td>
     	<br>ausgewählte:<br>
     	<select size="10" style="width:110px" multiple="true" class="select" name="selectedBlatt">

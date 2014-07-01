@@ -167,7 +167,7 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
  </table>
  <?  }
   else {?>
-   <br><strong><font color="#FF0000">Es wurden keine Daten gefunden.<br>
+   <br><span class="fett" style="color:"#FF0000">Es wurden keine Daten gefunden.</span><br>
  <? }
 } ?>
 <a href="javascript:backto_gbbsearch();">zurück zur Grundbuchblattsuche</a>

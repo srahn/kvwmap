@@ -110,7 +110,7 @@ backto = function(go){
 
               <? if($privileg_['flurstkennz']){ ?>
               <tr>
-                <td align="right"><strong>Flurst&uuml;ck&nbsp;</strong></td>
+                <td align="right"><span class="fett">Flurst&uuml;ck&nbsp;</span></td>
                 <td> <? echo $flst->FlurstNr; ?>&nbsp;(<?php echo $flst->Flurstkennz_alt; ?>)</td>
               </tr>
               <? }
@@ -118,13 +118,13 @@ backto = function(go){
           if($privileg_['gemkgname'] OR $privileg_['gemkgschl']){
               ?>
               <tr>
-                <td align="right"><strong>Gemarkung&nbsp;</strong></td>
+                <td align="right"><span class="fett">Gemarkung&nbsp;</span></td>
                 <td><?php if($privileg_['gemkgname']){echo $flst->GemkgName;} ?> <?php if($both){ echo '('.$flst->GemkgSchl.')';} elseif($privileg_['gemkgschl']){ echo $flst->GemkgSchl;}?></td>
               </tr>
               <? }
               if($privileg_['flurnr']){ ?>
               <tr>
-                <td height="20" align="right"><strong>Flur&nbsp;</strong></td>
+                <td height="20" align="right"><span class="fett">Flur&nbsp;</span></td>
                 <td><?php echo $flst->FlurNr; ?></td>
               </tr>
               <? }
@@ -132,7 +132,7 @@ backto = function(go){
               if($privileg_['gemeinde'] OR $privileg_['gemeindename']){
               ?>
               <tr>
-                <td align="right"><strong>Gemeinde&nbsp;</strong></td>
+                <td align="right"><span class="fett">Gemeinde&nbsp;</span></td>
                 <td><?php if($privileg_['gemeindename']){ echo $flst->GemeindeName;} ?> <?php if($both){ echo '('.$flst->GemeindeID.')';} elseif($privileg_['gemeinde']){ echo $flst->GemeindeID;} ?></td>
               </tr>
               <? }
@@ -140,7 +140,7 @@ backto = function(go){
               if($privileg_['kreisname'] OR $privileg_['kreisid']){
               ?>
               <tr>
-                <td align="right"><strong>Kreis&nbsp;</strong></td>
+                <td align="right"><span class="fett">Kreis&nbsp;</span></td>
                 <td><?php if($privileg_['kreisname']){ echo $flst->KreisName;} ?> <?php if($both){echo '('.$flst->KreisID.')';} elseif($privileg_['kreisid']){ echo $flst->KreisID;} ?></td>
               </tr>
           <? }
@@ -148,7 +148,7 @@ backto = function(go){
           if($privileg_['finanzamtname'] OR $privileg_['finanzamt']){
           ?>
               <tr>
-                <td align="right"><strong> Finanzamt&nbsp;</strong></td>
+                <td align="right"><span class="fett"> Finanzamt&nbsp;</span></td>
                 <td><?php if($privileg_['finanzamtname']){ echo $flst->FinanzamtName;} ?> <?php if($both){echo '('.$flst->FinanzamtSchl.')';} elseif($privileg_['finanzamt']){ echo $flst->FinanzamtSchl; } ?></td>
               </tr>
           <? }
@@ -156,13 +156,13 @@ backto = function(go){
           if($privileg_['forstname'] OR $privileg_['forstschluessel']){
           ?>
               <tr>
-                <td align="right"><strong>Forstamt&nbsp;</strong></td>
+                <td align="right"><span class="fett">Forstamt&nbsp;</span></td>
                 <td><?php if($privileg_['forstname']){echo $flst->Forstamt['name'];} ?> <?php if($both){echo '('.$flst->Forstamt['schluessel'].')';} elseif($privileg_['forstschluessel']){ echo $flst->Forstamt['schluessel'];} ?></td>
               </tr>
           <? }
           if($privileg_['flaeche']){ ?>
               <tr>
-                <td align="right"><strong>Fl&auml;che&nbsp;</strong></td>
+                <td align="right"><span class="fett">Fl&auml;che&nbsp;</span></td>
                 <td><?php echo $flst->ALB_Flaeche; ?>m&sup2;</td>
               </tr>
           <? }
@@ -170,7 +170,7 @@ backto = function(go){
           if($privileg_['amtsgerichtname'] OR $privileg_['amtsgerichtnr']){
           ?>
           <tr>
-                <td align="right"><b>Amtsgericht:</b>&nbsp;</td>
+                <td align="right"><span class="fett">Amtsgericht:</span>&nbsp;</td>
                 <td><?php if($privileg_['amtsgerichtnr']){echo $flst->Amtsgericht['schluessel'];} ?>&nbsp;&nbsp;<?php if($privileg_['amtsgerichtname']){ echo $flst->Amtsgericht['name'];} ?></td>
               </tr>
               <? }
@@ -178,13 +178,13 @@ backto = function(go){
           if($privileg_['grundbuchbezirkname'] OR $privileg_['grundbuchbezirkschl']){
           ?>
               <tr>
-                <td align="right"><b>Grundbuchbezirk:</b>&nbsp;</td>
+                <td align="right"><span class="fett">Grundbuchbezirk:</span>&nbsp;</td>
                 <td><?php if($privileg_['grundbuchbezirkschl']){ echo $flst->Grundbuchbezirk['schluessel'];} ?>&nbsp;&nbsp;<?php if($privileg_['grundbuchbezirkname']){ echo $flst->Grundbuchbezirk['name'];} ?></td>
               </tr>
           <? }
           if($privileg_['lagebezeichnung']){ ?>
               <tr>
-                <td align="right" valign="top"><strong>Lage:&nbsp;</strong></td>
+                <td align="right" valign="top"><span class="fett">Lage:&nbsp;</span></td>
                 <td>
                 <?php
                 $anzStrassen=count($flst->Adresse);
@@ -207,31 +207,31 @@ backto = function(go){
           <? }
           if($privileg_['entsteh']){ ?>
               <tr>
-                <td align="right"><strong>Entstehung&nbsp;</strong></td>
+                <td align="right"><span class="fett">Entstehung&nbsp;</span></td>
                 <td><?php echo $flst->Entstehung; ?></td>
               </tr>
           <? }
           if($privileg_['letzff']){ ?>
               <tr>
-                <td align="right"><strong>Fortf&uuml;hrung&nbsp;</strong></td>
+                <td align="right"><span class="fett">Fortf&uuml;hrung&nbsp;</span></td>
                 <td><?php echo $flst->LetzteFF; ?></td>
               </tr>
           <? }
           if($privileg_['karte']){ ?>
               <tr>
-                <td align="right"><strong> Flurkarte/Ri&szlig;&nbsp;</strong></td>
+                <td align="right"><span class="fett"> Flurkarte/Ri&szlig;&nbsp;</span></td>
                 <td><?php echo $flst->Flurkarte; ?></td>
               </tr>
               <? }
               if($privileg_['status']){ ?>
               <tr>
-                <td align="right"><strong> Status&nbsp;</strong></td>
+                <td align="right"><span class="fett"> Status&nbsp;</span></td>
                 <td><?php if ($flst->Status=="H") { echo "historisches"; } else { echo "aktuelles"; } echo "&nbsp;Flurst&uuml;ck&nbsp;(".$flst->Status.")"; ?></td>
               </tr>
               <? } ?>
               <?php if ($privileg_['vorgaenger'] AND $flst->Vorgaenger != '') { ?>
           <tr>
-              <td align="right"><strong>Vorgänger</strong></td>
+              <td align="right"><span class="fett">Vorgänger</span></td>
               <td>
                 <?php
                 for($v = 0; $v < count($flst->Vorgaenger); $v++){ ?>
@@ -252,7 +252,7 @@ backto = function(go){
           <? } ?>
           <?php if ($privileg_['nachfolger'] AND $flst->Nachfolger != '') { ?>
           <tr>
-              <td align="right" valign="top"><strong>Nachfolger</strong></td>
+              <td align="right" valign="top"><span class="fett">Nachfolger</span></td>
               <td>
                 <?php
                 for($v = 0; $v < count($flst->Nachfolger); $v++){ ?>
@@ -284,7 +284,7 @@ backto = function(go){
               if(count($this->bau->baudata) != 0){
               ?>
           <tr>
-              <td align="right"><strong> Baudaten&nbsp;</strong></td>
+              <td align="right"><span class="fett"> Baudaten&nbsp;</span></td>
               <td><a href="index.php?go=Bauauskunft_Suche_Suchen&flurstkennz=<? echo $flst->Flurstkennz_alt; ?>&distinct=1">anzeigen</a></td>
             </tr>
               <?
@@ -302,7 +302,7 @@ backto = function(go){
 	        ?>
 	        	<tr>
           		<td colspan="2">
-            		<strong>Gesetzl.&nbsp;Klassifizierung Bodensch&auml;tzung</strong>
+            		<span class="fett">Gesetzl.&nbsp;Klassifizierung Bodensch&auml;tzung</span>
               </td>
             </tr>
             <tr>
@@ -370,7 +370,7 @@ backto = function(go){
           <td colspan="2">
             <table border="0" cellspacing="0" cellpadding="2">
             <tr valign="top">
-              <td align="right"><strong>Zus&auml;tzliche&nbsp;Angaben</strong></td>
+              <td align="right"><span class="fett">Zus&auml;tzliche&nbsp;Angaben</span></td>
               <td>
               <?php for ($j=0;$j<count($flst->FreiText);$j++) {
               if ($j>0) { ?><br>
@@ -388,7 +388,7 @@ backto = function(go){
           <td colspan="2">
             <table border="0" cellspacing="0" cellpadding="2">
             <tr>
-              <td valign="top"><strong>Hinweise:</strong>&nbsp;</td>
+              <td valign="top"><span class="fett">Hinweise:</span>&nbsp;</td>
               <td>
               <?php
               for($h = 0; $h < count($flst->Hinweis); $h++){
@@ -406,7 +406,7 @@ backto = function(go){
           <td colspan="2">
             <table border="0" cellspacing="0" cellpadding="2">
             <tr>
-              <td><strong>Baulastenblatt-Nr</strong></td>
+              <td><span class="fett">Baulastenblatt-Nr</span></td>
               <td>
               <?php
                   for ($b=0;$b<count($flst->Baulasten);$b++) {
@@ -428,7 +428,7 @@ backto = function(go){
             <?php if ($privileg_['ausfstelle'])
             { ?>
               <tr valign="top">
-			          <td align="right"><strong>Ausf&uuml;hrende&nbsp;Stelle</strong></td>
+			          <td align="right"><span class="fett">Ausf&uuml;hrende&nbsp;Stelle</span></td>
 			          <td valign="top"><?php echo $flst->Verfahren[$j]['ausfstelleid']; ?></td>
 			          <td valign="top">
 			          <?php
@@ -450,7 +450,7 @@ backto = function(go){
             <?php }
               if ($privileg_['verfahren']){ ?>
               <tr valign="top">
-			          <td align="right"><strong>Verfahren</strong></td>
+			          <td align="right"><span class="fett">Verfahren</span></td>
 			          <td valign="top"><?php echo $flst->Verfahren[$j]['verfnr']; ?></td>
 			          <td valign="top">
 			          (<?php echo $flst->Verfahren[$j]['verfbemid']; ?>)
@@ -482,12 +482,12 @@ backto = function(go){
           <td colspan="2">
             <table border="0" cellspacing="0" cellpadding="2">
               <tr>
-                <td colspan="3"><strong>Nutzung</strong></td>
+                <td colspan="3"><span class="fett">Nutzung</span></td>
               </tr>
               <tr>
-                <td><b>Fl&auml;che&nbsp;</b></td>
-                <td><b>Nutzung&nbsp;</b></td>
-                <td><b>Bezeichnung</b></td>
+                <td><span class="fett">Fl&auml;che&nbsp;</span></td>
+                <td><span class="fett">Nutzung&nbsp;</span></td>
+                <td><span class="fett">Bezeichnung</span></td>
               </tr>
               <?php
               $anzNutzung=count($flst->Nutzung);
@@ -522,7 +522,7 @@ backto = function(go){
         <td colspan="2">
             <table border="0" cellspacing="0" cellpadding="2">
               <tr>
-                <td colspan="3"><strong>Eigentümer</strong></td>
+                <td colspan="3"><span class="fett">Eigentümer</span></td>
               </tr>
             <? for ($g=0;$g<count($flst->Grundbuecher);$g++) {
             $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
@@ -571,18 +571,18 @@ backto = function(go){
                       }
                     }
                   if ($adressaenderungen['user_id'] != '') {
-                echo '<span style="font-size:90%;"><b><u>Aktualisierte Adresse ('.$aendatum.' - '.$user->Name.'):</u></b><br>';
+                echo '<span style="font-size:90%;"><span class="fett"><u>Aktualisierte Adresse ('.$aendatum.' - '.$user->Name.'):</u></span><br>';
                     if($adressaenderungen['neu_name3'] == ''){
-                      echo '&nbsp;&nbsp;<b>(Name3 leer)</b><br>';
+                      echo '&nbsp;&nbsp;<span class="fett">(Name3 leer)</span><br>';
                     }
                     else{
-                      echo '&nbsp;&nbsp;<b>'.$adressaenderungen['neu_name3'].'</b><br>';
+                      echo '&nbsp;&nbsp;<span class="fett">'.$adressaenderungen['neu_name3'].'</span><br>';
                     }
                     if($adressaenderungen['neu_name4'] == ''){
-                      echo '&nbsp;&nbsp;<b>(Name4 leer)</b><br>';
+                      echo '&nbsp;&nbsp;<span class="fett">(Name4 leer)</span><br>';
                     }
                     else{
-                      echo '&nbsp;&nbsp;<b>'.$adressaenderungen['neu_name4'].'</b></span><br>';
+                      echo '&nbsp;&nbsp;<span class="fett">'.$adressaenderungen['neu_name4'].'</span></span><br>';
                     }
                   }
                   ?>
@@ -676,7 +676,7 @@ backto = function(go){
     <tr>
       <td colspan="2">
         <? echo '<img src="'.GRAPHICSPATH.'pfeil_unten-rechts.gif" width="10" height="20" border="0">'; ?>
-        <b>Für alle ausgewählten Flurstücke:</b><br>
+        <span class="fett">Für alle ausgewählten Flurstücke:</span><br>
       </td>
     </tr>
     <tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
@@ -705,8 +705,8 @@ backto = function(go){
   } # Ende es liegen Flurstücke im Suchbereich
 
   else {
-    ?><br><strong><font color="#FF0000">
-    Zu diesem Layer wurden keine Objekte gefunden!</font></strong><br>
+    ?><br><span class="fett"><font color="#FF0000">
+    Zu diesem Layer wurden keine Objekte gefunden!</font></span><br>
     Wählen Sie einen neuen Bereich oder prüfen Sie die Datenquellen.<br>
     <?php
   }
