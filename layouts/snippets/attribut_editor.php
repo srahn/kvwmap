@@ -12,7 +12,7 @@
 
 <table border="0" cellpadding="5" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
-    <td colspan="5"><strong><font size="+1"><?php echo $this->titel; ?></font></strong></td>
+    <td colspan="5"><h2><?php echo $this->titel; ?></h2></td>
   </tr>
   <tr>
   	<td>&nbsp;</td>
@@ -22,7 +22,7 @@
   </tr>
   <tr> 
     <td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3" colspan="5"> 
-      <select style="width:250px" size="1" class="select" name="selected_layer_id" onchange="document.GUI.submit();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
+      <select style="width:250px" size="1"  name="selected_layer_id" onchange="document.GUI.submit();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
       <option value=""><?php echo $strPleaseSelect; ?></option>
         <?
     		for($i = 0; $i < count($this->layerdaten['ID']); $i++){
@@ -45,21 +45,21 @@
 		if ((count($this->attributes))!=0) {
 			echo '
 					<tr>
-						<td align="center"><b>Attribut</b></td>
+						<td align="center"><span class="fett">Attribut</span></td>
 						<td>&nbsp;</td>
-						<td align="center"><b>Formularelement</b></td>
+						<td align="center"><span class="fett">Formularelement</span></td>
 						<td>&nbsp;</td>
-						<td align="center"><b>Optionen</b></td>
+						<td align="center"><span class="fett">Optionen</span></td>
 						<td>&nbsp;</td>
-						<td align="center"><b>Aliasname</b></td>
+						<td align="center"><span class="fett">Aliasname</span></td>
 						<td>&nbsp;</td>
-						<td align="center"><b>Erläuterungen</b></td>
+						<td align="center"><span class="fett">Erläuterungen</span></td>
 						<td>&nbsp;</td>
-						<td align="center"><b>Gruppe</b></td>
+						<td align="center"><span class="fett">Gruppe</span></td>
 						<td>&nbsp;</td>
-						<td align="center"><b>Suche-Pflicht</b></td>
+						<td align="center"><span class="fett">Suche-Pflicht</span></td>
 						<td>&nbsp;</td>
-						<td align="center"><b>Schnell-<br>suche</b></td>
+						<td align="center"><span class="fett">Schnell-<br>suche</span></td>
 					</tr>
 			';
 
@@ -67,11 +67,11 @@
 				echo '
 				<tr>
 				  <td align="center">
-				  	<input class="input" type="text" name="attribute_'.$this->attributes['name'][$i].'" value="'.$this->attributes['name'][$i].'" readonly>
+				  	<input type="text" name="attribute_'.$this->attributes['name'][$i].'" value="'.$this->attributes['name'][$i].'" readonly>
 				  </td>
 				  <td>&nbsp;</td>
 				  <td align="center">
-				  	<select class="select" style="width:130px" name="form_element_'.$this->attributes['name'][$i].'">';
+				  	<select  style="width:130px" name="form_element_'.$this->attributes['name'][$i].'">';
 				  	if($this->attributes['type'][$i] == 'geometry'){
 				  		echo'<option value="Geometrie" selected>Geometrie</option>';
 				  	}
@@ -142,26 +142,26 @@
 				  <td align="center">';
 				  if($this->attributes['constraints'][$i] != '' AND $this->attributes['constraints'][$i] != 'PRIMARY KEY'){
 				  	echo '
-				  	<input disabled class="input" size="40" name="options_'.$this->attributes['name'][$i].'" type="text" value="'.$this->attributes['constraints'][$i].'">';
+				  	<input disabled size="40" name="options_'.$this->attributes['name'][$i].'" type="text" value="'.$this->attributes['constraints'][$i].'">';
 				  }
 				  else{
 				  	echo '
-				  	<input class="input" size="40" name="options_'.$this->attributes['name'][$i].'" type="text" value="'.$this->attributes['options'][$i].'">';
+				  	<input size="40" name="options_'.$this->attributes['name'][$i].'" type="text" value="'.$this->attributes['options'][$i].'">';
 				  }
 				  echo '
 				  </td>
 				  <td>&nbsp;</td>
 				  <td>
-				  	<input class="input" name="alias_'.$this->attributes['name'][$i].'" type="text" value="'.$this->attributes['alias'][$i].'">
+				  	<input name="alias_'.$this->attributes['name'][$i].'" type="text" value="'.$this->attributes['alias'][$i].'">
 				  </td>
 					</td>
 				  <td>&nbsp;</td>
 				  <td>
-				  	<input class="input" name="tooltip_'.$this->attributes['name'][$i].'" type="text" value="'.htmlspecialchars($this->attributes['tooltip'][$i]).'">
+				  	<input name="tooltip_'.$this->attributes['name'][$i].'" type="text" value="'.htmlspecialchars($this->attributes['tooltip'][$i]).'">
 				  </td>
 				  <td>&nbsp;</td>
 				  <td>
-				  	<input class="input" name="group_'.$this->attributes['name'][$i].'" type="text" value="'.$this->attributes['group'][$i].'">
+				  	<input name="group_'.$this->attributes['name'][$i].'" type="text" value="'.$this->attributes['group'][$i].'">
 				  </td>
 					<td>&nbsp;</td>
 				  <td align="center">

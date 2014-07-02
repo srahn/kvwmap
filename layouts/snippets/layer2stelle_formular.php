@@ -4,7 +4,7 @@
 ?><script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
-    <td><strong><font size="+1"><?php echo $strTitle; ?></font></strong></td>
+    <td><h2><?php echo $strTitle; ?></h2></td>
   </tr>
   <tr>
     <td align="center"><?php   
@@ -19,7 +19,7 @@ else {
  ?>      
 		<table border="0" cellspacing="0" cellpadding="5" style="border:1px solid #C3C7C3">
 			<tr align="center">
-		    	<td class="bold" colspan="3" style="border-bottom:1px solid #C3C7C3">
+		    	<td class="fett" colspan="3" style="border-bottom:1px solid #C3C7C3">
 		    		<? echo ''.$this->strLayer.' '.$this->formvars['Name'].' '.$strTask.' '.$this->formvars['stellen_name']; ?>
 				</td>
 		    </tr>

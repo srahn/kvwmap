@@ -10,7 +10,7 @@ else {
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr> 
     <td> <div align="center"></div></td>
-    <td colspan="4"><div align="center"><strong><font size="+1"><?php echo $this->titel; ?></font></strong> 
+    <td colspan="4"><div align="center"><h2><?php echo $this->titel; ?></h2> 
       </div></td>
   </tr>
   <tr> 

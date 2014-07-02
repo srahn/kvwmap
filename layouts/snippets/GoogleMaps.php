@@ -12,7 +12,7 @@
 
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr> 
-    <td align="center" colspan="3"><strong><font size="+1"><?php echo $strTitle; ?></font></strong></td>
+    <td align="center" colspan="3"><h2><?php echo $strTitle; ?></h2></td>
   </tr>
   <tr> 
     <td rowspan="3">&nbsp;</td>

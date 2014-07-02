@@ -7,7 +7,7 @@ function Bestaetigung(link,text) {
 </script>
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
-    <td><strong><font size="+1">Funktionen</font></strong></td>
+    <td><h2>Funktionen</h2></td>
   </tr>
   <tr>
     <td><table width="100%" border="0" cellspacing="0" cellpadding="2">

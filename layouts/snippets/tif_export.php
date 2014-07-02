@@ -15,12 +15,12 @@ function DruckAufloesung(pixel,breite) {
 
 <table border="0" cellpadding="5" cellspacing="3" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center">
-    <td colspan="3"><strong><font size="+1"><?php echo $this->titel; ?></font></strong></td>
+    <td colspan="3"><h2><?php echo $this->titel; ?></h2></td>
   </tr>
   <tr>
   	<td>&nbsp;</td>
 		<td align="center">
-			<b>Auflösung:</b>  1 Pixel = <input type="text" value="<? echo round($this->formvars['resolution'],3); ?>" name="resolution" size="3" onkeyup="DruckAufloesung(this.value,<? echo $this->map->extent->maxx - $this->map->extent->minx; ?>)">&nbsp;m
+			<span class="fett">Auflösung:</span>  1 Pixel = <input type="text" value="<? echo round($this->formvars['resolution'],3); ?>" name="resolution" size="3" onkeyup="DruckAufloesung(this.value,<? echo $this->map->extent->maxx - $this->map->extent->minx; ?>)">&nbsp;m
 		</td>
 		<td>&nbsp;</td>
 	</tr>
@@ -43,7 +43,7 @@ function DruckAufloesung(pixel,breite) {
   <?if($this->tif->tifimage != ''){
   		if($this->tif->tifimage == 'error'){ ?>
   <tr>
-  	<td colspan="3" align="center"><b>TIF-Erzeugung fehlgeschlagen.</b></td>
+  	<td colspan="3" align="center"><span class="fett">TIF-Erzeugung fehlgeschlagen.</span></td>
   </tr>
   <?	}else{?>
   	<tr>

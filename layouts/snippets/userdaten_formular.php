@@ -20,7 +20,7 @@
 </script>
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
-    <td><strong><font size="+1"><?php echo $strTitle; ?></font></strong></td>
+    <td><h2><?php echo $strTitle; ?></h2></td>
   </tr>
   <tr>
     <td align="center"><?php
@@ -34,34 +34,34 @@ else {
 }
  ?>      <table border="0" cellspacing="0" cellpadding="5" style="border:1px solid #C3C7C3">
   <tr align="center">
-    <td colspan="2" style="border-bottom:1px solid #C3C7C3"><em><font size="-1"><?php echo $strAsteriskRequired;?></font></em></td>
+    <td colspan="2" style="border-bottom:1px solid #C3C7C3"><em><span class="px13"><?php echo $strAsteriskRequired;?></span></em></td>
     </tr><?php if ($this->formvars['selected_user_id']>0) {?>
   <tr>
-    <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDataBankID;?></th>
+    <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDataBankID;?></th>
     <td style="border-bottom:1px solid #C3C7C3">
     	<input name="id" type="text" value="<?php echo $this->formvars['selected_user_id']; ?>" size="25" maxlength="11">
     </td>
   </tr><?php } ?>
   <tr>
-    <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strName;?></th>
+    <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strName;?></th>
     <td style="border-bottom:1px solid #C3C7C3">
       <input name="nachname" type="text" value="<?php echo $this->formvars['nachname']; ?>" size="25" maxlength="100">
   	</td>
   </tr>
   <tr>
-    <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo 'Namenszusatz';?></th>
+    <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo 'Namenszusatz';?></th>
     <td style="border-bottom:1px solid #C3C7C3"><input name="Namenszusatz" type="text" value="<?php echo $this->formvars['Namenszusatz']; ?>" size="25" maxlength="100"></td>
   </tr>
   <tr>
-    <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strForeName;?></th>
+    <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strForeName;?></th>
     <td style="border-bottom:1px solid #C3C7C3"><input name="vorname" type="text" value="<?php echo $this->formvars['vorname']; ?>" size="25" maxlength="100"></td>
   </tr>
   <tr>
-    <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLogInName;?></th>
+    <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLogInName;?></th>
     <td style="border-bottom:1px solid #C3C7C3"><input name="loginname" type="text" value="<?php echo $this->formvars['loginname']; ?>" size="15" maxlength="15"></td>
   </tr><?php if ($this->formvars['selected_user_id']>0) {?>
   <tr>
-    <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strChangePassword;?></th>
+    <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strChangePassword;?></th>
     <td style="border-bottom:1px solid #C3C7C3"><input type="checkbox" onchange="toggle_password();" name="changepasswd" value="1">&nbsp;Letzte Änderung am: <?php
     $passwordSettingUnixTime=strtotime($this->formvars['password_setting_time']);
     echo date('d.m.Y',$passwordSettingUnixTime); ?><?php
@@ -71,29 +71,29 @@ else {
      } ?></td>
   </tr><?php } ?>
   <tr>
-    <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPassword;?></th>
+    <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPassword;?></th>
     <td style="border-bottom:1px solid #C3C7C3"><input name="password1" <?php if ($this->formvars['selected_user_id']>0)echo'disabled="true"';?> type="password" size="10" maxlength="30"></td>
   </tr>
   <tr>
-    <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strReEnterPassword;?></th>
+    <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strReEnterPassword;?></th>
     <td style="border-bottom:1px solid #C3C7C3"><input name="password2" <?php if ($this->formvars['selected_user_id']>0)echo'disabled="true"';?> type="password" size="10" maxlength="30"></td>
   </tr>
   <tr>
-    <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strStart;?></th>
+    <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strStart;?></th>
     <td style="border-bottom:1px solid #C3C7C3"><input name="start" type="text" size="25" maxlength="100" value="<? echo $this->formvars['start']; ?>"></td>
   </tr>
   <tr>
-    <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strStop;?></th>
+    <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strStop;?></th>
     <td style="border-bottom:1px solid #C3C7C3"><input name="stop" type="text" size="25" maxlength="100" value="<? echo $this->formvars['stop']; ?>"></td>
   </tr>
   <tr>
-    <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strAllowedIps;?></th>
+    <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strAllowedIps;?></th>
     <td style="border-bottom:1px solid #C3C7C3"><input name="ips" type="text" size="25" maxlength="100" value="<? echo $this->formvars['ips']; ?>"></td>
   </tr>
   <tr>
-    <th align="right" style="border-bottom:1px solid #C3C7C3"><table border="0" cellspacing="0" cellpadding="0">
+    <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><table border="0" cellspacing="0" cellpadding="0">
       <tr>
-        <th align="right"><?php echo $strAuthorizeTask;?></th>
+        <th class="fetter" align="right"><?php echo $strAuthorizeTask;?></th>
       </tr>
       <tr>
         <td align="right">&nbsp;</td>
@@ -133,11 +133,11 @@ else {
     </td>
   </tr>
   <tr>
-    <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTelephone;?></th>
+    <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTelephone;?></th>
     <td style="border-bottom:1px solid #C3C7C3"><input name="phon" type="text" value="<?php echo $this->formvars['phon']; ?>" size="15" maxlength="15"></td>
   </tr>
     <tr>
-    <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strEmail;?></th>
+    <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strEmail;?></th>
     <td style="border-bottom:1px solid #C3C7C3"><input name="email" type="text" value="<?php echo $this->formvars['email']; ?>" size="30" maxlength="50"></td>
   </tr>
 </table>

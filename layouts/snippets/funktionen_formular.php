@@ -2,7 +2,7 @@
 </script>
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
-    <td><strong><font size="+1">Funktionen-Editor</font></strong></td>
+    <td><h2>Funktionen-Editor</h2></td>
   </tr>
   <tr>
     <td align="center"><?php

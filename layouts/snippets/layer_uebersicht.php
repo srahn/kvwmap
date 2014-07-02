@@ -11,7 +11,7 @@ function Bestaetigung(link,text) {
 </script>
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
-    <td><strong><font size="+1"><?php echo $this->titel; ?></font></strong></td>
+    <td><h2><?php echo $this->titel; ?></h2></td>
   </tr>
   <tr>
     <td>
@@ -26,7 +26,7 @@ function Bestaetigung(link,text) {
 	      	if($lastgroup != $this->layer['Gruppe'][$i]){  	
 	      		$lastgroup = $this->layer['Gruppe'][$i]; ?>
 	      	<tr>
-	      		<td colspan="3" bgcolor="<?php echo BG_DEFAULT ?>" style="border:1px solid <?php echo BG_DEFAULT ?>"><b><? echo $this->layer['Gruppe'][$i]; ?></b></td>
+	      		<td colspan="3" bgcolor="<?php echo BG_DEFAULT ?>" style="border:1px solid <?php echo BG_DEFAULT ?>"><span class="fett"><? echo $this->layer['Gruppe'][$i]; ?></span></td>
 	      	</tr>
 		   <? } ?>
 		      <tr>

@@ -18,7 +18,7 @@
 
 <table border="0" cellpadding="5" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
-    <td colspan="5"><strong><font size="+1"><?php echo $this->titel; ?></font></strong></td>
+    <td colspan="5"><h2><?php echo $this->titel; ?></h2></td>
   </tr>
   <tr>
   	<td>&nbsp;</td>
@@ -28,7 +28,7 @@
   </tr>
   <tr> 
     <td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3" colspan="5"> 
-      <select multiple="multiple" style="width:250px" size="20" class="select" name="layer"  <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
+      <select multiple="multiple" style="width:250px" size="20"  name="layer"  <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
         <?
     		for($i = 0; $i < count($this->layerdaten['ID']); $i++){
     			echo '<option';
@@ -51,7 +51,7 @@
   </tr>
   <? if($this->layer_dumpfile != ''){ ?>
   <tr>
-  	<td>Layer wurden exportiert. <a href="<? echo TEMPPATH_REL.$this->layer_dumpfile; ?>"><b>Herunterladen</b></a></td>
+  	<td>Layer wurden exportiert. <a href="<? echo TEMPPATH_REL.$this->layer_dumpfile; ?>"><span class="fett">Herunterladen</span></a></td>
   </tr>	
   <? } ?>
 </table>

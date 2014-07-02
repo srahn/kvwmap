@@ -25,7 +25,7 @@ function send(){
 	}
 ?>
 
-<table width="760" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
+<table style="border: 1px solid; border-color: #eeeeee; border-left: none; border-right: none" width="760" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr> 
     <td align="center" colspan="5"><a name="geoedit_anchor"><h2><?php echo $this->titel; ?></h2></a></td>
   </tr>

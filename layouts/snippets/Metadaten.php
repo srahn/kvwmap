@@ -21,7 +21,7 @@ else {
     <br><i>Schlagwörter:</i>&nbsp;<?php echo $rs['themekeywords']; ?> <?php echo $rs['placekeywords']; ?>
     <br><i>Organization:</i>&nbsp;<?php echo $rs['rporgname']; ?>
     <br><i>Download:</i>&nbsp;<a href="<?php echo $rs['download']; ?>" class="green"><?php echo $rs['download']; ?></a>
-    <br><b><a href="index.php?go=Metadateneingabe&oid=<?php echo $rs['oid']; ?>">Bearbeiten</a></b><br><br>
+    <br><span class="fett"><a href="index.php?go=Metadateneingabe&oid=<?php echo $rs['oid']; ?>">Bearbeiten</a></span><br><br>
 <?php
   }
 ?>

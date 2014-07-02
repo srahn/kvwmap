@@ -7,10 +7,10 @@
   ?>
   <table border="1" cellspacing="0" cellpadding="2">
     <tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
-      <td><strong>&nbsp;&nbsp;Stichtag&nbsp;&nbsp;</strong></td> 
-    	<td><strong>Gemeinde</strong></td>
-    	<td><strong>Bodenwert</strong></td>
-    	<td><strong>Verfahren</strong></td>
+      <td><span class="fett">&nbsp;&nbsp;Stichtag&nbsp;&nbsp;</span></td> 
+    	<td><span class="fett">Gemeinde</span></td>
+    	<td><span class="fett">Bodenwert</span></td>
+    	<td><span class="fett">Verfahren</span></td>
     	<td>&nbsp;</td>
     </tr><?php
     for ($j=0;$j<$anzObj;$j++) {
@@ -28,8 +28,8 @@
   <?php    
   }
   else {?>
-    <br><strong><font color="#FF0000">
-    Zu diesem Layer wurden keine Objekte gefunden!</font></strong><br>
+    <br><span class="fett"><font color="#FF0000">
+    Zu diesem Layer wurden keine Objekte gefunden!</font></span><br>
     Wählen Sie einen neuen Bereich oder prüfen Sie die Datenquellen.<br>
     <?php   
   }

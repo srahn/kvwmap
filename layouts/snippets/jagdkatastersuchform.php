@@ -56,17 +56,17 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 ?><p>
 <table border="0" cellpadding="0" cellspacing="2">
   <tr>
-    <td align="right"><strong>laufende Nummer:</strong>
+    <td align="right"><span class="fett">laufende Nummer:</span>
     </td>
     <td><input name="search_nummer" type="text" value="<?php echo $this->formvars['search_nummer']; ?>" size="25" tabindex="1"></td>
   </tr>
   <tr>
-    <td align="right"><strong>Name:</strong>
+    <td align="right"><span class="fett">Name:</span>
       </td>
     <td><input name="search_name" type="text" value="<?php echo $this->formvars['search_name']; ?>" size="25" tabindex="2"></td>
   </tr>
   <tr>
-    <td align="right"><strong>Art:</strong>
+    <td align="right"><span class="fett">Art:</span>
       </td>
     <td>
     	<select name="search_art" onchange="update_form(this.value);">
@@ -86,7 +86,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 		</td>
   </tr>
   <tr id="status" style="display:<? if(in_array($this->formvars['search_art'], array('jbe', 'jbf', 'agf', 'atf'))){ echo '';}else{echo 'none';} ?>" >
-    <td align="right"><strong>Status:</strong></td>
+    <td align="right"><span class="fett">Status:</span></td>
     <td>
     	<select name="search_status">
   			<option <? if($this->formvars['search_status'] == 'false'){echo 'selected';} ?> value="false">aktuell</option>
@@ -96,7 +96,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 		</td>
   </tr>
   <tr id="verzicht" style="display:<? if(in_array($this->formvars['search_art'], array('ejb', 'ajb'))){ echo '';}else{echo 'none';} ?>" >
-    <td align="right"><strong>Verzicht gem. §3:</strong></td>
+    <td align="right"><span class="fett">Verzicht gem. §3:</span></td>
     <td>
     	<select name="search_verzicht">
   			<option <? if($this->formvars['search_verzicht'] == 'false'){echo 'selected';} ?> value="false">nein</option>
@@ -110,7 +110,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   </tr>
   <!--
   <tr>
-    <td><strong>Gro&szlig; und Kleinschreibung beachten</strong>&nbsp;
+    <td><span class="fett">Gro&szlig; und Kleinschreibung beachten</span>&nbsp;
     <input name="caseSensitive" type="checkbox" value="1"<?php if ($this->formvars['caseSensitive']) { ?> checked<?php } ?>><tr><td colspan="2"></td>
   <tr><td colspan="2"></tr>//-->
   <tr>
@@ -137,10 +137,10 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 		<table border="1" cellpadding="3" cellspacing="0">
       <tr bgcolor="<?php echo BG_DEFAULT ?>">
       	<td></td>
-        <td align="center"><strong><a href="javascript:search('id');">lfd. Nummer</a></strong></td>
-        <td align="center"><strong><a href="javascript:search('name');">Name</a></strong></td>
-        <td align="center"><strong><a href="javascript:search('flaeche');">Fläche</a></strong></td>
-        <td align="center"><strong><a href="javascript:search('art');">Typ</a></strong></td>
+        <td align="center"><span class="fett"><a href="javascript:search('id');">lfd. Nummer</a></span></td>
+        <td align="center"><span class="fett"><a href="javascript:search('name');">Name</a></span></td>
+        <td align="center"><span class="fett"><a href="javascript:search('flaeche');">Fläche</a></span></td>
+        <td align="center"><span class="fett"><a href="javascript:search('art');">Typ</a></span></td>
         <td align="center">&nbsp;</td>
         <td align="center">&nbsp;</td>
         <td align="center">&nbsp;</td>
@@ -184,7 +184,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 	  <table width="100%" border="0" cellpadding="3" cellspacing="0">
 	  	<tr>
       	<td width="30" valign="top" align="center" valign="bottom"><img src="<? echo GRAPHICSPATH?>pfeil_unten-rechts.gif"></td>
-      	<td height="29" valign="bottom" colspan="5"><a href="javascript:intersect_flurst();">enthaltene Flurstücke</a>&nbsp;&nbsp;<b>! Achtung dies kann u.U. sehr lange dauern !</b>&nbsp;&nbsp;</td>
+      	<td height="29" valign="bottom" colspan="5"><a href="javascript:intersect_flurst();">enthaltene Flurstücke</a>&nbsp;&nbsp;<span class="fett">! Achtung dies kann u.U. sehr lange dauern !</span>&nbsp;&nbsp;</td>
       </tr>
       <tr>
       	<td colspan="6" align="center"><a href="javascript:csv_export();">CSV-Export</a></td>

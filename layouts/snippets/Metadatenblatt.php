@@ -10,7 +10,7 @@
     <td><table border="0" cellspacing="0" cellpadding="2">
       <tr>
         <td width="134">Titel:</td>
-        <td width="206"><strong><?php echo $this->metadataset['restitle']; ?></strong>&nbsp;</td>
+        <td width="206"><span class="fett"><?php echo $this->metadataset['restitle']; ?></span>&nbsp;</td>
       </tr>
       <tr>
         <td>Zusammenfassung:</td>
@@ -26,7 +26,7 @@
       </tr>
       <tr>
         <td>Name:</td>
-        <td><strong><?php echo $this->metadataset['rporgname']; ?></strong>&nbsp;</td>
+        <td><span class="fett"><?php echo $this->metadataset['rporgname']; ?></span>&nbsp;</td>
       </tr>
       <tr>
         <td valign="top">Adresse:</td>
@@ -49,7 +49,7 @@
       </tr>
       <tr>
         <td valign="top">Service Typ:</td>
-        <td><strong><?php echo $this->metadataset['servicetype']; ?></strong>&nbsp;</td>
+        <td><span class="fett"><?php echo $this->metadataset['servicetype']; ?></span>&nbsp;</td>
       </tr>
       <tr>
         <td valign="top">Service Version:</td>

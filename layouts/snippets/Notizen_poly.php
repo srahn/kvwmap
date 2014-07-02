@@ -6,12 +6,12 @@
    
 <table border="1" cellspacing="0" cellpadding="2">
   <tr bgcolor="<?php echo BG_DEFAULT ?>"> 
-    <td><b>Notiz</b></td>
-    <td><b>Kategorie</b></td>
-    <td><b>Person</b></td>
-    <td><b>Datum</b></td>
-	<td><b>&nbsp;</b></td>
-	<td><b>&nbsp;</b></td>
+    <td><span class="fett">Notiz</span></td>
+    <td><span class="fett">Kategorie</span></td>
+    <td><span class="fett">Person</span></td>
+    <td><span class="fett">Datum</span></td>
+	<td><span class="fett">&nbsp;</span></td>
+	<td><span class="fett">&nbsp;</span></td>
   </tr>
   <?php
     for ($j=0;$j<$anzObj;$j++) {
@@ -54,8 +54,8 @@
 <?php    
   }
   else {
-    ?><br><strong><font color="#FF0000">
-    Zu diesem Layer wurden keine Objekte gefunden!</font></strong><br>
+    ?><br><span class="fett" style="color:#FF0000">
+    Zu diesem Layer wurden keine Objekte gefunden!</span><br>
     Wählen Sie einen neuen Bereich oder prüfen Sie die Datenquellen.<br>
     <?php   
   }

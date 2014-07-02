@@ -42,7 +42,7 @@ function createQueryURL(lat, lng, radius) {
 
 function formatToHTML(busStopsJSON) {
   busStops = eval('('+busStopsJSON+')');
-  html = '<b>'+busStops.numResults+' Haltestellen im Umkreis von '+busStops.radius+' km Luftlinie gefunden.</b><br>';
+  html = '<span class="fett">'+busStops.numResults+' Haltestellen im Umkreis von '+busStops.radius+' km Luftlinie gefunden.</span><br>';
   html +='<table border="0" cellspacing="2" cellpadding=2">'
   for (var i=0; i < busStops.numResults; i++) {
     haltestelle = busStops.haltestellen[i];
@@ -66,7 +66,7 @@ function createNotFoundMessage(msg, divSearchResultId) {
 }
 
 function showAddressSelectionLinks(placemarks, radius, divSearchResultId) {
-  htmltxt="<b>Welche Adresse meinen Sie?</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>";
+  htmltxt="<span class="fett">Welche Adresse meinen Sie?</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>";
   for (i=0;i<placemarks.length;i++) {
     htmltxt+=(i+1)+". <a href=\"#\" onclick=\"queryAndShowBusStops('"+placemarks[i].address+"', "+placemarks[i].Point.coordinates[1]+", "+placemarks[i].Point.coordinates[0]+", "+radius+", '"+divSearchResultId+"')\">"+placemarks[i].address+"</a><br>";
   }

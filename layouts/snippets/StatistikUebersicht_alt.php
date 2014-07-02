@@ -1,7 +1,7 @@
 <table width="100%" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
-    <td colspan="2"><strong><font size="+1"><br>
-      <?php echo $this->titel; ?></font></strong></td>
+    <td colspan="2"><h2><br>
+      <?php echo $this->titel; ?></h2></td>
   </tr>
   <tr> 
     <td> <table width="100%" border="0" cellspacing="0" cellpadding="2">
@@ -14,7 +14,7 @@
         <tr> 
           <td colspan="2"><hr color="#000000" size="1"></td>
         <tr> 
-          <td colspan="2"><b>Zusammenfassung: </b></td>
+          <td colspan="2"><span class="fett">Zusammenfassung: </span></td>
         <tr> 
           <td width="50%"><li>Anzahl der Layer :</li></td>
           <td width="50%"><?php echo $this->account->getLayer['layers']; ?></td>
@@ -33,7 +33,7 @@
      	<?php 
 		if ($this->formvars['zeitraum']=='month') { ?>
 		<tr>       
-          <td colspan="2"><br><b>Monat: <?php echo $this->formvars['month_m']; ?>/<?php echo $this->formvars['year_m']; ?></b><br></td>
+          <td colspan="2"><br><span class="fett">Monat: <?php echo $this->formvars['month_m']; ?>/<?php echo $this->formvars['year_m']; ?></span><br></td>
     
 		<?php if ($this->formvars['nutzung']=='stelle') { ?>
 
@@ -228,8 +228,8 @@
 
        	<?php if ($this->formvars['zeitraum']=='week') { ?>		
 
-          <td colspan="2"><b><br>
-            Woche: <?php echo $this->formvars['week_w']; ?>. Kalenderwoche <?php echo $this->formvars['year_w'] ?></b><br></td>
+          <td colspan="2"><span class="fett"><br>
+            Woche: <?php echo $this->formvars['week_w']; ?>. Kalenderwoche <?php echo $this->formvars['year_w'] ?></span><br></td>
 			
 		<?php if ($this->formvars['nutzung']=='stelle') { ?>
 		
@@ -367,7 +367,7 @@
 		  ?>			
        <?php if ($this->formvars['zeitraum']=='day') { ?>
         <tr> 
-          <td colspan="2"><b>Tag: <?php echo $this->formvars['day_d'].'.'.$this->formvars['month_d'].'.'.$this->formvars['year_d']; ?></b><br>
+          <td colspan="2"><span class="fett">Tag: <?php echo $this->formvars['day_d'].'.'.$this->formvars['month_d'].'.'.$this->formvars['year_d']; ?></span><br>
            </td>
 		  <?php if ($this->formvars['nutzung']=='stelle') { ?>
         <tr> 
@@ -500,7 +500,7 @@
         <tr> 
        <?php if ($this->formvars['zeitraum']=='era') { ?>
         <tr> 
-          <td colspan="2"><b>Zeitraum - vom: <?php echo $this->formvars['day_e1'].'.'.$this->formvars['month_e1'].'.'.$this->formvars['year_e1']; ?> bis  <?php echo $this->formvars['day_e2'].'.'.$this->formvars['month_e2'].'.'.$this->formvars['year_e2']; ?></b><br>
+          <td colspan="2"><span class="fett">Zeitraum - vom: <?php echo $this->formvars['day_e1'].'.'.$this->formvars['month_e1'].'.'.$this->formvars['year_e1']; ?> bis  <?php echo $this->formvars['day_e2'].'.'.$this->formvars['month_e2'].'.'.$this->formvars['year_e2']; ?></span><br>
 		   </td>
 		  <?php if ($this->formvars['nutzung']=='stelle') { ?>
         <tr> 

@@ -15,11 +15,11 @@
 			else{
 ?>
 				<tr>
-					<td width="150px"><b>Attribut</b></td>
+					<td width="150px"><span class="fett">Attribut</span></td>
 					<td>&nbsp;&nbsp;</td>
-					<td width="100px" align="center"><b>Operator</b></td>
+					<td width="100px" align="center"><span class="fett">Operator</span></td>
 					<td>&nbsp;&nbsp;</td>
-					<td width="150px" align="left"><b>&nbsp;&nbsp;Wert</b></td>
+					<td width="150px" align="left"><span class="fett">&nbsp;&nbsp;Wert</span></td>
 				</tr>
 
 <?		}
@@ -34,12 +34,12 @@
 										<td colspan="5" width="100%">
 											<table cellpadding="3" cellspacing="0" width="100%" id="colgroup'.$layer['Layer_ID'].'_'.$i.'_'.$searchmask_number.'"  style="'; if(!$collapsed)echo 'display:none;'; echo ' border:1px solid grey">
 												<tr>
-													<td width="100%" bgcolor="'.BG_GLEATTRIBUTE.'" colspan="2">&nbsp;<a href="javascript:void(0);" onclick="javascript:document.getElementById(\'group'.$layer['Layer_ID'].'_'.$i.'_'.$searchmask_number.'\').style.display=\'\';document.getElementById(\'colgroup'.$layer['Layer_ID'].'_'.$i.'_'.$searchmask_number.'\').style.display=\'none\';"><img border="0" src="'.GRAPHICSPATH.'/plus.gif"></a>&nbsp;<b>'.$groupname.'</b></td>
+													<td width="100%" bgcolor="'.BG_GLEATTRIBUTE.'" colspan="2">&nbsp;<a href="javascript:void(0);" onclick="javascript:document.getElementById(\'group'.$layer['Layer_ID'].'_'.$i.'_'.$searchmask_number.'\').style.display=\'\';document.getElementById(\'colgroup'.$layer['Layer_ID'].'_'.$i.'_'.$searchmask_number.'\').style.display=\'none\';"><img border="0" src="'.GRAPHICSPATH.'/plus.gif"></a>&nbsp;<span class="fett">'.$groupname.'</span></td>
 												</tr>
 											</table>
 											<table cellpadding="3" cellspacing="0" width="100%" id="group'.$layer['Layer_ID'].'_'.$i.'_'.$searchmask_number.'" style="'; if($collapsed)echo 'display:none;'; echo 'border:1px solid grey">
 												<tr>
-													<td style="border-bottom:1px dotted grey" bgcolor="'.BG_GLEATTRIBUTE.'" colspan="5">&nbsp;<a href="javascript:void(0);" onclick="javascript:document.getElementById(\'group'.$layer['Layer_ID'].'_'.$i.'_'.$searchmask_number.'\').style.display=\'none\';document.getElementById(\'colgroup'.$layer['Layer_ID'].'_'.$i.'_'.$searchmask_number.'\').style.display=\'\';"><img border="0" src="'.GRAPHICSPATH.'/minus.gif"></a>&nbsp;<b>'.$groupname.'</b></td>
+													<td style="border-bottom:1px dotted grey" bgcolor="'.BG_GLEATTRIBUTE.'" colspan="5">&nbsp;<a href="javascript:void(0);" onclick="javascript:document.getElementById(\'group'.$layer['Layer_ID'].'_'.$i.'_'.$searchmask_number.'\').style.display=\'none\';document.getElementById(\'colgroup'.$layer['Layer_ID'].'_'.$i.'_'.$searchmask_number.'\').style.display=\'\';"><img border="0" src="'.GRAPHICSPATH.'/minus.gif"></a>&nbsp;<span class="fett">'.$groupname.'</span></td>
 												</tr>';
 				}
 				
@@ -59,7 +59,7 @@
           ?></td>
             <td>&nbsp;&nbsp;</td>
             <td width="100px">
-              <select class="select" style="width:75px" <? if(count($this->attributes['enum_value'][$i]) == 0){ ?>onchange="operatorchange('<? echo $this->attributes['name'][$i]; ?>', <? echo $searchmask_number; ?>);" id="<? echo $prefix; ?>operator_<? echo $this->attributes['name'][$i]; ?>" <? } ?> name="<? echo $prefix; ?>operator_<? echo $this->attributes['name'][$i]; ?>">
+              <select  style="width:75px" <? if(count($this->attributes['enum_value'][$i]) == 0){ ?>onchange="operatorchange('<? echo $this->attributes['name'][$i]; ?>', <? echo $searchmask_number; ?>);" id="<? echo $prefix; ?>operator_<? echo $this->attributes['name'][$i]; ?>" <? } ?> name="<? echo $prefix; ?>operator_<? echo $this->attributes['name'][$i]; ?>">
                 <option title="Der Suchbegriff muss exakt so in der Datenbank stehen" value="=" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == '='){ echo 'selected';} ?> >=</option>
                 <option title="Der Suchbegriff kommt so NICHT in der Datenbank vor" value="!=" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == '!='){ echo 'selected';} ?> >!=</option>
                 <option title="'kleiner als': nur bei Zahlen verwenden!" value="<" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == '<'){ echo 'selected';} ?> ><</option>
@@ -76,7 +76,7 @@
             <td align="left" width="40%"><?
             	switch ($this->attributes['form_element_type'][$i]) {
             		case 'Auswahlfeld' : {
-                  ?><select class="select" 
+                  ?><select  
                   <?
                   	if($this->attributes['req_by'][$i] != ''){
 											echo 'onchange="update_require_attribute(\''.$this->attributes['req_by'][$i].'\','.$this->formvars['selected_layer_id'].', this.value, '.$searchmask_number.');" ';
@@ -93,24 +93,24 @@
                       <option <? if($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]] == $this->attributes['enum_value'][$i][$o]){ echo 'selected';} ?> value="<? echo $this->attributes['enum_value'][$i][$o]; ?>"><? echo $this->attributes['enum_output'][$i][$o]; ?></option><? echo "\n";
                     } ?>
                     </select>
-                    <input class="input" size="9" id="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" type="hidden" value="<? echo $this->formvars[$prefix.'value2_'.$this->attributes['name'][$i]]; ?>">
+                    <input size="9" id="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" type="hidden" value="<? echo $this->formvars[$prefix.'value2_'.$this->attributes['name'][$i]]; ?>">
                     <?
                 }break;
                 
                 case 'Checkbox' : {
-                  ?><select class="select" id="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>"><?echo "\n"; ?>
+                  ?><select  id="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>"><?echo "\n"; ?>
                       <option value="">-- <? echo $this->strChoose; ?> --</option><? echo "\n"; ?>
                       <option <? if($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]] == 't'){ echo 'selected';} ?> value="t">ja</option><? echo "\n"; ?>
                       <option <? if($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]] == 'f'){ echo 'selected';} ?> value="f">nein</option><? echo "\n"; ?>
                     </select>
-                    <input class="input" size="9" id="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" type="hidden" value="<? echo $this->formvars[$prefix.'value2_'.$this->attributes['name'][$i]]; ?>">
+                    <input size="9" id="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" type="hidden" value="<? echo $this->formvars[$prefix.'value2_'.$this->attributes['name'][$i]]; ?>">
                     <?
                 }break;
                 
 		default : { 
                   ?>
-                  <input class="input" size="<? if($this->formvars[$prefix.'value2_'.$this->attributes['name'][$i]] != ''){echo '9';}else{echo '24';} ?>" id="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" type="text" value="<? echo $this->formvars[$prefix.'value_'.$this->attributes['name'][$i]]; ?>">
-                  <input class="input" size="9" id="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" type="<? if($this->formvars[$prefix.'value2_'.$this->attributes['name'][$i]] != ''){echo 'text';}else{echo 'hidden';} ?>" value="<? echo $this->formvars[$prefix.'value2_'.$this->attributes['name'][$i]]; ?>">
+                  <input size="<? if($this->formvars[$prefix.'value2_'.$this->attributes['name'][$i]] != ''){echo '9';}else{echo '24';} ?>" id="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" type="text" value="<? echo $this->formvars[$prefix.'value_'.$this->attributes['name'][$i]]; ?>">
+                  <input size="9" id="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" type="<? if($this->formvars[$prefix.'value2_'.$this->attributes['name'][$i]] != ''){echo 'text';}else{echo 'hidden';} ?>" value="<? echo $this->formvars[$prefix.'value2_'.$this->attributes['name'][$i]]; ?>">
                   <?
                }
       				}

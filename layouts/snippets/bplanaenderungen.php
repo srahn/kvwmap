@@ -4,11 +4,11 @@
   if ($anzObj>0) {
     ?><table border="1" cellspacing="0" cellpadding="2">
     <tr bgcolor="<?php echo BG_DEFAULT ?>"> 
-	    <td><b>Nutzer</b></td>
-	    <td><b>Datum</b></td>
-	    <td><b>Hinweis</b></td>
-	    <td><b>Bemerkung</b></td>
-		  <td><b>&nbsp;</b></td>
+	    <td><span class="fett">Nutzer</span></td>
+	    <td><span class="fett">Datum</span></td>
+	    <td><span class="fett">Hinweis</span></td>
+	    <td><span class="fett">Bemerkung</span></td>
+		  <td><span class="fett">&nbsp;</span></td>
     </tr><?php
     for ($j=0;$j<$anzObj;$j++) {
       ?><tr> 

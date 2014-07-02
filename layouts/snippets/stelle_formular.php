@@ -83,10 +83,10 @@ function addMenues(){
 
 //-->
 </script>
-
+<br>
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center">
-    <td><strong><font size="+1"><?php echo $strTitle; ?></font></strong></td>
+    <td><h2><?php echo $strTitle; ?></h2></td>
   </tr>
   <tr>
     <td align="center"><?php
@@ -101,42 +101,42 @@ else {
  ?>
     <table border="0" cellspacing="0" cellpadding="5" style="border:1px solid #C3C7C3">
         <tr align="center">
-          <td colspan="3" style="border-bottom:1px solid #C3C7C3"><em><font size="-1"><?php echo $strAsteriskRequired; ?> </font></em></td>
+          <td colspan="3" style="border-bottom:1px solid #C3C7C3"><em><span class="px13"><?php echo $strAsteriskRequired; ?> </span></em></td>
         </tr><?php if ($this->formvars['selected_stelle_id']>0) {?>
         <tr>
-          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDataBankID; ?></th>
+          <th class="fetter" class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDataBankID; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
           	<input name="id" type="text" value="<?php echo $this->formvars['selected_stelle_id']; ?>" size="25" maxlength="11">
           </td>
         </tr><?php } ?>
         <tr>
-          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTask; ?></th>
+          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTask; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
               <input name="bezeichnung" type="text" value="<?php echo $this->formvars['bezeichnung']; ?>" size="25" maxlength="100">
           </td>
         </tr>
         <tr>
-          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strReferenceMapID; ?></th>
+          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strReferenceMapID; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
               <input name="Referenzkarte_ID" type="text" value="<?php echo $this->formvars['Referenzkarte_ID']; ?>" size="25" maxlength="100">
           </td>
         </tr>
         <tr>
-          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strMinExtent; ?></th>
+          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strMinExtent; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
               x&nbsp;<input name="minxmax" type="text" value="<?php echo $this->formvars['minxmax']; ?>" size="15" maxlength="100">
               y&nbsp;<input name="minymax" type="text" value="<?php echo $this->formvars['minymax']; ?>" size="15" maxlength="100">
           </td>
         </tr>
         <tr>
-          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strMaxExtent;  ?></th>
+          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strMaxExtent;  ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
               x&nbsp;<input name="maxxmax" type="text" value="<?php echo $this->formvars['maxxmax']; ?>" size="15" maxlength="100">
               y&nbsp;<input name="maxymax" type="text" value="<?php echo $this->formvars['maxymax']; ?>" size="15" maxlength="100">
           </td>
         </tr>
         <tr>
-        	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strEpsgCode; ?></th>
+        	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strEpsgCode; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<select name="epsg_code">
 		      			<option value=""><?php echo $this->strPleaseSelect; ?></option>
@@ -155,102 +155,102 @@ else {
 		  		</td>
         </tr>
 				<tr>
-          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strStart; ?></th>
+          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strStart; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
               <input name="start" type="text" value="<?php echo $this->formvars['start']; ?>" size="25" maxlength="100">
           </td>
         </tr>
         <tr>
-          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strStop; ?></th>
+          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strStop; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
               <input name="stop" type="text" value="<?php echo $this->formvars['stop']; ?>" size="25" maxlength="100">
           </td>
         </tr>
 
         <tr>
-          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPostgisHost; ?></th>
+          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPostgisHost; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
               <input name="pgdbhost" type="text" value="<?php echo $this->formvars['pgdbhost']; ?>" size="25" maxlength="100">
           </td>
         </tr>
 
         <tr>
-          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPostGISDataBankName; ?></th>
+          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPostGISDataBankName; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
               <input name="pgdbname" type="text" value="<?php echo $this->formvars['pgdbname']; ?>" size="25" maxlength="100">
           </td>
         </tr>
 
         <tr>
-          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPostGISUserName; ?></th>
+          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPostGISUserName; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
               <input name="pgdbuser" type="text" value="<?php echo $this->formvars['pgdbuser']; ?>" size="25" maxlength="100">
           </td>
         </tr>
 
         <tr>
-          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPostGISPassword; ?></th>
+          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPostGISPassword; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
               <input name="pgdbpasswd" type="password" value="<?php echo $this->formvars['pgdbpasswd']; ?>" size="25" maxlength="100">
           </td>
         </tr>
 
         <tr>
-          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsTitle; ?></th>
+          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsTitle; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
               <input name="ows_title" type="text" value="<?php echo $this->formvars['ows_title']; ?>" size="25" maxlength="100">
           </td>
         </tr>
         <tr>
-          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsAbstract; ?></th>
+          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsAbstract; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
               <input name="ows_abstract" type="text" value="<?php echo $this->formvars['ows_abstract']; ?>" size="25" maxlength="100">
           </td>
         </tr>
         <tr>
-          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWmsAccessConstraints; ?></th>
+          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWmsAccessConstraints; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
               <input name="wms_accessconstraints" type="text" value="<?php echo $this->formvars['wms_accessconstraints']; ?>" size="25" maxlength="100">
           </td>
         </tr>
         <tr>
-          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsContactPerson; ?></th>
+          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsContactPerson; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
               <input name="ows_contactperson" type="text" value="<?php echo $this->formvars['ows_contactperson']; ?>" size="25" maxlength="100">
           </td>
         </tr>
         <tr>
-          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsContactOrganization; ?></th>
+          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsContactOrganization; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
               <input name="ows_contactorganization" type="text" value="<?php echo $this->formvars['ows_contactorganization']; ?>" size="25" maxlength="100">
           </td>
         </tr>
         <tr>
-          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsContactEmailAddress; ?></th>
+          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsContactEmailAddress; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
               <input name="ows_contactemailaddress" type="text" value="<?php echo $this->formvars['ows_contactemailaddress']; ?>" size="25" maxlength="100">
           </td>
         </tr>
         <tr>
-          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsContactPosition; ?></th>
+          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsContactPosition; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
               <input name="ows_contactposition" type="text" value="<?php echo $this->formvars['ows_contactposition']; ?>" size="25" maxlength="100">
           </td>
         </tr>
         <tr>
-          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsFees; ?></th>
+          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsFees; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
               <input name="ows_fees" type="text" value="<?php echo $this->formvars['ows_fees']; ?>" size="25" maxlength="100">
           </td>
         </tr>
         <tr>
-          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsSrs; ?></th>
+          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsSrs; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
               <input name="ows_srs" type="text" value="<?php echo $this->formvars['ows_srs']; ?>" size="25" maxlength="100">
                <font size="-1">(EPSG:4326 EPSG:2398 ...)</font> </td>
         </tr>
         <tr>
-          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLogo; ?></th>
+          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLogo; ?></th>
           <td style="border-bottom:1px solid #C3C7C3">
             &nbsp;<input type="file" name="wappen" size="15"><br>
             &nbsp;<? echo $this->formvars['wappen'] ?>
@@ -261,7 +261,7 @@ else {
           </td>
         </tr>
         <tr>
-          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWaterMark; ?></th>
+          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWaterMark; ?></th>
           <td style="border-bottom:1px solid #C3C7C3">
             &nbsp;<input type="file" name="wasserzeichen" size="15"><br>
             &nbsp;<? echo $this->formvars['wasserzeichen'] ?>
@@ -272,7 +272,7 @@ else {
           </td>
         </tr>
         <tr>
-          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strALBReferencingRegion; ?></th>
+          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strALBReferencingRegion; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
             <select name="alb_raumbezug" size="1" style="width:160px">
                   <option value="Gemeinde"
@@ -307,16 +307,16 @@ else {
           </td>
         </tr>
         <tr>
-          <th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strALBReferencingRegionKey; ?></th>
+          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strALBReferencingRegionKey; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
               <input name="alb_raumbezug_wert" type="text" value="<?php echo $this->formvars['alb_raumbezug_wert']; ?>" size="25" maxlength="100">
           </td>
         </tr>
         <tr>
-          <th align="right" style="border-bottom:1px solid #C3C7C3">
+          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
             <table border="0" cellspacing="0" cellpadding="0">
               <tr>
-                  <th align="right"><?php echo $strMenuPoint; ?></th>
+                  <th class="fetter" align="right"><?php echo $strMenuPoint; ?></th>
                 </tr>
                 <tr>
                   <td align="right">&nbsp;</td>
@@ -359,10 +359,10 @@ else {
         </tr>
 
 				<tr>
-          <th align="right" style="border-bottom:1px solid #C3C7C3">
+          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
             <table border="0" cellspacing="0" cellpadding="0">
               <tr>
-                  <th align="right">Funktionen</th>
+                  <th class="fetter" align="right">Funktionen</th>
                 </tr>
                 <tr>
                   <td align="right">&nbsp;</td>
@@ -399,10 +399,10 @@ else {
         </tr>
 
 				<tr>
-          <th align="right" style="border-bottom:1px solid #C3C7C3">
+          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
             <table border="0" cellspacing="0" cellpadding="0">
               <tr>
-                  <th align="right">Kartendruck-Layouts</th>
+                  <th class="fetter" align="right">Kartendruck-Layouts</th>
                 </tr>
                 <tr>
                   <td align="right">&nbsp;</td>
@@ -439,10 +439,10 @@ else {
         </tr>
 				
 				<tr>
-          <th align="right" style="border-bottom:1px solid #C3C7C3">
+          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
             <table border="0" cellspacing="0" cellpadding="0">
               <tr>
-                  <th align="right">Datendruck-Layouts</th>
+                  <th class="fetter" align="right">Datendruck-Layouts</th>
                 </tr>
                 <tr>
                   <td align="right">&nbsp;</td>
@@ -479,10 +479,10 @@ else {
         </tr>
 
         <tr>
-          <th align="right" style="border-bottom:1px solid #C3C7C3">
+          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
             <table border="0" cellspacing="0" cellpadding="0">
               <tr>
-                  <th align="right">
+                  <th class="fetter" align="right">
                   <? if(count($this->formvars['sellayer']["Bezeichnung"]) > 0){?>
                     <a href="index.php?go=Layer2Stelle_Reihenfolge&selected_stelle_id=<? echo $this->formvars['selected_stelle_id']; ?>"><?php echo $strEdit; ?></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                   <?}?>
@@ -532,10 +532,10 @@ else {
         </tr>
 
         <tr>
-          <th align="right" style="border-bottom:1px solid #C3C7C3">
+          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
             <table border="0" cellspacing="0" cellpadding="0">
               <tr>
-                  <th align="right"><?php echo $strUser;?></th>
+                  <th class="fetter" align="right"><?php echo $strUser;?></th>
                 </tr>
                 <tr>
                   <td align="right">&nbsp;</td>

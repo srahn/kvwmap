@@ -105,43 +105,43 @@ function go_back(){
 	<h2>Veräußerung</h2><br>	   
 	<table border="0" cellspacing="2" cellpadding="2">
 	  <tr>
-	  	<td><b>Flurstück</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>Lfdnr</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>Bereich</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>verkaufte&nbsp;Fläche</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>Verkaufspreis</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>Vertrag</b></td>
+	  	<td><span class="fett">Flurstück</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">Lfdnr</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">Bereich</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">verkaufte&nbsp;Fläche</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">Verkaufspreis</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">Vertrag</span></td>
 	  </tr>
 	  <tr>
-	  	<td><b>Lage</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>Projekt</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>ALB-Fläche</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>Gesamtpreis</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>Urkunde</b></td>
+	  	<td><span class="fett">Lage</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">Projekt</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">ALB-Fläche</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">Gesamtpreis</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">Urkunde</span></td>
 	  </tr>
 	  <tr>
-	  	<td><b>1. Käufer</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>Preis/m<sub>2</sub></b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>Grundbuchstelle</b></td>
+	  	<td><span class="fett">1. Käufer</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">Preis/m<sub>2</sub></span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">Grundbuchstelle</span></td>
 	  </tr>
 	  <?php
 		for ($j=0;$j<$anzObj;$j++) {
@@ -196,15 +196,15 @@ function go_back(){
 	  </tr> 	
 		<tr>
 			<td><?php echo $this->qlayerset[$i]['shape'][$j]['flurstkennz']; ?></td>
-			<td><b>&nbsp;</b></td>
+			<td><span class="fett">&nbsp;</span></td>
 			<td><?php echo $this->qlayerset[$i]['shape'][$j]['lfdnr']; ?></td>
-			<td><b>&nbsp;</b></td>
+			<td><span class="fett">&nbsp;</span></td>
 			<td><?php echo $bereich_txt[0]; ?></td>
-			<td><b>&nbsp;</b></td>
+			<td><span class="fett">&nbsp;</span></td>
 			<td><?php echo $this->qlayerset[$i]['shape'][$j]['verkaufsflaeche']; ?></td>
-			<td><b>&nbsp;</b></td>
+			<td><span class="fett">&nbsp;</span></td>
 			<td><?php echo $this->qlayerset[$i]['shape'][$j]['kaufpreis']; ?></td>
-			<td><b>&nbsp;</b></td>
+			<td><span class="fett">&nbsp;</span></td>
 			<td><?php echo $this->qlayerset[$i]['shape'][$j]['vertrag_az']; ?></td>
 		</tr>
 		<tr>
@@ -238,8 +238,8 @@ function go_back(){
 		}    
   }
   else {
-  	?><br><strong><font color="#FF0000">
-	  Zu diesem Layer wurden keine Objekte gefunden!</font></strong><br>
+  	?><br><span class="fett" style="color:#FF0000">
+	  Zu diesem Layer wurden keine Objekte gefunden!</span><br>
 	  Wählen Sie einen neuen Bereich oder prüfen Sie die Datenquellen.<br>
 	  <?php  	
   }

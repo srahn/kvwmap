@@ -17,7 +17,7 @@
 
 <table border="0" cellpadding="5" cellspacing="3" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
-    <td colspan="3"><strong><font size="+1"><?php echo $this->titel; ?></font></strong></td>
+    <td colspan="3"><h2><?php echo $this->titel; ?></h2></td>
   </tr>
   <? if($this->shape->formvars['zipfile'] == ''){ ?>
   <tr>
@@ -27,7 +27,7 @@
   </tr>
   <tr>
   	<td>&nbsp;</td>
-		<td align="center" style="border-bottom:1px solid #C3C7C3"><b>Zip-Archiv:</b>
+		<td align="center" style="border-bottom:1px solid #C3C7C3"><span class="fett">Zip-Archiv:</span>
 		<input class="button" type="file" name="zipfile" size="12">
 		<input class="button" type="submit" name="goplus" value="Datei laden"></td>
 		<td>&nbsp;</td>
@@ -39,9 +39,9 @@
   	<td align="center">  		
   		<table border="0" width="400">
   			<tr>
-  				<td colspan="2" align="center"><b>dbf-Datei</b></td>
+  				<td colspan="2" align="center"><span class="fett">dbf-Datei</span></td>
   				<td>&nbsp;</td>
-  				<td colspan="2" align="center"><b>PostgreSQL-Tabelle</b></td>
+  				<td colspan="2" align="center"><span class="fett">PostgreSQL-Tabelle</span></td>
   			</tr>
   			<tr>
   				<td colspan="2" align="center"><input name="dbffile" type="text" value="<? echo $this->shape->dbf->file; ?>" readonly></td>
@@ -61,8 +61,8 @@
   			<? for($i = 0; $i < count($this->shape->dbf->header); $i++){ ?>
 				<tr>
 					<td colspan="5" align="center">
-						<input name="dbf_name_<? echo $this->shape->dbf->header[$i][0]; ?>" type="text" value="<? echo $this->shape->dbf->header[$i][0]; ?>" class="input" readonly size="20">
-						<input name="dbf_type_<? echo $this->shape->dbf->header[$i][0]; ?>" type="text" value="<? echo $this->shape->dbf->header[$i]['type']; ?>" class="input" readonly size="10">
+						<input name="dbf_name_<? echo $this->shape->dbf->header[$i][0]; ?>" type="text" value="<? echo $this->shape->dbf->header[$i][0]; ?>" readonly size="20">
+						<input name="dbf_type_<? echo $this->shape->dbf->header[$i][0]; ?>" type="text" value="<? echo $this->shape->dbf->header[$i]['type']; ?>" readonly size="10">
 					</td>
 				</tr>
   			<? } ?>
@@ -75,7 +75,7 @@
   	<td>
   		<table border="0">
   			<tr>
-  				<td height="30"><b>Optionen:</b></td>
+  				<td height="30"><span class="fett">Optionen:</span></td>
   			</tr>
   			<tr>
   				<td><input type="radio" name="table_option" value="-c" checked>Tabelle neu anlegen</td>

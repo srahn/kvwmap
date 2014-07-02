@@ -44,11 +44,11 @@ function back(){
 		<td>
 			 <table width=100% cellpadding="2" cellspacing="2" style="border:1px solid #C3C7C3">
         <tr>
-          <td class="bold" colspan=3 style="border-bottom:1px solid #C3C7C3">&nbsp;Layout-Auswahl</td>
+          <td class="fett" colspan=3 style="border-bottom:1px solid #C3C7C3">&nbsp;Layout-Auswahl</td>
         </tr>
         <tr>
           <td>
-            &nbsp;<select class="select" name="aktivesLayout" onchange="document.GUI.go_plus.value = '';document.GUI.submit()">
+            &nbsp;<select  name="aktivesLayout" onchange="document.GUI.go_plus.value = '';document.GUI.submit()">
             <option value="">--- bitte wählen ---</option>
             <?  
             for($i = 0; $i < count($this->ddl->layouts); $i++){
@@ -88,7 +88,7 @@ function back(){
     	for($i = 0; $i < count($this->attributes['type']); $i++){
     		if($this->attributes['type'][$i] != 'geometry'){ ?>
 	    		<!--tr>
-	        	<td class="bold" align="center" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="8"><? echo $this->attributes['name'][$i]; ?></td>
+	        	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="8"><? echo $this->attributes['name'][$i]; ?></td>
 	        </tr-->
  	<? 		}	
     	} ?>

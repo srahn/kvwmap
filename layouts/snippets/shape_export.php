@@ -46,7 +46,7 @@ function export_shape(){
 
 <table border="0" cellpadding="1" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>" width="100%">
   <tr> 
-    <td align="center" colspan="8" height="40" valign="middle"><strong><font size="+1"><?php echo $strTitle; ?></font></strong></td>
+    <td align="center" colspan="8" height="40" valign="middle"><h2><?php echo $strTitle; ?></h2></td>
   </tr>
   
   <?if($this->shape->formvars['filename'] != ''){?>
@@ -73,7 +73,7 @@ function export_shape(){
 			  </tr>
 			  <tr>
 			    <td valign="top" style="border-bottom:1px solid #C3C7C3;border-left:1px solid #C3C7C3" colspan="2"> 
-			      <select style="width:250px" size="1" class="select" name="selected_layer_id" onchange="document.GUI.submit();" <?php if(count($this->shape->layerdaten['ID'])==0){ echo 'disabled';}?>>
+			      <select style="width:250px" size="1"  name="selected_layer_id" onchange="document.GUI.submit();" <?php if(count($this->shape->layerdaten['ID'])==0){ echo 'disabled';}?>>
 			      	<option value=""><?php echo $this->strPleaseSelect; ?></option>
 			        <?
 			    		for($i = 0; $i < count($this->shape->layerdaten['ID']); $i++){    			
@@ -136,7 +136,7 @@ function export_shape(){
 			 	<? if($this->formvars['sql_'.$this->formvars['selected_layer_id']] != ''){ ?>
 			 	<tr>
 			 		<td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3" colspan="5" width="100%">
-			 			<b><? echo $this->formvars['anzahl']; ?> Datensätze aus Sachdatenanzeige</b>
+			 			<span class="fett"><? echo $this->formvars['anzahl']; ?> Datensätze aus Sachdatenanzeige</span>
 			 			<input type="hidden" name="sql_<? echo $this->formvars['selected_layer_id']; ?>" value="<? echo stripslashes($this->formvars['sql_'.$this->formvars['selected_layer_id']]); ?>">
 			 			<input type="hidden" name="anzahl" value="<? echo $this->formvars['anzahl']; ?>">
 			 		</td>

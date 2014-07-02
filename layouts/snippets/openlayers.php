@@ -161,13 +161,13 @@ if($this->formvars['gps_follow'] == ''){
         					<table width="100%" border="0" cellpadding="0" cellspacing="0">
 						        <tr style="background-color: <? echo BG_MENUETOP; ?>;">
 						          <td width="140px" height="30">
-						          	&nbsp;<b><?php echo $strMapScale; ?>&nbsp;1:&nbsp;</b><input type="text" id="scale" name="nScale" size="5" value="<?php echo round($this->map_scaledenom); ?>">
+						          	&nbsp;<span class="fett"><?php echo $strMapScale; ?>&nbsp;1:&nbsp;</span><input type="text" id="scale" name="nScale" size="5" value="<?php echo round($this->map_scaledenom); ?>">
 						          </td>
 						          <td align="center">
 						          	<? if($this->map->width > 700) {
 						          		echo '<div id="lagebezeichnung">';
 						          		if($this->Lagebezeichung!=''){
-						          			echo '<b>Gemeinde:&nbsp;</b>'.$this->Lagebezeichung['gemeindename'].' <b>Gemarkung:</b>&nbsp;'.$this->Lagebezeichung['gemkgname'].' <b>Flur:</b>&nbsp;'.$this->Lagebezeichung['flur'];
+						          			echo '<span class="fett">Gemeinde:&nbsp;</span>'.$this->Lagebezeichung['gemeindename'].' <span class="fett">Gemarkung:</span>&nbsp;'.$this->Lagebezeichung['gemkgname'].' <span class="fett">Flur:</span>&nbsp;'.$this->Lagebezeichung['flur'];
 						          		} ?>
 						          	</div>
 						          </td>
@@ -187,7 +187,7 @@ if($this->formvars['gps_follow'] == ''){
 			          	<div id="lagebezeichnung">
 			          		<?php 
 			          		if($this->Lagebezeichung!=''){
-			          			echo '<b>Gemeinde:&nbsp;</b>'.$this->Lagebezeichung['gemeindename'].' <b>Gemarkung:</b>&nbsp;'.$this->Lagebezeichung['gemkgname'].' <b>Flur:</b>&nbsp;'.$this->Lagebezeichung['flur'];
+			          			echo '<span class="fett">Gemeinde:&nbsp;</span>'.$this->Lagebezeichung['gemeindename'].' <span class="fett">Gemarkung:</span>&nbsp;'.$this->Lagebezeichung['gemkgname'].' <span class="fett">Flur:</span>&nbsp;'.$this->Lagebezeichung['flur'];
 			          		} ?>
 			          	</div>
 			          </td>
@@ -195,7 +195,7 @@ if($this->formvars['gps_follow'] == ''){
 			        <? } ?>
 			        <tr id="showcoords" style="display:none">
 			        	<td width="100px">
-			          	<b>&nbsp;<?php echo $strShowCoordinates; ?></b>&nbsp;
+			          	<span class="fett">&nbsp;<?php echo $strShowCoordinates; ?></span>&nbsp;
 			          </td>
 			        	<td colspan="2" width="80%">
 			        		<input type="text" name="firstcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?>
@@ -213,7 +213,7 @@ if($this->formvars['gps_follow'] == ''){
 			          		<tr>
 			          			<td>
 						          	<div id="maptime">
-						          		&nbsp;<a href="index.php?go=Kartenkommentar_Formular&consumetime=<?php echo $this->user->rolle->newtime; ?>&hauptkarte=<?php echo $this->img['hauptkarte']; ?>"><?php echo $strSave; ?></a>&nbsp;|&nbsp;<a href="index.php?go=Kartenkommentar_Waehlen&prevtime=<?php echo $this->user->rolle->newtime; ?>"><?php echo $strChoose ?></a>&nbsp;|&nbsp;<? if(SHOW_MAP_IMAGE == 'true'){ ?><a id="MapImageLink" target="_blank" href="" onmouseover="javascript:showMapImage();"><?php echo $strMapImageURL; ?></a></b><? } ?>&nbsp;|&nbsp;<a href="javascript:resizemap2window();" ><? echo $strMapSize; ?></a>
+						          		&nbsp;<a href="index.php?go=Kartenkommentar_Formular&consumetime=<?php echo $this->user->rolle->newtime; ?>&hauptkarte=<?php echo $this->img['hauptkarte']; ?>"><?php echo $strSave; ?></a>&nbsp;|&nbsp;<a href="index.php?go=Kartenkommentar_Waehlen&prevtime=<?php echo $this->user->rolle->newtime; ?>"><?php echo $strChoose ?></a>&nbsp;|&nbsp;<? if(SHOW_MAP_IMAGE == 'true'){ ?><a id="MapImageLink" target="_blank" href="" onmouseover="javascript:showMapImage();"><?php echo $strMapImageURL; ?></a></span><? } ?>&nbsp;|&nbsp;<a href="javascript:resizemap2window();" ><? echo $strMapSize; ?></a>
 						            </div>
 						          </td>
 						          <td id="options"></td><!-- hier werden die Spezialoptionen eingefügt -->

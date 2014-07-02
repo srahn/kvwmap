@@ -3,7 +3,7 @@
     <td align="center" valign="middle">
       <table border="0" cellpadding="5" cellspacing="0">
       <tr>
-        <td colspan="2" align="center" bgcolor="<?php echo BG_FORM ?>"><strong><?php echo $this->titel; ?></strong></td>
+        <td colspan="2" align="center" bgcolor="<?php echo BG_FORM ?>"><h2><?php echo $this->titel; ?></h2></td>
       </tr>
       <tr>
         <td colspan="2" bgcolor="<?php echo BG_FORM ?>"><div align="center"> <br>

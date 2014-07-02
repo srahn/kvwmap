@@ -14,7 +14,7 @@ function csv_export(){
     <td align="right">&nbsp;</td>
   </tr>
   <tr align="center"> 
-    <td><strong><font size="+1"><?php echo $this->titel; ?></font></strong></td>
+    <td><h2><?php echo $this->titel; ?></h2></td>
   </tr>
   <tr> 
     <td align="right">&nbsp;</td>
@@ -22,11 +22,11 @@ function csv_export(){
   <tr>
     <td><table width="100%" style="border-collapse:collapse;" border="1" cellspacing="1" cellpadding="4">
       <tr>
-      	<? if(!$this->formvars['oid']){ ?><td class="bold">Jagdbezirk</td><? } ?>
-      	<td class="bold">Eigentümer</td>
-        <td class="bold">Anteil nach ALB</td>
-        <td class="bold">Anteil nach ALK</td>
-        <td class="bold">ALB-Fläche</td>
+      	<? if(!$this->formvars['oid']){ ?><td class="fett">Jagdbezirk</td><? } ?>
+      	<td class="fett">Eigentümer</td>
+        <td class="fett">Anteil nach ALB</td>
+        <td class="fett">Anteil nach ALK</td>
+        <td class="fett">ALB-Fläche</td>
       </tr>
       <?php 
       for ($i = 0; $i < count($this->eigentuemer)-1; $i++) { ?>

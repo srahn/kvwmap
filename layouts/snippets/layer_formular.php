@@ -30,7 +30,7 @@ Text[3]=["Hilfe:","Das Data-Feld wird vom Mapserver für die Kartendarstellung v
 
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
-    <td><strong><font size="+1"><?php echo $strTitle; ?></font></strong></td>
+    <td><h2><?php echo $strTitle; ?></h2></td>
   </tr>
   <tr>
     <td align="center"><?php   
@@ -45,28 +45,28 @@ else {
  ?>
 		<table border="0" cellspacing="0" cellpadding="3" style="border:1px solid <?php echo BG_DEFAULT ?>">
 			<tr align="center">
-		    	<th bgcolor="<?php echo BG_DEFAULT ?>" width="570" colspan="3" style="border-bottom:1px solid #C3C7C3"><?php echo $strCommonData; ?></th>
+		    	<th bgcolor="<?php echo BG_DEFAULT ?>" width="570" colspan="3" class="fetter" style="border-bottom:1px solid #C3C7C3"><?php echo $strCommonData; ?></th>
 		    </tr><?php if ($this->formvars['selected_layer_id']>0) {?>
 		  	<tr>
-		    	<th width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLayerID; ?></th>
+		    	<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLayerID; ?></th>
 		    	<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
 		    		<input name="id" type="text" value="<?php echo $this->formvars['selected_layer_id']; ?>" size="25" maxlength="11">
 		    	</td>
 		  	</tr><?php } ?>
 		  	<tr>
-		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strName; ?></th>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strName; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<input name="Name" type="text" value="<?php echo $this->formvars['Name']; ?>" size="25" maxlength="100">
 		  		</td>
 		  	</tr>
 		  	<tr>
-		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strAlias; ?></th>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strAlias; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<input name="alias" type="text" value="<?php echo $this->formvars['alias']; ?>" size="25" maxlength="100">
 		  		</td>
 		  	</tr>
 		  	<tr>
-		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDataType; ?></th>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDataType; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<select name="Datentyp">
 		      			<option value=""><?php echo $this->strPleaseSelect; ?></option>
@@ -83,7 +83,7 @@ else {
 		  		</td>
 		  	</tr>
 		  	<tr>
-		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strGroup; ?></th>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strGroup; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<select name="Gruppe">
 		      			<option value=""><?php echo $this->strPleaseSelect; ?></option>
@@ -102,82 +102,82 @@ else {
 		  		</td>
 		  	</tr>
 		  	<tr>
-		  		<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPath; ?></th>
+		  		<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPath; ?></th>
 		  		<td colspan=2 valign="top" style="border-bottom:1px solid #C3C7C3">
 		  			<textarea name="pfad" cols="33" rows="4"><? echo $this->formvars['pfad'] ?></textarea>&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>ikon_i.gif" onMouseOver="stm(Text[2], Style[0], document.getElementById('TipLayer3'))" onmouseout="htm()">
 						<div id="TipLayer3" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 		  		</td>
 		  	</tr>
 		  	<tr>
-		  		<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strData; ?></th>
+		  		<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strData; ?></th>
 		  		<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		  			<textarea name="Data" cols="33" rows="4"><? echo $this->formvars['Data'] ?></textarea>&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>ikon_i.gif" onMouseOver="stm(Text[3], Style[0], document.getElementById('TipLayer4'))" onmouseout="htm()">
 						<div id="TipLayer4" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 		  		</td>
 		  	</tr>
 				<tr>
-					<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strMaintable; ?></th>
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strMaintable; ?></th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 						<input name="maintable" type="text" value="<?php echo $this->formvars['maintable']; ?>" size="25" maxlength="100">&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>ikon_i.gif" onMouseOver="stm(Text[1], Style[0], document.getElementById('TipLayer1'))" onmouseout="htm()">
 						<div id="TipLayer1" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 					</td>
 				</tr>
 		  	<tr>
-		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strSchema; ?></th>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strSchema; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<input name="schema" type="text" value="<?php echo $this->formvars['schema']; ?>" size="25" maxlength="100">
 		  		</td>
 		  	</tr>
 		  	<tr>
-		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDocument_path; ?></th>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDocument_path; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<input name="document_path" type="text" value="<?php echo $this->formvars['document_path']; ?>" size="25" maxlength="100">
 		  		</td>
 		  	</tr>
 		  	<tr>
-		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTileIndex; ?></th>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTileIndex; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<input name="tileindex" type="text" value="<?php echo $this->formvars['tileindex']; ?>" size="25" maxlength="100">
 		  		</td>
 		  	</tr>
 		  	<tr>
-		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTileItem; ?></th>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTileItem; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<input name="tileitem" type="text" value="<?php echo $this->formvars['tileitem']; ?>" size="25" maxlength="100">
 		  		</td>
 		  	</tr>
 		  	<tr>
-		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLabelAngleItem; ?></th>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLabelAngleItem; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<input name="labelangleitem" type="text" value="<?php echo $this->formvars['labelangleitem']; ?>" size="25" maxlength="100">
 		  		</td>
 		  	</tr>
 		  	<tr>
-		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLabelItem; ?></th>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLabelItem; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<input name="labelitem" type="text" value="<?php echo $this->formvars['labelitem']; ?>" size="25" maxlength="100">
 		  		</td>
 		  	</tr>
 		  	<tr>
-		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLabelMaxScale; ?></th>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLabelMaxScale; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<input name="labelmaxscale" type="text" value="<?php echo $this->formvars['labelmaxscale']; ?>" size="25" maxlength="100">
 		  		</td>
 		  	</tr>
 		  	<tr>
-		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLabelMinScale; ?></th>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLabelMinScale; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<input name="labelminscale" type="text" value="<?php echo $this->formvars['labelminscale']; ?>" size="25" maxlength="100">
 		  		</td>
 		  	</tr>
 		  	<tr>
-		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLabelRequires; ?></th>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLabelRequires; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<input name="labelrequires" type="text" value="<?php echo $this->formvars['labelrequires']; ?>" size="25" maxlength="100">
 		  		</td>
 		  	</tr>
 		  	<tr>
-		  		<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strConnection; ?></th>
+		  		<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strConnection; ?></th>
 		  		<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		  			<textarea id="connection" name="connection" cols="33" rows="2"><? echo $this->formvars['connection'] ?></textarea>
 		  			<input type="button"  onclick="testConnection();" value="Test"
@@ -190,13 +190,13 @@ else {
 		  		</td>
 		  	</tr>
 		  	<tr>
-		  		<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPrintConnection; ?></th>
+		  		<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPrintConnection; ?></th>
 		  		<td style="border-bottom:1px solid #C3C7C3">
 		  			<textarea name="printconnection" cols="33" rows="2"><? echo $this->formvars['printconnection'] ?></textarea>
 		  		</td>
 		  	</tr>
     		<tr>
-		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strConnectionType; ?></th>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strConnectionType; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<select id="connectiontype" name="connectiontype">
 		      			<option value=""><?php echo $this->strPleaseSelect; ?></option>
@@ -216,25 +216,25 @@ else {
 		  		</td>
 		  	</tr>
 		  	<tr>
-		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strClassItem; ?></th>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strClassItem; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<input name="classitem" type="text" value="<?php echo $this->formvars['classitem']; ?>" size="25" maxlength="100">
 		  		</td>
 		  	</tr>
 		  	<tr>
-		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strFilterItem; ?></th>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strFilterItem; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<input name="filteritem" type="text" value="<?php echo $this->formvars['filteritem']; ?>" size="25" maxlength="100">
 		  		</td>
 		  	</tr>
 		  	<tr>
-		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTolerance; ?></th>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTolerance; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<input name="tolerance" type="text" value="<?php echo $this->formvars['tolerance']; ?>" size="25" maxlength="100">
 		  		</td>
 		  	</tr>
 		  	<tr>
-		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strToleranceUnits; ?>*</th>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strToleranceUnits; ?>*</th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<select name="toleranceunits">
 		      			<option value=""><?php echo $this->strPleaseSelect; ?></option>
@@ -244,7 +244,7 @@ else {
 		  		</td>
 		  	</tr>
 		  	<tr>
-		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strEpsgCode; ?></th>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strEpsgCode; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<select name="epsg_code">
 		      			<option value=""><?php echo $this->strPleaseSelect; ?></option>
@@ -263,13 +263,13 @@ else {
 		  		</td>
 		  	</tr>
 		  	<tr>
-		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strSelectionType; ?></th>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strSelectionType; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<input name="selectiontype" type="text" value="<?php echo $this->formvars['selectiontype']; ?>" size="25" maxlength="20">
 		  		</td>
 		  	</tr>
 				<tr>
-		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strQueryMap; ?></th>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strQueryMap; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<select name="querymap">
 		      			<option <? if($this->formvars['querymap'] == '0'){echo 'selected ';} ?>value="0"><?php echo $this->strNo; ?></option>
@@ -278,7 +278,7 @@ else {
 		  		</td>
 		  	</tr>
 				<tr>
-		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strProcessing; ?></th>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strProcessing; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		    	  <input name="processing" type="text" value="<?php echo $this->formvars['processing']; ?>" size="25" maxlength="255">
 						<img src="<?php echo GRAPHICSPATH;?>ikon_i.gif" onMouseOver="stm(Text[0], Style[0], document.getElementById('TipLayer2'))" onmouseout="htm()">
@@ -286,19 +286,19 @@ else {
 		    	</td>
 		  	</tr>
 		  	<tr>
-		  		<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDescribtion; ?></th>
+		  		<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDescribtion; ?></th>
 		  		<td style="border-bottom:1px solid #C3C7C3">
 		  			<textarea name="kurzbeschreibung" cols="33" rows="2"><? echo $this->formvars['kurzbeschreibung'] ?></textarea>
 		  		</td>
 		  	</tr>
 		  	<tr>
-		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDataOwner; ?></th>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDataOwner; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<input name="datenherr" type="text" value="<?php echo $this->formvars['datenherr']; ?>" size="25" maxlength="100">
 		  		</td>
 		  	</tr>
 		  	<tr>
-		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strMetaLink; ?></th>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strMetaLink; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<input name="metalink" type="text" value="<?php echo $this->formvars['metalink']; ?>" size="25" maxlength="255">
 		  		</td>
@@ -308,16 +308,16 @@ else {
 		  	
 		  <table border="0" cellspacing="0" cellpadding="3" style="border:1px solid <?php echo BG_DEFAULT ?>">
 		  	<tr align="center">
-		  		<th bgcolor="<?php echo BG_DEFAULT ?>" width="570" style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strDefaultValues; ?></th>
+		  		<th class="fetter" bgcolor="<?php echo BG_DEFAULT ?>" width="570" style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strDefaultValues; ?></th>
 		  	</tr>
 		  	<tr>
-		    	<th width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTemplate; ?></th>
+		    	<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTemplate; ?></th>
 		    	<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<input name="template" type="text" value="<?php echo $this->formvars['template']; ?>" size="25" maxlength="100">
 		  		</td>
 		  	</tr>
 		  	<tr>
-		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strQueryable; ?></th>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strQueryable; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<select name="queryable">
 		      			<option <? if($this->formvars['queryable'] == '0'){echo 'selected ';} ?>value="0"><?php echo $this->strNo; ?></option>
@@ -326,37 +326,37 @@ else {
 		  		</td>
 		  	</tr>
 		  	<tr>
-		    	<th width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strtransparency; ?></th>
+		    	<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strtransparency; ?></th>
 		    	<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<input name="transparency" type="text" value="<?php echo $this->formvars['transparency']; ?>" size="25" maxlength="3">
 		  		</td>
 		  	</tr>
 		  	<tr>
-		    	<th width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strdrawingorder; ?></th>
+		    	<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strdrawingorder; ?></th>
 		    	<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<input name="drawingorder" type="text" value="<?php echo $this->formvars['drawingorder']; ?>" size="25" maxlength="15">
 		  		</td>
 		  	</tr>
 		  	<tr>
-		    	<th width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strminscale; ?></th>
+		    	<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strminscale; ?></th>
 		    	<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<input name="minscale" type="text" value="<?php echo $this->formvars['minscale']; ?>" size="25" maxlength="15">
 		  		</td>
 		  	</tr>
 		  	<tr>
-		    	<th width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strmaxscale; ?></th>
+		    	<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strmaxscale; ?></th>
 		    	<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<input name="maxscale" type="text" value="<?php echo $this->formvars['maxscale']; ?>" size="25" maxlength="15">
 		  		</td>
 		  	</tr>
 				<tr>
-		    	<th width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strsymbolscale; ?></th>
+		    	<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strsymbolscale; ?></th>
 		    	<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<input name="symbolscale" type="text" value="<?php echo $this->formvars['symbolscale']; ?>" size="25" maxlength="15">
 		  		</td>
 		  	</tr>
 		  	<tr>
-		    	<th width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $stroffsite; ?></th>
+		    	<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $stroffsite; ?></th>
 		    	<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<input name="offsite" type="text" value="<?php echo $this->formvars['offsite']; ?>" size="25" maxlength="11">
 		  		</td>
@@ -366,7 +366,7 @@ else {
     	<a name="stellenzuweisung"></a>
       <table border="0" cellspacing="0" cellpadding="3" style="border:1px solid <?php echo BG_DEFAULT ?>">
 		  	<tr align="center">
-		  		<th bgcolor="<?php echo BG_DEFAULT ?>" width="570" style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strTasks; ?></th>
+		  		<th class="fetter" bgcolor="<?php echo BG_DEFAULT ?>" width="570" style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strTasks; ?></th>
 		  	</tr>
         <tr valign="top"> 
           <td align="right">Zugeordnete<br>
@@ -405,22 +405,22 @@ else {
 		  <br>
 		  <table border="0" cellspacing="0" cellpadding="3" style="border:1px solid <?php echo BG_DEFAULT ?>">
 		  	<tr align="center">
-		  		<th bgcolor="<?php echo BG_DEFAULT ?>" width="570" style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strOWSParameter; ?></th>
+		  		<th class="fetter" bgcolor="<?php echo BG_DEFAULT ?>" width="570" style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strOWSParameter; ?></th>
 		  	</tr>	
 		  	<tr>
-		    	<th width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsSrs; ?></th>
+		    	<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsSrs; ?></th>
 		    	<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<input name="ows_srs" type="text" value="<?php echo $this->formvars['ows_srs']; ?>" size="25" maxlength="100">
 		  		</td>
 		  	</tr>
 		  	<tr>
-		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWMSName; ?></th>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWMSName; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<input name="wms_name" type="text" value="<?php echo $this->formvars['wms_name']; ?>" size="25" maxlength="100">
 		  		</td>
 		  	</tr>
 		  	<tr>
-		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWMSServerVersion; ?></th>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWMSServerVersion; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<select name="wms_server_version">
 		      			<option value=""><?php echo $this->strPleaseSelect; ?></option>
@@ -432,7 +432,7 @@ else {
 		  		</td>
 		  	</tr>
 		  	<tr>
-		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWMSFormat; ?></th>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWMSFormat; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<select name="wms_format">
 		      			<option value=""><?php echo $this->strPleaseSelect; ?></option>
@@ -443,25 +443,25 @@ else {
 		  		</td>
 		  	</tr>
 		  	<tr>
-		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWMSConnectionTimeout; ?></th>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWMSConnectionTimeout; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<input name="wms_connectiontimeout" type="text" value="<?php echo $this->formvars['wms_connectiontimeout']; ?>" size="25" maxlength="100">
 		  		</td>
 		  	</tr>
 		  	<tr>
-		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWMSAuthUsername; ?></th>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWMSAuthUsername; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<input name="wms_auth_username" type="text" value="<?php echo $this->formvars['wms_auth_username']; ?>" size="25" maxlength="100">
 		  		</td>
 		  	</tr>
 		  	<tr>
-		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWMSAuthPassword; ?></th>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWMSAuthPassword; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<input name="wms_auth_password" type="text" value="<?php echo $this->formvars['wms_auth_password']; ?>" size="25" maxlength="100">
 		  		</td>
 		  	</tr>
 		  	<tr>
-		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWFS_geom; ?></th>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWFS_geom; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<input name="wfs_geom" type="text" value="<?php echo $this->formvars['wfs_geom']; ?>" size="25" maxlength="100">
 		  		</td>
@@ -482,7 +482,7 @@ else {
 		<? if($this->formvars['selected_layer_id']){ ?>
 		<table border="0" cellspacing="0" cellpadding="3" style="border:1px solid <?php echo BG_DEFAULT ?>">
 			<tr>
-				<th bgcolor="<?php echo BG_DEFAULT ?>" style="border-bottom:1px solid #C3C7C3" colspan="5"><a name="Klassen"></a><?php echo $strClasses; ?></th>
+				<th class="fetter" bgcolor="<?php echo BG_DEFAULT ?>" style="border-bottom:1px solid #C3C7C3" colspan="5"><a name="Klassen"></a><?php echo $strClasses; ?></th>
 			</tr>
 			<tr>
 			  <td style="border-bottom:1px solid #C3C7C3">&nbsp;<?php echo $strID; ?></td>

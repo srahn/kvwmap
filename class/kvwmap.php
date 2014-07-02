@@ -910,7 +910,7 @@ class GUI extends GUI_core{
       for($i = 0; $i < count($this->styledaten); $i++){
         echo'
           <tr>
-            <td class="verysmall">';
+            <td class="px13">';
               echo key($this->styledaten).'</td><td><input ';
               if($i === 0)echo 'onkeyup="if(event.keyCode != 8)get_style(this.value)"';
               echo ' name="style_'.key($this->styledaten).'" size="11" type="text" value="'.$this->styledaten[key($this->styledaten)].'">';
@@ -944,7 +944,7 @@ class GUI extends GUI_core{
       for($i = 0; $i < count($this->labeldaten); $i++){
         echo'
           <tr>
-            <td class="verysmall">';
+            <td class="px13">';
               echo key($this->labeldaten).'</td><td><input name="label_'.key($this->labeldaten).'" size="11" type="text" value="'.$this->labeldaten[key($this->labeldaten)].'">';
         echo'
             </td>
@@ -1025,7 +1025,7 @@ class GUI extends GUI_core{
 		$layercount = count($this->groups_with_layers[$group_id]);
     if($groupstatus == 1){		# Gruppe aufgeklappt
 			for($u = 0; $u < count($this->groupset[$group_id]['untergruppen']); $u++){			# die Untergruppen rekursiv durchlaufen
-				$legend .= '<tr><td><table cellspacing="0" cellpadding="0" style="width:100%"><tr><td>&nbsp;&nbsp;&nbsp;</td><td style="width: 100%">';
+				$legend .= '<tr><td><table cellspacing="0" cellpadding="0" style="width:100%"><tr><td><img src="'.GRAPHICSPATH.'leer.gif" width="13" height="1" border="0"></td><td style="width: 100%">';
 				$legend .= $this->create_group_legend($this->groupset[$group_id]['untergruppen'][$u]);
 				$legend .= '</td></tr></table></td></tr>';
 			}
@@ -1041,7 +1041,7 @@ class GUI extends GUI_core{
 													<a href="javascript:selectgroupthema(document.GUI.layers_of_group_'.$group_id.')"><img border="0" src="graphics/pfeil.gif" title="Alle Themen ein/ausschalten"></a>
 												</td>
 												<td>
-													alle
+													<span class="legend_layer">alle</span>
 												</td>
 											</tr>';
 				}
@@ -1052,7 +1052,6 @@ class GUI extends GUI_core{
 					if($visible){
 						if($layer['requires'] == ''){
 							$legend .= '<tr><td valign="top">';
-							#$legend .=  '&nbsp;&nbsp;';
 							if($layer['queryable'] == 1 AND !$this->formvars['nurFremdeLayer']){
 								$legend .=  '<input id="qLayer'.$layer['Layer_ID'].'" title="Abfrage ein/ausschalten" ';
 								
@@ -1191,17 +1190,17 @@ class GUI extends GUI_core{
 										$classid = $layer['Class'][$k]['Class_ID'];
 										if($this->mapDB->disabled_classes['status'][$classid] == '0'){
 											$legend .= '<tr>
-													<td><input type="hidden" size="2" name="class'.$classid.'" value="0"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img border="0" name="imgclass'.$classid.'" src="graphics/inactive.jpg"></a>&nbsp;<span class="small">'.html_umlaute($class->name).'</span></td>
+													<td><input type="hidden" size="2" name="class'.$classid.'" value="0"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img border="0" name="imgclass'.$classid.'" src="graphics/inactive.jpg"></a>&nbsp;<span class="px13">'.html_umlaute($class->name).'</span></td>
 													</tr>';
 										}
 										elseif($this->mapDB->disabled_classes['status'][$classid] == 2){
 											$legend .= '<tr>
-													<td><input type="hidden" size="2" name="class'.$classid.'" value="2"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img border="0" name="imgclass'.$classid.'" src="'.TEMPPATH_REL.$newname.'"></a>&nbsp;<span class="small">'.html_umlaute($class->name).'</span></td>
+													<td><input type="hidden" size="2" name="class'.$classid.'" value="2"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img border="0" name="imgclass'.$classid.'" src="'.TEMPPATH_REL.$newname.'"></a>&nbsp;<span class="px13">'.html_umlaute($class->name).'</span></td>
 													</tr>';
 										}
 										else{
 											$legend .= '<tr>
-													<td><input type="hidden" size="2" name="class'.$classid.'" value="1"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img border="0" name="imgclass'.$classid.'" src="'.TEMPPATH_REL.$newname.'"></a>&nbsp;<span class="small">'.html_umlaute($class->name).'</span></td>
+													<td><input type="hidden" size="2" name="class'.$classid.'" value="1"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img border="0" name="imgclass'.$classid.'" src="'.TEMPPATH_REL.$newname.'"></a>&nbsp;<span class="px13">'.html_umlaute($class->name).'</span></td>
 													</tr>';
 										}
 									}
@@ -8161,7 +8160,7 @@ class GUI extends GUI_core{
 
   function layer_attributes_privileges(){
     $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-    $this->titel='Rechteverwaltung der Layerattribute';
+    $this->titel='Layer-Rechteverwaltung';
     $this->main='attribut_privileges_form.php';   
 		$this->layerdaten = $mapdb->get_postgis_layers('Name');    
     if($this->formvars['selected_layer_id'] != ''){

@@ -18,18 +18,18 @@ function selectall(count){
 
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
-    <td><br><strong><font size="+1"><?php echo $this->titel; ?></font></strong><br><br></td>
+    <td><br><h2><?php echo $this->titel; ?></h2><br><br></td>
   </tr>
   <tr>
     <td align="center">      
 		<table border="0" cellspacing="0" cellpadding="5" style="border:1px solid #C3C7C3">
 			<tr>
-	    	<td align="right" style="border-bottom:1px solid #C3C7C3"><b><?php echo $strMapdata; ?> </b></td>
+	    	<td align="right" style="border-bottom:1px solid #C3C7C3"><span class="fett"><?php echo $strMapdata; ?> </span></td>
 	    	<td style="border-bottom:1px solid #C3C7C3">&nbsp;<input class="button" type="file" name="mapfile" size="12"></td>
 	    	<td style="border-bottom:1px solid #C3C7C3"><input class="button" type="submit" name="go_plus" value="<?php echo $strButtonDataLoad; ?>"></td>
 	  	</tr>
 			<tr>
-	    	<td align="right" style="border-bottom:1px solid #C3C7C3"><b><?php echo $strZipArchives; ?> </b></td>
+	    	<td align="right" style="border-bottom:1px solid #C3C7C3"><span class="fett"><?php echo $strZipArchives; ?> </span></td>
 	    	<td style="border-bottom:1px solid #C3C7C3">&nbsp;<input class="button" type="file" name="zipfile" size="12"></td>
 	    	<td style="border-bottom:1px solid #C3C7C3"><input class="button" type="submit" name="go_plus" value="<?php echo $strButtonDataLoad; ?>"></td>
 	  	</tr>
@@ -37,7 +37,7 @@ function selectall(count){
 			if(count($this->mapfiles) > 0){
 				echo '
 					<tr>
-						<td colspan="3" align="center"><b>'.count($this->mapfiles).'&nbsp;Mapfiles&nbsp;in '.$this->formvars['zipfile'].' gefunden:</b></td>
+						<td colspan="3" align="center"><span class="fett">'.count($this->mapfiles).'&nbsp;Mapfiles&nbsp;in '.$this->formvars['zipfile'].' gefunden:</span></td>
 					</tr>
 				';
 				for($i = 0; $i < count($this->mapfiles); $i++){
@@ -55,7 +55,7 @@ function selectall(count){
 				if($this->mapobject->fontsetfilename != '' OR $this->mapobject->symbolsetfilename != ''){
 					echo '
 						<tr>
-							<td colspan="3" align="center"><b>Symbole und Fonts hinzufügen?</b></td>
+							<td colspan="3" align="center"><span class="fett">Symbole und Fonts hinzufügen?</span></td>
 						</tr>
 					';
 				}
@@ -77,7 +77,7 @@ function selectall(count){
 				}
 				echo '
 					<tr>
-						<td colspan="3" align="center"><b>'.count($this->layers).' Layer in '.basename($this->formvars['mapfile']).' gefunden:</b></td>
+						<td colspan="3" align="center"><span class="fett">'.count($this->layers).' Layer in '.basename($this->formvars['mapfile']).' gefunden:</span></td>
 					</tr>
 					<tr>
 						<td colspan="3" align="right"><input class="button" type="button" value="alle auswählen" name="alleauswaehlen" onClick="selectall('.count($this->layers).')"></td>

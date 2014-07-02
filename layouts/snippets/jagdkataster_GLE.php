@@ -257,7 +257,7 @@ function change_orderby(attribute, layer_id){
 								if($this->qlayerset[$i]['attributes']['alias'][$j] == ''){
 									$this->qlayerset[$i]['attributes']['alias'][$j] = $this->qlayerset[$i]['attributes']['name'][$j];
 								}
-								echo '<table width="100%"><tr><td><a style="font-size: '.$this->user->rolle->fontsize_gle.'px" title="Sortieren nach '.$this->qlayerset[$i]['attributes']['alias'][$j].'" style="color: #6c6c6c;" href="javascript:change_orderby(\''.$this->qlayerset[$i]['attributes']['name'][$j].'\', '.$this->qlayerset[$i]['Layer_ID'].');"><b>'.$this->qlayerset[$i]['attributes']['alias'][$j].'</b></a>';
+								echo '<table width="100%"><tr><td><a style="font-size: '.$this->user->rolle->fontsize_gle.'px" title="Sortieren nach '.$this->qlayerset[$i]['attributes']['alias'][$j].'" style="color: #6c6c6c;" href="javascript:change_orderby(\''.$this->qlayerset[$i]['attributes']['name'][$j].'\', '.$this->qlayerset[$i]['Layer_ID'].');"><span class="fett">'.$this->qlayerset[$i]['attributes']['alias'][$j].'</span></a>';
 								if ($this->qlayerset[$i]['attributes']['tooltip'][$j]!='' AND $this->qlayerset[$i]['attributes']['form_element_type'][$j] != 'Time') {
 								  echo '<td align="right"><a href="#" title="'.$this->qlayerset[$i]['attributes']['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
 								}
@@ -271,7 +271,7 @@ function change_orderby(attribute, layer_id){
 								if($this->qlayerset[$i]['attributes']['alias'][$j] == ''){
 									$this->qlayerset[$i]['attributes']['alias'][$j] = $this->qlayerset[$i]['attributes']['name'][$j];
 								}
-								echo '<table width="100%"><tr><td><a style="font-size: '.$this->user->rolle->fontsize_gle.'px" title="Sortieren nach '.$this->qlayerset[$i]['attributes']['alias'][$j].'" style="color: #6c6c6c;" href="javascript:change_orderby(\''.$this->qlayerset[$i]['attributes']['name'][$j].'\', '.$this->qlayerset[$i]['Layer_ID'].');"><b>'.$this->qlayerset[$i]['attributes']['alias'][$j].'</b></a>';
+								echo '<table width="100%"><tr><td><a style="font-size: '.$this->user->rolle->fontsize_gle.'px" title="Sortieren nach '.$this->qlayerset[$i]['attributes']['alias'][$j].'" style="color: #6c6c6c;" href="javascript:change_orderby(\''.$this->qlayerset[$i]['attributes']['name'][$j].'\', '.$this->qlayerset[$i]['Layer_ID'].');"><span class="fett">'.$this->qlayerset[$i]['attributes']['alias'][$j].'</span></a>';
 								if ($this->qlayerset[$i]['attributes']['tooltip'][$j]!='' AND $this->qlayerset[$i]['attributes']['form_element_type'][$j] != 'Time') {
 								  echo '<td align="right"><a href="#" title="'.$this->qlayerset[$i]['attributes']['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
 								}

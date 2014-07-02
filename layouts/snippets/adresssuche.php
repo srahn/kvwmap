@@ -52,21 +52,21 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 </tr>
 //-->
   <tr <? if($this->FormObject["Gemarkungen"]->selected){ echo 'style="display:none"'; }?>>
-    <td align="right"><span class="fett px15"><?php echo $strGem; ?>:&nbsp;</span></td>
+    <td align="right"><span class="fett"><?php echo $strGem; ?>:&nbsp;</span></td>
     <td colspan="3"><?php echo $this->FormObject["Gemeinden"]->html; ?><!-- Name GemID //-->
     </td>
   </tr>
   <tr <? if($this->FormObject["Gemeinden"]->selected){ echo 'style="display:none"'; }?>>
-    <td align="right"><span class="fett px15"><?php echo $strGemkg; ?>:&nbsp;</span></td>
+    <td align="right"><span class="fett"><?php echo $strGemkg; ?>:&nbsp;</span></td>
     <td colspan="3"><?php echo $this->FormObject["Gemarkungen"]->html; ?><!-- Name GemkgID //-->
     </td>
   </tr>
   <tr>
-    <td align="right"><span class="fett px15"><?php echo $strStreet; ?>:&nbsp;</span></td>
+    <td align="right"><span class="fett"><?php echo $strStreet; ?>:&nbsp;</span></td>
     <td colspan="3"><?php echo $this->FormObject["Strassen"]->html; ?><!-- Name StrID //--></td>
   </tr>
   <tr>
-    <td align="right"><span class="fett px15"><?php echo $strHnr; ?>:&nbsp;</span></td>
+    <td align="right"><span class="fett"><?php echo $strHnr; ?>:&nbsp;</span></td>
     <td>
     <? if($this->FormObject["selectedHausNr"]->html != ''){ ?>
     	<?php echo $strSelected; ?>:<br>

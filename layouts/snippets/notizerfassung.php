@@ -72,14 +72,15 @@ function neu(){
 if ($this->Fehlermeldung!='') {
   include(LAYOUTPATH."snippets/Fehlermeldung.php");
 }
-?><strong><font size="+1"> </font></strong> 
+?>
+<br> 
 <table border="0" cellspacing="0" cellpadding="2">
   <tr align="center"> 
-    <td colspan="2"><strong><font size="+1"> 
+    <td colspan="2"><h2> 
       <?php echo $strTitle; ?>
       <input type="hidden" name="go" value="Notizenformular">
       <input type="hidden" name="oid" value="<?php echo $this->formvars['oid']; ?>">
-      </font></strong></td>
+      </h2></td>
   </tr>
   <tr align="center"> 
     <td rowspan="2" valign="top" align="left"><?php echo $strNotice; ?><br>

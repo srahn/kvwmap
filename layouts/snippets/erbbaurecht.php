@@ -105,56 +105,56 @@ function go_back(){
 	<h2>Erbbaurechte</h2>	   
 	<table border="0" cellspacing="2" cellpadding="2">
 	  <tr>
-	  	<td><b>Flurstück</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>Form</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>Größe</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>Beginn</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>Ak.zeichen</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>Pacht</b></td>
+	  	<td><span class="fett">Flurstück</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">Form</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">Größe</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">Beginn</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">Ak.zeichen</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">Pacht</span></td>
 	  </tr>
 	  <tr>
-	  	<td><b>Lage</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>Art</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>Vertragsfläche</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>Ende</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>Gbs/Nr.</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>&nbsp;</b></td>
+	  	<td><span class="fett">Lage</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">Art</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">Vertragsfläche</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">Ende</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">Gbs/Nr.</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
 	  </tr>
 	  <tr>
-	  	<td><b>Bereich</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>Projekt</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>&nbsp;</b></td>
+	  	<td><span class="fett">Bereich</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">Projekt</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
 	  </tr>
 	  <tr>
-	  	<td><b>Lfdnr</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>1.Erbbauberechtigter</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>&nbsp;</b></td>
-	  	<td><b>&nbsp;</b></td>
+	  	<td><span class="fett">Lfdnr</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">1.Erbbauberechtigter</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
+	  	<td><span class="fett">&nbsp;</span></td>
 	  </tr>
 	  <?php
 		for ($j=0;$j<$anzObj;$j++) {
@@ -209,15 +209,15 @@ function go_back(){
 	  </tr> 	
 		<tr>
 			<td><?php echo $this->qlayerset[$i]['shape'][$j]['flurstkennz']; ?></td>
-			<td><b>&nbsp;</b></td>
+			<td><span class="fett">&nbsp;</span></td>
 			<td><?php echo $form_txt[0]; ?></td>
-			<td><b>&nbsp;</b></td>
+			<td><span class="fett">&nbsp;</span></td>
 			<td><?php echo $this->qlayerset[$i]['shape'][$j]['flaeche']; ?></td>
-			<td><b>&nbsp;</b></td>
+			<td><span class="fett">&nbsp;</span></td>
 			<td><?php echo $this->qlayerset[$i]['shape'][$j]['vertragsbeginn']; ?></td>
-			<td><b>&nbsp;</b></td>
+			<td><span class="fett">&nbsp;</span></td>
 			<td><?php echo $this->qlayerset[$i]['shape'][$j]['urkunde_az']; ?></td>
-			<td><b>&nbsp;</b></td>
+			<td><span class="fett">&nbsp;</span></td>
 			<td rowspan="3" valign="top"><?php echo $this->qlayerset[$i]['shape'][$j]['festsetzung']; ?></td>
 		</tr>
 		<tr>

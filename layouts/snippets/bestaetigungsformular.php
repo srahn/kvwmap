@@ -1,6 +1,6 @@
 <table width="100%" height="100" border="0" cellpadding="5" cellspacing="0">
   <tr> 
-    <td colspan="2" bgcolor="<?php echo BG_FORM ?>"><div align="center"><strong><?php echo $this->titel; ?></strong></div></td>
+    <td colspan="2" bgcolor="<?php echo BG_FORM ?>"><div align="center"><h2><?php echo $this->titel; ?></h2></div></td>
   </tr>
   <tr> 
     <td colspan="2" bgcolor="<?php echo BG_FORM ?>"><div align="center"><?php echo $this->formvars['nachfrage']; ?></div></td>

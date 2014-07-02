@@ -208,7 +208,7 @@ redraw();
 					<set attributeName="filter" begin="undo.mouseup;undo.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
 				</rect>
         <g transform="scale(0.7) translate(-5 0)">
-          <text x="9" y="15" font-weight="bold"> 
+          <text x="9" y="15" font-weight="fett"> 
           undo</text>
           <g id="pfeil_links" transform="matrix(-1 0 0 1 100 -25) scale(0.5) rotate(180) translate(-345 -152)">
             <polygon points="178.579,57.7353 164.258,51.2544 178.96,44.515 174.48,51.1628" style="fill:rgb(0,0,0);stroke-width:2"/>
@@ -244,7 +244,7 @@ redraw();
 				<set attributeName="filter" begin="pgon.mouseup;pgon.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
 			</rect>
 			<g transform="scale(0.7) translate(-5 0)">
-				<text x="23" y="15" font-weight="bold" text-anchor="middle">
+				<text x="23" y="15" font-weight="fett" text-anchor="middle">
 				pgon</text>
 				<g transform="matrix(-1 0 0 1 118 0) scale(0.5)">
 					<rect x="170" y="45" rx="5" ry="5" width="40" height="14" style="fill:none;stroke:rgb(0,0,0);stroke-width:4"/>

@@ -13,7 +13,7 @@
 
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
-    <td><strong><font size="+1"><?php echo $this->titel; ?></font></strong></td>
+    <td><h2><?php echo $this->titel; ?></h2></td>
   </tr>
   <tr>
   	<td><iframe width="1020" height="700" id="meta" src="<? echo METADATA_SEARCH_LINK; ?>"></iframe></td>

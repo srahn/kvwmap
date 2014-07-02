@@ -220,7 +220,7 @@ function add_searchmask(layer_id){
   </tr>
   <tr> 
     <td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3" colspan="5"> 
-      <select style="width:250px" size="1" class="select" name="selected_group_id" onchange="document.GUI.selected_layer_id.value='';document.GUI.submit();" <? if(count($this->layergruppen['ID'])==0){ echo 'disabled';}?>>
+      <select style="width:250px" size="1"  name="selected_group_id" onchange="document.GUI.selected_layer_id.value='';document.GUI.submit();" <? if(count($this->layergruppen['ID'])==0){ echo 'disabled';}?>>
         <option value="">  -- <? echo $this->strPleaseSelect; ?> --  </option>
         <?
         for($i = 0; $i < count($this->layergruppen['ID']); $i++){         
@@ -239,7 +239,7 @@ function add_searchmask(layer_id){
   </tr>
   <tr> 
     <td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3" colspan="5"> 
-      <select style="width:250px" size="1" class="select" name="selected_layer_id" onchange="document.GUI.submit();" <? if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
+      <select style="width:250px" size="1"  name="selected_layer_id" onchange="document.GUI.submit();" <? if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
         <option value="">  -- <? echo $this->strPleaseSelect; ?> --  </option>
         <?
         for($i = 0; $i < count($this->layerdaten['ID']); $i++){         

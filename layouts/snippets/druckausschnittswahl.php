@@ -123,19 +123,18 @@ function remove(){
 	  $bgcolor=BG_FORMFAIL;
 		showAlert('Fehler bei der Eingabe:\n'.$this->Meldung);
 }
- ?> <strong><font size="+1"> </font></strong> 
+ ?> 
+ <br>
 <table border="0" cellspacing="2" cellpadding="2">
   <tr align="center"> 
-    <td colspan="4"><strong><font size="+1"> 
-      <?php echo $strTitle; ?><br><br>
-      </font></strong>
+    <td colspan="4"><h2><? echo $strTitle; ?></h2><br>
     </td>
   </tr>
   <tr align="center"> 
     <td colspan="4"> 
       <input class="button" type="button" name="vorschau" value="<?php echo $strButtonPrintPreview; ?>" onclick="preview();">
       <input class="button" type="button" name="drucken" value="<?php echo $strButtonPrint; ?>" onclick="druck_pdf();">
-      <br><br>
+      <br>
     </td>
   </tr>
 	<tr align="center"> 

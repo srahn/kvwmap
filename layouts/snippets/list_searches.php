@@ -23,7 +23,7 @@
 				for($i = 0; $i < count($this->searches); $i++){
 					if($layer_id != $this->searches[$i]['layer_id']){	?>
 						<tr>
-							<td colspan="3" style="background-color:<? echo BG_GLEATTRIBUTE; ?>;border:1px solid #C3C7C3"><b><? echo $this->searches[$i]['layername']; ?></b></td>
+							<td colspan="3" style="background-color:<? echo BG_GLEATTRIBUTE; ?>;border:1px solid #C3C7C3"><span class="fett"><? echo $this->searches[$i]['layername']; ?></span></td>
 						</tr>
 		<?		}
 					$layer_id = $this->searches[$i]['layer_id'];

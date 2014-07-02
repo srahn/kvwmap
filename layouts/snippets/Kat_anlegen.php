@@ -1,6 +1,6 @@
 <strong><font size="+2"><?php echo $this->titel; ?></font></strong>
 <br><br>
-<strong><font size="+1">Neue Kategorie hinzufügen</font></strong>
+<h2>Neue Kategorie hinzufügen</h2>
 <br>
 <br>
 <table align="center" border="1" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>" rules="groups">

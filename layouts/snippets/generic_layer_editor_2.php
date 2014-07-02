@@ -67,7 +67,7 @@
 			    <tr>
 			      <td>
 			        <input id="<? echo $layer['Layer_ID'].'_'.$k; ?>" type="checkbox" name="check;<? echo $attributes['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>">&nbsp;
-			        <span class="px15" style="color:<? echo TXT_GLEHEADER; ?>;"><? echo $strSelectThisDataset; ?></span>
+			        <span style="color:<? echo TXT_GLEHEADER; ?>;"><? echo $strSelectThisDataset; ?></span>
 			      </td>
 			      <td align="right">
 			      	<? if($layer['privileg'] > '0'){ ?>
@@ -110,12 +110,12 @@
 									<td colspan="2" width="100%">
 										<table width="100%" id="colgroup'.$layer['Layer_ID'].'_'.$j.'_'.$k.'" class="tgle" '; if(!$collapsed)$datapart .= 'style="display:none"'; $datapart .= ' border="2"><tbody width="100%" class="gle">
 											<tr>
-												<td width="100%" bgcolor="'.BG_GLEATTRIBUTE.'" colspan="2">&nbsp;<a href="javascript:void(0);" onclick="javascript:document.getElementById(\'group'.$layer['Layer_ID'].'_'.$j.'_'.$k.'\').style.display=\'\';document.getElementById(\'colgroup'.$layer['Layer_ID'].'_'.$j.'_'.$k.'\').style.display=\'none\';"><img border="0" src="'.GRAPHICSPATH.'/plus.gif"></a>&nbsp;&nbsp;<span class="fett px15">'.$groupname.'</span></td>
+												<td width="100%" bgcolor="'.BG_GLEATTRIBUTE.'" colspan="2">&nbsp;<a href="javascript:void(0);" onclick="javascript:document.getElementById(\'group'.$layer['Layer_ID'].'_'.$j.'_'.$k.'\').style.display=\'\';document.getElementById(\'colgroup'.$layer['Layer_ID'].'_'.$j.'_'.$k.'\').style.display=\'none\';"><img border="0" src="'.GRAPHICSPATH.'/plus.gif"></a>&nbsp;&nbsp;<span class="fett">'.$groupname.'</span></td>
 											</tr>
 										</table>
 										<table width="100%" class="tgle" id="group'.$layer['Layer_ID'].'_'.$j.'_'.$k.'" '; if($collapsed)$datapart .= 'style="display:none"'; $datapart .= 'border="2"><tbody class="gle">
 											<tr>
-												<td bgcolor="'.BG_GLEATTRIBUTE.'" colspan="2">&nbsp;<a href="javascript:void(0);" onclick="javascript:document.getElementById(\'group'.$layer['Layer_ID'].'_'.$j.'_'.$k.'\').style.display=\'none\';document.getElementById(\'colgroup'.$layer['Layer_ID'].'_'.$j.'_'.$k.'\').style.display=\'\';"><img border="0" src="'.GRAPHICSPATH.'/minus.gif"></a>&nbsp;&nbsp;<span class="fett px15">'.$groupname.'</span></td>
+												<td bgcolor="'.BG_GLEATTRIBUTE.'" colspan="2">&nbsp;<a href="javascript:void(0);" onclick="javascript:document.getElementById(\'group'.$layer['Layer_ID'].'_'.$j.'_'.$k.'\').style.display=\'none\';document.getElementById(\'colgroup'.$layer['Layer_ID'].'_'.$j.'_'.$k.'\').style.display=\'\';"><img border="0" src="'.GRAPHICSPATH.'/minus.gif"></a>&nbsp;&nbsp;<span class="fett">'.$groupname.'</span></td>
 											</tr>';
 				}
 				
@@ -328,7 +328,7 @@
 			<table border="0">
 				<tr>
 					<td colspan="2">
-						<i><? echo $layer['Name'] ?></i>:&nbsp;<a href="javascript:selectall(<? echo $layer['Layer_ID']; ?>);">
+						<i><? echo $layer['Name'] ?></i>:&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:selectall(<? echo $layer['Layer_ID']; ?>);">
 						<? if ($layer['count'] > MAXQUERYROWS) {
 						    echo $strSelectAllShown;
 						   } else {
@@ -346,15 +346,15 @@
 				<tr>
 					<td>
 					<? if($layer['privileg'] == '2'){ ?>
-						&nbsp;&nbsp;&bull;&nbsp;<a href="javascript:delete_datasets(<?php echo $layer['Layer_ID']; ?>);"><? echo $strdelete; ?></a><br>
+						&nbsp;&nbsp;&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:delete_datasets(<?php echo $layer['Layer_ID']; ?>);"><? echo $strdelete; ?></a><br>
 					<?} if($layer['export_privileg'] == '1'){ ?>
-						&nbsp;&nbsp;&bull;&nbsp;<a id="csv_link" href="javascript:csv_export(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCSVExport; ?></a><br>
-						&nbsp;&nbsp;&bull;&nbsp;<a id="shape_link" href="javascript:shape_export(<?php echo $layer['Layer_ID']; ?>);"><? echo $strShapeExport; ?></a><br>
+						&nbsp;&nbsp;&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" id="csv_link" href="javascript:csv_export(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCSVExport; ?></a><br>
+						&nbsp;&nbsp;&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" id="shape_link" href="javascript:shape_export(<?php echo $layer['Layer_ID']; ?>);"><? echo $strShapeExport; ?></a><br>
 					<? } if($layer['layouts']){ ?>
-						&nbsp;&nbsp;&bull;&nbsp;<a id="print_link" href="javascript:print_data(<?php echo $layer['Layer_ID']; ?>);"><? echo $strPrint; ?></a><br>
+						&nbsp;&nbsp;&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" id="print_link" href="javascript:print_data(<?php echo $layer['Layer_ID']; ?>);"><? echo $strPrint; ?></a><br>
 					<? } ?>
 					<? if($privileg != ''){ ?>
-						&nbsp;&nbsp;&bull;&nbsp;<a href="javascript:zoomto_datasets(<?php echo $layer['Layer_ID']; ?>, '<? echo $tablename; ?>', '<? echo $columnname; ?>');"><? echo $strzoomtodatasets; ?></a>
+						&nbsp;&nbsp;&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:zoomto_datasets(<?php echo $layer['Layer_ID']; ?>, '<? echo $tablename; ?>', '<? echo $columnname; ?>');"><? echo $strzoomtodatasets; ?></a>
 						<select style="width: 130px" name="klass_<?php echo $layer['Layer_ID']; ?>">
 							<option value="">klassifiziert nach:</option>
 							<?
@@ -369,14 +369,14 @@
 					</td>
 					<? if($layer['export_privileg'] == '1'){ ?>
 					<td valign="top" colspan="3">
-						&nbsp;&nbsp;&bull;&nbsp;<a id="csv_link" href="javascript:csv_export_all(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCSVExport; ?></a><br>
-						&nbsp;&nbsp;&bull;&nbsp;<a id="csv_link" href="javascript:shape_export_all(<?php echo $layer['Layer_ID']; ?>, <? echo $layer['count']; ?>);"><? echo $strShapeExport; ?></a>
+						&nbsp;&nbsp;&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" id="csv_link" href="javascript:csv_export_all(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCSVExport; ?></a><br>
+						&nbsp;&nbsp;&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" id="csv_link" href="javascript:shape_export_all(<?php echo $layer['Layer_ID']; ?>, <? echo $layer['count']; ?>);"><? echo $strShapeExport; ?></a>
 					</td>
 					<? } ?>
 				</tr>
 				<tr style="display:none">
 					<td height="23" colspan="3">
-						&nbsp;&nbsp;&bull;&nbsp;<a href="javascript:showcharts(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCreateChart; ?></a>
+						&nbsp;&nbsp;&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:showcharts(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCreateChart; ?></a>
 					</td>
 				</tr>
 				<tr id="charts_<?php echo $layer['Layer_ID']; ?>" style="display:none">

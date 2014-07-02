@@ -9,9 +9,9 @@ else {
  ?> 
 <table border="0" cellspacing="0" cellpadding="2">
   <tr> 
-    <td colspan="2" align="center"><strong><font size="+1"> 
+    <td colspan="2" align="center"><h2> 
       <?php echo $this->titel; ?>
-      </font></strong> 
+      </h2> 
       <?php
 	 if ($this->Fehlermeldung!='') {
 	   include(LAYOUTPATH."snippets/Fehlermeldung.php");

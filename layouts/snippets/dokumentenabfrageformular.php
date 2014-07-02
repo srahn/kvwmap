@@ -101,9 +101,9 @@ else {
 }
  ?>
 
-<table border="0" cellpadding="4" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
+<table style="border: 1px solid; border-color: #eeeeee; border-left: none; border-right: none" border="0" cellpadding="4" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr> 
-    <td colspan="3"> <div align="center"></div>      <div align="center"><strong><font size="+1"><?php echo $this->titel; ?></font></strong> 
+    <td colspan="3"> <div align="center"></div>      <div align="center"><h2><?php echo $this->titel; ?></h2> 
     </div></td>
   </tr>
   <tr> 
@@ -152,7 +152,7 @@ else {
           <td rowspan="7" valign="top"><input type="radio" name="abfrageart" value="indiv_nr" <?php if ($this->formvars['abfrageart']=='indiv_nr') { ?> checked<?php } ?>>
           </td>
         </tr>
-		<tr><td colspan="3"><strong>Auswahl über Attribute<br></strong></td></tr>
+		<tr><td colspan="3"><span class="fett">Auswahl über Attribute<br></span></td></tr>
         <tr>
           <td colspan="3">
 			Gemarkung:<br>
@@ -214,11 +214,11 @@ else {
   </tr>
   <tr> 
     <td height="35px" colspan="2"><input type="radio" name="abfrageart" value="poly" <?php if ($this->formvars['abfrageart']=='poly' OR $this->formvars['abfrageart']=='') { ?> checked<?php } ?>> 
-   <strong>Auswahl im Kartenausschnitt über Suchpolygon</strong></td>
+   <span class="fett">Auswahl im Kartenausschnitt über Suchpolygon</span></td>
   </tr>
   <tr> 
     <td colspan="2"><input type="radio" name="abfrageart" value="antr_nr" <?php if ($this->formvars['abfrageart']=='antr_nr') { ?> checked<?php } ?>>
-		<strong>Vorbereitungsnummer:</strong>
+		<span class="fett">Vorbereitungsnummer:</span>
       <?php $this->FormObjAntr_nr->outputHTML();
         echo $this->FormObjAntr_nr->html;?>
     </td>

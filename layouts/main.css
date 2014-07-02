@@ -1,11 +1,3 @@
-body {  
-	font-family: SourceSansPro1, Arial, Verdana, Helvetica, sans-serif;
-	BACKGROUND:white;
-	margin-left:0px;
-	margin-top:0px;
-	font-size: 14px;
-}
-
 @font-face {
   font-family: 'SourceSansPro';
   font-style: normal;
@@ -31,16 +23,50 @@ body {
   src: local('SourceSansPro3'), url(http://themes.googleusercontent.com/static/fonts/sourcesanspro/v7/toadOcfmlt9b38dHJxOBGFkQc6VGVFSmCnC_l7QZG60.woff) format('woff');
 }
 
+body {  
+	font-family: SourceSansPro1, Arial, Verdana, Helvetica, sans-serif;
+	BACKGROUND:white;
+	margin:0px;
+	font-size: 15px;
+}
+
+form {
+	margin: 0;
+	padding: 0;
+} 
+
 .fett{
 	font-family: SourceSansPro2;
+	line-height: 18px;
+}
+
+.fetter{
+	font-family: SourceSansPro3;
+}
+
+.px13 {
+	font-size: 13px;
+}
+
+.px14 {
+	font-size: 14px;
 }
 
 .px15{
 	font-size: 15px;
 }
 
+.px16{
+	font-size: 16px;
+}
+
+.px20{
+	font-size: 20px;
+}
+
+
 h1 {  
-	font-size: 20pt; 
+	font-size: 24px; 
 	margin-top: 0px; 
 	margin-bottom: 0px; 
 	padding-top: 0px; 
@@ -49,19 +75,20 @@ h1 {
 
 h2 {
 	font-family: SourceSansPro3;
-	font-size: 18px; 
+	font-size: 20px; 
 	margin-bottom: 0px;
 	margin-top: 0px;
 }
 
+
 input[type="text"]{
 	font-size: 14px;
 	font-family: SourceSansPro1;
-	height: 21px;
+	height: 22px;
 }
 
 input[type="file"] {
-	font-size: 14px;
+	font-size: 15px;
 	font-family: SourceSansPro1;
 	height: 24px;
 }
@@ -73,8 +100,8 @@ input[type="button"], input[type="reset"], input[type="submit"] {
 	line-height : 15px;
 }
 
-.transparent_input{
-	font-size: 14px;
+input[type="text"].transparent_input{
+	font-size: 15px;
 	font-family: SourceSansPro1;
 	border:0px;
 	background-color:	transparent;
@@ -86,17 +113,24 @@ select {
   padding: 0 0;
 }
 
-.textarea {
-	font-size: 14px;
-}
-
-td {  
+textarea {
 	font-size: 14px;
 	font-family: SourceSansPro1;
 }
 
-th {  
+td {  
 	font-size: 15px;
+	line-height: 16px;
+	font-family: SourceSansPro1;
+}
+
+th {  
+	font-size: 17px;
+	font-family: SourceSansPro2;
+}
+
+th a {  
+	font-size: 17px;
 	font-family: SourceSansPro2;
 }
 
@@ -104,7 +138,7 @@ th {
 a {  
 	color: firebrick; 
 	TEXT-DECORATION: none;
-	font-size: 14px;
+	font-size: 15px;
 }
 
 a:focus{
@@ -179,6 +213,7 @@ a.metalink {
 	top: 0px; 
 	z-index:3;
 	border: 1px solid #cccccc;
+	line-height : 17px;
 }
 
 .menu:hover{
@@ -187,7 +222,8 @@ a.metalink {
 
 a.menuered {
 	color: #993333;
-	font-size: 14px;
+	font-size: 15px;
+	line-height : 17px;
 }
 
 a.menuered:hover {  
@@ -242,22 +278,24 @@ a.menuered:hover {
 
 .legend_group{
 	color: firebrick;
-	font-size: 14px;
 	font-family: SourceSansPro1;
+	font-size: 15px;
+	line-height: 17px;
 }
 
 .legend_group_active_layers{
 	color: firebrick;
-	font-size: 14px;
 	font-family: SourceSansPro3;
+	font-size: 15px;
+	line-height: 17px;
 }
 
 .legend_layer{
-	font-size: 14px;
+	font-size: 15px;
 }
 
 .legend_layer_hidden{
-	font-size: 14px;
+	font-size: 15px;
 	color: gray;
 }
 
@@ -265,15 +303,6 @@ a.menuered:hover {
 	font-size: 15px;
 	font-family: SourceSansPro1;
 }
-
-.small {
-	font-size: 9pt
-}
-
-.verysmall {
-	font-size: 8pt
-}
-
 
 a.infobox {  
 	text-decoration:none; 
@@ -314,16 +343,12 @@ option.imagebacked {
 	vertical-align: top; 
 }
 
-.bold {
-	font-weight: bold; 
-}
-
 span.italic {
 	font-style: italic; 
 }
 
 span.red {  
-	font-size: 14px;  
+	font-size: 15px;  
 	color: #a82e2e;
 	font-family: SourceSansPro2;
 }
@@ -335,13 +360,10 @@ span.black {
 }
 
 #layer {
-  /*border:1px solid gray;*/
   margin:0px 8px 8px 8px;
-  font:italic 120px verdana, arial, helvetica, sans-serif;
 }
 
 #layer  h2{
-  font-style: italic;
 	font-weight: bold;
 }
 

@@ -4,32 +4,32 @@
   if ($anzObj>0) {
     ?><table border="1" cellspacing="0" cellpadding="2">
     <tr align="right" bgcolor="<?php echo BG_DEFAULT ?>"> 
-    <td width="121"><b>Punktkennzeichen</b></td>
-    <td width="27"><b>RW</b></td>
-    <td width="27"><b>HW</b></td>    
-    <td width="17"><strong>H</strong></td>
-    <td width="104"><b>Vorschau</b></td>
-	<td width="71"><strong>verhandelt</strong></td>
-    <td width="62"><strong>vermarkt</strong></td>
-    <td width="53"><strong>Anzeige</strong></td>
-    <td width="17"><strong>S</strong></td>
-    <td width="28"><strong>ZST</strong></td>
-    <td width="38"><strong>VMA</strong></td>
-    <td width="37"><strong>BEM</strong></td>
-    <td width="32"><strong>ENT</strong></td>
-    <td width="33"><strong>UNT</strong></td>
-    <td width="32"><strong>ZUO</strong></td>
-    <td width="19"><strong>LS</strong></td>
-    <td width="22"><strong>LG</strong></td>
-    <td width="19"><strong>LZ</strong></td>
-    <td width="29"><strong>LBJ</strong></td>
-    <td width="33"><strong>LAH</strong></td>
-    <td width="21"><strong>HS</strong></td>
-    <td width="24"><strong>HG</strong></td>
-    <td width="21"><strong>HZ</strong></td>
-    <td width="31"><strong>HBJ</strong></td>
-    <td width="35"><strong>HAH</strong></td>
-    <td width="31"><strong>TEX</strong></td>
+    <td width="121"><span class="fett">Punktkennzeichen</span></td>
+    <td width="27"><span class="fett">RW</span></td>
+    <td width="27"><span class="fett">HW</span></td>    
+    <td width="17"><span class="fett">H</span></td>
+    <td width="104"><span class="fett">Vorschau</span></td>
+	<td width="71"><span class="fett">verhandelt</span></td>
+    <td width="62"><span class="fett">vermarkt</span></td>
+    <td width="53"><span class="fett">Anzeige</span></td>
+    <td width="17"><span class="fett">S</span></td>
+    <td width="28"><span class="fett">ZST</span></td>
+    <td width="38"><span class="fett">VMA</span></td>
+    <td width="37"><span class="fett">BEM</span></td>
+    <td width="32"><span class="fett">ENT</span></td>
+    <td width="33"><span class="fett">UNT</span></td>
+    <td width="32"><span class="fett">ZUO</span></td>
+    <td width="19"><span class="fett">LS</span></td>
+    <td width="22"><span class="fett">LG</span></td>
+    <td width="19"><span class="fett">LZ</span></td>
+    <td width="29"><span class="fett">LBJ</span></td>
+    <td width="33"><span class="fett">LAH</span></td>
+    <td width="21"><span class="fett">HS</span></td>
+    <td width="24"><span class="fett">HG</span></td>
+    <td width="21"><span class="fett">HZ</span></td>
+    <td width="31"><span class="fett">HBJ</span></td>
+    <td width="35"><span class="fett">HAH</span></td>
+    <td width="31"><span class="fett">TEX</span></td>
     </tr><?php
     for ($j=0;$j<$anzObj;$j++) {
     	$rs=$this->qlayerset[$i]['shape'][$j];
@@ -289,8 +289,8 @@
   }
   else {
 	  ?><br>
-	<strong><font color="#FF0000">
-	  Zu diesem Layer wurden keine Objekte gefunden!</font></strong><br>
+	<span class="fett"><font color="#FF0000">
+	  Zu diesem Layer wurden keine Objekte gefunden!</font></span><br>
 	  Wählen Sie einen neuen Bereich oder prüfen Sie die Datenquellen.<br>
 	  <?php  	
   }

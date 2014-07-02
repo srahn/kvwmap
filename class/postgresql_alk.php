@@ -545,7 +545,7 @@ class pgdatabase extends pgdatabase_alkis{
 		$sql.= " order by rtrim(name1,',')),' || ') as eigentuemer, st_intersection(alkobj_e_fla.the_geom, jagdbezirke.the_geom) as the_geom_inter, alkobj_e_fla.the_geom";
 		$sql.= " FROM alknflst, alkobj_e_fla, jagdbezirke, alb_flurstuecke AS alb, alb_g_namen n, alb_g_eigentuemer e, alb_g_buchungen b";
 		$sql.= " WHERE alknflst.objnr = alkobj_e_fla.objnr AND jagdbezirke.oid IN (".implode(',', $oids).") AND alkobj_e_fla.the_geom && jagdbezirke.the_geom";
-		$sql.= " AND intersects(alkobj_e_fla.the_geom, jagdbezirke.the_geom) AND st_area(st_intersection(alkobj_e_fla.the_geom, jagdbezirke.the_geom)) > 1";
+		$sql.= " AND st_intersects(alkobj_e_fla.the_geom, jagdbezirke.the_geom) AND st_area(st_intersection(alkobj_e_fla.the_geom, jagdbezirke.the_geom)) > 1";
 		$sql.= " AND alb.flurstkennz = alknflst.flurstkennz AND e.lfd_nr_name=n.lfd_nr_name AND e.bezirk=b.bezirk";
 		$sql.= " AND e.blatt=b.blatt AND b.flurstkennz=alb.flurstkennz) as foo";
 		$sql.= " group by eigentuemer, j_flaeche";

@@ -54,10 +54,10 @@ function buildwktpolygonfromsvgpath(svgpath){
 	}
 ?>
 
-<table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
+<table style="border: 1px solid; border-color: #eeeeee; border-left: none; border-right: none" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr> 
     <td> <div align="center"></div></td>
-    <td colspan="3"><div align="center"><strong><font size="+1"><?php echo $this->titel; ?></font></strong> 
+    <td colspan="3"><div align="center"><h2><?php echo $this->titel; ?></h2> 
       </div></td>
   </tr>
   <tr> 
@@ -69,7 +69,7 @@ function buildwktpolygonfromsvgpath(svgpath){
     </td>
   </tr>
   <tr> 
-    <td><p><strong>Schritt 1: </strong></p>
+    <td><p><span class="fett">Schritt 1: </span></p>
       <p>Umfahren Sie die betreffende Fl&auml;che per Mausklick!</p>
       <p>(<i>Es wird ein Polygon beschrieben!</i>)</p></td>
   </tr>
@@ -77,7 +77,7 @@ function buildwktpolygonfromsvgpath(svgpath){
     <td><hr align="center" noshade></td>
   </tr>
   <tr> 
-    <td><p><strong>Schritt 2:</strong></p></td>
+    <td><p><span class="fett">Schritt 2:</span></p></td>
   </tr>
   <tr>  
   	<td><p>E-mail:</p><input type="text" name="email" value=""></td>

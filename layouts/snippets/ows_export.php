@@ -4,7 +4,7 @@
  ?>
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center">
-    <td colspan="2"><strong><font size="+1"><?php echo $strTitle; ?></font></strong></td>
+    <td colspan="2"><h2><?php echo $strTitle; ?></h2></td>
   </tr>
   <tr>
     <td colspan="2" align="left"><?php echo $strWMSExportWarning; ?></td>

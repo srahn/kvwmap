@@ -13,7 +13,7 @@
 
 <table border="0" cellpadding="5" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
-    <td colspan="5"><strong><font size="+1"><?php echo $strtitle; ?></font></strong></td>
+    <td colspan="5"><h2><?php echo $strtitle; ?></h2></td>
   </tr>
   <tr>
   	<td>&nbsp;</td>
@@ -23,7 +23,7 @@
   </tr>
   <tr> 
     <td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3" colspan="5"> 
-      <select style="width:250px" size="1" class="select" name="selected_layer_id" onchange="document.GUI.submit();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
+      <select style="width:250px" size="1"  name="selected_layer_id" onchange="document.GUI.submit();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
       	<option value=""><?php echo $strPleaseSelect; ?></option>
         <?
     		for($i = 0; $i < count($this->layerdaten['ID']); $i++){    			
@@ -63,7 +63,7 @@ if($this->formvars['selected_layer_id'] AND $this->Fehler == ''){
 			else{
 	   		#Version 1.6.5 pk 2007-04-17
 	   	 	echo '<p>Das in den stellenbezogenen Layereigenschaften angegebene Templatefile:';
-	   	 	echo '<br><b>'.SNIPPETS.$this->qlayerset[$i]['template'].'</b>';
+	   	 	echo '<br><span class="fett">'.SNIPPETS.$this->qlayerset[$i]['template'].'</span>';
 	   	 	echo '<br>kann nicht gefunden werden. Überprüfen Sie ob der angegebene Dateiname richtig ist oder eventuell Leerzeichen angegeben sind.';
 	   	 	echo ' Die Templatezuordnung für die Sachdatenanzeige ändern Sie über Stellen anzeigen, ändern, Layer bearbeiten, stellenbezogen bearbeiten.';
 	   	 	#echo '<p><a href="index.php?go=Layer2Stelle_Editor&selected_layer_id='.$this->qlayerset[$i]['Layer_ID'].'&selected_stelle_id='.$this->Stelle->id.'&stellen_name='.$this->Stelle->Bezeichnung.'">zum Stellenbezogener Layereditor</a> (nur mit Berechtigung möglich)';

@@ -4,19 +4,19 @@
 ?><script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
-    <td><strong><font size="+1"><?php echo $strTitle.' '.$this->selected_stelle->Bezeichnung; ?></font></strong></td>
+    <td><h2><?php echo $strTitle.' '.$this->selected_stelle->Bezeichnung; ?></h2></td>
   </tr>
   <tr>
     <td>
     <table width="100%" border="0" cellspacing="0" cellpadding="2">
     	<tr>
-    		<td rowspan="2" style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-top:1px solid #C3C7C3" class="bold">&nbsp;<a href="index.php?go=Layer2Stelle_Reihenfolge&selected_stelle_id=<? echo $this->formvars['selected_stelle_id']; ?>&order=Name"><?php echo $this->strLayer; ?></a></td>
-    		<td rowspan="2" style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-top:1px solid #C3C7C3" class="bold">&nbsp;<a href="index.php?go=Layer2Stelle_Reihenfolge&selected_stelle_id=<? echo $this->formvars['selected_stelle_id']; ?>&order=drawingorder"><?php echo $strDrawingOrder; ?></a></td>
-    		<td colspan="2" style="border-top:1px solid #C3C7C3; border-right:1px solid #C3C7C3; border-left:1px solid #C3C7C3" align="center" class="bold"><?php echo $strProperties; ?></td>
+    		<td rowspan="2" style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-top:1px solid #C3C7C3" class="fett">&nbsp;<a href="index.php?go=Layer2Stelle_Reihenfolge&selected_stelle_id=<? echo $this->formvars['selected_stelle_id']; ?>&order=Name"><?php echo $this->strLayer; ?></a></td>
+    		<td rowspan="2" style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-top:1px solid #C3C7C3" class="fett">&nbsp;<a href="index.php?go=Layer2Stelle_Reihenfolge&selected_stelle_id=<? echo $this->formvars['selected_stelle_id']; ?>&order=drawingorder"><?php echo $strDrawingOrder; ?></a></td>
+    		<td colspan="2" style="border-top:1px solid #C3C7C3; border-right:1px solid #C3C7C3; border-left:1px solid #C3C7C3" align="center" class="fett"><?php echo $strProperties; ?></td>
     	</tr>
     	<tr>
-    		<td style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3" class="bold"><?php echo $strTask; ?></td>
-    		<td style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-right:1px solid #C3C7C3" class="bold"><?php echo $strGlobal; ?></td>
+    		<td style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3" class="fett"><?php echo $strTask; ?></td>
+    		<td style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-right:1px solid #C3C7C3" class="fett"><?php echo $strGlobal; ?></td>
     	</tr>
       <?
       for($i = 0; $i < count($this->layers['ID']); $i++){

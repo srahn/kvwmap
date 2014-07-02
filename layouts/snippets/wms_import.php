@@ -4,7 +4,7 @@
  ?>
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr>
-    <td colspan="2" align="center"><strong><font size="+1"><?php echo $this->titel; ?></font></strong></td> 
+    <td colspan="2" align="center"><h2><?php echo $this->titel; ?></h2></td> 
   </tr>
   <tr>
     <td colspan="2" align="center"><?php
@@ -14,7 +14,7 @@ if ($this->Fehlermeldung!='') {
 ?></td>
   </tr>
   <tr>
-    <td colspan="2"><strong><?php echo $strFindGoodWMS; ?></strong></td>
+    <td colspan="2"><span class="fett"><?php echo $strFindGoodWMS; ?></span></td>
   </tr>
   <tr>
     <td colspan="2">
@@ -24,7 +24,7 @@ if ($this->Fehlermeldung!='') {
     </ul></td>
   </tr>
   <tr>
-    <td colspan="2"><b><?php echo $strAdresseCapabilitiesDocument; ?></b><br>
+    <td colspan="2"><span class="fett"><?php echo $strAdresseCapabilitiesDocument; ?></span><br>
       <textarea name="capabilitiesURI" cols="80" rows="3"><?php
     if ($this->formvars['capabilitiesURI']!='') {
       echo $this->formvars['capabilitiesURI'];
@@ -43,7 +43,7 @@ if ($this->Fehlermeldung!='') {
     <td colspan="2"><?php
    if ($this->formvars['capabilitiesURI']!='') {
       ?>
-      <strong>Capabilities &Uuml;bersicht:</strong> <a href="<?php echo $this->formvars['capabilitiesURI']; ?>">als
+      <span class="fett">Capabilities &Uuml;bersicht:</span> <a href="<?php echo $this->formvars['capabilitiesURI']; ?>">als
         XML-Datei</a> <input type="checkbox" name="capabilitiesAnzeigen" value="1"<?php if ($this->formvars['capabilitiesAnzeigen']=='1') { ?> checked<?php  } ?>>
       Kurzdarstellung hier anzeigen<?php
      }
@@ -61,7 +61,7 @@ if ($this->Fehlermeldung!='') {
   }
    ?>
   <tr>
-    <td colspan="2"><b>Haken Sie die getMap-Requests an, die sie in die Stelle als Layer einbinden wollen.</b></td>
+    <td colspan="2"><span class="fett">Haken Sie die getMap-Requests an, die sie in die Stelle als Layer einbinden wollen.</span></td>
   </tr><?php
    $this->wms->wms_getmap.='VERSION='.$this->wms->wms_version.'&REQUEST=GetMap&SERVICE=wms&LAYERS=';  
 #   for ($i=0;$i<$anzWMSlayer;$i++) {
@@ -75,7 +75,7 @@ if ($this->Fehlermeldung!='') {
     ?>]" value="<?php
      echo $this->wms->objLayer[$i]->layer_id;
     ?>"></td>
-    <td align="left">Name: <b><?php echo $this->wms->objLayer[$i]->layer_name; ?></b> Titel: <b><?php echo $this->wms->objLayer[$i]->layer_title; ?></b>
+    <td align="left">Name: <span class="fett"><?php echo $this->wms->objLayer[$i]->layer_name; ?></span> Titel: <span class="fett"><?php echo $this->wms->objLayer[$i]->layer_title; ?></span>
   <br><a href="<?php echo $this->wms->wms_getmap.$this->wms->objLayer[$i]->layer_name; ?>" target="_blank"><?php echo $this->wms->wms_getmap.$this->wms->objLayer[$i]->layer_name; ?></a></td>
   </tr><?php
      }

@@ -1,16 +1,16 @@
 <table width="0%" border="0" cellpadding="5" cellspacing="0">
 	<tr><td></td></tr>
   <tr> 
-    <td bgcolor="<?php echo BG_FORM ?>"><div align="center"><strong><font size="+1"><?php echo $this->titel; ?></font></strong> 
+    <td bgcolor="<?php echo BG_FORM ?>"><div align="center"><h2><?php echo $this->titel; ?></h2> 
       </div></td>
   </tr>
   <tr> 
     <td bgcolor="<?php echo BG_FORM ?>"><div align="center">
 	
 	<?php if ($this->Fehlermeldung!='') { include(LAYOUTPATH."snippets/Fehlermeldung.php"); } ?>
-	<strong><font color="#FF0000">
+	<span class="fett"><font color="#FF0000">
 	<?php if ($this->Meldung!='') { echo $this->Meldung; } ?>
-	</font> </strong>
+	</font> </span>
 	 </div>
 	 
     </td>
@@ -20,10 +20,10 @@
     <td bgcolor="<?php echo BG_FORM ?>"><table border="0" cellspacing="0" cellpadding="5">
         <tr bgcolor="#FFFFFF"> 
           <td>&nbsp;</td>
-          <td><div align="center"><a href="index.php?go=Antraege_Anzeigen&order=antr_nr&richtung=<?php  if ($this->antrag->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach Antragsnummer sortieren"><strong><strong>Antragsnummer</strong></strong></a></div></td>
-          <td><div align="center"><a href="index.php?go=Antraege_Anzeigen&order=vermstelle&richtung=<?php	if ($this->antrag->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach Vermessungstelle sortieren"><strong>Vermessungsstelle</strong></a></div></td>
-          <td ><div align="center"><a href="index.php?go=Antraege_Anzeigen&order=verm_art&richtung=<?php	if ($this->antrag->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach Vermessungsart sortieren"><strong>Vermessungsart</strong></a></div></td>
-          <td>&nbsp;&nbsp;<a href="index.php?go=Antraege_Anzeigen&order=datum&richtung=<?php  if ($this->antrag->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach Datum sortieren"><strong>Datum</strong></a>&nbsp;&nbsp;&nbsp;</td>
+          <td><div align="center"><a href="index.php?go=Antraege_Anzeigen&order=antr_nr&richtung=<?php  if ($this->antrag->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach Antragsnummer sortieren"><span class="fett">Antragsnummer</span></a></div></td>
+          <td><div align="center"><a href="index.php?go=Antraege_Anzeigen&order=vermstelle&richtung=<?php	if ($this->antrag->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach Vermessungstelle sortieren"><span class="fett">Vermessungsstelle</span></a></div></td>
+          <td ><div align="center"><a href="index.php?go=Antraege_Anzeigen&order=verm_art&richtung=<?php	if ($this->antrag->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach Vermessungsart sortieren"><span class="fett">Vermessungsart</span></a></div></td>
+          <td>&nbsp;&nbsp;<a href="index.php?go=Antraege_Anzeigen&order=datum&richtung=<?php  if ($this->antrag->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach Datum sortieren"><span class="fett">Datum</span></a>&nbsp;&nbsp;&nbsp;</td>
           <td>&nbsp;</td>
           <td colspan="2">&nbsp;</td>
         </tr>

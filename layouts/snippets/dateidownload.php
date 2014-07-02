@@ -1,6 +1,6 @@
 <table width="0%" border="0" cellpadding="5" cellspacing="0">
   <tr> 
-    <td bgcolor="<?php echo BG_FORM ?>"><div align="center"><strong><font size="+1"><?php echo $this->titel; ?></font></strong> 
+    <td bgcolor="<?php echo BG_FORM ?>"><div align="center"><h2><?php echo $this->titel; ?></h2> 
       </div></td>
   </tr>
   <tr> 

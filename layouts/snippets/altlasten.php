@@ -6,8 +6,8 @@
    
 <table border="1" cellspacing="0" cellpadding="2">
   <tr bgcolor="<?php echo BG_DEFAULT ?>">
-    <td><b>Rechts</b></td>
-    <td><b>Hoch</b></td>    
+    <td><span class="fett">Rechts</span></td>
+    <td><span class="fett">Hoch</span></td>    
   </tr>
   <?php
     for ($j=0;$j<$anzObj;$j++) {

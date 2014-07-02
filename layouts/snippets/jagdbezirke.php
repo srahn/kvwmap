@@ -64,7 +64,7 @@ function save(){
 		<td>
 <table border="0" cellspacing="0" cellpadding="2" width="690px">
   <tr align="center" height="100px">
-    <td valign="middle"><strong><font size="+1">Jagdbezirke</font></strong></td>
+    <td valign="middle"><h2>Jagdbezirke</h2></td>
   </tr>
 
 <?php
@@ -91,7 +91,7 @@ function save(){
        <col width="*">
       <colgroup>
         <tr width="100%">
-          <td bgcolor="<?php echo BG_DEFAULT ?>"><b>Name Jagdbezirk</b></td>
+          <td bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett">Name Jagdbezirk</span></td>
           <td valign="top">
           	<input type="text" <? if($privileg_['name'] == 0)echo 'readonly'; ?> name="<? echo $this->qlayerset[$i]['Layer_ID'].';name;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j]['oid'].';Text;1'; ?>" value="<? echo $this->qlayerset[$i]['shape'][$j]['name']; ?>">
           	<?
@@ -101,7 +101,7 @@ function save(){
         </tr>
 
         <tr width="100%">
-          <td bgcolor="<?php echo BG_DEFAULT ?>"><b>Art</b></td>
+          <td bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett">Art</span></td>
           <td valign="top">
           	<select onchange="update_form(this.value);" name="<? echo $this->qlayerset[$i]['Layer_ID'].';art;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j]['oid'].';Text;1'; ?>">
           		<option value="">--- Bitte wählen ---</option>
@@ -124,7 +124,7 @@ function save(){
         </tr>
 
         <tr width="100%">
-          <td bgcolor="<?php echo BG_DEFAULT ?>"><b>Fl&auml;che&nbsp;[ha]</b></td>
+          <td bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett">Fl&auml;che&nbsp;[ha]</span></td>
           <td valign="top">
             <?php
             if($this->qlayerset[$i]['shape'][$j]['flaeche'] == '') {
@@ -137,7 +137,7 @@ function save(){
         </tr>
 
         <tr id="lfdnr" width="100%" style="display:<? if(in_array($this->qlayerset[$i]['shape'][$j]['art'], array('jbe', 'jbf', 'agf', 'atf', 'apf', 'atv'))){ echo 'none';}else{echo '';} ?>">
-          <td bgcolor="<?php echo BG_DEFAULT ?>"><b>lfd. Nr. Condition</b></td>
+          <td bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett">lfd. Nr. Condition</span></td>
           <td valign="top">
           	<input type="text" name="<? echo $this->qlayerset[$i]['Layer_ID'].';id;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j]['oid'].';Text;1'; ?>" value="<? echo $this->qlayerset[$i]['shape'][$j]['id']; ?>">
           	<?
@@ -147,7 +147,7 @@ function save(){
         </tr>
 
         <tr id="zuordnung" width="100%" style="display:<? if(in_array($this->qlayerset[$i]['shape'][$j]['art'], array('jbe', 'jbf', 'agf', 'atf', 'apf', 'atv'))){ echo '';}else{echo 'none';} ?>">
-          <td bgcolor="<?php echo BG_DEFAULT ?>"><b>Zuordnung (lfd. Nr. EJB)</b></td>
+          <td bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett">Zuordnung (lfd. Nr. EJB)</span></td>
           <td valign="top">
           	<input type="text" name="<? echo $this->qlayerset[$i]['Layer_ID'].';jb_zuordnung;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j]['oid'].';Text;1'; ?>" value="<? echo $this->qlayerset[$i]['shape'][$j]['jb_zuordnung']; ?>">
           	<?
@@ -156,7 +156,7 @@ function save(){
           </td>
         </tr>
         <tr id="status" width="100%" style="display:<? if(in_array($this->qlayerset[$i]['shape'][$j]['art'], array('ejb', 'jbe', 'jbf', 'agf', 'atf', 'apf', 'atv'))){ echo '';}else{echo 'none';} ?>">
-          <td bgcolor="<?php echo BG_DEFAULT ?>"><b>Status</b></td>
+          <td bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett">Status</span></td>
           <td valign="top">
           	<select name="<? echo $this->qlayerset[$i]['Layer_ID'].';status;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j]['oid'].';Text;1'; ?>">
           		<option value="0" <? if($this->qlayerset[$i]['shape'][$j]['status'] == 'f'){echo 'selected="true"';} ?>>aktuell</option>
@@ -169,7 +169,7 @@ function save(){
         </tr>
         
         <tr id="verzicht" width="100%" style="display:<? if(in_array($this->qlayerset[$i]['shape'][$j]['art'], array('ejb','ajb'))){ echo '';}else{echo 'none';} ?>">
-          <td bgcolor="<?php echo BG_DEFAULT ?>"><b>Verzicht gem. §3</b></td>
+          <td bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett">Verzicht gem. §3</span></td>
           <td valign="top">
           	<select name="<? echo $this->qlayerset[$i]['Layer_ID'].';verzicht;jagdbezirke;'.$this->qlayerset[$i]['shape'][$j]['oid'].';Text;1'; ?>">
           		<option <? if($this->qlayerset[$i]['shape'][$j]['verzicht'] == 'f'){echo 'selected';} ?> value="0">nein</option>
@@ -185,10 +185,10 @@ function save(){
           <td valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
             <?php
             if(count($paechterliste) == 0) {
-            echo "<b>P&auml;chter</b>";
+            echo "<span class="fett">P&auml;chter</span>";
             } else {
             ?>
-            <a href="javascript:paechter_listen(<?php echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>, '<? echo $this->qlayerset[$i]['shape'][$j]['name'] ?>');"><b>P&auml;chter</b></a>&nbsp;
+            <a href="javascript:paechter_listen(<?php echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>, '<? echo $this->qlayerset[$i]['shape'][$j]['name'] ?>');"><span class="fett">P&auml;chter</span></a>&nbsp;
             <?php
             }
             ?>
@@ -206,7 +206,7 @@ function save(){
         </tr>
 
         <tr width="100%">
-          <td bgcolor="<?php echo BG_DEFAULT ?>"><b>Abschussplanung</b></td>
+          <td bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett">Abschussplanung</span></td>
           <td valign="top">
   &nbsp; <!-- hier muss noch die Anzeige der sowie der Link zur Abschussplanung hin! -->
           </td>

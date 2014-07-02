@@ -81,9 +81,9 @@ else {
 }
 ?>
        
-<table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
+<table style="border: 1px solid; border-color: #eeeeee; border-left: none; border-right: none" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
-    <td colspan="8"><strong><font size="+1"><?php echo $this->titel; ?></font></strong></td>
+    <td colspan="8"><h2><?php echo $this->titel; ?></h2></td>
   </tr>
   <tr> 
     <td colspan="8">
@@ -263,9 +263,9 @@ else {
   <tr>
   	<td>&nbsp;</td> 
     <td><?php if ($this->formvars[NACHWEIS_PRIMARY_ATTRIBUTE]!='') { ?><a href="index.php?go=Nachweisanzeige&order=<? echo $this->formvars['order']; ?>">&lt;&lt;&nbsp;zur&uuml;ck&nbsp;zum&nbsp;Rechercheergebnis</a><?php } ?></td>
-		<td>&nbsp;<b>Maßstab&nbsp;1:&nbsp;</b><input type="text" id="scale" name="nScale" size="5" value="<?php echo round($this->map->scaledenom); ?>"></td>
+		<td>&nbsp;<span class="fett">Maßstab&nbsp;1:&nbsp;</span><input type="text" id="scale" name="nScale" size="5" value="<?php echo round($this->map->scaledenom); ?>"></td>
 	<? if($this->user->rolle->runningcoords != '0'){ ?>
-	<td width="100px"><b>&nbsp;<?php echo $this->strCoordinates; ?>:</b>&nbsp;</td>
+	<td width="100px"><span class="fett">&nbsp;<?php echo $this->strCoordinates; ?>:</span>&nbsp;</td>
 	<td><input type="text" style="border:0px;background-color:transparent" name="runningcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?></td>
 	<? }else{ ?>
 	<td colspan="2"></td>

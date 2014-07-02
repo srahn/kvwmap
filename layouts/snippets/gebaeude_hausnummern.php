@@ -6,11 +6,11 @@
    
 <table border="1" cellspacing="0" cellpadding="2">
   <tr bgcolor="<?php echo BG_DEFAULT ?>"> 
-    <td><b>Gemeinde</b></td>
-    <td><b>Straße</b></td>
-    <td><b>Hausnummer</b></td>
-    <td><b>Zusatz</b></td>
-    <td><b>Kommentar</b></td>
+    <td><span class="fett">Gemeinde</span></td>
+    <td><span class="fett">Straße</span></td>
+    <td><span class="fett">Hausnummer</span></td>
+    <td><span class="fett">Zusatz</span></td>
+    <td><span class="fett">Kommentar</span></td>
     <td>&nbsp;</td>
   </tr>
   <?php

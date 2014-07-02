@@ -10,11 +10,11 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 
 <table border="0" cellpadding="0" cellspacing="2">
   <tr>
-    <td align="right"><strong>Suche nach Kilometerquadrat:</strong></td>
+    <td align="right"><span class="fett">Suche nach Kilometerquadrat:</span></td>
     <td><input name="kiloquad" type="text" value="<?php echo $this->formvars['kiloquad']; ?>" size="9" tabindex="1"></td>
   </tr>
   <tr>
-    <td align="right"><strong>Suche nach Punktkennzeichen:</strong></td>
+    <td align="right"><span class="fett">Suche nach Punktkennzeichen:</span></td>
     <td><input name="pkz" type="text" value="<?php echo $this->formvars['pkz']; ?>" size="25" tabindex="2"></td>
   </tr>
   <tr>

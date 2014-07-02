@@ -6,11 +6,11 @@ if ($this->festpunkte->anzPunkte>0) {
   <table border="1" cellspacing="0" cellpadding="2">
       
       <tr bgcolor="<?php echo BG_DEFAULT ?>"> 
-      <td><b>Punktkennzeichen</b></td>
-      <td><b>Rechtswert</b></td>
-      <td><b>Hochwert</b></td>    
-      <td><b>Punkt&nbsp;zuordnen&nbsp;zu&nbsp;folgender&nbsp;Datei:</b></td>
-      <td><strong>Vorschaubild:</strong></td>
+      <td><span class="fett">Punktkennzeichen</span></td>
+      <td><span class="fett">Rechtswert</span></td>
+      <td><span class="fett">Hochwert</span></td>    
+      <td><span class="fett">Punkt&nbsp;zuordnen&nbsp;zu&nbsp;folgender&nbsp;Datei:</span></td>
+      <td><span class="fett">Vorschaubild:</span></td>
       </tr><?php
     for ($i=0;$i<$this->festpunkte->anzPunkte;$i++) {
     	$rs=$this->festpunkte->liste[$i];
@@ -62,12 +62,12 @@ if ($this->festpunkte->anzPunkte>0) {
 <br>
 <table border="1" cellspacing="0" cellpadding="2"> 
     <tr>
-      <td bgcolor="<?php echo BG_DEFAULT ?>"><strong>Dateien ohne Zuordnung   </strong><br>
+      <td bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett">Dateien ohne Zuordnung   </span><br>
         <em><font size="-2">(in km-Quadraten der ausgew&auml;hlten Punkte)</font></em></td> 
-      <td bgcolor="<?php echo BG_DEFAULT ?>"><strong>Umbenennen&nbsp;nach:</strong></td>
-	  <td bgcolor="<?php echo BG_DEFAULT ?>"><strong>Vorschaubild</strong></td>
-	  <td bgcolor="<?php echo BG_DEFAULT ?>"><strong>Archiv</strong></td>
-      <td bgcolor="<?php echo BG_DEFAULT ?>"><strong>L&ouml;schen</strong></td>
+      <td bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett">Umbenennen&nbsp;nach:</span></td>
+	  <td bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett">Vorschaubild</span></td>
+	  <td bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett">Archiv</span></td>
+      <td bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett">L&ouml;schen</span></td>
     </tr>  
       <?php
     for ($i=0;$i<count($this->skizzenohnezuordnung);$i++) {
@@ -130,8 +130,8 @@ Verschoben bzw. gel&ouml;scht werden immer tif und png Dateien soweit beide vorh
   else {
 	  ?>
   <br>
-  <strong><font color="#FF0000">
-	    Zu dieser Anfrage wurden keine Objekte gefunden!</font></strong><br>
+  <span class="fett"><font color="#FF0000">
+	    Zu dieser Anfrage wurden keine Objekte gefunden!</font></span><br>
 	    Wählen Sie einen neuen Bereich oder prüfen Sie die Datenquellen.<br>
 	    <?php  	
   }

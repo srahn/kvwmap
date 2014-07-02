@@ -33,24 +33,24 @@
     <td valign="top"> 
       <table border="0" cellspacing="0" cellpadding="2">
         <tr> 
-          <td align="right"><strong>Flurst&uuml;ck&nbsp;</strong></td>
+          <td align="right"><span class="fett">Flurst&uuml;ck&nbsp;</span></td>
           <td> <?php echo $flst->FlurstNr; ?> (<?php echo $flst->FlurstKennz; ?>)</td>
         </tr>
         <tr> 
-          <td align="right"><strong>Gemarkung&nbsp;</strong></td>
+          <td align="right"><span class="fett">Gemarkung&nbsp;</span></td>
           <td><?php echo $flst->GemkgName; ?> (<?php echo $flst->GemkgSchl; ?>)</td>
         </tr>
         <tr> 
-          <td height="20" align="right"><strong>Flur&nbsp;</strong></td>
+          <td height="20" align="right"><span class="fett">Flur&nbsp;</span></td>
           <td><?php echo $flst->FlurNr; ?></td>
         </tr>
         <tr> 
-          <td align="right"><strong>Gemeinde&nbsp;</strong></td>
+          <td align="right"><span class="fett">Gemeinde&nbsp;</span></td>
           <td><?php echo $flst->GemeindeName; ?> (<?php echo $flst->GemeindeID; ?>)</td>
         </tr>
         <tr> 
 
-          <td align="right"><strong>Kreis&nbsp;</strong></td>
+          <td align="right"><span class="fett">Kreis&nbsp;</span></td>
 
           <td><?php echo $flst->KreisName; ?> (<?php echo $flst->KreisID; ?>)</td>
 
@@ -58,7 +58,7 @@
 
         <tr> 
 
-          <td align="right"><strong> Finanzamt&nbsp;</strong></td>
+          <td align="right"><span class="fett"> Finanzamt&nbsp;</span></td>
 
           <td><?php echo $flst->FinanzamtName; ?> (<?php echo $flst->FinanzamtSchl; ?>)</td>
 
@@ -66,7 +66,7 @@
 
         <tr>
 
-          <td align="right"><strong>Forstamt&nbsp;</strong></td>
+          <td align="right"><span class="fett">Forstamt&nbsp;</span></td>
 
           <td><?php echo $flst->Forstamt['name']; ?> (<?php echo '00'.$flst->Forstamt['schluessel']; ?>)</td>
 
@@ -80,7 +80,7 @@
 
         <tr> 
 
-          <td align="right"><strong>Fl&auml;che&nbsp;</strong></td>
+          <td align="right"><span class="fett">Fl&auml;che&nbsp;</span></td>
 
           <td><?php echo $flst->ALB_Flaeche; ?>m&sup2;</td>
 
@@ -88,7 +88,7 @@
 
         <tr> 
 
-          <td align="right" valign="top"><strong>Lage:&nbsp;</strong></td>
+          <td align="right" valign="top"><span class="fett">Lage:&nbsp;</span></td>
 
           <td><?php
 
@@ -128,7 +128,7 @@
 
         <tr> 
 
-          <td align="right"><strong>Entstehung&nbsp;</strong></td>
+          <td align="right"><span class="fett">Entstehung&nbsp;</span></td>
 
           <td><?php echo $flst->Entstehung; ?></td>
 
@@ -136,7 +136,7 @@
 
         <tr> 
 
-          <td align="right"><strong>Fortf&uuml;hrung&nbsp;</strong></td>
+          <td align="right"><span class="fett">Fortf&uuml;hrung&nbsp;</span></td>
 
           <td><?php echo $flst->LetzteFF; ?></td>
 
@@ -144,7 +144,7 @@
 
         <tr> 
 
-          <td align="right"><strong> Flurkarte/Ri&szlig;&nbsp;</strong></td>
+          <td align="right"><span class="fett"> Flurkarte/Ri&szlig;&nbsp;</span></td>
 
           <td><?php echo $flst->Flurkarte; ?></td>
 
@@ -158,7 +158,7 @@
 				    if(count($this->bau->baudata) != 0){
 				      ?>
 				      <tr> 
-			          <td align="right"><strong> Baudaten&nbsp;</strong></td>
+			          <td align="right"><span class="fett"> Baudaten&nbsp;</span></td>
 			          <td><a href="index.php?go=Bauauskunft_Suche_Suchen&flurstkennz=<? echo $flst->FlurstKennz; ?>&distinct=1">anzeigen</a></td>
 			        </tr>
 				      <?
@@ -184,7 +184,7 @@
 
   <tr>
 
-    <td align="right"><strong>Gesetzl.&nbsp;Klassifizierung</strong></td>
+    <td align="right"><span class="fett">Gesetzl.&nbsp;Klassifizierung</span></td>
 
     <td><?php echo $flst->Klassifizierung['tabkenn']; ?></td>
 
@@ -234,7 +234,7 @@
 
   <tr valign="top">
 
-    <td align="right"><strong>Zus&auml;tzliche&nbsp;Angaben</strong></td>
+    <td align="right"><span class="fett">Zus&auml;tzliche&nbsp;Angaben</span></td>
 
     <td><?php
 
@@ -274,7 +274,7 @@
 
   <tr>
 
-    <td><strong>Hinweise:</strong>&nbsp;</td>
+    <td><span class="fett">Hinweise:</span>&nbsp;</td>
     <td><?php 
     for($h = 0; $h < count($flst->Hinweis); $h++){
     	echo $flst->Hinweis[$h]['bezeichnung'].'<br>';
@@ -305,7 +305,7 @@
 
   <tr>
 
-    <td><strong>Baulastenblatt-Nr</strong></td>
+    <td><span class="fett">Baulastenblatt-Nr</span></td>
 
     <td><?php 
 
@@ -341,7 +341,7 @@
 
       <tr valign="top">
 
-        <td align="right"><strong>Ausführende&nbsp;Stelle</strong></td>
+        <td align="right"><span class="fett">Ausführende&nbsp;Stelle</span></td>
 
         <td><?php echo $flst->Verfahren['ausfstelleid']; ?></td>
 
@@ -351,7 +351,7 @@
 
       <tr valign="top">
 
-        <td align="right"><strong>Verfahren</strong></td>
+        <td align="right"><span class="fett">Verfahren</span></td>
 
         <td><?php echo $flst->Verfahren['verfnr']; ?></td>
 
@@ -377,17 +377,17 @@
 
           <tr>
 
-            <td colspan="3"><strong>Nutzung</strong></td>
+            <td colspan="3"><span class="fett">Nutzung</span></td>
 
           </tr>
 
           <tr> 
 
-            <td><b>Fl&auml;che&nbsp;</b></td>
+            <td><span class="fett">Fl&auml;che&nbsp;</span></td>
 
-            <td><b>Nutzung&nbsp;</b></td>
+            <td><span class="fett">Nutzung&nbsp;</span></td>
 
-            <td><b>Bezeichnung</b></td>
+            <td><span class="fett">Bezeichnung</span></td>
 
           </tr>
 
@@ -439,7 +439,7 @@ if ($flst->Nutzung[$j][kurzbezeichnung]!='') {
 
         <tr> 
 
-          <td align="right"><b>Amtsgericht:</b>&nbsp;</td>
+          <td align="right"><span class="fett">Amtsgericht:</span>&nbsp;</td>
 
           <td><?php echo $flst->Amtsgericht['schluessel']; ?></td>
 
@@ -449,7 +449,7 @@ if ($flst->Nutzung[$j][kurzbezeichnung]!='') {
 
         <tr> 
 
-          <td align="right"><b>Grundbuchbezirk:</b>&nbsp;</td>
+          <td align="right"><span class="fett">Grundbuchbezirk:</span>&nbsp;</td>
 
           <td><?php echo $flst->Grundbuchbezirk['schluessel']; ?></td>
 
@@ -528,7 +528,7 @@ if ($flst->Nutzung[$j][kurzbezeichnung]!='') {
 		<td>&nbsp;</td>
 	</tr>
 	<tr>
-		<td><b>Für alle Flurstücke:</b><br></td>
+		<td><span class="fett">Für alle Flurstücke:</span><br></td>
 	</tr>
 	<tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
     <td colspan="2">
@@ -582,8 +582,8 @@ if ($flst->Nutzung[$j][kurzbezeichnung]!='') {
 	<? 
   } # Ende es liegen Flurstücke im Suchbereich
   else {
-  	?><br><strong><font color="#FF0000">
-	  Zu diesem Layer wurden keine Objekte gefunden!</font></strong><br>
+  	?><br><span class="fett"><font color="#FF0000">
+	  Zu diesem Layer wurden keine Objekte gefunden!</font></span><br>
 	  Wählen Sie einen neuen Bereich oder prüfen Sie die Datenquellen.<br>
 	  <?php  	
   }

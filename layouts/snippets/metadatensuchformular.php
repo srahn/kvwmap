@@ -9,9 +9,9 @@ else {
 
 <table border="0" cellpadding="2" cellspacing="0">
   <tr> 
-    <td colspan="5" align="center"><strong><font size="+1"> 
+    <td colspan="5" align="center"><h2> 
       <?php echo $this->titel; ?>
-      </font></strong> 
+      </h2> 
       <?php
 	 if ($this->Fehlermeldung!='') {
 	echo $this->Fehlermeldung;
@@ -25,11 +25,11 @@ else {
     <td colspan="5" align="center"><hr></td>
   </tr>
   <tr> 
-    <td width="47" valign="middle"><p><strong>Was?</strong></p>
+    <td width="47" valign="middle"><p><span class="fett">Was?</span></p>
     </td>
     <td colspan="2" valign="top"><input name="was" type="text" value="<?php echo $this->formvars['was']; ?>" size="30">
       <em>Schlagwort</em></td>
-    <td width="31" rowspan="5" align="right" valign="top"><strong>Wo?</strong></td>
+    <td width="31" rowspan="5" align="right" valign="top"><span class="fett">Wo?</span></td>
     <td width="186" rowspan="5" valign="top"> <input name="wo" type="text" value="<?php echo $this->formvars['wo']; ?>" size="26">
       <em>Ort</em>      <table border="0" cellspacing="0" cellpadding="2">
         <tr align="center">
@@ -57,7 +57,7 @@ else {
     <td colspan="3" valign="middle"><hr></td>
   </tr>
   <tr>
-    <td valign="middle"><strong>Wer?</strong></td>
+    <td valign="middle"><span class="fett">Wer?</span></td>
     <td colspan="2" valign="top"><input name="wer" type="text" value="<?php echo $this->formvars['wer']; ?>">
       <em>Person/Organisation</em> </td>
   </tr>
@@ -65,7 +65,7 @@ else {
     <td colspan="3" valign="middle"><hr></td>
   </tr>
   <tr>
-    <td valign="middle"><strong>Wann?</strong></td>
+    <td valign="middle"><span class="fett">Wann?</span></td>
     <td width="96" valign="top"><table border="0" cellpadding="2" cellspacing="0">
       <tr>
         <td><?php

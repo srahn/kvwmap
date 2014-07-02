@@ -32,7 +32,7 @@
 	<table>
 		<tr>
 			<td>
-				<select size="1" class="select" name="quicksearch_layer_id" onchange="load_search_attributes(this.value);">
+				<select size="1"  name="quicksearch_layer_id" onchange="load_search_attributes(this.value);">
 					<option value="">-- Schnellsuche --</option>
 					<?
 					for($i = 0; $i < count($quicksearch_layerdaten['ID']); $i++){         

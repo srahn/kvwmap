@@ -1,6 +1,6 @@
-<div align="center"><strong><font size="+1"><br>
+<div align="center"><h2><br>
   <?php echo $this->titel; ?><br>
-</font></strong><br>
+</h2><br>
 <?php
 if ($this->Fehlermeldung=='') {
   $bgcolor=BG_FORM;

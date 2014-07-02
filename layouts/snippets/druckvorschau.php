@@ -120,11 +120,12 @@ function preventflickering(evt){
 	  $bgcolor=BG_FORMFAIL;
 		showAlert('Fehler bei der Eingabe:\n'.$this->Meldung);
 }
- ?> <strong><font size="+1"> </font></strong> 
+ ?> 
+<br>
 <table border="0" cellspacing="0" cellpadding="2">
   <tr align="center"> 
-    <td colspan="2"><strong><font size="+1"> 
-      <?php echo $this->titel; ?><br><br></font></strong>
+    <td colspan="2"><h2> 
+      <?php echo $this->titel; ?><br><br></h2>
     </td>
   </tr>
 </table>

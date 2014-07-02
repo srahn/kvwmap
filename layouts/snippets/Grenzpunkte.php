@@ -4,10 +4,10 @@
   if ($anzObj>0) {
     ?><table border="1" cellspacing="0" cellpadding="2">
     <tr bgcolor="<?php echo BG_DEFAULT ?>"> 
-    <td><b>Punktkennzeichen</b></td>
-    <td><b>Rechtswert</b></td>
-    <td><b>Hochwert</b></td>
-    <td><b>verhandelt</b></td>        
+    <td><span class="fett">Punktkennzeichen</span></td>
+    <td><span class="fett">Rechtswert</span></td>
+    <td><span class="fett">Hochwert</span></td>
+    <td><span class="fett">verhandelt</span></td>        
     </tr><?php
     for ($j=0;$j<$anzObj;$j++) {
     	$rs=$this->qlayerset[$i]['shape'][$j];

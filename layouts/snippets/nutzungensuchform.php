@@ -12,15 +12,15 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 ?><p>
 <table border="0" cellpadding="0" cellspacing="2">
   <tr>
-    <td height="28" align="right"><strong>Gemarkung (Gemeinde):</strong></td>
+    <td height="28" align="right"><span class="fett">Gemarkung (Gemeinde):</span></td>
     <td><?php echo $this->GemkgFormObj->html; ?></td>
   </tr>
   <tr>
-    <td height="28" align="right"><strong>Nutzungsart:</strong></td>
+    <td height="28" align="right"><span class="fett">Nutzungsart:</span></td>
     <td><input name="nutzung" type="text" value="<? echo $this->formvars['nutzung']; ?>"></td>
   </tr>
   <tr> 
-    <td height="28" align="right"><strong>Anzahl&nbsp;Treffer&nbsp;anzeigen:</strong></td>
+    <td height="28" align="right"><span class="fett">Anzahl&nbsp;Treffer&nbsp;anzeigen:</span></td>
     <td><input name="anzahl" type="text" value="<?php echo $this->formvars['anzahl']; ?>" size="2" tabindex="5"></td>
   </tr>
   <tr> 
@@ -36,19 +36,19 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
    ?>
 <tr>
   <td colspan="3" align="center">
-		<strong><br>
+		<span class="fett"><br>
 		Treffer gesamt: <?php echo $this->anzNamenGesamt; ?>
 	    <br>
 	    <br>
-		</strong>	
+		</span>	
 		<table width="100%" border="1" cellpadding="3" cellspacing="0">
 	  	<tr>
-	    	<td><b>Flurstück</b></td>
-	    	<td><b>Gemarkung</b></td>
-	    	<td><b>ALB-Fläche</b></td>
-	    	<td><b>Nutzung</b></td>
-	    	<td colspan="2"><b>ALB-Auszug</b></td>
-	    	<td><b>Kartenausschnitt</b></td>
+	    	<td><span class="fett">Flurstück</span></td>
+	    	<td><span class="fett">Gemarkung</span></td>
+	    	<td><span class="fett">ALB-Fläche</span></td>
+	    	<td><span class="fett">Nutzung</span></td>
+	    	<td colspan="2"><span class="fett">ALB-Auszug</span></td>
+	    	<td><span class="fett">Kartenausschnitt</span></td>
 	    </tr>
 		   <?	for($j = 0; $j < count($this->flurstuecke); $j++){ ?>
 			<tr>

@@ -58,7 +58,7 @@ function csv_export(){
     <td align="right">&nbsp;</td>
   </tr>
   <tr align="center"> 
-    <td><strong><font size="+1"><?php echo $this->titel; ?></font></strong></td>
+    <td><h2><?php echo $this->titel; ?></h2></td>
   </tr>
   <tr> 
     <td align="right">&nbsp;</td>
@@ -67,13 +67,13 @@ function csv_export(){
     <td><table width="100%" border="0" cellspacing="1" cellpadding="4">
       <tr>
       	<td>&nbsp;</td>
-      	<? if(!$this->formvars['oid']){ ?><td class="bold" style="border-top:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">Jagdbezirk</td><? } ?>
-        <td class="bold" style="border-top:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">Gemarkung</td>
-        <td class="bold" style="border-top:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">Flur</td>
-        <td class="bold" style="border-top:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">Zähler/Nenner</td>
-        <td class="bold" style="border-top:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">Eigentümer</td>
-        <td class="bold" style="border-top:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">Flurstücksfläche(ALB)</td>
-        <td class="bold" style="border-top:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">Anteil am Jagdbezirk</td>
+      	<? if(!$this->formvars['oid']){ ?><td class="fett" style="border-top:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">Jagdbezirk</td><? } ?>
+        <td class="fett" style="border-top:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">Gemarkung</td>
+        <td class="fett" style="border-top:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">Flur</td>
+        <td class="fett" style="border-top:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">Zähler/Nenner</td>
+        <td class="fett" style="border-top:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">Eigentümer</td>
+        <td class="fett" style="border-top:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">Flurstücksfläche(ALB)</td>
+        <td class="fett" style="border-top:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">Anteil am Jagdbezirk</td>
       </tr>
       <?php 
       for ($i = 0; $i < count($this->flurstuecke); $i++) { ?>
@@ -83,7 +83,7 @@ function csv_export(){
         <td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><a href="index.php?go=Flurstueck_Anzeigen&jagdkataster=true&oid=<? echo $this->formvars['oid']; ?>&name=<? echo $this->formvars['name']?>&search_nummer=<? echo $this->formvars['search_nummer']; ?>&search_name=<? echo $this->formvars['search_name']; ?>&search_art=<? echo $this->formvars['search_art']; ?>&FlurstKennz=<? echo $this->flurstuecke[$i]['flurstkennz']; ?>"><? echo $this->flurstuecke[$i]['gemkgname']; ?></a></td>
         <td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><a href="index.php?go=Flurstueck_Anzeigen&jagdkataster=true&oid=<? echo $this->formvars['oid']; ?>&name=<? echo $this->formvars['name']?>&search_nummer=<? echo $this->formvars['search_nummer']; ?>&search_name=<? echo $this->formvars['search_name']; ?>&search_art=<? echo $this->formvars['search_art']; ?>&FlurstKennz=<? echo $this->flurstuecke[$i]['flurstkennz']; ?>"><? echo $this->flurstuecke[$i]['flur']; ?></a></td>
         <td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><a href="index.php?go=Flurstueck_Anzeigen&jagdkataster=true&oid=<? echo $this->formvars['oid']; ?>&name=<? echo $this->formvars['name']?>&search_nummer=<? echo $this->formvars['search_nummer']; ?>&search_name=<? echo $this->formvars['search_name']; ?>&search_art=<? echo $this->formvars['search_art']; ?>&FlurstKennz=<? echo $this->flurstuecke[$i]['flurstkennz']; ?>"><? echo $this->flurstuecke[$i]['zaehlernenner']; ?></a></td>
-        <td width="25%" style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><? echo $this->flurstuecke[$i]['eigentuemer'][0]; ?>&nbsp;<? if(count($this->flurstuecke[$i]['eigentuemer']) > 1){ ?><a class="infobox" href=""><b>...</b><span><? for($j=0; $j < count($this->flurstuecke[$i]['eigentuemer']); $j++){echo $this->flurstuecke[$i]['eigentuemer'][$j].'<br>';} ?></span></a><? } ?></td>
+        <td width="25%" style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><? echo $this->flurstuecke[$i]['eigentuemer'][0]; ?>&nbsp;<? if(count($this->flurstuecke[$i]['eigentuemer']) > 1){ ?><a class="infobox" href=""><span class="fett">...</span><span><? for($j=0; $j < count($this->flurstuecke[$i]['eigentuemer']); $j++){echo $this->flurstuecke[$i]['eigentuemer'][$j].'<br>';} ?></span></a><? } ?></td>
         <td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><? echo $this->flurstuecke[$i]['albflaeche']; ?> m<sup>2</sup></td>
         <td style="border-left:1px solid #C3C7C3; border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><? echo $this->flurstuecke[$i]['anteil']; ?> %</td>
       </tr>

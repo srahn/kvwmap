@@ -31,7 +31,7 @@ function display(id) {
 
 </script>
 <br>
-<strong><font size="+2"><?php echo $this->titel; ?></font></strong>
+<h2><?php echo $this->titel; ?></h2>
 <br><br>
 <table align="center" border="0" cellspacing="0" cellpadding="0" rules="groups">
   <tr align="center">
@@ -53,7 +53,7 @@ function display(id) {
     <td align="center"> <table align="center" id="tablemonth" style="display: <?php if ($this->formvars['zeitraum']=='month' OR $this->formvars['zeitraum']==''){ echo 'block';} else { echo 'none';} ?>" width="100%" border="0" cellspacing="0" cellpadding="2">
         <tr> 
           <th width="71%">Monat:</th>
-          <th width="29%"><strong>Jahr:</strong></th>
+          <th width="29%"><span class="fett">Jahr:</span></th>
         </tr>
         <tr> 
           <td align="center"><select name="month_m">
@@ -157,7 +157,7 @@ function display(id) {
           <th>&nbsp;</th>
           <th>Tag:</th>
           <th>Monat:</th>
-          <th><strong>Jahr:</strong></th>
+          <th><span class="fett">Jahr:</span></th>
         </tr>
         <tr> 
           <td>von: </td>
@@ -199,7 +199,7 @@ function display(id) {
           <th>&nbsp;</th>
           <th>Tag:</th>
           <th>Monat:</th>
-          <th><strong>Jahr:</strong></th>
+          <th><span class="fett">Jahr:</span></th>
         </tr>
         <tr> 
           <td>bis: </td>
@@ -277,7 +277,7 @@ function display(id) {
       <? if($this->formvars['go'] != 'StatistikAuswahl_Stelle'){ ?>
         <tr> 
           <td align="center">&nbsp;</td>
-          <th colspan="2" align="center"><strong>Nutzer:</strong></th>
+          <th colspan="2" align="center"><span class="fett">Nutzer:</span></th>
         <tr> 
           <td align="center">&nbsp; </td>
           <td colspan="2" align="center"> <select name="nutzer">

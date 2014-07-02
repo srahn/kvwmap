@@ -189,7 +189,7 @@ function browser_check(){
 
 <table border="0" cellpadding="2" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
-    <td colspan="4" height="30"><strong><font size="+1"><?php echo $this->titel; ?></font></strong></td>
+    <td colspan="4" height="30"><h2><?php echo $this->titel; ?></h2></td>
   </tr>
   <tr>
   	<td valign="top">
@@ -200,7 +200,7 @@ function browser_check(){
 			  </tr>
 			  <tr>
 			  	<td colspan="2" valign="top" style="border-right:1px solid #C3C7C3;border-bottom:1px solid #C3C7C3;">
-			      <select style="width:200px" class="select" name="layer" onchange="change_layer();">
+			      <select style="width:200px"  name="layer" onchange="change_layer();">
 			        <option value="">------------------- Bitte wählen ----------------</option>
 			        <?
 			    		for($i = 0; $i < count($this->layerdaten['ID']); $i++){
@@ -215,7 +215,7 @@ function browser_check(){
 			    </td>
 			    <td style="border-bottom:1px solid #C3C7C3;" colspan="2">
 			    	<div id="classes_div"> 
-			      <select style="width:200px" size="4" class="select" name="class_1" onchange="change_class();" <?php if(count($this->allclassdaten)==0){ echo 'disabled';}?>>
+			      <select style="width:200px" size="4"  name="class_1" onchange="change_class();" <?php if(count($this->allclassdaten)==0){ echo 'disabled';}?>>
 			        <?
 			    		for($i = 0; $i < count($this->allclassdaten); $i++){
 			    			echo '<option';
@@ -307,7 +307,7 @@ function browser_check(){
 							for($i = 0; $i < count($this->styledaten); $i++){
 								echo'
 					    		<tr>
-								  	<td class="verysmall">';
+								  	<td class="px13">';
 								  		echo key($this->styledaten).'</td><td><input name="style_'.key($this->styledaten).'" size="11" type="text" value="'.$this->styledaten[key($this->styledaten)].'">';
 								echo'
 										</td>
@@ -332,7 +332,7 @@ function browser_check(){
 							for($i = 0; $i < count($this->labeldaten); $i++){
 								echo'
 					    		<tr>
-								  	<td class="verysmall">';
+								  	<td class="px13">';
 								  		echo key($this->labeldaten).'</td><td><input name="label_'.key($this->labeldaten).'" size="11" type="text" value="'.$this->labeldaten[key($this->labeldaten)].'">';
 								echo'
 										</td>
@@ -357,7 +357,7 @@ function browser_check(){
 					<td valign="top">
 						<table cellpadding="2" cellspacing="0">
 							<tr>
-								<td><b>Farbe:</b></td>
+								<td><span class="fett">Farbe:</span></td>
 							</tr>
 							<tr>
 								<td><input onmouseover="browser_check();" name="sample1" type="text" style="width: 180px; background-color: rgb(255, 255, 255);" id="sample1"></td>
@@ -372,7 +372,7 @@ function browser_check(){
 								<td>&nbsp;</td>
 							</tr>
 							<tr>
-								<td><b>Font:</b></td>
+								<td><span class="fett">Font:</span></td>
 							</tr>
 							<tr>
 								<td>

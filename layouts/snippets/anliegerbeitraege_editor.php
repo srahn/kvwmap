@@ -84,10 +84,10 @@ function buildwktpolygonfromsvgpath(svgpath){
 	}
 ?>
 
-<table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
+<table style="border: 1px solid; border-color: #eeeeee; border-left: none; border-right: none" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr> 
     <td> <div align="center"></div></td>
-    <td colspan="3"><div align="center"><strong><font size="+1"><?php echo $this->titel; ?></font></strong> 
+    <td colspan="3"><div align="center"><h2><?php echo $this->titel; ?></h2> 
       </div></td>
   </tr>
   <tr> 

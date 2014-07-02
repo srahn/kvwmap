@@ -56,7 +56,7 @@ function save(stelle){
 
 <table border="0" cellpadding="5" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
-    <td colspan="4"><strong><font size="+1"><?php echo $this->titel; ?></font></strong></td>
+    <td colspan="4"><h2><?php echo $this->titel; ?></h2></td>
   </tr>
   <tr>
   	<td>&nbsp;</td>
@@ -69,7 +69,7 @@ function save(stelle){
 			  </tr>
 				<tr>
 					<td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3"> 
-			      <select style="width:250px" size="1" class="select" name="selected_layer_id" onchange="document.GUI.scrollposition.value=0;document.GUI.submit();">
+			      <select style="width:250px" size="1"  name="selected_layer_id" onchange="document.GUI.scrollposition.value=0;document.GUI.submit();">
 			      	<option value="">----------- Bitte wählen -----------</option>
 			        <?
 			    		for($i = 0; $i < count($this->layerdaten['ID']); $i++){

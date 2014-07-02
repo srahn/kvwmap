@@ -163,9 +163,9 @@ function punktinfo()
 				<set attributeName="filter" begin="info.mouseup;info.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
 			</rect>
 			<g transform="scale(0.7) translate(-5 0)">
-				<text x="23" y="15" font-weight="bold" text-anchor="middle">
+				<text x="23" y="15" font-weight="fett" text-anchor="middle">
 				info</text>
-				<text x="23" y="30" font-weight="bold" text-anchor="middle">
+				<text x="23" y="30" font-weight="fett" text-anchor="middle">
 				x/y</text>
 			</g>
 			<rect onmouseover="show_tooltip(\'Koordinatenausgabe\',evt.clientX,evt.clientY)" x="0" y="0" width="25" height="25" opacity="0"/>

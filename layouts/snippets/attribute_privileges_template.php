@@ -5,9 +5,9 @@
 			  		<table border="0" cellspacing="0" cellpadding="0" width="100%">
 			  			<tr>
 			  				<? if($this->stelle->id != '' AND $this->layer[0]['Name'] != ''){ ?>
-						  	<td height="50px" valign="top" align="center"><b><span style="font-size:15px"><? echo $this->stelle->Bezeichnung; ?></span></b></td>
+						  	<td height="50px" valign="top" align="center"><span class="fetter px16"><? echo $this->stelle->Bezeichnung; ?></span></td>
 						  	<? }elseif($this->layer[0]['Name'] != ''){ ?>
-						  	<td height="50px" valign="top" align="center"><b><span style="font-size:15px">Default-Rechte</span></b></td>
+						  	<td height="50px" valign="top" align="center"><span class="fetter px16">Default-Rechte</span></td>
 						  	<? } ?>
 			  			</tr>
 			  		</table>
@@ -17,7 +17,7 @@
 			  	<td colspan="4">
 			    	<table align="center" border="0" cellspacing="2" cellpadding="2">
 			    		<tr>
-						  	<td align="center"><b>Layerzugriffsrechte</b></td>
+						  	<td align="center"><span class="fett">Layerzugriffsrechte</span></td>
 						  </tr>
 						  <tr>
 						  	<td>
@@ -35,7 +35,7 @@
 			  	<td colspan="4">
 			    	<table align="center" border="0" cellspacing="2" cellpadding="2">
 			    		<tr>
-						  	<td align="center"><b>Layerexportrechte</b></td>
+						  	<td align="center"><span class="fett">Layerexportrechte</span></td>
 						  </tr>
 						  <tr>
 						  	<td>
@@ -59,15 +59,15 @@
 						echo '
 								<tr>
 									<td align="center">
-										<b>Attribut</b>
+										<span class="fett">Attribut</span>
 									</td>
 									<td>&nbsp;</td>
 									<td align="center">
-										<b>Privileg</b>
+										<span class="fett">Privileg</span>
 									</td>
 									<td>&nbsp;</td>
 									<td align="center">
-										<b>Tooltip</b>
+										<span class="fett">Tooltip</span>
 									</td>
 								</tr>
 						';
@@ -86,11 +86,11 @@
 							echo '
 							<tr>
 							  <td align="center">
-							  	<input class="input" style="width:100px" type="text" name="attribute_'.$this->attributes['name'][$i].'" value="'.$this->attributes['name'][$i].'" readonly>
+							  	<input style="width:100px" type="text" name="attribute_'.$this->attributes['name'][$i].'" value="'.$this->attributes['name'][$i].'" readonly>
 							  </td>
 							  <td>&nbsp;</td>
 							  <td align="center" style="height:21px">
-							  	<select class="select" style="width:100px" name="privileg_'.$this->attributes['name'][$i].$this->stelle->id.'">';
+							  	<select  style="width:100px" name="privileg_'.$this->attributes['name'][$i].$this->stelle->id.'">';
 							  		echo '
 							  		<option value="" ';
 							  		if($this->attributes_privileges[$this->attributes['name'][$i]] == '' AND !$noentry){echo 'selected';}
@@ -120,11 +120,11 @@
 			    			if($this->formvars['stelle'] != 'a'){
 			    				echo '
 							  <td align="center">
-							  	<input class="input" style="width:100px" type="text" name="" value="alle" readonly>
+							  	<input style="width:100px" type="text" name="" value="alle" readonly>
 							  </td>';} echo '
 							  <td>&nbsp;</td>
 							  <td align="center">
-							  	<select class="select" style="width:100px" name="" onchange="set_all(\''.$attributenames.'\', \''.$this->stelle->id.'\', this.value);"">
+							  	<select  style="width:100px" name="" onchange="set_all(\''.$attributenames.'\', \''.$this->stelle->id.'\', this.value);"">
 										<option value=""> - Auswahl - </option>
 							  		<option value="">nicht sichtbar</option>
 							  		<option value="0">lesen</option>
@@ -155,7 +155,7 @@
 			 					<td>&nbsp;</td>
 			 				</tr>
 			 				<tr>
-			 					<td height="40px" align="center" colspan="5"><b><span style="font-size:15px">'.$this->stelle->Bezeichnung.'</span></b></td>
+			 					<td height="40px" align="center" colspan="5"><span class="fett"><span style="font-size:15px">'.$this->stelle->Bezeichnung.'</span></span></td>
 			 				</tr>';
 						}
 					} 

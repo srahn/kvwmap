@@ -177,7 +177,7 @@
                     echo'
                             <tr>
                               <td>
-                                <img src="'.GRAPHICSPATH.'leer.gif" width="13" height="1" border="0">
+                                <img src="'.GRAPHICSPATH.'leer.gif" width="17" height="1" border="0">
 							  </td>
 							  <td>';
                     ?>

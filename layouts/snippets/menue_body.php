@@ -20,7 +20,7 @@
   if ($this->img['referenzkarte']!='' AND MENU_REFMAP == "oben") {
     ?>
   <tr>
-    <td><input type="image" id="refmap" name="refmap" src="<?php echo $this->img['referenzkarte']; ?>" alt="Referenzkarte" align="right" hspace="0"></td>
+    <td><input style="border: 1px solid #cccccc;" type="image" id="refmap" name="refmap" src="<?php echo $this->img['referenzkarte']; ?>" alt="Referenzkarte" align="right" hspace="0"></td>
   </tr><?php } ?>
   <tr>
   	<td valign="top">
@@ -58,7 +58,7 @@
               echo'
                       <tr>
                         <td>
-                          <img src="'.GRAPHICSPATH.'leer.gif" width="13" height="1" border="0">
+                          <img src="'.GRAPHICSPATH.'leer.gif" width="17" height="1" border="0">
 												</td>
 												<td>';
               ?>
@@ -193,7 +193,7 @@
   </tr><?php
   if ($this->img['referenzkarte']!='' AND MENU_REFMAP !="oben") {
     ?><tr>
-    <td><input id="refmap" type="image" name="refmap" src="<?php echo $this->img['referenzkarte']; ?>" alt="Referenzkarte" align="right" hspace="0"></td>
+    <td><input style="border: 1px solid #cccccc;" id="refmap" type="image" name="refmap" src="<?php echo $this->img['referenzkarte']; ?>" alt="Referenzkarte" align="right" hspace="0"></td>
   </tr>
 	<tr>
 		<td valign="top" align="center"> <input name="button" type="button" class="button" onClick="showMapParameter()" value="<?php echo $strMapInfo; ?>">

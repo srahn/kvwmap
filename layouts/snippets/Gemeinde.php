@@ -4,13 +4,13 @@
 
   <tr bgcolor="<?php echo BG_DEFAULT ?>"> 
 
-    <td><b>Gemeinde</b></td>
+    <td><span class="fett">Gemeinde</span></td>
 
-    <td><b>Gemeindeschl&uuml;ssel</b></td>
+    <td><span class="fett">Gemeindeschl&uuml;ssel</span></td>
 
-    <td><b>Amt</b></td>
+    <td><span class="fett">Amt</span></td>
 
-    <td><b>Link</b></td>
+    <td><span class="fett">Link</span></td>
 
   </tr>
 

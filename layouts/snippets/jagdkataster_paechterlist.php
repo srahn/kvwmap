@@ -3,7 +3,7 @@
     <td align="right">&nbsp;</td>
   </tr>
   <tr align="center">
-    <td><strong><font size="+1"><?php echo $this->titel; ?></font></strong></td>
+    <td><h2><?php echo $this->titel; ?></h2></td>
   </tr>
   <tr>
     <td align="right">&nbsp;</td>
@@ -28,7 +28,7 @@
              <col width="*">
             <colgroup>
               <tr>
-                <td bgcolor="<?php echo BG_DEFAULT ?>"><b>P&auml;chter</b>&nbsp;</td>
+                <td bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett">P&auml;chter</span>&nbsp;</td>
                 <td>&nbsp;<? echo $this->paechter[$i]['nachname'].", ".$this->paechter[$i]['vorname']; ?></td>
               </tr>
             </table>
@@ -36,7 +36,7 @@
           <td rowspan="2" valign="top">
             <table width="100%" border="0" cellspacing="2" cellpadding="0">
               <tr>
-                <td bgcolor="<?php echo BG_DEFAULT ?>"><b>Jagdaus&uuml;bung:</b></td>
+                <td bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett">Jagdaus&uuml;bung:</span></td>
               </tr>
             <?php
             for ($j = 0; $j < count($bezirkliste); $j++) {
@@ -78,27 +78,27 @@
              <col width="*">
             <colgroup>
               <tr>
-                <td bgcolor="<?php echo BG_DEFAULT ?>"><b>PLZ</b></td>
+                <td bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett">PLZ</span></td>
                 <td><? if ($this->paechter[$i]['plz']==''){ echo "&nbsp;"; } else { echo $this->paechter[$i]['plz']; } ?></td>
               </tr>
               <tr>
-                <td bgcolor="<?php echo BG_DEFAULT ?>"><b>Wohnort</b></td>
+                <td bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett">Wohnort</span></td>
                 <td><? if ($this->paechter[$i]['ort']==''){ echo "&nbsp;"; } else { echo $this->paechter[$i]['ort']; } ?></td>
               </tr>
               <tr>
-                <td bgcolor="<?php echo BG_DEFAULT ?>"><b>Stra&szlig;e</b></td>
+                <td bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett">Stra&szlig;e</span></td>
                 <td><? if ($this->paechter[$i]['strasse']==''){ echo "&nbsp;"; } else { echo $this->paechter[$i]['strasse']; } ?></td>
               </tr>
               <tr>
-                <td bgcolor="<?php echo BG_DEFAULT ?>"><b>Telefon</b></td>
+                <td bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett">Telefon</span></td>
                 <td><? if ($this->paechter[$i]['telefon']==''){ echo "&nbsp;"; } else { echo $this->paechter[$i]['telefon']; } ?></td>
               </tr>
               <tr>
-                <td bgcolor="<?php echo BG_DEFAULT ?>"><b>Geburtsort</b></td>
+                <td bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett">Geburtsort</span></td>
                 <td><? if ($this->paechter[$i]['geburtsort']==''){ echo "&nbsp;"; } else { echo $this->paechter[$i]['geburtsort']; } ?></td>
               </tr>
               <tr>
-                <td bgcolor="<?php echo BG_DEFAULT ?>"><b>Geburtstag</b></td>
+                <td bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett">Geburtstag</span></td>
                 <?php
                 $geburtstag = $this->paechter[$i]['geburtstag'];
                 if ($geburtstag!='') {

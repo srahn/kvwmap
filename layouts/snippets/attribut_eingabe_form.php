@@ -71,7 +71,7 @@ function setlayers(selected_options){
 
 <table border="0" cellpadding="5" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
-    <td colspan="5"><strong><font size="+1"><?php echo $strTitle; ?></font></strong></td>
+    <td colspan="5"><h2><?php echo $strTitle; ?></h2></td>
   </tr>
   <tr> 
     <td align="right" colspan="5" align="center">
@@ -102,7 +102,7 @@ function setlayers(selected_options){
   </tr>
   <tr> 
     <td valign="top" style="border-bottom:1px solid #C3C7C3;border-left:1px solid #C3C7C3;border-right:1px solid #C3C7C3"> 
-      <select class="select" name="stelle" onchange="document.GUI.newpath.value = '';document.GUI.newpathwkt.value = '';document.GUI.pathwkt.value = '';document.GUI.result.value = '';document.GUI.layer.disabled = true;document.GUI.submit()">
+      <select  name="stelle" onchange="document.GUI.newpath.value = '';document.GUI.newpathwkt.value = '';document.GUI.pathwkt.value = '';document.GUI.result.value = '';document.GUI.layer.disabled = true;document.GUI.submit()">
         <option value=""><?php echo $this->strPleaseSelect; ?></option>
         <?
     		for($i = 0; $i < count($this->stellendaten['ID']); $i++){
@@ -115,7 +115,7 @@ function setlayers(selected_options){
     	?>
       </select> </td>
     <td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3" colspan="4"> 
-      <select style="width:250px" multiple size="5" class="select" name="layer" onchange="document.GUI.newpath.value = '';document.GUI.newpathwkt.value = '';document.GUI.pathwkt.value = '';document.GUI.result.value = '';" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
+      <select style="width:250px" multiple size="5"  name="layer" onchange="document.GUI.newpath.value = '';document.GUI.newpathwkt.value = '';document.GUI.pathwkt.value = '';document.GUI.result.value = '';" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
         <?
     		for($i = 0; $i < count($this->layerdaten['ID']); $i++){
     			echo '<option value="'.$this->layerdaten['ID'][$i].'">'.$this->layerdaten['Bezeichnung'][$i].'</option>';
@@ -134,7 +134,7 @@ function setlayers(selected_options){
     if(count($this->selected_layers) > 1){
     	echo '
 					<tr>
-						<td align="center" colspan="3"><b>Gemeinsame Attribute von '.count($this->selected_layers).' Layern:</b><br><br></td>
+						<td align="center" colspan="3"><span class="fett">Gemeinsame Attribute von '.count($this->selected_layers).' Layern:</span><br><br></td>
 					</tr>
 			';
     }
@@ -142,13 +142,13 @@ function setlayers(selected_options){
 			echo '
 					<tr>
 						<td align="center">
-							<b>Attribut</b>
+							<span class="fett">Attribut</span>
 						</td>
 						<td align="center">
-							<b>Operator</b>
+							<span class="fett">Operator</span>
 						</td>
 						<td align="center">
-							<b>Wert</b>
+							<span class="fett">Wert</span>
 						</td>
 					</tr>
 			';
@@ -162,10 +162,10 @@ function setlayers(selected_options){
 						echo '
 						<tr>
 						  <td align="center">
-						  	<input class="input" type="text" name="attribute_'.$this->attributes['name'][$i].'" value="'.$this->attributes['name'][$i].'" readonly>
+						  	<input type="text" name="attribute_'.$this->attributes['name'][$i].'" value="'.$this->attributes['name'][$i].'" readonly>
 						  </td>
 						  <td align="center">
-						  	<select class="select" style="width:90px" name="operator_'.$this->attributes['name'][$i].'">
+						  	<select  style="width:90px" name="operator_'.$this->attributes['name'][$i].'">
 						  		<option value="=" ';
 						  		if($this->formvars['operator_'.$this->attributes['name'][$i]] == '='){echo 'selected';}
 						  		echo ' >=</option>
@@ -190,7 +190,7 @@ function setlayers(selected_options){
 						  	</select>
 						  </td>
 						  <td align="center">
-						  	<input class="input" name="value_'.$this->attributes['name'][$i].'" type="text" value="'.$this->formvars['value_'.$this->attributes['name'][$i]].'">
+						  	<input name="value_'.$this->attributes['name'][$i].'" type="text" value="'.$this->formvars['value_'.$this->attributes['name'][$i]].'">
 						  </td>
 		        </tr>';
 	    		}
@@ -206,10 +206,10 @@ function setlayers(selected_options){
 	    		</tr>
 					<tr>
 					  <td align="center">
-					  	<input class="input" type="text" name="attribute_'.$this->attributes['name'][$the_geom_index[$i]].'" value="'.$this->attributes['name'][$the_geom_index[$i]].'" readonly>
+					  	<input type="text" name="attribute_'.$this->attributes['name'][$the_geom_index[$i]].'" value="'.$this->attributes['name'][$the_geom_index[$i]].'" readonly>
 					  </td>
 					  <td align="center">
-					  	<select class="select" style="width:90px" name="operator_'.$this->attributes['name'][$the_geom_index[$i]].'">
+					  	<select  style="width:90px" name="operator_'.$this->attributes['name'][$the_geom_index[$i]].'">
 					  		<option value="st_intersects" ';
 					  		if($this->formvars['operator_'.$this->attributes['name'][$the_geom_index[$i]]] == 'st_intersects'){echo 'selected';}
 					  		echo ' >Intersects</option>

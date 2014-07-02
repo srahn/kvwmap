@@ -26,7 +26,7 @@
 				?><tr>
 					<td align="left"><?php
 						 if($attributes['form_element_type'][$i] == 'Auswahlfeld'){
-								?><select class="select" 
+								?><select  
 								<?
 									if($attributes['req_by'][$i] != ''){
 										echo 'onchange="update_require_attribute(\''.$attributes['req_by'][$i].'\','.LAYER_ID_SCHNELLSPRUNG.', this.value);" ';
@@ -46,13 +46,13 @@
 										<option <? if($this->formvars['value_'.$attributes['name'][$i]] == $attributes['enum_value'][$i][$o]){ echo 'selected';} ?> value="<?php echo $attributes['enum_value'][$i][$o]; ?>"><?php echo $attributes['enum_output'][$i][$o]; ?></option><?php echo "\n";
 									} ?>
 									</select>
-									<input class="input" size="9" id="value2_<?php echo $attributes['name'][$i]; ?>" name="value2_<?php echo $attributes['name'][$i]; ?>" type="hidden" value="<?php echo $this->formvars['value2_'.$attributes['name'][$i]]; ?>">
+									<input size="9" id="value2_<?php echo $attributes['name'][$i]; ?>" name="value2_<?php echo $attributes['name'][$i]; ?>" type="hidden" value="<?php echo $this->formvars['value2_'.$attributes['name'][$i]]; ?>">
 									<?php
 							}
 							else { 
 								?>
-								<input class="input" size="<? if($this->formvars['value2_'.$attributes['name'][$i]] != ''){echo '9';}else{echo '24';} ?>" id="value_<?php echo $attributes['name'][$i]; ?>" name="value_<?php echo $attributes['name'][$i]; ?>" type="text" value="<?php echo $this->formvars['value_'.$attributes['name'][$i]]; ?>">
-								&nbsp;<input class="input" size="9" id="value2_<?php echo $attributes['name'][$i]; ?>" name="value2_<?php echo $attributes['name'][$i]; ?>" type="<? if($this->formvars['value2_'.$attributes['name'][$i]] != ''){echo 'text';}else{echo 'hidden';} ?>" value="<?php echo $this->formvars['value2_'.$attributes['name'][$i]]; ?>">
+								<input size="<? if($this->formvars['value2_'.$attributes['name'][$i]] != ''){echo '9';}else{echo '24';} ?>" id="value_<?php echo $attributes['name'][$i]; ?>" name="value_<?php echo $attributes['name'][$i]; ?>" type="text" value="<?php echo $this->formvars['value_'.$attributes['name'][$i]]; ?>">
+								&nbsp;<input size="9" id="value2_<?php echo $attributes['name'][$i]; ?>" name="value2_<?php echo $attributes['name'][$i]; ?>" type="<? if($this->formvars['value2_'.$attributes['name'][$i]] != ''){echo 'text';}else{echo 'hidden';} ?>" value="<?php echo $this->formvars['value2_'.$attributes['name'][$i]]; ?>">
 								<?php
 						 }
 				 ?></td>

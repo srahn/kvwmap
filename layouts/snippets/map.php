@@ -234,7 +234,7 @@ if($this->formvars['gps_follow'] == ''){
 			        			</tr>
 			        			<tr id="showcoords" style="display:none">
 			        				<td width="100px">
-			          					<b>&nbsp;&nbsp;<?php echo $strShowCoordinates; ?></b>&nbsp;
+			          					<span class="fett">&nbsp;&nbsp;<?php echo $strShowCoordinates; ?></span>&nbsp;
 			          				</td>
 			        				<td colspan="2" width="80%">
 			        					<input type="text" name="firstcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?>
@@ -255,7 +255,7 @@ if($this->formvars['gps_follow'] == ''){
 			          		<tr>
 			          			<td>
 						          	<div id="maptime">
-						          		&nbsp;&nbsp;<a href="index.php?go=Kartenkommentar_Formular&consumetime=<?php echo $this->user->rolle->newtime; ?>&hauptkarte=<?php echo $this->img['hauptkarte']; ?>"><?php echo $strSave; ?></a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="index.php?go=Kartenkommentar_Waehlen&prevtime=<?php echo $this->user->rolle->newtime; ?>"><?php echo $strChoose ?></a>&nbsp;&nbsp;|&nbsp;&nbsp;<? if(SHOW_MAP_IMAGE == 'true'){ ?><a id="MapImageLink" target="_blank" href="" onmouseover="javascript:showMapImage();"><?php echo $strMapImageURL; ?></a></b><? } ?>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="javascript:resizemap2window();" ><? echo $strMapSize; ?></a>
+						          		&nbsp;&nbsp;<a href="index.php?go=Kartenkommentar_Formular&consumetime=<?php echo $this->user->rolle->newtime; ?>&hauptkarte=<?php echo $this->img['hauptkarte']; ?>"><?php echo $strSave; ?></a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="index.php?go=Kartenkommentar_Waehlen&prevtime=<?php echo $this->user->rolle->newtime; ?>"><?php echo $strChoose ?></a>&nbsp;&nbsp;|&nbsp;&nbsp;<? if(SHOW_MAP_IMAGE == 'true'){ ?><a id="MapImageLink" target="_blank" href="" onmouseover="javascript:showMapImage();"><?php echo $strMapImageURL; ?></a></span><? } ?>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="javascript:resizemap2window();" ><? echo $strMapSize; ?></a>
 						            </div>
 						          </td>
 						          <td id="options"></td><!-- hier werden die Spezialoptionen eingefügt -->

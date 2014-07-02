@@ -7,19 +7,19 @@ else {
 }
  ?>
 
-<table width="0%" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
+<table style="border: 1px solid; border-color: #eeeeee; border-left: none; border-right: none" width="0%" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr> 
-    <td><div align="center"><strong><font size="+1"><?php echo $this->titel; ?></font></strong> 
+    <td><div align="center"><h2><?php echo $this->titel; ?></h2> 
       </div></td>
   </tr>
   <tr> 
     <?php $this->formvars['order']='';?>
     <td><table border="0" cellspacing="0" cellpadding="5">
         <tr bgcolor="#FFFFFF"> 
-          <td><div align="center"><strong>Antragsnummer</strong></div></td>
-          <td><div align="center"><strong>Vermessungsstelle</strong></div></td>
-          <td><div align="center"><strong>Vermessungsart</strong></div></td>
-          <td width="100"><div align="center"><strong>Datum</strong></div></td>
+          <td><div align="center"><span class="fett">Antragsnummer</span></div></td>
+          <td><div align="center"><span class="fett">Vermessungsstelle</span></div></td>
+          <td><div align="center"><span class="fett">Vermessungsart</span></div></td>
+          <td width="100"><div align="center"><span class="fett">Datum</span></div></td>
         </tr>
         <tr bgcolor="#FFFFFF"> 
           <td colspan="4"><hr></td>

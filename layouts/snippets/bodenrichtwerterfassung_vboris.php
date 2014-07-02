@@ -144,9 +144,9 @@ function update_require_attribute(attributes, layer_id, value){
  ?>
 
 	  
-<table border="0" cellpadding="4" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
+<table style="border: 1px solid; border-color: #eeeeee; border-left: none; border-right: none" border="0" cellpadding="4" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
-    <td colspan="6"><strong><font size="+1"><?php echo $this->titel; ?></font></strong></td>
+    <td colspan="6"><h2><?php echo $this->titel; ?></h2></td>
   </tr>
   <tr> 
     <td>&nbsp;</td>
@@ -448,7 +448,7 @@ function update_require_attribute(attributes, layer_id, value){
 									  </tr>
 						  		</table>
 								</td>
-								<td width="50%" align="left" valign="top">&nbsp;<b>Maßstab&nbsp;1:&nbsp;</b><input type="text" id="scale" name="nScale" size="5" value="<?php echo round($this->map->scaledenom); ?>"></td>
+								<td width="50%" align="left" valign="top">&nbsp;<span class="fett">Maßstab&nbsp;1:&nbsp;</span><input type="text" id="scale" name="nScale" size="5" value="<?php echo round($this->map->scaledenom); ?>"></td>
 								<td width="50%" align="right" valign="top">
 									<? if($this->formvars['go'] != 'Bodenrichtwertformular_Anzeige'){ ?>
 									<input type="checkbox" name="always_draw" value="1" <?if($always_draw == 1 OR $always_draw == 'true')echo 'checked'; ?>>&nbsp;weiterzeichnen&nbsp;&nbsp;

@@ -53,15 +53,15 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
     <td>&nbsp;</td>
   </tr>
   <tr> 
-    <td align="right"><span class="fett px15">Grundbuchbezirksschlüssel:</span></td>
+    <td align="right"><span class="fett">Grundbuchbezirksschlüssel:</span></td>
     <td colspan="3">
     	<input name="bezirk" style="width:230px" type="text" value="<?php echo $this->formvars['bezirk']; ?>" onkeyup="updateBezirksauswahl();" size="25" tabindex="1">
     </td>
   </tr>
   <tr> 
-    <td align="right"><span class="fett px15">Grundbuchbezirk:</span></td>
+    <td align="right"><span class="fett">Grundbuchbezirk:</span></td>
     <td colspan="3">
-    	<select style="width:230px" class="select" name="Bezirk" onchange="updateBezirksschluessel();">
+    	<select style="width:230px"  name="Bezirk" onchange="updateBezirksschluessel();">
     		<option value="">--- Auswahl ---</option>
     		<?for($i = 0; $i < count($this->gbliste['schluessel']); $i++){?>
     			<option 
@@ -75,15 +75,15 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   </tr>
   <? if($this->formvars['Bezirk'] == ''){ ?>
   <tr>
-    <td align="right"><span class="fett px15">Grundbuchblatt:</span></td>
+    <td align="right"><span class="fett">Grundbuchblatt:</span></td>
     <td colspan="3"><input name="Blatt" style="width:230px" type="text" value="<?php echo $this->formvars['Blatt']; ?>" size="25" tabindex="2"></td>
   </tr>
   <? }else{ ?>
   <tr>
-    <td align="right"><span class="fett px15">Grundbuchblatt:</span></td>
+    <td align="right"><span class="fett">Grundbuchblatt:</span></td>
     <td>
     	<br>ausgewählte:<br>
-    	<select size="10" style="width:110px" multiple="true" class="select" name="selectedBlatt">
+    	<select size="10" style="width:110px" multiple="true"  name="selectedBlatt">
     		 <?
           for($i=0; $i < count($this->selblattliste); $i++){
           	echo '<option value="'.$this->selblattliste[$i].'">'.$this->selblattliste[$i].'</option>';
@@ -97,7 +97,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
     </td>
     <td>
     	<br>vorhandene:<br>
-    	<select size="10" style="width:80px" multiple="true" class="select" name="Blatt">
+    	<select size="10" style="width:80px" multiple="true"  name="Blatt">
     		<?for($i = 0; $i < count($this->blattliste['blatt']); $i++){?>
     			<option
     			<?if($this->formvars['Blatt'] == $this->blattliste['blatt'][$i]){?>

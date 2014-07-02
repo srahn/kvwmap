@@ -13,7 +13,7 @@
 
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
-    <td><strong><font size="+1"><?php echo $this->titel; ?></font></strong></td>
+    <td><h2><?php echo $this->titel; ?></h2></td>
   </tr>
   <tr>
   	<td><iframe style="display:none" width="990" height="500" id="meta" src=""></iframe></td>

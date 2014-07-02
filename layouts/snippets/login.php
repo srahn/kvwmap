@@ -43,6 +43,7 @@
 		 <head>
 		  <title><?php echo TITLE; ?></title>
       <META http-equiv=Content-Type content="text/html; charset=UTF-8">
+			<link rel="stylesheet" href="layouts/main.css">
 		 </head>
 		 <body style="font-family: Arial, Verdana, Helvetica, sans-serif" onload="document.login.username.focus();">
 		  <form name="login" action="index.php" method="post">
@@ -53,29 +54,30 @@
 					next($_REQUEST);
 				}
 				?>
-				<table align="center" cellspacing="0" cellpadding="10" border="0" bgcolor="<?php echo BG_DEFAULT; ?>">
+				<br>
+				<table align="center" cellspacing="4" cellpadding="12" border="0" style="box-shadow: 12px 10px 14px #777; border: 1px solid #bbbbbb; background: linear-gradient(<? echo BG_GLEATTRIBUTE; ?> 0%, <? echo BG_DEFAULT ?> 100%);">
 					<tr>
 						<td align="center">
 							<table cellspacing="0" cellpadding="2" border="0">
 								<tr>
-									<td align="center" colspan="2"><h2>kvwmap&nbsp;Anmeldung</h2></td>
-								</tr><?php
-					if($username != '' OR $passwort != ''){
-						  ?><tr>
-									<td colspan="2"><font color="red"><b>Anmeldung nicht erfolgreich.</b></font><br><br></td>
-									</tr><?php														
-					}								
-			        ?><tr>
-									<td>Ihre IP-Adr: </td>
-									<td><?php echo $remote_addr; ?></td>
+									<td align="center" colspan="2"><h1>kvwmap&nbsp;Anmeldung</h1></td>
 								</tr>
 								<tr>
-									<td>Username: </td>
-  								<td><input type="text" value="<? echo $username; ?>" name="username"/></td>
+									<td>&nbsp;</td>
+								</tr>
+								<?php
+					if($username != '' OR $passwort != ''){
+						  ?><tr>
+									<td align="center" colspan="2"><span class="fett" style="color: #ff0000;">Anmeldung nicht erfolgreich.</span><br><br></td>
+								</tr><?php														
+					}								
+			        ?><tr>
+									<td>Nutzername: </td>
+  								<td><input style="width: 130px" type="text" value="<? echo $username; ?>" name="username"/></td>
 								</tr>
 								<tr>
 									<td>Passwort: </td>
-									<td><input type="password" value="<? echo $passwort; ?>" name="passwort" size="10"/></td>
+									<td><input style="width: 130px" type="password" value="<? echo $passwort; ?>" name="passwort" /></td>
 								</tr><?php
 					if (isset($newPassword) AND $newPassword!='') {
 						  ?><tr>
@@ -97,7 +99,10 @@
 								</tr><?php
 					}
               ?><tr>
-									<td colspan="2" align="center"><br><input type="submit" value="Anmelden"/></td>
+									<td style="height: 40px" colspan="2">Ihre IP-Adresse: <?php echo $remote_addr; ?></td>
+								</tr>
+								<tr>
+									<td colspan="2" align="center"><input type="submit" value="Anmelden"/></td>
 								</tr>
 							</table>
 						</td>

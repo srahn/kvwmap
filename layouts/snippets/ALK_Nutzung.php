@@ -6,10 +6,10 @@
    
 <table border="1" cellspacing="0" cellpadding="2">
   <tr bgcolor="<?php echo BG_DEFAULT ?>">
-    <td><b>Objnr</b></td>
-    <td><b>Folie</b></td>
-    <td><b>Objektart</b></td>
-    <td><b>Bezeichnung</b></td>    
+    <td><span class="fett">Objnr</span></td>
+    <td><span class="fett">Folie</span></td>
+    <td><span class="fett">Objektart</span></td>
+    <td><span class="fett">Bezeichnung</span></td>    
   </tr>
   <?php
     for ($j=0;$j<$anzObj;$j++) {

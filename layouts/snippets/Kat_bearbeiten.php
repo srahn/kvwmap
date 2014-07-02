@@ -47,9 +47,9 @@ function hinzufuegen(){
 	<tr><td><br>
 	<table align="center" border="0" cellspacing="0" cellpadding="0">
 	<tr>
-    <td align="center" colspan="6"><strong><font size="+1"><?php echo $strCategory; ?></font></strong></td></tr>
+    <td align="center" colspan="6"><h2><?php echo $strCategory; ?></font></strong></td></tr>
   <tr>
-	<td align="center" colspan="2"><strong><font size="+1">
+	<td align="center" colspan="2"><h2>
       <select name="kategorie_id" onChange="change()">
       	<option value=""><?php echo $this->strPleaseSelect; ?></option>
         <?php for ($k=0 ; $k<count($this->AllKat) ; $k++) { ?>

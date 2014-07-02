@@ -12,7 +12,7 @@ function Bestaetigung(link,text) {
 <a name="oben"></a>
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
-    <td><strong><font size="+1"><?php echo $strTitle; ?></font></strong></td>
+    <td><h2><?php echo $strTitle; ?></h2></td>
   </tr>
   <? if($this->formvars['order']=="Name") { ?>
   <tr height="50px" valign="bottom">

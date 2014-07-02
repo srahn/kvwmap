@@ -6,14 +6,14 @@
 
 <table border="1" cellspacing="0" cellpadding="2">
   <tr bgcolor="<?php echo BG_DEFAULT ?>">
-    <td><b>Nummer</b></td>
+    <td><span class="fett">Nummer</span></td>
     <td>Blatt-Nr.</td>
     <td>Art</td>
     <td>Flur</td>
     <td>Format</td>
-    <td><b>Vermessungsstelle</b></td>
-    <td><b>Datum</b></td>
-    <td><b>Riss</b></td>
+    <td><span class="fett">Vermessungsstelle</span></td>
+    <td><span class="fett">Datum</span></td>
+    <td><span class="fett">Riss</span></td>
 
   </tr>
   <?php
@@ -33,7 +33,7 @@
 $dname=NACHWEISDOCPATH.$gemarkid.$flur."/".$nr."/".$this->qlayerset[$i]['shape'][$j]['link_datei'];
     ?>
   <tr>
-	<td><b><?php echo $this->qlayerset[$i]['shape'][$j][NACHWEIS_PRIMARY_ATTRIBUTE]; ?></b></td>
+	<td><span class="fett"><?php echo $this->qlayerset[$i]['shape'][$j][NACHWEIS_PRIMARY_ATTRIBUTE]; ?></span></td>
 	<td><?php echo $this->qlayerset[$i]['shape'][$j]['blattnummer']; ?></td>
         <td><?php
            if ($art == '100') echo "FFR";

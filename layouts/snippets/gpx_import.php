@@ -12,12 +12,12 @@
 
 <table border="0" cellpadding="5" cellspacing="3" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
-    <td colspan="3"><strong><font size="+1"><?php echo $this->titel; ?></font></strong></td>
+    <td colspan="3"><h2><?php echo $this->titel; ?></h2></td>
   </tr>
   <? if($this->gpx->formvars['gpxfile'] == ''){ ?>
   <tr>
   	<td>&nbsp;</td>
-		<td align="center" style="border-bottom:1px solid #C3C7C3"><b>GPX-Datei</b>
+		<td align="center" style="border-bottom:1px solid #C3C7C3"><span class="fett">GPX-Datei</span>
 		<input class="button" type="file" name="gpxfile" size="12">
 		<input class="button" type="submit" name="goplus" value="Laden"></td>
 		<td>&nbsp;</td>
@@ -26,7 +26,7 @@
 			elseif($this->gpx->formvars['dbffile'] == ''){ ?>
 	<tr>
   	<td>&nbsp;</td>
-		<td align="center" style="border-bottom:1px solid #C3C7C3"><b>GPX-Datei</b>
+		<td align="center" style="border-bottom:1px solid #C3C7C3"><span class="fett">GPX-Datei</span>
 		<input class="button" type="file" name="gpxfile" size="12">
 		<input class="button" type="submit" name="goplus" value="Laden"></td>
 		<td>&nbsp;</td>
@@ -47,11 +47,11 @@
   	<td align="center">  		
   		<table border="0">
   			<tr>
-  				<td align="right"><b>Tabellenname:</b></td>
+  				<td align="right"><span class="fett">Tabellenname:</span></td>
   				<td align="center" height="35"><input name="table_name" type="text" value="<? echo array_pop(explode('/', strtolower(dirname($this->gpx->formvars['dbffile'])))); ?>" size="25" class="input"></td>
   			</tr>
   			<tr>
-  				<td height="30" align="right"><b>Optionen:</b></td>
+  				<td height="30" align="right"><span class="fett">Optionen:</span></td>
   				<td><input type="radio" name="table_option" value="-c" checked>Tabelle neu anlegen</td>
   			</tr>
   			<tr>

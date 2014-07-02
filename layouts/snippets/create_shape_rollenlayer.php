@@ -20,7 +20,7 @@ function save(){
 
 <table border="0" cellpadding="5" cellspacing="3" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
-    <td colspan="3"><strong><font size="+1"><?php echo $this->titel; ?></font></strong></td>
+    <td colspan="3"><h2><?php echo $this->titel; ?></h2></td>
   </tr>
   <? if($this->shape->formvars['zipfile'] == ''){ ?>
   <tr>
@@ -30,13 +30,13 @@ function save(){
   </tr>
   <tr>
   	<td>&nbsp;</td>
-		<td align="right"><b><?php echo $strZipArchive; ?></b></td>
+		<td align="right"><span class="fett"><?php echo $strZipArchive; ?></span></td>
 		<td><input type="file" name="zipfile" style="width:140px" ></td>
 		<td>&nbsp;</td>
 	</tr>
 	<tr align="center">
 		<td>&nbsp;</td>
-    <td align="right" style="border-bottom:1px solid #C3C7C3"><b><?php echo $strMapProjection; ?>:&nbsp;</b></td>
+    <td align="right" style="border-bottom:1px solid #C3C7C3"><span class="fett"><?php echo $strMapProjection; ?>:&nbsp;</span></td>
     <td align="left" style="border-bottom:1px solid #C3C7C3">
       <select name="epsg">
 		    <option value="">--<?php echo $this->strChoose; ?>--</option>

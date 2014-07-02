@@ -22,8 +22,8 @@ function popup(id){
 
 <table width="100%" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center">
-    <td colspan="2"><strong><font size="+1"><br>
-      <?php echo $this->titel; ?></font></strong></td>
+    <td colspan="2"><h2><br>
+      <?php echo $this->titel; ?></font></span></td>
   </tr>
   <tr>
     <td>
@@ -31,19 +31,19 @@ function popup(id){
 	    <?php
 			if ($this->formvars['zeitraum']=='month') { ?>
 				<tr>
-	      	<td colspan="2"><br><b>Monat: <?php echo $this->formvars['month_m']; ?>/<?php echo $this->formvars['year_m']; ?></b><br></td>
+	      	<td colspan="2"><br><span class="fett">Monat: <?php echo $this->formvars['month_m']; ?>/<?php echo $this->formvars['year_m']; ?></span><br></td>
 				</tr>
 			<? }elseif($this->formvars['zeitraum']=='week'){ ?>
 				<tr>
-					<td colspan="2"><b><br>Woche: <?php echo $this->formvars['week_w']; ?>. Kalenderwoche <?php echo $this->formvars['year_w'] ?></b><br></td>
+					<td colspan="2"><span class="fett"><br>Woche: <?php echo $this->formvars['week_w']; ?>. Kalenderwoche <?php echo $this->formvars['year_w'] ?></span><br></td>
 				</tr>
 			<? }elseif($this->formvars['zeitraum']=='day'){ ?>
 				<tr>
-	      	<td colspan="2"><b>Tag: <?php echo $this->formvars['day_d'].'.'.$this->formvars['month_d'].'.'.$this->formvars['year_d']; ?></b><br></td>
+	      	<td colspan="2"><span class="fett">Tag: <?php echo $this->formvars['day_d'].'.'.$this->formvars['month_d'].'.'.$this->formvars['year_d']; ?></span><br></td>
 	      </tr>
 	    <? }elseif($this->formvars['zeitraum']=='era'){ ?>
 	    	<tr>
-	      	<td colspan="2"><b>Zeitraum - vom: <?php echo $this->formvars['day_e1'].'.'.$this->formvars['month_e1'].'.'.$this->formvars['year_e1']; ?> bis  <?php echo $this->formvars['day_e2'].'.'.$this->formvars['month_e2'].'.'.$this->formvars['year_e2']; ?></b><br></td>
+	      	<td colspan="2"><span class="fett">Zeitraum - vom: <?php echo $this->formvars['day_e1'].'.'.$this->formvars['month_e1'].'.'.$this->formvars['year_e1']; ?> bis  <?php echo $this->formvars['day_e2'].'.'.$this->formvars['month_e2'].'.'.$this->formvars['year_e2']; ?></span><br></td>
 	      </tr>
 	    <? } ?>
 	    	<?php if ($this->formvars['nutzung']=='stelle') { ?>
@@ -68,8 +68,8 @@ function popup(id){
 	            	<td>
 	            		<table width="100%" border="0" cellpadding="5" cellspacing="0">
 	                	<tr bgcolor="#FFFFFF">
-	                  	<td width="50%"><strong>Layer</strong></td>
-	                    <td width="50%"><strong>Anzahl der Zugriffe</strong></td>
+	                  	<td width="50%"><span class="fett">Layer</span></td>
+	                    <td width="50%"><span class="fett">Anzahl der Zugriffe</span></td>
 	                  </tr>
 	                  <tr bgcolor="#FFFFFF">
 	                  	<td colspan="13"><hr></td>
@@ -123,9 +123,9 @@ function popup(id){
 		                <td>
 		                	<table width="100%" border="0" cellpadding="5" cellspacing="0">
 		                    <tr bgcolor="#FFFFFF">
-		                      <td width="40%"><strong>Drucklayout</strong></td>
-		                      <td width="27%"><strong>Format</strong></td>
-		                      <td width="33%"><strong>Anzahl der ALK-Drucke</strong></td>
+		                      <td width="40%"><span class="fett">Drucklayout</span></td>
+		                      <td width="27%"><span class="fett">Format</span></td>
+		                      <td width="33%"><span class="fett">Anzahl der ALK-Drucke</span></td>
 		                    </tr>
 		                    <tr bgcolor="#FFFFFF">
 		                      <td colspan="13"><hr></td>
@@ -191,9 +191,9 @@ function popup(id){
 		                <td>
 		                	<table width="100%" border="0" cellpadding="5" cellspacing="0">
 		                    <tr bgcolor="#FFFFFF">
-		                      <td width="33%"><strong>ALB-Format</strong></td>
-		                      <td width="33%"><strong>Anzahl der ALB-Drucke</strong></td>
-		                      <td width="33%"><strong>Anzahl der Seiten</strong></td>
+		                      <td width="33%"><span class="fett">ALB-Format</span></td>
+		                      <td width="33%"><span class="fett">Anzahl der ALB-Drucke</span></td>
+		                      <td width="33%"><span class="fett">Anzahl der Seiten</span></td>
 		                    </tr>
 		                    <tr bgcolor="#FFFFFF">
 		                      <td colspan="13"><hr></td>
@@ -259,9 +259,9 @@ function popup(id){
 		                <td>
 		                	<table width="100%" border="0" cellpadding="5" cellspacing="0">
 		                    <tr bgcolor="#FFFFFF">
-		                      <td width="33%"><strong>Export-Art</strong></td>
-		                      <td width="33%"><strong>Anzahl der Exporte</strong></td>
-		                      <td width="33%"><strong>Anzahl der Datensätze</strong></td>
+		                      <td width="33%"><span class="fett">Export-Art</span></td>
+		                      <td width="33%"><span class="fett">Anzahl der Exporte</span></td>
+		                      <td width="33%"><span class="fett">Anzahl der Datensätze</span></td>
 		                    </tr>
 		                    <tr bgcolor="#FFFFFF">
 		                      <td colspan="13"><hr></td>
@@ -328,9 +328,9 @@ function popup(id){
 		                <td>
 		                	<table width="100%" border="0" cellpadding="5" cellspacing="0">
 		                    <tr bgcolor="#FFFFFF">
-		                      <td width="33%"><strong>Layer-ID</strong></td>
-		                      <td width="33%"><strong>Anzahl der Exporte</strong></td>
-		                      <td width="33%"><strong>Anzahl der Datensätze</strong></td>
+		                      <td width="33%"><span class="fett">Layer-ID</span></td>
+		                      <td width="33%"><span class="fett">Anzahl der Exporte</span></td>
+		                      <td width="33%"><span class="fett">Anzahl der Datensätze</span></td>
 		                    </tr>
 		                    <tr bgcolor="#FFFFFF">
 		                      <td colspan="13"><hr></td>
