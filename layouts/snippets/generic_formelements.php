@@ -193,15 +193,15 @@
 											}
 										}
 										if($this->new_entry != true AND $no_query != true){
-											$datapart .= '<a id="show_all_'.$attributes['name'][$j].'_'.$k.'" style="font-size: '.$linksize.'px;visibility:hidden" class="buttonlink" href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
+											$datapart .= '<a id="show_all_'.$attributes['name'][$j].'_'.$k.'" style="font-size: '.$linksize.'px;display:none" class="buttonlink" href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
 											for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
 												$datapart .= '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$dataset[$attributes['subform_pkeys'][$j][$p]];
 												$datapart .= '&operator_'.$attributes['subform_pkeys'][$j][$p].'==';
 											}
-											$datapart .= 	'\')">'.$strShowAll.'</a>&nbsp;';												
+											$datapart .= 	'\')">'.$strShowAll.'</a>';												
 											if($attributes['subform_layer_privileg'][$j] > 0 AND !$lock[$k]){
 												if($attributes['embedded'][$j] == true){
-													$datapart .= '<a class="buttonlink" href="javascript:ahah(\''.URL.APPLVERSION.'index.php\', \'go=neuer_Layer_Datensatz';
+													$datapart .= '&nbsp;<a class="buttonlink" href="javascript:ahah(\''.URL.APPLVERSION.'index.php\', \'go=neuer_Layer_Datensatz';
 													$data = '';
 													for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
 														$datapart .= '&attributenames['.$p.']='.$attributes['subform_pkeys'][$j][$p];

@@ -2220,6 +2220,9 @@ class GUI extends GUI_core{
       $select .= ")";
       $datastring = $this->formvars['layer_columnname']." from (".$select.' '.$orderby;
       $datastring.=") as foo using unique oid using srid=".$layerset[0]['epsg_code'];
+			if($layerset[0]['alias'] != '' AND $this->Stelle->useLayerAliases){
+				$layerset[0]['Name'] = $layerset[0]['alias'];
+			}
       $legendentext = $layerset[0]['Name']." (".date('d.m. H:i',time()).")";
 
       $group = $dbmap->getGroupbyName('Suchergebnis');
@@ -2396,6 +2399,9 @@ class GUI extends GUI_core{
       
       $datastring = $this->formvars['layer_columnname']." from (".$select;
       $datastring.=") as foo using unique oid using srid=".$layerset[0]['epsg_code'];
+			if($layerset[0]['alias'] != '' AND $this->Stelle->useLayerAliases){
+				$layerset[0]['Name'] = $layerset[0]['alias'];
+			}
       $legendentext = $layerset[0]['Name']." (".date('d.m. H:i',time()).")";
 
       $group = $dbmap->getGroupbyName('Suchergebnis');
@@ -2525,6 +2531,9 @@ class GUI extends GUI_core{
 	      
 	      $datastring = $this->formvars['layer_columnname']." from (".$select;
 	      $datastring.=") as foo using unique oid using srid=".$layerset[0]['epsg_code'];
+				if($layerset[0]['alias'] != '' AND $this->Stelle->useLayerAliases){
+					$layerset[0]['Name'] = $layerset[0]['alias'];
+				}
 	      $legendentext = $layerset[0]['Name']." (".date('d.m. H:i',time()).")";
 	
 	      $group = $dbmap->getGroupbyName('Suchergebnis');
@@ -2635,6 +2644,9 @@ class GUI extends GUI_core{
       $datastring =$this->formvars['layer_columnname']." from (select oid, ".$this->formvars['layer_columnname']." from ".$this->formvars['layer_tablename'];
       $datastring.=" WHERE oid = '".$this->formvars['oid']."'";
       $datastring.=") as foo using unique oid using srid=".$layerset[0]['epsg_code'];
+			if($layerset[0]['alias'] != '' AND $this->Stelle->useLayerAliases){
+				$layerset[0]['Name'] = $layerset[0]['alias'];
+			}
       $legendentext = $layerset[0]['Name']." (".date('d.m. H:i',time()).")";
       $group = $dbmap->getGroupbyName('Suchergebnis');
       if($group != ''){
@@ -6574,7 +6586,7 @@ class GUI extends GUI_core{
       }
 			if($this->user->rolle->querymode == 1 AND $this->formvars['mime_type'] != 'overlay_html'){		# bei aktivierter Datenabfrage in extra Fenster und Suche aus Suchmaske (nicht aus Overlay) heraus --> Laden der Karte und Darstellung der Sachdaten im Overlay
 				$this->loadMap('DataBase');
-				if(count($this->qlayerset[$i]['shape']) > 0 AND ($layerset[0]['attributes']['the_geom'] != '' OR $layerset[0]['shape'][0]['geom'] != '')){			# wenn was gefunden wurde und der Layer Geometrie hat, auf Datensätze zoomen
+				if(count($this->qlayerset[$i]['shape']) > 0 AND ($layerset[0]['shape'][0][$layerset[0]['attributes']['the_geom']] != '' OR $layerset[0]['shape'][0]['geom'] != '')){			# wenn was gefunden wurde und der Layer Geometrie hat, auf Datensätze zoomen
 					switch ($layerset[0]['connectiontype']) {
 						case MS_POSTGIS : {
 							for($k = 0; $k < count($this->qlayerset[$i]['shape']); $k++){

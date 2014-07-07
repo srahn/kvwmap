@@ -325,7 +325,7 @@
 	<tr>
 		<td colspan="2"align="left">
 		<? if($this->new_entry != true){ ?>
-			<table border="0">
+			<table border="0" cellspacing="4" cellpadding="0">
 				<tr>
 					<td colspan="2">
 						<i><? echo $layer['Name'] ?></i>:&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:selectall(<? echo $layer['Layer_ID']; ?>);">
@@ -345,32 +345,36 @@
 				</tr>
 				<tr>
 					<td>
+						<table cellspacing="4" cellpadding="0">
 					<? if($layer['privileg'] == '2'){ ?>
-						&nbsp;&nbsp;&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:delete_datasets(<?php echo $layer['Layer_ID']; ?>);"><? echo $strdelete; ?></a><br>
+							<tr><td>&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:delete_datasets(<?php echo $layer['Layer_ID']; ?>);"><? echo $strdelete; ?></a></td></tr>
 					<?} if($layer['export_privileg'] == '1'){ ?>
-						&nbsp;&nbsp;&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" id="csv_link" href="javascript:csv_export(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCSVExport; ?></a><br>
-						&nbsp;&nbsp;&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" id="shape_link" href="javascript:shape_export(<?php echo $layer['Layer_ID']; ?>);"><? echo $strShapeExport; ?></a><br>
+							<tr><td>&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" id="csv_link" href="javascript:csv_export(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCSVExport; ?></a></td></tr>
+							<tr><td>&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" id="shape_link" href="javascript:shape_export(<?php echo $layer['Layer_ID']; ?>);"><? echo $strShapeExport; ?></a></td></tr>
 					<? } if($layer['layouts']){ ?>
-						&nbsp;&nbsp;&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" id="print_link" href="javascript:print_data(<?php echo $layer['Layer_ID']; ?>);"><? echo $strPrint; ?></a><br>
+							<tr><td>&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" id="print_link" href="javascript:print_data(<?php echo $layer['Layer_ID']; ?>);"><? echo $strPrint; ?></a></td></tr>
 					<? } ?>
 					<? if($privileg != ''){ ?>
-						&nbsp;&nbsp;&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:zoomto_datasets(<?php echo $layer['Layer_ID']; ?>, '<? echo $tablename; ?>', '<? echo $columnname; ?>');"><? echo $strzoomtodatasets; ?></a>
-						<select style="width: 130px" name="klass_<?php echo $layer['Layer_ID']; ?>">
-							<option value="">klassifiziert nach:</option>
-							<?
-							for($j = 0; $j < count($attributes['name']); $j++){
-								if($attributes['name'][$j] != $attributes['the_geom']){
-									echo '<option value="'.$attributes['name'][$j].'">'.$attributes['alias'][$j].'</option>';
-								}
-							}
-							?>
-						</select>
+							<tr><td>&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:zoomto_datasets(<?php echo $layer['Layer_ID']; ?>, '<? echo $tablename; ?>', '<? echo $columnname; ?>');"><? echo $strzoomtodatasets; ?></a>
+								<select style="width: 130px" name="klass_<?php echo $layer['Layer_ID']; ?>">
+									<option value="">klassifiziert nach:</option>
+									<?
+									for($j = 0; $j < count($attributes['name']); $j++){
+										if($attributes['name'][$j] != $attributes['the_geom']){
+											echo '<option value="'.$attributes['name'][$j].'">'.$attributes['alias'][$j].'</option>';
+										}
+									}
+									?>
+								</select></td></tr>
 					<?}?>
+						</table>
 					</td>
 					<? if($layer['export_privileg'] == '1'){ ?>
 					<td valign="top" colspan="3">
-						&nbsp;&nbsp;&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" id="csv_link" href="javascript:csv_export_all(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCSVExport; ?></a><br>
-						&nbsp;&nbsp;&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" id="csv_link" href="javascript:shape_export_all(<?php echo $layer['Layer_ID']; ?>, <? echo $layer['count']; ?>);"><? echo $strShapeExport; ?></a>
+						<table cellspacing="4" cellpadding="0">
+							<tr><td>&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" id="csv_link" href="javascript:csv_export_all(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCSVExport; ?></a></td></tr>
+							<tr><td>&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" id="csv_link" href="javascript:shape_export_all(<?php echo $layer['Layer_ID']; ?>, <? echo $layer['count']; ?>);"><? echo $strShapeExport; ?></a></td></tr>
+						</table>
 					</td>
 					<? } ?>
 				</tr>

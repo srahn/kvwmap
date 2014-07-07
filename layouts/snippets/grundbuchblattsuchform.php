@@ -47,10 +47,9 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 ?><p>
 
 <table border="0" cellpadding="5" cellspacing="2">
-
   <tr>
-    <td align="right">&nbsp;</td>
-    <td>&nbsp;</td>
+    <td></td>
+    <td></td>
   </tr>
   <tr> 
     <td align="right"><span class="fett">Grundbuchbezirksschlüssel:</span></td>

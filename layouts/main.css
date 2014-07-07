@@ -2,25 +2,25 @@
   font-family: 'SourceSansPro';
   font-style: normal;
   font-weight: 300;
-  src: local('SourceSansPro'), url(http://themes.googleusercontent.com/static/fonts/sourcesanspro/v7/toadOcfmlt9b38dHJxOBGNbE_oMaV8t2eFeISPpzbdE.woff) format('woff');
+  src: local('SourceSansPro'), url(../fonts/SourceSansPro-Light.ttf);
 }
 @font-face {
   font-family: 'SourceSansPro1';
   font-style: normal;
   font-weight: 400;
-  src: local('SourceSansPro1'), url(http://themes.googleusercontent.com/static/fonts/sourcesanspro/v7/ODelI1aHBYDBqgeIAH2zlBM0YzuT7MdOe03otPbuUS0.woff) format('woff');
+  src: local('SourceSansPro1'), url(../fonts/SourceSansPro-Regular.ttf);
 }
 @font-face {
   font-family: 'SourceSansPro2';
   font-style: normal;
   font-weight: 600;
-  src: local('SourceSansPro2'), url(http://themes.googleusercontent.com/static/fonts/sourcesanspro/v7/toadOcfmlt9b38dHJxOBGJ6-ys_j0H4QL65VLqzI3wI.woff) format('woff');
+  src: local('SourceSansPro2'), url(../fonts/SourceSansPro-Semibold.ttf);
 }
 @font-face {
   font-family: 'SourceSansPro3';
   font-style: normal;
   font-weight: 700;
-  src: local('SourceSansPro3'), url(http://themes.googleusercontent.com/static/fonts/sourcesanspro/v7/toadOcfmlt9b38dHJxOBGFkQc6VGVFSmCnC_l7QZG60.woff) format('woff');
+  src: local('SourceSansPro3'), url(../fonts/SourceSansPro-Bold.ttf);
 }
 
 body {  
@@ -65,7 +65,8 @@ form {
 }
 
 
-h1 {  
+h1 {
+	font-family: SourceSansPro3;
 	font-size: 24px; 
 	margin-top: 0px; 
 	margin-bottom: 0px; 
@@ -380,6 +381,8 @@ span.black {
   left:50%;
   width:200px;
   height:90px;
+	font-size: 17px;
+	font-family: SourceSansPro2;
 	margin:-45px 0 0 -100px;
   text-align:center;
 	line-height: 90px;
@@ -397,6 +400,8 @@ span.black {
   left:50%;
   width:200px;
   height:90px;
+	font-size: 17px;
+	font-family: SourceSansPro2;
 	margin:-45px 0 0 -100px;
   text-align:center;
 	line-height: 90px;
@@ -415,6 +420,8 @@ span.black {
   height:90px;
 	margin:-45px 0 0 -100px;
   text-align:center;
+	font-size: 17px;
+	font-family: SourceSansPro2;
 	line-height: 90px;
   border: 1px solid grey;
   background-color: #DAE4EC;
@@ -454,8 +461,8 @@ tbody.gle tr:hover {
 
 #calendar table thead th{ 
 	font-weight: bold; 
-	font-size: 12px;
-	line-height: 1.5em;				
+	font-size: 15px;
+	line-height: 1.2em;				
 	color: #BFBFC1; 
 	text-align: center;
 	background-color: #112A5D;
@@ -463,8 +470,8 @@ tbody.gle tr:hover {
 
 #calendar table thead th.weekday{ 
 	font-weight: bold; 
-	font-size: 11px;
-	line-height: 1.5em;
+	font-size: 14px;
+	line-height: 1.2em;
 	color: #112A5D; 
 	text-align: center;
 	background-color: #CCD2D8;
@@ -473,11 +480,11 @@ tbody.gle tr:hover {
 
 #calendar table tbody td, #calendar table tfoot td{ 
 	font-weight: normal; 
-	font-size: 11px;
-	line-height: 1.5em;
-	width: 1.7em;
-	padding-left: 0.6em; 
-	padding-right: 0.6em; 
+	font-size: 14px;
+	line-height: 1.2em;
+	width: 1.4em;
+	padding-left: 0.4em; 
+	padding-right: 0.4em; 
 	color: #0E224B; 
 	text-align: right;
 	border: 1px solid #CCD2D8;

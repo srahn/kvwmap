@@ -405,6 +405,9 @@ class GUI_core {
         $b = substr(BG_MENUETOP, 5, 2);
         $map->scalebar->imagecolor->setRGB(hexdec($r), hexdec($g), hexdec($b));
         $map->scalebar->outlinecolor->setRGB(0,0,0);
+				$map->scalebar->label->type = 'truetype';
+				$map->scalebar->label->font = 'SourceSansPro';
+				$map->scalebar->label->size = 10.5;
 
         # Groups
         if($this->formvars['nurAufgeklappteLayer'] == ''){
@@ -1833,9 +1836,11 @@ class db_mapObj_core {
       if($disabled_classes){
 				if($disabled_classes['status'][$rs['Class_ID']] == 2){
 					$rs['Status'] = 1;
-					foreach($rs['Style'] as &$style){
-						$style['outlinecolor'] = $style['color'];
-						$style['color'] = '-1 -1 -1';
+					for($i = 0; $i < count($rs['Style']); $i++){
+						if($rs['Style'][$i]['color'] != '' AND $rs['Style'][$i]['color'] != '-1 -1 -1'){
+							$rs['Style'][$i]['outlinecolor'] = $rs['Style'][$i]['color'];
+							$rs['Style'][$i]['color'] = '-1 -1 -1';
+						}
 					}
 				}
 				elseif($disabled_classes['status'][$rs['Class_ID']] == '0'){

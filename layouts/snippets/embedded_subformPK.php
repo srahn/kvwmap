@@ -82,7 +82,7 @@
 
 <?	if($anzObj > 1){ ?>
 		<script type="text/javascript">
-			document.getElementById('show_all_<? echo $this->formvars['targetobject'];?>').style.visibility = 'visible';
+			document.getElementById('show_all_<? echo $this->formvars['targetobject'];?>').style.display = '';
 		</script>
 
 <? }

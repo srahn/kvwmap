@@ -1974,7 +1974,7 @@ class pgdatabase_alkis extends pgdatabase_core {
 
   function getKlassifizierung($FlurstKennz) {
     $sql ="SELECT round(st_area(st_intersection(n.wkb_geometry,f.wkb_geometry))::numeric) AS flaeche,  round(st_area(f.wkb_geometry)::numeric) as flstflaeche, n.ackerzahlodergruenlandzahl as wert, n.kulturart as objart, ";
-		$sql.=" ARRAY_TO_STRING(ARRAY[k.kurz, b.kurz, z.kurz, e1.kurz, e2.kurz, s.kurz], ' ') as label";
+		$sql.=" ARRAY_TO_STRING(ARRAY[k.kurz, b.kurz, z.kurz, e1.kurz, e2.kurz, s.kurz, n.bodenzahlodergruenlandgrundzahl || '/' || n.ackerzahlodergruenlandzahl], ' ') as label";
     $sql.=" FROM alkis.ax_flurstueck f, alkis.ax_bodenschaetzung n ";
 		$sql.=" LEFT JOIN alkis.ax_bodenschaetzung_kulturart k ON k.wert=n.kulturart";
 		$sql.=" LEFT JOIN alkis.ax_bodenschaetzung_bodenart b ON b.wert=n.bodenart";

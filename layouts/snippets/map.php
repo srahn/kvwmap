@@ -177,7 +177,7 @@ if($this->formvars['gps_follow'] == ''){
 						          <td width="25%" height="30">
 												<div style="width:150px;" onmouseover="document.getElementById('scales').style.display='inline-block';" onmouseout="document.getElementById('scales').style.display='none';">
 													<div valign="top" style="height:0px; position:relative;">
-														<div id="scales" style="display:none; position:absolute; left:56px; bottom:-1px; width: 78px; vertical-align:top; overflow:hidden; border:solid grey 1px;">
+														<div id="scales" style="display:none; position:absolute; left:60px; bottom:-1px; width: 78px; vertical-align:top; overflow:hidden; border:solid grey 1px;">
 															<select size="8" style="padding:4px; margin:-2px -17px -4px -4px;" onclick="document.GUI.nScale.value=this.value; document.getElementById('scales').style.display='none'; document.GUI.submit();">
 																<option onmouseover="this.selected = true;" value="1000000">1:&nbsp;&nbsp;1000000</option>
 																<option onmouseover="this.selected = true;" value="250000">1:&nbsp;&nbsp;250000</option>
@@ -227,19 +227,19 @@ if($this->formvars['gps_follow'] == ''){
         				<td width="100%" colspan="3" style="border-top: 1px solid #aaaaaa;">
         					<table width="100%" border="0" cellpadding="0" cellspacing="0">
 			        			<tr style="background-color: <? echo BG_MENUETOP; if($this->user->rolle->runningcoords == '0'){echo ';display:none';} ?>">
-			        				<td width="100px">
+			        				<td style="width:100px">
 			          					<span class="fett">&nbsp;&nbsp;<?php echo $this->strCoordinates; ?></span>&nbsp;
 			          				</td>
-			        				<td colspan="2" width="80%"><input type="text" class="transparent_input" name="runningcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?></td>
+			        				<td colspan="2"><input type="text" style="width: 150px" class="transparent_input" name="runningcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?></td>
 			        			</tr>
-			        			<tr id="showcoords" style="display:none">
-			        				<td width="100px">
+			        			<tr id="showcoords" style="background-color: <? echo BG_MENUETOP; ?>;display:none">
+			        				<td style="width:150px">
 			          					<span class="fett">&nbsp;&nbsp;<?php echo $strShowCoordinates; ?></span>&nbsp;
 			          				</td>
-			        				<td colspan="2" width="80%">
-			        					<input type="text" name="firstcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?>
+			        				<td colspan="2">
+			        					<input type="text" style="width: 150px" name="firstcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?>
 			        					<? if($this->user->rolle->epsg_code2 != ''){ ?>
-			        					<br><input type="text" name="secondcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code2; ?>
+			        					<br><input type="text" style="width: 150px" name="secondcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code2; ?>
 			        					<? } ?>
 			        				</td>
 			        			</tr>

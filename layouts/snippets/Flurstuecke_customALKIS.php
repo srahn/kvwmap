@@ -34,6 +34,7 @@ backto = function(go){
 
 -->
 </script>
+<br>
 <a name="anfang"></a>
 <h2>Flurst&uuml;cke</h2>
 <table border="0" cellpadding="2" cellspacing="0">
@@ -318,6 +319,7 @@ backto = function(go){
 		            	$flaeche_222 = 0; $flaeche_223 = 0;
 		            	for($j = 0; $j < count($flst->Klassifizierung); $j++){
 		            	$wert=$flst->Klassifizierung[$j]['wert'];
+									$flst->Klassifizierung[$j]['flaeche'] = $flst->Klassifizierung[$j]['flaeche'] * $ratio;
 				          $emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
 				          if($flst->Klassifizierung[$j]['objart'] == 1000){
 				          	$emzges_222 = $emzges_222 + $emz;

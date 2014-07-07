@@ -2,7 +2,9 @@
   # 2007-12-30 pk
   include(LAYOUTPATH.'languages/rollenwahl_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
 	global $supportedLanguages;
-?><h2><?php echo $this->titel.$strTitleRoleSelection; ?></h2><br>
+?>
+<br>
+<h2><?php echo $this->titel.$strTitleRoleSelection; ?></h2><br>
 
 <?php if ($this->Fehlermeldung!='') {
        include(LAYOUTPATH."snippets/Fehlermeldung.php");

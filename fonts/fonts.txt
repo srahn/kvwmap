@@ -8,5 +8,4 @@ times-new-roman_bold		times-new-roman-bold.ttf
 garamond			GARAIT.TTF
 comic_sans			comicbd.ttf
 engravers			Engr.TTF
-lep1				custom/IFGDV1.TTF
-lep2				custom/rrop-sig.ttf
+SourceSansPro	SourceSansPro-Regular.ttf

@@ -5,11 +5,9 @@
 //-->
 </script>
 
-
+<br>
 <input type="hidden" name="go" value="">
-
-<h2><?php echo $this->titel; ?></h2>
-      
+<h2><?php echo $this->titel; ?></h2>    
 
 <table border="0" cellspacing="2" cellpadding="0">
   <tr>

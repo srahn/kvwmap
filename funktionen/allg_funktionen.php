@@ -824,9 +824,9 @@ function showMessage($text) {
 			var Msg = document.getElementById("message_box");
 		}
 		Msg.className = 'message_box_visible';
-		Msg.innerHTML = "<?php echo $text; ?>";
-		setTimeout(function() {Msg.className = 'message_box_hide';},300);
-		setTimeout(function() {Msg.className = 'message_box_hidden';},2000);
+		Msg.innerHTML = "<? echo $text; ?>";
+		setTimeout(function() {Msg.className = 'message_box_hide';},500);
+		setTimeout(function() {Msg.className = 'message_box_hidden';},2500);
   </script><?php
 }
 

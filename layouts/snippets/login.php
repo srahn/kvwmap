@@ -72,11 +72,11 @@
 								</tr><?php														
 					}								
 			        ?><tr>
-									<td>Nutzername: </td>
+									<td><span class="px16">Nutzername: </span></td>
   								<td><input style="width: 130px" type="text" value="<? echo $username; ?>" name="username"/></td>
 								</tr>
 								<tr>
-									<td>Passwort: </td>
+									<td><span class="px16">Passwort: </span></td>
 									<td><input style="width: 130px" type="password" value="<? echo $passwort; ?>" name="passwort" /></td>
 								</tr><?php
 					if (isset($newPassword) AND $newPassword!='') {

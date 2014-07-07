@@ -208,12 +208,10 @@ function add_searchmask(layer_id){
   
 //-->
 </script>
+<br><h2><? echo $this->titel; ?></h2>
 <table border="0" cellpadding="5" cellspacing="2" bgcolor="<? echo $bgcolor; ?>">
-  <tr align="center"> 
-    <td colspan="5"><h2><? echo $this->titel; ?></h2></td>
-  </tr>
   <tr>
-    <td>&nbsp;</td>
+    <td></td>
   </tr>
   <tr> 
     <td style="border-top:1px solid #C3C7C3;border-left:1px solid #C3C7C3;border-right:1px solid #C3C7C3" colspan="5">Gruppen</td>
