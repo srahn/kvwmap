@@ -1160,7 +1160,11 @@ function mouseup(evt){
 		else{
 			top.currentform.pathwkt.value = top.currentform.newpathwkt.value;
 		}
-		if(top.currentform.secondpoly.value == "true"){
+		remove_second_line();
+	}
+	
+	function remove_second_line(){
+		if(top.currentform.secondline.value == "true"){
 			var length = pathx_second.length;
 			for(i = 0; i < length; i++ ){
 				pathx_second.pop();
@@ -1753,7 +1757,7 @@ function mouseup(evt){
 	}
 
 	function edit_vertices(){
-		applylines();
+		remove_second_line();
 		save_geometry_for_undo();
 		top.currentform.last_doing.value = "vertex_edit";
 		pixel_path = world2pixelsvg(top.currentform.newpath.value);
@@ -2449,7 +2453,7 @@ function mouseup(evt){
 	}
 
 	function edit_vertices(){
-		applypolygons();
+		remove_second_poly()
 		save_geometry_for_undo();
 		top.currentform.last_doing.value = "vertex_edit";
 		pixel_path = world2pixelsvg(top.currentform.newpath.value);
@@ -2660,6 +2664,10 @@ function mouseup(evt){
 				top.currentform.pathwkt.value = top.currentform.newpathwkt.value;
 			}
 		}
+		remove_second_poly();
+	}
+	
+	function remove_second_poly(){
 		if(top.currentform.secondpoly.value == "true"){
 			path = top.currentform.newpath.value;
 			var length = pathx_second.length;
@@ -2674,7 +2682,7 @@ function mouseup(evt){
 			top.currentform.pathy_second.value = "";
 		}
 	}
-
+	
 	function subtr_polygon(){
 		applypolygons();
 		top.currentform.last_doing.value = "subtract_polygon";
