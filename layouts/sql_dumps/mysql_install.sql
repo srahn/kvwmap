@@ -626,7 +626,7 @@ CREATE TABLE rolle (
   `charset` enum('windows-1252','utf-8','ISO-8859-1','ISO-8859-2','ISO-8859-15','TCVN','VISCII','VPS') NOT NULL default 'windows-1252',
   `hidemenue` enum('0','1') NOT NULL default '0',
   `hidelegend` enum('0','1') NOT NULL default '0',
-  `fontsize_gle` INT( 2 ) NULL DEFAULT '13',
+  `fontsize_gle` INT( 2 ) NULL DEFAULT '15',
   `highlighting` BOOL NOT NULL DEFAULT 0,
   `buttons` VARCHAR( 255 ) NULL DEFAULT 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,query,touchquery,queryradius,polyquery,measure',
   `scrollposition` INT( 11 ) NOT NULL DEFAULT '0',

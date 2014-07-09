@@ -109,7 +109,7 @@
                 
 		default : { 
                   ?>
-                  <input size="<? if($this->formvars[$prefix.'value2_'.$this->attributes['name'][$i]] != ''){echo '9';}else{echo '24';} ?>" id="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" type="text" value="<? echo $this->formvars[$prefix.'value_'.$this->attributes['name'][$i]]; ?>">
+                  <input size="<? if($this->formvars[$prefix.'value2_'.$this->attributes['name'][$i]] != ''){echo '9';}else{echo '24';} ?>" id="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" type="text" value="<? echo $this->formvars[$prefix.'value_'.$this->attributes['name'][$i]]; ?>" onkeyup="checknumbers(this, '<? echo $this->attributes['type'][$i]; ?>', '<? echo $this->attributes['length'][$i]; ?>', '<? echo $this->attributes['decimal_length'][$i]; ?>');">
                   <input size="9" id="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" type="<? if($this->formvars[$prefix.'value2_'.$this->attributes['name'][$i]] != ''){echo 'text';}else{echo 'hidden';} ?>" value="<? echo $this->formvars[$prefix.'value2_'.$this->attributes['name'][$i]]; ?>">
                   <?
                }

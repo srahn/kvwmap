@@ -3,9 +3,14 @@
 	
 	function schnellsuche(){
 		save = document.GUI.go.value;
-		document.GUI.go.value = 'Layer-Suche_Suchen';
-		overlay_submit(document.GUI, true);
-		document.GUI.go.value = save;
+		document.GUI.go.value = 'SchnellSuche_Suchen';
+		if(document.GUI.legendtouched == undefined || document.GUI.legendtouched.value == 0){		// nur wenn die Legende nicht angefasst wurde, per ajax-Request (wenn Anzeige in extra Fenster eingestellt) laden, ansonsten kompletter submit
+			overlay_submit(document.GUI, true);
+			document.GUI.go.value = save;
+		}
+		else{
+			document.GUI.submit();
+		}
 	}
 
 	function keydown(event){
@@ -47,7 +52,7 @@
 						<?
 						for($i = 0; $i < count($quicksearch_layerdaten['ID']); $i++){         
 							echo '<option';
-							if($quicksearch_layerdaten['ID'][$i] == $this->formvars['selected_layer_id']){
+							if($quicksearch_layerdaten['ID'][$i] == $this->formvars['quicksearch_layer_id']){
 								echo ' selected';
 							}
 							echo ' value="'.$quicksearch_layerdaten['ID'][$i].'">'.$quicksearch_layerdaten['Bezeichnung'][$i].'</option>';

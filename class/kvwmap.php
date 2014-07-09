@@ -6292,7 +6292,6 @@ class GUI extends GUI_core{
 		if($this->last_query != ''){
 			$this->formvars['selected_layer_id'] = $this->last_query['layer_ids'][0];
 		}
-		if($this->formvars['selected_layer_id'] == '')$this->formvars['selected_layer_id'] = $this->formvars['quicksearch_layer_id'];
     $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
     switch ($layerset[0]['connectiontype']) {
       case MS_POSTGIS : {
@@ -13303,9 +13302,9 @@ class GUI extends GUI_core{
 		    $style=ms_newStyleObj($klasse);
 		    $style->color->setRGB(12,255,12);
 		    if (MAPSERVERVERSION > '500') {
-		    	$style->set('width', 2);
+		    	$style->set('width', 1);
 		    }
-		    $style->outlinecolor->setRGB(0,0,0);
+		    $style->outlinecolor->setRGB(110,110,110);
 		    # Datensatz-Layer erzeugen
 		    $layer=ms_newLayerObj($map);
 		    if($layerset['schema'] != ''){

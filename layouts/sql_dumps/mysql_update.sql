@@ -1189,3 +1189,7 @@ ALTER TABLE  `used_layer` ADD  `export_privileg` BOOLEAN NOT NULL DEFAULT  '1' A
 ALTER TABLE  `layer` ADD  `export_privileg` BOOLEAN NOT NULL DEFAULT  '1';
 
 ALTER TABLE  `search_attributes2rolle` ADD  `searchmask_number` INT( 11 ) NOT NULL DEFAULT 0 , ADD  `searchmask_operator` ENUM(  'AND',  'OR' ) NULL DEFAULT NULL;
+
+update rolle set fontsize_gle = fontsize_gle + 2;
+
+ALTER TABLE  `rolle` CHANGE  `fontsize_gle`  `fontsize_gle` INT( 2 ) NULL DEFAULT  '15';

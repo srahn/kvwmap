@@ -1,5 +1,7 @@
 <?
 if($this->formvars['anzahl'] == ''){$this->formvars['anzahl'] = 0;}
+
+include('funktionen/input_check_functions.php');
 ?>
 
 <script type="text/javascript">
@@ -65,23 +67,6 @@ if($this->formvars['anzahl'] == ''){$this->formvars['anzahl'] = 0;}
 		currentform.target = '_blank';
 		currentform.printversion.value = 'true';
 		currentform.submit();
-	}
-
-	checkDate = function(string){
-    var split = string.split(".");
-    var day = parseInt(split[0], 10);
-    var month = parseInt(split[1], 10);
-    var year = parseInt(split[2], 10);
-    var check = new Date(year, month-1, day);
-    var day2 = check.getDate();
-    var year2 = check.getFullYear();
-    var month2 = check.getMonth()+1;
-    if(year2 == year && month == month2 && day == day2){
-    	return true;
-    }
-    else{
-    	return false;
-    }
 	}
 	
 	save = function(){

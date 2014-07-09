@@ -1249,6 +1249,11 @@ if($GUI->goNotExecutedInPlugins){
 		case 'Layer-Suche_Suchen' : {
 			$GUI->GenerischeSuche_Suchen();
 	  } break;
+		
+		case 'SchnellSuche_Suchen' : {
+			$GUI->formvars['selected_layer_id'] = $GUI->formvars['quicksearch_layer_id'];
+			$GUI->GenerischeSuche_Suchen();
+	  } break;		
 
 	  case 'Layer-Suche' : {
 		$GUI->GenerischeSuche();
