@@ -124,8 +124,10 @@ function activate_overlay(){
 	overlay.style.left = document.GUI.overlayx.value+'px';
 	overlay.style.top = document.GUI.overlayy.value+'px';
 	overlay.style.display='';
-	svgdoc = document.SVG.getSVGDocument();	
-	svgdoc.getElementById('polygon').setAttribute("points", "");
+	if(document.SVG != undefined){
+		svgdoc = document.SVG.getSVGDocument();	
+		if(svgdoc != undefined)svgdoc.getElementById('polygon').setAttribute("points", "");
+	}
 }
 
 function deactivate_overlay(){
@@ -138,7 +140,7 @@ function overlay_submit(gui, start){
 	if(1 == <? echo $this->user->rolle->querymode; ?> && start || gui.id == 'GUI2'){
 		formdata = formSerialize(gui);
 		ahah("<? echo URL.APPLVERSION.'index.php'; ?>", formdata+"&mime_type=overlay_html", new Array(document.getElementById('contentdiv')), new Array("sethtml"));	
-		document.GUI.CMD.value = "";
+		if(document.GUI.CMD != undefined)document.GUI.CMD.value = "";
 	}else{
 		document.GUI.submit();
 	}
@@ -148,7 +150,7 @@ function overlay_link(data){
 	// diese Funktion macht bei Aufruf aus dem Overlay-Fenster einen ajax-Request mit den übergebenen Daten, ansonsten wird das Ganze wie ein normaler Link aufgerufen
 	if(currentform.name == 'GUI2'){
 		ahah("<? echo URL.APPLVERSION.'index.php'; ?>", data+"&mime_type=overlay_html", new Array(document.getElementById('contentdiv')), new Array("sethtml"));	
-		document.GUI.CMD.value = "";
+		if(document.GUI.CMD != undefined)document.GUI.CMD.value = "";
 	}else{
 		window.location.href = 'index.php?'+data;
 	}

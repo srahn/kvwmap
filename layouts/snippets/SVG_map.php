@@ -339,8 +339,7 @@ function startup(){';
 }
 
 function sendpath(cmd, pathx, pathy){
-	document.getElementById("waitingimage").style.setProperty("visibility","visible", "");
-	requestAnimationFrameID = requestAnimationFrame(doAnim); // Start the loop.
+	startwaiting();
 	top.sendpath(cmd, pathx, pathy);
 }
 
@@ -366,6 +365,11 @@ function doAnim() {
 	if(currentTheta%30 == 0)document.getElementById("waitingimage").setAttribute("transform", "translate('.$res_xm.', '.$res_ym.') scale(0.3 0.3) rotate(" + currentTheta + ")"); 
 	currentTheta += thetaDelta;  
 	requestAnimationFrameID = requestAnimationFrame(doAnim); 
+}
+
+function startwaiting(){
+	document.getElementById("waitingimage").style.setProperty("visibility","visible", "");
+	requestAnimationFrameID = requestAnimationFrame(doAnim); // Start the loop.
 }
 
 function stopwaiting(){
@@ -445,6 +449,8 @@ function init(){
 top.document.getElementById("map").SVGstartup = startup;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
 top.document.getElementById("svghelp").SVGstopwaiting = stopwaiting;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+
+top.document.getElementById("svghelp").SVGstartwaiting = startwaiting;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
 top.document.getElementById("svghelp").SVGmoveback = moveback;
 

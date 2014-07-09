@@ -326,9 +326,11 @@ function add_searchmask(layer_id){
 <? if(count($this->attributes) > 0){ ?>
 						
 			<table width="100%" align="center" border="0" cellspacing="0" cellpadding="3">			
+			<? if($this->layerset[0]['connectiontype'] == MS_POSTGIS){ ?>
 					<tr>
 						<td><a href="javascript:add_searchmask(<? echo $this->formvars['selected_layer_id']; ?>);">und/oder...</a></td>
 					</tr>
+			<? } ?>
 					<tr>
 						<td colspan="5"><br>Anzahl Treffer anzeigen:&nbsp;<input size="2" type="text" name="anzahl" value="<? echo $this->formvars['anzahl']; ?>"></td>
 					</tr>

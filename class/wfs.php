@@ -9,7 +9,7 @@ class wfs{
 	}
 	
 	function get_feature_request($bbox, $filter, $maxfeatures){
-		$request = $this->url.'&service=WFS&request=getfeature&version='.$this->version.'&typename='.$this->typename;
+		$request = $this->url.'&service=WFS&request=GetFeature&version='.$this->version.'&typename='.$this->typename;
 		if($bbox != ''){$request .= '&bbox='.$bbox;}
 		if($filter != ''){$request .= '&filter='.urlencode($filter);}
 		if($maxfeatures != ''){$request .= '&maxfeatures='.$maxfeatures;}
@@ -19,7 +19,8 @@ class wfs{
 	}
 	
 	function describe_featuretype_request(){
-		$request = $this->url.'&service=WFS&request=describefeaturetype&version='.$this->version.'&typename='.$this->typename;
+		$request = $this->url.'&service=WFS&request=DescribeFeatureType&version='.$this->version.'&typename='.$this->typename;
+		#echo $request;
 		$this->gml = url_get_contents($request);
 	}
 	

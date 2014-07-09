@@ -10,6 +10,12 @@ include (LAYOUTPATH.'snippets/'.$this->overlaymain);
 	</tr>
 </table>
 <script language="javascript" type="text/javascript">
-	stopwaiting();	// wenn man aus der Karte abgefragt hatte, Warteanimation beenden
+	if(typeof(stopwaiting) == "function"){
+		stopwaiting();	// wenn man aus der Karte abgefragt hatte, Warteanimation beenden		
+<? if($this->formvars['mime_type'] == 'overlay_html' AND $this->zoomed){ ?>		// wenn nicht aus normaler Suchmaske heraus gesucht wurde und auf die Treffer gezoomt wurde, Karte neu laden
+		startwaiting();
+		submit('', '');
+<? } ?>
+	}
 	activate_overlay();
 </script>

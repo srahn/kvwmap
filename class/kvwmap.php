@@ -1081,6 +1081,9 @@ class GUI extends GUI_core{
 								}
 								$legend .=  ' >';
 							}
+							else{
+								$legend .= '<img src="'.GRAPHICSPATH.'leer.gif" width="17" height="1" border="0">'; 
+							}
 							$legend .=  '</td><td valign="top">';
 							// die sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen, welches immer den value 0 hat, damit sie beim Neuladen ausgeschaltet werden können, denn eine nicht angehakte Checkbox/Radiobutton wird ja nicht übergeben
 							$legend .=  '<input type="hidden" id="thema'.$layer['Layer_ID'].'" name="thema'.$layer['Layer_ID'].'" value="0">';
@@ -6584,9 +6587,10 @@ class GUI extends GUI_core{
       if($this->formvars['printversion'] != ''){
         $this->mime_type = 'printversion';
       }
-			if($this->user->rolle->querymode == 1 AND $this->formvars['mime_type'] != 'overlay_html'){		# bei aktivierter Datenabfrage in extra Fenster und Suche aus Suchmaske (nicht aus Overlay) heraus --> Laden der Karte und Darstellung der Sachdaten im Overlay
+			if($this->user->rolle->querymode == 1){		# bei aktivierter Datenabfrage in extra Fenster --> Laden der Karte und zoom auf Treffer (das Zeichnen der Karte passiert in einem separaten Ajax-Request aus dem Overlay heraus)
 				$this->loadMap('DataBase');
 				if(count($this->qlayerset[$i]['shape']) > 0 AND ($layerset[0]['shape'][0][$layerset[0]['attributes']['the_geom']] != '' OR $layerset[0]['shape'][0]['geom'] != '')){			# wenn was gefunden wurde und der Layer Geometrie hat, auf Datensätze zoomen
+					$this->zoomed = true;
 					switch ($layerset[0]['connectiontype']) {
 						case MS_POSTGIS : {
 							for($k = 0; $k < count($this->qlayerset[$i]['shape']); $k++){
@@ -6609,70 +6613,92 @@ class GUI extends GUI_core{
 					}
 				}
 				$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-				$this->drawMap();
 				$this->saveMap('');
-				$this->main = 'map.php';
-				$this->overlaymain = 'sachdatenanzeige.php';
+				if($this->formvars['mime_type'] != 'overlay_html'){		// bei Suche aus normaler Suchmaske (nicht aus Overlay) heraus --> Zeichnen der Karte und Darstellung der Sachdaten im Overlay
+					$this->drawMap();
+					$this->main = 'map.php';
+					$this->overlaymain = 'sachdatenanzeige.php';
+				}
 			}
 			$this->output();
     }
   }
 
 	function get_quicksearch_attributes(){
-		if($this->formvars['layer_id']){   	
-      $this->formvars['anzahl'] = MAXQUERYROWS;
-			$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-			$layerdb = $mapdb->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-			$layerdb->setClientEncoding();
-			$path = $mapdb->getPath($this->formvars['layer_id']);
-			$privileges = $this->Stelle->get_attributes_privileges($this->formvars['layer_id']);
-			$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
-			$this->attributes = $mapdb->read_layer_attributes($this->formvars['layer_id'], $layerdb, $privileges['attributenames']);
-			# weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
-			$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $this->qlayerset['shape'], true);
+		if($this->formvars['layer_id']){
+			$this->formvars['anzahl'] = MAXQUERYROWS;
+			$this->layerset=$this->user->rolle->getLayer($this->formvars['layer_id']);
+			switch ($this->layerset[0]['connectiontype']){
+        case MS_POSTGIS : {
+          $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
+					$layerdb = $mapdb->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+					$layerdb->setClientEncoding();
+					$path = $mapdb->getPath($this->formvars['layer_id']);
+					$privileges = $this->Stelle->get_attributes_privileges($this->formvars['layer_id']);
+					$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
+					$this->attributes = $mapdb->read_layer_attributes($this->formvars['layer_id'], $layerdb, $privileges['attributenames']);
+					# weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
+					$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $this->qlayerset['shape'], true);
+        }break;
+        
+        case MS_WFS : {
+          $url = $this->layerset[0]['connection'];
+          $version = '1.0.0';
+          $typename = $this->layerset[0]['wms_name'];
+          $wfs = new wfs($url, $version, $typename);
+          $wfs->describe_featuretype_request();
+          $wfs->parse_gml('sequence');
+          $this->attributes = $wfs->get_attributes();
+        }break;
+      }
 			?><table><tr><?
 			for($i = 0; $i < count($this->attributes['name']); $i++){
-        if($this->attributes['quicksearch'][$i] == 1){
-          ?>
-            <td width="40%">&nbsp;&nbsp;<?
-              if($this->attributes['alias'][$i] != ''){
-                echo $this->attributes['alias'][$i];
-              }
-              else{
-                echo $this->attributes['name'][$i];
-              }
-          ?>:</td>
-            <td>
+				if($this->layerset[0]['connectiontype'] == MS_WFS OR $this->attributes['quicksearch'][$i] == 1){
+					?>
+						<td width="40%">&nbsp;&nbsp;<?
+							if($this->attributes['alias'][$i] != ''){
+								echo $this->attributes['alias'][$i];
+							}
+							else{
+								echo $this->attributes['name'][$i];
+							}
+					?>:</td>
+						<td>
 							<input type="hidden" name="operator_<? echo $this->attributes['name'][$i]; ?>" value="=">
 						</td>
-            <td align="left" width="40%"><?
-            	switch ($this->attributes['form_element_type'][$i]) {
-            		case 'Auswahlfeld' : {									# erstmal nur abhängige Auswahlfelder
-                  ?><select class="select" 
-                  <?
-                  	if($this->attributes['req_by'][$i] != ''){
+						<td align="left" width="40%"><?
+							switch ($this->attributes['form_element_type'][$i]) {
+								case 'Auswahlfeld' : {									# erstmal nur abhängige Auswahlfelder
+									?><select class="select" 
+									<?
+										if($this->attributes['req_by'][$i] != ''){
 											echo 'onchange="update_require_attribute_(\''.$this->attributes['req_by'][$i].'\','.$this->formvars['layer_id'].', this.value);" ';
 										}
-										else echo 'onchange="suche();" ';
+										else echo 'onchange="schnellsuche();" ';
 									?> 
-                  	id="value_<? echo $this->attributes['name'][$i]; ?>" name="value_<? echo $this->attributes['name'][$i]; ?>"><?echo "\n"; ?>
-                      <option value="">-- <? echo $this->strChoose; ?> --</option><? echo "\n";
-                      if(is_array($this->attributes['enum_value'][$i][0])){
-                      	$this->attributes['enum_value'][$i] = $this->attributes['enum_value'][$i][0];
-                      	$this->attributes['enum_output'][$i] = $this->attributes['enum_output'][$i][0];
-                      }
-                    for($o = 0; $o < count($this->attributes['enum_value'][$i]); $o++){
-                      ?>
-                      <option <? if($this->formvars['value_'.$this->attributes['name'][$i]] == $this->attributes['enum_value'][$i][$o]){ echo 'selected';} ?> value="<? echo $this->attributes['enum_value'][$i][$o]; ?>"><? echo $this->attributes['enum_output'][$i][$o]; ?></option><? echo "\n";
-                    } ?>
-                    </select>
-                    <input class="input" size="9" id="value2_<? echo $this->attributes['name'][$i]; ?>" name="value2_<? echo $this->attributes['name'][$i]; ?>" type="hidden" value="<? echo $this->formvars['value2_'.$this->attributes['name'][$i]]; ?>">
-                    <?
-                }break;
-      				}
-           ?></td><?					
-        }
-      }
+										id="value_<? echo $this->attributes['name'][$i]; ?>" name="value_<? echo $this->attributes['name'][$i]; ?>"><?echo "\n"; ?>
+											<option value="">-- <? echo $this->strChoose; ?> --</option><? echo "\n";
+											if(is_array($this->attributes['enum_value'][$i][0])){
+												$this->attributes['enum_value'][$i] = $this->attributes['enum_value'][$i][0];
+												$this->attributes['enum_output'][$i] = $this->attributes['enum_output'][$i][0];
+											}
+										for($o = 0; $o < count($this->attributes['enum_value'][$i]); $o++){
+											?>
+											<option <? if($this->formvars['value_'.$this->attributes['name'][$i]] == $this->attributes['enum_value'][$i][$o]){ echo 'selected';} ?> value="<? echo $this->attributes['enum_value'][$i][$o]; ?>"><? echo $this->attributes['enum_output'][$i][$o]; ?></option><? echo "\n";
+										} ?>
+										</select>
+										<?
+								}break;
+								
+								default : { 
+                  ?>
+                  <input size="24" onkeydown="keydown(event)" id="value_<? echo $this->attributes['name'][$i]; ?>" name="value_<? echo $this->attributes['name'][$i]; ?>" type="text" value="">
+                  <?
+               }
+							}
+					 ?></td><?					
+				}
+			}
 			?></tr></table><?
 		}
 	}
@@ -6763,9 +6789,9 @@ class GUI extends GUI_core{
 	    	########################################################################
     	}    	
       $this->formvars['anzahl'] = MAXQUERYROWS;
-      $layerset=$this->user->rolle->getLayer($this->formvars['selected_layer_id']);
-      $this->formvars['selected_group_id'] = $layerset[0]['Gruppe']; 
-      switch ($layerset[0]['connectiontype']) {
+      $this->layerset=$this->user->rolle->getLayer($this->formvars['selected_layer_id']);
+      $this->formvars['selected_group_id'] = $this->layerset[0]['Gruppe']; 
+      switch ($this->layerset[0]['connectiontype']) {
         case MS_POSTGIS : {
           $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
           $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
@@ -6783,9 +6809,9 @@ class GUI extends GUI_core{
         }break;
         
         case MS_WFS : {
-          $url = $layerset[0]['connection'];
+          $url = $this->layerset[0]['connection'];
           $version = '1.0.0';
-          $typename = $layerset[0]['wms_name'];
+          $typename = $this->layerset[0]['wms_name'];
           $wfs = new wfs($url, $version, $typename);
           $wfs->describe_featuretype_request();
           $wfs->parse_gml('sequence');
@@ -11681,7 +11707,7 @@ class GUI extends GUI_core{
 	            $sql = '';
 	            for($g = 0; $g < count($geoms); $g++){
 	            	if($g > 0)$sql .= " UNION ";
-	            	$sql .= "SELECT ".$pfad." AND ".$the_geom." && ('".$geoms[$g]."') AND (st_intersects(".$the_geom.", ('".$geoms[$g]."')) OR ".$the_geom." = ('".$geoms[$g]."'))";
+	            	$sql .= "SELECT ".$pfad." AND ".$the_geom." && ('".$geoms[$g]."') AND (st_intersects(".$the_geom.", ('".$geoms[$g]."'::geometry)) OR ".$the_geom." = ('".$geoms[$g]."'))";
 	            }
             }
             else{
@@ -12183,16 +12209,18 @@ class GUI extends GUI_core{
 				$path = substr($path, 0, $groupbyposition);
 	  	}
 
-      $show = false;
-      for($j = 0; $j < count($layerset[$i]['attributes']['name']); $j++){
-        $layerset[$i]['attributes']['tooltip'][$j] = $privileges['tooltip_'.$layerset[$i]['attributes']['name'][$j]];
-        if($layerset[$i]['attributes']['tooltip'][$j] == 1){
-          $show = true;
-        }
-      }
-      if(!$show){
-        return NULL;
-      }
+			if($rect->minx != ''){	####### Kartenabfrage
+				$show = false;
+				for($j = 0; $j < count($layerset[$i]['attributes']['name']); $j++){
+					$layerset[$i]['attributes']['tooltip'][$j] = $privileges['tooltip_'.$layerset[$i]['attributes']['name'][$j]];
+					if($layerset[$i]['attributes']['tooltip'][$j] == 1){
+						$show = true;
+					}
+				}
+				if(!$show){
+					return NULL;
+				}
+			}
       
 			$distinctpos = strpos(strtolower($path), 'distinct');
 			if($distinctpos !== false && $distinctpos < 10){

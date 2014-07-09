@@ -28,6 +28,11 @@ function stopwaiting(){
 	document.getElementById("svghelp").SVGstopwaiting();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 }
 
+function startwaiting(){
+	if(typeof document.getElementById("svghelp").SVGstartwaiting == 'function')
+	document.getElementById("svghelp").SVGstartwaiting();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+}
+
 function showtooltip(result, showdata){
 	document.getElementById("svghelp").SVGshowtooltip(result, showdata);			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 }
@@ -160,8 +165,6 @@ if($this->formvars['gps_follow'] == ''){
             <input type="hidden" name="legendtouched" value="0">
             <input type="hidden" name="stopnavigation" value="0">
 						<input type="hidden" name="svghelp" id="svghelp">
-						<input type="hidden" name="overlayx" value="<? echo $this->user->rolle->overlayx; ?>">
-						<input type="hidden" name="overlayy" value="<? echo $this->user->rolle->overlayy; ?>">
     <?php
         include(LAYOUTPATH.'snippets/SVG_map.php');
     ?>

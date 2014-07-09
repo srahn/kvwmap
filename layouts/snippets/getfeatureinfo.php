@@ -19,7 +19,7 @@
 		$this->qlayerset[$i][GetFeatureInfoRequest] = 'http://'.$this->qlayerset[$i][GetFeatureInfoRequest];
 		}
 
-		$response = url_get_contents($this->qlayerset[$i][GetFeatureInfoRequest]);			# ohne Proxy
+		$response = url_get_contents($this->qlayerset[$i][GetFeatureInfoRequest]);		
 		
 		if(strpos(strtolower($response), 'charset=utf-8') === false) $response = utf8_encode($response);
 		$response = str_replace('css', '', $response);

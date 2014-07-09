@@ -52,6 +52,8 @@ if($this->user->rolle->querymode == 1){
 							include(LAYOUTPATH."snippets/".FOOTER); ?></td>
           </tr>
         </table>
+				<input type="hidden" name="overlayx" value="<? echo $this->user->rolle->overlayx; ?>">
+				<input type="hidden" name="overlayy" value="<? echo $this->user->rolle->overlayy; ?>">
         </form>
 				<script type="text/javascript">
 					currentform = document.GUI;
