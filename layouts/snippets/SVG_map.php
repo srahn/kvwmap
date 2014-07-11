@@ -122,36 +122,42 @@
       path = pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "zoomin";
+			document.GUI.go.value = "neu Laden";
       submit(path, document.GUI.CMD.value);
      break;
      case "zoomout":
       path = pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = cmd;
+			document.GUI.go.value = "neu Laden";
       submit(path, cmd);
      break;
      case "zoomin_box":
       path = pathx[0]+","+pathy[0]+";"+pathx[2]+","+pathy[2];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "zoomin";
+			document.GUI.go.value = "neu Laden";
       submit(path, document.GUI.CMD.value);
      break;
      case "recentre":
       path = pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = cmd;
+			document.GUI.go.value = "neu Laden";
       submit(path, cmd);
      break;
      case "pquery_point":
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "pquery";
+			document.GUI.go.value = "Sachdaten";
       overlay_submit(document.GUI, true);
      break;
      case "pquery_box":
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "pquery";
+			document.GUI.go.value = "Sachdaten";
       overlay_submit(document.GUI, true);
      break;
      case "touchquery_point":
@@ -159,6 +165,7 @@
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "touchquery";
+			document.GUI.go.value = "Sachdaten";
       overlay_submit(document.GUI, true);
      break;
      case "touchquery_box":
@@ -166,6 +173,7 @@
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "touchquery";
+			document.GUI.go.value = "Sachdaten";
       overlay_submit(document.GUI, true);
      break;
      case "ppquery_point":
@@ -173,6 +181,7 @@
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "ppquery";
+			document.GUI.go.value = "Sachdaten";
 			overlay_submit(document.GUI, true);
      break;
      case "ppquery_box":
@@ -180,12 +189,14 @@
       path = pathx[0]+","+pathy[0]+";"+pathx[2]+","+pathy[2];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "ppquery";
+			document.GUI.go.value = "Sachdaten";
       overlay_submit(document.GUI, true);
      break;
      case "pquery_polygon":
       path = pathx[0]+","+pathy[0]+";"+pathx[2]+","+pathy[2];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "pquery";
+			document.GUI.go.value = "Sachdaten";
       overlay_submit(document.GUI, true);
      break;
      case "polygonquery":
@@ -195,6 +206,7 @@
      	path = path+pathx[i]+","+pathy[i];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "polygonquery";
+			document.GUI.go.value = "Sachdaten";
       overlay_submit(document.GUI, true);
      break;
      default:

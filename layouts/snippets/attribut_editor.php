@@ -57,9 +57,13 @@
 						<td>&nbsp;</td>
 						<td align="center"><span class="fett">Gruppe</span></td>
 						<td>&nbsp;</td>
-						<td align="center"><span class="fett">Suche-Pflicht</span></td>
+						<td align="center"><span class="fett">Suche-Pflicht</span></td>';
+			if(in_array($this->formvars['selected_layer_id'], $quicksearch_layer_ids)){			
+				echo '
 						<td>&nbsp;</td>
-						<td align="center"><span class="fett">Schnell-<br>suche</span></td>
+						<td align="center"><span class="fett">Schnell-<br>suche</span></td>';
+			}
+			echo '
 					</tr>
 			';
 
@@ -168,13 +172,17 @@
 				  	<input name="mandatory_'.$this->attributes['name'][$i].'" type="checkbox" value="1" ';
 				  	if($this->attributes['mandatory'][$i]) echo 'checked="true"';
 						echo '>
-				  </td>
+				  </td>';
+				if(in_array($this->formvars['selected_layer_id'], $quicksearch_layer_ids)){	
+					echo '
 					<td>&nbsp;</td>
 					<td align="center">
 				  	<input name="quicksearch_'.$this->attributes['name'][$i].'" type="checkbox" value="1" ';
 				  	if($this->attributes['quicksearch'][$i]) echo 'checked="true"';
 						echo '>
-				  </td>
+				  </td>';
+				}
+				echo '
         </tr>';
     	}
 			if(count($this->attributes) > 0){

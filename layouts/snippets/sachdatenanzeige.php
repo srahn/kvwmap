@@ -2,7 +2,8 @@
   include(LAYOUTPATH.'languages/sachdatenanzeige_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
 	include(SNIPPETS.'sachdatenanzeige_functions.php'); 
  ?>
-	<a name="oben"></a>
+	<img height="7" src="<? echo GRAPHICSPATH ?>leer.gif">
+	<a name="oben"></a>	
 <?php
 $anzLayer=count($this->qlayerset);
 if ($anzLayer==0) {

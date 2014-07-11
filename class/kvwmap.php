@@ -88,7 +88,7 @@ class GUI extends GUI_core{
   # bestaetigungsformAnzeigen()
   # bodenrichtwerterfassung()
   # bodenRichtWertZoneLoeschen
-  # changeMap()
+  # neuLaden()
   # changemenue_with_ajax($id, $status)
   # commitBodenrichtwertCopy
   # composePoint2Array($point,$minx,$miny,$scale)
@@ -586,7 +586,7 @@ class GUI extends GUI_core{
 
   function import_layer(){
     if($this->formvars['neuladen']){
-      $this->changeMap();
+      $this->neuLaden();
     }
     else{
       $this->formvars['nurFremdeLayer'] = true;
@@ -626,7 +626,7 @@ class GUI extends GUI_core{
 
   function export_layer(){
     if($this->formvars['neuladen']){
-      $this->changeMap();
+      $this->neuLaden();
     }
     else{
       $this->formvars['nurFremdeLayer'] = true;
@@ -3463,7 +3463,7 @@ class GUI extends GUI_core{
     $this->main="druckausschnittswahl.php";
     # aktuellen Kartenausschnitt laden + zeichnen!
   	if($this->formvars['neuladen']){
-      $this->changeMap();
+      $this->neuLaden();
     }
     else{
       $this->loadMap($loadmapsource);
@@ -6667,7 +6667,7 @@ class GUI extends GUI_core{
 						</td>
 						<td align="left" width="40%"><?
 							switch ($this->attributes['form_element_type'][$i]) {
-								case 'Auswahlfeld' : {									# erstmal nur abhängige Auswahlfelder
+								case 'Auswahlfeld' : {									
 									?><select class="select" 
 									<?
 										if($this->attributes['req_by'][$i] != ''){
@@ -8894,7 +8894,7 @@ class GUI extends GUI_core{
     $this->user->rolle->nImageWidth = 500;
     $this->user->rolle->nImageHeight = 500;
     if($this->formvars['neuladen']){
-      $this->changeMap();
+      $this->neuLaden();
     }
     else{
       $this->loadMap('DataBase');
@@ -9382,8 +9382,8 @@ class GUI extends GUI_core{
     }
   }
 
-  function changeMap() {
-  	# Scrollposition der Legende wird gespeichert
+	function saveLegendRoleParameters(){
+		# Scrollposition der Legende wird gespeichert
   	$this->user->rolle->setScrollPosition($this->formvars['scrollposition']);
     # Änderungen in den Gruppen werden gesetzt
     $this->formvars = $this->user->rolle->setGroupStatus($this->formvars);
@@ -9393,6 +9393,10 @@ class GUI extends GUI_core{
     # werden auch die Einstellungen aus der Legende übernommen
     $this->user->rolle->setAktivLayer($this->formvars,$this->Stelle->id,$this->user->id);
     $this->user->rolle->setQueryStatus($this->formvars);
+	}
+	
+  function neuLaden() {
+		$this->saveLegendRoleParameters();
     # Karteninformationen lesen
     $this->loadMap('DataBase');
     # zwischenspeichern des vorherigen Maßstabs
@@ -11409,38 +11413,41 @@ class GUI extends GUI_core{
         $this->GenerischeSuche_Suchen();
       }
       else{                                 # man kam aus einer Sachdatenabfrage    -> nochmal abfragen
-        $this->sachdaten_anzeigen();
+        $this->queryMap();
       }
     }
   }
 
- function sachdaten_anzeigen(){
-  if($this->formvars['querypolygon'] != ''){
-    $rect = $this->formvars['querypolygon'];
-  }
-  else{
-		if($this->formvars['rectminx'] != ''){
-			$rect = ms_newRectObj();
-			$rect->setextent($this->formvars['rectminx'],$this->formvars['rectminy'],$this->formvars['rectmaxx'],$this->formvars['rectmaxy']);
+	function queryMap() {
+		# scale ausrechnen, da wir uns das loadmap sparen
+		$width = $this->user->rolle->nImageWidth;
+		$pixelsize = ($this->user->rolle->oGeorefExt->maxx - $this->user->rolle->oGeorefExt->minx)/($width-1);		# das width - 1 kommt daher, weil der Mapserver das auch so macht
+		$this->map_scaledenom = round($pixelsize * 96 / 0.0254);
+    # Abfragebereich berechnen
+		if($this->formvars['querypolygon'] != ''){
+			$rect = $this->formvars['querypolygon'];
 		}
 		else{
-			$rect = $this->create_query_rect($this->formvars['INPUT_COORD']);
+			if($this->formvars['rectminx'] != ''){			// ?????????
+				$rect = ms_newRectObj();										// ?????????
+				$rect->setextent($this->formvars['rectminx'],$this->formvars['rectminy'],$this->formvars['rectmaxx'],$this->formvars['rectmaxy']);		// ?????????
+			}
+			else{
+				$rect = $this->create_query_rect($this->formvars['INPUT_COORD']);
+			}
 		}
-  	if(MAPSERVERVERSION >= 600 ) {
-			$this->map_scaledenom = $this->map->scaledenom;
-		}
-		else {
-			$this->map_scaledenom = $this->map->scale;
-		}
+    if($this->show_query_tooltip == true){
+      $this->tooltip_query($rect);
+    }
+    else{
+      $this->SachdatenAnzeige($rect);
+			if($this->formvars['printversion'] != ''){
+				$this->mime_type = 'printversion';
+			}
+			$this->output();
+    }
   }
-  $this->loadMap('DataBase');
-  $this->Sachdatenanzeige($rect);
-  if($this->formvars['printversion'] != ''){
-    $this->mime_type = 'printversion';
-  }
-  $this->output();
- }
-
+	
  # 2006-07-26 pk
 	function SachdatenAnzeige($rect){
 		if($this->last_query != ''){
@@ -11540,7 +11547,7 @@ class GUI extends GUI_core{
             # Path auf Basis der Rechte einschränken
             # Attribute aus Path laden
             # Rechte den Attributen zuweisen
-
+						$this->mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
             $layerdb = $this->mapDB->getlayerdatabase($layerset[$i]['Layer_ID'], $this->Stelle->pgdbhost);
             $layerdb->setClientEncoding();
             $path = $layerset[$i]['pfad'];
@@ -11830,7 +11837,7 @@ class GUI extends GUI_core{
             $projTO = ms_newprojectionobj("init=epsg:".$layerset[$i]['epsg_code']);
 
             $bbox=ms_newRectObj();
-            $bbox->setextent($this->map->extent->minx,$this->map->extent->miny,$this->map->extent->maxx,$this->map->extent->maxy);
+            $bbox->setextent($this->user->rolle->oGeorefExt->minx,$this->user->rolle->oGeorefExt->miny,$this->user->rolle->oGeorefExt->maxx,$this->user->rolle->oGeorefExt->maxy);
             
             $bbox = $this->pgdatabase->transformRect($bbox,$this->user->rolle->epsg_code,$layerset[$i]['epsg_code']);            
             $bbox = $bbox[1];
@@ -13385,17 +13392,6 @@ class GUI extends GUI_core{
 		}
 	}
 	
-  function queryMap() {
-    # Abfragebereich berechnen
-		$rect = $this->create_query_rect($this->formvars['INPUT_COORD']);
-    if($this->show_query_tooltip == true){
-      $this->tooltip_query($rect);
-    }
-    else{
-      $this->SachdatenAnzeige($rect);
-    }
-  }
-
   function zoomToRefExt() {
     # Zoomen auf den in der Referenckarte gesetzten Punkt
     # Berechnen der Koordinaten des angeklickten Punktes in der Referencekarte

@@ -303,7 +303,7 @@ if($this->formvars['gps_follow'] == ''){
 						<tr align="left">
 							<td><!-- bgcolor=#e3e3e6 -->
 							<div align="center"><?php # 2007-12-30 pk
-							?><input type="submit" name="senden" value="<?php echo $strLoadNew; ?>" class="send" tabindex="1"></div>
+							?><input type="submit" name="senden" onclick="document.GUI.go.value='neu Laden';" value="<?php echo $strLoadNew; ?>" tabindex="1"></div>
 							<br>
 							<? if(defined('LAYER_ID_SCHNELLSPRUNG') AND LAYER_ID_SCHNELLSPRUNG != ''){
 								include(SNIPPETS.'schnellsprung.php');

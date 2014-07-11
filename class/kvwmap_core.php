@@ -1324,7 +1324,7 @@ class GUI_core {
     }
   }
 
-  # Speichert die Daten des MapObjetes in Datei oder Datenbank
+  # Speichert die Daten des MapObjetes in Datei oder Datenbank und den Extent in die Rolle
   function saveMap($saveMapDestination) {
 		if ($saveMapDestination=='') {
       $saveMapDestination=SAVEMAPFILE;

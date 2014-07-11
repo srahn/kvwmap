@@ -549,7 +549,8 @@ if($GUI->goNotExecutedInPlugins){
 
 	  # Sachdaten anzeigen
 	  case 'Sachdaten' : {
-		$GUI->sachdaten_anzeigen();
+			$GUI->saveLegendRoleParameters();
+			$GUI->queryMap();
 	  }break;
 
 	  # Jagdbezirke Sachdaten anzeigen
@@ -1759,7 +1760,7 @@ if($GUI->goNotExecutedInPlugins){
 	  } break;
 
 	  case "neu Laden" : {
-		$GUI->changeMap();
+		$GUI->neuLaden();
 		$GUI->saveMap('');
 		$currenttime=date('Y-m-d H:i:s',time());
 		$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
@@ -1772,7 +1773,7 @@ if($GUI->goNotExecutedInPlugins){
 		} break;
 
 	  case "history_move" : {
-		$GUI->changeMap();
+		$GUI->neuLaden();
 		$GUI->saveMap('');
 		$GUI->drawMap();
 		$GUI->output();
