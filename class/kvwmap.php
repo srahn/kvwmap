@@ -1120,7 +1120,7 @@ class GUI extends GUI_core{
 							}
 							# Bei eingeschalteten Layern kann man auf die maximale Ausdehnung des Layers zoomen
 							if ($layer['aktivStatus'] == 1) {
-								if ($layer['connectiontype']==6 AND $layer['maxscale'] < 1) {
+								if ($layer['connectiontype']==6) {
 									# Link zum Zoomen auf maximalen Extent des Layers erstmal nur für PostGIS Layer
 									$legend.='&nbsp;<a href="index.php?go=zoomToMaxLayerExtent&layer_id='.$layer['Layer_ID'].'"><img src="graphics/maxLayerExtent.gif" border="0" title="volle Layerausdehnung"></a>';
 								}
@@ -6480,7 +6480,7 @@ class GUI extends GUI_core{
         }
 		
 				$layerset[0]['sql'] = $sql;
-				#echo "Abfragestatement: ".$sql;
+				#echo "Abfragestatement: ".$sql.$sql_order.$sql_limit;
         $ret=$layerdb->execSQL($sql.$sql_order.$sql_limit,4, 0);
         if (!$ret[0]) {
           while ($rs=pg_fetch_array($ret[1])) {

@@ -214,6 +214,7 @@
       alert("Keine Bearbeitung moeglich! \nUebergebene Daten: "+cmd+", "+path);
      break;
     }
+		document.GUI.legendtouched.value = 0;		// nach dem Submit kann das legendtouched-flag wieder auf 0 gesetzt werden
   }
   
   --></SCRIPT>
@@ -734,6 +735,8 @@ function world2pixelsvg(pathWelt){
 
 function mousedown(evt){
 	mouse_down = true;
+	console.log(mouse_down);
+	tooltipstate = "tooltip_paused";
 	cleartooltip();
 	if(top.document.GUI.stopnavigation.value == 0){
 	  switch(doing){

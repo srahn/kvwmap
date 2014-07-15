@@ -24,7 +24,7 @@ CREATE TABLE  `rolle_last_query` (
   `orderby` TEXT NULL ,
   `limit` INT( 11 ) NULL ,
   `offset` INT( 11 ) NULL
-);
+) ENGINE=MyISAM;
 
 CREATE TABLE `u_consumeShape` (
   `user_id` int(11) NOT NULL,
@@ -33,7 +33,7 @@ CREATE TABLE `u_consumeShape` (
   `layer_id` int(11) NOT NULL,
   `numdatasets` int(11) default NULL,
   PRIMARY KEY  (`user_id`,`stelle_id`,`time_id`)
-) ;
+) ENGINE=MyISAM;
 
 CREATE TABLE `rolle_csv_attributes` (
   `user_id` int(11) NOT NULL,
@@ -41,7 +41,7 @@ CREATE TABLE `rolle_csv_attributes` (
   `name` varchar(50) NOT NULL,
   `attributes` text NOT NULL,
   PRIMARY KEY (`user_id`,`stelle_id`,`name`)
-);
+) ENGINE=MyISAM;
 
 
 CREATE TABLE `u_consumeCSV` (
@@ -51,7 +51,7 @@ CREATE TABLE `u_consumeCSV` (
   `art` varchar(20) NOT NULL,
   `numdatasets` int(11) default NULL,
   PRIMARY KEY  (`user_id`,`stelle_id`,`time_id`)
-) ;
+) ENGINE=MyISAM;
 
 CREATE TABLE `u_rolle2used_class` (
 `user_id` int( 11 ) NOT NULL default '0',
@@ -59,7 +59,7 @@ CREATE TABLE `u_rolle2used_class` (
 `class_id` int( 11 ) NOT NULL default '0',
 `status` INT( 1 ) NOT NULL DEFAULT  0,
 PRIMARY KEY ( `user_id` , `stelle_id` , `class_id` )
-);
+) ENGINE=MyISAM;
 
 # Neue Tabellen zur Speicherung von Sachdaten-Drucklayouts
 CREATE TABLE `datendrucklayouts` (
@@ -81,7 +81,7 @@ CREATE TABLE `datendrucklayouts` (
   `font_user` varchar(255) default NULL,
   `type` tinyint(1) NOT NULL default '0',
   PRIMARY KEY  (`id`)
-);
+) ENGINE=MyISAM;
 
 CREATE TABLE `ddl_elemente` (
 `ddl_id` INT( 11 ) NOT NULL ,
@@ -94,19 +94,19 @@ CREATE TABLE `ddl_elemente` (
 `font` VARCHAR( 255 ) NULL ,
 `fontsize` INT( 11 ) NULL ,
 PRIMARY KEY ( `ddl_id` , `name` )
-);
+) ENGINE=MyISAM;
 
 CREATE TABLE `ddl2stelle` (
   `stelle_id` int(11) NOT NULL,
   `ddl_id` int(11) NOT NULL,
   PRIMARY KEY  (`stelle_id`,`ddl_id`)
-);
+) ENGINE=MyISAM;
 
 CREATE TABLE `ddl2freitexte` (
   `ddl_id` int(11) NOT NULL,
   `freitext_id` int(11) NOT NULL,
   PRIMARY KEY  (`ddl_id`,`freitext_id`)
-);
+) ENGINE=MyISAM;
 
 
 # Neue Tabelle zur Festlegung von Style-Farben für die automatische Klassifizierung
@@ -116,7 +116,7 @@ CREATE TABLE `colors` (
 `red` SMALLINT( 3 ) NOT NULL DEFAULT '0',
 `green` SMALLINT( 3 ) NOT NULL DEFAULT '0',
 `blue` SMALLINT( 3 ) NOT NULL DEFAULT '0'
-);
+) ENGINE=MyISAM;
 INSERT INTO `colors` VALUES (1, NULL, 166, 206, 227);
 INSERT INTO `colors` VALUES (2, NULL, 31, 120, 180);
 INSERT INTO `colors` VALUES (3, NULL, 178, 223, 138);
@@ -143,7 +143,7 @@ CREATE TABLE `search_attributes2rolle` (
 	`searchmask_number` INT( 11 ) NOT NULL DEFAULT 0, 
 	`searchmask_operator` ENUM(  'AND',  'OR' ) NULL DEFAULT NULL,
   PRIMARY KEY  (`name`,`user_id`,`stelle_id`,`layer_id`,`attribute`)
-);
+) ENGINE=MyISAM;
 
 
 # neue Tabelle zur rollenbezogenen Speicherung von Druckausschnitten
@@ -158,7 +158,7 @@ CREATE TABLE `druckausschnitte` (
   `angle` int(11) NOT NULL,
   `frame_id` int(11) NOT NULL,
   PRIMARY KEY  (`id`)
-);
+) ENGINE=MyISAM;
 ALTER TABLE `druckausschnitte` DROP PRIMARY KEY,
 ADD PRIMARY KEY ( `id` , `stelle_id` , `user_id` );
 
@@ -168,7 +168,7 @@ CREATE TABLE `druckfreibilder` (
   `id` int(11) NOT NULL auto_increment,
   `src` varchar(255) collate latin1_german2_ci NOT NULL default '',
   PRIMARY KEY  (`id`)
-);
+) ENGINE=MyISAM;
 
 
 # Neue Tabelle für die Zuordnung von freien Bildern und den Druckrahmen
@@ -181,7 +181,7 @@ CREATE TABLE `druckrahmen2freibilder` (
   `height` int(11) default NULL,
   `angle` int(11) default NULL,
   PRIMARY KEY  (`druckrahmen_id`,`freibild_id`)
-);
+) ENGINE=MyISAM;
 
 CREATE TABLE `rollenlayer` (
   `id` int(11) NOT NULL auto_increment,
@@ -199,7 +199,7 @@ CREATE TABLE `rollenlayer` (
   `transparency` int(11) NOT NULL,
   `labelitem` VARCHAR( 100 ) NULL,
   PRIMARY KEY  (`id`)
-);
+) ENGINE=MyISAM;
 
 
 CREATE TABLE `layer_attributes2stelle` (
@@ -209,7 +209,7 @@ CREATE TABLE `layer_attributes2stelle` (
 `privileg` BOOL NOT NULL ,
 `tooltip` BOOL NULL DEFAULT '0',
 PRIMARY KEY ( `layer_id` , `attributename` , `stelle_id` )
-);
+) ENGINE=MyISAM;
 
 
 
@@ -236,7 +236,7 @@ CREATE TABLE layer_attributes (
   `privileg` BOOLEAN NULL DEFAULT '0',
   `query_tooltip` BOOLEAN NULL DEFAULT '0',
   PRIMARY KEY  (layer_id,`name`)
-);
+) ENGINE=MyISAM;
 
 
 -- Hinzufügen einer Tabelle u_attributfilter2used_layer zur Speicherung der Attribut-Filter der Layer einer Stelle
@@ -249,7 +249,7 @@ CREATE TABLE `u_attributfilter2used_layer` (
   `operator` enum('=','!=','>','<','like','IS','IN','st_within','st_intersects') NOT NULL,
   `type` varchar(255) NOT NULL,
   PRIMARY KEY  (`Stelle_ID`,`Layer_ID`,`attributname`)
-);
+) ENGINE=MyISAM;
 
 --
 -- Erzeugen einer neuen Tabelle groups für die Gruppen in denen die Layer gruppiert sind
@@ -260,7 +260,7 @@ CREATE TABLE `u_groups` (
   `obergruppe` INT( 11 ) NULL,
   `order` INT( 11 ) NULL,
   PRIMARY KEY  (`id`)
-);
+) ENGINE=MyISAM;
 
 --
 -- Erzeugt eine neue Tabelle für die Speicherung von Eigenschaften, die an der Beziehung
@@ -275,7 +275,7 @@ CREATE TABLE `u_groups2rolle` (
   KEY `user_id_2` (`user_id`),
   KEY `user_id_3` (`user_id`),
   PRIMARY KEY ( `user_id` , `stelle_id` , `id` )
-);
+) ENGINE=MyISAM;
 
 -- 
 -- Table structure for table `druckrahmen`
@@ -346,7 +346,7 @@ CREATE TABLE `druckrahmen` (
   `font_watermark` varchar(255) default NULL,
   `font_user` varchar(255) default NULL,
   PRIMARY KEY  (`id`)
-);
+) ENGINE=MyISAM;
 
 
 
@@ -356,7 +356,7 @@ CREATE TABLE `druckrahmen2stelle` (
 `stelle_id` INT( 11 ) NOT NULL ,
 `druckrahmen_id` INT( 11 ) NOT NULL ,
 PRIMARY KEY ( `stelle_id` , `druckrahmen_id` )
-);
+) ENGINE=MyISAM;
 
 
 CREATE TABLE `druckfreitexte` (
@@ -370,13 +370,13 @@ CREATE TABLE `druckfreitexte` (
   `angle` int(11) default NULL,
   `type` tinyint(1) default NULL,
   PRIMARY KEY  (`id`)
-);
+) ENGINE=MyISAM;
 
 CREATE TABLE `druckrahmen2freitexte` (
 `druckrahmen_id` INT( 11 ) NOT NULL ,
 `freitext_id` INT( 11 ) NOT NULL ,
 PRIMARY KEY ( `druckrahmen_id` , `freitext_id` )
-);
+) ENGINE=MyISAM;
 
 -- 
 -- Table structure for table `u_menue2rolle`
@@ -388,7 +388,7 @@ CREATE TABLE `u_menue2rolle` (
 `menue_id` INT( 11 ) NOT NULL ,
 `status` TINYINT( 1 ) NOT NULL,
 PRIMARY KEY ( `user_id` , `stelle_id` , `menue_id` )
-);
+) ENGINE=MyISAM;
 
 
 -- --------------------------------------------------------
@@ -406,7 +406,7 @@ CREATE TABLE classes (
   text varchar(255) NULL,
   PRIMARY KEY  (Class_ID),
   KEY Layer_ID (Layer_ID)
-);
+) ENGINE=MyISAM;
 
 -- --------------------------------------------------------
 
@@ -476,7 +476,7 @@ CREATE TABLE labels (
   wrap tinyint(3) default NULL,
   the_force int(1) default NULL,
   PRIMARY KEY  (Label_ID)
-);
+) ENGINE=MyISAM;
 
 -- --------------------------------------------------------
 
@@ -488,7 +488,7 @@ CREATE TABLE u_labels2classes (
   class_id int(11) NOT NULL default '0',
   label_id int(11) NOT NULL default '0',
   PRIMARY KEY  (class_id,label_id)
-);
+) ENGINE=MyISAM;
 
 -- --------------------------------------------------------
 
@@ -550,7 +550,7 @@ CREATE TABLE `layer` (
 	`export_privileg` BOOLEAN NOT NULL DEFAULT  '1',
   PRIMARY KEY  (`Layer_ID`),
   KEY `Gruppe` (`Gruppe`)
-);
+) ENGINE=MyISAM;
 
 -- --------------------------------------------------------
 
@@ -565,7 +565,7 @@ CREATE TABLE polygon (
   art varchar(25) NOT NULL default '',
   feldname varchar(25) NOT NULL default '',
   PRIMARY KEY  (polygon_id)
-);
+) ENGINE=MyISAM;
 
 -- --------------------------------------------------------
 
@@ -578,7 +578,7 @@ CREATE TABLE u_polygon2used_layer (
   layer_id int(11) NOT NULL,
   stelle_id int(11) NOT NULL,
   PRIMARY KEY (polygon_id,layer_id,stelle_id)
-);
+) ENGINE=MyISAM;
 
 -- --------------------------------------------------------
 
@@ -597,7 +597,7 @@ CREATE TABLE referenzkarten (
   width int(4) unsigned NOT NULL default '0',
   height int(4) unsigned NOT NULL default '0',
   PRIMARY KEY  (ID)
-);
+) ENGINE=MyISAM;
 
 -- --------------------------------------------------------
 
@@ -639,7 +639,7 @@ CREATE TABLE rolle (
 	`overlayx` INT( 11 ) NOT NULL DEFAULT  '400',
 	`overlayy` INT( 11 ) NOT NULL DEFAULT  '150',
   PRIMARY KEY  (user_id,stelle_id)
-);
+) ENGINE=MyISAM;
 
 -- ---------------------------------------------------------
 
@@ -656,7 +656,7 @@ CREATE TABLE u_rolle2used_layer (
   `showclasses` BOOL NOT NULL DEFAULT '1',
   `logconsume` enum('0','1') NOT NULL default '0',
   PRIMARY KEY  (user_id,stelle_id,layer_id)
-);
+) ENGINE=MyISAM;
 
 -- --------------------------------------------------------
 
@@ -690,7 +690,7 @@ CREATE TABLE rolle_nachweise (
   markkvz char(1) NOT NULL default '0',
   markgn char(1) NOT NULL default '0',
   PRIMARY KEY  (user_id,stelle_id)
-);
+) ENGINE=MyISAM;
 
 -- --------------------------------------------------------
 
@@ -738,7 +738,7 @@ CREATE TABLE stelle (
   allowed_password_age TINYINT NOT NULL DEFAULT '6',
   use_layer_aliases ENUM( '0', '1' ) NOT NULL DEFAULT '0',
   PRIMARY KEY  (ID)
-);
+) ENGINE=MyISAM;
 
 -- --------------------------------------------------------
 
@@ -750,7 +750,7 @@ CREATE TABLE stelle_gemeinden (
   Stelle_ID int(11) NOT NULL default '0',
   Gemeinde_ID int(8) NOT NULL default '0',
   PRIMARY KEY  (Stelle_ID,Gemeinde_ID)
-);
+) ENGINE=MyISAM;
 
 -- --------------------------------------------------------
 
@@ -784,7 +784,7 @@ CREATE TABLE `styles` (
 	`linejoin` VARCHAR( 5 ) NULL ,
 	`linejoinmaxsize` INT( 11 ) NULL,
   PRIMARY KEY  (`Style_ID`)
-);
+) ENGINE=MyISAM;
 
 -- --------------------------------------------------------
 
@@ -796,7 +796,7 @@ CREATE TABLE u_funktion2stelle (
   funktion_id int(11) NOT NULL default '0',
   stelle_id int(11) NOT NULL default '0',
   PRIMARY KEY  (funktion_id,stelle_id)
-);
+) ENGINE=MyISAM;
 
 -- --------------------------------------------------------
 
@@ -809,7 +809,7 @@ CREATE TABLE u_funktionen (
   bezeichnung varchar(255) NOT NULL default '',
   link varchar(255) default NULL,
   PRIMARY KEY  (id)
-);
+) ENGINE=MyISAM;
 
 -- --------------------------------------------------------
 
@@ -822,7 +822,7 @@ CREATE TABLE u_menue2stelle (
   menue_id int(11) NOT NULL default '0',
   menue_order int(11) NOT NULL default '0',
   PRIMARY KEY  (stelle_id,menue_id)
-);
+) ENGINE=MyISAM;
 
 -- --------------------------------------------------------
 
@@ -843,7 +843,7 @@ CREATE TABLE u_menues (
   target varchar(10) default NULL,
   `order` INT(11) NOT NULL DEFAULT '0',
   PRIMARY KEY  (id)
-);
+) ENGINE=MyISAM;
 
 -- --------------------------------------------------------
 
@@ -856,7 +856,7 @@ CREATE TABLE u_styles2classes (
   style_id int(11) NOT NULL default '0',
   drawingorder int(11) unsigned default NULL,
   PRIMARY KEY  (class_id,style_id)
-);
+) ENGINE=MyISAM;
 
 -- --------------------------------------------------------
 
@@ -885,7 +885,7 @@ CREATE TABLE used_layer (
 	export_privileg BOOLEAN NOT NULL DEFAULT  '1',
   start_aktiv ENUM( '0', '1' ) NOT NULL DEFAULT '0',
   PRIMARY KEY (Stelle_ID, Layer_ID)
-);
+) ENGINE=MyISAM;
 
 
 -- --------------------------------------------------------
@@ -910,7 +910,7 @@ CREATE TABLE user (
   phon varchar(15) default NULL,
   email varchar(50) default NULL,
   PRIMARY KEY  (ID)
-);
+) ENGINE=MyISAM;
 
 -- ---------------------------------------
 
@@ -932,7 +932,7 @@ CREATE TABLE `u_consume` (
 `prev` datetime default NULL,
 `next` datetime default NULL,
 PRIMARY KEY ( `user_id` , `stelle_id` , `time_id` ) 
-);
+) ENGINE=MyISAM;
 
 -- ---------------------------------------
 
@@ -946,7 +946,7 @@ CREATE TABLE `u_consume2layer` (
 `time_id` DATETIME NOT NULL ,
 `layer_id` INT NOT NULL,
 PRIMARY KEY ( `user_id` , `stelle_id` , `time_id` , `layer_id`)
-);  
+) ENGINE=MyISAM;  
 
 
 --
@@ -959,7 +959,7 @@ CREATE TABLE `u_consumeALK` (
 `time_id` DATETIME NOT NULL ,
 `druckrahmen_id` INT NOT NULL,
 PRIMARY KEY ( `user_id` , `stelle_id` , `time_id` ) 
-);  
+) ENGINE=MyISAM;  
 
 
 --
@@ -972,7 +972,7 @@ CREATE TABLE `u_consume2comments` (
  `time_id` datetime NOT NULL,
  `comment` text,
  PRIMARY KEY  (`user_id`,`stelle_id`,`time_id`)
-);
+) ENGINE=MyISAM;
 
 # Hinzufügen einer Tabelle zur Speicherung der ALB-Zugriffe
 
@@ -985,4 +985,4 @@ CREATE TABLE `u_consumeALB` (
   `wz` ENUM( '0', '1' ) NULL,
   `numpages` INT( 11 ) NULL ,
   PRIMARY KEY  (`user_id`,`stelle_id`,`time_id`,`log_number`)
-);
+) ENGINE=MyISAM;

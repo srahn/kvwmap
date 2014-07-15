@@ -148,11 +148,11 @@ if (isset($GUI->formvars['newPassword'])) {
 		#$GUI->formvars['newPassword'];
 	}
   else {
-  	$GUI->Fehlermeldung=urlencode('<font color="red">'.$GUI->Fehlermeldung.'!<br>Vorschlag für ein neues Password: <b>'.createRandomPassword(8).'</b></font><br>');
+  	$GUI->Fehlermeldung=urlencode($GUI->Fehlermeldung.'!<br>Vorschlag für ein neues Password: <b>'.createRandomPassword(8).'</b><br>');
 	  $GUI->formvars['go']='logout';
   }
 }
-
+ 
 ###################################################################################
 # Einstellung der Stellen_ID
 # 1) Die Variable Stelle_ID wurde nicht neu gesetzt,

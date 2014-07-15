@@ -1193,3 +1193,56 @@ ALTER TABLE  `search_attributes2rolle` ADD  `searchmask_number` INT( 11 ) NOT NU
 update rolle set fontsize_gle = fontsize_gle + 2;
 
 ALTER TABLE  `rolle` CHANGE  `fontsize_gle`  `fontsize_gle` INT( 2 ) NULL DEFAULT  '15';
+
+# da sich herausgestellt hat, das InnoDB-Tabellen sehr langsam sind, werden alle Tabellen auf MyISAM umgestellt
+
+ALTER TABLE `classes` ENGINE = MyISAM;
+ALTER TABLE `colors` ENGINE = MyISAM;
+ALTER TABLE `datendrucklayouts` ENGINE = MyISAM;
+ALTER TABLE `ddl2freitexte` ENGINE = MyISAM;
+ALTER TABLE `ddl2stelle` ENGINE = MyISAM;
+ALTER TABLE `ddl_elemente` ENGINE = MyISAM;
+ALTER TABLE `druckausschnitte` ENGINE = MyISAM;
+ALTER TABLE `druckfreibilder` ENGINE = MyISAM;
+ALTER TABLE `druckfreitexte` ENGINE = MyISAM;
+ALTER TABLE `druckrahmen` ENGINE = MyISAM;
+ALTER TABLE `druckrahmen2freibilder` ENGINE = MyISAM;
+ALTER TABLE `druckrahmen2freitexte` ENGINE = MyISAM;
+ALTER TABLE `druckrahmen2stelle` ENGINE = MyISAM;
+ALTER TABLE `labels` ENGINE = MyISAM;
+ALTER TABLE `layer` ENGINE = MyISAM;
+ALTER TABLE `layer_attributes` ENGINE = MyISAM;
+ALTER TABLE `layer_attributes2stelle` ENGINE = MyISAM;
+ALTER TABLE `referenzkarten` ENGINE = MyISAM;
+ALTER TABLE `rolle` ENGINE = MyISAM;
+ALTER TABLE `rollenlayer` ENGINE = MyISAM;
+ALTER TABLE `rolle_csv_attributes` ENGINE = MyISAM;
+ALTER TABLE `rolle_last_query` ENGINE = MyISAM;
+ALTER TABLE `rolle_nachweise` ENGINE = MyISAM;
+ALTER TABLE `search_attributes2rolle` ENGINE = MyISAM;
+ALTER TABLE `stelle` ENGINE = MyISAM;
+ALTER TABLE `stelle_gemeinden` ENGINE = MyISAM;
+ALTER TABLE `styles` ENGINE = MyISAM;
+ALTER TABLE `used_layer` ENGINE = MyISAM;
+ALTER TABLE `user` ENGINE = MyISAM;
+ALTER TABLE `u_attribute2used_layer` ENGINE = MyISAM;
+ALTER TABLE `u_attributfilter2used_layer` ENGINE = MyISAM;
+ALTER TABLE `u_consume` ENGINE = MyISAM;
+ALTER TABLE `u_consume2comments` ENGINE = MyISAM;
+ALTER TABLE `u_consume2layer` ENGINE = MyISAM;
+ALTER TABLE `u_consumeALB` ENGINE = MyISAM;
+ALTER TABLE `u_consumeALK` ENGINE = MyISAM;
+ALTER TABLE `u_consumeCSV` ENGINE = MyISAM;
+ALTER TABLE `u_consumeShape` ENGINE = MyISAM;
+ALTER TABLE `u_funktion2stelle` ENGINE = MyISAM;
+ALTER TABLE `u_funktionen` ENGINE = MyISAM;
+ALTER TABLE `u_groups` ENGINE = MyISAM;
+ALTER TABLE `u_groups2rolle` ENGINE = MyISAM;
+ALTER TABLE `u_labels2classes` ENGINE = MyISAM;
+ALTER TABLE `u_menue2rolle` ENGINE = MyISAM;
+ALTER TABLE `u_menue2stelle` ENGINE = MyISAM;
+ALTER TABLE `u_menues` ENGINE = MyISAM;
+ALTER TABLE `u_polygon2used_layer` ENGINE = MyISAM;
+ALTER TABLE `u_rolle2used_class` ENGINE = MyISAM;
+ALTER TABLE `u_rolle2used_layer` ENGINE = MyISAM;
+ALTER TABLE `u_styles2classes` ENGINE = MyISAM;

@@ -436,8 +436,8 @@ if($GUI->goNotExecutedInPlugins){
 		if (isset($newPassword)) {
 		  $locationStr.='?newPassword='.$newPassword;
 		  $locationStr.='&msg='.$GUI->Fehlermeldung;
-		  #$locationStr.='&passwort='.$passwort;
-		  #$locationStr.='&username='.$username;
+		  $locationStr.='&passwort='.$passwort;
+		  $locationStr.='&username='.$username;
 		}
 		header('Location: '.$locationStr);
 	  } break;
@@ -549,7 +549,7 @@ if($GUI->goNotExecutedInPlugins){
 
 	  # Sachdaten anzeigen
 	  case 'Sachdaten' : {
-			$GUI->saveLegendRoleParameters();
+			if($GUI->formvars['legendtouched'])$GUI->saveLegendRoleParameters();			
 			$GUI->queryMap();
 	  }break;
 

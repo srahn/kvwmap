@@ -27,7 +27,7 @@ $SVGvars_querytooltipscript .= '
 			}
 			mousex = evt.clientX;
 			mousey = evt.clientY;
-			if(oldmousex == undefined || Math.abs(oldmousex-mousex) > 1 || Math.abs(oldmousey-mousey) > 1){			// Maus bewegen
+			if(mouse_down == false && (oldmousex == undefined || Math.abs(oldmousex-mousex) > 1 || Math.abs(oldmousey-mousey) > 1)){			// Maus bewegen
 				if(prevent != 1 && (oldmousex == undefined || Math.abs(oldmousex-mousex) > 30 || Math.abs(oldmousey-mousey) > 30)){			// Maus bewegen
 					cleartooltip();
 				}
@@ -123,7 +123,7 @@ $SVGvars_querytooltipscript .= '
 		 	}
 		}		
 				
-		window.setInterval("tooltip_query()", 50);
+		window.setInterval("tooltip_query()", 100);
 		
 		function cleartext(object){
 			while(object.childNodes.length > 0){
@@ -240,20 +240,18 @@ $SVGvars_querytooltipscript .= '
 		function tooltip_query(){
 			var querylayer = "";
 			var querylayer_id;
-			if(doing == "ppquery" && mouse_down == false){ 
+			if(doing == "ppquery" && mouse_down == false && tooltipstate == "ready_for_request" && prevent != 1){ 		// wenn bereit fuer Request
 				if(Math.abs(oldmousex-mousex) < 1 && Math.abs(oldmousey-mousey) < 1){		// Maus stillhalten
-					if(tooltipstate == "ready_for_request" && prevent != 1){			// wenn Maus bewegt wurde --> neuer Request
-						tooltipstate = "request_sent";
-						for(i = 0; i < layerset.length; i++){
-							if(layerset[i] != undefined && layerset[i].checked){
-								querylayer = "&qLayer"+layernumber[i]+"=1";
-								querylayer_id = layernumber[i];
-							}
+					tooltipstate = "request_sent";
+					for(i = 0; i < layerset.length; i++){
+						if(layerset[i] != undefined && layerset[i].checked){
+							querylayer = "&qLayer"+layernumber[i]+"=1";
+							querylayer_id = layernumber[i];
 						}
-						counter++;
-						path = mousex+","+mousey+";"+mousex+","+mousey;
-					  top.ahah("'.URL.APPLVERSION.'index.php", "go=tooltip_query&INPUT_COORD="+path+"&CMD=ppquery"+querylayer+"&querylayer_id="+querylayer_id+"&counter="+counter, new Array(top.document.GUI.result, \'\'), new Array(\'setvalue\', \'execute_function\'));
 					}
+					counter++;
+					path = mousex+","+mousey+";"+mousex+","+mousey;
+					top.ahah("'.URL.APPLVERSION.'index.php", "go=tooltip_query&INPUT_COORD="+path+"&CMD=ppquery"+querylayer+"&querylayer_id="+querylayer_id+"&counter="+counter, new Array(top.document.GUI.result, \'\'), new Array(\'setvalue\', \'execute_function\'));
 				}
 				oldmousex = mousex;
 				oldmousey = mousey;

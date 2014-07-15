@@ -20,14 +20,14 @@
 	}
 	$oldPassword = $_REQUEST['passwort'];
 	$newPassword = $_REQUEST['newPassword'];
-	#$newPassword2 = $_REQUEST['newPassword2'];
+	$newPassword2 = $_REQUEST['newPassword2'];
 	$msg = $_REQUEST['msg'];
 	$mobile = $_REQUEST['mobile'];
-        $remote_addr = getenv('REMOTE_ADDR');
+  $remote_addr = getenv('REMOTE_ADDR');
     
 	// Benutzername und Passwort werden überprüft
-	##if (($newPassword == '' OR ($newPassword != '' AND $newPassword2 != '')) AND $userDb->login_user($username, $passwort)) {
-	if ($userDb->login_user($username, $passwort)) {
+	if (($newPassword == '' OR ($newPassword != '' AND $newPassword2 != '')) AND $userDb->login_user($username, $passwort)) {
+	#if ($userDb->login_user($username, $passwort)) {
 		$_SESSION['angemeldet'] = true;
 		$_SESSION['login_name'] = $username;
 		$_SESSION['login_routines'] = true;
@@ -68,7 +68,7 @@
 								<?php
 					if($username != '' OR $passwort != ''){
 						  ?><tr>
-									<td align="center" colspan="2"><span class="fett" style="color: #ff0000;">Anmeldung nicht erfolgreich.</span><br><br></td>
+									<td align="center" colspan="2"><span class="fett red">Anmeldung nicht erfolgreich.</span><br><br></td>
 								</tr><?php														
 					}								
 			        ?><tr>
@@ -81,15 +81,15 @@
 								</tr><?php
 					if (isset($newPassword) AND $newPassword!='') {
 						  ?><tr>
-									<td width="400" colspan="2"><font size="-1"><?php echo urldecode($msg); ?></font></td>
+									<td width="400" colspan="2"><span class="red"><?php echo urldecode($msg); ?></span></td>
 								</tr>
 								<tr>
-									<td>Neues Passwort: </td>
-									<td><input type="password" name="newPassword" size="10"/></td>
+									<td><span class="px16">Neues Passwort: </span></td>
+									<td><input style="width: 130px" type="password" name="newPassword"/></td>
 								</tr>
 								<tr>
-									<td>Wiederholung: </td>
-									<td><input type="password" name="newPassword2" size="10"/></td>
+									<td><span class="px16">Wiederholung: </span></td>
+									<td><input style="width: 130px" type="password" name="newPassword2"/></td>
 								</tr><?php
 					}			
 					if(MOBILE == 'true'){
