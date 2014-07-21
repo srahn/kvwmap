@@ -341,15 +341,15 @@ VALUES (@stelle_id, @last_menue_id, '91');
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
 
 # eine Layer-Gruppe anlegen
-INSERT INTO `u_groups` (`id`, `Gruppenname`) VALUES (1, 'Hintergrundkarten');
-INSERT INTO `u_groups` (`id`, `Gruppenname`) VALUES (2, 'Verwaltungsgrenzen');
-INSERT INTO `u_groups` (`id`, `Gruppenname`) VALUES (3, 'Kataster');
-INSERT INTO `u_groups` (`id`, `Gruppenname`) VALUES (4, 'Umwelt');
-INSERT INTO `u_groups` (`id`, `Gruppenname`) VALUES (5, 'Bauen');
-INSERT INTO `u_groups` (`id`, `Gruppenname`) VALUES (6, 'Raumordnung');
-INSERT INTO `u_groups` (`id`, `Gruppenname`) VALUES (7, 'Soziales');
-INSERT INTO `u_groups` (`id`, `Gruppenname`) VALUES (8, 'Verkehr');
-INSERT INTO `u_groups` (`id`, `Gruppenname`) VALUES (9, 'Administration');
+INSERT INTO `u_groups` (`id`, `Gruppenname`, `order`) VALUES (1, 'Hintergrundkarten', 1000);
+INSERT INTO `u_groups` (`id`, `Gruppenname`, `order`) VALUES (2, 'Verwaltungsgrenzen', 900);
+INSERT INTO `u_groups` (`id`, `Gruppenname`, `order`) VALUES (3, 'Kataster', 800);
+INSERT INTO `u_groups` (`id`, `Gruppenname`, `order`) VALUES (4, 'Umwelt', 700);
+INSERT INTO `u_groups` (`id`, `Gruppenname`, `order`) VALUES (5, 'Bauen', 600);
+INSERT INTO `u_groups` (`id`, `Gruppenname`, `order`) VALUES (6, 'Raumordnung', 500);
+INSERT INTO `u_groups` (`id`, `Gruppenname`, `order`) VALUES (7, 'Soziales', 400);
+INSERT INTO `u_groups` (`id`, `Gruppenname`, `order`) VALUES (8, 'Verkehr', 300);
+INSERT INTO `u_groups` (`id`, `Gruppenname`, `order`) VALUES (9, 'Administration', 100);
 
 # einen ersten WMS Layer anlegen
 INSERT INTO layer (`Name`, `alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`) VALUES('OSM', '', '3', '1', NULL, NULL, NULL, NULL, NULL, '', '', '', '', NULL, NULL, '', 'http://x.osm.omniscale.net/proxy/service?LAYERS=osm&STYLES=&Version=1.1.1&', '', 7, '', '', 3, 'pixels', '25832', '', '0', NULL, NULL, NULL, NULL, '', 'EPSG:25832', 'osm', '1.1.1', 'image/png', 60, '', '', '', 'radio', '0', '', '', '', '');

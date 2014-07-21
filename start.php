@@ -1,6 +1,6 @@
 <?php
 # Objekt für graphische Benutzeroberfläche erzeugen
-if($_REQUEST['go'] == 'getMap_ajax'){
+if($_REQUEST['go'] == 'navMap_ajax'){
 	$GUI=new GUI_core();
 }
 else{
@@ -126,7 +126,7 @@ else {
   $debug->write("Verbindung zur MySQL Benutzerdatenbank erfolgreich hergestellt.",4);        
 }
 # User Daten lesen
-if($_REQUEST['go'] == 'getMap_ajax'){
+if($_REQUEST['go'] == 'navMap_ajax'){
 	$GUI->user=new user_core($login_name,0,$userDb);
 }
 else{
@@ -207,7 +207,7 @@ else {
 }
 
 # Erzeugen eines Stellenobjektes
-if($_REQUEST['go'] == 'getMap_ajax'){
+if($_REQUEST['go'] == 'navMap_ajax'){
 	$GUI->Stelle=new stelle_core($Stelle_ID,$userDb);
 }
 else{
@@ -273,7 +273,7 @@ if ($pgdbname=='') {
   # pgdbname ist leer, die Informationen zur Verbindung mit der PostGIS Datenbank
   # mit Geometriedaten werden aus der Tabelle stelle
   # der kvwmap-Datenbank $GUI->database gelesen
-  if($_REQUEST['go'] == 'getMap_ajax'){
+  if($_REQUEST['go'] == 'navMap_ajax'){
   	$PostGISdb=new pgdatabase_core();
   }
   else{

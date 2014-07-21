@@ -23,7 +23,7 @@
     <td><input style="border: 1px solid #cccccc;" type="image" id="refmap" name="refmap" src="<?php echo $this->img['referenzkarte']; ?>" alt="Referenzkarte" align="right" hspace="0"></td>
   </tr><?php } ?>
   <tr>
-  	<td valign="top">
+  	<td valign="top" bgcolor="<? echo BG_MENUETOP; ?>">
 			<a href="index.php?go=logout">
 				<div>
 				<div class="menu">
@@ -140,7 +140,7 @@
               	else{
               	  echo '
                   <tr>
-                    <td valign="top">
+                    <td valign="top" bgcolor="'.BG_MENUETOP.'">
 											<a href="javascript:changemenue('.$this->Menue->Menueoption[$i]['id'].');" >                      
                       <div id="menue'.$this->Menue->Menueoption[$i]['id'].'">
 												<div class="menu">
@@ -152,7 +152,7 @@
               else{
                 echo'
                   <tr>
-                    <td valign="top">
+                    <td valign="top" bgcolor="'.BG_MENUETOP.'">
 											<a href="javascript:changemenue('.$this->Menue->Menueoption[$i]['id'].');" >
                       <div id="menue'.$this->Menue->Menueoption[$i]['id'].'">
 												<div class="menu">
@@ -164,7 +164,7 @@
             else{
               echo'
                 <tr>
-                  <td valign="top">
+                  <td valign="top" bgcolor="'.BG_MENUETOP.'">
                     <a href="'.$this->Menue->Menueoption[$i]['links'].'" target="'.$this->Menue->Menueoption[$i]['target'].'" >
                     <div id="menue'.$this->Menue->Menueoption[$i]['id'].'">
 											<div class="menu">

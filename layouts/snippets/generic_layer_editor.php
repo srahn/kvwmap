@@ -203,25 +203,25 @@
 					 <? //} ?>
 				 
 						<? //if($layer['querymaps'][$k] != ''){ ?>
-						<!--td <? //if($attributes['group'][0] != '')echo 'width="200px"'; ?> bgcolor="<? echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;" align="center"><img style="border:1px solid grey" src="<? echo $layer['querymaps'][$k]; ?>"></td>
+						<!--td <? //if($attributes['group'][0] != '')echo 'width="200px"'; ?> bgcolor="<? #echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;" align="center"><img style="border:1px solid grey" src="<? echo $layer['querymaps'][$k]; ?>"></td>
 						<? //} else { ?>
-			    	    <td <? //if($attributes['group'][0] != '')echo 'width="200px"'; ?> bgcolor="<? echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;">&nbsp;</td-->
+			    	    <td <? //if($attributes['group'][0] != '')echo 'width="200px"'; ?> bgcolor="<? #echo BG_GLEATTRIBUTE; ?>" style="padding-top:5px; padding-bottom:5px;">&nbsp;</td-->
 			    	    <? //} ?>
 			    	    <td style="padding-top:5px; padding-bottom:5px;">
 <?						
 							if($layer['shape'][$k][$attributes['the_geom']]){
 								if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY'){
 ?>
-			    					&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="" onclick="this.href='index.php?go=zoomtoPolygon&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&layer_tablename=<? echo $tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>&selektieren='+currentform.selektieren<? echo $layer['Layer_ID'].'_'.$k; ?>.checked;"><? echo $strMapZoom; ?></a>&nbsp;&nbsp;&nbsp;<span style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px"><? echo $strMapSelect; ?></span><input type="checkbox" name="selektieren<? echo $layer['Layer_ID'].'_'.$k; ?>" value="1">
+			    					&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:zoom2object('go=zoomtoPolygon&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&layer_tablename=<? echo $tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>&selektieren='+currentform.selektieren<? echo $layer['Layer_ID'].'_'.$k; ?>.checked);"><? echo $strMapZoom; ?></a>&nbsp;&nbsp;&nbsp;<span style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px"><? echo $strMapSelect; ?></span><input type="checkbox" name="selektieren<? echo $layer['Layer_ID'].'_'.$k; ?>" value="1">
 			    					<?
 								} elseif($geomtype == 'POINT') {
 ?>
-			    					&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="index.php?go=zoomtoPoint&dimension=<? echo $dimension; ?>&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&layer_tablename=<? echo $tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>"><? echo $strMapZoom; ?></a>
+			    					&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:zoom2object('go=zoomtoPoint&dimension=<? echo $dimension; ?>&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&layer_tablename=<? echo $tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>');"><? echo $strMapZoom; ?></a>
 <?
 			    				}
 			    				elseif($geomtype == 'MULTILINESTRING' OR $geomtype == 'LINESTRING') {
 ?>
-			    					&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="" onclick="this.href='index.php?go=zoomToLine&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&layer_tablename=<? echo $tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>&selektieren='+currentform.selektieren<? echo $layer['Layer_ID'].'_'.$k; ?>.checked;"><? echo $strMapZoom; ?></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px"><? echo $strMapSelect; ?></span><input type="checkbox" name="selektieren<? echo $layer['Layer_ID'].'_'.$k; ?>" value="1">
+			    					&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:zoom2object('go=zoomToLine&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&layer_tablename=<? echo $tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>&selektieren='+currentform.selektieren<? echo $layer['Layer_ID'].'_'.$k; ?>.checked);"><? echo $strMapZoom; ?></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px"><? echo $strMapSelect; ?></span><input type="checkbox" name="selektieren<? echo $layer['Layer_ID'].'_'.$k; ?>" value="1">
 <?
 			    				}
 ?>
@@ -269,12 +269,13 @@
 ?>
 
 <table width="100%" border="0">
-	<tr>
-		<td colspan="2" align="center">
-			<table border="0">
+		<tr>
+		<td colspan="2"align="left">
+		<? if($this->new_entry != true){ ?>
+			<table border="0" cellspacing="4" cellpadding="0">
 				<tr>
 					<td colspan="2">
-						<i><? echo $layer['Name'] ?></i>:&nbsp;<a href="javascript:selectall(<? echo $layer['Layer_ID']; ?>);">
+						<i><? echo $layer['Name'] ?></i>:&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:selectall(<? echo $layer['Layer_ID']; ?>);">
 						<? if ($layer['count'] > MAXQUERYROWS) {
 						    echo $strSelectAllShown;
 						   } else {
@@ -285,39 +286,48 @@
 				</tr>
 				<tr>
 					<td valign="top"><? echo $strSelectedDatasets.':'; ?></td>
-					<td>
-					<? if($layer['privileg'] == '2'){ ?>
-						&bull;&nbsp;<a href="javascript:delete_datasets(<?php echo $layer['Layer_ID']; ?>);"><? echo $strdelete; ?></a><br>
-					<?}?>
-						&bull;&nbsp;<a id="csv_link" href="javascript:csv_export(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCSVExport; ?></a><br>
-						&bull;&nbsp;<a id="shape_link" href="javascript:shape_export(<?php echo $layer['Layer_ID']; ?>);"><? echo $strShapeExport; ?></a><br>
-					<? if($layer['layouts']){ ?>
-						&bull;&nbsp;<a id="print_link" href="javascript:print_data(<?php echo $layer['Layer_ID']; ?>);"><? echo $strPrint; ?></a>
+					<? if($layer['export_privileg'] == '1'){ ?>
+					<td valign="top"><? echo $strAllDatasets.':'; ?><? if ($layer['count'] > MAXQUERYROWS){	echo "&nbsp;(".$layer['count'].")"; } ?></td>					
 					<? } ?>
-					</td>
-				<? if($this->formvars['printversion'] == '' AND $privileg != ''){ ?>
 				</tr>
 				<tr>
-					<td>&nbsp;</td>
-					<td colspan="3">
-						&bull;&nbsp;<a href="javascript:zoomto_datasets(<?php echo $layer['Layer_ID']; ?>, '<? echo $tablename; ?>', '<? echo $columnname; ?>');"><? echo $strzoomtodatasets; ?></a>
-						<select name="klass_<?php echo $layer['Layer_ID']; ?>">
-							<option value="">klassifiziert nach:</option>
-							<?
-							for($j = 0; $j < count($attributes['name']); $j++){
-								if($attributes['name'][$j] != $attributes['the_geom']){
-									echo '<option value="'.$attributes['name'][$j].'">'.$attributes['alias'][$j].'</option>';
-								}
-							}
-							?>
-						</select>
-					</td>
-				</tr>
+					<td>
+						<table cellspacing="4" cellpadding="0">
+					<? if($layer['privileg'] == '2'){ ?>
+							<tr><td>&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:delete_datasets(<?php echo $layer['Layer_ID']; ?>);"><? echo $strdelete; ?></a></td></tr>
+					<?} if($layer['export_privileg'] == '1'){ ?>
+							<tr><td>&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" id="csv_link" href="javascript:csv_export(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCSVExport; ?></a></td></tr>
+							<tr><td>&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" id="shape_link" href="javascript:shape_export(<?php echo $layer['Layer_ID']; ?>);"><? echo $strShapeExport; ?></a></td></tr>
+					<? } if($layer['layouts']){ ?>
+							<tr><td>&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" id="print_link" href="javascript:print_data(<?php echo $layer['Layer_ID']; ?>);"><? echo $strPrint; ?></a></td></tr>
+					<? } ?>
+					<? if($privileg != ''){ ?>
+							<tr><td>&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:zoomto_datasets(<?php echo $layer['Layer_ID']; ?>, '<? echo $tablename; ?>', '<? echo $columnname; ?>');"><? echo $strzoomtodatasets; ?></a>
+								<select style="width: 130px" name="klass_<?php echo $layer['Layer_ID']; ?>">
+									<option value="">klassifiziert nach:</option>
+									<?
+									for($j = 0; $j < count($attributes['name']); $j++){
+										if($attributes['name'][$j] != $attributes['the_geom']){
+											echo '<option value="'.$attributes['name'][$j].'">'.$attributes['alias'][$j].'</option>';
+										}
+									}
+									?>
+								</select></td></tr>
 					<?}?>
+						</table>
+					</td>
+					<? if($layer['export_privileg'] == '1'){ ?>
+					<td valign="top" colspan="3">
+						<table cellspacing="4" cellpadding="0">
+							<tr><td>&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" id="csv_link" href="javascript:csv_export_all(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCSVExport; ?></a></td></tr>
+							<tr><td>&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" id="csv_link" href="javascript:shape_export_all(<?php echo $layer['Layer_ID']; ?>, <? echo $layer['count']; ?>);"><? echo $strShapeExport; ?></a></td></tr>
+						</table>
+					</td>
+					<? } ?>
+				</tr>
 				<tr style="display:none">
-					<td>&nbsp;</td>
 					<td height="23" colspan="3">
-						&bull;&nbsp;<a href="javascript:showcharts(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCreateChart; ?></a>
+						&nbsp;&nbsp;&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:showcharts(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCreateChart; ?></a>
 					</td>
 				</tr>
 				<tr id="charts_<?php echo $layer['Layer_ID']; ?>" style="display:none">
@@ -387,21 +397,8 @@
 					</td>
 				</tr>
 			</table>
+		<?} ?>
 		</td>
-	</tr>
-	<tr>
-		<td align="center"><a id="csv_link" href="javascript:csv_export_all(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCSVExportAll; ?></a>
-		<? if ($layer['count'] > MAXQUERYROWS) {
-		  echo "&nbsp;(".$layer['count'].")";
-		   } ?>
-		&nbsp;&nbsp;<a id="csv_link" href="javascript:shape_export_all(<?php echo $layer['Layer_ID']; ?>, <? echo $layer['count']; ?>);"><? echo $strSHPExportAll; ?></a>
-		<? if ($layer['count'] > MAXQUERYROWS) {
-		  echo "&nbsp;(".$layer['count'].")";
-		   } ?>
-		</td>
-	</tr>
-	<tr>
-		<td>&nbsp;</td>
 	</tr>
 </table>
 

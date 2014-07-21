@@ -16,7 +16,12 @@
 	function keydown(event){
 		var key = event.keyCode;
 		if (key == 13) {
+			value = event.target.value;
+			if(document.getElementById('operator_'+event.target.id).value == 'LIKE'){
+				event.target.value = '%'+value+'%';
+			}
 			schnellsuche();
+			event.target.value = value;
 			preventDefault(event);		// form-submit unterdruecken
 		}		
 	}

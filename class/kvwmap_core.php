@@ -270,7 +270,7 @@ class GUI_core {
 				else {
 					$map = new mapObj(DEFAULTMAPFILE);
 				}
-        if($this->formvars['go'] == 'getMap_ajax'){
+        if($this->formvars['go'] == 'navMap_ajax'){
         	$mapDB = new db_mapObj_core($this->Stelle->id,$this->user->id);
         }
         else{
@@ -424,11 +424,10 @@ class GUI_core {
         $layer = $mapDB->read_Layer($this->class_load_level, $this->list_subgroups($this->formvars['group']));     # class_load_level: 2 = für alle Layer die Klassen laden, 1 = nur für aktive Layer laden, 0 = keine Klassen laden
         $rollenlayer = $mapDB->read_RollenLayer();
         $layerset = array_merge($layer, $rollenlayer);
-        $layerset['anzLayer'] = count($layerset);
+        $layerset['anzLayer'] = count($layerset) - 1; # wegen $layerset['layer_ids']
         unset($this->layers_of_group);		# falls loadmap zweimal aufgerufen wird
-				unset($this->groups_with_layers);	# falls loadmap zweimal aufgerufen wird
-				
-        for($i=0; $i < $layerset['anzLayer']; $i++){
+				unset($this->groups_with_layers);	# falls loadmap zweimal aufgerufen wird				
+        for($i=0; $i < $layerset['anzLayer']; $i++){					
 					if($layerset[$i]['alias'] == '' OR !$this->Stelle->useLayerAliases){
 						$layerset[$i]['alias'] = $layerset[$i]['Name'];			# kann vielleicht auch in read_layer gesetzt werden
 					}
@@ -535,24 +534,23 @@ class GUI_core {
 						}
 						}
 						if ($layerset[$i]['maxscale']>0) {
-						if($this->map_factor != ''){
-							if(MAPSERVERVERSION > 500){
-							$layer->set('maxscaledenom', $layerset[$i]['maxscale']/$this->map_factor*1.414);
+							if($this->map_factor != ''){
+								if(MAPSERVERVERSION > 500){
+								$layer->set('maxscaledenom', $layerset[$i]['maxscale']/$this->map_factor*1.414);
+								}
+								else{
+								$layer->set('maxscale', $layerset[$i]['maxscale']/$this->map_factor*1.414);
+								}
 							}
 							else{
-							$layer->set('maxscale', $layerset[$i]['maxscale']/$this->map_factor*1.414);
+								if(MAPSERVERVERSION > 500){
+								$layer->set('maxscaledenom', $layerset[$i]['maxscale']);
+								}
+								else{
+								$layer->set('maxscale', $layerset[$i]['maxscale']);
+								}
 							}
 						}
-						else{
-							if(MAPSERVERVERSION > 500){
-							$layer->set('maxscaledenom', $layerset[$i]['maxscale']);
-							}
-							else{
-							$layer->set('maxscale', $layerset[$i]['maxscale']);
-							}
-						}
-						}
-            
             $layer->setProjection('+init=epsg:'.$layerset[$i]['epsg_code']); # recommended
             if ($layerset[$i]['connection']!='') {
               if($this->map_factor != '' AND $layerset[$i]['connectiontype'] == 7){		# WMS-Layer
@@ -1237,7 +1235,7 @@ class GUI_core {
           $groupid = $group['id'];
         }
         else{
-          $groupid = $this->mapDB->newGroup('Suchergebnis');
+          $groupid = $this->mapDB->newGroup('Suchergebnis', 0);
         }
         $this->formvars['user_id'] = $this->user->id;
         $this->formvars['stelle_id'] = $this->Stelle->id;

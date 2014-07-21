@@ -1,4 +1,6 @@
+<br>
 <h2><?php echo $this->qlayerset[$i]['Name']; ?></h2>
+<br>
 <?php
  #echo '<br>'.$this->qlayerset[$i][GetFeatureInfoRequest];
 ?>
@@ -9,7 +11,7 @@
 
 ?>
 
-  <iframe style="border:none;"  src="<?php echo $this->qlayerset[$i][GetFeatureInfoRequest]; ?>" width="90%" height="500">
+  <iframe style="min-width:500px;width:90%;height:500px;border:none;"  src="<?php echo $this->qlayerset[$i][GetFeatureInfoRequest]; ?>">
     Wenn Sie dies hier lesen können, unterstützt Ihr Browser keine iframes.
   <iframe>
 	

@@ -408,7 +408,7 @@ include (CLASSPATH.'kataster_core.php');						# Version 1.7.6
 include (CLASSPATH.'mysql.php');										# Version 1.7.6
 include (CLASSPATH.'postgresql_core.php');					# Version 1.7.6
 include (CLASSPATH.'users_core.php');								# Version 1.7.6
-if($_REQUEST['go'] != 'getMap_ajax'){								# Version 1.7.6    (die folgenden Klassen nicht laden, wenn man nur in der Karte navigiert)
+if($_REQUEST['go'] != 'navMap_ajax'){								# Version 1.7.6   # in 1.14 in navMap_ajax umbenannt (die folgenden Klassen nicht laden, wenn man nur in der Karte navigiert)
 	include (CLASSPATH.'kvwmap.php');
 	include (CLASSPATH.'kataster.php');
 	include (CLASSPATH.'postgresql.php');
@@ -507,7 +507,7 @@ $GISdb = $userDb; 																			# Version 1.7.6
 
 # Datenbank mit den Geometrieobjekten (PostgreSQL mit PostGIS Aufsatz)
 if ($pgdbname!='') {
-	if($_REQUEST['go'] == 'getMap_ajax'){									# Version 1.7.6
+	if($_REQUEST['go'] == 'navMap_ajax'){									# Version 1.7.6			# in 1.14 in navMap_ajax umbenannt
 		$PostGISdb=new pgdatabase_core();										# Version 1.7.6
 	}																											# Version 1.7.6
 	else{																									# Version 1.7.6

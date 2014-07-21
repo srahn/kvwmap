@@ -120,6 +120,7 @@ function drag(event) {
 }
 
 function activate_overlay(){
+	document.getElementById('contentdiv').scrollTop = 0;
 	overlay = document.getElementById('overlaydiv');
 	overlay.style.left = document.GUI.overlayx.value+'px';
 	overlay.style.top = document.GUI.overlayy.value+'px';
@@ -166,8 +167,9 @@ function datecheck(value){
 function update_legend(layerhiddenstring){
 	parts = layerhiddenstring.split(' ');
 	for(j = 0; j < parts.length-1; j=j+2){
-		if((document.getElementById('thema_'+parts[j]) != undefined && document.getElementById('thema_'+parts[j]).disabled && parts[j+1] == 0) || 	// wenn Layer nicht sichtbar war und jetzt sichtbar ist
-			(document.getElementById('thema_'+parts[j]) != undefined && !document.getElementById('thema_'+parts[j]).disabled && parts[j+1] == 1)){		// oder andersrum
+		if((parts[j] == 'reload')||																																																								// wenn Legenden-Reload erzwungen wird oder
+			(document.getElementById('thema_'+parts[j]) != undefined && document.getElementById('thema_'+parts[j]).disabled && parts[j+1] == 0) || 	// wenn Layer nicht sichtbar war und jetzt sichtbar ist
+			(document.getElementById('thema_'+parts[j]) != undefined && !document.getElementById('thema_'+parts[j]).disabled && parts[j+1] == 1)){	// oder andersrum
 			legende = document.getElementById('legend');
 			ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=get_legend', new Array(legende), "");
 			break;

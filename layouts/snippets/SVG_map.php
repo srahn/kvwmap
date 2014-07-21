@@ -58,7 +58,7 @@
 	}
 	
    
-  function submit(input_coord, cmd){
+  function get_map_ajax(postdata){
 		if(document.GUI.legendtouched.value == 0){
   		svgdoc = document.SVG.getSVGDocument();	
 			// nix
@@ -74,14 +74,17 @@
 			var maxy = document.GUI.maxy;			
 			var pixelsize = document.GUI.pixelsize;
 			var maptime = document.getElementById("maptime");
-			var polygon = svgdoc.getElementById("polygon");
+			var polygon = svgdoc.getElementById("polygon");			
 			// nix
 			// nix
+			
+			input_coord = document.GUI.INPUT_COORD.value;
+      cmd = document.GUI.CMD.value;
 			
 			var code2execute;
 			if(browser != 'firefox')code2execute = 'moveback()';
 			
-  		ahah("<? echo URL.APPLVERSION.'index.php'; ?>", "go=getMap_ajax&INPUT_COORD="+input_coord+"&CMD="+cmd+"&code2execute="+code2execute, 
+  		ahah("<? echo URL.APPLVERSION.'index.php'; ?>", postdata+"&mime_type=map_ajax&INPUT_COORD="+input_coord+"&CMD="+cmd+"&code2execute="+code2execute, 
   		new Array(
 				'',
   			mapimg, 
@@ -114,7 +117,6 @@
 	}
 	
   function sendpath(cmd,pathx,pathy)   {
-		document.GUI.stopnavigation.value = 1;
     path  = "";
     switch(cmd) 
     {
@@ -123,28 +125,28 @@
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "zoomin";
 			document.GUI.go.value = "neu Laden";
-      submit(path, document.GUI.CMD.value);
+      get_map_ajax('go=navMap_ajax');
      break;
      case "zoomout":
       path = pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = cmd;
 			document.GUI.go.value = "neu Laden";
-      submit(path, cmd);
+      get_map_ajax('go=navMap_ajax');
      break;
      case "zoomin_box":
       path = pathx[0]+","+pathy[0]+";"+pathx[2]+","+pathy[2];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "zoomin";
 			document.GUI.go.value = "neu Laden";
-      submit(path, document.GUI.CMD.value);
+      get_map_ajax('go=navMap_ajax');
      break;
      case "recentre":
       path = pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = cmd;
 			document.GUI.go.value = "neu Laden";
-      submit(path, cmd);
+      get_map_ajax('go=navMap_ajax');
      break;
      case "pquery_point":
       path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
@@ -381,6 +383,7 @@ function doAnim() {
 }
 
 function startwaiting(){
+	top.document.GUI.stopnavigation.value = 1;
 	document.getElementById("waitingimage").style.setProperty("visibility","visible", "");
 	requestAnimationFrameID = requestAnimationFrame(doAnim); // Start the loop.
 }
@@ -735,7 +738,6 @@ function world2pixelsvg(pathWelt){
 
 function mousedown(evt){
 	mouse_down = true;
-	console.log(mouse_down);
 	tooltipstate = "tooltip_paused";
 	cleartooltip();
 	if(top.document.GUI.stopnavigation.value == 0){

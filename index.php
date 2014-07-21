@@ -182,6 +182,7 @@ $GUI->loadPlugins();
 if($GUI->goNotExecutedInPlugins){
 	if($go == 'get_last_query'){
 		$GUI->last_query = $GUI->user->rolle->get_last_query();
+		$GUI->formvars['keinzurueck'] = true;
 		$go = $GUI->last_query['go'];
 	}
 	switch($go){
@@ -482,17 +483,20 @@ if($GUI->goNotExecutedInPlugins){
 
 	  # zoomToPoint
 	  case 'zoomtoPoint' : {
-		$GUI->zoom_toPoint();
+			if($GUI->formvars['mime_type'] != '')$GUI->mime_type = $GUI->formvars['mime_type'];
+			$GUI->zoom_toPoint();
 	  }break;
 
 	  # zoomToPolygon
 	  case 'zoomtoPolygon' : {
-		$GUI->zoom_toPolygon();
+			if($GUI->formvars['mime_type'] != '')$GUI->mime_type = $GUI->formvars['mime_type'];
+			$GUI->zoom_toPolygon();
 	  }break;
 	  
 	  # zoomToLine
 	  case 'zoomToLine' : {
-		$GUI->zoom_toLine();
+			if($GUI->formvars['mime_type'] != '')$GUI->mime_type = $GUI->formvars['mime_type'];
+			$GUI->zoom_toLine();
 	  }break;
 
 	  # zoom to maximum extent of the layer
@@ -1253,6 +1257,7 @@ if($GUI->goNotExecutedInPlugins){
 		
 		case 'SchnellSuche_Suchen' : {
 			$GUI->formvars['selected_layer_id'] = $GUI->formvars['quicksearch_layer_id'];
+			$GUI->formvars['keinzurueck'] = true;
 			$GUI->GenerischeSuche_Suchen();
 	  } break;		
 
@@ -1918,7 +1923,7 @@ if($GUI->goNotExecutedInPlugins){
 		$GUI->output();
 	  } break;
 
-		case 'getMap_ajax' : {   
+		case 'navMap_ajax' : {   
       $GUI->formvars['nurAufgeklappteLayer'] = true;		
       $GUI->loadMap('DataBase');		
       $GUI->navMap($GUI->formvars['CMD']);

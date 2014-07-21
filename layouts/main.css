@@ -247,6 +247,78 @@ a.menuered:hover {
 	margin-left:13px;
 }
 
+.use_for_dataset{
+	background-image: url(../graphics/use_for_dataset.png);
+}
+
+.datensatz_exportieren_uko{
+	background-image: url(../graphics/datensatz_exportieren_uko.png);
+}
+
+.datensatz_exportieren_csv{
+	background-image: url(../graphics/datensatz_exportieren_csv.png);
+}
+
+.datensatz_exportieren_shp{
+	background-image: url(../graphics/datensatz_exportieren_shp.png);
+}
+
+.drucken{
+	background-image: url(../graphics/drucken.png);
+}
+
+.datensatz_loeschen{
+	background-image: url(../graphics/datensatz_loeschen.png);
+}
+
+.edit_geom{
+	background-image: url(../graphics/edit_geom.png);
+}
+
+.zoom_normal{
+	background-image: url(../graphics/zoom_normal.png);
+}
+
+.zoom_highlight{
+	background-image: url(../graphics/zoom_highlight.png);
+}
+
+.zoom_select{
+	background-image: url(../graphics/zoom_select.png);
+}
+
+.emboss{
+	width:30px;
+	height:30px;
+	box-shadow:
+	2px 3px 3px rgba(0, 0, 0, 0.2), 
+	0px 3px 1px rgba(255, 255, 255, 0.6) inset, 
+	-1px -1px 3px rgba(0, 0, 0, 0.7) inset,   
+	0px 1px 1px rgba(0, 0, 0, 0.8) inset;
+}
+
+.emboss:hover{
+	box-shadow:
+	2px 0 7px rgba( 255, 255, 255 ,0.1), 
+	0 2px 7px rgba( 255, 255, 255 ,0.1), 
+	-2px 0 7px rgba( 255, 255, 255 ,0.1),
+	0 -2px 7px rgba( 255, 255, 255 ,0.1),
+	2px 3px 3px rgba(0, 0, 0, 0.2), 
+	0px 3px 1px rgba(255, 255, 255, 0.6) inset, 
+	-1px -1px 3px rgba(0, 0, 0, 0.7) inset,   
+	0px 1px 1px rgba(0, 0, 0, 0.8) inset;
+}
+
+.emboss:active{
+	box-shadow:
+	2px 0 7px rgba( 255, 255, 255 ,0.2), 
+	0 2px 7px rgba( 255, 255, 255 ,0.2), 
+	-2px 0 7px rgba( 255, 255, 255 ,0.2),
+	0 -2px 7px rgba( 255, 255, 255 ,0.2),
+	-1px -1px 3px rgba(0, 0, 0, 0.7) inset,   
+	0px 0px 1px rgba(0, 0, 0, 0.8) inset;
+}
+
 .slidinglegend_slideout {
   position:absolute;
   border-left:1px solid #CCCCCC;

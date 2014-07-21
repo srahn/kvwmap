@@ -232,6 +232,7 @@ CREATE TABLE layer_attributes (
   tooltip varchar(255) default NULL,
   `group` VARCHAR( 255 ) DEFAULT NULL,
   `mandatory` BOOL NULL,
+	`quicksearch` BOOLEAN NULL DEFAULT NULL,
   `order` int(11) default NULL,
   `privileg` BOOLEAN NULL DEFAULT '0',
   `query_tooltip` BOOLEAN NULL DEFAULT '0',

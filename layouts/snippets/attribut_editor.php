@@ -1,6 +1,7 @@
 <?php
  # 2008-01-12 pkvvm
   include(LAYOUTPATH.'languages/attribut_editor_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
+	global $quicksearch_layer_ids;
  ?>
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">

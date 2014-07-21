@@ -183,10 +183,10 @@
     }
     
     ?>
-      <select name="result_color" onchange="this.blur();" style="background-color:#<? echo $bgcolor; ?>">
+      <select name="result_color" style="background-color:#<? echo $bgcolor; ?>" onchange="this.setAttribute('style', this.options[this.selectedIndex].getAttribute('style'));">
 		    <?
   			for($i = 0; $i < count($this->result_colors); $i++){
-  				echo '<option onclick="this.parentNode.setAttribute(\'style\',this.getAttribute(\'style\'));"';
+  				echo '<option ';
   				if($this->user->rolle->result_color == $this->result_colors[$i]['id']){
   					echo ' selected';
   				}

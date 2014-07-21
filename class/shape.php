@@ -75,7 +75,7 @@ class shape {
 				      $groupid = $group['id'];
 				    }
 				    else{
-				      $groupid = $dbmap->newGroup('Eigene Shapes');
+				      $groupid = $dbmap->newGroup('Eigene Shapes', 1);
 				    }
 				
 				    $this->formvars['user_id'] = $user->id;

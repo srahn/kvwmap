@@ -25,6 +25,16 @@ zoom2wkt = function(wkt, epsg){
 	currentform.submit();
 }
 
+zoom2object = function(params){
+	if(currentform.id == 'GUI2'){					// aus overlay heraus --> Kartenzoom per Ajax machen
+		startwaiting();
+		get_map_ajax(params);
+	}
+	else{
+		window.location.href = 'index.php?'+params;		// aus normaler Sachdatenanzeige heraus --> normalen Kartenzoom machen
+	}
+}
+
 check_for_selection = function(layer_id){
 	go = 'false';
 	checkbox_name_obj = document.getElementsByName('checkbox_names_'+layer_id);
@@ -72,12 +82,32 @@ delete_document = function(attributename){
 	}
 }
 
+csv_export = function(layer_id){
+	currentform.all.value = document.getElementById('all_'+layer_id).value;
+	if(currentform.all.value || check_for_selection(layer_id)){				// entweder alle gefundenen oder die ausgewaehlten
+		currentform.chosen_layer_id.value = layer_id;
+		currentform.go_backup.value = currentform.go.value;
+		currentform.go.value = 'generischer_csv_export';
+		currentform.submit();
+	}
+}
+
 csv_export_all = function(layer_id){
 	currentform.all.value = 'true';
 	currentform.chosen_layer_id.value = layer_id;
 	currentform.go_backup.value = currentform.go.value;
 	currentform.go.value = 'generischer_csv_export';
 	currentform.submit();
+}
+
+shape_export = function(layer_id){
+	currentform.all.value = document.getElementById('all_'+layer_id).value;
+	if(currentform.all.value || check_for_selection(layer_id)){				// entweder alle gefundenen oder die ausgewaehlten
+		currentform.chosen_layer_id.value = layer_id;
+		currentform.go_backup.value = currentform.go.value;
+		currentform.go.value = 'SHP_Export';
+		currentform.submit();
+	}
 }
 
 shape_export_all = function(layer_id, anzahl){
@@ -88,14 +118,6 @@ shape_export_all = function(layer_id, anzahl){
 	currentform.submit();
 }
 
-shape_export = function(layer_id){
-	if(check_for_selection(layer_id)){
-		currentform.chosen_layer_id.value = layer_id;
-		currentform.go_backup.value = currentform.go.value;
-		currentform.go.value = 'SHP_Export';
-		currentform.submit();
-	}
-}
 
 select_this_dataset = function(layer_id, n){
 	var k = 0;
@@ -116,15 +138,6 @@ use_for_new_dataset = function(layer_id){
 		currentform.newpath.value = '';
 		currentform.go_backup.value = currentform.go.value;
 		currentform.go.value = 'neuer_Layer_Datensatz';
-		currentform.submit();
-	}
-}
-
-csv_export = function(layer_id){
-	if(check_for_selection(layer_id)){
-		currentform.chosen_layer_id.value = layer_id;
-		currentform.go_backup.value = currentform.go.value;
-		currentform.go.value = 'generischer_csv_export';
 		currentform.submit();
 	}
 }
