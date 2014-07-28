@@ -13,7 +13,7 @@
 
   <iframe style="min-width:500px;width:90%;height:500px;border:none;"  src="<?php echo $this->qlayerset[$i][GetFeatureInfoRequest]; ?>">
     Wenn Sie dies hier lesen können, unterstützt Ihr Browser keine iframes.
-  <iframe>
+  </iframe><br><br>
 	
 <? }else{																																								# sie haben unterschiedliche Protokolle und daher kann kein Iframe verwendet werden -> direkte Einbindung ins html
 

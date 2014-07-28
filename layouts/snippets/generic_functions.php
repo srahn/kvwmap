@@ -8,6 +8,25 @@
 	}
  ?>
  
+update_buttons = function(all, layer_id){
+	delete_link = document.getElementById('delete_link_'+layer_id);
+	print_link = document.getElementById('print_link_'+layer_id);
+	zoom_link = document.getElementById('zoom_link_'+layer_id);
+	classify_link = document.getElementById('classify_link_'+layer_id);
+	if(all == 'true'){		
+		if(print_link != undefined)print_link.style.display = 'none';
+		if(delete_link != undefined)delete_link.style.display = 'none';
+		if(zoom_link != undefined)zoom_link.style.display = 'none';
+		if(classify_link != undefined)classify_link.style.display = 'none';
+	}
+	else{
+		if(print_link != undefined)print_link.style.display = '';
+		if(delete_link != undefined)delete_link.style.display = '';
+		if(zoom_link != undefined)zoom_link.style.display = '';
+		if(classify_link != undefined)classify_link.style.display = '';
+	}
+} 
+
 selectall = function(layer_id){
 	var k = 0;
 	obj = document.getElementById(layer_id+'_'+k);
@@ -92,32 +111,16 @@ csv_export = function(layer_id){
 	}
 }
 
-csv_export_all = function(layer_id){
-	currentform.all.value = 'true';
-	currentform.chosen_layer_id.value = layer_id;
-	currentform.go_backup.value = currentform.go.value;
-	currentform.go.value = 'generischer_csv_export';
-	currentform.submit();
-}
-
-shape_export = function(layer_id){
+shape_export = function(layer_id, anzahl){
 	currentform.all.value = document.getElementById('all_'+layer_id).value;
 	if(currentform.all.value || check_for_selection(layer_id)){				// entweder alle gefundenen oder die ausgewaehlten
+		if(currentform.all.value)currentform.anzahl.value = anzahl;			// alle
 		currentform.chosen_layer_id.value = layer_id;
 		currentform.go_backup.value = currentform.go.value;
 		currentform.go.value = 'SHP_Export';
 		currentform.submit();
 	}
 }
-
-shape_export_all = function(layer_id, anzahl){
-	currentform.chosen_layer_id.value = layer_id;
-	currentform.anzahl.value = anzahl;
-	currentform.go_backup.value = currentform.go.value;
-	currentform.go.value = 'SHP_Export';
-	currentform.submit();
-}
-
 
 select_this_dataset = function(layer_id, n){
 	var k = 0;

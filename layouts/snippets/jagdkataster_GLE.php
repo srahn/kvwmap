@@ -641,7 +641,7 @@ function change_orderby(attribute, layer_id){
 							echo'
 								</td>
 							</tr>';
-						} elseif($geomtype == 'MULTILINESTRING') {
+						} elseif($geomtype == 'MULTILINESTRING'  OR $geomtype == 'LINESTRING') {
 							echo '
 							<tr>
 								<td colspan="2" align="center">';

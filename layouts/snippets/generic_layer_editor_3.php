@@ -347,14 +347,14 @@
 				</tr>
 				<tr>
 					<? if($layer['export_privileg'] == '1'){ ?>
-					<td valign="top">
+					<td style="padding: 5 0 0 0;">
 						<select id="all_<? echo $layer['Layer_ID']; ?>" name="all_<? echo $layer['Layer_ID']; ?>">
 							<option value=""><? echo $strSelectedDatasets.':'; ?></option>
 							<option value="true"><? echo $strAllDatasets.':'; ?><? if ($layer['count'] > MAXQUERYROWS){	echo "&nbsp;(".$layer['count'].")"; } ?></option>
 						</select>
 					</td>					
 					<? }else{ ?>
-					<td valign="top"><? echo $strSelectedDatasets.':'; ?></td>
+					<td style="padding: 5 0 0 0;"><? echo $strSelectedDatasets.':'; ?></td>
 					<? } ?>
 				</tr>
 				<tr>
@@ -362,17 +362,16 @@
 						<table cellspacing="0" cellpadding="0">
 							<tr>
 					<? if($layer['privileg'] == '2'){ ?>
-								<td style="padding: 0 10 0 0;"><a title="löschen" href="javascript:delete_datasets(<?php echo $layer['Layer_ID']; ?>);"><div class="emboss datensatz_loeschen"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></td>
+								<td style="padding: 5 10 0 0;"><a title="löschen" href="javascript:delete_datasets(<?php echo $layer['Layer_ID']; ?>);"><div class="emboss datensatz_loeschen"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></td>
 					<?} if($layer['export_privileg'] == '1'){ ?>
-								<td style="padding: 0 10 0 0;"><a id="csv_link" title="in CSV-Datei exportieren" href="javascript:csv_export(<?php echo $layer['Layer_ID']; ?>);"><div class="emboss datensatz_exportieren_csv"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
-								<td style="padding: 0 10 0 0;"><a id="shape_link" title="in Shape-Datei exportieren" href="javascript:shape_export(<?php echo $layer['Layer_ID']; ?>);"><div class="emboss datensatz_exportieren_shp"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+								<td style="padding: 5 10 0 0;"><a id="csv_link" title="in CSV-Datei exportieren" href="javascript:csv_export(<?php echo $layer['Layer_ID']; ?>);"><div class="emboss datensatz_exportieren_csv"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+								<td style="padding: 5 10 0 0;"><a id="shape_link" title="in Shape-Datei exportieren" href="javascript:shape_export(<?php echo $layer['Layer_ID']; ?>, <? echo $layer['count']; ?>);"><div class="emboss datensatz_exportieren_shp"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
 					<? } if($layer['layouts']){ ?>
-								<td style="padding: 0 10 0 0;"><a id="print_link" title="drucken" href="javascript:print_data(<?php echo $layer['Layer_ID']; ?>);"><div class="emboss drucken"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+								<td style="padding: 5 10 0 0;"><a id="print_link" title="drucken" href="javascript:print_data(<?php echo $layer['Layer_ID']; ?>);"><div class="emboss drucken"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
 					<? } ?>
-								<td width="100%"></td>
 					<? if($privileg != ''){ ?>
-								<td><a title="in Karte anzeigen" href="javascript:zoomto_datasets(<?php echo $layer['Layer_ID']; ?>, '<? echo $tablename; ?>', '<? echo $columnname; ?>');"><div class="emboss zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
-								<td style="padding: 0 0 0 5;" colspan="4"><select style="width: 130px" name="klass_<?php echo $layer['Layer_ID']; ?>">
+								<td style="padding: 5 10 0 0;"><a title="in Karte anzeigen" href="javascript:zoomto_datasets(<?php echo $layer['Layer_ID']; ?>, '<? echo $tablename; ?>', '<? echo $columnname; ?>');"><div class="emboss zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+								<td style="padding: 5 0 0 5;"><select style="width: 130px" name="klass_<?php echo $layer['Layer_ID']; ?>">
 										<option value="">klassifiziert nach:</option>
 										<?
 										for($j = 0; $j < count($attributes['name']); $j++){
@@ -387,16 +386,6 @@
 							</tr>
 						</table>
 					</td>
-					<? if($layer['export_privileg'] == '1'){ ?>
-					<td valign="top" colspan="3">
-						<table cellspacing="0" cellpadding="0">
-							<tr>
-								<td><a id="csv_link" title="in CSV-Datei exportieren" href="javascript:csv_export_all(<?php echo $layer['Layer_ID']; ?>);"><div class="emboss datensatz_exportieren_csv"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
-								<td style="padding: 0 0 0 10;"><a id="csv_link" title="in Shape-Datei exportieren" href="javascript:shape_export_all(<?php echo $layer['Layer_ID']; ?>, <? echo $layer['count']; ?>);"><div class="emboss datensatz_exportieren_shp"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
-							</tr>
-						</table>
-					</td>
-					<? } ?>
 				</tr>
 				<tr style="display:none">
 					<td height="23" colspan="3">
