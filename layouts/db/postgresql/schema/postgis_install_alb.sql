@@ -6,7 +6,11 @@
 --
 -- Zusätzlich ist PostGIS ab 1.0 mit GEOS und Proj Unterstützung installiert
 --
+-- Zusätzlich ist eine Datenbank durch EDBS2WKT angelegt
+--
 -- Zusätzlich wurde ein Datenbank in Postgres erzeugt.
+-- Für die Nutzung mit ALK sollte dieses Skript in einer fertigen
+-- Datenbank des EDBS2WKT Konverters ausgeführt werden
 -- Der Name der Datenbank wird in config.php angepasst.
 
 --###########################
@@ -14,31 +18,41 @@
 --###########################
 --# START TRANSACTION;
 
---###############################################################
---# Zusätzliche Funktionen zum Selektieren von einzelnen        #
---# Liniensegmenten aus einem Polygon 2007-07-17 pk             #
---# Die Funktionen müssen in dieser Reihenfolge erzeugt werden! #
---###############################################################
 
--- Tabelle für andere Dokumentarten in der Nachweisverwaltung
+CREATE SCHEMA custom_shapes;	-- kann auch anders heißen, ist der config.php über CUSTOM_SHAPE_SCHEMA definierbar
 
-CREATE TABLE n_dokumentarten
+
+-- Tabelle zur Speicherung von Umringspolygonen aus uko-Dateien
+
+CREATE TABLE uko_polygon
 (
-   id serial NOT NULL, 
-   art character varying(100)
-) 
+  id serial NOT NULL,
+  username character varying(25),
+  userid integer
+)
 WITH OIDS;
-ALTER TABLE n_dokumentarten OWNER TO kvwmap;
+select AddGeometryColumn ('public','uko_polygon','the_geom',2398,'GEOMETRY',2);  -- oder 2399
 
--- Tabelle für die Zuordnung von Nachweisen zu anderen Dokumentarten
 
-CREATE TABLE n_nachweise2dokumentarten
-(
-   nachweis_id integer NOT NULL, 
-   dokumentart_id integer NOT NULL
-) 
-WITH OIDS;
-ALTER TABLE n_nachweise2dokumentarten OWNER TO kvwmap;
+CREATE OR REPLACE FUNCTION linefrompoly(geometry)
+  RETURNS geometry AS
+$BODY$SELECT 
+	geomfromtext(
+		replace(
+			replace(
+				replace(
+					replace(
+						replace(
+							asText($1),'MULTIPOLYGON','MULTILINESTRING'
+						),'POLYGON','MULTILINESTRING'
+					), '(((', '(('
+				), ')))', '))'
+			), ')),((', '),('
+		), srid($1)
+	)$BODY$
+  LANGUAGE 'sql' IMMUTABLE STRICT;
+COMMENT ON FUNCTION linefrompoly(geometry) IS 'Liefert eine LINESTRING Gemetrie von einer MULTIPOLYGON oder POLYGON Geometrie zurück';
+
 
 
 --# Tabelle für die Aliasnamen der Koordinatensysteme
@@ -50,11 +64,30 @@ CREATE TABLE spatial_ref_sys_alias
 )
 WITH OIDS;
 
+
+-- Tabelle für andere Dokumentarten in der Nachweisverwaltung
+
+CREATE TABLE n_dokumentarten
+(
+   id serial NOT NULL, 
+   art character varying(100)
+) 
+WITH OIDS;
+
+-- Tabelle für die Zuordnung von Nachweisen zu anderen Dokumentarten
+
+CREATE TABLE n_nachweise2dokumentarten
+(
+   nachweis_id integer NOT NULL, 
+   dokumentart_id integer NOT NULL
+) 
+WITH OIDS;
+
 -- Tabelle für Metainformationen
 
 CREATE TABLE tabelleninfo
 (
-  thema character varying(10),
+  thema character varying(20),
   datum character varying(10)
 )
 WITH OIDS;
@@ -149,17 +182,14 @@ CREATE TABLE gaz_begriffe
 ) 
 WITH OIDS;
 SELECT AddGeometryColumn('public', 'gaz_begriffe', 'wgs_geom', 4326, 'POINT', 2);
-CREATE INDEX gaz_begriffe_gist ON gaz_begriffe USING GIST (wgs_geom GIST_GEOMETRY_OPS );
+CREATE INDEX gaz_begriffe_gist ON gaz_begriffe USING GIST (wgs_geom );
 
--- Function: linefrompoly(geometry)
--- Liefert eine LINESTRING Gemetrie von einer MULTIPOLYGON oder POLYGON Geometrie zurück
--- DROP FUNCTION linefrompoly(geometry); 
-CREATE OR REPLACE FUNCTION linefrompoly(geometry)
-  RETURNS geometry AS
-  $BODY$SELECT st_geomfromtext(replace(replace(replace(asText($1),'MULTIPOLYGON','LINESTRING'),'(((','('),')))',')'),srid($1))$BODY$
-  LANGUAGE 'sql' IMMUTABLE STRICT;
-ALTER FUNCTION linefrompoly(geometry) OWNER TO postgres;
-COMMENT ON FUNCTION linefrompoly(geometry) IS 'Liefert eine LINESTRING Gemetrie von einer MULTIPOLYGON oder POLYGON Geometrie zurück';
+--###############################################################
+--# Zusätzliche Funktionen zum Selektieren von einzelnen        #
+--# Liniensegmenten aus einem Polygon 2007-07-17 pk             #
+--# Die Funktionen müssen in dieser Reihenfolge erzeugt werden! #
+--###############################################################
+
 
 -- Function: linen(geometry, int4)
 -- Liefert die n-te Linien innerhalb eines Polygon als Geometry zurück
@@ -168,7 +198,7 @@ CREATE OR REPLACE FUNCTION linen(geometry, int4)
   RETURNS geometry AS
   $BODY$SELECT st_geomfromtext('LINESTRING('||X(pointn(linefrompoly($1),$2))||' '||Y(pointn(linefrompoly($1),$2))||','||X(pointn(linefrompoly($1),$2+1))||' '||Y(pointn(linefrompoly($1),$2+1))||')',srid($1))$BODY$
   LANGUAGE 'sql' IMMUTABLE STRICT;
-ALTER FUNCTION linen(geometry, int4) OWNER TO postgres;
+
 COMMENT ON FUNCTION linen(geometry, int4) IS 'Liefert die n-te Linien innerhalb eines Polygon als Geometry zurück';
 
 -- Function: snapline(geometry, geometry)
@@ -195,71 +225,12 @@ CREATE OR REPLACE FUNCTION snapline(geometry, geometry)
     RETURN output;
   END;$BODY$
   LANGUAGE 'plpgsql' VOLATILE;
-ALTER FUNCTION snapline(geometry, geometry) OWNER TO postgres;
+
 COMMENT ON FUNCTION snapline(geometry, geometry) IS 'Liefert die einzelne Kante eines LINESTRINGS mit der Geometry1, welche am dichtesten am Punkt mit der Geometrie 2 liegt als Geometry';
 -- Beispiel zur Abfrage der Gebäudekante des gegebenen Objektes, welches am dichtesten zum gegebenen Punkt liegt und dessen Azimutwinkel.
 -- SELECT AsText(snapline(linefrompoly(the_geom),st_geomfromtext('Point(4516219.4 6013803.0)',2398))) AS Segment
 -- ,azimuth(pointn(snapline(linefrompoly(the_geom),st_geomfromtext('Point(4516219.4 6013803.0)',2398)),1),pointn(snapline(linefrompoly(the_geom),st_geomfromtext('Point(4516219.4 6013803.0)',2398)),2)) AS winkel
 -- FROM alkobj_e_fla WHERE objnr = 'D0009O1'
-
---###########################
---# Tabellen für Jagdkataster
---# 2006-07-26 pk
---# Tabelle zur Speicherung der Jagdbezirke
-CREATE TABLE jagdbezirke
-(
-  id int4 NOT NULL,
-  art varchar, -- mögliche Werte gjb, ejb, tjb
-  jagdbezirk int4,
-  flaeche float4,
-  name varchar(255),
-  CONSTRAINT jagdbezirke_pkey PRIMARY KEY (id),
-  CONSTRAINT art CHECK (art::text = 'gjb'::text OR art::text = 'ejb'::text OR art::text = 'tjb'::text OR art::text = 'sf'::text)
-) 
-WITH OIDS;
-COMMENT ON TABLE jagdbezirke IS 'Befriedete und unbefriedete, unterteilte und nicht unterteilte Jagdbezirke, Eigenjagdbezirke oder Teiljagdbezirke';
-COMMENT ON COLUMN jagdbezirke.art IS 'mögliche Werte gjb, ejb, tjb';
-SELECT AddGeometryColumn('public', 'jagdbezirke','the_geom',2398,'POLYGON', 2);
-CREATE INDEX jagdbezirke_the_geom_gist ON jagdbezirke USING GIST (the_geom GIST_GEOMETRY_OPS);
-ALTER TABLE jagdbezirke DROP CONSTRAINT enforce_geotype_the_geom;
-ALTER TABLE jagdbezirke ADD CONSTRAINT enforce_geotype_the_geom CHECK (geometrytype(the_geom) = 'POLYGON'::text OR geometrytype(the_geom) = 'MULTIPOLYGON'::text OR the_geom IS NULL);
-
---# Tabelle zur Speicherung der Jagdpaechter
-CREATE TABLE jagdpaechter
-(
-  id serial NOT NULL,
-  name varchar(255),
-  weiteres varchar(255),
-  CONSTRAINT jagdpaechter_pkey PRIMARY KEY (id)
-) 
-WITH OIDS;
-COMMENT ON TABLE jagdpaechter IS 'Paechter von Jagdbezirken';
-
---# Tabelle zur Speicherung der Zuordnung der Paechter zur den Jagdbezirken
-CREATE TABLE jagdpaechter2bezirke
-(
-  bezirkid int4 NOT NULL,
-  paechterid int4 NOT NULL,
-  CONSTRAINT jagdpaechter2bezirke_pkey PRIMARY KEY (bezirkid, paechterid)
-) 
-WITH OIDS;
-
---# Tabelle zur Speicherung der Jagdabschussplanung
-CREATE TABLE jagdabschussplanung
-(
-  bezirkid int4 NOT NULL,
-  von int4 NOT NULL,
-  bis int4 NOT NULL,
-  rehwild int4,
-  damwild int4,
-  schwarzwild int4,
-  muffelwild int4,
-  antragsdatum date,
-  genehmigung varchar(20),
-  wiederspruchsdatum date,
-  CONSTRAINT jagdabschussplanung_pkey PRIMARY KEY (bezirkid, von, bis)
-) 
-WITH OIDS;
 
 
 --# Tabelle zur Speicherung der Bauleitplanungsänderungen
@@ -278,7 +249,7 @@ CREATE TABLE bp_aenderungen
 WITH OIDS;
 
 SELECT AddGeometryColumn('public', 'bp_aenderungen','the_geom',2398,'POLYGON', 2);
-CREATE INDEX bp_aenderungen_the_geom_gist ON bp_aenderungen USING GIST (the_geom GIST_GEOMETRY_OPS);
+CREATE INDEX bp_aenderungen_the_geom_gist ON bp_aenderungen USING GIST (the_geom);
 ALTER TABLE bp_aenderungen DROP CONSTRAINT enforce_geotype_the_geom;
 ALTER TABLE bp_aenderungen ADD CONSTRAINT enforce_geotype_the_geom CHECK (geometrytype(the_geom) = 'POLYGON'::text OR geometrytype(the_geom) = 'MULTIPOLYGON'::text OR the_geom IS NULL);
 
@@ -293,7 +264,7 @@ CREATE TABLE u_polygon
 WITH OIDS;
 
 SELECT AddGeometryColumn('public', 'u_polygon','the_geom',2398,'MULTIPOLYGON', 2);
-CREATE INDEX u_polygon_the_geom_gist ON u_polygon USING GIST (the_geom GIST_GEOMETRY_OPS);
+CREATE INDEX u_polygon_the_geom_gist ON u_polygon USING GIST (the_geom);
 
 
 --# Tabelle zur Speicherung der Gemarkungsnummer-zu-Gemarkungsschlüssel-Beziehung für die Bauauskunft
@@ -372,7 +343,7 @@ CREATE TABLE q_fehlerellipsen
 )
 WITH OIDS;
 SELECT AddGeometryColumn('public', 'q_fehlerellipsen','the_geom',2398,'POINT', 2);
-CREATE INDEX q_fehlerellipsen_the_geom_gist ON q_fehlerellipsen USING GIST (the_geom GIST_GEOMETRY_OPS);
+CREATE INDEX q_fehlerellipsen_the_geom_gist ON q_fehlerellipsen USING GIST (the_geom);
 
 --##################################
 --# Qualität der Flurstücksflächen #
@@ -403,15 +374,14 @@ WITH OIDS;
 CREATE TABLE q_notizen
 (
   notiz text,
-  kategorie_id varchar(100),
+  kategorie_id integer,
   person varchar(100),
   datum date
 ) 
 WITH OIDS;
 SELECT AddGeometryColumn('public', 'q_notizen','the_geom',2398,'POLYGON', 2);
-CREATE INDEX q_notizen_the_geom_gist ON q_notizen USING GIST (the_geom GIST_GEOMETRY_OPS);
+CREATE INDEX q_notizen_the_geom_gist ON q_notizen USING GIST (the_geom);
 ALTER TABLE q_notizen DROP CONSTRAINT enforce_geotype_the_geom;
-ALTER TABLE q_notizen ADD CONSTRAINT enforce_geotype_the_geom CHECK (geometrytype(the_geom) = 'POLYGON'::text OR geometrytype(the_geom) = 'MULTIPOLYGON'::text OR the_geom IS NULL);
 -- ALTER TABLE q_notizen DROP CONSTRAINT enforce_geotype_position;
 
 
@@ -435,7 +405,12 @@ CREATE TABLE q_notiz_kategorie2stelle
   anlegen bool NOT NULL DEFAULT false,
   aendern bool DEFAULT false
 ) 
-WITHOUT OIDS;
+WITH OIDS;
+
+CREATE INDEX q_notizen_kategorie_id_idx ON q_notizen USING btree (kategorie_id);
+CREATE INDEX q_notiz_kategorie2stelle_stelle_idx ON q_notiz_kategorie2stelle USING btree (stelle);
+CREATE INDEX q_notiz_kategorie2stelle_kat_id_idx ON q_notiz_kategorie2stelle USING btree (stelle);
+ALTER TABLE q_notiz_kategorie2stelle ADD CONSTRAINT q_notiz_kategorie2stelle_pkey PRIMARY KEY(stelle, kat_id);
 
 
 --#####################
@@ -496,7 +471,7 @@ WITH OIDS;
 COMMENT ON TABLE md_metadata IS 'Metadatendokumente';
 
 SELECT AddGeometryColumn('public', 'md_metadata','the_geom',2398,'POLYGON', 2);
-CREATE INDEX md_metadata_the_geom_gist ON md_metadata USING GIST (the_geom GIST_GEOMETRY_OPS);
+CREATE INDEX md_metadata_the_geom_gist ON md_metadata USING GIST (the_geom);
 
 --# Diese Tabellen sind für ein normalisiertes Datenbankmodell für Metadaten geplant
 --# und werden noch nicht verwendet 
@@ -567,27 +542,6 @@ CREATE TABLE md_keywords2metadata
 ) 
 WITHOUT OIDS;
 
---####################################
---# Tabellen für die Bodenrichtwerte #
---####################################
-
-CREATE TABLE bw_bodenrichtwertzonen (
-  gemeinde_id int8 NOT NULL DEFAULT 0,
-  zonennr int8 NOT NULL DEFAULT 0,
-  standort varchar(255),
-  richtwertdefinition varchar(50),
-  bodenwert float4,
-  erschliessungsart varchar(50),
-  sanierungsgebiete varchar(50),
-  sichtbarkeit bool NOT NULL DEFAULT true,
-  datum date
-)
-WITH OIDS;
-
-SELECT AddGeometryColumn('public', 'bw_bodenrichtwertzonen','the_geom',2398,'POLYGON', 2);
-CREATE INDEX bw_bodenrichtwertzonen_the_geom_gist ON bw_bodenrichtwertzonen USING GIST (the_geom GIST_GEOMETRY_OPS);
-SELECT AddGeometryColumn('public', 'bw_bodenrichtwertzonen','textposition',2398,'POINT', 2);
-CREATE INDEX bw_bodenrichtwertzonen_textposition_gist ON bw_bodenrichtwertzonen USING GIST (textposition GIST_GEOMETRY_OPS);
 
 --####################################
 --# Tabellen für Ver- und Entsorgung #
@@ -605,7 +559,7 @@ CREATE TABLE ve_versiegelung
 ) 
 WITH OIDS;
 SELECT AddGeometryColumn('public', 've_versiegelung','the_geom',2398,'POLYGON', 2);
-CREATE INDEX ve_versiegelung_the_geom_gist ON ve_versiegelung USING GIST (the_geom GIST_GEOMETRY_OPS);
+CREATE INDEX ve_versiegelung_the_geom_gist ON ve_versiegelung USING GIST (the_geom);
 ALTER TABLE ve_versiegelung DROP CONSTRAINT enforce_geotype_the_geom;
 ALTER TABLE ve_versiegelung ADD CONSTRAINT enforce_geotype_the_geom CHECK (geometrytype(the_geom) = 'POLYGON'::text OR geometrytype(the_geom) = 'MULTIPOLYGON'::text OR the_geom IS NULL);
 
@@ -626,23 +580,28 @@ CREATE TABLE n_nachweise (
     id serial NOT NULL PRIMARY KEY,
     flurid integer NOT NULL,
     blattnummer character varying NOT NULL,
-    datum character varying,
+    datum date,
     vermstelle character varying,
     gueltigkeit integer,
     link_datei character varying,
     art character(3),
     format character(2),
-    stammnr character varying(8)
-);
+    stammnr character varying(15)
+)
+WITH OIDS;
 SELECT AddGeometryColumn('public', 'n_nachweise','the_geom',2398,'POLYGON', 2);
-CREATE INDEX n_nachweise_the_geom_gist ON n_nachweise USING GIST (the_geom GIST_GEOMETRY_OPS);
+CREATE INDEX n_nachweise_the_geom_gist ON n_nachweise USING GIST (the_geom);
 ALTER TABLE n_nachweise DROP CONSTRAINT enforce_geotype_the_geom;
 ALTER TABLE n_nachweise ADD CONSTRAINT enforce_geotype_the_geom CHECK (geometrytype(the_geom) = 'POLYGON'::text OR geometrytype(the_geom) = 'MULTIPOLYGON'::text OR the_geom IS NULL);
+
+ALTER TABLE public.n_nachweise ADD COLUMN fortfuehrung integer;
+ALTER TABLE public.n_nachweise ADD COLUMN rissnummer character varying(20);
+ALTER TABLE public.n_nachweise ADD COLUMN bemerkungen text;
 
 -- Zuordnung der Nachweise zu den Antraegen
 CREATE TABLE n_nachweise2antraege (
     nachweis_id integer,
-    antrag_id character varying(8)
+    antrag_id character varying(11)
 );
 ALTER TABLE n_nachweise2antraege
   ADD CONSTRAINT n_nachweise2antraege_pkey PRIMARY KEY(nachweis_id, antrag_id);
@@ -696,7 +655,7 @@ CREATE TABLE fp_punkte
 ) 
 WITH OIDS;
 SELECT AddGeometryColumn('public', 'fp_punkte','the_geom',2398,'POINT', 3);
-CREATE INDEX fp_punkte_the_geom_gist ON fp_punkte USING GIST (the_geom GIST_GEOMETRY_OPS);
+CREATE INDEX fp_punkte_the_geom_gist ON fp_punkte USING GIST (the_geom);
 
 CREATE TABLE fp_punkte2
 (
@@ -730,7 +689,7 @@ CREATE TABLE fp_punkte2
 ) 
 WITH OIDS;
 SELECT AddGeometryColumn('public', 'fp_punkte2','the_geom',2399,'POINT', 3);
-CREATE INDEX fp_punkte2_the_geom_gist ON fp_punkte2 USING GIST (the_geom GIST_GEOMETRY_OPS);
+CREATE INDEX fp_punkte2_the_geom_gist ON fp_punkte2 USING GIST (the_geom);
 
 --####################################
 --# Temporäre Tabelle für Punktdatei #
@@ -767,7 +726,7 @@ CREATE TABLE fp_punkte_temp
 ) 
 WITH OIDS;
 SELECT AddGeometryColumn('public', 'fp_punkte_temp','the_geom',2398,'POINT', 3);
-CREATE INDEX fp_punkte_temp_the_geom_gist ON fp_punkte_temp USING GIST (the_geom GIST_GEOMETRY_OPS);
+CREATE INDEX fp_punkte_temp_the_geom_gist ON fp_punkte_temp USING GIST (the_geom);
 ALTER TABLE fp_punkte_temp DROP CONSTRAINT enforce_srid_the_geom;
 
 --#####################################################
@@ -779,7 +738,7 @@ ALTER TABLE fp_punkte_temp DROP CONSTRAINT enforce_srid_the_geom;
 CREATE TABLE fp_punkte2antraege
 (
   pkz char(16) NOT NULL,
-  antrag_nr varchar(8) NOT NULL,
+  antrag_nr varchar(11) NOT NULL,
   zeitstempel timestamp,
   CONSTRAINT fp_punkte2antraege_pkey PRIMARY KEY (pkz, antrag_nr)
 ) 
@@ -814,7 +773,7 @@ CREATE TABLE gt_bohrpunkte (
     ort character varying
 );
 SELECT AddGeometryColumn('public', 'gt_bohrpunkte','bohrpunkt',2398,'POINT', 2);
-CREATE INDEX gt_bohrpunkte_bohrpunkt_gist ON gt_bohrpunkte USING GIST (bohrpunkt GIST_GEOMETRY_OPS);
+CREATE INDEX gt_bohrpunkte_bohrpunkt_gist ON gt_bohrpunkte USING GIST (bohrpunkt);
 
 -- Erdwaermesonden
 CREATE TABLE gt_erdwaermesonden (
@@ -825,7 +784,7 @@ CREATE TABLE gt_erdwaermesonden (
     ellipse_halbachse_b numeric(5,2)
 );
 SELECT AddGeometryColumn('public', 'gt_erdwaermesonden','bohrpunkt',2398,'POINT', 2);
-CREATE INDEX gt_erdwaermesonden_bohrpunkt_gist ON gt_erdwaermesonden USING GIST (bohrpunkt GIST_GEOMETRY_OPS);
+CREATE INDEX gt_erdwaermesonden_bohrpunkt_gist ON gt_erdwaermesonden USING GIST (bohrpunkt);
 
 --##################################
 --# Tabellen für die Daten des ALB #
@@ -2150,1440 +2109,12 @@ ALTER TABLE ONLY alb_x_v_nutzungsarten
 
 ALTER TABLE ONLY alb_x_v_strassen
     ADD CONSTRAINT alb_x_v_strassen_pkey PRIMARY KEY (gemeinde, strasse);
-
-
-CREATE TABLE alkfolien (
-    folie character varying(3) DEFAULT ''::character varying NOT NULL,
-    bezeichnung character varying(60) DEFAULT ''::character varying NOT NULL
-);
-
-
-ALTER TABLE public.alkfolien OWNER TO kvwmap;
-
---
--- Name: TABLE alkfolien; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON TABLE alkfolien IS 'Fachliche Ebenen, Folien';
-
-
---
--- Name: COLUMN alkfolien.folie; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkfolien.folie IS 'fachliche Ebene, Folie';
-
-
---
--- Name: COLUMN alkfolien.bezeichnung; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkfolien.bezeichnung IS 'Name oder Bezeichnung der Folie';
-
-
---
--- Name: alkgebschrwink; Type: TABLE; Schema: public; Owner: kvwmap; Tablespace: 
---
-
-CREATE TABLE alkgebschrwink (
-    objartvon smallint NOT NULL,
-    objartbis smallint NOT NULL,
-    schratyp smallint
-);
-
-
-ALTER TABLE public.alkgebschrwink OWNER TO kvwmap;
-
---
--- Name: TABLE alkgebschrwink; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON TABLE alkgebschrwink IS 'Typen von Gebaeuden fuer Schraffurwinkel';
-
-
---
--- Name: COLUMN alkgebschrwink.objartvon; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkgebschrwink.objartvon IS 'Objektart (Beginn des Schlüsselbereiches)';
-
-
---
--- Name: COLUMN alkgebschrwink.objartbis; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkgebschrwink.objartbis IS 'Objektart (Ende des Schlüsselbereiches)';
-
-
---
--- Name: COLUMN alkgebschrwink.schratyp; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkgebschrwink.schratyp IS '1=Wohn-o.öff.Geb., 2=Wirtsch.o.Industrie, 0=keine Schraffur';
-
-
---
--- Name: alkgeom; Type: TABLE; Schema: public; Owner: kvwmap; Tablespace: 
---
-
-CREATE TABLE alkgeom (
-    gid serial NOT NULL,
-    folie character varying(3) DEFAULT ''::character varying NOT NULL,
-    artgeo character varying(2) DEFAULT ''::character varying NOT NULL,
-    arw double precision NOT NULL,
-    ahw double precision NOT NULL,
-    objart smallint NOT NULL,
-    darken character varying(1),
-    objnr character varying(7) DEFAULT ''::character varying NOT NULL,
-    umdrehn boolean NOT NULL,
-    aecht boolean NOT NULL,
-    eecht boolean NOT NULL,
-    lageparam text,
-    erw double precision NOT NULL,
-    ehw double precision NOT NULL,
-    lmeri character varying(1) DEFAULT ''::character varying NOT NULL
-);
-
-
-ALTER TABLE public.alkgeom OWNER TO kvwmap;
-
---
--- Name: TABLE alkgeom; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON TABLE alkgeom IS 'Geometrie der ALK';
-
-
---
--- Name: COLUMN alkgeom.gid; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkgeom.gid IS 'bei der Konvertierung generierte ID (künstlicher Schlüssel)';
-
-
---
--- Name: COLUMN alkgeom.folie; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkgeom.folie IS 'fachliche Ebene, Folie';
-
-
---
--- Name: COLUMN alkgeom.artgeo; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkgeom.artgeo IS 'Art der Geometrie';
-
-
---
--- Name: COLUMN alkgeom.arw; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkgeom.arw IS 'Anfangspunkt Rechtswert (x)';
-
-
---
--- Name: COLUMN alkgeom.ahw; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkgeom.ahw IS 'Anfangspunkt Hochwert (y)';
-
-
---
--- Name: COLUMN alkgeom.objart; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkgeom.objart IS 'Objektart (Linie)';
-
-
---
--- Name: COLUMN alkgeom.darken; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkgeom.darken IS 'Darstellungskennung für Linien';
-
-
---
--- Name: COLUMN alkgeom.objnr; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkgeom.objnr IS 'Objektnummer (eindeutiger interner Schlüssel eines ALK-Objektes)';
-
-
---
--- Name: COLUMN alkgeom.umdrehn; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkgeom.umdrehn IS 'ALK-Linie umdrehen?  Nein: Objekt liegt rechts.  Ja: Objekt liegt links.';
-
-
---
--- Name: COLUMN alkgeom.aecht; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkgeom.aecht IS 'Anfangspunkt echt?  Ja: P. hat fachl. Bedeutung, wie Eingabe.  Nein: Linie innerhalb der DB geteilt.';
-
-
---
--- Name: COLUMN alkgeom.eecht; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkgeom.eecht IS 'Endpunkt echt?  Ja: P. hat fachl. Bedeutung, wie Eingabe.  Nein: Linie innerhalb der DB geteilt.';
-
-
---
--- Name: COLUMN alkgeom.lageparam; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkgeom.lageparam IS '(Liste der..) Lageparameter (Zwischenpunkte, Kreismittelpunkt)';
-
-
---
--- Name: COLUMN alkgeom.erw; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkgeom.erw IS 'Endpunkt Rechtswert (x)';
-
-
---
--- Name: COLUMN alkgeom.ehw; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkgeom.ehw IS 'Endpunkt Hochwert (y)';
-
-
---
--- Name: COLUMN alkgeom.lmeri; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkgeom.lmeri IS 'Meridianstreifensystem der Linie';
-
-
---
--- Name: alkgeom_gid_seq; Type: SEQUENCE SET; Schema: public; Owner: kvwmap
---
-
-SELECT pg_catalog.setval(pg_catalog.pg_get_serial_sequence('alkgeom', 'gid'), 650789, true);
-
-
---
--- Name: alkgeomart; Type: TABLE; Schema: public; Owner: kvwmap; Tablespace: 
---
-
-CREATE TABLE alkgeomart (
-    artgeo character varying(2) DEFAULT ''::character varying NOT NULL,
-    artgeo_txt character varying(80) DEFAULT ''::character varying NOT NULL
-);
-
-
-ALTER TABLE public.alkgeomart OWNER TO kvwmap;
-
---
--- Name: TABLE alkgeomart; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON TABLE alkgeomart IS 'Art der Geometrie (Schluesseltabelle)';
-
-
---
--- Name: COLUMN alkgeomart.artgeo; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkgeomart.artgeo IS 'Art der Geometrie';
-
-
---
--- Name: COLUMN alkgeomart.artgeo_txt; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkgeomart.artgeo_txt IS 'Art der Geometrie (entschlüsselt)';
-
-
---
--- Name: alkinfoart; Type: TABLE; Schema: public; Owner: kvwmap; Tablespace: 
---
-
-CREATE TABLE alkinfoart (
-    artinfo smallint NOT NULL,
-    artinfo_txt character varying(100) DEFAULT ''::character varying NOT NULL
-);
-
-
-ALTER TABLE public.alkinfoart OWNER TO kvwmap;
-
---
--- Name: TABLE alkinfoart; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON TABLE alkinfoart IS 'Art der bes. Inf. zum Objekt (Schluesseltabelle)';
-
-
---
--- Name: COLUMN alkinfoart.artinfo; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkinfoart.artinfo IS 'Art der Besonderen Information, DLOB2101';
-
-
---
--- Name: COLUMN alkinfoart.artinfo_txt; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkinfoart.artinfo_txt IS 'Art der bes. Inf. zum Objekt (entschlüsselt)';
-
-
---
--- Name: alknamobj; Type: TABLE; Schema: public; Owner: kvwmap; Tablespace: 
---
-
-CREATE TABLE alknamobj (
-    objnr character varying(7) DEFAULT ''::character varying NOT NULL,
-    artinfo smallint NOT NULL,
-    fdat character varying(2) DEFAULT ''::character varying NOT NULL,
-    objnam character varying(33) DEFAULT ''::character varying NOT NULL
-);
-
-
-ALTER TABLE public.alknamobj OWNER TO kvwmap;
-
---
--- Name: TABLE alknamobj; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON TABLE alknamobj IS 'Objektnamen zu Objekten (Schluessel aus ext. Fachdateien)';
-
-
---
--- Name: COLUMN alknamobj.objnr; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alknamobj.objnr IS 'Objektnummer (eindeutiger interner Schlüssel eines ALK-Objektes)';
-
-
---
--- Name: COLUMN alknamobj.artinfo; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alknamobj.artinfo IS 'Art der Besonderen Information, DLOB2101';
-
-
---
--- Name: COLUMN alknamobj.fdat; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alknamobj.fdat IS 'Fachdateikennung';
-
-
---
--- Name: COLUMN alknamobj.objnam; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alknamobj.objnam IS 'Objektname';
-
-
---
--- Name: alknflst; Type: TABLE; Schema: public; Owner: kvwmap; Tablespace: 
---
-
-CREATE TABLE alknflst (
-    objnr character varying(7) DEFAULT ''::character varying NOT NULL,
-    gemkgschl character varying(6) DEFAULT ''::character varying NOT NULL,
-    flurstkennz character varying(27) DEFAULT ''::character varying NOT NULL
-);
-
-
-ALTER TABLE public.alknflst OWNER TO kvwmap;
-
---
--- Name: TABLE alknflst; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON TABLE alknflst IS 'Flurstueckskennzeichen (Objektnamen) aus dem ALB';
-
-
---
--- Name: COLUMN alknflst.objnr; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alknflst.objnr IS 'Objektnummer (eindeutiger interner Schlüssel eines ALK-Objektes)';
-
-
---
--- Name: COLUMN alknflst.gemkgschl; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alknflst.gemkgschl IS 'Gemarkungsschlüssel';
-
-
---
--- Name: COLUMN alknflst.flurstkennz; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alknflst.flurstkennz IS 'Flurstückskennzeichen im ALB-Format';
-
-
---
--- Name: alknflur; Type: TABLE; Schema: public; Owner: kvwmap; Tablespace: 
---
-
-CREATE TABLE alknflur (
-    objnr character varying(7) DEFAULT ''::character varying NOT NULL,
-    gemkgschl character varying(6) DEFAULT ''::character varying NOT NULL,
-    flur character varying(3) DEFAULT ''::character varying NOT NULL
-);
-
-
-ALTER TABLE public.alknflur OWNER TO kvwmap;
-
---
--- Name: TABLE alknflur; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON TABLE alknflur IS 'Fluren (Objektnamen) aus dem ALB';
-
-
---
--- Name: COLUMN alknflur.objnr; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alknflur.objnr IS 'Objektnummer (eindeutiger interner Schlüssel eines ALK-Objektes)';
-
-
---
--- Name: COLUMN alknflur.gemkgschl; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alknflur.gemkgschl IS 'Gemarkungsschlüssel';
-
-
---
--- Name: COLUMN alknflur.flur; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alknflur.flur IS 'Flurnummer innerhalb einer Gemarkung';
-
-
---
--- Name: alknhaus; Type: TABLE; Schema: public; Owner: kvwmap; Tablespace: 
---
-
-CREATE TABLE alknhaus (
-    objnr character varying(7) DEFAULT ''::character varying NOT NULL,
-    gemeinde integer NOT NULL,
-    strasse character varying(5) DEFAULT ''::character varying NOT NULL,
-    hausnr character varying(8) DEFAULT ''::character varying NOT NULL,
-    lfdnr character varying(8) DEFAULT ''::character varying NOT NULL
-);
-
-
-ALTER TABLE public.alknhaus OWNER TO kvwmap;
-
---
--- Name: TABLE alknhaus; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON TABLE alknhaus IS 'Gebaeude (Objektnamen), verkn. mit f_Adressen aus ALB-Info';
-
-
---
--- Name: COLUMN alknhaus.objnr; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alknhaus.objnr IS 'Objektnummer (eindeutiger interner Schlüssel eines ALK-Objektes)';
-
-
---
--- Name: COLUMN alknhaus.gemeinde; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alknhaus.gemeinde IS 'Gemeindeschlüssel';
-
-
---
--- Name: COLUMN alknhaus.strasse; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alknhaus.strasse IS 'Straßenschlüssel';
-
-
---
--- Name: COLUMN alknhaus.hausnr; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alknhaus.hausnr IS 'Hausnummer mit Zusatz (Nr. in Stelle 1-4 rechtsbündig)';
-
-
---
--- Name: COLUMN alknhaus.lfdnr; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alknhaus.lfdnr IS 'laufende Nummer der Gebäude zu einer Adresse';
-
-
---
--- Name: alknpunkt; Type: TABLE; Schema: public; Owner: kvwmap; Tablespace: 
---
-
-CREATE TABLE alknpunkt (
-    objnr character varying(7) DEFAULT ''::character varying NOT NULL,
-    nbz character varying(8) DEFAULT ''::character varying NOT NULL,
-    pat character varying(1) DEFAULT ''::character varying NOT NULL,
-    pnr character varying(5) DEFAULT ''::character varying NOT NULL
-);
-
-
-ALTER TABLE public.alknpunkt OWNER TO kvwmap;
-
---
--- Name: TABLE alknpunkt; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON TABLE alknpunkt IS 'Punkte (Objektnamen) aus der ALK-Punktdatei';
-
-
---
--- Name: COLUMN alknpunkt.objnr; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alknpunkt.objnr IS 'Objektnummer (eindeutiger interner Schlüssel eines ALK-Objektes)';
-
-
---
--- Name: COLUMN alknpunkt.nbz; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alknpunkt.nbz IS 'Nummerierungsbezirk';
-
-
---
--- Name: COLUMN alknpunkt.pat; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alknpunkt.pat IS 'Punktart';
-
-
---
--- Name: COLUMN alknpunkt.pnr; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alknpunkt.pnr IS 'Punktnummer';
-
-
-SET default_with_oids = true;
-
---
--- Name: alkobj_a_lin; Type: TABLE; Schema: public; Owner: kvwmap; Tablespace: 
---
-
-CREATE TABLE alkobj_a_lin (
-    objnr character varying(7) DEFAULT ''::character varying NOT NULL,
-    folie character varying(3) DEFAULT ''::character varying NOT NULL,
-    objart smallint NOT NULL,
-    artinfo smallint NOT NULL,
-    objkartyp character varying(2),
-    objgeom text,
-    bemerkung text,
-    the_geom geometry,
-    CONSTRAINT enforce_dims_the_geom CHECK ((ndims(the_geom) = 2)),
-    CONSTRAINT enforce_geotype_the_geom CHECK (((geometrytype(the_geom) = 'MULTILINESTRING'::text) OR (the_geom IS NULL))),
-    CONSTRAINT enforce_srid_the_geom CHECK ((srid(the_geom) = 2398))
-);
-
-
-ALTER TABLE public.alkobj_a_lin OWNER TO kvwmap;
-
---
--- Name: TABLE alkobj_a_lin; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON TABLE alkobj_a_lin IS 'Objekte der ALK - Ausgestaltung: Linien';
-
-
---
--- Name: COLUMN alkobj_a_lin.objnr; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_a_lin.objnr IS 'Objektnummer (eindeutiger interner Schlüssel eines ALK-Objektes)';
-
-
---
--- Name: COLUMN alkobj_a_lin.folie; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_a_lin.folie IS 'fachliche Ebene, Folie';
-
-
---
--- Name: COLUMN alkobj_a_lin.objart; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_a_lin.objart IS 'Objektart laut OSKA (Objektschlüsselkatalog des Bundeslandes)';
-
-
---
--- Name: COLUMN alkobj_a_lin.artinfo; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_a_lin.artinfo IS 'Art der Besonderen Information, DLOB2101';
-
-
---
--- Name: COLUMN alkobj_a_lin.objkartyp; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_a_lin.objkartyp IS 'Kartentyp (Ausgabe nur bei ..)';
-
-
---
--- Name: COLUMN alkobj_a_lin.objgeom; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_a_lin.objgeom IS 'Geometrie des Objektes, WKT-Format';
-
-
---
--- Name: COLUMN alkobj_a_lin.bemerkung; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_a_lin.bemerkung IS 'Besonderheiten bei der Konvertierung';
-
-
---
--- Name: COLUMN alkobj_a_lin.the_geom; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_a_lin.the_geom IS 'WKT Geometrie';
-
-
---
--- Name: alkobj_a_sym; Type: TABLE; Schema: public; Owner: kvwmap; Tablespace: 
---
-
-CREATE TABLE alkobj_a_sym (
-    objnr character varying(7) DEFAULT ''::character varying NOT NULL,
-    folie character varying(3) DEFAULT ''::character varying NOT NULL,
-    objart smallint NOT NULL,
-    artinfo smallint NOT NULL,
-    objkartyp character varying(2),
-    winkel real,
-    groesse real NOT NULL,
-    artgeo character varying(2) DEFAULT ''::character varying NOT NULL,
-    objgeom text,
-    bemerkung text,
-    the_geom geometry,
-    CONSTRAINT enforce_dims_the_geom CHECK ((ndims(the_geom) = 2)),
-    CONSTRAINT enforce_geotype_the_geom CHECK (((geometrytype(the_geom) = 'POINT'::text) OR (the_geom IS NULL))),
-    CONSTRAINT enforce_srid_the_geom CHECK ((srid(the_geom) = 2398))
-);
-
-
-ALTER TABLE public.alkobj_a_sym OWNER TO kvwmap;
-
---
--- Name: TABLE alkobj_a_sym; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON TABLE alkobj_a_sym IS 'Objekte der ALK - Ausgestaltung: Symbole';
-
-
---
--- Name: COLUMN alkobj_a_sym.objnr; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_a_sym.objnr IS 'Objektnummer (eindeutiger interner Schlüssel eines ALK-Objektes)';
-
-
---
--- Name: COLUMN alkobj_a_sym.folie; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_a_sym.folie IS 'fachliche Ebene, Folie';
-
-
---
--- Name: COLUMN alkobj_a_sym.objart; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_a_sym.objart IS 'Objektart laut OSKA (Objektschlüsselkatalog des Bundeslandes)';
-
-
---
--- Name: COLUMN alkobj_a_sym.artinfo; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_a_sym.artinfo IS 'Art der Besonderen Information, DLOB2101';
-
-
---
--- Name: COLUMN alkobj_a_sym.objkartyp; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_a_sym.objkartyp IS 'Kartentyp (Ausgabe nur bei ..)';
-
-
---
--- Name: COLUMN alkobj_a_sym.winkel; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_a_sym.winkel IS 'Rotation, Drehwinkel zur Darstellung';
-
-
---
--- Name: COLUMN alkobj_a_sym.groesse; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_a_sym.groesse IS 'Masstabsfaktor für das Symbol';
-
-
---
--- Name: COLUMN alkobj_a_sym.artgeo; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_a_sym.artgeo IS 'Art der Geometrie';
-
-
---
--- Name: COLUMN alkobj_a_sym.objgeom; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_a_sym.objgeom IS 'Geometrie des Objektes, WKT-Format';
-
-
---
--- Name: COLUMN alkobj_a_sym.bemerkung; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_a_sym.bemerkung IS 'Besonderheiten bei der Konvertierung';
-
-
---
--- Name: COLUMN alkobj_a_sym.the_geom; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_a_sym.the_geom IS 'WKT Geometrie';
-
-
---
--- Name: alkobj_d_fla; Type: TABLE; Schema: public; Owner: kvwmap; Tablespace: 
---
-
-CREATE TABLE alkobj_d_fla (
-    objnr character varying(7) DEFAULT ''::character varying NOT NULL,
-    folie character varying(3) DEFAULT ''::character varying NOT NULL,
-    objart smallint NOT NULL,
-    objgeom text,
-    bemerkung text,
-    the_geom geometry,
-    CONSTRAINT enforce_dims_the_geom CHECK ((ndims(the_geom) = 2)),
-    CONSTRAINT enforce_geotype_the_geom CHECK (((geometrytype(the_geom) = 'MULTILINESTRING'::text) OR (the_geom IS NULL))),
-    CONSTRAINT enforce_srid_the_geom CHECK ((srid(the_geom) = 2398))
-);
-
-
-ALTER TABLE public.alkobj_d_fla OWNER TO kvwmap;
-
---
--- Name: TABLE alkobj_d_fla; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON TABLE alkobj_d_fla IS 'Objekte der ALK - Darstellung: Flaechenbegrenzung';
-
-
---
--- Name: COLUMN alkobj_d_fla.objnr; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_d_fla.objnr IS 'Objektnummer (eindeutiger interner Schlüssel eines ALK-Objektes)';
-
-
---
--- Name: COLUMN alkobj_d_fla.folie; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_d_fla.folie IS 'fachliche Ebene, Folie';
-
-
---
--- Name: COLUMN alkobj_d_fla.objart; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_d_fla.objart IS 'Objektart laut OSKA (Objektschlüsselkatalog des Bundeslandes)';
-
-
---
--- Name: COLUMN alkobj_d_fla.objgeom; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_d_fla.objgeom IS 'Geometrie des Objektes, WKT-Format';
-
-
---
--- Name: COLUMN alkobj_d_fla.bemerkung; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_d_fla.bemerkung IS 'Besonderheiten bei der Konvertierung';
-
-
---
--- Name: COLUMN alkobj_d_fla.the_geom; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_d_fla.the_geom IS 'WKT Geometrie';
-
-
---
--- Name: alkobj_d_lin; Type: TABLE; Schema: public; Owner: kvwmap; Tablespace: 
---
-
-CREATE TABLE alkobj_d_lin (
-    objnr character varying(7) DEFAULT ''::character varying NOT NULL,
-    folie character varying(3) DEFAULT ''::character varying NOT NULL,
-    objart smallint NOT NULL,
-    darken character varying(1),
-    objgeom text,
-    bemerkung text,
-    the_geom geometry,
-    CONSTRAINT enforce_dims_the_geom CHECK ((ndims(the_geom) = 2)),
-    CONSTRAINT enforce_geotype_the_geom CHECK (((geometrytype(the_geom) = 'LINESTRING'::text) OR (the_geom IS NULL))),
-    CONSTRAINT enforce_srid_the_geom CHECK ((srid(the_geom) = 2398))
-);
-
-
-ALTER TABLE public.alkobj_d_lin OWNER TO kvwmap;
-
---
--- Name: TABLE alkobj_d_lin; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON TABLE alkobj_d_lin IS 'Objekte der ALK - Darstellung: Linien';
-
-
---
--- Name: COLUMN alkobj_d_lin.objnr; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_d_lin.objnr IS 'Objektnummer (eindeutiger interner Schlüssel eines ALK-Objektes)';
-
-
---
--- Name: COLUMN alkobj_d_lin.folie; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_d_lin.folie IS 'fachliche Ebene, Folie';
-
-
---
--- Name: COLUMN alkobj_d_lin.objart; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_d_lin.objart IS 'Objektart laut OSKA (Objektschlüsselkatalog des Bundeslandes)';
-
-
---
--- Name: COLUMN alkobj_d_lin.darken; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_d_lin.darken IS 'Darstellungskennung für Linien';
-
-
---
--- Name: COLUMN alkobj_d_lin.objgeom; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_d_lin.objgeom IS 'Geometrie des Objektes, WKT-Format';
-
-
---
--- Name: COLUMN alkobj_d_lin.bemerkung; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_d_lin.bemerkung IS 'Besonderheiten bei der Konvertierung';
-
-
---
--- Name: COLUMN alkobj_d_lin.the_geom; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_d_lin.the_geom IS 'WKT Geometrie';
-
-
---
--- Name: alkobj_e_fla; Type: TABLE; Schema: public; Owner: kvwmap; Tablespace: 
---
-
-CREATE TABLE alkobj_e_fla (
-    objnr character varying(7) DEFAULT ''::character varying NOT NULL,
-    folie character varying(3) DEFAULT ''::character varying NOT NULL,
-    objart smallint NOT NULL,
-    objgeom text,
-    bemerkung text,
-    the_geom geometry,
-    CONSTRAINT enforce_dims_the_geom CHECK ((ndims(the_geom) = 2)),
-    CONSTRAINT enforce_geotype_the_geom CHECK (((geometrytype(the_geom) = 'MULTIPOLYGON'::text) OR (the_geom IS NULL))),
-    CONSTRAINT enforce_srid_the_geom CHECK ((srid(the_geom) = 2398))
-);
-
-
-ALTER TABLE public.alkobj_e_fla OWNER TO kvwmap;
-
---
--- Name: TABLE alkobj_e_fla; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON TABLE alkobj_e_fla IS 'Objekte der ALK - Elementarobjekte: Flaechen';
-
-
---
--- Name: COLUMN alkobj_e_fla.objnr; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_e_fla.objnr IS 'Objektnummer (eindeutiger interner Schlüssel eines ALK-Objektes)';
-
-
---
--- Name: COLUMN alkobj_e_fla.folie; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_e_fla.folie IS 'fachliche Ebene, Folie';
-
-
---
--- Name: COLUMN alkobj_e_fla.objart; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_e_fla.objart IS 'Objektart laut OSKA (Objektschlüsselkatalog des Bundeslandes)';
-
-
---
--- Name: COLUMN alkobj_e_fla.objgeom; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_e_fla.objgeom IS 'Geometrie des Objektes, WKT-Format';
-
-
---
--- Name: COLUMN alkobj_e_fla.bemerkung; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_e_fla.bemerkung IS 'Besonderheiten bei der Konvertierung';
-
-
---
--- Name: COLUMN alkobj_e_fla.the_geom; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_e_fla.the_geom IS 'WKT Geometrie';
-
-
---
--- Name: alkobj_e_lin; Type: TABLE; Schema: public; Owner: kvwmap; Tablespace: 
---
-
-CREATE TABLE alkobj_e_lin (
-    objnr character varying(7) DEFAULT ''::character varying NOT NULL,
-    folie character varying(3) DEFAULT ''::character varying NOT NULL,
-    objart smallint NOT NULL,
-    objgeom text,
-    bemerkung text,
-    the_geom geometry,
-    CONSTRAINT enforce_dims_the_geom CHECK ((ndims(the_geom) = 2)),
-    CONSTRAINT enforce_geotype_the_geom CHECK (((geometrytype(the_geom) = 'MULTILINESTRING'::text) OR (the_geom IS NULL))),
-    CONSTRAINT enforce_srid_the_geom CHECK ((srid(the_geom) = 2398))
-);
-
-
-ALTER TABLE public.alkobj_e_lin OWNER TO kvwmap;
-
---
--- Name: TABLE alkobj_e_lin; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON TABLE alkobj_e_lin IS 'Objekte der ALK - Elementarobjekte: Linien';
-
-
---
--- Name: COLUMN alkobj_e_lin.objnr; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_e_lin.objnr IS 'Objektnummer (eindeutiger interner Schlüssel eines ALK-Objektes)';
-
-
---
--- Name: COLUMN alkobj_e_lin.folie; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_e_lin.folie IS 'fachliche Ebene, Folie';
-
-
---
--- Name: COLUMN alkobj_e_lin.objart; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_e_lin.objart IS 'Objektart laut OSKA (Objektschlüsselkatalog des Bundeslandes)';
-
-
---
--- Name: COLUMN alkobj_e_lin.objgeom; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_e_lin.objgeom IS 'Geometrie des Objektes, WKT-Format';
-
-
---
--- Name: COLUMN alkobj_e_lin.bemerkung; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_e_lin.bemerkung IS 'Besonderheiten bei der Konvertierung';
-
-
---
--- Name: COLUMN alkobj_e_lin.the_geom; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_e_lin.the_geom IS 'WKT Geometrie';
-
-
---
--- Name: alkobj_e_pkt; Type: TABLE; Schema: public; Owner: kvwmap; Tablespace: 
---
-
-CREATE TABLE alkobj_e_pkt (
-    objnr character varying(7) DEFAULT ''::character varying NOT NULL,
-    folie character varying(3) DEFAULT ''::character varying NOT NULL,
-    objart smallint NOT NULL,
-    objgeom text,
-    bemerkung text,
-    the_geom geometry,
-    CONSTRAINT enforce_dims_the_geom CHECK ((ndims(the_geom) = 2)),
-    CONSTRAINT enforce_geotype_the_geom CHECK (((geometrytype(the_geom) = 'POINT'::text) OR (the_geom IS NULL))),
-    CONSTRAINT enforce_srid_the_geom CHECK ((srid(the_geom) = 2398))
-);
-
-
-ALTER TABLE public.alkobj_e_pkt OWNER TO kvwmap;
-
---
--- Name: TABLE alkobj_e_pkt; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON TABLE alkobj_e_pkt IS 'Objekte der ALK - Elementarobjekte: Punkte';
-
-
---
--- Name: COLUMN alkobj_e_pkt.objnr; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_e_pkt.objnr IS 'Objektnummer (eindeutiger interner Schlüssel eines ALK-Objektes)';
-
-
---
--- Name: COLUMN alkobj_e_pkt.folie; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_e_pkt.folie IS 'fachliche Ebene, Folie';
-
-
---
--- Name: COLUMN alkobj_e_pkt.objart; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_e_pkt.objart IS 'Objektart laut OSKA (Objektschlüsselkatalog des Bundeslandes)';
-
-
---
--- Name: COLUMN alkobj_e_pkt.objgeom; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_e_pkt.objgeom IS 'Geometrie des Objektes, WKT-Format';
-
-
---
--- Name: COLUMN alkobj_e_pkt.bemerkung; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_e_pkt.bemerkung IS 'Besonderheiten bei der Konvertierung';
-
-
---
--- Name: COLUMN alkobj_e_pkt.the_geom; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_e_pkt.the_geom IS 'WKT Geometrie';
-
-
---
--- Name: alkobj_t_lin; Type: TABLE; Schema: public; Owner: kvwmap; Tablespace: 
---
-
-CREATE TABLE alkobj_t_lin (
-    objnr character varying(7) DEFAULT ''::character varying NOT NULL,
-    folie character varying(3) DEFAULT ''::character varying NOT NULL,
-    objart smallint NOT NULL,
-    artinfo smallint NOT NULL,
-    objkartyp character varying(2),
-    label character varying(35),
-    objgeom text,
-    bemerkung text,
-    the_geom geometry,
-    CONSTRAINT enforce_dims_the_geom CHECK ((ndims(the_geom) = 2)),
-    CONSTRAINT enforce_geotype_the_geom CHECK (((geometrytype(the_geom) = 'LINESTRING'::text) OR (the_geom IS NULL))),
-    CONSTRAINT enforce_srid_the_geom CHECK ((srid(the_geom) = 2398))
-);
-
-
-ALTER TABLE public.alkobj_t_lin OWNER TO kvwmap;
-
---
--- Name: TABLE alkobj_t_lin; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON TABLE alkobj_t_lin IS 'Objekte der ALK - Texte: Liniengeometrie';
-
-
---
--- Name: COLUMN alkobj_t_lin.objnr; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_t_lin.objnr IS 'Objektnummer (eindeutiger interner Schlüssel eines ALK-Objektes)';
-
-
---
--- Name: COLUMN alkobj_t_lin.folie; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_t_lin.folie IS 'fachliche Ebene, Folie';
-
-
---
--- Name: COLUMN alkobj_t_lin.objart; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_t_lin.objart IS 'Objektart laut OSKA (Objektschlüsselkatalog des Bundeslandes)';
-
-
---
--- Name: COLUMN alkobj_t_lin.artinfo; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_t_lin.artinfo IS 'Art der Besonderen Information, DLOB2101';
-
-
---
--- Name: COLUMN alkobj_t_lin.objkartyp; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_t_lin.objkartyp IS 'Kartentyp (Ausgabe nur bei ..)';
-
-
---
--- Name: COLUMN alkobj_t_lin.label; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_t_lin.label IS 'Text zu einem ALK-Objekt';
-
-
---
--- Name: COLUMN alkobj_t_lin.objgeom; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_t_lin.objgeom IS 'Geometrie des Objektes, WKT-Format';
-
-
---
--- Name: COLUMN alkobj_t_lin.bemerkung; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_t_lin.bemerkung IS 'Besonderheiten bei der Konvertierung';
-
-
---
--- Name: COLUMN alkobj_t_lin.the_geom; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_t_lin.the_geom IS 'WKT Geometrie';
-
-
---
--- Name: alkobj_t_pkt; Type: TABLE; Schema: public; Owner: kvwmap; Tablespace: 
---
-
-CREATE TABLE alkobj_t_pkt (
-    objnr character varying(7) DEFAULT ''::character varying NOT NULL,
-    folie character varying(3) DEFAULT ''::character varying NOT NULL,
-    objart smallint NOT NULL,
-    artinfo smallint NOT NULL,
-    objkartyp character varying(2),
-    label character varying(35),
-    winkel real,
-    mver boolean,
-    objgeom text,
-    bemerkung text,
-    the_geom geometry,
-    CONSTRAINT enforce_dims_the_geom CHECK ((ndims(the_geom) = 2)),
-    CONSTRAINT enforce_geotype_the_geom CHECK (((geometrytype(the_geom) = 'POINT'::text) OR (the_geom IS NULL))),
-    CONSTRAINT enforce_srid_the_geom CHECK ((srid(the_geom) = 2398))
-);
-
-
-ALTER TABLE public.alkobj_t_pkt OWNER TO kvwmap;
-
---
--- Name: TABLE alkobj_t_pkt; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON TABLE alkobj_t_pkt IS 'Objekte der ALK - Texte: Punktgeometrie';
-
-
---
--- Name: COLUMN alkobj_t_pkt.objnr; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_t_pkt.objnr IS 'Objektnummer (eindeutiger interner Schlüssel eines ALK-Objektes)';
-
-
---
--- Name: COLUMN alkobj_t_pkt.folie; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_t_pkt.folie IS 'fachliche Ebene, Folie';
-
-
---
--- Name: COLUMN alkobj_t_pkt.objart; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_t_pkt.objart IS 'Objektart laut OSKA (Objektschlüsselkatalog des Bundeslandes)';
-
-
---
--- Name: COLUMN alkobj_t_pkt.artinfo; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_t_pkt.artinfo IS 'Art der Besonderen Information, DLOB2101';
-
-
---
--- Name: COLUMN alkobj_t_pkt.objkartyp; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_t_pkt.objkartyp IS 'Kartentyp (Ausgabe nur bei ..)';
-
-
---
--- Name: COLUMN alkobj_t_pkt.label; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_t_pkt.label IS 'Text zu einem ALK-Objekt';
-
-
---
--- Name: COLUMN alkobj_t_pkt.winkel; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_t_pkt.winkel IS 'Rotation, Drehwinkel zur Darstellung';
-
-
---
--- Name: COLUMN alkobj_t_pkt.mver; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_t_pkt.mver IS 'Standardposition, Label maßstabsabhängig verschieben';
-
-
---
--- Name: COLUMN alkobj_t_pkt.objgeom; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_t_pkt.objgeom IS 'Geometrie des Objektes, WKT-Format';
-
-
---
--- Name: COLUMN alkobj_t_pkt.bemerkung; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_t_pkt.bemerkung IS 'Besonderheiten bei der Konvertierung';
-
-
---
--- Name: COLUMN alkobj_t_pkt.the_geom; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobj_t_pkt.the_geom IS 'WKT Geometrie';
-
-
-SET default_with_oids = false;
-
---
--- Name: alkobjekte; Type: TABLE; Schema: public; Owner: kvwmap; Tablespace: 
---
-
-CREATE TABLE alkobjekte (
-    objnr character varying(7) DEFAULT ''::character varying NOT NULL,
-    folie character varying(3) DEFAULT ''::character varying NOT NULL,
-    objart smallint NOT NULL,
-    objaktu character varying(2) DEFAULT ''::character varying NOT NULL,
-    entstehung date,
-    objtyp character varying(1) DEFAULT ''::character varying NOT NULL,
-    objr double precision NOT NULL,
-    objh double precision NOT NULL
-);
-
-
-ALTER TABLE public.alkobjekte OWNER TO kvwmap;
-
---
--- Name: TABLE alkobjekte; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON TABLE alkobjekte IS 'Objekte der ALK - Objektverwaltung';
-
-
---
--- Name: COLUMN alkobjekte.objnr; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobjekte.objnr IS 'Objektnummer (eindeutiger interner Schlüssel eines ALK-Objektes)';
-
-
---
--- Name: COLUMN alkobjekte.folie; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobjekte.folie IS 'fachliche Ebene, Folie';
-
-
---
--- Name: COLUMN alkobjekte.objart; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobjekte.objart IS 'Objektart laut OSKA (Objektschlüsselkatalog des Bundeslandes)';
-
-
---
--- Name: COLUMN alkobjekte.objaktu; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobjekte.objaktu IS 'Zaehler für Fortführungen';
-
-
---
--- Name: COLUMN alkobjekte.entstehung; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobjekte.entstehung IS 'Entstehungsdatum';
-
-
---
--- Name: COLUMN alkobjekte.objtyp; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobjekte.objtyp IS 'ALK-Objekttyp';
-
-
---
--- Name: COLUMN alkobjekte.objr; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobjekte.objr IS 'Objekt-Koordinate Rechtswert (x)';
-
-
---
--- Name: COLUMN alkobjekte.objh; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobjekte.objh IS 'Objekt-Koordinate Hochwert (y)';
-
-
---
--- Name: alkobjswin; Type: TABLE; Schema: public; Owner: kvwmap; Tablespace: 
---
-
-CREATE TABLE alkobjswin (
-    objnr character varying(7) DEFAULT ''::character varying NOT NULL,
-    gebwink smallint NOT NULL,
-    schrawink smallint,
-    schratyp smallint
-);
-
-
-ALTER TABLE public.alkobjswin OWNER TO kvwmap;
-
---
--- Name: TABLE alkobjswin; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON TABLE alkobjswin IS 'Schraffurwinkel zu Gebaeudeflaechen';
-
-
---
--- Name: COLUMN alkobjswin.objnr; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobjswin.objnr IS 'Objektnummer (eindeutiger interner Schlüssel eines ALK-Objektes)';
-
-
---
--- Name: COLUMN alkobjswin.gebwink; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobjswin.gebwink IS 'Schraffurwinkel (Einheit Grad)';
-
-
---
--- Name: COLUMN alkobjswin.schrawink; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobjswin.schrawink IS 'Schraffurwinkel (Einheit Grad)';
-
-
---
--- Name: COLUMN alkobjswin.schratyp; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkobjswin.schratyp IS '1=Wohn-o.öff.Geb., 2=Wirtsch.o.Industrie, 0=keine Schraffur';
-
-
---
--- Name: alkstdtxt; Type: TABLE; Schema: public; Owner: kvwmap; Tablespace: 
---
-
-CREATE TABLE alkstdtxt (
-    folie character varying(3) DEFAULT ''::character varying NOT NULL,
-    objart smallint NOT NULL,
-    standardtext character varying(40) DEFAULT ''::character varying NOT NULL
-);
-
-
-ALTER TABLE public.alkstdtxt OWNER TO kvwmap;
-
---
--- Name: TABLE alkstdtxt; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON TABLE alkstdtxt IS 'ALK Standardtexte zu Objektarten';
-
-
---
--- Name: COLUMN alkstdtxt.folie; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkstdtxt.folie IS 'fachliche Ebene, Folie';
-
-
---
--- Name: COLUMN alkstdtxt.objart; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkstdtxt.objart IS 'Objektart laut OSKA (Objektschlüsselkatalog des Bundeslandes)';
-
-
---
--- Name: COLUMN alkstdtxt.standardtext; Type: COMMENT; Schema: public; Owner: kvwmap
---
-
-COMMENT ON COLUMN alkstdtxt.standardtext IS 'Label, anzuzeigender Text (zur Objektart)';
-
-
+    
+ 
+ 
+ 
+    
+   
 
 --##########################
 --# Beende die Transaktion #

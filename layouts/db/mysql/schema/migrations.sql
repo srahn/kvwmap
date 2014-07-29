@@ -1,19 +1,9 @@
--- Dieses Dokument steht unter der LGPL-Lizenz
 
--- Dieser Dump dient dem Anlegen einer leeren MySQL-Datenbank für die Nutzung in kvwmap
--- Sie enthält die Tabellen für die Benutzer und Kartendaten.
+### migration 2014-08-03 00:00:00
 
--- Voraussetzung: Es ist eine Datenbank mit dem Namen kvwmapdb_Version angelegt.
--- Versionsname anpassen!
+# Installationsskript der Version 2.0.0
 
--- letzte: Änderung: 07.11.2005
-
--- --------------------------------------------------------
--- Setzen des Datenbanknamens 
--- SET @mysql_dbname='kvwmapdb';
-
--- Setzen des Charactersets
--- ALTER DATABASE `@mysql_dbname` CHARACTER SET latin1 COLLATE latin1_german2_ci;
+BEGIN;
 
 CREATE TABLE  `rolle_last_query` (
   `user_id` INT( 11 ) NOT NULL ,
@@ -987,3 +977,5 @@ CREATE TABLE `u_consumeALB` (
   `numpages` INT( 11 ) NULL ,
   PRIMARY KEY  (`user_id`,`stelle_id`,`time_id`,`log_number`)
 ) ENGINE=MyISAM;
+
+COMMIT;

@@ -1122,41 +1122,6 @@ if($GUI->goNotExecutedInPlugins){
 		$GUI->exportMapToPDF();
 	  } break;
 
-	  case 'Bodenrichtwertzone_Loeschen' : {
-		$GUI->bodenRichtWertZoneLoeschen();
-	  } break;
-
-	  case 'Bodenrichtwertformular' : {
-		$GUI->checkCaseAllowed('Bodenrichtwertformular');		
-		$GUI->titel='Bodenrichtwerterfassung';
-		$GUI->bodenRichtWertErfassung();
-	  } break;
-	  
-	  case 'Bodenrichtwertformular_Anzeige' : {
-		$GUI->titel='Bodenrichtwertanzeige';
-		$GUI->aendernBodenRichtWert();
-	  } break;
-
-	  case 'Bodenrichtwertformular_Aendern' : {
-		$GUI->checkCaseAllowed('Bodenrichtwertformular');
-		$GUI->aendernBodenRichtWert();
-	  } break;
-
-	  case 'Bodenrichtwertformular_Senden' : {
-		$GUI->checkCaseAllowed('Bodenrichtwertformular');
-		$GUI->bodenRichtWertFormSenden();
-	  } break;
-
-	  case 'BodenrichtwertzonenKopieren' : {
-		$GUI->checkCaseAllowed('BodenrichtwertzonenKopieren');
-		$GUI->waehleBodenwertStichtagToCopy();
-	  } break;
-
-	  case 'BodenrichtwertzonenKopieren_Senden' : {
-		$GUI->checkCaseAllowed('BodenrichtwertzonenKopieren');
-		$GUI->copyBodenrichtwertzonen();
-	  } break;
-
 		case 'TIF_Export' : {
 		$GUI->TIFExport();
 	  } break;

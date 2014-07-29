@@ -213,6 +213,13 @@ class GUI extends GUI_core{
     if (isset ($mime_type)) $this->mime_type=$mime_type;
   }
 	
+	public function __call($method, $arguments){
+		if(isset($this->{$method}) && is_callable($this->{$method})){
+			return call_user_func_array($this->{$method}, $arguments);
+    }
+	}
+		
+	
 	function autocomplete_request(){	# sql, columnname, inputvalue, inputname, resultdiv_id
 		$sql = $this->formvars['sql']." AND ".$this->formvars['columnname']." like upper(substr('".$this->formvars['inputvalue']."', 1, 1))||substr('".$this->formvars['inputvalue']."', 2, ".strlen($this->formvars['inputvalue']).")||'%' ORDER BY ".$this->formvars['columnname']." LIMIT 15";  			
   	$ret=$this->pgdatabase->execSQL($sql,4, 1);	# bei Nutzung für GLE, gegen Layer-DB austauschen 
@@ -677,6 +684,7 @@ class GUI extends GUI_core{
     if($req_start > 0){
     	$sql_rest = substr($attributes['options'][0], $req_end, $ende);
       $sql = substr($attributes['options'][0], 0, $req_start)."'".$this->formvars['value']."' ".$sql_rest;    # requires-Tag aus SQL entfernen und um den übergebenen Wert erweitern
+			echo $sql;
       $ret=$layerdb->execSQL($sql,4,0);
       if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
       switch($this->formvars['type']) {
@@ -3262,6 +3270,21 @@ class GUI extends GUI_core{
 
       # Fonts auslesen
       $this->document->fonts = searchdir(PDFCLASSPATH.'fonts/', true);
+			
+			if($this->Document->selectedframe[0]['headsrc'] != '' && file_exists(DRUCKRAHMEN_PATH.basename($this->Document->selectedframe[0]['headsrc']))){
+        $this->Document->headsize = GetImageSize(DRUCKRAHMEN_PATH.basename($this->Document->selectedframe[0]['headsrc']));
+      }
+      else{
+        $this->Document->headsize[0] = 1;
+        $this->Document->headsize[1] = 1;
+      }
+			if($this->Document->selectedframe[0]['refmapsrc'] != '' && file_exists(DRUCKRAHMEN_PATH.basename($this->Document->selectedframe[0]['refmapsrc']))){
+        $this->Document->refmapsize = GetImageSize(DRUCKRAHMEN_PATH.basename($this->Document->selectedframe[0]['refmapsrc']));
+      }
+      else{
+        $this->Document->refmapsize[0] = 1;
+        $this->Document->refmapsize[1] = 1;
+      }
 
       $this->Document->cent = $this->Document->selectedframe[0]['preis']%100;
       $this->Document->euro = ($this->Document->selectedframe[0]['preis'] - $this->Document->cent)/100;
@@ -5614,265 +5637,6 @@ class GUI extends GUI_core{
         }
       }
     $this->versiegelungsFlaechenErfassung();
-  }
-
-  function aendernBodenRichtWert() {
-    # Bodenrichtwertzone aus der Datenbank abfragen
-    $layer = $this->user->rolle->getLayer(LAYERNAME_BODENRICHTWERTE);
-    $bodenrichtwertzone=new bodenrichtwertzone($this->pgdatabase, $layer[0]['epsg_code'], $this->user->rolle->epsg_code);
-    $ret=$bodenrichtwertzone->getBodenrichtwertzonen($this->formvars['oid']);
-    if ($ret[0]) {
-      # Fehler bei der Abfrage
-      showAlert($ret);
-    }
-    else {
-      # Abfrage war erfolgreich
-      # Zoom zum Polygon des Dokumentes
-      $this->loadMap('DataBase');
-      $this->zoomToBodenrichtwertzone($this->formvars['oid'],20);
-      $this->user->rolle->saveSettings($this->map->extent);
-      $this->user->rolle->readSettings();
-      # Zuweisen der Werte der Zone zum Formular
-      $this->formvars=array_merge($this->formvars,$bodenrichtwertzone->zonen[0]);
-      $datumteile=explode('-',$this->formvars['datum']);
-      $this->formvars['datum']=$datumteile[0];
-
-      $PolygonAsSVG = transformCoordsSVG($this->formvars['svg_umring']);
-      $this->formvars['newpath'] = $PolygonAsSVG;
-      $this->formvars['newpathwkt'] = $this->formvars['wkt_umring'];
-      $this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
-
-      # Bildung der Textposition zur SVG-Ausgabe
-      $point_teil=strrpos($this->formvars['wkt_textposition'],'(')+1;
-      $point_paar=substr($this->formvars['wkt_textposition'],$point_teil,count($point_teil)-2);
-      $point_xy=explode(' ',$point_paar);
-      $this->formvars['loc_x']=$point_xy[0];
-      $this->formvars['loc_y']=$point_xy[1];
-    }
-    $this->bodenRichtWertErfassung();
-  }
-
-  function bodenRichtWertZoneLoeschen() {
-    $layer = $this->user->rolle->getLayer(LAYERNAME_BODENRICHTWERTE);
-    $zone=new bodenrichtwertzone($this->pgdatabase, $layer[0]['epsg_code'], $this->user->rolle->epsg_code);
-    $ret=$zone->deleteBodenrichtwertzonen(array($this->formvars['oid']));
-    if ($ret[0]) {
-      echo 'Bodenrichtwertzone konnte nicht gelöscht werden.<br>'.$ret[1];
-    }
-    else {
-      //echo 'Bodenrichtwertzone mit oid: '.$this->formvars['oid'].' erfolgreich gelöscht.';
-    }
-    $this->loadMap('DataBase');
-    $currenttime=date('Y-m-d H:i:s',time());
-    $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-    $this->drawMap();
-    $this->saveMap('');
-    #$this->queryMap();
-    $this->output();
-  }
-
-  function zoomToBodenrichtwertzone($oid,$border) {
-    $layer = $this->user->rolle->getLayer(LAYERNAME_BODENRICHTWERTE);
-    $zone=new bodenrichtwertzone($this->pgdatabase, $layer[0]['epsg_code'], $this->user->rolle->epsg_code);
-    $ret=$zone->getBBoxAsRectObj($oid);
-    if ($ret[0]) {
-      # Fehler bei der Abfrag der BoundingBox
-      # Es erfolgt keine Änderung der aktuellen Ausdehnung
-    }
-    else {
-      $rect=$ret[1];
-      # Berechnen des Randes in Abhängigkeit vom Parameter border gegeben in Prozent
-      $randx=($rect->maxx-$rect->minx)*$border/100;
-      $randy=($rect->maxy-$rect->miny)*$border/100;
-      # Setzen der neuen Kartenausdehnung.
-      $this->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
-    	if(MAPSERVERVERSION >= 600 ) {
-				$this->map_scaledenom = $this->map->scaledenom;
-			}
-			else {
-				$this->map_scaledenom = $this->map->scale;
-			}
-    }
-  }
-
-  function bodenRichtWertErfassung() {
-    if ($this->formvars['oid']=='') {
-      $this->titel='Bodenrichtwerterfassung';
-    }
-    else {
-      $this->titel='Bodenrichtwertzone Ändern';
-    }
-    if($this->formvars['go'] == 'Bodenrichtwertformular_Anzeige'){
-    	$this->titel='Bodenrichtwertzone Anzeigen';
-      $this->formvars['loc_y'] = $this->formvars['loc_x'] = $this->formvars['pathwkt'] = $this->formvars['newpath'] = $this->formvars['newpathwkt'] = '';
-    }
-    $layer = $this->user->rolle->getLayer(LAYERNAME_BODENRICHTWERTE);
-    $this->formvars['boris_layer_id'] = $layer[0]['Layer_ID'];
-    $this->main="bodenrichtwerterfassung_vboris.php";
-    $saved_scale = $this->reduce_mapwidth(100);
-		$this->loadMap('DataBase');
-		if($this->formvars['CMD']=='')$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
-    $this->Lagebezeichnung = $this->getLagebezeichnung($this->user->rolle->epsg_code);
-    if($this->formvars['gemeinde'] == ''){
-    	$this->formvars['gemeinde'] = $this->Lagebezeichnung['gemeinde'];
-    }
-    if($this->formvars['gemarkung'] == ''){
-    	$this->formvars['gemarkung'] = $this->Lagebezeichnung['gemkgschl'];
-    }
-    # Bodenrichtwertzonenobjekt erzeugen
-    $bodenrichtwertzone=new bodenrichtwertzone($this->pgdatabase, $layer[0]['epsg_code'], $this->user->rolle->epsg_code);
-    # Formularobjekt für Gemeinde bilden
-    $GemObj=new gemeinde(0,$this->pgdatabase);
-  	$Gemeindeliste=$GemObj->getGemeindeListe(array());
-    $this->GemFormObj=new FormObject("gemeinde","select",$Gemeindeliste["ID"],$this->formvars['gemeinde'],$Gemeindeliste["Name"],1,0,0,158);
-    $this->GemFormObj->addJavaScript('onchange', "update_require_attribute('gemarkung', ".$this->formvars['boris_layer_id'].", this.value);");
-    # Formularobjekt für Gemarkung bilden
-    $GemkgObj = new gemarkung(0,$this->pgdatabase);
-  	$gemarkungsliste=$GemkgObj->getGemarkungListe(array($this->formvars['gemeinde']),array());
-    $this->GemkgFormObj=new FormObject('gemarkung','select',$gemarkungsliste['GemkgID'],$this->formvars['gemarkung'],$gemarkungsliste['Name'],1,0,0,158);
-    
-    $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
-    # Spaltenname und from-where abfragen
-    if(!$this->formvars['layer_id']){
-      $layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
-      $this->formvars['layer_id'] = $layerset[0]['Layer_ID'];
-    }
-    if($this->formvars['layer_id']){
-      $data = $this->mapDB->getData($this->formvars['layer_id']);
-      $data_explosion = explode(' ', $data);
-      $this->formvars['columnname'] = $data_explosion[0];
-      $select = $this->mapDB->getSelectFromData($data);
-      $this->formvars['fromwhere'] = 'from ('.$select.') as foo where 1=1';
-      if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
-        $this->formvars['fromwhere'] .= ' where (1=1)';
-      }
-    }
-    $oldscale=round($this->map_scaledenom);
-    if ($this->formvars['CMD']!='') {
-      # Nur Navigieren
-      $this->navMap($this->formvars['CMD']);
-      $this->user->rolle->saveDrawmode($this->formvars['always_draw']);
-    }
-    elseif($oldscale!=$this->formvars['nScale'] AND $this->formvars['nScale'] != '') {
-      $this->scaleMap($this->formvars['nScale']);
-    }
-    $this->saveMap('');
-  	if($this->formvars['CMD'] != 'previous' AND $this->formvars['CMD'] != 'next'){
-    	$currenttime=date('Y-m-d H:i:s',time());
-    	$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-    }
-    $this->drawMap();
-    $this->output();
-  }
-
-  function bodenRichtWertFormSenden() {
-    # Zusammensetzen der übergebenen Parameter für das Polygon und die Textposition
-    #echo 'formvars[loc_x, loc_y]: '.$this->formvars['loc_x'].', '.$this->formvars['loc_x'];
-    if ($this->formvars['loc_x']!='' OR $this->formvars['loc_y']!='') {
-      $location_x = $this->formvars['loc_x'];
-      $location_y = $this->formvars['loc_y'];
-      $this->formvars['textposition']="POINT(".$location_x." ".$location_y.")";
-      #echo '<br/>formvars[textposition]: '.$this->formvars['textposition'];
-    }
-    else {
-      $this->formvars['textposition']="";
-    }
-    $this->formvars['umring'] = $this->formvars['newpathwkt'];
-    # Bodenrichtwertzonenobjekt erzeugen
-    $layer = $this->user->rolle->getLayer(LAYERNAME_BODENRICHTWERTE);
-    $bodenrichtwertzone=new bodenrichtwertzone($this->pgdatabase, $layer[0]['epsg_code'], $this->user->rolle->epsg_code);
-
-		if ($this->formvars['oid']=='') {
-			# 2. eintragenNeueZone
-			$ret=$bodenrichtwertzone->eintragenNeueZone($this->formvars);
-			if ($ret[0]) {
-				# 2.1 eintrageung fehlerhaft
-				$this->Meldung=$ret[1];
-			}
-			else {
-				#  2.2 eintragung erfolgreich
-				$alertmsg='\nBodenrichtwertzone erfolgreich in die Datenbank eingetragen.'.
-				$this->formvars['pathx']='';    $this->formvars['loc_x']='';
-				$this->formvars['pathy']='';    $this->formvars['loc_y']='';
-				$this->formvars['umring']='';   $this->formvars['textposition']='';
-			}
-		}
-		else {
-			# 3. aktualisierenZone
-			$ret=$bodenrichtwertzone->aktualisierenZone($this->formvars['oid'],$this->formvars);
-			if ($ret[0]) {
-				# 3.1 eintrageung fehlerhaft
-				$this->Meldung=$ret[1];
-			}
-			else {
-				# 3.2 Aktualisierung erfolgreich
-				$alertmsg='\nBodenrichtwertzone erfolgreich in die Datenbank aktualisiert.';
-			}
-		}
-    $this->bodenRichtWertErfassung();
-  }
-
-  function copyBodenrichtwertzonen() {
-    # Bodenrichtwertzonenobjekt erzeugen
-    $layer = $this->user->rolle->getLayer(LAYERNAME_BODENRICHTWERTE);
-    $bodenrichtwertzone=new bodenrichtwertzone($this->pgdatabase, $layer[0]['epsg_code'], $this->user->rolle->epsg_code);
-    # Abfragen, ob der Vorgang schon bestätigt wurde
-    if ($this->formvars['bestaetigung']!='Ja') {
-      # nein
-      # zum Bestätigungsformular
-      $this->commitBodenrichtwertCopy();
-    }
-    else { # Kopiervorgang wurde bestätigt
-      # Starten einer Transaktion
-      $bodenrichtwertzone->database->begintransaction();
-      $ret=$bodenrichtwertzone->copyZonenToNewStichtag($this->formvars['oldStichtag'],$this->formvars['newStichtag']);
-      if ($ret=0) { # Fehler bei der Datenbank aktion
-        # Zurückrollen der Transaktion
-        $bodenrichtwertzone->database->rollbacktransaction();
-        # Zurück zum Auswahlformular
-        $this->waehleBodenwertStichtagToCopy();
-      }
-      else {
-        # Anlegen eines neuen Layers für die Bodenrichtwertzonen mit dem neuen Stichtag
-        # wenn es ausgewählt wurde
-        # Beschließen der Transaktion
-        $bodenrichtwertzone->database->committransaction();
-        # Starten der letzten Kartenansicht
-        # Karteninformationen lesen
-        $this->loadMap('DataBase');
-        # Karte zeichnen, protokollieren und ausgeben
-        $currenttime=date('Y-m-d H:i:s',time());
-        $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-        $this->drawMap();
-        $this->saveMap('');
-        $this->output();
-      } # ende kopiervorgang erfolgreich
-    } # ende kopiervorgang wurde bestätigt
-  } # ende function copyBodenrichtwertzonen()
-
-  function waehleBodenwertStichtagToCopy() {
-    $this->main='waehlebodenwertstichtagtocopy.php';
-    $this->titel='Kopieren von Bodenrichtwertzonen auf einen neuen Stichtag';
-    # Bodenrichtwertzonenobjekt erzeugen
-    $layer = $this->user->rolle->getLayer(LAYERNAME_BODENRICHTWERTE);
-    $bodenrichtwertzone=new bodenrichtwertzone($this->pgdatabase, $layer[0]['epsg_code'], $this->user->rolle->epsg_code);
-    # Abfragen der bisher vorhandenen Stichtage
-    $ret=$bodenrichtwertzone->getStichtage();
-    if ($ret[0]) { # Fehler bei der Abfrage der vorhandenen Stichtage
-
-    }
-    else { # Stichtage erfolgreich abgefragt
-      # Erzeugen des Formularobjektes zur Auswahl der vorhandenen Stichtage
-      $this->Stichtagform=new FormObject('oldStichtag','select',$ret[1],$ret[1][0],$ret[1],1,'',0,NULL);
-    }
-    $this->output();
-  }
-
-  function commitBodenrichtwertCopy() {
-    # Frage eine Bestätigung für die Aktion ab
-    $this->main='bestaetigebodenwertstichtagtocopy.php';
-    $this->titel='Bodenrichtwertzonen kopieren';
-    $this->output();
   }
 
   function DokumenteOrdnerPacken(){

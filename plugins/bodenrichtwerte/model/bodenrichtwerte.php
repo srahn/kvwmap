@@ -51,7 +51,7 @@ class bodenrichtwertzone {
     # ermittelt die Boundingbox der Bodenrichtwertzone $oid
     $sql ='SELECT st_xmin(st_extent(st_transform(the_geom, '.$this->client_epsg.'))) AS minx,st_ymin(st_extent(st_transform(the_geom, '.$this->client_epsg.'))) AS miny';
     $sql.=',st_xmax(st_extent(st_transform(the_geom, '.$this->client_epsg.'))) AS maxx,st_ymax(st_extent(st_transform(the_geom, '.$this->client_epsg.'))) AS maxy';
-    $sql.=' FROM bw_zonen WHERE oid='.$oid;
+    $sql.=' FROM bodenrichtwerte.bw_zonen WHERE oid='.$oid;
     #echo $sql;
     $ret=$this->database->execSQL($sql,4, 0);
     if ($ret[0]) {
@@ -81,7 +81,7 @@ class bodenrichtwertzone {
 
   function deleteBodenrichtwertzonen($oidliste){
     $this->debug->write('file:bodenrichtwerte.php class:bodenrichtwerte function:deleteBodenrichtwertzonen<br>Löschen von Bodenrichtwertzonen aus<br>PostGIS:',4);
-    $sql ="DELETE FROM bw_zonen";
+    $sql ="DELETE FROM bodenrichtwerte.bw_zonen";
     $sql.=" WHERE oid IN (".$oidliste[0];
     for ($i=1;$i<count($oidliste);$i++) {
       $sql.=",".$oidliste[$i];
@@ -101,7 +101,7 @@ class bodenrichtwertzone {
     $sql ="SELECT *,";
     $sql.=" st_asText(st_transform(the_geom, ".$this->client_epsg.")) AS wkt_umring, st_asSVG(st_transform(the_geom, ".$this->client_epsg.")) AS svg_umring,";
     $sql .=" st_asText(st_transform(textposition, ".$this->client_epsg.")) AS wkt_textposition";
-    $sql.=" FROM bw_zonen";
+    $sql.=" FROM bodenrichtwerte.bw_zonen";
     $sql.=" WHERE 1=1";
     if ($oid!='') {
       $sql.=" AND oid=".(int)$oid;
@@ -122,7 +122,7 @@ class bodenrichtwertzone {
   
   function getStichtage() {
     # Liefert alle bisher für Bodenrichtwertzonen erfassten Stichtage
-    $sql ='SELECT DISTINCT stichtag FROM bw_zonen ORDER BY stichtag DESC';
+    $sql ='SELECT DISTINCT stichtag FROM bodenrichtwerte.bw_zonen ORDER BY stichtag DESC';
     $ret=$this->database->execSQL($sql,4, 0);
     if ($ret[0]) {
       # Fehler beim Abfragen der Datenbank
@@ -145,7 +145,7 @@ class bodenrichtwertzone {
   	$formvars['oertliche_bezeichnung'] = str_replace(chr(10), '', $formvars['oertliche_bezeichnung']);
   	$formvars['oertliche_bezeichnung'] = str_replace(chr(13), '', $formvars['oertliche_bezeichnung']);
     $this->debug->write('<br>file:bodenrichtwerte.php class:bodenrichtwertzone function eintragenNeueZone<br>Einfügen der Daten zu einer Richtwertzone in<br>PostGIS',4);
-  	$sql ="INSERT INTO bw_zonen (";
+  	$sql ="INSERT INTO bodenrichtwerte.bw_zonen (";
   	if($formvars['stichtag']){$sql.= "stichtag";} 
 		if($formvars['gemeinde']){$sql.= ",gemeinde";} 
 		if($formvars['gemarkung']){$sql.= ",gemarkung";} 
@@ -238,7 +238,7 @@ class bodenrichtwertzone {
     	$formvars['oertliche_bezeichnung'] = str_replace(chr(10), '', $formvars['oertliche_bezeichnung']);
     	$formvars['oertliche_bezeichnung'] = str_replace(chr(13), '', $formvars['oertliche_bezeichnung']);
       $this->debug->write('<br>file:bodenrichtwerte.php class:bodenrichtwertzone function aktualisierenZone<br>Einfügen der Daten zu einer Richtwertzone in<br>PostGIS',4);
-      $sql = "UPDATE bw_zonen SET ";
+      $sql = "UPDATE bodenrichtwerte.bw_zonen SET ";
       if($formvars['gemeinde']){$sql.= "gemeinde = ".(int)$formvars['gemeinde'].", ";}
       if($formvars['gemarkung']){$sql.= "gemarkung = ".(int)$formvars['gemarkung'].", ";}
       if($formvars['ortsteilname']){$sql.= "ortsteilname = '".$formvars['ortsteilname']."', ";}
@@ -316,9 +316,9 @@ class bodenrichtwertzone {
     else {
       # SQL-Einfügeanfrage stellen
       $this->debug->write('Kopieren der Zonen von einem Stichtag zu einem neuen.',4);
-      $sql.="INSERT INTO bw_zonen";
+      $sql.="INSERT INTO bodenrichtwerte.bw_zonen";
       $sql.=" SELECT gemeinde, gemarkung, ortsteilname, postleitzahl, zonentyp, gutachterausschuss, bodenrichtwertnummer, oertliche_bezeichnung, bodenrichtwert, '".$newStichtag."', basiskarte, entwicklungszustand, beitragszustand, nutzungsart, ergaenzende_nutzung, bauweise, geschosszahl, grundflaechenzahl, geschossflaechenzahl, baumassenzahl, flaeche, tiefe, breite, wegeerschliessung, ackerzahl, gruenlandzahl, aufwuchs, verfahrensgrund, verfahrensgrund_zusatz, bemerkungen, textposition, the_geom, erschliessungsverhaeltnisse, bedarfswert, bodenart, brwu, brws, brwb";
-      $sql.=" FROM bw_zonen WHERE stichtag = '".$oldStichtag."'";
+      $sql.=" FROM bodenrichtwerte.bw_zonen WHERE stichtag = '".$oldStichtag."'";
       $ret=$this->database->execSQL($sql,4, 1);
       if ($ret[0]) {
         # Fehler beim Eintragen in Datenbank

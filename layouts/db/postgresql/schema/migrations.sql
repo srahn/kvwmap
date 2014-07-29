@@ -1,26 +1,11 @@
--- Installationsskript für die Datenbankstruktur, die kvwmap für Postgres mit PostGIS benötigt.
---
--- Voraussetzungen/Vorarbeiten
---
--- Ein Postgres version ab 4.7.3 ist installiert
---
--- Zusätzlich ist PostGIS ab 1.0 mit GEOS und Proj Unterstützung installiert
---
--- Zusätzlich ist eine Datenbank durch EDBS2WKT angelegt
---
--- Zusätzlich wurde ein Datenbank in Postgres erzeugt.
--- Für die Nutzung mit ALK sollte dieses Skript in einer fertigen
--- Datenbank des EDBS2WKT Konverters ausgeführt werden
--- Der Name der Datenbank wird in config.php angepasst.
 
---###########################
---# Starte eine Transaktion #
---###########################
---# START TRANSACTION;
+### migration 2014-08-03 00:00:00
 
+# Installationsskript der Version 2.0.0
+
+BEGIN;
 
 CREATE SCHEMA custom_shapes;	-- kann auch anders heißen, ist der config.php über CUSTOM_SHAPE_SCHEMA definierbar
-
 
 -- Tabelle zur Speicherung von Umringspolygonen aus uko-Dateien
 
@@ -91,7 +76,6 @@ SELECT AddGeometryColumn('public', 'u_polygon','the_geom',2398,'GEOMETRY', 2);
 CREATE INDEX u_polygon_the_geom_gist ON u_polygon USING GIST (the_geom);
 
 
---# Tabelle zur Speicherung der Gemarkungsnummer-zu-Gemarkungsschlüssel-Beziehung für die Bauauskunft
 
 
 
@@ -138,9 +122,5 @@ CREATE INDEX q_notiz_kategorie2stelle_stelle_idx ON q_notiz_kategorie2stelle USI
 CREATE INDEX q_notiz_kategorie2stelle_kat_id_idx ON q_notiz_kategorie2stelle USING btree (stelle);
 ALTER TABLE q_notiz_kategorie2stelle ADD CONSTRAINT q_notiz_kategorie2stelle_pkey PRIMARY KEY(stelle, kat_id);
 
+COMMIT;
 
---
---##########################
---# Beende die Transaktion #
---##########################
---# COMMIT TRANSACTION;
