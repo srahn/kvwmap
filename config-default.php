@@ -427,12 +427,12 @@ if($_REQUEST['go'] != 'navMap_ajax'){								# Version 1.7.6   # in 1.14 in navM
 	include (CLASSPATH.'bau.php');
 	include (CLASSPATH.'nachweis.php');
 	include (CLASSPATH.'geothermie.php');
-	include (CLASSPATH.'bodenrichtwerte.php');
+	#include (CLASSPATH.'bodenrichtwerte.php');				# in Version 1.14 gelöscht
 	include (CLASSPATH.'verundentsorgung.php');
 	include (CLASSPATH.'metadaten.php');
 	include (CLASSPATH.'spatial_processor.php');
 	include (CLASSPATH.'bauleitplanung.php');           # Version 1.6.1
-	include (CLASSPATH.'jagdkataster.php');             # Version 1.6.1
+	#include (CLASSPATH.'jagdkataster.php');             # Version 1.6.1		# in Version 1.14 gelöscht
 	include (CLASSPATH.'polygoneditor.php');            # Version 1.6.3
 	include (CLASSPATH.'pointeditor.php');              # Version 1.6.3
 	include (CLASSPATH.'dbf.php');                      # Version 1.6.5
@@ -462,6 +462,8 @@ $kvwmap_plugins = array();																			# Version 1.11.0
 #$kvwmap_plugins[] = 'bauleitplanung';														# Version 1.11.0
 #$kvwmap_plugins[] = 'bevoelkerung';															# Version 1.11.0
 #$kvwmap_plugins[] = 'gewaesser';																	# Version 1.11.0
+#$kvwmap_plugins[] = 'bodenrichtwerte';														# Version 1.14.0
+#$kvwmap_plugins[] = 'jagdkataster';															# Version 1.14.0
 #																																# Version 1.11.0
 #############################################################		# Version 1.11.0
 

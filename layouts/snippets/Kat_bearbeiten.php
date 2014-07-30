@@ -39,7 +39,7 @@ function hinzufuegen(){
 	<tr>
 		<td>
 			<div>
-				<img src="<?php echo GRAPHICSPATH;?>/ikon_i.gif" align="right" onMouseOver="stm(Text[3],Style[0], document.getElementById('TipLayer'))" onmouseout="htm()">
+				<img src="<?php echo GRAPHICSPATH;?>/icon_i.png" align="right" onMouseOver="stm(Text[3],Style[0], document.getElementById('TipLayer'))" onmouseout="htm()">
 				<DIV id="TipLayer" style="visibility:hidden;position:absolute;z-index:1000;"></DIV>
 			</div>
 		</td>

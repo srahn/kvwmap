@@ -3623,50 +3623,7 @@ class pgdatabase_alkis extends pgdatabase_core {
     }
     return $Liste;
   }
-	
-	function getIntersectedFlurstWithJagdbezirke($oids){
-		$sql = "SELECT f.land*10000 + f.gemarkungsnummer as gemkgschl, f.flurnummer as flur, f.zaehler, f.nenner, g.bezeichnung as gemkgname, f.flurstueckskennzeichen as flurstkennz, st_area(f.wkb_geometry) AS flurstflaeche, st_area(st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS."))) AS schnittflaeche, jagdbezirke.name, jagdbezirke.art, f.amtlicheflaeche AS albflaeche";
-		$sql.= " FROM alkis.ax_gemarkung AS g, jagdbezirke, alkis.ax_flurstueck AS f";
-		$sql.= " WHERE f.gemarkungsnummer = g.gemarkungsnummer";
-		$sql.= " AND jagdbezirke.oid IN (".implode(',', $oids).")";
-		$sql.= " AND f.wkb_geometry && st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.") AND st_intersects(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS."))";
-		$sql.= " AND st_area(st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS."))) > 1";
-		$sql.= " ORDER BY jagdbezirke.name";
-		return $this->execSQL($sql, 4, 0);
-	}
-	
-	
-	function getEigentuemerListeFromJagdbezirke($oids){
-		$sql = "SELECT round((st_area(st_memunion(the_geom_inter))*100/j_flaeche)::numeric, 2) as anteil_alk, round((sum(flaeche)*(st_area(st_memunion(the_geom_inter))/st_area(st_memunion(the_geom))))::numeric, 2) AS albflaeche, eigentuemer";
-		$sql.= " FROM(SELECT distinct st_area(jagdbezirke.the_geom) as j_flaeche, f.amtlicheflaeche as flaeche, array_to_string(array(";
-		$sql.= "SELECT distinct array_to_string(array[p.nachnameoderfirma, p.vorname], ' ') as name ";
-		$sql.= "FROM alkis.ax_flurstueck ff ";		
-		$sql.= "LEFT JOIN (alkis.alkis_beziehungen bsf LEFT JOIN alkis.alkis_beziehungen s2s LEFT JOIN alkis.alkis_beziehungen s2s2 ON s2s2.beziehung_zu = s2s.beziehung_von ON s2s.beziehung_zu = bsf.beziehung_zu) ON f.gml_id = bsf.beziehung_von ";
-		$sql.= "LEFT JOIN alkis.ax_buchungsstelle s ON bsf.beziehung_zu = s.gml_id OR s2s.beziehung_von = s.gml_id OR s2s2.beziehung_von = s.gml_id ";
-		$sql.= "LEFT JOIN alkis.ax_buchungsstelle_buchungsart art ON s.buchungsart = art.wert ";
-		$sql.= "LEFT JOIN alkis.alkis_beziehungen bgs ON s.gml_id = bgs.beziehung_von ";
-		$sql.= "LEFT JOIN alkis.ax_buchungsblatt g ON bgs.beziehung_zu = g.gml_id ";
-		$sql.= "LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
-		$sql.= "LEFT JOIN alkis.alkis_beziehungen bng ON bng.beziehung_zu = g.gml_id ";
-		$sql.= "LEFT JOIN alkis.ax_namensnummer n ON n.gml_id = bng.beziehung_von ";
-		$sql.= "LEFT JOIN alkis.alkis_beziehungen bpn ON bpn.beziehung_von = n.gml_id ";
-		$sql.= "LEFT JOIN alkis.ax_person p ON bpn.beziehung_zu = p.gml_id ";
-		$sql.= " WHERE f.flurstueckskennzeichen = ff.flurstueckskennzeichen";
-		$sql.= " AND bsf.beziehungsart::text = 'istGebucht'::text";
-		$sql.= " AND bgs.beziehungsart::text = 'istBestandteilVon'::text"; 
-		$sql.= " AND bng.beziehungsart::text = 'istBestandteilVon'::text"; 
-		$sql.= " AND bpn.beziehungsart::text = 'benennt'::text"; 
-		$sql.= " order by name),' || ') as eigentuemer,";
-		$sql.= " st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.")) AS the_geom_inter, f.wkb_geometry as the_geom";		
-		$sql.= " FROM alkis.ax_gemarkung AS g, jagdbezirke, alkis.ax_flurstueck AS f";
-		$sql.= " WHERE f.gemarkungsnummer = g.gemarkungsnummer";
-		$sql.= " AND jagdbezirke.oid IN (".implode(',', $oids).")";
-		$sql.= " AND f.wkb_geometry && st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.") AND st_intersects(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS."))";
-		$sql.= " AND st_area(st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS."))) > 1) as foo";
-		$sql.= " group by eigentuemer, j_flaeche";
-		return $this->execSQL($sql, 4, 0);
-	}
-		
+			
 	function check_poly_in_flur($polygon, $epsg){
 		$sql = "SELECT f.land * 10000 + f.gemarkungsnummer, f.flurnummer FROM alkis.ax_flurstueck f WHERE st_intersects(wkb_geometry, st_transform(st_geomfromtext('".$polygon."', ".$epsg."), ".EPSGCODE_ALKIS."))";
   	return $this->execSQL($sql,4, 1);

@@ -104,21 +104,21 @@ else {
 		  	<tr>
 		  		<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPath; ?></th>
 		  		<td colspan=2 valign="top" style="border-bottom:1px solid #C3C7C3">
-		  			<textarea name="pfad" cols="33" rows="4"><? echo $this->formvars['pfad'] ?></textarea>&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>ikon_i.gif" onMouseOver="stm(Text[2], Style[0], document.getElementById('TipLayer3'))" onmouseout="htm()">
+		  			<textarea name="pfad" cols="33" rows="4"><? echo $this->formvars['pfad'] ?></textarea>&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[2], Style[0], document.getElementById('TipLayer3'))" onmouseout="htm()">
 						<div id="TipLayer3" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 		  		</td>
 		  	</tr>
 		  	<tr>
 		  		<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strData; ?></th>
 		  		<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-		  			<textarea name="Data" cols="33" rows="4"><? echo $this->formvars['Data'] ?></textarea>&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>ikon_i.gif" onMouseOver="stm(Text[3], Style[0], document.getElementById('TipLayer4'))" onmouseout="htm()">
+		  			<textarea name="Data" cols="33" rows="4"><? echo $this->formvars['Data'] ?></textarea>&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[3], Style[0], document.getElementById('TipLayer4'))" onmouseout="htm()">
 						<div id="TipLayer4" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 		  		</td>
 		  	</tr>
 				<tr>
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strMaintable; ?></th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-						<input name="maintable" type="text" value="<?php echo $this->formvars['maintable']; ?>" size="25" maxlength="100">&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>ikon_i.gif" onMouseOver="stm(Text[1], Style[0], document.getElementById('TipLayer1'))" onmouseout="htm()">
+						<input name="maintable" type="text" value="<?php echo $this->formvars['maintable']; ?>" size="25" maxlength="100">&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[1], Style[0], document.getElementById('TipLayer1'))" onmouseout="htm()">
 						<div id="TipLayer1" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 					</td>
 				</tr>
@@ -281,7 +281,7 @@ else {
 		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strProcessing; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		    	  <input name="processing" type="text" value="<?php echo $this->formvars['processing']; ?>" size="25" maxlength="255">
-						<img src="<?php echo GRAPHICSPATH;?>ikon_i.gif" onMouseOver="stm(Text[0], Style[0], document.getElementById('TipLayer2'))" onmouseout="htm()">
+						<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[0], Style[0], document.getElementById('TipLayer2'))" onmouseout="htm()">
 						<div id="TipLayer2" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 		    	</td>
 		  	</tr>

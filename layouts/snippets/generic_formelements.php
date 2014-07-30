@@ -4,10 +4,10 @@
 									case 'Textfeld' : {
 										$datapart .= '<textarea title="'.$attributes['alias'][$j].'" cols="45" onchange="set_changed_flag(currentform.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')"';
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
-											$datapart .= ' readonly style="border:0px;background-color:transparent;font-family:arial,verdana,helvetica,sans-serif;font-size: '.$this->user->rolle->fontsize_gle.'px;"';
+											$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;"';
 										}
 										else{
-											$datapart .= ' style="font-family:arial,verdana,helvetica,sans-serif;font-size: '.$this->user->rolle->fontsize_gle.'px"';
+											$datapart .= ' style="font-size: '.$this->user->rolle->fontsize_gle.'px"';
 										}
 										$datapart .= ' rows="3" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'">'.$dataset[$attributes['name'][$j]].'</textarea>';
 									}break;

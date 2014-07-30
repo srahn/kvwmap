@@ -54,6 +54,8 @@ function save(){
 
 <?php
 
+	$this->qlayerset[$i]['Layer_ID'] = LAYER_ID_JAGDBEZIRKE;		// damit man alle Jagd-Layer abfragen und editieren kann, wird die Layer-ID vom Lagbezirks_Layer genommen
+
   $anzObj=count($this->qlayerset[$i]['shape']);
   if ($anzObj>0) {
     ?>
@@ -68,6 +70,7 @@ function save(){
   </tr>
 
 <?php
+	if(!class_exists('jagdkataster'))include (PLUGINS.'jagdkataster/model/jagdkataster.php');		# jagdkataster-Klasse einbinden
 	$jagdkataster = new jagdkataster($this->pgdatabase);
 	$privileg_ = array();
 	for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
@@ -185,7 +188,7 @@ function save(){
           <td valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
             <?php
             if(count($paechterliste) == 0) {
-            echo "<span class="fett">P&auml;chter</span>";
+            echo '<span class="fett">P&auml;chter</span>';
             } else {
             ?>
             <a href="javascript:paechter_listen(<?php echo $this->qlayerset[$i]['shape'][$j]['oid']; ?>, '<? echo $this->qlayerset[$i]['shape'][$j]['name'] ?>');"><span class="fett">P&auml;chter</span></a>&nbsp;

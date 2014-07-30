@@ -168,7 +168,7 @@ else {
 		<tr>
           <td align="left" colspan="3">Flur:&nbsp;&nbsp;&nbsp;&nbsp;
 						<div style="position: relative">
-						<img src="<?php echo GRAPHICSPATH;?>ikon_i.gif" onMouseOver="stm(Text[1],Style[0], document.getElementById('TipLayer'))" onmouseout="htm()"><br><input type="text" name="suchflur" value="<?php echo $this->formvars['suchflur']; ?>" size="3" maxlength="3">
+						<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[1],Style[0], document.getElementById('TipLayer'))" onmouseout="htm()"><br><input type="text" name="suchflur" value="<?php echo $this->formvars['suchflur']; ?>" size="3" maxlength="3">
 						<DIV id="TipLayer" style="visibility:hidden;position:absolute;z-index:1000;left: -50px"></DIV>
 						</div>
           </td>

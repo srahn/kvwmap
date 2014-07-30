@@ -90,7 +90,7 @@ function save(stelle){
 	<tr>
   	<td>
 			<div style="position:relative;">
-				<img src="<?php echo GRAPHICSPATH;?>ikon_i.gif" onMouseOver="stm(Text[1],Style[0], document.getElementById('TipLayer'))" onmouseout="htm()">
+				<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[1],Style[0], document.getElementById('TipLayer'))" onmouseout="htm()">
 				<DIV id="TipLayer" style="visibility:hidden;position:absolute;z-index:1000;"></DIV>
 			</div>
   	</td>

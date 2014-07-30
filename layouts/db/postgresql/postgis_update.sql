@@ -1286,6 +1286,8 @@ SELECT bw.oid, bw.gemeinde::text || '0000'::text AS gesl, g.gemeindename AS gena
   LEFT JOIN alb_v_gemeinden g ON bw.gemeinde = g.gemeinde
   LEFT JOIN alb_v_gemarkungen gm ON bw.gemarkung = gm.gemkgschl;
 
+	
+-- Überspielen der vorhandenen Daten
 
 insert into bodenrichtwerte.bw_zonen 
 select gemeinde, gemarkung, ortsteilname, postleitzahl, zonentyp, gutachterausschuss, bodenrichtwertnummer, oertliche_bezeichnung, bodenrichtwert, 
@@ -1302,4 +1304,138 @@ select gemeinde, gemarkung, ortsteilname, postleitzahl, zonentyp, gutachteraussc
 -- DROP VIEW boris205_view;
 -- DROP TABLE bw_zonen;
 			 
----- BORIS ----
+---- BORIS Ende ----
+
+---- Jagdkataster ----
+
+CREATE SCHEMA jagdkataster;
+
+
+-- Tabelle Jagdbezirke
+-- ####################### 
+
+CREATE TABLE jagdkataster.jagdbezirke
+(
+  id character varying(10),
+  art character varying(15),
+  flaeche numeric,
+  name character varying(50),
+  concode character varying(5), -- entspricht tbJagdbezirk.BCode in condition
+  conname character varying(40), -- entspricht tbJagdbezirk.BBezeichnung in condition
+  jb_zuordnung character varying(10),
+  status boolean,
+  verzicht boolean NOT NULL DEFAULT false
+)
+WITH (
+  OIDS=TRUE
+);
+ALTER TABLE jagdkataster.jagdbezirke
+  ADD CONSTRAINT jagdbezirke_pkey PRIMARY KEY(oid);
+COMMENT ON COLUMN jagdkataster.jagdbezirke.concode IS 'entspricht tbJagdbezirk.BCode in condition';
+COMMENT ON COLUMN jagdkataster.jagdbezirke.conname IS 'entspricht tbJagdbezirk.BBezeichnung in condition';
+
+SELECT AddGeometryColumn('jagdkataster', 'jagdbezirke','the_geom',2398,'GEOMETRY', 2);
+
+CREATE INDEX jagdbezirke_the_geom_gist
+  ON jagdkataster.jagdbezirke
+  USING gist
+  (the_geom );
+
+
+-- Tabelle Jagdbezirkarten
+-- #######################
+
+CREATE TABLE jagdkataster.jagdbezirkart
+(
+  art character varying(10),
+  bezeichnung character varying(30)
+)
+WITH (
+  OIDS=TRUE
+);
+
+INSERT INTO jagdkataster.jagdbezirkart VALUES ('ejb', 'EJB im Verfahren');
+INSERT INTO jagdkataster.jagdbezirkart VALUES ('ajb', 'Abgerundeter EJB');
+INSERT INTO jagdkataster.jagdbezirkart VALUES ('gjb', 'Gemeinschaftlicher Jagdbezirk');
+INSERT INTO jagdkataster.jagdbezirkart VALUES ('tjb', 'Teiljagdbezirk');
+INSERT INTO jagdkataster.jagdbezirkart VALUES ('sf', 'Sonderfläche');
+INSERT INTO jagdkataster.jagdbezirkart VALUES ('agf', 'Angliederungsfläche');
+INSERT INTO jagdkataster.jagdbezirkart VALUES ('atf', 'Abtrennungsfläche');
+INSERT INTO jagdkataster.jagdbezirkart VALUES ('slf', 'Anpachtfläche');
+INSERT INTO jagdkataster.jagdbezirkart VALUES ('jbe', 'Enklave');
+INSERT INTO jagdkataster.jagdbezirkart VALUES ('jbf', 'Jagdbezirksfreie Fläche');
+
+
+
+
+-- Tabelle Jagdpaechter
+-- #######################
+
+CREATE TABLE jagdkataster.jagdpaechter
+(
+  id integer NOT NULL, -- entspricht Waffenbesitzer.Code in condition
+  anrede character varying(10),
+  nachname character varying(50),
+  vorname character varying(50),
+  geburtstag character varying(20),
+  geburtsort character varying(50),
+  strasse character varying(50),
+  plz character varying(5),
+  ort character varying(50),
+  telefon character varying(50)
+)
+WITH (
+  OIDS=TRUE
+);
+ALTER TABLE jagdkataster.jagdpaechter
+  ADD CONSTRAINT jagdpaechter_pkey PRIMARY KEY(id);
+COMMENT ON COLUMN jagdkataster.jagdpaechter.id IS 'entspricht Waffenbesitzer.Code in condition';
+
+
+
+-- Tabelle Zuordnung der Paechter zur den Jagdbezirken
+-- #######################
+
+CREATE TABLE jagdkataster.jagdpaechter2bezirke
+(
+  bezirkid integer NOT NULL,
+  paechterid integer NOT NULL
+)
+WITH (
+  OIDS=TRUE
+);
+ALTER TABLE jagdkataster.jagdpaechter2bezirke
+  ADD CONSTRAINT jagdpaechter2bezirke_pkey PRIMARY KEY(oid);
+
+
+-- View zu den Jagdbezirken
+-- #######################
+
+CREATE OR REPLACE VIEW jagdkataster.jagdbezirk_paechter AS 
+ SELECT jb.oid, jb.id, jb.name, jb.art, jb.flaeche, jpb.bezirkid, jb.concode, jb.jb_zuordnung, jb.status, jb.the_geom
+   FROM jagdkataster.jagdbezirke jb
+   LEFT JOIN jagdkataster.jagdpaechter2bezirke jpb ON jb.concode = cast(jpb.bezirkid as text)
+  GROUP BY jb.oid, jb.id, jb.name, jb.art, jb.flaeche, jpb.bezirkid, jb.concode, jb.jb_zuordnung, jb.status, jb.the_geom;
+	
+
+-- Überspielen der vorhandenen Daten
+
+INSERT INTO jagdkataster.jagdbezirke
+SELECT id, art, flaeche, name, concode, conname, jb_zuordnung, status, verzicht, the_geom FROM jagdbezirke;
+
+INSERT INTO jagdkataster.jagdpaechter
+SELECT id, anrede, nachname, vorname, geburtstag, geburtsort, strasse, plz, ort, telefon FROM jagdpaechter;
+
+INSERT INTO jagdkataster.jagdpaechter2bezirke
+SELECT bezirkid, paechterid FROM jagdpaechter2bezirke;
+
+-- Löschen der alten Tabellen und der Sicht
+
+--DROP VIEW jagdbezirk_paechter;
+--DROP TABLE jagdbezirke;
+--DROP TABLE jagdpaechter;
+--DROP TABLE jagdbezirkart;
+--DROP TABLE jagdpaechter2bezirke;
+	
+---- Jagdkataster Ende ----
+
