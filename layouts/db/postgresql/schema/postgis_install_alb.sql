@@ -89,26 +89,6 @@ CREATE TABLE alb_g_namen_temp
 )
 WITH OIDS;
 
---# Anlegen der Tabellen für die Fachscale Anliegerbeiträge
-
-CREATE TABLE anliegerbeitraege_bereiche
-(
-  id serial NOT NULL,
-  flaeche real,
-  kommentar character varying(255),
-  CONSTRAINT anliegerbeitraege_bereiche_pkey PRIMARY KEY (id)
-) 
-WITH OIDS;
-SELECT AddGeometryColumn('public', 'anliegerbeitraege_bereiche','the_geom',2398,'GEOMETRY', 2);
-
-CREATE TABLE anliegerbeitraege_strassen
-(
-  id serial NOT NULL,
-  CONSTRAINT anliegerbeitraege_strassen_pkey PRIMARY KEY (id)
-) 
-WITH OIDS;
-SELECT AddGeometryColumn('public', 'anliegerbeitraege_strassen','the_geom',2398,'GEOMETRY', 2);
-
 
 --# Anlegen der Tabelle zum Speichern von beliebigen Polygonen
 

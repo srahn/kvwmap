@@ -436,7 +436,7 @@ if($_REQUEST['go'] != 'navMap_ajax'){								# Version 1.7.6   # in 1.14 in navM
 	include (CLASSPATH.'polygoneditor.php');            # Version 1.6.3
 	include (CLASSPATH.'pointeditor.php');              # Version 1.6.3
 	include (CLASSPATH.'dbf.php');                      # Version 1.6.5
-	include (CLASSPATH.'anliegerbeitraege.php');        # Version 1.6.6   (nur für die, die diese Fachschale nutzen wollen)
+	#include (CLASSPATH.'anliegerbeitraege.php');        # Version 1.6.6   # in Version 1.14 gelöscht
 	include (CLASSPATH.'gebaeude_editor.php');          # Version 1.6.6   (nur für die, die diese Fachschale nutzen wollen)
 	include (CLASSPATH.'documents.php');                # Version 1.6.6
 	include (CLASSPATH.'esaf.php');                     # Version 1.6.6
@@ -464,6 +464,7 @@ $kvwmap_plugins = array();																			# Version 1.11.0
 #$kvwmap_plugins[] = 'bodenrichtwerte';														# Version 1.14.0
 #$kvwmap_plugins[] = 'jagdkataster';															# Version 1.14.0
 #$kvwmap_plugins[] = 'nachweisverwaltung';												# Version 1.14.0
+#$kvwmap_plugins[] = 'anliegerbeitraege';												# Version 1.14.0
 #																																# Version 1.11.0
 #############################################################		# Version 1.11.0
 

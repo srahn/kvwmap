@@ -1,3 +1,8 @@
+<?
+		
+	$this->goNotExecutedInPlugins = false;
+		
+	switch($this->go){
 	  # Jagdbezirke Sachdaten anzeigen
 	  case 'jagdbezirk_show_data' : {
 			include(PLUGINS.'jagdkataster/model/kvwmap.php');						# GUI-Objekt erweitern
@@ -96,3 +101,10 @@
 			include (PLUGINS.'jagdkataster/model/jagdkataster.php');		# jagdkataster-Klasse einbinden
 			$this->jagdkatastereditor_listpaechter();
 	  }break;
+		
+		default : {
+			$this->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
+		}
+	}
+	
+?>

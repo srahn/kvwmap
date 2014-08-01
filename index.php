@@ -535,22 +535,6 @@ if($GUI->goNotExecutedInPlugins){
 		$GUI->sachdaten_speichern();
 	  }break;
 
-	  # Anliegerbeiträge
-	  case 'anliegerbeitraege' : {
-		$GUI->checkCaseAllowed($go);
-		$GUI->Anliegerbeiträge_editor();
-	  }break;
-
-	  # Anliegerbeiträge Strasse speichern
-	  case 'anliegerbeitraege_strasse_speichern' : {
-		$GUI->Anliegerbeiträge_strasse_speichern();
-	  }break;
-
-	  # Anliegerbeiträge Buffer speichern
-	  case 'anliegerbeitraege_buffer_speichern' : {
-		$GUI->Anliegerbeiträge_buffer_speichern();
-	  }break;
-
 	  # Sachdaten anzeigen
 	  case 'Sachdaten' : {
 			if($GUI->formvars['legendtouched'])$GUI->saveLegendRoleParameters();			

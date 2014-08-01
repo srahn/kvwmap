@@ -1676,6 +1676,42 @@ INSERT INTO nachweisverwaltung.fp_punkte_temp SELECT * FROM fp_punkte_temp;
 --DROP TABLE fp_punkte2;
 --DROP TABLE fp_punkte_temp;
 
-
 ---- Nachweisverwaltung Ende ----
+
+
+---- Anliegerbeitraege ----
+
+CREATE SCHEMA anliegerbeitraege;
+
+CREATE TABLE anliegerbeitraege.anliegerbeitraege_bereiche
+(
+  id serial NOT NULL,
+  flaeche real,
+  kommentar character varying(255),
+  CONSTRAINT anliegerbeitraege_bereiche_pkey PRIMARY KEY (id)
+) 
+WITH OIDS;
+SELECT AddGeometryColumn('anliegerbeitraege', 'anliegerbeitraege_bereiche','the_geom',2398,'GEOMETRY', 2);
+
+CREATE TABLE anliegerbeitraege.anliegerbeitraege_strassen
+(
+  id serial NOT NULL,
+  CONSTRAINT anliegerbeitraege_strassen_pkey PRIMARY KEY (id)
+) 
+WITH OIDS;
+SELECT AddGeometryColumn('anliegerbeitraege', 'anliegerbeitraege_strassen','the_geom',2398,'GEOMETRY', 2);
+
+
+-- Überspielen der vorhandenen Daten
+
+INSERT INTO anliegerbeitraege.anliegerbeitraege_bereiche SELECT id, flaeche, kommentar, the_geom FROM anliegerbeitraege_bereiche;
+
+INSERT INTO anliegerbeitraege.anliegerbeitraege_strassen SELECT * FROM anliegerbeitraege_strassen;
+
+-- Löschen der alten Tabellen
+
+--DROP TABLE anliegerbeitraege_bereiche;
+--DROP TABLE anliegerbeitraege_strassen;
+
+---- Anliegerbeitraege Ende ----
 

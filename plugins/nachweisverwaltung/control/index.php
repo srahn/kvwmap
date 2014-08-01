@@ -1,3 +1,8 @@
+<?
+
+	$this->goNotExecutedInPlugins = false;
+	
+	switch($this->go){
 		case 'Antraege_Anzeigen' : {
 			$this->checkCaseAllowed('Antraege_Anzeigen');
 			include (PLUGINS.'nachweisverwaltung/model/kvwmap.php');						# GUI-Objekt erweitern
@@ -345,3 +350,10 @@
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$this->ordneFestpunktSkizzen();
 	  } break;
+		
+		default : {
+			$this->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
+		}
+	}
+	
+?>

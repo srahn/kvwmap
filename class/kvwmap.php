@@ -328,24 +328,18 @@ class GUI extends GUI_core{
 
 	return array("success" => $success, "antrag_id" => $antrag_id, "xml_file" => IMAGEURL . $xml_file_name, "pdf_file" => IMAGEURL . $pdf_file_name, "zip_file" => IMAGEURL . $zip_file_name, "email_text" => $email_text, "email_recipient" => $email_recipient, "authority_processingTime" => $data['authority_processingTime'], "data:" => $data);
 	}
-	
-  function loadPlugins(){
+		
+	function loadPlugins(){
   	global $kvwmap_plugins;
-	  $this->goNotExecutedInPlugins = false;
-  	$plugins = scandir(PLUGINS, 1);
-  	$code = '
-		switch($this->go){';
-			for($i = 0; $i < count($plugins)-2; $i++){
-				if(in_array($plugins[$i], $kvwmap_plugins)){
-					$code.= file_get_contents(PLUGINS.$plugins[$i].'/control/index.php');
+	  $this->goNotExecutedInPlugins = true;		// wenn es keine Plugins gibt, ist diese Var. immer true
+  	if(count($kvwmap_plugins) > 0){
+			$plugins = scandir(PLUGINS, 1);  	
+			for($i = 0; $i < count($plugins)-2; $i++){				
+				if($this->goNotExecutedInPlugins == true AND in_array($plugins[$i], $kvwmap_plugins)){
+					include(PLUGINS.$plugins[$i].'/control/index.php');
 				}
 			}
-			$code.= '
-			default : {
-				$this->goNotExecutedInPlugins = true;
-			}		
-		}';
-		eval($code);
+		}
   }
   
   function truncateAlbAlkTables(){
@@ -2743,99 +2737,6 @@ class GUI extends GUI_core{
 		$this->layerhiddenstring = 'reload ';		// Legenden-Reload erzwingen, damit Suchergebnis-Layer angezeigt werden
     $this->output();
   }
-
-  function Anliegerbeiträge_editor(){
-    $this->main='anliegerbeitraege_editor.php';
-    $this->titel='Anliegerbeiträge';
-    # aktuellen Kartenausschnitt laden + zeichnen!
-		$saved_scale = $this->reduce_mapwidth(100);
-    $this->loadMap('DataBase');
-		if($_SERVER['REQUEST_METHOD'] == 'GET')$this->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
-    if ($this->formvars['CMD']!='') {
-      $this->navMap($this->formvars['CMD']);
-      $this->user->rolle->saveDrawmode($this->formvars['always_draw']);
-    }
-    $this->queryable_postgis_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
-
-  	if(!$this->formvars['layer_id']){
-      $layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
-      $this->formvars['layer_id'] = $layerset[0]['Layer_ID'];
-    }
-    if($this->formvars['layer_id']){
-      $layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
-      $data = $this->mapDB->getData($this->formvars['layer_id']);
-      $data_explosion = explode(' ', $data);
-      $this->formvars['columnname'] = $data_explosion[0];
-      $select = $this->mapDB->getSelectFromData($data);
-      $this->formvars['fromwhere'] = 'from ('.$select.') as foo where 1=1';
-      if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
-        $this->formvars['fromwhere'] .= ' where (1=1)';
-      }
-    }
-    else{
-      $layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
-      $this->formvars['layer_id'] = $layerset[0]['Layer_ID'];
-    }
-
-    $this->saveMap('');
-    $currenttime=date('Y-m-d H:i:s',time());
-    $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-    $this->drawMap();
-    $this->output();
-  }
-
-  function Anliegerbeiträge_strasse_speichern(){
-    $anliegerbeitraege = new anliegerbeitraege($this->pgdatabase);
-    $layerset = $this->user->rolle->getLayer('AB_Strassen');
-    $anliegerbeitraege->layerepsg = $layerset[0]['epsg_code'];
-    $anliegerbeitraege->clientepsg = $this->user->rolle->epsg_code;
-    # eingeabewerte pruefen:
-    $ret = $anliegerbeitraege->pruefeEingabedaten($this->formvars['newpathwkt']);
-    if ($ret[0]) { # fehlerhafte eingabedaten
-      $this->Meldung=$ret[1];
-      $this->Anliegerbeiträge_editor();
-      return;
-    }
-    else{
-      $umring = $this->formvars['newpathwkt'];
-      $ret = $anliegerbeitraege->eintragenNeueStrasse($umring);
-      if ($ret[0]) { # fehler beim eintrag
-          $this->Meldung=$ret[1];
-      }
-      else { # eintrag erfolgreich
-        $this->formvars['secondpoly']="true";
-        showMessage('Eintrag erfolgreich!');
-      }
-      $this->Anliegerbeiträge_editor();
-    }
-  }
-
-  function Anliegerbeiträge_buffer_speichern(){
-    $anliegerbeitraege = new anliegerbeitraege($this->pgdatabase);
-    $layerset = $this->user->rolle->getLayer('AB_Bereiche');
-    $anliegerbeitraege->layerepsg = $layerset[0]['epsg_code'];
-    $anliegerbeitraege->clientepsg = $this->user->rolle->epsg_code;
-    # eingeabewerte pruefen:
-    $ret = $anliegerbeitraege->pruefeEingabedaten($this->formvars['newpathwkt']);
-    if ($ret[0]) { # fehlerhafte eingabedaten
-      $this->Meldung=$ret[1];
-      $this->Anliegerbeiträge_editor();
-      return;
-    }
-    else{
-      $umring = $this->formvars['newpathwkt'];
-      $ret = $anliegerbeitraege->eintragenNeueBereiche($umring);
-      if ($ret[0]) { # fehler beim eintrag
-          $this->Meldung=$ret[1];
-      }
-      else { # eintrag erfolgreich
-        $this->formvars['secondpoly']="true";
-        showMessage('Eintrag erfolgreich!');
-      }
-      $this->Anliegerbeiträge_editor();
-    }
-  }
-
 
   function bauleitplanung(){
     $this->main='bauleitplanungsaenderung.php';

@@ -39,12 +39,12 @@ function save_buffer(){
 function createbuffer(){
 	top.document.GUI.secondpoly.value = true;
   if(top.document.GUI.newpathwkt.value != ""){
-  	top.ahah("<? echo URL.APPLVERSION; ?>index.php", "go=spatial_processing&path1="+top.document.GUI.newpathwkt.value+"&width="+top.document.GUI.buffersize.value+"&operation=buffer_ring&resulttype=svgwkt", new Array(top.document.GUI.result), "");
+  	top.ahah("<? echo URL.APPLVERSION; ?>index.php", "go=spatial_processing&path1="+top.document.GUI.newpathwkt.value+"&width="+top.document.GUI.buffersize.value+"&operation=buffer_ring&resulttype=svgwkt", new Array(top.document.GUI.result, ""), new Array("setvalue", "execute_function"));
   }
   else{
   	if(top.document.GUI.newpath.value != ""){
   		newpath = buildwktpolygonfromsvgpath(top.document.GUI.newpath.value);
-  		top.ahah("<? echo URL.APPLVERSION; ?>index.php", "go=spatial_processing&path1="+newpath+"&width="+top.document.GUI.buffersize.value+"&operation=buffer_ring&resulttype=svgwkt", new Array(top.document.GUI.result), "");
+  		top.ahah("<? echo URL.APPLVERSION; ?>index.php", "go=spatial_processing&path1="+newpath+"&width="+top.document.GUI.buffersize.value+"&operation=buffer_ring&resulttype=svgwkt", new Array(top.document.GUI.result, ""), new Array("setvalue", "execute_function"));
   	}
   }
 }
