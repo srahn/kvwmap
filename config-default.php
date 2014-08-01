@@ -423,9 +423,9 @@ if($_REQUEST['go'] != 'navMap_ajax'){								# Version 1.7.6   # in 1.14 in navM
 	include (CLASSPATH.'users.php');
 	include (CLASSPATH.'alb.php');
 	include (CLASSPATH.'alk.php');
-	include (CLASSPATH.'antrag.php');
+	#include (CLASSPATH.'antrag.php');								# in Version 1.14 gelöscht
 	include (CLASSPATH.'bau.php');
-	include (CLASSPATH.'nachweis.php');
+	#include (CLASSPATH.'nachweis.php');							# in Version 1.14 gelöscht
 	include (CLASSPATH.'geothermie.php');
 	#include (CLASSPATH.'bodenrichtwerte.php');				# in Version 1.14 gelöscht
 	include (CLASSPATH.'verundentsorgung.php');
@@ -447,7 +447,6 @@ if($_REQUEST['go'] != 'navMap_ajax'){								# Version 1.7.6   # in 1.14 in navM
 	include (CLASSPATH.'lineeditor.php');               # Version 1.7.0
 	include (CLASSPATH.'wfs.php');                      # Version 1.7.0
 	include (CLASSPATH.'synchronisation.php');          # Version 1.7.0
-	#include (CLASSPATH.'rok.php');          						# Version 1.7.1		in Version 1.11.0 gelöscht
 	include (CLASSPATH.'tif.php');          						# Version 1.7.2
 	include (CLASSPATH.'gpx.php');          						# Version 1.7.4
 	include (CLASSPATH.'datendrucklayout.php');         # Version 1.7.5
@@ -464,6 +463,7 @@ $kvwmap_plugins = array();																			# Version 1.11.0
 #$kvwmap_plugins[] = 'gewaesser';																	# Version 1.11.0
 #$kvwmap_plugins[] = 'bodenrichtwerte';														# Version 1.14.0
 #$kvwmap_plugins[] = 'jagdkataster';															# Version 1.14.0
+#$kvwmap_plugins[] = 'nachweisverwaltung';												# Version 1.14.0
 #																																# Version 1.11.0
 #############################################################		# Version 1.11.0
 

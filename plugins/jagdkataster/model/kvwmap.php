@@ -91,7 +91,7 @@
     $GUI->titel='Jagdbezirk anlegen';
     $saved_scale = $GUI->reduce_mapwidth(100);
     $GUI->loadMap('DataBase');
-		if($GUI->formvars['CMD']=='')$GUI->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
+		if($_SERVER['REQUEST_METHOD'] == 'GET')$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
     $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id);
   	if(!$GUI->formvars['layer_id']){
       $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);

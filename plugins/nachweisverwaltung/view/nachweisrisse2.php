@@ -1,6 +1,7 @@
 <h2><?php echo $this->qlayerset[$i]['Name']; ?></h2>
 <?php
   $layer_id=$this->qlayerset[$i]['Layer_ID'];
+	include (PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Klasse einbinden
   $this->nachweis = new Nachweis($this->pgdatabase, $this->user->rolle->epsg_code);
 ?>
 

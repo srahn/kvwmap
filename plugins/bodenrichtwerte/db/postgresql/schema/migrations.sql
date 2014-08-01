@@ -1,7 +1,7 @@
 
-### migration 2014-08-03 00:00:00
+--- migration 2014-08-03 00:00:00
 
-# Version 2.0.0
+-- Version 2.0.0
 
 BEGIN;
 

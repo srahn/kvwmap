@@ -816,15 +816,15 @@ if($GUI->goNotExecutedInPlugins){
 	  } break;
 
 	  case 'Druckrahmen_Löschen' : {
-		$GUI->checkCaseAllowed('Druckrahmen');
-		$GUI->druckrahmen_init();
-		$GUI->Document->delete_frame($GUI->formvars['selected_frame_id']);
-		$GUI->druckrahmen_load();
-		$GUI->output();
+			$GUI->checkCaseAllowed('Druckrahmen');
+			$GUI->druckrahmen_init();
+			$GUI->Document->delete_frame($GUI->formvars['selected_frame_id']);
+			$GUI->druckrahmen_load();
+			$GUI->output();
 	  } break;
 
 	  case 'Druckausschnitt_loeschen' : {
-		$GUI->druckausschnitt_löschen($GUI->formvars['loadmapsource']);
+			$GUI->druckausschnitt_löschen($GUI->formvars['loadmapsource']);
 	  } break;
 
 	  case 'Druckausschnitt_speichern' : {
@@ -837,51 +837,51 @@ if($GUI->goNotExecutedInPlugins){
 	  } break;
 
 	  case 'Druckausschnittswahl_Vorschau' : {
-		if(IMAGEMAGICK == 'true'){
-		  $GUI->druckvorschau();
-		  $GUI->output();
-		}
-		else{
-		  $GUI->druckvorschau_html();
-		  $GUI->output();
-		}
+			if(IMAGEMAGICK == 'true'){
+				$GUI->druckvorschau();
+				$GUI->output();
+			}
+			else{
+				$GUI->druckvorschau_html();
+				$GUI->output();
+			}
 	  } break;
 
 	  case 'Druckausschnittswahl_Drucken' : {
-		$GUI->createMapPDF($GUI->formvars['aktiverRahmen'], false);
-		$GUI->mime_type='pdf';
-		$GUI->output();
+			$GUI->createMapPDF($GUI->formvars['aktiverRahmen'], false);
+			$GUI->mime_type='pdf';
+			$GUI->output();
 	  } break;
 	  
 	  case 'Schnelle_Druckausgabe' : { 
-		if($GUI->formvars['druckrahmen_id'] == ''){
-			$GUI->formvars['druckrahmen_id'] = DEFAULT_DRUCKRAHMEN_ID;
-		}
-		$GUI->createMapPDF($GUI->formvars['druckrahmen_id'], false, true);
-		$GUI->mime_type='pdf';
-		$GUI->output();
+			if($GUI->formvars['druckrahmen_id'] == ''){
+				$GUI->formvars['druckrahmen_id'] = DEFAULT_DRUCKRAHMEN_ID;
+			}
+			$GUI->createMapPDF($GUI->formvars['druckrahmen_id'], false, true);
+			$GUI->mime_type='pdf';
+			$GUI->output();
 	  } break;
 
 	  case 'Notizenformular' : {
-		$GUI->notizErfassung();
+			$GUI->notizErfassung();
 	  } break;
 
 	  case 'Notizenformular_Senden' : {
-		$GUI->notizSpeichern();
+			$GUI->notizSpeichern();
 	  } break;
 
 	  case 'Notiz_Loeschen' : {
-		$GUI->notizLoeschen($GUI->formvars['oid']);
-		$GUI->loadMap('DataBase');
-		$currenttime=date('Y-m-d H:i:s',time());
-		$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
-		$GUI->drawMap();
-		$GUI->output();
+			$GUI->notizLoeschen($GUI->formvars['oid']);
+			$GUI->loadMap('DataBase');
+			$currenttime=date('Y-m-d H:i:s',time());
+			$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+			$GUI->drawMap();
+			$GUI->output();
 	  } break;
 
 	  case 'Notizenformular_KatVerwaltung' : {
-		$GUI->checkCaseAllowed($go);
-		$GUI->notizKatVerwaltung();
+			$GUI->checkCaseAllowed($go);
+			$GUI->notizKatVerwaltung();
 	  } break;
 
 	  case 'NotizKategorie_hinzufuegen' : {
@@ -928,27 +928,6 @@ if($GUI->goNotExecutedInPlugins){
 		$GUI->metadatensatzspeichern();
 	  } break;
 
-	  case 'Sachdaten_Festpunkte Anzeigen' : {
-		$GUI->festpunkteZeigen();
-	  } break;
-
-	  case 'Festpunkte Anzeigen' : {
-		$GUI->festpunkteZeigen();
-	  } break;
-
-	  case 'Festpunkte in Liste Anzeigen' : {
-		$GUI->festpunkteSuchen();
-	  } break;
-
-	  case 'Festpunkte_Auswaehlen' : {
-		$GUI->checkCaseAllowed($go);
-		$GUI->festpunkteWahl();
-	  } break;
-
-	  case 'Festpunkte_Auswaehlen_Suchen' : {
-		$GUI->festpunkteSuchen();
-	  } break;
-
 	  case 'Nutzung_auswaehlen' : {
 		$GUI->checkCaseAllowed($go);
 		$GUI->nutzungWahl();
@@ -987,65 +966,6 @@ if($GUI->goNotExecutedInPlugins){
 			$GUI->flurstSuchenByLatLng();
 			$GUI->output();
 		} break;
-
-	  case 'Sachdaten_Festpunkte zu Auftrag Hinzufügen' : {
-		$GUI->festpunkteZuAuftragFormular();
-	  } break;
-	  
-	  case 'Sachdaten_KVZ-Datei erzeugen' : {
-		$GUI->formvars['antr_selected'] = 'ohne';
-		$GUI->festpunkteInKVZschreiben();
-		ob_end_clean();
-		header("Content-type: text/kvz");
-		header("Content-Disposition: attachment; filename=".basename($GUI->datei));
-		header('Expires: 0');
-		header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-		header('Pragma: public');
-		readfile($GUI->datei);
-	  } break;
-
-	  case 'Festpunkte zum Antrag Hinzufügen_Senden' : {
-		$GUI->festpunkteZuAuftragSenden();
-	  } break;
-
-	  case 'sendImage' : {
-		if ($GUI->formvars['format'] == '') {
-		  $GUI->formvars['format']='png';
-		}
-		$GUI->sendImage($GUI->formvars['name'],'png');
-	  } break;
-
-	  case 'sendeFestpunktskizze' : {
-		$GUI->checkCaseAllowed($go);
-		$GUI->sendeFestpunktskizze($GUI->formvars['name'],PUNKTDATEIPATH);
-	  } break;
-
-	  case 'sendeDokument' : {
-		$GUI->sendeDokument($GUI->formvars['dokument'], $GUI->formvars['original_name']);
-	  } break;
-
-	  case 'sendeDokument_mit_vorschau' : {
-		$GUI->sendeDokument_mit_vorschau($GUI->formvars['dokument'], $GUI->formvars['original_name']);    
-	  } break;
-
-	  case 'FestpunktDateiUebernehmen' : {
-		$GUI->checkCaseAllowed($go);
-		$GUI->uebernehmeFestpunkte();
-	  } break;
-
-	  case 'FestpunktDateiAktualisieren' : {
-		$GUI->checkCaseAllowed($go);
-		$GUI->aktualisiereFestpunkte();
-	  } break;
-
-	  case 'Sachdaten_FestpunkteSkizzenZuordnung' : {
-		$GUI->showFestpunkteSkizze();
-	  } break;
-
-	  case 'FestpunkteSkizzenZuordnung_Senden' : {
-		$GUI->checkCaseAllowed($go);
-		$GUI->ordneFestpunktSkizzen();
-	  } break;
 
 	  case 'ExportMapToPDF' : {
 		$GUI->exportMapToPDF();
@@ -1438,6 +1358,14 @@ if($GUI->goNotExecutedInPlugins){
 		$GUI->checkCaseAllowed('Funktionen_Formular');
 		$GUI->FunktionAendern();
 	  } break;
+		
+		case 'sendeDokument' : {
+			$this->sendeDokument($this->formvars['dokument'], $this->formvars['original_name']);
+	  } break;
+
+	  case 'sendeDokument_mit_vorschau' : {
+			$this->sendeDokument_mit_vorschau($this->formvars['dokument'], $this->formvars['original_name']);    
+	  } break;
 
 	  case 'help' : {
 		include(WWWROOT.APPLVERSION.'help/hilfe.php');
@@ -1468,179 +1396,6 @@ if($GUI->goNotExecutedInPlugins){
 
 		case 'Versiegelung_Senden' : {
 		$GUI->versiegelungsFlaechenSenden();
-	  } break;
-
-	  case 'Antraege_Anzeigen' : {
-		$GUI->checkCaseAllowed('Antraege_Anzeigen');
-		$GUI->Antraege_Anzeigen();
-	  } break;
-
-	  case 'Antrag_loeschen' : {
-		$GUI->checkCaseAllowed($go);
-		$GUI->Antrag_Loeschen();
-	  } break;
-
-	  case 'Antraganzeige_Festpunkte_in_Karte_Anzeigen' : {
-		$GUI->festpunkteZuAntragZeigen();
-	  } break;
-
-	  case 'Antraganzeige_Festpunkte_in_Liste_Anzeigen' : {
-		$GUI->festpunkteSuchen();
-	  } break;
-
-	  case 'Antraganzeige_Festpunkte_in_KVZ_schreiben' : {
-		$GUI->festpunkteInKVZschreiben();
-		$GUI->Antraege_Anzeigen();
-	  } break;
-
-	  case 'Antraganzeige_Zugeordnete_Dokumente_Anzeigen' : {
-		$GUI->checkCaseAllowed($go);
-		$GUI->DokumenteZuAntraegeAnzeigen();
-	  } break;
-
-	  case 'Antraganzeige_Uebergabeprotokoll_Erzeugen' : {
-			$GUI->erzeugenUebergabeprotokollNachweise($GUI->formvars['antr_selected']);
-	  }break;
-	  
-	  case 'Antraganzeige_Uebergabeprotokoll_Erzeugen_PDF' : {
-			$GUI->erzeugenUebergabeprotokollNachweise_PDF();
-	  }break;
-	  
-	  case 'Antraganzeige_Uebergabeprotokoll_Erzeugen_CSV' : {
-			$GUI->erzeugenUebergabeprotokollNachweise_CSV();
-	  }break;
-
-	  case 'Antraganzeige_Rechercheergebnis_in_Ordner_zusammenstellen' : {
-		$ret=$GUI->DokumenteZumAntragInOrdnerZusammenstellen();
-		$GUI->Antraege_Anzeigen();
-		showAlert($ret);
-	  } break;
-
-	  case 'Antraganzeige_Recherche_Ordner_packen' : {
-		$filename = $GUI->DokumenteOrdnerPacken();
-		$GUI->Datei_Download($filename);
-	  } break;
-
-	  case 'Antraganzeige_Zusammenstellen_Zippen' : {
-		$ret=$GUI->DokumenteZumAntragInOrdnerZusammenstellen();
-		showAlert($ret);
-		$filename = $GUI->DokumenteOrdnerPacken();
-		$GUI->Datei_Download($filename);
-	  } break;
-
-
-	  # Die Werte zum Eintragen von neuen Documenten in die DB werden an "nachweisFormSenden"
-	  case 'Nachweisformular_Senden' : {
-	  	$_files = $_FILES;
-			$GUI->formvars['Bilddatei']=$_files['Bilddatei']['tmp_name'];
-			$GUI->formvars['Bilddatei_name']=$_files['Bilddatei']['name'];
-			$GUI->formvars['Bilddatei_size']=$_files['Bilddatei']['size'];
-			$GUI->formvars['Bilddatei_type']=$_files['Bilddatei']['type'];
-			$GUI->nachweisFormSenden();
-	  } break;
-
-	  case 'Nachweisloeschen':{
-		$GUI->checkCaseAllowed($go);
-		$GUI->nachweisLoeschen();
-	  } break;
-
-
-	#Documente die in der Ergebnisliste ausgewählt wurden sollen weiterverarbeitet werden!
-	# 2006-01-26 pk
-	  case 'Nachweisanzeige_zum_Auftrag_hinzufuegen' : {
-		$GUI->checkCaseAllowed($go);
-		$GUI->nachweiseZuAuftrag();
-	  } break;
-
-	  case 'Nachweisanzeige_aus_Auftrag_entfernen':{
-		$GUI->checkCaseAllowed($go);
-		$GUI->nachweiseZuAuftragEntfernen();
-	  } break;
-
-	  # Der case 'Bestaetigung' wurde am 2006-01-30 gelöscht, weil nicht mehr benutzt
-
-	  # Rechercheanfrage an die Datenbank senden / mit prüfen der Eingabedaten
-	  case 'Nachweisanzeige' : {
-		if($GUI->formvars['art_markieren'] AND $GUI->formvars['art_einblenden']){
-		  $GUI->formvars['showffr']=substr($GUI->formvars['art_einblenden'],0,1);
-		  $GUI->formvars['showkvz']=substr($GUI->formvars['art_einblenden'],1,1);
-		  $GUI->formvars['showgn']=substr($GUI->formvars['art_einblenden'],2,1);
-		  $GUI->formvars['showan']=substr($GUI->formvars['art_einblenden'],3,1);
-		  $GUI->formvars['markffr']=substr($GUI->formvars['art_markieren'],0,1);
-		  $GUI->formvars['markkvz']=substr($GUI->formvars['art_markieren'],1,1);
-		  $GUI->formvars['markgn']=substr($GUI->formvars['art_markieren'],2,1);
-		  $GUI->user->rolle->setNachweisAnzeigeparameter($GUI->formvars['showffr'],$GUI->formvars['showkvz'],$GUI->formvars['showgn'],$GUI->formvars['showan'],$GUI->formvars['markffr'],$GUI->formvars['markkvz'],$GUI->formvars['markgn']);
-		}
-		# Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
-		$GUI->savedformvars=$GUI->user->rolle->getNachweisParameter();
-		$GUI->formvars=array_merge($GUI->savedformvars,$GUI->formvars);
-		$GUI->nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
-		$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'],$GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur']);
-		if($ret!=''){
-		  $GUI->nachweisAnzeige();
-		  showAlert($ret);
-		}
-		else {
-		  $GUI->nachweisAnzeige();
-		}
-	  } break;
-
-	  case 'document_anzeigen' : {
-		$GUI->nachweisDokumentAnzeigen();
-	  } break;
-	  
-	  case 'document_vorschau' : {
-		$GUI->nachweisDokumentVorschau();
-	  } break;
-
-	  # Eingabe oder Änderung der Daten zu einem Dokument im Katasternachweis
-	  # für Fortführungsrisse, Koordinatenverzeichnisse und Grenzniederschriften
-
-	  case 'Nachweisformular' : {
-		$GUI->checkCaseAllowed($go);		
-		# Unterscheidung ob vorhandene Dokumente geändert werden sollen oder neu eingegeben
-		if ($GUI->formvars['id']!='') {
-		  # Ein Nachweis soll geändert werden
-		  $GUI->nachweisAenderungsformular();
-		}
-		else {
-		  # Eingabe von Daten zu einem neuen Nachweisdokument
-		  # Anzeige des Neueingabeformulars
-		  $GUI->nachweisFormAnzeige();
-		}
-	  } break;
-	  
-	  case 'Nachweisformular_Vorlage' : {
-		# Eingabe von Daten zu einem neuen Nachweisdokument
-		$GUI->nachweisFormAnzeigeVorlage();
-	  } break;
-
-		case 'check_nachweis_poly' : {
-		$GUI->check_nachweis_poly();
-	  } break;
-
-	  case 'Antrag_Aendern' : {
-		$GUI->checkCaseAllowed($go);
-		$GUI->vermessungsantragAendern();
-	  } break;
-
-	  case 'Nachweis_antragsnr_form_aufrufen' : {
-		$GUI->checkCaseAllowed($go);
-		$GUI->vermessungsantragsFormular();
-	  } break;
-
-	  case 'Nachweis_antragsnummer_Senden' : {
-		$GUI->vermessungsantragAnlegen();
-	  } break;
-
-	  case 'Nachweisrechercheformular':{
-		$GUI->checkCaseAllowed($go);
-		$GUI->rechercheFormAnzeigen();
-	  } break;
-
-	  # Rechercheanfrage an die Datenbank senden/ mit prüfen der Eingabedaten
-	  case 'Nachweisrechercheformular_Senden':{
-		$GUI->nachweiseRecherchieren();
 	  } break;
 
 	  case "Ändern" : {
