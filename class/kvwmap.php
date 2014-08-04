@@ -698,6 +698,24 @@ class GUI extends GUI_core{
       echo $html;
     }
   }
+	
+	function get_vorschlag(){
+    $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+    $layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+    $layerdb->setClientEncoding();
+    $attributenames[0] = $this->formvars['attribute'];
+    $attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
+		$attributenames = explode('|', $this->formvars['attributenames']);
+		$attributevalues = explode('|', $this->formvars['attributevalues']);
+		$sql = $attributes['options'][0];
+		for($i = 0; $i < count($attributenames); $i++){
+			$sql = str_replace('$'.$attributenames[$i], $attributevalues[$i], $sql);
+		}
+		$ret=$layerdb->execSQL($sql,4,0);
+		if($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
+		$rs = pg_fetch_array($ret[1]);
+		echo $rs[0];
+  }
 
   function showMapImage(){
   	$this->loadMap('DataBase');

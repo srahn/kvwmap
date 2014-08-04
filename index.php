@@ -298,7 +298,12 @@ if($GUI->goNotExecutedInPlugins){
 
 	  # liefert die options für ein Selectfeld für abhängige Attribute
 	  case 'get_select_list' : {
-		$GUI->get_select_list();
+			$GUI->get_select_list();
+	  } break;
+		
+		# liefert einen Vorschlag der sich aus einem in options stehenden SQL ergibt
+	  case 'get_vorschlag' : {
+			$GUI->get_vorschlag();
 	  } break;
 	  
 	  # Kartenbild anzeigen

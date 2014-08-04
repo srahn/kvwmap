@@ -7,6 +7,18 @@
 		echo 'window.close();';
 	}
  ?>
+
+make_vorschlag = function(attributenamesarray, attribute, k, layer_id){
+	var attributenames = '';
+	var attributevalues = '';
+	for(i = 0; i < attributenamesarray.length; i++){
+		if(document.getElementById(attributenamesarray[i]+'_'+k) != undefined){
+			attributenames += attributenamesarray[i] + '|';
+			attributevalues += document.getElementById(attributenamesarray[i]+'_'+k).value + '|';
+		}
+	}
+	ahah("<? echo URL.APPLVERSION; ?>index.php", "go=get_vorschlag&layer_id="+layer_id+"&attribute="+attribute+"&attributenames="+attributenames+"&attributevalues="+attributevalues, new Array(document.getElementById(attribute+'_'+k)), new Array("setvalue"));
+}
  
 update_buttons = function(all, layer_id){
 	delete_link = document.getElementById('delete_link_'+layer_id);
