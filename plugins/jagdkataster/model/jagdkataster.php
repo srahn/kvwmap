@@ -332,25 +332,18 @@ class jagdkataster {
 	
 	function getEigentuemerListeFromJagdbezirke($oids){
 		if(ALKIS){
-			$sql = "SELECT round((st_area(st_memunion(the_geom_inter))*100/j_flaeche)::numeric, 2) as anteil_alk, round((sum(flaeche)*(st_area(st_memunion(the_geom_inter))/st_area(st_memunion(the_geom))))::numeric, 2) AS albflaeche, eigentuemer";
+			$sql = "SELECT round((st_area(st_union(the_geom_inter))*100/j_flaeche)::numeric, 2) as anteil_alk, round((sum(flaeche)*(st_area(st_memunion(the_geom_inter))/st_area(st_memunion(the_geom))))::numeric, 2) AS albflaeche, eigentuemer";
 			$sql.= " FROM(SELECT distinct st_area(jagdbezirke.the_geom) as j_flaeche, f.amtlicheflaeche as flaeche, array_to_string(array(";
 			$sql.= "SELECT distinct array_to_string(array[p.nachnameoderfirma, p.vorname], ' ') as name ";
 			$sql.= "FROM alkis.ax_flurstueck ff ";		
-			$sql.= "LEFT JOIN (alkis.alkis_beziehungen bsf LEFT JOIN alkis.alkis_beziehungen s2s LEFT JOIN alkis.alkis_beziehungen s2s2 ON s2s2.beziehung_zu = s2s.beziehung_von ON s2s.beziehung_zu = bsf.beziehung_zu) ON f.gml_id = bsf.beziehung_von ";
-			$sql.= "LEFT JOIN alkis.ax_buchungsstelle s ON bsf.beziehung_zu = s.gml_id OR s2s.beziehung_von = s.gml_id OR s2s2.beziehung_von = s.gml_id ";
-			$sql.= "LEFT JOIN alkis.ax_buchungsstelle_buchungsart art ON s.buchungsart = art.wert ";
-			$sql.= "LEFT JOIN alkis.alkis_beziehungen bgs ON s.gml_id = bgs.beziehung_von ";
-			$sql.= "LEFT JOIN alkis.ax_buchungsblatt g ON bgs.beziehung_zu = g.gml_id ";
+			$sql.= "LEFT JOIN alkis.ax_buchungsstelle s2 ON ff.istgebucht = any(s2.an) ";
+			$sql.= "LEFT JOIN alkis.ax_buchungsstelle s ON ff.istgebucht = s.gml_id OR ff.istgebucht = any(s.an) OR ff.istgebucht = any(s2.an) AND s2.gml_id = any(s.an) ";
+			$sql.= "LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
 			$sql.= "LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
-			$sql.= "LEFT JOIN alkis.alkis_beziehungen bng ON bng.beziehung_zu = g.gml_id ";
-			$sql.= "LEFT JOIN alkis.ax_namensnummer n ON n.gml_id = bng.beziehung_von ";
-			$sql.= "LEFT JOIN alkis.alkis_beziehungen bpn ON bpn.beziehung_von = n.gml_id ";
-			$sql.= "LEFT JOIN alkis.ax_person p ON bpn.beziehung_zu = p.gml_id ";
+			$sql.= "LEFT JOIN alkis.ax_namensnummer n ON n.istbestandteilvon = g.gml_id ";
+			$sql.= "LEFT JOIN alkis.ax_namensnummer_eigentuemerart w ON w.wert = n.eigentuemerart ";
+			$sql.= "LEFT JOIN alkis.ax_person p ON n.benennt = p.gml_id ";
 			$sql.= " WHERE f.flurstueckskennzeichen = ff.flurstueckskennzeichen";
-			$sql.= " AND bsf.beziehungsart::text = 'istGebucht'::text";
-			$sql.= " AND bgs.beziehungsart::text = 'istBestandteilVon'::text"; 
-			$sql.= " AND bng.beziehungsart::text = 'istBestandteilVon'::text"; 
-			$sql.= " AND bpn.beziehungsart::text = 'benennt'::text"; 
 			$sql.= " order by name),' || ') as eigentuemer,";
 			$sql.= " st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.")) AS the_geom_inter, f.wkb_geometry as the_geom";		
 			$sql.= " FROM alkis.ax_gemarkung AS g, jagdkataster.jagdbezirke, alkis.ax_flurstueck AS f";

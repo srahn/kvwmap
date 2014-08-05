@@ -4005,6 +4005,7 @@ class GUI extends GUI_core{
     $formvars = $this->formvars;
     $flurstueck=new flurstueck('',$this->pgdatabase);
 		$ret=$flurstueck->getNamen($formvars,$GemkgListe['GemkgID']);
+		$this->anzNamenGesamt=count($ret[1]);
     if ($ret[0]) {
       $this->Fehlermeldung='<br>Es konnten keine Namen abgefragt werden'.$ret[1];
       $this->namenWahl();
@@ -4017,8 +4018,8 @@ class GUI extends GUI_core{
       else {
 				$formvars['anzahl'] = '';
 				$formvars['offset'] = '';
-				$ret=$flurstueck->getNamen($formvars,$GemkgListe['GemkgID']);
-        $this->anzNamenGesamt=count($ret[1]);
+				#$ret=$flurstueck->getNamen($formvars,$GemkgListe['GemkgID']);
+        #$this->anzNamenGesamt=count($ret[1]);
 
         if($this->formvars['withflurst'] == 'on'){
           for($i = 0; $i < count($this->namen); $i++){
@@ -11002,7 +11003,7 @@ class GUI extends GUI_core{
 	    	$epsg = EPSGCODE_ALKIS;
 	    	$datastring ="the_geom from (select g.gml_id as oid, wkb_geometry as the_geom FROM alkis.ax_gemeinde gem, alkis.ax_gebaeude g";
 		    $datastring.=" LEFT JOIN alkis.alkis_beziehungen v ON g.gml_id=v.beziehung_von"; 
-				$datastring.=" LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON v.beziehung_zu=l.gml_id";
+				$datastring.=" LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = any(g.zeigtauf)"; 
 				$datastring.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde";
 				$datastring.=" AND l.lage = lpad(s.lage,5,'0')";
 				$datastring.=" WHERE gem.gemeinde = l.gemeinde";
