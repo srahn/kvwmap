@@ -872,6 +872,8 @@ class user extends user_core{
 			if($formvars['querymode'] != '') $sql.=',querymode="1"';
 			else $sql.=',querymode="0"';
 			$sql.=',geom_edit_first="'.$formvars['geom_edit_first'].'"';
+			if($formvars['hist_timestamp'] != '') $sql.=',hist_timestamp="'.DateTime::createFromFormat('d.m.Y H:i:s', $formvars['hist_timestamp'])->format('Y-m-d H:i:s').'"';
+			else $sql.=',hist_timestamp = NULL';
 			if($formvars['back']){$buttons .= 'back,';}
 			if($formvars['forward']){$buttons .= 'forward,';}
 			if($formvars['zoomin']){$buttons .= 'zoomin,';}

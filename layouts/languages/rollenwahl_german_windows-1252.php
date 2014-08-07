@@ -26,6 +26,7 @@
 	$strNewDatasetOrder="Reihenfolge Datensatz-Erfassung";
 	$strGeomSecond="Sachdaten zuerst";
 	$strGeomFirst="Geometrie zuerst";
+	$strhist_timestamp="Zeitpunkt für historische Daten";
   
   
 ?>

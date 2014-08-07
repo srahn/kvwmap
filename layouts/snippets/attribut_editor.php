@@ -71,11 +71,11 @@
     	for($i = 0; $i < count($this->attributes['type']); $i++){
 				echo '
 				<tr>
-				  <td align="center">
+				  <td align="left" valign="top">
 				  	<input type="text" name="attribute_'.$this->attributes['name'][$i].'" value="'.$this->attributes['name'][$i].'" readonly>
 				  </td>
 				  <td>&nbsp;</td>
-				  <td align="center">
+				  <td align="left" valign="top">
 				  	<select  style="width:130px" name="form_element_'.$this->attributes['name'][$i].'">';
 				  	if($this->attributes['type'][$i] == 'geometry'){
 				  		echo'<option value="Geometrie" selected>Geometrie</option>';
@@ -144,32 +144,31 @@
 				  	</select>
 				  </td>
 				  <td>&nbsp;</td>
-				  <td align="center">';
+				  <td align="left" valign="top">';
 				  if($this->attributes['constraints'][$i] != '' AND $this->attributes['constraints'][$i] != 'PRIMARY KEY'){
 				  	echo '
-				  	<input disabled size="40" name="options_'.$this->attributes['name'][$i].'" type="text" value="'.$this->attributes['constraints'][$i].'">';
+				  	<input disabled style="width:180px" name="options_'.$this->attributes['name'][$i].'" type="text" value="'.$this->attributes['constraints'][$i].'">';
 				  }
 				  else{
 				  	echo '
-				  	<input size="40" name="options_'.$this->attributes['name'][$i].'" type="text" value="'.$this->attributes['options'][$i].'">';
+						<textarea name="options_'.$this->attributes['name'][$i].'" style="height:22px; width:180px">'.$this->attributes['options'][$i].'</textarea>';
 				  }
 				  echo '
 				  </td>
 				  <td>&nbsp;</td>
-				  <td>
+				  <td align="left" valign="top">
 				  	<input name="alias_'.$this->attributes['name'][$i].'" type="text" value="'.$this->attributes['alias'][$i].'">
 				  </td>
-					</td>
 				  <td>&nbsp;</td>
-				  <td>
-				  	<input name="tooltip_'.$this->attributes['name'][$i].'" type="text" value="'.htmlspecialchars($this->attributes['tooltip'][$i]).'">
+				  <td align="left" valign="top">
+						<textarea name="tooltip_'.$this->attributes['name'][$i].'" style="height:22px; width:120px">'.htmlspecialchars($this->attributes['tooltip'][$i]).'</textarea>
 				  </td>
 				  <td>&nbsp;</td>
-				  <td>
+				  <td align="left" valign="top">
 				  	<input name="group_'.$this->attributes['name'][$i].'" type="text" value="'.$this->attributes['group'][$i].'">
 				  </td>
 					<td>&nbsp;</td>
-				  <td align="center">
+				  <td align="center" valign="top">
 				  	<input name="mandatory_'.$this->attributes['name'][$i].'" type="checkbox" value="1" ';
 				  	if($this->attributes['mandatory'][$i]) echo 'checked="true"';
 						echo '>
@@ -177,7 +176,7 @@
 				if(in_array($this->formvars['selected_layer_id'], $quicksearch_layer_ids)){	
 					echo '
 					<td>&nbsp;</td>
-					<td align="center">
+					<td align="center" valign="top">
 				  	<input name="quicksearch_'.$this->attributes['name'][$i].'" type="checkbox" value="1" ';
 				  	if($this->attributes['quicksearch'][$i]) echo 'checked="true"';
 						echo '>

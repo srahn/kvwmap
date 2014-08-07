@@ -1,15 +1,19 @@
 <?php
-$layerset=$this->user->rolle->getLayer('');
+#$layerset=$this->user->rolle->getLayer('');
+
+$layerset = $this->layerset;
 
 $SVGvars_querytooltipscript = '
 
 		var layerset = new Array();
 		var layernumber = new Array();';
 for($i = 0; $i < count($layerset); $i++){
-	$SVGvars_querytooltipscript.= 'layerset['.$i.'] = top.document.GUI.qLayer'.$layerset[$i]['Layer_ID'].';
-	';
-	$SVGvars_querytooltipscript.= 'layernumber['.$i.'] = '.$layerset[$i]['Layer_ID'].';
-	';
+	if($layerset[$i]['Layer_ID'] != ''){
+		$SVGvars_querytooltipscript.= 'layerset['.$i.'] = top.document.GUI.qLayer'.$layerset[$i]['Layer_ID'].';
+		';
+		$SVGvars_querytooltipscript.= 'layernumber['.$i.'] = '.$layerset[$i]['Layer_ID'].';
+		';
+	}
 }
 $SVGvars_querytooltipscript .= '
 

@@ -60,6 +60,20 @@ class pgdatabase_alkis extends pgdatabase_core {
     $this->blocktransaction=0;
   }
 
+	function build_temporal_filter($timestamp, $tablenames){
+		if($timestamp == ''){
+			foreach($tablenames as $tablename){
+				$filter .= ' AND '.$tablename.'.endet IS NULL ';
+			}
+		}
+		else{
+			foreach($tablenames as $tablename){
+				$filter .= ' AND '.$tablename.'.beginnt <= \''.$timestamp.'\' and (\''.$timestamp.'\' <= '.$tablename.'.endet or '.$tablename.'.endet IS NULL) ';
+			}
+		}
+		return $filter;
+	}
+	
   function getFlurstByNutzungen($gemkgschl, $nutzung, $anzahl){
   	$sql = "SELECT f.flurstkennz, f.flaeche, gk.gemkgname, nutz.flaeche AS nutzflaeche, '21-' || nutz.nutzungsart AS nutzkennz, art.bezeichnung ";
   	$sql.= "FROM alb_v_gemarkungen AS gk, alb_flurstuecke AS f ";
@@ -791,6 +805,7 @@ class pgdatabase_alkis extends pgdatabase_core {
 		$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
 		$sql.="WHERE (g.blattart = 1000 OR g.blattart = 2000 OR g.blattart = 3000) ";
 		$sql.="AND f.flurstueckskennzeichen = '".$FlurstKennz."' ";
+		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('f', 's', 'g', 'b'));
 		$sql.="ORDER BY blatt";
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
@@ -982,18 +997,20 @@ class pgdatabase_alkis extends pgdatabase_core {
 			$sql.="LEFT JOIN alkis.ax_buchungsstelle_buchungsart art ON s.buchungsart = art.wert ";
 			$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
 			$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
-			$sql.="LEFT JOIN alkis.ax_namensnummer n ON n.istbestandteilvon = g.gml_id AND n.beschriebderrechtsgemeinschaft IS NOT NULL ";		
+			$sql.="LEFT JOIN alkis.ax_namensnummer n ON n.istbestandteilvon = g.gml_id AND n.beschriebderrechtsgemeinschaft IS NOT NULL ";
+			$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('n'));
 		}
 		else{
 			$sql.="FROM alkis.ax_buchungsblatt g ";
 			$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
 			$sql.="LEFT JOIN alkis.ax_namensnummer n ON n.istbestandteilvon = g.gml_id AND n.beschriebderrechtsgemeinschaft IS NOT NULL ";
+			$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('n'));
 			$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON s.istbestandteilvon = g.gml_id ";
 			$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON s.istbestandteilvon = g.gml_id ";
 			$sql.="LEFT JOIN alkis.ax_flurstueck f ON f.istgebucht = s.gml_id OR f.istgebucht = any(s.an) OR f.istgebucht = any(s2.an) AND s2.gml_id = any(s.an) ";
 			$sql.="LEFT JOIN alkis.ax_buchungsstelle_buchungsart art ON s.buchungsart = art.wert ";		
 		}
-		$sql.="WHERE n.endet IS NULL AND g.endet IS NULL AND b.endet IS NULL AND s.endet IS NULL AND f.endet IS NULL ";
+		$sql.="WHERE 1=1 ";
     if ($Bezirk!='') {
       $sql.=" AND b.schluesselgesamt=".$Bezirk;
     }
@@ -1003,6 +1020,7 @@ class pgdatabase_alkis extends pgdatabase_core {
     if ($FlurstKennz!='') {
       $sql.=" AND f.flurstueckskennzeichen='".$FlurstKennz."'";
     }
+		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('f', 's', 'g', 'b'));
     $sql.=" ORDER BY b.schluesselgesamt,g.buchungsblattnummermitbuchstabenerweiterung,s.laufendenummer,f.flurstueckskennzeichen";
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
@@ -1143,6 +1161,7 @@ class pgdatabase_alkis extends pgdatabase_core {
       }
       $sql.=")";
     }
+		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('gmk', 'gem'));
     $sql.=" ORDER BY gmk.bezeichnung";
     #echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
@@ -1168,6 +1187,7 @@ class pgdatabase_alkis extends pgdatabase_core {
         $sql.=")";
       }
     }
+		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('g'));
     $sql.=" ORDER BY bezeichnung";
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
@@ -1245,6 +1265,7 @@ class pgdatabase_alkis extends pgdatabase_core {
     if ($FlurID!='') {
       $sql.=" AND flurnummer=".intval($FlurID);
     }
+		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('ax_flurstueck'));
     $sql.=" ORDER BY flurstueckskennzeichen";
     #echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
@@ -1260,6 +1281,7 @@ class pgdatabase_alkis extends pgdatabase_core {
 	function getFlurstueckByLatLng($latitude, $longitude) {
 		if (ALKIS) {
 			$sql  = "SELECT flst.land, flst.kreis, flst.gemeinde, flst.gemarkungsnummer, gemkg.bezeichnung AS gemarkungname, flst.flurnummer, flst.zaehler, flst.nenner, lpad(flst.land::text,2,'0')||lpad(flst.gemarkungsnummer::text,4,'0')||'-'||lpad(flst.flurnummer::text,3,'0')||'-'||lpad(flst.zaehler::text,5,'0')||'/'||CASE WHEN flst.nenner IS NULL THEN '000' ELSE lpad(flst.nenner::text,3,'0') END||'.00' AS flurstkennz, flst.flurstueckskennzeichen, flst.zaehler::text||CASE WHEN flst.nenner IS NULL THEN '' ELSE '/'||flst.nenner::text END AS flurstuecksnummer FROM alkis.ax_flurstueck AS flst, alkis.ax_gemarkung AS gemkg WHERE (flst.land::text||lpad(flst.gemarkungsnummer::text,4,'0'))::integer = gemkg.schluesselgesamt AND flst.gemarkungsnummer = gemkg.gemarkungsnummer AND ST_within(ST_transform(ST_GeomFromText('POINT(".$longitude." ".$latitude.")', 4326), ST_srid(flst.wkb_geometry)), flst.wkb_geometry);";
+			$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('flst', 'gemkg'));
 		}
 		else {
 		# Achtung hier ist die Spalte gemarkungname mit '' belegt	
@@ -1295,6 +1317,7 @@ class pgdatabase_alkis extends pgdatabase_core {
     	$sql.=" AND g.schluesselgesamt=".(int)$GemeindeSchl;
     	$sql.=" AND l.lage='".$StrassenSchl."'";
     }
+		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('g', 'f', 'l', 's'));
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
@@ -1342,6 +1365,7 @@ class pgdatabase_alkis extends pgdatabase_core {
 		$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON s.istbestandteilvon = g.gml_id ";
 		$sql.="LEFT JOIN alkis.ax_flurstueck f ON f.istgebucht = s.gml_id OR f.istgebucht = any(s.an) OR f.istgebucht = any(s2.an) AND s2.gml_id = any(s.an) ";
     $sql.="WHERE f.flurstueckskennzeichen IS NOT NULL AND b.schluesselgesamt = ".$bezirk." AND g.buchungsblattnummermitbuchstabenerweiterung = '".$blatt."'";
+		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('b', 'g', 's', 'f'));
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
@@ -1460,6 +1484,7 @@ class pgdatabase_alkis extends pgdatabase_core {
 	  $sql.="FROM alkis.ax_kreisregion AS k, alkis.pp_gemeinde as ppge, alkis.pp_gemarkung AS ppg, alkis.ax_flurstueck AS f ";
 	  $sql.="LEFT JOIN alkis.ax_dienststelle as d ON d.stellenart = 1200 AND d.stelle::integer = ANY(f.stelle)";
 	  $sql.="WHERE f.gemarkungsnummer=ppg.gemarkung AND ppge.land = ppg.land AND ppge.gemeinde = ppg.gemeinde AND f.kreis = k.kreis AND f.flurstueckskennzeichen='".$FlurstKennz."'";
+		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('k', 'f'));
     #echo $sql.'<br><br>';
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0]) {
@@ -1497,6 +1522,7 @@ class pgdatabase_alkis extends pgdatabase_core {
     }
     $sql .= ")";
     $sql.=" AND f.flurstueckskennzeichen IN ('".$FlurstKennz[0]."'";
+		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('f'));
     for ($i=1;$i<count($FlurstKennz);$i++) {
       $sql.=", '".$FlurstKennz[$i]."'";
     }
@@ -1640,6 +1666,7 @@ class pgdatabase_alkis extends pgdatabase_core {
     $sql.="JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = any(f.weistauf) ";
     $sql.="LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND s.lage = lpad(l.lage,5,'0') ";
     $sql.="WHERE g.gemeinde = l.gemeinde AND f.flurstueckskennzeichen = '".$FlurstKennz."'";
+		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('g', 'f', 'l', 's'));
     #echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0]) {
@@ -1676,6 +1703,7 @@ class pgdatabase_alkis extends pgdatabase_core {
     
 	function getStrNameByID($GemID,$StrID) {
     $sql ="SELECT bezeichnung FROM alkis.ax_lagebezeichnungkatalogeintrag WHERE schluesselgesamt = '".$GemID.str_pad($StrID, 5, '0', STR_PAD_LEFT)."'";
+		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('ax_lagebezeichnungkatalogeintrag'));
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0]) {
       $ret[0]=1;
@@ -1696,6 +1724,7 @@ class pgdatabase_alkis extends pgdatabase_core {
     $sql.="FROM alkis.ax_flurstueck as f ";
     $sql.="JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = any(f.weistauf) ";
     $sql.="WHERE l.lage='".$Strasse."' AND f.flurstueckskennzeichen = '".$FlurstKennz."'";
+		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('f', 'l'));
     #echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0]) {
@@ -1773,6 +1802,7 @@ class pgdatabase_alkis extends pgdatabase_core {
 		$sql.= "JOIN alkis.ax_lagebezeichnungohnehausnummer l ON f.gml_id = any(l.gehoertzu) ";
 		$sql.= "LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND l.lage=s.lage ";
 		$sql.= "WHERE f.flurstueckskennzeichen = '".$FlurstKennz."'";
+		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('f', 'l', 's'));
 		#echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0]) {
@@ -1863,6 +1893,7 @@ class pgdatabase_alkis extends pgdatabase_core {
 		$sql.=" WHERE st_intersects(n.wkb_geometry,f.wkb_geometry) = true";
 		$sql.=" AND st_area(st_intersection(n.wkb_geometry,f.wkb_geometry)) > 0.05";
 		$sql.=" AND f.flurstueckskennzeichen = '".$FlurstKennz."'";
+		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('f'));
 		#echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0] OR pg_num_rows($queryret[1])==0) {
@@ -1979,6 +2010,7 @@ class pgdatabase_alkis extends pgdatabase_core {
 		$sql.=" LEFT JOIN alkis.ax_bodenschaetzung_zustandsstufe z ON z.wert=n.zustandsstufeoderbodenstufe";
 		$sql.=" LEFT JOIN alkis.ax_bodenschaetzung_sonstigeangaben s ON k.wert=n.sonstigeangaben[1]";
     $sql.=" WHERE st_intersects(n.wkb_geometry,f.wkb_geometry) = true AND st_area(st_intersection(n.wkb_geometry,f.wkb_geometry)) > 0.05 AND f.flurstueckskennzeichen='".$FlurstKennz."'";
+		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('f', 'n'));
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
@@ -2392,6 +2424,7 @@ class pgdatabase_alkis extends pgdatabase_core {
     if ($BVNR!="") {
       $sql.=" AND s.laufendenummer='".$BVNR."'";
     }
+		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('f', 's', 'g', 'b', 'n', 'p', 'anschrift'));
     $sql.= " ORDER BY namensnr;";
     #echo $sql.'<br><br>';
     $ret=$this->execSQL($sql, 4, 0);
@@ -2601,6 +2634,7 @@ class pgdatabase_alkis extends pgdatabase_core {
     if ($flur>0) {
       $sql.=" AND lpad(f.flurnummer::text, 3, '0') = '".$flur."'";
     }
+		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('p', 'anschrift', 'n', 'g', 'b', 's', 'f'));
     if($order != ''){
     	$sql.=" ORDER BY ".$order;
     }
@@ -2697,6 +2731,8 @@ class pgdatabase_alkis extends pgdatabase_core {
   function getForstamt($FlurstKennz) {
     $sql ="SELECT d.stelle as schluessel, d.bezeichnung as name FROM alkis.ax_dienststelle as d, alkis.ax_flurstueck as f";
     $sql.=" WHERE d.stellenart = 1400 AND d.stelle::integer = ANY(f.stelle) AND f.flurstueckskennzeichen = '".$FlurstKennz."'";
+		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('d', 'f'));
+		#echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0]) {
       $ret[0]=1;
@@ -2808,6 +2844,7 @@ class pgdatabase_alkis extends pgdatabase_core {
 		$sql.=" FROM alkis.ax_buchungsblattbezirk b , alkis.ax_dienststelle a";
 		$sql.=" WHERE b.land=a.land AND b.stelle=a.stelle AND a.stellenart=1000";
 		$sql.=" AND b.schluesselgesamt = ".$bezirk['schluessel'];
+		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('b', 'a'));
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0]) {
       $ret[0]=1;
@@ -2987,6 +3024,7 @@ class pgdatabase_alkis extends pgdatabase_core {
   
   function getGemarkungName($GemkgSchl) {
     $sql ="SELECT bezeichnung as gemkgname FROM alkis.ax_gemarkung WHERE land*10000 + gemarkungsnummer = ".$GemkgSchl;
+		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('ax_gemarkung'));
     $this->debug->write("<p>postgres.sql getGemarkungName Abfragen des Gemarkungsnamen:<br>".$sql,4);
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0]) {
@@ -3051,7 +3089,9 @@ class pgdatabase_alkis extends pgdatabase_core {
   }
 	
 	function getGrundbuchblattliste($bezirk){
-		$sql = "SELECT buchungsblattnummermitbuchstabenerweiterung as blatt FROM alkis.ax_buchungsblatt WHERE land*10000 + bezirk = ".$bezirk." AND (blattart = 1000 OR blattart = 2000 OR blattart = 3000) ORDER BY blatt";
+		$sql = "SELECT buchungsblattnummermitbuchstabenerweiterung as blatt FROM alkis.ax_buchungsblatt WHERE land*10000 + bezirk = ".$bezirk." AND (blattart = 1000 OR blattart = 2000 OR blattart = 3000) ";
+		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('ax_buchungsblatt'));
+		$sql.= " ORDER BY blatt";
 		$ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
     	while($rs=pg_fetch_array($ret[1])){
@@ -3062,7 +3102,8 @@ class pgdatabase_alkis extends pgdatabase_core {
 	}
   
   function getGrundbuchbezirksliste(){
-  	$sql ="SELECT schluesselgesamt as grundbuchbezschl, bezeichnung FROM alkis.ax_buchungsblattbezirk";
+  	$sql ="SELECT schluesselgesamt as grundbuchbezschl, bezeichnung FROM alkis.ax_buchungsblattbezirk WHERE 1=1";
+		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('ax_buchungsblattbezirk'));
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
     	while($rs=pg_fetch_array($ret[1])){
@@ -3084,6 +3125,7 @@ class pgdatabase_alkis extends pgdatabase_core {
 		$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
 		$sql.="WHERE (g.blattart = 1000 OR g.blattart = 2000 OR g.blattart = 3000) ";
 		$sql.="AND f.land*10000 + f.gemarkungsnummer IN (".implode(',', $gemkg_ids).")";
+		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('f', 's', 'g', 'b'));
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
@@ -3105,6 +3147,7 @@ class pgdatabase_alkis extends pgdatabase_core {
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id "; 
 		$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
 		$sql.="WHERE f.flurstueckskennzeichen = '".$FlurstKennz."'";
+		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('f', 's', 'g', 'b'));
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) {
@@ -3509,6 +3552,7 @@ class pgdatabase_alkis extends pgdatabase_core {
     if ($StrID!='') {
       $sql.=" AND l.lage='".$StrID."'";
     }
+		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('g', 'f', 'l', 's'));
     $sql.=") AS foo ";
     $sql.=") AS foofoo ORDER BY ".$order;
     #echo $sql;
@@ -3535,6 +3579,7 @@ class pgdatabase_alkis extends pgdatabase_core {
     if ($GemkgID!='') {
       $sql.=" AND f.land*10000 + f.gemarkungsnummer=".(int)$GemkgID;
     }
+		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('g', 'gem', 'f', 'l', 's'));
     $sql.=" ORDER BY gemeinde, strassenname";
     #echo $sql;
     $this->debug->write("<p>postgres getStrassenListe Abfragen der Strassendaten:<br>".$sql,4);
@@ -3585,6 +3630,7 @@ class pgdatabase_alkis extends pgdatabase_core {
       }
       $sql.=")";
     }
+		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('ax_gemarkungsteilflur'));
     $sql.=" ORDER BY gemarkungsteilflur";
     #echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
@@ -3598,6 +3644,7 @@ class pgdatabase_alkis extends pgdatabase_core {
 			
 	function check_poly_in_flur($polygon, $epsg){
 		$sql = "SELECT f.land * 10000 + f.gemarkungsnummer, f.flurnummer FROM alkis.ax_flurstueck f WHERE st_intersects(wkb_geometry, st_transform(st_geomfromtext('".$polygon."', ".$epsg."), ".EPSGCODE_ALKIS."))";
+		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('f'));
   	return $this->execSQL($sql,4, 1);
 	}
   
@@ -3652,6 +3699,7 @@ class pgdatabase_alkis extends pgdatabase_core {
       }
       $sql.=")";
     }
+		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('f'));
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) {
       $ret[1]='Fehler beim Abfragen des Umschlieï¿½enden Rechtecks um die Flurstï¿½cke.<br>'.$ret[1];
@@ -3725,6 +3773,7 @@ class pgdatabase_alkis extends pgdatabase_core {
 	      $sql.=" AND l.lage='".$Strasse."'";
 	    }
     }
+		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('gem', 'g', 'l', 's'));
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) {

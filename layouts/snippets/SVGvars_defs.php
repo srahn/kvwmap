@@ -53,6 +53,6 @@ $SVGvars_defs = '
 	    <use xlink:href="#1move" transform="scale(0.6)"/> 
 		</cursor>
 
-		<polygon points="-5 -40, 5 -40, 5 -20, 15 -20, 0 0, -15 -20, -5 -20, -5 -40" id="free_arrow" style="opacity:0.35;fill:red;stroke:black;stroke-width:2"/>
+		<polygon points="-5 -40, 5 -40, 5 -20, 15 -20, 0 0, -15 -20, -5 -20, -5 -40" id="free_arrow" style="opacity:1;fill:red;stroke:black;stroke-width:2"/>
 '
 ?>

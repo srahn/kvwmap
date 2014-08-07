@@ -147,6 +147,10 @@
     </td>
   </tr>
 	<tr>
+    <td align="right"><?php echo $strhist_timestamp; ?>:&nbsp;</td>
+    <td><input name="hist_timestamp" type="text" value="<?php echo $this->user->rolle->hist_timestamp; ?>" size="16"></td>
+  </tr>
+	<tr>
     <td align="right"><?php echo $strSingleQuery; ?>:&nbsp;</td>
     <td><input name="singlequery" type="checkbox" value="1" <? if($this->user->rolle->singlequery == '1'){echo 'checked="true"';} ?> ></td>
   </tr>

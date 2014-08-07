@@ -374,7 +374,7 @@ class GUI extends GUI_core{
   
 	function getSVG_vertices(){
 		# Diese Funktion liefert die Eckpunkte der Geometrien von allen aktiven Postgis-Layern, die im aktuellen Kartenausschnitt liegen
-		$this->user->rolle->readSettings();
+		#$this->user->rolle->readSettings();
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$mapDB->nurAktiveLayerOhneRequires = true;
 		$layer = $mapDB->read_Layer(0);     # 2 = für alle Layer die Klassen laden, 1 = nur für aktive Layer laden, 0 = keine Klassen laden
@@ -393,7 +393,7 @@ class GUI extends GUI_core{
 					$sql = 'SELECT st_x(the_geom), st_y(the_geom) FROM (SELECT st_transform('.$data_attributes['the_geom'].', '.$this->user->rolle->epsg_code.') as '.$data_attributes['the_geom'].' '.$fromwhere.') foo LIMIT 10000';
 				}
 				else{	# LINE / POLYGON
-					$sql = 'SELECT st_x('.$data_attributes['the_geom'].'), st_y('.$data_attributes['the_geom'].') FROM (SELECT st_transform(st_pointn(foo.linestring, foo.count1), '.$this->user->rolle->epsg_code.') AS the_geom
+					$sql = 'SELECT st_x(the_geom), st_y(the_geom) FROM (SELECT st_transform(st_pointn(foo.linestring, foo.count1), '.$this->user->rolle->epsg_code.') AS the_geom
 					FROM (SELECT generate_series(1, st_npoints(foo4.linestring)) AS count1, foo4.linestring FROM (
 					SELECT st_GeometryN(foo2.linestring, foo2.count2) as linestring FROM (
 					SELECT generate_series(1, st_NumGeometries(foo5.linestring)) AS count2, foo5.linestring FROM (SELECT st_multi(linefrompoly(st_intersection('.$data_attributes['the_geom'].', '.$extent.'))) AS linestring '.$fromwhere.') foo5) foo2
@@ -414,7 +414,7 @@ class GUI extends GUI_core{
 	
 	function getSVG_foreign_vertices(){
 		# Diese Funktion liefert die Eckpunkte der Geometrien des übergebenen Postgis-Layers, die im aktuellen Kartenausschnitt liegen
-		$this->user->rolle->readSettings();
+		#$this->user->rolle->readSettings();
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$mapDB->nurAktiveLayerOhneRequires = true;
 		if($this->formvars['layer_id'] > 0){
@@ -735,7 +735,7 @@ class GUI extends GUI_core{
 		$svg.= str_replace('points=""', 'points="-1000,-1000 -2000,-2000 -3000,-3000 -1000,-1000"', $this->formvars['svg_string']); 
 		fputs($fpsvg, $svg);
   	fclose($fpsvg);
-  	exec(IMAGEMAGICKPATH.'convert '.IMAGEPATH.$svgfile.' '.IMAGEPATH.$jpgfile);
+  	exec(IMAGEMAGICKPATH.'convert MSVG:'.IMAGEPATH.$svgfile.' '.IMAGEPATH.$jpgfile);
   	#echo IMAGEMAGICKPATH.'convert '.IMAGEPATH.$svgfile.' '.IMAGEPATH.$jpgfile;
 
     if(function_exists('imagecreatefromjpeg')){
@@ -1781,6 +1781,7 @@ class GUI extends GUI_core{
 	    if ($ret[0]) {
 	      $this->Fehlermeldung='Angaben fehlerhaft:'.$ret[1];
 	      $this->grundbuchblattWahl();
+				return;
 	    }
 	    else {
 	      # Suchparameter sind in Ordnung
@@ -1790,6 +1791,7 @@ class GUI extends GUI_core{
 	        # Fehler bei der Abfrage der Flurstücke des Grundbuchblattes
 	        $this->Fehlermeldung=$ret[1];
 	        $this->grundbuchblattWahl();
+					return;
 	      }
 	      else {
 	        $buchungen=$ret[1];
@@ -1799,6 +1801,7 @@ class GUI extends GUI_core{
 	          # Wenn keine Flurstücke gefunden wurden
 	          $this->Fehlermeldung.='Es konnten keine Flurstücke zu dem Grundbuchblatt '.$blatt[0].'-'.$blatt[1].' gefunden werden.<br>';
 	          $this->grundbuchblattWahl();
+						return;
 	        }
 	        else {
 	          # Es wurden Flurstücke gefunden, ins Ergebnisarray aufnehmen
@@ -9598,7 +9601,8 @@ class GUI extends GUI_core{
 						$this->mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
             $layerdb = $this->mapDB->getlayerdatabase($layerset[$i]['Layer_ID'], $this->Stelle->pgdbhost);
             $layerdb->setClientEncoding();
-            $path = $layerset[$i]['pfad'];
+            #$path = $layerset[$i]['pfad'];
+						$path = str_replace('$hist_timestamp', HIST_TIMESTAMP, $layerset[$i]['pfad']);
             $privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
             $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
             $layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames']);
@@ -10240,7 +10244,8 @@ class GUI extends GUI_core{
       }	
       $output .= $layerset[$i]['Name'].' : || ';
       $layerdb = $this->mapDB->getlayerdatabase($layerset[$i]['Layer_ID'], $this->Stelle->pgdbhost);
-      $path = $layerset[$i]['pfad'];
+      #$path = $layerset[$i]['pfad'];
+			$path = str_replace('$hist_timestamp', HIST_TIMESTAMP, $layerset[$i]['pfad']);
       $privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
       #$path = $this->Stelle->parse_path($layerdb, $path, $privileges);
       $layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames']);

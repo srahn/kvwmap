@@ -629,6 +629,7 @@ CREATE TABLE rolle (
 	`geom_edit_first` BOOLEAN NOT NULL DEFAULT  '0',
 	`overlayx` INT( 11 ) NOT NULL DEFAULT  '400',
 	`overlayy` INT( 11 ) NOT NULL DEFAULT  '150',
+	`hist_timestamp` TIMESTAMP NULL,
   PRIMARY KEY  (user_id,stelle_id)
 ) ENGINE=MyISAM;
 

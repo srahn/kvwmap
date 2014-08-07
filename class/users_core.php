@@ -129,7 +129,7 @@ class rolle_core {
     $this->user_id=$user_id;
     $this->stelle_id=$stelle_id;
     $this->database=$database;
-    $this->layerset=$this->getLayer('');
+    #$this->layerset=$this->getLayer('');
     $this->groupset=$this->getGroups('');
     $this->loglevel = 0;
   }
@@ -178,6 +178,7 @@ class rolle_core {
     }
     return $layer;
   }
+	
 
   # 2006-02-11 pk
   function getAktivLayer($aktivStatus,$queryStatus,$logconsume) {
@@ -309,6 +310,10 @@ class rolle_core {
 		$this->geom_edit_first=$rs['geom_edit_first'];		
 		$this->overlayx=$rs['overlayx'];
 		$this->overlayy=$rs['overlayy'];
+		if($rs['hist_timestamp'] != ''){
+			$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');
+			define(HIST_TIMESTAMP, DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z'));
+		}
     $buttons = explode(',', $rs['buttons']);
     $this->back = in_array('back', $buttons);
     $this->forward = in_array('forward', $buttons);
@@ -327,7 +332,7 @@ class rolle_core {
     $this->freearrow = in_array('freearrow', $buttons);
     return 1;
   }
-  
+	  
   function set_last_time_id($time){
     # Eintragen der last_time_id
     $sql = 'UPDATE rolle SET last_time_id="'.$time.'"';

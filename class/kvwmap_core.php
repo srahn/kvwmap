@@ -604,6 +604,7 @@ class GUI_core {
             else {
               # Vektorlayer
               if($layerset[$i]['Data'] != ''){
+								$layerset[$i]['Data'] = str_replace('$hist_timestamp', HIST_TIMESTAMP, $layerset[$i]['Data']);
                 $layer->set('data', $layerset[$i]['Data']);
               }
   
@@ -1332,7 +1333,7 @@ class GUI_core {
     }  
     $this->user->rolle->saveSettings($this->map->extent);
     # 2006-02-16 pk
-    $this->user->rolle->readSettings();
+    #$this->user->rolle->readSettings();
   }
 	
 	/**

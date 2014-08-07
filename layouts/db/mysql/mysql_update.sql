@@ -1194,6 +1194,8 @@ update rolle set fontsize_gle = fontsize_gle + 2;
 
 ALTER TABLE  `rolle` CHANGE  `fontsize_gle`  `fontsize_gle` INT( 2 ) NULL DEFAULT  '15';
 
+ALTER TABLE  `rolle` ADD  `hist_timestamp` TIMESTAMP NULL;
+
 # da sich herausgestellt hat, das InnoDB-Tabellen sehr langsam sind, werden alle Tabellen auf MyISAM umgestellt
 
 ALTER TABLE `classes` ENGINE = MyISAM;

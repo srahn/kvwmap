@@ -1,4 +1,8 @@
 <?
+
+$config = '../config.php';		# Pfad zur config.php
+$bbox = array("left" => 11.85321, "bottom" => 53.96559, "right" => 11.93711, "top" => 54.01517);		# BBox, mit der die Test-Requests gemacht werden
+
 /*
 * @params(string) $request ein getMap Request von dem der Status geprüft werden soll 
 * gibt einen array mit 2 elementen zurück das erste element ist entweder true
@@ -11,14 +15,18 @@ function checkStatus($request){
   curl_setopt($ch, CURLOPT_URL, $request);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
   curl_setopt($ch, CURLOPT_CONNECTTIMEOUT,1);
-  if(!curl_exec($ch)){
+	curl_setopt($ch, CURLOPT_VERBOSE, 1);
+	curl_setopt($ch, CURLOPT_HEADER, 1);
+	$response = curl_exec($ch);
+	$header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+	$header = substr($response, 0, $header_size);
+  if(!$response){
     $status = false;
     $info = "timeout";
   }
   else{
-    $data = @file_get_contents($request);
-    #print_r($http_response_header);
-    if($http_response_header[0] == "HTTP/1.1 404 Not Found" OR $http_response_header[0] == "404 Not Found"){
+    $data = $response;
+    if(strpos($header, '404 Not Found') !== false){
       $status = false;
       $info = 404;
     }
@@ -41,18 +49,20 @@ function getExceptionCode($data){
   xml_parse_into_struct($parser, $data, $values, $index);
   xml_parser_free($parser);
   $exceptionIndexList = $index["SERVICEEXCEPTION"];
-  foreach($exceptionIndexList as $ExceptionIndex){
-    $shortErrorMessage = $values[$ExceptionIndex]["value"];
-    return $shortErrorMessage;  
+  if(count($exceptionIndexList) > 1){
+		foreach($exceptionIndexList as $ExceptionIndex){
+			$shortErrorMessage = $values[$ExceptionIndex]["value"];
+			return $shortErrorMessage;  
+		}
   }  
 }
 
-$bbox = array("left" => 12.46746, "bottom" => 53.771865, "right" => 12.52526, "top" => 53.829665);
-$con = mysql_connect("localhost", "kvwmap", "kv_Map-12:)");
-mysql_select_db("kvwmapdb_dev");
 
+include($config);
+
+$userDb->open();
 $query = "SELECT * FROM `layer` WHERE connectiontype = 7";
-$result = mysql_query($query, $con);
+$result = mysql_query($query, $userDb->dbConn);
 
 while($line = mysql_fetch_array($result)){
   try{
@@ -68,17 +78,20 @@ while($line = mysql_fetch_array($result)){
   $bounding = implode(",", array($extent->minx, $extent->miny, $extent->maxx, $extent->maxy));
   
   $url = $line["connection"]."&REQUEST=GetMap&EXCEPTIONS=XML&SRS=EPSG:".$line["epsg_code"]."&WIDTH=400&HEIGHT=400&BBOX=".$bounding;
-  
-  #$epsg = $line["epsg_code"];
-  echo '<a href="'.$url.'"target="_blank">'.$line["Name"]."</a><br/>";
   $status = checkStatus($url);
+	
+	if(!$status[0])$color = '#db5a5a';
+	else $color = '#36908a';
+	
+  echo '<div style="border: 1px solid black;width: 700px;padding: 10px;background-color: '.$color.'">';  
+	echo '<a href="'.$url.'"target="_blank">'.$line["Name"]."</a><br/>";
   if(!$status[0]){
-    echo "nicht ok<br/>".$status[1]."<hr/>";
+    echo 'nicht ok<br>'.$status[1];
   }
   else{
-    echo "ok<br/><hr/>";
+    echo 'ok<br>';
   }
-  
+	echo '</div>';
 }
 
 ?>

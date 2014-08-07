@@ -74,7 +74,7 @@
 		 	}
 		}
 		else{
-			alert('Es wurden keine Flurst¸cke ausgew‰hlt.');
+			alert('Es wurden keine Flurst√ºcke ausgew√§hlt.');
 		}
 	}
 
@@ -107,7 +107,7 @@
 		 	location.href=url;
 		}
 		else{
-			alert('Es wurden keine Grundbuchbl‰tter ausgew‰hlt.');
+			alert('Es wurden keine Grundbuchbl√§tter ausgew√§hlt.');
 		}
 	}
 
@@ -289,11 +289,11 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
     			<table width="100%" border="0" cellpadding="0" cellspacing="0">
     				<tr>
     					<td></td>
-    					<td><span style="font-size:12px;"><span class="fett"><?php echo $strParcelNo; ?></span></span></td>
-    					<td><span style="font-size:12px;"><span class="fett"><?php echo $strGemkgName; ?></span></span></td>
-    					<td><span style="font-size:12px;"><span class="fett"><?php echo $strAreaALB; ?></span></span></td>
-    					<td colspan="2"><span style="font-size:12px;"><span class="fett"><?php echo $strDoPrintoutsALB; ?></span></span></td>
-    					<td><span style="font-size:12px;"><span class="fett"><?php echo $strMapSection; ?></span></span></td>
+    					<td><span class="px13 fett"><?php echo $strParcelNo; ?></span></span></td>
+    					<td><span class="px13 fett"><?php echo $strGemkgName; ?></span></span></td>
+    					<td><span class="px13 fett"><?php echo $strAreaALB; ?></span></span></td>
+    					<td colspan="2"><span class="px13 fett"><?php echo $strDoPrintoutsALB; ?></span></span></td>
+    					<td><span class="px13 fett"><?php echo $strMapSection; ?></span></span></td>
     				</tr>
 	    <?	for($j = 0; $j < count($this->namen[$i]['flurstuecke']); $j++){ ?>
 			      <tr>
@@ -305,23 +305,23 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 			      		 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 			      	<? } ?>
 			      	</td>
-			      	<td><span style="font-size:12px;"><? echo $this->namen[$i]['flurstuecke'][$j]; ?></span></td>
-			      	<td><span style="font-size:12px;"><? echo $this->namen[$i]['alb_data'][$j]['gemkgname']; ?></span></td>
-			      	<td><span style="font-size:12px;"><? echo $this->namen[$i]['alb_data'][$j]['flaeche']; ?> m≤</span></td>
+			      	<td><span class="px13"><? echo $this->namen[$i]['flurstuecke'][$j]; ?></span></td>
+			      	<td><span class="px13"><? echo $this->namen[$i]['alb_data'][$j]['gemkgname']; ?></span></td>
+			      	<td><span class="px13"><? echo $this->namen[$i]['alb_data'][$j]['flaeche']; ?> m¬≤</span></td>
 			      	<td>
 			      		<? $this->getFunktionen();
 				        if ($this->Stelle->funktionen['ohneWasserzeichen']['erlaubt']) { ?>
-				          <a href="index.php?go=ALB_Anzeige&FlurstKennz=<?php echo $this->namen[$i]['flurstuecke'][$j]; ?>&formnummer=30&wz=0" target="_blank"><span style="font-size:12px;"><?php echo $strPrintoutALB; ?>&nbsp;30</span></a>
+				          <a href="index.php?go=ALB_Anzeige&FlurstKennz=<?php echo $this->namen[$i]['flurstuecke'][$j]; ?>&formnummer=30&wz=0" target="_blank"><span class="px13"><?php echo $strPrintoutALB; ?>&nbsp;30</span></a>
 				  <?php }else{ ?>
-				  				<a href="index.php?go=ALB_Anzeige&FlurstKennz=<?php echo $this->namen[$i]['flurstuecke'][$j]; ?>&formnummer=30&wz=1" target="_blank"><span style="font-size:12px;"><?php echo $strPrintoutALB; ?>&nbsp;30</span></a>
+				  				<a href="index.php?go=ALB_Anzeige&FlurstKennz=<?php echo $this->namen[$i]['flurstuecke'][$j]; ?>&formnummer=30&wz=1" target="_blank"><span class="px13"><?php echo $strPrintoutALB; ?>&nbsp;30</span></a>
 				  				<? } ?>
 				      </td>
 				      <td>
 				        <?php
 				        if ($this->Stelle->funktionen['ALB-Auszug 35']['erlaubt'] AND $this->Stelle->funktionen['ohneWasserzeichen']['erlaubt']) { ?>
-				          <a href="index.php?go=ALB_Anzeige&FlurstKennz=<?php echo $this->namen[$i]['flurstuecke'][$j]; ?>&formnummer=35&wz=0" target="_blank"><span style="font-size:12px;"><?php echo $strPrintoutALB; ?>&nbsp;35</span></a>
+				          <a href="index.php?go=ALB_Anzeige&FlurstKennz=<?php echo $this->namen[$i]['flurstuecke'][$j]; ?>&formnummer=35&wz=0" target="_blank"><span class="px13"><?php echo $strPrintoutALB; ?>&nbsp;35</span></a>
 				     <?php }else{ ?>
-				     			<a href="index.php?go=ALB_Anzeige&FlurstKennz=<?php echo $this->namen[$i]['flurstuecke'][$j]; ?>&formnummer=35&wz=1" target="_blank"><span style="font-size:12px;"><?php echo $strPrintoutALB; ?>&nbsp;35</span></a>
+				     			<a href="index.php?go=ALB_Anzeige&FlurstKennz=<?php echo $this->namen[$i]['flurstuecke'][$j]; ?>&formnummer=35&wz=1" target="_blank"><span class="px13"><?php echo $strPrintoutALB; ?>&nbsp;35</span></a>
 				     	<? } ?>
 							</td>
 							<td><a href="index.php?go=ZoomToFlst&FlurstKennz=<?php echo $this->namen[$i]['flurstuecke'][$j]; ?>"><span style="font-size:12px;"><?php echo $strMapSection; ?></span></a></td>
@@ -360,7 +360,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   <tr>
   	<td colspan="9" align="center">
 
-  	<?	# Bl‰tterfunktion
+  	<?	# Bl√§tterfunktion
 	   if($this->formvars['offset'] == ''){
 		   $this->formvars['offset'] = 0;
 		 }
