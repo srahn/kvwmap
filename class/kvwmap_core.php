@@ -483,15 +483,15 @@ class GUI_core {
 								if($connection[$j] != ''){
 									$value = explode('=', $connection[$j]);
 									if(strtolower($value[0]) == 'host'){
-									$conn->host = $value[1];
+									$host = $value[1];
 									}
 									if(strtolower($value[0]) == 'port'){
-									$conn->port = $value[1];
+									$port = $value[1];
 									}
 								}
 								}
-								if($conn->port == '')$conn->port = '5432';
-						$fp = @fsockopen($conn->host, $conn->port, $errno, $errstr, 5);
+								if($port == '')$port = '5432';
+						$fp = @fsockopen($host, $port, $errno, $errstr, 5);
 						if(!$fp){			# keine Verbindung --> Layer ausschalten
 							$layer->set('status', 0);
 							$layer->setMetaData('queryStatus', 0);

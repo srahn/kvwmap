@@ -261,7 +261,7 @@ class antrag {
     $sql ="SELECT a.*,a.vermstelle,va.art AS vermart,vs.name AS vermst";
     $sql.=" ,SUBSTRING(a.antr_nr from 1 for 2) AS antr_nr_a";
     $sql.=" ,SUBSTRING(a.antr_nr from 4 for 4) AS antr_nr_b";
-    $sql.=" FROM n_antraege AS a,n_vermstelle AS vs, n_vermart AS va";
+    $sql.=" FROM nachweisverwaltung.n_antraege AS a,n_vermstelle AS vs, n_vermart AS va";
     $sql.=" WHERE a.vermstelle=vs.id AND a.vermart=va.id";
     if ($id[0]!='') {
       $sql.=" AND a.antr_nr IN ('".$id[0]."'";
@@ -319,7 +319,7 @@ class antrag {
     # meistens mindestens ein Fortführungsriss gehört.
     $this->debug->write('nachweis.php getFFR Abfragen der Risse zum Antrag.',4);                
     $sql ="SELECT DISTINCT n.flurid,n.stammnr,n.rissnummer";
-    $sql.=" FROM n_nachweise AS n, n_nachweise2antraege AS n2a";
+    $sql.=" FROM nachweisverwaltung.n_nachweise AS n, nachweisverwaltung.n_nachweise2antraege AS n2a";
     $sql.=" WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
     if($formvars['order'] != '')$sql.=" ORDER BY ".$formvars['order'];
     #echo $sql;
@@ -406,7 +406,7 @@ class antrag {
   function getDatum($flurid,$nr,$secondary) {
     $this->debug->write('<br>nachweis.php getDatum Abfragen der Datum zu einem Vorgang in der Nachweisführung.',4);
     # Abfragen der Datum zu einem Vorgang in der Nachweisführung
-    $sql.="SELECT DISTINCT n.datum FROM n_nachweise AS n";
+    $sql.="SELECT DISTINCT n.datum FROM nachweisverwaltung.n_nachweise AS n";
     $sql.=" WHERE n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
     if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
     $ret=$this->database->execSQL($sql,4, 0);
@@ -424,7 +424,7 @@ class antrag {
 	function getDatei($flurid,$nr,$secondary) {
     $this->debug->write('<br>nachweis.php getDatei Abfragen der Dateien zu einem Vorgang in der Nachweisführung.',4);
     # Abfragen der Datum zu einem Vorgang in der Nachweisführung
-    $sql.="SELECT DISTINCT n.link_datei FROM n_nachweise AS n";
+    $sql.="SELECT DISTINCT n.link_datei FROM nachweisverwaltung.n_nachweise AS n";
     $sql.=" WHERE n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
     if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
     $ret=$this->database->execSQL($sql,4, 0);
@@ -442,7 +442,7 @@ class antrag {
   function getGueltigkeit($flurid,$nr,$secondary) {
     $this->debug->write('<br>nachweis.php getDatum Abfragen der Gueltigkeit der Dokumente in einem Vorgang in der Nachweisführung.',4);
     # Abfragen der Gueltigkeit der Dokumente in einem Vorgang in der Nachweisführung.
-    $sql.="SELECT DISTINCT n.gueltigkeit FROM n_nachweise AS n";
+    $sql.="SELECT DISTINCT n.gueltigkeit FROM nachweisverwaltung.n_nachweise AS n";
     $sql.=" WHERE n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
     if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
     $sql.=" AND n.gueltigkeit=0";
@@ -464,7 +464,7 @@ class antrag {
   function getVermessungsStellen($flurid,$nr,$secondary) {
     $this->debug->write('<br>nachweis.php getDatum Abfragen der Vermessungsstellen, die an einem Vorgang beteiligt waren in der Nachweisführung.',4);
     # Abfragen der Vermessungsstellen, die an einem Vorgang beteiligt waren in der Nachweisführung.
-    $sql.="SELECT DISTINCT v.name FROM n_nachweise AS n, n_vermstelle AS v";
+    $sql.="SELECT DISTINCT v.name FROM nachweisverwaltung.n_nachweise AS n, nachweisverwaltung.n_vermstelle AS v";
     $sql.=" WHERE n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
     if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
     $sql.=" AND n.vermstelle::integer=v.id";
@@ -483,7 +483,7 @@ class antrag {
   function getAnzFFR($flurid,$nr,$secondary) {
     $this->debug->write('<br>nachweis.php getAnzFFR Abfragen der Anzahl der Blätter eines FFR.',4);
     # Abfrag der Anzahl der zum Riss gehörenden Fortführungsrisse
-    $sql.="SELECT COUNT(n.id) AS anzffr FROM n_nachweise AS n";
+    $sql.="SELECT COUNT(n.id) AS anzffr FROM nachweisverwaltung.n_nachweise AS n";
     if ($this->nr!='') {
       $sql.=",n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
     }
@@ -511,9 +511,9 @@ class antrag {
   function getAnzKVZ($flurid,$nr,$secondary) {
     $this->debug->write('<br>nachweis.php getAnzKVZ Abfragen der Anzahl der KVZ zum Riss.',4);
     # Abfrag der Anzahl der zum Riss gehörenden Koordinatenverzeichnisse
-    $sql.="SELECT COUNT(n.id) AS anzkvz FROM n_nachweise AS n";
+    $sql.="SELECT COUNT(n.id) AS anzkvz FROM nachweisverwaltung.n_nachweise AS n";
     if ($this->nr!='') {
-      $sql.=",n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
+      $sql.=",nachweisverwaltung.n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
     }
     else {
       $sql.=" WHERE (1=1)";
@@ -539,9 +539,9 @@ class antrag {
   function getAnzGN($flurid,$nr,$secondary) {
     $this->debug->write('<br>nachweis.php getAnzGN Abfragen der Anzahl der Grenzniederschriften zum Riss.',4);
     # Abfrage der Anzahl der zum Riss gehörenden Grenzniederschriften
-    $sql.="SELECT COUNT(n.id) AS anzgn FROM n_nachweise AS n";
+    $sql.="SELECT COUNT(n.id) AS anzgn FROM nachweisverwaltung.n_nachweise AS n";
     if ($this->nr!='') {
-      $sql.=",n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
+      $sql.=",nachweisverwaltung.n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
     }
     else {
       $sql.=" WHERE (1=1)";
@@ -567,9 +567,9 @@ class antrag {
   function getAnzAndere($flurid,$nr,$secondary) {
     $this->debug->write('<br>nachweis.php getAnzAn Abfragen der Anzahl der anderen Dokumente zum Riss.',4);
     # Abfrage der Anzahl der zum Riss gehörenden Grenzniederschriften
-    $sql.="SELECT COUNT(n.id) AS anzan FROM n_nachweise AS n";
+    $sql.="SELECT COUNT(n.id) AS anzan FROM nachweisverwaltung.n_nachweise AS n";
     if ($this->nr!='') {
-      $sql.=",n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
+      $sql.=",nachweisverwaltung.n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
     }
     else {
       $sql.=" WHERE (1=1)";
@@ -600,7 +600,7 @@ class antrag {
       $errmsg.='Bitte geben Sie die Antragsnummer ein! \n';
     }
     $this->debug->write("<br>antrag.php pruefe_antrag_eintragen() prüfen der Eingabe der Anträge, ob Antragsnummer schin vorhanden.<br>".$sql,4);        
-    $sql ="SELECT * FROM n_antraege WHERE antr_nr = '".$antr_nr."'";
+    $sql ="SELECT * FROM nachweisverwaltung.n_antraege WHERE antr_nr = '".$antr_nr."'";
     $queryret=$this->database->execSQL($sql,4, 0);
     if ($queryret[0]) {
       $errmsg.='Fehler bei der Abfrage der Anträge! '.$queryret[1].'\n';
@@ -629,7 +629,7 @@ class antrag {
   }
   
   function antrag_eintragen($antr_nr,$VermStelle,$verm_art,$datum) {
-    $sql ="INSERT INTO n_antraege (antr_nr,vermstelle,vermart,datum)";
+    $sql ="INSERT INTO nachweisverwaltung.n_antraege (antr_nr,vermstelle,vermart,datum)";
     $sql.=" VALUES('".$antr_nr."',".$VermStelle.",".$verm_art.",'".$datum."')";
     $queryret=$this->database->execSQL($sql,4, 1);
     if ($queryret[0]) {
@@ -642,7 +642,7 @@ class antrag {
   }
   
   function antrag_aendern($antr_nr,$VermStelle,$verm_art,$datum) {
-    $sql ="UPDATE n_antraege SET vermstelle=".(int)$VermStelle.",vermart=".(int)$verm_art.",datum='".$datum."'";
+    $sql ="UPDATE nachweisverwaltung.n_antraege SET vermstelle=".(int)$VermStelle.",vermart=".(int)$verm_art.",datum='".$datum."'";
     $sql.=" WHERE antr_nr='".$antr_nr_a."'";
     $queryret=$this->database->execSQL($sql,4, 1);
     if ($queryret[0]) {
@@ -659,12 +659,12 @@ class antrag {
   function antrag_loeschen($antr_nr){
     $this->database->begintransaction();
     $this->debug->write("<br>antrag.php antrag_loeschen Löschen der Anträge inclusive der Zuordnungen zu Nachweisdokumenten.<br>",4);
-    $sql="DELETE FROM n_antraege WHERE antr_nr='".$antr_nr."'";
+    $sql="DELETE FROM nachweisverwaltung.n_antraege WHERE antr_nr='".$antr_nr."'";
     $queryret=$this->database->execSQL($sql,4, 1);
     if ($queryret[0]) {
       $errmsg.='Fehler beim Löschen des Antrages!';
     }
-    $sql="DELETE FROM n_nachweise2antraege WHERE antrag_id='".$antr_nr."'";
+    $sql="DELETE FROM nachweisverwaltung.n_nachweise2antraege WHERE antrag_id='".$antr_nr."'";
     $queryret=$this->database->execSQL($sql,4, 1);
     if ($queryret[0]) {
       $errmsg.='Fehler beim Löschen der Zuordnungen der Nachweisdokumente zum Antrag!';
@@ -683,7 +683,7 @@ class antrag {
   
   function getAntragsnr_Liste() {
     # fragt alle Vermessungsstellen aus der Datenbank ab (id, Name)
-    $sql = "SELECT * FROM n_antraege ORDER BY antr_nr";
+    $sql = "SELECT * FROM nachweisverwaltung.n_antraege ORDER BY antr_nr";
     $queryret=$this->database->execSQL($sql,4, 0);
     if ($queryret[0]) { 
       $errmsg='Fehler bei der Abfrage der Antragsnummern in der Datenbank bei Statement: '; 
@@ -702,7 +702,7 @@ class antrag {
   
   function addFestpunkt($pkz) {
     # Fügt einen Festpunkt in dem Antrag hinzu
-    $sql ="INSERT INTO fp_punkte2antraege (pkz,antrag_nr,zeitstempel)";
+    $sql ="INSERT INTO nachweisverwaltung.fp_punkte2antraege (pkz,antrag_nr,zeitstempel)";
     $sql.="(";
     $sql.=" SELECT '".$pkz."','".$this->nr."',CURRENT_TIMESTAMP(0)";
     $sql.=" WHERE NOT EXISTS (";

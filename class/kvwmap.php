@@ -5152,7 +5152,8 @@ class GUI extends GUI_core{
         $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
         $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
         $layerdb->setClientEncoding();
-        $path = $layerset[0]['pfad'];
+        #$path = $layerset[0]['pfad'];
+				$path = str_replace('$hist_timestamp', HIST_TIMESTAMP, $layerset[0]['pfad']);
         $privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
         $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
         $layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
@@ -10421,6 +10422,7 @@ class GUI extends GUI_core{
           $attribcount = 0;
           for($j = 0; $j < count($attributes['name']); $j++){
             if($attributes['tooltip'][$j]){
+							if($attributes['alias'][$j] == '')$attributes['alias'][$j] = $attributes['name'][$j];
             	switch ($attributes['form_element_type'][$j]){
 				        case 'Dokument' : {
 				        	$filename = explode('&', $layer['shape'][$k][$attributes['name'][$j]]);
@@ -10439,13 +10441,30 @@ class GUI extends GUI_core{
 										$links .= $link.'##';
 									}
 								} break;
+								case 'Auswahlfeld': {
+									if(is_array($attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
+										for($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++){
+											if($attributes['enum_value'][$j][$k][$e] == $layer['shape'][$k][$attributes['name'][$j]]){
+												$auswahlfeld_output = $attributes['enum_output'][$j][$k][$e];
+												break;
+											}
+										}
+									}
+									else{
+										for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
+											if($attributes['enum_value'][$j][$e] == $layer['shape'][$k][$attributes['name'][$j]]){
+												$auswahlfeld_output = $attributes['enum_output'][$j][$e];
+												break;
+											}
+										}
+									}
+									$output .=  $attributes['alias'][$j].': ';
+									$output .= $auswahlfeld_output;
+									$output .= '##';
+									$attribcount++;
+								} break;
 				        default : {
-		              if($attributes['alias'][$j] != ''){
-		                $output .=  $attributes['alias'][$j].': ';
-		              }
-		              else{
-		                $output .= $attributes['name'][$j].': ';
-		              }
+		              $output .=  $attributes['alias'][$j].': ';
 		              $attribcount++;
 		              $output .= $layer['shape'][$k][$attributes['name'][$j]].'  ';
 		              $output .= '##';

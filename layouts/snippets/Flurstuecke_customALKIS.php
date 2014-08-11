@@ -227,7 +227,7 @@ backto = function(go){
               if($privileg_['status']){ ?>
               <tr>
                 <td align="right"><span class="fett"> Status&nbsp;</span></td>
-                <td><?php if ($flst->Status=="H") { echo "historisches"; } else { echo "aktuelles"; } echo "&nbsp;Flurst&uuml;ck&nbsp;(".$flst->Status.")"; ?></td>
+                <td><?php if ($flst->endet!="") { echo "historisches&nbsp;Flurst&uuml;ck&nbsp;(endet: ".$flst->endet.")"; } else { echo "aktuelles&nbsp;Flurst&uuml;ck"; }  ?></td>
               </tr>
               <? } ?>
               <?php if ($privileg_['vorgaenger'] AND $flst->Vorgaenger != '') { ?>

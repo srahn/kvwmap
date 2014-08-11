@@ -1980,7 +1980,7 @@ class flurstueck_alkis {
     $this->LetzteFF=$rs['letzff'];
     $this->Flurkarte=$rs['karte'];
     $this->ALB_Flaeche=$rs['flaeche'];
-    $this->Status=$rs['status'];
+    $this->endet=$rs['endet'];
     $this->Pruefzeichen=$rs['pruefzeichen'];
     $this->Forstamt=$this->getForstamt();	
     $this->AktualitaetsNr=$this->getAktualitaetsNr();			# ALKIS TODO
