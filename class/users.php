@@ -2149,6 +2149,7 @@ class stelle extends stelle_core{
 		$sql.=', ows_contactposition= "'.$stellendaten['ows_contactposition'].'"';
 		$sql.=', ows_fees= "'.$stellendaten['ows_fees'].'"';
 		$sql.=', ows_srs= "'.$stellendaten['ows_srs'].'"';
+		$sql.=', wappen_link= "'.$stellendaten['wappen_link'].'"';
 		if($stellendaten['wappen']){
 			$sql.=', wappen="'.$_files['wappen']['name'].'"';
 		}
@@ -2243,6 +2244,7 @@ class stelle extends stelle_core{
 		$sql.=', ows_contactposition= "'.$stellendaten['ows_contactposition'].'"';
 		$sql.=', ows_fees= "'.$stellendaten['ows_fees'].'"';
 		$sql.=', ows_srs= "'.$stellendaten['ows_srs'].'"';
+		$sql.=', wappen_link= "'.$stellendaten['wappen_link'].'"';
 		if($stellendaten['wappen']){
 			$sql.=', wappen="'.$stellendaten['wappen'].'"';
 		}
@@ -2437,7 +2439,7 @@ class stelle extends stelle_core{
 			$html .='
         <tr>
           <td> 
-            <img src="'.GRAPHICSPATH.'leer.gif" width="13" height="1" border="0">
+            <img src="'.GRAPHICSPATH.'leer.gif" width="17" height="1" border="0">
 					</td>
 					<td>
             <a href="';
@@ -2449,7 +2451,7 @@ class stelle extends stelle_core{
 				$html .= '\',\'Diese Aktion wirklich ausf&uuml;hren?\')';
 				$menue['target'][$i]='';
 			}
-			$html .= '" class="testred"';
+			$html .= '" class="menuered"';
 			if ($menue['target'][$i]!='') {
 				$html .= ' target="'.$menue['target'][$i].'"';
 			}
@@ -3016,5 +3018,14 @@ class stelle extends stelle_core{
 		$rs=mysql_fetch_array($query);
 		return $rs['wappen'];
 	}
+	
+	function getWappenLink() {
+		$sql ='SELECT wappen_link FROM stelle WHERE ID='.$this->id;
+		$this->debug->write("<p>file:users.php class:stelle->getWappen - Abfragen des Wappens der Stelle:<br>".$sql,4);
+		$query=mysql_query($sql,$this->database->dbConn);
+		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+		$rs=mysql_fetch_array($query);
+		return $rs['wappen_link'];
+	} 
 }
 ?>

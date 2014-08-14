@@ -82,7 +82,7 @@
 									case 'Checkbox' : {
 										$datapart .= '<input type="checkbox" title="'.$attributes['alias'][$j].'" cols="45" onchange="set_changed_flag(currentform.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')"';
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
-											$datapart .= ' readonly style="border:0px;background-color:transparent;"';
+											$datapart .= ' onclick="return false" style="border:0px;background-color:transparent;"';
 										}
 										$datapart .= 'value="t" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'"';
 										if($dataset[$attributes['name'][$j]] == 't')$datapart .= 'checked=true';

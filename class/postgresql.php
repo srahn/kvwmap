@@ -1006,7 +1006,7 @@ class pgdatabase_alkis extends pgdatabase_core {
 			$sql.="LEFT JOIN alkis.ax_namensnummer n ON n.istbestandteilvon = g.gml_id AND n.beschriebderrechtsgemeinschaft IS NOT NULL ";
 			$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('n'));
 			$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON s.istbestandteilvon = g.gml_id ";
-			$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON s.istbestandteilvon = g.gml_id ";
+			$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON s2.istbestandteilvon = g.gml_id ";
 			$sql.="LEFT JOIN alkis.ax_flurstueck f ON f.istgebucht = s.gml_id OR f.istgebucht = any(s.an) OR f.istgebucht = any(s2.an) AND s2.gml_id = any(s.an) ";
 			$sql.="LEFT JOIN alkis.ax_buchungsstelle_buchungsart art ON s.buchungsart = art.wert ";		
 		}
@@ -1362,7 +1362,7 @@ class pgdatabase_alkis extends pgdatabase_core {
 		$sql.="FROM alkis.ax_buchungsblattbezirk b ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON g.land = b.land AND g.bezirk = b.bezirk ";
 		$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON s.istbestandteilvon = g.gml_id ";
-		$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON s.istbestandteilvon = g.gml_id ";
+		$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON s2.istbestandteilvon = g.gml_id ";
 		$sql.="LEFT JOIN alkis.ax_flurstueck f ON f.istgebucht = s.gml_id OR f.istgebucht = any(s.an) OR f.istgebucht = any(s2.an) AND s2.gml_id = any(s.an) ";
     $sql.="WHERE f.flurstueckskennzeichen IS NOT NULL AND b.schluesselgesamt = ".$bezirk." AND g.buchungsblattnummermitbuchstabenerweiterung = '".$blatt."'";
 		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('b', 'g', 's', 'f'));
@@ -2405,16 +2405,18 @@ class pgdatabase_alkis extends pgdatabase_core {
   
   function getEigentuemerliste($FlurstKennz,$Bezirk,$Blatt,$BVNR) {
     $sql = "SELECT distinct n.laufendenummernachdin1421 AS namensnr, p.nachnameoderfirma, p.vorname, p.akademischergrad, p.geburtsname, p.geburtsdatum::date, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, w.bezeichner as Art, n.zaehler||'/'||n.nenner as anteil ";
-		$sql.= "FROM alkis.ax_flurstueck f ";
-		$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON f.istgebucht = any(s2.an) ";
-		$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR f.istgebucht = any(s.an) OR f.istgebucht = any(s2.an) AND s2.gml_id = any(s.an) ";
+		//$sql.= "FROM alkis.ax_flurstueck f ";
+		$sql.= "FROM alkis.ax_buchungsstelle s ";
+		//$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON f.istgebucht = any(s2.an) ";
+		//$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR f.istgebucht = any(s.an) OR f.istgebucht = any(s2.an) AND s2.gml_id = any(s.an) ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
 		$sql.= "LEFT JOIN alkis.ax_namensnummer n ON n.istbestandteilvon = g.gml_id ";
 		$sql.= "LEFT JOIN alkis.ax_namensnummer_eigentuemerart w ON w.wert = n.eigentuemerart ";
 		$sql.= "LEFT JOIN alkis.ax_person p ON n.benennt = p.gml_id ";
 		$sql.= "LEFT JOIN alkis.ax_anschrift anschrift ON anschrift.gml_id = any(p.hat) ";
-		$sql.= " WHERE f.flurstueckskennzeichen = '".$FlurstKennz."'"; 
+		//$sql.= " WHERE f.flurstueckskennzeichen = '".$FlurstKennz."'"; 
+		$sql.= " WHERE 1=1"; 
     if ($Bezirk!="") {
       $sql.=" AND b.schluesselgesamt=".(int)$Bezirk;
     }
@@ -2424,7 +2426,7 @@ class pgdatabase_alkis extends pgdatabase_core {
     if ($BVNR!="") {
       $sql.=" AND s.laufendenummer='".$BVNR."'";
     }
-		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('f', 's', 'g', 'b', 'n', 'p', 'anschrift'));
+		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('s', 'g', 'b', 'n', 'p', 'anschrift'));
     $sql.= " ORDER BY namensnr;";
     #echo $sql.'<br><br>';
     $ret=$this->execSQL($sql, 4, 0);
@@ -3141,8 +3143,9 @@ class pgdatabase_alkis extends pgdatabase_core {
   function getGrundbuchbezirke($FlurstKennz) {
 		$sql ="SELECT b.schluesselgesamt as Schluessel, b.bezeichnung AS Name ";
 		$sql.="FROM alkis.ax_flurstueck f ";  
-		$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON f.istgebucht = any(s2.an) ";
-		$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR f.istgebucht = any(s.an) OR f.istgebucht = any(s2.an) AND s2.gml_id = any(s.an) ";
+		//$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON f.istgebucht = any(s2.an) ";
+		//$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR f.istgebucht = any(s.an) OR f.istgebucht = any(s2.an) AND s2.gml_id = any(s.an) ";
+		$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id ";
 		$sql.="LEFT JOIN alkis.ax_buchungsstelle_buchungsart art ON s.buchungsart = art.wert ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id "; 
 		$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";

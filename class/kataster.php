@@ -1987,9 +1987,9 @@ class flurstueck_alkis {
     $this->Adresse=$this->getAdresse();
     $this->Lage=$this->getLage();
     $this->Grundbuchbezirk=$this->getGrundbuchbezirk();
-    $this->Klassifizierung=$this->getKlassifizierung();		# ALKIS TODO
+    $this->Klassifizierung=$this->getKlassifizierung();	
     $this->Grundbuecher=$this->getGrundbuecher();
-    $this->Buchungen=$this->getBuchungen($Bezirk,$Blatt,1);
+    //$this->Buchungen=$this->getBuchungen($Bezirk,$Blatt,1);
     $this->Amtsgericht=$this->getAmtsgericht(); 
     $this->FreiText=$this->getFreiText();		# ALKIS TODO
     $this->Hinweis=$this->getHinweis();		# ALKIS TODO

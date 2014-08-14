@@ -3,6 +3,7 @@
   include(LAYOUTPATH.'languages/MapCommentSelectForm_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
  ?>
 <h2><?php echo $strTitle; ?></h2>
+<br>
 <table border="1" cellspacing="0" cellpadding="2">
 <tr bgcolor="<?php echo BG_DEFAULT ?>">
   <th><?php echo $strTime; ?></th>

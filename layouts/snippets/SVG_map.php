@@ -881,7 +881,8 @@ function create_new_freetext(x, y){
 	newtext.setAttributeNS(null, "transform", "scale(1,-1)");
 	newtext.setAttributeNS(null, "x", x);
 	newtext.setAttributeNS(null, "y", -y);
-	document.documentElement.addEventListener("keypress", texttype, false);
+	document.documentElement.addEventListener("keypress", texttype, true);
+	document.documentElement.addEventListener("keydown", trigger_keypress, true);
 	tspan1 = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
 	tspan1.appendChild(document.createTextNode("Text"));
 	newtext.appendChild(tspan1);
@@ -889,13 +890,19 @@ function create_new_freetext(x, y){
 	return newtext;
 }
 
+function trigger_keypress(evt){		// Funktion verhindert in Chrome ein history-back bei backspace
+	if(evt.keyCode == 8){		// backspace
+		texttype(evt);
+	}
+}
 
 function texttype(evt){
 	if(doing == "addtext" && texttyping){
 		var text = current_freetext.lastChild.firstChild.nodeValue;
 		var offsetx = current_freetext.getAttribute("x");
 		var offsety = 20;
-		if(evt.type == "keypress"){
+		console.log(evt.type);
+		if(evt.type == "keypress" || evt.type == "keydown"){			
 			if(evt.charCode){
 	      var charCode = evt.charCode;
 			}

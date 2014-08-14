@@ -40,17 +40,24 @@
       <?php
              if (MENU_WAPPEN=="oben") {
       ?>
-        <tr>
-          <td align="center">
-            <div style="position: relative; visibility: visible; left: 0px; top: 0px">
-        <?
-              $this->debug->write("Include Wappen <b>".WAPPENPATH.$this->Stelle->getWappen()."</b> in menue.php",4);
-        ?>
-                    <img src="<? echo WAPPENPATH.$this->Stelle->getWappen(); ?>" alt="Wappen" align="middle"></td>
-            </div>
-            </td>
-        </tr>
-      <?php
+  <tr>
+    <td align="center">
+      <div style="position: relative; visibility: visible; left: 0px; top: 0px">
+  <?
+        $this->debug->write("Include Wappen <b>".WAPPENPATH.$this->Stelle->getWappen()."</b> in menue.php",4);
+        $wappen_link = $this->Stelle->getWappenLink();
+        if ($wappen_link != '') {
+          ?><a href="<?php echo $wappen_link; ?>" target="_blank"><?php
+        }
+        ?><img src="<? echo WAPPENPATH.$this->Stelle->getWappen(); ?>" alt="Wappen" align="middle" border="0"><?php
+        if ($wappen_link != '') {
+          ?></a><?php
+        }
+        ?></td>
+      </div>
+      </td>
+  </tr>
+<?php
              }
         if ($this->img['referenzkarte']!='' AND MENU_REFMAP == "oben") {
           ?>

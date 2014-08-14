@@ -32,6 +32,7 @@ session_start();
 ob_start ();    // Ausgabepufferung starten
 include('config.php');
 if(!$_SESSION['angemeldet']){
+	header('logout: true');		// damit ajax-Requests das auch mitkriegen
   include(LAYOUTPATH.'snippets/'.LOGIN);
 }
 include(WWWROOT.APPLVERSION.'start.php');

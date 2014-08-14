@@ -1196,6 +1196,10 @@ ALTER TABLE  `rolle` CHANGE  `fontsize_gle`  `fontsize_gle` INT( 2 ) NULL DEFAUL
 
 ALTER TABLE  `rolle` ADD  `hist_timestamp` TIMESTAMP NULL;
 
+ALTER TABLE  `stelle` ADD  `wappen_link` VARCHAR( 255 ) NULL AFTER  `wappen`;
+
+ALTER TABLE  `layer` ADD  `status` VARCHAR( 255 ) NULL;
+
 # da sich herausgestellt hat, das InnoDB-Tabellen sehr langsam sind, werden alle Tabellen auf MyISAM umgestellt
 
 ALTER TABLE `classes` ENGINE = MyISAM;

@@ -63,6 +63,7 @@
   $strMaintable="Main Table";
   $strPrivileges="Set Privileges";
   $strAlias="Alias";
+	$strStatus="Status";
   
   
   

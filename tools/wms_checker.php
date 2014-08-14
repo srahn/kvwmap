@@ -1,6 +1,18 @@
 <?
 
-$config = '../config.php';		# Pfad zur config.php
+########################################################################################################################################################################
+#																																																																																			 #
+#	Dieses Skript kann in einem Web-Verzeichnis wie z.B. .../kvwmap/tools plaziert werden.																																							 #
+# Es sind 2 Einstellungen zu machen: - die Variable $config muss auf den Pfad zur config.php gesetzt werden.																													 #
+#                                    - das Array $bbox muss gültige BBox-Werte im EPSG-Code 4326 enthalten; damit werden die Test-Requests gemacht										 #
+# Wenn man das Skript aufruft, werden alle WMS-Layer aus der in der config.php definierten MySQL-DB ausgelesen und mit einem getMap-Request getestet.									 #
+# Das Ergebnis des Tests wird in die Spalte status der Tabelle layer geschrieben. Diese Spalte wird von kvwmap ausgewertet und der Status in der Legende visualisiert. #
+# Ruft man das Skript im Browser auf, erhält man außerdem eine Übersicht über die getesteten Layer.																																		 #
+# Um den Status regelmäßig zu überprüfen, muss man sich einen entsprechenden cron-job einrichten, der das Skript aufruft. 																																		 #
+#																																																																																			 #
+########################################################################################################################################################################
+
+$config = '../config.php';		# Pfad zur config.php (von tools aus kann er so bleiben)
 $bbox = array("left" => 11.85321, "bottom" => 53.96559, "right" => 11.93711, "top" => 54.01517);		# BBox, mit der die Test-Requests gemacht werden
 
 /*
@@ -87,10 +99,13 @@ while($line = mysql_fetch_array($result)){
 	echo '<a href="'.$url.'"target="_blank">'.$line["Name"]."</a><br/>";
   if(!$status[0]){
     echo 'nicht ok<br>'.$status[1];
+		$query = "UPDATE `layer` SET status = '".$status[1]."' WHERE Layer_ID = ".$line["Layer_ID"];
   }
   else{
     echo 'ok<br>';
+		$query = "UPDATE `layer` SET status = '' WHERE Layer_ID = ".$line["Layer_ID"];
   }
+	$result2 = mysql_query($query, $userDb->dbConn);
 	echo '</div>';
 }
 

@@ -539,6 +539,7 @@ CREATE TABLE `layer` (
   `metalink` VARCHAR( 255 ) NULL,
   `privileg` ENUM( '0', '1', '2' ) NOT NULL DEFAULT '0',
 	`export_privileg` BOOLEAN NOT NULL DEFAULT  '1',
+	`status` VARCHAR( 255 ) NULL,
   PRIMARY KEY  (`Layer_ID`),
   KEY `Gruppe` (`Gruppe`)
 ) ENGINE=MyISAM;
@@ -708,6 +709,7 @@ CREATE TABLE stelle (
   Authentifizierung enum('0','1') NOT NULL default '1',
   ALB_status enum('30','35') NOT NULL default '30',
   wappen varchar(150) NOT NULL default 'stz.gif',
+	wappen_link VARCHAR( 255 ) NULL,
   wasserzeichen varchar(150) default NULL,
   alb_raumbezug set('','Kreis','Amtsverwaltung','Gemeinde') NOT NULL default '',
   alb_raumbezug_wert varchar(255) NOT NULL default '',

@@ -904,6 +904,7 @@ class GUI extends GUI_core{
 
   function add_label(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$empty_label = new stdClass();
     $empty_label->font = 'arial';
     $empty_label->size = '8';
     $empty_label->minsize = '6';
@@ -1122,7 +1123,7 @@ class GUI extends GUI_core{
 							if($layer['aktivStatus'] == 1){
 								$legend .=  'checked';
 							}
-							$legend .= ' ></td><td>';
+							$legend .= ' ></td><td valign="middle">';							
 							if($layer['metalink'] != ''){
 								$legend .= '<a ';
 								if(substr($layer['metalink'], 0, 10) != 'javascript'){
@@ -1274,6 +1275,9 @@ class GUI extends GUI_core{
 							$legend .= 'title="'.$layer['minscale'].' - '.$layer['maxscale'].'"';
 						}
 						$legend .= ' >'.html_umlaute($layer['alias']).'</span>';
+						if($layer['status'] != ''){
+							$legend .= '&nbsp;<img title="Thema nicht verfügbar: '.$layer['status'].'" src="'.GRAPHICSPATH.'warning.png">';
+						}
 						if($layer['queryable'] == 1){
 							$legend .=  '<input type="hidden" name="qLayer'.$layer['Layer_ID'].'"';
 							if($layer['queryStatus'] != 0){
@@ -9763,7 +9767,7 @@ class GUI extends GUI_core{
 	              	$geoms[]=$rs[0];
 	              }
 	            }
-	            $sql = '';
+	            if(count($geoms) > 0)$sql = '';
 	            for($g = 0; $g < count($geoms); $g++){
 	            	if($g > 0)$sql .= " UNION ";
 	            	$sql .= "SELECT ".$pfad." AND ".$the_geom." && ('".$geoms[$g]."') AND (st_intersects(".$the_geom.", ('".$geoms[$g]."'::geometry)) OR ".$the_geom." = ('".$geoms[$g]."'))";
@@ -11294,8 +11298,8 @@ class GUI extends GUI_core{
     $rs = pg_fetch_array($ret[1]);
     if($rs['minx'] != ''){			
 			$minx=$rs['minx']-10; 
-			$maxx=$rs['maxx']-10;
-			$miny=$rs['miny']+10; 
+			$maxx=$rs['maxx']+10;
+			$miny=$rs['miny']-10; 
 			$maxy=$rs['maxy']+10;
 	    #echo 'box:'.$minx.' '.$miny.','.$maxx.' '.$maxy;
 	    $this->map->setextent($minx,$miny,$maxx,$maxy);			
@@ -11303,13 +11307,13 @@ class GUI extends GUI_core{
 	    $oPixelPos=ms_newPointObj();
 	    $oPixelPos->setXY($this->map->width/2,$this->map->height/2);
 	    if (MAPSERVERVERSION > 600) {
-				if($layer[0]['maxscale'] > 0)$nScale = $layer[0]['maxscale'];
+				if($layer[0]['maxscale'] > 0)$nScale = $layer[0]['maxscale']-1;
 				else $nScale = $this->map->scaledenom;
 				$this->map->zoomscale($nScale,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
 				$this->map_scaledenom = $this->map->scaledenom;
 			}
 			else {
-				if($layer[0]['maxscale'] > 0)$nScale = $layer[0]['maxscale'];
+				if($layer[0]['maxscale'] > 0)$nScale = $layer[0]['maxscale']-1;
 				else $nScale = $this->map->scale;
 				$this->map->zoomscale($nScale,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
 				$this->map_scaledenom = $this->map->scale;
@@ -12789,7 +12793,8 @@ class db_mapObj extends db_mapObj_core{
     $sql .= "processing = '".$formvars['processing']."',";
     $sql .= "kurzbeschreibung = '".$formvars['kurzbeschreibung']."',";
     $sql .= "datenherr = '".$formvars['datenherr']."',";
-    $sql .= "metalink = '".$formvars['metalink']."'";
+    $sql .= "metalink = '".$formvars['metalink']."', ";
+		$sql .= "status = '".$formvars['status']."'";
     $sql .= " WHERE Layer_ID = ".$formvars['selected_layer_id'];
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->updateLayer - Aktualisieren eines Layers:<br>".$sql,4);
@@ -12811,7 +12816,7 @@ class db_mapObj extends db_mapObj_core{
       if($formvars['id'] != ''){
         $sql.="`Layer_ID`, ";
       }
-      $sql.= "`Name`, `alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`) VALUES(";
+      $sql.= "`Name`, `alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`) VALUES(";
       if($formvars['id'] != ''){
         $sql.="'".$formvars['id']."', ";
       }
@@ -12898,6 +12903,7 @@ class db_mapObj extends db_mapObj_core{
       $sql .= "'".$formvars['kurzbeschreibung']."', ";
       $sql .= "'".$formvars['datenherr']."', ";
       $sql .= "'".$formvars['metalink']."'";
+			$sql .= "'".$formvars['status']."'";
       $sql .= ")";
 
     }
@@ -13354,7 +13360,7 @@ class db_mapObj extends db_mapObj_core{
     if(is_array($style)){
       $sql = "INSERT INTO styles SET ";
       if($style['color']){$sql.= "color = '".$style['color']."'";}
-      if($style['colorred']){$sql.= "color = '".$style['colorred']." ".$style['colorgreen']." ".$style['colorblue']."'";}
+			if($style['colorred'] != ''){$sql.= "color = '".$style['colorred']." ".$style['colorgreen']." ".$style['colorblue']."'";}
       if($style['symbol']){$sql.= ", symbol = '".$style['symbol']."'";}
       if($style['symbolname']){$sql.= ", symbolname = '".$style['symbolname']."'";}
       if($style['size']){$sql.= ", size = '".$style['size']."'";}

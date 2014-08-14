@@ -1298,6 +1298,9 @@ select gemeinde, gemarkung, ortsteilname, postleitzahl, zonentyp, gutachteraussc
        verfahrensgrund_zusatz, bemerkungen, erschliessungsverhaeltnisse, 
        bedarfswert, bodenart, brwu, brws, brwb, textposition, the_geom from bw_zonen
 
+-- Updaten der Sequenz
+SELECT setval('bodenrichtwerte.bw_zonen_bodenrichtwertnummer_seq', (select max(bodenrichtwertnummer)+1 from bodenrichtwerte.bw_zonen), true);
+			 
 -- Löschen der alten Tabelle bw_zonen und der Views
 
 -- DROP VIEW bw_boris_view;
@@ -1662,6 +1665,12 @@ INSERT INTO nachweisverwaltung.fp_punkte2 SELECT * FROM fp_punkte2;
 
 INSERT INTO nachweisverwaltung.fp_punkte_temp SELECT * FROM fp_punkte_temp;
 
+-- Updaten der Sequenzen
+SELECT setval('nachweisverwaltung.n_nachweise_id_seq', (select max(id)+1 from nachweisverwaltung.n_nachweise), true);
+SELECT setval('nachweisverwaltung.n_dokumentarten_id_seq', (select max(id)+1 from nachweisverwaltung.n_dokumentarten), true);
+SELECT setval('nachweisverwaltung.n_vermart_id_seq', (select max(id)+1 from nachweisverwaltung.n_vermart), true);
+SELECT setval('nachweisverwaltung.n_vermstelle_id_seq', (select max(id)+1 from nachweisverwaltung.n_vermstelle), true);
+
 
 -- Löschen der alten Tabellen
 
@@ -1707,6 +1716,12 @@ SELECT AddGeometryColumn('anliegerbeitraege', 'anliegerbeitraege_strassen','the_
 INSERT INTO anliegerbeitraege.anliegerbeitraege_bereiche SELECT id, flaeche, kommentar, the_geom FROM anliegerbeitraege_bereiche;
 
 INSERT INTO anliegerbeitraege.anliegerbeitraege_strassen SELECT * FROM anliegerbeitraege_strassen;
+
+-- Updaten der Sequenzen
+SELECT setval('anliegerbeitraege.anliegerbeitraege_bereiche_id_seq', (select max(id)+1 from anliegerbeitraege.anliegerbeitraege_bereiche), true);
+SELECT setval('anliegerbeitraege.anliegerbeitraege_strassen_id_seq', (select max(id)+1 from anliegerbeitraege.anliegerbeitraege_strassen), true);
+
+
 
 -- Löschen der alten Tabellen
 

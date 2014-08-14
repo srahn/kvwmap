@@ -26,6 +26,10 @@ function ahah(url, data, target, action){
 function ahahDone(url, targets, req, actions) {
   if (req.readyState == 4) { // only if req is "loaded"
     if(req.status == 200) { // only if "OK"
+			if(req.getResponseHeader(\'logout\') == \'true\'){	// falls man zwischenzeitlich ausgeloggt wurde
+				window.location = url;
+				return;
+			}
 			var found = false;
     	response = ""+req.responseText;
     	//response = response.replace(/\s/,"");		# bei neueren Postgis-Versionen wird hier das Leerzeichen nach dem M bei asSVG-Abfragen entfernt 

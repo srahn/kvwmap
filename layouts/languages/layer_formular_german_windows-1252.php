@@ -64,4 +64,5 @@
   $strMaintable="Haupttabelle";
   $strPrivileges="Rechte festlegen";
   $strAlias="Aliasname";
+	$strStatus="Status";
 ?>  

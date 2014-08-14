@@ -42,4 +42,5 @@
   $strStop="Stop";
   $strEpsgCode="EPSG-Code";
   $strUseLayerAliases="Use Layer-Aliasnames";
+	$strWappenLink="Logo-Link";
 ?>  

@@ -303,6 +303,12 @@ else {
 		      		<input name="metalink" type="text" value="<?php echo $this->formvars['metalink']; ?>" size="25" maxlength="255">
 		  		</td>
 		  	</tr>
+				<tr>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strStatus; ?></th>
+		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+		      		<input name="status" type="text" value="<?php echo $this->formvars['status']; ?>" size="25" maxlength="255">
+		  		</td>
+		  	</tr>
 		 	</table>
 		  <br>
 		  	

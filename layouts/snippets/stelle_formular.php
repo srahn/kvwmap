@@ -198,56 +198,55 @@ else {
         <tr>
           <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsTitle; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-              <input name="ows_title" type="text" value="<?php echo $this->formvars['ows_title']; ?>" size="25" maxlength="100">
+              <input name="ows_title" type="text" value="<?php echo $this->formvars['ows_title']; ?>" size="50" maxlength="100">
           </td>
         </tr>
         <tr>
           <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsAbstract; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-              <input name="ows_abstract" type="text" value="<?php echo $this->formvars['ows_abstract']; ?>" size="25" maxlength="100">
+              <input name="ows_abstract" type="text" value="<?php echo $this->formvars['ows_abstract']; ?>" size="50" maxlength="100">
           </td>
         </tr>
         <tr>
           <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWmsAccessConstraints; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-              <input name="wms_accessconstraints" type="text" value="<?php echo $this->formvars['wms_accessconstraints']; ?>" size="25" maxlength="100">
+              <input name="wms_accessconstraints" type="text" value="<?php echo $this->formvars['wms_accessconstraints']; ?>" size="50" maxlength="100">
           </td>
         </tr>
         <tr>
           <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsContactPerson; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-              <input name="ows_contactperson" type="text" value="<?php echo $this->formvars['ows_contactperson']; ?>" size="25" maxlength="100">
+              <input name="ows_contactperson" type="text" value="<?php echo $this->formvars['ows_contactperson']; ?>" size="50" maxlength="100">
           </td>
         </tr>
         <tr>
           <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsContactOrganization; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-              <input name="ows_contactorganization" type="text" value="<?php echo $this->formvars['ows_contactorganization']; ?>" size="25" maxlength="100">
+              <input name="ows_contactorganization" type="text" value="<?php echo $this->formvars['ows_contactorganization']; ?>" size="50" maxlength="100">
           </td>
         </tr>
         <tr>
           <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsContactEmailAddress; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-              <input name="ows_contactemailaddress" type="text" value="<?php echo $this->formvars['ows_contactemailaddress']; ?>" size="25" maxlength="100">
+              <input name="ows_contactemailaddress" type="text" value="<?php echo $this->formvars['ows_contactemailaddress']; ?>" size="50" maxlength="100">
           </td>
         </tr>
         <tr>
           <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsContactPosition; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-              <input name="ows_contactposition" type="text" value="<?php echo $this->formvars['ows_contactposition']; ?>" size="25" maxlength="100">
+              <input name="ows_contactposition" type="text" value="<?php echo $this->formvars['ows_contactposition']; ?>" size="50" maxlength="100">
           </td>
         </tr>
         <tr>
           <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsFees; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-              <input name="ows_fees" type="text" value="<?php echo $this->formvars['ows_fees']; ?>" size="25" maxlength="100">
+              <input name="ows_fees" type="text" value="<?php echo $this->formvars['ows_fees']; ?>" size="50" maxlength="100">
           </td>
         </tr>
         <tr>
           <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsSrs; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-              <input name="ows_srs" type="text" value="<?php echo $this->formvars['ows_srs']; ?>" size="25" maxlength="100">
-               <font size="-1">(EPSG:4326 EPSG:2398 ...)</font> </td>
+              <input name="ows_srs" type="text" value="<?php echo $this->formvars['ows_srs']; ?>" size="50" maxlength="100"></td>
         </tr>
         <tr>
           <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLogo; ?></th>
@@ -260,6 +259,12 @@ else {
             <input type="hidden" name="wappen_save" value="<? echo $this->formvars['wappen']; ?>">
           </td>
         </tr>
+				<tr>
+          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWappenLink; ?></th>
+          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
+              <input name="wappen_link" type="text" value="<?php echo $this->formvars['wappen_link']; ?>" size="50" maxlength="100">
+          </td>
+        </tr>
         <tr>
           <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWaterMark; ?></th>
           <td style="border-bottom:1px solid #C3C7C3">
@@ -270,7 +275,7 @@ else {
             &nbsp;<img src="<? echo WAPPENPATH.basename($this->formvars['wasserzeichen']); ?>" width="100" alt="<?php echo $strNoWatermarkSelected; ?>">
             <input type="hidden" name="wasserzeichen_save" value="<? echo $this->formvars['wasserzeichen']; ?>">
           </td>
-        </tr>
+        </tr>				
         <tr>
           <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strALBReferencingRegion; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">

@@ -465,6 +465,10 @@ class GUI_core {
 												 
 						$layer->set('name', $layerset[$i]['alias']);          
 
+						if($layerset[$i]['status'] != ''){
+							$layerset[$i]['aktivStatus'] = 0;
+						}
+						
 						//---- wenn die Layer einer eingeklappten Gruppe nicht in der Karte //
 						//---- dargestellt werden sollen, muß hier bei aktivStatus != 1 //
 						//---- der layer_status auf 0 gesetzt werden//
@@ -1333,7 +1337,7 @@ class GUI_core {
     }  
     $this->user->rolle->saveSettings($this->map->extent);
     # 2006-02-16 pk
-    #$this->user->rolle->readSettings();
+    $this->user->rolle->readSettings();
   }
 	
 	/**
@@ -1370,7 +1374,7 @@ class GUI_core {
   }
 
 	function check_layer_visibility($layer){
-		if($this->map_scaledenom < $layer['minscale'] OR ($layer['maxscale'] > 0 AND $this->map_scaledenom > $layer['maxscale'])) {
+		if($layer['status'] != '' OR ($this->map_scaledenom < $layer['minscale'] OR ($layer['maxscale'] > 0 AND $this->map_scaledenom > $layer['maxscale']))) {
 			return false;
 		}
 		elseif($layer['Filter'] != ''){
@@ -1720,8 +1724,10 @@ class db_mapObj_core {
   }  
 
   function read_RollenLayer($id = NULL, $typ = NULL){
-    $sql = 'SELECT DISTINCT l.*, g.Gruppenname, gr.status, -l.id AS Layer_ID, 1 as showclasses from rollenlayer AS l, u_groups AS g, u_groups2rolle as gr';
-    $sql.= ' WHERE l.Gruppe = g.id AND l.stelle_id='.$this->Stelle_ID.' AND l.user_id='.$this->User_ID.' AND gr.id = g.id AND gr.stelle_id='.$this->Stelle_ID.' AND gr.user_id='.$this->User_ID;
+    //$sql = 'SELECT DISTINCT l.*, g.Gruppenname, gr.status, -l.id AS Layer_ID, 1 as showclasses from rollenlayer AS l, u_groups AS g, u_groups2rolle as gr';
+    //$sql.= ' WHERE l.Gruppe = g.id AND l.stelle_id='.$this->Stelle_ID.' AND l.user_id='.$this->User_ID.' AND gr.id = g.id AND gr.stelle_id='.$this->Stelle_ID.' AND gr.user_id='.$this->User_ID;
+		$sql = 'SELECT DISTINCT l.*, g.Gruppenname, -l.id AS Layer_ID, 1 as showclasses from rollenlayer AS l, u_groups AS g';
+    $sql.= ' WHERE l.Gruppe = g.id AND l.stelle_id='.$this->Stelle_ID.' AND l.user_id='.$this->User_ID;
     if($id != NULL){
     	$sql .= ' AND l.id = '.$id;
     }
@@ -1740,7 +1746,7 @@ class db_mapObj_core {
   }
 	
   function read_Layer($withClasses, $groups = NULL){
-    $sql ='SELECT DISTINCT rl.*,ul.*, l.Layer_ID, l.Name, l.alias, l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem, l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem, l.tolerance, l.toleranceunits, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version, l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, g.*';
+    $sql ='SELECT DISTINCT rl.*,ul.*, l.Layer_ID, l.Name, l.alias, l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem, l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem, l.tolerance, l.toleranceunits, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version, l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, g.*';
     $sql.=' FROM u_rolle2used_layer AS rl,used_layer AS ul,layer AS l, u_groups AS g, u_groups2rolle as gr';
     $sql.=' WHERE rl.stelle_id=ul.Stelle_ID AND rl.layer_id=ul.Layer_ID AND l.Layer_ID=ul.Layer_ID';
     $sql.=' AND (ul.minscale != -1 OR ul.minscale IS NULL) AND l.Gruppe = g.id AND rl.stelle_ID='.$this->Stelle_ID.' AND rl.user_id='.$this->User_ID;

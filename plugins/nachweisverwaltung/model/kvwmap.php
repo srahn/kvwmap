@@ -852,15 +852,6 @@
     $GUI->drawMap();
 			
     $GUI->output();
-
-//    # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
-//    $GUI->formvars=$GUI->user->rolle->getNachweisParameter();
-//    # erzeugen des Formularobjektes für Antragsnr
-//    $GUI->FormObjAntr_nr=$GUI->getFormObjAntr_nr($GUI->formvars['suchantrnr']);
-//    $GUI->loadMap('DataBase');
-//    $GUI->drawMap();
-//    $GUI->output();
-//    $GUI->saveMap('');
   };
 
 	$this->vermessungsAntragEingabeForm = function() use ($GUI){
