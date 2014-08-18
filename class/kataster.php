@@ -1437,8 +1437,8 @@ class grundbuch_alkis {
       $buchungen=$ret[1];
       $anzBuchungen=count($buchungen);
       for($i=0;$i<$anzBuchungen;$i++) {
-				$buchungenret=$this->database->getGemarkungName(substr($buchungen[$i]['flurstkennz'],0,6));
-				$buchungen[$i]['gemkgname']=$buchungenret[1];
+				//$buchungenret=$this->database->getGemarkungName(substr($buchungen[$i]['flurstkennz'],0,6));
+				$buchungen[$i]['gemkgname']=$buchungen[$i]['gemarkungsname'];
 				$buchungen[$i]['flur']=intval(substr($buchungen[$i]['flurstkennz'],6,3));
 				$buchungen[$i]['zaehler']=intval(substr($buchungen[$i]['flurstkennz'],9,5));
 				$buchungen[$i]['nenner']=intval(substr($buchungen[$i]['flurstkennz'],14,6));

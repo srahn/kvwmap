@@ -10255,7 +10255,7 @@ class GUI extends GUI_core{
       #$path = $this->Stelle->parse_path($layerdb, $path, $privileges);
       $layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames']);
 	    # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
-	    #$layerset[$i]['attributes'] = $this->mapDB->add_attribute_values($layerset[$i]['attributes'], $layerdb, NULL, true);
+	    $layerset[$i]['attributes'] = $this->mapDB->add_attribute_values($layerset[$i]['attributes'], $layerdb, NULL, true);
       
 
       # order by rausnehmen
