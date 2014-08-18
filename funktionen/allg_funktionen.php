@@ -1278,21 +1278,24 @@ function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $
 	$botschaft.="Content-transfer-encoding: 7BIT\r\n";
 	$botschaft.="Content-type: text/plain; charset=UTF-8\n\n";
 	$botschaft.= $message;
-	$botschaft.="\n\n";
-	$botschaft.="\n--$grenze\n";
+  
+  if ($attachement) {
+  	$botschaft.="\n\n";
+  	$botschaft.="\n--$grenze\n";
 
-	$botschaft.="Content-Type: application/octetstream;\n\tname=" . basename($attachement) . "\n";
-	$botschaft.="Content-Transfer-Encoding: base64\n";
-	$botschaft.="Content-Disposition: attachment;\n\tfilename=" . basename($attachement) . "\n\n";
+  	$botschaft.="Content-Type: application/octetstream;\n\tname=" . basename($attachement) . "\n";
+  	$botschaft.="Content-Transfer-Encoding: base64\n";
+  	$botschaft.="Content-Disposition: attachment;\n\tfilename=" . basename($attachement) . "\n\n";
 
-	$zeiger_auf_datei=fopen($attachement,"rb");
-	$inhalt_der_datei=fread($zeiger_auf_datei,filesize($attachement));
-	fclose($zeiger_auf_datei);
+  	$zeiger_auf_datei=fopen($attachement,"rb");
+  	$inhalt_der_datei=fread($zeiger_auf_datei,filesize($attachement));
+  	fclose($zeiger_auf_datei);
 
-	$inhalt_der_datei=chunk_split(base64_encode($inhalt_der_datei));
-	$botschaft.=$inhalt_der_datei;
-	$botschaft.="\n\n";
-	$botschaft.="--$grenze";
+  	$inhalt_der_datei=chunk_split(base64_encode($inhalt_der_datei));
+  	$botschaft.=$inhalt_der_datei;
+  	$botschaft.="\n\n";
+  	$botschaft.="--$grenze";
+  }
 #  echo 'to_email: '.$to_email.'<br>';
 #  echo 'subject: '.$subject.'<br>';
 #  echo 'botschaft: '.$botschaft.'<br>';

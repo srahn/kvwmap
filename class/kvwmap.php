@@ -12902,7 +12902,7 @@ class db_mapObj extends db_mapObj_core{
       $sql .= "'".$formvars['processing']."', ";
       $sql .= "'".$formvars['kurzbeschreibung']."', ";
       $sql .= "'".$formvars['datenherr']."', ";
-      $sql .= "'".$formvars['metalink']."'";
+      $sql .= "'".$formvars['metalink']."', ";
 			$sql .= "'".$formvars['status']."'";
       $sql .= ")";
 
