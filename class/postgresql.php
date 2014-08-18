@@ -800,8 +800,8 @@ class pgdatabase_alkis extends pgdatabase_core {
   function getGrundbuecher($FlurstKennz) {
     $sql ="SET enable_seqscan = OFF;SELECT distinct (g.land::text||lpad(g.bezirk::text, 4, '0'))::integer as bezirk, g.buchungsblattnummermitbuchstabenerweiterung AS blatt ";
 		$sql.="FROM alkis.ax_flurstueck f ";
-		$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON array[f.istgebucht] <@ s2.an ";
-		$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR array[f.istgebucht] <@ s.an OR array[f.istgebucht] <@ s2.an AND array[s2.gml_id] <@ s.an ";
+		$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON f.istgebucht = ANY(s2.an) ";
+		$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR f.istgebucht = ANY(s.an) OR f.istgebucht = ANY(s2.an) AND s2.gml_id = ANY(s.an) ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
 		$sql.="WHERE (g.blattart = 1000 OR g.blattart = 2000 OR g.blattart = 3000) ";
 		$sql.="AND f.flurstueckskennzeichen = '".$FlurstKennz."' ";
@@ -993,8 +993,8 @@ class pgdatabase_alkis extends pgdatabase_core {
 		if($FlurstKennz!='') {
 			$sql.="FROM alkis.ax_flurstueck f ";
 			$sql.="LEFT JOIN alkis.ax_gemarkung gem ON f.land = gem.land AND f.gemarkungsnummer = gem.gemarkungsnummer ";
-			$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON array[f.istgebucht] <@ s2.an ";
-			$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR array[f.istgebucht] <@ s.an OR array[f.istgebucht] <@ s2.an AND array[s2.gml_id] <@ s.an ";
+			$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON f.istgebucht = ANY(s2.an) ";
+			$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR f.istgebucht = ANY(s.an) OR f.istgebucht = ANY(s2.an) AND s2.gml_id = ANY(s.an) ";
 			$sql.="LEFT JOIN alkis.ax_buchungsstelle_buchungsart art ON s.buchungsart = art.wert ";
 			$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
 			$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
@@ -1801,7 +1801,7 @@ class pgdatabase_alkis extends pgdatabase_core {
     # liefert die Lage des Flurstückes
     $sql = "SELECT l.unverschluesselt, s.bezeichnung ";
 		$sql.= "FROM alkis.ax_flurstueck as f ";
-		$sql.= "JOIN alkis.ax_lagebezeichnungohnehausnummer l ON array[f.gml_id] <@ l.gehoertzu ";
+		$sql.= "JOIN alkis.ax_lagebezeichnungohnehausnummer l ON f.gml_id = ANY(l.gehoertzu) ";
 		$sql.= "LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND l.lage=s.lage ";
 		$sql.= "WHERE f.flurstueckskennzeichen = '".$FlurstKennz."'";
 		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('f', 'l', 's'));
@@ -2730,7 +2730,7 @@ class pgdatabase_alkis extends pgdatabase_core {
 
   function getForstamt($FlurstKennz) {
     $sql ="SELECT d.stelle as schluessel, d.bezeichnung as name FROM alkis.ax_dienststelle as d, alkis.ax_flurstueck as f";
-    $sql.=" WHERE d.stellenart = 1400 AND array[d.stelle::integer] <@ f.stelle AND f.flurstueckskennzeichen = '".$FlurstKennz."'";
+    $sql.=" WHERE d.stellenart = 1400 AND d.stelle::integer = ANY(f.stelle) AND f.flurstueckskennzeichen = '".$FlurstKennz."'";
 		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('d', 'f'));
 		#echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
