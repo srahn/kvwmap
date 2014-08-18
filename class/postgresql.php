@@ -1300,7 +1300,7 @@ class pgdatabase_alkis extends pgdatabase_core {
   function getFlurstKennzListeByGemSchlByStrSchl($GemeindeSchl,$StrassenSchl,$HausNr) {
   	$sql.=" SELECT f.flurstueckskennzeichen as flurstkennz";
     $sql.=" FROM alkis.ax_gemeinde as g, alkis.ax_flurstueck as f";
-    $sql.=" JOIN alkis.ax_lagebezeichnungmithausnummer l ON array[l.gml_id] <@ f.weistauf";
+    $sql.=" JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(f.weistauf)";
     $sql.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND l.lage = lpad(s.lage,5,'0')";
     $sql.=" WHERE g.gemeinde = l.gemeinde";
     if ($HausNr!='') {
@@ -1365,7 +1365,7 @@ class pgdatabase_alkis extends pgdatabase_core {
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON g.land = b.land AND g.bezirk = b.bezirk ";
 		$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON s.istbestandteilvon = g.gml_id ";
 		$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON s2.istbestandteilvon = g.gml_id ";
-		$sql.="LEFT JOIN alkis.ax_flurstueck f ON f.istgebucht = s.gml_id OR array[f.istgebucht] <@ s.an OR array[f.istgebucht] <@ s2.an AND array[s2.gml_id] <@ s.an ";
+		$sql.="LEFT JOIN alkis.ax_flurstueck f ON f.istgebucht = s.gml_id OR f.istgebucht = ANY(s.an) OR f.istgebucht = ANY(s2.an) AND s2.gml_id = ANY(s.an) ";
     $sql.="WHERE f.flurstueckskennzeichen IS NOT NULL AND b.schluesselgesamt = ".$bezirk." AND g.buchungsblattnummermitbuchstabenerweiterung = '".$blatt."'";
 		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('b', 'g', 's', 'f'));
 		#echo $sql;
@@ -1484,7 +1484,7 @@ class pgdatabase_alkis extends pgdatabase_core {
     $sql ="SELECT lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, zaehler, nenner, k.schluesselgesamt AS kreisid, k.bezeichnung as kreisname, f.land::text||f.gemarkungsnummer::text as gemkgschl, ppg.gemarkungsname as gemkgname, ppg.land::text||ppg.regierungsbezirk::text||ppg.kreis::text||ppg.gemeinde::text as gemeinde, ppge.gemeindename,d.stelle as finanzamt, d.bezeichnung AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.endet::timestamp ";
 	  //$sql.=",f.pruefzeichen,f.status,f.entsteh,f.letzff,f.aktunr,f.karte,f.baublock,f.koorrw,f.koorhw,f.forstamt,fa.finanzamt,fa.name AS finanzamtname,";
 	  $sql.="FROM alkis.ax_kreisregion AS k, alkis.pp_gemeinde as ppge, alkis.pp_gemarkung AS ppg, alkis.ax_flurstueck AS f ";
-	  $sql.="LEFT JOIN alkis.ax_dienststelle as d ON d.stellenart = 1200 AND array[d.stelle::integer] <@ f.stelle ";
+	  $sql.="LEFT JOIN alkis.ax_dienststelle as d ON d.stellenart = 1200 AND d.stelle::integer = ANY(f.stelle) ";
 	  $sql.="WHERE f.gemarkungsnummer=ppg.gemarkung AND ppge.land = ppg.land AND ppge.gemeinde = ppg.gemeinde AND f.kreis = k.kreis AND f.flurstueckskennzeichen='".$FlurstKennz."'";
 		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('k', 'f'));
     #echo $sql.'<br><br>';
@@ -1665,7 +1665,7 @@ class pgdatabase_alkis extends pgdatabase_core {
     # 1. Abfragen der Strassen die am Flurstï¿½ck liegen
     $sql ="SELECT DISTINCT g.bezeichnung as gemeindename, l.lage as strasse, s.bezeichnung as strassenname ";
     $sql.="FROM alkis.ax_gemeinde as g, alkis.ax_flurstueck as f ";
-    $sql.="JOIN alkis.ax_lagebezeichnungmithausnummer l ON array[l.gml_id] <@ f.weistauf ";
+    $sql.="JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(f.weistauf) ";
     $sql.="LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND s.lage = lpad(l.lage,5,'0') ";
     $sql.="WHERE g.gemeinde = l.gemeinde AND f.flurstueckskennzeichen = '".$FlurstKennz."'";
 		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('g', 'f', 'l', 's'));
@@ -1724,7 +1724,7 @@ class pgdatabase_alkis extends pgdatabase_core {
     # Abfragen der Hausnummern zu den jeweiligen Strassen
     $sql ="SELECT DISTINCT ".HAUSNUMMER_TYPE."(l.hausnummer) AS hausnr ";
     $sql.="FROM alkis.ax_flurstueck as f ";
-    $sql.="JOIN alkis.ax_lagebezeichnungmithausnummer l ON array[l.gml_id] <@ f.weistauf ";
+    $sql.="JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(f.weistauf) ";
     $sql.="WHERE l.lage='".$Strasse."' AND f.flurstueckskennzeichen = '".$FlurstKennz."'";
 		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('f', 'l'));
     #echo $sql;
@@ -2603,14 +2603,14 @@ class pgdatabase_alkis extends pgdatabase_core {
 			
     $sql = "SELECT distinct n.laufendenummernachdin1421 AS lfd_nr_name, p.nachnameoderfirma, p.vorname, p.akademischergrad, p.geburtsname, p.geburtsdatum, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, g.buchungsblattnummermitbuchstabenerweiterung as blatt, b.schluesselgesamt as bezirk ";
 		$sql.= "FROM alkis.ax_person p ";
-		$sql.= "LEFT JOIN alkis.ax_anschrift anschrift ON array[anschrift.gml_id] <@ p.hat ";
+		$sql.= "LEFT JOIN alkis.ax_anschrift anschrift ON anschrift.gml_id = ANY(p.hat) ";
 		$sql.= "LEFT JOIN alkis.ax_namensnummer n ON n.benennt = p.gml_id ";
 		$sql.= "LEFT JOIN alkis.ax_namensnummer_eigentuemerart w ON w.wert = n.eigentuemerart ";
 		$sql.= "LEFT JOIN alkis.ax_buchungsblatt g ON n.istbestandteilvon = g.gml_id ";
 		$sql.= "LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
 		$sql.= "LEFT JOIN alkis.ax_buchungsstelle s ON s.istbestandteilvon = g.gml_id ";
 		$sql.= "LEFT JOIN alkis.ax_buchungsstelle s2 ON s2.istbestandteilvon = g.gml_id ";
-		$sql.= "LEFT JOIN alkis.ax_flurstueck f ON f.istgebucht = s.gml_id OR array[f.istgebucht] <@ s.an OR array[f.istgebucht] <@ s2.an AND array[s2.gml_id] <@ s.an ";
+		$sql.= "LEFT JOIN alkis.ax_flurstueck f ON f.istgebucht = s.gml_id OR f.istgebucht = ANY(s.an) OR f.istgebucht = ANY(s2.an) AND s2.gml_id = ANY(s.an) ";
 		$sql.= " WHERE 1=1 ";
 
     if($n1 != '%%')$sql.=" AND lower(nachnameoderfirma) LIKE lower('".$n1."') ";
@@ -3119,8 +3119,8 @@ class pgdatabase_alkis extends pgdatabase_core {
   function getGrundbuchbezirkslisteByGemkgIDs($gemkg_ids) {
 		$sql ="SELECT DISTINCT b.schluesselgesamt as grundbuchbezschl, b.bezeichnung ";
 		$sql.="FROM alkis.ax_flurstueck f ";	
-		$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON array[f.istgebucht] <@ s2.an ";
-		$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR array[f.istgebucht] <@ s.an OR array[f.istgebucht] <@ s2.an AND array[s2.gml_id] <@ s.an ";
+		$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON f.istgebucht = ANY(s2.an) ";
+		$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR f.istgebucht = ANY(s.an) OR f.istgebucht = ANY(s2.an) AND s2.gml_id = ANY(s.an) ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
 		$sql.="WHERE (g.blattart = 1000 OR g.blattart = 2000 OR g.blattart = 3000) ";
@@ -3544,7 +3544,7 @@ class pgdatabase_alkis extends pgdatabase_core {
     $sql.=",(CASE WHEN TRIM(ordernr)='' THEN '0' ELSE SPLIT_PART(TRIM(ordernr),' ',1) END) as ordernr FROM (";
     $sql.=" SELECT DISTINCT '".$GemID."-".$StrID."-'||TRIM(".HAUSNUMMER_TYPE."(l.hausnummer)) AS id, ".HAUSNUMMER_TYPE."(l.hausnummer) AS nr, l.hausnummer AS ordernr";
     $sql.=" FROM alkis.ax_gemeinde as g, alkis.ax_flurstueck as f";
-    $sql.=" JOIN alkis.ax_lagebezeichnungmithausnummer l ON array[l.gml_id] <@ f.weistauf";
+    $sql.=" JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(f.weistauf)";
     $sql.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND l.lage = lpad(s.lage,5,'0')";
     $sql.=" WHERE g.gemeinde = l.gemeinde";
     if ($GemID!='') {
@@ -3571,7 +3571,7 @@ class pgdatabase_alkis extends pgdatabase_core {
     $sql.=" UNION";
     $sql.=" SELECT DISTINCT g.gemeinde, l.lage as strasse, s.bezeichnung as strassenname, gem.bezeichnung as gemkgname";
     $sql.=" FROM alkis.ax_gemeinde as g, alkis.ax_gemarkung as gem, alkis.ax_flurstueck as f";
-    $sql.=" JOIN alkis.ax_lagebezeichnungmithausnummer l ON array[l.gml_id] <@ f.weistauf";
+    $sql.=" JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(f.weistauf)";
     $sql.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND s.lage = lpad(l.lage,5,'0')";
     $sql.=" WHERE g.gemeinde = l.gemeinde AND f.gemarkungsnummer = gem.gemarkungsnummer";
     if ($GemID!='') {
@@ -3759,7 +3759,7 @@ class pgdatabase_alkis extends pgdatabase_core {
     $sql ="SELECT MIN(st_xmin(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS minx,MAX(st_xmax(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS maxx";
     $sql.=",MIN(st_ymin(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS miny,MAX(st_ymax(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS maxy";
     $sql.=" FROM alkis.ax_gemeinde gem, alkis.ax_gebaeude g";
-    $sql.=" LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON array[l.gml_id] <@ g.zeigtauf "; 
+    $sql.=" LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(g.zeigtauf) "; 
 		$sql.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde";
 		$sql.=" AND l.lage = lpad(s.lage,5,'0')";
 		$sql.=" WHERE gem.gemeinde = l.gemeinde";
