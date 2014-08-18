@@ -11772,6 +11772,7 @@ class GUI extends GUI_core{
   }
 
   function tooltip_query($rect){
+		$showdata = 'true';
     $this->mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->queryrect = $rect;
     if($this->formvars['querylayer_id'] != 'undefined'){
@@ -11865,8 +11866,7 @@ class GUI extends GUI_core{
 				# EPSG-Code des Layers der Abgefragt werden soll
 				$layer_epsg=$layerset[$i]['epsg_code'];
 				
-			if($rect->minx != ''){		################ Kartenabfrage ################
-				$showdata = 'true';
+			if($rect->minx != ''){		################ Kartenabfrage ################				
 				switch ($layerset[$i]['toleranceunits']) {
 					case 'pixels' : $pixsize=$this->user->rolle->pixsize; break;
 					case 'meters' : $pixsize=1; break;
