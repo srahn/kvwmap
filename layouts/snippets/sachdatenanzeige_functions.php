@@ -171,7 +171,9 @@ if($this->formvars['anzahl'] == ''){$this->formvars['anzahl'] = 0;}
   			alert('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
   			return;
   		}
-  		data_r += '&'+form_fields[i]+'='+document.getElementsByName(form_fields[i])[0].value;
+			if(document.getElementsByName(form_fields[i])[0] != undefined){
+				data_r += '&'+form_fields[i]+'='+document.getElementsByName(form_fields[i])[0].value;
+			}
   	}
   	data = 'go=Sachdaten_speichern&selected_layer_id='+layer_id+'&fromobject='+fromobject+'&targetobject='+targetobject+'&targetlayer_id='+targetlayer_id+'&targetattribute='+targetattribute+'&data='+data+'&form_field_names='+form_fieldstring+'&embedded=true' + data_r;
 		ahah('<? echo URL.APPLVERSION; ?>index.php', data, new Array(document.getElementById(fromobject), document.getElementById(targetobject)), new Array('sethtml', 'sethtml'));
