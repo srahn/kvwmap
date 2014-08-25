@@ -30,6 +30,9 @@ session_start();
 # Peter Korduan peter.korduan@uni-rostock.de                      #
 ###################################################################
 ob_start ();    // Ausgabepufferung starten
+
+$fast_loading_cases = array('navMap_ajax', 'changemenue_with_ajax', 'get_group_legend');
+
 include('config.php');
 if(!$_SESSION['angemeldet']){
 	header('logout: true');		// damit ajax-Requests das auch mitkriegen
@@ -46,139 +49,7 @@ if ($GUI->formvars['go_plus']!='') {
 }
 $GUI->go=$go;
 $GUI->requeststring = $QUERY_STRING;
-##### Anwendungsfälle der Benutzeroberfläche GUI #################
-# ALB_Aenderung
-# ALB_Anzeige
-# ALK_Fortfuehrung
-# Adm_Fortfuehrung
-# Administratorfunktionen
-# Adresse_Auswaehlen
-# Adresse_Auswaehlen_Suchen
-# Ändern
-# Antraege_Anzeigen
-# Antrag_Aendern
-# Antrag_Loeschen
-# Antraganzeige_Festpunkte_in_Liste_anzeigen
-# Antraganzeige_Festpunkte_in_Karte_anzeigen
-# Antraganzeige_Festpunkte_in_KVZ_schreiben
-# Antraganzeige_Uebergabeprotokoll_Erzeugen
-# Antraganzeige_Rechercheergebnis_in_Ordner_zusammenstellen
-# Antraganzeige_Zugeordnete_Dokumente_Anzeigen
-# Attributeditor
-# Attributeditor_speichern
-# Bauauskunft
-# Bauauskunft_Suche
-# Bauauskunft_Suche_Suchen
-# bauleitplanung
-# bauleitplanung_Senden
-# Benutzerdaten_Als neuen Nutzer eintragen
-# Benutzerdaten_Ändern
-# Benutzerdaten_Formular
-# Benutzer_Löschen
-# Benutzerdaten_Anzeigen
-# Bestaetigung
-# Bodenrichtwertformular
-# Bodenrichtwertformular_Aendern
-# Bodenrichtwertformular_senden
-# Bodenrichtwertzone_Loeschen
-# BodenrichtwertzonenKopieren
-# changemenue
-# document_anzeigen
-# Dokumentenkoepfe
-# Dokumentenkoepfe_als neuen Kopf speichern
-# Dokumentenkoepfe_Änderungen Speichern
-# Dokumentenkoepfe_übernehmen >>
-# Druckausschnittswahl
-# Druckausschnittswahl_Vorschau
-# editLayerForm($layerName,$oid)
-# ExportMapToPDF
-# Externer_Druck
-# Externer_Druck_Drucken
-# FestpunktDateiAktualisieren
-# FestpunktDateiUebernehmen
-# Festpunkte Anzeigen
-# Festpunkte_Auswaehlen
-# Festpunkte_Auswaehlen_Suchen
-# Festpunkte zum Antrag Anzeigen
-# Festpunkte zum Antrag Hinzufügen
-# Festpunkte zum Antrag Hinzufügen_Senden
-# FestpunkteSkizzenZuordnung
-# FestpunkteSkizzenZuordnung_Senden
-# Flurstueck_Anzeigen
-# Flurstueck_Auswaehlen
-# Flurstueck_Auswaehlen_Suchen
-# Full_Extent
-# Geothermie_Abfrage
-# Geothermie_Eingabe
-# getMenueWithAjax
-# getRow
-# Grundbuchblatt_Auswaehlen
-# Grundbuchblatt_Auswaehlen_Suchen
-# Hausnummernkorrektur
-# hideMenueWithAjax
-# help
-# Kartenkommentar_Formular
-# Kartenkommentar_Speichern
-# Kartenkommentar_Waehlen
-# Kartenkommentar_Zoom
-# Layer-Suche
-# Layer-Suche_Suchen
-# Layerattribut-Rechteverwaltung
-# Layerattribut-Rechteverwaltung_speichern
-# Metadaten_Auswaehlen
-# Metadaten_Auswaehlen_Senden
-# Metadatenblattanzeige
-# Metadateneingabe
-# Metadateneingabe_Senden
-# neu Laden
-# neuer Layer
-# neuerLayer_Senden
-# Nachweis_antragsnr_form_aufrufen
-# Nachweis_antragsnummer_Senden
-# Nachweisanzeige
-# Nachweisanzeige_aus_Auftrag_entfernen
-# Nachweisanzeige_zum_Auftrag_hinzufuegen
-# Nachweisbearbeitung_Senden
-# Nachweisformular
-# Nachweisformular_Senden
-# Nachweisloeschen
-# Nachweisrechercheformular
-# Nachweisrechercheformular_Senden
-# Namen_Auswaehlen
-# Namen_Auswaehlen_Suchen
-# Notizenformular_KatVerwaltung
-# NotizKategorie_aendern
-# NotizKategorie_hinzufuegen
-# NotizKategorie_loeschen
-# Metadaten_Auswaehlen
-# OWS
-# pack_and_mail
-# sendeDokument
-# sendImage
-# sendeFestpunktskizze
-# setMapExtent
-# spatial_processing
-# StatistikAuswahl
-# StatistikAuswahl_anzeigen
-# Stelle Wählen
-# Stelleneditor
-# Stelle_Löschen
-# Stelleneditor_Als neue Stelle eintragen
-# Stelleneditor_Ändern
-# Stellen_Anzeigen
-# Suche_Flurstuecke_zu_Namen
-# tmp_Adr_Tabelle_Aktualisieren
-# upload_temp_file
-# Versiegelung
-# WMS_Export
-# WMS_Export_Senden
-# WMS_Import
-# WMS_Import_Eintragen
-# ZoomToFlst
-#
-####################################################################
-#echo 'go: '.$go;
-#var_dump($GUI->formvars);
+
 $GUI->loadPlugins();
 if($GUI->goNotExecutedInPlugins){
 	if($go == 'get_last_query'){
@@ -186,7 +57,22 @@ if($GUI->goNotExecutedInPlugins){
 		$GUI->formvars['keinzurueck'] = true;
 		$go = $GUI->last_query['go'];
 	}
+	
+	$executiontimes['time'][] = microtime_float();
+	$executiontimes['action'][] = 'switch';
+	
 	switch($go){
+		case 'navMap_ajax' : {   
+      $GUI->formvars['nurAufgeklappteLayer'] = true;		
+      $GUI->loadMap('DataBase');
+      $GUI->navMap($GUI->formvars['CMD']);
+      $GUI->saveMap('');    			
+      $currenttime=date('Y-m-d H:i:s',time());
+      $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+      $GUI->drawMap();    
+      $GUI->mime_type='map_ajax';
+      $GUI->output();
+		}break;
 	
 		case 'autocomplete_request' :{
 			$GUI->autocomplete_request();
@@ -622,28 +508,32 @@ if($GUI->goNotExecutedInPlugins){
 
 	  # OWS-Proxy erstellt bild nur neu, wenn noch nicht vorher schon mal gefordert
 	  case 'OWS-Proxy' : {
-		$GUI->owsProxy();
+			$GUI->owsProxy();
 	  }break;
 
 	  # OWS_Ausnahmebehandlung
 	  case 'OWS_Exception' : {
-		$GUI->createOWSException();
+			$GUI->createOWSException();
 	  }break;
 
 	  # 2006-03-24 CG
 	  case 'StatistikAuswahl' : {
-		$GUI->checkCaseAllowed($go);
-		$GUI->StatistikAuswahl();
+			$GUI->checkCaseAllowed($go);
+			$GUI->StatistikAuswahl();
+	  }break;
+		
+		case 'loadDenkmale_laden' : {
+			$GUI->loadDenkmale_laden();
 	  }break;
 	  
 	  case 'StatistikAuswahl_Stelle' : {
-		$GUI->checkCaseAllowed($go);
-		$GUI->StatistikAuswahl();
+			$GUI->checkCaseAllowed($go);
+			$GUI->StatistikAuswahl();
 	  }break;
 
 	  # 2006-04-03 CG
 	  case 'StatistikAuswahl_anzeigen' : {
-		$GUI->StatistikAuswahlErgebnis();
+			$GUI->StatistikAuswahlErgebnis();
 	  }break;
 	  
 	  case 'StatistikAuswahl_Stelle_anzeigen' : {
@@ -734,24 +624,6 @@ if($GUI->goNotExecutedInPlugins){
 		$GUI->output();
 	  } break;
 	  
-	  case 'Bauauskunft_Suche' : {
-		$GUI->checkCaseAllowed($go);
-		$GUI->bauauskunftSuche();
-		$GUI->output();
-	  } break;
-
-	  case 'Bauauskunft_Suche_Suchen' : {
-		$GUI->checkCaseAllowed('Bauakteneinsicht');
-		$GUI->bauauskunftSucheSenden($GUI->formvars['flurstkennz']);
-		$GUI->output();
-	  } break;
-
-	  case 'Baudatenanzeige' : {
-		$GUI->checkCaseAllowed('Bauakteneinsicht');
-		$GUI->bauauskunftanzeige();
-		$GUI->output();
-	  } break;
-
 	  case 'Druckrahmen' : {
 		$GUI->checkCaseAllowed($go);
 		$GUI->druckrahmen_init();
@@ -895,7 +767,7 @@ if($GUI->goNotExecutedInPlugins){
 	  } break;
 	  
 	  case 'Metadaten_generieren' : {
-		$GUI->metadaten_generieren($this->formvars['layer_id']);
+		$GUI->metadaten_generieren($GUI->formvars['layer_id']);
 	  } break;
 		
 	  case 'Metadaten_Auswaehlen' : {
@@ -1350,11 +1222,11 @@ if($GUI->goNotExecutedInPlugins){
 	  } break;
 		
 		case 'sendeDokument' : {
-			$this->sendeDokument($this->formvars['dokument'], $this->formvars['original_name']);
+			$GUI->sendeDokument($GUI->formvars['dokument'], $GUI->formvars['original_name']);
 	  } break;
 
 	  case 'sendeDokument_mit_vorschau' : {
-			$this->sendeDokument_mit_vorschau($this->formvars['dokument'], $this->formvars['original_name']);    
+			$GUI->sendeDokument_mit_vorschau($GUI->formvars['dokument'], $GUI->formvars['original_name']);    
 	  } break;
 
 	  case 'help' : {
@@ -1498,19 +1370,13 @@ if($GUI->goNotExecutedInPlugins){
 	  } break;
 		
 	  case "Hausnummernkorrektur" : {
-		$ALB=new ALB($GUI->database);
-		$ALB->HausNrTextKorrektur();
-		$Adresse=new adresse('','','',$this->database);
-		$Adresse->updateAdressTable();
-		$GUI->adresswahl();
-		$GUI->output();
-	  } break;
-
-	  case 'ALK_Fortfuehrung' : {
-		$GUI->checkCaseAllowed($go);
-		$GUI->ALK_Fortfuehrung();
-		$GUI->tmp_Adr_Tabelle_Aktualisieren();
-		$GUI->output();
+			include (CLASSPATH.'alb.php');
+			$ALB=new ALB($GUI->database);
+			$ALB->HausNrTextKorrektur();
+			$Adresse=new adresse('','','',$GUI->database);
+			$Adresse->updateAdressTable();
+			$GUI->adresswahl();
+			$GUI->output();
 	  } break;
 
 	  case 'Adm_Fortfuehrung' : {
@@ -1562,18 +1428,6 @@ if($GUI->goNotExecutedInPlugins){
 		$GUI->output();
 	  } break;
 
-		case 'navMap_ajax' : {   
-      $GUI->formvars['nurAufgeklappteLayer'] = true;		
-      $GUI->loadMap('DataBase');		
-      $GUI->navMap($GUI->formvars['CMD']);
-      $GUI->saveMap('');    
-      $currenttime=date('Y-m-d H:i:s',time());
-      $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
-      $GUI->drawMap();    
-      $GUI->mime_type='map_ajax';
-      $GUI->output();
-		}break;
-
     default : {
       # Karteninformationen lesen
       $GUI->loadMap('DataBase');
@@ -1585,7 +1439,12 @@ if($GUI->goNotExecutedInPlugins){
 	}
 }
 include('end.php');
-#$executiontime=microtime_float()-$starttime;
-#echo date('G:i:s', time());
-#if (0) { echo '<br>Laufzeit:'.$executiontime.'s'; }
+
+#$executiontimes['time'][] = microtime_float();
+#$executiontimes['action'][] = 'Ende';
+
+#for($i = 0;  $i < count($executiontimes['time']); $i++){
+#	$dauer = $executiontimes['time'][$i] - $starttime;
+#	echo chr(10).chr(13).'<br>'.$executiontimes['action'][$i].': '.$dauer.'s';
+#}
 ?>

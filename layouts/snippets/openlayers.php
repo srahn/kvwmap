@@ -85,13 +85,13 @@ function showMapImage(){
 function switchlegend(){
 	if(document.getElementById('legendTable').style.display == 'none'){
 		document.getElementById('legendTable').style.display='';
-		ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=changeLegendDisplay&hide=0', new Array(), "");
+		ahah('index.php', 'go=changeLegendDisplay&hide=0', new Array(), "");
 		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>maximize.png';
 		document.getElementById('LegendMinMax').title="Legende verstecken";
 	}
 	else{
 		document.getElementById('legendTable').style.display='none';
-		ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=changeLegendDisplay&hide=1', new Array(), "");
+		ahah('index.php', 'go=changeLegendDisplay&hide=1', new Array(), "");
 		document.getElementById('LegendMinMax').src='<?php echo GRAPHICSPATH; ?>minimize.png';
 		document.getElementById('LegendMinMax').title="Legende zeigen";
 	}

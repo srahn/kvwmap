@@ -61,15 +61,15 @@ define('GLEVIEW', 2);                  # 1 / 2              # Version 1.6.5
 define('HEADER', 'header.php');															# Version 1.8.0
 define('FOOTER', 'footer.php');															# Version 1.8.0
 # Höhe von Header und Footer zusammen
-define('HEADER_FOOTER_HEIGHT', 132);																# Version 1.14
+define('HEADER_FOOTER_HEIGHT', 132);																# Version 2.0
 # Breite von Menü und Legende zusammen
-$menue_legend_widths = array('gui.php' => 485, 'gui_button.php' => 486);		# Version 1.14
+$menue_legend_widths = array('gui.php' => 485, 'gui_button.php' => 486);		# Version 2.0
 # login.php
 define('LOGIN', 'login.php');																# Version 1.8.0
 # Seite zur Fehlerbehandlung, die durch fehlerhafte Layer verursacht werden; unterhalb von /snippets
-define('LAYER_ERROR_PAGE', 'layer_error_page.php');					# Version 1.14
+define('LAYER_ERROR_PAGE', 'layer_error_page.php');					# Version 2.0
 # Geschwindigkeit der Warteanimation (normal: 6, 0 = keine Animation)
-define('WAITING_ANIMATION_SPEED', 6);												# Version 1.14
+define('WAITING_ANIMATION_SPEED', 6);												# Version 2.0
 
 ### Einstellungen für das Menü
 # Da die Bezeichnungen der Menüs frei wählbar sind, muss man hier angegen
@@ -90,7 +90,7 @@ define('MENU_WAPPEN','oben');          # oben / unten / kein
 # Position der Referenzkarte (oben/unten)                   # Version 1.6.4
 define('MENU_REFMAP','unten');          # oben / unten      # Version 1.6.4
 # Schalter für die Ajax-Funktionalität des Menüs            # Version 1.6.4
-#define('AJAX_MENUE','true');          # true / false        # Version 1.6.4   # in Version 1.14 wieder gelöscht
+#define('AJAX_MENUE','true');          # true / false        # Version 1.6.4   # in Version 2.0 wieder gelöscht
 # Hintergrundfarbe Zeile bei Listen
 define('BG_TR','lightsteelblue');  # lightblue lightsteelblue		# Version 1.7.3
 # Hintergrundfarbe Top-Menüzeilen
@@ -208,7 +208,7 @@ define('EPSGCODE','2398'); # Krassowski, Pulkowo 42, Gauß Krüger 3° Streifen 
 $supportedSRIDs = array(4326,2397,2398,2399,31466,31467,31468,31469,32648,25832,25833,35833,32633,325833,15833,900913,28992);                    # Version 1.6.8
 
 # Unterstützte Sprachen, nur diese stehen zur Auswahl bei der Stellenwahl
-$supportedLanguages = array('german', 'english');															# Version 1.14
+$supportedLanguages = array('german', 'english');															# Version 2.0
 
 # Name der Stopwortdatei
 define('STOPWORDFILE',SHAPEPATH.'gazetteer/top10000de.txt');
@@ -345,8 +345,8 @@ define("LAYERNAME_BODENRICHTWERTE",'BORIS');	# Version 1.7.3
 define("LAYER_ID_ADRESSAENDERUNGEN", '162');  # Version 1.6.7
 define("LAYER_IDS_DOP", '79,80');							# Version 1.8.0
 define("LAYER_ID_JAGDBEZIRKE", '432');				# Version 1.10.0
-define("LAYER_ID_SCHNELLSPRUNG", 749);				# Version 1.14
-$quicksearch_layer_ids = array(752);					# Version 1.14
+define("LAYER_ID_SCHNELLSPRUNG", 749);				# Version 2.0
+$quicksearch_layer_ids = array(752);					# Version 2.0
 
 ######################### Dateieinstellungen
 # Datei in der das MapFile als Dokumentation zur Kartenausgabe geschrieben wird
@@ -403,55 +403,55 @@ define('SHOW_MAP_IMAGE', 'true');       # true / false                          
 
 ############################# Klassenbibliotheken lesen
 # laden der Klassenbibliotheken
-include (CLASSPATH.'kvwmap_core.php');							# Version 1.7.6
-include (CLASSPATH.'kataster_core.php');						# Version 1.7.6
-include (CLASSPATH.'mysql.php');										# Version 1.7.6
-include (CLASSPATH.'postgresql_core.php');					# Version 1.7.6
-include (CLASSPATH.'users_core.php');								# Version 1.7.6
-if($_REQUEST['go'] != 'navMap_ajax'){								# Version 1.7.6   # in 1.14 in navMap_ajax umbenannt (die folgenden Klassen nicht laden, wenn man nur in der Karte navigiert)
-	include (CLASSPATH.'kvwmap.php');
+include (CLASSPATH.'kvwmap_core.php');								# Version 1.7.6
+include (CLASSPATH.'kataster_core.php');							# Version 1.7.6
+include (CLASSPATH.'mysql.php');											# Version 1.7.6
+include (CLASSPATH.'postgresql_core.php');						# Version 1.7.6
+include (CLASSPATH.'users_core.php');									# Version 1.7.6
+if(!in_array($_REQUEST['go'], $fast_loading_cases)){		# Version 1.7.6		# in Version 2.0 angepasst   (die folgenden Klassen nicht laden, wenn einer der schnell ladenden Anwendungsfälle ausgeführt werden soll)
+	include (CLASSPATH.'kvwmap.php');	
 	include (CLASSPATH.'kataster.php');
 	include (CLASSPATH.'postgresql.php');
-	if(ALKIS){																				# Version 1.13
-		include (CLASSPATH.'kataster_alkis.php');				# Version 1.13
-		include (CLASSPATH.'postgresql_alkis.php');			# Version 1.13
-	}																									# Version 1.13
-	else{																							# Version 1.13
-		include (CLASSPATH.'kataster_alk.php');					# Version 1.13
-		include (CLASSPATH.'postgresql_alk.php');				# Version 1.13
-	}																									# Version 1.13
+	if(ALKIS){																					#	Version 1.13
+		include (CLASSPATH.'kataster_alkis.php');					# Version 1.13
+		include (CLASSPATH.'postgresql_alkis.php');				# Version 1.13
+	}																										# Version 1.13
+	else{																								# Version 1.13
+		include (CLASSPATH.'kataster_alk.php');						# Version 1.13
+		include (CLASSPATH.'postgresql_alk.php');					# Version 1.13
+	}																										# Version 1.13
 	include (CLASSPATH.'users.php');
-	include (CLASSPATH.'alb.php');
-	include (CLASSPATH.'alk.php');
-	#include (CLASSPATH.'antrag.php');								# in Version 1.14 gelöscht
-	include (CLASSPATH.'bau.php');
-	#include (CLASSPATH.'nachweis.php');							# in Version 1.14 gelöscht
-	include (CLASSPATH.'geothermie.php');
-	#include (CLASSPATH.'bodenrichtwerte.php');				# in Version 1.14 gelöscht
-	include (CLASSPATH.'verundentsorgung.php');
-	include (CLASSPATH.'metadaten.php');
-	include (CLASSPATH.'spatial_processor.php');
+	#include (CLASSPATH.'alb.php');											# in Version 2.0 gelöscht
+	#include (CLASSPATH.'alk.php');											# in Version 2.0 gelöscht
+	#include (CLASSPATH.'antrag.php');									# in Version 2.0 gelöscht
+	#include (CLASSPATH.'bau.php');											# in Version 2.0 gelöscht
+	#include (CLASSPATH.'nachweis.php');								# in Version 2.0 gelöscht
+	#include (CLASSPATH.'geothermie.php');							# in Version 2.0 gelöscht
+	#include (CLASSPATH.'bodenrichtwerte.php');					# in Version 2.0 gelöscht
+	#include (CLASSPATH.'verundentsorgung.php');				# in Version 2.0 gelöscht
+	#include (CLASSPATH.'metadaten.php');								# in Version 2.0 gelöscht
+	#include (CLASSPATH.'spatial_processor.php');				# in Version 2.0 gelöscht
 	include (CLASSPATH.'bauleitplanung.php');           # Version 1.6.1
-	#include (CLASSPATH.'jagdkataster.php');             # Version 1.6.1		# in Version 1.14 gelöscht
-	include (CLASSPATH.'polygoneditor.php');            # Version 1.6.3
-	include (CLASSPATH.'pointeditor.php');              # Version 1.6.3
-	include (CLASSPATH.'dbf.php');                      # Version 1.6.5
-	#include (CLASSPATH.'anliegerbeitraege.php');        # Version 1.6.6   # in Version 1.14 gelöscht
-	include (CLASSPATH.'gebaeude_editor.php');          # Version 1.6.6   (nur für die, die diese Fachschale nutzen wollen)
-	include (CLASSPATH.'documents.php');                # Version 1.6.6
-	include (CLASSPATH.'esaf.php');                     # Version 1.6.6
-	include (CLASSPATH.'shape.php');                    # Version 1.6.6
-	include (CLASSPATH.'gps.php');                      # Version 1.6.7   (noch in Entwicklung)
-	include (CLASSPATH.'wms.php');                      # Version 1.6.7   (noch in Entwicklung)
-	include (CLASSPATH.'funktion.php');                 # Version 1.6.9
-	include (CLASSPATH.'lineeditor.php');               # Version 1.7.0
-	include (CLASSPATH.'wfs.php');                      # Version 1.7.0
-	include (CLASSPATH.'synchronisation.php');          # Version 1.7.0
-	include (CLASSPATH.'tif.php');          						# Version 1.7.2
-	include (CLASSPATH.'gpx.php');          						# Version 1.7.4
-	include (CLASSPATH.'datendrucklayout.php');         # Version 1.7.5
-	include (CLASSPATH.'metadaten_csw.php');						# Version 1.7.5
-	include (CLASSPATH.'uko.php');          						# Version 1.8.0
+	#include (CLASSPATH.'jagdkataster.php');            # Version 1.6.1		# in Version 2.0 gelöscht
+	#include (CLASSPATH.'polygoneditor.php');           # Version 1.6.3		# in Version 2.0 gelöscht
+	#include (CLASSPATH.'pointeditor.php');             # Version 1.6.3		# in Version 2.0 gelöscht
+	#include (CLASSPATH.'dbf.php');                     # Version 1.6.5		# in Version 2.0 gelöscht
+	#include (CLASSPATH.'anliegerbeitraege.php');       # Version 1.6.6   # in Version 2.0 gelöscht
+	#include (CLASSPATH.'gebaeude_editor.php');         # Version 1.6.6   # in Version 2.0 gelöscht
+	#include (CLASSPATH.'documents.php');               # Version 1.6.6		# in Version 2.0 gelöscht
+	#include (CLASSPATH.'esaf.php');                    # Version 1.6.6		# in Version 2.0 gelöscht
+	#include (CLASSPATH.'shape.php');                   # Version 1.6.6		# in Version 2.0 gelöscht
+	#include (CLASSPATH.'gps.php');                     # Version 1.6.7   # in Version 2.0 gelöscht
+	#include (CLASSPATH.'wms.php');                     # Version 1.6.7   # in Version 2.0 gelöscht
+	#include (CLASSPATH.'funktion.php');                # Version 1.6.9		# in Version 2.0 gelöscht
+	#include (CLASSPATH.'lineeditor.php');              # Version 1.7.0		# in Version 2.0 gelöscht
+	#include (CLASSPATH.'wfs.php');                     # Version 1.7.0		# in Version 2.0 gelöscht
+	#include (CLASSPATH.'synchronisation.php');         # Version 1.7.0		# in Version 2.0 gelöscht
+	#include (CLASSPATH.'tif.php');          						# Version 1.7.2		# in Version 2.0 gelöscht
+	#include (CLASSPATH.'gpx.php');          						# Version 1.7.4		# in Version 2.0 gelöscht
+	#include (CLASSPATH.'datendrucklayout.php');        # Version 1.7.5		# in Version 2.0 gelöscht
+	#include (CLASSPATH.'metadaten_csw.php');						# Version 1.7.5		# in Version 2.0 gelöscht
+	#include (CLASSPATH.'uko.php');          						# Version 1.8.0		# in Version 2.0 gelöscht
 }																											# Version 1.7.6
 include (WWWROOT.APPLVERSION.'funktionen/allg_funktionen.php');		# In Version 1.7.3 angepasst
 
@@ -461,10 +461,11 @@ $kvwmap_plugins = array();																			# Version 1.11.0
 #$kvwmap_plugins[] = 'bauleitplanung';														# Version 1.11.0
 #$kvwmap_plugins[] = 'bevoelkerung';															# Version 1.11.0
 #$kvwmap_plugins[] = 'gewaesser';																	# Version 1.11.0
-#$kvwmap_plugins[] = 'bodenrichtwerte';														# Version 1.14.0
-#$kvwmap_plugins[] = 'jagdkataster';															# Version 1.14.0
-#$kvwmap_plugins[] = 'nachweisverwaltung';												# Version 1.14.0
-#$kvwmap_plugins[] = 'anliegerbeitraege';												# Version 1.14.0
+#$kvwmap_plugins[] = 'bodenrichtwerte';														# Version 2.0.0
+#$kvwmap_plugins[] = 'jagdkataster';															# Version 2.0.0
+#$kvwmap_plugins[] = 'nachweisverwaltung';												# Version 2.0.0
+#$kvwmap_plugins[] = 'anliegerbeitraege';													# Version 2.0.0
+#$kvwmap_plugins[] = 'probaug';																		# Version 2.0.0
 #																																# Version 1.11.0
 #############################################################		# Version 1.11.0
 
@@ -510,7 +511,7 @@ $GISdb = $userDb; 																			# Version 1.7.6
 
 # Datenbank mit den Geometrieobjekten (PostgreSQL mit PostGIS Aufsatz)
 if ($pgdbname!='') {
-	if($_REQUEST['go'] == 'navMap_ajax'){									# Version 1.7.6			# in 1.14 in navMap_ajax umbenannt
+	if(in_array($_REQUEST['go'], $fast_loading_cases)){		# Version 1.7.6		# in Version 2.0 angepasst
 		$PostGISdb=new pgdatabase_core();										# Version 1.7.6
 	}																											# Version 1.7.6
 	else{																									# Version 1.7.6

@@ -41,9 +41,9 @@ function save(){
       <select name="epsg">
 		    <option value="">--<?php echo $this->strChoose; ?>--</option>
 		    <?
-  			for($i = 0; $i < count($this->epsg_codes); $i++){
-  				echo '<option value="'.$this->epsg_codes[$i]['srid'].'">';
-  				echo $this->epsg_codes[$i]['srid'].': '.$this->epsg_codes[$i]['srtext'];
+  			foreach($this->epsg_codes as $epsg_code){
+  				echo '<option value="'.$epsg_code['srid'].'">';
+  				echo $epsg_code['srid'].': '.$epsg_code['srtext'];
   				echo "</option>\n";
   			}
   			?>

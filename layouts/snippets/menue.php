@@ -24,11 +24,11 @@ function changemenue(id){
   if(sub == undefined){
     var sub = document.createElement("div");
     sub.id = 'menue'+id+'sub';
-    ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=changemenue_with_ajax&id='+id+'&status=on', new Array(sub), "");
+    ahah('index.php', 'go=changemenue_with_ajax&id='+id+'&status=on', new Array(sub), "");
     main.appendChild(sub);
   }
   else{
-    ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=changemenue_with_ajax&id='+id+'&status=off', new Array(sub), "");
+    ahah('index.php', 'go=changemenue_with_ajax&id='+id+'&status=off', new Array(sub), "");
     main.removeChild(sub);
   }
 }

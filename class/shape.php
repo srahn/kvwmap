@@ -146,6 +146,7 @@ class shape {
    function shp_import_speichern($formvars, $database){
    	$this->formvars = $formvars;
     if(file_exists(UPLOADPATH.$this->formvars['dbffile'])){
+			include (CLASSPATH.'dbf.php');
       $this->dbf = new dbf();
       $this->dbf->header = $this->dbf->get_dbf_header(UPLOADPATH.$this->formvars['dbffile']);
       $this->dbf->header = $this->dbf->get_sql_types($this->dbf->header);
@@ -267,6 +268,7 @@ class shape {
   }
   
   function shp_import($formvars){
+		include (CLASSPATH.'dbf.php');
   	$_files = $_FILES;
     $this->formvars = $formvars;
     if($_files['zipfile']['name']){     # eine Zipdatei wurde ausgewählt

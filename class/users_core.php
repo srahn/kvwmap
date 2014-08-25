@@ -130,9 +130,30 @@ class rolle_core {
     $this->stelle_id=$stelle_id;
     $this->database=$database;
     #$this->layerset=$this->getLayer('');
-    $this->groupset=$this->getGroups('');
+    #$this->groupset=$this->getGroups('');
     $this->loglevel = 0;
   }
+	
+	function setGroupStatus($formvars) {
+		$this->groupset=$this->getGroups('');
+		# Eintragen des group_status=1 für Gruppen, die angezeigt werden sollen
+		for ($i=0;$i<count($this->groupset);$i++) {
+			if($formvars['group_'.$this->groupset[$i]['id']] !== NULL){
+				if ($formvars['group_'.$this->groupset[$i]['id']] == 1) {
+					$group_status=1;
+				}
+				else {
+					$group_status=0;
+				}
+				$sql ='UPDATE u_groups2rolle set status="'.$group_status.'"';
+				$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+				$sql.=' AND id='.$this->groupset[$i]['id'];
+				$this->debug->write("<p>file:users.php class:rolle->setGroupStatus - Speichern des Status der Gruppen zur Rolle:",4);
+				$this->database->execSQL($sql,4, $this->loglevel);
+			}
+		}
+		return $formvars;
+	}
 
   function setSelectedButton($selectedButton) {
     $this->selectedButton=$selectedButton;
@@ -558,6 +579,58 @@ class stelle_core {
     $this->readDefaultValues();
   }
 
+	function getsubmenues($id){
+		$sql ='SELECT menue_id,';
+		if ($this->language != 'german') {
+			$sql.='`name_'.$this->language.'_'.$this->charset.'` AS ';
+		}
+		$sql .=' name, target, links FROM u_menue2stelle, u_menues';
+		$sql .=' WHERE stelle_id = '.$this->id;
+		$sql .=' AND obermenue = '.$id;
+		$sql .=' AND menueebene = 2';
+		$sql .=' AND u_menue2stelle.menue_id = u_menues.id';
+		$sql .= ' ORDER BY menue_order';
+		$this->debug->write("<p>file:users.php class:stelle->getsubMenues - Lesen der UnterMenuepunkte eines Menüpunktes:<br>".$sql,4);
+		$query=mysql_query($sql,$this->database->dbConn);
+		if ($query==0) {
+			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+		}
+		else{
+			while($rs=mysql_fetch_array($query)) {
+				$menue['name'][]=$rs['name'];
+				$menue['target'][]=$rs['target'];
+				$menue['links'][]=$rs['links'];
+			}
+		}
+		$html = '<table cellspacing="2" cellpadding="0" border="0">';
+		for ($i = 0; $i < count($menue['name']); $i++) {
+			$html .='
+        <tr>
+          <td> 
+            <img src="'.GRAPHICSPATH.'leer.gif" width="17" height="1" border="0">
+					</td>
+					<td>
+            <a href="';
+			if ($menue['target'][$i]=='confirm') {
+				$html .='javascript:Bestaetigung(\'';
+			}
+			$html .= $menue['links'][$i];
+			if ($menue['target'][$i]=='confirm') {
+				$html .= '\',\'Diese Aktion wirklich ausf&uuml;hren?\')';
+				$menue['target'][$i]='';
+			}
+			$html .= '" class="menuered"';
+			if ($menue['target'][$i]!='') {
+				$html .= ' target="'.$menue['target'][$i].'"';
+			}
+			$html .= '>'.$menue['name'][$i].'</a>
+          </td>
+        </tr>';
+		}
+		$html .= '</table>';
+		return $html;
+	}
+	
   function getName() {
     $sql ='SELECT ';
     if ($this->language != 'german' AND $this->language != ''){

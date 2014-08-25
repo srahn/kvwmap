@@ -7,7 +7,7 @@
   }
   if($doit == true){
 ?>
-		<table border="0" cellspacing="0" cellpadding="2">
+		<table border="0" cellspacing="0" cellpadding="2" width="100%">
 <?	for ($k=0;$k<$anzObj;$k++) {
 			for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
 				if($this->formvars['preview_attribute'] == $this->qlayerset[$i]['attributes']['name'][$j]){
@@ -47,6 +47,9 @@
   							}
 								echo '<input type="hidden" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].'_alt'.';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'" value="'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]].'"></td>';
 							}
+							echo '<td><a ';
+							if($this->formvars['no_new_window'] != true)echo 	' target="_blank"';
+							echo ' href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$this->qlayerset[$i]['Layer_ID'].'&value_'.$this->qlayerset[$i]['maintable'].'_oid='.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['maintable'].'_oid'].'\')"><img border="0" title="zum Datensatz" src="'.GRAPHICSPATH.'zum_datensatz.gif"></a></td>';
 							$output = '<img border="0" title="zum Datensatz" src="'.GRAPHICSPATH.'zum_datensatz.gif">';
 						}break;
 						
@@ -62,7 +65,7 @@
 			}
 			if($this->formvars['embedded'] == 'true'){
 				echo '<tr style="border: none">
-								<td><a href="javascript:if(document.getElementById(\'subform'.$this->qlayerset[$i]['Layer_ID'].$this->formvars['count'].'_'.$k.'\').innerHTML == \'\')ahah(\''.URL.APPLVERSION.'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$this->qlayerset[$i]['Layer_ID'].'&value_'.$this->qlayerset[$i]['maintable'].'_oid='.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['maintable'].'_oid'].'&embedded=true&fromobject=subform'.$this->qlayerset[$i]['Layer_ID'].$this->formvars['count'].'_'.$k.'&targetobject='.$this->formvars['targetobject'].'&targetlayer_id='.$this->formvars['targetlayer_id'].'&targetattribute='.$this->formvars['targetattribute'].'&data='.$this->formvars['data'].'\', new Array(document.getElementById(\'subform'.$this->qlayerset[$i]['Layer_ID'].$this->formvars['count'].'_'.$k.'\')), \'\');clearsubforms();">'.$output.'</a><div id="subform'.$this->qlayerset[$i]['Layer_ID'].$this->formvars['count'].'_'.$k.'"></div></td>
+								<td><a href="javascript:if(document.getElementById(\'subform'.$this->qlayerset[$i]['Layer_ID'].$this->formvars['count'].'_'.$k.'\').innerHTML == \'\')ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$this->qlayerset[$i]['Layer_ID'].'&value_'.$this->qlayerset[$i]['maintable'].'_oid='.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['maintable'].'_oid'].'&embedded=true&fromobject=subform'.$this->qlayerset[$i]['Layer_ID'].$this->formvars['count'].'_'.$k.'&targetobject='.$this->formvars['targetobject'].'&targetlayer_id='.$this->formvars['targetlayer_id'].'&targetattribute='.$this->formvars['targetattribute'].'&data='.$this->formvars['data'].'\', new Array(document.getElementById(\'subform'.$this->qlayerset[$i]['Layer_ID'].$this->formvars['count'].'_'.$k.'\')), \'\');clearsubforms();">'.$output.'</a><div id="subform'.$this->qlayerset[$i]['Layer_ID'].$this->formvars['count'].'_'.$k.'"></div></td>
 							</tr>
 ';
 			}

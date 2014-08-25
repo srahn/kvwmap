@@ -582,6 +582,7 @@ CREATE TABLE referenzkarten (
   ID int(11) NOT NULL auto_increment,
   Name varchar(100) NOT NULL default '',
   Dateiname varchar(100) NOT NULL default '',
+  epsg_code INT NOT NULL DEFAULT  '2398',
   xmin double NOT NULL default '0',
   ymin double NOT NULL default '0',
   xmax double NOT NULL default '0',

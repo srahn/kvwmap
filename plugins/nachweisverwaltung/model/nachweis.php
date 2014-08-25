@@ -693,7 +693,7 @@ class Nachweis {
     return $errmsg;
   }
   
-  function getNachweise($id,$polygon,$gemarkung,$stammnr,$rissnr,$fortf,$art_einblenden,$richtung,$abfrage_art,$order,$antr_nr, $datum = NULL, $VermStelle = NULL, $gueltigkeit = NULL, $datum2 = NULL, $flur = NULL) {
+  function getNachweise($id,$polygon,$gemarkung,$stammnr,$rissnr,$fortf,$art_einblenden,$richtung,$abfrage_art,$order,$antr_nr, $datum = NULL, $VermStelle = NULL, $gueltigkeit = NULL, $datum2 = NULL, $flur = NULL, $flur_thematisch = NULL) {
     # Die Funktion liefert die Nachweise nach verschiedenen Suchverfahren.
     # Vor dem Suchen nach Nachweisen werden jeweils die Suchparameter überprüft    
     if (is_array($id)) { $idListe=$id; } else { $idListe=array($id); }
@@ -854,7 +854,7 @@ class Nachweis {
           #echo '<br>Suche nach individueller Nummer.';
           $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS andere_art, d.art AS andere_art_name";
           $sql.=" FROM nachweisverwaltung.n_vermstelle AS v";
-					if($gemarkung != ''){
+					if($gemarkung != '' AND $flur_thematisch == ''){
 						if(ALKIS)$sql.=", alkis.pp_flur as flur";
 						else $sql.=", alkobj_e_fla as alko, alknflur";
 					}
@@ -871,13 +871,18 @@ class Nachweis {
             }
             $sql.=")";
           }
-          if($gemarkung != ''){
-						if(ALKIS)$sql.=" AND flur.land*10000 + flur.gemarkung = '".$gemarkung."' AND st_intersects(st_transform(flur.the_geom, ".EPSGCODE."), n.the_geom)";
-						else $sql.=" AND alko.objnr = alknflur.objnr AND alknflur.gemkgschl = '".$gemarkung."' AND st_intersects(st_transform(alko.the_geom, ".EPSGCODE."), n.the_geom)";
-					}
-					if($flur != ''){
-						if(ALKIS)$sql.=" AND flur.flurnummer = ".$flur." ";
-						else $sql.=" AND alknflur.flur = '".str_pad($flur,3,'0',STR_PAD_LEFT)."' ";
+					if($flur_thematisch != '' AND $gemarkung != '' AND $flur != ''){
+            $sql.=" AND n.flurid='".$gemarkung.str_pad($flur,3,'0',STR_PAD_LEFT)."'";
+          }
+					else{
+						if($gemarkung != ''){
+							if(ALKIS)$sql.=" AND flur.land*10000 + flur.gemarkung = '".$gemarkung."' AND st_intersects(st_transform(flur.the_geom, ".EPSGCODE."), n.the_geom)";
+							else $sql.=" AND alko.objnr = alknflur.objnr AND alknflur.gemkgschl = '".$gemarkung."' AND st_intersects(st_transform(alko.the_geom, ".EPSGCODE."), n.the_geom)";
+						}
+						if($flur != ''){
+							if(ALKIS)$sql.=" AND flur.flurnummer = ".$flur." ";
+							else $sql.=" AND alknflur.flur = '".str_pad($flur,3,'0',STR_PAD_LEFT)."' ";
+						}
 					}
           if($stammnr!=''){
             $sql.=" AND n.stammnr='".$stammnr."'";

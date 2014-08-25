@@ -17,7 +17,7 @@ make_vorschlag = function(attributenamesarray, attribute, k, layer_id){
 			attributevalues += document.getElementById(attributenamesarray[i]+'_'+k).value + '|';
 		}
 	}
-	ahah("<? echo URL.APPLVERSION; ?>index.php", "go=get_vorschlag&layer_id="+layer_id+"&attribute="+attribute+"&attributenames="+attributenames+"&attributevalues="+attributevalues, new Array(document.getElementById(attribute+'_'+k)), new Array("setvalue"));
+	ahah("index.php", "go=get_vorschlag&layer_id="+layer_id+"&attribute="+attribute+"&attributenames="+attributenames+"&attributevalues="+attributevalues, new Array(document.getElementById(attribute+'_'+k)), new Array("setvalue"));
 }
  
 update_buttons = function(all, layer_id){
@@ -203,7 +203,7 @@ update_require_attribute = function(attributes, k,layer_id, value){
 		type = document.getElementById(attribute[i]+'_'+k).type;
 		if(type == 'text'){action = 'setvalue'};
 		if(type == 'select-one'){action = 'sethtml'};
-		ahah("<? echo URL.APPLVERSION; ?>index.php", "go=get_select_list&layer_id="+layer_id+"&attribute="+attribute[i]+"&value="+value+"&type="+type, new Array(document.getElementById(attribute[i]+'_'+k)), new Array(action));
+		ahah("index.php", "go=get_select_list&layer_id="+layer_id+"&attribute="+attribute[i]+"&value="+value+"&type="+type, new Array(document.getElementById(attribute[i]+'_'+k)), new Array(action));
 	}
 }
 

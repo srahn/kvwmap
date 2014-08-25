@@ -233,6 +233,7 @@ class ddl {
 				elseif($attributes['name'][$j] == $attributes['the_geom'] AND $this->layout['elements'][$attributes['name'][$j]]['xpos'] > 0){		# Geometrie
 					if($oids[$i] != ''){
 						if($attributes['geomtype'][$attributes['the_geom']] == 'POINT'){
+							include (CLASSPATH.'pointeditor.php');
 							$pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->gui->user->rolle->epsg_code);							
 							$point = $pointeditor->getpoint($oids[$i], $attributes['table_name'][$attributes['the_geom']], $attributes['the_geom']);
 							$rect = ms_newRectObj();
@@ -242,6 +243,7 @@ class ddl {
 							$rect->maxy = $point['pointy']+100;
 						}
 						else{
+							include (CLASSPATH.'polygoneditor.php');
 							$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->gui->user->rolle->epsg_code);
 							$rect = $polygoneditor->zoomTopolygon($oids[$i], $attributes['table_name'][$attributes['the_geom']], $attributes['the_geom'], 10);
 						}

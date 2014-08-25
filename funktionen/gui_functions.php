@@ -64,7 +64,7 @@ function dragstop(){
 	if(dragobjekt){
 		document.GUI.overlayx.value = parseInt(dragobjekt.style.left);
 		document.GUI.overlayy.value = parseInt(dragobjekt.style.top);
-		ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=saveOverlayPosition&overlayx='+document.GUI.overlayx.value+'&overlayy='+document.GUI.overlayy.value, new Array(''), new Array(""));
+		ahah('index.php', 'go=saveOverlayPosition&overlayx='+document.GUI.overlayx.value+'&overlayy='+document.GUI.overlayy.value, new Array(''), new Array(""));
 	}
   dragobjekt = null;
 	resizeobjekt = null;
@@ -138,9 +138,10 @@ function deactivate_overlay(){
 
 function overlay_submit(gui, start){
 	// diese Funktion macht beim Fenstermodus und einer Kartenabfrage oder einem Aufruf aus dem Overlay-Fenster einen ajax-Request mit den Formulardaten des uebergebenen Formularobjektes, ansonsten einen normalen Submit
-	if(1 == <? echo $this->user->rolle->querymode; ?> && start || gui.id == 'GUI2'){
-		formdata = formSerialize(gui);
-		ahah("<? echo URL.APPLVERSION.'index.php'; ?>", formdata+"&mime_type=overlay_html", new Array(document.getElementById('contentdiv')), new Array("sethtml"));	
+	if(1 == <? echo $this->user->rolle->querymode; ?> && start || gui.id == 'GUI2'){	
+		formdata = new FormData(gui);
+		formdata.append("mime_type", "overlay_html");	
+		ahah("index.php", formdata, new Array(document.getElementById('contentdiv')), new Array("sethtml"));	
 		if(document.GUI.CMD != undefined)document.GUI.CMD.value = "";
 	}else{
 		document.GUI.submit();
@@ -150,7 +151,7 @@ function overlay_submit(gui, start){
 function overlay_link(data){
 	// diese Funktion macht bei Aufruf aus dem Overlay-Fenster einen ajax-Request mit den übergebenen Daten, ansonsten wird das Ganze wie ein normaler Link aufgerufen
 	if(currentform.name == 'GUI2'){
-		ahah("<? echo URL.APPLVERSION.'index.php'; ?>", data+"&mime_type=overlay_html", new Array(document.getElementById('contentdiv')), new Array("sethtml"));	
+		ahah("index.php", data+"&mime_type=overlay_html", new Array(document.getElementById('contentdiv')), new Array("sethtml"));	
 		if(document.GUI.CMD != undefined)document.GUI.CMD.value = "";
 	}else{
 		window.location.href = 'index.php?'+data;
@@ -171,7 +172,7 @@ function update_legend(layerhiddenstring){
 			(document.getElementById('thema_'+parts[j]) != undefined && document.getElementById('thema_'+parts[j]).disabled && parts[j+1] == 0) || 	// wenn Layer nicht sichtbar war und jetzt sichtbar ist
 			(document.getElementById('thema_'+parts[j]) != undefined && !document.getElementById('thema_'+parts[j]).disabled && parts[j+1] == 1)){	// oder andersrum
 			legende = document.getElementById('legend');
-			ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=get_legend', new Array(legende), "");
+			ahah('index.php', 'go=get_legend', new Array(legende), "");
 			break;
 		}
 	}
@@ -183,7 +184,7 @@ function getlegend(groupid, layerid, fremde){
 		group = document.getElementById('group_'+groupid);
 		if(group.value == 0){												// eine Gruppe wurde aufgeklappt -> Layerstruktur per Ajax holen
 			group.value = 1;
-			ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=get_group_legend&'+group.name+'='+group.value+'&group='+groupid+'&nurFremdeLayer='+fremde, new Array(groupdiv), "");
+			ahah('index.php', 'go=get_group_legend&'+group.name+'='+group.value+'&group='+groupid+'&nurFremdeLayer='+fremde, new Array(groupdiv), "");
 		}
 		else{																// eine Gruppe wurde zugeklappt -> Layerstruktur nur verstecken
 			group.value = 0;
@@ -201,7 +202,7 @@ function getlegend(groupid, layerid, fremde){
 		else{
 			layer.value = 0;
 		}
-		ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=get_group_legend&'+layer.name+'='+layer.value+'&group='+groupid+'&nurFremdeLayer='+fremde, new Array(groupdiv), "");
+		ahah('index.php', 'go=get_group_legend&'+layer.name+'='+layer.value+'&group='+groupid+'&nurFremdeLayer='+fremde, new Array(groupdiv), "");
 	}
 }
 

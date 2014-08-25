@@ -48,7 +48,7 @@ class Bauauskunft {
   }
   
   function getbaudaten2($searchvars){
-  	$baudata = $this->database->getbaudaten($searchvars);
+  	$baudata = $this->getbaudaten_db($searchvars);
   	return $baudata;
   }
   
@@ -79,13 +79,78 @@ class Bauauskunft {
   		$searchvars['flurstueck'] = $flurstueck;
   	}
   	
-  	$this->baudata = $this->database->getbaudaten($searchvars);
+  	$this->baudata = $this->getbaudaten_db($searchvars);
   	return $searchvars;
+  }
+	
+	function getbaudaten_db($searchvars){
+    if($searchvars['distinct'] == 1){
+      $sql = 'SELECT DISTINCT feld1, feld2, feld3, feld8, feld11, feld20 FROM probaug.bau_akten WHERE 1 = 1';
+    }
+    else{
+      $sql = 'SELECT * FROM probaug.bau_akten WHERE 1 = 1';
+    }
+    if($searchvars['jahr'] != ''){$sql .= " AND Feld1 = '".$searchvars['jahr']."'";}
+    if($searchvars['obergruppe'] != ''){$sql .= " AND Feld2 = '".$searchvars['obergruppe']."'";}
+    if($searchvars['nummer'] != ''){$sql .= " AND Feld3 = '".$searchvars['nummer']."'";}
+    if($searchvars['vorhaben'] != ''){$sql .= " AND Feld8 LIKE '%".$searchvars['vorhaben']."%'";}
+    if($searchvars['verfahrensart'] != ''){$sql .= " AND Feld9 LIKE '%".$searchvars['verfahrensart']."%'";}
+    if($searchvars['gemarkung'] != ''){$sql .= " AND '13'||Feld12 = '".$searchvars['gemarkung']."'";}
+    if($searchvars['flur'] != ''){$sql .= " AND trim(trim(leading '0' from Feld13)) = '".$searchvars['flur']."'";}
+    if($searchvars['flurstueck'] != ''){$sql .= " AND trim(trim(leading '0' from Feld14)) LIKE '".$searchvars['flurstueck']."'";}
+    if($searchvars['vorname'] != ''){$sql .= " AND Feld19 LIKE '%".$searchvars['vorname']."%'";}
+    if($searchvars['nachname'] != ''){$sql .= " AND Feld20 LIKE '%".$searchvars['nachname']."%'";}
+    if($searchvars['strasse'] != ''){$sql .= " AND Feld21 LIKE '%".$searchvars['strasse']."%'";}
+    if($searchvars['hausnummer'] != ''){$sql .= " AND Feld22 LIKE '%".$searchvars['hausnummer']."%'";}
+    if($searchvars['plz'] != ''){$sql .= " AND Feld23 LIKE '%".$searchvars['plz']."%'";}
+    if($searchvars['ort'] != ''){$sql .= " AND Feld24 LIKE '%".$searchvars['ort']."%'";}
+    if($searchvars['vonJahr'] != ''){$sql .= " AND Feld1 BETWEEN '".$searchvars['vonJahr']."' AND '".$searchvars['bisJahr']."'";}
+    if($searchvars['withlimit'] == 'true'){$sql .= ' LIMIT '.$searchvars['limit'].' OFFSET '.$searchvars['offset'];}
+    #echo $sql;
+    $ret = $this->database->execSQL($sql, 4, 0);
+    if($ret[0]==0){
+      while($row = pg_fetch_array($ret[1])){
+        $baudata[] = $row;
+      }
+    }
+    return $baudata;
+  }
+	
+  function readvorhaben(){
+    $sql = 'SELECT vorhaben FROM probaug.bau_vorhaben';
+    $ret = $this->database->execSQL($sql, 4, 0);
+    if($ret[0]==0){
+      while($row = pg_fetch_array($ret[1])){
+        $vorhaben[] = $row;
+      }
+    }
+    $this->vorhaben = $vorhaben;
+  }
+
+  function readverfahrensart(){
+    $sql = 'SELECT verfahrensart FROM probaug.bau_verfahrensart';
+    $ret = $this->database->execSQL($sql, 4, 0);
+    if($ret[0]==0){
+      while($row = pg_fetch_array($ret[1])){
+        $verfahrensart[] = $row;
+      }
+    }
+    $this->verfahrensart = $verfahrensart;
+  }
+
+  function readaktualitaet(){
+  	$sql = "SET datestyle TO 'German';";
+		$sql.= "SELECT max(datum::date) FROM tabelleninfo WHERE thema = 'probaug'"; 
+    $ret = $this->database->execSQL($sql, 4, 0);
+    if($ret[0]==0){
+      $datum = pg_fetch_array($ret[1]);
+    }
+    $this->aktualitaet = $datum[0];
   }
   
   function countbaudaten($searchvars){
   	$searchvars['withlimit'] = false;
-  	$ret = $this->database->getbaudaten($searchvars);
+  	$ret = $this->getbaudaten_db($searchvars);
   	return count($ret);
   }
   
@@ -112,19 +177,7 @@ class Bauauskunft {
   	if(ALKIS)$FlurstKennz = formatFlurstkennzALKIS($FlurstKennz);
   	return $FlurstKennz;
   }
-  
-  function readvorhaben(){
-  	$this->vorhaben = $this->database->readvorhaben();
-  }
-  
-  function readverfahrensart(){
-  	$this->verfahrensart = $this->database->readverfahrensart();
-  }
-  
-  function readaktualitaet(){
-  	$this->aktualitaet = $this->database->readaktualitaet();
-  }
-  
+        
   function checkformdaten($formvars){
   		return true;
   }

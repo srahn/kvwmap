@@ -1213,6 +1213,21 @@ SELECT bw.oid, bw.gemeinde::text || '0000'::text AS gesl, g.gemeindename AS gena
 
 ----# Änderungen von 1.13.0 nach 2.0.0
 
+ALTER TABLE spatial_ref_sys_alias ADD COLUMN minx integer;
+ALTER TABLE spatial_ref_sys_alias ADD COLUMN miny integer;
+ALTER TABLE spatial_ref_sys_alias ADD COLUMN maxx integer;
+ALTER TABLE spatial_ref_sys_alias ADD COLUMN maxy integer;
+
+CREATE INDEX spatial_ref_sys_srid_idx
+  ON spatial_ref_sys
+  USING btree
+  (srid);
+
+CREATE INDEX spatial_ref_sys_alias_srid_idx
+  ON spatial_ref_sys_alias
+  USING btree
+  (srid);
+
 ---- BORIS ----
 
 CREATE SCHEMA bodenrichtwerte;
@@ -1730,3 +1745,91 @@ SELECT setval('anliegerbeitraege.anliegerbeitraege_strassen_id_seq', (select max
 
 ---- Anliegerbeitraege Ende ----
 
+
+---- ProBauG ----
+
+CREATE SCHEMA probaug;
+
+--# Tabelle zur Speicherung der Gemarkungsnummer-zu-Gemarkungsschlüssel-Beziehung für die Bauauskunft
+
+CREATE TABLE probaug.bau_gemarkungen
+(
+  nummer int8 NOT NULL,
+  schluessel int8 NOT NULL
+) 
+WITH OIDS;
+
+
+--###########################
+--# Tabelle für Bauaktendaten
+--# 2006-01-26 pk
+CREATE TABLE probaug.bau_akten
+(
+  feld1 integer,
+  feld2 integer,
+  feld3 integer,
+  feld4 text,
+  feld5 text,
+  feld6 text,
+  feld7 text,
+  feld8 text,
+  feld9 text,
+  feld10 text,
+  feld11 text,
+  feld12 text,
+  feld13 text,
+  feld14 text,
+  feld15 text,
+  feld16 text,
+  feld17 text,
+  feld18 text,
+  feld19 text,
+  feld20 text,
+  feld21 text,
+  feld22 text,
+  feld23 integer,
+  feld24 text,
+  feld25 text,
+  feld26 text
+)
+WITH (
+  OIDS=TRUE
+);
+
+--# Hinzufügen der Tabellen bau_verfahrensart und bau_vorhaben, in denen die zur Auswahl stehenden Werte für das Vorhaben und die Verfahrensart bei der Bauauskunftssuche gespeichert sind
+CREATE TABLE probaug.bau_verfahrensart
+(
+  verfahrensart text,
+  id serial NOT NULL
+) 
+WITH OIDS;
+
+CREATE TABLE probaug.bau_vorhaben
+(
+  vorhaben text,
+  id serial NOT NULL
+) 
+WITH OIDS;
+
+
+-- Überspielen der vorhandenen Daten
+
+INSERT INTO probaug.bau_gemarkungen SELECT * FROM bau_gemarkungen;
+INSERT INTO probaug.bau_akten SELECT * FROM bau_akten;
+INSERT INTO probaug.bau_verfahrensart SELECT * FROM bau_verfahrensart;
+INSERT INTO probaug.bau_vorhaben SELECT * FROM bau_vorhaben;
+
+
+-- Updaten der Sequenzen
+SELECT setval('probaug.bau_verfahrensart_id_seq', (select max(id)+1 from probaug.bau_verfahrensart), true);
+SELECT setval('probaug.bau_vorhaben_id_seq', (select max(id)+1 from probaug.bau_vorhaben), true);
+
+
+-- Löschen der alten Tabellen
+
+--DROP TABLE bau_gemarkungen;
+--DROP TABLE bau_akten;
+--DROP TABLE bau_verfahrensart;
+--DROP TABLE bau_vorhaben;
+
+---- ProBauG Ende ----

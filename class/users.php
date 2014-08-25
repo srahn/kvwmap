@@ -707,10 +707,10 @@ class user extends user_core{
 	}
 
 	function setRolle($stelle_id) {
-		# Abfragen und zuweisen der Einstellungen für die Rolle
-		$rolle=new rolle($this->id,$stelle_id,$this->database);
+		# Abfragen und zuweisen der Einstellungen für die Rolle		
+		$rolle=new rolle($this->id,$stelle_id,$this->database);		
 		if ($rolle->readSettings()) {
-			$this->rolle=$rolle;
+			$this->rolle=$rolle;			
 			return 1;
 		}
 		return 0;
@@ -1173,8 +1173,8 @@ class rolle extends rolle_core{
 		$this->user_id=$user_id;
 		$this->stelle_id=$stelle_id;
 		$this->database=$database;
-		$this->layerset=$this->getLayer('');
-		$this->groupset=$this->getGroups('');
+		#$this->layerset=$this->getLayer('');
+		#$this->groupset=$this->getGroups('');
 		$this->loglevel = 0;
 	}
 
@@ -1390,6 +1390,7 @@ class rolle extends rolle_core{
 	}
 
 	function setAktivLayer($formvars, $stelle_id, $user_id) {
+		$this->layerset=$this->getLayer('');
 		# Eintragen des Status der Layer, 1 angezeigt oder 0 nicht.
 		for ($i=0;$i<count($this->layerset);$i++) {
 			#echo $i.' '.$this->layerset[$i]['Layer_ID'].' '.$formvars['thema'.$this->layerset[$i]['Layer_ID']].'<br>';
@@ -1475,47 +1476,6 @@ class rolle extends rolle_core{
 			}
 		}
 	}
-
-	function setGroupStatus($formvars) {
-		# Eintragen des group_status=1 für Gruppen, die angezeigt werden sollen
-		for ($i=0;$i<count($this->groupset);$i++) {
-			if($formvars['group_'.$this->groupset[$i]['id']] !== NULL){
-				if ($formvars['group_'.$this->groupset[$i]['id']] == 1) {
-					$group_status=1;
-				}
-				else {
-					$group_status=0;
-				}
-				$sql ='UPDATE u_groups2rolle set status="'.$group_status.'"';
-				$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-				$sql.=' AND id='.$this->groupset[$i]['id'];
-				$this->debug->write("<p>file:users.php class:rolle->setGroupStatus - Speichern des Status der Gruppen zur Rolle:",4);
-				$this->database->execSQL($sql,4, $this->loglevel);
-			}
-		}
-		/*for ($i=0;$i<count($this->layerset);$i++) {										# hat bewirkt, dass als abfragbar markierte Layer, deren Gruppe zugeklappt ist, nicht abfragbar waren -> ist eigetnlich überflüssig
-		 $tempgroup = $this->read_Group($this->layerset[$i]['Gruppe']);
-		 if($tempgroup['status'] == 0){
-		 # Setzen des layer_status und des query_status= 2 für Layer, deren Gruppe nicht angezeigt wird
-		 if($formvars['qLayer'.$this->layerset[$i]['Layer_ID']] != 0){
-		 $formvars['qLayer'.$this->layerset[$i]['Layer_ID']] = 2;
-		 }
-		 if($formvars['thema'.$this->layerset[$i]['Layer_ID']] != 0){
-		 $formvars['thema'.$this->layerset[$i]['Layer_ID']] = 2;
-		 }
-		 }
-		 else{
-		 if($formvars['qLayer'.$this->layerset[$i]['Layer_ID']] == 2){
-		 $formvars['qLayer'.$this->layerset[$i]['Layer_ID']] = 1;
-		 }
-		 if($formvars['thema'.$this->layerset[$i]['Layer_ID']] == 2){
-		 $formvars['thema'.$this->layerset[$i]['Layer_ID']] = 1;
-		 }
-		 }
-		 }*/
-		return $formvars;
-	}
-
 
 	function setSize($mapsize) {
 		# setzen der Werte, die aktuell für die Nutzung der Stelle durch den Nutzer gelten sollen.
@@ -2352,6 +2312,7 @@ class stelle extends stelle_core{
 	}
 
 	function getFlurstueckeAllowed($FlurstKennz, $database) {
+		include (CLASSPATH.'alb.php');
 		$GemeindenStelle = $this->getGemeindeIDs();
 		if($GemeindenStelle != NULL){
 			$alb = new ALB($database);
@@ -2409,58 +2370,6 @@ class stelle extends stelle_core{
 			 */
 		}
 		return 1;
-	}
-
-	function getsubmenues($id){
-		$sql ='SELECT menue_id,';
-		if ($this->language != 'german') {
-			$sql.='`name_'.$this->language.'_'.$this->charset.'` AS ';
-		}
-		$sql .=' name, target, links FROM u_menue2stelle, u_menues';
-		$sql .=' WHERE stelle_id = '.$this->id;
-		$sql .=' AND obermenue = '.$id;
-		$sql .=' AND menueebene = 2';
-		$sql .=' AND u_menue2stelle.menue_id = u_menues.id';
-		$sql .= ' ORDER BY menue_order';
-		$this->debug->write("<p>file:users.php class:stelle->getsubMenues - Lesen der UnterMenuepunkte eines Menüpunktes:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) {
-			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
-		}
-		else{
-			while($rs=mysql_fetch_array($query)) {
-				$menue['name'][]=$rs['name'];
-				$menue['target'][]=$rs['target'];
-				$menue['links'][]=$rs['links'];
-			}
-		}
-		$html = '<table cellspacing="2" cellpadding="0" border="0">';
-		for ($i = 0; $i < count($menue['name']); $i++) {
-			$html .='
-        <tr>
-          <td> 
-            <img src="'.GRAPHICSPATH.'leer.gif" width="17" height="1" border="0">
-					</td>
-					<td>
-            <a href="';
-			if ($menue['target'][$i]=='confirm') {
-				$html .='javascript:Bestaetigung(\'';
-			}
-			$html .= $menue['links'][$i];
-			if ($menue['target'][$i]=='confirm') {
-				$html .= '\',\'Diese Aktion wirklich ausf&uuml;hren?\')';
-				$menue['target'][$i]='';
-			}
-			$html .= '" class="menuered"';
-			if ($menue['target'][$i]!='') {
-				$html .= ' target="'.$menue['target'][$i].'"';
-			}
-			$html .= '>'.$menue['name'][$i].'</a>
-          </td>
-        </tr>';
-		}
-		$html .= '</table>';
-		return $html;
 	}
 
 	function getMenue($ebene) {

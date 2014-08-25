@@ -249,14 +249,10 @@ else {
 		      		<select name="epsg_code">
 		      			<option value=""><?php echo $this->strPleaseSelect; ?></option>
 		      			<? 
-		      			for($i = 0; $i < count($this->epsg_codes); $i++){
-		      				if($this->formvars['epsg_code'] == $this->epsg_codes[$i]['srid']){
-		      					echo '<option selected';
-		      				}
-		      				else{
-		      					echo '<option';
-		      				}
-		      				echo ' value="'.$this->epsg_codes[$i]['srid'].'">'.$this->epsg_codes[$i]['srid'].': '.$this->epsg_codes[$i]['srtext'].'</option>';
+		      			foreach($this->epsg_codes as $epsg_code){
+									echo '<option ';
+		      				if($this->formvars['epsg_code'] == $epsg_code['srid'])echo 'selected ';
+		      				echo ' value="'.$epsg_code['srid'].'">'.$epsg_code['srid'].': '.$epsg_code['srtext'].'</option>';
 		      			}
 		      			?>	      			
 		      		</select>

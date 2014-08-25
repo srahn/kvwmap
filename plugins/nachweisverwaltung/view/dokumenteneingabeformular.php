@@ -19,7 +19,7 @@ function save(){
 		}
 	}
 	if(document.GUI.newpathwkt.value != ''){
-		ahah("<? echo URL.APPLVERSION; ?>index.php", "go=check_nachweis_poly&umring="+document.GUI.newpathwkt.value+"&flur="+document.GUI.Flur.value+"&gemkgschl="+document.GUI.Gemarkung.value, new Array(top.document.GUI.result2, ""), new Array("setvalue", "execute_function"));
+		ahah("index.php", "go=check_nachweis_poly&umring="+document.GUI.newpathwkt.value+"&flur="+document.GUI.Flur.value+"&gemkgschl="+document.GUI.Gemarkung.value, new Array(top.document.GUI.result2, ""), new Array("setvalue", "execute_function"));
 	}
 }
 

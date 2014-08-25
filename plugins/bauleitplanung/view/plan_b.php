@@ -33,7 +33,7 @@ function update_require_attribute(attributes, k,layer_id, value){
 		type = document.getElementById(attribute[i]+'_'+k).type;
 		if(type == 'text'){action = 'setvalue'};
 		if(type == 'select-one'){action = 'sethtml'};
-		ahah("<? echo URL.APPLVERSION; ?>index.php", "go=get_select_list&layer_id="+layer_id+"&attribute="+attribute[i]+"&value="+value+"&type="+type, new Array(document.getElementById(attribute[i]+'_'+k)), new Array(action));
+		ahah("index.php", "go=get_select_list&layer_id="+layer_id+"&attribute="+attribute[i]+"&value="+value+"&type="+type, new Array(document.getElementById(attribute[i]+'_'+k)), new Array(action));
 	}
 }
 
@@ -438,7 +438,7 @@ function update_gebietstyp(){
 										}
 										if($this->new_entry != true AND $no_query != true){
 											echo '<script type="text/javascript">
-															ahah(\''.URL.APPLVERSION.'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
+															ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
 															$data = '';
 															for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
 																$data .= '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$layer['shape'][$k][$attributes['subform_pkeys'][$j][$p]];
@@ -459,7 +459,7 @@ function update_gebietstyp(){
 													';
 											if($attributes['subform_layer_privileg'][$j] > 0 AND !$lock[$k]){
 												if($attributes['embedded'][$j] == true){
-													echo '<table width="98%" cellspacing="0" cellpadding="0"><tr><td width="100%" align="right"><a href="javascript:ahah(\''.URL.APPLVERSION.'index.php\', \'go=neuer_Layer_Datensatz';
+													echo '<table width="98%" cellspacing="0" cellpadding="0"><tr><td width="100%" align="right"><a href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz';
 													$data = '';
 													for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
 														echo '&attributenames['.$p.']='.$attributes['subform_pkeys'][$j][$p];
@@ -509,7 +509,7 @@ function update_gebietstyp(){
 										}
 										if($this->new_entry != true AND $no_query != true){
 											echo '<script type="text/javascript">
-															ahah(\''.URL.APPLVERSION.'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
+															ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
 															$data = '';
 															for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
 																$data .= '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$layer['shape'][$k][$attributes['subform_pkeys'][$j][$p]];
@@ -530,7 +530,7 @@ function update_gebietstyp(){
 													';
 											if($attributes['subform_layer_privileg'][$j] > 0 AND !$lock[$k]){
 												if($attributes['embedded'][$j] == true){
-													echo '<table width="98%" cellspacing="0" cellpadding="0"><tr><td width="100%" align="right"><a href="javascript:ahah(\''.URL.APPLVERSION.'index.php\', \'go=neuer_Layer_Datensatz';
+													echo '<table width="98%" cellspacing="0" cellpadding="0"><tr><td width="100%" align="right"><a href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz';
 													$data = '';
 													for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
 														echo '&attributenames['.$p.']='.$attributes['subform_pkeys'][$j][$p];

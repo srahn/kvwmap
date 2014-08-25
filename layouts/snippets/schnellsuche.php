@@ -28,7 +28,7 @@
 	
 	function load_search_attributes(layer_id){
 		if(layer_id != undefined){
-			ahah("<? echo URL.APPLVERSION; ?>index.php", "go=get_quicksearch_attributes&layer_id="+layer_id, new Array(document.getElementById('search_div')), new Array('sethtml'));
+			ahah("index.php", "go=get_quicksearch_attributes&layer_id="+layer_id, new Array(document.getElementById('search_div')), new Array('sethtml'));
 		}
 	}
 		
@@ -36,7 +36,7 @@
 		// attributes ist eine Liste von zu aktualisierenden Attribut und value der ausgewaehlte Wert
 		attribute = attributes.split(',');
 		for(i = 0; i < attribute.length; i++){
-			ahah("<? echo URL.APPLVERSION; ?>index.php", "go=get_select_list&layer_id="+layer_id+"&attribute="+attribute[i]+"&value="+value+"&type=select-one", new Array(document.getElementById('value_'+attribute[i])), new Array('sethtml'));
+			ahah("index.php", "go=get_select_list&layer_id="+layer_id+"&attribute="+attribute[i]+"&value="+value+"&type=select-one", new Array(document.getElementById('value_'+attribute[i])), new Array('sethtml'));
 		}
 	}
 	

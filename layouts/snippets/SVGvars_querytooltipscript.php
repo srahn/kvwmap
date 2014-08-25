@@ -255,7 +255,7 @@ $SVGvars_querytooltipscript .= '
 					}
 					counter++;
 					path = mousex+","+mousey+";"+mousex+","+mousey;
-					top.ahah("'.URL.APPLVERSION.'index.php", "go=tooltip_query&INPUT_COORD="+path+"&CMD=ppquery"+querylayer+"&querylayer_id="+querylayer_id+"&counter="+counter, new Array(top.document.GUI.result, \'\'), new Array(\'setvalue\', \'execute_function\'));
+					top.ahah("index.php", "go=tooltip_query&INPUT_COORD="+path+"&CMD=ppquery"+querylayer+"&querylayer_id="+querylayer_id+"&counter="+counter, new Array(top.document.GUI.result, \'\'), new Array(\'setvalue\', \'execute_function\'));
 				}
 				oldmousex = mousex;
 				oldmousey = mousey;

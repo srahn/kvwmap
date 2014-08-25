@@ -91,13 +91,11 @@ function export_shape(){
 					  <select name="epsg">
 					    <option value="">-- Auswahl --</option>
 					    <?
-							for($i = 0; $i < count($this->epsg_codes); $i++){
-								echo '<option ';
-								if($this->formvars['epsg'] == $this->epsg_codes[$i]['srid'])echo 'selected="true"';
-								echo ' value="'.$this->epsg_codes[$i]['srid'].'">';
-								echo $this->epsg_codes[$i]['srid'].': '.$this->epsg_codes[$i]['srtext'];
-								echo "</option>\n";
-							}
+							foreach($this->epsg_codes as $epsg_code){
+									echo '<option ';
+		      				if($this->formvars['epsg'] == $epsg_code['srid'])echo 'selected ';
+		      				echo ' value="'.$epsg_code['srid'].'">'.$epsg_code['srid'].': '.$epsg_code['srtext'].'</option>';
+		      			}
 							?>
 					  </select>
 			    </td>

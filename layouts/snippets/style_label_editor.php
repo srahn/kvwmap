@@ -11,7 +11,7 @@ function change_layer(){
 	document.GUI.selected_label_id.value = '';
 	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
 	document.GUI.selected_layer_id.value = layer_id;
-	ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=getclasses&layer_id='+layer_id, new Array(document.getElementById('classes_div')), "");
+	ahah('index.php', 'go=getclasses&layer_id='+layer_id, new Array(document.getElementById('classes_div')), "");
 }
 
 function change_class(){
@@ -22,7 +22,7 @@ function change_class(){
 	class_id = document.GUI.class_1.options[document.GUI.class_1.selectedIndex].value;
 	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
 	document.GUI.selected_class_id.value = class_id;
-	ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=getstyles_labels&class_id='+class_id+'&layer_id='+layer_id, new Array(document.getElementById('style_div'), document.getElementById('label_div')), "");
+	ahah('index.php', 'go=getstyles_labels&class_id='+class_id+'&layer_id='+layer_id, new Array(document.getElementById('style_div'), document.getElementById('label_div')), "");
 }
 
 function get_style(style_id){
@@ -33,7 +33,7 @@ function get_style(style_id){
 	if(document.getElementById('td1_style_'+style_id))document.getElementById('td1_style_'+style_id).style.backgroundColor='lightsteelblue';
 	if(document.getElementById('td2_style_'+style_id))document.getElementById('td2_style_'+style_id).style.backgroundColor='lightsteelblue';
 	document.GUI.selected_style_id.value = style_id;
-	ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=get_style&style_id='+style_id, new Array(document.getElementById('selected_style_div')), "");
+	ahah('index.php', 'go=get_style&style_id='+style_id, new Array(document.getElementById('selected_style_div')), "");
 }
 
 function get_label(label_id){
@@ -44,14 +44,14 @@ function get_label(label_id){
 	document.getElementById('td1_label_'+label_id).style.backgroundColor='lightsteelblue';
 	document.getElementById('td2_label_'+label_id).style.backgroundColor='lightsteelblue';
 	document.GUI.selected_label_id.value = label_id;
-	ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=get_label&label_id='+label_id, new Array(document.getElementById('selected_label_div')), "");
+	ahah('index.php', 'go=get_label&label_id='+label_id, new Array(document.getElementById('selected_label_div')), "");
 }
 
 function add_label(){
 	class_id = document.GUI.class_1.options[document.GUI.class_1.selectedIndex].value;
 	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
 	label_id = document.GUI.selected_label_id.value;
-	ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=add_label&label_id='+label_id+'&class_id='+class_id+'&layer_id='+layer_id, new Array(document.getElementById('label_div')), "");
+	ahah('index.php', 'go=add_label&label_id='+label_id+'&class_id='+class_id+'&layer_id='+layer_id, new Array(document.getElementById('label_div')), "");
 }
 
 function delete_label(label_id){
@@ -62,14 +62,14 @@ function delete_label(label_id){
 	selected_label_id = document.GUI.selected_label_id.value;
 	class_id = document.GUI.class_1.options[document.GUI.class_1.selectedIndex].value;
 	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
-	ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=delete_label&selected_label_id='+selected_label_id+'&label_id='+label_id+'&class_id='+class_id+'&layer_id='+layer_id, new Array(document.getElementById('label_div')), "");
+	ahah('index.php', 'go=delete_label&selected_label_id='+selected_label_id+'&label_id='+label_id+'&class_id='+class_id+'&layer_id='+layer_id, new Array(document.getElementById('label_div')), "");
 }
 
 function add_style(){
 	class_id = document.GUI.class_1.options[document.GUI.class_1.selectedIndex].value;
 	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
 	style_id = document.GUI.selected_style_id.value;
-	ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=add_style&style_id='+style_id+'&class_id='+class_id+'&layer_id='+layer_id, new Array(document.getElementById('style_div')), "");
+	ahah('index.php', 'go=add_style&style_id='+style_id+'&class_id='+class_id+'&layer_id='+layer_id, new Array(document.getElementById('style_div')), "");
 }
 
 function delete_style(style_id){
@@ -80,21 +80,21 @@ function delete_style(style_id){
 	selected_style_id = document.GUI.selected_style_id.value;
 	class_id = document.GUI.class_1.options[document.GUI.class_1.selectedIndex].value;
 	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
-	ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=delete_style&selected_style_id='+selected_style_id+'&style_id='+style_id+'&class_id='+class_id+'&layer_id='+layer_id, new Array(document.getElementById('style_div')), "");
+	ahah('index.php', 'go=delete_style&selected_style_id='+selected_style_id+'&style_id='+style_id+'&class_id='+class_id+'&layer_id='+layer_id, new Array(document.getElementById('style_div')), "");
 }
 
 function moveup_style(style_id){
 	selected_style_id = document.GUI.selected_style_id.value;
 	class_id = document.GUI.class_1.options[document.GUI.class_1.selectedIndex].value;
 	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
-	ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=moveup_style&selected_style_id='+selected_style_id+'&style_id='+style_id+'&class_id='+class_id+'&layer_id='+layer_id, new Array(document.getElementById('style_div')), "");	
+	ahah('index.php', 'go=moveup_style&selected_style_id='+selected_style_id+'&style_id='+style_id+'&class_id='+class_id+'&layer_id='+layer_id, new Array(document.getElementById('style_div')), "");	
 }
 
 function movedown_style(style_id){
 	selected_style_id = document.GUI.selected_style_id.value;
 	class_id = document.GUI.class_1.options[document.GUI.class_1.selectedIndex].value;
 	layer_id = document.GUI.layer.options[document.GUI.layer.selectedIndex].value;
-	ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=movedown_style&selected_style_id='+selected_style_id+'&style_id='+style_id+'&class_id='+class_id+'&layer_id='+layer_id, new Array(document.getElementById('style_div')), "");	
+	ahah('index.php', 'go=movedown_style&selected_style_id='+selected_style_id+'&style_id='+style_id+'&class_id='+class_id+'&layer_id='+layer_id, new Array(document.getElementById('style_div')), "");	
 }
 
 function save_style(style_id){
@@ -126,7 +126,7 @@ function save_style(style_id){
 	data+= '&linecap='+document.GUI.style_linecap.value;
 	data+= '&linejoin='+document.GUI.style_linejoin.value;
 	data+= '&linejoinmaxsize='+document.GUI.style_linejoinmaxsize.value;
-	ahah('<? echo URL.APPLVERSION; ?>index.php', data, new Array(document.getElementById('style_div'), document.getElementById('selected_style_div')), "");
+	ahah('index.php', data, new Array(document.getElementById('style_div'), document.getElementById('selected_style_div')), "");
 }
 
 function save_label(label_id){
@@ -162,7 +162,7 @@ function save_label(label_id){
 	data+= '&partials='+document.GUI.label_partials.value;
 	data+= '&wrap='+document.GUI.label_wrap.value;
 	data+= '&the_force='+document.GUI.label_the_force.value;
-	ahah('<? echo URL.APPLVERSION; ?>index.php', data, new Array(document.getElementById('label_div'), document.getElementById('selected_label_div')), "");
+	ahah('index.php', data, new Array(document.getElementById('label_div'), document.getElementById('selected_label_div')), "");
 }
 
 function applyfont(){

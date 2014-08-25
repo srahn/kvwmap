@@ -1,5 +1,6 @@
 <h2>Notizen</h2>
 <?php
+	include (CLASSPATH.'notiz.php');
   $anzObj=count($this->qlayerset[$i]['shape']);
   if ($anzObj>0) { 
     ?>

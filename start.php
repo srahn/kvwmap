@@ -1,6 +1,6 @@
 <?php
 # Objekt für graphische Benutzeroberfläche erzeugen
-if($_REQUEST['go'] == 'navMap_ajax'){
+if(in_array($_REQUEST['go'], $fast_loading_cases)){
 	$GUI=new GUI_core();
 }
 else{
@@ -28,7 +28,6 @@ else {
   }
   $GUI->formvars=$_REQUEST;
 }
-
 ####################################
 # Übergeben der Datenbank an die GUI
 $GUI->database=$GISdb;
@@ -104,7 +103,6 @@ else {
   $debug->write("Verbindung zur MySQL Kartendatenbank erfolgreich hergestellt.",4);        
 }
 
-
 # Angeben, dass die Texte in latin1 zurückgegeben werden sollen
 $GUI->database->execSQL("SET NAMES '".MYSQL_CHARSET."'",0,0);
 
@@ -113,24 +111,13 @@ $GUI->database->execSQL("SET NAMES '".MYSQL_CHARSET."'",0,0);
 # aktuellen Benutzer abfragen
 $login_name = $_SESSION['login_name'];
 
-# öffnen der Datenbankverbindung zur Benutzerdatenbank
-if (!$userDb->open()) {
-  echo 'Die Verbindung zur Benutzerdatenbank konnte mit folgenden Daten nicht hergestellt werden:';
-  echo '<br>Host: '.$userDb->host;
-  echo '<br>User: '.$userDb->user;
- # echo '<br>Passwd: '.$userDb->passwd;
-  echo '<br>Datenbankname: '.$userDb->dbName;
-  exit;
-}
-else {
-  $debug->write("Verbindung zur MySQL Benutzerdatenbank erfolgreich hergestellt.",4);        
-}
+
 # User Daten lesen
-if($_REQUEST['go'] == 'navMap_ajax'){
-	$GUI->user=new user_core($login_name,0,$userDb);
+if(in_array($_REQUEST['go'], $fast_loading_cases)){
+	$GUI->user=new user_core($login_name,0,$GUI->database);
 }
 else{
-	$GUI->user=new user($login_name,0,$userDb);
+	$GUI->user=new user($login_name,0,$GUI->database);
 }
 if(BEARBEITER == 'true'){
 	define('BEARBEITER_NAME', 'Bearbeiter: '.$GUI->user->Name);
@@ -207,7 +194,7 @@ else {
 }
 
 # Erzeugen eines Stellenobjektes
-if($_REQUEST['go'] == 'navMap_ajax'){
+if(in_array($_REQUEST['go'], $fast_loading_cases)){
 	$GUI->Stelle=new stelle_core($Stelle_ID,$userDb);
 }
 else{
@@ -263,6 +250,7 @@ if ($GUI->Stelle->checkPasswordAge==true) {
 # Abfragen der Einstellungen des Benutzers in der ausgewählten Stelle
 # Rollendaten zuweisen
 $GUI->user->setRolle($Stelle_ID);
+
 #echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language.' CharSet: '.$GUI->user->rolle->charset;
 # Rollenbezogene Stellendaten zuweisen
 $GUI->loadMultiLingualText($GUI->user->rolle->language,$GUI->user->rolle->charset);
@@ -273,7 +261,7 @@ if ($pgdbname=='') {
   # pgdbname ist leer, die Informationen zur Verbindung mit der PostGIS Datenbank
   # mit Geometriedaten werden aus der Tabelle stelle
   # der kvwmap-Datenbank $GUI->database gelesen
-  if($_REQUEST['go'] == 'navMap_ajax'){
+	if(in_array($_REQUEST['go'], $fast_loading_cases)){
   	$PostGISdb=new pgdatabase_core();
   }
   else{
@@ -305,24 +293,6 @@ if ($PostGISdb->dbName!='') {
   }
 }
 
-
-##############################################################
-# Übergeben der Gazetteer Datenbank (PostgreSQL mit PostGIS)
-# Version 1.6.6
-if ($Gazdb->dbName!='') {
-	$GUI->Gazdb=$Gazdb;
-	if (!$GUI->Gazdb->open()) {
-		echo 'Die Verbindung zur Gazetteer-Datenbank konnte mit folgenden Daten nicht hergestellt werden:';
-		echo '<br>Host: '.$GUI->Gazdb->host;
-		echo '<br>User: '.$GUI->Gazdb->user;
-		echo '<br>Datenbankname: '.$GUI->Gazdb->dbName;
-		exit;
-	}
-	else {
-	  $debug->write("Verbindung zur Gazetteers-Datenbank erfolgreich hergestellt.",4);        
-	}
-}
-
 # Ausgabe der Zugriffsinformationen in debug-Datei
 $debug->write('User: '.$GUI->user->login_name,4);
 $debug->write('Name: '.$GUI->user->Name.' '.$GUI->user->Vorname,4);
@@ -332,11 +302,30 @@ $debug->write('Host_ID: '.getenv("REMOTE_ADDR"),4);
 
 # Umrechnen der für die Stelle eingetragenen Koordinaten in das aktuelle System der Rolle
 # wenn die EPSG-Codes voneinander abweichen
-if ($GUI->Stelle->epsg_code!=$GUI->user->rolle->epsg_code) {
-  # Umrechnen der maximalen Kartenausdehnung der Stelle
-  $projFROM = ms_newprojectionobj("init=epsg:".$GUI->Stelle->epsg_code);
-  $projTO = ms_newprojectionobj("init=epsg:".$GUI->user->rolle->epsg_code);
-  $GUI->Stelle->MaxGeorefExt->project($projFROM, $projTO);
+if ($GUI->Stelle->epsg_code != $GUI->user->rolle->epsg_code){
+	$epsg_codes = $GUI->pgdatabase->read_epsg_codes(false);	
+	$user_epsg = $epsg_codes[$GUI->user->rolle->epsg_code];
+	if($user_epsg['minx'] != ''){							// Koordinatensystem ist räumlich eingegrenzt
+		if($GUI->Stelle->epsg_code != 4326){
+			$projFROM = ms_newprojectionobj("init=epsg:".$GUI->Stelle->epsg_code);
+			$projTO = ms_newprojectionobj("init=epsg:4326");
+			$GUI->Stelle->MaxGeorefExt->project($projFROM, $projTO);			// max. Stellenextent wird in 4326 transformiert
+		}
+		// Vergleich der Extents und ggfs. Anpassung
+		if($user_epsg['minx'] > $GUI->Stelle->MaxGeorefExt->minx)$GUI->Stelle->MaxGeorefExt->minx = $user_epsg['minx'];
+		if($user_epsg['miny'] > $GUI->Stelle->MaxGeorefExt->miny)$GUI->Stelle->MaxGeorefExt->miny = $user_epsg['miny'];
+		if($user_epsg['maxx'] < $GUI->Stelle->MaxGeorefExt->maxx)$GUI->Stelle->MaxGeorefExt->maxx = $user_epsg['maxx'];
+		if($user_epsg['maxy'] < $GUI->Stelle->MaxGeorefExt->maxy)$GUI->Stelle->MaxGeorefExt->maxy = $user_epsg['maxy'];
+		$projFROM = ms_newprojectionobj("init=epsg:4326");
+		$projTO = ms_newprojectionobj("init=epsg:".$GUI->user->rolle->epsg_code);
+		$GUI->Stelle->MaxGeorefExt->project($projFROM, $projTO);				// Transformation in das System des Nutzers
+	}
+	else{
+		# Umrechnen der maximalen Kartenausdehnung der Stelle
+		$projFROM = ms_newprojectionobj("init=epsg:".$GUI->Stelle->epsg_code);
+		$projTO = ms_newprojectionobj("init=epsg:".$GUI->user->rolle->epsg_code);
+		$GUI->Stelle->MaxGeorefExt->project($projFROM, $projTO);
+	}
 }
 
 if($_SESSION['login_routines'] == true){

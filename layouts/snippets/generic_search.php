@@ -133,7 +133,7 @@ function update_require_attribute(attributes, layer_id, value, searchmask_number
 	else prefix = '';
 	attribute = attributes.split(',');
 	for(i = 0; i < attribute.length; i++){
-		ahah("<? echo URL.APPLVERSION; ?>index.php", "go=get_select_list&layer_id="+layer_id+"&attribute="+attribute[i]+"&value="+value+"&type=select-one", new Array(document.getElementById(prefix+'value_'+attribute[i])), new Array('sethtml'));
+		ahah("index.php", "go=get_select_list&layer_id="+layer_id+"&attribute="+attribute[i]+"&value="+value+"&type=select-one", new Array(document.getElementById(prefix+'value_'+attribute[i])), new Array('sethtml'));
 	}
 }
 
@@ -185,7 +185,7 @@ function add_searchmask(layer_id){
 	document.GUI.searchmask_count.value = parseInt(document.GUI.searchmask_count.value) + 1;
 	newdiv = document.createElement('div');
 	document.getElementById('searchmasks').appendChild(newdiv);
-	ahah("<? echo URL.APPLVERSION; ?>index.php", "go=Layer-Suche_Suchmaske_generieren&selected_layer_id="+layer_id+"&searchmask_number="+document.GUI.searchmask_count.value, new Array(newdiv), new Array('sethtml'));
+	ahah("index.php", "go=Layer-Suche_Suchmaske_generieren&selected_layer_id="+layer_id+"&searchmask_number="+document.GUI.searchmask_count.value, new Array(newdiv), new Array('sethtml'));
 }
   
 //-->

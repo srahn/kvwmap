@@ -70,7 +70,7 @@ function save(){
   </tr>
 
 <?php
-	if(!class_exists('jagdkataster'))include (PLUGINS.'jagdkataster/model/jagdkataster.php');		# jagdkataster-Klasse einbinden
+	include_once (PLUGINS.'jagdkataster/model/jagdkataster.php');		# jagdkataster-Klasse einbinden
 	$jagdkataster = new jagdkataster($this->pgdatabase);
 	$privileg_ = array();
 	for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){

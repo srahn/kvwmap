@@ -17,8 +17,8 @@ function ahah(url, data, target, action){
   }
   if(req != undefined){
   	req.onreadystatechange = function() {ahahDone(url, target, req, action);};
-    req.open("POST", url, true);
-		req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=iso-8859-15");
+    req.open("POST", url, true);		
+		if(typeof data == "string")req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=iso-8859-15");		// data kann entweder ein String oder ein FormData-Objekt sein
   	req.send(data);		
   }
 }  

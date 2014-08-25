@@ -86,16 +86,12 @@
   <tr align="center">
     <td align="right"><?php echo $strMapProjection; ?>:&nbsp;</td>
     <td align="left">
-      <select name="epsg_code" onchange="ahah('<? echo URL.APPLVERSION; ?>index.php','go=spatial_processing&newSRID='+this.form.epsg_code.value+'&operation=transform&resulttype=wkt',new Array(newExtent), '');">
+      <select name="epsg_code" onchange="ahah('index.php','go=spatial_processing&newSRID='+this.form.epsg_code.value+'&operation=transform&resulttype=wkt',new Array(newExtent), '');">
 		    <?
-  			for($i = 0; $i < count($this->epsg_codes); $i++){
+  			foreach($this->epsg_codes as $epsg_code){
   				echo '<option';
-  				if($this->user->rolle->epsg_code == $this->epsg_codes[$i]['srid']){
-  					echo ' selected';
-  				}
-  				echo ' value="'.$this->epsg_codes[$i]['srid'].'">';
-  				echo $this->epsg_codes[$i]['srid'].': '.$this->epsg_codes[$i]['srtext'];
-  				echo "</option>\n";
+  				if($this->user->rolle->epsg_code == $epsg_code['srid'])echo ' selected';
+					echo ' value="'.$epsg_code['srid'].'">'.$epsg_code['srid'].': '.$epsg_code['srtext'].'</option>';
   			}
   			?>
 		  </select>
@@ -107,14 +103,10 @@
       <select name="epsg_code2">
 		    <option value="">--<?php echo $this->strChoose; ?>--</option>
 		    <?
-  			for($i = 0; $i < count($this->epsg_codes); $i++){
+  			foreach($this->epsg_codes as $epsg_code){
   				echo '<option';
-  				if($this->user->rolle->epsg_code2 == $this->epsg_codes[$i]['srid']){
-  					echo ' selected';
-  				}
-  				echo ' value="'.$this->epsg_codes[$i]['srid'].'">';
-  				echo $this->epsg_codes[$i]['srid'].': '.$this->epsg_codes[$i]['srtext'];
-  				echo "</option>\n";
+  				if($this->user->rolle->epsg_code2 == $epsg_code['srid'])echo ' selected';
+					echo ' value="'.$epsg_code['srid'].'">'.$epsg_code['srid'].': '.$epsg_code['srtext'].'</option>';
   			}
   			?>
 		  </select>

@@ -126,7 +126,7 @@
 	function autocomplete1(sql, columnname, inputname, resultdiv_id, inputvalue){
 		document.getElementById(resultdiv_id).style.display='none';
 		if(inputvalue.length > 2){
-			ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=autocomplete_request&sql='+sql+'&columnname='+columnname+'&inputname='+inputname+'&inputvalue='+inputvalue+'&resultdiv_id='+resultdiv_id, new Array(document.getElementById(resultdiv_id)), new Array("sethtml"));
+			ahah('index.php', 'go=autocomplete_request&sql='+sql+'&columnname='+columnname+'&inputname='+inputname+'&inputvalue='+inputvalue+'&resultdiv_id='+resultdiv_id, new Array(document.getElementById(resultdiv_id)), new Array("sethtml"));
 		}
 	}
 

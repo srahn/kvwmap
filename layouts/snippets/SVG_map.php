@@ -84,7 +84,7 @@
 			var code2execute;
 			if(browser != 'firefox')code2execute = 'moveback()';
 			
-  		ahah("<? echo URL.APPLVERSION.'index.php'; ?>", postdata+"&mime_type=map_ajax&INPUT_COORD="+input_coord+"&CMD="+cmd+"&code2execute="+code2execute, 
+  		ahah("index.php", postdata+"&mime_type=map_ajax&INPUT_COORD="+input_coord+"&CMD="+cmd+"&code2execute="+code2execute, 
   		new Array(
 				'',
   			mapimg, 
@@ -332,7 +332,7 @@ if($_SESSION['mobile'] == 'true'){
 				}
 			}
 		}
-  	top.ahah("'.URL.APPLVERSION.'index.php", "go=get_gps_position&srs='.$this->user->rolle->epsg_code.'", new Array(top.document.GUI.gps_posx, top.document.GUI.gps_posy), "");
+  	top.ahah("index.php", "go=get_gps_position&srs='.$this->user->rolle->epsg_code.'", new Array(top.document.GUI.gps_posx, top.document.GUI.gps_posy), "");
  	}
  	
  	window.setInterval("update_gps_position()", 2000);';
@@ -1077,7 +1077,7 @@ function toggle_vertices(){
 }
 
 function request_vertices(){
-	top.ahah("'.URL.APPLVERSION.'index.php", "go=getSVG_vertices&scale="+top.document.getElementById("scale").value, new Array(top.document.GUI.vertices, ""), new Array("setvalue", "execute_function"));
+	top.ahah("index.php", "go=getSVG_vertices&scale="+top.document.getElementById("scale").value, new Array(top.document.GUI.vertices, ""), new Array("setvalue", "execute_function"));
 }
 
 function show_vertices(){
@@ -1204,7 +1204,7 @@ function redrawPL(){
 function show_coords(evt){
 	coorx = evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value);
 	coory = top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value);
-	if(top.document.GUI.secondcoords != undefined)top.ahah("'.URL.APPLVERSION.'index.php", "go=spatial_processing&curSRID='.$this->user->rolle->epsg_code.'&newSRID='.$this->user->rolle->epsg_code2.'&point="+coorx+" "+coory+"&operation=transformPoint&resulttype=wkt&coordtype='.$this->user->rolle->coordtype.'", new Array(top.document.GUI.secondcoords), "");
+	if(top.document.GUI.secondcoords != undefined)top.ahah("index.php", "go=spatial_processing&curSRID='.$this->user->rolle->epsg_code.'&newSRID='.$this->user->rolle->epsg_code2.'&point="+coorx+" "+coory+"&operation=transformPoint&resulttype=wkt&coordtype='.$this->user->rolle->coordtype.'", new Array(top.document.GUI.secondcoords), "");
 	coorx = top.format_number(coorx, true);
 	coory = top.format_number(coory, true);
 	top.document.GUI.firstcoords.value = coorx+" "+coory; 

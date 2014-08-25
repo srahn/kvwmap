@@ -54,7 +54,7 @@
 			<img height="7" src="<? echo GRAPHICSPATH ?>leer.gif">
 	    <div id="datensatz" 
 			<? if($this->new_entry != true AND $this->user->rolle->querymode == 1){ ?>
-			onmouseenter="ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=tooltip_query&querylayer_id=<? echo $layer['Layer_ID']; ?>&oid=<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>', new Array(top.document.GUI.result, ''), new Array('setvalue', 'execute_function'));"
+			onmouseenter="ahah('index.php', 'go=tooltip_query&querylayer_id=<? echo $layer['Layer_ID']; ?>&oid=<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>', new Array(top.document.GUI.result, ''), new Array('setvalue', 'execute_function'));"
 			<? } ?>
 			>
 	    <input type="hidden" value="" name="changed_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 

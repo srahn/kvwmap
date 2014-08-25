@@ -545,6 +545,12 @@ SYMBOLSET
 #		STYLE 1 20 END
 	END
 
+  SYMBOL
+    NAME "kreuz_gefaellt"
+    TYPE PIXMAP
+    IMAGE "kreuz_gefaellt.png"
+    TRANSPARENT 1
+  END
 END
 
 

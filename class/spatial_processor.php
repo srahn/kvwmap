@@ -182,15 +182,35 @@ class spatial_processor {
 		    $curExtent=$this->rolle->oGeorefExt;
 		    $curSRID=$this->rolle->epsg_code;
 		    $newSRID=$formvars['newSRID'];
-		    # Ges:	newExtent ...	Neue Koordinaten des aktuellen Ausschnittes (ms_newRectObj)
-		    $ret=$this->pgdatabase->transformRect($curExtent,$curSRID,$newSRID);
-		    if ($ret[0]) {
-		    	$result = 'Fehler bei der Abfrage in PostGIS!';
-		    }
-		    else {
-		    	$newExtent=$ret[1];
-		    	$result=$newExtent->minx.' '.$newExtent->miny.', '.$newExtent->maxx.' '.$newExtent->maxy;
-		    }
+				
+				$epsg_codes = read_epsg_codes($this->pgdatabase);
+				$user_epsg = $epsg_codes[$newSRID];
+				if($user_epsg['minx'] != ''){							// Koordinatensystem ist räumlich eingegrenzt
+					if($curSRID != 4326){
+						$projFROM = ms_newprojectionobj("init=epsg:".$curSRID);
+						$projTO = ms_newprojectionobj("init=epsg:4326");
+						$curExtent->project($projFROM, $projTO);			// $curExtent wird in 4326 transformiert
+					}
+					// Vergleich der Extents und ggfs. Anpassung
+					if($user_epsg['minx'] > $curExtent->minx)$curExtent->minx = $user_epsg['minx'];
+					if($user_epsg['miny'] > $curExtent->miny)$curExtent->miny = $user_epsg['miny'];
+					if($user_epsg['maxx'] < $curExtent->maxx)$curExtent->maxx = $user_epsg['maxx'];
+					if($user_epsg['maxy'] < $curExtent->maxy)$curExtent->maxy = $user_epsg['maxy'];
+					$projFROM = ms_newprojectionobj("init=epsg:4326");
+					$projTO = ms_newprojectionobj("init=epsg:".$newSRID);
+					$curExtent->project($projFROM, $projTO);				// Transformation in das System des Nutzers
+					$result=$curExtent->minx.' '.$curExtent->miny.', '.$curExtent->maxx.' '.$curExtent->maxy;
+				}
+				else{				
+					$ret=$this->pgdatabase->transformRect($curExtent,$curSRID,$newSRID);
+					if ($ret[0]) {
+						$result = 'Fehler bei der Abfrage in PostGIS!';
+					}
+					else {
+						$newExtent=$ret[1];
+						$result=$newExtent->minx.' '.$newExtent->miny.', '.$newExtent->maxx.' '.$newExtent->maxy;
+					}
+				}
 			}break;
 			
 			case 'get_closest_line':{

@@ -1200,6 +1200,8 @@ ALTER TABLE  `stelle` ADD  `wappen_link` VARCHAR( 255 ) NULL AFTER  `wappen`;
 
 ALTER TABLE  `layer` ADD  `status` VARCHAR( 255 ) NULL;
 
+ALTER TABLE  `referenzkarten` ADD  `epsg_code` INT NOT NULL DEFAULT  '2398' AFTER  `Dateiname`;
+
 # da sich herausgestellt hat, das InnoDB-Tabellen sehr langsam sind, werden alle Tabellen auf MyISAM umgestellt
 
 ALTER TABLE `classes` ENGINE = MyISAM;
@@ -1231,7 +1233,6 @@ ALTER TABLE `stelle_gemeinden` ENGINE = MyISAM;
 ALTER TABLE `styles` ENGINE = MyISAM;
 ALTER TABLE `used_layer` ENGINE = MyISAM;
 ALTER TABLE `user` ENGINE = MyISAM;
-ALTER TABLE `u_attribute2used_layer` ENGINE = MyISAM;
 ALTER TABLE `u_attributfilter2used_layer` ENGINE = MyISAM;
 ALTER TABLE `u_consume` ENGINE = MyISAM;
 ALTER TABLE `u_consume2comments` ENGINE = MyISAM;

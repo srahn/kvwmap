@@ -218,7 +218,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
           <td><div align="center"><?php echo $this->formvars['gueltigkeit']=$this->nachweis->Dokumente[$i]['gueltigkeit']; ?></div></td>
           <td><div align="center"><?php echo $this->formvars['format']=$this->nachweis->Dokumente[$i]['format']; ?> 
             </div></td>
-          <td width="16"><a target="_blank" onmouseover="ahah('<? echo URL.APPLVERSION.'index.php'; ?>', 'go=document_vorschau&id=<?php echo $this->nachweis->Dokumente[$i]['id']; ?>', new Array(document.getElementById('vorschau')), new Array('sethtml'));" href="index.php?go=document_anzeigen&ohnesession=1&id=<?php echo $this->nachweis->Dokumente[$i]['id']; ?>&file=1" title="Ansicht"><img src="graphics/button_ansicht.png" border="0"></a></td>
+          <td width="16"><a target="_blank" onmouseover="ahah('index.php', 'go=document_vorschau&id=<?php echo $this->nachweis->Dokumente[$i]['id']; ?>', new Array(document.getElementById('vorschau')), new Array('sethtml'));" href="index.php?go=document_anzeigen&ohnesession=1&id=<?php echo $this->nachweis->Dokumente[$i]['id']; ?>&file=1" title="Ansicht"><img src="graphics/button_ansicht.png" border="0"></a></td>
           <td width="15">
           	<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten')){ ?>
           	<a href="index.php?go=Nachweisformular&id=<?php echo $this->nachweis->Dokumente[$i]['id'];?>&order=<? echo $this->formvars['order'] ?>" title="bearbeiten"><img src="graphics/button_edit.png" border="0"></a></td>

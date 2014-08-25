@@ -68,7 +68,7 @@
 											if($attributes['subform_layer_id'][$j] != ''){
 												if($attributes['subform_layer_privileg'][$j] > 0){
 													if($attributes['embedded'][$j] == true){
-														$datapart .= '<a href="javascript:ahah(\''.URL.APPLVERSION.'index.php\', \'go=neuer_Layer_Datensatz&selected_layer_id='.$attributes['subform_layer_id'][$j].'&embedded=true&fromobject=subform'.$layer['Layer_ID'].'_'.$k.'_'.$j.'&targetobject='.$attributes['name'][$j].'_'.$k.'&targetlayer_id='.$layer['Layer_ID'].'&targetattribute='.$attributes['name'][$j].'\', new Array(document.getElementById(\'subform'.$layer['Layer_ID'].'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'));clearsubforms();">&nbsp;neu&nbsp;</a>';
+														$datapart .= '<a href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz&selected_layer_id='.$attributes['subform_layer_id'][$j].'&embedded=true&fromobject=subform'.$layer['Layer_ID'].'_'.$k.'_'.$j.'&targetobject='.$attributes['name'][$j].'_'.$k.'&targetlayer_id='.$layer['Layer_ID'].'&targetattribute='.$attributes['name'][$j].'\', new Array(document.getElementById(\'subform'.$layer['Layer_ID'].'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'));clearsubforms();">&nbsp;neu&nbsp;</a>';
 														$datapart .= '<div style="display:inline" id="subform'.$layer['Layer_ID'].'_'.$k.'_'.$j.'"></div>';
 													}
 													else{
@@ -166,7 +166,7 @@
 									case 'SubFormEmbeddedPK' : {
 										$datapart .= '<div id="'.$attributes['name'][$j].'_'.$k.'"><img src="'.GRAPHICSPATH.'leer.gif" ';
 										if($this->new_entry != true AND $no_query != true){
-											$datapart .= 'onload="ahah(\''.URL.APPLVERSION.'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
+											$datapart .= 'onload="ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
 															$data = '';
 															for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
 																$data .= '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$dataset[$attributes['subform_pkeys'][$j][$p]];
@@ -201,7 +201,7 @@
 											$datapart .= 	'\')">'.$strShowAll.'</a>';												
 											if($attributes['subform_layer_privileg'][$j] > 0 AND !$lock[$k]){
 												if($attributes['embedded'][$j] == true){
-													$datapart .= '&nbsp;<a class="buttonlink" href="javascript:ahah(\''.URL.APPLVERSION.'index.php\', \'go=neuer_Layer_Datensatz';
+													$datapart .= '&nbsp;<a class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz';
 													$data = '';
 													for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
 														$datapart .= '&attributenames['.$p.']='.$attributes['subform_pkeys'][$j][$p];
@@ -215,7 +215,7 @@
 													$datapart .= '<div style="display:inline" id="subform'.$layer['Layer_ID'].'_'.$k.'_'.$j.'"></div>';
 												}
 												else{
-													$datapart .= '<a ';
+													$datapart .= '&nbsp;<a class="buttonlink"';
 													if($attributes['no_new_window'][$j] != true){
 														$datapart .= 	' target="_blank"';
 													}
@@ -264,7 +264,7 @@
 
 										}
 										if($attributes['privileg'][$j] != '0' AND !$lock[$k]){
-											$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" style="font-size: '.$this->user->rolle->fontsize_gle.'px" size="43" type="file" onchange="this.title=this.value;" accept="image/*" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'">';
+											$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" style="font-size: '.$this->user->rolle->fontsize_gle.'px" size="43" type="file" onchange="this.title=this.value;" accept="image/*" id="'.$attributes['name'][$j].'_'.$k.'" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'">';
 										}
 										else{
 											$datapart .= '&nbsp;';

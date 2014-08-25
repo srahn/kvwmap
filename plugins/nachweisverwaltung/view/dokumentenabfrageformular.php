@@ -5,7 +5,7 @@
 <script type="text/javascript">
 <!--
 
-Text[1]=["Achtung:","Bei Auswahl von Gemarkung und Flur erfolgt eine räumliche Suche über die aktuelle Flurgeometrie."]
+Text[1]=["Achtung:","Bei Auswahl von Gemarkung und Flur erfolgt eine räumliche Suche über die aktuelle Flurgeometrie. Soll stattdessen über die in den Nachweisen gespeicherte Flur gesucht werden, muss der Haken bei 'thematisch' gesetzt werden."]
 
 
 function save(){
@@ -166,13 +166,14 @@ else {
           </td>
 		</tr>
 		<tr>
-          <td align="left" colspan="3">Flur:&nbsp;&nbsp;&nbsp;&nbsp;
-						<div style="position: relative">
-						<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[1],Style[0], document.getElementById('TipLayer'))" onmouseout="htm()"><br><input type="text" name="suchflur" value="<?php echo $this->formvars['suchflur']; ?>" size="3" maxlength="3">
-						<DIV id="TipLayer" style="visibility:hidden;position:absolute;z-index:1000;left: -50px"></DIV>
-						</div>
-          </td>
-        </tr>
+			<td align="left" colspan="3">Flur:&nbsp;
+				<div style="position: relative">
+				<input type="text" name="suchflur" value="<?php echo $this->formvars['suchflur']; ?>" size="3" maxlength="3"><img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[1],Style[0], document.getElementById('TipLayer'))" onmouseout="htm()">
+				&nbsp;&nbsp;&nbsp;<input type="checkbox" name="flur_thematisch" value="1"> thematisch
+				<DIV id="TipLayer" style="visibility:hidden;position:absolute;z-index:1000;left: -50px"></DIV>
+				</div>
+			</td>
+		</tr>
 		<tr>
         <? if(NACHWEIS_PRIMARY_ATTRIBUTE != 'rissnummer'){ ?>
           <td align="left">          Antragsnummer<br>

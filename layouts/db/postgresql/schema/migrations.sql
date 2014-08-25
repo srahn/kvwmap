@@ -45,9 +45,23 @@ CREATE TABLE spatial_ref_sys_alias
 (
   srid integer NOT NULL,
   alias character varying(256),
+	minx integer,
+  miny integer,
+  maxx integer,
+  maxy integer,
   CONSTRAINT spatial_ref_sys_alias_pkey PRIMARY KEY (srid)
 )
 WITH OIDS;
+
+CREATE INDEX spatial_ref_sys_srid_idx
+  ON spatial_ref_sys
+  USING btree
+  (srid);
+
+CREATE INDEX spatial_ref_sys_alias_srid_idx
+  ON spatial_ref_sys_alias
+  USING btree
+  (srid);
 
 
 -- Tabelle für andere Dokumentarten in der Nachweisverwaltung
@@ -76,7 +90,14 @@ SELECT AddGeometryColumn('public', 'u_polygon','the_geom',2398,'GEOMETRY', 2);
 CREATE INDEX u_polygon_the_geom_gist ON u_polygon USING GIST (the_geom);
 
 
+-- Tabelle für Metainformationen
 
+CREATE TABLE tabelleninfo
+(
+  thema character varying(20),
+  datum character varying(10)
+)
+WITH OIDS;
 
 
 --##################################################

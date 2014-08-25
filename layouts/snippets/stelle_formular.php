@@ -9,12 +9,12 @@
 
 function getsubmenues(){
 	menue_id = document.GUI.allmenues.options[document.GUI.allmenues.selectedIndex].value;
-	ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=getsubmenues&menue_id='+menue_id, new Array(document.getElementById('submenue_div')), "");
+	ahah('index.php', 'go=getsubmenues&menue_id='+menue_id, new Array(document.getElementById('submenue_div')), "");
 }
 
 function getlayer(){
 	group_id = document.GUI.allgroups.options[document.GUI.allgroups.selectedIndex].value;
-	ahah('<? echo URL.APPLVERSION; ?>index.php', 'go=getlayerfromgroup&group_id='+group_id, new Array(document.getElementById('alllayer_div')), "");
+	ahah('index.php', 'go=getlayerfromgroup&group_id='+group_id, new Array(document.getElementById('alllayer_div')), "");
 }
 
 function select_layer(){
@@ -141,14 +141,10 @@ else {
 		      		<select name="epsg_code">
 		      			<option value=""><?php echo $this->strPleaseSelect; ?></option>
 		      			<? 
-		      			for($i = 0; $i < count($this->epsg_codes); $i++){
-		      				if($this->formvars['epsg_code'] == $this->epsg_codes[$i]['srid']){
-		      					echo '<option selected';
-		      				}
-		      				else{
-		      					echo '<option';
-		      				}
-		      				echo ' value="'.$this->epsg_codes[$i]['srid'].'">'.$this->epsg_codes[$i]['srid'].': '.$this->epsg_codes[$i]['srtext'].'</option>';
+		      			foreach($this->epsg_codes as $epsg_code){
+									echo '<option ';
+		      				if($this->formvars['epsg_code'] == $epsg_code['srid'])echo 'selected ';
+		      				echo ' value="'.$epsg_code['srid'].'">'.$epsg_code['srid'].': '.$epsg_code['srtext'].'</option>';
 		      			}
 		      			?>	      			
 		      		</select>

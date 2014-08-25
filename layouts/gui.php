@@ -4,7 +4,6 @@
 include(WWWROOT.APPLVERSION.'funktionen/gui_functions.php');
 if($this->user->rolle->querymode == 1){
 	#if(!$this->formvars['anzahl'])$this->formvars['anzahl'] = MAXQUERYROWS;
-	include(WWWROOT.APPLVERSION.'funktionen/formserializer.js');
 }
 ?>
 <link rel="shortcut icon" href="graphics/wappen/favicon.ico">

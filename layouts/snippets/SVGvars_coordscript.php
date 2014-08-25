@@ -12,7 +12,8 @@
 			minutes = minutes+"";
 			part2 = minutes.split(".");
 			minutes = part2[0];
-			seconds = Math.round(parseFloat("."+part2[1]) * 60);
+			if(part2[1] != undefined)seconds = Math.round(parseFloat("."+part2[1]) * 60);
+			else seconds = "00";			
 			return degrees+"°"+minutes+"\'"+seconds+\'"\';
 		}
 		
@@ -91,22 +92,29 @@
 		}
 
 		function coords_anzeige(evt) {
+			minx = '.$this->Stelle->MaxGeorefExt->minx.';
+			miny = '.$this->Stelle->MaxGeorefExt->miny.';
+			maxx = '.$this->Stelle->MaxGeorefExt->maxx.';
+			maxy = '.$this->Stelle->MaxGeorefExt->maxy.';
 		  coorx = evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value);
 		  coory = parseFloat(top.document.GUI.maxy.value) - evt.clientY*parseFloat(top.document.GUI.pixelsize.value);
-		  	
-		  coorx = format_number(coorx, true);
-		  coory = format_number(coory, true);
+		  					
+		  coorxf = format_number(coorx, true);
+		  cooryf = format_number(coory, true);
+			
+			if(coorx < minx || coorx > maxx)coorxf = "undefiniert";
+			if(coory < miny || coory > maxy)cooryf = "undefiniert";
 		  
 			if(top.document.GUI.lastcoordx != undefined && top.document.GUI.lastcoordx.value != ""){
-				vectorx = top.document.GUI.lastcoordx.value - coorx;
-				vectory = top.document.GUI.lastcoordy.value - coory;
+				vectorx = top.document.GUI.lastcoordx.value - coorxf;
+				vectory = top.document.GUI.lastcoordy.value - cooryf;
 				distance = format_number(Math.sqrt(Math.pow(vectorx, 2) + Math.pow(vectory, 2)), false);
-				window.status = " R:" + coorx + " / H:" + coory + "  Entfernung: " + distance + " m    EPSG: "+'.$this->user->rolle->epsg_code.';
-				if(top.document.GUI.runningcoords != undefined)top.document.GUI.runningcoords.value = coorx + " / " + coory + "   " + distance + " m"; 
+				window.status = " R:" + coorxf + " / H:" + cooryf + "  Entfernung: " + distance + " m    EPSG: "+'.$this->user->rolle->epsg_code.';
+				if(top.document.GUI.runningcoords != undefined)top.document.GUI.runningcoords.value = coorxf + " / " + cooryf + "   " + distance + " m"; 
 			}
 			else{
-				window.status = " R:" + coorx + " / H:" + coory + "   EPSG: "+'.$this->user->rolle->epsg_code.';
-				if(top.document.GUI.runningcoords != undefined)top.document.GUI.runningcoords.value = coorx + " / " + coory; 
+				window.status = " R:" + coorxf + " / H:" + cooryf + "   EPSG: "+'.$this->user->rolle->epsg_code.';
+				if(top.document.GUI.runningcoords != undefined)top.document.GUI.runningcoords.value = coorxf + " / " + cooryf; 
 			}			
 		}
 
