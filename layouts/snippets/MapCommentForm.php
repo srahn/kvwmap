@@ -1,6 +1,6 @@
 <?php
  # 2008-02-05 pkvvm
-  include(LAYOUTPATH.'languages/MapCommentForm_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
+  include(LAYOUTPATH.'languages/MapCommentForm_'.$this->user->rolle->language.'.php');
 ?>
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <br><table border="1" cellspacing="0" cellpadding="2">

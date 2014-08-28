@@ -1,6 +1,6 @@
 <?php
   # 2007-01-26 pkvvm
-  include(LAYOUTPATH.'languages/Kat_bearbeiten_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
+  include(LAYOUTPATH.'languages/Kat_bearbeiten_'.$this->user->rolle->language.'.php');
 ?>
 <SCRIPT src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></SCRIPT>
 <script type="text/javascript">

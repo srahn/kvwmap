@@ -1,5 +1,5 @@
 <?
-include(LAYOUTPATH.'languages/map_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
+include(LAYOUTPATH.'languages/map_'.$this->user->rolle->language.'.php');
 $res_x    = $this->map->width;
 $res_y    = $this->map->height;
 $dx       = $this->map->extent->maxx-$this->map->extent->minx;

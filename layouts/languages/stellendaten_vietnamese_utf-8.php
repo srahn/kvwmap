@@ -1,3 +1,0 @@
-﻿<?php
-$strTitel="Tác vụ";
-?>  

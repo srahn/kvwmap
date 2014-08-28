@@ -1,5 +1,5 @@
 <?
-  include(LAYOUTPATH.'languages/sachdatenanzeige_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
+  include(LAYOUTPATH.'languages/sachdatenanzeige_'.$this->user->rolle->language.'.php');
 	include(SNIPPETS.'sachdatenanzeige_functions.php'); 
  ?>
 	<img height="7" src="<? echo GRAPHICSPATH ?>leer.gif">
@@ -80,7 +80,7 @@ for($i=0;$i<$anzLayer;$i++){
 		<table width="100%" border="0" cellpadding="10" cellspacing="0">
     <tr>
     	<td>&nbsp;</td>
-      <td align="center" width="100%"><input type="button" class="button" name="savebutton" value="<? echo $strSave; ?>" onclick="save();">&nbsp;<input class="button" type="reset" value="Zurücksetzen"></td>
+      <td align="center" width="100%"><input type="button" class="button" name="savebutton" value="<? echo $strSave; ?>" onclick="save();">&nbsp;<input class="button" type="reset" value="<? echo $strReset; ?>"></td>
       <td align="right"><a href="javascript:scrolltop();"><img title="nach oben" src="<? echo GRAPHICSPATH; ?>pfeil2.gif" width="11" height="11" border="0"></a></td>
     </tr>
 		<tr>

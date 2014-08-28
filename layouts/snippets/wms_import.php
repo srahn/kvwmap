@@ -1,6 +1,6 @@
 <?php
  # 2008-01-20 pkvvm
-  include(LAYOUTPATH.'languages/wms_import_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
+  include(LAYOUTPATH.'languages/wms_import_'.$this->user->rolle->language.'.php');
  ?>
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr>

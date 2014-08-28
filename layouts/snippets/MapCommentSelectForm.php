@@ -1,6 +1,6 @@
 <?php
  # 2008-02-05 pkvvm
-  include(LAYOUTPATH.'languages/MapCommentSelectForm_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
+  include(LAYOUTPATH.'languages/MapCommentSelectForm_'.$this->user->rolle->language.'.php');
  ?>
 <h2><?php echo $strTitle; ?></h2>
 <br>

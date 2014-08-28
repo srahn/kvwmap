@@ -251,9 +251,9 @@ if ($GUI->Stelle->checkPasswordAge==true) {
 # Rollendaten zuweisen
 $GUI->user->setRolle($Stelle_ID);
 
-#echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language.' CharSet: '.$GUI->user->rolle->charset;
+#echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language;
 # Rollenbezogene Stellendaten zuweisen
-$GUI->loadMultiLingualText($GUI->user->rolle->language,$GUI->user->rolle->charset);
+$GUI->loadMultiLingualText($GUI->user->rolle->language);
 
 ##############################################################################
 # Übergeben der Datenbank für die raumbezogenen Daten (PostgreSQL mit PostGIS)

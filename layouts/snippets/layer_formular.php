@@ -1,6 +1,6 @@
 <?php
- # 2008-01-12 pkvvm
-  include(LAYOUTPATH.'languages/layer_formular_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
+	global $supportedLanguages;
+  include(LAYOUTPATH.'languages/layer_formular_'.$this->user->rolle->language.'.php');
  ?><script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <script src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
@@ -54,11 +54,21 @@ else {
 		    	</td>
 		  	</tr><?php } ?>
 		  	<tr>
-		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strName; ?></th>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strName; ?>*</th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<input name="Name" type="text" value="<?php echo $this->formvars['Name']; ?>" size="25" maxlength="100">
 		  		</td>
 		  	</tr>
+	<?		foreach($supportedLanguages as $language){
+					if($language != 'german'){	?>
+						<tr>
+							<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strName.' '.$language; ?></th>
+							<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+									<input name="Name_<? echo $language; ?>" type="text" value="<?php echo $this->formvars['Name_'.$language]; ?>" size="25" maxlength="100">
+							</td>
+						</tr>	
+	<?			}
+				}			?>
 		  	<tr>
 		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strAlias; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
@@ -484,11 +494,16 @@ else {
 		<? if($this->formvars['selected_layer_id']){ ?>
 		<table border="0" cellspacing="0" cellpadding="3" style="border:1px solid <?php echo BG_DEFAULT ?>">
 			<tr>
-				<th class="fetter" bgcolor="<?php echo BG_DEFAULT ?>" style="border-bottom:1px solid #C3C7C3" colspan="5"><a name="Klassen"></a><?php echo $strClasses; ?></th>
+				<th class="fetter" bgcolor="<?php echo BG_DEFAULT ?>" style="border-bottom:1px solid #C3C7C3" colspan="9"><a name="Klassen"></a><?php echo $strClasses; ?></th>
 			</tr>
 			<tr>
 			  <td style="border-bottom:1px solid #C3C7C3">&nbsp;<?php echo $strID; ?></td>
 				<td style="border-bottom:1px solid #C3C7C3">&nbsp;<?php echo $strClass; ?></td>
+	<?		foreach($supportedLanguages as $language){
+					if($language != 'german'){	?>
+						<td style="border-bottom:1px solid #C3C7C3">&nbsp;<?php echo $strClass.' '.$language; ?></td>
+	<?			}
+				}		?>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strExpression; ?></td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strSignOrder; ?></td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strDelete; ?></td>
@@ -500,8 +515,13 @@ else {
 			<tr>
 				<input type="hidden" name="ID['.$this->classes[$i]['Class_ID'].']" value="'.$this->classes[$i]['Class_ID'].'">
 				<td style="border-bottom:1px solid #C3C7C3">'.$this->classes[$i]['Class_ID'].'</td>	
-				<td style="border-bottom:1px solid #C3C7C3"><input size="12" type="text" name="name['.$this->classes[$i]['Class_ID'].']" value="'.$this->classes[$i]['Name'].'"</td>
-				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><textarea name="expression['.$this->classes[$i]['Class_ID'].']" cols="28" rows="3">'.$this->classes[$i]['Expression'].'</textarea></td>
+				<td style="border-bottom:1px solid #C3C7C3"><input size="12" type="text" name="name['.$this->classes[$i]['Class_ID'].']" value="'.$this->classes[$i]['Name'].'"</td>';
+				foreach($supportedLanguages as $language){
+					if($language != 'german'){	
+						echo '<td style="border-bottom:1px solid #C3C7C3"><input size="12" type="text" name="name_'.$language.'['.$this->classes[$i]['Class_ID'].']" value="'.$this->classes[$i]['Name_'.$language].'"</td>';
+					}
+				}
+				echo '<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><textarea name="expression['.$this->classes[$i]['Class_ID'].']" cols="28" rows="3">'.$this->classes[$i]['Expression'].'</textarea></td>
 				<td align="center" style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><input size="3" type="text" name="order['.$this->classes[$i]['Class_ID'].']" value="'.$this->classes[$i]['drawingorder'].'"></td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><a href="javascript:Bestaetigung(\'index.php?go=Layereditor_Klasse_Löschen&class_id='.$this->classes[$i]['Class_ID'].'&selected_layer_id='.$this->formvars['selected_layer_id'].'#Klassen\', \''.$this->strDeleteWarningMessage.'\');">'.$this->strDelete.'</a></td>
 			</tr>						

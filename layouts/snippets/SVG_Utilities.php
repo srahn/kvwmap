@@ -1,6 +1,6 @@
 <?php
  # 2008-01-24 pkvvm
-  include(LAYOUTPATH.'languages/SVG_Utilities_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
+  include(LAYOUTPATH.'languages/SVG_Utilities_'.$this->user->rolle->language.'.php');
  ?>
  
 <script language="JavaScript">

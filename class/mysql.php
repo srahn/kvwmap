@@ -282,8 +282,8 @@ class database {
     $user_id = mysql_fetch_row($query);
     $id = $user_id[0];
     
-    $sql = "INSERT INTO `rolle` (`user_id`,`stelle_id`,`nImageWidth`,`nImageHeight`,`minx`,`miny`,`maxx`,`maxy`,`nZoomFactor`,`selectedButton`,`epsg_code`,`active_frame`,`last_time_id`,`language`,`charset`,`hidemenue`,`fontsize_gle`,`highlighting`, `singlequery`, `querymode`)
-                    SELECT ".$id.", ".$gast_stelle.", '800', '600', minxmax, minymax, maxxmax, maxymax, '2', 'zoomin', epsg_code, ".DEFAULT_DRUCKRAHMEN_ID." , '0000-00-00 00:00:00', 'german', 'windows-1252', '0', '15', '1', '1', '1' FROM stelle WHERE ID = ".$gast_stelle;
+    $sql = "INSERT INTO `rolle` (`user_id`,`stelle_id`,`nImageWidth`,`nImageHeight`,`minx`,`miny`,`maxx`,`maxy`,`nZoomFactor`,`selectedButton`,`epsg_code`,`active_frame`,`last_time_id`,`language`,`hidemenue`,`fontsize_gle`,`highlighting`, `singlequery`, `querymode`)
+                    SELECT ".$id.", ".$gast_stelle.", '800', '600', minxmax, minymax, maxxmax, maxymax, '2', 'zoomin', epsg_code, ".DEFAULT_DRUCKRAHMEN_ID." , '0000-00-00 00:00:00', 'german', '0', '15', '1', '1', '1' FROM stelle WHERE ID = ".$gast_stelle;
     $query = mysql_query($sql);
     
 		$stelle = new stelle($gast_stelle,$this);

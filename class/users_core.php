@@ -179,7 +179,11 @@ class rolle_core {
 
   function getLayer($LayerName) {
     # Abfragen der Layer in der Rolle
-    $sql ='SELECT l.*,ul.* FROM layer AS l, used_layer AS ul';
+		$sql ='SELECT ';
+		if(LANGUAGE != 'german') {
+			$sql.='CASE WHEN `Name_'.LANGUAGE.'` != "" THEN `Name_'.LANGUAGE.'` ELSE `Name` END AS ';
+		}
+		$sql.='Name, l.Layer_ID, alias, Datentyp, Gruppe, pfad, maintable, Data, `schema`, document_path, connection, printconnection, connectiontype, epsg_code, ows_srs, wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, ul.* FROM layer AS l, used_layer AS ul';
     $sql.=' WHERE l.Layer_ID=ul.Layer_ID AND Stelle_ID='.$this->stelle_id;
     if ($LayerName!='') {
       $sql.=' AND (l.Name LIKE "'.$LayerName.'" ';
@@ -253,7 +257,11 @@ class rolle_core {
 
   function getGroups($GroupName) {
     # Abfragen der Gruppen in der Rolle
-    $sql ='SELECT g2r.*, g.Gruppenname FROM u_groups AS g, u_groups2rolle AS g2r ';
+    $sql ='SELECT g2r.*, ';
+		if(LANGUAGE != 'german') {
+			$sql.='CASE WHEN `Gruppenname_'.LANGUAGE.'` != "" THEN `Gruppenname_'.LANGUAGE.'` ELSE `Gruppenname` END AS ';
+		}
+		$sql.='Gruppenname FROM u_groups AS g, u_groups2rolle AS g2r ';
     $sql.=' WHERE g2r.stelle_ID='.$this->stelle_id.' AND g2r.user_id='.$this->user_id;
     $sql.=' AND g2r.id = g.id';
     if ($GroupName!='') {
@@ -317,7 +325,7 @@ class rolle_core {
     $this->last_time_id=$rs['last_time_id'];
     $this->gui=$rs['gui'];
     $this->language=$rs['language'];
-    $this->charset=$rs['charset'];
+		define(LANGUAGE, $this->language);
     $this->hideMenue=$rs['hidemenue'];
     $this->hideLegend=$rs['hidelegend'];
     $this->fontsize_gle=$rs['fontsize_gle'];
@@ -582,7 +590,7 @@ class stelle_core {
 	function getsubmenues($id){
 		$sql ='SELECT menue_id,';
 		if ($this->language != 'german') {
-			$sql.='`name_'.$this->language.'_'.$this->charset.'` AS ';
+			$sql.='`name_'.$this->language.'` AS ';
 		}
 		$sql .=' name, target, links FROM u_menue2stelle, u_menues';
 		$sql .=' WHERE stelle_id = '.$this->id;
@@ -634,7 +642,7 @@ class stelle_core {
   function getName() {
     $sql ='SELECT ';
     if ($this->language != 'german' AND $this->language != ''){
-      $sql.='`Bezeichnung_'.$this->language.'_'.$this->charset.'` AS ';
+      $sql.='`Bezeichnung_'.$this->language.'` AS ';
     }
     $sql.='Bezeichnung FROM stelle WHERE ID='.$this->id;
     #echo $sql;

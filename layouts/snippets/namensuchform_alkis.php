@@ -1,5 +1,5 @@
 <?php
-  include(LAYOUTPATH.'languages/namensuche_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
+  include(LAYOUTPATH.'languages/namensuche_'.$this->user->rolle->language.'.php');
  ?>
 
 <script type="text/javascript">

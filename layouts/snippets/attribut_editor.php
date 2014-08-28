@@ -1,6 +1,6 @@
 <?php
- # 2008-01-12 pkvvm
-  include(LAYOUTPATH.'languages/attribut_editor_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
+	global $supportedLanguages;
+  include(LAYOUTPATH.'languages/attribut_editor_'.$this->user->rolle->language.'.php');
 	global $quicksearch_layer_ids;
  ?>
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
@@ -53,7 +53,14 @@
 						<td align="center"><span class="fett">Optionen</span></td>
 						<td>&nbsp;</td>
 						<td align="center"><span class="fett">Aliasname</span></td>
-						<td>&nbsp;</td>
+						<td>&nbsp;</td>';
+	foreach($supportedLanguages as $language){
+		if($language != 'german'){
+			echo '<td align="center"><span class="fett">Aliasname '.$language.'</span></td>
+						<td>&nbsp;</td>';
+		}
+	}
+			echo '
 						<td align="center"><span class="fett">Erläuterungen</span></td>
 						<td>&nbsp;</td>
 						<td align="center"><span class="fett">Gruppe</span></td>
@@ -159,7 +166,17 @@
 				  <td align="left" valign="top">
 				  	<input name="alias_'.$this->attributes['name'][$i].'" type="text" value="'.$this->attributes['alias'][$i].'">
 				  </td>
-				  <td>&nbsp;</td>
+				  <td>&nbsp;</td>';
+					foreach($supportedLanguages as $language){
+						if($language != 'german'){
+							echo '
+							<td align="left" valign="top">
+								<input name="alias_'.$language.'_'.$this->attributes['name'][$i].'" type="text" value="'.$this->attributes['alias_'.$language][$i].'">
+							</td>
+							<td>&nbsp;</td>';
+						}
+					}
+					echo '
 				  <td align="left" valign="top">
 						<textarea name="tooltip_'.$this->attributes['name'][$i].'" style="height:22px; width:120px">'.htmlspecialchars($this->attributes['tooltip'][$i]).'</textarea>
 				  </td>

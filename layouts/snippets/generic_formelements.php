@@ -249,22 +249,25 @@
 												$url = URL.APPLVERSION.'index.php?go=sendeDokument&dokument=';
 											}
 											$type = strtolower(array_pop(explode('.', $dataset[$attributes['name'][$j]])));
+											$original_name = array_pop(explode('original_name=', $dataset[$attributes['name'][$j]]));
 											$datapart .= '<table border="0"><tr><td>';
-			  							if($type == 'jpg' OR $type == 'png' OR $type == 'gif' ){
-												$datapart .= '<iframe height="160" style="border:none" frameborder="0" marginheight="3" marginwidth="3" src="'.$url.$dataset[$attributes['name'][$j]].'&go_plus=mit_vorschau"></iframe>';
-			  							}else{
-			  								$datapart .= '<iframe height="80" style="border:none" frameborder="0" marginheight="3" marginwidth="3" src="'.$url.$dataset[$attributes['name'][$j]].'&go_plus=mit_vorschau"></iframe>';
-			  							}
-			  							$datapart .= '</td><td>';
+			  							if($type == 'jpg' OR $type == 'png' OR $type == 'gif' ){									
+												$datapart .= '<a href="'.$url.$dataset[$attributes['name'][$j]].'"><img style="border:1px solid black" src="'.$url.$dataset[$attributes['name'][$j]].'&go_plus=mit_vorschau"></a>';									
+											}else{
+												$datapart .= '<a href="'.$url.$dataset[$attributes['name'][$j]].'"><img style="border:none" src="'.$url.$dataset[$attributes['name'][$j]].'&go_plus=mit_vorschau"></a>';
+											}
+			  							$datapart .= '</td><td width="100%">';
 			  							if($attributes['privileg'][$j] != '0' AND !$lock[$k]){
 			  								$datapart .= '<a href="javascript:delete_document(\''.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'\');">Dokument <br>löschen</a>';
 			  							}
-											$datapart .= '</td></tr></table>';
+											$datapart .= '</td></tr>';
+											$datapart .= '<tr><td colspan="2">'.$original_name.'</td></tr>';
+											$datapart .= '</table>';
 											$datapart .= '<input type="hidden" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].'_alt'.';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$dataset[$attributes['name'][$j]].'">';
 
 										}
 										if($attributes['privileg'][$j] != '0' AND !$lock[$k]){
-											$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" style="font-size: '.$this->user->rolle->fontsize_gle.'px" size="43" type="file" onchange="this.title=this.value;" accept="image/*" id="'.$attributes['name'][$j].'_'.$k.'" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'">';
+											$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" style="font-size: '.$this->user->rolle->fontsize_gle.'px" size="43" type="file" onchange="this.title=this.value;" id="'.$attributes['name'][$j].'_'.$k.'" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'">';
 										}
 										else{
 											$datapart .= '&nbsp;';

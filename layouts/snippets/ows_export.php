@@ -1,6 +1,6 @@
 <?php
  # 2008-01-12 pkvvm
-  include(LAYOUTPATH.'languages/ows_export_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
+  include(LAYOUTPATH.'languages/ows_export_'.$this->user->rolle->language.'.php');
  ?>
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center">

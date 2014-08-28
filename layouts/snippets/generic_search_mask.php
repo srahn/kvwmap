@@ -1,3 +1,7 @@
+<?
+include(LAYOUTPATH.'languages/generic_search_'.$this->user->rolle->language.'.php');
+?>
+
 <table width="100%" align="center" border="0" cellspacing="0" cellpadding="3" id="searchmasks">
 <?    
 			if($searchmask_number > 0){						// es ist nicht die erste Suchmaske, sondern eine weitere hinzugefügte
@@ -5,8 +9,8 @@
 				<tr>
 					<td align="center" width="100%" colspan="5">
 						<select name="boolean_operator_<? echo $searchmask_number; ?>">
-							<option value="AND" <? if($this->formvars['searchmask_operator'][$searchmask_number] == 'AND')echo 'selected'; ?>>und</option>
-							<option value="OR" <? if($this->formvars['searchmask_operator'][$searchmask_number] == 'OR')echo 'selected'; ?>>oder</option>
+							<option value="AND" <? if($this->formvars['searchmask_operator'][$searchmask_number] == 'AND')echo 'selected'; ?>><? echo $strAnd; ?></option>
+							<option value="OR" <? if($this->formvars['searchmask_operator'][$searchmask_number] == 'OR')echo 'selected'; ?>><? echo $strOr; ?></option>
 						</select>
 					</td>
 				</tr>
@@ -15,11 +19,11 @@
 			else{
 ?>
 				<tr>
-					<td width="150px"><span class="fett">Attribut</span></td>
+					<td width="150px"><span class="fett"><? echo $strAttribute; ?></span></td>
 					<td>&nbsp;&nbsp;</td>
-					<td width="100px" align="center"><span class="fett">Operator</span></td>
+					<td width="100px" align="center"><span class="fett"><? echo $strOperator; ?></span></td>
 					<td>&nbsp;&nbsp;</td>
-					<td width="150px" align="left"><span class="fett">&nbsp;&nbsp;Wert</span></td>
+					<td width="150px" align="left"><span class="fett">&nbsp;&nbsp;<? echo $strValue; ?></span></td>
 				</tr>
 
 <?		}
@@ -60,16 +64,16 @@
             <td>&nbsp;&nbsp;</td>
             <td width="100px">
               <select  style="width:75px" <? if(count($this->attributes['enum_value'][$i]) == 0){ ?>onchange="operatorchange('<? echo $this->attributes['name'][$i]; ?>', <? echo $searchmask_number; ?>);" id="<? echo $prefix; ?>operator_<? echo $this->attributes['name'][$i]; ?>" <? } ?> name="<? echo $prefix; ?>operator_<? echo $this->attributes['name'][$i]; ?>">
-                <option title="Der Suchbegriff muss exakt so in der Datenbank stehen" value="=" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == '='){ echo 'selected';} ?> >=</option>
-                <option title="Der Suchbegriff kommt so NICHT in der Datenbank vor" value="!=" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == '!='){ echo 'selected';} ?> >!=</option>
-                <option title="'kleiner als': nur bei Zahlen verwenden!" value="<" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == '<'){ echo 'selected';} ?> ><</option>
-                <option title="'größer als': nur bei Zahlen verwenden!" value=">" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == '>'){ echo 'selected';} ?> >></option>
-                <option title="Fügen Sie das %-Zeichen vor und/oder nach dem Suchbegriff für beliebige Zeichen ein" value="LIKE" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == 'LIKE'){ echo 'selected';} ?> >ähnlich</option>
-                <option title="Fügen Sie das %-Zeichen vor und/oder nach dem Suchbegriff für beliebige Zeichen ein" value="NOT LIKE" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == 'NOT LIKE'){ echo 'selected';} ?> >nicht ähnlich</option>
-                <option title="Sucht nach Datensätzen ohne Eintrag in diesem Attribut" value="IS NULL" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == 'IS NULL'){ echo 'selected';} ?> >ist leer</option>
-                <option title="Sucht nach Datensätzen mit beliebigem Eintrag in diesem Attribut" value="IS NOT NULL" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == 'IS NOT NULL'){ echo 'selected';} ?> >ist nicht leer</option>
-                <option title="Sucht nach mehreren exakten Suchbegriffen, zur Trennung '|' verwenden:  [Alt Gr] + [<]" value="IN" <? if (count($this->attributes['enum_value'][$i]) > 0){ echo 'disabled="true"'; } ?> <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == 'IN'){ echo 'selected';} ?> >befindet sich in</option>
-                <option title="Sucht zwischen zwei Zahlwerten" value="between" <? if (count($this->attributes['enum_value'][$i]) > 0){ echo 'disabled="true"'; } ?> <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == 'between'){ echo 'selected';} ?> >zwischen</option>
+                <option title="<? echo $strEqualHint; ?>" value="=" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == '='){ echo 'selected';} ?> >=</option>
+                <option title="<? echo $strNotEqualHint; ?>" value="!=" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == '!='){ echo 'selected';} ?> >!=</option>
+                <option title="<? echo $strLowerHint; ?>" value="<" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == '<'){ echo 'selected';} ?> ><</option>
+                <option title="<? echo $strGreaterHint; ?>" value=">" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == '>'){ echo 'selected';} ?> >></option>
+                <option title="<? echo $strLikeHint; ?>" value="LIKE" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == 'LIKE'){ echo 'selected';} ?> ><? echo $strLike; ?></option>
+                <option title="<? echo $strLikeHint; ?>" value="NOT LIKE" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == 'NOT LIKE'){ echo 'selected';} ?> ><? echo $strNotLike; ?></option>
+                <option title="<? echo $strIsEmptyHint; ?>" value="IS NULL" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == 'IS NULL'){ echo 'selected';} ?> ><? echo $strIsEmpty; ?></option>
+                <option title="<? echo $strIsNotEmptyHint; ?>" value="IS NOT NULL" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == 'IS NOT NULL'){ echo 'selected';} ?> ><? echo $strIsNotEmpty; ?></option>
+                <option title="<? echo $strInHint; ?>" value="IN" <? if (count($this->attributes['enum_value'][$i]) > 0){ echo 'disabled="true"'; } ?> <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == 'IN'){ echo 'selected';} ?> ><? echo $strIsIn; ?></option>
+                <option title="<? echo $strBetweenHint; ?>" value="between" <? if (count($this->attributes['enum_value'][$i]) > 0){ echo 'disabled="true"'; } ?> <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == 'between'){ echo 'selected';} ?> ><? echo $strBetween; ?></option>
               </select>
             </td>
             <td>&nbsp;&nbsp;</td>

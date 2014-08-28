@@ -1,6 +1,6 @@
 <?php
   # 2008-01-11 pk
-  include(LAYOUTPATH.'languages/menue_body_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
+  include(LAYOUTPATH.'languages/menue_body_'.$this->user->rolle->language.'.php');
 ?><table width="<? echo $this->Menue->width+7 ?>" height="100%" border="0" cellpadding="0" cellspacing="2">
 <?php
        if (MENU_WAPPEN=="oben") {

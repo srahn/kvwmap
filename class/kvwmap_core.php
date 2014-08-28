@@ -564,13 +564,7 @@ class GUI_core {
         # Allgemeine Parameter
         $map->set('width',$this->user->rolle->nImageWidth);
         $map->set('height',$this->user->rolle->nImageHeight);
-        $map->set('resolution',96);
-        if($this->user->rolle->epsg_code == '4326'){
-        	$map->set('units',MS_DD);
-        }
-        else{
-        	$map->set('units',MS_METERS);
-        }        
+        $map->set('resolution',96);      
         #$map->set('transparent', MS_OFF);
         #$map->set('interlace', MS_ON);
         $map->set('status', MS_ON);
@@ -578,7 +572,8 @@ class GUI_core {
         $map->set('debug', MS_ON);
         $map->imagecolor->setRGB(255,255,255);
         $map->maxsize = 4096;
-        
+        $map->setProjection('+init=epsg:'.$this->user->rolle->epsg_code,MS_TRUE);
+				
 				# setzen der Kartenausdehnung über die letzten Benutzereinstellungen
 				if($this->user->rolle->oGeorefExt->minx==='') {
 				  echo "Richten Sie mit phpMyAdmin in der kvwmap Datenbank eine Referenzkarte, eine Stelle, einen Benutzer und eine Rolle ein ";
@@ -645,9 +640,7 @@ class GUI_core {
 
         $map->setSymbolSet(SYMBOLSET);
         $map->setFontSet(FONTSET);
-        $map->set('shapepath', SHAPEPATH);
-
-        $map->setProjection('+init=epsg:'.$this->user->rolle->epsg_code,MS_FALSE);
+        $map->set('shapepath', SHAPEPATH);        
 
         # Umrechnen des Stellenextents kann hier raus, weil es schon in start.php gemacht wird
                 
@@ -1758,12 +1751,11 @@ class GUI_core {
     }
 	}
 	
-	function loadMultiLingualText($language,$charset) {
-    #echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language.' CharSet: '.$GUI->user->rolle->charset;
+	function loadMultiLingualText($language) {
+    #echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language;
     $this->Stelle->language=$language;
-    $this->Stelle->charset=$charset;
     $this->Stelle->getName();
-    include(LAYOUTPATH.'languages/'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
+    include(LAYOUTPATH.'languages/'.$this->user->rolle->language.'.php');
   }
 
   function getLagebezeichnung($epsgcode) {
@@ -1836,7 +1828,7 @@ class GUI_core {
       case 'html' : {
         $this->debug->write("Include <b>".LAYOUTPATH.$this->user->rolle->gui."</b> in kvwmap.php function output()",4);
         # erzeugen des Menueobjektes
-        $this->Menue=new menue($this->user->rolle->language,$this->user->rolle->charset);
+        $this->Menue=new menue($this->user->rolle->language);
         # laden des Menues der Stelle und der Rolle
         $this->Menue->loadMenue($this->Stelle->id, $this->user->id);
         $this->Menue->get_menue_width($this->Stelle->id);
@@ -2039,7 +2031,11 @@ class db_mapObj_core {
   }
 	
   function read_Layer($withClasses, $groups = NULL){
-    $sql ='SELECT DISTINCT rl.*,ul.*, l.Layer_ID, l.Name, l.alias, l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem, l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem, l.tolerance, l.toleranceunits, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version, l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, g.*';
+    $sql ='SELECT DISTINCT rl.*,ul.*, l.Layer_ID, ';
+		if(LANGUAGE != 'german') {
+			$sql.='CASE WHEN `Name_'.LANGUAGE.'` != "" THEN `Name_'.LANGUAGE.'` ELSE `Name` END AS ';
+		}
+		$sql.='Name, l.alias, l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem, l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem, l.tolerance, l.toleranceunits, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version, l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, g.*';
     $sql.=' FROM u_rolle2used_layer AS rl,used_layer AS ul,layer AS l, u_groups AS g, u_groups2rolle as gr';
     $sql.=' WHERE rl.stelle_id=ul.Stelle_ID AND rl.layer_id=ul.Layer_ID AND l.Layer_ID=ul.Layer_ID';
     $sql.=' AND (ul.minscale != -1 OR ul.minscale IS NULL) AND l.Gruppe = g.id AND rl.stelle_ID='.$this->Stelle_ID.' AND rl.user_id='.$this->User_ID;
@@ -2078,7 +2074,11 @@ class db_mapObj_core {
   
 
   function read_Groups() {
-    $sql ='SELECT g2r.*, g.Gruppenname, obergruppe FROM u_groups AS g, u_groups2rolle AS g2r ';
+    $sql ='SELECT g2r.*, ';
+		if(LANGUAGE != 'german') {
+			$sql.='CASE WHEN `Gruppenname_'.LANGUAGE.'` IS NOT NULL THEN `Gruppenname_'.LANGUAGE.'` ELSE `Gruppenname` END AS ';
+		}
+		$sql.='Gruppenname, obergruppe FROM u_groups AS g, u_groups2rolle AS g2r ';
     $sql.=' WHERE g2r.stelle_ID='.$this->Stelle_ID.' AND g2r.user_id='.$this->User_ID;
     $sql.=' AND g2r.id = g.id';
 		$sql.=' ORDER BY `order`';
@@ -2094,19 +2094,23 @@ class db_mapObj_core {
   }
 
 
-  function read_Group($id) {
-    $sql ='SELECT g2r.*, g.Gruppenname FROM u_groups AS g, u_groups2rolle AS g2r';
-    $sql.=' WHERE g2r.stelle_ID='.$this->Stelle_ID.' AND g2r.user_id='.$this->User_ID.' AND g2r.id = g.id AND g.id='.$id;
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Group - Lesen einer Gruppe der Rolle:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
-    $rs=mysql_fetch_array($query);
-    return $rs;
-  }
+  // function read_Group($id) {
+    // $sql ='SELECT g2r.*, g.Gruppenname FROM u_groups AS g, u_groups2rolle AS g2r';
+    // $sql.=' WHERE g2r.stelle_ID='.$this->Stelle_ID.' AND g2r.user_id='.$this->User_ID.' AND g2r.id = g.id AND g.id='.$id;
+    // $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Group - Lesen einer Gruppe der Rolle:<br>".$sql,4);
+    // $query=mysql_query($sql);
+    // if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+    // $rs=mysql_fetch_array($query);
+    // return $rs;
+  // }
 
 
   function read_ClassesbyClassid($class_id) {
-    $sql ='SELECT * FROM classes';
+    $sql ='SELECT ';
+		if(LANGUAGE != 'german') {
+			$sql.='CASE WHEN `Name_'.LANGUAGE.'` IS NOT NULL THEN `Name_'.LANGUAGE.'` ELSE `Name` END AS ';
+		}
+		$sql.='Name, Class_ID, Layer_ID, Expression, drawingorder, text FROM classes';
     $sql.=' WHERE Class_ID = '.$class_id.' ORDER BY drawingorder,Class_ID';
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>".$sql,4);
@@ -2120,8 +2124,12 @@ class db_mapObj_core {
     return $Classes;
   }
 
-  function read_Classes($Layer_ID, $disabled_classes = NULL) {
-    $sql ='SELECT * FROM classes';
+  function read_Classes($Layer_ID, $disabled_classes = NULL, $all_languages = false) {
+    $sql ='SELECT ';
+		if(!$all_languages AND LANGUAGE != 'german') {
+			$sql.='CASE WHEN `Name_'.LANGUAGE.'` IS NOT NULL THEN `Name_'.LANGUAGE.'` ELSE `Name` END AS ';
+		}
+		$sql.='Name, `Name_low-german`, Name_english, Name_polish, Name_vietnamese, Class_ID, Layer_ID, Expression, drawingorder, text FROM classes';
     $sql.=' WHERE Layer_ID='.$Layer_ID.' ORDER BY drawingorder,Class_ID';
     #echo $sql.'<br>';
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>".$sql,4);

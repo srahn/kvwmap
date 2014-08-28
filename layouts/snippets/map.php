@@ -1,6 +1,6 @@
 <?php
 # 2007-12-30 pk
-  include(LAYOUTPATH.'languages/map_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
+  include(LAYOUTPATH.'languages/map_'.$this->user->rolle->language.'.php');
 	include(LAYOUTPATH.'snippets/ahah.php');
   echo $ahah;
 ?>
@@ -38,6 +38,7 @@ function showtooltip(result, showdata){
 }
 
 function resizemap2window() {
+	startwaiting();
   if(typeof(window.innerWidth) == 'number'){
     width = window.innerWidth;
     height = window.innerHeight;

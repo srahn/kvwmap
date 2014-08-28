@@ -1,6 +1,6 @@
 <?php
   # 2007-12-30 pk
-  include(LAYOUTPATH.'languages/stelle_formular_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
+  include(LAYOUTPATH.'languages/stelle_formular_'.$this->user->rolle->language.'.php');
 
 ?><script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript">
 </script>

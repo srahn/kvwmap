@@ -1,6 +1,6 @@
 <?php
   # 2007-12-30 pk
-  include(LAYOUTPATH.'languages/rollenwahl_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
+  include(LAYOUTPATH.'languages/rollenwahl_'.$this->user->rolle->language.'.php');
 	global $supportedLanguages;
 ?>
 <br>
@@ -129,12 +129,12 @@
   <tr align="center">
     <td align="right"><?php echo $strLanguage; ?>:&nbsp;</td>
     <td align="left">
-      <select name="language_charset">
-				<? if(in_array('german', $supportedLanguages)){ ?><option value="german_windows-1252"<?php if($this->user->rolle->language == 'german') { echo ' selected'; }	?>><?php echo $strGerman; ?></option><? } ?>
-				<? if(in_array('low-german', $supportedLanguages)){ ?><option value="low-german_windows-1252"<?php if($this->user->rolle->language == 'low-german') { echo ' selected'; }	?>><?php echo $strPlatt; ?></option><? } ?>
-				<? if(in_array('english', $supportedLanguages)){ ?><option value="english_windows-1252"<?php if($this->user->rolle->language == 'english') { echo ' selected'; }	?>><?php echo $strEnglish; ?></option><? } ?>
-				<? if(in_array('polish', $supportedLanguages)){ ?><option value="polish_utf-8"<?php if($this->user->rolle->language == 'polish') { echo ' selected'; }	?>><?php echo $strPolish; ?></option><? } ?>
-				<? if(in_array('vietnamese', $supportedLanguages)){ ?><option value="vietnamese_utf-8"<?php if($this->user->rolle->language == 'vietnamese') { echo ' selected'; }	?>><?php echo $strVietnamese; ?></option><? } ?>
+      <select name="language">
+				<? if(in_array('german', $supportedLanguages)){ ?><option value="german"<?php if($this->user->rolle->language == 'german') { echo ' selected'; }	?>><?php echo $strGerman; ?></option><? } ?>
+				<? if(in_array('low-german', $supportedLanguages)){ ?><option value="low-german"<?php if($this->user->rolle->language == 'low-german') { echo ' selected'; }	?>><?php echo $strPlatt; ?></option><? } ?>
+				<? if(in_array('english', $supportedLanguages)){ ?><option value="english"<?php if($this->user->rolle->language == 'english') { echo ' selected'; }	?>><?php echo $strEnglish; ?></option><? } ?>
+				<? if(in_array('polish', $supportedLanguages)){ ?><option value="polish"<?php if($this->user->rolle->language == 'polish') { echo ' selected'; }	?>><?php echo $strPolish; ?></option><? } ?>
+				<? if(in_array('vietnamese', $supportedLanguages)){ ?><option value="vietnamese"<?php if($this->user->rolle->language == 'vietnamese') { echo ' selected'; }	?>><?php echo $strVietnamese; ?></option><? } ?>
 			</select>
     </td>
   </tr>

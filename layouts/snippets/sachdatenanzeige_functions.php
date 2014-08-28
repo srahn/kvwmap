@@ -158,9 +158,15 @@ include('funktionen/input_check_functions.php');
   			alert('Das Datumsfeld '+document.getElementsByName(fieldstring)[0].title+' hat nicht das Format TT.MM.JJJJ.');
   			return;
   		}
-  		data_r += '&'+form_fields[i]+'='+document.getElementsByName(form_fields[i])[0].value;
+			if(document.getElementsByName(form_fields[i])[0] != undefined){
+				data_r += '&'+form_fields[i]+'='+document.getElementsByName(form_fields[i])[0].value;
+			}
   	}
   	data = 'go=Sachdaten_speichern&selected_layer_id='+layer_id+'&fromobject='+fromobject+'&targetobject='+targetobject+'&targetlayer_id='+targetlayer_id+'&targetattribute='+targetattribute+'&data='+data+'&form_field_names='+form_fieldstring+'&embedded=true' + data_r;
+		if(typeof (window.FormData) != 'undefined'){		// in alten IEs gibts FormData nicht
+			formdata = new FormData(currentform);
+			data = urlstring2formdata(formdata, data);
+		}
 		ahah('index.php', data, new Array(document.getElementById(fromobject), document.getElementById(targetobject)), new Array('sethtml', 'sethtml'));
 	}
 
@@ -190,6 +196,10 @@ include('funktionen/input_check_functions.php');
   		}
   	}
   	data = 'go=neuer_Layer_Datensatz_speichern&selected_layer_id='+layer_id+'&fromobject='+fromobject+'&targetobject='+targetobject+'&targetlayer_id='+targetlayer_id+'&targetattribute='+targetattribute+'&data='+data+'&form_field_names='+form_fieldstring+'&embedded=true' + data_r;
+		if(typeof (window.FormData) != 'undefined'){		// in alten IEs gibts FormData nicht
+			formdata = new FormData(currentform);
+			data = urlstring2formdata(formdata, data);
+		}
 		ahah('index.php', data, new Array(document.getElementById(fromobject), document.getElementById(targetobject)), new Array('sethtml', 'sethtml'));
 	}
 

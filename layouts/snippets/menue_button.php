@@ -1,5 +1,5 @@
 <?php
-  include(LAYOUTPATH.'languages/menue_body_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
+  include(LAYOUTPATH.'languages/menue_body_'.$this->user->rolle->language.'.php');
 ?>
 
 <script language="JavaScript" type="text/javascript">

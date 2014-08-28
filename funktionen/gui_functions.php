@@ -9,6 +9,7 @@ function ImageLoadFailed(id) {
 }
 
 var currentform;
+var doit;
 
 function onload_functions(){
 	if(document.getElementById('scrolldiv') != undefined){
@@ -16,7 +17,8 @@ function onload_functions(){
 	}
 	document.onmousemove = drag;
   document.onmouseup = dragstop;
-	document.onmousedown = stop;	
+	document.onmousedown = stop;
+	if(typeof resizemap2window != 'undefined')window.onresize = function(){clearTimeout(doit);doit = setTimeout(resizemap2window, 200);};
 }
 
 var dragobjekt = null;
@@ -134,6 +136,15 @@ function activate_overlay(){
 function deactivate_overlay(){
 	document.getElementById('contentdiv').scrollTop = 0;
 	document.getElementById('overlaydiv').style.display='none';
+}
+
+function urlstring2formdata(formdata, string){
+	kvpairs = string.split('&');
+	for(i = 0; i < kvpairs.length; i++) {
+    el = kvpairs[i].split(/=(.+)/);		// nur das erste "=" zum splitten nehmen
+		formdata.append(el[0], el[1]);	
+	}
+	return formdata;
 }
 
 function overlay_submit(gui, start){

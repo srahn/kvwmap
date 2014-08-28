@@ -1202,6 +1202,44 @@ ALTER TABLE  `layer` ADD  `status` VARCHAR( 255 ) NULL;
 
 ALTER TABLE  `referenzkarten` ADD  `epsg_code` INT NOT NULL DEFAULT  '2398' AFTER  `Dateiname`;
 
+ALTER TABLE  `rolle` DROP  `charset` ;
+
+ALTER TABLE  `stelle` 
+CHANGE  `Bezeichnung_low-german_windows-1252`  `Bezeichnung_low-german` VARCHAR( 255 ) CHARACTER SET latin1 COLLATE latin1_german1_ci NULL DEFAULT NULL ,
+CHANGE  `Bezeichnung_english_windows-1252`  `Bezeichnung_english` VARCHAR( 255 ) CHARACTER SET cp1250 COLLATE cp1250_general_ci NULL DEFAULT NULL ,
+CHANGE  `Bezeichnung_polish_utf-8`  `Bezeichnung_polish` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL ,
+CHANGE  `Bezeichnung_vietnamese_utf-8`  `Bezeichnung_vietnamese` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL;
+
+ALTER TABLE  `u_menues` 
+CHANGE  `name_low-german_windows-1252`  `name_low-german` VARCHAR( 100 ) CHARACTER SET latin1 COLLATE latin1_german1_ci NULL DEFAULT NULL ,
+CHANGE  `name_english_windows-1252`  `name_english` VARCHAR( 100 ) CHARACTER SET cp1250 COLLATE cp1250_general_ci NULL DEFAULT NULL ,
+CHANGE  `name_polish_utf-8`  `name_polish` VARCHAR( 100 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL ,
+CHANGE  `name_vietnamese_utf-8`  `name_vietnamese` VARCHAR( 100 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL;
+
+ALTER TABLE  `u_groups` 
+ADD  `Gruppenname_low-german` VARCHAR( 100 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL AFTER  `Gruppenname` ,
+ADD  `Gruppenname_english` VARCHAR( 100 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL AFTER  `Gruppenname_low-german` ,
+ADD  `Gruppenname_polish` VARCHAR( 100 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL AFTER  `Gruppenname_english` ,
+ADD  `Gruppenname_vietnamese` VARCHAR( 100 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL AFTER  `Gruppenname_polish`;
+
+ALTER TABLE  `layer` 
+ADD  `Name_low-german` VARCHAR( 100 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL AFTER  `Name` ,
+ADD  `Name_english` VARCHAR( 100 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL AFTER  `Name_low-german` ,
+ADD  `Name_polish` VARCHAR( 100 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL AFTER  `Name_english` ,
+ADD  `Name_vietnamese` VARCHAR( 100 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL AFTER  `Name_polish`;
+
+ALTER TABLE  `classes` 
+ADD  `Name_low-german` VARCHAR( 100 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL AFTER  `Name` ,
+ADD  `Name_english` VARCHAR( 100 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL AFTER  `Name_low-german` ,
+ADD  `Name_polish` VARCHAR( 100 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL AFTER  `Name_english` ,
+ADD  `Name_vietnamese` VARCHAR( 100 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL AFTER  `Name_polish`;
+
+ALTER TABLE  `layer_attributes` 
+ADD  `alias_low-german` VARCHAR( 100 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL AFTER  `alias` ,
+ADD  `alias_english` VARCHAR( 100 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL AFTER  `alias_low-german` ,
+ADD  `alias_polish` VARCHAR( 100 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL AFTER  `alias_english` ,
+ADD  `alias_vietnamese` VARCHAR( 100 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL AFTER  `alias_polish`;
+
 # da sich herausgestellt hat, das InnoDB-Tabellen sehr langsam sind, werden alle Tabellen auf MyISAM umgestellt
 
 ALTER TABLE `classes` ENGINE = MyISAM;

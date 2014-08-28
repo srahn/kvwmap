@@ -1,6 +1,6 @@
 <?php
  # 2008-10-01 sr
-  include(LAYOUTPATH.'languages/PolygonEditor_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
+  include(LAYOUTPATH.'languages/PolygonEditor_'.$this->user->rolle->language.'.php');
  ?>
 <script language="JavaScript">
 <!--

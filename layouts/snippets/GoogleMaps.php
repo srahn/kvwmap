@@ -1,6 +1,6 @@
 <?php
  # 2008-01-22 pkvvm
-  include(LAYOUTPATH.'languages/GoogleMaps_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
+  include(LAYOUTPATH.'languages/GoogleMaps_'.$this->user->rolle->language.'.php');
  ?>
 <script language="JavaScript">
 <!--

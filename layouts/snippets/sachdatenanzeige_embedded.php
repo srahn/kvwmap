@@ -1,6 +1,6 @@
 <?php
  # 2008-09-30 sr
-  include(LAYOUTPATH.'languages/sachdatenanzeige_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
+  include(LAYOUTPATH.'languages/sachdatenanzeige_'.$this->user->rolle->language.'.php');
   
 	$i = 0;
 

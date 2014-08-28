@@ -1,6 +1,6 @@
 <?php
  # 2008-01-12 pkvvm
-  include(LAYOUTPATH.'languages/new_layer_data_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
+  include(LAYOUTPATH.'languages/new_layer_data_'.$this->user->rolle->language.'.php');
 	
 	include(SNIPPETS.'sachdatenanzeige_functions.php'); 
  ?>

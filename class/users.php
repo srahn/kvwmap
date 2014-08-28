@@ -846,9 +846,7 @@ class user extends user_core{
 		$newMaxPoint=explode(' ',trim($newMinMaxPoints[1]));
 		$newExtent['minx']=$newMinPoint[0]; $newExtent['miny']=$newMinPoint[1];
 		$newExtent['maxx']=$newMaxPoint[0]; $newExtent['maxy']=$newMaxPoint[1];
-		$language_charset=explode('_',$formvars['language_charset']);
-		$formvars['language']=$language_charset['0'];
-		$formvars['charset']=$language_charset['1'];
+		$formvars['language']=$formvars['language'];
 
 		# Eintragen der neuen Einstellungen für die Rolle
 		if($formvars['gui'] != '' AND $formvars['mapsize'] != ''){
@@ -860,7 +858,6 @@ class user extends user_core{
 			$sql.=',minx='.$newExtent['minx'].',miny='.$newExtent['miny'];
 			$sql.=',maxx='.$newExtent['maxx'].',maxy='.$newExtent['maxy'];
 			$sql.=',language="'.$formvars['language'].'"';
-			$sql.=',charset="'.$formvars['charset'].'"';
 			if($formvars['fontsize_gle'])$sql.=',fontsize_gle="'.$formvars['fontsize_gle'].'"';
 			if($formvars['highlighting'] != '')	$sql.=',highlighting="1"';
 			else $sql.=',highlighting="0"';
@@ -2376,7 +2373,7 @@ class stelle extends stelle_core{
 		# Lesen der Menuepunkte zur Stelle
 		$sql ='SELECT menue_id,';
 		if ($this->language != 'german') {
-			$sql.='`name_'.$this->language.'_'.$this->charset.'` AS ';
+			$sql.='`name_'.$this->language.'` AS ';
 		}
 		$sql.=' name, menueebene, `order` FROM u_menue2stelle, u_menues';
 		$sql .=' WHERE stelle_id = '.$this->id;
@@ -2617,7 +2614,15 @@ class stelle extends stelle_core{
 	}
 
 	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL){
-		$sql = 'SELECT layer.Layer_ID, Name, alias, Gruppe, Gruppenname, `connection` FROM used_layer, layer, u_groups';
+		$sql = 'SELECT layer.Layer_ID, ';
+		if(LANGUAGE != 'german') {
+			$sql.='CASE WHEN `Name_'.LANGUAGE.'` != "" THEN `Name_'.LANGUAGE.'` ELSE `Name` END AS ';
+		}
+		$sql .='Name, alias, Gruppe, ';
+		if(LANGUAGE != 'german') {
+			$sql.='CASE WHEN `Gruppenname_'.LANGUAGE.'` != "" THEN `Gruppenname_'.LANGUAGE.'` ELSE `Gruppenname` END AS ';
+		}
+		$sql .='Gruppenname, `connection` FROM used_layer, layer, u_groups';
 		$sql .=' WHERE stelle_id = '.$this->id;
 		$sql .=' AND layer.Gruppe = u_groups.id AND (layer.connectiontype = 6 OR layer.connectiontype = 9)';
 		$sql .=' AND layer.Layer_ID = used_layer.Layer_ID';

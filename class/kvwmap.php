@@ -72,127 +72,6 @@ class GUI extends GUI_core{
   var $user;
   var $qlayerset;
 
-  ###################### Liste der Funktionen ####################################
-  #
-  # adresswahl()
-  # adresseSuchen()
-  # aendernBodenRichtWert()
-  # ALK_Fortfuehrung()
-  # Adm_Fortfuehrung()
-  # ALB_Anzeigen($FlurstKennz,$formnummer)
-  # tmp_Adr_Tabelle_Aktualisieren()
-  # ALB_Aenderung()
-  # ALB_Fortfuehren()
-  # ALB_Grundausstattung()
-  # aktualisiereFestpunkte()
-  # bestaetigungsformAnzeigen()
-  # bodenrichtwerterfassung()
-  # bodenRichtWertZoneLoeschen
-  # neuLaden()
-  # changemenue_with_ajax($id, $status)
-  # commitBodenrichtwertCopy
-  # composePoint2Array($point,$minx,$miny,$scale)
-  # composePolygon2Array($umring,$minx,$miny,$scale)
-  # composePolygonWKTString($pathx,$pathy,$minx,$miny,$scale)
-  # copyBodenrichtwertzonen
-  # drawMap()
-  # druckausschnittswahl()
-  # editLayerForm($layerName,$oid)
-  # erzeugenUebergabeprotokollNachweise()
-  # exportMapToPDF()
-  # festpunkteErgebnisanzeige
-  # festpunkteSuchen()
-  # festpunkteWahl()
-  # festpunkteZeigen()
-  # festpunkteZuAuftragSenden
-  # flurstSuchen()
-	# flurstSuchenByLatLng
-  # flurstAnzeige($FlurstKennz)
-  # flurstwahl()
-  # getFormObjGemGemkgFlur($Gemeinde,$Gemarkung,$Flur)
-  # getFormObjVermStelle($VermStelle)
-  # getFunktionen()
-  # getFeatureIDbyPolygon($data,$filterdatei,$filterattribut,$filtervalue)
-  # GUI ($main,$style,$mime_type,$db) - constructor
-  # grundbuchblattWahl()
-  # loadMap($loadMapSource)
-  # loadMultiLingualWords()
-  # mapCommentForm()
-  # metadateneingabe()
-  # metadatensatzspeichern()
-  # metadatenSuchen()
-  # navMap($cmd)
-  # nachweisDokumentAnzeigen()
-  # nachweisFormSenden()
-  # nachweisFormAnzeige()
-  # nachweisAnzeige()
-  # nachweisLoeschen()
-  # nachweisRechercheByPolygon
-  # nameSuchen($name)
-  # neuerLayer()
-  # notizErfassung
-  # notizSpeichern
-  # notizKatanlegen
-  # notizKatbearbeiten
-  # notizKategorieAenderung
-  # output()
-	# packAndMail()
-  # queryMap()
-  # rechercheFormAnzeigen()
-  # rollenwahl($Stelle_ID)
-  # setFullExtent()
-  # setNextMapExtent($consumetime)
-  # setPrevMapExtent($consumetime)
-  # setSpatialFilter($layername)
-  # scaleMap($nScale)
-  # showConstants
-  # showStyles
-  # setStoredMapExtent()
-  # StatistikAuswahl()
-  # StatistikAuswahlErgebnis()
-  # suchparameterSetzen()
-  # suchparameterLesen()
-  # saveMap($saveMapDestination)
-  # SachdatenAnzeige($rect)
-	# uploadTempFile()
-  # zoomToALKGebaeude($GebaeudeListe,$border)
-  # zoomToALKGemeinde($GemID,$border)
-  # zoomToBodenrichtwertzone($oid,$border);
-  # zoomToGebaeude($GebaeudeListe,$border)
-  # zoomToGemarkung($GemID,$GemkgID,$border)
-  # zoomToGemeinde($GemID,$border)
-  # zoomToFestpunkte($FestpunktListe,$border)
-  # zoomToFlur($GemID,$GemkgID,$FlurID,$border)
-  # zoomToFlurst($FlurstListe,$border)
-  # zoomToNachweis($nachweis,$border)
-  # zoomToStoredMapExtent($storetime,$prevtime)
-  # zoomMap($nZoomFactor)
-  # zoomToRefExt()
-  # versiegelungsFlaechenErfassung()
-  # versiegelungsFlaechenSenden()
-  # waehleBodenwertStichtagToCopy
-  # WLDGE_Auswaehlen()
-  # wmsExport()
-  # wmsExportSenden()
-  ################################################################################
-  ################################################################################
-  #2005-11-29_pk
-  # Grundsätzliches zu Formularen:
-  # Es gibt folgende Zustände, die ein Formular haben kann:
-  # Ein Formular kann:
-  # 1. völlig leer sein
-  # 2. mit Defaultvalues gefüllt sein
-  # 3. mit Werten eines vorhandenen Datensatzes gefüllt sein
-  # 4. die Werte der vorherigen Eingabe enthalten
-  # letzteres läßt sich noch unterteilen in:
-  # 4.1. die Werte aus der vorherigen Eingabe ohne dass der Datensatz schon
-  #      eingetragen wurde, z.B. bei Fehlermeldungen zu unvollständigen oder
-  #      falschen Eingaben, dabei müssen alle Werte so wie vorher eingestellt sein
-  # 4.2. die Werte aus der vorherigen Eingabe nachdem die Werte in die Datenbank
-  #      eingetagen wurden. Hier bei kann es sein, dass nicht alle Werte aus der
-  #      vorherigen Eingabe über nommen werden sollen, z.B. eine fortlaufende Nr.
-  # Diese Zustände gilt es immer wieder bei der Bearbeitung von Dokumenten zu
-  # berücksichtigen und zu vereinheitlichen.
 
   # Konstruktor
   function GUI($main, $style, $mime_type) {
@@ -985,7 +864,7 @@ class GUI extends GUI_core{
   }
 
   function get_sub_menues(){
-    $this->Menue = new menue($this->user->rolle->language,$this->user->rolle->charset);
+    $this->Menue = new menue($this->user->rolle->language);
     $submenues = $this->Menue->getsubmenues($this->formvars['menue_id']);
     echo '<select name="submenues" size="5" multiple style="width:200px">';
     for($i=0; $i < count($submenues["Bezeichnung"]); $i++){
@@ -1442,7 +1321,7 @@ class GUI extends GUI_core{
     $this->loadMap('DataBase');
     $this->drawMap();
     # erzeugen des Menueobjektes
-    $this->Menue=new menue($this->user->rolle->language,$this->user->rolle->charset);
+    $this->Menue=new menue($this->user->rolle->language);
     # laden des Menues der Stelle und der Rolle
     $this->Menue->loadMenue($this->Stelle->id, $this->user->id);
     $this->Menue->get_menue_width($this->Stelle->id);
@@ -3762,24 +3641,27 @@ class GUI extends GUI_core{
     return 1;
   }
 
-  function sendeDokument_mit_vorschau($dokument, $original_name) {
-  	$type = strtolower(array_pop(explode('.', $dokument)));
-  	echo '<html>
-					<head>
-					<link rel="stylesheet" href="layouts/'.$this->style.'">
-					</head>
-					<body style="background-image:url('.GRAPHICSPATH.'bg.gif)" ><table border="0" cellpadding="0" cellspacing="0"><tr><td>';
-  	if($type == 'jpg' OR $type == 'png' OR $type == 'gif' ){
-  		echo '<a href="index.php?go=sendeDokument&dokument='.$dokument.'&original_name='.$original_name.'"><img style="border:1px solid black" height="140" src="index.php?go=sendeDokument&dokument='.$dokument.'"></a>';
-  	}
-  	else{
+  function sendeDokument_mit_vorschau($dokument, $original_name){
+		$type = strtolower(array_pop(explode('.', $dokument)));
+  	$dateiname = basename($dokument);
+		if($original_name == '')$original_name=$dateiname;    
+		if($type == 'jpg' OR $type == 'png' OR $type == 'gif' ){			// für Bilder werden automatisch Thumbnails erzeugt
+			$dateinamensteil=explode('.',$dateiname);
+			$thumbname = dirname($dokument).'/'.$dateinamensteil[0].'_thumb.'.$dateinamensteil[1];			
+			ob_end_clean();
+			if(!file_exists($thumbname)){
+				exec(IMAGEMAGICKPATH.'convert '.$dokument.' -resize 200 '.$thumbname);
+			}
+		}
+		else{																// alle anderen Dokumenttypen bekommen entsprechende Dokumentensymbole als Vorschaubild
+			$dateinamensteil[1] = 'gif';
   		switch ($type) {
   			case 'pdf' :{
-  				echo '<a href="index.php?go=sendeDokument&dokument='.$dokument.'&original_name='.$original_name.'"><img style="border:0px solid black" src="'.GRAPHICSPATH.'pdf.gif"></a>';
+  				$thumbname = GRAPHICSPATH.'pdf.gif';
   			}break;
   			
   			case 'doc' :{
-  				echo '<a href="index.php?go=sendeDokument&dokument='.$dokument.'&original_name='.$original_name.'"><img style="border:0px solid black" src="'.GRAPHICSPATH.'openoffice.gif"></a>';
+					$thumbname = GRAPHICSPATH.'openoffice.gif';
   			}break;
   			
   			default : {
@@ -3788,17 +3670,21 @@ class GUI extends GUI_core{
           $textwidth = $textbox[2] - $textbox[0] + 13;
           $blue = ImageColorAllocate ($image, 26, 87, 150);
           imagettftext($image, 13, 0, 22, 34, $blue, dirname(FONTSET).'/arial_bold.ttf', $type);
-          $filename = rand(0,100000).'.gif';
-          imagegif($image, IMAGEPATH.$filename);
-  				echo '<a href="index.php?go=sendeDokument&dokument='.$dokument.'&original_name='.$original_name.'"><img style="border:0px solid black" src="'.TEMPPATH_REL.$filename.'"></a>';
+          $thumbname = IMAGEPATH.rand(0,100000).'.gif';
+          imagegif($image, $thumbname);
   			}
   		}
   	}
-  	echo '</td><td valign="middle">&nbsp;&nbsp;<a href="index.php?go=sendeDokument&dokument='.$dokument.'&original_name='.$original_name.'">'.$original_name.'</a></td></tr></table>';
-  	echo '</body></html>';
+		header("Content-type: image/".$dateinamensteil[1]);
+		header("Content-Disposition: attachment; filename=".$original_name);
+		header('Expires: 0');
+		header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+		header('Pragma: public');		
+		readfile($thumbname);
+    ob_flush();
     return 1;
   }
-
+	
   function exportMapToPDF() {
     # Abfrage der aktuellen Karte
     $this->loadMap('DataBase');
@@ -4438,7 +4324,7 @@ class GUI extends GUI_core{
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     # Abfragen der Layerdaten wenn eine layer_id zur Änderung selektiert ist
     if ($this->formvars['selected_layer_id'] > 0) {
-      $this->classes = $mapDB->read_Classes($this->formvars['selected_layer_id']);
+      $this->classes = $mapDB->read_Classes($this->formvars['selected_layer_id'], NULL, true);
       $save = $this->formvars['selected_layer_id'];
       $this->formvars = $mapDB->get_Layer($this->formvars['selected_layer_id']);
       $this->formvars['selected_layer_id'] = $save;
@@ -4468,6 +4354,7 @@ class GUI extends GUI_core{
   }
 	
   function LayerAnlegen(){
+		global $supportedLanguages;
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 	  if (trim($this->formvars['id'])!='' and $mapDB->id_exists('layer',$this->formvars['id'])) {
 		  $table_information = $mapDB->get_table_information($this->Stelle->database->dbName,'layer');
@@ -4488,14 +4375,24 @@ class GUI extends GUI_core{
 			
 			# Klassen übernehmen (aber als neue Klassen anlegen)
 			$name = @array_values($this->formvars['name']);
+			foreach($supportedLanguages as $language){
+				if($language != 'german'){	
+					$name_[$language] = @array_values($this->formvars['name_'.$language]);
+				}
+			}
 			$expression = @array_values($this->formvars['expression']);
 			$order = @array_values($this->formvars['order']);
 			$ID = @array_values($this->formvars['ID']);
 			for($i = 0; $i < count($name); $i++){
-				$attrib[0] = $name[$i];
-				$attrib[1] = $this->formvars['selected_layer_id'];
-				$attrib[2] = $expression[$i];
-				$attrib[3] = $order[$i];
+				$attrib['name'] = $name[$i];
+				foreach($supportedLanguages as $language){
+					if($language != 'german'){	
+						$attrib['name_'.$language] = $name_[$language][$i];
+					}
+				}
+				$attrib['layer_id'] = $this->formvars['selected_layer_id'];
+				$attrib['expression'] = $expression[$i];
+				$attrib['order'] = $order[$i];
 				$class_id = $mapDB->new_Class($attrib);
 				# Styles übernehmen (in u_styles2classes eintragen)
 				$styles = $mapDB->read_Styles($ID[$i]);
@@ -4515,6 +4412,7 @@ class GUI extends GUI_core{
   }
 
   function LayerAendern(){
+		global $supportedLanguages;
   	$this->formvars['pfad'] = stripslashes($this->formvars['pfad']);
   	$this->formvars['Data'] = stripslashes($this->formvars['Data']);
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
@@ -4544,10 +4442,6 @@ class GUI extends GUI_core{
 			}
 		}
 		
-    $name = @array_values($this->formvars['name']);
-    $expression = @array_values($this->formvars['expression']);
-    $order = @array_values($this->formvars['order']);
-
     # Stellenzuweisung
     $stellen = explode(', ',$this->formvars['selstellen']);
     for($i = 0; $i < count($stellen); $i++){
@@ -4585,13 +4479,27 @@ class GUI extends GUI_core{
       }
     # /Löschen der in der Selectbox entfernten Stellen
 
+		# Klassen
+		$name = @array_values($this->formvars['name']);
+		foreach($supportedLanguages as $language){
+			if($language != 'german'){	
+				$name_[$language] = @array_values($this->formvars['name_'.$language]);
+			}
+		}
+    $expression = @array_values($this->formvars['expression']);
+    $order = @array_values($this->formvars['order']);
     $this->classes = $mapDB->read_Classes($old_layer_id);
     for($i = 0; $i < count($name); $i++){
-      $attrib[0] = $name[$i];
-      $attrib[1] = $this->formvars['selected_layer_id'];
-      $attrib[2] = $expression[$i];
-      $attrib[3] = $order[$i];
-      $attrib[4] = $this->classes[$i]['Class_ID'];
+      $attrib['name'] = $name[$i];
+			foreach($supportedLanguages as $language){
+				if($language != 'german'){	
+					$attrib['name_'.$language] = $name_[$language][$i];
+				}
+			}
+      $attrib['layer_id'] = $this->formvars['selected_layer_id'];
+      $attrib['expression'] = $expression[$i];
+      $attrib['order'] = $order[$i];
+      $attrib['class_id'] = $this->classes[$i]['Class_ID'];
       $mapDB->update_Class($attrib);
     }
     $this->Layereditor();
@@ -5075,12 +4983,7 @@ class GUI extends GUI_core{
 	}
 	
   function GenerischeSuche(){
-  	if($this->formvars['titel'] == ''){
-      $this->titel='Layer-Suche';
-    }
-    else{
-      $this->titel=$this->formvars['titel'];
-    }
+    $this->titel=$this->formvars['titel'];
     $this->main='generic_search.php';
     $this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, NULL);
 		$this->layergruppen['ID'] = array_values(array_unique($this->layerdaten['Gruppe']));
@@ -6556,7 +6459,7 @@ class GUI extends GUI_core{
     $this->layerdaten = $mapdb->get_postgis_layers('Name');
     if($this->formvars['selected_layer_id']){
       $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-      $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
+      $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL, true);
       # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
 			#$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, NULL, true);
     }
@@ -6567,7 +6470,7 @@ class GUI extends GUI_core{
     $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $path = $mapdb->getPath($this->formvars['selected_layer_id']);
     $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-    $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
+    $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL, true);
     $mapdb->save_attributes($this->attributes, $this->database, $this->formvars);
     $this->Attributeditor();
   }
@@ -6628,7 +6531,6 @@ class GUI extends GUI_core{
       $stelleid = $this->formvars['selected_stelle_id'];
       $Stelle = new stelle($stelleid,$this->user->database);
       $Stelle->language = $this->Stelle->language;
-      $Stelle->charset = $this->Stelle->charset;
       $Stelle->Aendern($this->formvars);
       if($this->formvars['id'] != ''){
         $new_stelle = new stelle($this->formvars['id'],$this->user->database);
@@ -6830,7 +6732,6 @@ class GUI extends GUI_core{
     if ($this->formvars['selected_stelle_id']>0) {
       $Stelle = new stelle($this->formvars['selected_stelle_id'],$this->user->database);
       $Stelle->language = $this->Stelle->language;
-      $Stelle->charset = $this->Stelle->charset;
       $this->stellendaten = $Stelle->getstellendaten();
       $this->formvars['bezeichnung'] = $this->stellendaten['Bezeichnung'];
       $this->formvars['minxmax'] = $this->stellendaten['minxmax'];
@@ -6870,7 +6771,7 @@ class GUI extends GUI_core{
       $this->formvars['selusers'] = $Stelle->getUser();
     }
     # Abfragen aller möglichen Menuepunkte
-    $this->Menue=new menue($this->user->rolle->language,$this->user->rolle->charset);
+    $this->Menue=new menue($this->user->rolle->language);
     $this->formvars['menues']=$this->Menue->getallOberMenues();
     # Abfragen aller möglichen Funktionen
     $funktion = new funktion($this->database);
@@ -9794,7 +9695,7 @@ class GUI extends GUI_core{
 				# EPSG-Code des Layers der Abgefragt werden soll
 				$layer_epsg=$layerset[$i]['epsg_code'];
 				
-			if($rect->minx != ''){		################ Kartenabfrage ################
+			if($rect->minx != ''){		################ Kartenabfrage ################				
 				switch ($layerset[$i]['toleranceunits']) {
 					case 'pixels' : $pixsize=$this->user->rolle->pixsize; break;
 					case 'meters' : $pixsize=1; break;
@@ -11523,21 +11424,6 @@ class db_mapObj extends db_mapObj_core{
   var $Stelle_ID;
   var $User_ID;
 
-  ###################### Liste der Funktionen ####################################
-  #
-  # deleteFilter($stelle_id, $layer_id, $attributname)
-	# function db_mapObj($Stelle_ID,$User_ID) - Construktor
-	# function read_ReferenceMap()
-  # function read_Classes($Layer_ID)
-  # function read_Styles($Style_ID)
-  # function read_Label($Label_ID)
-  # function getShapeByAttribute($layer,$attribut,$value)
-  # function getMaxMapExtent()
-  # function outputHTML()
-	# zoomToDatasets($oids, $tablename, $columnname, $border, $layerdb, $client_epsg)
-  #
-  ################################################################################
-
   function db_mapObj($Stelle_ID,$User_ID) {
     global $debug;
     $this->debug=$debug;
@@ -12201,6 +12087,7 @@ class db_mapObj extends db_mapObj_core{
 	}
 
   function updateLayer($formvars){
+		global $supportedLanguages;
   	$formvars['pfad'] = str_replace(array("\r\n", "\n"), '', $formvars['pfad']);
     $formvars['pfad'] = str_replace ( "'", "''", $formvars['pfad']);
     $formvars['Data'] = str_replace ( "'", "''", $formvars['Data']);
@@ -12210,6 +12097,11 @@ class db_mapObj extends db_mapObj_core{
       $sql.="Layer_ID = ".$formvars['id'].", ";
     }
     $sql .= "Name = '".$formvars['Name']."', ";
+		foreach($supportedLanguages as $language){
+			if($language != 'german'){
+				$sql .= "`Name_".$language."` = '".$formvars['Name_'.$language]."', ";
+			}
+		}
     $sql .= "alias = '".$formvars['alias']."', ";
     $sql .= "Datentyp = '".$formvars['Datentyp']."', ";
     $sql .= "Gruppe = '".$formvars['Gruppe']."', ";
@@ -12273,6 +12165,7 @@ class db_mapObj extends db_mapObj_core{
   }
 
   function newLayer($layerdata) {
+		global $supportedLanguages;
     # Erzeugt einen neuen Layer (entweder aus formvars oder aus einem Layerobjekt)
     if(is_array($layerdata)){
       $formvars = $layerdata;   # formvars wurden übergeben
@@ -12286,11 +12179,22 @@ class db_mapObj extends db_mapObj_core{
       if($formvars['id'] != ''){
         $sql.="`Layer_ID`, ";
       }
-      $sql.= "`Name`, `alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`) VALUES(";
+      $sql.= "`Name`, ";
+			foreach($supportedLanguages as $language){
+				if($language != 'german'){
+					$sql .= "`Name_".$language."`, ";
+				}
+			}
+			$sql.="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`) VALUES(";
       if($formvars['id'] != ''){
         $sql.="'".$formvars['id']."', ";
       }
       $sql .= "'".$formvars['Name']."', ";
+			foreach($supportedLanguages as $language){
+				if($language != 'german'){
+					$sql .= "'".$formvars['Name_'.$language]."', ";
+				}
+			}
       $sql .= "'".$formvars['alias']."', ";
       $sql .= "'".$formvars['Datentyp']."', ";
       $sql .= "'".$formvars['Gruppe']."', ";
@@ -12417,6 +12321,7 @@ class db_mapObj extends db_mapObj_core{
   }
 
   function save_attributes($attributes, $database, $formvars){
+		global $supportedLanguages;
     for($i = 0; $i < count($attributes['name']); $i++){
       $sql = 'INSERT INTO layer_attributes SET ';
       $sql.= 'layer_id = '.$formvars['selected_layer_id'].', ';
@@ -12429,12 +12334,21 @@ class db_mapObj extends db_mapObj_core{
       	$formvars['mandatory_'.$attributes['name'][$i]] = 'NULL';
       }
       $sql.= 'mandatory = '.$formvars['mandatory_'.$attributes['name'][$i]].', ';
-			if($formvars['quicksearch_'.$attributes['name'][$i]] == ''){
-      	$formvars['quicksearch_'.$attributes['name'][$i]] = 'NULL';
-      }
-      $sql.= 'quicksearch = '.$formvars['quicksearch_'.$attributes['name'][$i]].', ';
-      $sql.= 'alias = "'.$formvars['alias_'.$attributes['name'][$i]].'" ';
-      $sql.= 'ON DUPLICATE KEY UPDATE name = "'.$attributes['name'][$i].'", form_element_type = "'.$formvars['form_element_'.$attributes['name'][$i]].'", options = "'.$formvars['options_'.$attributes['name'][$i]].'", tooltip = "'.$formvars['tooltip_'.$attributes['name'][$i]].'", `group` = "'.$formvars['group_'.$attributes['name'][$i]].'", alias = "'.$formvars['alias_'.$attributes['name'][$i]].'", mandatory = '.$formvars['mandatory_'.$attributes['name'][$i]].' , quicksearch = '.$formvars['quicksearch_'.$attributes['name'][$i]];
+      $sql.= 'alias = "'.$formvars['alias_'.$attributes['name'][$i]].'", ';
+			foreach($supportedLanguages as $language){
+				if($language != 'german'){
+					$sql.= '`alias_'.$language.'` = "'.$formvars['alias_'.$language.'_'.$attributes['name'][$i]].'", ';
+				}
+			}
+			if($formvars['quicksearch_'.$attributes['name'][$i]] == '')$formvars['quicksearch_'.$attributes['name'][$i]] = 'NULL';
+			$sql.= 'quicksearch = '.$formvars['quicksearch_'.$attributes['name'][$i]];
+      $sql.= ' ON DUPLICATE KEY UPDATE name = "'.$attributes['name'][$i].'", form_element_type = "'.$formvars['form_element_'.$attributes['name'][$i]].'", options = "'.$formvars['options_'.$attributes['name'][$i]].'", tooltip = "'.$formvars['tooltip_'.$attributes['name'][$i]].'", `group` = "'.$formvars['group_'.$attributes['name'][$i]].'", alias = "'.$formvars['alias_'.$attributes['name'][$i]].'", ';
+			foreach($supportedLanguages as $language){
+				if($language != 'german'){
+					$sql.= '`alias_'.$language.'` = "'.$formvars['alias_'.$language.'_'.$attributes['name'][$i]].'", ';
+				}
+			}
+			$sql.= ' mandatory = '.$formvars['mandatory_'.$attributes['name'][$i]].' , quicksearch = '.$formvars['quicksearch_'.$attributes['name'][$i]];
       $this->debug->write("<p>file:kvwmap class:Document->save_attributes :",4);
       $database->execSQL($sql,4, 1);
     }
@@ -12461,13 +12375,17 @@ class db_mapObj extends db_mapObj_core{
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
   }
   
-  function read_layer_attributes($layer_id, $layerdb, $attributenames){
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false){
     	if($attributenames != NULL){
     		$einschr = ' AND name IN (\'';
     		$einschr.= implode('\', \'', $attributenames);
     		$einschr.= '\')';
     	}
-      $sql = 'SELECT * FROM layer_attributes WHERE layer_id = '.$layer_id.$einschr.' ORDER BY `order`';
+      $sql = 'SELECT ';
+			if(!$all_languages AND LANGUAGE != 'german') {
+				$sql.='CASE WHEN `alias_'.LANGUAGE.'` != "" THEN `alias_'.LANGUAGE.'` ELSE `alias` END AS ';
+			}
+			$sql.='alias, `alias_low-german`, alias_english, alias_polish, alias_vietnamese, layer_id, name, real_name, tablename, table_alias_name, type, geometrytype, constraints, nullable, length, decimal_length, `default`, form_element_type, options, tooltip, `group`, mandatory, quicksearch, `order`, privileg, query_tooltip FROM layer_attributes WHERE layer_id = '.$layer_id.$einschr.' ORDER BY `order`';
       $this->debug->write("<p>file:kvwmap class:db_mapObj->read_layer_attributes:<br>".$sql,4);
       $query=mysql_query($sql);
       if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
@@ -12507,6 +12425,10 @@ class db_mapObj extends db_mapObj_core{
       	$attributes['options'][$rs['name']]= $rs['options'];
       	$attributes['alias'][$i]= $rs['alias'];
       	$attributes['alias'][$attributes['name'][$i]]= $rs['alias'];
+				$attributes['alias_low-german'][$i]= $rs['alias_low-german'];
+				$attributes['alias_english'][$i]= $rs['alias_english'];
+				$attributes['alias_polish'][$i]= $rs['alias_polish'];
+				$attributes['alias_vietnamese'][$i]= $rs['alias_vietnamese'];
       	$attributes['tooltip'][$i]= $rs['tooltip'];
       	$attributes['group'][$i]= $rs['group'];
       	$attributes['mandatory'][$i]= $rs['mandatory'];
@@ -12529,7 +12451,15 @@ class db_mapObj extends db_mapObj_core{
   }
 
   function getall_Layer($order) {
-    $sql ='SELECT * FROM layer, u_groups';
+    $sql ='SELECT ';
+		if(LANGUAGE != 'german') {
+			$sql.='CASE WHEN `Name_'.LANGUAGE.'` != "" THEN `Name_'.LANGUAGE.'` ELSE `Name` END AS ';
+		}
+		$sql.='Name, Layer_ID, Gruppe, kurzbeschreibung, datenherr, alias, ';
+		if(LANGUAGE != 'german') {
+			$sql.='CASE WHEN `Gruppenname_'.LANGUAGE.'` != "" THEN `Gruppenname_'.LANGUAGE.'` ELSE `Gruppenname` END AS ';
+		}
+		$sql.='Gruppenname FROM layer, u_groups';
     $sql.=' WHERE layer.Gruppe = u_groups.id';
     if($order != ''){$sql .= ' ORDER BY '.$order;}
     $this->debug->write("<p>file:kvwmap class:db_mapObj->getall_Layer - Lesen aller Layer:<br>".$sql,4);
@@ -12749,7 +12679,7 @@ class db_mapObj extends db_mapObj_core{
   function copyClass($class_id, $layer_id){
     # diese Funktion kopiert eine Klasse mit Styles und Labels und gibt die ID der neuen Klasse zurück
     $class = $this->read_ClassesbyClassid($class_id);
-    $sql = "INSERT INTO classes (Name,Layer_ID,Expression,drawingorder,text) SELECT Name, ".$layer_id.",'',drawingorder,text FROM classes WHERE Class_ID = ".$class_id;
+    $sql = "INSERT INTO classes (Name, `Name_low-german`, Name_english, Name_polish, Name_vietnamese, Layer_ID,Expression,drawingorder,text) SELECT Name, `Name_low-german`, Name_english, Name_polish, Name_vietnamese, ".$layer_id.",'',drawingorder,text FROM classes WHERE Class_ID = ".$class_id;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->copyClass - Kopieren einer Klasse:<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
@@ -12766,10 +12696,23 @@ class db_mapObj extends db_mapObj_core{
   }
 
   function new_Class($classdata) {
+		global $supportedLanguages;
     if(is_array($classdata)){
       $attrib = $classdata;         # Attributarray wurde übergeben
       # attrib:(Name, Layer_ID, Expression, drawingorder)
-      $sql = 'INSERT INTO classes (Name, Layer_ID, Expression, drawingorder) VALUES ("'.$attrib[0].'", '.$attrib[1].', "'.$attrib[2].'", "'.$attrib[3].'")';
+      $sql = 'INSERT INTO classes (Name, ';
+			foreach($supportedLanguages as $language){
+				if($language != 'german'){
+					$sql.= '`Name_'.$language.'`, ';
+				}
+			}
+			$sql.= 'Layer_ID, Expression, drawingorder) VALUES ("'.$attrib['name'].'",';
+			foreach($supportedLanguages as $language){
+				if($language != 'german'){
+					$sql.= '"'.$attrib['name_'.$language].'",';
+				}
+			}
+			$sql.= $attrib['layer_id'].', "'.$attrib['expression'].'", "'.$attrib['order'].'")';
     }
     else{
       $class = $classdata;        # Classobjekt wurde übergeben
@@ -12818,8 +12761,15 @@ class db_mapObj extends db_mapObj_core{
   }
 
   function update_Class($attrib){
+		global $supportedLanguages;
     # attrib:(Name, Layer_ID, Expression, drawingorder, Class_ID)
-    $sql = 'UPDATE classes SET Name = "'.$attrib[0].'", Layer_ID = '.$attrib[1].', Expression = "'.$attrib[2].'", drawingorder = "'.$attrib[3].'" WHERE Class_ID = '.$attrib[4];
+    $sql = 'UPDATE classes SET Name = "'.$attrib['name'].'",';
+		foreach($supportedLanguages as $language){
+			if($language != 'german'){
+				$sql.= '`Name_'.$language.'` = "'.$attrib['name_'.$language].'",';
+			}
+		}
+		$sql.= 'Layer_ID = '.$attrib['layer_id'].', Expression = "'.$attrib['expression'].'", drawingorder = "'.$attrib['order'].'" WHERE Class_ID = '.$attrib['class_id'];
     #echo $sql.'<br>';
     $this->debug->write("<p>file:kvwmap class:db_mapObj->update_Class - Aktualisieren einer Klasse:<br>".$sql,4);
     $query=mysql_query($sql);
@@ -13201,17 +13151,16 @@ class Menue {
   #
   ################################################################################
 
-  function menue ($language,$charset){
+  function menue ($language){
     global $debug;
     $this->debug=$debug;
     $this->language=$language;
-    $this->charset=$charset;
   }
 
   function loadMenue($Stelle_ID, $User_ID) {
     $sql ='SELECT status, m.id, m.links, name as name_german,';
     if ($this->language != 'german') {
-      $sql.=' `name_'.$this->language.'_'.$this->charset.'` AS ';
+      $sql.=' `name_'.$this->language.'` AS ';
     }
     $sql.='name,m.menueebene,m.obermenue, m.target';
     $sql.=' FROM u_menue2rolle, u_menue2stelle AS m2s, u_menues AS m';
@@ -13243,7 +13192,7 @@ class Menue {
   function getallOberMenues(){
     $sql.='SELECT id,';
     if ($this->language != 'german') {
-      $sql.='`name_'.$this->language.'_'.$this->charset.'` AS ';
+      $sql.='`name_'.$this->language.'` AS ';
     }
     $sql.=' name, `order`, menueebene FROM u_menues WHERE menueebene = 1 ORDER BY `order`';
     $this->debug->write("<p>file:kvwmap class:Menue - Lesen aller OberMenüs:<br>".$sql,4);
@@ -13265,7 +13214,7 @@ class Menue {
   function getsubmenues($menue_id){
     $sql.='SELECT id,';
     if ($this->language != 'german') {
-      $sql.='`name_'.$this->language.'_'.$this->charset.'` AS ';
+      $sql.='`name_'.$this->language.'` AS ';
     }
     $sql.=' name, `order`, menueebene FROM u_menues WHERE obermenue = '.$menue_id.' AND menueebene = 2 ORDER BY `order`, name';
     $this->debug->write("<p>file:kvwmap class:Menue - Lesen aller OberMenüs:<br>".$sql,4);

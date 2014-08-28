@@ -1,6 +1,6 @@
 <?php
  # 2008-01-22 pkvvm
-  include(LAYOUTPATH.'languages/shape_import_'.$this->user->rolle->language.'_'.$this->user->rolle->charset.'.php');
+  include(LAYOUTPATH.'languages/shape_import_'.$this->user->rolle->language.'.php');
  ?>
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">

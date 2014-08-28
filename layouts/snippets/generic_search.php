@@ -1,4 +1,7 @@
-<? include('funktionen/input_check_functions.php'); ?>
+<? 
+include(LAYOUTPATH.'languages/generic_search_'.$this->user->rolle->language.'.php');
+include('funktionen/input_check_functions.php'); 
+?>
 
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
@@ -190,13 +193,13 @@ function add_searchmask(layer_id){
   
 //-->
 </script>
-<br><h2><? echo $this->titel; ?></h2>
+<br><h2><? if($this->titel != '')echo $this->titel;else echo $strLayerSearch; ?></h2>
 <table border="0" cellpadding="5" cellspacing="2" bgcolor="<? echo $bgcolor; ?>">
   <tr>
     <td></td>
   </tr>
   <tr> 
-    <td style="border-top:1px solid #C3C7C3;border-left:1px solid #C3C7C3;border-right:1px solid #C3C7C3" colspan="5">Gruppen</td>
+    <td style="border-top:1px solid #C3C7C3;border-left:1px solid #C3C7C3;border-right:1px solid #C3C7C3" colspan="5"><? echo $strGroups; ?></td>
   </tr>
   <tr> 
     <td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3" colspan="5"> 
@@ -215,7 +218,7 @@ function add_searchmask(layer_id){
   	</td>
   </tr>
   <tr> 
-    <td style="border-top:1px solid #C3C7C3;border-left:1px solid #C3C7C3;border-right:1px solid #C3C7C3" colspan="5">Themen</td>
+    <td style="border-top:1px solid #C3C7C3;border-left:1px solid #C3C7C3;border-right:1px solid #C3C7C3" colspan="5"><? echo $strLayers; ?></td>
   </tr>
   <tr> 
     <td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3" colspan="5"> 
@@ -234,20 +237,20 @@ function add_searchmask(layer_id){
   	</td>
   </tr>
   <tr>
-    <td id="searches1"><? if($this->formvars['selected_layer_id'] != ''){ ?><a href="javascript:showsearches();">Suchabfragen...</a><? } ?>&nbsp;</td>
+    <td id="searches1"><? if($this->formvars['selected_layer_id'] != ''){ ?><a href="javascript:showsearches();"><? echo $strSearches; ?></a><? } ?>&nbsp;</td>
   </tr>
   <tr id="searches2" style="display:none"> 
     <td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3">
     	<table border="0" cellspacing="0" cellpadding="1">
     		<tr align="center"> 
 			    <td colspan="2"  align="right">
-			    	Name:&nbsp;<input type="text" name="search_name" value="<? echo $this->formvars['searches']; ?>">
-			    	<input class="button" type="button" style="width:74px" name="speichern" value="speichern" onclick="save_search();">
+			    	<? echo $this->strName; ?>:&nbsp;<input type="text" name="search_name" value="<? echo $this->formvars['searches']; ?>">
+			    	<input class="button" type="button" style="width:74px" name="speichern" value="<? echo $this->strSave; ?>" onclick="save_search();">
 			    </td>
 			  </tr>
     		<tr>
 			  	<td align="right"  colspan="2">
-			  		<input class="button" type="button" style="width:74px" name="delete" value="löschen" onclick="delete_search();">
+			  		<input class="button" type="button" style="width:74px" name="delete" value="<? echo $this->strDelete; ?>" onclick="delete_search();">
 			  		<select name="searches">
 			  			<option value="">  -- <? echo $this->strPleaseSelect; ?> --  </option>
 			  			<?
@@ -258,7 +261,7 @@ function add_searchmask(layer_id){
 			  				}
 			  			?>
 			  		</select>
-			  		<input class="button" type="button" style="width:74px" name="laden" value="laden" onclick="document.GUI.submit();">
+			  		<input class="button" type="button" style="width:74px" name="laden" value="<? echo $this->strLoad; ?>" onclick="document.GUI.submit();">
 			    </td>
 			  </tr>
     	</table>
@@ -267,12 +270,12 @@ function add_searchmask(layer_id){
   
   <? if($this->formvars['columnname'] != ''){ ?>
   <tr>
-    <td id="map1" <? if($this->formvars['map_flag'] != ''){echo 'style="border-top: 1px solid #C3C7C3;border-left: 1px solid #C3C7C3;border-right: 1px solid #C3C7C3"';} ?>><a href="javascript:showmap();">Suche räumlich eingrenzen...</a>&nbsp;</td>
+    <td id="map1" <? if($this->formvars['map_flag'] != ''){echo 'style="border-top: 1px solid #C3C7C3;border-left: 1px solid #C3C7C3;border-right: 1px solid #C3C7C3"';} ?>><a href="javascript:showmap();"><? echo $strSpatialFiltering; ?></a>&nbsp;</td>
   </tr>
   <? if($this->formvars['map_flag'] != ''){ ?>
   <tr id="map2"> 
     <td align="right" style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3">
-    	Geometrie übernehmen von: 
+    	<? echo $this->strUseGeometryOf; ?>: 
   		<select name="layer_id" onchange="document.GUI.submit();">
   			<?
   				for($i = 0; $i < count($this->queryable_vector_layers['ID']); $i++){
@@ -310,21 +313,21 @@ function add_searchmask(layer_id){
 			<table width="100%" align="center" border="0" cellspacing="0" cellpadding="3">			
 			<? if($this->layerset[0]['connectiontype'] == MS_POSTGIS){ ?>
 					<tr>
-						<td><a href="javascript:add_searchmask(<? echo $this->formvars['selected_layer_id']; ?>);">und/oder...</a></td>
+						<td><a href="javascript:add_searchmask(<? echo $this->formvars['selected_layer_id']; ?>);"><? echo $strAndOr; ?></a></td>
 					</tr>
 			<? } ?>
 					<tr>
-						<td colspan="5"><br>Anzahl Treffer anzeigen:&nbsp;<input size="2" type="text" name="anzahl" value="<? echo $this->formvars['anzahl']; ?>"></td>
+						<td colspan="5"><br><? echo $strLimit; ?>&nbsp;<input size="2" type="text" name="anzahl" value="<? echo $this->formvars['anzahl']; ?>"></td>
 					</tr>
 					<tr>
-						<td colspan="5"><br><em>Zur nicht exakten Suche verwenden Sie den <br>Operator "ähnlich" und den Platzhalter %.</em></td>
+						<td colspan="5"><br><em><? echo $strLikeSearchHint; ?></em></td>
 					</tr>
 					<tr>
-						<td colspan="5"><br><em>Für Datumsangaben verwenden Sie bitte das <br>Format "TT.MM.JJJJ".</em></td>
+						<td colspan="5"><br><em><? echo $strDateHint; ?></em></td>
 					</tr>
 					<tr>                
 						<td align="center" colspan="5"><br>
-							<input class="button" type="button" name="suchen" onclick="suche();" value="Suchen">
+							<input class="button" type="button" name="suchen" onclick="suche();" value="<? echo $this->strSearch; ?>">
 						</td>
 					</tr>
 					<tr>
