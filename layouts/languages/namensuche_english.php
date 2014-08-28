@@ -1,0 +1,43 @@
+﻿<?php
+
+ $strName1="Name/Incorporation";
+ $strName2="Prename";
+ $strName3="Name of birth";
+ $strName4="Date of birth/Annex";
+ $strName5="Street";
+ $strName6="House number";
+ $strName7="Postcode";
+ $strName8="Locality";
+ $strGbbez="Land register borough";
+ $strGbbl="Land register folio";
+ $strGemkg="Local subdistrict (Commune)";
+ $strHintCaseSens="Regard upper and lower case";
+ $strHintWildcard="Use the wildcard &quot;%&quot; (e.g. &quot;me%er&quot;) for any and optional characters. Use the wildcard &quot;_&quot; (e.g. &quot;me_er&quot;) for only one optional character";
+ $strShowHits="Show number of hits";
+ $strShowWithFst="Show land parcels";
+ $strSearch="Search";
+ $strTotalHits="Total hits";
+ $strGbbezShort="Borough";
+ $strGbblShort="Folio";
+ $strName1Short="Name/Inc.";
+ $strName2Short="DateOfBirth/Annex";
+ $strName3Short="Street HouseNo.";
+ $strName4Short="Pcode Location";
+ $strFst="Land parcels";
+ $strHunt="Hunting cadastre";
+ $strShowFst="Report";
+ $strToMap="Map";
+ $strHuntEdit="Edit hunting borough";
+ $strParcelNo="No. of Parcel";
+ $strGemkgName="NameOfSubdist.";
+ $strAreaALB="ALB-Area";
+ $strDoPrintoutsALB="Generate ALB-Printouts";
+ $strPrintoutALB="ALB-Printout";
+ $strMapSection="Map section";
+ $strSelFst="Selected parcels";
+ $strSelGbbl="Selected register folio";
+ $strShowFstInMap="Show land parcels in map";
+ $strBack="back";
+ $strNext="next";
+ $strCheckAll="select all";
+?>

@@ -1,0 +1,31 @@
+<?
+$strLayerSearch="Layer-Suche";
+$strGroups="Gruppen";
+$strLayers="Themen";
+$strSearches="Suchabfragen...";
+$strSpatialFiltering="Suche räumlich eingrenzen...";
+$strAndOr="und/oder...";
+$strAnd="und";
+$strOr="oder";
+$strLikeSearchHint="Zur nicht exakten Suche verwenden Sie den <br>Operator \"ähnlich\" und den Platzhalter %.";
+$strDateHint="Für Datumsangaben verwenden Sie bitte das <br>Format \"TT.MM.JJJJ\".";
+$strLimit="Anzahl Treffer anzeigen:";
+$strAttribute="Attribut";
+$strOperator="Operator";
+$strValue="Wert";
+$strLike="ähnlich";
+$strNotLike="nicht ähnlich";
+$strIsEmpty="ist leer";
+$strIsNotEmpty="ist nicht leer";
+$strIsIn="befindet sich in";
+$strBetween="zwischen";
+$strEqualHint="Der Suchbegriff muss exakt so in der Datenbank stehen";
+$strNotEqualHint="Der Suchbegriff kommt so NICHT in der Datenbank vor";
+$strLowerHint="'kleiner als': nur bei Zahlen verwenden!";
+$strGreaterHint="'größer als': nur bei Zahlen verwenden!";
+$strLikeHint="Fügen Sie das %-Zeichen vor und/oder nach dem Suchbegriff für beliebige Zeichen ein";
+$strIsEmptyHint="Sucht nach Datensätzen ohne Eintrag in diesem Attribut";
+$strIsNotEmptyHint="Sucht nach Datensätzen mit beliebigem Eintrag in diesem Attribut";
+$strInHint="Sucht nach mehreren exakten Suchbegriffen, zur Trennung '|' verwenden:  [Alt Gr] + [<]";
+$strBetweenHint="Sucht zwischen zwei Zahlwerten";
+?>

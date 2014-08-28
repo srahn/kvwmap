@@ -1,0 +1,30 @@
+<?php
+  $strAvailableLayer="Praatheite Themen";
+  $strCoordinates="Koordinaten";
+  $strShowCoordinates="Koordinatenabfrage";
+  $strLoadNew="Nieg Loden";
+  $strMapImageURL="Koortbeld taun Ofsekern anwiesen";
+  $strChoose="Utwählen";
+  $strSave="Spiekern";
+  $strMapScale="Maat";
+  $strMapSettingsFrom="Koortinstellen vun";
+  $strPreviousView="v'+unescape('%F6')+'rherig Ansich";
+  $strNextView="neegste Ansich";
+  $strZoomIn="Rin zoomen";
+  $strZoomOut="Rut zoomen";
+  $strZoomToFullExtent="Samtansich";
+  $strPan="Verschuven";
+  $strCoordinatesZoom="Koordinatenzoom/Abfrage";
+  $strInfo="Info Affraag";
+  $strTouchInfo="Info Affraag auf angrenzende Objekte";
+  $strInfoWithRadius="Info Affraag mit S'+unescape('%F6')+'kkrink";
+  $strInfoInPolygon="Info Affraag in\'n Polygon";
+  $strRuler="Streek afmeten";
+  $strFreePolygon="Polygon zeichnen";
+  $strFreeArrow="Pfeil zeichnen";
+  $strFreeText="Text Hinzufuegen";
+  $strX="R";  
+  $strY="H";
+  $strMap="Koort";
+  $strMapSize="Grött anpassen";
+?>

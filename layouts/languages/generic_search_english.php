@@ -1,0 +1,31 @@
+<?
+$strLayerSearch="Layer-Search";
+$strGroups="Groups";
+$strLayers="Layers";
+$strSearches="Saved Searches...";
+$strSpatialFiltering="Add Spatial Filter...";
+$strAndOr="and/or...";
+$strAnd="and";
+$strOr="or";
+$strLikeSearchHint="For non exact Search you must use the operator \"like\" and the wildcard %.";
+$strDateHint="For date input please use the format \"DD.MM.YYYY\".";
+$strLimit="Limit Resultcount:";
+$strAttribute="Attribute";
+$strOperator="Operator";
+$strValue="Value";
+$strLike="like";
+$strNotLike="not like";
+$strIsEmpty="is empty";
+$strIsNotEmpty="is not empty";
+$strIsIn="is in";
+$strBetween="between";
+$strEqualHint="The search term must be exactly as in the database";
+$strNotEqualHint="The search term is NOT in the database";
+$strLowerHint="'less than': use only for numbers!";
+$strGreaterHint="'greater than': use only for numbers!";
+$strLikeHint="Use the % character as a wildcard";
+$strIsEmptyHint="To find records with empty entries in this attribute";
+$strIsNotEmptyHint="To find records with any entry in this attribute";
+$strInHint="Searches for multiple exact search terms, use '|' for separation";
+$strBetweenHint="Searches between two numbers";
+?>
