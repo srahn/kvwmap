@@ -5,7 +5,7 @@
 #                                                                  #
 ####################################################################
 
-include (CLASSPATH.'georg_export.php');						# Version 1.6.1
+include_(CLASSPATH.'georg_export.php');						# Version 1.6.1
 define('GEORG_FOLDER', SHAPEPATH.'Georg/');
 define('GEORG_AMTS_DATEI', GEORG_FOLDER.'georg_amt.txt');
 define('GEORG_PROGRAMM', 'Georg 6.0');

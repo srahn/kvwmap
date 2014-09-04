@@ -1,6 +1,10 @@
 <?php
 # Script wird zum Ende von index.php abgearbeitet
 
+if(!empty($GUI->allowed_documents)){
+	$GUI->write_document_loader();
+}
+
 # Schließen der offenen Datenbankverbindungen
 if (isset($user)) {
   if ($user->database->dbConn>0) { $user->database->close(); }

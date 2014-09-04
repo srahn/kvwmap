@@ -1,6 +1,11 @@
 <? 
+
+	# Variablensubstitution
+	$layer = $this->qlayerset[$i];
+	$attributes = $layer['attributes'];
+
 	$doit = false;
-  $anzObj = count($this->qlayerset[$i]['shape']);
+  $anzObj = count($layer['shape']);
   if ($anzObj > 0) {
   	$this->found = 'true';
   	$doit = true;
@@ -9,22 +14,23 @@
 ?>
 		<table border="0" cellspacing="0" cellpadding="2" width="100%">
 <?	for ($k=0;$k<$anzObj;$k++) {
-			for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
-				if($this->formvars['preview_attribute'] == $this->qlayerset[$i]['attributes']['name'][$j]){
-					switch ($this->qlayerset[$i]['attributes']['form_element_type'][$j]){
+			$dataset = $layer['shape'][$k];								# der aktuelle Datensatz
+			for($j = 0; $j < count($attributes['name']); $j++){
+				if($this->formvars['preview_attribute'] == $attributes['name'][$j]){
+					switch ($attributes['form_element_type'][$j]){
 						case 'Auswahlfeld' : {
-							if(is_array($this->qlayerset[$i]['attributes']['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-								for($e = 0; $e < count($this->qlayerset[$i]['attributes']['enum_value'][$j][$k]); $e++){
-									if($this->qlayerset[$i]['attributes']['enum_value'][$j][$k][$e] == $this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]){
-										$output = $this->qlayerset[$i]['attributes']['enum_output'][$j][$k][$e];
+							if(is_array($attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
+								for($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++){
+									if($attributes['enum_value'][$j][$k][$e] == $dataset[$attributes['name'][$j]]){
+										$output = $attributes['enum_output'][$j][$k][$e];
 										break;
 									}
 								}
 							}
 							else{
-								for($e = 0; $e < count($this->qlayerset[$i]['attributes']['enum_value'][$j]); $e++){
-									if($this->qlayerset[$i]['attributes']['enum_value'][$j][$e] == $this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]){
-										$output = $this->qlayerset[$i]['attributes']['enum_output'][$j][$e];
+								for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
+									if($attributes['enum_value'][$j][$e] == $dataset[$attributes['name'][$j]]){
+										$output = $attributes['enum_output'][$j][$e];
 										break;
 									}
 								}
@@ -32,39 +38,60 @@
 						}break;
 						
 						case 'Dokument' : {
-							if ($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]!='') {
-								if($this->qlayerset[$i]['attributes']['options'][$j] != ''){		# bei Layern die auf andere Server zugreifen, wird die URL des anderen Servers verwendet
-									$url = $this->qlayerset[$i]['attributes']['options'][$j];
+							if ($dataset[$attributes['name'][$j]]!='') {							
+								$dokumentpfad = $dataset[$attributes['name'][$j]];
+								$pfadteil = explode('&original_name=', $dokumentpfad);
+								$dateiname = $pfadteil[0];
+								$original_name = $pfadteil[1];
+								$dateinamensteil=explode('.', $dateiname);
+								$type = $dateinamensteil[1];
+								$thumbname = $this->get_dokument_vorschau($dateinamensteil);
+								$this->allowed_documents[] = addslashes($dateiname);
+								$this->allowed_documents[] = addslashes($thumbname);
+								if($attributes['options'][$j] != '' AND strtolower(substr($attributes['options'][$j], 0, 6)) != 'select'){		# bei Layern die auf andere Server zugreifen, wird die URL des anderen Servers verwendet
+									$url = $attributes['options'][$j].session_id().'.php?dokument=';
 								}
 								else{
-									$url = URL.APPLVERSION.'index.php?go=sendeDokument&dokument='; 
-								}
-								$type = strtolower(array_pop(explode('.', $this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]])));
-								$original_name = array_pop(explode('original_name=', $this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]));
-  							if($type == 'jpg' OR $type == 'png' OR $type == 'gif' ){									
-									echo '<tr><td><a href="'.$url.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]].'"><img style="border:1px solid black" src="'.$url.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]].'&go_plus=mit_vorschau"></a></td></tr>';									
+									$url = IMAGEURL.session_id().'.php?dokument=';
+								}											
+								$datapart .= '<table border="0"><tr><td>';								
+								if($type == 'jpg' OR $type == 'png' OR $type == 'gif' ){									
+									echo '<tr><td><a href="'.$url.$dokumentpfad.'"><img class="preview_image" src="'.$url.$thumbname.'"></a></td></tr>';									
   							}else{
-  								echo '<tr><td><a href="'.$url.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]].'"><img style="border:none" src="'.$url.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]].'&go_plus=mit_vorschau"></a></td></tr>';
+  								echo '<tr><td><a href="'.$url.$dokumentpfad.'"><img src="'.$url.$thumbname.'"></a></td></tr>';
+  							}
+								$datapart .= '</td><td width="100%">';
+								if($attributes['privileg'][$j] != '0' AND !$lock[$k]){
+									$datapart .= '<a href="javascript:delete_document(\''.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'\');"><span>Dokument <br>löschen</span></a>';
+								}
+								$datapart .= '</td></tr>';
+								$datapart .= '<tr><td colspan="2"><span>'.$original_name.'</span></td></tr>';
+								$datapart .= '</table>';
+								$datapart .= '<input type="hidden" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].'_alt'.';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$dataset[$attributes['name'][$j]].'">';
+  							if($type == 'jpg' OR $type == 'png' OR $type == 'gif' ){									
+									$datapart .= '<a href="'.$url.$dokumentpfad.'"><img class="preview_image" src="'.$url.$thumbname.'"></a>';									
+  							}else{
+  								$datapart .= '<a href="'.$url.$dokumentpfad.'"><img src="'.$url.$thumbname.'"></a>';
   							}
 								$output = '<table><tr><td>'.$original_name.'</td>';
-								echo '<input type="hidden" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].'_alt'.';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'" value="'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]].'"></td>';
+								echo '<input type="hidden" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].'_alt'.';'.$attributes['nullable'][$j].'" value="'.$dataset[$attributes['name'][$j]].'"></td>';
 							}
 							$output .= '<td><img border="0" title="zum Datensatz" src="'.GRAPHICSPATH.'zum_datensatz.gif"></td></tr></table>';
 						}break;
 						
 						case 'Link': {
-							$output = basename($this->qlayerset[$i]['shape'][$k][$this->formvars['preview_attribute']]);								
+							$output = basename($dataset[$this->formvars['preview_attribute']]);								
 						} break;
 						
 						default : {
-							$output = $this->qlayerset[$i]['shape'][$k][$this->formvars['preview_attribute']];						
+							$output = $dataset[$this->formvars['preview_attribute']];						
 						}
 					}
 				}
 			}
 			if($this->formvars['embedded'] == 'true'){
 				echo '<tr style="border: none">
-								<td style="height:20px"><a href="javascript:if(document.getElementById(\'subform'.$this->qlayerset[$i]['Layer_ID'].$this->formvars['count'].'_'.$k.'\').innerHTML == \'\')ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$this->qlayerset[$i]['Layer_ID'].'&value_'.$this->qlayerset[$i]['maintable'].'_oid='.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['maintable'].'_oid'].'&embedded=true&fromobject=subform'.$this->qlayerset[$i]['Layer_ID'].$this->formvars['count'].'_'.$k.'&targetobject='.$this->formvars['targetobject'].'&targetlayer_id='.$this->formvars['targetlayer_id'].'&targetattribute='.$this->formvars['targetattribute'].'&data='.$this->formvars['data'].'\', new Array(document.getElementById(\'subform'.$this->qlayerset[$i]['Layer_ID'].$this->formvars['count'].'_'.$k.'\')), \'\');clearsubforms();">'.$output.'</a><div id="subform'.$this->qlayerset[$i]['Layer_ID'].$this->formvars['count'].'_'.$k.'"></div></td>
+								<td style="height:20px"><a href="javascript:if(document.getElementById(\'subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\').innerHTML == \'\')ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$layer['Layer_ID'].'&value_'.$layer['maintable'].'_oid='.$dataset[$layer['maintable'].'_oid'].'&embedded=true&fromobject=subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'&targetobject='.$this->formvars['targetobject'].'&targetlayer_id='.$this->formvars['targetlayer_id'].'&targetattribute='.$this->formvars['targetattribute'].'&data='.$this->formvars['data'].'\', new Array(document.getElementById(\'subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\')), \'\');clearsubforms();">'.$output.'</a><div id="subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'"></div></td>
 							</tr>
 ';
 			}
@@ -74,7 +101,7 @@
 								if($this->formvars['no_new_window'] != true){
 									echo 	' target="_blank"';
 								}
-				echo ' href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$this->qlayerset[$i]['Layer_ID'].'&value_'.$this->qlayerset[$i]['maintable'].'_oid='.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['maintable'].'_oid'].'\')">'.$output.'</a></td>
+				echo ' href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$layer['Layer_ID'].'&value_'.$layer['maintable'].'_oid='.$dataset[$layer['maintable'].'_oid'].'\')">'.$output.'</a></td>
 							</tr>';
 			}
 						

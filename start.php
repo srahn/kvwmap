@@ -1,11 +1,8 @@
 <?php
 # Objekt für graphische Benutzeroberfläche erzeugen
-if(in_array($_REQUEST['go'], $fast_loading_cases)){
-	$GUI=new GUI_core();
-}
-else{
-	$GUI=new GUI("map.php", "main.css", "html");
-}
+$GUI=new GUI("map.php", "main.css", "html");
+
+$GUI->allowed_documents = array();
 
 # Übergabe aller Formularvariablen an die Benutzeroberfläche an formvars
 # Dabei wird unterschieden zwischen Aufrufen über das Internet oder von der Komandozeile aus
@@ -27,10 +24,8 @@ else {
   	if(is_string($value))$_REQUEST[$key] = addslashes($value);
   }
   $GUI->formvars=$_REQUEST;
-}
-####################################
-# Übergeben der Datenbank an die GUI
-$GUI->database=$GISdb;
+}		
+											
 
 #################################################################################
 # Setzen der Konstante, ob in die Datenbank geschrieben werden soll oder nicht.
@@ -44,6 +39,15 @@ else {
 if (!DBWRITE) { echo '<br>Das Schreiben in die Datenbank wird unterdrückt!'; }
 
 # Öffnen der Datenbankverbindung zur Kartenverwaltung (MySQL)
+# Erzeugen des MYSQL-DB-Objekts, falls es noch nicht durch den Login erzeugt wurde
+if($userDb == NULL){
+	$userDb = new database();
+	$userDb->host = MYSQL_HOST;
+	$userDb->user = MYSQL_USER;																			
+	$userDb->passwd = MYSQL_PASSWORD;															
+	$userDb->dbName = MYSQL_DBNAME;
+}
+$GUI->database = $userDb;
 if (!$GUI->database->open()) {
   # Prüfen ob eine neue Datenbank angelegt werden soll
   if ($GUI->formvars['go']=='install-mysql-db') {
@@ -113,12 +117,7 @@ $login_name = $_SESSION['login_name'];
 
 
 # User Daten lesen
-if(in_array($_REQUEST['go'], $fast_loading_cases)){
-	$GUI->user=new user_core($login_name,0,$GUI->database);
-}
-else{
-	$GUI->user=new user($login_name,0,$GUI->database);
-}
+$GUI->user=new user($login_name,0,$GUI->database);
 if(BEARBEITER == 'true'){
 	define('BEARBEITER_NAME', 'Bearbeiter: '.$GUI->user->Name);
 }
@@ -194,12 +193,7 @@ else {
 }
 
 # Erzeugen eines Stellenobjektes
-if(in_array($_REQUEST['go'], $fast_loading_cases)){
-	$GUI->Stelle=new stelle_core($Stelle_ID,$userDb);
-}
-else{
-	$GUI->Stelle=new stelle($Stelle_ID,$userDb);
-}
+$GUI->Stelle=new stelle($Stelle_ID,$GUI->database);
 
 # Prüfung ob Client-IP-Adressen nach Vorgabe aus der Configurationsdatei überhaupt geprüft werden sollen
 if (CHECK_CLIENT_IP) {
@@ -215,7 +209,7 @@ if (CHECK_CLIENT_IP) {
 	  	# bzw. ist nicht innerhalb eines angegebenen Subnetzes
 	    # Nutzer ist nicht berechtigt in die gewünschte Stelle zu wechseln
 	    $Stelle_ID=$alteStelle;
-      $GUI->Stelle=new stelle($Stelle_ID,$userDb);
+      $GUI->Stelle=new stelle($Stelle_ID,$GUI->database);
 	    $GUI->Fehlermeldung='Sie haben keine Berechtigung von dem Rechner mit der IP: '.getenv('REMOTE_ADDR'). ' auf die Stelle zuzugreifen.';
 	    if($GUI->formvars['go'] == 'OWS'){
 	      $GUI->formvars['go_plus'] = 'Exception';
@@ -228,7 +222,7 @@ if (CHECK_CLIENT_IP) {
 } # End of IP-Adressenprüfung verfügbar
 
 # Püfung ob das Alter der Passwörter in der Stelle geprüft werden müssen
-if ($GUI->Stelle->checkPasswordAge==true) {
+if ($GUI->Stelle->checkPasswordAge==true){
 	# Das Alter des Passwortes des Nutzers muß geprüft werden
 	$remainingDays=checkPasswordAge($GUI->user->password_setting_time,$GUI->Stelle->allowedPasswordAge);
 	#echo 'Verbleibende Tage '.$remainingDays;
@@ -255,44 +249,6 @@ $GUI->user->setRolle($Stelle_ID);
 # Rollenbezogene Stellendaten zuweisen
 $GUI->loadMultiLingualText($GUI->user->rolle->language);
 
-##############################################################################
-# Übergeben der Datenbank für die raumbezogenen Daten (PostgreSQL mit PostGIS)
-if ($pgdbname=='') {
-  # pgdbname ist leer, die Informationen zur Verbindung mit der PostGIS Datenbank
-  # mit Geometriedaten werden aus der Tabelle stelle
-  # der kvwmap-Datenbank $GUI->database gelesen
-	if(in_array($_REQUEST['go'], $fast_loading_cases)){
-  	$PostGISdb=new pgdatabase_core();
-  }
-  else{
-  	$PostGISdb=new pgdatabase();
-  }
-  $PostGISdb->host = $GUI->Stelle->pgdbhost;
-  $PostGISdb->dbName = $GUI->Stelle->pgdbname;
-  $PostGISdb->user = $GUI->Stelle->pgdbuser;
-  $PostGISdb->passwd = $GUI->Stelle->pgdbpasswd;
-  $PostGISdb->port = $GUI->Stelle->port;  
-}
-if ($PostGISdb->dbName!='') {
-  # Übergeben der GIS-Datenbank für GIS-Daten an die GUI
-  $GUI->pgdatabase=$PostGISdb;
-  # Übergeben der GIS-Datenbank für die Bauaktendaten an die GUI
-  $GUI->baudatabase=$PostGISdb;
-  
-  if (!$GUI->pgdatabase->open()) {
-    echo 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden:';
-    echo '<br>Host: '.$GUI->pgdatabase->host;
-    echo '<br>User: '.$GUI->pgdatabase->user;
-   # echo '<br>Passwd: '.$GUI->database->passwd;
-    echo '<br>Datenbankname: '.$GUI->pgdatabase->dbName;
-    exit;
-  }
-  else {
-    $debug->write("Verbindung zur PostGIS Datenbank erfolgreich hergestellt.",4);
-    $GUI->pgdatabase->setClientEncoding();
-  }
-}
-
 # Ausgabe der Zugriffsinformationen in debug-Datei
 $debug->write('User: '.$GUI->user->login_name,4);
 $debug->write('Name: '.$GUI->user->Name.' '.$GUI->user->Vorname,4);
@@ -300,31 +256,73 @@ $debug->write('Stelle_ID: '.$GUI->Stelle->id,4);
 $debug->write('Stellenbezeichnung: '.$GUI->Stelle->Bezeichnung,4);
 $debug->write('Host_ID: '.getenv("REMOTE_ADDR"),4); 
 
-# Umrechnen der für die Stelle eingetragenen Koordinaten in das aktuelle System der Rolle
-# wenn die EPSG-Codes voneinander abweichen
-if ($GUI->Stelle->epsg_code != $GUI->user->rolle->epsg_code){
-	$epsg_codes = $GUI->pgdatabase->read_epsg_codes(false);	
-	$user_epsg = $epsg_codes[$GUI->user->rolle->epsg_code];
-	if($user_epsg['minx'] != ''){							// Koordinatensystem ist räumlich eingegrenzt
-		if($GUI->Stelle->epsg_code != 4326){
-			$projFROM = ms_newprojectionobj("init=epsg:".$GUI->Stelle->epsg_code);
-			$projTO = ms_newprojectionobj("init=epsg:4326");
-			$GUI->Stelle->MaxGeorefExt->project($projFROM, $projTO);			// max. Stellenextent wird in 4326 transformiert
-		}
-		// Vergleich der Extents und ggfs. Anpassung
-		if($user_epsg['minx'] > $GUI->Stelle->MaxGeorefExt->minx)$GUI->Stelle->MaxGeorefExt->minx = $user_epsg['minx'];
-		if($user_epsg['miny'] > $GUI->Stelle->MaxGeorefExt->miny)$GUI->Stelle->MaxGeorefExt->miny = $user_epsg['miny'];
-		if($user_epsg['maxx'] < $GUI->Stelle->MaxGeorefExt->maxx)$GUI->Stelle->MaxGeorefExt->maxx = $user_epsg['maxx'];
-		if($user_epsg['maxy'] < $GUI->Stelle->MaxGeorefExt->maxy)$GUI->Stelle->MaxGeorefExt->maxy = $user_epsg['maxy'];
-		$projFROM = ms_newprojectionobj("init=epsg:4326");
-		$projTO = ms_newprojectionobj("init=epsg:".$GUI->user->rolle->epsg_code);
-		$GUI->Stelle->MaxGeorefExt->project($projFROM, $projTO);				// Transformation in das System des Nutzers
-	}
+if(!in_array($go, $non_spatial_cases)){		// für fast_cases, die keinen Raumbezug haben, den PGConnect und Trafos weglassen
+	##############################################################################
+	# Übergeben der Datenbank für die raumbezogenen Daten (PostgreSQL mit PostGIS)
+	if(POSTGRES_DBNAME != ''){																													
+		$PostGISdb=new pgdatabase();											
+		$PostGISdb->host = POSTGRES_HOST;												
+		$PostGISdb->user = POSTGRES_USER;													
+		$PostGISdb->passwd = POSTGRES_PASSWORD;										
+		$PostGISdb->dbName = POSTGRES_DBNAME;												
+	}	
 	else{
-		# Umrechnen der maximalen Kartenausdehnung der Stelle
-		$projFROM = ms_newprojectionobj("init=epsg:".$GUI->Stelle->epsg_code);
-		$projTO = ms_newprojectionobj("init=epsg:".$GUI->user->rolle->epsg_code);
-		$GUI->Stelle->MaxGeorefExt->project($projFROM, $projTO);
+		# pgdbname ist leer, die Informationen zur Verbindung mit der PostGIS Datenbank
+		# mit Geometriedaten werden aus der Tabelle stelle
+		# der kvwmap-Datenbank $GUI->database gelesen
+		$PostGISdb=new pgdatabase();
+		$PostGISdb->host = $GUI->Stelle->pgdbhost;
+		$PostGISdb->dbName = $GUI->Stelle->pgdbname;
+		$PostGISdb->user = $GUI->Stelle->pgdbuser;
+		$PostGISdb->passwd = $GUI->Stelle->pgdbpasswd;
+		$PostGISdb->port = $GUI->Stelle->port;  
+	}
+	if ($PostGISdb->dbName!='') {
+		# Übergeben der GIS-Datenbank für GIS-Daten an die GUI
+		$GUI->pgdatabase=$PostGISdb;
+		# Übergeben der GIS-Datenbank für die Bauaktendaten an die GUI
+		$GUI->baudatabase=$PostGISdb;
+		
+		if (!$GUI->pgdatabase->open()) {
+			echo 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden:';
+			echo '<br>Host: '.$GUI->pgdatabase->host;
+			echo '<br>User: '.$GUI->pgdatabase->user;
+		 # echo '<br>Passwd: '.$GUI->database->passwd;
+			echo '<br>Datenbankname: '.$GUI->pgdatabase->dbName;
+			exit;
+		}
+		else {
+			$debug->write("Verbindung zur PostGIS Datenbank erfolgreich hergestellt.",4);
+			$GUI->pgdatabase->setClientEncoding();
+		}
+	}
+
+	# Umrechnen der für die Stelle eingetragenen Koordinaten in das aktuelle System der Rolle
+	# wenn die EPSG-Codes voneinander abweichen
+	if ($GUI->Stelle->epsg_code != $GUI->user->rolle->epsg_code){
+		$epsg_codes = $GUI->pgdatabase->read_epsg_codes(false);	
+		$user_epsg = $epsg_codes[$GUI->user->rolle->epsg_code];
+		if($user_epsg['minx'] != ''){							// Koordinatensystem ist räumlich eingegrenzt
+			if($GUI->Stelle->epsg_code != 4326){
+				$projFROM = ms_newprojectionobj("init=epsg:".$GUI->Stelle->epsg_code);
+				$projTO = ms_newprojectionobj("init=epsg:4326");
+				$GUI->Stelle->MaxGeorefExt->project($projFROM, $projTO);			// max. Stellenextent wird in 4326 transformiert
+			}
+			// Vergleich der Extents und ggfs. Anpassung
+			if($user_epsg['minx'] > $GUI->Stelle->MaxGeorefExt->minx)$GUI->Stelle->MaxGeorefExt->minx = $user_epsg['minx'];
+			if($user_epsg['miny'] > $GUI->Stelle->MaxGeorefExt->miny)$GUI->Stelle->MaxGeorefExt->miny = $user_epsg['miny'];
+			if($user_epsg['maxx'] < $GUI->Stelle->MaxGeorefExt->maxx)$GUI->Stelle->MaxGeorefExt->maxx = $user_epsg['maxx'];
+			if($user_epsg['maxy'] < $GUI->Stelle->MaxGeorefExt->maxy)$GUI->Stelle->MaxGeorefExt->maxy = $user_epsg['maxy'];
+			$projFROM = ms_newprojectionobj("init=epsg:4326");
+			$projTO = ms_newprojectionobj("init=epsg:".$GUI->user->rolle->epsg_code);
+			$GUI->Stelle->MaxGeorefExt->project($projFROM, $projTO);				// Transformation in das System des Nutzers
+		}
+		else{
+			# Umrechnen der maximalen Kartenausdehnung der Stelle
+			$projFROM = ms_newprojectionobj("init=epsg:".$GUI->Stelle->epsg_code);
+			$projTO = ms_newprojectionobj("init=epsg:".$GUI->user->rolle->epsg_code);
+			$GUI->Stelle->MaxGeorefExt->project($projFROM, $projTO);
+		}
 	}
 }
 

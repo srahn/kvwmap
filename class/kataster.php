@@ -51,7 +51,7 @@
 #-> Flur #
 ##########
 
-class Flur extends Flur_core{
+class Flur {
   var $FlurID;
   var $database;
   ###################### Liste der Funktionen ####################################
@@ -75,6 +75,25 @@ class Flur extends Flur_core{
     $this->FlurID=$FlurID;
     $this->database=$database;
     $this->LayerName=LAYERNAME_FLUR;
+  }
+	
+	function getBezeichnungFromPosition($position, $epsgcode) {
+    $this->debug->write("<p>kataster.php Flur->getBezeichnungFromPosition:",4);
+    $sql ="SELECT gm.gemeindename,gm.gemeinde,g.gemkgname,g.gemkgschl,f.flur";
+    $sql.=" FROM alb_v_gemarkungen AS g,alknflur AS f,alb_v_gemeinden AS gm, alkobj_e_fla AS fla";
+    $sql.=" WHERE f.gemkgschl::integer=g.gemkgschl AND g.gemeinde=gm.gemeinde AND fla.objnr=f.objnr";
+    $sql.=" AND ST_WITHIN(st_transform(st_geomfromtext('POINT(".$position['rw']." ".$position['hw'].")',".$epsgcode."), ".EPSGCODE."),fla.the_geom)";
+    #echo $sql;
+    $ret=$this->database->execSQL($sql,4, 0);
+    if ($ret[0]!=0) {
+      $ret[1]='Fehler bei der Abfrage der Datenbank.'.$ret[1];
+    }
+    else {
+      if (pg_num_rows($ret[1])>0) {
+        $ret[1]=pg_fetch_array($ret[1]);
+      }
+    }
+    return $ret;
   }
 
   function getFlurListe($GemkgID,$FlurID, $historical = false) {

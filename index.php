@@ -29,38 +29,97 @@ session_start();
 # Kontakt:                                                        #
 # Peter Korduan peter.korduan@uni-rostock.de                      #
 ###################################################################
-ob_start ();    // Ausgabepufferung starten
 
-$fast_loading_cases = array('navMap_ajax', 'changemenue_with_ajax', 'get_group_legend');
+// function microtime_float1(){
+   // list($usec, $sec) = explode(" ", microtime());
+   // return ((float)$usec + (float)$sec);
+// }
+// $starttime=microtime_float1();
+
+ob_start ();    // Ausgabepufferung starten
+$go = $_REQUEST['go'];
+if($_REQUEST['go_plus'] != '')$go = $go.'_'.$_REQUEST['go_plus'];
+
+#####################################
+define(CASE_COMPRESS, false);				#
+#####################################
+
+$non_spatial_cases = array('changemenue_with_ajax', 'get_group_legend');		// für non-spatial cases wird in start.php keine Verbindung zur PostgreSQL aufgebaut usw.
+$spatial_cases = array('navMap_ajax', 'tooltip_query');
+$fast_loading_cases = array_merge($spatial_cases, $non_spatial_cases);
+
+if(in_array($go, $fast_loading_cases))define(FAST_CASE, true);else define(FAST_CASE, false);
 
 include('config.php');
+include(CLASSPATH.'log.php');
+if(CASE_COMPRESS)	include(CLASSPATH.'case_compressor.php');
+
+if(DEBUG_LEVEL>0) $debug=new debugfile(DEBUGFILE);	# öffnen der Debug-log-datei
+# Öffnen der Log-Dateien. Derzeit werden in den Log-Dateien nur die SQL-Statements gespeichert, die über execSQL in den Klassen mysql und postgres ausgeführt werden.
+if (LOG_LEVEL>0) {
+ $log_mysql=new LogFile(LOGFILE_MYSQL,'text','Log-Datei MySQL', '#------v: '.date("Y:m:d H:i:s",time()));
+ $log_postgres=new LogFile(LOGFILE_POSTGRES,'text', 'Log-Datei-Postgres', '------v: '.date("Y:m:d H:i:s",time()));
+}
+
 if(!$_SESSION['angemeldet']){
-	header('logout: true');		// damit ajax-Requests das auch mitkriegen
+	include(CLASSPATH.'mysql.php');
+	# Erzeugen des MYSQL-DB-Objekts
+	$userDb = new database();
+	$userDb->host = MYSQL_HOST;
+	$userDb->user = MYSQL_USER;																			
+	$userDb->passwd = MYSQL_PASSWORD;															
+	$userDb->dbName = MYSQL_DBNAME;
+	header('logout: true');		// damit ajax-Requests das auch mitkriegen	
   include(LAYOUTPATH.'snippets/'.LOGIN);
 }
-include(WWWROOT.APPLVERSION.'start.php');
-#$starttime=microtime_float();
-# Übergeben des Anwendungsfalles
-$go=$GUI->formvars['go'];
-$debug->write("<br><b>Anwendungsfall go: ".$go."</b>",4);
-if ($GUI->formvars['go_plus']!='') {
-  $go = $go.'_'.$GUI->formvars['go_plus'];
-  $debug->write("<br>goplus: ".$GUI->formvars['go_plus'],4);
+
+function include_($filename){
+	if(CASE_COMPRESS AND FAST_CASE){		// ein fast-case und er soll komprimiert werden
+		$filename = case_compressor::inject($filename);
+		include $filename;		
+		unlink($filename);
+	}
+	elseif(FAST_CASE){}				// nix inkludieren, denn die fast-case-Datei enthält ja schon alles
+	else include $filename;		// normaler include
 }
+
+# laden der Klassenbibliotheken
+if(!CASE_COMPRESS AND FAST_CASE){
+	include (CLASSPATH.'fast_cases/'.$go.'.php');
+}
+else{
+	include_(WWWROOT.APPLVERSION.'funktionen/allg_funktionen.php');	
+	if($userDb == NULL)include_(CLASSPATH.'mysql.php');
+	include_(CLASSPATH.'kvwmap.php');	
+	include_(CLASSPATH.'kataster.php');
+	include_(CLASSPATH.'postgresql.php');
+	if(ALKIS){																					
+		include_(CLASSPATH.'kataster_alkis.php');					
+		include_(CLASSPATH.'postgresql_alkis.php');				
+	}																										
+	else{																								
+		include_(CLASSPATH.'kataster_alk.php');						
+		include_(CLASSPATH.'postgresql_alk.php');					
+	}																										
+	include_(CLASSPATH.'users.php');
+	include_(CLASSPATH.'bauleitplanung.php');           
+}																						
+
+include(WWWROOT.APPLVERSION.'start.php');
+
+# Übergeben des Anwendungsfalles
+$debug->write("<br><b>Anwendungsfall go: ".$go."</b>",4);
 $GUI->go=$go;
 $GUI->requeststring = $QUERY_STRING;
 
-$GUI->loadPlugins();
-if($GUI->goNotExecutedInPlugins){
+if(!FAST_CASE)$GUI->loadPlugins();
+if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	if($go == 'get_last_query'){
 		$GUI->last_query = $GUI->user->rolle->get_last_query();
 		$GUI->formvars['keinzurueck'] = true;
 		$go = $GUI->last_query['go'];
 	}
-	
-	$executiontimes['time'][] = microtime_float();
-	$executiontimes['action'][] = 'switch';
-	
+		
 	switch($go){
 		case 'navMap_ajax' : {   
       $GUI->formvars['nurAufgeklappteLayer'] = true;		
@@ -73,6 +132,44 @@ if($GUI->goNotExecutedInPlugins){
       $GUI->mime_type='map_ajax';
       $GUI->output();
 		}break;
+		
+		case 'sendeDokument' : {
+			$GUI->sendeDokument($GUI->formvars['dokument'], $GUI->formvars['original_name']);
+	  } break;
+
+	  case 'sendeDokument_mit_vorschau' : {
+			$GUI->sendeDokument_mit_vorschau($GUI->formvars['dokument'], $GUI->formvars['original_name']);    
+	  } break;
+		
+		case 'changemenue' : {
+			$GUI->changemenue($GUI->formvars['id'], $GUI->formvars['status']);
+			$GUI->loadMap('DataBase');
+			$GUI->drawMap();
+			$GUI->output();
+	  } break;
+
+	  case 'changemenue_with_ajax' : {
+			$GUI->changemenue_with_ajax($GUI->formvars['id'], $GUI->formvars['status']);
+	  } break;
+
+	  case 'getMenueWithAjax' : {
+			$GUI->getMenueWithAjax();
+	  } break;
+
+	  case 'hideMenueWithAjax' : {
+			$GUI->hideMenueWithAjax();
+	  } break;
+	
+		# Legende für eine Gruppe erzeugen
+	  case 'get_group_legend' : {
+			$GUI->get_group_legend();
+	  } break;
+		
+		# Legende erzeugen
+	  case 'get_legend' : {
+			$GUI->loadMap('DataBase');
+			echo $GUI->create_dynamic_legend();
+	  } break;
 	
 		case 'autocomplete_request' :{
 			$GUI->autocomplete_request();
@@ -268,17 +365,6 @@ if($GUI->goNotExecutedInPlugins){
 		$GUI->getlayerfromgroup();
 	  } break;
 
-	  # Legende für eine Gruppe erzeugen
-	  case 'get_group_legend' : {
-			$GUI->get_group_legend();
-	  } break;
-		
-		# Legende erzeugen
-	  case 'get_legend' : {
-			$GUI->loadMap('DataBase');
-			echo $GUI->create_dynamic_legend();
-	  } break;
-
 	  # GPS-Position auslesen
 	  case 'get_gps_position' : {
 		$GUI->get_gps_position();
@@ -324,6 +410,11 @@ if($GUI->goNotExecutedInPlugins){
 
 	  case 'logout' : {
 		session_start();
+		$_SESSION = array();
+		if(ini_get("session.use_cookies")){
+			$params = session_get_cookie_params();
+			setcookie(session_name(), '', time() - 42000, $params["path"], $params["domain"], $params["secure"], $params["httponly"]);
+		}
 		session_destroy();
 		$locationStr='index.php';
 		if (isset($newPassword)) {
@@ -585,26 +676,7 @@ if($GUI->goNotExecutedInPlugins){
 		$GUI->flurstAnzeige($explodedFlurstKennz);
 		$GUI->output();
 	  } break;
-
-	  case 'changemenue' : {
-		$GUI->changemenue($GUI->formvars['id'], $GUI->formvars['status']);
-		$GUI->loadMap('DataBase');
-		$GUI->drawMap();
-		$GUI->output();
-	  } break;
-
-	  case 'changemenue_with_ajax' : {
-		$GUI->changemenue_with_ajax($GUI->formvars['id'], $GUI->formvars['status']);
-	  } break;
-
-	  case 'getMenueWithAjax' : {
-		$GUI->getMenueWithAjax();
-	  } break;
-
-	  case 'hideMenueWithAjax' : {
-		$GUI->hideMenueWithAjax();
-	  } break;
-	  
+  
 	  case 'changeLegendDisplay' : {
 		$GUI->changeLegendDisplay();
 	  } break;
@@ -1221,14 +1293,6 @@ if($GUI->goNotExecutedInPlugins){
 		$GUI->FunktionAendern();
 	  } break;
 		
-		case 'sendeDokument' : {
-			$GUI->sendeDokument($GUI->formvars['dokument'], $GUI->formvars['original_name']);
-	  } break;
-
-	  case 'sendeDokument_mit_vorschau' : {
-			$GUI->sendeDokument_mit_vorschau($GUI->formvars['dokument'], $GUI->formvars['original_name']);    
-	  } break;
-
 	  case 'help' : {
 		include(WWWROOT.APPLVERSION.'help/hilfe.php');
 	  } break;
@@ -1370,7 +1434,7 @@ if($GUI->goNotExecutedInPlugins){
 	  } break;
 		
 	  case "Hausnummernkorrektur" : {
-			include (CLASSPATH.'alb.php');
+			include_(CLASSPATH.'alb.php');
 			$ALB=new ALB($GUI->database);
 			$ALB->HausNrTextKorrektur();
 			$Adresse=new adresse('','','',$GUI->database);
@@ -1440,11 +1504,12 @@ if($GUI->goNotExecutedInPlugins){
 }
 include('end.php');
 
-#$executiontimes['time'][] = microtime_float();
-#$executiontimes['action'][] = 'Ende';
+if(CASE_COMPRESS AND FAST_CASE)case_compressor::write_fast_case_file($go);
 
-#for($i = 0;  $i < count($executiontimes['time']); $i++){
-#	$dauer = $executiontimes['time'][$i] - $starttime;
-#	echo chr(10).chr(13).'<br>'.$executiontimes['action'][$i].': '.$dauer.'s';
-#}
+// $executiontimes['time'][] = microtime_float1();
+// $executiontimes['action'][] = 'Ende';
+// for($i = 0;  $i < count($executiontimes['time']); $i++){
+	// $dauer = $executiontimes['time'][$i] - $starttime;
+	// echo chr(10).chr(13).'<br>'.$executiontimes['action'][$i].': '.$dauer.'s';
+// }
 ?>

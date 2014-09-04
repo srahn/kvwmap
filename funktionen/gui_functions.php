@@ -220,8 +220,12 @@ function getlegend(groupid, layerid, fremde){
 function updateThema(event, thema, query, groupradiolayers, queryradiolayers){
 	var status = query.checked;
   if(status == true){
-    thema.checked = true;
+    thema.checked = true;		
+		query.title="Dieses Thema abfragbar schalten";
   }
+	else{
+		query.title="Die Abfrage dieses Themas ausschalten";		
+	}
   if(groupradiolayers != '' && groupradiolayers.value != ''){
     preventDefault(event);
 		groupradiolayerstring = groupradiolayers.value+'';			// die Radiolayer innerhalb einer Gruppe
@@ -267,7 +271,11 @@ function updateQuery(event, thema, query, radiolayers){
   if(query){
     if(thema.checked == false){
       query.checked = false;
+			thema.title="Dieses Thema sichtbar schalten";
     }
+		else{
+			thema.title="Dieses Thema ausschalten";			
+		}
   }
   if(radiolayers != '' && radiolayers.value != ''){  
   	preventDefault(event);

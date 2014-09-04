@@ -71,7 +71,7 @@ if($this->user->rolle->querymode == 1){
 						<div id="dragdiv" align="right" onmousedown="dragstart(document.getElementById('overlaydiv'))" style="cursor:default; background-color:<? echo BG_DEFAULT; ?>; border: 1px solid #cccccc;height:20px;position:relative;">
 							<a href="javascript:deactivate_overlay();" title="Schlie&szlig;en"><img style="border:none" src="<? echo GRAPHICSPATH."exit.png"; ?>"></img></a>
 						</div>
-						<div id="contentdiv" style="background: url(<? echo GRAPHICSPATH; ?>bg.gif);border: 1px solid #cccccc;height:100%;max-height:<? echo $this->user->rolle->nImageHeight+30; ?>px;position:relative;overflow-y: scroll;overflow-x: auto;">
+						<div id="contentdiv" style="background: url(<? echo GRAPHICSPATH; ?>bg.gif);border: 1px solid #cccccc;max-width:1400px;height:100%;max-height:<? echo $this->user->rolle->nImageHeight+30; ?>px;position:relative;overflow-y: scroll;overflow-x: auto;">
 						<? if($this->overlaymain != '')include(LAYOUTPATH.'snippets/overlay.php'); ?>
 						</div>
 					</div>

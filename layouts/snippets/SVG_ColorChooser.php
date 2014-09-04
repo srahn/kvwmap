@@ -229,7 +229,7 @@ function setSquare(deg) {
 
 ]]></script>
 	  <rect style="fill:#ffffff" id="greyback" width="100%" height="100%" visibility="visible"/>
-		<image xlink:href="'.IMAGEURL.basename(copy_file_to_tmp(GRAPHICSPATH."hsvwheel.png")).'" height="100%" width="100%" y="0" x="0"/>
+		<image xlink:href="'.URL.APPLVERSION.GRAPHICSPATH.'hsvwheel.png" height="100%" width="100%" y="0" x="0"/>
 	  <rect id="wheel" cursor="crosshair" onmousedown="mousedown(evt)" onmousemove="mouseMoved(evt);" width="100%" height="100%" opacity="0" visibility="visible"/>
 	</svg>
 ';

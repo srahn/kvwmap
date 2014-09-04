@@ -660,7 +660,7 @@ class account {
 
 #########################
 # class_user #
-class user extends user_core{
+class user {
 	# todo
 	# Beim Anlegen eines neuen Benutzers müssen die Einstellungen für die Karte
 	# aus der Stellenbeschreibung als Anfangswerte übernommen werden
@@ -678,14 +678,7 @@ class user extends user_core{
 	var $database;
 	var $remote_addr;
 
-	## functions
-	# getFunktion($id)
-	# readUserDaten($id,$login_name)
-	# setStelle($stelle_id,$nZoomFactor,$mapsize)
-	# StelleWechseln($stelle_id)
-	# StellenZugriff($stelle_id)
-	# user($login_name,$database) - konstruktor
-
+	
 	function user($login_name,$id,$database) {
 		global $debug;
 		$this->debug=$debug;
@@ -700,7 +693,58 @@ class user extends user_core{
 			$this->readUserDaten($id,0);
 		}
 	}
+	
+	function clientIpIsValide($remote_addr) {
+    # Prüfen ob die übergebene IP Adresse zu den für den Nutzer eingetragenen Adressen passt
+    $ips=explode(';',$this->ips);
+    foreach ($ips AS $ip) {
+      if (trim($ip)!='') {
+        $ip=trim($ip);
+        if (in_subnet($remote_addr,$ip)) {
+          $this->debug->write('<br>IP:'.$remote_addr.' paßt zu '.$ip,4);
+          #echo '<br>IP:'.$remote_addr.' paßt zu '.$ip;
+          return 1;
+        }
+      }
+    }
+    return 0;
+  }
 
+  function readUserDaten($id,$login_name) {
+    $sql ='SELECT * FROM user WHERE 1=1';
+    if ($id>0) {
+      $sql.=' AND ID='.$id;
+    }
+    if ($login_name!='') {
+      $sql.=' AND login_name LIKE "'.$login_name.'"';
+    }
+    $this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>".$sql,4);
+    $query=mysql_query($sql,$this->database->dbConn);
+    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    $rs=mysql_fetch_array($query);
+    $this->id=$rs['ID'];
+    $this->login_name=$rs['login_name'];
+    $this->Namenszusatz=$rs['Namenszusatz'];
+    $this->Name=$rs['Name'];
+    $this->Vorname=$rs['Vorname'];
+    $this->stelle_id=$rs['stelle_id'];
+    $this->phon=$rs['phon'];
+    $this->email=$rs['email'];
+    if (CHECK_CLIENT_IP) {
+      $this->ips=$rs['ips'];
+    }
+    $this->password_setting_time=$rs['password_setting_time'];
+  }
+  
+  function getLastStelle() {
+    $sql = 'SELECT stelle_id FROM user WHERE ID='.$this->id;
+    $this->debug->write("<p>file:users.php class:user->getLastStelle - Abfragen der zuletzt genutzten Stelle:<br>".$sql,4);
+    $query=mysql_query($sql,$this->database->dbConn);
+    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    $rs=mysql_fetch_array($query);
+    return $rs['stelle_id'];
+  }
+  
 	function setSize($mapsize) {
 		$this->rolle->setSize($mapsize);
 		return 1;
@@ -1144,25 +1188,12 @@ class user extends user_core{
 
 ###################################
 # class_rolle #
-class rolle extends rolle_core{
+class rolle {
 	var $user_id;
 	var $stelle_id;
 	var $debug;
 	var $database;
 	var $loglevel;
-
-	##functionliste
-	# getLayer()
-	# getMapComments($consumetime)
-	# getSelectedButton()
-	# insertMapComment($consumetime,$comment)
-	# readSettings()
-	# rolle($user_id,$stelle_id) konstruktor
-	# setAktivLayer($formvars)
-	# setConsumeActivity($time,$activity,$prevtime)
-	# setSelectedButton($selectedButton)
-	# updateNextConsumeTime($time_id,$prevtime)
-	# updatePrevConsumeTime($time_id,$prevtime)
 
 	function rolle($user_id,$stelle_id,$database) {
 		global $debug;
@@ -1175,6 +1206,445 @@ class rolle extends rolle_core{
 		$this->loglevel = 0;
 	}
 
+	function setGroupStatus($formvars) {
+		$this->groupset=$this->getGroups('');
+		# Eintragen des group_status=1 für Gruppen, die angezeigt werden sollen
+		for ($i=0;$i<count($this->groupset);$i++) {
+			if($formvars['group_'.$this->groupset[$i]['id']] !== NULL){
+				if ($formvars['group_'.$this->groupset[$i]['id']] == 1) {
+					$group_status=1;
+				}
+				else {
+					$group_status=0;
+				}
+				$sql ='UPDATE u_groups2rolle set status="'.$group_status.'"';
+				$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+				$sql.=' AND id='.$this->groupset[$i]['id'];
+				$this->debug->write("<p>file:users.php class:rolle->setGroupStatus - Speichern des Status der Gruppen zur Rolle:",4);
+				$this->database->execSQL($sql,4, $this->loglevel);
+			}
+		}
+		return $formvars;
+	}
+
+  function setSelectedButton($selectedButton) {
+    $this->selectedButton=$selectedButton;
+    # Eintragen des aktiven Button
+    $sql ='UPDATE rolle SET selectedButton="'.$selectedButton.'"';
+    $sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+    $this->debug->write("<p>file:users.php class:rolle->setSelectedButton - Speichern des zuletzt gewählten Buttons aus dem Kartenfensters:",4);
+    $this->database->execSQL($sql,4, $this->loglevel);
+    return 1;
+  }
+
+  function getSelectedButton() {
+    # Eintragen des aktiven Button
+    $sql ='SELECT selectedButton FROM rolle';
+    $sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+    $this->debug->write("<p>file:users.php class:rolle->getSelectedButton - Abfragen des zuletzt gewählten Buttons aus dem Kartenfensters:<br>".$sql,4);
+    $query=mysql_query($sql,$this->database->dbConn);
+    if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+    $rs=mysql_fetch_array($query);
+    $this->selectedButton=$rs['selectedButton'];
+    return $this->selectedButton;
+  }
+
+  function getLayer($LayerName) {
+    # Abfragen der Layer in der Rolle
+		$sql ='SELECT ';
+		if(LANGUAGE != 'german') {
+			$sql.='CASE WHEN `Name_'.LANGUAGE.'` != "" THEN `Name_'.LANGUAGE.'` ELSE `Name` END AS ';
+		}
+		$sql.='Name, l.Layer_ID, alias, Datentyp, Gruppe, pfad, maintable, Data, `schema`, document_path, connection, printconnection, connectiontype, epsg_code, ows_srs, wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, ul.* FROM layer AS l, used_layer AS ul';
+    $sql.=' WHERE l.Layer_ID=ul.Layer_ID AND Stelle_ID='.$this->stelle_id;
+    if ($LayerName!='') {
+      $sql.=' AND (l.Name LIKE "'.$LayerName.'" ';
+      if(is_numeric($LayerName)){
+        $sql.='OR l.Layer_ID = "'.$LayerName.'")';
+      }
+      else{
+        $sql.=')';
+      }
+    }
+    #echo $sql.'<br>';
+    $this->debug->write("<p>file:users.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
+    $query=mysql_query($sql,$this->database->dbConn);
+    if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+    while ($rs=mysql_fetch_array($query)) {
+      $layer[]=$rs;
+    }
+    return $layer;
+  }
+	
+
+  # 2006-02-11 pk
+  function getAktivLayer($aktivStatus,$queryStatus,$logconsume) {
+    # Abfragen der zu loggenden Layer der Rolle
+    $sql ='SELECT r2ul.layer_id FROM u_rolle2used_layer AS r2ul';
+    if ($logconsume) {
+      $sql.=',used_layer AS ul,layer AS l,stelle AS s';
+    }
+    $sql.=' WHERE r2ul.user_id='.$this->user_id.' AND r2ul.stelle_id='.$this->stelle_id;
+    if ($logconsume) {
+      $sql.=' AND r2ul.layer_id=ul.Layer_ID AND r2ul.stelle_id=ul.Stelle_ID';
+      $sql.=' AND ul.Layer_ID=l.Layer_ID AND ul.Stelle_ID=s.ID';
+      $sql.=' AND (s.logconsume="1"';
+      $sql.=' OR l.logconsume="1"';
+      $sql.=' OR ul.logconsume="1"';
+      $sql.=' OR r2ul.logconsume="1")';
+    }
+    $anzaktivStatus=count($aktivStatus);
+    if ($anzaktivStatus>0) {
+      $sql.=' AND r2ul.aktivStatus IN ("'.$aktivStatus[0].'"';
+      for ($i=1;$i<$anzaktivStatus;$i++) {
+        $sql.=',"'.$aktivStatus[$i].'"';
+      }
+      $sql.=')';
+    }
+    $anzqueryStatus=count($queryStatus);
+    if ($anzqueryStatus>0) {
+      $sql.=' AND r2ul.queryStatus IN ("'.$queryStatus[0].'"';
+      for ($i=1;$i<$anzqueryStatus;$i++) {
+        $sql.=',"'.$queryStatus[$i].'"';
+      }
+      $sql.=')';
+    }
+    #echo $sql;
+    $this->debug->write("<p>file:users.php class:rolle->getAktivLayer - Abfragen der aktiven Layer zur Rolle:<br>".$sql,4);
+    $queryret=$this->database->execSQL($sql,4, 0);
+    if ($queryret[0]) {
+      # Fehler bei Datenbankanfrage
+      $ret[0]=1;
+      $ret[1]='<br>Die aktiven Layer konnten nicht abgefragt werden.<br>'.$ret[1];
+    }
+    else {
+      while ($rs=mysql_fetch_array($queryret[1])) {
+        $layer[]=$rs['layer_id'];
+      }
+      $ret[0]=0;
+      $ret[1]=$layer;
+    }
+    return $ret;
+  }
+
+  function getGroups($GroupName) {
+    # Abfragen der Gruppen in der Rolle
+    $sql ='SELECT g2r.*, ';
+		if(LANGUAGE != 'german') {
+			$sql.='CASE WHEN `Gruppenname_'.LANGUAGE.'` != "" THEN `Gruppenname_'.LANGUAGE.'` ELSE `Gruppenname` END AS ';
+		}
+		$sql.='Gruppenname FROM u_groups AS g, u_groups2rolle AS g2r ';
+    $sql.=' WHERE g2r.stelle_ID='.$this->stelle_id.' AND g2r.user_id='.$this->user_id;
+    $sql.=' AND g2r.id = g.id';
+    if ($GroupName!='') {
+      $sql.=' AND Gruppenname LIKE "'.$GroupName.'"';
+    }
+    $this->debug->write("<p>file:users.php class:rolle->getGroups - Abfragen der Gruppen zur Rolle:<br>".$sql,4);
+    $query=mysql_query($sql,$this->database->dbConn);
+    if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+    while ($rs=mysql_fetch_array($query)) {
+      $groups[]=$rs;
+    }
+    return $groups;
+  }
+
+	/*
+	 * Sichert den gegebenen Kartenausschnittes für die Rolle
+	 */
+  function saveSettings($extent) {
+    $sql ='UPDATE rolle SET minx='.$extent->minx.',miny='.$extent->miny;
+    $sql.=',maxx='.$extent->maxx.',maxy='.$extent->maxy;
+    $sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+    # echo $sql;
+    $this->debug->write("<p>file:users.php class:rolle function:saveSettings - Speichern der Einstellungen zur Rolle:",4);
+    $this->database->execSQL($sql,4, $this->loglevel);
+    return 1;
+  }
+  
+	function saveDrawmode($always_draw){
+		if($always_draw == '')$always_draw = 'false';
+    $sql ='UPDATE rolle SET always_draw = '.$always_draw;
+    $sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+    #echo $sql;
+    $this->debug->write("<p>file:users.php class:rolle function:saveDrawmode - Speichern der Einstellungen zur Rolle:",4);
+    $this->database->execSQL($sql,4, $this->loglevel);
+    return 1;
+  }
+
+  function readSettings() {
+    # Abfragen und Zuweisen der Einstellungen der Rolle
+    $sql ='SELECT * FROM rolle WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+    #echo $sql;
+    $this->debug->write("<p>file:users.php class:rolle function:readSettings - Abfragen der Einstellungen der Rolle:<br>".$sql,4);
+    $query=mysql_query($sql,$this->database->dbConn);
+    if ($query==0) {
+      $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4);
+      return 0;
+    }
+    $rs=mysql_fetch_array($query);
+    $this->oGeorefExt=ms_newRectObj();
+    $this->oGeorefExt->setextent($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
+    $this->nImageWidth=$rs['nImageWidth'];
+    $this->nImageHeight=$rs['nImageHeight'];
+    $this->mapsize=$this->nImageWidth.'x'.$this->nImageHeight;
+    @$this->pixwidth=($rs['maxx']-$rs['minx'])/$rs['nImageWidth'];
+    @$this->pixheight=($rs['maxy']-$rs['miny'])/$rs['nImageHeight'];
+    $this->pixsize=($this->pixwidth+$this->pixheight)/2;
+    $this->nZoomFactor=$rs['nZoomFactor'];
+    $this->epsg_code=$rs['epsg_code'];
+    $this->epsg_code2=$rs['epsg_code2'];
+    $this->coordtype=$rs['coordtype'];
+    $this->last_time_id=$rs['last_time_id'];
+    $this->gui=$rs['gui'];
+    $this->language=$rs['language'];
+		define(LANGUAGE, $this->language);
+    $this->hideMenue=$rs['hidemenue'];
+    $this->hideLegend=$rs['hidelegend'];
+    $this->fontsize_gle=$rs['fontsize_gle'];
+    $this->highlighting=$rs['highlighting'];
+    $this->scrollposition=$rs['scrollposition'];
+    $this->result_color=$rs['result_color'];
+    $this->always_draw=$rs['always_draw'];
+    $this->runningcoords=$rs['runningcoords'];
+		$this->singlequery=$rs['singlequery'];
+		$this->querymode=$rs['querymode'];
+		$this->geom_edit_first=$rs['geom_edit_first'];		
+		$this->overlayx=$rs['overlayx'];
+		$this->overlayy=$rs['overlayy'];
+		if($rs['hist_timestamp'] != ''){
+			$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');
+			define(HIST_TIMESTAMP, DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z'));
+		}
+		else define(HIST_TIMESTAMP, '');
+    $buttons = explode(',', $rs['buttons']);
+    $this->back = in_array('back', $buttons);
+    $this->forward = in_array('forward', $buttons);
+    $this->zoomin = in_array('zoomin', $buttons);
+    $this->zoomout = in_array('zoomout', $buttons);
+    $this->zoomall = in_array('zoomall', $buttons);
+    $this->recentre = in_array('recentre', $buttons);
+    $this->jumpto = in_array('jumpto', $buttons);
+    $this->query = in_array('query', $buttons);
+    $this->queryradius = in_array('queryradius', $buttons);
+    $this->polyquery = in_array('polyquery', $buttons);
+    $this->touchquery = in_array('touchquery', $buttons);
+    $this->measure = in_array('measure', $buttons);
+    $this->freepolygon = in_array('freepolygon', $buttons);
+    $this->freetext = in_array('freetext', $buttons);
+    $this->freearrow = in_array('freearrow', $buttons);
+    return 1;
+  }
+	  
+  function set_last_time_id($time){
+    # Eintragen der last_time_id
+    $sql = 'UPDATE rolle SET last_time_id="'.$time.'"';
+    $sql.= ' WHERE user_id = '.$this->user_id.' AND stelle_id = '.$this->stelle_id;
+    #echo $sql;
+    $ret=$this->database->execSQL($sql,4, 1);
+    return $ret;
+  }
+
+  # 2006-02-16 pk
+  function getLastConsumeTime() {
+    $sql ='SELECT time_id,prev FROM u_consume';
+    $sql.=' WHERE stelle_id='.$this->stelle_id.' AND user_id='.$this->user_id;
+    $sql.=' ORDER BY time_id DESC limit 1';
+    #echo '<br>'.$sql;
+    $queryret=$this->database->execSQL($sql,4, 0);
+    if ($queryret[0]) {
+      # Fehler bei Datenbankanfrage
+      $ret[0]=1;
+      $ret[1]='<br>Fehler bei der Abfrage der letzten Zugriffszeit.<br>'.$ret[1];
+    }
+    else {
+      $rs=mysql_fetch_array($queryret[1]);
+      $ret[0]=0;
+      $ret[1]=$rs;
+    }
+    return $ret;
+  }
+
+  # 2006-02-16 pk
+  function  getConsume($consumetime) {
+    $sql ='SELECT * FROM u_consume';
+    $sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+    $sql.=' AND time_id="'.$consumetime.'"';
+    #echo '<br>'.$sql;
+    $queryret=$this->database->execSQL($sql,4, 0);
+    if ($queryret[0]) {
+      # Fehler bei Datenbankanfrage
+      $ret[0]=1;
+      $ret[1]='<br>Fehler bei der Abfrage der letzten Zugriffszeit.<br>'.$ret[1];
+    }
+    else {
+      $rs=mysql_fetch_array($queryret[1]);
+      $ret[0]=0;
+      $ret[1]=$rs;
+    }
+    return $ret;
+  }
+  
+# 2006-03-20 pk
+  function updateNextConsumeTime($time_id,$nexttime) {
+    $sql ='UPDATE u_consume SET next="'.$nexttime.'"';
+    $sql.=' WHERE time_id="'.$time_id.'"';
+    #echo '<br>'.$sql;
+    $queryret=$this->database->execSQL($sql,4, 1);
+    if ($queryret[0]) {
+      # Fehler bei Datenbankanfrage
+      $ret[0]=1;
+      $ret[1]='<br>Fehler bei der Aktualisierung des Zeitstempels des Nachfolgers Next.<br>'.$ret[1];
+    }
+    else {
+      $ret[0]=0;
+      $ret[1]=1;
+    }
+    return $ret;
+  }
+
+  # 2006-03-20 pk
+  function updatePrevConsumeTime($time_id,$prevtime) {
+    $sql ='UPDATE u_consume SET prev="'.$prevtime.'"';
+    $sql.=' WHERE time_id="'.$time_id.'"';
+    #echo '<br>'.$sql;
+    $queryret=$this->database->execSQL($sql,4, 1);
+    if ($queryret[0]) {
+      # Fehler bei Datenbankanfrage
+      $ret[0]=1;
+      $ret[1]='<br>Fehler bei der Aktualisierung des Zeitstempels des Vorgängers Prev.<br>'.$ret[1];
+    }
+    else {
+      $ret[0]=0;
+      $ret[1]=1;
+    }
+    return $ret;
+  }
+
+
+  function setConsumeALK($time,$druckrahmen_id) {
+    if (LOG_CONSUME_ACTIVITY==1) {
+      # function setzt eine ALK-PDF-EXportaktivität
+      $sql ='INSERT INTO u_consumeALK SET';
+      $sql.=' user_id='.$this->user_id;
+      $sql.=', stelle_id='.$this->stelle_id;
+      $sql.=', time_id="'.$time.'"';
+      $sql .= ', druckrahmen_id = "'.$druckrahmen_id.'"';
+      #echo $sql;
+      $ret=$this->database->execSQL($sql,4, 1);
+      if ($ret[0]) {
+        # Fehler bei Datenbankanfrage
+        $errmsg.='<br>Die Verbraucheraktivität konnte nicht eingetragen werden.<br>'.$ret[1];
+      }
+    }
+    else {
+      $ret[0]=0;
+      $ret[1]='<br>Funktion zur Speicherung der Verbraucheraktivitäten ist ausgeschaltet (LOG_CONSUME_ACTIVITY).';
+    }
+    return $ret;
+  }
+
+
+# 2006-03-20 pk
+  function setConsumeActivity($time,$activity,$prevtime) {
+    if (LOG_CONSUME_ACTIVITY==1) {
+      # function setzt eine Verbraucheraktivität (den Zugriff auf Layer oder Daten)
+      # Starten der Transaktion
+      $sql ='START TRANSACTION';
+      $ret=$this->database->execSQL($sql,4, 1);
+      if ($ret[0]) {
+        # Fehler bei Datenbankanfrage
+        $ret[1]='<br>Die Transaktion zur Eintragung der Verbraucheraktivität konnte gestartet werden.<br>'.$ret[1];
+      }
+      else {
+        # Eintragen der Consume Activity
+        $sql ='INSERT INTO u_consume SET';
+        $sql.=' user_id='.$this->user_id;
+        $sql.=', stelle_id='.$this->stelle_id;
+        $sql.=', time_id="'.$time.'"';
+        $sql.=',activity="'.$activity.'"';
+        # 2006-09-29 pk
+        if ($prevtime=="0000-00-00 00:00:00" OR $prevtime=='') {
+          $prevtime=$time;
+        }
+        $sql.=',prev="'.$prevtime.'"';        
+        # 2006-02-16 pk
+        $sql.=', nimagewidth='.$this->nImageWidth.',nimageheight='.$this->nImageHeight;
+        $sql.=', minx='.$this->oGeorefExt->minx.', miny='.$this->oGeorefExt->miny;
+        $sql.=', maxx='.$this->oGeorefExt->maxx.', maxy='.$this->oGeorefExt->maxy;
+        #echo $sql;
+        $ret=$this->database->execSQL($sql,4, 1);
+        
+        if ($ret[0]) {
+          # Fehler bei Datenbankanfrage
+          $errmsg.='<br>Die Verbraucheraktivität konnte nicht eingetragen werden.<br>'.$ret[1];
+        }
+        if($activity != 'print' AND $activity != 'print_preview'){    # bei der Druckvorschau und dem PDF-Export zwar loggen aber nicht in die History aufnehmen
+          $this->newtime = $time;
+          $ret = $this->set_last_time_id($time);
+          if ($ret[0]) {
+            # Fehler bei Datenbankanfrage
+            $errmsg.='<br>Die Verbraucheraktivität konnte nicht eingetragen werden.<br>'.$ret[1];
+          }
+        }
+        
+        # Abfragen der aktiven Layer
+        $ret=$this->getAktivLayer(array(1,2),array(),1);
+        if ($ret[0]) {
+          # Fehler bei Datenbankanfrage
+          $errmsg.='<br>Fehler bei der Abfrage der aktiven Layer.<br>'.$ret[1];
+        }
+        else {
+          $layer=$ret[1];
+          # Eintragung des Zugriffs auf die angeschalteten Layer
+          for ($i=0;$i<count($layer);$i++) {
+            # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            # Hier eventuell später mal einbauen, dass geprüft wird, ob die Layer wirklich verfügbar sind.
+            # Wichtig wird das besonders für externe Datenquellen wie fremde WMS oder WFS Layer
+            # Die dürfen nicht mit abgerechnet werden, wenn sie beim Client nicht erscheinen.
+            # bzw. nicht geliefert werden
+            $sql ='INSERT INTO u_consume2layer SET';
+            $sql.=' user_id='.$this->user_id;
+            $sql.=', stelle_id='.$this->stelle_id;
+            $sql.=', time_id="'.$time.'"';
+            $sql.=', layer_id='.$layer[$i];
+            $ret=$this->database->execSQL($sql,4, 1);
+            if ($ret[0]) {
+              # Fehler bei Datenbankanfrage
+              $errmsg.='<br>Die Verbraucheraktivität für den Zugiff auf den Layer: '.$layer[$i].' konnte nicht eingetragen werden.<br>'.$ret[1];
+            }
+          } # ende eintragen aktiver Layer
+        } # ende erfolgreiches Abfragen der aktiven Layer
+      } # ende kartenausschnitt loggen
+      if ($errmsg!='') {
+        # Es sind Fehler innerhalb der Transaktion aufgetreten, Abbrechen der Transaktion
+        $sql ='ROLLBACK TRANSACTION';
+        $ret=$this->database->execSQL($sql,4, 1);
+        if ($ret[0]) {
+          # Fehler bei Datenbankanfrage
+          $errmsg.='<br>Die Transaktion zum Eintragen der Verbraucheraktivität konnte nicht abgebrochen werden.<br>'.$ret[1];
+        }
+        $ret[0]=1;
+        $ret[1]=$errmsg;
+      }
+      else {
+        # Es sind keine Fehler innerhalb der Transaktion aufgetreten, Erfolgreich abschließen der Transaktion
+        $sql ='COMMIT';
+        $ret=$this->database->execSQL($sql,4, 1);
+        if ($ret[0]) {
+          # Fehler bei Datenbankanfrage
+          $errmsg.='<br>Die Transaktion zum Eintragen der Verbraucheraktivität konnte nicht erfolgreich abgeschlossen werden.<br>'.$ret[1];
+        }
+        $ret[0]=0;
+        $ret[1]='<br>Verbraucheraktivität erfolgreich eingetragen.';
+      }
+    }
+    else {
+      $ret[0]=0;
+      $ret[1]='<br>Funktion zur Speicherung der Verbraucheraktivitäten ist ausgeschaltet (LOG_CONSUME_ACTIVITY).';
+    }
+    return $ret;
+  }
+	
 	function save_last_query($go, $layer_id, $query, $sql_order, $limit, $offset){
 		if($limit == '')$limit = 'NULL';
 		if($offset == '')$offset = 'NULL';
@@ -1939,7 +2409,7 @@ class rolle extends rolle_core{
 
 #####################################
 # class_stelle #
-class stelle extends stelle_core{
+class stelle {
 	var $id;
 	var $Bezeichnung;
 	var $debug;
@@ -1950,32 +2420,6 @@ class stelle extends stelle_core{
 	var $selectedButton;
 	var $database;
 
-	## Funktionen
-	# addAktivLayer($layerid)
-	# addLayer($layer_ids)
-	# addMenue($menue_ids)
-	# Aendern($stellendaten)
-	# deleteLayer($layer)
-	# deleteMenue($menues)
-	# getFunktionen($action)
-	# getLayers()
-	# getMenues($ebene)
-	# getName()
-	# getGemeindeIDs()
-	# getGemeinden()
-	# getUsers()
-	# getWappen()
-	# setAktivLayer($formvars)
-	# getstellendaten($stellendaten)
-	# getLayer($LayerName)
-	# isFunctionAllowed($functionname)
-	# Löschen()
-	# NeueStelleAnlegen($stellendaten)
-	# readDefaultValues()
-	# setAktivLayer($formvars)
-	# setQueryStatus($formvars)
-	# stelle - konstruktor
-
 	function stelle($id,$database) {
 		global $debug;
 		$this->debug=$debug;
@@ -1985,6 +2429,119 @@ class stelle extends stelle_core{
 		$this->readDefaultValues();
 	}
 
+	function getsubmenues($id){
+		$sql ='SELECT menue_id,';
+		if ($this->language != 'german') {
+			$sql.='`name_'.$this->language.'` AS ';
+		}
+		$sql .=' name, target, links FROM u_menue2stelle, u_menues';
+		$sql .=' WHERE stelle_id = '.$this->id;
+		$sql .=' AND obermenue = '.$id;
+		$sql .=' AND menueebene = 2';
+		$sql .=' AND u_menue2stelle.menue_id = u_menues.id';
+		$sql .= ' ORDER BY menue_order';
+		$this->debug->write("<p>file:users.php class:stelle->getsubMenues - Lesen der UnterMenuepunkte eines Menüpunktes:<br>".$sql,4);
+		$query=mysql_query($sql,$this->database->dbConn);
+		if ($query==0) {
+			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+		}
+		else{
+			while($rs=mysql_fetch_array($query)) {
+				$menue['name'][]=$rs['name'];
+				$menue['target'][]=$rs['target'];
+				$menue['links'][]=$rs['links'];
+			}
+		}
+		$html = '<table cellspacing="2" cellpadding="0" border="0">';
+		for ($i = 0; $i < count($menue['name']); $i++) {
+			$html .='
+        <tr>
+          <td> 
+            <img src="'.GRAPHICSPATH.'leer.gif" width="17" height="1" border="0">
+					</td>
+					<td>
+            <a href="';
+			if ($menue['target'][$i]=='confirm') {
+				$html .='javascript:Bestaetigung(\'';
+			}
+			$html .= $menue['links'][$i];
+			if ($menue['target'][$i]=='confirm') {
+				$html .= '\',\'Diese Aktion wirklich ausf&uuml;hren?\')';
+				$menue['target'][$i]='';
+			}
+			$html .= '" class="menuered"';
+			if ($menue['target'][$i]!='') {
+				$html .= ' target="'.$menue['target'][$i].'"';
+			}
+			$html .= '>'.$menue['name'][$i].'</a>
+          </td>
+        </tr>';
+		}
+		$html .= '</table>';
+		return $html;
+	}
+	
+  function getName() {
+    $sql ='SELECT ';
+    if ($this->language != 'german' AND $this->language != ''){
+      $sql.='`Bezeichnung_'.$this->language.'` AS ';
+    }
+    $sql.='Bezeichnung FROM stelle WHERE ID='.$this->id;
+    #echo $sql;
+    $this->debug->write("<p>file:users.php class:stelle->getName - Abfragen des Namens der Stelle:<br>".$sql,4);
+    $query=mysql_query($sql,$this->database->dbConn);
+    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    $rs=mysql_fetch_array($query);
+    $this->Bezeichnung=$rs['Bezeichnung'];
+    return $rs['Bezeichnung'];
+  }
+
+  function readDefaultValues() {
+    $sql ='SELECT * FROM stelle WHERE ID='.$this->id;
+    $this->debug->write("<p>file:users.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>".$sql,4);
+    $query=mysql_query($sql,$this->database->dbConn);
+    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    $rs=mysql_fetch_array($query);    
+    $this->MaxGeorefExt=ms_newRectObj();
+    $this->MaxGeorefExt->setextent($rs['minxmax'],$rs['minymax'],$rs['maxxmax'],$rs['maxymax']);
+    $this->epsg_code=$rs["epsg_code"];
+    $this->alb_raumbezug=$rs["alb_raumbezug"];
+    $this->alb_raumbezug_wert=$rs["alb_raumbezug_wert"];
+    $this->wasserzeichen=$rs["wasserzeichen"];
+    $this->pgdbhost=$rs["pgdbhost"];
+    $this->pgdbname=$rs["pgdbname"];
+    $this->pgdbuser=$rs["pgdbuser"];
+    $this->pgdbpasswd=$rs["pgdbpasswd"];
+    $this->protected=$rs["protected"];
+    //---------- OWS Metadaten ----------//
+    $this->ows_title=$rs["ows_title"];
+    $this->ows_abstract=$rs["ows_abstract"];
+    $this->wms_accessconstraints=$rs["wms_accessconstraints"];
+    $this->ows_contactperson=$rs["ows_contactperson"];
+    $this->ows_contactorganization=$rs["ows_contactorganization"];
+    $this->ows_contactelectronicmailaddress=$rs["ows_contactemailaddress"];
+    $this->ows_contactposition=$rs["ows_contactposition"];
+    $this->ows_fees=$rs["ows_fees"];
+    $this->ows_srs=$rs["ows_srs"];
+    $this->check_client_ip=$rs["check_client_ip"];
+    $this->checkPasswordAge=$rs["check_password_age"];
+    $this->allowedPasswordAge=$rs["allowed_password_age"];
+    $this->useLayerAliases=$rs["use_layer_aliases"];
+  }
+
+  function checkClientIpIsOn() {
+    $sql ='SELECT check_client_ip FROM stelle WHERE ID = '.$this->id;
+    $this->debug->write("<p>file:users.php class:stelle->checkClientIpIsOn- Abfragen ob IP's der Nutzer in der Stelle getestet werden sollen<br>".$sql,4);
+    #echo '<br>'.$sql;
+    $query=mysql_query($sql,$this->database->dbConn);
+    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    $rs=mysql_fetch_array($query);
+    if ($rs['check_client_ip']=='1') {
+      return 1;
+    }
+    return 0;
+  }
+	
 	function Löschen() {
 		$sql ='DELETE FROM stelle';
 		$sql.=' WHERE ID = '.$this->id;
@@ -2309,7 +2866,7 @@ class stelle extends stelle_core{
 	}
 
 	function getFlurstueckeAllowed($FlurstKennz, $database) {
-		include (CLASSPATH.'alb.php');
+		include_(CLASSPATH.'alb.php');
 		$GemeindenStelle = $this->getGemeindeIDs();
 		if($GemeindenStelle != NULL){
 			$alb = new ALB($database);
@@ -2613,7 +3170,7 @@ class stelle extends stelle_core{
 		return $layer;
 	}
 
-	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL){
+	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL){	
 		$sql = 'SELECT layer.Layer_ID, ';
 		if(LANGUAGE != 'german') {
 			$sql.='CASE WHEN `Name_'.LANGUAGE.'` != "" THEN `Name_'.LANGUAGE.'` ELSE `Name` END AS ';
@@ -2646,34 +3203,34 @@ class stelle extends stelle_core{
 		$sql .= ' ORDER BY Name';
 		#echo $sql;
 		$this->debug->write("<p>file:users.php class:stelle->getqueryableVectorLayers - Lesen der abfragbaren VektorLayer zur Stelle:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
+		$query=mysql_query($sql,$this->database->dbConn);		
 		if ($query==0) {
 			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
 		}
 		else{
 			while($rs=mysql_fetch_array($query)){
 				 
-				# fremde Layer werden auf Verbindung getestet
-				if(strpos($rs['connection'], 'host') !== false AND strpos($rs['connection'], 'host=localhost') === false){
-					$connection = explode(' ', trim($rs['connection']));
-					for($j = 0; $j < count($connection); $j++){
-						if($connection[$j] != ''){
-							$value = explode('=', $connection[$j]);
-							if(strtolower($value[0]) == 'host'){
-								$host = $value[1];
-							}
-							if(strtolower($value[0]) == 'port'){
-								$port = $value[1];
-							}
-						}
-					}
-					if($port == '')$port = '5432';
-					$fp = @fsockopen($host, $port, $errno, $errstr, 0.1);
-					if(!$fp){			# keine Verbindung --> Layer ausschalten
-						#$this->Fehlermeldung = $errstr.' für Layer: '.$rs['Name'].'<br>';
-						continue;
-					}
-				}
+				# fremde Layer werden auf Verbindung getestet (erstmal rausgenommen, dauert relativ lange)
+				// if(strpos($rs['connection'], 'host') !== false AND strpos($rs['connection'], 'host=localhost') === false){
+					// $connection = explode(' ', trim($rs['connection']));
+					// for($j = 0; $j < count($connection); $j++){
+						// if($connection[$j] != ''){
+							// $value = explode('=', $connection[$j]);
+							// if(strtolower($value[0]) == 'host'){
+								// $host = $value[1];
+							// }
+							// if(strtolower($value[0]) == 'port'){
+								// $port = $value[1];
+							// }
+						// }
+					// }
+					// if($port == '')$port = '5432';
+					// $fp = @fsockopen($host, $port, $errno, $errstr, 0.1);
+					// if(!$fp){			# keine Verbindung --> Layer ausschalten
+						// #$this->Fehlermeldung = $errstr.' für Layer: '.$rs['Name'].'<br>';
+						// continue;
+					// }
+				// }
 				
 				if($rs['alias'] != '' AND $this->useLayerAliases){
 					$rs['Name'] = $rs['alias'];

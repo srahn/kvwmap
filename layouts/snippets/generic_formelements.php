@@ -106,10 +106,10 @@
 												if($attributes['no_new_window'][$j] != true){
 													$datapart .= 	' target="_blank"';
 												}
-												$datapart .= 	' style="font-size: '.$this->user->rolle->fontsize_gle.'px">'.$strShowPK.'</a>&nbsp;';
+												$datapart .= 	' class="buttonlink">'.$strShowPK.'</a>&nbsp;';
 											}
 											if($attributes['subform_layer_privileg'][$j] > 0){
-												$datapart .= '|&nbsp;<a href="" onclick="this.href=\'index.php?go=neuer_Layer_Datensatz&selected_layer_id='.$attributes['subform_layer_id'][$j];
+												$datapart .= '<a href="" onclick="this.href=\'index.php?go=neuer_Layer_Datensatz&selected_layer_id='.$attributes['subform_layer_id'][$j];
 												for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
 													$datapart .= '&attributenames['.$p.']='.$attributes['subform_pkeys'][$j][$p];
 													$datapart .= '&values['.$p.']=\'+document.getElementById(\''.$attributes['subform_pkeys'][$j][$p].'_'.$k.'\').value';
@@ -118,7 +118,7 @@
 												if($attributes['no_new_window'][$j] != true){
 													$datapart .= 	' target="_blank"';
 												}
-												$datapart .= 	' style="font-size: '.$this->user->rolle->fontsize_gle.'px">'.$strNewPK.'</a>';
+												$datapart .= 	' class="buttonlink">'.$strNewPK.'</a>&nbsp;';
 											}
 										}
 									}break;
@@ -242,29 +242,36 @@
 
 									case 'Dokument': {
 										if ($dataset[$attributes['name'][$j]]!='') {
-											if($attributes['options'][$j] != ''){		# bei Layern die auf andere Server zugreifen, wird die URL des anderen Servers verwendet
-												$url = $attributes['options'][$j];
+											$dokumentpfad = $dataset[$attributes['name'][$j]];
+											$pfadteil = explode('&original_name=', $dokumentpfad);
+											$dateiname = $pfadteil[0];
+											$original_name = $pfadteil[1];
+											$dateinamensteil=explode('.', $dateiname);
+											$type = $dateinamensteil[1];
+											$thumbname = $this->get_dokument_vorschau($dateinamensteil);
+											$this->allowed_documents[] = addslashes($dateiname);
+											$this->allowed_documents[] = addslashes($thumbname);
+											if($attributes['options'][$j] != '' AND strtolower(substr($attributes['options'][$j], 0, 6)) != 'select'){		# bei Layern die auf andere Server zugreifen, wird die URL des anderen Servers verwendet
+												$url = $attributes['options'][$j].session_id().'.php?dokument=';
 											}
 											else{
-												$url = URL.APPLVERSION.'index.php?go=sendeDokument&dokument=';
-											}
-											$type = strtolower(array_pop(explode('.', $dataset[$attributes['name'][$j]])));
-											$original_name = array_pop(explode('original_name=', $dataset[$attributes['name'][$j]]));
+												$url = IMAGEURL.session_id().'.php?dokument=';
+											}											
 											$datapart .= '<table border="0"><tr><td>';
-			  							if($type == 'jpg' OR $type == 'png' OR $type == 'gif' ){									
-												$datapart .= '<a href="'.$url.$dataset[$attributes['name'][$j]].'"><img style="border:1px solid black" src="'.$url.$dataset[$attributes['name'][$j]].'&go_plus=mit_vorschau"></a>';									
-											}else{
-												$datapart .= '<a href="'.$url.$dataset[$attributes['name'][$j]].'"><img style="border:none" src="'.$url.$dataset[$attributes['name'][$j]].'&go_plus=mit_vorschau"></a>';
+											if($type == 'jpg' OR $type == 'png' OR $type == 'gif' ){
+												$datapart .= '<a href="'.$url.$dokumentpfad.'"><img class="preview_image" src="'.$url.$thumbname.'"></a>';									
+											}
+											else{
+												$datapart .= '<a href="'.$url.$dokumentpfad.'"><img src="'.$url.$thumbname.'"></a>';									
 											}
 			  							$datapart .= '</td><td width="100%">';
 			  							if($attributes['privileg'][$j] != '0' AND !$lock[$k]){
-			  								$datapart .= '<a href="javascript:delete_document(\''.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'\');">Dokument <br>löschen</a>';
+			  								$datapart .= '<a href="javascript:delete_document(\''.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'\');"><span>Dokument <br>löschen</span></a>';
 			  							}
 											$datapart .= '</td></tr>';
-											$datapart .= '<tr><td colspan="2">'.$original_name.'</td></tr>';
+											$datapart .= '<tr><td colspan="2"><span>'.$original_name.'</span></td></tr>';
 											$datapart .= '</table>';
 											$datapart .= '<input type="hidden" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].'_alt'.';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$dataset[$attributes['name'][$j]].'">';
-
 										}
 										if($attributes['privileg'][$j] != '0' AND !$lock[$k]){
 											$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" style="font-size: '.$this->user->rolle->fontsize_gle.'px" size="43" type="file" onchange="this.title=this.value;" id="'.$attributes['name'][$j].'_'.$k.'" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'">';

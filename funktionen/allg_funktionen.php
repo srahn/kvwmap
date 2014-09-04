@@ -5,7 +5,7 @@
  */
  
 $errors = array();
- 
+  
 function MapserverErrorHandler($errno, $errstr, $errfile, $errline){
 	global $errors;	
 	if(!(error_reporting() & $errno)){
@@ -751,6 +751,8 @@ function copy_file_to_tmp($frompath){
   else{
     echo 'Datei '.$frompath.' konnte nicht nach '.$dateipfad.$dateiname.' kopiert werden.';
   }
+	#exec('ln -s '.$frompath.' '.$dateipfad.$dateiname);
+	#return TEMPPATH_REL.$dateiname;
 }
 
 function read_epsg_codes($database){

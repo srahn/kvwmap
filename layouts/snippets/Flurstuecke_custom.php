@@ -341,6 +341,7 @@ emzversteckt = function(k){
 
 					        <?
 				        	if($this->Stelle->isFunctionAllowed('Bauakteneinsicht')){
+									include(PLUGINS.'probaug/model/bau.php');
 								$this->bau = new Bauauskunft($this->baudatabase);
 								$searchvars['flurstkennz'] = $flst->FlurstKennz;
 							    $this->bau->getbaudaten($searchvars);

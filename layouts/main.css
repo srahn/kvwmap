@@ -434,7 +434,30 @@ span.black {
 
 #layer {
   margin:0px 8px 8px 8px;
+	overflow:hidden;
+	clear: both;
 }
+
+.preview_image{
+	border:1px solid black;
+}
+
+.raster_record{
+	float:left;
+	padding: 5px;
+}
+
+.raster_record input{width:0.1px;height:0.1px;transition: all 0.25s ease;}
+.raster_record span{line-height:0.1px;font-size: 0.1px;transition: all 0.25s ease;}
+.raster_record td{padding: 0px;transition: all 0.25s ease;}
+.raster_record .preview_image{width: 125px;transition: all 0.25s ease;}
+
+.raster_record:hover input{width:300px;height:24px;transition: all 0.25s ease;}
+.raster_record:hover span{line-height:20px;font-size: 15px;transition: all 0.25s ease;}
+.raster_record:hover td{padding: 2px;transition: all 0.25s ease;}
+.raster_record:hover .preview_image{width: 250px;transition: all 0.25s ease;}
+
+
 
 #layer  h2{
 	font-weight: bold;
@@ -520,7 +543,6 @@ tbody.gle tr {
 tbody.gle tr:hover { 
  border:1px solid #03476F;
 }
-
 
 #calendar { /* Fuer IE <= 6 */
 	text-align: center;

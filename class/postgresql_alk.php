@@ -28,6 +28,27 @@
 
 class pgdatabase extends pgdatabase_alkis{
 
+	function pgdatabase() {
+	  global $debug;
+    $this->debug=$debug;
+    $this->loglevel=LOG_LEVEL;
+ 		$this->defaultloglevel=LOG_LEVEL;
+ 		global $log_postgres;
+    $this->logfile=$log_postgres;
+ 		$this->defaultlogfile=$log_postgres;
+    $this->ist_Fortfuehrung=1;
+    $this->type='postgresql';
+    $this->commentsign='--';
+    # Wenn dieser Parameter auf 1 gesetzt ist werden alle Anweisungen
+    # START TRANSACTION, ROLLBACK und COMMIT unterdr�ckt, so da� alle anderen SQL
+    # Anweisungen nicht in Transactionsbl�cken ablaufen.
+    # Kann zur Steigerung der Geschwindigkeit von gro�en Datenbest�nden verwendet werden
+    # Vorsicht: Wenn Fehler beim Einlesen passieren, ist der Datenbestand inkonsistent
+    # und der Einlesevorgang muss wiederholt werden bis er fehlerfrei durchgelaufen ist.
+    # Dazu Fehlerausschriften bearchten.
+    $this->blocktransaction=0;
+  }
+
 	function getKlassifizierung($FlurstKennz) {
     $sql ="SELECT k.tabkenn,fk.flaeche,fk.angaben,k.klass,k.bezeichnung,k.abkuerzung";
     $sql.=" FROM alb_f_klassifizierungen AS fk,alb_v_klassifizierungen AS k";

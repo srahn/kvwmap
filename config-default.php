@@ -403,55 +403,55 @@ define('SHOW_MAP_IMAGE', 'true');       # true / false                          
 
 ############################# Klassenbibliotheken lesen
 # laden der Klassenbibliotheken
-include (CLASSPATH.'kvwmap_core.php');								# Version 1.7.6
-include (CLASSPATH.'kataster_core.php');							# Version 1.7.6
-include (CLASSPATH.'mysql.php');											# Version 1.7.6
-include (CLASSPATH.'postgresql_core.php');						# Version 1.7.6
-include (CLASSPATH.'users_core.php');									# Version 1.7.6
+include_(CLASSPATH.'kvwmap_core.php');								# Version 1.7.6
+include_(CLASSPATH.'kataster_core.php');							# Version 1.7.6
+include_(CLASSPATH.'mysql.php');											# Version 1.7.6
+include_(CLASSPATH.'postgresql_core.php');						# Version 1.7.6
+include_(CLASSPATH.'users_core.php');									# Version 1.7.6
 if(!in_array($_REQUEST['go'], $fast_loading_cases)){		# Version 1.7.6		# in Version 2.0 angepasst   (die folgenden Klassen nicht laden, wenn einer der schnell ladenden Anwendungsfälle ausgeführt werden soll)
-	include (CLASSPATH.'kvwmap.php');	
-	include (CLASSPATH.'kataster.php');
-	include (CLASSPATH.'postgresql.php');
+	include_(CLASSPATH.'kvwmap.php');	
+	include_(CLASSPATH.'kataster.php');
+	include_(CLASSPATH.'postgresql.php');
 	if(ALKIS){																					#	Version 1.13
-		include (CLASSPATH.'kataster_alkis.php');					# Version 1.13
-		include (CLASSPATH.'postgresql_alkis.php');				# Version 1.13
+		include_(CLASSPATH.'kataster_alkis.php');					# Version 1.13
+		include_(CLASSPATH.'postgresql_alkis.php');				# Version 1.13
 	}																										# Version 1.13
 	else{																								# Version 1.13
-		include (CLASSPATH.'kataster_alk.php');						# Version 1.13
-		include (CLASSPATH.'postgresql_alk.php');					# Version 1.13
+		include_(CLASSPATH.'kataster_alk.php');						# Version 1.13
+		include_(CLASSPATH.'postgresql_alk.php');					# Version 1.13
 	}																										# Version 1.13
-	include (CLASSPATH.'users.php');
-	#include (CLASSPATH.'alb.php');											# in Version 2.0 gelöscht
-	#include (CLASSPATH.'alk.php');											# in Version 2.0 gelöscht
-	#include (CLASSPATH.'antrag.php');									# in Version 2.0 gelöscht
-	#include (CLASSPATH.'bau.php');											# in Version 2.0 gelöscht
-	#include (CLASSPATH.'nachweis.php');								# in Version 2.0 gelöscht
-	#include (CLASSPATH.'geothermie.php');							# in Version 2.0 gelöscht
-	#include (CLASSPATH.'bodenrichtwerte.php');					# in Version 2.0 gelöscht
-	#include (CLASSPATH.'verundentsorgung.php');				# in Version 2.0 gelöscht
-	#include (CLASSPATH.'metadaten.php');								# in Version 2.0 gelöscht
-	#include (CLASSPATH.'spatial_processor.php');				# in Version 2.0 gelöscht
-	include (CLASSPATH.'bauleitplanung.php');           # Version 1.6.1
-	#include (CLASSPATH.'jagdkataster.php');            # Version 1.6.1		# in Version 2.0 gelöscht
-	#include (CLASSPATH.'polygoneditor.php');           # Version 1.6.3		# in Version 2.0 gelöscht
-	#include (CLASSPATH.'pointeditor.php');             # Version 1.6.3		# in Version 2.0 gelöscht
-	#include (CLASSPATH.'dbf.php');                     # Version 1.6.5		# in Version 2.0 gelöscht
-	#include (CLASSPATH.'anliegerbeitraege.php');       # Version 1.6.6   # in Version 2.0 gelöscht
-	#include (CLASSPATH.'gebaeude_editor.php');         # Version 1.6.6   # in Version 2.0 gelöscht
-	#include (CLASSPATH.'documents.php');               # Version 1.6.6		# in Version 2.0 gelöscht
-	#include (CLASSPATH.'esaf.php');                    # Version 1.6.6		# in Version 2.0 gelöscht
-	#include (CLASSPATH.'shape.php');                   # Version 1.6.6		# in Version 2.0 gelöscht
-	#include (CLASSPATH.'gps.php');                     # Version 1.6.7   # in Version 2.0 gelöscht
-	#include (CLASSPATH.'wms.php');                     # Version 1.6.7   # in Version 2.0 gelöscht
-	#include (CLASSPATH.'funktion.php');                # Version 1.6.9		# in Version 2.0 gelöscht
-	#include (CLASSPATH.'lineeditor.php');              # Version 1.7.0		# in Version 2.0 gelöscht
-	#include (CLASSPATH.'wfs.php');                     # Version 1.7.0		# in Version 2.0 gelöscht
-	#include (CLASSPATH.'synchronisation.php');         # Version 1.7.0		# in Version 2.0 gelöscht
-	#include (CLASSPATH.'tif.php');          						# Version 1.7.2		# in Version 2.0 gelöscht
-	#include (CLASSPATH.'gpx.php');          						# Version 1.7.4		# in Version 2.0 gelöscht
-	#include (CLASSPATH.'datendrucklayout.php');        # Version 1.7.5		# in Version 2.0 gelöscht
-	#include (CLASSPATH.'metadaten_csw.php');						# Version 1.7.5		# in Version 2.0 gelöscht
-	#include (CLASSPATH.'uko.php');          						# Version 1.8.0		# in Version 2.0 gelöscht
+	include_(CLASSPATH.'users.php');
+	#include_(CLASSPATH.'alb.php');											# in Version 2.0 gelöscht
+	#include_(CLASSPATH.'alk.php');											# in Version 2.0 gelöscht
+	#include_(CLASSPATH.'antrag.php');									# in Version 2.0 gelöscht
+	#include_(CLASSPATH.'bau.php');											# in Version 2.0 gelöscht
+	#include_(CLASSPATH.'nachweis.php');								# in Version 2.0 gelöscht
+	#include_(CLASSPATH.'geothermie.php');							# in Version 2.0 gelöscht
+	#include_(CLASSPATH.'bodenrichtwerte.php');					# in Version 2.0 gelöscht
+	#include_(CLASSPATH.'verundentsorgung.php');				# in Version 2.0 gelöscht
+	#include_(CLASSPATH.'metadaten.php');								# in Version 2.0 gelöscht
+	#include_(CLASSPATH.'spatial_processor.php');				# in Version 2.0 gelöscht
+	include_(CLASSPATH.'bauleitplanung.php');           # Version 1.6.1
+	#include_(CLASSPATH.'jagdkataster.php');            # Version 1.6.1		# in Version 2.0 gelöscht
+	#include_(CLASSPATH.'polygoneditor.php');           # Version 1.6.3		# in Version 2.0 gelöscht
+	#include_(CLASSPATH.'pointeditor.php');             # Version 1.6.3		# in Version 2.0 gelöscht
+	#include_(CLASSPATH.'dbf.php');                     # Version 1.6.5		# in Version 2.0 gelöscht
+	#include_(CLASSPATH.'anliegerbeitraege.php');       # Version 1.6.6   # in Version 2.0 gelöscht
+	#include_(CLASSPATH.'gebaeude_editor.php');         # Version 1.6.6   # in Version 2.0 gelöscht
+	#include_(CLASSPATH.'documents.php');               # Version 1.6.6		# in Version 2.0 gelöscht
+	#include_(CLASSPATH.'esaf.php');                    # Version 1.6.6		# in Version 2.0 gelöscht
+	#include_(CLASSPATH.'shape.php');                   # Version 1.6.6		# in Version 2.0 gelöscht
+	#include_(CLASSPATH.'gps.php');                     # Version 1.6.7   # in Version 2.0 gelöscht
+	#include_(CLASSPATH.'wms.php');                     # Version 1.6.7   # in Version 2.0 gelöscht
+	#include_(CLASSPATH.'funktion.php');                # Version 1.6.9		# in Version 2.0 gelöscht
+	#include_(CLASSPATH.'lineeditor.php');              # Version 1.7.0		# in Version 2.0 gelöscht
+	#include_(CLASSPATH.'wfs.php');                     # Version 1.7.0		# in Version 2.0 gelöscht
+	#include_(CLASSPATH.'synchronisation.php');         # Version 1.7.0		# in Version 2.0 gelöscht
+	#include_(CLASSPATH.'tif.php');          						# Version 1.7.2		# in Version 2.0 gelöscht
+	#include_(CLASSPATH.'gpx.php');          						# Version 1.7.4		# in Version 2.0 gelöscht
+	#include_(CLASSPATH.'datendrucklayout.php');        # Version 1.7.5		# in Version 2.0 gelöscht
+	#include_(CLASSPATH.'metadaten_csw.php');						# Version 1.7.5		# in Version 2.0 gelöscht
+	#include_(CLASSPATH.'uko.php');          						# Version 1.8.0		# in Version 2.0 gelöscht
 }																											# Version 1.7.6
 include (WWWROOT.APPLVERSION.'funktionen/allg_funktionen.php');		# In Version 1.7.3 angepasst
 

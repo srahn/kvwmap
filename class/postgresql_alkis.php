@@ -26,6 +26,29 @@
 # Klasse Datenbank für PostgreSQL                #
 ##################################################
 
-class pgdatabase extends pgdatabase_alkis{}
+class pgdatabase extends pgdatabase_alkis{
+
+	function pgdatabase() {
+	  global $debug;
+    $this->debug=$debug;
+    $this->loglevel=LOG_LEVEL;
+ 		$this->defaultloglevel=LOG_LEVEL;
+ 		global $log_postgres;
+    $this->logfile=$log_postgres;
+ 		$this->defaultlogfile=$log_postgres;
+    $this->ist_Fortfuehrung=1;
+    $this->type='postgresql';
+    $this->commentsign='--';
+    # Wenn dieser Parameter auf 1 gesetzt ist werden alle Anweisungen
+    # START TRANSACTION, ROLLBACK und COMMIT unterdrï¿½ckt, so daï¿½ alle anderen SQL
+    # Anweisungen nicht in Transactionsblï¿½cken ablaufen.
+    # Kann zur Steigerung der Geschwindigkeit von groï¿½en Datenbestï¿½nden verwendet werden
+    # Vorsicht: Wenn Fehler beim Einlesen passieren, ist der Datenbestand inkonsistent
+    # und der Einlesevorgang muss wiederholt werden bis er fehlerfrei durchgelaufen ist.
+    # Dazu Fehlerausschriften bearchten.
+    $this->blocktransaction=0;
+  }
+
+}
 
 ?>

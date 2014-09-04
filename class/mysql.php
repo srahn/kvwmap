@@ -23,7 +23,7 @@
 # pkorduan@gmx.de peter.korduan@auf.uni-rostock.de                #
 ###################################################################
 ##################################################
-# Klasse Datenbank für ALB-Info Modell und MySQL #
+# Klasse Datenbank fÃ¼r ALB-Info Modell und MySQL #
 ##################################################
 class database {
   var $ist_Fortfuehrung;
@@ -32,176 +32,6 @@ class database {
   var $logfile;
   var $commentsign;
   var $blocktransaction;
-
-# begintransaction() {
-# close() {
-# committransaction() {
-# create_update_dump() {
-# database() {
-# deleteAddressLagen() {
-# deleteBuchungenByHistFlurstuecke() {
-# deleteBuchungenByHistGrundbuecher() {
-# deleteEigentuemerByHistGrundbuecher() {
-# deleteGrundbuecher() {
-# deleteGrundstueckeByHistGrundbuecher() {
-# deleteHistAdressen() {
-# deleteHistAnlieger() {
-# deleteHistBaulasten() {
-# deleteHistFlurstuecke() {
-# deleteHistHinweise() {
-# deleteHistHistorie() {
-# deleteHistKlassifizierungen() {
-# deleteHistLagen() {
-# deleteHistNutzungen() {
-# deleteHistTexte() {
-# deleteHistVerfahren() {
-# deleteNewBuchungen() {
-# deleteNewEigentuemer() {
-# deleteNewGrundstuecke() {
-# deleteNewHistorien() {
-# deleteOldAdressen() {
-# deleteOldAnlieger() {
-# deleteOldBaulasten() {
-# deleteOldHinweise() {
-# deleteOldKlassifizierungen() {
-# deleteOldLagen() {
-# deleteOldNutzungen() {
-# deleteOldTexte() {
-# deleteOldVerfahren() {
-# deleteTempHistVorgaenger() {
-# execSQL($sql,$debuglevel) {
-# getAdressenListeByExtent($GebaeudeAdressenListe,$FlurstueckAdressenListe)
-# getALBData($FlurstKennz) {
-# getAffectedRows() {
-# getAktualitaetsNr($FlurstKennz) {
-# getAmtsgericht($GemkgSchl) {
-# getAnzFluren($neu)
-# getAnzFlurstuecke() {
-# getAnzGrundbuecher($AktualitaetsNr) {
-# getAnzHistorie($Vorgaenger,$Nachfolger)
-# getAnzNewFlurstuecke() {
-# getBaulasten($FlurstKennz) {
-# getBuchungen($FlurstKennz) {
-# getEigentuemerliste($FlurstKennz,$Bezirk,$Blatt,$BVNR) {
-# getFilterPolygons($used_layer_id) {
-# getFilteredUsedLayer($layername) {
-# getFinanzamt($FlurstKennz) {
-# getFlstFlaeche($FlurstKennz) {
-# getFlurkarte($FlurstKennz) {
-# getFlurstuecksKennzByRaumbezug($FlurstKennz,$Raumbezug,$Wert)
-# getForstamt($FlurstKennz) {
-# getFreiText($FlurstKennz) {
-# getGemarkungName($GemkgSchl) {
-# getGrundbuchbezirk($FlurstKennz) {
-# getHausNrListe($GemID,$StrID,$PolygonWKTString,$HausNr,$order)
-# getHausNummern($FlurstKennz,$Strasse) {
-# getHinweise($FlurstKennz) {
-# getHistorie($Vorgaenger,$Nachfolger)
-# getKlassifizierung($FlurstKennz) {
-# getKreisName($KreisSchl) {
-# getLage($FlurstKennz) {
-# getNutzung($FlurstKennz) {
-# getPruefKZ($FlurstKennz) {
-# getRow($select,$from,$where) {
-# getStrassen($FlurstKennz) {
-# getStrassenListe($GemID,$extent,$order)
-# getVerfahren($FlurstKennz) {
-# getVorgaenger($FlurstKennz) {
-# insertALKAusgestaltungen($colnames,$row) {
-# insertALKFlurst($colnames,$row) {
-# insertALKGebaeude($colnames,$row) {
-# insertALKNutzungen($colnames,$row) {
-# insertALKUpdateMessage($anzflurstuecke,$anzgebaeude,$anznutzungen,$anzausgestaltungen) {
-# insertAbgabeZeitraum($dategrundausstattung,$zeitraumvon,$zeitraumbis) {
-# insertAdmKreis($colnames,$row) {
-# insertAdresse($FlurstKennz,$Gemeinde,$Strasse,$HausNr) {
-# insertAmtsgericht($Amtsgericht,$Name) {
-# insertAnlieger($FlurstKennz,$Kennung,$AnlFlstKennz,$AnlFlstPruefz) {
-# insertAusfuehrendeStelle($AusfStelle,$Name) {
-# insertBaulast($FlurstKennz,$BlattNr) {
-# insertBemerkgZumVerfahren($VerfBemerkung,$Bezeichnung) {
-# insertBuchung($FlurstKennz,$Bezirk,$Blatt,$BVNR,$ErbbaurechtsHinw) {
-# insertBuchungsart($Buchungsart,$Bezeichnung) {
-# insertEigentuemer($Bezirk,$Blatt,$NamensNr,$Eigentuemerart,$Anteilsverhaeltnis,$lfd_Nr_Name) {
-# insertEigentuemerart($Eigentuemerart,$Bezeichnung) {
-# insertFinanzamt($Finanzamt,$Name) {
-# insertFlurstueck($FlurstKennz,$GemkgSchl,$FlurNr,$Pruefzeichen) {
-# insertForstamt($Forstamt,$Name) {
-# insertGemarkung($GemkgSchl,$Gemeinde,$Amtsgericht,$GemkgName) {
-# insertGemeinde($Gemeinde,$Name) {
-# insertGrundbuch($Bezirk,$Blatt,$AktualitaetsNr,$Pruefzeichen) {
-# insertGrundbuchbezirk($GrundbuchbezSchl,$Amtsgericht,$Bezeichnung) {
-# insertGrundstueck($Bezirk,$Blatt,$BVNR,$Buchungsart) {
-# insertHinweis($FlurstKennz,$Hinweis) {
-# insertHinweisart($HinwZFlst,$Bezeichnung) {
-# insertHistorie($Vorgaenger,$Nachfolger) {
-# insertKatasteramt($Katasteramt,$ArtAmt,$Name) {
-# insertKlassifizierung($FlurstKennz,$TabKenn,$Klass,$KlassFlaeche,$KlassAngabe) {
-# insertKlassifizierungsart($TabKenn,$Klass,$Bezeichnung,$Abkuerzung) {
-# insertKreis($Kreis,$Name) {
-# insertLage($FlurstKennz,$lfdNr,$Lage) {
-# insertName($lfd_Nr_Name,$Satzunterart,$Namen) {
-# insertNeueGrundbuecher() {
-# insertNewAdressen() {
-# insertNewAnlieger() {
-# insertNewBaulasten() {
-# insertNewBuchungen() {
-# insertNewEigentuemer() {
-# insertNewGrundstuecke() {
-# insertNewHinweise() {
-# insertNewHistorien() {
-# insertNewKlassifizierungen() {
-# insertNewLagen() {
-# insertNewNamen() {
-# insertNewNutzungen() {
-# insertNewTexte() {
-# insertNewVerfahren() {
-# insertNutzung($FlurstKennz,$Nutzungsart,$NutzungFlaeche) {
-# insertNutzungsart($Nutzungsart,$Bezeichnung,$Abkuerzung) {
-# insertStrasse($Gemeinde,$Strasse,$Name) {
-# insertText($FlurstKennz,$lfdNr,$freierText) {
-# insertVerfahren($FlurstKennz,$AusfStelle,$VerfNr,$VerfBem) {
-# loadDataInFile($filename,$tablename) {
-# open() {
-# optimizeALKAusgestaltungen() {
-# optimizeALKFlurst() {
-# readLastUpdateDate() {
-# replaceAmtsgerichte() {
-# replaceAusfuehrendeStellen() {
-# replaceBemerkungenZumVerfahren() {
-# replaceBuchungsarten() {
-# replaceEigentuemerArten() {
-# replaceFinanzaemter() {
-# replaceFlurstuecke() {
-# replaceForstaemter() {
-# replaceGemarkungen() {
-# replaceGemeinden() {
-# replaceGrundbuchbezirke() {
-# replaceHinweise() {
-# replaceKatasteraemter() {
-# replaceKlassifizierungen() {
-# replaceKreise() {
-# replaceNutzungsarten() {
-# replaceStrassen() {
-# rollbacktransaction() {
-# setFilter($layer_id,$stelle_id,$filter) {
-# setFortfuehrung($ist_Fortfuehrung) {
-# setLogLevel($loglevel,$logfile) {
-# truncateALKAusgestaltungen() {
-# truncateALKFlurst() {
-# truncateALKGebaeude() {
-# truncateALKNutzungen() {
-# truncateAdmKreise() {
-# truncateAll() {
-# updateEigentuemer() {
-# updateFluren() {
-# updateFlurstueck($FlurstKennz,$Status,$Entsteh,$LetzFF,$Flaeche,$AktuNr,$Karte,$BauBlock,$KoorRW,$KoorHW,$Forstamt,$Finanzamt) {
-# updateGrundbuch($Bezirk,$Blatt,$Zusatz_Eigentuemer,$Bestandsflaeche) {
-# updateGrundstueck($Bezirk,$Blatt,$BVNR,$Anteil,$AuftPlanNr,$Sondereigentum) {
-# updateLfdNrName() {
-# updateName($lfd_Nr_Name,$Satzunterart,$Namen)
-# updateNewGrundstuecke()
-# updateTempAdressTable()
 
   function database() {
     global $debug;
@@ -215,9 +45,9 @@ class database {
     $this->type="MySQL";
     $this->commentsign='#';
     # Wenn dieser Parameter auf 1 gesetzt ist werden alle Anweisungen
-    # BEGIN TRANSACTION, ROLLBACK und COMMIT unterdrückt, so daß alle anderen SQL
-    # Anweisungen nicht in Transactionsblöcken ablaufen.
-    # Kann zur Steigerung der Geschwindigkeit von großen Datenbeständen verwendet werden
+    # BEGIN TRANSACTION, ROLLBACK und COMMIT unterdrÃ¼ckt, so daÃŸ alle anderen SQL
+    # Anweisungen nicht in TransactionsblÃ¶cken ablaufen.
+    # Kann zur Steigerung der Geschwindigkeit von groÃŸen DatenbestÃ¤nden verwendet werden
     # Vorsicht: Wenn Fehler beim Einlesen passieren, ist der Datenbestand inkonsistent
     # und der Einlesevorgang muss wiederholt werden bis er fehlerfrei durchgelaufen ist.
     # Dazu Fehlerausschriften bearchten.
@@ -228,7 +58,7 @@ class database {
   	$sql = "SELECT login_name FROM user WHERE login_name = BINARY('".addslashes($username)."') AND passwort = '".md5($passwort)."'";
   	$sql.=' AND (("'.date('Y-m-d h:i:s').'" >= start AND "'.date('Y-m-d h:i:s').'" <= stop)';
     $sql.=' OR ';
-    $sql.='(start="0000-00-00 00:00:00" AND stop="0000-00-00 00:00:00"))';		# Zeiteinschränkung wird nicht berücksichtigt.
+    $sql.='(start="0000-00-00 00:00:00" AND stop="0000-00-00 00:00:00"))';		# ZeiteinschrÃ¤nkung wird nicht berÃ¼cksichtigt.
   	#echo $sql;
   	$ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
@@ -328,9 +158,9 @@ class database {
   }
 
 	function create_insert_dump($table, $extra, $sql){
-		# Funktion liefert das Ergebnis einer SQL-Abfrage als INSERT-Dump für die Tabelle "$table" 
-		# über $extra kann ein Feld angegeben werden, welches nicht mit in das INSERT aufgenommen wird
-		# dieses Feld wird jedoch auch mit abgefragt und separat zurückgeliefert
+		# Funktion liefert das Ergebnis einer SQL-Abfrage als INSERT-Dump fÃ¼r die Tabelle "$table" 
+		# Ã¼ber $extra kann ein Feld angegeben werden, welches nicht mit in das INSERT aufgenommen wird
+		# dieses Feld wird jedoch auch mit abgefragt und separat zurÃ¼ckgeliefert
 		$this->debug->write("<p>file:kvwmap class:database->create_insert_dump :<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
@@ -385,7 +215,7 @@ class database {
 	}
 
   function create_update_dump($table){
-		# Funktion erstellt zu einer Tabelle einen Update-Dump und liefert ihn als String zurück
+		# Funktion erstellt zu einer Tabelle einen Update-Dump und liefert ihn als String zurÃ¼ck
 		$sql = 'SELECT * FROM '.$table;
 		$this->debug->write("<p>file:kvwmap class:database->create_update_dump :<br>".$sql,4);
     $query=mysql_query($sql);
@@ -422,18 +252,8 @@ class database {
 # Funktionen der Anwendung kvwmap
 #################################################
 
- # function getFilteredUsedLayer($layername) {
- #   # liefert die id´s der Zuordnung zwischen Layern und Stellen (used_layer_id),
- #   # die mit einem Polygon gefiltert werden sollen
- #   $sql ="SELECT DISTINCT ul.used_layer_id,l.data,ul.Stelle_ID FROM polygon AS p, polygon_used_layer AS pul";
- #   $sql.=", used_layer AS ul, layer AS l WHERE p.polygon_id = pul.polygon_id";
- #   $sql.=" AND pul.used_layer_id = ul.used_layer_id AND ul.Layer_ID = l.Layer_ID";
- #   $sql.=" AND l.Name = '".$layername."'";
- #   return $this->execSQL($sql, 4, 0);
- # }
-
   function getFilteredUsedLayer($layername) {
-    # geändert 2005-12-15 pk
+    # geÃ¤ndert 2005-12-15 pk
     # liefert layer_id und stelle_id aus used_layer,
     # die mit einem Polygon gefiltert werden sollen
     $sql ="SELECT DISTINCT ul.Stelle_ID,ul.Layer_ID,l.data FROM polygon AS p, u_polygon2used_layer AS pul";
@@ -443,30 +263,15 @@ class database {
     return $this->execSQL($sql, 4, 0);
   }
 
- # function getFilterPolygons($used_layer_id) {
- #   # liefert Shapdateinamen und Namen des Polygons mit denen ein Filter
- #   # für used_layer_id berechnet werden soll
- #   $sql ="SELECT p.polygonname,p.datei,p.feldname FROM polygon AS p, polygon_used_layer AS pul";
- #   $sql.=" WHERE p.polygon_id = pul.polygon_id";
- #   $sql.=" AND pul.used_layer_id=".$used_layer_id;
- #   return $this->execSQL($sql, 4, 0);
- # }
-
   function getFilterPolygons($layer_id,$stelle_id) {
-    # geändert 2005-12-15 pk
+    # geÃ¤ndert 2005-12-15 pk
     # liefert Shapdateinamen und Namen des Polygons mit denen ein Filter
-    # für layer_id und stelle_id in Tabelle used_layer berechnet werden soll
+    # fÃ¼r layer_id und stelle_id in Tabelle used_layer berechnet werden soll
     $sql ="SELECT p.polygonname,p.datei,p.feldname FROM polygon AS p, u_polygon2used_layer AS pul";
     $sql.=" WHERE p.polygon_id = pul.polygon_id";
     $sql.=" AND pul.layer_id=".(int)$layer_id." AND pul.stelle_id=".(int)$stelle_id;
     return $this->execSQL($sql, 4, 0);
   }
-
- # function setFilter($used_layer_id,$filter) {
- #   $sql ="UPDATE used_layer SET Filter='".$filter."'";
- #   $sql.=" WHERE used_layer_id=".$used_layer_id;
- #   return $this->execSQL($sql, 4, 0);
- # }
 
   function setFilter($layer_id,$stelle_id,$filter) {
     $sql ="UPDATE used_layer SET Filter='".$filter."'";
@@ -478,14 +283,14 @@ class database {
 # database Funktionen
 ###########################################################
   function open() {
-    $this->debug->write("<br>MySQL Verbindung öffnen mit Host: ".$this->host." User: ".$this->user,4);
+    $this->debug->write("<br>MySQL Verbindung Ã¶ffnen mit Host: ".$this->host." User: ".$this->user,4);
     $this->dbConn=mysql_connect($this->host,$this->user,$this->passwd);
-    $this->debug->write("Datenbank mit ID: ".$this->dbConn." und Name: ".$this->dbName." auswählen.",4);
+    $this->debug->write("Datenbank mit ID: ".$this->dbConn." und Name: ".$this->dbName." auswÃ¤hlen.",4);
     return mysql_select_db($this->dbName,$this->dbConn);
   }
 
   function close() {
-    $this->debug->write("<br>MySQL Verbindung mit ID: ".$this->dbConn." schließen.",4);
+    $this->debug->write("<br>MySQL Verbindung mit ID: ".$this->dbConn." schlieÃŸen.",4);
     if (LOG_LEVEL>0){
     	$this->logfile->close();
     }
@@ -504,7 +309,7 @@ class database {
   }
 
   function rollbacktransaction() {
-    # Rückgängigmachung aller bisherigen Änderungen in der Transaktion
+    # RÃ¼ckgÃ¤ngigmachung aller bisherigen Ã„nderungen in der Transaktion
     # und Abbrechen der Transaktion
     # rolls back the current transaction and causes all the updates
     # made by the transaction to be discarded
@@ -515,7 +320,7 @@ class database {
   }
 
   function committransaction() {
-    # Gültigmachen und Beenden der Transaktion
+    # GÃ¼ltigmachen und Beenden der Transaktion
     # commits the current transaction. All changes made by the transaction
     # become visible to others and are guaranteed to be durable if a crash occurs
     if ($this->blocktransaction==0) {
@@ -525,10 +330,10 @@ class database {
   }
 
   function vacuum() {
-    # Hier sollten alle Tabellen optimiert werden können
-    # in MySQL müsste man den Befehl OPTIMIZE für alle Tabellen einzeln aufrufen
+    # Hier sollten alle Tabellen optimiert werden kÃ¶nnen
+    # in MySQL mÃ¼sste man den Befehl OPTIMIZE fÃ¼r alle Tabellen einzeln aufrufen
     # eine Idee wie man das umgehen kann?
-    # in postgres gibt es dafür den vacuum-Befehl
+    # in postgres gibt es dafÃ¼r den vacuum-Befehl
     if (!$this->vacuumOff) {
     	# OPTIMIZE ALL
     }
@@ -573,7 +378,7 @@ class database {
   			$logsql=$loglevel;
   		} break;
   	}
-    # SQL-Statement wird nur ausgeführt, wenn DBWRITE gesetzt oder
+    # SQL-Statement wird nur ausgefÃ¼hrt, wenn DBWRITE gesetzt oder
     # wenn keine INSERT, UPDATE und DELETE Anweisungen in $sql stehen.
     # (lesend immer, aber schreibend nur mit DBWRITE=1)
     if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {

@@ -279,6 +279,7 @@ backto = function(go){
 
               <?
               if($this->Stelle->isFunctionAllowed('Bauakteneinsicht')){
+							include(PLUGINS.'probaug/model/bau.php');
             $this->bau = new Bauauskunft($this->baudatabase);
             $searchvars['flurstkennz'] = $flst->Flurstkennz_alt;
               $this->bau->getbaudaten($searchvars);
