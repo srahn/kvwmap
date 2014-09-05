@@ -6940,8 +6940,7 @@ class GUI {
             $datei_name=$name_array[0];
             $datei_erweiterung=array_pop($name_array);
 						$doc_path = $mapdb->getDocument_Path($layerset[0]['document_path'], $attributes['options'][$element[1]], $attributenames, $attributevalues, $layerdb);
-            $currenttime = date('Y-m-d_H_i_s',time());
-            $nachDatei = $doc_path.$currenttime.'-'.rand(0, 1000000).'.'.$datei_erweiterung; 
+            $nachDatei = $doc_path.'.'.$datei_erweiterung; 
             # Bild in das Datenverzeichnis kopieren
             if (move_uploaded_file($_files[$form_fields[$i]]['tmp_name'],$nachDatei)) {
               //echo '<br>Lade '.$_files[$form_fields[$i]]['tmp_name'].' nach '.$nachDatei.' hoch';
@@ -10475,8 +10474,7 @@ class GUI {
                 $datei_name=$name_array[0];
                 $datei_erweiterung=array_pop($name_array);
                 $doc_path = $mapdb->getDocument_Path($layerset[0]['document_path'], $attributes['options'][$element[1]], $attributenames, $attributevalues, $layerdb);
-                $currenttime = date('Y-m-d_H_i_s',time());
-                $nachDatei = $doc_path.$currenttime.'-'.rand(0, 1000000).'.'.$datei_erweiterung;
+                $nachDatei = $doc_path.'.'.$datei_erweiterung;
                 $eintrag = $nachDatei."&original_name=".$_files[$form_fields[$i]]['name'];
                 if($datei_name == 'delete')$eintrag = '';
                 # Bild in das Datenverzeichnis kopieren
@@ -13512,8 +13510,9 @@ class db_mapObj{
     $pfad = $rs[0];
     return $pfad;
   }
-  
+   
   function getDocument_Path($doc_path, $option, $attributenames, $attributevalues, $layerdb){
+		// diese Funktion liefert den Pfad des Dokuments, welches hochgeladen werden soll (absoluter Pfad mit Dateiname ohne Dateiendung)
     if($doc_path == '')$doc_path = CUSTOM_IMAGE_PATH;
 		if(strtolower(substr($option, 0, 6)) == 'select'){		// ist im Optionenfeld eine SQL-Abfrage definiert, diese ausführen und mit dem Ergebnis den Dokumentenpfad erweitern
 			$sql = $option;
@@ -13522,8 +13521,15 @@ class db_mapObj{
 			}
 			$ret = $layerdb->execSQL($sql,4, 1);
 			$dynamic_path = pg_fetch_row($ret[1]);
-			$doc_path .= $dynamic_path[0];
-			@mkdir($doc_path, 0777, true);
+			$doc_path .= $dynamic_path[0];		// der ganze Pfad mit Dateiname ohne Endung
+			$path_parts = explode('/', $doc_path);
+			array_pop($path_parts);
+			$new_path = implode('/', $path_parts);		// der evtl. neu anzulegende Pfad ohne Datei
+			@mkdir($new_path, 0777, true);
+		}
+		else{
+			$currenttime = date('Y-m-d_H_i_s',time());			// andernfalls werden keine weiteren Unterordner generiert und der Dateiname aus Zeitstempel und Zufallszahl zusammengesetzt
+      $doc_path .= $doc_path.$currenttime.'-'.rand(0, 1000000);
 		}
     return $doc_path;
   }

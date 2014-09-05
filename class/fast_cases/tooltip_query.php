@@ -1,4 +1,38 @@
-<?function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
+<?function in_subnet($ip,$net) {
+	$ipparts=explode('.',$ip);
+	$netparts=explode('.',$net);
+
+	# Direkter Vergleich
+	if ($ip==$net) {
+		return 1;
+	}
+
+  # Test auf C-Netz
+	if (trim($netparts[3],'0')=='' OR $netparts[3]=='*') {
+		# C-Netzvergleich
+	  if ($ipparts[0].'.'.$ipparts[1].'.'.$ipparts[2]==$netparts[0].'.'.$netparts[1].'.'.$netparts[2]) {
+	  	return 1;
+	  }
+	}
+
+  # Test auf B-Netz
+	if ((trim($netparts[3],'0')=='' OR $netparts[3]=='*') AND (trim($netparts[2],'0')=='' OR $netparts[2]=='*')) {
+		# B-Netzvergleich
+	  if ($ipparts[0].'.'.$ipparts[1]==$netparts[0].'.'.$netparts[1]) {
+	  	return 1;
+	  }
+	}
+
+  # Test auf A-Netz
+	if ((trim($netparts[3],'0')=='' OR $netparts[3]=='*') AND (trim($netparts[2],'0')=='' OR $netparts[2]=='*') AND (trim($netparts[1],'0')=='' OR $netparts[1]=='*')) {
+		# A-Netzvergleich
+	  if ($ipparts[0]==$netparts[0]) {
+	  	return 1;
+	  }
+	}
+	return 0;
+}
+function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
   $passwordSettingUnixTime=strtotime($passwordSettingTime); # Unix Zeit in Sekunden an dem das Passwort gesetzt wurde
   $allowedPasswordAgeDays=round($allowedPassordAgeMonth*30.5); # Zeitintervall, wie alt das Password sein darf in Tagen
   $passwordAgeDays=round((time()-$passwordSettingUnixTime)/60/60/24); # Zeitinterval zwischen setzen des Passwortes und aktueller Zeit in Tagen
@@ -497,6 +531,21 @@
     $rs=mysql_fetch_array($query);
     return $rs['stelle_id'];
   }
+	function clientIpIsValide($remote_addr) {
+    # Prüfen ob die übergebene IP Adresse zu den für den Nutzer eingetragenen Adressen passt
+    $ips=explode(';',$this->ips);
+    foreach ($ips AS $ip) {
+      if (trim($ip)!='') {
+        $ip=trim($ip);
+        if (in_subnet($remote_addr,$ip)) {
+          $this->debug->write('<br>IP:'.$remote_addr.' paßt zu '.$ip,4);
+          #echo '<br>IP:'.$remote_addr.' paßt zu '.$ip;
+          return 1;
+        }
+      }
+    }
+    return 0;
+  }
 	function setRolle($stelle_id) {
 		# Abfragen und zuweisen der Einstellungen für die Rolle		
 		$rolle=new rolle($this->id,$stelle_id,$this->database);		
@@ -559,6 +608,18 @@
     $this->checkPasswordAge=$rs["check_password_age"];
     $this->allowedPasswordAge=$rs["allowed_password_age"];
     $this->useLayerAliases=$rs["use_layer_aliases"];
+  }
+  function checkClientIpIsOn() {
+    $sql ='SELECT check_client_ip FROM stelle WHERE ID = '.$this->id;
+    $this->debug->write("<p>file:users.php class:stelle->checkClientIpIsOn- Abfragen ob IP's der Nutzer in der Stelle getestet werden sollen<br>".$sql,4);
+    #echo '<br>'.$sql;
+    $query=mysql_query($sql,$this->database->dbConn);
+    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    $rs=mysql_fetch_array($query);
+    if ($rs['check_client_ip']=='1') {
+      return 1;
+    }
+    return 0;
   }
 	function get_attributes_privileges($layer_id){
 		$sql = 'SELECT attributename, privileg, tooltip FROM layer_attributes2stelle WHERE stelle_id = '.$this->id.' AND layer_id = '.$layer_id;

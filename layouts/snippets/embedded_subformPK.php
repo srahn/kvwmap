@@ -54,24 +54,10 @@
 								else{
 									$url = IMAGEURL.session_id().'.php?dokument=';
 								}											
-								$datapart .= '<table border="0"><tr><td>';								
 								if($type == 'jpg' OR $type == 'png' OR $type == 'gif' ){									
-									echo '<tr><td><a href="'.$url.$dokumentpfad.'"><img class="preview_image" src="'.$url.$thumbname.'"></a></td></tr>';									
+									echo '<tr><td><a class="preview_link" href="'.$url.$dokumentpfad.'"><img class="preview_image" src="'.$url.$thumbname.'"></a></td></tr>';									
   							}else{
-  								echo '<tr><td><a href="'.$url.$dokumentpfad.'"><img src="'.$url.$thumbname.'"></a></td></tr>';
-  							}
-								$datapart .= '</td><td width="100%">';
-								if($attributes['privileg'][$j] != '0' AND !$lock[$k]){
-									$datapart .= '<a href="javascript:delete_document(\''.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'\');"><span>Dokument <br>löschen</span></a>';
-								}
-								$datapart .= '</td></tr>';
-								$datapart .= '<tr><td colspan="2"><span>'.$original_name.'</span></td></tr>';
-								$datapart .= '</table>';
-								$datapart .= '<input type="hidden" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].'_alt'.';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$dataset[$attributes['name'][$j]].'">';
-  							if($type == 'jpg' OR $type == 'png' OR $type == 'gif' ){									
-									$datapart .= '<a href="'.$url.$dokumentpfad.'"><img class="preview_image" src="'.$url.$thumbname.'"></a>';									
-  							}else{
-  								$datapart .= '<a href="'.$url.$dokumentpfad.'"><img src="'.$url.$thumbname.'"></a>';
+  								echo '<tr><td><a class="preview_link" href="'.$url.$dokumentpfad.'"><img class="preview_doc" src="'.$url.$thumbname.'"></a></td></tr>';
   							}
 								$output = '<table><tr><td>'.$original_name.'</td>';
 								echo '<input type="hidden" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].'_alt'.';'.$attributes['nullable'][$j].'" value="'.$dataset[$attributes['name'][$j]].'"></td>';

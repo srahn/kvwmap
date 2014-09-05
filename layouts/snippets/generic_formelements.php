@@ -106,7 +106,7 @@
 												if($attributes['no_new_window'][$j] != true){
 													$datapart .= 	' target="_blank"';
 												}
-												$datapart .= 	' class="buttonlink">'.$strShowPK.'</a>&nbsp;';
+												$datapart .= 	' class="buttonlink"><span>'.$strShowPK.'</span></a>&nbsp;';
 											}
 											if($attributes['subform_layer_privileg'][$j] > 0){
 												$datapart .= '<a href="" onclick="this.href=\'index.php?go=neuer_Layer_Datensatz&selected_layer_id='.$attributes['subform_layer_id'][$j];
@@ -118,7 +118,7 @@
 												if($attributes['no_new_window'][$j] != true){
 													$datapart .= 	' target="_blank"';
 												}
-												$datapart .= 	' class="buttonlink">'.$strNewPK.'</a>&nbsp;';
+												$datapart .= 	' class="buttonlink"><span>'.$strNewPK.'</span></a>&nbsp;';
 											}
 										}
 									}break;
@@ -142,7 +142,9 @@
 											}
 											$this->form_field_names .= $layer['Layer_ID'].';'.$attributes['real_name'][$attribute_foreign_keys[$f]].';'.$attributes['table_name'][$attribute_foreign_keys[$f]].';'.$dataset[$attributes['table_name'][$attribute_foreign_keys[$f]].'_oid'].';TextFK;0;varchar|';
 										}
-										$datapart .= '<input style="width:83%;border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px"';
+										$size = $size - 10;
+										$datapart .= '<input size="'.$size.'" style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px"';
+										$size = $size + 10;
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
 											$datapart .= ' readonly style="background-color:#e8e3da;"';
 										}
@@ -158,7 +160,7 @@
 												if($attributes['no_new_window'][$j] != true){
 													$datapart .= 	' target="_blank"';
 												}
-												$datapart .= 	' style="font-size: '.$this->user->rolle->fontsize_gle.'px">'.$strShowFK.'</a>';
+												$datapart .= 	' style="font-size: '.$this->user->rolle->fontsize_gle.'px"><span>'.$strShowFK.'</span></a>';
 											}
 										}
 									}break;
@@ -198,7 +200,7 @@
 												$datapart .= '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$dataset[$attributes['subform_pkeys'][$j][$p]];
 												$datapart .= '&operator_'.$attributes['subform_pkeys'][$j][$p].'==';
 											}
-											$datapart .= 	'\')">'.$strShowAll.'</a>';												
+											$datapart .= 	'\')"><span>'.$strShowAll.'</span></a>';												
 											if($attributes['subform_layer_privileg'][$j] > 0 AND !$lock[$k]){
 												if($attributes['embedded'][$j] == true){
 													$datapart .= '&nbsp;<a class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz';
@@ -211,7 +213,7 @@
 													}
 													$data .= '&preview_attribute='.$attributes['preview_attribute'][$j];
 													$datapart .= '&data='.str_replace('&', '<und>', $data);
-													$datapart .= '&selected_layer_id='.$attributes['subform_layer_id'][$j].'&embedded=true&fromobject=subform'.$layer['Layer_ID'].'_'.$k.'_'.$j.'&targetobject='.$attributes['name'][$j].'_'.$k.'&targetlayer_id='.$layer['Layer_ID'].'&targetattribute='.$attributes['name'][$j].'\', new Array(document.getElementById(\'subform'.$layer['Layer_ID'].'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'));clearsubforms();">'.$strNewEmbeddedPK.'</a>';
+													$datapart .= '&selected_layer_id='.$attributes['subform_layer_id'][$j].'&embedded=true&fromobject=subform'.$layer['Layer_ID'].'_'.$k.'_'.$j.'&targetobject='.$attributes['name'][$j].'_'.$k.'&targetlayer_id='.$layer['Layer_ID'].'&targetattribute='.$attributes['name'][$j].'\', new Array(document.getElementById(\'subform'.$layer['Layer_ID'].'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'));clearsubforms();"><span>'.$strNewEmbeddedPK.'</span></a>';
 													$datapart .= '<div style="display:inline" id="subform'.$layer['Layer_ID'].'_'.$k.'_'.$j.'"></div>';
 												}
 												else{
@@ -228,7 +230,7 @@
 													$datapart .= '&oid='.$dataset[$attributes['table_name'][$attributes['subform_pkeys'][$j][0]].'_oid'];			# die oid des Datensatzes und die Layer-ID wird mit übergeben, für evtl. Zoom auf den Datensatz
 													$datapart .= '&tablename='.$attributes['table_name'][$attributes['the_geom']];											# dito
 													$datapart .= '&columnname='.$attributes['the_geom'];																								# dito
-													$datapart .= '&selected_layer_id='.$attributes['subform_layer_id'][$j].'\')">&nbsp;'.$strNewEmbeddedPK.'</a>';
+													$datapart .= '&selected_layer_id='.$attributes['subform_layer_id'][$j].'\')"><span>&nbsp;'.$strNewEmbeddedPK.'</span></a>';
 												}
 											}
 										}
@@ -262,7 +264,7 @@
 												$datapart .= '<a href="'.$url.$dokumentpfad.'"><img class="preview_image" src="'.$url.$thumbname.'"></a>';									
 											}
 											else{
-												$datapart .= '<a href="'.$url.$dokumentpfad.'"><img src="'.$url.$thumbname.'"></a>';									
+												$datapart .= '<a href="'.$url.$dokumentpfad.'"><img class="preview_doc" src="'.$url.$thumbname.'"></a>';									
 											}
 			  							$datapart .= '</td><td width="100%">';
 			  							if($attributes['privileg'][$j] != '0' AND !$lock[$k]){

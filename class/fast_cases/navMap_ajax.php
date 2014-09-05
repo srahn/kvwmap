@@ -1,4 +1,38 @@
-<?function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
+<?function in_subnet($ip,$net) {
+	$ipparts=explode('.',$ip);
+	$netparts=explode('.',$net);
+
+	# Direkter Vergleich
+	if ($ip==$net) {
+		return 1;
+	}
+
+  # Test auf C-Netz
+	if (trim($netparts[3],'0')=='' OR $netparts[3]=='*') {
+		# C-Netzvergleich
+	  if ($ipparts[0].'.'.$ipparts[1].'.'.$ipparts[2]==$netparts[0].'.'.$netparts[1].'.'.$netparts[2]) {
+	  	return 1;
+	  }
+	}
+
+  # Test auf B-Netz
+	if ((trim($netparts[3],'0')=='' OR $netparts[3]=='*') AND (trim($netparts[2],'0')=='' OR $netparts[2]=='*')) {
+		# B-Netzvergleich
+	  if ($ipparts[0].'.'.$ipparts[1]==$netparts[0].'.'.$netparts[1]) {
+	  	return 1;
+	  }
+	}
+
+  # Test auf A-Netz
+	if ((trim($netparts[3],'0')=='' OR $netparts[3]=='*') AND (trim($netparts[2],'0')=='' OR $netparts[2]=='*') AND (trim($netparts[1],'0')=='' OR $netparts[1]=='*')) {
+		# A-Netzvergleich
+	  if ($ipparts[0]==$netparts[0]) {
+	  	return 1;
+	  }
+	}
+	return 0;
+}
+function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
   $passwordSettingUnixTime=strtotime($passwordSettingTime); # Unix Zeit in Sekunden an dem das Passwort gesetzt wurde
   $allowedPasswordAgeDays=round($allowedPassordAgeMonth*30.5); # Zeitintervall, wie alt das Password sein darf in Tagen
   $passwordAgeDays=round((time()-$passwordSettingUnixTime)/60/60/24); # Zeitinterval zwischen setzen des Passwortes und aktueller Zeit in Tagen
@@ -1248,9 +1282,10 @@
 		if($this->formvars['go'] != 'navMap_ajax')set_error_handler("MapserverErrorHandler");		// ist in allg_funktionen.php definiert
     if($this->main == 'map.php' AND MINSCALE != '' AND $this->map_factor == '' AND $this->map_scaledenom < MINSCALE){
       $this->scaleMap(MINSCALE);
-    }
+    }    
     $this->image_map = $this->map->draw() OR die($this->layer_error_handling());    
-    $filename = $this->user->id.'_'.rand(0, 1000000).'.'.$this->map->outputformat->extension;				$this->image_map->saveImage(IMAGEPATH.$filename);		
+    $filename = $this->user->id.'_'.rand(0, 1000000).'.'.$this->map->outputformat->extension;
+    $this->image_map->saveImage(IMAGEPATH.$filename);
     $this->img['hauptkarte'] = IMAGEURL.$filename;
     $this->debug->write("Name der Hauptkarte: ".$this->img['hauptkarte'],4);
 
@@ -1542,6 +1577,21 @@
     if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     $rs=mysql_fetch_array($query);
     return $rs['stelle_id'];
+  }
+	function clientIpIsValide($remote_addr) {
+    # Prüfen ob die übergebene IP Adresse zu den für den Nutzer eingetragenen Adressen passt
+    $ips=explode(';',$this->ips);
+    foreach ($ips AS $ip) {
+      if (trim($ip)!='') {
+        $ip=trim($ip);
+        if (in_subnet($remote_addr,$ip)) {
+          $this->debug->write('<br>IP:'.$remote_addr.' paßt zu '.$ip,4);
+          #echo '<br>IP:'.$remote_addr.' paßt zu '.$ip;
+          return 1;
+        }
+      }
+    }
+    return 0;
   }
 	function setRolle($stelle_id) {
 		# Abfragen und zuweisen der Einstellungen für die Rolle		

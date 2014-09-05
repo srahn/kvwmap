@@ -177,6 +177,21 @@
     $rs=mysql_fetch_array($query);
     return $rs['stelle_id'];
   }
+	function clientIpIsValide($remote_addr) {
+    # Prüfen ob die übergebene IP Adresse zu den für den Nutzer eingetragenen Adressen passt
+    $ips=explode(';',$this->ips);
+    foreach ($ips AS $ip) {
+      if (trim($ip)!='') {
+        $ip=trim($ip);
+        if (in_subnet($remote_addr,$ip)) {
+          $this->debug->write('<br>IP:'.$remote_addr.' paßt zu '.$ip,4);
+          #echo '<br>IP:'.$remote_addr.' paßt zu '.$ip;
+          return 1;
+        }
+      }
+    }
+    return 0;
+  }
 	function setRolle($stelle_id) {
 		# Abfragen und zuweisen der Einstellungen für die Rolle		
 		$rolle=new rolle($this->id,$stelle_id,$this->database);		
@@ -239,6 +254,18 @@
     $this->checkPasswordAge=$rs["check_password_age"];
     $this->allowedPasswordAge=$rs["allowed_password_age"];
     $this->useLayerAliases=$rs["use_layer_aliases"];
+  }
+  function checkClientIpIsOn() {
+    $sql ='SELECT check_client_ip FROM stelle WHERE ID = '.$this->id;
+    $this->debug->write("<p>file:users.php class:stelle->checkClientIpIsOn- Abfragen ob IP's der Nutzer in der Stelle getestet werden sollen<br>".$sql,4);
+    #echo '<br>'.$sql;
+    $query=mysql_query($sql,$this->database->dbConn);
+    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    $rs=mysql_fetch_array($query);
+    if ($rs['check_client_ip']=='1') {
+      return 1;
+    }
+    return 0;
   }
 	function getsubmenues($id){
 		$sql ='SELECT menue_id,';

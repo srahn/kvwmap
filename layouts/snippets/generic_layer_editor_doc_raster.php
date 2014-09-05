@@ -4,11 +4,13 @@
  
 	include(SNIPPETS.'generic_functions.php'); 
  
- # Variablensubstitution
- $layer = $this->qlayerset[$i];
- $attributes = $layer['attributes'];
- $size = 49;
- $select_width = 'width:290px;';
+	# Variablensubstitution
+	$layer = $this->qlayerset[$i];
+	$attributes = $layer['attributes'];
+	if($this->currentform == 'document.GUI2')$size = 40;
+	else $size = 61;
+	$linksize = $this->user->rolle->fontsize_gle - 1;
+	$select_width = 'width:290px;';
 ?>
 <div id="layer">
 <table border="0" cellpadding="0" cellspacing="0">
@@ -63,7 +65,7 @@
 				}
 				if($attributes['invisible'][$attributes['name'][$j]] != 'true'  AND $attributes['name'][$j] != 'lock'){
 ?>
-					<tr>
+					<tr class="<? if($attributes['form_element_type'][$j] == 'Dokument')echo 'tr_doc'; else echo 'tr_other'; ?>">
 <?				if($attributes['type'][$j] != 'geometry'){
 						echo '<td  valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';
 						if($attributes['privileg'][$j] != '0' AND !$lock[$k]){
