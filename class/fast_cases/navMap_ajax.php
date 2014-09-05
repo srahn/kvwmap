@@ -2012,6 +2012,37 @@
 
     return $ret;
   }
+	function read_epsg_codes($order = true){
+    global $supportedSRIDs;
+    $sql ="SELECT spatial_ref_sys.srid, srtext, alias, minx, miny, maxx, maxy FROM spatial_ref_sys ";
+    $sql.="LEFT JOIN spatial_ref_sys_alias ON spatial_ref_sys_alias.srid = spatial_ref_sys.srid";
+    # Wenn zu unterstützende SRIDs angegeben sind, ist die Abfrage diesbezüglich eingeschränkt
+    $anzSupportedSRIDs = count($supportedSRIDs);
+    if ($anzSupportedSRIDs > 0) {
+      $sql.=" WHERE spatial_ref_sys.srid IN (".implode(',', $supportedSRIDs).")";
+    }
+    if($order)$sql.=" ORDER BY spatial_ref_sys.srid";
+    #echo $sql;		
+    $ret = $this->execSQL($sql, 4, 0);		
+    if($ret[0]==0){
+			$i = 0;
+      while($row = pg_fetch_array($ret[1])){
+      	if($row['alias'] != ''){
+      		$row['srtext'] = $row['alias'];
+      	}
+      	else{
+	        $explosion = explode('[', $row['srtext']);
+	        if(strlen($explosion[1]) > 30){
+	          $explosion[1] = substr($explosion[1], 0, 30);
+	        }
+	        $row['srtext'] = $explosion[1];
+      	}
+				$epsg_codes[$row['srid']] = $row;
+				$i++;
+      }
+    }
+    return $epsg_codes;
+  }
   function close() {
     $this->debug->write("<br>PostgreSQL Verbindung mit ID: ".$this->dbConn." schließen.",4);
     return pg_close($this->dbConn);
