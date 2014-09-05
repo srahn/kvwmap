@@ -7024,7 +7024,7 @@ class GUI {
             $datei_name=$name_array[0];
             $datei_erweiterung=array_pop($name_array);
 						$doc_path = $mapdb->getDocument_Path($layerset[0]['document_path'], $attributes['options'][$element[1]], $attributenames, $attributevalues, $layerdb);
-            $nachDatei = $doc_path.$datei_erweiterung; 
+            $nachDatei = $doc_path.'.'.$datei_erweiterung; 
             # Bild in das Datenverzeichnis kopieren
             if (move_uploaded_file($_files[$form_fields[$i]]['tmp_name'],$nachDatei)) {
               //echo '<br>Lade '.$_files[$form_fields[$i]]['tmp_name'].' nach '.$nachDatei.' hoch';
@@ -10558,7 +10558,7 @@ class GUI {
                 $datei_name=$name_array[0];
                 $datei_erweiterung=array_pop($name_array);
                 $doc_path = $mapdb->getDocument_Path($layerset[0]['document_path'], $attributes['options'][$element[1]], $attributenames, $attributevalues, $layerdb);
-                $nachDatei = $doc_path.$datei_erweiterung;
+                $nachDatei = $doc_path.'.'.$datei_erweiterung;
                 $eintrag = $nachDatei."&original_name=".$_files[$form_fields[$i]]['name'];
                 if($datei_name == 'delete')$eintrag = '';
                 # Bild in das Datenverzeichnis kopieren
@@ -13613,7 +13613,7 @@ class db_mapObj{
 		}
 		else{
 			$currenttime = date('Y-m-d_H_i_s',time());			// andernfalls werden keine weiteren Unterordner generiert und der Dateiname aus Zeitstempel und Zufallszahl zusammengesetzt
-      $doc_path .= $doc_path.$currenttime.'-'.rand(0, 1000000);; 
+      $doc_path .= $doc_path.$currenttime.'-'.rand(0, 1000000);
 		}
     return $doc_path;
   }
