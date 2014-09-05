@@ -6,7 +6,7 @@
 	$username = lumberjack;
 	$passwort = lumbertest;
 	$layerId = 455;
-	$selectors = "gemnr, name, lk_nr, email, ansprechpartner, bearbeitungszeit";
+	$selectors = "gemnr, name, lk_nr, email, ansprechpartner, bearbeitungszeit, npa_allowed, www";
 	
 	# default Values (if not set, we set here the default)
 	$_REQUEST['epsg_code'] == '' ? $epsg_code = 4326     : $epsg_code = $_REQUEST['epsg_code'];  # epsg_code of search point coordinates

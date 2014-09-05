@@ -2,11 +2,10 @@
 header('Content-Type: text/html; charset=utf-8');
 session_start();
 ###################################################################
-# kvwmap - Kartenserver für Kreisverwaltungen                     #
-###################################################################
+# kvwmap - Kartenserver für die Verwaltung raumbezogener Daten.   #
 # Lizenz                                                          #
 #                                                                 #
-# Copyright (C) 2008  Peter Korduan                               #
+# Copyright (C) 2008  Peter Korduan                               # 
 #                                                                 #
 # This program is free software; you can redistribute it and/or   #
 # modify it under the terms of the GNU General Public License as  #
@@ -27,7 +26,8 @@ session_start();
 # http://www.gnu.de/gpl-ger.html                                  #
 #                                                                 #
 # Kontakt:                                                        #
-# Peter Korduan peter.korduan@uni-rostock.de                      #
+# peter.korduan@gdi-service.de                                    #
+# stefan.rahn@gdi-service.de                                      #
 ###################################################################
 
 // function microtime_float1(){
@@ -178,22 +178,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 		case 'get_quicksearch_attributes' : {
 			$GUI->get_quicksearch_attributes();
 	  } break;
-	
-		case 'upload_temp_file' : {
-			$GUI->checkCaseAllowed($go);			
-			$GUI->qlayerset[0]['shape'][0] = $GUI->uploadTempFile(); 
-			$GUI->output();
-			break;
-		}
-		
-		case 'pack_and_mail' : {
-			$GUI->checkCaseAllowed($go);
-			$strip_list = "go, go_plus, username, passwort, Stelle_ID, format, version, callback, _dc, file";
-			$GUI->qlayerset[0]['shape'][0] = $GUI->packAndMail(formvars_strip($GUI->formvars, $strip_list), 'baumfaellantrag_');
-			$GUI->output();
-			break;
-		}
-			
+
 		case 'ALB_ALK_Tabellen_leeren' : {
 			$GUI->checkCaseAllowed($go);
 			$GUI->truncateAlbAlkTables();
