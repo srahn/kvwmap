@@ -65,7 +65,9 @@ class case_compressor {
 
 	public static function inject($filename){
 		$filenameparts = explode('.', $filename);
-		$newfilename = $filenameparts[0].'_injected.'.$filenameparts[1];
+		$type = array_pop($filenameparts);
+		$file = implode('.', $filenameparts);
+		$newfilename = $file.'_injected.'.$type;
 		$filestring = file_get_contents($filename);
 		self::$filearray[$filename] = file($filename);
 		# die original Klassendateien mit dem Code-Extraktor injezieren

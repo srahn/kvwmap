@@ -41,7 +41,7 @@ $go = $_REQUEST['go'];
 if($_REQUEST['go_plus'] != '')$go = $go.'_'.$_REQUEST['go_plus'];
 
 #####################################
-define(CASE_COMPRESS, false);				#
+define(CASE_COMPRESS, true);				#
 #####################################
 
 $non_spatial_cases = array('changemenue_with_ajax', 'get_group_legend');		// für non-spatial cases wird in start.php keine Verbindung zur PostgreSQL aufgebaut usw.
