@@ -10538,10 +10538,11 @@ class GUI {
       if($form_fields[$i] != ''){
         $element = explode(';', $form_fields[$i]);
         $layer_id = $element[0];
-        $attributname = $attributenames[] = $element[1];
-				$attributevalues[] = $this->formvars[$form_fields[$i]];
+        $attributname = $element[1];				
         $tablename = $element[2];
         $oid = $element[3];
+				$attributenames[$oid][] = $attributname;
+				$attributevalues[$oid][] = $this->formvars[$form_fields[$i]];
         $formtype = $element[4];
         $datatype = $element[6];
 				$layerset = $this->user->rolle->getLayer($layer_id);
@@ -10562,7 +10563,7 @@ class GUI {
                 $name_array=explode('.',basename($_files[$form_fields[$i]]['name']));
                 $datei_name=$name_array[0];
                 $datei_erweiterung=array_pop($name_array);
-                $doc_path = $mapdb->getDocument_Path($layerset[0]['document_path'], $attributes['options'][$element[1]], $attributenames, $attributevalues, $layerdb);
+                $doc_path = $mapdb->getDocument_Path($layerset[0]['document_path'], $attributes['options'][$element[1]], $attributenames[$oid], $$attributevalues[$oid], $layerdb);
                 $nachDatei = $doc_path.'.'.$datei_erweiterung;
                 $eintrag = $nachDatei."&original_name=".$_files[$form_fields[$i]]['name'];
                 if($datei_name == 'delete')$eintrag = '';
