@@ -109,7 +109,7 @@ class GUI {
     #$this->user->rolle->setClassStatus($this->formvars); ???
     $this->loadMap('DataBase');
     echo $this->create_group_legend($this->formvars['group']);
-  }
+  } 
 	
 	function create_group_legend($group_id){
 		if($this->groupset[$group_id]['untergruppen'] == NULL AND $this->groups_with_layers[$group_id] == NULL)return;			# wenns keine Layer oder Untergruppen gibt, nix machen
@@ -138,7 +138,7 @@ class GUI {
 		$layercount = count($this->groups_with_layers[$group_id]);
     if($groupstatus == 1){		# Gruppe aufgeklappt
 			for($u = 0; $u < count($this->groupset[$group_id]['untergruppen']); $u++){			# die Untergruppen rekursiv durchlaufen
-				$legend .= '<tr><td><table cellspacing="0" cellpadding="0" style="width:100%"><tr><td><img src="'.GRAPHICSPATH.'leer.gif" width="13" height="1" border="0"></td><td style="width: 100%">';
+				$legend .= '<tr><td colspan="3"><table cellspacing="0" cellpadding="0" style="width:100%"><tr><td><img src="'.GRAPHICSPATH.'leer.gif" width="13" height="1" border="0"></td><td style="width: 100%">';
 				$legend .= $this->create_group_legend($this->groupset[$group_id]['untergruppen'][$u]);
 				$legend .= '</td></tr></table></td></tr>';
 			}
@@ -5460,11 +5460,15 @@ class GUI {
 			$dateinamensteil[1] = 'gif';
   		switch ($type) {
   			case 'pdf' :{
-  				$thumbname = GRAPHICSPATH.'pdf.gif';
+  				//$thumbname = WWWROOT.APPLVERSION.GRAPHICSPATH.'pdf.gif';
+					$thumbname = $dateinamensteil[0].'_thumb.jpg';			
+					if(!file_exists($thumbname)){
+						exec(IMAGEMAGICKPATH.'convert '.$dokument.'[0] -resize 250 '.$thumbname);
+					}
   			}break;
   			
   			case 'doc' :{
-					$thumbname = GRAPHICSPATH.'openoffice.gif';
+					$thumbname = WWWROOT.APPLVERSION.GRAPHICSPATH.'openoffice.gif';
   			}break;
   			
   			default : {
@@ -5488,7 +5492,8 @@ class GUI {
 			if(in_array($_REQUEST[\'dokument\'], $allowed_documents)){
 				if($_REQUEST[\'original_name\'] == "")$_REQUEST[\'original_name\'] = basename($_REQUEST[\'dokument\']);
 				$type = strtolower(array_pop(explode(\'.\', $_REQUEST[\'dokument\'])));
-				header("Content-type: image/".$type);
+				if(in_array($type, array(\'jpg\', \'gif\', \'png\')))header("Content-type: image/".$type);
+				else header("Content-type: application/".$type);
 				header("Content-Disposition: attachment; filename=".$_REQUEST[\'original_name\']);
 				header("Expires: 0");
 				header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
@@ -7489,8 +7494,8 @@ class GUI {
 			$pdf_file = $output;
 			# in jpg umwandeln
 			$currenttime = date('Y-m-d_H_i_s',time());
-			exec(IMAGEMAGICKPATH.'convert '.$pdf_file.' -resize 595 '.dirname($pdf_file).'/'.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg');
-			#echo IMAGEMAGICKPATH.'convert '.$pdf_file.' -resize 595 '.dirname($pdf_file).'/'.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg';
+			exec(IMAGEMAGICKPATH.'convert '.$pdf_file.'[0] -resize 595 '.dirname($pdf_file).'/'.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg');
+			#echo IMAGEMAGICKPATH.'convert '.$pdf_file.'[0] -resize 595 '.dirname($pdf_file).'/'.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg';
 			if(!file_exists(IMAGEPATH.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg')){
 				return TEMPPATH_REL.basename($pdf_file, ".pdf").'-'.$currenttime.'-0.jpg';
 			}
@@ -7552,8 +7557,8 @@ class GUI {
 	    $pdf_file = $this->ddl->createDataPDF(NULL, NULL, NULL, $layerdb, $layerset, $attributes, $this->formvars['chosen_layer_id'], $this->ddl->selectedlayout[0], $oids, $result, $this->Stelle, $this->user);
 	    # in jpg umwandeln
 	    $currenttime = date('Y-m-d_H_i_s',time());
-	    exec(IMAGEMAGICKPATH.'convert '.$pdf_file.' -resize 595 '.dirname($pdf_file).'/'.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg');
-	    #echo IMAGEMAGICKPATH.'convert '.$pdf_file.' -resize 595 '.dirname($pdf_file).'/'.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg';
+	    exec(IMAGEMAGICKPATH.'convert '.$pdf_file.'[0] -resize 595 '.dirname($pdf_file).'/'.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg');
+	    #echo IMAGEMAGICKPATH.'convert '.$pdf_file.'[0] -resize 595 '.dirname($pdf_file).'/'.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg';
 	    if(!file_exists(IMAGEPATH.basename($pdf_file, ".pdf").'-'.$currenttime.'.jpg')){
 	    	$this->previewfile = TEMPPATH_REL.basename($pdf_file, ".pdf").'-'.$currenttime.'-0.jpg';
 	    }
@@ -11612,14 +11617,17 @@ class GUI {
 							if($attributes['alias'][$j] == '')$attributes['alias'][$j] = $attributes['name'][$j];
             	switch ($attributes['form_element_type'][$j]){
 				        case 'Dokument' : {
-				        	$filename = explode('&', $layer['shape'][$k][$attributes['name'][$j]]);
-				        	if(file_exists($filename[0])){
-				        		$info = pathinfo($filename[0]);
-										if(in_array(strtolower($info['extension']), array('jpg', 'png', 'gif'))){
-				        			$image = copy_file_to_tmp($filename[0]);
-				          		$pictures .= '| '.$image;
-										}
-				        	}
+									$dokumentpfad = $layer['shape'][$k][$attributes['name'][$j]];
+									$pfadteil = explode('&original_name=', $dokumentpfad);
+									$dateiname = $pfadteil[0];
+									$original_name = $pfadteil[1];
+									$dateinamensteil=explode('.', $dateiname);
+									$type = $dateinamensteil[1];
+									$thumbname = $this->get_dokument_vorschau($dateinamensteil);
+									$this->allowed_documents[] = addslashes($dateiname);
+									$this->allowed_documents[] = addslashes($thumbname);
+									$url = IMAGEURL.session_id().'.php?dokument=';
+									$pictures .= '| '.$url.$thumbname;
 				        }break;
 				        case 'Link': {
 		              $attribcount++;
@@ -12639,18 +12647,22 @@ class GUI {
   function zoomToRefExt() {
     # Zoomen auf den in der Referenckarte gesetzten Punkt
     # Berechnen der Koordinaten des angeklickten Punktes in der Referencekarte
-    $refmapwidthm=($this->map->reference->extent->maxx-$this->map->reference->extent->minx);
-    $refmappixsize=$refmapwidthm/$this->map->reference->width;
-    $refmapxposm=$this->map->reference->extent->minx+$refmappixsize*$this->formvars['refmap_x'];
-    $refmapyposm=$this->map->reference->extent->maxy-$refmappixsize*$this->formvars['refmap_y'];
+    $refmapwidthm=($this->reference_map->reference->extent->maxx-$this->reference_map->reference->extent->minx);
+    $refmappixsize=$refmapwidthm/$this->reference_map->reference->width;
+    $refmapxposm=$this->reference_map->reference->extent->minx+$refmappixsize*$this->formvars['refmap_x'];
+    $refmapyposm=$this->reference_map->reference->extent->maxy-$refmappixsize*$this->formvars['refmap_y'];
     $halfmapwidthm=($this->map->extent->maxx-$this->map->extent->minx)/2;
     $halfmapheight=($this->map->extent->maxy-$this->map->extent->miny)/2;
     $zoommaxx=$refmapxposm+$halfmapwidthm;
     $zoomminx=$refmapxposm-$halfmapwidthm;
     $zoommaxy=$refmapyposm+$halfmapheight;
     $zoomminy=$refmapyposm-$halfmapheight;
-    # ersetzen durch zoomPoint Funktion von mapObject.
-    $this->map->setextent($zoomminx,$zoomminy,$zoommaxx,$zoommaxy);
+		$newextent=ms_newRectObj();
+		$newextent->setextent($zoomminx,$zoomminy,$zoommaxx,$zoommaxy);
+		if($this->ref['epsg_code'] != $this->user->rolle->epsg_code){
+			$newextent->project($this->reference_map->projection, $this->map->projection);
+		}
+    $this->map->setextent($newextent->minx,$newextent->miny,$newextent->maxx,$newextent->maxy);
     $oPixelPos=ms_newPointObj();
     $oPixelPos->setXY($this->map->width/2,$this->map->height/2);
     $this->map->zoompoint(1,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
@@ -13613,7 +13625,7 @@ class db_mapObj{
 		}
 		else{
 			$currenttime = date('Y-m-d_H_i_s',time());			// andernfalls werden keine weiteren Unterordner generiert und der Dateiname aus Zeitstempel und Zufallszahl zusammengesetzt
-      $doc_path .= $doc_path.$currenttime.'-'.rand(0, 1000000);
+      $doc_path .= $currenttime.'-'.rand(0, 1000000);
 		}
     return $doc_path;
   }

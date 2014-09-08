@@ -154,7 +154,7 @@ function save(stelle){
 
 <script type="text/javascript">
 
-	document.getElementById("stellendiv").scrollLeft="<? echo $this->formvars['scrollposition']; ?>"
+	if(document.getElementById("stellendiv"))document.getElementById("stellendiv").scrollLeft="<? echo $this->formvars['scrollposition']; ?>"
 
 </script>
 

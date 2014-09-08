@@ -5,14 +5,13 @@
 #                                                                  #
 ####################################################################
 # aktuelle Versionsnummer
-define('VERSION','1.13');
+define('VERSION','2.0');
 define('APPLVERSION','kvwmap/');
 # Bezeichnung der MySQL-Datenbank mit den Benutzerdaten
 $dbname='kvwmapdb';
 # Wenn der pgdbname leer gelassen wird, wird versucht die Information
 # für die Verbindung zur PostGIS-Datenbank aus der Tabelle Stelle zu lesen.
 $pgdbname='kvwmapsp';
-#$pgdbname='alkis_25833';
 
 ########################## Metadaten zum Landkreis
 define('LANDKREIS', 'für den Landkreis');
@@ -401,71 +400,71 @@ define('DELETE_ROLLENLAYER', 'true');   # true / false                          
 define('SHOW_MAP_IMAGE', 'true');       # true / false                            # Version 1.6.7
 
 
-############################# Klassenbibliotheken lesen
-# laden der Klassenbibliotheken
-include_(CLASSPATH.'kvwmap_core.php');								# Version 1.7.6
-include_(CLASSPATH.'kataster_core.php');							# Version 1.7.6
-include_(CLASSPATH.'mysql.php');											# Version 1.7.6
-include_(CLASSPATH.'postgresql_core.php');						# Version 1.7.6
-include_(CLASSPATH.'users_core.php');									# Version 1.7.6
-if(!in_array($_REQUEST['go'], $fast_loading_cases)){		# Version 1.7.6		# in Version 2.0 angepasst   (die folgenden Klassen nicht laden, wenn einer der schnell ladenden Anwendungsfälle ausgeführt werden soll)
-	include_(CLASSPATH.'kvwmap.php');	
-	include_(CLASSPATH.'kataster.php');
-	include_(CLASSPATH.'postgresql.php');
-	if(ALKIS){																					#	Version 1.13
-		include_(CLASSPATH.'kataster_alkis.php');					# Version 1.13
-		include_(CLASSPATH.'postgresql_alkis.php');				# Version 1.13
-	}																										# Version 1.13
-	else{																								# Version 1.13
-		include_(CLASSPATH.'kataster_alk.php');						# Version 1.13
-		include_(CLASSPATH.'postgresql_alk.php');					# Version 1.13
-	}																										# Version 1.13
-	include_(CLASSPATH.'users.php');
-	#include_(CLASSPATH.'alb.php');											# in Version 2.0 gelöscht
-	#include_(CLASSPATH.'alk.php');											# in Version 2.0 gelöscht
-	#include_(CLASSPATH.'antrag.php');									# in Version 2.0 gelöscht
-	#include_(CLASSPATH.'bau.php');											# in Version 2.0 gelöscht
-	#include_(CLASSPATH.'nachweis.php');								# in Version 2.0 gelöscht
-	#include_(CLASSPATH.'geothermie.php');							# in Version 2.0 gelöscht
-	#include_(CLASSPATH.'bodenrichtwerte.php');					# in Version 2.0 gelöscht
-	#include_(CLASSPATH.'verundentsorgung.php');				# in Version 2.0 gelöscht
-	#include_(CLASSPATH.'metadaten.php');								# in Version 2.0 gelöscht
-	#include_(CLASSPATH.'spatial_processor.php');				# in Version 2.0 gelöscht
-	include_(CLASSPATH.'bauleitplanung.php');           # Version 1.6.1
-	#include_(CLASSPATH.'jagdkataster.php');            # Version 1.6.1		# in Version 2.0 gelöscht
-	#include_(CLASSPATH.'polygoneditor.php');           # Version 1.6.3		# in Version 2.0 gelöscht
-	#include_(CLASSPATH.'pointeditor.php');             # Version 1.6.3		# in Version 2.0 gelöscht
-	#include_(CLASSPATH.'dbf.php');                     # Version 1.6.5		# in Version 2.0 gelöscht
-	#include_(CLASSPATH.'anliegerbeitraege.php');       # Version 1.6.6   # in Version 2.0 gelöscht
-	#include_(CLASSPATH.'gebaeude_editor.php');         # Version 1.6.6   # in Version 2.0 gelöscht
-	#include_(CLASSPATH.'documents.php');               # Version 1.6.6		# in Version 2.0 gelöscht
-	#include_(CLASSPATH.'esaf.php');                    # Version 1.6.6		# in Version 2.0 gelöscht
-	#include_(CLASSPATH.'shape.php');                   # Version 1.6.6		# in Version 2.0 gelöscht
-	#include_(CLASSPATH.'gps.php');                     # Version 1.6.7   # in Version 2.0 gelöscht
-	#include_(CLASSPATH.'wms.php');                     # Version 1.6.7   # in Version 2.0 gelöscht
-	#include_(CLASSPATH.'funktion.php');                # Version 1.6.9		# in Version 2.0 gelöscht
-	#include_(CLASSPATH.'lineeditor.php');              # Version 1.7.0		# in Version 2.0 gelöscht
-	#include_(CLASSPATH.'wfs.php');                     # Version 1.7.0		# in Version 2.0 gelöscht
-	#include_(CLASSPATH.'synchronisation.php');         # Version 1.7.0		# in Version 2.0 gelöscht
-	#include_(CLASSPATH.'tif.php');          						# Version 1.7.2		# in Version 2.0 gelöscht
-	#include_(CLASSPATH.'gpx.php');          						# Version 1.7.4		# in Version 2.0 gelöscht
-	#include_(CLASSPATH.'datendrucklayout.php');        # Version 1.7.5		# in Version 2.0 gelöscht
-	#include_(CLASSPATH.'metadaten_csw.php');						# Version 1.7.5		# in Version 2.0 gelöscht
-	#include_(CLASSPATH.'uko.php');          						# Version 1.8.0		# in Version 2.0 gelöscht
-}																											# Version 1.7.6
-include (WWWROOT.APPLVERSION.'funktionen/allg_funktionen.php');		# In Version 1.7.3 angepasst
+// ############################# Klassenbibliotheken lesen														# in Version 2.0 gelöscht
+// # laden der Klassenbibliotheken																										# in Version 2.0 gelöscht
+// include_(CLASSPATH.'kvwmap_core.php');								# Version 1.7.6								# in Version 2.0 gelöscht
+// include_(CLASSPATH.'kataster_core.php');							# Version 1.7.6								# in Version 2.0 gelöscht
+// include_(CLASSPATH.'mysql.php');											# Version 1.7.6								# in Version 2.0 gelöscht
+// include_(CLASSPATH.'postgresql_core.php');						# Version 1.7.6								# in Version 2.0 gelöscht
+// include_(CLASSPATH.'users_core.php');									# Version 1.7.6							# in Version 2.0 gelöscht
+// if(!in_array($_REQUEST['go'], $fast_loading_cases)){		# Version 1.7.6							# in Version 2.0 gelöscht
+	// include_(CLASSPATH.'kvwmap.php');																								# in Version 2.0 gelöscht
+	// include_(CLASSPATH.'kataster.php');																							# in Version 2.0 gelöscht
+	// include_(CLASSPATH.'postgresql.php');																						# in Version 2.0 gelöscht
+	// if(ALKIS){																					#	Version 1.13								# in Version 2.0 gelöscht
+		// include_(CLASSPATH.'kataster_alkis.php');					# Version 1.13							# in Version 2.0 gelöscht
+		// include_(CLASSPATH.'postgresql_alkis.php');				# Version 1.13							# in Version 2.0 gelöscht
+	// }																										# Version 1.13							# in Version 2.0 gelöscht
+	// else{																								# Version 1.13							# in Version 2.0 gelöscht
+		// include_(CLASSPATH.'kataster_alk.php');						# Version 1.13							# in Version 2.0 gelöscht
+		// include_(CLASSPATH.'postgresql_alk.php');					# Version 1.13							# in Version 2.0 gelöscht
+	// }																										# Version 1.13							# in Version 2.0 gelöscht
+	// include_(CLASSPATH.'users.php');																									# in Version 2.0 gelöscht
+	// #include_(CLASSPATH.'alb.php');																									# in Version 2.0 gelöscht
+	// #include_(CLASSPATH.'alk.php');																									# in Version 2.0 gelöscht
+	// #include_(CLASSPATH.'antrag.php');																								# in Version 2.0 gelöscht
+	// #include_(CLASSPATH.'bau.php');																									# in Version 2.0 gelöscht
+	// #include_(CLASSPATH.'nachweis.php');																							# in Version 2.0 gelöscht
+	// #include_(CLASSPATH.'geothermie.php');																						# in Version 2.0 gelöscht
+	// #include_(CLASSPATH.'bodenrichtwerte.php');																			# in Version 2.0 gelöscht
+	// #include_(CLASSPATH.'verundentsorgung.php');																			# in Version 2.0 gelöscht
+	// #include_(CLASSPATH.'metadaten.php');																						# in Version 2.0 gelöscht
+	// #include_(CLASSPATH.'spatial_processor.php');																		# in Version 2.0 gelöscht
+	// include_(CLASSPATH.'bauleitplanung.php');           # Version 1.6.1							# in Version 2.0 gelöscht
+	// #include_(CLASSPATH.'jagdkataster.php');            # Version 1.6.1							# in Version 2.0 gelöscht
+	// #include_(CLASSPATH.'polygoneditor.php');           # Version 1.6.3							# in Version 2.0 gelöscht
+	// #include_(CLASSPATH.'pointeditor.php');             # Version 1.6.3							# in Version 2.0 gelöscht
+	// #include_(CLASSPATH.'dbf.php');                     # Version 1.6.5							# in Version 2.0 gelöscht
+	// #include_(CLASSPATH.'anliegerbeitraege.php');       # Version 1.6.6   						# in Version 2.0 gelöscht
+	// #include_(CLASSPATH.'gebaeude_editor.php');         # Version 1.6.6   						# in Version 2.0 gelöscht
+	// #include_(CLASSPATH.'documents.php');               # Version 1.6.6							# in Version 2.0 gelöscht
+	// #include_(CLASSPATH.'esaf.php');                    # Version 1.6.6							# in Version 2.0 gelöscht
+	// #include_(CLASSPATH.'shape.php');                   # Version 1.6.6							# in Version 2.0 gelöscht
+	// #include_(CLASSPATH.'gps.php');                     # Version 1.6.7   						# in Version 2.0 gelöscht
+	// #include_(CLASSPATH.'wms.php');                     # Version 1.6.7   						# in Version 2.0 gelöscht
+	// #include_(CLASSPATH.'funktion.php');                # Version 1.6.9							# in Version 2.0 gelöscht
+	// #include_(CLASSPATH.'lineeditor.php');              # Version 1.7.0							# in Version 2.0 gelöscht
+	// #include_(CLASSPATH.'wfs.php');                     # Version 1.7.0							# in Version 2.0 gelöscht
+	// #include_(CLASSPATH.'synchronisation.php');         # Version 1.7.0							# in Version 2.0 gelöscht
+	// #include_(CLASSPATH.'tif.php');          						# Version 1.7.2							# in Version 2.0 gelöscht
+	// #include_(CLASSPATH.'gpx.php');          						# Version 1.7.4							# in Version 2.0 gelöscht
+	// #include_(CLASSPATH.'datendrucklayout.php');        # Version 1.7.5							# in Version 2.0 gelöscht
+	// #include_(CLASSPATH.'metadaten_csw.php');						# Version 1.7.5							# in Version 2.0 gelöscht
+	// #include_(CLASSPATH.'uko.php');          						# Version 1.8.0							# in Version 2.0 gelöscht
+// }																											# Version 1.7.6							# in Version 2.0 gelöscht
+// include (WWWROOT.APPLVERSION.'funktionen/allg_funktionen.php');										# in Version 2.0 gelöscht
 
 ############################ kvwmap-plugins #################		# Version 1.11.0
 #																																# Version 1.11.0
 $kvwmap_plugins = array();																			# Version 1.11.0
-#$kvwmap_plugins[] = 'bauleitplanung';														# Version 1.11.0
-#$kvwmap_plugins[] = 'bevoelkerung';															# Version 1.11.0
-#$kvwmap_plugins[] = 'gewaesser';																	# Version 1.11.0
-#$kvwmap_plugins[] = 'bodenrichtwerte';														# Version 2.0.0
-#$kvwmap_plugins[] = 'jagdkataster';															# Version 2.0.0
-#$kvwmap_plugins[] = 'nachweisverwaltung';												# Version 2.0.0
-#$kvwmap_plugins[] = 'anliegerbeitraege';													# Version 2.0.0
-#$kvwmap_plugins[] = 'probaug';																		# Version 2.0.0
+#$kvwmap_plugins[] = 'bauleitplanung';													# Version 1.11.0
+#$kvwmap_plugins[] = 'bevoelkerung';														# Version 1.11.0
+#$kvwmap_plugins[] = 'gewaesser';																# Version 1.11.0
+#$kvwmap_plugins[] = 'bodenrichtwerte';													# Version 2.0.0
+#$kvwmap_plugins[] = 'jagdkataster';														# Version 2.0.0
+#$kvwmap_plugins[] = 'nachweisverwaltung';											# Version 2.0.0
+#$kvwmap_plugins[] = 'anliegerbeitraege';												# Version 2.0.0
+#$kvwmap_plugins[] = 'probaug';																	# Version 2.0.0
 #																																# Version 1.11.0
 #############################################################		# Version 1.11.0
 
@@ -475,21 +474,21 @@ $kvwmap_plugins = array();																			# Version 1.11.0
 #dl('php_mapscript.so');             #Version 5.0.2
 #dl('php_mapscript_4.10.0.so');     #Version 4.10
 
-# Einstellen des Debuglevels und öffnen der Debug-log-datei
-if (DEBUG_LEVEL>0) {
- # Datei für debug Meldungen öffnen
- $debug=new debugfile(DEBUGFILE);
-}
+// # Einstellen des Debuglevels und öffnen der Debug-log-datei																																						# in Version 2.0 gelöscht
+// if (DEBUG_LEVEL>0) {																																																										# in Version 2.0 gelöscht
+ // # Datei für debug Meldungen öffnen																																																		# in Version 2.0 gelöscht
+ // $debug=new debugfile(DEBUGFILE);																																																			# in Version 2.0 gelöscht
+// }																																																																			# in Version 2.0 gelöscht
 
-# Öffnen der Log-Dateien
-# Derzeit werden in den Log-Dateien nur die SQL-Statements gespeichert, die über execSQL
-# in den Classen mysql und postgres ausgeführt werden.
-if (LOG_LEVEL>0) {
- # Datei für mysql-logs öffnen
- $log_mysql=new LogFile(LOGFILE_MYSQL,'text','Log-Datei MySQL', '#------v: '.date("Y:m:d H:i:s",time())); # Version 1.6.4
- # Datei für postgres-logs öffnen
- $log_postgres=new LogFile(LOGFILE_POSTGRES,'text', 'Log-Datei-Postgres', '------v: '.date("Y:m:d H:i:s",time())); # Version 1.6.4
-}
+// # Öffnen der Log-Dateien																																																								# in Version 2.0 gelöscht
+// # Derzeit werden in den Log-Dateien nur die SQL-Statements gespeichert, die über execSQL																								# in Version 2.0 gelöscht
+// # in den Classen mysql und postgres ausgeführt werden.																																									# in Version 2.0 gelöscht
+// if (LOG_LEVEL>0) {																																																											# in Version 2.0 gelöscht
+ // # Datei für mysql-logs öffnen																																																					# in Version 2.0 gelöscht
+ // $log_mysql=new LogFile(LOGFILE_MYSQL,'text','Log-Datei MySQL', '#------v: '.date("Y:m:d H:i:s",time())); # Version 1.6.4							# in Version 2.0 gelöscht
+ // # Datei für postgres-logs öffnen																																																			# in Version 2.0 gelöscht
+ // $log_postgres=new LogFile(LOGFILE_POSTGRES,'text', 'Log-Datei-Postgres', '------v: '.date("Y:m:d H:i:s",time())); # Version 1.6.4			# in Version 2.0 gelöscht
+// }																																																																			# in Version 2.0 gelöscht
 
 # Festlegung von Fehlermeldungen und Hinweisen
 define ('INFO1','Prüfen Sie ob Ihr Datenbankmodell aktuell ist.');
@@ -499,29 +498,39 @@ define(MYSQL_CHARSET,'UTF8');													# Version 1.7.6		# in Version 1.11.0 a
 define(POSTGRES_CHARSET,'UTF8');											# Version 1.8.0		# in Version 1.11.0 auf UTF8 gesetzt
 
 
-################################ Datenbankangaben setzen######################		
+################################ Datenbankangaben setzen ######################		
 # Datenbank für die Nutzerdaten (mysql)
-$userDb=new database();
-$userDb->host='localhost';
-$userDb->user='';
-$userDb->passwd='';
-$userDb->dbName=$dbname;
+define(MYSQL_HOST, 'localhost');																	# Version 2.0
+define(MYSQL_USER, '');																						# Version 2.0
+define(MYSQL_PASSWORD, '');																				# Version 2.0
+define(MYSQL_DBNAME, $dbname);																		# Version 2.0
 
-$GISdb = $userDb; 																			# Version 1.7.6
+// $userDb=new database();																				# in Version 2.0 gelöscht
+// $userDb->host='localhost';																			# in Version 2.0 gelöscht
+// $userDb->user='';																							# in Version 2.0 gelöscht
+// $userDb->passwd='';																						# in Version 2.0 gelöscht
+// $userDb->dbName=$dbname;																				# in Version 2.0 gelöscht
+
+//$GISdb = $userDb; 													# Version 1.7.6			# in Version 2.0 gelöscht
 
 # Datenbank mit den Geometrieobjekten (PostgreSQL mit PostGIS Aufsatz)
-if ($pgdbname!='') {
-	if(in_array($_REQUEST['go'], $fast_loading_cases)){		# Version 1.7.6		# in Version 2.0 angepasst
-		$PostGISdb=new pgdatabase_core();										# Version 1.7.6
-	}																											# Version 1.7.6
-	else{																									# Version 1.7.6
-  	$PostGISdb=new pgdatabase();												# Version 1.7.6
-	}																											# Version 1.7.6
-  $PostGISdb->host='localhost';
-  $PostGISdb->user='';
-  $PostGISdb->passwd='';
-  $PostGISdb->dbName=$pgdbname;
-}
+define(POSTGRES_HOST, 'localhost');																# Version 2.0
+define(POSTGRES_USER, '');																				# Version 2.0
+define(POSTGRES_PASSWORD, '');																		# Version 2.0
+define(POSTGRES_DBNAME, $pgdbname);																# Version 2.0
+	
+// if ($pgdbname!='') {																													# in Version 2.0 gelöscht
+	// if(in_array($_REQUEST['go'], $fast_loading_cases)){		# Version 1.7.6			# in Version 2.0 gelöscht
+		// $PostGISdb=new pgdatabase_core();										# Version 1.7.6			# in Version 2.0 gelöscht
+	// }																											# Version 1.7.6			# in Version 2.0 gelöscht
+	// else{																									# Version 1.7.6			# in Version 2.0 gelöscht
+  	// $PostGISdb=new pgdatabase();													# Version 1.7.6			# in Version 2.0 gelöscht
+	// }																											# Version 1.7.6			# in Version 2.0 gelöscht
+  // $PostGISdb->host='localhost';																							# in Version 2.0 gelöscht
+  // $PostGISdb->user='';																												# in Version 2.0 gelöscht
+  // $PostGISdb->passwd='';																											# in Version 2.0 gelöscht
+  // $PostGISdb->dbName=$pgdbname;																							# in Version 2.0 gelöscht
+// }																																						# in Version 2.0 gelöscht
 
 ###########################################################################
 
