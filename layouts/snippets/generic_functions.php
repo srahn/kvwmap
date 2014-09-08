@@ -49,13 +49,6 @@ selectall = function(layer_id){
 	}
 }
 
-zoom2wkt = function(wkt, epsg){
-	currentform.epsg.value = epsg;
-	currentform.wkt.value = wkt;
-	currentform.go.value = 'zoom2wkt';
-	currentform.submit();
-}
-
 zoom2object = function(params){
 	if(currentform.id == 'GUI2'){					// aus overlay heraus --> Kartenzoom per Ajax machen
 		startwaiting();
