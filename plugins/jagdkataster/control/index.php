@@ -40,7 +40,7 @@
 
 	  # Jagdkatastereditor
 	  case 'jagdkatastereditor' : {
-			$this->checkCaseAllowed($go);
+			$this->checkCaseAllowed($this->go);
 			include(PLUGINS.'jagdkataster/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'jagdkataster/model/jagdkataster.php');		# jagdkataster-Klasse einbinden
 			$this->jagdkatastereditor();

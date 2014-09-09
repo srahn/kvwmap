@@ -5,7 +5,7 @@
 	switch($this->go){
 		# Anliegerbeiträge
 	  case 'anliegerbeitraege' : {
-			$this->checkCaseAllowed($go);
+			$this->checkCaseAllowed($this->go);
 			include(PLUGINS.'anliegerbeitraege/model/kvwmap.php');
 			$this->Anliegerbeiträge_editor();
 	  }break;
