@@ -10,7 +10,7 @@
 	if($this->currentform == 'document.GUI2')$size = 40;
 	else $size = 61;
 	$linksize = $this->user->rolle->fontsize_gle - 1;
-	$select_width = 'width:290px;';
+	$select_width = '';
 ?>
 <div id="layer">
 <table border="0" cellpadding="0" cellspacing="0">

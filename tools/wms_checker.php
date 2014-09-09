@@ -71,7 +71,14 @@ function getExceptionCode($data){
 
 
 include($config);
-
+include(CLASSPATH.'log.php');
+include(CLASSPATH.'mysql.php');
+$debug=new debugfile(DEBUGFILE);	# öffnen der Debug-log-datei
+$userDb = new database();
+$userDb->host = MYSQL_HOST;
+$userDb->user = MYSQL_USER;																			
+$userDb->passwd = MYSQL_PASSWORD;															
+$userDb->dbName = MYSQL_DBNAME;
 $userDb->open();
 $query = "SELECT * FROM `layer` WHERE connectiontype = 7";
 $result = mysql_query($query, $userDb->dbConn);

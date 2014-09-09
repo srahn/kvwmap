@@ -260,7 +260,7 @@
 												$url = IMAGEURL.session_id().'.php?dokument=';
 											}											
 											$datapart .= '<table border="0"><tr><td>';
-											if($type == 'jpg' OR $type == 'png' OR $type == 'gif' ){
+											if($type == 'jpg' OR $type == 'png' OR $type == 'gif' OR $type == 'pdf' ){
 												$datapart .= '<a href="'.$url.$dokumentpfad.'"><img class="preview_image" src="'.$url.$thumbname.'"></a>';									
 											}
 											else{

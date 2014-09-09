@@ -64,17 +64,19 @@
 	        <th colspan="2" style="background-color:<? echo BG_GLEHEADER; ?>;">			  
 			  <table width="100%">
 			    <tr>
+						<? if($layer['connectiontype'] == 6){ ?>
 			      <td>
 			        <input id="<? echo $layer['Layer_ID'].'_'.$k; ?>" type="checkbox" name="check;<? echo $attributes['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>">&nbsp;
 			        <span style="color:<? echo TXT_GLEHEADER; ?>;"><? echo $strSelectThisDataset; ?></span>
 			      </td>
+						<? } ?>
 			      <td align="right">
 							<table cellspacing="0" cellpadding="0">
 								<tr>
 			     	<? 	if($layer['privileg'] > '0'){ ?>
 									<td style="padding: 0 0 0 10;"><a href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);use_for_new_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>)" title="<? echo $strUseForNewDataset; ?>"><div class="emboss use_for_dataset"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
 			      <? 	} 
-								if($layer['export_privileg'] == '1'){ ?>
+								if($layer['connectiontype'] == 6 AND $layer['export_privileg'] == '1'){ ?>
 									<td style="padding: 0 0 0 10;display:none" id="td_uko_<? echo $layer['Layer_ID'].'_'.$k; ?>"><a id="uko_<? echo $layer['Layer_ID'].'_'.$k; ?>" href="" title="<? echo $strUKOExportThis; ?>"><div class="emboss datensatz_exportieren_uko"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
 									<td style="padding: 0 0 0 10;"><a href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);csv_export(<? echo $layer['Layer_ID']; ?>);" title="<? echo $strCSVExportThis; ?>"><div class="emboss datensatz_exportieren_csv"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
 			      <? 	} 
@@ -231,7 +233,7 @@
 <?						
 							if($layer['shape'][$k][$attributes['the_geom']]){
 								if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY'){
-									if($layer['export_privileg'] == '1'){ ?>
+									if($layer['connectiontype'] == 6 AND $layer['export_privileg'] == '1'){ ?>
 			    					<script type="text/javascript">
 			    						document.getElementById('uko_<? echo $layer['Layer_ID'].'_'.$k; ?>').href = 'index.php?go=UKO_Export&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&layer_tablename=<? echo $tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>&selected_layer_id=<? echo $layer['Layer_ID'];?>';
 			    						document.getElementById('td_uko_<? echo $layer['Layer_ID'].'_'.$k; ?>').style.display = '';
@@ -275,8 +277,11 @@
 			    				}
 						}
 						elseif($layer['shape'][$k]['geom']){		# bei WFS-Layern
-?>
-							&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:zoom2wkt('<? echo $layer['shape'][$k]['geom']; ?>', '<? echo $layer['epsg_code']; ?>');"><? echo $strMapZoom; ?></a>&nbsp;&nbsp;&nbsp;
+?>						<table cellspacing="0" cellpadding="0">
+								<tr>
+									<td style="padding: 0 0 0 5;"><a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:zoom2object('go=zoom2wkt&wkt=<? echo $layer['shape'][$k]['geom']; ?>&epsg=<? echo $layer['epsg_code']; ?>');"><div class="emboss zoom_normal"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+								</tr>
+							</table>
 <?															
 						}							
 ?>								
@@ -355,7 +360,7 @@
 					</td>
 				</tr>
 				<tr>
-					<? if($layer['export_privileg'] == '1'){ ?>
+					<? if($layer['connectiontype'] == 6 AND $layer['export_privileg'] == '1'){ ?>
 					<td style="padding: 5 0 0 0;">
 						<select id="all_<? echo $layer['Layer_ID']; ?>" name="all_<? echo $layer['Layer_ID']; ?>" onchange="update_buttons(this.value, <? echo $layer['Layer_ID']; ?>);">
 							<option value=""><? echo $strSelectedDatasets.':'; ?></option>
@@ -372,7 +377,7 @@
 							<tr>
 					<? if($layer['privileg'] == '2'){ ?>
 								<td id="delete_link_<? echo $layer['Layer_ID']; ?>" style="padding: 5 10 0 0;"><a title="<? echo $strdelete; ?>" href="javascript:delete_datasets(<?php echo $layer['Layer_ID']; ?>);"><div class="emboss datensatz_loeschen"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></td>
-					<?} if($layer['export_privileg'] == '1'){ ?>
+					<?} if($layer['connectiontype'] == 6 AND $layer['export_privileg'] == '1'){ ?>
 								<td style="padding: 5 10 0 0;"><a title="<? echo $strCSVExport; ?>" href="javascript:csv_export(<?php echo $layer['Layer_ID']; ?>);"><div class="emboss datensatz_exportieren_csv"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
 								<td style="padding: 5 10 0 0;"><a title="<? echo $strShapeExport; ?>" href="javascript:shape_export(<?php echo $layer['Layer_ID']; ?>, <? echo $layer['count']; ?>);"><div class="emboss datensatz_exportieren_shp"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
 					<? } if($layer['layouts']){ ?>
@@ -476,8 +481,6 @@
 </table>
 
 
-<input type="hidden" name="wkt" value=""><!-- für den WFS Kartenzoom -->
-<input type="hidden" name="epsg" value=""><!-- für den WFS Kartenzoom -->
 <input type="hidden" name="checkbox_names_<? echo $layer['Layer_ID']; ?>" value="<? echo $checkbox_names; ?>">
 <input type="hidden" name="orderby<? echo $layer['Layer_ID']; ?>" id="orderby<? echo $layer['Layer_ID']; ?>" value="<? echo $this->formvars['orderby'.$layer['Layer_ID']]; ?>">
 

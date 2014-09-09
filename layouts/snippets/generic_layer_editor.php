@@ -255,10 +255,13 @@
 			    				}
 						}
 						elseif($layer['shape'][$k]['geom']){		# bei WFS-Layern
-?>
-							&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:zoom2wkt('<? echo $layer['shape'][$k]['geom']; ?>', '<? echo $layer['epsg_code']; ?>');"><? echo $strMapZoom; ?></a>&nbsp;&nbsp;&nbsp;
+?>						<table cellspacing="0" cellpadding="0">
+								<tr>
+									<td style="padding: 0 0 0 5;"><a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:zoom2object('go=zoom2wkt&wkt=<? echo $layer['shape'][$k]['geom']; ?>&epsg=<? echo $layer['epsg_code']; ?>');"><div class="emboss zoom_normal"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+								</tr>
+							</table>
 <?															
-						}
+						}	
 
 ?>
 			    </td>
@@ -416,8 +419,6 @@
 	<? } ?>
 
 
-<input type="hidden" name="wkt" value=""><!-- für den WFS Kartenzoom -->
-<input type="hidden" name="epsg" value=""><!-- für den WFS Kartenzoom -->
 <input type="hidden" name="checkbox_names_<? echo $layer['Layer_ID']; ?>" value="<? echo $checkbox_names; ?>">
 <input type="hidden" name="orderby<? echo $layer['Layer_ID']; ?>" id="orderby<? echo $layer['Layer_ID']; ?>" value="<? echo $this->formvars['orderby'.$layer['Layer_ID']]; ?>">
 

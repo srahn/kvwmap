@@ -80,7 +80,7 @@ function include_($filename){
 		unlink($filename);
 	}
 	elseif(FAST_CASE){}				// nix inkludieren, denn die fast-case-Datei enthält ja schon alles
-	else include $filename;		// normaler include
+	else include_once $filename;		// normaler include
 }
 
 # laden der Klassenbibliotheken

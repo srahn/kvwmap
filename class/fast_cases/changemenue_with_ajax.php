@@ -1,4 +1,38 @@
-<?function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
+<?function in_subnet($ip,$net) {
+	$ipparts=explode('.',$ip);
+	$netparts=explode('.',$net);
+
+	# Direkter Vergleich
+	if ($ip==$net) {
+		return 1;
+	}
+
+  # Test auf C-Netz
+	if (trim($netparts[3],'0')=='' OR $netparts[3]=='*') {
+		# C-Netzvergleich
+	  if ($ipparts[0].'.'.$ipparts[1].'.'.$ipparts[2]==$netparts[0].'.'.$netparts[1].'.'.$netparts[2]) {
+	  	return 1;
+	  }
+	}
+
+  # Test auf B-Netz
+	if ((trim($netparts[3],'0')=='' OR $netparts[3]=='*') AND (trim($netparts[2],'0')=='' OR $netparts[2]=='*')) {
+		# B-Netzvergleich
+	  if ($ipparts[0].'.'.$ipparts[1]==$netparts[0].'.'.$netparts[1]) {
+	  	return 1;
+	  }
+	}
+
+  # Test auf A-Netz
+	if ((trim($netparts[3],'0')=='' OR $netparts[3]=='*') AND (trim($netparts[2],'0')=='' OR $netparts[2]=='*') AND (trim($netparts[1],'0')=='' OR $netparts[1]=='*')) {
+		# A-Netzvergleich
+	  if ($ipparts[0]==$netparts[0]) {
+	  	return 1;
+	  }
+	}
+	return 0;
+}
+function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
   $passwordSettingUnixTime=strtotime($passwordSettingTime); # Unix Zeit in Sekunden an dem das Passwort gesetzt wurde
   $allowedPasswordAgeDays=round($allowedPassordAgeMonth*30.5); # Zeitintervall, wie alt das Password sein darf in Tagen
   $passwordAgeDays=round((time()-$passwordSettingUnixTime)/60/60/24); # Zeitinterval zwischen setzen des Passwortes und aktueller Zeit in Tagen
