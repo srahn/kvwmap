@@ -1,7 +1,7 @@
 <?
   $GUI = $this;
 
-  $this->uploadTempFile = function() use ($GUI){
+  $this->uploadTempFile = function() use ($GUI) {
     $GUI->mime_type = "formatter";
     if ($GUI->formvars['format'] == '') $GUI->formvars['format'] = "json";
     if ($GUI->formvars['content_type'] == '') $GUI->formvars['content_type'] = "text/html";
@@ -21,24 +21,23 @@
     # prüfe ob die Datei klein genug ist
     if ($_FILES["file"]["size"] > 10737418240)
       return array("success" => 0, "error_message" => "Fehler: Die Datei ist " . formatBytes($_FILES["file"]["size"], 2) . " groß und damti größer als die zugelassenen 10 MB");
-        
+
     # prüfe ob Dateiformat zulässig
     if (!in_array($_FILES["file"]["type"], array("image/jpeg", "image/jpg", "image/jp2", "image/png", "image/gif", "application/pdf")))
       return array("success" => 0, "error_message" => "Fehler: Der Dateityp " . $_FILES["file"]["type"] . " ist nicht zulässig. Nur die folgenden Dateitypen sind erlaubt: image/jpeg, image/jp2, image/png, image/gif, application/pdf.");
     $pathinfo = pathinfo($_FILES["file"]["name"]);
     $upload_file = UPLOADPATH . basename($_FILES["file"]["tmp_name"] . "." . $pathinfo["extension"]);
-    
+
     # copiere die temporäre Datei in den upload ordner 
     if (!@copy($_FILES["file"]["tmp_name"], $upload_file))
       return array("success" => 0, "error_message" => "Fehler: Die hochgeladene Datei konnte nicht auf dem Server gespeichert werden. Beim Kopieren vom temporären Uploadverzeichnis in das Uploadverzeichnis der Anwendung trat ein Fehler auf. Wahrscheinlich fehlen die Schreibrechte im Uploadverzeichnins für den WebServer-Nutzer.");
 
     # sende den Namen der temporären Datei zurück
     return array("success" => 1, "temp_file" => $upload_file);
-  }
+  };
 
-  function packAndMail($data) {
+  $this->packAndMail = function($data) use ($GUI) {
     #var_dump($data);
-    
     $GUI->mime_type = "formatter";
     if ($GUI->formvars['format'] == '') $GUI->formvars['format'] = "json";
     
@@ -57,24 +56,24 @@
     $xml_file_name =  "Antrag_" . $antrag_id . ".xml";
     include (PLUGINS . 'baumfaellantrag/view/xml_template.php');
     $xml = new SimpleXMLElement($xml_string);
-    $xml->asXML(IMAGEPATH . $xml_file_name);
+    $xml->asXML(UPLOADPATH . $xml_file_name);
 
     # create pdf file
     $pdf_file_name = 'Antrag_' . $antrag_id . '.pdf';
-    $fp=fopen(IMAGEPATH . $pdf_file_name, 'wb');
+    $fp = fopen(UPLOADPATH . $pdf_file_name, 'wb');
     include (PLUGINS . 'baumfaellantrag/view/pdf_template.php'); // create pdf and put it in $pdf_output variable
     fwrite($fp, $pdf_output);
     fclose($fp);
     
     # create zip file
     $zip_file_name =  'Antrag_' . $antrag_id;
-    if (file_exists(IMAGEPATH . $xml_file_name))
-      exec(ZIP_PATH . ' ' . IMAGEPATH . $zip_file_name . ' ' . IMAGEPATH . $xml_file_name);   // add xml file
-    if (file_exists(IMAGEPATH . $pdf_file_name))
-      exec(ZIP_PATH . ' ' . IMAGEPATH . $zip_file_name . ' ' . IMAGEPATH . $pdf_file_name);   // add pdf file
+    if (file_exists(UPLOADPATH . $xml_file_name))
+      exec(ZIP_PATH . ' ' . UPLOADPATH . $zip_file_name . ' ' . UPLOADPATH . $xml_file_name);   // add xml file
+    if (file_exists(UPLOADPATH . $pdf_file_name))
+      exec(ZIP_PATH . ' ' . UPLOADPATH . $zip_file_name . ' ' . UPLOADPATH . $pdf_file_name);   // add pdf file
     foreach($ref_files AS $ref_file) {
       if (file_exists($ref_file))
-        exec(ZIP_PATH . ' ' . IMAGEPATH . $zip_file_name . ' ' . $ref_file); // add mandate file
+        exec(ZIP_PATH . ' ' . UPLOADPATH . $zip_file_name . ' ' . $ref_file); // add mandate file
     }
     $zip_file_name .= '.zip';
 
@@ -84,6 +83,6 @@
     # send email
     $success = mail_att($mail['from_name'], $mail['from_email'], $mail['to_email'], $mail['cc_email'], $mail['reply_email'],  $mail['subject'], $mail['message'], $mail['attachement']);
 
-  return array("success" => $success, "antrag_id" => $antrag_id, "xml_file" => IMAGEURL . $xml_file_name, "pdf_file" => IMAGEURL . $pdf_file_name, "zip_file" => IMAGEURL . $zip_file_name, "email_text" => $email_text, "email_recipient" => $email_recipient, "authority_processingTime" => $data['authority_processingTime'], "data:" => $data);
-  }
+  return array("success" => $success, "antrag_id" => $antrag_id, "xml_file" => UPLOADPATH . $xml_file_name, "pdf_file" => UPLOADPATH . $pdf_file_name, "zip_file" => UPLOADPATH . $zip_file_name, "email_text" => $email_text, "email_recipient" => $email_recipient, "authority_processingTime" => $data['authority_processingTime'], "data:" => $data);
+  };
 ?>
