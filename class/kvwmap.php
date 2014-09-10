@@ -1787,7 +1787,15 @@ class GUI {
     if($this->reference_map->reference->image != NULL){
 			$this->reference_map->setextent($this->map->extent->minx,$this->map->extent->miny,$this->map->extent->maxx,$this->map->extent->maxy);
 			if($this->ref['epsg_code'] != $this->user->rolle->epsg_code){
-				$this->reference_map->extent->project($this->map->projection, $this->reference_map->projection);
+				if(MAPSERVERVERSION < '600'){
+					$projFROM = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);
+					$projTO = ms_newprojectionobj("init=epsg:".$this->ref['epsg_code']);
+				}
+				else{
+					$projFROM = $this->map->projection;
+					$projTO = $this->reference_map->projection;
+				}
+				$this->reference_map->extent->project($projFROM, $projTO);
 			}
       $img_refmap = $this->reference_map->drawReferenceMap();
       $filename = $this->map_saveWebImage($img_refmap,'png');
