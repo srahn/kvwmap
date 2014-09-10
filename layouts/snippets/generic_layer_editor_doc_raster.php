@@ -74,7 +74,7 @@
 						if($attributes['alias'][$j] == ''){
 							$attributes['alias'][$j] = $attributes['name'][$j];
 						}
-						echo '<table width="100%" cellspacing="0" cellpadding="0"><tr><td>';
+						echo '<table width="100%" cellspacing="0" cellpadding="0"><tr style="border: none"><td>';
 						echo '<span style="color: #222222;" title="'.$attributes['tooltip'][$j].'">'.$attributes['alias'][$j].'</span>';
 						if($attributes['nullable'][$j] == '0' AND $attributes['privileg'][$j] != '0'){
 							echo '<span title="Eingabe erforderlich">*</span>';

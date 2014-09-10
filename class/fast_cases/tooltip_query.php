@@ -410,25 +410,6 @@
       echo umlaute_javascript(umlaute_html($output)).'~showtooltip(top.document.GUI.result.value, '.$showdata.');';
     }
   }
-  function get_dokument_vorschau($dateinamensteil){		$type = $dateinamensteil[1];  	$dokument = $dateinamensteil[0].'.'.$dateinamensteil[1];		if($type == 'jpg' OR $type == 'png' OR $type == 'gif' ){			// für Bilder werden automatisch Thumbnails erzeugt			$thumbname = $dateinamensteil[0].'_thumb.'.$dateinamensteil[1];						if(!file_exists($thumbname)){				exec(IMAGEMAGICKPATH.'convert '.$dokument.' -resize 250 '.$thumbname);			}		}		else{																// alle anderen Dokumenttypen bekommen entsprechende Dokumentensymbole als Vorschaubild			$dateinamensteil[1] = 'gif';  		switch ($type) {  			case 'pdf' :{  				//$thumbname = WWWROOT.APPLVERSION.GRAPHICSPATH.'pdf.gif';					$thumbname = $dateinamensteil[0].'_thumb.jpg';								if(!file_exists($thumbname)){						exec(IMAGEMAGICKPATH.'convert '.$dokument.'[0] -resize 250 '.$thumbname);					}  			}break;  			  			case 'doc' :{					$thumbname = WWWROOT.APPLVERSION.GRAPHICSPATH.'openoffice.gif';  			}break;  			  			default : {  				$image = imagecreatefromgif(GRAPHICSPATH.'document.gif');          $textbox = imagettfbbox(13, 0, dirname(FONTSET).'/arial.ttf', '.'.$type);          $textwidth = $textbox[2] - $textbox[0] + 13;          $blue = ImageColorAllocate ($image, 26, 87, 150);          imagettftext($image, 13, 0, 22, 34, $blue, dirname(FONTSET).'/arial_bold.ttf', $type);          $thumbname = IMAGEPATH.rand(0,100000).'.gif';          imagegif($image, $thumbname);  			}  		}  	}		return $thumbname;  }
-	function write_document_loader(){
-		$handle = fopen(IMAGEPATH.session_id().'.php', 'w');
-		$code = '<?
-			$allowed_documents = array(\''.implode('\',\'', $this->allowed_documents).'\');
-			if(in_array($_REQUEST[\'dokument\'], $allowed_documents)){
-				if($_REQUEST[\'original_name\'] == "")$_REQUEST[\'original_name\'] = basename($_REQUEST[\'dokument\']);
-				$type = strtolower(array_pop(explode(\'.\', $_REQUEST[\'dokument\'])));
-				header("Content-type: image/".$type);
-				header("Content-Disposition: attachment; filename=".$_REQUEST[\'original_name\']);
-				header("Expires: 0");
-				header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
-				header("Pragma: public");
-				readfile($_REQUEST[\'dokument\']);
-			}
-		?>';
-		fwrite($handle, $code);
-		fclose($handle);
-	}
 }class database {  var $ist_Fortfuehrung;  var $debug;  var $loglevel;  var $logfile;  var $commentsign;  var $blocktransaction;  function database() {
     global $debug;
     $this->debug=$debug;
@@ -734,7 +715,7 @@
 		if(LANGUAGE != 'german') {
 			$sql.='CASE WHEN `Name_'.LANGUAGE.'` != "" THEN `Name_'.LANGUAGE.'` ELSE `Name` END AS ';
 		}
-		$sql.='Name, l.Layer_ID, alias, Datentyp, Gruppe, pfad, maintable, Data, `schema`, document_path, connection, printconnection, connectiontype, epsg_code, ows_srs, wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, ul.* FROM layer AS l, used_layer AS ul';
+		$sql.='Name, l.Layer_ID, alias, Datentyp, Gruppe, pfad, maintable, Data, `schema`, document_path, connection, printconnection, connectiontype, epsg_code, tolerance, ows_srs, wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, ul.* FROM layer AS l, used_layer AS ul';
     $sql.=' WHERE l.Layer_ID=ul.Layer_ID AND Stelle_ID='.$this->stelle_id;
     if ($LayerName!='') {
       $sql.=' AND (l.Name LIKE "'.$LayerName.'" ';
@@ -1195,13 +1176,5 @@
       }
     }
     return $attributes;
-  }
-  function get_used_Layer($id) {
-    $sql ='SELECT * FROM used_layer WHERE Layer_ID = '.$id.' AND Stelle_ID = '.$this->Stelle_ID;
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->get_used_Layer - Lesen eines Layers:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
-    $layer = mysql_fetch_array($query);
-    return $layer;
   }
 }?>

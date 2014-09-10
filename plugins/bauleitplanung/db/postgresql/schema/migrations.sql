@@ -17,7 +17,7 @@ SET client_min_messages = warning;
 CREATE SCHEMA bauleitplanung;
 
 
-SET search_path = bauleitplanung, pg_catalog;
+SET search_path = bauleitplanung, public;
 
 SET default_tablespace = '';
 

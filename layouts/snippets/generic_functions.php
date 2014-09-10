@@ -8,7 +8,7 @@
 	}
  ?>
 
-make_vorschlag = function(attributenamesarray, attribute, k, layer_id){
+auto_generate = function(attributenamesarray, attribute, k, layer_id){
 	var attributenames = '';
 	var attributevalues = '';
 	for(i = 0; i < attributenamesarray.length; i++){
@@ -17,7 +17,7 @@ make_vorschlag = function(attributenamesarray, attribute, k, layer_id){
 			attributevalues += document.getElementById(attributenamesarray[i]+'_'+k).value + '|';
 		}
 	}
-	ahah("index.php", "go=get_vorschlag&layer_id="+layer_id+"&attribute="+attribute+"&attributenames="+attributenames+"&attributevalues="+attributevalues, new Array(document.getElementById(attribute+'_'+k)), new Array("setvalue"));
+	ahah("index.php", "go=auto_generate&layer_id="+layer_id+"&attribute="+attribute+"&attributenames="+attributenames+"&attributevalues="+attributevalues, new Array(document.getElementById(attribute+'_'+k)), new Array("setvalue"));
 }
  
 update_buttons = function(all, layer_id){

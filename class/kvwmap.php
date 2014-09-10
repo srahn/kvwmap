@@ -1594,10 +1594,7 @@ class GUI {
 
         $layer_id = $this->mapDB->newRollenLayer($this->formvars);
         
-        $classdata[0] = '';
-        $classdata[1] = -$layer_id;
-        $classdata[2] = '';
-        $classdata[3] = 0;
+        $classdata['layer_id'] = -$layer_id;
         $class_id = $this->mapDB->new_Class($classdata);
 				
 				if(defined('ZOOM2COORD_STYLE_ID') AND ZOOM2COORD_STYLE_ID != ''){
@@ -2403,7 +2400,7 @@ class GUI {
     }
   }
 	
-	function get_vorschlag(){
+	function auto_generate(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
     $layerdb->setClientEncoding();
@@ -2765,15 +2762,6 @@ class GUI {
     return $mapObject;
 	}
  
-  function spatialDocIndexing() {
-		include_(CLASSPATH.'documents.php');
-    $doc=new textdocument($this->Gazdb);
-    #$ret=$doc->spatialDocIndexing("/www/kvwmap/var/data/docs/","test.pdf",false,true);
-    $test = $doc->pdf2string("/www/kvwmap/var/data/docs/Adressen_Katasteraemter.pdf");
-    echo $test;
-    return $ret;
-  }
-
   function rewriteLayer() {
     ## in Entwicklung Konzept noch nicht zuende gedacht pk
     # Diese Funktion nimmt folgende Veränderungen in der MySQL Datenbank vor:
@@ -3603,10 +3591,7 @@ class GUI {
       	# ------------ automatische Klassifizierung -------------------
       	else{
       		$color = $this->user->rolle->readcolor();
-	        $classdata[0] = ' ';
-	        $classdata[1] = -$layer_id;
-	        $classdata[2] = '';
-	        $classdata[3] = 0;
+	        $classdata['layer_id'] = -$layer_id;
 	        $class_id = $dbmap->new_Class($classdata);
 	        if($this->formvars['Datentyp'] == 0){			# Punkt						
 						if(defined('ZOOM2POINT_STYLE_ID') AND ZOOM2POINT_STYLE_ID != ''){
@@ -3767,10 +3752,7 @@ class GUI {
 
 				if($this->formvars['selektieren'] == 'false'){      # highlighten (mit der ausgewählten Farbe)
 					$color = $this->user->rolle->readcolor();
-					$classdata[0] = '';
-					$classdata[1] = -$layer_id;
-					$classdata[2] = '';
-					$classdata[3] = 0;
+					$classdata['layer_id'] = -$layer_id;
 					$class_id = $dbmap->new_Class($classdata);
 					$this->formvars['class'] = $class_id;
 					$style['colorred'] = $color['red'];
@@ -3900,10 +3882,7 @@ class GUI {
 	      
 	      if($this->formvars['selektieren'] == 'false'){      # highlighten (mit der ausgewählten Farbe)
 	      	$color = $this->user->rolle->readcolor();
-	        $classdata[0] = '';
-	        $classdata[1] = -$layer_id;
-	        $classdata[2] = '';
-	        $classdata[3] = 0;
+	        $classdata['layer_id'] = -$layer_id;
 	        $class_id = $dbmap->new_Class($classdata);
 	        $this->formvars['class'] = $class_id;
 	        $style['colorred'] = $color['red'];
@@ -4009,10 +3988,7 @@ class GUI {
 
 				$layer_id = $dbmap->newRollenLayer($this->formvars);
 				
-				$classdata[0] = '';
-				$classdata[1] = -$layer_id;
-				$classdata[2] = '';
-				$classdata[3] = 0;
+				$classdata['layer_id'] = -$layer_id;
 				$class_id = $dbmap->new_Class($classdata);
 
 				if(defined('ZOOM2POINT_STYLE_ID') AND ZOOM2POINT_STYLE_ID != ''){
@@ -6165,10 +6141,8 @@ class GUI {
 
   function Layereditor_KlasseHinzufuegen(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-    $attrib[0] = '';
-    $attrib[1] = $this->formvars['selected_layer_id'];
-    $attrib[2] = '';
-    $attrib[3] = 1;
+    $attrib['layer_id'] = $this->formvars['selected_layer_id'];
+    $attrib['order'] = 1;
     $mapDB->new_Class($attrib);
     $this->Layereditor();
   }
@@ -12156,10 +12130,7 @@ class GUI {
 
     $layer_id = $dbmap->newRollenLayer($this->formvars);
     
-    $classdata[0] = '';
-    $classdata[1] = -$layer_id;
-    $classdata[2] = '';
-    $classdata[3] = 0;
+    $classdata['layer_id'] = -$layer_id;
     $class_id = $dbmap->new_Class($classdata);
 
 		$color = $this->user->rolle->readcolor();
@@ -12302,10 +12273,7 @@ class GUI {
 	
 	    $layer_id = $dbmap->newRollenLayer($this->formvars);
 	    
-	    $classdata[0] = '';
-	    $classdata[1] = -$layer_id;
-	    $classdata[2] = '';
-	    $classdata[3] = 0;
+	    $classdata['layer_id'] = -$layer_id;
 	    $class_id = $dbmap->new_Class($classdata);
 	
 			$color = $this->user->rolle->readcolor();
@@ -14073,10 +14041,10 @@ class db_mapObj{
 		shuffle($result_colors);
 		for($i = 0; $i < count($values); $i++){
 			if($i == count($result_colors))return;				# Anzahl der Klassen ist auf die Anzahl der Colors beschränkt
-			$classdata[0] = $values[$i].' ';
-      $classdata[1] = -$layer_id;
-      $classdata[2] = "('[".$attribute."]' eq '".$values[$i]."')";
-      $classdata[3] = 0;
+			$classdata['name'] = $values[$i].' ';
+      $classdata['layer_id'] = -$layer_id;
+      $classdata['expression'] = "('[".$attribute."]' eq '".$values[$i]."')";
+      $classdata['order'] = 0;
       $class_id = $this->new_Class($classdata);
     	$style['colorred'] = $result_colors[$i]['red'];
       $style['colorgreen'] = $result_colors[$i]['green'];

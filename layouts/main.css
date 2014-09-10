@@ -454,20 +454,20 @@ span.black {
 }
 
 
-.raster_record table{line-height: 0.1px;padding: 0.1px;transition: all 0.25s ease;}
-.raster_record td{line-height: 0.1px;padding: 0.1px;transition: all 0.25s ease;}
-.raster_record input{width:0.1px;font-size: 0.1px;height:0.1px;transition: all 0.25s ease;}
-.raster_record select{width:0.1px;transition: all 0.25s ease;}
-.raster_record span{line-height:0.1px;font-size: 0px;transition: all 0.25s ease;}
+.raster_record table{line-height: 0.0001px;padding: 0.0001px;transition: all 0.25s ease;}
+.raster_record td{line-height: 0.0001px;padding: 0.0001px;transition: all 0.25s ease;}
+.raster_record input{width:0.0001px;font-size: 0.0001px;height:0.0001px;transition: all 0.25s ease;}
+.raster_record select{width:0.0001px;height:0.0001px;transition: all 0.25s ease;}
+.raster_record span{line-height:0.0001px;font-size: 0px;transition: all 0.25s ease;}
 .raster_record img{width: 0px;transition: all 0.25s ease;}
-.raster_record .tr_other{visibility:collapse;transition: all 0.25s ease;}
+.raster_record .tr_other{visibility:collapse;}
 .raster_record .tr_doc{visibility:visible;}
 .raster_record .preview_image{width: 125px;transition: all 0.25s ease;}
 .raster_record .preview_doc{width: auto;}
 
 .raster_record:hover td{line-height: 16px;padding: 2px;transition: all 0.25s ease;}
 .raster_record:hover input{width:200px;font-size: 15px;height:22px;transition: all 0.25s ease;}
-.raster_record:hover select{width:290px;transition: all 0.25s ease;}
+.raster_record:hover select{width:290px;height:22px;transition: all 0.25s ease;}
 .raster_record:hover span{line-height:16px;font-size: 15px;transition: all 0.25s ease;}
 .raster_record:hover img{width: auto; transition: all 0.25s ease;}
 .raster_record:hover .tr_other{visibility:visible;}
