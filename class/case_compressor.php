@@ -15,7 +15,7 @@ class case_compressor {
 			$classname = $class->getName();
 			if($parent = $class->getParentClass())$extends = ' extends '.$parent->getName();
 			$properties = $class->getProperties();
-			# wenn er noch nicht da ist, den leeren Klassenköper ermitteln
+			# wenn er noch nicht da ist, den leeren Klassenkörper ermitteln
 			if(self::$classarray[$classname] == ''){
 				self::$classarray[$classname]['code'] = chr(13).'class '.$classname.$extends.' {'.chr(13);		
 				foreach($properties as $prop) {

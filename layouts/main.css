@@ -444,35 +444,42 @@ span.black {
 
 .preview_doc{}
 
-.tr_doc{}
+.tr_show{}
 
-.tr_other{}
-
-.raster_record{
-	float:left;
-	padding: 5px;
-}
+.tr_hide{}
 
 
-.raster_record table{line-height: 0.0001px;padding: 0.0001px;transition: all 0.25s ease;}
-.raster_record td{line-height: 0.0001px;padding: 0.0001px;transition: all 0.25s ease;}
-.raster_record input{width:0.0001px;font-size: 0.0001px;height:0.0001px;transition: all 0.25s ease;}
-.raster_record select{width:0.0001px;height:0.0001px;transition: all 0.25s ease;}
+/* Ohne Mouseover: */
+.raster_record{max-width: 135px;border:1px solid gray;float:left;margin: 5px;padding: 0.0001px;overflow: hidden;transition: all 0.25s ease;}
+.raster_record .gle tr{border:none;}
+/* Attribute, die ausgeblendet werden sollen: */
+.raster_record .tr_hide{visibility:collapse;transition: all 0.25s ease;}
+.raster_record .tr_hide td{line-height: 0.0001px;padding: 0.0001px;transition: all 0.25s ease;}
+.raster_record .tr_hide select{width:0.0001px;height:0.0001px;transition: all 0.25s ease;}
+.raster_record .tr_hide input{width:0.0001px;font-size: 0.0001px;height:0.0001px;transition: all 0.25s ease;}
+/* Attribute, die eingeblendet werden sollen: */
+.raster_record .tr_show{visibility:visible;}
+.raster_record .tr_show td{border:none;padding: 0.0001px;transition: all 0.25s ease;}
+.raster_record .tr_show select{width: 112%;height:22px;transition: all 0.25s ease;}									/* Selectfelder werden auf 130px Breite verkleinert*/
+.raster_record .tr_show input{width:130px;font-size: 15px;height:22px;transition: all 0.25s ease;}		/* normale Inputfelder werden auf 130px Breite verkleinert*/
+.raster_record .tr_show input[type=file]{width:0.0001px;font-size: 0.0001px;height:0.0001px;transition: all 0.25s ease;}		/* Das FileUpload-Inputfeld soll auch versteckt werden*/
+.raster_record .tr_show .preview_image{width: 125px;transition: all 0.25s ease;}	/* Vorschaubilder für Bilder (und PDFs) werden zunächst mit 125px Breite angezeigt und bei Hover auf 250px vergrößert */
+.raster_record .tr_show .preview_doc{width: auto;}																/* Vorschaubilder für andere Dokumente nicht */
+/* Alle Attribute: */
 .raster_record span{line-height:0.0001px;font-size: 0px;transition: all 0.25s ease;}
 .raster_record img{width: 0px;transition: all 0.25s ease;}
-.raster_record .tr_other{visibility:collapse;}
-.raster_record .tr_doc{visibility:visible;}
-.raster_record .preview_image{width: 125px;transition: all 0.25s ease;}
-.raster_record .preview_doc{width: auto;}
 
+/* Bei Mouseover auf Datensatz: */
+.raster_record:hover{max-width: 800px;transition: all 0.25s ease;}
+.raster_record:hover .gle tr{border:1px dotted gray;}
+.raster_record:hover .gle tr:hover{border:1px solid #03476F;}
 .raster_record:hover td{line-height: 16px;padding: 2px;transition: all 0.25s ease;}
 .raster_record:hover input{width:200px;font-size: 15px;height:22px;transition: all 0.25s ease;}
 .raster_record:hover select{width:290px;height:22px;transition: all 0.25s ease;}
 .raster_record:hover span{line-height:16px;font-size: 15px;transition: all 0.25s ease;}
 .raster_record:hover img{width: auto; transition: all 0.25s ease;}
-.raster_record:hover .tr_other{visibility:visible;}
+.raster_record:hover .tr_hide{visibility:visible;}
 .raster_record:hover .preview_image{width: 250px;transition: all 0.25s ease;}
-
 
 
 #layer  h2{
