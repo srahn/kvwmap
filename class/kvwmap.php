@@ -71,7 +71,7 @@ class GUI {
   var $nImageHeight;
   var $user;
   var $qlayerset;
-	static $scaleUnitSwitchScale = 239210;
+	var $scaleUnitSwitchScale;
   var $map_scaledenom;
   var $map_factor='';
 	var $formatter;
@@ -94,6 +94,7 @@ class GUI {
     if (isset($style)) $this->style=$style;
     # mime_type html, pdf
     if (isset ($mime_type)) $this->mime_type=$mime_type;
+		$this->scaleUnitSwitchScale = 239210;
   }
 	
 	public function __call($method, $arguments){
@@ -1759,7 +1760,7 @@ class GUI {
   }
 
   function switchScaleUnitIfNecessary() {
-		if ($this->map_scaledenom > self::$scaleUnitSwitchScale) $this->map->scalebar->set('units', MS_KILOMETERS);
+		if ($this->map_scaledenom > $this->scaleUnitSwitchScale) $this->map->scalebar->set('units', MS_KILOMETERS);
   }
 
 	function calculatePixelSize() {
