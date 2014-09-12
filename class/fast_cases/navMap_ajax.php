@@ -55,6 +55,7 @@
     if (isset($style)) $this->style=$style;
     # mime_type html, pdf
     if (isset ($mime_type)) $this->mime_type=$mime_type;
+		$this->scaleUnitSwitchScale = 239210;
   }
 	function loadMultiLingualText($language) {
     #echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language;
@@ -1209,10 +1210,7 @@
 
         $layer_id = $this->mapDB->newRollenLayer($this->formvars);
         
-        $classdata[0] = '';
-        $classdata[1] = -$layer_id;
-        $classdata[2] = '';
-        $classdata[3] = 0;
+        $classdata['layer_id'] = -$layer_id;
         $class_id = $this->mapDB->new_Class($classdata);
 				
 				if(defined('ZOOM2COORD_STYLE_ID') AND ZOOM2COORD_STYLE_ID != ''){
@@ -1362,7 +1360,15 @@
     if($this->reference_map->reference->image != NULL){
 			$this->reference_map->setextent($this->map->extent->minx,$this->map->extent->miny,$this->map->extent->maxx,$this->map->extent->maxy);
 			if($this->ref['epsg_code'] != $this->user->rolle->epsg_code){
-				$this->reference_map->extent->project($this->map->projection, $this->reference_map->projection);
+				if(MAPSERVERVERSION < '600'){
+					$projFROM = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);
+					$projTO = ms_newprojectionobj("init=epsg:".$this->ref['epsg_code']);
+				}
+				else{
+					$projFROM = $this->map->projection;
+					$projTO = $this->reference_map->projection;
+				}
+				$this->reference_map->extent->project($projFROM, $projTO);
 			}
       $img_refmap = $this->reference_map->drawReferenceMap();
       $filename = $this->map_saveWebImage($img_refmap,'png');

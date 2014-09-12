@@ -8,16 +8,30 @@
 	}
  ?>
 
-make_vorschlag = function(attributenamesarray, attribute, k, layer_id){
+auto_generate = function(attributenamesarray, geom_attribute, attribute, k, layer_id){
 	var attributenames = '';
 	var attributevalues = '';
+	var geom = '';
 	for(i = 0; i < attributenamesarray.length; i++){
 		if(document.getElementById(attributenamesarray[i]+'_'+k) != undefined){
 			attributenames += attributenamesarray[i] + '|';
 			attributevalues += document.getElementById(attributenamesarray[i]+'_'+k).value + '|';
 		}
+		else if(attributenamesarray[i] == geom_attribute ){	// wenn es das Geometrieattribut ist, handelt es sich um eine Neuerfassung --> aktuelle Geometrie nehmen
+			if(document.GUI.loc_x != undefined && document.GUI.loc_x.value != ''){		// Punktgeometrie
+				geom = 'POINT('+document.GUI.loc_x.value+' '+document.GUI.loc_y.value+')';
+			}
+			else if(document.GUI.newpathwkt.value == ''){		// Polygon- oder Liniengeometrie
+				if(document.GUI.newpath.value != ''){
+					geom = buildwktpolygonfromsvgpath(document.GUI.newpath.value);
+				}
+			}
+			attributenames += attributenamesarray[i] + '|';
+			if(geom != '')attributevalues += 'SRID=<? echo $this->user->rolle->epsg_code; ?>;' + geom + '|';		// EWKT mit dem user-epsg draus machen
+			else attributevalues += 'POINT EMPTY|';		// leere Geometrie zurückliefern
+		}
 	}
-	ahah("index.php", "go=get_vorschlag&layer_id="+layer_id+"&attribute="+attribute+"&attributenames="+attributenames+"&attributevalues="+attributevalues, new Array(document.getElementById(attribute+'_'+k)), new Array("setvalue"));
+	ahah("index.php", "go=auto_generate&layer_id="+layer_id+"&attribute="+attribute+"&attributenames="+attributenames+"&attributevalues="+attributevalues, new Array(document.getElementById(attribute+'_'+k)), new Array("setvalue"));
 }
  
 update_buttons = function(all, layer_id){

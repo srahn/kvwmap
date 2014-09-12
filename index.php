@@ -270,9 +270,9 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->get_select_list();
 	  } break;
 		
-		# liefert einen Vorschlag der sich aus einem in options stehenden SQL ergibt
-	  case 'get_vorschlag' : {
-			$GUI->get_vorschlag();
+		# liefert einen automatisch generierten Vorschlag der sich aus einem in options stehenden SQL ergibt
+	  case 'auto_generate' : {
+			$GUI->auto_generate();
 	  } break;
 	  
 	  # Kartenbild anzeigen
@@ -363,90 +363,86 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 
 	  # Eigentuemerfortführung
 	  case 'export_ESAF64_Exportieren' : {
-		$GUI->checkCaseAllowed('export_ESAF64');
-		$GUI->export_ESAF64_exportieren();
+			$GUI->checkCaseAllowed('export_ESAF64');
+			$GUI->export_ESAF64_exportieren();
 	  } break;
 
 	  # Eigentuemerfortführung
 	  case 'export_ESAF64_Tabelle Bereinigen' : {
-		$GUI->checkCaseAllowed('export_ESAF64');
-		$GUI->export_ESAF64_bereiningen();
+			$GUI->checkCaseAllowed('export_ESAF64');
+			$GUI->export_ESAF64_bereiningen();
 	  } break;
 	  
 	  case 'exportWMC' :{
 		  $GUI->exportWMC();
 		} break;
 
-	  case 'spatialDocIndexing' : {
-		$GUI->spatialDocIndexing();
-	  } break;
-
 	  case 'Externer_Druck' : {
-		$GUI->checkCaseAllowed($go);
-		$GUI->formvars['loadmapsource'] = 'Post';
-		$GUI->druckausschnittswahl($GUI->formvars['loadmapsource']);
+			$GUI->checkCaseAllowed($go);
+			$GUI->formvars['loadmapsource'] = 'Post';
+			$GUI->druckausschnittswahl($GUI->formvars['loadmapsource']);
 	  } break;
 
 	  case 'Externer_Druck_Drucken' : {
-		$GUI->createMapPDF($GUI->formvars['aktiverRahmen'], false);
-		$GUI->mime_type='pdf';
-		$GUI->output();
+			$GUI->createMapPDF($GUI->formvars['aktiverRahmen'], false);
+			$GUI->mime_type='pdf';
+			$GUI->output();
 	  } break;
 
 	  case 'logout' : {
-		session_start();
-		$_SESSION = array();
-		if(ini_get("session.use_cookies")){
-			$params = session_get_cookie_params();
-			setcookie(session_name(), '', time() - 42000, $params["path"], $params["domain"], $params["secure"], $params["httponly"]);
-		}
-		session_destroy();
-		$locationStr='index.php';
-		if (isset($newPassword)) {
-		  $locationStr.='?newPassword='.$newPassword;
-		  $locationStr.='&msg='.$GUI->Fehlermeldung;
-		  $locationStr.='&passwort='.$passwort;
-		  $locationStr.='&username='.$username;
-		}
-		header('Location: '.$locationStr);
+			session_start();
+			$_SESSION = array();
+			if(ini_get("session.use_cookies")){
+				$params = session_get_cookie_params();
+				setcookie(session_name(), '', time() - 42000, $params["path"], $params["domain"], $params["secure"], $params["httponly"]);
+			}
+			session_destroy();
+			$locationStr='index.php';
+			if (isset($newPassword)) {
+				$locationStr.='?newPassword='.$newPassword;
+				$locationStr.='&msg='.$GUI->Fehlermeldung;
+				$locationStr.='&passwort='.$passwort;
+				$locationStr.='&username='.$username;
+			}
+			header('Location: '.$locationStr);
 	  } break;
 
 	  case 'Flurstuecks-CSV-Export' : {
-		$GUI->export_flurst_csv();
+			$GUI->export_flurst_csv();
 	  } break;
 	  
 	  case 'Flurstuecks-CSV-Export_Auswahl_speichern' : {
-		$GUI->export_flurst_csv_auswahl_speichern();
+			$GUI->export_flurst_csv_auswahl_speichern();
 	  } break;
 	  
 	  case 'Flurstuecks-CSV-Export_Auswahl_laden' : {
-		$GUI->export_flurst_csv_auswahl_laden();
+			$GUI->export_flurst_csv_auswahl_laden();
 	  } break;
 	  
 	  case 'Flurstuecks-CSV-Export_Auswahl_loeschen' : {
-		$GUI->export_flurst_csv_auswahl_loeschen();
+			$GUI->export_flurst_csv_auswahl_loeschen();
 	  } break;
 	  
 	  case 'Flurstuecks-CSV-Export_Exportieren' : {
-		$GUI->export_flurst_csv_exportieren();
+			$GUI->export_flurst_csv_exportieren();
 	  } break;
 		
 	  case 'googlemaps' : {
-		$GUI->googlemaps();
+			$GUI->googlemaps();
 	  } break;
 
 	  # PointEditor
 	  case 'PointEditor' : {
-		$GUI->PointEditor();
+			$GUI->PointEditor();
 	  }break;
 
 	  # PointEditor
 	  case 'PointEditor_Senden' : {
-		$GUI->PointEditor_Senden();
+			$GUI->PointEditor_Senden();
 	  }break;
 
 	  case 'zoomto_selected_datasets' : {
-		$GUI->zoomto_selected_datasets();
+			$GUI->zoomto_selected_datasets();
 	  }break;
 
 	  # zoomToPoint

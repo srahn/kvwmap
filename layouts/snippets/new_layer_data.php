@@ -10,7 +10,6 @@
 
 //-->
 </script>
-
 <table border="0" cellpadding="5" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
     <td colspan="5"><h2><?php echo $strtitle; ?></h2></td>
@@ -44,7 +43,7 @@
   	 ?></td>
   </tr><?php
    }
-   ?></table>
+   ?></table><br>
 
 <?
 if($this->formvars['selected_layer_id'] AND $this->Fehler == ''){

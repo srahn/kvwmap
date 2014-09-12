@@ -225,6 +225,7 @@ CREATE TABLE layer_attributes (
 	`alias_vietnamese` VARCHAR( 100 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL,
   tooltip varchar(255) default NULL,
   `group` VARCHAR( 255 ) DEFAULT NULL,
+	`raster_visibility` BOOLEAN NULL,
   `mandatory` BOOL NULL,
 	`quicksearch` BOOLEAN NULL DEFAULT NULL,
   `order` int(11) default NULL,

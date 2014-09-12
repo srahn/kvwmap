@@ -12,7 +12,7 @@
 	  } break;
 
 	  case 'Antrag_loeschen' : {
-			$this->checkCaseAllowed($go);
+			$this->checkCaseAllowed($this->go);
 			include (PLUGINS.'nachweisverwaltung/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Klasse einbinden
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
@@ -45,7 +45,7 @@
 			include (PLUGINS.'nachweisverwaltung/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Klasse einbinden
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
-			$this->checkCaseAllowed($go);
+			$this->checkCaseAllowed($this->go);
 			$this->DokumenteZuAntraegeAnzeigen();
 	  } break;
 
@@ -98,7 +98,7 @@
 	  } break;
 
 	  case 'Nachweisloeschen':{
-			$this->checkCaseAllowed($go);
+			$this->checkCaseAllowed($this->go);
 			include (PLUGINS.'nachweisverwaltung/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Klasse einbinden
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
@@ -109,7 +109,7 @@
 		#Documente die in der Ergebnisliste ausgewählt wurden sollen weiterverarbeitet werden!
 		# 2006-01-26 pk
 	  case 'Nachweisanzeige_zum_Auftrag_hinzufuegen' : {
-			$this->checkCaseAllowed($go);
+			$this->checkCaseAllowed($this->go);
 			include (PLUGINS.'nachweisverwaltung/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Klasse einbinden
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
@@ -117,7 +117,7 @@
 	  } break;
 
 	  case 'Nachweisanzeige_aus_Auftrag_entfernen':{
-			$this->checkCaseAllowed($go);
+			$this->checkCaseAllowed($this->go);
 			include (PLUGINS.'nachweisverwaltung/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Klasse einbinden
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
@@ -166,7 +166,7 @@
 	  } break;
 
 	  case 'Nachweisformular' : {
-			$this->checkCaseAllowed($go);		
+			$this->checkCaseAllowed($this->go);		
 			include (PLUGINS.'nachweisverwaltung/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Klasse einbinden
 			# Unterscheidung ob vorhandene Dokumente geändert werden sollen oder neu eingegeben
@@ -205,7 +205,7 @@
 	  } break;
 
 	  case 'Antrag_Aendern' : {
-			$this->checkCaseAllowed($go);
+			$this->checkCaseAllowed($this->go);
 			include (PLUGINS.'nachweisverwaltung/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Klasse einbinden
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
@@ -213,7 +213,7 @@
 	  } break;
 
 	  case 'Nachweis_antragsnr_form_aufrufen' : {
-			$this->checkCaseAllowed($go);
+			$this->checkCaseAllowed($this->go);
 			include (PLUGINS.'nachweisverwaltung/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Klasse einbinden
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
@@ -228,7 +228,7 @@
 	  } break;
 
 	  case 'Nachweisrechercheformular':{
-			$this->checkCaseAllowed($go);
+			$this->checkCaseAllowed($this->go);
 			include (PLUGINS.'nachweisverwaltung/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Klasse einbinden
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
@@ -263,7 +263,7 @@
 	  } break;
 
 	  case 'Festpunkte_Auswaehlen' : {
-			$this->checkCaseAllowed($go);
+			$this->checkCaseAllowed($this->go);
 			include (PLUGINS.'nachweisverwaltung/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Klasse einbinden
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
@@ -314,14 +314,14 @@
 	  } break;
 
 	  case 'sendeFestpunktskizze' : {
-			$this->checkCaseAllowed($go);
+			$this->checkCaseAllowed($this->go);
 			include (PLUGINS.'nachweisverwaltung/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Klasse einbinden
 			$this->sendeFestpunktskizze($this->formvars['name'],PUNKTDATEIPATH);
 	  } break;
 
 	  case 'FestpunktDateiUebernehmen' : {
-			$this->checkCaseAllowed($go);
+			$this->checkCaseAllowed($this->go);
 			include (PLUGINS.'nachweisverwaltung/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Klasse einbinden
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
@@ -329,7 +329,7 @@
 	  } break;
 
 	  case 'FestpunktDateiAktualisieren' : {
-			$this->checkCaseAllowed($go);
+			$this->checkCaseAllowed($this->go);
 			include (PLUGINS.'nachweisverwaltung/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Klasse einbinden
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
@@ -344,7 +344,7 @@
 	  } break;
 
 	  case 'FestpunkteSkizzenZuordnung_Senden' : {
-			$this->checkCaseAllowed($go);
+			$this->checkCaseAllowed($this->go);
 			include (PLUGINS.'nachweisverwaltung/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Klasse einbinden
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden

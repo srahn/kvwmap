@@ -65,7 +65,7 @@
 				}
 				if($attributes['invisible'][$attributes['name'][$j]] != 'true'  AND $attributes['name'][$j] != 'lock'){
 ?>
-					<tr class="<? if($attributes['form_element_type'][$j] == 'Dokument')echo 'tr_doc'; else echo 'tr_other'; ?>">
+					<tr class="<? if($attributes['raster_visibility'][$j] == 1)echo 'tr_show'; else echo 'tr_hide'; ?>">
 <?				if($attributes['type'][$j] != 'geometry'){
 						echo '<td  valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';
 						if($attributes['privileg'][$j] != '0' AND !$lock[$k]){
@@ -74,7 +74,7 @@
 						if($attributes['alias'][$j] == ''){
 							$attributes['alias'][$j] = $attributes['name'][$j];
 						}
-						echo '<table width="100%" cellspacing="0" cellpadding="0"><tr><td>';
+						echo '<table width="100%" cellspacing="0" cellpadding="0"><tr style="border: none"><td>';
 						echo '<span style="color: #222222;" title="'.$attributes['tooltip'][$j].'">'.$attributes['alias'][$j].'</span>';
 						if($attributes['nullable'][$j] == '0' AND $attributes['privileg'][$j] != '0'){
 							echo '<span title="Eingabe erforderlich">*</span>';

@@ -4,7 +4,7 @@
 	
 	switch($this->go){		
 		case 'Bauauskunft_Suche' : {
-			$this->checkCaseAllowed($go);
+			$this->checkCaseAllowed($this->go);
 			include(PLUGINS.'probaug/model/kvwmap.php');
 			include(PLUGINS.'probaug/model/bau.php');
 			$this->bauauskunftSuche();

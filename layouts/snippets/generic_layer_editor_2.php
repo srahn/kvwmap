@@ -164,10 +164,6 @@
 							  $datapart .= '><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div id="calendar"><a name="calendar_'.$attributes['name'][$j].'_'.$k.'"></div></td>';
 							}
 							
-							if(in_array($attributes['form_element_type'][$j], array('Text', 'Textfeld')) AND $attributes['options'][$j] != ''){
-								$datapart .= '<td align="right"><a title="automatisch generieren" href="javascript:make_vorschlag(new Array(\''.implode($attributes['name'], "','").'\'), \''.$attributes['name'][$j].'\', '.$k.', '.$layer['Layer_ID'].');"><img src="'.GRAPHICSPATH.'autogen.png"></a></td>';
-							}
-							
 							$datapart .= '</td></tr></table>';
 							$datapart .= '</td><td>';
 			  			if($attributes['constraints'][$j] != '' AND $attributes['constraints'][$j] != 'PRIMARY KEY'){
@@ -194,9 +190,6 @@
 									</td>
 								</tr>
 							';
-
-			  			
-			  			
 							if($attributes['privileg'][$j] >= '0'){
 								$this->form_field_names .= $layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'|';
 							}
@@ -232,6 +225,7 @@
 			    	    <td style="padding-top:5px; padding-bottom:5px;" valign="middle">
 <?						
 							if($layer['shape'][$k][$attributes['the_geom']]){
+								echo '<input type="hidden" id="'.$columnname.'_'.$k.'" value="'.$layer['shape'][$k][$columnname].'">';
 								if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY'){
 									if($layer['connectiontype'] == 6 AND $layer['export_privileg'] == '1'){ ?>
 			    					<script type="text/javascript">
