@@ -1240,6 +1240,8 @@ ADD  `alias_english` VARCHAR( 100 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci N
 ADD  `alias_polish` VARCHAR( 100 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL AFTER  `alias_english` ,
 ADD  `alias_vietnamese` VARCHAR( 100 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL AFTER  `alias_polish`;
 
+ALTER TABLE  `layer_attributes` ADD  `raster_visibility` BOOLEAN NULL AFTER  `group`;
+
 # da sich herausgestellt hat, das InnoDB-Tabellen sehr langsam sind, werden alle Tabellen auf MyISAM umgestellt
 
 ALTER TABLE `classes` ENGINE = MyISAM;

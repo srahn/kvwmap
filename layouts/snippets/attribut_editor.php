@@ -65,6 +65,8 @@
 						<td>&nbsp;</td>
 						<td align="center"><span class="fett">Gruppe</span></td>
 						<td>&nbsp;</td>
+						<td align="center"><span class="fett">sichtbar im Rastertemplate</span></td>
+						<td>&nbsp;</td>
 						<td align="center"><span class="fett">Suche-Pflicht</span></td>';
 			if(in_array($this->formvars['selected_layer_id'], $quicksearch_layer_ids)){			
 				echo '
@@ -183,6 +185,12 @@
 				  <td>&nbsp;</td>
 				  <td align="left" valign="top">
 				  	<input name="group_'.$this->attributes['name'][$i].'" type="text" value="'.$this->attributes['group'][$i].'">
+				  </td>
+					<td>&nbsp;</td>
+					<td align="center" valign="top">
+				  	<input name="raster_visibility_'.$this->attributes['name'][$i].'" type="checkbox" value="1" ';
+				  	if($this->attributes['raster_visibility'][$i]) echo 'checked="true"';
+						echo '>
 				  </td>
 					<td>&nbsp;</td>
 				  <td align="center" valign="top">

@@ -2421,6 +2421,7 @@ class GUI {
 		for($i = 0; $i < count($attributenames); $i++){
 			$sql = str_replace('$'.$attributenames[$i], $attributevalues[$i], $sql);
 		}
+		#echo $sql;
 		$ret=$layerdb->execSQL($sql,4,0);
 		if($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
 		$rs = pg_fetch_array($ret[1]);
@@ -13946,7 +13947,7 @@ class db_mapObj{
 			$last_layer_id = '@last_layer_id'.$layer_ids[$i];
 			$sql .= chr(10).'SET '.$last_layer_id.'=LAST_INSERT_ID();'.chr(10);
 			$classes = $database->create_insert_dump('classes', 'Class_ID', 'SELECT `Class_ID`, `Name`, \''.$last_layer_id.'\' AS `Layer_ID`, `Expression`, `drawingorder`, `text` FROM classes WHERE Layer_ID='.$layer_ids[$i]);
-			$layer_attributes = $database->create_insert_dump('layer_attributes', '', 'SELECT \''.$last_layer_id.'\' AS `layer_id`, `name`, real_name, tablename, table_alias_name, `type`, geometrytype, constraints, nullable, length, form_element_type, options, alias, tooltip, `order`, `privileg` FROM layer_attributes WHERE layer_id = '.$layer_ids[$i]);
+			$layer_attributes = $database->create_insert_dump('layer_attributes', '', 'SELECT \''.$last_layer_id.'\' AS `layer_id`, `name`, real_name, tablename, table_alias_name, `type`, geometrytype, constraints, nullable, length, decimal_length, `default`, form_element_type, options, alias, `alias_low-german`, alias_english, alias_polish, alias_vietnamese, tooltip, `group`, `raster_visibility`, `mandatory`, `order`, `privileg`, query_tooltip FROM layer_attributes WHERE layer_id = '.$layer_ids[$i]);
 			for($j = 0; $j < count($layer_attributes['insert']); $j++){
 				$sql .= $layer_attributes['insert'][$j].chr(10);
 			}
@@ -14323,9 +14324,9 @@ class db_mapObj{
       $sql.= 'options = "'.$formvars['options_'.$attributes['name'][$i]].'", ';
       $sql.= 'tooltip = "'.$formvars['tooltip_'.$attributes['name'][$i]].'", ';
       $sql.= '`group` = "'.$formvars['group_'.$attributes['name'][$i]].'", ';
-      if($formvars['mandatory_'.$attributes['name'][$i]] == ''){
-      	$formvars['mandatory_'.$attributes['name'][$i]] = 'NULL';
-      }
+			if($formvars['raster_visibility_'.$attributes['name'][$i]] == '')$formvars['raster_visibility_'.$attributes['name'][$i]] = 'NULL';
+      $sql.= 'raster_visibility = '.$formvars['raster_visibility_'.$attributes['name'][$i]].', ';
+      if($formvars['mandatory_'.$attributes['name'][$i]] == '')$formvars['mandatory_'.$attributes['name'][$i]] = 'NULL';
       $sql.= 'mandatory = '.$formvars['mandatory_'.$attributes['name'][$i]].', ';
       $sql.= 'alias = "'.$formvars['alias_'.$attributes['name'][$i]].'", ';
 			foreach($supportedLanguages as $language){
@@ -14341,7 +14342,8 @@ class db_mapObj{
 					$sql.= '`alias_'.$language.'` = "'.$formvars['alias_'.$language.'_'.$attributes['name'][$i]].'", ';
 				}
 			}
-			$sql.= ' mandatory = '.$formvars['mandatory_'.$attributes['name'][$i]].' , quicksearch = '.$formvars['quicksearch_'.$attributes['name'][$i]];
+			$sql.= ' raster_visibility = '.$formvars['raster_visibility_'.$attributes['name'][$i]].', mandatory = '.$formvars['mandatory_'.$attributes['name'][$i]].' , quicksearch = '.$formvars['quicksearch_'.$attributes['name'][$i]];
+			#echo $sql;
       $this->debug->write("<p>file:kvwmap class:Document->save_attributes :",4);
       $database->execSQL($sql,4, 1);
     }
@@ -14378,7 +14380,7 @@ class db_mapObj{
 			if(!$all_languages AND LANGUAGE != 'german') {
 				$sql.='CASE WHEN `alias_'.LANGUAGE.'` != "" THEN `alias_'.LANGUAGE.'` ELSE `alias` END AS ';
 			}
-			$sql.='alias, `alias_low-german`, alias_english, alias_polish, alias_vietnamese, layer_id, name, real_name, tablename, table_alias_name, type, geometrytype, constraints, nullable, length, decimal_length, `default`, form_element_type, options, tooltip, `group`, mandatory, quicksearch, `order`, privileg, query_tooltip FROM layer_attributes WHERE layer_id = '.$layer_id.$einschr.' ORDER BY `order`';
+			$sql.='alias, `alias_low-german`, alias_english, alias_polish, alias_vietnamese, layer_id, name, real_name, tablename, table_alias_name, type, geometrytype, constraints, nullable, length, decimal_length, `default`, form_element_type, options, tooltip, `group`, raster_visibility, mandatory, quicksearch, `order`, privileg, query_tooltip FROM layer_attributes WHERE layer_id = '.$layer_id.$einschr.' ORDER BY `order`';
       $this->debug->write("<p>file:kvwmap class:db_mapObj->read_layer_attributes:<br>".$sql,4);
       $query=mysql_query($sql);
       if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
@@ -14424,6 +14426,7 @@ class db_mapObj{
 				$attributes['alias_vietnamese'][$i]= $rs['alias_vietnamese'];
       	$attributes['tooltip'][$i]= $rs['tooltip'];
       	$attributes['group'][$i]= $rs['group'];
+				$attributes['raster_visibility'][$i]= $rs['raster_visibility'];
       	$attributes['mandatory'][$i]= $rs['mandatory'];
 				$attributes['quicksearch'][$i]= $rs['quicksearch'];
       	$attributes['privileg'][$i]= $rs['privileg'];

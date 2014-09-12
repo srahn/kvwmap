@@ -412,7 +412,7 @@
 										}
 										$datapart .= ' size="'.$size.'" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" id="'.$attributes['name'][$j].'_'.$k.'" value="'.htmlspecialchars($value).'">';
 										if($attributes['privileg'][$j] > '0' AND $attributes['options'][$j] != ''){
-											$datapart .= '&nbsp;<a title="automatisch generieren" href="javascript:auto_generate(new Array(\''.implode($attributes['name'], "','").'\'), \''.$attributes['name'][$j].'\', '.$k.', '.$layer['Layer_ID'].');"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
+											$datapart .= '&nbsp;<a title="automatisch generieren" href="javascript:auto_generate(new Array(\''.implode($attributes['name'], "','").'\'), \''.$attributes['the_geom'].'\', \''.$attributes['name'][$j].'\', '.$k.', '.$layer['Layer_ID'].');"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
 										}
 									}
 								}

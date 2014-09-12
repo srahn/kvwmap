@@ -65,7 +65,7 @@
 				}
 				if($attributes['invisible'][$attributes['name'][$j]] != 'true'  AND $attributes['name'][$j] != 'lock'){
 ?>
-					<tr class="<? if($attributes['group'][$j] != 'collapsed')echo 'tr_show'; else echo 'tr_hide'; ?>">
+					<tr class="<? if($attributes['raster_visibility'][$j] == 1)echo 'tr_show'; else echo 'tr_hide'; ?>">
 <?				if($attributes['type'][$j] != 'geometry'){
 						echo '<td  valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';
 						if($attributes['privileg'][$j] != '0' AND !$lock[$k]){
