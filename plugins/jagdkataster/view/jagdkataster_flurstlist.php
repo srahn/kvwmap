@@ -116,6 +116,18 @@ function csv_export(){
   </tr>
 </table>
 
+<input name="checkbox_names" type="hidden" value="<? echo $this->formvars['checkbox_names']; ?>">
+<?
+	// Durchschleifen der angehakten Checkboxen der Jagdbezirke
+	$checkbox_names = explode('|', $this->formvars['checkbox_names']);
+	for($i = 0; $i < count($checkbox_names); $i++){
+		if($this->formvars[$checkbox_names[$i]] == 'on'){
+			echo '<input name="'.$checkbox_names[$i].'" type="hidden" value="on">';
+		}
+	}
+
+?>
+
 <input name="go" type="hidden" value="jagdbezirk_show_data">
 <input name="oid" type="hidden" value="<? echo $this->formvars['oid']; ?>">
 <input name="name" type="hidden" value="<? echo $this->formvars['name']; ?>">
