@@ -42,6 +42,7 @@ form {
 
 .fetter{
 	font-family: SourceSansPro3;
+	line-height: 20px;
 }
 
 .px13 {
@@ -58,6 +59,10 @@ form {
 
 .px16{
 	font-size: 16px;
+}
+
+.px17{
+	font-size: 17px;
 }
 
 .px20{
@@ -377,25 +382,29 @@ a.menuered:hover {
 	font-family: SourceSansPro1;
 }
 
-a.infobox {  
-	text-decoration:none; 
+.infobox {  
+	text-decoration:none;
+	overflow: auto;
 }
 
-a.infobox:hover { 
+.infotext{  
+	overflow-y: auto; 
+	max-height:100px;
+}
+
+.infobox:hover { 
 	text-decoration:none;  
 }
 
-a.infobox span 
-	{ visibility:hidden; 
+.infobox .infotext 
+	{ display:none; 
 		position:absolute;
-    margin-top:1.5em; 
     padding:0.5em; 
     text-decoration:none; 
 }
 
-
-a.infobox:hover span, a.infobox:focus span, a.infobox:active span {
-	visibility:visible; 
+.infobox:hover .infotext{
+	display:inline;
   border:1px solid steelblue; 
   background:white; 
   text-decoration:none;

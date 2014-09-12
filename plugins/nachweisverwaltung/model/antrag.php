@@ -22,7 +22,8 @@
 # MA 02111-1307, USA.                                             # 
 #                                                                 #
 # Kontakt:                                                        #
-# pkorduan@gmx.de peter.korduan@auf.uni-rostock.de                #
+# peter.korduan@gdi-service.de                                    #
+# stefan.rahn@gdi-service.de                                      #
 ###################################################################
 #################
 # Klasse Antrag #

@@ -22,7 +22,8 @@
 # MA 02111-1307, USA.                                             #
 #                                                                 #
 # Kontakt:                                                        #
-# pkorduan@gmx.de peter.korduan@auf.uni-rostock.de                #
+# peter.korduan@gdi-service.de                                    #
+# stefan.rahn@gdi-service.de                                      #
 ###################################################################
 #############################
 # Klasse jagdkataster #
@@ -254,9 +255,14 @@ class jagdkataster {
 	        $Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
 	        $anzEigentuemer=count($Eigentuemerliste);
 	        for($e=0;$e<$anzEigentuemer;$e++){
-	        	$rs['eigentuemer'][$e] = rtrim($Eigentuemerliste[$e]->Name[0], ',');
+	        	$rs['eigentuemer'][] = rtrim($Eigentuemerliste[$e]->Name[0], ',');						
+						$rs['eigentuemer_nr'][] = $Eigentuemerliste[$e]->NamensNr;
 	        }
       	}
+				if($flst->Grundbuecher[$g]['zusatz_eigentuemer'] != ''){
+					$rs['eigentuemer'][] = $flst->Grundbuecher[$g]['zusatz_eigentuemer'];						
+					$rs['eigentuemer_nr'][] = ' - ';
+				}
 			}
 			# --- Eigentümer ---
 			$flurstuecke[] = $rs;
@@ -367,6 +373,7 @@ class jagdkataster {
 			$sql.= " AND alb.flurstkennz = alknflst.flurstkennz AND e.lfd_nr_name=n.lfd_nr_name AND e.bezirk=b.bezirk";
 			$sql.= " AND e.blatt=b.blatt AND b.flurstkennz=alb.flurstkennz) as foo";
 			$sql.= " group by eigentuemer, j_flaeche";
+			#echo $sql;
 		}
 		return $this->database->execSQL($sql, 4, 0);
 	}

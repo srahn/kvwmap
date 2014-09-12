@@ -220,7 +220,7 @@
       $csv .= $GUI->flurstuecke[$i]['flur'].';';
       $csv .= $GUI->flurstuecke[$i]['zaehlernenner'].';';
       for($j=0; $j < count($GUI->flurstuecke[$i]['eigentuemer']); $j++){
-      	$csv .= $GUI->flurstuecke[$i]['eigentuemer'][$j].'   ';
+      	$csv .= $GUI->flurstuecke[$i]['eigentuemer_nr'][$j].' '.$GUI->flurstuecke[$i]['eigentuemer'][$j].'   ';
       }
       $csv .= ';';
       $csv .= $GUI->flurstuecke[$i]['albflaeche'].';';

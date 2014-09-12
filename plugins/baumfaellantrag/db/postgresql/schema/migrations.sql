@@ -1,6 +1,3 @@
---- migration 2014-08-03 00:00:00
-
--- Version 2.0.0
 
 BEGIN;
 
@@ -8,7 +5,7 @@ CREATE SCHEMA baumfaellung;
 
 SET search_path = baumfaellung, public;
 
-CREATE TABLE baumfaellung.antraege
+CREATE TABLE antraege
 (
   id serial NOT NULL,
   nr bigint,

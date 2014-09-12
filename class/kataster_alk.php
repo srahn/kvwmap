@@ -22,7 +22,8 @@
 # MA 02111-1307, USA.                                             #
 #                                                                 #
 # Kontakt:                                                        #
-# pkorduan@gmx.de peter.korduan@gdi-service.de                    #
+# peter.korduan@gdi-service.de                                    #
+# stefan.rahn@gdi-service.de                                      #
 ###################################################################
 #  kataster_alkis.php  Klassenbibliothek für Klassen zum Kataster #
 ###################################################################

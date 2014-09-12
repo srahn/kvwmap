@@ -20,7 +20,8 @@
 # MA 02111-1307, USA.                                             #
 #                                                                 #
 # Kontakt:                                                        #
-# pkorduan@gmx.de peter.korduan@auf.uni-rostock.de                #
+# peter.korduan@gdi-service.de                                    #
+# stefan.rahn@gdi-service.de                                      #
 ###################################################################
 ##################################################
 # Klasse Datenbank für ALB Modell und PostgreSQL #
@@ -34,10 +35,6 @@ class pgdatabase_alkis {
   var $defaultlogfile;
   var $commentsign;
   var $blocktransaction;
-
-  # Für eine Liste der verfügbaren Funktionen siehe:
-  # https://kvwmap.geoinformatik.uni-rostock.de/PHPDoc/apidoc/pgdatabase.html
-  # Liste ggf. mit https://kvwmap.geoinformatik.uni-rostock.de/PHPDoc/ aktualisieren
 
   function pgdatabase_alkis() {
     global $debug;

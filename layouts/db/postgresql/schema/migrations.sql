@@ -1,8 +1,4 @@
 
-### migration 2014-08-03 00:00:00
-
-# Installationsskript der Version 2.0.0
-
 BEGIN;
 
 CREATE SCHEMA custom_shapes;	-- kann auch anders heißen, ist der config.php über CUSTOM_SHAPE_SCHEMA definierbar

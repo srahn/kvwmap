@@ -1,6 +1,4 @@
 
---- migration 2014-08-03 00:00:00
-
 BEGIN;
 
 SET statement_timeout = 0;

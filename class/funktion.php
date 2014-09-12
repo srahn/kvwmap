@@ -22,7 +22,8 @@
 # MA 02111-1307, USA.                                             #
 #                                                                 #
 # Kontakt:                                                        #
-# pkorduan@gmx.de peter.korduan@auf.uni-rostock.de                #
+# peter.korduan@gdi-service.de                                    #
+# stefan.rahn@gdi-service.de                                      #
 ###################################################################
 # users.php Klassenbibliothek zu Nutzern und Stellen #
 ######################################################
@@ -33,7 +34,8 @@
 #
 # You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 #
-# pkorduan@gmx.de peter.korduan@auf.uni-rostock.de
+# peter.korduan@gdi-service.de                                    #
+# stefan.rahn@gdi-service.de                                      #
 #
 ############################################################################################
 #########################

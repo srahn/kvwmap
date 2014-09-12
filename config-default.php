@@ -661,7 +661,7 @@ define("OWS_CONTACTFACSIMILETELEPHONE","0049-381-498-2188");
 # An Stelle von WMS_CONTACTELECTRONICMAILADDRESS
 # /WMT_MS_Capabilities/Service/ContactInformation/ContactElectronicMailAddress
 # /WCS_Capabilities/Service/contactInfo/address/eletronicMailAddress
-define("OWS_CONTACTELECTRONICMAILADDRESS","peter.korduan@uni-rostock.de");
+define("OWS_CONTACTELECTRONICMAILADDRESS","peter.korduan@gdi-service.de");
 
 # An Stelle von WMS_SRS
 # /WMT_MS_Capabilities/Capability/Layer/SRS
