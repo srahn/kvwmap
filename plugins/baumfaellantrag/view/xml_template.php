@@ -5,6 +5,7 @@ $xml_string =
 	<form>catalog://kommunen/zweck/zweckverb_antrag_faellung</form>
 	<instance>
 		<datarow>
+			<element id="ID_PROVIDER">' . $data['provider_id'] . '</element>
 			<element id="ID_USER">MANDANTUSER</element>
 			<element id="LIP_FORM_REVISION">-1</element>
 			<element id="DVZ_FORM_NAME">Antrag auf Fällung von Einzelbäumen</element>

@@ -38,6 +38,7 @@ for ($i = 0; $i < count ( $data['wood_species'] ); $i++ ) {
 	mandatereference,
 	locationsketchreference,
 	npa_authenticated,
+  privider_id,
 	tree_geometry
   )
   VALUES (
@@ -78,11 +79,12 @@ for ($i = 0; $i < count ( $data['wood_species'] ); $i++ ) {
 	".(($data['mandateReference'] == '') ? 'NULL' : "'".UPLOADPATH.$data['mandateReference']."'").",
 	".(($data['locationSketchReference'] == '') ? 'NULL' : "'".UPLOADPATH.$data['locationSketchReference']."'").",
 	".$data['npa_authenticated'].",
+  ".$data['provider_id'].",
 	ST_GeometryFromText('POINT(".$data['longitude'][$i]." ".$data['latitude'][$i].")', 4326)
   )
   RETURNING id";
   #echo $sql;
-  $ret = $this->pgdatabase->execSQL($sql, 4, 1);
+  $ret = $GUI->pgdatabase->execSQL($sql, 4, 1);
   #$data['debug'][] = $sql;
 }
 ?>

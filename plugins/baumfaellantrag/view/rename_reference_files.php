@@ -18,5 +18,4 @@ if (array_key_exists('locationSketchReference', $data) and isset($data['location
 	if (file_exists($sketch_reference_file))
 		$ref_files[] = $sketch_reference_file;
 }
-
 ?>

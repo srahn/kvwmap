@@ -37,6 +37,7 @@
   };
 
   $this->packAndMail = function($data) use ($GUI) {
+    $plugin_name = 'baumfaellantrag';
     #var_dump($data);
     $GUI->mime_type = "formatter";
     if ($GUI->formvars['format'] == '') $GUI->formvars['format'] = "json";
@@ -50,18 +51,18 @@
 
     # create reference files
     $ref_files = array();
-    include (PLUGINS . 'baumfaellantrag/view/rename_reference_files.php'); // create references to uploaded files
+    include (PLUGINS . $plugin_name . '/view/rename_reference_files.php'); // create references to uploaded files
     
     # create xml file
     $xml_file_name =  "Antrag_" . $antrag_id . ".xml";
-    include (PLUGINS . 'baumfaellantrag/view/xml_template.php');
+    include (PLUGINS . $plugin_name . '/view/xml_template.php');
     $xml = new SimpleXMLElement($xml_string);
     $xml->asXML(UPLOADPATH . $xml_file_name);
 
     # create pdf file
     $pdf_file_name = 'Antrag_' . $antrag_id . '.pdf';
     $fp = fopen(UPLOADPATH . $pdf_file_name, 'wb');
-    include (PLUGINS . 'baumfaellantrag/view/pdf_template.php'); // create pdf and put it in $pdf_output variable
+    include (PLUGINS . $plugin_name . '/view/pdf_template.php'); // create pdf and put it in $pdf_output variable
     fwrite($fp, $pdf_output);
     fclose($fp);
     
@@ -79,9 +80,14 @@
 
     # create email
     $mail = array();
-    include (PLUGINS . 'baumfaellantrag/view/email_template.php');
+    include (PLUGINS . $plugin_name . '/view/email_template.php');
     # send email
     $success = mail_att($mail['from_name'], $mail['from_email'], $mail['to_email'], $mail['cc_email'], $mail['reply_email'],  $mail['subject'], $mail['message'], $mail['attachement']);
+    
+    if ($success) {
+      # save application data
+      include(PLUGINS . $plugin_name . '/view/save_application_data.php');
+    }
 
   return array("success" => $success, "antrag_id" => $antrag_id, "xml_file" => UPLOADPATH . $xml_file_name, "pdf_file" => UPLOADPATH . $pdf_file_name, "zip_file" => UPLOADPATH . $zip_file_name, "email_text" => $email_text, "email_recipient" => $email_recipient, "authority_processingTime" => $data['authority_processingTime'], "data:" => $data);
   };
