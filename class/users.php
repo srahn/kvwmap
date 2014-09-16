@@ -51,15 +51,6 @@ class account {
 
 	var $database;
 
-	## functions
-	# account ($database)
-	# getLayer()
-	# getAllAccess($case)
-	# getAccessToLayer($nutzung,$zeitraum,$date1,$date2,$case,$era,$date,$year,$id)
-	# getStatistik($nutzer,$nutzung,$stelle,$zeitraum,$day_d,$week_w,$month_d,$month_w,$month_m,$year_m,$year_w,$year_d,$day_e1,$day_e2,$month_e1,$month_e2,$year_e1,$year_e2)
-	# epoch()
-
-
 	function account ($database) {
 		global $debug;
 		$this->debug=$debug;

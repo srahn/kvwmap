@@ -1,6 +1,4 @@
 
-### migration 2014-08-03 00:00:00
-
 # Installationsskript der Version 2.0.0
 
 BEGIN;
@@ -997,5 +995,11 @@ CREATE TABLE `u_consumeALB` (
   `numpages` INT( 11 ) NULL ,
   PRIMARY KEY  (`user_id`,`stelle_id`,`time_id`,`log_number`)
 ) ENGINE=MyISAM;
+
+CREATE TABLE  `migrations` (
+	`component` VARCHAR( 50 ) NOT NULL ,
+	`type` ENUM(  'mysql',  'postgresql' ) NOT NULL ,
+	`filename` VARCHAR( 255 ) NOT NULL
+) ENGINE = MYISAM ;
 
 COMMIT;

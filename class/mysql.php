@@ -298,6 +298,20 @@ class database {
     return mysql_close($this->dbConn);
   }
 
+	function exec_file($filename){
+    if ($file = file_get_contents($filename)){
+			foreach(explode(";", $file) as $query){
+				$query = trim($query);
+				if (!empty($query) && $query != ";") {
+					$ret=$this->execSQL($query, 4, 1);
+					if($ret[0] == 1){
+						return $ret;
+					}
+				}
+			}
+    }
+	}
+	
   function begintransaction() {
     # Starten einer Transaktion
     # initiates a transaction block, that is, all statements
@@ -387,7 +401,7 @@ class database {
       #echo $sql;
       if ($query==0) {
         $ret[0]=1;
-        $ret[1]="<b>Fehler bei SQL Anweisung:</b><br>".$sql."<br>".mysql_error($query);
+        $ret[1]="<b>Fehler bei SQL Anweisung:</b><br>".$sql."<br>".mysql_error($this->dbConn);
         $this->debug->write($ret[1],$debuglevel);
         if ($logsql) {
           $this->logfile->write("#".$ret[1]);

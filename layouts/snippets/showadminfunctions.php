@@ -10,20 +10,27 @@
 				</tr>
 				<tr style="border:1px solid #C3C7C3">
 					<td><span class="fett">Komponente</span></td>
-					<td><span class="fett">Status</span></td>
+					<td align="right"><span class="fett">Status</span></td>
 				</tr>
-				<tr style="border:1px solid #C3C7C3;">
-					<td>kvwmap</td>
-					<td></td>
-				</tr>
-				<? for($i = 0; $i < count($kvwmap_plugins); $i++){ ?>
+				<? foreach($this->administration->migration_logs as $component => $component_migrations){
+						$mysql_counter = count($this->administration->migrations_to_execute['mysql'][$component]);
+						$postgresql_counter = count($this->administration->migrations_to_execute['postgresql'][$component]);
+				?>
 					<tr style="border:1px solid #C3C7C3;">
-						<td>Plugin: <? echo $kvwmap_plugins[$i]; ?></td>
-						<td></td>
+						<td><?	echo $component; ?></td>
+						<td align="right"><?	if($mysql_counter == 0 AND $postgresql_counter == 0)echo 'aktuell'; 
+										else {
+											$update_necessary = true;
+											if($mysql_counter > 0)echo 'MySQL ';
+											if($postgresql_counter > 0)echo 'PostgreSQL ';
+											echo ' nicht aktuell';
+										}
+								?>
+						</td>
 					</tr>
 				<? } ?>
 				<tr >
-					<td colspan="2" align="center"><input type="button" value="Aktualisieren"></td>
+					<td colspan="2" align="center"><input type="button" onclick="location.href='index.php?go=Administratorfunktionen&func=update_databases'" <? if(!$update_necessary)echo 'disabled'; ?> value="Aktualisieren"></td>
 				</tr>
 			</table> 
 		</td>

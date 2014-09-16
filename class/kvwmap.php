@@ -2901,7 +2901,15 @@ class GUI {
 
 
   function adminFunctions() {
+		include_once(CLASSPATH.'administration.php');
+		$this->administration = new administration($this->database, $this->pgdatabase);
+		$this->administration->get_database_status();
     switch ($this->formvars['func']) {
+			case "update_databases" : {
+        $this->administration->update_databases();
+				$this->administration->get_database_status();
+				$this->showAdminFunctions();
+      } break;
       case "showConstants" : {
         $this->showConstants();
       } break;

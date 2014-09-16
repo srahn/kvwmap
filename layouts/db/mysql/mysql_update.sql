@@ -1293,3 +1293,22 @@ ALTER TABLE `u_polygon2used_layer` ENGINE = MyISAM;
 ALTER TABLE `u_rolle2used_class` ENGINE = MyISAM;
 ALTER TABLE `u_rolle2used_layer` ENGINE = MyISAM;
 ALTER TABLE `u_styles2classes` ENGINE = MyISAM;
+
+CREATE TABLE  `migrations` (
+	`component` VARCHAR( 50 ) NOT NULL ,
+	`type` ENUM(  'mysql',  'postgresql' ) NOT NULL ,
+	`filename` VARCHAR( 255 ) NOT NULL
+) ENGINE = MYISAM ;
+
+INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES ('kvwmap', 'mysql', '2014-09-12_16-33-22_Version2.0.sql');
+INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES ('kvwmap', 'postgresql', '2014-09-12_16-33-22_Version2.0.sql');
+
+
+# Bitte die folgenden Inserts nur ausführen, wenn die entsprechenden Plugins verwendet werden!
+
+INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES ('bauleitplanung', 'postgresql', '2014-09-12_16-33-22_Version2.0.sql');
+INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES ('jagdkataster', 'postgresql', '2014-09-12_16-33-22_Version2.0.sql');
+INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES ('bodenrichtwerte', 'postgresql', '2014-09-12_16-33-22_Version2.0.sql');
+INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES ('nachweisverwaltung', 'postgresql', '2014-09-12_16-33-22_Version2.0.sql');
+INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES ('anliegerbeitraege', 'postgresql', '2014-09-12_16-33-22_Version2.0.sql');
+INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES ('probaug', 'postgresql', '2014-09-12_16-33-22_Version2.0.sql');
