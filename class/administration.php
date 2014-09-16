@@ -39,10 +39,11 @@ class administration{
 	}
 	
 	function get_migration_logs(){
+		$migrations = array();
 		$sql = "SELECT * FROM migrations";
-		$queryret=$this->database->execSQL($sql,4, 0);
+		$queryret=$this->database->execSQL($sql,0, 0);
     if($queryret[0]) {
-      echo '<br>Fehler bei der Abfrage der Tabelle migrations.<br>';
+      #echo '<br>Fehler bei der Abfrage der Tabelle migrations.<br>'; 	// bei Neuinstallation gibt es diese Tabelle noch nicht
     }
     else {
       while($rs=mysql_fetch_array($queryret[1])){
@@ -70,10 +71,10 @@ class administration{
 		$this->migrations_to_execute['postgresql'] = array();
 		$this->migration_logs = $this->get_migration_logs();
 		$this->migration_files = $this->get_migration_files();
-		foreach($this->migration_logs as $component => $log_component_migrations){
-			foreach($this->migration_files[$component] as $type => $component_type_migrations){
-				foreach($component_type_migrations as $file){
-					if($log_component_migrations[$type][$file] != 1)$this->migrations_to_execute[$type][$component][] = $file;
+		foreach($this->migration_files as $component => $file_component_migrations){
+			foreach($file_component_migrations as $type => $file_component_type_migrations){
+				foreach($file_component_type_migrations as $file){
+					if($this->migration_logs[$component][$type][$file] != 1)$this->migrations_to_execute[$type][$component][] = $file;
 				}
 			}
 		}
@@ -90,7 +91,7 @@ class administration{
 				}
 				else{
 					$sql = "INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES ('".$component."', 'mysql', '".$file."');";
-					$queryret=$this->database->execSQL($sql,4, 0);
+					$queryret=$this->database->execSQL($sql,0, 0);
 				}				
 			}
 		}
@@ -100,13 +101,13 @@ class administration{
 				$filepath = $prepath.'db/postgresql/schema/'.$file;
 				$sql = file_get_contents($filepath);
 				if($sql != ''){
-					$queryret=$this->pgdatabase->execSQL($sql,4, 0);
+					$queryret=$this->pgdatabase->execSQL($sql,0, 0);
 					if($queryret[0]){
 						echo $queryret[1].'<br>Fehler beim Ausführen von migration-Datei: '.$filepath.'<br>';
 					}
 					else{
 						$sql = "INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES ('".$component."', 'postgresql', '".$file."');";
-						$queryret=$this->database->execSQL($sql,4, 0);
+						$queryret=$this->database->execSQL($sql,0, 0);
 					}
 				}
 			}

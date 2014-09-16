@@ -303,7 +303,7 @@ class database {
 			foreach(explode(";", $file) as $query){
 				$query = trim($query);
 				if (!empty($query) && $query != ";") {
-					$ret=$this->execSQL($query, 4, 1);
+					$ret=$this->execSQL($query, 0, 0);
 					if($ret[0] == 1){
 						return $ret;
 					}

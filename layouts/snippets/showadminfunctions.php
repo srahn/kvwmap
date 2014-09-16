@@ -12,7 +12,7 @@
 					<td><span class="fett">Komponente</span></td>
 					<td align="right"><span class="fett">Status</span></td>
 				</tr>
-				<? foreach($this->administration->migration_logs as $component => $component_migrations){
+				<? foreach($this->administration->migration_files as $component => $component_migrations){
 						$mysql_counter = count($this->administration->migrations_to_execute['mysql'][$component]);
 						$postgresql_counter = count($this->administration->migrations_to_execute['postgresql'][$component]);
 				?>

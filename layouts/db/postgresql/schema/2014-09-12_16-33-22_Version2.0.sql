@@ -1,7 +1,7 @@
 
 BEGIN;
 
-CREATE SCHEMA custom_shapes;	-- kann auch anders heißen, ist der config.php über CUSTOM_SHAPE_SCHEMA definierbar
+CREATE SCHEMA custom_shapes;	-- kann auch anders heiÃŸen, ist der config.php Ã¼ber CUSTOM_SHAPE_SCHEMA definierbar
 
 -- Tabelle zur Speicherung von Umringspolygonen aus uko-Dateien
 
@@ -32,11 +32,11 @@ $BODY$SELECT
 		), st_srid($1)
 	)$BODY$
   LANGUAGE 'sql' IMMUTABLE STRICT;
-COMMENT ON FUNCTION linefrompoly(geometry) IS 'Liefert eine LINESTRING Gemetrie von einer MULTIPOLYGON oder POLYGON Geometrie zurück';
+COMMENT ON FUNCTION linefrompoly(geometry) IS 'Liefert eine LINESTRING Gemetrie von einer MULTIPOLYGON oder POLYGON Geometrie zurÃ¼ck';
 
 
 
---# Tabelle für die Aliasnamen der Koordinatensysteme
+--# Tabelle fÃ¼r die Aliasnamen der Koordinatensysteme
 CREATE TABLE spatial_ref_sys_alias
 (
   srid integer NOT NULL,
@@ -60,11 +60,11 @@ CREATE INDEX spatial_ref_sys_alias_srid_idx
   (srid);
 
 
--- Tabelle für andere Dokumentarten in der Nachweisverwaltung
+-- Tabelle fÃ¼r andere Dokumentarten in der Nachweisverwaltung
 
 
 
--- Tabelle für Adressänderungen
+-- Tabelle fÃ¼r AdressÃ¤nderungen
 
 CREATE TABLE shp_import_tables
 (
@@ -72,8 +72,8 @@ CREATE TABLE shp_import_tables
 ) 
 WITH OIDS;
 
---# Tabellen für Dokumente
--- # Hinzufügen einer Tabelle u_polygon zur Speicherung von Polygonen
+--# Tabellen fÃ¼r Dokumente
+-- # HinzufÃ¼gen einer Tabelle u_polygon zur Speicherung von Polygonen
 
 CREATE TABLE u_polygon
 (
@@ -86,7 +86,7 @@ SELECT AddGeometryColumn('public', 'u_polygon','the_geom',2398,'GEOMETRY', 2);
 CREATE INDEX u_polygon_the_geom_gist ON u_polygon USING GIST (the_geom);
 
 
--- Tabelle für Metainformationen
+-- Tabelle fÃ¼r Metainformationen
 
 CREATE TABLE tabelleninfo
 (
@@ -97,7 +97,7 @@ WITH OIDS;
 
 
 --##################################################
---# Tabelle für Notizen
+--# Tabelle fÃ¼r Notizen
 CREATE TABLE q_notizen
 (
   notiz text,

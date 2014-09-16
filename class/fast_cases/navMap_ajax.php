@@ -1481,9 +1481,9 @@
     $this->blocktransaction=0;
   }
   function open() {
-    $this->debug->write("<br>MySQL Verbindung öffnen mit Host: ".$this->host." User: ".$this->user,4);
+    #$this->debug->write("<br>MySQL Verbindung öffnen mit Host: ".$this->host." User: ".$this->user,4);
     $this->dbConn=mysql_connect($this->host,$this->user,$this->passwd);
-    $this->debug->write("Datenbank mit ID: ".$this->dbConn." und Name: ".$this->dbName." auswählen.",4);
+    #$this->debug->write("Datenbank mit ID: ".$this->dbConn." und Name: ".$this->dbName." auswählen.",4);
     return mysql_select_db($this->dbName,$this->dbConn);
   }
   function execSQL($sql,$debuglevel, $loglevel) {
@@ -1506,8 +1506,8 @@
       #echo $sql;
       if ($query==0) {
         $ret[0]=1;
-        $ret[1]="<b>Fehler bei SQL Anweisung:</b><br>".$sql."<br>".mysql_error($query);
-        $this->debug->write($ret[1],$debuglevel);
+        $ret[1]="<b>Fehler bei SQL Anweisung:</b><br>".$sql."<br>".mysql_error($this->dbConn);
+        if($debuglevel > 0)$this->debug->write($ret[1],$debuglevel);
         if ($logsql) {
           $this->logfile->write("#".$ret[1]);
         }
@@ -1518,7 +1518,7 @@
         if ($logsql) {
           $this->logfile->write($sql.';');
         }
-        $this->debug->write(date('H:i:s')."<br>".$sql,$debuglevel);
+        if($debuglevel > 0)$this->debug->write(date('H:i:s')."<br>".$sql,$debuglevel);
       }
       $ret[2]=$sql;
     }
@@ -1526,7 +1526,7 @@
     	if ($logsql) {
     		$this->logfile->write($sql.';');
     	}
-    	$this->debug->write("<br>".$sql,$debuglevel);
+    	if($debuglevel > 0)$this->debug->write("<br>".$sql,$debuglevel);
     }
     return $ret;
   }
@@ -1942,11 +1942,11 @@
   }
 }class pgdatabase_alkis {  var $ist_Fortfuehrung;  var $debug;  var $loglevel;  var $defaultloglevel;  var $logfile;  var $defaultlogfile;  var $commentsign;  var $blocktransaction;  function open() {
   	if($this->port == '') $this->port = 5432;
-    $this->debug->write("<br>Datenbankverbindung öffnen: Datenbank: ".$this->dbName." User: ".$this->user,4);
+    #$this->debug->write("<br>Datenbankverbindung öffnen: Datenbank: ".$this->dbName." User: ".$this->user,4);
 		$connect_string = 'dbname='.$this->dbName.' port='.$this->port.' user='.$this->user.' password='.$this->passwd;
 		if($this->host != 'localhost' AND $this->host != '127.0.0.1')$connect_string .= 'host='.$this->host;		// das beschleunigt den Connect extrem
     $this->dbConn=pg_connect($connect_string);
-    $this->debug->write("Datenbank mit Connection_ID: ".$this->dbConn." geöffnet.",4);
+    #$this->debug->write("Datenbank mit Connection_ID: ".$this->dbConn." geöffnet.",4);
     # $this->version = pg_version($this->dbConn); geht erst mit PHP 5
     $this->version = POSTGRESVERSION;
     return $this->dbConn;

@@ -1,39 +1,39 @@
-# SQL-Statements fÃ¼r die Einrichtung und Administration eines kvwmap Projektes
+# SQL-Statements für die Einrichtung und Administration eines kvwmap Projektes
 #
 # Voraussetzungen/Vorarbeiten
 #
 # MySQL ist installiert
 #
-# ZusÃ¤tzlich ist die kvwmap-Datenbank angelegt
+# Zusätzlich ist die kvwmap-Datenbank angelegt
 #
-# Die folgenden SQL-Statements in einem SQL-Fenster z.B. in phpMyAdmin ausfÃ¼hren
+# Die folgenden SQL-Statements in einem SQL-Fenster z.B. in phpMyAdmin ausführen
 
 #!!!!!!!!!!!!!!!!!!!
-# Bei verschiedenen SQL-Anweisungen sind vorher Konstanten fÃ¼r die EintrÃ¤ge in der Datenbank zu setzen
-# Benutzer fÃ¼r den Zugriff auf die PostGIS-Datenbank
+# Bei verschiedenen SQL-Anweisungen sind vorher Konstanten für die Einträge in der Datenbank zu setzen
+# Benutzer für den Zugriff auf die PostGIS-Datenbank
 SET @pg_user='kvwmap';
 SET @pg_dbname='kvwmapsp';
-# Benutzer in der Mysql-Datenbank fÃ¼r den die Eintragungen vorgenommen werden sollen
+# Benutzer in der Mysql-Datenbank für den die Eintragungen vorgenommen werden sollen
 SET @user_id=1;
-# Stelle in der Mysql-Datenbank, fÃ¼r die die Eintragungen vorgenommen werden sollen
+# Stelle in der Mysql-Datenbank, für die die Eintragungen vorgenommen werden sollen
 SET @stelle_id=1;
-# Password fÃ¼r Nutzer kvwmap bei der Anmeldung an kvwmap
+# Password für Nutzer kvwmap bei der Anmeldung an kvwmap
 SET @kvwmap_password='kvwmap';
 #!!!!!!!!!!!!!!!!!!!!!!
-# Beim HinzufÃ¼gen von Layern ist an Steller der Gruppenbezeichnung eine ID einzusetzen, die der Gruppe in der
-# Tabelle u_groups entspricht. Wer eine neue Gruppe verwenden mÃ¶chte, muss die neue Gruppe auch in die Tabelle
+# Beim Hinzufügen von Layern ist an Steller der Gruppenbezeichnung eine ID einzusetzen, die der Gruppe in der
+# Tabelle u_groups entspricht. Wer eine neue Gruppe verwenden möchte, muss die neue Gruppe auch in die Tabelle
 # u_groups eintragen.
 # Generell ist es mit der neuen Stellenverwaltung auch nicht mehr notwendig die Zuordnungen der Layer zu den Stellen und Rollen
-# per Hand einzutragen. Dazu nur noch den Layer in der Tabelle Layer anlegen und die Zuordnung zur Stelle Ã¼ber die Stellenverwaltung
+# per Hand einzutragen. Dazu nur noch den Layer in der Tabelle Layer anlegen und die Zuordnung zur Stelle über die Stellenverwaltung
 # vornehmen
-# Ã„hnliches gilt fÃ¼r die MenÃ¼punkte, ein einmal in der Tabelle u_menues angelegtes MenÃ¼ kann in der Stellenverwaltung zur Stellen
+# Ähnliches gilt für die Menüpunkte, ein einmal in der Tabelle u_menues angelegtes Menü kann in der Stellenverwaltung zur Stellen
 # zugeordnet werden.
 
 ################################################################################
-# EintrÃ¤ge fÃ¼r eine neu angelegte Datenbank
+# Einträge für eine neu angelegte Datenbank
 # Standardnutzer, Stelle, Rolle, Referenzkarte einrichten
-# FÃ¼hren Sie hinterher am besten gleich alle Statements zum Anlegen von MenÃ¼punkten
-# fÃ¼r die hier angelegten stelle=1 und user_id=1 aus
+# Führen Sie hinterher am besten gleich alle Statements zum Anlegen von Menüpunkten
+# für die hier angelegten stelle=1 und user_id=1 aus
 ################################################################################
 # Stelle anlegen
 INSERT INTO `stelle` ( `ID` , `Bezeichnung` , `start` , `stop` , `minxmax` , `minymax` , `maxxmax` , `maxymax` , `epsg_code`, `Referenzkarte_ID` , `Authentifizierung` , `ALB_status` , `wappen` , `alb_raumbezug` , `alb_raumbezug_wert` )
@@ -58,7 +58,7 @@ VALUES (
 );
 
 ############################################################################
-# Sicherheitskritische AnwendungsfÃ¤lle Werte fÃ¼r go Variablen              #
+# Sicherheitskritische Anwendungsfälle Werte für go Variablen              #
 ############################################################################
 INSERT INTO `u_funktionen` (`id`, `bezeichnung`, `link`) VALUES
 (1, 'ALB-Auszug 35', NULL),
@@ -85,7 +85,7 @@ INSERT INTO `u_funktionen` (`id`, `bezeichnung`, `link`) VALUES
 
 
 ####################################################################################
-# Eintragen von Berechtigungen fÃ¼r einen Administrator zum AusfÃ¼hren von Funktionen
+# Eintragen von Berechtigungen für einen Administrator zum Ausführen von Funktionen
 ####################################################################################
 # 2006-05-12
 
@@ -115,32 +115,32 @@ INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (21,@stelle_i
 
 
 ###########################
-# EintrÃ¤ge der MenÃ¼punkte #
+# Einträge der Menüpunkte #
 ###########################
-#### gegebenenfalls vorherige EintrÃ¤ge lÃ¶schen
+#### gegebenenfalls vorherige Einträge löschen
 # TRUNCATE u_menues;
 # TRUNCATE u_menue2stelle;
 
-# Setzen der Stelle, fÃ¼r die die MenÃ¼s eingetragen werden sollen
+# Setzen der Stelle, für die die Menüs eingetragen werden sollen
 SET @stelle_id=1;
-# Setzen der User_ID fÃ¼r die die MenÃ¼s zugeordnet werden sollen
+# Setzen der User_ID für die die Menüs zugeordnet werden sollen
 SET @user_id=1;
 
-# Die nachfolgenden Statements mÃ¼ssen in 1.5 angepasst werden
-# Alle Gruppen von MenÃ¼s sind in einer separaten Tabelle u_groups enthalten und in der Tabelle u_menues erscheinen in der Spalte
-# Gruppe nur noch die IDÂ´s der Gruppen aus der Tabelle u_groups
-# Wer seine Tabellen dahingehend anpassen mÃ¶chte muss das entsprechende Statement aus mysql_update.php ausfÃ¼hren.
+# Die nachfolgenden Statements müssen in 1.5 angepasst werden
+# Alle Gruppen von Menüs sind in einer separaten Tabelle u_groups enthalten und in der Tabelle u_menues erscheinen in der Spalte
+# Gruppe nur noch die ID´s der Gruppen aus der Tabelle u_groups
+# Wer seine Tabellen dahingehend anpassen möchte muss das entsprechende Statement aus mysql_update.php ausführen.
 # siehe "Erzeugen einer neuen Tabelle groups"
 
-INSERT INTO `u_menues` (name, links, obermenue, menueebene, target, `order`) VALUES ('Stelle w&auml;hlen', 'index.php?go=Stelle WÃ¤hlen', 0, 1, NULL, 1);
+INSERT INTO `u_menues` (name, links, obermenue, menueebene, target, `order`) VALUES ('Stelle wählen', 'index.php?go=Stelle Wählen', 0, 1, NULL, 1);
 SET @last_menue_id=LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,1);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
 
 
-#### Volle Ausdehnung (Ãœbersicht) und letzte Kartenansicht
-# Ãœbersicht
-INSERT INTO u_menues (name, links, obermenue, menueebene, target, `order`) VALUES ('Ãœbersicht', 'index.php?go=Full_Extent', 0, 1, NULL, 2);
+#### Volle Ausdehnung (Übersicht) und letzte Kartenansicht
+# Übersicht
+INSERT INTO u_menues (name, links, obermenue, menueebene, target, `order`) VALUES ('Übersicht', 'index.php?go=Full_Extent', 0, 1, NULL, 2);
 SET @last_menue_id=LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,2);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
@@ -152,15 +152,15 @@ INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
 
 ##### Suchfunktionen
-# ObermenÃ¼ fÃ¼r die Suchfunktionen
+# Obermenü für die Suchfunktionen
 INSERT INTO u_menues (name, links, obermenue, menueebene, target, `order`) VALUES ('Suchen', 'index.php?go=changemenue', 0, 1, NULL, 4);
 SET @last_level1menue_id=LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_level1menue_id,10);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_level1menue_id,0);
 
 
-# UntermenÃ¼punkte fÃ¼r die Suche
-# Wenn das ObermenÃ¼ schon existiert hier die ID-Angeben
+# Untermenüpunkte für die Suche
+# Wenn das Obermenü schon existiert hier die ID-Angeben
 # SET @last_level1menue_id=<Ihre ID>;
 
 # Layersuche 
@@ -175,8 +175,8 @@ SET @last_menue_id=LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,12);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
 
-# FlurstÃ¼ckssuche
-INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Flurst&uuml;cke', 'index.php?go=Flurstueck_Auswaehlen', @last_level1menue_id, 2, NULL);
+# Flurstückssuche
+INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Flurstücke', 'index.php?go=Flurstueck_Auswaehlen', @last_level1menue_id, 2, NULL);
 SET @last_menue_id=LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,13);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
@@ -207,13 +207,13 @@ INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_level1menue_id,0);
 
 # Stellen anlegen
-INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Stellen&nbsp;anlegen', 'index.php?go=Stelleneditor', @last_level1menue_id, 2, NULL);
+INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Stellen anlegen', 'index.php?go=Stelleneditor', @last_level1menue_id, 2, NULL);
 SET @last_menue_id=LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,61);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
 
 # Stellen anzeigen
-INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Stellen&nbsp;anzeigen', 'index.php?go=Stellen_Anzeigen', @last_level1menue_id, 2, NULL);
+INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Stellen anzeigen', 'index.php?go=Stellen_Anzeigen', @last_level1menue_id, 2, NULL);
 SET @last_menue_id=LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,62);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
@@ -237,13 +237,13 @@ INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_level1menue_id,0);
 
 # Nutzer anlegen
-INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Nutzer&nbsp;anlegen', 'index.php?go=Benutzerdaten_Formular', @last_level1menue_id, 2, NULL);
+INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Nutzer anlegen', 'index.php?go=Benutzerdaten_Formular', @last_level1menue_id, 2, NULL);
 SET @last_menue_id=LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,71);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
 
 # Nutzer anzeigen
-INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Nutzer&nbsp;anzeigen', 'index.php?go=Benutzerdaten_Anzeigen', @last_level1menue_id, 2, NULL);
+INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Nutzer anzeigen', 'index.php?go=Benutzerdaten_Anzeigen', @last_level1menue_id, 2, NULL);
 SET @last_menue_id=LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,72);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
@@ -255,7 +255,7 @@ INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_level1menue_id,0);
 
 # Layer anzeigen
-INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Layer&nbsp;anzeigen', 'index.php?go=Layer_Anzeigen', @last_level1menue_id, 2, NULL);
+INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Layer anzeigen', 'index.php?go=Layer_Anzeigen', @last_level1menue_id, 2, NULL);
 SET @last_menue_id=LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,76);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);

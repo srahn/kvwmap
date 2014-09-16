@@ -54,12 +54,12 @@ INSERT INTO jagdbezirkart VALUES ('ejb', 'EJB im Verfahren');
 INSERT INTO jagdbezirkart VALUES ('ajb', 'Abgerundeter EJB');
 INSERT INTO jagdbezirkart VALUES ('gjb', 'Gemeinschaftlicher Jagdbezirk');
 INSERT INTO jagdbezirkart VALUES ('tjb', 'Teiljagdbezirk');
-INSERT INTO jagdbezirkart VALUES ('sf', 'Sonderfl‰che');
-INSERT INTO jagdbezirkart VALUES ('agf', 'Angliederungsfl‰che');
-INSERT INTO jagdbezirkart VALUES ('atf', 'Abtrennungsfl‰che');
-INSERT INTO jagdbezirkart VALUES ('slf', 'Anpachtfl‰che');
+INSERT INTO jagdbezirkart VALUES ('sf', 'Sonderfl√§che');
+INSERT INTO jagdbezirkart VALUES ('agf', 'Angliederungsfl√§che');
+INSERT INTO jagdbezirkart VALUES ('atf', 'Abtrennungsfl√§che');
+INSERT INTO jagdbezirkart VALUES ('slf', 'Anpachtfl√§che');
 INSERT INTO jagdbezirkart VALUES ('jbe', 'Enklave');
-INSERT INTO jagdbezirkart VALUES ('jbf', 'Jagdbezirksfreie Fl‰che');
+INSERT INTO jagdbezirkart VALUES ('jbf', 'Jagdbezirksfreie Fl√§che');
 
 
 

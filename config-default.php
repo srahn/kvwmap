@@ -47,7 +47,7 @@ define('ALKIS', false);																# Version 1.8.0
 
 ########################## Layout-Vorgaben
 # hier kann eine eigene css-Datei angegeben werden
-define('CUSTOM_STYLE', 'custom.css'); 											# Version 1.13
+define('CUSTOM_STYLE', ''); 											# Version 1.13
 # hier können eigene Styles für den Koordinatenzoom und Punktzoom definiert werden
 #define('ZOOM2COORD_STYLE_ID', 3244); 												# Version 1.13
 #define('ZOOM2POINT_STYLE_ID', 3244); 												# Version 1.13
@@ -238,7 +238,7 @@ define('WASSERZEICHEN',WAPPENPATH.'wappen_wz.jpg');
 # Layouts
 define ('LAYOUTPATH',WWWROOT.APPLVERSION.'layouts/');
 define ('SNIPPETS',LAYOUTPATH.'snippets/');
-define('CLASSPATH',WWWROOT.APPLVERSION.'class/');
+define('CLASSPATH', WWWROOT.APPLVERSION.'class/');
 define('PLUGINS',WWWROOT.APPLVERSION.'plugins/');		# Version 1.11.0
 define('TEMPTABLEPREFIX','x_');
 # Default Templates für Sachdatenanzeige

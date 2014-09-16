@@ -93,9 +93,7 @@ if (!$GUI->database->open()) {
    # echo '<br>Passwd: '.$GUI->database->passwd;
     echo '<br>Datenbankname: '.$GUI->database->dbName;
     echo '<p>Das kann folgende Gründe haben:<lu>';
-    echo '<li>Die Datenbank existiert noch nicht.';
-    echo '<br><a href="index.php?go=install-mysql-db">Leere Datenbank jetzt anlegen</a>';
-    echo '<br><a href="index.php?go=install-mysql-db&install-GUI=1">Datenbank mit Demodaten jetzt anlegen</a></li>';
+    echo '<li>Die Datenbank existiert noch nicht. Legen Sie eine leere Datenbank an und führen Sie das <a href="install.php">Installationsskript</a> durch.';
     echo '<li>Der Datenbankserver ist gerade nicht erreichbar.</li>';
     echo '<li>Die Angaben zum Host, Benutzer und Password in der config.php sind falsch.</li>';
     echo '<li>Die Angaben zum Host, Benutzer und Password in der Tabelle mysql.users sind falsch.</li>';

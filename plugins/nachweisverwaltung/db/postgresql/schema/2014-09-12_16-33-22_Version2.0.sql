@@ -8,7 +8,7 @@ SET search_path = nachweisverwaltung, public;
 SET default_with_oids = true;
 
 --#######################################
---# Tabellen für die Nachweisverwaltung #
+--# Tabellen fÃ¼r die Nachweisverwaltung #
 --#######################################
 
 -- Antraege
@@ -55,7 +55,7 @@ CREATE TABLE n_vermart (
     art character varying(50)
 );
 
-INSERT INTO n_vermart (art) VALUES ('Gebäudeeinmessung');
+INSERT INTO n_vermart (art) VALUES ('GebÃ¤udeeinmessung');
 INSERT INTO n_vermart (art) VALUES ('Zerlegung');
 INSERT INTO n_vermart (art) VALUES ('Genzfeststellung');
 INSERT INTO n_vermart (art) VALUES ('Sonderung');
@@ -80,13 +80,13 @@ INSERT INTO n_vermstelle (name) VALUES ('Brandenburg, Lothar');
 INSERT INTO n_vermstelle (name) VALUES ('Brandt, Hans');
 INSERT INTO n_vermstelle (name) VALUES ('Brekenfelder, Andre');
 INSERT INTO n_vermstelle (name) VALUES ('Buse, Annette');
-INSERT INTO n_vermstelle (name) VALUES ('Dubbert, Jörg-M.');
+INSERT INTO n_vermstelle (name) VALUES ('Dubbert, JÃ¶rg-M.');
 INSERT INTO n_vermstelle (name) VALUES ('Fiebig, Wilfried');
 INSERT INTO n_vermstelle (name) VALUES ('Gajek, Diethard');
 INSERT INTO n_vermstelle (name) VALUES ('Golnik, Andreas');
-INSERT INTO n_vermstelle (name) VALUES ('Grünhagen, Kai');
-INSERT INTO n_vermstelle (name) VALUES ('Grüning, Marion');
-INSERT INTO n_vermstelle (name) VALUES ('Gudat, Jürgen');
+INSERT INTO n_vermstelle (name) VALUES ('GrÃ¼nhagen, Kai');
+INSERT INTO n_vermstelle (name) VALUES ('GrÃ¼ning, Marion');
+INSERT INTO n_vermstelle (name) VALUES ('Gudat, JÃ¼rgen');
 INSERT INTO n_vermstelle (name) VALUES ('Hansch, Peter');
 INSERT INTO n_vermstelle (name) VALUES ('Harnisch, Thomas');
 INSERT INTO n_vermstelle (name) VALUES ('Hermerding, Ralf');
@@ -101,40 +101,40 @@ INSERT INTO n_vermstelle (name) VALUES ('Jansen, Hans-Gerd');
 INSERT INTO n_vermstelle (name) VALUES ('Jeske, Andre');
 INSERT INTO n_vermstelle (name) VALUES ('Kattner, Wolfgang');
 INSERT INTO n_vermstelle (name) VALUES ('Klug, Andreas');
-INSERT INTO n_vermstelle (name) VALUES ('Krähmer, Heike');
-INSERT INTO n_vermstelle (name) VALUES ('Krätschel, Michael');
+INSERT INTO n_vermstelle (name) VALUES ('KrÃ¤hmer, Heike');
+INSERT INTO n_vermstelle (name) VALUES ('KrÃ¤tschel, Michael');
 INSERT INTO n_vermstelle (name) VALUES ('Krawutschke, Holger');
 INSERT INTO n_vermstelle (name) VALUES ('Kremer, Wolfgang');
 INSERT INTO n_vermstelle (name) VALUES ('Lessner, Rainer');
-INSERT INTO n_vermstelle (name) VALUES ('Lorenz, Änne');
+INSERT INTO n_vermstelle (name) VALUES ('Lorenz, Ã„nne');
 INSERT INTO n_vermstelle (name) VALUES ('Lorenz, Renate');
-INSERT INTO n_vermstelle (name) VALUES ('Lübcke, Holger');
-INSERT INTO n_vermstelle (name) VALUES ('Lusch, Jürgen');
-INSERT INTO n_vermstelle (name) VALUES ('Maaß, Klaus-Dieter');
+INSERT INTO n_vermstelle (name) VALUES ('LÃ¼bcke, Holger');
+INSERT INTO n_vermstelle (name) VALUES ('Lusch, JÃ¼rgen');
+INSERT INTO n_vermstelle (name) VALUES ('MaaÃŸ, Klaus-Dieter');
 INSERT INTO n_vermstelle (name) VALUES ('Manthey, Dirk');
 INSERT INTO n_vermstelle (name) VALUES ('Matthias, Gerd');
-INSERT INTO n_vermstelle (name) VALUES ('Meißner, Gerd');
-INSERT INTO n_vermstelle (name) VALUES ('Meißner, Torsten');
+INSERT INTO n_vermstelle (name) VALUES ('MeiÃŸner, Gerd');
+INSERT INTO n_vermstelle (name) VALUES ('MeiÃŸner, Torsten');
 INSERT INTO n_vermstelle (name) VALUES ('Mill, Arno');
-INSERT INTO n_vermstelle (name) VALUES ('Möbius, Steffen');
-INSERT INTO n_vermstelle (name) VALUES ('Müller, Hans-Jürgen');
-INSERT INTO n_vermstelle (name) VALUES ('Neiseke, Jörg');
+INSERT INTO n_vermstelle (name) VALUES ('MÃ¶bius, Steffen');
+INSERT INTO n_vermstelle (name) VALUES ('MÃ¼ller, Hans-JÃ¼rgen');
+INSERT INTO n_vermstelle (name) VALUES ('Neiseke, JÃ¶rg');
 INSERT INTO n_vermstelle (name) VALUES ('Panke, Wilfried');
-INSERT INTO n_vermstelle (name) VALUES ('Prestin, Jürgen');
+INSERT INTO n_vermstelle (name) VALUES ('Prestin, JÃ¼rgen');
 INSERT INTO n_vermstelle (name) VALUES ('Reimers, Dietmar');
 INSERT INTO n_vermstelle (name) VALUES ('Sankowsky, Mario');
-INSERT INTO n_vermstelle (name) VALUES ('Schmidt, Jürgen');
-INSERT INTO n_vermstelle (name) VALUES ('Schönemann, Dirk');
+INSERT INTO n_vermstelle (name) VALUES ('Schmidt, JÃ¼rgen');
+INSERT INTO n_vermstelle (name) VALUES ('SchÃ¶nemann, Dirk');
 INSERT INTO n_vermstelle (name) VALUES ('Scholwin, Klaus-Peter');
-INSERT INTO n_vermstelle (name) VALUES ('Schröder, Reinhard');
-INSERT INTO n_vermstelle (name) VALUES ('Schröder, Wolfgang');
+INSERT INTO n_vermstelle (name) VALUES ('SchrÃ¶der, Reinhard');
+INSERT INTO n_vermstelle (name) VALUES ('SchrÃ¶der, Wolfgang');
 INSERT INTO n_vermstelle (name) VALUES ('Seehase, Karl-Heinz');
 INSERT INTO n_vermstelle (name) VALUES ('Seehase, Stefan');
 INSERT INTO n_vermstelle (name) VALUES ('Sperlich, Mirjam');
 INSERT INTO n_vermstelle (name) VALUES ('Stechert, Andreas');
 INSERT INTO n_vermstelle (name) VALUES ('Stechert, Werner');
 INSERT INTO n_vermstelle (name) VALUES ('Sy, Torsten');
-INSERT INTO n_vermstelle (name) VALUES ('Täger, Hans-Georg');
+INSERT INTO n_vermstelle (name) VALUES ('TÃ¤ger, Hans-Georg');
 INSERT INTO n_vermstelle (name) VALUES ('Urban, Oliver');
 INSERT INTO n_vermstelle (name) VALUES ('Wagner, Frank');
 INSERT INTO n_vermstelle (name) VALUES ('Walther, Lothar');
@@ -142,11 +142,11 @@ INSERT INTO n_vermstelle (name) VALUES ('Weinert, Herbert');
 INSERT INTO n_vermstelle (name) VALUES ('Weinke, Gunnar');
 INSERT INTO n_vermstelle (name) VALUES ('Werner, Hansjoachim');
 INSERT INTO n_vermstelle (name) VALUES ('Wieck, Eberhard');
-INSERT INTO n_vermstelle (name) VALUES ('Winkelmann, Jörg');
+INSERT INTO n_vermstelle (name) VALUES ('Winkelmann, JÃ¶rg');
 INSERT INTO n_vermstelle (name) VALUES ('Zeh, Ulrich');
 INSERT INTO n_vermstelle (name) VALUES ('Zeise, Petra');
 
--- Tabelle für andere Dokumentarten in der Nachweisverwaltung
+-- Tabelle fÃ¼r andere Dokumentarten in der Nachweisverwaltung
 
 CREATE TABLE n_dokumentarten(
    id serial NOT NULL, 
@@ -154,7 +154,7 @@ CREATE TABLE n_dokumentarten(
 ) 
 WITH OIDS;
 
--- Tabelle für die Zuordnung von Nachweisen zu anderen Dokumentarten
+-- Tabelle fÃ¼r die Zuordnung von Nachweisen zu anderen Dokumentarten
 
 CREATE TABLE n_nachweise2dokumentarten(
    nachweis_id integer NOT NULL, 
@@ -163,7 +163,7 @@ CREATE TABLE n_nachweise2dokumentarten(
 WITH OIDS;
 
 --##########################################################
---# Tabellen für die Punktdatei des Liegenschaftskatasters #
+--# Tabellen fÃ¼r die Punktdatei des Liegenschaftskatasters #
 --##########################################################
 
 -- Festpunkte
@@ -236,7 +236,7 @@ SELECT AddGeometryColumn('nachweisverwaltung', 'fp_punkte2','the_geom',2399,'POI
 CREATE INDEX fp_punkte2_the_geom_gist ON fp_punkte2 USING GIST (the_geom);
 
 --####################################
---# Temporäre Tabelle für Punktdatei #
+--# TemporÃ¤re Tabelle fÃ¼r Punktdatei #
 --####################################
 CREATE TABLE fp_punkte_temp
 (
@@ -277,7 +277,7 @@ WITH (
 );
 
 --#####################################################
---# Tabelle für die Zuordnung der Punkte zu Aufträgen #
+--# Tabelle fÃ¼r die Zuordnung der Punkte zu AuftrÃ¤gen #
 --#####################################################
 
 -- Table: fp_punkte2antraege

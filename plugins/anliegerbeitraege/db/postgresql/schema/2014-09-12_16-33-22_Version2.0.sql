@@ -6,7 +6,7 @@ CREATE SCHEMA anliegerbeitraege;
 SET search_path = anliegerbeitraege, public;
 
 
---# Anlegen der Tabellen für die Fachscale Anliegerbeiträge
+--# Anlegen der Tabellen fÃ¼r die Fachscale AnliegerbeitrÃ¤ge
 
 CREATE TABLE anliegerbeitraege_bereiche
 (

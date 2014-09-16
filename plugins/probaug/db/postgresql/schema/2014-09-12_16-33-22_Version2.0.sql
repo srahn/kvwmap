@@ -5,7 +5,7 @@ CREATE SCHEMA probaug;
 
 SET search_path = probaug, public;
 
---# Tabelle zur Speicherung der Gemarkungsnummer-zu-Gemarkungsschlüssel-Beziehung für die Bauauskunft
+--# Tabelle zur Speicherung der Gemarkungsnummer-zu-GemarkungsschlÃ¼ssel-Beziehung fÃ¼r die Bauauskunft
 
 CREATE TABLE bau_gemarkungen
 (
@@ -16,7 +16,7 @@ WITH OIDS;
 
 
 --###########################
---# Tabelle für Bauaktendaten
+--# Tabelle fÃ¼r Bauaktendaten
 --# 2006-01-26 pk
 CREATE TABLE bau_akten
 (
@@ -51,7 +51,7 @@ WITH (
   OIDS=TRUE
 );
 
---# Hinzufügen der Tabellen bau_verfahrensart und bau_vorhaben, in denen die zur Auswahl stehenden Werte für das Vorhaben und die Verfahrensart bei der Bauauskunftssuche gespeichert sind
+--# HinzufÃ¼gen der Tabellen bau_verfahrensart und bau_vorhaben, in denen die zur Auswahl stehenden Werte fÃ¼r das Vorhaben und die Verfahrensart bei der Bauauskunftssuche gespeichert sind
 CREATE TABLE bau_verfahrensart
 (
   verfahrensart text,

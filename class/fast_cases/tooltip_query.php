@@ -81,6 +81,7 @@
     if (isset($style)) $this->style=$style;
     # mime_type html, pdf
     if (isset ($mime_type)) $this->mime_type=$mime_type;
+		$this->scaleUnitSwitchScale = 239210;
   }
 	function loadMultiLingualText($language) {
     #echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language;
@@ -410,6 +411,62 @@
       echo umlaute_javascript(umlaute_html($output)).'~showtooltip(top.document.GUI.result.value, '.$showdata.');';
     }
   }
+  function get_dokument_vorschau($dateinamensteil){
+		$type = $dateinamensteil[1];
+  	$dokument = $dateinamensteil[0].'.'.$dateinamensteil[1];
+		if($type == 'jpg' OR $type == 'png' OR $type == 'gif' ){			// für Bilder werden automatisch Thumbnails erzeugt
+			$thumbname = $dateinamensteil[0].'_thumb.'.$dateinamensteil[1];			
+			if(!file_exists($thumbname)){
+				exec(IMAGEMAGICKPATH.'convert '.$dokument.' -resize 250 '.$thumbname);
+			}
+		}
+		else{																// alle anderen Dokumenttypen bekommen entsprechende Dokumentensymbole als Vorschaubild
+			$dateinamensteil[1] = 'gif';
+  		switch ($type) {
+  			case 'pdf' :{
+  				//$thumbname = WWWROOT.APPLVERSION.GRAPHICSPATH.'pdf.gif';
+					$thumbname = $dateinamensteil[0].'_thumb.jpg';			
+					if(!file_exists($thumbname)){
+						exec(IMAGEMAGICKPATH.'convert '.$dokument.'[0] -resize 250 '.$thumbname);
+					}
+  			}break;
+  			
+  			case 'doc' :{
+					$thumbname = WWWROOT.APPLVERSION.GRAPHICSPATH.'openoffice.gif';
+  			}break;
+  			
+  			default : {
+  				$image = imagecreatefromgif(GRAPHICSPATH.'document.gif');
+          $textbox = imagettfbbox(13, 0, dirname(FONTSET).'/arial.ttf', '.'.$type);
+          $textwidth = $textbox[2] - $textbox[0] + 13;
+          $blue = ImageColorAllocate ($image, 26, 87, 150);
+          imagettftext($image, 13, 0, 22, 34, $blue, dirname(FONTSET).'/arial_bold.ttf', $type);
+          $thumbname = IMAGEPATH.rand(0,100000).'.gif';
+          imagegif($image, $thumbname);
+  			}
+  		}
+  	}
+		return $thumbname;
+  }
+	function write_document_loader(){
+		$handle = fopen(IMAGEPATH.session_id().'.php', 'w');
+		$code = '<?
+			$allowed_documents = array(\''.implode('\',\'', $this->allowed_documents).'\');
+			if(in_array($_REQUEST[\'dokument\'], $allowed_documents)){
+				if($_REQUEST[\'original_name\'] == "")$_REQUEST[\'original_name\'] = basename($_REQUEST[\'dokument\']);
+				$type = strtolower(array_pop(explode(\'.\', $_REQUEST[\'dokument\'])));
+				if(in_array($type, array(\'jpg\', \'gif\', \'png\')))header("Content-type: image/".$type);
+				else header("Content-type: application/".$type);
+				header("Content-Disposition: attachment; filename=".$_REQUEST[\'original_name\']);
+				header("Expires: 0");
+				header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+				header("Pragma: public");
+				readfile($_REQUEST[\'dokument\']);
+			}
+		?>';
+		fwrite($handle, $code);
+		fclose($handle);
+	}
 }class database {  var $ist_Fortfuehrung;  var $debug;  var $loglevel;  var $logfile;  var $commentsign;  var $blocktransaction;  function database() {
     global $debug;
     $this->debug=$debug;
@@ -431,9 +488,9 @@
     $this->blocktransaction=0;
   }
   function open() {
-    $this->debug->write("<br>MySQL Verbindung öffnen mit Host: ".$this->host." User: ".$this->user,4);
+    #$this->debug->write("<br>MySQL Verbindung öffnen mit Host: ".$this->host." User: ".$this->user,4);
     $this->dbConn=mysql_connect($this->host,$this->user,$this->passwd);
-    $this->debug->write("Datenbank mit ID: ".$this->dbConn." und Name: ".$this->dbName." auswählen.",4);
+    #$this->debug->write("Datenbank mit ID: ".$this->dbConn." und Name: ".$this->dbName." auswählen.",4);
     return mysql_select_db($this->dbName,$this->dbConn);
   }
   function execSQL($sql,$debuglevel, $loglevel) {
@@ -456,8 +513,8 @@
       #echo $sql;
       if ($query==0) {
         $ret[0]=1;
-        $ret[1]="<b>Fehler bei SQL Anweisung:</b><br>".$sql."<br>".mysql_error($query);
-        $this->debug->write($ret[1],$debuglevel);
+        $ret[1]="<b>Fehler bei SQL Anweisung:</b><br>".$sql."<br>".mysql_error($this->dbConn);
+        if($debuglevel > 0)$this->debug->write($ret[1],$debuglevel);
         if ($logsql) {
           $this->logfile->write("#".$ret[1]);
         }
@@ -468,7 +525,7 @@
         if ($logsql) {
           $this->logfile->write($sql.';');
         }
-        $this->debug->write(date('H:i:s')."<br>".$sql,$debuglevel);
+        if($debuglevel > 0)$this->debug->write(date('H:i:s')."<br>".$sql,$debuglevel);
       }
       $ret[2]=$sql;
     }
@@ -476,7 +533,7 @@
     	if ($logsql) {
     		$this->logfile->write($sql.';');
     	}
-    	$this->debug->write("<br>".$sql,$debuglevel);
+    	if($debuglevel > 0)$this->debug->write("<br>".$sql,$debuglevel);
     }
     return $ret;
   }
@@ -757,11 +814,11 @@
   }
 }class pgdatabase_alkis {  var $ist_Fortfuehrung;  var $debug;  var $loglevel;  var $defaultloglevel;  var $logfile;  var $defaultlogfile;  var $commentsign;  var $blocktransaction;  function open() {
   	if($this->port == '') $this->port = 5432;
-    $this->debug->write("<br>Datenbankverbindung öffnen: Datenbank: ".$this->dbName." User: ".$this->user,4);
+    #$this->debug->write("<br>Datenbankverbindung öffnen: Datenbank: ".$this->dbName." User: ".$this->user,4);
 		$connect_string = 'dbname='.$this->dbName.' port='.$this->port.' user='.$this->user.' password='.$this->passwd;
 		if($this->host != 'localhost' AND $this->host != '127.0.0.1')$connect_string .= 'host='.$this->host;		// das beschleunigt den Connect extrem
     $this->dbConn=pg_connect($connect_string);
-    $this->debug->write("Datenbank mit Connection_ID: ".$this->dbConn." geöffnet.",4);
+    #$this->debug->write("Datenbank mit Connection_ID: ".$this->dbConn." geöffnet.",4);
     # $this->version = pg_version($this->dbConn); geht erst mit PHP 5
     $this->version = POSTGRESVERSION;
     return $this->dbConn;
@@ -950,7 +1007,7 @@
 			if(!$all_languages AND LANGUAGE != 'german') {
 				$sql.='CASE WHEN `alias_'.LANGUAGE.'` != "" THEN `alias_'.LANGUAGE.'` ELSE `alias` END AS ';
 			}
-			$sql.='alias, `alias_low-german`, alias_english, alias_polish, alias_vietnamese, layer_id, name, real_name, tablename, table_alias_name, type, geometrytype, constraints, nullable, length, decimal_length, `default`, form_element_type, options, tooltip, `group`, mandatory, quicksearch, `order`, privileg, query_tooltip FROM layer_attributes WHERE layer_id = '.$layer_id.$einschr.' ORDER BY `order`';
+			$sql.='alias, `alias_low-german`, alias_english, alias_polish, alias_vietnamese, layer_id, name, real_name, tablename, table_alias_name, type, geometrytype, constraints, nullable, length, decimal_length, `default`, form_element_type, options, tooltip, `group`, raster_visibility, mandatory, quicksearch, `order`, privileg, query_tooltip FROM layer_attributes WHERE layer_id = '.$layer_id.$einschr.' ORDER BY `order`';
       $this->debug->write("<p>file:kvwmap class:db_mapObj->read_layer_attributes:<br>".$sql,4);
       $query=mysql_query($sql);
       if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
@@ -996,6 +1053,7 @@
 				$attributes['alias_vietnamese'][$i]= $rs['alias_vietnamese'];
       	$attributes['tooltip'][$i]= $rs['tooltip'];
       	$attributes['group'][$i]= $rs['group'];
+				$attributes['raster_visibility'][$i]= $rs['raster_visibility'];
       	$attributes['mandatory'][$i]= $rs['mandatory'];
 				$attributes['quicksearch'][$i]= $rs['quicksearch'];
       	$attributes['privileg'][$i]= $rs['privileg'];
@@ -1176,5 +1234,13 @@
       }
     }
     return $attributes;
+  }
+  function get_used_Layer($id) {
+    $sql ='SELECT * FROM used_layer WHERE Layer_ID = '.$id.' AND Stelle_ID = '.$this->Stelle_ID;
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->get_used_Layer - Lesen eines Layers:<br>".$sql,4);
+    $query=mysql_query($sql);
+    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+    $layer = mysql_fetch_array($query);
+    return $layer;
   }
 }?>
