@@ -49,8 +49,8 @@ define('ALKIS', false);																# Version 1.8.0
 # hier kann eine eigene css-Datei angegeben werden
 define('CUSTOM_STYLE', 'custom.css'); 											# Version 1.13
 # hier können eigene Styles für den Koordinatenzoom und Punktzoom definiert werden
-define('ZOOM2COORD_STYLE_ID', 3244); 												# Version 1.13
-define('ZOOM2POINT_STYLE_ID', 3244); 												# Version 1.13
+#define('ZOOM2COORD_STYLE_ID', 3244); 												# Version 1.13
+#define('ZOOM2POINT_STYLE_ID', 3244); 												# Version 1.13
 # definiert, ob der Polygoneditor nach einem Neuladen
 # der Seite immer in den Modus "Polygon zeichnen" wechselt
 define('ALWAYS_DRAW', 'true');     #true/false             # Version 1.6.9
@@ -207,7 +207,7 @@ define('EPSGCODE','2398'); # Krassowski, Pulkowo 42, Gauß Krüger 3° Streifen 
 $supportedSRIDs = array(4326,2397,2398,2399,31466,31467,31468,31469,32648,25832,25833,35833,32633,325833,15833,900913,28992);                    # Version 1.6.8
 
 # Unterstützte Sprachen, nur diese stehen zur Auswahl bei der Stellenwahl
-$supportedLanguages = array('german', 'english');															# Version 2.0
+$supportedLanguages = array('german');															# Version 2.0
 
 # Name der Stopwortdatei
 define('STOPWORDFILE',SHAPEPATH.'gazetteer/top10000de.txt');
