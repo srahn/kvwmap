@@ -340,8 +340,9 @@ emzversteckt = function(k){
 					<?php } ?>
 
 					        <?
-				        	if($this->Stelle->isFunctionAllowed('Bauakteneinsicht')){
-									include(PLUGINS.'probaug/model/bau.php');
+									global $kvwmap_plugins;
+				        	if(in_array('probaug', $kvwmap_plugins) AND $this->Stelle->isFunctionAllowed('Bauakteneinsicht')){
+									include_once(PLUGINS.'probaug/model/bau.php');
 								$this->bau = new Bauauskunft($this->baudatabase);
 								$searchvars['flurstkennz'] = $flst->FlurstKennz;
 							    $this->bau->getbaudaten($searchvars);

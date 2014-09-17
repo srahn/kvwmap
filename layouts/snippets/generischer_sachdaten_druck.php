@@ -20,7 +20,7 @@ function back(){
 
 
 <input type="hidden" name="go" value="generischer_sachdaten_druck">
-
+<br>
 <h2><?php echo $this->titel; ?></h2>
 
 <?php 

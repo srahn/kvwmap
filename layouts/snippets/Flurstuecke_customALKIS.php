@@ -279,7 +279,7 @@ backto = function(go){
 
               <?
               if($this->Stelle->isFunctionAllowed('Bauakteneinsicht')){
-							include(PLUGINS.'probaug/model/bau.php');
+							if(in_array('probaug', $kvwmap_plugins) AND $this->Stelle->isFunctionAllowed('Bauakteneinsicht')){
             $this->bau = new Bauauskunft($this->baudatabase);
             $searchvars['flurstkennz'] = $flst->Flurstkennz_alt;
               $this->bau->getbaudaten($searchvars);

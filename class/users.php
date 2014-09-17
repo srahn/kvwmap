@@ -3066,7 +3066,8 @@ class stelle {
 		else{
 			$sql .= ', symbolscale = NULL';
 		}
-		if($formvars['requires'] != '')$sql .= ', requires = '.$formvars['requires'];
+		if($formvars['requires'] == '')$formvars['requires'] = 'NULL';
+		$sql .= ', requires = '.$formvars['requires'];
 		$sql .= ', start_aktiv = "'.$formvars['startaktiv'].'"';
 		$sql .= ' WHERE Stelle_ID = '.$formvars['selected_stelle_id'].' AND Layer_ID = '.$formvars['selected_layer_id'];
 		#echo $sql.'<br>';

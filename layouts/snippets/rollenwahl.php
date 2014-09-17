@@ -139,7 +139,7 @@
     </td>
   </tr>
 	<tr>
-    <td align="right"><?php echo $strhist_timestamp; ?>:&nbsp;<img title="TT.MM.JJJJ hh.mm.ss" src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></td>
+    <td align="right"><?php echo $strhist_timestamp; ?>:&nbsp;<img title="TT.MM.JJJJ hh:mm:ss" src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></td>
     <td><input name="hist_timestamp" type="text" value="<?php echo $this->user->rolle->hist_timestamp; ?>" size="16"></td>
   </tr>
 	<tr>

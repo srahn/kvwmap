@@ -13589,9 +13589,9 @@ class db_mapObj{
   function getSelectFromData($data){
     if(strpos($data, '(') === false){
       $from = stristr($data, ' from ');
-      $fooposition = strpos($from, 'as foo');
-      if($fooposition > 0){
-        $from = substr($from, 0, $fooposition);
+      $usingposition = strpos($from, 'using');
+      if($usingposition > 0){
+        $from = substr($from, 0, $usingposition);
       }
       $select = 'select * '.$from.' where 1=1';
     }
