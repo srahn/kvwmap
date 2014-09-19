@@ -206,7 +206,7 @@ define('EPSGCODE','2398'); # Krassowski, Pulkowo 42, Gauß Krüger 3° Streifen 
 # Unterstützte SRIDs, nur diese stehen zur Auswahl bei der Stellenwahl
 $supportedSRIDs = array(4326,2397,2398,2399,31466,31467,31468,31469,32648,25832,25833,35833,32633,325833,15833,900913,28992);                    # Version 1.6.8
 
-# Unterstützte Sprachen, nur diese stehen zur Auswahl bei der Stellenwahl
+# Unterstützte Sprachen, nur diese stehen zur Auswahl bei der Stellenwahl ('german', 'low-german', 'english', 'polish', 'vietnamese')
 $supportedLanguages = array('german');															# Version 2.0
 
 # Name der Stopwortdatei

@@ -278,19 +278,20 @@ backto = function(go){
           <?php } ?>
 
               <?
-              if($this->Stelle->isFunctionAllowed('Bauakteneinsicht')){
+							global $kvwmap_plugins;
 							if(in_array('probaug', $kvwmap_plugins) AND $this->Stelle->isFunctionAllowed('Bauakteneinsicht')){
-            $this->bau = new Bauauskunft($this->baudatabase);
-            $searchvars['flurstkennz'] = $flst->Flurstkennz_alt;
-              $this->bau->getbaudaten($searchvars);
-              if(count($this->bau->baudata) != 0){
-              ?>
-          <tr>
-              <td align="right"><span class="fett"> Baudaten&nbsp;</span></td>
-              <td><a href="index.php?go=Bauauskunft_Suche_Suchen&flurstkennz=<? echo $flst->Flurstkennz_alt; ?>&distinct=1">anzeigen</a></td>
-            </tr>
-              <?
-              }
+								include_once(PLUGINS.'probaug/model/bau.php');
+								$this->bau = new Bauauskunft($this->baudatabase);
+								$searchvars['flurstkennz'] = $flst->Flurstkennz_alt;
+								$this->bau->getbaudaten($searchvars);
+								if(count($this->bau->baudata) != 0){
+								?>
+						<tr>
+								<td align="right"><span class="fett"> Baudaten&nbsp;</span></td>
+								<td><a href="index.php?go=Bauauskunft_Suche_Suchen&flurstkennz=<? echo $flst->Flurstkennz_alt; ?>&distinct=1">anzeigen</a></td>
+							</tr>
+								<?
+								}
           } # ende Bauakteneinsicht
               ?>
 
