@@ -484,6 +484,7 @@ span.black {
 .raster_record:hover .gle tr:hover{border:1px solid #03476F;}
 .raster_record:hover td{line-height: 16px;padding: 2px;transition: all 0.25s ease;}
 .raster_record:hover input{width:200px;font-size: 15px;height:22px;transition: all 0.25s ease;}
+.raster_record:hover .tr_show input[type=file]{width:290px;font-size: 15px;height:22px;transition: all 0.25s ease;}
 .raster_record:hover select{width:290px;height:22px;transition: all 0.25s ease;}
 .raster_record:hover span{line-height:16px;font-size: 15px;transition: all 0.25s ease;}
 .raster_record:hover img{width: auto; transition: all 0.25s ease;}

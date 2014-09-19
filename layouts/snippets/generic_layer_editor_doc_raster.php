@@ -12,8 +12,8 @@
 	$linksize = $this->user->rolle->fontsize_gle - 1;
 	$select_width = '';
 ?>
-<div id="layer">
-<table border="0" cellpadding="0" cellspacing="0">
+<div id="layer" align="left">
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
 	<tr>
 		<td width="95%" align="center"><h2>&nbsp;&nbsp;<? echo $layer['Name']; ?></h2></td>
 	</tr>
@@ -32,7 +32,8 @@
 	  }
 	  if($doit == true){
 ?>
-<!--table border="0" cellspacing="0" cellpadding="2"-->
+<table border="0" cellspacing="0" cellpadding="2">
+	<tr>
 <?
 	$checkbox_names = '';
 	$columnname = '';
@@ -42,7 +43,14 @@
 	$privileg = '';
 	for ($k=0;$k<$anzObj;$k++) {
 		$checkbox_name .= 'check;'.$attributes['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'];
+		if($k%5==0){
 ?>
+	</tr>
+</table>
+<table>		
+	<tr>
+<? } ?>
+		<td>
 		<div <? if($this->new_entry != true)echo 'class="raster_record"'; ?> id="record_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>" <? if($k%5==0)echo 'style="clear: both;"'?>>
 			<input type="hidden" value="" name="changed_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
 			<table class="tgle" border="1">
@@ -217,7 +225,8 @@
 <?
 	}
 ?>
-<!--/table-->
+	</tr>
+<table>
 </div>
 <input type="hidden" name="checkbox_names_<? echo $layer['Layer_ID']; ?>" value="<? echo $checkbox_name; ?>">
 <?
