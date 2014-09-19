@@ -203,11 +203,12 @@ include('funktionen/input_check_functions.php');
 		ahah('index.php', data, new Array(document.getElementById(fromobject), document.getElementById(targetobject)), new Array('sethtml', 'sethtml'));
 	}
 
-	clearsubforms = function(){
+	clearsubforms = function(layer_id){
+		layer_id = layer_id + '';
 		alldivs = document.getElementsByTagName('div');
 		for(i = 0; i < alldivs.length; i++){
 			id = alldivs[i].id + '';
-			if(id.substr(0, 7) == 'subform'){
+			if(id.substr(0, 7 + layer_id.length) == 'subform'+layer_id){
 				alldivs[i].innerHTML = '';
 			}
 		}

@@ -7083,8 +7083,8 @@ class GUI {
     }
     if($this->formvars['embedded'] != ''){    # wenn es ein neuer Datensatz aus einem embedded-Formular ist, muss das entsprechende Attribut des Hauptformulars aktualisiert werden
       header('Content-type: text/html; charset=UTF-8');
-      $attributenames[0] = $this->formvars['targetattribute'];
-      $attributes = $mapdb->read_layer_attributes($this->formvars['targetlayer_id'], $layerdb, $attributenames);
+      $attributename[0] = $this->formvars['targetattribute'];
+      $attributes = $mapdb->read_layer_attributes($this->formvars['targetlayer_id'], $layerdb, $attributename);
       switch ($attributes['form_element_type'][0]){
         case 'Auswahlfeld' : {
           list($sql) = explode(';', $attributes['options'][0]);

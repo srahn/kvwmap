@@ -73,6 +73,13 @@
 						if($attributes['tooltip'][$j]!='' AND $attributes['form_element_type'][$j] != 'Time') {
 						  echo '<td align="right"><a href="#" title="'.$attributes['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
 						}
+						if($attributes['type'][$j] == 'date'){
+							echo '<td align="right"><a href="javascript:;" title=" (TT.MM.JJJJ) '.$attributes['tooltip'][$j].'" ';
+							if($attributes['privileg'][$j] == '1' AND !$lock[$k]){
+								echo 'onclick="new CalendarJS().init(\''.$attributes['name'][$j].'_'.$k.'\');"';
+							}
+							echo '><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div id="calendar"><a name="calendar_'.$attributes['name'][$j].'_'.$k.'"></div></td>';
+						}
 						echo '</td></tr></table>';
 						echo '</td><td>';
 		  			if($attributes['constraints'][$j] != '' AND $attributes['constraints'][$j] != 'PRIMARY KEY'){
