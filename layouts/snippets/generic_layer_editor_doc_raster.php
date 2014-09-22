@@ -50,7 +50,7 @@
 <table>		
 	<tr>
 <? } ?>
-		<td>
+		<td valign="top">
 		<div <? if($this->new_entry != true)echo 'class="raster_record"'; ?> id="record_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>" <? if($k%5==0)echo 'style="clear: both;"'?>>
 			<input type="hidden" value="" name="changed_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
 			<table class="tgle" border="1">
