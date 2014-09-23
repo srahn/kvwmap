@@ -66,7 +66,7 @@ class ddl {
     	if(in_array($this->layout['texts'][$j]['id'], $this->remaining_freetexts) AND $this->layout['texts'][$j]['posy'] > 0){	# nur Freitexte mit einem y-Wert werden geschrieben
 				if(($type == 'fixed' AND $this->layout['texts'][$j]['type'] != 2 AND ($this->layout['type'] == 0 OR $this->layout['texts'][$j]['type'] == 1)) 
 				OR ($type == 'running' AND $this->layout['type'] != 0 AND $this->layout['texts'][$j]['type'] == 0)
-				OR ($type == 'everypage' AND $this->layout['texts'][$j]['type'] == 2)){				
+				OR ($type == 'everypage' AND $this->layout['texts'][$j]['type'] == 2)){									
 					$this->pdf->selectFont($this->layout['texts'][$j]['font']);								
 					$x = $this->layout['texts'][$j]['posx'];
 					$ypos = $this->layout['texts'][$j]['posy'];
@@ -92,8 +92,8 @@ class ddl {
 					}
 					$text = utf8_decode($this->substituteFreitext($this->layout['texts'][$j]['text'], $i, $pagenumber, $pagecount));
 					$this->putText($text, $this->layout['texts'][$j]['size'], NULL, $x, $y, $offsetx);
-					# falls in eine alte Seite geschrieben wurde, zurückkehren
-					$this->pdf->closeObject();
+					# falls in eine alte Seite geschrieben wurde, zurückkehren (aber nicht bei everypage-Freitexten)
+					if($type != 'everypage')$this->pdf->closeObject();
 				}
 				else{
 					$remaining_freetexts[] = $this->layout['texts'][$j]['id'];

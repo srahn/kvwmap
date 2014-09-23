@@ -432,7 +432,9 @@ function save_layout(){
           <td class="fett" style="border-top:2px solid #C3C7C3" colspan=8 align="center">
 						Freitexte
 						<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[0], Style[0], document.getElementById('Tip1'))" onmouseout="htm()">
-						<div id="Tip1" style="visibility:hidden;position:absolute;bottom:110px;z-index:1000;"></div>
+						<div style="position:relative">
+							<div id="Tip1" style="visibility:hidden;position:absolute;bottom:20px;z-index:1000;"></div>
+						</div>
 					</td>
         </tr>
         <? for($i = 0; $i < count($this->ddl->selectedlayout[0]['texts']); $i++){
