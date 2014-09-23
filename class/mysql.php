@@ -116,7 +116,7 @@ class database {
     $sql = "INSERT INTO `rolle` (`user_id`,`stelle_id`,`nImageWidth`,`nImageHeight`,`minx`,`miny`,`maxx`,`maxy`,`nZoomFactor`,`selectedButton`,`epsg_code`,`active_frame`,`last_time_id`,`language`,`hidemenue`,`fontsize_gle`,`highlighting`, `singlequery`, `querymode`)
                     SELECT ".$id.", ".$gast_stelle.", '800', '600', minxmax, minymax, maxxmax, maxymax, '2', 'zoomin', epsg_code, ".DEFAULT_DRUCKRAHMEN_ID." , '0000-00-00 00:00:00', 'german', '0', '15', '1', '1', '1' FROM stelle WHERE ID = ".$gast_stelle;
     $query = mysql_query($sql);
-    
+    include(CLASSPATH.'users.php');
 		$stelle = new stelle($gast_stelle,$this);
 		$rolle = new rolle(NULL,$gast_stelle,$this);
 		$layers = $stelle->getLayers(NULL);

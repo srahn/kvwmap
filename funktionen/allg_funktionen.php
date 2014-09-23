@@ -16,7 +16,20 @@ function MapserverErrorHandler($errno, $errstr, $errfile, $errline){
 	/* Don't execute PHP internal error handler */
 	return true;
 }
- 
+
+function InchesPerUnit($unit, $center_y){
+	if($unit == MS_METERS){
+		return 39.3701;
+	}
+	elseif($unit == MS_DD){
+		if($center_y != 0.0){
+			$cos_lat = cos(MS_PI * $center_y/180.0);
+			$lat_adj = sqrt(1 + $cos_lat * $cos_lat)/sqrt(2);
+		}
+		return 4374754 * $lat_adj;
+	}
+}
+
 function ie_check(){
 	$browser = $_SERVER['HTTP_USER_AGENT'];
 	if (preg_match("/MSIE/i", $browser)){
