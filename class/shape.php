@@ -369,7 +369,7 @@ class shape {
     }
     $sql = $stelle->parse_path($layerdb, $path, $selection);		# parse_path wird hier benutzt um die Auswahl der Attribute auf das Pfad-SQL zu übertragen
     
-    if($this->attributes['table_alias_name'][$this->attributes['the_geom']] != ''){
+    if($this->attributes['table_alias_name'][$this->attributes['the_geom']] != $this->attributes['table_name'][$this->attributes['the_geom']]){
     	$the_geom = $this->attributes['table_alias_name'][$this->attributes['the_geom']].'.'.$this->attributes['the_geom'];
     }
     else{
