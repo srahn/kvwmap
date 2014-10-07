@@ -1681,8 +1681,9 @@ class ALB {
               $angaben = explode(' ', $flst->Klassifizierung[$i]['angaben']);
               $z = 0;
               $row = $row-12;
+							if(in_array($angaben[1], array('I', 'II', 'III')))$angaben[0] .= ' '.$angaben[1];
               for($j = 0; $j < count($angaben); $j++){
-                if($angaben[$j] != ''){
+                if($angaben[$j] != '' AND !in_array($angaben[$j], array('I', 'II', 'III'))){
                   if($z == 0){
                     $ausgabe = 'Bodsch '.$angaben[$j];
                     $abstand = 0;
