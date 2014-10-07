@@ -2096,6 +2096,8 @@ class GUI {
 		if($this->user->rolle->hideMenue == 1){$width = $width + 195;}
 		if($this->user->rolle->hideLegend == 1){$width = $width + 254;}
 		$height = $this->formvars['height'] - HEADER_FOOTER_HEIGHT;
+		if($height < 0)$height = 10;
+		if($width < 0)$width = 10;
 		$this->user->rolle->setSize($width.'x'.$height);
 		$this->user->rolle->readSettings();
 	}
