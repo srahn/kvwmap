@@ -299,12 +299,18 @@ class database {
   }
 
 	function exec_file($filename, $search, $replace){
-    if ($file = file_get_contents($filename)){
+    if($file = file_get_contents($filename)){
 			foreach(explode(';'.chr(10), $file) as $query){
+				$query_to_execute = '';
 				$query = trim($query);
 				if($search != NULL)$query = str_replace($search, $replace, $query);
-				if (!empty($query) && $query != ";") {
-					$ret=$this->execSQL($query, 0, 0);
+				foreach(explode(chr(10), $query) as $line){
+					if(strpos($line, "--") !== 0 && strpos($line, "#") !== 0){					// Zeilen mit Kommentarzeichen ignorieren
+						$query_to_execute .= $line;
+					}
+				}
+				if (!empty($query_to_execute)) {		
+					$ret=$this->execSQL($query_to_execute, 0, 0);
 					if($ret[0] == 1){
 						return $ret;
 					}
