@@ -134,7 +134,7 @@ class administration{
 			$prepath = PLUGINS.$component.'/';
 			foreach($component_seed as $file){
 				$filepath = $prepath.'db/mysql/data/'.$file;
-				$connection = $this->pgdatabase->user.' '.$this->pgdatabase->passwd.' '.$this->pgdatabase->dbName;
+				$connection = 'user='.$this->pgdatabase->user.' password='.$this->pgdatabase->passwd.' dbname='.$this->pgdatabase->dbName;
 				$queryret = $this->database->exec_file($filepath, 'user=xxxx password=xxxx dbname=kvwmapsp', $connection);
 				if($queryret[0]){
 					echo $queryret[1].'<br>Fehler beim Ausführen von seed-Datei: '.$filepath.'<br>';
