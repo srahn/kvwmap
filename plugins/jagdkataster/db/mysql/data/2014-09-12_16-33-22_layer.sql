@@ -5,24 +5,24 @@
 # 
 # Die Fachschale "Jagdbezirke" besteht zum einen aus den
 # Layern Gemeinschaftlicher Jagdbezirk, abgerundeter Eigen- 
-# jagdbezirk, Sonderfläche und Teiljagdbezirk (= Pachfläche  
+# jagdbezirk, SonderflÃ¤che und Teiljagdbezirk (= PachflÃ¤che  
 # innerhalb eines Eigenjagdbezirks).
 #
 # Die Fachschale "Jagdbezirke" besteht zum anderen auch
-# aus den Layern, die für das sog. "Abrundungsverfahren"
-# nötig sind, um Jagdbezirke nach LJagdG M-V zu
+# aus den Layern, die fÃ¼r das sog. "Abrundungsverfahren"
+# nÃ¶tig sind, um Jagdbezirke nach LJagdG M-V zu
 # definieren. Noch nicht abgerundete Eigenjagdbezirke werden
-# hier in einem eigenen Layer geführt. Zur besseren Übersicht-
+# hier in einem eigenen Layer gefÃ¼hrt. Zur besseren Ãœbersicht-
 # lichkeit werden diese Layer in einer eigenen Gruppe
 # zusammengefasst.
 #
-# Der Layer EJB-Verdachtsflächen greift auf eine Tabelle zu,
-# die vorab gefüllt werden muss. Das entsprechende SQL ist
+# Der Layer EJB-VerdachtsflÃ¤chen greift auf eine Tabelle zu,
+# die vorab gefÃ¼llt werden muss. Das entsprechende SQL ist
 # in 'postgis_install_help_jagdbezirke.sql' zu finden.
 #
 # Die Layer Gemeinschaftlicher Jagdbezirk und abgerundeter 
-# Eigenjagdbezirk sind so angelegt, dass eine Verknüpfung mit
-# den Daten des Programms 'condition' möglich ist.
+# Eigenjagdbezirk sind so angelegt, dass eine VerknÃ¼pfung mit
+# den Daten des Programms 'condition' mÃ¶glich ist.
 #
 ###########################################################
 
@@ -30,7 +30,7 @@
 
 
 ##########################
-# Layer für Jagdbezirke  #
+# Layer fÃ¼r Jagdbezirke  #
 ##########################
 # Definitionen
 INSERT INTO `u_groups` (`Gruppenname`) VALUES ('Jagdbezirke');
@@ -71,12 +71,12 @@ INSERT INTO u_labels2classes (label_id, class_id) VALUES (@last_label_id, @last_
 ########################################
 # Layer abgerundete Eigenjagdbezirke
 
-INSERT INTO layer (`Name`,`alias`,`Datentyp`,`Gruppe`,`pfad`,`maintable`,`Data`,`schema`,`document_path`,`tileindex`,`tileitem`,`labelangleitem`,`labelitem`,`labelmaxscale`,`labelminscale`,`labelrequires`,`connection`,`printconnection`,`connectiontype`,`classitem`,`filteritem`,`tolerance`,`toleranceunits`,`epsg_code`,`template`,`queryable`,`transparency`,`drawingorder`,`minscale`,`maxscale`,`offsite`,`ows_srs`,`wms_name`,`wms_server_version`,`wms_format`,`wms_connectiontimeout`,`wms_auth_username`,`wms_auth_password`,`wfs_geom`,`selectiontype`,`querymap`,`logconsume`,`processing`,`kurzbeschreibung`,`datenherr`,`metalink`,`privileg`) VALUES('Abgerundete EJB','','2',@group_id,'SELECT oid, id, name, art, flaeche, bezirkid, concode, the_geom FROM jagdbezirk_paechter WHERE art = \'ajb\'','jagdbezirk_paechter','the_geom from (select oid, oid as id, name, art, the_geom from jagdkataster.jagdbezirk_paechter WHERE art = \'ajb\') as foo using unique oid using srid=2398','jagdkataster','','','','','name','100001','399','',@connection,'','6','art','id','3','pixels','2398','jagdkataster/view/jagdbezirke.php','1','50',NULL,'99','600001','','EPSG:2398','','1.1.0','image/png','60','','','','','1','0','','','untere Jagdbehörde','','0');
+INSERT INTO layer (`Name`,`alias`,`Datentyp`,`Gruppe`,`pfad`,`maintable`,`Data`,`schema`,`document_path`,`tileindex`,`tileitem`,`labelangleitem`,`labelitem`,`labelmaxscale`,`labelminscale`,`labelrequires`,`connection`,`printconnection`,`connectiontype`,`classitem`,`filteritem`,`tolerance`,`toleranceunits`,`epsg_code`,`template`,`queryable`,`transparency`,`drawingorder`,`minscale`,`maxscale`,`offsite`,`ows_srs`,`wms_name`,`wms_server_version`,`wms_format`,`wms_connectiontimeout`,`wms_auth_username`,`wms_auth_password`,`wfs_geom`,`selectiontype`,`querymap`,`logconsume`,`processing`,`kurzbeschreibung`,`datenherr`,`metalink`,`privileg`) VALUES('Abgerundete EJB','','2',@group_id,'SELECT oid, id, name, art, flaeche, bezirkid, concode, the_geom FROM jagdbezirk_paechter WHERE art = \'ajb\'','jagdbezirk_paechter','the_geom from (select oid, oid as id, name, art, the_geom from jagdkataster.jagdbezirk_paechter WHERE art = \'ajb\') as foo using unique oid using srid=2398','jagdkataster','','','','','name','100001','399','',@connection,'','6','art','id','3','pixels','2398','jagdkataster/view/jagdbezirke.php','1','50',NULL,'99','600001','','EPSG:2398','','1.1.0','image/png','60','','','','','1','0','','','untere JagdbehÃ¶rde','','0');
 SET @last_layer_id766=LAST_INSERT_ID();
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`form_element_type`,`options`,`alias`,`tooltip`,`order`,`privileg`) VALUES(@last_layer_id766,'art','art','jagdbezirk_paechter','jagdbezirk_paechter','varchar','','','1','15','Text','','','','3','0');
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`form_element_type`,`options`,`alias`,`tooltip`,`order`,`privileg`) VALUES(@last_layer_id766,'bezirkid','bezirkid','jagdbezirk_paechter','jagdbezirk_paechter','int4','','','1','32','Text','','','','5','0');
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`form_element_type`,`options`,`alias`,`tooltip`,`order`,`privileg`) VALUES(@last_layer_id766,'concode','concode','jagdbezirk_paechter','jagdbezirk_paechter','varchar','','','1','5','Text','','','','6','0');
-INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`form_element_type`,`options`,`alias`,`tooltip`,`order`,`privileg`) VALUES(@last_layer_id766,'flaeche','flaeche','jagdbezirk_paechter','jagdbezirk_paechter','numeric','','','1',NULL,'Text','','Fläche [ha]','','4','0');
+INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`form_element_type`,`options`,`alias`,`tooltip`,`order`,`privileg`) VALUES(@last_layer_id766,'flaeche','flaeche','jagdbezirk_paechter','jagdbezirk_paechter','numeric','','','1',NULL,'Text','','FlÃ¤che [ha]','','4','0');
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`form_element_type`,`options`,`alias`,`tooltip`,`order`,`privileg`) VALUES(@last_layer_id766,'id','id','jagdbezirk_paechter','jagdbezirk_paechter','varchar','','','1','10','Text','','Lfd. Nr. (Condition)','','1','0');
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`form_element_type`,`options`,`alias`,`tooltip`,`order`,`privileg`) VALUES(@last_layer_id766,'name','name','jagdbezirk_paechter','jagdbezirk_paechter','varchar','','','1','50','Text','','','','2','0');
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`form_element_type`,`options`,`alias`,`tooltip`,`order`,`privileg`) VALUES(@last_layer_id766,'oid','oid','jagdbezirk_paechter','jagdbezirk_paechter','oid','','','1',NULL,'Text','','','','0','0');
@@ -95,7 +95,7 @@ INSERT INTO u_labels2classes (label_id, class_id) VALUES (@last_label_id, @last_
 
 
 ########################################
-# Layer Teiljagdbezirke (Teiljagdbezirke können auch keine Geometrie haben!)
+# Layer Teiljagdbezirke (Teiljagdbezirke kÃ¶nnen auch keine Geometrie haben!)
 
 INSERT INTO layer (`Name`,`alias`,`Datentyp`,`Gruppe`,`pfad`,`maintable`,`Data`,`schema`,`document_path`,`tileindex`,`tileitem`,`labelangleitem`,`labelitem`,`labelmaxscale`,`labelminscale`,`labelrequires`,`connection`,`printconnection`,`connectiontype`,`classitem`,`filteritem`,`tolerance`,`toleranceunits`,`epsg_code`,`template`,`queryable`,`transparency`,`drawingorder`,`minscale`,`maxscale`,`offsite`,`ows_srs`,`wms_name`,`wms_server_version`,`wms_format`,`wms_connectiontimeout`,`wms_auth_username`,`wms_auth_password`,`wfs_geom`,`selectiontype`,`querymap`,`logconsume`,`processing`,`kurzbeschreibung`,`datenherr`,`metalink`,`privileg`) VALUES('Teiljagdbezirke','','2',@group_id,'SELECT oid, * FROM jagdbezirke WHERE art = \'tjb\'','jagdbezirke','the_geom from (select *, oid from jagdkataster.jagdbezirke where art = \'tjb\') as foo using unique id using srid=2398','jagdkataster','','','','','name','100002','400','',@connection,'','6','id','id','3','pixels','2398','jagdkataster/view/jagdbezirke.php','1',NULL,NULL,NULL,NULL,'','EPSG:2398','','1.1.0','image/png','60','','','','','0','0','','','','','0');
 SET @last_layer_id215=LAST_INSERT_ID();
@@ -121,9 +121,9 @@ INSERT INTO u_labels2classes (label_id, class_id) VALUES (@last_label_id, @last_
 
 
 ########################################
-# Layer Sonderflächen
+# Layer SonderflÃ¤chen
 
-INSERT INTO layer (`Name`,`alias`,`Datentyp`,`Gruppe`,`pfad`,`maintable`,`Data`,`schema`,`document_path`,`tileindex`,`tileitem`,`labelangleitem`,`labelitem`,`labelmaxscale`,`labelminscale`,`labelrequires`,`connection`,`printconnection`,`connectiontype`,`classitem`,`filteritem`,`tolerance`,`toleranceunits`,`epsg_code`,`template`,`queryable`,`transparency`,`drawingorder`,`minscale`,`maxscale`,`offsite`,`ows_srs`,`wms_name`,`wms_server_version`,`wms_format`,`wms_connectiontimeout`,`wms_auth_username`,`wms_auth_password`,`wfs_geom`,`selectiontype`,`querymap`,`logconsume`,`processing`,`kurzbeschreibung`,`datenherr`,`metalink`,`privileg`) VALUES('Sonderflächen','','2',@group_id,'SELECT oid, * FROM jagdbezirke WHERE art = \'sf\'','jagdbezirke','the_geom from (select * from jagdkataster.jagdbezirke where art = \'sf\') as foo using unique id using srid=2398','jagdkataster','','','','','','100002','400','',@connection,'','6','id','id','3','pixels','2398','jagdkataster/view/jagdbezirke.php','1',NULL,NULL,NULL,NULL,'','EPSG:2398','','1.1.0','image/png','60','','','','','0','0','','','','','0');
+INSERT INTO layer (`Name`,`alias`,`Datentyp`,`Gruppe`,`pfad`,`maintable`,`Data`,`schema`,`document_path`,`tileindex`,`tileitem`,`labelangleitem`,`labelitem`,`labelmaxscale`,`labelminscale`,`labelrequires`,`connection`,`printconnection`,`connectiontype`,`classitem`,`filteritem`,`tolerance`,`toleranceunits`,`epsg_code`,`template`,`queryable`,`transparency`,`drawingorder`,`minscale`,`maxscale`,`offsite`,`ows_srs`,`wms_name`,`wms_server_version`,`wms_format`,`wms_connectiontimeout`,`wms_auth_username`,`wms_auth_password`,`wfs_geom`,`selectiontype`,`querymap`,`logconsume`,`processing`,`kurzbeschreibung`,`datenherr`,`metalink`,`privileg`) VALUES('SonderflÃ¤chen','','2',@group_id,'SELECT oid, * FROM jagdbezirke WHERE art = \'sf\'','jagdbezirke','the_geom from (select * from jagdkataster.jagdbezirke where art = \'sf\') as foo using unique id using srid=2398','jagdkataster','','','','','','100002','400','',@connection,'','6','id','id','3','pixels','2398','jagdkataster/view/jagdbezirke.php','1',NULL,NULL,NULL,NULL,'','EPSG:2398','','1.1.0','image/png','60','','','','','0','0','','','','','0');
 SET @last_layer_id216=LAST_INSERT_ID();
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`form_element_type`,`options`,`alias`,`tooltip`,`order`,`privileg`) VALUES(@last_layer_id216,'art','art','jagdbezirke','jagdbezirke','varchar','','','1','15','Text','','','','2','0');
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`form_element_type`,`options`,`alias`,`tooltip`,`order`,`privileg`) VALUES(@last_layer_id216,'concode','concode','jagdbezirke','jagdbezirke','varchar','','','1','5','Text','','','','5','0');
@@ -145,7 +145,7 @@ INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_st
 
 
 ##################################
-# Layer für Abrundungsverfahren  #
+# Layer fÃ¼r Abrundungsverfahren  #
 ##################################
 # Definitionen
 INSERT INTO `u_groups` (`id` ,`Gruppenname`) VALUES (NULL , 'Abrundungsverfahren');
@@ -159,12 +159,12 @@ SET @connection = 'user=xxxx password=xxxx dbname=kvwmapsp';
 # Layerdefinition
 
 
-INSERT INTO layer (`Name`,`alias`,`Datentyp`,`Gruppe`,`pfad`,`maintable`,`Data`,`schema`,`document_path`,`tileindex`,`tileitem`,`labelangleitem`,`labelitem`,`labelmaxscale`,`labelminscale`,`labelrequires`,`connection`,`printconnection`,`connectiontype`,`classitem`,`filteritem`,`tolerance`,`toleranceunits`,`epsg_code`,`template`,`queryable`,`transparency`,`drawingorder`,`minscale`,`maxscale`,`offsite`,`ows_srs`,`wms_name`,`wms_server_version`,`wms_format`,`wms_connectiontimeout`,`wms_auth_username`,`wms_auth_password`,`wfs_geom`,`selectiontype`,`querymap`,`logconsume`,`processing`,`kurzbeschreibung`,`datenherr`,`metalink`,`privileg`) VALUES('EJB im Verfahren','','2',@group_id,'SELECT oid, id, name, art, flaeche, bezirkid, concode, the_geom FROM jagdbezirk_paechter WHERE art = \'ejb\'','jagdbezirk_paechter','the_geom from (select oid, oid as id, name, art, the_geom from jagdkataster.jagdbezirk_paechter where art = \'ejb\') as foo using unique oid using srid=2398','jagdkataster','','','','','name','100001','399','',@connection,'','6','art','id','3','pixels','2398','jagdkataster/view/jagdbezirke.php','1','50',NULL,'99','600001','','EPSG:2398','','1.1.0','image/png','60','','','','','1','0','','','untere Jagdbehörde','','0');
+INSERT INTO layer (`Name`,`alias`,`Datentyp`,`Gruppe`,`pfad`,`maintable`,`Data`,`schema`,`document_path`,`tileindex`,`tileitem`,`labelangleitem`,`labelitem`,`labelmaxscale`,`labelminscale`,`labelrequires`,`connection`,`printconnection`,`connectiontype`,`classitem`,`filteritem`,`tolerance`,`toleranceunits`,`epsg_code`,`template`,`queryable`,`transparency`,`drawingorder`,`minscale`,`maxscale`,`offsite`,`ows_srs`,`wms_name`,`wms_server_version`,`wms_format`,`wms_connectiontimeout`,`wms_auth_username`,`wms_auth_password`,`wfs_geom`,`selectiontype`,`querymap`,`logconsume`,`processing`,`kurzbeschreibung`,`datenherr`,`metalink`,`privileg`) VALUES('EJB im Verfahren','','2',@group_id,'SELECT oid, id, name, art, flaeche, bezirkid, concode, the_geom FROM jagdbezirk_paechter WHERE art = \'ejb\'','jagdbezirk_paechter','the_geom from (select oid, oid as id, name, art, the_geom from jagdkataster.jagdbezirk_paechter where art = \'ejb\') as foo using unique oid using srid=2398','jagdkataster','','','','','name','100001','399','',@connection,'','6','art','id','3','pixels','2398','jagdkataster/view/jagdbezirke.php','1','50',NULL,'99','600001','','EPSG:2398','','1.1.0','image/png','60','','','','','1','0','','','untere JagdbehÃ¶rde','','0');
 SET @last_layer_id767=LAST_INSERT_ID();
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`form_element_type`,`options`,`alias`,`tooltip`,`order`,`privileg`) VALUES(@last_layer_id767,'art','art','jagdbezirk_paechter','jagdbezirk_paechter','varchar','','','1','15','Text','','Art','','3','0');
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`form_element_type`,`options`,`alias`,`tooltip`,`order`,`privileg`) VALUES(@last_layer_id767,'bezirkid','bezirkid','jagdbezirk_paechter','jagdbezirk_paechter','int4','','','1','32','Text','','','','5','0');
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`form_element_type`,`options`,`alias`,`tooltip`,`order`,`privileg`) VALUES(@last_layer_id767,'concode','concode','jagdbezirk_paechter','jagdbezirk_paechter','varchar','','','1','5','Text','','','','6','0');
-INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`form_element_type`,`options`,`alias`,`tooltip`,`order`,`privileg`) VALUES(@last_layer_id767,'flaeche','flaeche','jagdbezirk_paechter','jagdbezirk_paechter','numeric','','','1',NULL,'Text','','Fläche [ha]','','4','0');
+INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`form_element_type`,`options`,`alias`,`tooltip`,`order`,`privileg`) VALUES(@last_layer_id767,'flaeche','flaeche','jagdbezirk_paechter','jagdbezirk_paechter','numeric','','','1',NULL,'Text','','FlÃ¤che [ha]','','4','0');
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`form_element_type`,`options`,`alias`,`tooltip`,`order`,`privileg`) VALUES(@last_layer_id767,'id','id','jagdbezirk_paechter','jagdbezirk_paechter','varchar','','','1','10','Text','','Lfd. Nr. (Condition)','','1','0');
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`form_element_type`,`options`,`alias`,`tooltip`,`order`,`privileg`) VALUES(@last_layer_id767,'name','name','jagdbezirk_paechter','jagdbezirk_paechter','varchar','','','1','50','Text','','Name','','2','0');
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`form_element_type`,`options`,`alias`,`tooltip`,`order`,`privileg`) VALUES(@last_layer_id767,'oid','oid','jagdbezirk_paechter','jagdbezirk_paechter','oid','','','1',NULL,'Text','','','','0','0');
@@ -183,9 +183,9 @@ INSERT INTO u_labels2classes (label_id, class_id) VALUES (@last_label_id, @last_
 
 
 ########################################
-# Layer Abtrennungsflächen
+# Layer AbtrennungsflÃ¤chen
 
-INSERT INTO layer (`Name`,`alias`,`Datentyp`,`Gruppe`,`pfad`,`maintable`,`Data`,`schema`,`document_path`,`tileindex`,`tileitem`,`labelangleitem`,`labelitem`,`labelmaxscale`,`labelminscale`,`labelrequires`,`connection`,`printconnection`,`connectiontype`,`classitem`,`filteritem`,`tolerance`,`toleranceunits`,`epsg_code`,`template`,`queryable`,`transparency`,`drawingorder`,`minscale`,`maxscale`,`offsite`,`ows_srs`,`wms_name`,`wms_server_version`,`wms_format`,`wms_connectiontimeout`,`wms_auth_username`,`wms_auth_password`,`wfs_geom`,`selectiontype`,`querymap`,`logconsume`,`processing`,`kurzbeschreibung`,`datenherr`,`metalink`,`privileg`) VALUES('Abtrennungsflächen','','2',@group_id,'SELECT oid, id, name, art, flaeche,  bezirkid, concode, jb_zuordnung, status, the_geom FROM jagdbezirk_paechter WHERE art = \'atf\'','jagdbezirk_paechter','the_geom from (select oid, id, name, art, the_geom from jagdkataster.jagdbezirk_paechter where art = \'atf\') as foo using unique oid using srid=2398','jagdkataster','','','','','name','100001','399','',@connection,'','6','art','id','3','pixels','2398','jagdkataster/view/jagdbezirke.php','1','50',NULL,'99','600001','','EPSG:2398','','1.1.0','image/png','60','','','','','1','0','','','untere Jagdbehörde','','0');
+INSERT INTO layer (`Name`,`alias`,`Datentyp`,`Gruppe`,`pfad`,`maintable`,`Data`,`schema`,`document_path`,`tileindex`,`tileitem`,`labelangleitem`,`labelitem`,`labelmaxscale`,`labelminscale`,`labelrequires`,`connection`,`printconnection`,`connectiontype`,`classitem`,`filteritem`,`tolerance`,`toleranceunits`,`epsg_code`,`template`,`queryable`,`transparency`,`drawingorder`,`minscale`,`maxscale`,`offsite`,`ows_srs`,`wms_name`,`wms_server_version`,`wms_format`,`wms_connectiontimeout`,`wms_auth_username`,`wms_auth_password`,`wfs_geom`,`selectiontype`,`querymap`,`logconsume`,`processing`,`kurzbeschreibung`,`datenherr`,`metalink`,`privileg`) VALUES('AbtrennungsflÃ¤chen','','2',@group_id,'SELECT oid, id, name, art, flaeche,  bezirkid, concode, jb_zuordnung, status, the_geom FROM jagdbezirk_paechter WHERE art = \'atf\'','jagdbezirk_paechter','the_geom from (select oid, id, name, art, the_geom from jagdkataster.jagdbezirk_paechter where art = \'atf\') as foo using unique oid using srid=2398','jagdkataster','','','','','name','100001','399','',@connection,'','6','art','id','3','pixels','2398','jagdkataster/view/jagdbezirke.php','1','50',NULL,'99','600001','','EPSG:2398','','1.1.0','image/png','60','','','','','1','0','','','untere JagdbehÃ¶rde','','0');
 SET @last_layer_id775=LAST_INSERT_ID();
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`form_element_type`,`options`,`alias`,`tooltip`,`order`,`privileg`) VALUES(@last_layer_id775,'art','art','jagdbezirk_paechter','jagdbezirk_paechter','varchar','','','1','15','Text','','','','3','0');
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`form_element_type`,`options`,`alias`,`tooltip`,`order`,`privileg`) VALUES(@last_layer_id775,'bezirkid','bezirkid','jagdbezirk_paechter','jagdbezirk_paechter','int4','','','1','32','Text','','','','5','0');
@@ -207,14 +207,14 @@ INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outl
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 1);
 
 
-# Kein Label für Abtrennungsflächen
+# Kein Label fÃ¼r AbtrennungsflÃ¤chen
 
 
 ########################################
-# Layer Angliederungsflächen
+# Layer AngliederungsflÃ¤chen
 
 
-INSERT INTO layer (`Name`,`alias`,`Datentyp`,`Gruppe`,`pfad`,`maintable`,`Data`,`schema`,`document_path`,`tileindex`,`tileitem`,`labelangleitem`,`labelitem`,`labelmaxscale`,`labelminscale`,`labelrequires`,`connection`,`printconnection`,`connectiontype`,`classitem`,`filteritem`,`tolerance`,`toleranceunits`,`epsg_code`,`template`,`queryable`,`transparency`,`drawingorder`,`minscale`,`maxscale`,`offsite`,`ows_srs`,`wms_name`,`wms_server_version`,`wms_format`,`wms_connectiontimeout`,`wms_auth_username`,`wms_auth_password`,`wfs_geom`,`selectiontype`,`querymap`,`logconsume`,`processing`,`kurzbeschreibung`,`datenherr`,`metalink`,`privileg`) VALUES('Angliederungsflächen','','2',@group_id,'SELECT oid, id, name, art, flaeche,  bezirkid, concode, jb_zuordnung, status, the_geom FROM jagdbezirk_paechter WHERE art = \'agf\'','jagdbezirk_paechter','the_geom from (select oid, oid as id, name, art, the_geom from jagdkataster.jagdbezirk_paechter where art = \'agf\') as foo using unique oid using srid=2398','jagdkataster','','','','','name','100001','399','',@connection,'','6','art','id','3','pixels','2398','jagdkataster/view/jagdbezirke.php','1','50',NULL,'99','600001','','EPSG:2398','','1.1.0','image/png','60','','','','','1','0','','','untere Jagdbehörde','','0');
+INSERT INTO layer (`Name`,`alias`,`Datentyp`,`Gruppe`,`pfad`,`maintable`,`Data`,`schema`,`document_path`,`tileindex`,`tileitem`,`labelangleitem`,`labelitem`,`labelmaxscale`,`labelminscale`,`labelrequires`,`connection`,`printconnection`,`connectiontype`,`classitem`,`filteritem`,`tolerance`,`toleranceunits`,`epsg_code`,`template`,`queryable`,`transparency`,`drawingorder`,`minscale`,`maxscale`,`offsite`,`ows_srs`,`wms_name`,`wms_server_version`,`wms_format`,`wms_connectiontimeout`,`wms_auth_username`,`wms_auth_password`,`wfs_geom`,`selectiontype`,`querymap`,`logconsume`,`processing`,`kurzbeschreibung`,`datenherr`,`metalink`,`privileg`) VALUES('AngliederungsflÃ¤chen','','2',@group_id,'SELECT oid, id, name, art, flaeche,  bezirkid, concode, jb_zuordnung, status, the_geom FROM jagdbezirk_paechter WHERE art = \'agf\'','jagdbezirk_paechter','the_geom from (select oid, oid as id, name, art, the_geom from jagdkataster.jagdbezirk_paechter where art = \'agf\') as foo using unique oid using srid=2398','jagdkataster','','','','','name','100001','399','',@connection,'','6','art','id','3','pixels','2398','jagdkataster/view/jagdbezirke.php','1','50',NULL,'99','600001','','EPSG:2398','','1.1.0','image/png','60','','','','','1','0','','','untere JagdbehÃ¶rde','','0');
 SET @last_layer_id771=LAST_INSERT_ID();
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`form_element_type`,`options`,`alias`,`tooltip`,`order`,`privileg`) VALUES(@last_layer_id771,'art','art','jagdbezirk_paechter','jagdbezirk_paechter','varchar','','','1','15','Text','','Art','','3','0');
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`form_element_type`,`options`,`alias`,`tooltip`,`order`,`privileg`) VALUES(@last_layer_id771,'bezirkid','bezirkid','jagdbezirk_paechter','jagdbezirk_paechter','int4','','','1','32','Text','','','','5','0');
@@ -236,13 +236,13 @@ INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outl
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 1);
 
 
-# Kein Label für Angliederungsflächen
+# Kein Label fÃ¼r AngliederungsflÃ¤chen
 
 
 ########################################
 # Layer Jagdbezirk-Enklaven
 
-INSERT INTO layer (`Name`,`alias`,`Datentyp`,`Gruppe`,`pfad`,`maintable`,`Data`,`schema`,`document_path`,`tileindex`,`tileitem`,`labelangleitem`,`labelitem`,`labelmaxscale`,`labelminscale`,`labelrequires`,`connection`,`printconnection`,`connectiontype`,`classitem`,`filteritem`,`tolerance`,`toleranceunits`,`epsg_code`,`template`,`queryable`,`transparency`,`drawingorder`,`minscale`,`maxscale`,`offsite`,`ows_srs`,`wms_name`,`wms_server_version`,`wms_format`,`wms_connectiontimeout`,`wms_auth_username`,`wms_auth_password`,`wfs_geom`,`selectiontype`,`querymap`,`logconsume`,`processing`,`kurzbeschreibung`,`datenherr`,`metalink`,`privileg`) VALUES('Jagdbezirk Enklaven','','2',@group_id,'SELECT oid, id, name, art, flaeche,  bezirkid, concode, jb_zuordnung, status, the_geom FROM jagdbezirk_paechter WHERE art = \'jbe\'','jagdbezirk_paechter','the_geom from (select oid, oid as id, name, art, the_geom from jagdkataster.jagdbezirk_paechter where art = \'jbe\') as foo using unique oid using srid=2398','jagdkataster','','','','','name','100001','399','',@connection,'','6','art','id','3','pixels','2398','jagdkataster/view/jagdbezirke.php','1','50',NULL,'99','600001','','EPSG:2398','','1.1.0','image/png','60','','','','','1','0','','','untere Jagdbehörde','','0');
+INSERT INTO layer (`Name`,`alias`,`Datentyp`,`Gruppe`,`pfad`,`maintable`,`Data`,`schema`,`document_path`,`tileindex`,`tileitem`,`labelangleitem`,`labelitem`,`labelmaxscale`,`labelminscale`,`labelrequires`,`connection`,`printconnection`,`connectiontype`,`classitem`,`filteritem`,`tolerance`,`toleranceunits`,`epsg_code`,`template`,`queryable`,`transparency`,`drawingorder`,`minscale`,`maxscale`,`offsite`,`ows_srs`,`wms_name`,`wms_server_version`,`wms_format`,`wms_connectiontimeout`,`wms_auth_username`,`wms_auth_password`,`wfs_geom`,`selectiontype`,`querymap`,`logconsume`,`processing`,`kurzbeschreibung`,`datenherr`,`metalink`,`privileg`) VALUES('Jagdbezirk Enklaven','','2',@group_id,'SELECT oid, id, name, art, flaeche,  bezirkid, concode, jb_zuordnung, status, the_geom FROM jagdbezirk_paechter WHERE art = \'jbe\'','jagdbezirk_paechter','the_geom from (select oid, oid as id, name, art, the_geom from jagdkataster.jagdbezirk_paechter where art = \'jbe\') as foo using unique oid using srid=2398','jagdkataster','','','','','name','100001','399','',@connection,'','6','art','id','3','pixels','2398','jagdkataster/view/jagdbezirke.php','1','50',NULL,'99','600001','','EPSG:2398','','1.1.0','image/png','60','','','','','1','0','','','untere JagdbehÃ¶rde','','0');
 SET @last_layer_id772=LAST_INSERT_ID();
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`form_element_type`,`options`,`alias`,`tooltip`,`order`,`privileg`) VALUES(@last_layer_id772,'art','art','jagdbezirk_paechter','jagdbezirk_paechter','varchar','','','1','15','Auswahlfeld','select bezeichnung as output, art as value from jagdbezirkart','Art','','3','0');
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`form_element_type`,`options`,`alias`,`tooltip`,`order`,`privileg`) VALUES(@last_layer_id772,'bezirkid','bezirkid','jagdbezirk_paechter','jagdbezirk_paechter','int4','','','1','32','Text','','','','5','0');
@@ -264,14 +264,14 @@ INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outl
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 1);
 
 
-# Kein Label für Jagdbezirk-Enklaven
+# Kein Label fÃ¼r Jagdbezirk-Enklaven
 
 
 ########################################
-# Layer jadbezirksfreie Flächen
+# Layer jadbezirksfreie FlÃ¤chen
 
 
-INSERT INTO layer (`Name`,`alias`,`Datentyp`,`Gruppe`,`pfad`,`maintable`,`Data`,`schema`,`document_path`,`tileindex`,`tileitem`,`labelangleitem`,`labelitem`,`labelmaxscale`,`labelminscale`,`labelrequires`,`connection`,`printconnection`,`connectiontype`,`classitem`,`filteritem`,`tolerance`,`toleranceunits`,`epsg_code`,`template`,`queryable`,`transparency`,`drawingorder`,`minscale`,`maxscale`,`offsite`,`ows_srs`,`wms_name`,`wms_server_version`,`wms_format`,`wms_connectiontimeout`,`wms_auth_username`,`wms_auth_password`,`wfs_geom`,`selectiontype`,`querymap`,`logconsume`,`processing`,`kurzbeschreibung`,`datenherr`,`metalink`,`privileg`) VALUES('jadbezirksfreie Flächen','','2',@group_id,'SELECT oid, id, name, art, flaeche,  bezirkid, concode, jb_zuordnung, status, the_geom FROM jagdbezirk_paechter WHERE art = \'jbf\'','jagdbezirk_paechter','the_geom from (select oid, oid as id, name, art, the_geom from jagdkataster.jagdbezirk_paechter where art = \'jbf\') as foo using unique oid using srid=2398','jagdkataster','','','','','name','100001','399','',@connection,'','6','art','id','3','pixels','2398','jagdkataster/view/jagdbezirke.php','1','50',NULL,'99','600001','','EPSG:2398','','1.1.0','image/png','60','','','','','1','0','','','untere Jagdbehörde','','0');
+INSERT INTO layer (`Name`,`alias`,`Datentyp`,`Gruppe`,`pfad`,`maintable`,`Data`,`schema`,`document_path`,`tileindex`,`tileitem`,`labelangleitem`,`labelitem`,`labelmaxscale`,`labelminscale`,`labelrequires`,`connection`,`printconnection`,`connectiontype`,`classitem`,`filteritem`,`tolerance`,`toleranceunits`,`epsg_code`,`template`,`queryable`,`transparency`,`drawingorder`,`minscale`,`maxscale`,`offsite`,`ows_srs`,`wms_name`,`wms_server_version`,`wms_format`,`wms_connectiontimeout`,`wms_auth_username`,`wms_auth_password`,`wfs_geom`,`selectiontype`,`querymap`,`logconsume`,`processing`,`kurzbeschreibung`,`datenherr`,`metalink`,`privileg`) VALUES('jadbezirksfreie FlÃ¤chen','','2',@group_id,'SELECT oid, id, name, art, flaeche,  bezirkid, concode, jb_zuordnung, status, the_geom FROM jagdbezirk_paechter WHERE art = \'jbf\'','jagdbezirk_paechter','the_geom from (select oid, oid as id, name, art, the_geom from jagdkataster.jagdbezirk_paechter where art = \'jbf\') as foo using unique oid using srid=2398','jagdkataster','','','','','name','100001','399','',@connection,'','6','art','id','3','pixels','2398','jagdkataster/view/jagdbezirke.php','1','50',NULL,'99','600001','','EPSG:2398','','1.1.0','image/png','60','','','','','1','0','','','untere JagdbehÃ¶rde','','0');
 SET @last_layer_id773=LAST_INSERT_ID();
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`form_element_type`,`options`,`alias`,`tooltip`,`order`,`privileg`) VALUES(@last_layer_id773,'art','art','jagdbezirk_paechter','jagdbezirk_paechter','varchar','','','1','15','Auswahlfeld','select bezeichnung as output, art as value from jagdbezirkart','Art','','3','0');
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`form_element_type`,`options`,`alias`,`tooltip`,`order`,`privileg`) VALUES(@last_layer_id773,'bezirkid','bezirkid','jagdbezirk_paechter','jagdbezirk_paechter','int4','','','1','32','Text','','','','5','0');
@@ -293,14 +293,14 @@ INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outl
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 1);
 
 
-# Kein Label für jadbezirksfreie Flächen
+# Kein Label fÃ¼r jadbezirksfreie FlÃ¤chen
 
 
 ########################################
-# Layer Anpachtflächen
+# Layer AnpachtflÃ¤chen
 
 
-INSERT INTO layer (`Name`,`alias`,`Datentyp`,`Gruppe`,`pfad`,`maintable`,`Data`,`schema`,`document_path`,`tileindex`,`tileitem`,`labelangleitem`,`labelitem`,`labelmaxscale`,`labelminscale`,`labelrequires`,`connection`,`printconnection`,`connectiontype`,`classitem`,`filteritem`,`tolerance`,`toleranceunits`,`epsg_code`,`template`,`queryable`,`transparency`,`drawingorder`,`minscale`,`maxscale`,`offsite`,`ows_srs`,`wms_name`,`wms_server_version`,`wms_format`,`wms_connectiontimeout`,`wms_auth_username`,`wms_auth_password`,`wfs_geom`,`selectiontype`,`querymap`,`logconsume`,`processing`,`kurzbeschreibung`,`datenherr`,`metalink`,`privileg`) VALUES('Anpachtflächen','','2',@group_id,'SELECT oid, id, name, art, flaeche,  bezirkid, concode, jb_zuordnung, status, the_geom FROM jagdbezirk_paechter WHERE art = \'apf\'','jagdbezirk_paechter','the_geom from (select oid, the_geom, id, art, name from jagdkataster.jagdbezirk_paechter where art = \'apf\') as foo using unique oid using srid=2398','jagdkataster','','','','','name','100001','399','',@connection,'','6','art','id','1','pixels','2398','jagdkataster/view/jagdbezirke.php','1','50',NULL,'99','500001','','EPSG:2398','','1.1.0','image/png','60','','','','','1','0','','','untere Jagdbehörde','','0');
+INSERT INTO layer (`Name`,`alias`,`Datentyp`,`Gruppe`,`pfad`,`maintable`,`Data`,`schema`,`document_path`,`tileindex`,`tileitem`,`labelangleitem`,`labelitem`,`labelmaxscale`,`labelminscale`,`labelrequires`,`connection`,`printconnection`,`connectiontype`,`classitem`,`filteritem`,`tolerance`,`toleranceunits`,`epsg_code`,`template`,`queryable`,`transparency`,`drawingorder`,`minscale`,`maxscale`,`offsite`,`ows_srs`,`wms_name`,`wms_server_version`,`wms_format`,`wms_connectiontimeout`,`wms_auth_username`,`wms_auth_password`,`wfs_geom`,`selectiontype`,`querymap`,`logconsume`,`processing`,`kurzbeschreibung`,`datenherr`,`metalink`,`privileg`) VALUES('AnpachtflÃ¤chen','','2',@group_id,'SELECT oid, id, name, art, flaeche,  bezirkid, concode, jb_zuordnung, status, the_geom FROM jagdbezirk_paechter WHERE art = \'apf\'','jagdbezirk_paechter','the_geom from (select oid, the_geom, id, art, name from jagdkataster.jagdbezirk_paechter where art = \'apf\') as foo using unique oid using srid=2398','jagdkataster','','','','','name','100001','399','',@connection,'','6','art','id','1','pixels','2398','jagdkataster/view/jagdbezirke.php','1','50',NULL,'99','500001','','EPSG:2398','','1.1.0','image/png','60','','','','','1','0','','','untere JagdbehÃ¶rde','','0');
 SET @last_layer_id774=LAST_INSERT_ID();
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`form_element_type`,`options`,`alias`,`tooltip`,`order`,`privileg`) VALUES(@last_layer_id774,'art','art','jagdbezirk_paechter','jagdbezirk_paechter','varchar','','','1','15','Text','','','','3','0');
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`form_element_type`,`options`,`alias`,`tooltip`,`order`,`privileg`) VALUES(@last_layer_id774,'bezirkid','bezirkid','jagdbezirk_paechter','jagdbezirk_paechter','int4','','','1','32','Text','','','','5','0');
@@ -312,7 +312,7 @@ INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_a
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`form_element_type`,`options`,`alias`,`tooltip`,`order`,`privileg`) VALUES(@last_layer_id774,'oid','oid','jagdbezirk_paechter','jagdbezirk_paechter','oid','','','1',NULL,'Text','','','','0','0');
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`form_element_type`,`options`,`alias`,`tooltip`,`order`,`privileg`) VALUES(@last_layer_id774,'status','status','jagdbezirk_paechter','jagdbezirk_paechter','bool','','','1',NULL,'Text','','','','8','0');
 INSERT INTO layer_attributes (`layer_id`,`name`,`real_name`,`tablename`,`table_alias_name`,`type`,`geometrytype`,`constraints`,`nullable`,`length`,`form_element_type`,`options`,`alias`,`tooltip`,`order`,`privileg`) VALUES(@last_layer_id774,'the_geom','the_geom','jagdbezirk_paechter','jagdbezirk_paechter','geometry','POLYGON','','1',NULL,'Text','','','','9','0');
-INSERT INTO classes (`Name`,`Layer_ID`,`Expression`,`drawingorder`,`text`) VALUES('Anpachtfläche',@last_layer_id774,'','1','');
+INSERT INTO classes (`Name`,`Layer_ID`,`Expression`,`drawingorder`,`text`) VALUES('AnpachtflÃ¤che',@last_layer_id774,'','1','');
 SET @last_class_id=LAST_INSERT_ID();
 INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`,`minsize`,`maxsize`,`angle`,`angleitem`,`antialias`,`width`,`minwidth`,`maxwidth`,`sizeitem`) VALUES(NULL,'cross','9','0 0 0','255 215 0','-1 -1 -1','30','30','0','',NULL,NULL,NULL,NULL,'');
  SET @last_style_id=LAST_INSERT_ID();
@@ -322,7 +322,7 @@ INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outl
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 1);
 
 
-# Kein Label für Anpachtflächen
+# Kein Label fÃ¼r AnpachtflÃ¤chen
 
 
 

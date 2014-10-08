@@ -300,7 +300,7 @@ class database {
 
 	function exec_file($filename, $search, $replace){
     if ($file = file_get_contents($filename)){
-			foreach(explode(";", $file) as $query){
+			foreach(explode(';'.chr(10), $file) as $query){
 				$query = trim($query);
 				if($search != NULL)$query = str_replace($search, $replace, $query);
 				if (!empty($query) && $query != ";") {

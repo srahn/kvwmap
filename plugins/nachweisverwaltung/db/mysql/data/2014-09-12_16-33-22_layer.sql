@@ -48,10 +48,10 @@ INSERT INTO styles (`symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outl
 INSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, 0);
 
 ##########################################################
-# Einträge für die Festpunkte des Liegenschaftskatasters #
+# EintrÃ¤ge fÃ¼r die Festpunkte des Liegenschaftskatasters #
 ##########################################################
 
-# Eintragen eines Layers für die Festpunkte des Liegenschaftskatasters
+# Eintragen eines Layers fÃ¼r die Festpunkte des Liegenschaftskatasters
 INSERT INTO layer (`Name`,`alias`,`Datentyp`,`Gruppe`,`pfad`,`maintable`,`Data`,`schema`,`document_path`,`tileindex`,`tileitem`,`labelangleitem`,`labelitem`,`labelmaxscale`,`labelminscale`,`labelrequires`,`connection`,`printconnection`,`connectiontype`,`classitem`,`filteritem`,`tolerance`,`toleranceunits`,`epsg_code`,`template`,`queryable`,`transparency`,`drawingorder`,`minscale`,`maxscale`,`offsite`,`ows_srs`,`wms_name`,`wms_server_version`,`wms_format`,`wms_connectiontimeout`,`wms_auth_username`,`wms_auth_password`,`wfs_geom`,`selectiontype`,`querymap`,`logconsume`,`processing`,`kurzbeschreibung`,`datenherr`,`metalink`,`privileg`) VALUES('Festpunkte','','0',@group_id,'SELECT *,st_x(the_geom) AS x,st_y(the_geom) AS y FROM fp_punkte WHERE art IN (0,1,5,6)','fp_punkte','the_geom from nachweisverwaltung.fp_punkte using unique pkz using srid=2398','nachweisverwaltung','','','','','pktnr','25000','0','',@connection,'','6','art','pkz','3','pixels','2398','nachweisverwaltung/view/Festpunkte.php','1',NULL,NULL,NULL,NULL,'','EPSG:2398','','1.1.0','image/png','60','','','','','0','0','','','','','0');
 SET @last_layer_id784=LAST_INSERT_ID();
 INSERT INTO classes (`Name`,`Layer_ID`,`Expression`,`drawingorder`,`text`) VALUES('TP',@last_layer_id784,'([art]=0)','1','');
@@ -89,7 +89,7 @@ INSERT INTO labels (`font`,`type`,`color`,`outlinecolor`,`shadowcolor`,`shadowsi
 INSERT INTO u_labels2classes (label_id, class_id) VALUES (@last_label_id, @last_class_id);
 
 
-########## Eintragen eines Layers für die Sicherungspunkte der AP´s (SiP)
+########## Eintragen eines Layers fÃ¼r die Sicherungspunkte der APÂ´s (SiP)
 INSERT INTO layer (`Name`,`alias`,`Datentyp`,`Gruppe`,`pfad`,`maintable`,`Data`,`schema`,`document_path`,`tileindex`,`tileitem`,`labelangleitem`,`labelitem`,`labelmaxscale`,`labelminscale`,`labelrequires`,`connection`,`printconnection`,`connectiontype`,`classitem`,`filteritem`,`tolerance`,`toleranceunits`,`epsg_code`,`template`,`queryable`,`transparency`,`drawingorder`,`minscale`,`maxscale`,`offsite`,`ows_srs`,`wms_name`,`wms_server_version`,`wms_format`,`wms_connectiontimeout`,`wms_auth_username`,`wms_auth_password`,`wfs_geom`,`selectiontype`,`querymap`,`logconsume`,`processing`,`kurzbeschreibung`,`datenherr`,`metalink`,`privileg`) VALUES('Sicherungspunkte','','0',@group_id,'','','the_geom from nachweisverwaltung.fp_punkte using unique pkz using srid=2398','nachweisverwaltung','','','','','','25000','0','',@connection,'','6','art','ID','3','pixels','2398','','0',NULL,NULL,NULL,NULL,'','EPSG:2398','','1.1.0','image/png','60','','','','','0','0','','','','','0');
 SET @last_layer_id785=LAST_INSERT_ID();
 INSERT INTO classes (`Name`,`Layer_ID`,`Expression`,`drawingorder`,`text`) VALUES('SiP',@last_layer_id785,'([art]=5)','1','');
