@@ -36,7 +36,7 @@
 					</tr>
 				<? }
 				foreach($this->administration->seed_files as $component => $component_seeds){			// die restlichen Plugins, die kein DB-Schema haben
-					if($this->administration->schema_migration_files[$component] == NULL){
+					if($this->administration->schema_migration_files[$component] == NULL AND count($this->administration->seeds_to_execute['mysql'][$component]) > 0){
 				?>
 					<tr style="border:1px solid #C3C7C3;">
 						<td><?	echo $component; ?></td>
