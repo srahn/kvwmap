@@ -1307,8 +1307,21 @@ INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES ('kvwmap', 'po
 # Bitte die folgenden Inserts nur ausführen, wenn die entsprechenden Plugins verwendet werden!
 
 INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES ('bauleitplanung', 'postgresql', '2014-09-12_16-33-22_Version2.0.sql');
+INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES ('bauleitplanung', 'mysql', '2014-09-12_16-33-22_layer.sql');
+
 INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES ('jagdkataster', 'postgresql', '2014-09-12_16-33-22_Version2.0.sql');
+INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES ('jagdkataster', 'mysql', '2014-09-12_16-33-22_layer.sql');
+
 INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES ('bodenrichtwerte', 'postgresql', '2014-09-12_16-33-22_Version2.0.sql');
+INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES ('bodenrichtwerte', 'mysql', '2014-09-12_16-33-22_layer.sql');
+
 INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES ('nachweisverwaltung', 'postgresql', '2014-09-12_16-33-22_Version2.0.sql');
+INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES ('nachweisverwaltung', 'mysql', '2014-09-12_16-33-22_layer.sql');
+
 INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES ('anliegerbeitraege', 'postgresql', '2014-09-12_16-33-22_Version2.0.sql');
+INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES ('anliegerbeitraege', 'mysql', '2014-09-12_16-33-22_layer.sql');
+
 INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES ('probaug', 'postgresql', '2014-09-12_16-33-22_Version2.0.sql');
+
+INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES ('bevoelkerung', 'mysql', '2014-09-12_16-33-22_layer.sql');
+
