@@ -53,7 +53,7 @@ class administration{
 		return $migrations;
 	}
 	
-	function get_migration_files(){
+	function get_schema_migration_files(){
 		global $kvwmap_plugins;
 		$migrations['kvwmap']['mysql'] = array_diff(scandir(LAYOUTPATH.'db/mysql/schema'), array('.', '..'));
 		$migrations['kvwmap']['postgresql'] = array_diff(scandir(LAYOUTPATH.'db/postgresql/schema'), array('.', '..'));
@@ -66,15 +66,32 @@ class administration{
 		return $migrations;
 	}
 	
+	function get_seed_files(){
+		global $kvwmap_plugins;
+		for($i = 0; $i < count($kvwmap_plugins); $i++){
+			$path = PLUGINS.$kvwmap_plugins[$i].'/db/mysql/data';
+			if(file_exists($path))$seeds[$kvwmap_plugins[$i]]['mysql'] = array_diff(scandir($path), array('.', '..'));
+		}
+		return $seeds;
+	}
+	
 	function get_database_status(){
 		$this->migrations_to_execute['mysql'] = array();
 		$this->migrations_to_execute['postgresql'] = array();
 		$this->migration_logs = $this->get_migration_logs();
-		$this->migration_files = $this->get_migration_files();
-		foreach($this->migration_files as $component => $file_component_migrations){
+		$this->schema_migration_files = $this->get_schema_migration_files();
+		$this->seed_files = $this->get_seed_files();
+		foreach($this->schema_migration_files as $component => $file_component_migrations){
 			foreach($file_component_migrations as $type => $file_component_type_migrations){
 				foreach($file_component_type_migrations as $file){
 					if($this->migration_logs[$component][$type][$file] != 1)$this->migrations_to_execute[$type][$component][] = $file;
+				}
+			}
+		}
+		foreach($this->seed_files as $component => $file_component_seeds){
+			foreach($file_component_seeds as $type => $file_component_type_seeds){
+				foreach($file_component_type_seeds as $file){
+					if($this->migration_logs[$component][$type][$file] != 1)$this->seeds_to_execute[$type][$component][] = $file;
 				}
 			}
 		}
@@ -85,7 +102,7 @@ class administration{
 			if($component == 'kvwmap')$prepath = LAYOUTPATH; else $prepath = PLUGINS.$component.'/';
 			foreach($component_migration as $file){
 				$filepath = $prepath.'db/mysql/schema/'.$file;
-				$queryret = $this->database->exec_file($filepath);
+				$queryret = $this->database->exec_file($filepath, NULL, NULL);
 				if($queryret[0]){
 					echo $queryret[1].'<br>Fehler beim Ausführen von migration-Datei: '.$filepath.'<br>';
 				}
@@ -110,6 +127,21 @@ class administration{
 						$queryret=$this->database->execSQL($sql,0, 0);
 					}
 				}
+			}
+		}
+		foreach($this->seeds_to_execute['mysql'] as $component => $component_seed){
+			$prepath = PLUGINS.$component.'/';
+			foreach($component_seed as $file){
+				$filepath = $prepath.'db/mysql/data/'.$file;
+				$connection = $this->pgdatabase->user.' '.$this->pgdatabase->passwd.' '.$this->pgdatabase->dbName;
+				$queryret = $this->database->exec_file($filepath, 'user=xxxx password=xxxx dbname=kvwmapsp', $connection);
+				if($queryret[0]){
+					echo $queryret[1].'<br>Fehler beim Ausführen von seed-Datei: '.$filepath.'<br>';
+				}
+				else{
+					$sql = "INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES ('".$component."', 'mysql', '".$file."');";
+					$queryret=$this->database->execSQL($sql,0, 0);
+				}				
 			}
 		}
 	}

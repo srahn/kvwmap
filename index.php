@@ -643,45 +643,45 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 
 	  #2006-01-03 pk
 	  case 'Grundbuchblatt_Auswaehlen_Suchen' : {
-		$GUI->checkCaseAllowed('Grundbuchblatt_Auswaehlen');
-		$GUI->grundbuchblattSuchen();
+			$GUI->checkCaseAllowed('Grundbuchblatt_Auswaehlen');
+			$GUI->grundbuchblattSuchen();
 	  } break;
 
 	  # 2006-01-26 pk
 	  case 'Flurstueck_Anzeigen' : {
-		$GUI->checkCaseAllowed($go);
-		if($GUI->last_query != ''){
-			$GUI->formvars['FlurstKennz'] = $GUI->last_query[$GUI->last_query['layer_ids'][0]]['sql'];
-		}
-		$explodedFlurstKennz = explode(';',$GUI->formvars['FlurstKennz']);
-		$GUI->flurstAnzeige($explodedFlurstKennz);
-		$GUI->output();
+			$GUI->checkCaseAllowed($go);
+			if($GUI->last_query != ''){
+				$GUI->formvars['FlurstKennz'] = $GUI->last_query[$GUI->last_query['layer_ids'][0]]['sql'];
+			}
+			$explodedFlurstKennz = explode(';',$GUI->formvars['FlurstKennz']);
+			$GUI->flurstAnzeige($explodedFlurstKennz);
+			$GUI->output();
 	  } break;
   
 	  case 'changeLegendDisplay' : {
-		$GUI->changeLegendDisplay();
+			$GUI->changeLegendDisplay();
 	  } break;
 		
 		case 'saveOverlayPosition' : {
-		$GUI->saveOverlayPosition();
+			$GUI->saveOverlayPosition();
 	  } break;
 
 	  case 'Administratorfunktionen' : {
-		$GUI->checkCaseAllowed($go);
-		$GUI->adminFunctions();
-		$GUI->output();
+			$GUI->checkCaseAllowed($go);
+			$GUI->adminFunctions();
+			$GUI->output();
 	  } break;
 	  
 	  case 'Haltestellen_Suche' : {
-		$GUI->haltestellenSuche();
-		$GUI->output();
+			$GUI->haltestellenSuche();
+			$GUI->output();
 	  } break;
 	  
 	  case 'Druckrahmen' : {
-		$GUI->checkCaseAllowed($go);
-		$GUI->druckrahmen_init();
-		$GUI->druckrahmen_load();
-		$GUI->output();
+			$GUI->checkCaseAllowed($go);
+			$GUI->druckrahmen_init();
+			$GUI->druckrahmen_load();
+			$GUI->output();
 	  } break;
 
 	  case 'Druckrahmen_Freitexthinzufuegen' : {

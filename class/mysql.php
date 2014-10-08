@@ -298,10 +298,11 @@ class database {
     return mysql_close($this->dbConn);
   }
 
-	function exec_file($filename){
+	function exec_file($filename, $search, $replace){
     if ($file = file_get_contents($filename)){
 			foreach(explode(";", $file) as $query){
 				$query = trim($query);
+				if($search != NULL)$query = str_replace($search, $replace, $query);
 				if (!empty($query) && $query != ";") {
 					$ret=$this->execSQL($query, 0, 0);
 					if($ret[0] == 1){

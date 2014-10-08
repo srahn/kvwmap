@@ -12,23 +12,42 @@
 					<td><span class="fett">Komponente</span></td>
 					<td align="right"><span class="fett">Status</span></td>
 				</tr>
-				<? foreach($this->administration->migration_files as $component => $component_migrations){
+				<? foreach($this->administration->schema_migration_files as $component => $component_migrations){
 						$mysql_counter = count($this->administration->migrations_to_execute['mysql'][$component]);
 						$postgresql_counter = count($this->administration->migrations_to_execute['postgresql'][$component]);
+						$seed_counter = count($this->administration->seeds_to_execute['mysql'][$component]);
 				?>
 					<tr style="border:1px solid #C3C7C3;">
 						<td><?	echo $component; ?></td>
-						<td align="right"><?	if($mysql_counter == 0 AND $postgresql_counter == 0)echo 'aktuell'; 
-										else {
-											$update_necessary = true;
-											if($mysql_counter > 0)echo 'MySQL ';
-											if($postgresql_counter > 0)echo 'PostgreSQL ';
-											echo ' nicht aktuell';
-										}
+						<td align="right">
+						<?	if($mysql_counter == 0 AND $postgresql_counter == 0)echo ' Schemata aktuell'; 
+								else {
+									$update_necessary = true;
+									if($mysql_counter > 0)echo 'MySQL-Schema ';
+									if($postgresql_counter > 0)echo 'PostgreSQL-Schema ';
+									echo ' nicht aktuell';
+								}
+								if($seed_counter > 0){
+									$update_necessary = true;
+									echo ',<br> neue Menüs- bzw. Layer verfügbar';
+								}
 								?>
 						</td>
 					</tr>
-				<? } ?>
+				<? }
+				foreach($this->administration->seed_files as $component => $component_seeds){			// die restlichen Plugins, die kein DB-Schema haben
+					if($this->administration->schema_migration_files[$component] == NULL){
+				?>
+					<tr style="border:1px solid #C3C7C3;">
+						<td><?	echo $component; ?></td>
+						<td align="right">
+						<?	$update_necessary = true;
+								echo 'neue Menüs- bzw. Layer verfügbar';
+								?>
+						</td>
+					</tr>
+				<? }
+				} ?>
 				<tr >
 					<td colspan="2" align="center"><input type="button" onclick="location.href='index.php?go=Administratorfunktionen&func=update_databases'" <? if(!$update_necessary)echo 'disabled'; ?> value="Aktualisieren"></td>
 				</tr>
