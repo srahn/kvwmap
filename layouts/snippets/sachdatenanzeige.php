@@ -40,7 +40,14 @@ for($i=0;$i<$anzLayer;$i++){
    }
 	}
 
-   if($this->qlayerset[$i]['connectiontype'] == MS_POSTGIS AND $this->qlayerset[$i]['count'] > 1){
+	if($this->qlayerset[$i]['connectiontype'] == MS_WMS){
+		$imgxy=explode(';',$this->formvars['INPUT_COORD']);
+		if($imgxy[0] != $imgxy[1]){
+			echo 'Sie haben ein Rechteck zur Abfrage eines WMS-Themas aufgezogen.<br>Bei WMS-Themen sind nur punktuelle Abfragen möglich,<br>daher wird der Mittelpunkt des Rechtecks verwendet.';
+		}
+	}
+	
+  if($this->qlayerset[$i]['connectiontype'] == MS_POSTGIS AND $this->qlayerset[$i]['count'] > 1){
 	   # BlÃ¤tterfunktion
 	   if($this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] == ''){
 		   $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] = 0;
