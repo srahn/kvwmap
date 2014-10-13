@@ -11,7 +11,7 @@
   $strRunningCoords="mitlaufende Koordinaten";
   $strMapSize="Kartenfenstergr&ouml;&szlig;e";
   $strTask="Stelle";
-  $strTitleRoleSelection="Auswahl der Arbeitsstelle";
+  $strTitleRoleSelection="Optionen";
   $strVietnamese="Vietnamesisch";
   $strZoomFactor="Zoomfaktor";
   $strButtonNext="Weiter";
@@ -27,6 +27,9 @@
 	$strGeomSecond="Sachdaten zuerst";
 	$strGeomFirst="Geometrie zuerst";
 	$strhist_timestamp="Zeitpunkt für historische Daten";
+	$strGeneralOptions="allgemeine Optionen";
+	$strMapOptions="Karteneinstellungen";
+	$strDataPresentation="Sachdatenanzeige";
   
   
 ?>

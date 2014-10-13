@@ -9,10 +9,10 @@ CREATE OR REPLACE VIEW bw_boris_view AS
 	SELECT 
 	bw.gutachterausschuss||'_'||LPAD(cast(bodenrichtwertnummer as char(13)), 7 , '0') as brwid,
 	k.kreisname as kreis_name,
-	k.kreis as kreis_schluessel ,
-	--e.gemeindeverband_name,
-	--e.gemeindeverband_schluessel,
-	--e.gemeinde_schluessel,
+	k.kreis as kreis_schluessel,
+	ag.amt_name as gemeindeverband_name,
+	k.kreis||ag.amt_schluessel as gemeindeverband_schluessel,
+	k.kreis||ag.amt_schluessel||bw.gemeinde as gemeinde_schluessel,
 	NULL as gemeindeteil_schluessel,
 	bw.gemeinde AS gesl,
 	g.gemeindename AS gena, 
@@ -70,6 +70,7 @@ CREATE OR REPLACE VIEW bw_boris_view AS
 	(bw.stichtag + Interval '2 Year') as guelt_bis,
 	bw.the_geom as geometrie
 	FROM alb_v_kreise k, bodenrichtwerte.bw_zonen bw
-	LEFT JOIN alb_v_gemeinden g ON bw.gemeinde = g.gemeinde;
+	LEFT JOIN alb_v_gemeinden g ON bw.gemeinde = g.gemeinde
+	LEFT JOIN aemter_gemeinden ag ON ag.gemeinde_schluessel::integer = bw.gemeinde;
 	
 COMMIT;

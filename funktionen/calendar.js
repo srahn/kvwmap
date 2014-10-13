@@ -36,6 +36,7 @@ function CalendarJS() {
         	if(document.getElementById(elementid).calendar != true){
         		document.getElementById(elementid).calendar = true;
 	        	value = document.getElementById(elementid).value;
+						value = value.substr(0, 10);		// evtl. Uhrzeit abschneiden
 	        	if(value != ''){
 	        		dateElements = value.split('.');
 	        		initDate = new Date(dateElements[2],dateElements[1]-1,dateElements[0]);

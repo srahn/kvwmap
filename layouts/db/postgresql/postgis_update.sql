@@ -1282,24 +1282,25 @@ CREATE TABLE bodenrichtwerte.bw_zonen (
  
  
  -- View zum Austausch der BRWs
+ -- Es wird eine Tabelle aemter_gemeinden o.ä. vorausgesetzt
  
 CREATE OR REPLACE VIEW bodenrichtwerte.bw_boris_view AS 
-SELECT bw.oid, bw.gemeinde::text || '0000'::text AS gesl, g.gemeindename AS gena, bw.gutachterausschuss AS gasl, gm.gemkgschl AS genu, bw.ortsteilname AS ortst, bw.bodenrichtwertnummer AS wnum, 
-       CASE
-           WHEN bw.brwu IS NOT NULL THEN bw.brwu
-           WHEN bw.brwb IS NOT NULL THEN bw.brwb
-           ELSE bw.bodenrichtwert
-       END AS brw, bw.stichtag AS stag, 1 AS brke, 1000 AS basma, '25833'::text AS bezug, bw.entwicklungszustand AS entw, bw.beitragszustand AS beit, bw.nutzungsart AS nuta, bw.ergaenzende_nutzung AS ergnuta, bw.bauweise AS bauw, bw.geschosszahl AS gez, bw.geschossflaechenzahl AS wgfz, bw.grundflaechenzahl AS grz, bw.baumassenzahl AS bmz, bw.flaeche AS flae, bw.tiefe AS gtie, bw.breite AS gbrei, bw.verfahrensgrund AS verg, 
-       CASE
-           WHEN bw.brwu IS NOT NULL AND bw.verfahrensgrund::text = 'San'::text THEN 'SU'::character varying
-           WHEN bw.brwu IS NOT NULL AND bw.verfahrensgrund::text = 'Entw'::text THEN 'EU'::character varying
-           WHEN bw.brwb IS NOT NULL AND bw.verfahrensgrund::text = 'San'::text THEN 'SB'::character varying
-           WHEN bw.brwb IS NOT NULL AND bw.verfahrensgrund::text = 'Entw'::text THEN 'EB'::character varying
-           ELSE bw.verfahrensgrund_zusatz
-       END AS verf, bw.bodenart AS bod, bw.ackerzahl AS acza, bw.gruenlandzahl AS grza, 'link_zur_umrechnungstabelle'::text AS lumnum, bw.zonentyp AS typ, bw.the_geom
-  FROM bodenrichtwerte.bw_zonen bw
-  LEFT JOIN alb_v_gemeinden g ON bw.gemeinde = g.gemeinde
-  LEFT JOIN alb_v_gemarkungen gm ON bw.gemarkung = gm.gemkgschl;
+ SELECT (bw.gutachterausschuss || '_'::text) || lpad(bw.bodenrichtwertnummer::character(13)::text, 7, '0'::text) AS brwid, k.kreisname AS kreis_name, k.kreis AS kreis_schluessel, ag.amt_name AS gemeindeverband_name, k.kreis || ag.amt_schluessel::text AS gemeindeverband_schluessel, (k.kreis || ag.amt_schluessel::text) || bw.gemeinde AS gemeinde_schluessel, NULL::unknown AS gemeindeteil_schluessel, bw.gemeinde AS gesl, g.gemeindename AS gena, bw.gutachterausschuss AS gasl, NULL::unknown AS gabe, "substring"(bw.gemarkung::text, 3, 4) AS genu, NULL::unknown AS gema, bw.ortsteilname AS ortst, lpad(bw.bodenrichtwertnummer::character(13)::text, 7, '0'::text) AS wnum, 
+        CASE
+            WHEN bw.brwu IS NOT NULL THEN bw.brwu
+            WHEN bw.brwb IS NOT NULL THEN bw.brwb
+            ELSE bw.bodenrichtwert
+        END AS brw, bw.stichtag AS stag, '1' AS brke, bw.bedarfswert AS bedw, bw.postleitzahl AS plz, bw.basiskarte AS basbe, '' AS basma, 'EPSG:25833' AS bezug, bw.entwicklungszustand AS entw, bw.beitragszustand AS beit, bw.nutzungsart AS nuta, bw.ergaenzende_nutzung AS ergnuta, bw.bauweise AS bauw, bw.geschosszahl AS gez, bw.geschossflaechenzahl AS wgfz, bw.grundflaechenzahl AS grz, bw.baumassenzahl AS bmz, bw.flaeche AS flae, bw.tiefe AS gtie, bw.breite AS gbrei, bw.erschliessungsverhaeltnisse AS erve, bw.verfahrensgrund AS verg, 
+        CASE
+            WHEN bw.brwu IS NOT NULL AND bw.verfahrensgrund::text = 'San'::text THEN 'SU'::character varying
+            WHEN bw.brwu IS NOT NULL AND bw.verfahrensgrund::text = 'Entw'::text THEN 'EU'::character varying
+            WHEN bw.brwb IS NOT NULL AND bw.verfahrensgrund::text = 'San'::text THEN 'SB'::character varying
+            WHEN bw.brwb IS NOT NULL AND bw.verfahrensgrund::text = 'Entw'::text THEN 'EB'::character varying
+            ELSE bw.verfahrensgrund_zusatz
+        END AS verf, bw.bodenart AS bod, bw.ackerzahl AS acza, bw.gruenlandzahl AS grza, bw.aufwuchs AS aufw, bw.wegeerschliessung AS weer, bw.bemerkungen AS bem, '' AS frei, bw.oertliche_bezeichnung AS brzname, '0' AS umdart, ('http://pfad/zur/umrechungstabelle/tabelle'::text || bw.stichtag) || '.pdf'::text AS lumnum, bw.zonentyp AS typ, bw.stichtag + '1 day'::interval AS guelt_von, bw.stichtag + '2 years'::interval AS guelt_bis, bw.the_geom AS geometrie
+   FROM alb_v_kreise k, bodenrichtwerte.bw_zonen bw
+   LEFT JOIN alb_v_gemeinden g ON bw.gemeinde = g.gemeinde
+   LEFT JOIN aemter_gemeinden ag ON ag.gemeinde_schluessel::integer = bw.gemeinde;
 
 	
 -- Überspielen der vorhandenen Daten

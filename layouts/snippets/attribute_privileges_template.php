@@ -142,7 +142,7 @@
 							if($this->stelle->id != '' AND $this->layer[0]['Name'] != ''){
 								echo '<a href="javascript:get_from_default(\''.$attributenames.'\', \''.$this->stelle->id.'\');">Default-Rechte übernehmen</a>';
 							}
-							else{
+							elseif(count($this->stellen['ID']) > 0){
 								echo '<a href="javascript:get_from_default(\''.$attributenames.'\', \''.implode('|', $this->stellen['ID']).'\');">Default-Rechte allen Stellen zuweisen</a>';
 							}
 							echo '</td>

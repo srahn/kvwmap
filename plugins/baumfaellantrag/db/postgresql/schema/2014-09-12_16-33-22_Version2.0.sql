@@ -1,9 +1,9 @@
 
 BEGIN;
 
-CREATE SCHEMA baumfaellung;
+CREATE SCHEMA baumfaellantrag;
 
-SET search_path = baumfaellung, public;
+SET search_path = baumfaellantrag, public;
 
 CREATE TABLE antraege
 (
@@ -55,6 +55,6 @@ CREATE TABLE antraege
 WITH (
   OIDS=TRUE
 );
-SELECT AddGeometryColumn('baumfaellung', 'antraege', 'tree_geometry', 4326,'POINT', 2);
+SELECT AddGeometryColumn('baumfaellantrag', 'antraege', 'tree_geometry', 4326,'POINT', 2);
 
 COMMIT;

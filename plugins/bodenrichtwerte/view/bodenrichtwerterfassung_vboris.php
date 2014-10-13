@@ -587,8 +587,8 @@ function update_require_attribute(attributes, layer_id, value){
 						    </td>
 						    <td colspan="3"> 
 						      <?php 
-						        $FormatWerte = array('', 'Gewerbeflächen', 'Sanierungsflächen', 'Ackerlandflächen', 'Grünlandflächen', 'Forstflächen', 'Gartenflächen', 'gemischte Bauflächen', 'Wohnflächen', 'Sonderbauflächen');
-						        $FormatBez = array('-- Bitte wählen --', 'Gewerbeflächen', 'Sanierungsflächen', 'Ackerlandflächen', 'Grünlandflächen', 'Forstflächen', 'Gartenflächen', 'gemischte Bauflächen', 'Wohnflächen', 'Sonderbauflächen');
+						        $FormatWerte = array('', 'Gewerbeflächen', 'Sanierungsflächen', 'Ackerlandflächen', 'Grünlandflächen', 'Forstflächen', 'Gartenflächen', 'gemischte Bauflächen', 'Wohnbauflächen', 'Sonderbauflächen');
+						        $FormatBez = array('-- Bitte wählen --', 'Gewerbeflächen', 'Sanierungsflächen', 'Ackerlandflächen', 'Grünlandflächen', 'Forstflächen', 'Gartenflächen', 'gemischte Bauflächen', 'Wohnbauflächen', 'Sonderbauflächen');
 						        $zonentyp = new FormObject('zonentyp','select',$FormatWerte,array($this->formvars['zonentyp']),$FormatBez,1,$maxlenght,$multiple,158);
 						        $zonentyp->OutputHTML();
 						        echo $zonentyp->html;
