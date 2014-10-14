@@ -314,6 +314,10 @@ function isPasswordValide($oldPassword,$newPassword,$newPassword2) {
 	  if($strlen <= 5) {
 	    $password_errors[] = "ist zu kurz";
 	  }
+		
+		if($strlen > PASSWORD_MAXLENGTH) {
+	    $password_errors[] = "ist zu lang";
+	  }
   
 	  # Prüft die Anzahl unterschiedlicher Zeichen
 	  $count_chars = count_chars($newPassword, 3);

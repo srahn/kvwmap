@@ -124,6 +124,9 @@ define('LAGEBEZEICHNUNGSART', '');						# in Version 1.7.6 wieder eingeführt f�
 # Testet ob die IP des anfragenden Clientrechners dem Nutzer zugeordnet ist
 define('CHECK_CLIENT_IP',true);                               # Version 1.6.9 Setzt zusätzliche Spalte in Tabelle stelle voraus.
 
+# maximale Länge der Passwörter
+define('PASSWORD_MAXLENGTH', 16);		# Version 2.1
+
 ########################## Pfadeinstellungen
 # Installationspfad
 define('INSTALLPATH','/home/gisadmin/');
