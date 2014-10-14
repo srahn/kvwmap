@@ -166,6 +166,7 @@ if($this->formvars['gps_follow'] == ''){
             <input type="hidden" name="legendtouched" value="0">
             <input type="hidden" name="stopnavigation" value="0">
 						<input type="hidden" name="svghelp" id="svghelp">
+						<input type="hidden" name="activated_vertex" value="0">
     <?php
         include(LAYOUTPATH.'snippets/SVG_map.php');
     ?>
@@ -234,7 +235,7 @@ if($this->formvars['gps_follow'] == ''){
 			        				<td style="width:100px">
 			          					<span class="fett">&nbsp;&nbsp;<?php echo $this->strCoordinates; ?></span>&nbsp;
 			          				</td>
-			        				<td colspan="2"><input type="text" style="width: 150px" class="transparent_input" name="runningcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?></td>
+			        				<td colspan="2"><input type="text" style="width: 190px" class="transparent_input" name="runningcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?></td>
 			        			</tr>
 			        			<tr id="showcoords" style="background-color: <? echo BG_MENUETOP; ?>;display:none">
 			        				<td style="width:150px">
@@ -262,7 +263,7 @@ if($this->formvars['gps_follow'] == ''){
 						          		&nbsp;&nbsp;<a href="index.php?go=Kartenkommentar_Formular&consumetime=<?php echo $this->user->rolle->newtime; ?>&hauptkarte=<?php echo $this->img['hauptkarte']; ?>"><?php echo $strSave; ?></a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="index.php?go=Kartenkommentar_Waehlen&prevtime=<?php echo $this->user->rolle->newtime; ?>"><?php echo $strChoose ?></a>&nbsp;&nbsp;|&nbsp;&nbsp;<? if(SHOW_MAP_IMAGE == 'true'){ ?><a id="MapImageLink" target="_blank" href="" onmouseover="javascript:showMapImage();"><?php echo $strMapImageURL; ?></a></span><? } ?>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="javascript:resizemap2window();" ><? echo $strMapSize; ?></a>
 						            </div>
 						          </td>
-						          <td id="options"></td><!-- hier werden die Spezialoptionen eingefügt -->
+						          <td id="options"><input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang</td><!-- hier werden die Spezialoptionen eingefügt -->
 						        </tr>
 						    	</table>
 			          </td>

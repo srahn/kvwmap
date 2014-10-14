@@ -610,8 +610,8 @@ function noMeasuring(){
 }
 
 function measure(){
-	options1 = top.document.getElementById("options");
-	options1.innerHTML=\'<input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang\';
+	//options1 = top.document.getElementById("options");
+	//options1.innerHTML=\'<input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang\';		// ist jetzt immer da
   doing = "measure";
 	if(top.document.GUI.str_pathx.value != ""){
 		measuring = true;	
@@ -1113,15 +1113,18 @@ function remove_vertices(){
 }
 
 function activate_vertex(evt){
-	if(doing == "measure"){
-		evt.target.setAttribute("opacity", "1");
-	}
+	evt.target.setAttribute("opacity", "1");
+	coordx = evt.target.getAttribute("x");
+	coordy = evt.target.getAttribute("y");
+	coordx = Math.round(coordx * 1000) / 1000;
+	coordy = Math.round(coordy * 1000) / 1000;
+	if(top.document.GUI.runningcoords != undefined)top.document.GUI.runningcoords.value = coordx + " / " + coordy; 
+	top.document.GUI.activated_vertex.value = evt.target.getAttribute("id");
 }
 
 function deactivate_vertex(evt){
-	if(doing == "measure"){
-		evt.target.setAttribute("opacity", "0.1");
-	}
+	evt.target.setAttribute("opacity", "0.1");
+	top.document.GUI.activated_vertex.value = 0;
 }
 
 function add_vertex(evt){
