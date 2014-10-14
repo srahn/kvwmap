@@ -133,7 +133,7 @@ if (isset($GUI->formvars['newPassword'])) {
 	}
   else {
   	$GUI->Fehlermeldung=urlencode($GUI->Fehlermeldung.'!<br>Vorschlag für ein neues Password: <b>'.createRandomPassword(8).'</b><br>');
-	  $GUI->formvars['go']='logout';
+	  $go='logout';
   }
 }
  
@@ -168,7 +168,7 @@ if ($neueStelle>0 AND $GUI->formvars['go']!='Abbrechen') {
         $GUI->formvars['go_plus'] = 'Exception';
       }
       else{
-        $GUI->formvars['go']='Stelle Wählen';
+        $go='Stelle Wählen';
       }
     }
   }
@@ -180,7 +180,7 @@ if ($neueStelle>0 AND $GUI->formvars['go']!='Abbrechen') {
       $GUI->formvars['go_plus'] = 'Exception';
     }
     else{
-      $GUI->formvars['go']='Stelle Wählen';
+      $go='Stelle Wählen';
     }
   }
 }
@@ -213,7 +213,7 @@ if (CHECK_CLIENT_IP) {
 	      $GUI->formvars['go_plus'] = 'Exception';
 	    }
 	    else{
-	      $GUI->formvars['go']='Stelle Wählen';
+	      $go='Stelle Wählen';
 	    }
 		}
 	} # end of IP-Adressen werden in der Stelle geprüft
@@ -234,7 +234,7 @@ if ($GUI->Stelle->checkPasswordAge==true){
     else{
     	# Setzen eines zufälligen Passwortes
     	$newPassword='xxx';
-    	$GUI->formvars['go']='logout';
+    	$go='logout';
     }
   }
 }
