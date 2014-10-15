@@ -543,7 +543,7 @@ class GUI {
           if($this->map_factor == ''){
             $this->map_factor=1;
           }
-          if ($layerset[$i]['maxscale'] > 0) {
+          if($layerset[$i]['maxscale'] > 0) {
             if(MAPSERVERVERSION > 500){
               $layer->set('maxscaledenom', $layerset[$i]['maxscale']/$this->map_factor*1.414);
             }
@@ -551,7 +551,7 @@ class GUI {
               $layer->set('maxscale', $layerset[$i]['maxscale']/$this->map_factor*1.414);
             }
           }
-          if ($layerset[$i]['minscale'] > 0) {
+          if($layerset[$i]['minscale'] > 0) {
             if(MAPSERVERVERSION > 500){
               $layer->set('minscaledenom', $layerset[$i]['minscale']/$this->map_factor*1.414);
             }
@@ -848,39 +848,39 @@ class GUI {
 							}
 						}
 						
-						if ($layerset[$i]['minscale']>=0) {
-						if($this->map_factor != ''){
-							if(MAPSERVERVERSION > 500){
-							$layer->set('minscaledenom', $layerset[$i]['minscale']/$this->map_factor*1.414);
-							}
-							else{
-							$layer->set('minscale', $layerset[$i]['minscale']/$this->map_factor*1.414);
-							}
-						}
-						else{
-							if(MAPSERVERVERSION > 500){
-							$layer->set('minscaledenom', $layerset[$i]['minscale']);
-							}
-							else{
-							$layer->set('minscale', $layerset[$i]['minscale']);
-							}
-						}
-						}
-						if ($layerset[$i]['maxscale']>0) {
+						if(!$this->noMinMaxScaling AND $layerset[$i]['minscale']>=0) {
 							if($this->map_factor != ''){
 								if(MAPSERVERVERSION > 500){
-								$layer->set('maxscaledenom', $layerset[$i]['maxscale']/$this->map_factor*1.414);
+									$layer->set('minscaledenom', $layerset[$i]['minscale']/$this->map_factor*1.414);
 								}
 								else{
-								$layer->set('maxscale', $layerset[$i]['maxscale']/$this->map_factor*1.414);
+									$layer->set('minscale', $layerset[$i]['minscale']/$this->map_factor*1.414);
 								}
 							}
 							else{
 								if(MAPSERVERVERSION > 500){
-								$layer->set('maxscaledenom', $layerset[$i]['maxscale']);
+									$layer->set('minscaledenom', $layerset[$i]['minscale']);
 								}
 								else{
-								$layer->set('maxscale', $layerset[$i]['maxscale']);
+									$layer->set('minscale', $layerset[$i]['minscale']);
+								}
+							}
+						}
+						if(!$this->noMinMaxScaling AND $layerset[$i]['maxscale']>0) {
+							if($this->map_factor != ''){
+								if(MAPSERVERVERSION > 500){
+									$layer->set('maxscaledenom', $layerset[$i]['maxscale']/$this->map_factor*1.414);
+								}
+								else{
+									$layer->set('maxscale', $layerset[$i]['maxscale']/$this->map_factor*1.414);
+								}
+							}
+							else{
+								if(MAPSERVERVERSION > 500){
+									$layer->set('maxscaledenom', $layerset[$i]['maxscale']);
+								}
+								else{
+									$layer->set('maxscale', $layerset[$i]['maxscale']);
 								}
 							}
 						}
@@ -4285,6 +4285,7 @@ class GUI {
     $this->titel='Druckausschnitt wählen';
     $this->main="druckausschnittswahl.php";
     # aktuellen Kartenausschnitt laden + zeichnen!
+		$this->noMinMaxScaling = true;
   	if($this->formvars['neuladen']){
       $this->neuLaden();
     }
