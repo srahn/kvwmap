@@ -396,6 +396,7 @@
 						$layer->setMetaData('wms_format',$layerset[$i]['wms_format']);
 						$layer->setMetaData('ows_server_version',$layerset[$i]['wms_server_version']);
 						$layer->setMetaData('ows_version',$layerset[$i]['wms_server_version']);
+						if($layerset[$i]['ows_srs'] == '')$layerset[$i]['ows_srs'] = 'EPSG:'.$layerset[$i]['epsg_code'];
 						$layer->setMetaData('ows_srs',$layerset[$i]['ows_srs']);
 						$layer->setMetaData('wms_connectiontimeout',$layerset[$i]['wms_connectiontimeout']);
 						$layer->setMetaData('wms_auth_username', $layerset[$i]['wms_auth_username']);
@@ -1481,9 +1482,9 @@
     $this->blocktransaction=0;
   }
   function open() {
-    #$this->debug->write("<br>MySQL Verbindung öffnen mit Host: ".$this->host." User: ".$this->user,4);
+    $this->debug->write("<br>MySQL Verbindung öffnen mit Host: ".$this->host." User: ".$this->user,4);
     $this->dbConn=mysql_connect($this->host,$this->user,$this->passwd);
-    #$this->debug->write("Datenbank mit ID: ".$this->dbConn." und Name: ".$this->dbName." auswählen.",4);
+    $this->debug->write("Datenbank mit ID: ".$this->dbConn." und Name: ".$this->dbName." auswählen.",4);
     return mysql_select_db($this->dbName,$this->dbConn);
   }
   function execSQL($sql,$debuglevel, $loglevel) {
@@ -1507,7 +1508,7 @@
       if ($query==0) {
         $ret[0]=1;
         $ret[1]="<b>Fehler bei SQL Anweisung:</b><br>".$sql."<br>".mysql_error($this->dbConn);
-        if($debuglevel > 0)$this->debug->write($ret[1],$debuglevel);
+        $this->debug->write($ret[1],$debuglevel);
         if ($logsql) {
           $this->logfile->write("#".$ret[1]);
         }
@@ -1518,7 +1519,7 @@
         if ($logsql) {
           $this->logfile->write($sql.';');
         }
-        if($debuglevel > 0)$this->debug->write(date('H:i:s')."<br>".$sql,$debuglevel);
+        $this->debug->write(date('H:i:s')."<br>".$sql,$debuglevel);
       }
       $ret[2]=$sql;
     }
@@ -1526,7 +1527,7 @@
     	if ($logsql) {
     		$this->logfile->write($sql.';');
     	}
-    	if($debuglevel > 0)$this->debug->write("<br>".$sql,$debuglevel);
+    	$this->debug->write("<br>".$sql,$debuglevel);
     }
     return $ret;
   }
@@ -1946,7 +1947,7 @@
 		$connect_string = 'dbname='.$this->dbName.' port='.$this->port.' user='.$this->user.' password='.$this->passwd;
 		if($this->host != 'localhost' AND $this->host != '127.0.0.1')$connect_string .= 'host='.$this->host;		// das beschleunigt den Connect extrem
     $this->dbConn=pg_connect($connect_string);
-    #$this->debug->write("Datenbank mit Connection_ID: ".$this->dbConn." geöffnet.",4);
+    $this->debug->write("Datenbank mit Connection_ID: ".$this->dbConn." geöffnet.",4);
     # $this->version = pg_version($this->dbConn); geht erst mit PHP 5
     $this->version = POSTGRESVERSION;
     return $this->dbConn;

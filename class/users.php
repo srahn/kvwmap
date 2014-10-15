@@ -1828,10 +1828,12 @@ class rolle {
 				if($formvars['thema_rolle'.$rollenlayerset[$i]['id']] == 0){
 					$mapdb->deleteRollenLayer($rollenlayerset[$i]['id']);
 					# auch die Klassen und styles löschen
-					foreach($rollenlayerset[$i]['Class'] as $class){
-						$mapdb->delete_Class($class['Class_ID']);
-						foreach($class['Style'] as $style){
-							$mapdb->delete_Style($style['Style_ID']);
+					if($rollenlayerset[$i]['Class'] != ''){
+						foreach($rollenlayerset[$i]['Class'] as $class){
+							$mapdb->delete_Class($class['Class_ID']);
+							foreach($class['Style'] as $style){
+								$mapdb->delete_Style($style['Style_ID']);
+							}
 						}
 					}
 				}
@@ -1886,10 +1888,14 @@ class rolle {
 			if($formvars['thema'.$rollenlayerset[$i]['Layer_ID']] == 0){
 				$mapdb->deleteRollenLayer($rollenlayerset[$i]['id']);
 				# auch die Klassen und styles löschen
-				foreach($rollenlayerset[$i]['Class'] as $class){
-					$mapdb->delete_Class($class['Class_ID']);
-					foreach($class['Style'] as $style){
-						$mapdb->delete_Style($style['Style_ID']);
+				if($rollenlayerset[$i]['Class'] != ''){
+					foreach($rollenlayerset[$i]['Class'] as $class){
+						$mapdb->delete_Class($class['Class_ID']);
+						if($class['Style'] != ''){
+							foreach($class['Style'] as $style){
+								$mapdb->delete_Style($style['Style_ID']);
+							}
+						}
 					}
 				}
 			}

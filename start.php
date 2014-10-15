@@ -333,12 +333,16 @@ if($_SESSION['login_routines'] == true){
     for($i = 0; $i < count($rollenlayerset); $i++){   
       $mapdb->deleteRollenLayer($rollenlayerset[$i]['id']);
       # auch die Klassen und styles löschen
-      foreach($rollenlayerset[$i]['Class'] as $class){
-        $mapdb->delete_Class($class['Class_ID']);
-        foreach($class['Style'] as $style){
-          $mapdb->delete_Style($style['Style_ID']);
-        }
-      }
+			if($rollenlayerset[$i]['Class'] != ''){
+				foreach($rollenlayerset[$i]['Class'] as $class){
+					$mapdb->delete_Class($class['Class_ID']);
+					if($class['Style'] != ''){
+						foreach($class['Style'] as $style){
+							$mapdb->delete_Style($style['Style_ID']);
+						}
+					}
+				}
+			}
     }
 	}
 	$_SESSION['login_routines'] = false;

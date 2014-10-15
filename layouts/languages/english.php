@@ -18,7 +18,8 @@
  $this->strCancel="Cancel";
  $this->strSend="Send";
  $this->strSearch="Search";
- $this->strEnter="Enter"; 
+ $this->strEnter="Apply"; 
+ $this->strConnect="Connect";
  $this->strReset="Reset";
  $this->strSaveMapViewCommittMassage="Mapview is saved";
  $this->strMapScale="Scale";

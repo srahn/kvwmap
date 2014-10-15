@@ -781,6 +781,7 @@ class GUI {
 						$layer->setMetaData('wms_format',$layerset[$i]['wms_format']);
 						$layer->setMetaData('ows_server_version',$layerset[$i]['wms_server_version']);
 						$layer->setMetaData('ows_version',$layerset[$i]['wms_server_version']);
+						if($layerset[$i]['ows_srs'] == '')$layerset[$i]['ows_srs'] = 'EPSG:'.$layerset[$i]['epsg_code'];
 						$layer->setMetaData('ows_srs',$layerset[$i]['ows_srs']);
 						$layer->setMetaData('wms_connectiontimeout',$layerset[$i]['wms_connectiontimeout']);
 						$layer->setMetaData('wms_auth_username', $layerset[$i]['wms_auth_username']);
@@ -5980,6 +5981,49 @@ class GUI {
     $this->main="ows_export.php";
     $this->output();
   }
+	
+	function wmsImportFormular(){
+		$this->titel='WMS Import';
+    $this->main="wms_import.php";
+		if($this->formvars['wms_url']){
+			include(CLASSPATH.'wms.php');
+			$wms = new wms_request_obj();
+			$this->layers = $wms->parseCapabilities($this->formvars['wms_url']);
+		}
+    $this->output();
+	}
+	
+	function wmsImportieren(){
+		if(count($this->formvars['layers']) > 0){
+			$dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
+			$group = $dbmap->getGroupbyName('WMS-Importe');
+			if($group != '')$groupid = $group['id'];
+			else $groupid = $dbmap->newGroup('WMS-Importe', 0);
+			$this->formvars['user_id'] = $this->user->id;
+			$this->formvars['stelle_id'] = $this->Stelle->id;
+			$this->formvars['aktivStatus'] = 1;
+			$this->formvars['Name'] = implode(',', $this->formvars['layers']);
+			$this->formvars['Gruppe'] = $groupid;
+			$this->formvars['Typ'] = 'search';
+			$this->formvars['Datentyp'] = MS_LAYER_RASTER;
+			$this->formvars['connectiontype'] = MS_WMS;
+			$this->formvars['transparency'] = 100;
+			$this->formvars['epsg_code'] = str_replace('EPSG:', '', $this->formvars['srs'][0]);
+			if(strpos($this->formvars['wms_url'], '?') !== false)$this->formvars['wms_url'] .= '&';
+			else $this->formvars['wms_url'] .= '?';
+			$this->formvars['connection'] = $this->formvars['wms_url'].'VERSION=1.1.0&FORMAT=image/png&LAYERS='.implode(',', $this->formvars['layers']);
+			$layer_id = $dbmap->newRollenLayer($this->formvars);			
+			$classdata['layer_id'] = -$layer_id;
+			$classdata['name'] = '_';
+	    $class_id = $dbmap->new_Class($classdata);
+			$this->user->rolle->set_one_Group($this->user->id, $this->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
+		}
+		$this->loadMap('DataBase');
+		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
+		$this->drawMap();
+		$this->saveMap('');
+		$this->output();
+	}
 
   function setSize() {
     $this->user->setSize($this->formars['mapsize']);
@@ -12047,7 +12091,7 @@ class GUI {
       $groupid = $group['id'];
     }
     else{
-      $groupid = $dbmap->newGroup('Suchergebnis');
+      $groupid = $dbmap->newGroup('Suchergebnis', 0);
     }
 
     $this->formvars['user_id'] = $this->user->id;

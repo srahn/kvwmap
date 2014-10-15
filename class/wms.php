@@ -5,11 +5,13 @@ class wms_request_obj {
   var $request;
 
   
-  function wms_request_obj($request) {
-    $this->request = $request;
-    $link=explode('?',$this->request);
-    $this->online_resource=$link[0];
-    $this->param = $this->getKeyValuePairs(explode('&',$link[1]));
+  function wms_request_obj($request = NULL) {
+		if($request != NULL){
+			$this->request = $request;
+			$link=explode('?',$this->request);
+			$this->online_resource=$link[0];
+			$this->param = $this->getKeyValuePairs(explode('&',$link[1]));
+		}
   }
 
   function getKvpsToLower($kvps) {
@@ -26,12 +28,79 @@ class wms_request_obj {
     }
     return $param;
   }
+	
+	function parseCapabilities($onlineResource){
+		if(strpos($onlineResource, '?') !== false)$onlineResource .= '&';
+		else $onlineResource .= '?';
+		$doc = file_get_contents($onlineResource.'SERVICE=WMS&VERSION=1.1.0&REQUEST=GetCapabilities');
+		$parser = xml_parser_create();
+		xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE,1);
+		xml_parse_into_struct($parser, $doc, $values, $index);
+		xml_parser_free($parser);
+		$indexlistLayers = $index['LAYER'];
+		#print_r($indexlistLayers);
+		$layers = $this->searchLayers($values,$indexlistLayers[0],false);
+		return $layers[0];
+	}
+	/*
+	* @param {array[array[string]]} $values liste aller werte eines xml dokuments
+	* @param {integer} $i indexz√§hler
+	* @param {boolean} $parentLvl endbedingung
+	* die Fnktion 'searchLayer()' durchsucht ein getcapabilties xml-dokument nach
+	* verf√ºgbaren layers und ihren styles
+	*/
+	function searchLayers($values, $i, $parentLvl){
+		$currentTag = $values[$i];
+		$layerEnd = false;
+		$styleOpen = false;
+		#print_r($values);
+		while(!$layerEnd){
+			$i++;    
+			if($values[$i]['level'] == $currentTag['level']+1 && $values[$i]['tag'] == 'LAYER' && $values[$i]['type'] == 'open' ){
+				#echo "unterlayer gefunden<br/>";
+				$return = $this->searchLayers($values, $i, true);
+				$layer['layers'] = $return[0];
+				$i = $return[1];
+			}
+			if($values[$i]['tag'] == 'NAME' && $values[$i]['level'] == $currentTag['level']+1){
+				$layer['name'] = $values[$i]['value'];
+			}
+			if($values[$i]['tag'] == 'TITLE' && $values[$i]['level'] == $currentTag['level']+1){
+				$layer['title'] = $values[$i]['value'];
+			}
+			if($values[$i]['tag'] == 'SRS' && $values[$i]['level'] == $currentTag['level']+1){
+				$layer['srs'] = $values[$i]['value'];
+			}
+			if($values[$i]['tag'] == 'STYLE' && $values[$i]['type'] == 'open'){
+				$styleOpen = true;
+			}
+			if($styleOpen && $values[$i]['tag'] == 'NAME'){
+				$layer['styles'][] = $values[$i]['value'];
+				$styleOpen = false;
+			}
+			
+			if($values[$i]['level'] == $currentTag['level'] && $values[$i]['tag'] == 'LAYER' && $values[$i]['type'] == 'close'){
+				$layers[] = $layer;
+				unset($layer);
+			
+			}  
+
+			if((!$parentLvl && $values[$i]['tag'] == 'LAYER' && $values[$i]['type'] == 'close') OR ($values[$i]['level'] == $currentTag['level']-1)){
+				$layerEnd =true;
+			}
+			if($i>26000){
+				#echo "saveend gefunden<br/>";
+				$layerEnd = true;
+			}
+		}
+		return array($layers, $i);
+	}
 
   function getMap() {
     $num_rows=intval(sqrt($this->num_tiles));
     # Teilen der BBOX
     $this->bbox=explode(',',$this->param['BBOX']);
-    # Grˆﬂe der tiles bestimmen
+    # Gr√∂√üe der tiles bestimmen
     $width = $this->param['WIDTH']/$num_rows;
     $height = $this->param['HEIGHT']/$num_rows;
     $width_ext = $width*$this->tile_extend/100;
@@ -49,7 +118,7 @@ class wms_request_obj {
         $tile_ext=$this->getTile($tile_request);
         # Ausklippen der Tiles
         $tile=$this->clipTile($tile_ext);
-        # Hinzuf¸gen zum Gesamtbild
+        # Hinzuf√ºgen zum Gesamtbild
         $img=$this->addTile($tile);
       }
     }
@@ -64,7 +133,7 @@ class wms_request_obj {
     $maxy=$this->bbox[1]+$height_box*($j+1)+$height_box_ext;
     # Setzen der BBOX
     $this->param['BBOX']=$minx.','.$miny.','.$maxx.','.$maxy;
-    # Setzen der Breite und Hˆhe in Pixeln
+    # Setzen der Breite und H√∂he in Pixeln
     $this->param['WIDTH']=strval($width+$width_ext);
     $this->param['HEIGHT']=strval($height+$height_ext);
     # Berechnen der Position der Tiles im Grid des Tiles

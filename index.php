@@ -888,55 +888,55 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  } break;
 
 		case 'TIF_Export' : {
-		$GUI->TIFExport();
+			$GUI->TIFExport();
 	  } break;
 	  
 	  case 'TIF_Export_TIF-Datei erzeugen' : {
-		$GUI->TIFExport_erzeugen();
+			$GUI->TIFExport_erzeugen();
 	  } break;
 
 	  case 'WMS_Export_Senden' : {
-		$GUI->checkCaseAllowed('WMS_Export');
-		$GUI->wmsExportSenden();
+			$GUI->checkCaseAllowed('WMS_Export');
+			$GUI->wmsExportSenden();
 	  } break;
 
 	  case 'WMS_Export' : {
-		$GUI->checkCaseAllowed('WMS_Export');
-		$GUI->wmsExport();
+			$GUI->checkCaseAllowed('WMS_Export');
+			$GUI->wmsExport();
 	  } break;
 
-	  case 'WMS_Import_Eintragen' : {
-		$GUI->checkCaseAllowed('WMS_Import');
-		$GUI->wmsImportieren();
+	  case 'WMS_Import_eintragen' : {
+			$GUI->checkCaseAllowed('WMS_Import');
+			$GUI->wmsImportieren();
 	  } break;
 
 	  case 'WMS_Import' : {
-		$GUI->checkCaseAllowed('WMS_Import');
-		$GUI->wmsImportFormular();
+			$GUI->checkCaseAllowed('WMS_Import');
+			$GUI->wmsImportFormular();
 	  } break;
 	  
 	  case 'UKO_Export' : {
-		$GUI->uko_export();
+			$GUI->uko_export();
 	  } break;
 	  
 	  case 'UKO_Import' : {
-		$GUI->checkCaseAllowed('UKO_Import');
-		$GUI->uko_import();
+			$GUI->checkCaseAllowed('UKO_Import');
+			$GUI->uko_import();
 	  } break;
 	  
 	  case 'UKO_Import_Importieren' : {
-		$GUI->checkCaseAllowed('UKO_Import');
-		$GUI->uko_import_importieren();
+			$GUI->checkCaseAllowed('UKO_Import');
+			$GUI->uko_import_importieren();
 	  } break;
 		
 	  case 'GPX_Import' : {
-		$GUI->checkCaseAllowed('GPX_Import');
-		$GUI->gpx_import();
+			$GUI->checkCaseAllowed('GPX_Import');
+			$GUI->gpx_import();
 	  } break;
 	  
 	  case 'GPX_Import_importieren' : {
-		$GUI->checkCaseAllowed('GPX_Import');
-		$GUI->gpx_import_importieren();
+			$GUI->checkCaseAllowed('GPX_Import');
+			$GUI->gpx_import_importieren();
 	  } break;
 
 		case 'SHP_Anzeigen' : {

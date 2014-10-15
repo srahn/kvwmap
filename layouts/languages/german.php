@@ -19,6 +19,7 @@
  $this->strSend="Senden";
  $this->strSearch="Suchen";
  $this->strEnter="Übernehmen";
+ $this->strConnect="Verbinden";
  $this->strReset="Zurücksetzen";
  $this->strSaveMapViewCommittMassage="Kartenausschnitt wurde gespeichert";
  $this->strCoordinates = "Koordinaten";
