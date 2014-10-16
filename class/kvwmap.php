@@ -4726,6 +4726,7 @@ class GUI {
     $legendimagename = IMAGEPATH.rand(0, 1000000).'.jpg';
     imagejpeg($legendimage, $legendimagename, 100);
     $legend['width'] = imagesx($legendimage);
+		$legend['height'] = imagesy($legendimage);
     $legend['name'] = $legendimagename;
     return $legend;
   }
@@ -5916,7 +5917,11 @@ class GUI {
 		# Legende
     if($this->Docu->activeframe[0]['legendsize'] > 0){
       $legend = $this->createlegend($this->Docu->activeframe[0]['legendsize']);
-			if($this->formvars['legend_extra'])$pdf->newPage();
+			if($this->formvars['legend_extra']){
+				$pdf->newPage();
+				$this->Docu->activeframe[0]['legendposx'] = 50;
+				$this->Docu->activeframe[0]['legendposy'] = $this->Docu->height - $legend['height']/$this->map_factor - 50;
+			}
       $pdf->addJpegFromFile(IMAGEPATH.basename($legend['name']),$this->Docu->activeframe[0]['legendposx'],$this->Docu->activeframe[0]['legendposy'],$legend['width']/$this->map_factor);
     }
     
@@ -6378,8 +6383,10 @@ class GUI {
 					for($i = 0; $i < count($layerset[0]['attributes']['name']); $i++){
 						if($this->formvars[$prefix.'value_'.$layerset[0]['attributes']['name'][$i]] != ''){
 							if($this->formvars[$prefix.'operator_'.$layerset[0]['attributes']['name'][$i]] == 'LIKE' OR $this->formvars[$prefix.'operator_'.$layerset[0]['attributes']['name'][$i]] == 'NOT LIKE'){
+								$value = $this->formvars[$prefix.'value_'.$layerset[0]['attributes']['name'][$i]];
+								if(strpos($value, '%') === false)$value = '%'.$value.'%';
 								$sql_where .= ' AND LOWER(CAST(query.'.$layerset[0]['attributes']['name'][$i].' AS TEXT)) '.$this->formvars[$prefix.'operator_'.$layerset[0]['attributes']['name'][$i]].' ';
-								$sql_where.='LOWER(\''.$this->formvars[$prefix.'value_'.$layerset[0]['attributes']['name'][$i]].'\')';
+								$sql_where.='LOWER(\''.$value.'\')';
 							}
 							else{
 								if($this->formvars[$prefix.'operator_'.$layerset[0]['attributes']['name'][$i]] == 'IN'){
