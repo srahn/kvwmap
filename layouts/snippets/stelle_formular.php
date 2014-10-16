@@ -50,13 +50,17 @@ function getInsertIndex(insertObj, id, order, start){
 	// 																			 2. dem eigentlichen index i im Selectfeld)	
 	// start ist der index i, bei dem die Suche startet
 	ordersplit = order.split('_');
+	order_to_be_inserted = parseInt(ordersplit[0]);
+	menueebene_to_be_inserted = parseInt(ordersplit[2]);
 	for(i=start; i<insertObj.length; i++) {
 		if(insertObj.options[i].value == id){
 			return -i;			// Menü ist bereits vorhanden -> index negieren
 		}
 		options_order_string = insertObj.options[i].id + "";
 		options_order_split = options_order_string.split('_');
-		if(parseInt(options_order_split[0]) > parseInt(ordersplit[0])){
+		order_in_list = parseInt(options_order_split[0]);
+		menueebene_in_list = parseInt(options_order_split[2]);
+		if(menueebene_in_list == menueebene_to_be_inserted && order_in_list > order_to_be_inserted){
 			return i;
 		}
 	}
