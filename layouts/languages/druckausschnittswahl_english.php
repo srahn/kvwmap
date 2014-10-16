@@ -7,6 +7,7 @@ $strPrintFrame="Print layout: ";
 $strRotationAngle="Rotation Angle";
 $strPrintDetail="Printing details";
 $strLoad="Load";
-$strReferenceMap="Übersichtskarte";
+$strReferenceMap="Referencemap";
+$strLegendExtra="Legend on separate page";
 
 ?>  

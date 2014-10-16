@@ -4664,11 +4664,12 @@ class GUI {
 	          $classimage = imagecreatefromjpeg(IMAGEPATH.$newname);
           }
 	        else{
+						$layer->connection = str_replace('jpeg', 'png', $layer->connection);
           	$layersection = substr($layer->connection, strpos(strtolower($layer->connection), 'layers')+7);
             $layersection = substr($layersection, 0, strpos($layersection, '&'));
             $layers = explode(',', $layersection);
             for($l = 0; $l < count($layers); $l++){
-              $classimage = ImageCreateFromPNG($layer->connection.'&layer='.$layers[$l].'&request=getlegendgraphic');
+              $classimage = ImageCreateFromPNG($layer->connection.'&service=wms&layer='.$layers[$l].'&request=getlegendgraphic');
             }
           }
           $classheight = imagesy($classimage);
@@ -5859,14 +5860,7 @@ class GUI {
 				}
       }
     }
-    
-
-    # Legende
-    if($this->Docu->activeframe[0]['legendsize'] > 0){
-      $legend = $this->createlegend($this->Docu->activeframe[0]['legendsize']);
-      $pdf->addJpegFromFile(IMAGEPATH.basename($legend['name']),$this->Docu->activeframe[0]['legendposx'],$this->Docu->activeframe[0]['legendposy'],$legend['width']/$this->map_factor);
-    }
-    
+        
     # Nutzer
     if($this->Docu->activeframe[0]['usersize'] > 0){
       $pdf->selectFont($this->Docu->activeframe[0]['font_user']);
@@ -5918,6 +5912,13 @@ class GUI {
 				}      	
 			}
     }
+		
+		# Legende
+    if($this->Docu->activeframe[0]['legendsize'] > 0){
+      $legend = $this->createlegend($this->Docu->activeframe[0]['legendsize']);
+			if($this->formvars['legend_extra'])$pdf->newPage();
+      $pdf->addJpegFromFile(IMAGEPATH.basename($legend['name']),$this->Docu->activeframe[0]['legendposx'],$this->Docu->activeframe[0]['legendposy'],$legend['width']/$this->map_factor);
+    }
     
     $this->pdf=$pdf;
 
@@ -5933,7 +5934,12 @@ class GUI {
     if($preview == true){
       exec(IMAGEMAGICKPATH.'convert -density 300x300 '.$dateipfad.$dateiname.' -resize 595 '.$dateipfad.$name.'-'.$currenttime.'.jpg');
       #echo IMAGEMAGICKPATH.'convert -density 300x300  '.$dateipfad.$dateiname.' -resize 595 '.$dateipfad.$name.'-'.$currenttime.'.jpg';
-      return TEMPPATH_REL.$name.'-'.$currenttime.'.jpg';
+			if(!file_exists(IMAGEPATH.$name.'-'.$currenttime.'.jpg')){
+				return TEMPPATH_REL.$name.'-'.$currenttime.'-0.jpg';
+			}
+			else{
+				return TEMPPATH_REL.$name.'-'.$currenttime.'.jpg';
+			}
     }
   }
   

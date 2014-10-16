@@ -8,5 +8,6 @@ $strRotationAngle="Drehwinkel: ";
 $strPrintDetail="Druckausschnitt";
 $strLoad="Laden";
 $strReferenceMap="Übersichtskarte";
+$strLegendExtra="Legende auf Extrablatt";
  
 ?>  

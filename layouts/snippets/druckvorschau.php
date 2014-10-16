@@ -198,6 +198,7 @@ function preventflickering(evt){
 <input type="hidden" name="printscale" value="<?php echo $this->formvars['printscale']; ?>">
 <input type="hidden" name="angle" value="<?php echo $this->formvars['angle']; ?>">
 <input type="hidden" name="referencemap" value="<?php echo $this->formvars['referencemap']; ?>">
+<input type="hidden" name="legend_extra" value="<?php echo $this->formvars['legend_extra']; ?>">
 <input type="hidden" name="minx" value="<?php echo $this->map->extent->minx; ?>">
 <input type="hidden" name="miny" value="<?php echo $this->map->extent->miny; ?>">
 <input type="hidden" name="maxx" value="<?php echo $this->map->extent->maxx; ?>">

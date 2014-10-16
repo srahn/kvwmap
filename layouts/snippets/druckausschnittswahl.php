@@ -191,6 +191,11 @@ function remove(){
     	echo $strReferenceMap; ?>&nbsp;<input type="checkbox" name="referencemap" value="1" <? if($this->formvars['referencemap']) echo 'checked="true"'; ?>">
     	<? } ?>
     </td>
+		<td align="left">
+    	<? if($this->Document->activeframe[0]['legendsize'] > 0){ 
+    	echo $strLegendExtra; ?>&nbsp;<input type="checkbox" name="legend_extra" value="1" <? if($this->formvars['legend_extra']) echo 'checked="true"'; ?>">
+    	<? } ?>
+    </td>
     <td align="right"> 
       <?php echo $strPrintDetail; ?>
     	<input type="text" name="name" value="" style="width:120px" >&nbsp;<input class="button" type="button" style="width:84px" name="speichern" value="<?php echo $this->strSave; ?>" onclick="save();">
@@ -198,7 +203,7 @@ function remove(){
   </tr>
   <tr>
   	<td>&nbsp;</td>
-  	<td align="right"  colspan="2">
+  	<td align="right"  colspan="3">
   		<input class="button" type="button" style="width:84px" name="delete" value="<?php echo $this->strDelete; ?>" onclick="remove();">&nbsp;
 
   		<select name="druckausschnitt" style="width:120px">
