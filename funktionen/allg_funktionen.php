@@ -70,6 +70,15 @@ function formatFlurstkennzALKIS($FlurstKennz){
   return $FlurstKennz;
 }
 
+function formatFlurstkennzALK($FlurstKennz){
+	$gem = substr($FlurstKennz, 0, 6);
+	$flur = substr($FlurstKennz, 6, 3);
+	$zaehler = substr($FlurstKennz, 9, 5);
+	$vorkomma = substr($FlurstKennz, 15, 3);  
+  $FlurstKennz = $gem.'-'.$flur.'-'.$zaehler.'/'.$vorkomma.'.00';
+  return $FlurstKennz;
+}
+
 function tausenderTrenner($number){
 	if(strpos($number, ' ') === false){
 		$explosion = explode('.', $number);

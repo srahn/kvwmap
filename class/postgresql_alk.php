@@ -50,6 +50,40 @@ class pgdatabase extends pgdatabase_alkis{
     $this->blocktransaction=0;
   }
 
+	function getVorgaenger($FlurstKennz) {
+    $sql = "SELECT vorgaenger FROM alb_f_historie WHERE nachfolger = '".$FlurstKennz."'";
+    $queryret=$this->execSQL($sql, 4, 0);
+    if ($queryret[0]) {
+      $ret[0]=1;
+      $ret[1]=$queryret[1];
+    }
+    else {
+      while($rs=pg_fetch_array($queryret[1])) {
+        $Vorgaenger[]=$rs;
+      }
+      $ret[0]=0;
+      $ret[1]=$Vorgaenger;
+    }
+    return $ret;
+  }
+	
+	function getNachfolger($FlurstKennz) {
+    $sql = "SELECT nachfolger, status FROM alb_f_historie, alb_flurstuecke WHERE nachfolger = flurstkennz AND vorgaenger = '".$FlurstKennz."'";
+    $queryret=$this->execSQL($sql, 4, 0);
+    if ($queryret[0]) {
+      $ret[0]=1;
+      $ret[1]=$queryret[1];
+    }
+    else {
+      while($rs=pg_fetch_array($queryret[1])) {
+        $Nachfolger[]=$rs;
+      }
+      $ret[0]=0;
+      $ret[1]=$Nachfolger;
+    }
+    return $ret;
+  }
+	
 	function getKlassifizierung($FlurstKennz) {
     $sql ="SELECT k.tabkenn,fk.flaeche,fk.angaben,k.klass,k.bezeichnung,k.abkuerzung";
     $sql.=" FROM alb_f_klassifizierungen AS fk,alb_v_klassifizierungen AS k";

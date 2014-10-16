@@ -207,6 +207,7 @@ class pgdatabase_alkis {
 				$filter .= ' AND '.$tablename.'.endet IS NULL ';
 			}
 		}
+		elseif($timestamp == 'hist'){}
 		else{
 			foreach($tablenames as $tablename){
 				$filter .= ' AND '.$tablename.'.beginnt <= \''.$timestamp.'\' and (\''.$timestamp.'\' <= '.$tablename.'.endet or '.$tablename.'.endet IS NULL) ';
@@ -1527,7 +1528,7 @@ class pgdatabase_alkis {
   }
   
   function getALBData($FlurstKennz) {
-    $sql ="SELECT lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, zaehler, nenner, k.schluesselgesamt AS kreisid, k.bezeichnung as kreisname, f.land::text||f.gemarkungsnummer::text as gemkgschl, ppg.gemarkungsname as gemkgname, ppg.land::text||ppg.regierungsbezirk::text||ppg.kreis::text||ppg.gemeinde::text as gemeinde, ppge.gemeindename,d.stelle as finanzamt, d.bezeichnung AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.endet::timestamp ";
+    $sql ="SELECT distinct lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, zaehler, nenner, k.schluesselgesamt AS kreisid, k.bezeichnung as kreisname, f.land::text||f.gemarkungsnummer::text as gemkgschl, ppg.gemarkungsname as gemkgname, ppg.land::text||ppg.regierungsbezirk::text||ppg.kreis::text||ppg.gemeinde::text as gemeinde, ppge.gemeindename,d.stelle as finanzamt, d.bezeichnung AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.endet::timestamp ";
 	  //$sql.=",f.pruefzeichen,f.status,f.entsteh,f.letzff,f.aktunr,f.karte,f.baublock,f.koorrw,f.koorhw,f.forstamt,fa.finanzamt,fa.name AS finanzamtname,";
 	  $sql.="FROM alkis.ax_kreisregion AS k, alkis.pp_gemeinde as ppge, alkis.pp_gemarkung AS ppg, alkis.ax_flurstueck AS f ";
 	  $sql.="LEFT JOIN alkis.ax_dienststelle as d ON d.stellenart = 1200 AND d.stelle::integer = ANY(f.stelle) ";
@@ -2372,7 +2373,7 @@ class pgdatabase_alkis {
   }
 
 	function getNachfolger($FlurstKennz) {
-    $sql = "SELECT nachfolger, status FROM alb_f_historie, alb_flurstuecke WHERE nachfolger = flurstkennz AND vorgaenger = '".$FlurstKennz."'";
+    $sql = "SELECT unnest(zeigtaufneuesflurstueck) as nachfolger FROM alkis.ax_fortfuehrungsfall WHERE ARRAY['".$FlurstKennz."'::varchar] <@ zeigtaufaltesflurstueck";
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0]) {
       $ret[0]=1;
@@ -2389,7 +2390,7 @@ class pgdatabase_alkis {
   }
 
   function getVorgaenger($FlurstKennz) {
-    $sql = "SELECT vorgaenger FROM alb_f_historie WHERE nachfolger = '".$FlurstKennz."'";
+    $sql = "SELECT unnest(zeigtaufaltesflurstueck) as vorgaenger FROM alkis.ax_fortfuehrungsfall WHERE ARRAY['".$FlurstKennz."'::varchar] <@ zeigtaufneuesflurstueck";
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0]) {
       $ret[0]=1;
@@ -2404,7 +2405,7 @@ class pgdatabase_alkis {
     }
     return $ret;
   }
-
+	
   function deleteNewHistorien() {
     $sql ="DELETE FROM alb_f_historie";
     #Eingefï¿½gt 11.04.2006 H. Riedel

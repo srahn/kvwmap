@@ -237,7 +237,7 @@ backto = function(go){
                 <?php
                 for($v = 0; $v < count($flst->Vorgaenger); $v++){ ?>
                   <a href="index.php?go=Flurstueck_Anzeigen&FlurstKennz=<?php echo $flst->Vorgaenger[$v]['vorgaenger']; ?>">
-                  <? echo $flst->Vorgaenger[$v]['vorgaenger'].' (H)<br>'; ?>
+                  <? echo formatFlurstkennzALK($flst->Vorgaenger[$v]['vorgaenger']).' (H)<br>'; ?>
                   </a>
                 <? } ?>
                 </td>
@@ -258,7 +258,7 @@ backto = function(go){
                 <?php
                 for($v = 0; $v < count($flst->Nachfolger); $v++){ ?>
                   <a href="index.php?go=Flurstueck_Anzeigen&FlurstKennz=<?php echo $flst->Nachfolger[$v]['nachfolger']; ?>">
-                  <? echo $flst->Nachfolger[$v]['nachfolger'];
+                  <? echo formatFlurstkennzALK($flst->Nachfolger[$v]['nachfolger']);
                   if($flst->Nachfolger[$v]['status'] == 'H'){
                     echo ' ('.$flst->Nachfolger[$v]['status'].')';
                   }

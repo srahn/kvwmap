@@ -1958,16 +1958,14 @@ class flurstueck_alkis {
 	function getNachfolger() {
     if ($this->FlurstKennz=="") { return 0; }
     $this->debug->write("<p>kataster flurstueck->getNachfolger (vom Flurstück):<br>",4);
-    if(ALKIS){}		#ALKIS TODO
-    else $ret=$this->database->getNachfolger($this->FlurstKennz);
+    $ret=$this->database->getNachfolger($this->FlurstKennz);
     return $ret[1];
   }
 
   function getVorgaenger() {
     if ($this->FlurstKennz=="") { return 0; }
     $this->debug->write("<p>kataster flurstueck->getVorgaenger (vom Flurstück):<br>",4);
-    if(ALKIS){}		#ALKIS TODO
-    else $ret=$this->database->getVorgaenger($this->FlurstKennz);
+		$ret=$this->database->getVorgaenger($this->FlurstKennz);
     return $ret[1];
   }
 
