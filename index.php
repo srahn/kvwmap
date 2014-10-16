@@ -501,7 +501,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 
 	  # Sachdaten anzeigen
 	  case 'Sachdaten' : {
-			$GUI->user->rolle->setSelectedButton($GUI->formvars['CMD']);
+			if($GUI->formvars['CMD'] != '')$GUI->user->rolle->setSelectedButton($GUI->formvars['CMD']);
 			if($GUI->formvars['legendtouched'])$GUI->saveLegendRoleParameters();			
 			$GUI->queryMap();
 	  }break;
