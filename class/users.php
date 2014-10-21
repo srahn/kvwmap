@@ -1187,6 +1187,7 @@ class rolle {
 	var $debug;
 	var $database;
 	var $loglevel;
+	public static $hist_timestamp;
 
 	function rolle($user_id,$stelle_id,$database) {
 		global $debug;
@@ -1422,9 +1423,9 @@ class rolle {
 		$this->overlayy=$rs['overlayy'];
 		if($rs['hist_timestamp'] != ''){
 			$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');
-			define(HIST_TIMESTAMP, DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z'));
+			rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');
 		}
-		else define(HIST_TIMESTAMP, '');
+		else rolle::$hist_timestamp = $this->hist_timestamp = '';
     $buttons = explode(',', $rs['buttons']);
     $this->back = in_array('back', $buttons);
     $this->forward = in_array('forward', $buttons);
