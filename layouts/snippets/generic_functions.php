@@ -133,7 +133,7 @@ csv_export = function(layer_id){
 shape_export = function(layer_id, anzahl){
 	currentform.all.value = document.getElementById('all_'+layer_id).value;
 	if(currentform.all.value || check_for_selection(layer_id)){				// entweder alle gefundenen oder die ausgewaehlten
-		if(currentform.all.value)currentform.anzahl.value = anzahl;			// alle
+		currentform.anzahl.value = anzahl;		
 		currentform.chosen_layer_id.value = layer_id;
 		currentform.go_backup.value = currentform.go.value;
 		currentform.go.value = 'SHP_Export';
