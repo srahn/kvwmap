@@ -69,10 +69,10 @@
     # Debugdatei setzen
     global $debug;
     $this->debug=$debug;
-    # Logdatei fÃ¼r Mysql setzen
+    # Logdatei für Mysql setzen
     global $log_mysql;
     $this->log_mysql=$log_mysql;
-    # Logdatei fÃ¼r PostgreSQL setzten
+    # Logdatei für PostgreSQL setzten
     global $log_postgres;
     $this->log_postgres=$log_postgres;
     # layout Templatedatei zur Anzeige der Daten
@@ -125,7 +125,7 @@
 				$lo=explode(',',$corners[0]); # linke obere Ecke in Bildkoordinaten von links oben gesehen
 				$ru=explode(',',$corners[1]); # reche untere Ecke des Auswahlbereiches in Bildkoordinaten von links oben gesehen
 				$width=$this->user->rolle->pixsize*($ru[0]-$lo[0]); # Breite des Auswahlbereiches in m
-				$height=$this->user->rolle->pixsize*($ru[1]-$lo[1]); # HÃ¶he des Auswahlbereiches in m
+				$height=$this->user->rolle->pixsize*($ru[1]-$lo[1]); # Höhe des Auswahlbereiches in m
 				#echo 'Abfragerechteck im Bild: '.$lo[0].' '.$lo[1].' '.$ru[0].' '.$ru[1];
 				# linke obere Ecke im Koordinatensystem in m
 				$minx=$this->user->rolle->oGeorefExt->minx+$this->user->rolle->pixsize*$lo[0]; # x Wert
@@ -158,7 +158,7 @@
       $anzLayer=count($layerset);
     }
     else{
-      echo 'Bitte wÃ¤hlen Sie einen Layer zur Sachdatenabfrage aus.##';
+      echo 'Bitte wählen Sie einen Layer zur Sachdatenabfrage aus.##';
     }
     $map=ms_newMapObj('');
     $map->set('shapepath', SHAPEPATH);
@@ -170,11 +170,11 @@
       $output .= $layerset[$i]['Name'].' : || ';
       $layerdb = $this->mapDB->getlayerdatabase($layerset[$i]['Layer_ID'], $this->Stelle->pgdbhost);
       #$path = $layerset[$i]['pfad'];
-			$path = str_replace('$hist_timestamp', HIST_TIMESTAMP, $layerset[$i]['pfad']);
+			$path = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[$i]['pfad']);
       $privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
       #$path = $this->Stelle->parse_path($layerdb, $path, $privileges);
       $layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames']);
-	    # weitere Informationen hinzufÃ¼gen (AuswahlmÃ¶glichkeiten, usw.)
+	    # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
 	    $layerset[$i]['attributes'] = $this->mapDB->add_attribute_values($layerset[$i]['attributes'], $layerdb, NULL, true);
       
 
@@ -244,7 +244,7 @@
       
       //$the_geom = $layerset[$i]['attributes']['the_geom'];
 				
-				# Aktueller EPSG in der die Abfrage ausgefÃ¼hrt wurde
+				# Aktueller EPSG in der die Abfrage ausgeführt wurde
 				$client_epsg=$this->user->rolle->epsg_code;
 				# EPSG-Code des Layers der Abgefragt werden soll
 				$layer_epsg=$layerset[$i]['epsg_code'];
@@ -256,7 +256,7 @@
 					default : $pixsize=$this->user->rolle->pixsize;
 				}
 				$rand=$layerset[$i]['tolerance']*$pixsize;
-				# Bildung der Where-Klausel fÃ¼r die rÃ¤umliche Abfrage mit der searchbox
+				# Bildung der Where-Klausel für die räumliche Abfrage mit der searchbox
 				$loosesearchbox_wkt ="POLYGON((";
 				$loosesearchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->miny-$rand).",";
 				$loosesearchbox_wkt.=strval($rect->maxx+$rand)." ".strval($rect->miny-$rand).",";
@@ -289,12 +289,12 @@
 				$sql_where = " AND ".$layerset[$i]['maintable']."_oid = ".$this->formvars['oid'];
 			}
       
-      # SVG-Geometrie abfragen fÃ¼r highlighting
+      # SVG-Geometrie abfragen für highlighting
       if($this->user->rolle->highlighting == '1'){
         $pfad = "st_assvg(st_transform(".$layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$the_geom.", ".$client_epsg."), 0, 8) AS highlight_geom, ".$pfad;
       }
       
-      # 2006-06-12 sr   Filter zur Where-Klausel hinzugefÃ¼gt
+      # 2006-06-12 sr   Filter zur Where-Klausel hinzugefügt
       if($layerset[$i]['Filter'] != ''){
       	$layerset[$i]['Filter'] = str_replace('$userid', $this->user->id, $layerset[$i]['Filter']);
         $sql_where .= " AND ".$layerset[$i]['Filter'];
@@ -324,7 +324,7 @@
       	$sql .= $layerset[$i]['attributes']['orderby'];
       }
       
-      # AnhÃ¤ngen des Begrenzers zur EinschrÃ¤nkung der Anzahl der Ergebniszeilen
+      # Anhängen des Begrenzers zur Einschränkung der Anzahl der Ergebniszeilen
       $sql_limit.=' LIMIT '.MAXQUERYROWS;
 
       #echo '<br>sql:<br>'.$sql;
@@ -369,7 +369,7 @@
 									}
 								} break;
 								case 'Auswahlfeld': {
-									if(is_array($attributes['dependent_options'][$j])){		# mehrere DatensÃ¤tze und ein abhÃ¤ngiges Auswahlfeld --> verschiedene AuswahlmÃ¶glichkeiten
+									if(is_array($attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
 										for($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++){
 											if($attributes['enum_value'][$j][$k][$e] == $layer['shape'][$k][$attributes['name'][$j]]){
 												$auswahlfeld_output = $attributes['enum_output'][$j][$k][$e];
@@ -399,14 +399,14 @@
             	}
             }
           }
-          # Links und Bild-URLs anfÃ¼gen
+          # Links und Bild-URLs anfügen
           $output .= $links;
       		$output .= $pictures;
       		$pictures = '';
           $output .= '|| ';
         }
       }
-      # highlighting-Geometrie anfÃ¼gen
+      # highlighting-Geometrie anfügen
       $output .= '||| '.$this->qlayerset[0]['shape'][0]['highlight_geom'];
       echo umlaute_javascript(umlaute_html($output)).'~showtooltip(top.document.GUI.result.value, '.$showdata.');';
     }
@@ -414,7 +414,7 @@
   function get_dokument_vorschau($dateinamensteil){
 		$type = $dateinamensteil[1];
   	$dokument = $dateinamensteil[0].'.'.$dateinamensteil[1];
-		if($type == 'jpg' OR $type == 'png' OR $type == 'gif' ){			// fÃ¼r Bilder werden automatisch Thumbnails erzeugt
+		if($type == 'jpg' OR $type == 'png' OR $type == 'gif' ){			// für Bilder werden automatisch Thumbnails erzeugt
 			$thumbname = $dateinamensteil[0].'_thumb.'.$dateinamensteil[1];			
 			if(!file_exists($thumbname)){
 				exec(IMAGEMAGICKPATH.'convert '.$dokument.' -resize 250 '.$thumbname);
@@ -488,9 +488,9 @@
     $this->blocktransaction=0;
   }
   function open() {
-    #$this->debug->write("<br>MySQL Verbindung Ã¶ffnen mit Host: ".$this->host." User: ".$this->user,4);
+    $this->debug->write("<br>MySQL Verbindung Ã¶ffnen mit Host: ".$this->host." User: ".$this->user,4);
     $this->dbConn=mysql_connect($this->host,$this->user,$this->passwd);
-    #$this->debug->write("Datenbank mit ID: ".$this->dbConn." und Name: ".$this->dbName." auswÃ¤hlen.",4);
+    $this->debug->write("Datenbank mit ID: ".$this->dbConn." und Name: ".$this->dbName." auswÃ¤hlen.",4);
     return mysql_select_db($this->dbName,$this->dbConn);
   }
   function execSQL($sql,$debuglevel, $loglevel) {
@@ -514,7 +514,7 @@
       if ($query==0) {
         $ret[0]=1;
         $ret[1]="<b>Fehler bei SQL Anweisung:</b><br>".$sql."<br>".mysql_error($this->dbConn);
-        if($debuglevel > 0)$this->debug->write($ret[1],$debuglevel);
+        $this->debug->write($ret[1],$debuglevel);
         if ($logsql) {
           $this->logfile->write("#".$ret[1]);
         }
@@ -525,7 +525,7 @@
         if ($logsql) {
           $this->logfile->write($sql.';');
         }
-        if($debuglevel > 0)$this->debug->write(date('H:i:s')."<br>".$sql,$debuglevel);
+        $this->debug->write(date('H:i:s')."<br>".$sql,$debuglevel);
       }
       $ret[2]=$sql;
     }
@@ -533,7 +533,7 @@
     	if ($logsql) {
     		$this->logfile->write($sql.';');
     	}
-    	if($debuglevel > 0)$this->debug->write("<br>".$sql,$debuglevel);
+    	$this->debug->write("<br>".$sql,$debuglevel);
     }
     return $ret;
   }
@@ -693,7 +693,7 @@
 		}
 		return $privileges;
 	}
-}class rolle {  var $user_id;  var $stelle_id;  var $debug;  var $database;  var $loglevel;	function rolle($user_id,$stelle_id,$database) {
+}class rolle {  var $user_id;  var $stelle_id;  var $debug;  var $database;  var $loglevel;  var $hist_timestamp;	function rolle($user_id,$stelle_id,$database) {
 		global $debug;
 		$this->debug=$debug;
 		$this->user_id=$user_id;
@@ -745,9 +745,9 @@
 		$this->overlayy=$rs['overlayy'];
 		if($rs['hist_timestamp'] != ''){
 			$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');
-			define(HIST_TIMESTAMP, DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z'));
+			rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');
 		}
-		else define(HIST_TIMESTAMP, '');
+		else rolle::$hist_timestamp = $this->hist_timestamp = '';
     $buttons = explode(',', $rs['buttons']);
     $this->back = in_array('back', $buttons);
     $this->forward = in_array('forward', $buttons);
@@ -818,7 +818,7 @@
 		$connect_string = 'dbname='.$this->dbName.' port='.$this->port.' user='.$this->user.' password='.$this->passwd;
 		if($this->host != 'localhost' AND $this->host != '127.0.0.1')$connect_string .= 'host='.$this->host;		// das beschleunigt den Connect extrem
     $this->dbConn=pg_connect($connect_string);
-    #$this->debug->write("Datenbank mit Connection_ID: ".$this->dbConn." geÃ¶ffnet.",4);
+    $this->debug->write("Datenbank mit Connection_ID: ".$this->dbConn." geÃ¶ffnet.",4);
     # $this->version = pg_version($this->dbConn); geht erst mit PHP 5
     $this->version = POSTGRESVERSION;
     return $this->dbConn;
@@ -1032,7 +1032,7 @@
       	$attributes['length'][$i]= $rs['length'];
       	$attributes['decimal_length'][$i]= $rs['decimal_length'];
   		
-				if(substr($rs['default'], 0, 6) == 'SELECT'){					# da Defaultvalues auch dynamisch sein kÃ¶nnen (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
+				if(substr($rs['default'], 0, 6) == 'SELECT'){					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
 					$ret1 = $layerdb->execSQL($rs['default'], 4, 0);					
 					if($ret1[0]==0){
 						$attributes['default'][$i] = array_pop(pg_fetch_row($ret1[1]));
@@ -1073,9 +1073,9 @@
       return $attributes;
   }
   function add_attribute_values($attributes, $database, $query_result, $withvalues = true){
-    # Diese Funktion fÃ¼gt den Attributen je nach Attributtyp zusÃ¤tzliche Werte hinzu. Z.B. bei Auswahlfeldern die AuswahlmÃ¶glichkeiten.
+    # Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
     for($i = 0; $i < count($attributes['name']); $i++){
-      if($attributes['constraints'][$i] != '' AND $attributes['constraints'][$i] != 'PRIMARY KEY'){  # das sind die AuswahlmÃ¶glichkeiten, die durch die Tabellendefinition in Postgres fest vorgegeben sind
+      if($attributes['constraints'][$i] != '' AND $attributes['constraints'][$i] != 'PRIMARY KEY'){  # das sind die Auswahlmöglichkeiten, die durch die Tabellendefinition in Postgres fest vorgegeben sind
       	$attributes['enum_value'][$i] = explode(',', str_replace("'", "", $attributes['constraints'][$i]));
       	$attributes['enum_output'][$i] = $attributes['enum_value'][$i];
       }
@@ -1083,8 +1083,8 @@
         switch($attributes['form_element_type'][$i]){
           # Auswahlfelder
           case 'Auswahlfeld' : {
-            if($attributes['options'][$i] != ''){     # das sind die AuswahlmÃ¶glichkeiten, die man im Attributeditor selber festlegen kann
-              if(strpos($attributes['options'][$i], "'") === 0){      # AufzÃ¤hlung wie 'wert1','wert2','wert3'
+            if($attributes['options'][$i] != ''){     # das sind die Auswahlmöglichkeiten, die man im Attributeditor selber festlegen kann
+              if(strpos($attributes['options'][$i], "'") === 0){      # Aufzählung wie 'wert1','wert2','wert3'
                 $attributes['enum_value'][$i] = explode(',', str_replace("'", "", $attributes['options'][$i]));
                 $attributes['enum_output'][$i] = $attributes['enum_value'][$i];
               }
@@ -1096,7 +1096,7 @@
                 if($req_by_start > 0){
                   $req_by_end = strpos(strtolower($attributes['options'][$i]), "</required by>");
                   $req_by = trim(substr($attributes['options'][$i], $req_by_start+13, $req_by_end-$req_by_start-13));
-                  $attributes['req_by'][$i] = $req_by;    # das abhÃ¤ngige Attribut
+                  $attributes['req_by'][$i] = $req_by;    # das abhängige Attribut
                   $attributes['options'][$i] = substr($attributes['options'][$i], 0, $req_by_start);    # required-Tag aus SQL entfernen
                 }
                 # ------<required by>------
@@ -1106,7 +1106,7 @@
                   $req_end = strpos(strtolower($attributes['options'][$i]), "</requires>");                  
     							$sql_rest = substr($attributes['options'][$i], $req_end+11);
                   $req = trim(substr($attributes['options'][$i], $req_start+10, $req_end-$req_start-10));
-                  $attributes['req'][$i] = $req;    # das Attribut von dem dieses Attribut abhÃ¤ngig ist
+                  $attributes['req'][$i] = $req;    # das Attribut von dem dieses Attribut abhängig ist
                   if($query_result != NULL){
                     $options = $attributes['options'][$i];
                     for($k = 0; $k < count($query_result); $k++){
@@ -1114,16 +1114,16 @@
                         $attributes['dependent_options'][$i][$k] = substr($options, 0, $req_start)."'".$query_result[$k][$req]."' ".$sql_rest;    # requires-Tag aus SQL entfernen und ein Array erzeugen, welches die korrekten SQLs jedem Datensatz zuordnet
                       }
                       else{
-                        $attributes['dependent_options'][$i][$k] = '';    # wenn in diesem Datensatz des Query-Results das benÃ¶tigte Attribut keinen Wert hat, sind die abhÃ¤ngigen Optionen fÃ¼r diesen Datensatz leer
+                        $attributes['dependent_options'][$i][$k] = '';    # wenn in diesem Datensatz des Query-Results das benötigte Attribut keinen Wert hat, sind die abhängigen Optionen für diesen Datensatz leer
                       }
                     }
                   }
                   else{
-                    $attributes['options'][$i] = '';      # wenn kein Query-Result Ã¼bergeben wurde, sind die Optionen leer
+                    $attributes['options'][$i] = '';      # wenn kein Query-Result übergeben wurde, sind die Optionen leer
                   }
                 }
                 # -----<requires>------
-                if(is_array($attributes['dependent_options'][$i])){   # mehrere DatensÃ¤tze und ein abhÃ¤ngiges Auswahlfeld --> verschiedene AuswahlmÃ¶glichkeiten
+                if(is_array($attributes['dependent_options'][$i])){   # mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
                   for($k = 0; $k < count($query_result); $k++){
                     $sql = $attributes['dependent_options'][$i][$k];
                     if($sql != ''){
@@ -1150,7 +1150,7 @@
                 if($optionen[1] != ''){   
                   $further_options = explode(' ', $optionen[1]);      # die weiteren Optionen exploden (opt1 opt2 opt3)
                   for($k = 0; $k < count($further_options); $k++){
-                    if(strpos($further_options[$k], 'layer_id') !== false){     #layer_id=XX bietet die MÃ¶glichkeit hier eine Layer_ID zu definieren, fÃ¼r die man einen neuen Datensatz erzeugen kann
+                    if(strpos($further_options[$k], 'layer_id') !== false){     #layer_id=XX bietet die Möglichkeit hier eine Layer_ID zu definieren, für die man einen neuen Datensatz erzeugen kann
                       $attributes['subform_layer_id'][$i] = array_pop(explode('=', $further_options[$k]));
                       $layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
                       $attributes['subform_layer_privileg'][$i] = $layer['privileg'];
@@ -1164,7 +1164,7 @@
             }
           }break;
   
-          # SubFormulare mit PrimÃ¤rschlÃ¼ssel(n)
+          # SubFormulare mit Primärschlüssel(n)
           case 'SubFormPK' : {
             if($attributes['options'][$i] != ''){
               $options = explode(';', $attributes['options'][$i]);  # layer_id,pkey1,pkey2,pkey3...; weitere optionen
@@ -1183,7 +1183,7 @@
             }
           }break;
   
-          # SubFormulare mit FremdschlÃ¼ssel
+          # SubFormulare mit Fremdschlüssel
           case 'SubFormFK' : {
             if($attributes['options'][$i] != ''){
               $options = explode(';', $attributes['options'][$i]);  # layer_id,fkey1,fkey2,fkey3...; weitere optionen
@@ -1203,7 +1203,7 @@
             }
           }break;
           
-          # eingebettete SubFormulare mit PrimÃ¤rschlÃ¼ssel(n)
+          # eingebettete SubFormulare mit Primärschlüssel(n)
           case 'SubFormEmbeddedPK' : {
             if($attributes['options'][$i] != ''){
               $options = explode(';', $attributes['options'][$i]);  # layer_id,pkey1,pkey2,preview_attribute; weitere Optionen

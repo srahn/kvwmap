@@ -43,10 +43,10 @@
     # Debugdatei setzen
     global $debug;
     $this->debug=$debug;
-    # Logdatei fÃ¼r Mysql setzen
+    # Logdatei für Mysql setzen
     global $log_mysql;
     $this->log_mysql=$log_mysql;
-    # Logdatei fÃ¼r PostgreSQL setzten
+    # Logdatei für PostgreSQL setzten
     global $log_postgres;
     $this->log_postgres=$log_postgres;
     # layout Templatedatei zur Anzeige der Daten
@@ -353,7 +353,7 @@
 		$html .= '</table>';
 		return $html;
 	}
-}class rolle {  var $user_id;  var $stelle_id;  var $debug;  var $database;  var $loglevel;	function rolle($user_id,$stelle_id,$database) {
+}class rolle {  var $user_id;  var $stelle_id;  var $debug;  var $database;  var $loglevel;  var $hist_timestamp;	function rolle($user_id,$stelle_id,$database) {
 		global $debug;
 		$this->debug=$debug;
 		$this->user_id=$user_id;
@@ -405,9 +405,9 @@
 		$this->overlayy=$rs['overlayy'];
 		if($rs['hist_timestamp'] != ''){
 			$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');
-			define(HIST_TIMESTAMP, DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z'));
+			rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');
 		}
-		else define(HIST_TIMESTAMP, '');
+		else rolle::$hist_timestamp = $this->hist_timestamp = '';
     $buttons = explode(',', $rs['buttons']);
     $this->back = in_array('back', $buttons);
     $this->forward = in_array('forward', $buttons);
