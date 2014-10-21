@@ -935,7 +935,7 @@ class user {
 		}
 		return 1;
 	}
-
+	
 	function checkstelle(){
 		# Funktion wird nach Änderungen im Nutzer- und Stelleneditor aufgerufen und überprüft
 		# ob die letzte Stellen_ID leer ist und ob die letzte Stellen_ID nicht mehr zu den dem Nutzer
@@ -1364,6 +1364,22 @@ class rolle {
     return 1;
   }
 
+	function setHistTimestamp($timestamp) {
+		$sql ='UPDATE rolle SET ';
+		if($timestamp != ''){
+			$time = new DateTime(DateTime::createFromFormat('d.m.Y H:i:s', $timestamp)->format('Y-m-d H:i:s'));
+			$time->modify("-1 second");
+			$sql.='hist_timestamp="'.$time->format('Y-m-d H:i:s').'"';
+		}
+		else $sql.='hist_timestamp = NULL';
+		$sql.=' WHERE stelle_id='.$this->stelle_id.' AND user_id='.$this->user_id;
+		#echo $sql;
+		$this->debug->write("<p>file:users.php class:user->setHistTimestamp - Setzen der Einstellungen für die Rolle<br>".$sql,4);
+		$query=mysql_query($sql,$this->database->dbConn);
+		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+		$this->debug->write('Neue Werte für Rolle eingestellt: '.$formvars['nZoomFactor'].', '.$formvars['mapsize'],4);
+	}
+	
   function readSettings() {
     # Abfragen und Zuweisen der Einstellungen der Rolle
     $sql ='SELECT * FROM rolle WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;

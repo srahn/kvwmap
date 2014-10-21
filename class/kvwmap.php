@@ -10477,6 +10477,13 @@ class GUI {
       $anzFlurst=count($FlurstKennzListe);
     }
 	
+		if($this->formvars['without_temporal_filter'] == true){		// der zeitliche Filter wurde für die Abfrage des Flurstücks ausgeschaltet, um das Flurstück abfragen zu können und den HIST_TIMESTAMP des Nutzers in das Lebenszeitintervall des Flurstücks zu setzen
+			$FlurstKennz = $FlurstKennzListe[0];
+			$ret=$this->pgdatabase->getALBData($FlurstKennz, true);
+			$this->user->rolle->setHistTimestamp($ret[1]['endet']);
+			$this->user->rolle->readSettings();
+		}
+	
     $this->mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $layer = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
     $privileges = $this->Stelle->get_attributes_privileges($layer[0]['Layer_ID']);
