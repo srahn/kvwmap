@@ -43,10 +43,10 @@
     # Debugdatei setzen
     global $debug;
     $this->debug=$debug;
-    # Logdatei für Mysql setzen
+    # Logdatei fÃ¼r Mysql setzen
     global $log_mysql;
     $this->log_mysql=$log_mysql;
-    # Logdatei für PostgreSQL setzten
+    # Logdatei fÃ¼r PostgreSQL setzten
     global $log_postgres;
     $this->log_postgres=$log_postgres;
     # layout Templatedatei zur Anzeige der Daten
@@ -353,7 +353,7 @@
 		$html .= '</table>';
 		return $html;
 	}
-}class rolle {  var $user_id;  var $stelle_id;  var $debug;  var $database;  var $loglevel;  var $hist_timestamp;	function rolle($user_id,$stelle_id,$database) {
+}class rolle {  var $user_id;  var $stelle_id;  var $debug;  var $database;  var $loglevel;  static $hist_timestamp;	function rolle($user_id,$stelle_id,$database) {
 		global $debug;
 		$this->debug=$debug;
 		$this->user_id=$user_id;

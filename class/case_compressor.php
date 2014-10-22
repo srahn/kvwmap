@@ -15,11 +15,14 @@ class case_compressor {
 			$classname = $class->getName();
 			if($parent = $class->getParentClass())$extends = ' extends '.$parent->getName();
 			$properties = $class->getProperties();
+			
 			# wenn er noch nicht da ist, den leeren Klassenkörper ermitteln
 			if(self::$classarray[$classname] == ''){
 				self::$classarray[$classname]['code'] = chr(13).'class '.$classname.$extends.' {'.chr(13);		
 				foreach($properties as $prop) {
-					self::$classarray[$classname]['code'] .= chr(13).'  var $'.$prop->getName();
+					if($prop->isStatic())$var = 'static'; else $var = 'var';
+					#if($prop->isPublic())$public = 'public '; else $public = '';
+					self::$classarray[$classname]['code'] .= chr(13).'  '.$public.$var.' $'.$prop->getName();
 					if(@$prop->getValue() != '')self::$classarray[$classname]['code'] .= ' = '.@$prop->getValue().';';
 					else self::$classarray[$classname]['code'] .= ';';
 				}

@@ -43,10 +43,10 @@
     # Debugdatei setzen
     global $debug;
     $this->debug=$debug;
-    # Logdatei für Mysql setzen
+    # Logdatei fÃ¼r Mysql setzen
     global $log_mysql;
     $this->log_mysql=$log_mysql;
-    # Logdatei für PostgreSQL setzten
+    # Logdatei fÃ¼r PostgreSQL setzten
     global $log_postgres;
     $this->log_postgres=$log_postgres;
     # layout Templatedatei zur Anzeige der Daten
@@ -236,7 +236,7 @@
         $map->maxsize = 4096;
         $map->setProjection('+init=epsg:'.$this->user->rolle->epsg_code,MS_TRUE);
 				
-				# setzen der Kartenausdehnung über die letzten Benutzereinstellungen
+				# setzen der Kartenausdehnung Ã¼ber die letzten Benutzereinstellungen
 				if($this->user->rolle->oGeorefExt->minx==='') {
 				  echo "Richten Sie mit phpMyAdmin in der kvwmap Datenbank eine Referenzkarte, eine Stelle, einen Benutzer und eine Rolle ein ";
 				  echo "<br>(Tabellen referenzkarten, stelle, user, rolle) ";
@@ -323,7 +323,7 @@
 				}
 				$reference_map->web->set('imagepath', IMAGEPATH);
 				$reference_map->setProjection('+init=epsg:'.$this->ref['epsg_code'],MS_FALSE);
-				#$reference_map->extent->setextent in drawreferencemap() ausgelagert, da der Extent sich geändert haben kann nach dem loadmap
+				#$reference_map->extent->setextent in drawreferencemap() ausgelagert, da der Extent sich geÃ¤ndert haben kann nach dem loadmap
 				$reference_map->reference->extent->setextent(round($this->ref['xmin']),round($this->ref['ymin']),round($this->ref['xmax']),round($this->ref['ymax']));
         $reference_map->reference->set('image',REFERENCEMAPPATH.$this->ref['Dateiname']);
         $reference_map->reference->set('width',$this->ref['width']);
@@ -364,7 +364,7 @@
         if($this->class_load_level == ''){
           $this->class_load_level = 1;
         }
-        $layer = $mapDB->read_Layer($this->class_load_level, $this->list_subgroups($this->formvars['group']));     # class_load_level: 2 = für alle Layer die Klassen laden, 1 = nur für aktive Layer laden, 0 = keine Klassen laden
+        $layer = $mapDB->read_Layer($this->class_load_level, $this->list_subgroups($this->formvars['group']));     # class_load_level: 2 = fÃ¼r alle Layer die Klassen laden, 1 = nur fÃ¼r aktive Layer laden, 0 = keine Klassen laden
         $rollenlayer = $mapDB->read_RollenLayer();
         $layerset = array_merge($layer, $rollenlayer);
         $layerset['anzLayer'] = count($layerset) - 1; # wegen $layerset['layer_ids']
@@ -414,7 +414,7 @@
 						}
 						
 						//---- wenn die Layer einer eingeklappten Gruppe nicht in der Karte //
-						//---- dargestellt werden sollen, muß hier bei aktivStatus != 1 //
+						//---- dargestellt werden sollen, muÃŸ hier bei aktivStatus != 1 //
 						//---- der layer_status auf 0 gesetzt werden//
 						if($layerset[$i]['aktivStatus'] == 0){
 						$layer->set('status', 0);
@@ -443,7 +443,7 @@
 						if(!$fp){			# keine Verbindung --> Layer ausschalten
 							$layer->set('status', 0);
 							$layer->setMetaData('queryStatus', 0);
-									$this->Fehlermeldung = $errstr.' für Layer: '.$layerset[$i]['Name'].'<br>';
+									$this->Fehlermeldung = $errstr.' fÃ¼r Layer: '.$layerset[$i]['Name'].'<br>';
 						}
 						}
 						
@@ -506,10 +506,10 @@
               		$layerset[$i]['connection'] = $layerset[$i]['printconnection']; 		# wenn es eine Druck-Connection gibt, wird diese verwendet
               	}
               	else{
-                	//$layerset[$i]['connection'] .= '&mapfactor='.$this->map_factor;			# bei WMS-Layern wird der map_factor durchgeschleift (für die eigenen WMS) erstmal rausgenommen, weil einige WMS-Server der zusätzliche Parameter mapfactor stört
+                	//$layerset[$i]['connection'] .= '&mapfactor='.$this->map_factor;			# bei WMS-Layern wird der map_factor durchgeschleift (fÃ¼r die eigenen WMS) erstmal rausgenommen, weil einige WMS-Server der zusÃ¤tzliche Parameter mapfactor stÃ¶rt
               	}
               }
-              if($layerset[$i]['connectiontype'] == 6)$layerset[$i]['connection'] .= " options='-c client_encoding=".MYSQL_CHARSET."'";		# z.B. für Klassen mit Umlauten
+              if($layerset[$i]['connectiontype'] == 6)$layerset[$i]['connection'] .= " options='-c client_encoding=".MYSQL_CHARSET."'";		# z.B. fÃ¼r Klassen mit Umlauten
               $layer->set('connection', $layerset[$i]['connection']);
             }
             if ($layerset[$i]['connectiontype']>0) {
@@ -521,7 +521,7 @@
               }
             }
             
-						$layerset[$i]['processing'] = 'CLOSE_CONNECTION=DEFER;'.$layerset[$i]['processing'];		# DB-Connection erst am Ende schliessen und nicht für jeden Layer neu aufmachen
+						$layerset[$i]['processing'] = 'CLOSE_CONNECTION=DEFER;'.$layerset[$i]['processing'];		# DB-Connection erst am Ende schliessen und nicht fÃ¼r jeden Layer neu aufmachen
             if ($layerset[$i]['processing'] != "") {
               $processings = explode(";",$layerset[$i]['processing']);
               foreach ($processings as $processing) {
@@ -557,7 +557,7 @@
                 $layer->set('data', $layerset[$i]['Data']);
               }
   
-              # Setzen der Templatedateien für die Sachdatenanzeige inclt. Footer und Header.
+              # Setzen der Templatedateien fÃ¼r die Sachdatenanzeige inclt. Footer und Header.
               # Template (Body der Anzeige)
               if ($layerset[$i]['template']!='') {
                 $layer->set('template',$layerset[$i]['template']);
@@ -714,7 +714,7 @@
         $klasse -> settext($classset[$j]['text']);
       }
       # setzen eines oder mehrerer Styles
-      # Änderung am 12.07.2005 Korduan
+      # Ã„nderung am 12.07.2005 Korduan
       for ($k=0;$k<count($classset[$j]['Style']);$k++) {
         $dbStyle=$classset[$j]['Style'][$k];
 				if (MAPSERVERVERSION < 600) {
@@ -780,7 +780,7 @@
         }
 
         if($this->map_factor != '' and $layerset['Datentyp'] != 8){ 
-          # Skalierung der Stylegröße, wenn map_factor gesetzt und nicht vom Type Chart
+          # Skalierung der StylegrÃ¶ÃŸe, wenn map_factor gesetzt und nicht vom Type Chart
           $style->set('size', $dbStyle['size']*$this->map_factor);
         }
         else{
@@ -870,10 +870,10 @@
         if ($dbStyle['offsety']!='') {
           $style->set('offsety', $dbStyle['offsety']);
         }
-      } # Ende Schleife für mehrere Styles
+      } # Ende Schleife fÃ¼r mehrere Styles
 
       # setzen eines oder mehrerer Labels
-      # Änderung am 12.07.2005 Korduan
+      # Ã„nderung am 12.07.2005 Korduan
       for ($k=0;$k<count($classset[$j]['Label']);$k++) {
         $dbLabel=$classset[$j]['Label'][$k];
         if (MAPSERVERVERSION < 600) { 
@@ -923,7 +923,7 @@
           $klasse->label->set('size',$dbLabel['size']);
           $klasse->label->set('minsize',$dbLabel['minsize']);
           $klasse->label->set('maxsize',$dbLabel['maxsize']);
-          # Skalierung der Labelschriftgröße, wenn map_factor gesetzt
+          # Skalierung der LabelschriftgrÃ¶ÃŸe, wenn map_factor gesetzt
           if($this->map_factor != ''){
             $klasse->label->set('minsize',$dbLabel['minsize']*$this->map_factor);
             $klasse->label->set('maxsize',$dbLabel['size']*$this->map_factor);
@@ -1024,7 +1024,7 @@
           $label->size = $dbLabel['size'];
           $label->minsize = $dbLabel['minsize'];
           $label->maxsize = $dbLabel['maxsize'];
-          # Skalierung der Labelschriftgröße, wenn map_factor gesetzt
+          # Skalierung der LabelschriftgrÃ¶ÃŸe, wenn map_factor gesetzt
           if($this->map_factor != ''){
             $label->minsize = $dbLabel['minsize']*$this->map_factor;
             $label->maxsize = $dbLabel['size']*$this->map_factor;
@@ -1072,7 +1072,7 @@
           }
           $klasse->addLabel($label);
         } # ende mapserver >=600
-      } # ende Schleife für mehrere Label
+      } # ende Schleife fÃ¼r mehrere Label
     } # end of Schleife Class
   }
   function navMap($cmd) {
@@ -1135,13 +1135,13 @@
     # Zerlegung der Input Koordinaten in linke obere und rechte untere Ecke
     # echo ('formvars[INPUT_COORD]: '.$this->formvars['INPUT_COORD']);
     $corners=explode(';',$this->formvars['INPUT_COORD']);
-    # Auslesen der ersten übergebenen Koordinate
+    # Auslesen der ersten Ã¼bergebenen Koordinate
     $lo=explode(',',$corners[0]);
     $minx=$lo[0];
     $maxy=$lo[1];
-    # Abfrage, ob eine oder zwei Koordinaten übergeben wurden
+    # Abfrage, ob eine oder zwei Koordinaten Ã¼bergeben wurden
     if (count($corners)==1) {
-      # es wurde nur ein Punkt übergeben zum zoomen
+      # es wurde nur ein Punkt Ã¼bergeben zum zoomen
       #echo '<br>Zoom zum Punkt.';
       $zoom='point';
     }
@@ -1152,11 +1152,11 @@
       $miny=$ru[1];
       $maxx=$ru[0];
       if ($minx==$maxx AND $miny==$maxy) {
-        # Das Rechteck hat die Kantenlänge 0 deshalb zoom auf Punkt
+        # Das Rechteck hat die KantenlÃ¤nge 0 deshalb zoom auf Punkt
         $zoom='point';
       }
       else {
-        # zoom auf Rechteck wegen Kantenlänge > 0
+        # zoom auf Rechteck wegen KantenlÃ¤nge > 0
         $zoom='rectangle';
       }
     }
@@ -1173,7 +1173,7 @@
       else{
         #---------- Punkt-Rollenlayer erzeugen --------#
         $legendentext ="Koordinate: ".$minx." ".$maxy;
-        if(strpos($minx, '°') !== false){
+        if(strpos($minx, 'Â°') !== false){
 	      	$minx = dms2dec($minx);
 	      	$maxy = dms2dec($maxy);
 	      }
@@ -1237,7 +1237,7 @@
         $this->user->rolle->set_one_Group($this->user->id, $this->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
         $this->loadMap('DataBase');
 
-        # hier wurden Weltkoordinaten übergeben
+        # hier wurden Weltkoordinaten Ã¼bergeben
         $this->pixwidth = ($this->map->extent->maxx - $this->map->extent->minx)/$this->map->width;
         $pixel_x = ($minx-$this->map->extent->minx)/$this->pixwidth;
         $pixel_y = ($this->map->extent->maxy-$maxy)/$this->pixwidth;
@@ -1258,7 +1258,7 @@
        	$oPixelExt->setextent($minx,$miny,$maxx,$maxy); 
         $this->map->zoomrectangle($oPixelExt,$this->map->width,$this->map->height,$this->map->extent);
         # Nochmal Zoomen auf die Mitte mit Faktor 1, damit der Ausschnitt in den erlaubten Bereich
-        # verschoben wird, falls er ausserhalb liegt, zoompoint berücksichtigt das, zoomrectangle nicht.
+        # verschoben wird, falls er ausserhalb liegt, zoompoint berÃ¼cksichtigt das, zoomrectangle nicht.
         # Berechnung der Bildmitte
         $oPixelPos=ms_newPointObj();
         $oPixelPos->setXY($this->map->width/2,$this->map->height/2);
@@ -1304,7 +1304,7 @@
 			}
 		}
     
-    # Erstellen des Maßstabes
+    # Erstellen des MaÃŸstabes
     $this->switchScaleUnitIfNecessary();
     $img_scalebar = $this->map->drawScaleBar();
     $filename = $this->map_saveWebImage($img_scalebar,'png');
@@ -1410,7 +1410,7 @@
 	  foreach($this->formvars as $key => $value){
 	  	if(is_string($value))$this->formvars[$key] = stripslashes($value);
 	  }
-    # bisher gibt es folgenden verschiedenen Dokumente die angezeigt werden können
+    # bisher gibt es folgenden verschiedenen Dokumente die angezeigt werden kÃ¶nnen
 		if ($this->formvars['mime_type'] != '') $this->mime_type = $this->formvars['mime_type'];
 
     switch ($this->mime_type) {
@@ -1675,7 +1675,7 @@
     }
     return 0;
   }
-}class rolle {  var $user_id;  var $stelle_id;  var $debug;  var $database;  var $loglevel;  var $hist_timestamp;	function rolle($user_id,$stelle_id,$database) {
+}class rolle {  var $user_id;  var $stelle_id;  var $debug;  var $database;  var $loglevel;  static $hist_timestamp;	function rolle($user_id,$stelle_id,$database) {
 		global $debug;
 		$this->debug=$debug;
 		$this->user_id=$user_id;
@@ -2101,11 +2101,11 @@
     $this->disabled_classes = $this->read_disabled_classes();
 		$i = 0;
     while ($rs=mysql_fetch_array($query)) {
-      if($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivStatus'] != '0')){    # bei withclasses == 2 werden für alle Layer die Klassen geladen, bei withclasses == 1 werden die Klassen nur dann geladen, wenn der Layer aktiv ist
+      if($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivStatus'] != '0')){    # bei withclasses == 2 werden fÃ¼r alle Layer die Klassen geladen, bei withclasses == 1 werden die Klassen nur dann geladen, wenn der Layer aktiv ist
         $rs['Class']=$this->read_Classes($rs['Layer_ID'], $this->disabled_classes);
       }
       $this->Layer[$i]=$rs;
-			$this->Layer['layer_ids'][$rs['Layer_ID']] =& $this->Layer[$i];		# damit man mit einer Layer-ID als Schlüssel auf dieses Array zugreifen kann
+			$this->Layer['layer_ids'][$rs['Layer_ID']] =& $this->Layer[$i];		# damit man mit einer Layer-ID als SchlÃ¼ssel auf dieses Array zugreifen kann
 			$i++;
     }
     return $this->Layer;

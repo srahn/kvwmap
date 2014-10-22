@@ -1187,7 +1187,7 @@ class rolle {
 	var $debug;
 	var $database;
 	var $loglevel;
-	public static $hist_timestamp;
+	static $hist_timestamp;
 
 	function rolle($user_id,$stelle_id,$database) {
 		global $debug;

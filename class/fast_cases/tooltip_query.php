@@ -69,10 +69,10 @@
     # Debugdatei setzen
     global $debug;
     $this->debug=$debug;
-    # Logdatei f¸r Mysql setzen
+    # Logdatei f√ºr Mysql setzen
     global $log_mysql;
     $this->log_mysql=$log_mysql;
-    # Logdatei f¸r PostgreSQL setzten
+    # Logdatei f√ºr PostgreSQL setzten
     global $log_postgres;
     $this->log_postgres=$log_postgres;
     # layout Templatedatei zur Anzeige der Daten
@@ -125,7 +125,7 @@
 				$lo=explode(',',$corners[0]); # linke obere Ecke in Bildkoordinaten von links oben gesehen
 				$ru=explode(',',$corners[1]); # reche untere Ecke des Auswahlbereiches in Bildkoordinaten von links oben gesehen
 				$width=$this->user->rolle->pixsize*($ru[0]-$lo[0]); # Breite des Auswahlbereiches in m
-				$height=$this->user->rolle->pixsize*($ru[1]-$lo[1]); # Hˆhe des Auswahlbereiches in m
+				$height=$this->user->rolle->pixsize*($ru[1]-$lo[1]); # H√∂he des Auswahlbereiches in m
 				#echo 'Abfragerechteck im Bild: '.$lo[0].' '.$lo[1].' '.$ru[0].' '.$ru[1];
 				# linke obere Ecke im Koordinatensystem in m
 				$minx=$this->user->rolle->oGeorefExt->minx+$this->user->rolle->pixsize*$lo[0]; # x Wert
@@ -158,7 +158,7 @@
       $anzLayer=count($layerset);
     }
     else{
-      echo 'Bitte w‰hlen Sie einen Layer zur Sachdatenabfrage aus.##';
+      echo 'Bitte w√§hlen Sie einen Layer zur Sachdatenabfrage aus.##';
     }
     $map=ms_newMapObj('');
     $map->set('shapepath', SHAPEPATH);
@@ -174,7 +174,7 @@
       $privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
       #$path = $this->Stelle->parse_path($layerdb, $path, $privileges);
       $layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames']);
-	    # weitere Informationen hinzuf¸gen (Auswahlmˆglichkeiten, usw.)
+	    # weitere Informationen hinzuf√ºgen (Auswahlm√∂glichkeiten, usw.)
 	    $layerset[$i]['attributes'] = $this->mapDB->add_attribute_values($layerset[$i]['attributes'], $layerdb, NULL, true);
       
 
@@ -244,7 +244,7 @@
       
       //$the_geom = $layerset[$i]['attributes']['the_geom'];
 				
-				# Aktueller EPSG in der die Abfrage ausgef¸hrt wurde
+				# Aktueller EPSG in der die Abfrage ausgef√ºhrt wurde
 				$client_epsg=$this->user->rolle->epsg_code;
 				# EPSG-Code des Layers der Abgefragt werden soll
 				$layer_epsg=$layerset[$i]['epsg_code'];
@@ -256,7 +256,7 @@
 					default : $pixsize=$this->user->rolle->pixsize;
 				}
 				$rand=$layerset[$i]['tolerance']*$pixsize;
-				# Bildung der Where-Klausel f¸r die r‰umliche Abfrage mit der searchbox
+				# Bildung der Where-Klausel f√ºr die r√§umliche Abfrage mit der searchbox
 				$loosesearchbox_wkt ="POLYGON((";
 				$loosesearchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->miny-$rand).",";
 				$loosesearchbox_wkt.=strval($rect->maxx+$rand)." ".strval($rect->miny-$rand).",";
@@ -289,12 +289,12 @@
 				$sql_where = " AND ".$layerset[$i]['maintable']."_oid = ".$this->formvars['oid'];
 			}
       
-      # SVG-Geometrie abfragen f¸r highlighting
+      # SVG-Geometrie abfragen f√ºr highlighting
       if($this->user->rolle->highlighting == '1'){
         $pfad = "st_assvg(st_transform(".$layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$the_geom.", ".$client_epsg."), 0, 8) AS highlight_geom, ".$pfad;
       }
       
-      # 2006-06-12 sr   Filter zur Where-Klausel hinzugef¸gt
+      # 2006-06-12 sr   Filter zur Where-Klausel hinzugef√ºgt
       if($layerset[$i]['Filter'] != ''){
       	$layerset[$i]['Filter'] = str_replace('$userid', $this->user->id, $layerset[$i]['Filter']);
         $sql_where .= " AND ".$layerset[$i]['Filter'];
@@ -324,7 +324,7 @@
       	$sql .= $layerset[$i]['attributes']['orderby'];
       }
       
-      # Anh‰ngen des Begrenzers zur Einschr‰nkung der Anzahl der Ergebniszeilen
+      # Anh√§ngen des Begrenzers zur Einschr√§nkung der Anzahl der Ergebniszeilen
       $sql_limit.=' LIMIT '.MAXQUERYROWS;
 
       #echo '<br>sql:<br>'.$sql;
@@ -369,7 +369,7 @@
 									}
 								} break;
 								case 'Auswahlfeld': {
-									if(is_array($attributes['dependent_options'][$j])){		# mehrere Datens‰tze und ein abh‰ngiges Auswahlfeld --> verschiedene Auswahlmˆglichkeiten
+									if(is_array($attributes['dependent_options'][$j])){		# mehrere Datens√§tze und ein abh√§ngiges Auswahlfeld --> verschiedene Auswahlm√∂glichkeiten
 										for($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++){
 											if($attributes['enum_value'][$j][$k][$e] == $layer['shape'][$k][$attributes['name'][$j]]){
 												$auswahlfeld_output = $attributes['enum_output'][$j][$k][$e];
@@ -399,14 +399,14 @@
             	}
             }
           }
-          # Links und Bild-URLs anf¸gen
+          # Links und Bild-URLs anf√ºgen
           $output .= $links;
       		$output .= $pictures;
       		$pictures = '';
           $output .= '|| ';
         }
       }
-      # highlighting-Geometrie anf¸gen
+      # highlighting-Geometrie anf√ºgen
       $output .= '||| '.$this->qlayerset[0]['shape'][0]['highlight_geom'];
       echo umlaute_javascript(umlaute_html($output)).'~showtooltip(top.document.GUI.result.value, '.$showdata.');';
     }
@@ -414,7 +414,7 @@
   function get_dokument_vorschau($dateinamensteil){
 		$type = $dateinamensteil[1];
   	$dokument = $dateinamensteil[0].'.'.$dateinamensteil[1];
-		if($type == 'jpg' OR $type == 'png' OR $type == 'gif' ){			// f¸r Bilder werden automatisch Thumbnails erzeugt
+		if($type == 'jpg' OR $type == 'png' OR $type == 'gif' ){			// f√ºr Bilder werden automatisch Thumbnails erzeugt
 			$thumbname = $dateinamensteil[0].'_thumb.'.$dateinamensteil[1];			
 			if(!file_exists($thumbname)){
 				exec(IMAGEMAGICKPATH.'convert '.$dokument.' -resize 250 '.$thumbname);
@@ -693,7 +693,7 @@
 		}
 		return $privileges;
 	}
-}class rolle {  var $user_id;  var $stelle_id;  var $debug;  var $database;  var $loglevel;  var $hist_timestamp;	function rolle($user_id,$stelle_id,$database) {
+}class rolle {  var $user_id;  var $stelle_id;  var $debug;  var $database;  var $loglevel;  static $hist_timestamp;	function rolle($user_id,$stelle_id,$database) {
 		global $debug;
 		$this->debug=$debug;
 		$this->user_id=$user_id;
@@ -1032,7 +1032,7 @@
       	$attributes['length'][$i]= $rs['length'];
       	$attributes['decimal_length'][$i]= $rs['decimal_length'];
   		
-				if(substr($rs['default'], 0, 6) == 'SELECT'){					# da Defaultvalues auch dynamisch sein kˆnnen (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
+				if(substr($rs['default'], 0, 6) == 'SELECT'){					# da Defaultvalues auch dynamisch sein k√∂nnen (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
 					$ret1 = $layerdb->execSQL($rs['default'], 4, 0);					
 					if($ret1[0]==0){
 						$attributes['default'][$i] = array_pop(pg_fetch_row($ret1[1]));
@@ -1073,9 +1073,9 @@
       return $attributes;
   }
   function add_attribute_values($attributes, $database, $query_result, $withvalues = true){
-    # Diese Funktion f¸gt den Attributen je nach Attributtyp zus‰tzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmˆglichkeiten.
+    # Diese Funktion f√ºgt den Attributen je nach Attributtyp zus√§tzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlm√∂glichkeiten.
     for($i = 0; $i < count($attributes['name']); $i++){
-      if($attributes['constraints'][$i] != '' AND $attributes['constraints'][$i] != 'PRIMARY KEY'){  # das sind die Auswahlmˆglichkeiten, die durch die Tabellendefinition in Postgres fest vorgegeben sind
+      if($attributes['constraints'][$i] != '' AND $attributes['constraints'][$i] != 'PRIMARY KEY'){  # das sind die Auswahlm√∂glichkeiten, die durch die Tabellendefinition in Postgres fest vorgegeben sind
       	$attributes['enum_value'][$i] = explode(',', str_replace("'", "", $attributes['constraints'][$i]));
       	$attributes['enum_output'][$i] = $attributes['enum_value'][$i];
       }
@@ -1083,8 +1083,8 @@
         switch($attributes['form_element_type'][$i]){
           # Auswahlfelder
           case 'Auswahlfeld' : {
-            if($attributes['options'][$i] != ''){     # das sind die Auswahlmˆglichkeiten, die man im Attributeditor selber festlegen kann
-              if(strpos($attributes['options'][$i], "'") === 0){      # Aufz‰hlung wie 'wert1','wert2','wert3'
+            if($attributes['options'][$i] != ''){     # das sind die Auswahlm√∂glichkeiten, die man im Attributeditor selber festlegen kann
+              if(strpos($attributes['options'][$i], "'") === 0){      # Aufz√§hlung wie 'wert1','wert2','wert3'
                 $attributes['enum_value'][$i] = explode(',', str_replace("'", "", $attributes['options'][$i]));
                 $attributes['enum_output'][$i] = $attributes['enum_value'][$i];
               }
@@ -1096,7 +1096,7 @@
                 if($req_by_start > 0){
                   $req_by_end = strpos(strtolower($attributes['options'][$i]), "</required by>");
                   $req_by = trim(substr($attributes['options'][$i], $req_by_start+13, $req_by_end-$req_by_start-13));
-                  $attributes['req_by'][$i] = $req_by;    # das abh‰ngige Attribut
+                  $attributes['req_by'][$i] = $req_by;    # das abh√§ngige Attribut
                   $attributes['options'][$i] = substr($attributes['options'][$i], 0, $req_by_start);    # required-Tag aus SQL entfernen
                 }
                 # ------<required by>------
@@ -1106,7 +1106,7 @@
                   $req_end = strpos(strtolower($attributes['options'][$i]), "</requires>");                  
     							$sql_rest = substr($attributes['options'][$i], $req_end+11);
                   $req = trim(substr($attributes['options'][$i], $req_start+10, $req_end-$req_start-10));
-                  $attributes['req'][$i] = $req;    # das Attribut von dem dieses Attribut abh‰ngig ist
+                  $attributes['req'][$i] = $req;    # das Attribut von dem dieses Attribut abh√§ngig ist
                   if($query_result != NULL){
                     $options = $attributes['options'][$i];
                     for($k = 0; $k < count($query_result); $k++){
@@ -1114,16 +1114,16 @@
                         $attributes['dependent_options'][$i][$k] = substr($options, 0, $req_start)."'".$query_result[$k][$req]."' ".$sql_rest;    # requires-Tag aus SQL entfernen und ein Array erzeugen, welches die korrekten SQLs jedem Datensatz zuordnet
                       }
                       else{
-                        $attributes['dependent_options'][$i][$k] = '';    # wenn in diesem Datensatz des Query-Results das benˆtigte Attribut keinen Wert hat, sind die abh‰ngigen Optionen f¸r diesen Datensatz leer
+                        $attributes['dependent_options'][$i][$k] = '';    # wenn in diesem Datensatz des Query-Results das ben√∂tigte Attribut keinen Wert hat, sind die abh√§ngigen Optionen f√ºr diesen Datensatz leer
                       }
                     }
                   }
                   else{
-                    $attributes['options'][$i] = '';      # wenn kein Query-Result ¸bergeben wurde, sind die Optionen leer
+                    $attributes['options'][$i] = '';      # wenn kein Query-Result √ºbergeben wurde, sind die Optionen leer
                   }
                 }
                 # -----<requires>------
-                if(is_array($attributes['dependent_options'][$i])){   # mehrere Datens‰tze und ein abh‰ngiges Auswahlfeld --> verschiedene Auswahlmˆglichkeiten
+                if(is_array($attributes['dependent_options'][$i])){   # mehrere Datens√§tze und ein abh√§ngiges Auswahlfeld --> verschiedene Auswahlm√∂glichkeiten
                   for($k = 0; $k < count($query_result); $k++){
                     $sql = $attributes['dependent_options'][$i][$k];
                     if($sql != ''){
@@ -1150,7 +1150,7 @@
                 if($optionen[1] != ''){   
                   $further_options = explode(' ', $optionen[1]);      # die weiteren Optionen exploden (opt1 opt2 opt3)
                   for($k = 0; $k < count($further_options); $k++){
-                    if(strpos($further_options[$k], 'layer_id') !== false){     #layer_id=XX bietet die Mˆglichkeit hier eine Layer_ID zu definieren, f¸r die man einen neuen Datensatz erzeugen kann
+                    if(strpos($further_options[$k], 'layer_id') !== false){     #layer_id=XX bietet die M√∂glichkeit hier eine Layer_ID zu definieren, f√ºr die man einen neuen Datensatz erzeugen kann
                       $attributes['subform_layer_id'][$i] = array_pop(explode('=', $further_options[$k]));
                       $layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
                       $attributes['subform_layer_privileg'][$i] = $layer['privileg'];
@@ -1164,7 +1164,7 @@
             }
           }break;
   
-          # SubFormulare mit Prim‰rschl¸ssel(n)
+          # SubFormulare mit Prim√§rschl√ºssel(n)
           case 'SubFormPK' : {
             if($attributes['options'][$i] != ''){
               $options = explode(';', $attributes['options'][$i]);  # layer_id,pkey1,pkey2,pkey3...; weitere optionen
@@ -1183,7 +1183,7 @@
             }
           }break;
   
-          # SubFormulare mit Fremdschl¸ssel
+          # SubFormulare mit Fremdschl√ºssel
           case 'SubFormFK' : {
             if($attributes['options'][$i] != ''){
               $options = explode(';', $attributes['options'][$i]);  # layer_id,fkey1,fkey2,fkey3...; weitere optionen
@@ -1203,7 +1203,7 @@
             }
           }break;
           
-          # eingebettete SubFormulare mit Prim‰rschl¸ssel(n)
+          # eingebettete SubFormulare mit Prim√§rschl√ºssel(n)
           case 'SubFormEmbeddedPK' : {
             if($attributes['options'][$i] != ''){
               $options = explode(';', $attributes['options'][$i]);  # layer_id,pkey1,pkey2,preview_attribute; weitere Optionen
