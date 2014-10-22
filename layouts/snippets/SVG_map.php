@@ -1374,10 +1374,6 @@ function highlight(evt){
 	if(document.getElementById("coords0") != undefined){document.getElementById("coords0").style.setProperty("fill","ghostwhite","");}
   evt.target.style.setProperty("fill",highlighted,"");
   document.getElementById("suchkreis").setAttribute("cx", -10000);
-	if(top.document.GUI.punktfang != undefined){
-		remove_vertices();
-		options1 = top.document.getElementById("options").innerHTML="";
-	}
 }
 
 
