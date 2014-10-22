@@ -12572,7 +12572,15 @@ class GUI {
 		$newextent=ms_newRectObj();
 		$newextent->setextent($zoomminx,$zoomminy,$zoommaxx,$zoommaxy);
 		if($this->ref['epsg_code'] != $this->user->rolle->epsg_code){
-			$newextent->project($this->reference_map->projection, $this->map->projection);
+			if(MAPSERVERVERSION < '600'){
+				$projFROM = ms_newprojectionobj("init=epsg:".$this->ref['epsg_code']);
+				$projTO = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);
+			}
+			else{
+				$projFROM = $this->reference_map->projection;
+				$projTO = $this->map->projection;
+			}
+			$newextent->project($projFROM, $projTO);
 		}
     $this->map->setextent($newextent->minx,$newextent->miny,$newextent->maxx,$newextent->maxy);
     $oPixelPos=ms_newPointObj();
