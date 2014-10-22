@@ -87,8 +87,20 @@ class ALB {
       $flurstkennz = $flurstuecke[$i];
       $flst = new flurstueck($flurstkennz,$this->database);
       $flst->readALB_Data($flurstkennz);
-
-      for($kl = 0; $kl < count($flst->Klassifizierung)-1; $kl++){		    		           
+			if(ALKIS){
+				$ratio = $flst->ALB_Flaeche/$flst->Klassifizierung[0]['flstflaeche'];
+				$emzges_222 = 0; $emzges_223 = 0;
+				$flaeche_222 = 0; $flaeche_223 = 0;
+				$limit = count($flst->Klassifizierung)+2;
+			}
+			else{
+				$limit = count($flst->Klassifizierung)-1;
+			}
+      for($kl = 0; $kl < $limit; $kl++){
+				if(ALKIS AND $kl == $limit-2){              
+					$nichtgeschaetzt=round($flst->ALB_Flaeche-$flaeche_222-$flaeche_223);
+					if($nichtgeschaetzt <= 0)continue;
+				}
 	      if($formvars['flurstkennz']){ $csv .= $flst->FlurstKennz.';';}
 	      if($formvars['flurstkennz']){ $csv .= "'".$flst->FlurstNr."';";}
 	      if($formvars['gemkgname']){ $csv .= $flst->GemkgName.';';}
@@ -142,22 +154,66 @@ class ALB {
 	      }
       
       	// Klassifizierung
-      	$csv .= '"'; 
-        $csv .= $flst->Klassifizierung[$kl]['tabkenn'].'-'.$flst->Klassifizierung[$kl]['klass'].' '.$flst->Klassifizierung[$kl]['bezeichnung'].' ';
-        $wert=substr($flst->Klassifizierung[$kl]['angaben'],strrpos($flst->Klassifizierung[$kl]['angaben'],'/')+1);
-        $emz = round($flst->Klassifizierung[$kl]['flaeche'] * $wert / 100);
-        if($flst->Klassifizierung[$kl]['tabkenn'] =='32' AND $flst->Klassifizierung[$kl]['angaben'] !='') {
-          $csv .= "'".$flst->Klassifizierung[$kl]['angaben']."'";
-        } else {
-          $csv .= $flst->Klassifizierung[$kl]['angaben'];
-        }
-        $csv .= '";';
-        $csv .= $flst->Klassifizierung[$kl]['flaeche'].';';
-        if ($flst->Klassifizierung[$kl]['tabkenn'] == '32' AND $flst->Klassifizierung[$kl]['angaben'] !='') {
-        	$csv .= $emz;
-        	$flst->emz = true;
-        }
-        $csv .= ';;;;';
+				if(ALKIS){
+					$wert=$flst->Klassifizierung[$kl]['wert'];
+					if($wert != ''){
+						$csv .= '"';
+						$flst->Klassifizierung[$kl]['flaeche'] = $flst->Klassifizierung[$kl]['flaeche'] * $ratio;
+						$emz = round($flst->Klassifizierung[$kl]['flaeche'] * $wert / 100);
+						if($flst->Klassifizierung[$kl]['objart'] == 1000){
+							$emzges_222 = $emzges_222 + $emz;
+							$flaeche_222 = $flaeche_222 + $flst->Klassifizierung[$kl]['flaeche'];
+						}
+						if($flst->Klassifizierung[$kl]['objart'] == 3000){
+							$emzges_223 = $emzges_223 + $emz;
+							$flaeche_223 = $flaeche_223 + $flst->Klassifizierung[$kl]['flaeche'];
+						}					
+						$csv .= $flst->Klassifizierung[$kl]['label'];
+						$csv .= '";';
+						$csv .= round($flst->Klassifizierung[$kl]['flaeche']).';';
+						$csv .= $emz;
+						$flst->emz = true;
+					}
+					
+					if($kl == $limit-2){              
+						if($nichtgeschaetzt>0){
+							$csv .= utf8_encode('nicht geschätzt: ;'.$nichtgeschaetzt.';');
+						}
+						else{
+							$csv .= ';;';
+						}
+					}
+					$csv .= ';';
+					if($kl == $limit-1){              
+						$csv .= ';';
+						if($emzges_222 > 0){
+							$BWZ_222 = round($emzges_222/$flaeche_222*100);
+							$csv .= ' Ackerland gesamt: EMZ '.$emzges_222.' , BWZ '.$BWZ_222." ";
+						}
+						if($emzges_223 > 0){
+							$BWZ_223 = round($emzges_223/$flaeche_223*100);
+							$csv .= utf8_encode(' Grünland gesamt: EMZ '.$emzges_223.' , BWZ '.$BWZ_223);
+						}
+					}
+				}
+				else{
+					$csv .= '"';
+					$csv .= $flst->Klassifizierung[$kl]['tabkenn'].'-'.$flst->Klassifizierung[$kl]['klass'].' '.$flst->Klassifizierung[$kl]['bezeichnung'].' ';
+					$wert=substr($flst->Klassifizierung[$kl]['angaben'],strrpos($flst->Klassifizierung[$kl]['angaben'],'/')+1);
+					$emz = round($flst->Klassifizierung[$kl]['flaeche'] * $wert / 100);
+					if($flst->Klassifizierung[$kl]['tabkenn'] =='32' AND $flst->Klassifizierung[$kl]['angaben'] !='') {
+						$csv .= "'".$flst->Klassifizierung[$kl]['angaben']."'";
+					} else {
+						$csv .= $flst->Klassifizierung[$kl]['angaben'];
+					}
+					$csv .= '";';
+					$csv .= $flst->Klassifizierung[$kl]['flaeche'].';';
+					if ($flst->Klassifizierung[$kl]['tabkenn'] == '32' AND $flst->Klassifizierung[$kl]['angaben'] !='') {
+						$csv .= $emz;
+						$flst->emz = true;
+					}
+				}
+				$csv .= ';;;;';
         //////////////////////EMZ aus ALK////////////////////////
         //////////////////////
         	      
@@ -636,27 +692,62 @@ class ALB {
 				        $csv .= ';';
 				      }
             if($formvars['klassifizierung']){
-            	$emzges = 0;
-			      	$csv .= '"';
-			        for($j = 0; $j < count($flst->Klassifizierung)-1; $j++){
-			          if($j > 0)$csv .= " \n ";
-			          $csv .= $flst->Klassifizierung[$j]['flaeche'].'m² '.$flst->Klassifizierung[$j]['tabkenn'].'-'.$flst->Klassifizierung[$j]['klass'].' '.$flst->Klassifizierung[$j]['bezeichnung'].' ';
-			          $wert=mb_substr($flst->Klassifizierung[$j]['angaben'],mb_strrpos($flst->Klassifizierung[$j]['angaben'],'/','utf8')+1, 999,'utf8');
-			          $emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
-			          if($flst->Klassifizierung[$j]['tabkenn'] =='32' AND $flst->Klassifizierung[$j]['angaben'] !='') {
-			            $csv .= "'".$flst->Klassifizierung[$j]['angaben']."'";
-			          } else {
-			            $csv .= $flst->Klassifizierung[$j]['angaben'];
-			          }
-			          if ($flst->Klassifizierung[$j]['tabkenn'] == '32' AND $flst->Klassifizierung[$j]['angaben'] !='') {
-			            $csv .= ' EMZ: '.$emz;
-			            $emzges=$emzges+$emz;
-			            $flst->emz = true;
-			          }
-			        }
-			        if ($emzges > 0) {
-			          $csv .= "\n EMZ gesamt: ".$emzges;
-			        }
+							$csv .= '"';
+							if(ALKIS){
+								$ratio = $flst->ALB_Flaeche/$flst->Klassifizierung[0]['flstflaeche'];
+								$emzges_222 = 0; $emzges_223 = 0;
+								$flaeche_222 = 0; $flaeche_223 = 0;
+								for($j = 0; $j < count($flst->Klassifizierung); $j++){
+									$wert=$flst->Klassifizierung[$j]['wert'];
+									$flst->Klassifizierung[$j]['flaeche'] = $flst->Klassifizierung[$j]['flaeche'] * $ratio;
+									$emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
+									if($flst->Klassifizierung[$j]['objart'] == 1000){
+										$emzges_222 = $emzges_222 + $emz;
+										$flaeche_222 = $flaeche_222 + $flst->Klassifizierung[$j]['flaeche'];
+									}
+									if($flst->Klassifizierung[$j]['objart'] == 3000){
+										$emzges_223 = $emzges_223 + $emz;
+										$flaeche_223 = $flaeche_223 + $flst->Klassifizierung[$j]['flaeche'];
+									}
+									$csv .= utf8_encode(round($flst->Klassifizierung[$j]['flaeche']).' m² ');
+									$csv .= $flst->Klassifizierung[$j]['label'];
+									$csv .= ' EMZ: '.$emz." \n";
+								}
+								$nichtgeschaetzt=round($flst->ALB_Flaeche-$flaeche_222-$flaeche_223);
+								if($nichtgeschaetzt > 0){
+									$csv .= utf8_encode('nicht geschätzt: '.$nichtgeschaetzt." m² \n");
+								}
+								if($emzges_222 > 0){
+									$BWZ_222 = round($emzges_222/$flaeche_222*100);
+									$csv .= 'Ackerland gesamt: EMZ '.$emzges_222.', BWZ '.$BWZ_222." \n";
+								}
+								if($emzges_223 > 0){
+									$BWZ_223 = round($emzges_223/$flaeche_223*100);
+									$csv .= utf8_encode('Grünland gesamt: EMZ '.$emzges_223.', BWZ '.$BWZ_223." \n");
+								}
+							}
+							else{
+								$emzges = 0;
+								for($j = 0; $j < count($flst->Klassifizierung)-1; $j++){
+									if($j > 0)$csv .= " \n ";
+									$csv .= $flst->Klassifizierung[$j]['flaeche'].'m² '.$flst->Klassifizierung[$j]['tabkenn'].'-'.$flst->Klassifizierung[$j]['klass'].' '.$flst->Klassifizierung[$j]['bezeichnung'].' ';
+									$wert=mb_substr($flst->Klassifizierung[$j]['angaben'],mb_strrpos($flst->Klassifizierung[$j]['angaben'],'/','utf8')+1, 999,'utf8');
+									$emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
+									if($flst->Klassifizierung[$j]['tabkenn'] =='32' AND $flst->Klassifizierung[$j]['angaben'] !='') {
+										$csv .= "'".$flst->Klassifizierung[$j]['angaben']."'";
+									} else {
+										$csv .= $flst->Klassifizierung[$j]['angaben'];
+									}
+									if ($flst->Klassifizierung[$j]['tabkenn'] == '32' AND $flst->Klassifizierung[$j]['angaben'] !='') {
+										$csv .= ' EMZ: '.$emz;
+										$emzges=$emzges+$emz;
+										$flst->emz = true;
+									}
+								}
+								if ($emzges > 0) {
+									$csv .= "\n EMZ gesamt: ".$emzges;
+								}
+							}
 			        $csv .= '";"';
 			        //////////////////////EMZ aus ALK////////////////////////
 			      		if(!$flst->emz){
@@ -907,27 +998,62 @@ class ALB {
 	        $csv .= ';';
 	      }
 			if($formvars['klassifizierung']){
-				$emzges = 0;
-      	$csv .= '"';
-        for($j = 0; $j < count($flst->Klassifizierung)-1; $j++){
-          if($j > 0)$csv .= " \n ";
-          $csv .= $flst->Klassifizierung[$j]['flaeche'].'m² '.$flst->Klassifizierung[$j]['tabkenn'].'-'.$flst->Klassifizierung[$j]['klass'].' '.$flst->Klassifizierung[$j]['bezeichnung'].' ';
-          $wert=mb_substr($flst->Klassifizierung[$j]['angaben'],mb_strrpos($flst->Klassifizierung[$j]['angaben'],'/','utf8')+1, 999, 'utf8');
-          $emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
-          if($flst->Klassifizierung[$j]['tabkenn'] =='32' AND $flst->Klassifizierung[$j]['angaben'] !='') {
-            $csv .= "'".$flst->Klassifizierung[$j]['angaben']."'";
-          } else {
-            $csv .= $flst->Klassifizierung[$j]['angaben'];
-          }
-          if ($flst->Klassifizierung[$j]['tabkenn'] == '32' AND $flst->Klassifizierung[$j]['angaben'] !='') {
-            $csv .= ' EMZ: '.$emz;
-            $emzges=$emzges+$emz;
-            $flst->emz = true;
-          }
-        }
-        if ($emzges > 0) {
-          $csv .= "\n EMZ gesamt: ".$emzges;
-        }
+				$csv .= '"';
+				if(ALKIS){
+					$ratio = $flst->ALB_Flaeche/$flst->Klassifizierung[0]['flstflaeche'];
+					$emzges_222 = 0; $emzges_223 = 0;
+					$flaeche_222 = 0; $flaeche_223 = 0;
+					for($j = 0; $j < count($flst->Klassifizierung); $j++){
+						$wert=$flst->Klassifizierung[$j]['wert'];
+						$flst->Klassifizierung[$j]['flaeche'] = $flst->Klassifizierung[$j]['flaeche'] * $ratio;
+						$emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
+						if($flst->Klassifizierung[$j]['objart'] == 1000){
+							$emzges_222 = $emzges_222 + $emz;
+							$flaeche_222 = $flaeche_222 + $flst->Klassifizierung[$j]['flaeche'];
+						}
+						if($flst->Klassifizierung[$j]['objart'] == 3000){
+							$emzges_223 = $emzges_223 + $emz;
+							$flaeche_223 = $flaeche_223 + $flst->Klassifizierung[$j]['flaeche'];
+						}
+						$csv .= utf8_encode(round($flst->Klassifizierung[$j]['flaeche']).' m² ');
+						$csv .= $flst->Klassifizierung[$j]['label'];
+						$csv .= ' EMZ: '.$emz." \n";
+					}
+					$nichtgeschaetzt=round($flst->ALB_Flaeche-$flaeche_222-$flaeche_223);
+					if($nichtgeschaetzt > 0){
+						$csv .= utf8_encode('nicht geschätzt: '.$nichtgeschaetzt." m² \n");
+					}
+					if($emzges_222 > 0){
+						$BWZ_222 = round($emzges_222/$flaeche_222*100);
+						$csv .= 'Ackerland gesamt: EMZ '.$emzges_222.', BWZ '.$BWZ_222." \n";
+					}
+					if($emzges_223 > 0){
+						$BWZ_223 = round($emzges_223/$flaeche_223*100);
+						$csv .= utf8_encode('Grünland gesamt: EMZ '.$emzges_223.', BWZ '.$BWZ_223." \n");
+					}
+				}
+				else{
+					$emzges = 0;
+					for($j = 0; $j < count($flst->Klassifizierung)-1; $j++){
+						if($j > 0)$csv .= " \n ";
+						$csv .= $flst->Klassifizierung[$j]['flaeche'].'m² '.$flst->Klassifizierung[$j]['tabkenn'].'-'.$flst->Klassifizierung[$j]['klass'].' '.$flst->Klassifizierung[$j]['bezeichnung'].' ';
+						$wert=mb_substr($flst->Klassifizierung[$j]['angaben'],mb_strrpos($flst->Klassifizierung[$j]['angaben'],'/','utf8')+1, 999, 'utf8');
+						$emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
+						if($flst->Klassifizierung[$j]['tabkenn'] =='32' AND $flst->Klassifizierung[$j]['angaben'] !='') {
+							$csv .= "'".$flst->Klassifizierung[$j]['angaben']."'";
+						} else {
+							$csv .= $flst->Klassifizierung[$j]['angaben'];
+						}
+						if ($flst->Klassifizierung[$j]['tabkenn'] == '32' AND $flst->Klassifizierung[$j]['angaben'] !='') {
+							$csv .= ' EMZ: '.$emz;
+							$emzges=$emzges+$emz;
+							$flst->emz = true;
+						}
+					}
+					if ($emzges > 0) {
+						$csv .= "\n EMZ gesamt: ".$emzges;
+					}
+				}
         $csv .= '";"';
         //////////////////////EMZ aus ALK////////////////////////
       		if(!$flst->emz){
@@ -1204,28 +1330,63 @@ class ALB {
         $csv .= ';';
       }
       if($formvars['klassifizierung']){
-      	$csv .= '"';
-      	$emzges = 0;
-        for($j = 0; $j < count($flst->Klassifizierung)-1; $j++){
-          if($j > 0)$csv .= "\n";
-          $csv .= $flst->Klassifizierung[$j]['flaeche'].'m² '.$flst->Klassifizierung[$j]['tabkenn'].'-'.$flst->Klassifizierung[$j]['klass'].' '.$flst->Klassifizierung[$j]['bezeichnung'].' ';
-          $wert=mb_substr($flst->Klassifizierung[$j]['angaben'],mb_strrpos($flst->Klassifizierung[$j]['angaben'],'/','utf8')+1, 999, 'utf8');
-          $emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
-          if($flst->Klassifizierung[$j]['tabkenn'] =='32' AND $flst->Klassifizierung[$j]['angaben'] !='') {
-            $csv .= "'".$flst->Klassifizierung[$j]['angaben']."'";
-          } else {
-            $csv .= $flst->Klassifizierung[$j]['angaben'];
-          }
-          if ($flst->Klassifizierung[$j]['tabkenn'] == '32' AND $flst->Klassifizierung[$j]['angaben'] !='') {
-            $csv .= ' EMZ: '.$emz;
-            $emzges=$emzges+$emz;
-            $flst->emz = true;
-          }
-        }
-        if ($emzges > 0) {
-          $csv .= "\n EMZ gesamt: ".$emzges;
-        }
-        $csv .= '";"';
+				$csv .= '"';
+				if(ALKIS){
+					$ratio = $flst->ALB_Flaeche/$flst->Klassifizierung[0]['flstflaeche'];
+	        $emzges_222 = 0; $emzges_223 = 0;
+		      $flaeche_222 = 0; $flaeche_223 = 0;
+		      for($j = 0; $j < count($flst->Klassifizierung); $j++){
+						$wert=$flst->Klassifizierung[$j]['wert'];
+						$flst->Klassifizierung[$j]['flaeche'] = $flst->Klassifizierung[$j]['flaeche'] * $ratio;
+						$emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
+						if($flst->Klassifizierung[$j]['objart'] == 1000){
+							$emzges_222 = $emzges_222 + $emz;
+							$flaeche_222 = $flaeche_222 + $flst->Klassifizierung[$j]['flaeche'];
+						}
+						if($flst->Klassifizierung[$j]['objart'] == 3000){
+							$emzges_223 = $emzges_223 + $emz;
+							$flaeche_223 = $flaeche_223 + $flst->Klassifizierung[$j]['flaeche'];
+						}
+            $csv .= utf8_encode(round($flst->Klassifizierung[$j]['flaeche']).' m² ');
+						$csv .= $flst->Klassifizierung[$j]['label'];
+						$csv .= ' EMZ: '.$emz." \n";
+					}
+					$nichtgeschaetzt=round($flst->ALB_Flaeche-$flaeche_222-$flaeche_223);
+					if($nichtgeschaetzt > 0){
+						$csv .= utf8_encode('nicht geschätzt: '.$nichtgeschaetzt." m² \n");
+					}
+					if($emzges_222 > 0){
+						$BWZ_222 = round($emzges_222/$flaeche_222*100);
+						$csv .= 'Ackerland gesamt: EMZ '.$emzges_222.', BWZ '.$BWZ_222." \n";
+					}
+					if($emzges_223 > 0){
+						$BWZ_223 = round($emzges_223/$flaeche_223*100);
+						$csv .= utf8_encode('Grünland gesamt: EMZ '.$emzges_223.', BWZ '.$BWZ_223." \n");
+					}
+				}
+				else{
+					$emzges = 0;
+					for($j = 0; $j < count($flst->Klassifizierung)-1; $j++){
+						if($j > 0)$csv .= "\n";
+						$csv .= $flst->Klassifizierung[$j]['flaeche'].'m² '.$flst->Klassifizierung[$j]['tabkenn'].'-'.$flst->Klassifizierung[$j]['klass'].' '.$flst->Klassifizierung[$j]['bezeichnung'].' ';
+						$wert=mb_substr($flst->Klassifizierung[$j]['angaben'],mb_strrpos($flst->Klassifizierung[$j]['angaben'],'/','utf8')+1, 999, 'utf8');
+						$emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
+						if($flst->Klassifizierung[$j]['tabkenn'] =='32' AND $flst->Klassifizierung[$j]['angaben'] !='') {
+							$csv .= "'".$flst->Klassifizierung[$j]['angaben']."'";
+						} else {
+							$csv .= $flst->Klassifizierung[$j]['angaben'];
+						}
+						if ($flst->Klassifizierung[$j]['tabkenn'] == '32' AND $flst->Klassifizierung[$j]['angaben'] !='') {
+							$csv .= ' EMZ: '.$emz;
+							$emzges=$emzges+$emz;
+							$flst->emz = true;
+						}
+					}
+					if ($emzges > 0) {
+						$csv .= "\n EMZ gesamt: ".$emzges;
+					}
+				}
+				$csv .= '";"';
         //////////////////////EMZ aus ALK////////////////////////
       		if(!$flst->emz){
 	        	$alkemz = $flst->getEMZfromALK();
