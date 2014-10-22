@@ -97,11 +97,12 @@ class shape {
 				
 						$layer_id = $dbmap->newRollenLayer($this->formvars);
 				
-				    $classdata[0] = ' ';
-				    $classdata[1] = -$layer_id;
-				    $classdata[2] = '';
-				    $classdata[3] = 0;
-				    $class_id = $dbmap->new_Class($classdata);
+						$attrib['name'] = ' ';
+						$attrib['layer_id'] = -$layer_id;
+						$attrib['expression'] = '';
+						$attrib['order'] = 0;
+						
+				    $class_id = $dbmap->new_Class($attrib);
 				    $this->formvars['class'] = $class_id;
 							    
 				    $style['colorred'] = $result_colors[rand(0,10)]['red'];
