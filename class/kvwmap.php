@@ -2013,6 +2013,10 @@ class GUI {
 				$data_attributes = $mapDB->getDataAttributes($layerdb, $layer[$i]['Layer_ID']);
 				$extent = 'st_transform(st_geomfromtext(\'POLYGON(('.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->maxy.', '.$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layer[$i]['epsg_code'].')';				
 				$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects('.$data_attributes['the_geom'].', '.$extent.')';
+				# Filter hinzufügen
+				if($layer[$i]['Filter'] != ''){
+          $fromwhere .= " AND ".$layer[$i]['Filter'];
+        }
 				if($layer[$i]['Datentyp'] == 0){	# POINT
 					$sql = 'SELECT st_x(the_geom), st_y(the_geom) FROM (SELECT st_transform('.$data_attributes['the_geom'].', '.$this->user->rolle->epsg_code.') as '.$data_attributes['the_geom'].' '.$fromwhere.') foo LIMIT 10000';
 				}
