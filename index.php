@@ -44,8 +44,8 @@ if($_REQUEST['go_plus'] != '')$go = $go.'_'.$_REQUEST['go_plus'];
 define(CASE_COMPRESS, false);				#
 #####################################
 
-$non_spatial_cases = array('changemenue_with_ajax', 'get_group_legend');		// für non-spatial cases wird in start.php keine Verbindung zur PostgreSQL aufgebaut usw.
-$spatial_cases = array('navMap_ajax', 'tooltip_query');
+$non_spatial_cases = array('changemenue_with_ajax');		// für non-spatial cases wird in start.php keine Verbindung zur PostgreSQL aufgebaut usw.
+$spatial_cases = array('navMap_ajax', 'tooltip_query', 'get_group_legend');
 $fast_loading_cases = array_merge($spatial_cases, $non_spatial_cases);
 
 if(in_array($go, $fast_loading_cases))define(FAST_CASE, true);else define(FAST_CASE, false);
