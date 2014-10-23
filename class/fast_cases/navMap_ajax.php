@@ -1321,11 +1321,11 @@
 			return false;
 		}
 		elseif($layer['Filter'] != ''){
-			if(strpos($layer['Filter'], '&&')){
-				$filterparts = explode(' ', $layer['Filter']);
+			if(strpos($layer['Filter'], '::geometry')){				
+				$filterparts = explode(",", $layer['Filter']);
 				for($j = 0; $j < count($filterparts); $j++){
-					if($filterparts[$j] == '&&'){
-						if($this->BBoxinExtent($filterparts[$j+1]) == 'f'){
+					if(strpos($filterparts[$j], '::geometry))')){
+						if($this->BBoxinExtent(trim($filterparts[$j], ')')) == 'f'){
 							return false;
 						}
 						break;
