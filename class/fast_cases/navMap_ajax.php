@@ -39,6 +39,7 @@
   $allowedPasswordAgeRemainDays=$allowedPasswordAgeDays-$passwordAgeDays; # Zeitinterval wie lange das Passwort noch gilt in Tagen
 	return $allowedPasswordAgeRemainDays; // Passwort ist abgelaufen wenn Wert < 1  
 }
+
 class GUI {  var $layout;  var $style;  var $mime_type;  var $menue;  var $pdf;  var $addressliste;  var $debug;  var $dbConn;  var $flst;  var $formvars;  var $legende;  var $map;  var $mapDB;  var $img;  var $FormObject;  var $StellenForm;  var $Fehlermeldung;  var $Hinweis;  var $Stelle;  var $ALB;  var $activeLayer;  var $nImageWidth;  var $nImageHeight;  var $user;  var $qlayerset;  var $scaleUnitSwitchScale;  var $map_scaledenom;  var $map_factor;  var $formatter;  function GUI($main, $style, $mime_type) {
     # Debugdatei setzen
     global $debug;
@@ -158,7 +159,7 @@
           if($this->map_factor == ''){
             $this->map_factor=1;
           }
-          if($layerset[$i]['maxscale'] > 0) {
+          if ($layerset[$i]['maxscale'] > 0) {
             if(MAPSERVERVERSION > 500){
               $layer->set('maxscaledenom', $layerset[$i]['maxscale']/$this->map_factor*1.414);
             }
@@ -166,7 +167,7 @@
               $layer->set('maxscale', $layerset[$i]['maxscale']/$this->map_factor*1.414);
             }
           }
-          if($layerset[$i]['minscale'] > 0) {
+          if ($layerset[$i]['minscale'] > 0) {
             if(MAPSERVERVERSION > 500){
               $layer->set('minscaledenom', $layerset[$i]['minscale']/$this->map_factor*1.414);
             }
@@ -396,7 +397,6 @@
 						$layer->setMetaData('wms_format',$layerset[$i]['wms_format']);
 						$layer->setMetaData('ows_server_version',$layerset[$i]['wms_server_version']);
 						$layer->setMetaData('ows_version',$layerset[$i]['wms_server_version']);
-						if($layerset[$i]['ows_srs'] == '')$layerset[$i]['ows_srs'] = 'EPSG:'.$layerset[$i]['epsg_code'];
 						$layer->setMetaData('ows_srs',$layerset[$i]['ows_srs']);
 						$layer->setMetaData('wms_connectiontimeout',$layerset[$i]['wms_connectiontimeout']);
 						$layer->setMetaData('wms_auth_username', $layerset[$i]['wms_auth_username']);
@@ -463,39 +463,39 @@
 							}
 						}
 						
-						if(!$this->noMinMaxScaling AND $layerset[$i]['minscale']>=0) {
-							if($this->map_factor != ''){
-								if(MAPSERVERVERSION > 500){
-									$layer->set('minscaledenom', $layerset[$i]['minscale']/$this->map_factor*1.414);
-								}
-								else{
-									$layer->set('minscale', $layerset[$i]['minscale']/$this->map_factor*1.414);
-								}
+						if ($layerset[$i]['minscale']>=0) {
+						if($this->map_factor != ''){
+							if(MAPSERVERVERSION > 500){
+							$layer->set('minscaledenom', $layerset[$i]['minscale']/$this->map_factor*1.414);
 							}
 							else{
-								if(MAPSERVERVERSION > 500){
-									$layer->set('minscaledenom', $layerset[$i]['minscale']);
-								}
-								else{
-									$layer->set('minscale', $layerset[$i]['minscale']);
-								}
+							$layer->set('minscale', $layerset[$i]['minscale']/$this->map_factor*1.414);
 							}
 						}
-						if(!$this->noMinMaxScaling AND $layerset[$i]['maxscale']>0) {
+						else{
+							if(MAPSERVERVERSION > 500){
+							$layer->set('minscaledenom', $layerset[$i]['minscale']);
+							}
+							else{
+							$layer->set('minscale', $layerset[$i]['minscale']);
+							}
+						}
+						}
+						if ($layerset[$i]['maxscale']>0) {
 							if($this->map_factor != ''){
 								if(MAPSERVERVERSION > 500){
-									$layer->set('maxscaledenom', $layerset[$i]['maxscale']/$this->map_factor*1.414);
+								$layer->set('maxscaledenom', $layerset[$i]['maxscale']/$this->map_factor*1.414);
 								}
 								else{
-									$layer->set('maxscale', $layerset[$i]['maxscale']/$this->map_factor*1.414);
+								$layer->set('maxscale', $layerset[$i]['maxscale']/$this->map_factor*1.414);
 								}
 							}
 							else{
 								if(MAPSERVERVERSION > 500){
-									$layer->set('maxscaledenom', $layerset[$i]['maxscale']);
+								$layer->set('maxscaledenom', $layerset[$i]['maxscale']);
 								}
 								else{
-									$layer->set('maxscale', $layerset[$i]['maxscale']);
+								$layer->set('maxscale', $layerset[$i]['maxscale']);
 								}
 							}
 						}
@@ -553,7 +553,7 @@
             else {
               # Vektorlayer
               if($layerset[$i]['Data'] != ''){
-								$layerset[$i]['Data'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[$i]['Data']);
+								$layerset[$i]['Data'] = str_replace('$hist_timestamp', HIST_TIMESTAMP, $layerset[$i]['Data']);
                 $layer->set('data', $layerset[$i]['Data']);
               }
   
@@ -1335,6 +1335,15 @@
 		}
 		return true;
 	}
+	function BBoxinExtent($geom){
+    $sql = "SELECT st_geomfromtext('POLYGON((".$this->map->extent->minx." ".$this->map->extent->miny.", ".$this->map->extent->maxx." ".$this->map->extent->miny.", ".$this->map->extent->maxx." ".$this->map->extent->maxy.", ".$this->map->extent->minx." ".$this->map->extent->maxy.", ".$this->map->extent->minx." ".$this->map->extent->miny."))', ".$this->user->rolle->epsg_code.") && st_transform(".$geom.", ".$this->user->rolle->epsg_code.")";
+    #echo $sql;
+    $ret = $this->pgdatabase->execSQL($sql,4, 0);
+    if(!$ret[0]) {
+      $rs=pg_fetch_array($ret[1]);
+      return $rs[0];
+    }
+  }
   function switchScaleUnitIfNecessary() {
 		if ($this->map_scaledenom > $this->scaleUnitSwitchScale) $this->map->scalebar->set('units', MS_KILOMETERS);
   }
