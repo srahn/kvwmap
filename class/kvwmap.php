@@ -1705,11 +1705,11 @@ class GUI {
 			return false;
 		}
 		elseif($layer['Filter'] != ''){
-			if(strpos($layer['Filter'], '&&')){
-				$filterparts = explode(' ', $layer['Filter']);
+			if(strpos($layer['Filter'], '::geometry')){				
+				$filterparts = explode(",", $layer['Filter']);
 				for($j = 0; $j < count($filterparts); $j++){
-					if($filterparts[$j] == '&&'){
-						if($this->BBoxinExtent($filterparts[$j+1]) == 'f'){
+					if(strpos($filterparts[$j], '::geometry))')){
+						if($this->BBoxinExtent(trim($filterparts[$j], ')')) == 'f'){
 							return false;
 						}
 						break;
@@ -13401,8 +13401,8 @@ class db_mapObj{
       for($i = 0; $i < count($filter); $i++){
         if($filter[$i]['type'] == 'geometry'){
           $poly_geom = $database->getpolygon($filter[$i]['attributvalue'], $layerdata['epsg_code']);
-          $filterstring .= ' AND '.$filter[$i]['attributname'].' && \''.$poly_geom.'\'';
-          $filterstring .= ' AND '.$filter[$i]['operator'].'('.$filter[$i]['attributname'].',\''.$poly_geom.'\')';
+          #$filterstring .= ' AND '.$filter[$i]['attributname'].' && \''.$poly_geom.'\'';		// ist ja bei within und intersects schon mit drin
+          $filterstring .= ' AND '.$filter[$i]['operator'].'('.$filter[$i]['attributname'].',\''.$poly_geom.'\'::geometry)';
         }
         else{
           if($filter[$i]['operator'] == 'IS'){
