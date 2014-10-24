@@ -570,7 +570,7 @@ class Nachweis {
     $ret=$this->database->execSQL($sql,4, 1);
     if($andere_art != ''){
     	$sql = "INSERT INTO nachweisverwaltung.n_nachweise2dokumentarten";
-    	$sql .= " SELECT id, ".$andere_art." FROM n_nachweise WHERE oid = ".pg_last_oid($ret[1]);
+    	$sql .= " SELECT id, ".$andere_art." FROM nachweisverwaltung.n_nachweise WHERE oid = ".pg_last_oid($ret[1]);
     	#echo $sql;
     	$ret=$this->database->execSQL($sql,4, 1);	
     }
@@ -602,7 +602,7 @@ class Nachweis {
 	    }
 	    else{
 	    	$sql = "INSERT INTO nachweisverwaltung.n_nachweise2dokumentarten";
-	    	$sql .= " SELECT id, ".$andere_art." FROM n_nachweise WHERE id = ".$id;
+	    	$sql .= " SELECT id, ".$andere_art." FROM nachweisverwaltung.n_nachweise WHERE id = ".$id;
 	    	#echo $sql;
 	    	$ret=$this->database->execSQL($sql,4, 1);	
 	    }	
