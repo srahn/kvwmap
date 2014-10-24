@@ -29,7 +29,7 @@
 			return Math.round((degrees + minutes)*10000)/10000;  
 		}
 		
-		function format_number(number, convert){
+		function format_number(number, convert, freehand){
 			coordtype = \''.$this->user->rolle->coordtype.'\';
 			epsgcode = \''.$this->user->rolle->epsg_code.'\';
 			if(epsgcode == 4326){
@@ -41,7 +41,10 @@
 				}
 			}
 			else{
-				if(parseFloat(document.GUI.pixelsize.value) < 0.01){
+				if(freehand == false){
+					stellen = 3;
+				}
+				else if(parseFloat(document.GUI.pixelsize.value) < 0.01){
 			    stellen = 2;
 			  }
 			  else if(parseFloat(document.GUI.pixelsize.value) < 0.1){
@@ -72,8 +75,8 @@
 			coordtype = \''.$this->user->rolle->coordtype.'\';		
 			var mittex  = '.$this->map->width.'/2*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value);
 			var mittey  = parseFloat(top.document.GUI.maxy.value) - '.$this->map->height.'/2*parseFloat(top.document.GUI.pixelsize.value);
-			mittex = format_number(mittex, true);
-			mittey = format_number(mittey, true);
+			mittex = format_number(mittex, true, true);
+			mittey = format_number(mittey, true, true);
 			coords1 = prompt("Geben Sie die gewünschten Koordinaten ein \noder klicken Sie auf Abbrechen für die Koordinatenabfrage.",mittex+" "+mittey);
 			if(coords1){
 				coords2 = coords1.split(" ");
@@ -99,8 +102,8 @@
 		  coorx = evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value);
 		  coory = parseFloat(top.document.GUI.maxy.value) - evt.clientY*parseFloat(top.document.GUI.pixelsize.value);
 		  					
-		  coorxf = format_number(coorx, true);
-		  cooryf = format_number(coory, true);
+		  coorxf = format_number(coorx, true, true);
+		  cooryf = format_number(coory, true, true);
 			
 			if(coorx < minx || coorx > maxx)coorxf = "undefiniert";
 			if(coory < miny || coory > maxy)cooryf = "undefiniert";
@@ -108,7 +111,7 @@
 			if(top.document.GUI.lastcoordx != undefined && top.document.GUI.lastcoordx.value != ""){
 				vectorx = top.document.GUI.lastcoordx.value - coorxf;
 				vectory = top.document.GUI.lastcoordy.value - cooryf;
-				distance = format_number(Math.sqrt(Math.pow(vectorx, 2) + Math.pow(vectory, 2)), false);
+				distance = format_number(Math.sqrt(Math.pow(vectorx, 2) + Math.pow(vectory, 2)), false, true);
 				window.status = " R:" + coorxf + " / H:" + cooryf + "  Entfernung: " + distance + " m    EPSG: "+'.$this->user->rolle->epsg_code.';
 				if(top.document.GUI.runningcoords != undefined)top.document.GUI.runningcoords.value = coorxf + " / " + cooryf + "   " + distance + " m"; 
 			}

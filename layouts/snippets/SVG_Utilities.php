@@ -3011,8 +3011,8 @@ $measurefunctions = '
 	  else{
 	    stellen = 0;
 	  }
-	  track0 = top.format_number(track0, false);
-	  track = top.format_number(track, false);
+	  track0 = top.format_number(track0, false, true);
+	  track = top.format_number(track, false, true);
 	
 	  output = "Strecke: "+track+" m ("+track0+" m)";
 	  show_tooltip(output,client_x,resy-client_y);

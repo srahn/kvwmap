@@ -305,6 +305,7 @@ $svg='<?xml version="1.0"?>
   var thetaDelta = '.WAITING_ANIMATION_SPEED.'; // The amount to rotate the square about every 16.7 milliseconds, in degrees.
 	var requestAnimationFrameID;
 	var last_x = 0;
+	freehand_measuring = false;
   		
   ';
 	
@@ -406,6 +407,7 @@ function mousewheelzoom(){
 }
 
 function mousewheelchange(evt){
+	deactivate_vertices();
 	if(!evt)evt = window.event; // For IE
 	if(top.document.GUI.stopnavigation.value == 0){
 		window.clearTimeout(mousewheelloop);
@@ -610,8 +612,8 @@ function noMeasuring(){
 }
 
 function measure(){
-	//options1 = top.document.getElementById("options");
-	//options1.innerHTML=\'<input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang\';		// ist jetzt immer da
+	options1 = top.document.getElementById("options");
+	options1.innerHTML=\'<input type="checkbox" onclick="toggle_vertices()" name="orthofang">&nbsp;Ortho-Fang\';
   doing = "measure";
 	if(top.document.GUI.str_pathx.value != ""){
 		measuring = true;	
@@ -790,6 +792,7 @@ function mousedown(evt){
 		   startarrowdraw(evt);
 	   break;
 	   case "measure":
+			freehand_measuring = true;
 	    if (measuring){
 	    	client_x = evt.clientX;
 			  client_y = resy - evt.clientY;
@@ -1052,7 +1055,7 @@ function polygonarea(evt){
 		parea	= 0.5 * Math.sqrt(parts*parts);
 		hidetooltip(evt);
 		area = parea*parseFloat(top.document.GUI.pixelsize.value)*parseFloat(top.document.GUI.pixelsize.value);			
-		area = top.format_number(area, false);
+		area = top.format_number(area, false, true);
 		show_tooltip("Fl"+unescape("%E4")+"cheninhalt: "+area+" m"+unescape("%B2")+" "+unescape("%A0"),  evt.clientX, evt.clientY);
 		return;
 	}
@@ -1068,12 +1071,15 @@ top.document.getElementById("vertices").SVGtoggle_vertices = toggle_vertices;		/
 top.document.getElementById("vertices").SVGshow_vertices = show_vertices;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
 function toggle_vertices(){
-	if(top.document.GUI.punktfang.checked){
+	remove_vertices();
+	if(top.document.GUI.punktfang.checked || top.document.GUI.orthofang.checked){
 		request_vertices();
 	}
-	else{
-		remove_vertices();
-	}
+}
+
+function deactivate_vertices(){
+	top.document.GUI.punktfang.checked = false;
+	remove_vertices();
 }
 
 function request_vertices(){
@@ -1081,25 +1087,70 @@ function request_vertices(){
 }
 
 function show_vertices(){
+	remove_vertices();
 	if(top.document.GUI.vertices.value != ""){
 		var parent = document.getElementById("vertices");
+		var last_x;
+		var last_y;
 		circle = new Array();
+		circle2 = new Array();
+		line = new Array();
+		image_coords = new Array();
 		kreis1 = document.getElementById("kreis");
+		linie1 = document.getElementById("linie");
 		vertex_string = top.document.GUI.vertices.value+"";
 		top.document.GUI.vertices.value = "";
 		vertices = vertex_string.split("|");
 		for(i = 0; i < vertices.length-1; i++){
-			circle[i] = kreis1.cloneNode(true);
-			coords = vertices[i].split(" ");
-			circle[i].setAttribute("x", coords[0]);
-			circle[i].setAttribute("y", coords[1]);
-			coords[0] = Math.round((coords[0] - parseFloat(top.document.GUI.minx.value))/parseFloat(top.document.GUI.pixelsize.value));
-			coords[1] = Math.round((coords[1] - top.document.GUI.miny.value)/parseFloat(top.document.GUI.pixelsize.value));
-			circle[i].setAttribute("cx", coords[0]);
-			circle[i].setAttribute("cy", coords[1]);
-			circle[i].setAttribute("style","fill: #FF0000");
-			circle[i].setAttribute("id", "vertex_"+i);
-			parent.appendChild(circle[i]);
+			if(vertices[i] == " "){		// das ist der Trenner zwischen Geometrien
+				start_vertex = "";
+			}
+			else{
+				coords = vertices[i].split(" ");
+				image_coords[0] = Math.round((coords[0] - parseFloat(top.document.GUI.minx.value))/parseFloat(top.document.GUI.pixelsize.value));
+				image_coords[1] = Math.round((coords[1] - top.document.GUI.miny.value)/parseFloat(top.document.GUI.pixelsize.value));
+				if(top.document.GUI.punktfang.checked && start_vertex != vertices[i]){		// damit bei Polygonen der gleiche Anfangs- und Endpunkt nicht zweimal hinzugefuegt wird
+					circ = kreis1.cloneNode(true);
+					circ.setAttribute("x", coords[0]);
+					circ.setAttribute("y", coords[1]);
+					circ.setAttribute("cx", image_coords[0]);
+					circ.setAttribute("cy", image_coords[1]);
+					circ.setAttribute("style","fill: #FF0000");
+					circ.setAttribute("id", "vertex_"+i);
+					circle.push(circ);
+				}
+				if(top.document.GUI.orthofang != undefined && top.document.GUI.orthofang.checked && start_vertex != ""){
+					// Zwischenlinien
+					line[i] = linie1.cloneNode(true);
+					line[i].setAttribute("wx1", coords[0]);
+					line[i].setAttribute("wy1", coords[1]);
+					line[i].setAttribute("wx2", last_x);
+					line[i].setAttribute("wy2", last_y);
+					line[i].setAttribute("x1", image_coords[0]);
+					line[i].setAttribute("y1", image_coords[1]);
+					line[i].setAttribute("x2", last_image_x);
+					line[i].setAttribute("y2", last_image_y);
+					line[i].setAttribute("style","stroke: #FFFFFF");
+					line[i].setAttribute("opacity", "0.01");
+					line[i].setAttribute("id", "line_new_"+i);
+					parent.appendChild(line[i]);
+					// Zwischenpunkte
+					circle2[i] = kreis1.cloneNode(true);
+					circle2[i].setAttribute("cx", -5000);
+					circle2[i].setAttribute("cy", -5000);
+					circle2[i].setAttribute("style","fill: #00FF00");
+					circle2[i].setAttribute("id", "vertex_new_"+i);
+					parent.appendChild(circle2[i]);
+				}
+				last_x = coords[0];
+				last_y = coords[1];
+				last_image_x = image_coords[0];
+				last_image_y = image_coords[1];
+				if(start_vertex == "")start_vertex = vertices[i];
+			}
+		}
+		for(i = 0; i < circle.length; i++){
+			parent.appendChild(circle[i]);		// erst jetzt, damit die Punkte ueber den Linien liegen
 		}
 	}
 }
@@ -1107,7 +1158,7 @@ function show_vertices(){
 function remove_vertices(){
 	var parent = document.getElementById("vertices");
 	var count = parent.childNodes.length;
-	for(i = 0; i < count-2; i++){
+	for(i = 0; i < count-4; i++){
 		parent.removeChild(parent.lastChild);
 	}
 }
@@ -1122,8 +1173,44 @@ function activate_vertex(evt){
 	top.document.GUI.activated_vertex.value = evt.target.getAttribute("id");
 }
 
+function activate_line(evt){
+	if(doing == "measure"){
+		last_x = pathx_world[pathx_world.length-1];
+		last_y = pathy_world[pathy_world.length-1];
+		if(last_x != undefined){
+			line = evt.target;
+			vertex_id_string = line.getAttribute("id");
+			vertex_id = vertex_id_string.split("_");
+			// Lotfusspunkt berechnen
+			p1x = parseFloat(line.getAttribute("wx1"));
+			p1y = parseFloat(line.getAttribute("wy1"));
+			p2x = parseFloat(line.getAttribute("wx2"));
+			p2y = parseFloat(line.getAttribute("wy2"));
+			ax = p2x - p1x;
+			ay = p2y - p1y;
+			bx = last_x - p1x;
+			by = last_y - p1y;
+			c = ax*ax + ay*ay;
+			d = bx*ax + by*ay;
+			e = d/c;
+			x = p1x + e*ax;
+			y = p1y + e*ay;
+			image_x = Math.round((x - parseFloat(top.document.GUI.minx.value))/parseFloat(top.document.GUI.pixelsize.value));
+			image_y = Math.round((y - top.document.GUI.miny.value)/parseFloat(top.document.GUI.pixelsize.value));
+			// Position des Punktes auf der Linie setzen
+			vertex = document.getElementById("vertex_new_"+vertex_id[2]);
+			vertex.setAttribute("x", x);
+			vertex.setAttribute("y", y);
+			vertex.setAttribute("cx", image_x);
+			vertex.setAttribute("cy", image_y);
+			vertex.setAttribute("opacity", "0.3");
+		}
+	}
+}
+
 function deactivate_vertex(evt){
-	evt.target.setAttribute("opacity", "0.1");
+	vertex = evt.target;
+	if(vertex.getAttribute("opacity") != "0.8")vertex.setAttribute("opacity", "0.1");
 	top.document.GUI.activated_vertex.value = 0;
 }
 
@@ -1133,10 +1220,12 @@ function add_vertex(evt){
 			restart();	
 			measuring = true;
 		}
-		pathx.push(evt.target.getAttribute("cx"));
-		pathy.push(evt.target.getAttribute("cy"));
-		pathx_world.push(top.format_number(evt.target.getAttribute("x"), false));
-		pathy_world.push(top.format_number(evt.target.getAttribute("y"), false));
+		vertex = evt.target;
+		pathx.push(vertex.getAttribute("cx"));
+		pathy.push(vertex.getAttribute("cy"));
+		pathx_world.push(parseFloat(vertex.getAttribute("x")));
+		pathy_world.push(parseFloat(vertex.getAttribute("y")));
+		vertex.setAttribute("opacity", "0.8");
 	  redrawPL();
 	}
 }
@@ -1147,8 +1236,8 @@ function startMeasure(evt) {
   // neuen punkt abgreifen
 	pathx[0] = evt.clientX;
 	pathy[0] = resy - evt.clientY;
-	pathx_world[0] = top.format_number(evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value), false);
-	pathy_world[0] = top.format_number(top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value), false);
+	pathx_world[0] = top.format_number(evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value), false, true);
+	pathy_world[0] = top.format_number(top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value), false, true);
 }
 
 function showMeasurement(evt){
@@ -1158,8 +1247,8 @@ function showMeasurement(evt){
     part0 = parts;
     parts = parts + Math.sqrt(((pathx_world[j]-pathx_world[j+1])*(pathx_world[j]-pathx_world[j+1]))+((pathy_world[j]-pathy_world[j+1])*(pathy_world[j]-pathy_world[j+1])));
   }
-  track0 = top.format_number(part0, false);
-  track = top.format_number(parts, false);
+  track0 = top.format_number(part0, false, freehand_measuring);
+  track = top.format_number(parts, false, freehand_measuring);
   output = "Strecke: "+track+" m ("+track0+" m)";
   show_tooltip(output, evt.clientX, evt.clientY);
   deletelast(evt);
@@ -1171,8 +1260,8 @@ function addpoint(evt){
 	client_y = resy - evt.clientY;
 	pathx.push(client_x);
 	pathy.push(client_y);
-	pathx_world.push(top.format_number(evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value), false));
-	pathy_world.push(top.format_number(top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value), false));
+	pathx_world.push(top.format_number(evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value), false, true));
+	pathy_world.push(top.format_number(top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value), false, true));
   redrawPL();
 }
 
@@ -1208,8 +1297,8 @@ function show_coords(evt){
 	coorx = evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value);
 	coory = top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value);
 	if(top.document.GUI.secondcoords != undefined)top.ahah("index.php", "go=spatial_processing&curSRID='.$this->user->rolle->epsg_code.'&newSRID='.$this->user->rolle->epsg_code2.'&point="+coorx+" "+coory+"&operation=transformPoint&resulttype=wkt&coordtype='.$this->user->rolle->coordtype.'", new Array(top.document.GUI.secondcoords), "");
-	coorx = top.format_number(coorx, true);
-	coory = top.format_number(coory, true);
+	coorx = top.format_number(coorx, true, true);
+	coory = top.format_number(coory, true, true);
 	top.document.GUI.firstcoords.value = coorx+" "+coory; 
 	top.document.getElementById("showcoords").style.display="";
 }
@@ -1316,6 +1405,7 @@ if (!moving) return;
 }
 
 function moveMap(){
+	deactivate_vertices();
   //kartenausschnitt verschieben
   move_x = pathx[1]-pathx[0];
   move_y = pathy[1]-pathy[0];
@@ -1374,6 +1464,9 @@ function highlight(evt){
 	if(document.getElementById("coords0") != undefined){document.getElementById("coords0").style.setProperty("fill","ghostwhite","");}
   evt.target.style.setProperty("fill",highlighted,"");
   document.getElementById("suchkreis").setAttribute("cx", -10000);
+	if(top.document.GUI.orthofang != undefined){
+		options1 = top.document.getElementById("options").innerHTML="";
+	}
 }
 
 
@@ -1435,6 +1528,7 @@ $svg.='
   <rect id="canvas" cursor="crosshair" onmousedown="mousedown(evt)" onmousemove="mousemove(evt);" onmouseup="mouseup(evt);" width="100%" height="100%" opacity="0"/>
 		<g id="vertices" transform="translate(0,'.$res_y.') scale(1,-1)">
 			<circle id="kreis" cx="-500" cy="-500" r="7" opacity="0.1" onmouseover="activate_vertex(evt)" onmouseout="deactivate_vertex(evt)" onmousedown="add_vertex(evt)" />
+			<line stroke="#111" stroke-width="14" id="linie" x1="-5000" y1="-5000" x2="-5001" y2="-5001" opacity="0.8" onmouseover="activate_line(evt)" onmousemove="activate_line(evt)" />
 		</g>
     <g id="buttons" onmouseout="hide_tooltip()" onmousemove="get_bbox();" onmousedown="hide_tooltip()" cursor="pointer">
 '.$SVGvars_mainnavbuttons.'

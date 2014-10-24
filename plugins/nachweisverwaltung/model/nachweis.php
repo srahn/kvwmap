@@ -1818,7 +1818,7 @@ class Vermessungsstelle {
 
   function getVermStelleListe(){
     # fragt alle Vermessungsstellen aus der Datenbank ab (id, Name)
-    $sql = 'SELECT * FROM nachweisverwaltung.n_vermstelle ORDER BY name';
+    $sql = 'SELECT * FROM nachweisverwaltung.n_vermstelle ORDER BY ascii(name)';
     $queryret=$this->database->execSQL($sql,4, 0);
     if ($queryret[0]) {
       $errmsg='Fehler bei der Abfrage der Vermessungsstellen in der Datenbank bei Statement: '.$sql;

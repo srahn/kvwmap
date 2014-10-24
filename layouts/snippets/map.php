@@ -263,7 +263,10 @@ if($this->formvars['gps_follow'] == ''){
 						          		&nbsp;&nbsp;<a href="index.php?go=Kartenkommentar_Formular&consumetime=<?php echo $this->user->rolle->newtime; ?>&hauptkarte=<?php echo $this->img['hauptkarte']; ?>"><?php echo $strSave; ?></a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="index.php?go=Kartenkommentar_Waehlen&prevtime=<?php echo $this->user->rolle->newtime; ?>"><?php echo $strChoose ?></a>&nbsp;&nbsp;|&nbsp;&nbsp;<? if(SHOW_MAP_IMAGE == 'true'){ ?><a id="MapImageLink" target="_blank" href="" onmouseover="javascript:showMapImage();"><?php echo $strMapImageURL; ?></a></span><? } ?>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="javascript:resizemap2window();" ><? echo $strMapSize; ?></a>
 						            </div>
 						          </td>
-						          <td id="options"><input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang</td><!-- hier werden die Spezialoptionen eingefügt -->
+						          <td>
+												<input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang
+												<div id="options"></div><!-- hier werden die Spezialoptionen eingefügt -->
+											</td>
 						        </tr>
 						    	</table>
 			          </td>
