@@ -665,12 +665,8 @@ function get_measure_path(){
 function save_polygon_path(){
 	var length = polypathx.length;
 	if(length > 0){
-		var str_polypathx = (polypathx[0] * parseFloat(top.document.GUI.pixelsize.value)) + parseFloat(top.document.GUI.minx.value);
-		var str_polypathy = (polypathy[0] * parseFloat(top.document.GUI.pixelsize.value)) + parseFloat(top.document.GUI.miny.value);
-	  for(var i = 1; i < length; i++){
-	    str_polypathx = str_polypathx + ";" + ((polypathx[i] * parseFloat(top.document.GUI.pixelsize.value)) + parseFloat(top.document.GUI.minx.value));
-			str_polypathy = str_polypathy + ";" + ((polypathy[i] * parseFloat(top.document.GUI.pixelsize.value)) + parseFloat(top.document.GUI.miny.value));
-		}
+		str_polypathx = polypathx.join(";");
+		str_polypathy = polypathy.join(";");
 		top.document.GUI.str_polypathx.value = str_polypathx;
 		top.document.GUI.str_polypathy.value = str_polypathy;
 	}
@@ -682,15 +678,8 @@ function get_polygon_path(){
 		doing = "polygonquery";
 		var str_polypathx = top.document.GUI.str_polypathx.value;
 		var str_polypathy = top.document.GUI.str_polypathy.value;
-		world_polypathx = str_polypathx.split(";");
-		world_polypathy = str_polypathy.split(";");  
-		polypathx[0] = (world_polypathx[0] - parseFloat(top.document.GUI.minx.value))/parseFloat(top.document.GUI.pixelsize.value);
-		polypathy[0] = (world_polypathy[0] - parseFloat(top.document.GUI.miny.value))/parseFloat(top.document.GUI.pixelsize.value);
-		var length = world_polypathx.length; 
-	  for(var i = 1; i < length; i++){
-	    polypathx[i] = (world_polypathx[i] - parseFloat(top.document.GUI.minx.value))/parseFloat(top.document.GUI.pixelsize.value);
-			polypathy[i] = (world_polypathy[i] - parseFloat(top.document.GUI.miny.value))/parseFloat(top.document.GUI.pixelsize.value);
-		}
+		polypathx = str_polypathx.split(";");
+		polypathy = str_polypathy.split(";");  
 	}
 }
 
@@ -818,7 +807,7 @@ function mousemove(evt){
   switch(doing) {
 	 case "measure":
 	    if (measuring){
-	      showMeasurement(evt);
+	      add_current_point(evt);
 	    }
 	    else {
 	    show_tooltip(\'Startpunkt setzen\',evt.clientX,evt.clientY)
@@ -991,17 +980,17 @@ function startpolydraw(evt){
 	restart();
   polydrawing = true;
   // neuen punkt abgreifen
-  polypathx[0] = evt.clientX;
-  polypathy[0] = resy - evt.clientY;
+	polypathx[0] = evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value);
+	polypathy[0] = top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value);
 	if(doing == "drawpolygon"){
 		current_freepolygon = create_new_freepolygon();
 	}
 }
 		
 function addpolypoint(evt){
-	// neuen eckpunkt abgreifen
-  client_x = evt.clientX;
-  client_y = resy - evt.clientY;
+	// neuen eckpunkt abgreifen	
+	client_x = evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value);
+	client_y = top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value);
   if(doing == "polygonquery" && client_x == polypathx[polypathx.length-1] && client_y == polypathy[polypathy.length-1]){
   	sendpath(doing,polypathx,polypathy);
   }
@@ -1024,11 +1013,17 @@ function deletepolygon(){
 function redrawPolygon(){
 	// punktepfad erstellen
   polypath = "";
-  for(var i = 0; i < polypathx.length; ++i){
-  	polypath = polypath+" "+polypathx[i]+","+polypathy[i];
+	var image_polypathx = new Array();
+	var image_polypathy = new Array();
+	for(var i = 0; i < polypathx.length; i++){		// in Bild-Koordinaten umrechnen
+		image_polypathx[i] = (polypathx[i] - parseFloat(top.document.GUI.minx.value))/parseFloat(top.document.GUI.pixelsize.value);
+		image_polypathy[i] = (polypathy[i] - parseFloat(top.document.GUI.miny.value))/parseFloat(top.document.GUI.pixelsize.value);
+	}
+  for(var i = 0; i < image_polypathx.length; ++i){
+  	polypath = polypath+" "+image_polypathx[i]+","+image_polypathy[i];
 	}	
-	if(polypathx.length > 0){
-		polypath = polypath+" "+polypathx[0]+","+polypathy[0];
+	if(image_polypathx.length > 0){
+		polypath = polypath+" "+image_polypathx[0]+","+image_polypathy[0];
 	}
   // polygon um punktepfad erweitern
 	if(doing == "polygonquery"){
@@ -1046,15 +1041,14 @@ function redrawPolygon(){
 		
 function polygonarea(evt){
   // Flaecheninhalt eines Polygons nach Gauss
-  var parea = 0,parts = 0;
+  var area = 0,parts = 0;
 	if(polypathx.length > 2){
 		for(var j = 1; j < polypathx.length-1; ++j){
 	 		parts 	= parts + (polypathx[j]*(polypathy[j+1]-polypathy[j-1]));
 		}
 		parts = parts + (polypathx[polypathx.length-1]*(polypathy[0]-polypathy[polypathx.length-2])) + (polypathx[0]*(polypathy[1]-polypathy[polypathx.length-1]));
-		parea	= 0.5 * Math.sqrt(parts*parts);
-		hidetooltip(evt);
-		area = parea*parseFloat(top.document.GUI.pixelsize.value)*parseFloat(top.document.GUI.pixelsize.value);			
+		area	= 0.5 * Math.sqrt(parts*parts);
+		hidetooltip(evt);	
 		area = top.format_number(area, false, true);
 		show_tooltip("Fl"+unescape("%E4")+"cheninhalt: "+area+" m"+unescape("%B2")+" "+unescape("%A0"),  evt.clientX, evt.clientY);
 		return;
@@ -1167,9 +1161,18 @@ function activate_vertex(evt){
 	evt.target.setAttribute("opacity", "1");
 	coordx = evt.target.getAttribute("x");
 	coordy = evt.target.getAttribute("y");
-	coordx = Math.round(coordx * 1000) / 1000;
-	coordy = Math.round(coordy * 1000) / 1000;
-	if(top.document.GUI.runningcoords != undefined)top.document.GUI.runningcoords.value = coordx + " / " + coordy; 
+	image_coordx = evt.target.getAttribute("cx");
+	image_coordy = evt.target.getAttribute("cy");
+	if(doing == "measure" && measuring){
+		pathx.push(image_coordx);
+		pathy.push(image_coordy);
+		pathx_world.push(coordx);
+		pathy_world.push(coordy);
+		showMeasurement(evt);
+		redrawPL();
+		deletelast(evt);
+	}
+	if(top.document.GUI.runningcoords != undefined)top.document.GUI.runningcoords.value = top.format_number(coordx, false, false) + " / " + top.format_number(coordy, false, false); 
 	top.document.GUI.activated_vertex.value = evt.target.getAttribute("id");
 }
 
@@ -1215,18 +1218,29 @@ function deactivate_vertex(evt){
 }
 
 function add_vertex(evt){
+	vertex = evt.target;
 	if(doing == "measure"){
 		if(!measuring){
 			restart();	
 			measuring = true;
 		}
-		vertex = evt.target;
 		pathx.push(vertex.getAttribute("cx"));
 		pathy.push(vertex.getAttribute("cy"));
 		pathx_world.push(parseFloat(vertex.getAttribute("x")));
 		pathy_world.push(parseFloat(vertex.getAttribute("y")));
-		vertex.setAttribute("opacity", "0.8");
 	  redrawPL();
+		vertex.setAttribute("opacity", "0.8");
+	}
+	if(doing == "polygonquery"){
+		if(!polydrawing){
+			restart();
+			polydrawing = true;
+		}
+  	polypathx.push(parseFloat(vertex.getAttribute("x")));
+  	polypathy.push(parseFloat(vertex.getAttribute("y")));
+		redrawPolygon();
+		polygonarea(evt);
+		vertex.setAttribute("opacity", "0.8");
 	}
 }
 
@@ -1240,8 +1254,13 @@ function startMeasure(evt) {
 	pathy_world[0] = top.format_number(top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value), false, true);
 }
 
+function add_current_point(evt){
+	addpoint(evt);
+  showMeasurement(evt);
+  deletelast(evt);
+}
+
 function showMeasurement(evt){
-  addpoint(evt);
   var track = 0, track0 = 0, part0 = 0, parts = 0, output = "";
   for(var j = 0; j < pathx_world.length-1; ++j){
     part0 = parts;
@@ -1251,7 +1270,6 @@ function showMeasurement(evt){
   track = top.format_number(parts, false, freehand_measuring);
   output = "Strecke: "+track+" m ("+track0+" m)";
   show_tooltip(output, evt.clientX, evt.clientY);
-  deletelast(evt);
 }
 
 function addpoint(evt){
