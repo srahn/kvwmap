@@ -213,7 +213,7 @@ function getlegend(groupid, layerid, fremde){
 		else{
 			layer.value = 0;
 		}
-		ahah('index.php', 'go=get_group_legend&'+layer.name+'='+layer.value+'&group='+groupid+'&nurFremdeLayer='+fremde, new Array(groupdiv), "");
+		ahah('index.php', 'go=get_group_legend&layer_id='+layerid+'&show_classes='+layer.value+'&group='+groupid+'&nurFremdeLayer='+fremde, new Array(groupdiv), "");
 	}
 }
 
