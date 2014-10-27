@@ -110,7 +110,7 @@ class GUI {
     # Änderungen in den Gruppen werden gesetzt
     $this->formvars = $this->user->rolle->setGroupStatus($this->formvars);
     # Ein- oder Ausblenden der Klassen
-    #$this->user->rolle->setClassStatus($this->formvars); ???
+    $this->user->rolle->setClassStatus($this->formvars);
     $this->loadMap('DataBase');
     echo $this->create_group_legend($this->formvars['group']);
   } 

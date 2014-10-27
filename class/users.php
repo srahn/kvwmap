@@ -1942,21 +1942,13 @@ class rolle {
 	}
 
 	function setClassStatus($formvars) {
-		# Eintragen des showclasses=1 für Klassen, die angezeigt werden sollen
-		for ($i=0;$i<count($this->layerset);$i++) {
-			if ($formvars['classes_'.$this->layerset[$i]['Layer_ID']] != ''){
-				if ($formvars['classes_'.$this->layerset[$i]['Layer_ID']] == 1) {
-					$showclasses=1;
-				}
-				else {
-					$showclasses=0;
-				}
-				$sql ='UPDATE u_rolle2used_layer set showclasses = "'.$showclasses.'"';
-				$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-				$sql.=' AND layer_id='.$this->layerset[$i]['Layer_ID'];
-				$this->debug->write("<p>file:users.php class:rolle->setClassStatus - Speichern des Status der Klassen zur Rolle:",4);
-				$this->database->execSQL($sql,4, $this->loglevel);
-			}
+		if($formvars['layer_id'] != ''){
+			# Eintragen des showclasses=1 für Klassen, die angezeigt werden sollen
+			$sql ='UPDATE u_rolle2used_layer set showclasses = "'.$formvars['show_classes'].'"';
+			$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+			$sql.=' AND layer_id='.$formvars['layer_id'];
+			$this->debug->write("<p>file:users.php class:rolle->setClassStatus - Speichern des Status der Klassen zur Rolle:",4);
+			$this->database->execSQL($sql,4, $this->loglevel);
 		}
 	}
 

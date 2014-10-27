@@ -80,7 +80,7 @@
     # Änderungen in den Gruppen werden gesetzt
     $this->formvars = $this->user->rolle->setGroupStatus($this->formvars);
     # Ein- oder Ausblenden der Klassen
-    #$this->user->rolle->setClassStatus($this->formvars); ???
+    $this->user->rolle->setClassStatus($this->formvars);
     $this->loadMap('DataBase');
     echo $this->create_group_legend($this->formvars['group']);
   } 
@@ -1738,6 +1738,16 @@
     }
     return $groups;
   }
+	function setClassStatus($formvars) {
+		if($formvars['layer_id'] != ''){
+			# Eintragen des showclasses=1 für Klassen, die angezeigt werden sollen
+			$sql ='UPDATE u_rolle2used_layer set showclasses = "'.$formvars['show_classes'].'"';
+			$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+			$sql.=' AND layer_id='.$formvars['layer_id'];
+			$this->debug->write("<p>file:users.php class:rolle->setClassStatus - Speichern des Status der Klassen zur Rolle:",4);
+			$this->database->execSQL($sql,4, $this->loglevel);
+		}
+	}
 }class pgdatabase extends pgdatabase_alkis {  var $ist_Fortfuehrung;  var $debug;  var $loglevel;  var $defaultloglevel;  var $logfile;  var $defaultlogfile;  var $commentsign;  var $blocktransaction;	function pgdatabase() {
 	  global $debug;
     $this->debug=$debug;
