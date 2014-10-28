@@ -48,6 +48,7 @@ function set_richtung(richtung){
 <input type="hidden" name="go" value="Nachweisanzeige">
 <input type="hidden" name="order" value="<? echo $this->formvars['order']; ?>">
 <input type="hidden" name="richtung" value="<? echo $this->formvars['richtung']; ?>">
+<input type="hidden" name="flur_thematisch" value="<? echo $this->formvars['flur_thematisch']; ?>">
 	
 <table width="0%" border="0" cellpadding="5" cellspacing="0">
   <tr> 
