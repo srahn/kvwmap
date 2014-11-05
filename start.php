@@ -1,6 +1,6 @@
 <?php
 # Objekt für graphische Benutzeroberfläche erzeugen
-$GUI=new GUI("map.php", "main.css", "html");
+$GUI=new GUI("map.php", "main.css.php", "html");
 
 $GUI->allowed_documents = array();
 

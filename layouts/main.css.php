@@ -1,3 +1,8 @@
+<?php
+  header('Content-type: text/css');
+  include('../config.php');
+?>
+
 @font-face {
   font-family: 'SourceSansPro';
   font-style: normal;
@@ -447,9 +452,10 @@ span.black {
 	clear: both;
 }
 
-.preview_image{
-	border:1px solid black;
-}
+
+.preview_image{border:1px solid black;width: 125px;transition: all 0.25s ease;}	/* Vorschaubilder für Bilder (und PDFs) werden zunächst mit 125px Breite angezeigt und bei Hover auf 250px vergrößert */
+
+.preview_image:hover{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 0.25s ease;}
 
 .preview_doc{}
 
@@ -465,6 +471,7 @@ span.black {
 .raster_record .tr_hide{visibility:collapse;transition: all 0.25s ease;}
 .raster_record .tr_hide td{line-height: 0.0001px;padding: 0.0001px;transition: all 0.25s ease;}
 .raster_record .tr_hide select{width:0.0001px;height:0.0001px;transition: all 0.25s ease;}
+.raster_record .tr_hide select:focus{display:none;width:0.0001px;height:0.0001px;transition: all 0.25s ease;}
 .raster_record .tr_hide input{width:0.0001px;font-size: 0.0001px;height:0.0001px;transition: all 0.25s ease;}
 /* Attribute, die eingeblendet werden sollen: */
 .raster_record .tr_show{visibility:visible;}
@@ -485,11 +492,12 @@ span.black {
 .raster_record:hover td{line-height: 16px;padding: 2px;transition: all 0.25s ease;}
 .raster_record:hover input{width:200px;font-size: 15px;height:22px;transition: all 0.25s ease;}
 .raster_record:hover .tr_show input[type=file]{width:290px;font-size: 15px;height:22px;transition: all 0.25s ease;}
-.raster_record:hover select{width:290px;height:22px;transition: all 0.25s ease;}
+.raster_record:hover select{display:inline;width:290px;height:22px;transition: all 0.25s ease;}
+.raster_record:hover select:focus{display:inline;width:290px;height:22px;}
 .raster_record:hover span{line-height:16px;font-size: 15px;transition: all 0.25s ease;}
 .raster_record:hover img{width: auto; transition: all 0.25s ease;}
 .raster_record:hover .tr_hide{visibility:visible;}
-.raster_record:hover .preview_image{width: 250px;transition: all 0.25s ease;}
+.raster_record:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 0.25s ease;}
 
 
 #layer  h2{

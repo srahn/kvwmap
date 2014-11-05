@@ -69,6 +69,8 @@ define('LOGIN', 'login.php');																# Version 1.8.0
 define('LAYER_ERROR_PAGE', 'layer_error_page.php');					# Version 2.0
 # Geschwindigkeit der Warteanimation (normal: 6, 0 = keine Animation)
 define('WAITING_ANIMATION_SPEED', 6);												# Version 2.0
+# Vorschaubildgröße
+define('PREVIEW_IMAGE_WIDTH', 250);													# Version 2.1
 
 ### Einstellungen für das Menü
 # Da die Bezeichnungen der Menüs frei wählbar sind, muss man hier angegen

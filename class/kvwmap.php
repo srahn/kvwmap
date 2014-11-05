@@ -5385,7 +5385,7 @@ class GUI {
 		if($type == 'jpg' OR $type == 'png' OR $type == 'gif' ){			// für Bilder werden automatisch Thumbnails erzeugt
 			$thumbname = $dateinamensteil[0].'_thumb.'.$dateinamensteil[1];			
 			if(!file_exists($thumbname)){
-				exec(IMAGEMAGICKPATH.'convert '.$dokument.' -resize 250 '.$thumbname);
+				exec(IMAGEMAGICKPATH.'convert '.$dokument.' -resize '.PREVIEW_IMAGE_WIDTH.' '.$thumbname);
 			}
 		}
 		else{																// alle anderen Dokumenttypen bekommen entsprechende Dokumentensymbole als Vorschaubild
@@ -5395,7 +5395,7 @@ class GUI {
   				//$thumbname = WWWROOT.APPLVERSION.GRAPHICSPATH.'pdf.gif';
 					$thumbname = $dateinamensteil[0].'_thumb.jpg';			
 					if(!file_exists($thumbname)){
-						exec(IMAGEMAGICKPATH.'convert '.$dokument.'[0] -resize 250 '.$thumbname);
+						exec(IMAGEMAGICKPATH.'convert '.$dokument.'[0] -resize '.PREVIEW_IMAGE_WIDTH.' '.$thumbname);
 					}
   			}break;
   			
