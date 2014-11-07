@@ -4,7 +4,7 @@
 
 var counter = 0;
 
-Text[0]=["Hilfe:","In Freitexten können folgende Schlüsselwörter verwendet werden, die dann durch andere Texte ersetzt werden:<ul><li>$stelle: die aktuelle Stellenbezeichung</li><li>$user: der Name des Nutzers</li><li>$pagenumber: die aktuelle Seitennummer</li><li>$pagecount: die Gesamtseitenzahl</li><li>$<i>&lt;attributname&gt;</i>: der Wert des Attributs</li></ul>"]
+Text[0]=["Hilfe:","In Freitexten können folgende Schlüsselwörter verwendet werden, die dann durch andere Texte ersetzt werden:<ul><li>$stelle: die aktuelle Stellenbezeichung</li><li>$user: der Name des Nutzers</li><li>$pagenumber: die aktuelle Seitennummer<br>(Platzierung \"auf jeder Seite\" erforderlich)</li><li>$pagecount: die Gesamtseitenzahl<br>(Platzierung \"auf jeder Seite\" erforderlich)</li><li>$<i>&lt;attributname&gt;</i>: der Wert des Attributs</li></ul>"]
 
 function image_coords(event){
 	document.getElementById('coords').style.visibility='';

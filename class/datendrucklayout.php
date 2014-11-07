@@ -310,9 +310,9 @@ class ddl {
 			$options = array('aright'=>$x, 'justification'=>'right');
 		}
 		else{							# linksbündig
+			$x = $x + $offsetx;
 			if($width != '')$right = 595 - $width - $x + 20;
 			else $right = NULL;
-			$x = $x + $offsetx;
 			$options = array('aleft'=>$x, 'right'=>$right, 'justification'=>'full');
 		}
 		$fh = $this->pdf->getFontHeight($fontsize);
