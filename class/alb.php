@@ -25,22 +25,113 @@ class ALB {
   # festgestellten Fehlers nicht eingelesen werden kann.
   var $WLDGE_Datei_fehlerhaft;
 
-  ###################### Liste der Funktionen ####################################
-  #
-  # function ALB($database) - Construktor
-  # function ALBAuszug($FlurstKennz,$formnummer)
-  # function HausNrTextKorrektur()
-  # function GrundausstattungAnlegen()
-  # function WLDGE_Datei_Pruefen()
-  # function WLDGE_Datei_einlesen()
-  # function Fortfuehren()
-
   function ALB($database) {
     global $debug;
     $this->debug=$debug;
     $this->database=$database;
     $database->setDebugLevel=1;
   }
+	
+	function dhk_call_login($url, $username, $password){
+		$data = 'cmd=login&j_username='.$username.'&j_password='.$password;
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+		$result = curl_exec($ch);
+		curl_close($ch);
+		$parser = xml_parser_create();
+		xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE,1);
+		xml_parse_into_struct($parser, $result, $values, $index);
+		xml_parser_free($parser);
+		return $values[$index['JSESSIONID'][0]]['value'];
+	}
+		
+	function dhk_call_getPDF($url, $sessionid, $nasfile){
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: multipart/form-data'));
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);	
+		curl_setopt($ch, CURLOPT_POSTFIELDS, array('cmd' => 'ausfuehren', 'jsessionid' => $sessionid, 'nasfile' => '@'.$nasfile));
+		$result = curl_exec($ch);
+		curl_close($ch);
+		header("Pragma: public"); 
+		header("Expires: 0"); 
+		header("Cache-Control: must-revalidate, post-check=0, pre-check=0"); 
+		header("Content-Type: application/force-download"); 
+		header("Content-Type: application/octet-stream"); 
+		header("Content-Type: application/download"); 
+		header('Content-Disposition: attachment; filename=test.pdf'); 
+		header("Content-Transfer-Encoding: binary"); 
+		return $result;
+	}
+	
+	function create_nas_request_xml_file($formnummer, $FlurstKennz){
+		$xml = '<?xml version="1.0" encoding="UTF-8"?>
+<CPA_Benutzungsauftrag
+ xmlns ="http://www.cpa-systems.de/namespaces/adv/gid/6.0"
+ xmlns:cpa="http://www.cpa-systems.de/namespaces/adv/gid/6.0"
+ xmlns:adv="http://www.adv-online.de/namespaces/adv/gid/6.0"
+ xmlns:gmd ="http://www.isotc211.org/2005/gmd"
+ xmlns:gml="http://www.opengis.net/gml/3.2"
+ xmlns:ogc="http://www.adv-online.de/namespaces/adv/gid/ogc"
+ xmlns:wfs="http://www.adv-online.de/namespaces/adv/gid/wfs"
+ xmlns:wfsext="http://www.adv-online.de/namespaces/adv/gid/wfsext"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns:gco="http://www.isotc211.org/2005/gco"
+ xmlns:ext="http://www.supportgis.de/cpa"
+ xsi:schemaLocation="http://www.cpa-systems.de/namespaces/adv/gid/6.0 AAA-Extensions_CPA.xsd"
+>
+	<empfaenger>
+		<adv:AA_Empfaenger>
+			<adv:direkt>true</adv:direkt>
+		</adv:AA_Empfaenger>
+	</empfaenger>
+	<ausgabeform>application/zip</ausgabeform>
+	<art>'.$formnummer.'</art>
+	<koordinatenreferenzsystem xlink:href="urn:adv:crs:ETRS89_UTM33"/>
+	<anforderungsmerkmale>
+<wfs:Query typeName="adv:AX_Flurstueck">
+  <ogc:Filter>';
+	if(count($FlurstKennz) > 1)$xml .= '<ogc:Or>';
+	foreach($FlurstKennz as $flurst){
+		$xml .= '<ogc:PropertyIsEqualTo>
+      <ogc:PropertyName>flurstueckskennzeichen</ogc:PropertyName>
+      <ogc:Literal>'.$flurst.'</ogc:Literal>
+    </ogc:PropertyIsEqualTo>';
+	}
+	if(count($FlurstKennz) > 1)$xml .= '</ogc:Or>';
+		
+  $xml .='</ogc:Filter>	
+</wfs:Query>
+	</anforderungsmerkmale>
+
+	<profilkennung>mvaaa</profilkennung>
+	<antragsnummer>BWAPK_0000002</antragsnummer>
+	<selektionsmassstab>1000</selektionsmassstab>
+	<mitMetadaten>false</mitMetadaten>
+	<verarbeitungszeitpunkt>2014-10-28T10:56:40Z</verarbeitungszeitpunkt>
+	<folgeverarbeitung>
+		<CPA_FOLGEVA>
+			<ausgabemasstab>500</ausgabemasstab>
+			<formatangabe>A4h</formatangabe>
+			<ausgabemedium>1000</ausgabemedium>
+			<datenformat>5000</datenformat>
+		</CPA_FOLGEVA>
+	</folgeverarbeitung>
+	<auftragsnummer>BWAPK_0000002</auftragsnummer>
+	<portionierung></portionierung>
+	<konvertierungskonfig></konvertierungskonfig>
+</CPA_Benutzungsauftrag>';
+	
+		$currenttime = date('Y-m-d_H_i_s',time());
+		$nasfile = IMAGEPATH.'nas_call_'.$currenttime.'-'.rand(0, 1000000).'.xml';
+		file_put_contents($nasfile, $xml);
+		return $nasfile;
+	}
 
   function export_klassifizierung_csv($flurstuecke, $formvars){
   if($formvars['flurstkennz']){ $csv .= 'FlstKZ;';}

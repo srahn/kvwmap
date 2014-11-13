@@ -9980,6 +9980,42 @@ class GUI {
     dbase_close($dbfoutid);
   }
 
+	function ALKIS_Auszug($FlurstKennz,$formnummer,$Grundbuchbezirk,$Grundbuchblatt){
+		include_(CLASSPATH.'alb.php');
+    if($FlurstKennz == NULL AND $formnummer < 26){
+      $grundbuch=new grundbuch($Grundbuchbezirk,$Grundbuchblatt,$this->pgdatabase);
+      # Abfrage aller Flurstücke, die auf dem angegebenen Grundbuchblatt liegen.
+      $ret=$grundbuch->getBuchungen('','','',1);
+      $buchungen=$ret[1];
+      for ($b=0;$b < count($buchungen);$b++) {
+        $FlurstKennz[] = $buchungen[$b]['flurstkennz'];
+      }
+    }
+    # Abfrage der Berechtigung zum Anzeigen der FlurstKennz
+    $ret=$this->Stelle->getFlurstueckeAllowed($FlurstKennz,$this->pgdatabase);
+    if ($ret[0]) {
+      $this->Fehlermeldung=$ret[1];
+      $this->titel='Flurstücksanzeige';
+      $this->main='flurstuecksanzeige.php';
+    }
+    else{
+      $FlurstKennz=$ret[1];
+      #$this->getFunktionen();
+      # Prüfen ob stelle Formular 30 sehen darf
+      #if($formnummer==30) {
+      #  if(!$this->Stelle->funktionen['ALB-Auszug 30']['erlaubt']) {
+      #    showAlert('Die Anzeige des Eigentümernachweises ist für diese Stelle nicht erlaubt.');
+      #    exit();
+      #  }
+      #}
+      # Ausgabe der Flurstücksdaten im PDF Format
+			$ALB=new ALB($this->pgdatabase);
+			$nasfile = $ALB->create_nas_request_xml_file($formnummer, $FlurstKennz);
+			$sessionid = $ALB->dhk_call_login(DHK_CALL_URL, DHK_CALL_USER, DHK_CALL_PASSWORD);
+			print $ALB->dhk_call_getPDF(DHK_CALL_URL, $sessionid, $nasfile);
+		}
+	}
+	
   function ALB_Anzeigen($FlurstKennz,$formnummer,$Grundbuchbezirk,$Grundbuchblatt) {
 		include_(CLASSPATH.'alb.php');
     if($FlurstKennz == NULL AND $formnummer < 26){

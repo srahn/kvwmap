@@ -647,6 +647,8 @@ backto = function(go){
         ?>">zur Adresssuche</a>
            |
           <a href="index.php?go=ZoomToFlst&FlurstKennz=<?php echo $flst->FlurstKennz; ?>">Kartenausschnitt</a>
+					|
+					<a target="_blank" href="index.php?go=ALKIS_Auszug&formnummer=MV0510&FlurstKennz=<?php echo $flst->FlurstKennz; ?>">ALKIS-Auszug</a>
           </td>
           </tr>
           <tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">

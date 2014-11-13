@@ -43,6 +43,9 @@ define('ALKIS', false);																# Version 1.8.0
 #define("LAYERNAME_FLURSTUECKE",'Flurstuecke_Alkis');
 #define('EPSGCODE','2398');
 #define('EPSGCODE_ALKIS','25833');
+define('DHK_CALL_URL', 'http://dhkserver/call/');
+define('DHK_CALL_USER', '12345');
+define('DHK_CALL_PASSWORD', '6789');
 
 
 ########################## Layout-Vorgaben

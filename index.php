@@ -1426,17 +1426,22 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  } break;
 
 	  case 'Adm_Fortfuehrung' : {
-		$GUI->Adm_Fortfuehrung();
-		$GUI->output();
+			$GUI->Adm_Fortfuehrung();
+			$GUI->output();
+	  } break;
+		
+		case 'ALKIS_Auszug' : {
+			$flurst_array = explode(';', $GUI->formvars['FlurstKennz']);
+			$GUI->ALKIS_Auszug($flurst_array, $GUI->formvars['formnummer'], NULL, NULL);
 	  } break;
 
 	  case  'ALB_Anzeige' : {
-		$flurst_array = explode(';', $GUI->formvars['FlurstKennz']);
-		$GUI->ALB_Anzeigen($flurst_array,$GUI->formvars['formnummer'], NULL, NULL);
+			$flurst_array = explode(';', $GUI->formvars['FlurstKennz']);
+			$GUI->ALB_Anzeigen($flurst_array,$GUI->formvars['formnummer'], NULL, NULL);
 	  } break;
 
 	  case  'ALB_Anzeige_Bestand' : {
-		$GUI->ALB_Anzeigen(NULL, $GUI->formvars['formnummer'], $GUI->formvars['Grundbuchbezirk'], $GUI->formvars['Grundbuchblatt']);
+			$GUI->ALB_Anzeigen(NULL, $GUI->formvars['formnummer'], $GUI->formvars['Grundbuchbezirk'], $GUI->formvars['Grundbuchblatt']);
 	  } break;
 
 	  # Aktualisierung des ALB-Datenbestandes an Hand einer WLDGE-Datei
