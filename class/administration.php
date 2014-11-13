@@ -78,7 +78,8 @@ class administration{
 	function get_database_status(){
 		$this->migrations_to_execute['mysql'] = array();
 		$this->migrations_to_execute['postgresql'] = array();
-		$this->seeds_to_execute = array();
+		$this->seeds_to_execute['mysql'] = array();
+		$this->seeds_to_execute['postgresql'] = array();
 		$this->migration_logs = $this->get_migration_logs();
 		$this->schema_migration_files = $this->get_schema_migration_files();
 		$this->seed_files = $this->get_seed_files();

@@ -470,8 +470,7 @@ span.black {
 /* Attribute, die ausgeblendet werden sollen: */
 .raster_record .tr_hide{visibility:collapse;transition: all 0.25s ease;}
 .raster_record .tr_hide td{line-height: 0.0001px;padding: 0.0001px;transition: all 0.25s ease;}
-.raster_record .tr_hide select{width:0.0001px;height:0.0001px;transition: all 0.25s ease;}
-.raster_record .tr_hide select:focus{display:none;width:0.0001px;height:0.0001px;transition: all 0.25s ease;}
+.raster_record .tr_hide select:focus{display:none;width:0.0001px;transition: all 0.25s ease;}
 .raster_record .tr_hide input{width:0.0001px;font-size: 0.0001px;height:0.0001px;transition: all 0.25s ease;}
 /* Attribute, die eingeblendet werden sollen: */
 .raster_record .tr_show{visibility:visible;}
@@ -492,8 +491,8 @@ span.black {
 .raster_record:hover td{line-height: 16px;padding: 2px;transition: all 0.25s ease;}
 .raster_record:hover input{width:200px;font-size: 15px;height:22px;transition: all 0.25s ease;}
 .raster_record:hover .tr_show input[type=file]{width:290px;font-size: 15px;height:22px;transition: all 0.25s ease;}
-.raster_record:hover select{display:inline;width:290px;height:22px;transition: all 0.25s ease;}
-.raster_record:hover select:focus{display:inline;width:290px;height:22px;}
+.raster_record:hover select{display:inline;width:290px;transition: all 0.25s ease;}
+.raster_record:hover select:focus{display:inline;width:290px;}
 .raster_record:hover span{line-height:16px;font-size: 15px;transition: all 0.25s ease;}
 .raster_record:hover img{width: auto; transition: all 0.25s ease;}
 .raster_record:hover .tr_hide{visibility:visible;}

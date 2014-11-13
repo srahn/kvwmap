@@ -106,6 +106,9 @@
 				  		<option value="Auswahlfeld" ';
 				  		if($this->attributes['form_element_type'][$i] == 'Auswahlfeld'){echo 'selected';}
 				  		echo ' >Auswahlfeld</option>
+							<option value="Autovervollständigungsfeld" ';
+				  		if($this->attributes['form_element_type'][$i] == 'Autovervollständigungsfeld'){echo 'selected';}
+				  		echo ' >Autovervollständigungsfeld</option>
 				  		<option value="Checkbox" ';
 				  		if($this->attributes['form_element_type'][$i] == 'Checkbox'){echo 'selected';}
 				  		echo ' >Checkbox</option>

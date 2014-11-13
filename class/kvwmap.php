@@ -1931,24 +1931,40 @@ class GUI {
     }
   } # end of function output
 	
-	function autocomplete_request(){	# sql, columnname, inputvalue, inputname, resultdiv_id
-		$sql = $this->formvars['sql']." AND ".$this->formvars['columnname']." like upper(substr('".$this->formvars['inputvalue']."', 1, 1))||substr('".$this->formvars['inputvalue']."', 2, ".strlen($this->formvars['inputvalue']).")||'%' ORDER BY ".$this->formvars['columnname']." LIMIT 15";  			
-  	$ret=$this->pgdatabase->execSQL($sql,4, 1);	# bei Nutzung für GLE, gegen Layer-DB austauschen 
+	function autocomplete_request(){	# layer_id, attribute, inputvalue, field_id
+		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+    $layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+    $layerdb->setClientEncoding();
+    $attributenames[0] = $this->formvars['attribute'];
+    $attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
+		# value und output ermitteln
+		$sql = $attributes['options'][0];
+    $explosion = explode(' ', $sql);
+		$value = '';
+		$output = '';
+		$i = 3;
+		while($i < 1000 AND ($value == '' OR $output == '')){
+			if(trim($explosion[$i], ',') == 'output')$output = $explosion[$i-2];
+			if(trim($explosion[$i], ',') == 'value')$value = $explosion[$i-2];
+			$i++;
+		}
+		$sql .= " AND ".$output."::text like upper(substr('".$this->formvars['inputvalue']."', 1, 1))||substr('".$this->formvars['inputvalue']."', 2, ".strlen($this->formvars['inputvalue']).")||'%' OR ".$value."::text like upper(substr('".$this->formvars['inputvalue']."', 1, 1))||substr('".$this->formvars['inputvalue']."', 2, ".strlen($this->formvars['inputvalue']).")||'%' ORDER BY ".$output." LIMIT 15";  			
+  	$ret=$layerdb->execSQL($sql,4, 1);
 		$count = pg_num_rows($ret[1]);
 		if($count == 0 OR ($count == 1 AND strtolower(array_pop(pg_fetch_row($ret[1]))) == strtolower($this->formvars['inputvalue']))){		# wenn nichts gefunden wurde oder nur ein Treffer und der dem Eingabewert entspricht
 			echo '<script type="text/javascript">
-				document.getElementById(\''.$this->formvars['resultdiv_id'].'\').style.display=\'none\';
+				document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'none\';
 			</script>';
 		}
 		else{
 			pg_result_seek($ret[1], 0);
-			echo'<select size="'.$count.'" style="width: 200px;padding:4px; margin:-2px -17px -4px -4px;" onclick="document.GUI.'.$this->formvars['inputname'].'.value=this.value; document.getElementById(\''.$this->formvars['resultdiv_id'].'\').style.display=\'none\';">';
-			while($rs=pg_fetch_row($ret[1])) {
-				echo '<option onmouseover="this.selected = true;" value="'.$rs[0].'">'.$rs[0].'</option>';
+			echo'<select size="'.$count.'" style="width: 200px;padding:4px; margin:-2px -17px -4px -4px;" onclick="document.getElementById(\''.$this->formvars['field_id'].'\').value=this.value; document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'none\';">';
+			while($rs=pg_fetch_array($ret[1])) {
+				echo '<option onmouseover="this.selected = true;" value="'.$rs['value'].'">'.$rs['output'].'</option>';
 			}				
 			echo '</select>
 			<script type="text/javascript">
-				document.getElementById(\''.$this->formvars['resultdiv_id'].'\').style.display=\'block\';
+				document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'block\';
 			</script>';
 		}
 	}
@@ -4837,7 +4853,7 @@ class GUI {
     $style->outlinecolor->setRGB(intval($RGB[0]),intval($RGB[1]),intval($RGB[2]));
     if($dbStyle['backgroundcolor']!='') {
       $RGB=explode(" ",$dbStyle['backgroundcolor']);
-      $style->backgroundcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+      if($RGB[0] != '')$style->backgroundcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
     }
 		
     $image = $klasse->createLegendIcon(25,18);

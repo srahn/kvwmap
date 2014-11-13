@@ -1,22 +1,26 @@
 <?
-								$dataset = $layer['shape'][$k];								# der aktuelle Datensatz
+								$dataset = $layer['shape'][$k];																								# der aktuelle Datensatz
+								$value = $dataset[$attributes['name'][$j]];																		# der Wert des Attributs
+								$tablename = $attributes['table_name'][$attributes['name'][$j]];								# der Tabellenname des Attributs
+								$oid = $dataset[$tablename.'_oid'];																					# die oid des Datensatzes
+								$fieldname = $layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$tablename.';'.$oid.';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j];
 								switch ($attributes['form_element_type'][$j]){
 									case 'Textfeld' : {
-										$datapart .= '<textarea title="'.$attributes['alias'][$j].'" cols="45" onchange="set_changed_flag(currentform.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')"';
+										$datapart .= '<textarea title="'.$attributes['alias'][$j].'" cols="45" onchange="set_changed_flag(currentform.changed_'.$oid.')"';
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
 											$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;"';
 										}
 										else{
 											$datapart .= ' style="font-size: '.$this->user->rolle->fontsize_gle.'px"';
 										}
-										$datapart .= ' rows="3" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'">'.$dataset[$attributes['name'][$j]].'</textarea>';
+										$datapart .= ' rows="3" name="'.$fieldname.'">'.$value.'</textarea>';
 									}break;
 
 									case 'Auswahlfeld' : case 'Auswahlfeld_not_saveable' : {
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
 										  if(is_array($attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
 												for($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++){
-													if($attributes['enum_value'][$j][$k][$e] == $dataset[$attributes['name'][$j]]){
+													if($attributes['enum_value'][$j][$k][$e] == $value){
 														$auswahlfeld_output = $attributes['enum_output'][$j][$k][$e];
 														$auswahlfeld_output_laenge=strlen($auswahlfeld_output)+1;
 														break;
@@ -25,31 +29,31 @@
 											}
 											else{
 												for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
-													if($attributes['enum_value'][$j][$e] == $dataset[$attributes['name'][$j]]){
+													if($attributes['enum_value'][$j][$e] == $value){
 														$auswahlfeld_output = $attributes['enum_output'][$j][$e];
 														$auswahlfeld_output_laenge=strlen($auswahlfeld_output)+1;
 														break;
 													}
 												}
 											}
-                      $datapart .= '<input readonly id="'.$attributes['name'][$j].'_'.$k.'" style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;" size="'.$auswahlfeld_output_laenge.'" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$auswahlfeld_output.'">';
+                      $datapart .= '<input readonly id="'.$attributes['name'][$j].'_'.$k.'" style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;" size="'.$auswahlfeld_output_laenge.'" type="text" name="'.$fieldname.'" value="'.$auswahlfeld_output.'">';
                       $auswahlfeld_output = '';
                       $auswahlfeld_output_laenge = '';
 										}
 										else{
 											$datapart .= '<select title="'.$attributes['alias'][$j].'" style="'.$select_width.'font-size: '.$this->user->rolle->fontsize_gle.'px"';
 											if($attributes['req_by'][$j] != ''){
-												$datapart .= 'onchange="update_require_attribute(\''.$attributes['req_by'][$j].'\', '.$k.','.$layer['Layer_ID'].', this.value);set_changed_flag(currentform.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" ';
+												$datapart .= 'onchange="update_require_attribute(\''.$attributes['req_by'][$j].'\', '.$k.','.$layer['Layer_ID'].', this.value);set_changed_flag(currentform.changed_'.$oid.')" ';
 											}
 											else{
-												$datapart .= 'onchange="set_changed_flag(currentform.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')"';
+												$datapart .= 'onchange="set_changed_flag(currentform.changed_'.$oid.')"';
 											}
-											$datapart .= 'id="'.$attributes['name'][$j].'_'.$k.'" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'">';
+											$datapart .= 'id="'.$attributes['name'][$j].'_'.$k.'" name="'.$fieldname.'">';
 											$datapart .= '<option value="">-- '.$this->strPleaseSelect.' --</option>';
 											if(is_array($attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
 												for($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++){
 													$datapart .= '<option ';
-													if($attributes['enum_value'][$j][$k][$e] == $dataset[$attributes['name'][$j]] OR ($attributes['enum_value'][$j][$k][$e] != '' AND $attributes['enum_value'][$j][$k][$e] == $this->formvars[$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j]])){
+													if($attributes['enum_value'][$j][$k][$e] == $value OR ($attributes['enum_value'][$j][$k][$e] != '' AND $attributes['enum_value'][$j][$k][$e] == $this->formvars[$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$tablename.';'.$oid.';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j]])){
 														$datapart .= 'selected ';
 													}
 													$datapart .= 'value="'.$attributes['enum_value'][$j][$k][$e].'">'.$attributes['enum_output'][$j][$k][$e].'</option>';
@@ -58,7 +62,7 @@
 											else{
 												for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
 													$datapart .= '<option ';
-													if($attributes['enum_value'][$j][$e] == $dataset[$attributes['name'][$j]] OR ($attributes['enum_value'][$j][$e] != '' AND $attributes['enum_value'][$j][$e] == $this->formvars[$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j]])){
+													if($attributes['enum_value'][$j][$e] == $value OR ($attributes['enum_value'][$j][$e] != '' AND $attributes['enum_value'][$j][$e] == $this->formvars[$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$tablename.';'.$oid.';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j]])){
 														$datapart .= 'selected ';
 													}
 													$datapart .= 'value="'.$attributes['enum_value'][$j][$e].'">'.$attributes['enum_output'][$j][$e].'</option>';
@@ -79,13 +83,29 @@
 										}
 									}break;
 									
+									case 'Autovervollständigungsfeld' : {
+										$datapart .= '<div style="width:150px;">';
+										$datapart .= '<input title="'.$attributes['alias'][$j].'" autocomplete="off" onkeyup="autocomplete1(\''.$layer['Layer_ID'].'\', \''.$attributes['name'][$j].'\', \''.$attributes['name'][$j].'_'.$k.'\', this.value);" onchange="set_changed_flag(currentform.changed_'.$oid.')"';
+										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
+											$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;"';
+										}
+										else{
+											$datapart .= ' style="font-size: '.$this->user->rolle->fontsize_gle.'px;"';
+										}
+										$datapart .= ' size="'.$size.'" type="text" name="'.$fieldname.'" id="'.$attributes['name'][$j].'_'.$k.'" value="'.htmlspecialchars($value).'">';
+										$datapart .= '<div valign="top" style="height:0px; position:relative;">
+												<div id="suggests_'.$attributes['name'][$j].'_'.$k.'" style="display:none; position:absolute; left:0px; top:0px; width: 150px; vertical-align:top; overflow:hidden; border:solid grey 1px;"></div>
+											</div>
+										</div>';
+									}break;
+									
 									case 'Checkbox' : {
-										$datapart .= '<input type="checkbox" title="'.$attributes['alias'][$j].'" cols="45" onchange="set_changed_flag(currentform.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')"';
+										$datapart .= '<input type="checkbox" title="'.$attributes['alias'][$j].'" cols="45" onchange="set_changed_flag(currentform.changed_'.$oid.')"';
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
 											$datapart .= ' onclick="return false" style="border:0px;background-color:transparent;"';
 										}
-										$datapart .= 'value="t" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'"';
-										if($dataset[$attributes['name'][$j]] == 't')$datapart .= 'checked=true';
+										$datapart .= 'value="t" name="'.$fieldname.'"';
+										if($value == 't')$datapart .= 'checked=true';
 										$datapart .= '>';
 									}break;
 
@@ -94,9 +114,9 @@
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
 											$datapart .= ' readonly style="background-color:#e8e3da;"';
 										}
-										$datapart .= ' size="40" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$dataset[$attributes['name'][$j]].'">';
+										$datapart .= ' size="40" type="text" name="'.$fieldname.'" value="'.$value.'">';
 										if($this->new_entry != true){
-											if($dataset[$attributes['name'][$j]] != ''){
+											if($value != ''){
 												$datapart .= '&nbsp;<a href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
 												for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
 													$datapart .= '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$dataset[$attributes['subform_pkeys'][$j][$p]];
@@ -148,9 +168,9 @@
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
 											$datapart .= ' readonly style="background-color:#e8e3da;"';
 										}
-										$datapart .= ' type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$dataset[$attributes['name'][$j]].'">';
+										$datapart .= ' type="text" name="'.$fieldname.'" value="'.$value.'">';
 										if($this->new_entry != true){
-											if($dataset[$attributes['name'][$j]] != ''){
+											if($value != ''){
 												$datapart .= '<a class="buttonlink" href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
 												for($f = 0; $f < count($attribute_foreign_keys); $f++){
 													$datapart .= '&value_'.$attribute_foreign_keys[$f].'='.$dataset[$attribute_foreign_keys[$f]];
@@ -239,12 +259,12 @@
 
 									case 'Time': {
 										$datapart .= '<input readonly style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;"';
-										$datapart .= ' size="'.$size.'" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$dataset[$attributes['name'][$j]].'">';
+										$datapart .= ' size="'.$size.'" type="text" name="'.$fieldname.'" value="'.$value.'">';
 									}break;
 
 									case 'Dokument': {
-										if ($dataset[$attributes['name'][$j]]!='') {
-											$dokumentpfad = $dataset[$attributes['name'][$j]];
+										if ($value!='') {
+											$dokumentpfad = $value;
 											$pfadteil = explode('&original_name=', $dokumentpfad);
 											$dateiname = $pfadteil[0];
 											$original_name = $pfadteil[1];
@@ -268,15 +288,15 @@
 											}
 			  							$datapart .= '</td><td width="100%">';
 			  							if($attributes['privileg'][$j] != '0' AND !$lock[$k]){
-			  								$datapart .= '<a href="javascript:delete_document(\''.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'\');"><span>Dokument <br>löschen</span></a>';
+			  								$datapart .= '<a href="javascript:delete_document(\''.$fieldname.'\');"><span>Dokument <br>löschen</span></a>';
 			  							}
 											$datapart .= '</td></tr>';
 											$datapart .= '<tr><td colspan="2"><span>'.$original_name.'</span></td></tr>';
 											$datapart .= '</table>';
-											$datapart .= '<input type="hidden" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].'_alt'.';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$dataset[$attributes['name'][$j]].'">';
+											$datapart .= '<input type="hidden" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$tablename.';'.$oid.';'.$attributes['form_element_type'][$j].'_alt'.';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$value.'">';
 										}
 										if($attributes['privileg'][$j] != '0' AND !$lock[$k]){
-											$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" style="font-size: '.$this->user->rolle->fontsize_gle.'px" size="43" type="file" onchange="this.title=this.value;" id="'.$attributes['name'][$j].'_'.$k.'" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'">';
+											$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$oid.')" style="font-size: '.$this->user->rolle->fontsize_gle.'px" size="43" type="file" onchange="this.title=this.value;" id="'.$attributes['name'][$j].'_'.$k.'" name="'.$fieldname.'">';
 										}
 										else{
 											$datapart .= '&nbsp;';
@@ -284,21 +304,21 @@
 									} break;
 
 									case 'Link': {
-										if ($dataset[$attributes['name'][$j]]!='') {
-											if(substr($dataset[$attributes['name'][$j]], 0, 4) == 'http')$target = '_blank';
-											$datapart .= '<a class="link" target="'.$target.'" style="font-size: '.$this->user->rolle->fontsize_gle.'px" href="'.$dataset[$attributes['name'][$j]].'">';
+										if ($value!='') {
+											if(substr($value, 0, 4) == 'http')$target = '_blank';
+											$datapart .= '<a class="link" target="'.$target.'" style="font-size: '.$this->user->rolle->fontsize_gle.'px" href="'.$value.'">';
 											if($attributes['options'][$j] != ''){
 												$datapart .= $attributes['options'][$j];
 											}
 											else{
-												$datapart .= basename($dataset[$attributes['name'][$j]]);
+												$datapart .= basename($value);
 											}
 											$datapart .= '</a><br>';
 										}
 										if($attributes['privileg'][$j] != '0' OR $lock[$k]){
-											$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" style="font-size: '.$this->user->rolle->fontsize_gle.'px" size="'.$size.'" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.htmlspecialchars($dataset[$attributes['name'][$j]]).'">';
+											$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$oid.')" style="font-size: '.$this->user->rolle->fontsize_gle.'px" size="'.$size.'" type="text" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 										}else{
-											$datapart .= '<input type="hidden" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.htmlspecialchars($dataset[$attributes['name'][$j]]).'">';
+											$datapart .= '<input type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 										}
 									} break;
 
@@ -337,49 +357,49 @@
 									} break;
 									
 									case 'mailto': {
-										if ($dataset[$attributes['name'][$j]]!='') {
-											$datapart .= '<a class="link" target="_blank" style="font-size: '.$this->user->rolle->fontsize_gle.'px" href="mailto:'.$dataset[$attributes['name'][$j]].'">';
+										if ($value!='') {
+											$datapart .= '<a class="link" target="_blank" style="font-size: '.$this->user->rolle->fontsize_gle.'px" href="mailto:'.$value.'">';
 											if($attributes['options'][$j] != ''){
 												$datapart .= $attributes['options'][$j];
 											}
 											else{
-												$datapart .= basename($dataset[$attributes['name'][$j]]);
+												$datapart .= basename($value);
 											}
 											$datapart .= '</a><br>';
 										}
 										if($attributes['privileg'][$j] != '0' OR $lock[$k]){
-											$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" style="font-size: '.$this->user->rolle->fontsize_gle.'px" size="'.$size.'" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.htmlspecialchars($dataset[$attributes['name'][$j]]).'">';
+											$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$oid.')" style="font-size: '.$this->user->rolle->fontsize_gle.'px" size="'.$size.'" type="text" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 										}else{
-											$datapart .= '<input type="hidden" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.htmlspecialchars($dataset[$attributes['name'][$j]]).'">';
+											$datapart .= '<input type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 										}
 									} break;
 
 									case 'Fläche': {
-										$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" id="custom_area" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$attributes['alias'][$j].'" ';
+										$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$oid.')" id="custom_area" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$attributes['alias'][$j].'" ';
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
 											$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;"';
 										}
 										else{
 											$datapart .= ' style="font-size: '.$this->user->rolle->fontsize_gle.'px;"';
 										}
-										$datapart .= ' size="'.$size.'" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.htmlspecialchars($dataset[$attributes['name'][$j]]).'">';
+										$datapart .= ' size="'.$size.'" type="text" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 									}break;
 									
 									case 'Länge': {
-										$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" id="custom_length" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$attributes['alias'][$j].'" ';
+										$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$oid.')" id="custom_length" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$attributes['alias'][$j].'" ';
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
 											$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;"';
 										}
 										else{
 											$datapart .= ' style="font-size: '.$this->user->rolle->fontsize_gle.'px;"';
 										}
-										$datapart .= ' size="'.$size.'" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.htmlspecialchars($dataset[$attributes['name'][$j]]).'">';
+										$datapart .= ' size="'.$size.'" type="text" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 									}break;
 									
 									case 'Zahl': {
 										# bei Zahlen Tausendertrennzeichen einfügen 
-										$value = tausenderTrenner($dataset[$attributes['name'][$j]]);
-										$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$attributes['alias'][$j].'" ';
+										$value = tausenderTrenner($value);
+										$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$oid.')" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$attributes['alias'][$j].'" ';
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
 											$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;"';
 										}
@@ -392,12 +412,11 @@
 										if($attributes['length'][$j] AND !in_array($attributes['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))){
 											$datapart .= ' maxlength="'.$attributes['length'][$j].'"';
 										}
-										$datapart .= ' size="'.$size.'" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" id="'.$attributes['name'][$j].'_'.$k.'" value="'.htmlspecialchars($value).'">';
+										$datapart .= ' size="'.$size.'" type="text" name="'.$fieldname.'" id="'.$attributes['name'][$j].'_'.$k.'" value="'.htmlspecialchars($value).'">';
 									}break;
 									
 									default : {
-										$value = $dataset[$attributes['name'][$j]];
-										$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$attributes['alias'][$j].'" ';
+										$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$oid.')" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$attributes['alias'][$j].'" ';
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
 											$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;"';
 										}
@@ -410,7 +429,7 @@
 										if($attributes['length'][$j] AND !in_array($attributes['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))){
 											$datapart .= ' maxlength="'.$attributes['length'][$j].'"';
 										}
-										$datapart .= ' size="'.$size.'" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" id="'.$attributes['name'][$j].'_'.$k.'" value="'.htmlspecialchars($value).'">';
+										$datapart .= ' size="'.$size.'" type="text" name="'.$fieldname.'" id="'.$attributes['name'][$j].'_'.$k.'" value="'.htmlspecialchars($value).'">';
 										if($attributes['privileg'][$j] > '0' AND $attributes['options'][$j] != ''){
 											$datapart .= '&nbsp;<a title="automatisch generieren" href="javascript:auto_generate(new Array(\''.implode($attributes['name'], "','").'\'), \''.$attributes['the_geom'].'\', \''.$attributes['name'][$j].'\', '.$k.', '.$layer['Layer_ID'].');"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
 										}
