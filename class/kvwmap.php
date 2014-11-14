@@ -10001,12 +10001,11 @@ class GUI {
       $FlurstKennz=$ret[1];
       #$this->getFunktionen();
       # Prüfen ob stelle Formular 30 sehen darf
-      #if($formnummer==30) {
-      #  if(!$this->Stelle->funktionen['ALB-Auszug 30']['erlaubt']) {
-      #    showAlert('Die Anzeige des Eigentümernachweises ist für diese Stelle nicht erlaubt.');
-      #    exit();
-      #  }
-      #}
+			$this->getFunktionen();
+			if(!$this->Stelle->funktionen[$formnummer]['erlaubt']){
+				showAlert('Die Anzeige dieses Nachweises ist für diese Stelle nicht erlaubt.');
+				exit();
+			}
       # Ausgabe der Flurstücksdaten im PDF Format
 			$ALB=new ALB($this->pgdatabase);
 			$nasfile = $ALB->create_nas_request_xml_file($formnummer, $FlurstKennz);
