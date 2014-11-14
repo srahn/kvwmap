@@ -11,7 +11,7 @@
 autocomplete1 = function(layer_id, attribute, field_id, inputvalue){
 	document.getElementById('suggests_'+field_id).style.display='none';
 	if(inputvalue.length > 0){
-		ahah('index.php', 'go=autocomplete_request&layer_id='+layer_id+'&attribute='+attribute+'&inputvalue='+inputvalue+'&field_id='+field_id, new Array(document.getElementById('suggests_'+field_id)), new Array("sethtml"));
+		ahah('index.php', 'go=autocomplete_request&layer_id='+layer_id+'&attribute='+attribute+'&inputvalue='+inputvalue+'&field_id='+field_id, new Array(document.getElementById('suggests_'+field_id), ""), new Array("sethtml", "execute_function"));
 	}
 }
  

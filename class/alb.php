@@ -57,13 +57,18 @@ class ALB {
 		curl_setopt($ch, CURLOPT_POSTFIELDS, array('cmd' => 'ausfuehren', 'jsessionid' => $sessionid, 'nasfile' => '@'.$nasfile));
 		$result = curl_exec($ch);
 		curl_close($ch);
+		switch (substr($result, 0, 2)){
+			case 'PK' : $type = 'zip'; break;
+			case '<?' : $type = 'xml'; break;
+			case '%P' : $type = 'pdf'; break;
+		}
 		header("Pragma: public"); 
 		header("Expires: 0"); 
 		header("Cache-Control: must-revalidate, post-check=0, pre-check=0"); 
 		header("Content-Type: application/force-download"); 
 		header("Content-Type: application/octet-stream"); 
 		header("Content-Type: application/download"); 
-		header('Content-Disposition: attachment; filename=test.pdf'); 
+		header('Content-Disposition: attachment; filename=test.'.$type); 
 		header("Content-Transfer-Encoding: binary"); 
 		return $result;
 	}

@@ -1952,9 +1952,10 @@ class GUI {
   	$ret=$layerdb->execSQL($sql,4, 1);
 		$count = pg_num_rows($ret[1]);
 		if($count == 0 OR ($count == 1 AND strtolower(array_pop(pg_fetch_row($ret[1]))) == strtolower($this->formvars['inputvalue']))){		# wenn nichts gefunden wurde oder nur ein Treffer und der dem Eingabewert entspricht
-			echo '<script type="text/javascript">
-				document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'none\';
-			</script>';
+			echo '~document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'none\';';
+			if($count == 0){
+				echo 'document.getElementById(\''.$this->formvars['field_id'].'\').value = document.getElementById(\''.$this->formvars['field_id'].'\').backup_value;';
+			}
 		}
 		else{
 			pg_result_seek($ret[1], 0);
@@ -1963,9 +1964,7 @@ class GUI {
 				echo '<option onmouseover="this.selected = true;" value="'.$rs['value'].'">'.$rs['output'].'</option>';
 			}				
 			echo '</select>
-			<script type="text/javascript">
-				document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'block\';
-			</script>';
+			~document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'block\';';
 		}
 	}
 
