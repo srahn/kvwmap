@@ -1458,25 +1458,25 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  } break; # end of Änderung des ALB-Datenbestandes
 
 	  case 'tmp_Adr_Tabelle_Aktualisieren' : {
-		$GUI->tmp_Adr_Tabelle_Aktualisieren();
-		$GUI->loadMap('DataBase');
-		$currenttime=date('Y-m-d H:i:s',time());
-		$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
-		$GUI->drawMap();
-		$GUI->output();
-		$GUI->saveMap('');
+			$GUI->tmp_Adr_Tabelle_Aktualisieren();
+			$GUI->loadMap('DataBase');
+			$currenttime=date('Y-m-d H:i:s',time());
+			$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+			$GUI->drawMap();
+			$GUI->output();
+			$GUI->saveMap('');
 	  } break;
 
 	  # Auswählen einer neuen Stelle
 	  case 'Stelle Wählen' : {
-		$GUI->rollenwahl($Stelle_ID);
-		$GUI->output();
+			$GUI->rollenwahl($Stelle_ID);
+			$GUI->output();
 	  } break;
 	  
 	   # Auswählen einer neuen Stelle
 	  case 'Stelle_waehlen' : {
-		$GUI->rollenwahl($Stelle_ID);
-		$GUI->output();
+			$GUI->rollenwahl($Stelle_ID);
+			$GUI->output();
 	  } break;
 
     default : {
