@@ -90,7 +90,7 @@ class ALB {
 			<adv:direkt>true</adv:direkt>
 		</adv:AA_Empfaenger>
 	</empfaenger>
-	<ausgabeform>application/zip</ausgabeform>
+	<ausgabeform>application/xml</ausgabeform>
 	<art>'.$formnummer.'</art>
 	<koordinatenreferenzsystem xlink:href="urn:adv:crs:ETRS89_UTM33"/>
 	<anforderungsmerkmale>

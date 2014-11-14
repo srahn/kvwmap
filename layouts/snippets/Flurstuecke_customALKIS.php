@@ -39,6 +39,9 @@ backto = function(go){
 <h2>Flurst&uuml;cke</h2>
 <table border="0" cellpadding="2" cellspacing="0">
 <?php
+
+	$lines = file('index.php', FILE_SKIP_EMPTY_LINES);
+
 	$forall = false;
 	if($i == '')$i = 0;
   $anzObj=count($this->qlayerset[$i]['shape']);	
@@ -706,8 +709,16 @@ backto = function(go){
 		</tr>
 		<tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
 		  <td>
-        <? if($flst->Status != 'H'){ ?><a href="javascript:send_selected_flurst('ZoomToFlst', '');">Kartenausschnitt</a><? } ?>
-  		  </td>
+        <a href="javascript:send_selected_flurst('ZoomToFlst', '');">Kartenausschnitt</a> | 
+				Auszug:
+				<select style="width: 200px">
+					<option>-- Auswahl --</option>
+					<option onclick="send_selected_flurst('ALKIS_Auszug', 'MV0510', 1, '_blank');">Flurstücksnachweis</option>
+					<option onclick="send_selected_flurst('ALKIS_Auszug', 'MV0550', 1, '_blank');">Flurstücks- und Eigentumsnachweis</option>
+					<option onclick="send_selected_flurst('ALKIS_Auszug', 'MV0520', 1, '_blank');">Flurstücksnachweis mit Bodenschätzung</option>
+					<option onclick="send_selected_flurst('ALKIS_Auszug', 'MV0560', 1, '_blank');">Flurstücks- und Eigentumsnachweis mit Bodenschätzung</option>
+				</select>
+  		</td>
 		</tr>
     <tr>
       <td>&nbsp;</td>
