@@ -1,5 +1,5 @@
 <?php
- # 2008-01-12 pkvvm
+	include(SNIPPETS.'generic_formelement_definitions.php'); 
   include(LAYOUTPATH.'languages/new_layer_data_'.$this->user->rolle->language.'.php');
 	
 	include(SNIPPETS.'sachdatenanzeige_functions.php'); 
