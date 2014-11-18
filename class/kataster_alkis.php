@@ -32,4 +32,6 @@ class grundbuch extends grundbuch_alkis{}
 
 class flurstueck extends flurstueck_alkis{}
 
+class Flur extends Flur_alkis {}
+
 ?>
