@@ -2209,7 +2209,7 @@
     }
     return $Layer;
   }
-}class Flur {  var $FlurID;  var $database;  function Flur($GemID,$GemkgID,$FlurID,$database) {
+}class Flur extends Flur_alkis {  var $FlurID;  var $database;  function Flur($GemID,$GemkgID,$FlurID,$database) {
     # constructor
     global $debug;
     $this->debug=$debug;
@@ -2219,12 +2219,12 @@
     $this->database=$database;
     $this->LayerName=LAYERNAME_FLUR;
   }
-	function getBezeichnungFromPosition($position, $epsgcode) {
+}class Flur_alkis {  var $FlurID;  var $database;	function getBezeichnungFromPosition($position, $epsgcode) {
     $this->debug->write("<p>kataster.php Flur->getBezeichnungFromPosition:",4);
-    $sql ="SELECT gm.gemeindename,gm.gemeinde,g.gemkgname,g.gemkgschl,f.flur";
-    $sql.=" FROM alb_v_gemarkungen AS g,alknflur AS f,alb_v_gemeinden AS gm, alkobj_e_fla AS fla";
-    $sql.=" WHERE f.gemkgschl::integer=g.gemkgschl AND g.gemeinde=gm.gemeinde AND fla.objnr=f.objnr";
-    $sql.=" AND ST_WITHIN(st_transform(st_geomfromtext('POINT(".$position['rw']." ".$position['hw'].")',".$epsgcode."), ".EPSGCODE."),fla.the_geom)";
+		$sql ="SELECT gemeindename, gk.gemeinde, gemarkungsname as gemkgname, f.gemarkung as gemkgschl, flurnummer as flur";
+    $sql.=" FROM alkis.pp_flur as f, alkis.pp_gemarkung as gk, alkis.pp_gemeinde as gm";
+    $sql.=" WHERE gk.gemarkung = f.gemarkung AND gk.gemeinde = gm.gemeinde";
+    $sql.=" AND ST_WITHIN(st_transform(st_geomfromtext('POINT(".$position['rw']." ".$position['hw'].")',".$epsgcode."), ".EPSGCODE_ALKIS."),f.the_geom)";
     #echo $sql;
     $ret=$this->database->execSQL($sql,4, 0);
     if ($ret[0]!=0) {

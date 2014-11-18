@@ -32,6 +32,19 @@ class grundbuch extends grundbuch_alkis{}
 
 class flurstueck extends flurstueck_alkis{}
 
-class Flur extends Flur_alkis {}
+class Flur extends Flur_alkis {
+
+  function Flur($GemID,$GemkgID,$FlurID,$database) {
+    # constructor
+    global $debug;
+    $this->debug=$debug;
+    $this->GemID=$GemID;
+    $this->GemkgID=$GemkgID;
+    $this->FlurID=$FlurID;
+    $this->database=$database;
+    $this->LayerName=LAYERNAME_FLUR;
+  }
+
+}
 
 ?>

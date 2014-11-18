@@ -70,6 +70,17 @@ class Flur extends Flur_alkis {
   var $FlurID;
   var $database;
 	
+	function Flur_alkis($GemID,$GemkgID,$FlurID,$database) {
+    # constructor
+    global $debug;
+    $this->debug=$debug;
+    $this->GemID=$GemID;
+    $this->GemkgID=$GemkgID;
+    $this->FlurID=$FlurID;
+    $this->database=$database;
+    $this->LayerName=LAYERNAME_FLUR;
+  }
+	
 	function getBezeichnungFromPosition($position, $epsgcode) {
     $this->debug->write("<p>kataster.php Flur->getBezeichnungFromPosition:",4);
     $sql ="SELECT gm.gemeindename,gm.gemeinde,g.gemkgname,g.gemkgschl,f.flur";
