@@ -10597,7 +10597,9 @@ class GUI {
 				$attributevalues[$oid][] = $this->formvars[$form_fields[$i]];
         $formtype = $element[4];
         $datatype = $element[6];
-				$layerset = $this->user->rolle->getLayer($layer_id);
+				if($layerset[$layer_id] == NULL){
+					$layerset[$layer_id] = $this->user->rolle->getLayer($layer_id);
+				}
         if($layer_id != $old_layer_id AND $tablename != ''){
           $layerdb = $mapdb->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
           $layerdb->setClientEncoding();
@@ -10605,7 +10607,7 @@ class GUI {
           #$filter = $mapdb->getFilter($layer_id, $this->Stelle->id);		# siehe unten
           $old_layer_id = $layer_id;
         } 
-        if(($this->formvars['go'] == 'Dokument_Loeschen' OR $this->formvars['changed_'.$oid] == 1 OR $this->formvars['embedded']) AND $attributname != 'oid' AND $tablename != '' AND $tablename == $layerset[0]['maintable']){		# nur Attribute aus der Haupttabelle werden gespeichert
+        if(($this->formvars['go'] == 'Dokument_Loeschen' OR $this->formvars['changed_'.$oid] == 1 OR $this->formvars['embedded']) AND $attributname != 'oid' AND $tablename != '' AND $tablename == $layerset[$layer_id][0]['maintable']){		# nur Attribute aus der Haupttabelle werden gespeichert
           # 2008-03-26 pk
           switch($formtype) {
             case 'Dokument' : {
@@ -10615,7 +10617,7 @@ class GUI {
                 $name_array=explode('.',basename($_files[$form_fields[$i]]['name']));
                 $datei_name=$name_array[0];
                 $datei_erweiterung=array_pop($name_array);
-                $doc_path = $mapdb->getDocument_Path($layerset[0]['document_path'], $attributes['options'][$element[1]], $attributenames[$oid], $$attributevalues[$oid], $layerdb);
+                $doc_path = $mapdb->getDocument_Path($layerset[$layer_id][0]['document_path'], $attributes['options'][$element[1]], $attributenames[$oid], $$attributevalues[$oid], $layerdb);
                 $nachDatei = $doc_path.'.'.$datei_erweiterung;
                 $eintrag = $nachDatei."&original_name=".$_files[$form_fields[$i]]['name'];
                 if($datei_name == 'delete')$eintrag = '';

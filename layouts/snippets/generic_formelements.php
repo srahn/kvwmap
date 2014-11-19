@@ -139,24 +139,27 @@
 									case 'SubFormFK' : {
 										$attribute_foreign_keys = $attributes['subform_fkeys'][$j];	# die FKeys des aktuellen Attributes
 										for($f = 0; $f < count($attribute_foreign_keys); $f++){											
+											$name_ = $attribute_foreign_keys[$f];
+											$tablename_ = $attributes['table_name'][$name_];
+											$oid = $dataset[$tablename_.'_oid'];
 											if($attributes['form_element_type'][$attribute_foreign_keys[$f]] == 'Autovervollständigungsfeld'){
-												$fieldname[$f] = $layer_id.';'.$attributes['real_name'][$attribute_foreign_keys[$f]].';'.$attributes['table_name'][$attribute_foreign_keys[$f]].';'.$oid.';Autovervollständigungsfeld;0;varchar';
-												if($dataset[$attribute_foreign_keys[$f]] == '')$dataset[$attribute_foreign_keys[$f]] = $this->formvars[$fieldname[$f]];
-												$datapart .= Autovervollstaendigungsfeld($layer_id, $attribute_foreign_keys[$f], $attributes['alias'][$attribute_foreign_keys[$f]], $fieldname[$f], $dataset[$attribute_foreign_keys[$f]], $attributes['privileg'][$attribute_foreign_keys[$f]], $k, $oid, $lock[$k], $fontsize);
+												$fieldname_[$f] = $layer_id.';'.$attributes['real_name'][$name_].';'.$tablename_.';'.$oid.';Autovervollständigungsfeld;0;varchar';
+												if($dataset[$name_] == '')$dataset[$name_] = $this->formvars[$fieldname_[$f]];
+												$datapart .= Autovervollstaendigungsfeld($layer_id, $name_, $attributes['alias'][$name_], $fieldname_[$f], $dataset[$name_], $attributes['privileg'][$name_], $k, $oid, $lock[$k], $fontsize);
 											}
 											else{
 												$datapart .= '<input style="font-size: '.(0.9*$fontsize).'px';
-												if($attributes['privileg'][$attribute_foreign_keys[$f]] == '0' OR $lock[$k]){
+												if($attributes['privileg'][$name_] == '0' OR $lock[$k]){
 													$datapart .= ';background-color:transparent;border:0px;display:none;background-color:#e8e3da;" readonly ';
 												}
 												else{
 													'" ';
 												}
-												$fieldname[$f] = $layer_id.';'.$attributes['real_name'][$attribute_foreign_keys[$f]].';'.$attributes['table_name'][$attribute_foreign_keys[$f]].';'.$dataset[$attributes['table_name'][$attribute_foreign_keys[$f]].'_oid'].';TextFK;0;varchar';
-												if($dataset[$attribute_foreign_keys[$f]] == '')$dataset[$attribute_foreign_keys[$f]] = $this->formvars[$fieldname[$f]];
-												$datapart .= ' id="'.$attributes['real_name'][$attribute_foreign_keys[$f]].'_'.$k.'" name="'.$fieldname[$f].'" value="'.$dataset[$attribute_foreign_keys[$f]].'">';
+												$fieldname_[$f] = $layer_id.';'.$attributes['real_name'][$name_].';'.$tablename_.';'.$oid.';TextFK;0;varchar';
+												if($dataset[$name_] == '')$dataset[$name_] = $this->formvars[$fieldname_[$f]];
+												$datapart .= ' id="'.$attributes['real_name'][$name_].'_'.$k.'" name="'.$fieldname_[$f].'" value="'.$dataset[$name_].'">';
 											}
-											$this->form_field_names .= $fieldname[$f];
+											$this->form_field_names .= $fieldname_[$f].'|';
 										}
 										$size = $size - 10;
 										$datapart .= '<input size="'.$size.'" style="border:0px;background-color:transparent;font-size: '.$fontsize.'px"';
