@@ -285,7 +285,7 @@
 											else{
 												$datapart .= '<a href="'.$url.$dokumentpfad.'"><img class="preview_doc" src="'.$url.$thumbname.'"></a>';									
 											}
-			  							$datapart .= '</td><td width="100%">';
+			  							$datapart .= '</td><td>';
 			  							if($privileg != '0' AND !$lock[$k]){
 			  								$datapart .= '<a href="javascript:delete_document(\''.$fieldname.'\');"><span>Dokument <br>löschen</span></a>';
 			  							}

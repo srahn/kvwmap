@@ -1,7 +1,7 @@
 <?
 
 	function Autovervollstaendigungsfeld($layer_id, $name, $alias, $fieldname, $value, $privileg, $k, $oid, $lock, $fontsize){
-		$datapart = '<div style="float: left;width:150px;">';
+		$datapart = '<div style="float: left;">';
 		$datapart .= '<input title="'.$alias.'" onkeydown="if(this.backup_value==undefined)this.backup_value=this.value" onkeyup="autocomplete1(\''.$layer_id.'\', \''.$name.'\', \''.$name.'_'.$k.'\', this.value);" onchange="if(document.getElementById(\'suggests_'.$name.'_'.$k.'\').style.display==\'block\')this.value=this.backup_value;set_changed_flag(currentform.changed_'.$oid.')"';
 		if($privileg == '0' OR $lock){
 			$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';

@@ -465,7 +465,7 @@ span.black {
 
 
 /* Ohne Mouseover: */
-.raster_record{max-width: 135px;border:1px solid gray;margin: 5px;padding: 0.0001px;overflow: hidden;transition: all 0.25s ease;}
+.raster_record{max-width: 135px;border:1px solid gray;margin: 5px;padding: 0.0001px;transition: all 0.25s ease;}
 .raster_record .gle tr{border:none;}
 /* Attribute, die ausgeblendet werden sollen: */
 .raster_record .tr_hide{visibility:collapse;transition: all 0.25s ease;}
