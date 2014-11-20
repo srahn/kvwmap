@@ -146,18 +146,7 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
        <table widt="100%" border="0" cellspacing="0" cellpadding="2">
          <tr align="center" bgcolor="<?php echo BG_DEFAULT ?>">
            <td>
-            	&nbsp;<a href="index.php?go=ALB_Anzeige_Bestand&formnummer=20&Grundbuchbezirk=<? echo $this->buchungen[0]['bezirk'] ?>&Grundbuchblatt=<? echo $this->buchungen[0]['blatt'] ?>&wz=1" target="_blank">ALB-Auszug&nbsp;20&nbsp;mit&nbsp;WZ</a>
-                &nbsp;|&nbsp;<a href="index.php?go=ALB_Anzeige_Bestand&formnummer=25&Grundbuchbezirk=<? echo $this->buchungen[0]['bezirk'] ?>&Grundbuchblatt=<? echo $this->buchungen[0]['blatt'] ?>&wz=1" target="_blank">ALB-Auszug&nbsp;25&nbsp;mit&nbsp;WZ</a>&nbsp;
-           </td>
-         </tr>
-         <tr align="center" bgcolor="<?php echo BG_DEFAULT ?>">
-           <td>
-           <?php $this->getFunktionen();
-           if ($this->Stelle->funktionen['ohneWasserzeichen']['erlaubt']) {
-           ?>
-              	&nbsp;<a href="index.php?go=ALB_Anzeige_Bestand&formnummer=20&Grundbuchbezirk=<? echo $this->buchungen[0]['bezirk'] ?>&Grundbuchblatt=<? echo $this->buchungen[0]['blatt'] ?>&wz=0" target="_blank">ALB-Auszug&nbsp;20&nbsp;ohne&nbsp;WZ</a>
-              	&nbsp;|&nbsp;<a href="index.php?go=ALB_Anzeige_Bestand&formnummer=25&Grundbuchbezirk=<? echo $this->buchungen[0]['bezirk'] ?>&Grundbuchblatt=<? echo $this->buchungen[0]['blatt'] ?>&wz=0" target="_blank">ALB-Auszug&nbsp;25&nbsp;ohne&nbsp;WZ</a>&nbsp;
-            <? } ?>
+            	&nbsp;<a href="index.php?go=ALKIS_Auszug_Bestand&formnummer=MV0700&Grundbuchbezirk=<? echo $this->buchungen[0]['bezirk'] ?>&Grundbuchblatt=<? echo $this->buchungen[0]['blatt'] ?>" target="_blank">Bestandsnachweis</a>&nbsp;
            </td>
          </tr>
        </table>

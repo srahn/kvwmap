@@ -1432,7 +1432,12 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 		
 		case 'ALKIS_Auszug' : {
 			$flurst_array = explode(';', $GUI->formvars['FlurstKennz']);
-			$GUI->ALKIS_Auszug($flurst_array, $GUI->formvars['formnummer'], NULL, NULL);
+			$GUI->ALKIS_Auszug($flurst_array, NULL, NULL, $GUI->formvars['formnummer']);
+	  } break;
+		
+		case 'ALKIS_Auszug_Bestand' : {
+			$flurst_array = explode(';', $GUI->formvars['FlurstKennz']);
+			$GUI->ALKIS_Auszug(NULL, $GUI->formvars['Grundbuchbezirk'], $GUI->formvars['Grundbuchblatt'], $GUI->formvars['formnummer']);
 	  } break;
 
 	  case  'ALB_Anzeige' : {
