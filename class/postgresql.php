@@ -2640,12 +2640,12 @@ class pgdatabase_alkis {
 		$n6 = '%'.$formvars['name6'].'%';
 		$n7 = '%'.$formvars['name7'].'%';
 		$n8 = '%'.$formvars['name8'].'%';		
-		$blatt = $this->formvars['blatt'];
-		$flur = $this->formvars['FlurID'];
-		$limitAnzahl = $this->formvars['anzahl'];
-		$limitStart = $this->formvars['offset'];
-		$caseSensitive = $this->formvars['caseSensitive'];
-		$order = $this->formvars['order'];
+		$blatt = $formvars['blatt'];
+		$flur = $formvars['FlurID'];
+		$limitAnzahl = $formvars['anzahl'];
+		$limitStart = $formvars['offset'];
+		$caseSensitive = $formvars['caseSensitive'];
+		$order = $formvars['order'];
 			
     $sql = "SELECT distinct n.laufendenummernachdin1421 AS lfd_nr_name, p.nachnameoderfirma, p.vorname, p.akademischergrad, p.geburtsname, p.geburtsdatum, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, g.buchungsblattnummermitbuchstabenerweiterung as blatt, b.schluesselgesamt as bezirk ";
 		$sql.= "FROM alkis.ax_person p ";

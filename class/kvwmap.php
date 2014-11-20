@@ -5196,7 +5196,6 @@ class GUI {
     $formvars = $this->formvars;
     $flurstueck=new flurstueck('',$this->pgdatabase);
 		$ret=$flurstueck->getNamen($formvars,$GemkgListe['GemkgID']);
-		$this->anzNamenGesamt=count($ret[1]);
     if ($ret[0]) {
       $this->Fehlermeldung='<br>Es konnten keine Namen abgefragt werden'.$ret[1];
       $this->namenWahl();
@@ -5209,8 +5208,8 @@ class GUI {
       else {
 				$formvars['anzahl'] = '';
 				$formvars['offset'] = '';
-				#$ret=$flurstueck->getNamen($formvars,$GemkgListe['GemkgID']);
-        #$this->anzNamenGesamt=count($ret[1]);
+				$ret=$flurstueck->getNamen($formvars,$GemkgListe['GemkgID']);
+        $this->anzNamenGesamt=count($ret[1]);
 
         if($this->formvars['withflurst'] == 'on'){
           for($i = 0; $i < count($this->namen); $i++){
