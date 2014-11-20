@@ -70,7 +70,7 @@ class Flur extends Flur_alkis {
   var $FlurID;
   var $database;
 	
-	function Flur_alkis($GemID,$GemkgID,$FlurID,$database) {
+	function Flur($GemID,$GemkgID,$FlurID,$database) {
     # constructor
     global $debug;
     $this->debug=$debug;

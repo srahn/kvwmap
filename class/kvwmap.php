@@ -10593,6 +10593,7 @@ class GUI {
         $attributname = $element[1];				
         $tablename = $element[2];
         $oid = $element[3];
+				$updates[$tablename]['oid'] = $oid;
 				$attributenames[$oid][] = $attributname;
 				$attributevalues[$oid][] = $this->formvars[$form_fields[$i]];
         $formtype = $element[4];
@@ -10608,7 +10609,8 @@ class GUI {
           $old_layer_id = $layer_id;
         } 
         if(($this->formvars['go'] == 'Dokument_Loeschen' OR $this->formvars['changed_'.$oid] == 1 OR $this->formvars['embedded']) AND $attributname != 'oid' AND $tablename != '' AND $tablename == $layerset[$layer_id][0]['maintable']){		# nur Attribute aus der Haupttabelle werden gespeichert
-          # 2008-03-26 pk
+					$updates[$tablename]['attributename'][] = $attributname; 
+					$updates[$tablename]['eintrag'][] = $eintrag;
           switch($formtype) {
             case 'Dokument' : {
               # Prüfen ob ein neues Bild angegebeben wurde
