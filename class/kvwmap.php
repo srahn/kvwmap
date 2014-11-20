@@ -10587,12 +10587,12 @@ class GUI {
     $old_layer_id = '';
     for($i = 0; $i < count($form_fields); $i++){
       if($form_fields[$i] != ''){
+				$eintrag = NULL;
         $element = explode(';', $form_fields[$i]);
         $layer_id = $element[0];
         $attributname = $element[1];				
         $tablename = $element[2];
         $oid = $element[3];
-				$updates[$tablename]['oid'] = $oid;
 				$attributenames[$oid][] = $attributname;
 				$attributevalues[$oid][] = $this->formvars[$form_fields[$i]];
         $formtype = $element[4];
@@ -10601,6 +10601,7 @@ class GUI {
 					$layerset[$layer_id] = $this->user->rolle->getLayer($layer_id);
 				}
         if($layer_id != $old_layer_id AND $tablename != ''){
+					$updates[$tablename]['oid'] = $oid;
           $layerdb = $mapdb->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
           $layerdb->setClientEncoding();
 					$attributes = $mapdb->read_layer_attributes($layer_id, $layerdb, NULL);
@@ -10608,8 +10609,6 @@ class GUI {
           $old_layer_id = $layer_id;
         } 
         if(($this->formvars['go'] == 'Dokument_Loeschen' OR $this->formvars['changed_'.$oid] == 1 OR $this->formvars['embedded']) AND $attributname != 'oid' AND $tablename != '' AND $tablename == $layerset[$layer_id][0]['maintable']){		# nur Attribute aus der Haupttabelle werden gespeichert
-					$updates[$tablename]['attributename'][] = $attributname; 
-					$updates[$tablename]['eintrag'][] = $eintrag;
           switch($formtype) {
             case 'Dokument' : {
               # Prüfen ob ein neues Bild angegebeben wurde
@@ -10631,7 +10630,6 @@ class GUI {
                   	$this->deleteDokument($old);
                   }
                   # Dateiname in der Datentabelle aktualisieren
-                  $sql = "UPDATE ".$tablename." SET ".$attributname." = '".$eintrag."' WHERE oid = '".$oid."'";
                 } # ende von Datei wurde erfolgreich in Datenverzeichnis kopiert
                 else {
                   echo '<br>Datei: '.$_files[$form_fields[$i]]['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
@@ -10639,23 +10637,23 @@ class GUI {
               } # ende vom Fall, dass ein neues Dokument hochgeladen wurde
             } break; # ende case Bild
             case 'Time' : {
-              $sql = "UPDATE ".$tablename." SET ".$attributname." = '".date('Y-m-d G:i:s')."' WHERE oid = '".$oid."'";
+							$eintrag = date('Y-m-d G:i:s');
             } break;
             case 'User' : {
-              $sql = "UPDATE ".$tablename." SET ".$attributname." = '".$this->user->Vorname." ".$this->user->Name."' WHERE oid = '".$oid."'";
+							$eintrag = $this->user->Vorname." ".$this->user->Name;
             } break;
             case 'UserID' : {
-              $sql = "UPDATE ".$tablename." SET ".$attributname." = '".$this->user->id."' WHERE oid = '".$oid."'";
+							$eintrag = $this->user->id;
             } break;
             case 'Stelle' : {
-              $sql = "UPDATE ".$tablename." SET ".$attributname." = '".$this->Stelle->Bezeichnung."' WHERE oid = '".$oid."'";
+							$eintrag = $this->Stelle->Bezeichnung;
             } break;
             case 'Geometrie' : {
               # nichts machen
             } break;
             case 'Checkbox' : {
             	if($this->formvars[$form_fields[$i]] == '')$this->formvars[$form_fields[$i]] = 'f';
-              $sql = "UPDATE ".$tablename." SET ".$attributname." = '".$this->formvars[$form_fields[$i]]."' WHERE oid = '".$oid."'";
+							$eintrag = $this->formvars[$form_fields[$i]];
             } break;
             default : {
               if($tablename AND $formtype != 'Text_not_saveable' AND $formtype != 'Auswahlfeld_not_saveable' AND $formtype != 'SubFormPK' AND $formtype != 'SubFormFK' AND $formtype != 'SubFormEmbeddedPK' AND $attributname != 'the_geom'){
@@ -10663,29 +10661,45 @@ class GUI {
               		$this->formvars[$form_fields[$i]] = str_replace(' ', '', $this->formvars[$form_fields[$i]]);		# bei Zahlen das Leerzeichen (Tausendertrenner) entfernen
               	}
                 if($this->formvars[$form_fields[$i]] == ''){
-                  $sql = "UPDATE ".$tablename." SET ".$attributname." = NULL WHERE oid = '".$oid."'";
+									$eintrag = 'NULL';
                 }
                 else{
-                  $sql = "UPDATE ".$tablename." SET ".$attributname." = '".pg_escape_string(stripslashes($this->formvars[$form_fields[$i]]))."' WHERE oid = '".$oid."'";
+									$eintrag = pg_escape_string(stripslashes($this->formvars[$form_fields[$i]]));
                 }
               }
             } # end of default case
           } # end of switch for type
-          
-          #if($filter != ''){							# erstmal wieder rausgenommen, weil der Filter sich auf Attribute beziehen kann, die zu anderen Tabellen gehören
-          #  $sql .= " AND ".$filter;
-          #}
-          $this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
-          $ret = $layerdb->execSQL($sql,4, 1);
-          
-          if ($ret[0]) {
-            $success = false;
-          }
+					if($eintrag !== NULL){
+						$updates[$tablename]['eintrag'][] = $eintrag;
+						$updates[$tablename]['attributename'][] = $attributname;
+					}          
         }
       }
     }
+		foreach($updates as $tablename => $table){
+			$sql = "UPDATE ".$tablename." SET ";
+			for($i = 0; $i < count($table['attributename']); $i++){
+				if($i > 0)$sql .= ', ';
+				$sql .= $table['attributename'][$i]." = ";
+				if($table['eintrag'][$i] == 'NULL')$sql .= 'NULL';
+				else $sql .= "'".$table['eintrag'][$i]."'";
+			}
+			$sql .= " WHERE oid = ".$table['oid'];
+			#if($filter != ''){							# erstmal wieder rausgenommen, weil der Filter sich auf Attribute beziehen kann, die zu anderen Tabellen gehören
+			#  $sql .= " AND ".$filter;
+			#}
+			$this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
+			$ret = $layerdb->execSQL($sql,4, 1);			
+			if(!$ret[0]){
+				if(pg_affected_rows($ret[1]) == 0){
+					$result = pg_fetch_row($ret[1]);
+					$ret[0] = 1;
+					$success = false;
+				}
+			}
+		}
     if($success == false){
-      showAlert('Änderung fehlgeschlagen');
+			showAlert('Änderung fehlgeschlagen.\n'.$result[0]);
     }
     else{
       if($this->formvars['close_window'] == ""){
