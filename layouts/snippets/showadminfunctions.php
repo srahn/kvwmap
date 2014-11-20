@@ -35,19 +35,21 @@
 						</td>
 					</tr>
 				<? }
-				foreach($this->administration->seed_files as $component => $component_seeds){			// die restlichen Plugins, die kein DB-Schema haben
-					if($this->administration->schema_migration_files[$component] == NULL AND count($this->administration->seeds_to_execute['mysql'][$component]) > 0){
-				?>
-					<tr style="border:1px solid #C3C7C3;">
-						<td><?	echo $component; ?></td>
-						<td align="right">
-						<?	$update_necessary = true;
-								echo 'neue Menüs- bzw. Layer verfügbar';
-								?>
-						</td>
-					</tr>
-				<? }
-				} ?>
+				if($this->administration->seed_files != ''){
+					foreach($this->administration->seed_files as $component => $component_seeds){			// die restlichen Plugins, die kein DB-Schema haben
+						if($this->administration->schema_migration_files[$component] == NULL AND count($this->administration->seeds_to_execute['mysql'][$component]) > 0){
+					?>
+						<tr style="border:1px solid #C3C7C3;">
+							<td><?	echo $component; ?></td>
+							<td align="right">
+							<?	$update_necessary = true;
+									echo 'neue Menüs- bzw. Layer verfügbar';
+									?>
+							</td>
+						</tr>
+					<? }
+					}
+				}?>
 				<tr >
 					<td colspan="2" align="center"><input type="button" onclick="location.href='index.php?go=Administratorfunktionen&func=update_databases'" <? if(!$update_necessary)echo 'disabled'; ?> value="Aktualisieren"></td>
 				</tr>

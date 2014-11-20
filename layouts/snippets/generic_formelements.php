@@ -7,12 +7,12 @@
 								$value = $dataset[$name];																				# der Wert des Attributs
 								$tablename = $attributes['table_name'][$name];									# der Tabellenname des Attributs
 								$oid = $dataset[$tablename.'_oid'];															# die oid des Datensatzes
-								$privileg = $attributes['privileg'][$j];												# das Recht des Attributs
+								$attribute_privileg = $attributes['privileg'][$j];												# das Recht des Attributs
 								$fieldname = $layer_id.';'.$attributes['real_name'][$name].';'.$tablename.';'.$oid.';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j];
 								switch ($attributes['form_element_type'][$j]){
 									case 'Textfeld' : {
 										$datapart .= '<textarea title="'.$alias.'" cols="45" onchange="set_changed_flag(currentform.changed_'.$oid.')"';
-										if($privileg == '0' OR $lock[$k]){
+										if($attribute_privileg == '0' OR $lock[$k]){
 											$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
 										}
 										else{
@@ -22,7 +22,7 @@
 									}break;
 
 									case 'Auswahlfeld' : case 'Auswahlfeld_not_saveable' : {
-										if($privileg == '0' OR $lock[$k]){
+										if($attribute_privileg == '0' OR $lock[$k]){
 										  if(is_array($attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
 												for($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++){
 													if($attributes['enum_value'][$j][$k][$e] == $value){
@@ -89,12 +89,12 @@
 									}break;
 									
 									case 'Autovervollständigungsfeld' : {
-										$datapart .= Autovervollstaendigungsfeld($layer_id, $name, $alias, $fieldname, $value, $privileg, $k, $oid, $lock[$k], $fontsize);
+										$datapart .= Autovervollstaendigungsfeld($layer_id, $name, $alias, $fieldname, $value, $attribute_privileg, $k, $oid, $lock[$k], $fontsize);
 									}break;
 									
 									case 'Checkbox' : {
 										$datapart .= '<input type="checkbox" title="'.$alias.'" cols="45" onchange="set_changed_flag(currentform.changed_'.$oid.')"';
-										if($privileg == '0' OR $lock[$k]){
+										if($attribute_privileg == '0' OR $lock[$k]){
 											$datapart .= ' onclick="return false" style="border:0px;background-color:transparent;"';
 										}
 										$datapart .= 'value="t" name="'.$fieldname.'"';
@@ -104,7 +104,7 @@
 
 									case 'SubFormPK' : {
 										$datapart .= '<input style="font-size: '.$fontsize.'px"';
-										if($privileg == '0' OR $lock[$k]){
+										if($attribute_privileg == '0' OR $lock[$k]){
 											$datapart .= ' readonly style="background-color:#e8e3da;"';
 										}
 										$datapart .= ' size="40" type="text" name="'.$fieldname.'" value="'.$value.'">';
@@ -164,7 +164,7 @@
 										$size = $size - 10;
 										$datapart .= '<input size="'.$size.'" style="border:0px;background-color:transparent;font-size: '.$fontsize.'px"';
 										$size = $size + 10;
-										if($privileg == '0' OR $lock[$k]){
+										if($attribute_privileg == '0' OR $lock[$k]){
 											$datapart .= ' readonly style="background-color:#e8e3da;"';
 										}
 										$datapart .= ' type="text" name="'.$fieldname.'" value="'.$value.'">';
@@ -286,7 +286,7 @@
 												$datapart .= '<a href="'.$url.$dokumentpfad.'"><img class="preview_doc" src="'.$url.$thumbname.'"></a>';									
 											}
 			  							$datapart .= '</td><td>';
-			  							if($privileg != '0' AND !$lock[$k]){
+			  							if($attribute_privileg != '0' AND !$lock[$k]){
 			  								$datapart .= '<a href="javascript:delete_document(\''.$fieldname.'\');"><span>Dokument <br>löschen</span></a>';
 			  							}
 											$datapart .= '</td></tr>';
@@ -294,7 +294,7 @@
 											$datapart .= '</table>';
 											$datapart .= '<input type="hidden" name="'.$layer_id.';'.$attributes['real_name'][$name].';'.$tablename.';'.$oid.';'.$attributes['form_element_type'][$j].'_alt'.';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$value.'">';
 										}
-										if($privileg != '0' AND !$lock[$k]){
+										if($attribute_privileg != '0' AND !$lock[$k]){
 											$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$oid.')" style="font-size: '.$fontsize.'px" size="43" type="file" onchange="this.title=this.value;" id="'.$name.'_'.$k.'" name="'.$fieldname.'">';
 										}
 										else{
@@ -314,7 +314,7 @@
 											}
 											$datapart .= '</a><br>';
 										}
-										if($privileg != '0' OR $lock[$k]){
+										if($attribute_privileg != '0' OR $lock[$k]){
 											$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$oid.')" style="font-size: '.$fontsize.'px" size="'.$size.'" type="text" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 										}else{
 											$datapart .= '<input type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
@@ -366,7 +366,7 @@
 											}
 											$datapart .= '</a><br>';
 										}
-										if($privileg != '0' OR $lock[$k]){
+										if($attribute_privileg != '0' OR $lock[$k]){
 											$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$oid.')" style="font-size: '.$fontsize.'px" size="'.$size.'" type="text" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 										}else{
 											$datapart .= '<input type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
@@ -375,7 +375,7 @@
 
 									case 'Fläche': {
 										$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$oid.')" id="custom_area" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
-										if($privileg == '0' OR $lock[$k]){
+										if($attribute_privileg == '0' OR $lock[$k]){
 											$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
 										}
 										else{
@@ -386,7 +386,7 @@
 									
 									case 'Länge': {
 										$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$oid.')" id="custom_length" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
-										if($privileg == '0' OR $lock[$k]){
+										if($attribute_privileg == '0' OR $lock[$k]){
 											$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
 										}
 										else{
@@ -399,7 +399,7 @@
 										# bei Zahlen Tausendertrennzeichen einfügen 
 										$value = tausenderTrenner($value);
 										$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$oid.')" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
-										if($privileg == '0' OR $lock[$k]){
+										if($attribute_privileg == '0' OR $lock[$k]){
 											$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
 										}
 										else{
@@ -416,7 +416,7 @@
 									
 									default : {
 										$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$oid.')" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
-										if($privileg == '0' OR $lock[$k]){
+										if($attribute_privileg == '0' OR $lock[$k]){
 											$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
 										}
 										else{
@@ -429,7 +429,7 @@
 											$datapart .= ' maxlength="'.$attributes['length'][$j].'"';
 										}
 										$datapart .= ' size="'.$size.'" type="text" name="'.$fieldname.'" id="'.$name.'_'.$k.'" value="'.htmlspecialchars($value).'">';
-										if($privileg > '0' AND $attributes['options'][$j] != ''){
+										if($attribute_privileg > '0' AND $attributes['options'][$j] != ''){
 											$datapart .= '&nbsp;<a title="automatisch generieren" href="javascript:auto_generate(new Array(\''.implode($attributes['name'], "','").'\'), \''.$attributes['the_geom'].'\', \''.$name.'\', '.$k.', '.$layer_id.');"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
 										}
 									}

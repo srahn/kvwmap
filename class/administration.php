@@ -90,10 +90,12 @@ class administration{
 				}
 			}
 		}
-		foreach($this->seed_files as $component => $file_component_seeds){
-			foreach($file_component_seeds as $type => $file_component_type_seeds){
-				foreach($file_component_type_seeds as $file){
-					if($this->migration_logs[$component][$type][$file] != 1)$this->seeds_to_execute[$type][$component][] = $file;
+		if($this->seed_files != ''){
+			foreach($this->seed_files as $component => $file_component_seeds){
+				foreach($file_component_seeds as $type => $file_component_type_seeds){
+					foreach($file_component_type_seeds as $file){
+						if($this->migration_logs[$component][$type][$file] != 1)$this->seeds_to_execute[$type][$component][] = $file;
+					}
 				}
 			}
 		}
