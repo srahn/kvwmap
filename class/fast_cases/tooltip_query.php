@@ -417,7 +417,7 @@
 		if($type == 'jpg' OR $type == 'png' OR $type == 'gif' ){			// für Bilder werden automatisch Thumbnails erzeugt
 			$thumbname = $dateinamensteil[0].'_thumb.'.$dateinamensteil[1];			
 			if(!file_exists($thumbname)){
-				exec(IMAGEMAGICKPATH.'convert '.$dokument.' -resize 250 '.$thumbname);
+				exec(IMAGEMAGICKPATH.'convert '.$dokument.' -resize '.PREVIEW_IMAGE_WIDTH.' '.$thumbname);
 			}
 		}
 		else{																// alle anderen Dokumenttypen bekommen entsprechende Dokumentensymbole als Vorschaubild
@@ -427,7 +427,7 @@
   				//$thumbname = WWWROOT.APPLVERSION.GRAPHICSPATH.'pdf.gif';
 					$thumbname = $dateinamensteil[0].'_thumb.jpg';			
 					if(!file_exists($thumbname)){
-						exec(IMAGEMAGICKPATH.'convert '.$dokument.'[0] -resize 250 '.$thumbname);
+						exec(IMAGEMAGICKPATH.'convert '.$dokument.'[0] -resize '.PREVIEW_IMAGE_WIDTH.' '.$thumbname);
 					}
   			}break;
   			
@@ -1101,21 +1101,19 @@
                 }
                 # ------<required by>------
                 # -----<requires>------
-                $req_start = strpos(strtolower($attributes['options'][$i]), "<requires>");
-                if($req_start > 0){
-                  $req_end = strpos(strtolower($attributes['options'][$i]), "</requires>");                  
-    							$sql_rest = substr($attributes['options'][$i], $req_end+11);
-                  $req = trim(substr($attributes['options'][$i], $req_start+10, $req_end-$req_start-10));
-                  $attributes['req'][$i] = $req;    # das Attribut von dem dieses Attribut abhängig ist
+                if(strpos(strtolower($attributes['options'][$i]), "<requires>") > 0){
                   if($query_result != NULL){
                     $options = $attributes['options'][$i];
                     for($k = 0; $k < count($query_result); $k++){
-                      if($query_result[$k][$req] != ''){
-                        $attributes['dependent_options'][$i][$k] = substr($options, 0, $req_start)."'".$query_result[$k][$req]."' ".$sql_rest;    # requires-Tag aus SQL entfernen und ein Array erzeugen, welches die korrekten SQLs jedem Datensatz zuordnet
-                      }
-                      else{
-                        $attributes['dependent_options'][$i][$k] = '';    # wenn in diesem Datensatz des Query-Results das benötigte Attribut keinen Wert hat, sind die abhängigen Optionen für diesen Datensatz leer
-                      }
+											foreach($attributes['name'] as $attributename){
+												if(strpos($options, '<requires>'.$attributename.'</requires>') !== false AND $query_result[$k][$attributename] != ''){
+													$options = str_replace('<requires>'.$attributename.'</requires>', "'".$query_result[$k][$attributename]."'", $options);
+												}
+											}
+											if(strpos($options, '<requires>') !== false){
+												$options = '';    # wenn in diesem Datensatz des Query-Results ein benötigtes Attribut keinen Wert hat (also nicht alle <requires>-Einträge ersetzt wurden), sind die abhängigen Optionen für diesen Datensatz leer
+											}
+											$attributes['dependent_options'][$i][$k] = $options;
                     }
                   }
                   else{
