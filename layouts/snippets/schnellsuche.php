@@ -31,12 +31,20 @@
 			ahah("index.php", "go=get_quicksearch_attributes&layer_id="+layer_id, new Array(document.getElementById('search_div')), new Array('sethtml'));
 		}
 	}
-		
-	function update_require_attribute_(attributes, layer_id, value){
-		// attributes ist eine Liste von zu aktualisierenden Attribut und value der ausgewaehlte Wert
+	
+	function update_require_attribute_(attributes, layer_id, attributenamesarray){
+		// attributes ist eine Liste von zu aktualisierenden Attributen und attributenamesarray ein Array aller Attribute im Formular
+		var attributenames = '';
+		var attributevalues = '';
+		for(i = 0; i < attributenamesarray.length; i++){
+			if(document.getElementById('value_'+attributenamesarray[i]) != undefined){
+				attributenames += attributenamesarray[i] + '|';
+				attributevalues += document.getElementById('value_'+attributenamesarray[i]).value + '|';
+			}
+		}
 		attribute = attributes.split(',');
 		for(i = 0; i < attribute.length; i++){
-			ahah("index.php", "go=get_select_list&layer_id="+layer_id+"&attribute="+attribute[i]+"&value="+value+"&type=select-one", new Array(document.getElementById('value_'+attribute[i])), new Array('sethtml'));
+			ahah("index.php", "go=get_select_list&layer_id="+layer_id+"&attribute="+attribute[i]+"&attributenames="+attributenames+"&attributevalues="+attributevalues+"&type=select-one", new Array(document.getElementById('value_'+attribute[i])), new Array('sethtml'));
 		}
 	}
 	

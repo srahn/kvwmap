@@ -127,16 +127,23 @@ function buildwktpolygonfromsvgpath(svgpath){
 	return wkt;
 }
 
-
-function update_require_attribute(attributes, layer_id, value, searchmask_number){
-	// attributes ist eine Liste von zu aktualisierenden Attribut und value der ausgewaehlte Wert
+function update_require_attribute(attributes, layer_id, attributenamesarray, searchmask_number){
+	// attributes ist eine Liste von zu aktualisierenden Attributen und attributenamesarray ein Array aller Attribute im Formular
 	if(searchmask_number > 0){						// es ist nicht die erste Suchmaske, sondern eine weitere hinzugefügte
 		prefix = searchmask_number+'_';
 	}
 	else prefix = '';
+	var attributenames = '';
+	var attributevalues = '';
+	for(i = 0; i < attributenamesarray.length; i++){
+		if(document.getElementById(prefix+'value_'+attributenamesarray[i]) != undefined){
+			attributenames += attributenamesarray[i] + '|';
+			attributevalues += document.getElementById(prefix+'value_'+attributenamesarray[i]).value + '|';
+		}
+	}
 	attribute = attributes.split(',');
 	for(i = 0; i < attribute.length; i++){
-		ahah("index.php", "go=get_select_list&layer_id="+layer_id+"&attribute="+attribute[i]+"&value="+value+"&type=select-one", new Array(document.getElementById(prefix+'value_'+attribute[i])), new Array('sethtml'));
+		ahah("index.php", "go=get_select_list&layer_id="+layer_id+"&attribute="+attribute[i]+"&attributenames="+attributenames+"&attributevalues="+attributevalues+"&type=select-one", new Array(document.getElementById(prefix+'value_'+attribute[i])), new Array('sethtml'));
 	}
 }
 

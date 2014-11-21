@@ -48,7 +48,7 @@
 										else{
 											$datapart .= '<select title="'.$alias.'" style="'.$select_width.'font-size: '.$fontsize.'px"';
 											if($attributes['req_by'][$j] != ''){
-												$datapart .= 'onchange="update_require_attribute(\''.$attributes['req_by'][$j].'\', '.$k.','.$layer_id.', this.value);set_changed_flag(currentform.changed_'.$oid.')" ';
+												$datapart .= 'onchange="update_require_attribute(\''.$attributes['req_by'][$j].'\', '.$k.','.$layer_id.', new Array(\''.implode($attributes['name'], "','").'\'));set_changed_flag(currentform.changed_'.$oid.')" ';
 											}
 											else{
 												$datapart .= 'onchange="set_changed_flag(currentform.changed_'.$oid.')"';

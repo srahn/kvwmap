@@ -2331,32 +2331,32 @@ class GUI {
     $layerdb->setClientEncoding();
     $attributenames[0] = $this->formvars['attribute'];
     $attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
-    $req_start = strpos(strtolower($attributes['options'][0]), "<requires>");
-    $req_end = strpos(strtolower($attributes['options'][0]), "</requires>")+11;
-    $reqby_start = strpos(strtolower($attributes['options'][0]), "<required by>");
-    if($reqby_start > 0)$ende = $reqby_start-$req_end;else $ende = strlen($attributes['options'][0]); 
-    if($req_start > 0){
-    	$sql_rest = substr($attributes['options'][0], $req_end, $ende);
-      $sql = substr($attributes['options'][0], 0, $req_start)."'".$this->formvars['value']."' ".$sql_rest;    # requires-Tag aus SQL entfernen und um den übergebenen Wert erweitern
-			echo $sql;
-      $ret=$layerdb->execSQL($sql,4,0);
-      if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
-      switch($this->formvars['type']) {
-  			case 'select-one' : {					# ein Auswahlfeld soll mit den Optionen aufgefüllt werden 
-      		$html = '>';			# Workaround für dummen IE Bug
-			$html .= '<option value="">-- Auswahl --</option>';
-      		while($rs = pg_fetch_array($ret[1])){
-        		$html .= '<option value="'.$rs['value'].'">'.$rs['output'].'</option>';
-      		}
-  			}break;
-  			
-  			case 'text' : {								#  ein Textfeld soll nur mit dem ersten Wert aufgefüllt werden
-  				$rs = pg_fetch_array($ret[1]);
-        	$html = $rs['output'];
-  			}break;
-      }
-      echo $html;
-    }
+		$options = $attributes['options'][$this->formvars['attribute']];
+    $reqby_start = strpos(strtolower($options), "<required by>");
+    if($reqby_start > 0)$sql = substr($options, 0, $reqby_start);else $sql = $options; 
+		$attributenames = explode('|', $this->formvars['attributenames']);
+		$attributevalues = explode('|', $this->formvars['attributevalues']);
+		for($i = 0; $i < count($attributenames); $i++){
+			$sql = str_replace('<requires>'.$attributenames[$i].'</requires>', "'".$attributevalues[$i]."'", $sql);
+		}
+		#echo $sql;
+		$ret=$layerdb->execSQL($sql,4,0);
+		if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
+		switch($this->formvars['type']) {
+			case 'select-one' : {					# ein Auswahlfeld soll mit den Optionen aufgefüllt werden 
+				$html = '>';			# Workaround für dummen IE Bug
+				$html .= '<option value="">-- Auswahl --</option>';
+				while($rs = pg_fetch_array($ret[1])){
+					$html .= '<option value="'.$rs['value'].'">'.$rs['output'].'</option>';
+				}
+			}break;
+			
+			case 'text' : {								#  ein Textfeld soll nur mit dem ersten Wert aufgefüllt werden
+				$rs = pg_fetch_array($ret[1]);
+				$html = $rs['output'];
+			}break;
+		}
+		echo $html;
   }
 	
 	function auto_generate(){
@@ -6743,7 +6743,7 @@ class GUI {
 									<select class="select" 
 									<?
 										if($this->attributes['req_by'][$i] != ''){
-											echo 'onchange="update_require_attribute_(\''.$this->attributes['req_by'][$i].'\','.$this->formvars['layer_id'].', this.value);" ';
+											echo 'onchange="update_require_attribute_(\''.$this->attributes['req_by'][$i].'\','.$this->formvars['layer_id'].', new Array(\''.implode($this->attributes['name'], "','").'\'));" ';
 										}
 										else echo 'onchange="schnellsuche();" ';
 									?> 
@@ -13819,21 +13819,19 @@ class db_mapObj{
                 }
                 # ------<required by>------
                 # -----<requires>------
-                $req_start = strpos(strtolower($attributes['options'][$i]), "<requires>");
-                if($req_start > 0){
-                  $req_end = strpos(strtolower($attributes['options'][$i]), "</requires>");                  
-    							$sql_rest = substr($attributes['options'][$i], $req_end+11);
-                  $req = trim(substr($attributes['options'][$i], $req_start+10, $req_end-$req_start-10));
-                  $attributes['req'][$i] = $req;    # das Attribut von dem dieses Attribut abhängig ist
+                if(strpos(strtolower($attributes['options'][$i]), "<requires>") > 0){
                   if($query_result != NULL){
                     $options = $attributes['options'][$i];
                     for($k = 0; $k < count($query_result); $k++){
-                      if($query_result[$k][$req] != ''){
-                        $attributes['dependent_options'][$i][$k] = substr($options, 0, $req_start)."'".$query_result[$k][$req]."' ".$sql_rest;    # requires-Tag aus SQL entfernen und ein Array erzeugen, welches die korrekten SQLs jedem Datensatz zuordnet
-                      }
-                      else{
-                        $attributes['dependent_options'][$i][$k] = '';    # wenn in diesem Datensatz des Query-Results das benötigte Attribut keinen Wert hat, sind die abhängigen Optionen für diesen Datensatz leer
-                      }
+											foreach($attributes['name'] as $attributename){
+												if(strpos($options, '<requires>'.$attributename.'</requires>') !== false AND $query_result[$k][$attributename] != ''){
+													$options = str_replace('<requires>'.$attributename.'</requires>', "'".$query_result[$k][$attributename]."'", $options);
+												}
+											}
+											if(strpos($options, '<requires>') !== false){
+												$options = '';    # wenn in diesem Datensatz des Query-Results ein benötigtes Attribut keinen Wert hat (also nicht alle <requires>-Einträge ersetzt wurden), sind die abhängigen Optionen für diesen Datensatz leer
+											}
+											$attributes['dependent_options'][$i][$k] = $options;
                     }
                   }
                   else{

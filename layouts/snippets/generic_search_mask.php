@@ -83,7 +83,7 @@ include(LAYOUTPATH.'languages/generic_search_'.$this->user->rolle->language.'.ph
                   ?><select  
                   <?
                   	if($this->attributes['req_by'][$i] != ''){
-											echo 'onchange="update_require_attribute(\''.$this->attributes['req_by'][$i].'\','.$this->formvars['selected_layer_id'].', this.value, '.$searchmask_number.');" ';
+											echo 'onchange="update_require_attribute(\''.$this->attributes['req_by'][$i].'\','.$this->formvars['selected_layer_id'].', new Array(\''.implode($this->attributes['name'], "','").'\'), '.$searchmask_number.');" ';
 										}
 									?> 
                   	id="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>"><?echo "\n"; ?>
