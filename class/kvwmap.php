@@ -3883,10 +3883,16 @@ class GUI {
       # Polygon abfragen und Extent setzen
       $rect = $polygoneditor->zoomTopolygon($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], 10);
       $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
+			
+			# damit nicht außerhalb des Stellen-Extents gezoomt wird
+	    $oPixelPos=ms_newPointObj();
+	    $oPixelPos->setXY($this->map->width/2,$this->map->height/2);
 	    if (MAPSERVERVERSION > 600) {
+				$this->map->zoomscale($this->map->scaledenom,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
 				$this->map_scaledenom = $this->map->scaledenom;
 			}
 			else {
+				$this->map->zoomscale($this->map->scale,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
 				$this->map_scaledenom = $this->map->scale;
 			}
     }
