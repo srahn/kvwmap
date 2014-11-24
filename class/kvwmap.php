@@ -5837,11 +5837,17 @@ class GUI {
     $pdf->selectFont($this->Docu->activeframe[0]['font_scale']);
     if($this->Docu->activeframe[0]['scalesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['scaleposx'],$this->Docu->activeframe[0]['scaleposy'],$this->Docu->activeframe[0]['scalesize'],'1: '.$this->formvars['printscale']);
     $pdf->selectFont($this->Docu->activeframe[0]['font_oscale']);
-    if($this->Docu->activeframe[0]['oscalesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['oscaleposx'],$this->Docu->activeframe[0]['oscaleposy'],$this->Docu->activeframe[0]['oscalesize'],'1:xxxx');
+    if($this->Docu->activeframe[0]['oscalesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['oscaleposx'],$this->Docu->activeframe[0]['oscaleposy'],$this->Docu->activeframe[0]['oscalesize'],'1:xxxx');		
+		$pdf->selectFont($this->Docu->activeframe[0]['font_lage']);
+    if($this->Docu->activeframe[0]['lagesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['lageposx'],$this->Docu->activeframe[0]['lageposy'],$this->Docu->activeframe[0]['lagesize'],utf8_decode($this->lagebezeichnung[1]['strasse']).' '.$this->lagebezeichnung[1]['hausnummer']);
+		$pdf->selectFont($this->Docu->activeframe[0]['font_gemeinde']);
+    if($this->Docu->activeframe[0]['gemeindesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['gemeindeposx'],$this->Docu->activeframe[0]['gemeindeposy'],$this->Docu->activeframe[0]['gemeindesize'],utf8_decode($this->lagebezeichnung[1]['gemeindename'].' ('.$this->lagebezeichnung[1]['gemeinde'].')'));		
     $pdf->selectFont($this->Docu->activeframe[0]['font_gemarkung']);
-    if($this->Docu->activeframe[0]['gemarkungsize'] > 0)$pdf->addText($this->Docu->activeframe[0]['gemarkungposx'],$this->Docu->activeframe[0]['gemarkungposy'],$this->Docu->activeframe[0]['gemarkungsize'],utf8_decode('Gemarkung: '.$this->lagebezeichnung[1]['gemkgschl'].' / '.$this->lagebezeichnung[1]['gemkgname']));
+    if($this->Docu->activeframe[0]['gemarkungsize'] > 0)$pdf->addText($this->Docu->activeframe[0]['gemarkungposx'],$this->Docu->activeframe[0]['gemarkungposy'],$this->Docu->activeframe[0]['gemarkungsize'],utf8_decode($this->lagebezeichnung[1]['gemkgname'].' ('.$this->lagebezeichnung[1]['gemkgschl'].')'));
     $pdf->selectFont($this->Docu->activeframe[0]['font_flur']);
-    if($this->Docu->activeframe[0]['flursize'] > 0)$pdf->addText($this->Docu->activeframe[0]['flurposx'],$this->Docu->activeframe[0]['flurposy'],$this->Docu->activeframe[0]['flursize'],utf8_decode('Flur: '.$this->lagebezeichnung[1]['flur']));
+    if($this->Docu->activeframe[0]['flursize'] > 0)$pdf->addText($this->Docu->activeframe[0]['flurposx'],$this->Docu->activeframe[0]['flurposy'],$this->Docu->activeframe[0]['flursize'],utf8_decode($this->lagebezeichnung[1]['flur']));
+		$pdf->selectFont($this->Docu->activeframe[0]['font_flurst']);
+    if($this->Docu->activeframe[0]['flurstsize'] > 0)$pdf->addText($this->Docu->activeframe[0]['flurstposx'],$this->Docu->activeframe[0]['flurstposy'],$this->Docu->activeframe[0]['flurstsize'],utf8_decode($this->lagebezeichnung[1]['flurst']));
 
     # Freie Graphiken
     for($j = 0; $j < count($this->Docu->activeframe[0]['bilder']); $j++){
@@ -15557,12 +15563,21 @@ class Document {
       if($formvars['oscaleposx']){$sql .= ", `oscaleposx` = ".$formvars['oscaleposx'];}
       if($formvars['oscaleposy']){$sql .= ", `oscaleposy` = ".$formvars['oscaleposy'];}
       if($formvars['oscalesize']){$sql .= ", `oscalesize` = ".$formvars['oscalesize'];}
+			if($formvars['lageposx']){$sql .= ", `lageposx` = ".$formvars['lageposx'];}
+      if($formvars['lageposy']){$sql .= ", `lageposy` = ".$formvars['lageposy'];}
+      if($formvars['lagesize']){$sql .= ", `lagesize` = ".$formvars['lagesize'];}
+			if($formvars['gemeindeposx']){$sql .= ", `gemeindeposx` = ".$formvars['gemeindeposx'];}
+      if($formvars['gemeindeposy']){$sql .= ", `gemeindeposy` = ".$formvars['gemeindeposy'];}
+      if($formvars['gemeindesize']){$sql .= ", `gemeindesize` = ".$formvars['gemeindesize'];}
       if($formvars['gemarkungposx']){$sql .= ", `gemarkungposx` = ".$formvars['gemarkungposx'];}
       if($formvars['gemarkungposy']){$sql .= ", `gemarkungposy` = ".$formvars['gemarkungposy'];}
       if($formvars['gemarkungsize']){$sql .= ", `gemarkungsize` = ".$formvars['gemarkungsize'];}
       if($formvars['flurposx']){$sql .= ", `flurposx` = ".$formvars['flurposx'];}
       if($formvars['flurposy']){$sql .= ", `flurposy` = ".$formvars['flurposy'];}
       if($formvars['flursize']){$sql .= ", `flursize` = ".$formvars['flursize'];}
+			if($formvars['flurstposx']){$sql .= ", `flurstposx` = ".$formvars['flurstposx'];}
+      if($formvars['flurstposy']){$sql .= ", `flurstposy` = ".$formvars['flurstposy'];}
+      if($formvars['flurstsize']){$sql .= ", `flurstsize` = ".$formvars['flurstsize'];}
       if($formvars['legendposx']){$sql .= ", `legendposx` = ".$formvars['legendposx'];}
       if($formvars['legendposy']){$sql .= ", `legendposy` = ".$formvars['legendposy'];}
       if($formvars['legendsize']){$sql .= ", `legendsize` = ".$formvars['legendsize'];}
@@ -15584,8 +15599,11 @@ class Document {
       if($preis){$sql .= ", `preis` = '".$preis."'";}
       if($formvars['font_date']){$sql .= ", `font_date` = '".$formvars['font_date']."'";}
       if($formvars['font_scale']){$sql .= ", `font_scale` = '".$formvars['font_scale']."'";}
+			if($formvars['font_lage']){$sql .= ", `font_lage` = '".$formvars['font_lage']."'";}
+			if($formvars['font_gemeinde']){$sql .= ", `font_gemeinde` = '".$formvars['font_gemeinde']."'";}
       if($formvars['font_gemarkung']){$sql .= ", `font_gemarkung` = '".$formvars['font_gemarkung']."'";}
       if($formvars['font_flur']){$sql .= ", `font_flur` = '".$formvars['font_flur']."'";}
+			if($formvars['font_flurst']){$sql .= ", `font_flurst` = '".$formvars['font_flurst']."'";}
       if($formvars['font_legend']){$sql .= ", `font_legend` = '".$formvars['font_legend']."'";}
       if($formvars['font_user']){$sql .= ", `font_user` = '".$formvars['font_user']."'";}
       if($formvars['font_watermark']){$sql .= ", `font_watermark` = '".$formvars['font_watermark']."'";}
@@ -15692,12 +15710,21 @@ class Document {
       $sql .= ", `oscaleposx` = '".$formvars['oscaleposx']."'";
       $sql .= ", `oscaleposy` = '".$formvars['oscaleposy']."'";
       $sql .= ", `oscalesize` = '".$formvars['oscalesize']."'";
+			$sql .= ", `lageposx` = '".$formvars['lageposx']."'";
+      $sql .= ", `lageposy` = '".$formvars['lageposy']."'";
+      $sql .= ", `lagesize` = '".$formvars['lagesize']."'";
+			$sql .= ", `gemeindeposx` = '".$formvars['gemeindeposx']."'";
+      $sql .= ", `gemeindeposy` = '".$formvars['gemeindeposy']."'";
+      $sql .= ", `gemeindesize` = '".$formvars['gemeindesize']."'";
       $sql .= ", `gemarkungposx` = '".$formvars['gemarkungposx']."'";
       $sql .= ", `gemarkungposy` = '".$formvars['gemarkungposy']."'";
       $sql .= ", `gemarkungsize` = '".$formvars['gemarkungsize']."'";
       $sql .= ", `flurposx` = '".$formvars['flurposx']."'";
       $sql .= ", `flurposy` = '".$formvars['flurposy']."'";
       $sql .= ", `flursize` = '".$formvars['flursize']."'";
+			$sql .= ", `flurstposx` = '".$formvars['flurstposx']."'";
+      $sql .= ", `flurstposy` = '".$formvars['flurstposy']."'";
+      $sql .= ", `flurstsize` = '".$formvars['flurstsize']."'";
       $sql .= ", `legendposx` = '".$formvars['legendposx']."'";
       $sql .= ", `legendposy` = '".$formvars['legendposy']."'";
       $sql .= ", `legendsize` = '".$formvars['legendsize']."'";
@@ -15719,8 +15746,11 @@ class Document {
       $sql .= ", `preis` = '".$preis."'";
       $sql .= ", `font_date` = '".$formvars['font_date']."'";
       $sql .= ", `font_scale` = '".$formvars['font_scale']."'";
+			$sql .= ", `font_lage` = '".$formvars['font_lage']."'";
+			$sql .= ", `font_gemeinde` = '".$formvars['font_gemeinde']."'";
       $sql .= ", `font_gemarkung` = '".$formvars['font_gemarkung']."'";
       $sql .= ", `font_flur` = '".$formvars['font_flur']."'";
+			$sql .= ", `font_flurst` = '".$formvars['font_flurst']."'";
       $sql .= ", `font_legend` = '".$formvars['font_legend']."'";
       $sql .= ", `font_user` = '".$formvars['font_user']."'";
       $sql .= ", `font_watermark` = '".$formvars['font_watermark']."'";

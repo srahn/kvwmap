@@ -69,10 +69,12 @@ class Flur_alkis {
 	
 	function getBezeichnungFromPosition($position, $epsgcode) {
     $this->debug->write("<p>kataster.php Flur->getBezeichnungFromPosition:",4);
-		$sql ="SELECT gemeindename, gk.gemeinde, gemarkungsname as gemkgname, f.gemarkung as gemkgschl, flurnummer as flur";
-    $sql.=" FROM alkis.pp_flur as f, alkis.pp_gemarkung as gk, alkis.pp_gemeinde as gm";
-    $sql.=" WHERE gk.gemarkung = f.gemarkung AND gk.gemeinde = gm.gemeinde";
-    $sql.=" AND ST_WITHIN(st_transform(st_geomfromtext('POINT(".$position['rw']." ".$position['hw'].")',".$epsgcode."), ".EPSGCODE_ALKIS."),f.the_geom)";
+		$sql ="SELECT gemeindename, gk.gemeinde, gemarkungsname as gemkgname, fl.gemarkungsnummer as gemkgschl, fl.flurnummer as flur, CASE WHEN fl.nenner IS NULL THEN fl.zaehler::text ELSE fl.zaehler::text||'/'||fl.nenner::text end as flurst, s.bezeichnung as strasse, l.hausnummer";
+    $sql.=" FROM alkis.pp_gemarkung as gk, alkis.pp_gemeinde as gm, alkis.ax_flurstueck as fl";
+		$sql.=" LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(fl.weistauf)";
+		$sql.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND s.lage = lpad(l.lage,5,'0')";
+    $sql.=" WHERE gk.gemarkung = fl.gemarkungsnummer AND gk.gemeinde = gm.gemeinde";
+    $sql.=" AND ST_WITHIN(st_transform(st_geomfromtext('POINT(".$position['rw']." ".$position['hw'].")',".$epsgcode."), ".EPSGCODE_ALKIS."),fl.wkb_geometry)";
     #echo $sql;
     $ret=$this->database->execSQL($sql,4, 0);
     if ($ret[0]!=0) {

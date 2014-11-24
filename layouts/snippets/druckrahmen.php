@@ -279,6 +279,52 @@ function addfreetext(){
         	<td>&nbsp;Höhe:</td>
         	<td><input type="text" name="refheight" value="<? echo $this->Document->selectedframe[0]['refheight'] ?>" size="5"></td>
         </tr>
+				
+				<tr>
+        	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Lage&nbsp;</td>
+        	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Gemeinde&nbsp;</td>
+        </tr>
+        <tr>
+        	<td>&nbsp;x:</td>
+        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="lageposx" value="<? echo $this->Document->selectedframe[0]['lageposx'] ?>" size="5"></td>
+        	<td colspan="2" style="border-right:2px solid #C3C7C3" align="center">
+        		<select name="font_lage">
+	        		<?
+	        		for($i = 0; $i < count($this->document->fonts); $i++){
+	        			echo '<option ';
+	        			if($this->Document->selectedframe[0]['font_lage'] == $this->document->fonts[$i]){
+	        				echo 'selected ';
+	        			}
+	        			echo 'value="'.$this->document->fonts[$i].'">'.basename($this->document->fonts[$i]).'</option>';
+	        		}
+	        		?>
+        		</select>
+        	</td>
+					<td>&nbsp;x:</td>
+        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="gemeindeposx" value="<? echo $this->Document->selectedframe[0]['gemeindeposx'] ?>" size="5"></td>
+					<td colspan="2" align="center">
+						<select name="font_gemeinde">
+	        		<?
+	        		for($i = 0; $i < count($this->document->fonts); $i++){
+	        			echo '<option ';
+	        			if($this->Document->selectedframe[0]['font_gemeinde'] == $this->document->fonts[$i]){
+	        				echo 'selected ';
+	        			}
+	        			echo 'value="'.$this->document->fonts[$i].'">'.basename($this->document->fonts[$i]).'</option>';
+	        		}
+	        		?>
+        		</select>
+					</td>        						               	
+        </tr>
+        <tr>
+        	<td>&nbsp;y:</td>
+        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="lageposy" value="<? echo $this->Document->selectedframe[0]['lageposy'] ?>" size="5"></td>
+					<td style="border-right:2px solid #C3C7C3" colspan="2" align="center"><input type="text" name="lagesize" value="<? echo $this->Document->selectedframe[0]['lagesize'] ?>" size="5">&nbsp;pt</td>
+					<td>&nbsp;y:</td>
+        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="gemeindeposy" value="<? echo $this->Document->selectedframe[0]['gemeindeposy'] ?>" size="5"></td>
+        	<td colspan="2" align="center"><input type="text" name="gemeindesize" value="<? echo $this->Document->selectedframe[0]['gemeindesize'] ?>" size="5">&nbsp;pt</td>
+        </tr>
+				
         <tr>
         	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Gemarkung&nbsp;</td>
         	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Flur&nbsp;</td>
@@ -324,13 +370,28 @@ function addfreetext(){
         	<td colspan="2" align="center"><input type="text" name="flursize" value="<? echo $this->Document->selectedframe[0]['flursize'] ?>" size="5">&nbsp;pt</td>
         </tr>
         <tr>
-        	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Datum&nbsp;</td>
-        	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;ursprünglicher Maßstab&nbsp;</td>
+        	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Flurstück&nbsp;</td>
+        	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Datum&nbsp;</td>
         </tr>
         <tr>
         	<td>&nbsp;x:</td>
-        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="dateposx" value="<? echo $this->Document->selectedframe[0]['dateposx'] ?>" size="5"></td>
+        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="flurstposx" value="<? echo $this->Document->selectedframe[0]['flurstposx'] ?>" size="5"></td>
         	<td colspan="2" style="border-right:2px solid #C3C7C3" align="center">
+        		<select name="font_flurst">
+	        		<?
+	        		for($i = 0; $i < count($this->document->fonts); $i++){
+	        			echo '<option ';
+	        			if($this->Document->selectedframe[0]['font_flurst'] == $this->document->fonts[$i]){
+	        				echo 'selected ';
+	        			}
+	        			echo 'value="'.$this->document->fonts[$i].'">'.basename($this->document->fonts[$i]).'</option>';
+	        		}
+	        		?>
+        		</select>
+        	</td>
+					<td>&nbsp;x:</td>
+        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="dateposx" value="<? echo $this->Document->selectedframe[0]['dateposx'] ?>" size="5"></td>
+        	<td colspan="2" align="center">
         		<select name="font_date">
 	        		<?
 	        		for($i = 0; $i < count($this->document->fonts); $i++){
@@ -342,30 +403,15 @@ function addfreetext(){
 	        		}
 	        		?>
         		</select>
-        	</td>
-					<td>&nbsp;x:</td>
-        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="oscaleposx" value="<? echo $this->Document->selectedframe[0]['oscaleposx'] ?>" size="5"></td>
-        	<td colspan="2" align="center">
-        		<select name="font_oscale">
-	        		<?
-	        		for($i = 0; $i < count($this->document->fonts); $i++){
-	        			echo '<option ';
-	        			if($this->Document->selectedframe[0]['font_oscale'] == $this->document->fonts[$i]){
-	        				echo 'selected ';
-	        			}
-	        			echo 'value="'.$this->document->fonts[$i].'">'.basename($this->document->fonts[$i]).'</option>';
-	        		}
-	        		?>
-        		</select>
         	</td>					               	
         </tr>
         <tr>
         	<td>&nbsp;y:</td>
-        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="dateposy" value="<? echo $this->Document->selectedframe[0]['dateposy'] ?>" size="5"></td>
-        	<td style="border-right:2px solid #C3C7C3" align="center" colspan="2"><input type="text" name="datesize" value="<? echo $this->Document->selectedframe[0]['datesize'] ?>" size="5">&nbsp;pt</td>
+        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="flurstposy" value="<? echo $this->Document->selectedframe[0]['flurstposy'] ?>" size="5"></td>
+        	<td style="border-right:2px solid #C3C7C3" align="center" colspan="2"><input type="text" name="flurstsize" value="<? echo $this->Document->selectedframe[0]['flurstsize'] ?>" size="5">&nbsp;pt</td>
         	<td>&nbsp;y:</td>
-        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="oscaleposy" value="<? echo $this->Document->selectedframe[0]['oscaleposy'] ?>" size="5"></td>
-        	<td align="center" colspan="2"><input type="text" name="oscalesize" value="<? echo $this->Document->selectedframe[0]['oscalesize'] ?>" size="5">&nbsp;pt</td>
+        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="dateposy" value="<? echo $this->Document->selectedframe[0]['dateposy'] ?>" size="5"></td>
+        	<td align="center" colspan="2"><input type="text" name="datesize" value="<? echo $this->Document->selectedframe[0]['datesize'] ?>" size="5">&nbsp;pt</td>
         </tr>
         <tr>
         	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Legende&nbsp;</td>
