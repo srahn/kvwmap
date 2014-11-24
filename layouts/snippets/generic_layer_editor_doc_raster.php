@@ -12,6 +12,29 @@
 	$linksize = $this->user->rolle->fontsize_gle - 1;
 	$select_width = '';
 ?>
+
+<script type="text/javascript">
+
+	open_record = function(event, record){
+		if(record.className == 'raster_record'){
+			event.preventDefault();
+			alldivs = document.getElementsByTagName('div');
+			for(i = 0; i < alldivs.length; i++){
+				classname = alldivs[i].className;
+				if(classname == 'raster_record_open'){
+					alldivs[i].className = 'raster_record';
+				}
+			}
+			record.className = 'raster_record_open';
+		}
+	}
+	
+	close_record = function(record){
+		document.getElementById(record).className = 'raster_record';
+	}
+		
+</script>
+
 <div id="layer" align="left">
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
 	<tr>
@@ -51,7 +74,8 @@
 	<tr>
 <? } ?>
 		<td valign="top">
-		<div <? if($this->new_entry != true)echo 'class="raster_record"'; ?> id="record_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>" <? if($k%5==0)echo 'style="clear: both;"'?>>
+		<div <? if($this->new_entry != true)echo 'class="raster_record" onclick="open_record(event, this)"'; ?> id="record_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>" <? if($k%5==0)echo 'style="clear: both;"'?>>
+			<div style="position: absolute;top: 1px;right: 1px"><a href="javascript:close_record('record_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>');" title="Schlie&szlig;en"><img style="border:none" src="<? echo GRAPHICSPATH."exit2.png"; ?>"></img></a></div>
 			<input type="hidden" value="" name="changed_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
 			<table class="tgle" border="1">
 			  <tbody class="gle">

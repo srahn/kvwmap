@@ -1938,7 +1938,8 @@ class GUI {
     $attributenames[0] = $this->formvars['attribute'];
     $attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
 		# value und output ermitteln
-		$sql = $attributes['options'][0];
+		$options = explode(';', $attributes['options'][0]);
+		$sql = $options[0];
     $explosion = explode(' ', $sql);
 		$value = '';
 		$output = '';
@@ -13891,6 +13892,28 @@ class db_mapObj{
               }
             }
           }break;
+					
+					case 'Autovervollständigungsfeld' : {
+            if($attributes['options'][$i] != ''){
+              if(strpos(strtolower($attributes['options'][$i]), "select") === 0){     # SQl-Abfrage wie select attr1 as value, atrr2 as output from table1
+                $optionen = explode(';', $attributes['options'][$i]);  # SQL; weitere Optionen
+                $attributes['options'][$i] = $optionen[0]; 
+                if($optionen[1] != ''){   
+                  $further_options = explode(' ', $optionen[1]);      # die weiteren Optionen exploden (opt1 opt2 opt3)
+                  for($k = 0; $k < count($further_options); $k++){
+                    if(strpos($further_options[$k], 'layer_id') !== false){     #layer_id=XX bietet die Möglichkeit hier eine Layer_ID zu definieren, für die man einen neuen Datensatz erzeugen kann
+                      $attributes['subform_layer_id'][$i] = array_pop(explode('=', $further_options[$k]));
+                      $layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
+                      $attributes['subform_layer_privileg'][$i] = $layer['privileg'];
+                    }
+                    elseif($further_options[$k] == 'embedded'){       # Subformular soll embedded angezeigt werden
+                      $attributes['embedded'][$i] = true;
+                    }
+                  }
+                }
+              }
+            }
+          }break;
   
           # SubFormulare mit Primärschlüssel(n)
           case 'SubFormPK' : {
@@ -14482,6 +14505,7 @@ class db_mapObj{
       $i = 0;
       while($rs=mysql_fetch_array($query)){
       	$attributes['name'][$i]= $rs['name'];
+				$attributes['indizes'][$rs['name']] = $i;
       	$attributes['real_name'][$rs['name']]= $rs['real_name'];
       	if($rs['tablename'])$attributes['table_name'][$i]= $rs['tablename'];
       	if($rs['tablename'])$attributes['table_name'][$rs['name']] = $rs['tablename']; 
