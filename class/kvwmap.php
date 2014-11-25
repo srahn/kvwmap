@@ -1940,29 +1940,26 @@ class GUI {
 		# value und output ermitteln
 		$options = explode(';', $attributes['options'][0]);
 		$sql = $options[0];
-    $explosion = explode(' ', $sql);
-		$value = '';
-		$output = '';
-		$i = 3;
-		while($i < 1000 AND ($value == '' OR $output == '')){
-			if(trim($explosion[$i], ',') == 'output')$output = $explosion[$i-2];
-			if(trim($explosion[$i], ',') == 'value')$value = $explosion[$i-2];
-			$i++;
-		}
-		$sql .= " AND ".$output."::text like upper(substr('".$this->formvars['inputvalue']."', 1, 1))||substr('".$this->formvars['inputvalue']."', 2, ".strlen($this->formvars['inputvalue']).")||'%' OR ".$value."::text like upper(substr('".$this->formvars['inputvalue']."', 1, 1))||substr('".$this->formvars['inputvalue']."', 2, ".strlen($this->formvars['inputvalue']).")||'%' ORDER BY ".$output." LIMIT 15";  			
+		$sql = 'SELECT * FROM ('.$sql.') as foo WHERE';
+		$sql .= " output::text like '".$this->formvars['inputvalue']."%' OR output::text like upper(substr('".$this->formvars['inputvalue']."', 1, 1))||substr('".$this->formvars['inputvalue']."', 2, ".strlen($this->formvars['inputvalue']).")||'%' ORDER BY output LIMIT 15";  			
+		#echo $sql;
   	$ret=$layerdb->execSQL($sql,4, 1);
 		$count = pg_num_rows($ret[1]);
-		if($count == 0 OR ($count == 1 AND strtolower(array_pop(pg_fetch_row($ret[1]))) == strtolower($this->formvars['inputvalue']))){		# wenn nichts gefunden wurde oder nur ein Treffer und der dem Eingabewert entspricht
+		if($count == 1)$rs = pg_fetch_array($ret[1]);
+		if($count == 1 AND strtolower($rs['output']) == strtolower($this->formvars['inputvalue'])){	# wenn nur ein Treffer gefunden wurde und der dem Eingabewert entspricht
 			echo '~document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'none\';';
-			if($count == 0){
-				echo 'document.getElementById(\''.$this->formvars['field_id'].'\').value = document.getElementById(\''.$this->formvars['field_id'].'\').backup_value;';
-			}
+			echo 'document.getElementById(\''.$this->formvars['field_id'].'\').value=\''.$rs['value'].'\';';
+		}
+		elseif($count == 0 ){		# wenn nichts gefunden wurde
+			echo '~document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'none\';';
+			echo 'document.getElementById(\''.$this->formvars['field_id'].'\').value = document.getElementById(\''.$this->formvars['field_id'].'\').backup_value;';
+			echo 'document.getElementById(\''.$this->formvars['field_id'].'_output\').value = document.getElementById(\''.$this->formvars['field_id'].'_output\').backup_value;';
 		}
 		else{
 			pg_result_seek($ret[1], 0);
-			echo'<select size="'.$count.'" style="width: 200px;padding:4px; margin:-2px -17px -4px -4px;" onclick="document.getElementById(\''.$this->formvars['field_id'].'\').value=this.value; document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'none\';">';
+			echo'<select size="'.$count.'" style="width: 200px;padding:4px; margin:-2px -17px -4px -4px;" onclick="document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'none\';">';
 			while($rs=pg_fetch_array($ret[1])) {
-				echo '<option onmouseover="this.selected = true;" value="'.$rs['value'].'">'.$rs['output'].'</option>';
+				echo '<option onmouseover="this.selected = true;" onclick="document.getElementById(\''.$this->formvars['field_id'].'\').value=\''.$rs['value'].'\';document.getElementById(\''.$this->formvars['field_id'].'_output\').value=\''.$rs['output'].'\';" value="'.$rs['value'].'">'.$rs['output'].'</option>';
 			}				
 			echo '</select>
 			~document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'block\';';
@@ -7319,12 +7316,14 @@ class GUI {
 						$parentlayerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
         		$layerdb = $this->mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
         		$rect = $this->mapDB->zoomToDatasets(array($this->formvars['oid']), $this->formvars['tablename'], $this->formvars['columnname'], 10, $layerdb, $parentlayerset[0]['epsg_code'], $this->user->rolle->epsg_code);
-			      $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);		# Zoom auf den "Mutter"-Datensatz
-				    if (MAPSERVERVERSION > 600) {
-							$this->map_scaledenom = $this->map->scaledenom;
-						}
-						else {
-							$this->map_scaledenom = $this->map->scale;
+						if($rect->minx != ''){
+							$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);		# Zoom auf den "Mutter"-Datensatz
+							if (MAPSERVERVERSION > 600) {
+								$this->map_scaledenom = $this->map->scaledenom;
+							}
+							else {
+								$this->map_scaledenom = $this->map->scale;
+							}
 						}
         	}
           $oldscale=round($this->map_scaledenom);
@@ -13876,6 +13875,7 @@ class db_mapObj{
                     $attributes['enum_output'][$i][] = $rs['output'];
                   }
                 }
+								# weitere Optionen
                 if($optionen[1] != ''){   
                   $further_options = explode(' ', $optionen[1]);      # die weiteren Optionen exploden (opt1 opt2 opt3)
                   for($k = 0; $k < count($further_options); $k++){
@@ -13897,7 +13897,18 @@ class db_mapObj{
             if($attributes['options'][$i] != ''){
               if(strpos(strtolower($attributes['options'][$i]), "select") === 0){     # SQl-Abfrage wie select attr1 as value, atrr2 as output from table1
                 $optionen = explode(';', $attributes['options'][$i]);  # SQL; weitere Optionen
-                $attributes['options'][$i] = $optionen[0]; 
+                $attributes['options'][$i] = $optionen[0];
+								if($query_result != NULL){
+									$sql = $attributes['options'][$i];
+									for($k = 0; $k < count($query_result); $k++){
+										$sql = 'SELECT * FROM ('.$sql.') as foo WHERE value = \''.$query_result[$k][$attributes['name'][$i]].'\'';
+										$ret=$database->execSQL($sql,4,0);
+										if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
+										$rs = pg_fetch_array($ret[1]);
+										$attributes['enum_output'][$i][$k] = $rs['output'];
+									}
+								}
+								# weitere Optionen
                 if($optionen[1] != ''){   
                   $further_options = explode(' ', $optionen[1]);      # die weiteren Optionen exploden (opt1 opt2 opt3)
                   for($k = 0; $k < count($further_options); $k++){
