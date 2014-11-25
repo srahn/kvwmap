@@ -73,7 +73,7 @@ class ALB {
 		return $result;
 	}
 	
-	function create_nas_request_xml_file($FlurstKennz, $Grundbuchbezirk, $Grundbuchblatt, $formnummer){
+	function create_nas_request_xml_file($FlurstKennz, $Grundbuchbezirk, $Grundbuchblatt, $Buchnungstelle, $formnummer){
 		$xml = '<?xml version="1.0" encoding="UTF-8"?>
 <CPA_Benutzungsauftrag
  xmlns ="http://www.cpa-systems.de/namespaces/adv/gid/6.0"
@@ -100,30 +100,46 @@ class ALB {
 	<koordinatenreferenzsystem xlink:href="urn:adv:crs:ETRS89_UTM33"/>
 	<anforderungsmerkmale>';
 	
-	if($formnummer == 'MV0700'){
-		$xml .= '<wfs:Query typeName="adv:AX_Buchungsblatt">
-  <ogc:Filter>
-		<ogc:PropertyIsEqualTo>
-				<ogc:PropertyName>buchungsblattkennzeichen</ogc:PropertyName>
-				<ogc:Literal>'.$Grundbuchbezirk.str_pad($Grundbuchblatt, 7, '0',STR_PAD_LEFT).'</ogc:Literal>
-			</ogc:PropertyIsEqualTo>';
-	}
-	else{
-		$xml .= '<wfs:Query typeName="adv:AX_Flurstueck">
-  <ogc:Filter>';
-		if(count($FlurstKennz) > 1)$xml .= '<ogc:Or>';
-		foreach($FlurstKennz as $flurst){
+	switch($formnummer){
+		case 'MV0700' : {   
 			$xml .= '
-			<ogc:PropertyIsEqualTo>
-				<ogc:PropertyName>flurstueckskennzeichen</ogc:PropertyName>
-				<ogc:Literal>'.$flurst.'</ogc:Literal>
-			</ogc:PropertyIsEqualTo>';
+			<wfs:Query typeName="adv:AX_Buchungsblatt">
+				<ogc:Filter>
+					<ogc:PropertyIsEqualTo>
+						<ogc:PropertyName>buchungsblattkennzeichen</ogc:PropertyName>
+						<ogc:Literal>'.$Grundbuchbezirk.str_pad($Grundbuchblatt, 7, '0',STR_PAD_LEFT).'</ogc:Literal>
+					</ogc:PropertyIsEqualTo>';
+		}break;
+		
+		case 'MV0600' : {   
+			$xml .= '
+			<wfs:Query typeName="adv:AX_Buchungsstelle">
+				<ogc:Filter>
+					<ogc:PropertyIsEqualTo>
+						<ogc:PropertyName>id</ogc:PropertyName>
+						<ogc:Literal>'.$Buchnungstelle.'</ogc:Literal>
+					</ogc:PropertyIsEqualTo>';
+		}break;
+		
+		default : {
+			$xml .= '
+			<wfs:Query typeName="adv:AX_Flurstueck">
+			<ogc:Filter>';
+			if(count($FlurstKennz) > 1)$xml .= '<ogc:Or>';
+			foreach($FlurstKennz as $flurst){
+				$xml .= '
+				<ogc:PropertyIsEqualTo>
+					<ogc:PropertyName>flurstueckskennzeichen</ogc:PropertyName>
+					<ogc:Literal>'.$flurst.'</ogc:Literal>
+				</ogc:PropertyIsEqualTo>';
+			}
+			if(count($FlurstKennz) > 1)$xml .= '</ogc:Or>';
 		}
-		if(count($FlurstKennz) > 1)$xml .= '</ogc:Or>';
 	}
 		
-  $xml .='</ogc:Filter>
-</wfs:Query>
+  $xml .='
+				</ogc:Filter>
+			</wfs:Query>
 	</anforderungsmerkmale>
 
 	<profilkennung>mvaaa</profilkennung>

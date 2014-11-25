@@ -20,7 +20,8 @@ function flurstanzeige(flurstkennz){
 //-->
 </script>
 
-<?php 
+<?php
+$this->Stelle->getFunktionen();
 for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 	$this->buchungen = $this->gbblaetter[$gb];
 	$alle_flst = array();
@@ -73,7 +74,10 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
     }
 	  ?>
 	  <tr>
-      <td valign="top" align="center"><?php echo $this->buchungen[0]['bvnr']; ?></td>
+      <td valign="top" align="center">
+			<? echo $this->buchungen[0]['bvnr'];
+			if($this->Stelle->funktionen['MV0600']['erlaubt']){ ?>&nbsp;<a href="index.php?go=ALKIS_Auszug&formnummer=MV0600&Buchungsstelle=<? echo $this->buchungen[0]['gml_id'] ?>" target="_blank">Grundstücksnachweis</a>&nbsp;<? } ?>
+			</td>
       <td valign="top" align="center"><?php echo '&nbsp;'.$this->buchungen[0]['erbbaurechtshinw'];?></td>
       <td valign="top" rowspan="<? echo $anzObj; ?>">
       	<table>
@@ -116,7 +120,10 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 	    	}
 	    }
 	    ?><tr>
-	      <td valign="top" align="center"><?php echo $this->buchungen[$i]['bvnr']; ?></td>
+	      <td valign="top" align="center">
+					<? echo $this->buchungen[$i]['bvnr'];
+					if($this->Stelle->funktionen['MV0600']['erlaubt']){ ?>&nbsp;<a href="index.php?go=ALKIS_Auszug&formnummer=MV0600&Buchungsstelle=<? echo $this->buchungen[$i]['gml_id'] ?>" target="_blank">Grundstücksnachweis</a>&nbsp;<? } ?>
+				</td>
 	      <td valign="top" align="center"><?php echo '&nbsp;'.$this->buchungen[$i]['erbbaurechtshinw'];?></td>
 	    	<td valign="top"><? echo $Adressbezeichnung.'&nbsp;'; ?></td>
 	    	<td valign="top"><? echo $Nutzunglangtext.'&nbsp;'; ?></td>
@@ -146,7 +153,7 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
        <table widt="100%" border="0" cellspacing="0" cellpadding="2">
          <tr align="center" bgcolor="<?php echo BG_DEFAULT ?>">
            <td>
-            	&nbsp;<a href="index.php?go=ALKIS_Auszug_Bestand&formnummer=MV0700&Grundbuchbezirk=<? echo $this->buchungen[0]['bezirk'] ?>&Grundbuchblatt=<? echo $this->buchungen[0]['blatt'] ?>" target="_blank">Bestandsnachweis</a>&nbsp;
+            	<? if($this->Stelle->funktionen['MV0700']['erlaubt']){ ?>&nbsp;<a href="index.php?go=ALKIS_Auszug&formnummer=MV0700&Grundbuchbezirk=<? echo $this->buchungen[0]['bezirk'] ?>&Grundbuchblatt=<? echo $this->buchungen[0]['blatt'] ?>" target="_blank">Bestandsnachweis</a>&nbsp;<? } ?>
            </td>
          </tr>
        </table>

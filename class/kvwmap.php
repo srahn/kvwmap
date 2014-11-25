@@ -9991,7 +9991,7 @@ class GUI {
     dbase_close($dbfoutid);
   }
 
-	function ALKIS_Auszug($FlurstKennz,$Grundbuchbezirk,$Grundbuchblatt,$formnummer){
+	function ALKIS_Auszug($FlurstKennz,$Grundbuchbezirk,$Grundbuchblatt,$Buchnungstelle,$formnummer){
 		include_(CLASSPATH.'alb.php');
     if($FlurstKennz == NULL AND $formnummer < 26){
       $grundbuch=new grundbuch($Grundbuchbezirk,$Grundbuchblatt,$this->pgdatabase);
@@ -10020,7 +10020,7 @@ class GUI {
 			}
       # Ausgabe der Flurstücksdaten im PDF Format
 			$ALB=new ALB($this->pgdatabase);
-			$nasfile = $ALB->create_nas_request_xml_file($FlurstKennz, $Grundbuchbezirk, $Grundbuchblatt, $formnummer);
+			$nasfile = $ALB->create_nas_request_xml_file($FlurstKennz, $Grundbuchbezirk, $Grundbuchblatt, $Buchnungstelle, $formnummer);
 			$sessionid = $ALB->dhk_call_login(DHK_CALL_URL, DHK_CALL_USER, DHK_CALL_PASSWORD);
 			print $ALB->dhk_call_getPDF(DHK_CALL_URL, $sessionid, $nasfile);
 		}
