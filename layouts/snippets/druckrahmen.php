@@ -415,7 +415,7 @@ function addfreetext(){
         </tr>
         <tr>
         	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Legende&nbsp;</td>
-        	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Maßstab&nbsp;</td>
+        	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Stelle-Nutzer&nbsp;</td>
         </tr>
         <tr>
         	<td>&nbsp;x:</td>
@@ -434,6 +434,39 @@ function addfreetext(){
         		</select>
         	</td>
 					<td>&nbsp;x:</td>
+        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="userposx" value="<? echo $this->Document->selectedframe[0]['userposx'] ?>" size="5"></td>
+        	<td colspan="2" align="center">
+        		<select name="font_user">
+	        		<?
+	        		for($i = 0; $i < count($this->document->fonts); $i++){
+	        			echo '<option ';
+	        			if($this->Document->selectedframe[0]['font_user'] == $this->document->fonts[$i]){
+	        				echo 'selected ';
+	        			}
+	        			echo 'value="'.$this->document->fonts[$i].'">'.basename($this->document->fonts[$i]).'</option>';
+	        		}
+	        		?>
+        		</select>
+        	</td>
+        </tr>
+        <tr>
+        	<td>&nbsp;y:</td>
+        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="legendposy" value="<? echo $this->Document->selectedframe[0]['legendposy'] ?>" size="5"></td>
+        	<td style="border-right:2px solid #C3C7C3" colspan="2" align="center"><input type="text" name="legendsize" value="<? echo $this->Document->selectedframe[0]['legendsize'] ?>" size="5">&nbsp;pt</td>
+        	<td>&nbsp;y:</td>
+        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="userposy" value="<? echo $this->Document->selectedframe[0]['userposy'] ?>" size="5"></td>
+        	<td colspan="2" align="center"><input type="text" name="usersize" value="<? echo $this->Document->selectedframe[0]['usersize'] ?>" size="5">&nbsp;pt</td>
+        </tr>
+        
+        <tr>
+        	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Nordpfeil&nbsp;</td>
+        	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">Maßstab</td>
+        </tr>
+        <tr>
+        	<td>&nbsp;x:</td>
+        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="arrowposx" value="<? echo $this->Document->selectedframe[0]['arrowposx'] ?>" size="5"></td>
+        	<td style="border-right:2px solid #C3C7C3" colspan="2" align="center">Länge:&nbsp;<input type="text" name="arrowlength" value="<? echo $this->Document->selectedframe[0]['arrowlength'] ?>" size="5">&nbsp;</td>		
+        	<td>&nbsp;x:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" name="scaleposx" value="<? echo $this->Document->selectedframe[0]['scaleposx'] ?>" size="5"></td>
         	<td colspan="2" align="center">
         		<select name="font_scale">
@@ -451,44 +484,33 @@ function addfreetext(){
         </tr>
         <tr>
         	<td>&nbsp;y:</td>
-        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="legendposy" value="<? echo $this->Document->selectedframe[0]['legendposy'] ?>" size="5"></td>
-        	<td style="border-right:2px solid #C3C7C3" colspan="2" align="center"><input type="text" name="legendsize" value="<? echo $this->Document->selectedframe[0]['legendsize'] ?>" size="5">&nbsp;pt</td>
+        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="arrowposy" value="<? echo $this->Document->selectedframe[0]['arrowposy'] ?>" size="5"></td>
+        	<td style="border-right:2px solid #C3C7C3" colspan="2" align="center">&nbsp;</td>
         	<td>&nbsp;y:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" name="scaleposy" value="<? echo $this->Document->selectedframe[0]['scaleposy'] ?>" size="5"></td>
         	<td colspan="2" align="center"><input type="text" name="scalesize" value="<? echo $this->Document->selectedframe[0]['scalesize'] ?>" size="5">&nbsp;pt</td>
         </tr>
-        
-        <tr>
-        	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Nordpfeil&nbsp;</td>
-        	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">Stelle-Nutzer</td>
+				
+				 <tr>
+        	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Maßstabsleiste&nbsp;</td>
+        	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-bottom:0px solid #C3C7C3" colspan="4">&nbsp;</td>
         </tr>
         <tr>
         	<td>&nbsp;x:</td>
-        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="arrowposx" value="<? echo $this->Document->selectedframe[0]['arrowposx'] ?>" size="5"></td>
-        	<td style="border-right:2px solid #C3C7C3" colspan="2" align="center">Länge:&nbsp;<input type="text" name="arrowlength" value="<? echo $this->Document->selectedframe[0]['arrowlength'] ?>" size="5">&nbsp;</td>		
-        	<td>&nbsp;x:</td>
-        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="userposx" value="<? echo $this->Document->selectedframe[0]['userposx'] ?>" size="5"></td>
+        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="scalebarposx" value="<? echo $this->Document->selectedframe[0]['scalebarposx'] ?>" size="5"></td>
+        	<td style="border-right:2px solid #C3C7C3" colspan="2" align="center">&nbsp;</td>		
+        	<td></td>
+        	<td style="border-right:1px solid #C3C7C3"></td>
         	<td colspan="2" align="center">
-        		<select name="font_user">
-	        		<?
-	        		for($i = 0; $i < count($this->document->fonts); $i++){
-	        			echo '<option ';
-	        			if($this->Document->selectedframe[0]['font_scale'] == $this->document->fonts[$i]){
-	        				echo 'selected ';
-	        			}
-	        			echo 'value="'.$this->document->fonts[$i].'">'.basename($this->document->fonts[$i]).'</option>';
-	        		}
-	        		?>
-        		</select>
         	</td>
         </tr>
         <tr>
         	<td>&nbsp;y:</td>
-        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="arrowposy" value="<? echo $this->Document->selectedframe[0]['arrowposy'] ?>" size="5"></td>
+        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="scalebarposy" value="<? echo $this->Document->selectedframe[0]['scalebarposy'] ?>" size="5"></td>
         	<td style="border-right:2px solid #C3C7C3" colspan="2" align="center">&nbsp;</td>
-        	<td>&nbsp;y:</td>
-        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="userposy" value="<? echo $this->Document->selectedframe[0]['userposy'] ?>" size="5"></td>
-        	<td colspan="2" align="center"><input type="text" name="usersize" value="<? echo $this->Document->selectedframe[0]['usersize'] ?>" size="5">&nbsp;pt</td>
+        	<td></td>
+        	<td style="border-right:1px solid #C3C7C3"></td>
+        	<td colspan="2" align="center"></td>
         </tr>
         
         <tr>

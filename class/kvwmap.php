@@ -5925,6 +5925,27 @@ class GUI {
       $pdf->setColor(1,1,1);
       $pdf->polygon($pdata,3,1);
     }
+		
+		# Maßstabsleiste
+    if($this->Docu->activeframe[0]['scalebarposx'] != 0){
+			$posx = $this->Docu->activeframe[0]['scalebarposx'];
+			$posy = $this->Docu->activeframe[0]['scalebarposy'];
+			$scalebarwidth = 30; 	# in mm
+			$width3 = $scalebarwidth / 0.3529411; 	# in PDF-Pixeln
+			$width2 = 2*$width3/3;
+			$width1 = $width3/3;
+			$label3 = $scalebarwidth / 1000 * $this->formvars['printscale'];
+			$label2 = 2*$label3/3;
+			$label1 = $label3/3;
+			$pdf->addText($posx+$width1-5, $posy+6, 8, $label1);
+			$pdf->addText($posx+$width2-5, $posy+6, 8, $label2);
+			$pdf->addText($posx+$width3-5, $posy+6, 8, $label3.' Meter');
+			$pdf->setColor(1,1,1);
+			$pdf->setLineStyle(0.5);
+      $pdf->rectangle($posx, $posy, $width1, 4);
+			$pdf->rectangle($posx, $posy, $width2, 4);
+			$pdf->rectangle($posx, $posy, $width3, 4);
+    }
     
     # variable Freitexte
 		for($j = 1; $j <= $this->formvars['last_freetext_id']; $j++){
@@ -15606,6 +15627,8 @@ class Document {
       if($formvars['scaleposx']){$sql .= ", `scaleposx` = ".$formvars['scaleposx'];}
       if($formvars['scaleposy']){$sql .= ", `scaleposy` = ".$formvars['scaleposy'];}
       if($formvars['scalesize']){$sql .= ", `scalesize` = ".$formvars['scalesize'];}
+			if($formvars['scalebarposx']){$sql .= ", `scalebarposx` = ".$formvars['scalebarposx'];}
+      if($formvars['scalebarposy']){$sql .= ", `scalebarposy` = ".$formvars['scalebarposy'];}
       if($formvars['oscaleposx']){$sql .= ", `oscaleposx` = ".$formvars['oscaleposx'];}
       if($formvars['oscaleposy']){$sql .= ", `oscaleposy` = ".$formvars['oscaleposy'];}
       if($formvars['oscalesize']){$sql .= ", `oscalesize` = ".$formvars['oscalesize'];}
@@ -15753,6 +15776,8 @@ class Document {
       $sql .= ", `scaleposx` = '".$formvars['scaleposx']."'";
       $sql .= ", `scaleposy` = '".$formvars['scaleposy']."'";
       $sql .= ", `scalesize` = '".$formvars['scalesize']."'";
+			$sql .= ", `scalebarposx` = '".$formvars['scalebarposx']."'";
+      $sql .= ", `scalebarposy` = '".$formvars['scalebarposy']."'";
       $sql .= ", `oscaleposx` = '".$formvars['oscaleposx']."'";
       $sql .= ", `oscaleposy` = '".$formvars['oscaleposy']."'";
       $sql .= ", `oscalesize` = '".$formvars['oscalesize']."'";
