@@ -3679,7 +3679,7 @@ class pgdatabase_alkis {
       $sql.=")";
     }
 		$sql.= $this->build_temporal_filter(array('ax_gemarkungsteilflur'));
-    $sql.=" ORDER BY gemarkungsteilflur";
+		$sql.=" GROUP BY gemarkungsteilflur,schluesselgesamt ORDER BY gemarkungsteilflur";
     #echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
     while ($rs=pg_fetch_array($queryret[1])) {

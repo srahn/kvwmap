@@ -448,7 +448,7 @@ span.black {
 
 #layer {
   margin:0px 8px 8px 8px;
-	overflow:hidden;
+	#overflow:hidden;
 	clear: both;
 }
 

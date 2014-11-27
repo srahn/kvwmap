@@ -12736,7 +12736,15 @@ class GUI {
 		$newextent=ms_newRectObj();
 		$newextent->setextent($zoomminx,$zoomminy,$zoommaxx,$zoommaxy);
 		if($this->ref['epsg_code'] != $this->user->rolle->epsg_code){
-			$newextent->project($this->reference_map->projection, $this->map->projection);
+			if(MAPSERVERVERSION < '600'){
+				$projFROM = ms_newprojectionobj("init=epsg:".$this->ref['epsg_code']);
+				$projTO = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);
+			}
+			else{
+				$projFROM = $this->reference_map->projection;
+				$projTO = $this->map->projection;
+			}
+			$newextent->project($projFROM, $projTO);
 		}
     $this->map->setextent($newextent->minx,$newextent->miny,$newextent->maxx,$newextent->maxy);
     $oPixelPos=ms_newPointObj();
@@ -13898,14 +13906,17 @@ class db_mapObj{
               if(strpos(strtolower($attributes['options'][$i]), "select") === 0){     # SQl-Abfrage wie select attr1 as value, atrr2 as output from table1
                 $optionen = explode(';', $attributes['options'][$i]);  # SQL; weitere Optionen
                 $attributes['options'][$i] = $optionen[0];
-								if($query_result != NULL){
-									$sql = $attributes['options'][$i];
+								if($query_result != NULL){									
 									for($k = 0; $k < count($query_result); $k++){
-										$sql = 'SELECT * FROM ('.$sql.') as foo WHERE value = \''.$query_result[$k][$attributes['name'][$i]].'\'';
-										$ret=$database->execSQL($sql,4,0);
-										if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
-										$rs = pg_fetch_array($ret[1]);
-										$attributes['enum_output'][$i][$k] = $rs['output'];
+										$sql = $attributes['options'][$i];
+										$value = $query_result[$k][$attributes['name'][$i]];
+										if($value != ''){
+											$sql = 'SELECT * FROM ('.$sql.') as foo WHERE value = \''.$value.'\'';
+											$ret=$database->execSQL($sql,4,0);
+											if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
+											$rs = pg_fetch_array($ret[1]);
+											$attributes['enum_output'][$i][$k] = $rs['output'];
+										}
 									}
 								}
 								# weitere Optionen
