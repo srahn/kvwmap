@@ -37,6 +37,10 @@
 							} 
 						}break;
 						
+						case 'Autovervollständigungsfeld' : {
+							$output = $attributes['enum_output'][$j][$k];
+						}break;
+						
 						case 'Dokument' : {
 							if ($dataset[$attributes['name'][$j]]!='') {							
 								$dokumentpfad = $dataset[$attributes['name'][$j]];

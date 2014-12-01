@@ -39,6 +39,7 @@ backto = function(go){
 <h2>Flurst&uuml;cke</h2>
 <table border="0" cellpadding="2" cellspacing="0">
 <?php
+	$this->Stelle->getFunktionen();
 	$forall = false;
 	if($i == '')$i = 0;
   $anzObj=count($this->qlayerset[$i]['shape']);	

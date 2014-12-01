@@ -1941,7 +1941,7 @@ class GUI {
 		$options = explode(';', $attributes['options'][0]);
 		$sql = $options[0];
 		$sql = 'SELECT * FROM ('.$sql.') as foo WHERE';
-		$sql .= " output::text like '".$this->formvars['inputvalue']."%' OR output::text like upper(substr('".$this->formvars['inputvalue']."', 1, 1))||substr('".$this->formvars['inputvalue']."', 2, ".strlen($this->formvars['inputvalue']).")||'%' ORDER BY output LIMIT 15";  			
+		$sql .= " lower(output::text) like lower('".$this->formvars['inputvalue']."%') ORDER BY output LIMIT 15";  			
 		#echo $sql;
   	$ret=$layerdb->execSQL($sql,4, 1);
 		$count = pg_num_rows($ret[1]);
@@ -1953,7 +1953,9 @@ class GUI {
 		elseif($count == 0 ){		# wenn nichts gefunden wurde
 			echo '~document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'none\';';
 			echo 'document.getElementById(\''.$this->formvars['field_id'].'\').value = document.getElementById(\''.$this->formvars['field_id'].'\').backup_value;';
-			echo 'document.getElementById(\''.$this->formvars['field_id'].'_output\').value = document.getElementById(\''.$this->formvars['field_id'].'_output\').backup_value;';
+			echo 'output = document.getElementById(\''.$this->formvars['field_id'].'_output\').value;';
+			echo 'document.getElementById(\''.$this->formvars['field_id'].'_output\').value = output.substring(0, output.length-1);';
+			echo 'document.getElementById(\''.$this->formvars['field_id'].'_output\').onkeyup();';
 		}
 		else{
 			pg_result_seek($ret[1], 0);
@@ -13862,8 +13864,8 @@ class db_mapObj{
                 # -----<requires>------
                 if(strpos(strtolower($attributes['options'][$i]), "<requires>") > 0){
                   if($query_result != NULL){
-                    $options = $attributes['options'][$i];
                     for($k = 0; $k < count($query_result); $k++){
+											$options = $attributes['options'][$i];
 											foreach($attributes['name'] as $attributename){
 												if(strpos($options, '<requires>'.$attributename.'</requires>') !== false AND $query_result[$k][$attributename] != ''){
 													$options = str_replace('<requires>'.$attributename.'</requires>', "'".$query_result[$k][$attributename]."'", $options);
