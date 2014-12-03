@@ -15,7 +15,7 @@
            $anzeigename=$this->layerdaten['alias'][$i];
          }
          if(!in_array(strtoupper(mb_substr($anzeigename,0,1,'UTF-8')),$umlaute) AND strtolower(mb_substr($anzeigename,0,1,'UTF-8')) != $first) {
-           echo "<a href='#".strtoupper(mb_substr($anzeigename,0,1,'UTF-8'))."'>".strtoupper(mb_substr($anzeigename,0,1,'UTF-8'))."</a>&nbsp;&nbsp;";
+					 echo "<a href='#".strtoupper(mb_substr($anzeigename,0,1,'UTF-8'))."'><div class='menu abc'>".strtoupper(mb_substr($anzeigename,0,1,'UTF-8'))."</div></a>";
            $first=strtolower(mb_substr($anzeigename,0,1));
          }
        } ?> 

@@ -679,3 +679,10 @@ tbody.gle tr:hover {
 	margin-right:auto;
 	background-color: #F6F6F6;
 }
+
+.abc {
+	float:left;
+	text-align:center;
+	width:19px;
+	margin-left:3px;
+}
