@@ -11,6 +11,18 @@ function ImageLoadFailed(id) {
 var currentform;
 var doit;
 
+function message(text){
+	var Msg = document.getElementById("message_box");
+	if(Msg == undefined){
+		document.write('<div id="message_box" class="message_box_hidden"></div>');
+		var Msg = document.getElementById("message_box");
+	}
+	Msg.className = 'message_box_visible';
+	Msg.innerHTML = text;
+	setTimeout(function() {Msg.className = 'message_box_hide';},500);
+	setTimeout(function() {Msg.className = 'message_box_hidden';},2500);
+}
+
 function onload_functions(){
 	if(document.getElementById('scrolldiv') != undefined){
 		document.getElementById('scrolldiv').scrollTop = <? echo $this->user->rolle->scrollposition; ?>;

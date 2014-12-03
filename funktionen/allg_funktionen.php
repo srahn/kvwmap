@@ -846,15 +846,7 @@ function showAlert($text) {
 function showMessage($text) {
   ?>
   <script type="text/javascript">
-		var Msg = document.getElementById("message_box");
-		if(Msg == undefined){
-			document.write('<div id="message_box" class="message_box_hidden"></div>');
-			var Msg = document.getElementById("message_box");
-		}
-		Msg.className = 'message_box_visible';
-		Msg.innerHTML = "<? echo $text; ?>";
-		setTimeout(function() {Msg.className = 'message_box_hide';},500);
-		setTimeout(function() {Msg.className = 'message_box_hidden';},2500);
+		message("<?php echo $text; ?>");
   </script><?php
 }
 

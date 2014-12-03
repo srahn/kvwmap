@@ -6517,8 +6517,9 @@ class GUI {
         foreach($layerset[0]['attributes']['all_table_names'] as $tablename){
 					if($tablename == $layerset[0]['maintable'] AND $layerset[0]['attributes']['oids'][$j]){		# hat Haupttabelle oids?
             $pfad = $layerset[0]['attributes']['table_alias_name'][$tablename].'.oid AS '.$tablename.'_oid, '.$pfad;
+						if($this->formvars['operator_'.$tablename.'_oid'] == '')$this->formvars['operator_'.$tablename.'_oid'] = '=';
             if($this->formvars['value_'.$tablename.'_oid']){
-              $sql_where .= ' AND '.$tablename.'_oid = '.$this->formvars['value_'.$tablename.'_oid'];
+              $sql_where .= ' AND '.$tablename.'_oid '.$this->formvars['operator_'.$tablename.'_oid'].' '.$this->formvars['value_'.$tablename.'_oid'];
             }
           }
           $j++;
@@ -6975,6 +6976,71 @@ class GUI {
 		$this->titel='Gespeicherte Suchabfragen';
 		$this->searches = $this->user->rolle->getsearches(NULL);
 		$this->output();
+	}
+	
+	function Datensaetze_Merken(){
+    $checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
+    for($i = 0; $i < count($checkbox_names); $i++){
+      if($this->formvars[$checkbox_names[$i]] == 'on'){
+        $element = explode(';', $checkbox_names[$i]);     #  check;table_alias;table;oid
+        $oid = $element[3];
+				if($oid != ''){
+					$sql = 'INSERT INTO zwischenablage VALUES ('.$this->user->id.', '.$this->Stelle->id.', '.$this->formvars['chosen_layer_id'].', '.$oid.') ON DUPLICATE KEY UPDATE layer_id=layer_id';
+					#echo $sql.'<br>';
+					$ret = $this->database->execSQL($sql,4, 1);
+				}
+      }
+    }
+	}
+	
+	function Datensaetze_nicht_mehr_merken(){
+    $checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
+    for($i = 0; $i < count($checkbox_names); $i++){
+      if($this->formvars[$checkbox_names[$i]] == 'on'){
+        $element = explode(';', $checkbox_names[$i]);     #  check;table_alias;table;oid
+        $oids[] = $element[3];
+			}
+		}
+		$sql = 'DELETE FROM zwischenablage WHERE user_id = '.$this->user->id.' AND stelle_id = '.$this->Stelle->id;
+		if($this->formvars['chosen_layer_id'] != '')$sql.= ' AND layer_id = '.$this->formvars['chosen_layer_id'];
+		if(count($oids) > 0)$sql.= ' AND oid IN ('.implode($oids).')';
+		#echo $sql.'<br>';
+		$ret = $this->database->execSQL($sql,4, 1);
+		if(count($oids) == 0){
+			$this->Zwischenablage();
+		}
+	}
+	
+	function Zwischenablage(){
+		$sql = "SELECT count(z.layer_id) as count, z.layer_id, layer.Name FROM zwischenablage as z, layer WHERE z.layer_id = layer.Layer_ID AND user_id = ".$this->user->id." AND stelle_id = ".$this->Stelle->id." GROUP BY z.layer_id, Name";
+		#echo $sql.'<br>';
+		$ret = $this->database->execSQL($sql,4, 1);
+    $this->num_rows=mysql_num_rows($ret[1]);
+		while($rs=mysql_fetch_array($ret[1])){
+			$this->layer[] = $rs;
+		}
+		// if($this->num_rows == 1){
+			// $this->gemerkte_Datensaetze_anzeigen($this->layer[0]['layer_id']);
+		// }
+		// else{
+			$this->titel = 'Zwischenablage';
+			$this->main = 'zwischenablage.php';
+			$this->output();
+		//}
+	}
+	
+	function gemerkte_Datensaetze_anzeigen($layer_id){
+		$sql = "SELECT oid FROM zwischenablage WHERE user_id = ".$this->user->id." AND stelle_id = ".$this->Stelle->id;
+		#echo $sql.'<br>';
+		$ret = $this->database->execSQL($sql,4, 1);
+		while($rs=mysql_fetch_array($ret[1])){
+			$oids[] = $rs['oid'];
+		}
+		$layerset = $this->user->rolle->getLayer($layer_id);
+		$this->formvars['selected_layer_id'] = $layer_id;
+		$this->formvars['value_'.$layerset[0]['maintable'].'_oid'] = '('.implode(',', $oids).')';
+		$this->formvars['operator_'.$layerset[0]['maintable'].'_oid'] = 'IN';
+		$this->GenerischeSuche_Suchen();
 	}
 	
 	function dokument_loeschen(){

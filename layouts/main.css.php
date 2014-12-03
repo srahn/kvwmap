@@ -277,6 +277,14 @@ a.menuered:hover {
 	background-image: url(../graphics/drucken.png);
 }
 
+.merken{
+	background-image: url(../graphics/merken.png);
+}
+
+.nicht_mehr_merken{
+	background-image: url(../graphics/nicht_mehr_merken.png);
+}
+
 .datensatz_loeschen{
 	background-image: url(../graphics/datensatz_loeschen.png);
 }

@@ -42,17 +42,20 @@ auto_generate = function(attributenamesarray, geom_attribute, attribute, k, laye
 }
  
 update_buttons = function(all, layer_id){
+	merk_link = document.getElementById('merk_link_'+layer_id);
 	delete_link = document.getElementById('delete_link_'+layer_id);
 	print_link = document.getElementById('print_link_'+layer_id);
 	zoom_link = document.getElementById('zoom_link_'+layer_id);
 	classify_link = document.getElementById('classify_link_'+layer_id);
 	if(all == 'true'){		
+		if(merk_link != undefined)merk_link.style.display = 'none';
 		if(print_link != undefined)print_link.style.display = 'none';
 		if(delete_link != undefined)delete_link.style.display = 'none';
 		if(zoom_link != undefined)zoom_link.style.display = 'none';
 		if(classify_link != undefined)classify_link.style.display = 'none';
 	}
 	else{
+		if(merk_link != undefined)merk_link.style.display = '';
 		if(print_link != undefined)print_link.style.display = '';
 		if(delete_link != undefined)delete_link.style.display = '';
 		if(zoom_link != undefined)zoom_link.style.display = '';
@@ -157,6 +160,26 @@ select_this_dataset = function(layer_id, n){
 		obj = document.getElementById(layer_id+'_'+k);
 	}
 	document.getElementById(layer_id+'_'+n).checked = true;
+}
+
+add_to_clipboard = function(layer_id){
+	if(check_for_selection(layer_id)){
+		currentform.chosen_layer_id.value = layer_id;
+		currentform.go.value = 'Datensaetze_Merken';
+		formdata = new FormData(currentform);
+		ahah("index.php", formdata, new Array(), new Array());
+		message("Datensätze gemerkt");
+	}
+}
+
+remove_from_clipboard = function(layer_id){
+	if(check_for_selection(layer_id)){
+		currentform.chosen_layer_id.value = layer_id;
+		currentform.go.value = 'Datensaetze_nicht_mehr_merken';
+		formdata = new FormData(currentform);
+		ahah("index.php", formdata, new Array(), new Array());
+		message("Datensätze entfernt");
+	}
 }
 
 use_for_new_dataset = function(layer_id){

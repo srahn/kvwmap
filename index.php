@@ -992,27 +992,43 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  } break;		
 
 	  case 'Layer-Suche' : {
-		$GUI->GenerischeSuche();
+			$GUI->GenerischeSuche();
 	  } break;
 	  
 		case 'Suchabfragen_auflisten' : {
-		$GUI->Suchabfragen_auflisten();
+			$GUI->Suchabfragen_auflisten();
 	  } break;
 		
 	  case 'Layer-Suche_Suchabfrage_speichern' : {
-		$GUI->GenerischeSuche();
+			$GUI->GenerischeSuche();
 	  } break;
 	  
 	  case 'Layer-Suche_Suchabfrage_löschen' : {
-		$GUI->GenerischeSuche();
+			$GUI->GenerischeSuche();
+	  } break;		
+		
+		case 'Datensaetze_Merken' : {
+			$GUI->Datensaetze_Merken();
 	  } break;
-
+		
+		case 'Datensaetze_nicht_mehr_merken' : {
+			$GUI->Datensaetze_nicht_mehr_merken();
+	  } break;
+		
+		case 'Zwischenablage' : {
+			$GUI->Zwischenablage();
+	  } break;
+		
+		case 'gemerkte_Datensaetze_anzeigen' : {
+			$GUI->gemerkte_Datensaetze_anzeigen($GUI->formvars['layer_id']);
+	  } break;
+		
 	  case 'Layer_Datensaetze_Loeschen' : {
-		$GUI->layer_Datensaetze_loeschen();
+			$GUI->layer_Datensaetze_loeschen();
 	  } break;
 	  
 	  case 'Dokument_Loeschen' : {
-		$GUI->dokument_loeschen();
+			$GUI->dokument_loeschen();
 	  } break;
 
 	  case 'neuer_Layer_Datensatz' : {			
