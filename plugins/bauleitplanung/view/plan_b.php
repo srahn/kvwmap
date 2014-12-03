@@ -1,4 +1,7 @@
 <?php
+
+	include(SNIPPETS.'generic_functions.php'); 
+
   $doit = false;
   $anzObj = count($this->qlayerset[$i]['shape']);
   if ($anzObj > 0) {
@@ -13,7 +16,7 @@
     ?>
 
 <STYLE type="text/css">
-   td {font-size: 10pt}
+   td {font-size: 15px}
    input.class2 {border:none;background-color: transparent;text-align:right;}
    .titel {font-size: 17pt; font-weight: bold}
 </STYLE>
@@ -26,72 +29,61 @@ function nurZahlen(el)
   el.value = val;
 }
 
-function update_require_attribute(attributes, k,layer_id, value){
-	// attributes ist eine Liste von zu aktualisierenden Attributen, k die Nummer des Datensatzes und value der ausgewaehlte Wert
-	attribute = attributes.split(',');
-	for(i = 0; i < attribute.length; i++){
-		type = document.getElementById(attribute[i]+'_'+k).type;
-		if(type == 'text'){action = 'setvalue'};
-		if(type == 'select-one'){action = 'sethtml'};
-		ahah("index.php", "go=get_select_list&layer_id="+layer_id+"&attribute="+attribute[i]+"&value="+value+"&type="+type, new Array(document.getElementById(attribute[i]+'_'+k)), new Array(action));
-	}
-}
-
 
 function show_details(oid){
-	document.GUI.go.value = 'Layer-Suche_Suchen';
-	document.GUI.search.value = 'true';
-	document.GUI.selected_layer_id.value = <? echo $this->qlayerset[$i]['Layer_ID'] ?>;
-	document.GUI.details.value = 'true';
-	document.GUI.offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value = '';
-	document.GUI.value_b_plan_stammdaten_oid.value = oid;
-	document.GUI.submit();
+	currentform.go.value = 'Layer-Suche_Suchen';
+	currentform.search.value = 'true';
+	currentform.selected_layer_id.value = <? echo $this->qlayerset[$i]['Layer_ID'] ?>;
+	currentform.details.value = 'true';
+	currentform.offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value = '';
+	currentform.value_b_plan_stammdaten_oid.value = oid;
+	currentform.submit();
 }
 
 function go_back(){
-	document.GUI.details.value = '';
-	document.GUI.go.value = 'Layer-Suche_Suchen';
-	document.GUI.selected_layer_id.value = <? echo $this->qlayerset[$i]['Layer_ID'] ?>;
-	document.GUI.value_b_plan_stammdaten_oid.value = '';
-	document.GUI.offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value = document.GUI._offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value;
-	document.GUI.submit();
+	currentform.details.value = '';
+	currentform.go.value = 'Layer-Suche_Suchen';
+	currentform.selected_layer_id.value = <? echo $this->qlayerset[$i]['Layer_ID'] ?>;
+	currentform.value_b_plan_stammdaten_oid.value = '';
+	currentform.offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value = currentform._offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value;
+	currentform.submit();
 }
 
 function copy_dataset(plan_id){
-	document.GUI.plan_id.value = plan_id;
-	document.GUI.go.value = 'copy_bplan';
-	document.GUI.submit();
+	currentform.plan_id.value = plan_id;
+	currentform.go.value = 'copy_bplan';
+	currentform.submit();
 }
 
 function update_bplan_from_rok(plan_id){
 	really = confirm('Wollen Sie die Flächen der Gebiete und Sondergebiete wirklich mit den ROK-Flächen überschreiben?');
 	if(really){
-		document.GUI.plan_id.value = plan_id;
-		document.GUI.go.value = 'update_bplan_from_rok';
-		document.GUI.submit();
+		currentform.plan_id.value = plan_id;
+		currentform.go.value = 'update_bplan_from_rok';
+		currentform.submit();
 	}
 }
 
 function delete_dataset(plan_id){
 	really = confirm('Wollen Sie diesen Datensatz wirklich löschen?');
 	if(really){
-		if((document.GUI.details.value != 'true' && document.GUI.value_b_plan_stammdaten_oid.value == '') || (document.GUI.details.value == 'true' && document.GUI.value_b_plan_stammdaten_oid.value != '')){		// Trefferliste vorhanden -> wieder zurück zur Trefferliste
-			document.GUI.details.value = '';
-			document.GUI.selected_layer_id.value = <? echo $this->qlayerset[$i]['Layer_ID'] ?>;
-			document.GUI.value_b_plan_stammdaten_oid.value = '';
-			document.GUI.offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value = document.GUI._offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value;
+		if((currentform.details.value != 'true' && currentform.value_b_plan_stammdaten_oid.value == '') || (currentform.details.value == 'true' && currentform.value_b_plan_stammdaten_oid.value != '')){		// Trefferliste vorhanden -> wieder zurück zur Trefferliste
+			currentform.details.value = '';
+			currentform.selected_layer_id.value = <? echo $this->qlayerset[$i]['Layer_ID'] ?>;
+			currentform.value_b_plan_stammdaten_oid.value = '';
+			currentform.offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value = currentform._offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value;
 		}
-		document.GUI.plan_id.value = plan_id;
-		document.GUI.go.value = 'delete_bplan';
-		document.GUI.submit();
+		currentform.plan_id.value = plan_id;
+		currentform.go.value = 'delete_bplan';
+		currentform.submit();
 	}
 }
 
 function zoomto(roknr, art){
-	document.GUI.roknr.value = roknr;
-	document.GUI.art.value = art;
-	document.GUI.go.value = 'zoomtobplan';
-	document.GUI.submit();
+	currentform.roknr.value = roknr;
+	currentform.art.value = art;
+	currentform.go.value = 'zoomtobplan';
+	currentform.submit();
 }
 
 function set_changed_flag(flag){
@@ -156,7 +148,7 @@ function update_gebietstyp(){
 									$this->qlayerset[$i]['attributes']['name'][$j] = 'gkz';
 			  					$this->form_field_names .= $this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'|';
 									echo '<select title="'.$this->qlayerset[$i]['attributes']['alias'][$j].'" style="font-size: '.$this->user->rolle->fontsize_gle.'px" ';
-									echo 'onchange="update_require_attribute(\''.$this->qlayerset[$i]['attributes']['req_by'][$j].'\', '.$k.','.$this->qlayerset[$i]['Layer_ID'].', this.value);" ';
+									echo 'onchange="update_require_attribute(\''.$this->qlayerset[$i]['attributes']['req_by'][$j].'\', '.$k.','.$this->qlayerset[$i]['Layer_ID'].', new Array(\''.implode($this->qlayerset[$i]['attributes']['name'], "','").'\'));" ';
 									echo 'id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].'">';
 									echo '<option value="">-- Bitte Auswählen --</option>';
 									for($e = 0; $e < count($this->qlayerset[$i]['attributes']['enum_value'][$j]); $e++){

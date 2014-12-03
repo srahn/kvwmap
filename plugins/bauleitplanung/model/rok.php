@@ -283,6 +283,20 @@ class rok {
     	showAlert('Löschen erfolgreich');
     }
   }
+	
+	function delete_fplan($plan_id){
+  	$sql = "DELETE FROM f_plan_stammdaten WHERE plan_id = ".$plan_id.';';
+  	$sql.= "DELETE FROM f_plan_gebiete WHERE plan_id = ".$plan_id.';';
+  	$sql.= "DELETE FROM f_plan_sondergebiete WHERE plan_id = ".$plan_id.';';
+  	#echo $sql;
+  	$ret = $this->database->execSQL($sql,4, 1);
+    if ($ret[0]) {
+     showAlert('Löschen fehlgeschlagen');
+    }
+    else{
+    	showAlert('Löschen erfolgreich');
+    }
+  }
   
   function copy_bplan($plan_id){
   	$sql = "BEGIN;";
@@ -306,21 +320,30 @@ class rok {
     }
     return $new_oid;
   }
-  
-  function delete_fplan($oid){
-  	$success = true;
-  	$sql = "DELETE FROM tblf_plan WHERE oid = ".$oid;
-  	#echo $sql;
+	
+	function copy_fplan($plan_id){
+  	$sql = "BEGIN;";
+  	$sql.= "INSERT INTO f_plan_stammdaten (gkz, art, pl_nr, gemeinde_alt, bezeichnung, aktuell, lfd_rok_nr, aktenzeichen, datumeing, datumzust, datumabl, datumgenehm, datumbeka, datumaufh, erteilteaufl, ert_hinweis, ert_bemerkungen) ";
+  	$sql.= "SELECT gkz, art, pl_nr, gemeinde_alt, bezeichnung, aktuell, lfd_rok_nr, aktenzeichen, datumeing, datumzust, datumabl, datumgenehm, datumbeka, datumaufh, erteilteaufl, ert_hinweis, ert_bemerkungen FROM f_plan_stammdaten ";
+  	$sql.= "WHERE plan_id = ".$plan_id;
   	$ret = $this->database->execSQL($sql,4, 1);
-    if ($ret[0]) {
-     showAlert('Löschen fehlgeschlagen');
+  	$new_oid = pg_last_oid($ret[1]);
+  	$sql = "SELECT plan_id FROM f_plan_stammdaten WHERE oid = ".$new_oid;
+  	$ret = $this->database->execSQL($sql, 4, 0);
+		$rs = pg_fetch_array($ret[1]);
+		$sql = "INSERT INTO f_plan_gebiete SELECT ".$rs['plan_id'].", gebietstyp, flaeche, kap_gemziel, kap_nachstell FROM f_plan_gebiete WHERE plan_id = ".$plan_id.";";
+		$sql.= "INSERT INTO f_plan_sondergebiete SELECT ".$rs['plan_id'].", gebietstyp, flaeche, kap_gemziel, kap_nachstell FROM f_plan_sondergebiete WHERE plan_id = ".$plan_id.";";
+		$sql.= "COMMIT;"; 
+		$ret = $this->database->execSQL($sql, 4, 0);
+  	if ($ret[0]) {
+     showAlert('Kopieren fehlgeschlagen');
     }
     else{
-    	showAlert('Löschen erfolgreich');
+    	showAlert('Kopieren erfolgreich');
     }
+    return $new_oid;
   }
- 	
-  
+    
   function getExtentFromRokNrBplan($roknr, $art, $border, $epsg) {
 		if(in_array($art, array("B-Plan", "vb-Plan", "Einzelvorhaben", "BImSchG"))) $table = "rok_edit.bpl_geltungsbereiche";
 		if(in_array($art, array("Innenbereichssatzung", "Außenbereichssatzung"))) $table = "rok_edit.satzungen ";
