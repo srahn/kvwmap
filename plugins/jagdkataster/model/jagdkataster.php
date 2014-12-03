@@ -321,7 +321,7 @@ class jagdkataster {
 			$sql.= " AND jagdbezirke.oid IN (".implode(',', $oids).")";
 			$sql.= " AND f.wkb_geometry && st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.") AND st_intersects(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS."))";
 			$sql.= " AND st_area(st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS."))) > 1";
-			$sql.= $this->database->build_temporal_filter(HIST_TIMESTAMP, array('g', 'f'));
+			$sql.= $this->database->build_temporal_filter(array('g', 'f'));
 			$sql.= " ORDER BY jagdbezirke.name";
 		}
 		else{
@@ -351,7 +351,7 @@ class jagdkataster {
 			$sql.= "LEFT JOIN alkis.ax_namensnummer_eigentuemerart w ON w.wert = n.eigentuemerart ";
 			$sql.= "LEFT JOIN alkis.ax_person p ON n.benennt = p.gml_id ";
 			$sql.= " WHERE f.flurstueckskennzeichen = ff.flurstueckskennzeichen";
-			$sql.= $this->database->build_temporal_filter(HIST_TIMESTAMP, array('ff', 's', 'g', 'b', 'n', 'p'));
+			$sql.= $this->database->build_temporal_filter(array('ff', 's', 'g', 'b', 'n', 'p'));
 			$sql.= " order by name),' || ') as eigentuemer,";
 			$sql.= " st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.")) AS the_geom_inter, f.wkb_geometry as the_geom";		
 			$sql.= " FROM alkis.ax_gemarkung AS g, jagdkataster.jagdbezirke, alkis.ax_flurstueck AS f";
