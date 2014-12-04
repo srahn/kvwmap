@@ -220,7 +220,7 @@
       $csv .= $GUI->flurstuecke[$i]['flur'].';';
       $csv .= $GUI->flurstuecke[$i]['zaehlernenner'].';';
       for($j=0; $j < count($GUI->flurstuecke[$i]['eigentuemer']); $j++){
-      	$csv .= $GUI->flurstuecke[$i]['eigentuemer_nr'][$j].' '.$GUI->flurstuecke[$i]['eigentuemer'][$j].'   ';
+      	$csv .= $GUI->flurstuecke[$i]['eigentuemer'][$j].' ('.$GUI->flurstuecke[$i]['eigentuemer_nr'][$j].')   ';
       }
       $csv .= ';';
       $csv .= $GUI->flurstuecke[$i]['albflaeche'].';';
@@ -228,7 +228,7 @@
       $csv .= str_replace('.', ',', $GUI->flurstuecke[$i]['anteil']).';';
      	$csv .= chr(10);  
     }
-    $csv = 'Gemarkung;Flur;Zähler/Nenner;Eigentümer;Flst-Fläche(ALB);Anteil m²;Anteil %'.chr(10).$csv;
+    $csv = 'Gemarkung;Flur;Zähler/Nenner;Eigentümer (Nr.);Flst-Fläche(ALB);Anteil m²;Anteil %'.chr(10).$csv;
     ob_end_clean();
     header("Content-type: application/vnd.ms-excel");
     header("Content-disposition:  inline; filename=Flurstuecke.csv");
