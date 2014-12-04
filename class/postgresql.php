@@ -1847,7 +1847,7 @@ class pgdatabase_alkis {
     # liefert die Lage des Flurstückes
     $sql = "SELECT l.unverschluesselt, s.bezeichnung ";
 		$sql.= "FROM alkis.ax_flurstueck as f ";
-		$sql.= "JOIN alkis.ax_lagebezeichnungohnehausnummer l ON f.gml_id = ANY(l.gehoertzu) ";
+		$sql.= "JOIN alkis.ax_lagebezeichnungohnehausnummer l ON l.gml_id = ANY(f.zeigtauf)  ";
 		$sql.= "LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND l.lage=s.lage ";
 		$sql.= "WHERE f.flurstueckskennzeichen = '".$FlurstKennz."'";
 		$sql.= $this->build_temporal_filter(HIST_TIMESTAMP, array('f', 'l', 's'));
