@@ -407,8 +407,14 @@ class antrag {
   function getDatum($flurid,$nr,$secondary) {
     $this->debug->write('<br>nachweis.php getDatum Abfragen der Datum zu einem Vorgang in der Nachweisführung.',4);
     # Abfragen der Datum zu einem Vorgang in der Nachweisführung
-    $sql.="SELECT DISTINCT n.datum FROM nachweisverwaltung.n_nachweise AS n";
-    $sql.=" WHERE n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
+    $sql.="SELECT DISTINCT n.datum FROM nachweisverwaltung.n_nachweise AS n";		
+		if ($this->nr!='') {
+      $sql.=",nachweisverwaltung.n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
+    }
+    else {
+      $sql.=" WHERE (1=1)";
+    }
+    $sql.=" AND n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
     if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
     $ret=$this->database->execSQL($sql,4, 0);
     if (!$ret[0]) {
@@ -426,7 +432,13 @@ class antrag {
     $this->debug->write('<br>nachweis.php getDatei Abfragen der Dateien zu einem Vorgang in der Nachweisführung.',4);
     # Abfragen der Datum zu einem Vorgang in der Nachweisführung
     $sql.="SELECT DISTINCT n.link_datei FROM nachweisverwaltung.n_nachweise AS n";
-    $sql.=" WHERE n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
+    if ($this->nr!='') {
+      $sql.=",nachweisverwaltung.n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
+    }
+    else {
+      $sql.=" WHERE (1=1)";
+    }
+    $sql.=" AND n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
     if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
     $ret=$this->database->execSQL($sql,4, 0);
     if (!$ret[0]) {
@@ -444,7 +456,13 @@ class antrag {
     $this->debug->write('<br>nachweis.php getDatum Abfragen der Gueltigkeit der Dokumente in einem Vorgang in der Nachweisführung.',4);
     # Abfragen der Gueltigkeit der Dokumente in einem Vorgang in der Nachweisführung.
     $sql.="SELECT DISTINCT n.gueltigkeit FROM nachweisverwaltung.n_nachweise AS n";
-    $sql.=" WHERE n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
+    if ($this->nr!='') {
+      $sql.=",nachweisverwaltung.n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
+    }
+    else {
+      $sql.=" WHERE (1=1)";
+    }
+    $sql.=" AND n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
     if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
     $sql.=" AND n.gueltigkeit=0";
     $ret=$this->database->execSQL($sql,4, 0);
@@ -466,7 +484,13 @@ class antrag {
     $this->debug->write('<br>nachweis.php getDatum Abfragen der Vermessungsstellen, die an einem Vorgang beteiligt waren in der Nachweisführung.',4);
     # Abfragen der Vermessungsstellen, die an einem Vorgang beteiligt waren in der Nachweisführung.
     $sql.="SELECT DISTINCT v.name FROM nachweisverwaltung.n_nachweise AS n, nachweisverwaltung.n_vermstelle AS v";
-    $sql.=" WHERE n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
+    if ($this->nr!='') {
+      $sql.=",nachweisverwaltung.n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
+    }
+    else {
+      $sql.=" WHERE (1=1)";
+    }
+    $sql.=" AND n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
     if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
     $sql.=" AND n.vermstelle::integer=v.id";
     $ret=$this->database->execSQL($sql,4, 0);
@@ -486,7 +510,7 @@ class antrag {
     # Abfrag der Anzahl der zum Riss gehörenden Fortführungsrisse
     $sql.="SELECT COUNT(n.id) AS anzffr FROM nachweisverwaltung.n_nachweise AS n";
     if ($this->nr!='') {
-      $sql.=",n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
+			$sql.=",nachweisverwaltung.n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
     }
     else {
       $sql.=" WHERE (1=1)";

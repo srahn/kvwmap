@@ -57,7 +57,7 @@ function create_protocol(){
           <td align="center" <? if($this->formvars['andere'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['andere']; ?></td>
           <td align="center" <? if($this->formvars['Datum'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['Datum']; ?></td>
           <td align="center" <? if($this->formvars['Datei'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['Datei']; ?></td>
-          <td align="center" <? if($this->formvars['gemessendurch'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['gemessen durch']; ?></td>
+          <td align="center" <? if($this->formvars['gemessendurch'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.utf8_encode($this->antrag->FFR[$i]['gemessen durch']); ?></td>
 		  <td align="center" <? if($this->formvars['Gueltigkeit'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['Gueltigkeit']; ?></td>
         </tr>
         <? }?>
