@@ -3710,17 +3710,16 @@ class GUI {
 		$this->formvars['transparency'] = 60;
 		
 		$layer_id = $dbmap->newRollenLayer($this->formvars);
-		
-		$classdata['layer_id'] = -$layer_id;
-		$class_id = $dbmap->new_Class($classdata);
-		$this->formvars['class'] = $class_id;
-		
+				
 		$color = $this->user->rolle->readcolor();
 		$style['colorred'] = $color['red'];
 		$style['colorgreen'] = $color['green'];
 		$style['colorblue'] = $color['blue'];
 		
 		if($this->formvars['selektieren'] == 'false'){      # highlighten (mit der ausgewählten Farbe)
+			$classdata['layer_id'] = -$layer_id;
+			$class_id = $dbmap->new_Class($classdata);
+			$this->formvars['class'] = $class_id;
 			switch ($layerset[0]['Datentyp']){
 				case MS_LAYER_POINT : {
 					if(defined('ZOOM2POINT_STYLE_ID') AND ZOOM2POINT_STYLE_ID != ''){
