@@ -65,7 +65,7 @@
 	$dimension = '';
 	$privileg = '';
 	for ($k=0;$k<$anzObj;$k++) {
-		$checkbox_name .= 'check;'.$attributes['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'];
+		$checkbox_names .= 'check;'.$attributes['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].'|';
 		if($k%5==0){
 ?>
 	</tr>
@@ -78,6 +78,45 @@
 			<div style="position: absolute;top: 1px;right: 1px"><a href="javascript:close_record('record_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>');" title="Schlie&szlig;en"><img style="border:none" src="<? echo GRAPHICSPATH."exit2.png"; ?>"></img></a></div>
 			<input type="hidden" value="" name="changed_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
 			<table class="tgle" border="1">
+				<? if($this->new_entry != true AND $this->formvars['printversion'] == ''){ ?>
+				<tr class="tr_hide">
+	        <th colspan="2" style="background-color:<? echo BG_GLEHEADER; ?>;">			  
+						<table width="100%" cellspacing="0" cellpadding="0">
+							<tr>
+								<? if($layer['connectiontype'] == 6){ ?>
+								<td>
+									<input style="display:none" id="<? echo $layer['Layer_ID'].'_'.$k; ?>" type="checkbox" name="check;<? echo $attributes['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>">&nbsp;
+								</td>
+								<? } ?>
+								<td align="right">
+									<table cellspacing="0" cellpadding="0">
+										<tr>
+											<? if($this->formvars['go'] == 'Zwischenablage' OR $this->formvars['go'] == 'gemerkte_Datensaetze_anzeigen'){ ?>
+												<td style="padding: 0 0 0 10;"><a title="Datensatz nicht mehr merken" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);remove_from_clipboard(<? echo $layer['Layer_ID']; ?>);"><div class="emboss nicht_mehr_merken"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+											<? }else{ ?>
+											<td style="padding: 0 0 0 10;"><a title="Datensatz merken" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);add_to_clipboard(<? echo $layer['Layer_ID']; ?>);"><div class="emboss merken"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+											<? } ?>
+								<? 	if($layer['privileg'] > '0'){ ?>
+											<td style="padding: 0 0 0 10;"><a href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);use_for_new_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>)" title="<? echo $strUseForNewDataset; ?>"><div class="emboss use_for_dataset"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+								<? 	} 
+										if(false AND $layer['connectiontype'] == 6 AND $layer['export_privileg'] == '1'){ ?>
+											<td style="padding: 0 0 0 10;display:none" id="td_uko_<? echo $layer['Layer_ID'].'_'.$k; ?>"><a id="uko_<? echo $layer['Layer_ID'].'_'.$k; ?>" href="" title="<? echo $strUKOExportThis; ?>"><div class="emboss datensatz_exportieren_uko"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+											<td style="padding: 0 0 0 10;"><a href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);csv_export(<? echo $layer['Layer_ID']; ?>);" title="<? echo $strCSVExportThis; ?>"><div class="emboss datensatz_exportieren_csv"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+								<? 	} 
+										if($layer['layouts']){ ?>
+											<td style="padding: 0 0 0 10;"><a title="Datensatz drucken" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);print_data(<?php echo $layer['Layer_ID']; ?>);"><div class="emboss drucken"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+								<?	}
+										if($layer['privileg'] == '2'){ ?>
+											<td style="padding: 0 40 0 10;"><a href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);delete_datasets(<?php echo $layer['Layer_ID']; ?>);" title="<? echo $strDeleteThisDataset; ?>"><div class="emboss datensatz_loeschen"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+									<? } ?>
+										</tr>
+									</table>
+								</td>
+							</tr>
+						</table>
+					</th>
+				</tr>
+			<? } ?>
 			  <tbody class="gle">
 <?		$trans_oid = explode('|', $layer['shape'][$k]['lock']);
 			if($layer['shape'][$k]['lock'] == 'bereits übertragen' OR $trans_oid[1] != '' AND $layer['shape'][$k][$layer['maintable'].'_oid'] == $trans_oid[1]){
@@ -278,7 +317,7 @@
 	</tr>
 <table>
 </div>
-<input type="hidden" name="checkbox_names_<? echo $layer['Layer_ID']; ?>" value="<? echo $checkbox_name; ?>">
+<input type="hidden" name="checkbox_names_<? echo $layer['Layer_ID']; ?>" value="<? echo $checkbox_names; ?>">
 <?
   }
   else {

@@ -1959,9 +1959,9 @@ class GUI {
 		}
 		else{
 			pg_result_seek($ret[1], 0);
-			echo'<select size="'.$count.'" style="width: 200px;padding:4px; margin:-2px -17px -4px -4px;" onclick="document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'none\';">';
+			echo'<select size="'.$count.'" style="width: 200px;padding:4px; margin:-2px -17px -4px -4px;">';
 			while($rs=pg_fetch_array($ret[1])) {
-				echo '<option onmouseover="this.selected = true;" onclick="document.getElementById(\''.$this->formvars['field_id'].'\').value=\''.$rs['value'].'\';document.getElementById(\''.$this->formvars['field_id'].'_output\').value=\''.$rs['output'].'\';" value="'.$rs['value'].'">'.$rs['output'].'</option>';
+				echo '<option onmouseover="this.selected = true;" onclick="document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'none\'; document.getElementById(\''.$this->formvars['field_id'].'\').value=\''.$rs['value'].'\';document.getElementById(\''.$this->formvars['field_id'].'_output\').value=\''.$rs['output'].'\';" value="'.$rs['value'].'">'.$rs['output'].'</option>';
 			}				
 			echo '</select>
 			~document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'block\';';
@@ -6602,11 +6602,11 @@ class GUI {
         $layerset[0]['attributes'] = $mapDB->add_attribute_values($layerset[0]['attributes'], $layerdb, $layerset[0]['shape']);
         
 				if($layerset[0]['count'] != 0 AND $this->formvars['embedded_subformPK'] == '' AND $this->formvars['embedded'] == '' AND $this->formvars['embedded_dataPDF'] == ''){
-					if($this->formvars['go'] != 'neuer_Layer_Datensatz_speichern'){		// wenns nur die Anzeige des gerade angelegten Datensatzes ist, nicht als last_query speichern
+					#if($this->formvars['go'] != 'neuer_Layer_Datensatz_speichern'){		// wenns nur die Anzeige des gerade angelegten Datensatzes ist, nicht als last_query speichern (wieder rausgenommen)
 						# last_query speichern
 						$this->user->rolle->delete_last_query();
 						$this->user->rolle->save_last_query('Layer-Suche_Suchen', $this->formvars['selected_layer_id'], $sql, $sql_order, $this->formvars['anzahl'], $this->formvars['offset_'.$layerset[0]['Layer_ID']]);
-					}
+					#}
         
 					# Querymaps erzeugen
 					if($layerset[0]['querymap'] == 1 AND $layerset[0]['attributes']['privileg'][$layerset[0]['attributes']['the_geom']] >= '0' AND ($layerset[0]['Datentyp'] == 1 OR $layerset[0]['Datentyp'] == 2)){
