@@ -3161,8 +3161,10 @@ class stelle {
 			$sql .=' AND used_layer.export_privileg = "'.$export_privileg.'"';
 		}
 		$sql .= ' ORDER BY Name) as foo ';
-		$sql .= 'WHERE subformfk IS NULL OR privilegfk = 1';
-		#echo $sql;
+		if($privileg > 0){
+			$sql .= 'WHERE subformfk IS NULL OR privilegfk = 1';			# nicht editierbare SubformFKs ausschliessen
+		}
+		echo $sql;
 		$this->debug->write("<p>file:users.php class:stelle->getqueryablePostgisLayers - Lesen der abfragbaren PostgisLayer zur Stelle:<br>".$sql,4);
 		$query=mysql_query($sql,$this->database->dbConn);
 		if ($query==0) {
