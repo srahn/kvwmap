@@ -60,7 +60,8 @@ function getInsertIndex(insertObj, id, order, start){
 		options_order_split = options_order_string.split('_');
 		order_in_list = parseInt(options_order_split[0]);
 		menueebene_in_list = parseInt(options_order_split[2]);
-		if(menueebene_in_list == menueebene_to_be_inserted && order_in_list >= order_to_be_inserted){
+		if((menueebene_in_list == menueebene_to_be_inserted && order_in_list >= order_to_be_inserted) ||
+		(menueebene_in_list == 1 && menueebene_to_be_inserted == 2)){			//naechster Obermenuepunkt
 			return i;
 		}
 	}
