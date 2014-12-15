@@ -13,18 +13,15 @@ function send(zoom){
 	document.GUI.zoom.value = zoom;
 	if(document.GUI.newpathwkt.value == ''){
 		if(document.GUI.newpath.value == ''){
-			alert('Geben Sie ein Polygon an.');
+			if(document.GUI.geom_nullable.value == '0'){
+				alert('Geben Sie ein Polygon an.');
+				return 0;
+			}
 		}
-		else{
-			document.GUI.newpathwkt.value = buildwktpolygonfromsvgpath(document.GUI.newpath.value);
-			document.GUI.go_plus.value = 'Senden';
-			document.GUI.submit();
-		}
+		else document.GUI.newpathwkt.value = buildwktpolygonfromsvgpath(document.GUI.newpath.value);
 	}
-	else{
-		document.GUI.go_plus.value = 'Senden';
-		document.GUI.submit();
-	}
+	document.GUI.go_plus.value = 'Senden';
+	document.GUI.submit();
 }
 
 function buildwktpolygonfromsvgpath(svgpath){
@@ -151,6 +148,7 @@ function buildwktpolygonfromsvgpath(svgpath){
 <INPUT TYPE="HIDDEN" NAME="fromwhere" VALUE="<? echo $this->formvars['fromwhere']; ?>">
 <INPUT TYPE="HIDDEN" NAME="layer_columnname" VALUE="<?php echo $this->formvars['layer_columnname']; ?>">
 <INPUT TYPE="HIDDEN" NAME="layer_tablename" VALUE="<?php echo $this->formvars['layer_tablename']; ?>">
+<INPUT TYPE="HIDDEN" NAME="geom_nullable" VALUE="<?php echo $this->formvars['geom_nullable']; ?>">
 <INPUT TYPE="HIDDEN" NAME="no_load" VALUE="">
 <INPUT TYPE="HIDDEN" NAME="oid" VALUE="<?php echo $this->formvars['oid']; ?>">
 <INPUT TYPE="HIDDEN" NAME="scale" VALUE="<?php echo $scale; ?>">    

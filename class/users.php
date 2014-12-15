@@ -3145,8 +3145,12 @@ class stelle {
 	}
 
 	function getqueryablePostgisLayers($privileg, $export_privileg = NULL){
-		$sql = 'SELECT layer.Layer_ID, Name, alias FROM used_layer, layer, u_groups';
-		$sql .=' WHERE stelle_id = '.$this->id;
+		$sql = 'SELECT distinct Layer_ID, Name, alias FROM (';
+		$sql .='SELECT layer.Layer_ID, layer.Name, layer.alias, form_element_type as subformfk, las.privileg as privilegfk ';
+		$sql .='FROM u_groups, layer, used_layer ';
+		$sql .='LEFT JOIN layer_attributes as la ON la.layer_id = used_layer.Layer_ID AND form_element_type = \'SubformFK\' ';
+		$sql .='LEFT JOIN layer_attributes2stelle as las ON las.stelle_id = used_layer.Stelle_ID AND  used_layer.Layer_ID = las.layer_id AND las.attributename = SUBSTRING_INDEX(SUBSTRING_INDEX(la.options, \';\', 1) , \',\',  -1) ';		
+		$sql .=' WHERE used_layer.stelle_id = '.$this->id;
 		$sql .=' AND layer.Gruppe = u_groups.id AND layer.connectiontype = 6';
 		$sql .=' AND layer.Layer_ID = used_layer.Layer_ID';
 		$sql .=' AND used_layer.queryable = \'1\'';
@@ -3156,7 +3160,8 @@ class stelle {
 		if($export_privileg != NULL){
 			$sql .=' AND used_layer.export_privileg = "'.$export_privileg.'"';
 		}
-		$sql .= ' ORDER BY Name';
+		$sql .= ' ORDER BY Name) as foo ';
+		$sql .= 'WHERE subformfk IS NULL OR privilegfk = 1';
 		#echo $sql;
 		$this->debug->write("<p>file:users.php class:stelle->getqueryablePostgisLayers - Lesen der abfragbaren PostgisLayer zur Stelle:<br>".$sql,4);
 		$query=mysql_query($sql,$this->database->dbConn);

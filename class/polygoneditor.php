@@ -65,11 +65,7 @@ class polygoneditor {
   function pruefeEingabedaten($newpathwkt) {
     $ret[1]='';
     $ret[0]=0;
-    if($newpathwkt == ''){
-      $ret[1]='\nEs muss ein Polygon mit Flaecheninhalt beschrieben werden!';
-      $ret[0]=1;
-    }
-    else{
+    if($newpathwkt != ''){
     	$sql = "SELECT st_isvalid(ST_SnapToGrid(st_geomfromtext('".$newpathwkt."'), 0.0001))";
     	$ret = $this->database->execSQL($sql, 4, 0);
     	$valid = pg_fetch_row($ret[1]);
@@ -85,7 +81,8 @@ class polygoneditor {
   }
   
   function eintragenFlaeche($umring, $oid, $tablename, $columnname){  	
-		$sql = "UPDATE ".$tablename." SET ".$columnname." = st_transform(st_multi(st_geometryfromtext('".$umring."',".$this->clientepsg.")),".$this->layerepsg.") WHERE oid = ".$oid;
+		if($umring == '')$sql = "UPDATE ".$tablename." SET ".$columnname." = NULL WHERE oid = ".$oid;
+		else $sql = "UPDATE ".$tablename." SET ".$columnname." = st_transform(st_multi(st_geometryfromtext('".$umring."',".$this->clientepsg.")),".$this->layerepsg.") WHERE oid = ".$oid;
 		$ret = $this->database->execSQL($sql, 4, 1);
 		if(!$ret[0]){
 			if(pg_affected_rows($ret[1]) == 0){

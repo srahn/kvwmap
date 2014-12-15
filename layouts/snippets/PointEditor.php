@@ -3,7 +3,7 @@
 <!--
 
 function send(){
-	if(document.GUI.loc_x.value == ''){
+	if(document.GUI.geom_nullable.value == '0' && document.GUI.loc_x.value == ''){
 		alert('Geben Sie einen Punkt an.');
 	}
 	else{
@@ -83,6 +83,7 @@ function send(){
 <INPUT TYPE="HIDDEN" NAME="layer_columnname" VALUE="<?php echo $this->formvars['layer_columnname']; ?>">
 <INPUT TYPE="HIDDEN" NAME="layer_tablename" VALUE="<?php echo $this->formvars['layer_tablename']; ?>">
 <INPUT TYPE="hidden" NAME="fromwhere" VALUE="">
+<INPUT TYPE="HIDDEN" NAME="geom_nullable" VALUE="<?php echo $this->formvars['geom_nullable']; ?>">
 <INPUT TYPE="HIDDEN" NAME="oid" VALUE="<?php echo $this->formvars['oid']; ?>">
 <INPUT TYPE="HIDDEN" NAME="scale" VALUE="<?php echo $scale; ?>"> 
 <? if($this->formvars['go'] == 'PointEditor'){ ?>   

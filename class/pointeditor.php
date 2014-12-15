@@ -42,20 +42,19 @@ class pointeditor {
   function pruefeEingabedaten($locx, $locy) {
     $ret[1]='';
     $ret[0]=0;
-    if ( $locx == '' OR $locy == ''){
-      $ret[1]='\nEs muss ein Punkt gesetzt werden!';
-      $ret[0]=1;
-    }
     return $ret; 
   }
   
   function eintragenPunkt($pointx, $pointy, $oid, $tablename, $columnname, $dimension){
-  	if($dimension == 3){  	
-			$sql = "UPDATE ".$tablename." SET ".$columnname." = st_transform(St_GeomFromText('POINT(".$pointx." ".$pointy." 0)',".$this->clientepsg."),".$this->layerepsg.") WHERE oid = ".$oid;
-  	}
-  	else{
-  		$sql = "UPDATE ".$tablename." SET ".$columnname." = st_transform(St_GeomFromText('POINT(".$pointx." ".$pointy.")',".$this->clientepsg."),".$this->layerepsg.") WHERE oid = ".$oid;
-  	}
+		if($pointx == '')$sql = "UPDATE ".$tablename." SET ".$columnname." = NULL WHERE oid = ".$oid;
+		else{
+			if($dimension == 3){  	
+				$sql = "UPDATE ".$tablename." SET ".$columnname." = st_transform(St_GeomFromText('POINT(".$pointx." ".$pointy." 0)',".$this->clientepsg."),".$this->layerepsg.") WHERE oid = ".$oid;
+			}
+			else{
+				$sql = "UPDATE ".$tablename." SET ".$columnname." = st_transform(St_GeomFromText('POINT(".$pointx." ".$pointy.")',".$this->clientepsg."),".$this->layerepsg.") WHERE oid = ".$oid;
+			}
+		}
 		$ret = $this->database->execSQL($sql, 4, 1);
 		if ($ret[0]) {
       # Fehler beim Eintragen in Datenbank

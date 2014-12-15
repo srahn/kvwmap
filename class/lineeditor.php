@@ -68,11 +68,7 @@ class lineeditor {
   function pruefeEingabedaten($newpathwkt) {
     $ret[1]='';
     $ret[0]=0;
-    if ( $newpathwkt == ''){
-      $ret[1]='\nEs muss eine Linie beschrieben werden!';
-      $ret[0]=1;
-    }
-    else{
+    if ( $newpathwkt != ''){
     	$sql = "SELECT st_isvalid(ST_SnapToGrid(st_geomfromtext('".$newpathwkt."'), 0.0001))";
     	$ret = $this->database->execSQL($sql, 4, 0);
     	$valid = pg_fetch_row($ret[1]);
@@ -87,8 +83,9 @@ class lineeditor {
     return $ret; 
   }
   
-  function eintragenLinie($line, $oid, $tablename, $columnname){  	
-		$sql = "UPDATE ".$tablename." SET ".$columnname." = st_transform(st_multi(st_geometryfromtext('".$line."',".$this->clientepsg.")),".$this->layerepsg.") WHERE oid = ".$oid;
+  function eintragenLinie($line, $oid, $tablename, $columnname){
+		if($line == '')$sql = "UPDATE ".$tablename." SET ".$columnname." = NULL WHERE oid = ".$oid;
+		else $sql = "UPDATE ".$tablename." SET ".$columnname." = st_transform(st_multi(st_geometryfromtext('".$line."',".$this->clientepsg.")),".$this->layerepsg.") WHERE oid = ".$oid;
 		$ret = $this->database->execSQL($sql, 4, 1);    
   	if(!$ret[0]){
 			if(pg_affected_rows($ret[1]) == 0){

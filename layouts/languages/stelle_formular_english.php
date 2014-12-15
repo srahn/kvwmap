@@ -32,6 +32,7 @@
   $strEdit="Edit";
   $strUser="User";
   $strButtonChange="Save";
+	$strButtonUpdate="Save";
   $strButtonInsert="Save as new task";
   $strCommunity="Community";
   $strAdministrationAgency="Administration Agency";
