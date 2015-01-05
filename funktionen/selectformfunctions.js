@@ -44,6 +44,8 @@
 	function addOptionsWithIndex(selectObj,insertObj,hiddenObj,mode,index) {
     // Diese Funktion fügt alle im Selectfeld selectObj selektierten Optionen im Selectfeld insertObj an der mit index definierten Position ein.
 		var insertObjLengthStart = insertObj.length;
+		// Selektionen im insertObj entfernen
+		insertObj.selectedIndex = -1;
 		//------- erst den Rest entfernen und dabei die entfernten merken
 		saveOptionsObj = insertObj.cloneNode(true);
 		if(index < insertObjLengthStart){

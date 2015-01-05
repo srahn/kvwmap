@@ -2057,7 +2057,7 @@ class pgdatabase_alkis {
 		$sql.=" LEFT JOIN alkis.ax_bodenschaetzung_entstehungsartoderklimastufe e1 ON e1.wert=n.entstehungsartoderklimastufewasserverhaeltnisse[1]";
 		$sql.=" LEFT JOIN alkis.ax_bodenschaetzung_entstehungsartoderklimastufe e2 ON e2.wert=n.entstehungsartoderklimastufewasserverhaeltnisse[2]";
 		$sql.=" LEFT JOIN alkis.ax_bodenschaetzung_zustandsstufe z ON z.wert=n.zustandsstufeoderbodenstufe";
-		$sql.=" LEFT JOIN alkis.ax_bodenschaetzung_sonstigeangaben s ON k.wert=n.sonstigeangaben[1]";
+		$sql.=" LEFT JOIN alkis.ax_bodenschaetzung_sonstigeangaben s ON s.wert=n.sonstigeangaben[1]";
     $sql.=" WHERE st_intersects(n.wkb_geometry,f.wkb_geometry) = true AND st_area(st_intersection(n.wkb_geometry,f.wkb_geometry)) > 0.05 AND f.flurstueckskennzeichen='".$FlurstKennz."'";
 		$sql.= $this->build_temporal_filter(array('f', 'n'));
 		#echo $sql;
@@ -2632,7 +2632,7 @@ class pgdatabase_alkis {
     return $ret;
   }
   
-  function getNamen($formvars, $bezirk){
+  function getNamen($formvars, $gemkgschl){
     $n1 = '%'.$formvars['name1'].'%';
 		$n2 = '%'.$formvars['name2'].'%';
 		$n3 = '%'.$formvars['name3'].'%';
@@ -2641,8 +2641,9 @@ class pgdatabase_alkis {
 		$n6 = '%'.$formvars['name6'].'%';
 		$n7 = '%'.$formvars['name7'].'%';
 		$n8 = '%'.$formvars['name8'].'%';		
+		$bezirk = $formvars['bezirk'];
 		$blatt = $formvars['blatt'];
-		$flur = $formvars['FlurID'];
+		$flur = $formvars['FlurID'];		
 		$limitAnzahl = $formvars['anzahl'];
 		$limitStart = $formvars['offset'];
 		$caseSensitive = $formvars['caseSensitive'];
@@ -2670,10 +2671,10 @@ class pgdatabase_alkis {
 		if($n8 != '%%')$sql.=" AND lower(ort_post) LIKE lower('".$n8."') ";
 
     if($bezirk!='') {
-      $sql.=" AND bezirk.schluesselgesamt=".(int)$bezirk;
+      $sql.=" AND b.schluesselgesamt=".(int)$bezirk;
     }
     if($blatt != ''){
-      $sql.=" AND blatt.buchungsblattnummermitbuchstabenerweiterung= '".$blatt."'";
+      $sql.=" AND g.buchungsblattnummermitbuchstabenerweiterung= '".$blatt."'";
     }   
     if ($gemkgschl>0) {
       $sql.=" AND f.land*10000 + f.gemarkungsnummer IN (".implode(',', $gemkgschl).")";

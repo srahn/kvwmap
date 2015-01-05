@@ -10655,24 +10655,26 @@ class GUI {
       }
     }
 		foreach($updates as $tablename => $table){
-			$sql = "UPDATE ".$tablename." SET ";
-			for($i = 0; $i < count($table['attributename']); $i++){
-				if($i > 0)$sql .= ', ';
-				$sql .= $table['attributename'][$i]." = ";
-				if($table['eintrag'][$i] == 'NULL')$sql .= 'NULL';
-				else $sql .= "'".$table['eintrag'][$i]."'";
-			}
-			$sql .= " WHERE oid = ".$table['oid'];
-			#if($filter != ''){							# erstmal wieder rausgenommen, weil der Filter sich auf Attribute beziehen kann, die zu anderen Tabellen gehören
-			#  $sql .= " AND ".$filter;
-			#}
-			$this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
-			$ret = $layerdb->execSQL($sql,4, 1);			
-			if(!$ret[0]){
-				if(pg_affected_rows($ret[1]) == 0){
-					$result = pg_fetch_row($ret[1]);
-					$ret[0] = 1;
-					$success = false;
+			if(count($table['attributename']) > 0){
+				$sql = "UPDATE ".$tablename." SET ";
+				for($i = 0; $i < count($table['attributename']); $i++){
+					if($i > 0)$sql .= ', ';
+					$sql .= $table['attributename'][$i]." = ";
+					if($table['eintrag'][$i] == 'NULL')$sql .= 'NULL';
+					else $sql .= "'".$table['eintrag'][$i]."'";
+				}
+				$sql .= " WHERE oid = ".$table['oid'];
+				#if($filter != ''){							# erstmal wieder rausgenommen, weil der Filter sich auf Attribute beziehen kann, die zu anderen Tabellen gehören
+				#  $sql .= " AND ".$filter;
+				#}
+				$this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
+				$ret = $layerdb->execSQL($sql,4, 1);			
+				if(!$ret[0]){
+					if(pg_affected_rows($ret[1]) == 0){
+						$result = pg_fetch_row($ret[1]);
+						$ret[0] = 1;
+						$success = false;
+					}
 				}
 			}
 		}
