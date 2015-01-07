@@ -3157,7 +3157,7 @@ class GUI {
     $this->loadMap('DataBase');
     $layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
     $layerdb = $this->mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-		$attributes = $this->mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
+		$attributes = $this->mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, NULL);
 		$this->formvars['geom_nullable'] = $attributes['nullable'][$attributes['indizes'][$attributes['the_geom']]];
     $pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
     $oldscale=round($this->map_scaledenom);
