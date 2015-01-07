@@ -1,5 +1,9 @@
 <?
 	$GUI = $this;
+	
+	# set upload_path from layers document_path
+	$layer = $GUI->user->rolle->getLayer(BAUMFAELLANTRAG_LAYER_ID_ANTRAEGE);
+	define('BAUMFAELLANTRAG_UPLOAD_PATH', $layer[0]['document_path']);
 
 	$this->uploadTempFile = function() use ($GUI) {
 		# pruefe Version
@@ -24,8 +28,8 @@
 		$pathinfo = pathinfo($_FILES["file"]["name"]);
 		$upload_file = basename($_FILES["file"]["tmp_name"] . "." . $pathinfo["extension"]);
 
-		# copiere die temporäre Datei in den upload ordner 
-		if (!@copy($_FILES["file"]["tmp_name"], UPLOADPATH . $upload_file))
+		# copiere die temporäre Datei in den upload ordner
+		if (!@copy($_FILES["file"]["tmp_name"], BAUMFAELLANTRAG_UPLOAD_PATH . $upload_file))
 			return array("success" => 0, "error_message" => "Fehler: Die hochgeladene Datei konnte nicht auf dem Server gespeichert werden. Beim Kopieren vom temporären Uploadverzeichnis in das Uploadverzeichnis der Anwendung trat ein Fehler auf. Wahrscheinlich fehlen die Schreibrechte im Uploadverzeichnins für den WebServer-Nutzer.");
 
 		# sende den Namen der temporären Datei zurück
@@ -34,8 +38,7 @@
 
 	$this->packAndMail = function($antrag_id, $data) use ($GUI) {
 		$plugin_name = 'baumfaellantrag';
-		#var_dump($data);
-		
+
 		# pruefe Version
 		if ($GUI->formvars['version'] != "1.0.0")
 			return array("success" => 0, "error_message" => "Geben Sie eine gültige Versionsnummer an. Derzeit wird nur die Version 1.0.0 unterstützt.");
@@ -43,29 +46,29 @@
 		# create reference files
 		$ref_files = array();
 		include (PLUGINS . $plugin_name . '/view/rename_reference_files.php'); // create references to uploaded files
-		
+
 		# create xml file
 		$xml_file_name =	"Antrag_" . $antrag_id . ".xml";
 		include (PLUGINS . $plugin_name . '/view/xml_template.php');
 		$xml = new SimpleXMLElement($xml_string);
-		$xml->asXML(UPLOADPATH . $xml_file_name);
+		$xml->asXML(BAUMFAELLANTRAG_UPLOAD_PATH . $xml_file_name);
 
 		# create pdf file
 		$pdf_file_name = 'Antrag_' . $antrag_id . '.pdf';
-		$fp = fopen(UPLOADPATH . $pdf_file_name, 'wb');
+		$fp = fopen(BAUMFAELLANTRAG_UPLOAD_PATH . $pdf_file_name, 'wb');
 		include (PLUGINS . $plugin_name . '/view/pdf_template.php'); // create pdf and put it in $pdf_output variable
 		fwrite($fp, $pdf_output);
 		fclose($fp);
 		
 		# create zip file
 		$zip_file_name =	'Antrag_' . $antrag_id;
-		if (file_exists(UPLOADPATH . $xml_file_name))
-			exec(ZIP_PATH . ' ' . UPLOADPATH . $zip_file_name . ' ' . UPLOADPATH . $xml_file_name);	 // add xml file
-		if (file_exists(UPLOADPATH . $pdf_file_name))
-			exec(ZIP_PATH . ' ' . UPLOADPATH . $zip_file_name . ' ' . UPLOADPATH . $pdf_file_name);	 // add pdf file
+		if (file_exists(BAUMFAELLANTRAG_UPLOAD_PATH . $xml_file_name))
+			exec(ZIP_PATH . ' ' . BAUMFAELLANTRAG_UPLOAD_PATH . $zip_file_name . ' ' . BAUMFAELLANTRAG_UPLOAD_PATH . $xml_file_name);	 // add xml file
+		if (file_exists(BAUMFAELLANTRAG_UPLOAD_PATH . $pdf_file_name))
+			exec(ZIP_PATH . ' ' . BAUMFAELLANTRAG_UPLOAD_PATH . $zip_file_name . ' ' . BAUMFAELLANTRAG_UPLOAD_PATH . $pdf_file_name);	 // add pdf file
 		foreach($ref_files AS $ref_file) {
 			if (file_exists($ref_file))
-				exec(ZIP_PATH . ' ' . UPLOADPATH . $zip_file_name . ' ' . $ref_file); // add mandate file
+				exec(ZIP_PATH . ' ' . BAUMFAELLANTRAG_UPLOAD_PATH . $zip_file_name . ' ' . $ref_file); // add mandate file
 		}
 		$zip_file_name .= '.zip';
 
@@ -85,18 +88,20 @@
 	};
 	
 	$this->saveApplicationData = function($antrag_id, $data) use ($GUI) {
+		# get layer database
 		$mapDB = new db_mapObj(null, null);
-		$antraegeDb = $mapDB->getlayerdatabase(LAYER_ID_BAUMFAELLANTRAG, 'loclahost');
+		$antraegeDb = $mapDB->getlayerdatabase(BAUMFAELLANTRAG_LAYER_ID_ANTRAEGE, 'localhost');
 
 		$success = 1;
 		if (!is_array($data['wood_species']) or count($data['wood_species']) < 1) return 0;
 		if (!is_array($data['latitude']) or count($data['latitude']) < 1) return 0;
 		if (!is_array($data['longitude']) or count($data['longitude']) < 1) return 0;
 		if ($data['surname'] == '') return 0;
-		#if ($data['place'] == '') return 0;
-		#if ($data['postcode'] == '') return 0;
-		#if ($data['streetName'] == '') return 0;
-		#if ($data['streetNo'] == '') return 0;
+		if ($data['place'] == '') return 0;
+		if ($data['postcode'] == '') return 0;
+		if ($data['streetName'] == '') return 0;
+		if ($data['streetNo'] == '') return 0;
+		# ... TODO add more check constraints
 
 		$sql = '';
 		for ($i = 0; $i < count ( $data['wood_species'] ); $i++ ) {
@@ -176,8 +181,8 @@
 				'".$data['wood_species'][$i]."',
 				".(($data['trunk_circumference'][$i] == '') ? 'NULL' : $data['trunk_circumference'][$i]).",
 				".(($data['crown_diameter'][$i] == '') ? 'NULL' : $data['crown_diameter'][$i]).",
-				".(($data['mandateReference'] == '') ? 'NULL' : "'".UPLOADPATH.$data['mandateReference']."'").",
-				".(($data['locationSketchReference'] == '') ? 'NULL' : "'".UPLOADPATH.$data['locationSketchReference']."'").",
+				".(($data['mandateReference'] == '') ? 'NULL' : "'".BAUMFAELLANTRAG_UPLOAD_PATH.$data['mandateReference']."&original_name=Vollmacht.".end(explode('.', $data['mandateReference']))."'").",
+				".(($data['locationSketchReference'] == '') ? 'NULL' : "'".BAUMFAELLANTRAG_UPLOAD_PATH.$data['locationSketchReference']."&original_name=Skizze.".end(explode('.', $data['locationSketchReference']))."'").",
 				".(($data['npa_authenticated'] == '') ? 'false' : $data['npa_authenticated']).",
 				".(($data['provider_id'] == '') ? 'NULL' : $data['provider_id']).",
 				ST_GeometryFromText('POINT(".$data['longitude'][$i]." ".$data['latitude'][$i].")', 4326)
@@ -187,7 +192,7 @@
 			$ret = $antraegeDb->execSQL($sql, 4, 1);
 			#$data['debug'][] = $sql;
 			if ($ret[0] == 1) {
-				// set success to 0 if an error occur in saving the dataset and break the loop
+				# set success to 0 if an error occur in saving the dataset and break the loop
 				$success = 0;
 				break;
 			}

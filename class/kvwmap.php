@@ -1973,11 +1973,11 @@ class GUI {
 	  $this->goNotExecutedInPlugins = true;		// wenn es keine Plugins gibt, ist diese Var. immer true
   	if(count($kvwmap_plugins) > 0){
 			$plugins = scandir(PLUGINS, 1);  	
-			for($i = 0; $i < count($plugins)-2; $i++){				
+			for($i = 0; $i < count($plugins)-2; $i++) {
 				if($this->goNotExecutedInPlugins == true AND in_array($plugins[$i], $kvwmap_plugins)){
-					include(PLUGINS.$plugins[$i].'/control/index.php');
 					if (file_exists(PLUGINS.$plugins[$i].'/config/config.php'))
 						include(PLUGINS.$plugins[$i].'/config/config.php');
+					include(PLUGINS.$plugins[$i].'/control/index.php');
 				}
 			}
 		}
@@ -13696,6 +13696,7 @@ class db_mapObj{
     if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     $rs = mysql_fetch_array($query);
     $connectionstring = $rs[0];
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->getlayerdatabase - Gefundener Connection String des Layers:<br>".$connectionstring, 4);
     if($connectionstring != ''){
       $layerdb = new pgdatabase();
       if($rs[1] == ''){
