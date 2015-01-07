@@ -704,6 +704,9 @@ function update_gebietstyp(){
     	<input type="button" class="button" name="mapbutton" value="In die Karte" onclick="zoomto('<? echo $this->qlayerset[$i]['shape'][$k]['lfd_rok_nr']; ?>', '<? echo $this->qlayerset[$i]['shape'][$k]['art']; ?>');">
     </td>
   </tr>
+	<tr>
+		<td height="30" valign="bottom" align="center" colspan="5" id="loader" style="display:none"><img id="loaderimg" src="graphics/ajax-loader.gif"></td>
+	</tr>
 </table>
 <? } ?>
 <? if($this->new_entry != true AND $this->formvars['details'] == true){ ?>

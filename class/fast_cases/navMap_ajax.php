@@ -39,7 +39,6 @@
   $allowedPasswordAgeRemainDays=$allowedPasswordAgeDays-$passwordAgeDays; # Zeitinterval wie lange das Passwort noch gilt in Tagen
 	return $allowedPasswordAgeRemainDays; // Passwort ist abgelaufen wenn Wert < 1  
 }
-
 class GUI {  var $layout;  var $style;  var $mime_type;  var $menue;  var $pdf;  var $addressliste;  var $debug;  var $dbConn;  var $flst;  var $formvars;  var $legende;  var $map;  var $mapDB;  var $img;  var $FormObject;  var $StellenForm;  var $Fehlermeldung;  var $Hinweis;  var $Stelle;  var $ALB;  var $activeLayer;  var $nImageWidth;  var $nImageHeight;  var $user;  var $qlayerset;  var $scaleUnitSwitchScale;  var $map_scaledenom;  var $map_factor;  var $formatter;  function GUI($main, $style, $mime_type) {
     # Debugdatei setzen
     global $debug;
@@ -159,7 +158,7 @@
           if($this->map_factor == ''){
             $this->map_factor=1;
           }
-          if ($layerset[$i]['maxscale'] > 0) {
+          if($layerset[$i]['maxscale'] > 0) {
             if(MAPSERVERVERSION > 500){
               $layer->set('maxscaledenom', $layerset[$i]['maxscale']/$this->map_factor*1.414);
             }
@@ -167,7 +166,7 @@
               $layer->set('maxscale', $layerset[$i]['maxscale']/$this->map_factor*1.414);
             }
           }
-          if ($layerset[$i]['minscale'] > 0) {
+          if($layerset[$i]['minscale'] > 0) {
             if(MAPSERVERVERSION > 500){
               $layer->set('minscaledenom', $layerset[$i]['minscale']/$this->map_factor*1.414);
             }
@@ -397,6 +396,7 @@
 						$layer->setMetaData('wms_format',$layerset[$i]['wms_format']);
 						$layer->setMetaData('ows_server_version',$layerset[$i]['wms_server_version']);
 						$layer->setMetaData('ows_version',$layerset[$i]['wms_server_version']);
+						if($layerset[$i]['ows_srs'] == '')$layerset[$i]['ows_srs'] = 'EPSG:'.$layerset[$i]['epsg_code'];
 						$layer->setMetaData('ows_srs',$layerset[$i]['ows_srs']);
 						$layer->setMetaData('wms_connectiontimeout',$layerset[$i]['wms_connectiontimeout']);
 						$layer->setMetaData('wms_auth_username', $layerset[$i]['wms_auth_username']);
@@ -463,39 +463,39 @@
 							}
 						}
 						
-						if ($layerset[$i]['minscale']>=0) {
-						if($this->map_factor != ''){
-							if(MAPSERVERVERSION > 500){
-							$layer->set('minscaledenom', $layerset[$i]['minscale']/$this->map_factor*1.414);
-							}
-							else{
-							$layer->set('minscale', $layerset[$i]['minscale']/$this->map_factor*1.414);
-							}
-						}
-						else{
-							if(MAPSERVERVERSION > 500){
-							$layer->set('minscaledenom', $layerset[$i]['minscale']);
-							}
-							else{
-							$layer->set('minscale', $layerset[$i]['minscale']);
-							}
-						}
-						}
-						if ($layerset[$i]['maxscale']>0) {
+						if(!$this->noMinMaxScaling AND $layerset[$i]['minscale']>=0) {
 							if($this->map_factor != ''){
 								if(MAPSERVERVERSION > 500){
-								$layer->set('maxscaledenom', $layerset[$i]['maxscale']/$this->map_factor*1.414);
+									$layer->set('minscaledenom', $layerset[$i]['minscale']/$this->map_factor*1.414);
 								}
 								else{
-								$layer->set('maxscale', $layerset[$i]['maxscale']/$this->map_factor*1.414);
+									$layer->set('minscale', $layerset[$i]['minscale']/$this->map_factor*1.414);
 								}
 							}
 							else{
 								if(MAPSERVERVERSION > 500){
-								$layer->set('maxscaledenom', $layerset[$i]['maxscale']);
+									$layer->set('minscaledenom', $layerset[$i]['minscale']);
 								}
 								else{
-								$layer->set('maxscale', $layerset[$i]['maxscale']);
+									$layer->set('minscale', $layerset[$i]['minscale']);
+								}
+							}
+						}
+						if(!$this->noMinMaxScaling AND $layerset[$i]['maxscale']>0) {
+							if($this->map_factor != ''){
+								if(MAPSERVERVERSION > 500){
+									$layer->set('maxscaledenom', $layerset[$i]['maxscale']/$this->map_factor*1.414);
+								}
+								else{
+									$layer->set('maxscale', $layerset[$i]['maxscale']/$this->map_factor*1.414);
+								}
+							}
+							else{
+								if(MAPSERVERVERSION > 500){
+									$layer->set('maxscaledenom', $layerset[$i]['maxscale']);
+								}
+								else{
+									$layer->set('maxscale', $layerset[$i]['maxscale']);
 								}
 							}
 						}
@@ -553,7 +553,7 @@
             else {
               # Vektorlayer
               if($layerset[$i]['Data'] != ''){
-								$layerset[$i]['Data'] = str_replace('$hist_timestamp', HIST_TIMESTAMP, $layerset[$i]['Data']);
+								$layerset[$i]['Data'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[$i]['Data']);
                 $layer->set('data', $layerset[$i]['Data']);
               }
   
@@ -1315,6 +1315,17 @@
 		
 		$this->calculatePixelSize();
 		$this->drawReferenceMap();
+  }
+  function scaleMap($nScale) {
+    $oPixelPos=ms_newPointObj();
+    $oPixelPos->setXY($this->map->width/2,$this->map->height/2);
+    $this->map->zoomscale($nScale,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
+  	if (MAPSERVERVERSION >= 600 ) {
+			$this->map_scaledenom = $this->map->scaledenom;
+		}
+		else {
+			$this->map_scaledenom = $this->map->scale;
+		}
   }
 	function check_layer_visibility($layer){
 		if($layer['status'] != '' OR ($this->map_scaledenom < $layer['minscale'] OR ($layer['maxscale'] > 0 AND $this->map_scaledenom > $layer['maxscale']))) {
@@ -2221,10 +2232,12 @@
   }
 }class Flur_alkis {  var $FlurID;  var $database;	function getBezeichnungFromPosition($position, $epsgcode) {
     $this->debug->write("<p>kataster.php Flur->getBezeichnungFromPosition:",4);
-		$sql ="SELECT gemeindename, gk.gemeinde, gemarkungsname as gemkgname, f.gemarkung as gemkgschl, flurnummer as flur";
-    $sql.=" FROM alkis.pp_flur as f, alkis.pp_gemarkung as gk, alkis.pp_gemeinde as gm";
-    $sql.=" WHERE gk.gemarkung = f.gemarkung AND gk.gemeinde = gm.gemeinde";
-    $sql.=" AND ST_WITHIN(st_transform(st_geomfromtext('POINT(".$position['rw']." ".$position['hw'].")',".$epsgcode."), ".EPSGCODE_ALKIS."),f.the_geom)";
+		$sql ="SELECT gemeindename, gk.gemeinde, gemarkungsname as gemkgname, fl.gemarkungsnummer as gemkgschl, fl.flurnummer as flur, CASE WHEN fl.nenner IS NULL THEN fl.zaehler::text ELSE fl.zaehler::text||'/'||fl.nenner::text end as flurst, s.bezeichnung as strasse, l.hausnummer";
+    $sql.=" FROM alkis.pp_gemarkung as gk, alkis.pp_gemeinde as gm, alkis.ax_flurstueck as fl";
+		$sql.=" LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(fl.weistauf)";
+		$sql.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND s.lage = lpad(l.lage,5,'0')";
+    $sql.=" WHERE gk.gemarkung = fl.gemarkungsnummer AND gk.gemeinde = gm.gemeinde";
+    $sql.=" AND ST_WITHIN(st_transform(st_geomfromtext('POINT(".$position['rw']." ".$position['hw'].")',".$epsgcode."), ".EPSGCODE_ALKIS."),fl.wkb_geometry)";
     #echo $sql;
     $ret=$this->database->execSQL($sql,4, 0);
     if ($ret[0]!=0) {
