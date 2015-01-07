@@ -1976,6 +1976,8 @@ class GUI {
 			for($i = 0; $i < count($plugins)-2; $i++){				
 				if($this->goNotExecutedInPlugins == true AND in_array($plugins[$i], $kvwmap_plugins)){
 					include(PLUGINS.$plugins[$i].'/control/index.php');
+					if (file_exists(PLUGINS.$plugins[$i].'/config/config.php'))
+						include(PLUGINS.$plugins[$i].'/config/config.php');
 				}
 			}
 		}
