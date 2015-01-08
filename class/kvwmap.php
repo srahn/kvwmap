@@ -3800,7 +3800,7 @@ class GUI {
       $this->loadMap('DataBase');
       # Linie abfragen und Extent setzen
       $rect = $lineeditor->zoomToLine($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], 10);
-      #$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
+      $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
 	    if (MAPSERVERVERSION > 600) {
 				$this->map_scaledenom = $this->map->scaledenom;
 			}
