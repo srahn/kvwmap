@@ -731,7 +731,7 @@ class antrag {
     $sql.="(";
     $sql.=" SELECT '".$pkz."','".$this->nr."',CURRENT_TIMESTAMP(0)";
     $sql.=" WHERE NOT EXISTS (";
-    $sql.=" SELECT 1 FROM fp_punkte2antraege WHERE pkz='".$pkz."' AND antrag_nr='".$this->nr."')";
+    $sql.=" SELECT 1 FROM nachweisverwaltung.fp_punkte2antraege WHERE pkz='".$pkz."' AND antrag_nr='".$this->nr."')";
     $sql.=")";
     $this->debug->write("<br>antrag->addFestpunkt().<br>",4);
     $ret=$this->database->execSQL($sql,4, 1);
