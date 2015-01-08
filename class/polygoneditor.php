@@ -52,9 +52,14 @@ class polygoneditor {
     $rect->minx=$rs['minx']; 
     $rect->maxx=$rs['maxx'];
     $rect->miny=$rs['miny']; 
-    $rect->maxy=$rs['maxy'];		
-    $randx=($rect->maxx-$rect->minx)*$border/100 +10;
-    $randy=($rect->maxy-$rect->miny)*$border/100 +10;
+    $rect->maxy=$rs['maxy'];
+		if(defined('ZOOMBUFFER') AND ZOOMBUFFER > 0){
+			$randx = $randy = ZOOMBUFFER;
+		}
+		else{
+			$randx=($rect->maxx-$rect->minx)*$border/100 +10;
+			$randy=($rect->maxy-$rect->miny)*$border/100 +10;
+		}		
     $rect->minx -= $randx;
     $rect->miny -= $randy;
     $rect->maxx += $randx;

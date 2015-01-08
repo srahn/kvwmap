@@ -3800,7 +3800,7 @@ class GUI {
       $this->loadMap('DataBase');
       # Linie abfragen und Extent setzen
       $rect = $lineeditor->zoomToLine($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], 10);
-      $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
+      #$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
 	    if (MAPSERVERVERSION > 600) {
 				$this->map_scaledenom = $this->map->scaledenom;
 			}
@@ -3864,10 +3864,12 @@ class GUI {
     	}
       $this->point = $pointeditor->getpoint($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname']);
       $rect = ms_newRectObj();
-      $rect->minx = $this->point['pointx']-100;
-      $rect->maxx = $this->point['pointx']+100;
-      $rect->miny = $this->point['pointy']-100;
-      $rect->maxy = $this->point['pointy']+100;
+			if(defined('ZOOMBUFFER') AND ZOOMBUFFER > 0)$rand = ZOOMBUFFER;
+			else $rand = 100;
+      $rect->minx = $this->point['pointx']-$rand;
+      $rect->maxx = $this->point['pointx']+$rand;
+      $rect->miny = $this->point['pointy']-$rand;
+      $rect->maxy = $this->point['pointy']+$rand;
 			if($this->formvars['selektieren'] != 'zoomonly'){
 				$this->createZoomRollenlayer($dbmap, $layerdb, $layerset);
 			}

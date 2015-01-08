@@ -324,6 +324,8 @@ define('CHECKPUNKTDATEI', 'true');      # true/false                            
 # Minmale Maßstabszahl
 define('MINSCALE', 100);                                                        # Version 1.7.0
 
+# Puffer (in Metern) der beim Zoom auf ein Objekt hinzugegeben wird
+define('ZOOMBUFFER', 100);                                                        # Version 2.1
 
 # URL zum Authentifizieren am CSW-Metadatensystem
 define('METADATA_AUTH_LINK', 'http://berg.preagro.de:8088/geonetwork/srv/en/xml.user.login?username=admin&password=!admin!');		# Version 1.7.5
