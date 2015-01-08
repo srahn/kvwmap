@@ -359,6 +359,9 @@ class ddl {
 					$output = utf8_decode($this->result[$i][$this->attributes['name'][$j]]);
 				}			
 			}break;
+			case 'Autovervollständigungsfeld' : {
+				$output = utf8_decode($this->attributes['enum_output'][$j][0]);
+			}break;
 			default: {
 				if(!$preview AND $this->attributes['type'][$j] == 'bool'){
 					$this->result[$i][$this->attributes['name'][$j]] = str_replace('t', "ja", $this->result[$i][$this->attributes['name'][$j]]);	
