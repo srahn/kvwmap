@@ -10749,6 +10749,7 @@ class GUI {
 	
  # 2006-07-26 pk
 	function SachdatenAnzeige($rect){
+		$last_query_deleted = false;
 		if($this->last_query != ''){
 			foreach($this->last_query['layer_ids'] as $layer_id){
 				$this->formvars['qLayer'.$layer_id] = 1;
@@ -11101,7 +11102,10 @@ class GUI {
             $layerset[$i]['attributes'] = $this->mapDB->add_attribute_values($layerset[$i]['attributes'], $layerdb, $layerset[$i]['shape']);
                      
 						if($layerset[$i]['count'] != 0){
-							$this->user->rolle->delete_last_query();
+							if(!$last_query_deleted){			# damit nur die letzte Query gelöscht wird und nicht eine bereits gespeicherte Query eines anderen Layers der aktuellen Abfrage
+								$this->user->rolle->delete_last_query();
+								$last_query_deleted = true;
+							}
 							$this->user->rolle->save_last_query('Sachdaten', $layerset[$i]['Layer_ID'], $sql, $sql_order, $this->formvars['anzahl'], $this->formvars['offset_'.$layerset[$i]['Layer_ID']]);
 							
 							# Querymaps erzeugen
