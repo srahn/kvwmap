@@ -1531,7 +1531,7 @@ class pgdatabase_alkis {
   
   function getALBData($FlurstKennz, $without_temporal_filter = FALSE, $hist_alb = false){
 		if($hist_alb){
-			$sql = "SELECT distinct lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, zaehler, nenner, f.land::text||f.gemarkungsnummer::text as gemkgschl, ppg.gemarkungsname as gemkgname, ppg.land::text||ppg.regierungsbezirk::text||ppg.kreis::text||ppg.gemeinde::text as gemeinde, ppge.gemeindename, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp FROM alkis.pp_gemeinde as ppge, alkis.pp_gemarkung AS ppg, alkis.ax_historischesflurstueckohneraumbezug as f";
+			$sql = "SELECT distinct TRUE as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, zaehler, nenner, f.land::text||f.gemarkungsnummer::text as gemkgschl, ppg.gemarkungsname as gemkgname, ppg.land::text||ppg.regierungsbezirk::text||ppg.kreis::text||ppg.gemeinde::text as gemeinde, ppge.gemeindename, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp FROM alkis.pp_gemeinde as ppge, alkis.pp_gemarkung AS ppg, alkis.ax_historischesflurstueckohneraumbezug as f";
 			$sql.= " WHERE f.gemarkungsnummer=ppg.gemarkung AND ppge.land = ppg.land AND ppge.gemeinde = ppg.gemeinde AND f.flurstueckskennzeichen='".$FlurstKennz."'";
 		}
 		else{
@@ -2381,31 +2381,27 @@ class pgdatabase_alkis {
   }
 
 	function getNachfolger($FlurstKennz) {
-    $sql = "SELECT unnest(zeigtaufneuesflurstueck) as nachfolger FROM alkis.ax_fortfuehrungsfall WHERE ARRAY['".$FlurstKennz."'::varchar] <@ zeigtaufaltesflurstueck";
+		$sql = "SELECT nachfolger, c.endet FROM (";
+    $sql.= "SELECT unnest(zeigtaufneuesflurstueck) as nachfolger FROM alkis.ax_fortfuehrungsfall WHERE ARRAY['".$FlurstKennz."'::varchar] <@ zeigtaufaltesflurstueck) as foo ";
+		$sql.= "LEFT JOIN alkis.ax_flurstueck c ON c.flurstueckskennzeichen = nachfolger";		
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0]) {
       $ret[0]=1;
       $ret[1]=$queryret[1];
     }
     else {
-			if(pg_num_rows($queryret[1]) == 0){			# kein Nachfolger unter ALKIS -> Suche in ALB-Historie
-				$sql = "SELECT flurstueckskennzeichen as nachfolger, TRUE as hist_alb FROM alkis.ax_historischesflurstueckohneraumbezug WHERE ARRAY['".$FlurstKennz."'::varchar] <@ vorgaengerflurstueckskennzeichen";
-				$queryret=$this->execSQL($sql, 4, 0);			# Nachfolger ist auch alb-historisch
-				if(pg_num_rows($queryret[1]) == 0){
-					$sql = "SELECT unnest(nachfolgerflurstueckskennzeichen) as nachfolger FROM alkis.ax_historischesflurstueckohneraumbezug WHERE flurstueckskennzeichen = '".$FlurstKennz."'";
-					$queryret=$this->execSQL($sql, 4, 0);			# Nachfolger ist ALKIS-Flurstück
-					while($rs=pg_fetch_array($queryret[1])) {
-						$Nachfolger[]=$rs;
-					}
-				}
-				else{
-					while($rs=pg_fetch_array($queryret[1])) {
-						$Nachfolger[]=$rs;
-					}
+			if(pg_num_rows($queryret[1]) == 0){		# kein Fortführungsfall unter ALKIS -> Suche in ALB-Historie
+				$sql = "SELECT nachfolger, CASE WHEN b.flurstueckskennzeichen IS NULL THEN NULL ELSE TRUE END as hist_alb, c.endet FROM (";
+				$sql.= "SELECT unnest(a.nachfolgerflurstueckskennzeichen) as nachfolger FROM alkis.ax_historischesflurstueckohneraumbezug as a WHERE a.flurstueckskennzeichen = '".$FlurstKennz."') as foo ";
+				$sql.= "LEFT JOIN alkis.ax_historischesflurstueckohneraumbezug b ON b.flurstueckskennzeichen = nachfolger ";
+				$sql.= "LEFT JOIN alkis.ax_flurstueck c ON c.flurstueckskennzeichen = nachfolger";			# falls ein Nachfolger in ALKIS historisch ist (endet IS NOT NULL)
+				$queryret=$this->execSQL($sql, 4, 0);	
+				while($rs=pg_fetch_array($queryret[1])){
+					$Nachfolger[]=$rs;
 				}
 			}
 			else{
-				while($rs=pg_fetch_array($queryret[1])) {
+				while($rs=pg_fetch_array($queryret[1])){
 					$Nachfolger[]=$rs;
 				}
 			}

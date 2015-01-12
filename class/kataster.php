@@ -1627,10 +1627,10 @@ class flurstueck_alkis {
     return $ret[1];
   }
 
-  function getGrundbuecher($hist_alb) {
+  function getGrundbuecher() {
     if ($this->FlurstKennz=="") { return 0; }
     $this->debug->write("<br>kataster.php->flurstueck->getGrundbuecher Abfrage der Angaben zum Grundbuch auf dem das Flurstück gebucht ist<br>",4);
-    $ret=$this->database->getGrundbuecher($this->FlurstKennz, $hist_alb);
+    $ret=$this->database->getGrundbuecher($this->FlurstKennz, $this->hist_alb);
     return $ret[1];
   }
 
@@ -1724,9 +1724,9 @@ class flurstueck_alkis {
     return $ret;
   }
 
-  function getGrundbuchbezirk($hist_alb = false) {
+  function getGrundbuchbezirk() {
     if ($this->FlurstKennz=="") { return 0; }
-    $ret=$this->database->getGrundbuchbezirke($this->FlurstKennz);
+    $ret=$this->database->getGrundbuchbezirke($this->FlurstKennz, $this->hist_alb);
     return $ret;
   }
 
@@ -1990,14 +1990,15 @@ class flurstueck_alkis {
     $this->Flurkarte=$rs['karte'];
     $this->ALB_Flaeche=$rs['flaeche'];
     $this->endet=$rs['endet'];
+		$this->hist_alb=$rs['hist_alb'];
     $this->Pruefzeichen=$rs['pruefzeichen'];
     $this->Forstamt=$this->getForstamt();	
     $this->AktualitaetsNr=$this->getAktualitaetsNr();			# ALKIS TODO
     $this->Adresse=$this->getAdresse();
     $this->Lage=$this->getLage();
-    $this->Grundbuchbezirk=$this->getGrundbuchbezirk($hist_alb);
+    $this->Grundbuchbezirk=$this->getGrundbuchbezirk();
     $this->Klassifizierung=$this->getKlassifizierung();	
-    $this->Grundbuecher=$this->getGrundbuecher($hist_alb);
+    $this->Grundbuecher=$this->getGrundbuecher();
     //$this->Buchungen=$this->getBuchungen($Bezirk,$Blatt,1);
     $this->Amtsgericht=$this->getAmtsgericht(); 
     $this->FreiText=$this->getFreiText();		# ALKIS TODO
