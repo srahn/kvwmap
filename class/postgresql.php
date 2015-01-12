@@ -844,9 +844,10 @@ class pgdatabase_alkis {
     return $this->execSQL($sql, 4, 0);
   }
   
-  function getGrundbuecher($FlurstKennz) {
+  function getGrundbuecher($FlurstKennz, $hist_alb = false) {
     $sql ="SET enable_seqscan = OFF;SELECT distinct (g.land::text||lpad(g.bezirk::text, 4, '0'))::integer as bezirk, g.buchungsblattnummermitbuchstabenerweiterung AS blatt ";
-		$sql.="FROM alkis.ax_flurstueck f ";
+		if($hist_alb) $sql.="FROM alkis.ax_historischesflurstueckohneraumbezug f ";
+		else $sql.="FROM alkis.ax_flurstueck f ";  
 		$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON f.istgebucht = ANY(s2.an) ";
 		$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR f.istgebucht = ANY(s.an) OR f.istgebucht = ANY(s2.an) AND s2.gml_id = ANY(s.an) ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
@@ -1033,12 +1034,13 @@ class pgdatabase_alkis {
     return $ret;
   }
   
-  function getBuchungenFromGrundbuch($FlurstKennz,$Bezirk,$Blatt,$keine_historischen) {
+  function getBuchungenFromGrundbuch($FlurstKennz,$Bezirk,$Blatt,$hist_alb = false) {
   	// max(namensnummer.beschriebderrechtsgemeinschaft) weil es bei einer Buchung mit Zusatz zum Eigentï¿½mer einen weiteren Eintrag mit diesem Zusatz in ax_namensnummer gibt
   	// ohne Aggregation wï¿½rden sonst 2 Buchungen von der Abfrage zurï¿½ckgeliefert werden 
     $sql ="SELECT DISTINCT gem.bezeichnung as gemarkungsname, b.schluesselgesamt AS bezirk, g.buchungsblattnummermitbuchstabenerweiterung AS blatt, s.gml_id, s.laufendenummer AS bvnr, s.buchungsart, art.bezeichner as bezeichnung, f.flurstueckskennzeichen as flurstkennz, s.zaehler::text||s.nenner::text as anteil, s.nummerimaufteilungsplan as auftplannr, s.beschreibungdessondereigentums as sondereigentum, n.beschriebderrechtsgemeinschaft as zusatz_eigentuemer "; 
 		if($FlurstKennz!='') {
-			$sql.="FROM alkis.ax_flurstueck f ";
+			if($hist_alb) $sql.="FROM alkis.ax_historischesflurstueckohneraumbezug f ";
+			else $sql.="FROM alkis.ax_flurstueck f ";  
 			$sql.="LEFT JOIN alkis.ax_gemarkung gem ON f.land = gem.land AND f.gemarkungsnummer = gem.gemarkungsnummer ";
 			$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON f.istgebucht = ANY(s2.an) ";
 			$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR f.istgebucht = ANY(s.an) OR f.istgebucht = ANY(s2.an) AND s2.gml_id = ANY(s.an) ";
@@ -1527,22 +1529,28 @@ class pgdatabase_alkis {
   	return $this->execSQL($sql, 4, 0);
   }
   
-  function getALBData($FlurstKennz, $without_temporal_filter = FALSE) {
-    $sql ="SELECT distinct lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, zaehler, nenner, k.schluesselgesamt AS kreisid, k.bezeichnung as kreisname, f.land::text||f.gemarkungsnummer::text as gemkgschl, ppg.gemarkungsname as gemkgname, ppg.land::text||ppg.regierungsbezirk::text||ppg.kreis::text||ppg.gemeinde::text as gemeinde, ppge.gemeindename,d.stelle as finanzamt, d.bezeichnung AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.endet::timestamp ";
-	  //$sql.=",f.pruefzeichen,f.status,f.entsteh,f.letzff,f.aktunr,f.karte,f.baublock,f.koorrw,f.koorhw,f.forstamt,fa.finanzamt,fa.name AS finanzamtname,";
-	  $sql.="FROM alkis.ax_kreisregion AS k, alkis.pp_gemeinde as ppge, alkis.pp_gemarkung AS ppg, alkis.ax_flurstueck AS f ";
-	  $sql.="LEFT JOIN alkis.ax_dienststelle as d ON d.stellenart = 1200 AND d.stelle::integer = ANY(f.stelle) ";
-	  $sql.="WHERE f.gemarkungsnummer=ppg.gemarkung AND ppge.land = ppg.land AND ppge.gemeinde = ppg.gemeinde AND f.kreis = k.kreis AND f.flurstueckskennzeichen='".$FlurstKennz."'";
-		if(!$without_temporal_filter)$sql.= $this->build_temporal_filter(array('k', 'f'));
+  function getALBData($FlurstKennz, $without_temporal_filter = FALSE, $hist_alb = false){
+		if($hist_alb){
+			$sql = "SELECT distinct lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, zaehler, nenner, f.land::text||f.gemarkungsnummer::text as gemkgschl, ppg.gemarkungsname as gemkgname, ppg.land::text||ppg.regierungsbezirk::text||ppg.kreis::text||ppg.gemeinde::text as gemeinde, ppge.gemeindename, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp FROM alkis.pp_gemeinde as ppge, alkis.pp_gemarkung AS ppg, alkis.ax_historischesflurstueckohneraumbezug as f";
+			$sql.= " WHERE f.gemarkungsnummer=ppg.gemarkung AND ppge.land = ppg.land AND ppge.gemeinde = ppg.gemeinde AND f.flurstueckskennzeichen='".$FlurstKennz."'";
+		}
+		else{
+			$sql ="SELECT distinct lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, zaehler, nenner, k.schluesselgesamt AS kreisid, k.bezeichnung as kreisname, f.land::text||f.gemarkungsnummer::text as gemkgschl, ppg.gemarkungsname as gemkgname, ppg.land::text||ppg.regierungsbezirk::text||ppg.kreis::text||ppg.gemeinde::text as gemeinde, ppge.gemeindename,d.stelle as finanzamt, d.bezeichnung AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp ";
+			//$sql.=",f.pruefzeichen,f.status,f.entsteh,f.letzff,f.aktunr,f.karte,f.baublock,f.koorrw,f.koorhw,f.forstamt,fa.finanzamt,fa.name AS finanzamtname,";
+			$sql.="FROM alkis.ax_kreisregion AS k, alkis.pp_gemeinde as ppge, alkis.pp_gemarkung AS ppg, alkis.ax_flurstueck AS f ";
+			$sql.="LEFT JOIN alkis.ax_dienststelle as d ON d.stellenart = 1200 AND d.stelle::integer = ANY(f.stelle) ";
+			$sql.="WHERE f.gemarkungsnummer=ppg.gemarkung AND ppge.land = ppg.land AND ppge.gemeinde = ppg.gemeinde AND f.kreis = k.kreis AND f.flurstueckskennzeichen='".$FlurstKennz."'";
+			if(!$without_temporal_filter)$sql.= $this->build_temporal_filter(array('k', 'f'));
+		}
     #echo $sql.'<br><br>';
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0]) {
       $ret[0]=0;
       $ret[1]=$queryret[1];
     }
-    else {
-      $ret[0]=0;
-      $rs=pg_fetch_array($queryret[1]);
+    else{
+			$rs=pg_fetch_array($queryret[1]);
+			$ret[0]=0;
       $ret[1]=$rs;
     }
     return $ret;
@@ -2380,9 +2388,27 @@ class pgdatabase_alkis {
       $ret[1]=$queryret[1];
     }
     else {
-      while($rs=pg_fetch_array($queryret[1])) {
-        $Nachfolger[]=$rs;
-      }
+			if(pg_num_rows($queryret[1]) == 0){			# kein Nachfolger unter ALKIS -> Suche in ALB-Historie
+				$sql = "SELECT flurstueckskennzeichen as nachfolger, TRUE as hist_alb FROM alkis.ax_historischesflurstueckohneraumbezug WHERE ARRAY['".$FlurstKennz."'::varchar] <@ vorgaengerflurstueckskennzeichen";
+				$queryret=$this->execSQL($sql, 4, 0);			# Nachfolger ist auch alb-historisch
+				if(pg_num_rows($queryret[1]) == 0){
+					$sql = "SELECT unnest(nachfolgerflurstueckskennzeichen) as nachfolger FROM alkis.ax_historischesflurstueckohneraumbezug WHERE flurstueckskennzeichen = '".$FlurstKennz."'";
+					$queryret=$this->execSQL($sql, 4, 0);			# Nachfolger ist ALKIS-Flurstück
+					while($rs=pg_fetch_array($queryret[1])) {
+						$Nachfolger[]=$rs;
+					}
+				}
+				else{
+					while($rs=pg_fetch_array($queryret[1])) {
+						$Nachfolger[]=$rs;
+					}
+				}
+			}
+			else{
+				while($rs=pg_fetch_array($queryret[1])) {
+					$Nachfolger[]=$rs;
+				}
+			}
       $ret[0]=0;
       $ret[1]=$Nachfolger;
     }
@@ -2392,14 +2418,23 @@ class pgdatabase_alkis {
   function getVorgaenger($FlurstKennz) {
     $sql = "SELECT unnest(zeigtaufaltesflurstueck) as vorgaenger FROM alkis.ax_fortfuehrungsfall WHERE ARRAY['".$FlurstKennz."'::varchar] <@ zeigtaufneuesflurstueck";
     $queryret=$this->execSQL($sql, 4, 0);
-    if ($queryret[0]) {
+    if($queryret[0]) {
       $ret[0]=1;
       $ret[1]=$queryret[1];
     }
-    else {
-      while($rs=pg_fetch_array($queryret[1])) {
-        $Vorgaenger[]=$rs;
-      }
+    else{
+			if(pg_num_rows($queryret[1]) == 0){			# kein Vorgänger unter ALKIS -> Suche in ALB-Historie
+				$sql = "SELECT flurstueckskennzeichen as vorgaenger, TRUE as hist_alb FROM alkis.ax_historischesflurstueckohneraumbezug WHERE ARRAY['".$FlurstKennz."'::varchar] <@ nachfolgerflurstueckskennzeichen";
+				$queryret=$this->execSQL($sql, 4, 0);
+				while($rs=pg_fetch_array($queryret[1])) {
+					$Vorgaenger[]=$rs;
+				}
+			}
+			else{
+				while($rs=pg_fetch_array($queryret[1])) {
+					$Vorgaenger[]=$rs;
+				}
+			}
       $ret[0]=0;
       $ret[1]=$Vorgaenger;
     }
@@ -3186,12 +3221,13 @@ class pgdatabase_alkis {
     return $liste;
   }
     
-  function getGrundbuchbezirke($FlurstKennz) {
+  function getGrundbuchbezirke($FlurstKennz, $hist_alb = false) {
 		$sql ="SELECT b.schluesselgesamt as Schluessel, b.bezeichnung AS Name ";
-		$sql.="FROM alkis.ax_flurstueck f ";  
+		if($hist_alb) $sql.="FROM alkis.ax_historischesflurstueckohneraumbezug f ";
+		else $sql.="FROM alkis.ax_flurstueck f ";  
 		//$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON array[f.istgebucht] <@ s2.an ";
 		//$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR array[f.istgebucht] <@ s.an OR array[f.istgebucht] <@ s2.an AND array[s2.gml_id] <@ s.an ";
-		$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id ";
+		$sql.="JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id ";
 		$sql.="LEFT JOIN alkis.ax_buchungsstelle_buchungsart art ON s.buchungsart = art.wert ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id "; 
 		$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
@@ -3199,18 +3235,12 @@ class pgdatabase_alkis {
 		$sql.= $this->build_temporal_filter(array('f', 's', 'g', 'b'));
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
-    if ($ret[0]) {
-      $Bezirk['Name']="nicht gefunden";
-      $Bezirk['Schluessel']="0";
+    if ($ret[0] OR pg_num_rows($ret[1])==0){
+      $Bezirk['name']="nicht gefunden";
+      $Bezirk['schluessel']="0";
     }
-    else {
-      if (pg_num_rows($ret[1])==0) {
-        $Bezirk['Name']="nicht gefunden";
-        $Bezirk['Schluessel']="0";
-      }
-      else {
-        $Bezirk=pg_fetch_array($ret[1]);
-      }
+    else{
+      $Bezirk=pg_fetch_array($ret[1]);
     }
     return $Bezirk;
   }

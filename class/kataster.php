@@ -1619,18 +1619,18 @@ class flurstueck_alkis {
     return $ret[1];
   }
 
-  function getBuchungen($Bezirk,$Blatt,$keine_historischen) {
+  function getBuchungen($Bezirk,$Blatt,$hist_alb = false) {
     if ($this->FlurstKennz=="") { return 0; }
     $this->debug->write("<br>kataster.php->flurstueck->getBuchungen Abfrage der Buchungen zum Flurstück auf dem Grundbuch<br>",4);
     #$ret=$this->database->getBuchungen($this->FlurstKennz);
-    $ret=$this->database->getBuchungenFromGrundbuch($this->FlurstKennz,$Bezirk,$Blatt,$keine_historischen);
+    $ret=$this->database->getBuchungenFromGrundbuch($this->FlurstKennz,$Bezirk,$Blatt,$hist_alb);
     return $ret[1];
   }
 
-  function getGrundbuecher() {
+  function getGrundbuecher($hist_alb) {
     if ($this->FlurstKennz=="") { return 0; }
     $this->debug->write("<br>kataster.php->flurstueck->getGrundbuecher Abfrage der Angaben zum Grundbuch auf dem das Flurstück gebucht ist<br>",4);
-    $ret=$this->database->getGrundbuecher($this->FlurstKennz);
+    $ret=$this->database->getGrundbuecher($this->FlurstKennz, $hist_alb);
     return $ret[1];
   }
 
@@ -1724,7 +1724,7 @@ class flurstueck_alkis {
     return $ret;
   }
 
-  function getGrundbuchbezirk() {
+  function getGrundbuchbezirk($hist_alb = false) {
     if ($this->FlurstKennz=="") { return 0; }
     $ret=$this->database->getGrundbuchbezirke($this->FlurstKennz);
     return $ret;
@@ -1960,9 +1960,9 @@ class flurstueck_alkis {
     return $ret[1];
   }
 
-  function readALB_Data($FlurstKennz) {
+  function readALB_Data($FlurstKennz, $hist_alb = false) {
     $this->debug->write("<p>kataster.php flurstueck->readALB_Data (vom Flurstück)",4);
-    $ret=$this->database->getALBData($FlurstKennz);
+    $ret=$this->database->getALBData($FlurstKennz, false, $hist_alb);
     if ($ret[0] AND DBWRITE) {
       $errmsg ='<p>kvwmap readALB_Data Abfragen der ALB-Flurstücksdaten';
       $errmsg.='in line: '.__LINE__.'<br>'.$ret[1];
@@ -1995,9 +1995,9 @@ class flurstueck_alkis {
     $this->AktualitaetsNr=$this->getAktualitaetsNr();			# ALKIS TODO
     $this->Adresse=$this->getAdresse();
     $this->Lage=$this->getLage();
-    $this->Grundbuchbezirk=$this->getGrundbuchbezirk();
+    $this->Grundbuchbezirk=$this->getGrundbuchbezirk($hist_alb);
     $this->Klassifizierung=$this->getKlassifizierung();	
-    $this->Grundbuecher=$this->getGrundbuecher();
+    $this->Grundbuecher=$this->getGrundbuecher($hist_alb);
     //$this->Buchungen=$this->getBuchungen($Bezirk,$Blatt,1);
     $this->Amtsgericht=$this->getAmtsgericht(); 
     $this->FreiText=$this->getFreiText();		# ALKIS TODO

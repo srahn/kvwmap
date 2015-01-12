@@ -14,13 +14,13 @@
   <tr align="center"> 
     <td colspan="5"><h2><?php echo $strtitle; ?></h2></td>
   </tr>
-  <tr>
+  <tr <? if($this->formvars['selected_layer_id'] != '')echo 'style="display:none"'; ?>>
   	<td>&nbsp;</td>
   </tr>
-  <tr> 
+  <tr <? if($this->formvars['selected_layer_id'] != '')echo 'style="display:none"'; ?>> 
     <td style="border-top:1px solid #C3C7C3;border-left:1px solid #C3C7C3;border-right:1px solid #C3C7C3" colspan="5"><?php echo $strLayer;?></td>
   </tr>
-  <tr> 
+  <tr <? if($this->formvars['selected_layer_id'] != '')echo 'style="display:none"'; ?>> 
     <td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3" colspan="5"> 
       <select style="width:250px" size="1"  name="selected_layer_id" onchange="document.GUI.submit();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
       	<option value=""><?php echo $strPleaseSelect; ?></option>

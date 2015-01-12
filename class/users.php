@@ -1369,7 +1369,7 @@ class rolle {
 		$sql ='UPDATE rolle SET ';
 		if($timestamp != ''){
 			$time = new DateTime(DateTime::createFromFormat('d.m.Y H:i:s', $timestamp)->format('Y-m-d H:i:s'));
-			$time->modify("-1 second");
+			$time->modify("+1 second");
 			$sql.='hist_timestamp="'.$time->format('Y-m-d H:i:s').'"';
 		}
 		else $sql.='hist_timestamp = NULL';
@@ -3144,7 +3144,7 @@ class stelle {
 		return $layer;
 	}
 
-	function getqueryablePostgisLayers($privileg, $export_privileg = NULL){
+	function getqueryablePostgisLayers($privileg, $export_privileg = NULL, $no_subform_layers = false){
 		$sql = 'SELECT distinct Layer_ID, Name, alias FROM (';
 		$sql .='SELECT layer.Layer_ID, layer.Name, layer.alias, form_element_type as subformfk, las.privileg as privilegfk ';
 		$sql .='FROM u_groups, layer, used_layer ';
@@ -3161,7 +3161,7 @@ class stelle {
 			$sql .=' AND used_layer.export_privileg = "'.$export_privileg.'"';
 		}
 		$sql .= ' ORDER BY Name) as foo ';
-		if($privileg > 0){
+		if($privileg > 0 AND $no_subform_layers){
 			$sql .= 'WHERE subformfk IS NULL OR privilegfk = 1';			# nicht editierbare SubformFKs ausschliessen
 		}
 		#echo $sql;

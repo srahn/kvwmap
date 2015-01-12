@@ -74,7 +74,7 @@ backto = function(go){
       $flurstkennz=$this->qlayerset[$i]['shape'][$k]['flurstkennz'];
       #echo '<br>'.$flurstkennz; #2005-11-30_pk
       $flst=new flurstueck($flurstkennz,$this->pgdatabase);
-      $flst->readALB_Data($flurstkennz);
+      $flst->readALB_Data($flurstkennz, $this->formvars['hist_alb']);
     #  $flst->isALK($flurstkennz);
       if ($flst->FlurstNr!='') {
         if($k > 0){
@@ -238,7 +238,7 @@ backto = function(go){
               <td>
                 <?php
                 for($v = 0; $v < count($flst->Vorgaenger); $v++){ ?>
-                  <a href="javascript:overlay_link('go=Flurstueck_Anzeigen&FlurstKennz=<?php echo $flst->Vorgaenger[$v]['vorgaenger']; ?>&without_temporal_filter=true');">
+                  <a href="javascript:overlay_link('go=Flurstueck_Anzeigen&FlurstKennz=<?php echo $flst->Vorgaenger[$v]['vorgaenger']; ?>&without_temporal_filter=true&hist_alb=<? echo $flst->Vorgaenger[$v]['hist_alb']; ?>');">
                   <? echo formatFlurstkennzALK($flst->Vorgaenger[$v]['vorgaenger']).' (H)<br>'; ?>
                   </a>
                 <? } ?>
@@ -247,8 +247,7 @@ backto = function(go){
                 <? if (count($flst->Vorgaenger) > 1){?>
                   <a href="javascript:overlay_link('go=Flurstueck_Anzeigen&FlurstKennz=<?php echo $flst->Vorgaenger[0]['vorgaenger'];
                   for($v = 1; $v < count($flst->Vorgaenger); $v++)
-                  echo ';'.$flst->Vorgaenger[$v]['vorgaenger']; ?>
-                  &without_temporal_filter=true');">alle</a>
+                  echo ';'.$flst->Vorgaenger[$v]['vorgaenger']; ?>&without_temporal_filter=true');">alle</a>
                 <? } ?>
               </td>
           </tr>
@@ -272,8 +271,7 @@ backto = function(go){
               <? if(count($flst->Nachfolger) > 1){ ?>
                 <a href="javascript:overlay_link('go=Flurstueck_Anzeigen&FlurstKennz=<?php echo $flst->Nachfolger[0]['nachfolger'];
                 for($v = 1; $v < count($flst->Nachfolger); $v++)
-                echo ';'.$flst->Nachfolger[$v]['nachfolger']; ?>
-                &without_temporal_filter=true');">alle</a>
+                echo ';'.$flst->Nachfolger[$v]['nachfolger']; ?>&without_temporal_filter=true');">alle</a>
               <? } ?>
               </td>
           </tr>
@@ -531,7 +529,7 @@ backto = function(go){
                 <td colspan="3"><span class="fett">Eigentümer</span></td>
               </tr>
             <? for ($g=0;$g<count($flst->Grundbuecher);$g++) {
-            $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
+            $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],$this->formvars['hist_alb']);
             for ($b=0;$b<count($flst->Buchungen);$b++) {
                 if($privileg_['bestandsnr']){
                   $BestandStr ='<a href="index.php?go=Grundbuchblatt_Auswaehlen_Suchen&selBlatt='.$flst->Buchungen[$b]['bezirk'].'-'.$flst->Buchungen[$b]['blatt'].'">'.$flst->Buchungen[$b]['bezirk'].'-'.ltrim($flst->Buchungen[$b]['blatt'], '0').'</a>';

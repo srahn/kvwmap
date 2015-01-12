@@ -7206,8 +7206,7 @@ class GUI {
     }
   }
 
-  function neuer_Layer_Datensatz(){
-    $this->layerdaten = $this->Stelle->getqueryablePostgisLayers(1);
+  function neuer_Layer_Datensatz(){    
     $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->titel='neuen Datensatz einfügen';
     $this->main='new_layer_data.php';
@@ -7217,7 +7216,11 @@ class GUI {
     	$this->formvars['selected_layer_id'] = $this->formvars['chosen_layer_id'];
     }
     
-    if($this->formvars['selected_layer_id']){
+    if($this->formvars['selected_layer_id'] == ''){
+			$this->layerdaten = $this->Stelle->getqueryablePostgisLayers(1, NULL, true);		# wenn kein Layer vorausgewählt, Subform-Layer ausschliessen
+		}
+		else{
+			$this->layerdaten = $this->Stelle->getqueryablePostgisLayers(1, NULL, false);		# ansonsten nicht
       $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
       if($layerset[0]['privileg'] > 0){   # überprüfen, ob Recht zum Erstellen von neuen Datensätzen gesetzt ist
         $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
@@ -10527,8 +10530,8 @@ class GUI {
 	
 		if($this->formvars['without_temporal_filter'] == true){		// der zeitliche Filter wurde für die Abfrage des Flurstücks ausgeschaltet, um das Flurstück abfragen zu können und den rolle::$hist_timestamp des Nutzers in das Lebenszeitintervall des Flurstücks zu setzen
 			$FlurstKennz = $FlurstKennzListe[0];
-			$ret=$this->pgdatabase->getALBData($FlurstKennz, true);
-			$this->user->rolle->setHistTimestamp($ret[1]['endet']);
+			$ret=$this->pgdatabase->getALBData($FlurstKennz, true, $this->formvars['hist_alb']);
+			$this->user->rolle->setHistTimestamp($ret[1]['beginnt']);
 			$this->user->rolle->readSettings();
 			showAlert('Der Zeitpunkt für den Stand der ALKIS-Daten wurde geändert.');
 		}
@@ -13508,13 +13511,19 @@ class db_mapObj{
     $rect->maxx=$rs['maxx'];
     $rect->miny=$rs['miny']; 
     $rect->maxy=$rs['maxy'];
-		if($rect->maxx-$rect->minx < 1){		# bei einem Punktdatensatz
-			$randx = 50;
-			$randy = 50;
+		if(defined('ZOOMBUFFER') AND ZOOMBUFFER > 0){
+			$randx = ZOOMBUFFER;
+			$randy = ZOOMBUFFER;
 		}
 		else{
-			$randx=($rect->maxx-$rect->minx)*$border/100;
-			$randy=($rect->maxy-$rect->miny)*$border/100;
+			if($rect->maxx-$rect->minx < 1){		# bei einem Punktdatensatz
+				$randx = 50;
+				$randy = 50;
+			}
+			else{
+				$randx=($rect->maxx-$rect->minx)*$border/100;
+				$randy=($rect->maxy-$rect->miny)*$border/100;
+			}
 		}
     $rect->minx -= $randx;
     $rect->miny -= $randy;

@@ -264,6 +264,8 @@
   };
 
 	$this->nachweiseRecherchieren = function() use ($GUI){
+		$GUI->formvars['suchstammnr'] = trim($GUI->formvars['suchstammnr']);
+		$GUI->formvars['suchrissnr'] = trim($GUI->formvars['suchrissnr']);
     # Suchparameter, die neu gesetzt worden sind in formvars, sollen übernommen werden und gespeichert werden
     # für späterer Suchanfragen und die anderen sollen aus der Datenbank abgefragt werden.
     # Setzen von Such- und Anzeigeparametern die neu gesetzt worden sind
