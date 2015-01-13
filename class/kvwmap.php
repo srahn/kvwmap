@@ -10530,7 +10530,7 @@ class GUI {
 
 		if($this->formvars['historical'] == 1 OR $this->formvars['without_temporal_filter'] == true){		
 			// Der zeitliche Filter wurde ausgeschaltet, um die Flurstücke abfragen zu können 
-			// und den rolle::$hist_timestamp des Nutzers in das Lebenszeitintervall des ersten Flurstücks zu setzen.
+			// und den rolle::$hist_timestamp des Nutzers in das Lebenszeitintervall des ersten Flurstücks zu setzen (allerdings nicht bei historischen Flurstücken aus dem ALB).
 			// Das wird immer dann gemacht, wenn eine historische Flurstückssuche gemacht wurde oder
 			// auf Vorgänger oder Nachfolger in der Flurstücksanzeige geklickt wurde.
 			$this->formvars['without_temporal_filter'] = true;
@@ -11093,6 +11093,7 @@ class GUI {
             $layerset[$i]['sql'] = $sql;
 			
             $ret=$layerdb->execSQL($sql.$sql_order.$sql_limit,4, 0);
+						#echo $sql.$sql_order.$sql_limit;
             if (!$ret[0]) {
               while ($rs=pg_fetch_array($ret[1])) {
                 $layerset[$i]['shape'][]=$rs;
