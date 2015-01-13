@@ -12698,8 +12698,8 @@ class GUI {
 				$polygon = 'POLYGON((';
 				for($i = 0; $i < count($corners); $i++){
 					$coord = explode(',',$corners[$i]);
-					$coordx[$i] = $this->user->rolle->oGeorefExt->minx+$this->user->rolle->pixsize*$coord[0];
-					$coordy[$i] = $this->user->rolle->oGeorefExt->miny+$this->user->rolle->pixsize*($coord[1]);
+					$coordx[$i] = $coord[0];
+					$coordy[$i] = $coord[1];
 					$polygon .= $coordx[$i].' '.$coordy[$i].',';
 				}
 				$polygon .= $coordx[0].' '.$coordy[0].'))';
