@@ -74,7 +74,7 @@ function formatFlurstkennzALK($FlurstKennz){
 	$gem = substr($FlurstKennz, 0, 6);
 	$flur = substr($FlurstKennz, 6, 3);
 	$zaehler = substr($FlurstKennz, 9, 5);
-	$vorkomma = substr($FlurstKennz, 15, 3);  
+	$vorkomma = str_pad(intval(substr($FlurstKennz, 15, 3)), 3, '0', STR_PAD_LEFT);  
   $FlurstKennz = $gem.'-'.$flur.'-'.$zaehler.'/'.$vorkomma.'.00';
   return $FlurstKennz;
 }

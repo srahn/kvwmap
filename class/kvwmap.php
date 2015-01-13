@@ -10527,11 +10527,16 @@ class GUI {
       $FlurstKennzListe=$ret[1];
       $anzFlurst=count($FlurstKennzListe);
     }
-	
-		if($this->formvars['without_temporal_filter'] == true){		// der zeitliche Filter wurde für die Abfrage des Flurstücks ausgeschaltet, um das Flurstück abfragen zu können und den rolle::$hist_timestamp des Nutzers in das Lebenszeitintervall des Flurstücks zu setzen
+
+		if($this->formvars['historical'] == 1 OR $this->formvars['without_temporal_filter'] == true){		
+			// Der zeitliche Filter wurde ausgeschaltet, um die Flurstücke abfragen zu können 
+			// und den rolle::$hist_timestamp des Nutzers in das Lebenszeitintervall der Flurstücke zu setzen.
+			// Das wird immer dann gemacht, wenn eine historische Flurstückssuche gemacht wurde oder
+			// auf Vorgänger oder Nachfolger in der Flurstücksanzeige geklickt wurde.
+			$this->formvars['without_temporal_filter'] = true;
 			$FlurstKennz = $FlurstKennzListe[0];
-			$ret=$this->pgdatabase->getALBData($FlurstKennz, true, $this->formvars['hist_alb']);
-			$this->user->rolle->setHistTimestamp($ret[1]['beginnt']);
+			$ret=$this->pgdatabase->getALBData($FlurstKennz, true);
+			$this->user->rolle->setHistTimestamp($ret[1]['beginnt']);		// ToDo: alle Flurstücke berücksichtigen
 			$this->user->rolle->readSettings();
 			showAlert('Der Zeitpunkt für den Stand der ALKIS-Daten wurde geändert.');
 		}
@@ -10587,7 +10592,6 @@ class GUI {
 					$layerset[$layer_id] = $this->user->rolle->getLayer($layer_id);
 				}
         if($layer_id != $old_layer_id AND $tablename != ''){
-					$updates[$tablename]['oid'] = $oid;
           $layerdb = $mapdb->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
           $layerdb->setClientEncoding();
 					$attributes = $mapdb->read_layer_attributes($layer_id, $layerdb, NULL);
@@ -10656,32 +10660,34 @@ class GUI {
             } # end of default case
           } # end of switch for type
 					if($eintrag !== NULL){
-						$updates[$tablename]['eintrag'][] = $eintrag;
-						$updates[$tablename]['attributename'][] = $attributname;
+						$updates[$tablename][$oid]['eintrag'][] = $eintrag;
+						$updates[$tablename][$oid]['attributename'][] = $attributname;
 					}          
         }
       }
     }
 		foreach($updates as $tablename => $table){
-			if(count($table['attributename']) > 0){
-				$sql = "UPDATE ".$tablename." SET ";
-				for($i = 0; $i < count($table['attributename']); $i++){
-					if($i > 0)$sql .= ', ';
-					$sql .= $table['attributename'][$i]." = ";
-					if($table['eintrag'][$i] == 'NULL')$sql .= 'NULL';
-					else $sql .= "'".$table['eintrag'][$i]."'";
-				}
-				$sql .= " WHERE oid = ".$table['oid'];
-				#if($filter != ''){							# erstmal wieder rausgenommen, weil der Filter sich auf Attribute beziehen kann, die zu anderen Tabellen gehören
-				#  $sql .= " AND ".$filter;
-				#}
-				$this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
-				$ret = $layerdb->execSQL($sql,4, 1);			
-				if(!$ret[0]){
-					if(pg_affected_rows($ret[1]) == 0){
-						$result = pg_fetch_row($ret[1]);
-						$ret[0] = 1;
-						$success = false;
+			foreach($table as $oid => $row){
+				if(count($row['attributename']) > 0){
+					$sql = "UPDATE ".$tablename." SET ";
+					for($i = 0; $i < count($row['attributename']); $i++){
+						if($i > 0)$sql .= ', ';
+						$sql .= $row['attributename'][$i]." = ";
+						if($row['eintrag'][$i] == 'NULL')$sql .= 'NULL';
+						else $sql .= "'".$row['eintrag'][$i]."'";
+					}
+					$sql .= " WHERE oid = ".$oid;
+					#if($filter != ''){							# erstmal wieder rausgenommen, weil der Filter sich auf Attribute beziehen kann, die zu anderen Tabellen gehören
+					#  $sql .= " AND ".$filter;
+					#}
+					$this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
+					$ret = $layerdb->execSQL($sql,4, 1);			
+					if(!$ret[0]){
+						if(pg_affected_rows($ret[1]) == 0){
+							$result = pg_fetch_row($ret[1]);
+							$ret[0] = 1;
+							$success = false;
+						}
 					}
 				}
 			}

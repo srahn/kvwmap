@@ -1307,17 +1307,31 @@ class pgdatabase_alkis {
 	}
   
   function getFlurstuecksListe($GemID,$GemkgID,$FlurID, $historical = false){
-    //$sql ="SELECT land||gemarkungsnummer||'-'||lpad(flurnummer, 3, '0')||'-'||lpad(zaehler, 5, '0')||'/'||case when nenner IS NULL THEN '000.00' ELSE lpad(nenner, 3, '0')||'.00' END as flurstkennz, zaehler, nenner";
-    $sql ="SELECT flurstueckskennzeichen as flurstkennz, zaehler, nenner";
-    $sql.=" FROM alkis.ax_flurstueck WHERE 1=1";
-    if ($GemkgID>0) {
-      $sql.=" AND land*10000 + gemarkungsnummer= ".$GemkgID;
-    }
-    if ($FlurID!='') {
-      $sql.=" AND flurnummer=".intval($FlurID);
-    }
-		$sql.= $this->build_temporal_filter(array('ax_flurstueck'));
-    $sql.=" ORDER BY flurstueckskennzeichen";
+		if(!$historical){
+			$sql ="SELECT flurstueckskennzeichen as flurstkennz, zaehler, nenner";
+			$sql.=" FROM alkis.ax_flurstueck WHERE 1=1";
+			if ($GemkgID>0) {
+				$sql.=" AND land*10000 + gemarkungsnummer= ".$GemkgID;
+			}
+			if ($FlurID!='') {
+				$sql.=" AND flurnummer=".intval($FlurID);
+			}
+			$sql.= $this->build_temporal_filter(array('ax_flurstueck'));
+			$sql.=" ORDER BY flurstueckskennzeichen";
+		}
+		else{
+			$sql = "SELECT flurstueckskennzeichen as flurstkennz, zaehler, nenner ";
+			$sql.= "FROM alkis.ax_flurstueck WHERE 1=1 ";
+			$sql.= "AND land*10000 + gemarkungsnummer = ".$GemkgID." ";
+			$sql.= "AND flurnummer = ".intval($FlurID)." ";
+			$sql.= "AND ax_flurstueck.endet IS NOT NULL ";
+			$sql.= "UNION ";
+			$sql.= "SELECT flurstueckskennzeichen as flurstkennz, zaehler, nenner ";
+			$sql.= "FROM alkis.ax_historischesflurstueckohneraumbezug WHERE 1=1 ";
+			$sql.= "AND land*10000 + gemarkungsnummer = ".$GemkgID." ";
+			$sql.= "AND flurnummer = ".intval($FlurID)." ";
+			$sql.= "ORDER BY flurstkennz";
+		}
     #echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
     while ($rs=pg_fetch_array($queryret[1])) {
@@ -1529,18 +1543,16 @@ class pgdatabase_alkis {
   	return $this->execSQL($sql, 4, 0);
   }
   
-  function getALBData($FlurstKennz, $without_temporal_filter = FALSE, $hist_alb = false){
-		if($hist_alb){
-			$sql = "SELECT distinct TRUE as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, zaehler, nenner, f.land::text||f.gemarkungsnummer::text as gemkgschl, ppg.gemarkungsname as gemkgname, ppg.land::text||ppg.regierungsbezirk::text||ppg.kreis::text||ppg.gemeinde::text as gemeinde, ppge.gemeindename, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp FROM alkis.pp_gemeinde as ppge, alkis.pp_gemarkung AS ppg, alkis.ax_historischesflurstueckohneraumbezug as f";
-			$sql.= " WHERE f.gemarkungsnummer=ppg.gemarkung AND ppge.land = ppg.land AND ppge.gemeinde = ppg.gemeinde AND f.flurstueckskennzeichen='".$FlurstKennz."'";
-		}
+  function getALBData($FlurstKennz, $without_temporal_filter = false){		
+		$sql ="SELECT distinct 0 as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, zaehler, nenner, k.schluesselgesamt AS kreisid, k.bezeichnung as kreisname, f.land::text||f.gemarkungsnummer::text as gemkgschl, ppg.gemarkungsname as gemkgname, ppg.land::text||ppg.regierungsbezirk::text||ppg.kreis::text||ppg.gemeinde::text as gemeinde, ppge.gemeindename,d.stelle as finanzamt, d.bezeichnung AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp ";
+		$sql.="FROM alkis.ax_kreisregion AS k, alkis.pp_gemeinde as ppge, alkis.pp_gemarkung AS ppg, alkis.ax_flurstueck AS f ";
+		$sql.="LEFT JOIN alkis.ax_dienststelle as d ON d.stellenart = 1200 AND d.stelle::integer = ANY(f.stelle) ";
+		$sql.="WHERE f.gemarkungsnummer=ppg.gemarkung AND ppge.land = ppg.land AND ppge.gemeinde = ppg.gemeinde AND f.kreis = k.kreis AND f.flurstueckskennzeichen='".$FlurstKennz."'";
+		if(!$without_temporal_filter)$sql.= $this->build_temporal_filter(array('k', 'f'));
 		else{
-			$sql ="SELECT distinct lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, zaehler, nenner, k.schluesselgesamt AS kreisid, k.bezeichnung as kreisname, f.land::text||f.gemarkungsnummer::text as gemkgschl, ppg.gemarkungsname as gemkgname, ppg.land::text||ppg.regierungsbezirk::text||ppg.kreis::text||ppg.gemeinde::text as gemeinde, ppge.gemeindename,d.stelle as finanzamt, d.bezeichnung AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp ";
-			//$sql.=",f.pruefzeichen,f.status,f.entsteh,f.letzff,f.aktunr,f.karte,f.baublock,f.koorrw,f.koorhw,f.forstamt,fa.finanzamt,fa.name AS finanzamtname,";
-			$sql.="FROM alkis.ax_kreisregion AS k, alkis.pp_gemeinde as ppge, alkis.pp_gemarkung AS ppg, alkis.ax_flurstueck AS f ";
-			$sql.="LEFT JOIN alkis.ax_dienststelle as d ON d.stellenart = 1200 AND d.stelle::integer = ANY(f.stelle) ";
-			$sql.="WHERE f.gemarkungsnummer=ppg.gemarkung AND ppge.land = ppg.land AND ppge.gemeinde = ppg.gemeinde AND f.kreis = k.kreis AND f.flurstueckskennzeichen='".$FlurstKennz."'";
-			if(!$without_temporal_filter)$sql.= $this->build_temporal_filter(array('k', 'f'));
+			$sql.= " UNION ";
+			$sql.= "SELECT distinct 1 as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, zaehler, nenner, 0 AS kreisid, '' as kreisname, f.land::text||f.gemarkungsnummer::text as gemkgschl, ppg.gemarkungsname as gemkgname, ppg.land::text||ppg.regierungsbezirk::text||ppg.kreis::text||ppg.gemeinde::text as gemeinde, ppge.gemeindename, '' as finanzamt, '' AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp FROM alkis.pp_gemeinde as ppge, alkis.pp_gemarkung AS ppg, alkis.ax_historischesflurstueckohneraumbezug as f";
+			$sql.= " WHERE f.gemarkungsnummer=ppg.gemarkung AND ppge.land = ppg.land AND ppge.gemeinde = ppg.gemeinde AND f.flurstueckskennzeichen='".$FlurstKennz."'";
 		}
     #echo $sql.'<br><br>';
     $queryret=$this->execSQL($sql, 4, 0);
@@ -3692,21 +3704,31 @@ class pgdatabase_alkis {
   }
   
   function getFlurenListeByGemkgIDByFlurID($GemkgID,$FlurID, $historical = false){
-    $sql ="SELECT lpad(gemarkungsteilflur::text, 3, '0') AS FlurID, lpad(gemarkungsteilflur::text, 3, '0') AS Name";
-    $sql.=",schluesselgesamt AS GemFlurID FROM alkis.ax_gemarkungsteilflur WHERE 1=1 ";
-    
-    if ($GemkgID>0) {
-      $sql.=" AND land*10000 + gemarkung=".(int)$GemkgID;
-    }
-    if ($FlurID[0]>0) {
-      $sql.=" AND schluesselgesamt IN (".$FlurID[0];
-      for ($i=1;$i<count($FlurID);$i++) {
-      $sql.=",".$FlurID[$i];
-      }
-      $sql.=")";
-    }
-		$sql.= $this->build_temporal_filter(array('ax_gemarkungsteilflur'));
-		$sql.=" GROUP BY gemarkungsteilflur,schluesselgesamt ORDER BY gemarkungsteilflur";
+		if(!$historical){
+			$sql ="SELECT lpad(gemarkungsteilflur::text, 3, '0') AS FlurID, lpad(gemarkungsteilflur::text, 3, '0') AS Name";
+			$sql.=",schluesselgesamt AS GemFlurID FROM alkis.ax_gemarkungsteilflur WHERE 1=1 ";
+			
+			if ($GemkgID>0) {
+				$sql.=" AND land*10000 + gemarkung=".(int)$GemkgID;
+			}
+			if ($FlurID[0]>0) {
+				$sql.=" AND schluesselgesamt IN (".$FlurID[0];
+				for ($i=1;$i<count($FlurID);$i++) {
+				$sql.=",".$FlurID[$i];
+				}
+				$sql.=")";
+			}
+			$sql.= $this->build_temporal_filter(array('ax_gemarkungsteilflur'));
+			$sql.=" ORDER BY gemarkungsteilflur";
+		}
+		else{		// die Fluren aller historischen Flurstücke abfragen
+			$sql = "SELECT distinct flurnummer, lpad(flurnummer::text, 3, '0') AS FlurID, lpad(flurnummer::text, 3, '0') AS Name, land*10000000 + gemarkungsnummer*1000 + flurnummer AS GemFlurID ";
+			$sql.= "FROM alkis.ax_historischesflurstueckohneraumbezug WHERE 1=1 AND land*10000 + gemarkungsnummer = ".(int)$GemkgID." ";
+			$sql.= "UNION ";
+			$sql.= "SELECT flurnummer, lpad(flurnummer::text, 3, '0') AS FlurID, lpad(flurnummer::text, 3, '0') AS Name, land*10000000 + gemarkungsnummer*1000 + flurnummer AS GemFlurID ";
+			$sql.= "FROM alkis.ax_flurstueck WHERE endet is NOT NULL AND land*10000 + gemarkungsnummer = ".(int)$GemkgID." ";
+			$sql.= "ORDER BY flurnummer";
+		}
     #echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
     while ($rs=pg_fetch_array($queryret[1])) {

@@ -1960,9 +1960,9 @@ class flurstueck_alkis {
     return $ret[1];
   }
 
-  function readALB_Data($FlurstKennz, $hist_alb = false) {
+  function readALB_Data($FlurstKennz, $without_temporal_filter = false) {
     $this->debug->write("<p>kataster.php flurstueck->readALB_Data (vom Flurstück)",4);
-    $ret=$this->database->getALBData($FlurstKennz, false, $hist_alb);
+    $ret=$this->database->getALBData($FlurstKennz, $without_temporal_filter);
     if ($ret[0] AND DBWRITE) {
       $errmsg ='<p>kvwmap readALB_Data Abfragen der ALB-Flurstücksdaten';
       $errmsg.='in line: '.__LINE__.'<br>'.$ret[1];

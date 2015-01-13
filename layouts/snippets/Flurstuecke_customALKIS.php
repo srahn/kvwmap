@@ -74,7 +74,7 @@ backto = function(go){
       $flurstkennz=$this->qlayerset[$i]['shape'][$k]['flurstkennz'];
       #echo '<br>'.$flurstkennz; #2005-11-30_pk
       $flst=new flurstueck($flurstkennz,$this->pgdatabase);
-      $flst->readALB_Data($flurstkennz, $this->formvars['hist_alb']);
+      $flst->readALB_Data($flurstkennz, $this->formvars['without_temporal_filter']);
     #  $flst->isALK($flurstkennz);
       if ($flst->FlurstNr!='') {
         if($k > 0){
@@ -229,7 +229,7 @@ backto = function(go){
               if($privileg_['status']){ ?>
               <tr>
                 <td align="right"><span class="fett"> Status&nbsp;</span></td>
-                <td><?php if ($flst->endet!="" OR $flst->hist_alb != '') { echo "historisches&nbsp;Flurst&uuml;ck"; if($flst->endet != '')echo "&nbsp;(endet: ".$flst->endet.")"; } else { echo "aktuelles&nbsp;Flurst&uuml;ck"; }  ?></td>
+                <td><?php if ($flst->endet!="" OR $flst->hist_alb == 1) { echo "historisches&nbsp;Flurst&uuml;ck"; if($flst->endet != '')echo "&nbsp;(endet: ".$flst->endet.")"; } else { echo "aktuelles&nbsp;Flurst&uuml;ck"; }  ?></td>
               </tr>
               <? } ?>
               <?php if ($privileg_['vorgaenger'] AND $flst->Vorgaenger != '') { ?>
@@ -238,7 +238,7 @@ backto = function(go){
               <td>
                 <?php
                 for($v = 0; $v < count($flst->Vorgaenger); $v++){ ?>
-                  <a href="javascript:overlay_link('go=Flurstueck_Anzeigen&FlurstKennz=<?php echo $flst->Vorgaenger[$v]['vorgaenger']; ?>&without_temporal_filter=true&hist_alb=<? echo $flst->Vorgaenger[$v]['hist_alb']; ?>');">
+                  <a href="javascript:overlay_link('go=Flurstueck_Anzeigen&FlurstKennz=<?php echo $flst->Vorgaenger[$v]['vorgaenger']; ?>&without_temporal_filter=true');">
                   <? echo formatFlurstkennzALK($flst->Vorgaenger[$v]['vorgaenger']).' (H)<br>'; ?>
                   </a>
                 <? } ?>
@@ -246,7 +246,7 @@ backto = function(go){
                 <td>
                 <? if (count($flst->Vorgaenger) > 1){?>
                   <a href="javascript:overlay_link('go=Flurstueck_Anzeigen&FlurstKennz=<?php echo $flst->Vorgaenger[0]['vorgaenger'];
-                  for($v = 1; $v < count($flst->Vorgaenger); $v++)echo ';'.$flst->Vorgaenger[$v]['vorgaenger']; ?>&without_temporal_filter=true&hist_alb=<? echo $flst->Vorgaenger[0]['hist_alb']; ?>');">alle</a>
+                  for($v = 1; $v < count($flst->Vorgaenger); $v++)echo ';'.$flst->Vorgaenger[$v]['vorgaenger']; ?>&without_temporal_filter=true');">alle</a>
                 <? } ?>
               </td>
           </tr>
@@ -257,7 +257,7 @@ backto = function(go){
               <td>
                 <?php
                 for($v = 0; $v < count($flst->Nachfolger); $v++){ ?>
-                  <a href="javascript:overlay_link('go=Flurstueck_Anzeigen&FlurstKennz=<?php echo $flst->Nachfolger[$v]['nachfolger']; ?>&without_temporal_filter=true&hist_alb=<? echo $flst->Nachfolger[$v]['hist_alb']; ?>');">
+                  <a href="javascript:overlay_link('go=Flurstueck_Anzeigen&FlurstKennz=<?php echo $flst->Nachfolger[$v]['nachfolger']; ?>&without_temporal_filter=true');">
                   <? echo formatFlurstkennzALK($flst->Nachfolger[$v]['nachfolger']);
                   if($flst->Nachfolger[$v]['endet'] != '' OR $flst->Nachfolger[$v]['hist_alb'] != ''){
                     echo ' (H)';
@@ -270,7 +270,7 @@ backto = function(go){
               <? if(count($flst->Nachfolger) > 1){ ?>
                 <a href="javascript:overlay_link('go=Flurstueck_Anzeigen&FlurstKennz=<?php echo $flst->Nachfolger[0]['nachfolger'];
                 for($v = 1; $v < count($flst->Nachfolger); $v++)
-                echo ';'.$flst->Nachfolger[$v]['nachfolger']; ?>&without_temporal_filter=true&hist_alb=<? echo $flst->Nachfolger[0]['hist_alb']; ?>');">alle</a>
+                echo ';'.$flst->Nachfolger[$v]['nachfolger']; ?>&without_temporal_filter=true');">alle</a>
               <? } ?>
               </td>
           </tr>
