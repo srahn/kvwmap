@@ -1369,7 +1369,7 @@ class rolle {
 		$sql ='UPDATE rolle SET ';
 		if($timestamp != ''){
 			$time = new DateTime(DateTime::createFromFormat('d.m.Y H:i:s', $timestamp)->format('Y-m-d H:i:s'));
-			$time->modify("+1 second");
+			$time->modify("-1 second");
 			$sql.='hist_timestamp="'.$time->format('Y-m-d H:i:s').'"';
 		}
 		else $sql.='hist_timestamp = NULL';

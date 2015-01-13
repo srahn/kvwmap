@@ -10530,15 +10530,17 @@ class GUI {
 
 		if($this->formvars['historical'] == 1 OR $this->formvars['without_temporal_filter'] == true){		
 			// Der zeitliche Filter wurde ausgeschaltet, um die Flurstücke abfragen zu können 
-			// und den rolle::$hist_timestamp des Nutzers in das Lebenszeitintervall der Flurstücke zu setzen.
+			// und den rolle::$hist_timestamp des Nutzers in das Lebenszeitintervall des ersten Flurstücks zu setzen.
 			// Das wird immer dann gemacht, wenn eine historische Flurstückssuche gemacht wurde oder
 			// auf Vorgänger oder Nachfolger in der Flurstücksanzeige geklickt wurde.
 			$this->formvars['without_temporal_filter'] = true;
 			$FlurstKennz = $FlurstKennzListe[0];
 			$ret=$this->pgdatabase->getALBData($FlurstKennz, true);
-			$this->user->rolle->setHistTimestamp($ret[1]['beginnt']);		// ToDo: alle Flurstücke berücksichtigen
-			$this->user->rolle->readSettings();
-			showAlert('Der Zeitpunkt für den Stand der ALKIS-Daten wurde geändert.');
+			if($ret[1]['hist_alb'] == 0){
+				$this->user->rolle->setHistTimestamp($ret[1]['endet']);
+				$this->user->rolle->readSettings();
+				showAlert('Der Zeitpunkt für den Stand der ALKIS-Daten wurde geändert.');
+			}
 		}
 	
     $this->mapDB = new db_mapObj($this->Stelle->id,$this->user->id);

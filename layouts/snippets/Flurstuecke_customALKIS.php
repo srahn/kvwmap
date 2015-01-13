@@ -528,7 +528,7 @@ backto = function(go){
                 <td colspan="3"><span class="fett">Eigentümer</span></td>
               </tr>
             <? for ($g=0;$g<count($flst->Grundbuecher);$g++) {
-            $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],$this->formvars['hist_alb']);
+            $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],$flst->hist_alb);
             for ($b=0;$b<count($flst->Buchungen);$b++) {
                 if($privileg_['bestandsnr']){
                   $BestandStr ='<a href="index.php?go=Grundbuchblatt_Auswaehlen_Suchen&selBlatt='.$flst->Buchungen[$b]['bezirk'].'-'.$flst->Buchungen[$b]['blatt'].'">'.$flst->Buchungen[$b]['bezirk'].'-'.ltrim($flst->Buchungen[$b]['blatt'], '0').'</a>';

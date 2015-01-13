@@ -853,7 +853,7 @@ class pgdatabase_alkis {
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
 		$sql.="WHERE (g.blattart = 1000 OR g.blattart = 2000 OR g.blattart = 3000) ";
 		$sql.="AND f.flurstueckskennzeichen = '".$FlurstKennz."' ";
-		$sql.= $this->build_temporal_filter(array('f', 's', 'g'));
+		if(!$hist_alb) $sql.= $this->build_temporal_filter(array('f', 's', 'g'));
 		$sql.="ORDER BY blatt";
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
@@ -1048,7 +1048,7 @@ class pgdatabase_alkis {
 			$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
 			$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
 			$sql.="LEFT JOIN alkis.ax_namensnummer n ON n.istbestandteilvon = g.gml_id AND n.beschriebderrechtsgemeinschaft IS NOT NULL ";
-			$sql.= $this->build_temporal_filter(array('n'));
+			if(!$hist_alb) $sql.= $this->build_temporal_filter(array('n'));
 		}
 		else{
 			$sql.="FROM alkis.ax_buchungsblatt g ";
@@ -1071,7 +1071,7 @@ class pgdatabase_alkis {
     if ($FlurstKennz!='') {
       $sql.=" AND f.flurstueckskennzeichen='".$FlurstKennz."'";
     }
-		$sql.= $this->build_temporal_filter(array('f', 's', 'g', 'b'));
+		if(!$hist_alb) $sql.= $this->build_temporal_filter(array('f', 's', 'g', 'b'));
     $sql.=" ORDER BY b.schluesselgesamt,g.buchungsblattnummermitbuchstabenerweiterung,s.laufendenummer,f.flurstueckskennzeichen";
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
@@ -3240,7 +3240,7 @@ class pgdatabase_alkis {
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id "; 
 		$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
 		$sql.="WHERE f.flurstueckskennzeichen = '".$FlurstKennz."'";
-		$sql.= $this->build_temporal_filter(array('f', 's', 'g', 'b'));
+		if(!$hist_alb) $sql.= $this->build_temporal_filter(array('f', 's', 'g', 'b'));
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0] OR pg_num_rows($ret[1])==0){
