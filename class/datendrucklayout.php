@@ -360,7 +360,7 @@ class ddl {
 				}			
 			}break;
 			case 'Autovervollständigungsfeld' : {
-				$output = utf8_decode($this->attributes['enum_output'][$j][0]);
+				$output = utf8_decode($this->attributes['enum_output'][$j][$i]);
 			}break;
 			default: {
 				if(!$preview AND $this->attributes['type'][$j] == 'bool'){

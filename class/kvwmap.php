@@ -604,7 +604,7 @@ class GUI {
 							$map = ms_newMapObj(DEFAULTMAPFILE);
 						}
 				else {
-					$map = new mapObj(DEFAULTMAPFILE);
+					$map = new mapObj(DEFAULTMAPFILE, SHAPEPATH);
 				}
         $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
         
@@ -5882,8 +5882,8 @@ class GUI {
     fclose($fp);
 
     if($preview == true){
-      exec(IMAGEMAGICKPATH.'convert -density 300x300 '.$dateipfad.$dateiname.' -resize 595 '.$dateipfad.$name.'-'.$currenttime.'.jpg');
-      #echo IMAGEMAGICKPATH.'convert -density 300x300  '.$dateipfad.$dateiname.' -resize 595 '.$dateipfad.$name.'-'.$currenttime.'.jpg';
+      exec(IMAGEMAGICKPATH.'convert -alpha off -density 300x300 '.$dateipfad.$dateiname.' -resize 595 '.$dateipfad.$name.'-'.$currenttime.'.jpg');
+      #echo IMAGEMAGICKPATH.'convert -alpha off -density 300x300  '.$dateipfad.$dateiname.' -resize 595 '.$dateipfad.$name.'-'.$currenttime.'.jpg';
 			if(!file_exists(IMAGEPATH.$name.'-'.$currenttime.'.jpg')){
 				return TEMPPATH_REL.$name.'-'.$currenttime.'-0.jpg';
 			}
@@ -11073,8 +11073,7 @@ class GUI {
 								$j++;
 							}
 						}
-									
-						if($this->last_query != ''){
+						if($this->last_query != '' AND $this->last_query[$layerset[$i]['Layer_ID']]['sql'] != ''){
 							$sql = $this->last_query[$layerset[$i]['Layer_ID']]['sql'];
 							if($this->formvars['orderby'.$layerset[$i]['Layer_ID']] == '')$sql_order = $this->last_query[$layerset[$i]['Layer_ID']]['orderby'];
 							$this->formvars['anzahl'] = $this->last_query[$layerset[$i]['Layer_ID']]['limit'];
@@ -11512,13 +11511,9 @@ class GUI {
 			$path = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[$i]['pfad']);
       $privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
       #$path = $this->Stelle->parse_path($layerdb, $path, $privileges);
-      $layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames']);
-	    # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
-	    $layerset[$i]['attributes'] = $this->mapDB->add_attribute_values($layerset[$i]['attributes'], $layerdb, NULL, true);
-      
+      $layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames']);      
 
-      # order by rausnehmen
-			
+      # order by rausnehmen			
 			$orderbyposition = strrpos(strtolower($path), 'order by');
 			$lastfromposition = strrpos(strtolower($path), 'from');
 			if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
@@ -11673,6 +11668,11 @@ class GUI {
           $layerset[$i]['shape'][]=$rs;
         }
       }
+			
+			# Hier nach der Abfrage der Sachdaten die weiteren Attributinformationen hinzufügen
+      # Steht an dieser Stelle, weil die Auswahlmöglichkeiten von Auswahlfeldern abhängig sein können
+	    $layerset[$i]['attributes'] = $this->mapDB->add_attribute_values($layerset[$i]['attributes'], $layerdb, $layerset[$i]['shape'], true);
+			
       $this->qlayerset[]=$layerset[$i];
     } # ende der Schleife zur Abfrage der Layer der Stelle
     # Tooltip-Abfrage

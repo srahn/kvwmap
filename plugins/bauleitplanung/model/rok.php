@@ -44,14 +44,14 @@ class rok {
 																4 => 'gewerbegebiet',	      #"Gewerbegebiet"
 																5 => 'industriegebiet',	      #"Industriegebiet"
 																6 => 'gemeinbedarf',	      #"Gemeinbedarf"
-																7 => 'ver_entsorgungsflaechen',	      #"Ver- und Entsorgungsfläche"
-																8 => 'verkehrsflaechen',	      #"Verkehrsfläche"
+																7 => 'ver_entsorgungsflaeche',	      #"Ver- und Entsorgungsfläche"
+																8 => 'verkehrsflaeche',	      #"Verkehrsfläche"
 																9 => 'landwirtschaft',	      #"Landwirtschaftsfläche"
 																10 => 'waldgebiete',	      #"Waldfläche"
-																11 => 'gruenflaechen',	      #"Grünfläche"
-																12 => 'wasserflaechen',	      #"Wasserfläche"
-																13 => 'rohstoffgebiete',	      #"Aufschüttung"
-																14 => 'rohstoffgebiete',	      #"Abgrabung"
+																11 => 'gruenflaeche',	      #"Grünfläche"
+																12 => 'wasserflaeche',	      #"Wasserfläche"
+																13 => 'rohstoffgebiet',	      #"Aufschüttung"
+																14 => 'rohstoffgebiet',	      #"Abgrabung"
 																15 => 'so_sport_freizeit',	      #"Sport und Freizeit"
 																16 => 'so_sport_freizeit',	      #"Golfplatz"
 																17 => 'so_sport_freizeit',	      #"Freizeitpark"
@@ -256,7 +256,7 @@ class rok {
 		}
 		
 		# Fläche des Geltungsbereichs aktualisieren
-		$sql = "SELECT round((st_area(shape)/10000)::numeric, 2) FROM rok_edit.bpl_geltungsbereiche as rok, b_plan_stammdaten as sd ";
+		$sql = "SELECT round((st_area(shape)/10000)::numeric, 2) FROM rok_edit.bpl_geltungsbereich as rok, b_plan_stammdaten as sd ";
 		$sql.= "WHERE sd.plan_id = ".$plan_id." AND rok.roknr = sd.lfd_rok_nr ";
 		#echo $sql.'<br>';
 		$ret1 = $this->database->execSQL($sql, 4, 0);
@@ -345,9 +345,9 @@ class rok {
   }
     
   function getExtentFromRokNrBplan($roknr, $art, $border, $epsg) {
-		if(in_array($art, array("B-Plan", "vb-Plan", "Einzelvorhaben", "BImSchG"))) $table = "rok_edit.bpl_geltungsbereiche";
-		if(in_array($art, array("Innenbereichssatzung", "Außenbereichssatzung"))) $table = "rok_edit.satzungen ";
-		if(in_array($art, array("Planungsanzeige"))) $table = "rok_edit.plananzeigen";
+		if(in_array($art, array("B-Plan", "vb-Plan", "Einzelvorhaben", "BImSchG"))) $table = "rok_edit.bpl_geltungsbereich";
+		if(in_array($art, array("Innenbereichssatzung", "Außenbereichssatzung"))) $table = "rok_edit.satzung ";
+		if(in_array($art, array("Planungsanzeige"))) $table = "rok_edit.plananzeige";
 		$sql = "SELECT st_xmin(st_extent(st_transform(shape,".$epsg."))) AS minx,st_ymin(st_extent(st_transform(shape, ".$epsg."))) as miny,st_xmax(st_extent(st_transform(shape, ".$epsg."))) AS maxx,st_ymax(st_extent(st_transform(shape, ".$epsg."))) AS maxy FROM ".$table." WHERE roknr = '".$roknr."'";
 		#echo $sql;
 	  $ret = $this->database->execSQL($sql, 4, 0);

@@ -139,8 +139,8 @@
 				$polygon = 'POLYGON((';
 				for($i = 0; $i < count($corners); $i++){
 					$coord = explode(',',$corners[$i]);
-					$coordx[$i] = $this->user->rolle->oGeorefExt->minx+$this->user->rolle->pixsize*$coord[0];
-					$coordy[$i] = $this->user->rolle->oGeorefExt->miny+$this->user->rolle->pixsize*($coord[1]);
+					$coordx[$i] = $coord[0];
+					$coordy[$i] = $coord[1];
 					$polygon .= $coordx[$i].' '.$coordy[$i].',';
 				}
 				$polygon .= $coordx[0].' '.$coordy[0].'))';
@@ -173,13 +173,9 @@
 			$path = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[$i]['pfad']);
       $privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
       #$path = $this->Stelle->parse_path($layerdb, $path, $privileges);
-      $layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames']);
-	    # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
-	    $layerset[$i]['attributes'] = $this->mapDB->add_attribute_values($layerset[$i]['attributes'], $layerdb, NULL, true);
-      
+      $layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames']);      
 
-      # order by rausnehmen
-			
+      # order by rausnehmen			
 			$orderbyposition = strrpos(strtolower($path), 'order by');
 			$lastfromposition = strrpos(strtolower($path), 'from');
 			if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
@@ -334,6 +330,11 @@
           $layerset[$i]['shape'][]=$rs;
         }
       }
+			
+			# Hier nach der Abfrage der Sachdaten die weiteren Attributinformationen hinzufügen
+      # Steht an dieser Stelle, weil die Auswahlmöglichkeiten von Auswahlfeldern abhängig sein können
+	    $layerset[$i]['attributes'] = $this->mapDB->add_attribute_values($layerset[$i]['attributes'], $layerdb, $layerset[$i]['shape'], true);
+			
       $this->qlayerset[]=$layerset[$i];
     } # ende der Schleife zur Abfrage der Layer der Stelle
     # Tooltip-Abfrage
@@ -816,7 +817,7 @@
   	if($this->port == '') $this->port = 5432;
     #$this->debug->write("<br>Datenbankverbindung öffnen: Datenbank: ".$this->dbName." User: ".$this->user,4);
 		$connect_string = 'dbname='.$this->dbName.' port='.$this->port.' user='.$this->user.' password='.$this->passwd;
-		if($this->host != 'localhost' AND $this->host != '127.0.0.1')$connect_string .= 'host='.$this->host;		// das beschleunigt den Connect extrem
+		if($this->host != 'localhost' AND $this->host != '127.0.0.1')$connect_string .= ' host='.$this->host;		// das beschleunigt den Connect extrem
     $this->dbConn=pg_connect($connect_string);
     $this->debug->write("Datenbank mit Connection_ID: ".$this->dbConn." geöffnet.",4);
     # $this->version = pg_version($this->dbConn); geht erst mit PHP 5
@@ -957,6 +958,7 @@
     if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     $rs = mysql_fetch_array($query);
     $connectionstring = $rs[0];
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->getlayerdatabase - Gefundener Connection String des Layers:<br>".$connectionstring, 4);
     if($connectionstring != ''){
       $layerdb = new pgdatabase();
       if($rs[1] == ''){
@@ -1014,6 +1016,7 @@
       $i = 0;
       while($rs=mysql_fetch_array($query)){
       	$attributes['name'][$i]= $rs['name'];
+				$attributes['indizes'][$rs['name']] = $i;
       	$attributes['real_name'][$rs['name']]= $rs['real_name'];
       	if($rs['tablename'])$attributes['table_name'][$i]= $rs['tablename'];
       	if($rs['tablename'])$attributes['table_name'][$rs['name']] = $rs['tablename']; 
@@ -1103,8 +1106,8 @@
                 # -----<requires>------
                 if(strpos(strtolower($attributes['options'][$i]), "<requires>") > 0){
                   if($query_result != NULL){
-                    $options = $attributes['options'][$i];
                     for($k = 0; $k < count($query_result); $k++){
+											$options = $attributes['options'][$i];
 											foreach($attributes['name'] as $attributename){
 												if(strpos($options, '<requires>'.$attributename.'</requires>') !== false AND $query_result[$k][$attributename] != ''){
 													$options = str_replace('<requires>'.$attributename.'</requires>', "'".$query_result[$k][$attributename]."'", $options);
@@ -1145,6 +1148,43 @@
                     $attributes['enum_output'][$i][] = $rs['output'];
                   }
                 }
+								# weitere Optionen
+                if($optionen[1] != ''){   
+                  $further_options = explode(' ', $optionen[1]);      # die weiteren Optionen exploden (opt1 opt2 opt3)
+                  for($k = 0; $k < count($further_options); $k++){
+                    if(strpos($further_options[$k], 'layer_id') !== false){     #layer_id=XX bietet die Möglichkeit hier eine Layer_ID zu definieren, für die man einen neuen Datensatz erzeugen kann
+                      $attributes['subform_layer_id'][$i] = array_pop(explode('=', $further_options[$k]));
+                      $layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
+                      $attributes['subform_layer_privileg'][$i] = $layer['privileg'];
+                    }
+                    elseif($further_options[$k] == 'embedded'){       # Subformular soll embedded angezeigt werden
+                      $attributes['embedded'][$i] = true;
+                    }
+                  }
+                }
+              }
+            }
+          }break;
+					
+					case 'Autovervollständigungsfeld' : {
+            if($attributes['options'][$i] != ''){
+              if(strpos(strtolower($attributes['options'][$i]), "select") === 0){     # SQl-Abfrage wie select attr1 as value, atrr2 as output from table1
+                $optionen = explode(';', $attributes['options'][$i]);  # SQL; weitere Optionen
+                $attributes['options'][$i] = $optionen[0];
+								if($query_result != NULL){									
+									for($k = 0; $k < count($query_result); $k++){
+										$sql = $attributes['options'][$i];
+										$value = $query_result[$k][$attributes['name'][$i]];
+										if($value != ''){
+											$sql = 'SELECT * FROM ('.$sql.') as foo WHERE value = \''.$value.'\'';
+											$ret=$database->execSQL($sql,4,0);
+											if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
+											$rs = pg_fetch_array($ret[1]);
+											$attributes['enum_output'][$i][$k] = $rs['output'];
+										}
+									}
+								}
+								# weitere Optionen
                 if($optionen[1] != ''){   
                   $further_options = explode(' ', $optionen[1]);      # die weiteren Optionen exploden (opt1 opt2 opt3)
                   for($k = 0; $k < count($further_options); $k++){
