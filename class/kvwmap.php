@@ -1117,6 +1117,9 @@ class GUI {
 					if($dbStyle['gap'] != '') {
 	          $style->set('gap', $dbStyle['gap']);
 	        }
+					if($dbStyle['initialgap'] != '') {
+            $style->set('initialgap', $dbStyle['initialgap']);
+          }
 					if($dbStyle['linecap'] != '') {
 	          $style->set('linecap', constant(MS_CJC_.strtoupper($dbStyle['linecap'])));
 	        }
@@ -1228,6 +1231,9 @@ class GUI {
           if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
           $style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
         }
+				if($dbStyle['opacity'] != '') {		# muss nach color gesetzt werden
+					$style->set('opacity', $dbStyle['opacity']);
+				}
         if ($dbStyle['outlinecolor']!='') {
           $RGB=explode(" ",$dbStyle['outlinecolor']);
         	if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
@@ -4707,6 +4713,9 @@ class GUI {
 			if($dbStyle['gap'] != '') {
 				$style->set('gap', $dbStyle['gap']);
 			}
+			if($dbStyle['initialgap'] != '') {
+        $style->set('initialgap', $dbStyle['initialgap']);
+      }
 			if($dbStyle['linecap'] != '') {
 				$style->set('linecap', constant(MS_CJC_.strtoupper($dbStyle['linecap'])));
 			}
@@ -4742,6 +4751,9 @@ class GUI {
       $RGB=explode(" ",$dbStyle['backgroundcolor']);
       if($RGB[0] != '')$style->backgroundcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
     }
+		if($dbStyle['opacity'] != '') {		# muss nach color gesetzt werden
+			$style->set('opacity', $dbStyle['opacity']);
+		}
 		
     $image = $klasse->createLegendIcon(25,18);
     $filename = $this->map_saveWebImage($image,'jpeg');
@@ -15070,6 +15082,8 @@ class db_mapObj{
     if($formvars["pattern"] != ''){$sql.="pattern = '".$formvars["pattern"]."',";}else{$sql.="pattern = NULL,";}
   	if($formvars["geomtransform"] != ''){$sql.="geomtransform = '".$formvars["geomtransform"]."',";}else{$sql.="geomtransform = NULL,";}
 		if($formvars["gap"] != ''){$sql.="gap = ".$formvars["gap"].",";}else{$sql.="gap = NULL,";}
+		if($formvars["initialgap"] != ''){$sql.="initialgap = ".$formvars["initialgap"].",";}else{$sql.="initialgap = NULL,";}
+		if($formvars["opacity"] != ''){$sql.="opacity = ".$formvars["opacity"].",";}else{$sql.="opacity = NULL,";}
 		if($formvars["linecap"] != ''){$sql.="linecap = '".$formvars["linecap"]."',";}else{$sql.="linecap = NULL,";}
 		if($formvars["linejoin"] != ''){$sql.="linejoin = '".$formvars["linejoin"]."',";}else{$sql.="linejoin = NULL,";}
 		if($formvars["linejoinmaxsize"] != ''){$sql.="linejoinmaxsize = ".$formvars["linejoinmaxsize"].",";}else{$sql.="linejoinmaxsize = NULL,";}

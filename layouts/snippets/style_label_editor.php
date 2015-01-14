@@ -110,6 +110,7 @@ function save_style(style_id){
 	data+= '&color='+document.GUI.style_color.value;
 	data+= '&backgroundcolor='+document.GUI.style_backgroundcolor.value;
 	data+= '&outlinecolor='+document.GUI.style_outlinecolor.value;
+	data+= '&opacity='+document.GUI.style_opacity.value;
 	data+= '&minsize='+document.GUI.style_minsize.value;
 	data+= '&maxsize='+document.GUI.style_maxsize.value;
 	data+= '&angle='+document.GUI.style_angle.value;
@@ -123,6 +124,7 @@ function save_style(style_id){
   data+= '&pattern='+document.GUI.style_pattern.value;
   data+= '&geomtransform='+document.GUI.style_geomtransform.value;  
 	data+= '&gap='+document.GUI.style_gap.value;
+	data+= '&initialgap='+document.GUI.style_initialgap.value;
 	data+= '&linecap='+document.GUI.style_linecap.value;
 	data+= '&linejoin='+document.GUI.style_linejoin.value;
 	data+= '&linejoinmaxsize='+document.GUI.style_linejoinmaxsize.value;
