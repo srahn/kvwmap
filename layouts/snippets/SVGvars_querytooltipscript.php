@@ -249,13 +249,12 @@ $SVGvars_querytooltipscript .= '
 					tooltipstate = "request_sent";
 					for(i = 0; i < layerset.length; i++){
 						if(layerset[i] != undefined && layerset[i].checked){
-							querylayer = "&qLayer"+layernumber[i]+"=1";
-							querylayer_id = layernumber[i];
+							querylayer += "&qLayer"+layernumber[i]+"=1";
 						}
 					}
 					counter++;
 					path = mousex+","+mousey+";"+mousex+","+mousey;
-					top.ahah("index.php", "go=tooltip_query&INPUT_COORD="+path+"&CMD=ppquery"+querylayer+"&querylayer_id="+querylayer_id+"&counter="+counter, new Array(top.document.GUI.result, \'\'), new Array(\'setvalue\', \'execute_function\'));
+					top.ahah("index.php", "go=tooltip_query&INPUT_COORD="+path+"&CMD=ppquery"+querylayer+"&counter="+counter, new Array(top.document.GUI.result, \'\'), new Array(\'setvalue\', \'execute_function\'));
 				}
 				oldmousex = mousex;
 				oldmousey = mousey;
