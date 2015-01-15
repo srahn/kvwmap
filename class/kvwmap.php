@@ -11695,6 +11695,7 @@ class GUI {
         $anzObj = count($layer['shape']);
         for($k = 0; $k < $anzObj; $k++) {
           $attribcount = 0;
+					$highlight_geom .= $layer['shape'][$k]['highlight_geom'].' ';
           for($j = 0; $j < count($attributes['name']); $j++){
             if($attributes['tooltip'][$j]){
 							if($attributes['alias'][$j] == '')$attributes['alias'][$j] = $attributes['name'][$j];
@@ -11758,7 +11759,7 @@ class GUI {
         }
       }
       # highlighting-Geometrie anfügen
-      $output .= '||| '.$this->qlayerset[0]['shape'][0]['highlight_geom'];
+      $output .= '||| '.$highlight_geom;
       echo umlaute_javascript(umlaute_html($output)).'~showtooltip(top.document.GUI.result.value, '.$showdata.');';
     }
   }
