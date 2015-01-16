@@ -152,7 +152,7 @@
   function tooltip_query($rect){
 		$showdata = 'true';
     $this->mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-    $this->queryrect = $rect;		$layerset = $this->user->rolle->getLayer('');    $anzLayer=count($layerset);
+    $this->queryrect = $rect;		$layerset = $this->user->rolle->getLayer('');		$layerset = array_reverse($layerset);    $anzLayer=count($layerset);
     $map=ms_newMapObj('');
     $map->set('shapepath', SHAPEPATH);		$found = false;
     for ($i=0;$i<$anzLayer;$i++) {			if($found)break;		# wenn in einem Layer was gefunden wurde, abbrechen			if($this->formvars['qLayer'.$layerset[$i]['Layer_ID']]=='1' AND ($layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] > $this->map_scaledenom) AND ($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] < $this->map_scaledenom)){
@@ -775,7 +775,7 @@
       else{
         $sql.=')';
       }
-    }
+    }		$sql.=' ORDER BY ul.drawingorder';
     #echo $sql.'<br>';
     $this->debug->write("<p>file:users.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);

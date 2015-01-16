@@ -11521,6 +11521,7 @@ class GUI {
     $this->mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->queryrect = $rect;
 		$layerset = $this->user->rolle->getLayer('');
+		$layerset = array_reverse($layerset);
     $anzLayer=count($layerset);
     $map=ms_newMapObj('');
     $map->set('shapepath', SHAPEPATH);
