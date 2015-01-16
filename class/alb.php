@@ -2125,34 +2125,37 @@ class ALB {
 	            $pdf->addText($col0,$row-=24,$fontSize,'Bestand');
 	            $pdf->addText($col0,$row-12,$fontSize,str_repeat("=",7));
 	
-	            for ($b=0;$b<count($flst->Buchungen);$b++) {
-	              # Seitenumbruch wenn erforderlich
-	              if($row<60) {
-	                # Seitenumbruch
-	                $seite++;
-	                # aktuelle Seite abschließen
-	                $pdf->addText($col9_1,$row-=24,$fontSize,'Forts. Seite '.$seite);
-	                # neue Seite beginnen
-	                $pageid=$pdf->newPage();
-	                $pagecount[$f] = $pagecount[$f] + 1;
-	                if ($wasserzeichen) {
-	                  $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
-	                }
-	                $row=825; # 812 -> 825 2007-04-02 Schmidt
-	                $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
-	                $pdf->addText($col0,$row-=24,$fontSize,'Bestand');
-	                $pdf->addText($col0,$row-12,$fontSize,str_repeat("=",7));
-	              }
-	
-	              # Ausgabe der Zeile für die Bestandbezeichnung
-	              $BestandStr =$flst->Buchungen[$b]['bezirk'].'-'.intval($flst->Buchungen[$b]['blatt']);
-	              $BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
-	              $BestandStr.=' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
-	              $BestandStr.=' ('.$flst->Buchungen[$b]['buchungsart'].')';
-	              $BestandStr.=' '.$flst->Buchungen[$b]['bezeichnung'];
-	              $pdf->addText($col2_1,$row-=12,$fontSize,$BestandStr);
-	
-	            } # ende Schleife Bestand
+							for ($g=0;$g<count($flst->Grundbuecher);$g++) {
+	              $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],1);
+								for ($b=0;$b<count($flst->Buchungen);$b++) {
+									# Seitenumbruch wenn erforderlich
+									if($row<60) {
+										# Seitenumbruch
+										$seite++;
+										# aktuelle Seite abschließen
+										$pdf->addText($col9_1,$row-=24,$fontSize,'Forts. Seite '.$seite);
+										# neue Seite beginnen
+										$pageid=$pdf->newPage();
+										$pagecount[$f] = $pagecount[$f] + 1;
+										if ($wasserzeichen) {
+											$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
+										}
+										$row=825; # 812 -> 825 2007-04-02 Schmidt
+										$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+										$pdf->addText($col0,$row-=24,$fontSize,'Bestand');
+										$pdf->addText($col0,$row-12,$fontSize,str_repeat("=",7));
+									}
+		
+									# Ausgabe der Zeile für die Bestandbezeichnung
+									$BestandStr =$flst->Buchungen[$b]['bezirk'].'-'.intval($flst->Buchungen[$b]['blatt']);
+									$BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
+									$BestandStr.=' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
+									$BestandStr.=' ('.$flst->Buchungen[$b]['buchungsart'].')';
+									$BestandStr.=' '.$flst->Buchungen[$b]['bezeichnung'];
+									$pdf->addText($col2_1,$row-=12,$fontSize,$BestandStr);
+		
+								} # ende Schleife Bestand
+							}
 	          } # ende Ausgabe Bestandsnachweis Formular 30
 	          break;
 	        } # end of switch for Bestandsnachweis
