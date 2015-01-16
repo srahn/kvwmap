@@ -12729,14 +12729,12 @@ class GUI {
     $refmappixsize=$refmapwidthm/$this->reference_map->reference->width;
     $refmapxposm=$this->reference_map->reference->extent->minx+$refmappixsize*$this->formvars['refmap_x'];
     $refmapyposm=$this->reference_map->reference->extent->maxy-$refmappixsize*$this->formvars['refmap_y'];
-    $halfmapwidthm=($this->map->extent->maxx-$this->map->extent->minx)/2;
-    $halfmapheight=($this->map->extent->maxy-$this->map->extent->miny)/2;
-    $zoommaxx=$refmapxposm+$halfmapwidthm;
-    $zoomminx=$refmapxposm-$halfmapwidthm;
-    $zoommaxy=$refmapyposm+$halfmapheight;
-    $zoomminy=$refmapyposm-$halfmapheight;
-		$newextent=ms_newRectObj();
-		$newextent->setextent($zoomminx,$zoomminy,$zoommaxx,$zoommaxy);
+				
+		$point = ms_newPointObj();
+	  $point->setXY($refmapxposm, $refmapyposm);
+		
+		#$newextent=ms_newRectObj();
+		#$newextent->setextent($zoomminx,$zoomminy,$zoommaxx,$zoommaxy);
 		if($this->ref['epsg_code'] != $this->user->rolle->epsg_code){
 			if(MAPSERVERVERSION < '600'){
 				$projFROM = ms_newprojectionobj("init=epsg:".$this->ref['epsg_code']);
@@ -12746,9 +12744,17 @@ class GUI {
 				$projFROM = $this->reference_map->projection;
 				$projTO = $this->map->projection;
 			}
-			$newextent->project($projFROM, $projTO);
+			$point->project($projFROM, $projTO);
 		}
-    $this->map->setextent($newextent->minx,$newextent->miny,$newextent->maxx,$newextent->maxy);
+		
+		$halfmapwidthm=($this->map->extent->maxx-$this->map->extent->minx)/2;
+    $halfmapheight=($this->map->extent->maxy-$this->map->extent->miny)/2;
+    $zoommaxx=$point->x + $halfmapwidthm;
+    $zoomminx=$point->x - $halfmapwidthm;
+    $zoommaxy=$point->y + $halfmapheight;
+    $zoomminy=$point->y - $halfmapheight;
+		
+    $this->map->setextent($zoomminx,$zoomminy,$zoommaxx,$zoommaxy);
     $oPixelPos=ms_newPointObj();
     $oPixelPos->setXY($this->map->width/2,$this->map->height/2);
     $this->map->zoompoint(1,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
