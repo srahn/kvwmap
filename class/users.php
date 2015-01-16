@@ -2353,8 +2353,8 @@ class rolle {
 				$sql.=', format="'.$format.'"';
 				$sql .= ', log_number = "'.$log_number[$i].'"';
 				$sql .= ', wz = "'.$wz.'"';
-				$sql .= ', numpages = '.$pagecount[$i];
-				#echo $sql;
+				$sql .= ', numpages = '.$pagecount;
+				#echo $sql.'<br>';
 				$ret=$this->database->execSQL($sql,4, 1);
 				if ($ret[0]) {
 					# Fehler bei Datenbankanfrage

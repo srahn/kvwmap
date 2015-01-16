@@ -10007,6 +10007,23 @@ class GUI {
 			$ALB=new ALB($this->pgdatabase);
 			$nasfile = $ALB->create_nas_request_xml_file($FlurstKennz, $Grundbuchbezirk, $Grundbuchblatt, $Buchnungstelle, $formnummer);
 			$sessionid = $ALB->dhk_call_login(DHK_CALL_URL, DHK_CALL_USER, DHK_CALL_PASSWORD);
+			
+			switch($formnummer){
+				case 'MV0700' : {   
+					$log_number = array($Grundbuchbezirk.'-'.$Grundbuchblatt);
+				}break;
+				
+				case 'MV0600' : {   
+					$log_number = array($Buchnungstelle);
+				}break;
+				
+				default : {
+					$log_number = $FlurstKennz;
+				}break;
+			}
+			$currenttime=date('Y-m-d H:i:s',time());
+      $this->user->rolle->setConsumeALB($currenttime, substr($formnummer, 3, 3),$log_number, 0, 1);
+			
 			print $ALB->dhk_call_getPDF(DHK_CALL_URL, $sessionid, $nasfile);
 		}
 	}
