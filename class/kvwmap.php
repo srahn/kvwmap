@@ -7145,11 +7145,11 @@ class GUI {
           if($this->formvars['embedded'] == ''){
             $ret = $layerdb->execSQL($sql,4, 1);
             if(!$ret[0]){
+							$result = pg_fetch_row($ret[1]);
             	if(pg_affected_rows($ret[1]) > 0){
               	$this->formvars['value_'.$table['tablename'].'_oid'] = pg_last_oid($ret[1]);
             	}
-            	else{
-            		$result = pg_fetch_row($ret[1]);
+            	else{            		
             		$ret[0] = 1;
             	}
             }
@@ -7199,7 +7199,8 @@ class GUI {
       }
       else{
         if($this->formvars['close_window'] == ""){
-          showMessage('Eintrag erfolgreich!');
+					if($result[0] != '')showAlert('Eintrag erfolgreich.\n'.$result[0]);
+          else showMessage('Eintrag erfolgreich!');
         }
         if($this->formvars['weiter_erfassen'] == 1){
         	$this->formvars['firstpoly'] = '';
@@ -10623,9 +10624,9 @@ class GUI {
 					$layerset[$layer_id] = $this->user->rolle->getLayer($layer_id);
 				}
         if($layer_id != $old_layer_id AND $tablename != ''){
-          $layerdb = $mapdb->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
-          $layerdb->setClientEncoding();
-					$attributes = $mapdb->read_layer_attributes($layer_id, $layerdb, NULL);
+          $layerdb[$layer_id] = $mapdb->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
+          $layerdb[$layer_id]->setClientEncoding();
+					$attributes = $mapdb->read_layer_attributes($layer_id, $layerdb[$layer_id], NULL);
           #$filter = $mapdb->getFilter($layer_id, $this->Stelle->id);		# siehe unten
           $old_layer_id = $layer_id;
         } 
@@ -10638,7 +10639,7 @@ class GUI {
                 $name_array=explode('.',basename($_files[$form_fields[$i]]['name']));
                 $datei_name=$name_array[0];
                 $datei_erweiterung=array_pop($name_array);
-                $doc_path = $mapdb->getDocument_Path($layerset[$layer_id][0]['document_path'], $attributes['options'][$element[1]], $attributenames[$oid], $$attributevalues[$oid], $layerdb);
+                $doc_path = $mapdb->getDocument_Path($layerset[$layer_id][0]['document_path'], $attributes['options'][$element[1]], $attributenames[$oid], $$attributevalues[$oid], $layerdb[$layer_id]);
                 $nachDatei = $doc_path.'.'.$datei_erweiterung;
                 $eintrag = $nachDatei."&original_name=".$_files[$form_fields[$i]]['name'];
                 if($datei_name == 'delete')$eintrag = '';
@@ -10691,46 +10692,54 @@ class GUI {
             } # end of default case
           } # end of switch for type
 					if($eintrag !== NULL){
-						$updates[$tablename][$oid]['eintrag'][] = $eintrag;
-						$updates[$tablename][$oid]['attributename'][] = $attributname;
+						$updates[$layer_id][$tablename][$oid]['eintrag'][] = $eintrag;
+						$updates[$layer_id][$tablename][$oid]['attributename'][] = $attributname;
 					}          
         }
       }
     }
-		foreach($updates as $tablename => $table){
-			foreach($table as $oid => $row){
-				if(count($row['attributename']) > 0){
-					$sql = "UPDATE ".$tablename." SET ";
-					for($i = 0; $i < count($row['attributename']); $i++){
-						if($i > 0)$sql .= ', ';
-						$sql .= $row['attributename'][$i]." = ";
-						if($row['eintrag'][$i] == 'NULL')$sql .= 'NULL';
-						else $sql .= "'".$row['eintrag'][$i]."'";
-					}
-					$sql .= " WHERE oid = ".$oid;
-					#if($filter != ''){							# erstmal wieder rausgenommen, weil der Filter sich auf Attribute beziehen kann, die zu anderen Tabellen gehören
-					#  $sql .= " AND ".$filter;
-					#}
-					$this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
-					$ret = $layerdb->execSQL($sql,4, 1);			
-					if(!$ret[0]){
-						if(pg_affected_rows($ret[1]) == 0){
-							$result = pg_fetch_row($ret[1]);
-							$ret[0] = 1;
-							$success = false;
+		if($updates != NULL){
+			foreach($updates as $layer_id => $layer){
+				foreach($layer as $tablename => $table){
+					foreach($table as $oid => $row){
+						if(count($row['attributename']) > 0){
+							$sql = "UPDATE ".$tablename." SET ";
+							for($i = 0; $i < count($row['attributename']); $i++){
+								if($i > 0)$sql .= ', ';
+								$sql .= $row['attributename'][$i]." = ";
+								if($row['eintrag'][$i] == 'NULL')$sql .= 'NULL';
+								else $sql .= "'".$row['eintrag'][$i]."'";
+							}
+							$sql .= " WHERE oid = ".$oid;
+							#if($filter != ''){							# erstmal wieder rausgenommen, weil der Filter sich auf Attribute beziehen kann, die zu anderen Tabellen gehören
+							#  $sql .= " AND ".$filter;
+							#}
+							$this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
+							$ret = $layerdb[$layer_id]->execSQL($sql,4, 1);			
+							if(!$ret[0]){
+								$result = pg_fetch_row($ret[1]);
+								if(pg_affected_rows($ret[1]) == 0){
+									$ret[0] = 1;
+									$success = false;
+								}
+							}
 						}
 					}
 				}
 			}
+			if($success == false){
+				showAlert('Änderung fehlgeschlagen.\n'.$result[0]);
+			}
+			else{
+				if($this->formvars['close_window'] == ""){
+					if($result[0] != '')showAlert('Änderung erfolgreich.\n'.$result[0]);
+					else showMessage('Änderung erfolgreich');
+				}
+			}
 		}
-    if($success == false){
-			showAlert('Änderung fehlgeschlagen.\n'.$result[0]);
-    }
-    else{
-      if($this->formvars['close_window'] == ""){
-        showMessage('Änderung erfolgreich');
-      }
-    }
+		else{
+			showMessage('Keine Änderung.');
+		}
     if($this->formvars['embedded'] != ''){    # wenn es ein Datensatz aus einem embedded-Formular ist, muss das entsprechende Attribut des Hauptformulars aktualisiert werden
       header('Content-type: text/html; charset=UTF-8');
       $attributenames[0] = $this->formvars['targetattribute'];
@@ -11516,11 +11525,17 @@ class GUI {
     $this->layerfromMapfile();
   }
 
-    function tooltip_query($rect){
+  function tooltip_query($rect){
 		$showdata = 'true';
     $this->mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->queryrect = $rect;
-		$layerset = $this->user->rolle->getLayer('');
+		if($this->formvars['querylayer_id'] != '' AND $this->formvars['querylayer_id'] != 'undefined'){
+			$layerset = $this->user->rolle->getLayer($this->formvars['querylayer_id']);
+			$this->formvars['qLayer'.$this->formvars['querylayer_id']] = '1';
+		}
+		else{
+			$layerset = $this->user->rolle->getLayer('');
+		}		
 		$layerset = array_reverse($layerset);
     $anzLayer=count($layerset);
     $map=ms_newMapObj('');

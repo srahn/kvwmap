@@ -1,6 +1,6 @@
 
 <script language="JavaScript" type="text/javascript">
-<!--
+
 send_selected_flurst = function(go, formnummer, wz, target){
 	currentform.go_backup.value=currentform.go.value;
   var semi = false;
@@ -31,8 +31,6 @@ backto = function(go){
   currentform.submit();
 }
 
-
--->
 </script>
 <br>
 <a name="anfang"></a>

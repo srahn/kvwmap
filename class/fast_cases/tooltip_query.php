@@ -152,7 +152,7 @@
   function tooltip_query($rect){
 		$showdata = 'true';
     $this->mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-    $this->queryrect = $rect;		$layerset = $this->user->rolle->getLayer('');		$layerset = array_reverse($layerset);    $anzLayer=count($layerset);
+    $this->queryrect = $rect;		if($this->formvars['querylayer_id'] != '' AND $this->formvars['querylayer_id'] != 'undefined'){			$layerset = $this->user->rolle->getLayer($this->formvars['querylayer_id']);			$this->formvars['qLayer'.$this->formvars['querylayer_id']] = '1';		}		else{			$layerset = $this->user->rolle->getLayer('');		}				$layerset = array_reverse($layerset);    $anzLayer=count($layerset);
     $map=ms_newMapObj('');
     $map->set('shapepath', SHAPEPATH);		$found = false;
     for ($i=0;$i<$anzLayer;$i++) {			if($found)break;		# wenn in einem Layer was gefunden wurde, abbrechen			if($this->formvars['qLayer'.$layerset[$i]['Layer_ID']]=='1' AND ($layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] > $this->map_scaledenom) AND ($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] < $this->map_scaledenom)){
