@@ -362,15 +362,15 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  } break;
 
 	  # Eigentuemerfortführung
-	  case 'export_ESAF64' : {
+	  case 'Adressaenderungen_Export' : {
 		$GUI->checkCaseAllowed($go);
-		$GUI->export_ESAF64();
+		$GUI->export_Adressaenderungen();
 	  } break;
 
 	  # Eigentuemerfortführung
-	  case 'export_ESAF64_Exportieren' : {
-			$GUI->checkCaseAllowed('export_ESAF64');
-			$GUI->export_ESAF64_exportieren();
+	  case 'Adressaenderungen_Export_Exportieren' : {
+			$GUI->checkCaseAllowed('Adressaenderungen_Export');
+			$GUI->export_Adressaenderungen_exportieren();
 	  } break;
 
 	  # Eigentuemerfortführung

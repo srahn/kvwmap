@@ -2693,19 +2693,19 @@ class GUI {
     echo $point->x.'~'.$point->y;
  }
 
-  function export_ESAF64(){
+  function export_Adressaenderungen(){
     $this->titel='Adressänderungen der Eigentümer exportieren';
-    $this->main='export_esaf64.php';
+    $this->main='Adressaenderungen_Export.php';
     $this->output();
   }
 
-  function export_ESAF64_exportieren(){
-		include_(CLASSPATH.'esaf.php');
-    $esaf = new esaf($this->pgdatabase);
-    $esaf->delete_old_entries();
-    $esaf->read_eigentuemer_data();
-    $this->filename = $esaf->export_into_file();
-    $this->export_ESAF64();
+  function export_Adressaenderungen_exportieren(){
+		include_(CLASSPATH.'adressaenderungen.php');
+    $adressaenderungen = new adressaenderungen($this->pgdatabase);
+    $adressaenderungen->delete_old_entries();
+    $adressaenderungen->read_eigentuemer_data();
+    $this->filename = $adressaenderungen->export_into_file();
+    $this->export_Adressaenderungen();
   }
 
   function export_ESAF64_bereiningen(){

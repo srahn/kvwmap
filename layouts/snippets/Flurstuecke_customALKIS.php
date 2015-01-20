@@ -553,9 +553,9 @@ backto = function(go){
               if(substr($Eigentuemerliste[$e]->Name_bearb[0], strlen($Eigentuemerliste[$e]->Name_bearb[0])-1) == ','){
                 $Eigentuemerliste[$e]->Name_bearb[0] = substr($Eigentuemerliste[$e]->Name_bearb[0], 0, strlen($Eigentuemerliste[$e]->Name_bearb[0])-1);
               }
-              if(false AND $this->Stelle->isFunctionAllowed('Adressaenderungen')) {
+              if($this->Stelle->isFunctionAllowed('Adressaenderungen')) {
                     $eigentuemer = new eigentuemer(NULL, NULL, $this->pgdatabase);
-                    $adressaenderungen =  $eigentuemer->getAdressaenderungen($Eigentuemerliste[$e]->Name[0], $Eigentuemerliste[$e]->Name[1], $Eigentuemerliste[$e]->Name[2], $Eigentuemerliste[$e]->Name[3]);
+                    $adressaenderungen =  $eigentuemer->getAdressaenderungen($Eigentuemerliste[$e]->anschrift_gml_id);
                     $aendatum=substr($adressaenderungen['datum'],0,10);
               }
               if ($adressaenderungen['user_id'] != '') {
@@ -572,30 +572,30 @@ backto = function(go){
                       }
                     }
                   if ($adressaenderungen['user_id'] != '') {
-                echo '<span style="font-size:90%;"><span class="fett"><u>Aktualisierte Adresse ('.$aendatum.' - '.$user->Name.'):</u></span><br>';
-                    if($adressaenderungen['neu_name3'] == ''){
-                      echo '&nbsp;&nbsp;<span class="fett">(Name3 leer)</span><br>';
-                    }
-                    else{
-                      echo '&nbsp;&nbsp;<span class="fett">'.$adressaenderungen['neu_name3'].'</span><br>';
-                    }
-                    if($adressaenderungen['neu_name4'] == ''){
-                      echo '&nbsp;&nbsp;<span class="fett">(Name4 leer)</span><br>';
-                    }
-                    else{
-                      echo '&nbsp;&nbsp;<span class="fett">'.$adressaenderungen['neu_name4'].'</span></span><br>';
-                    }
+                echo '<span class="fett"><u>Aktualisierte Adresse ('.$aendatum.' - '.$user->Name.'):</u></span><br>';
+                    #if($adressaenderungen['strasse'] == ''){
+                    #  echo '&nbsp;&nbsp;<span class="fett">(Strasse leer)</span><br>';
+                    #}
+                    #else{
+                      echo '&nbsp;&nbsp;<span class="fett">'.$adressaenderungen['strasse'].' '.$adressaenderungen['hausnummer'].'</span><br>';
+                    #}
+                    #if($adressaenderungen['neu_name4'] == ''){
+                    #  echo '&nbsp;&nbsp;<span class="fett">(Name4 leer)</span><br>';
+                    #}
+                    #else{
+                      echo '&nbsp;&nbsp;<span class="fett">'.$adressaenderungen['postleitzahlpostzustellung'].' '.$adressaenderungen['ort_post'].'</span><br>';
+                    #}
                   }
                   ?>
                   </td>
                   <td valign="bottom">
                   <?
-                  if(false AND $this->Stelle->isFunctionAllowed('Adressaenderungen')){
+                  if($this->Stelle->isFunctionAllowed('Adressaenderungen')){
                     if ($adressaenderungen['user_id'] == '') {
-                      echo '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">'; ?>&nbsp;<a target="_blank" href="index.php?go=neuer_Layer_Datensatz&close_after_saving=true&selected_layer_id=<? echo LAYER_ID_ADRESSAENDERUNGEN; ?>&attributenames[0]=name1&attributenames[1]=name2&attributenames[2]=name3&attributenames[3]=name4&attributenames[4]=neu_name3&attributenames[5]=neu_name4&attributenames[6]=user_id&values[0]=<? echo urlencode($Eigentuemerliste[$e]->Name[0]); ?>&values[1]=<? echo urlencode($Eigentuemerliste[$e]->Name[1]); ?>&values[2]=<? echo urlencode($Eigentuemerliste[$e]->Name[2]); ?>&values[3]=<? echo urlencode($Eigentuemerliste[$e]->Name[3]); ?>&values[4]=<? echo urlencode($Eigentuemerliste[$e]->Name[2]); ?>&values[5]=<? echo urlencode($Eigentuemerliste[$e]->Name[3]); ?>&values[6]=<? echo $this->user->id ?>">Adresse aktualisieren</a>
+                      echo '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">'; ?>&nbsp;<a target="_blank" href="index.php?go=neuer_Layer_Datensatz&close_after_saving=true&selected_layer_id=<? echo LAYER_ID_ADRESSAENDERUNGEN; ?>&attributenames[0]=ort_post&attributenames[1]=postleitzahlpostzustellung&attributenames[2]=strasse&attributenames[3]=hausnummer&attributenames[4]=gml_id&values[0]=<? echo urlencode($Eigentuemerliste[$e]->ort_post); ?>&values[1]=<? echo urlencode($Eigentuemerliste[$e]->postleitzahlpostzustellung); ?>&values[2]=<? echo urlencode($Eigentuemerliste[$e]->strasse); ?>&values[3]=<? echo urlencode($Eigentuemerliste[$e]->hausnummer); ?>&values[4]=<? echo urlencode($Eigentuemerliste[$e]->anschrift_gml_id); ?>">Adresse aktualisieren</a>
                   <?}
                     else {
-                      echo '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">'; ?>&nbsp;<a target="_blank" href="index.php?go=Layer-Suche_Suchen&close_after_saving=true&selected_layer_id=<? echo LAYER_ID_ADRESSAENDERUNGEN; ?>&value_name1=<? echo urlencode($Eigentuemerliste[$e]->Name[0]); ?>&operator_name1==&value_name2=<? echo urlencode($Eigentuemerliste[$e]->Name[1]); ?>&operator_name2==&value_name3=<? echo urlencode($Eigentuemerliste[$e]->Name[2]); ?>&operator_name3==&value_name4=<? echo urlencode($Eigentuemerliste[$e]->Name[3]); ?>&operator_name4==&attributenames[0]=user_id&values[0]=<? echo $this->user->id ?>">Adresse &auml;ndern</a>
+                      echo '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">'; ?>&nbsp;<a target="_blank" href="index.php?go=Layer-Suche_Suchen&close_after_saving=true&selected_layer_id=<? echo LAYER_ID_ADRESSAENDERUNGEN; ?>&value_gml_id=<? echo urlencode($Eigentuemerliste[$e]->anschrift_gml_id); ?>&operator_gml_id==&attributenames[0]=user_id&values[0]=<? echo $this->user->id ?>">Adresse &auml;ndern</a>
                   <?}
                   }?>
                     </td>

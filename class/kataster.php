@@ -1349,21 +1349,9 @@ class eigentuemer {
     }
   }
 
-  function getAdressaenderungen($name1, $name2, $name3, $name4) {
-    $sql ="SELECT neu_name3, neu_name4, user_id, datum FROM alb_g_namen_temp";
-    $sql.=" WHERE 1=1 ";
-    if($name1 != ''){
-    	$sql.= "AND name1 = '".addslashes($name1)."' ";
-    }
-    if($name2 != ''){
-    	$sql.= "AND name2 = '".addslashes($name2)."' ";
-    }
-    if($name3 != ''){
-    	$sql.= "AND name3 = '".addslashes($name3)."' ";
-    }
-    if($name4 != ''){
-    	$sql.= "AND name4 = '".addslashes($name4)."' ";
-    }
+  function getAdressaenderungen($gml_id) {
+    $sql ="SELECT * FROM alkis.ax_anschrift_temp";
+    $sql.=" WHERE gml_id = '".$gml_id."'";
     #echo $sql;
     $query=pg_query($sql);
   	$ret=$this->database->execSQL($sql, 4, 0);

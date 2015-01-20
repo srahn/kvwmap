@@ -29,5 +29,5 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 		</td>
   </tr>
 </table>
-<input type="hidden" name="go" value="export_ESAF64">
+<input type="hidden" name="go" value="Adressaenderungen_Export">
 
