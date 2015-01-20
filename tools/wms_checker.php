@@ -32,12 +32,12 @@ function checkStatus($request){
 	$response = curl_exec($ch);
 	$header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
 	$header = substr($response, 0, $header_size);
+	$data = substr($response, $header_size);
   if(!$response){
     $status = false;
     $info = "timeout";
   }
   else{
-    $data = $response;
     if(strpos($header, '404 Not Found') !== false){
       $status = false;
       $info = 404;
@@ -61,7 +61,7 @@ function getExceptionCode($data){
   xml_parse_into_struct($parser, $data, $values, $index);
   xml_parser_free($parser);
   $exceptionIndexList = $index["SERVICEEXCEPTION"];
-  if(count($exceptionIndexList) > 1){
+  if(count($exceptionIndexList) > 0){
 		foreach($exceptionIndexList as $ExceptionIndex){
 			$shortErrorMessage = $values[$ExceptionIndex]["value"];
 			return $shortErrorMessage;  
