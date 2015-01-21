@@ -33,9 +33,6 @@ class adressaenderungen {
     $this->debug=$debug;
     $this->database = $database;
 		$this->predata = '<?xml version="1.0" encoding="UTF-8"?>
-<!-- DSR  4.78 (DSIX 4.78z27 (VC10) IM                   28-Jul-2014 14:24:21) -->
-<!-- Verzeichnis P:\DAVID\DAVID4\SYSTEM\SCHEMATA_601\SCHEMATAKUNDE -->
-<!-- Schemadatei NAS-Operationen.xsd -->
 <AX_Fortfuehrungsauftrag
 	xmlns="http://www.adv-online.de/namespaces/adv/gid/6.0"
 	xmlns:adv="http://www.adv-online.de/namespaces/adv/gid/6.0"
@@ -62,7 +59,8 @@ class adressaenderungen {
 			<standard>true</standard>
 		</AA_Koordinatenreferenzsystemangaben>
 	</koordinatenangaben>
-	<geaenderteObjekte>';
+	<geaenderteObjekte>
+		<wfs:Transaction version="1.0.0" service="WFS">';
 	
 		$this->postdata = '<verarbeitungsart>2000</verarbeitungsart>
 	<geometriebehandlung>false</geometriebehandlung>
@@ -119,8 +117,7 @@ class adressaenderungen {
 			$currenttime=date('Y-m-d_H_i_s',time());
 			fwrite($fp, $this->predata.chr(10));
       for($i = 0; $i < count($this->eigentuemerliste); $i++){
-        $data = '<wfs:Transaction version="1.0.0" service="WFS">
-			<wfsext:Replace vendorId="AdV" safeToIgnore="false">
+        $data = '<wfsext:Replace vendorId="AdV" safeToIgnore="false">
 				<AX_Anschrift gml:id="'.$this->eigentuemerliste[$i]['gml_id'].'">
 					<gml:identifier codeSpace="http://www.adv-online.de/">urn:adv:oid:'.$this->eigentuemerliste[$i]['gml_id'].'</gml:identifier>
 					<lebenszeitintervall>
@@ -165,13 +162,13 @@ class adressaenderungen {
 					</qualitaetsangaben>
 				</AX_Anschrift>
 				<ogc:Filter>
-					<ogc:FeatureId fid="DEMVAL73Z0003V8J20141113T175641Z" />
+					<ogc:FeatureId fid="'.$this->eigentuemerliste[$i]['gml_id'].str_replace(':', '', str_replace('-', '', $this->eigentuemerliste[$i]['beginnt'])).'" />
 				</ogc:Filter>
-			</wfsext:Replace>
-		</wfs:Transaction>'.chr(10);
+			</wfsext:Replace>'.chr(10);
         fwrite($fp, $data);
       }
-			$antragsnummer = '</geaenderteObjekte>
+			$antragsnummer = '</wfs:Transaction>
+			</geaenderteObjekte>
 	<profilkennung>mvaaa</profilkennung>
 	<antragsnummer>'.$this->auftragsnummer.'</antragsnummer>
 	<auftragsnummer>'.$this->auftragsnummer.'_'.$currenttime.'</auftragsnummer>';
