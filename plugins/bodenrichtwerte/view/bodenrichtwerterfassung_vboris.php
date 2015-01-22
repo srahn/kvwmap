@@ -123,11 +123,14 @@ function buildwktpolygonfromsvgpath(svgpath){
 	return wkt;
 }
 
-function update_require_attribute(attributes, layer_id, value){
-	// attributes ist eine Liste von zu aktualisierenden Attributen und value der ausgewaehlte Wert
+update_require_attribute = function(attributes, layer_id, value){
+	// attributes ist eine Liste von zu aktualisierenden Attributen, k die Nummer des Datensatzes und attributenamesarray ein Array aller Attribute im Formular
+	var attributenames = 'gemeinde';
+	var attributevalues = value;
 	attribute = attributes.split(',');
 	for(i = 0; i < attribute.length; i++){
-		ahah("index.php", "go=get_select_list&layer_id="+layer_id+"&attribute="+attribute[i]+"&value="+value+"&type=select-one", new Array(document.getElementsByName(attribute[i])[0]), new Array('sethtml'));
+		action = 'sethtml';
+		ahah("index.php", "go=get_select_list&layer_id="+layer_id+"&attribute="+attribute[i]+"&attributenames="+attributenames+"&attributevalues="+attributevalues+"&type=select-one", new Array(document.getElementsByName(attribute[i])[0]), new Array(action));
 	}
 }
 
