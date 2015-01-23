@@ -1375,12 +1375,20 @@ class GUI {
             $style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
             $style->set('offsetx', $dbLabel['backgroundshadowsizex']);
 						$style->set('offsety', $dbLabel['backgroundshadowsizey']);
+						if ($dbLabel['buffer']!='') {
+							$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+							$style->set('width', $dbLabel['buffer']);
+						}
           }
 					if ($dbLabel['backgroundcolor']!='') {
             $RGB=explode(" ",$dbLabel['backgroundcolor']);
 						$style = new styleObj($label);
 						$style->setGeomTransform('labelpoly');
-            $style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+            $style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);						
+						if ($dbLabel['buffer']!='') {
+							$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+							$style->set('width', $dbLabel['buffer']);
+						}
           }
 					
           $label->angle = $dbLabel['angle'];
