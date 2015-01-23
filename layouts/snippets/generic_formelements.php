@@ -144,7 +144,7 @@
 											$oid = $dataset[$tablename_.'_oid'];
 											$index = $attributes['indizes'][$attribute_foreign_keys[$f]];
 											if($attributes['form_element_type'][$attribute_foreign_keys[$f]] == 'Autovervollständigungsfeld'){
-												$fieldname_[$f] = $layer_id.';'.$attributes['real_name'][$name_].';'.$tablename_.';'.$oid.';Autovervollständigungsfeld;0;varchar';
+												$fieldname_[$f] = $layer_id.';'.$attributes['real_name'][$name_].';'.$tablename_.';'.$oid.';Autovervollständigungsfeld;'.$attributes['nullable'][$index].';'.$attributes['type'][$index];
 												if($dataset[$name_] == '')$dataset[$name_] = $this->formvars[$fieldname_[$f]];
 												if($attributes['subform_layer_privileg'][$index] != '0')$this->editable = 'true';
 												$datapart .= Autovervollstaendigungsfeld($layer_id, $name_, $attributes['alias'][$name_], $fieldname_[$f], $dataset[$name_], $attributes['enum_output'][$index][$k], $attributes['privileg'][$name_], $k, $oid, $attributes['subform_layer_id'][$index], $attributes['subform_layer_privileg'][$index], $attributes['embedded'][$index], $lock[$k], $fontsize);

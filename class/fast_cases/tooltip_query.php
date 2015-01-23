@@ -1070,7 +1070,7 @@
   function add_attribute_values($attributes, $database, $query_result, $withvalues = true){
     # Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
     for($i = 0; $i < count($attributes['name']); $i++){
-      if($attributes['constraints'][$i] != '' AND $attributes['constraints'][$i] != 'PRIMARY KEY'){  # das sind die Auswahlmöglichkeiten, die durch die Tabellendefinition in Postgres fest vorgegeben sind
+      if($attributes['constraints'][$i] != '' AND !in_array($attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))){  # das sind die Auswahlmöglichkeiten, die durch die Tabellendefinition in Postgres fest vorgegeben sind
       	$attributes['enum_value'][$i] = explode(',', str_replace("'", "", $attributes['constraints'][$i]));
       	$attributes['enum_output'][$i] = $attributes['enum_value'][$i];
       }

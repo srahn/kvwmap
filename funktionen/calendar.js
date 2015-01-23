@@ -49,11 +49,17 @@ function CalendarJS() {
 	            this.tableHead = this.createTableHead();
 	            this.tableFoot = this.createTableFoot();
 	            this.attributefield = document.getElementById(elementid);
-	            this.parEl = document.getElementsByName('calendar_'+elementid)[0].parentNode;
+							dummy = document.getElementById('calendar_'+elementid);
+	            this.parEl = dummy.parentNode;
 	            this.show();
 	            if (!initDate) this.checkDate();
         	}
         },
+				
+				this.destroy = function(){
+					this.attributefield.calendar = false;
+					this.removeElement(this.table);
+				},
  
         this.checkDate = function() {
             var self = this;
@@ -84,9 +90,10 @@ function CalendarJS() {
         },
         		
         this.show = function() {
-            if(this.table)this.removeElement(this.table);
+            if(this.table)this.destroy();
             this.monthCell.firstChild.replaceData(0, this.monthCell.firstChild.nodeValue.length, this.monthname[this.mm]+"\u00a0"+this.yy);
             this.table = document.createElement("table");
+						this.table.onclick = function(event){event.stopPropagation();};
             this.table.appendChild( this.createTableBody() );
             this.table.appendChild( this.tableHead );
             //table.appendChild( this.tableFoot );
@@ -206,6 +213,7 @@ function CalendarJS() {
                 td.table = this.table;
                 td.onclick = function(e) {
                     this.setDate( this.attributefield, this.dd, this.mm+1, this.yy);
+										this.attributefield.calendar = false;
                     this.removeElement(this.table);
                 };
                 try { td.style.cursor = "pointer"; } catch(e){ td.style.cursor = "hand"; }
@@ -253,8 +261,7 @@ function CalendarJS() {
 	    	if(m.length == 1){
 	    		m = "0"+m;
 	    	}
-	    	field.value=d+"."+m+"."+y;
-	    	field.calendar = false;
+	    	field.value=d+"."+m+"."+y;	    	
 	    	field.onchange();
 	    },
 	

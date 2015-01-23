@@ -19,7 +19,7 @@
 		$layer['Name'] = $layer['alias'];
 	}
 ?>
-<div id="layer">
+<div id="layer" onclick="remove_calendar();">
 
 <h2><? echo $layer['Name']; ?></h2>
 <?
@@ -75,9 +75,9 @@
 								if($attributes['type'][$j] == 'date' OR $attributes['type'][$j] == 'timestamp' OR $attributes['type'][$j] == 'timestamptz'){
 								  echo '<td align="right"><a href="javascript:;" title=" (TT.MM.JJJJ) '.$attributes['tooltip'][$j].'" ';
 								  if($attributes['privileg'][$j] == '1' AND !$lock[$k]){
-									echo 'onclick="new CalendarJS().init(\''.$attributes['name'][$j].'_'.$k.'\');"';
+									echo 'onclick="add_calendar(event, \''.$attributes['name'][$j].'_'.$k.'\');"';
 								  }
-								  echo '><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div id="calendar"><a name="calendar_'.$attributes['name'][$j].'_'.$k.'"></div></td>';
+								  echo '><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id=calendar_'.$attributes['name'][$j].'_'.$k.'"></div></td>';
 								}
 								echo '</td></tr></table>';
 								echo '</td>';

@@ -21,7 +21,7 @@
 		$layer['Name'] = $layer['alias'];
 	}
 ?>
-<div id="layer">
+<div id="layer" onclick="remove_calendar();">
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 	<tr>
 		<td width="95%" align="center"><h2>&nbsp;&nbsp;<? echo $layer['Name']; ?></h2></td>
@@ -164,9 +164,9 @@
 							if($attributes['type'][$j] == 'date'){
 							  $datapart .= '<td align="right"><a href="javascript:;" title=" (TT.MM.JJJJ) '.$attributes['tooltip'][$j].'" ';
 							  if($attributes['privileg'][$j] == '1' AND !$lock[$k]){
-							  	$datapart .= 'onclick="new CalendarJS().init(\''.$attributes['name'][$j].'_'.$k.'\');"';
+							  	$datapart .= 'onclick="add_calendar(event, \''.$attributes['name'][$j].'_'.$k.'\');"';
 							  }
-							  $datapart .= '><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div id="calendar"><a name="calendar_'.$attributes['name'][$j].'_'.$k.'"></div></td>';
+							  $datapart .= '><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id="calendar_'.$attributes['name'][$j].'_'.$k.'"></div></td>';
 							}
 							
 							$datapart .= '</td></tr></table>';

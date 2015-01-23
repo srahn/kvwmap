@@ -2176,7 +2176,7 @@ class GUI {
 		$ret=$layerdb->execSQL($sql,4, 0);
 		if(!$ret[0]){
 			while ($rs=pg_fetch_row($ret[1])){
-				if($layerattributes['constraints'][$rs[0]] != 'PRIMARY KEY') $attributes[] = $rs[0];
+				if(!in_array($layerattributes['constraints'][$rs[0]], array('PRIMARY KEY', 'UNIQUE'))) $attributes[] = $rs[0];
 			}
 		}
 				
@@ -7255,7 +7255,7 @@ class GUI {
 		      for($i = 0; $i < count($form_fields); $i++){
 			      if($form_fields[$i] != ''){
 			        $element = explode(';', $form_fields[$i]);
-			        if($element[3] == $oid AND $layerset[0]['attributes']['constraints'][$element[1]] != 'PRIMARY KEY'){		# Primärschlüssel werden nicht mitübergeben
+			        if($element[3] == $oid AND !in_array($layerset[0]['attributes']['constraints'][$element[1]],  array('PRIMARY KEY', 'UNIQUE'))){		# Primärschlüssel werden nicht mitübergeben
 				        $element[3] = '';
 				        $this->formvars[implode(';', $element)] = $this->formvars[$form_fields[$i]];
 			        }
@@ -13861,7 +13861,7 @@ class db_mapObj{
   function add_attribute_values($attributes, $database, $query_result, $withvalues = true){
     # Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
     for($i = 0; $i < count($attributes['name']); $i++){
-      if($attributes['constraints'][$i] != '' AND $attributes['constraints'][$i] != 'PRIMARY KEY'){  # das sind die Auswahlmöglichkeiten, die durch die Tabellendefinition in Postgres fest vorgegeben sind
+			if($attributes['constraints'][$i] != '' AND !in_array($attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))){  # das sind die Auswahlmöglichkeiten, die durch die Tabellendefinition in Postgres fest vorgegeben sind
       	$attributes['enum_value'][$i] = explode(',', str_replace("'", "", $attributes['constraints'][$i]));
       	$attributes['enum_output'][$i] = $attributes['enum_value'][$i];
       }
