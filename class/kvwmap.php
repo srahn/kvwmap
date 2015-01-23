@@ -8231,7 +8231,7 @@ class GUI {
 	      $this->formvars['fromwhere'] .= ' where (1=1)';
 	    }
 			###################### über Checkboxen aus der Sachdatenanzeige des GLE ausgewählt ###############
-			if($this->formvars['anzahl'] == ''){	    
+			if($this->formvars['all'] == ''){	    
 				$anzahl = 0;
 				$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
 				# Daten abfragen
