@@ -89,7 +89,7 @@
 				  	if($this->attributes['type'][$i] == 'geometry'){
 				  		echo'<option value="Geometrie" selected>Geometrie</option>';
 				  	}
-				  	elseif($this->attributes['constraints'][$i] != '' AND $this->attributes['constraints'][$i] != 'PRIMARY KEY'){
+				  	elseif($this->attributes['constraints'][$i] != '' AND !in_array($this->attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))){
 				  		echo '<option value="Auswahlfeld" selected>Auswahlfeld</option>';
 				  	}
 				  	else{
@@ -157,7 +157,7 @@
 				  </td>
 				  <td>&nbsp;</td>
 				  <td align="left" valign="top">';
-				  if($this->attributes['constraints'][$i] != '' AND $this->attributes['constraints'][$i] != 'PRIMARY KEY'){
+				  if($this->attributes['constraints'][$i] != '' AND !in_array($this->attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))){
 				  	echo '
 				  	<input disabled style="width:180px" name="options_'.$this->attributes['name'][$i].'" type="text" value="'.$this->attributes['constraints'][$i].'">';
 				  }

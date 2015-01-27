@@ -1054,6 +1054,7 @@ class pgdatabase_alkis {
 			$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
 			$sql.="LEFT JOIN alkis.ax_namensnummer n ON n.istbestandteilvon = g.gml_id AND n.beschriebderrechtsgemeinschaft IS NOT NULL ";
 			if(!$hist_alb) $sql.= $this->build_temporal_filter(array('n'));
+			$sql.="WHERE 1=1 ";
 		}
 		else{
 			$sql.="FROM alkis.ax_buchungsblatt g ";
@@ -1065,14 +1066,14 @@ class pgdatabase_alkis {
 			$sql.="LEFT JOIN alkis.ax_flurstueck f ON f.istgebucht = s.gml_id OR f.istgebucht = ANY(s.an) OR f.istgebucht = ANY(s2.an) AND s2.gml_id = ANY(s.an) ";
 			$sql.="LEFT JOIN alkis.ax_gemarkung gem ON f.land = gem.land AND f.gemarkungsnummer = gem.gemarkungsnummer ";
 			$sql.="LEFT JOIN alkis.ax_buchungsstelle_buchungsart art ON s.buchungsart = art.wert ";		
-		}
-		$sql.="WHERE 1=1 ";
-    if ($Bezirk!='') {
+			$sql.="WHERE 1=1 ";
+			if ($Bezirk!='') {
       $sql.=" AND b.schluesselgesamt=".$Bezirk;
-    }
-    if ($Blatt!='') {
-      $sql.=" AND g.buchungsblattnummermitbuchstabenerweiterung='".$Blatt."'";
-    }
+			}
+			if ($Blatt!='') {
+				$sql.=" AND g.buchungsblattnummermitbuchstabenerweiterung='".$Blatt."'";
+			}
+		}
     if ($FlurstKennz!='') {
       $sql.=" AND f.flurstueckskennzeichen='".$FlurstKennz."'";
     }
@@ -1590,17 +1591,17 @@ class pgdatabase_alkis {
   
   function getFlurstuecksKennzByGemeindeIDs($Gemeinde_ID, $FlurstKennz){
     $sql ="SELECT f.flurstueckskennzeichen as flurstkennz FROM alkis.ax_flurstueck AS f, alkis.gemeinde_gemarkung AS g_g";
-    $sql.=" WHERE f.gemarkungsnummer=g_g.gemarkung AND g_g.gemeinde IN ('".$Gemeinde_ID[0]['ID']."'";
+    $sql.=" WHERE f.gemarkungsnummer=g_g.gemarkung AND g_g.land::text||g_g.regierungsbezirk::text||lpad(g_g.kreis::text, 2, '0')||lpad(g_g.gemeinde::text, 3, '0') IN ('".$Gemeinde_ID[0]['ID']."'";
     for($i = 1; $i < count($Gemeinde_ID); $i++){
       $sql .= ", '".$Gemeinde_ID[$i]['ID']."'";
     }
     $sql .= ")";
-    $sql.=" AND f.flurstueckskennzeichen IN ('".$FlurstKennz[0]."'";
-		$sql.= $this->build_temporal_filter(array('f'));
+    $sql.=" AND f.flurstueckskennzeichen IN ('".$FlurstKennz[0]."'";		
     for ($i=1;$i<count($FlurstKennz);$i++) {
       $sql.=", '".$FlurstKennz[$i]."'";
     }
     $sql.=")";
+		$sql.= $this->build_temporal_filter(array('f'));
     $this->debug->write("<p>postgresql.php getFlurstuecksKennzByGemeindeIDs() Abfragen erlaubten Flurstï¿½ckskennzeichen nach Gemeindeids:<br>".$sql,4);
     $query=pg_query($sql);
     if ($query==0) {
@@ -3220,8 +3221,9 @@ class pgdatabase_alkis {
   function getGrundbuchbezirkslisteByGemkgIDs($gemkg_ids) {
 		$sql ="SELECT DISTINCT b.schluesselgesamt as grundbuchbezschl, b.bezeichnung ";
 		$sql.="FROM alkis.ax_flurstueck f ";	
-		$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON f.istgebucht = ANY(s2.an) ";
-		$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR f.istgebucht = ANY(s.an) OR f.istgebucht = ANY(s2.an) AND s2.gml_id = ANY(s.an) ";
+		//$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON f.istgebucht = ANY(s2.an) ";
+		//$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR f.istgebucht = ANY(s.an) OR f.istgebucht = ANY(s2.an) AND s2.gml_id = ANY(s.an) ";
+		$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
 		$sql.="WHERE (g.blattart = 1000 OR g.blattart = 2000 OR g.blattart = 3000) ";
