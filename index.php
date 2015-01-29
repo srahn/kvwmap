@@ -1364,14 +1364,15 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  } break;
 
 	  case "ZoomToFlst" : {
-		$GUI->loadMap('DataBase');
-		$explodedFlurstKennz = explode(';',$GUI->formvars['FlurstKennz']);
-		$GUI->zoomToALKFlurst($explodedFlurstKennz,10);
-		$currenttime=date('Y-m-d H:i:s',time());
-		$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
-		$GUI->drawMap();
-		$GUI->saveMap('');
-		$GUI->output();
+			$GUI->loadMap('DataBase');
+			if(strpos($GUI->formvars['FlurstKennz'], '/') !== false)$GUI->formvars['FlurstKennz'] = formatFlurstkennzALKIS($GUI->formvars['FlurstKennz']);
+			$explodedFlurstKennz = explode(';',$GUI->formvars['FlurstKennz']);
+			$GUI->zoomToALKFlurst($explodedFlurstKennz,10);
+			$currenttime=date('Y-m-d H:i:s',time());
+			$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+			$GUI->drawMap();
+			$GUI->saveMap('');
+			$GUI->output();
 	  } break;
 
 	  case "Full_Extent" : {

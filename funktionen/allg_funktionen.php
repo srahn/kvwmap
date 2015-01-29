@@ -53,21 +53,25 @@ if(!function_exists('mb_substr')){		# Workaround, falls es die Funktion nicht gi
 }
 
 
-function formatFlurstkennzALKIS($FlurstKennz){
-	$explosion = explode('-', $FlurstKennz);
-  $gem = trim($explosion[0]);
-  $flur = trim($explosion[1]);
-  $flurst = trim($explosion[2]);
-  $explosion = explode('/',$flurst);
-  $zaehler = $explosion[0];
-  $nenner = $explosion[1];
-  if($nenner != '000.00'){
-  	$explosion = explode('.',$nenner);
-  	$vorkomma = '0'.$explosion[0];
-  }
-  $FlurstKennz = $gem.$flur.$zaehler.$vorkomma;
-  $FlurstKennz = str_pad($FlurstKennz, 20, '_', STR_PAD_RIGHT);
-  return $FlurstKennz;
+function formatFlurstkennzALKIS($FlurstKennzListe){
+	$Flurstuecke = explode(';', $FlurstKennzListe);
+	for($i = 0; $i < count($Flurstuecke); $i++){
+		$FlurstKennz = $Flurstuecke[$i];
+		$explosion = explode('-', $FlurstKennz);
+		$gem = trim($explosion[0]);
+		$flur = trim($explosion[1]);
+		$flurst = trim($explosion[2]);
+		$explosion = explode('/',$flurst);
+		$zaehler = $explosion[0];
+		$nenner = $explosion[1];
+		if($nenner != '000.00'){
+			$explosion = explode('.',$nenner);
+			$vorkomma = '0'.$explosion[0];
+		}
+		$FlurstKennz = $gem.$flur.$zaehler.$vorkomma;
+		$Flurstuecke[$i] = str_pad($FlurstKennz, 20, '_', STR_PAD_RIGHT);
+	}
+  return implode(';', $Flurstuecke);
 }
 
 function formatFlurstkennzALK($FlurstKennz){
