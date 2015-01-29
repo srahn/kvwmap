@@ -1874,7 +1874,7 @@ class rolle {
 		# Eintragen des Status der Layer, 1 angezeigt oder 0 nicht.
 		for ($i=0;$i<count($this->layerset);$i++) {
 			#echo $i.' '.$this->layerset[$i]['Layer_ID'].' '.$formvars['thema'.$this->layerset[$i]['Layer_ID']].'<br>';
-			$aktiv_status = $formvars['thema'.$this->layerset[$i]['Layer_ID']];
+			$aktiv_status = $formvars['thema'.$this->layerset[$i]['Layer_ID']] + $formvars['thema'.$this->layerset[$i]['requires']];		// entweder ist der Layer selber an oder sein requires-Layer
 			if(isset($aktiv_status)){
 				$sql ='UPDATE u_rolle2used_layer SET aktivStatus="'.$aktiv_status.'"';
 				$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
@@ -1884,7 +1884,7 @@ class rolle {
 				
 				#Anne
 				#neu eintragen der deaktiven Klassen
-				if($aktiv_status!=0){
+				if($aktiv_status != 0){
 					$sql = 'SELECT Class_ID FROM classes WHERE Layer_ID='.$this->layerset[$i]['Layer_ID'].';';
 					$query = mysql_query($sql);
 					while($row = @mysql_fetch_array($query)){
