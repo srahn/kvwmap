@@ -1712,7 +1712,7 @@ class Festpunkte {
         }
       } # ende Datenquelle für Festpunkte alk-Tabellen
       else {
-        $sql ="SELECT p.*,st_asText(p.the_geom) AS wkt_the_geom FROM nachweisverwaltung.".$this->tabellenname." AS p";
+        $sql ="SELECT p.*,st_asText(p.the_geom) AS wkt_the_geom FROM nachweisverwaltung.fp_punkte AS p";
         if ($antrag_nr!='') {
           $sql.=",nachweisverwaltung.fp_punkte2antraege AS p2a";
         }
