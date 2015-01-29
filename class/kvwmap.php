@@ -7087,7 +7087,7 @@ class GUI {
         $sql = "INSERT INTO ".$table['tablename']." (";
         for($i = 0; $i < count($table['attributname']); $i++){
           if(($table['type'][$i] != 'Text_not_saveable' AND $table['type'][$i] != 'Auswahlfeld_not_saveable' AND $table['type'][$i] != 'SubFormPK' AND $table['type'][$i] != 'SubFormFK' AND $this->formvars[$table['formfield'][$i]] != '') 
-          OR $table['type'][$i] == 'Time' OR $table['type'][$i] == 'User' OR $table['type'][$i] == 'UserID' OR $table['type'][$i] == 'Stelle' OR $table['type'][$i] == 'Geometrie'){
+          OR $table['type'][$i] == 'Checkbox' OR $table['type'][$i] == 'Time' OR $table['type'][$i] == 'User' OR $table['type'][$i] == 'UserID' OR $table['type'][$i] == 'Stelle' OR $table['type'][$i] == 'Geometrie'){
             if($table['type'][$i] == 'Geometrie'){
               if($this->formvars['geomtype'] == 'POINT' AND $this->formvars['loc_x'] != ''){
                 $sql .= $table['attributname'][$i].", ";
@@ -7119,7 +7119,7 @@ class GUI {
         	elseif($table['type'][$i] == 'Stelle'){                       # Typ "Stelle"
             $sql.= "'".$this->Stelle->Bezeichnung."', ";
           }
-          elseif($table['type'][$i] != 'Text_not_saveable' AND $table['type'][$i] != 'Auswahlfeld_not_saveable' AND $table['type'][$i] != 'SubFormPK' AND $table['type'][$i] != 'SubFormFK' AND $this->formvars[$table['formfield'][$i]] != ''){
+          elseif($table['type'][$i] != 'Text_not_saveable' AND $table['type'][$i] != 'Auswahlfeld_not_saveable' AND $table['type'][$i] != 'SubFormPK' AND $table['type'][$i] != 'SubFormFK' AND ($this->formvars[$table['formfield'][$i]] != '' OR $table['type'][$i] == 'Checkbox')){
           	if($table['type'][$i] == 'Zahl'){                       # Typ "Zahl"
 	            $this->formvars[$table['formfield'][$i]] = str_replace(' ', '', $this->formvars[$table['formfield'][$i]]);		# bei Zahlen das Leerzeichen (Tausendertrenner) entfernen
 	          }
@@ -10031,7 +10031,7 @@ class GUI {
 				}break;
 			}
 			$currenttime=date('Y-m-d H:i:s',time());
-      $this->user->rolle->setConsumeALB($currenttime, substr($formnummer, 3, 3),$log_number, 0, 1);
+      $this->user->rolle->setConsumeALB($currenttime, substr($formnummer, 3, 3),$log_number, 0, 'NULL');
 			
 			print $ALB->dhk_call_getPDF(DHK_CALL_URL, $sessionid, $nasfile);
 		}
