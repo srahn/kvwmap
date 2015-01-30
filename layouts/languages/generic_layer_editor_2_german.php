@@ -7,8 +7,7 @@
  $strdelete="löschen";
  $strSelectedDatasets="ausgewählte Datensätze";
  $strAllDatasets="alle gefundenen Datensätze";
- $strCSVExport="in CSV-Datei exportieren";
- $strShapeExport="in Shape-Datei exportieren";
+ $strExport="exportieren";
  $strzoomtodatasets="in Karte anzeigen";
  $strClassify="klassifiziert nach";
  $strPrint="drucken";
@@ -17,8 +16,7 @@
  $strSelectThisDataset="Datensatz auswählen";
  $strNoMatch="Zu diesem Thema wurden keine Objekte gefunden!";
  $strDeleteThisDataset="Datensatz löschen";
- $strCSVExportThis="Datensatz in CSV exportieren";
- $strUKOExportThis="Geometrie ins UKO-Format exportieren";
+ $strExportThis="Datensatz exportieren";
  $strUseForNewDataset="Für neuen Datensatz verwenden";
  $strShowPK="anzeigen";
  $strNewPK="neu";

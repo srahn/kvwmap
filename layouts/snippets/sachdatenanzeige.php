@@ -194,3 +194,4 @@ for($i=0;$i<$anzLayer;$i++){
 <input name="newpathwkt" type="hidden" value="<?php echo $this->formvars['newpathwkt']; ?>">
 <input name="result" type="hidden" value="">
 <input name="firstpoly" type="hidden" value="<?php echo $this->formvars['firstpoly']; ?>">
+<input name="export_format" type="hidden" value="<?php echo $this->formvars['export_format']; ?>">

@@ -144,23 +144,14 @@ delete_document = function(attributename){
 	}
 }
 
-csv_export = function(layer_id){
+daten_export = function(layer_id, anzahl, format){
 	currentform.all.value = document.getElementById('all_'+layer_id).value;
 	if(currentform.all.value || check_for_selection(layer_id)){				// entweder alle gefundenen oder die ausgewaehlten
+		currentform.anzahl.value = anzahl;
 		currentform.chosen_layer_id.value = layer_id;
 		currentform.go_backup.value = currentform.go.value;
-		currentform.go.value = 'generischer_csv_export';
-		currentform.submit();
-	}
-}
-
-shape_export = function(layer_id, anzahl){
-	currentform.all.value = document.getElementById('all_'+layer_id).value;
-	if(currentform.all.value || check_for_selection(layer_id)){				// entweder alle gefundenen oder die ausgewaehlten
-		currentform.anzahl.value = anzahl;		
-		currentform.chosen_layer_id.value = layer_id;
-		currentform.go_backup.value = currentform.go.value;
-		currentform.go.value = 'SHP_Export';
+		currentform.go.value = 'Daten_Export';
+		currentform.export_format.value = format;
 		currentform.submit();
 	}
 }

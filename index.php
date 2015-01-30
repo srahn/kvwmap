@@ -973,14 +973,14 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 		$GUI->shp_import_speichern();
 	  } break;
 
-	  case 'SHP_Export' : {
-		$GUI->checkCaseAllowed('SHP_Export');
-		$GUI->shp_export();
+	  case 'Daten_Export' : {
+			$GUI->checkCaseAllowed('Daten_Export');
+			$GUI->daten_export();
 	  } break;
 
-	  case 'SHP_Export_Shape-Datei erzeugen' : {
-		$GUI->checkCaseAllowed('SHP_Export');
-		$GUI->shp_export_exportieren();
+	  case 'Daten_Export_Exportieren' : {
+			$GUI->checkCaseAllowed('Daten_Export');
+			$GUI->daten_export_exportieren();
 	  } break;
 
 	  case 'Layer-Suche_Suchmaske_generieren' : {

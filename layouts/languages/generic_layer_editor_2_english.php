@@ -7,8 +7,7 @@
  $strdelete="delete";
  $strSelectedDatasets="selected records";
  $strAllDatasets="all records found";
- $strCSVExport="export into CSV-File";
- $strShapeExport="export into Shape-File";
+ $strExport="export";
  $strzoomtodatasets="show in map";
  $strClassify="classified by";
  $strPrint="print";
@@ -18,7 +17,7 @@
  $strNoMatch="No objects found in this layer!";
  $strDeleteThisDataset="delete record";
  $strUseForNewDataset="use for new record";
- $strCSVExportThis="export record into CSV";
+ $strExportThis="export record";
  $strShowPK="show";
  $strNewPK="new";
  $strShowFK="show";

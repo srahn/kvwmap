@@ -28,12 +28,12 @@ function buildwktpolygonfromsvgpath(svgpath){
 	return wkt;
 }
 
-function export_shape(){
+function data_export(){
 	if(document.GUI.selected_layer_id.value != ''){
 		if(document.GUI.newpath.value != ''){
 			document.GUI.newpathwkt.value = buildwktpolygonfromsvgpath(document.GUI.newpath.value);
 		}
-		document.GUI.go_plus.value = 'Shape-Datei erzeugen';
+		document.GUI.go_plus.value = 'Exportieren';
 		document.GUI.submit();
 	}
 	else{
@@ -47,17 +47,7 @@ function export_shape(){
 <table border="0" cellpadding="1" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>" width="100%">
   <tr> 
     <td align="center" colspan="8" height="40" valign="middle"><h2><?php echo $strTitle; ?></h2></td>
-  </tr>
-  
-  <?if($this->shape->formvars['filename'] != ''){?>
-  <tr>
-  	<td></td><td colspan="6">Shape-Dateien erzeugt. <a href="<? echo $this->shape->formvars['filename'] ?>">Herunterladen</a></td>
-  </tr>
-  <tr>
-  	<td>&nbsp;</td>
-  </tr>	
-  <?}?>
-  
+  </tr>  
   <tr>
   	<td>&nbsp;</td>
   	<td colspan="6" width="100%">
@@ -67,22 +57,25 @@ function export_shape(){
 			    <td style="border-top:1px solid #C3C7C3">
 					  transformieren nach:
 			    </td>
+					<td style="border-top:1px solid #C3C7C3">
+					  Format:
+			    </td>
 			    <td style="border-bottom:1px solid #C3C7C3;border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3" rowspan="2">
-			     	<input class="button" name="create" type="button" onclick="export_shape();" value="<?php echo $strButtonGenerateShapeData; ?>">
+			     	<input class="button" name="create" type="button" onclick="data_export();" value="<?php echo $strButtonGenerateShapeData; ?>">
 			    </td>
 			  </tr>
 			  <tr>
 			    <td valign="top" style="border-bottom:1px solid #C3C7C3;border-left:1px solid #C3C7C3" colspan="2"> 
-			      <select style="width:250px" size="1"  name="selected_layer_id" onchange="document.GUI.submit();" <?php if(count($this->shape->layerdaten['ID'])==0){ echo 'disabled';}?>>
+			      <select style="width:250px" size="1"  name="selected_layer_id" onchange="document.GUI.submit();" <?php if(count($this->data_import_export->layerdaten['ID'])==0){ echo 'disabled';}?>>
 			      	<option value=""><?php echo $this->strPleaseSelect; ?></option>
 			        <?
-			    		for($i = 0; $i < count($this->shape->layerdaten['ID']); $i++){    			
+			    		for($i = 0; $i < count($this->data_import_export->layerdaten['ID']); $i++){    			
 			    			echo '<option';
-			    			if($this->shape->layerdaten['ID'][$i] == $this->shape->formvars['selected_layer_id']){
+			    			if($this->data_import_export->layerdaten['ID'][$i] == $this->data_import_export->formvars['selected_layer_id']){
 			    				echo ' selected';
 			    				$selectindex = $i;
 			    			}
-			    			echo ' value="'.$this->shape->layerdaten['ID'][$i].'">'.$this->shape->layerdaten['Bezeichnung'][$i].'</option>';
+			    			echo ' value="'.$this->data_import_export->layerdaten['ID'][$i].'">'.$this->data_import_export->layerdaten['Bezeichnung'][$i].'</option>';
 			    		}
 			    		?>
 			      </select> 
@@ -99,6 +92,15 @@ function export_shape(){
 							?>
 					  </select>
 			    </td>
+					<td style="border-bottom:1px solid #C3C7C3">
+					  <select name="export_format">
+					    <option <? if($this->formvars['export_format'] == 'Shape')echo 'selected '; ?> value="Shape">Shape</option>
+							<option <? if($this->formvars['export_format'] == 'GML')echo 'selected '; ?> value="GML">GML</option>
+							<option <? if($this->formvars['export_format'] == 'KML')echo 'selected '; ?> value="KML">KML</option>
+							<option <? if($this->formvars['export_format'] == 'UKO')echo 'selected '; ?> value="UKO">UKO</option>
+							<option <? if($this->formvars['export_format'] == 'CSV')echo 'selected '; ?> value="CSV">CSV</option>
+					  </select>
+			    </td>
 			  </tr>
 			  <tr>
 		     	<td style="border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3" colspan="5" width="100%">
@@ -110,17 +112,17 @@ function export_shape(){
 		      	<table cellpadding="1" cellspacing="0">
 		      		<tr>
 			      		<?
-				      		for($i = 0; $i < count($this->shape->attributes['name']); $i++){
+				      		for($i = 0; $i < count($this->data_import_export->attributes['name']); $i++){
 				      			if($i % 6 == 0){ echo '</tr><tr>';}	
 				      	?>
 			            <td>
-			            	<input type="checkbox" <? if($this->formvars['load'] OR $this->formvars['check_'.$this->shape->attributes['name'][$i]] == 1)echo 'checked'; ?> value="1" name="check_<? echo $this->shape->attributes['name'][$i]; ?>">
+			            	<input type="checkbox" <? if($this->formvars['load'] OR $this->formvars['check_'.$this->data_import_export->attributes['name'][$i]] == 1)echo 'checked'; ?> value="1" name="check_<? echo $this->data_import_export->attributes['name'][$i]; ?>">
 			            	<?php
-			              if($this->shape->attributes['alias'][$i] != ''){
-			                echo $this->shape->attributes['alias'][$i];
+			              if($this->data_import_export->attributes['alias'][$i] != ''){
+			                echo $this->data_import_export->attributes['alias'][$i];
 			              }
 			              else{
-			                echo $this->shape->attributes['name'][$i];
+			                echo $this->data_import_export->attributes['name'][$i];
 			              }
 			          ?></td>
 			          	<td>&nbsp;&nbsp;</td>
@@ -175,14 +177,14 @@ function export_shape(){
   </tr>
 </table>
 
-<input type="hidden" name="layer_name" value="<? echo umlaute_umwandeln($this->shape->layerdaten['Bezeichnung'][$selectindex]); ?>">
-<input type="hidden" name="selectstring_save" value="<? echo $this->shape->formvars['selectstring_save'] ?>">
+<input type="hidden" name="layer_name" value="<? echo umlaute_umwandeln($this->data_import_export->layerdaten['Bezeichnung'][$selectindex]); ?>">
+<input type="hidden" name="selectstring_save" value="<? echo $this->data_import_export->formvars['selectstring_save'] ?>">
 <input type="hidden" name="client_epsg" value="<? echo $this->user->rolle->epsg_code ?>">
-<input type="hidden" name="go" value="SHP_Export">
+<input type="hidden" name="go" value="Daten_Export">
 <input type="hidden" name="area" value="">
 <INPUT TYPE="hidden" NAME="columnname" VALUE="<? echo $this->formvars['columnname'] ?>">
 <INPUT TYPE="hidden" NAME="fromwhere" VALUE="<? echo $this->formvars['fromwhere']; ?>">
-<INPUT TYPE="hidden" NAME="export_columnname" VALUE="<? echo $this->shape->formvars['columnname'] ?>">
+<INPUT TYPE="hidden" NAME="export_columnname" VALUE="<? echo $this->data_import_export->formvars['columnname'] ?>">
 <input type="hidden" name="always_draw" value="<? echo $always_draw; ?>">
 
 

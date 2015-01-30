@@ -1,7 +1,6 @@
 ﻿<?php
- $strTitle="Shape-Export";
- $strSelectStatement="Select Statement";
+ $strTitle="Data-Export";
  $strButtonCutByPolygon="Cut by Polygon";
- $strButtonGenerateShapeData="Generate Shape data";
+ $strButtonGenerateShapeData="Export";
  
 ?>  

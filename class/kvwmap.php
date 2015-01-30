@@ -7963,119 +7963,6 @@ class GUI {
     //return TEMPPATH_REL.$imagename;
     //$this->output();
 	}
-
-  function generic_csv_export(){
-    $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-    $layerdb = $mapDB->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
-    $layerdb->setClientEncoding();
-    $path = $mapDB->getPath($this->formvars['chosen_layer_id']);
-    $privileges = $this->Stelle->get_attributes_privileges($this->formvars['chosen_layer_id']);
-    $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);    
-    $attributes = $mapDB->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, $privileges['attributenames']);
-    # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
-		$attributes = $mapDB->add_attribute_values($attributes, $layerdb, NULL, true);
-		
-		# order by rausnehmen
-  	$orderbyposition = strrpos(strtolower($newpath), 'order by');
-		$lastfromposition = strrpos(strtolower($newpath), 'from');
-		if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
-	  	$orderby = ' '.substr($newpath, $orderbyposition);
-	  	$newpath = substr($newpath, 0, $orderbyposition);
-  	}
-  	
-  	# group by rausnehmen
-		$groupbyposition = strpos(strtolower($newpath), 'group by');
-		if($groupbyposition !== false){
-			$groupby = ' '.substr($newpath, $groupbyposition);
-			$newpath = substr($newpath, 0, $groupbyposition);
-  	}
-
-    if($this->formvars['all'] != 'true'){                     // nur ausgewählte Datensätze abfragen
-      $checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
-      # Daten abfragen
-      $element = explode(';', $checkbox_names[0]);   #  check;table_alias;table;oid
-      $where = " AND ".$element[1].".oid IN (";
-      for($i = 0; $i < count($checkbox_names); $i++){
-        if($this->formvars[$checkbox_names[$i]] == 'on'){
-          $element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
-          $where = $where."'".$element[3]."',";
-        }
-      }
-      $where .= "0)";
-            
-      $sql.= $newpath.$where.$groupby.$orderby;
-      #echo $sql.'<br><br>';
-      $this->debug->write("<p>file:kvwmap class:generic_csv_export :",4);
-      $ret = $layerdb->execSQL($sql,4, 1);
-      if (!$ret[0]) {
-      	while ($rs=pg_fetch_array($ret[1])) {
-        	$result[] = $rs;
-      	}
-      }
-    }
-    else{                                           // alle Treffer abfragen
-      $sql = stripslashes($this->formvars['sql_'.$this->formvars['chosen_layer_id']]);
-      $this->debug->write("<p>file:kvwmap class:generic_csv_export :",4);
-      $ret = $layerdb->execSQL($sql,4, 1);
-      if (!$ret[0]) {
-        while ($rs=pg_fetch_array($ret[1])) {
-          $result[] = $rs;
-        }
-      }
-    }
-
-    # Spaltenüberschriften schreiben
-    # Excel is zu blöd für 'ID' als erstes Attribut
-    if($attributes['alias'][0] == 'ID'){
-      $attributes['alias'][0] = 'id';
-    }
-    if($attributes['name'][0] == 'ID'){
-      $attributes['name'][0] = 'id';
-    }
-    for($i = 0; $i < count($attributes['name']); $i++){
-    	if($attributes['type'][$i] != 'geometry' AND $attributes['name'][$i] != 'lock'){
-	      if($attributes['alias'][$i] != ''){
-	        $name = $attributes['alias'][$i];
-	      }
-	      else{
-	        $name = $attributes['name'][$i];
-	      }
-	      $csv .= $name.';';
-    	}
-    }
-    $csv .= chr(13).chr(10);
- 
-    # Daten schreiben
-    for($i = 0; $i < count($result); $i++){
-      for($j = 0; $j < count($attributes['name']); $j++){
-      	if($attributes['type'][$j] != 'geometry' AND $attributes['name'][$i] != 'lock'){
-      		$csv .= '"';
-	        if(in_array($attributes['type'][$j], array('numeric', 'float4', 'float8'))){
-	        	$result[$i][$attributes['name'][$j]] = str_replace('.', ",", $result[$i][$attributes['name'][$j]]);	
-	        }
-					if($attributes['type'][$j] == 'bool'){
-						$result[$i][$attributes['name'][$j]] = str_replace('t', "ja", $result[$i][$attributes['name'][$j]]);	
-						$result[$i][$attributes['name'][$j]] = str_replace('f', "nein", $result[$i][$attributes['name'][$j]]);
-					}
-	        $result[$i][$attributes['name'][$j]] = str_replace(';', ",", $result[$i][$attributes['name'][$j]]);
-	        $result[$i][$attributes['name'][$j]] = str_replace(chr(10), " ", $result[$i][$attributes['name'][$j]]);
-	        $result[$i][$attributes['name'][$j]] = str_replace(chr(13), "", $result[$i][$attributes['name'][$j]]);
-	        $csv .= $result[$i][$attributes['name'][$j]].'";';
-      	}
-      }
-      $csv .= chr(13).chr(10);
-    }
-    
-    $currenttime=date('Y-m-d H:i:s',time());
-    $this->user->rolle->setConsumeCSV($currenttime,$this->formvars['chosen_layer_id'],count($result));
-
-    ob_end_clean();
-    header("Content-type: application/vnd.ms-excel");
-    header("Content-disposition:  attachment; filename=".$this->user->id."_".$this->formvars['chosen_layer_id']."_export.csv");
-    header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-    header('Pragma: public');
-    print utf8_decode($csv);
-  }
 	  
   function uko_export(){
   	$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
@@ -8205,16 +8092,16 @@ class GUI {
     $this->output();
   }
 
-  function shp_export(){
-		include_once (CLASSPATH.'shape.php');
-    $this->titel='Shape-Export';
+  function daten_export(){
+		include_once (CLASSPATH.'data_import_export.php');
     if($this->formvars['chosen_layer_id'] != '')$this->formvars['selected_layer_id'] = $this->formvars['chosen_layer_id'];		# aus der Sachdatenanzeige des GLE
-    $this->main='shape_export.php';
+    $this->main='data_export.php';
     $saved_scale = $this->reduce_mapwidth(10);
 		$this->loadMap('DataBase');
 		if($_SERVER['REQUEST_METHOD'] == 'GET')$this->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
     $this->epsg_codes = read_epsg_codes($this->pgdatabase);
-    $this->shape = new shape();
+		$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
+    $this->data_import_export = new data_import_export();
   	if(!$this->formvars['layer_id']){
       $layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
       $this->formvars['layer_id'] = $layerset[0]['Layer_ID'];
@@ -8266,7 +8153,7 @@ class GUI {
     else{
       $this->formvars['load'] = true;
     }
-    $this->shape->shp_export($this->formvars, $this->Stelle, $this->mapDB);
+    $this->data_import_export->export($this->formvars, $this->Stelle, $this->mapDB);
     $this->saveMap('');
     $currenttime=date('Y-m-d H:i:s',time());
     $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
@@ -8274,11 +8161,11 @@ class GUI {
     $this->output();
   }
 
-  function shp_export_exportieren(){
-		include_(CLASSPATH.'shape.php');
-    $this->shape = new shape();
-    $this->formvars['filename'] = $this->shape->shp_export_exportieren($this->formvars, $this->Stelle, $this->user);
-    $this->shp_export();
+  function daten_export_exportieren(){
+		include_(CLASSPATH.'data_import_export.php');
+    $this->data_import_export = new data_import_export();
+    $this->formvars['filename'] = $this->data_import_export->export_exportieren($this->formvars, $this->Stelle, $this->user);
+    $this->daten_export();
   }
 
   function Attributeditor(){

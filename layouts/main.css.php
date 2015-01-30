@@ -261,16 +261,8 @@ a.menuered:hover {
 	background-image: url(../graphics/use_for_dataset.png);
 }
 
-.datensatz_exportieren_uko{
-	background-image: url(../graphics/datensatz_exportieren_uko.png);
-}
-
-.datensatz_exportieren_csv{
-	background-image: url(../graphics/datensatz_exportieren_csv.png);
-}
-
-.datensatz_exportieren_shp{
-	background-image: url(../graphics/datensatz_exportieren_shp.png);
+.datensatz_exportieren{
+	background-image: url(../graphics/datensatz_exportieren.png);
 }
 
 .drucken{
