@@ -55,7 +55,10 @@ function data_export(){
 			  <tr>
 			    <td style="border-top:1px solid #C3C7C3;border-left:1px solid #C3C7C3" colspan="2"><?php echo $this->strLayer; ?></td>
 			    <td style="border-top:1px solid #C3C7C3">
+						<? if($this->data_import_export->attributes['the_geom'] != ''){ ?>
 					  transformieren nach:
+						<? } ?>
+						&nbsp;
 			    </td>
 					<td style="border-top:1px solid #C3C7C3">
 					  Format:
@@ -81,6 +84,7 @@ function data_export(){
 			      </select> 
 			    </td>
 			    <td style="border-bottom:1px solid #C3C7C3">
+						<? if($this->data_import_export->attributes['the_geom'] != ''){ ?>
 					  <select name="epsg">
 					    <option value="">-- Auswahl --</option>
 					    <?
@@ -91,13 +95,17 @@ function data_export(){
 		      			}
 							?>
 					  </select>
+						<? } ?>
+						&nbsp;
 			    </td>
 					<td style="border-bottom:1px solid #C3C7C3">
 					  <select name="export_format">
+							<? if($this->data_import_export->attributes['the_geom'] != ''){ ?>
 					    <option <? if($this->formvars['export_format'] == 'Shape')echo 'selected '; ?> value="Shape">Shape</option>
 							<option <? if($this->formvars['export_format'] == 'GML')echo 'selected '; ?> value="GML">GML</option>
 							<option <? if($this->formvars['export_format'] == 'KML')echo 'selected '; ?> value="KML">KML</option>
 							<option <? if($this->formvars['export_format'] == 'UKO')echo 'selected '; ?> value="UKO">UKO</option>
+							<? } ?>
 							<option <? if($this->formvars['export_format'] == 'CSV')echo 'selected '; ?> value="CSV">CSV</option>
 					  </select>
 			    </td>
