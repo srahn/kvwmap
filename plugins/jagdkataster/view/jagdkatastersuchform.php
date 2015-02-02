@@ -27,9 +27,9 @@ function update_form(art){
 	}
 }
 
-function intersect_flurst(){
+check_for_selection = function(layer_id){
 	go = 'false';
-	checkbox_name_obj = document.getElementsByName('checkbox_names');
+	checkbox_name_obj = document.getElementsByName('checkbox_names_'+layer_id);
 	checkbox_name_string = checkbox_name_obj[0].value;
 	checkbox_names = checkbox_name_string.split('|');
 	for(i = 0; i < checkbox_names.length; i++){
@@ -39,9 +39,24 @@ function intersect_flurst(){
 	}
 	if(go == 'false'){
 		alert('Es wurde kein Datensatz ausgewählt.');
+		return false;
 	}
 	else{
+		return true;
+	}
+}
+
+function intersect_flurst(layer_id){
+	if(check_for_selection(layer_id)){
 		document.GUI.go.value = 'jagdkatastereditor_Flurstuecke_Listen';
+		document.GUI.submit();
+	}
+}
+
+function zoomto_datasets(layer_id){
+	if(check_for_selection(layer_id)){
+		document.GUI.go.value = 'zoomto_selected_datasets';
+		document.GUI.chosen_layer_id.value = layer_id;
 		document.GUI.submit();
 	}
 }
@@ -146,11 +161,11 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
         <td align="center">&nbsp;</td>
       </tr>
   <?php
-  for($i = 0; $i < $anz; $i++) {
-  	$checkbox_names .= 'check_'.$this->jagdbezirke[$i]['oid'].'|';
+  for($i = 0; $i < $anz; $i++) {	#check;table_alias;table;oid
+  	$checkbox_names .= 'check;;;'.$this->jagdbezirke[$i]['oid'].'|';
   ?>
       <tr>
-      	<td align="center"><input type="checkbox" name="check_<? echo $this->jagdbezirke[$i]['oid'] ?>"></td>
+      	<td align="center"><input type="checkbox" name="check;;;<? echo $this->jagdbezirke[$i]['oid'] ?>"></td>
         <td align="center"><?php if ($this->jagdbezirke[$i]['art']=='ejb' OR $this->jagdbezirke[$i]['art']=='ajb' OR $this->jagdbezirke[$i]['art']=='gjb') { echo $this->jagdbezirke[$i]['id']; } else { echo $this->jagdbezirke[$i]['jb_zuordnung']; } ?></td>
         <td align="center"><?php echo $this->jagdbezirke[$i]['name']; ?></td>
       	<td align="center"><?php echo $this->jagdbezirke[$i]['flaeche']; ?></td>
@@ -184,7 +199,11 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 	  <table width="100%" border="0" cellpadding="3" cellspacing="0">
 	  	<tr>
       	<td width="30" valign="top" align="center" valign="bottom"><img src="<? echo GRAPHICSPATH?>pfeil_unten-rechts.gif"></td>
-      	<td height="29" valign="bottom" colspan="5"><a href="javascript:intersect_flurst();">enthaltene Flurstücke</a>&nbsp;&nbsp;<span class="fett">! Achtung dies kann u.U. sehr lange dauern !</span>&nbsp;&nbsp;</td>
+      	<td height="29" valign="bottom" colspan="5"><a href="javascript:intersect_flurst(<? echo LAYER_ID_JAGDBEZIRKE; ?>);">enthaltene Flurstücke</a>&nbsp;&nbsp;<span class="fett">! Achtung dies kann u.U. sehr lange dauern !</span>&nbsp;&nbsp;</td>
+      </tr>
+			<tr>
+      	<td width="30" valign="top" align="center" valign="bottom"><img src="<? echo GRAPHICSPATH?>pfeil_unten-rechts.gif"></td>
+      	<td height="29" valign="bottom" colspan="5"><a href="javascript:zoomto_datasets(<? echo LAYER_ID_JAGDBEZIRKE; ?>);">in Karte anzeigen</a>&nbsp;<input type="checkbox" name="selektieren" value="1">selektieren</td>
       </tr>
       <tr>
       	<td colspan="6" align="center"><a href="javascript:csv_export();">CSV-Export</a></td>
@@ -196,5 +215,9 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 
 </table>
 
-<input type="hidden" name="checkbox_names" value="<? echo $checkbox_names; ?>">
+<input type="hidden" name="checkbox_names_<? echo LAYER_ID_JAGDBEZIRKE; ?>" value="<? echo $checkbox_names; ?>">
+<input type="hidden" name="chosen_layer_id" value="<? echo LAYER_ID_JAGDBEZIRKE; ?>">
+<input type="hidden" name="layer_columnname" value="the_geom">
+<input type="hidden" name="layer_tablename" value="jagdbezirke">
+
 

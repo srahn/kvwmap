@@ -210,8 +210,8 @@ class jagdkataster {
 			$checkbox_names = explode('|', $formvars['checkbox_names']);
 	    for($i = 0; $i < count($checkbox_names); $i++){
 	      if($formvars[$checkbox_names[$i]] == 'on'){
-	        $element = explode('_', $checkbox_names[$i]);     #  check_oid
-	        $oids[] = $element[1];
+	        $element = explode(';', $checkbox_names[$i]);     #  check;table_alias;table;oid
+					$oids[] = $element[3];
 	      }
 	    }
 		}
@@ -232,8 +232,8 @@ class jagdkataster {
 			$checkbox_names = explode('|', $formvars['checkbox_names']);
 	    for($i = 0; $i < count($checkbox_names); $i++){
 	      if($formvars[$checkbox_names[$i]] == 'on'){
-	        $element = explode('_', $checkbox_names[$i]);     #  check_oid
-	        $oids[] = $element[1];
+	        $element = explode(';', $checkbox_names[$i]);     #  check;table_alias;table;oid
+					$oids[] = $element[3];
 	      }
 	    }
 		}

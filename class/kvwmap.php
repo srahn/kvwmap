@@ -3563,7 +3563,7 @@ class GUI {
       
       $layer_id = $dbmap->newRollenLayer($this->formvars);
       
-      if($this->formvars['selektieren'] != 'true'){      # highlighten (gelb)
+      if($this->formvars['selektieren'] != '1'){      # highlighten (gelb)
       	# ------------ automatische Klassifizierung -------------------
       	if($this->formvars['klass_'.$this->formvars['chosen_layer_id']] != ''){
       		$count = 0;				
@@ -3635,8 +3635,10 @@ class GUI {
       	}  
       }
       else{         # selektieren (eigenen Style verwenden)
-        $class_id =  $dbmap->getClassFromObject($this->formvars['layer_tablename'], $this->formvars['oid'], $this->formvars['chosen_layer_id']);
-        $dbmap->copyClass($class_id, -$layer_id);
+				$classes = $dbmap->read_Classes($this->formvars['chosen_layer_id']);
+				for($i = 0; $i < count($classes); $i++){
+					$dbmap->copyClass($classes[$i]['Class_ID'], -$layer_id);
+				}
         $this->user->rolle->setOneLayer($this->formvars['chosen_layer_id'], 0);
       }
       
