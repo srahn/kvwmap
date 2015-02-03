@@ -1724,7 +1724,7 @@ class ALB {
     if($art != 'Bestand'){
       $pdf->addText(412,$row,$fontSize,mb_substr($flst->FlurstKennz,0,20,'utf8')); # 2007-04-02 Schmidt
       # $pdf->addText(374,$row,$fontSize,mb_substr($flst->FlurstKennz,0,20));
-      $pdf->addText(572,$row,$fontSize,$flst->getPruefKZ()); # 2007-04-02 Schmidt
+      #$pdf->addText(572,$row,$fontSize,$flst->getPruefKZ()); # 2007-04-02 Schmidt
       #  $pdf->addText(547,$row,$fontSize,$flst->getPruefKZ());
       $pdf->addText(412,$row-=12,$fontSize,str_repeat('=',23)); # 2007-04-02 Schmidt
       # $pdf->addText(374,$row-=12,$fontSize,str_repeat('=',25));
@@ -1867,7 +1867,7 @@ class ALB {
           }
           if ($flst->Nenner!=0) { $nennerausgabe="/".$flst->Nenner; }
           $pdf->addText($col0,$row-=12,$fontSize,$flst->GemkgSchl." ".str_pad($flst->FlurNr,3," ",STR_PAD_LEFT)." ".str_pad($flst->Zaehler,5," ",STR_PAD_LEFT).$nennerausgabe);
-          $pdf->addText($col0+173,$row,$fontSize,$flst->getPruefKZ());
+          #$pdf->addText($col0+173,$row,$fontSize,$flst->getPruefKZ());
           $pdf->addText($col0,$row-=12,$fontSize,str_repeat('=',25));
 
           $pdf->addText($col3,$row,$fontSize,'Entstehung');
@@ -2206,7 +2206,7 @@ class ALB {
 	          case 40 : {
 	            for ($g=0;$g<count($flst->Grundbuecher);$g++) {
 	              # Bestand
-	              $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],1);
+	              $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
 	              for ($b=0;$b<count($flst->Buchungen);$b++) {
 	                # Seitenumbruch wenn erforderlich
 	                if($row<120) {
@@ -2304,7 +2304,7 @@ class ALB {
 	          case 35 : {
 	            for ($g=0;$g<count($flst->Grundbuecher);$g++) {
 	              # Bestand
-	              $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],1);
+	              $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
 	              for ($b=0;$b<count($flst->Buchungen);$b++) {
 	                # Seitenumbruch wenn erforderlich
 	                if($row<120) {
@@ -2415,7 +2415,7 @@ class ALB {
 	            $pdf->addText($col0,$row-12,$fontSize,str_repeat("=",7));
 	
 							for ($g=0;$g<count($flst->Grundbuecher);$g++) {
-	              $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],1);
+	              $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
 								for ($b=0;$b<count($flst->Buchungen);$b++) {
 									# Seitenumbruch wenn erforderlich
 									if($row<60) {
@@ -2710,7 +2710,7 @@ class ALB {
             $row = $row-12;
           }
           $pdf->addText($col10,$row,$fontSize,$flst->GemkgSchl." ".str_pad($flst->FlurNr,3," ",STR_PAD_LEFT)." ".str_pad($flst->Zaehler,5," ",STR_PAD_LEFT).$nennerausgabe);
-          $pdf->addText($col34,$row,$fontSize,$flst->getPruefKZ());
+          #$pdf->addText($col34,$row,$fontSize,$flst->getPruefKZ());
           $pdf->addText($col59,$row,$fontSize,str_pad(str_space($flst->ALB_Flaeche,3).' m2',14,' ',STR_PAD_LEFT));
           $gesamtflaeche += $flst->ALB_Flaeche;
 
@@ -2926,7 +2926,7 @@ class ALB {
             $row = $row-12;
           }
           $pdf->addText($col10,$row,$fontSize,$flst->GemkgSchl." ".str_pad($flst->FlurNr,3," ",STR_PAD_LEFT)." ".str_pad($flst->Zaehler,5," ",STR_PAD_LEFT).$nennerausgabe);
-          $pdf->addText($col34,$row,$fontSize,$flst->getPruefKZ());
+          #$pdf->addText($col34,$row,$fontSize,$flst->getPruefKZ());
           $pdf->addText($col59,$row,$fontSize,str_pad(str_space($flst->ALB_Flaeche,3).' m2',14,' ',STR_PAD_LEFT));
           $gesamtflaeche += $flst->ALB_Flaeche;
           if($buchungen[$b+1]['bvnr'] != $buchungen[$b]['bvnr']){

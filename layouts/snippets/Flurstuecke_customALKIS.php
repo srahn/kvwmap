@@ -631,34 +631,34 @@ backto = function(go){
     <td colspan="2">
       <table cellspacing="0" cellpading="0" border="0">
         <tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
-        <td colspan="2">
-        <a href="index.php?go=Flurstueck_Auswaehlen&searchInExtent=<?php echo $this->searchInExtent;
-        ?>&GemID=<?php echo $flst->GemeindeID;
-        ?>&GemkgID=<?php echo $flst->GemkgSchl; ?>&FlurID=<?php echo $flst->FlurID;
-        ?>&FlstID=<?php echo $flst->FlurstKennz; ?>">zur Flurstückssuche</a> |
-        <a href="index.php?go=Adresse_Auswaehlen&searchInExtent=<?php echo $this->searchInExtent;
-        ?>&GemID=<?php echo $flst->GemeindeID;
-        ?>&StrID=<?php echo $this->formvars['StrID'];
-        ?>&HausID=<?php echo $this->formvars['HausID'];
-        ?>">zur Adresssuche</a>
-           |
-          <a href="index.php?go=ZoomToFlst&FlurstKennz=<?php echo $flst->FlurstKennz; ?>">Kartenausschnitt</a>
-					|
-					<!--a target="_blank" href="index.php?go=ALKIS_Auszug&formnummer=MV0510&FlurstKennz=<?php echo $flst->FlurstKennz; ?>">ALKIS-Auszug</a-->
-					Auszug:
-					<select style="width: 200px">
-						<option>-- Auswahl --</option>
-						<? if($this->Stelle->funktionen['MV0510']['erlaubt']){ ?><option onclick="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0510&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücksnachweis</option><? } ?>
-						<? if($this->Stelle->funktionen['MV0550']['erlaubt']){ ?><option onclick="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0550&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücks- und Eigentumsnachweis</option><? } ?>
-						<? if($this->Stelle->funktionen['MV0520']['erlaubt']){ ?><option onclick="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0520&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücksnachweis mit Bodenschätzung</option><? } ?>
-						<? if($this->Stelle->funktionen['MV0560']['erlaubt']){ ?><option onclick="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0560&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücks- und Eigentumsnachweis mit Bodenschätzung</option><? } ?>
-					</select>
-          </td>
-          </tr>
-          <tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
-          <td colspan="2">          
+					<td colspan="2">
+					<a href="index.php?go=Flurstueck_Auswaehlen&searchInExtent=<?php echo $this->searchInExtent;
+					?>&GemID=<?php echo $flst->GemeindeID;
+					?>&GemkgID=<?php echo $flst->GemkgSchl; ?>&FlurID=<?php echo $flst->FlurID;
+					?>&FlstID=<?php echo $flst->FlurstKennz; ?>">zur Flurstückssuche</a> |
+					<a href="index.php?go=Adresse_Auswaehlen&searchInExtent=<?php echo $this->searchInExtent;
+					?>&GemID=<?php echo $flst->GemeindeID;
+					?>&StrID=<?php echo $this->formvars['StrID'];
+					?>&HausID=<?php echo $this->formvars['HausID'];
+					?>">zur Adresssuche</a>
+						 |
+						<a href="index.php?go=ZoomToFlst&FlurstKennz=<?php echo $flst->FlurstKennz; ?>">Kartenausschnitt</a>
+						|
+						Auszug:
+						<select style="width: 200px">
+							<option>-- Auswahl --</option>
+							<? if($this->Stelle->funktionen['MV0510']['erlaubt']){ ?><option onclick="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0510&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücksnachweis</option><? } ?>
+							<? if($this->Stelle->funktionen['MV0550']['erlaubt']){ ?><option onclick="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0550&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücks- und Eigentumsnachweis</option><? } ?>
+							<? if($this->Stelle->funktionen['MV0520']['erlaubt']){ ?><option onclick="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0520&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücksnachweis mit Bodenschätzung</option><? } ?>
+							<? if($this->Stelle->funktionen['MV0560']['erlaubt']){ ?><option onclick="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0560&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücks- und Eigentumsnachweis mit Bodenschätzung</option><? } ?>
+						
+							<? if($this->Stelle->funktionen['ALB-Auszug 30']['erlaubt']){ ?><option onclick="window.open('index.php?go=ALB_Anzeige&formnummer=30&wz=1&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">ALB-Auszug&nbsp;30&nbsp;mit&nbsp;WZ</option><? } ?>
+							<? if($this->Stelle->funktionen['ALB-Auszug 35']['erlaubt']){ ?><option onclick="window.open('index.php?go=ALB_Anzeige&formnummer=35&wz=1&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">ALB-Auszug&nbsp;35&nbsp;mit&nbsp;WZ</option><? } ?>
+							<? if($this->Stelle->funktionen['ALB-Auszug 40']['erlaubt']){ ?><option onclick="window.open('index.php?go=ALB_Anzeige&formnummer=40&wz=1&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">ALB-Auszug&nbsp;40&nbsp;mit&nbsp;WZ</option><? } ?>							
+						</select>
+						</td>
+          </tr>         
         </tr>
-
       </table>
         </td>
       </tr>
@@ -710,6 +710,10 @@ backto = function(go){
 					<? if($this->Stelle->funktionen['MV0550']['erlaubt']){ ?><option onclick="send_selected_flurst('ALKIS_Auszug', 'MV0550', 1, '_blank');">Flurstücks- und Eigentumsnachweis</option><? } ?>
 					<? if($this->Stelle->funktionen['MV0520']['erlaubt']){ ?><option onclick="send_selected_flurst('ALKIS_Auszug', 'MV0520', 1, '_blank');">Flurstücksnachweis mit Bodenschätzung</option><? } ?>
 					<? if($this->Stelle->funktionen['MV0560']['erlaubt']){ ?><option onclick="send_selected_flurst('ALKIS_Auszug', 'MV0560', 1, '_blank');">Flurstücks- und Eigentumsnachweis mit Bodenschätzung</option><? } ?>
+
+					<? if($this->Stelle->funktionen['ALB-Auszug 30']['erlaubt']){ ?><option onclick="send_selected_flurst('ALB_Anzeige', '30', 1, '_blank');">ALB-Auszug&nbsp;30&nbsp;mit&nbsp;WZ</option><? } ?>
+					<? if($this->Stelle->funktionen['ALB-Auszug 35']['erlaubt']){ ?><option onclick="send_selected_flurst('ALB_Anzeige', '35', 1, '_blank');">ALB-Auszug&nbsp;35&nbsp;mit&nbsp;WZ</option><? } ?>
+					<? if($this->Stelle->funktionen['ALB-Auszug 40']['erlaubt']){ ?><option onclick="send_selected_flurst('ALB_Anzeige', '40', 1, '_blank');">ALB-Auszug&nbsp;40&nbsp;mit&nbsp;WZ</option><? } ?>					
 				</select>
   		</td>
 		</tr>
