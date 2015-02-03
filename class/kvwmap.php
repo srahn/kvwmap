@@ -5552,6 +5552,12 @@ class GUI {
     }
 
     $this->map->setextent($minx,$miny,$maxx,$maxy);
+		
+		# Welt-Eckkordinaten
+		$this->minx = round($minx, 1);
+		$this->miny = round($miny, 1);
+		$this->maxx = round($maxx, 1);
+		$this->maxy = round($maxy, 1);
     
     if(MAPSERVERVERSION >= 600 ) {
     		$this->map_scaledenom = $this->map->scaledenom;
@@ -5736,22 +5742,32 @@ class GUI {
       $pdf->addJpegFromFile(DRUCKRAHMEN_PATH.basename($this->Docu->activeframe[0]['refmapsrc']),$this->Docu->activeframe[0]['refmapposx'],$this->Docu->activeframe[0]['refmapposy'],$this->Docu->activeframe[0]['refmapwidth']);
       $pdf->addJpegFromFile(IMAGEPATH.basename($this->Docu->referencemap),$this->Docu->activeframe[0]['refposx'],$this->Docu->activeframe[0]['refposy'],$this->Docu->activeframe[0]['refwidth'], $this->Docu->activeframe[0]['refheight']);
     }
+		
+		# Attribute
+		$this->gemeinde = utf8_decode($this->lagebezeichnung[1]['gemeindename'].' ('.$this->lagebezeichnung[1]['gemeinde'].')');
+		$this->gemarkung = utf8_decode($this->lagebezeichnung[1]['gemkgname'].' ('.$this->lagebezeichnung[1]['gemkgschl'].')');
+		$this->flur = utf8_decode($this->lagebezeichnung[1]['flur']);
+		$this->flurstueck = utf8_decode($this->lagebezeichnung[1]['flurst']);
+		$this->lage = utf8_decode($this->lagebezeichnung[1]['strasse']).' '.$this->lagebezeichnung[1]['hausnummer'];
+		$this->date = date("d.m.Y");
+		$this->scale = $this->formvars['printscale'];
+		
     $pdf->selectFont($this->Docu->activeframe[0]['font_date']);
-    if($this->Docu->activeframe[0]['datesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['dateposx'],$this->Docu->activeframe[0]['dateposy'],$this->Docu->activeframe[0]['datesize'],date("d.m.Y"));
+    if($this->Docu->activeframe[0]['datesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['dateposx'],$this->Docu->activeframe[0]['dateposy'],$this->Docu->activeframe[0]['datesize'], $this->date);
     $pdf->selectFont($this->Docu->activeframe[0]['font_scale']);
-    if($this->Docu->activeframe[0]['scalesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['scaleposx'],$this->Docu->activeframe[0]['scaleposy'],$this->Docu->activeframe[0]['scalesize'],'1: '.$this->formvars['printscale']);
+    if($this->Docu->activeframe[0]['scalesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['scaleposx'],$this->Docu->activeframe[0]['scaleposy'],$this->Docu->activeframe[0]['scalesize'],'1: '.$this->scale);
     $pdf->selectFont($this->Docu->activeframe[0]['font_oscale']);
     if($this->Docu->activeframe[0]['oscalesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['oscaleposx'],$this->Docu->activeframe[0]['oscaleposy'],$this->Docu->activeframe[0]['oscalesize'],'1:xxxx');		
 		$pdf->selectFont($this->Docu->activeframe[0]['font_lage']);
-    if($this->Docu->activeframe[0]['lagesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['lageposx'],$this->Docu->activeframe[0]['lageposy'],$this->Docu->activeframe[0]['lagesize'],utf8_decode($this->lagebezeichnung[1]['strasse']).' '.$this->lagebezeichnung[1]['hausnummer']);
+    if($this->Docu->activeframe[0]['lagesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['lageposx'],$this->Docu->activeframe[0]['lageposy'],$this->Docu->activeframe[0]['lagesize'],$this->lage);
 		$pdf->selectFont($this->Docu->activeframe[0]['font_gemeinde']);
-    if($this->Docu->activeframe[0]['gemeindesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['gemeindeposx'],$this->Docu->activeframe[0]['gemeindeposy'],$this->Docu->activeframe[0]['gemeindesize'],utf8_decode($this->lagebezeichnung[1]['gemeindename'].' ('.$this->lagebezeichnung[1]['gemeinde'].')'));		
+    if($this->Docu->activeframe[0]['gemeindesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['gemeindeposx'],$this->Docu->activeframe[0]['gemeindeposy'],$this->Docu->activeframe[0]['gemeindesize'],$this->gemeinde);		
     $pdf->selectFont($this->Docu->activeframe[0]['font_gemarkung']);
-    if($this->Docu->activeframe[0]['gemarkungsize'] > 0)$pdf->addText($this->Docu->activeframe[0]['gemarkungposx'],$this->Docu->activeframe[0]['gemarkungposy'],$this->Docu->activeframe[0]['gemarkungsize'],utf8_decode($this->lagebezeichnung[1]['gemkgname'].' ('.$this->lagebezeichnung[1]['gemkgschl'].')'));
+    if($this->Docu->activeframe[0]['gemarkungsize'] > 0)$pdf->addText($this->Docu->activeframe[0]['gemarkungposx'],$this->Docu->activeframe[0]['gemarkungposy'],$this->Docu->activeframe[0]['gemarkungsize'],$this->gemarkung);
     $pdf->selectFont($this->Docu->activeframe[0]['font_flur']);
-    if($this->Docu->activeframe[0]['flursize'] > 0)$pdf->addText($this->Docu->activeframe[0]['flurposx'],$this->Docu->activeframe[0]['flurposy'],$this->Docu->activeframe[0]['flursize'],utf8_decode($this->lagebezeichnung[1]['flur']));
+    if($this->Docu->activeframe[0]['flursize'] > 0)$pdf->addText($this->Docu->activeframe[0]['flurposx'],$this->Docu->activeframe[0]['flurposy'],$this->Docu->activeframe[0]['flursize'], $this->flur);
 		$pdf->selectFont($this->Docu->activeframe[0]['font_flurst']);
-    if($this->Docu->activeframe[0]['flurstsize'] > 0)$pdf->addText($this->Docu->activeframe[0]['flurstposx'],$this->Docu->activeframe[0]['flurstposy'],$this->Docu->activeframe[0]['flurstsize'],utf8_decode($this->lagebezeichnung[1]['flurst']));
+    if($this->Docu->activeframe[0]['flurstsize'] > 0)$pdf->addText($this->Docu->activeframe[0]['flurstposx'],$this->Docu->activeframe[0]['flurstposy'],$this->Docu->activeframe[0]['flurstsize'], $this->flurstueck);
 
     # Freie Graphiken
     for($j = 0; $j < count($this->Docu->activeframe[0]['bilder']); $j++){
@@ -5836,22 +5852,47 @@ class GUI {
     if($this->Docu->activeframe[0]['scalebarposx'] != 0){
 			$posx = $this->Docu->activeframe[0]['scalebarposx'];
 			$posy = $this->Docu->activeframe[0]['scalebarposy'];
-			$scalebarwidth = 30; 	# in mm
-			$width3 = $scalebarwidth / 0.3529411; 	# in PDF-Pixeln
-			$width2 = 2*$width3/3;
-			$width1 = $width3/3;
-			$label3 = $scalebarwidth / 1000 * $this->formvars['printscale'];
-			$label2 = 2*$label3/3;
-			$label1 = $label3/3;
+			$scalebarwidth = 40; 	# in mm
+			$width4 = $scalebarwidth / 0.3529411; 	# in PDF-Pixeln
+			$width3 = 3*$width4/4;
+			$width2 = $width4/2;
+			$width1 = $width4/4;
+			$label4 = $scalebarwidth / 1000 * $this->formvars['printscale'];
+			$label3 = 3*$label4/4;
+			$label2 = $label4/2;
+			$label1 = $label4/4;
+			$pdf->setColor(0,0,0);
+			$pdf->addText($posx-1.5, $posy+6, 8, '0');
 			$pdf->addText($posx+$width1-5, $posy+6, 8, $label1);
 			$pdf->addText($posx+$width2-5, $posy+6, 8, $label2);
-			$pdf->addText($posx+$width3-5, $posy+6, 8, $label3.' Meter');
-			$pdf->setColor(1,1,1);
+			$pdf->addText($posx+$width3-5, $posy+6, 8, $label3);
+			$pdf->addText($posx+$width4-5, $posy+6, 8, $label4.' Meter');
 			$pdf->setLineStyle(0.5);
       $pdf->rectangle($posx, $posy, $width1, 4);
 			$pdf->rectangle($posx, $posy, $width2, 4);
 			$pdf->rectangle($posx, $posy, $width3, 4);
+			$pdf->rectangle($posx, $posy, $width4, 4);
+			$smallrects = 10;
+			$smallrectwidth = $width1 / $smallrects;
+			for($s = 0; $s < $smallrects; $s++){
+				$pdf->rectangle($posx, $posy, $smallrectwidth*($s+1), 4);
+			}
     }
+		
+		# Bild-Eckkoordinaten
+		$posx1 = $this->Docu->activeframe[0]['mapposx'];
+		$posy1 = $this->Docu->activeframe[0]['mapposy'];
+		$posx2 = $this->Docu->activeframe[0]['mapposx'] + $this->Docu->activeframe[0]['mapwidth'];
+		$posy2 = $this->Docu->activeframe[0]['mapposy'] + $this->Docu->activeframe[0]['mapheight'];
+		
+		# Rechteck um die Karte
+		$pdf->rectangle($posx1, $posy1, $this->Docu->activeframe[0]['mapwidth'], $this->Docu->activeframe[0]['mapheight']);
+		
+		# Eckkoordinaten (werden jetzt über Freitexte hinzugefügt)
+		#$pdf->addText($posx1, $posy1-6, 4, $this->miny);
+		#$pdf->addText($posx1-2, $posy1, 4, $this->minx, -90);
+		#$pdf->addText($posx2-20, $posy2+2, 4, $this->maxy);
+		#$pdf->addText($posx2+2, $posy2, 4, $this->maxx, 90);
     
     # variable Freitexte
 		for($j = 1; $j <= $this->formvars['last_freetext_id']; $j++){
@@ -5918,6 +5959,17 @@ class GUI {
   function substituteFreitext($text){
   	$text = str_replace('$stelle', $this->Stelle->Bezeichnung, $text);
   	$text = str_replace('$user', $this->user->Name, $text);
+		$text = str_replace('$scale', $this->scale, $text);
+		$text = str_replace('$gemeinde', $this->gemeinde, $text);
+		$text = str_replace('$gemarkung', $this->gemarkung, $text);
+		$text = str_replace('$flurstueck', $this->flurstueck, $text);
+		$text = str_replace('$flur', $this->flur, $text);
+		$text = str_replace('$lage', $this->lage, $text);
+		$text = str_replace('$date', $this->date, $text);	
+		$text = str_replace('$minx', $this->minx, $text);
+		$text = str_replace('$miny', $this->miny, $text);
+		$text = str_replace('$maxx', $this->maxx, $text);
+		$text = str_replace('$maxy', $this->maxy, $text);
   	return $text;
   }
 

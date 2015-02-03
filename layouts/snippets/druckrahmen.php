@@ -256,7 +256,7 @@ function addfreetext(){
           <td style="border-bottom:1px solid #C3C7C3" colspan=8>&nbsp;</td>
         </tr>
         <tr>
-        	<td class="fett" align="center" style="border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Karte&nbsp;</td>
+        	<td class="fett" align="center" style="border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Karte&nbsp;($minx, $miny, $maxx, $maxy)</td>
         	<td width="50%" align="center" style="border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;<span class="fett">Referenzkarte</span>&nbsp;&nbsp;&nbsp;Zoomfaktor:&nbsp;<input type="text" name="refzoom" value="<? echo $this->Document->selectedframe[0]['refzoom'] ?>" size="5"></td>
         </tr>
         <tr>
@@ -281,8 +281,8 @@ function addfreetext(){
         </tr>
 				
 				<tr>
-        	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Lage&nbsp;</td>
-        	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Gemeinde&nbsp;</td>
+        	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Lage&nbsp;($lage)</td>
+        	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Gemeinde&nbsp;($gemeinde)</td>
         </tr>
         <tr>
         	<td>&nbsp;x:</td>
@@ -326,8 +326,8 @@ function addfreetext(){
         </tr>
 				
         <tr>
-        	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Gemarkung&nbsp;</td>
-        	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Flur&nbsp;</td>
+        	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Gemarkung&nbsp;($gemarkung)</td>
+        	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Flur&nbsp;($flur)</td>
         </tr>
         <tr>
         	<td>&nbsp;x:</td>
@@ -370,8 +370,8 @@ function addfreetext(){
         	<td colspan="2" align="center"><input type="text" name="flursize" value="<? echo $this->Document->selectedframe[0]['flursize'] ?>" size="5">&nbsp;pt</td>
         </tr>
         <tr>
-        	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Flurstück&nbsp;</td>
-        	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Datum&nbsp;</td>
+        	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Flurstück&nbsp;($flurstueck)</td>
+        	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Datum&nbsp;($date)</td>
         </tr>
         <tr>
         	<td>&nbsp;x:</td>
@@ -415,7 +415,7 @@ function addfreetext(){
         </tr>
         <tr>
         	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Legende&nbsp;</td>
-        	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Stelle-Nutzer&nbsp;</td>
+        	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Stelle-Nutzer&nbsp;($stelle, $user)</td>
         </tr>
         <tr>
         	<td>&nbsp;x:</td>
@@ -460,7 +460,7 @@ function addfreetext(){
         
         <tr>
         	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Nordpfeil&nbsp;</td>
-        	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">Maßstab</td>
+        	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">Maßstab&nbsp;($scale)</td>
         </tr>
         <tr>
         	<td>&nbsp;x:</td>
