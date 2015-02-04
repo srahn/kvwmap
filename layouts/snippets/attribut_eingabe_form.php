@@ -6,8 +6,8 @@
 <script type="text/javascript">
 <!--
 
-function save(){
-	if(document.GUI.check_the_geom.checked == true){
+function save(the_geom_checked){
+	if(the_geom_checked == true){
 		if(document.GUI.newpathwkt.value == ''){
 			if(document.GUI.newpath.value == ''){
 				alert('Geben Sie ein Polygon an.');
@@ -235,7 +235,7 @@ function setlayers(selected_options){
 			}
 			if(count($this->attributes) > 0){
 				echo '<tr>
-			 					<td align="center" colspan="5"><br><br><input class="button" type="button" name="speichern" value="speichern" onclick="save();">
+			 					<td align="center" colspan="5"><br><br><input class="button" type="button" name="speichern" value="speichern" onclick="save(document.GUI.check_'.$this->attributes['name'][$the_geom_index[0]].'.checked);">
 			 					</td>
 			 				</tr>';
 			}
