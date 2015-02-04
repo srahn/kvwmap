@@ -105,7 +105,7 @@ class bodenrichtwertzone {
     $sql.=" FROM bodenrichtwerte.bw_zonen";
     $sql.=" WHERE 1=1";
     if ($oid!='') {
-      $sql.=" AND oid=".(int)$oid;
+      $sql.=" AND oid=".sprintf("%.0f", $oid);
     }
     $ret=$this->database->execSQL($sql,4, 0);    
     if ($ret[0]) {
@@ -290,7 +290,7 @@ class bodenrichtwertzone {
       $sql.= "bemerkungen = '".$formvars['bemerkungen']."', ";
       $sql.= "the_geom = st_transform(st_GeometryFromText('".$formvars['umring']."',".$this->client_epsg."), ".$this->layer_epsg.")";
       $sql.= ", textposition = st_transform(st_GeometryFromText('".$formvars['textposition']."',".$this->client_epsg."), ".$this->layer_epsg.")";
-      $sql.=" WHERE oid=".(int)$oid;
+      $sql.=" WHERE oid=".sprintf("%.0f", $oid);
       #echo $sql;
       $ret=$this->database->execSQL($sql,4, 1);
       if ($ret[0]) {
