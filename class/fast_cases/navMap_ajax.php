@@ -521,7 +521,7 @@
               }
             }
             
-						$layerset[$i]['processing'] = 'CLOSE_CONNECTION=DEFER;'.$layerset[$i]['processing'];		# DB-Connection erst am Ende schliessen und nicht für jeden Layer neu aufmachen
+						if($layerset[$i]['connectiontype'] == 6)$layerset[$i]['processing'] = 'CLOSE_CONNECTION=DEFER;'.$layerset[$i]['processing'];		# DB-Connection erst am Ende schliessen und nicht für jeden Layer neu aufmachen
             if ($layerset[$i]['processing'] != "") {
               $processings = explode(";",$layerset[$i]['processing']);
               foreach ($processings as $processing) {

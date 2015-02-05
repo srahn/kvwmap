@@ -16,7 +16,7 @@ add_calendar = function(event, elementid){
 }
  
 remove_calendar = function(){
-	document.getElementById('layer').calendar.destroy();
+	if(document.getElementById('layer').calendar != undefined)document.getElementById('layer').calendar.destroy();
 }
  
 autocomplete1 = function(layer_id, attribute, field_id, inputvalue){

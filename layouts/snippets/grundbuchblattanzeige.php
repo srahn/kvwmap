@@ -155,6 +155,10 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
            <td>
             	<? if($this->Stelle->funktionen['MV0700']['erlaubt']){ ?>&nbsp;<a href="index.php?go=ALKIS_Auszug&formnummer=MV0700&Grundbuchbezirk=<? echo $this->buchungen[0]['bezirk'] ?>&Grundbuchblatt=<? echo $this->buchungen[0]['blatt'] ?>" target="_blank">Bestandsnachweis</a>&nbsp;<? } ?>
            </td>
+					 <td>
+            	<? if($this->Stelle->funktionen['ALB-Auszug 20']['erlaubt']){ ?>|&nbsp;<a href="index.php?go=ALB_Anzeige_Bestand&formnummer=20&Grundbuchbezirk=<? echo $this->buchungen[0]['bezirk'] ?>&Grundbuchblatt=<? echo $this->buchungen[0]['blatt'] ?>&wz=1" target="_blank">ALB-Auszug&nbsp;20&nbsp;mit&nbsp;WZ</a>&nbsp;<? } ?>
+              <? if($this->Stelle->funktionen['ALB-Auszug 25']['erlaubt']){ ?>|&nbsp;<a href="index.php?go=ALB_Anzeige_Bestand&formnummer=25&Grundbuchbezirk=<? echo $this->buchungen[0]['bezirk'] ?>&Grundbuchblatt=<? echo $this->buchungen[0]['blatt'] ?>&wz=1" target="_blank">ALB-Auszug&nbsp;25&nbsp;mit&nbsp;WZ</a>&nbsp;<? } ?>
+           </td>
          </tr>
        </table>
      </td>

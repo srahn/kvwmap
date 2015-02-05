@@ -906,7 +906,7 @@ class GUI {
               }
             }
             
-						$layerset[$i]['processing'] = 'CLOSE_CONNECTION=DEFER;'.$layerset[$i]['processing'];		# DB-Connection erst am Ende schliessen und nicht für jeden Layer neu aufmachen
+						if($layerset[$i]['connectiontype'] == 6)$layerset[$i]['processing'] = 'CLOSE_CONNECTION=DEFER;'.$layerset[$i]['processing'];		# DB-Connection erst am Ende schliessen und nicht für jeden Layer neu aufmachen
             if ($layerset[$i]['processing'] != "") {
               $processings = explode(";",$layerset[$i]['processing']);
               foreach ($processings as $processing) {
@@ -6274,7 +6274,7 @@ class GUI {
       if($deletestellen != 0){
         for($i = 0; $i < count($deletestellen); $i++){
           $stelle = new stelle($deletestellen[$i], $this->database);
-          $stelle->deleteLayer(array($this->formvars['selected_layer_id']));
+          $stelle->deleteLayer(array($this->formvars['selected_layer_id']), $this->pgdatabase);
           $users = $stelle->getUser();
           for($j = 0; $j < count($users['ID']); $j++){
             $this->user->rolle->deleteLayer($users['ID'][$j], array($deletestellen[$i]), array($this->formvars['selected_layer_id']));
@@ -6326,7 +6326,7 @@ class GUI {
 
     $layer[] = $this->formvars['selected_layer_id'];
     $stelle[] = $this->Stelle->id;
-    $this->Stelle->deleteLayer($layer);
+    $this->Stelle->deleteLayer($layer, $this->pgdatabase);
     $this->user->rolle->deleteLayer('', $stelle, $layer);
     $this->LayerAnzeigen();
   }
@@ -8367,7 +8367,7 @@ class GUI {
         }
       }
       if($deletelayer != 0){
-        $Stelle->deleteLayer($deletelayer);
+        $Stelle->deleteLayer($deletelayer, $this->pgdatabase);
         for($i = 0; $i < count($deletelayer); $i++){
           $layerid = $deletelayer[$i];
           $layer_id = explode(',',$layerid);
@@ -8565,7 +8565,7 @@ class GUI {
     $selected_stelle=new stelle($this->formvars['selected_stelle_id'],$this->user->database);
     $selected_stelle->Löschen();
     $selected_stelle->deleteMenue(0);
-    $selected_stelle->deleteLayer(0);
+    $selected_stelle->deleteLayer(0, $this->pgdatabase);
     $user = $selected_stelle->getUser();
     $stelle_id = explode(',',$selected_stelle->id);
     for($i = 0; $i < count($user['ID']); $i++){

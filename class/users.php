@@ -2601,7 +2601,7 @@ class stelle {
 		return 1;
 	}
 
-	function deleteLayer($layer) {
+	function deleteLayer($layer, $pgdatabase) {
 		if($layer == 0){
 			# löscht alle Layer der Stelle
 			$sql ='DELETE FROM `used_layer` WHERE `Stelle_ID` = '.$this->id;
@@ -2609,6 +2609,19 @@ class stelle {
 			$query=mysql_query($sql,$this->database->dbConn);
 			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 			$sql ='DELETE FROM `layer_attributes2stelle` WHERE `stelle_id` = '.$this->id;
+			$this->debug->write("<p>file:users.php class:stelle function:deleteLayer - Löschen der Layer der Stelle:<br>".$sql,4);
+			$query=mysql_query($sql,$this->database->dbConn);
+			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+			# Filter löschen
+			$sql ='SELECT attributvalue FROM `u_attributfilter2used_layer` WHERE `type` = \'geometry\' AND `Stelle_ID` = '.$this->id;
+			$this->debug->write("<p>file:users.php class:stelle function:deleteLayer - Löschen der Layer der Stelle:<br>".$sql,4);
+			$query=mysql_query($sql,$this->database->dbConn);
+			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+			while($rs=mysql_fetch_row($query)){
+				$poly_id = $rs[0];
+				if($poly_id != '')$pgdatabase->deletepolygon($poly_id);
+			}
+			$sql ='DELETE FROM `u_attributfilter2used_layer` WHERE `Stelle_ID` = '.$this->id;
 			$this->debug->write("<p>file:users.php class:stelle function:deleteLayer - Löschen der Layer der Stelle:<br>".$sql,4);
 			$query=mysql_query($sql,$this->database->dbConn);
 			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
@@ -2621,6 +2634,18 @@ class stelle {
 				$query=mysql_query($sql,$this->database->dbConn);
 				if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 				$sql ='DELETE FROM `layer_attributes2stelle` WHERE `stelle_id` = '.$this->id.' AND `layer_id` = '.$layer[$i];
+				$this->debug->write("<p>file:users.php class:stelle function:deleteLayer - Löschen der Layer der Stelle:<br>".$sql,4);
+				$query=mysql_query($sql,$this->database->dbConn);
+				if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; 	}			
+				# Filter löschen
+				$sql ='SELECT attributvalue FROM `u_attributfilter2used_layer` WHERE `type` = \'geometry\' AND `Stelle_ID` = '.$this->id.' AND `Layer_ID` = '.$layer[$i];
+				$this->debug->write("<p>file:users.php class:stelle function:deleteLayer - Löschen der Layer der Stelle:<br>".$sql,4);
+				$query=mysql_query($sql,$this->database->dbConn);
+				if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+				$rs=mysql_fetch_row($query);
+				$poly_id = $rs[0];
+				if($poly_id != '')$pgdatabase->deletepolygon($poly_id);
+				$sql ='DELETE FROM `u_attributfilter2used_layer` WHERE `Stelle_ID` = '.$this->id.' AND `Layer_ID` = '.$layer[$i];
 				$this->debug->write("<p>file:users.php class:stelle function:deleteLayer - Löschen der Layer der Stelle:<br>".$sql,4);
 				$query=mysql_query($sql,$this->database->dbConn);
 				if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
