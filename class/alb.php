@@ -2230,7 +2230,7 @@ class ALB {
 	                $BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
 	                $BestandStr.=' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
 	                $BestandStr.=' ('.$flst->Buchungen[$b]['buchungsart'].')';
-	                $BestandStr.=' '.$flst->Buchungen[$b]['bezeichnung'];
+	                $BestandStr.=' '.utf8_decode($flst->Buchungen[$b]['bezeichnung']);
 	                $pdf->addText($col2_1,$row,$fontSize,$BestandStr);
 	                $pdf->addText($col0,$row-=12,$fontSize,str_repeat("=",7));
 	
@@ -2328,7 +2328,7 @@ class ALB {
 	                $BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
 	                $BestandStr.=' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
 	                $BestandStr.=' ('.$flst->Buchungen[$b]['buchungsart'].')';
-	                $BestandStr.=' '.$flst->Buchungen[$b]['bezeichnung'];
+	                $BestandStr.=' '.utf8_decode($flst->Buchungen[$b]['bezeichnung']);
 	                $pdf->addText($col2_1,$row,$fontSize,$BestandStr);
 	                $pdf->addText($col0,$row-=12,$fontSize,str_repeat("=",7));
 	
@@ -2440,7 +2440,7 @@ class ALB {
 									$BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
 									$BestandStr.=' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
 									$BestandStr.=' ('.$flst->Buchungen[$b]['buchungsart'].')';
-									$BestandStr.=' '.$flst->Buchungen[$b]['bezeichnung'];
+									$BestandStr.=' '.utf8_decode($flst->Buchungen[$b]['bezeichnung']);
 									$pdf->addText($col2_1,$row-=12,$fontSize,$BestandStr);
 		
 								} # ende Schleife Bestand
@@ -2697,12 +2697,12 @@ class ALB {
                 $pdf->addText($col10,$row,$fontSize, $buchungen[$b]['anteil'].' Miteigentumsanteil an');
               }
               elseif($buchungen[$b]['buchungsart'] == 'H'){
-                $pdf->addText($col10,$row,$fontSize, $buchungen[$b]['anteil'].' '.$buchungen[$b]['bezeichnung'].' an');
+                $pdf->addText($col10,$row,$fontSize, $buchungen[$b]['anteil'].' '.utf8_decode($buchungen[$b]['bezeichnung']).' an');
               }
               $row = $row-12;
             }
             elseif($buchungen[$b]['buchungsart'] != 'N'){
-              $pdf->addText($col10,$row,$fontSize, $buchungen[$b]['bezeichnung'].' an');
+              $pdf->addText($col10,$row,$fontSize, utf8_decode($buchungen[$b]['bezeichnung']).' an');
               $row = $row-12;
             }
           }
@@ -2913,12 +2913,12 @@ class ALB {
                 $pdf->addText($col10,$row,$fontSize, $buchungen[$b]['anteil'].' Miteigentumsanteil an');
               }
               elseif($buchungen[$b]['buchungsart'] == 'H'){
-                $pdf->addText($col10,$row,$fontSize, $buchungen[$b]['anteil'].' '.$buchungen[$b]['bezeichnung']);
+                $pdf->addText($col10,$row,$fontSize, $buchungen[$b]['anteil'].' '.utf8_decode($buchungen[$b]['bezeichnung']));
               }
               $row = $row-12;
             }
             elseif($buchungen[$b]['buchungsart'] != 'N'){
-              $pdf->addText($col10,$row,$fontSize, $buchungen[$b]['bezeichnung'].' an');
+              $pdf->addText($col10,$row,$fontSize, utf8_decode($buchungen[$b]['bezeichnung']).' an');
               $row = $row-12;
             }
           }

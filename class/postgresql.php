@@ -3644,7 +3644,7 @@ class pgdatabase_alkis {
     $sql.=" FROM alkis.ax_gemeinde as g, alkis.ax_flurstueck as f";
     $sql.=" JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(f.weistauf)";
     $sql.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND l.lage = lpad(s.lage,5,'0')";
-    $sql.=" WHERE g.gemeinde = l.gemeinde";
+    $sql.=" WHERE g.gemeinde = f.gemeinde";
     if ($GemID!='') {
       $sql.=" AND g.schluesselgesamt=".(int)$GemID;
     }
@@ -3671,7 +3671,7 @@ class pgdatabase_alkis {
     $sql.=" FROM alkis.ax_gemeinde as g, alkis.ax_gemarkung as gem, alkis.ax_flurstueck as f";
     $sql.=" JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(f.weistauf)";
     $sql.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND s.lage = lpad(l.lage,5,'0')";
-    $sql.=" WHERE g.gemeinde = l.gemeinde AND f.gemarkungsnummer = gem.gemarkungsnummer";
+    $sql.=" WHERE g.gemeinde = f.gemeinde AND f.gemarkungsnummer = gem.gemarkungsnummer";
     if ($GemID!='') {
       $sql.=" AND g.schluesselgesamt=".(int)$GemID;
     }
