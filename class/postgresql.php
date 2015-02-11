@@ -1549,14 +1549,14 @@ class pgdatabase_alkis {
   }
   
   function getALBData($FlurstKennz, $without_temporal_filter = false){		
-		$sql ="SELECT distinct 0 as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, zaehler, nenner, k.schluesselgesamt AS kreisid, k.bezeichnung as kreisname, f.land::text||f.gemarkungsnummer::text as gemkgschl, ppg.gemarkungsname as gemkgname, ppg.land::text||ppg.regierungsbezirk::text||ppg.kreis::text||ppg.gemeinde::text as gemeinde, ppge.gemeindename,d.stelle as finanzamt, d.bezeichnung AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp ";
-		$sql.="FROM alkis.ax_kreisregion AS k, alkis.pp_gemeinde as ppge, alkis.pp_gemarkung AS ppg, alkis.ax_flurstueck AS f ";
+		$sql ="SELECT distinct 0 as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, zaehler, nenner, k.schluesselgesamt AS kreisid, k.bezeichnung as kreisname, gem.schluesselgesamt as gemkgschl, gem.bezeichnung as gemkgname, g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename,d.stelle as finanzamt, d.bezeichnung AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp ";
+		$sql.="FROM alkis.ax_kreisregion AS k, alkis.ax_gemeinde as g, alkis.ax_gemarkung AS gem, alkis.ax_flurstueck AS f ";
 		$sql.="LEFT JOIN alkis.ax_dienststelle as d ON d.stellenart = 1200 AND d.stelle::integer = ANY(f.stelle) ";
-		$sql.="WHERE f.gemarkungsnummer=ppg.gemarkung AND ppge.land = ppg.land AND ppge.gemeinde = ppg.gemeinde AND f.kreis = k.kreis AND f.flurstueckskennzeichen='".$FlurstKennz."'";
+		$sql.="WHERE f.gemarkungsnummer=gem.gemarkungsnummer AND f.land = gem.land AND f.kreis = g.kreis AND f.gemeinde = g.gemeinde AND f.kreis = k.kreis AND f.flurstueckskennzeichen='".$FlurstKennz."'";
 		if(!$without_temporal_filter)$sql.= $this->build_temporal_filter(array('k', 'f'));
 		else{
 			$sql.= " UNION ";
-			$sql.= "SELECT distinct 1 as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, zaehler, nenner, 0 AS kreisid, '' as kreisname, f.land::text||f.gemarkungsnummer::text as gemkgschl, ppg.gemarkungsname as gemkgname, ppg.land::text||ppg.regierungsbezirk::text||ppg.kreis::text||ppg.gemeinde::text as gemeinde, ppge.gemeindename, '' as finanzamt, '' AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp FROM alkis.pp_gemeinde as ppge, alkis.pp_gemarkung AS ppg, alkis.ax_historischesflurstueckohneraumbezug as f";
+			$sql.= "SELECT distinct 1 as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, zaehler, nenner, 0 AS kreisid, '' as kreisname, gem.schluesselgesamt as gemkgschl, gem.bezeichnung as gemkgname, g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename, '' as finanzamt, '' AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp FROM alkis.pp_gemeinde as ppge, alkis.pp_gemarkung AS ppg, alkis.ax_historischesflurstueckohneraumbezug as f";
 			$sql.= " WHERE f.gemarkungsnummer=ppg.gemarkung AND ppge.land = ppg.land AND ppge.gemeinde = ppg.gemeinde AND f.flurstueckskennzeichen='".$FlurstKennz."'";
 		}
     #echo $sql.'<br><br>';
@@ -1735,11 +1735,11 @@ class pgdatabase_alkis {
   function getStrassen($FlurstKennz) {
     # Abfrage der Adressenangabe zum Flurstï¿½ck
     # 1. Abfragen der Strassen die am Flurstï¿½ck liegen
-    $sql ="SELECT DISTINCT g.bezeichnung as gemeindename, l.lage as strasse, s.bezeichnung as strassenname ";
+    $sql ="SELECT DISTINCT g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename, l.lage as strasse, s.bezeichnung as strassenname ";
     $sql.="FROM alkis.ax_gemeinde as g, alkis.ax_flurstueck as f ";
     $sql.="JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(f.weistauf) ";
     $sql.="LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND s.lage = lpad(l.lage,5,'0') ";
-    $sql.="WHERE g.gemeinde = l.gemeinde AND f.flurstueckskennzeichen = '".$FlurstKennz."'";
+    $sql.="WHERE g.gemeinde = l.gemeinde AND g.kreis = l.kreis AND f.flurstueckskennzeichen = '".$FlurstKennz."'";
 		$sql.= $this->build_temporal_filter(array('g', 'f', 'l', 's'));
     #echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
@@ -3664,7 +3664,9 @@ class pgdatabase_alkis {
     return $Liste;
   }
     
-  function getStrassenListe($GemID,$GemkgID,$PolygonWKTString) {
+  function getStrassenListe($GemID,$GemkgID,$PolygonWKTString) {		
+	# Hier bitte nicht auf die Idee kommen, die Strassen ohne die Flurstücke abfragen zu können. 
+	# Die Flurstücke müssen miteinbezogen werden, weil wir ja auch über die Gemarkung auswählen wollen.	
   	$sql ="set enable_seqscan = off;SELECT -1 AS gemeinde,'-1' AS strasse,'--Auswahl--' AS strassenname, '' as gemkgname";
     $sql.=" UNION";
     $sql.=" SELECT DISTINCT g.gemeinde, l.lage as strasse, s.bezeichnung as strassenname, gem.bezeichnung as gemkgname";

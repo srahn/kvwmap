@@ -190,6 +190,7 @@ backto = function(go){
                 <?php
                 $anzStrassen=count($flst->Adresse);
                 for ($s=0;$s<$anzStrassen;$s++) {
+									$flst->selHausID[] = $flst->Adresse[$s]["gemeinde"].'-'.$flst->Adresse[$s]["strasse"].'-'.$flst->Adresse[$s]["hausnr"];	# für die Adressensuche
                   echo $flst->Adresse[$s]["gemeindename"]; ?><br><?php
                   echo $flst->Adresse[$s]["strassenname"]; ?>&nbsp;<?php
                   echo $flst->Adresse[$s]["hausnr"]; ?><br><?php
@@ -644,13 +645,11 @@ backto = function(go){
 					  &nbsp;&nbsp;
                     </div>
     				</a>
-
 					<a href="index.php?go=Adresse_Auswaehlen&searchInExtent=<?php echo $this->searchInExtent;
-					?>&GemID=<?php echo $flst->GemeindeID;
-					?>&StrID=<?php echo $this->formvars['StrID'];
-					?>&HausID=<?php echo $this->formvars['HausID'];
-					?>">
-                    <div class="fstanzeigehover">
+					?>&GemID=<? echo $flst->GemeindeID;
+					?>&StrID=<? echo $flst->Adresse[0]["strasse"];
+					?>&selHausID=<? echo implode($flst->selHausID, ', '); ?>">
+										<div class="fstanzeigehover">
 					  &nbsp;&nbsp;
 					  zur Adresssuche
 					  &nbsp;&nbsp;
