@@ -59,7 +59,7 @@ function ahahDone(url, targets, req, actions) {
 				  case "sethtml":
 						if(targets[i] != undefined){
 				    	targets[i].innerHTML = responsevalues[i];
-							//targets[i].outerHTML = targets[i].outerHTML;		// Bug-Workaround fuer den IE beim setzen eines select-Objekts
+							if(targets[i].outerHTML != undefined)targets[i].outerHTML = targets[i].outerHTML;		// Bug-Workaround fuer den IE 8 beim setzen eines select-Objekts
 													
 							scripts = targets[i].getElementsByTagName("script");		// Alle script-Bloecke evaln damit diese Funktionen bekannt sind							
 							for(s = 0; s < scripts.length; s++){

@@ -689,3 +689,24 @@ tbody.gle tr:hover {
 	width:19px;
 	margin-left:3px;
 }
+
+.fstanzeigecontainer{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.fstanzeigehover{
+                position: relative;
+                float: left;
+                margin: auto;
+                visibility: visible;
+                z-index:3;
+                line-height: 30px;
+}
+
+.fstanzeigehover:hover{
+                background-color:rgba(255,255,255,0.2);
+}

@@ -1167,21 +1167,6 @@ class gemarkung {
   var $debug;
   var $database;
 
-  ###################### Liste der Funktionen ####################################
-  #
-  # function gemarkung($GemkgSchl)  - Construktor
-  # function getTableDef()
-  # function getAmtsgericht()
-  # function getGemkgName()
-  # function getGemeindeSchl()
-  # function getGemkgSchlFromName($GemID,$Name)
-  # function getGemarkungListe($GemID,$GemkgID,$order)
-  # function getGemarkungListeByExtent($extent)
-  # function getDataSourceName()
-  # function getMER($layer)
-  # function updateGemarkungen()
-  #
-  ################################################################################
 
   function gemarkung($GemkgSchl,$database) {
     global $debug;

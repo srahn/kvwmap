@@ -5121,6 +5121,45 @@ class GUI {
     $this->nutzungWahl();
   }
 		
+	 function namenWahl() {
+    if ($this->formvars['anzahl']==0) {
+      $this->formvars['anzahl']=10;
+    }
+    $this->main='namensuchform.php';
+
+    # 2006-29-06 sr: Gemarkungsformobjekt nur für Gemeinden der Stelle
+    $GemeindenStelle=$this->Stelle->getGemeindeIDs();
+    $Gemeinde=new gemeinde('',$this->pgdatabase);
+    # Auswahl aller Gemeinden der Stelle
+		$GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle);
+
+    # Abfragen der Gemarkungen mit dazugehörigen Namen der Gemeinden
+    $GemkgID=$this->formvars['GemkgID'];
+    $Gemarkung=new gemarkung('',$this->pgdatabase);
+    $GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'');
+    // Sortieren der Gemarkungen unter Berücksichtigung von Umlauten
+    $sorted_arrays = umlaute_sortieren($GemkgListe['Bezeichnung'], $GemkgListe['GemkgID']);
+    $GemkgListe['Bezeichnung'] = $sorted_arrays['array'];
+    $GemkgListe['GemkgID'] = $sorted_arrays['second_array'];
+    # Erzeugen des Formobjektes für die Gemarkungsauswahl    
+    $this->GemkgFormObj=new selectFormObject("GemkgID","select",$GemkgListe['GemkgID'],array($GemkgID),$GemkgListe['Bezeichnung'],"1","","",NULL);
+    $this->GemkgFormObj->insertOption(-1,0,'--Auswahl--',0);
+    $this->GemkgFormObj->outputHTML();
+    $GemkgID=$this->formvars['GemkgID'];
+    
+    # Abragen der Fluren zur Gemarkung
+    if($GemkgID > 0){
+    	$Flur=new Flur('','','',$this->pgdatabase);
+			$FlurListe=$Flur->getFlurListe($GemkgID,'');
+    	# Erzeugen des Formobjektes für die Flurauswahl
+    	if (count($FlurListe['FlurID'])==1) { $FlurID=$FlurListe['FlurID'][0]; }
+    }
+    $this->FlurFormObj=new FormObject("FlurID","select",$FlurListe['FlurID'],$this->formvars['FlurID'],$FlurListe['Name'],"1","","",NULL);
+    $this->FlurFormObj->insertOption(-1,0,'--Auswahl--',0);
+    $this->FlurFormObj->outputHTML();
+    $this->output();
+  }	
+	
 	function nameSuchen() {
     # 2006-29-06 sr: auf Gemarkungen der Stelle einschränken
     if($this->formvars['GemkgID'] > 0){       # es wurde eine Gemarkung ausgewählt
@@ -5253,46 +5292,6 @@ class GUI {
         $this->output();
       } # ende Ergebnisanzahl größer 0
     } # ende Abfrage war erfolgreich
-  }
-
-  function namenWahl() {
-    if ($this->formvars['anzahl']==0) {
-      $this->formvars['anzahl']=10;
-    }
-    $this->titel='Namenssuche im ALB';
-    $this->main='namensuchform.php';
-
-    # 2006-29-06 sr: Gemarkungsformobjekt nur für Gemeinden der Stelle
-    $GemeindenStelle=$this->Stelle->getGemeindeIDs();
-    $Gemeinde=new gemeinde('',$this->pgdatabase);
-    # Auswahl aller Gemeinden der Stelle
-		$GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle);
-
-    # Abfragen der Gemarkungen mit dazugehörigen Namen der Gemeinden
-    $GemkgID=$this->formvars['GemkgID'];
-    $Gemarkung=new gemarkung('',$this->pgdatabase);
-    $GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'');
-    // Sortieren der Gemarkungen unter Berücksichtigung von Umlauten
-    $sorted_arrays = umlaute_sortieren($GemkgListe['Bezeichnung'], $GemkgListe['GemkgID']);
-    $GemkgListe['Bezeichnung'] = $sorted_arrays['array'];
-    $GemkgListe['GemkgID'] = $sorted_arrays['second_array'];
-    # Erzeugen des Formobjektes für die Gemarkungsauswahl    
-    $this->GemkgFormObj=new selectFormObject("GemkgID","select",$GemkgListe['GemkgID'],array($GemkgID),$GemkgListe['Bezeichnung'],"1","","",NULL);
-    $this->GemkgFormObj->insertOption(-1,0,'--Auswahl--',0);
-    $this->GemkgFormObj->outputHTML();
-    $GemkgID=$this->formvars['GemkgID'];
-    
-    # Abragen der Fluren zur Gemarkung
-    if($GemkgID > 0){
-    	$Flur=new Flur('','','',$this->pgdatabase);
-			$FlurListe=$Flur->getFlurListe($GemkgID,'');
-    	# Erzeugen des Formobjektes für die Flurauswahl
-    	if (count($FlurListe['FlurID'])==1) { $FlurID=$FlurListe['FlurID'][0]; }
-    }
-    $this->FlurFormObj=new FormObject("FlurID","select",$FlurListe['FlurID'],$this->formvars['FlurID'],$FlurListe['Name'],"1","","",NULL);
-    $this->FlurFormObj->insertOption(-1,0,'--Auswahl--',0);
-    $this->FlurFormObj->outputHTML();
-    $this->output();
   }
 
 	function deleteDokument($path){

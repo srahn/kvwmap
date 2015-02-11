@@ -242,10 +242,10 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
       	<td>&nbsp;</td>
         <td align="center"><span class="fett"><a href="javascript:changeorder('bezirk');"><?php echo $strGbbezShort; ?></a></span></td>
         <td align="center"><span class="fett"><a href="javascript:changeorder('blatt');"><?php echo $strGbblShort; ?></a></span></td>
-        <td align="left"><span class="fett"><a href="javascript:changeorder('name1');"><?php echo $strName1Short; ?></a></span></td>
-        <td align="left"><span class="fett"><a href="javascript:changeorder('name2');"><?php echo $strName2Short; ?></a></span></td>
-        <td align="left" bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett"><a href="javascript:changeorder('name3');"><?php echo $strName3Short; ?></a></span></td>
-        <td align="left"><span class="fett"><a href="javascript:changeorder('name4');"><?php echo $strName4Short; ?></a></span></td>
+        <td align="left"><span class="fett"><a href="javascript:changeorder('nachnameoderfirma');"><?php echo $strName1Short; ?></a></span></td>
+        <td align="left"><span class="fett"><a href="javascript:changeorder('geburtsname');"><?php echo $strName2Short; ?></a></span></td>
+        <td align="left" bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett"><a href="javascript:changeorder('strasse,hausnummer');"><?php echo $strName3Short; ?></a></span></td>
+        <td align="left"><span class="fett"><a href="javascript:changeorder('postleitzahlpostzustellung, ort_post');"><?php echo $strName4Short; ?></a></span></td>
         <td align="center" colspan="2"><span class="fett"><?php echo $strFst; ?></span></td>
         <? if($this->Stelle->isFunctionAllowed('Jagdkataster')){ ?>
         <td align="center"><span class="fett"><?php echo $strHunt; ?></span></td>

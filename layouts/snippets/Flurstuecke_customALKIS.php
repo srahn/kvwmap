@@ -40,7 +40,7 @@ backto = function(go){
 	$this->Stelle->getFunktionen();
 	$forall = false;
 	if($i == '')$i = 0;
-  $anzObj=count($this->qlayerset[$i]['shape']);	
+  $anzObj=count($this->qlayerset[$i]['shape']);
   if ($anzObj>0) { ?>
 		<br><br>
     <u><? echo $anzObj; ?> Flurstück<? if ($anzObj>1) { echo "e"; } ?> gefunden:</u>
@@ -56,7 +56,7 @@ backto = function(go){
     }
 
     for ($a=0;$a<$anzObj;$a++) { // 2007-11-13_mh
-      $flurstkennz_a=$this->qlayerset[$i]['shape'][$a]['flurstkennz'];      
+      $flurstkennz_a=$this->qlayerset[$i]['shape'][$a]['flurstkennz'];
       $gemkg=substr($flurstkennz_a, 0, 6);
       $flur=substr($flurstkennz_a, 6, 3);
       $zaehler=ltrim(substr($flurstkennz_a, 9, 5), '0');
@@ -295,7 +295,7 @@ backto = function(go){
             </table>
           </td>
         </tr>
-				
+
         <? if($privileg_['klassifizierung']){
 	        	if($flst->Klassifizierung[0]['wert'] != ''){
 	        		$ratio = $flst->ALB_Flaeche/$flst->Klassifizierung[0]['flstflaeche'];
@@ -365,7 +365,7 @@ backto = function(go){
 	        <?
 	        	}
         } ?>
-				
+
         <?php if ($privileg_['freitext'] AND count($flst->FreiText)>0) { ?>
         <tr>
           <td colspan="2">
@@ -631,33 +631,60 @@ backto = function(go){
     <td colspan="2">
       <table cellspacing="0" cellpading="0" border="0">
         <tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
-					<td colspan="2">
+		  <td colspan="2">
+            <div class="fstanzeigecontainer">
+
 					<a href="index.php?go=Flurstueck_Auswaehlen&searchInExtent=<?php echo $this->searchInExtent;
 					?>&GemID=<?php echo $flst->GemeindeID;
 					?>&GemkgID=<?php echo $flst->GemkgSchl; ?>&FlurID=<?php echo $flst->FlurID;
-					?>&FlstID=<?php echo $flst->FlurstKennz; ?>">zur Flurstückssuche</a> |
+					?>&FlstID=<?php echo $flst->FlurstKennz; ?>">
+                    <div class="fstanzeigehover">
+					  &nbsp;&nbsp;
+					  zur Flurstückssuche
+					  &nbsp;&nbsp;
+                    </div>
+    				</a>
+
 					<a href="index.php?go=Adresse_Auswaehlen&searchInExtent=<?php echo $this->searchInExtent;
 					?>&GemID=<?php echo $flst->GemeindeID;
 					?>&StrID=<?php echo $this->formvars['StrID'];
 					?>&HausID=<?php echo $this->formvars['HausID'];
-					?>">zur Adresssuche</a>
-						 |
-						<a href="index.php?go=ZoomToFlst&FlurstKennz=<?php echo $flst->FlurstKennz; ?>">Kartenausschnitt</a>
-						|
-						Auszug:
-						<select style="width: 200px">
+					?>">
+                    <div class="fstanzeigehover">
+					  &nbsp;&nbsp;
+					  zur Adresssuche
+					  &nbsp;&nbsp;
+                    </div>
+					</a>
+
+					<a href="index.php?go=ZoomToFlst&FlurstKennz=<?php echo $flst->FlurstKennz; ?>">
+                    <div class="fstanzeigehover">
+					  &nbsp;&nbsp;
+					  Kartenausschnitt
+					  &nbsp;&nbsp;
+                    </div>
+                    </a>
+
+                    <div class="fstanzeigehover">
+					  &nbsp;&nbsp;
+					  Auszug:
+						<select style="width: 130px">
 							<option>-- Auswahl --</option>
 							<? if($this->Stelle->funktionen['MV0510']['erlaubt']){ ?><option onclick="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0510&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücksnachweis</option><? } ?>
 							<? if($this->Stelle->funktionen['MV0550']['erlaubt']){ ?><option onclick="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0550&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücks- und Eigentumsnachweis</option><? } ?>
 							<? if($this->Stelle->funktionen['MV0520']['erlaubt']){ ?><option onclick="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0520&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücksnachweis mit Bodenschätzung</option><? } ?>
 							<? if($this->Stelle->funktionen['MV0560']['erlaubt']){ ?><option onclick="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0560&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurstücks- und Eigentumsnachweis mit Bodenschätzung</option><? } ?>
-						
+
 							<? if($this->Stelle->funktionen['ALB-Auszug 30']['erlaubt']){ ?><option onclick="window.open('index.php?go=ALB_Anzeige&formnummer=30&wz=1&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurst&uuml;cksdaten</option><? } ?>
 							<? if($this->Stelle->funktionen['ALB-Auszug 35']['erlaubt']){ ?><option onclick="window.open('index.php?go=ALB_Anzeige&formnummer=35&wz=1&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Flurst&uuml;cksdaten&nbsp;mit&nbsp;Eigent&uuml;mer</option><? } ?>
-							<? if($this->Stelle->funktionen['ALB-Auszug 40']['erlaubt']){ ?><option onclick="window.open('index.php?go=ALB_Anzeige&formnummer=40&wz=1&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Eigent&uuml;merdaten&nbsp;zum&nbsp;Flurst&uuml;ck</option><? } ?>							
+							<? if($this->Stelle->funktionen['ALB-Auszug 40']['erlaubt']){ ?><option onclick="window.open('index.php?go=ALB_Anzeige&formnummer=40&wz=1&FlurstKennz=<?php echo $flst->FlurstKennz; ?>','_blank')">Eigent&uuml;merdaten&nbsp;zum&nbsp;Flurst&uuml;ck</option><? } ?>
 						</select>
-						</td>
-          </tr>         
+					  &nbsp;&nbsp;
+                      </div>
+
+              </div>
+			</td>
+          </tr>
         </tr>
       </table>
         </td>
@@ -666,14 +693,14 @@ backto = function(go){
       </div>
     </td>
   </tr>
-  
+
   <?} # Ende es wurde auch was zum Flurstück gefunden
     else { ?>
     <tr>
     <td>Das Flurstück mit Kennzeichen: <?php echo $flurstkennz; ?> ist nicht in der aktuellen<br> PostGIS-Datenbank enthalten. Aktualisieren Sie die ALB und ALK-Daten.
     </td>
     </tr>
-    <? } 
+    <? }
   } # Ende der Schleife zur Abfrage und Anzeige der einzelnen Flurstücke
   ?>
 
@@ -692,19 +719,62 @@ backto = function(go){
     </tr>
     <tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
 		  <td colspan="2">
-        <a href="javascript:send_selected_flurst('Flurstuecks-CSV-Export', 'Flurstück', '', '');">CSV-Export FST</a>&nbsp;|&nbsp;
-        <? if($privileg_['eigentuemer']){ ?>
-        <a href="javascript:send_selected_flurst('Flurstuecks-CSV-Export', 'Eigentümer', '', '');">CSV-Export Eigent&uuml;mer</a>&nbsp;|&nbsp;
-        <? } ?>
-        <a href="javascript:send_selected_flurst('Flurstuecks-CSV-Export', 'Nutzungsarten', '', '');">CSV-Export NA</a>&nbsp;|&nbsp;
-        <a href="javascript:send_selected_flurst('Flurstuecks-CSV-Export', 'Klassifizierung', '', '');">CSV-Export Klassifizierung</a>
+          <div class="fstanzeigecontainer">
+
+            <a href="javascript:send_selected_flurst('Flurstuecks-CSV-Export', 'Flurstück', '', '');">
+            <div class="fstanzeigehover">
+              &nbsp;&nbsp;
+              CSV-Export FST
+              &nbsp;&nbsp;
+            </div>
+            </a>
+
+            <? if($privileg_['eigentuemer']){ ?>
+            <a href="javascript:send_selected_flurst('Flurstuecks-CSV-Export', 'Eigentümer', '', '');">
+            <div class="fstanzeigehover">
+              &nbsp;&nbsp;
+              CSV-Export Eigent&uuml;mer
+              &nbsp;&nbsp;
+            </div>
+            </a>
+            <? } ?>
+
+            <a href="javascript:send_selected_flurst('Flurstuecks-CSV-Export', 'Nutzungsarten', '', '');">
+            <div class="fstanzeigehover">
+              &nbsp;&nbsp;
+              CSV-Export NA
+              &nbsp;&nbsp;
+            </div>
+            </a>
+
+            <a href="javascript:send_selected_flurst('Flurstuecks-CSV-Export', 'Klassifizierung', '', '');">
+            <div class="fstanzeigehover">
+              &nbsp;&nbsp;
+              CSV-Export Klassifizierung
+              &nbsp;&nbsp;
+            </div>
+            </a>
+
+          </div>
   		  </td>
 		</tr>
 		<tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
 		  <td>
-        <a href="javascript:send_selected_flurst('ZoomToFlst', '');">Kartenausschnitt</a> | 
+          <div class="fstanzeigecontainer">
+            <div style="text-align:center;">
+
+              <a href="javascript:send_selected_flurst('ZoomToFlst', '');">
+              <div class="fstanzeigehover">
+                &nbsp;&nbsp;
+                Kartenausschnitt
+                &nbsp;&nbsp;
+              </div>
+              </a>
+
+              <div class="fstanzeigehover">
+                &nbsp;&nbsp;
 				Auszug:
-				<select style="width: 200px">
+				<select style="width: 130px">
 					<option>-- Auswahl --</option>
 					<? if($this->Stelle->funktionen['MV0510']['erlaubt']){ ?><option onclick="send_selected_flurst('ALKIS_Auszug', 'MV0510', 1, '_blank');">Flurstücksnachweis</option><? } ?>
 					<? if($this->Stelle->funktionen['MV0550']['erlaubt']){ ?><option onclick="send_selected_flurst('ALKIS_Auszug', 'MV0550', 1, '_blank');">Flurstücks- und Eigentumsnachweis</option><? } ?>
@@ -713,8 +783,13 @@ backto = function(go){
 
 					<? if($this->Stelle->funktionen['ALB-Auszug 30']['erlaubt']){ ?><option onclick="send_selected_flurst('ALB_Anzeige', '30', 1, '_blank');">Flurst&uuml;cksdaten</option><? } ?>
 					<? if($this->Stelle->funktionen['ALB-Auszug 35']['erlaubt']){ ?><option onclick="send_selected_flurst('ALB_Anzeige', '35', 1, '_blank');">Flurst&uuml;cksdaten&nbsp;mit&nbsp;Eigent&uuml;mer</option><? } ?>
-					<? if($this->Stelle->funktionen['ALB-Auszug 40']['erlaubt']){ ?><option onclick="send_selected_flurst('ALB_Anzeige', '40', 1, '_blank');">Eigent&uuml;merdaten&nbsp;zum&nbsp;Flurst&uuml;ck</option><? } ?>					
+					<? if($this->Stelle->funktionen['ALB-Auszug 40']['erlaubt']){ ?><option onclick="send_selected_flurst('ALB_Anzeige', '40', 1, '_blank');">Eigent&uuml;merdaten&nbsp;zum&nbsp;Flurst&uuml;ck</option><? } ?>
 				</select>
+                &nbsp;&nbsp;
+              </div>
+
+          </div>
+        </div>
   		</td>
 		</tr>
     <tr>
