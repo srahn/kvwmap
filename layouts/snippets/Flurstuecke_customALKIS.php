@@ -648,7 +648,7 @@ backto = function(go){
 					<a href="index.php?go=Adresse_Auswaehlen&searchInExtent=<?php echo $this->searchInExtent;
 					?>&GemID=<? echo $flst->GemeindeID;
 					?>&StrID=<? echo $flst->Adresse[0]["strasse"];
-					?>&selHausID=<? echo implode($flst->selHausID, ', '); ?>">
+					?>&selHausID=<? if($flst->selHausID != '')echo implode($flst->selHausID, ', '); ?>">
 										<div class="fstanzeigehover">
 					  &nbsp;&nbsp;
 					  zur Adresssuche
