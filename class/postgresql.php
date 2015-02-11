@@ -853,8 +853,8 @@ class pgdatabase_alkis {
     $sql ="SET enable_seqscan = OFF;SELECT distinct (g.land::text||lpad(g.bezirk::text, 4, '0'))::integer as bezirk, g.buchungsblattnummermitbuchstabenerweiterung AS blatt ";
 		if($hist_alb) $sql.="FROM alkis.ax_historischesflurstueckohneraumbezug f ";
 		else $sql.="FROM alkis.ax_flurstueck f ";  
-		$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON f.istgebucht = ANY(s2.an) ";
-		$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR f.istgebucht = ANY(s.an) OR f.istgebucht = ANY(s2.an) AND s2.gml_id = ANY(s.an) ";
+		$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON ARRAY[f.istgebucht] <@ s2.an ";
+		$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR ARRAY[f.istgebucht] <@ s.an OR ARRAY[f.istgebucht] <@ s2.an AND ARRAY[s2.gml_id] <@ s.an ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
 		$sql.="WHERE (g.blattart = 1000 OR g.blattart = 2000 OR g.blattart = 3000) ";
 		$sql.="AND f.flurstueckskennzeichen = '".$FlurstKennz."' ";
@@ -1047,8 +1047,8 @@ class pgdatabase_alkis {
 			if($hist_alb) $sql.="FROM alkis.ax_historischesflurstueckohneraumbezug f ";
 			else $sql.="FROM alkis.ax_flurstueck f ";  
 			$sql.="LEFT JOIN alkis.ax_gemarkung gem ON f.land = gem.land AND f.gemarkungsnummer = gem.gemarkungsnummer ";
-			$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON f.istgebucht = ANY(s2.an) ";
-			$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR f.istgebucht = ANY(s.an) OR f.istgebucht = ANY(s2.an) AND s2.gml_id = ANY(s.an) ";
+			$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON ARRAY[f.istgebucht] <@ s2.an ";
+			$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR ARRAY[f.istgebucht] <@ s.an OR ARRAY[f.istgebucht] <@ s2.an AND ARRAY[s2.gml_id] <@ s.an ";
 			$sql.="LEFT JOIN alkis.ax_buchungsstelle_buchungsart art ON s.buchungsart = art.wert ";
 			$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
 			$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
@@ -2828,7 +2828,7 @@ class pgdatabase_alkis {
   }
 
   function getForstamt($FlurstKennz) {
-    $sql ="SELECT d.stelle as schluessel, d.bezeichnung as name FROM alkis.ax_dienststelle as d, alkis.ax_flurstueck as f";
+    $sql ="SELECT distinct d.stelle as schluessel, d.bezeichnung as name FROM alkis.ax_dienststelle as d, alkis.ax_flurstueck as f";
     $sql.=" WHERE d.stellenart = 1400 AND d.stelle::integer = ANY(f.stelle) AND f.flurstueckskennzeichen = '".$FlurstKennz."'";
 		$sql.= $this->build_temporal_filter(array('d', 'f'));
 		#echo $sql;

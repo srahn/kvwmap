@@ -526,7 +526,9 @@ backto = function(go){
               <tr>
                 <td colspan="3"><span class="fett">Eigentümer</span></td>
               </tr>
-            <? for ($g=0;$g<count($flst->Grundbuecher);$g++) {
+            <? 
+					$flst->Grundbuecher=$flst->getGrundbuecher();
+					for ($g=0;$g<count($flst->Grundbuecher);$g++) {
             $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],$flst->hist_alb);
             for ($b=0;$b<count($flst->Buchungen);$b++) {
                 if($privileg_['bestandsnr']){
