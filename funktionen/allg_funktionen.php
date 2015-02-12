@@ -68,6 +68,7 @@ function formatFlurstkennzALKIS($FlurstKennzListe){
 			$explosion = explode('.',$nenner);
 			$vorkomma = '0'.$explosion[0];
 		}
+		else $vorkomma = '';
 		$FlurstKennz = $gem.$flur.$zaehler.$vorkomma;
 		$Flurstuecke[$i] = str_pad($FlurstKennz, 20, '_', STR_PAD_RIGHT);
 	}
