@@ -441,7 +441,7 @@ class data_import_export {
   	$layerset = $user->rolle->getLayer($this->formvars['selected_layer_id']);
     $mapdb = new db_mapObj($stelle->id,$user->id);
     $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $stelle->pgdbhost);
-    $path = $mapdb->getPath($this->formvars['selected_layer_id']);
+		$path = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[0]['pfad']);
     $privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
     $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
     for($i = 0; $i < count($this->attributes['name']); $i++){
@@ -462,14 +462,15 @@ class data_import_export {
     if($this->formvars['epsg']){
     	$select = substr($sql, 0, strrpos(strtolower($sql), 'from'));
     	$rest = substr($sql, strrpos(strtolower($sql), 'from'));
-    	// if(strpos($select, '.'.$this->attributes['the_geom']) !== false){		// table.the_geom muss ersetzt werden
-    		// $select = str_replace($the_geom, 'st_transform('.$the_geom.', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);
-    	// }
-    	// else{		// nur the_geom muss ersetzt werden
-    		$select = str_replace(',  '.$the_geom, ', st_transform('.$the_geom.', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);    		
-    		$select = str_replace(', '.$the_geom, ', st_transform('.$the_geom.', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);
-    		$select = str_replace(','.$the_geom, ',st_transform('.$the_geom.', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);
-    	//}
+    	 if(strpos($select, '.'.$this->attributes['the_geom']) !== false){		// table.the_geom muss ersetzt werden
+    		 $select = str_replace($the_geom, 'st_transform('.$the_geom.', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);
+    	 }
+    	 else{		// nur the_geom muss ersetzt werden
+    		$select = str_replace(',  '.$this->attributes['the_geom'], ', st_transform('.$this->attributes['the_geom'].', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);    		
+    		$select = str_replace(', '.$this->attributes['the_geom'], ', st_transform('.$this->attributes['the_geom'].', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);
+    		$select = str_replace(','.$this->attributes['the_geom'], ',st_transform('.$this->attributes['the_geom'].', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);
+				$select = str_replace(' '.$this->attributes['the_geom'].',', ' st_transform('.$this->attributes['the_geom'].', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'].',', $select);
+    	}
     	$sql = $select.$rest;
     }
     # order by rausnehmen
@@ -486,7 +487,7 @@ class data_import_export {
   	}
   	# über Polygon einschränken
     if($this->formvars['newpathwkt']){
-    	$sql.= " AND st_transform(".$the_geom.", ".$user->rolle->epsg_code.") && st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code.") AND ST_INTERSECTS(st_transform(".$the_geom.", ".$user->rolle->epsg_code."), st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."))";
+    	$sql.= " AND ".$the_geom." && st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code'].") AND ST_INTERSECTS(".$the_geom.", st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."))";
     }
     # Filter
     $filter = $mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id);
@@ -509,6 +510,7 @@ class data_import_export {
 	    }
   	}
     $sql.= $orderby;
+		#echo $sql;
     $temp_table = 'shp_export_'.rand(1, 10000);
     $sql = 'CREATE TABLE public.'.$temp_table.' AS '.$sql;		# temporäre Tabelle erzeugen, damit das/die Schema/ta berücksichtigt werden
     $ret = $layerdb->execSQL($sql,4, 0);

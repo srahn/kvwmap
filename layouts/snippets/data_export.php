@@ -88,7 +88,7 @@ $j=0;
       		?>
       	</select>
         </div>
-        <div style="padding-top:5px; padding-bottom:5px; margin-left: 7px;">
+        <div style="padding-top:5px; padding-bottom:5px; margin-left: 15px;">
           <?php echo $strFormat; ?>:<br>
       	<select name="export_format">
       		<? if($this->data_import_export->attributes['the_geom'] != ''){ ?>
@@ -101,7 +101,7 @@ $j=0;
       	</select>
         </div>
         <? if($this->data_import_export->attributes['the_geom'] != ''){ ?>
-        <div style="padding-top:5px; padding-bottom:5px; margin-left: 7px;">
+        <div style="padding-top:5px; padding-bottom:5px; margin-left: 15px;">
           <?php echo $strTransformInto; ?>:<br>
       	<select name="epsg">
       	  <option value="">-- Auswahl --</option>

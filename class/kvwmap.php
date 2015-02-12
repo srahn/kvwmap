@@ -8098,9 +8098,9 @@ class GUI {
 	}
 	
 	function create_shp_rollenlayer_load(){
-		include_(CLASSPATH.'shape.php');
-		$this->shape = new shape();
-		$layer_id = $this->shape->create_shape_rollenlayer($this->formvars, $this->Stelle, $this->user, $this->database, $this->pgdatabase);
+		include_(CLASSPATH.'data_import_export.php');
+		$this->data_import_export = new data_import_export();
+		$layer_id = $this->data_import_export->create_shape_rollenlayer($this->formvars, $this->Stelle, $this->user, $this->database, $this->pgdatabase);
 		$this->loadMap('DataBase');
 		$this->zoomToMaxLayerExtent($layer_id);
 		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
