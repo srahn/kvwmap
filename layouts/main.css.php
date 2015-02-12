@@ -710,3 +710,17 @@ tbody.gle tr:hover {
 .fstanzeigehover:hover{
                 background-color:rgba(255,255,255,0.2);
 }
+
+.flexcontainer1{
+    display: flex;
+    justify-content:flex-start;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.flexcontainer2{
+    display: flex;
+    justify-content:flex-start;
+    flex-direction: row;
+    align-items:stretch;
+}

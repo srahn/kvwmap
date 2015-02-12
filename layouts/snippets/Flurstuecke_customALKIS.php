@@ -632,7 +632,7 @@ backto = function(go){
   </tr>
   <tr>
     <td colspan="2">
-      <table cellspacing="0" cellpading="0" border="0">
+      <table width="100%" cellspacing="0" cellpading="0" border="0">
         <tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
 		  <td colspan="2">
             <div class="fstanzeigecontainer">
