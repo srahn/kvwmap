@@ -2709,6 +2709,9 @@ class pgdatabase_alkis {
 		$sql.= "LEFT JOIN alkis.ax_namensnummer_eigentuemerart w ON w.wert = n.eigentuemerart ";
 		$sql.= "LEFT JOIN alkis.ax_buchungsblatt g ON n.istbestandteilvon = g.gml_id ";
 		$sql.= "LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
+		$sql.= "LEFT JOIN alkis.ax_buchungsstelle s ON s.istbestandteilvon = g.gml_id ";
+		$sql.= "LEFT JOIN alkis.ax_buchungsstelle s2 ON s2.istbestandteilvon = g.gml_id ";
+		$sql.= "LEFT JOIN alkis.ax_flurstueck f ON f.istgebucht = s.gml_id OR f.istgebucht = ANY(s.an) OR f.istgebucht = ANY(s2.an) AND s2.gml_id = ANY(s.an) ";
 		$sql.= " WHERE 1=1 ";
 
     if($n1 != '%%')$sql.=" AND lower(nachnameoderfirma) LIKE lower('".$n1."') ";

@@ -2202,6 +2202,7 @@ class ALB {
 	        ################################################################################
 	        # Bestandsnachweis #
 	        ####################
+					$flst->Grundbuecher=$flst->getGrundbuecher();
 	        switch ($formnummer) {
 	          case 40 : {
 	            for ($g=0;$g<count($flst->Grundbuecher);$g++) {
