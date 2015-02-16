@@ -2501,7 +2501,7 @@ class pgdatabase_alkis {
   }
   
   function getEigentuemerliste($FlurstKennz,$Bezirk,$Blatt,$BVNR) {
-    $sql = "SELECT distinct n.laufendenummernachdin1421 AS namensnr, p.nachnameoderfirma, p.vorname, p.akademischergrad, p.geburtsname, p.geburtsdatum::date, anschrift.gml_id as anschrift_gml_id, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, w.bezeichner as Art, n.zaehler||'/'||n.nenner as anteil ";
+    $sql = "SELECT distinct n.laufendenummernachdin1421 AS namensnr, p.nachnameoderfirma, p.vorname, p.akademischergrad, p.namensbestandteil, p.geburtsname, p.geburtsdatum::date, anschrift.gml_id as anschrift_gml_id, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, w.bezeichner as Art, n.zaehler||'/'||n.nenner as anteil ";
 		$sql.= "FROM alkis.ax_buchungsstelle s ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
@@ -2539,6 +2539,8 @@ class pgdatabase_alkis {
 
       $Eigentuemer->Name[0]=$rs['nachnameoderfirma'];
       if($rs['vorname'] != '')$Eigentuemer->Name[0] .= ', '.$rs['vorname']; 
+			if($rs['namensbestandteil'] != '')$Eigentuemer->Name[0] .= ', '.$rs['namensbestandteil']; 
+			if($rs['akademischergrad'] != '')$Eigentuemer->Name[0] .= ', '.$rs['akademischergrad']; 				
       $Eigentuemer->Name[1] = $rs['geburtsdatum'];
 			if($rs['geburtsname'] != '')$Eigentuemer->Name[1] = 'geb. '.$rs['geburtsname'].' '.$Eigentuemer->Name[1];
       $Eigentuemer->Name[2] = $rs['strasse'].' '.$rs['hausnummer'];
@@ -2702,7 +2704,7 @@ class pgdatabase_alkis {
 		$caseSensitive = $formvars['caseSensitive'];
 		$order = $formvars['order'];
 			
-    $sql = "set enable_seqscan = off;SELECT distinct n.laufendenummernachdin1421 AS lfd_nr_name, p.nachnameoderfirma, p.vorname, p.akademischergrad, p.geburtsname, p.geburtsdatum, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, anschrift.ortsteil, g.buchungsblattnummermitbuchstabenerweiterung as blatt, b.schluesselgesamt as bezirk ";
+    $sql = "set enable_seqscan = off;SELECT distinct n.laufendenummernachdin1421 AS lfd_nr_name, p.nachnameoderfirma, p.vorname, p.namensbestandteil, p.akademischergrad, p.geburtsname, p.geburtsdatum, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, anschrift.ortsteil, g.buchungsblattnummermitbuchstabenerweiterung as blatt, b.schluesselgesamt as bezirk ";
 		$sql.= "FROM alkis.ax_person p ";
 		$sql.= "LEFT JOIN alkis.ax_anschrift anschrift ON anschrift.gml_id = ANY(p.hat) ";
 		$sql.= "LEFT JOIN alkis.ax_namensnummer n ON n.benennt = p.gml_id ";
@@ -2759,6 +2761,8 @@ class pgdatabase_alkis {
       	$namen[$i]=$rs;
 	      $namen[$i]['name1'] = $rs['nachnameoderfirma'];
 	      if($rs['vorname'] != '')$namen[$i]['name1'] .= ', '.$rs['vorname']; 
+				if($rs['namensbestandteil'] != '')$namen[$i]['name1'] .= ', '.$rs['namensbestandteil']; 
+				if($rs['akademischergrad'] != '')$namen[$i]['name1'] .= ', '.$rs['akademischergrad']; 				
 	      $namen[$i]['name2'] = $rs['geburtsdatum'];
 				if($rs['geburtsname'] != '')$namen[$i]['name2'] .= ' geb. '.$rs['geburtsname'];
 	      $namen[$i]['name3'] = $rs['strasse'].' '.$rs['hausnummer'];
