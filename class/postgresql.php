@@ -1967,7 +1967,7 @@ class pgdatabase_alkis {
 		$sql.=" WHERE st_intersects(n.wkb_geometry,f.wkb_geometry) = true";
 		$sql.=" AND st_area(st_intersection(n.wkb_geometry,f.wkb_geometry)) > 0.05";
 		$sql.=" AND f.flurstueckskennzeichen = '".$FlurstKennz."'";
-		$sql.= $this->build_temporal_filter(array('f'));
+		$sql.= $this->build_temporal_filter(array('f','n'));
 		#echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0] OR pg_num_rows($queryret[1])==0) {
