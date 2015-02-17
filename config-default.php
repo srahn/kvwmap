@@ -150,7 +150,8 @@ switch ($subnetaddr) {
     define('URL','http://localhost/');
   }
 }
-# -----------------Version 1.6.6 End
+# Datei mit den Nummerierungsbezirkshöhen
+define('NBH_PATH', WWWROOT.APPLVERSION.'tools/UTM33_NBH.lst');			# Version 2.1
 define('MAPSERV_CGI_BIN',URL.'cgi-bin/mapserv');
 define('LOGPATH',INSTALLPATH.'logs/');
 # Shapepath [Pfad zum Shapefileverzeichnis]

@@ -139,14 +139,10 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
       $GUI->output();
 		}break;
 		
-		case 'sendeDokument' : {
-			$GUI->sendeDokument($GUI->formvars['dokument'], $GUI->formvars['original_name']);
-	  } break;
-
-	  case 'sendeDokument_mit_vorschau' : {
-			$GUI->sendeDokument_mit_vorschau($GUI->formvars['dokument'], $GUI->formvars['original_name']);    
-	  } break;
-		
+		case 'getNBH' : {
+			$GUI->getNBH();
+		}break;
+				
 		case 'changemenue' : {
 			$GUI->changemenue($GUI->formvars['id'], $GUI->formvars['status']);
 			$GUI->loadMap('DataBase');

@@ -44,6 +44,8 @@
 		   
   <SCRIPT type="text/ecmascript"><!--
 
+	var nbh = new Array();
+	
   function go_cmd(cmd)   {
       document.GUI.CMD.value  = cmd;
       document.GUI.submit();
@@ -563,6 +565,8 @@ function touchquery(){
 function polygonquery(){
 	doing = "polygonquery";
 	document.getElementById("canvas").setAttribute("cursor", "help");
+	// Wenn im UTM-System gemessen wird, NBH-Datei laden
+	if('.$this->user->rolle->epsg_code.' == 25833)top.ahah("index.php", "go=getNBH", new Array(""), new Array("execute_function"));
 	if(top.document.GUI.str_polypathx.value != ""){
 		polydrawing = true;
 		top.document.GUI.str_polypathx.value = "";
@@ -614,6 +618,8 @@ function noMeasuring(){
 function measure(){
 	options1 = top.document.getElementById("options");
 	options1.innerHTML=\'<input type="checkbox" onclick="toggle_vertices()" name="orthofang">&nbsp;Ortho-Fang\';
+	// Wenn im UTM-System gemessen wird, NBH-Datei laden
+	if('.$this->user->rolle->epsg_code.' == 25833)top.ahah("index.php", "go=getNBH", new Array(""), new Array("execute_function"));
   doing = "measure";
 	if(top.document.GUI.str_pathx.value != ""){
 		measuring = true;	
@@ -1048,6 +1054,10 @@ function polygonarea(evt){
 		}
 		parts = parts + (polypathx[polypathx.length-1]*(polypathy[0]-polypathy[polypathx.length-2])) + (polypathx[0]*(polypathy[1]-polypathy[polypathx.length-1]));
 		area	= 0.5 * Math.sqrt(parts*parts);
+		k = calculate_reduction(polypathx, polypathy[0]);
+		console.log(area);
+		area = area / (k * k);
+		console.log(area);
 		hidetooltip(evt);	
 		area = top.format_number(area, false, true);
 		show_tooltip("Fl"+unescape("%E4")+"cheninhalt: "+area+" m"+unescape("%B2")+" "+unescape("%A0"),  evt.clientX, evt.clientY);
@@ -1260,11 +1270,44 @@ function add_current_point(evt){
   deletelast(evt);
 }
 
+function calculate_reduction(pathx, y1){
+	k = 1;
+	if(top.nbh.length > 0){
+		em = 0;
+		r = 6384000;
+		x = pathx[0] + "";
+		y = y1 + "";
+		x_1 = x.substring(2,3);
+		x_10 = x.substring(1,2);
+		x_100 = x.substring(0,1);
+		y_1 = y.substring(3,4);
+		y_10 = y.substring(2,3);
+		y_100 = y.substring(1,2);
+		y_1000 = y.substring(0,1);
+		nhn = 33+x_100+y_1000+y_100+x_10+x_1+y_10+y_1;
+		hell = 38 + top.nbh[nhn];
+		for(i = 0; i < pathx.length; i++){
+			em = em + parseInt(pathx[i]);
+		}
+		em = em / pathx.length;
+		k = (1 - (hell / r)) * (1 + (((em - 500000)*(em - 500000))/(2 * r * r))) * 0.9996;
+	}
+	return k;
+}
+
+function calculate_distance(x1, y1, x2, y2){	
+	distance = Math.sqrt(((x1-x2)*(x1-x2))+((y1-y2)*(y1-y2)));
+	var pathx = new Array(x1, x2);
+	k = calculate_reduction(pathx, y1);
+	distance = distance / k;
+	return distance;
+}
+
 function showMeasurement(evt){
   var track = 0, track0 = 0, part0 = 0, parts = 0, output = "";
   for(var j = 0; j < pathx_world.length-1; ++j){
     part0 = parts;
-    parts = parts + Math.sqrt(((pathx_world[j]-pathx_world[j+1])*(pathx_world[j]-pathx_world[j+1]))+((pathy_world[j]-pathy_world[j+1])*(pathy_world[j]-pathy_world[j+1])));
+    parts = parts + calculate_distance(pathx_world[j], pathy_world[j], pathx_world[j+1], pathy_world[j+1]);
   }
   track0 = top.format_number(part0, false, freehand_measuring);
   track = top.format_number(parts, false, freehand_measuring);

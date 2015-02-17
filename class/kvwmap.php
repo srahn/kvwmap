@@ -106,6 +106,17 @@ class GUI {
     }
 	}
 	
+	function getNBH(){
+		if(defined('NBH_PATH')){
+			$nbh = file_get_contents(NBH_PATH);
+			$nbh = str_replace("NB	", "nbh[", $nbh);
+			$nbh = str_replace("	", "]=", $nbh);
+			$nbh = str_replace(" ", "", $nbh);
+			$nbh = str_replace(chr(13), ";".chr(13), $nbh);
+			echo $nbh;
+		}
+	}
+	
 	function get_group_legend(){
     # Änderungen in den Gruppen werden gesetzt
     $this->formvars = $this->user->rolle->setGroupStatus($this->formvars);
