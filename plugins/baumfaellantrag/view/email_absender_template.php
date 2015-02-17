@@ -15,7 +15,7 @@
 	$mail_absender['message'] .= "Ihre Daten wurden an die zuständige Stelle weitergeleitet.\n";
   $mail_absender['message'] .= 'Der Ansprechpartner dort ist: ' . $data['authority_contactPerson']. "\n";
   $mail_absender['message'] .= 'E-Mail: ' . $data['authority_email']. "\n\n";
-  $mail_absender['message'] .= "Sie werden über den Beschreid per E-Mail oder per Post informiert\n\n";
+  $mail_absender['message'] .= "Sie werden über den Bescheid per E-Mail oder per Post informiert\n\n";
 	$mail_absender['message'] .= "\n";
 	$mail_absender['message'] .= 'Für technische Rückfragen wenden Sie sich bitte an:' . "\n";
 	$mail_absender['message'] .= 'Roland Grösch' . "\n";
