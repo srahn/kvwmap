@@ -1055,9 +1055,7 @@ function polygonarea(evt){
 		parts = parts + (polypathx[polypathx.length-1]*(polypathy[0]-polypathy[polypathx.length-2])) + (polypathx[0]*(polypathy[1]-polypathy[polypathx.length-1]));
 		area	= 0.5 * Math.sqrt(parts*parts);
 		k = calculate_reduction(polypathx, polypathy[0]);
-		console.log(area);
 		area = area / (k * k);
-		console.log(area);
 		hidetooltip(evt);	
 		area = top.format_number(area, false, true);
 		show_tooltip("Fl"+unescape("%E4")+"cheninhalt: "+area+" m"+unescape("%B2")+" "+unescape("%A0"),  evt.clientX, evt.clientY);
