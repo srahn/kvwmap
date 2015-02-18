@@ -215,6 +215,7 @@ class ALB {
       $flurstkennz = $flurstuecke[$i];
       $flst = new flurstueck($flurstkennz,$this->database);
       $flst->readALB_Data($flurstkennz);
+			$flst->Grundbuecher=$flst->getGrundbuecher();
 			if(ALKIS){
 				$ratio = $flst->ALB_Flaeche/$flst->Klassifizierung[0]['flstflaeche'];
 				$emzges_222 = 0; $emzges_223 = 0;
@@ -387,7 +388,7 @@ class ALB {
 	        $csv .= ';';
 	      }
 	      
-	      if($formvars['blattnr']){
+					if($formvars['blattnr']){
 		        for($g = 0; $g < count($flst->Grundbuecher); $g++){
 		          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
 		          for($b = 0; $b < count($flst->Buchungen); $b++){
@@ -439,7 +440,6 @@ class ALB {
 	      
 	      if($formvars['eigentuemer']){
 	      	$csv .= '"';
-					$flst->Grundbuecher=$flst->getGrundbuecher();
 	        for($g = 0; $g < count($flst->Grundbuecher); $g++){
 	        	if($g > 0)$csv .= "\n";
 	          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
@@ -629,7 +629,7 @@ class ALB {
 			        $csv .= ';';
 			      }
 			      
-			      if($formvars['blattnr']){
+							if($formvars['blattnr']){
 				        for($g = 0; $g < count($flst->Grundbuecher); $g++){
 				          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
 				          for($b = 0; $b < count($flst->Buchungen); $b++){
@@ -681,7 +681,6 @@ class ALB {
 			      
 			      if($formvars['eigentuemer']){
 			      	$csv .= '"';
-							$flst->Grundbuecher=$flst->getGrundbuecher();
 			        for($g = 0; $g < count($flst->Grundbuecher); $g++){
 			        	if($g > 0)$csv .= "\n";
 			          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
@@ -762,7 +761,7 @@ class ALB {
       $flurstkennz = $flurstuecke[$i];
       $flst = new flurstueck($flurstkennz,$this->database);
       $flst->readALB_Data($flurstkennz);
-      
+      $flst->Grundbuecher=$flst->getGrundbuecher();
       for($g = 0; $g < count($flst->Grundbuecher); $g++){
           $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
           for($b = 0; $b < count($flst->Buchungen); $b++){
@@ -1072,7 +1071,7 @@ class ALB {
       $flurstkennz = $flurstuecke[$i];
       $flst = new flurstueck($flurstkennz,$this->database);
       $flst->readALB_Data($flurstkennz);
-      
+      $flst->Grundbuecher=$flst->getGrundbuecher();
       $anzNutzung=count($flst->Nutzung);
 			for ($n = 0; $n < $anzNutzung; $n++){
       
@@ -1321,7 +1320,6 @@ class ALB {
 	      }
 	      
   		if($formvars['eigentuemer']){
-				$flst->Grundbuecher=$flst->getGrundbuecher();
         for($g = 0; $g < count($flst->Grundbuecher); $g++){
           $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
           for($b = 0; $b < count($flst->Buchungen); $b++){
@@ -1409,6 +1407,7 @@ class ALB {
       $flurstkennz = $flurstuecke[$i];
       $flst = new flurstueck($flurstkennz,$this->database);
       $flst->readALB_Data($flurstkennz);
+			$flst->Grundbuecher=$flst->getGrundbuecher();
       if($formvars['flurstkennz']){ $csv .= $flst->FlurstKennz.';';}
       if($formvars['flurstkennz']){ $csv .= "'".$flst->FlurstNr."';";}
       if($formvars['gemkgname']){ $csv .= $flst->GemkgName.';';}
@@ -1621,7 +1620,7 @@ class ALB {
 	          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
 	          for($b = 0; $b < count($flst->Buchungen); $b++){
 	          	if($b > 0)$csv .= ' | ';
-	            $csv .= intval($flst->Buchungen[$b]['blatt']).'|';
+	            $csv .= intval($flst->Buchungen[$b]['blatt']);
 	          }
 	        }
 	        $csv .= ';';
@@ -1668,7 +1667,6 @@ class ALB {
       
       if($formvars['eigentuemer']){
       	$csv .= '"';
-				$flst->Grundbuecher=$flst->getGrundbuecher();
         for($g = 0; $g < count($flst->Grundbuecher); $g++){
         	if($g > 0)$csv .= "\n";
           $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
@@ -1796,6 +1794,7 @@ class ALB {
       $flst=new flurstueck($FlurstKennz[$f],$this->database);
       $flst->database=$this->database;
       $ret=$flst->readALB_Data($FlurstKennz[$f]);
+			$flst->Grundbuecher=$flst->getGrundbuecher();
       if ($ret!='') {
         return $ret;
       }
@@ -2206,7 +2205,6 @@ class ALB {
 	        ################################################################################
 	        # Bestandsnachweis #
 	        ####################
-					$flst->Grundbuecher=$flst->getGrundbuecher();
 	        switch ($formnummer) {
 	          case 40 : {
 	            for ($g=0;$g<count($flst->Grundbuecher);$g++) {
@@ -2479,6 +2477,7 @@ class ALB {
     $flst=new flurstueck($buchungen[0]['flurstkennz'],$this->database);
     $flst->database=$this->database;
     $ret=$flst->readALB_Data($buchungen[0]['flurstkennz']);
+		$flst->Grundbuecher=$flst->getGrundbuecher();
 
     if ($wasserzeichen) {
       $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
