@@ -169,7 +169,7 @@ else {
 			<td align="left" colspan="3">Flur:&nbsp;
 				<div style="position: relative">
 				<input type="text" name="suchflur" value="<?php echo $this->formvars['suchflur']; ?>" size="3" maxlength="3"><img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[1],Style[0], document.getElementById('TipLayer'))" onmouseout="htm()">
-				&nbsp;&nbsp;&nbsp;<input type="checkbox" name="flur_thematisch" value="1"> thematisch
+				&nbsp;&nbsp;&nbsp;<input type="checkbox" name="flur_thematisch" <? if($this->formvars['flur_thematisch'] == '1')echo 'checked'; ?> value="1"> thematisch
 				<DIV id="TipLayer" style="visibility:hidden;position:absolute;z-index:1000;left: -50px"></DIV>
 				</div>
 			</td>

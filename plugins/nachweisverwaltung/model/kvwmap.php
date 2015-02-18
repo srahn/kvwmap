@@ -518,6 +518,7 @@
     $GUI->formvars['Flur']=intval(substr($GUI->formvars['flurid'],6,9));
     $GUI->formvars['Bilddatei']=NACHWEISDOCPATH.$nachweis->document['link_datei'];
     $GUI->formvars['andere_art']=$nachweis->document['andere_art'];
+		$GUI->formvars['fortfuehrung']=$nachweis->document['fortfuehrung'];
     $GUI->formvars['id'] = '';
     $GUI->nachweisFormAnzeige($nachweis);
 	};
