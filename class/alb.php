@@ -439,6 +439,7 @@ class ALB {
 	      
 	      if($formvars['eigentuemer']){
 	      	$csv .= '"';
+					$flst->Grundbuecher=$flst->getGrundbuecher();
 	        for($g = 0; $g < count($flst->Grundbuecher); $g++){
 	        	if($g > 0)$csv .= "\n";
 	          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
@@ -680,6 +681,7 @@ class ALB {
 			      
 			      if($formvars['eigentuemer']){
 			      	$csv .= '"';
+							$flst->Grundbuecher=$flst->getGrundbuecher();
 			        for($g = 0; $g < count($flst->Grundbuecher); $g++){
 			        	if($g > 0)$csv .= "\n";
 			          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
@@ -1318,7 +1320,8 @@ class ALB {
 	        $csv .= ';';
 	      }
 	      
-  			if($formvars['eigentuemer']){
+  		if($formvars['eigentuemer']){
+				$flst->Grundbuecher=$flst->getGrundbuecher();
         for($g = 0; $g < count($flst->Grundbuecher); $g++){
           $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
           for($b = 0; $b < count($flst->Buchungen); $b++){
@@ -1665,6 +1668,7 @@ class ALB {
       
       if($formvars['eigentuemer']){
       	$csv .= '"';
+				$flst->Grundbuecher=$flst->getGrundbuecher();
         for($g = 0; $g < count($flst->Grundbuecher); $g++){
         	if($g > 0)$csv .= "\n";
           $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
