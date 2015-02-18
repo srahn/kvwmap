@@ -265,20 +265,20 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
           <td>einblenden</td>
           <td colspan="3"><select name="art_einblenden" onChange="document.GUI.submit()">
               <option value="">---</option>
-              <option value="111"<?php if ($this->formvars['art_einblenden']==='1111') { ?> selected<?php } ?>>alle</option>
+              <option value="1111"<?php if ($this->formvars['art_einblenden']==='1111') { ?> selected<?php } ?>>alle</option>
               <option value="0001"<?php if ($this->formvars['art_einblenden']==='0001') { ?> selected<?php } ?>>nur Andere</option>
-              <option value="100"<?php if ($this->formvars['art_einblenden']==='1000') { ?> selected<?php } ?>>nur 
-              FFR</option>
-              <option value="010"<?php if ($this->formvars['art_einblenden']==='0100') { ?> selected<?php } ?>>nur 
-              KVZ</option>
-              <option value="001"<?php if ($this->formvars['art_einblenden']==='0010') { ?> selected<?php } ?>>nur 
-              GN</option>
-              <option value="110"<?php if ($this->formvars['art_einblenden']==='1100') { ?> selected<?php } ?>>FFR 
-              + KVZ</option>
-              <option value="101"<?php if ($this->formvars['art_einblenden']==='1010') { ?> selected<?php } ?>>FFR 
-              + GN</option>
-              <option value="011"<?php if ($this->formvars['art_einblenden']==='0110') { ?> selected<?php } ?>>KVZ 
-              + GN</option>
+              <option value="1000"<?php if ($this->formvars['art_einblenden']==='1000') { ?> selected<?php } ?>>nur FFR</option>
+              <option value="0100"<?php if ($this->formvars['art_einblenden']==='0100') { ?> selected<?php } ?>>nur KVZ</option>
+              <option value="0010"<?php if ($this->formvars['art_einblenden']==='0010') { ?> selected<?php } ?>>nur GN</option>
+              <option value="1100"<?php if ($this->formvars['art_einblenden']==='1100') { ?> selected<?php } ?>>FFR + KVZ</option>
+              <option value="1010"<?php if ($this->formvars['art_einblenden']==='1010') { ?> selected<?php } ?>>FFR + GN</option>
+              <option value="0110"<?php if ($this->formvars['art_einblenden']==='0110') { ?> selected<?php } ?>>KVZ + GN</option>
+							<option value="1001"<?php if ($this->formvars['art_einblenden']==='1001') { ?> selected<?php } ?>>FFR + Andere</option>
+              <option value="0101"<?php if ($this->formvars['art_einblenden']==='0101') { ?> selected<?php } ?>>KVZ + Andere</option>
+              <option value="0011"<?php if ($this->formvars['art_einblenden']==='0011') { ?> selected<?php } ?>>GN + Andere</option>
+              <option value="1101"<?php if ($this->formvars['art_einblenden']==='1101') { ?> selected<?php } ?>>FFR + KVZ + Andere</option>
+              <option value="1011"<?php if ($this->formvars['art_einblenden']==='1011') { ?> selected<?php } ?>>FFR + GN + Andere</option>
+              <option value="0111"<?php if ($this->formvars['art_einblenden']==='0111') { ?> selected<?php } ?>>KVZ + GN + Andere</option>
             </select></td>
         </tr>
         <tr> 
