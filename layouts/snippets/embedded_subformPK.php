@@ -58,7 +58,7 @@
 								else{
 									$url = IMAGEURL.session_id().'.php?dokument=';
 								}											
-								if($type == 'jpg' OR $type == 'png' OR $type == 'gif' ){									
+								if($type == 'jpg' OR $type == 'png' OR $type == 'gif' OR $type == 'pdf' ){
 									echo '<tr><td><a class="preview_link" href="'.$url.$dokumentpfad.'"><img class="preview_image" src="'.$url.$thumbname.'"></a></td></tr>';									
   							}else{
   								echo '<tr><td><a class="preview_link" href="'.$url.$dokumentpfad.'"><img class="preview_doc" src="'.$url.$thumbname.'"></a></td></tr>';
