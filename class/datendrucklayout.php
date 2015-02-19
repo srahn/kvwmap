@@ -55,7 +55,7 @@ class ddl {
     	$this->pdf->selectFont($this->layout['font_user']);			
 			$x = $this->layout['userposx'];
 			$y = $this->layout['userposy'] - $offsety;
-			$this->putText(utf8_decode('Stelle: '.$this->Stelle->Bezeichnung.', Nutzer: '.$this->user->Name), $this->layout['usersize'], NULL, $x, $y, $offsetx);
+			$this->putText(iconv("UTF-8", "CP1252", 'Stelle: '.$this->Stelle->Bezeichnung.', Nutzer: '.$this->user->Name), $this->layout['usersize'], NULL, $x, $y, $offsetx);
     }
   }
 	
@@ -90,7 +90,7 @@ class ddl {
 							$y = $y - $this->yoffset_onpage-22;
 						}
 					}
-					$text = utf8_decode($this->substituteFreitext($this->layout['texts'][$j]['text'], $i, $pagenumber, $pagecount));
+					$text = iconv("UTF-8", "CP1252", $this->substituteFreitext($this->layout['texts'][$j]['text'], $i, $pagenumber, $pagecount));
 					$this->putText($text, $this->layout['texts'][$j]['size'], NULL, $x, $y, $offsetx);
 					# falls in eine alte Seite geschrieben wurde, zurückkehren (aber nicht bei everypage-Freitexten)
 					if($type != 'everypage')$this->pdf->closeObject();
@@ -340,34 +340,34 @@ class ddl {
 				if(is_array($this->attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
 					for($e = 0; $e < count($this->attributes['enum_value'][$j][$i]); $e++){
 						if($this->attributes['enum_value'][$j][$i][$e] == $this->result[$i][$this->attributes['name'][$j]]){
-							$output = utf8_decode($this->attributes['enum_output'][$j][$i][$e]);
+							$output = iconv("UTF-8", "CP1252", $this->attributes['enum_output'][$j][$i][$e]);
 							break;
 						}
-						else $output = utf8_decode($this->result[$i][$this->attributes['name'][$j]]);
+						else $output = iconv("UTF-8", "CP1252", $this->result[$i][$this->attributes['name'][$j]]);
 					}
 				}
 				else{
 					for($e = 0; $e < count($this->attributes['enum_value'][$j]); $e++){
 						if($this->attributes['enum_value'][$j][$e] == $this->result[$i][$this->attributes['name'][$j]]){
-							$output = utf8_decode($this->attributes['enum_output'][$j][$e]);
+							$output = iconv("UTF-8", "CP1252", $this->attributes['enum_output'][$j][$e]);
 							break;
 						}
-						else $output = utf8_decode($this->result[$i][$this->attributes['name'][$j]]);
+						else $output = iconv("UTF-8", "CP1252", $this->result[$i][$this->attributes['name'][$j]]);
 					}
 				}
 				if(count($this->attributes['enum_value'][$j]) == 0){	
-					$output = utf8_decode($this->result[$i][$this->attributes['name'][$j]]);
+					$output = iconv("UTF-8", "CP1252", $this->result[$i][$this->attributes['name'][$j]]);
 				}			
 			}break;
 			case 'Autovervollständigungsfeld' : {
-				$output = utf8_decode($this->attributes['enum_output'][$j][$i]);
+				$output = iconv("UTF-8", "CP1252", $this->attributes['enum_output'][$j][$i]);
 			}break;
 			default: {
 				if(!$preview AND $this->attributes['type'][$j] == 'bool'){
 					$this->result[$i][$this->attributes['name'][$j]] = str_replace('t', "ja", $this->result[$i][$this->attributes['name'][$j]]);	
 					$this->result[$i][$this->attributes['name'][$j]] = str_replace('f', "nein", $this->result[$i][$this->attributes['name'][$j]]);
 				}
-				$output = utf8_decode($this->result[$i][$this->attributes['name'][$j]]);
+				$output = iconv("UTF-8", "CP1252", $this->result[$i][$this->attributes['name'][$j]]);
 			}break;
 		}
 	return $output;
