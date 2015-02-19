@@ -98,14 +98,14 @@ else {
 		      		<select name="Gruppe">
 		      			<option value=""><?php echo $this->strPleaseSelect; ?></option>
 		      			<? 
-		      			foreach($this->Groups as $group){
-		      				if($this->formvars['Gruppe'] == $group['id']){
+		      			for($i = 0; $i < count($this->Groups['ID']); $i++){
+		      				if($this->formvars['Gruppe'] == $this->Groups['ID'][$i]){
 		      					echo '<option selected';
 		      				}
 		      				else{
 		      					echo '<option';
 		      				}
-		      				echo ' value="'.$group['id'].'">'.$group['id'].' - '.$group['Gruppenname'].'</option>';
+		      				echo ' value="'.$this->Groups['ID'][$i].'">'.$this->Groups['ID'][$i].' - '.$this->Groups['Bezeichnung'][$i].'</option>';
 		      			}
 		      			?>	      			
 		      		</select>

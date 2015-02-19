@@ -446,18 +446,6 @@ class GUI {
 			else return $groupid;
 		}
 	}
-	
-	function list_uppergroups($groupid){
-		if($groupid != ''){
-			$lastgroupid = '';
-			while($groupid != '' AND $lastgroupid != $groupid){
-				$uppergroups[] = $this->groupset[$groupid]['Gruppenname'];
-				$lastgroupid = $groupid;
-				$groupid = $this->groupset[$groupid]['obergruppe'];
-			}
-			return $uppergroups;
-		}
-	}
   
   function loadMap($loadMapSource) {
     $this->debug->write("<p>Funktion: loadMap('".$loadMapSource."','".$connStr."')",4);
@@ -6149,7 +6137,7 @@ class GUI {
       $this->formvars['selstellen']=$mapDB->get_stellen_from_layer($this->formvars['selected_layer_id']);
     }
     $this->stellen=$this->Stelle->getStellen('Bezeichnung');
-    $this->Groups = $mapDB->getall_Groups();
+    $this->Groups = $mapDB->get_Groups();
     $this->epsg_codes = read_epsg_codes($this->pgdatabase);
     $this->output();
   }
@@ -6804,22 +6792,12 @@ class GUI {
 	}
 	
   function GenerischeSuche(){
+		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->titel=$this->formvars['titel'];
     $this->main='generic_search.php';
     $this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, NULL);
 		$this->layergruppen['ID'] = array_values(array_unique($this->layerdaten['Gruppe']));
-		
-		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-		$this->groupset = $mapdb->read_Groups();		
-		foreach($this->layergruppen['ID'] as $groupid){
-			$uppergroupnames = $this->list_uppergroups($groupid);
-			$this->layergruppen['Bezeichnung'][] = implode('->', array_reverse($uppergroupnames));;
-		}
-			
-    // Sortieren der User unter Berücksichtigung von Umlauten
-    $sorted_arrays = umlaute_sortieren($this->layergruppen['Bezeichnung'], $this->layergruppen['ID']);
-    $this->layergruppen['Bezeichnung'] = $sorted_arrays['array'];
-    $this->layergruppen['ID'] = $sorted_arrays['second_array'];
+		$this->layergruppen = $mapdb->get_Groups($this->layergruppen);		# Gruppen mit Pfaden versehen
 		
     # wenn Gruppe ausgewählt, Einschränkung auf Layer dieser Gruppe 
     if($this->formvars['selected_group_id']){
@@ -8563,16 +8541,7 @@ class GUI {
     # Abfragen aller möglichen Layer
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->formvars['layer']=$mapDB->getall_Layer('Name');
-		$this->groupset = $mapDB->read_Groups(true, 'Gruppenname');		
-		$this->layergruppen['ID'] = array_unique(array_keys($this->groupset));
-		foreach($this->layergruppen['ID'] as $groupid){
-			$uppergroupnames = $this->list_uppergroups($groupid);
-			$this->layergruppen['Bezeichnung'][] = implode('->', array_reverse($uppergroupnames));;
-		}
-		// Sortieren der Gruppen unter Berücksichtigung von Umlauten
-    $sorted_arrays = umlaute_sortieren($this->layergruppen['Bezeichnung'], $this->layergruppen['ID']);
-    $this->layergruppen['Bezeichnung'] = $sorted_arrays['array'];
-    $this->layergruppen['ID'] = $sorted_arrays['second_array'];
+		$this->layergruppen = $mapDB->get_Groups();		
     # Abfragen aller möglichen User
     $this->formvars['users']=$this->user->getall_Users('Name');
     # Abfragen aller möglichen EPSG-Codes
@@ -14762,16 +14731,33 @@ class db_mapObj{
     return mysql_insert_id();
   }
 
-  function getall_Groups() {
-    $sql ='SELECT * FROM u_groups ORDER BY Gruppenname';
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->getall_Groups - Lesen aller Gruppen:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
-    while($rs=mysql_fetch_array($query)) {
-          $groups[$rs['id']] = $rs;
-      }
-    return $groups;
+  function get_Groups($layergruppen = NULL) {
+		$this->groupset = $this->read_Groups(true, 'Gruppenname');
+		if($layergruppen == NULL){	# alle abfragen
+			$layergruppen['ID'] = array_unique(array_keys($this->groupset));
+		}
+		foreach($layergruppen['ID'] as $groupid){
+			$uppergroupnames = $this->list_uppergroups($groupid);
+			$layergruppen['Bezeichnung'][] = implode('->', array_reverse($uppergroupnames));;
+		}
+		// Sortieren der Gruppen unter Berücksichtigung von Umlauten
+    $sorted_arrays = umlaute_sortieren($layergruppen['Bezeichnung'], $layergruppen['ID']);
+    $layergruppen['Bezeichnung'] = $sorted_arrays['array'];
+    $layergruppen['ID'] = $sorted_arrays['second_array'];
+		return $layergruppen;
   }
+	
+	function list_uppergroups($groupid){
+		if($groupid != ''){
+			$lastgroupid = '';
+			while($groupid != '' AND $lastgroupid != $groupid){
+				$uppergroups[] = $this->groupset[$groupid]['Gruppenname'];
+				$lastgroupid = $groupid;
+				$groupid = $this->groupset[$groupid]['obergruppe'];
+			}
+			return $uppergroups;
+		}
+	}
 
   function getGroupbyName($groupname){
     $sql ="SELECT * FROM u_groups WHERE Gruppenname = '".$groupname."'";
