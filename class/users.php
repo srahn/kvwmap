@@ -904,7 +904,7 @@ class user {
 			if($formvars['singlequery'] != '') $sql.=',singlequery="1"';
 			else $sql.=',singlequery="0"';
 			if($formvars['querymode'] != '') $sql.=',querymode="1"';
-			else $sql.=',querymode="0"';
+			else $sql.=',querymode="0", overlayx=400, overlayy=150';
 			$sql.=',geom_edit_first="'.$formvars['geom_edit_first'].'"';
 			if($formvars['hist_timestamp'] != '') $sql.=',hist_timestamp="'.DateTime::createFromFormat('d.m.Y H:i:s', $formvars['hist_timestamp'])->format('Y-m-d H:i:s').'"';
 			else $sql.=',hist_timestamp = NULL';

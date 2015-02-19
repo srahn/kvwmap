@@ -8563,7 +8563,16 @@ class GUI {
     # Abfragen aller möglichen Layer
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->formvars['layer']=$mapDB->getall_Layer('Name');
-    $this->formvars['groups']=$mapDB->getall_Groups('Gruppenname');
+		$this->groupset = $mapDB->read_Groups(true, 'Gruppenname');		
+		$this->layergruppen['ID'] = array_unique(array_keys($this->groupset));
+		foreach($this->layergruppen['ID'] as $groupid){
+			$uppergroupnames = $this->list_uppergroups($groupid);
+			$this->layergruppen['Bezeichnung'][] = implode('->', array_reverse($uppergroupnames));;
+		}
+		// Sortieren der Gruppen unter Berücksichtigung von Umlauten
+    $sorted_arrays = umlaute_sortieren($this->layergruppen['Bezeichnung'], $this->layergruppen['ID']);
+    $this->layergruppen['Bezeichnung'] = $sorted_arrays['array'];
+    $this->layergruppen['ID'] = $sorted_arrays['second_array'];
     # Abfragen aller möglichen User
     $this->formvars['users']=$this->user->getall_Users('Name');
     # Abfragen aller möglichen EPSG-Codes
@@ -13390,15 +13399,21 @@ class db_mapObj{
 
   
 
-  function read_Groups() {
-    $sql ='SELECT g2r.*, ';
+  function read_Groups($all = false, $order = '') {    
+		$sql = 'SELECT ';
+		if($all == false) $sql .= 'g2r.status, ';
 		if(LANGUAGE != 'german') {
 			$sql.='CASE WHEN `Gruppenname_'.LANGUAGE.'` IS NOT NULL THEN `Gruppenname_'.LANGUAGE.'` ELSE `Gruppenname` END AS ';
 		}
-		$sql.='Gruppenname, obergruppe FROM u_groups AS g, u_groups2rolle AS g2r ';
-    $sql.=' WHERE g2r.stelle_ID='.$this->Stelle_ID.' AND g2r.user_id='.$this->User_ID;
-    $sql.=' AND g2r.id = g.id';
-		$sql.=' ORDER BY `order`';
+		$sql.='g.id, Gruppenname, obergruppe FROM u_groups AS g';
+		if($all == false){
+			$sql.=', u_groups2rolle AS g2r ';
+			$sql.=' WHERE g2r.stelle_ID='.$this->Stelle_ID.' AND g2r.user_id='.$this->User_ID;
+			$sql.=' AND g2r.id = g.id';
+		}
+		if($order != '')$sql.=' ORDER BY '.$order;
+		else $sql.=' ORDER BY `order`';
+		#echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Groups - Lesen der Gruppen der Rolle:<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }

@@ -518,8 +518,8 @@ else {
                     <td>
 											<select name="allgroups" size="5" onchange="getlayer();select_layer();" style="width:200px">
 												<option value=""> - alle - </option>
-                      <? foreach($this->formvars['groups'] as $group){
-                          echo '<option title="'.str_replace(' ', '&nbsp;', $group["Gruppenname"]).'" value="'.$group["id"].'">'.$group["Gruppenname"].'</option>';
+                      <? for($i = 0; $i < count($this->layergruppen['ID']); $i++){
+                          echo '<option title="'.str_replace(' ', '&nbsp;', $this->layergruppen['Bezeichnung'][$i]).'" value="'.$this->layergruppen['ID'][$i].'">'.$this->layergruppen['Bezeichnung'][$i].'</option>';
                          }
                       ?>
                       </select>                    
