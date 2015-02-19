@@ -109,6 +109,7 @@ class GUI {
 	function setLanguage(){
 		$this->user->rolle->setLanguage($this->formvars['language']);		
 		$this->user->rolle->readSettings();
+		$this->loadMultiLingualText($this->user->rolle->language);
 		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
 		$this->loadMap('DataBase');		
 		$this->drawMap();
