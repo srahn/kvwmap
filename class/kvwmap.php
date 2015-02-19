@@ -2673,7 +2673,7 @@ class GUI {
   function get_sub_menues(){
     $this->Menue = new menue($this->user->rolle->language);
     $submenues = $this->Menue->getsubmenues($this->formvars['menue_id']);
-    echo '<select name="submenues" size="5" multiple style="width:200px">';
+    echo '<select name="submenues" size="6" multiple style="width:300px">';
     for($i=0; $i < count($submenues["Bezeichnung"]); $i++){
       echo '<option selected title="'.$submenues["Bezeichnung"][$i].'" id="'.$submenues["ORDER"][$i].'_all_'.$submenues["menueebene"][$i].'_'.$i.'" value="'.$submenues["ID"][$i].'">&nbsp;&nbsp;-->&nbsp;'.$submenues["Bezeichnung"][$i].'</option>';
     }
@@ -2683,7 +2683,7 @@ class GUI {
 	function getlayerfromgroup(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $layer = $mapDB->get_layersfromgroup($this->formvars['group_id']);
-    echo '<select name="alllayer" size="5" multiple style="width:200px">';
+    echo '<select name="alllayer" size="6" multiple style="width:300px">';
     for($i=0; $i < count($layer["Bezeichnung"]); $i++){
       echo '<option selected title="'.str_replace(' ', '&nbsp;', $layer["Bezeichnung"][$i]).'" value="'.$layer["ID"][$i].'">'.$layer["Bezeichnung"][$i].'</option>';
     }
