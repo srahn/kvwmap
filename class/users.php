@@ -1244,10 +1244,11 @@ class rolle {
   }
 
   function getLayer($LayerName) {
+		global $language;
     # Abfragen der Layer in der Rolle
 		$sql ='SELECT ';
-		if(LANGUAGE != 'german') {
-			$sql.='CASE WHEN `Name_'.LANGUAGE.'` != "" THEN `Name_'.LANGUAGE.'` ELSE `Name` END AS ';
+		if($language != 'german') {
+			$sql.='CASE WHEN `Name_'.$language.'` != "" THEN `Name_'.$language.'` ELSE `Name` END AS ';
 		}
 		$sql.='Name, l.Layer_ID, alias, Datentyp, Gruppe, pfad, maintable, Data, `schema`, document_path, labelitem, connection, printconnection, connectiontype, epsg_code, tolerance, wms_name, ows_srs, wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, ul.* FROM layer AS l, used_layer AS ul';
     $sql.=' WHERE l.Layer_ID=ul.Layer_ID AND Stelle_ID='.$this->stelle_id;
@@ -1323,10 +1324,11 @@ class rolle {
   }
 
   function getGroups($GroupName) {
+		global $language;
     # Abfragen der Gruppen in der Rolle
     $sql ='SELECT g2r.*, ';
-		if(LANGUAGE != 'german') {
-			$sql.='CASE WHEN `Gruppenname_'.LANGUAGE.'` != "" THEN `Gruppenname_'.LANGUAGE.'` ELSE `Gruppenname` END AS ';
+		if($language != 'german') {
+			$sql.='CASE WHEN `Gruppenname_'.$language.'` != "" THEN `Gruppenname_'.$language.'` ELSE `Gruppenname` END AS ';
 		}
 		$sql.='Gruppenname FROM u_groups AS g, u_groups2rolle AS g2r ';
     $sql.=' WHERE g2r.stelle_ID='.$this->stelle_id.' AND g2r.user_id='.$this->user_id;
@@ -1343,9 +1345,15 @@ class rolle {
     return $groups;
   }
 
-	/*
-	 * Sichert den gegebenen Kartenausschnittes für die Rolle
-	 */
+	function setLanguage($language) {
+    $sql ='UPDATE rolle SET language="'.$language.'"';
+    $sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+    # echo $sql;
+    $this->debug->write("<p>file:users.php class:rolle function:setLanguage - Speichern der Einstellungen zur Rolle:",4);
+    $this->database->execSQL($sql,4, $this->loglevel);
+    return 1;
+  }
+	
   function saveSettings($extent) {
     $sql ='UPDATE rolle SET minx='.$extent->minx.',miny='.$extent->miny;
     $sql.=',maxx='.$extent->maxx.',maxy='.$extent->maxy;
@@ -1383,6 +1391,7 @@ class rolle {
 	}
 	
   function readSettings() {
+		global $language;
     # Abfragen und Zuweisen der Einstellungen der Rolle
     $sql ='SELECT * FROM rolle WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
     #echo $sql;
@@ -1408,7 +1417,7 @@ class rolle {
     $this->last_time_id=$rs['last_time_id'];
     $this->gui=$rs['gui'];
     $this->language=$rs['language'];
-		define(LANGUAGE, $this->language);
+		$language = $this->language;
     $this->hideMenue=$rs['hidemenue'];
     $this->hideLegend=$rs['hidelegend'];
     $this->fontsize_gle=$rs['fontsize_gle'];
@@ -3212,14 +3221,15 @@ class stelle {
 		return $layer;
 	}
 
-	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL){	
+	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL){
+		global $language;
 		$sql = 'SELECT layer.Layer_ID, ';
-		if(LANGUAGE != 'german') {
-			$sql.='CASE WHEN `Name_'.LANGUAGE.'` != "" THEN `Name_'.LANGUAGE.'` ELSE `Name` END AS ';
+		if($language != 'german') {
+			$sql.='CASE WHEN `Name_'.$language.'` != "" THEN `Name_'.$language.'` ELSE `Name` END AS ';
 		}
 		$sql .='Name, alias, Gruppe, ';
-		if(LANGUAGE != 'german') {
-			$sql.='CASE WHEN `Gruppenname_'.LANGUAGE.'` != "" THEN `Gruppenname_'.LANGUAGE.'` ELSE `Gruppenname` END AS ';
+		if($language != 'german') {
+			$sql.='CASE WHEN `Gruppenname_'.$language.'` != "" THEN `Gruppenname_'.$language.'` ELSE `Gruppenname` END AS ';
 		}
 		$sql .='Gruppenname, `connection` FROM used_layer, layer, u_groups';
 		$sql .=' WHERE stelle_id = '.$this->id;

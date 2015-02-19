@@ -696,7 +696,7 @@
 		#$this->groupset=$this->getGroups('');
 		$this->loglevel = 0;
 	}
-  function readSettings() {
+  function readSettings() {		global $language;
     # Abfragen und Zuweisen der Einstellungen der Rolle
     $sql ='SELECT * FROM rolle WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
     #echo $sql;
@@ -722,7 +722,7 @@
     $this->last_time_id=$rs['last_time_id'];
     $this->gui=$rs['gui'];
     $this->language=$rs['language'];
-		define(LANGUAGE, $this->language);
+		$language = $this->language;
     $this->hideMenue=$rs['hidemenue'];
     $this->hideLegend=$rs['hidelegend'];
     $this->fontsize_gle=$rs['fontsize_gle'];
@@ -759,11 +759,11 @@
     $this->freearrow = in_array('freearrow', $buttons);
     return 1;
   }
-  function getLayer($LayerName) {
+  function getLayer($LayerName) {		global $language;
     # Abfragen der Layer in der Rolle
 		$sql ='SELECT ';
-		if(LANGUAGE != 'german') {
-			$sql.='CASE WHEN `Name_'.LANGUAGE.'` != "" THEN `Name_'.LANGUAGE.'` ELSE `Name` END AS ';
+		if($language != 'german') {
+			$sql.='CASE WHEN `Name_'.$language.'` != "" THEN `Name_'.$language.'` ELSE `Name` END AS ';
 		}
 		$sql.='Name, l.Layer_ID, alias, Datentyp, Gruppe, pfad, maintable, Data, `schema`, document_path, connection, printconnection, connectiontype, epsg_code, tolerance, ows_srs, wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, ul.* FROM layer AS l, used_layer AS ul';
     $sql.=' WHERE l.Layer_ID=ul.Layer_ID AND Stelle_ID='.$this->stelle_id;
@@ -991,15 +991,15 @@
     }
     return $layerdb;
   }
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false){
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false){			$global $language;
     	if($attributenames != NULL){
     		$einschr = ' AND name IN (\'';
     		$einschr.= implode('\', \'', $attributenames);
     		$einschr.= '\')';
     	}
       $sql = 'SELECT ';
-			if(!$all_languages AND LANGUAGE != 'german') {
-				$sql.='CASE WHEN `alias_'.LANGUAGE.'` != "" THEN `alias_'.LANGUAGE.'` ELSE `alias` END AS ';
+			if(!$all_languages AND $language != 'german') {
+				$sql.='CASE WHEN `alias_'.$language.'` != "" THEN `alias_'.$language.'` ELSE `alias` END AS ';
 			}
 			$sql.='alias, `alias_low-german`, alias_english, alias_polish, alias_vietnamese, layer_id, name, real_name, tablename, table_alias_name, type, geometrytype, constraints, nullable, length, decimal_length, `default`, form_element_type, options, tooltip, `group`, raster_visibility, mandatory, quicksearch, `order`, privileg, query_tooltip FROM layer_attributes WHERE layer_id = '.$layer_id.$einschr.' ORDER BY `order`';
       $this->debug->write("<p>file:kvwmap class:db_mapObj->read_layer_attributes:<br>".$sql,4);

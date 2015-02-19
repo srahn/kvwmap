@@ -1698,7 +1698,7 @@
 		#$this->groupset=$this->getGroups('');
 		$this->loglevel = 0;
 	}
-  function readSettings() {
+  function readSettings() {		global $language;
     # Abfragen und Zuweisen der Einstellungen der Rolle
     $sql ='SELECT * FROM rolle WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
     #echo $sql;
@@ -1724,7 +1724,7 @@
     $this->last_time_id=$rs['last_time_id'];
     $this->gui=$rs['gui'];
     $this->language=$rs['language'];
-		define(LANGUAGE, $this->language);
+		$language = $this->language;
     $this->hideMenue=$rs['hidemenue'];
     $this->hideLegend=$rs['hidelegend'];
     $this->fontsize_gle=$rs['fontsize_gle'];
@@ -2083,10 +2083,10 @@
     $this->referenceMap=$rs;
     return $rs;
   }  
-  function read_Layer($withClasses, $groups = NULL){
+  function read_Layer($withClasses, $groups = NULL){		global $language;
     $sql ='SELECT DISTINCT rl.*,ul.*, l.Layer_ID, ';
-		if(LANGUAGE != 'german') {
-			$sql.='CASE WHEN `Name_'.LANGUAGE.'` != "" THEN `Name_'.LANGUAGE.'` ELSE `Name` END AS ';
+		if($language != 'german') {
+			$sql.='CASE WHEN `Name_'.$language.'` != "" THEN `Name_'.$language.'` ELSE `Name` END AS ';
 		}
 		$sql.='Name, l.alias, l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem, l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem, l.tolerance, l.toleranceunits, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version, l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, g.*';
     $sql.=' FROM u_rolle2used_layer AS rl,used_layer AS ul,layer AS l, u_groups AS g, u_groups2rolle as gr';
@@ -2133,10 +2133,10 @@
 		}
 		return $classarray;
   }
-  function read_Classes($Layer_ID, $disabled_classes = NULL, $all_languages = false) {
+  function read_Classes($Layer_ID, $disabled_classes = NULL, $all_languages = false) {		global $language;
     $sql ='SELECT ';
-		if(!$all_languages AND LANGUAGE != 'german') {
-			$sql.='CASE WHEN `Name_'.LANGUAGE.'` IS NOT NULL THEN `Name_'.LANGUAGE.'` ELSE `Name` END AS ';
+		if(!$all_languages AND $language != 'german') {
+			$sql.='CASE WHEN `Name_'.$language.'` IS NOT NULL THEN `Name_'.$language.'` ELSE `Name` END AS ';
 		}
 		$sql.='Name, `Name_low-german`, Name_english, Name_polish, Name_vietnamese, Class_ID, Layer_ID, Expression, drawingorder, text FROM classes';
     $sql.=' WHERE Layer_ID='.$Layer_ID.' ORDER BY drawingorder,Class_ID';

@@ -106,6 +106,15 @@ class GUI {
     }
 	}
 	
+	function setLanguage(){
+		$this->user->rolle->setLanguage($this->formvars['language']);		
+		$this->user->rolle->readSettings();
+		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
+		$this->loadMap('DataBase');		
+		$this->drawMap();
+		$this->output();
+	}
+	
 	function getNBH(){
 		if(defined('NBH_PATH')){
 			$nbh = file_get_contents(NBH_PATH);
@@ -13326,9 +13335,10 @@ class db_mapObj{
   }
 	
   function read_Layer($withClasses, $groups = NULL){
+		global $language;
     $sql ='SELECT DISTINCT rl.*,ul.*, l.Layer_ID, ';
-		if(LANGUAGE != 'german') {
-			$sql.='CASE WHEN `Name_'.LANGUAGE.'` != "" THEN `Name_'.LANGUAGE.'` ELSE `Name` END AS ';
+		if($language != 'german') {
+			$sql.='CASE WHEN `Name_'.$language.'` != "" THEN `Name_'.$language.'` ELSE `Name` END AS ';
 		}
 		$sql.='Name, l.alias, l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem, l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem, l.tolerance, l.toleranceunits, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version, l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, g.*';
     $sql.=' FROM u_rolle2used_layer AS rl,used_layer AS ul,layer AS l, u_groups AS g, u_groups2rolle as gr';
@@ -13368,13 +13378,14 @@ class db_mapObj{
 
   
 
-  function read_Groups($all = false, $order = '') {    
+  function read_Groups($all = false, $order = '') {
+		global $language;
 		$sql = 'SELECT ';
 		if($all == false) $sql .= 'g2r.status, ';
-		if(LANGUAGE != 'german') {
-			$sql.='CASE WHEN `Gruppenname_'.LANGUAGE.'` IS NOT NULL THEN `Gruppenname_'.LANGUAGE.'` ELSE `Gruppenname` END AS ';
+		if($language != 'german') {
+			$sql.='CASE WHEN `Gruppenname_'.$language.'` IS NOT NULL THEN `Gruppenname_'.$language.'` ELSE `Gruppenname` END AS ';
 		}
-		$sql.='g.id, Gruppenname, obergruppe FROM u_groups AS g';
+		$sql.='Gruppenname, obergruppe, g.id FROM u_groups AS g';
 		if($all == false){
 			$sql.=', u_groups2rolle AS g2r ';
 			$sql.=' WHERE g2r.stelle_ID='.$this->Stelle_ID.' AND g2r.user_id='.$this->User_ID;
@@ -13407,9 +13418,10 @@ class db_mapObj{
 
 
   function read_ClassesbyClassid($class_id) {
+		global $language;
     $sql ='SELECT ';
-		if(LANGUAGE != 'german') {
-			$sql.='CASE WHEN `Name_'.LANGUAGE.'` IS NOT NULL THEN `Name_'.LANGUAGE.'` ELSE `Name` END AS ';
+		if($language != 'german') {
+			$sql.='CASE WHEN `Name_'.$language.'` IS NOT NULL THEN `Name_'.$language.'` ELSE `Name` END AS ';
 		}
 		$sql.='Name, Class_ID, Layer_ID, Expression, drawingorder, text FROM classes';
     $sql.=' WHERE Class_ID = '.$class_id.' ORDER BY drawingorder,Class_ID';
@@ -13426,9 +13438,10 @@ class db_mapObj{
   }
 
   function read_Classes($Layer_ID, $disabled_classes = NULL, $all_languages = false) {
+		global $language;
     $sql ='SELECT ';
-		if(!$all_languages AND LANGUAGE != 'german') {
-			$sql.='CASE WHEN `Name_'.LANGUAGE.'` IS NOT NULL THEN `Name_'.LANGUAGE.'` ELSE `Name` END AS ';
+		if(!$all_languages AND $language != 'german') {
+			$sql.='CASE WHEN `Name_'.$language.'` IS NOT NULL THEN `Name_'.$language.'` ELSE `Name` END AS ';
 		}
 		$sql.='Name, `Name_low-german`, Name_english, Name_polish, Name_vietnamese, Class_ID, Layer_ID, Expression, drawingorder, text FROM classes';
     $sql.=' WHERE Layer_ID='.$Layer_ID.' ORDER BY drawingorder,Class_ID';
@@ -14502,90 +14515,92 @@ class db_mapObj{
   }
   
   function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false){
-    	if($attributenames != NULL){
-    		$einschr = ' AND name IN (\'';
-    		$einschr.= implode('\', \'', $attributenames);
-    		$einschr.= '\')';
-    	}
-      $sql = 'SELECT ';
-			if(!$all_languages AND LANGUAGE != 'german') {
-				$sql.='CASE WHEN `alias_'.LANGUAGE.'` != "" THEN `alias_'.LANGUAGE.'` ELSE `alias` END AS ';
+		global $language;
+		if($attributenames != NULL){
+			$einschr = ' AND name IN (\'';
+			$einschr.= implode('\', \'', $attributenames);
+			$einschr.= '\')';
+		}
+		$sql = 'SELECT ';
+		if(!$all_languages AND $language != 'german') {
+			$sql.='CASE WHEN `alias_'.$language.'` != "" THEN `alias_'.$language.'` ELSE `alias` END AS ';
+		}
+		$sql.='alias, `alias_low-german`, alias_english, alias_polish, alias_vietnamese, layer_id, name, real_name, tablename, table_alias_name, type, geometrytype, constraints, nullable, length, decimal_length, `default`, form_element_type, options, tooltip, `group`, raster_visibility, mandatory, quicksearch, `order`, privileg, query_tooltip FROM layer_attributes WHERE layer_id = '.$layer_id.$einschr.' ORDER BY `order`';
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_layer_attributes:<br>".$sql,4);
+		$query=mysql_query($sql);
+		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+		$i = 0;
+		while($rs=mysql_fetch_array($query)){
+			$attributes['name'][$i]= $rs['name'];
+			$attributes['indizes'][$rs['name']] = $i;
+			$attributes['real_name'][$rs['name']]= $rs['real_name'];
+			if($rs['tablename'])$attributes['table_name'][$i]= $rs['tablename'];
+			if($rs['tablename'])$attributes['table_name'][$rs['name']] = $rs['tablename']; 
+			if($rs['table_alias_name'])$attributes['table_alias_name'][$i]= $rs['table_alias_name'];
+			if($rs['table_alias_name'])$attributes['table_alias_name'][$rs['name']]= $rs['table_alias_name'];
+			$attributes['table_alias_name'][$rs['tablename']]= $rs['table_alias_name'];
+			$attributes['type'][$i]= $rs['type'];
+			if($rs['type'] == 'geometry'){
+				$attributes['the_geom'] = $rs['name'];
 			}
-			$sql.='alias, `alias_low-german`, alias_english, alias_polish, alias_vietnamese, layer_id, name, real_name, tablename, table_alias_name, type, geometrytype, constraints, nullable, length, decimal_length, `default`, form_element_type, options, tooltip, `group`, raster_visibility, mandatory, quicksearch, `order`, privileg, query_tooltip FROM layer_attributes WHERE layer_id = '.$layer_id.$einschr.' ORDER BY `order`';
-      $this->debug->write("<p>file:kvwmap class:db_mapObj->read_layer_attributes:<br>".$sql,4);
-      $query=mysql_query($sql);
-      if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
-      $i = 0;
-      while($rs=mysql_fetch_array($query)){
-      	$attributes['name'][$i]= $rs['name'];
-				$attributes['indizes'][$rs['name']] = $i;
-      	$attributes['real_name'][$rs['name']]= $rs['real_name'];
-      	if($rs['tablename'])$attributes['table_name'][$i]= $rs['tablename'];
-      	if($rs['tablename'])$attributes['table_name'][$rs['name']] = $rs['tablename']; 
-      	if($rs['table_alias_name'])$attributes['table_alias_name'][$i]= $rs['table_alias_name'];
-      	if($rs['table_alias_name'])$attributes['table_alias_name'][$rs['name']]= $rs['table_alias_name'];
-      	$attributes['table_alias_name'][$rs['tablename']]= $rs['table_alias_name'];
-      	$attributes['type'][$i]= $rs['type'];
-      	if($rs['type'] == 'geometry'){
-      		$attributes['the_geom'] = $rs['name'];
-      	}
-      	$attributes['geomtype'][$i]= $rs['geometrytype'];
-      	$attributes['geomtype'][$rs['name']]= $rs['geometrytype'];
-      	$attributes['constraints'][$i]= $rs['constraints'];
-      	$attributes['constraints'][$rs['real_name']]= $rs['constraints'];
-      	$attributes['nullable'][$i]= $rs['nullable'];
-      	$attributes['length'][$i]= $rs['length'];
-      	$attributes['decimal_length'][$i]= $rs['decimal_length'];
-  		
-				if(substr($rs['default'], 0, 6) == 'SELECT'){					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
-					$ret1 = $layerdb->execSQL($rs['default'], 4, 0);					
-					if($ret1[0]==0){
-						$attributes['default'][$i] = array_pop(pg_fetch_row($ret1[1]));
-					}
+			$attributes['geomtype'][$i]= $rs['geometrytype'];
+			$attributes['geomtype'][$rs['name']]= $rs['geometrytype'];
+			$attributes['constraints'][$i]= $rs['constraints'];
+			$attributes['constraints'][$rs['real_name']]= $rs['constraints'];
+			$attributes['nullable'][$i]= $rs['nullable'];
+			$attributes['length'][$i]= $rs['length'];
+			$attributes['decimal_length'][$i]= $rs['decimal_length'];
+		
+			if(substr($rs['default'], 0, 6) == 'SELECT'){					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
+				$ret1 = $layerdb->execSQL($rs['default'], 4, 0);					
+				if($ret1[0]==0){
+					$attributes['default'][$i] = array_pop(pg_fetch_row($ret1[1]));
 				}
-				else{															# das sind die alten Defaultwerte ohne 'SELECT ' davor, ab Version 1.13 haben Defaultwerte immer ein SELECT, wenn man den Layer in dieser Version einmal gespeichert hat
-					$attributes['default'][$i]= $rs['default'];
-				}
-      	$attributes['form_element_type'][$i]= $rs['form_element_type'];
-      	$attributes['form_element_type'][$rs['name']]= $rs['form_element_type'];
-      	$attributes['options'][$i]= $rs['options'];
-      	$attributes['options'][$rs['name']]= $rs['options'];
-      	$attributes['alias'][$i]= $rs['alias'];
-      	$attributes['alias'][$attributes['name'][$i]]= $rs['alias'];
-				$attributes['alias_low-german'][$i]= $rs['alias_low-german'];
-				$attributes['alias_english'][$i]= $rs['alias_english'];
-				$attributes['alias_polish'][$i]= $rs['alias_polish'];
-				$attributes['alias_vietnamese'][$i]= $rs['alias_vietnamese'];
-      	$attributes['tooltip'][$i]= $rs['tooltip'];
-      	$attributes['group'][$i]= $rs['group'];
-				$attributes['raster_visibility'][$i]= $rs['raster_visibility'];
-      	$attributes['mandatory'][$i]= $rs['mandatory'];
-				$attributes['quicksearch'][$i]= $rs['quicksearch'];
-      	$attributes['privileg'][$i]= $rs['privileg'];
-      	$attributes['query_tooltip'][$i]= $rs['query_tooltip'];
-      	$i++;
-      }
-      if($attributes['table_name'] != NULL){   
-        $attributes['all_table_names'] = array_unique($attributes['table_name']);
-        //$attributes['all_alias_table_names'] = array_values(array_unique($attributes['table_alias_name']));
-        foreach($attributes['all_table_names'] as $tablename){
-          $attributes['oids'][] = $layerdb->check_oid($tablename);   # testen ob Tabelle oid hat
-        }
-      }
-      else{
-      	$attributes['all_table_names'] = array();
-      }
-      return $attributes;
+			}
+			else{															# das sind die alten Defaultwerte ohne 'SELECT ' davor, ab Version 1.13 haben Defaultwerte immer ein SELECT, wenn man den Layer in dieser Version einmal gespeichert hat
+				$attributes['default'][$i]= $rs['default'];
+			}
+			$attributes['form_element_type'][$i]= $rs['form_element_type'];
+			$attributes['form_element_type'][$rs['name']]= $rs['form_element_type'];
+			$attributes['options'][$i]= $rs['options'];
+			$attributes['options'][$rs['name']]= $rs['options'];
+			$attributes['alias'][$i]= $rs['alias'];
+			$attributes['alias'][$attributes['name'][$i]]= $rs['alias'];
+			$attributes['alias_low-german'][$i]= $rs['alias_low-german'];
+			$attributes['alias_english'][$i]= $rs['alias_english'];
+			$attributes['alias_polish'][$i]= $rs['alias_polish'];
+			$attributes['alias_vietnamese'][$i]= $rs['alias_vietnamese'];
+			$attributes['tooltip'][$i]= $rs['tooltip'];
+			$attributes['group'][$i]= $rs['group'];
+			$attributes['raster_visibility'][$i]= $rs['raster_visibility'];
+			$attributes['mandatory'][$i]= $rs['mandatory'];
+			$attributes['quicksearch'][$i]= $rs['quicksearch'];
+			$attributes['privileg'][$i]= $rs['privileg'];
+			$attributes['query_tooltip'][$i]= $rs['query_tooltip'];
+			$i++;
+		}
+		if($attributes['table_name'] != NULL){   
+			$attributes['all_table_names'] = array_unique($attributes['table_name']);
+			//$attributes['all_alias_table_names'] = array_values(array_unique($attributes['table_alias_name']));
+			foreach($attributes['all_table_names'] as $tablename){
+				$attributes['oids'][] = $layerdb->check_oid($tablename);   # testen ob Tabelle oid hat
+			}
+		}
+		else{
+			$attributes['all_table_names'] = array();
+		}
+		return $attributes;
   }
 
   function getall_Layer($order) {
+		global $language;
     $sql ='SELECT ';
-		if(LANGUAGE != 'german') {
-			$sql.='CASE WHEN `Name_'.LANGUAGE.'` != "" THEN `Name_'.LANGUAGE.'` ELSE `Name` END AS ';
+		if($language != 'german') {
+			$sql.='CASE WHEN `Name_'.$language.'` != "" THEN `Name_'.$language.'` ELSE `Name` END AS ';
 		}
 		$sql.='Name, Layer_ID, Gruppe, kurzbeschreibung, datenherr, alias, ';
-		if(LANGUAGE != 'german') {
-			$sql.='CASE WHEN `Gruppenname_'.LANGUAGE.'` != "" THEN `Gruppenname_'.LANGUAGE.'` ELSE `Gruppenname` END AS ';
+		if($language != 'german') {
+			$sql.='CASE WHEN `Gruppenname_'.$language.'` != "" THEN `Gruppenname_'.$language.'` ELSE `Gruppenname` END AS ';
 		}
 		$sql.='Gruppenname FROM layer, u_groups';
     $sql.=' WHERE layer.Gruppe = u_groups.id';

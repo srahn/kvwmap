@@ -139,6 +139,10 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
       $GUI->output();
 		}break;
 		
+		case 'setLanguage' : {
+			$GUI->setLanguage();
+	  } break;
+		
 		case 'getNBH' : {
 			$GUI->getNBH();
 		}break;

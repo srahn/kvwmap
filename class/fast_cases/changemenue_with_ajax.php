@@ -363,7 +363,7 @@
 		#$this->groupset=$this->getGroups('');
 		$this->loglevel = 0;
 	}
-  function readSettings() {
+  function readSettings() {		global $language;
     # Abfragen und Zuweisen der Einstellungen der Rolle
     $sql ='SELECT * FROM rolle WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
     #echo $sql;
@@ -389,7 +389,7 @@
     $this->last_time_id=$rs['last_time_id'];
     $this->gui=$rs['gui'];
     $this->language=$rs['language'];
-		define(LANGUAGE, $this->language);
+		$language = $this->language;
     $this->hideMenue=$rs['hidemenue'];
     $this->hideLegend=$rs['hidelegend'];
     $this->fontsize_gle=$rs['fontsize_gle'];
