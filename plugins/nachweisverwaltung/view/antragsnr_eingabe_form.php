@@ -33,7 +33,7 @@ else {
           <?php $this->FormObjVermStelle->outputHTML(); echo $this->FormObjVermStelle->html; ?>            <div align="left"></div></td>
           <td>            <?php $this->FormObjVermArt->outputHTML(); echo $this->FormObjVermArt->html; ?>   
             <div align="left"></div></td>
-          <td width="100"><div align="left"><em><font size="2">Jahr-Monat-Tag</font></em><br>
+          <td width="100"><div align="left"><em><font size="2">Tag.Monat.Jahr</font></em><br>
               <input name="datum" type="text" value="<?php echo $this->formvars['datum']; ?>" size="11"> 
           </div></td>
         </tr>

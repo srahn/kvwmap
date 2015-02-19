@@ -642,9 +642,9 @@ class antrag {
     }
     else {
       # Pfüfen, ob es sich um das richtige Format handelt.
-      $datumteile=explode('-',$datum);
-      if (!checkdate($datumteile[1],$datumteile[2],$datumteile[0])) {
-        $errmsg.='Das ist kein gültiges Datum. Geben sie es in der Form JJJJ-MM-TT ein.\n';
+      $datumteile=explode('.',$datum);
+      if (!checkdate($datumteile[1],$datumteile[0],$datumteile[2])) {
+        $errmsg.='Das ist kein gültiges Datum. Geben sie es in der Form TT-MM-JJJJ ein.\n';
       }
     }
     if($verm_art==''){
