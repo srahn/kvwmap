@@ -345,6 +345,8 @@ if($_SESSION['login_routines'] == true){
 			}
     }
 	}
+	# Anpassen der Kartengröße an das Browserfenster
+	if($GUI->formvars['width'] != '')$GUI->resizeMap2Window();
 	$_SESSION['login_routines'] = false;
 }
 

@@ -44,6 +44,34 @@
 		  <title><?php echo TITLE; ?></title>
       <META http-equiv=Content-Type content="text/html; charset=UTF-8">
 			<link rel="stylesheet" href="layouts/main.css">
+			<script type="text/javascript">
+
+			function logon(){
+				if(typeof(window.innerWidth) == 'number'){
+					width = window.innerWidth;
+					height = window.innerHeight;
+				}else if(document.documentElement && (document.documentElement.clientWidth || document.documentElement.clientHeight)){
+					width = document.documentElement.clientWidth;
+					height = document.documentElement.clientHeight;
+				}else if(document.body && (document.body.clientWidth || document.body.clientHeight)){
+					width = document.body.clientWidth;
+					height = document.body.clientHeight;
+				}
+				document.login.width.value = width;
+				document.login.height.value = height;
+				document.login.submit();
+			}
+			
+			document.onkeydown = function(ev){
+				var key;
+				ev = ev || event;
+				key = ev.keyCode;
+				if (key == 13) {
+					document.login.anmelden.click();
+				}
+			}
+				
+			</script>
 		 </head>
 		 <body style="font-family: Arial, Verdana, Helvetica, sans-serif" onload="document.login.username.focus();">
 		  <form name="login" action="index.php" method="post">
@@ -102,13 +130,15 @@
 									<td style="height: 40px" colspan="2">Ihre IP-Adresse: <?php echo $remote_addr; ?></td>
 								</tr>
 								<tr>
-									<td colspan="2" align="center"><input type="submit" value="Anmelden"/></td>
+									<td colspan="2" align="center"><input type="button" name="anmelden" onclick="logon();" value="Anmelden"/></td>
 								</tr>
 							</table>
 						</td>
 					</tr>
 				</table>
-			</form>
+				<input type="hidden" name="width">
+				<input type="hidden" name="height">
+			</form>			
 		 </body>
 		</html><?php
 		exit;
