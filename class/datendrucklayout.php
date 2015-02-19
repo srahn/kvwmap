@@ -340,37 +340,37 @@ class ddl {
 				if(is_array($this->attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
 					for($e = 0; $e < count($this->attributes['enum_value'][$j][$i]); $e++){
 						if($this->attributes['enum_value'][$j][$i][$e] == $this->result[$i][$this->attributes['name'][$j]]){
-							$output = iconv("UTF-8", "CP1252", $this->attributes['enum_output'][$j][$i][$e]);
+							$output = $this->attributes['enum_output'][$j][$i][$e];
 							break;
 						}
-						else $output = iconv("UTF-8", "CP1252", $this->result[$i][$this->attributes['name'][$j]]);
+						else $output = $this->result[$i][$this->attributes['name'][$j]];
 					}
 				}
 				else{
 					for($e = 0; $e < count($this->attributes['enum_value'][$j]); $e++){
 						if($this->attributes['enum_value'][$j][$e] == $this->result[$i][$this->attributes['name'][$j]]){
-							$output = iconv("UTF-8", "CP1252", $this->attributes['enum_output'][$j][$e]);
+							$output = $this->attributes['enum_output'][$j][$e];
 							break;
 						}
-						else $output = iconv("UTF-8", "CP1252", $this->result[$i][$this->attributes['name'][$j]]);
+						else $output = $this->result[$i][$this->attributes['name'][$j]];
 					}
 				}
 				if(count($this->attributes['enum_value'][$j]) == 0){	
-					$output = iconv("UTF-8", "CP1252", $this->result[$i][$this->attributes['name'][$j]]);
+					$output = $this->result[$i][$this->attributes['name'][$j]];
 				}			
 			}break;
 			case 'Autovervollständigungsfeld' : {
-				$output = iconv("UTF-8", "CP1252", $this->attributes['enum_output'][$j][$i]);
+				$output = $this->attributes['enum_output'][$j][$i];
 			}break;
 			default: {
 				if(!$preview AND $this->attributes['type'][$j] == 'bool'){
 					$this->result[$i][$this->attributes['name'][$j]] = str_replace('t', "ja", $this->result[$i][$this->attributes['name'][$j]]);	
 					$this->result[$i][$this->attributes['name'][$j]] = str_replace('f', "nein", $this->result[$i][$this->attributes['name'][$j]]);
 				}
-				$output = iconv("UTF-8", "CP1252", $this->result[$i][$this->attributes['name'][$j]]);
+				$output = $this->result[$i][$this->attributes['name'][$j]];
 			}break;
 		}
-	return $output;
+		return iconv("UTF-8", "CP1252", $output);		# besser als utf8_decode()
   }
   
   function createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $selected_layer_id, $layout, $oids, $result, $stelle, $user, $preview = NULL){
