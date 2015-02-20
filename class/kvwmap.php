@@ -14840,7 +14840,7 @@ class db_mapObj{
   function copyClass($class_id, $layer_id){
     # diese Funktion kopiert eine Klasse mit Styles und Labels und gibt die ID der neuen Klasse zurück
     $class = $this->read_ClassesbyClassid($class_id);
-    $sql = "INSERT INTO classes (Name, `Name_low-german`, Name_english, Name_polish, Name_vietnamese, Layer_ID,Expression,drawingorder,text) SELECT Name, `Name_low-german`, Name_english, Name_polish, Name_vietnamese, ".$layer_id.",'',drawingorder,text FROM classes WHERE Class_ID = ".$class_id;
+    $sql = "INSERT INTO classes (Name, `Name_low-german`, Name_english, Name_polish, Name_vietnamese, Layer_ID,Expression,drawingorder,text) SELECT Name, `Name_low-german`, Name_english, Name_polish, Name_vietnamese, ".$layer_id.",Expression,drawingorder,text FROM classes WHERE Class_ID = ".$class_id;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->copyClass - Kopieren einer Klasse:<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
