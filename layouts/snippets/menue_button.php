@@ -166,73 +166,44 @@
                   if($last==1){
                     $count1 = 1;
                     if($this->Menue->Menueoption[$i-$count1]['status']==1){
-                      echo'
-                      <div id="menue'.$this->Menue->Menueoption[$i-1]['id'].'sub" style="background-color: '.BG_MENUESUB.';">
-                      <table cellspacing="2" cellpadding="0" border="0">
-                        ';
-                    }
-                    else{
-                      # Abstand der Aufklappenden Untermenuepunkte bezüglich des linken Randes
-                      $haengend=$this->Menue->width-0;
-                      echo'
-                        <div id="menue'.$this->Menue->Menueoption[$i-1]['id'].'subpop" class="" style="background-color: '.BG_MENUESUB.';position: absolute; visibility: hidden; left: '.$haengend.'px; top: 0px; z-index:3">
-                        <table border="0" cellspacing="2" cellpadding="0" bgcolor="'.BG_MENUESUB.'" style="border-bottom:3px solid #B1B1B1; border-right:2px solid #B1B1B1; border-top:1px solid #D2E0E8; border-left:1px solid #D2E0E8">
-                        ';
-                    }
+											echo'
+											<div id="menue'.$this->Menue->Menueoption[$i-1]['id'].'sub" style="background-color: '.BG_MENUESUB.';">
+											<table cellspacing="2" cellpadding="0" border="0">
+												';
+										}
+										else{
+											echo'
+											<div id="menue'.$this->Menue->Menueoption[$i-1]['id'].'sub" style="background-color: '.BG_MENUESUB.';display: none">
+											<table cellspacing="2" cellpadding="0" border="0">
+												';
+										}
                   }
-                  if($this->Menue->Menueoption[$i - $count1]['status']==1){
-                    echo'
-                            <tr>
-                              <td>
-                                <img src="'.GRAPHICSPATH.'leer.gif" width="17" height="1" border="0">
-							  </td>
-							  <td>';
-                    ?>
-                                <a href="<?
-                              if ($this->Menue->Menueoption[$i]['target']=='confirm') {
-                                  ?>javascript:Bestaetigung('<?
-                              }
-                              echo $this->Menue->Menueoption[$i]['links'];
-                              if ($this->Menue->Menueoption[$i]['target']=='confirm') {
-                                  ?>','Diese Aktion wirklich ausführen?')<?
-                                  $this->Menue->Menueoption[$i]['target']='';
-                              }
-                              ?>" class="menuered"<?
-                              if ($this->Menue->Menueoption[$i]['target']!='') {
-                                  ?> target="<? echo $this->Menue->Menueoption[$i]['target']; ?>"<?
-                              }
-                              ?>><?
+									echo'
+													<tr>
+														<td>
+															<img src="'.GRAPHICSPATH.'leer.gif" width="17" height="1" border="0">
+							</td>
+							<td>';
+									?>
+															<a href="<?
+														if ($this->Menue->Menueoption[$i]['target']=='confirm') {
+																?>javascript:Bestaetigung('<?
+														}
+														echo $this->Menue->Menueoption[$i]['links'];
+														if ($this->Menue->Menueoption[$i]['target']=='confirm') {
+																?>','Diese Aktion wirklich ausführen?')<?
+																$this->Menue->Menueoption[$i]['target']='';
+														}
+														?>" class="menuered"<?
+														if ($this->Menue->Menueoption[$i]['target']!='') {
+																?> target="<? echo $this->Menue->Menueoption[$i]['target']; ?>"<?
+														}
+														?>><?
 
-                      echo        $this->Menue->Menueoption[$i]['name'].'</a>
-                              </td>
-                            </tr>
+										echo        $this->Menue->Menueoption[$i]['name'].'</a>
+														</td>
+													</tr>
                   ';
-                  }
-                  else{
-                    echo'
-                            <tr>
-                              <td>';
-                    ?>
-                                <a href="<?
-                              if ($this->Menue->Menueoption[$i]['target']=='confirm') {
-                                  ?>javascript:Bestaetigung('<?
-                              }
-                              echo $this->Menue->Menueoption[$i]['links'];
-                              if ($this->Menue->Menueoption[$i]['target']=='confirm') {
-                                  ?>','Diese Aktion wirklich ausführen?')<?
-                                  $this->Menue->Menueoption[$i]['target']='';
-                              }
-                              ?>" class="menuered"<?
-                              if ($this->Menue->Menueoption[$i]['target']!='') {
-                                  ?> target="<? echo $this->Menue->Menueoption[$i]['target']; ?>"<?
-                              }
-                              ?>><?
-
-                      echo          $this->Menue->Menueoption[$i]['name'].'</a>
-                              </td>
-                            </tr>
-                  ';
-                  }
                   $count1++;
                   $last=2;
                 }
@@ -272,7 +243,7 @@
                   <tr>
                     <td valign="top" onmouseover="popup(\'menue'.$this->Menue->Menueoption[$i]['id'].'\')" onmouseout="popdown(\'menue'.$this->Menue->Menueoption[$i]['id'].'\')">
 											<a href="javascript:changemenue('.$this->Menue->Menueoption[$i]['id'].');" >
-                      <div id="menue'.$this->Menue->Menueoption[$i]['id'].'" class="" style="background-color: '.BG_MENUETOP.';position: relative; visibility: visible; left: 0px; top: 0px; z-index:3">
+                      <div name="obermenu" id="menue'.$this->Menue->Menueoption[$i]['id'].'" class="" style="background-color: '.BG_MENUETOP.';position: relative; visibility: visible; left: 0px; top: 0px; z-index:3">
                       <img id="image_'.$this->Menue->Menueoption[$i]['id'].'" src="'.GRAPHICSPATH.'menue_top.gif" width="17" height="17" border="0">
 												<span class="black">'.$this->Menue->Menueoption[$i]['name'].'</span>';
               	}
@@ -281,7 +252,7 @@
                   <tr>
                     <td valign="top">
 											<a href="javascript:changemenue('.$this->Menue->Menueoption[$i]['id'].');" >                      
-                      <div id="menue'.$this->Menue->Menueoption[$i]['id'].'">
+                      <div name="obermenu" id="menue'.$this->Menue->Menueoption[$i]['id'].'">
 												<div class="menu">
 													<img id="image_'.$this->Menue->Menueoption[$i]['id'].'" src="'.GRAPHICSPATH.'menue_top.gif" width="17" height="17" border="0">
 													<span class="black">'.$this->Menue->Menueoption[$i]['name'].'</span>
@@ -293,7 +264,7 @@
                   <tr>
                     <td valign="top">
 											<a href="javascript:changemenue('.$this->Menue->Menueoption[$i]['id'].');" >
-                      <div id="menue'.$this->Menue->Menueoption[$i]['id'].'">
+                      <div name="obermenu" id="menue'.$this->Menue->Menueoption[$i]['id'].'">
 												<div class="menu">
 													<img id="image_'.$this->Menue->Menueoption[$i]['id'].'" src="'.GRAPHICSPATH.'menue_top_open.gif" width="17" height="17" border="0">
 													<span class="black">'.$this->Menue->Menueoption[$i]['name'].'</span>

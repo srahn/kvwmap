@@ -903,6 +903,10 @@ class user {
 			else	$sql.=',runningcoords="0"';
 			if($formvars['singlequery'] != '') $sql.=',singlequery="1"';
 			else $sql.=',singlequery="0"';
+			if($formvars['instant_reload'] != '') $sql.=',instant_reload="1"';
+			else $sql.=',instant_reload="0"';
+			if($formvars['menu_auto_close'] != '') $sql.=',menu_auto_close="1"';
+			else $sql.=',menu_auto_close="0"';
 			if($formvars['querymode'] != '') $sql.=',querymode="1"';
 			else $sql.=',querymode="0", overlayx=400, overlayy=150';
 			$sql.=',geom_edit_first="'.$formvars['geom_edit_first'].'"';
@@ -1431,9 +1435,11 @@ class rolle {
 		$this->geom_edit_first=$rs['geom_edit_first'];		
 		$this->overlayx=$rs['overlayx'];
 		$this->overlayy=$rs['overlayy'];
+		$this->instant_reload=$rs['instant_reload'];
+		$this->menu_auto_close=$rs['menu_auto_close'];
 		if($rs['hist_timestamp'] != ''){
-			$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');
-			rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');
+			$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');			# der wird zur Anzeige des Timestamps benutzt
+			rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');	# der hat die Form, wie der timestamp in der PG-DB steht und wird für die Abfragen benutzt
 		}
 		else rolle::$hist_timestamp = $this->hist_timestamp = '';
     $buttons = explode(',', $rs['buttons']);

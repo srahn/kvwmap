@@ -30,5 +30,7 @@
 	$strGeneralOptions="General Options";
 	$strMapOptions="Map Options";
 	$strDataPresentation="Data Presentation";
+	$strInstantReload="Instant Map Reload";
+	$strMenuAutoClose="Close Menus automatically";
   
 ?>  

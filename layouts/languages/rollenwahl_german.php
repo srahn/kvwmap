@@ -30,6 +30,8 @@
 	$strGeneralOptions="allgemeine Optionen";
 	$strMapOptions="Karteneinstellungen";
 	$strDataPresentation="Sachdatenanzeige";
+	$strInstantReload="Karte sofort neu laden";
+	$strMenuAutoClose="Menüs automatisch schliessen";
   
   
 ?>

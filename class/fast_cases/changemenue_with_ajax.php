@@ -65,24 +65,23 @@
   }
 	function changemenue_with_ajax($id, $status){
     $this->changemenue($id, $status);
-    if($status == 'on'){
-      echo $this->Stelle->getsubmenues($id);
-    }
   }
 	function changemenue($id, $status){
-    $sql ='SELECT status from u_menue2rolle WHERE `user_id` ='.$this->user->id.' AND `stelle_id` ='.$this->Stelle->id.' AND `menue_id` ='.$id;
-    $this->debug->write("<p>file:kvwmap class:GUI->changemenue :<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);
-    if($rs[0] == 0 AND $status == 'on'){
+    if($status == 'on'){
+			if($this->user->rolle->menu_auto_close == 1){		# alle Obermenüpunkte schliessen
+				$sql ='UPDATE u_menue2rolle SET `status` = 0 WHERE `user_id` ='.$this->user->id.' AND `stelle_id` ='.$this->Stelle->id;
+				$this->debug->write("<p>file:kvwmap class:GUI->changemenue :<br>".$sql,4);
+				$query=mysql_query($sql);
+				if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+			}
       $sql ='UPDATE u_menue2rolle SET `status` = 1 WHERE `user_id` ='.$this->user->id.' AND `stelle_id` ='.$this->Stelle->id.' AND `menue_id` ='.$id;
       $this->debug->write("<p>file:kvwmap class:GUI->changemenue :<br>".$sql,4);
       $query=mysql_query($sql);
       if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     }
-    elseif($rs[0] == 1 AND $status == 'off'){
-      $sql ='UPDATE u_menue2rolle SET `status` = 0 WHERE `user_id` ='.$this->user->id.' AND `stelle_id` ='.$this->Stelle->id.' AND `menue_id` ='.$id;
+    elseif($status == 'off'){
+      $sql ='UPDATE u_menue2rolle SET `status` = 0 WHERE `user_id` ='.$this->user->id.' AND `stelle_id` ='.$this->Stelle->id;
+			if($id != '')$sql .= ' AND `menue_id` ='.$id;
       $this->debug->write("<p>file:kvwmap class:GUI->changemenue :<br>".$sql,4);
       $query=mysql_query($sql);
       if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
@@ -302,57 +301,6 @@
     }
     return 0;
   }
-	function getsubmenues($id){
-		$sql ='SELECT menue_id,';
-		if ($this->language != 'german') {
-			$sql.='`name_'.$this->language.'` AS ';
-		}
-		$sql .=' name, target, links FROM u_menue2stelle, u_menues';
-		$sql .=' WHERE stelle_id = '.$this->id;
-		$sql .=' AND obermenue = '.$id;
-		$sql .=' AND menueebene = 2';
-		$sql .=' AND u_menue2stelle.menue_id = u_menues.id';
-		$sql .= ' ORDER BY menue_order';
-		$this->debug->write("<p>file:users.php class:stelle->getsubMenues - Lesen der UnterMenuepunkte eines Menüpunktes:<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) {
-			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
-		}
-		else{
-			while($rs=mysql_fetch_array($query)) {
-				$menue['name'][]=$rs['name'];
-				$menue['target'][]=$rs['target'];
-				$menue['links'][]=$rs['links'];
-			}
-		}
-		$html = '<table cellspacing="2" cellpadding="0" border="0">';
-		for ($i = 0; $i < count($menue['name']); $i++) {
-			$html .='
-        <tr>
-          <td> 
-            <img src="'.GRAPHICSPATH.'leer.gif" width="17" height="1" border="0">
-					</td>
-					<td>
-            <a href="';
-			if ($menue['target'][$i]=='confirm') {
-				$html .='javascript:Bestaetigung(\'';
-			}
-			$html .= $menue['links'][$i];
-			if ($menue['target'][$i]=='confirm') {
-				$html .= '\',\'Diese Aktion wirklich ausf&uuml;hren?\')';
-				$menue['target'][$i]='';
-			}
-			$html .= '" class="menuered"';
-			if ($menue['target'][$i]!='') {
-				$html .= ' target="'.$menue['target'][$i].'"';
-			}
-			$html .= '>'.$menue['name'][$i].'</a>
-          </td>
-        </tr>';
-		}
-		$html .= '</table>';
-		return $html;
-	}
 }class rolle {  var $user_id;  var $stelle_id;  var $debug;  var $database;  var $loglevel;  static $hist_timestamp;	function rolle($user_id,$stelle_id,$database) {
 		global $debug;
 		$this->debug=$debug;
@@ -363,7 +311,8 @@
 		#$this->groupset=$this->getGroups('');
 		$this->loglevel = 0;
 	}
-  function readSettings() {		global $language;
+  function readSettings() {
+		global $language;
     # Abfragen und Zuweisen der Einstellungen der Rolle
     $sql ='SELECT * FROM rolle WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
     #echo $sql;
@@ -403,9 +352,11 @@
 		$this->geom_edit_first=$rs['geom_edit_first'];		
 		$this->overlayx=$rs['overlayx'];
 		$this->overlayy=$rs['overlayy'];
+		$this->instant_reload=$rs['instant_reload'];
+		$this->menu_auto_close=$rs['menu_auto_close'];
 		if($rs['hist_timestamp'] != ''){
-			$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');
-			rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');
+			$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');			# der wird zur Anzeige des Timestamps benutzt
+			rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');	# der hat die Form, wie der timestamp in der PG-DB steht und wird für die Abfragen benutzt
 		}
 		else rolle::$hist_timestamp = $this->hist_timestamp = '';
     $buttons = explode(',', $rs['buttons']);

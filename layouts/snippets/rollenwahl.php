@@ -96,6 +96,14 @@
 				</select>
 			</td>
 		</tr>
+		<tr>
+			<td align="left" style="padding: 8px; padding-top: 0px"><?php echo $strInstantReload; ?>:&nbsp;</td>
+			<td style="padding: 8px; padding-top: 0px"><input name="instant_reload" type="checkbox" value="1" <? if($this->user->rolle->instant_reload == '1'){echo 'checked="true"';} ?> ></td>
+		</tr>
+		<tr>
+			<td align="left" style="padding: 8px; padding-top: 0px"><?php echo $strMenuAutoClose; ?>:&nbsp;</td>
+			<td style="padding: 8px; padding-top: 0px"><input name="menu_auto_close" type="checkbox" value="1" <? if($this->user->rolle->menu_auto_close == '1'){echo 'checked="true"';} ?> ></td>
+		</tr>
 	</table>
 </div>
 <div style="margin:10px;margin-bottom:20px;border: 1px solid #cccccc">
@@ -176,7 +184,7 @@
 			</td>
 		</tr>
 		<tr>
-			<td align="left" style="padding: 8px; padding-top: 0px"><?php echo $strRunningCoords;; ?>:&nbsp;</td>
+			<td align="left" style="padding: 8px; padding-top: 0px"><?php echo $strRunningCoords; ?>:&nbsp;</td>
 			<td style="padding: 8px; padding-top: 0px"><input name="runningcoords" type="checkbox" value="1" <? if($this->user->rolle->runningcoords == '1'){echo 'checked="true"';} ?> ></td>
 		</tr>
 	</table>

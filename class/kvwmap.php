@@ -419,25 +419,24 @@ class GUI {
   
 	function changemenue_with_ajax($id, $status){
     $this->changemenue($id, $status);
-    if($status == 'on'){
-      echo $this->Stelle->getsubmenues($id);
-    }
   }
 	
 	function changemenue($id, $status){
-    $sql ='SELECT status from u_menue2rolle WHERE `user_id` ='.$this->user->id.' AND `stelle_id` ='.$this->Stelle->id.' AND `menue_id` ='.$id;
-    $this->debug->write("<p>file:kvwmap class:GUI->changemenue :<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);
-    if($rs[0] == 0 AND $status == 'on'){
+    if($status == 'on'){
+			if($this->user->rolle->menu_auto_close == 1){		# alle Obermenüpunkte schliessen
+				$sql ='UPDATE u_menue2rolle SET `status` = 0 WHERE `user_id` ='.$this->user->id.' AND `stelle_id` ='.$this->Stelle->id;
+				$this->debug->write("<p>file:kvwmap class:GUI->changemenue :<br>".$sql,4);
+				$query=mysql_query($sql);
+				if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+			}
       $sql ='UPDATE u_menue2rolle SET `status` = 1 WHERE `user_id` ='.$this->user->id.' AND `stelle_id` ='.$this->Stelle->id.' AND `menue_id` ='.$id;
       $this->debug->write("<p>file:kvwmap class:GUI->changemenue :<br>".$sql,4);
       $query=mysql_query($sql);
       if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     }
-    elseif($rs[0] == 1 AND $status == 'off'){
-      $sql ='UPDATE u_menue2rolle SET `status` = 0 WHERE `user_id` ='.$this->user->id.' AND `stelle_id` ='.$this->Stelle->id.' AND `menue_id` ='.$id;
+    elseif($status == 'off'){
+      $sql ='UPDATE u_menue2rolle SET `status` = 0 WHERE `user_id` ='.$this->user->id.' AND `stelle_id` ='.$this->Stelle->id;
+			if($id != '')$sql .= ' AND `menue_id` ='.$id;
       $this->debug->write("<p>file:kvwmap class:GUI->changemenue :<br>".$sql,4);
       $query=mysql_query($sql);
       if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }

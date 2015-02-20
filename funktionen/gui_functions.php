@@ -231,8 +231,12 @@ function getlegend(groupid, layerid, fremde){
 
 function updateThema(event, thema, query, groupradiolayers, queryradiolayers){
 	var status = query.checked;
+	var reload = false;
   if(status == true){
-    thema.checked = true;		
+    if(thema.checked == false){
+			thema.checked = true;		
+			if(1 == <? echo $this->user->rolle->instant_reload; ?>)reload = true;
+		}
 		query.title="Dieses Thema abfragbar schalten";
   }
 	else{
@@ -276,7 +280,8 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers){
 				}
 			}
 		}
-  }  
+  }
+	if(reload)document.GUI.submit();
 }
 
 function updateQuery(event, thema, query, radiolayers){
@@ -307,6 +312,7 @@ function updateQuery(event, thema, query, radiolayers){
   		}
   	}
   }
+	if(1 == <? echo $this->user->rolle->instant_reload; ?>)document.GUI.submit();
 }
 
 function preventDefault(e){
