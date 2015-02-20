@@ -714,9 +714,10 @@ class Nachweis {
         else {
           # Suche nach einer einzelnen Nachweis_id
           # echo '<br>Suche nach einer einzelnen ID.';
-          $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring, st_assvg(st_transform(n.the_geom, ".$this->client_epsg.")) AS svg_umring,v.name AS vermst,n2d.dokumentart_id as andere_art FROM nachweisverwaltung.n_vermstelle AS v, nachweisverwaltung.n_nachweise AS n";
+          $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring, st_assvg(st_transform(n.the_geom, ".$this->client_epsg.")) AS svg_umring,v.name AS vermst,n2d.dokumentart_id as andere_art FROM nachweisverwaltung.n_nachweise AS n";
+					$sql.= " LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
           $sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id";
-          $sql.=" WHERE CAST(n.vermstelle AS integer)=v.id AND n.id=".(int)$id;
+          $sql.=" WHERE n.id=".(int)$id;
 		  if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
           #echo $sql;
           $this->debug->write("<br>nachweis.php getNachweise Abfragen der Nachweisdokumente.<br>",4);
@@ -854,16 +855,17 @@ class Nachweis {
           # Suche nach individueller Nummer
           #echo '<br>Suche nach individueller Nummer.';
           $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS andere_art, d.art AS andere_art_name";
-          $sql.=" FROM nachweisverwaltung.n_vermstelle AS v";
+          $sql.=" FROM ";
 					if($gemarkung != '' AND $flur_thematisch == ''){
-						if(ALKIS)$sql.=", alkis.pp_flur as flur";
-						else $sql.=", alkobj_e_fla as alko, alknflur";
+						if(ALKIS)$sql.=" alkis.pp_flur as flur, ";
+						else $sql.=" alkobj_e_fla as alko, alknflur, ";
 					}
-					$sql.=" , nachweisverwaltung.n_nachweise AS n";
+					$sql.=" nachweisverwaltung.n_nachweise AS n";
+					$sql.= " LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
           $sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d"; 
 					$sql.=" 		LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id";
 					$sql.=" ON n2d.nachweis_id = n.id";
-          $sql.=" WHERE CAST(n.vermstelle AS integer)=v.id";
+          $sql.=" WHERE 1=1 ";
 					if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
           if ($idselected[0]!=0) {
             $sql.=" AND n.id IN ('".$idselected[0]."'";
