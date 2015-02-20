@@ -62,7 +62,7 @@
         if ($this->img['referenzkarte']!='' AND MENU_REFMAP == "oben") {
           ?>
         <tr>
-          <td><input type="image" id="refmap" name="refmap" onclick="document.GUI.go.value='neu Laden';" src="<?php echo $this->img['referenzkarte']; ?>" alt="Referenzkarte" align="right" hspace="0"></td>
+          <td><input type="image" id="refmap" name="refmap" onmousedown="document.GUI.go.value='neu Laden';" src="<?php echo $this->img['referenzkarte']; ?>" alt="Referenzkarte" align="right" hspace="0"></td>
         </tr>
         <?php } ?>
 
@@ -312,7 +312,7 @@
         if ($this->img['referenzkarte']!='' AND MENU_REFMAP !="oben") {
           ?>
         <tr>
-          <td><input type="image" id="refmap" name="refmap" onclick="document.GUI.go.value='neu Laden';" src="<?php echo $this->img['referenzkarte']; ?>" alt="Referenzkarte" align="right" hspace="0"></td>
+          <td><input type="image" id="refmap" name="refmap" onmousedown="document.GUI.go.value='neu Laden';" src="<?php echo $this->img['referenzkarte']; ?>" alt="Referenzkarte" align="right" hspace="0"></td>
         </tr><?php } ?>
 
         <tr>
