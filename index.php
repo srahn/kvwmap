@@ -98,15 +98,7 @@ else{
 	if($userDb == NULL)include_(CLASSPATH.'mysql.php');
 	include_(CLASSPATH.'kvwmap.php');	
 	include_(CLASSPATH.'kataster.php');
-	include_(CLASSPATH.'postgresql.php');
-	if(ALKIS){																					
-		include_(CLASSPATH.'kataster_alkis.php');					
-		include_(CLASSPATH.'postgresql_alkis.php');				
-	}																										
-	else{																								
-		include_(CLASSPATH.'kataster_alk.php');						
-		include_(CLASSPATH.'postgresql_alk.php');					
-	}																										
+	include_(CLASSPATH.'postgresql.php');																										
 	include_(CLASSPATH.'users.php');
 	include_(CLASSPATH.'bauleitplanung.php');           
 }																						
@@ -1436,16 +1428,6 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  case "ALK-Flurstueck_Auswaehlen_Suchen" : {
 		$GUI->flurstSuchen();
 		$GUI->output();
-	  } break;
-		
-	  case "Hausnummernkorrektur" : {
-			include_(CLASSPATH.'alb.php');
-			$ALB=new ALB($GUI->database);
-			$ALB->HausNrTextKorrektur();
-			$Adresse=new adresse('','','',$GUI->database);
-			$Adresse->updateAdressTable();
-			$GUI->adresswahl();
-			$GUI->output();
 	  } break;
 
 	  case 'Adm_Fortfuehrung' : {

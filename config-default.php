@@ -36,17 +36,7 @@ define('GUTACHTERAUSSCHUSS', '12345');								# Version 1.7.3			# in Version 1.7
 #$katasterfuehrendestelle = array('0019' => '132845', '0021' => '132846');		# Version 1.9.0
 $katasterfuehrendestelle = array('132845' => '0019', '132846' => '0021');		# Version 1.10.0  (Schlüssel und Werte wurden vertauscht)
 
-
-# definiert, ob zu Testzwecken auf ein PostNAS-Schema zugegriffen wird, oder nicht
-define('ALKIS', false);																# Version 1.8.0
-#define('ALKIS', true);																# Version 1.8.0
-#define("LAYERNAME_FLURSTUECKE",'Flurstuecke_Alkis');
-#define('EPSGCODE','2398');
-#define('EPSGCODE_ALKIS','25833');
-define('DHK_CALL_URL', 'http://dhkserver/call/');
-define('DHK_CALL_USER', '12345');
-define('DHK_CALL_PASSWORD', '6789');
-
+#define('ALKIS', true);																# Version 1.8.0					# in Version 2.1 gelöscht
 
 ########################## Layout-Vorgaben
 # hier kann eine eigene css-Datei angegeben werden
@@ -211,6 +201,14 @@ define('ZIP_PATH', 'zip -j');													# Version 1.7.3  hier wurde das ' -j' 
 # die Geometriespalte muß auch mit dieser EPSG Nummer angelegt sein.
 define('EPSGCODE','2398'); # Krassowski, Pulkowo 42, Gauß Krüger 3° Streifen 4 (12°)
 #define('EPSGCODE','2399'); # Krassowski, Pulkowo 42, Gauß Krüger 3° Streifen 5 (15°)
+
+# EPSG-Code der ALKIS-Daten
+define('EPSGCODE_ALKIS','25833');
+
+# DHK-Call-Schnittstelle
+define('DHK_CALL_URL', 'http://dhkserver/call?form=login');						# Version 2.1
+define('DHK_CALL_USER', '12345');																			# Version 2.1
+define('DHK_CALL_PASSWORD', '6789');																	# Version 2.1
 
 # Unterstützte SRIDs, nur diese stehen zur Auswahl bei der Stellenwahl
 $supportedSRIDs = array(4326,2397,2398,2399,31466,31467,31468,31469,32648,25832,25833,35833,32633,325833,15833,900913,28992);                    # Version 1.6.8

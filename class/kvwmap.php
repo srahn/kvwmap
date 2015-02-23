@@ -10448,7 +10448,7 @@ class GUI {
             # Zoom auf Flurstücke
             if($this->formvars['ALK_Suche'] == 1){
             	$this->loadMap('DataBase');
-		          $this->zoomToALKFlurst($FlurstKennz,10);				# ALKIS TODO
+		          $this->zoomToALKFlurst($FlurstKennz,10);				
 							if($this->formvars['go_next'] != '')header('location: index.php?go='.$this->formvars['go_next']);
 		          $currenttime=date('Y-m-d H:i:s',time());
 		          $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
@@ -12164,16 +12164,9 @@ class GUI {
     }
 
     # zu 3)
-    if(ALKIS){
-    	$datastring ="the_geom from (select f.gml_id as oid, wkb_geometry as the_geom from alkis.ax_flurstueck as f";
-    	$datastring.=" WHERE f.flurstueckskennzeichen IN ('".$FlurstListe[0]."'";
-    	$epsg = EPSGCODE_ALKIS;
-    }
-    else{
-    	$datastring ="the_geom from (select o.objnr as id, o.objnr as oid,o.the_geom from alkobj_e_fla AS o,alknflst as f";
-    	$datastring.=" WHERE o.objnr=f.objnr AND f.flurstkennz IN ('".$FlurstListe[0]."'";
-    	$epsg = EPSGCODE;
-    }
+		$datastring ="the_geom from (select f.gml_id as oid, wkb_geometry as the_geom from alkis.ax_flurstueck as f";
+		$datastring.=" WHERE f.flurstueckskennzeichen IN ('".$FlurstListe[0]."'";
+		$epsg = EPSGCODE_ALKIS;
     $legendentext="Flurstück";
     if(count($FlurstListe) > 1){
       $legendentext .= "e";
@@ -12283,42 +12276,24 @@ class GUI {
 			}
 	    # zu 3)
 	    $layer=ms_newLayerObj($this->map);
-	    if(ALKIS){
-	    	$epsg = EPSGCODE_ALKIS;
-	    	$datastring ="the_geom from (select g.gml_id as oid, wkb_geometry as the_geom FROM alkis.ax_gemeinde gem, alkis.ax_gebaeude g";
-		    $datastring.=" LEFT JOIN alkis.alkis_beziehungen v ON g.gml_id=v.beziehung_von"; 
-				$datastring.=" LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = any(g.zeigtauf)"; 
-				$datastring.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde";
-				$datastring.=" AND l.lage = lpad(s.lage,5,'0')";
-				$datastring.=" WHERE gem.gemeinde = l.gemeinde";
-		    if ($Hausnr!='') {
-		    	$Hausnr = str_replace(", ", ",", $Hausnr);
-		    	$Hausnr = strtolower(str_replace(",", "','", $Hausnr));    	
-		      $datastring.=" AND gem.schluesselgesamt||'-'||l.lage||'-'||TRIM(LOWER(l.hausnummer)) IN ('".$Hausnr."')";
-		    }
-	    	else{
-			    $datastring.=" AND gem.schluesselgesamt=".(int)$Gemeinde;
-			    if ($Strasse!='') {
-			      $datastring.=" AND l.lage='".$Strasse."'";
-			    }
-		    }
-	    }
-	    else{
-	    	$epsg = EPSGCODE;
-		    $datastring ="the_geom from (select o.objnr as oid,o.the_geom from alkobj_e_fla AS o,alknhaus as h";
-		    $datastring.=" WHERE o.objnr=h.objnr";
-		    if (trim($Hausnr)!='') {
-		    	$Hausnr = str_replace(", ", ",", $Hausnr);
-		    	$Hausnr = strtolower(str_replace(",", "','", $Hausnr));
-		      $datastring.=" AND h.gemeinde||'-'||h.strasse||'-'||TRIM(LOWER(h.hausnr)) IN ('".$Hausnr."')";
-		    }
-	    	else{
-			    $datastring.=" AND h.gemeinde=".(int)$Gemeinde;
-			    if ($Strasse!='') {
-			      $datastring.=" AND h.strasse='".$Strasse."'";
-			    }
-		    }
-	    }
+			$epsg = EPSGCODE_ALKIS;
+			$datastring ="the_geom from (select g.gml_id as oid, wkb_geometry as the_geom FROM alkis.ax_gemeinde gem, alkis.ax_gebaeude g";
+			$datastring.=" LEFT JOIN alkis.alkis_beziehungen v ON g.gml_id=v.beziehung_von"; 
+			$datastring.=" LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = any(g.zeigtauf)"; 
+			$datastring.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde";
+			$datastring.=" AND l.lage = lpad(s.lage,5,'0')";
+			$datastring.=" WHERE gem.gemeinde = l.gemeinde";
+			if ($Hausnr!='') {
+				$Hausnr = str_replace(", ", ",", $Hausnr);
+				$Hausnr = strtolower(str_replace(",", "','", $Hausnr));    	
+				$datastring.=" AND gem.schluesselgesamt||'-'||l.lage||'-'||TRIM(LOWER(l.hausnummer)) IN ('".$Hausnr."')";
+			}
+			else{
+				$datastring.=" AND gem.schluesselgesamt=".(int)$Gemeinde;
+				if ($Strasse!='') {
+					$datastring.=" AND l.lage='".$Strasse."'";
+				}
+			}
 	    $datastring.=") as foo using unique oid using srid=".$epsg;
 	    $legendentext ="Geb&auml;ude<br>";
 	    if ($Hausnr!='') {
@@ -12816,12 +12791,7 @@ class GUI {
       # Abragen der Fluren zur Gemarkung
       if ($GemkgID==0) { $GemkgID=$GemkgListe['GemkgID'][0]; }
       $Flur=new Flur('','','',$this->pgdatabase);
-    	if($this->formvars['ALK_Suche'] == 1){
-    		$FlurListe=$Flur->getFlurListeALK($GemkgID, $this->formvars['historical']);
-    	}
-    	else{
-    		$FlurListe=$Flur->getFlurListe($GemkgID,'', $this->formvars['historical']);
-    	}
+    	$FlurListe=$Flur->getFlurListe($GemkgID,'', $this->formvars['historical']);
       # Erzeugen des Formobjektes für die Flurauswahl
       if (count($FlurListe['FlurID'])==1) { $FlurID=$FlurListe['FlurID'][0]; }
       $FlurFormObj=new selectFormObject("FlurID","select",$FlurListe['FlurID'],array($FlurID),$FlurListe['Name'],"1","","",NULL);
@@ -12836,12 +12806,7 @@ class GUI {
         # $FlstNrExtentListe=$FlstNr->getFlstListeByExtent($this->user->rolle->oGeorefExt);
         # $FlstNrListe=$FlstNr->getFlstListe($GemID,$GemkgID,$FlurID,$FlstNrExtentListe,'FKZ');
         if ($FlurID==0) { $FlurID=$FlurListe['FlurID'][0]; }
-        if($this->formvars['ALK_Suche'] == 1){
-        	$FlstNrListe=$FlstNr->getFlstListeALK($GemID,$GemkgID,$FlurID, $this->formvars['historical']);
-        }
-        else{
-        	$FlstNrListe=$FlstNr->getFlstListe($GemID,$GemkgID,$FlurID, $this->formvars['historical']);
-        }
+        $FlstNrListe=$FlstNr->getFlstListe($GemID,$GemkgID,$FlurID, $this->formvars['historical']);
         # Erzeugen des Formobjektes für die Flurstücksauswahl
         if (count($FlstNrListe['FlstID'])==1){
           $FLstID=$FlstNrListe['FlstID'][0];
@@ -12939,8 +12904,8 @@ class GUI {
     $GemFormObj->outputHTML();
     # Wenn Gemeinde gewählt wurde, oder nur eine zur Auswahl stand, Auswahlliste für Strassen erzeugen
     if ($GemFormObj->selected OR $GemkgFormObj->selected){
-    	if($GemFormObj->selected)$StrassenListe=$Adresse->getStrassenListe($GemID,'');
-    	elseif($GemkgFormObj->selected)$StrassenListe=$Adresse->getStrassenListeByGemkg($GemkgID,'');
+    	if($GemFormObj->selected)$StrassenListe=$Adresse->getStrassenListe($GemID,'', '');
+    	elseif($GemkgFormObj->selected)$StrassenListe=$Adresse->getStrassenListe('', $GemkgID,'');
       $StrSelected[0]=$StrID;
       # Erzeugen des Formobjektes für die Strassenauswahl
       $StrFormObj=new selectFormObject("StrID","select",$StrassenListe['StrID'],$StrSelected,$StrassenListe['Name'],"1","","",NULL);

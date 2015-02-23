@@ -40,24 +40,6 @@ class Nachweis {
   var $database;
   var $client_epsg;
     
-  ################### Liste der Funktionen ########################################################################################################
-  #
-  # pruefeEingabedaten($datum,$VermStelle,$art,$gueltigkeit,$stammnr,$Blattformat,$Blattnr,$Bilddatei_name)
-  # dokumentenDateiHochladen($flurid,$stammnr,$art,$Blattnr,$Bilddatei_type,$Bilddatei,$Bilddatei_name,$Bilddatei_type,$Zielpfad,$Zieldatei)
-  # nachweiseLoeschen($id,$loeschenDateien)
-  # eintragenNeuesDokument($id,$Tag,$Monat,$Jahr,$Gemarkung,$Flur,$VermStelle,$art,$gueltigkeit,$stammnr,$Blattformat,$Blattnr,$link_datei,$umring)  
-  # dokumentenDateiLoeschen()
-  # getLinkDateiName()
-  # aktualisierenDokument($id,$datum, $Gemarkung, $Flur, $VermStelle, $art, $gueltigkeit, $stammnr, $Blattformat,$Blattnr,$link_datei,$umring)
-  # pruefeAnzeigedaten($stammnr,$f,$k,$g,$abfrage_art,$antr_nr_a,$antr_nr_b)
-  # getNachweise(array($id),$FlurID,$polygon,$stammnr,$art_einblenden,$richtung,$abfrage_art,$order,$antr_nr_a,$antr_nr_b)
-  # pruefe_zum_Auftrag_hinzufuegen($antr_nr_a,$antr_nr_b,$id)
-  # zum_Auftrag_hinzufuegen($antr_nr_a,$antr_nr_b,$id)
-  # getDocLocation($id)
-  # zoomToNachweis();
-  #
-  ##################################################################################################################################################
-
   function Nachweis($database, $client_epsg) {
     global $debug;
     $this->debug=$debug;
@@ -857,8 +839,7 @@ class Nachweis {
           $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS andere_art, d.art AS andere_art_name";
           $sql.=" FROM ";
 					if($gemarkung != '' AND $flur_thematisch == ''){
-						if(ALKIS)$sql.=" alkis.pp_flur as flur, ";
-						else $sql.=" alkobj_e_fla as alko, alknflur, ";
+						$sql.=" alkis.pp_flur as flur, ";
 					}
 					$sql.=" nachweisverwaltung.n_nachweise AS n";
 					$sql.= " LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
@@ -880,12 +861,10 @@ class Nachweis {
           }
 					else{
 						if($gemarkung != ''){
-							if(ALKIS)$sql.=" AND flur.land*10000 + flur.gemarkung = '".$gemarkung."' AND st_intersects(st_transform(flur.the_geom, ".EPSGCODE."), n.the_geom)";
-							else $sql.=" AND alko.objnr = alknflur.objnr AND alknflur.gemkgschl = '".$gemarkung."' AND st_intersects(st_transform(alko.the_geom, ".EPSGCODE."), n.the_geom)";
+							$sql.=" AND flur.land*10000 + flur.gemarkung = '".$gemarkung."' AND st_intersects(st_transform(flur.the_geom, ".EPSGCODE."), n.the_geom)";
 						}
 						if($flur != ''){
-							if(ALKIS)$sql.=" AND flur.flurnummer = ".$flur." ";
-							else $sql.=" AND alknflur.flur = '".str_pad($flur,3,'0',STR_PAD_LEFT)."' ";
+							$sql.=" AND flur.flurnummer = ".$flur." ";
 						}
 					}
           if($stammnr!=''){

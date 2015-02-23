@@ -175,7 +175,7 @@ class Bauauskunft {
   	$nenner = $vorkomma.'.'.$nachkomma;
   	
   	$FlurstKennz = $gem.'-'.$flur.'-'.$zaehler.'/'.$nenner;
-  	if(ALKIS)$FlurstKennz = formatFlurstkennzALKIS($FlurstKennz);
+  	$FlurstKennz = formatFlurstkennzALKIS($FlurstKennz);
   	return $FlurstKennz;
   }
         
