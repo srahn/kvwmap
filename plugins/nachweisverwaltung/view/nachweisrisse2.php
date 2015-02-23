@@ -24,14 +24,14 @@
     $id=$this->qlayerset[$i]['shape'][$j]['id'];
     $flur=$this->qlayerset[$i]['shape'][$j]['flur'];
     $gemarkid=$this->qlayerset[$i]['shape'][$j]['gemarkung'];
-    $flurid=$gemarkid."-".$flur;
+		$flurid=$this->qlayerset[$i]['shape'][$j]['flurid'];
     $art=$this->qlayerset[$i]['shape'][$j]['art'];
 	
     while (strlen($stammnr) < 8)
     {
       $stammnr="0".$stammnr;
     }
-$dname=NACHWEISDOCPATH.$gemarkid.$flur."/".$nr."/".$this->qlayerset[$i]['shape'][$j]['link_datei'];
+$dname=NACHWEISDOCPATH.$flurid."/".$nr."/".$this->qlayerset[$i]['shape'][$j]['link_datei'];
     ?>
   <tr>
 	<td><span class="fett"><?php echo $this->qlayerset[$i]['shape'][$j][NACHWEIS_PRIMARY_ATTRIBUTE]; ?></span></td>
