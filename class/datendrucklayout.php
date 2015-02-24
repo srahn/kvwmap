@@ -238,10 +238,12 @@ class ddl {
 							$pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->gui->user->rolle->epsg_code);							
 							$point = $pointeditor->getpoint($oids[$i], $attributes['table_name'][$attributes['the_geom']], $attributes['the_geom']);
 							$rect = ms_newRectObj();
-							$rect->minx = $point['pointx']-100;
-							$rect->maxx = $point['pointx']+100;
-							$rect->miny = $point['pointy']-100;
-							$rect->maxy = $point['pointy']+100;
+							if(defined('ZOOMBUFFER') AND ZOOMBUFFER > 0)$rand = ZOOMBUFFER;
+							else $rand = 100;
+							$rect->minx = $point['pointx']-$rand;
+							$rect->maxx = $point['pointx']+$rand;
+							$rect->miny = $point['pointy']-$rand;
+							$rect->maxy = $point['pointy']+$rand;
 						}
 						else{
 							include_(CLASSPATH.'polygoneditor.php');
