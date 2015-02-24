@@ -367,7 +367,7 @@ backto = function(go){
 	        	}
         } ?>
 				
-				 <? if($privileg_['klassifizierung']){
+				 <? if($privileg_['festlegungen']){
 	        ?>
 	        	<tr>
           		<td colspan="2">
