@@ -12752,9 +12752,14 @@ class GUI {
 		$_files = $_FILES;
     if($_files['importliste']['name']){
 			$importliste = file($_files['importliste']['tmp_name'], FILE_IGNORE_NEW_LINES);
+			if(strpos($importliste[0], '/') !== false){
+				$importliste_string = implode('; ', $importliste);
+				$importliste_string = formatFlurstkennzALKIS($importliste_string);
+				$importliste = explode(';', $importliste_string);
+			}
 			$this->formvars['selFlstID'] = implode(', ', $importliste);
 			$this->formvars['GemkgID'] = substr($importliste[0], 0, 6);
-			$this->formvars['FlurID'] = substr($importliste[0], 7, 3);
+			$this->formvars['FlurID'] = substr($importliste[0], 6, 3);
 		}
 		##########################
 		# Übernahme der Formularwerte für die Einstellung der Auswahlmaske
