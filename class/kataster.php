@@ -1497,6 +1497,33 @@ class flurstueck {
     #ALKIS TODO
     return $ret[1];
   }
+	
+	function getWasserrecht() {
+    if ($this->FlurstKennz=="") { return 0; }
+    $this->debug->write("<br>kataster.php->flurstueck->getWasserrecht Abfrage des Wasserrechts zum Flurstück<br>".$sql,4);
+    $ret=$this->database->getWasserrecht($this->FlurstKennz);
+    if ($ret[0] AND DBWRITE) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    $Wasserrecht=$ret[1];
+    return $Wasserrecht;
+  }
+	
+	function getStrassenrecht() {
+    if ($this->FlurstKennz=="") { return 0; }
+    $this->debug->write("<br>kataster.php->flurstueck->getStrassenrecht Abfrage des Strassenrechts zum Flurstück<br>".$sql,4);
+    $ret=$this->database->getStrassenrecht($this->FlurstKennz);
+    if ($ret[0] AND DBWRITE) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    $Strassenrecht=$ret[1];
+    return $Strassenrecht;
+  }
+	
+	function getForstrecht() {
+    if ($this->FlurstKennz=="") { return 0; }
+    $this->debug->write("<br>kataster.php->flurstueck->getForstrecht Abfrage des Forstrechts zum Flurstück<br>".$sql,4);
+    $ret=$this->database->getForstrecht($this->FlurstKennz);
+    if ($ret[0] AND DBWRITE) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    $Forstrecht=$ret[1];
+    return $Forstrecht;
+  }
 
   function getKlassifizierung() {
     if ($this->FlurstKennz=="") { return 0; }
@@ -1876,7 +1903,10 @@ class flurstueck {
     $this->Adresse=$this->getAdresse();
     $this->Lage=$this->getLage();
     $this->Grundbuchbezirk=$this->getGrundbuchbezirk();
-    $this->Klassifizierung=$this->getKlassifizierung();	
+    $this->Klassifizierung=$this->getKlassifizierung();
+		$this->Forstrecht=$this->getForstrecht();
+		$this->Strassenrecht=$this->getStrassenrecht();
+		$this->Wasserrecht=$this->getWasserrecht();
     //$this->Grundbuecher=$this->getGrundbuecher();							# steht im Snippet
     //$this->Buchungen=$this->getBuchungen($Bezirk,$Blatt,1);		# steht im Snippet
     $this->Amtsgericht=$this->getAmtsgericht(); 

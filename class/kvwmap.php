@@ -3777,12 +3777,15 @@ class GUI {
 					$style['outlinecolorred'] = -1;
 					$style['outlinecolorgreen'] = -1;
 					$style['outlinecolorblue'] = -1;
-					$style['size'] = 3;
-					$style['symbol'] = 9;
+					$style['size'] = NULL;
+					$style['symbol'] = NULL;
 					$style['symbolname'] = NULL;
 					$style['backgroundcolor'] = NULL;
 					$style['minsize'] = NULL;
-					$style['maxsize'] = 3;
+					$style['maxsize'] = NULL;
+					$style['width'] = 3;
+					$style['minwidth'] = 3;
+					$style['maxwidth'] = 3;
 					$style_id = $dbmap->new_Style($style);
 				}break;
 				

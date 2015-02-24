@@ -1182,6 +1182,66 @@ class pgdatabase {
     $ret[1]=$Nutzungen;
     return $ret;
   }
+		
+	function getWasserrecht($FlurstKennz) {
+    $sql ="SELECT round(st_area(st_intersection(fo.wkb_geometry,f.wkb_geometry))::numeric) AS flaeche,  a.bezeichner as art";
+    $sql.=" FROM alkis.ax_flurstueck f, alkis.ax_klassifizierungnachwasserrecht fo ";
+		$sql.=" LEFT JOIN alkis.ax_klassifizierungnachwasserrecht_artdf a ON a.wert=fo.artderfestlegung";
+    $sql.=" WHERE st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND st_area(st_intersection(fo.wkb_geometry,f.wkb_geometry)) > 0.05 AND f.flurstueckskennzeichen='".$FlurstKennz."'";
+		$sql.= $this->build_temporal_filter(array('f', 'fo'));
+		$sql.=" UNION SELECT round(st_area(st_intersection(fo.wkb_geometry,f.wkb_geometry))::numeric) AS flaeche,  a.bezeichner as art";
+    $sql.=" FROM alkis.ax_flurstueck f, alkis.ax_anderefestlegungnachwasserrecht fo ";
+		$sql.=" LEFT JOIN alkis.ax_anderefestlegungnachwasserrecht_artdf a ON a.wert=fo.artderfestlegung";
+    $sql.=" WHERE st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND st_area(st_intersection(fo.wkb_geometry,f.wkb_geometry)) > 0.05 AND f.flurstueckskennzeichen='".$FlurstKennz."'";
+		$sql.= $this->build_temporal_filter(array('f', 'fo'));
+		#echo $sql;
+    $ret=$this->execSQL($sql, 4, 0);
+    if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
+    if (pg_num_rows($ret[1])>0) {
+      while($rs=pg_fetch_array($ret[1])) {
+        $Strassenrecht[]=$rs;
+      }
+    }
+    $ret[1]=$Strassenrecht;
+    return $ret;
+  }
+	
+	function getStrassenrecht($FlurstKennz) {
+    $sql ="SELECT round(st_area(st_intersection(fo.wkb_geometry,f.wkb_geometry))::numeric) AS flaeche,  a.bezeichner as art, bezeichnung";
+    $sql.=" FROM alkis.ax_flurstueck f, alkis.ax_klassifizierungnachstrassenrecht fo ";
+		$sql.=" LEFT JOIN alkis.ax_klassifizierungnachstrassenrecht_artdf a ON a.wert=fo.artderfestlegung";
+    $sql.=" WHERE st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND st_area(st_intersection(fo.wkb_geometry,f.wkb_geometry)) > 0.05 AND f.flurstueckskennzeichen='".$FlurstKennz."'";
+		$sql.= $this->build_temporal_filter(array('f', 'fo'));
+		#echo $sql;
+    $ret=$this->execSQL($sql, 4, 0);
+    if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
+    if (pg_num_rows($ret[1])>0) {
+      while($rs=pg_fetch_array($ret[1])) {
+        $Strassenrecht[]=$rs;
+      }
+    }
+    $ret[1]=$Strassenrecht;
+    return $ret;
+  }
+	
+	function getForstrecht($FlurstKennz) {
+    $sql ="SELECT round(st_area(st_intersection(fo.wkb_geometry,f.wkb_geometry))::numeric) AS flaeche,  a.bezeichner as art, b.bezeichner as funktion ";
+    $sql.=" FROM alkis.ax_flurstueck f, alkis.ax_forstrecht fo ";
+		$sql.=" LEFT JOIN alkis.ax_forstrecht_artderfestlegung a ON a.wert=fo.artderfestlegung";
+		$sql.=" LEFT JOIN alkis.ax_forstrecht_besonderefunktion b ON b.wert=fo.besonderefunktion";
+    $sql.=" WHERE st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND st_area(st_intersection(fo.wkb_geometry,f.wkb_geometry)) > 0.05 AND f.flurstueckskennzeichen='".$FlurstKennz."'";
+		$sql.= $this->build_temporal_filter(array('f', 'fo'));
+		#echo $sql;
+    $ret=$this->execSQL($sql, 4, 0);
+    if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
+    if (pg_num_rows($ret[1])>0) {
+      while($rs=pg_fetch_array($ret[1])) {
+        $Forstrecht[]=$rs;
+      }
+    }
+    $ret[1]=$Forstrecht;
+    return $ret;
+  }
 
   function getKlassifizierung($FlurstKennz) {
     $sql ="SELECT round(st_area(st_intersection(n.wkb_geometry,f.wkb_geometry))::numeric) AS flaeche,  round(st_area(f.wkb_geometry)::numeric) as flstflaeche, n.ackerzahlodergruenlandzahl as wert, n.kulturart as objart, ";

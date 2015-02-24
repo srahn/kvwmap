@@ -366,6 +366,69 @@ backto = function(go){
 	        <?
 	        	}
         } ?>
+				
+				 <? if($privileg_['klassifizierung']){
+	        	if($flst->Forstrecht[0]['art'] != ''){
+	        ?>
+	        	<tr>
+          		<td colspan="2">
+            		<span class="fett">Forstrecht</span>
+              </td>
+            </tr>
+            <tr>
+							<td>
+		            <table border="0" cellspacing="0" cellpadding="2">
+		            <?  for($j = 0; $j < count($flst->Forstrecht); $j++){
+										echo '<tr><td>'.$flst->Forstrecht[$j]['art'].' - '.$flst->Forstrecht[$j]['funktion'].'</td></tr>';
+		             } ?>
+								</table>
+		          </td>
+		         </tr>
+	        <?
+	        	}
+        } ?>
+				
+				<? if($privileg_['klassifizierung']){
+	        	if($flst->Strassenrecht[0]['art'] != ''){
+	        ?>
+	        	<tr>
+          		<td colspan="2">
+            		<span class="fett">Strassenrecht</span>
+              </td>
+            </tr>
+            <tr>
+							<td>
+		            <table border="0" cellspacing="0" cellpadding="2">
+		            <?  for($j = 0; $j < count($flst->Strassenrecht); $j++){
+										echo '<tr><td>'.$flst->Strassenrecht[$j]['art'].' - '.$flst->Strassenrecht[$j]['bezeichnung'].'</td></tr>';
+		             } ?>
+								</table>
+		          </td>
+		         </tr>
+	        <?
+	        	}
+        } ?>
+				
+				<? if($privileg_['klassifizierung']){
+	        	if($flst->Wasserrecht[0]['art'] != ''){
+	        ?>
+	        	<tr>
+          		<td colspan="2">
+            		<span class="fett">Wasserrecht</span>
+              </td>
+            </tr>
+            <tr>
+							<td>
+		            <table border="0" cellspacing="0" cellpadding="2">
+		            <?  for($j = 0; $j < count($flst->Wasserrecht); $j++){
+										echo '<tr><td>'.$flst->Wasserrecht[$j]['art'].'</td></tr>';
+		             } ?>
+								</table>
+		          </td>
+		         </tr>
+	        <?
+	        	}
+        } ?>
 
         <?php if ($privileg_['freitext'] AND count($flst->FreiText)>0) { ?>
         <tr>
