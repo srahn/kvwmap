@@ -368,67 +368,50 @@ backto = function(go){
         } ?>
 				
 				 <? if($privileg_['klassifizierung']){
-	        	if($flst->Forstrecht[0]['art'] != ''){
 	        ?>
 	        	<tr>
           		<td colspan="2">
-            		<span class="fett">Forstrecht</span>
+            		<span class="fett">Öffentlich-rechtliche und sonstige Festlegungen</span>
               </td>
             </tr>
             <tr>
 							<td>
 		            <table border="0" cellspacing="0" cellpadding="2">
-		            <?  for($j = 0; $j < count($flst->Forstrecht); $j++){
-										echo '<tr><td>'.$flst->Forstrecht[$j]['art'].' - '.$flst->Forstrecht[$j]['funktion'].'</td></tr>';
-		             } ?>
+		            <?
+								for($j = 0; $j < count($flst->Strassenrecht); $j++){
+									echo '<tr><td>'.$flst->Strassenrecht[$j]['flaeche'].' m²</td><td>'.$flst->Strassenrecht[$j]['art'].': '.$flst->Strassenrecht[$j]['bezeichnung'].'</td></tr>';
+		            }
+								for($j = 0; $j < count($flst->Wasserrecht); $j++){
+									echo '<tr><td>'.$flst->Wasserrecht[$j]['flaeche'].' m²</td><td>'.$flst->Wasserrecht[$j]['art'].': '.$flst->Wasserrecht[$j]['bezeichnung'].'</td></tr>';
+		            }
+								for($j = 0; $j < count($flst->Schutzgebiet); $j++){
+									echo '<tr><td>'.$flst->Schutzgebiet[$j]['flaeche'].' m²</td><td>'.$flst->Schutzgebiet[$j]['art'].'</td></tr>';
+		            }
+								for($j = 0; $j < count($flst->NaturUmweltrecht); $j++){
+									echo '<tr><td>'.$flst->NaturUmweltrecht[$j]['flaeche'].' m²</td><td>'.$flst->NaturUmweltrecht[$j]['art'].'</td></tr>';
+		            }
+								for($j = 0; $j < count($flst->BauBodenrecht); $j++){
+									echo '<tr><td>'.$flst->BauBodenrecht[$j]['flaeche'].' m²</td><td>'.$flst->BauBodenrecht[$j]['art'];
+									if($flst->BauBodenrecht[$j]['bezeichnung'] != '')echo ': '.$flst->BauBodenrecht[$j]['bezeichnung'];
+									if($flst->BauBodenrecht[$j]['stelle'] != '')echo ' ('.$flst->BauBodenrecht[$j]['stelle'].')';
+									echo '</td></tr>';
+		            }
+								for($j = 0; $j < count($flst->Denkmalschutzrecht); $j++){
+									echo '<tr><td>'.$flst->Denkmalschutzrecht[$j]['flaeche'].' m²</td><td>'.$flst->Denkmalschutzrecht[$j]['art'].' '.$flst->Denkmalschutzrecht[$j]['name'].'</td></tr>';
+		            }
+								for($j = 0; $j < count($flst->Forstrecht); $j++){
+									echo '<tr><td>'.$flst->Forstrecht[$j]['flaeche'].' m²</td><td>'.$flst->Forstrecht[$j]['art'].': '.$flst->Forstrecht[$j]['funktion'].'</td></tr>';
+		            }
+								for($j = 0; $j < count($flst->Sonstigesrecht); $j++){
+									echo '<tr><td>'.$flst->Sonstigesrecht[$j]['flaeche'].' m²</td><td>'.$flst->Sonstigesrecht[$j]['art'].' '.$flst->Sonstigesrecht[$j]['name'].'</td></tr>';
+		            }
+								?>
 								</table>
 		          </td>
 		         </tr>
 	        <?
-	        	}
         } ?>
 				
-				<? if($privileg_['klassifizierung']){
-	        	if($flst->Strassenrecht[0]['art'] != ''){
-	        ?>
-	        	<tr>
-          		<td colspan="2">
-            		<span class="fett">Strassenrecht</span>
-              </td>
-            </tr>
-            <tr>
-							<td>
-		            <table border="0" cellspacing="0" cellpadding="2">
-		            <?  for($j = 0; $j < count($flst->Strassenrecht); $j++){
-										echo '<tr><td>'.$flst->Strassenrecht[$j]['art'].' - '.$flst->Strassenrecht[$j]['bezeichnung'].'</td></tr>';
-		             } ?>
-								</table>
-		          </td>
-		         </tr>
-	        <?
-	        	}
-        } ?>
-				
-				<? if($privileg_['klassifizierung']){
-	        	if($flst->Wasserrecht[0]['art'] != ''){
-	        ?>
-	        	<tr>
-          		<td colspan="2">
-            		<span class="fett">Wasserrecht</span>
-              </td>
-            </tr>
-            <tr>
-							<td>
-		            <table border="0" cellspacing="0" cellpadding="2">
-		            <?  for($j = 0; $j < count($flst->Wasserrecht); $j++){
-										echo '<tr><td>'.$flst->Wasserrecht[$j]['art'].'</td></tr>';
-		             } ?>
-								</table>
-		          </td>
-		         </tr>
-	        <?
-	        	}
-        } ?>
 
         <?php if ($privileg_['freitext'] AND count($flst->FreiText)>0) { ?>
         <tr>

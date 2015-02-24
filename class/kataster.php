@@ -1482,20 +1482,50 @@ class flurstueck {
     }
     $this->LayerName=LAYERNAME_FLURSTUECKE;
   }
-
-  function getVerfahren() {
+		
+	function getSonstigesrecht() {
     if ($this->FlurstKennz=="") { return 0; }
-    $this->debug->write("<br>kataster.php->flurstueck->getVerfahren Abfrage der Verfahrensdaten<br>".$sql,4);
-    #ALKIS TODO
-    return $ret[1];
+    $this->debug->write("<br>kataster.php->flurstueck->getSonstigesrecht Abfrage des Sonstigesrechts zum Flurstück<br>".$sql,4);
+    $ret=$this->database->getSonstigesrecht($this->FlurstKennz);
+    if ($ret[0] AND DBWRITE) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    $Sonstigesrecht=$ret[1];
+    return $Sonstigesrecht;
   }
-
-  function getBaulasten() {
+	
+	function getDenkmalschutzrecht() {
     if ($this->FlurstKennz=="") { return 0; }
-    $Baulasten=array();
-    $this->debug->write("<br>kataster.php->flurstueck->getBaulasten Abfrage der Baulasten zum Flurstück<br>",4);
-    #ALKIS TODO
-    return $ret[1];
+    $this->debug->write("<br>kataster.php->flurstueck->getDenkmalschutzrecht Abfrage des Denkmalschutzrechts zum Flurstück<br>".$sql,4);
+    $ret=$this->database->getDenkmalschutzrecht($this->FlurstKennz);
+    if ($ret[0] AND DBWRITE) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    $Denkmalschutzrecht=$ret[1];
+    return $Denkmalschutzrecht;
+  }
+	
+	function getBauBodenrecht() {
+    if ($this->FlurstKennz=="") { return 0; }
+    $this->debug->write("<br>kataster.php->flurstueck->getBauBodenrecht Abfrage des BauBodenrechts zum Flurstück<br>".$sql,4);
+    $ret=$this->database->getBauBodenrecht($this->FlurstKennz);
+    if ($ret[0] AND DBWRITE) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    $BauBodenrecht=$ret[1];
+    return $BauBodenrecht;
+  }
+		
+	function getNaturUmweltrecht() {
+    if ($this->FlurstKennz=="") { return 0; }
+    $this->debug->write("<br>kataster.php->flurstueck->getNaturUmweltrecht Abfrage des NaturUmweltrechts zum Flurstück<br>".$sql,4);
+    $ret=$this->database->getNaturUmweltrecht($this->FlurstKennz);
+    if ($ret[0] AND DBWRITE) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    $NaturUmweltrecht=$ret[1];
+    return $NaturUmweltrecht;
+  }
+	
+	function getSchutzgebiet() {
+    if ($this->FlurstKennz=="") { return 0; }
+    $this->debug->write("<br>kataster.php->flurstueck->getSchutzgebiet Abfrage des Schutzgebiets zum Flurstück<br>".$sql,4);
+    $ret=$this->database->getSchutzgebiet($this->FlurstKennz);
+    if ($ret[0] AND DBWRITE) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    $Schutzgebiet=$ret[1];
+    return $Schutzgebiet;
   }
 	
 	function getWasserrecht() {
@@ -1907,11 +1937,14 @@ class flurstueck {
 		$this->Forstrecht=$this->getForstrecht();
 		$this->Strassenrecht=$this->getStrassenrecht();
 		$this->Wasserrecht=$this->getWasserrecht();
+		$this->Schutzgebiet=$this->getSchutzgebiet();		
+		$this->NaturUmweltrecht=$this->getNaturUmweltrecht();
+		$this->BauBodenrecht=$this->getBauBodenrecht();
+		$this->Denkmalschutzrecht=$this->getDenkmalschutzrecht();		
+		$this->Sonstigesrecht=$this->getSonstigesrecht();				
     //$this->Grundbuecher=$this->getGrundbuecher();							# steht im Snippet
     //$this->Buchungen=$this->getBuchungen($Bezirk,$Blatt,1);		# steht im Snippet
     $this->Amtsgericht=$this->getAmtsgericht(); 
-    $this->Verfahren=$this->getVerfahren();		# ALKIS TODO
-    $this->Baulasten=$this->getBaulasten();		# ALKIS TODO
     $this->Vorgaenger=$this->getVorgaenger();	
     $this->Nachfolger=$this->getNachfolger();	
     # Abfragen der Nutzungen
