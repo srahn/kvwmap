@@ -15116,6 +15116,7 @@ class db_mapObj{
     if($formvars["offsety"] != ''){$sql.="offsety = '".$formvars["offsety"]."',";}else{$sql.="offsety = NULL,";}
     if($formvars["angle"] != ''){$sql.="angle = '".$formvars["angle"]."',";}else{$sql.="angle = NULL,";}
     if($formvars["autoangle"]){$sql.="autoangle = '".$formvars["autoangle"]."',";}
+		else $sql.="autoangle = NULL,";
     if($formvars["buffer"]){$sql.="buffer = '".$formvars["buffer"]."',";}
     if($formvars["antialias"] != ''){$sql.="antialias = '".$formvars["antialias"]."',";}else{$sql.="antialias = NULL,";}
     if($formvars["minfeaturesize"]){$sql.="minfeaturesize = '".$formvars["minfeaturesize"]."',";}
