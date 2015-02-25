@@ -168,7 +168,7 @@ class ALB {
     if($formvars['finanzamt']){ $csv .= utf8_encode('Finanzamtschlüssel;');}
     if($formvars['forstname']){ $csv .= 'Forstamtname;';}
     if($formvars['forstschluessel']){ $csv .= utf8_encode('Forstamtschlüssel;');}
-    if($formvars['flaeche']){ $csv .= utf8_encode('Flst-Fläche ALB;');}
+    if($formvars['flaeche']){ $csv .= utf8_encode('amtliche Fläche;');}
     if($formvars['amtsgerichtnr']){ $csv .= 'Amtsgericht;';}
     if($formvars['amtsgerichtname']){ $csv .= 'Amtsgerichtname;';}
     if($formvars['grundbuchbezirkschl']){ $csv .= utf8_encode('GBBschlüssel;');}
@@ -689,7 +689,7 @@ class ALB {
     if($formvars['finanzamt']){ $csv .= utf8_encode('Finanzamtschlüssel;');}
     if($formvars['forstname']){ $csv .= 'Forstamtname;';}
     if($formvars['forstschluessel']){ $csv .= utf8_encode('Forstamtschlüssel;');}
-    if($formvars['flaeche']){ $csv .= utf8_encode('Flst-Fläche ALB;');}
+    if($formvars['flaeche']){ $csv .= utf8_encode('amtliche Fläche;');}
     if($formvars['amtsgerichtnr']){ $csv .= 'Amtsgericht;';}
     if($formvars['amtsgerichtname']){ $csv .= 'Amtsgerichtname;';}
     if($formvars['grundbuchbezirkschl']){ $csv .= utf8_encode('GBBschlüssel;');}
@@ -974,7 +974,7 @@ class ALB {
     if($formvars['finanzamt']){ $csv .= utf8_encode('Finanzamtschlüssel;');}
     if($formvars['forstname']){ $csv .= 'Forstamtname;';}
     if($formvars['forstschluessel']){ $csv .= utf8_encode('Forstamtschlüssel;');}
-    if($formvars['flaeche']){ $csv .= utf8_encode('Flst-Fläche ALB;');}
+    if($formvars['flaeche']){ $csv .= utf8_encode('amtliche Fläche;');}
     if($formvars['amtsgerichtnr']){ $csv .= 'Amtsgericht;';}
     if($formvars['amtsgerichtname']){ $csv .= 'Amtsgerichtname;';}
     if($formvars['grundbuchbezirkschl']){ $csv .= utf8_encode('GBBschlüssel;');}
@@ -1288,7 +1288,7 @@ class ALB {
     if($formvars['finanzamt']){ $csv .= utf8_encode('Finanzamtschlüssel;');}
     if($formvars['forstname']){ $csv .= 'Forstamtname;';}
     if($formvars['forstschluessel']){ $csv .= utf8_encode('Forstamtschlüssel;');}
-    if($formvars['flaeche']){ $csv .= utf8_encode('Flst-Fläche ALB;');}
+    if($formvars['flaeche']){ $csv .= utf8_encode('amtliche Fläche;');}
     if($formvars['amtsgerichtnr']){ $csv .= 'Amtsgericht;';}
     if($formvars['amtsgerichtname']){ $csv .= 'Amtsgerichtname;';}
     if($formvars['grundbuchbezirkschl']){ $csv .= utf8_encode('GBBschlüssel;');}
