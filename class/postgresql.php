@@ -1025,8 +1025,9 @@ class pgdatabase {
 		if(!$without_temporal_filter)$sql.= $this->build_temporal_filter(array('k', 'f'));
 		else{
 			$sql.= " UNION ";
-			$sql.= "SELECT distinct 1 as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, zaehler, nenner, 0 AS kreisid, '' as kreisname, gem.schluesselgesamt as gemkgschl, gem.bezeichnung as gemkgname, g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename, '' as finanzamt, '' AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp FROM alkis.pp_gemeinde as ppge, alkis.pp_gemarkung AS ppg, alkis.ax_historischesflurstueckohneraumbezug as f";
-			$sql.= " WHERE f.gemarkungsnummer=ppg.gemarkung AND ppge.land = ppg.land AND ppge.gemeinde = ppg.gemeinde AND f.flurstueckskennzeichen='".$FlurstKennz."'";
+			$sql.= "SELECT distinct 1 as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, zaehler, nenner, 0 AS kreisid, '' as kreisname, gem.schluesselgesamt as gemkgschl, gem.bezeichnung as gemkgname, g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename, '' as finanzamt, '' AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp ";
+			$sql.= "FROM alkis.ax_gemeinde as g, alkis.ax_gemarkung AS gem, alkis.ax_historischesflurstueckohneraumbezug as f ";
+			$sql.= "WHERE g.kreis = gem.stelle AND f.gemarkungsnummer=gem.gemarkungsnummer AND f.land = gem.land AND f.gemeinde =g.gemeinde AND f.flurstueckskennzeichen='".$FlurstKennz."'";
 		}
     #echo $sql.'<br><br>';
     $queryret=$this->execSQL($sql, 4, 0);
