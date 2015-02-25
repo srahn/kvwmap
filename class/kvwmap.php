@@ -13342,6 +13342,8 @@ class db_mapObj{
       if($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivStatus'] != '0')){    # bei withclasses == 2 werden für alle Layer die Klassen geladen, bei withclasses == 1 werden die Klassen nur dann geladen, wenn der Layer aktiv ist
         $rs['Class']=$this->read_Classes($rs['Layer_ID'], $this->disabled_classes);
       }
+			if($rs['maxscale'] > 0)$rs['maxscale'] = $rs['maxscale']+0.5;
+			if($rs['minscale'] > 0)$rs['minscale'] = $rs['minscale']-0.5;
       $this->Layer[$i]=$rs;
 			$this->Layer['layer_ids'][$rs['Layer_ID']] =& $this->Layer[$i];		# damit man mit einer Layer-ID als Schlüssel auf dieses Array zugreifen kann
 			$i++;
