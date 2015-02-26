@@ -26,6 +26,11 @@ function set_richtung(richtung){
 	document.GUI.submit();
 }
 
+function getvorschau(url){
+	img = '<img style="border: 1px solid black" src="'+url+'">';
+	document.getElementById('vorschau').innerHTML = img;
+}
+
 //-->
 </script>
 
@@ -154,7 +159,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 		$bgcolor = '#FFFFFF';
      for ($i=0;$i<$this->nachweis->erg_dokumente;$i++) {
         ?>
-        <tr style="outline: 1px dotted grey;" onmouseover="document.getElementById('vorschau').innerHTML='';" bgcolor="
+        <tr style="outline: 1px dotted grey;" onmouseout="document.getElementById('vorschau').innerHTML='';" bgcolor="
 			<? $orderelem = explode(',', $this->formvars['order']);
 			if ($this->nachweis->Dokumente[$i][$orderelem[0]] != $this->nachweis->Dokumente[$i-1][$orderelem[0]]){
 				if($bgcolor == '#EBEBEB'){
@@ -219,7 +224,15 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
           <td><div align="center"><?php echo $this->formvars['gueltigkeit']=$this->nachweis->Dokumente[$i]['gueltigkeit']; ?></div></td>
           <td><div align="center"><?php echo $this->formvars['format']=$this->nachweis->Dokumente[$i]['format']; ?> 
             </div></td>
-          <td width="16"><a target="_blank" onmouseover="ahah('index.php', 'go=document_vorschau&id=<?php echo $this->nachweis->Dokumente[$i]['id']; ?>', new Array(document.getElementById('vorschau')), new Array('sethtml'));" href="index.php?go=document_anzeigen&ohnesession=1&id=<?php echo $this->nachweis->Dokumente[$i]['id']; ?>&file=1" title="Ansicht"><img src="graphics/button_ansicht.png" border="0"></a></td>
+          <td width="16">
+					<? 
+						$dateiname = NACHWEISDOCPATH.$this->nachweis->Dokumente[$i]['flurid'].'/'.$this->nachweis->buildNachweisNr($this->nachweis->Dokumente[$i][NACHWEIS_PRIMARY_ATTRIBUTE], $this->nachweis->Dokumente[$i][NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$this->nachweis->Dokumente[$i]['link_datei'];
+						$dateinamensteil=explode('.',$dateiname);
+						$thumbname = $dateinamensteil[0].'_thumb.jpg';
+						$this->allowed_documents[] = addslashes($thumbname);
+						$url = IMAGEURL.session_id().'.php?dokument='.$thumbname;
+					?>
+					<a target="_blank" onmouseover="getvorschau('<? echo $url; ?>');" href="index.php?go=document_anzeigen&ohnesession=1&id=<?php echo $this->nachweis->Dokumente[$i]['id']; ?>&file=1" title="Ansicht"><img src="graphics/button_ansicht.png" border="0"></a></td>
           <td width="15">
           	<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten')){ ?>
           	<a href="index.php?go=Nachweisformular&id=<?php echo $this->nachweis->Dokumente[$i]['id'];?>&order=<? echo $this->formvars['order'] ?>" title="bearbeiten"><img src="graphics/button_edit.png" border="0"></a></td>
@@ -313,7 +326,7 @@ Wählen Sie neue Suchparameter.</span><br>
 
 
 <!--[IF !IE]> -->
-<div id="vorschau" style="position: fixed; left:50%; margin-left:-150px;  top:190px; "></div>
+<div id="vorschau" style="position: fixed; left:50%; margin-left:-410px;  top:50px; "></div>
 <!-- <![ENDIF]-->
  <!--[IF IE]>
 <div id="vorschau" style="position: absolute; left:50%; margin-left:-150px; top: expression((190 + (ignoreMe = document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop)) + 'px');"></div>

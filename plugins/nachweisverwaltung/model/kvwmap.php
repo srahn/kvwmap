@@ -720,25 +720,6 @@
     }
   };
   
-	$this->nachweisDokumentVorschau = function() use ($GUI){
-    $GUI->nachweis = new nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
-    $ret=$GUI->nachweis->getDocLocation($GUI->formvars['id']);
-    if($ret[0]!='') {
-      showAlert($ret[0]);
-      return 0;
-    }
-    else {
-	    $dateiname=basename($ret[1]);
-      $dateinamensteil=explode('.',$dateiname);
-      if(!file_exists(IMAGEPATH.$dateinamensteil[0].'.jpg') AND !file_exists(IMAGEPATH.$dateinamensteil[0].'-0.jpg')){
-      	exec(IMAGEMAGICKPATH.'convert '.$ret[1].' -resize 600x500 '.IMAGEPATH.$dateinamensteil[0].'.jpg');
-      	#echo IMAGEMAGICKPATH.'convert '.$ret[1].' -resize 600x500 '.IMAGEPATH.$dateinamensteil[0].'.jpg';
-      }
-			if(!file_exists(IMAGEPATH.$dateinamensteil[0].'.jpg')) echo '<img style="border: 1px solid black" src="'.TEMPPATH_REL.$dateinamensteil[0].'-0.jpg">';
-			else echo '<img style="border: 1px solid black" src="'.TEMPPATH_REL.$dateinamensteil[0].'.jpg">';
-    }
-  };
-  
 	$this->bestaetigungsformAnzeigen = function() use ($GUI){
     $GUI->menue='menue.php';
     $GUI->titel='Bestätigung';

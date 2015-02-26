@@ -426,6 +426,15 @@ class Nachweis {
   	}
   }
   
+	function CreateNachweisDokumentVorschau($dateiname){
+		$dateinamensteil=explode('.',$dateiname);
+		$command = IMAGEMAGICKPATH.'convert '.$dateiname.'[0] -resize 800x800\> '.$dateinamensteil[0].'_thumb.jpg';
+		exec($command);
+		if(!file_exists($dateinamensteil[0].'_thumb.jpg')){
+			return 'Fehler! Das Vorschaubild konnte mit folgendem Befehl nicht generiert werden: '.$command;
+		}
+  }
+	
   function dokumentenDateiHochladen($flurid,$nr,$artname,$quelldatei,$zieldateiname) {
     #2005-11-24_pk
     # Speicherort für die Nachweisdatei bestimmen
@@ -449,6 +458,9 @@ class Nachweis {
       if(!file_exists($zielpfad.$zieldateiname) OR filesize($zielpfad.$zieldateiname) == 0){
       	$errmsg=' Beim Laden der Datei auf den Server sind Fehler aufgetreten!';
       }
+			else{
+				$errmsg = $this->CreateNachweisDokumentVorschau($zielpfad.$zieldateiname);
+			}
     }
     $this->link_datei=$artname.'/'.$zieldateiname;
     return $errmsg;     
