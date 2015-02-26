@@ -5314,25 +5314,17 @@ class GUI {
 	}
 
   function get_dokument_vorschau($dateinamensteil){
-		$type = $dateinamensteil[1];
+		$type = strtolower($dateinamensteil[1]);
   	$dokument = $dateinamensteil[0].'.'.$dateinamensteil[1];
-		if($type == 'jpg' OR $type == 'png' OR $type == 'gif' ){			// für Bilder werden automatisch Thumbnails erzeugt
-			$thumbname = $dateinamensteil[0].'_thumb.'.$dateinamensteil[1];			
+		if(in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf')) ){			// für Bilder und PDFs werden automatisch Thumbnails erzeugt
+			$thumbname = $dateinamensteil[0].'_thumb.jpg';			
 			if(!file_exists($thumbname)){
-				exec(IMAGEMAGICKPATH.'convert '.$dokument.' -resize '.PREVIEW_IMAGE_WIDTH.' '.$thumbname);
+				exec(IMAGEMAGICKPATH.'convert -filter Lanczos '.$dokument.'[0] -resize '.PREVIEW_IMAGE_WIDTH.'\> '.$thumbname);
 			}
 		}
 		else{																// alle anderen Dokumenttypen bekommen entsprechende Dokumentensymbole als Vorschaubild
 			$dateinamensteil[1] = 'gif';
-  		switch ($type) {
-  			case 'pdf' :{
-  				//$thumbname = WWWROOT.APPLVERSION.GRAPHICSPATH.'pdf.gif';
-					$thumbname = $dateinamensteil[0].'_thumb.jpg';			
-					if(!file_exists($thumbname)){
-						exec(IMAGEMAGICKPATH.'convert '.$dokument.'[0] -resize '.PREVIEW_IMAGE_WIDTH.' '.$thumbname);
-					}
-  			}break;
-  			
+  		switch ($type) {  			
   			case 'doc' :{
 					$thumbname = WWWROOT.APPLVERSION.GRAPHICSPATH.'openoffice.gif';
   			}break;

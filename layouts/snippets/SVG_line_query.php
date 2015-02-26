@@ -11,7 +11,6 @@
 	<input type="hidden" name="imgbox" value="-1 -1 -1 -1">
 	
 <!-- ----------------------- formular-variabeln fuer fachschale ---------------------- -->
-  <input type="hidden" name="MAX_FILE_SIZE" value="5000">
   <input type="HIDDEN" name="minx" value="<?php echo $this->map->extent->minx; ?>">
 	<input type="HIDDEN" name="miny" value="<?php echo $this->map->extent->miny; ?>">
 	<input type="HIDDEN" name="maxx" value="<?php echo $this->map->extent->maxx; ?>">
