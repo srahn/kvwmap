@@ -1903,7 +1903,6 @@ class GUI {
 	  }
     # bisher gibt es folgenden verschiedenen Dokumente die angezeigt werden können
 		if ($this->formvars['mime_type'] != '') $this->mime_type = $this->formvars['mime_type'];
-
     switch ($this->mime_type) {
       case 'printversion' : {
         include (LAYOUTPATH.'snippets/printversion.php');

@@ -9,7 +9,7 @@
 			mit_leerz = parts[0].length;
 			length = parseInt(length) - parseInt(decimal_length);
 			if(length != '' &&  ohne_leerz > length){
-				alert('Für dieses Feld sind maximal '+length+' Vorkommastellen erlaubt.');
+				alert('FÃ¼r dieses Feld sind maximal '+length+' Vorkommastellen erlaubt.');
 				parts[0] = parts[0].substring(0, length - ohne_leerz + mit_leerz);
 			}
 			val = parts[0];

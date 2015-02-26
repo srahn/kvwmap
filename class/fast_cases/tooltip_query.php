@@ -991,7 +991,7 @@
     }
     return $layerdb;
   }
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false){			$global $language;
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false){			global $language;
     	if($attributenames != NULL){
     		$einschr = ' AND name IN (\'';
     		$einschr.= implode('\', \'', $attributenames);
