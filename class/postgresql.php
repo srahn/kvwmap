@@ -792,7 +792,8 @@ class pgdatabase {
   }
   
   function getGrundbuecher($FlurstKennz, $hist_alb = false) {
-    $sql ="SET enable_seqscan = OFF;SELECT distinct (g.land::text||lpad(g.bezirk::text, 4, '0'))::integer as bezirk, g.buchungsblattnummermitbuchstabenerweiterung AS blatt ";
+		if(rolle::$hist_timestamp != '')$sql = 'SET enable_mergejoin = OFF;';
+    $sql.="SET enable_seqscan = OFF;SELECT distinct (g.land::text||lpad(g.bezirk::text, 4, '0'))::integer as bezirk, g.buchungsblattnummermitbuchstabenerweiterung AS blatt ";
 		if($hist_alb) $sql.="FROM alkis.ax_historischesflurstueckohneraumbezug f ";
 		else $sql.="FROM alkis.ax_flurstueck f ";  
 		$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON ARRAY[f.istgebucht] <@ s2.an ";
@@ -1070,12 +1071,10 @@ class pgdatabase {
   }
   
   function getStrassen($FlurstKennz) {
-    # Abfrage der Adressenangabe zum Flurstï¿½ck
-    # 1. Abfragen der Strassen die am Flurstï¿½ck liegen
-    $sql ="SELECT DISTINCT g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename, l.lage as strasse, s.bezeichnung as strassenname ";
+    $sql ="set enable_seqscan = off;SELECT DISTINCT g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename, l.lage as strasse, s.bezeichnung as strassenname ";
     $sql.="FROM alkis.ax_gemeinde as g, alkis.ax_flurstueck as f ";
     $sql.="JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(f.weistauf) ";
-    $sql.="LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND s.lage = lpad(l.lage,5,'0') ";
+    $sql.="LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND s.lage = l.lage ";
     $sql.="WHERE g.gemeinde = l.gemeinde AND g.kreis = l.kreis AND f.flurstueckskennzeichen = '".$FlurstKennz."'";
 		$sql.= $this->build_temporal_filter(array('g', 'f', 'l', 's'));
     #echo $sql;
