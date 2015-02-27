@@ -116,10 +116,10 @@ function csv_export(){
   </tr>
 </table>
 
-<input name="checkbox_names" type="hidden" value="<? echo $this->formvars['checkbox_names']; ?>">
+<input name="checkbox_names_<? echo LAYER_ID_JAGDBEZIRKE; ?>" type="hidden" value="<? echo $this->formvars['checkbox_names_'.LAYER_ID_JAGDBEZIRKE]; ?>">
 <?
 	// Durchschleifen der angehakten Checkboxen der Jagdbezirke
-	$checkbox_names = explode('|', $this->formvars['checkbox_names']);
+	$checkbox_names = explode('|', $this->formvars['checkbox_names_'.LAYER_ID_JAGDBEZIRKE]);
 	for($i = 0; $i < count($checkbox_names); $i++){
 		if($this->formvars[$checkbox_names[$i]] == 'on'){
 			echo '<input name="'.$checkbox_names[$i].'" type="hidden" value="on">';
@@ -136,4 +136,5 @@ function csv_export(){
 <input name="search_art" type="hidden" value="<?php echo $this->formvars['search_art']; ?>">
 <input name="FlurstKennz" type="hidden" value="">
 <input name="jagdkataster" type="hidden" value="true">
+<input type="hidden" name="chosen_layer_id" value="<? echo LAYER_ID_JAGDBEZIRKE; ?>">
 

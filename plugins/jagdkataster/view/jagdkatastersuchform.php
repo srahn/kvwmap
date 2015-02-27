@@ -49,6 +49,7 @@ check_for_selection = function(layer_id){
 function intersect_flurst(layer_id){
 	if(check_for_selection(layer_id)){
 		document.GUI.go.value = 'jagdkatastereditor_Flurstuecke_Listen';
+		document.GUI.chosen_layer_id.value = layer_id;
 		document.GUI.submit();
 	}
 }

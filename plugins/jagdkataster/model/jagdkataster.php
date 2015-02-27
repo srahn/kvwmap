@@ -229,7 +229,7 @@ class jagdkataster {
 		
 	function getIntersectedFlurst($formvars){
 		if($formvars['oid'] == ''){		# mehrere Jagdbezirke
-			$checkbox_names = explode('|', $formvars['checkbox_names']);
+			$checkbox_names = explode('|', $formvars['checkbox_names_'.$formvars['chosen_layer_id']]);
 	    for($i = 0; $i < count($checkbox_names); $i++){
 	      if($formvars[$checkbox_names[$i]] == 'on'){
 	        $element = explode(';', $checkbox_names[$i]);     #  check;table_alias;table;oid
@@ -244,7 +244,8 @@ class jagdkataster {
 		while($rs = pg_fetch_array($ret[1])){
 			$rs['anteil'] = round($rs['schnittflaeche'] * 100 / $rs['albflaeche'], 2);
 			$rs['albflaeche'] = round($rs['albflaeche'], 2);
-      $rs['zaehlernenner'] = $rs['zaehler'].'/'.$rs['nenner'];
+      $rs['zaehlernenner'] = $rs['zaehler'];
+			if($rs['nenner'] != '')$rs['zaehlernenner'] .= '/'.$rs['nenner'];
 			
 			# --- Eigentümer ---
 			$flst = new flurstueck($rs['flurstkennz'], $this->database);

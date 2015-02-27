@@ -218,7 +218,7 @@
   	for($i = 0; $i < count($GUI->flurstuecke); $i++){          	
     	$csv .= $GUI->flurstuecke[$i]['gemkgname'].';';
       $csv .= $GUI->flurstuecke[$i]['flur'].';';
-      $csv .= $GUI->flurstuecke[$i]['zaehlernenner'].';';
+      $csv .= " ".$GUI->flurstuecke[$i]['zaehlernenner'].";";
       for($j=0; $j < count($GUI->flurstuecke[$i]['eigentuemer']); $j++){
       	$csv .= $GUI->flurstuecke[$i]['eigentuemer'][$j].' ('.$GUI->flurstuecke[$i]['eigentuemer_nr'][$j].')   ';
       }
