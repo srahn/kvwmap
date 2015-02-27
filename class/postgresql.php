@@ -1366,8 +1366,8 @@ class pgdatabase {
   
 	function getNachfolger($FlurstKennz) {
 		$sql = "SELECT nachfolger, c.endet FROM (";
-    $sql.= "SELECT unnest(zeigtaufneuesflurstueck) as nachfolger FROM alkis.ax_fortfuehrungsfall WHERE ARRAY['".$FlurstKennz."'::varchar] <@ zeigtaufaltesflurstueck) as foo ";
-		$sql.= "LEFT JOIN alkis.ax_flurstueck c ON c.flurstueckskennzeichen = nachfolger";		
+    $sql.= "SELECT unnest(zeigtaufneuesflurstueck) as nachfolger FROM alkis.ax_fortfuehrungsfall WHERE ARRAY['".$FlurstKennz."'::varchar] <@ zeigtaufaltesflurstueck AND zeigtaufneuesflurstueck != ARRAY['".$FlurstKennz."'::varchar]) as foo ";
+		$sql.= "LEFT JOIN alkis.ax_flurstueck c ON c.flurstueckskennzeichen = nachfolger";
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0]) {
       $ret[0]=1;
@@ -1396,7 +1396,7 @@ class pgdatabase {
   }
 
   function getVorgaenger($FlurstKennz) {
-    $sql = "SELECT unnest(zeigtaufaltesflurstueck) as vorgaenger FROM alkis.ax_fortfuehrungsfall WHERE ARRAY['".$FlurstKennz."'::varchar] <@ zeigtaufneuesflurstueck";
+    $sql = "SELECT unnest(zeigtaufaltesflurstueck) as vorgaenger FROM alkis.ax_fortfuehrungsfall WHERE ARRAY['".$FlurstKennz."'::varchar] <@ zeigtaufneuesflurstueck AND zeigtaufaltesflurstueck != ARRAY['".$FlurstKennz."'::varchar]";
     $queryret=$this->execSQL($sql, 4, 0);
     if($queryret[0]) {
       $ret[0]=1;
