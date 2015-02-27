@@ -10508,8 +10508,7 @@ class GUI {
 			$ret=$this->pgdatabase->getALBData($FlurstKennz, true);
 			if($ret[1]['hist_alb'] == 0){
 				$this->user->rolle->setHistTimestamp($ret[1]['endet']);
-				$this->user->rolle->readSettings();
-				showAlert('Der Zeitpunkt für den Stand der ALKIS-Daten wurde geändert.');
+				$this->user->rolle->readSettings();				
 			}
 		}
 	

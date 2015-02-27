@@ -1384,9 +1384,13 @@ class rolle {
 			$time = new DateTime(DateTime::createFromFormat('d.m.Y H:i:s', $timestamp)->format('Y-m-d H:i:s'));
 			$time->modify("-1 second");
 			$sql.='hist_timestamp="'.$time->format('Y-m-d H:i:s').'"';
+			showAlert('Der Zeitpunkt für den Stand der ALKIS-Daten wurde auf '.$time->format('d.m.Y H:i:s').' geändert.');
 		}
-		else $sql.='hist_timestamp = NULL';
-		$sql.=' WHERE stelle_id='.$this->stelle_id.' AND user_id='.$this->user_id;
+		else{
+			$sql.='hist_timestamp = NULL';
+			showAlert('Der Zeitpunkt für den Stand der ALKIS-Daten ist jetzt wieder aktuell.');
+		}
+		$sql.=' WHERE stelle_id='.$this->stelle_id.' AND user_id='.$this->user_id;		
 		#echo $sql;
 		$this->debug->write("<p>file:users.php class:user->setHistTimestamp - Setzen der Einstellungen für die Rolle<br>".$sql,4);
 		$query=mysql_query($sql,$this->database->dbConn);
