@@ -102,7 +102,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
     			<?if($this->formvars['Blatt'] == $this->blattliste['blatt'][$i]){?>
     		 selected
     		 <?}?> 
-    			value="<? echo $this->formvars['Bezirk'].'-'.$this->blattliste['blatt'][$i]; ?>"><? echo $this->blattliste['blatt'][$i]; ?></option>
+    			value="<? echo $this->formvars['Bezirk'].'-'.$this->blattliste['blatt'][$i]; ?>"><? echo ltrim($this->blattliste['blatt'][$i], '0'); ?></option>
     		<? } ?>
     	</select>
   	</td>
