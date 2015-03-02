@@ -10,16 +10,7 @@ function browser_switch(){
 
 function back(){
 	document.GUI.target = '';
-	if(document.GUI.GemkgID != undefined){
-		document.GUI.go.value = 'Flurstueck_Auswaehlen';
-		document.GUI.go_plus.value = 'Suchen';
-		document.GUI.submit();
-	}
-	else{
-		document.GUI.go.value = 'Sachdaten';
-		document.GUI.go_plus.value = '';
-		document.GUI.submit();
-	}
+	location.href="index.php?go=get_last_query";
 }
 
 function save_selection(){
