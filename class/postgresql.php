@@ -1045,22 +1045,25 @@ class pgdatabase {
   }
  
   function getFlurstuecksKennzByGemeindeIDs($Gemeinde_ID, $FlurstKennz){
-    $sql ="SELECT f.flurstueckskennzeichen as flurstkennz FROM alkis.ax_flurstueck AS f, alkis.gemeinde_gemarkung AS g_g";
-    $sql.=" WHERE f.gemarkungsnummer=g_g.gemarkung AND g_g.land::text||g_g.regierungsbezirk::text||lpad(g_g.kreis::text, 2, '0')||lpad(g_g.gemeinde::text, 3, '0') IN ('".$Gemeinde_ID[0]['ID']."'";
-    for($i = 1; $i < count($Gemeinde_ID); $i++){
-      $sql .= ", '".$Gemeinde_ID[$i]['ID']."'";
-    }
-    $sql .= ")";
-    $sql.=" AND f.flurstueckskennzeichen IN ('".$FlurstKennz[0]."'";		
-    for ($i=1;$i<count($FlurstKennz);$i++) {
-      $sql.=", '".$FlurstKennz[$i]."'";
-    }
-    $sql.=")";
-		$sql.= $this->build_temporal_filter(array('f'));
-    $this->debug->write("<p>postgresql.php getFlurstuecksKennzByGemeindeIDs() Abfragen erlaubten Flurstï¿½ckskennzeichen nach Gemeindeids:<br>".$sql,4);
+		$sql ="SELECT f.flurstueckskennzeichen as flurstkennz FROM alkis.ax_historischesflurstueckohneraumbezug AS f, alkis.gemeinde_gemarkung AS g_g";
+		$sql.=" WHERE f.gemarkungsnummer=g_g.gemarkung AND g_g.land::text||g_g.regierungsbezirk::text||lpad(g_g.kreis::text, 2, '0')||lpad(g_g.gemeinde::text, 3, '0') IN ('".$Gemeinde_ID[0]['ID']."'";
+		for($i = 1; $i < count($Gemeinde_ID); $i++){
+			$sql .= ", '".$Gemeinde_ID[$i]['ID']."'";
+		}
+		$sql .= ")";
+		$sql.=" AND f.flurstueckskennzeichen IN ('".implode($FlurstKennz, "', '")."')";
+		$sql.=" UNION ";
+		$sql.="SELECT f.flurstueckskennzeichen as flurstkennz FROM alkis.ax_flurstueck AS f, alkis.gemeinde_gemarkung AS g_g";
+		$sql.=" WHERE f.gemarkungsnummer=g_g.gemarkung AND g_g.land::text||g_g.regierungsbezirk::text||lpad(g_g.kreis::text, 2, '0')||lpad(g_g.gemeinde::text, 3, '0') IN ('".$Gemeinde_ID[0]['ID']."'";
+		for($i = 1; $i < count($Gemeinde_ID); $i++){
+			$sql .= ", '".$Gemeinde_ID[$i]['ID']."'";
+		}
+		$sql .= ")";
+		$sql.=" AND f.flurstueckskennzeichen IN ('".implode($FlurstKennz, "', '")."')";
+    $this->debug->write("<p>postgresql.php getFlurstuecksKennzByGemeindeIDs() Abfragen erlaubten Flurstückskennzeichen nach Gemeindeids:<br>".$sql,4);
     $query=pg_query($sql);
     if ($query==0) {
-      $ret[0]=1; $ret[1]="Fehler bei der Abfrage der zur Anzeige erlaubten Flurstï¿½cke";
+      $ret[0]=1; $ret[1]="Fehler bei der Abfrage der zur Anzeige erlaubten Flurstücke";
       $this->debug->write("<br>Abbruch in postgresql.php getFlurstuecksKennzByGemeindeIDs Zeile: ".__LINE__."<br>sql: ".$sql,4);
       return $ret;
     }
