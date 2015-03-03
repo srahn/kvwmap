@@ -326,7 +326,7 @@ Wählen Sie neue Suchparameter.</span><br>
 
 
 <!--[IF !IE]> -->
-<div id="vorschau" style="position: fixed; left:50%; margin-left:-410px;  top:50px; "></div>
+<div id="vorschau" style="z-index: 1000; position: fixed; left:50%; margin-left:-410px;  top:50px; "></div>
 <!-- <![ENDIF]-->
  <!--[IF IE]>
 <div id="vorschau" style="position: absolute; left:50%; margin-left:-150px; top: expression((190 + (ignoreMe = document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop)) + 'px');"></div>
