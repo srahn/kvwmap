@@ -19,7 +19,7 @@
   <tr align="center"> 
     <td colspan="3"><h2><?php echo $this->titel; ?></h2></td>
   </tr>
-  <? if($this->shape->formvars['zipfile'] == ''){ ?>
+  <? if($this->data_import_export->formvars['zipfile'] == ''){ ?>
   <tr>
   	<td>&nbsp;</td>
   	<td>Sie können hier ein zip-Archiv hochladen, welches <br>die 3 Dateien vom Typ dbf, shp und shx enthält.</td>
@@ -44,25 +44,25 @@
   				<td colspan="2" align="center"><span class="fett">PostgreSQL-Tabelle</span></td>
   			</tr>
   			<tr>
-  				<td colspan="2" align="center"><input name="dbffile" type="text" value="<? echo $this->shape->dbf->file; ?>" readonly></td>
+  				<td colspan="2" align="center"><input name="dbffile" type="text" value="<? echo $this->data_import_export->dbf->file; ?>" readonly></td>
   				<td>==></td>
   				<td colspan="1" align="center" height="35"><input name="table_name" type="text" value="<Tabellenname>" size="15" class="input"></td>
   				<td colspan="1" align="center" height="35">
   					<select name="tabellen" onchange="document.GUI.table_name.value = document.GUI.tabellen.value;">
   						<option value="">--- Auswahl ---</option>
   						<?
-  						for($i = 0; $i < count($this->shape->tables); $i++){
-  							echo '<option value="'.$this->shape->tables[$i]['tabellenname'].'">'.$this->shape->tables[$i]['tabellenname'].'</option>';
+  						for($i = 0; $i < count($this->data_import_export->tables); $i++){
+  							echo '<option value="'.$this->data_import_export->tables[$i]['tabellenname'].'">'.$this->data_import_export->tables[$i]['tabellenname'].'</option>';
   						}
   						?>
   					</select>
   				</td>
   			</tr>
-  			<? for($i = 0; $i < count($this->shape->dbf->header); $i++){ ?>
+  			<? for($i = 0; $i < count($this->data_import_export->dbf->header); $i++){ ?>
 				<tr>
 					<td colspan="5" align="center">
-						<input name="dbf_name_<? echo $this->shape->dbf->header[$i][0]; ?>" type="text" value="<? echo $this->shape->dbf->header[$i][0]; ?>" readonly size="20">
-						<input name="dbf_type_<? echo $this->shape->dbf->header[$i][0]; ?>" type="text" value="<? echo $this->shape->dbf->header[$i]['type']; ?>" readonly size="10">
+						<input name="dbf_name_<? echo $this->data_import_export->dbf->header[$i][0]; ?>" type="text" value="<? echo $this->data_import_export->dbf->header[$i][0]; ?>" readonly size="20">
+						<input name="dbf_type_<? echo $this->data_import_export->dbf->header[$i][0]; ?>" type="text" value="<? echo $this->data_import_export->dbf->header[$i]['type']; ?>" readonly size="10">
 					</td>
 				</tr>
   			<? } ?>
