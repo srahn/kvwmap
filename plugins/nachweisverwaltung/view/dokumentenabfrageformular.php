@@ -88,6 +88,18 @@ function updateGemarkungsauswahl(){
 	document.GUI.gemschl.value = document.GUI.gemschl1.value+document.GUI.gemschl2.value;
 	selectbyString(document.GUI.suchgemarkung, document.GUI.gemschl.value);
 }
+
+function clear(){
+	document.GUI.gemschl2.value = '';
+	document.GUI.suchgemarkung.value = '';
+	document.GUI.suchflur.value = '';
+	document.GUI.suchstammnr.value = '';
+	document.GUI.suchrissnr.value = '';
+	document.GUI.suchfortf.value = '';
+	document.GUI.sdatum.value = '';
+	document.GUI.sdatum2.value = '';
+	document.GUI.sVermStelle.value = '';
+}
   
 //-->
 </script>
@@ -152,7 +164,7 @@ else {
           <td rowspan="7" valign="top"><input type="radio" name="abfrageart" value="indiv_nr" <?php if ($this->formvars['abfrageart']=='indiv_nr') { ?> checked<?php } ?>>
           </td>
         </tr>
-		<tr><td colspan="3"><span class="fett">Auswahl über Attribute<br></span></td></tr>
+		<tr><td colspan="3"><span class="fett">Auswahl über Attribute</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:clear();" title="Suchfelder leeren"><img style="vertical-align:top;" src="<? echo GRAPHICSPATH.'edit-clear.png'; ?>"></a></td></tr>
         <tr>
           <td colspan="3">
 			Gemarkung:<br>
