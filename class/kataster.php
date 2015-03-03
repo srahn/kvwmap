@@ -1925,6 +1925,7 @@ class flurstueck {
     $this->LetzteFF=$rs['letzff'];
     $this->Flurkarte=$rs['karte'];
     $this->ALB_Flaeche=$rs['flaeche'];
+		$this->abweichenderrechtszustand=$rs['abweichenderrechtszustand'];
     $this->endet=$rs['endet'];
 		$this->hist_alb=$rs['hist_alb'];
     $this->Pruefzeichen=$rs['pruefzeichen'];

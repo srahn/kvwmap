@@ -1019,14 +1019,14 @@ class pgdatabase {
   }
   
   function getALBData($FlurstKennz, $without_temporal_filter = false){		
-		$sql ="SELECT distinct 0 as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, zaehler, nenner, k.schluesselgesamt AS kreisid, k.bezeichnung as kreisname, gem.schluesselgesamt as gemkgschl, gem.bezeichnung as gemkgname, g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename,d.stelle as finanzamt, d.bezeichnung AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp ";
+		$sql ="SELECT distinct 0 as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, f.abweichenderrechtszustand, zaehler, nenner, k.schluesselgesamt AS kreisid, k.bezeichnung as kreisname, gem.schluesselgesamt as gemkgschl, gem.bezeichnung as gemkgname, g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename,d.stelle as finanzamt, d.bezeichnung AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp ";
 		$sql.="FROM alkis.ax_kreisregion AS k, alkis.ax_gemeinde as g, alkis.ax_gemarkung AS gem, alkis.ax_flurstueck AS f ";
 		$sql.="LEFT JOIN alkis.ax_dienststelle as d ON d.stellenart = 1200 AND d.stelle::integer = ANY(f.stelle) ";
 		$sql.="WHERE f.gemarkungsnummer=gem.gemarkungsnummer AND f.land = gem.land AND f.kreis = g.kreis AND f.gemeinde = g.gemeinde AND f.kreis = k.kreis AND f.flurstueckskennzeichen='".$FlurstKennz."'";
 		if(!$without_temporal_filter)$sql.= $this->build_temporal_filter(array('k', 'f'));
 		else{
 			$sql.= " UNION ";
-			$sql.= "SELECT distinct 1 as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, zaehler, nenner, 0 AS kreisid, '' as kreisname, gem.schluesselgesamt as gemkgschl, gem.bezeichnung as gemkgname, g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename, '' as finanzamt, '' AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp ";
+			$sql.= "SELECT distinct 1 as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, '' as abweichenderrechtszustand, zaehler, nenner, 0 AS kreisid, '' as kreisname, gem.schluesselgesamt as gemkgschl, gem.bezeichnung as gemkgname, g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename, '' as finanzamt, '' AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp ";
 			$sql.= "FROM alkis.ax_gemeinde as g, alkis.ax_gemarkung AS gem, alkis.ax_historischesflurstueckohneraumbezug as f ";
 			$sql.= "WHERE g.kreis = gem.stelle AND f.gemarkungsnummer=gem.gemarkungsnummer AND f.land = gem.land AND f.gemeinde =g.gemeinde AND f.flurstueckskennzeichen='".$FlurstKennz."'";
 		}
