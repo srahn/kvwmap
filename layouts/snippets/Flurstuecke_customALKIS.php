@@ -367,7 +367,7 @@ backto = function(go){
 	        	}
         } ?>
 				
-				 <? if($privileg_['festlegungen']){
+				 <? if($privileg_['festlegungen'] AND (count($flst->Strassenrecht) > 0 OR count($flst->Wasserrecht) > 0 OR count($flst->Schutzgebiet) > 0 OR count($flst->NaturUmweltrecht) > 0 OR count($flst->BauBodenrecht) > 0 OR count($flst->Denkmalschutzrecht) > 0 OR count($flst->Forstrecht) > 0 OR count($flst->Sonstigesrecht) > 0)){
 	        ?>
 	        	<tr>
           		<td colspan="2">
