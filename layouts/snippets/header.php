@@ -2,7 +2,7 @@
   <tr> 
 	  <td width="50%" align="right" valign="middle"><span class="fett px20"><?php echo $this->Stelle->Bezeichnung; ?></span></td>
 		<td width="50%" align="left">
-			<h2 style="color: #a82e2e;">&nbsp;&nbsp;&nbsp;<? if($this->user->rolle->hist_timestamp != '') echo 'Stand der ALKIS-Daten: '.$this->user->rolle->hist_timestamp; ?></h2>
+			<? if($this->user->rolle->hist_timestamp != '') echo '<a href="index.php?go=setHistTimestamp" title="Zeitpunkt auf aktuell setzen"><h2 style="color: #a82e2e;">Zeitpunkt ALKIS-Historie: '.$this->user->rolle->hist_timestamp.'</h2></a>'; ?>
 		</td>	
   </tr>
 </table>

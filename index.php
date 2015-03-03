@@ -130,6 +130,10 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
       $GUI->mime_type='map_ajax';
       $GUI->output();
 		}break;
+				
+		case 'setHistTimestamp' : {
+			$GUI->setHistTimestamp();
+	  } break;
 		
 		case 'setLanguage' : {
 			$GUI->setLanguage();
