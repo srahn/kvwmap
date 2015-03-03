@@ -1,5 +1,5 @@
 <?php
-  $strChangeTask="Stäe utsöken";
+  $strChangeTask="Optschoonen";
   $strHelp="Hülp";
   $strMaximize="Maximieren";
   $strMinimize="Minimieren";
