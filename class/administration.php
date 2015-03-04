@@ -149,6 +149,11 @@ class administration{
 			}
 		}
 	}
+	
+	function update_code(){
+		$folder = WWWROOT.APPLVERSION;
+		exec('cd '.$folder.' && git pull origin', $ausgabe);
+	}
 
 }
 

@@ -2,6 +2,23 @@
 <? global $kvwmap_plugins; ?>
 
 <table cellpadding="2" cellspacing="12">
+	<? if(defined('GIT') AND GIT == 'true'){ ?>
+	<tr>
+		<td valign="top" align="center" style="border:1px solid #C3C7C3">			
+			<table width="400px" cellpadding="4" cellspacing="2" border="0" style="border:1px solid #C3C7C3;border-collapse:collapse">
+				<tr style="border:1px solid #C3C7C3">
+					<td colspan="3" style="background-color:<? echo BG_GLEATTRIBUTE; ?>;"><span class="fetter px17">Aktualisierung des Quellcodes</span></td>
+				</tr>
+				<tr style="border:1px solid #C3C7C3">
+					<td><? include(SNIPPETS.'git_remote_update.php');include(SNIPPETS.'git_status.php'); ?></td>
+				</tr>
+				<tr >
+					<td colspan="2" align="center"><input type="button" onclick="location.href='index.php?go=Administratorfunktionen&func=update_code'" <? if(!$num_commits_behind)echo 'disabled'; ?> value="Aktualisieren"></td>
+				</tr>
+			</table> 
+		</td>
+	</tr>
+	<? } ?>
 	<tr>
 		<td valign="top" align="center" style="border:1px solid #C3C7C3">			
 			<table width="400px" cellpadding="4" cellspacing="2" border="0" style="border:1px solid #C3C7C3;border-collapse:collapse">
@@ -55,14 +72,18 @@
 				</tr>
 			</table> 
 		</td>
-		
+	</tr>
+	<tr>
+		<td>&nbsp;</td>
+	</tr>
+	<tr>
 		<td valign="top" align="center" style="border:1px solid #C3C7C3">
-			<table cellpadding="4" cellspacing="2" border="0" style="border:1px solid #C3C7C3;border-collapse:collapse">
+			<table width="400px" cellpadding="4" cellspacing="2" border="0" style="border:1px solid #C3C7C3;border-collapse:collapse">
 				<tr style="border:1px solid #C3C7C3;">
 					<td style="background-color:<? echo BG_GLEATTRIBUTE; ?>;"><span class="fetter px17">weitere Funktionen</span></td>
 				</tr>
 				<tr style="border:1px solid #C3C7C3;">
-					<td><span class="fett"><a href="index.php?go=Administratorfunktionen&func=showConstants">Anzeige der Konstanten</a></span></td>
+					<td align="center"><span class="fett"><a href="index.php?go=Administratorfunktionen&func=showConstants">Anzeige der Konstanten</a></span></td>
 				</tr>
 				<!--tr>
 					<td bordercolor="#000000" bgcolor="<?php echo BG_GLEATTRIBUTE ?>">
@@ -70,7 +91,7 @@
 					</td>
 				</tr-->
 				<tr style="border:1px solid #C3C7C3;">
-					<td><span class="fett"><a href="index.php?go=Administratorfunktionen&func=createRandomPassword">Erzeuge zufälliges Passwort</a></span></td>
+					<td align="center"><span class="fett"><a href="index.php?go=Administratorfunktionen&func=createRandomPassword">Erzeuge zufälliges Passwort</a></span></td>
 				</tr>
 				<!--tr>
 					<td bordercolor="#000000" bgcolor="<?php echo BG_GLEATTRIBUTE ?>">
@@ -82,7 +103,7 @@
 					</td>
 				</tr-->
 				<tr style="border:1px solid #C3C7C3;">
-					<td><span class="fett"><a href="index.php?go=Administratorfunktionen&func=save_all_layer_attributes">Alle Layerattribute speichern</a></span></td>
+					<td align="center"><span class="fett"><a href="index.php?go=Administratorfunktionen&func=save_all_layer_attributes">Alle Layerattribute speichern</a></span></td>
 				</tr>  
 			</table>
 		</td>

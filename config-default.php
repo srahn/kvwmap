@@ -122,6 +122,10 @@ define('CHECK_CLIENT_IP',true);                               # Version 1.6.9 Se
 # maximale Länge der Passwörter
 define('PASSWORD_MAXLENGTH', 16);		# Version 2.1
 
+# Wenn das kvwmap-Verzeichnis ein git-Repository ist, kann diese Konstante auf true gesetzt werden.
+# Dann kann man die Aktualität des Quellcodes in der Administrationsoberfläche überprüfen und ihn aktualisieren.
+define('GIT', 'false');																	# Version 2.1
+
 ########################## Pfadeinstellungen
 # Installationspfad
 define('INSTALLPATH','/home/gisadmin/');

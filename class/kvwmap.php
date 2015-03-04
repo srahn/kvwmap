@@ -2977,6 +2977,10 @@ class GUI {
 				$this->administration->get_database_status();
 				$this->showAdminFunctions();
       } break;
+			case "update_code" : {
+        $this->administration->update_code();
+				$this->showAdminFunctions();
+      } break;			
       case "showConstants" : {
         $this->showConstants();
       } break;
