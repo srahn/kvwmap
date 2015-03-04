@@ -88,10 +88,11 @@ $j=0;
       		?>
       	</select>
         </div>
+				<? if($this->data_import_export->formvars['selected_layer_id'] != ''){ ?>
         <div style="padding-top:5px; padding-bottom:5px; margin-left: 15px;">
           <?php echo $strFormat; ?>:<br>
       	<select name="export_format">
-      		<? if($this->data_import_export->attributes['the_geom'] != ''){ ?>
+      		<? if($this->data_import_export->layerdaten['export_privileg'][$selectindex] == 1 AND $this->data_import_export->attributes['the_geom'] != ''){ ?>
       	    <option <? if($this->formvars['export_format'] == 'Shape')echo 'selected '; ?> value="Shape">Shape</option>
       		<option <? if($this->formvars['export_format'] == 'GML')echo 'selected '; ?> value="GML">GML</option>
       		<option <? if($this->formvars['export_format'] == 'KML')echo 'selected '; ?> value="KML">KML</option>
@@ -100,7 +101,8 @@ $j=0;
       		<option <? if($this->formvars['export_format'] == 'CSV')echo 'selected '; ?> value="CSV">CSV</option>
       	</select>
         </div>
-        <? if($this->data_import_export->attributes['the_geom'] != ''){ ?>
+				<? }
+        if($this->data_import_export->attributes['the_geom'] != ''){ ?>
         <div style="padding-top:5px; padding-bottom:5px; margin-left: 15px;">
           <?php echo $strTransformInto; ?>:<br>
       	<select name="epsg">
