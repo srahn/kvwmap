@@ -428,7 +428,7 @@ class Nachweis {
   
 	function CreateNachweisDokumentVorschau($dateiname){
 		$dateinamensteil=explode('.',$dateiname);
-		$command = IMAGEMAGICKPATH.'convert '.$dateiname.'[0] -resize 800x800\> '.$dateinamensteil[0].'_thumb.jpg';
+		$command = IMAGEMAGICKPATH.'convert '.$dateiname.'[0] -quality 75 -resize 800x800\> '.$dateinamensteil[0].'_thumb.jpg';
 		exec($command);
 		if(!file_exists($dateinamensteil[0].'_thumb.jpg')){
 			return 'Fehler! Das Vorschaubild konnte mit folgendem Befehl nicht generiert werden: '.$command;
