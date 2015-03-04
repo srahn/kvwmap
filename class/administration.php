@@ -152,7 +152,8 @@ class administration{
 	
 	function update_code(){
 		$folder = WWWROOT.APPLVERSION;
-		exec('cd '.$folder.' && git pull origin', $ausgabe);
+		exec('cd '.$folder.' && sudo -u '.GIT_USER.' git pull origin', $ausgabe, $ret);
+		if($ret != 0)showAlert('Fehler bei der Ausführung von "git pull origin".');
 	}
 
 }

@@ -2,7 +2,7 @@
 <? global $kvwmap_plugins; ?>
 
 <table cellpadding="2" cellspacing="12">
-	<? if(defined('GIT') AND GIT == 'true'){ ?>
+	<? if(defined('GIT_USER') AND GIT_USER != ''){ ?>
 	<tr>
 		<td valign="top" align="center" style="border:1px solid #C3C7C3">			
 			<table width="400px" cellpadding="4" cellspacing="2" border="0" style="border:1px solid #C3C7C3;border-collapse:collapse">

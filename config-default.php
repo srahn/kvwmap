@@ -122,9 +122,12 @@ define('CHECK_CLIENT_IP',true);                               # Version 1.6.9 Se
 # maximale Länge der Passwörter
 define('PASSWORD_MAXLENGTH', 16);		# Version 2.1
 
-# Wenn das kvwmap-Verzeichnis ein git-Repository ist, kann diese Konstante auf true gesetzt werden.
+# Wenn das kvwmap-Verzeichnis ein git-Repository ist, kann diese Konstante auf den User gesetzt werden, der das Repository angelegt hat.
+# Damit der Apache-User dann die git-Befehle als dieser User ausführen kann, muss man als root über den Befehl "visudo" die /etc/sudoers editieren.
+# Dort muss dann eine Zeile in dieser Form hinzugefügt werden: 
+# www-data        ALL=(fgs) NOPASSWD: /usr/bin/git
 # Dann kann man die Aktualität des Quellcodes in der Administrationsoberfläche überprüfen und ihn aktualisieren.
-define('GIT', 'false');																	# Version 2.1
+define('GIT_USER', '');																	# Version 2.1
 
 ########################## Pfadeinstellungen
 # Installationspfad
