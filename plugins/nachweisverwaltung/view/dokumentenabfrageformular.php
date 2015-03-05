@@ -207,10 +207,10 @@ else {
         <tr> 
 			    <td colspan="3">
 			    		Datum:<br>
-						<a href="javascript:;" title=" (TT.MM.JJJJ) " onclick="new CalendarJS().init('sdatum')"><img src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar"><a name="calendar_sdatum"></a></div>
+						<a href="javascript:;" title=" (TT.MM.JJJJ) " onclick="new CalendarJS().init('sdatum')"><img src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id="calendar_sdatum"></div>
 			    		<input id="sdatum" name="sdatum" type="text" onchange="if(document.GUI.sdatum2.value=='')document.GUI.sdatum2.value=this.value" value="<?php echo $this->formvars['sdatum']; ?>" size="10" maxlength="50">
 						&nbsp;bis&nbsp;
-						<a href="javascript:;" title=" (TT.MM.JJJJ) " onclick="new CalendarJS().init('sdatum2')"><img src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar"><a name="calendar_sdatum2"></a></div>
+						<a href="javascript:;" title=" (TT.MM.JJJJ) " onclick="new CalendarJS().init('sdatum2')"><img src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id="calendar_sdatum2"></div>
 			    		<input id="sdatum2" name="sdatum2" type="text" onchange="" value="<?php echo $this->formvars['sdatum2']; ?>" size="10" maxlength="50">
 			    </td>
 			  </tr>

@@ -220,7 +220,7 @@
 			<td style="padding: 8px; padding-top: 0px"><input name="highlighting" type="checkbox" value="1" <? if($this->user->rolle->highlighting == '1'){echo 'checked="true"';} ?> ></td>
 		</tr>
 		<tr>		
-			<td align="left" style="padding: 8px; padding-top: 0px"><?php echo $strhist_timestamp; ?>:&nbsp;<a href="javascript:;" onclick="new CalendarJS().init('hist_timestamp');"><img title="TT.MM.JJJJ hh:mm:ss" src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar" style="bottom:100px"><a name="calendar_hist_timestamp"></div></td>
+			<td align="left" style="padding: 8px; padding-top: 0px"><?php echo $strhist_timestamp; ?>:&nbsp;<a href="javascript:;" onclick="new CalendarJS().init('hist_timestamp');"><img title="TT.MM.JJJJ hh:mm:ss" src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar" style="bottom:100px"><input type="hidden" id="calendar_hist_timestamp"></div></td>
 			<td style="padding: 8px; padding-top: 0px"><input onchange="if(this.value.length == 10)this.value = this.value + ' 06:00:00'" id="hist_timestamp" name="hist_timestamp" type="text" value="<?php echo $this->user->rolle->hist_timestamp; ?>" size="16"></td>
 		</tr>
 	</table>

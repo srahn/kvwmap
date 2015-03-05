@@ -190,7 +190,7 @@ else {
   <tr> 
     <td>Datum:</td>
     <td>
-		<a href="javascript:;" title=" (TT.MM.JJJJ) " onclick="new CalendarJS().init('datum')"><img src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar"><a name="calendar_datum"></a></div>
+		<a href="javascript:;" title=" (TT.MM.JJJJ) " onclick="new CalendarJS().init('datum')"><img src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id="calendar_datum"></div>
 		<input name="datum" id="datum" type="text" onchange="" value="<?php echo $this->formvars['datum']; ?>" size="10" maxlength="50">
 	</td>
   </tr>
