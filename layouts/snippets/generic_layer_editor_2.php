@@ -81,7 +81,7 @@
 			     	<? 	if($layer['privileg'] > '0'){ ?>
 									<td style="padding: 0 0 0 10;"><a href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);use_for_new_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>)" title="<? echo $strUseForNewDataset; ?>"><div class="emboss use_for_dataset"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
 			      <? 	} 
-								if($layer['connectiontype'] == 6 AND $layer['export_privileg'] == '1'){ ?>
+								if($layer['connectiontype'] == 6 AND $layer['export_privileg'] != 0){ ?>
 									<td style="padding: 0 0 0 10;"><a href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);daten_export(<? echo $layer['Layer_ID']; ?>, <? echo $layer['count']; ?>);" title="<? echo $strExportThis; ?>"><div class="emboss datensatz_exportieren"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
 			      <? 	} 
 								if($layer['layouts']){ ?>
@@ -358,7 +358,7 @@
 					</td>
 				</tr>
 				<tr>
-					<? if($layer['connectiontype'] == 6 AND $layer['export_privileg'] == '1'){ ?>
+					<? if($layer['connectiontype'] == 6 AND $layer['export_privileg'] != 0){ ?>
 					<td style="padding: 5 0 0 0;">
 						<select id="all_<? echo $layer['Layer_ID']; ?>" name="all_<? echo $layer['Layer_ID']; ?>" onchange="update_buttons(this.value, <? echo $layer['Layer_ID']; ?>);">
 							<option value=""><? echo $strSelectedDatasets.':'; ?></option>
@@ -380,7 +380,7 @@
 							<? } ?>
 					<? if($layer['privileg'] == '2'){ ?>
 								<td id="delete_link_<? echo $layer['Layer_ID']; ?>" style="padding: 5 10 0 0;"><a title="<? echo $strdelete; ?>" href="javascript:delete_datasets(<?php echo $layer['Layer_ID']; ?>);"><div class="emboss datensatz_loeschen"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></td>
-					<?} if($layer['connectiontype'] == 6 AND $layer['export_privileg'] == '1'){ ?>
+					<?} if($layer['connectiontype'] == 6 AND $layer['export_privileg'] != 0){ ?>
 								<td style="padding: 5 10 0 0;"><a title="<? echo $strExport; ?>" href="javascript:daten_export(<?php echo $layer['Layer_ID']; ?>, <? echo $layer['count']; ?>);"><div class="emboss datensatz_exportieren"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
 					<? } if($layer['layouts']){ ?>
 								<td id="print_link_<? echo $layer['Layer_ID']; ?>" style="padding: 5 10 0 0;"><a title="<? echo $strPrint; ?>" href="javascript:print_data(<?php echo $layer['Layer_ID']; ?>);"><div class="emboss drucken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>

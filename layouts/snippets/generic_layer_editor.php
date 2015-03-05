@@ -299,7 +299,7 @@
 					</td>
 				</tr>
 				<tr>
-					<? if($layer['export_privileg'] == '1'){ ?>
+					<? if($layer['export_privileg'] != 0){ ?>
 					<td style="padding: 5 0 0 0;">
 						<select id="all_<? echo $layer['Layer_ID']; ?>" name="all_<? echo $layer['Layer_ID']; ?>" onchange="update_buttons(this.value, <? echo $layer['Layer_ID']; ?>);">
 							<option value=""><? echo $strSelectedDatasets.':'; ?></option>
@@ -316,7 +316,7 @@
 							<tr>
 					<? if($layer['privileg'] == '2'){ ?>
 								<td id="delete_link_<? echo $layer['Layer_ID']; ?>" style="padding: 5 10 0 0;"><a title="<? echo $strdelete; ?>" href="javascript:delete_datasets(<?php echo $layer['Layer_ID']; ?>);"><div class="emboss datensatz_loeschen"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></td>
-					<?} if($layer['export_privileg'] == '1'){ ?>
+					<?} if($layer['export_privileg'] != 0){ ?>
 								<td style="padding: 5 10 0 0;"><a title="<? echo $strExport; ?>" href="javascript:daten_export(<?php echo $layer['Layer_ID']; ?>, <? echo $layer['count']; ?>);"><div class="emboss datensatz_exportieren"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
 					<? } if($layer['layouts']){ ?>
 								<td id="print_link_<? echo $layer['Layer_ID']; ?>" style="padding: 5 10 0 0;"><a title="<? echo $strPrint; ?>" href="javascript:print_data(<?php echo $layer['Layer_ID']; ?>);"><div class="emboss drucken"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
