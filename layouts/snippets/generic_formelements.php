@@ -89,7 +89,7 @@
 									}break;
 									
 									case 'Autovervollständigungsfeld' : {
-										$datapart .= Autovervollstaendigungsfeld($layer_id, $name, $alias, $fieldname, $value, $attributes['enum_output'][$i][$k], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $fontsize);
+										$datapart .= Autovervollstaendigungsfeld($layer_id, $name, $alias, $fieldname, $value, $attributes['enum_output'][$j][$k], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $fontsize);
 									}break;
 									
 									case 'Checkbox' : {
