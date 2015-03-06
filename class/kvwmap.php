@@ -4244,7 +4244,7 @@ class GUI {
     $this->titel='Druckausschnitt wählen';
     $this->main="druckausschnittswahl.php";
     # aktuellen Kartenausschnitt laden + zeichnen!
-		$this->noMinMaxScaling = true;
+		$this->noMinMaxScaling = false;
   	if($this->formvars['neuladen']){
       $this->neuLaden();
     }
