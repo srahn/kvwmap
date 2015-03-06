@@ -30,9 +30,8 @@
  $strHuntEdit="Jagdbezirk bearbeiten";
  $strParcelNo="Flurstkennz";
  $strGemkgName="Gemarkungsname";
- $strAreaALB="ALB-Fläche";
- $strDoPrintoutsALB="ALB-Auszüge erzeugen";
- $strPrintoutALB="ALB-Auszug";
+ $strAreaALB="amtliche Fläche";
+ $strDoPrintoutsALB="Auszüge erzeugen";
  $strMapSection="Kartenausschnitt";
  $strSelFst="ausgewählte Flurstücke";
  $strSelGbbl="ausgewählte Grundbuchblätter";

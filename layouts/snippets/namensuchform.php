@@ -50,28 +50,31 @@
 		document.GUI.go.value = 'Namen_Auswaehlen_Suchen';
 		document.GUI.submit();
 	}
-
-	function send_selected_flurst(url, i, target){
+	
+	function send_selected_flurst(go, i, formnummer, wz, target){
+		currentform.go_backup.value=currentform.go.value;
 		var semi = false;
 		var flurstkennz = "";
 		var flurstarray = document.getElementsByName("check_flurstueck_"+i);
 		for(i = 0; i < flurstarray.length; i++){
-	  	if(flurstarray[i].checked == true){
-	  		if(semi == true){
-	    		flurstkennz += ';';
-	    	}
-	    	flurstkennz += flurstarray[i].value;
-	    	semi = true;
-	    }
-	  }
-	  if(semi == true){
-		  url += '&FlurstKennz='+flurstkennz;
-		  if(target == '_blank'){
-		  	window.open(url, "kvwmap", "toolbar=yes,status=yes,menubar=yes,width="+self.screen.width+",height="+self.screen.height);
-		  }
-		  else{
-		  	location.href=url;
-		 	}
+			if(flurstarray[i].checked == true){
+				if(semi == true){
+					flurstkennz += ';';
+				}
+				flurstkennz += flurstarray[i].value;
+				semi = true;
+			}
+		}
+		if(semi == true){
+			currentform.target = '';
+			if(target == '_blank'){
+				currentform.target = '_blank';
+			}
+			currentform.go.value=go;
+			currentform.FlurstKennz.value=flurstkennz;
+			currentform.formnummer.value=formnummer;
+			currentform.wz.value=wz;
+			currentform.submit();
 		}
 		else{
 			alert('Es wurden keine Flurstücke ausgewählt.');
@@ -292,7 +295,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
     					<td><span class="px13 fett"><?php echo $strParcelNo; ?></span></span></td>
     					<td><span class="px13 fett"><?php echo $strGemkgName; ?></span></span></td>
     					<td><span class="px13 fett"><?php echo $strAreaALB; ?></span></span></td>
-    					<td colspan="2"><span class="px13 fett"><?php echo $strDoPrintoutsALB; ?></span></span></td>
+    					<td><span class="px13 fett"><?php echo $strDoPrintoutsALB; ?></span></span></td>
     					<td><span class="px13 fett"><?php echo $strMapSection; ?></span></span></td>
     				</tr>
 	    <?	for($j = 0; $j < count($this->namen[$i]['flurstuecke']); $j++){ ?>
@@ -305,37 +308,40 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 			      		 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 			      	<? } ?>
 			      	</td>
-			      	<td><span class="px13"><? echo $this->namen[$i]['flurstuecke'][$j]; ?></span></td>
+			      	<td><span class="px13"><? echo formatFlurstkennzALK($this->namen[$i]['flurstuecke'][$j]); ?></span></td>
 			      	<td><span class="px13"><? echo $this->namen[$i]['alb_data'][$j]['gemkgname']; ?></span></td>
 			      	<td><span class="px13"><? echo $this->namen[$i]['alb_data'][$j]['flaeche']; ?> m²</span></td>
 			      	<td>
-			      		<? $this->getFunktionen();
-				        if ($this->Stelle->funktionen['ohneWasserzeichen']['erlaubt']) { ?>
-				          <a href="index.php?go=ALB_Anzeige&FlurstKennz=<?php echo $this->namen[$i]['flurstuecke'][$j]; ?>&formnummer=30&wz=0" target="_blank"><span class="px13"><?php echo $strPrintoutALB; ?>&nbsp;30</span></a>
-				  <?php }else{ ?>
-				  				<a href="index.php?go=ALB_Anzeige&FlurstKennz=<?php echo $this->namen[$i]['flurstuecke'][$j]; ?>&formnummer=30&wz=1" target="_blank"><span class="px13"><?php echo $strPrintoutALB; ?>&nbsp;30</span></a>
-				  				<? } ?>
+			      		<? $this->getFunktionen(); ?>
+								<select style="width: 130px">
+									<option>-- Auswahl --</option>
+									<? if($this->Stelle->funktionen['MV0510']['erlaubt']){ ?><option onclick="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0510&FlurstKennz=<?php echo $this->namen[$i]['flurstuecke'][$j]; ?>','_blank')">Flurstücksnachweis</option><? } ?>
+									<? if($this->Stelle->funktionen['MV0550']['erlaubt']){ ?><option onclick="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0550&FlurstKennz=<?php echo $this->namen[$i]['flurstuecke'][$j]; ?>','_blank')">Flurstücks- und Eigentumsnachweis</option><? } ?>
+									<? if($this->Stelle->funktionen['MV0520']['erlaubt']){ ?><option onclick="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0520&FlurstKennz=<?php echo $this->namen[$i]['flurstuecke'][$j]; ?>','_blank')">Flurstücksnachweis mit Bodenschätzung</option><? } ?>
+									<? if($this->Stelle->funktionen['MV0560']['erlaubt']){ ?><option onclick="window.open('index.php?go=ALKIS_Auszug&formnummer=MV0560&FlurstKennz=<?php echo $this->namen[$i]['flurstuecke'][$j]; ?>','_blank')">Flurstücks- und Eigentumsnachweis mit Bodenschätzung</option><? } ?>
+
+									<? if($this->Stelle->funktionen['ALB-Auszug 30']['erlaubt']){ ?><option onclick="window.open('index.php?go=ALB_Anzeige&formnummer=30&wz=1&FlurstKennz=<?php echo $this->namen[$i]['flurstuecke'][$j]; ?>','_blank')">Flurst&uuml;cksdaten</option><? } ?>
+									<? if($this->Stelle->funktionen['ALB-Auszug 35']['erlaubt']){ ?><option onclick="window.open('index.php?go=ALB_Anzeige&formnummer=35&wz=1&FlurstKennz=<?php echo $this->namen[$i]['flurstuecke'][$j]; ?>','_blank')">Flurst&uuml;cksdaten&nbsp;mit&nbsp;Eigent&uuml;mer</option><? } ?>
+									<? if($this->Stelle->funktionen['ALB-Auszug 40']['erlaubt']){ ?><option onclick="window.open('index.php?go=ALB_Anzeige&formnummer=40&wz=1&FlurstKennz=<?php echo $this->namen[$i]['flurstuecke'][$j]; ?>','_blank')">Eigent&uuml;merdaten&nbsp;zum&nbsp;Flurst&uuml;ck</option><? } ?>
+								</select>
 				      </td>
-				      <td>
-				        <?php
-				        if ($this->Stelle->funktionen['ALB-Auszug 35']['erlaubt'] AND $this->Stelle->funktionen['ohneWasserzeichen']['erlaubt']) { ?>
-				          <a href="index.php?go=ALB_Anzeige&FlurstKennz=<?php echo $this->namen[$i]['flurstuecke'][$j]; ?>&formnummer=35&wz=0" target="_blank"><span class="px13"><?php echo $strPrintoutALB; ?>&nbsp;35</span></a>
-				     <?php }else{ ?>
-				     			<a href="index.php?go=ALB_Anzeige&FlurstKennz=<?php echo $this->namen[$i]['flurstuecke'][$j]; ?>&formnummer=35&wz=1" target="_blank"><span class="px13"><?php echo $strPrintoutALB; ?>&nbsp;35</span></a>
-				     	<? } ?>
-							</td>
 							<td><a href="index.php?go=ZoomToFlst&FlurstKennz=<?php echo $this->namen[$i]['flurstuecke'][$j]; ?>"><span style="font-size:12px;"><?php echo $strMapSection; ?></span></a></td>
 			      </tr>
 	    <?	}
 	    		if(count($this->namen[$i]['flurstuecke']) > 1 AND $this->Stelle->funktionen['ohneWasserzeichen']['erlaubt']){ ?>
 	    		<tr>
 	    			<td colspan="6">&nbsp;&nbsp;<? echo '<a href="javascript:checkall(\'check_flurstueck_'.$i.'\');"><img src="'.GRAPHICSPATH.'pfeil_unten-rechts.gif" width="10" height="20" border="0"></a>'; ?>&nbsp;<?php echo $strSelFst; ?>:
-	    			<? if ($this->Stelle->funktionen['ohneWasserzeichen']['erlaubt']) { ?>
-			          <a href="javascript:send_selected_flurst('index.php?go=ALB_Anzeige&formnummer=30&wz=0', '<? echo $i; ?>', '_blank');"><?php echo $strPrintoutALB; ?>&nbsp;30</a>
-		        <? }
-		        if ($this->Stelle->funktionen['ALB-Auszug 35']['erlaubt'] AND $this->Stelle->funktionen['ohneWasserzeichen']['erlaubt']) { ?>
-			          | <a href="javascript:send_selected_flurst('index.php?go=ALB_Anzeige&formnummer=35&wz=0', '<? echo $i; ?>','_blank');"><?php echo $strPrintoutALB; ?>&nbsp;35</a>
-			      <? } ?>
+							<select style="width: 130px">
+								<option>-- Auswahl --</option>
+								<? if($this->Stelle->funktionen['MV0510']['erlaubt']){ ?><option onclick="send_selected_flurst('ALKIS_Auszug', '<? echo $i; ?>', 'MV0510', 1, '_blank');">Flurstücksnachweis</option><? } ?>
+								<? if($this->Stelle->funktionen['MV0550']['erlaubt']){ ?><option onclick="send_selected_flurst('ALKIS_Auszug', '<? echo $i; ?>', 'MV0550', 1, '_blank');">Flurstücks- und Eigentumsnachweis</option><? } ?>
+								<? if($this->Stelle->funktionen['MV0520']['erlaubt']){ ?><option onclick="send_selected_flurst('ALKIS_Auszug', '<? echo $i; ?>', 'MV0520', 1, '_blank');">Flurstücksnachweis mit Bodenschätzung</option><? } ?>
+								<? if($this->Stelle->funktionen['MV0560']['erlaubt']){ ?><option onclick="send_selected_flurst('ALKIS_Auszug', '<? echo $i; ?>' 'MV0560', 1, '_blank');">Flurstücks- und Eigentumsnachweis mit Bodenschätzung</option><? } ?>
+
+								<? if($this->Stelle->funktionen['ALB-Auszug 30']['erlaubt']){ ?><option onclick="send_selected_flurst('ALB_Anzeige', '<? echo $i; ?>', '30', 1, '_blank');">Flurst&uuml;cksdaten</option><? } ?>
+								<? if($this->Stelle->funktionen['ALB-Auszug 35']['erlaubt']){ ?><option onclick="send_selected_flurst('ALB_Anzeige', '<? echo $i; ?>', '35', 1, '_blank');">Flurst&uuml;cksdaten&nbsp;mit&nbsp;Eigent&uuml;mer</option><? } ?>
+								<? if($this->Stelle->funktionen['ALB-Auszug 40']['erlaubt']){ ?><option onclick="send_selected_flurst('ALB_Anzeige', '<? echo $i; ?>', '40', 1, '_blank');">Eigent&uuml;merdaten&nbsp;zum&nbsp;Flurst&uuml;ck</option><? } ?>
+							</select>
 	    			</td>
 	    		</tr>
 	    		<? } ?>
@@ -414,10 +420,14 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   ?>
 
 </table>
+<input type="hidden" name="go_backup" value="">
 <input name="namensuche" type="hidden" value="true">
 <input name="selBlatt" type="hidden" value="">
 <input name="Grundbuecher" type="hidden" value="">
 <input name="lfd_nr_name" type="hidden" value="">
 <input name="offset" type="hidden" value="<? echo $this->formvars['offset']; ?>">
 <input type="hidden" name="order" value="<? echo $this->formvars['order'] ?>">
+<input type="hidden" name="FlurstKennz" value="">
+<input type="hidden" name="formnummer" value="">
+<input type="hidden" name="wz" value="">
 
