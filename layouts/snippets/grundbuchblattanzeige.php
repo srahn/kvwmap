@@ -93,9 +93,12 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
       <td valign="top" align="center"><?php echo $this->buchungen[0]['flur']; ?></td>
       <td valign="top" align="center">
       	<? echo $this->buchungen[0]['flurstuecksnr'];
-      		if($this->buchungen[0]['anteil'] != ''){
+					if($this->buchungen[0]['sondereigentum'] != ''){
+      			echo '<br><br>'.$this->buchungen[0]['anteil'].' Miteigentumsanteil an '.$this->buchungen[0]['sondereigentum'];
+      		}
+      		elseif($this->buchungen[0]['anteil'] != ''){
       			echo '<br><br>zu '.$this->buchungen[0]['anteil'];
-      		} 
+      		}
       	?>
       </td>
       <td valign="top" align="center"><a href="javascript:flurstanzeige('<?php echo $this->buchungen[0]['flurstkennz']; ?>');" title="Flurstücksdaten anzeigen">anzeigen</a></td>
