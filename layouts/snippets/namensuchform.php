@@ -81,33 +81,23 @@
 		}
 	}
 
-	function send_selected_grundbuecher(url){
+	function send_selected_grundbuecher(go){
 		var semi = false;
 		var grundbuecher = "";
-		url += '&name1='+document.GUI.name1.value;
-		url += '&name2='+document.GUI.name2.value;
-		url += '&name3='+document.GUI.name3.value;
-		url += '&name4='+document.GUI.name4.value;
-		url += '&bezirk='+document.GUI.bezirk.value;
-		url += '&blatt='+document.GUI.blatt.value;
-		url += '&GemkgID='+document.GUI.GemkgID.value;
-		url += '&offset='+document.GUI.offset.value;
-		url += '&order='+document.GUI.order.value;
-		url += '&anzahl='+document.GUI.anzahl.value;
-		url += '&namensuche=true';
 		var gbarray = document.getElementsByName("check_grundbuch");
 		for(i = 0; i < gbarray.length; i++){
 	  	if(gbarray[i].checked == true){
 	  		if(semi == true){
-	    		grundbuecher += ';';
+	    		grundbuecher += ', ';
 	    	}
 	    	grundbuecher += gbarray[i].value;
 	    	semi = true;
 	    }
 	  }
 	  if(semi == true){
-		  url += '&Grundbuecher='+grundbuecher;
-		 	location.href=url;
+		  currentform.selBlatt.value = grundbuecher;
+			currentform.go.value = go;
+		 	currentform.submit();
 		}
 		else{
 			alert('Es wurden keine Grundbuchblätter ausgewählt.');
@@ -360,7 +350,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 		</td>
 	</tr>
   <tr>
-		<td colspan="2">&nbsp;&nbsp;&nbsp;<? echo '<a href="javascript:checkall(\'check_grundbuch\');"><img src="'.GRAPHICSPATH.'pfeil_unten-rechts.gif" width="10" height="20" border="0"></a>'; ?>&nbsp;<?php echo $strSelGbbl; ?>: <a href="javascript:send_selected_grundbuecher('index.php?go=Suche_Flurstuecke_zu_Grundbuechern');"><?php echo $strShowFst; ?></a>&nbsp;|&nbsp;<a href="javascript:send_selected_grundbuecher('index.php?go=Zeige_Flurstuecke_zu_Grundbuechern');"><?php echo $strShowFstInMap; ?></a>
+		<td colspan="2">&nbsp;&nbsp;&nbsp;<? echo '<a href="javascript:checkall(\'check_grundbuch\');"><img src="'.GRAPHICSPATH.'pfeil_unten-rechts.gif" width="10" height="20" border="0"></a>'; ?>&nbsp;<?php echo $strSelGbbl; ?>: <a href="javascript:send_selected_grundbuecher('Grundbuchblatt_Auswaehlen_Suchen');">anzeigen</a>&nbsp;|&nbsp;<a href="javascript:send_selected_grundbuecher('Suche_Flurstuecke_zu_Grundbuechern');"><?php echo $strShowFst; ?></a>&nbsp;|&nbsp;<a href="javascript:send_selected_grundbuecher('Zeige_Flurstuecke_zu_Grundbuechern');"><?php echo $strShowFstInMap; ?></a>
 		</td>
 	</tr>
   <tr>

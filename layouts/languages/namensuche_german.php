@@ -25,7 +25,7 @@
  $strName4Short="PLZ Ort";
  $strFst="Flurstücke";
  $strHunt="Jagdkataster";
- $strShowFst="anzeigen";
+ $strShowFst="Flurstücke anzeigen";
  $strToMap="Karte";
  $strHuntEdit="Jagdbezirk bearbeiten";
  $strParcelNo="Flurstkennz";

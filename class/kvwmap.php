@@ -5238,7 +5238,7 @@ class GUI {
   function flurstuecksAnzeigeByGrundbuecher(){
     $flurstueck=new flurstueck('',$this->database);
     $flurstueck->database=$this->pgdatabase;
-    $gbarray = explode(';', $this->formvars['Grundbuecher']);
+    $gbarray = explode(', ', $this->formvars['selBlatt']);
     $Flurstuecke = $flurstueck->getFlurstByGrundbuecher($gbarray);
     if (count($Flurstuecke)==0) {
       $this->Fehlermeldung='<br>Es konnten keine Flurstücke gefunden werden, bitte ändern Sie die Anfrage!';
@@ -5258,7 +5258,7 @@ class GUI {
   function flurstuecksSucheByGrundbuecher(){
     $flurstueck=new flurstueck('',$this->database);
     $flurstueck->database=$this->pgdatabase;
-    $gbarray = explode(';', $this->formvars['Grundbuecher']);
+    $gbarray = explode(', ', $this->formvars['selBlatt']);
     $Flurstuecke = $flurstueck->getFlurstByGrundbuecher($gbarray);
     if(count($Flurstuecke)==0) {
         $this->Fehlermeldung='<br>Es konnten keine Flurstücke gefunden werden, bitte ändern Sie die Anfrage!';
