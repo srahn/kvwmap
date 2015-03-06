@@ -69,7 +69,6 @@ if (LOG_LEVEL>0) {
 
 if(!$_SESSION['angemeldet']){
 	include(CLASSPATH.'mysql.php');
-	# Erzeugen des MYSQL-DB-Objekts
 	$userDb = new database();
 	$userDb->host = MYSQL_HOST;
 	$userDb->user = MYSQL_USER;																			
