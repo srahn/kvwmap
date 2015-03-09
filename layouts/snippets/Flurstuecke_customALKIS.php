@@ -315,19 +315,27 @@ backto = function(go){
                       <col width="*">
                       <col width="*">
                     </colgroup>
-		            <?  $emzges_222 = 0; $emzges_223 = 0;
-		            	$flaeche_222 = 0; $flaeche_223 = 0;
+		            <?  $emzges_a = 0; $emzges_gr = 0; $emzges_agr = 0; $emzges_gra = 0;
+										$flaeche_a = 0; $flaeche_gr = 0; $flaeche_agr = 0; $flaeche_gra = 0;
 		            	for($j = 0; $j < count($flst->Klassifizierung); $j++){
 		            	$wert=$flst->Klassifizierung[$j]['wert'];
 									$flst->Klassifizierung[$j]['flaeche'] = $flst->Klassifizierung[$j]['flaeche'] * $ratio;
 				          $emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
 				          if($flst->Klassifizierung[$j]['objart'] == 1000){
-				          	$emzges_222 = $emzges_222 + $emz;
-				          	$flaeche_222 = $flaeche_222 + $flst->Klassifizierung[$j]['flaeche'];
+				          	$emzges_a = $emzges_a + $emz;
+				          	$flaeche_a = $flaeche_a + $flst->Klassifizierung[$j]['flaeche'];
+				          }
+									if($flst->Klassifizierung[$j]['objart'] == 2000){
+				          	$emzges_agr = $emzges_agr + $emz;
+				          	$flaeche_agr = $flaeche_agr + $flst->Klassifizierung[$j]['flaeche'];
 				          }
 				          if($flst->Klassifizierung[$j]['objart'] == 3000){
-				          	$emzges_223 = $emzges_223 + $emz;
-				          	$flaeche_223 = $flaeche_223 + $flst->Klassifizierung[$j]['flaeche'];
+				          	$emzges_gr = $emzges_gr + $emz;
+				          	$flaeche_gr = $flaeche_gr + $flst->Klassifizierung[$j]['flaeche'];
+				          }
+									if($flst->Klassifizierung[$j]['objart'] == 4000){
+				          	$emzges_gra = $emzges_gra + $emz;
+				          	$flaeche_gra = $flaeche_gra + $flst->Klassifizierung[$j]['flaeche'];
 				          }
 		            	?>
 		            <tr>
@@ -337,27 +345,43 @@ backto = function(go){
 		              <td>EMZ: <? echo $emz; ?></td>
 		            </tr>
 		            <? } // end for
-		            $nichtgeschaetzt=round($flst->ALB_Flaeche-$flaeche_222-$flaeche_223);
+		            $nichtgeschaetzt=round($flst->ALB_Flaeche-$flaeche_a-$flaeche_gr-$flaeche_agr-$flaeche_gra);
 		            if ($nichtgeschaetzt>0) { ?>
           				<tr>
           					<td></td>
           					<td colspan="3">nicht geschätzt: <? echo $nichtgeschaetzt; ?> m&sup2;</td>
           				</tr>
 		            <? }
-        			if ($emzges_222 > 0)  {
-        					$BWZ_222 = round($emzges_222/$flaeche_222*100);
+        			if ($emzges_a > 0)  {
+        					$BWZ_a = round($emzges_a/$flaeche_a*100);
         					?>
           				<tr>
           					<td></td>
-          					<td colspan="3">Ackerland gesamt: EMZ <? echo $emzges_222; ?>, BWZ <? echo $BWZ_222; ?></td>
+          					<td colspan="3">Ackerland gesamt: EMZ <? echo $emzges_a; ?>, BWZ <? echo $BWZ_a; ?></td>
           				</tr>
         			<?	}
-        			if ($emzges_223 > 0) {
-        					$BWZ_223 = round($emzges_223/$flaeche_223*100);
+        			if ($emzges_gr > 0) {
+        					$BWZ_gr = round($emzges_gr/$flaeche_gr*100);
         					?>
           				<tr>
           					<td></td>
-          					<td colspan="3">Grünland gesamt: EMZ <? echo $emzges_223; ?>, BWZ <? echo $BWZ_223; ?></td>
+          					<td colspan="3">Grünland gesamt: EMZ <? echo $emzges_gr; ?>, BWZ <? echo $BWZ_gr; ?></td>
+          				</tr>
+        			<?	}
+							if ($emzges_agr > 0) {
+        					$BWZ_agr = round($emzges_agr/$flaeche_agr*100);
+        					?>
+          				<tr>
+          					<td></td>
+          					<td colspan="3">Acker-Grünland gesamt: EMZ <? echo $emzges_agr; ?>, BWZ <? echo $BWZ_agr; ?></td>
+          				</tr>
+        			<?	}
+							if ($emzges_gra > 0) {
+        					$BWZ_gra = round($emzges_gra/$flaeche_gra*100);
+        					?>
+          				<tr>
+          					<td></td>
+          					<td colspan="3">Grünland-Acker gesamt: EMZ <? echo $emzges_gra; ?>, BWZ <? echo $BWZ_gra; ?></td>
           				</tr>
         			<?	} ?>
 		          </table>
