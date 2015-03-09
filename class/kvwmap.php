@@ -6634,7 +6634,7 @@ class GUI {
             $layerset[0]['shape'][$j][$layerset[0]['attributes']['name'][$k]] = $features[$j]['value'][$k];
             $layerset[0]['attributes']['privileg'][$k] = 0;
           }
-          $layerset[0]['shape'][$j]['geom'] = $features[$j]['geom'];
+          $layerset[0]['shape'][$j]['wfs_geom'] = $features[$j]['geom'];
         }
         $this->qlayerset[]=$layerset[0];
       }break;
@@ -11210,7 +11210,7 @@ class GUI {
                 $layerset[$i]['shape'][$j][$layerset[$i]['attributes']['name'][$k]] = $features[$j]['value'][$k];
                 $layerset[$i]['attributes']['privileg'][$k] = 0;
               }
-              $layerset[$i]['shape'][$j]['geom'] = $features[$j]['geom'];
+              $layerset[$i]['shape'][$j]['wfs_geom'] = $features[$j]['geom'];
             }
             $this->qlayerset[]=$layerset[$i];
           } break;

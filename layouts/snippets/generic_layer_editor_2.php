@@ -215,7 +215,7 @@
 				
 				if($this->new_entry != true)echo $datapart;
 				
-				if(($columnname != '' OR $layer['shape'][$k]['geom'] != '') AND $this->new_entry != true AND $this->formvars['printversion'] == ''){
+				if(($columnname != '' OR $layer['shape'][$k]['wfs_geom'] != '') AND $this->new_entry != true AND $this->formvars['printversion'] == ''){
 					if($attributes['group'][0] != ''){ ?>
 						<tr><td colspan="2"><table width="100%" class="tgle" border="2" cellpadding="0" cellspacing="0"><tbody class="gle">
 					<? } ?>
@@ -228,7 +228,7 @@
 			    	    <? } ?>
 			    	    <td style="padding-top:5px; padding-bottom:5px;" valign="middle">
 <?						
-							if(!$layer['shape'][$k]['geom']){		// kein WFS 
+							if(!$layer['shape'][$k]['wfs_geom']){		// kein WFS 
 								echo '<input type="hidden" id="'.$columnname.'_'.$k.'" value="'.$layer['shape'][$k][$columnname].'">';
 								if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY'){ ?>
 									<table cellspacing="0" cellpadding="0">
@@ -277,7 +277,7 @@
 						else{		# bei WFS-Layern
 ?>						<table cellspacing="0" cellpadding="0">
 								<tr>
-									<td style="padding: 0 0 0 5;"><a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:zoom2object('go=zoom2wkt&wkt=<? echo $layer['shape'][$k]['geom']; ?>&epsg=<? echo $layer['epsg_code']; ?>');"><div class="emboss zoom_normal"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+									<td style="padding: 0 0 0 5;"><a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:zoom2object('go=zoom2wkt&wkt=<? echo $layer['shape'][$k]['wfs_geom']; ?>&epsg=<? echo $layer['epsg_code']; ?>');"><div class="emboss zoom_normal"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
 								</tr>
 							</table>
 <?															
