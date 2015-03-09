@@ -262,7 +262,7 @@ class GUI {
 							}
 							$legend .= '<span ';
 							if($layer['minscale'] != -1 AND $layer['maxscale'] > 0){
-								$legend .= 'title="'.$layer['minscale'].' - '.$layer['maxscale'].'"';
+								$legend .= 'title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
 							}			  
 							$legend .=' class="legend_layer">'.html_umlaute($layer['alias']).'</span>';
 							if($layer['metalink'] != ''){
@@ -401,7 +401,7 @@ class GUI {
 						$legend .= 'id="thema_'.$layer['Layer_ID'].'" name="thema'.$layer['Layer_ID'].'" disabled="true"></td><td>
 						<span class="legend_layer_hidden" ';
 						if($layer['minscale'] != -1 AND $layer['maxscale'] != -1){
-							$legend .= 'title="'.$layer['minscale'].' - '.$layer['maxscale'].'"';
+							$legend .= 'title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
 						}
 						$legend .= ' >'.html_umlaute($layer['alias']).'</span>';
 						if($layer['status'] != ''){
@@ -13346,8 +13346,8 @@ class db_mapObj{
       if($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivStatus'] != '0')){    # bei withclasses == 2 werden für alle Layer die Klassen geladen, bei withclasses == 1 werden die Klassen nur dann geladen, wenn der Layer aktiv ist
         $rs['Class']=$this->read_Classes($rs['Layer_ID'], $this->disabled_classes);
       }
-			if($rs['maxscale'] > 0)$rs['maxscale'] = $rs['maxscale']+0.5;
-			if($rs['minscale'] > 0)$rs['minscale'] = $rs['minscale']-0.5;
+			if($rs['maxscale'] > 0)$rs['maxscale'] = $rs['maxscale']+0.3;
+			if($rs['minscale'] > 0)$rs['minscale'] = $rs['minscale']-0.3;
       $this->Layer[$i]=$rs;
 			$this->Layer['layer_ids'][$rs['Layer_ID']] =& $this->Layer[$i];		# damit man mit einer Layer-ID als Schlüssel auf dieses Array zugreifen kann
 			$i++;
