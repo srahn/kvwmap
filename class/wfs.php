@@ -167,10 +167,10 @@ class wfs{
 						$coords = implode(', ', $coord_pair);
 					}
 					else{
-						$num_coords = substr_count($coords, ' ');
 						$coords = str_replace(' ', '_', trim($coords));
 						$coords = str_replace(',', ' ', $coords);
 						$coords = str_replace('_', ',', $coords);
+						$num_coords = substr_count($coords, ' ');
 					}
 					if($num_coords > 1)$features[$i]['geom'] = 'LINESTRING('.$coords.')';
 					else $features[$i]['geom'] = 'POINT('.$coords.')';
