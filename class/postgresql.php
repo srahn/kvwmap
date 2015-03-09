@@ -1343,17 +1343,18 @@ class pgdatabase {
   }
 
   function getKlassifizierung($FlurstKennz) {
-    $sql ="SELECT round(st_area(st_intersection(n.wkb_geometry,f.wkb_geometry))::numeric) AS flaeche,  round(st_area(f.wkb_geometry)::numeric) as flstflaeche, n.ackerzahlodergruenlandzahl as wert, n.kulturart as objart, ";
-		$sql.=" ARRAY_TO_STRING(ARRAY[k.kurz, b.kurz, z.kurz, e1.kurz, e2.kurz, s.kurz, n.bodenzahlodergruenlandgrundzahl || '/' || n.ackerzahlodergruenlandzahl], ' ') as label";
-    $sql.=" FROM alkis.ax_flurstueck f, alkis.ax_bodenschaetzung n ";
+    $sql ="SELECT flaeche, flstflaeche, n.wert, objart, ARRAY_TO_STRING(ARRAY[k.kurz, b.kurz, z.kurz, e1.kurz, e2.kurz, s.kurz, n.bodenzahlodergruenlandgrundzahl || '/' || n.wert], ' ') as label ";
+		$sql.=" FROM (SELECT round(st_area(st_intersection(n.wkb_geometry, st_intersection(be.wkb_geometry,f.wkb_geometry)))::numeric) AS flaeche, round(st_area(f.wkb_geometry)::numeric) as flstflaeche, n.bodenzahlodergruenlandgrundzahl, n.ackerzahlodergruenlandzahl as wert, n.kulturart as objart, n.kulturart, n.bodenart, n.entstehungsartoderklimastufewasserverhaeltnisse, n.zustandsstufeoderbodenstufe, n.sonstigeangaben";
+    $sql.=" FROM alkis.ax_flurstueck f, alkis.ax_bewertung be, alkis.ax_bodenschaetzung n ";		
+    $sql.=" WHERE st_intersects(n.wkb_geometry,f.wkb_geometry) = true AND st_intersects(be.wkb_geometry,f.wkb_geometry) = true AND st_area(st_intersection(n.wkb_geometry, st_intersection(be.wkb_geometry,f.wkb_geometry))) > 0.05 AND f.flurstueckskennzeichen='".$FlurstKennz."'";
+		$sql.= $this->build_temporal_filter(array('f', 'n'));
+		$sql.=" ) as n";
 		$sql.=" LEFT JOIN alkis.ax_bodenschaetzung_kulturart k ON k.wert=n.kulturart";
 		$sql.=" LEFT JOIN alkis.ax_bodenschaetzung_bodenart b ON b.wert=n.bodenart";
 		$sql.=" LEFT JOIN alkis.ax_bodenschaetzung_entstehungsartoderklimastufe e1 ON e1.wert=n.entstehungsartoderklimastufewasserverhaeltnisse[1]";
 		$sql.=" LEFT JOIN alkis.ax_bodenschaetzung_entstehungsartoderklimastufe e2 ON e2.wert=n.entstehungsartoderklimastufewasserverhaeltnisse[2]";
 		$sql.=" LEFT JOIN alkis.ax_bodenschaetzung_zustandsstufe z ON z.wert=n.zustandsstufeoderbodenstufe";
 		$sql.=" LEFT JOIN alkis.ax_bodenschaetzung_sonstigeangaben s ON s.wert=n.sonstigeangaben[1]";
-    $sql.=" WHERE st_intersects(n.wkb_geometry,f.wkb_geometry) = true AND st_area(st_intersection(n.wkb_geometry,f.wkb_geometry)) > 0.05 AND f.flurstueckskennzeichen='".$FlurstKennz."'";
-		$sql.= $this->build_temporal_filter(array('f', 'n'));
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
