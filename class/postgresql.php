@@ -1825,31 +1825,23 @@ class pgdatabase {
 ##########################################################################
 # ALK Funktionen
 ##########################################################################
-
-  #2005-11-30_pk
-  function getMERfromFlurstuecke($flurstkennz, $epsgcode) {
-    $this->debug->write("<br>postgres.php->database->getMERfromFlurstuecke, Abfrage des Maximalen umschlieï¿½enden Rechtecks um die Flurstï¿½cke",4);
-    $sql ="SELECT MIN(st_xmin(st_envelope(st_transform(o.the_geom, ".$epsgcode.")))) AS minx,MAX(st_xmax(st_envelope(st_transform(o.the_geom, ".$epsgcode.")))) AS maxx";
-    $sql.=",MIN(st_ymin(st_envelope(st_transform(o.the_geom, ".$epsgcode.")))) AS miny,MAX(st_ymax(st_envelope(st_transform(o.the_geom, ".$epsgcode.")))) AS maxy";
-    $sql.=" FROM alkobj_e_fla as o,alknflst AS f";
-    $sql.=" WHERE o.objnr=f.objnr";
-    $anzflst=count($flurstkennz);
-    if ($anzflst>0) {
-      $sql.=" AND f.flurstkennz IN ('".$flurstkennz[0]."'";
-      for ($i=1;$i<$anzflst;$i++) {
-        $sql.=",'".$flurstkennz[$i]."'";
-      }
-      $sql.=")";
-    }
+	
+	function getMERfromGemarkung($Gemarkung, $epsgcode) {
+    $this->debug->write("<br>postgres.php->database->getMERfromGemarkung, Abfrage des Maximalen umschliessenden Rechtecks um die Gemarkung",4);
+    $sql ="SELECT MIN(st_xmin(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS minx,MAX(st_xmax(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS maxx";
+    $sql.=",MIN(st_ymin(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS miny,MAX(st_ymax(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS maxy";
+    $sql.=" FROM alkis.pp_gemarkung";
+    $sql.=" WHERE land*10000 + gemarkung = ".$Gemarkung;
+    #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) {
-      $ret[1]='Fehler beim Abfragen des Umschlieï¿½enden Rechtecks um die Flurstï¿½cke.<br>'.$ret[1];
+      $ret[1]='Fehler beim Abfragen des Umschliessenden Rechtecks um die Gemarkung.<br>'.$ret[1];
     }
     else {
       $rs=pg_fetch_array($ret[1]);
       if ($rs['minx']==0) {
         $ret[0]=1;
-        $ret[1]='Flurstï¿½ck nicht in Postgres Datenbank '.$this->dbName.' vorhanden.';
+        $ret[1]='Gemarkung nicht in ALK Datenbank '.$this->dbName.' vorhanden.';
       }
       else {
         $ret[1]=$rs;
@@ -1857,8 +1849,34 @@ class pgdatabase {
     }
     return $ret;
   }
-  
-  function getMERfromFlurstueckeALKIS($flurstkennz, $epsgcode) {
+	
+	function getMERfromFlur($Gemarkung,$Flur, $epsgcode) {
+    $this->debug->write("<br>postgres.php->database->getMERfromFlur, Abfrage des Maximalen umschlieï¿½enden Rechtecks um die Flur",4);
+    $sql ="SELECT MIN(st_xmin(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS minx,MAX(st_xmax(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS maxx";
+    $sql.=",MIN(st_ymin(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS miny,MAX(st_ymax(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS maxy";
+    $sql.=" FROM alkis.pp_flur";
+    $sql.=" WHERE land*10000 + gemarkung = ".$Gemarkung;
+    $sql.=" AND flurnummer = ".(int)$Flur;
+    #echo $sql;
+    $ret=$this->execSQL($sql, 4, 0);
+    if ($ret[0]) {
+      $ret[1]='Fehler beim Abfragen des Umschliessenden Rechtecks um die Flur.<br>'.$ret[1];
+    }
+    else {
+      $rs=pg_fetch_array($ret[1]);
+      if ($rs['minx']==0) {
+        $ret[0]=1;
+        $ret[1]='Flur nicht in ALK Datenbank '.$this->dbName.' vorhanden.';
+      }
+      else {
+        $ret[1]=$rs;
+      }
+    }
+    return $ret;
+  }
+	
+	
+  function getMERfromFlurstuecke($flurstkennz, $epsgcode) {
     $this->debug->write("<br>postgres.php->database->getMERfromFlurstuecke, Abfrage des Maximalen umschlieï¿½enden Rechtecks um die Flurstï¿½cke",4);
     $sql ="SELECT MIN(st_xmin(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS minx,MAX(st_xmax(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS maxx";
     $sql.=",MIN(st_ymin(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS miny,MAX(st_ymax(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS maxy";
@@ -1875,7 +1893,7 @@ class pgdatabase {
 		$sql.= $this->build_temporal_filter(array('f'));
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) {
-      $ret[1]='Fehler beim Abfragen des Umschlieï¿½enden Rechtecks um die Flurstï¿½cke.<br>'.$ret[1];
+      $ret[1]='Fehler beim Abfragen des Umschliessenden Rechtecks um die Flurstücke.<br>'.$ret[1];
     }
     else {
       $rs=pg_fetch_array($ret[1]);
@@ -1889,44 +1907,8 @@ class pgdatabase {
     }
     return $ret;
   }
-
-  # 2006-01-31 pk
-  function getMERfromGebaeude($Gemeinde,$Strasse,$Hausnr, $epsgcode){
-    $this->debug->write("<br>postgres.php->database->getMERfromGebaeude, Abfrage des Maximalen umschlieï¿½enden Rechtecks um die Gebaeude",4);
-    $sql ="SELECT MIN(st_xmin(st_envelope(st_transform(o.the_geom, ".$epsgcode.")))) AS minx,MAX(st_xmax(st_envelope(st_transform(o.the_geom, ".$epsgcode.")))) AS maxx";
-    $sql.=",MIN(st_ymin(st_envelope(st_transform(o.the_geom, ".$epsgcode.")))) AS miny,MAX(st_ymax(st_envelope(st_transform(o.the_geom, ".$epsgcode.")))) AS maxy";
-    $sql.=" FROM alkobj_e_fla as o,alknhaus AS h";
-    $sql.=" WHERE o.objnr=h.objnr";
-    if ($Hausnr!='') {
-    	$Hausnr = str_replace(", ", ",", $Hausnr);
-    	$Hausnr = strtolower(str_replace(",", "','", $Hausnr));    	
-      $sql.=" AND h.gemeinde||'-'||h.strasse||'-'||TRIM(LOWER(h.hausnr)) IN ('".$Hausnr."')";
-    }
-    else{
-	    $sql.=" AND h.gemeinde=".(int)$Gemeinde;
-	    if ($Strasse!='') {
-	      $sql.=" AND h.strasse='".$Strasse."'";
-	    }
-    }
-    #echo $sql;
-    $ret=$this->execSQL($sql, 4, 0);
-    if ($ret[0]) {
-      $ret[1]='Fehler beim Abfragen des Umschlieï¿½enden Rechtecks um die Gebï¿½ude.<br>'.$ret[1];
-    }
-    else {
-      $rs=pg_fetch_array($ret[1]);
-      if ($rs['minx']==0) {
-        $ret[0]=1;
-        $ret[1]='Geb&auml;ude nicht in Postgres Datenbank '.$this->dbName.' vorhanden.';
-      }
-      else {
-        $ret[1]=$rs;
-      }
-    }
-    return $ret;
-  }
   
-  function getMERfromGebaeudeALKIS($Gemeinde,$Strasse,$Hausnr, $epsgcode) {
+  function getMERfromGebaeude($Gemeinde,$Strasse,$Hausnr, $epsgcode) {
     $this->debug->write("<br>postgres.php->database->getMERfromGebaeude, Abfrage des Maximalen umschlieï¿½enden Rechtecks um die Gebaeude",4);
     $sql ="SELECT MIN(st_xmin(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS minx,MAX(st_xmax(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS maxx";
     $sql.=",MIN(st_ymin(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS miny,MAX(st_ymax(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS maxy";
@@ -1950,7 +1932,7 @@ class pgdatabase {
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) {
-      $ret[1]='Fehler beim Abfragen des Umschlieï¿½enden Rechtecks um die Gebï¿½ude.<br>'.$ret[1];
+      $ret[1]='Fehler beim Abfragen des Umschliessenden Rechtecks um die Gebäude.<br>'.$ret[1];
     }
     else {
       $rs=pg_fetch_array($ret[1]);

@@ -51,7 +51,7 @@ class ALK {
   }
   
   function getMERfromGebaeude($Gemeinde,$Strasse,$Hausnr, $epsgcode) {
-    $ret=$this->database->getMERfromGebaeudeALKIS($Gemeinde,$Strasse,$Hausnr, $epsgcode);
+    $ret=$this->database->getMERfromGebaeude($Gemeinde,$Strasse,$Hausnr, $epsgcode);
     if ($ret[0]==0) {
       $rect=ms_newRectObj();
       $rect->minx=$ret[1]['minx']; $rect->maxx=$ret[1]['maxx'];
@@ -98,7 +98,7 @@ class ALK {
   }
     
   function getMERfromFlurstuecke($flstliste, $epsgcode) {
-    $ret=$this->database->getMERfromFlurstueckeALKIS($flstliste, $epsgcode);
+    $ret=$this->database->getMERfromFlurstuecke($flstliste, $epsgcode);
     if ($ret[0]==0) {
       $rect=ms_newRectObj();
       $rect->minx=$ret[1]['minx']; $rect->maxx=$ret[1]['maxx'];

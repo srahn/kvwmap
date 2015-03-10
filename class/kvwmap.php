@@ -10410,7 +10410,7 @@ class GUI {
         if(($FlstID=='' AND $FlstNr=='') OR ($FlstID=='-1')){
         	if($this->formvars['ALK_Suche'] == 1){
 	          $this->loadMap('DataBase');
-	          $this->zoomToALKFlur($GemID,$GemkgID,$FlurID,10);			# ALKIS TODO
+	          $this->zoomToALKFlur($GemID,$GemkgID,$FlurID,10);
 	          $currenttime=date('Y-m-d H:i:s',time());
 	          $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
 	          $this->drawMap();
