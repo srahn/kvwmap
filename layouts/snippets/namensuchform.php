@@ -111,7 +111,7 @@
 	}
 
 	function flurstsuche(bezirk, blatt){
-		document.GUI.Grundbuecher.value = bezirk+'-'+blatt;
+		document.GUI.selBlatt.value = bezirk+'-'+blatt;
 		document.GUI.go.value = 'Suche_Flurstuecke_zu_Grundbuechern';
 		document.GUI.submit();
 	}
@@ -263,7 +263,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
         <td align="left"><?php echo str_replace(' ','&nbsp;',$this->namen[$i]['name3']); if ($this->namen[$i]['name3']=='') { ?>&nbsp;<?php } ?></td>
         <td align="left"><?php echo str_replace(' ','&nbsp;',$this->namen[$i]['name4']); if ($this->namen[$i]['name4']=='') { ?>&nbsp;<?php } ?></td>
         <td align="center"><a href="javascript:flurstsuche('<?php echo $this->namen[$i]['bezirk'].'\',\''.$this->namen[$i]['blatt']; ?>');"><?php echo $strShowFst; ?></a></td>
-				<td align="center"><a href="index.php?go=Zeige_Flurstuecke_zu_Grundbuechern&Grundbuecher=<?php echo $this->namen[$i]['bezirk'].'-'.$this->namen[$i]['blatt'];?>"><?php echo $strToMap; ?></a></td>
+				<td align="center"><a href="index.php?go=Zeige_Flurstuecke_zu_Grundbuechern&selBlatt=<?php echo $this->namen[$i]['bezirk'].'-'.$this->namen[$i]['blatt'];?>"><?php echo $strToMap; ?></a></td>
 
 		<? if($this->Stelle->isFunctionAllowed('Jagdkataster')){ ?>
 		<td align="center"><a href="index.php?go=jagdkatastereditor&lfd_nr_name=<?php echo $this->namen[$i]['lfd_nr_name'];
