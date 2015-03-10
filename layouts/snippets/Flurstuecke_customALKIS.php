@@ -342,7 +342,7 @@ backto = function(go){
 		              <td></td>
 		              <td><? echo round($flst->Klassifizierung[$j]['flaeche']); ?> m&sup2&nbsp;</td>
 		              <td><? echo $flst->Klassifizierung[$j]['label']; ?></td>
-		              <td>EMZ: <? echo $emz; ?></td>
+		              <td>EMZ: <? echo $emz; ?></td><td>BWZ: <? echo $wert; ?></td>
 		            </tr>
 		            <? } // end for
 		            $nichtgeschaetzt=round($flst->ALB_Flaeche-$flaeche_a-$flaeche_gr-$flaeche_agr-$flaeche_gra);
