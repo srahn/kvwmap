@@ -77,7 +77,7 @@
 											if($attributes['subform_layer_id'][$j] != ''){
 												if($attributes['subform_layer_privileg'][$j] > 0){
 													if($attributes['embedded'][$j] == true){
-														$datapart .= '&nbsp;&nbsp;<a class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz&selected_layer_id='.$attributes['subform_layer_id'][$j].'&embedded=true&fromobject=subform'.$layer_id.'_'.$k.'_'.$j.'&targetobject='.$name.'_'.$k.'&targetlayer_id='.$layer_id.'&targetattribute='.$name.'\', new Array(document.getElementById(\'subform'.$layer_id.'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'));clearsubforms('.$layer_id.');">&nbsp;neu&nbsp;</a>';
+														$datapart .= '&nbsp;&nbsp;<a class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz&selected_layer_id='.$attributes['subform_layer_id'][$j].'&embedded=true&fromobject=subform'.$layer_id.'_'.$k.'_'.$j.'&targetobject='.$name.'_'.$k.'&targetlayer_id='.$layer_id.'&targetattribute='.$name.'\', new Array(document.getElementById(\'subform'.$layer_id.'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'));">&nbsp;neu&nbsp;</a>';
 														$datapart .= '<div style="display:inline" id="subform'.$layer_id.'_'.$k.'_'.$j.'"></div>';
 													}
 													else{
@@ -89,7 +89,7 @@
 									}break;
 									
 									case 'Autovervollständigungsfeld' : {
-										$datapart .= Autovervollstaendigungsfeld($layer_id, $name, $alias, $fieldname, $value, $attributes['enum_output'][$j][$k], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $fontsize);
+										$datapart .= Autovervollstaendigungsfeld($layer_id, $name, $j, $alias, $fieldname, $value, $attributes['enum_output'][$j][$k], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $fontsize);
 									}break;
 									
 									case 'Checkbox' : {
@@ -137,6 +137,7 @@
 									}break;
 
 									case 'SubFormFK' : {
+										$datapart .= '<table width="100%" cellpadding="0" cellspacing="0"><tr><td>';
 										$attribute_foreign_keys = $attributes['subform_fkeys'][$j];	# die FKeys des aktuellen Attributes
 										for($f = 0; $f < count($attribute_foreign_keys); $f++){											
 											$name_ = $attribute_foreign_keys[$f];
@@ -147,7 +148,8 @@
 												$fieldname_[$f] = $layer_id.';'.$attributes['real_name'][$name_].';'.$tablename_.';'.$oid.';Autovervollständigungsfeld;'.$attributes['nullable'][$index].';'.$attributes['type'][$index];
 												if($dataset[$name_] == '')$dataset[$name_] = $this->formvars[$fieldname_[$f]];
 												if($attributes['subform_layer_privileg'][$index] != '0')$this->editable = 'true';
-												$datapart .= Autovervollstaendigungsfeld($layer_id, $name_, $attributes['alias'][$name_], $fieldname_[$f], $dataset[$name_], $attributes['enum_output'][$index][$k], $attributes['privileg'][$name_], $k, $oid, $attributes['subform_layer_id'][$index], $attributes['subform_layer_privileg'][$index], $attributes['embedded'][$index], $lock[$k], $fontsize);
+												$datapart .= Autovervollstaendigungsfeld($layer_id, $name_, $index, $attributes['alias'][$name_], $fieldname_[$f], $dataset[$name_], $attributes['enum_output'][$index][$k], $attributes['privileg'][$name_], $k, $oid, $attributes['subform_layer_id'][$index], $attributes['subform_layer_privileg'][$index], $attributes['embedded'][$index], $lock[$k], $fontsize);
+												$datapart .= '</td><td align="right" valign="top">';
 											}
 											else{
 												$datapart .= '<input style="font-size: '.(0.9*$fontsize).'px';
@@ -184,6 +186,7 @@
 												$datapart .= 	' style="font-size: '.$fontsize.'px"><span>'.$strShowFK.'</span></a>';
 											}
 										}
+										$datapart .= '</td></tr></table>';
 									}break;
 
 									case 'SubFormEmbeddedPK' : {
