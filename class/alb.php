@@ -2176,18 +2176,21 @@ class ALB {
             $nennerausgabe= '';
           }
          if($buchungen[$b-1]['bvnr'] != $buchungen[$b]['bvnr']){
-            $pdf->addText($col1,$row-=12,$fontSize,str_pad(intval($buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT).' ('.$buchungen[$b]['buchungsart'].') ');
+            $pdf->addText($col1,$row-=12,$fontSize,str_pad(intval($buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT).' ('.utf8_decode($buchungen[$b]['bezeichnung']).') ');
             if($buchungen[$b]['anteil'] != ''){
-              if($buchungen[$b]['buchungsart'] == 'N' OR $buchungen[$b]['buchungsart'] == 'W'){
-                $pdf->addText($col10,$row,$fontSize, $buchungen[$b]['anteil'].' Miteigentumsanteil an');
+#              if($buchungen[$b]['buchungsart'] == 'N' OR $buchungen[$b]['buchungsart'] == 'W'){
+              if($buchungen[$b]['buchungsart'] == '1101' OR $buchungen[$b]['buchungsart'] == '1102' OR $buchungen[$b]['buchungsart'] == '1301' OR $buchungen[$b]['buchungsart'] == '1302'){
+                $pdf->addText($col10,$row-=12,$fontSize, $buchungen[$b]['anteil'].' Miteigentumsanteil an');
               }
-              elseif($buchungen[$b]['buchungsart'] == 'H'){
-                $pdf->addText($col10,$row,$fontSize, $buchungen[$b]['anteil'].' '.utf8_decode($buchungen[$b]['bezeichnung']).' an');
+#              elseif($buchungen[$b]['buchungsart'] == 'H'){
+              elseif($buchungen[$b]['buchungsart'] == '2205' OR $buchungen[$b]['buchungsart'] == '2305'){
+                $pdf->addText($col10,$row-=12,$fontSize, $buchungen[$b]['anteil'].' '.utf8_decode($buchungen[$b]['bezeichnung']).' an');
               }
               $row = $row-12;
             }
-            elseif($buchungen[$b]['buchungsart'] != 'N'){
-              $pdf->addText($col10,$row,$fontSize, utf8_decode($buchungen[$b]['bezeichnung']).' an');
+#            elseif($buchungen[$b]['buchungsart'] != 'N'){
+            elseif($buchungen[$b]['buchungsart'] != '2101'){
+              $pdf->addText($col10,$row-=12,$fontSize, utf8_decode($buchungen[$b]['bezeichnung']).' an');
               $row = $row-12;
             }
           }
@@ -2266,10 +2269,12 @@ class ALB {
             if($buchungen[$b]['auftplannr'] != ''){
               $pdf->addText($col6,$row-=12,$fontSize,'Aufteilungsplan-Nr. '.$buchungen[$b]['auftplannr']);
             }
-            if($buchungen[$b]['erbbaurechtshinw'] == 'E'){
+#            if($buchungen[$b]['erbbaurechtshinw'] == 'E'){
+            if($buchungen[$b]['buchungsart'] == '2101' OR $buchungen[$b]['buchungsart'] == '2203' OR $buchungen[$b]['buchungsart'] == '2303'){
               $pdf->addText($col6,$row-=12,$fontSize, 'belastet mit Erbbaurecht');
             }
-            if($buchungen[$b]['erbbaurechtshinw'] == 'G'){
+#            if($buchungen[$b]['erbbaurechtshinw'] == 'G'){
+            if($buchungen[$b]['buchungsart'] == '2103'){
               $pdf->addText($col6,$row-=12,$fontSize, 'belastet mit Nutzungsrecht');
             }
           }
@@ -2392,18 +2397,21 @@ class ALB {
             $nennerausgabe= '';
           }
           if($buchungen[$b-1]['bvnr'] != $buchungen[$b]['bvnr']){
-            $pdf->addText($col1,$row-=12,$fontSize,str_pad(intval($buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT).' ('.$buchungen[$b]['buchungsart'].') ');
+            $pdf->addText($col1,$row-=12,$fontSize,str_pad(intval($buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT).' ('.utf8_decode($buchungen[$b]['bezeichnung']).') ');
             if($buchungen[$b]['anteil'] != ''){
-              if($buchungen[$b]['buchungsart'] == 'N' OR $buchungen[$b]['buchungsart'] == 'W'){
-                $pdf->addText($col10,$row,$fontSize, $buchungen[$b]['anteil'].' Miteigentumsanteil an');
+#              if($buchungen[$b]['buchungsart'] == 'N' OR $buchungen[$b]['buchungsart'] == 'W'){
+              if($buchungen[$b]['buchungsart'] == '1101' OR $buchungen[$b]['buchungsart'] == '1102' OR $buchungen[$b]['buchungsart'] == '1301' OR $buchungen[$b]['buchungsart'] == '1302'){
+                $pdf->addText($col10,$row-=12,$fontSize, $buchungen[$b]['anteil'].' Miteigentumsanteil an');
               }
-              elseif($buchungen[$b]['buchungsart'] == 'H'){
-                $pdf->addText($col10,$row,$fontSize, $buchungen[$b]['anteil'].' '.utf8_decode($buchungen[$b]['bezeichnung']));
+#              elseif($buchungen[$b]['buchungsart'] == 'H'){
+              elseif($buchungen[$b]['buchungsart'] == '2205' OR $buchungen[$b]['buchungsart'] == '2305'){
+                $pdf->addText($col10,$row-=12,$fontSize, $buchungen[$b]['anteil'].' '.utf8_decode($buchungen[$b]['bezeichnung']));
               }
               $row = $row-12;
             }
-            elseif($buchungen[$b]['buchungsart'] != 'N'){
-              $pdf->addText($col10,$row,$fontSize, utf8_decode($buchungen[$b]['bezeichnung']).' an');
+ #           elseif($buchungen[$b]['buchungsart'] != 'N'){
+            elseif($buchungen[$b]['buchungsart'] != '2101'){
+              $pdf->addText($col10,$row-=12,$fontSize, utf8_decode($buchungen[$b]['bezeichnung']).' an');
               $row = $row-12;
             }
           }
@@ -2425,10 +2433,12 @@ class ALB {
             if($buchungen[$b]['auftplannr'] != ''){
               $pdf->addText($col6,$row-=12,$fontSize,'Aufteilungsplan-Nr. '.$buchungen[$b]['auftplannr']);
             }
-            if($buchungen[$b]['erbbaurechtshinw'] == 'E'){
+#            if($buchungen[$b]['erbbaurechtshinw'] == 'E'){
+            if($buchungen[$b]['buchungsart'] == '2101' OR $buchungen[$b]['buchungsart'] == '2203' OR $buchungen[$b]['buchungsart'] == '2303'){
               $pdf->addText($col6,$row-=12,$fontSize, 'belastet mit Erbbaurecht');
             }
-            if($buchungen[$b]['erbbaurechtshinw'] == 'G'){
+#            if($buchungen[$b]['erbbaurechtshinw'] == 'G'){
+            if($buchungen[$b]['buchungsart'] == '2103'){
               $pdf->addText($col6,$row-=12,$fontSize, 'belastet mit Nutzungsrecht');
             }
           }
