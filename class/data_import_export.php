@@ -534,7 +534,7 @@ class data_import_export {
 			$exportfile = IMAGEPATH.$folder.'/'.$this->formvars['layer_name'];
 			switch($this->formvars['export_format']){
 				case 'Shape' : { 
-					$command = POSTGRESBINPATH.'pgsql2shp -u '.$layerdb->user;
+					$command = POSTGRESBINPATH.'pgsql2shp -r -u '.$layerdb->user;
 					if($layerdb->passwd != '')$command.= ' -P "'.$layerdb->passwd.'"';
 					if($layerdb->port != '')$command.=' -p '.$layerdb->port;
 					$command.= ' -f '.$exportfile.' '.$layerdb->dbName.' '.$temp_table; 
