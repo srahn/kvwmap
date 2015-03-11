@@ -10399,7 +10399,7 @@ class GUI {
       # Die Gemarkung ist ausgewählt und gültig aber Flur leer, zoom auf Gemarkung
       if($FlurID==0 OR $FlurID=='-1'){
         $this->loadMap('DataBase');
-        $this->zoomToALKGemarkung($GemkgID,10);				# ALKIS TODO
+        $this->zoomToALKGemarkung($GemkgID,10);	
         $currenttime=date('Y-m-d H:i:s',time());
         $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
         $this->drawMap();
@@ -11940,10 +11940,9 @@ class GUI {
     # zu 3)
     $GemkgObj=new Gemarkung($Gemkgschl,$this->pgdatabase);
     $layer=ms_newLayerObj($this->map);
-    $datastring ="the_geom from (select o.objnr as oid,o.the_geom from alkobj_e_fla AS o,alknflur as fl";
-    $datastring.=",alb_v_gemarkungen AS g WHERE o.objnr=fl.objnr";
-    $datastring.=" AND fl.gemkgschl='".$Gemkgschl."'";
-    $datastring.=") as foo using unique oid using srid=".EPSGCODE;
+    $datastring ="the_geom from (select oid, the_geom from alkis.pp_gemarkung ";
+    $datastring.="WHERE land*10000 + gemarkung = ".$Gemkgschl;
+    $datastring.=") as foo using unique oid using srid=".EPSGCODE_ALKIS;
     $legendentext ="Gemarkung: ".$GemkgObj->getGemkgName($Gemkgschl);
     $layer->set('data',$datastring);
     $layer->set('status',MS_ON);
@@ -12009,11 +12008,10 @@ class GUI {
     # zu 3)
     $GemkgObj=new Gemarkung($GemkgID,$this->pgdatabase);
     $layer=ms_newLayerObj($this->map);
-    $datastring ="the_geom from (select o.objnr as oid,o.the_geom from alkobj_e_fla AS o,alknflur as fl";
-    $datastring.=",alb_v_gemarkungen AS g WHERE o.objnr=fl.objnr";
-    $datastring.=" AND fl.gemkgschl='".$GemkgID."'";
-    $datastring.=" AND fl.flur='".$FlurID."'";
-    $datastring.=") as foo using unique oid using srid=".EPSGCODE;
+    $datastring ="the_geom from (select oid, the_geom from alkis.pp_flur as f ";
+    $datastring.="WHERE f.land*10000 + f.gemarkung = ".$GemkgID;
+    $datastring.=" AND f.flurnummer = ".(int)$FlurID;
+    $datastring.=") as foo using unique oid using srid=".EPSGCODE_ALKIS;
     $legendentext ="Gemarkung: ".$GemkgObj->getGemkgName($GemkgID);
     $legendentext .="<br>Flur: ".$FlurID;
     $layer->set('data',$datastring);
@@ -12044,108 +12042,12 @@ class GUI {
     $layer->set('connection',$connectionstring);
     $layer->setMetaData('queryStatus','2');
     $layer->setMetaData('wms_queryable','0');
-    $layer->setMetaData('layer_hidden','0'); #2005-11-30_pk
-    $klasse=ms_newClassObj($layer);
-    $klasse->set('status', MS_ON);
-    $klasse->setexpression($expression);
-    $style=ms_newStyleObj($klasse);
-    $style->color->setRGB(255,255,128);
-    $style->outlinecolor->setRGB(0,0,0);
-  }
-
-  function zoomToFlur($GemID,$GemkgID,$FlurID,$border) {
-    $Gemarkung=new Gemarkung($GemkgID,$this->database);
-    $Flur=new Flur($GemID,$GemkgID,$FlurID,$this->database);
-    # 1. Anlegen eines neuen Layers für die Suche nach Fluren
-    $layer=ms_newLayerObj($this->map);
-    $layer->set('data',SHAPEPATH.$Flur->getDataSourceName());
-    $layer->set('status',MS_ON);
-    $layer->set('template', ' ');
-    $layer->set('name',$Gemarkung->getGemkgName().'<br>Flur: '.$FlurID);
-    $layer->set('type',2);
-    $layer->set('group','Suchergebnis');
-    $layer->setMetaData('off_requires',0);
-    $layer->setMetaData('layer_has_classes',0);
-    $this->map->setMetaData('group_status_Suchergebnis','0');
-    $this->map->setMetaData('group_Suchergebnis_has_active_layers','0');
-    $layer->setMetaData('queryStatus','2');
-    $layer->setMetaData('wms_queryable','0');
     $layer->setMetaData('layer_hidden','0');
     $klasse=ms_newClassObj($layer);
     $klasse->set('status', MS_ON);
-    $klasse->setexpression('([FLUR_ID]='.$GemkgID.$FlurID.')');
     $style=ms_newStyleObj($klasse);
-    $style->color->setRGB(200,0,0);
-    # 2. zoom auf eine Flur
-    $this->setFullExtent();
-    $rect=$Flur->getMER($layer);
-    if ($rect==0) {
-      $this->Fehlermeldung='Diese Flur konnte nicht gefunden werden.';
-      $rect=$this->Stelle->MaxGeorefExt;
-    }
-    else {
-      $randx=($rect->maxx-$rect->minx)*$border/100;
-      $randy=($rect->maxy-$rect->miny)*$border/100;
-    }
-    $this->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
-  	if(MAPSERVERVERSION >= 600 ) {
-			$this->map_scaledenom = $this->map->scaledenom;
-		}
-		else {
-			$this->map_scaledenom = $this->map->scale;
-		}
-  }
-
-  function zoomToFlurst($FlurstListe,$border) {
-    include_(CLASSPATH.'alk.php');
-    if (count($FlurstListe)>1) {
-      $expression='("[FKZ]" eq "'.$FlurstListe['FlurstKennz'][0].'"';
-      $LegendeText='Flurstücke:<br>'.$FlurstListe['FlurstNr'][0];
-      for ($i=1;$i<count($FlurstListe['FlurstKennz']);$i++) {
-        $expression.=' OR "[FKZ]" eq "'.$FlurstListe['FlurstKennz'][$i].'"';
-        $LegendeText.=', '.$FlurstListe['FlurstNr'][$i];
-      }
-      $expression.=')';
-      $ALK=new ALK();
-      # 1. Anlegen eines neuen Layers für die Suche nach Flurstücken
-      $layer=ms_newLayerObj($this->map);
-      $layer->set('data',SHAPEPATH.$ALK->getDataSourceName());
-      $layer->set('status',MS_ON);
-      $layer->set('template', ' ');
-      $layer->set('name',$LegendeText);
-      $layer->set('type',2);
-      $layer->set('group','Suchergebnis');
-      $layer->setMetaData('off_requires',0);
-      $layer->setMetaData('layer_has_classes',0);
-      $this->map->setMetaData('group_status_Suchergebnis','0');
-      $this->map->setMetaData('group_Suchergebnis_has_active_layers','0');
-      $layer->setMetaData('queryStatus','2');
-      $layer->setMetaData('wms_queryable','1');
-      $layer->setMetaData('layer_hidden','0');
-      $klasse=ms_newClassObj($layer);
-      $klasse->set('status', MS_ON);
-      $klasse->setexpression($expression);
-      $style=ms_newStyleObj($klasse);
-      $style->color->setRGB(255,255,128);
-      # 2. zoom auf ein oder mehrere Flurstücke
-      $this->setFullExtent();
-      $rect=$ALK->getRectByFlurstListe($FlurstListe['FlurstKennz'],$layer);
-      if ($rect==0) {
-        $this->Fehlermeldung='Es konnten keine Flurstücke gefunden werden.';
-        $rect=$this->Stelle->MaxGeorefExt;
-      }
-      else {
-        $randx=($rect->maxx-$rect->minx)*$border/100;
-        $randy=($rect->maxy-$rect->miny)*$border/100;
-      }
-      $this->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
-	    if(MAPSERVERVERSION >= 600 ) {
-				$this->map_scaledenom = $this->map->scaledenom;
-			}
-			else {
-				$this->map_scaledenom = $this->map->scale;
-			}
-    }
+    $style->color->setRGB(255,255,128);
+    $style->outlinecolor->setRGB(0,0,0);
   }
 
   function zoomToALKFlurst($FlurstListe,$border){
