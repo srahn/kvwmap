@@ -57,7 +57,8 @@ class lineeditor {
     $rect->miny=$rs['miny']; 
     $rect->maxy=$rs['maxy'];
 		if(defined('ZOOMBUFFER') AND ZOOMBUFFER > 0){
-			$randx = $randy = ZOOMBUFFER;
+			if($this->clientepsg == 4326)$randx = $randy = ZOOMBUFFER/10000;
+			else $randx = $randy = ZOOMBUFFER;
 		}
 		else{
 			$randx=($rect->maxx-$rect->minx)*$border/100;

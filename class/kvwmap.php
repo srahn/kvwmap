@@ -3906,6 +3906,7 @@ class GUI {
       $rect = ms_newRectObj();
 			if(defined('ZOOMBUFFER') AND ZOOMBUFFER > 0)$rand = ZOOMBUFFER;
 			else $rand = 100;
+			if($this->user->rolle->epsg_code == 4326)$rand = $rand/10000;
       $rect->minx = $this->point['pointx']-$rand;
       $rect->maxx = $this->point['pointx']+$rand;
       $rect->miny = $this->point['pointy']-$rand;
@@ -4273,14 +4274,23 @@ class GUI {
       # Druckrahmen setzen
       $this->Document->activeframe = $this->Document->load_frames($this->Stelle->id, $this->Document->ausschnitt[0]['frame_id']);
       # Extent setzen
-      $width = $this->Document->activeframe[0]['mapwidth'] * $this->Document->ausschnitt[0]['print_scale'] * 0.00035277;
-      $height = $this->Document->activeframe[0]['mapheight'] * $this->Document->ausschnitt[0]['print_scale'] * 0.00035277;
+			if($this->user->rolle->epsg_code == 4326){
+				$center_y = ($this->user->rolle->oGeorefExt->maxy + $this->user->rolle->oGeorefExt->miny) / 2;
+				$zoll_pro_einheit = InchesPerUnit(MS_DD, $center_y);
+				$meter_pro_einheit = $zoll_pro_einheit / 39.3701;
+			}
+			else{
+				$meter_pro_einheit = 1;
+			}
+      $width = $this->Document->activeframe[0]['mapwidth'] * $this->Document->ausschnitt[0]['print_scale']/$meter_pro_einheit * 0.00035277;
+      $height = $this->Document->activeframe[0]['mapheight'] * $this->Document->ausschnitt[0]['print_scale']/$meter_pro_einheit * 0.00035277;
       $rect= ms_newRectObj();
       $rect->minx = $this->Document->ausschnitt[0]['center_x'] - $width/2;
       $rect->miny = $this->Document->ausschnitt[0]['center_y'] - $height/2;
       $rect->maxx = $this->Document->ausschnitt[0]['center_x'] + $width/2;
       $rect->maxy = $this->Document->ausschnitt[0]['center_y'] + $height/2;
-      $rand = 10;
+      if($this->user->rolle->epsg_code == 4326)$rand = 10/10000;
+			else $rand = 10;
       $this->map->setextent($rect->minx-$rand,$rect->miny-$rand,$rect->maxx+$rand,$rect->maxy+$rand);
 	    if(MAPSERVERVERSION >= 600 ) {
 				$this->map_scaledenom = $this->map->scaledenom;
@@ -10989,7 +10999,6 @@ class GUI {
             	$layerset[$i]['Filter'] = str_replace('$userid', $this->user->id, $layerset[$i]['Filter']);
               $sql_where .= " AND ".$layerset[$i]['Filter'];
             }
-            
             if($this->formvars['CMD'] == 'touchquery'){
             	if(substr_count(strtolower($pfad), ' from ') > 1){			# mehrere froms -> das FROM der Hauptabfrage muss groß geschrieben sein
             		$fromposition = strpos($pfad, ' FROM ');
@@ -12429,11 +12438,13 @@ class GUI {
     $ret=$layerdb->execSQL($sql,4,0);
     if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
     $rs = pg_fetch_array($ret[1]);
-    if($rs['minx'] != ''){			
-			$minx=$rs['minx']-10; 
-			$maxx=$rs['maxx']+10;
-			$miny=$rs['miny']-10; 
-			$maxy=$rs['maxy']+10;
+    if($rs['minx'] != ''){
+			if($this->user->rolle->epsg_code == 4326)$rand = 10/10000;
+			else $rand = 10;
+			$minx=$rs['minx']-$rand; 
+			$maxx=$rs['maxx']+$rand;
+			$miny=$rs['miny']-$rand; 
+			$maxy=$rs['maxy']+$rand;
 	    #echo 'box:'.$minx.' '.$miny.','.$maxx.' '.$maxy;
 	    $this->map->setextent($minx,$miny,$maxx,$maxy);			
 	    # damit nicht außerhalb des Stellen-Extents oder des maximalen Layer-Maßstabs gezoomt wird
@@ -13410,13 +13421,13 @@ class db_mapObj{
     $rect->miny=$rs['miny']; 
     $rect->maxy=$rs['maxy'];
 		if(defined('ZOOMBUFFER') AND ZOOMBUFFER > 0){
-			$randx = ZOOMBUFFER;
-			$randy = ZOOMBUFFER;
+			if($client_epsg == 4326)$randx = $randy = ZOOMBUFFER/10000;
+			else $randx = $randy = ZOOMBUFFER;
 		}
 		else{
 			if($rect->maxx-$rect->minx < 1){		# bei einem Punktdatensatz
-				$randx = 50;
-				$randy = 50;
+				$randx = $randy = 50;
+				if($client_epsg == 4326)$randx = $randy = $randy/10000;
 			}
 			else{
 				$randx=($rect->maxx-$rect->minx)*$border/100;

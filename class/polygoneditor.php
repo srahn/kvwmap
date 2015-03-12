@@ -54,11 +54,12 @@ class polygoneditor {
     $rect->miny=$rs['miny']; 
     $rect->maxy=$rs['maxy'];
 		if(defined('ZOOMBUFFER') AND ZOOMBUFFER > 0){
-			$randx = $randy = ZOOMBUFFER;
+			if($this->clientepsg == 4326)$randx = $randy = ZOOMBUFFER/10000;
+			else $randx = $randy = ZOOMBUFFER;
 		}
 		else{
-			$randx=($rect->maxx-$rect->minx)*$border/100 +10;
-			$randy=($rect->maxy-$rect->miny)*$border/100 +10;
+			$randx=($rect->maxx-$rect->minx)*$border/100;
+			$randy=($rect->maxy-$rect->miny)*$border/100;
 		}		
     $rect->minx -= $randx;
     $rect->miny -= $randy;
