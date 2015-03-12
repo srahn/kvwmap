@@ -12051,13 +12051,6 @@ class GUI {
   }
 
   function zoomToALKFlurst($FlurstListe,$border){
-    #2005-11-30_pk
-    # 1. Funktion ermittelt das umschließende Rechteck der in $FlurstListe übergebenen
-    # Flurstückskennz aus der postgis Datenbank
-    # mit Rand entsprechend dem Faktor $border
-    # 2. zoom auf diese Rechteck
-    # 3. und stellt die Flurstücke in einem gesonderten Layer in Gelb dar
-    # zu 1)
 		include_(CLASSPATH.'alk.php');
     $alk=new ALK();
     $alk->database=$this->pgdatabase;
@@ -12071,11 +12064,9 @@ class GUI {
       $randx=($rect->maxx-$rect->minx)*$border/100;
       $randy=($rect->maxy-$rect->miny)*$border/100;
     }
-
-    # zu 3)
-		$datastring ="the_geom from (select f.gml_id as oid, wkb_geometry as the_geom from alkis.ax_flurstueck as f";
-		$datastring.=" WHERE f.flurstueckskennzeichen IN ('".$FlurstListe[0]."'";
 		$epsg = EPSGCODE_ALKIS;
+		$datastring ="the_geom from (select f.gml_id as oid, wkb_geometry as the_geom from alkis.ax_flurstueck as f";
+		$datastring.=" WHERE f.flurstueckskennzeichen IN ('".$FlurstListe[0]."' ";
     $legendentext="Flurstück";
     if(count($FlurstListe) > 1){
       $legendentext .= "e";
@@ -12085,7 +12076,12 @@ class GUI {
       $datastring.=",'".$FlurstListe[$i]."'";
       $legendentext.=",<br>".$FlurstListe[$i];
     }
-   	$datastring.=")) as foo using unique oid using srid=".$epsg;
+   	$datastring.=") ";
+		# Filter
+		$layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
+		$filter = $this->mapDB->getFilter($layerset[0]['Layer_ID'], $this->Stelle->id);
+		if($filter != '')$datastring.= ' AND '.$filter;
+		$datastring.=") as foo using unique oid using srid=".$epsg;
 
     $dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
 
