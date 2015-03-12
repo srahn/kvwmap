@@ -1,5 +1,4 @@
-<?php
-	ob_end_clean();
+<? ob_end_clean();
 	if (!$userDb->open()) {
 	  echo 'Die Verbindung zur Benutzerdatenbank konnte mit folgenden Daten nicht hergestellt werden:';
 	  echo '<br>Host: '.$userDb->host;
@@ -7,12 +6,67 @@
 	  echo '<br>Datenbankname: '.$userDb->dbName;
 	  exit;
 	}
+ ?>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" lang="de">
+	 <head>
+		<title><?php echo TITLE; ?></title>
+		<META http-equiv=Content-Type content="text/html; charset=UTF-8">
+		<link rel="stylesheet" href="layouts/main.css">
+		<script type="text/javascript">
+
+		function logon(){
+			if(typeof(window.innerWidth) == 'number'){
+				width = window.innerWidth;
+				height = window.innerHeight;
+			}else if(document.documentElement && (document.documentElement.clientWidth || document.documentElement.clientHeight)){
+				width = document.documentElement.clientWidth;
+				height = document.documentElement.clientHeight;
+			}else if(document.body && (document.body.clientWidth || document.body.clientHeight)){
+				width = document.body.clientWidth;
+				height = document.body.clientHeight;
+			}
+			document.login.width.value = width;
+			document.login.height.value = height;
+			document.login.submit();
+		}
+		
+		document.onkeydown = function(ev){
+			var key;
+			ev = ev || event;
+			key = ev.keyCode;
+			if (key == 13) {
+				document.login.anmelden.click();
+			}
+		}
+			
+		</script>
+	 </head>
+
+<?php
 	session_start();
 
 	if($_REQUEST['gast'] != '' AND in_array($_REQUEST['gast'], $gast_stellen)){
 		$gast = $userDb->create_new_gast($_REQUEST['gast']);
 		$username = $gast['username'];    
-		$passwort = $gast['passwort'];
+		$passwort = $gast['passwort'];	?>
+		
+		<body onload="logon();">
+		  <form name="login" action="index.php" method="post">
+				<input type="hidden" value="<? echo $username; ?>" name="username"/>
+				<input type="hidden" value="<? echo $passwort; ?>" name="passwort" />
+				<input type="hidden" name="width">
+				<input type="hidden" name="height">
+				<br>
+				<table align="center" cellspacing="4" cellpadding="22" bgcolor="<? echo BG_DEFAULT; ?>" border="0" style="background-color: <? echo BG_DEFAULT; ?>; box-shadow: 12px 10px 14px #777; border: 1px solid #bbbbbb; background: linear-gradient(<? echo BG_GLEATTRIBUTE; ?> 0%, <? echo BG_DEFAULT ?> 100%);">
+					<tr>
+						<td align="center"><h1>Bitte warten...</h1></td>
+					</tr>
+				</table>
+			</form>
+		</body>
+		</html>
+		<?
+		exit;
 	}
 	else{
 		$username = $_REQUEST['username'];
@@ -39,40 +93,7 @@
 		}
 	}
 	else{
-		?><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" lang="de">
-		 <head>
-		  <title><?php echo TITLE; ?></title>
-      <META http-equiv=Content-Type content="text/html; charset=UTF-8">
-			<link rel="stylesheet" href="layouts/main.css">
-			<script type="text/javascript">
-
-			function logon(){
-				if(typeof(window.innerWidth) == 'number'){
-					width = window.innerWidth;
-					height = window.innerHeight;
-				}else if(document.documentElement && (document.documentElement.clientWidth || document.documentElement.clientHeight)){
-					width = document.documentElement.clientWidth;
-					height = document.documentElement.clientHeight;
-				}else if(document.body && (document.body.clientWidth || document.body.clientHeight)){
-					width = document.body.clientWidth;
-					height = document.body.clientHeight;
-				}
-				document.login.width.value = width;
-				document.login.height.value = height;
-				document.login.submit();
-			}
-			
-			document.onkeydown = function(ev){
-				var key;
-				ev = ev || event;
-				key = ev.keyCode;
-				if (key == 13) {
-					document.login.anmelden.click();
-				}
-			}
-				
-			</script>
-		 </head>
+		?>
 		 <body style="font-family: Arial, Verdana, Helvetica, sans-serif" onload="document.login.username.focus();">
 		  <form name="login" action="index.php" method="post">
 				<input type="hidden" name="go" value="login">
