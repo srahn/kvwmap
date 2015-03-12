@@ -708,11 +708,11 @@ function world2pixelsvg(pathWelt){
 		if(explosion[i] == "M"){
 			path.push("M");
 			laststartx = Math.round((explosion[i+1] - parseFloat(top.document.GUI.minx.value))/parseFloat(top.document.GUI.pixelsize.value));
-			laststarty = Math.round((explosion[i+2] - top.document.GUI.miny.value)/parseFloat(top.document.GUI.pixelsize.value));
+			laststarty = Math.round((-1*explosion[i+2] - top.document.GUI.miny.value)/parseFloat(top.document.GUI.pixelsize.value));
 		}
 		if(explosion[i] != "M" && explosion[i] != "Z" && explosion[i] != ""){
 			path.push(Math.round((explosion[i] - parseFloat(top.document.GUI.minx.value))/parseFloat(top.document.GUI.pixelsize.value)));
-			path.push(Math.round((explosion[i+1] - top.document.GUI.miny.value)/parseFloat(top.document.GUI.pixelsize.value)));
+			path.push(Math.round((-1*explosion[i+1] - top.document.GUI.miny.value)/parseFloat(top.document.GUI.pixelsize.value)));
 			i++;
 		}
 		if(explosion[i] == "Z"){			// neuere Postgis-Versionen liefern bei asSVG ein Z zum Schliessen des Rings anstatt der Startkoordinate

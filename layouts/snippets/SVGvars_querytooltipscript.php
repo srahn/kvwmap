@@ -66,7 +66,6 @@ $SVGvars_querytooltipscript .= '
 			// Highlighting-Geometrie
 			if(res[1] != "" && res[1] != undefined){
 				geom = res[1];
-				geom = geom.replace(/-/g, "");
 				geom = world2pixelsvg(geom);
 				var obj = document.getElementById("highlight")
 				obj.setAttribute("d", geom);
