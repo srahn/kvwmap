@@ -1283,12 +1283,14 @@ function calculate_reduction(pathx, y1){
 		y_100 = y.substring(1,2);
 		y_1000 = y.substring(0,1);
 		nhn = 33+x_100+y_1000+y_100+x_10+x_1+y_10+y_1;
-		hell = 38 + top.nbh[nhn];
-		for(i = 0; i < pathx.length; i++){
-			em = em + parseInt(pathx[i]);
+		if(top.nbh[nhn] > 0){
+			hell = 38 + top.nbh[nhn];
+			for(i = 0; i < pathx.length; i++){
+				em = em + parseInt(pathx[i]);
+			}
+			em = em / pathx.length;
+			k = (1 - (hell / r)) * (1 + (((em - 500000)*(em - 500000))/(2 * r * r))) * 0.9996;
 		}
-		em = em / pathx.length;
-		k = (1 - (hell / r)) * (1 + (((em - 500000)*(em - 500000))/(2 * r * r))) * 0.9996;
 	}
 	return k;
 }
