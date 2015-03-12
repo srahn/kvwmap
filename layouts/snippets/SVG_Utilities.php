@@ -52,7 +52,7 @@
 	$SVG_begin ='<?xml version="1.0"?>
 	<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
 	  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-	<svg width="'.$res_x.'" height="'.$res_y.'" zoomAndPan="enable" onload="startup()" onmousemove="top.coords_anzeige(evt)"
+	<svg width="'.$res_x.'" height="'.$res_y.'" zoomAndPan="disable" onload="startup()" onmousemove="top.coords_anzeige(evt)"
 	  xmlns="http://www.w3.org/2000/svg" version="1.1"
 	  xmlns:xlink="http://www.w3.org/1999/xlink">
 	';
@@ -3122,8 +3122,8 @@ $measurefunctions = '
 	      <g id="new" onmousedown="restart();highlightbyid(\'pgon0\');" transform="translate(0 0 )">
 	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
 	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-	        	<set attributeName="filter" begin="new0.mousedown" dur="0s" fill="freeze" to="none"/>
-						<set attributeName="filter" begin="new0.mouseup;new0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+	        	<set attributeName="filter" begin="new0.mousedown" fill="freeze" to="none"/>
+						<set attributeName="filter" begin="new0.mouseup;new0.mouseout" fill="freeze" to="url(#Schatten)"/>
 					</rect>
 					<path
 						d="M153.245 92.3923 C153.245 92.3923 198.593 158.983 242.478 202.712 C268.178 171.839
@@ -3148,8 +3148,8 @@ $measurefunctions = '
 	      <g id="undo" onmousedown="deletelast(evt);" transform="translate(26 0)">
 	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
 	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-	        	<set attributeName="filter" begin="undo0.mousedown" dur="0s" fill="freeze" to="none"/>
-						<set attributeName="filter" begin="undo0.mouseup;undo0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+	        	<set attributeName="filter" begin="undo0.mousedown" fill="freeze" to="none"/>
+						<set attributeName="filter" begin="undo0.mouseup;undo0.mouseout" fill="freeze" to="url(#Schatten)"/>
 					</rect>
 					<g transform="translate(0 -4.5)">
 						<polygon points="178.579,57.7353 164.258,51.2544 178.96,44.515 174.48,51.1628"
@@ -3164,8 +3164,8 @@ $measurefunctions = '
 				<g id="pgon" onmousedown="draw_pgon_on();add_polygon();highlightbyid(\'pgon0\');" transform="translate(52 0 )">
 		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
 		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-		      	<set attributeName="filter" begin="pgon0.mousedown" dur="0s" fill="freeze" to="none"/>
-						<set attributeName="filter" begin="pgon0.mouseup;pgon0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+		      	<set attributeName="filter" begin="pgon0.mousedown" fill="freeze" to="none"/>
+						<set attributeName="filter" begin="pgon0.mouseup;pgon0.mouseout" fill="freeze" to="url(#Schatten)"/>
 					</rect>
 					<polygon
 						points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284
@@ -3178,8 +3178,8 @@ $measurefunctions = '
 				<g id="pgon_subtr" onmousedown="draw_pgon_on();subtr_polygon();highlightbyid(\'pgon_subtr0\');" transform="translate(78 0 )">
 		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
 		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(111,111,111);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-		      	<set attributeName="filter" begin="pgon_subtr0.mousedown" dur="0s" fill="freeze" to="none"/>
-						<set attributeName="filter" begin="pgon_subtr0.mouseup;pgon_subtr0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+		      	<set attributeName="filter" begin="pgon_subtr0.mousedown" fill="freeze" to="none"/>
+						<set attributeName="filter" begin="pgon_subtr0.mouseup;pgon_subtr0.mouseout" fill="freeze" to="url(#Schatten)"/>
 					</rect>
 					<polygon
 						points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284
@@ -3199,8 +3199,8 @@ $measurefunctions = '
 			<g id="gps" onmousedown="set_gps_position();" transform="translate('.$last_x.' 0 )">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-        	<set attributeName="filter" begin="gps1.mousedown" dur="0s" fill="freeze" to="none"/>
-					<set attributeName="filter" begin="gps1.mouseup;gps1.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+        	<set attributeName="filter" begin="gps1.mousedown" fill="freeze" to="none"/>
+					<set attributeName="filter" begin="gps1.mouseup;gps1.mouseout" fill="freeze" to="url(#Schatten)"/>
 				</rect>
 				<g transform="scale(0.5) translate(2 8)">
 					<text x="23" y="15" style="text-anchor:middle;fill:black;font-size:10;font-family:Arial;font-weight:bold">
@@ -3213,8 +3213,8 @@ $measurefunctions = '
 		$gpsbuttons.= '
 			<g id="gps_f" transform="translate('.$last_x.' 0 )">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-          <set attributeName="filter" begin="gps0.mousedown" dur="0s" fill="freeze" to="none"/>
-          <set attributeName="filter" begin="gps0.mouseup;gps0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+          <set attributeName="filter" begin="gps0.mousedown" fill="freeze" to="none"/>
+          <set attributeName="filter" begin="gps0.mouseup;gps0.mouseout" fill="freeze" to="url(#Schatten)"/>
         </rect>
         <g transform="scale(0.6) translate(8 8)">
           <use xlink:href="#1move" transform="translate(2.1 -5.9) scale(0.9)"/> 
@@ -3234,8 +3234,8 @@ $measurefunctions = '
 				<g id="text" onmousedown="draw_point();highlightbyid(\'text0\');" transform="translate('.$last_x.' 0 )">
 	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
 	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-	        	<set attributeName="filter" begin="text0.mousedown" dur="0s" fill="freeze" to="none"/>
-						<set attributeName="filter" begin="text0.mouseup;text0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+	        	<set attributeName="filter" begin="text0.mousedown" fill="freeze" to="none"/>
+						<set attributeName="filter" begin="text0.mouseup;text0.mouseout" fill="freeze" to="url(#Schatten)"/>
 					</rect>
 					<g transform="scale(0.5) translate(2 8)">
 						<text x="23" y="15" style="text-anchor:middle;fill:black;font-size:10;font-family:Arial;font-weight:bold">
@@ -3255,8 +3255,8 @@ $measurefunctions = '
 				<g id="box" onmousedown="draw_box_on();highlightbyid(\'box0\');" transform="translate('.$last_x.' 0)">
 	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
 	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-	          <set attributeName="filter" begin="box0.mousedown" dur="0s" fill="freeze" to="none"/>
-	          <set attributeName="filter" begin="box0.mouseup;box0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+	          <set attributeName="filter" begin="box0.mousedown" fill="freeze" to="none"/>
+	          <set attributeName="filter" begin="box0.mouseup;box0.mouseout" fill="freeze" to="url(#Schatten)"/>
 	        </rect>
 	        <g transform="scale(0.7) translate(-5 0)">
 	          <g transform="matrix(-1 0 0 1 118 0) scale(0.5)">
@@ -3275,8 +3275,8 @@ $measurefunctions = '
 				 <g id="undo" onmousedown="deletelastline(evt);" transform="translate(0 0)">
 	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
 	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-	        	<set attributeName="filter" begin="undo0.mousedown" dur="0s" fill="freeze" to="none"/>
-						<set attributeName="filter" begin="undo0.mouseup;undo0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+	        	<set attributeName="filter" begin="undo0.mousedown" fill="freeze" to="none"/>
+						<set attributeName="filter" begin="undo0.mouseup;undo0.mouseout" fill="freeze" to="url(#Schatten)"/>
 					</rect>
 					<g transform="translate(0 -4.5)">
 						<polygon points="178.579,57.7353 164.258,51.2544 178.96,44.515 174.48,51.1628"
@@ -3291,8 +3291,8 @@ $measurefunctions = '
 	      <g id="new" onmousedown="restartline();highlightbyid(\'line0\');" transform="translate(26 0 )">
 	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
 	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-	        	<set attributeName="filter" begin="new0.mousedown" dur="0s" fill="freeze" to="none"/>
-						<set attributeName="filter" begin="new0.mouseup;new0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+	        	<set attributeName="filter" begin="new0.mousedown" fill="freeze" to="none"/>
+						<set attributeName="filter" begin="new0.mouseup;new0.mouseout" fill="freeze" to="url(#Schatten)"/>
 					</rect>
 					<path
 						d="M153.245 92.3923 C153.245 92.3923 198.593 158.983 242.478 202.712 C268.178 171.839
@@ -3317,8 +3317,8 @@ $measurefunctions = '
 				<g id="line" onmousedown="add_line();highlightbyid(\'line0\');" transform="translate(52 0 )">
 		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
 		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-		      	<set attributeName="filter" begin="line0.mousedown" dur="0s" fill="freeze" to="none"/>
-						<set attributeName="filter" begin="line0.mouseup;line0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+		      	<set attributeName="filter" begin="line0.mousedown" fill="freeze" to="none"/>
+						<set attributeName="filter" begin="line0.mouseup;line0.mouseout" fill="freeze" to="url(#Schatten)"/>
 					</rect>
 					<line	x1="81.5" y1="391" x2="127.5" y2="250" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
 					<line	x1="127.5" y1="250" x2="310.5" y2="243" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
@@ -3329,8 +3329,8 @@ $measurefunctions = '
 				<g id="line" onmousedown="delete_lines();highlightbyid(\'del0\');" transform="translate(78 0 )">
 		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
 		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-		      	<set attributeName="filter" begin="del0.mousedown" dur="0s" fill="freeze" to="none"/>
-						<set attributeName="filter" begin="del0.mouseup;del0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+		      	<set attributeName="filter" begin="del0.mousedown" fill="freeze" to="none"/>
+						<set attributeName="filter" begin="del0.mouseup;del0.mouseout" fill="freeze" to="url(#Schatten)"/>
 					</rect>
 					<line	x1="81.5" y1="391" x2="127.5" y2="250" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
 					<line	x1="127.5" y1="250" x2="310.5" y2="243" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
@@ -3348,8 +3348,8 @@ $measurefunctions = '
 				<g id="query_add" transform="translate(104 0)">
 	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
 	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-	          <set attributeName="filter" begin="ppquery0.mousedown" dur="0s" fill="freeze" to="none"/>
-	          <set attributeName="filter" begin="ppquery0.mouseup;ppquery0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+	          <set attributeName="filter" begin="ppquery0.mousedown" fill="freeze" to="none"/>
+	          <set attributeName="filter" begin="ppquery0.mouseup;ppquery0.mouseout" fill="freeze" to="url(#Schatten)"/>
 	        </rect>
 	        <polygon
 						points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284
@@ -3364,8 +3364,8 @@ $measurefunctions = '
 	      <g id="query_subtract" transform="translate(130 0)">
 	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
 	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(111,111,111);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-	          <set attributeName="filter" begin="ppquery1.mousedown" dur="0s" fill="freeze" to="none"/>
-	          <set attributeName="filter" begin="ppquery1.mouseup;ppquery1.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+	          <set attributeName="filter" begin="ppquery1.mousedown" fill="freeze" to="none"/>
+	          <set attributeName="filter" begin="ppquery1.mouseup;ppquery1.mouseout" fill="freeze" to="url(#Schatten)"/>
 	        </rect>
 	        <polygon
 						points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284
@@ -3380,8 +3380,8 @@ $measurefunctions = '
 				<g id="line" onmousedown="split_lines();highlightbyid(\'split0\');" transform="translate(156 0 )">
 		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
 		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-		      	<set attributeName="filter" begin="del0.mousedown" dur="0s" fill="freeze" to="none"/>
-						<set attributeName="filter" begin="del0.mouseup;del0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+		      	<set attributeName="filter" begin="del0.mousedown" fill="freeze" to="none"/>
+						<set attributeName="filter" begin="del0.mouseup;del0.mouseout" fill="freeze" to="url(#Schatten)"/>
 					</rect>
 						<line	x1="81.5" y1="391" x2="127.5" y2="250" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
 						<line	x1="127.5" y1="250" x2="310.5" y2="243" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
@@ -3401,8 +3401,8 @@ $measurefunctions = '
       <g id="query_add" transform="translate('.$last_x.' 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-          <set attributeName="filter" begin="ppquery0.mousedown" dur="0s" fill="freeze" to="none"/>
-          <set attributeName="filter" begin="ppquery0.mouseup;ppquery0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+          <set attributeName="filter" begin="ppquery0.mousedown" fill="freeze" to="none"/>
+          <set attributeName="filter" begin="ppquery0.mouseup;ppquery0.mouseout" fill="freeze" to="url(#Schatten)"/>
         </rect>
         <polygon
 					points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284
@@ -3418,8 +3418,8 @@ $measurefunctions = '
 			  <g id="query_subtract" transform="translate('.$last_x.' 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(111,111,111);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-          <set attributeName="filter" begin="ppquery1.mousedown" dur="0s" fill="freeze" to="none"/>
-          <set attributeName="filter" begin="ppquery1.mouseup;ppquery1.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+          <set attributeName="filter" begin="ppquery1.mousedown" fill="freeze" to="none"/>
+          <set attributeName="filter" begin="ppquery1.mouseup;ppquery1.mouseout" fill="freeze" to="url(#Schatten)"/>
         </rect>
         <polygon
 					points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284
@@ -3440,8 +3440,8 @@ $measurefunctions = '
       <g id="buffer_add" transform="translate('.$last_x.' 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-          <set attributeName="filter" begin="buffer0.mousedown" dur="0s" fill="freeze" to="none"/>
-          <set attributeName="filter" begin="buffer0.mouseup;buffer0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+          <set attributeName="filter" begin="buffer0.mousedown" fill="freeze" to="none"/>
+          <set attributeName="filter" begin="buffer0.mouseup;buffer0.mouseout" fill="freeze" to="url(#Schatten)"/>
         </rect>
 				<polygon
 					points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284
@@ -3460,8 +3460,8 @@ $measurefunctions = '
       <g id="buffer_add_line" transform="translate('.$last_x.' 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-          <set attributeName="filter" begin="buffer1.mousedown" dur="0s" fill="freeze" to="none"/>
-          <set attributeName="filter" begin="buffer1.mouseup;buffer1.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+          <set attributeName="filter" begin="buffer1.mousedown" fill="freeze" to="none"/>
+          <set attributeName="filter" begin="buffer1.mouseup;buffer1.mouseout" fill="freeze" to="url(#Schatten)"/>
         </rect>
         <polygon
 					points="221 339 212 344 204 351 197 359 192 368 189 378 188 389 189 399 192 410 197 419 322 607 329 615 337 622 346 627 356 630 366 631 377 630 387 627 396 622 404 616 499 525 506 517 511 508 515 498 516 487 515 477 512 466 507 457 501 449 493 442 484 437 474 433 463 432 453 433 442 436 433 441 425 447 376 493 323 414 524 331 533 326 541 319 548 311 553 302 556 292 557 281 556 270 553 260 548 251 541 243 533 236 524 231 514 228 503 227 492 228 482 231 221 339"
@@ -3475,8 +3475,8 @@ $measurefunctions = '
       <g id="parallel_polygon" transform="translate('.$last_x.' 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-          <set attributeName="filter" begin="buffer2.mousedown" dur="0s" fill="freeze" to="none"/>
-          <set attributeName="filter" begin="buffer2.mouseup;buffer2.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+          <set attributeName="filter" begin="buffer2.mousedown" fill="freeze" to="none"/>
+          <set attributeName="filter" begin="buffer2.mouseup;buffer2.mouseout" fill="freeze" to="url(#Schatten)"/>
         </rect>
 				<polyline points="476 285 677 517" transform="translate(0 -41) scale(0.070) rotate(94 197 419)" style="fill:none;stroke:#4A4A4A;stroke-width:20"/>
         <polygon
@@ -3495,8 +3495,8 @@ $measurefunctions = '
 			<g id="vertex_edit" transform="translate('.$last_x.' 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-          <set attributeName="filter" begin="move1.mousedown" dur="0s" fill="freeze" to="none"/>
-          <set attributeName="filter" begin="move1.mouseup;move1.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+          <set attributeName="filter" begin="move1.mousedown" fill="freeze" to="none"/>
+          <set attributeName="filter" begin="move1.mouseup;move1.mouseout" fill="freeze" to="url(#Schatten)"/>
         </rect>
 				<polygon points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284
 						379.5,218 378.5,139 357.5,138 260.5,91"
@@ -3519,8 +3519,8 @@ $measurefunctions = '
 			<g id="vertex_edit" transform="translate('.$last_x.' 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-          <set attributeName="filter" begin="vertex_edit1.mousedown" dur="0s" fill="freeze" to="none"/>
-          <set attributeName="filter" begin="vertex_edit1.mouseup;vertex_edit1.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+          <set attributeName="filter" begin="vertex_edit1.mousedown" fill="freeze" to="none"/>
+          <set attributeName="filter" begin="vertex_edit1.mouseup;vertex_edit1.mouseout" fill="freeze" to="url(#Schatten)"/>
         </rect>
         <circle cx="178.579" cy="57.7353" r="3" transform="translate(-167 -47)"/>
 				<polygon points="178.579,57.7353 164.258,51.2544 178.96,44.515 176.48,49.1628 185.48,49.1628 185.48,53.1628 176.48,53.1628"
@@ -3538,8 +3538,8 @@ $measurefunctions = '
 			<g id="vertex_edit" transform="translate('.$last_x.' 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-          <!--set attributeName="filter" begin="coord_input1.mousedown" dur="0s" fill="freeze" to="none"/-->
-          <!--set attributeName="filter" begin="coord_input1.mouseup;coord_input1.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/-->
+          <!--set attributeName="filter" begin="coord_input1.mousedown" fill="freeze" to="none"/-->
+          <!--set attributeName="filter" begin="coord_input1.mouseup;coord_input1.mouseout" fill="freeze" to="url(#Schatten)"/-->
         </rect>
         <circle cx="178.579" cy="57.7353" r="3" transform="translate(-166 -41)"/>
 				<text transform="scale(0.7 0.7)" x="18" y="14" style="text-anchor:middle;fill:rgb(0,0,0);font-size:15;font-family:Arial;font-weight:bold">x,y</text>
@@ -3555,8 +3555,8 @@ $measurefunctions = '
 		$measure_buttons ='
 			<g id="dist" transform="translate('.$last_x.' 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-          <set attributeName="filter" begin="measure0.mousedown" dur="0s" fill="freeze" to="none"/>
-          <set attributeName="filter" begin="measure0.mouseup;measure0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+          <set attributeName="filter" begin="measure0.mousedown" fill="freeze" to="none"/>
+          <set attributeName="filter" begin="measure0.mouseup;measure0.mouseout" fill="freeze" to="url(#Schatten)"/>
         </rect>
         <g transform="scale(0.8) rotate(-30) translate(-20 -5)">
           <line x1="13" y1="28" x2="37" y2="28" style="fill:none;stroke:black;stroke-width:3"/>

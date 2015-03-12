@@ -36,8 +36,8 @@ $SVGvars_navbuttons = '
 			<g id="previous" transform="translate(0 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-          <set attributeName="filter" begin="previous0.mousedown" dur="0s" fill="freeze" to="none"/>
-          <set attributeName="filter" begin="previous0.mouseup;previous0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+          <set attributeName="filter" begin="previous0.mousedown" fill="freeze" to="none"/>
+          <set attributeName="filter" begin="previous0.mouseup;previous0.mouseout" fill="freeze" to="url(#Schatten)"/>
         </rect>
         <rect x="10" y="8.5" width="10" height="8.25" style="fill:rgb('.$prevbuttoncolor.')"/>
         <polygon points="4,12.5 11,5 11,20" style="fill:rgb('.$prevbuttoncolor.');stroke:rgb('.$prevbuttoncolor.');stroke-width:1"/>
@@ -47,8 +47,8 @@ $SVGvars_navbuttons = '
       <g id="next" transform="translate(26 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-          <set attributeName="filter" begin="next0.mousedown" dur="0s" fill="freeze" to="none"/>
-          <set attributeName="filter" begin="next0.mouseup;next0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+          <set attributeName="filter" begin="next0.mousedown" fill="freeze" to="none"/>
+          <set attributeName="filter" begin="next0.mouseup;next0.mouseout" fill="freeze" to="url(#Schatten)"/>
         </rect>
         <g transform="rotate(180 12.5 12.7)">
           <rect x="10" y="8.5" width="10" height="8.25" style="fill:rgb('.$nextbuttoncolor.')"/>
@@ -60,8 +60,8 @@ $SVGvars_navbuttons = '
       <g id="zoomin" transform="translate(52 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-        	<set attributeName="filter" begin="zoomin0.mousedown" dur="0s" fill="freeze" to="none"/>
-					<set attributeName="filter" begin="zoomin0.mouseup;zoomin0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+        	<set attributeName="filter" begin="zoomin0.mousedown" fill="freeze" to="none"/>
+					<set attributeName="filter" begin="zoomin0.mouseup;zoomin0.mouseout" fill="freeze" to="url(#Schatten)"/>
 				</rect>
 				<g transform="translate(-4 -9) matrix(0.7 0 0 0.7 -3.5 0)">
 					<line x1="31.25" y1="34" x2="40" y2="42"
@@ -80,8 +80,8 @@ $SVGvars_navbuttons = '
       <g id="zoomout" transform="translate(78 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-        	<set attributeName="filter" begin="zoomout0.mousedown" dur="0s" fill="freeze" to="none"/>
-					<set attributeName="filter" begin="zoomout0.mouseup;zoomout0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+        	<set attributeName="filter" begin="zoomout0.mousedown" fill="freeze" to="none"/>
+					<set attributeName="filter" begin="zoomout0.mouseup;zoomout0.mouseout" fill="freeze" to="url(#Schatten)"/>
 				</rect>
 				<g transform="translate(-4 -9) matrix(0.7 0 0 0.7 -3.5 0)">
 					<line x1="31.25" y1="34" x2="40" y2="42"
@@ -98,8 +98,8 @@ $SVGvars_navbuttons = '
       <g id="zoomall" transform="translate(104 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-        	<set attributeName="filter" begin="zoomall0.mousedown" dur="0s" fill="freeze" to="none"/>
-					<set attributeName="filter" begin="zoomall0.mouseup;zoomall0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+        	<set attributeName="filter" begin="zoomall0.mousedown" fill="freeze" to="none"/>
+					<set attributeName="filter" begin="zoomall0.mouseup;zoomall0.mouseout" fill="freeze" to="url(#Schatten)"/>
 				</rect>
 				<g transform="translate(-4.7 -12) scale(1.35 1.35) matrix(0.7 0 0 0.7 -3.5 0)">
 					<rect x="14" y="20" width="18" height="12"
@@ -118,8 +118,8 @@ $SVGvars_navbuttons = '
       <g id="recentre" transform="translate(130 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-        	<set attributeName="filter" begin="recentre0.mousedown" dur="0s" fill="freeze" to="none"/>
-					<set attributeName="filter" begin="recentre0.mouseup;recentre0.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+        	<set attributeName="filter" begin="recentre0.mousedown" fill="freeze" to="none"/>
+					<set attributeName="filter" begin="recentre0.mouseup;recentre0.mouseout" fill="freeze" to="url(#Schatten)"/>
 				</rect>
         <g transform="scale(0.7) translate(-5 0)">
 					<use xlink:href="#1move" transform="translate(2.1 -5.9) scale(0.9)"/> 

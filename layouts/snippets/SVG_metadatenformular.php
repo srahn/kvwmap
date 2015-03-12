@@ -204,8 +204,8 @@ redraw();
       <g id="undo" onmousedown="deletelast(evt)" transform="translate(0 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
 	      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-	      	<set attributeName="filter" begin="undo.mousedown" dur="0s" fill="freeze" to="none"/>
-					<set attributeName="filter" begin="undo.mouseup;undo.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+	      	<set attributeName="filter" begin="undo.mousedown" fill="freeze" to="none"/>
+					<set attributeName="filter" begin="undo.mouseup;undo.mouseout" fill="freeze" to="url(#Schatten)"/>
 				</rect>
         <g transform="scale(0.7) translate(-5 0)">
           <text x="9" y="15" font-weight="fett"> 
@@ -221,8 +221,8 @@ redraw();
       <g id="new" onmousedown="restart();draw_pgon_on()" transform="translate(26 0)">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
 	      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-	      	<set attributeName="filter" begin="new.mousedown" dur="0s" fill="freeze" to="none"/>
-					<set attributeName="filter" begin="new.mouseup;new.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+	      	<set attributeName="filter" begin="new.mousedown" fill="freeze" to="none"/>
+					<set attributeName="filter" begin="new.mouseup;new.mouseout" fill="freeze" to="url(#Schatten)"/>
 				</rect>
         <g transform="scale(0.7) translate(-5 0)">
 				<text x="23" y="15" style="text-anchor:middle;fill:black;font-size:12;font-family:Arial;font-weight:bold">
@@ -240,8 +240,8 @@ redraw();
 		<g id="pgon" onmousedown="draw_pgon_on()" transform="translate(52 0)">
       <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
       <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-      	<set attributeName="filter" begin="pgon.mousedown" dur="0s" fill="freeze" to="none"/>
-				<set attributeName="filter" begin="pgon.mouseup;pgon.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+      	<set attributeName="filter" begin="pgon.mousedown" fill="freeze" to="none"/>
+				<set attributeName="filter" begin="pgon.mouseup;pgon.mouseout" fill="freeze" to="url(#Schatten)"/>
 			</rect>
 			<g transform="scale(0.7) translate(-5 0)">
 				<text x="23" y="15" font-weight="fett" text-anchor="middle">
@@ -256,8 +256,8 @@ redraw();
 		<g id="box" onmousedown="draw_pgon_off();restart()" transform="translate(83 0)">
       <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
       <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(222,222,222);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
-      	<set attributeName="filter" begin="box.mousedown" dur="0s" fill="freeze" to="none"/>
-				<set attributeName="filter" begin="box.mouseup;box.mouseout" dur="0s" fill="freeze" to="url(#Schatten)"/>
+      	<set attributeName="filter" begin="box.mousedown" fill="freeze" to="none"/>
+				<set attributeName="filter" begin="box.mouseup;box.mouseout" fill="freeze" to="url(#Schatten)"/>
 			</rect>
 			<g transform="scale(0.7) translate(-5 0)">
 				<text x="23" y="15" style="text-anchor:middle;fill:black;font-size:12;font-family:Arial;font-weight:bold">
