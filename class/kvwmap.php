@@ -1261,6 +1261,12 @@ class GUI {
         	if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
           $style->backgroundcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
         }
+				if($dbStyle['colorrange'] != '') {
+					$style->updateFromString("STYLE COLORRANGE ".$dbStyle['colorrange']." END");
+				}
+				if($dbStyle['datarange'] != '') {
+					$style->updateFromString("STYLE DATARANGE ".$dbStyle['datarange']." END");
+				}
         if ($dbStyle['offsetx']!='') {
           $style->set('offsetx', $dbStyle['offsetx']);
         }
@@ -13226,7 +13232,7 @@ class db_mapObj{
 		if($language != 'german') {
 			$sql.='CASE WHEN `Name_'.$language.'` != "" THEN `Name_'.$language.'` ELSE `Name` END AS ';
 		}
-		$sql.='Name, l.alias, l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem, l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem, l.tolerance, l.toleranceunits, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version, l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, g.*';
+		$sql.='Name, l.alias, l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem, l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version, l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, g.*';
     $sql.=' FROM u_rolle2used_layer AS rl,used_layer AS ul,layer AS l, u_groups AS g, u_groups2rolle as gr';
     $sql.=' WHERE rl.stelle_id=ul.Stelle_ID AND rl.layer_id=ul.Layer_ID AND l.Layer_ID=ul.Layer_ID';
     $sql.=' AND (ul.minscale != -1 OR ul.minscale IS NULL) AND l.Gruppe = g.id AND rl.stelle_ID='.$this->Stelle_ID.' AND rl.user_id='.$this->User_ID;
@@ -14971,6 +14977,8 @@ class db_mapObj{
     if($formvars["color"] != ''){$sql.="color = '".$formvars["color"]."',";}else{$sql.="color = NULL,";}
     if($formvars["backgroundcolor"] != ''){$sql.="backgroundcolor = '".$formvars["backgroundcolor"]."',";}else{$sql.="backgroundcolor = NULL,";}
     if($formvars["outlinecolor"] != ''){$sql.="outlinecolor = '".$formvars["outlinecolor"]."',";}else{$sql.="outlinecolor = NULL,";}
+		if($formvars["colorrange"] != ''){$sql.="colorrange = '".$formvars["colorrange"]."',";}else{$sql.="colorrange = NULL,";}
+		if($formvars["datarange"] != ''){$sql.="datarange = '".$formvars["datarange"]."',";}else{$sql.="datarange = NULL,";}
     if($formvars["minsize"] != ''){$sql.="minsize = '".$formvars["minsize"]."',";}else{$sql.="minsize = NULL,";}
     if($formvars["maxsize"] != ''){$sql.="maxsize = '".$formvars["maxsize"]."',";}else{$sql.="maxsize = NULL,";}
     if($formvars["angle"] != ''){$sql.="angle = '".$formvars["angle"]."',";}else{$sql.="angle = NULL,";}

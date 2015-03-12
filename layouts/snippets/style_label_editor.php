@@ -110,6 +110,8 @@ function save_style(style_id){
 	data+= '&color='+document.GUI.style_color.value;
 	data+= '&backgroundcolor='+document.GUI.style_backgroundcolor.value;
 	data+= '&outlinecolor='+document.GUI.style_outlinecolor.value;
+	data+= '&colorrange='+document.GUI.style_colorrange.value;
+	data+= '&datarange='+document.GUI.style_datarange.value;
 	data+= '&opacity='+document.GUI.style_opacity.value;
 	data+= '&minsize='+document.GUI.style_minsize.value;
 	data+= '&maxsize='+document.GUI.style_maxsize.value;
