@@ -472,7 +472,9 @@ class Nachweis {
       if (!$erfolg){  
         $errmsg.= 'Die Datei konnte nicht gelöscht werden, weil sie nicht existiert oder keine Zugriffsrechte bestehen! ';      
       }
-      else {
+      else{
+				$dateinamensteil = explode('.', $doclocation);
+				unlink($dateinamensteil[0].'_thumb.jpg');
         #echo '<br>Datei: '.$doclocation.' gelöscht.';
       }
     }
@@ -501,14 +503,9 @@ class Nachweis {
           $nachweisDatei=NACHWEISDOCPATH.$this->Dokumente[0]['flurid'].'/'.$this->buildNachweisNr($this->Dokumente[0][NACHWEIS_PRIMARY_ATTRIBUTE], $this->Dokumente[0][NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$this->Dokumente[0]['link_datei'];
           if (file_exists($nachweisDatei)) {
             # Datei existiert und kann jetzt im Filesystem gelöscht werden
-            if (unlink($nachweisDatei)) {
-              # Datei wurde erfolgreich gelöscht
+						$ret = $this->dokumentenDateiLoeschen($nachweisDatei);
+						if ($ret == '') {
               $msg.='Datei '.$nachweisDatei.' wurde erfolgreich gelöscht.';
-            }
-            else {
-              # Datei konnte nicht gelöscht werden
-              $errmsg.='Datei konnte nicht vom Server gelöscht werden. Wahrscheinlich fehlende Zugriffsrechte.';
-              $loeschenabbrechen=1;              
             }
           }
           else {
