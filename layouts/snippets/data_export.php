@@ -35,6 +35,7 @@ function data_export(){
 		}
 		document.GUI.go_plus.value = 'Exportieren';
 		document.GUI.submit();
+		document.GUI.go_plus.value = '';
 	}
 	else{
 		alert('Bitten wählen Sie einen Layer aus.');
