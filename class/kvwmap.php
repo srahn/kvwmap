@@ -10792,6 +10792,7 @@ class GUI {
               $layer=ms_newLayerObj($map);
               $layer->set('data', $layerset[$i]['Data']);
               $layer->set('status',MS_ON);
+							$layer->set('type',$layerset[$i]['Datentyp']);
               if ($layerset[$i]['template']!='') {
                 $layer->set('template',$layerset[$i]['template']);
               }
@@ -10801,19 +10802,18 @@ class GUI {
               $projFROM = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);
     					$projTO = ms_newprojectionobj("init=epsg:".$layerset[$i]['epsg_code']);
     					$rect->project($projFROM, $projTO);
-              @$layer->queryByRect($rect);
-              $layer->open();
+							$point=ms_newPointObj();
+							$point->setXY($rect->minx,$rect->miny);
+							$point->project($projFROM, $projTO);
+							$layer->queryByPoint($point, MS_SINGLE, 0);
               $anzResult=$layer->getNumResults();
               for ($j=0;$j<$anzResult;$j++) {
-                $result=$layer->getResult($j);
-                $shapeindex=$result->shapeindex;
-                if(MAPSERVERVERSION > 500){
-                  $layerset[$i]['shape'][$j]=$layer->getFeature($shapeindex,-1);
-                }
-                else{
-                  $layerset[$i]['shape'][$j]=$layer->getShape(-1,$shapeindex);
-                }
+								$result = $layer->getResult($j);
+								$s = $layer->getShape($layer->getResult($j));
+								$layerset[$i]['shape'][$j][' '] = $s->values['value_0'];
               }
+							$layerset[$i]['attributes']['name'][0] = ' ';
+							$layerset[$i]['attributes']['privileg'][0] = 0;
               $this->qlayerset[]=$layerset[$i];
             }
           } break; # ende Layer ist ein Shapefile

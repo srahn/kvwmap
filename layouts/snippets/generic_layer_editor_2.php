@@ -75,7 +75,7 @@
 								<tr>
 									<? if($this->formvars['go'] == 'Zwischenablage' OR $this->formvars['go'] == 'gemerkte_Datensaetze_anzeigen'){ ?>
 										<td style="padding: 0 0 0 10;"><a title="Datensatz nicht mehr merken" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);remove_from_clipboard(<? echo $layer['Layer_ID']; ?>);"><div class="emboss nicht_mehr_merken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
-									<? }else{ ?>
+									<? }elseif($layer['connectiontype'] == 6){ ?>
 									<td style="padding: 0 0 0 10;"><a title="Datensatz merken" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);add_to_clipboard(<? echo $layer['Layer_ID']; ?>);"><div class="emboss merken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
 									<? } ?>
 			     	<? 	if($layer['privileg'] > '0'){ ?>
@@ -344,7 +344,7 @@
 ?>
 	<tr>
 		<td colspan="2"align="left">
-		<? if($this->new_entry != true){ ?>
+		<? if($layer['connectiontype'] == 6 AND $this->new_entry != true){ ?>
 			<table width="100%" border="0" cellspacing="4" cellpadding="0">
 				<tr>
 					<td colspan="2">
@@ -358,7 +358,7 @@
 					</td>
 				</tr>
 				<tr>
-					<? if($layer['connectiontype'] == 6 AND $layer['export_privileg'] != 0){ ?>
+					<? if($layer['export_privileg'] != 0){ ?>
 					<td style="padding: 5 0 0 0;">
 						<select id="all_<? echo $layer['Layer_ID']; ?>" name="all_<? echo $layer['Layer_ID']; ?>" onchange="update_buttons(this.value, <? echo $layer['Layer_ID']; ?>);">
 							<option value=""><? echo $strSelectedDatasets.':'; ?></option>
@@ -380,7 +380,7 @@
 							<? } ?>
 					<? if($layer['privileg'] == '2'){ ?>
 								<td id="delete_link_<? echo $layer['Layer_ID']; ?>" style="padding: 5 10 0 0;"><a title="<? echo $strdelete; ?>" href="javascript:delete_datasets(<?php echo $layer['Layer_ID']; ?>);"><div class="emboss datensatz_loeschen"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></td>
-					<?} if($layer['connectiontype'] == 6 AND $layer['export_privileg'] != 0){ ?>
+					<?} if($layer['export_privileg'] != 0){ ?>
 								<td style="padding: 5 10 0 0;"><a title="<? echo $strExport; ?>" href="javascript:daten_export(<?php echo $layer['Layer_ID']; ?>, <? echo $layer['count']; ?>);"><div class="emboss datensatz_exportieren"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
 					<? } if($layer['layouts']){ ?>
 								<td id="print_link_<? echo $layer['Layer_ID']; ?>" style="padding: 5 10 0 0;"><a title="<? echo $strPrint; ?>" href="javascript:print_data(<?php echo $layer['Layer_ID']; ?>);"><div class="emboss drucken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
