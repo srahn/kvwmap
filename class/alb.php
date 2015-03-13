@@ -1283,15 +1283,15 @@ class ALB {
       if ($flst->Status != 'H' OR $formnummer = '30') {
         switch ($formnummer) {
           case '30' : {
-            $Ueberschrift='*Flurstücksnachweis';
+            $Ueberschrift='Flurstücksdaten - interne Verwendung';
             $art = 'Flurstück';
           } break;
           case '35' : {
-            $Ueberschrift='*Flurstücks- und Eigentümernachweis';
+            $Ueberschrift='Flurstücks- und Eigentümerdaten - interne Verwendung';
             $art = 'Flurstück';
           } break;
           case '40' : {
-            $Ueberschrift='******** Eigentümernachweis *******';
+            $Ueberschrift='Eigentümerdaten zum Flurstück - interne Verwendung';
             $art = 'Flurstück';
           } break;
         }
@@ -1620,9 +1620,8 @@ class ALB {
             #$pdf->addText($col2_1,$row,$fontSize,$BaulastenStr);
           }
 
-          # Verfahren
-          $anzVerfahren=count($flst->Verfahren);
-          for ($i=0;$i<$anzVerfahren;$i++){
+          # BauBodenrecht					
+          for ($i=0; $i < count($flst->BauBodenrecht); $i++){
 	          if($row<120) {
 	            # Seitenumbruch
 	            $seite++;
@@ -1637,23 +1636,19 @@ class ALB {
 	            $row=825; # 812 -> 825 2007-04-02 Schmidt
 	          	$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 	          }
-            $pdf->addText($col0,$row-=24,$fontSize,'Ausführende Stelle');
-            $pdf->addText($col2_1,$row,$fontSize,$flst->Verfahren[$i]['ausfstelleid']);
-            $AusfStelleName=zeilenumbruch($flst->Verfahren[$i]['ausfstellename'],40);
-            $pdf->addText($col4,$row,$fontSize,utf8_decode($AusfStelleName[0]));
-            for ($j=1;$j<count($AusfStelleName);$j++) {
-              $pdf->addText($col4,$row-=12,$fontSize,utf8_decode($AusfStelleName[$j]));
-            }
-            if($flst->Verfahren[$i]['verfnr'] != ''){
-              $pdf->addText($col0,$row-=12,$fontSize,'Verfahren');
-              $pdf->addText($col2_1,$row,$fontSize,$flst->Verfahren[$i]['verfnr']);
-              $pdf->addText($col4,$row,$fontSize,'('.$flst->Verfahren[$i]['verfbemid'].')');
-              $AusfBemerkung=zeilenumbruch($flst->Verfahren[$i]['verfbemerkung'],40);
-              $pdf->addText($col5,$row,$fontSize,utf8_decode($AusfBemerkung[0]));
-              for ($j=1;$j<count($AusfBemerkung);$j++) {
-                $pdf->addText($col5,$row-=12,$fontSize,utf8_decode($AusfBemerkung[$j]));
-              }
-            }
+						$pdf->addText($col2_1,$row-=24,$fontSize,$flst->BauBodenrecht[$i]['flaeche'].'m² '.$flst->BauBodenrecht[$i]['bezeichnung']);
+						$art=zeilenumbruch($flst->BauBodenrecht[$i]['art'],40);
+						$pdf->addText($col5,$row,$fontSize,utf8_decode($art[0]));
+						for ($j=1;$j<count($art);$j++) {
+							$pdf->addText($col5,$row-=12,$fontSize,utf8_decode($art[$j]));
+						}
+						if($flst->BauBodenrecht[$i]['stelle'] != ''){
+							$AusfStelleName=zeilenumbruch(utf8_encode('Ausführende Stelle: ').$flst->BauBodenrecht[$i]['stelle'],50);
+							$pdf->addText($col2_1,$row-=12,$fontSize,utf8_decode($AusfStelleName[0]));
+							for ($j=1;$j<count($AusfStelleName);$j++) {
+								$pdf->addText($col2_1,$row-=12,$fontSize,utf8_decode($AusfStelleName[$j]));
+							}
+						}
           }
 
           # Vorgängerflurstücke
@@ -2009,12 +2004,12 @@ class ALB {
     switch ($formnummer) {
       case '20' : {
 #        $Ueberschrift='******** Bestandsnachweis *******';
-        $Ueberschrift='********* Bestandsnachweis ********';
+        $Ueberschrift='Bestandsdaten - interne Verwendung';
         $art = 'Bestand';
       } break;
       case '25' : {
 #        $Ueberschrift='******** Bestandsübersicht *******';
-        $Ueberschrift='******** Bestandsübersicht ********';
+        $Ueberschrift='Übersicht Bestandsdaten - interne Verwendung';
         $art = 'Bestand';
       } break;
     }
