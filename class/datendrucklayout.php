@@ -362,7 +362,10 @@ class ddl {
 				}			
 			}break;
 			case 'Autovervollständigungsfeld' : {
-				$output = $this->attributes['enum_output'][$j][$i];
+				if(count($this->attributes['enum_output'][$j]) == 0){	
+					$output = $this->result[$i][$this->attributes['name'][$j]];		# preview
+				}	
+				else $output = $this->attributes['enum_output'][$j][$i];
 			}break;
 			default: {
 				if(!$preview AND $this->attributes['type'][$j] == 'bool'){
