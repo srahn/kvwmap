@@ -1259,8 +1259,9 @@ class ALB {
     $col4a=$col0+228;
     $col5=$col0+248;
     $col6=342;
-    $col7=363;
+    $col7=363;		
     $col8=$col6+70;
+		$col8a=490;
     $col9=527;
     $col9_1=$col9-50;
 
@@ -1418,154 +1419,85 @@ class ALB {
           $pdf->addText($col0,$row-=12,$fontSize,str_repeat('=',25));
 
           # Gesetzliche Klassifizierung
-          $anzKlassifizierungen=count($flst->Klassifizierung)-1;
-          if ($anzKlassifizierungen>0) {
-            $pdf->addText($col0,$row-=24,$fontSize,'Klassifizierung');
-            $pdf->addText($col4,$row,$fontSize,$flst->Klassifizierung[0]['tabkenn']);
-            $emz_summe = 0;
-            $summe = 0;
-            $count = 0;
-            for ($i=0;$i<$anzKlassifizierungen;$i++) {
-            	$bruch = NULL;            	
-              # Seitenumbruch wenn erforderlich
-              if($row<120) {
-                # Seitenumbruch
-                $seite++;
-                # aktuelle Seite abschließen
-                $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
-                # neue Seite beginnen
-                $pageid=$pdf->newPage();
-                $pagecount[$f] = $pagecount[$f] + 1;
-                if ($wasserzeichen) {
-                  $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
-                }
-                $row=825; # 812 -> 825 2007-04-02 Schmidt
-                $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
-              }
-              $pdf->addText($col2,$row-=12,$fontSize,str_pad ($flst->Klassifizierung[$i]['flaeche'].' m2', 11, ' ', STR_PAD_LEFT));
-              $pdf->addText($col4,$row,$fontSize,utf8_decode($flst->Klassifizierung[$i]['tabkenn'].'-'.$flst->Klassifizierung[$i]['klass']));
-              $ausgabetext=zeilenumbruch($flst->Klassifizierung[$i]['bezeichnung'],40);
-              $pdf->addText($col5,$row,$fontSize,utf8_decode($ausgabetext[0]));
-              for ($j=1;$j<count($ausgabetext);$j++) {
-                $pdf->addText($col5,$row-=12,$fontSize,utf8_decode($ausgabetext[$j]));
-              }
-              # $pdf->addText($col5,$row-=12,$fontSize,$flst->Klassifizierung[$i]['Abkuerzung']);
-
-              $angaben = explode(' ', $flst->Klassifizierung[$i]['angaben']);
-              $z = 0;
-              $row = $row-12;
-							if(in_array($angaben[1], array('I', 'II', 'III')))$angaben[0] .= ' '.$angaben[1];
-              for($j = 0; $j < count($angaben); $j++){
-                if($angaben[$j] != '' AND !in_array($angaben[$j], array('I', 'II', 'III'))){
-                  if($z == 0){
-                    $ausgabe = 'Bodsch '.$angaben[$j];
-                    $abstand = 0;
-                  }
-                  if($z == 1){
-                    if(strlen($angaben[$j]) == 1){
-                      $ausgabe = $angaben[$j].$angaben[$j+1];
-                      $j++;
-                    }
-                    else{
-                      $ausgabe = $angaben[$j];
-                    }
-                    $abstand += 100;
-                  }
-                  if($z == 2){
-                    $bruch = explode('/', $angaben[$j]);
-                    $ausgabe = 'WZ  '.ltrim($bruch[0], '0').'/'.ltrim($bruch[1], '0');
-                    $abstand += 40;
-                  }
-                  $pdf->addText($col4+$abstand,$row,$fontSize,utf8_decode($ausgabe));
-                  $z++;
-                }
-              }
-              if($bruch[1]){
-                $abstand += 110;
-                $emz = round($flst->Klassifizierung[$i]['flaeche'] * $bruch[1] / 100);
-                $pdf->addText($col4+$abstand,$row,$fontSize,'EMZ   '.$emz);
-                $emz_summe += $emz;
-              }
-              $summe += $flst->Klassifizierung[$i]['flaeche'];
-              $count++;
-							#--- nach den 32er Folien die Summen ausgeben
-            	if($flst->Klassifizierung[$i]['tabkenn'] == '32' AND $flst->Klassifizierung[$i+1]['tabkenn'] != '32'){
-            		if($count > 1){
-		            	$pdf->addText($col0,$row-=12,$fontSize,str_repeat(" ",10).str_repeat("-",65));
-			            $pdf->addText($col0,$row-=12,$fontSize,'Summe');
-			            //$pdf->addText($col2,$row,$fontSize,str_pad ($flst->Klassifizierung['summe'].' m2',11,' ',STR_PAD_LEFT));
-			            $pdf->addText($col2,$row,$fontSize,str_pad ($summe.' m2',11,' ',STR_PAD_LEFT));
-			            $pdf->addText($col4+250,$row,$fontSize,'EMZ   '.$emz_summe);
-            		}
-		            $summe = 0;
-		            $count = 0;
-		            $row-=24;
-            	}
-            	if($flst->Klassifizierung[$i]['tabkenn'] == '33' AND $flst->Klassifizierung[$i+1]['tabkenn'] != '33'){
-            		if($count > 1){
-		            	$pdf->addText($col0,$row-=12,$fontSize,str_repeat(" ",10).str_repeat("-",65));
-			            $pdf->addText($col0,$row-=12,$fontSize,'Summe');
-			            $pdf->addText($col2,$row,$fontSize,str_pad ($summe.' m2',11,' ',STR_PAD_LEFT));
-            		}
-		            $summe = 0;
-		            $count = 0;
-		            $row-=24;
-            	}
-            	if($flst->Klassifizierung[$i]['tabkenn'] == '34' AND $flst->Klassifizierung[$i+1]['tabkenn'] != '34'){
-            		if($count > 1){
-		            	$pdf->addText($col0,$row-=12,$fontSize,str_repeat(" ",10).str_repeat("-",65));
-			            $pdf->addText($col0,$row-=12,$fontSize,'Summe');
-			            $pdf->addText($col2,$row,$fontSize,str_pad ($summe.' m2',11,' ',STR_PAD_LEFT));
-            		}
-		            $summe = 0;
-		            $count = 0;
-		            $row-=24;
-            	}
-            	if($flst->Klassifizierung[$i]['tabkenn'] == '35' AND $flst->Klassifizierung[$i+1]['tabkenn'] != '35'){
-            		if($count > 1){
-		            	$pdf->addText($col0,$row-=12,$fontSize,str_repeat(" ",10).str_repeat("-",65));
-			            $pdf->addText($col0,$row-=12,$fontSize,'Summe');
-			            $pdf->addText($col2,$row,$fontSize,str_pad ($summe.' m2',11,' ',STR_PAD_LEFT));
-            		}
-		            $summe = 0;
-		            $count = 0;
-		            $row-=24;
-            	}
-            	if($flst->Klassifizierung[$i]['tabkenn'] == '37' AND $flst->Klassifizierung[$i+1]['tabkenn'] != '37'){
-            		if($count > 1){
-		            	$pdf->addText($col0,$row-=12,$fontSize,str_repeat(" ",10).str_repeat("-",65));
-			            $pdf->addText($col0,$row-=12,$fontSize,'Summe');
-			            $pdf->addText($col2,$row,$fontSize,str_pad ($summe.' m2',11,' ',STR_PAD_LEFT));
-            		}
-		            $summe = 0;
-		            $count = 0;
-		            $row-=24;
-            	}
-            }
-          }
-
-          /*
-          # Gesetzliche Klassifizierung
-          $anzKlassifizierungen=count($flst->Klassifizierung)-1;
-          if ($anzKlassifizierungen>0) {
-            $pdf->addText($col0,$row-=24,$fontSize,'Klassifizierung'.count($flst->Klassifizierung));
-            $pdf->addText($col4,$row,$fontSize,$flst->Klassifizierung[0]['tabkenn']);
-            for ($i=0;$i<$anzKlassifizierungen;$i++) {
-              $pdf->addText($col2,$row-=12,$fontSize,str_pad ($flst->Klassifizierung[$i]['flaeche'].' m2', 11, ' ', STR_PAD_LEFT));
-              $pdf->addText($col4,$row,$fontSize,$flst->Klassifizierung[$i]['tabkenn'].'-'.$flst->Klassifizierung[$i]['klass']);
-              $ausgabetext=zeilenumbruch($flst->Klassifizierung[$i]['bezeichnung'],40);
-              $pdf->addText($col5,$row,$fontSize,$ausgabetext[0]);
-              for ($j=1;$j<count($ausgabetext);$j++) {
-                $pdf->addText($col5,$row-=12,$fontSize,$ausgabetext[$j]);
-              }
-              # $pdf->addText($col5,$row-=12,$fontSize,$flst->Klassifizierung[$i]['Abkuerzung']);
-              $pdf->addText($col4,$row-=12,$fontSize,$flst->Klassifizierung[$i]['angaben']);
-            }
-            $pdf->addText($col0,$row-=12,$fontSize,str_repeat(" ",10).str_repeat("-",65));
-            $pdf->addText($col0,$row-=12,$fontSize,'Summe');
-            $pdf->addText($col2,$row,$fontSize,str_pad ($flst->Klassifizierung['summe'].' m2',11,' ',STR_PAD_LEFT));
-          }
-          */
+					if($flst->Klassifizierung[0]['wert'] != ''){
+						$pdf->addText($col0,$row-=24,$fontSize, 'gesetzl. Klassifizierung Bodenschätzung');
+						$ratio = $flst->ALB_Flaeche/$flst->Klassifizierung[0]['flstflaeche'];
+						$emzges_a = 0; $emzges_gr = 0; $emzges_agr = 0; $emzges_gra = 0;
+						$flaeche_a = 0; $flaeche_gr = 0; $flaeche_agr = 0; $flaeche_gra = 0;
+						for($j = 0; $j < count($flst->Klassifizierung); $j++){
+		        	if($row<120) {
+								# Seitenumbruch
+								$seite++;
+								# aktuelle Seite abschließen
+								$pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
+								# neue Seite beginnen
+								$pageid=$pdf->newPage();
+								$pagecount[$f] = $pagecount[$f] + 1;
+								if ($wasserzeichen) {
+									$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
+								}
+								$row=825; # 812 -> 825 2007-04-02 Schmidt
+								$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+							}
+							$wert=$flst->Klassifizierung[$j]['wert'];
+							$flst->Klassifizierung[$j]['flaeche'] = $flst->Klassifizierung[$j]['flaeche'] * $ratio;
+							$emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
+							if($flst->Klassifizierung[$j]['objart'] == 1000){
+								$emzges_a = $emzges_a + $emz;
+								$flaeche_a = $flaeche_a + $flst->Klassifizierung[$j]['flaeche'];
+							}
+							if($flst->Klassifizierung[$j]['objart'] == 2000){
+								$emzges_agr = $emzges_agr + $emz;
+								$flaeche_agr = $flaeche_agr + $flst->Klassifizierung[$j]['flaeche'];
+							}
+							if($flst->Klassifizierung[$j]['objart'] == 3000){
+								$emzges_gr = $emzges_gr + $emz;
+								$flaeche_gr = $flaeche_gr + $flst->Klassifizierung[$j]['flaeche'];
+							}
+							if($flst->Klassifizierung[$j]['objart'] == 4000){
+								$emzges_gra = $emzges_gra + $emz;
+								$flaeche_gra = $flaeche_gra + $flst->Klassifizierung[$j]['flaeche'];
+							}							
+							$pdf->addText($col2,$row-=12,$fontSize, str_pad(round($flst->Klassifizierung[$j]['flaeche']).' m2', 11, ' ', STR_PAD_LEFT));
+              $pdf->addText($col4,$row,$fontSize,utf8_decode($flst->Klassifizierung[$j]['label']));
+							$pdf->addText($col8,$row,$fontSize, 'EMZ: '.$emz);							
+							$pdf->addText($col8a,$row,$fontSize, 'BWZ: '.$wert);							
+						}
+	        	if($row<120) {
+							# Seitenumbruch
+							$seite++;
+							# aktuelle Seite abschließen
+							$pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
+							# neue Seite beginnen
+							$pageid=$pdf->newPage();
+							$pagecount[$f] = $pagecount[$f] + 1;
+							if ($wasserzeichen) {
+								$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
+							}
+							$row=825; # 812 -> 825 2007-04-02 Schmidt
+							$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+						}
+						$nichtgeschaetzt=round($flst->ALB_Flaeche-$flaeche_a-$flaeche_gr-$flaeche_agr-$flaeche_gra);
+						if($nichtgeschaetzt>0){
+							$pdf->addText($col2,$row-=12,$fontSize, 'nicht geschätzt: '.$nichtgeschaetzt.' m²');
+						}
+						if($emzges_a > 0){
+							$BWZ_a = round($emzges_a/$flaeche_a*100);
+							$pdf->addText($col2,$row-=12,$fontSize, 'Ackerland gesamt: EMZ '.$emzges_a.', BWZ '.$BWZ_a);
+						}
+						if($emzges_gr > 0){
+							$BWZ_gr = round($emzges_gr/$flaeche_gr*100);
+							$pdf->addText($col2,$row-=12,$fontSize, 'Grünland gesamt: EMZ '.$emzges_gr.', BWZ '.$BWZ_gr);
+						}
+						if($emzges_agr > 0){
+							$BWZ_agr = round($emzges_agr/$flaeche_agr*100);
+							$pdf->addText($col2,$row-=12,$fontSize, 'Acker-Grünland gesamt: EMZ '.$emzges_agr.', BWZ '.$BWZ_agr);
+						}
+						if($emzges_gra > 0){
+								$BWZ_gra = round($emzges_gra/$flaeche_gra*100);
+								$pdf->addText($col2,$row-=12,$fontSize, 'Grünland-Acker gesamt: EMZ '.$emzges_gra.', BWZ '.$BWZ_gra);
+						}
+					}
 
         	if($row<120) {
             # Seitenumbruch
@@ -1636,17 +1568,17 @@ class ALB {
 	            $row=825; # 812 -> 825 2007-04-02 Schmidt
 	          	$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 	          }
-						$pdf->addText($col2_1,$row-=24,$fontSize,$flst->BauBodenrecht[$i]['flaeche'].'m² '.$flst->BauBodenrecht[$i]['bezeichnung']);
+						$pdf->addText($col2,$row-=24,$fontSize,$flst->BauBodenrecht[$i]['flaeche'].'m² '.$flst->BauBodenrecht[$i]['bezeichnung']);
 						$art=zeilenumbruch($flst->BauBodenrecht[$i]['art'],40);
-						$pdf->addText($col5,$row,$fontSize,utf8_decode($art[0]));
+						$pdf->addText($col4a,$row,$fontSize,utf8_decode($art[0]));
 						for ($j=1;$j<count($art);$j++) {
-							$pdf->addText($col5,$row-=12,$fontSize,utf8_decode($art[$j]));
+							$pdf->addText($col4a,$row-=12,$fontSize,utf8_decode($art[$j]));
 						}
 						if($flst->BauBodenrecht[$i]['stelle'] != ''){
-							$AusfStelleName=zeilenumbruch(utf8_encode('Ausführende Stelle: ').$flst->BauBodenrecht[$i]['stelle'],50);
-							$pdf->addText($col2_1,$row-=12,$fontSize,utf8_decode($AusfStelleName[0]));
+							$AusfStelleName=zeilenumbruch(utf8_encode('Ausführende Stelle: ').$flst->BauBodenrecht[$i]['stelle'],60);
+							$pdf->addText($col2,$row-=12,$fontSize,utf8_decode($AusfStelleName[0]));
 							for ($j=1;$j<count($AusfStelleName);$j++) {
-								$pdf->addText($col2_1,$row-=12,$fontSize,utf8_decode($AusfStelleName[$j]));
+								$pdf->addText($col2,$row-=12,$fontSize,utf8_decode($AusfStelleName[$j]));
 							}
 						}
           }
