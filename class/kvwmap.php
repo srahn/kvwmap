@@ -10776,7 +10776,9 @@ class GUI {
     }
     $this->queryrect = $rect;
     # Abfragen der Layer, die zur Stelle gehören
-    $layerset=$this->user->rolle->getLayer('');
+    $layer=$this->user->rolle->getLayer('');
+		$rollenlayer=$this->user->rolle->getRollenLayer('', 'import');
+		$layerset = array_merge($layer, $rollenlayer);
     $anzLayer=count($layerset);
     $map=ms_newMapObj('');
     $map->set('shapepath', SHAPEPATH);
@@ -13208,9 +13210,7 @@ class db_mapObj{
   }  
 
   function read_RollenLayer($id = NULL, $typ = NULL){
-    //$sql = 'SELECT DISTINCT l.*, g.Gruppenname, gr.status, -l.id AS Layer_ID, 1 as showclasses from rollenlayer AS l, u_groups AS g, u_groups2rolle as gr';
-    //$sql.= ' WHERE l.Gruppe = g.id AND l.stelle_id='.$this->Stelle_ID.' AND l.user_id='.$this->User_ID.' AND gr.id = g.id AND gr.stelle_id='.$this->Stelle_ID.' AND gr.user_id='.$this->User_ID;
-		$sql = 'SELECT DISTINCT l.*, g.Gruppenname, -l.id AS Layer_ID, 1 as showclasses from rollenlayer AS l, u_groups AS g';
+		$sql = "SELECT DISTINCT l.*, g.Gruppenname, -l.id AS Layer_ID, 1 as showclasses, CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable from rollenlayer AS l, u_groups AS g";
     $sql.= ' WHERE l.Gruppe = g.id AND l.stelle_id='.$this->Stelle_ID.' AND l.user_id='.$this->User_ID;
     if($id != NULL){
     	$sql .= ' AND l.id = '.$id;
@@ -13616,7 +13616,7 @@ class db_mapObj{
 
   function getlayerdatabase($layer_id, $host){
   	if($layer_id < 0){	# Rollenlayer
-  		$sql ='SELECT `connection`, "" as `schema` FROM rollenlayer WHERE -id = '.$layer_id.' AND connectiontype = 6';
+  		$sql ='SELECT `connection`, "'.CUSTOM_SHAPE_SCHEMA.'" as `schema` FROM rollenlayer WHERE -id = '.$layer_id.' AND connectiontype = 6';
   	}
   	else{
     	$sql ='SELECT `connection`, `schema` FROM layer WHERE Layer_ID = '.$layer_id.' AND connectiontype = 6';
@@ -14041,7 +14041,8 @@ class db_mapObj{
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
     $rs=mysql_fetch_array($query);
     if($rs['Typ'] == 'import'){		# beim Shape-Import-Layern die Tabelle löschen
-    	$explosion = explode(CUSTOM_SHAPE_SCHEMA.'.', $rs['Data']);
+			$explosion = explode('using', $rs['Data']);
+    	$explosion = explode(CUSTOM_SHAPE_SCHEMA.'.', $explosion[0]);
     	$sql = 'DROP TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$explosion[1].';';
     	$sql.= 'DELETE FROM geometry_columns WHERE f_table_schema = \''.CUSTOM_SHAPE_SCHEMA.'\' AND f_table_name = \''.$explosion[1].'\'';
     	$this->debug->write("<p>file:kvwmap class:db_mapObj->deleteRollenLayer - Löschen eines RollenLayers:<br>".$sql,4);
@@ -14065,7 +14066,7 @@ class db_mapObj{
   function newRollenLayer($formvars){
     $formvars['Data'] = str_replace ( "'", "''", $formvars['Data']);
 
-    $sql = "INSERT INTO rollenlayer (`user_id`, `stelle_id`, `aktivStatus`, `Name`, `Datentyp`, `Gruppe`, `Typ`, `Data`, `connection`, `connectiontype`, `transparency`, `epsg_code`, `labelitem`) VALUES(";
+    $sql = "INSERT INTO rollenlayer (`user_id`, `stelle_id`, `aktivStatus`, `Name`, `Datentyp`, `Gruppe`, `Typ`, `Data`, `query`, `connection`, `connectiontype`, `transparency`, `epsg_code`, `labelitem`) VALUES(";
     $sql .= "'".$formvars['user_id']."', ";
     $sql .= "'".$formvars['stelle_id']."', ";
     $sql .= "'".$formvars['aktivStatus']."', ";
@@ -14074,6 +14075,7 @@ class db_mapObj{
     $sql .= "'".$formvars['Gruppe']."', ";
     $sql .= "'".$formvars['Typ']."', ";
     $sql .= "'".$formvars['Data']."', ";
+		$sql .= "'".$formvars['query']."', ";
     $sql .= "'".$formvars['connection']."', ";
     $sql .= "'".$formvars['connectiontype']."', ";
     $sql .= "'".$formvars['transparency']."', ";

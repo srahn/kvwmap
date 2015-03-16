@@ -50,6 +50,9 @@ class data_import_export {
 		      $command = POSTGRESBINPATH.'shp2pgsql -g the_geom -I -s '.$formvars['epsg'].' -W LATIN1 -c "'.UPLOADPATH.$file.'" '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' > "'.UPLOADPATH.$file.'.sql"'; 
 		      exec($command);
 		     	#echo $command;
+					$fp = fopen(UPLOADPATH.$file.'.sql', 'r+');
+					fwrite($fp, 'SET default_with_oids = true;'.chr(10));
+					fclose($fp);
 					$command = POSTGRESBINPATH.'psql -f "'.UPLOADPATH.$file.'.sql" '.$pgdatabase->dbName.' '.$pgdatabase->user;
 					if($pgdatabase->passwd != '')$command = 'export PGPASSWORD="'.$pgdatabase->passwd.'"; '.$command;
 		      exec($command);
@@ -83,7 +86,8 @@ class data_import_export {
 				    $this->formvars['Gruppe'] = $groupid;
 				    $this->formvars['Typ'] = 'import';
 				    $this->formvars['Datentyp'] = $datatype;
-				    $this->formvars['Data'] = 'the_geom from '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename;
+				    $this->formvars['Data'] = 'the_geom from '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' using srid='.$formvars['epsg'];
+						$this->formvars['query'] = 'SELECT * FROM '.$tablename.' WHERE 1=1';
 				    $connectionstring ='user='.$pgdatabase->user;
 	    			if($pgdatabase->passwd != '')$connectionstring.=' password='.$pgdatabase->passwd;
 				    $connectionstring.=' dbname='.$pgdatabase->dbName;
@@ -93,6 +97,11 @@ class data_import_export {
 				    $this->formvars['transparency'] = 65;
 				
 						$layer_id = $dbmap->newRollenLayer($this->formvars);
+						$layerdb = $dbmap->getlayerdatabase(-$layer_id, $this->Stelle->pgdbhost);
+						$layerdb->setClientEncoding();
+						$path = $this->formvars['query'];
+						$attributes = $dbmap->load_attributes($layerdb, $path);
+						$dbmap->save_postgis_attributes(-$layer_id, $attributes, '');
 				
 						$attrib['name'] = ' ';
 						$attrib['layer_id'] = -$layer_id;

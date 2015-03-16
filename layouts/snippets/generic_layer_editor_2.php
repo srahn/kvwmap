@@ -64,7 +64,7 @@
 	        <th colspan="2" style="background-color:<? echo BG_GLEHEADER; ?>;">			  
 			  <table width="100%">
 			    <tr>
-						<? if($layer['connectiontype'] == 6){ ?>
+						<? if($layer['connectiontype'] == 6 AND $layer['Layer_ID'] > 0){ ?>
 			      <td>
 			        <input id="<? echo $layer['Layer_ID'].'_'.$k; ?>" type="checkbox" name="check;<? echo $attributes['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>">&nbsp;
 			        <span style="color:<? echo TXT_GLEHEADER; ?>;"><? echo $strSelectThisDataset; ?></span>
@@ -75,7 +75,7 @@
 								<tr>
 									<? if($this->formvars['go'] == 'Zwischenablage' OR $this->formvars['go'] == 'gemerkte_Datensaetze_anzeigen'){ ?>
 										<td style="padding: 0 0 0 10;"><a title="Datensatz nicht mehr merken" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);remove_from_clipboard(<? echo $layer['Layer_ID']; ?>);"><div class="emboss nicht_mehr_merken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
-									<? }elseif($layer['connectiontype'] == 6){ ?>
+									<? }elseif($layer['connectiontype'] == 6 AND $layer['Layer_ID'] > 0){ ?>
 									<td style="padding: 0 0 0 10;"><a title="Datensatz merken" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);add_to_clipboard(<? echo $layer['Layer_ID']; ?>);"><div class="emboss merken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
 									<? } ?>
 			     	<? 	if($layer['privileg'] > '0'){ ?>
@@ -238,9 +238,10 @@
 <?								} 
 									if($layer['shape'][$k][$attributes['the_geom']]){ ?>
 											<td style="padding: 0 0 0 10;"><a title="<? echo $strMapZoom; ?>" href="javascript:zoom2object('go=zoomtoPolygon&oid=<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>&layer_tablename=<? echo $geom_tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>&selektieren=zoomonly');"><div class="emboss zoom_normal"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+									<? if($layer['Layer_ID'] > 0){ ?>
 											<td style="padding: 0 0 0 10;"><a title="<? echo $strMapZoom.$strAndHighlight; ?>" href="javascript:zoom2object('go=zoomtoPolygon&oid=<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>&layer_tablename=<? echo $geom_tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>&selektieren=false');"><div class="emboss zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
 											<td style="padding: 0 0 0 10;"><a title="<? echo $strMapZoom.$strAndHide; ?>" href="javascript:zoom2object('go=zoomtoPolygon&oid=<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>&layer_tablename=<? echo $geom_tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>&selektieren=true');"><div class="emboss zoom_select"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
-									<? } ?>
+									<? }} ?>
 										</tr>
 									</table>
 <?							}
@@ -344,7 +345,7 @@
 ?>
 	<tr>
 		<td colspan="2"align="left">
-		<? if($layer['connectiontype'] == 6 AND $this->new_entry != true){ ?>
+		<? if($layer['connectiontype'] == 6 AND $this->new_entry != true AND $layer['Layer_ID'] > 0){ ?>
 			<table width="100%" border="0" cellspacing="4" cellpadding="0">
 				<tr>
 					<td colspan="2">

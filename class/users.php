@@ -1824,8 +1824,8 @@ class rolle {
 		}
 	}
 
-	function getRollenLayer($LayerName) {
-    $sql ='SELECT l.*, -l.id as Layer_ID FROM rollenlayer AS l';
+	function getRollenLayer($LayerName, $typ = NULL) {
+    $sql ="SELECT l.*, -l.id as Layer_ID, l.query as pfad FROM rollenlayer AS l";
     $sql.=' WHERE l.stelle_id = '.$this->stelle_id.' AND l.user_id = '.$this->user_id;
     if ($LayerName!='') {
       $sql.=' AND (l.Name LIKE "'.$LayerName.'" ';
@@ -1836,6 +1836,9 @@ class rolle {
         $sql.=')';
       }
     }
+		if($typ != NULL){
+			$sql .= " AND Typ = '".$typ."'";
+		}
     #echo $sql.'<br>';
     $this->debug->write("<p>file:users.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
@@ -1924,6 +1927,7 @@ class rolle {
 		for($i = 0; $i < count($rollenlayerset); $i++){
 			if($formvars['thema'.$rollenlayerset[$i]['Layer_ID']] == 0){
 				$mapdb->deleteRollenLayer($rollenlayerset[$i]['id']);
+				$mapdb->delete_layer_attributes(-$rollenlayerset[$i]['id']);
 				# auch die Klassen und styles löschen
 				if($rollenlayerset[$i]['Class'] != ''){
 					foreach($rollenlayerset[$i]['Class'] as $class){
