@@ -26,7 +26,7 @@ function save(){
   <? if($this->formvars['ukofile'] == ''){ ?>
   <tr>
   	<td>&nbsp;</td>
-		<td align="center" style="border-bottom:1px solid #C3C7C3"><span class="fett">UKO-Datei</span>
+		<td align="center" style="border-bottom:1px solid #C3C7C3"><span class="fett">UKO- oder Zip-Datei:</span>
 		<input class="button" type="file" name="ukofile" size="12">
 		<input class="button" type="button" name="import" onclick="save();" value="Importieren"></td>
 		<td>&nbsp;</td>
