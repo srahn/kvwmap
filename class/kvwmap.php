@@ -8038,15 +8038,7 @@ class GUI {
     //return TEMPPATH_REL.$imagename;
     //$this->output();
 	}
-	  
-  function uko_export(){
-  	$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-    $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-		include_(CLASSPATH.'uko.php');
-    $this->uko = new uko($this->pgdatabase);
-    $this->uko->uko_export($this->formvars, $layerdb);
-  }
-	
+	  	
   function uko_import(){
 		$this->titel='UKO-Import';
     $this->main='uko_import.php';
@@ -8062,11 +8054,18 @@ class GUI {
 		include_(CLASSPATH.'data_import_export.php');
     $this->data_import_export = new data_import_export();
 		$this->data_import_export->get_ukotable_srid($this->pgdatabase);
-    $id = $this->data_import_export->uko_importieren($this->formvars, $this->user->Name, $this->user->id, $this->pgdatabase);
+    $oids = $this->data_import_export->uko_importieren($this->formvars, $this->user->Name, $this->user->id, $this->pgdatabase);
 		if($this->data_import_export->success == true){
 			$this->main='map.php';
 			$this->loadMap('DataBase');
-			$this->zoomToPolygon('uko_polygon', $id, 20, $this->user->rolle->epsg_code);
+			$rect = $this->mapDB->zoomToDatasets($oids, 'uko_polygon', 'the_geom', 20, $this->pgdatabase, $this->data_import_export->uko_srid, $this->user->rolle->epsg_code);
+			$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
+	    if (MAPSERVERVERSION > 600) {
+				$this->map_scaledenom = $this->map->scaledenom;
+			}
+			else {
+				$this->map_scaledenom = $this->map->scale;
+			}
 			$this->user->rolle->newtime = $this->user->rolle->last_time_id;
 			$this->drawMap();
 			$this->saveMap('');
@@ -12433,6 +12432,7 @@ class GUI {
 		# Filter berücksichtigen
 		$filter = $this->mapDB->getFilter($layer_id, $this->Stelle->id);
 		if($filter != ''){
+			$filter = str_replace('$userid', $this->user->id, $filter);
 			$subquery .= ' WHERE '.$filter;
 		}
 
@@ -12479,7 +12479,8 @@ class GUI {
 	    $tablename = $layerset['attributes']['table_name'][$layerset['attributes']['the_geom']];
 	    $oid = $layerset['shape'][$k][$tablename.'_oid'];
 	    $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-	    $map = ms_newMapObj('');
+	    $map = new mapObj(DEFAULTMAPFILE);
+			$map->set('debug', 5);
 	    $layerdb = $mapDB->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
 	    # Auf den Datensatz zoomen
 	    $sql ="SELECT st_xmin(bbox) AS minx,st_ymin(bbox) AS miny,st_xmax(bbox) AS maxx,st_ymax(bbox) AS maxy";

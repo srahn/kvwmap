@@ -915,11 +915,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->checkCaseAllowed('WMS_Import');
 			$GUI->wmsImportFormular();
 	  } break;
-	  
-	  case 'UKO_Export' : {
-			$GUI->uko_export();
-	  } break;
-	  
+	  	  
 	  case 'UKO_Import' : {
 			$GUI->checkCaseAllowed('UKO_Import');
 			$GUI->uko_import();

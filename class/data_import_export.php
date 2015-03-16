@@ -351,25 +351,35 @@ class data_import_export {
   
 	function uko_importieren($formvars, $username, $userid, $database){
 		$_files = $_FILES;
-		if($_files['ukofile']['name']){     # eine UKOdatei wurde ausgewählt
+		if($_files['ukofile']['name']){     
 		  $formvars['ukofile'] = $_files['ukofile']['name'];
 		  $nachDatei = UPLOADPATH.$_files['ukofile']['name'];
 		  if(move_uploaded_file($_files['ukofile']['tmp_name'],$nachDatei)){
-			$wkt = file_get_contents($nachDatei);
-			$wkt = substr($wkt, strpos($wkt, 'KOO ')+4);
-			$wkt = 'MULTIPOLYGON((('.$wkt;
-			$wkt = str_replace(chr(10).'FL+'.chr(10).'KOO ', ')),((', $wkt);
-			$wkt = str_replace(chr(10).'FL-'.chr(10).'KOO ', '),(', $wkt);
-			$wkt = str_replace(chr(10).'KOO ', ',', $wkt);
-			$wkt.= ')))';
-			$sql = "INSERT INTO uko_polygon (username, userid, dateiname, the_geom) VALUES('".$username."', ".$userid.", '".$_files['ukofile']['name']."', st_transform(st_geomfromtext('".$wkt."', ".$formvars['epsg']."), ".$this->uko_srid.")) RETURNING id";
-			$ret = $database->execSQL($sql,4, 1);
-			if ($ret[0])$this->success = false;
-			else {
-				$this->success = true;
-				$rs=pg_fetch_array($ret[1]);
-				return $rs[0];
-			}
+				$dateinamensteil = explode('.', $nachDatei);
+				if(strtolower($dateinamensteil[1]) == 'zip'){
+					$files = unzip($nachDatei, false, false, true);
+				}
+				else $files = array($_files['ukofile']['name']);
+				for($i = 0; $i < count($files); $i++){
+					$wkt = file_get_contents(UPLOADPATH.$files[$i]);
+					$wkt = substr($wkt, strpos($wkt, 'KOO ')+4);
+					$wkt = str_replace(chr(13), '', $wkt);
+					$wkt = 'MULTIPOLYGON((('.$wkt;
+					$wkt = str_replace(chr(13).'FL+'.chr(13).'KOO ', ')),((', $wkt);
+					$wkt = str_replace(chr(10).'FL+'.chr(10).'KOO ', ')),((', $wkt);
+					$wkt = str_replace(chr(10).'FL-'.chr(10).'KOO ', '),(', $wkt);
+					$wkt = str_replace(chr(10).'KOO ', ',', $wkt);
+					$wkt.= ')))';
+					$sql = "INSERT INTO uko_polygon (username, userid, dateiname, the_geom) VALUES('".$username."', ".$userid.", '".$_files['ukofile']['name']."', st_transform(st_geomfromtext('".$wkt."', ".$formvars['epsg']."), ".$this->uko_srid.")) RETURNING oid";
+					$ret = $database->execSQL($sql,4, 1);
+					if ($ret[0])$this->success = false;
+					else{
+						$this->success = true;
+						$rs=pg_fetch_array($ret[1]);
+						$oids[] = $rs[0];
+					}
+				}
+				return $oids;
 		  }
 		}
 	}
