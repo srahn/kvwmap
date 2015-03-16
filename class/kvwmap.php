@@ -12410,15 +12410,15 @@ class GUI {
 		if($layer == NULL)$layer = $this->user->rolle->getRollenLayer(-$layer_id);
 		$data = $layer[0]['Data'];
     
-    # suchen nach dem ersten Vorkommen von using unique
-    $pos = strpos(strtolower($data),'using unique');
+    # suchen nach dem ersten Vorkommen von using
+    $pos = strpos(strtolower($data),'using ');
 
-    # Abschneiden der unique Wörter im Datastatement wenn unique verwendet wurde
+    # Abschneiden der uing Wörter im Datastatement wenn unique verwendet wurde
     if ($pos !== false) {
       $subquery=substr($data,0,$pos);
     }
     else {
-      # unique kommt nicht vor, es handelt sich um ein einfaches Data Statement in der Form
+      # using kommt nicht vor, es handelt sich um ein einfaches Data Statement in der Form
       # the_geom from tabelle, übernehmen wie es ist.
       $subquery = $data;
     }
