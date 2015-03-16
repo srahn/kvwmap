@@ -30,15 +30,13 @@
 
 class data_import_export {
     
-  ################### Liste der Funktionen ########################################################################################################
-  # dbf($database)
-  ##################################################################################################################################################
-
   function data_import_export() {
     global $debug;
     $this->debug=$debug;
   }
-  
+
+################# Import #################
+	
   function create_shape_rollenlayer($formvars, $stelle, $user, $database, $pgdatabase){
   	$_files = $_FILES;
   	if($_files['zipfile']['name']){     # eine Zipdatei wurde ausgewählt
@@ -341,7 +339,44 @@ class data_import_export {
     	$this->tables[] = $rs;
     }
   }
+	
+	function get_ukotable_srid($database){
+		$sql = "select srid from geometry_columns where f_table_name = 'uko_polygon'";
+		$ret = $database->execSQL($sql,4, 1);
+		if(!$ret[0]){
+			$rs=pg_fetch_array($ret[1]);
+			$this->uko_srid = $rs[0];
+		}
+  }
   
+	function uko_importieren($formvars, $username, $userid, $database){
+		$_files = $_FILES;
+		if($_files['ukofile']['name']){     # eine UKOdatei wurde ausgewählt
+		  $formvars['ukofile'] = $_files['ukofile']['name'];
+		  $nachDatei = UPLOADPATH.$_files['ukofile']['name'];
+		  if(move_uploaded_file($_files['ukofile']['tmp_name'],$nachDatei)){
+			$wkt = file_get_contents($nachDatei);
+			$wkt = substr($wkt, strpos($wkt, 'KOO ')+4);
+			$wkt = 'MULTIPOLYGON((('.$wkt;
+			$wkt = str_replace(chr(10).'FL+'.chr(10).'KOO ', ')),((', $wkt);
+			$wkt = str_replace(chr(10).'FL-'.chr(10).'KOO ', '),(', $wkt);
+			$wkt = str_replace(chr(10).'KOO ', ',', $wkt);
+			$wkt.= ')))';
+			$sql = "INSERT INTO uko_polygon (username, userid, dateiname, the_geom) VALUES('".$username."', ".$userid.", '".$_files['ukofile']['name']."', st_transform(st_geomfromtext('".$wkt."', ".$formvars['epsg']."), ".$this->uko_srid.")) RETURNING id";
+			$ret = $database->execSQL($sql,4, 1);
+			if ($ret[0])$this->success = false;
+			else {
+				$this->success = true;
+				$rs=pg_fetch_array($ret[1]);
+				return $rs[0];
+			}
+		  }
+		}
+	}
+  
+	
+################### Export ########################
+
   function export($formvars, $stelle, $mapdb){
   	$this->formvars = $formvars;
     $this->layerdaten = $stelle->getqueryablePostgisLayers(NULL, 1);
@@ -413,27 +448,19 @@ class data_import_export {
 	}
   
 	function create_uko($layerdb, $table, $column){
-		$sql = "SELECT replace(replace(st_astext(st_pointn(st_ExteriorRing(".$column."), generate_series(1,st_npoints(".$column.")))), 'POINT(', 'KOO '), ')', '') as coords ";
-		$sql.= "FROM (SELECT st_GeometryN(".$column.", generate_series(1, st_numgeometries(".$column."))) as ".$column." ";
-		$sql.= "From (SELECT st_union(".$column.") as ".$column." FROM ".$table.") as foo) as foofoo";
+		$sql.= "SELECT st_astext(st_multi(st_union(".$column."))) as geom FROM ".$table;
 		#echo $sql;
 		$ret = $layerdb->execSQL($sql,4, 1);
-		if (!$ret[0]) {
-			while ($rs=pg_fetch_array($ret[1])) {
-				$result[] = $rs;
-			}
+		if(!$ret[0]){
+			$rs=pg_fetch_array($ret[1]);
+			$uko = $rs['geom'];
+			$uko = str_replace('MULTIPOLYGON(((', 'TYP UPO 2'.chr(10).'KOO ', $uko);
+			$uko = str_replace(')),((', chr(10).'FL+'.chr(10).'KOO ', $uko);
+			$uko = str_replace('),(', chr(10).'FL-'.chr(10).'KOO ', $uko);
+			$uko = str_replace(',', chr(10).'KOO ', $uko);
+			$uko = str_replace(')))', '', $uko);			
+			return $uko;
 		}
-		$uko = 'TYP UPO 2'.chr(10);
-		# Daten schreiben
-		for($j = 0; $j < count($result); $j++){
-			$uko .= $result[$j]['coords'].chr(10);
-			if($start == '')$start = $result[$j]['coords'];
-			elseif($j < count($result)-1 AND $start == $result[$j]['coords']){
-				$uko .= 'FL+'.chr(10);
-				$start = '';
-			}
-		}
-		return $uko;
   }
 	
 	function export_exportieren($formvars, $stelle, $user){

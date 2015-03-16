@@ -38,13 +38,13 @@ class uko{
 	$this->srid = $this->getsrid($database);
   }
   
-  function getsrid($database){
-	$sql = "select srid from geometry_columns where f_table_name = 'uko_polygon'";
-	$ret = $database->execSQL($sql,4, 1);
-	if(!$ret[0]){
-		$rs=pg_fetch_array($ret[1]);
-		return $rs[0];
-	}
+  function get_ukotable_srid($database){
+		$sql = "select srid from geometry_columns where f_table_name = 'uko_polygon'";
+		$ret = $database->execSQL($sql,4, 1);
+		if(!$ret[0]){
+			$rs=pg_fetch_array($ret[1]);
+			return $rs[0];
+		}
   }
   
 	function uko_importieren($formvars, $username, $userid, $database){

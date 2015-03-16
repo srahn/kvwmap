@@ -8048,23 +8048,25 @@ class GUI {
   }
 	
   function uko_import(){
-	$this->titel='UKO-Import';
+		$this->titel='UKO-Import';
     $this->main='uko_import.php';
-		include_(CLASSPATH.'uko.php');
-    $this->uko = new uko($this->pgdatabase);
+		include_(CLASSPATH.'data_import_export.php');
+    $this->data_import_export = new data_import_export();
+		$this->epsg_codes = read_epsg_codes($this->pgdatabase);
     $this->output();
   }
   
   function uko_import_importieren(){
     $this->titel='UKO-Import';
     $this->main='uko_import.php';
-		include_(CLASSPATH.'uko.php');
-    $this->uko = new uko($this->pgdatabase);
-    $id = $this->uko->uko_importieren($this->formvars, $this->user->Name, $this->user->id, $this->pgdatabase);
-		if($this->uko->success == true){
+		include_(CLASSPATH.'data_import_export.php');
+    $this->data_import_export = new data_import_export();
+		$this->data_import_export->get_ukotable_srid($this->pgdatabase);
+    $id = $this->data_import_export->uko_importieren($this->formvars, $this->user->Name, $this->user->id, $this->pgdatabase);
+		if($this->data_import_export->success == true){
 			$this->main='map.php';
 			$this->loadMap('DataBase');
-			$this->zoomToPolygon('uko_polygon', $id, 20, $this->uko->srid);
+			$this->zoomToPolygon('uko_polygon', $id, 20, $this->user->rolle->epsg_code);
 			$this->user->rolle->newtime = $this->user->rolle->last_time_id;
 			$this->drawMap();
 			$this->saveMap('');
