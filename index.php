@@ -927,31 +927,39 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  } break;
 
 		case 'SHP_Anzeigen' : {
-		$GUI->create_shp_rollenlayer();
+			$GUI->create_shp_rollenlayer();
 	  } break;
 	  
 	  case 'SHP_Anzeigen_Datei laden' : {
-		$GUI->create_shp_rollenlayer_load();
+			$GUI->create_shp_rollenlayer_load();
+	  } break;
+		
+		case 'Punktliste_Anzeigen' : {
+			$GUI->create_point_rollenlayer();
+	  } break;
+		
+		case 'Punktliste_Anzeigen_Datei laden' : {
+			$GUI->create_point_rollenlayer_load();
 	  } break;
 
 	  case 'simple_SHP_Import' : {
-		$GUI->checkCaseAllowed('simple_SHP_Import');
-		$GUI->simple_shp_import();
+			$GUI->checkCaseAllowed('simple_SHP_Import');
+			$GUI->simple_shp_import();
 	  } break;
 
 	  case 'simple_SHP_Import_speichern' : {
-		$GUI->checkCaseAllowed('simple_SHP_Import');
-		$GUI->simple_shp_import_speichern();
+			$GUI->checkCaseAllowed('simple_SHP_Import');
+			$GUI->simple_shp_import_speichern();
 	  } break;
 	  
 	  case 'SHP_Import' : {
-		$GUI->checkCaseAllowed('SHP_Import');
-		$GUI->shp_import();
+			$GUI->checkCaseAllowed('SHP_Import');
+			$GUI->shp_import();
 	  } break;
 
 	  case 'SHP_Import_speichern' : {
-		$GUI->checkCaseAllowed('SHP_Import');
-		$GUI->shp_import_speichern();
+			$GUI->checkCaseAllowed('SHP_Import');
+			$GUI->shp_import_speichern();
 	  } break;
 
 	  case 'Daten_Export' : {

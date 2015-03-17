@@ -37,9 +37,97 @@ class data_import_export {
 
 ################# Import #################
 	
-  function create_shape_rollenlayer($formvars, $stelle, $user, $database, $pgdatabase){
-  	$_files = $_FILES;
-  	if($_files['zipfile']['name']){     # eine Zipdatei wurde ausgewählt
+  function create_shape_rollenlayer($formvars, $type, $stelle, $user, $database, $pgdatabase){
+		switch ($type){
+			case 'Shape' : {
+				$custom_table = $this->import_custom_shape($formvars, $pgdatabase);
+			}break;
+			case 'point' : {
+				$custom_table = $this->import_custom_point($formvars, $pgdatabase);
+			}break;
+		}
+		if($custom_table['datatype'] !== NULL){			# ------ Rollenlayer erzeugen ------- #
+			$result_colors = read_colors($database);
+			$dbmap = new db_mapObj($stelle->id, $user->id);
+			$group = $dbmap->getGroupbyName('Eigene Importe');
+			if($group != ''){
+				$groupid = $group['id'];
+			}
+			else{
+				$groupid = $dbmap->newGroup('Eigene Importe', 1);
+			}
+			$this->formvars['user_id'] = $user->id;
+			$this->formvars['stelle_id'] = $stelle->id;
+			$this->formvars['aktivStatus'] = 1;
+			$this->formvars['Name'] = $file." (".date('d.m. H:i',time()).")";;
+			$this->formvars['Gruppe'] = $groupid;
+			$this->formvars['Typ'] = 'import';
+			$this->formvars['Datentyp'] = $custom_table['datatype'];
+			$this->formvars['Data'] = 'the_geom from '.CUSTOM_SHAPE_SCHEMA.'.'.$custom_table['tablename'].' using srid='.$formvars['epsg'];
+			$this->formvars['query'] = 'SELECT * FROM '.$custom_table['tablename'].' WHERE 1=1';
+			$connectionstring ='user='.$pgdatabase->user;
+			if($pgdatabase->passwd != '')$connectionstring.=' password='.$pgdatabase->passwd;
+			$connectionstring.=' dbname='.$pgdatabase->dbName;
+			$this->formvars['connection'] = $connectionstring;
+			$this->formvars['connectiontype'] = 6;
+			$this->formvars['epsg_code'] = $formvars['epsg'];
+			$this->formvars['transparency'] = 65;
+	
+			$layer_id = $dbmap->newRollenLayer($this->formvars);
+			$layerdb = $dbmap->getlayerdatabase(-$layer_id, $this->Stelle->pgdbhost);
+			$layerdb->setClientEncoding();
+			$path = $this->formvars['query'];
+			$attributes = $dbmap->load_attributes($layerdb, $path);
+			$dbmap->save_postgis_attributes(-$layer_id, $attributes, '');
+	
+			$attrib['name'] = ' ';
+			$attrib['layer_id'] = -$layer_id;
+			$attrib['expression'] = '';
+			$attrib['order'] = 0;
+			
+			$class_id = $dbmap->new_Class($attrib);
+			$this->formvars['class'] = $class_id;
+						
+			$style['colorred'] = $result_colors[rand(0,10)]['red'];
+			$style['colorgreen'] = $result_colors[rand(0,10)]['green'];
+			$style['colorblue'] = $result_colors[rand(0,10)]['blue'];
+			
+			$style['outlinecolorred'] = 0;
+			$style['outlinecolorgreen'] = 0;
+			$style['outlinecolorblue'] = 0;
+			switch ($custom_table['datatype']) {
+				case 0 :{
+					$style['size'] = 8;
+					$style['maxsize'] = 8;
+					$style['symbol'] = 9;
+				}break;
+				case 1 :{
+					$style['size'] = 1;
+					$style['maxsize'] = 2;
+					$style['symbol'] = NULL;
+				}break;
+				case 2 :{
+					$style['size'] = 1;
+					$style['maxsize'] = 2;
+					$style['symbol'] = NULL;
+				}
+			}
+			$style['symbolname'] = NULL;
+			$style['backgroundcolor'] = NULL;
+			$style['minsize'] = NULL;
+			
+			$style['angle'] = 360;
+			$style_id = $dbmap->new_Style($style);
+	
+			$dbmap->addStyle2Class($class_id, $style_id, 0);          # den Style der Klasse zuordnen
+			$user->rolle->set_one_Group($user->id, $stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
+		}
+    return -$layer_id;
+  }
+  
+	function import_custom_shape($formvars, $pgdatabase){
+		$_files = $_FILES;	
+		if($_files['zipfile']['name']){     # eine Zipdatei wurde ausgewählt
       $nachDatei = UPLOADPATH.$_files['zipfile']['name'];
       if(move_uploaded_file($_files['zipfile']['tmp_name'],$nachDatei)){
 				$files = unzip($nachDatei, false, false, true);
@@ -68,90 +156,16 @@ class data_import_export {
 			      }elseif(strpos($sql, 'POLYGON') !== false){
 			      	$datatype = 2;
 			      }
-			      # ------ Rollenlayer erzeugen ------- #
-			      $result_colors = read_colors($database);
-			      $dbmap = new db_mapObj($stelle->id, $user->id);
-				    $group = $dbmap->getGroupbyName('Eigene Shapes');
-				    if($group != ''){
-				      $groupid = $group['id'];
-				    }
-				    else{
-				      $groupid = $dbmap->newGroup('Eigene Shapes', 1);
-				    }
-				
-				    $this->formvars['user_id'] = $user->id;
-				    $this->formvars['stelle_id'] = $stelle->id;
-				    $this->formvars['aktivStatus'] = 1;
-				    $this->formvars['Name'] = $file." (".date('d.m. H:i',time()).")";;
-				    $this->formvars['Gruppe'] = $groupid;
-				    $this->formvars['Typ'] = 'import';
-				    $this->formvars['Datentyp'] = $datatype;
-				    $this->formvars['Data'] = 'the_geom from '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' using srid='.$formvars['epsg'];
-						$this->formvars['query'] = 'SELECT * FROM '.$tablename.' WHERE 1=1';
-				    $connectionstring ='user='.$pgdatabase->user;
-	    			if($pgdatabase->passwd != '')$connectionstring.=' password='.$pgdatabase->passwd;
-				    $connectionstring.=' dbname='.$pgdatabase->dbName;
-				    $this->formvars['connection'] = $connectionstring;
-				    $this->formvars['connectiontype'] = 6;
-				    $this->formvars['epsg_code'] = $formvars['epsg'];
-				    $this->formvars['transparency'] = 65;
-				
-						$layer_id = $dbmap->newRollenLayer($this->formvars);
-						$layerdb = $dbmap->getlayerdatabase(-$layer_id, $this->Stelle->pgdbhost);
-						$layerdb->setClientEncoding();
-						$path = $this->formvars['query'];
-						$attributes = $dbmap->load_attributes($layerdb, $path);
-						$dbmap->save_postgis_attributes(-$layer_id, $attributes, '');
-				
-						$attrib['name'] = ' ';
-						$attrib['layer_id'] = -$layer_id;
-						$attrib['expression'] = '';
-						$attrib['order'] = 0;
-						
-				    $class_id = $dbmap->new_Class($attrib);
-				    $this->formvars['class'] = $class_id;
-							    
-				    $style['colorred'] = $result_colors[rand(0,10)]['red'];
-	      		$style['colorgreen'] = $result_colors[rand(0,10)]['green'];
-	      		$style['colorblue'] = $result_colors[rand(0,10)]['blue'];
-				    
-				    $style['outlinecolorred'] = 0;
-				    $style['outlinecolorgreen'] = 0;
-				    $style['outlinecolorblue'] = 0;
-				    switch ($datatype) {
-					    case 0 :{
-					    	$style['size'] = 8;
-					    	$style['maxsize'] = 8;
-					    	$style['symbol'] = 9;
-					    }break;
-					    case 1 :{
-					    	$style['size'] = 1;
-					    	$style['maxsize'] = 2;
-					    	$style['symbol'] = NULL;
-					    }break;
-					    case 2 :{
-					    	$style['size'] = 1;
-					    	$style['maxsize'] = 2;
-					    	$style['symbol'] = NULL;
-					    }
-				    }
-				    $style['symbolname'] = NULL;
-				    $style['backgroundcolor'] = NULL;
-				    $style['minsize'] = NULL;
-				    
-				    $style['angle'] = 360;
-				    $style_id = $dbmap->new_Style($style);
-				
-				    $dbmap->addStyle2Class($class_id, $style_id, 0);          # den Style der Klasse zuordnen
-				    $user->rolle->set_one_Group($user->id, $stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
-		      }
+						$custom_table['datatype'] = $datatype;
+						$custom_table['tablename'] = $tablename;
+						return $custom_table;
+					}
 				}
-      }
-    }
-    return -$layer_id;
-  }
-  
-   function shp_import_speichern($formvars, $database){
+			}
+		}
+	}
+	
+  function shp_import_speichern($formvars, $database){
    	$this->formvars = $formvars;
     if(file_exists(UPLOADPATH.$this->formvars['dbffile'])){
 			include_(CLASSPATH.'dbf.php');

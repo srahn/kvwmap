@@ -1,5 +1,4 @@
 <?php
- # 2008-01-22 pkvvm
   include(LAYOUTPATH.'languages/shape_import_'.$this->user->rolle->language.'.php');
  ?>
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
@@ -31,7 +30,7 @@ function save(){
   <tr>
   	<td>&nbsp;</td>
 		<td align="right"><span class="fett"><?php echo $strZipArchive; ?></span></td>
-		<td><input type="file" name="zipfile" style="width:140px" ></td>
+		<td><input type="file" name="zipfile"></td>
 		<td>&nbsp;</td>
 	</tr>
 	<tr align="center">

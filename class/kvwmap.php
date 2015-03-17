@@ -8077,7 +8077,25 @@ class GUI {
 	function create_shp_rollenlayer_load(){
 		include_(CLASSPATH.'data_import_export.php');
 		$this->data_import_export = new data_import_export();
-		$layer_id = $this->data_import_export->create_shape_rollenlayer($this->formvars, $this->Stelle, $this->user, $this->database, $this->pgdatabase);
+		$layer_id = $this->data_import_export->create_shape_rollenlayer($this->formvars, 'Shape', $this->Stelle, $this->user, $this->database, $this->pgdatabase);
+		$this->loadMap('DataBase');
+		$this->zoomToMaxLayerExtent($layer_id);
+		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
+    $this->drawMap();
+    $this->saveMap('');
+    $this->output();
+	}
+	
+	function create_point_rollenlayer(){
+    $this->main='create_point_rollenlayer.php';
+    $this->epsg_codes = read_epsg_codes($this->pgdatabase);
+    $this->output();
+	}
+	
+	function create_point_rollenlayer_load(){
+		include_(CLASSPATH.'data_import_export.php');
+		$this->data_import_export = new data_import_export();
+		$layer_id = $this->data_import_export->create_shape_rollenlayer($this->formvars, 'point', $this->Stelle, $this->user, $this->database, $this->pgdatabase);
 		$this->loadMap('DataBase');
 		$this->zoomToMaxLayerExtent($layer_id);
 		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
