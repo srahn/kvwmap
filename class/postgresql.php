@@ -1633,7 +1633,7 @@ class pgdatabase {
 	function getGrundbuchblattliste($bezirk){
 		$sql = "SELECT buchungsblattnummermitbuchstabenerweiterung as blatt FROM alkis.ax_buchungsblatt WHERE land*10000 + bezirk = ".$bezirk." AND (blattart = 1000 OR blattart = 2000 OR blattart = 3000) ";
 		$sql.= $this->build_temporal_filter(array('ax_buchungsblatt'));
-		$sql.= " ORDER BY buchungsblattnummermitbuchstabenerweiterung::integer";
+		$sql.= " ORDER BY rtrim(ltrim(buchungsblattnummermitbuchstabenerweiterung,'PF0'),'ABCDEFGHIJKLMNOPQRSTUVWXYZ')::integer";
 		$ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
     	while($rs=pg_fetch_array($ret[1])){
