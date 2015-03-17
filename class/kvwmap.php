@@ -3146,32 +3146,6 @@ class GUI {
   	$this->user->rolle->saveOverlayPosition($this->formvars['overlayx'],$this->formvars['overlayy']);
   }
 
-  function googlemaps(){
-    $this->loadMap('DataBase');
-    $onlineresource=URL.APPLVERSION.'index.php?go=OWS&request=getmap&service=wms&version=1.1.0';
-    if ($this->mapDB->Layer[0]['aktivStatus']) {
-      $layers =$this->mapDB->Layer[0]['Name'];
-      $komma=1;
-    }
-    for($i = 1; $i<$this->mapDB->anzLayer; $i++){
-      if($this->mapDB->Layer[$i]['aktivStatus']) {
-        if($komma){
-          $layers.=',';
-        }
-        $layers.=$this->mapDB->Layer[$i]['Name'];
-        $komma=1;
-      }
-    }
-    $projection = $this->map->getProjection();
-    $projFROM = ms_newprojectionobj($projection);
-    $projTO = ms_newprojectionobj("proj=latlong");
-    $this->map->extent->project($projFROM, $projTO);
-    $this->main='GoogleMaps.php';
-    $this->titel='Google Maps Viewer';
-    $this->googlelink = 'http://www.gdi-service.de/gmaps/google-wms-overlay.php?onlineresource='.$onlineresource.'&layers='.$layers.'&format=image/png&width='.$this->user->rolle->nImageWidth.'&height='.$this->user->rolle->nImageHeight.'&srs=EPSG:4326&bbox='.$this->map->extent->minx.','.$this->map->extent->miny.','.$this->map->extent->maxx.','.$this->map->extent->maxy;
-    $this->output();
-  }
-
   function PointEditor(){
 		include_once (CLASSPATH.'pointeditor.php');
 		$this->reduce_mapwidth(0);

@@ -422,10 +422,6 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->export_flurst_csv_exportieren();
 	  } break;
 		
-	  case 'googlemaps' : {
-			$GUI->googlemaps();
-	  } break;
-
 	  # PointEditor
 	  case 'PointEditor' : {
 			$GUI->PointEditor();
