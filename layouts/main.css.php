@@ -440,6 +440,11 @@ span.red {
 	font-family: SourceSansPro2;
 }
 
+.blink {
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink { 80% { visibility: hidden; }}
+
 span.black {
 	color: #252525;
 	font-size: 15px;

@@ -39,10 +39,11 @@
 						<td align="right">
 						<?	if($mysql_counter == 0 AND $postgresql_counter == 0)echo ' Schemata aktuell'; 
 								else {
+									echo '<span class="fett red blink">';
 									$update_necessary = true;
 									if($mysql_counter > 0)echo 'MySQL-Schema ';
 									if($postgresql_counter > 0)echo 'PostgreSQL-Schema ';
-									echo ' nicht aktuell';
+									echo ' nicht aktuell</span>';
 								}
 								if($seed_counter > 0){
 									$update_necessary = true;
