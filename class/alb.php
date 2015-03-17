@@ -1678,37 +1678,37 @@ class ALB {
 	                    $pdf->addText($col1,$row-=12,$fontSize,utf8_decode($Eigentuemerliste[$i]->Name[$k]));
 	                  }
 	                } # ende Schleife Eigentümer des Grundbuchblattes
+									if ($flst->Buchungen[$b]['zusatz_eigentuemer'] != '') {
+										$zusatzeigentuemertext = $flst->Buchungen[$b]['zusatz_eigentuemer'];
+										while(strlen($zusatzeigentuemertext) > 60){
+											$positionkomma=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8'),",",'utf8');
+											$positionleerzeichen=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8')," ",'utf8');
+											if($positionkomma>$positionleerzeichen){
+												$positiontrenner=$positionkomma;
+											}
+											else{
+												$positiontrenner=$positionleerzeichen;
+											}
+											if($row<120) {
+												# Seitenumbruch
+												$seite++;
+												# aktuelle Seite abschließen
+												$pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
+												# neue Seite beginnen
+												$pageid=$pdf->newPage();
+												$pagecount[$f] = $pagecount[$f] + 1;
+												if ($wasserzeichen) {
+													$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
+												}
+												$row=825; # 812 -> 825 2007-04-02 Schmidt;
+												$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+											}
+											$pdf->addText($col1,$row-=12,$fontSize,utf8_decode(mb_substr($zusatzeigentuemertext,0,$positiontrenner,'utf8')));
+											$zusatzeigentuemertext=mb_substr($zusatzeigentuemertext,$positiontrenner+1, 999,'utf8');
+										}
+										$pdf->addText($col1,$row-=12,$fontSize,utf8_decode($zusatzeigentuemertext));
+									}
 	              } # ende Schleife Bestand
-	              if ($flst->Grundbuecher[$g]['zusatz_eigentuemer']!='') {
-	                $zusatzeigentuemertext=$flst->Grundbuecher[$g]['zusatz_eigentuemer'];
-	                while(strlen($zusatzeigentuemertext) > 60){
-	                  $positionkomma=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8'),",",'utf8');
-	                  $positionleerzeichen=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8')," ",'utf8');
-	                  if($positionkomma>$positionleerzeichen){
-	                    $positiontrenner=$positionkomma;
-	                  }
-	                  else{
-	                    $positiontrenner=$positionleerzeichen;
-	                  }
-	                  if($row<120) {
-	                    # Seitenumbruch
-	                    $seite++;
-	                    # aktuelle Seite abschließen
-	                    $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
-	                    # neue Seite beginnen
-	                    $pageid=$pdf->newPage();
-	                    $pagecount[$f] = $pagecount[$f] + 1;
-	                    if ($wasserzeichen) {
-	                      $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
-	                    }
-	                    $row=825; # 812 -> 825 2007-04-02 Schmidt;
-	                    $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
-	                  }
-	                  $pdf->addText($col1,$row-=12,$fontSize,utf8_decode(mb_substr($zusatzeigentuemertext,0,$positiontrenner,'utf8')));
-	                  $zusatzeigentuemertext=mb_substr($zusatzeigentuemertext,$positiontrenner+1, 999, 'utf8');
-	                }
-	                $pdf->addText($col1,$row-=12,$fontSize,utf8_decode($zusatzeigentuemertext));
-	              }
 	            } # ende Schleife Grundbuecher
 	          } # ende Ausgabe Formular 40
 	          break;
@@ -1784,39 +1784,37 @@ class ALB {
 	                    $pdf->addText($col1,$row-=12,$fontSize,utf8_decode($Eigentuemerliste[$i]->Name_bearb[$k]));
 	                  }
 	                } # ende Schleife Eigentümer des Grundbuchblattes
-	              } # ende Schleife Bestand
-	                            
-	              if ($flst->Grundbuecher[$g]['zusatz_eigentuemer']!='') {
-	                $zusatzeigentuemertext=$flst->Grundbuecher[$g]['zusatz_eigentuemer'];
-	                while(strlen($zusatzeigentuemertext) > 60){
-	                  $positionkomma=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8'),",",'utf8');
-	                  $positionleerzeichen=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8')," ",'utf8');
-	                  if($positionkomma>$positionleerzeichen){
-	                    $positiontrenner=$positionkomma;
-	                  }
-	                  else{
-	                    $positiontrenner=$positionleerzeichen;
-	                  }
-	                  if($row<120) {
-	                    # Seitenumbruch
-	                    $seite++;
-	                    # aktuelle Seite abschließen
-	                    $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
-	                    # neue Seite beginnen
-	                    $pageid=$pdf->newPage();
-	                    $pagecount[$f] = $pagecount[$f] + 1;
-	                    if ($wasserzeichen) {
-	                      $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
-	                    }
-	                    $row=825; # 812 -> 825 2007-04-02 Schmidt;
-	                    $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
-	                  }
-	                  $pdf->addText($col1,$row-=12,$fontSize,utf8_decode(mb_substr($zusatzeigentuemertext,0,$positiontrenner,'utf8')));
-	                  $zusatzeigentuemertext=mb_substr($zusatzeigentuemertext,$positiontrenner+1, 999,'utf8');
-	                }
-	                $pdf->addText($col1,$row-=12,$fontSize,utf8_decode($zusatzeigentuemertext));
-	              }
-	              
+									if ($flst->Buchungen[$b]['zusatz_eigentuemer'] != '') {
+										$zusatzeigentuemertext = $flst->Buchungen[$b]['zusatz_eigentuemer'];
+										while(strlen($zusatzeigentuemertext) > 60){
+											$positionkomma=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8'),",",'utf8');
+											$positionleerzeichen=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8')," ",'utf8');
+											if($positionkomma>$positionleerzeichen){
+												$positiontrenner=$positionkomma;
+											}
+											else{
+												$positiontrenner=$positionleerzeichen;
+											}
+											if($row<120) {
+												# Seitenumbruch
+												$seite++;
+												# aktuelle Seite abschließen
+												$pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
+												# neue Seite beginnen
+												$pageid=$pdf->newPage();
+												$pagecount[$f] = $pagecount[$f] + 1;
+												if ($wasserzeichen) {
+													$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
+												}
+												$row=825; # 812 -> 825 2007-04-02 Schmidt;
+												$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+											}
+											$pdf->addText($col1,$row-=12,$fontSize,utf8_decode(mb_substr($zusatzeigentuemertext,0,$positiontrenner,'utf8')));
+											$zusatzeigentuemertext=mb_substr($zusatzeigentuemertext,$positiontrenner+1, 999,'utf8');
+										}
+										$pdf->addText($col1,$row-=12,$fontSize,utf8_decode($zusatzeigentuemertext));
+									}
+	              } # ende Schleife Bestand	              
 	            } # ende Schleife Grundbuecher
 	          } # ende Ausgabe Formular 35
 	          break;

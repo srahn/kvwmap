@@ -1453,11 +1453,15 @@ class pgdatabase {
     while ($rs=pg_fetch_array($ret[1])) {
       $Grundbuch = new grundbuch("","",$this->debug);
       
-      $part = explode('.', $rs['namensnr']);
-      $rs['namensnr'] = intval($part[0]);
-      if(intval($part[1]) != 0){
-      	$rs['namensnr'] .= '.'.intval($part[1]);
-      }
+			$newparts = array();
+      $parts = explode('.', $rs['namensnr']);
+			for($i = 0; $i < count($parts); $i++){
+				$parts[$i] = intval($parts[$i]);
+				if($parts[$i] != 0){
+					$newparts[] = $parts[$i];
+				}
+			}
+			$rs['namensnr'] = implode('.', $newparts);
       
       $Eigentuemer = new eigentuemer($Grundbuch,$rs['namensnr']);
 

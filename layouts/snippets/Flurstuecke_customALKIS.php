@@ -664,7 +664,7 @@ backto = function(go){
                   </td>
                   <td valign="bottom">
                   <?
-                  if($this->Stelle->isFunctionAllowed('Adressaenderungen')){
+                  if($this->Stelle->isFunctionAllowed('Adressaenderungen') AND $Eigentuemerliste[$e]->Nr != ''){
                     if ($adressaenderungen['user_id'] == '') {
                       echo '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">'; ?>&nbsp;<a target="_blank" href="index.php?go=neuer_Layer_Datensatz&close_after_saving=true&selected_layer_id=<? echo LAYER_ID_ADRESSAENDERUNGEN; ?>&attributenames[0]=ort_post&attributenames[1]=postleitzahlpostzustellung&attributenames[2]=strasse&attributenames[3]=hausnummer&attributenames[4]=gml_id&values[0]=<? echo urlencode($Eigentuemerliste[$e]->ort_post); ?>&values[1]=<? echo urlencode($Eigentuemerliste[$e]->postleitzahlpostzustellung); ?>&values[2]=<? echo urlencode($Eigentuemerliste[$e]->strasse); ?>&values[3]=<? echo urlencode($Eigentuemerliste[$e]->hausnummer); ?>&values[4]=<? echo urlencode($Eigentuemerliste[$e]->anschrift_gml_id); ?>">Adresse aktualisieren</a>
                   <?}
