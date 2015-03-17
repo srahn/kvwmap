@@ -51,7 +51,6 @@
 	$string = str_replace('æ', '&aelig;', $string);
 	return $string;
 }
-
 class GUI {  var $layout;  var $style;  var $mime_type;  var $menue;  var $pdf;  var $addressliste;  var $debug;  var $dbConn;  var $flst;  var $formvars;  var $legende;  var $map;  var $mapDB;  var $img;  var $FormObject;  var $StellenForm;  var $Fehlermeldung;  var $Hinweis;  var $Stelle;  var $ALB;  var $activeLayer;  var $nImageWidth;  var $nImageHeight;  var $user;  var $qlayerset;  var $scaleUnitSwitchScale;  var $map_scaledenom;  var $map_factor;  var $formatter;  function GUI($main, $style, $mime_type) {
     # Debugdatei setzen
     global $debug;
@@ -179,7 +178,7 @@
           if($this->map_factor == ''){
             $this->map_factor=1;
           }
-          if ($layerset[$i]['maxscale'] > 0) {
+          if($layerset[$i]['maxscale'] > 0) {
             if(MAPSERVERVERSION > 500){
               $layer->set('maxscaledenom', $layerset[$i]['maxscale']/$this->map_factor*1.414);
             }
@@ -187,7 +186,7 @@
               $layer->set('maxscale', $layerset[$i]['maxscale']/$this->map_factor*1.414);
             }
           }
-          if ($layerset[$i]['minscale'] > 0) {
+          if($layerset[$i]['minscale'] > 0) {
             if(MAPSERVERVERSION > 500){
               $layer->set('minscaledenom', $layerset[$i]['minscale']/$this->map_factor*1.414);
             }
@@ -240,7 +239,7 @@
 							$map = ms_newMapObj(DEFAULTMAPFILE);
 						}
 				else {
-					$map = new mapObj(DEFAULTMAPFILE);
+					$map = new mapObj(DEFAULTMAPFILE, SHAPEPATH);
 				}
         $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
         
@@ -380,7 +379,6 @@
 
         # Layer
         $mapDB->nurAufgeklappteLayer=$this->formvars['nurAufgeklappteLayer'];
-        $mapDB->nurAktiveLayerOhneRequires=$this->formvars['nurAktiveLayerOhneRequires'];
         $mapDB->nurFremdeLayer=$this->formvars['nurFremdeLayer'];
         if($this->class_load_level == ''){
           $this->class_load_level = 1;
@@ -402,7 +400,8 @@
 					$this->layer_id_string .= $layerset[$i]['Layer_ID'].'|';							# alle Layer-IDs hintereinander in einem String
 											
 					if($layerset[$i]['requires'] != ''){
-						$layerset[$i]['aktivStatus'] = $layerset['layer_ids'][$layerset[$i]['requires']]['aktivStatus'];						$layerset[$i]['showclasses'] = $layerset['layer_ids'][$layerset[$i]['requires']]['showclasses'];
+						$layerset[$i]['aktivStatus'] = $layerset['layer_ids'][$layerset[$i]['requires']]['aktivStatus'];
+						$layerset[$i]['showclasses'] = $layerset['layer_ids'][$layerset[$i]['requires']]['showclasses'];
 					}
 					
 					if($this->class_load_level == 2 OR $layerset[$i]['requires'] != '' OR ($this->class_load_level == 1 AND $layerset[$i]['aktivStatus'] != 0)){      # nur wenn der Layer aktiv ist (oder ein requires-Layer), sollen seine Parameter gesetzt werden
@@ -416,6 +415,7 @@
 						$layer->setMetaData('wms_format',$layerset[$i]['wms_format']);
 						$layer->setMetaData('ows_server_version',$layerset[$i]['wms_server_version']);
 						$layer->setMetaData('ows_version',$layerset[$i]['wms_server_version']);
+						if($layerset[$i]['ows_srs'] == '')$layerset[$i]['ows_srs'] = 'EPSG:'.$layerset[$i]['epsg_code'];
 						$layer->setMetaData('ows_srs',$layerset[$i]['ows_srs']);
 						$layer->setMetaData('wms_connectiontimeout',$layerset[$i]['wms_connectiontimeout']);
 						$layer->setMetaData('wms_auth_username', $layerset[$i]['wms_auth_username']);
@@ -482,39 +482,39 @@
 							}
 						}
 						
-						if ($layerset[$i]['minscale']>=0) {
-						if($this->map_factor != ''){
-							if(MAPSERVERVERSION > 500){
-							$layer->set('minscaledenom', $layerset[$i]['minscale']/$this->map_factor*1.414);
-							}
-							else{
-							$layer->set('minscale', $layerset[$i]['minscale']/$this->map_factor*1.414);
-							}
-						}
-						else{
-							if(MAPSERVERVERSION > 500){
-							$layer->set('minscaledenom', $layerset[$i]['minscale']);
-							}
-							else{
-							$layer->set('minscale', $layerset[$i]['minscale']);
-							}
-						}
-						}
-						if ($layerset[$i]['maxscale']>0) {
+						if(!$this->noMinMaxScaling AND $layerset[$i]['minscale']>=0) {
 							if($this->map_factor != ''){
 								if(MAPSERVERVERSION > 500){
-								$layer->set('maxscaledenom', $layerset[$i]['maxscale']/$this->map_factor*1.414);
+									$layer->set('minscaledenom', $layerset[$i]['minscale']/$this->map_factor*1.414);
 								}
 								else{
-								$layer->set('maxscale', $layerset[$i]['maxscale']/$this->map_factor*1.414);
+									$layer->set('minscale', $layerset[$i]['minscale']/$this->map_factor*1.414);
 								}
 							}
 							else{
 								if(MAPSERVERVERSION > 500){
-								$layer->set('maxscaledenom', $layerset[$i]['maxscale']);
+									$layer->set('minscaledenom', $layerset[$i]['minscale']);
 								}
 								else{
-								$layer->set('maxscale', $layerset[$i]['maxscale']);
+									$layer->set('minscale', $layerset[$i]['minscale']);
+								}
+							}
+						}
+						if(!$this->noMinMaxScaling AND $layerset[$i]['maxscale']>0) {
+							if($this->map_factor != ''){
+								if(MAPSERVERVERSION > 500){
+									$layer->set('maxscaledenom', $layerset[$i]['maxscale']/$this->map_factor*1.414);
+								}
+								else{
+									$layer->set('maxscale', $layerset[$i]['maxscale']/$this->map_factor*1.414);
+								}
+							}
+							else{
+								if(MAPSERVERVERSION > 500){
+									$layer->set('maxscaledenom', $layerset[$i]['maxscale']);
+								}
+								else{
+									$layer->set('maxscale', $layerset[$i]['maxscale']);
 								}
 							}
 						}
@@ -540,7 +540,7 @@
               }
             }
             
-						$layerset[$i]['processing'] = 'CLOSE_CONNECTION=DEFER;'.$layerset[$i]['processing'];		# DB-Connection erst am Ende schliessen und nicht für jeden Layer neu aufmachen
+						if($layerset[$i]['connectiontype'] == 6)$layerset[$i]['processing'] = 'CLOSE_CONNECTION=DEFER;'.$layerset[$i]['processing'];		# DB-Connection erst am Ende schliessen und nicht für jeden Layer neu aufmachen
             if ($layerset[$i]['processing'] != "") {
               $processings = explode(";",$layerset[$i]['processing']);
               foreach ($processings as $processing) {
@@ -572,7 +572,7 @@
             else {
               # Vektorlayer
               if($layerset[$i]['Data'] != ''){
-								$layerset[$i]['Data'] = str_replace('$hist_timestamp', HIST_TIMESTAMP, $layerset[$i]['Data']);
+								$layerset[$i]['Data'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[$i]['Data']);
                 $layer->set('data', $layerset[$i]['Data']);
               }
   
@@ -762,6 +762,9 @@
 					if($dbStyle['gap'] != '') {
 	          $style->set('gap', $dbStyle['gap']);
 	        }
+					if($dbStyle['initialgap'] != '') {
+            $style->set('initialgap', $dbStyle['initialgap']);
+          }
 					if($dbStyle['linecap'] != '') {
 	          $style->set('linecap', constant(MS_CJC_.strtoupper($dbStyle['linecap'])));
 	        }
@@ -873,6 +876,9 @@
           if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
           $style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
         }
+				if($dbStyle['opacity'] != '') {		# muss nach color gesetzt werden
+					$style->set('opacity', $dbStyle['opacity']);
+				}
         if ($dbStyle['outlinecolor']!='') {
           $RGB=explode(" ",$dbStyle['outlinecolor']);
         	if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
@@ -883,6 +889,12 @@
         	if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
           $style->backgroundcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
         }
+				if($dbStyle['colorrange'] != '') {
+					$style->updateFromString("STYLE COLORRANGE ".$dbStyle['colorrange']." END");
+				}
+				if($dbStyle['datarange'] != '') {
+					$style->updateFromString("STYLE DATARANGE ".$dbStyle['datarange']." END");
+				}
         if ($dbStyle['offsetx']!='') {
           $style->set('offsetx', $dbStyle['offsetx']);
         }
@@ -1014,12 +1026,20 @@
             $style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
             $style->set('offsetx', $dbLabel['backgroundshadowsizex']);
 						$style->set('offsety', $dbLabel['backgroundshadowsizey']);
+						if ($dbLabel['buffer']!='') {
+							$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+							$style->set('width', $dbLabel['buffer']);
+						}
           }
 					if ($dbLabel['backgroundcolor']!='') {
             $RGB=explode(" ",$dbLabel['backgroundcolor']);
 						$style = new styleObj($label);
 						$style->setGeomTransform('labelpoly');
-            $style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+            $style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);						
+						if ($dbLabel['buffer']!='') {
+							$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+							$style->set('width', $dbLabel['buffer']);
+						}
           }
 					
           $label->angle = $dbLabel['angle'];
@@ -1211,7 +1231,7 @@
 							}
 							$legend .= '<span ';
 							if($layer['minscale'] != -1 AND $layer['maxscale'] > 0){
-								$legend .= 'title="'.$layer['minscale'].' - '.$layer['maxscale'].'"';
+								$legend .= 'title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
 							}			  
 							$legend .=' class="legend_layer">'.html_umlaute($layer['alias']).'</span>';
 							if($layer['metalink'] != ''){
@@ -1350,7 +1370,7 @@
 						$legend .= 'id="thema_'.$layer['Layer_ID'].'" name="thema'.$layer['Layer_ID'].'" disabled="true"></td><td>
 						<span class="legend_layer_hidden" ';
 						if($layer['minscale'] != -1 AND $layer['maxscale'] != -1){
-							$legend .= 'title="'.$layer['minscale'].' - '.$layer['maxscale'].'"';
+							$legend .= 'title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
 						}
 						$legend .= ' >'.html_umlaute($layer['alias']).'</span>';
 						if($layer['status'] != ''){
@@ -1634,7 +1654,8 @@
 		#$this->groupset=$this->getGroups('');
 		$this->loglevel = 0;
 	}
-  function readSettings() {		global $language;
+  function readSettings() {
+		global $language;
     # Abfragen und Zuweisen der Einstellungen der Rolle
     $sql ='SELECT * FROM rolle WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
     #echo $sql;
@@ -1674,9 +1695,11 @@
 		$this->geom_edit_first=$rs['geom_edit_first'];		
 		$this->overlayx=$rs['overlayx'];
 		$this->overlayy=$rs['overlayy'];
+		$this->instant_reload=$rs['instant_reload'];
+		$this->menu_auto_close=$rs['menu_auto_close'];
 		if($rs['hist_timestamp'] != ''){
-			$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');
-			rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');
+			$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');			# der wird zur Anzeige des Timestamps benutzt
+			rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');	# der hat die Form, wie der timestamp in der PG-DB steht und wird für die Abfragen benutzt
 		}
 		else rolle::$hist_timestamp = $this->hist_timestamp = '';
     $buttons = explode(',', $rs['buttons']);
@@ -1717,7 +1740,8 @@
 		}
 		return $formvars;
 	}
-  function getGroups($GroupName) {		global $language;
+  function getGroups($GroupName) {
+		global $language;
     # Abfragen der Gruppen in der Rolle
     $sql ='SELECT g2r.*, ';
 		if($language != 'german') {
@@ -1747,7 +1771,7 @@
 			$this->database->execSQL($sql,4, $this->loglevel);
 		}
 	}
-}class pgdatabase extends pgdatabase_alkis {  var $ist_Fortfuehrung;  var $debug;  var $loglevel;  var $defaultloglevel;  var $logfile;  var $defaultlogfile;  var $commentsign;  var $blocktransaction;	function pgdatabase() {
+}class pgdatabase {  var $ist_Fortfuehrung;  var $debug;  var $loglevel;  var $defaultloglevel;  var $logfile;  var $defaultlogfile;  var $commentsign;  var $blocktransaction;	function pgdatabase() {
 	  global $debug;
     $this->debug=$debug;
     $this->loglevel=LOG_LEVEL;
@@ -1759,19 +1783,19 @@
     $this->type='postgresql';
     $this->commentsign='--';
     # Wenn dieser Parameter auf 1 gesetzt ist werden alle Anweisungen
-    # START TRANSACTION, ROLLBACK und COMMIT unterdr�ckt, so da� alle anderen SQL
-    # Anweisungen nicht in Transactionsbl�cken ablaufen.
-    # Kann zur Steigerung der Geschwindigkeit von gro�en Datenbest�nden verwendet werden
+    # START TRANSACTION, ROLLBACK und COMMIT unterdrï¿½ckt, so daï¿½ alle anderen SQL
+    # Anweisungen nicht in Transactionsblï¿½cken ablaufen.
+    # Kann zur Steigerung der Geschwindigkeit von groï¿½en Datenbestï¿½nden verwendet werden
     # Vorsicht: Wenn Fehler beim Einlesen passieren, ist der Datenbestand inkonsistent
     # und der Einlesevorgang muss wiederholt werden bis er fehlerfrei durchgelaufen ist.
     # Dazu Fehlerausschriften bearchten.
     $this->blocktransaction=0;
   }
-}class pgdatabase_alkis {  var $ist_Fortfuehrung;  var $debug;  var $loglevel;  var $defaultloglevel;  var $logfile;  var $defaultlogfile;  var $commentsign;  var $blocktransaction;  function open() {
+  function open() {
   	if($this->port == '') $this->port = 5432;
     #$this->debug->write("<br>Datenbankverbindung öffnen: Datenbank: ".$this->dbName." User: ".$this->user,4);
 		$connect_string = 'dbname='.$this->dbName.' port='.$this->port.' user='.$this->user.' password='.$this->passwd;
-		if($this->host != 'localhost' AND $this->host != '127.0.0.1')$connect_string .= 'host='.$this->host;		// das beschleunigt den Connect extrem
+		if($this->host != 'localhost' AND $this->host != '127.0.0.1')$connect_string .= ' host='.$this->host;		// das beschleunigt den Connect extrem
     $this->dbConn=pg_connect($connect_string);
     $this->debug->write("Datenbank mit Connection_ID: ".$this->dbConn." geöffnet.",4);
     # $this->version = pg_version($this->dbConn); geht erst mit PHP 5
@@ -1896,15 +1920,22 @@
     $this->referenceMap=$rs;
     return $rs;
   }  
-  function read_Groups() {		global $language;
-    $sql ='SELECT g2r.*, ';
+  function read_Groups($all = false, $order = '') {
+		global $language;
+		$sql = 'SELECT ';
+		if($all == false) $sql .= 'g2r.status, ';
 		if($language != 'german') {
 			$sql.='CASE WHEN `Gruppenname_'.$language.'` IS NOT NULL THEN `Gruppenname_'.$language.'` ELSE `Gruppenname` END AS ';
 		}
-		$sql.='Gruppenname, obergruppe FROM u_groups AS g, u_groups2rolle AS g2r ';
-    $sql.=' WHERE g2r.stelle_ID='.$this->Stelle_ID.' AND g2r.user_id='.$this->User_ID;
-    $sql.=' AND g2r.id = g.id';
-		$sql.=' ORDER BY `order`';
+		$sql.='Gruppenname, obergruppe, g.id FROM u_groups AS g';
+		if($all == false){
+			$sql.=', u_groups2rolle AS g2r ';
+			$sql.=' WHERE g2r.stelle_ID='.$this->Stelle_ID.' AND g2r.user_id='.$this->User_ID;
+			$sql.=' AND g2r.id = g.id';
+		}
+		if($order != '')$sql.=' ORDER BY '.$order;
+		else $sql.=' ORDER BY `order`';
+		#echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Groups - Lesen der Gruppen der Rolle:<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
@@ -1915,12 +1946,13 @@
     $this->anzGroups=count($groups);
     return $groups;
   }
-  function read_Layer($withClasses, $groups = NULL){		global $language;
+  function read_Layer($withClasses, $groups = NULL){
+		global $language;
     $sql ='SELECT DISTINCT rl.*,ul.*, l.Layer_ID, ';
 		if($language != 'german') {
 			$sql.='CASE WHEN `Name_'.$language.'` != "" THEN `Name_'.$language.'` ELSE `Name` END AS ';
 		}
-		$sql.='Name, l.alias, l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem, l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem, l.tolerance, l.toleranceunits, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version, l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, g.*';
+		$sql.='Name, l.alias, l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem, l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version, l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, g.*';
     $sql.=' FROM u_rolle2used_layer AS rl,used_layer AS ul,layer AS l, u_groups AS g, u_groups2rolle as gr';
     $sql.=' WHERE rl.stelle_id=ul.Stelle_ID AND rl.layer_id=ul.Layer_ID AND l.Layer_ID=ul.Layer_ID';
     $sql.=' AND (ul.minscale != -1 OR ul.minscale IS NULL) AND l.Gruppe = g.id AND rl.stelle_ID='.$this->Stelle_ID.' AND rl.user_id='.$this->User_ID;
@@ -1928,11 +1960,16 @@
 		if($groups != NULL){
 			$sql.=' AND g.id IN ('.$groups.')';
 		}
-    if ($this->nurAufgeklappteLayer) {
+    if($this->nurAufgeklappteLayer){
       $sql.=' AND (rl.aktivStatus != "0" OR gr.status != "0" OR requires != "")';
     }
-    if($this->nurAktiveLayer){      $sql.=' AND (rl.aktivStatus != "0")';    }		if($this->OhneRequires){      $sql.=' AND (ul.requires IS NULL)';    }
-    if ($this->nurFremdeLayer){			# entweder fremde (mit host=...) Postgis-Layer oder aktive nicht-Postgis-Layer
+    if($this->nurAktiveLayer){
+      $sql.=' AND (rl.aktivStatus != "0")';
+    }
+		if($this->OhneRequires){
+      $sql.=' AND (ul.requires IS NULL)';
+    }
+    if($this->nurFremdeLayer){			# entweder fremde (mit host=...) Postgis-Layer oder aktive nicht-Postgis-Layer
     	$sql.=' AND (l.connection like "%host=%" AND l.connection NOT like "%host=localhost%" OR l.connectiontype != 6 AND rl.aktivStatus != "0")';
     }
     $sql.=' ORDER BY ul.drawingorder';
@@ -1947,6 +1984,8 @@
       if($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivStatus'] != '0')){    # bei withclasses == 2 werden für alle Layer die Klassen geladen, bei withclasses == 1 werden die Klassen nur dann geladen, wenn der Layer aktiv ist
         $rs['Class']=$this->read_Classes($rs['Layer_ID'], $this->disabled_classes);
       }
+			if($rs['maxscale'] > 0)$rs['maxscale'] = $rs['maxscale']+0.3;
+			if($rs['minscale'] > 0)$rs['minscale'] = $rs['minscale']-0.3;
       $this->Layer[$i]=$rs;
 			$this->Layer['layer_ids'][$rs['Layer_ID']] =& $this->Layer[$i];		# damit man mit einer Layer-ID als Schlüssel auf dieses Array zugreifen kann
 			$i++;
@@ -1963,7 +2002,8 @@
 		}
 		return $classarray;
   }
-  function read_Classes($Layer_ID, $disabled_classes = NULL, $all_languages = false) {		global $language;
+  function read_Classes($Layer_ID, $disabled_classes = NULL, $all_languages = false) {
+		global $language;
     $sql ='SELECT ';
 		if(!$all_languages AND $language != 'german') {
 			$sql.='CASE WHEN `Name_'.$language.'` IS NOT NULL THEN `Name_'.$language.'` ELSE `Name` END AS ';
@@ -2023,9 +2063,7 @@
     return $Labels;
   }
   function read_RollenLayer($id = NULL, $typ = NULL){
-    //$sql = 'SELECT DISTINCT l.*, g.Gruppenname, gr.status, -l.id AS Layer_ID, 1 as showclasses from rollenlayer AS l, u_groups AS g, u_groups2rolle as gr';
-    //$sql.= ' WHERE l.Gruppe = g.id AND l.stelle_id='.$this->Stelle_ID.' AND l.user_id='.$this->User_ID.' AND gr.id = g.id AND gr.stelle_id='.$this->Stelle_ID.' AND gr.user_id='.$this->User_ID;
-		$sql = 'SELECT DISTINCT l.*, g.Gruppenname, -l.id AS Layer_ID, 1 as showclasses from rollenlayer AS l, u_groups AS g';
+		$sql = "SELECT DISTINCT l.*, g.Gruppenname, -l.id AS Layer_ID, 1 as showclasses, CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable from rollenlayer AS l, u_groups AS g";
     $sql.= ' WHERE l.Gruppe = g.id AND l.stelle_id='.$this->Stelle_ID.' AND l.user_id='.$this->User_ID;
     if($id != NULL){
     	$sql .= ' AND l.id = '.$id;

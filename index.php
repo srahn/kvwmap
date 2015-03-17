@@ -43,7 +43,7 @@ if($_REQUEST['go_plus'] != '')$go = $go.'_'.$_REQUEST['go_plus'];
 #########################################################################################################
 define(CASE_COMPRESS, false);																																						#
 #																																																				#
-# 	navMap_ajax: 		- unter 1:100 zoomen																																#
+# 	navMap_ajax: 		- unter 1:10 zoomen																																	#
 #										- ein räumlich gefilterter Layer muss an sein																				#
 #										- man muss einen anderen EPSG-Code als den der Ref-Karte (2398) eingestellt haben		#
 # 	tooltip_query:	- ein Datensatz mit Bild muss abgefragt werden																			#

@@ -359,7 +359,6 @@
 
         # Layer
         $mapDB->nurAufgeklappteLayer=$this->formvars['nurAufgeklappteLayer'];
-        $mapDB->nurAktiveLayerOhneRequires=$this->formvars['nurAktiveLayerOhneRequires'];
         $mapDB->nurFremdeLayer=$this->formvars['nurFremdeLayer'];
         if($this->class_load_level == ''){
           $this->class_load_level = 1;
@@ -382,7 +381,7 @@
 											
 					if($layerset[$i]['requires'] != ''){
 						$layerset[$i]['aktivStatus'] = $layerset['layer_ids'][$layerset[$i]['requires']]['aktivStatus'];
-						$layerset[$i]['showclasses'] = $layerset['layer_ids'][$layerset[$i]['requires']];
+						$layerset[$i]['showclasses'] = $layerset['layer_ids'][$layerset[$i]['requires']]['showclasses'];
 					}
 					
 					if($this->class_load_level == 2 OR $layerset[$i]['requires'] != '' OR ($this->class_load_level == 1 AND $layerset[$i]['aktivStatus'] != 0)){      # nur wenn der Layer aktiv ist (oder ein requires-Layer), sollen seine Parameter gesetzt werden
@@ -869,7 +868,13 @@
           $RGB=explode(" ",$dbStyle['backgroundcolor']);
         	if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
           $style->backgroundcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
-        }				if($dbStyle['colorrange'] != '') {					$style->updateFromString("STYLE COLORRANGE ".$dbStyle['colorrange']." END");				}				if($dbStyle['datarange'] != '') {					$style->updateFromString("STYLE DATARANGE ".$dbStyle['datarange']." END");				}
+        }
+				if($dbStyle['colorrange'] != '') {
+					$style->updateFromString("STYLE COLORRANGE ".$dbStyle['colorrange']." END");
+				}
+				if($dbStyle['datarange'] != '') {
+					$style->updateFromString("STYLE DATARANGE ".$dbStyle['datarange']." END");
+				}
         if ($dbStyle['offsetx']!='') {
           $style->set('offsetx', $dbStyle['offsetx']);
         }
@@ -994,7 +999,28 @@
             $label->shadowsizey = $dbLabel['shadowsizey'];
           }
 					
-          if($dbLabel['backgroundshadowcolor']!='') {            $RGB=explode(" ",$dbLabel['backgroundshadowcolor']);            $style = new styleObj($label);						$style->setGeomTransform('labelpoly');            $style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);            $style->set('offsetx', $dbLabel['backgroundshadowsizex']);						$style->set('offsety', $dbLabel['backgroundshadowsizey']);						if ($dbLabel['buffer']!='') {							$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);							$style->set('width', $dbLabel['buffer']);						}          }					if ($dbLabel['backgroundcolor']!='') {            $RGB=explode(" ",$dbLabel['backgroundcolor']);						$style = new styleObj($label);						$style->setGeomTransform('labelpoly');            $style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);												if ($dbLabel['buffer']!='') {							$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);							$style->set('width', $dbLabel['buffer']);						}          }
+          if($dbLabel['backgroundshadowcolor']!='') {
+            $RGB=explode(" ",$dbLabel['backgroundshadowcolor']);
+            $style = new styleObj($label);
+						$style->setGeomTransform('labelpoly');
+            $style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+            $style->set('offsetx', $dbLabel['backgroundshadowsizex']);
+						$style->set('offsety', $dbLabel['backgroundshadowsizey']);
+						if ($dbLabel['buffer']!='') {
+							$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+							$style->set('width', $dbLabel['buffer']);
+						}
+          }
+					if ($dbLabel['backgroundcolor']!='') {
+            $RGB=explode(" ",$dbLabel['backgroundcolor']);
+						$style = new styleObj($label);
+						$style->setGeomTransform('labelpoly');
+            $style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);						
+						if ($dbLabel['buffer']!='') {
+							$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+							$style->set('width', $dbLabel['buffer']);
+						}
+          }
 					
           $label->angle = $dbLabel['angle'];
           if($layerset['labelangleitem']!=''){
@@ -1425,7 +1451,6 @@
 	  }
     # bisher gibt es folgenden verschiedenen Dokumente die angezeigt werden können
 		if ($this->formvars['mime_type'] != '') $this->mime_type = $this->formvars['mime_type'];
-
     switch ($this->mime_type) {
       case 'printversion' : {
         include (LAYOUTPATH.'snippets/printversion.php');
@@ -1698,7 +1723,8 @@
 		#$this->groupset=$this->getGroups('');
 		$this->loglevel = 0;
 	}
-  function readSettings() {		global $language;
+  function readSettings() {
+		global $language;
     # Abfragen und Zuweisen der Einstellungen der Rolle
     $sql ='SELECT * FROM rolle WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
     #echo $sql;
@@ -1738,9 +1764,11 @@
 		$this->geom_edit_first=$rs['geom_edit_first'];		
 		$this->overlayx=$rs['overlayx'];
 		$this->overlayy=$rs['overlayy'];
+		$this->instant_reload=$rs['instant_reload'];
+		$this->menu_auto_close=$rs['menu_auto_close'];
 		if($rs['hist_timestamp'] != ''){
-			$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');
-			rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');
+			$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');			# der wird zur Anzeige des Timestamps benutzt
+			rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');	# der hat die Form, wie der timestamp in der PG-DB steht und wird für die Abfragen benutzt
 		}
 		else rolle::$hist_timestamp = $this->hist_timestamp = '';
     $buttons = explode(',', $rs['buttons']);
@@ -1934,7 +1962,7 @@
     }
     return $ret;
   }
-}class pgdatabase extends pgdatabase_alkis {  var $ist_Fortfuehrung;  var $debug;  var $loglevel;  var $defaultloglevel;  var $logfile;  var $defaultlogfile;  var $commentsign;  var $blocktransaction;	function pgdatabase() {
+}class pgdatabase {  var $ist_Fortfuehrung;  var $debug;  var $loglevel;  var $defaultloglevel;  var $logfile;  var $defaultlogfile;  var $commentsign;  var $blocktransaction;	function pgdatabase() {
 	  global $debug;
     $this->debug=$debug;
     $this->loglevel=LOG_LEVEL;
@@ -1946,15 +1974,15 @@
     $this->type='postgresql';
     $this->commentsign='--';
     # Wenn dieser Parameter auf 1 gesetzt ist werden alle Anweisungen
-    # START TRANSACTION, ROLLBACK und COMMIT unterdr�ckt, so da� alle anderen SQL
-    # Anweisungen nicht in Transactionsbl�cken ablaufen.
-    # Kann zur Steigerung der Geschwindigkeit von gro�en Datenbest�nden verwendet werden
+    # START TRANSACTION, ROLLBACK und COMMIT unterdrï¿½ckt, so daï¿½ alle anderen SQL
+    # Anweisungen nicht in Transactionsblï¿½cken ablaufen.
+    # Kann zur Steigerung der Geschwindigkeit von groï¿½en Datenbestï¿½nden verwendet werden
     # Vorsicht: Wenn Fehler beim Einlesen passieren, ist der Datenbestand inkonsistent
     # und der Einlesevorgang muss wiederholt werden bis er fehlerfrei durchgelaufen ist.
     # Dazu Fehlerausschriften bearchten.
     $this->blocktransaction=0;
   }
-}class pgdatabase_alkis {  var $ist_Fortfuehrung;  var $debug;  var $loglevel;  var $defaultloglevel;  var $logfile;  var $defaultlogfile;  var $commentsign;  var $blocktransaction;  function open() {
+  function open() {
   	if($this->port == '') $this->port = 5432;
     #$this->debug->write("<br>Datenbankverbindung öffnen: Datenbank: ".$this->dbName." User: ".$this->user,4);
 		$connect_string = 'dbname='.$this->dbName.' port='.$this->port.' user='.$this->user.' password='.$this->passwd;
@@ -2083,11 +2111,13 @@
     $this->referenceMap=$rs;
     return $rs;
   }  
-  function read_Layer($withClasses, $groups = NULL){		global $language;
+  function read_Layer($withClasses, $groups = NULL){
+		global $language;
     $sql ='SELECT DISTINCT rl.*,ul.*, l.Layer_ID, ';
 		if($language != 'german') {
 			$sql.='CASE WHEN `Name_'.$language.'` != "" THEN `Name_'.$language.'` ELSE `Name` END AS ';
-		}		$sql.='Name, l.alias, l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem, l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version, l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, g.*';
+		}
+		$sql.='Name, l.alias, l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem, l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version, l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, g.*';
     $sql.=' FROM u_rolle2used_layer AS rl,used_layer AS ul,layer AS l, u_groups AS g, u_groups2rolle as gr';
     $sql.=' WHERE rl.stelle_id=ul.Stelle_ID AND rl.layer_id=ul.Layer_ID AND l.Layer_ID=ul.Layer_ID';
     $sql.=' AND (ul.minscale != -1 OR ul.minscale IS NULL) AND l.Gruppe = g.id AND rl.stelle_ID='.$this->Stelle_ID.' AND rl.user_id='.$this->User_ID;
@@ -2095,11 +2125,16 @@
 		if($groups != NULL){
 			$sql.=' AND g.id IN ('.$groups.')';
 		}
-    if ($this->nurAufgeklappteLayer) {
+    if($this->nurAufgeklappteLayer){
       $sql.=' AND (rl.aktivStatus != "0" OR gr.status != "0" OR requires != "")';
     }
-    if($this->nurAktiveLayer){      $sql.=' AND (rl.aktivStatus != "0")';    }		if($this->OhneRequires){      $sql.=' AND (ul.requires IS NULL)';    }
-    if ($this->nurFremdeLayer){			# entweder fremde (mit host=...) Postgis-Layer oder aktive nicht-Postgis-Layer
+    if($this->nurAktiveLayer){
+      $sql.=' AND (rl.aktivStatus != "0")';
+    }
+		if($this->OhneRequires){
+      $sql.=' AND (ul.requires IS NULL)';
+    }
+    if($this->nurFremdeLayer){			# entweder fremde (mit host=...) Postgis-Layer oder aktive nicht-Postgis-Layer
     	$sql.=' AND (l.connection like "%host=%" AND l.connection NOT like "%host=localhost%" OR l.connectiontype != 6 AND rl.aktivStatus != "0")';
     }
     $sql.=' ORDER BY ul.drawingorder';
@@ -2113,7 +2148,9 @@
     while ($rs=mysql_fetch_array($query)) {
       if($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivStatus'] != '0')){    # bei withclasses == 2 werden für alle Layer die Klassen geladen, bei withclasses == 1 werden die Klassen nur dann geladen, wenn der Layer aktiv ist
         $rs['Class']=$this->read_Classes($rs['Layer_ID'], $this->disabled_classes);
-      }			if($rs['maxscale'] > 0)$rs['maxscale'] = $rs['maxscale']+0.5;			if($rs['minscale'] > 0)$rs['minscale'] = $rs['minscale']-0.5;
+      }
+			if($rs['maxscale'] > 0)$rs['maxscale'] = $rs['maxscale']+0.3;
+			if($rs['minscale'] > 0)$rs['minscale'] = $rs['minscale']-0.3;
       $this->Layer[$i]=$rs;
 			$this->Layer['layer_ids'][$rs['Layer_ID']] =& $this->Layer[$i];		# damit man mit einer Layer-ID als Schlüssel auf dieses Array zugreifen kann
 			$i++;
@@ -2130,7 +2167,8 @@
 		}
 		return $classarray;
   }
-  function read_Classes($Layer_ID, $disabled_classes = NULL, $all_languages = false) {		global $language;
+  function read_Classes($Layer_ID, $disabled_classes = NULL, $all_languages = false) {
+		global $language;
     $sql ='SELECT ';
 		if(!$all_languages AND $language != 'german') {
 			$sql.='CASE WHEN `Name_'.$language.'` IS NOT NULL THEN `Name_'.$language.'` ELSE `Name` END AS ';
@@ -2190,9 +2228,7 @@
     return $Labels;
   }
   function read_RollenLayer($id = NULL, $typ = NULL){
-    //$sql = 'SELECT DISTINCT l.*, g.Gruppenname, gr.status, -l.id AS Layer_ID, 1 as showclasses from rollenlayer AS l, u_groups AS g, u_groups2rolle as gr';
-    //$sql.= ' WHERE l.Gruppe = g.id AND l.stelle_id='.$this->Stelle_ID.' AND l.user_id='.$this->User_ID.' AND gr.id = g.id AND gr.stelle_id='.$this->Stelle_ID.' AND gr.user_id='.$this->User_ID;
-		$sql = 'SELECT DISTINCT l.*, g.Gruppenname, -l.id AS Layer_ID, 1 as showclasses from rollenlayer AS l, u_groups AS g';
+		$sql = "SELECT DISTINCT l.*, g.Gruppenname, -l.id AS Layer_ID, 1 as showclasses, CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable from rollenlayer AS l, u_groups AS g";
     $sql.= ' WHERE l.Gruppe = g.id AND l.stelle_id='.$this->Stelle_ID.' AND l.user_id='.$this->User_ID;
     if($id != NULL){
     	$sql .= ' AND l.id = '.$id;
@@ -2210,7 +2246,7 @@
     }
     return $Layer;
   }
-}class Flur extends Flur_alkis {  var $FlurID;  var $database;  function Flur($GemID,$GemkgID,$FlurID,$database) {
+}class Flur {  var $FlurID;  var $database;	function Flur($GemID,$GemkgID,$FlurID,$database) {
     # constructor
     global $debug;
     $this->debug=$debug;
@@ -2220,9 +2256,9 @@
     $this->database=$database;
     $this->LayerName=LAYERNAME_FLUR;
   }
-}class Flur_alkis {  var $FlurID;  var $database;	function getBezeichnungFromPosition($position, $epsgcode) {
+	function getBezeichnungFromPosition($position, $epsgcode) {
     $this->debug->write("<p>kataster.php Flur->getBezeichnungFromPosition:",4);
-		$sql ="SELECT gemeindename, gk.gemeinde, gemarkungsname as gemkgname, fl.gemarkungsnummer as gemkgschl, fl.flurnummer as flur, CASE WHEN fl.nenner IS NULL THEN fl.zaehler::text ELSE fl.zaehler::text||'/'||fl.nenner::text end as flurst, s.bezeichnung as strasse, l.hausnummer";
+		$sql ="SELECT gemeindename, gk.gemeinde, gemarkungsname as gemkgname, fl.land::text||fl.gemarkungsnummer::text as gemkgschl, fl.flurnummer as flur, CASE WHEN fl.nenner IS NULL THEN fl.zaehler::text ELSE fl.zaehler::text||'/'||fl.nenner::text end as flurst, s.bezeichnung as strasse, l.hausnummer";
     $sql.=" FROM alkis.pp_gemarkung as gk, alkis.pp_gemeinde as gm, alkis.ax_flurstueck as fl";
 		$sql.=" LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(fl.weistauf)";
 		$sql.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND s.lage = lpad(l.lage,5,'0')";

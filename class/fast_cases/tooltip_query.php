@@ -152,10 +152,22 @@
   function tooltip_query($rect){
 		$showdata = 'true';
     $this->mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-    $this->queryrect = $rect;		if($this->formvars['querylayer_id'] != '' AND $this->formvars['querylayer_id'] != 'undefined'){			$layerset = $this->user->rolle->getLayer($this->formvars['querylayer_id']);			$this->formvars['qLayer'.$this->formvars['querylayer_id']] = '1';		}		else{			$layerset = $this->user->rolle->getLayer('');		}				$layerset = array_reverse($layerset);    $anzLayer=count($layerset);
+    $this->queryrect = $rect;
+		if($this->formvars['querylayer_id'] != '' AND $this->formvars['querylayer_id'] != 'undefined'){
+			$layerset = $this->user->rolle->getLayer($this->formvars['querylayer_id']);
+			$this->formvars['qLayer'.$this->formvars['querylayer_id']] = '1';
+		}
+		else{
+			$layerset = $this->user->rolle->getLayer('');
+		}		
+		$layerset = array_reverse($layerset);
+    $anzLayer=count($layerset);
     $map=ms_newMapObj('');
-    $map->set('shapepath', SHAPEPATH);		$found = false;
-    for ($i=0;$i<$anzLayer;$i++) {			if($found)break;		# wenn in einem Layer was gefunden wurde, abbrechen			if($this->formvars['qLayer'.$layerset[$i]['Layer_ID']]=='1' AND ($layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] > $this->map_scaledenom) AND ($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] < $this->map_scaledenom)){
+    $map->set('shapepath', SHAPEPATH);
+		$found = false;
+    for ($i=0;$i<$anzLayer;$i++) {
+			if($found)break;		# wenn in einem Layer was gefunden wurde, abbrechen
+			if($this->formvars['qLayer'.$layerset[$i]['Layer_ID']]=='1' AND ($layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] > $this->map_scaledenom) AND ($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] < $this->map_scaledenom)){
 				# Dieser Layer soll abgefragt werden
 				if($layerset[$i]['alias'] != '' AND $this->Stelle->useLayerAliases){
 					$layerset[$i]['Name'] = $layerset[$i]['alias'];
@@ -318,7 +330,8 @@
 				#echo '<br>sql:<br>'.$sql;
 				$ret=$layerdb->execSQL($sql.$sql_limit,4, 0);
 				if (!$ret[0]) {
-					while ($rs=pg_fetch_array($ret[1])) {						$found = true;
+					while ($rs=pg_fetch_array($ret[1])) {
+						$found = true;
 						$layerset[$i]['shape'][]=$rs;
 					}
 				}
@@ -327,16 +340,19 @@
 				# Steht an dieser Stelle, weil die Auswahlmöglichkeiten von Auswahlfeldern abhängig sein können
 				$layerset[$i]['attributes'] = $this->mapDB->add_attribute_values($layerset[$i]['attributes'], $layerdb, $layerset[$i]['shape'], true);
 				
-				if($found)$this->qlayerset[]=$layerset[$i];			}
+				if($found)$this->qlayerset[]=$layerset[$i];
+			}
     } # ende der Schleife zur Abfrage der Layer der Stelle
     # Tooltip-Abfrage
     if($found AND $this->show_query_tooltip == true){
       for($i = 0; $i < count($this->qlayerset); $i++) {
-      	$layer = $this->qlayerset[$i];				$output .= $layer['Name'].' : || ';
+      	$layer = $this->qlayerset[$i];
+				$output .= $layer['Name'].' : || ';
  				$attributes = $layer['attributes'];
         $anzObj = count($layer['shape']);
         for($k = 0; $k < $anzObj; $k++) {
-          $attribcount = 0;					$highlight_geom .= $layer['shape'][$k]['highlight_geom'].' ';
+          $attribcount = 0;
+					$highlight_geom .= $layer['shape'][$k]['highlight_geom'].' ';
           for($j = 0; $j < count($attributes['name']); $j++){
             if($attributes['tooltip'][$j]){
 							if($attributes['alias'][$j] == '')$attributes['alias'][$j] = $attributes['name'][$j];
@@ -405,25 +421,17 @@
     }
   }
   function get_dokument_vorschau($dateinamensteil){
-		$type = $dateinamensteil[1];
+		$type = strtolower($dateinamensteil[1]);
   	$dokument = $dateinamensteil[0].'.'.$dateinamensteil[1];
-		if($type == 'jpg' OR $type == 'png' OR $type == 'gif' ){			// für Bilder werden automatisch Thumbnails erzeugt
-			$thumbname = $dateinamensteil[0].'_thumb.'.$dateinamensteil[1];			
+		if(in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf')) ){			// für Bilder und PDFs werden automatisch Thumbnails erzeugt
+			$thumbname = $dateinamensteil[0].'_thumb.jpg';			
 			if(!file_exists($thumbname)){
-				exec(IMAGEMAGICKPATH.'convert '.$dokument.' -resize '.PREVIEW_IMAGE_WIDTH.' '.$thumbname);
+				exec(IMAGEMAGICKPATH.'convert -filter Hanning '.$dokument.'[0] -quality 75 -resize '.PREVIEW_IMAGE_WIDTH.'\> '.$thumbname);
 			}
 		}
 		else{																// alle anderen Dokumenttypen bekommen entsprechende Dokumentensymbole als Vorschaubild
 			$dateinamensteil[1] = 'gif';
-  		switch ($type) {
-  			case 'pdf' :{
-  				//$thumbname = WWWROOT.APPLVERSION.GRAPHICSPATH.'pdf.gif';
-					$thumbname = $dateinamensteil[0].'_thumb.jpg';			
-					if(!file_exists($thumbname)){
-						exec(IMAGEMAGICKPATH.'convert '.$dokument.'[0] -resize '.PREVIEW_IMAGE_WIDTH.' '.$thumbname);
-					}
-  			}break;
-  			
+  		switch ($type) {  			
   			case 'doc' :{
 					$thumbname = WWWROOT.APPLVERSION.GRAPHICSPATH.'openoffice.gif';
   			}break;
@@ -696,7 +704,8 @@
 		#$this->groupset=$this->getGroups('');
 		$this->loglevel = 0;
 	}
-  function readSettings() {		global $language;
+  function readSettings() {
+		global $language;
     # Abfragen und Zuweisen der Einstellungen der Rolle
     $sql ='SELECT * FROM rolle WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
     #echo $sql;
@@ -736,9 +745,11 @@
 		$this->geom_edit_first=$rs['geom_edit_first'];		
 		$this->overlayx=$rs['overlayx'];
 		$this->overlayy=$rs['overlayy'];
+		$this->instant_reload=$rs['instant_reload'];
+		$this->menu_auto_close=$rs['menu_auto_close'];
 		if($rs['hist_timestamp'] != ''){
-			$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');
-			rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');
+			$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');			# der wird zur Anzeige des Timestamps benutzt
+			rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');	# der hat die Form, wie der timestamp in der PG-DB steht und wird für die Abfragen benutzt
 		}
 		else rolle::$hist_timestamp = $this->hist_timestamp = '';
     $buttons = explode(',', $rs['buttons']);
@@ -759,13 +770,14 @@
     $this->freearrow = in_array('freearrow', $buttons);
     return 1;
   }
-  function getLayer($LayerName) {		global $language;
+  function getLayer($LayerName) {
+		global $language;
     # Abfragen der Layer in der Rolle
 		$sql ='SELECT ';
 		if($language != 'german') {
 			$sql.='CASE WHEN `Name_'.$language.'` != "" THEN `Name_'.$language.'` ELSE `Name` END AS ';
 		}
-		$sql.='Name, l.Layer_ID, alias, Datentyp, Gruppe, pfad, maintable, Data, `schema`, document_path, connection, printconnection, connectiontype, epsg_code, tolerance, ows_srs, wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, ul.* FROM layer AS l, used_layer AS ul';
+		$sql.='Name, l.Layer_ID, alias, Datentyp, Gruppe, pfad, maintable, Data, `schema`, document_path, labelitem, connection, printconnection, connectiontype, epsg_code, tolerance, wms_name, ows_srs, wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, ul.* FROM layer AS l, used_layer AS ul';
     $sql.=' WHERE l.Layer_ID=ul.Layer_ID AND Stelle_ID='.$this->stelle_id;
     if ($LayerName!='') {
       $sql.=' AND (l.Name LIKE "'.$LayerName.'" ';
@@ -775,7 +787,8 @@
       else{
         $sql.=')';
       }
-    }		$sql.=' ORDER BY ul.drawingorder';
+    }
+		$sql.=' ORDER BY ul.drawingorder';
     #echo $sql.'<br>';
     $this->debug->write("<p>file:users.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
@@ -785,7 +798,7 @@
     }
     return $layer;
   }
-}class pgdatabase extends pgdatabase_alkis {  var $ist_Fortfuehrung;  var $debug;  var $loglevel;  var $defaultloglevel;  var $logfile;  var $defaultlogfile;  var $commentsign;  var $blocktransaction;	function pgdatabase() {
+}class pgdatabase {  var $ist_Fortfuehrung;  var $debug;  var $loglevel;  var $defaultloglevel;  var $logfile;  var $defaultlogfile;  var $commentsign;  var $blocktransaction;	function pgdatabase() {
 	  global $debug;
     $this->debug=$debug;
     $this->loglevel=LOG_LEVEL;
@@ -797,15 +810,15 @@
     $this->type='postgresql';
     $this->commentsign='--';
     # Wenn dieser Parameter auf 1 gesetzt ist werden alle Anweisungen
-    # START TRANSACTION, ROLLBACK und COMMIT unterdr�ckt, so da� alle anderen SQL
-    # Anweisungen nicht in Transactionsbl�cken ablaufen.
-    # Kann zur Steigerung der Geschwindigkeit von gro�en Datenbest�nden verwendet werden
+    # START TRANSACTION, ROLLBACK und COMMIT unterdrï¿½ckt, so daï¿½ alle anderen SQL
+    # Anweisungen nicht in Transactionsblï¿½cken ablaufen.
+    # Kann zur Steigerung der Geschwindigkeit von groï¿½en Datenbestï¿½nden verwendet werden
     # Vorsicht: Wenn Fehler beim Einlesen passieren, ist der Datenbestand inkonsistent
     # und der Einlesevorgang muss wiederholt werden bis er fehlerfrei durchgelaufen ist.
     # Dazu Fehlerausschriften bearchten.
     $this->blocktransaction=0;
   }
-}class pgdatabase_alkis {  var $ist_Fortfuehrung;  var $debug;  var $loglevel;  var $defaultloglevel;  var $logfile;  var $defaultlogfile;  var $commentsign;  var $blocktransaction;  function open() {
+  function open() {
   	if($this->port == '') $this->port = 5432;
     #$this->debug->write("<br>Datenbankverbindung öffnen: Datenbank: ".$this->dbName." User: ".$this->user,4);
 		$connect_string = 'dbname='.$this->dbName.' port='.$this->port.' user='.$this->user.' password='.$this->passwd;
@@ -940,7 +953,7 @@
   }
   function getlayerdatabase($layer_id, $host){
   	if($layer_id < 0){	# Rollenlayer
-  		$sql ='SELECT `connection`, "" as `schema` FROM rollenlayer WHERE -id = '.$layer_id.' AND connectiontype = 6';
+  		$sql ='SELECT `connection`, "'.CUSTOM_SHAPE_SCHEMA.'" as `schema` FROM rollenlayer WHERE -id = '.$layer_id.' AND connectiontype = 6';
   	}
   	else{
     	$sql ='SELECT `connection`, `schema` FROM layer WHERE Layer_ID = '.$layer_id.' AND connectiontype = 6';
@@ -991,86 +1004,87 @@
     }
     return $layerdb;
   }
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false){			global $language;
-    	if($attributenames != NULL){
-    		$einschr = ' AND name IN (\'';
-    		$einschr.= implode('\', \'', $attributenames);
-    		$einschr.= '\')';
-    	}
-      $sql = 'SELECT ';
-			if(!$all_languages AND $language != 'german') {
-				$sql.='CASE WHEN `alias_'.$language.'` != "" THEN `alias_'.$language.'` ELSE `alias` END AS ';
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false){
+		global $language;
+		if($attributenames != NULL){
+			$einschr = ' AND name IN (\'';
+			$einschr.= implode('\', \'', $attributenames);
+			$einschr.= '\')';
+		}
+		$sql = 'SELECT ';
+		if(!$all_languages AND $language != 'german') {
+			$sql.='CASE WHEN `alias_'.$language.'` != "" THEN `alias_'.$language.'` ELSE `alias` END AS ';
+		}
+		$sql.='alias, `alias_low-german`, alias_english, alias_polish, alias_vietnamese, layer_id, name, real_name, tablename, table_alias_name, type, geometrytype, constraints, nullable, length, decimal_length, `default`, form_element_type, options, tooltip, `group`, raster_visibility, mandatory, quicksearch, `order`, privileg, query_tooltip FROM layer_attributes WHERE layer_id = '.$layer_id.$einschr.' ORDER BY `order`';
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_layer_attributes:<br>".$sql,4);
+		$query=mysql_query($sql);
+		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+		$i = 0;
+		while($rs=mysql_fetch_array($query)){
+			$attributes['name'][$i]= $rs['name'];
+			$attributes['indizes'][$rs['name']] = $i;
+			$attributes['real_name'][$rs['name']]= $rs['real_name'];
+			if($rs['tablename'])$attributes['table_name'][$i]= $rs['tablename'];
+			if($rs['tablename'])$attributes['table_name'][$rs['name']] = $rs['tablename']; 
+			if($rs['table_alias_name'])$attributes['table_alias_name'][$i]= $rs['table_alias_name'];
+			if($rs['table_alias_name'])$attributes['table_alias_name'][$rs['name']]= $rs['table_alias_name'];
+			$attributes['table_alias_name'][$rs['tablename']]= $rs['table_alias_name'];
+			$attributes['type'][$i]= $rs['type'];
+			if($rs['type'] == 'geometry'){
+				$attributes['the_geom'] = $rs['name'];
 			}
-			$sql.='alias, `alias_low-german`, alias_english, alias_polish, alias_vietnamese, layer_id, name, real_name, tablename, table_alias_name, type, geometrytype, constraints, nullable, length, decimal_length, `default`, form_element_type, options, tooltip, `group`, raster_visibility, mandatory, quicksearch, `order`, privileg, query_tooltip FROM layer_attributes WHERE layer_id = '.$layer_id.$einschr.' ORDER BY `order`';
-      $this->debug->write("<p>file:kvwmap class:db_mapObj->read_layer_attributes:<br>".$sql,4);
-      $query=mysql_query($sql);
-      if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
-      $i = 0;
-      while($rs=mysql_fetch_array($query)){
-      	$attributes['name'][$i]= $rs['name'];
-				$attributes['indizes'][$rs['name']] = $i;
-      	$attributes['real_name'][$rs['name']]= $rs['real_name'];
-      	if($rs['tablename'])$attributes['table_name'][$i]= $rs['tablename'];
-      	if($rs['tablename'])$attributes['table_name'][$rs['name']] = $rs['tablename']; 
-      	if($rs['table_alias_name'])$attributes['table_alias_name'][$i]= $rs['table_alias_name'];
-      	if($rs['table_alias_name'])$attributes['table_alias_name'][$rs['name']]= $rs['table_alias_name'];
-      	$attributes['table_alias_name'][$rs['tablename']]= $rs['table_alias_name'];
-      	$attributes['type'][$i]= $rs['type'];
-      	if($rs['type'] == 'geometry'){
-      		$attributes['the_geom'] = $rs['name'];
-      	}
-      	$attributes['geomtype'][$i]= $rs['geometrytype'];
-      	$attributes['geomtype'][$rs['name']]= $rs['geometrytype'];
-      	$attributes['constraints'][$i]= $rs['constraints'];
-      	$attributes['constraints'][$rs['real_name']]= $rs['constraints'];
-      	$attributes['nullable'][$i]= $rs['nullable'];
-      	$attributes['length'][$i]= $rs['length'];
-      	$attributes['decimal_length'][$i]= $rs['decimal_length'];
-  		
-				if(substr($rs['default'], 0, 6) == 'SELECT'){					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
-					$ret1 = $layerdb->execSQL($rs['default'], 4, 0);					
-					if($ret1[0]==0){
-						$attributes['default'][$i] = array_pop(pg_fetch_row($ret1[1]));
-					}
+			$attributes['geomtype'][$i]= $rs['geometrytype'];
+			$attributes['geomtype'][$rs['name']]= $rs['geometrytype'];
+			$attributes['constraints'][$i]= $rs['constraints'];
+			$attributes['constraints'][$rs['real_name']]= $rs['constraints'];
+			$attributes['nullable'][$i]= $rs['nullable'];
+			$attributes['length'][$i]= $rs['length'];
+			$attributes['decimal_length'][$i]= $rs['decimal_length'];
+		
+			if(substr($rs['default'], 0, 6) == 'SELECT'){					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
+				$ret1 = $layerdb->execSQL($rs['default'], 4, 0);					
+				if($ret1[0]==0){
+					$attributes['default'][$i] = array_pop(pg_fetch_row($ret1[1]));
 				}
-				else{															# das sind die alten Defaultwerte ohne 'SELECT ' davor, ab Version 1.13 haben Defaultwerte immer ein SELECT, wenn man den Layer in dieser Version einmal gespeichert hat
-					$attributes['default'][$i]= $rs['default'];
-				}
-      	$attributes['form_element_type'][$i]= $rs['form_element_type'];
-      	$attributes['form_element_type'][$rs['name']]= $rs['form_element_type'];
-      	$attributes['options'][$i]= $rs['options'];
-      	$attributes['options'][$rs['name']]= $rs['options'];
-      	$attributes['alias'][$i]= $rs['alias'];
-      	$attributes['alias'][$attributes['name'][$i]]= $rs['alias'];
-				$attributes['alias_low-german'][$i]= $rs['alias_low-german'];
-				$attributes['alias_english'][$i]= $rs['alias_english'];
-				$attributes['alias_polish'][$i]= $rs['alias_polish'];
-				$attributes['alias_vietnamese'][$i]= $rs['alias_vietnamese'];
-      	$attributes['tooltip'][$i]= $rs['tooltip'];
-      	$attributes['group'][$i]= $rs['group'];
-				$attributes['raster_visibility'][$i]= $rs['raster_visibility'];
-      	$attributes['mandatory'][$i]= $rs['mandatory'];
-				$attributes['quicksearch'][$i]= $rs['quicksearch'];
-      	$attributes['privileg'][$i]= $rs['privileg'];
-      	$attributes['query_tooltip'][$i]= $rs['query_tooltip'];
-      	$i++;
-      }
-      if($attributes['table_name'] != NULL){   
-        $attributes['all_table_names'] = array_unique($attributes['table_name']);
-        //$attributes['all_alias_table_names'] = array_values(array_unique($attributes['table_alias_name']));
-        foreach($attributes['all_table_names'] as $tablename){
-          $attributes['oids'][] = $layerdb->check_oid($tablename);   # testen ob Tabelle oid hat
-        }
-      }
-      else{
-      	$attributes['all_table_names'] = array();
-      }
-      return $attributes;
+			}
+			else{															# das sind die alten Defaultwerte ohne 'SELECT ' davor, ab Version 1.13 haben Defaultwerte immer ein SELECT, wenn man den Layer in dieser Version einmal gespeichert hat
+				$attributes['default'][$i]= $rs['default'];
+			}
+			$attributes['form_element_type'][$i]= $rs['form_element_type'];
+			$attributes['form_element_type'][$rs['name']]= $rs['form_element_type'];
+			$attributes['options'][$i]= $rs['options'];
+			$attributes['options'][$rs['name']]= $rs['options'];
+			$attributes['alias'][$i]= $rs['alias'];
+			$attributes['alias'][$attributes['name'][$i]]= $rs['alias'];
+			$attributes['alias_low-german'][$i]= $rs['alias_low-german'];
+			$attributes['alias_english'][$i]= $rs['alias_english'];
+			$attributes['alias_polish'][$i]= $rs['alias_polish'];
+			$attributes['alias_vietnamese'][$i]= $rs['alias_vietnamese'];
+			$attributes['tooltip'][$i]= $rs['tooltip'];
+			$attributes['group'][$i]= $rs['group'];
+			$attributes['raster_visibility'][$i]= $rs['raster_visibility'];
+			$attributes['mandatory'][$i]= $rs['mandatory'];
+			$attributes['quicksearch'][$i]= $rs['quicksearch'];
+			$attributes['privileg'][$i]= $rs['privileg'];
+			$attributes['query_tooltip'][$i]= $rs['query_tooltip'];
+			$i++;
+		}
+		if($attributes['table_name'] != NULL){   
+			$attributes['all_table_names'] = array_unique($attributes['table_name']);
+			//$attributes['all_alias_table_names'] = array_values(array_unique($attributes['table_alias_name']));
+			foreach($attributes['all_table_names'] as $tablename){
+				$attributes['oids'][] = $layerdb->check_oid($tablename);   # testen ob Tabelle oid hat
+			}
+		}
+		else{
+			$attributes['all_table_names'] = array();
+		}
+		return $attributes;
   }
   function add_attribute_values($attributes, $database, $query_result, $withvalues = true){
     # Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
     for($i = 0; $i < count($attributes['name']); $i++){
-      if($attributes['constraints'][$i] != '' AND !in_array($attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))){  # das sind die Auswahlmöglichkeiten, die durch die Tabellendefinition in Postgres fest vorgegeben sind
+			if($attributes['constraints'][$i] != '' AND !in_array($attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))){  # das sind die Auswahlmöglichkeiten, die durch die Tabellendefinition in Postgres fest vorgegeben sind
       	$attributes['enum_value'][$i] = explode(',', str_replace("'", "", $attributes['constraints'][$i]));
       	$attributes['enum_output'][$i] = $attributes['enum_value'][$i];
       }

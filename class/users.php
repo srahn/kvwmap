@@ -1843,6 +1843,7 @@ class rolle {
     $this->debug->write("<p>file:users.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
     if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		$layer = array();
     while ($rs=mysql_fetch_array($query)) {
       $layer[]=$rs;
     }
