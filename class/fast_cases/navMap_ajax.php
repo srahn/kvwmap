@@ -2098,9 +2098,7 @@
     if ($this->nurAufgeklappteLayer) {
       $sql.=' AND (rl.aktivStatus != "0" OR gr.status != "0" OR requires != "")';
     }
-    if ($this->nurAktiveLayerOhneRequires) {
-      $sql.=' AND (rl.aktivStatus != "0")';
-    }
+    if($this->nurAktiveLayer){      $sql.=' AND (rl.aktivStatus != "0")';    }		if($this->OhneRequires){      $sql.=' AND (ul.requires IS NULL)';    }
     if ($this->nurFremdeLayer){			# entweder fremde (mit host=...) Postgis-Layer oder aktive nicht-Postgis-Layer
     	$sql.=' AND (l.connection like "%host=%" AND l.connection NOT like "%host=localhost%" OR l.connectiontype != 6 AND rl.aktivStatus != "0")';
     }

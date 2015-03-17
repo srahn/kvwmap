@@ -761,7 +761,6 @@ class GUI {
 
         # Layer
         $mapDB->nurAufgeklappteLayer=$this->formvars['nurAufgeklappteLayer'];
-        $mapDB->nurAktiveLayerOhneRequires=$this->formvars['nurAktiveLayerOhneRequires'];
         $mapDB->nurFremdeLayer=$this->formvars['nurFremdeLayer'];
         if($this->class_load_level == ''){
           $this->class_load_level = 1;
@@ -2054,7 +2053,8 @@ class GUI {
 		# Diese Funktion liefert die Eckpunkte der Geometrien von allen aktiven Postgis-Layern, die im aktuellen Kartenausschnitt liegen
 		#$this->user->rolle->readSettings();
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-		$mapDB->nurAktiveLayerOhneRequires = true;
+		$mapDB->nurAktiveLayer = true;
+		$mapDB->OhneRequires = true;
 		$layer = $mapDB->read_Layer(0);     # 2 = für alle Layer die Klassen laden, 1 = nur für aktive Layer laden, 0 = keine Klassen laden
 		$anzLayer = count($layer);
 		for($i = 0; $i < $anzLayer; $i++){
@@ -2071,36 +2071,38 @@ class GUI {
 				if($layer[$i]['Filter'] != ''){
           $fromwhere .= " AND ".$layer[$i]['Filter'];
         }
-				switch($layer[$i]['Datentyp']){
-					case MS_LAYER_POINT : {
-						$sql = 'SELECT st_x(the_geom), st_y(the_geom) FROM (SELECT st_transform('.$data_attributes['the_geom'].', '.$this->user->rolle->epsg_code.') as '.$data_attributes['the_geom'].' '.$fromwhere.') foo LIMIT 10000';
-					}break;
-				
-					case MS_LAYER_LINE : {				
-						$sql = 'SELECT st_x(the_geom), st_y(the_geom) FROM (SELECT st_transform(st_pointn(foo.linestring, foo.count1), '.$this->user->rolle->epsg_code.') AS the_geom
-						FROM (SELECT generate_series(0, st_npoints(foo4.linestring)) AS count1, foo4.linestring FROM (
-						SELECT st_GeometryN(foo2.linestring, foo2.count2) as linestring FROM (
-						SELECT generate_series(1, st_NumGeometries(foo5.linestring)) AS count2, foo5.linestring FROM (SELECT st_multi(st_intersection('.$data_attributes['the_geom'].', '.$extent.')) AS linestring '.$fromwhere.') foo5) foo2
-						) foo4) foo
-						WHERE (foo.count1) <= st_npoints(foo.linestring)) foo3 LIMIT 10000';
-					}break;
+				if($data_attributes['the_geom'] != ''){
+					switch($layer[$i]['Datentyp']){
+						case MS_LAYER_POINT : {
+							$sql = 'SELECT st_x(the_geom), st_y(the_geom) FROM (SELECT st_transform('.$data_attributes['the_geom'].', '.$this->user->rolle->epsg_code.') as '.$data_attributes['the_geom'].' '.$fromwhere.') foo LIMIT 10000';
+						}break;
 					
-					case MS_LAYER_POLYGON : {
-						$sql = 'SELECT st_x(the_geom), st_y(the_geom) FROM (SELECT st_transform(st_pointn(foo.linestring, foo.count1), '.$this->user->rolle->epsg_code.') AS the_geom
-						FROM (SELECT generate_series(0, st_npoints(foo4.linestring)) AS count1, foo4.linestring FROM (
-						SELECT st_GeometryN(foo2.linestring, foo2.count2) as linestring FROM (
-						SELECT generate_series(1, st_NumGeometries(foo5.linestring)) AS count2, foo5.linestring FROM (SELECT st_multi(linefrompoly(st_intersection('.$data_attributes['the_geom'].', '.$extent.'))) AS linestring '.$fromwhere.') foo5) foo2
-						) foo4) foo
-						WHERE (foo.count1) <= st_npoints(foo.linestring)) foo3 LIMIT 10000';
-					}break;
+						case MS_LAYER_LINE : {				
+							$sql = 'SELECT st_x(the_geom), st_y(the_geom) FROM (SELECT st_transform(st_pointn(foo.linestring, foo.count1), '.$this->user->rolle->epsg_code.') AS the_geom
+							FROM (SELECT generate_series(0, st_npoints(foo4.linestring)) AS count1, foo4.linestring FROM (
+							SELECT st_GeometryN(foo2.linestring, foo2.count2) as linestring FROM (
+							SELECT generate_series(1, st_NumGeometries(foo5.linestring)) AS count2, foo5.linestring FROM (SELECT st_multi(st_intersection('.$data_attributes['the_geom'].', '.$extent.')) AS linestring '.$fromwhere.') foo5) foo2
+							) foo4) foo
+							WHERE (foo.count1) <= st_npoints(foo.linestring)) foo3 LIMIT 10000';
+						}break;
+						
+						case MS_LAYER_POLYGON : {
+							$sql = 'SELECT st_x(the_geom), st_y(the_geom) FROM (SELECT st_transform(st_pointn(foo.linestring, foo.count1), '.$this->user->rolle->epsg_code.') AS the_geom
+							FROM (SELECT generate_series(0, st_npoints(foo4.linestring)) AS count1, foo4.linestring FROM (
+							SELECT st_GeometryN(foo2.linestring, foo2.count2) as linestring FROM (
+							SELECT generate_series(1, st_NumGeometries(foo5.linestring)) AS count2, foo5.linestring FROM (SELECT st_multi(linefrompoly(st_intersection('.$data_attributes['the_geom'].', '.$extent.'))) AS linestring '.$fromwhere.') foo5) foo2
+							) foo4) foo
+							WHERE (foo.count1) <= st_npoints(foo.linestring)) foo3 LIMIT 10000';
+						}break;
+					}
+					#echo $sql;
+					$ret=$layerdb->execSQL($sql,4, 0);
+					if(!$ret[0]){
+						while ($rs=pg_fetch_array($ret[1])){
+							echo $rs[0].' '.$rs[1].'|';
+						}
+					}
 				}
-				#echo $sql;
-				$ret=$layerdb->execSQL($sql,4, 0);
-        if(!$ret[0]){
-        	while ($rs=pg_fetch_array($ret[1])){
-          	echo $rs[0].' '.$rs[1].'|';
-          }
-        }
 			}
 		}
 		echo '~show_vertices();';
@@ -2110,7 +2112,6 @@ class GUI {
 		# Diese Funktion liefert die Eckpunkte der Geometrien des übergebenen Postgis-Layers, die im aktuellen Kartenausschnitt liegen
 		#$this->user->rolle->readSettings();
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-		$mapDB->nurAktiveLayerOhneRequires = true;
 		if($this->formvars['layer_id'] > 0){
 			$layer = $mapDB->get_Layer($this->formvars['layer_id']);
 		}
@@ -4602,7 +4603,7 @@ class GUI {
     $this->map->legend->label->color->setRGB(0,0,0);
     $this->map->legend->outlinecolor->setRGB(0,0,0);
     $legendmapDB = new db_mapObj($this->Stelle->id, $this->user->id);
-    $legendmapDB->nurAktiveLayerOhneRequires = 1;
+    $legendmapDB->nurAktiveLayer = 1;
     $layerset = $legendmapDB->read_Layer(1);
     $rollenlayer = $legendmapDB->read_RollenLayer();
     $layerset = array_merge($layerset, $rollenlayer);		
@@ -6008,7 +6009,7 @@ class GUI {
     $this->titel='WMS Map-Datei erfolgreich exportiert';
     $this->main="ows_exportiert.php";
     # laden der aktuellen Karteneinstellungen
-    $this->formvars['nurAktiveLayerOhneRequires'] = true;
+    $this->formvars['nurAktiveLayer'] = true;
     $this->class_load_level = 2;    # die Klassen von allen Layern laden
     $this->loadMap('DataBase');
     # setzen der WMS-Metadaten
@@ -13243,13 +13244,16 @@ class db_mapObj{
 		if($groups != NULL){
 			$sql.=' AND g.id IN ('.$groups.')';
 		}
-    if ($this->nurAufgeklappteLayer) {
+    if($this->nurAufgeklappteLayer){
       $sql.=' AND (rl.aktivStatus != "0" OR gr.status != "0" OR requires != "")';
     }
-    if ($this->nurAktiveLayerOhneRequires) {
+    if($this->nurAktiveLayer){
       $sql.=' AND (rl.aktivStatus != "0")';
     }
-    if ($this->nurFremdeLayer){			# entweder fremde (mit host=...) Postgis-Layer oder aktive nicht-Postgis-Layer
+		if($this->OhneRequires){
+      $sql.=' AND (ul.requires IS NULL)';
+    }
+    if($this->nurFremdeLayer){			# entweder fremde (mit host=...) Postgis-Layer oder aktive nicht-Postgis-Layer
     	$sql.=' AND (l.connection like "%host=%" AND l.connection NOT like "%host=localhost%" OR l.connectiontype != 6 AND rl.aktivStatus != "0")';
     }
     $sql.=' ORDER BY ul.drawingorder';
