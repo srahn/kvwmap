@@ -179,12 +179,6 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 		case 'get_quicksearch_attributes' : {
 			$GUI->get_quicksearch_attributes();
 	  } break;
-
-		case 'ALB_ALK_Tabellen_leeren' : {
-			$GUI->checkCaseAllowed($go);
-			$GUI->truncateAlbAlkTables();
-			$GUI->output();
-		} break;
   	 
 		case 'Multi_Geometrien_splitten' : {
 		  $GUI->split_multi_geometries();
@@ -1446,29 +1440,6 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 
 	  case  'ALB_Anzeige_Bestand' : {
 			$GUI->ALB_Anzeigen(NULL, $GUI->formvars['formnummer'], $GUI->formvars['Grundbuchbezirk'], $GUI->formvars['Grundbuchblatt']);
-	  } break;
-
-	  # Aktualisierung des ALB-Datenbestandes an Hand einer WLDGE-Datei
-	  # Dieser Anwendungsfall deckt das Anlegen eines neuen ALB-Bestandes mit ab, dazu muß die Variable ist_Fortführung=0 sein
-	  case 'ALB_Aenderung' : {
-		$GUI->checkCaseAllowed($go);
-		if ($GUI->formvars['WLDGE_lokal']==2) {
-		  $GUI->ALB_Aenderung_Stapel();
-		}
-		else {
-		  $GUI->ALB_Aenderung();
-		}
-		$GUI->output();
-	  } break; # end of Änderung des ALB-Datenbestandes
-
-	  case 'tmp_Adr_Tabelle_Aktualisieren' : {
-			$GUI->tmp_Adr_Tabelle_Aktualisieren();
-			$GUI->loadMap('DataBase');
-			$currenttime=date('Y-m-d H:i:s',time());
-			$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
-			$GUI->drawMap();
-			$GUI->output();
-			$GUI->saveMap('');
 	  } break;
 
 	  # Auswählen einer neuen Stelle

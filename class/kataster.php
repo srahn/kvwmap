@@ -201,17 +201,6 @@ class adresse {
     return $Gebaeude->getGebaeude();
   }
 
-  function getQuelle() {
-    $sql ='SELECT Quelle FROM tmp_Adressen WHERE Gemeinde='.$this->GemeindeSchl;
-    $sql.=' AND Strasse="'.$this->StrassenSchl.'" AND HausNr="'.$this->HausNr.'"';
-    $sql.=' ORDER BY Quelle DESC';
-    $this->debug->write("<p>kataster.php Adresse->getQuelle Abfragen der Quelle:<br>".$sql,4);
-    $query=mysql_query($sql);
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);
-    return $rs['Quelle'];
-  }
-
   function getFlurstKennzListe() {
     # liefert FlurstKennz zur Adressangaben aus dem ALB Bestand
     $ret=$this->database->getFlurstKennzListeByGemSchlByStrSchl($this->GemeindeSchl,$this->StrassenSchl,$this->HausNr);
@@ -222,12 +211,6 @@ class adresse {
     else {
       return $ret[1];
     }
-  }
-
-  # Funktion aktualisiert die Tabelle in der die Adressen aus ALK und ALB zusammengefasst sind
-  function updateAdressTable() {
-    # übernommen nach mysql.php und postgres.php
-    #$this->database->updateTempAdressTable();
   }
 
   function getStrassenListe($GemID,$GemkgID,$extent) {

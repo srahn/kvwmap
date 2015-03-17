@@ -13,7 +13,7 @@
   $this->strSave="Speichern";
   $this->strTask="Stelle";
   $this->strYes="Ja";
-  $this->TaskChangeWarning="Sie sind nicht berechtigt zur Auführung der Funktion in dieser Stelle.";
+  $this->TaskChangeWarning="Sie sind nicht berechtigt zur Ausführung der Funktion in dieser Stelle.";
   $this->strButtonBack="Zurück";  
  $this->strCancel="Abbrechen";
  $this->strSend="Senden";
