@@ -750,6 +750,7 @@ function mousedown(evt){
 	    selectPoint(evt);
 	   break;
 	   case "recentre":
+			deactivate_vertices();
 	    startMove(evt);
 	   break;
 		case "showcoords":
