@@ -11924,8 +11924,6 @@ class GUI {
       $randx=($rect->maxx-$rect->minx)*$border/100;
       $randy=($rect->maxy-$rect->miny)*$border/100;
     
-	    # zu 2)
-	    $this->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
 	    if(MAPSERVERVERSION >= 600 ) {
 				$this->map_scaledenom = $this->map->scaledenom;
 			}
@@ -11933,7 +11931,6 @@ class GUI {
 				$this->map_scaledenom = $this->map->scale;
 			}
 	    # zu 3)
-	    $layer=ms_newLayerObj($this->map);
 			$epsg = EPSGCODE_ALKIS;
 			$datastring ="the_geom from (select g.gml_id as oid, wkb_geometry as the_geom FROM alkis.ax_gemeinde gem, alkis.ax_gebaeude g";
 			$datastring.=" LEFT JOIN alkis.alkis_beziehungen v ON g.gml_id=v.beziehung_von"; 
