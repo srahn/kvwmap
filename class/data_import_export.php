@@ -56,6 +56,7 @@ class data_import_export {
 			else{
 				$groupid = $dbmap->newGroup('Eigene Importe', 1);
 			}
+			$user->rolle->set_one_Group($user->id, $stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
 			$this->formvars['user_id'] = $user->id;
 			$this->formvars['stelle_id'] = $stelle->id;
 			$this->formvars['aktivStatus'] = 1;
@@ -72,26 +73,22 @@ class data_import_export {
 			$this->formvars['connectiontype'] = 6;
 			$this->formvars['epsg_code'] = $formvars['epsg'];
 			$this->formvars['transparency'] = 65;
-	
+			if($custom_table['labelitem'] != '')$this->formvars['labelitem'] = $custom_table['labelitem'];
 			$layer_id = $dbmap->newRollenLayer($this->formvars);
 			$layerdb = $dbmap->getlayerdatabase(-$layer_id, $this->Stelle->pgdbhost);
 			$layerdb->setClientEncoding();
 			$path = $this->formvars['query'];
 			$attributes = $dbmap->load_attributes($layerdb, $path);
 			$dbmap->save_postgis_attributes(-$layer_id, $attributes, '');
-	
 			$attrib['name'] = ' ';
 			$attrib['layer_id'] = -$layer_id;
 			$attrib['expression'] = '';
 			$attrib['order'] = 0;
-			
 			$class_id = $dbmap->new_Class($attrib);
 			$this->formvars['class'] = $class_id;
-						
 			$style['colorred'] = $result_colors[rand(0,10)]['red'];
 			$style['colorgreen'] = $result_colors[rand(0,10)]['green'];
 			$style['colorblue'] = $result_colors[rand(0,10)]['blue'];
-			
 			$style['outlinecolorred'] = 0;
 			$style['outlinecolorgreen'] = 0;
 			$style['outlinecolorblue'] = 0;
@@ -99,28 +96,35 @@ class data_import_export {
 				case 0 :{
 					$style['size'] = 8;
 					$style['maxsize'] = 8;
-					$style['symbol'] = 9;
+					$style['symbolname'] = 'circle';
 				}break;
 				case 1 :{
 					$style['size'] = 1;
 					$style['maxsize'] = 2;
-					$style['symbol'] = NULL;
+					$style['symbolname'] = NULL;
 				}break;
 				case 2 :{
 					$style['size'] = 1;
 					$style['maxsize'] = 2;
-					$style['symbol'] = NULL;
+					$style['symbolname'] = NULL;
 				}
 			}
-			$style['symbolname'] = NULL;
 			$style['backgroundcolor'] = NULL;
 			$style['minsize'] = NULL;
-			
 			$style['angle'] = 360;
-			$style_id = $dbmap->new_Style($style);
-	
+			$style_id = $dbmap->new_Style($style);	
 			$dbmap->addStyle2Class($class_id, $style_id, 0);          # den Style der Klasse zuordnen
-			$user->rolle->set_one_Group($user->id, $stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
+			if($custom_table['labelitem'] != ''){
+				$label['font'] = 'arial';
+				$label['color'] = '0 0 0';
+				$label['outlinecolor'] = '255 255 255';
+				$label['size'] = 8;
+				$label['minsize'] = 6;
+				$label['maxsize'] = 10;
+				$label['position'] = 9;
+				$new_label_id = $dbmap->new_Label($label);				
+				$dbmap->addLabel2Class($class_id, $new_label_id, 0);
+			}
 		}
     return -$layer_id;
   }
@@ -153,7 +157,7 @@ class data_import_export {
 				$j = $i+1;
 				$sql.= "spalte".$j." varchar";
 				$komma = true;
-				if($formvars['column'.$i] == 'label')$labelitem = $i;
+				if($formvars['column'.$i] == 'label')$labelitem = $i+1;
 			}
 		}
 		$sql.= ")WITH (OIDS=TRUE);";
@@ -165,7 +169,7 @@ class data_import_export {
 			for($i = 0; $i < count($columns); $i++){
 				if($formvars['column'.$i] != 'x' AND $formvars['column'.$i] != 'y'){
 					if($komma)$sql.= ", ";
-					$sql.= "'".$columns[$i]."'";
+					$sql.= "E'".addslashes($columns[$i])."'";
 					$komma = true;
 				}
 				else{
@@ -179,7 +183,7 @@ class data_import_export {
 		if(!$ret[0]){
 			$custom_table['datatype'] = 0;
 			$custom_table['tablename'] = $tablename;
-			$custom_table['labelitem'] = 'Spalte'.$labelitem;
+			$custom_table['labelitem'] = 'spalte'.$labelitem;
 			return $custom_table;
 		}
 	}
