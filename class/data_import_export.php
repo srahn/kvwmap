@@ -43,7 +43,7 @@ class data_import_export {
 				$custom_table = $this->import_custom_shape($formvars, $pgdatabase);
 			}break;
 			case 'point' : {
-				$custom_table = $this->import_custom_point($formvars, $pgdatabase);
+				$custom_table = $this->import_custom_pointlist($formvars, $pgdatabase);
 			}break;
 		}
 		if($custom_table['datatype'] !== NULL){			# ------ Rollenlayer erzeugen ------- #
@@ -125,6 +125,65 @@ class data_import_export {
     return -$layer_id;
   }
   
+	function load_custom_pointlist($formvars){
+		$_files = $_FILES;
+		if($_files['pointfile']['name']){
+			$this->pointfile = UPLOADPATH.$_files['pointfile']['name'];
+			if(move_uploaded_file($_files['pointfile']['tmp_name'], $this->pointfile)){
+				$rows = file($this->pointfile);
+				$delimiters = array(';', ' ', ',');		# erlaubte Trennzeichen
+				while(count($delimiters) > 0 AND count($this->columns) < 2){
+					$this->delimiter = array_shift($delimiters);
+					$this->columns = explode($this->delimiter, $rows[0]);
+				}
+			}
+		}
+	}
+	
+	function import_custom_pointlist($formvars, $pgdatabase){
+		$rows = file($formvars['pointfile']);
+		$delimiters = array(';', ' ', ',');		# erlaubte Trennzeichen
+		$tablename = 'a'.strtolower(umlaute_umwandeln(basename($formvars['pointfile']))).rand(1,1000000);
+		$columns = explode($formvars['delimiter'], $rows[0]);
+		$sql = "CREATE TABLE ".CUSTOM_SHAPE_SCHEMA.".".$tablename." (";
+		$komma = false;
+		for($i = 0; $i < count($columns); $i++){
+			if($formvars['column'.$i] != 'x' AND $formvars['column'.$i] != 'y'){
+				if($komma)$sql.= ", ";
+				$j = $i+1;
+				$sql.= "spalte".$j." varchar";
+				$komma = true;
+				if($formvars['column'.$i] == 'label')$labelitem = $i;
+			}
+		}
+		$sql.= ")WITH (OIDS=TRUE);";
+		$sql.= "SELECT AddGeometryColumn('".CUSTOM_SHAPE_SCHEMA."', '".$tablename."', 'the_geom', ".$formvars['epsg'].", 'POINT', 2);";
+		foreach($rows as $row){
+			$columns = explode($formvars['delimiter'], $row);
+			$sql.= "INSERT INTO ".CUSTOM_SHAPE_SCHEMA.".".$tablename." VALUES(";
+			$komma = false;
+			for($i = 0; $i < count($columns); $i++){
+				if($formvars['column'.$i] != 'x' AND $formvars['column'.$i] != 'y'){
+					if($komma)$sql.= ", ";
+					$sql.= "'".$columns[$i]."'";
+					$komma = true;
+				}
+				else{
+					$$formvars['column'.$i] = $columns[$i];			# Hier werden $x und $y gesetzt
+				}
+			}
+			$sql.= ", st_geomfromtext('POINT(".$x." ".$y.")', ".$formvars['epsg']."));";
+		}
+		#echo $sql;
+		$ret = $pgdatabase->execSQL($sql,4, 0);
+		if(!$ret[0]){
+			$custom_table['datatype'] = 0;
+			$custom_table['tablename'] = $tablename;
+			$custom_table['labelitem'] = 'Spalte'.$labelitem;
+			return $custom_table;
+		}
+	}
+	
 	function import_custom_shape($formvars, $pgdatabase){
 		$_files = $_FILES;	
 		if($_files['zipfile']['name']){     # eine Zipdatei wurde ausgewählt

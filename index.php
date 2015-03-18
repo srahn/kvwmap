@@ -941,6 +941,10 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 		case 'Punktliste_Anzeigen_Datei laden' : {
 			$GUI->create_point_rollenlayer_load();
 	  } break;
+		
+		case 'Punktliste_Anzeigen_Anzeigen' : {
+			$GUI->create_point_rollenlayer_import();
+	  } break;
 
 	  case 'simple_SHP_Import' : {
 			$GUI->checkCaseAllowed('simple_SHP_Import');

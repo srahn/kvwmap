@@ -8093,6 +8093,14 @@ class GUI {
 	}
 	
 	function create_point_rollenlayer_load(){
+		$this->main='create_point_rollenlayer.php';
+		include_(CLASSPATH.'data_import_export.php');
+		$this->data_import_export = new data_import_export();
+		$this->data_import_export->pointlist = $this->data_import_export->load_custom_pointlist($this->formvars);
+    $this->output();
+	}	
+	
+	function create_point_rollenlayer_import(){
 		include_(CLASSPATH.'data_import_export.php');
 		$this->data_import_export = new data_import_export();
 		$layer_id = $this->data_import_export->create_shape_rollenlayer($this->formvars, 'point', $this->Stelle, $this->user, $this->database, $this->pgdatabase);
