@@ -12213,7 +12213,12 @@ class GUI {
 	    $tablename = $layerset['attributes']['table_name'][$layerset['attributes']['the_geom']];
 	    $oid = $layerset['shape'][$k][$tablename.'_oid'];
 	    $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-	    $map = new mapObj(DEFAULTMAPFILE);
+			if(MAPSERVERVERSION < 600){
+				$map = ms_newMapObj(DEFAULTMAPFILE);
+			}
+			else {
+				$map = new mapObj(DEFAULTMAPFILE);
+			}
 			$map->set('debug', 5);
 	    $layerdb = $mapDB->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
 	    # Auf den Datensatz zoomen
