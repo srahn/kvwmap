@@ -10209,7 +10209,6 @@ class GUI {
             # Es wurde mindestens ein eindeutiges FlurstKennz in FlstID ausgewählt, oder ein oder mehrere über FlstNr gefunden
             # Zoom auf Flurstücke
             if($this->formvars['ALK_Suche'] == 1){
-            	$this->loadMap('DataBase');
 		          $this->zoomToALKFlurst($FlurstKennz,10);				
 							if($this->formvars['go_next'] != '')header('location: index.php?go='.$this->formvars['go_next']);
 		          $currenttime=date('Y-m-d H:i:s',time());
@@ -11832,13 +11831,12 @@ class GUI {
       $legendentext.=",<br>".$FlurstListe[$i];
     }
    	$datastring.=") ";
+		$dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
 		# Filter
 		$layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
-		$filter = $this->mapDB->getFilter($layerset[0]['Layer_ID'], $this->Stelle->id);
+		$filter = $dbmap->getFilter($layerset[0]['Layer_ID'], $this->Stelle->id);
 		if($filter != '')$datastring.= ' AND '.$filter;
 		$datastring.=") as foo using unique oid using srid=".$epsg;
-
-    $dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
 
     $group = $dbmap->getGroupbyName('Suchergebnis');
     if($group != ''){
@@ -12669,7 +12667,6 @@ class GUI {
         # Abfrage der Flurstücks aus dem ALB über die Adresse
         $FlurstKennz=$Adresse->getFlurstKennzListe();
         if($this->formvars['ALK_Suche'] == 1){
-        	$this->loadMap('DataBase');
 	        $ret = $this->zoomToALKGebaeude($GemID,$StrID,$StrName,$HausID,100);
 	        if($ret[0]){
 	        	$this->zoomToALKFlurst($FlurstKennz,100);
@@ -12688,7 +12685,6 @@ class GUI {
 	        else {
 	          # Anzeige der Gebaeude in der ALK
 	          # Karte laden, auf die Gebaeude zoomen, Karte Zeichnen und speichern für späteren gebrauch
-	          $this->loadMap('DataBase');
 	          $this->zoomToALKGebaeude($GemID,$StrID,$StrName,$HausID,100);
 	          $currenttime=date('Y-m-d H:i:s',time());
 	          $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
