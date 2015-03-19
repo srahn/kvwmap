@@ -11831,6 +11831,7 @@ class GUI {
       $legendentext.=",<br>".$FlurstListe[$i];
     }
    	$datastring.=") ";
+		$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN endet IS NULL ELSE beginnt <= '\$hist_timestamp' and ('\$hist_timestamp' <= endet or endet IS NULL) END";
 		$dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
 		# Filter
 		$layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
