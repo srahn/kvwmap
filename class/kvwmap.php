@@ -11694,9 +11694,10 @@ class GUI {
     # zu 3)
     $GemkgObj=new Gemarkung($Gemkgschl,$this->pgdatabase);
     $layer=ms_newLayerObj($this->map);
-    $datastring ="the_geom from (select oid, the_geom from alkis.pp_gemarkung ";
-    $datastring.="WHERE land*10000 + gemarkung = ".$Gemkgschl;
-    $datastring.=") as foo using unique oid using srid=".EPSGCODE_ALKIS;
+    $datastring ="the_geom from (SELECT 1 as id, st_multi(st_buffer(st_union(wkb_geometry), 0.1)) as the_geom FROM alkis.ax_flurstueck ";
+    $datastring.="WHERE land*10000 + gemarkungsnummer = ".$Gemkgschl;
+		$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN endet IS NULL ELSE beginnt <= '\$hist_timestamp' and ('\$hist_timestamp' <= endet or endet IS NULL) END";
+    $datastring.=") as foo using unique id using srid=".EPSGCODE_ALKIS;
     $legendentext ="Gemarkung: ".$GemkgObj->getGemkgName($Gemkgschl);
     $layer->set('data',$datastring);
     $layer->set('status',MS_ON);
@@ -11762,10 +11763,11 @@ class GUI {
     # zu 3)
     $GemkgObj=new Gemarkung($GemkgID,$this->pgdatabase);
     $layer=ms_newLayerObj($this->map);
-    $datastring ="the_geom from (select oid, the_geom from alkis.pp_flur as f ";
-    $datastring.="WHERE f.land*10000 + f.gemarkung = ".$GemkgID;
-    $datastring.=" AND f.flurnummer = ".(int)$FlurID;
-    $datastring.=") as foo using unique oid using srid=".EPSGCODE_ALKIS;
+    $datastring ="the_geom from (SELECT 1 as id, st_multi(st_buffer(st_union(wkb_geometry), 0.1)) as the_geom FROM alkis.ax_flurstueck ";
+    $datastring.="WHERE land*10000 + gemarkungsnummer = ".$GemkgID;
+    $datastring.=" AND flurnummer = ".(int)$FlurID;
+		$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN endet IS NULL ELSE beginnt <= '\$hist_timestamp' and ('\$hist_timestamp' <= endet or endet IS NULL) END";
+    $datastring.=") as foo using unique id using srid=".EPSGCODE_ALKIS;
     $legendentext ="Gemarkung: ".$GemkgObj->getGemkgName($GemkgID);
     $legendentext .="<br>Flur: ".$FlurID;
     $layer->set('data',$datastring);
@@ -11934,7 +11936,6 @@ class GUI {
 	    # zu 3)
 			$epsg = EPSGCODE_ALKIS;
 			$datastring ="the_geom from (select g.gml_id as oid, wkb_geometry as the_geom FROM alkis.ax_gemeinde gem, alkis.ax_gebaeude g";
-			$datastring.=" LEFT JOIN alkis.alkis_beziehungen v ON g.gml_id=v.beziehung_von"; 
 			$datastring.=" LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = any(g.zeigtauf)"; 
 			$datastring.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde";
 			$datastring.=" AND l.lage = lpad(s.lage,5,'0')";
@@ -11950,6 +11951,8 @@ class GUI {
 					$datastring.=" AND l.lage='".$Strasse."'";
 				}
 			}
+			$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN g.endet IS NULL ELSE g.beginnt <= '\$hist_timestamp' and ('\$hist_timestamp' <= g.endet or g.endet IS NULL) END";
+			$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN gem.endet IS NULL ELSE gem.beginnt <= '\$hist_timestamp' and ('\$hist_timestamp' <= gem.endet or gem.endet IS NULL) END";
 	    $datastring.=") as foo using unique oid using srid=".$epsg;
 	    $legendentext ="Geb&auml;ude<br>";
 	    if ($Hausnr!='') {

@@ -1046,21 +1046,21 @@ class pgdatabase {
   }
  
   function getFlurstuecksKennzByGemeindeIDs($Gemeinde_ID, $FlurstKennz){
-		$sql ="SELECT f.flurstueckskennzeichen as flurstkennz FROM alkis.ax_historischesflurstueckohneraumbezug AS f, alkis.gemeinde_gemarkung AS g_g";
-		$sql.=" WHERE f.gemarkungsnummer=g_g.gemarkung AND g_g.land::text||g_g.regierungsbezirk::text||lpad(g_g.kreis::text, 2, '0')||lpad(g_g.gemeinde::text, 3, '0') IN ('".$Gemeinde_ID[0]['ID']."'";
+		$sql ="SELECT f.flurstueckskennzeichen as flurstkennz FROM alkis.ax_historischesflurstueckohneraumbezug AS f, alkis.pp_gemarkung AS g ";
+		$sql.="WHERE f.gemarkungsnummer=g.gemarkung AND g.land::text||g.regierungsbezirk::text||lpad(g.kreis::text, 2, '0')||lpad(g.gemeinde::text, 3, '0') IN ('".$Gemeinde_ID[0]['ID']."'";
 		for($i = 1; $i < count($Gemeinde_ID); $i++){
 			$sql .= ", '".$Gemeinde_ID[$i]['ID']."'";
 		}
-		$sql .= ")";
-		$sql.=" AND f.flurstueckskennzeichen IN ('".implode($FlurstKennz, "', '")."')";
-		$sql.=" UNION ";
-		$sql.="SELECT f.flurstueckskennzeichen as flurstkennz FROM alkis.ax_flurstueck AS f, alkis.gemeinde_gemarkung AS g_g";
-		$sql.=" WHERE f.gemarkungsnummer=g_g.gemarkung AND g_g.land::text||g_g.regierungsbezirk::text||lpad(g_g.kreis::text, 2, '0')||lpad(g_g.gemeinde::text, 3, '0') IN ('".$Gemeinde_ID[0]['ID']."'";
+		$sql .= ") ";
+		$sql.="AND f.flurstueckskennzeichen IN ('".implode($FlurstKennz, "', '")."') ";
+		$sql.="UNION ";
+		$sql.="SELECT f.flurstueckskennzeichen as flurstkennz FROM alkis.ax_flurstueck AS f ";
+		$sql.="WHERE f.land::text||f.regierungsbezirk::text||lpad(f.kreis::text, 2, '0')||lpad(f.gemeinde::text, 3, '0') IN ('".$Gemeinde_ID[0]['ID']."'";
 		for($i = 1; $i < count($Gemeinde_ID); $i++){
 			$sql .= ", '".$Gemeinde_ID[$i]['ID']."'";
 		}
-		$sql .= ")";
-		$sql.=" AND f.flurstueckskennzeichen IN ('".implode($FlurstKennz, "', '")."')";
+		$sql .= ") ";
+		$sql.="AND f.flurstueckskennzeichen IN ('".implode($FlurstKennz, "', '")."')";
     $this->debug->write("<p>postgresql.php getFlurstuecksKennzByGemeindeIDs() Abfragen erlaubten Flurstückskennzeichen nach Gemeindeids:<br>".$sql,4);
     $query=pg_query($sql);
     if ($query==0) {
