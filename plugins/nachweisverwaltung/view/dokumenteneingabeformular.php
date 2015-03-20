@@ -140,27 +140,29 @@ $legendheight = $this->map->height-8;
 						?>
 					</td>
 					<td colspan="2" style="border-top:1px solid #999999"><img width="290px" height="1px" src="<? echo GRAPHICSPATH; ?>leer.gif"></td>
-				</tr>
-				<tr>					
+				</tr>					
 					<? if(NACHWEIS_PRIMARY_ATTRIBUTE != 'rissnummer'){ ?>
+				<tr>
 					<td>Antragsnr:</td>
 					<td>
 						<input name="stammnr" type="text" value="<?php echo $this->formvars['stammnr']; ?>" size="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>" maxlength="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>">
 					</td>
+					</tr>
 					<? } ?>
-				</tr>
 				<tr>
 					<td>Rissnummer:</td>
 					<td>
 						<input name="rissnummer" type="text" value="<?php echo $this->formvars['rissnummer']; ?>" size="<?php echo RISSNUMMERMAXLENGTH; ?>" maxlength="<? echo RISSNUMMERMAXLENGTH; ?>">
 					</td>
+				</tr>
 					<? if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){ ?>
+				<tr>
 					<td>Antragsnummer:</td>
 					<td>
 						<input name="stammnr" type="text" value="<?php echo $this->formvars['stammnr']; ?>" size="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>" maxlength="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>">
 					</td>
-					<? } ?>
 				</tr>
+					<? } ?>
 				<tr>
 					<td colspan="2" style="border-top:1px solid #999999"><img width="290px" height="1px" src="<? echo GRAPHICSPATH; ?>leer.gif"></td>
 				</tr>
