@@ -133,39 +133,14 @@ $legendheight = $this->map->height-8;
 						</table></td>
 				</tr>
 				<tr> 
-					<td rowspan="23">&nbsp; </td>
-					<td rowspan="23" colspan="5"> 
+					<td rowspan="20">&nbsp; </td>
+					<td rowspan="20" colspan="5"> 
 						<?php
 							include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php')
 						?>
 					</td>
 					<td colspan="2" style="border-top:1px solid #999999"><img width="290px" height="1px" src="<? echo GRAPHICSPATH; ?>leer.gif"></td>
 				</tr>					
-					<? if(NACHWEIS_PRIMARY_ATTRIBUTE != 'rissnummer'){ ?>
-				<tr>
-					<td>Antragsnr:</td>
-					<td>
-						<input name="stammnr" type="text" value="<?php echo $this->formvars['stammnr']; ?>" size="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>" maxlength="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>">
-					</td>
-					</tr>
-					<? } ?>
-				<tr>
-					<td>Rissnummer:</td>
-					<td>
-						<input name="rissnummer" type="text" value="<?php echo $this->formvars['rissnummer']; ?>" size="<?php echo RISSNUMMERMAXLENGTH; ?>" maxlength="<? echo RISSNUMMERMAXLENGTH; ?>">
-					</td>
-				</tr>
-					<? if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){ ?>
-				<tr>
-					<td>Antragsnummer:</td>
-					<td>
-						<input name="stammnr" type="text" value="<?php echo $this->formvars['stammnr']; ?>" size="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>" maxlength="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>">
-					</td>
-				</tr>
-					<? } ?>
-				<tr>
-					<td colspan="2" style="border-top:1px solid #999999"><img width="290px" height="1px" src="<? echo GRAPHICSPATH; ?>leer.gif"></td>
-				</tr>
 				<tr> 
 					<td colspan="2"><input type="radio" name="art" value="100"<?php if ($this->formvars['art']=='100') { ?> checked<?php } ?>>
 						Fortführungsriss&nbsp;(FFR)
@@ -195,6 +170,28 @@ $legendheight = $this->map->height-8;
 				<tr> 
 					<td colspan="2" style="border-top:1px solid #999999"><img width="290px" height="1px" src="<? echo GRAPHICSPATH; ?>leer.gif"></td>
 				</tr>
+				<? if(NACHWEIS_PRIMARY_ATTRIBUTE != 'rissnummer'){ ?>
+				<tr>
+					<td>Antragsnr:</td>
+					<td>
+						<input name="stammnr" type="text" value="<?php echo $this->formvars['stammnr']; ?>" size="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>" maxlength="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>">
+					</td>
+					</tr>
+					<? } ?>
+				<tr>
+					<td>Rissnummer:</td>
+					<td>
+						<input name="rissnummer" type="text" value="<?php echo $this->formvars['rissnummer']; ?>" size="<?php echo RISSNUMMERMAXLENGTH; ?>" maxlength="<? echo RISSNUMMERMAXLENGTH; ?>">
+					</td>
+				</tr>
+					<? if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){ ?>
+				<tr>
+					<td>Antragsnummer:</td>
+					<td>
+						<input name="stammnr" type="text" value="<?php echo $this->formvars['stammnr']; ?>" size="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>" maxlength="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>">
+					</td>
+				</tr>
+				<? } ?>				
 				<tr> 
 					<td width="80px">Blattnummer:</td>
 					<td>
@@ -208,22 +205,15 @@ $legendheight = $this->map->height-8;
 					</td>
 				</tr>
 				<tr> 
-					<td colspan="2">Bemerkungen:
-						<textarea style="width:260px" name="bemerkungen"><?php echo $this->formvars['bemerkungen']; ?></textarea>
+					<td>Datum:&nbsp;&nbsp;<a href="javascript:;" title=" (TT.MM.JJJJ) " onclick="new CalendarJS().init('datum')"><img src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar" style="right: 70px"><input type="hidden" id="calendar_datum"></div></td>
+					<td>
+						<input name="datum" id="datum" type="text" onchange="" value="<?php echo $this->formvars['datum']; ?>" size="10" maxlength="50">
 					</td>
 				</tr>
 				<tr> 
-					<td colspan="2">&nbsp;</td>
-				</tr>
-				<tr> 
-					<td>Datum:</td>
-					<td>
-					<a href="javascript:;" title=" (TT.MM.JJJJ) " onclick="new CalendarJS().init('datum')"><img src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id="calendar_datum"></div>
-					<input name="datum" id="datum" type="text" onchange="" value="<?php echo $this->formvars['datum']; ?>" size="10" maxlength="50">
-				</td>
-				</tr>
-				<tr> 
-					<td colspan="2">&nbsp;</td>
+					<td colspan="2">Bemerkungen:
+						<textarea style="width:260px" name="bemerkungen"><?php echo $this->formvars['bemerkungen']; ?></textarea>
+					</td>
 				</tr>
 				<tr> 
 					<td colspan="2">Vermessungsstelle:<br> 
