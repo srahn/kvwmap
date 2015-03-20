@@ -334,11 +334,6 @@ $legendheight = $this->map->height-8;
 									<td><!-- bgcolor=#e3e3e6 -->
 									<div align="center"><?php # 2007-12-30 pk
 									?><input type="submit" name="neuladen" value="<?php echo $strLoadNew; ?>" tabindex="1"></div>
-									<br>
-									<? if(defined('LAYER_ID_SCHNELLSPRUNG') AND LAYER_ID_SCHNELLSPRUNG != ''){
-										include(SNIPPETS.'schnellsprung.php');
-										} ?>
-									&nbsp;
 									<div id="legendcontrol">
 										<a href="index.php?go=reset_querys"><img src="graphics/tool_info.png" border="0" alt="Informationsabfrage." title="Informationsabfrage | Hier klicken, um alle Abfragehaken zu entfernen" width="17"></a>
 										<a href="index.php?go=reset_layers"><img src="graphics/layer.png" border="0" alt="Themensteuerung." title="Themensteuerung | Hier klicken, um alle Themen zu deaktivieren" width="20" height="20"></a><br>
