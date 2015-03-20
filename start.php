@@ -346,10 +346,11 @@ if($_SESSION['login_routines'] == true){
 			}
     }
 	}
-	# Anpassen der Kartengröße an das Browserfenster
-	if($GUI->formvars['width'] != '')$GUI->resizeMap2Window();
 	$_SESSION['login_routines'] = false;
 }
+
+# Anpassen der Kartengröße an das Browserfenster
+if($GUI->formvars['browserwidth'] != '')$GUI->resizeMap2Window();
 
 if(isset($_FILES)) {
 	foreach ($_FILES AS $datei) {

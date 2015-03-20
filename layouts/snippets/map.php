@@ -49,7 +49,7 @@ function resizemap2window() {
     width = document.body.clientWidth;
     height = document.body.clientHeight;
   }
-	document.location.href='index.php?go=ResizeMap2Window&width='+width+'&height='+height+'&nScale='+document.GUI.nScale.value;
+	document.location.href='index.php?go=ResizeMap2Window&browserwidth='+width+'&browserheight='+height+'&nScale='+document.GUI.nScale.value;
 }
 
 function showMapImage(){ 
@@ -117,7 +117,8 @@ function switchlegend(){
 
   $res_x    = $this->map->width;
   $res_y    = $this->map->height;
-  $legendheight = $this->map->height-47;
+  $legendheight = $this->map->height-52;
+	if($this->user->rolle->runningcoords == 1)$legendheight = $legendheight + 22;
   $res_xm   = $this->map->width/2;
   $res_ym   = $this->map->height/2;
   $dx       = $this->map->extent->maxx-$this->map->extent->minx;

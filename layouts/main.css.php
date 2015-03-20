@@ -242,7 +242,7 @@ a.menuered:hover {
 }
 
 .normallegend {
-
+	border-bottom: 1px solid #aaaaaa;
 }
 
 #scrolldiv{

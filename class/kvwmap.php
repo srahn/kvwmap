@@ -2143,10 +2143,11 @@ class GUI {
 	function resizeMap2Window(){
 		global $menue_legend_widths;
 		if($menue_legend_widths[$this->user->rolle->gui] == NULL)$menue_legend_widths[$this->user->rolle->gui] = 490;
-		$width = $this->formvars['width'] - $menue_legend_widths[$this->user->rolle->gui];
-		if($this->user->rolle->hideMenue == 1){$width = $width + 195;}
-		if($this->user->rolle->hideLegend == 1){$width = $width + 254;}
-		$height = $this->formvars['height'] - HEADER_FOOTER_HEIGHT;
+		$width = $this->formvars['browserwidth'] - $menue_legend_widths[$this->user->rolle->gui];
+		$height = $this->formvars['browserheight'] - HEADER_FOOTER_HEIGHT;
+		if($this->user->rolle->hideMenue == 1)$width = $width + 195;
+		if($this->user->rolle->hideLegend == 1)$width = $width + 254;
+		if($this->user->rolle->runningcoords == 1)$height = $height - 22;
 		if($height < 0)$height = 10;
 		if($width < 0)$width = 10;
 		$this->user->rolle->setSize($width.'x'.$height);

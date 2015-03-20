@@ -4,6 +4,25 @@
 	global $supportedLanguages;
 ?>
 <script type="text/javascript" src="funktionen/calendar.js"></script>
+<script type="text/javascript">
+
+	function start(){
+		if(typeof(window.innerWidth) == 'number'){
+			width = window.innerWidth;
+			height = window.innerHeight;
+		}else if(document.documentElement && (document.documentElement.clientWidth || document.documentElement.clientHeight)){
+			width = document.documentElement.clientWidth;
+			height = document.documentElement.clientHeight;
+		}else if(document.body && (document.body.clientWidth || document.body.clientHeight)){
+			width = document.body.clientWidth;
+			height = document.body.clientHeight;
+		}
+		document.GUI.browserwidth.value = width;
+		document.GUI.browserheight.value = height;
+		document.GUI.submit();
+	}
+	
+</script>
 <br>
 <h2><?php echo $this->titel.$strTitleRoleSelection; ?></h2><br>
 
@@ -228,7 +247,9 @@
 <table>
   <tr>
     <td></td>
-    <td><br><input type="submit" name="submit" value="<?php echo $this->strEnter; ?>"><br><br></td>
+    <td><br><input type="button" name="starten" onclick="start();" value="<?php echo $this->strEnter; ?>"><br><br></td>
   </tr>
 </table>
   <input type="hidden" name="go" value="">
+	<input type="hidden" name="browserwidth">
+	<input type="hidden" name="browserheight">

@@ -25,8 +25,8 @@
 				width = document.body.clientWidth;
 				height = document.body.clientHeight;
 			}
-			document.login.width.value = width;
-			document.login.height.value = height;
+			document.login.browserwidth.value = width;
+			document.login.browserheight.value = height;
 			document.login.submit();
 		}
 		
@@ -157,8 +157,8 @@
 						</td>
 					</tr>
 				</table>
-				<input type="hidden" name="width">
-				<input type="hidden" name="height">
+				<input type="hidden" name="browserwidth">
+				<input type="hidden" name="browserheight">
 			</form>			
 		 </body>
 		</html><?php
