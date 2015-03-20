@@ -3149,41 +3149,40 @@ class GUI {
 
   function PointEditor(){
 		include_once (CLASSPATH.'pointeditor.php');
-		$this->reduce_mapwidth(0);
+		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$this->reduce_mapwidth(100);
     $this->main='PointEditor.php';
     $this->titel='Geometrie bearbeiten';
-    # aktuellen Kartenausschnitt laden
-    $this->loadMap('DataBase');
     $layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
-    $layerdb = $this->mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-		$attributes = $this->mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, NULL);
+    $layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+		$attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, NULL);
 		$this->formvars['geom_nullable'] = $attributes['nullable'][$attributes['indizes'][$attributes['the_geom']]];
     $pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
     $oldscale=round($this->map_scaledenom);
-    if ($this->formvars['CMD']!='') {
-      $this->navMap($this->formvars['CMD']);
-    }
-    elseif($oldscale!=$this->formvars['nScale'] AND $this->formvars['nScale'] != '') {
-      $this->scaleMap($this->formvars['nScale']);
-    }
-    elseif($this->formvars['oid'] != '') {
-      $this->point = $pointeditor->getpoint($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname']);
-      if($this->point['pointx'] != ''){
-        $this->formvars['loc_x']=$this->point['pointx'];
-        $this->formvars['loc_y']=$this->point['pointy'];
-        $rect = ms_newRectObj();
-        $rect->minx = $this->point['pointx']-100;
-        $rect->maxx = $this->point['pointx']+100;
-        $rect->miny = $this->point['pointy']-100;
-        $rect->maxy = $this->point['pointy']+100;
-        $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
-      	if (MAPSERVERVERSION > 600) {
-					$this->map_scaledenom = $this->map->scaledenom;
+    if($oldscale != $this->formvars['nScale'] OR $this->formvars['neuladen'] OR $this->formvars['CMD'] != ''){
+			$this->neuLaden();
+		}
+		else{
+			$this->loadMap('DataBase');
+			if($this->formvars['oid'] != ''){
+				$this->point = $pointeditor->getpoint($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname']);
+				if($this->point['pointx'] != ''){
+					$this->formvars['loc_x']=$this->point['pointx'];
+					$this->formvars['loc_y']=$this->point['pointy'];
+					$rect = ms_newRectObj();
+					$rect->minx = $this->point['pointx']-100;
+					$rect->maxx = $this->point['pointx']+100;
+					$rect->miny = $this->point['pointy']-100;
+					$rect->maxy = $this->point['pointy']+100;
+					$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
+					if (MAPSERVERVERSION > 600) {
+						$this->map_scaledenom = $this->map->scaledenom;
+					}
+					else {
+						$this->map_scaledenom = $this->map->scale;
+					}
 				}
-				else {
-					$this->map_scaledenom = $this->map->scale;
-				}
-      }
+			}
     }
     $this->saveMap('');
     if($this->formvars['CMD'] != 'previous' AND $this->formvars['CMD'] != 'next'){
@@ -3221,46 +3220,45 @@ class GUI {
 
   function LineEditor(){
 		include_once (CLASSPATH.'lineeditor.php');
+		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$this->reduce_mapwidth(100);
     $this->main='LineEditor.php';
     $this->titel='Geometrie bearbeiten';
-    # aktuellen Kartenausschnitt laden
-    $this->loadMap('DataBase');
-    $layerdb = $this->mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+    $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
     $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
-		$attributes = $this->mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
+		$attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
 		$this->formvars['geom_nullable'] = $attributes['nullable'][$attributes['indizes'][$attributes['the_geom']]];
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
     $lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
-    $oldscale=round($this->map_scaledenom);
-    if ($this->formvars['CMD']!='') {
-      $this->navMap($this->formvars['CMD']);
-      $this->user->rolle->saveDrawmode($this->formvars['always_draw']);
-    }
-    elseif($oldscale!=$this->formvars['nScale'] AND $this->formvars['nScale'] != '') {
-      $this->scaleMap($this->formvars['nScale']);
-    }
-    elseif($this->formvars['oid'] != '' AND $this->formvars['no_load'] != 'true'){
-      # Linien abfragen
-      $this->geomload = true;			# Geometrie wird das erste Mal geladen, deshalb nicht in den Weiterzeichnenmodus gehen
-      $this->lines = $lineeditor->getlines($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname']);
-      if($this->lines['wktgeom'] != ''){
-        $this->formvars['newpathwkt'] = $this->lines['wktgeom'];
-        $this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
-        $this->formvars['newpath'] = str_replace('-', '', $this->lines['svggeom']);
-        $this->formvars['newpath'] = str_replace('L ', '', $this->formvars['newpath']);		# neuere Postgis-Versionen haben ein L mit drin
-        $this->formvars['firstline'] = 'true';
-        if($this->formvars['zoom'] != 'false'){
-          $rect = $lineeditor->zoomToLine($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], 10);
-          $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
-        	if (MAPSERVERVERSION > 600) {
-						$this->map_scaledenom = $this->map->scaledenom;
+    $oldscale=round($this->map_scaledenom);		
+		if($oldscale != $this->formvars['nScale'] OR $this->formvars['neuladen'] OR $this->formvars['CMD'] != ''){
+			$this->neuLaden();
+			$this->user->rolle->saveDrawmode($this->formvars['always_draw']);
+		}
+		else{
+			$this->loadMap('DataBase');
+			if($this->formvars['oid'] != '' AND $this->formvars['no_load'] != 'true'){
+				# Linien abfragen
+				$this->geomload = true;			# Geometrie wird das erste Mal geladen, deshalb nicht in den Weiterzeichnenmodus gehen
+				$this->lines = $lineeditor->getlines($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname']);
+				if($this->lines['wktgeom'] != ''){
+					$this->formvars['newpathwkt'] = $this->lines['wktgeom'];
+					$this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
+					$this->formvars['newpath'] = str_replace('-', '', $this->lines['svggeom']);
+					$this->formvars['newpath'] = str_replace('L ', '', $this->formvars['newpath']);		# neuere Postgis-Versionen haben ein L mit drin
+					$this->formvars['firstline'] = 'true';
+					if($this->formvars['zoom'] != 'false'){
+						$rect = $lineeditor->zoomToLine($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], 10);
+						$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
+						if (MAPSERVERVERSION > 600) {
+							$this->map_scaledenom = $this->map->scaledenom;
+						}
+						else {
+							$this->map_scaledenom = $this->map->scale;
+						}
 					}
-					else {
-						$this->map_scaledenom = $this->map->scale;
-					}
-        }
-      }
+				}
+			}
     }
     # Spaltenname und from-where abfragen
     $data = $this->mapDB->getData($this->formvars['layer_id']);
@@ -3335,46 +3333,45 @@ class GUI {
 
   function PolygonEditor(){
 		include_once (CLASSPATH.'polygoneditor.php');
+		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$this->reduce_mapwidth(100);
    	$this->main='PolygonEditor.php';
     $this->titel='Geometrie bearbeiten';
-    # aktuellen Kartenausschnitt laden
-    $this->loadMap('DataBase');
-    $layerdb = $this->mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+    $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
     $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
-		$attributes = $this->mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
+		$attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
 		$this->formvars['geom_nullable'] = $attributes['nullable'][$attributes['indizes'][$attributes['the_geom']]];
     $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
     $polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
-    $oldscale=round($this->map_scaledenom);
-    if ($this->formvars['CMD']!='') {
-      $this->navMap($this->formvars['CMD']);
-      $this->user->rolle->saveDrawmode($this->formvars['always_draw']);
-    }
-    elseif($oldscale!=$this->formvars['nScale'] AND $this->formvars['nScale'] != '') {
-      $this->scaleMap($this->formvars['nScale']);
-    }
-    elseif($this->formvars['oid'] != '' AND $this->formvars['no_load'] != 'true'){
-      # Polygon abfragen
-      $this->geomload = true;			# Geometrie wird das erste Mal geladen, deshalb nicht in den Weiterzeichnenmodus gehen
-      $this->polygon = $polygoneditor->getpolygon($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], $this->map->extent);
-      if($this->polygon['wktgeom'] != ''){
-        $this->formvars['newpathwkt'] = $this->polygon['wktgeom'];
-        $this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
-        $this->formvars['newpath'] = $this->polygon['svggeom'];
-        $this->formvars['firstpoly'] = 'true';
-        if($this->formvars['zoom'] != 'false'){
-          $rect = $polygoneditor->zoomTopolygon($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], 10);
-          $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
-        	if (MAPSERVERVERSION > 600) {
-						$this->map_scaledenom = $this->map->scaledenom;
+		$oldscale=round($this->map_scaledenom);		
+		if($oldscale != $this->formvars['nScale'] OR $this->formvars['neuladen'] OR $this->formvars['CMD'] != ''){
+			$this->neuLaden();
+			$this->user->rolle->saveDrawmode($this->formvars['always_draw']);
+		}
+		else{
+			$this->loadMap('DataBase');
+			if($this->formvars['oid'] != '' AND $this->formvars['no_load'] != 'true'){
+				# Polygon abfragen
+				$this->geomload = true;			# Geometrie wird das erste Mal geladen, deshalb nicht in den Weiterzeichnenmodus gehen
+				$this->polygon = $polygoneditor->getpolygon($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], $this->map->extent);
+				if($this->polygon['wktgeom'] != ''){
+					$this->formvars['newpathwkt'] = $this->polygon['wktgeom'];
+					$this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
+					$this->formvars['newpath'] = $this->polygon['svggeom'];
+					$this->formvars['firstpoly'] = 'true';
+					if($this->formvars['zoom'] != 'false'){
+						$rect = $polygoneditor->zoomTopolygon($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], 10);
+						$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
+						if (MAPSERVERVERSION > 600) {
+							$this->map_scaledenom = $this->map->scaledenom;
+						}
+						else {
+							$this->map_scaledenom = $this->map->scale;
+						}
 					}
-					else {
-						$this->map_scaledenom = $this->map->scale;
-					}
-        }
-      }
-    }
+				}
+			}
+		}
     # Geometrie-Übernahme-Layer:
     # Spaltenname und from-where abfragen
     $data = $this->mapDB->getData($this->formvars['layer_id']);
@@ -7261,12 +7258,10 @@ class GUI {
     $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->titel='neuen Datensatz einfügen';
     $this->main='new_layer_data.php';
-    
     if($this->formvars['chosen_layer_id']){			# von einer Sachdatenanzeige übergebene Formvars
     	$this->formvars['CMD'] = '';
     	$this->formvars['selected_layer_id'] = $this->formvars['chosen_layer_id'];
     }
-    
     if($this->formvars['selected_layer_id'] == ''){
 			$this->layerdaten = $this->Stelle->getqueryablePostgisLayers(1, NULL, true);		# wenn kein Layer vorausgewählt, Subform-Layer ausschliessen
 		}
@@ -7333,11 +7328,19 @@ class GUI {
         $this->new_entry = true;
 
         $this->geomtype = $this->qlayerset[0]['attributes']['geomtype'][$this->qlayerset[0]['attributes']['the_geom']];
-        if($this->geomtype != ''){
-          $saved_scale = $this->reduce_mapwidth(150);
-					$this->loadMap('DataBase');
-					if($_SERVER['REQUEST_METHOD'] == 'GET')$this->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
-        	if($this->formvars['layer_id'] != '' AND $this->formvars['oid'] != '' AND $this->formvars['tablename'] != '' AND $this->formvars['columnname'] != ''){			# das sind die Sachen vom "Mutter"-Layer
+        if($this->geomtype != ''){          
+					$saved_scale = $this->reduce_mapwidth(150);
+					$oldscale=round($this->map_scaledenom);
+					if($oldscale != $this->formvars['nScale'] OR $this->formvars['neuladen'] OR $this->formvars['CMD'] != ''){
+						$this->neuLaden();
+						$this->user->rolle->saveDrawmode($this->formvars['always_draw']);
+					}
+					else{
+						$this->loadMap('DataBase');
+					}											
+					if($_SERVER['REQUEST_METHOD'] == 'GET')$this->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist          
+					# evtl. Zoom auf "Mutter-Layer"
+					if($this->formvars['layer_id'] != '' AND $this->formvars['oid'] != '' AND $this->formvars['tablename'] != '' AND $this->formvars['columnname'] != ''){			# das sind die Sachen vom "Mutter"-Layer
 						$parentlayerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
         		$layerdb = $this->mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
         		$rect = $this->mapDB->zoomToDatasets(array($this->formvars['oid']), $this->formvars['tablename'], $this->formvars['columnname'], 10, $layerdb, $parentlayerset[0]['epsg_code'], $this->user->rolle->epsg_code);
@@ -7351,14 +7354,6 @@ class GUI {
 							}
 						}
         	}
-          $oldscale=round($this->map_scaledenom);
-          if($this->formvars['CMD']!='') {
-            $this->navMap($this->formvars['CMD']);
-            $this->user->rolle->saveDrawmode($this->formvars['always_draw']);
-          }
-			    elseif($oldscale!=$this->formvars['nScale'] AND $this->formvars['nScale'] != '') {
-			      $this->scaleMap($this->formvars['nScale']);
-			    }																																									# Achtung: evtl. Bug-Report wegen fehlendem $this->geomtype == 'LINESTRING'
           if($this->geomtype == 'POLYGON' OR $this->geomtype == 'MULTIPOLYGON' OR $this->geomtype == 'GEOMETRY' OR $this->geomtype == 'LINESTRING' OR $this->geomtype == 'MULTILINESTRING'){
             #-----Polygoneditor und Linieneditor---#
             # aktuellen Kartenausschnitt laden
@@ -9258,7 +9253,7 @@ class GUI {
     # Änderungen in den Gruppen werden gesetzt
     $this->formvars = $this->user->rolle->setGroupStatus($this->formvars);
     # Ein- oder Ausblenden der Klassen
-    $this->user->rolle->setClassStatus($this->formvars);
+    #$this->user->rolle->setClassStatus($this->formvars);			# kann wahrscheinlich weg
     # Wenn ein Button im Kartenfenster gewählt wurde,
     # werden auch die Einstellungen aus der Legende übernommen
     $this->user->rolle->setAktivLayer($this->formvars,$this->Stelle->id,$this->user->id);

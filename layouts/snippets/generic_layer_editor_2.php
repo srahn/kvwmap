@@ -22,6 +22,7 @@
 	}
 ?>
 <div id="layer" onclick="remove_calendar();">
+<? if($this->new_entry != true){ ?>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 	<tr>
 		<td width="95%" align="center"><h2>&nbsp;&nbsp;<? echo $layer['Name']; ?></h2></td>
@@ -30,7 +31,8 @@
 		</td>		
 	</tr>
 </table>
-<?
+<? }
+
 	$doit = false;
   $anzObj = count($layer['shape']);
   if ($anzObj > 0) {

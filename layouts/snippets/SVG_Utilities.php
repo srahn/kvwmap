@@ -454,11 +454,13 @@
 	  	}
 			if(linefunctions == true){
 				linelength();
-				if(paths[1].search(/MULTI.+/) != -1){
-	  			top.currentform.split.style.visibility = "visible";
-				}
-				else{
-					top.currentform.split.style.visibility = "hidden";
+				if(top.currentform.split != undefined){
+					if(paths[1].search(/MULTI.+/) != -1){
+						top.currentform.split.style.visibility = "visible";
+					}
+					else{
+						top.currentform.split.style.visibility = "hidden";
+					}
 				}
 				if(top.currentform.last_doing.value == "split_lines"){
 					split_lines();
@@ -1214,7 +1216,7 @@ function mouseup(evt){
 		path_second = "";
 		redrawsecondline();
 		redraw();
-		top.currentform.split.style.visibility = "hidden";
+		if(top.currentform.split != undefined)top.currentform.split.style.visibility = "hidden";
 	}
 
 	function deletelastline(evt){

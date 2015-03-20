@@ -12,7 +12,7 @@
 </script>
 <table border="0" cellpadding="5" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
-    <td colspan="5"><h2><?php echo $strtitle; ?></h2></td>
+    <td colspan="5"><h2><?php echo $strtitle; ?>:&nbsp;<? echo $this->qlayerset[$i]['Name']; ?></h2></td>
   </tr>
   <tr <? if($this->formvars['selected_layer_id'] != '')echo 'style="display:none"'; ?>>
   	<td>&nbsp;</td>
@@ -43,7 +43,7 @@
   	 ?></td>
   </tr><?php
    }
-   ?></table><br>
+   ?></table>
 
 <?
 if($this->formvars['selected_layer_id'] AND $this->Fehler == ''){

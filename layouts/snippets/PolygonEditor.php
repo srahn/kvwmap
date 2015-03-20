@@ -61,24 +61,46 @@ function buildwktpolygonfromsvgpath(svgpath){
 	}
 ?>
 
-<table style="border: 1px solid; border-color: #eeeeee; border-left: none; border-right: none" width="760" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
+<table style="border: 1px solid; border-color: #eeeeee; border-left: none; border-right: none" width="760" border="0" cellpadding="0" cellspacing="5" bgcolor="<?php echo $bgcolor; ?>">
   <tr> 
     <td align="center" colspan="5"><a name="geoedit_anchor"><h2><?php echo $this->titel; ?></h2></a></td>
   </tr>
   <tr> 
-    <td rowspan="7">&nbsp;</td>
-    <td colspan="4" rowspan="7"> 
+    <td rowspan="8">&nbsp;</td>
+    <td colspan="4" rowspan="8"> 
       <?
 				include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php');
 			?>
     </td>
   </tr>
   <tr>
-  	<td height="380">&nbsp;</td>
+  	<td>
+			<table cellspacing=4 cellpadding=0 border=0 style="border:1px solid #C3C7C3;" background="<? echo GRAPHICSPATH."bg.gif"; ?>">
+				<tr align="center">
+					<td>Verfügbare Themen:</td>
+				</tr>
+				<tr align="left">
+					<td>
+					<div align="center"><input type="submit" class="button" name="neuladen" value="neu Laden"></div>
+					<br>
+					<div style="width:260px; height:<?php echo $this->map->height-196; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
+						&nbsp;
+						<img src="graphics/tool_info_2.png" alt="Informationsabfrage" title="Informationsabfrage" width="17">&nbsp;
+						<img src="graphics/layer.png" alt="Themensteuerung" title="Themensteuerung" width="20" height="20"><br>
+						<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
+						<div id="legend_div"><? echo $this->legende; ?></div>
+					</div>
+					</td>
+				</tr>
+			</table>
+		</td>
   </tr>
+	<tr>
+		<td></td>
+	</tr>
   <tr>
   	<td><? echo $strGeomFrom; ?>:<br>
-  		<select name="layer_id" onchange="document.GUI.no_load.value='true';document.GUI.submit();">
+  		<select name="layer_id" style="width: 260px" onchange="document.GUI.no_load.value='true';document.GUI.submit();">
   			<?
 				for($i = 0; $i < count($this->queryable_vector_layers['ID']); $i++){
   					echo '<option';
@@ -90,24 +112,23 @@ function buildwktpolygonfromsvgpath(svgpath){
   	</td>
   </tr>
   <tr> 
-    <td><hr align="center" noshade></td>
+    <td colspan="2" style="border-top:1px solid #999999"><img width="240px" height="1px" src="<? echo GRAPHICSPATH; ?>leer.gif"></td>
   </tr>
   <tr>  
   	<td width="160"><? echo $strArea; ?>:<br><input size="12" type="text" name="area" value="<?echo $this->formvars['area']?>">&nbsp;m<SUP>2</SUP></td>
   </tr>
   <tr> 
-    <td><hr align="center" noshade></td>
+    <td colspan="2" style="border-top:1px solid #999999"><img width="240px" height="1px" src="<? echo GRAPHICSPATH; ?>leer.gif"></td>
   </tr>
   <? if($this->new_entry != true){ ?>
   <tr> 
     <td align="center">
-    	<input type="button" name="senden2" value="<? echo $strSaveWithoutZoom; ?>" onclick="send('false');">&nbsp;<input type="button" name="senden" value="<? echo $strSave; ?>" onclick="send('true');"><br><br>
-    	<a href="index.php?go=Layer-Suche&go_plus=Suchen&selected_layer_id=<?php echo $this->formvars['selected_layer_id']; ?>&value_<?php echo $this->formvars['layer_tablename']; ?>_oid=<?php echo $this->formvars['oid']; ?>">Sachdatenanzeige</a>
+    	<input type="button" name="senden2" value="<? echo $strSaveWithoutZoom; ?>" onclick="send('false');">&nbsp;<input type="button" name="senden" value="<? echo $strSave; ?>" onclick="send('true');"><br>
     </td>
   </tr>
   <? }else{ ?>
   <tr>
-  	<td></td>
+  	<td style="height: 24px">&nbsp;</td>
   </tr>
   <? } ?>
   <tr>
@@ -131,16 +152,21 @@ function buildwktpolygonfromsvgpath(svgpath){
 				&nbsp;<span class="fett"><?php echo $this->strMapScale; ?>&nbsp;1:&nbsp;</span><input type="text" id="scale" autocomplete="off" name="nScale" style="width:58px" value="<?php echo round($this->map_scaledenom); ?>">
 			</div>
 		</td>
-	<? if($this->user->rolle->runningcoords != '0'){ ?>
-	<td><span class="fett">&nbsp;<?php echo $this->strCoordinates; ?>:</span>&nbsp;</td>
-	<td><input type="text" style="width:190px;border:0px;background-color:transparent" name="runningcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?></td>
-	<? }else{ ?>
-	<td colspan="2"></td>
-	<? } ?>
+		<? if($this->user->rolle->runningcoords != '0'){ ?>
+		<td><span class="fett">&nbsp;<?php echo $this->strCoordinates; ?>:</span>&nbsp;</td>
+		<td><input type="text" style="width:190px;border:0px;background-color:transparent" name="runningcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?></td>
+		<? }else{ ?>
+		<td colspan="2"></td>
+		<? } ?>
   	<td align="right">
   		<input type="checkbox" name="always_draw" value="1" <?if($always_draw == 1 OR $always_draw == 'true')echo 'checked'; ?>>&nbsp;weiterzeichnen&nbsp;&nbsp;
   		<input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang
   	</td>
+		<td align="center">
+			  <? if($this->new_entry != true){ ?>
+			<a href="index.php?go=Layer-Suche&go_plus=Suchen&selected_layer_id=<?php echo $this->formvars['selected_layer_id']; ?>&value_<?php echo $this->formvars['layer_tablename']; ?>_oid=<?php echo $this->formvars['oid']; ?>">Sachdatenanzeige</a>
+				<? } ?>&nbsp;
+		</td>
   </tr>
 </table>
 <INPUT TYPE="HIDDEN" NAME="zoom" VALUE="">

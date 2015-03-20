@@ -30,18 +30,39 @@ function send(){
     <td align="center" colspan="5"><a name="geoedit_anchor"><h2><?php echo $this->titel; ?></h2></a></td>
   </tr>
   <tr> 
-    <td rowspan="2">&nbsp;</td>
-    <td colspan="4" rowspan="2"> 
+    <td rowspan="3">&nbsp;</td>
+    <td colspan="3" rowspan="3"> 
       <?php
 				include(LAYOUTPATH.'snippets/SVG_point.php')
 			?>
     </td>
   </tr>
+	<tr>
+		<td>
+			<table cellspacing=4 cellpadding=0 border=0 style="border:1px solid #C3C7C3;" background="<? echo GRAPHICSPATH."bg.gif"; ?>">
+				<tr align="center">
+					<td>Verfügbare Themen:</td>
+				</tr>
+				<tr align="left">
+					<td>
+					<div align="center"><input type="submit" class="button" name="neuladen" value="neu Laden"></div>
+					<br>
+					<div style="width:260px; height:<?php echo $this->map->height-102; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
+						&nbsp;
+						<img src="graphics/tool_info_2.png" alt="Informationsabfrage" title="Informationsabfrage" width="17">&nbsp;
+						<img src="graphics/layer.png" alt="Themensteuerung" title="Themensteuerung" width="20" height="20"><br>
+						<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
+						<div id="legend_div"><? echo $this->legende; ?></div>
+					</div>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
   <? if($this->new_entry != true){ ?>
   <tr> 
     <td align="center">
-    	<input type="button" name="senden" value="Speichern" onclick="send();"><br><br>
-    	<a href="index.php?go=Layer-Suche&go_plus=Suchen&selected_layer_id=<?php echo $this->formvars['layer_id']; ?>&value_<?php echo $this->formvars['layer_tablename']; ?>_oid=<?php echo $this->formvars['oid']; ?>">Sachdatenanzeige</a>
+    	<input type="button" name="senden" value="Speichern" onclick="send();"><br>
     </td>
   </tr>
   <? }else{ ?>
@@ -76,6 +97,11 @@ function send(){
 	<? }else{ ?>
 	<td colspan="2"></td>
 	<? } ?>
+	<td align="center">
+		<? if($this->new_entry != true){ ?>
+		<a href="index.php?go=Layer-Suche&go_plus=Suchen&selected_layer_id=<?php echo $this->formvars['selected_layer_id']; ?>&value_<?php echo $this->formvars['layer_tablename']; ?>_oid=<?php echo $this->formvars['oid']; ?>">Sachdatenanzeige</a>
+		<? } ?>&nbsp;
+	</td>
   </tr>
 </table>
 <INPUT TYPE="HIDDEN" NAME="dimension" VALUE="<?php echo $this->formvars['dimension']; ?>">
