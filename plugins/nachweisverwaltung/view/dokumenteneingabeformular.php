@@ -93,7 +93,7 @@ else {
   $bgcolor=BG_FORMFAIL;
 }
 
-$legendheight = $this->map->height-8;
+$legendheight = $this->map->height + 20;
 
 ?>
 
