@@ -197,6 +197,15 @@ function add_searchmask(layer_id){
 	document.getElementById('searchmasks').appendChild(newdiv);
 	ahah("index.php", "go=Layer-Suche_Suchmaske_generieren&selected_layer_id="+layer_id+"&searchmask_number="+document.GUI.searchmask_count.value, new Array(newdiv), new Array('sethtml'));
 }
+
+function checknumbers(input){
+	if(input.value.search(/[^-\d]/g) != -1 || input.value.search(/.-/g) != -1){
+		alert('Es sind nur numerische Angaben erlaubt!');
+		var val = input.value.replace(/[^-\d]/g, '');
+		val = val.replace(/-/g, '');
+		input.value = val;
+	}
+}
   
 //-->
 </script>
@@ -324,7 +333,7 @@ function add_searchmask(layer_id){
 					</tr>
 			<? } ?>
 					<tr>
-						<td colspan="5"><br><? echo $strLimit; ?>&nbsp;<input size="2" type="text" name="anzahl" value="<? echo $this->formvars['anzahl']; ?>"></td>
+						<td colspan="5"><br><? echo $strLimit; ?>&nbsp;<input size="2" onkeyup="checknumbers(this);" type="text" name="anzahl" value="<? echo $this->formvars['anzahl']; ?>"></td>
 					</tr>
 					<tr>
 						<td colspan="5"><br><em><? echo $strLikeSearchHint; ?></em></td>

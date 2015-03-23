@@ -122,6 +122,15 @@
 			ahah('index.php', 'go=autocomplete_request&sql='+sql+'&columnname='+columnname+'&inputname='+inputname+'&inputvalue='+inputvalue+'&resultdiv_id='+resultdiv_id, new Array(document.getElementById(resultdiv_id)), new Array("sethtml"));
 		}
 	}
+	
+	function checknumbers(input){
+		if(input.value.search(/[^-\d]/g) != -1 || input.value.search(/.-/g) != -1){
+			alert('Es sind nur numerische Angaben erlaubt!');
+			var val = input.value.replace(/[^-\d]/g, '');
+			val = val.replace(/-/g, '');
+			input.value = val;
+		}
+	}
 
 
 //-->
@@ -210,7 +219,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
     <td colspan="2"><em><?php echo $strHintWildcard; ?>.</em></td>
   </tr>
   <tr>
-    <td colspan="1"><span class="fett"><?php echo $strShowHits; ?>:</span><input name="anzahl" type="text" value="<?php echo $this->formvars['anzahl']; ?>" size="2" tabindex="5"></td>
+    <td colspan="1"><span class="fett"><?php echo $strShowHits; ?>:</span><input name="anzahl" onkeyup="checknumbers(this);" type="text" value="<?php echo $this->formvars['anzahl']; ?>" size="2" tabindex="5"></td>
     <td colspan="1"><span class="fett"><?php echo $strShowWithFst; ?>:</span><input name="withflurst" type="checkbox" <? if($this->formvars['withflurst'] == 'on'){echo 'checked';} ?>></td>
   </tr>
   <tr>
