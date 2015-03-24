@@ -28,7 +28,7 @@ Text_fontsizegle=["<? echo $strHelp; ?>:","<? echo $strHintFontSizeGLE; ?>"];
 Text_highlight=["<? echo $strHelp; ?>:","<? echo $strHintHighlight; ?>"];
 Text_histtimestamp=["<? echo $strHelp; ?>:","<? echo $strHinthist_timestamp; ?>"];
 
-	function start(){
+	function start1(){
 		if(typeof(window.innerWidth) == 'number'){
 			width = window.innerWidth;
 			height = window.innerHeight;
@@ -328,7 +328,7 @@ Text_histtimestamp=["<? echo $strHelp; ?>:","<? echo $strHinthist_timestamp; ?>"
 <table>
   <tr>
     <td></td>
-    <td><br><input type="button" name="starten" onclick="start();" value="<?php echo $this->strEnter; ?>"><br><br></td>
+    <td><br><input type="button" name="starten" onclick="start1();" value="<?php echo $this->strEnter; ?>"><br><br></td>
   </tr>
 </table>
   <input type="hidden" name="go" value="">
