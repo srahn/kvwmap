@@ -57,7 +57,7 @@ Text_histtimestamp=["<? echo $strHelp; ?>:","<? echo $strHinthist_timestamp; ?>"
 			<td colspan="2" style="background-color: #c7d9e6; padding: 2px;padding-left: 8px"><span class="fett"><? echo $strGeneralOptions; ?></span></td>
 		</tr>
 		<tr>
-			<td align="left" valign="top" style="width: 230px;padding: 8px"><?php echo $strTask; ?>:&nbsp;</td>
+			<td align="left" valign="top" style="width: 250px;padding: 8px"><?php echo $strTask; ?>:&nbsp;</td>
 			<td style="padding: 8px">
 				<?php echo $this->StellenForm->html; ?>
 				<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_task, Style[0], document.getElementById('Tip1'))" onmouseout="htm()">
@@ -65,7 +65,7 @@ Text_histtimestamp=["<? echo $strHelp; ?>:","<? echo $strHinthist_timestamp; ?>"
 			</td>
 		</tr>
 		<tr align="center">
-			<td align="left" style="width: 230px;padding: 8px; padding-top: 0px"><?php echo $strLanguage; ?>:&nbsp;</td>
+			<td align="left" style="width: 250px;padding: 8px; padding-top: 0px"><?php echo $strLanguage; ?>:&nbsp;</td>
 			<td align="left" style="padding: 8px; padding-top: 0px">
 				<select name="language">
 					<? if(in_array('german', $supportedLanguages)){ ?><option value="german"<?php if($this->user->rolle->language == 'german') { echo ' selected'; }	?>><?php echo $strGerman; ?></option><? } ?>
@@ -172,7 +172,7 @@ Text_histtimestamp=["<? echo $strHelp; ?>:","<? echo $strHinthist_timestamp; ?>"
 			<td colspan="2" style="background-color: #c7d9e6; padding: 2px;padding-left: 8px"><span class="fett"><? echo $strMapOptions; ?></span></td>
 		</tr>
 		<tr>
-			<td align="left" style="padding: 8px"><?php echo $strZoomFactor; ?>:&nbsp;</td>
+			<td align="left" style="width: 250px;padding: 8px"><?php echo $strZoomFactor; ?>:&nbsp;</td>
 			<td style="padding: 8px">
 				<input name="nZoomFactor" type="text" value="<?php echo $this->user->rolle->nZoomFactor; ?>" size="2" maxlength="3">
 				<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_zoomfactor, Style[0], document.getElementById('Tip8'))" onmouseout="htm()">
@@ -206,7 +206,7 @@ Text_histtimestamp=["<? echo $strHelp; ?>:","<? echo $strHinthist_timestamp; ?>"
 		<tr align="center">
 			<td align="left" style="padding: 8px; padding-top: 0px"><?php echo $strMapExtent; ?>:&nbsp;</td>
 			<td align="left" style="padding: 8px; padding-top: 0px"><?php
-				$curExtentText=$this->user->rolle->oGeorefExt->minx.' '.$this->user->rolle->oGeorefExt->miny.', '.$this->user->rolle->oGeorefExt->maxx.' '.$this->user->rolle->oGeorefExt->maxy;
+				$curExtentText=round($this->user->rolle->oGeorefExt->minx, 3).' '.round($this->user->rolle->oGeorefExt->miny, 3).', '.round($this->user->rolle->oGeorefExt->maxx, 3).' '.round($this->user->rolle->oGeorefExt->maxy, 3);
 			 ?><input name="newExtent" id="newExtent" type="text" size="<?php echo strlen($curExtentText); ?>" value="<?php echo $curExtentText; ?>">
 				<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_mapextent, Style[0], document.getElementById('Tip10'))" onmouseout="htm()">
 				<div id="Tip10" style="visibility:hidden;position:absolute;z-index:1000;"></div>
@@ -273,7 +273,7 @@ Text_histtimestamp=["<? echo $strHelp; ?>:","<? echo $strHinthist_timestamp; ?>"
 			<td colspan="2" style="background-color: #c7d9e6; padding: 2px;padding-left: 8px"><span class="fett"><? echo $strDataPresentation; ?></span></td>
 		</tr>
 		<tr>
-			<td align="left" style="width: 230px;padding: 8px"><?php echo $strSingleQuery; ?>:&nbsp;</td>
+			<td align="left" style="width: 250px;padding: 8px"><?php echo $strSingleQuery; ?>:&nbsp;</td>
 			<td style="padding: 8px">
 				<input name="singlequery" type="checkbox" value="1" <? if($this->user->rolle->singlequery == '1'){echo 'checked="true"';} ?> >
 				<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_singlequery, Style[0], document.getElementById('Tip15'))" onmouseout="htm()">
@@ -281,7 +281,7 @@ Text_histtimestamp=["<? echo $strHelp; ?>:","<? echo $strHinthist_timestamp; ?>"
 			</td>
 		</tr>
 		<tr>
-			<td align="left" style="padding: 8px; padding-top: 0px"><?php echo $strQuerymode; ?>:&nbsp;</td>
+			<td align="left" style="width: 250px;padding: 8px; padding-top: 0px"><?php echo $strQuerymode; ?>:&nbsp;</td>
 			<td style="padding: 8px; padding-top: 0px">
 				<input name="querymode" type="checkbox" value="1" <? if($this->user->rolle->querymode == '1'){echo 'checked="true"';} ?> >
 				<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_querymode, Style[0], document.getElementById('Tip16'))" onmouseout="htm()">
