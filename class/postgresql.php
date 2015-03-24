@@ -1370,7 +1370,7 @@ class pgdatabase {
   
 	function getNachfolger($FlurstKennz) {
 		$sql = "SELECT nachfolger, c.endet FROM (";
-    $sql.= "SELECT unnest(zeigtaufneuesflurstueck) as nachfolger FROM alkis.ax_fortfuehrungsfall WHERE ARRAY['".$FlurstKennz."'::varchar] <@ zeigtaufaltesflurstueck AND ueberschriftimfortfuehrungsnachweis && ARRAY[10101,10102,10103,10201,10202,10205,10206,10301,10302,10303,10304,10305,10306,10307,10308,10502,10503,10900]) as foo ";
+    $sql.= "SELECT unnest(zeigtaufneuesflurstueck) as nachfolger FROM alkis.ax_fortfuehrungsfall WHERE ARRAY['".$FlurstKennz."'::varchar] <@ zeigtaufaltesflurstueck AND ueberschriftimfortfuehrungsnachweis && ARRAY[10101,10102,10103,10201,10202,10205,10206,10301,10302,10303,10304,10305,10306,10307,10308,10502,10503,10700,10900]) as foo ";
 		$sql.= "LEFT JOIN alkis.ax_flurstueck c ON c.flurstueckskennzeichen = nachfolger";
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0]) {
@@ -1401,7 +1401,7 @@ class pgdatabase {
   }
 
   function getVorgaenger($FlurstKennz) {
-    $sql = "SELECT unnest(zeigtaufaltesflurstueck) as vorgaenger FROM alkis.ax_fortfuehrungsfall WHERE ARRAY['".$FlurstKennz."'::varchar] <@ zeigtaufneuesflurstueck AND ueberschriftimfortfuehrungsnachweis && ARRAY[10101,10102,10103,10201,10202,10205,10206,10301,10302,10303,10304,10305,10306,10307,10308,10502,10503,10900]";
+    $sql = "SELECT unnest(zeigtaufaltesflurstueck) as vorgaenger FROM alkis.ax_fortfuehrungsfall WHERE ARRAY['".$FlurstKennz."'::varchar] <@ zeigtaufneuesflurstueck AND ueberschriftimfortfuehrungsnachweis && ARRAY[10101,10102,10103,10201,10202,10205,10206,10301,10302,10303,10304,10305,10306,10307,10308,10502,10503,10700,10900]";
     $queryret=$this->execSQL($sql, 4, 0);
     if($queryret[0]) {
       $ret[0]=1;
@@ -1788,7 +1788,7 @@ class pgdatabase {
   function getFlurenListeByGemkgIDByFlurID($GemkgID,$FlurID, $historical = false){
 		if(!$historical){
 			$sql ="SELECT lpad(gemarkungsteilflur::text, 3, '0') AS FlurID, lpad(gemarkungsteilflur::text, 3, '0') AS Name";
-			$sql.=",schluesselgesamt AS GemFlurID FROM alkis.ax_gemarkungsteilflur WHERE 1=1 ";
+			$sql.=",schluesselgesamt AS GemFlurID FROM alkis.ax_gemarkungsteilflur WHERE anlass != '300700'";
 			
 			if ($GemkgID>0) {
 				$sql.=" AND land*10000 + gemarkung=".(int)$GemkgID;
