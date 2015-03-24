@@ -19,4 +19,26 @@
   $strPlatt="Plattdüütsch";
   $strSearchColor="Suchergebnis-Farbe";
   $strPolish="Polnisch";
+	
+	# Översett vun Haaschihup
+	$strHintTask="De Stell hett ünnerscheedlich Themen, Funktschoneer´s un Rechtstüüch, de för ünnerscheedlich Upgaben brukt ward. All wiedere Optschoonen gellen binnen de hie utsökt Stell.";
+	$strHintLanguage="Sök de Spraak ut, de in de Bovensied brukt ward.";
+	$strHintGUI="Sök de grafisch Bovensied ut.";
+	$strHintButtons="Sök de Werktüüg ut, de du brukst.";
+	$strHintColor="Sök de Faarf ut, för dat wat rutekümt un wat rutekieken sall.";
+	$strHintInstantReload="Deist du de Optschoon ut wähln, ward bi jede Aktivierung un Gegenaktivierung een Sock de Kort gliek nig loden.";
+	$strHintMenuAutoClose="Deist du de Optschoon ut söken, is linkerhand ümmer blot een Överspies apen.";
+	$strHintZoomFactor="Sök de Faktoor ut, mit de du de Rakenlup hen un her trecken daust.";
+	$strHintMapSize="Sök de Grött ut, wenn de von süllmst bereken Grött nix dugt.";
+	$strHintMapExtent="De afsteckt Koordinat unner linkepoot un boben rechtepoot in de eerste Koortprojektschoon.";
+	$strHintMapProjection="Sök de Koordinatenreferenztüüch ut, wo de Koordinat de Koort upwiest ward.";
+	$strHintSecondMapProjection="Sök ok noch een Koordinatenreferenztüüch ut, mit dei de Koortkoordinat upwiest ward.";
+	$strHintCoordType="Deist du een geografisch Koortprojektschoon utwähln, denn sök ut wie datt utsehn sall.";
+	$strHintRunningCoords="Deist du de Optschoon utwähln, krüzt unner de Koort de Cursor-Koordinat op un seggt di de utsökt Koortenpositschoon an.";
+	$strHintSingleQuery="Deist du de Optschoon utwähln, krüzt de Affraaghakenfeller bi de Legend op as Quasselkistpinökel. Es dürt ümmer blot een Thema affraagt warrn.";
+	$strHintQuerymode="Deist du de Optschoon utwähln, krüzen Tüüchdatenaffraag as egen Finster op, de över de Koort fleigen.";
+	$strHintNewDatasetOrder="Sök ut, ob biem Bifaaten nieg Daten de Geometrie-Editor boben or ünern bi de Tüüchdaten sien sall.";
+	$strHintFontSizeGLE="Sök de Grött de Schrift in de Tüüchdatenanzeich.";
+	$strHintHighlight="Deist du de Optschoon utwähln, kieken de affrogen Themenobjekte in de Koort mit blaach Suum rut wenn du mit de Cursor överfleigst.";
+	$strHinthist_timestamp="Deist du een Dach ingeven, warn de ALKIS-Objekt mit düsse verleden Tied vörstellt. Affraag to´n Flurstück ergewen ok düsse verleden Tied.";
 ?>

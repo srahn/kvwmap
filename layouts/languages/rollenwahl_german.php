@@ -32,6 +32,26 @@
 	$strDataPresentation="Sachdatenanzeige";
 	$strInstantReload="Karte sofort neu laden";
 	$strMenuAutoClose="Menüs automatisch schliessen";
+	$strHintTask="Jede Stelle umfasst verschiedene Themen, Funktionen und Rechte, die für unterschiedliche Aufgaben benötigt werden. Alle weiteren Optionen gelten innerhalb der hier ausgewählten Stelle.";
+	$strHintLanguage="Wählen Sie die Sprache, die in der Oberfläche verwendet werden soll.";
+	$strHintGUI="Wählen Sie die grafische Oberfläche aus.";
+	$strHintButtons="Wählen Sie die Werkzeuge aus, die Sie benötigen.";
+	$strHintColor="Wählen Sie die Farbe aus, mit der Suchergebnisse hervorgehoben werden sollen.";
+	$strHintInstantReload="Wenn Sie diese Option auswählen, wird bei jeder Aktivierung oder Deaktivierung eines Layers die Karte sofort neu geladen.";
+	$strHintMenuAutoClose="Wenn Sie diese Option auswählen, ist auf der linken Seite immer nur ein Obermenü geöffnet.";
+	$strHintZoomFactor="Wählen Sie den Faktor, mit dem Plus- und Minuslupe hinein bzw. heraus zoomen.";
+	$strHintMapSize="Wählen Sie die Größe der Karte, wenn die automatisch berechnete Größe nicht passt.";
+	$strHintMapExtent="Die Koordinaten der Eckpunkte unten links und oben rechts in der ausgewählten 1. Kartenprojektion.";
+	$strHintMapProjection="Wählen Sie das Koordinatenreferenzsystem, in dem Ihnen die Koordinaten der Karte angezeigt werden sollen.";
+	$strHintSecondMapProjection="Wählen Sie optional ein zusätzliches Koordinaten- referenzsystem,in dem Ihnen die Koordinaten der Karte angezeigt werden sollen.";
+	$strHintCoordType="Nur wenn Sie eine geografische Kartenprojektion gewählt haben: Wählen Sie, wie Ihnen die geografischen Koordinaten angezeigt werden sollen.";
+	$strHintRunningCoords="Wenn Sie diese Option auswählen, erscheint unterhalb der Karte die Koordinate der Cursorposition unter Angabe der ausgewählten Kartenprojektion.";
+	$strHintSingleQuery="Wenn Sie diese Option auswählen, erscheinen die Abfragehäkchenfelder in der Legende als sog. Radiobutton. Es kann dann immer nur genau ein Thema abfragbar geschaltet werden.";
+	$strHintQuerymode="Wenn Sie diese Option auswählen, erscheinen Sachdatenabfragen als eigene Fenster, die über der Karte schweben.";
+	$strHintNewDatasetOrder="Wählen Sie, ob bei der Erfassung neuer Daten der Geometrie-Editor oberhalb der Sachdaten erscheinen soll oder darunter.";
+	$strHintFontSizeGLE="Wählen Sie die Schriftgröße der Texte in der Sachdatenanzeige";
+	$strHintHighlight="Wenn Sie diese Option auswählen, werden Objekte von Themen, die abfragbar geschaltet sind, in der Karte mit blauem Rand hervorgehoben, wenn Sie mit dem Cursor darüber fahren.";
+	$strHinthist_timestamp="Wenn Sie hier ein Datum eingeben, werden ALKIS-Objekte in der Karte mit diesem historischen Stand dargestellt. Abfragen auf Flurstücke liefern ebenfalls Ergebnisse zu diesem historischen Stand.";
   
   
 ?>
