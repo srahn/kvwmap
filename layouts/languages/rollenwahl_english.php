@@ -32,6 +32,9 @@
 	$strDataPresentation="Data Presentation";
 	$strInstantReload="Instant Map Reload";
 	$strMenuAutoClose="Close Menus automatically";
+	$strdecimal="Decimal";
+	$strgrad1="Degrees,Minutes,Seconds";
+	$strgrad2="Degrees Decimalminutes";
 	$strHintTask="Task means different themes, funktions and rights which are needed for various assignments. All options mentioned below are related to the task you will select here.";
 	$strHintLanguage="Choose the language to be used in the user interface.";
 	$strHintGUI="Choose the graphical user interface.";

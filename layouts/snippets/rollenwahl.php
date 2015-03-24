@@ -249,9 +249,9 @@ Text_histtimestamp=["<? echo $strHelp; ?>:","<? echo $strHinthist_timestamp; ?>"
 			<td align="left" style="padding: 8px; padding-top: 0px"><?php echo $strCoordType; ?>:&nbsp;</td>
 			<td style="padding: 8px; padding-top: 0px">
 				<select name="coordtype">
-					<option value="dec" <?php if ($this->user->rolle->coordtype=="dec") { echo "selected"; } ?>>Dezimal</option>
-					<option value="dms" <?php if ($this->user->rolle->coordtype=="dms") { echo "selected"; } ?>>Grad,Minuten,Sekunden</option>
-					<option value="dmin" <?php if ($this->user->rolle->coordtype=="dmin") { echo "selected"; } ?>>Grad Dezimalminuten</option>				
+					<option value="dec" <?php if ($this->user->rolle->coordtype=="dec") { echo "selected"; } ?>><? echo $strdecimal; ?></option>
+					<option value="dms" <?php if ($this->user->rolle->coordtype=="dms") { echo "selected"; } ?>><? echo $strgrad1; ?></option>
+					<option value="dmin" <?php if ($this->user->rolle->coordtype=="dmin") { echo "selected"; } ?>><? echo $strgrad2; ?></option>				
 				</select>
 				<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_coordtype, Style[0], document.getElementById('Tip13'))" onmouseout="htm()">
 				<div id="Tip13" style="visibility:hidden;position:absolute;z-index:1000;"></div>

@@ -33,6 +33,9 @@
 	$strDataPresentation="Tüüchdatenaffraag";
 	$strInstantReload="Kort gliek nieg loden";
 	$strMenuAutoClose="Menüs von süllst sluten";
+	$strdecimal="Dezimal";
+	$strgrad1="Grod, Minüten, Sekunn";
+	$strgrad2="Grod, Dezimalminüten";
 	$strHintTask="De Stell hett ünnerscheedlich Themen, Funktschoneer´s un Rechtstüüch, de för ünnerscheedlich Upgaben brukt ward. All wiedere Optschoonen gellen binnen de hie utsökt Stell.";
 	$strHintLanguage="Sök de Spraak ut, de in de Bovensied brukt ward.";
 	$strHintGUI="Sök de grafisch Bovensied ut.";

@@ -32,6 +32,9 @@
 	$strDataPresentation="Sachdatenanzeige";
 	$strInstantReload="Karte sofort neu laden";
 	$strMenuAutoClose="Menüs automatisch schließen";
+	$strdecimal="Dezimal";
+	$strgrad1="Grad,Minuten,Sekunden";
+	$strgrad2="Grad Dezimalminuten";
 	$strHintTask="Jede Stelle umfasst verschiedene Themen, Funktionen und Rechte, die für unterschiedliche Aufgaben benötigt werden. Alle weiteren Optionen gelten innerhalb der hier ausgewählten Stelle.";
 	$strHintLanguage="Wählen Sie die Sprache, die in der Oberfläche verwendet werden soll.";
 	$strHintGUI="Wählen Sie die grafische Oberfläche aus.";
