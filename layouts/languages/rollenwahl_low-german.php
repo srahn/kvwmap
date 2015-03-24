@@ -1,4 +1,5 @@
 <?php
+	# Översett vun Haaschihup
   $strCharSet="Tekensatz";
   $strLanguage="Spraak";
   $strEnglish="Engelsch";
@@ -6,21 +7,32 @@
   $strGUI="Grafische Överflach";
   $strButtons="Schaltflächen";
   $strMapExtent="Opstunns Koortutmoot";
-  $strMapProjection="1.Koortprojektion (EPSG-Code)";
-  $strSecondMapProjection="2.Koortprojektion (EPSG-Code)";
+  $strMapProjection="1.Koortprojektschoon (EPSG-Code)";
+  $strSecondMapProjection="2.Koortprojektschoon (EPSG-Code)";
+	$strRunningCoords="Koordinaten opwiest";
   $strMapSize="Grött vun de Koortfinster";
-  $strTask="Stäe";
-  $strTitleRoleSelection="Utwahl vun de Arbeidsstäe";
+  $strTask="Stell";
+  $strTitleRoleSelection="Optschoonen";
   $strVietnamese="Vietnameesch";
   $strZoomFactor="Zoomfakter";
   $strButtonNext="Wieter";
   $strFontSizeGLE="GLE-Textgrött";
   $strHighlight="Textverkloren-Rutstrieken";
   $strPlatt="Plattdüütsch";
-  $strSearchColor="Suchergebnis-Farbe";
+  $strSearchColor="Faarf van de Sökergebnis";
   $strPolish="Polnisch";
-	
-	# Översett vun Haaschihup
+	$strCoordType="Utsehn van de Koordinaten";
+	$strSingleQuery="blot een Thema affraagbar";
+	$strQuerymode="Tüüchdatenaffraag in en egen Finster";
+	$strNewDatasetOrder="Riegfolg bi de Datensatz griepen";
+	$strGeomSecond="toeerst de Tüüchdaten";
+	$strGeomFirst="toeerst de Geometrie";
+	$strhist_timestamp="Tiedpunkt för de verleden Tied";
+	$strGeneralOptions="allgemeen Optschoonen";
+	$strMapOptions="Koort Instellungen";
+	$strDataPresentation="Tüüchdatenaffraag";
+	$strInstantReload="Kort gliek nieg loden";
+	$strMenuAutoClose="Menüs von süllst sluten";
 	$strHintTask="De Stell hett ünnerscheedlich Themen, Funktschoneer´s un Rechtstüüch, de för ünnerscheedlich Upgaben brukt ward. All wiedere Optschoonen gellen binnen de hie utsökt Stell.";
 	$strHintLanguage="Sök de Spraak ut, de in de Bovensied brukt ward.";
 	$strHintGUI="Sök de grafisch Bovensied ut.";
