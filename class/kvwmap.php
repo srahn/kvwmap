@@ -1741,19 +1741,6 @@ class GUI {
 		if($layer['status'] != '' OR ($this->map_scaledenom < $layer['minscale'] OR ($layer['maxscale'] > 0 AND $this->map_scaledenom > $layer['maxscale']))) {
 			return false;
 		}
-		elseif($layer['Filter'] != ''){
-			if(strpos($layer['Filter'], '::geometry')){				
-				$filterparts = explode(",", $layer['Filter']);
-				for($j = 0; $j < count($filterparts); $j++){
-					if(strpos($filterparts[$j], '::geometry))')){
-						if($this->BBoxinExtent(trim($filterparts[$j], ')')) == 'f'){
-							return false;
-						}
-						break;
-					}
-				}
-			}
-		}
 		return true;
 	}
 		
