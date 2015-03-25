@@ -37,6 +37,84 @@ class rok {
     $this->database = $database;
   }
   
+	
+	function update_fplan_from_rok($plan_id){
+
+		$gebiet2rok_themennr = array( 1 => array(90016),			# Grün
+																	2 => array(1010016),		# Wohnen
+																	3 => array(1020016),		# Mischbau
+																	4 => array(1030016),		# Gewerbe
+																	5 => array(4010016),		# Gemeindebedarf
+																	6 => array(12010116),		# Fläche für Landwirtschaft
+																	7 => array(12020116)		# Wald
+																);
+																
+		$gebiet2rok_konkret = array( 8 => array('Einzelhandel'),
+																 9 => array('Bund und Land'),
+																10 => array('Erholung'),
+																11 => array('Hafen'),
+																12 => array('Gesundheit'),
+																13 => array('Militär'),
+																14 => array('sonstig')
+																);
+																
+		# Gebiete aktualisieren
+		$sql = "SELECT * FROM f_plan_gebiete WHERE plan_id = ".$plan_id;
+		$ret = $this->database->execSQL($sql, 4, 0);
+		while($gebiet = pg_fetch_array($ret[1])){
+			$sql = "SELECT round((st_area(st_union(rok.shape))/10000)::numeric, 2) FROM f_plan_stammdaten as sd, rok_edit.fnp_flaechen as rok ";
+			$sql.= "WHERE sd.plan_id = ".$plan_id." AND CASE WHEN sd.art = 'FNP' THEN sd.gkz = rok.gemeindekennung ELSE rok.roknr = sd.lfd_rok_nr END ";
+			if($gebiet2rok_themennr[$gebiet['gebietstyp']] != ''){
+				$sql .= "AND rok.themennr IN (".implode(",", $gebiet2rok_themennr[$gebiet['gebietstyp']]).") ";
+			}
+			#echo $sql.'<br>';
+			$ret1 = $this->database->execSQL($sql, 4, 0);
+			$flaeche = pg_fetch_array($ret1[1]);
+			if($flaeche[0] != ''){
+				$sql = "UPDATE f_plan_gebiete SET flaeche = ".$flaeche[0]." ";
+				$sql.= "WHERE f_plan_gebiete.plan_id = ".$plan_id." ";
+				$sql.= "AND f_plan_gebiete.gebietstyp = ".$gebiet['gebietstyp']." ";
+			}			
+			#echo $sql.'<br>';
+			$ret2 = $this->database->execSQL($sql,4, 1);
+		}
+
+		# Sondergebiete aktualisieren
+		$sql = "SELECT * FROM f_plan_sondergebiete WHERE plan_id = ".$plan_id;
+		$ret = $this->database->execSQL($sql, 4, 0);
+		while($gebiet = pg_fetch_array($ret[1])){
+			$sql = "SELECT round((st_area(st_union(rok.shape))/10000)::numeric, 2) FROM f_plan_stammdaten as sd, rok_edit.fnp_flaechen as rok ";
+			$sql.= "WHERE sd.plan_id = ".$plan_id." AND CASE WHEN sd.art = 'FNP' THEN sd.gkz = rok.gemeindekennung ELSE rok.roknr = sd.lfd_rok_nr END ";
+			if($gebiet2rok_konkret[$gebiet['gebietstyp']] != ''){
+				$sql .= "AND rok.konkretisierung IN ('".implode("','", $gebiet2rok_konkret[$gebiet['gebietstyp']])."') ";
+			}
+			#echo $sql.'<br>';
+			$ret1 = $this->database->execSQL($sql, 4, 0);
+			$flaeche = pg_fetch_array($ret1[1]);
+			if($flaeche[0] != ''){
+				$sql = "UPDATE f_plan_sondergebiete SET flaeche = ".$flaeche[0]." ";
+				$sql.= "WHERE f_plan_sondergebiete.plan_id = ".$plan_id." ";
+				$sql.= "AND f_plan_sondergebiete.gebietstyp = ".$gebiet['gebietstyp']." ";
+			}			
+			#echo $sql.'<br>';
+			$ret2 = $this->database->execSQL($sql,4, 1);
+		}
+		
+		// # Fläche des Geltungsbereichs aktualisieren
+		// $sql = "SELECT round((st_area(shape)/10000)::numeric, 2) FROM rok_edit.bpl_geltungsbereich as rok, b_plan_stammdaten as sd ";
+		// $sql.= "WHERE sd.plan_id = ".$plan_id." AND rok.roknr = sd.lfd_rok_nr ";
+		// #echo $sql.'<br>';
+		// $ret1 = $this->database->execSQL($sql, 4, 0);
+		// $flaeche = pg_fetch_array($ret1[1]);
+		// if($flaeche[0] != ''){
+			// $sql = "UPDATE b_plan_stammdaten SET geltungsbereich = ".$flaeche[0]." ";
+			// $sql.= "WHERE plan_id = ".$plan_id." ";
+		// }			
+		// #echo $sql.'<br>';
+		// $ret2 = $this->database->execSQL($sql,4, 1);
+	}
+	
+	
 	function update_bplan_from_rok($plan_id){
 		$gebiet2rok_table = array(	1 => 'wohngebiet',				#"Wohngebiet"
 																2 => 'wohngebiet',	      #"spez. Wohnen"
@@ -267,7 +345,6 @@ class rok {
 		}			
 		#echo $sql.'<br>';
 		$ret2 = $this->database->execSQL($sql,4, 1);
-		
 	}
 	
   function delete_bplan($plan_id){

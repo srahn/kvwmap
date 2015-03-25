@@ -55,11 +55,11 @@ function copy_dataset(plan_id){
 	currentform.submit();
 }
 
-function update_bplan_from_rok(plan_id){
+function update_fplan_from_rok(plan_id){
 	really = confirm('Wollen Sie die Flächen der Gebiete und Sondergebiete wirklich mit den ROK-Flächen überschreiben?');
 	if(really){
 		currentform.plan_id.value = plan_id;
-		currentform.go.value = 'update_bplan_from_rok';
+		currentform.go.value = 'update_fplan_from_rok';
 		currentform.submit();
 	}
 }
@@ -628,7 +628,7 @@ function update_gebietstyp(){
     	<input type="button" class="button" name="savebutton" value="<? echo $strSave; ?>" onclick="save();">&nbsp;&nbsp;
     	<input type="button" class="button" name="savebutton2" value="Datensatz kopieren" onclick="copy_dataset(<? echo $this->qlayerset[$i]['shape'][$k]['plan_id']; ?>);">&nbsp;&nbsp;
     	<input type="button" class="button" name="deletebutton" value="Löschen" onclick="delete_dataset(<? echo $this->qlayerset[$i]['shape'][$k]['plan_id']; ?>);">&nbsp;&nbsp;
-			<!--input type="button" class="button" name="rokbutton" value="Flächen aus ROK holen" onclick="update_bplan_from_rok(<? echo $this->qlayerset[$i]['shape'][$k]['plan_id']; ?>);"-->&nbsp;&nbsp;
+			<input type="button" class="button" name="rokbutton" value="Flächen aus ROK holen" onclick="update_fplan_from_rok(<? echo $this->qlayerset[$i]['shape'][$k]['plan_id']; ?>);">&nbsp;&nbsp;
     	<!--input type="button" class="button" name="mapbutton" value="In die Karte" onclick="zoomto('<? echo $this->qlayerset[$i]['shape'][$k]['lfd_rok_nr']; ?>', '<? echo $this->qlayerset[$i]['shape'][$k]['art']; ?>');"-->
     </td>
   </tr>

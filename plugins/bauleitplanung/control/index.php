@@ -68,6 +68,15 @@
 			$this->GenerischeSuche_Suchen();
 		} break;
 		
+		case 'update_fplan_from_rok' : {
+			include(PLUGINS.'bauleitplanung/model/rok.php');
+			$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
+			$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+			$rok = new rok($layerdb);
+			$rok->update_fplan_from_rok($this->formvars['plan_id']);
+			$this->GenerischeSuche_Suchen();
+		} break;
+		
 		case 'zoomtobplan' : {
 			include(PLUGINS.'bauleitplanung/model/rok.php');
 			$rok = new rok($this->pgdatabase);
