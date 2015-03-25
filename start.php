@@ -241,7 +241,10 @@ if ($GUI->Stelle->checkPasswordAge==true){
 
 # Abfragen der Einstellungen des Benutzers in der ausgewählten Stelle
 # Rollendaten zuweisen
-$GUI->user->setRolle($Stelle_ID);
+if(!$GUI->user->setRolle($Stelle_ID)){
+	echo 'Dem aktuellen Nutzer ist keine Stelle zugeordet!';
+	exit;
+}
 
 #echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language;
 # Rollenbezogene Stellendaten zuweisen
