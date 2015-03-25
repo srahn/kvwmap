@@ -5,7 +5,7 @@
   $strEnglish="Engelsch";
   $strGerman="Düütsch";
   $strGUI="Grafische Överflach";
-  $strButtons="Schaltflächen";
+  $strButtons="Schaltknöpp";
   $strMapExtent="Opstunns Koortutmoot";
   $strMapProjection="1.Koortprojektschoon (EPSG-Code)";
   $strSecondMapProjection="2.Koortprojektschoon (EPSG-Code)";
