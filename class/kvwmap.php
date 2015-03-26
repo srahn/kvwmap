@@ -5320,7 +5320,7 @@ class GUI {
 				$type = strtolower(array_pop(explode(\'.\', $_REQUEST[\'dokument\'])));
 				if(in_array($type, array(\'jpg\', \'gif\', \'png\')))header("Content-type: image/".$type);
 				else header("Content-type: application/".$type);
-				header("Content-Disposition: attachment; filename=".$_REQUEST[\'original_name\']);
+				header("Content-Disposition: attachment; filename=\"".$_REQUEST[\'original_name\']."\"");
 				header("Expires: 0");
 				header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
 				header("Pragma: public");
