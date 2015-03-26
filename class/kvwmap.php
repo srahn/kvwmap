@@ -2137,8 +2137,8 @@ class GUI {
 		if($this->user->rolle->runningcoords == 1)$height = $height - 22;
 		if($height < 0)$height = 10;
 		if($width < 0)$width = 10;
-		if($height % 2 != 0)$height = $height - 1;
-		if($width % 2 != 0)$width = $width - 1;
+		if($height % 2 != 0)$height = $height - 1;		# muss gerade sein, sonst verspringt die Karte beim Panen immer um 1 Pixel
+		if($width % 2 != 0)$width = $width - 1;				# muss gerade sein, sonst verspringt die Karte beim Panen immer um 1 Pixel
 		$this->user->rolle->setSize($width.'x'.$height);
 		$this->user->rolle->readSettings();
 	}
