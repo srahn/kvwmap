@@ -111,7 +111,7 @@ function send(){
 <INPUT TYPE="hidden" NAME="fromwhere" VALUE="">
 <INPUT TYPE="HIDDEN" NAME="geom_nullable" VALUE="<?php echo $this->formvars['geom_nullable']; ?>">
 <INPUT TYPE="HIDDEN" NAME="oid" VALUE="<?php echo $this->formvars['oid']; ?>">
-<INPUT TYPE="HIDDEN" NAME="scale" VALUE="<?php echo $scale; ?>"> 
+<INPUT TYPE="HIDDEN" NAME="oldscale" VALUE="<?php echo round($this->map_scaledenom); ?>"> 
 <? if($this->formvars['go'] == 'PointEditor'){ ?>   
 	<INPUT TYPE="HIDDEN" NAME="go" VALUE="PointEditor" >
 <? } ?>

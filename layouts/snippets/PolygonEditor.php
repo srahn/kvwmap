@@ -177,7 +177,7 @@ function buildwktpolygonfromsvgpath(svgpath){
 <INPUT TYPE="HIDDEN" NAME="geom_nullable" VALUE="<?php echo $this->formvars['geom_nullable']; ?>">
 <INPUT TYPE="HIDDEN" NAME="no_load" VALUE="">
 <INPUT TYPE="HIDDEN" NAME="oid" VALUE="<?php echo $this->formvars['oid']; ?>">
-<INPUT TYPE="HIDDEN" NAME="scale" VALUE="<?php echo $scale; ?>">    
+<INPUT TYPE="HIDDEN" NAME="oldscale" VALUE="<?php echo round($this->map_scaledenom); ?>">    
 <? if($this->formvars['go'] == 'PolygonEditor'){ ?>
 	<INPUT TYPE="HIDDEN" NAME="go" VALUE="PolygonEditor" >
 	<INPUT TYPE="HIDDEN" NAME="selected_layer_id" VALUE="<?php echo $this->formvars['selected_layer_id']; ?>">
