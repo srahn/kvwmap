@@ -9,9 +9,12 @@ include(LAYOUTPATH.'languages/generic_search_'.$this->user->rolle->language.'.ph
 				<tr>
 					<td align="center" width="100%" colspan="5">
 						<select name="boolean_operator_<? echo $searchmask_number; ?>">
-							<option value="AND" <? if($this->formvars['searchmask_operator'][$searchmask_number] == 'AND')echo 'selected'; ?>><? echo $strAnd; ?></option>
 							<option value="OR" <? if($this->formvars['searchmask_operator'][$searchmask_number] == 'OR')echo 'selected'; ?>><? echo $strOr; ?></option>
+							<option value="AND" <? if($this->formvars['searchmask_operator'][$searchmask_number] == 'AND')echo 'selected'; ?>><? echo $strAnd; ?></option>
 						</select>
+						&nbsp;
+						<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text1, Style[0], document.getElementById('Tip1'))" onmouseout="htm()">
+						<div id="Tip1" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 					</td>
 				</tr>
 				<?

@@ -28,4 +28,5 @@ $strIsEmptyHint="Sucht nach Datensätzen ohne Eintrag in diesem Attribut";
 $strIsNotEmptyHint="Sucht nach Datensätzen mit beliebigem Eintrag in diesem Attribut";
 $strInHint="Sucht nach mehreren exakten Suchbegriffen, zur Trennung '|' verwenden:  [Alt Gr] + [<]";
 $strBetweenHint="Sucht zwischen zwei Zahlwerten";
+$strAndOrHint="Bitte beachten Sie, dass Sie mit \"und\" bzw. \"oder\" die Suchkriterien verknüpfen und nicht die Ergebnismengen. Bedingungen, die mit \"und\" verknüpft sind, müssen <b>alle</b> zutreffen. Bei Bedingungen, die mit \"oder\" verknüpft sind, reicht es, wenn eine Bedingung erfüllt ist.";
 ?>

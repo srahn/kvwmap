@@ -28,4 +28,5 @@ $strIsEmptyHint="To find records with empty entries in this attribute";
 $strIsNotEmptyHint="To find records with any entry in this attribute";
 $strInHint="Searches for multiple exact search terms, use '|' for separation";
 $strBetweenHint="Searches between two numbers";
+$strAndOrHint="Please note that by using \"and\" or \"or\" you connect the search criteria and not the result sets. Search criteria that are connected with \"and\" must apply <b>all</b>. For search criteria that are connected with \"or\", it is sufficient if one condition is met.";
 ?>
