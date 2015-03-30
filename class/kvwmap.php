@@ -800,9 +800,9 @@ class GUI {
 						if($layerset[$i]['ows_srs'] == '')$layerset[$i]['ows_srs'] = 'EPSG:'.$layerset[$i]['epsg_code'];
 						$layer->setMetaData('ows_srs',$layerset[$i]['ows_srs']);
 						$layer->setMetaData('wms_connectiontimeout',$layerset[$i]['wms_connectiontimeout']);
-						$layer->setMetaData('wms_auth_username', $layerset[$i]['wms_auth_username']);
-						$layer->setMetaData('wms_auth_password', '{'.$layerset[$i]['wms_auth_password'].'}');
-						$layer->setMetaData('wms_auth_type', 'any');
+						$layer->setMetaData('ows_auth_username', $layerset[$i]['wms_auth_username']);
+						$layer->setMetaData('ows_auth_password', '{'.$layerset[$i]['wms_auth_password'].'}');
+						$layer->setMetaData('ows_auth_type', 'any');
 						
 						$layer->set('dump', 0);
 						$layer->set('type',$layerset[$i]['Datentyp']);
