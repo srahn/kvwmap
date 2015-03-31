@@ -101,14 +101,14 @@ function update_planart(){
 }
 
 function update_gebietstyp(){
-	if(document.getElementById('kap2_gemziel')){
-		if(document.getElementById('gebietstyp_0').value == 33){	// Wohnen+Ferienwohnen
-			document.getElementById('kap2_gemziel').style.display = '';
-			document.getElementById('kap2_nachstell').style.display = '';
+	if(document.getElementById('kap2_gemziel_s')){
+		if(document.getElementById('gebietstyp_s_0').value == 33){	// Wohnen+Ferienwohnen
+			document.getElementById('kap2_gemziel_s').style.display = '';
+			document.getElementById('kap2_nachstell_s').style.display = '';
 		}
 		else{
-			document.getElementById('kap2_gemziel').style.display = 'none';
-			document.getElementById('kap2_nachstell').style.display = 'none';
+			document.getElementById('kap2_gemziel_s').style.display = 'none';
+			document.getElementById('kap2_nachstell_s').style.display = 'none';
 		}
 	}
 }

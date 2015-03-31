@@ -56,13 +56,13 @@
 					<tr 
 						<? 
 						if($attributes['name'][$j] == 'plan_id')echo 'style="display: none"'; 
-						if($attributes['name'][$j] == 'kap2_gemziel'){
-							echo 'id="kap2_gemziel"';
-							if($layer['shape'][$k]['gebietstyp'] != 33)echo ' style="display: none"';
+						if($attributes['name'][$j] == 'kap2_gemziel_s'){
+							echo 'id="kap2_gemziel_s"';
+							if($layer['shape'][$k]['gebietstyp_s'] != 33)echo ' style="display: none"';
 						}
-						if($attributes['name'][$j] == 'kap2_nachstell'){
-							echo 'id="kap2_nachstell"';
-							 if($layer['shape'][$k]['gebietstyp'] != 33)echo ' style="display: none"';
+						if($attributes['name'][$j] == 'kap2_nachstell_s'){
+							echo 'id="kap2_nachstell_s"';
+							 if($layer['shape'][$k]['gebietstyp_s'] != 33)echo ' style="display: none"';
 						}
 						?>
 						>
@@ -139,11 +139,11 @@
 										}
 										else{
 											echo '<select title="'.$attributes['alias'][$j].'" style="'.$select_width.'font-size: '.$this->user->rolle->fontsize_gle.'px"';
-											if($attributes['name'][$j] == 'gebietstyp'){
-												echo 'onchange="update_gebietstyp();update_require_attribute(\''.$attributes['req_by'][$j].'\', '.$k.','.$layer['Layer_ID'].', this.value);set_changed_flag(document.GUI.changed_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" ';												
+											if($attributes['name'][$j] == 'gebietstyp_s'){
+												echo 'onchange="update_gebietstyp();update_require_attribute(\''.$attributes['req_by'][$j].'\', '.$k.','.$layer['Layer_ID'].', new Array(\''.implode($attributes['name'], "','").'\'));set_changed_flag(document.GUI.changed_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" ';												
 											}
 											if($attributes['req_by'][$j] != ''){
-												echo 'onchange="update_require_attribute(\''.$attributes['req_by'][$j].'\', '.$k.','.$layer['Layer_ID'].', this.value);set_changed_flag(document.GUI.changed_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" ';
+												echo 'onchange="update_require_attribute(\''.$attributes['req_by'][$j].'\', '.$k.','.$layer['Layer_ID'].', new Array(\''.implode($attributes['name'], "','").'\'));set_changed_flag(document.GUI.changed_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" ';
 											}
 											else{
 												echo 'onchange="set_changed_flag(document.GUI.changed_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')"';
