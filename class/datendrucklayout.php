@@ -413,6 +413,7 @@ class ddl {
 				$this->datasetcount_on_page = 0; # ??
 				$this->i_on_page = 1;	# ??
 				$this->maxy = 800;
+				$offsety = 35;		# das ist für den Fall, dass ein Sublayout in einem Sublayout einen Seitenüberlauf verursacht hat
 			}
     	if($this->layout['type'] == 0 AND $i > 0){		# neue Seite beim seitenweisen Typ und neuem Datensatz 
     		$this->pdf->newPage();
