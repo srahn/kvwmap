@@ -160,7 +160,9 @@
 								$datapart .= '<span title="Eingabe erforderlich">*</span>';
 							}
 							if($attributes['tooltip'][$j]!='' AND $attributes['form_element_type'][$j] != 'Time'){
-							  $datapart .= '<td align="right"><a href="javascript:void(0);" title="'.$attributes['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
+								if(substr($attributes['tooltip'][$j], 0, 4) == 'http')$title_link = 'href="'.$attributes['tooltip'][$j].'" target="_blank"';
+								else $title_link = 'href="javascript:void(0);"';
+							  $datapart .= '<td align="right"><a '.$title_link.' title="'.$attributes['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
 							}
 							if($attributes['type'][$j] == 'date'){
 							  $datapart .= '<td align="right"><a href="javascript:;" title=" (TT.MM.JJJJ) '.$attributes['tooltip'][$j].'" ';
