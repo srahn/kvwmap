@@ -12,7 +12,7 @@
 		$datapart .= ' size="40" type="text" id="'.$name.'_'.$k.'_output" value="'.htmlspecialchars($output).'">';
 		$datapart .= '<input type="hidden" readonly name="'.$fieldname.'" id="'.$name.'_'.$k.'" value="'.htmlspecialchars($value).'">';
 		$datapart .= '<div valign="top" style="height:0px; position:relative;">
-				<div id="suggests_'.$name.'_'.$k.'" style="z-index: 3000;display:none; position:absolute; left:0px; top:0px; width: 150px; vertical-align:top; overflow:hidden; border:solid grey 1px;"></div>
+				<div id="suggests_'.$name.'_'.$k.'" style="z-index: 3000;display:none; position:absolute; left:0px; top:0px; width: 200px; vertical-align:top; overflow:hidden; border:solid grey 1px;"></div>
 			</div>
 		</div>';
 		

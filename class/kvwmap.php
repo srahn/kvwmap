@@ -1982,7 +1982,7 @@ class GUI {
 		else{
 			if($count == 1)$count = 2;		# weil ein select-Feld bei size 1 anders funktioniert
 			pg_result_seek($ret[1], 0);
-			echo'<select size="'.$count.'" style="width: 200px;padding:4px; margin:-2px -17px -4px -4px;">';				
+			echo'<select size="'.$count.'" style="width: 250px;padding:4px; margin:-2px -17px -4px -4px;">';				
 			while($rs=pg_fetch_array($ret[1])) {
 				echo '<option onmouseover="this.selected = true;" onclick="document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'none\'; document.getElementById(\''.$this->formvars['field_id'].'\').value=\''.$rs['value'].'\';document.getElementById(\''.$this->formvars['field_id'].'_output\').value=\''.$rs['output'].'\';" value="'.$rs['value'].'">'.$rs['output'].'</option>';
 			}
