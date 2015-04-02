@@ -2,10 +2,13 @@
 
 class wfs{
 	
-	function wfs($url, $version, $typename){
+	function wfs($url, $version, $typename, $namespace, $username = NULL, $password = NULL){
 		$this->url = $url;
 		$this->version = $version;
 		$this->typename = $typename;
+		$this->username = $username;
+		$this->password = $password;
+		$this->namespace = $namespace;
 	}
 	
 	function get_feature_request($bbox, $filter, $maxfeatures){
@@ -13,60 +16,68 @@ class wfs{
 		if($bbox != ''){$request .= '&bbox='.$bbox;}
 		if($filter != ''){$request .= '&filter='.urlencode($filter);}
 		if($maxfeatures != ''){$request .= '&maxfeatures='.$maxfeatures;}
-		#$this->gml = utf8_decode(file_get_contents($request));
 		#echo $request;
-    $this->gml = url_get_contents($request);
+    $this->gml = url_get_contents($request, $this->username, $this->password);
 	}
 	
 	function describe_featuretype_request(){
 		$request = $this->url.'&service=WFS&request=DescribeFeatureType&version='.$this->version.'&typename='.$this->typename;
 		#echo $request;
-		$this->gml = url_get_contents($request);
+		$this->gml = url_get_contents($request, $this->username, $this->password);
+	}
+	
+	function getTargetNamespace(){
+		$exp = explode('targetNamespace="', $this->gml);
+		$this->targetnamespace = substr($exp[1], 0, strpos($exp[1], '"'));
 	}
 	
 	function create_filter($attributenames, $operators, $values){
 		# Diese Funktion generiert aus Attributnamen, Operatoren und Werten einen über 'And' verknüpften WFS-Filterstring
+		if($this->namespace != '')$namespace = $this->namespace.':';
 		$count = count($attributenames);
-		$filter = '<Filter>';
-		if($count > 1){
-			$filter .= '<And>';
-		}
-		for($i = 0; $i < $count; $i++){
-			$operator_attributes = '';
-			switch ($operators[$i]){
-				case '=' : {
-					$operator = 'PropertyIsEqualTo';
-				}break;
-				
-				case '!=' : {
-					$operator = 'PropertyIsNotEqualTo';
-				}break;
-				
-				case '<' : {
-					$operator = 'PropertyIsLessThan';
-				}break;
-				
-				case '>' : {
-					$operator = 'PropertyIsGreaterThan';
-				}break;
-				
-				/*case 'LIKE' : {									# geht noch nicht, weil man den requeststring hierfür url-encoden muss und dann ist er zu lang 
-					$operator = 'PropertyIsLike';
-					$operator_attributes = " wildCard='*' singleChar='.' escape='!'";
-					$values[$i] = str_replace('%', '*', $values[$i]);
-				}break;
-				*/
+		if($count > 0){
+			$filter = '<ogc:Filter xmlns:ogc="http://www.opengis.net/ogc">';
+			if($count > 1){
+				$filter .= '<ogc:And>';
 			}
-			
-			$filter .= '<'.$operator.$operator_attributes.'>';
-			$filter .= '<PropertyName>'.$attributenames[$i].'</PropertyName>';
-			$filter .= '<Literal>'.$values[$i].'</Literal>';
-			$filter .= '</'.$operator.'>';
+			for($i = 0; $i < $count; $i++){
+				$operator_attributes = '';
+				switch ($operators[$i]){
+					case '=' : {
+						$operator = 'PropertyIsEqualTo';
+					}break;
+					
+					case '!=' : {
+						$operator = 'PropertyIsNotEqualTo';
+					}break;
+					
+					case '<' : {
+						$operator = 'PropertyIsLessThan';
+					}break;
+					
+					case '>' : {
+						$operator = 'PropertyIsGreaterThan';
+					}break;
+					
+					/*case 'LIKE' : {									# geht noch nicht, weil man den requeststring hierfür url-encoden muss und dann ist er zu lang 
+						$operator = 'PropertyIsLike';
+						$operator_attributes = " wildCard='*' singleChar='.' escape='!'";
+						$values[$i] = str_replace('%', '*', $values[$i]);
+					}break;
+					*/
+				}
+				
+				$filter .= '<ogc:'.$operator.$operator_attributes.'>';
+				$filter .= '<ogc:PropertyName>'.$namespace.$attributenames[$i].'</ogc:PropertyName>';
+				$filter .= '<ogc:Literal>'.$values[$i].'</ogc:Literal>';
+				$filter .= '</ogc:'.$operator.'>';
+			}
+			if($count > 1){
+				$filter .= '</ogc:And>';
+			}
+			$filter .= '</ogc:Filter>';
+			$filter .= '&namespace=xmlns('.$this->namespace.'='.$this->targetnamespace.')';
 		}
-		if($count > 1){
-			$filter .= '</And>';
-		}
-		$filter .= '</Filter>';
 		return $filter;
 				
 		
@@ -108,61 +119,25 @@ class wfs{
     }
     $this->objects = $objects;
 	}
-	
-/*	function xml2array($xml){
-    $opened = array();
-    $opened[1] = 0;
-    $xml_parser = xml_parser_create();
-    xml_parser_set_option($xml_parser, XML_OPTION_CASE_FOLDING, 0);
-    xml_parser_set_option($xml_parser, XML_OPTION_SKIP_WHITE, 1);
-    xml_parse_into_struct($xml_parser, $xml, $xmlarray);
-    xml_parser_free($xml_parser);
-    $array = array_shift($xmlarray);
-    unset($array["level"]);
-    unset($array["type"]);
-    $arrsize = sizeof($xmlarray);
-    for($j=0;$j<$arrsize;$j++){
-        $val = $xmlarray[$j];
-        switch($val["type"]){
-            case "open":
-                $opened[$val["level"]]=0;
-            case "complete":
-                $index = "";
-                for($i = 1; $i < ($val["level"]); $i++)
-                    $index .= "[" . $opened[$i] . "]";
-                $path = explode('][', substr($index, 1, -1));
-                $value = &$array;
-                foreach($path as $segment)
-                    $value = &$value[$segment];
-                $value = $val;
-                unset($value["level"]);
-                unset($value["type"]);
-                if($val["type"] == "complete")
-                    $opened[$val["level"]-1]++;
-            break;
-            case "close":
-                $opened[$val["level"]-1]++;
-                unset($opened[$val["level"]]);
-            break;
-        }
-    }
-    return $array;
-	} 
-*/
-		
+			
 	function extract_features(){
-		# liefert die Datensätze einer getfeature-Abfrage (zuvor muss get_feature_request() und parse_gml() ausgeführt werden)
+		# liefert die Datensätze einer getfeature-Abfrage (zuvor muss get_feature_request() ausgeführt werden)
+		if(strpos($this->gml, 'gmlx:featureMember') !== false)$this->parse_gml('gmlx:featureMember');
+		else $this->parse_gml('gml:featureMember');		
+		if(strpos($this->gml, 'gmlx:posList') !== false)$geomtag = 'gmlx:posList';
+		elseif(strpos($this->gml, 'gml:posList') !== false)$geomtag = 'gml:posList';
+		else $geomtag = 'gml:coordinates';
 		for($i=0; $i < count($this->objects); $i++){		# durchläuft alle Objekte
 			for($j = 0; $j < count($this->objects[$i]); $j++){		# durchläuft alle Tags im Objekt
 				# Boundingbox entnehmen und ins aktuelle System transformieren
-				if($this->objects[$i][$j]["tag"] == 'gml:coordinates' AND $features[$i]['geom'] == ''){
+				if($this->objects[$i][$j]["tag"] == $geomtag AND $features[$i]['geom'] == ''){
 					#4495561.758,5997768.92 4495532.625,5997774.389 4495517.732,5997697.398 4495530.82,5997694.958 4495538.126,5997693.31 4495545.292,5997691.136 4495547.163,5997690.416 4495561.758,5997768.92
 					$coords = $this->objects[$i][$j]["value"];
 					if(strpos($coords, ',') === false){						# GML 3 ohne Kommas
 						$explosion = explode(' ', $coords);
 						$num_coords = count($explosion)/2;
 						for($e = 0; $e < count($explosion); $e=$e+2){
-							$coord_pair[] = $explosion[$e].' '.$explosion[$e+1];
+							if($explosion[$e] != '')$coord_pair[] = $explosion[$e].' '.$explosion[$e+1];
 						}
 						$coords = implode(', ', $coord_pair);
 					}
@@ -175,9 +150,9 @@ class wfs{
 					if($num_coords > 1)$features[$i]['geom'] = 'LINESTRING('.$coords.')';
 					else $features[$i]['geom'] = 'POINT('.$coords.')';
 				}
-				if($this->objects[$i][$j]["type"] == 'complete' AND $this->objects[$i][$j]["tag"] != 'gml:coordinates'){			# alle kompletten Tags und keine Geometrie-Tags
-		  		$features[$i]['tag'][] = $this->objects[$i][$j]["tag"];
-		  		$features[$i]['value'][] = $this->objects[$i][$j]["value"];
+				if($this->objects[$i][$j]["type"] == 'complete' AND $this->objects[$i][$j]["tag"] != $geomtag){			# alle kompletten Tags und keine Geometrie-Tags
+					$this->objects[$i][$j]["tag"] = str_replace($this->namespace.':', '', $this->objects[$i][$j]["tag"]);		# evtl. Namespace davor entfernen
+		  		$features[$i]['value'][$this->objects[$i][$j]["tag"]] = $this->objects[$i][$j]["value"];
 				}
 			}
   	}
@@ -185,7 +160,8 @@ class wfs{
 	}
 	
 	function get_attributes(){
-		# liefert die Sachattribute eines WFS-Layers (zuvor muss describe_featuretype_request() und parse_gml() ausgeführt werden) 
+		# liefert die Sachattribute eines WFS-Layers (zuvor muss describe_featuretype_request() ausgeführt werden) 
+		$this->parse_gml('sequence');
 		for($j = 0; $j < count($this->objects[0]); $j++){
 			# nur offene oder komplette element-Tags
 			if(strpos($this->objects[0][$j]["tag"], 'element') !== false AND ($this->objects[0][$j]["type"] == 'complete' OR $this->objects[0][$j]["type"] == 'open')){

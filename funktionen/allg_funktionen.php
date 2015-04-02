@@ -1180,25 +1180,34 @@ function getArrayOfChars() {
 	return $characters;
 }
 
-function url_get_contents($url) {
+function url_get_contents($url, $username = NULL, $password = NULL) {
 	try {
-		$response = @ file_get_contents($url);
+		if($username){
+			$context = stream_context_create(array('http' => array('timeout' => 20, 'header'  => "Authorization: Basic ".base64_encode($username.':'.$password))));
+			$response = @ file_get_contents($url, false, $context);
+		}
+		else $response = @ file_get_contents($url);
 		if ($response == false) {
 			throw new Exception("Fehler beim Abfragen der URL mit file_get_contents(".$url.")");
 		}
 	}	
 	catch (Exception $e) {
-		$response = curl_get_contents($url);
+		$response = curl_get_contents($url, $username, $password);
 	}
 	return $response;
 }
 
-function curl_get_contents($url) {
-  $ch = curl_init($url);
+function curl_get_contents($url, $username = NULL, $password = NULL) {
+	$url_parts = explode('?',  $url);
+	parse_str($url_parts[1], $get_array);
+  $ch = curl_init($url_parts[0]);		# url
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-  $result = curl_exec($ch);
+	if($username)curl_setopt($ch, CURLOPT_USERPWD, $username . ":" . $password);	
+	curl_setopt($ch, CURLOPT_POST, true);
+	#curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: multipart/form-data'));
+	curl_setopt($ch, CURLOPT_POSTFIELDS, $get_array);	
   if (curl_getinfo($ch, CURLINFO_HTTP_CODE)==404) {
-	$result = "Fehler 404: File not found. Die Resource konnte mit der URL: ".$url." nicht auf dem Server gefunden werden!";
+		$result = "Fehler 404: File not found. Die Resource konnte mit der URL: ".$url." nicht auf dem Server gefunden werden!";
   }
   curl_close($ch);
   return $result;

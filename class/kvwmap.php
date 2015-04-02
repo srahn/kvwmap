@@ -6560,12 +6560,15 @@ class GUI {
       case MS_WFS : {
 				include_(CLASSPATH.'wfs.php');
         $url = $layerset[0]['connection'];
-        $version = '1.0.0';
+        $version = '1.1.0';
         $typename = $layerset[0]['wms_name'];
-        $wfs = new wfs($url, $version, $typename);
+				$namespace = substr($typename, 0, strpos($typename, ':'));
+				$username = $layerset[0]['wms_auth_username'];
+				$password = $layerset[0]['wms_auth_password'];
+        $wfs = new wfs($url, $version, $typename, $namespace, $username, $password);
         # Attributnamen ermitteln
         $wfs->describe_featuretype_request();
-        $wfs->parse_gml('sequence');
+				$wfs->getTargetNamespace();
         $layerset[0]['attributes'] = $wfs->get_attributes();
         # Filterstring erstellen
         for($i = 0; $i < count($layerset[0]['attributes']['name']); $i++){
@@ -6581,11 +6584,10 @@ class GUI {
           $this->formvars['anzahl'] = MAXQUERYROWS;
         }        
         $wfs->get_feature_request(NULL, $filter, $this->formvars['anzahl']);
-        $wfs->parse_gml('gml:featureMember');
         $features = $wfs->extract_features();
         for($j = 0; $j < count($features); $j++){
           for($k = 0; $k < count($layerset[0]['attributes']['name']); $k++){
-            $layerset[0]['shape'][$j][$layerset[0]['attributes']['name'][$k]] = $features[$j]['value'][$k];
+            $layerset[0]['shape'][$j][$layerset[0]['attributes']['name'][$k]] = $features[$j]['value'][$layerset[0]['attributes']['name'][$k]];
             $layerset[0]['attributes']['privileg'][$k] = 0;
           }
           $layerset[0]['shape'][$j]['wfs_geom'] = $features[$j]['geom'];
@@ -6676,11 +6678,13 @@ class GUI {
         case MS_WFS : {
 					include_(CLASSPATH.'wfs.php');
           $url = $this->layerset[0]['connection'];
-          $version = '1.0.0';
+          $version = '1.1.0';
           $typename = $this->layerset[0]['wms_name'];
-          $wfs = new wfs($url, $version, $typename);
+					$namespace = substr($typename, 0, strpos($typename, ':'));
+					$username = $this->layerset[0]['wms_auth_username'];
+					$password = $this->layerset[0]['wms_auth_password'];
+          $wfs = new wfs($url, $version, $typename, $namespace, $username, $password);
           $wfs->describe_featuretype_request();
-          $wfs->parse_gml('sequence');
           $this->attributes = $wfs->get_attributes();
         }break;
       }
@@ -6826,15 +6830,17 @@ class GUI {
           # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
 					$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $this->qlayerset['shape'], true);
         }break;
-        
+				
         case MS_WFS : {
 					include_(CLASSPATH.'wfs.php');
           $url = $this->layerset[0]['connection'];
-          $version = '1.0.0';
+          $version = '1.1.0';
           $typename = $this->layerset[0]['wms_name'];
-          $wfs = new wfs($url, $version, $typename);
+					$namespace = substr($typename, 0, strpos($typename, ':'));
+					$username = $this->layerset[0]['wms_auth_username'];
+					$password = $this->layerset[0]['wms_auth_password'];
+					$wfs = new wfs($url, $version, $typename, $namespace, $username, $password);
           $wfs->describe_featuretype_request();
-          $wfs->parse_gml('sequence');
           $this->attributes = $wfs->get_attributes();
 					for($i = 0; $i < count($this->attributes['name']); $i++){
 	          $this->qlayerset['shape'][0][$this->attributes['name'][$i]] = $this->formvars['value_'.$this->attributes['name'][$i]];
@@ -10928,22 +10934,23 @@ class GUI {
             $searchbox_maxx=strval($rect->maxx+$rand);
             $searchbox_maxy=strval($rect->maxy+$rand);
 
+						$bbox=$searchbox_minx.','.$searchbox_miny.','.$searchbox_maxx.','.$searchbox_maxy;
             $url = $layerset[$i]['connection'];
-            $version = '1.0.0';
+            $version = '1.1.0';
             $typename = $layerset[$i]['wms_name'];
-            $bbox=$searchbox_minx.','.$searchbox_miny.','.$searchbox_maxx.','.$searchbox_maxy;
-            $wfs = new wfs($url, $version, $typename);
+						$namespace = substr($typename, 0, strpos($typename, ':'));
+						$username = $layerset[$i]['wms_auth_username'];
+						$password = $layerset[$i]['wms_auth_password'];
+						$wfs = new wfs($url, $version, $typename, $namespace, $username, $password);
             # Attributnamen ermitteln
-            $wfs->describe_featuretype_request();            
-            $wfs->parse_gml('sequence');
+            $wfs->describe_featuretype_request();
             $layerset[$i]['attributes'] = $wfs->get_attributes();
             # Abfrage absetzen
             $wfs->get_feature_request($bbox, NULL, MAXQUERYROWS);
-            $wfs->parse_gml('gml:featureMember');
             $features = $wfs->extract_features();
             for($j = 0; $j < count($features); $j++){
               for($k = 0; $k < count($layerset[$i]['attributes']['name']); $k++){
-                $layerset[$i]['shape'][$j][$layerset[$i]['attributes']['name'][$k]] = $features[$j]['value'][$k];
+								$layerset[$i]['shape'][$j][$layerset[$i]['attributes']['name'][$k]] = $features[$j]['value'][$layerset[$i]['attributes']['name'][$k]];
                 $layerset[$i]['attributes']['privileg'][$k] = 0;
               }
               $layerset[$i]['shape'][$j]['wfs_geom'] = $features[$j]['geom'];
