@@ -357,7 +357,7 @@ backto = function(go){
         					?>
           				<tr>
           					<td></td>
-          					<td colspan="3">Ackerland gesamt: EMZ <? echo $emzges_a; ?>, BWZ <? echo $BWZ_a; ?></td>
+          					<td colspan="3">Ackerland gesamt: <? echo round($flaeche_a); ?>m², EMZ <? echo $emzges_a; ?>, BWZ <? echo $BWZ_a; ?></td>
           				</tr>
         			<?	}
         			if ($emzges_gr > 0) {
@@ -365,7 +365,7 @@ backto = function(go){
         					?>
           				<tr>
           					<td></td>
-          					<td colspan="3">Grünland gesamt: EMZ <? echo $emzges_gr; ?>, BWZ <? echo $BWZ_gr; ?></td>
+          					<td colspan="3">Grünland gesamt: <? echo round($flaeche_gr); ?>m², EMZ <? echo $emzges_gr; ?>, BWZ <? echo $BWZ_gr; ?></td>
           				</tr>
         			<?	}
 							if ($emzges_agr > 0) {
@@ -373,7 +373,7 @@ backto = function(go){
         					?>
           				<tr>
           					<td></td>
-          					<td colspan="3">Acker-Grünland gesamt: EMZ <? echo $emzges_agr; ?>, BWZ <? echo $BWZ_agr; ?></td>
+          					<td colspan="3">Acker-Grünland gesamt: <? echo round($flaeche_agr); ?>m², EMZ <? echo $emzges_agr; ?>, BWZ <? echo $BWZ_agr; ?></td>
           				</tr>
         			<?	}
 							if ($emzges_gra > 0) {
@@ -381,7 +381,7 @@ backto = function(go){
         					?>
           				<tr>
           					<td></td>
-          					<td colspan="3">Grünland-Acker gesamt: EMZ <? echo $emzges_gra; ?>, BWZ <? echo $BWZ_gra; ?></td>
+          					<td colspan="3">Grünland-Acker gesamt: <? echo round($flaeche_gra); ?>m², EMZ <? echo $emzges_gra; ?>, BWZ <? echo $BWZ_gra; ?></td>
           				</tr>
         			<?	} ?>
 		          </table>
