@@ -273,7 +273,7 @@
 											$dateiname = $pfadteil[0];
 											$original_name = $pfadteil[1];
 											$dateinamensteil=explode('.', $dateiname);
-											$type = $dateinamensteil[1];
+											$type = strtolower($dateinamensteil[1]);
 											$thumbname = $this->get_dokument_vorschau($dateinamensteil);
 											$this->allowed_documents[] = addslashes($dateiname);
 											$this->allowed_documents[] = addslashes($thumbname);
@@ -284,7 +284,7 @@
 												$url = IMAGEURL.session_id().'.php?dokument=';
 											}											
 											$datapart .= '<table border="0"><tr><td>';
-											if($type == 'jpg' OR $type == 'png' OR $type == 'gif' OR $type == 'pdf' ){
+											if(in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf')) ){
 												$datapart .= '<a href="'.$url.$dokumentpfad.'"><img class="preview_image" src="'.$url.$thumbname.'"></a>';									
 											}
 											else{
