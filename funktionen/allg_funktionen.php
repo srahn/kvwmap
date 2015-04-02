@@ -1206,6 +1206,7 @@ function curl_get_contents($url, $username = NULL, $password = NULL) {
 	curl_setopt($ch, CURLOPT_POST, true);
 	#curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: multipart/form-data'));
 	curl_setopt($ch, CURLOPT_POSTFIELDS, $get_array);	
+	$result = curl_exec($ch);
   if (curl_getinfo($ch, CURLINFO_HTTP_CODE)==404) {
 		$result = "Fehler 404: File not found. Die Resource konnte mit der URL: ".$url." nicht auf dem Server gefunden werden!";
   }
