@@ -1435,6 +1435,7 @@ class pgdatabase {
 		$sql.= "LEFT JOIN alkis.ax_namensnummer_eigentuemerart w ON w.wert = n.eigentuemerart ";
 		$sql.= "LEFT JOIN alkis.ax_person p ON n.benennt = p.gml_id ";
 		$sql.= "LEFT JOIN alkis.ax_anschrift anschrift ON anschrift.gml_id = ANY(p.hat) ";
+		$sql.= $this->build_temporal_filter(array('anschrift'));
 		$sql.= " WHERE 1=1"; 
     if ($Bezirk!="") {
       $sql.=" AND b.schluesselgesamt=".(int)$Bezirk;
@@ -1445,7 +1446,7 @@ class pgdatabase {
     if ($BVNR!="") {
       $sql.=" AND s.laufendenummer='".$BVNR."'";
     }
-		$sql.= $this->build_temporal_filter(array('s', 'g', 'b', 'n', 'p', 'anschrift'));
+		$sql.= $this->build_temporal_filter(array('s', 'g', 'b', 'n', 'p'));
     $sql.= " ORDER BY namensnr;";
     #echo $sql.'<br><br>';
     $ret=$this->execSQL($sql, 4, 0);
