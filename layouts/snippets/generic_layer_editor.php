@@ -20,9 +20,10 @@
 	}
 ?>
 <div id="layer" onclick="remove_calendar();">
-
+<? if($this->new_entry != true){ ?>
 <h2><? echo $layer['Name']; ?></h2>
 <?
+	}
 	$doit = false;
   $anzObj = count($layer['shape']);
   if ($anzObj > 0) {

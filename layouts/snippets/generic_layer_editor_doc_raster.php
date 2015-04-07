@@ -36,6 +36,7 @@
 </script>
 
 <div id="layer" align="left">
+<? if($this->new_entry != true){ ?>
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
 	<tr>
 		<td width="95%" align="center"><h2>&nbsp;&nbsp;<? echo $layer['Name']; ?></h2></td>
@@ -43,6 +44,7 @@
 	<tr><td><img height="7" src="<? echo GRAPHICSPATH ?>leer.gif"></td></tr>
 </table>
 <?
+		}
   	$doit = false;
 	  $anzObj = count($this->qlayerset[$i]['shape']);
 	  if ($anzObj > 0) {
@@ -75,7 +77,9 @@
 <? } ?>
 		<td valign="top">
 		<div <? if($this->new_entry != true)echo 'class="raster_record" onclick="open_record(event, this)"'; ?> id="record_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>" <? if($k%5==0)echo 'style="clear: both;"'?>>
+			<? if($this->new_entry != true){ ?>
 			<div style="position: absolute;top: 1px;right: 1px"><a href="javascript:close_record('record_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>');" title="Schlie&szlig;en"><img style="border:none" src="<? echo GRAPHICSPATH."exit2.png"; ?>"></img></a></div>
+			<? } ?>
 			<input type="hidden" value="" name="changed_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
 			<table class="tgle" border="1">
 				<? if($this->new_entry != true AND $this->formvars['printversion'] == ''){ ?>
