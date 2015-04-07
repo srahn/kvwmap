@@ -1181,12 +1181,18 @@ function getArrayOfChars() {
 }
 
 function url_get_contents($url, $username = NULL, $password = NULL) {
+	$hostname = parse_url($url, PHP_URL_HOST);
 	try {
-		if($username){
-			$context = stream_context_create(array('http' => array('timeout' => 20, 'header'  => "Authorization: Basic ".base64_encode($username.':'.$password))));
-			$response = @ file_get_contents($url, false, $context);
+		$ctx['http']['timeout'] = 20;
+		if($username)$ctx['http']['header'] = "Authorization: Basic ".base64_encode($username.':'.$password);
+		if(defined('HTTP_PROXY')){
+			$ctx['http']['proxy'] = HTTP_PROXY;
+			$ctx['http']['request_fulluri'] = true;
+			$ctx['ssl']['SNI_server_name'] = $hostname;
+			$ctx['ssl']['SNI_enabled'] = true;
 		}
-		else $response = @ file_get_contents($url);
+		$context = stream_context_create($ctx);
+		$response = @ file_get_contents($url, false, $context);
 		if ($response == false) {
 			throw new Exception("Fehler beim Abfragen der URL mit file_get_contents(".$url.")");
 		}

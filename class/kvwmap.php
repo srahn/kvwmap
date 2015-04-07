@@ -6679,8 +6679,8 @@ class GUI {
         case MS_WFS : {
 					include_(CLASSPATH.'wfs.php');
           $url = $this->layerset[0]['connection'];
-					$version = $layerset[0]['wms_server_version'];
-					$epsg = $layerset[0]['epsg_code'];
+					$version = $this->layerset[0]['wms_server_version'];
+					$epsg = $this->layerset[0]['epsg_code'];
           $typename = $this->layerset[0]['wms_name'];
 					$namespace = substr($typename, 0, strpos($typename, ':'));
 					$username = $this->layerset[0]['wms_auth_username'];
@@ -6836,8 +6836,8 @@ class GUI {
         case MS_WFS : {
 					include_(CLASSPATH.'wfs.php');
           $url = $this->layerset[0]['connection'];
-					$version = $layerset[0]['wms_server_version'];
-					$epsg = $layerset[0]['epsg_code'];
+					$version = $this->layerset[0]['wms_server_version'];
+					$epsg = $this->layerset[0]['epsg_code'];
           $typename = $this->layerset[0]['wms_name'];
 					$namespace = substr($typename, 0, strpos($typename, ':'));
 					$username = $this->layerset[0]['wms_auth_username'];
