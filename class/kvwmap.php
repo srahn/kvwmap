@@ -6560,12 +6560,13 @@ class GUI {
       case MS_WFS : {
 				include_(CLASSPATH.'wfs.php');
         $url = $layerset[0]['connection'];
-        $version = '1.1.0';
+        $version = $layerset[0]['wms_server_version'];
+				$epsg = $layerset[0]['epsg_code'];
         $typename = $layerset[0]['wms_name'];
 				$namespace = substr($typename, 0, strpos($typename, ':'));
 				$username = $layerset[0]['wms_auth_username'];
 				$password = $layerset[0]['wms_auth_password'];
-        $wfs = new wfs($url, $version, $typename, $namespace, $username, $password);
+        $wfs = new wfs($url, $version, $typename, $namespace, $epsg, $username, $password);
         # Attributnamen ermitteln
         $wfs->describe_featuretype_request();
 				$wfs->getTargetNamespace();
@@ -6678,12 +6679,13 @@ class GUI {
         case MS_WFS : {
 					include_(CLASSPATH.'wfs.php');
           $url = $this->layerset[0]['connection'];
-          $version = '1.1.0';
+					$version = $layerset[0]['wms_server_version'];
+					$epsg = $layerset[0]['epsg_code'];
           $typename = $this->layerset[0]['wms_name'];
 					$namespace = substr($typename, 0, strpos($typename, ':'));
 					$username = $this->layerset[0]['wms_auth_username'];
 					$password = $this->layerset[0]['wms_auth_password'];
-          $wfs = new wfs($url, $version, $typename, $namespace, $username, $password);
+          $wfs = new wfs($url, $version, $typename, $namespace, $epsg, $username, $password);
           $wfs->describe_featuretype_request();
           $this->attributes = $wfs->get_attributes();
         }break;
@@ -6834,12 +6836,13 @@ class GUI {
         case MS_WFS : {
 					include_(CLASSPATH.'wfs.php');
           $url = $this->layerset[0]['connection'];
-          $version = '1.1.0';
+					$version = $layerset[0]['wms_server_version'];
+					$epsg = $layerset[0]['epsg_code'];
           $typename = $this->layerset[0]['wms_name'];
 					$namespace = substr($typename, 0, strpos($typename, ':'));
 					$username = $this->layerset[0]['wms_auth_username'];
 					$password = $this->layerset[0]['wms_auth_password'];
-					$wfs = new wfs($url, $version, $typename, $namespace, $username, $password);
+					$wfs = new wfs($url, $version, $typename, $namespace, $epsg, $username, $password);
           $wfs->describe_featuretype_request();
           $this->attributes = $wfs->get_attributes();
 					for($i = 0; $i < count($this->attributes['name']); $i++){
@@ -10936,12 +10939,13 @@ class GUI {
 
 						$bbox=$searchbox_minx.','.$searchbox_miny.','.$searchbox_maxx.','.$searchbox_maxy;
             $url = $layerset[$i]['connection'];
-            $version = '1.1.0';
+						$version = $layerset[$i]['wms_server_version'];
+						$epsg = $layerset[$i]['epsg_code'];
             $typename = $layerset[$i]['wms_name'];
 						$namespace = substr($typename, 0, strpos($typename, ':'));
 						$username = $layerset[$i]['wms_auth_username'];
 						$password = $layerset[$i]['wms_auth_password'];
-						$wfs = new wfs($url, $version, $typename, $namespace, $username, $password);
+						$wfs = new wfs($url, $version, $typename, $namespace, $epsg, $username, $password);
             # Attributnamen ermitteln
             $wfs->describe_featuretype_request();
             $layerset[$i]['attributes'] = $wfs->get_attributes();

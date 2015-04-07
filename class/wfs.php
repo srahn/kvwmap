@@ -2,18 +2,22 @@
 
 class wfs{
 	
-	function wfs($url, $version, $typename, $namespace, $username = NULL, $password = NULL){
+	function wfs($url, $version, $typename, $namespace, $epsg, $username = NULL, $password = NULL){
 		$this->url = $url;
 		$this->version = $version;
 		$this->typename = $typename;
 		$this->username = $username;
 		$this->password = $password;
 		$this->namespace = $namespace;
+		$this->epsg = $epsg;
 	}
 	
 	function get_feature_request($bbox, $filter, $maxfeatures){
 		$request = $this->url.'&service=WFS&request=GetFeature&version='.$this->version.'&typename='.$this->typename;
-		if($bbox != ''){$request .= '&bbox='.$bbox;}
+		if($bbox != ''){
+			$request .= '&bbox='.$bbox;
+			if($this->version = '1.1.0')$request .= ',EPSG:'.$this->epsg;
+		}
 		if($filter != ''){$request .= '&filter='.urlencode($filter);}
 		if($maxfeatures != ''){$request .= '&maxfeatures='.$maxfeatures;}
 		#echo $request;
