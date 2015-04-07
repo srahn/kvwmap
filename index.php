@@ -987,6 +987,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 		case 'SchnellSuche_Suchen' : {
 			$GUI->formvars['selected_layer_id'] = $GUI->formvars['quicksearch_layer_id'];
 			$GUI->formvars['keinzurueck'] = true;
+			$GUI->formvars['quicksearch'] = true;
 			$GUI->GenerischeSuche_Suchen();
 	  } break;		
 

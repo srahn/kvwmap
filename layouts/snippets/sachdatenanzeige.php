@@ -137,15 +137,17 @@ for($i=0;$i<$anzLayer;$i++){
 		    }
   		}
 
-	  	for($j = 0; $j < count($this->qlayerset[0]['attributes']['type']); $j++){
-	  		if($this->qlayerset[0]['attributes']['type'][$j] != 'geometry'){
-					echo '
-						<input name="value_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars['value_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
-						<input name="value2_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars['value2_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
-						<input name="operator_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars['operator_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
-					';
-	  		}
-	  	}
+			if($this->formvars['quicksearch'] != true){
+				for($j = 0; $j < count($this->qlayerset[0]['attributes']['type']); $j++){
+					if($this->qlayerset[0]['attributes']['type'][$j] != 'geometry'){
+						echo '
+							<input name="value_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars['value_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
+							<input name="value2_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars['value2_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
+							<input name="operator_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars['operator_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
+						';
+					}
+				}
+			}
 	  	if($this->formvars['printversion'] == '' AND $this->formvars['keinzurueck'] == ''){
 	  		echo '<a href="javascript:back();">'.$strbackToSearch.'</a><br><br>';
 	  	}
