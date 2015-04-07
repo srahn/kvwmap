@@ -491,9 +491,22 @@ function moveback_ff(evt){
 	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("style", "display:none")\', 400);
 }
 
+
+
+function sleep(milliseconds) {
+  var start = new Date().getTime();
+  for (var i = 0; i < 1e7; i++) {
+    if ((new Date().getTime() - start) > milliseconds){
+      break;
+    }
+  }
+}
+
+
+
 function moveback(evt){
 	// bei allen anderen Browsern gibt es kein onload für das Kartenbild, deswegen wird diese Funktion als erstes ausgefuehrt
-	document.getElementById("mapimg").setAttribute("xlink:href", "");
+	document.getElementById("mapimg").setAttribute("xlink:href", "/'.APPLVERSION.GRAPHICSPATH.'leer.gif")
 	document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");
 	// Redlining-Sachen loeschen
 	while(child = document.getElementById("redlining").firstChild){
