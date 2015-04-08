@@ -634,6 +634,7 @@ function measure(){
 	// Wenn im UTM-System gemessen wird, NBH-Datei laden
 	if('.$this->user->rolle->epsg_code.' == 25833)top.ahah("index.php", "go=getNBH", new Array(""), new Array("execute_function"));
   doing = "measure";
+	freehand_measuring = false;
 	if(top.document.GUI.str_pathx.value != ""){
 		measuring = true;	
 		top.document.GUI.str_pathx.value = "";
