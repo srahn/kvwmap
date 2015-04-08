@@ -5758,7 +5758,7 @@ class GUI {
         $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']] = str_replace(chr(13), '', $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']]);
         $this->Docu->activeframe[0]['texts'][$j]['text'] = $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']];
       }
-      $freitext = explode(';', $this->substituteFreitext($this->Docu->activeframe[0]['texts'][$j]['text']));
+      $freitext = explode(';', $this->substituteFreitext(utf8_decode($this->Docu->activeframe[0]['texts'][$j]['text'])));
       $anzahlzeilen = count($freitext);
       $alpha = $this->Docu->activeframe[0]['texts'][$j]['angle'];
       for($i = 0; $i < $anzahlzeilen; $i++){
@@ -5772,7 +5772,7 @@ class GUI {
       		$posx = $pdf->ez['pageWidth'] + $posx;
       		$justification = 'right';
       		$orientation = 'left';
-      		$data = array(array(1 => utf8_decode($freitext[$i])));
+      		$data = array(array(1 => $freitext[$i]));
       		$pdf->ezSetY($posy+$this->Docu->activeframe[0]['texts'][$j]['size']);
 	      	$pdf->ezTable($data, NULL, NULL, 
 	      	array('xOrientation'=>$orientation, 
@@ -5788,7 +5788,7 @@ class GUI {
 	      	);
 				}
 				else{
-        	$pdf->addText($posx,$posy,$this->Docu->activeframe[0]['texts'][$j]['size'],utf8_decode($freitext[$i]), -1 * $alpha);
+        	$pdf->addText($posx,$posy,$this->Docu->activeframe[0]['texts'][$j]['size'],$freitext[$i], -1 * $alpha);
 				}
       }
     }
