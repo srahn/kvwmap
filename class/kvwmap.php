@@ -294,7 +294,7 @@ class GUI {
 									$layersection = substr($layersection, 0, strpos($layersection, '&'));
 									$layers = explode(',', $layersection);
 									for($l = 0; $l < count($layers); $l++){
-									$legend .=  '<div style="display:inline" id="lg'.$j.'_'.$l.'"><br><img src="'.$layer['connection'].'&layer='.$layers[$l].'&service=wms&request=getlegendgraphic" onerror="ImageLoadFailed(\'lg'.$j.'_'.$l.'\')"></div>';
+									$legend .=  '<div style="display:inline" id="lg'.$j.'_'.$l.'"><br><img src="'.$layer['connection'].'&layer='.$layers[$l].'&service=WMS&request=getlegendgraphic" onerror="ImageLoadFailed(\'lg'.$j.'_'.$l.'\')"></div>';
 									}
 								}
 								else{
@@ -4582,7 +4582,7 @@ class GUI {
             $layersection = substr($layersection, 0, strpos($layersection, '&'));
             $layers = explode(',', $layersection);
             for($l = 0; $l < count($layers); $l++){
-              $classimage = ImageCreateFromPNG($layer->connection.'&service=wms&layer='.$layers[$l].'&request=getlegendgraphic');
+              $classimage = ImageCreateFromPNG($layer->connection.'&service=WMS&layer='.$layers[$l].'&request=getlegendgraphic');
             }
           }
           $classheight = imagesy($classimage);
