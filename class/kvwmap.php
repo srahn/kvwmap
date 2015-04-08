@@ -10531,7 +10531,6 @@ class GUI {
               }
               $projFROM = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);
     					$projTO = ms_newprojectionobj("init=epsg:".$layerset[$i]['epsg_code']);
-    					$rect->project($projFROM, $projTO);
 							$point=ms_newPointObj();
 							$point->setXY($rect->minx,$rect->miny);
 							$point->project($projFROM, $projTO);
