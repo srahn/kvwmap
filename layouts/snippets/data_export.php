@@ -103,7 +103,7 @@ $j=0;
       	</select>
         </div>
 				<? }
-        if($this->data_import_export->attributes['the_geom'] != ''){ ?>
+        if($this->data_import_export->layerdaten['export_privileg'][$selectindex] == 1 AND $this->data_import_export->attributes['the_geom'] != ''){ ?>
         <div style="padding-top:5px; padding-bottom:5px; margin-left: 15px;">
           <?php echo $strTransformInto; ?>:<br>
       	<select name="epsg">
@@ -126,7 +126,9 @@ $j=0;
         <div class="flexcontainer2">
         	<? for($s = 0; $s < 4; $s++){ ?>
         	<div style="float: left; padding: 4px; min-width:20%;">
-          <? for($i = 0; $i < $floor+$r; $i++){ ?>
+          <? for($i = 0; $i < $floor+$r; $i++){
+						if($this->data_import_export->attributes['name'][$j] == $this->data_import_export->attributes['the_geom'] AND $this->data_import_export->layerdaten['export_privileg'][$selectindex] != 1) continue;
+					?>
       	  <div style="padding: 4px;">
       	  <input type="checkbox" <? if($this->formvars['load'] OR $this->formvars['check_'.$this->data_import_export->attributes['name'][$j]] == 1)echo 'checked'; ?> value="1" name="check_<? echo $this->data_import_export->attributes['name'][$j]; ?>">
       	  <?php
