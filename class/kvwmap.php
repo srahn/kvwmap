@@ -5926,8 +5926,8 @@ class GUI {
   }
   
   function substituteFreitext($text){
-  	$text = str_replace('$stelle', $this->Stelle->Bezeichnung, $text);
-  	$text = str_replace('$user', $this->user->Name, $text);
+  	$text = str_replace('$stelle', utf8_decode($this->Stelle->Bezeichnung), $text);
+  	$text = str_replace('$user', utf8_decode($this->user->Name), $text);
 		$text = str_replace('$scale', $this->scale, $text);
 		$text = str_replace('$gemeinde', $this->gemeinde, $text);
 		$text = str_replace('$gemarkung', $this->gemarkung, $text);
