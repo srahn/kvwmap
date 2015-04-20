@@ -5705,7 +5705,12 @@ class GUI {
 
     # Hinzufügen der vom MapServer produzierten Karte
     $pdf->addJpegFromFile(IMAGEPATH.basename($this->img['hauptkarte']),$this->Docu->activeframe[0]['mapposx'],$this->Docu->activeframe[0]['mapposy'],$this->Docu->activeframe[0]['mapwidth'], $this->Docu->activeframe[0]['mapheight']);
-
+		
+		# Rechteck um die Karte
+		$posx1 = $this->Docu->activeframe[0]['mapposx'];
+		$posy1 = $this->Docu->activeframe[0]['mapposy'];
+		$pdf->rectangle($posx1, $posy1, $this->Docu->activeframe[0]['mapwidth'], $this->Docu->activeframe[0]['mapheight']);
+		
     # Hinzufügen der Referenzkarte, wenn eine angegeben ist.
     if($this->Docu->activeframe[0]['refmapfile'] AND $this->formvars['referencemap']){
       $pdf->addJpegFromFile(DRUCKRAHMEN_PATH.basename($this->Docu->activeframe[0]['refmapsrc']),$this->Docu->activeframe[0]['refmapposx'],$this->Docu->activeframe[0]['refmapposy'],$this->Docu->activeframe[0]['refmapwidth']);
@@ -5847,22 +5852,7 @@ class GUI {
 				$pdf->rectangle($posx, $posy, $smallrectwidth*($s+1), 4);
 			}
     }
-		
-		# Bild-Eckkoordinaten
-		$posx1 = $this->Docu->activeframe[0]['mapposx'];
-		$posy1 = $this->Docu->activeframe[0]['mapposy'];
-		$posx2 = $this->Docu->activeframe[0]['mapposx'] + $this->Docu->activeframe[0]['mapwidth'];
-		$posy2 = $this->Docu->activeframe[0]['mapposy'] + $this->Docu->activeframe[0]['mapheight'];
-		
-		# Rechteck um die Karte
-		$pdf->rectangle($posx1, $posy1, $this->Docu->activeframe[0]['mapwidth'], $this->Docu->activeframe[0]['mapheight']);
-		
-		# Eckkoordinaten (werden jetzt über Freitexte hinzugefügt)
-		#$pdf->addText($posx1, $posy1-6, 4, $this->miny);
-		#$pdf->addText($posx1-2, $posy1, 4, $this->minx, -90);
-		#$pdf->addText($posx2-20, $posy2+2, 4, $this->maxy);
-		#$pdf->addText($posx2+2, $posy2, 4, $this->maxx, 90);
-    
+		    
     # variable Freitexte
 		for($j = 1; $j <= $this->formvars['last_freetext_id']; $j++){
 			$pdf->selectFont(PDFCLASSPATH.'fonts/Helvetica.afm');
