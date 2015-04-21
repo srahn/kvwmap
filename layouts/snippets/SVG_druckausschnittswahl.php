@@ -45,6 +45,8 @@
 #
 	$pixel_y=($this->formvars['center_y']-$this->map->extent->miny)/$scale;
 	$pixel_x=($this->formvars['center_x']-$this->map->extent->minx)/$scale;
+	$refpoint_y=($this->formvars['refpoint_y']-$this->map->extent->miny)/$scale;
+	$refpoint_x=($this->formvars['refpoint_x']-$this->map->extent->minx)/$scale;
 	$angle = $this->formvars['angle'];
 	$pos_x = round($pixel_x-$printwidth/2);
 	$pos_y = round($pixel_y-$printheight/2);
@@ -66,6 +68,8 @@
 	<input type="hidden" name="worldprintheight" value="<? echo $worldprintheight ?>">
 	<input type="hidden" name="center_x" value="<?php echo $this->formvars['center_x']; ?>">
 	<input type="hidden" name="center_y" value="<?php echo $this->formvars['center_y']; ?>">
+	<input type="hidden" name="refpoint_x" value="<?php echo $this->formvars['refpoint_x']; ?>">
+	<input type="hidden" name="refpoint_y" value="<?php echo $this->formvars['refpoint_y']; ?>">
 	<input type="hidden" name="pathx" value="<?php echo $this->formvars['pathx']; ?>">
 	<input type="hidden" name="pathy" value="<?php echo $this->formvars['pathy']; ?>">
 	<input type="hidden" name="pathlength" value="<?php echo $this->formvars['pathlength']; ?>">
@@ -78,13 +82,18 @@
 	var miny = <? echo $this->map->extent->miny; ?>;
   
   function sendcenterlocation(center_x,center_y) {
-      document.GUI.center_x.value = (center_x*scale)+minx;
-      document.GUI.center_y.value = (center_y*scale)+miny;
+    document.GUI.center_x.value = (center_x*scale)+minx;
+    document.GUI.center_y.value = (center_y*scale)+miny;
   }
   
   function sendworldprintvalues(worldprintwidth,worldprintheight){
   	document.GUI.worldprintwidth.value = worldprintwidth;
   	document.GUI.worldprintheight.value = worldprintheight;
+  }
+	
+	function sendrefpointlocation(center_x,center_y) {
+    document.GUI.refpoint_x.value = (center_x*scale)+minx;
+    document.GUI.refpoint_y.value = (center_y*scale)+miny;
   }
 
   function sendBWpath(pathx,pathy) {
@@ -164,7 +173,7 @@ $svg='<?xml version="1.0"?>
 	var resx_m  = '.$res_xm.';
 	var resy_m  = '.$res_ym.';
 	var scale = '.$scale.';
-	var polygon_draw=true;
+	var refpoint_setting=true;
 	var boxx 	= new Array();
 	var boxy 	= new Array();
 	var move_x 	= new Array();
@@ -182,6 +191,7 @@ $svg='<?xml version="1.0"?>
 	var root = document.documentElement;
 	var mousewheelloop = 0;
 	var stopnavigation = false;
+	var refpoint_set_manually = false;
 
 function startup() {
 	if(window.addEventListener){
@@ -194,8 +204,7 @@ function startup() {
 		top.document.getElementById("map").onmousewheel = mousewheelchange;
 	}
 	focus_FS();
-	draw_pgon_on();
-	redraw();
+	set_printextent_on();
 	alignbuttons(width, height);
 }
 
@@ -300,17 +309,7 @@ function focus_NAV(){
   document.getElementById("canvas").setAttribute("visibility", "visible");
 	// --------------- FS-leiste ohne highlight ---------------------
   document.getElementById("text0").style.setProperty("fill","ghostwhite", "");
-//  document.getElementById("pgon0").style.setProperty("fill","ghostwhite", "");
-//  document.getElementById("pgon1").style.setProperty("fill","ghostwhite", "");
-//  document.getElementById("pgon2").style.setProperty("fill","ghostwhite", "");
-//	var obj = document.getElementById("text0");
-//	obj.setAttributeNS(null,"fill","none");
-//	var obj = document.getElementById("pgon0");
-//	obj.setAttributeNS(null,"fill","none");
-//	var obj = document.getElementById("pgon1");
-//	obj.setAttributeNS(null,"fill","none");
-//	var obj = document.getElementById("pgon2");
-//	obj.setAttributeNS(null,"fill","none");
+	document.getElementById("refpoint0").style.setProperty("fill","ghostwhite", "");
 }
 
 function focus_FS(){
@@ -325,8 +324,6 @@ function focus_FS(){
 
 // -------------------------mausinteraktionen auf canvas------------------------------
 function mousedown(evt){
-//	alert(doing);
-//  restart();draw_pgon_off(); // ========== temp. nur fuer bodenrichtwert-FS eingefuegt! =========
   switch(doing){
    case "zoomin":
     startPoint(evt);
@@ -373,11 +370,11 @@ function highlight(evt){
 // --------------------------scripte fuer die FS bodenrichtwerte-------------------------------
 // ------------------------------------------------------------------------------------
 function task(evt) {
-	if (polygon_draw){
-		addpoint(evt)
+	if(refpoint_setting){
+		choose_refpoint(evt)
 	}
 	else {
-		choose(evt)
+		choose_print_extent(evt)
 	}
 }
 
@@ -385,28 +382,23 @@ function get_map_scale(){
 	top.document.GUI.printscale.value = Math.round('.$this->map_scaledenom.');
 }		
 		
-// --------------------------wechsel zwischen pgon&text-------------------------------
-function draw_pgon_on() {
+function set_printextent_on() {
   document.getElementById("canvas_FS").setAttribute("cursor", "crosshair");
-  document.getElementById("text0").style.setProperty("fill","ghostwhite", "");
-//  document.getElementById("pgon0").style.setProperty("fill",highlighted, "");
-//  document.getElementById("pgon1").style.setProperty("fill",highlighted, "");
-//  document.getElementById("pgon2").style.setProperty("fill",highlighted, "");
-	polygon_draw=false;
-}
-
-function draw_pgon_off() {
-  document.getElementById("canvas_FS").setAttribute("cursor", "crosshair");
+	document.getElementById("refpoint0").style.setProperty("fill","ghostwhite", "");
   document.getElementById("text0").style.setProperty("fill",highlighted, "");
-	polygon_draw=false;
-	// formularfelder + position der bodenwert-textanzeige loeschen
+	refpoint_setting=false;
   client_x = ""; client_y = "";
 }
 
-// ------------------------texteinfuegepunkt setzen-----------------------------
-function choose(evt) {
-	polygon_draw=false;
-	
+function set_refpoint_on(){
+	document.getElementById("canvas_FS").setAttribute("cursor", "crosshair");
+	document.getElementById("text0").style.setProperty("fill","ghostwhite", "");
+  document.getElementById("refpoint0").style.setProperty("fill",highlighted, "");
+	refpoint_setting=true;
+  client_x = ""; client_y = "";
+}
+
+function choose_print_extent(evt) {
   // neuen punkt abgreifen
   client_x = evt.clientX;
   client_y = resy - evt.clientY;
@@ -429,10 +421,26 @@ function choose(evt) {
 		alignbuttons(width, height);
 	  top.sendcenterlocation(client_x,client_y);
 	  top.sendworldprintvalues(worldprintwidth, worldprintheight);
+		if(refpoint_set_manually == false){
+			refpoint = document.getElementById("pointposition");
+			refpoint.setAttribute("x", client_x);
+			refpoint.setAttribute("y", client_y);
+			top.sendrefpointlocation(client_x,client_y);
+		}
   }
   else{
   	alert("Bitte geben Sie einen Druckmassstab ein");
   }
+}
+
+function choose_refpoint(evt){
+	refpoint_set_manually = true;
+	client_x = evt.clientX;
+  client_y = resy - evt.clientY;
+	refpoint = document.getElementById("pointposition");
+	refpoint.setAttribute("x", client_x);
+	refpoint.setAttribute("y", client_y);
+	top.sendrefpointlocation(client_x,client_y);
 }
 
 function alignbuttons(width, height){
@@ -456,6 +464,8 @@ function right(){
 	currenttranslate[0] = parseFloat(currenttranslate[0]) + width;
   newtranslate = "translate(" + currenttranslate.join(\' \') + ")";
   obj.setAttributeNS(null, "transform", newtranslate);
+	refpoint = document.getElementById("pointposition");
+	refpoint.setAttribute("x", parseFloat(refpoint.getAttribute("x")) + width);
 	top.document.GUI.center_x.value = parseFloat(top.document.GUI.center_x.value) + parseFloat(top.document.GUI.worldprintwidth.value);
 	document.getElementById("poly_right").setAttribute("style", "-moz-user-select: none;opacity:0.01;fill:rgb(192,192,255);stroke:black;stroke-width:2"); 
 }
@@ -466,6 +476,8 @@ function left(){
 	currenttranslate[0] = parseFloat(currenttranslate[0]) - width;
   newtranslate = "translate(" + currenttranslate.join(\' \') + ")";
   obj.setAttributeNS(null, "transform", newtranslate);
+	refpoint = document.getElementById("pointposition");
+	refpoint.setAttribute("x", parseFloat(refpoint.getAttribute("x")) - width);
 	top.document.GUI.center_x.value = parseFloat(top.document.GUI.center_x.value) - parseFloat(top.document.GUI.worldprintwidth.value);
 	document.getElementById("poly_left").setAttribute("style", "-moz-user-select: none;opacity:0.01;fill:rgb(192,192,255);stroke:black;stroke-width:2"); 
 }
@@ -476,6 +488,8 @@ function up(){
 	currenttranslate[1] = parseFloat(currenttranslate[1]) + height;
   newtranslate = "translate(" + currenttranslate.join(\' \') + ")";
   obj.setAttributeNS(null, "transform", newtranslate);
+	refpoint = document.getElementById("pointposition");
+	refpoint.setAttribute("y", parseFloat(refpoint.getAttribute("y")) + height);
 	top.document.GUI.center_y.value = parseFloat(top.document.GUI.center_y.value) + parseFloat(top.document.GUI.worldprintheight.value);
 	document.getElementById("poly_up").setAttribute("style", "-moz-user-select: none;opacity:0.01;fill:rgb(192,192,255);stroke:black;stroke-width:2"); 
 }
@@ -486,6 +500,8 @@ function down(){
 	currenttranslate[1] = parseFloat(currenttranslate[1]) - height;
   newtranslate = "translate(" + currenttranslate.join(\' \') + ")";
   obj.setAttributeNS(null, "transform", newtranslate);
+	refpoint = document.getElementById("pointposition");
+	refpoint.setAttribute("y", parseFloat(refpoint.getAttribute("y")) - height);
 	top.document.GUI.center_y.value = parseFloat(top.document.GUI.center_y.value) - parseFloat(top.document.GUI.worldprintheight.value);
 	document.getElementById("poly_down").setAttribute("style", "-moz-user-select: none;opacity:0.01;fill:rgb(192,192,255);stroke:black;stroke-width:2"); 
 }
@@ -523,26 +539,12 @@ function deletelast(evt) {
 	pathx.pop();
 	pathy.pop();
 
-	//polygon_draw=true;
+	//refpoint_setting=true;
 	draw_pgon_on()
 	
 	redrawBW();
 }
-
-function restart()
-{
-	var alle = pathx.length;
-	for(var i = 0; i < alle; ++i)
-	 {
-	  pathx.pop();
-	  pathy.pop();
-	 }
-	//polygon_draw=true;
-	draw_pgon_on()
-
-	redrawBW();
-}
-		
+	
 		
 // ---------------------koordinatenausgabe in statuszeile--------------------------
 '.$SVGvars_coordscript.'
@@ -559,31 +561,29 @@ function restart()
   <rect id="background" style="fill:white" width="100%" height="100%"/>
 	<g id="moveGroup" transform="translate(0 0)">
 	  <image xlink:href="'.$bg_pic.'" height="100%" width="100%" y="0" x="0"/>
+		<rect id="canvas_FS" cursor="crosshair" onmousedown="task(evt)" onmousemove="hide_tooltip();" width="100%" height="100%" opacity="0" fill="cornflowerblue" visibility="visible"/>
+		<rect id="canvas" cursor="crosshair" onmousedown="mousedown(evt)" onmousemove="mousemove(evt);hide_tooltip();" onmouseup="mouseup(evt);" fill="yellow" width="100%" height="100%" opacity="0" visibility="hidden"/>
+		<g id="cartesian" transform="translate(0,'.$res_y.') scale(1,-1)">
+			<use id="pointposition" xlink:href="#crosshair_blue" x="'.$refpoint_x.'" y="'.$refpoint_y.'"/>
+			<polygon points="" id="polygon" style="fill-opacity:0.5;fill:rgb(192,192,255);stroke:blue;stroke-width:2"/>
+			<g id="auswahl" transform="rotate('.$angle.' '.$pixel_x.' '.$pixel_y.')">
+				<g id="auswahl2" transform="translate('.$pos_x.' '.$pos_y.')">			   		   				
+					<rect id="rechteck" x="0" y="0" rx="0" ry="0" width="'.$printwidth.'" height="'.$printheight.'" style="fill:none;stroke:black;stroke-width:2;"></rect>
+					<polygon points="0,15 15,0 0,-15 0,15" id="poly_right" onmouseover="activate(evt);" onmouseout="deactivate(evt);" onmouseup="right();" style="opacity:0.01;fill:rgb(192,192,255);stroke:blue;stroke-width:2"/>
+					<polygon points="0,15 -15,0 0,-15 0,15" id="poly_left" onmouseover="activate(evt);" onmouseout="deactivate(evt);" onmouseup="left();" style="opacity:0.01;fill:rgb(192,192,255);stroke:blue;stroke-width:2"/>
+					<polygon points="-15,0 0,15 15,0 -15,0" id="poly_up" onmouseover="activate(evt);" onmouseout="deactivate(evt);" onmouseup="up();" style="opacity:0.01;fill:rgb(192,192,255);stroke:blue;stroke-width:2"/>
+					<polygon points="-15,0 0,-15 15,0 -15,0" id="poly_down" onmouseover="activate(evt);" onmouseout="deactivate(evt);" onmouseup="down();" style="opacity:0.01;fill:rgb(192,192,255);stroke:blue;stroke-width:2"/>
+				</g>
+			</g>
+		</g>
 	</g>
-	<g id="cartesian" transform="translate(0,'.$res_y.') scale(1,-1)">
-    <polygon points="" id="polygon" style="fill-opacity:0.5;fill:rgb(192,192,255);stroke:blue;stroke-width:2"/>
-  </g>
-  <rect id="canvas_FS" cursor="crosshair" onmousedown="task(evt)" onmousemove="hide_tooltip();" width="100%" height="100%" opacity="0" fill="cornflowerblue" visibility="visible"/>
-  <rect id="canvas" cursor="crosshair" onmousedown="mousedown(evt)" onmousemove="mousemove(evt);hide_tooltip();" onmouseup="mouseup(evt);" fill="yellow" width="100%" height="100%" opacity="0" visibility="hidden"/>
-  <g id="cartesian" transform="translate(0,'.$res_y.') scale(1,-1)">
-    <polygon points="" id="polygon" style="fill-opacity:0.5;fill:rgb(192,192,255);stroke:blue;stroke-width:2"/>
-  	<g id="auswahl" transform="rotate('.$angle.' '.$pixel_x.' '.$pixel_y.')">
-		<g id="auswahl2" transform="translate('.$pos_x.' '.$pos_y.')">			   		   				
-	  	<rect id="rechteck" x="0" y="0" rx="0" ry="0" width="'.$printwidth.'" height="'.$printheight.'" style="fill:none;stroke:black;stroke-width:2;"></rect>
-	  	<polygon points="0,15 15,0 0,-15 0,15" id="poly_right" onmouseover="activate(evt);" onmouseout="deactivate(evt);" onmouseup="right();" style="opacity:0.01;fill:rgb(192,192,255);stroke:blue;stroke-width:2"/>
-	  	<polygon points="0,15 -15,0 0,-15 0,15" id="poly_left" onmouseover="activate(evt);" onmouseout="deactivate(evt);" onmouseup="left();" style="opacity:0.01;fill:rgb(192,192,255);stroke:blue;stroke-width:2"/>
-	  	<polygon points="-15,0 0,15 15,0 -15,0" id="poly_up" onmouseover="activate(evt);" onmouseout="deactivate(evt);" onmouseup="up();" style="opacity:0.01;fill:rgb(192,192,255);stroke:blue;stroke-width:2"/>
-	  	<polygon points="-15,0 0,-15 15,0 -15,0" id="poly_down" onmouseover="activate(evt);" onmouseout="deactivate(evt);" onmouseup="down();" style="opacity:0.01;fill:rgb(192,192,255);stroke:blue;stroke-width:2"/>
-  	</g>
-	</g>
-  </g>
   <g id="buttons_NAV" cursor="pointer" onmouseout="hide_tooltip()" onmousedown="focus_NAV();hide_tooltip()">
 '.$SVGvars_navbuttons.'
 		</g>
 
     <g id="buttons_FS" cursor="pointer" onmouseout="hide_tooltip()" onmousedown="focus_FS();hide_tooltip()" transform="translate(0 26)">
 
-			<g id="text" onmousedown="draw_pgon_off();" transform="translate(0 0 )">
+			<g id="text" onmousedown="set_printextent_on();" transform="translate(0 0 )">
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
         <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
         	<set attributeName="filter" begin="text.mousedown" fill="freeze" to="none"/>
@@ -606,7 +606,20 @@ function restart()
 				</g>
 				<text transform="scale(0.6 0.6)" x="20" y="27" style="text-anchor:middle;fill:rgb(0,0,0);font-size:18;font-family:Arial;">M</text>
 				<rect id="mapscale0" onmouseover="show_tooltip(\'Kartenmassstab uebernehmen\',evt.clientX,evt.clientY)" x="0" y="0" rx="1" ry="1" width="25" height="25" fill="white" opacity="0.0"/>
-	    </g>		
+	    </g>
+
+			<g id="refpoint" onmousedown="set_refpoint_on();" transform="translate(52 0 )">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+        	<set attributeName="filter" begin="mapscale.mousedown" fill="freeze" to="none"/>
+					<set attributeName="filter" begin="mapscale.mouseup;mapscale.mouseout" fill="freeze" to="url(#Schatten)"/>
+				</rect>
+				<g transform="scale(0.5) translate(2 8)">
+					<text x="23" y="15" style="text-anchor:middle;fill:black;font-size:10;font-family:Arial;font-weight:bold">Punkt</text>
+					<circle cx="23" cy="21" r="3"/>
+				</g>
+				<rect id="refpoint0" onmouseover="show_tooltip(\'Bezugspunkt setzen\',evt.clientX,evt.clientY)" x="0" y="0" rx="1" ry="1" width="25" height="25" fill="white" opacity="0.2"/>
+	    </g>
 	    
 		</g>
       

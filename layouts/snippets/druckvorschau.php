@@ -194,6 +194,8 @@ function preventflickering(evt){
 <input type="hidden" name="worldprintheight" value="<? echo $this->formvars['worldprintheight'] ?>">
 <input type="hidden" name="center_x" value="<?php echo $this->formvars['center_x']; ?>">
 <input type="hidden" name="center_y" value="<?php echo $this->formvars['center_y']; ?>">
+<input type="hidden" name="refpoint_x" value="<?php echo $this->formvars['refpoint_x']; ?>">
+<input type="hidden" name="refpoint_y" value="<?php echo $this->formvars['refpoint_y']; ?>">
 <input type="hidden" name="format" value="<?php echo $this->formvars['format']; ?>">
 <input type="hidden" name="printscale" value="<?php echo $this->formvars['printscale']; ?>">
 <input type="hidden" name="angle" value="<?php echo $this->formvars['angle']; ?>">

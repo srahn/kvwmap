@@ -5695,8 +5695,8 @@ class GUI {
     # Lagebezeichnung
     if(LAGEBEZEICHNUNGSART == 'Flurbezeichnung'){
 	    $flur = new Flur('','','',$this->pgdatabase);
-	    $bildmitte['rw']=$this->formvars['center_x'];
-	    $bildmitte['hw']=$this->formvars['center_y'];
+	    $bildmitte['rw']=$this->formvars['refpoint_x'];
+	    $bildmitte['hw']=$this->formvars['refpoint_y'];
 	    $this->lagebezeichnung = $flur->getBezeichnungFromPosition($bildmitte, $this->user->rolle->epsg_code);
     }
 
