@@ -119,7 +119,16 @@ else {
 		      			<option <? if($this->formvars['start_aktiv'] == 1){echo 'selected ';} ?>value="1"><?php echo $this->strYes; ?></option>		      			
 		      		</select>
 		  		</td>
-		  	</tr>  	
+		  	</tr>
+				<tr>
+		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLogconsume; ?></th>
+		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+		      		<select name="logconsume">
+		      			<option <? if($this->formvars['logconsume'] == '0'){echo 'selected ';} ?>value="0"><?php echo $this->strNo; ?></option>
+		      			<option <? if($this->formvars['logconsume'] == 1){echo 'selected ';} ?>value="1"><?php echo $this->strYes; ?></option>		      			
+		      		</select>
+		  		</td>
+		  	</tr>
 		</table>
 	</td>
   </tr>

@@ -14,5 +14,6 @@
  $strSymbolScale="Symbol scale";
  $stRequires="Requires";
  $stStartAktiv="aktiv bei Gast";
+ $strLogconsume="wird geloggt";
  
 ?>  

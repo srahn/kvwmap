@@ -14,5 +14,6 @@
  $strSymbolScale="Symbol scale";
  $stRequires="Requires";
  $stStartAktiv="active on Guest";
+ $strLogconsume="logging";
 
 ?>

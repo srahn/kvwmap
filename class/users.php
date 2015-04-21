@@ -3145,6 +3145,7 @@ class stelle {
 		if($formvars['requires'] == '')$formvars['requires'] = 'NULL';
 		$sql .= ', requires = '.$formvars['requires'];
 		$sql .= ', start_aktiv = "'.$formvars['startaktiv'].'"';
+		$sql .= ', logconsume = "'.$formvars['logconsume'].'"';
 		$sql .= ' WHERE Stelle_ID = '.$formvars['selected_stelle_id'].' AND Layer_ID = '.$formvars['selected_layer_id'];
 		#echo $sql.'<br>';
 		$this->debug->write("<p>file:users.php class:stelle->updateLayer - Aktualisieren der LayerzuStelle-Eigenschaften:<br>".$sql,4);
