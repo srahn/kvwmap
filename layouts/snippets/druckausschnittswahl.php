@@ -127,11 +127,11 @@ function remove(){
  <br>
 <table border="0" cellspacing="2" cellpadding="2">
   <tr align="center"> 
-    <td colspan="4"><h2><? echo $strTitle; ?></h2><br>
+    <td colspan="5"><h2><? echo $strTitle; ?></h2><br>
     </td>
   </tr>
   <tr align="center"> 
-    <td colspan="4"> 
+    <td colspan="5"> 
       <input class="button" type="button" name="vorschau" value="<?php echo $strButtonPrintPreview; ?>" onclick="preview();">
       <input class="button" type="button" name="drucken" value="<?php echo $strButtonPrint; ?>" onclick="druck_pdf();">
       <br>
