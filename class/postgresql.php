@@ -1027,8 +1027,11 @@ class pgdatabase {
 		else{
 			$sql.= " UNION ";
 			$sql.= "SELECT distinct 1 as hist_alb, lpad(f.flurnummer::text, 3, '0') as flurnr, f.amtlicheflaeche as flaeche, '' as abweichenderrechtszustand, zaehler, nenner, 0 AS kreisid, '' as kreisname, gem.schluesselgesamt as gemkgschl, gem.bezeichnung as gemkgname, g.schluesselgesamt as gemeinde, g.bezeichnung as gemeindename, '' as finanzamt, '' AS finanzamtname, zeitpunktderentstehung::date as entsteh, f.beginnt::timestamp, f.endet::timestamp ";
-			$sql.= "FROM alkis.ax_gemeinde as g, alkis.ax_gemarkung AS gem, alkis.ax_historischesflurstueckohneraumbezug as f ";
-			$sql.= "WHERE g.kreis = gem.stelle AND f.gemarkungsnummer=gem.gemarkungsnummer AND f.land = gem.land AND f.gemeinde =g.gemeinde AND f.flurstueckskennzeichen='".$FlurstKennz."'";
+			$sql.= "FROM alkis.ax_historischesflurstueckohneraumbezug as f ";
+			$sql.= "LEFT JOIN alkis.ax_gemarkung AS gem ON f.gemarkungsnummer=gem.gemarkungsnummer AND f.land = gem.land ";
+			$sql.= "LEFT JOIN alkis.pp_gemarkung ppg ON gem.land = ppg.land AND gem.gemarkungsnummer = ppg.gemarkung ";
+			$sql.= "LEFT JOIN alkis.ax_gemeinde g ON f.gemeinde=g.gemeinde AND ppg.kreis = g.kreis ";
+			$sql.= "WHERE f.flurstueckskennzeichen='".$FlurstKennz."'";
 			$sql.=" order by endet DESC";		# damit immer die jüngste Version eines Flurstücks gefunden wird
 		}		
     #echo $sql.'<br><br>';
