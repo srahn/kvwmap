@@ -9,5 +9,6 @@ $strPrintDetail="Druckausschnitt";
 $strLoad="Laden";
 $strReferenceMap="Übersichtskarte";
 $strLegendExtra="Legende auf Extrablatt";
+$strNoMinMaxscaling="Maßstabseinschränkung aufheben";
  
 ?>  

@@ -9,5 +9,6 @@ $strPrintDetail="Printing details";
 $strLoad="Load";
 $strReferenceMap="Referencemap";
 $strLegendExtra="Legend on separate page";
+$strNoMinMaxscaling="disable minscale/maxscale";
 
 ?>  

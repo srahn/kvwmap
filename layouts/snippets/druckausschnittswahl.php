@@ -141,7 +141,7 @@ function remove(){
     <td valign="top" align="left">
     	<?php echo $strButtonPrintScale; ?><input type="text" size="7" name="printscale" onkeydown="setprintextent('false');" value="<?php echo $this->formvars['printscale']; ?>">
     </td>
-    <td valign="top" align="right" colspan="3">
+    <td valign="top" align="right" colspan="4">
     	<?php echo $strPrintFrame; ?>
     	<select name="aktiverRahmen" onchange="document.GUI.go.value='Druckausschnittswahl';document.GUI.target = '';document.GUI.submit()">
             <?  
@@ -154,7 +154,7 @@ function remove(){
     </td>
   </tr>
   <tr valign="top"> 
-    <td align="center" colspan="4" style="border:1px solid #C3C7C3"> 
+    <td align="center" colspan="5" style="border:1px solid #C3C7C3"> 
       <?php
       include(LAYOUTPATH.'snippets/SVG_druckausschnittswahl.php');
     ?>
@@ -196,6 +196,9 @@ function remove(){
     	echo $strLegendExtra; ?>&nbsp;<input type="checkbox" name="legend_extra" value="1" <? if($this->formvars['legend_extra']) echo 'checked="true"'; ?>">
     	<? } ?>
     </td>
+		<td align="left">
+    	<? echo $strNoMinMaxscaling; ?>&nbsp;<input type="checkbox" name="no_minmax_scaling" onclick="document.GUI.submit();" value="1" <? if($this->formvars['no_minmax_scaling']) echo 'checked="true"'; ?>">
+    </td>
     <td align="right"> 
       <?php echo $strPrintDetail; ?>
     	<input type="text" name="name" value="" style="width:120px" >&nbsp;<input class="button" type="button" style="width:84px" name="speichern" value="<?php echo $this->strSave; ?>" onclick="save();">
@@ -203,7 +206,7 @@ function remove(){
   </tr>
   <tr>
   	<td>&nbsp;</td>
-  	<td align="right"  colspan="3">
+  	<td align="right"  colspan="4">
   		<input class="button" type="button" style="width:84px" name="delete" value="<?php echo $this->strDelete; ?>" onclick="remove();">&nbsp;
 
   		<select name="druckausschnitt" style="width:120px">
