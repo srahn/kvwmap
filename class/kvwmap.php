@@ -5998,7 +5998,7 @@ class GUI {
 			$this->formvars['Datentyp'] = MS_LAYER_RASTER;
 			$this->formvars['connectiontype'] = MS_WMS;
 			$this->formvars['transparency'] = 100;
-			$this->formvars['epsg_code'] = str_replace('EPSG:', '', $this->formvars['srs'][0]);
+			$this->formvars['epsg_code'] = str_replace('epsg:', '', strtolower($this->formvars['srs'][0]));
 			if(strpos($this->formvars['wms_url'], '?') !== false)$this->formvars['wms_url'] .= '&';
 			else $this->formvars['wms_url'] .= '?';
 			$this->formvars['connection'] = $this->formvars['wms_url'].'VERSION=1.1.0&FORMAT=image/png&LAYERS='.implode(',', $this->formvars['layers']);
