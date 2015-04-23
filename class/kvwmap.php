@@ -14188,6 +14188,7 @@ class db_mapObj{
 			}
 			$attributes['form_element_type'][$i]= $rs['form_element_type'];
 			$attributes['form_element_type'][$rs['name']]= $rs['form_element_type'];
+			$rs['options'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $rs['options']);
 			$attributes['options'][$i]= $rs['options'];
 			$attributes['options'][$rs['name']]= $rs['options'];
 			$attributes['alias'][$i]= $rs['alias'];
