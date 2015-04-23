@@ -10521,18 +10521,21 @@ class GUI {
               }
               $projFROM = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);
     					$projTO = ms_newprojectionobj("init=epsg:".$layerset[$i]['epsg_code']);
-							$point=ms_newPointObj();
-							$point->setXY($rect->minx,$rect->miny);
-							$point->project($projFROM, $projTO);
-							$layer->queryByPoint($point, MS_SINGLE, 0);
+							$rect->project($projFROM, $projTO);
+							$layer->queryByRect($rect);	
               $anzResult=$layer->getNumResults();
-              for ($j=0;$j<$anzResult;$j++) {
+              for ($j=0;$j<$anzResult;$j++){
 								$result = $layer->getResult($j);
-								$s = $layer->getShape($layer->getResult($j));
-								$layerset[$i]['shape'][$j][' '] = $s->values['value_0'];
+								if(MAPSERVERVERSION < '600') $s = $layer->getFeature($result->shapeindex);
+								else $s = $layer->getShape($result);
+								$count = 0;
+								foreach($s->values as $key => $value){
+									$layerset[$i]['shape'][$j][$key] = utf8_encode($value);
+									$layerset[$i]['attributes']['name'][$count] = $key;
+									$layerset[$i]['attributes']['privileg'][$count] = 0;
+									$count++;
+								}
               }
-							$layerset[$i]['attributes']['name'][0] = ' ';
-							$layerset[$i]['attributes']['privileg'][0] = 0;
               $this->qlayerset[]=$layerset[$i];
             }
           } break; # ende Layer ist ein Shapefile
