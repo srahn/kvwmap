@@ -174,7 +174,7 @@ $legendheight = $this->map->height + 20;
 				<tr>
 					<td>Antragsnr:</td>
 					<td>
-						<input name="stammnr" type="text" value="<?php echo $this->formvars['stammnr']; ?>" size="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>" maxlength="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>">
+						<input name="stammnr" onkeyup="this.value = this.value.toUpperCase();" type="text" value="<?php echo $this->formvars['stammnr']; ?>" size="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>" maxlength="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>">
 					</td>
 					</tr>
 					<? } ?>
@@ -188,7 +188,7 @@ $legendheight = $this->map->height + 20;
 				<tr>
 					<td>Antragsnummer:</td>
 					<td>
-						<input name="stammnr" type="text" value="<?php echo $this->formvars['stammnr']; ?>" size="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>" maxlength="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>">
+						<input name="stammnr" onkeyup="this.value = this.value.toUpperCase();" type="text" value="<?php echo $this->formvars['stammnr']; ?>" size="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>" maxlength="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>">
 					</td>
 				</tr>
 				<? } ?>				
