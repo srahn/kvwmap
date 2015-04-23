@@ -8162,35 +8162,36 @@ class GUI {
 	    if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
 	      $this->formvars['fromwhere'] .= ' where (1=1)';
 	    }
-			###################### über Checkboxen aus der Sachdatenanzeige des GLE ausgewählt ###############
-			if($this->formvars['all'] == ''){	    
-				$anzahl = 0;
-				$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
-				# Daten abfragen
-				$element = explode(';', $checkbox_names[0]);   #  check;table_alias;table;oid
-				$where = " AND ".$element[1].".oid IN (";
-				for($i = 0; $i < count($checkbox_names); $i++){
-					if($this->formvars[$checkbox_names[$i]] == 'on'){
-						$element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
-						$where = $where."'".$element[3]."',";
-						$anzahl++;
-					}
-				}
-				$where .= "0)";
-				if($anzahl > 0){
-					$this->formvars['sql_'.$this->formvars['selected_layer_id']] = $where.$orderby;
-					$this->formvars['anzahl'] = $anzahl;
+		}
+		###################### über Checkboxen aus der Sachdatenanzeige des GLE ausgewählt ###############
+		if($this->formvars['all'] == ''){	    
+			$anzahl = 0;
+			$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
+			# Daten abfragen
+			$element = explode(';', $checkbox_names[0]);   #  check;table_alias;table;oid
+			$where = " AND ".$element[1].".oid IN (";
+			for($i = 0; $i < count($checkbox_names); $i++){
+				if($this->formvars[$checkbox_names[$i]] == 'on'){
+					$element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
+					$where = $where."'".$element[3]."',";
+					$anzahl++;
 				}
 			}
-			####################################################################################################
-    }
+			$where .= "0)";
+			if($anzahl > 0){
+				$this->formvars['sql_'.$this->formvars['selected_layer_id']] = $where.$orderby;
+				$this->formvars['anzahl'] = $anzahl;
+			}
+		}
+		####################################################################################################
     if($this->formvars['CMD']== 'Full_Extent' OR $this->formvars['CMD'] == 'recentre' OR $this->formvars['CMD'] == 'zoomin' OR $this->formvars['CMD'] == 'zoomout' OR $this->formvars['CMD'] == 'previous' OR $this->formvars['CMD'] == 'next') {
       $this->navMap($this->formvars['CMD']);
     }
     else{
       $this->formvars['load'] = true;
     }
-    $this->data_import_export->export($this->formvars, $this->Stelle, $this->mapDB);
+    $this->data_import_export->export($this->formvars, $this->Stelle, $this->user, $this->mapDB);
+		if($this->formvars['epsg'] == '')$this->formvars['epsg'] = $this->data_import_export->layerset[0]['epsg_code'];		// originäres System
     $this->saveMap('');
     $currenttime=date('Y-m-d H:i:s',time());
     $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);

@@ -28,6 +28,23 @@ function buildwktpolygonfromsvgpath(svgpath){
 	return wkt;
 }
 
+function update_coords(){
+	if(document.GUI.export_format.value == 'CSV'){
+		document.getElementById('coord_div').style.display = 'none';
+	}
+	else{
+		document.getElementById('coord_div').style.display = 'inline';
+		if(document.GUI.export_format.value == 'KML'){
+			document.getElementById('wgs84').style.display = 'inline';
+			document.GUI.epsg.style.display = 'none';
+		}
+		else{
+			document.getElementById('wgs84').style.display = 'none';
+			document.GUI.epsg.style.display = 'inline';
+		}
+	}
+}
+
 function data_export(){
 	if(document.GUI.selected_layer_id.value != ''){
 		if(document.GUI.newpath.value != ''){
@@ -73,49 +90,74 @@ $j=0;
 
       <div class="flexcontainer1" style="border: 1px solid #C3C7C3; padding: 5px; margin-top:30px;">
 
-        <div style="padding-top:5px; padding-bottom:5px;">
-          <?php echo $this->strLayer; ?>:<br>
-          <select style="width:250px" size="1"  name="selected_layer_id" onchange="document.GUI.submit();" <?php if(count($this->data_import_export->layerdaten['ID'])==0){ echo 'disabled';}?>>
-      		<option value=""><?php echo $this->strPleaseSelect; ?></option>
-      	  <?
-      		for($i = 0; $i < count($this->data_import_export->layerdaten['ID']); $i++){
-      			echo '<option';
-      			if($this->data_import_export->layerdaten['ID'][$i] == $this->data_import_export->formvars['selected_layer_id']){
-      				echo ' selected';
-      				$selectindex = $i;
-      			}
-      			echo ' value="'.$this->data_import_export->layerdaten['ID'][$i].'">'.$this->data_import_export->layerdaten['Bezeichnung'][$i].'</option>';
-      		}
-      		?>
-      	</select>
+        <div style="padding-top:1px; padding-bottom:5px;">
+					<table>
+						<tr>
+							<td><? echo $this->strLayer; ?>:</td>
+						</tr>
+						<tr>
+							<td>
+								<select style="width:250px" size="1"  name="selected_layer_id" onchange="if(document.GUI.epsg != undefined)document.GUI.epsg.value='';document.GUI.submit();" <?php if(count($this->data_import_export->layerdaten['ID'])==0){ echo 'disabled';}?>>
+								<option value=""><?php echo $this->strPleaseSelect; ?></option>
+								<?
+								for($i = 0; $i < count($this->data_import_export->layerdaten['ID']); $i++){
+									echo '<option';
+									if($this->data_import_export->layerdaten['ID'][$i] == $this->data_import_export->formvars['selected_layer_id']){
+										echo ' selected';
+										$selectindex = $i;
+									}
+									echo ' value="'.$this->data_import_export->layerdaten['ID'][$i].'">'.$this->data_import_export->layerdaten['Bezeichnung'][$i].'</option>';
+								}
+								?>
+								</select>
+							</td>
+						</tr>
+					</table>
         </div>
 				<? if($this->data_import_export->formvars['selected_layer_id'] != ''){ ?>
-        <div style="padding-top:5px; padding-bottom:5px; margin-left: 15px;">
-          <?php echo $strFormat; ?>:<br>
-      	<select name="export_format">
-      		<? if($this->data_import_export->layerdaten['export_privileg'][$selectindex] == 1 AND $this->data_import_export->attributes['the_geom'] != ''){ ?>
-      	    <option <? if($this->formvars['export_format'] == 'Shape')echo 'selected '; ?> value="Shape">Shape</option>
-      		<option <? if($this->formvars['export_format'] == 'GML')echo 'selected '; ?> value="GML">GML</option>
-      		<option <? if($this->formvars['export_format'] == 'KML')echo 'selected '; ?> value="KML">KML</option>
-      		<option <? if($this->formvars['export_format'] == 'UKO')echo 'selected '; ?> value="UKO">UKO</option>
-      		<? } ?>
-      		<option <? if($this->formvars['export_format'] == 'CSV')echo 'selected '; ?> value="CSV">CSV</option>
-      	</select>
+        <div style="padding-top:1px; padding-bottom:5px; margin-left: 15px;">
+					<table>
+						<tr>
+							<td><? echo $strFormat; ?>:</td>
+						</tr>
+						<tr>
+							<td>
+								<select name="export_format" onchange="update_coords();">
+								<? if($this->data_import_export->layerdaten['export_privileg'][$selectindex] == 1 AND $this->data_import_export->attributes['the_geom'] != ''){ ?>
+									<option <? if($this->formvars['export_format'] == 'Shape')echo 'selected '; ?> value="Shape">Shape</option>
+									<option <? if($this->formvars['export_format'] == 'GML')echo 'selected '; ?> value="GML">GML</option>
+									<option <? if($this->formvars['export_format'] == 'KML')echo 'selected '; ?> value="KML">KML</option>
+									<option <? if($this->formvars['export_format'] == 'UKO')echo 'selected '; ?> value="UKO">UKO</option>
+								<? } ?>
+									<option <? if($this->formvars['export_format'] == 'CSV')echo 'selected '; ?> value="CSV">CSV</option>
+								</select>
+							</td>
+						</tr>
+					</table>
         </div>
 				<? }
         if($this->data_import_export->layerdaten['export_privileg'][$selectindex] == 1 AND $this->data_import_export->attributes['the_geom'] != ''){ ?>
-        <div style="padding-top:5px; padding-bottom:5px; margin-left: 15px;">
-          <?php echo $strTransformInto; ?>:<br>
-      	<select name="epsg">
-      	  <option value="">-- Auswahl --</option>
-      	  <?
-      		foreach($this->epsg_codes as $epsg_code){
-      				echo '<option ';
-      		if($this->formvars['epsg'] == $epsg_code['srid'])echo 'selected ';
-      		echo ' value="'.$epsg_code['srid'].'">'.$epsg_code['srid'].': '.$epsg_code['srtext'].'</option>';
-      	}
-      		?>
-      	</select>
+        <div id="coord_div" style="padding-top:1px; padding-bottom:5px; margin-left: 15px;<? if($this->formvars['export_format'] == 'CSV')echo 'display:none'; ?>">
+					<table>
+						<tr>
+							<td><? echo $strTransformInto; ?>:</td>
+						</tr>
+						<tr>
+							<td>
+								<select name="epsg" <? if($this->formvars['export_format'] == 'KML')echo 'style="display:none"'; ?>>
+									<option value="">-- Auswahl --</option>
+									<?
+									foreach($this->epsg_codes as $epsg_code){
+										echo '<option ';
+										if($this->formvars['epsg'] == $epsg_code['srid'])echo 'selected ';
+										echo ' value="'.$epsg_code['srid'].'">'.$epsg_code['srid'].': '.$epsg_code['srtext'].'</option>';
+									}
+								?>
+								</select>
+								<span id="wgs84" <? if($this->formvars['export_format'] != 'KML')echo 'style="display:none"'; ?>>4326: WGS84</span>
+							</td>
+						</tr>
+					</table>
         </div>
         <? } ?>
 

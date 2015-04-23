@@ -1,7 +1,7 @@
 <?php
  $strTitle="Daten-Export";
  $strFormat="Format";
- $strTransformInto="transformieren nach";
+ $strTransformInto="Ausgabe-Koordinatensystem";
  $strAttributeSelection="Attributauswahl";
  $strNameGeometryField="Geometrie";
  $strButtonGenerateShapeData="Exportieren";

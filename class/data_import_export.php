@@ -473,12 +473,13 @@ class data_import_export {
 	
 ################### Export ########################
 
-  function export($formvars, $stelle, $mapdb){
+  function export($formvars, $stelle, $user, $mapdb){
   	$this->formvars = $formvars;
     $this->layerdaten = $stelle->getqueryablePostgisLayers(NULL, 1);
     if($this->formvars['selected_layer_id']){
-      $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $stelle->pgdbhost);
-      $path = $mapdb->getPath($this->formvars['selected_layer_id']);
+			$this->layerset = $user->rolle->getLayer($this->formvars['selected_layer_id']);
+			$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $stelle->pgdbhost);
+			$path = $this->layerset[0]['pfad'];
       $privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
       $newpath = $stelle->parse_path($layerdb, $path, $privileges);
       $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
