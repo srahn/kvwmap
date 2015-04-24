@@ -21,7 +21,8 @@ else {
   # normaler Aufruf des PHP-Skriptes über Apache oder CGI  
   #$GUI->formvars=stripScript($_REQUEST);
   foreach($_REQUEST as $key => $value){
-  	if(is_string($value))$_REQUEST[$key] = addslashes($value);
+  	#if(is_string($value))$_REQUEST[$key] = addslashes($value);
+		if(is_string($value))$_REQUEST[$key] = pg_escape_string($value);
   }
   $GUI->formvars=$_REQUEST;
 }		

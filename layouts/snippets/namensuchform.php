@@ -136,7 +136,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
     <td align="right"><span class="fett"><?php echo $strName1; ?>:</span></td>
     <td>
 			<div style="width:150px;">				
-				<input name="name1" type="text" value="<?php echo $this->formvars['name1']; ?>" size="25" tabindex="1">
+				<input name="name1" type="text" value="<? echo htmlentities($this->formvars['name1']); ?>" size="25" tabindex="1">
 				<div valign="top" style="height:0px; position:relative;">
 					<div id="suggests1" style="display:none; position:absolute; left:0px; top:0px; width: 150px; vertical-align:top; overflow:hidden; border:solid grey 1px;"></div>
 				</div>

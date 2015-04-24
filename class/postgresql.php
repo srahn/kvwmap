@@ -1520,7 +1520,6 @@ class pgdatabase {
 		$sql.= "LEFT JOIN alkis.ax_buchungsstelle s2 ON s2.istbestandteilvon = g.gml_id ";
 		$sql.= "LEFT JOIN alkis.ax_flurstueck f ON f.istgebucht = s.gml_id OR f.istgebucht = ANY(s.an) OR f.istgebucht = ANY(s2.an) AND s2.gml_id = ANY(s.an) ";
 		$sql.= " WHERE 1=1 ";
-
     if($n1 != '%%')$sql.=" AND lower(nachnameoderfirma) LIKE lower('".$n1."') ";
 		if($n2 != '%%')$sql.=" AND lower(vorname) LIKE lower('".$n2."') ";
 		if($n3 != '%%')$sql.=" AND lower(geburtsname) LIKE lower('".$n3."') ";
