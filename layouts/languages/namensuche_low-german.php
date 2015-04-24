@@ -3,7 +3,7 @@
  $strName1="Naam/Firma";
  $strName2="Vörnaam";
  $strName3="Geburtsnaam";
- $strName4="geburen am/Firmentosatz";
+ $strName4="geburen am";
  $strName5="Stroat";
  $strName6="Husnummer";
  $strName7="PLZ";

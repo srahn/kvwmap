@@ -2,6 +2,7 @@
   include(LAYOUTPATH.'languages/namensuche_'.$this->user->rolle->language.'.php');
  ?>
 
+<script type="text/javascript" src="funktionen/calendar.js"></script>
 <script type="text/javascript">
 <!--
 
@@ -165,7 +166,10 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   <tr>
     <td height="28" align="right"><span class="fett"><?php echo $strName4; ?>:</span>
       </td>
-    <td><input name="name4" type="text" value="<?php echo $this->formvars['name4']; ?>" size="25"  tabindex="4"></td>
+    <td>
+			<input name="name4" id="name4" onchange="" type="text" value="<?php echo $this->formvars['name4']; ?>" size="25"  tabindex="4">
+			&nbsp;<a href="javascript:;" onclick="new CalendarJS().init('name4');"><img title="TT.MM.JJJJ" src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar" style="bottom:100px"><input type="hidden" id="calendar_name4"></div>
+		</td>
   </tr>
 	<tr>
     <td align="right"><span class="fett"><?php echo $strName5; ?>:</span>

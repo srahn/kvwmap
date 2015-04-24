@@ -1524,7 +1524,7 @@ class pgdatabase {
     if($n1 != '%%')$sql.=" AND lower(nachnameoderfirma) LIKE lower('".$n1."') ";
 		if($n2 != '%%')$sql.=" AND lower(vorname) LIKE lower('".$n2."') ";
 		if($n3 != '%%')$sql.=" AND lower(geburtsname) LIKE lower('".$n3."') ";
-		if($n4 != '%%')$sql.=" AND lower(geburtsdatum) LIKE lower('".$n4."') ";
+		if($n4 != '%%')$sql.=" AND geburtsdatum = '".$n4."' ";
 		if($n5 != '%%')$sql.=" AND lower(strasse) LIKE lower('".$n5."') ";
 		if($n6 != '%%')$sql.=" AND lower(hausnummer) LIKE lower('".$n6."') ";
 		if($n7 != '%%')$sql.=" AND lower(postleitzahlpostzustellung) LIKE lower('".$n7."') ";
