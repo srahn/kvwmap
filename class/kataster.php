@@ -1551,7 +1551,7 @@ class flurstueck {
     if ($this->FlurstKennz=="") { return 0; }
     $this->debug->write("<br>kataster.php->flurstueck->getBuchungen Abfrage der Buchungen zum Flurstück auf dem Grundbuch<br>",4);
     #$ret=$this->database->getBuchungen($this->FlurstKennz);
-    $ret=$this->database->getBuchungenFromGrundbuch($this->FlurstKennz,$Bezirk,$Blatt,$hist_alb);
+    $ret=$this->database->getBuchungenFromGrundbuch($this->FlurstKennz,$Bezirk,$Blatt,$hist_alb, $this->fiktiv);
     return $ret[1];
   }
 
@@ -1559,6 +1559,7 @@ class flurstueck {
     if ($this->FlurstKennz=="") { return 0; }
     $this->debug->write("<br>kataster.php->flurstueck->getGrundbuecher Abfrage der Angaben zum Grundbuch auf dem das Flurstück gebucht ist<br>",4);
     $ret=$this->database->getGrundbuecher($this->FlurstKennz, $this->hist_alb);
+		if($ret['fiktiv'])$this->fiktiv = true;
     return $ret[1];
   }
 
