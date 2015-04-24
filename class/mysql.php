@@ -146,9 +146,9 @@ class database {
   }
 
   function getRow($select,$from,$where) {
-    $select = str_replace("\'x\'","'x'",$select);
-    $select = str_replace("\' \'","' '",$select);
-    $select = str_replace("\',\'","','",$select);
+    #$select = str_replace("\'x\'","'x'",$select);
+    #$select = str_replace("\' \'","' '",$select);
+    #$select = str_replace("\',\'","','",$select);
 		$sql = "SELECT ".$select;
     $sql.= " FROM ".$from;
     $sql.= " WHERE ".$where;
