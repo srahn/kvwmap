@@ -997,12 +997,11 @@ class pgdatabase {
   } 
 	
   function getFlurstueckeByGrundbuchblatt($bezirk, $blatt) {
-    $sql ="SELECT DISTINCT f.flurstueckskennzeichen as flurstkennz ";
+    $sql ="set enable_seqscan = off;SELECT DISTINCT f.flurstueckskennzeichen as flurstkennz ";
 		$sql.="FROM alkis.ax_buchungsblattbezirk b ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON g.land = b.land AND g.bezirk = b.bezirk ";
 		$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON s.istbestandteilvon = g.gml_id ";
-		$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON s2.istbestandteilvon = g.gml_id ";
-		$sql.="LEFT JOIN alkis.ax_flurstueck f ON f.istgebucht = s.gml_id OR f.istgebucht = ANY(s.an) OR f.istgebucht = ANY(s2.an) AND s2.gml_id = ANY(s.an) ";
+		$sql.="LEFT JOIN alkis.ax_flurstueck f ON f.istgebucht = s.gml_id OR f.gml_id = ANY(s.verweistauf) ";
     $sql.="WHERE f.flurstueckskennzeichen IS NOT NULL AND b.schluesselgesamt = ".$bezirk." AND g.buchungsblattnummermitbuchstabenerweiterung = '".$blatt."'";
 		$sql.= $this->build_temporal_filter(array('b', 'g', 's', 'f'));
 		#echo $sql;
