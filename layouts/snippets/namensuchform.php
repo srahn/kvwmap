@@ -48,7 +48,8 @@
 	}
 
 	function save(){
-		if(!checkDate(document.getElementsByName('name4')[0].value)){
+		gdatum = document.getElementsByName('name4')[0].value;
+		if(gdatum != '' && !checkDate(gdatum)){
   		alert('Das Geburtsdatum hat nicht das Format TT.MM.JJJJ.');
   		return;
   	}
