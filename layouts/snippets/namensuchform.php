@@ -1,5 +1,6 @@
 <?php
   include(LAYOUTPATH.'languages/namensuche_'.$this->user->rolle->language.'.php');
+	include('funktionen/input_check_functions.php');
  ?>
 
 <script type="text/javascript" src="funktionen/calendar.js"></script>
@@ -121,33 +122,6 @@
 		document.GUI.submit();
 	}
 		
-	function checknumbers(input){
-		if(input.value.search(/[^-\d]/g) != -1 || input.value.search(/.-/g) != -1){
-			alert('Es sind nur numerische Angaben erlaubt!');
-			var val = input.value.replace(/[^-\d]/g, '');
-			val = val.replace(/-/g, '');
-			input.value = val;
-		}
-	}
-	
-	checkDate = function(string){
-    var split = string.split(".");
-    var day = parseInt(split[0], 10);
-    var month = parseInt(split[1], 10);
-    var year = parseInt(split[2], 10);
-    var check = new Date(year, month-1, day);
-    var day2 = check.getDate();
-    var year2 = check.getFullYear();
-    var month2 = check.getMonth()+1;
-    if(year2 == year && month == month2 && day == day2){
-    	return true;
-    }
-    else{
-    	return false;
-    }
-	}
-
-
 //-->
 </script>
 
@@ -237,7 +211,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
     <td colspan="2"><em><?php echo $strHintWildcard; ?>.</em></td>
   </tr>
   <tr>
-    <td colspan="1"><span class="fett"><?php echo $strShowHits; ?>:</span><input name="anzahl" onkeyup="checknumbers(this);" type="text" value="<?php echo $this->formvars['anzahl']; ?>" size="2" tabindex="5"></td>
+    <td colspan="1"><span class="fett"><?php echo $strShowHits; ?>:</span><input name="anzahl" onkeyup="checknumbers(this, 'int2', '', '');" type="text" value="<?php echo $this->formvars['anzahl']; ?>" size="2" tabindex="5"></td>
     <td colspan="1"><span class="fett"><?php echo $strShowWithFst; ?>:</span><input name="withflurst" type="checkbox" <? if($this->formvars['withflurst'] == 'on'){echo 'checked';} ?>></td>
   </tr>
   <tr>
