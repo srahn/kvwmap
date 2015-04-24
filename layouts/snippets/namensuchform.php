@@ -47,6 +47,10 @@
 	}
 
 	function save(){
+		if(!checkDate(document.getElementsByName('name4')[0].value)){
+  		alert('Das Geburtsdatum hat nicht das Format TT.MM.JJJJ.');
+  		return;
+  	}
 		document.GUI.offset.value = 0;
 		document.GUI.go.value = 'Namen_Auswaehlen_Suchen';
 		document.GUI.submit();
@@ -124,6 +128,23 @@
 			val = val.replace(/-/g, '');
 			input.value = val;
 		}
+	}
+	
+	checkDate = function(string){
+    var split = string.split(".");
+    var day = parseInt(split[0], 10);
+    var month = parseInt(split[1], 10);
+    var year = parseInt(split[2], 10);
+    var check = new Date(year, month-1, day);
+    var day2 = check.getDate();
+    var year2 = check.getFullYear();
+    var month2 = check.getMonth()+1;
+    if(year2 == year && month == month2 && day == day2){
+    	return true;
+    }
+    else{
+    	return false;
+    }
 	}
 
 
