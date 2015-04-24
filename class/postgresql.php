@@ -796,7 +796,8 @@ class pgdatabase {
     $sql.="SET enable_seqscan = OFF;SELECT distinct (g.land::text||lpad(g.bezirk::text, 4, '0'))::integer as bezirk, g.buchungsblattnummermitbuchstabenerweiterung AS blatt ";
 		if($hist_alb) $sql.="FROM alkis.ax_historischesflurstueckohneraumbezug f ";
 		else $sql.="FROM alkis.ax_flurstueck f ";  
-		$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR ARRAY[f.gml_id] <@ s.verweistauf ";
+		$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON ARRAY[f.istgebucht] <@ s2.an ";
+		$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR ARRAY[f.istgebucht] <@ s.an OR ARRAY[f.istgebucht] <@ s2.an AND ARRAY[s2.gml_id] <@ s.an ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
 		$sql.="WHERE (g.blattart = 1000 OR g.blattart = 2000 OR g.blattart = 3000) ";
 		$sql.="AND f.flurstueckskennzeichen = '".$FlurstKennz."' ";
@@ -820,7 +821,10 @@ class pgdatabase {
 			if($hist_alb) $sql.="FROM alkis.ax_historischesflurstueckohneraumbezug f ";
 			else $sql.="FROM alkis.ax_flurstueck f ";  
 			$sql.="LEFT JOIN alkis.ax_gemarkung gem ON f.land = gem.land AND f.gemarkungsnummer = gem.gemarkungsnummer ";
-			$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR ARRAY[f.gml_id] <@ s.verweistauf ";
+			#$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR ARRAY[f.gml_id] <@ s.verweistauf ";
+			$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON ARRAY[f.istgebucht] <@ s2.an ";
+			$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR ARRAY[f.istgebucht] <@ s.an OR ARRAY[f.istgebucht] <@ s2.an AND ARRAY[s2.gml_id] <@ s.an ";
+			
 			$sql.="LEFT JOIN alkis.ax_buchungsstelle_buchungsart art ON s.buchungsart = art.wert ";
 			$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
 			$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
