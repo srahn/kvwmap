@@ -250,8 +250,9 @@ class jagdkataster {
 			# --- Eigentümer ---
 			$flst = new flurstueck($rs['flurstkennz'], $this->database);
 			$flst->Grundbuecher=$flst->getGrundbuecher();
-			for($g = 0; $g < count($flst->Grundbuecher); $g++){
-      	$flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
+			#for($g = 0; $g < count($flst->Grundbuecher); $g++){
+      	#$flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
+				$flst->Buchungen=$flst->getBuchungen(NULL,NULL,0);
       	for($b = 0; $b < count($flst->Buchungen); $b++){
 	        $Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
 	        $anzEigentuemer=count($Eigentuemerliste);
@@ -264,7 +265,7 @@ class jagdkataster {
 					$rs['eigentuemer'][] = $flst->Grundbuecher[$g]['zusatz_eigentuemer'];						
 					$rs['eigentuemer_nr'][] = ' - ';
 				}
-			}
+			#}
 			# --- Eigentümer ---
 			$flurstuecke[] = $rs;
 		}
