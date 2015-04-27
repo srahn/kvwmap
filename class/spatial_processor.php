@@ -142,8 +142,8 @@ class spatial_processor {
   }
   
   function process_query($formvars){
+		$formvars['fromwhere'] = str_replace("''", "'", $formvars['fromwhere']);
 		$formvars['fromwhere'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $formvars['fromwhere']);	
-  	$formvars['fromwhere'] = stripslashes($formvars['fromwhere']);
 		if($formvars['path2'] != ''){
       $this->debug->write("path2:".$formvars['path2']."\n",4);
 			if($formvars['geotype'] == 'line'){
