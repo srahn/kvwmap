@@ -620,7 +620,7 @@ class data_import_export {
     }
 		# Where-Klausel aus Sachdatenabfrage-SQL anhängen
   	if($this->formvars['sql_'.$this->formvars['selected_layer_id']]){
-  		$where = substr(stripslashes($this->formvars['sql_'.$this->formvars['selected_layer_id']]), strrpos(strtolower(stripslashes($this->formvars['sql_'.$this->formvars['selected_layer_id']])), 'where')+5);
+  		$where = substr(strip_pg_escape_string($this->formvars['sql_'.$this->formvars['selected_layer_id']]), strrpos(strtolower(strip_pg_escape_string($this->formvars['sql_'.$this->formvars['selected_layer_id']])), 'where')+5);
   		$orderbyposition = strpos(strtolower($where), 'order by');
   		if($orderbyposition)$where = substr($where, 0, $orderbyposition);
 	    if(strpos($where, 'query.') !== false){

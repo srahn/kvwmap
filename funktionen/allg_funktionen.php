@@ -17,6 +17,13 @@ function MapserverErrorHandler($errno, $errstr, $errfile, $errline){
 	return true;
 }
 
+function strip_pg_escape_string($string){
+	$string = str_replace("''", "'", $string);
+	$string = str_replace(",' ", ",'' ", $string);
+	$string = str_replace(" ' ", " '' ", $string);
+	return $string;
+}
+
 function InchesPerUnit($unit, $center_y){
 	if($unit == MS_METERS){
 		return 39.3701;

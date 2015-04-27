@@ -1901,7 +1901,7 @@ class GUI {
   function output() {
 	  foreach($this->formvars as $key => $value){
 			#if(is_string($value))$this->formvars[$key] = stripslashes($value);
-			if(is_string($value))$this->formvars[$key] = str_replace(" ' ", " '' ", str_replace("''", "'", $value));
+			if(is_string($value))$this->formvars[$key] = strip_pg_escape_string($value);
 	  }
     # bisher gibt es folgenden verschiedenen Dokumente die angezeigt werden können
 		if ($this->formvars['mime_type'] != '') $this->mime_type = $this->formvars['mime_type'];
@@ -2402,7 +2402,7 @@ class GUI {
   xmlns="http://www.w3.org/2000/svg" version="1.1"
   xmlns:xlink="http://www.w3.org/1999/xlink">
 <title> kvwmap </title><desc> kvwmap - WebGIS application - kvwmap.sourceforge.net </desc>';
-		$this->formvars['svg_string'] = str_replace(IMAGEURL, IMAGEPATH, stripslashes($this->formvars['svg_string'])).'</svg>';
+		$this->formvars['svg_string'] = str_replace(IMAGEURL, IMAGEPATH, strip_pg_escape_string($this->formvars['svg_string'])).'</svg>';
 		$svg.= str_replace('points=""', 'points="-1000,-1000 -2000,-2000 -3000,-3000 -1000,-1000"', $this->formvars['svg_string']); 
 		fputs($fpsvg, $svg);
   	fclose($fpsvg);
@@ -6131,7 +6131,7 @@ class GUI {
 			if($this->formvars['connectiontype'] == 6 AND $this->formvars['pfad'] != ''){
 				#---------- Speichern der Layerattribute -------------------
 				$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-				$path = stripslashes($this->formvars['pfad']);
+				$path = strip_pg_escape_string($this->formvars['pfad']);
 				$attributes = $mapDB->load_attributes($layerdb, $path);
 				$mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes, $this->formvars['maintable']);
 				$mapDB->delete_old_attributes($this->formvars['selected_layer_id'], $attributes);
@@ -6178,8 +6178,8 @@ class GUI {
 
   function LayerAendern(){
 		global $supportedLanguages;
-  	$this->formvars['pfad'] = stripslashes($this->formvars['pfad']);
-  	$this->formvars['Data'] = stripslashes($this->formvars['Data']);
+  	$this->formvars['pfad'] = strip_pg_escape_string($this->formvars['pfad']);
+  	$this->formvars['Data'] = strip_pg_escape_string($this->formvars['Data']);
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $mapDB->updateLayer($this->formvars);
     $old_layer_id = $this->formvars['selected_layer_id'];
@@ -7139,7 +7139,7 @@ class GUI {
 	          if($table['type'][$i] == 'Checkbox' AND $this->formvars[$table['formfield'][$i]] == ''){                       # Typ "Checkbox"
 	          	$this->formvars[$table['formfield'][$i]] = 'f';
 	          }
-            $sql.= "'".pg_escape_string(stripslashes($this->formvars[$table['formfield'][$i]]))."', ";      # Typ "normal"
+            $sql.= "'".$this->formvars[$table['formfield'][$i]]."', ";      # Typ "normal"
           }
           elseif($table['type'][$i] == 'Geometrie'){                    # Typ "Geometrie"
             if($this->formvars['geomtype'] == 'POINT'){
@@ -10375,7 +10375,7 @@ class GUI {
 									$eintrag = 'NULL';
                 }
                 else{
-									$eintrag = pg_escape_string(stripslashes($this->formvars[$form_fields[$i]]));
+									$eintrag = $this->formvars[$form_fields[$i]];
                 }
               }
             } # end of default case
@@ -13937,11 +13937,6 @@ class db_mapObj{
     # Erzeugt einen neuen Layer (entweder aus formvars oder aus einem Layerobjekt)
     if(is_array($layerdata)){
       $formvars = $layerdata;   # formvars wurden übergeben
-
-      $formvars['pfad'] = stripslashes($formvars['pfad']);
-      $formvars['Data'] = stripslashes($formvars['Data']);
-      $formvars['pfad'] = str_replace ( "'", "''", $formvars['pfad']);
-      $formvars['Data'] = str_replace ( "'", "''", $formvars['Data']);
 
       $sql = "INSERT INTO layer (";
       if($formvars['id'] != ''){
