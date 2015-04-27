@@ -793,7 +793,7 @@ class pgdatabase {
   
   function getGrundbuecher($FlurstKennz, $hist_alb = false, $fiktiv = false) {
 		if(rolle::$hist_timestamp != '')$sql = 'SET enable_mergejoin = OFF;';
-    $sql.="SET enable_seqscan = OFF;SELECT distinct (g.land::text||lpad(g.bezirk::text, 4, '0'))::integer as bezirk, g.buchungsblattnummermitbuchstabenerweiterung AS blatt ";
+    $sql.="SET enable_seqscan = OFF;SELECT distinct (g.land::text||lpad(g.bezirk::text, 4, '0'))::integer as bezirk, g.buchungsblattnummermitbuchstabenerweiterung AS blatt, g.blattart ";
 		if($hist_alb) $sql.="FROM alkis.ax_historischesflurstueckohneraumbezug f ";
 		else $sql.="FROM alkis.ax_flurstueck f ";
 		if($fiktiv){
@@ -814,7 +814,7 @@ class pgdatabase {
       $Grundbuch[]=$rs;
     }
     $ret[1]=$Grundbuch;
-		if(substr($Grundbuch[0]['blatt'], 0, 1) == 'F'){			# wenn es ein fiktives Blatt ist, die untergeordneten Buchungsstellen abfragen
+		if($Grundbuch[0]['blattart'] == 5000){			# wenn es ein fiktives Blatt ist, die untergeordneten Buchungsstellen abfragen
 			$ret = $this->getGrundbuecher($FlurstKennz, $hist_alb, true);
 			$ret['fiktiv'] = true;
 		}
