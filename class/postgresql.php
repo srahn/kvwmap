@@ -797,7 +797,6 @@ class pgdatabase {
 		if($hist_alb) $sql.="FROM alkis.ax_historischesflurstueckohneraumbezug f ";
 		else $sql.="FROM alkis.ax_flurstueck f ";
 		if($fiktiv){
-			#$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON ARRAY[f.istgebucht] <@ s2.an ";
 			$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON ARRAY[f.istgebucht] <@ s.an ";
 		}
 		else{
@@ -831,7 +830,6 @@ class pgdatabase {
 			else $sql.="FROM alkis.ax_flurstueck f ";  
 			$sql.="LEFT JOIN alkis.ax_gemarkung gem ON f.land = gem.land AND f.gemarkungsnummer = gem.gemarkungsnummer ";
 			if($fiktiv){
-				#$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON ARRAY[f.istgebucht] <@ s2.an ";
 				$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON ARRAY[f.istgebucht] <@ s.an ";
 			}
 			else $sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR ARRAY[f.gml_id] <@ s.verweistauf ";
@@ -848,8 +846,7 @@ class pgdatabase {
 			$sql.="LEFT JOIN alkis.ax_namensnummer n ON n.istbestandteilvon = g.gml_id AND n.beschriebderrechtsgemeinschaft IS NOT NULL ";
 			$sql.= $this->build_temporal_filter(array('n'));
 			$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON s.istbestandteilvon = g.gml_id ";
-			$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON s2.istbestandteilvon = g.gml_id ";
-			$sql.="LEFT JOIN alkis.ax_flurstueck f ON f.istgebucht = s.gml_id OR f.gml_id = ANY(s.verweistauf) OR f.istgebucht = ANY(s.an) OR f.istgebucht = ANY(s2.an) AND s2.gml_id = ANY(s.an) ";
+			$sql.="LEFT JOIN alkis.ax_flurstueck f ON f.istgebucht = s.gml_id OR f.gml_id = ANY(s.verweistauf) OR f.istgebucht = ANY(s.an) ";
 			$sql.="LEFT JOIN alkis.ax_gemarkung gem ON f.land = gem.land AND f.gemarkungsnummer = gem.gemarkungsnummer ";
 			$sql.="LEFT JOIN alkis.ax_buchungsstelle_buchungsart art ON s.buchungsart = art.wert ";		
 		}
@@ -1521,7 +1518,7 @@ class pgdatabase {
 		$caseSensitive = $formvars['caseSensitive'];
 		$order = $formvars['order'];
 			
-    $sql = "set enable_seqscan = off;set enable_mergejoin = off;SELECT distinct n.laufendenummernachdin1421 AS lfd_nr_name, p.nachnameoderfirma, p.vorname, p.namensbestandteil, p.akademischergrad, p.geburtsname, p.geburtsdatum, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, anschrift.ortsteil, g.buchungsblattnummermitbuchstabenerweiterung as blatt, b.schluesselgesamt as bezirk ";
+    $sql = "set enable_seqscan = off;set enable_mergejoin = off;set enable_hashjoin = off;SELECT distinct n.laufendenummernachdin1421 AS lfd_nr_name, p.nachnameoderfirma, p.vorname, p.namensbestandteil, p.akademischergrad, p.geburtsname, p.geburtsdatum, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, anschrift.ortsteil, g.buchungsblattnummermitbuchstabenerweiterung as blatt, b.schluesselgesamt as bezirk ";
 		$sql.= "FROM alkis.ax_person p ";
 		$sql.= "LEFT JOIN alkis.ax_anschrift anschrift ON anschrift.gml_id = ANY(p.hat) ";
 		$sql.= "LEFT JOIN alkis.ax_namensnummer n ON n.benennt = p.gml_id ";
@@ -1529,8 +1526,7 @@ class pgdatabase {
 		$sql.= "LEFT JOIN alkis.ax_buchungsblatt g ON n.istbestandteilvon = g.gml_id ";
 		$sql.= "LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
 		$sql.= "LEFT JOIN alkis.ax_buchungsstelle s ON s.istbestandteilvon = g.gml_id ";
-		$sql.= "LEFT JOIN alkis.ax_buchungsstelle s2 ON s2.istbestandteilvon = g.gml_id ";
-		$sql.= "LEFT JOIN alkis.ax_flurstueck f ON f.istgebucht = s.gml_id OR f.istgebucht = ANY(s.an) OR f.istgebucht = ANY(s2.an) AND s2.gml_id = ANY(s.an) ";
+		$sql.= "LEFT JOIN alkis.ax_flurstueck f ON f.istgebucht = s.gml_id OR f.gml_id = ANY(s.verweistauf) OR f.istgebucht = ANY(s.an) ";
 		$sql.= " WHERE 1=1 ";
     if($n1 != '%%')$sql.=" AND lower(nachnameoderfirma) LIKE lower('".$n1."') ";
 		if($n2 != '%%')$sql.=" AND lower(vorname) LIKE lower('".$n2."') ";
