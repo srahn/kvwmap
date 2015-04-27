@@ -599,8 +599,9 @@ backto = function(go){
               </tr>
             <? 
 					$flst->Grundbuecher=$flst->getGrundbuecher();
-					for ($g=0;$g<count($flst->Grundbuecher);$g++) {
-            $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],$flst->hist_alb);
+					#for ($g=0;$g<count($flst->Grundbuecher);$g++) {
+            #$flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],$flst->hist_alb);
+						$flst->Buchungen=$flst->getBuchungen(NULL,NULL,$flst->hist_alb);
             for ($b=0;$b<count($flst->Buchungen);$b++) {
                 if($privileg_['bestandsnr']){
                   $BestandStr ='<a href="index.php?go=Grundbuchblatt_Auswaehlen_Suchen&selBlatt='.$flst->Buchungen[$b]['bezirk'].'-'.$flst->Buchungen[$b]['blatt'].'">'.$flst->Buchungen[$b]['bezirk'].'-'.ltrim($flst->Buchungen[$b]['blatt'], '0').'</a>';
@@ -689,7 +690,7 @@ backto = function(go){
       						echo '<tr><td></td><td colspan="2">'.$flst->Buchungen[$b]['zusatz_eigentuemer'].'</td></tr>';
       			 			} ?>
               <? }
-          } ?>
+          #} ?>
           </table>
         </td>
         </tr>
