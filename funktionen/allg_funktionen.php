@@ -1192,7 +1192,7 @@ function url_get_contents($url, $username = NULL, $password = NULL) {
 	try {
 		$ctx['http']['timeout'] = 20;
 		if($username)$ctx['http']['header'] = "Authorization: Basic ".base64_encode($username.':'.$password);
-		if(defined('HTTP_PROXY')){
+		if(defined('HTTP_PROXY') AND $hostname != 'localhost'){
 			$ctx['http']['proxy'] = HTTP_PROXY;
 			$ctx['http']['request_fulluri'] = true;
 			$ctx['ssl']['SNI_server_name'] = $hostname;
