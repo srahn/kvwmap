@@ -291,10 +291,11 @@ class GUI {
 							if($layer['showclasses'] != 0){
 								if($layer['connectiontype'] == 7){      # WMS   
 									$layersection = substr($layer['connection'], strpos(strtolower($layer['connection']), 'layers')+7);
-									$layersection = substr($layersection, 0, strpos($layersection, '&'));
+									$pos = strpos($layersection, '&');
+									if($pos !== false)$layersection = substr($layersection, 0, $pos);									
 									$layers = explode(',', $layersection);
 									for($l = 0; $l < count($layers); $l++){
-									$legend .=  '<div style="display:inline" id="lg'.$j.'_'.$l.'"><br><img src="'.$layer['connection'].'&layer='.$layers[$l].'&service=WMS&request=getlegendgraphic" onerror="ImageLoadFailed(\'lg'.$j.'_'.$l.'\')"></div>';
+										$legend .=  '<div style="display:inline" id="lg'.$j.'_'.$l.'"><br><img src="'.$layer['connection'].'&layer='.$layers[$l].'&service=WMS&request=getlegendgraphic" onerror="ImageLoadFailed(\'lg'.$j.'_'.$l.'\')"></div>';
 									}
 								}
 								else{
@@ -5999,7 +6000,11 @@ class GUI {
 			$this->formvars['Datentyp'] = MS_LAYER_RASTER;
 			$this->formvars['connectiontype'] = MS_WMS;
 			$this->formvars['transparency'] = 100;
-			$this->formvars['epsg_code'] = str_replace('epsg:', '', strtolower($this->formvars['srs'][0]));
+			
+			$wms_epsg_codes = array_flip(explode(' ', str_replace('epsg:', '', strtolower($this->formvars['srs'][0]))));
+			if($wms_epsg_codes[$this->user->rolle->epsg_code] !== '')$this->formvars['epsg_code'] = $this->user->rolle->epsg_code;
+			else $this->formvars['epsg_code'] = 4326;
+			
 			if(strpos($this->formvars['wms_url'], '?') !== false)$this->formvars['wms_url'] .= '&';
 			else $this->formvars['wms_url'] .= '?';
 			$this->formvars['connection'] = $this->formvars['wms_url'].'VERSION=1.1.0&FORMAT=image/png&LAYERS='.implode(',', $this->formvars['layers']);
