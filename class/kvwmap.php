@@ -2009,7 +2009,7 @@ class GUI {
     
   function checkCaseAllowed($case){
   	if(!$this->Stelle->isMenueAllowed($case) AND !$this->Stelle->isFunctionAllowed($case)) {
-      $this->Fehlermeldung=$this->TaskChangeWarning;
+      $this->Fehlermeldung=$this->TaskChangeWarning . '<br>(' . $case . ')';
       $this->rollenwahl($this->Stelle->id);
       $this->output();
       exit;
