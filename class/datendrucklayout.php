@@ -55,7 +55,7 @@ class ddl {
     	$this->pdf->selectFont($this->layout['font_user']);			
 			$x = $this->layout['userposx'];
 			$y = $this->layout['userposy'] - $offsety;
-			$this->putText(iconv("UTF-8", "CP1252", 'Stelle: '.$this->Stelle->Bezeichnung.', Nutzer: '.$this->user->Name), $this->layout['usersize'], NULL, $x, $y, $offsetx);
+			$this->putText('Stelle: '.$this->Stelle->Bezeichnung.', Nutzer: '.$this->user->Name, $this->layout['usersize'], NULL, $x, $y, $offsetx);
     }
   }
 	
@@ -90,7 +90,7 @@ class ddl {
 							$y = $y - $this->yoffset_onpage-22;
 						}
 					}
-					$text = iconv("UTF-8", "CP1252", $this->substituteFreitext($this->layout['texts'][$j]['text'], $i, $pagenumber, $pagecount));
+					$text = $this->substituteFreitext($this->layout['texts'][$j]['text'], $i, $pagenumber, $pagecount);
 					$this->putText($text, $this->layout['texts'][$j]['size'], NULL, $x, $y, $offsetx);
 					# falls in eine alte Seite geschrieben wurde, zurückkehren (aber nicht bei everypage-Freitexten)
 					if($type != 'everypage')$this->pdf->closeObject();
@@ -322,7 +322,7 @@ class ddl {
 		$fh = $this->pdf->getFontHeight($fontsize);
 		$y = $y + $fh;
 		$this->pdf->ezSetY($y);		
-		return $this->pdf->ezText($text, $fontsize, $options);
+		return $this->pdf->ezText(iconv("UTF-8", "CP1252", $text), $fontsize, $options);
 	}
   
   function substituteFreitext($text, $i, $pagenumber, $pagecount){
@@ -377,7 +377,7 @@ class ddl {
 				$output = $this->result[$i][$this->attributes['name'][$j]];
 			}break;
 		}
-		return iconv("UTF-8", "CP1252", $output);		# besser als utf8_decode()
+		return $output;
   }
   
   function createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $selected_layer_id, $layout, $oids, $result, $stelle, $user, $preview = NULL){
