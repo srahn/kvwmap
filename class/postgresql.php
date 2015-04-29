@@ -1360,7 +1360,7 @@ class pgdatabase {
 		$sql.=" FROM (SELECT round(st_area(st_intersection(n.wkb_geometry, st_intersection(be.wkb_geometry,f.wkb_geometry)))::numeric) AS flaeche, round(st_area(f.wkb_geometry)::numeric) as flstflaeche, n.bodenzahlodergruenlandgrundzahl, n.ackerzahlodergruenlandzahl as wert, n.kulturart as objart, n.kulturart, n.bodenart, n.entstehungsartoderklimastufewasserverhaeltnisse, n.zustandsstufeoderbodenstufe, n.sonstigeangaben";
     $sql.=" FROM alkis.ax_flurstueck f, alkis.ax_bewertung be, alkis.ax_bodenschaetzung n ";		
     $sql.=" WHERE st_intersects(n.wkb_geometry,f.wkb_geometry) = true AND st_intersects(be.wkb_geometry,f.wkb_geometry) = true AND st_area(st_intersection(n.wkb_geometry, st_intersection(be.wkb_geometry,f.wkb_geometry))) > 0.05 AND f.flurstueckskennzeichen='".$FlurstKennz."'";
-		$sql.= $this->build_temporal_filter(array('f', 'n'));
+		$sql.= $this->build_temporal_filter(array('f', 'be', 'n'));
 		$sql.=" ) as n";
 		$sql.=" LEFT JOIN alkis.ax_bodenschaetzung_kulturart k ON k.wert=n.kulturart";
 		$sql.=" LEFT JOIN alkis.ax_bodenschaetzung_bodenart b ON b.wert=n.bodenart";
