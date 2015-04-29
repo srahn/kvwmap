@@ -1376,7 +1376,7 @@ class grundbuch {
   }
 
   function getBuchungen($flurstkennz,$bvnr,$erbaurechtshinweise,$keine_historischen) {
-    $ret=$this->database->getBuchungenFromGrundbuch('',$this->Bezirk,$this->Blatt,$keine_historischen);
+    $ret=$this->database->getBuchungenFromGrundbuch('',$this->Bezirk,$this->Blatt);
     if ($ret[0]) {
       $ret[1]='Fehler bei der Datenbank abfrage<br>'.$ret[1];
     }
