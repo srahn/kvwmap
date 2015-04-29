@@ -13258,17 +13258,17 @@ class db_mapObj{
     if(MYSQLVERSION > 410){
       $sql = 'INSERT INTO u_attributfilter2used_layer SET';
       $sql .= ' attributname = "'.$formvars['attributname'].'",';
-      $sql .= ' attributvalue = "'.$formvars['attributvalue'].'",';
+      $sql .= " attributvalue = '".$formvars['attributvalue']."',";
       $sql .= ' operator = "'.$formvars['operator'].'",';
       $sql .= ' type = "'.$formvars['type'].'",';
       $sql .= ' Stelle_ID = '.$formvars['stelle'].',';
       $sql .= ' Layer_ID = '.$formvars['layer'];
-      $sql .= ' ON DUPLICATE KEY UPDATE  attributvalue = "'.$formvars['attributvalue'].'", operator = "'.$formvars['operator'].'"';
+      $sql .= " ON DUPLICATE KEY UPDATE  attributvalue = '".$formvars['attributvalue']."', operator = '".$formvars['operator']."'";
     }
     else{
       $sql = 'REPLACE INTO u_attributfilter2used_layer SET';
       $sql .= ' attributname = "'.$formvars['attributname'].'",';
-      $sql .= ' attributvalue = "'.$formvars['attributvalue'].'",';
+      $sql .= " attributvalue = '".$formvars['attributvalue']."',";
       $sql .= ' operator = "'.$formvars['operator'].'",';
       $sql .= ' type = "'.$formvars['type'].'",';
       $sql .= ' Stelle_ID = '.$formvars['stelle'].',';
