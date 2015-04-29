@@ -14095,7 +14095,7 @@ class db_mapObj{
       $sql.= 'layer_id = '.$formvars['selected_layer_id'].', ';
       $sql.= 'name = "'.$attributes['name'][$i].'", ';
       $sql.= 'form_element_type = "'.$formvars['form_element_'.$attributes['name'][$i]].'", ';
-      $sql.= 'options = "'.$formvars['options_'.$attributes['name'][$i]].'", ';
+      $sql.= "options = '".$formvars['options_'.$attributes['name'][$i]]."', ";
       $sql.= 'tooltip = "'.$formvars['tooltip_'.$attributes['name'][$i]].'", ';
       $sql.= '`group` = "'.$formvars['group_'.$attributes['name'][$i]].'", ';
 			if($formvars['raster_visibility_'.$attributes['name'][$i]] == '')$formvars['raster_visibility_'.$attributes['name'][$i]] = 'NULL';
@@ -14110,7 +14110,7 @@ class db_mapObj{
 			}
 			if($formvars['quicksearch_'.$attributes['name'][$i]] == '')$formvars['quicksearch_'.$attributes['name'][$i]] = 'NULL';
 			$sql.= 'quicksearch = '.$formvars['quicksearch_'.$attributes['name'][$i]];
-      $sql.= ' ON DUPLICATE KEY UPDATE name = "'.$attributes['name'][$i].'", form_element_type = "'.$formvars['form_element_'.$attributes['name'][$i]].'", options = "'.$formvars['options_'.$attributes['name'][$i]].'", tooltip = "'.$formvars['tooltip_'.$attributes['name'][$i]].'", `group` = "'.$formvars['group_'.$attributes['name'][$i]].'", alias = "'.$formvars['alias_'.$attributes['name'][$i]].'", ';
+      $sql.= " ON DUPLICATE KEY UPDATE name = '".$attributes['name'][$i]."', form_element_type = '".$formvars['form_element_'.$attributes['name'][$i]]."', options = '".$formvars['options_'.$attributes['name'][$i]]."', tooltip = '".$formvars['tooltip_'.$attributes['name'][$i]]."', `group` = '".$formvars['group_'.$attributes['name'][$i]]."', alias = '".$formvars['alias_'.$attributes['name'][$i]]."', ";
 			foreach($supportedLanguages as $language){
 				if($language != 'german'){
 					$sql.= '`alias_'.$language.'` = "'.$formvars['alias_'.$language.'_'.$attributes['name'][$i]].'", ';
