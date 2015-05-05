@@ -1297,7 +1297,7 @@
   function drawMap() {
 		if($this->formvars['go'] != 'navMap_ajax')set_error_handler("MapserverErrorHandler");		// ist in allg_funktionen.php definiert
     if($this->main == 'map.php' AND MINSCALE != '' AND $this->map_factor == '' AND $this->map_scaledenom < MINSCALE){
-      $this->scaleMap(MINSCALE);
+      $this->scaleMap(MINSCALE);			$this->saveMap('');
     }    
     $this->image_map = $this->map->draw() OR die($this->layer_error_handling());    
     $filename = $this->user->id.'_'.rand(0, 1000000).'.'.$this->map->outputformat->extension;
