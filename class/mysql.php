@@ -246,37 +246,6 @@ class database {
 	}
 
  
-##################################################
-# Funktionen der Anwendung kvwmap
-#################################################
-
-  function getFilteredUsedLayer($layername) {
-    # geändert 2005-12-15 pk
-    # liefert layer_id und stelle_id aus used_layer,
-    # die mit einem Polygon gefiltert werden sollen
-    $sql ="SELECT DISTINCT ul.Stelle_ID,ul.Layer_ID,l.data FROM polygon AS p, u_polygon2used_layer AS pul";
-    $sql.=", used_layer AS ul, layer AS l WHERE p.polygon_id = pul.polygon_id";
-    $sql.=" AND pul.stelle_id = ul.Stelle_ID AND pul.layer_id = ul.Layer_ID AND ul.Layer_ID = l.Layer_ID";
-    $sql.=" AND l.Name = '".$layername."'";
-    return $this->execSQL($sql, 4, 0);
-  }
-
-  function getFilterPolygons($layer_id,$stelle_id) {
-    # geändert 2005-12-15 pk
-    # liefert Shapdateinamen und Namen des Polygons mit denen ein Filter
-    # für layer_id und stelle_id in Tabelle used_layer berechnet werden soll
-    $sql ="SELECT p.polygonname,p.datei,p.feldname FROM polygon AS p, u_polygon2used_layer AS pul";
-    $sql.=" WHERE p.polygon_id = pul.polygon_id";
-    $sql.=" AND pul.layer_id=".(int)$layer_id." AND pul.stelle_id=".(int)$stelle_id;
-    return $this->execSQL($sql, 4, 0);
-  }
-
-  function setFilter($layer_id,$stelle_id,$filter) {
-    $sql ="UPDATE used_layer SET Filter='".$filter."'";
-    $sql.=" WHERE layer_id=".(int)$layer_id." AND stelle_id=".(int)$stelle_id;
-    return $this->execSQL($sql, 4, 0);
-  }
-
 ####################################################
 # database Funktionen
 ###########################################################

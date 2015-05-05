@@ -1431,11 +1431,6 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 		$GUI->flurstSuchen();
 		$GUI->output();
 	  } break;
-
-	  case 'Adm_Fortfuehrung' : {
-			$GUI->Adm_Fortfuehrung();
-			$GUI->output();
-	  } break;
 		
 		case 'ALKIS_Auszug' : {
 			$flurst_array = explode(';', $GUI->formvars['FlurstKennz']);

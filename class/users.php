@@ -2020,6 +2020,12 @@ class rolle {
 			$this->debug->write("<p>file:users.php class:rolle function:deleteRollen - Löschen der Rollen:<br>".$sql,4);
 			$query=mysql_query($sql,$this->database->dbConn);
 			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+			# rolle_nachweise
+			$sql ='DELETE FROM `rolle_nachweise` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stellen[$i];
+			#echo '<br>'.$sql;
+			$this->debug->write("<p>file:users.php class:rolle function:deleteRollen - Löschen der Rollen:<br>".$sql,4);
+			$query=mysql_query($sql,$this->database->dbConn);
+			if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		}
 		return 1;
 	}
@@ -2686,6 +2692,36 @@ class stelle {
 				if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 			}
 		}
+		return 1;
+	}
+	
+	function deleteDruckrahmen() {
+		# löscht alle Druckrahmenzuordnungen der Stelle
+		$sql ='DELETE FROM `druckrahmen2stelle` WHERE `stelle_id` = '.$this->id;
+		#echo '<br>'.$sql;
+		$this->debug->write("<p>file:users.php class:stelle function:deleteDruckrahmen - Löschen der Druckrahmen der Stelle:<br>".$sql,4);
+		$query=mysql_query($sql,$this->database->dbConn);
+		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		return 1;
+	}
+	
+	function deleteStelleGemeinden() {
+		# löscht alle StelleGemeinden der Stelle
+		$sql ='DELETE FROM `stelle_gemeinden` WHERE `Stelle_ID` = '.$this->id;
+		#echo '<br>'.$sql;
+		$this->debug->write("<p>file:users.php class:stelle function:deleteStelleGemeinden - Löschen der StelleGemeinden der Stelle:<br>".$sql,4);
+		$query=mysql_query($sql,$this->database->dbConn);
+		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		return 1;
+	}
+	
+	function deleteFunktionen() {
+		# löscht alle StelleGemeinden der Stelle
+		$sql ='DELETE FROM `u_funktion2stelle` WHERE `stelle_id` = '.$this->id;
+		#echo '<br>'.$sql;
+		$this->debug->write("<p>file:users.php class:stelle function:deleteFunktionen - Löschen der Funktionen der Stelle:<br>".$sql,4);
+		$query=mysql_query($sql,$this->database->dbConn);
+		if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		return 1;
 	}
 
