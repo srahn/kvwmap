@@ -31,6 +31,12 @@ backto = function(go){
   currentform.submit();
 }
 
+show_all = function(count){
+	currentform.offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value = 0;
+	currentform.anzahl.value = count;
+	currentform.submit();
+}
+
 </script>
 <br>
 <a name="anfang"></a>
@@ -40,11 +46,19 @@ backto = function(go){
 	$this->Stelle->getFunktionen();
 	$forall = false;
 	if($i == '')$i = 0;
-  $anzObj=count($this->qlayerset[$i]['shape']);
+	$gesamt = $this->qlayerset[$i]['count'];
+  $anzObj = count($this->qlayerset[$i]['shape']);
+	$von = $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] + 1;
+	$bis = $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] + $this->formvars['anzahl'];
   if ($anzObj>0) { ?>
 		<br><br>
-    <u><? echo $anzObj; ?> Flurstück<? if ($anzObj>1) { echo "e"; } ?> gefunden:</u>
-    <br>
+    <u><? echo $gesamt; ?> Flurstück<? if ($gesamt>1) { echo "e"; } ?> gefunden</u>
+		<? if($gesamt > $anzObj){ ?>
+		&nbsp;<a href="javascript:show_all(<? echo $gesamt; ?>);">alle anzeigen</a>
+    <br><br>
+		<u>Flurstücke <? echo $von; ?> bis <? echo $bis; ?></u>
+		<? } ?>
+		:<br>
 
     <?
     for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
