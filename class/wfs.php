@@ -137,22 +137,24 @@ class wfs{
 				if($this->objects[$i][$j]["tag"] == $geomtag AND $features[$i]['geom'] == ''){
 					#4495561.758,5997768.92 4495532.625,5997774.389 4495517.732,5997697.398 4495530.82,5997694.958 4495538.126,5997693.31 4495545.292,5997691.136 4495547.163,5997690.416 4495561.758,5997768.92
 					$coords = $this->objects[$i][$j]["value"];
-					if(strpos($coords, ',') === false){						# GML 3 ohne Kommas
-						$explosion = explode(' ', $coords);
-						$num_coords = count($explosion)/2;
-						for($e = 0; $e < count($explosion); $e=$e+2){
-							if($explosion[$e] != '')$coord_pair[] = $explosion[$e].' '.$explosion[$e+1];
+					if($coords != ''){
+						if(strpos($coords, ',') === false){						# GML 3 ohne Kommas
+							$explosion = explode(' ', $coords);
+							$num_coords = count($explosion)/2;
+							for($e = 0; $e < count($explosion); $e=$e+2){
+								if($explosion[$e] != '')$coord_pair[] = $explosion[$e].' '.$explosion[$e+1];
+							}
+							$coords = implode(', ', $coord_pair);
 						}
-						$coords = implode(', ', $coord_pair);
+						else{
+							$coords = str_replace(' ', '_', trim($coords));
+							$coords = str_replace(',', ' ', $coords);
+							$coords = str_replace('_', ',', $coords);
+							$num_coords = substr_count($coords, ' ');
+						}
+						if($num_coords > 1)$features[$i]['geom'] = 'LINESTRING('.$coords.')';
+						else $features[$i]['geom'] = 'POINT('.$coords.')';
 					}
-					else{
-						$coords = str_replace(' ', '_', trim($coords));
-						$coords = str_replace(',', ' ', $coords);
-						$coords = str_replace('_', ',', $coords);
-						$num_coords = substr_count($coords, ' ');
-					}
-					if($num_coords > 1)$features[$i]['geom'] = 'LINESTRING('.$coords.')';
-					else $features[$i]['geom'] = 'POINT('.$coords.')';
 				}
 				if($this->objects[$i][$j]["type"] == 'complete' AND $this->objects[$i][$j]["tag"] != $geomtag){			# alle kompletten Tags und keine Geometrie-Tags
 					$this->objects[$i][$j]["tag"] = str_replace($this->namespace.':', '', $this->objects[$i][$j]["tag"]);		# evtl. Namespace davor entfernen
