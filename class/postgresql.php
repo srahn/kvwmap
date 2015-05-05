@@ -627,7 +627,7 @@ class pgdatabase {
     for($i = 0; $i < count($tables); $i++){
     	$tableparts = explode(' ', $tables[$i]);
     	for($j = 0; $j < count($tableparts); $j++){
-      	$sql.= "'".str_replace("'", "\'", $tableparts[$j])."', ";
+				$sql.= "'".pg_escape_string($tableparts[$j])."', ";
     	}
     }
     $schema = str_replace(',', "','", $this->schema);
