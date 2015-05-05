@@ -218,6 +218,7 @@
       alert("Keine Bearbeitung moeglich! \nUebergebene Daten: "+cmd+", "+path);
      break;
     }
+		document.GUI.go.value = "neu Laden";
 		document.GUI.legendtouched.value = 0;		// nach dem Submit kann das legendtouched-flag wieder auf 0 gesetzt werden
   }
   
