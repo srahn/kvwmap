@@ -96,7 +96,7 @@ class spatial_processor {
   }
   
   function area($geom, $unit){
-  	$sql = "SELECT round(st_area(st_geomfromtext('".$geom."'))::numeric, 2)";
+  	$sql = "SELECT round(st_area_utm(st_geomfromtext('".$geom."'), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")::numeric, 2)";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
       $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
@@ -112,7 +112,7 @@ class spatial_processor {
   }
   
 	function length($geom){
-  	$sql = "SELECT round(st_length(st_geomfromtext('".$geom."'))::numeric, 2)";
+  	$sql = "SELECT round(st_length_utm(st_geomfromtext('".$geom."'), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")::numeric, 2)";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
       $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];

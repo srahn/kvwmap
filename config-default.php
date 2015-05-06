@@ -217,6 +217,10 @@ define('DHK_CALL_URL', 'http://dhkserver/call?form=login');						# Version 2.1
 define('DHK_CALL_USER', '12345');																			# Version 2.1
 define('DHK_CALL_PASSWORD', '6789');																	# Version 2.1
 
+# Parameter für die Strecken- und Flächenreduktion
+define('EARTH_RADIUS', 6384000);																										# Version 2.1
+define('M_QUASIGEOID', 38);																													# Version 2.1
+
 # Unterstützte SRIDs, nur diese stehen zur Auswahl bei der Stellenwahl
 $supportedSRIDs = array(4326,2397,2398,2399,31466,31467,31468,31469,32648,25832,25833,35833,32633,325833,15833,900913,28992);                    # Version 1.6.8
 

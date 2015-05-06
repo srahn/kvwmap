@@ -580,7 +580,7 @@ function polygonquery(){
 	doing = "polygonquery";
 	document.getElementById("canvas").setAttribute("cursor", "help");
 	// Wenn im UTM-System gemessen wird, NBH-Datei laden
-	if('.$this->user->rolle->epsg_code.' == 25833)top.ahah("index.php", "go=getNBH", new Array(""), new Array("execute_function"));
+	if('.$this->user->rolle->epsg_code.' == '.EPSGCODE_ALKIS.')top.ahah("index.php", "go=getNBH", new Array(""), new Array("execute_function"));
 	if(top.document.GUI.str_polypathx.value != ""){
 		polydrawing = true;
 		top.document.GUI.str_polypathx.value = "";
@@ -1286,9 +1286,9 @@ function add_current_point(evt){
 
 function calculate_reduction(pathx, y1){
 	k = 1;
-	if(top.nbh.length > 0){
+	r = '.EARTH_RADIUS.';
+	if(r > 0 && top.nbh.length > 0){
 		em = 0;
-		r = 6384000;
 		x = pathx[0] + "";
 		y = y1 + "";
 		x_1 = x.substring(2,3);
@@ -1300,7 +1300,7 @@ function calculate_reduction(pathx, y1){
 		y_1000 = y.substring(0,1);
 		nhn = 33+x_100+y_1000+y_100+x_10+x_1+y_10+y_1;
 		if(top.nbh[nhn] > 0){
-			hell = 38 + top.nbh[nhn];
+			hell = '.M_QUASIGEOID.' + top.nbh[nhn];
 			for(i = 0; i < pathx.length; i++){
 				em = em + parseInt(pathx[i]);
 			}
