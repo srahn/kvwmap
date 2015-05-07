@@ -278,10 +278,10 @@
 											$this->allowed_documents[] = addslashes($dateiname);
 											$this->allowed_documents[] = addslashes($thumbname);
 											if($attributes['options'][$j] != '' AND strtolower(substr($attributes['options'][$j], 0, 6)) != 'select'){		# bei Layern die auf andere Server zugreifen, wird die URL des anderen Servers verwendet
-												$url = $attributes['options'][$j].session_id().'.php?dokument=';
+												$url = $attributes['options'][$j].$this->document_loader_name.'?dokument=';
 											}
 											else{
-												$url = IMAGEURL.session_id().'.php?dokument=';
+												$url = IMAGEURL.$this->document_loader_name.'?dokument=';
 											}											
 											$datapart .= '<table border="0"><tr><td>';
 											if(in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf')) ){

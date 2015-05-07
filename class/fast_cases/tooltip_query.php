@@ -367,7 +367,7 @@
 									$thumbname = $this->get_dokument_vorschau($dateinamensteil);
 									$this->allowed_documents[] = addslashes($dateiname);
 									$this->allowed_documents[] = addslashes($thumbname);
-									$url = IMAGEURL.session_id().'.php?dokument=';
+									$url = IMAGEURL.$this->document_loader_name.'?dokument=';
 									$pictures .= '| '.$url.$thumbname;
 				        }break;
 				        case 'Link': {

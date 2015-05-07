@@ -53,10 +53,10 @@
 								$this->allowed_documents[] = addslashes($dateiname);
 								$this->allowed_documents[] = addslashes($thumbname);
 								if($attributes['options'][$j] != '' AND strtolower(substr($attributes['options'][$j], 0, 6)) != 'select'){		# bei Layern die auf andere Server zugreifen, wird die URL des anderen Servers verwendet
-									$url = $attributes['options'][$j].session_id().'.php?dokument=';
+									$url = $attributes['options'][$j].$this->document_loader_name.'?dokument=';
 								}
 								else{
-									$url = IMAGEURL.session_id().'.php?dokument=';
+									$url = IMAGEURL.$this->document_loader_name.'?dokument=';
 								}											
 								if($type == 'jpg' OR $type == 'png' OR $type == 'gif' OR $type == 'pdf' ){
 									echo '<tr><td><a class="preview_link" href="'.$url.$dokumentpfad.'"><img class="preview_image" src="'.$url.$thumbname.'"></a></td></tr>';									

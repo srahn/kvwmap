@@ -3,6 +3,7 @@
 $GUI=new GUI("map.php", "main.css.php", "html");
 
 $GUI->allowed_documents = array();
+$GUI->document_loader_name = session_id().rand(0,99999999).'.php';
 
 # Übergabe aller Formularvariablen an die Benutzeroberfläche an formvars
 # Dabei wird unterschieden zwischen Aufrufen über das Internet oder von der Komandozeile aus

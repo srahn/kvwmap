@@ -230,7 +230,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 						$dateinamensteil=explode('.',$dateiname);
 						$thumbname = $dateinamensteil[0].'_thumb.jpg';
 						$this->allowed_documents[] = addslashes($thumbname);
-						$url = IMAGEURL.session_id().'.php?dokument='.$thumbname;
+						$url = IMAGEURL.$this->document_loader_name.'?dokument='.$thumbname;
 					?>
 					<a target="_blank" onmouseover="getvorschau('<? echo $url; ?>');" href="index.php?go=document_anzeigen&ohnesession=1&id=<?php echo $this->nachweis->Dokumente[$i]['id']; ?>&file=1" title="Ansicht"><img src="graphics/button_ansicht.png" border="0"></a></td>
           <td width="15">
