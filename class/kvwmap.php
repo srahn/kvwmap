@@ -6774,7 +6774,7 @@ class GUI {
 		$this->layergruppen = $mapdb->get_Groups($this->layergruppen);		# Gruppen mit Pfaden versehen
 		
     # wenn Gruppe ausgewählt, Einschränkung auf Layer dieser Gruppe 
-    if($this->formvars['selected_group_id']){
+    if($this->formvars['selected_group_id'] AND $this->formvars['selected_layer_id'] == ''){
     	$this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, NULL, $this->formvars['selected_group_id']);	
     }
     if($this->formvars['selected_layer_id']){
@@ -6813,6 +6813,7 @@ class GUI {
       $this->formvars['anzahl'] = MAXQUERYROWS;
       $this->layerset=$this->user->rolle->getLayer($this->formvars['selected_layer_id']);
       $this->formvars['selected_group_id'] = $this->layerset[0]['Gruppe']; 
+			$this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, NULL, $this->formvars['selected_group_id']);	
       switch ($this->layerset[0]['connectiontype']) {
         case MS_POSTGIS : {
           $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
