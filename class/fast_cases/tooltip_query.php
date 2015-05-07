@@ -449,8 +449,7 @@
   	}
 		return $thumbname;
   }
-	function write_document_loader(){
-		$handle = fopen(IMAGEPATH.session_id().'.php', 'w');
+	function write_document_loader(){		$handle = fopen(IMAGEPATH.$this->document_loader_name, 'w');
 		$code = '<?
 			$allowed_documents = array(\''.implode('\',\'', $this->allowed_documents).'\');
 			if(in_array($_REQUEST[\'dokument\'], $allowed_documents)){
