@@ -30,6 +30,9 @@ include(LAYOUTPATH.'languages/generic_search_'.$this->user->rolle->language.'.ph
 				</tr>
 
 <?		}
+			if($this->{'attributes'.$searchmask_number} != NULL){
+				$this->attributes = $this->{'attributes'.$searchmask_number};   # dieses Attributarray nehmen, weil eine gespeicherte Suche geladen wurde
+			}
 			for($i = 0; $i < count($this->attributes['name']); $i++){
         if($this->attributes['type'][$i] != 'geometry'){
 				

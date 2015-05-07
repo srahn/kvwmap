@@ -6821,13 +6821,60 @@ class GUI {
           $path = $mapdb->getPath($this->formvars['selected_layer_id']);
           $privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
           $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
-          $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
+          $attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
           # wenn Attributname/Wert-Paare übergeben wurden, diese im Formular einsetzen
-	        for($i = 0; $i < count($this->attributes['name']); $i++){
-	          $this->qlayerset['shape'][0][$this->attributes['name'][$i]] = $this->formvars['value_'.$this->attributes['name'][$i]];
+	        for($i = 0; $i < count($attributes['name']); $i++){
+	          $this->qlayerset['shape'][0][$attributes['name'][$i]] = $this->formvars['value_'.$attributes['name'][$i]];
 	        }
           # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
-					$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $this->qlayerset['shape'], true);
+					$this->attributes = $mapdb->add_attribute_values($attributes, $layerdb, $this->qlayerset['shape'], true);
+					
+					# Speichern einer neuen Suchabfrage
+					if($this->formvars['go_plus'] == 'Suchabfrage_speichern'){
+						$this->user->rolle->save_search($this->attributes, $this->formvars);
+						$this->formvars['searches'] = $this->formvars['search_name'];
+					}
+					$this->formvars['searchmask_count'] = 0;		// darf erst nach dem speichern passieren
+					# Löschen einer Suchabfrage
+					if($this->formvars['go_plus'] == 'Suchabfrage_löschen'){
+						$this->user->rolle->delete_search($this->formvars['searches'], $this->formvars['selected_layer_id']);
+						$this->formvars['searches'] = '';
+					}
+					# die Namen aller gespeicherten Suchabfragen dieser Rolle zu diesem Layer laden
+					$this->searchset=$this->user->rolle->getsearches($this->formvars['selected_layer_id']);
+					# die ausgewählte Suchabfrage laden
+					if($this->formvars['searches'] != ''){				
+						$this->selected_search = $this->user->rolle->getsearch($this->formvars['selected_layer_id'], $this->formvars['searches']);
+						$this->formvars['searchmask_count'] = $this->selected_search[0]['searchmask_number'];
+						for($m = 0; $m <= $this->formvars['searchmask_count']; $m++){
+							if($m > 0){				// es ist nicht die erste Suchmaske, sondern eine weitere hinzugefügte
+								$prefix = $m.'_';
+							}
+							else{
+								$prefix = '';
+							}
+							# alle Suchparameter leeren
+							for($i = 0; $i < count($this->attributes['name']); $i++){
+								$this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] = '';
+								$this->formvars[$prefix.'value_'.$this->attributes['name'][$i]] = '';
+								$this->formvars[$prefix.'value2_'.$this->attributes['name'][$i]] = '';
+							}
+							# die gespeicherten Suchparameter setzen
+							for($i = 0; $i < count($this->selected_search); $i++){
+								if($this->selected_search[$i]['searchmask_number'] == $m){
+									$this->formvars['searchmask_operator'][$m] = $this->selected_search[$i]['searchmask_operator'];
+									$this->formvars[$prefix.'operator_'.$this->selected_search[$i]['attribute']] = $this->selected_search[$i]['operator'];
+									$this->formvars[$prefix.'value_'.$this->selected_search[$i]['attribute']] = $this->selected_search[$i]['value1'];
+									$this->formvars[$prefix.'value2_'.$this->selected_search[$i]['attribute']] = $this->selected_search[$i]['value2']; 
+									
+									$this->qlayerset['shape'][0][$this->selected_search[$i]['attribute']] = $this->selected_search[$i]['value1'];
+									
+								}
+							}
+							# für jede Suchmaske ein eigenes attributes-Array erzeugen, da z.B. die Auswahllisten ja anders sein können
+							$this->{'attributes'.$m} = $mapdb->add_attribute_values($attributes, $layerdb, $this->qlayerset['shape'], true);
+						}
+					}
         }break;
 				
         case MS_WFS : {
@@ -6847,47 +6894,6 @@ class GUI {
 	        }
         }break;
       }
-      # Speichern einer neuen Suchabfrage
-      if($this->formvars['go_plus'] == 'Suchabfrage_speichern'){
-      	$this->user->rolle->save_search($this->attributes, $this->formvars);
-      	$this->formvars['searches'] = $this->formvars['search_name'];
-      }
-			$this->formvars['searchmask_count'] = 0;		// darf erst nach dem speichern passieren
-      # Löschen einer Suchabfrage
-      if($this->formvars['go_plus'] == 'Suchabfrage_löschen'){
-      	$this->user->rolle->delete_search($this->formvars['searches'], $this->formvars['selected_layer_id']);
-      	$this->formvars['searches'] = '';
-      }
-      # die Namen aller gespeicherten Suchabfragen dieser Rolle zu diesem Layer laden
-    	$this->searchset=$this->user->rolle->getsearches($this->formvars['selected_layer_id']);
-    	# die ausgewählte Suchabfrage laden
-    	if($this->formvars['searches'] != ''){				
-    		$this->selected_search = $this->user->rolle->getsearch($this->formvars['selected_layer_id'], $this->formvars['searches']);
-				$this->formvars['searchmask_count'] = $this->selected_search[0]['searchmask_number'];
-				for($m = 0; $m <= $this->formvars['searchmask_count']; $m++){
-					if($m > 0){				// es ist nicht die erste Suchmaske, sondern eine weitere hinzugefügte
-						$prefix = $m.'_';
-					}
-					else{
-						$prefix = '';
-					}
-					# alle Suchparameter leeren
-					for($i = 0; $i < count($this->attributes['name']); $i++){
-						$this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] = '';
-						$this->formvars[$prefix.'value_'.$this->attributes['name'][$i]] = '';
-						$this->formvars[$prefix.'value2_'.$this->attributes['name'][$i]] = '';
-					}
-					# die gespeicherten Suchparameter setzen
-					for($i = 0; $i < count($this->selected_search); $i++){
-						if($this->selected_search[$i]['searchmask_number'] == $m){
-							$this->formvars['searchmask_operator'][$m] = $this->selected_search[$i]['searchmask_operator'];
-							$this->formvars[$prefix.'operator_'.$this->selected_search[$i]['attribute']] = $this->selected_search[$i]['operator'];
-							$this->formvars[$prefix.'value_'.$this->selected_search[$i]['attribute']] = $this->selected_search[$i]['value1'];
-							$this->formvars[$prefix.'value2_'.$this->selected_search[$i]['attribute']] = $this->selected_search[$i]['value2']; 
-						}
-					}
-				}
-    	}
     }
     $this->output();
   }
