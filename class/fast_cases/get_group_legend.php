@@ -1148,18 +1148,7 @@
 			if($layercount > 0){		# Layer vorhanden
 				$this->groups_with_layers[$group_id] = array_reverse($this->groups_with_layers[$group_id]);		# Layerreihenfolge umdrehen
 				if(!$this->formvars['nurFremdeLayer']){
-					$legend .=  '<tr>
-												<td align="center">
-													<input name="layers_of_group_'.$group_id.'" type="hidden" value="'.implode(',', $this->layers_of_group[$group_id]).'">
-													<a href="javascript:selectgroupquery(document.GUI.layers_of_group_'.$group_id.')"><img border="0" src="graphics/pfeil.gif" title="Alle Abfragen ein/ausschalten"></a>
-												</td>
-												<td align="center">
-													<a href="javascript:selectgroupthema(document.GUI.layers_of_group_'.$group_id.')"><img border="0" src="graphics/pfeil.gif" title="Alle Themen ein/ausschalten"></a>
-												</td>
-												<td>
-													<span class="legend_layer">alle</span>
-												</td>
-											</tr>';
+					$legend .=  '<tr>												<td align="center">													<input name="layers_of_group_'.$group_id.'" type="hidden" value="'.implode(',', $this->layers_of_group[$group_id]).'">';					if(!$this->user->rolle->singlequery){						$legend .=  '<a href="javascript:selectgroupquery(document.GUI.layers_of_group_'.$group_id.')"><img border="0" src="graphics/pfeil.gif" title="Alle Abfragen ein/ausschalten"></a>';					}					$legend .=		'</td>												<td align="center">													<a href="javascript:selectgroupthema(document.GUI.layers_of_group_'.$group_id.')"><img border="0" src="graphics/pfeil.gif" title="Alle Themen ein/ausschalten"></a>												</td>												<td>													<span class="legend_layer">alle</span>												</td>											</tr>';
 				}
 				for($j = 0; $j < $layercount; $j++){
 					$layer = $this->layerset[$this->groups_with_layers[$group_id][$j]];
