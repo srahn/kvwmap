@@ -449,7 +449,8 @@
   	}
 		return $thumbname;
   }
-	function write_document_loader(){		$handle = fopen(IMAGEPATH.$this->document_loader_name, 'w');
+	function write_document_loader(){
+		$handle = fopen(IMAGEPATH.$this->document_loader_name, 'w');
 		$code = '<?
 			$allowed_documents = array(\''.implode('\',\'', $this->allowed_documents).'\');
 			if(in_array($_REQUEST[\'dokument\'], $allowed_documents)){
@@ -457,7 +458,7 @@
 				$type = strtolower(array_pop(explode(\'.\', $_REQUEST[\'dokument\'])));
 				if(in_array($type, array(\'jpg\', \'gif\', \'png\')))header("Content-type: image/".$type);
 				else header("Content-type: application/".$type);
-				header("Content-Disposition: attachment; filename=".$_REQUEST[\'original_name\']);
+				header("Content-Disposition: attachment; filename=\"".$_REQUEST[\'original_name\']."\"");
 				header("Expires: 0");
 				header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
 				header("Pragma: public");
@@ -714,60 +715,62 @@
       $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4);
       return 0;
     }
-    $rs=mysql_fetch_array($query);
-    $this->oGeorefExt=ms_newRectObj();
-    $this->oGeorefExt->setextent($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
-    $this->nImageWidth=$rs['nImageWidth'];
-    $this->nImageHeight=$rs['nImageHeight'];
-    $this->mapsize=$this->nImageWidth.'x'.$this->nImageHeight;
-    @$this->pixwidth=($rs['maxx']-$rs['minx'])/$rs['nImageWidth'];
-    @$this->pixheight=($rs['maxy']-$rs['miny'])/$rs['nImageHeight'];
-    $this->pixsize=($this->pixwidth+$this->pixheight)/2;
-    $this->nZoomFactor=$rs['nZoomFactor'];
-    $this->epsg_code=$rs['epsg_code'];
-    $this->epsg_code2=$rs['epsg_code2'];
-    $this->coordtype=$rs['coordtype'];
-    $this->last_time_id=$rs['last_time_id'];
-    $this->gui=$rs['gui'];
-    $this->language=$rs['language'];
-		$language = $this->language;
-    $this->hideMenue=$rs['hidemenue'];
-    $this->hideLegend=$rs['hidelegend'];
-    $this->fontsize_gle=$rs['fontsize_gle'];
-    $this->highlighting=$rs['highlighting'];
-    $this->scrollposition=$rs['scrollposition'];
-    $this->result_color=$rs['result_color'];
-    $this->always_draw=$rs['always_draw'];
-    $this->runningcoords=$rs['runningcoords'];
-		$this->singlequery=$rs['singlequery'];
-		$this->querymode=$rs['querymode'];
-		$this->geom_edit_first=$rs['geom_edit_first'];		
-		$this->overlayx=$rs['overlayx'];
-		$this->overlayy=$rs['overlayy'];
-		$this->instant_reload=$rs['instant_reload'];
-		$this->menu_auto_close=$rs['menu_auto_close'];
-		if($rs['hist_timestamp'] != ''){
-			$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');			# der wird zur Anzeige des Timestamps benutzt
-			rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');	# der hat die Form, wie der timestamp in der PG-DB steht und wird für die Abfragen benutzt
-		}
-		else rolle::$hist_timestamp = $this->hist_timestamp = '';
-    $buttons = explode(',', $rs['buttons']);
-    $this->back = in_array('back', $buttons);
-    $this->forward = in_array('forward', $buttons);
-    $this->zoomin = in_array('zoomin', $buttons);
-    $this->zoomout = in_array('zoomout', $buttons);
-    $this->zoomall = in_array('zoomall', $buttons);
-    $this->recentre = in_array('recentre', $buttons);
-    $this->jumpto = in_array('jumpto', $buttons);
-    $this->query = in_array('query', $buttons);
-    $this->queryradius = in_array('queryradius', $buttons);
-    $this->polyquery = in_array('polyquery', $buttons);
-    $this->touchquery = in_array('touchquery', $buttons);
-    $this->measure = in_array('measure', $buttons);
-    $this->freepolygon = in_array('freepolygon', $buttons);
-    $this->freetext = in_array('freetext', $buttons);
-    $this->freearrow = in_array('freearrow', $buttons);
-    return 1;
+		if(mysql_num_rows($query) > 0){
+			$rs=mysql_fetch_assoc($query);
+			$this->oGeorefExt=ms_newRectObj();
+			$this->oGeorefExt->setextent($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
+			$this->nImageWidth=$rs['nImageWidth'];
+			$this->nImageHeight=$rs['nImageHeight'];
+			$this->mapsize=$this->nImageWidth.'x'.$this->nImageHeight;
+			@$this->pixwidth=($rs['maxx']-$rs['minx'])/$rs['nImageWidth'];
+			@$this->pixheight=($rs['maxy']-$rs['miny'])/$rs['nImageHeight'];
+			$this->pixsize=($this->pixwidth+$this->pixheight)/2;
+			$this->nZoomFactor=$rs['nZoomFactor'];
+			$this->epsg_code=$rs['epsg_code'];
+			$this->epsg_code2=$rs['epsg_code2'];
+			$this->coordtype=$rs['coordtype'];
+			$this->last_time_id=$rs['last_time_id'];
+			$this->gui=$rs['gui'];
+			$this->language=$rs['language'];
+			$language = $this->language;
+			$this->hideMenue=$rs['hidemenue'];
+			$this->hideLegend=$rs['hidelegend'];
+			$this->fontsize_gle=$rs['fontsize_gle'];
+			$this->highlighting=$rs['highlighting'];
+			$this->scrollposition=$rs['scrollposition'];
+			$this->result_color=$rs['result_color'];
+			$this->always_draw=$rs['always_draw'];
+			$this->runningcoords=$rs['runningcoords'];
+			$this->singlequery=$rs['singlequery'];
+			$this->querymode=$rs['querymode'];
+			$this->geom_edit_first=$rs['geom_edit_first'];		
+			$this->overlayx=$rs['overlayx'];
+			$this->overlayy=$rs['overlayy'];
+			$this->instant_reload=$rs['instant_reload'];
+			$this->menu_auto_close=$rs['menu_auto_close'];
+			if($rs['hist_timestamp'] != ''){
+				$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');			# der wird zur Anzeige des Timestamps benutzt
+				rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');	# der hat die Form, wie der timestamp in der PG-DB steht und wird für die Abfragen benutzt
+			}
+			else rolle::$hist_timestamp = $this->hist_timestamp = '';
+			$buttons = explode(',', $rs['buttons']);
+			$this->back = in_array('back', $buttons);
+			$this->forward = in_array('forward', $buttons);
+			$this->zoomin = in_array('zoomin', $buttons);
+			$this->zoomout = in_array('zoomout', $buttons);
+			$this->zoomall = in_array('zoomall', $buttons);
+			$this->recentre = in_array('recentre', $buttons);
+			$this->jumpto = in_array('jumpto', $buttons);
+			$this->query = in_array('query', $buttons);
+			$this->queryradius = in_array('queryradius', $buttons);
+			$this->polyquery = in_array('polyquery', $buttons);
+			$this->touchquery = in_array('touchquery', $buttons);
+			$this->measure = in_array('measure', $buttons);
+			$this->freepolygon = in_array('freepolygon', $buttons);
+			$this->freetext = in_array('freetext', $buttons);
+			$this->freearrow = in_array('freearrow', $buttons);
+			return 1;
+		}else return 0;
   }
   function getLayer($LayerName) {
 		global $language;
@@ -776,7 +779,7 @@
 		if($language != 'german') {
 			$sql.='CASE WHEN `Name_'.$language.'` != "" THEN `Name_'.$language.'` ELSE `Name` END AS ';
 		}
-		$sql.='Name, l.Layer_ID, alias, Datentyp, Gruppe, pfad, maintable, Data, `schema`, document_path, labelitem, connection, printconnection, connectiontype, epsg_code, tolerance, wms_name, ows_srs, wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, ul.* FROM layer AS l, used_layer AS ul';
+		$sql.='Name, l.Layer_ID, alias, Datentyp, Gruppe, pfad, maintable, Data, `schema`, document_path, labelitem, connection, printconnection, connectiontype, epsg_code, tolerance, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs, wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, ul.* FROM layer AS l, used_layer AS ul';
     $sql.=' WHERE l.Layer_ID=ul.Layer_ID AND Stelle_ID='.$this->stelle_id;
     if ($LayerName!='') {
       $sql.=' AND (l.Name LIKE "'.$LayerName.'" ';
@@ -1051,6 +1054,7 @@
 			}
 			$attributes['form_element_type'][$i]= $rs['form_element_type'];
 			$attributes['form_element_type'][$rs['name']]= $rs['form_element_type'];
+			$rs['options'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $rs['options']);
 			$attributes['options'][$i]= $rs['options'];
 			$attributes['options'][$rs['name']]= $rs['options'];
 			$attributes['alias'][$i]= $rs['alias'];

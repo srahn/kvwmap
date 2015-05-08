@@ -39,6 +39,12 @@
   $allowedPasswordAgeRemainDays=$allowedPasswordAgeDays-$passwordAgeDays; # Zeitinterval wie lange das Passwort noch gilt in Tagen
 	return $allowedPasswordAgeRemainDays; // Passwort ist abgelaufen wenn Wert < 1  
 }
+function strip_pg_escape_string($string){
+	$string = str_replace("''", "'", $string);
+	$string = str_replace(",' ", ",'' ", $string);
+	$string = str_replace(" ' ", " '' ", $string);
+	return $string;
+}
 class GUI {  var $layout;  var $style;  var $mime_type;  var $menue;  var $pdf;  var $addressliste;  var $debug;  var $dbConn;  var $flst;  var $formvars;  var $legende;  var $map;  var $mapDB;  var $img;  var $FormObject;  var $StellenForm;  var $Fehlermeldung;  var $Hinweis;  var $Stelle;  var $ALB;  var $activeLayer;  var $nImageWidth;  var $nImageHeight;  var $user;  var $qlayerset;  var $scaleUnitSwitchScale;  var $map_scaledenom;  var $map_factor;  var $formatter;  function GUI($main, $style, $mime_type) {
     # Debugdatei setzen
     global $debug;
@@ -369,7 +375,7 @@
         $layerset['anzLayer'] = count($layerset) - 1; # wegen $layerset['layer_ids']
         unset($this->layers_of_group);		# falls loadmap zweimal aufgerufen wird
 				unset($this->groups_with_layers);	# falls loadmap zweimal aufgerufen wird				
-        for($i=0; $i < $layerset['anzLayer']; $i++){					
+        for($i=0; $i < $layerset['anzLayer']; $i++){			
 					if($layerset[$i]['alias'] == '' OR !$this->Stelle->useLayerAliases){
 						$layerset[$i]['alias'] = $layerset[$i]['Name'];			# kann vielleicht auch in read_layer gesetzt werden
 					}
@@ -398,7 +404,9 @@
 						if($layerset[$i]['ows_srs'] == '')$layerset[$i]['ows_srs'] = 'EPSG:'.$layerset[$i]['epsg_code'];
 						$layer->setMetaData('ows_srs',$layerset[$i]['ows_srs']);
 						$layer->setMetaData('wms_connectiontimeout',$layerset[$i]['wms_connectiontimeout']);
-						$layer->setMetaData('ows_auth_username', $layerset[$i]['wms_auth_username']);						$layer->setMetaData('ows_auth_password', $layerset[$i]['wms_auth_password']);						$layer->setMetaData('ows_auth_type', 'basic');
+						$layer->setMetaData('ows_auth_username', $layerset[$i]['wms_auth_username']);
+						$layer->setMetaData('ows_auth_password', $layerset[$i]['wms_auth_password']);
+						$layer->setMetaData('ows_auth_type', 'basic');
 						
 						$layer->set('dump', 0);
 						$layer->set('type',$layerset[$i]['Datentyp']);
@@ -1297,7 +1305,8 @@
   function drawMap() {
 		if($this->formvars['go'] != 'navMap_ajax')set_error_handler("MapserverErrorHandler");		// ist in allg_funktionen.php definiert
     if($this->main == 'map.php' AND MINSCALE != '' AND $this->map_factor == '' AND $this->map_scaledenom < MINSCALE){
-      $this->scaleMap(MINSCALE);			$this->saveMap('');
+      $this->scaleMap(MINSCALE);
+			$this->saveMap('');
     }    
     $this->image_map = $this->map->draw() OR die($this->layer_error_handling());    
     $filename = $this->user->id.'_'.rand(0, 1000000).'.'.$this->map->outputformat->extension;
@@ -1312,7 +1321,7 @@
 		else{
 			# Zusammensetzen eines Layerhiddenstrings, in dem die aktuelle Sichtbarkeit aller aufgeklappten Layer gespeichert ist um damit bei Bedarf die Legende neu zu laden
 			for($i = 0; $i < $this->layerset['anzLayer']; $i++) {
-				$layer=$this->layerset[$i];
+				$layer=&$this->layerset[$i];
 				if($layer['requires'] == ''){
 					if($this->check_layer_visibility($layer))$layerhiddenflag = '0';
 					else $layerhiddenflag = '1';
@@ -1344,21 +1353,12 @@
 			$this->map_scaledenom = $this->map->scale;
 		}
   }
-	function check_layer_visibility($layer){
+	function check_layer_visibility(&$layer){
 		if($layer['status'] != '' OR ($this->map_scaledenom < $layer['minscale'] OR ($layer['maxscale'] > 0 AND $this->map_scaledenom > $layer['maxscale']))) {
 			return false;
 		}
 		return true;
 	}
-	function BBoxinExtent($geom){
-    $sql = "SELECT st_geomfromtext('POLYGON((".$this->map->extent->minx." ".$this->map->extent->miny.", ".$this->map->extent->maxx." ".$this->map->extent->miny.", ".$this->map->extent->maxx." ".$this->map->extent->maxy.", ".$this->map->extent->minx." ".$this->map->extent->maxy.", ".$this->map->extent->minx." ".$this->map->extent->miny."))', ".$this->user->rolle->epsg_code.") && st_transform(".$geom.", ".$this->user->rolle->epsg_code.")";
-    #echo $sql;
-    $ret = $this->pgdatabase->execSQL($sql,4, 0);
-    if(!$ret[0]) {
-      $rs=pg_fetch_array($ret[1]);
-      return $rs[0];
-    }
-  }
   function switchScaleUnitIfNecessary() {
 		if ($this->map_scaledenom > $this->scaleUnitSwitchScale) $this->map->scalebar->set('units', MS_KILOMETERS);
   }
@@ -1432,7 +1432,8 @@
   }
   function output() {
 	  foreach($this->formvars as $key => $value){
-	  	if(is_string($value))$this->formvars[$key] = stripslashes($value);
+			#if(is_string($value))$this->formvars[$key] = stripslashes($value);
+			if(is_string($value))$this->formvars[$key] = strip_pg_escape_string($value);
 	  }
     # bisher gibt es folgenden verschiedenen Dokumente die angezeigt werden können
 		if ($this->formvars['mime_type'] != '') $this->mime_type = $this->formvars['mime_type'];
@@ -1719,60 +1720,62 @@
       $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4);
       return 0;
     }
-    $rs=mysql_fetch_array($query);
-    $this->oGeorefExt=ms_newRectObj();
-    $this->oGeorefExt->setextent($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
-    $this->nImageWidth=$rs['nImageWidth'];
-    $this->nImageHeight=$rs['nImageHeight'];
-    $this->mapsize=$this->nImageWidth.'x'.$this->nImageHeight;
-    @$this->pixwidth=($rs['maxx']-$rs['minx'])/$rs['nImageWidth'];
-    @$this->pixheight=($rs['maxy']-$rs['miny'])/$rs['nImageHeight'];
-    $this->pixsize=($this->pixwidth+$this->pixheight)/2;
-    $this->nZoomFactor=$rs['nZoomFactor'];
-    $this->epsg_code=$rs['epsg_code'];
-    $this->epsg_code2=$rs['epsg_code2'];
-    $this->coordtype=$rs['coordtype'];
-    $this->last_time_id=$rs['last_time_id'];
-    $this->gui=$rs['gui'];
-    $this->language=$rs['language'];
-		$language = $this->language;
-    $this->hideMenue=$rs['hidemenue'];
-    $this->hideLegend=$rs['hidelegend'];
-    $this->fontsize_gle=$rs['fontsize_gle'];
-    $this->highlighting=$rs['highlighting'];
-    $this->scrollposition=$rs['scrollposition'];
-    $this->result_color=$rs['result_color'];
-    $this->always_draw=$rs['always_draw'];
-    $this->runningcoords=$rs['runningcoords'];
-		$this->singlequery=$rs['singlequery'];
-		$this->querymode=$rs['querymode'];
-		$this->geom_edit_first=$rs['geom_edit_first'];		
-		$this->overlayx=$rs['overlayx'];
-		$this->overlayy=$rs['overlayy'];
-		$this->instant_reload=$rs['instant_reload'];
-		$this->menu_auto_close=$rs['menu_auto_close'];
-		if($rs['hist_timestamp'] != ''){
-			$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');			# der wird zur Anzeige des Timestamps benutzt
-			rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');	# der hat die Form, wie der timestamp in der PG-DB steht und wird für die Abfragen benutzt
-		}
-		else rolle::$hist_timestamp = $this->hist_timestamp = '';
-    $buttons = explode(',', $rs['buttons']);
-    $this->back = in_array('back', $buttons);
-    $this->forward = in_array('forward', $buttons);
-    $this->zoomin = in_array('zoomin', $buttons);
-    $this->zoomout = in_array('zoomout', $buttons);
-    $this->zoomall = in_array('zoomall', $buttons);
-    $this->recentre = in_array('recentre', $buttons);
-    $this->jumpto = in_array('jumpto', $buttons);
-    $this->query = in_array('query', $buttons);
-    $this->queryradius = in_array('queryradius', $buttons);
-    $this->polyquery = in_array('polyquery', $buttons);
-    $this->touchquery = in_array('touchquery', $buttons);
-    $this->measure = in_array('measure', $buttons);
-    $this->freepolygon = in_array('freepolygon', $buttons);
-    $this->freetext = in_array('freetext', $buttons);
-    $this->freearrow = in_array('freearrow', $buttons);
-    return 1;
+		if(mysql_num_rows($query) > 0){
+			$rs=mysql_fetch_assoc($query);
+			$this->oGeorefExt=ms_newRectObj();
+			$this->oGeorefExt->setextent($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
+			$this->nImageWidth=$rs['nImageWidth'];
+			$this->nImageHeight=$rs['nImageHeight'];
+			$this->mapsize=$this->nImageWidth.'x'.$this->nImageHeight;
+			@$this->pixwidth=($rs['maxx']-$rs['minx'])/$rs['nImageWidth'];
+			@$this->pixheight=($rs['maxy']-$rs['miny'])/$rs['nImageHeight'];
+			$this->pixsize=($this->pixwidth+$this->pixheight)/2;
+			$this->nZoomFactor=$rs['nZoomFactor'];
+			$this->epsg_code=$rs['epsg_code'];
+			$this->epsg_code2=$rs['epsg_code2'];
+			$this->coordtype=$rs['coordtype'];
+			$this->last_time_id=$rs['last_time_id'];
+			$this->gui=$rs['gui'];
+			$this->language=$rs['language'];
+			$language = $this->language;
+			$this->hideMenue=$rs['hidemenue'];
+			$this->hideLegend=$rs['hidelegend'];
+			$this->fontsize_gle=$rs['fontsize_gle'];
+			$this->highlighting=$rs['highlighting'];
+			$this->scrollposition=$rs['scrollposition'];
+			$this->result_color=$rs['result_color'];
+			$this->always_draw=$rs['always_draw'];
+			$this->runningcoords=$rs['runningcoords'];
+			$this->singlequery=$rs['singlequery'];
+			$this->querymode=$rs['querymode'];
+			$this->geom_edit_first=$rs['geom_edit_first'];		
+			$this->overlayx=$rs['overlayx'];
+			$this->overlayy=$rs['overlayy'];
+			$this->instant_reload=$rs['instant_reload'];
+			$this->menu_auto_close=$rs['menu_auto_close'];
+			if($rs['hist_timestamp'] != ''){
+				$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');			# der wird zur Anzeige des Timestamps benutzt
+				rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');	# der hat die Form, wie der timestamp in der PG-DB steht und wird für die Abfragen benutzt
+			}
+			else rolle::$hist_timestamp = $this->hist_timestamp = '';
+			$buttons = explode(',', $rs['buttons']);
+			$this->back = in_array('back', $buttons);
+			$this->forward = in_array('forward', $buttons);
+			$this->zoomin = in_array('zoomin', $buttons);
+			$this->zoomout = in_array('zoomout', $buttons);
+			$this->zoomall = in_array('zoomall', $buttons);
+			$this->recentre = in_array('recentre', $buttons);
+			$this->jumpto = in_array('jumpto', $buttons);
+			$this->query = in_array('query', $buttons);
+			$this->queryradius = in_array('queryradius', $buttons);
+			$this->polyquery = in_array('polyquery', $buttons);
+			$this->touchquery = in_array('touchquery', $buttons);
+			$this->measure = in_array('measure', $buttons);
+			$this->freepolygon = in_array('freepolygon', $buttons);
+			$this->freetext = in_array('freetext', $buttons);
+			$this->freearrow = in_array('freearrow', $buttons);
+			return 1;
+		}else return 0;
   }
   function setSelectedButton($selectedButton) {
     $this->selectedButton=$selectedButton;
@@ -2130,7 +2133,7 @@
     $this->Layer = array();
     $this->disabled_classes = $this->read_disabled_classes();
 		$i = 0;
-    while ($rs=mysql_fetch_array($query)) {
+    while ($rs=mysql_fetch_assoc($query)) {
       if($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivStatus'] != '0')){    # bei withclasses == 2 werden für alle Layer die Klassen geladen, bei withclasses == 1 werden die Klassen nur dann geladen, wenn der Layer aktiv ist
         $rs['Class']=$this->read_Classes($rs['Layer_ID'], $this->disabled_classes);
       }
@@ -2243,11 +2246,11 @@
   }
 	function getBezeichnungFromPosition($position, $epsgcode) {
     $this->debug->write("<p>kataster.php Flur->getBezeichnungFromPosition:",4);
-		$sql ="SELECT gemeindename, gk.gemeinde, gemarkungsname as gemkgname, fl.land::text||fl.gemarkungsnummer::text as gemkgschl, fl.flurnummer as flur, CASE WHEN fl.nenner IS NULL THEN fl.zaehler::text ELSE fl.zaehler::text||'/'||fl.nenner::text end as flurst, s.bezeichnung as strasse, l.hausnummer";
-    $sql.=" FROM alkis.pp_gemarkung as gk, alkis.pp_gemeinde as gm, alkis.ax_flurstueck as fl";
-		$sql.=" LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(fl.weistauf)";
-		$sql.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND s.lage = lpad(l.lage,5,'0')";
-    $sql.=" WHERE gk.gemarkung = fl.gemarkungsnummer AND gk.gemeinde = gm.gemeinde";
+		$sql ="SELECT gm.bezeichnung as gemeindename, fl.gemeinde, gk.bezeichnung as gemkgname, fl.land::text||fl.gemarkungsnummer::text as gemkgschl, fl.flurnummer as flur, CASE WHEN fl.nenner IS NULL THEN fl.zaehler::text ELSE fl.zaehler::text||'/'||fl.nenner::text end as flurst, s.bezeichnung as strasse, l.hausnummer ";
+    $sql.="FROM alkis.ax_gemarkung as gk, alkis.ax_gemeinde as gm, alkis.ax_flurstueck as fl ";
+		$sql.="LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(fl.weistauf) ";
+		$sql.="LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND s.lage = lpad(l.lage,5,'0') ";
+    $sql.="WHERE gk.gemarkungsnummer = fl.gemarkungsnummer AND gm.kreis = fl.kreis AND gm.gemeinde = fl.gemeinde ";
     $sql.=" AND ST_WITHIN(st_transform(st_geomfromtext('POINT(".$position['rw']." ".$position['hw'].")',".$epsgcode."), ".EPSGCODE_ALKIS."),fl.wkb_geometry)";
     #echo $sql;
     $ret=$this->database->execSQL($sql,4, 0);
