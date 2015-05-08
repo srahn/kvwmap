@@ -56,12 +56,20 @@ class administration{
 	function get_schema_migration_files(){
 		global $kvwmap_plugins;
 		$migrations['kvwmap']['mysql'] = array_diff(scandir(LAYOUTPATH.'db/mysql/schema'), array('.', '..'));
+		sort($migrations['kvwmap']['mysql']);
 		$migrations['kvwmap']['postgresql'] = array_diff(scandir(LAYOUTPATH.'db/postgresql/schema'), array('.', '..'));
+		sort($migrations['kvwmap']['postgresql']);
 		for($i = 0; $i < count($kvwmap_plugins); $i++){
 			$path = PLUGINS.$kvwmap_plugins[$i].'/db/mysql/schema';
-			if(file_exists($path))$migrations[$kvwmap_plugins[$i]]['mysql'] = array_diff(scandir($path), array('.', '..'));
+			if(file_exists($path)){
+				$migrations[$kvwmap_plugins[$i]]['mysql'] = array_diff(scandir($path), array('.', '..'));
+				sort($migrations[$kvwmap_plugins[$i]]['mysql']);
+			}
 			$path = PLUGINS.$kvwmap_plugins[$i].'/db/postgresql/schema';
-			if(file_exists($path))$migrations[$kvwmap_plugins[$i]]['postgresql'] = array_diff(scandir($path), array('.', '..'));
+			if(file_exists($path)){
+				$migrations[$kvwmap_plugins[$i]]['postgresql'] = array_diff(scandir($path), array('.', '..'));
+				sort($migrations[$kvwmap_plugins[$i]]['postgresql']);
+			}
 		}
 		return $migrations;
 	}
