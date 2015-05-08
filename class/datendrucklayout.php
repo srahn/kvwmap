@@ -280,8 +280,9 @@ class ddl {
 	}
 	
 	function handlePageOverflow($offset_attribute, $offset_value, $ypos){
-		if($this->layout['page_id'][$offset_attribute] != end($this->pdf->ezPages)){
-			$backto_oldpage = true;															# das Offset-Attribut wurde auf einer der vorigen Seiten beendet -> zu dieser Seite zurückkehren
+		#if($this->layout['page_id'][$offset_attribute] != end($this->pdf->ezPages)){
+		if($this->layout['page_id'][$offset_attribute] != $this->pdf->currentContents){
+			$backto_oldpage = true;															# das Offset-Attribut wurde auf einer anderen Seite beendet -> zu dieser Seite zurückkehren
 		}
 		if($offset_value - $ypos < 20){	# Seitenüberlauf
 			$offset_value = 842 + $offset_value - 20 - 30;	# Offsetwert so anpassen, dass er für die neue Seite passt
