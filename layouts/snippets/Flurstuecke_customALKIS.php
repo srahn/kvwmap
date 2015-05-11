@@ -48,6 +48,7 @@ show_all = function(count){
 	if($i == '')$i = 0;
 	$gesamt = $this->qlayerset[$i]['count'];
   $anzObj = count($this->qlayerset[$i]['shape']);
+	if($gesamt == '')$gesamt = $anzObj;
 	$von = $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] + 1;
 	$bis = $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] + $this->formvars['anzahl'];
   if ($anzObj>0) { ?>
