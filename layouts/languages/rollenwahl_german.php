@@ -16,7 +16,7 @@
   $strZoomFactor="Zoomfaktor";
   $strButtonNext="Weiter";
   $strFontSizeGLE="GLE-Textgröße";
-  $strHighlight="Tooltip-Highlighting";
+  $strHighlight="Objekt-Highlighting";
   $strPlatt="Plattdeutsch";
   $strSearchColor="Suchergebnis-Farbe";
   $strPolish="Polnisch";
