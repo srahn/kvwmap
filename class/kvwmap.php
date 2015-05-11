@@ -183,11 +183,11 @@ class GUI {
 												<td align="center">
 													<input name="layers_of_group_'.$group_id.'" type="hidden" value="'.implode(',', $this->layers_of_group[$group_id]).'">';
 					if(!$this->user->rolle->singlequery){
-						$legend .=  '<a href="javascript:selectgroupquery(document.GUI.layers_of_group_'.$group_id.')"><img border="0" src="graphics/pfeil.gif" title="Alle Abfragen ein/ausschalten"></a>';
+						$legend .=  '<a href="javascript:selectgroupquery(document.GUI.layers_of_group_'.$group_id.')"><img border="0" src="graphics/pfeil.gif" title="'.$this->strActivateAllQueries.'"></a>';
 					}
 					$legend .=		'</td>
 												<td align="center">
-													<a href="javascript:selectgroupthema(document.GUI.layers_of_group_'.$group_id.')"><img border="0" src="graphics/pfeil.gif" title="Alle Themen ein/ausschalten"></a>
+													<a href="javascript:selectgroupthema(document.GUI.layers_of_group_'.$group_id.')"><img border="0" src="graphics/pfeil.gif" title="'.$this->strActivateAllLayers.'"></a>
 												</td>
 												<td>
 													<span class="legend_layer">alle</span>
@@ -274,13 +274,13 @@ class GUI {
 							if ($layer['aktivStatus'] == 1) {
 								if ($layer['connectiontype']==6) {
 									# Link zum Zoomen auf maximalen Extent des Layers erstmal nur für PostGIS Layer
-									$legend.='&nbsp;<a href="index.php?go=zoomToMaxLayerExtent&layer_id='.$layer['Layer_ID'].'"><img src="graphics/maxLayerExtent.gif" border="0" title="volle Layerausdehnung"></a>';
+									$legend.='&nbsp;<a href="index.php?go=zoomToMaxLayerExtent&layer_id='.$layer['Layer_ID'].'"><img src="graphics/maxLayerExtent.gif" border="0" title="'.$this->FullLayerExtent.'"></a>';
 								}
 							}
 						}
 						if($layer['aktivStatus'] == 1 AND $layer['Class'][0]['Name'] != ''){
 							if($layer['requires'] == '' AND $layer['Layer_ID'] > 0){
-								$legend .=  ' <a href="javascript:getlegend(\''.$group_id.'\', '.$layer['Layer_ID'].', document.GUI.nurFremdeLayer.value)" title="Klassen ein/ausblenden"><img border="0" src="graphics/';
+								$legend .=  ' <a href="javascript:getlegend(\''.$group_id.'\', '.$layer['Layer_ID'].', document.GUI.nurFremdeLayer.value)" title="'.$this->DisplayClasses.'"><img border="0" src="graphics/';
 								if($layer['showclasses']){
 									$legend .=  'minus.gif';
 								}

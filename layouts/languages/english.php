@@ -25,4 +25,8 @@
  $this->strMapScale="Scale";
  $this->strCoordinates="Coordinates:";
  $this->strUseGeometryOf="Use Geometry of";
+ $this->strActivateAllQueries="Activate/Deactivate all queries";
+ $this->strActivateAllLayers="Activate/Deactivate all layers";
+ $this->FullLayerExtent="zoom to Layer-Exent";
+ $this->DisplayClasses="Display/Hide Classes";
 ?>

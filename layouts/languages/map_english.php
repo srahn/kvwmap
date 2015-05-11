@@ -26,5 +26,9 @@
   $strSave="Save Extent";
   $strMap="Map";
 	$strMapSize="Adjust Mapsize";
+	$strLayerControl="Layer Control";
+	$strDeactivateAllLayer="Click to deactivate all layers.";
+	$strClearAllQuerys="Click to clear all query checkboxes.";
+	$strInfoQuery="Information Query";
   
 ?>

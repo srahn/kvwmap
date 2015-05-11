@@ -26,4 +26,8 @@
  $this->strAlias="Alias";
  $this->strMapScale="Maßstab";
  $this->strUseGeometryOf="Geometrie übernehmen von";
+ $this->strActivateAllQueries="Alle Abfragen ein/ausschalten";
+ $this->strActivateAllLayers="Alle Themen ein/ausschalten";
+ $this->FullLayerExtent="volle Layerausdehnung";
+ $this->DisplayClasses="Klassen ein/ausblenden";
 ?>

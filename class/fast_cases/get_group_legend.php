@@ -389,7 +389,7 @@
         $layerset['anzLayer'] = count($layerset) - 1; # wegen $layerset['layer_ids']
         unset($this->layers_of_group);		# falls loadmap zweimal aufgerufen wird
 				unset($this->groups_with_layers);	# falls loadmap zweimal aufgerufen wird				
-        for($i=0; $i < $layerset['anzLayer']; $i++){					
+        for($i=0; $i < $layerset['anzLayer']; $i++){			
 					if($layerset[$i]['alias'] == '' OR !$this->Stelle->useLayerAliases){
 						$layerset[$i]['alias'] = $layerset[$i]['Name'];			# kann vielleicht auch in read_layer gesetzt werden
 					}
@@ -418,9 +418,9 @@
 						if($layerset[$i]['ows_srs'] == '')$layerset[$i]['ows_srs'] = 'EPSG:'.$layerset[$i]['epsg_code'];
 						$layer->setMetaData('ows_srs',$layerset[$i]['ows_srs']);
 						$layer->setMetaData('wms_connectiontimeout',$layerset[$i]['wms_connectiontimeout']);
-						$layer->setMetaData('wms_auth_username', $layerset[$i]['wms_auth_username']);
-						$layer->setMetaData('wms_auth_password', '{'.$layerset[$i]['wms_auth_password'].'}');
-						$layer->setMetaData('wms_auth_type', 'any');
+						$layer->setMetaData('ows_auth_username', $layerset[$i]['wms_auth_username']);
+						$layer->setMetaData('ows_auth_password', $layerset[$i]['wms_auth_password']);
+						$layer->setMetaData('ows_auth_type', 'basic');
 						
 						$layer->set('dump', 0);
 						$layer->set('type',$layerset[$i]['Datentyp']);
@@ -1148,7 +1148,20 @@
 			if($layercount > 0){		# Layer vorhanden
 				$this->groups_with_layers[$group_id] = array_reverse($this->groups_with_layers[$group_id]);		# Layerreihenfolge umdrehen
 				if(!$this->formvars['nurFremdeLayer']){
-					$legend .=  '<tr>												<td align="center">													<input name="layers_of_group_'.$group_id.'" type="hidden" value="'.implode(',', $this->layers_of_group[$group_id]).'">';					if(!$this->user->rolle->singlequery){						$legend .=  '<a href="javascript:selectgroupquery(document.GUI.layers_of_group_'.$group_id.')"><img border="0" src="graphics/pfeil.gif" title="Alle Abfragen ein/ausschalten"></a>';					}					$legend .=		'</td>												<td align="center">													<a href="javascript:selectgroupthema(document.GUI.layers_of_group_'.$group_id.')"><img border="0" src="graphics/pfeil.gif" title="Alle Themen ein/ausschalten"></a>												</td>												<td>													<span class="legend_layer">alle</span>												</td>											</tr>';
+					$legend .=  '<tr>
+												<td align="center">
+													<input name="layers_of_group_'.$group_id.'" type="hidden" value="'.implode(',', $this->layers_of_group[$group_id]).'">';
+					if(!$this->user->rolle->singlequery){
+						$legend .=  '<a href="javascript:selectgroupquery(document.GUI.layers_of_group_'.$group_id.')"><img border="0" src="graphics/pfeil.gif" title="'.$this->strActivateAllQueries.'"></a>';
+					}
+					$legend .=		'</td>
+												<td align="center">
+													<a href="javascript:selectgroupthema(document.GUI.layers_of_group_'.$group_id.')"><img border="0" src="graphics/pfeil.gif" title="'.$this->strActivateAllLayers.'"></a>
+												</td>
+												<td>
+													<span class="legend_layer">alle</span>
+												</td>
+											</tr>';
 				}
 				for($j = 0; $j < $layercount; $j++){
 					$layer = $this->layerset[$this->groups_with_layers[$group_id][$j]];
@@ -1230,13 +1243,13 @@
 							if ($layer['aktivStatus'] == 1) {
 								if ($layer['connectiontype']==6) {
 									# Link zum Zoomen auf maximalen Extent des Layers erstmal nur für PostGIS Layer
-									$legend.='&nbsp;<a href="index.php?go=zoomToMaxLayerExtent&layer_id='.$layer['Layer_ID'].'"><img src="graphics/maxLayerExtent.gif" border="0" title="volle Layerausdehnung"></a>';
+									$legend.='&nbsp;<a href="index.php?go=zoomToMaxLayerExtent&layer_id='.$layer['Layer_ID'].'"><img src="graphics/maxLayerExtent.gif" border="0" title="'.$this->FullLayerExtent.'"></a>';
 								}
 							}
 						}
 						if($layer['aktivStatus'] == 1 AND $layer['Class'][0]['Name'] != ''){
 							if($layer['requires'] == '' AND $layer['Layer_ID'] > 0){
-								$legend .=  ' <a href="javascript:getlegend(\''.$group_id.'\', '.$layer['Layer_ID'].', document.GUI.nurFremdeLayer.value)" title="Klassen ein/ausblenden"><img border="0" src="graphics/';
+								$legend .=  ' <a href="javascript:getlegend(\''.$group_id.'\', '.$layer['Layer_ID'].', document.GUI.nurFremdeLayer.value)" title="'.$this->DisplayClasses.'"><img border="0" src="graphics/';
 								if($layer['showclasses']){
 									$legend .=  'minus.gif';
 								}
@@ -1249,10 +1262,11 @@
 							if($layer['showclasses'] != 0){
 								if($layer['connectiontype'] == 7){      # WMS   
 									$layersection = substr($layer['connection'], strpos(strtolower($layer['connection']), 'layers')+7);
-									$layersection = substr($layersection, 0, strpos($layersection, '&'));
+									$pos = strpos($layersection, '&');
+									if($pos !== false)$layersection = substr($layersection, 0, $pos);									
 									$layers = explode(',', $layersection);
 									for($l = 0; $l < count($layers); $l++){
-									$legend .=  '<div style="display:inline" id="lg'.$j.'_'.$l.'"><br><img src="'.$layer['connection'].'&layer='.$layers[$l].'&service=wms&request=getlegendgraphic" onerror="ImageLoadFailed(\'lg'.$j.'_'.$l.'\')"></div>';
+										$legend .=  '<div style="display:inline" id="lg'.$j.'_'.$l.'"><br><img src="'.$layer['connection'].'&layer='.$layers[$l].'&service=WMS&request=getlegendgraphic" onerror="ImageLoadFailed(\'lg'.$j.'_'.$l.'\')"></div>';
 									}
 								}
 								else{
@@ -1383,21 +1397,12 @@
 	  $legend .= '</div>';
     return $legend;
   }
-	function check_layer_visibility($layer){
+	function check_layer_visibility(&$layer){
 		if($layer['status'] != '' OR ($this->map_scaledenom < $layer['minscale'] OR ($layer['maxscale'] > 0 AND $this->map_scaledenom > $layer['maxscale']))) {
 			return false;
 		}
 		return true;
 	}
-	function BBoxinExtent($geom){
-    $sql = "SELECT st_geomfromtext('POLYGON((".$this->map->extent->minx." ".$this->map->extent->miny.", ".$this->map->extent->maxx." ".$this->map->extent->miny.", ".$this->map->extent->maxx." ".$this->map->extent->maxy.", ".$this->map->extent->minx." ".$this->map->extent->maxy.", ".$this->map->extent->minx." ".$this->map->extent->miny."))', ".$this->user->rolle->epsg_code.") && st_transform(".$geom.", ".$this->user->rolle->epsg_code.")";
-    #echo $sql;
-    $ret = $this->pgdatabase->execSQL($sql,4, 0);
-    if(!$ret[0]) {
-      $rs=pg_fetch_array($ret[1]);
-      return $rs[0];
-    }
-  }
 	function map_saveWebImage($image,$format) {
 		if(MAPSERVERVERSION >= 600 ) {		
 			return $image->saveWebImage();
@@ -1641,60 +1646,62 @@
       $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4);
       return 0;
     }
-    $rs=mysql_fetch_array($query);
-    $this->oGeorefExt=ms_newRectObj();
-    $this->oGeorefExt->setextent($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
-    $this->nImageWidth=$rs['nImageWidth'];
-    $this->nImageHeight=$rs['nImageHeight'];
-    $this->mapsize=$this->nImageWidth.'x'.$this->nImageHeight;
-    @$this->pixwidth=($rs['maxx']-$rs['minx'])/$rs['nImageWidth'];
-    @$this->pixheight=($rs['maxy']-$rs['miny'])/$rs['nImageHeight'];
-    $this->pixsize=($this->pixwidth+$this->pixheight)/2;
-    $this->nZoomFactor=$rs['nZoomFactor'];
-    $this->epsg_code=$rs['epsg_code'];
-    $this->epsg_code2=$rs['epsg_code2'];
-    $this->coordtype=$rs['coordtype'];
-    $this->last_time_id=$rs['last_time_id'];
-    $this->gui=$rs['gui'];
-    $this->language=$rs['language'];
-		$language = $this->language;
-    $this->hideMenue=$rs['hidemenue'];
-    $this->hideLegend=$rs['hidelegend'];
-    $this->fontsize_gle=$rs['fontsize_gle'];
-    $this->highlighting=$rs['highlighting'];
-    $this->scrollposition=$rs['scrollposition'];
-    $this->result_color=$rs['result_color'];
-    $this->always_draw=$rs['always_draw'];
-    $this->runningcoords=$rs['runningcoords'];
-		$this->singlequery=$rs['singlequery'];
-		$this->querymode=$rs['querymode'];
-		$this->geom_edit_first=$rs['geom_edit_first'];		
-		$this->overlayx=$rs['overlayx'];
-		$this->overlayy=$rs['overlayy'];
-		$this->instant_reload=$rs['instant_reload'];
-		$this->menu_auto_close=$rs['menu_auto_close'];
-		if($rs['hist_timestamp'] != ''){
-			$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');			# der wird zur Anzeige des Timestamps benutzt
-			rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');	# der hat die Form, wie der timestamp in der PG-DB steht und wird für die Abfragen benutzt
-		}
-		else rolle::$hist_timestamp = $this->hist_timestamp = '';
-    $buttons = explode(',', $rs['buttons']);
-    $this->back = in_array('back', $buttons);
-    $this->forward = in_array('forward', $buttons);
-    $this->zoomin = in_array('zoomin', $buttons);
-    $this->zoomout = in_array('zoomout', $buttons);
-    $this->zoomall = in_array('zoomall', $buttons);
-    $this->recentre = in_array('recentre', $buttons);
-    $this->jumpto = in_array('jumpto', $buttons);
-    $this->query = in_array('query', $buttons);
-    $this->queryradius = in_array('queryradius', $buttons);
-    $this->polyquery = in_array('polyquery', $buttons);
-    $this->touchquery = in_array('touchquery', $buttons);
-    $this->measure = in_array('measure', $buttons);
-    $this->freepolygon = in_array('freepolygon', $buttons);
-    $this->freetext = in_array('freetext', $buttons);
-    $this->freearrow = in_array('freearrow', $buttons);
-    return 1;
+		if(mysql_num_rows($query) > 0){
+			$rs=mysql_fetch_assoc($query);
+			$this->oGeorefExt=ms_newRectObj();
+			$this->oGeorefExt->setextent($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
+			$this->nImageWidth=$rs['nImageWidth'];
+			$this->nImageHeight=$rs['nImageHeight'];
+			$this->mapsize=$this->nImageWidth.'x'.$this->nImageHeight;
+			@$this->pixwidth=($rs['maxx']-$rs['minx'])/$rs['nImageWidth'];
+			@$this->pixheight=($rs['maxy']-$rs['miny'])/$rs['nImageHeight'];
+			$this->pixsize=($this->pixwidth+$this->pixheight)/2;
+			$this->nZoomFactor=$rs['nZoomFactor'];
+			$this->epsg_code=$rs['epsg_code'];
+			$this->epsg_code2=$rs['epsg_code2'];
+			$this->coordtype=$rs['coordtype'];
+			$this->last_time_id=$rs['last_time_id'];
+			$this->gui=$rs['gui'];
+			$this->language=$rs['language'];
+			$language = $this->language;
+			$this->hideMenue=$rs['hidemenue'];
+			$this->hideLegend=$rs['hidelegend'];
+			$this->fontsize_gle=$rs['fontsize_gle'];
+			$this->highlighting=$rs['highlighting'];
+			$this->scrollposition=$rs['scrollposition'];
+			$this->result_color=$rs['result_color'];
+			$this->always_draw=$rs['always_draw'];
+			$this->runningcoords=$rs['runningcoords'];
+			$this->singlequery=$rs['singlequery'];
+			$this->querymode=$rs['querymode'];
+			$this->geom_edit_first=$rs['geom_edit_first'];		
+			$this->overlayx=$rs['overlayx'];
+			$this->overlayy=$rs['overlayy'];
+			$this->instant_reload=$rs['instant_reload'];
+			$this->menu_auto_close=$rs['menu_auto_close'];
+			if($rs['hist_timestamp'] != ''){
+				$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');			# der wird zur Anzeige des Timestamps benutzt
+				rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');	# der hat die Form, wie der timestamp in der PG-DB steht und wird für die Abfragen benutzt
+			}
+			else rolle::$hist_timestamp = $this->hist_timestamp = '';
+			$buttons = explode(',', $rs['buttons']);
+			$this->back = in_array('back', $buttons);
+			$this->forward = in_array('forward', $buttons);
+			$this->zoomin = in_array('zoomin', $buttons);
+			$this->zoomout = in_array('zoomout', $buttons);
+			$this->zoomall = in_array('zoomall', $buttons);
+			$this->recentre = in_array('recentre', $buttons);
+			$this->jumpto = in_array('jumpto', $buttons);
+			$this->query = in_array('query', $buttons);
+			$this->queryradius = in_array('queryradius', $buttons);
+			$this->polyquery = in_array('polyquery', $buttons);
+			$this->touchquery = in_array('touchquery', $buttons);
+			$this->measure = in_array('measure', $buttons);
+			$this->freepolygon = in_array('freepolygon', $buttons);
+			$this->freetext = in_array('freetext', $buttons);
+			$this->freearrow = in_array('freearrow', $buttons);
+			return 1;
+		}else return 0;
   }
 	function setGroupStatus($formvars) {
 		$this->groupset=$this->getGroups('');
@@ -1956,7 +1963,7 @@
     $this->Layer = array();
     $this->disabled_classes = $this->read_disabled_classes();
 		$i = 0;
-    while ($rs=mysql_fetch_array($query)) {
+    while ($rs=mysql_fetch_assoc($query)) {
       if($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivStatus'] != '0')){    # bei withclasses == 2 werden für alle Layer die Klassen geladen, bei withclasses == 1 werden die Klassen nur dann geladen, wenn der Layer aktiv ist
         $rs['Class']=$this->read_Classes($rs['Layer_ID'], $this->disabled_classes);
       }

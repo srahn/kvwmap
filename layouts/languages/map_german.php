@@ -25,5 +25,9 @@
   $strSave="Ausschnitt speichern";
   $strMap="Kartenausschnitt";
   $strMapSize="Größe anpassen";
+	$strLayerControl="Themensteuerung";
+	$strDeactivateAllLayer="Hier klicken, um alle Themen zu deaktivieren";
+	$strClearAllQuerys="Hier klicken, um alle Abfragehaken zu entfernen";
+	$strInfoQuery="Informationsabfrage";
   
 ?>
