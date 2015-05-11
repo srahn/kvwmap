@@ -3257,7 +3257,7 @@ class GUI {
     $data_explosion = explode(' ', $data);
     $this->formvars['columnname'] = $data_explosion[0];
     $select = $this->mapDB->getSelectFromData($data);
-    $this->formvars['fromwhere'] = 'from ('.$select.') as foo where 1=1';
+    $this->formvars['fromwhere'] = pg_escape_string('from ('.$select.') as foo where 1=1');
     if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
       $this->formvars['fromwhere'] .= ' where (1=1)';
     }
@@ -3378,7 +3378,7 @@ class GUI {
 	  	$select = substr($select, 0, $orderbyposition);
   	}
     
-    $this->formvars['fromwhere'] = 'from ('.$select.') as foo where 1=1';
+    $this->formvars['fromwhere'] = pg_escape_string('from ('.$select.') as foo where 1=1');
     if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
       $this->formvars['fromwhere'] .= ' where (1=1)';
     }    
@@ -6100,9 +6100,7 @@ class GUI {
     # Abfragen der Layerdaten wenn eine layer_id zur Änderung selektiert ist
     if ($this->formvars['selected_layer_id'] > 0) {
       $this->classes = $mapDB->read_Classes($this->formvars['selected_layer_id'], NULL, true);
-      $save = $this->formvars['selected_layer_id'];
-      $this->formvars = $mapDB->get_Layer($this->formvars['selected_layer_id']);
-      $this->formvars['selected_layer_id'] = $save;
+      $this->layerdata = $mapDB->get_Layer($this->formvars['selected_layer_id']);
       # Abfragen der Stellen des Layer
       $this->formvars['selstellen']=$mapDB->get_stellen_from_layer($this->formvars['selected_layer_id']);
     }
@@ -6186,8 +6184,6 @@ class GUI {
 
   function LayerAendern(){
 		global $supportedLanguages;
-  	$this->formvars['pfad'] = strip_pg_escape_string($this->formvars['pfad']);
-  	$this->formvars['Data'] = strip_pg_escape_string($this->formvars['Data']);
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $mapDB->updateLayer($this->formvars);
     $old_layer_id = $this->formvars['selected_layer_id'];
@@ -6201,7 +6197,7 @@ class GUI {
 					#---------- Speichern der Layerattribute -------------------
 			    $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 			    $layerdb->setClientEncoding();
-			    $path = $this->formvars['pfad'];
+			    $path = strip_pg_escape_string($this->formvars['pfad']);
 			    $attributes = $mapDB->load_attributes($layerdb, $path);
 			    $mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes, $this->formvars['maintable']);
 			    #---------- Speichern der Layerattribute -------------------
@@ -6799,7 +6795,7 @@ class GUI {
 				if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
 			  	$select = substr($select, 0, $orderbyposition);
 		  	}
-		    $this->formvars['fromwhere'] = 'from ('.$select.') as foo where 1=1';
+		    $this->formvars['fromwhere'] = pg_escape_string('from ('.$select.') as foo where 1=1');
 		    if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
 		      $this->formvars['fromwhere'] .= ' where (1=1)';
 		    } 
@@ -7369,7 +7365,7 @@ class GUI {
             $space_explosion = explode(' ', $data);
             $this->formvars['columnname'] = $space_explosion[0];
             $select = $mapdb->getSelectFromData($data);
-            $this->formvars['fromwhere'] = 'from ('.$select.') as foo where 1=1';
+            $this->formvars['fromwhere'] = pg_escape_string('from ('.$select.') as foo where 1=1');
             if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
               $this->formvars['fromwhere'] .= ' where (1=1)';
             }
@@ -8174,7 +8170,7 @@ class GUI {
 			if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
 		  	$select = substr($select, 0, $orderbyposition);
 	  	}
-	    $this->formvars['fromwhere'] = 'from ('.$select.') as foo where 1=1';
+	    $this->formvars['fromwhere'] = pg_escape_string('from ('.$select.') as foo where 1=1');
 	    if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
 	      $this->formvars['fromwhere'] .= ' where (1=1)';
 	    }
@@ -8609,7 +8605,7 @@ class GUI {
 			if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
 		  	$select = substr($select, 0, $orderbyposition);
 	  	}
-	    $this->formvars['fromwhere'] = 'from ('.$select.') as foo where 1=1';
+	    $this->formvars['fromwhere'] = pg_escape_string('from ('.$select.') as foo where 1=1');
 	    if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
 	      $this->formvars['fromwhere'] .= ' where (1=1)';
 	    }
@@ -13702,8 +13698,6 @@ class db_mapObj{
   function updateLayer($formvars){
 		global $supportedLanguages;
   	$formvars['pfad'] = str_replace(array("\r\n", "\n"), '', $formvars['pfad']);
-    $formvars['pfad'] = str_replace ( "'", "''", $formvars['pfad']);
-    $formvars['Data'] = str_replace ( "'", "''", $formvars['Data']);
 
     $sql = 'UPDATE layer SET ';
     if($formvars['id'] != ''){

@@ -19,8 +19,6 @@ function MapserverErrorHandler($errno, $errstr, $errfile, $errline){
 
 function strip_pg_escape_string($string){
 	$string = str_replace("''", "'", $string);
-	$string = str_replace(",' ", ",'' ", $string);
-	$string = str_replace(" ' ", " '' ", $string);
 	return $string;
 }
 
