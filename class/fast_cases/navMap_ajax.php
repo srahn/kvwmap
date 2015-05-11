@@ -41,8 +41,6 @@
 }
 function strip_pg_escape_string($string){
 	$string = str_replace("''", "'", $string);
-	$string = str_replace(",' ", ",'' ", $string);
-	$string = str_replace(" ' ", " '' ", $string);
 	return $string;
 }
 class GUI {  var $layout;  var $style;  var $mime_type;  var $menue;  var $pdf;  var $addressliste;  var $debug;  var $dbConn;  var $flst;  var $formvars;  var $legende;  var $map;  var $mapDB;  var $img;  var $FormObject;  var $StellenForm;  var $Fehlermeldung;  var $Hinweis;  var $Stelle;  var $ALB;  var $activeLayer;  var $nImageWidth;  var $nImageHeight;  var $user;  var $qlayerset;  var $scaleUnitSwitchScale;  var $map_scaledenom;  var $map_factor;  var $formatter;  function GUI($main, $style, $mime_type) {
