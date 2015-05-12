@@ -291,7 +291,7 @@
 												$datapart .= '<a href="'.$url.$dokumentpfad.'"><img class="preview_image" src="'.$url.$thumbname.'" '.$onmouseover.'></a>';									
 											}
 											else{
-												$datapart .= '<a href="'.$url.$dokumentpfad.'"><img class="preview_doc" src="'.$url.$thumbname.'" '.$onmouseover.'></a>';									
+												$datapart .= '<a href="'.$url.$dokumentpfad.'"><img class="preview_doc" src="'.$url.$thumbname.'"></a>';									
 											}
 			  							$datapart .= '</td><td>';
 			  							if($attribute_privileg != '0' AND !$lock[$k]){
