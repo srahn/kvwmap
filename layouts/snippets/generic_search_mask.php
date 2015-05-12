@@ -106,6 +106,10 @@ include(LAYOUTPATH.'languages/generic_search_'.$this->user->rolle->language.'.ph
                     <input size="9" id="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" type="hidden" value="<? echo $this->formvars[$prefix.'value2_'.$this->attributes['name'][$i]]; ?>">
                     <?
                 }break;
+								
+								case 'Autovervollständigungsfeld' : {
+									echo Autovervollstaendigungsfeld($this->formvars['selected_layer_id'], $this->attributes['name'][$i], $i, $this->attributes['alias'][$i], $prefix.'value_'.$this->attributes['name'][$i], $this->formvars[$prefix.'value_'.$this->attributes['name'][$i]], $attributes['enum_output'][$i][$k], 1, 0, NULL, NULL, NULL, NULL, false, 15);
+								}break;
                 
                 case 'Checkbox' : {
                   ?><select  id="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>"><?echo "\n"; ?>
