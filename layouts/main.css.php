@@ -505,7 +505,8 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 .raster_record_open span{line-height:16px;font-size: 15px;transition: all 0.25s ease;}
 .raster_record_open img{width: auto; transition: all 0.25s ease;}
 .raster_record_open .tr_hide{visibility:visible;}
-.raster_record_open .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 0.25s ease;}
+.raster_record_open .preview_image{width: 125px;transition: all 0.25s ease;}
+.raster_record_open .preview_image:hover{width: 125; ?>px;transition: all 0.25s ease;}
 
 
 #layer  h2{

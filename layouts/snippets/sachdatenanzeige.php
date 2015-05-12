@@ -197,3 +197,7 @@ for($i=0;$i<$anzLayer;$i++){
 <input name="result" type="hidden" value="">
 <input name="firstpoly" type="hidden" value="<?php echo $this->formvars['firstpoly']; ?>">
 <input name="export_format" type="hidden" value="<?php echo $this->formvars['export_format']; ?>">
+
+<div id="vorschau" style="border: 1px solid grey;z-index: 1000; position: fixed; right:20px; top:20px; ">
+	<img id="preview_img" src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
+</div>

@@ -284,11 +284,14 @@
 												$url = IMAGEURL.$this->document_loader_name.'?dokument=';
 											}											
 											$datapart .= '<table border="0"><tr><td>';
+											if($hover_preview){
+												$onmouseover='onmouseenter="document.getElementById(\'preview_img\').src=this.src" onmouseleave="document.getElementById(\'preview_img\').src=\''.GRAPHICSPATH.'leer.gif\'"';
+											}
 											if(in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf')) ){
-												$datapart .= '<a href="'.$url.$dokumentpfad.'"><img class="preview_image" src="'.$url.$thumbname.'"></a>';									
+												$datapart .= '<a href="'.$url.$dokumentpfad.'"><img class="preview_image" src="'.$url.$thumbname.'" '.$onmouseover.'></a>';									
 											}
 											else{
-												$datapart .= '<a href="'.$url.$dokumentpfad.'"><img class="preview_doc" src="'.$url.$thumbname.'"></a>';									
+												$datapart .= '<a href="'.$url.$dokumentpfad.'"><img class="preview_doc" src="'.$url.$thumbname.'" '.$onmouseover.'></a>';									
 											}
 			  							$datapart .= '</td><td>';
 			  							if($attribute_privileg != '0' AND !$lock[$k]){

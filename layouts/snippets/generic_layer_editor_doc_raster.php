@@ -60,6 +60,7 @@
 <table border="0" cellspacing="0" cellpadding="2">
 	<tr>
 <?
+	$hover_preview = true;
 	$checkbox_names = '';
 	$columnname = '';
 	$tablename = '';
