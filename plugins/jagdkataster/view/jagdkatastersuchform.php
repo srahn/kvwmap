@@ -62,6 +62,17 @@ function zoomto_datasets(layer_id){
 	}
 }
 
+function delete_jagdbezirke(layer_id){
+	if(check_for_selection(layer_id)){
+		Check = confirm('Wollen Sie diese Jagdbezirke wirklich löschen?');
+		if(Check == true){
+			document.GUI.go.value = 'jagdkatastereditor_Loeschen';
+			document.GUI.chosen_layer_id.value = layer_id;
+			document.GUI.submit();
+		}
+	}
+}
+
 //-->
 </script>
 
@@ -205,6 +216,10 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 			<tr>
       	<td width="30" valign="top" align="center" valign="bottom"><img src="<? echo GRAPHICSPATH?>pfeil_unten-rechts.gif"></td>
       	<td height="29" valign="bottom" colspan="5"><a href="javascript:zoomto_datasets(<? echo LAYER_ID_JAGDBEZIRKE; ?>);">in Karte anzeigen</a>&nbsp;<input type="checkbox" name="selektieren" value="1">selektieren</td>
+      </tr>
+			<tr>
+      	<td width="30" valign="top" align="center" valign="bottom"><img src="<? echo GRAPHICSPATH?>pfeil_unten-rechts.gif"></td>
+      	<td height="29" valign="bottom" colspan="5"><a href="javascript:delete_jagdbezirke(<? echo LAYER_ID_JAGDBEZIRKE; ?>);">löschen</a></td>
       </tr>
       <tr>
       	<td colspan="6" align="center"><a href="javascript:csv_export();">CSV-Export</a></td>

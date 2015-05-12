@@ -194,8 +194,20 @@ class jagdkataster {
 		return $jagdbezirk;
 	}
 
-	function deletejagdbezirk($oid){
-		$sql = "DELETE FROM jagdkataster.jagdbezirke WHERE oid = ".sprintf("%.0f", $oid);
+	function deletejagdbezirk($formvars){
+		if($formvars['oid'] == ''){		# mehrere Jagdbezirke
+			$checkbox_names = explode('|', $formvars['checkbox_names_'.$formvars['chosen_layer_id']]);
+	    for($i = 0; $i < count($checkbox_names); $i++){
+	      if($formvars[$checkbox_names[$i]] == 'on'){
+	        $element = explode(';', $checkbox_names[$i]);     #  check;table_alias;table;oid
+					$oids[] = $element[3];
+	      }
+	    }
+		}
+		else{				# ein Jagdbezirk
+			$oids[] = $formvars['oid']; 
+		}
+		$sql = "DELETE FROM jagdkataster.jagdbezirke WHERE oid IN (".implode(',', $oids).")";
 		$ret = $this->database->execSQL($sql, 4, 1);
 	}
 	

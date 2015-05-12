@@ -198,12 +198,17 @@
 
 	$this->jagdkatastereditor_loeschen = function() use ($GUI){
     $jagdkataster = new jagdkataster($GUI->pgdatabase);
-    $jagdkataster->deletejagdbezirk($GUI->formvars['oid']);
-    $GUI->loadMap('DataBase');
-    $GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-    $GUI->drawMap();
-    $GUI->saveMap('');
-    $GUI->output();
+    $jagdkataster->deletejagdbezirk($GUI->formvars);
+		if($GUI->formvars['oid'] == ''){
+			$GUI->jagdbezirke_auswaehlen_suchen();		# zurück zum Suchergebnis
+		}
+		else{
+			$GUI->loadMap('DataBase');
+			$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+			$GUI->drawMap();
+			$GUI->saveMap('');
+			$GUI->output();
+		}
   };
 
 	$this->jagdkatastereditor_kopieren = function() use ($GUI){
