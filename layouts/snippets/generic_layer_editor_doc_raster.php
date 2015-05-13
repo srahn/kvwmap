@@ -150,7 +150,12 @@
 							$attributes['alias'][$j] = $attributes['name'][$j];
 						}
 						echo '<table width="100%" cellspacing="0" cellpadding="0"><tr style="border: none"><td>';
-						echo '<span style="color: #222222;" title="'.$attributes['tooltip'][$j].'">'.$attributes['alias'][$j].'</span>';
+						if(!in_array($attributes['form_element_type'][$j], array('SubFormPK', 'SubFormEmbeddedPK', 'SubFormFK', 'dynamicLink'))){
+							echo '<a title="Sortieren nach '.$attributes['alias'][$j].'" href="javascript:change_orderby(\''.$attributes['name'][$j].'\', '.$layer['Layer_ID'].');">'.$attributes['alias'][$j].'</a>';
+						}
+						else{
+							echo '<span style="color:#222222;">'.$attributes['alias'][$j].'</span>';
+						}
 						if($attributes['nullable'][$j] == '0' AND $attributes['privileg'][$j] != '0'){
 							echo '<span title="Eingabe erforderlich">*</span>';
 						}
@@ -317,6 +322,7 @@
 <table>
 </div>
 <input type="hidden" name="checkbox_names_<? echo $layer['Layer_ID']; ?>" value="<? echo $checkbox_names; ?>">
+<input type="hidden" name="orderby<? echo $layer['Layer_ID']; ?>" id="orderby<? echo $layer['Layer_ID']; ?>" value="<? echo $this->formvars['orderby'.$layer['Layer_ID']]; ?>">
 <?
   }
   else {

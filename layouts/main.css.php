@@ -471,6 +471,7 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 /* Ohne Mouseover: */
 .raster_record{position: relative; max-width: 135px;border:1px solid gray;margin: 5px;padding: 0.0001px;transition: all 0.25s ease;}
 .raster_record .gle tr{border:none;}
+.raster_record a{font-size: 0.0001px;transition: all 0.25s ease;}
 /* Attribute, die ausgeblendet werden sollen: */
 .raster_record .tr_hide{visibility:collapse;}
 .raster_record .tr_hide td{line-height: 0.0001px;padding: 0.0001px !important;transition: all 0.25s ease;}
@@ -496,6 +497,7 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 .raster_record_open .gle tr{border:1px dotted gray;}
 .raster_record_open .gle tr:hover{border:1px solid #03476F;}
 .raster_record_open td{line-height: 16px;padding: 2px;transition: all 0.25s ease;}
+.raster_record_open a{font-size: 15px;transition: all 0.25s ease;}
 .raster_record_open input{width:200px;font-size: 15px;height:22px;transition: all 0.25s ease;}
 .raster_record_open textarea{font-size: 15px;transition: all 0.25s ease;}
 .raster_record_open .tr_show #formelement{width: 100%;overflow: visible}
