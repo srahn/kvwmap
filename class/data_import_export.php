@@ -586,15 +586,12 @@ class data_import_export {
     if($this->formvars['epsg']){
     	$select = substr($sql, 0, strrpos(strtolower($sql), 'from'));
     	$rest = substr($sql, strrpos(strtolower($sql), 'from'));
-    	 if(strpos($select, '.'.$this->attributes['the_geom']) !== false){		// table.the_geom muss ersetzt werden
-    		 $select = str_replace($the_geom, 'st_transform('.$the_geom.', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);
-    	 }
-    	 else{		// nur the_geom muss ersetzt werden
-    		$select = str_replace(',  '.$this->attributes['the_geom'], ', st_transform('.$this->attributes['the_geom'].', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);    		
-    		$select = str_replace(', '.$this->attributes['the_geom'], ', st_transform('.$this->attributes['the_geom'].', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);
-    		$select = str_replace(','.$this->attributes['the_geom'], ',st_transform('.$this->attributes['the_geom'].', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);
-				$select = str_replace(' '.$this->attributes['the_geom'].',', ' st_transform('.$this->attributes['the_geom'].', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'].',', $select);
-    	}
+    	if(strpos($select, '.'.$this->attributes['the_geom']) !== false) $geom = $the_geom;	// table.the_geom muss ersetzt werden
+    	else	$geom = $this->attributes['the_geom'];	// nur the_geom muss ersetzt werden 
+			$select = str_replace(',  '.$geom, ', st_transform('.$geom.', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);    		
+			$select = str_replace(', '.$geom, ', st_transform('.$geom.', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);
+			$select = str_replace(','.$geom, ',st_transform('.$geom.', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);
+			$select = str_replace(' '.$geom.',', ' st_transform('.$geom.', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'].',', $select);
     	$sql = $select.$rest;
     }
     # order by rausnehmen
