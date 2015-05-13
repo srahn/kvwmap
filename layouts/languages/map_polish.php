@@ -23,7 +23,7 @@
   $strFreeText="dodaj tekst"; 
   $strX="R"; 
   $strY="H"; 
-  $strSave="Mapa sklepu";
+  $strSaveExtent="Mapa sklepu";
   $strMap="Mapa";
   $strMapSize="Zmiana rozmiaru";
 ?>

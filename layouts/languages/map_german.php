@@ -22,7 +22,7 @@
   $strFreeText="Text Hinzufuegen";
   $strX="R";  
   $strY="H";
-  $strSave="Ausschnitt speichern";
+  $strSaveExtent="Ausschnitt speichern";
   $strMap="Kartenausschnitt";
   $strMapSize="Größe anpassen";
 	$strLayerControl="Themensteuerung";

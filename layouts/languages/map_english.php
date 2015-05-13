@@ -23,7 +23,7 @@
   $strX="E";  
   $strY="N";
   $strChoose="Load Extent";
-  $strSave="Save Extent";
+  $strSaveExtent="Save Extent";
   $strMap="Map";
 	$strMapSize="Adjust Mapsize";
 	$strLayerControl="Layer Control";

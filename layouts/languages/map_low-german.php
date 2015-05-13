@@ -5,7 +5,7 @@
   $strLoadNew="Nieg Loden";
   $strMapImageURL="Koortbeld taun Ofsekern anwiesen";
   $strChoose="Utwählen";
-  $strSave="Spiekern";
+  $strSaveExtent="Spiekern";
   $strMapScale="Maat";
   $strMapSettingsFrom="Koortinstellen vun";
   $strPreviousView="v'+unescape('%F6')+'rherig Ansich";
