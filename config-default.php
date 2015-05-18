@@ -5,7 +5,7 @@
 #                                                                  #
 ####################################################################
 # aktuelle Versionsnummer
-define('VERSION','2.0');
+define('VERSION','2.1');
 define('APPLVERSION','kvwmap/');
 # Bezeichnung der MySQL-Datenbank mit den Benutzerdaten
 $dbname='kvwmapdb';
