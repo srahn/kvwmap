@@ -136,7 +136,7 @@ if($this->formvars['gps_follow'] == ''){
 
   <table border="0" cellspacing="0" cellpadding="0">
     <tr>
-      <td align="center" valign="top" style="border-right:1px solid; border-color:#CCCCCC;" height="100%">
+      <td align="center" valign="top" class="map-right" height="100%">
       <div id="map">
       <table bgcolor="#FFFFFF" border="0" cellpadding="0" cellspacing="0">
         <tr bgcolor="#FFFFFF" align="center">
@@ -177,7 +177,7 @@ if($this->formvars['gps_follow'] == ''){
         	<td width="100%">
         		<table width="100%" border="0" cellpadding="0" cellspacing="0">
         			<tr>
-        				<td width="100%" colspan="3" style="border-top: 1px solid #aaaaaa;">
+        				<td width="100%" colspan="3" class="map-bottom">
         					<table width="100%" border="0" cellpadding="0" cellspacing="0">
 						        <tr style="background-color: <? echo BG_MENUETOP; ?>;">
 						          <td width="25%" height="30">
@@ -230,7 +230,7 @@ if($this->formvars['gps_follow'] == ''){
 			        </tr>
 			        <? } ?>
         			<tr>
-        				<td width="100%" colspan="3" style="border-top: 1px solid #aaaaaa;">
+        				<td width="100%" colspan="3" class="map-bottom">
         					<table width="100%" border="0" cellpadding="0" cellspacing="0">
 			        			<tr style="background-color: <? echo BG_MENUETOP; if($this->user->rolle->runningcoords == '0'){echo ';display:none';} ?>">
 			        				<td style="width:100px">
@@ -256,7 +256,7 @@ if($this->formvars['gps_follow'] == ''){
 			        # 2006-03-20 pk
 			        if ($this->user->rolle->newtime!='') { ?>
 			        <tr style="background-color: <? echo BG_MENUESUB; ?>;">
-			          <td style="border-top: 1px solid #aaaaaa;border-bottom: 1px solid #aaaaaa;" height="33" colspan="3">
+			          <td class="map-options" height="33" colspan="3">
 			          	<table width="100%" border="0" cellpadding="0" cellspacing="0">
 			          		<tr>
 			          			<td>
@@ -264,7 +264,7 @@ if($this->formvars['gps_follow'] == ''){
 						          		&nbsp;&nbsp;<a href="index.php?go=Kartenkommentar_Formular&consumetime=<?php echo $this->user->rolle->newtime; ?>&hauptkarte=<?php echo $this->img['hauptkarte']; ?>"><?php echo $strSaveExtent; ?></a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="index.php?go=Kartenkommentar_Waehlen&prevtime=<?php echo $this->user->rolle->newtime; ?>"><?php echo $strChoose ?></a>&nbsp;&nbsp;|&nbsp;&nbsp;<? if(SHOW_MAP_IMAGE == 'true'){ ?><a id="MapImageLink" target="_blank" href="" onmouseover="javascript:showMapImage();"><?php echo $strMapImageURL; ?></a></span><? } ?>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="javascript:resizemap2window();" ><? echo $strMapSize; ?></a>
 						            </div>
 						          </td>
-						          <td>
+						          <td class="special-options">
 												<input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang
 												<div id="options"></div><!-- hier werden die Spezialoptionen eingefügt -->
 											</td>
@@ -287,9 +287,9 @@ if($this->formvars['gps_follow'] == ''){
       </table>
       </div>
       </td>
-      <td valign="top" style="border-top: 1px solid #eeeeee;">
+      <td valign="top" class="legend-top">
 				<div id="legenddiv" <? if (!ie_check() AND $this->user->rolle->hideLegend)echo 'onmouseenter="slide_legend_in(event);" onmouseleave="slide_legend_out(event);" class="slidinglegend_slideout"'; else echo 'class="normallegend"'; ?>>
-					<table width="100%" border="0" cellpadding="0" cellspacing="0">
+					<table width="100%" border="0" cellpadding="0" cellspacing="0" class="legend-switch">
 						<tr>
 							<td bgcolor="<?php echo BG_DEFAULT ?>" align="left"><?php
 								if ($this->user->rolle->hideLegend) {

@@ -70,7 +70,7 @@ function showMenue() {
   document.all.linkMinMax.title="Menü verstecken";
 }
 </script>
-<table width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="<?php echo BG_DEFAULT ?>">
+<table class="menue-switch" width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="<?php echo BG_DEFAULT ?>">
     <tr>
       <td bgcolor="<?php echo BG_DEFAULT ?>" align="right"><?php
         if ($this->user->rolle->hideMenue) {

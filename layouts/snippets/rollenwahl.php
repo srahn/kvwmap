@@ -54,7 +54,7 @@ Text_histtimestamp=["<? echo $strHelp; ?>:","<? echo $strHinthist_timestamp; ?>"
 <div style="margin:10px;margin-bottom:20px;border: 1px solid #cccccc">
 	<table width="700" border="0" cellpadding="0" cellspacing="0">
 		<tr>
-			<td colspan="2" style="background-color: #c7d9e6; padding: 2px;padding-left: 8px"><span class="fett"><? echo $strGeneralOptions; ?></span></td>
+			<td colspan="2" class="rollenwahl-gruppen"><span class="fett"><? echo $strGeneralOptions; ?></span></td>
 		</tr>
 		<tr>
 			<td align="left" valign="top" style="width: 250px;padding: 8px"><?php echo $strTask; ?>:&nbsp;</td>
@@ -169,7 +169,7 @@ Text_histtimestamp=["<? echo $strHelp; ?>:","<? echo $strHinthist_timestamp; ?>"
 <div style="margin:10px;margin-bottom:20px;border: 1px solid #cccccc">
 	<table width="700" border="0" cellpadding="0" cellspacing="0">
 			<tr>
-			<td colspan="2" style="background-color: #c7d9e6; padding: 2px;padding-left: 8px"><span class="fett"><? echo $strMapOptions; ?></span></td>
+			<td colspan="2" class="rollenwahl-gruppen"><span class="fett"><? echo $strMapOptions; ?></span></td>
 		</tr>
 		<tr>
 			<td align="left" style="width: 250px;padding: 8px"><?php echo $strZoomFactor; ?>:&nbsp;</td>
@@ -270,7 +270,7 @@ Text_histtimestamp=["<? echo $strHelp; ?>:","<? echo $strHinthist_timestamp; ?>"
 <div style="margin:10px;margin-bottom:0px;border: 1px solid #cccccc">
 	<table width="700" border="0" cellpadding="0" cellspacing="0">
 		<tr>
-			<td colspan="2" style="background-color: #c7d9e6; padding: 2px;padding-left: 8px"><span class="fett"><? echo $strDataPresentation; ?></span></td>
+			<td colspan="2" class="rollenwahl-gruppen"><span class="fett"><? echo $strDataPresentation; ?></span></td>
 		</tr>
 		<tr>
 			<td align="left" style="width: 250px;padding: 8px"><?php echo $strSingleQuery; ?>:&nbsp;</td>

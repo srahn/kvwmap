@@ -731,3 +731,26 @@ tbody.gle tr:hover {
     flex-direction: row;
     align-items:stretch;
 }
+
+.map-right{
+	border-right: 1px solid #CCCCCC;
+}
+
+.map-bottom{
+	border-top: 1px solid #aaaaaa;
+}
+
+.map-options{
+	border-top: 1px solid #aaaaaa;
+	border-bottom: 1px solid #aaaaaa;
+}
+
+.legend-top{
+	border-top: 1px solid #eeeeee;
+}
+
+.rollenwahl-gruppen{
+	background-color: #c7d9e6; 
+	padding: 2px;
+	padding-left: 8px
+}
