@@ -25,4 +25,8 @@
  $strNewEmbeddedPK="neu";
  $strTitleGeometryEditor="Geometrie-Editor";
  $strShowAll="alle anzeigen";
+ $strRememberDataset="Datensatz merken";
+ $strRemember="merken";
+ $strDontRememberDataset="Datensatz nicht mehr merken";
+ $strPrintDataset="Datensatz drucken";
 ?>

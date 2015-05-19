@@ -24,4 +24,8 @@
  $strNewFK="new";
  $strNewEmbeddedPK="new";
  $strShowAll="show all";
+ $strRememberDataset="bookmark record";
+ $strRemember="bookmark";
+ $strDontRememberDataset="bookmark record no longer";
+ $strPrintDataset="print record";
 ?>
