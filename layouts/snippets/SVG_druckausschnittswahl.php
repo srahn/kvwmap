@@ -429,7 +429,7 @@ function choose_print_extent(evt) {
 		}
   }
   else{
-  	alert("Bitte geben Sie einen Druckmassstab ein");
+  	alert("'.$strWarning4.'");
   }
 }
 
@@ -592,7 +592,7 @@ function deletelast(evt) {
 				<g transform="translate(-4.7 -12) scale(1.35 1.35) matrix(0.7 0 0 0.7 -3.5 0)">
 					<rect x="14" y="20" width="18" height="12" style="fill:none;stroke:rgb(0,0,0);stroke-width:1.5"/>
 				</g>
-				<rect id="text0" onmouseover="show_tooltip(\'Druckausschnitt setzen\',evt.clientX,evt.clientY)" x="0" y="0" rx="1" ry="1" width="25" height="25" fill="none" opacity="0.2"/>
+				<rect id="text0" onmouseover="show_tooltip(\''.$strSetPrintExtent.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="1" ry="1" width="25" height="25" fill="none" opacity="0.2"/>
 	    </g>
 	    		
 	    <g id="mapscale" onmousedown="get_map_scale();" transform="translate(26 0 )">
@@ -605,7 +605,7 @@ function deletelast(evt) {
 					<rect x="14" y="17" width="17" height="17" style="fill:none;stroke:rgb(0,0,0);stroke-width:1.5;stroke-dasharray:4,3,3,3,8,3,3,3,8,3,3,3,8,3,3,3,4"/>
 				</g>
 				<text transform="scale(0.6 0.6)" x="20" y="27" style="text-anchor:middle;fill:rgb(0,0,0);font-size:18;font-family:Arial;">M</text>
-				<rect id="mapscale0" onmouseover="show_tooltip(\'Kartenmassstab uebernehmen\',evt.clientX,evt.clientY)" x="0" y="0" rx="1" ry="1" width="25" height="25" fill="white" opacity="0.0"/>
+				<rect id="mapscale0" onmouseover="show_tooltip(\''.$strUseMapscale.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="1" ry="1" width="25" height="25" fill="white" opacity="0.0"/>
 	    </g>
 
 			<g id="refpoint" onmousedown="set_refpoint_on();" transform="translate(52 0 )">
@@ -618,7 +618,7 @@ function deletelast(evt) {
 					<text x="23" y="15" style="text-anchor:middle;fill:black;font-size:10;font-family:Arial;font-weight:bold">Punkt</text>
 					<circle cx="23" cy="21" r="3"/>
 				</g>
-				<rect id="refpoint0" onmouseover="show_tooltip(\'Bezugspunkt setzen\',evt.clientX,evt.clientY)" x="0" y="0" rx="1" ry="1" width="25" height="25" fill="white" opacity="0.2"/>
+				<rect id="refpoint0" onmouseover="show_tooltip(\''.$strSetRefPoint.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="1" ry="1" width="25" height="25" fill="white" opacity="0.2"/>
 	    </g>
 	    
 		</g>

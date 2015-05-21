@@ -11,11 +11,11 @@ function setprintextent(wert){
 
 function druck_pdf(){
 	if(document.GUI.printextent.value == 'false'){
-		alert("Bitte aktualisieren Sie den Druckausschnitt durch Klick in die Maßstabseingabe und dann [Enter].");
+		alert("<? echo $strWarning1; ?>");
 	}
 	else{
 		if(Math.abs(document.GUI.angle.value) > 90){
-			alert("Bitte geben Sie einen Winkel zwischen -90° und 90° an.");
+			alert("<? echo $strWarning2; ?>");
 		}
 		else{
 			if(document.GUI.printscale.value != ''){
@@ -27,11 +27,11 @@ function druck_pdf(){
 					document.GUI.target = '';
 				}
 				else{
-					alert("Bitte wählen Sie einen Druckausschnitt aus.");
+					alert("<? echo $strWarning3; ?>");
 				}
 			}
 			else{
-				alert("Bitte geben Sie einen Druckmassstab ein.");
+				alert("<? echo $strWarning4; ?>");
 			}
 		}
 	}
@@ -40,11 +40,11 @@ function druck_pdf(){
 function preview(){
 	document.GUI.target = '';
 	if(document.GUI.printextent.value == 'false'){
-		alert("Bitte aktualisieren Sie den Druckausschnitt durch Klick in die Maßstabseingabe und dann [Enter].");
+		alert("<? echo $strWarning1; ?>");
 	}
 	else{
 		if(Math.abs(document.GUI.angle.value) > 90){
-			alert("Bitte geben Sie einen Winkel zwischen -90° und 90° an.");
+			alert("<? echo $strWarning2; ?>");
 		}
 		else{
 			if(document.GUI.printscale.value != ''){
@@ -53,11 +53,11 @@ function preview(){
 					document.GUI.submit();
 				}
 				else{
-					alert("Bitte wählen Sie einen Druckausschnitt aus.");
+					alert("<? echo $strWarning3; ?>");
 				}
 			}
 			else{
-				alert("Bitte geben Sie einen Druckmassstab ein.");
+				alert("<? echo $strWarning4; ?>");
 			}
 		}
 	}
@@ -66,11 +66,11 @@ function preview(){
 function save(){
 	document.GUI.target = '';
 	if(document.GUI.name.value == ''){
-		alert("Bitte geben Sie einen Namen für den Druckausschnitt an.");
+		alert("<? echo $strWarning5; ?>");
 	}
 	else{
 		if(Math.abs(document.GUI.angle.value) > 90){
-			alert("Bitte geben Sie einen Winkel zwischen -90° und 90° an.");
+			alert("<? echo $strWarning2; ?>");
 		}
 		else{
 			if(document.GUI.printscale.value != ''){
@@ -79,11 +79,11 @@ function save(){
 					document.GUI.submit();
 				}
 				else{
-					alert("Bitte wählen Sie einen Druckausschnitt aus.");
+					alert("<? echo $strWarning3; ?>");
 				}
 			}
 			else{
-				alert("Bitte geben Sie einen Druckmassstab ein.");
+				alert("<? echo $strWarning4; ?>");
 			}
 		}
 	}
@@ -92,7 +92,7 @@ function save(){
 function load(){
 	document.GUI.target = '';
 	if(document.GUI.druckausschnitt.value == ''){
-		alert("Bitte wählen Sie einen Druckausschnitt aus.");
+		alert("<? echo $strWarning3; ?>");
 	}
 	else{
 		document.GUI.submit();
@@ -102,7 +102,7 @@ function load(){
 function remove(){
 	document.GUI.target = '';
 	if(document.GUI.druckausschnitt.value == ''){
-		alert("Bitte wählen Sie einen Druckausschnitt aus.");
+		alert("<? echo $strWarning3; ?>");
 	}
 	else{
 		document.GUI.go.value = "Druckausschnitt_loeschen";
