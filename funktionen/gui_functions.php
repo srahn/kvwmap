@@ -229,13 +229,14 @@ function getlegend(groupid, layerid, fremde){
 	}
 }
 
-function updateThema(event, thema, query, groupradiolayers, queryradiolayers){
+function updateThema(event, thema, query, groupradiolayers, queryradiolayers, instantreload){
 	var status = query.checked;
+	console.log(status);
 	var reload = false;
   if(status == true){
     if(thema.checked == false){
 			thema.checked = true;		
-			if(1 == <? echo $this->user->rolle->instant_reload; ?>)reload = true;
+			if(instantreload)reload = true;
 		}
 		query.title="Dieses Thema abfragbar schalten";
   }
@@ -257,6 +258,7 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers){
 					query.checked2 = query.checked;		// den check-Status hier nochmal merken, damit man ihn bei allen Click-Events setzen kann, sonst setzt z.B. Chrome den immer wieder zurueck
 					if(query.checked == true){
 						thema.checked = true;
+						if(instantreload)reload = true;
 					}
 				}
 			}
@@ -276,15 +278,16 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers){
 					query.checked2 = query.checked;		// den check-Status hier nochmal merken, damit man ihn bei allen Click-Events setzen kann, sonst setzt z.B. Chrome den immer wieder zurueck
 					if(query.checked == true){
 						thema.checked = true;
+						if(instantreload)reload = true;
 					}
 				}
 			}
 		}
   }
-	if(reload)document.GUI.submit();
+	if(reload)currentform.neuladen.click();
 }
 
-function updateQuery(event, thema, query, radiolayers){
+function updateQuery(event, thema, query, radiolayers, instantreload){
   if(query){
     if(thema.checked == false){
       query.checked = false;
@@ -312,7 +315,7 @@ function updateQuery(event, thema, query, radiolayers){
   		}
   	}
   }
-	if(1 == <? echo $this->user->rolle->instant_reload; ?>)document.GUI.submit();
+	if(instantreload)currentform.neuladen.click();
 }
 
 function preventDefault(e){
@@ -324,7 +327,7 @@ function preventDefault(e){
 	return false;
 }
 
-function selectgroupquery(group){
+function selectgroupquery(group, instantreload){
   value = group.value+"";
   layers = value.split(",");
   i = 0;
@@ -342,12 +345,13 @@ function selectgroupquery(group){
     if(query){
       query.checked = check;
       thema = document.getElementById("thema_"+layers[i]);
-      updateThema('', thema, query, '', '');
+      updateThema('', thema, query, '', '', 0);
     }
   }
+	if(instantreload)currentform.neuladen.click();
 }
 
-function selectgroupthema(group){
+function selectgroupthema(group, instantreload){
   var value = group.value+"";
   var layers = value.split(",");
 	var check;
@@ -363,9 +367,10 @@ function selectgroupthema(group){
     if(thema && (!check || thema.type == 'checkbox')){		// entweder alle Layer sollen ausgeschaltet werden oder es ist ein checkbox-Layer
       thema.checked = check;
       query = document.getElementById("qLayer"+layers[i]);
-      updateQuery('', thema, query, '');
+      updateQuery('', thema, query, '', 0);
     }
   }
+	if(instantreload)currentform.neuladen.click();
 }
 
 /*Anne*/
