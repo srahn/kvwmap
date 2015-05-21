@@ -6,43 +6,7 @@
 	  echo '<br>Datenbankname: '.$userDb->dbName;
 	  exit;
 	}
- ?>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" lang="de">
-	 <head>
-		<title><?php echo TITLE; ?></title>
-		<META http-equiv=Content-Type content="text/html; charset=UTF-8">
-		<link rel="stylesheet" href="layouts/main.css">
-		<script type="text/javascript">
-
-		function logon(){
-			if(typeof(window.innerWidth) == 'number'){
-				width = window.innerWidth;
-				height = window.innerHeight;
-			}else if(document.documentElement && (document.documentElement.clientWidth || document.documentElement.clientHeight)){
-				width = document.documentElement.clientWidth;
-				height = document.documentElement.clientHeight;
-			}else if(document.body && (document.body.clientWidth || document.body.clientHeight)){
-				width = document.body.clientWidth;
-				height = document.body.clientHeight;
-			}
-			document.login.browserwidth.value = width;
-			document.login.browserheight.value = height;
-			document.login.submit();
-		}
-		
-		document.onkeydown = function(ev){
-			var key;
-			ev = ev || event;
-			key = ev.keyCode;
-			if (key == 13) {
-				document.login.anmelden.click();
-			}
-		}
-			
-		</script>
-	 </head>
-
-<?php
+ 
 	session_start();
 
 	if($_REQUEST['gast'] != '' AND in_array($_REQUEST['gast'], $gast_stellen)){
@@ -50,6 +14,31 @@
 		$username = $gast['username'];    
 		$passwort = $gast['passwort'];	?>
 		
+	<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" lang="de">
+		<head>
+			<title><?php echo TITLE; ?></title>
+			<META http-equiv=Content-Type content="text/html; charset=UTF-8">
+			<link rel="stylesheet" href="layouts/main.css.php">
+			<script type="text/javascript">
+
+			function logon(){
+				if(typeof(window.innerWidth) == 'number'){
+					width = window.innerWidth;
+					height = window.innerHeight;
+				}else if(document.documentElement && (document.documentElement.clientWidth || document.documentElement.clientHeight)){
+					width = document.documentElement.clientWidth;
+					height = document.documentElement.clientHeight;
+				}else if(document.body && (document.body.clientWidth || document.body.clientHeight)){
+					width = document.body.clientWidth;
+					height = document.body.clientHeight;
+				}
+				document.login.browserwidth.value = width;
+				document.login.browserheight.value = height;
+				document.login.submit();
+			}
+							
+			</script>
+		</head>
 		<body onload="logon();">
 		  <form name="login" action="index.php" method="post">
 				<input type="hidden" value="<? echo $username; ?>" name="username"/>
@@ -94,7 +83,41 @@
 	}
 	else{
 		?>
-		 <body style="font-family: Arial, Verdana, Helvetica, sans-serif" onload="document.login.username.focus();">
+		<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" lang="de">
+		<head>
+			<title><?php echo TITLE; ?></title>
+			<META http-equiv=Content-Type content="text/html; charset=UTF-8">
+			<link rel="stylesheet" href="layouts/main.css.php">
+			<script type="text/javascript">
+
+			function logon(){
+				if(typeof(window.innerWidth) == 'number'){
+					width = window.innerWidth;
+					height = window.innerHeight;
+				}else if(document.documentElement && (document.documentElement.clientWidth || document.documentElement.clientHeight)){
+					width = document.documentElement.clientWidth;
+					height = document.documentElement.clientHeight;
+				}else if(document.body && (document.body.clientWidth || document.body.clientHeight)){
+					width = document.body.clientWidth;
+					height = document.body.clientHeight;
+				}
+				document.login.browserwidth.value = width;
+				document.login.browserheight.value = height;
+				document.login.submit();
+			}
+			
+			document.onkeydown = function(ev){
+				var key;
+				ev = ev || event;
+				key = ev.keyCode;
+				if (key == 13) {
+					document.login.anmelden.click();
+				}
+			}
+				
+			</script>
+		</head>
+		<body style="font-family: Arial, Verdana, Helvetica, sans-serif" onload="document.login.username.focus();">
 		  <form name="login" action="index.php" method="post">
 				<input type="hidden" name="go" value="login">
 				<? 
