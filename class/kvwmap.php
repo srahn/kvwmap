@@ -338,27 +338,25 @@ class GUI {
 												}												
 											}
 										}
-										$image = $class->createLegendIcon(18,12);
-										$filename = $this->map_saveWebImage($image,'jpeg');
-										$newname = $this->user->id.basename($filename);
-										rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
-										#Anne										
-										$classid = $layer['Class'][$k]['Class_ID'];
-										if($this->mapDB->disabled_classes['status'][$classid] == '0'){
-											$legend .= '<tr>
-													<td><input type="hidden" size="2" name="class'.$classid.'" value="0"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img border="0" name="imgclass'.$classid.'" src="graphics/inactive.jpg"></a>&nbsp;<span class="px13">'.html_umlaute($class->name).'</span></td>
-													</tr>';
+										$legend .= '<tr><td>';
+										if($s > 0){
+											$image = $class->createLegendIcon(18,12);
+											$filename = $this->map_saveWebImage($image,'jpeg');
+											$newname = $this->user->id.basename($filename);
+											rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
+											#Anne										
+											$classid = $layer['Class'][$k]['Class_ID'];
+											if($this->mapDB->disabled_classes['status'][$classid] == '0'){
+												$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="0"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img border="0" name="imgclass'.$classid.'" src="graphics/inactive.jpg"></a>';
+											}
+											elseif($this->mapDB->disabled_classes['status'][$classid] == 2){
+												$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="2"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img border="0" name="imgclass'.$classid.'" src="'.TEMPPATH_REL.$newname.'"></a>';
+											}
+											else{
+												$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="1"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img border="0" name="imgclass'.$classid.'" src="'.TEMPPATH_REL.$newname.'"></a>';
+											}
 										}
-										elseif($this->mapDB->disabled_classes['status'][$classid] == 2){
-											$legend .= '<tr>
-													<td><input type="hidden" size="2" name="class'.$classid.'" value="2"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img border="0" name="imgclass'.$classid.'" src="'.TEMPPATH_REL.$newname.'"></a>&nbsp;<span class="px13">'.html_umlaute($class->name).'</span></td>
-													</tr>';
-										}
-										else{
-											$legend .= '<tr>
-													<td><input type="hidden" size="2" name="class'.$classid.'" value="1"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img border="0" name="imgclass'.$classid.'" src="'.TEMPPATH_REL.$newname.'"></a>&nbsp;<span class="px13">'.html_umlaute($class->name).'</span></td>
-													</tr>';
-										}
+										$legend .= '&nbsp;<span class="px13">'.html_umlaute($class->name).'</span></td></tr>';
 									}
 									$legend .= '</table>';
 								}
