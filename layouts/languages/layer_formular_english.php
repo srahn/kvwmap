@@ -64,6 +64,7 @@
   $strPrivileges="Set Privileges";
   $strAlias="Alias";
 	$strStatus="Status";
+	$strPostlabelcache="Postlabelcache";
   
   
   
