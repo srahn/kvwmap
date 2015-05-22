@@ -138,8 +138,22 @@ function remove(){
     </td>
   </tr>
 	<tr align="center"> 
-    <td valign="top" align="left">
-    	<?php echo $strButtonPrintScale; ?><input type="text" size="7" name="printscale" onkeydown="setprintextent('false');" value="<?php echo $this->formvars['printscale']; ?>">
+    <td valign="top" align="left">			
+			<div style="width:350px;" onmouseover="document.getElementById('scales').style.display='inline-block';" onmouseout="document.getElementById('scales').style.display='none';">
+				<?php echo $strButtonPrintScale; ?><input type="text" size="7" name="printscale" onkeydown="setprintextent('false');" autocomplete="off" value="<?php echo $this->formvars['printscale']; ?>">
+				<div valign="top" style="height:0px; position:relative;">
+					<div id="scales" style="display:none; position:absolute; left:95px; top:-1px; width: 78px; vertical-align:top; overflow:hidden; border:solid grey 1px;">
+						<select size="<? echo count($this->selectable_scales); ?>" style="padding:4px; margin:-2px -17px -4px -4px;" onclick="document.GUI.printscale.value=this.value; document.getElementById('scales').style.display='none';setprintextent('false');">
+							<? 
+								foreach($this->selectable_scales as $scale){
+									echo '<option onmouseover="this.selected = true;" value="'.$scale.'">1:&nbsp;&nbsp;'.$scale.'</option>';
+								}
+							?>
+						</select>
+					</div>
+				</div>
+			</div>
+			
     </td>
     <td valign="top" align="right" colspan="4">
     	<?php echo $strPrintFrame; ?>

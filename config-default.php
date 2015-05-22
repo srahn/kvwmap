@@ -221,6 +221,9 @@ define('DHK_CALL_PASSWORD', '6789');																	# Version 2.1
 define('EARTH_RADIUS', 6384000);																										# Version 2.1
 define('M_QUASIGEOID', 38);																													# Version 2.1
 
+# auswählbare Maßstäbe
+$selectable_scales = array(500, 1000, 2500, 5000, 7500, 10000, 25000, 50000, 100000, 250000, 500000, 1000000);		# Version 2.2
+
 # Unterstützte SRIDs, nur diese stehen zur Auswahl bei der Stellenwahl
 $supportedSRIDs = array(4326,2397,2398,2399,31466,31467,31468,31469,32648,25832,25833,35833,32633,325833,15833,900913,28992);                    # Version 1.6.8
 

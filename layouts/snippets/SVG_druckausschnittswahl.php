@@ -20,18 +20,9 @@
 	$dx       = $this->map->extent->maxx-$this->map->extent->minx;
 	$dy       = $this->map->extent->maxy-$this->map->extent->miny;
 	$scale    = ($dx/$res_x+$dy/$res_y)/2;
-	
-	if($this->user->rolle->epsg_code == 4326){
-		$center_y = ($this->user->rolle->oGeorefExt->maxy + $this->user->rolle->oGeorefExt->miny) / 2;
-		$zoll_pro_einheit = InchesPerUnit(MS_DD, $center_y);
-		$meter_pro_einheit = $zoll_pro_einheit / 39.3701;
-	}
-	else{
-		$meter_pro_einheit = 1;
-	}
-	
-	$worldprintwidth = $this->Document->activeframe[0]["mapwidth"] * $this->formvars['printscale']/$meter_pro_einheit * 0.00035277;
-	$worldprintheight = $this->Document->activeframe[0]["mapheight"] * $this->formvars['printscale']/$meter_pro_einheit * 0.00035277;
+			
+	$worldprintwidth = $this->Document->activeframe[0]["mapwidth"] * $this->formvars['printscale']/$this->meter_pro_einheit * 0.00035277;
+	$worldprintheight = $this->Document->activeframe[0]["mapheight"] * $this->formvars['printscale']/$this->meter_pro_einheit * 0.00035277;
 	$printwidth = round($worldprintwidth/$scale);
 	$printheight = round($worldprintheight/$scale);
 	$halfprintheight = $printheight/2;
@@ -187,7 +178,7 @@ $svg='<?xml version="1.0"?>
 	var cmd   = "";
 	var width = '.$printwidth.';
 	var height = '.$printheight.';
-	var meter_pro_einheit = '.$meter_pro_einheit.';
+	var meter_pro_einheit = '.$this->meter_pro_einheit.';
 	var root = document.documentElement;
 	var mousewheelloop = 0;
 	var stopnavigation = false;

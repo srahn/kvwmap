@@ -4188,6 +4188,8 @@ class GUI {
   }
 
   function druckausschnittswahl($loadmapsource){
+		global $selectable_scales;
+		$this->selectable_scales = array_reverse($selectable_scales);
 		$saved_scale = $this->reduce_mapwidth(10);		
     $this->titel='Druckausschnitt wählen';
     $this->main="druckausschnittswahl.php";
@@ -4213,6 +4215,30 @@ class GUI {
     $this->Document->frames = $this->Document->load_frames($this->Stelle->id, NULL);
     #echo '<br>Druckrahmen geladen.';
 
+		if($this->user->rolle->epsg_code == 4326){
+			$center_y = ($this->user->rolle->oGeorefExt->maxy + $this->user->rolle->oGeorefExt->miny) / 2;
+			$zoll_pro_einheit = InchesPerUnit(MS_DD, $center_y);
+			$this->meter_pro_einheit = $zoll_pro_einheit / 39.3701;
+		}
+		else{
+			$this->meter_pro_einheit = 1;
+		}
+		
+		if($this->formvars['printscale'] == ''){			# einen geeigneten Druckmaßstab berechnen
+			$dx = $this->map->extent->maxx-$this->map->extent->minx;
+			$dy = $this->map->extent->maxy-$this->map->extent->miny;
+			$cal_scale_height = $dy * $this->meter_pro_einheit / 0.00035277 / $this->Document->activeframe[0]["mapheight"];
+			$cal_scale_width = $dx * $this->meter_pro_einheit / 0.00035277 / $this->Document->activeframe[0]["mapwidth"];
+			if($cal_scale_width > $cal_scale_height)$cal_scale = $cal_scale_height;
+			else $cal_scale = $cal_scale_width;
+			foreach($this->selectable_scales as $scale){
+				if($cal_scale > $scale){
+					$this->formvars['printscale'] = $scale;
+					break;
+				}
+			}
+		}
+		
     # alle Druckausschnitte der Rolle laden
     $this->Document->ausschnitte = $this->Document->load_ausschnitte($this->Stelle->id, $this->user->id, NULL);
     # wenn Druckausschnitts-ID übergeben, Ausschnitt laden
@@ -4221,16 +4247,8 @@ class GUI {
       # Druckrahmen setzen
       $this->Document->activeframe = $this->Document->load_frames($this->Stelle->id, $this->Document->ausschnitt[0]['frame_id']);
       # Extent setzen
-			if($this->user->rolle->epsg_code == 4326){
-				$center_y = ($this->user->rolle->oGeorefExt->maxy + $this->user->rolle->oGeorefExt->miny) / 2;
-				$zoll_pro_einheit = InchesPerUnit(MS_DD, $center_y);
-				$meter_pro_einheit = $zoll_pro_einheit / 39.3701;
-			}
-			else{
-				$meter_pro_einheit = 1;
-			}
-      $width = $this->Document->activeframe[0]['mapwidth'] * $this->Document->ausschnitt[0]['print_scale']/$meter_pro_einheit * 0.00035277;
-      $height = $this->Document->activeframe[0]['mapheight'] * $this->Document->ausschnitt[0]['print_scale']/$meter_pro_einheit * 0.00035277;
+      $width = $this->Document->activeframe[0]['mapwidth'] * $this->Document->ausschnitt[0]['print_scale']/$this->meter_pro_einheit * 0.00035277;
+      $height = $this->Document->activeframe[0]['mapheight'] * $this->Document->ausschnitt[0]['print_scale']/$this->meter_pro_einheit * 0.00035277;
       $rect= ms_newRectObj();
       $rect->minx = $this->Document->ausschnitt[0]['center_x'] - $width/2;
       $rect->miny = $this->Document->ausschnitt[0]['center_y'] - $height/2;

@@ -2,7 +2,8 @@
 # 2007-12-30 pk
   include(LAYOUTPATH.'languages/map_'.$this->user->rolle->language.'.php');
 	include(LAYOUTPATH.'snippets/ahah.php');
-  echo $ahah;
+	global $selectable_scales;
+	$selectable_scales = array_reverse($selectable_scales);
 ?>
 
 <script type="text/javascript">
@@ -184,15 +185,12 @@ if($this->formvars['gps_follow'] == ''){
 												<div style="width:150px;" onmouseover="document.getElementById('scales').style.display='inline-block';" onmouseout="document.getElementById('scales').style.display='none';">
 													<div valign="top" style="height:0px; position:relative;">
 														<div id="scales" style="display:none; position:absolute; left:60px; bottom:-1px; width: 78px; vertical-align:top; overflow:hidden; border:solid grey 1px;">
-															<select size="8" style="padding:4px; margin:-2px -17px -4px -4px;" onclick="document.GUI.nScale.value=this.value; document.getElementById('scales').style.display='none'; document.GUI.go.value='neu Laden'; document.GUI.submit();">
-																<option onmouseover="this.selected = true;" value="1000000">1:&nbsp;&nbsp;1000000</option>
-																<option onmouseover="this.selected = true;" value="250000">1:&nbsp;&nbsp;250000</option>
-																<option onmouseover="this.selected = true;" value="100000">1:&nbsp;&nbsp;100000</option>
-																<option onmouseover="this.selected = true;" value="50000">1:&nbsp;&nbsp;50000</option>
-																<option onmouseover="this.selected = true;" value="10000">1:&nbsp;&nbsp;10000</option>
-																<option onmouseover="this.selected = true;" value="5000">1:&nbsp;&nbsp;5000</option>
-																<option onmouseover="this.selected = true;" value="1000">1:&nbsp;&nbsp;1000</option>
-																<option onmouseover="this.selected = true;" value="500">1:&nbsp;&nbsp;500</option>
+															<select size="<? echo count($selectable_scales); ?>" style="padding:4px; margin:-2px -17px -4px -4px;" onclick="document.GUI.nScale.value=this.value; document.getElementById('scales').style.display='none'; document.GUI.go.value='neu Laden'; document.GUI.submit();">
+																<? 
+																	foreach($selectable_scales as $scale){
+																		echo '<option onmouseover="this.selected = true;" value="'.$scale.'">1:&nbsp;&nbsp;'.$scale.'</option>';
+																	}
+																?>
 															</select>
 														</div>
 													</div>
