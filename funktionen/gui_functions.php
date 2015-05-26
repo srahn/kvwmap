@@ -257,8 +257,10 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers, in
 					query.checked = !status;
 					query.checked2 = query.checked;		// den check-Status hier nochmal merken, damit man ihn bei allen Click-Events setzen kann, sonst setzt z.B. Chrome den immer wieder zurueck
 					if(query.checked == true){
-						thema.checked = true;
-						if(instantreload)reload = true;
+						if(thema.checked == false){
+							thema.checked = true;		
+							if(instantreload)reload = true;
+						}
 					}
 				}
 			}
@@ -277,8 +279,10 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers, in
 					query.checked = !status;
 					query.checked2 = query.checked;		// den check-Status hier nochmal merken, damit man ihn bei allen Click-Events setzen kann, sonst setzt z.B. Chrome den immer wieder zurueck
 					if(query.checked == true){
-						thema.checked = true;
-						if(instantreload)reload = true;
+						if(thema.checked == false){
+							thema.checked = true;		
+							if(instantreload)reload = true;
+						}
 					}
 				}
 			}
