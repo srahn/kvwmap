@@ -12064,10 +12064,10 @@ class GUI {
 	    $oid = $layerset['shape'][$k][$tablename.'_oid'];
 	    $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 			if(MAPSERVERVERSION < 600){
-				$map = ms_newMapObj(DEFAULTMAPFILE);
+				$map = ms_newMapObj(NULL);
 			}
 			else {
-				$map = new mapObj(DEFAULTMAPFILE);
+				$map = new mapObj(NULL);
 			}
 			$map->set('debug', 5);
 	    $layerdb = $mapDB->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
