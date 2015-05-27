@@ -5856,10 +5856,18 @@ class GUI {
 			$label1 = $label4/4;
 			$pdf->setColor(0,0,0);
 			$pdf->addText($posx-1.5, $posy+6, 8, '0');
-			$pdf->addText($posx+$width1-5, $posy+6, 8, $label1);
-			$pdf->addText($posx+$width2-5, $posy+6, 8, $label2);
-			$pdf->addText($posx+$width3-5, $posy+6, 8, $label3);
-			$pdf->addText($posx+$width4-5, $posy+6, 8, $label4.' Meter');
+			if($label1/1000 >= 1){
+				$div = 1000;
+				$unit = 'Km';
+			}
+			else{
+				$div = 1;
+				$unit = 'm';
+			}
+			$pdf->addText($posx+$width1-5, $posy+6, 8, round($label1/$div, 2));
+			$pdf->addText($posx+$width2-5, $posy+6, 8, round($label2/$div, 2));
+			$pdf->addText($posx+$width3-5, $posy+6, 8, round($label3/$div, 2));
+			$pdf->addText($posx+$width4-5, $posy+6, 8, round($label4/$div, 2).' '.$unit);
 			$pdf->setLineStyle(0.5);
       $pdf->rectangle($posx, $posy, $width1, 4);
 			$pdf->rectangle($posx, $posy, $width2, 4);
