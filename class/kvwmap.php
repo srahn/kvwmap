@@ -4548,18 +4548,19 @@ class GUI {
   }
 
   function createlegend($size){
+    $this->map->set('resolution',72);      
     $this->map->legend->set("keysizex", $size*1.8*$this->map_factor);
     $this->map->legend->set("keysizey", $size*1.8*$this->map_factor);
-    $this->map->legend->set("keyspacingx", $size*4*$this->map_factor);
+    $this->map->legend->set("keyspacingx", $size*$this->map_factor);
     $this->map->legend->set("keyspacingy", $size*0.83*$this->map_factor);
     $this->map->legend->label->set("size", $size*$this->map_factor);
 		$this->map->legend->label->set("type", 'truetype');
 		$this->map->legend->label->set("font", 'arial');
-    $this->map->legend->label->set("position", MS_LR);
-    $this->map->legend->label->set("offsetx", $size*-3.3*$this->map_factor);
-    $this->map->legend->label->set("offsety", -1*$size*$this->map_factor);
+    $this->map->legend->label->set("position", MS_C);
+    #$this->map->legend->label->set("offsetx", $size*-5*$this->map_factor);
+    #$this->map->legend->label->set("offsety", -1*$size*$this->map_factor);
     $this->map->legend->label->color->setRGB(0,0,0);
-    $this->map->legend->outlinecolor->setRGB(0,0,0);
+    #$this->map->legend->outlinecolor->setRGB(0,0,0);
     $legendmapDB = new db_mapObj($this->Stelle->id, $this->user->id);
     $legendmapDB->nurAktiveLayer = 1;
     $layerset = $legendmapDB->read_Layer(1);
@@ -4581,10 +4582,10 @@ class GUI {
           if($layerset[$i]['showclasses']){
             for($j = 0; $j < $layer->numclasses; $j++){
               $class = $layer->getClass($j);
-              $draw = true;
-              if($class->name == ''){
-                $class->set('name', ' ');
-              }
+							if($class->numstyles > 0){														# die Klasse wird entweder dargestellt, wenn sie einen Style hat
+								if($class->name == '')$class->set('name', ' ');			# und falls sie dann einen leeren Klassennamen hat, wird er auf " " gesetzt
+							}																											# oder falls sie einen nicht leeren Klassennamen hat
+              if($class->name != '')$draw = true;				
             }
           }
         }
