@@ -4582,9 +4582,6 @@ class GUI {
           if($layerset[$i]['showclasses']){
             for($j = 0; $j < $layer->numclasses; $j++){
               $class = $layer->getClass($j);
-							if($class->numstyles > 0){														# die Klasse wird entweder dargestellt, wenn sie einen Style hat
-								if($class->name == '')$class->set('name', ' ');			# und falls sie dann einen leeren Klassennamen hat, wird er auf " " gesetzt
-							}																											# oder falls sie einen nicht leeren Klassennamen hat
               if($class->name != '')$draw = true;				
             }
           }
