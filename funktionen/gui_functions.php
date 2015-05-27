@@ -288,7 +288,7 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers, in
 			}
 		}
   }
-	if(reload)currentform.neuladen.click();
+	if(reload)document.GUI.neuladen.click();
 }
 
 function updateQuery(event, thema, query, radiolayers, instantreload){
@@ -319,7 +319,7 @@ function updateQuery(event, thema, query, radiolayers, instantreload){
   		}
   	}
   }
-	if(instantreload)currentform.neuladen.click();
+	if(instantreload)document.GUI.neuladen.click();
 }
 
 function preventDefault(e){
@@ -352,7 +352,7 @@ function selectgroupquery(group, instantreload){
       updateThema('', thema, query, '', '', 0);
     }
   }
-	if(instantreload)currentform.neuladen.click();
+	if(instantreload)document.GUI.neuladen.click();
 }
 
 function selectgroupthema(group, instantreload){
@@ -374,7 +374,7 @@ function selectgroupthema(group, instantreload){
       updateQuery('', thema, query, '', 0);
     }
   }
-	if(instantreload)currentform.neuladen.click();
+	if(instantreload)document.GUI.neuladen.click();
 }
 
 /*Anne*/
