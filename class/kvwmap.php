@@ -4630,12 +4630,12 @@ class GUI {
               $width = $classwidth;
             }
           }
-          $newlegendimage = imagecreatetruecolor($width+$size*0.55*$this->map_factor,$height);
+          $newlegendimage = imagecreatetruecolor($width+$size*1.55*$this->map_factor,$height);
           $backgroundColor = ImageColorAllocate ($newlegendimage, 255, 255, 255);
           imagefilledrectangle($newlegendimage, 0, 0, imagesx($newlegendimage), imagesy($newlegendimage), $backgroundColor);
           ImageCopy($newlegendimage, $layernameimage, 0, 0, 0, 0, imagesx($layernameimage), $size*3.3*$this->map_factor);
           if($layerset[$i]['showclasses']){
-            ImageCopy($newlegendimage, $classimage, 0, $size*3.3*$this->map_factor, 0, 0, imagesx($classimage), imagesy($classimage));
+            ImageCopy($newlegendimage, $classimage, $size*$this->map_factor, $size*3.3*$this->map_factor, 0, 0, imagesx($classimage), imagesy($classimage));
           }
           ImageCopy($newlegendimage, $legendimage, 0, $size*3.3*$this->map_factor+$classheight, 0, 0, imagesx($legendimage), imagesy($legendimage));
           $legendimage = $newlegendimage;
