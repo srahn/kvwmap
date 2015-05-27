@@ -16,7 +16,7 @@ class wfs{
 		$request = $this->url.'&service=WFS&request=GetFeature&version='.$this->version.'&typename='.$this->typename;
 		if($bbox != ''){
 			$request .= '&bbox='.$bbox;
-			if($this->version = '1.1.0')$request .= ',EPSG:'.$this->epsg;
+			if($this->version == '1.1.0')$request .= ',EPSG:'.$this->epsg;
 		}
 		if($filter != ''){$request .= '&filter='.urlencode($filter);}
 		if($maxfeatures != ''){$request .= '&maxfeatures='.$maxfeatures;}
@@ -105,12 +105,12 @@ class wfs{
 		# Jedes Objekt ist wiederum ein Array, deren Elemente die im Objekt enthaltenen XML-Tags sind
 		# Jeder XML-Tag ist auch ein Array, dessen Elemente die verschiedenen Eigenschaften des Tags sind (tag,value,type,level,attributes)
 		# attributes ist ein Array, welches die Attribute des Tags enthält
-    $parser = xml_parser_create();
+    $parser = xml_parser_create('ISO-8859-1');
     xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, 0);
     xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE, 1);
     xml_parse_into_struct($parser, $this->gml, $values, $tags);
     xml_parser_free($parser);
-
+		
 		foreach($tags as $key=>$val){
 			if(strpos($key, $parse_object) !== false){
       	$ranges = $val;
