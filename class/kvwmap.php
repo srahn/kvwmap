@@ -5538,6 +5538,12 @@ class GUI {
       $point->setXY(0, $this->map->height - 2);
       $newcredits->addFeature($feature);
     }
+		
+		# Koordinatengitter-Layer aus dem Mapfile
+    @$gridlayer = $this->map->getLayerByName('grid');
+    if($gridlayer != false){
+      $gridlayer->set('status', MS_ON);
+    }
 
     $this->map->setextent($minx,$miny,$maxx,$maxy);
 		
