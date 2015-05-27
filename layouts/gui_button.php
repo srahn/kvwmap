@@ -14,6 +14,7 @@ if($this->user->rolle->querymode == 1){
 <? include(WWWROOT.APPLVERSION.'funktionen/msgboxes.php'); ?>
 </HEAD>
 <BODY onload="onload_functions();">
+	<div id="sperrdiv" style="position: absolute;height: 100%;z-index: 1000000;opacity: 0.3;background-color: grey;"></div>
 	<a name="oben"></a>
   <table width="900" align="center" border="0" cellspacing="0" cellpadding="0">
     <tr>
