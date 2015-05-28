@@ -10,6 +10,7 @@
   $strSecondMapProjection="2.Map Projection (EPSG-Code)";
   $strRunningCoords="Coordinates";
   $strMapSize="Map Size";
+	$strAutoResize="auto fit";
   $strTask="Task";
   $strTitleRoleSelection="Role Selection";
   $strVietnamese="Vietnamese";

@@ -11,6 +11,32 @@ function ImageLoadFailed(id) {
 var currentform;
 var doit;
 
+function getBrowserSize(){
+	if(typeof(window.innerWidth) == 'number'){
+		width = window.innerWidth;
+		height = window.innerHeight;
+	}else if(document.documentElement && (document.documentElement.clientWidth || document.documentElement.clientHeight)){
+		width = document.documentElement.clientWidth;
+		height = document.documentElement.clientHeight;
+	}else if(document.body && (document.body.clientWidth || document.body.clientHeight)){
+		width = document.body.clientWidth;
+		height = document.body.clientHeight;
+	}
+	document.GUI.browserwidth.value = width;
+	document.GUI.browserheight.value = height;
+}
+
+function resizemap2window(){
+	getBrowserSize();
+	params = 'go=ResizeMap2Window&browserwidth='+document.GUI.browserwidth.value+'&browserheight='+document.GUI.browserheight.value;
+<? if($this->main == 'map.php'){ ?>
+	startwaiting();
+	document.location.href='index.php?'+params+'&nScale='+document.GUI.nScale.value+'&reloadmap=true';			// in der Hauptkarte neuladen
+<? }else{ ?>
+	ahah('index.php', params, new Array(''), new Array(''));																								// ansonsten nur die neue Mapsize setzen
+<? } ?>
+}
+
 function message(text){
 	var Msg = document.getElementById("message_box");
 	if(Msg == undefined){
@@ -30,7 +56,10 @@ function onload_functions(){
 	document.onmousemove = drag;
   document.onmouseup = dragstop;
 	document.onmousedown = stop;
-	if(typeof resizemap2window != 'undefined')window.onresize = function(){clearTimeout(doit);doit = setTimeout(resizemap2window, 200);};
+	getBrowserSize();
+	<? if($this->user->rolle->auto_map_resize){ ?>
+	window.onresize = function(){clearTimeout(doit);doit = setTimeout(resizemap2window, 200);};
+	<? } ?>
 }
 
 var dragobjekt = null;

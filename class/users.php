@@ -871,6 +871,8 @@ class user {
 		$teil=explode('x',$formvars['mapsize']);
 		$nImageWidth=$teil[0];
 		$nImageHeight=$teil[1];
+		if($teil[2] == 'auto')$auto_map_resize = '1';
+		else $auto_map_resize = '0';
 		# Zoomfaktor (Wenn 1 erfolgt kein Zoom durch einfaches klicken in die Karte)
 		if ($formvars['nZoomFactor']=='' OR $formvars['nZoomFactor']==0) {
 			$formvars['nZoomFactor']=2;
@@ -889,6 +891,7 @@ class user {
 		if($formvars['gui'] != '' AND $formvars['mapsize'] != ''){
 			$sql ='UPDATE rolle SET nZoomFactor='.$formvars['nZoomFactor'].',nImageWidth='.$nImageWidth;
 			$sql.=',nImageHeight='.$nImageHeight.',gui="'.$formvars['gui'].'"';
+			$sql.=',auto_map_resize='.$auto_map_resize;
 			$sql.=',epsg_code="'.$formvars['epsg_code'].'"';
 			$sql.=',epsg_code2="'.$formvars['epsg_code2'].'"';
 			$sql.=',coordtype="'.$formvars['coordtype'].'"';
@@ -1414,8 +1417,9 @@ class rolle {
 			$this->oGeorefExt=ms_newRectObj();
 			$this->oGeorefExt->setextent($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
 			$this->nImageWidth=$rs['nImageWidth'];
-			$this->nImageHeight=$rs['nImageHeight'];
+			$this->nImageHeight=$rs['nImageHeight'];			
 			$this->mapsize=$this->nImageWidth.'x'.$this->nImageHeight;
+			$this->auto_map_resize=$rs['auto_map_resize'];
 			@$this->pixwidth=($rs['maxx']-$rs['minx'])/$rs['nImageWidth'];
 			@$this->pixheight=($rs['maxy']-$rs['miny'])/$rs['nImageHeight'];
 			$this->pixsize=($this->pixwidth+$this->pixheight)/2;

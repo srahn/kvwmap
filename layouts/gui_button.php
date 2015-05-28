@@ -54,6 +54,8 @@ if($this->user->rolle->querymode == 1){
         </table>
 				<input type="hidden" name="overlayx" value="<? echo $this->user->rolle->overlayx; ?>">
 				<input type="hidden" name="overlayy" value="<? echo $this->user->rolle->overlayy; ?>">
+				<input type="hidden" name="browserwidth">
+				<input type="hidden" name="browserheight">
         </form>
 				<script type="text/javascript">
 					currentform = document.GUI;

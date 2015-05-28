@@ -38,21 +38,6 @@ function showtooltip(result, showdata){
 	document.getElementById("svghelp").SVGshowtooltip(result, showdata);			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 }
 
-function resizemap2window() {
-	startwaiting();
-  if(typeof(window.innerWidth) == 'number'){
-    width = window.innerWidth;
-    height = window.innerHeight;
-  }else if(document.documentElement && (document.documentElement.clientWidth || document.documentElement.clientHeight)){
-    width = document.documentElement.clientWidth;
-    height = document.documentElement.clientHeight;
-  }else if(document.body && (document.body.clientWidth || document.body.clientHeight)){
-    width = document.body.clientWidth;
-    height = document.body.clientHeight;
-  }
-	document.location.href='index.php?go=ResizeMap2Window&browserwidth='+width+'&browserheight='+height+'&nScale='+document.GUI.nScale.value;
-}
-
 function showMapImage(){ 
 	svgdoc = document.SVG.getSVGDocument();	
 	var svg = svgdoc.getElementById("moveGroup");

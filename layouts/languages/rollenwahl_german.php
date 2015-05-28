@@ -10,6 +10,7 @@
   $strSecondMapProjection="2.Kartenprojektion (EPSG-Code)";
   $strRunningCoords="mitlaufende Koordinaten";
   $strMapSize="Kartenfenstergr&ouml;&szlig;e";
+	$strAutoResize="automatisch";
   $strTask="Stelle";
   $strTitleRoleSelection="Optionen";
   $strVietnamese="Vietnamesisch";

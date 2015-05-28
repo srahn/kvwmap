@@ -355,7 +355,7 @@ if($_SESSION['login_routines'] == true){
 }
 
 # Anpassen der Kartengröße an das Browserfenster
-if($GUI->formvars['browserwidth'] != '')$GUI->resizeMap2Window();
+if($GUI->user->rolle->auto_map_resize AND $GUI->formvars['browserwidth'] != '')$GUI->resizeMap2Window();
 
 if(isset($_FILES)) {
 	foreach ($_FILES AS $datei) {
