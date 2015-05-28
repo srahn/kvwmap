@@ -15084,9 +15084,9 @@ class Document {
   }
 
   function delete_frame($selected_frame_id){
- //   $sql ="DELETE FROM druckrahmen WHERE id = ".$selected_frame_id;
- //   $this->debug->write("<p>file:kvwmap class:Document->delete_frame :",4);
- //   $this->database->execSQL($sql,4, 1);
+    $sql ="DELETE FROM druckrahmen WHERE id = ".$selected_frame_id;
+    $this->debug->write("<p>file:kvwmap class:Document->delete_frame :",4);
+    $this->database->execSQL($sql,4, 1);
     $sql ="DELETE FROM druckrahmen2stelle WHERE druckrahmen_id = ".$selected_frame_id;
     $this->debug->write("<p>file:kvwmap class:Document->delete_frame :",4);
     $this->database->execSQL($sql,4, 1);
