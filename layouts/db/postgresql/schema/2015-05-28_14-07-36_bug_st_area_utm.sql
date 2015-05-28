@@ -1,6 +1,6 @@
 BEGIN;
 
-CREATE OR REPLACE FUNCTION st_area_utm(geom geometry, srid integer, r numeric, mh integer)
+CREATE OR REPLACE FUNCTION st_area_utm(ingeom geometry, srid integer, r numeric, mh integer)
   RETURNS numeric AS
 $BODY$DECLARE
 
@@ -13,13 +13,16 @@ $BODY$DECLARE
 		em numeric; 
 		i integer;
 		k numeric;
+		geom geometry;
 		mpoint geometry;
 		mgeom geometry;
 		NumB integer;
-		NBH integer;  
+		NBH integer; 
 		x character varying;
-		y character varying;  
-	Begin
+		y character varying; 
+  Begin
+
+  geom = ingeom;
 
 	IF st_srid(geom) != srid THEN
 		return st_area(geom);
