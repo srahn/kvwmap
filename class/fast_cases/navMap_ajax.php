@@ -556,7 +556,7 @@
             else {
               # Vektorlayer
               if($layerset[$i]['Data'] != ''){
-								$layerset[$i]['Data'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[$i]['Data']);
+							$layerset[$i]['Data'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[$i]['Data']);							$layerset[$i]['Data'] = str_replace('$language', $this->user->rolle->language, $layerset[$i]['Data']);
                 $layer->set('data', $layerset[$i]['Data']);
               }
   
