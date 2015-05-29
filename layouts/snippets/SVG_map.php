@@ -633,7 +633,7 @@ function measure(){
 	options1 = top.document.getElementById("options");
 	options1.innerHTML=\'<input type="checkbox" onclick="toggle_vertices()" name="orthofang">&nbsp;Ortho-Fang\';
 	// Wenn im UTM-System gemessen wird, NBH-Datei laden
-	if('.$this->user->rolle->epsg_code.' == 25833)top.ahah("index.php", "go=getNBH", new Array(""), new Array("execute_function"));
+	if('.$this->user->rolle->epsg_code.' == '.EPSGCODE_ALKIS.')top.ahah("index.php", "go=getNBH", new Array(""), new Array("execute_function"));
   doing = "measure";
 	freehand_measuring = false;
 	if(top.document.GUI.str_pathx.value != ""){
