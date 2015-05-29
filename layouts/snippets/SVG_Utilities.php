@@ -13,6 +13,8 @@
 		document.getElementById("svghelp").SVGshow_foreign_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 	}
 
+	var nbh = new Array();
+	
 </script>
  
 <?php
@@ -141,6 +143,8 @@
 	var currentTheta = 0;
   var thetaDelta = '.WAITING_ANIMATION_SPEED.'; // The amount to rotate the square about every 16.7 milliseconds, in degrees.
 	var requestAnimationFrameID;
+	var measured_distance = 0;
+	var new_distance = 0;
 	';
 
 	$polygonANDpoint = '
@@ -218,6 +222,8 @@
 
 	function measure(){
 	  top.currentform.last_doing.value = "measure";
+		// Wenn im UTM-System gemessen wird, NBH-Datei laden
+		if('.$this->user->rolle->epsg_code.' == '.EPSGCODE_ALKIS.')top.ahah("index.php", "go=getNBH", new Array(""), new Array("execute_function"));
 		if(top.currentform.str_pathx.value != ""){
 			measuring = true;	
 			top.currentform.str_pathx.value = "";
@@ -745,6 +751,7 @@
 			case "measure":
 		    if (measuring){
 		      addpoint(client_x, client_y);
+					measured_distance = new_distance;
 		    }
 		    else {
 		      startMeasure(client_x, client_y);
@@ -2964,6 +2971,7 @@ $measurefunctions = '
 			}
 			top.currentform.str_pathx.value = str_pathx;
 			top.currentform.str_pathy.value = str_pathy;
+			top.document.GUI.measured_distance.value = measured_distance;
 		}
 	}
 	
@@ -2982,6 +2990,7 @@ $measurefunctions = '
 		    m_pathx[i] = (world_pathx[i] - minx)/scale;
 				m_pathy[i] = (world_pathy[i] - miny)/scale;
 			}
+			measured_distance = parseFloat(top.document.GUI.measured_distance.value);
 		}
 	}
 
@@ -2992,32 +3001,62 @@ $measurefunctions = '
 	  m_pathy[0] = client_y;
 	}
 	
+	function calculate_reduction(pathx, y1){
+		k = 1;
+		r = '.EARTH_RADIUS.';
+		if(r > 0 && top.nbh.length > 0){
+			em = 0;
+			x = pathx[0] + "";
+			y = y1 + "";
+			x_1 = x.substring(2,3);
+			x_10 = x.substring(1,2);
+			x_100 = x.substring(0,1);
+			y_1 = y.substring(3,4);
+			y_10 = y.substring(2,3);
+			y_100 = y.substring(1,2);
+			y_1000 = y.substring(0,1);
+			nhn = 33+x_100+y_1000+y_100+x_10+x_1+y_10+y_1;
+			if(top.nbh[nhn] > 0){
+				hell = '.M_QUASIGEOID.' + top.nbh[nhn];
+				for(i = 0; i < pathx.length; i++){
+					em = em + parseInt(pathx[i]);
+				}
+				em = em / pathx.length;
+				k = (1 - (hell / r)) * (1 + (((em - 500000)*(em - 500000))/(2 * r * r))) * 0.9996;
+			}
+		}
+		return k;
+	}
+	
+	function calculate_distance(x1, y1, x2, y2){
+		if('.$this->user->rolle->epsg_code.' == 4326){
+			distance = '.EARTH_RADIUS.' * Math.acos(Math.sin(y1*Math.PI/180) * Math.sin(y2*Math.PI/180) + Math.cos(y1*Math.PI/180) * Math.cos(y2*Math.PI/180) * Math.cos((x2 - x1)*Math.PI/180))
+		}
+		else{
+			distance = Math.sqrt(((x1-x2)*(x1-x2))+((y1-y2)*(y1-y2)));
+		}
+		var pathx = new Array(x1, x2);
+		k = calculate_reduction(pathx, y1);
+		distance = distance / k;
+		return distance;
+	}
+	
 	function showMeasurement(client_x, client_y){
 	  addpoint(client_x, client_y);
 	  
-	  var track = 0, track0 = 0, part0 = 0, parts = 0, output = "";
-	    for(var j = 0; j < m_pathx.length-1; ++j)
-	    {
-	      part0 = parts;
-	      parts = parts + Math.sqrt(((m_pathx[j]-m_pathx[j+1])*(m_pathx[j]-m_pathx[j+1]))+((m_pathy[j]-m_pathy[j+1])*(m_pathy[j]-m_pathy[j+1])));
-	    }
-	//  track = Math.round((parts*scale)*100)/100;
-	  track0  = part0*scale;
-	  track = parts*scale;
-	  if(scale < 0.01){
-	    stellen = 2;
-	  }
-	  else if(scale < 0.1){
-	    stellen = 1;
-	  }
-	  else{
-	    stellen = 0;
-	  }
-	  track0 = top.format_number(track0, false, true);
-	  track = top.format_number(track, false, true);
-	
-	  output = "Strecke: "+track+" m ("+track0+" m)";
-	  show_tooltip(output,client_x,resy-client_y);
+	  var track = 0, track0 = 0, output = "";
+		j = m_pathx.length-1;
+		
+		x1 = (m_pathx[j-1] * scale) + minx;
+		y1 = (m_pathy[j-1] * scale) + miny;
+		x2 = (m_pathx[j] * scale) + minx;
+		y2 = (m_pathy[j] * scale) + miny;
+		
+		new_distance = measured_distance + calculate_distance(x1, y1, x2, y2);	
+		track0 = top.format_number(measured_distance, false, true, true);
+		track = top.format_number(new_distance, false, true, true);
+		output = "Strecke: "+track+" m ("+track0+" m)";
+		show_tooltip(output,client_x,resy-client_y);
 	
 	  deletelast_m();
 	}

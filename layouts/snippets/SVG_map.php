@@ -309,6 +309,8 @@ $svg='<?xml version="1.0"?>
 	var requestAnimationFrameID;
 	var last_x = 0;
 	freehand_measuring = false;
+	var measured_distance = 0;
+	var new_distance = 0;
   		
   ';
 	
@@ -635,13 +637,13 @@ function measure(){
 	// Wenn im UTM-System gemessen wird, NBH-Datei laden
 	if('.$this->user->rolle->epsg_code.' == '.EPSGCODE_ALKIS.')top.ahah("index.php", "go=getNBH", new Array(""), new Array("execute_function"));
   doing = "measure";
-	freehand_measuring = false;
 	if(top.document.GUI.str_pathx.value != ""){
 		measuring = true;	
 		top.document.GUI.str_pathx.value = "";
 		top.document.GUI.str_pathy.value = "";
 	}
 	else{
+		freehand_measuring = false;
   	measuring = false;
   	restart();
 	}
@@ -659,6 +661,7 @@ function save_measure_path(){
 		}
 		top.document.GUI.str_pathx.value = str_pathx;
 		top.document.GUI.str_pathy.value = str_pathy;
+		top.document.GUI.measured_distance.value = measured_distance;
 	}
 }
 
@@ -678,6 +681,7 @@ function get_measure_path(){
 	    pathx[i] = (pathx_world[i] - parseFloat(top.document.GUI.minx.value))/parseFloat(top.document.GUI.pixelsize.value);
 			pathy[i] = (pathy_world[i] - parseFloat(top.document.GUI.miny.value))/parseFloat(top.document.GUI.pixelsize.value);
 		}
+		measured_distance = parseFloat(top.document.GUI.measured_distance.value);
 		return true;
 	}
 	return false;
@@ -812,6 +816,7 @@ function mousedown(evt){
 			  }
 			  else{
 	      	addpoint(evt);
+					measured_distance = new_distance;
 	      }
 	    }
 	    else {
@@ -1073,7 +1078,7 @@ function polygonarea(evt){
 		k = calculate_reduction(polypathx, polypathy[0]);
 		area = area / (k * k);
 		hidetooltip(evt);	
-		area = top.format_number(area, false, true);
+		area = top.format_number(area, false, true, false);
 		show_tooltip("Fl"+unescape("%E4")+"cheninhalt: "+area+" m"+unescape("%B2")+" "+unescape("%A0"),  evt.clientX, evt.clientY);
 		return;
 	}
@@ -1196,7 +1201,7 @@ function activate_vertex(evt){
 		redrawPL();
 		deletelast(evt);
 	}
-	if(top.document.GUI.runningcoords != undefined)top.document.GUI.runningcoords.value = top.format_number(coordx, false, false) + " / " + top.format_number(coordy, false, false); 
+	if(top.document.GUI.runningcoords != undefined)top.document.GUI.runningcoords.value = top.format_number(coordx, false, false, false) + " / " + top.format_number(coordy, false, false, false); 
 	top.document.GUI.activated_vertex.value = evt.target.getAttribute("id");
 }
 
@@ -1274,8 +1279,8 @@ function startMeasure(evt) {
   // neuen punkt abgreifen
 	pathx[0] = evt.clientX;
 	pathy[0] = resy - evt.clientY;
-	pathx_world[0] = top.format_number(evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value), false, true);
-	pathy_world[0] = top.format_number(top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value), false, true);
+	pathx_world[0] = top.format_number(evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value), false, true, false);
+	pathy_world[0] = top.format_number(top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value), false, true, false);
 }
 
 function add_current_point(evt){
@@ -1311,8 +1316,13 @@ function calculate_reduction(pathx, y1){
 	return k;
 }
 
-function calculate_distance(x1, y1, x2, y2){	
-	distance = Math.sqrt(((x1-x2)*(x1-x2))+((y1-y2)*(y1-y2)));
+function calculate_distance(x1, y1, x2, y2){
+	if('.$this->user->rolle->epsg_code.' == 4326){
+		distance = '.EARTH_RADIUS.' * Math.acos(Math.sin(y1*Math.PI/180) * Math.sin(y2*Math.PI/180) + Math.cos(y1*Math.PI/180) * Math.cos(y2*Math.PI/180) * Math.cos((x2 - x1)*Math.PI/180))
+	}
+	else{
+		distance = Math.sqrt(((x1-x2)*(x1-x2))+((y1-y2)*(y1-y2)));
+	}
 	var pathx = new Array(x1, x2);
 	k = calculate_reduction(pathx, y1);
 	distance = distance / k;
@@ -1320,13 +1330,11 @@ function calculate_distance(x1, y1, x2, y2){
 }
 
 function showMeasurement(evt){
-  var track = 0, track0 = 0, part0 = 0, parts = 0, output = "";
-  for(var j = 0; j < pathx_world.length-1; ++j){
-    part0 = parts;
-    parts = parts + calculate_distance(pathx_world[j], pathy_world[j], pathx_world[j+1], pathy_world[j+1]);
-  }
-  track0 = top.format_number(part0, false, freehand_measuring);
-  track = top.format_number(parts, false, freehand_measuring);
+  var track = 0, track0 = 0, output = "";
+	j = pathx_world.length-1;
+  new_distance = measured_distance + calculate_distance(pathx_world[j-1], pathy_world[j-1], pathx_world[j], pathy_world[j]);	
+  track0 = top.format_number(measured_distance, false, freehand_measuring, true);
+  track = top.format_number(new_distance, false, freehand_measuring, true);
   output = "Strecke: "+track+" m ("+track0+" m)";
   show_tooltip(output, evt.clientX, evt.clientY);
 }
@@ -1337,8 +1345,8 @@ function addpoint(evt){
 	client_y = resy - evt.clientY;
 	pathx.push(client_x);
 	pathy.push(client_y);
-	pathx_world.push(top.format_number(evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value), false, true));
-	pathy_world.push(top.format_number(top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value), false, true));
+	pathx_world.push(top.format_number(evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value), false, true, false));
+	pathy_world.push(top.format_number(top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value), false, true, false));
   redrawPL();
 }
 
@@ -1374,8 +1382,8 @@ function show_coords(evt){
 	coorx = evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value);
 	coory = top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value);
 	if(top.document.GUI.secondcoords != undefined)top.ahah("index.php", "go=spatial_processing&curSRID='.$this->user->rolle->epsg_code.'&newSRID='.$this->user->rolle->epsg_code2.'&point="+coorx+" "+coory+"&operation=transformPoint&resulttype=wkt&coordtype='.$this->user->rolle->coordtype.'", new Array(top.document.GUI.secondcoords), "");
-	coorx = top.format_number(coorx, true, true);
-	coory = top.format_number(coory, true, true);
+	coorx = top.format_number(coorx, true, true, false);
+	coory = top.format_number(coory, true, true, false);
 	top.document.GUI.firstcoords.value = coorx+" "+coory; 
 	top.document.getElementById("showcoords").style.display="";
 }
