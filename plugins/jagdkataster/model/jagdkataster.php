@@ -336,7 +336,6 @@ class jagdkataster {
 		$sql.= " AND st_area_utm(st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.")), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.") > 1";
 		$sql.= $this->database->build_temporal_filter(array('g', 'f'));
 		$sql.= " ORDER BY jagdbezirke.name";
-		echo $sql;
 		return $this->database->execSQL($sql, 4, 0);
 	}
 	
