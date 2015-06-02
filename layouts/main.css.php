@@ -297,6 +297,26 @@ a.menuered:hover {
 	background-image: url(../graphics/zoom_select.png);
 }
 
+.save_extent{
+	background-image: url(../graphics/save_extent.png);
+}
+
+.load_extent{
+	background-image: url(../graphics/load_extent.png);
+}
+
+.save_image{
+	background-image: url(../graphics/save_image.png);
+}
+
+.resize_map{
+	background-image: url(../graphics/resize_map.png);
+}
+
+.button_background{
+	background: linear-gradient(#eff3f6, #DAE4EC);
+}
+
 .emboss{
 	width:30px;
 	height:30px;

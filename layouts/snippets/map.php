@@ -244,8 +244,15 @@ if($this->formvars['gps_follow'] == ''){
 			          	<table width="100%" border="0" cellpadding="0" cellspacing="0">
 			          		<tr>
 			          			<td>
-						          	<div id="maptime">
-						          		&nbsp;&nbsp;<a href="index.php?go=Kartenkommentar_Formular&consumetime=<?php echo $this->user->rolle->newtime; ?>&hauptkarte=<?php echo $this->img['hauptkarte']; ?>"><?php echo $strSaveExtent; ?></a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="index.php?go=Kartenkommentar_Waehlen&prevtime=<?php echo $this->user->rolle->newtime; ?>"><?php echo $strChoose ?></a>&nbsp;&nbsp;|&nbsp;&nbsp;<? if(SHOW_MAP_IMAGE == 'true'){ ?><a id="MapImageLink" target="_blank" href="" onmouseover="javascript:showMapImage();"><?php echo $strMapImageURL; ?></a></span><? } ?>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="javascript:resizemap2window();" ><? echo $strMapSize; ?></a>
+						          	<div id="maptime" style="padding: 2px">
+													<table cellpadding="0" cellspacing="0">
+														<tr>
+															<td style="padding: 0 0 0 5;"><a title="<? echo $strSaveExtent; ?>" href="index.php?go=Kartenkommentar_Formular&consumetime=<?php echo $this->user->rolle->newtime; ?>&hauptkarte=<?php echo $this->img['hauptkarte']; ?>"><div class="button_background"><div class="emboss save_extent"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div></a></td>
+															<td style="padding: 0 0 0 10;"><a title="<? echo $strChoose ?>" href="index.php?go=Kartenkommentar_Waehlen&prevtime=<?php echo $this->user->rolle->newtime; ?>"><div class="button_background"><div class="emboss load_extent"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div></a></td>
+															<td style="padding: 0 0 0 10;"><? if(SHOW_MAP_IMAGE == 'true'){ ?><a title="<? echo $strMapImageURL ?>" id="MapImageLink" target="_blank" href="" onmouseover="javascript:showMapImage();"><div class="button_background"><div class="emboss save_image"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div></a></span><? } ?></td>
+															<td style="padding: 0 0 0 10;"><a title="<? echo $strMapSize; ?>" href="javascript:resizemap2window();" ><div class="button_background"><div class="emboss resize_map"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div></a></td>
+														</tr>
+													</table>
 						            </div>
 						          </td>
 						          <td class="special-options">
