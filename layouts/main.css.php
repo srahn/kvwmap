@@ -241,10 +241,6 @@ a.menuered:hover {
 	color: black;
 }
 
-.normallegend {
-	border-bottom: 1px solid #aaaaaa;
-}
-
 #scrolldiv{
 	width:250;
 }
@@ -349,8 +345,14 @@ a.menuered:hover {
 	0px 0px 1px rgba(0, 0, 0, 0.8) inset;
 }
 
+.normallegend {
+	border-top: 1px solid #eeeeee;
+	border-bottom: 1px solid #aaaaaa;
+}
+
 .slidinglegend_slideout {
   position:absolute;
+	border-top: 1px solid #eeeeee;
   border-left:1px solid #CCCCCC;
   background-image: url(../graphics/bg.gif);
   transform: translate3d(-27px,0px,0px);
@@ -371,6 +373,7 @@ a.menuered:hover {
 
 .slidinglegend_slidein {
 	position:absolute;
+	border-top: 1px solid #eeeeee;
   border-left:1px solid #CCCCCC;
   background-image: url(../graphics/bg.gif);
   transform: translate3d(-255px,0px,0px);
@@ -763,10 +766,6 @@ tbody.gle tr:hover {
 .map-options{
 	border-top: 1px solid #aaaaaa;
 	border-bottom: 1px solid #aaaaaa;
-}
-
-.legend-top{
-	border-top: 1px solid #eeeeee;
 }
 
 .rollenwahl-gruppen{

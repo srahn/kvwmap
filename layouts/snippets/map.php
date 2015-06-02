@@ -103,7 +103,7 @@ function switchlegend(){
 
   $res_x    = $this->map->width;
   $res_y    = $this->map->height;
-  $legendheight = $this->map->height-52;
+  $legendheight = $this->map->height-49;
 	if($this->user->rolle->runningcoords == 1)$legendheight = $legendheight + 22;
   $res_xm   = $this->map->width/2;
   $res_ym   = $this->map->height/2;
@@ -255,10 +255,11 @@ if($this->formvars['gps_follow'] == ''){
 													</table>
 						            </div>
 						          </td>
-						          <td class="special-options">
+						          <td width="100px" class="special-options">
 												<input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang
 												<div id="options"></div><!-- hier werden die Spezialoptionen eingefügt -->
 											</td>
+											<td>&nbsp;</td>
 						        </tr>
 						    	</table>
 			          </td>
@@ -278,7 +279,7 @@ if($this->formvars['gps_follow'] == ''){
       </table>
       </div>
       </td>
-      <td valign="top" class="legend-top">
+      <td valign="top">
 				<div id="legenddiv" <? if (!ie_check() AND $this->user->rolle->hideLegend)echo 'onmouseenter="slide_legend_in(event);" onmouseleave="slide_legend_out(event);" class="slidinglegend_slideout"'; else echo 'class="normallegend"'; ?>>
 					<table width="100%" border="0" cellpadding="0" cellspacing="0" class="legend-switch">
 						<tr>
