@@ -35,7 +35,7 @@ function csv_export(){
         <td width="49%"><? echo $this->eigentuemer[$i]['eigentuemer']; ?></td>
 				<td><? echo $this->eigentuemer[$i]['anteil_alk']; ?> %</td>
         <td><? echo round($this->eigentuemer[$i]['albflaeche']*100/$this->eigentuemer['albsumme'], 1); ?> %</td>
-        <td><? echo $this->eigentuemer[$i]['albflaeche']; ?></td>
+        <td><? echo $this->eigentuemer[$i]['albflaeche']; ?> m²</td>
       </tr>
       <?php  
       }
