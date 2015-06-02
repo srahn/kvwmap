@@ -186,7 +186,7 @@ show_all = function(count){
           if($privileg_['amtsgerichtname'] OR $privileg_['amtsgerichtnr']){
           ?>
           <tr>
-                <td align="right"><span class="fett">Amtsgericht:</span>&nbsp;</td>
+                <td align="right"><span class="fett">Amtsgericht</span>&nbsp;</td>
                 <td><?php if($privileg_['amtsgerichtnr']){echo $flst->Amtsgericht['schluessel'];} ?>&nbsp;&nbsp;<?php if($privileg_['amtsgerichtname']){ echo $flst->Amtsgericht['name'];} ?></td>
               </tr>
               <? }
@@ -194,13 +194,13 @@ show_all = function(count){
           if($privileg_['grundbuchbezirkname'] OR $privileg_['grundbuchbezirkschl']){
           ?>
               <tr>
-                <td align="right"><span class="fett">Grundbuchbezirk:</span>&nbsp;</td>
+                <td align="right"><span class="fett">Grundbuchbezirk</span>&nbsp;</td>
                 <td><?php if($privileg_['grundbuchbezirkschl']){ echo $flst->Grundbuchbezirk['schluessel'];} ?>&nbsp;&nbsp;<?php if($privileg_['grundbuchbezirkname']){ echo $flst->Grundbuchbezirk['name'];} ?></td>
               </tr>
           <? }
           if($privileg_['lagebezeichnung']){ ?>
               <tr>
-                <td align="right" valign="top"><span class="fett">Lage:&nbsp;</span></td>
+                <td align="right" valign="top"><span class="fett">Lage&nbsp;</span></td>
                 <td>
                 <?php
                 $anzStrassen=count($flst->Adresse);
@@ -682,7 +682,7 @@ show_all = function(count){
                   <?
                   if($this->Stelle->isFunctionAllowed('Adressaenderungen') AND $Eigentuemerliste[$e]->Nr != ''){
                     if ($adressaenderungen['user_id'] == '') {
-                      echo '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">'; ?>&nbsp;<a target="_blank" href="index.php?go=neuer_Layer_Datensatz&close_after_saving=true&selected_layer_id=<? echo LAYER_ID_ADRESSAENDERUNGEN; ?>&attributenames[0]=ort_post&attributenames[1]=postleitzahlpostzustellung&attributenames[2]=strasse&attributenames[3]=hausnummer&attributenames[4]=gml_id&values[0]=<? echo urlencode($Eigentuemerliste[$e]->ort_post); ?>&values[1]=<? echo urlencode($Eigentuemerliste[$e]->postleitzahlpostzustellung); ?>&values[2]=<? echo urlencode($Eigentuemerliste[$e]->strasse); ?>&values[3]=<? echo urlencode($Eigentuemerliste[$e]->hausnummer); ?>&values[4]=<? echo urlencode($Eigentuemerliste[$e]->anschrift_gml_id); ?>">Adresse aktualisieren</a>
+                      echo '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">'; ?>&nbsp;<a target="_blank" href="index.php?go=neuer_Layer_Datensatz&close_after_saving=true&selected_layer_id=<? echo LAYER_ID_ADRESSAENDERUNGEN; ?>&attributenames[0]=ort_post&attributenames[1]=postleitzahlpostzustellung&attributenames[2]=strasse&attributenames[3]=hausnummer&attributenames[4]=ortsteil&attributenames[5]=gml_id&values[0]=<? echo urlencode($Eigentuemerliste[$e]->ort_post); ?>&values[1]=<? echo urlencode($Eigentuemerliste[$e]->postleitzahlpostzustellung); ?>&values[2]=<? echo urlencode($Eigentuemerliste[$e]->strasse); ?>&values[3]=<? echo urlencode($Eigentuemerliste[$e]->hausnummer); ?>&values[4]=<? echo urlencode($Eigentuemerliste[$e]->ortsteil); ?>&values[5]=<? echo urlencode($Eigentuemerliste[$e]->anschrift_gml_id); ?>">Adresse aktualisieren</a>
                   <?}
                     else {
                       echo '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">'; ?>&nbsp;<a target="_blank" href="index.php?go=Layer-Suche_Suchen&close_after_saving=true&selected_layer_id=<? echo LAYER_ID_ADRESSAENDERUNGEN; ?>&value_gml_id=<? echo urlencode($Eigentuemerliste[$e]->anschrift_gml_id); ?>&operator_gml_id==&attributenames[0]=user_id&values[0]=<? echo $this->user->id ?>">Adresse &auml;ndern</a>

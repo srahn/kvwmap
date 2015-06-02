@@ -71,8 +71,8 @@ class adressaenderungen {
   }
 
   function read_eigentuemer_data(){
-    $sql = " SELECT ogc_fid, b.gml_id, identifier, beginnt, endet, advstandardmodell, sonstigesmodell, anlass, b.ort_post, b.postleitzahlpostzustellung, b.strasse, b.hausnummer,";
-		$sql.= " bestimmungsland, postleitzahlpostfach, postfach, ortsteil, weitereadressen, telefon, fax, organisationname, beziehtsichauf, gehoertzu ";
+    $sql = " SELECT ogc_fid, b.gml_id, identifier, beginnt, endet, advstandardmodell, sonstigesmodell, anlass, b.ort_post, b.postleitzahlpostzustellung, b.strasse, b.hausnummer, b.ortsteil, ";
+		$sql.= " bestimmungsland, postleitzahlpostfach, postfach, weitereadressen, telefon, fax, organisationname, beziehtsichauf, gehoertzu ";
     $sql.= " FROM alkis.ax_anschrift a, alkis.ax_anschrift_temp b";
     $sql.= " WHERE a.gml_id = b.gml_id";
     $sql.= " AND a.endet IS NULL";
@@ -135,6 +135,7 @@ class adressaenderungen {
 					<postleitzahlPostzustellung>'.$this->eigentuemerliste[$i]['postleitzahlpostzustellung'].'</postleitzahlPostzustellung>
 					<strasse>'.$this->eigentuemerliste[$i]['strasse'].'</strasse>
 					<hausnummer>'.$this->eigentuemerliste[$i]['hausnummer'].'</hausnummer>
+					<ortsteil>'.$this->eigentuemerliste[$i]['ortsteil'].'</ortsteil>
 					<qualitaetsangaben>
 						<AX_DQOhneDatenerhebung>
 							<herkunft>
