@@ -255,6 +255,7 @@ class jagdkataster {
 		$ret = $this->getIntersectedFlurstWithJagdbezirke($oids);
 		while($rs = pg_fetch_array($ret[1])){
 			$rs['anteil'] = round($rs['schnittflaeche'] * 100 / $rs['flurstflaeche'], 2);
+			$rs['schnittflaeche'] = $rs['schnittflaeche'] / $rs['flurstflaeche'] * $rs['albflaeche'];
 			$rs['albflaeche'] = round($rs['albflaeche'], 2);
       $rs['zaehlernenner'] = $rs['zaehler'];
 			if($rs['nenner'] != '')$rs['zaehlernenner'] .= '/'.$rs['nenner'];
@@ -350,7 +351,7 @@ class jagdkataster {
 		$sql.= "LEFT JOIN alkis.ax_namensnummer n ON n.istbestandteilvon = g.gml_id ";
 		$sql.= "LEFT JOIN alkis.ax_namensnummer_eigentuemerart w ON w.wert = n.eigentuemerart ";
 		$sql.= "LEFT JOIN alkis.ax_person p ON n.benennt = p.gml_id ";
-		$sql.= " WHERE f.flurstueckskennzeichen = ff.flurstueckskennzeichen";
+		$sql.= " WHERE n.laufendenummernachdin1421 IS NOT NULL AND f.flurstueckskennzeichen = ff.flurstueckskennzeichen ";
 		$sql.= $this->database->build_temporal_filter(array('ff', 's', 'g', 'b', 'n', 'p'));
 		$sql.= " order by name),' || ') as eigentuemer,";
 		$sql.= " st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.")) AS the_geom_inter, f.wkb_geometry as the_geom";		
