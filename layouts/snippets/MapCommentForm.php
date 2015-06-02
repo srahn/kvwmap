@@ -11,12 +11,12 @@
 </tr>
 <tr><td align="center"><?php echo $strTime; ?><?php
     # 2006-03-20 pk
-     echo $this->formvars['consumetime']; 
+     echo $this->user->rolle->newtime; 
      
      ?><br> 
     <textarea name="comment" cols="35" rows="4" wrap="VIRTUAL"><?php echo $this->formvars['comment']; ?></textarea>
 <br>	<input type="hidden" name="go" value="Kartenkommentar">
-	<input type="hidden" name="consumetime" value="<?php echo $this->formvars['consumetime']; ?>">
+	<input type="hidden" name="consumetime" value="<?php echo $this->user->rolle->newtime; ?>">
     <input type="hidden" name="go_plus" id="go_plus" value="">
     <input type="button" name="dummy" value="<?php echo $this->strCancel; ?>" onclick="submitWithValue('GUI','go_plus','Abbrechen')">&nbsp;
 	<input type="reset" name="reset" value="<?php echo $this->strReset; ?>">&nbsp;    
@@ -25,7 +25,7 @@
   </tr>
   <tr> 
 	<td>
-	<img src="<?php echo $this->formvars['hauptkarte']; ?>">
+	<img src="<?php echo $this->img['hauptkarte']; ?>">
 	</td>
   </tr>
 </table>

@@ -17,7 +17,6 @@ $pixelsize    = ($dx/$res_x+$dy/$res_y)/2;		# ist $scale in SVG_map.php
 #			var maxx = document.GUI.maxx;
 #			var maxy = document.GUI.maxy;			
 #			var pixelsize = document.GUI.pixelsize;
-#			var maptime = document.getElementById("maptime");
 #			var polygon = svgdoc.getElementById("polygon");
 #			// nix
 #			// nix
@@ -37,12 +36,6 @@ $response.= '~
 '.$this->map->extent->maxx.'~
 '.$this->map->extent->maxy.'~
 '.$pixelsize.'~
-&nbsp;&nbsp;<a href="index.php?go=Kartenkommentar_Formular&consumetime='.$this->user->rolle->newtime.'&hauptkarte='.$this->img['hauptkarte'].'">'.$strSaveExtent.'</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="index.php?go=Kartenkommentar_Waehlen&prevtime='.$this->user->rolle->newtime.'">'.$strChoose.'</a>&nbsp;&nbsp;|&nbsp;&nbsp;';
-if(SHOW_MAP_IMAGE == 'true'){
-	$response .= '<a id="MapImageLink" target="_blank" href="" onmouseover="javascript:showMapImage();">'.$strMapImageURL.'</a></span>';
-}
-$response .='&nbsp;&nbsp;|&nbsp;&nbsp;<a href="javascript:resizemap2window();" >'.$strMapSize.'</a>
-~
 ~startup()
 ~update_legend(\''.$this->layerhiddenstring.'\')';
 

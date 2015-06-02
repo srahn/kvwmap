@@ -75,7 +75,6 @@
 			var maxx = document.GUI.maxx;
 			var maxy = document.GUI.maxy;			
 			var pixelsize = document.GUI.pixelsize;
-			var maptime = document.getElementById("maptime");
 			var polygon = svgdoc.getElementById("polygon");			
 			// nix
 			// nix
@@ -98,13 +97,12 @@
   			miny,
   			maxx,
   			maxy,
-  			pixelsize,
-  			maptime, 			
+  			pixelsize,			
   			polygon,
   			'',
 				''
   		), 			 
-  		new Array("execute_function", "xlink:href", "src", "src", "setvalue", "sethtml", "setvalue", "setvalue", "setvalue", "setvalue", "setvalue", "sethtml", "points", "execute_function", "execute_function"));
+  		new Array("execute_function", "xlink:href", "src", "src", "setvalue", "sethtml", "setvalue", "setvalue", "setvalue", "setvalue", "setvalue", "points", "execute_function", "execute_function"));
 						
   		document.GUI.INPUT_COORD.value = '';
   		document.GUI.CMD.value = '';

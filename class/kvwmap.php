@@ -9442,6 +9442,7 @@ class GUI {
   function mapCommentForm() {
     $this->titel='Kommentar zum Kartenausschnitt';
     $this->main='MapCommentForm.php';
+		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
     $this->loadMap('DataBase');
     $this->drawMap();
     $this->output();
