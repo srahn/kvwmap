@@ -34,7 +34,7 @@ function csv_export(){
       	<? if(!$this->formvars['oid']){ ?><td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><? echo $this->flurstuecke[$i]['name']; ?></td><? } ?>        
         <td width="49%"><? echo $this->eigentuemer[$i]['eigentuemer']; ?></td>
 				<td><? echo $this->eigentuemer[$i]['anteil_alk']; ?> %</td>
-        <td><? echo round($this->eigentuemer[$i]['albflaeche']*100/$this->eigentuemer['albsumme'], 1); ?> %</td>
+        <td><? echo round($this->eigentuemer[$i]['albflaeche']*100/$this->eigentuemer['albsumme'], 2); ?> %</td>
         <td><? echo $this->eigentuemer[$i]['albflaeche']; ?> m²</td>
       </tr>
       <?php  
