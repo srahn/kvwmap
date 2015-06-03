@@ -13695,11 +13695,17 @@ class db_mapObj{
   }
 
 	function createAutoClasses($values, $attribute, $layer_id, $datatype, $database){
+		global $supportedLanguages;
 		$result_colors = read_colors($database);
 		shuffle($result_colors);
 		for($i = 0; $i < count($values); $i++){
 			if($i == count($result_colors))return;				# Anzahl der Klassen ist auf die Anzahl der Colors beschränkt
 			$classdata['name'] = $values[$i].' ';
+			foreach($supportedLanguages as $language){
+				if($language != 'german'){
+					$classdata['name_'.$language] = $values[$i].' ';
+				}
+			}
       $classdata['layer_id'] = -$layer_id;
       $classdata['expression'] = "('[".$attribute."]' eq '".$values[$i]."')";
       $classdata['order'] = 0;
