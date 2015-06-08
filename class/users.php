@@ -1901,8 +1901,10 @@ class rolle {
 		# Eintragen des Status der Layer, 1 angezeigt oder 0 nicht.
 		for ($i=0;$i<count($this->layerset);$i++) {
 			#echo $i.' '.$this->layerset[$i]['Layer_ID'].' '.$formvars['thema'.$this->layerset[$i]['Layer_ID']].'<br>';
-			$aktiv_status = $formvars['thema'.$this->layerset[$i]['Layer_ID']] + $formvars['thema'.$this->layerset[$i]['requires']];		// entweder ist der Layer selber an oder sein requires-Layer
-			if(isset($aktiv_status)){
+			$aktiv_status = $formvars['thema'.$this->layerset[$i]['Layer_ID']];
+			$requires_status = $formvars['thema'.$this->layerset[$i]['requires']];
+			if(isset($aktiv_status) OR isset($requires_status)){										// entweder ist der Layer selber an oder sein requires-Layer
+				$aktiv_status = $aktiv_status + $requires_status;
 				$sql ='UPDATE u_rolle2used_layer SET aktivStatus="'.$aktiv_status.'"';
 				$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 				$sql.=' AND layer_id='.$this->layerset[$i]['Layer_ID'];
@@ -1952,27 +1954,21 @@ class rolle {
 	function setQueryStatus($formvars) {
 		# Eintragen des query_status=1 für Layer, die für die Abfrage selektiert wurden
 		for ($i=0;$i<count($this->layerset);$i++){
-			if ($formvars['qLayer'.$this->layerset[$i]['Layer_ID']] == 1) {
-				$query_status=1;
+			$query_status = $formvars['qLayer'.$this->layerset[$i]['Layer_ID']];
+			if(isset($query_status)){	
+				if($this->layerset[$i]['Layer_ID'] > 0){
+					$sql ='UPDATE u_rolle2used_layer set queryStatus="'.$query_status.'"';
+					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+					$sql.=' AND layer_id='.$this->layerset[$i]['Layer_ID'];
+				}
+				else{		# Rollenlayer
+					$sql ='UPDATE rollenlayer set queryStatus="'.$query_status.'"';
+					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+					$sql.=' AND id='.-$this->layerset[$i]['Layer_ID'];
+				}
+				$this->debug->write("<p>file:users.php class:rolle->setQueryStatus - Speichern des Abfragestatus der Layer zur Rolle:",4);
+				$this->database->execSQL($sql,4, $this->loglevel);
 			}
-			elseif ($formvars['qLayer'.$this->layerset[$i]['Layer_ID']] == 2) {
-				$query_status=2;
-			}
-			else{
-				$query_status=0;
-			}
-			if($this->layerset[$i]['Layer_ID'] > 0){
-				$sql ='UPDATE u_rolle2used_layer set queryStatus="'.$query_status.'"';
-				$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-				$sql.=' AND layer_id='.$this->layerset[$i]['Layer_ID'];
-			}
-			else{		# Rollenlayer
-				$sql ='UPDATE rollenlayer set queryStatus="'.$query_status.'"';
-				$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-				$sql.=' AND id='.-$this->layerset[$i]['Layer_ID'];
-			}
-			$this->debug->write("<p>file:users.php class:rolle->setQueryStatus - Speichern des Abfragestatus der Layer zur Rolle:",4);
-			$this->database->execSQL($sql,4, $this->loglevel);
 		}
 		return 1;
 	}
