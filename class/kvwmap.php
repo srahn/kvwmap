@@ -203,7 +203,7 @@ class GUI {
 							$legend .= '<tr><td valign="top">';
 							if($layer['queryable'] == 1 AND !$this->formvars['nurFremdeLayer']){
 								// die sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen, welches immer den value 0 hat, damit sie beim Neuladen ausgeschaltet werden können, denn eine nicht angehakte Checkbox/Radiobutton wird ja nicht übergeben
-								$legend .=  '<input type="hidden" id="qLayer'.$layer['Layer_ID'].'" name="qLayer'.$layer['Layer_ID'].'" value="0">';
+								$legend .=  '<input type="hidden" name="qLayer'.$layer['Layer_ID'].'" value="0">';
 								$legend .=  '<input id="qLayer'.$layer['Layer_ID'].'"';
 								
 								if($this->user->rolle->singlequery){			# singlequery-Modus
