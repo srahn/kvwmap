@@ -1304,8 +1304,11 @@ class eigentuemer {
   }
 
   function getAdressaenderungen($gml_id) {
-    $sql ="SELECT * FROM alkis.ax_anschrift_temp";
-    $sql.=" WHERE gml_id = '".$gml_id."'";
+    $sql ="SELECT gml_id, hat, datum, user_id, coalesce(strasse1, strasse) as strasse,  coalesce(hausnummer1, hausnummer) as hausnummer, coalesce(postleitzahlpostzustellung1, postleitzahlpostzustellung) as postleitzahlpostzustellung, coalesce(ort_post1, ort_post) as ort_post, coalesce(ortsteil1, ortsteil) as ortsteil FROM ";
+		$sql.="(SELECT p.*, a.strasse as strasse1, a.hausnummer as hausnummer1, a.postleitzahlpostzustellung as postleitzahlpostzustellung1, a.ort_post as ort_post1, a.ortsteil as ortsteil1, at.strasse, at.hausnummer, at.postleitzahlpostzustellung, at.ort_post, at.ortsteil FROM alkis.ax_person_temp p ";
+		$sql.="LEFT JOIN alkis.ax_anschrift_temp at ON p.hat = at.gml_id ";
+		$sql.="LEFT JOIN alkis.ax_anschrift a ON p.hat = a.gml_id ";
+    $sql.="WHERE p.gml_id = '".$gml_id."') as foo";
     #echo $sql;
     $query=pg_query($sql);
   	$ret=$this->database->execSQL($sql, 4, 0);

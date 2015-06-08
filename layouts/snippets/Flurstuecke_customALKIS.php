@@ -1,4 +1,6 @@
-
+<?
+ 	include(SNIPPETS.'generic_functions.php'); 
+?>
 <script language="JavaScript" type="text/javascript">
 
 send_selected_flurst = function(go, formnummer, wz, target){
@@ -645,7 +647,7 @@ show_all = function(count){
               }
               if($this->Stelle->isFunctionAllowed('Adressaenderungen')) {
                     $eigentuemer = new eigentuemer(NULL, NULL, $this->pgdatabase);
-                    $adressaenderungen =  $eigentuemer->getAdressaenderungen($Eigentuemerliste[$e]->anschrift_gml_id);
+                    $adressaenderungen =  $eigentuemer->getAdressaenderungen($Eigentuemerliste[$e]->gml_id);
                     $aendatum=substr($adressaenderungen['datum'],0,10);
               }
               if ($adressaenderungen['user_id'] != '') {
@@ -681,14 +683,18 @@ show_all = function(count){
                   <td valign="bottom">
                   <?
                   if($this->Stelle->isFunctionAllowed('Adressaenderungen') AND $Eigentuemerliste[$e]->Nr != ''){
-                    if ($adressaenderungen['user_id'] == '') {
-                      echo '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">'; ?>&nbsp;<a target="_blank" href="index.php?go=neuer_Layer_Datensatz&close_after_saving=true&selected_layer_id=<? echo LAYER_ID_ADRESSAENDERUNGEN; ?>&attributenames[0]=ort_post&attributenames[1]=postleitzahlpostzustellung&attributenames[2]=strasse&attributenames[3]=hausnummer&attributenames[4]=ortsteil&attributenames[5]=gml_id&values[0]=<? echo urlencode($Eigentuemerliste[$e]->ort_post); ?>&values[1]=<? echo urlencode($Eigentuemerliste[$e]->postleitzahlpostzustellung); ?>&values[2]=<? echo urlencode($Eigentuemerliste[$e]->strasse); ?>&values[3]=<? echo urlencode($Eigentuemerliste[$e]->hausnummer); ?>&values[4]=<? echo urlencode($Eigentuemerliste[$e]->ortsteil); ?>&values[5]=<? echo urlencode($Eigentuemerliste[$e]->anschrift_gml_id); ?>">Adresse aktualisieren</a>
+                    if ($adressaenderungen['user_id'] == '') {											
+											echo '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">'; ?>&nbsp;<a class="buttonlink" href="javascript:ahah('index.php', 'go=neuer_Layer_Datensatz&reload=true&selected_layer_id=<? echo LAYER_ID_ADRESSAENDERUNGEN_PERSON; ?>&attributenames[0]=gml_id&attributenames[1]=hat&values[0]=<? echo urlencode($Eigentuemerliste[$e]->gml_id); ?>&values[1]=<? echo urlencode($Eigentuemerliste[$e]->anschrift_gml_id); ?>&embedded=true&fromobject=subform_ax_person_temp&targetlayer_id=0&targetattribute=leer', new Array(document.getElementById('subform_ax_person_temp')), new Array('sethtml'));"><span> Adresse aktualisieren</span></a>
                   <?}
                     else {
-                      echo '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">'; ?>&nbsp;<a target="_blank" href="index.php?go=Layer-Suche_Suchen&close_after_saving=true&selected_layer_id=<? echo LAYER_ID_ADRESSAENDERUNGEN; ?>&value_gml_id=<? echo urlencode($Eigentuemerliste[$e]->anschrift_gml_id); ?>&operator_gml_id==&attributenames[0]=user_id&values[0]=<? echo $this->user->id ?>">Adresse &auml;ndern</a>
+											echo '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">'; ?>&nbsp;<a class="buttonlink" href="javascript:ahah('index.php', 'go=Layer-Suche_Suchen&reload=true&selected_layer_id=<? echo LAYER_ID_ADRESSAENDERUNGEN_PERSON; ?>&value_gml_id=<? echo urlencode($Eigentuemerliste[$e]->gml_id); ?>&operator_gml_id==&attributenames[0]=user_id&values[0]=<? echo $this->user->id ?>&embedded=true&fromobject=subform_ax_person_temp&targetlayer_id=0&targetattribute=leer', new Array(document.getElementById('subform_ax_person_temp')), '');">Adresse &auml;ndern</a>
                   <?}
                   }?>
                     </td>
+									<tr>
+										<td colspan="2"><div id="subform_ax_person_temp" style="display:inline"></div></td>
+									</tr>
+									</tr>
                   <tr>
                   <? if($Eigentuemerliste[$e]->Anteil != ''){ ?>
                   <tr>

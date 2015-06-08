@@ -165,7 +165,6 @@ for($i=0;$i<$anzLayer;$i++){
   <input type="hidden" name="anzahl" value="<? echo $this->formvars['anzahl']; ?>">
   <input type="hidden" name="printversion" value="">
   <input type="hidden" name="go_backup" value="">
-  <input type="hidden" name="close_window" value="">
   <input name="querypolygon" type="hidden" value="<?php echo $this->querypolygon; ?>">
   <input name="rectminx" type="hidden" value="<?php echo $this->formvars['rectminx'] ? $this->formvars['rectminx'] : $this->queryrect->minx; ?>">
   <input name="rectminy" type="hidden" value="<?php echo $this->formvars['rectminy'] ? $this->formvars['rectminy'] : $this->queryrect->miny; ?>">

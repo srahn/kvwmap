@@ -1987,7 +1987,7 @@ class GUI {
 		else{
 			if($count == 1)$count = 2;		# weil ein select-Feld bei size 1 anders funktioniert
 			pg_result_seek($ret[1], 0);
-			echo'<select size="'.$count.'" style="width: 250px;padding:4px; margin:-2px -17px -4px -4px;" onclick="document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'none\';document.getElementById(\''.$this->formvars['field_id'].'\').value=this.value;document.getElementById(\''.$this->formvars['field_id'].'_output\').value=this.options[this.selectedIndex].text">';				
+			echo'<select size="'.$count.'" style="width: 450px;padding:4px; margin:-2px -17px -4px -4px;" onclick="document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'none\';document.getElementById(\''.$this->formvars['field_id'].'\').value=this.value;document.getElementById(\''.$this->formvars['field_id'].'_output\').value=this.options[this.selectedIndex].text">';				
 			while($rs=pg_fetch_array($ret[1])) {
 				echo '<option onmouseover="this.selected = true;"  value="'.$rs['value'].'">'.$rs['output'].'</option>';
 			}
@@ -2708,16 +2708,10 @@ class GUI {
 		include_(CLASSPATH.'adressaenderungen.php');
     $adressaenderungen = new adressaenderungen($this->pgdatabase);
     $adressaenderungen->delete_old_entries();
-    $adressaenderungen->read_eigentuemer_data();
+    $adressaenderungen->read_anschriften();
+		$adressaenderungen->read_personen();
     $this->filename = $adressaenderungen->export_into_file();
     $this->export_Adressaenderungen();
-  }
-
-  function export_ESAF64_bereiningen(){
-		include_(CLASSPATH.'esaf.php');
-    $esaf = new esaf($this->pgdatabase);
-    $esaf->delete_old_entries();
-    $this->export_ESAF64();
   }
   
   function exportWMC(){
@@ -13581,7 +13575,7 @@ class db_mapObj{
 			$sql .= chr(10);
 		}
 		for($i = 0; $i < count($layer_ids); $i++){
-			$sql .= 'UPDATE layer_attributes SET options = REPLACE(options, \''.$layer_ids[$i].'\', @last_layer_id'.$layer_ids[$i].') WHERE layer_id IN(@last_layer_id'.implode(', @last_layer_id', $layer_ids).') AND form_element_type IN (\'SubFormPK\', \'SubFormFK\', \'SubFormEmbeddedPK\');'.chr(10);
+			$sql .= 'UPDATE layer_attributes SET options = REPLACE(options, \''.$layer_ids[$i].'\', @last_layer_id'.$layer_ids[$i].') WHERE layer_id IN(@last_layer_id'.implode(', @last_layer_id', $layer_ids).') AND form_element_type IN (\'SubFormPK\', \'SubFormFK\', \'SubFormEmbeddedPK\', \'Autovervollständigungsfeld\', \'Auswahlfeld\');'.chr(10);
 		}
 		$filename = rand(0, 1000000).'.sql';
 		$fp = fopen(IMAGEPATH.$filename, 'w');
