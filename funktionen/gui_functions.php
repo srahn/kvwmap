@@ -260,7 +260,6 @@ function getlegend(groupid, layerid, fremde){
 
 function updateThema(event, thema, query, groupradiolayers, queryradiolayers, instantreload){
 	var status = query.checked;
-	console.log(status);
 	var reload = false;
   if(status == true){
     if(thema.checked == false){
