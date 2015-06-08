@@ -363,12 +363,6 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->checkCaseAllowed('Adressaenderungen_Export');
 			$GUI->export_Adressaenderungen_exportieren();
 	  } break;
-
-	  # Eigentuemerfortführung
-	  case 'export_ESAF64_Tabelle Bereinigen' : {
-			$GUI->checkCaseAllowed('export_ESAF64');
-			$GUI->export_ESAF64_bereiningen();
-	  } break;
 	  
 	  case 'exportWMC' :{
 		  $GUI->exportWMC();

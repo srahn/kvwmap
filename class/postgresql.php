@@ -1439,7 +1439,7 @@ class pgdatabase {
   }
   
   function getEigentuemerliste($FlurstKennz,$Bezirk,$Blatt,$BVNR) {
-    $sql = "SELECT distinct n.laufendenummernachdin1421 AS namensnr, p.nachnameoderfirma, p.vorname, p.akademischergrad, p.namensbestandteil, p.geburtsname, p.geburtsdatum::date, anschrift.gml_id as anschrift_gml_id, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, anschrift.ortsteil, w.bezeichner as Art, n.zaehler||'/'||n.nenner as anteil ";
+    $sql = "SELECT distinct n.laufendenummernachdin1421 AS namensnr, p.gml_id, p.nachnameoderfirma, p.vorname, p.akademischergrad, p.namensbestandteil, p.geburtsname, p.geburtsdatum::date, anschrift.gml_id as anschrift_gml_id, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, anschrift.ortsteil, w.bezeichner as Art, n.zaehler||'/'||n.nenner as anteil ";
 		$sql.= "FROM alkis.ax_buchungsstelle s ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
@@ -1478,8 +1478,8 @@ class pgdatabase {
       
       $Eigentuemer = new eigentuemer($Grundbuch,$rs['namensnr']);
 
+			$Eigentuemer->gml_id = $rs['gml_id'];
       $Eigentuemer->lfd_nr=$rs['lfd_nr_name'];
-
       $Eigentuemer->Name[0]=$rs['nachnameoderfirma'];
       if($rs['vorname'] != '')$Eigentuemer->Name[0] .= ', '.$rs['vorname']; 
 			if($rs['namensbestandteil'] != '')$Eigentuemer->Name[0] .= ', '.$rs['namensbestandteil']; 

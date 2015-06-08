@@ -70,18 +70,25 @@ class adressaenderungen {
 </AX_Fortfuehrungsauftrag>';
   }
 
-  function read_eigentuemer_data(){
-    $sql = " SELECT ogc_fid, b.gml_id, identifier, beginnt, endet, advstandardmodell, sonstigesmodell, anlass, b.ort_post, b.postleitzahlpostzustellung, b.strasse, b.hausnummer, b.ortsteil, ";
-		$sql.= " bestimmungsland, postleitzahlpostfach, postfach, weitereadressen, telefon, fax, organisationname, beziehtsichauf, gehoertzu ";
-    $sql.= " FROM alkis.ax_anschrift a, alkis.ax_anschrift_temp b";
-    $sql.= " WHERE a.gml_id = b.gml_id";
-    $sql.= " AND a.endet IS NULL";
+  function read_anschriften(){
+    $sql = "SELECT gml_id, ort_post, postleitzahlpostzustellung, strasse, hausnummer, ortsteil ";
+    $sql.= "FROM alkis.ax_anschrift_temp";
     #echo $sql;
     $ret = $this->database->execSQL($sql, 4, 0);
     while($rs = pg_fetch_array($ret[1])){
-      $this->eigentuemerliste[] = $rs;
+      $this->anschriften[] = $rs;
     }
   }
+	
+	function read_personen(){
+    $sql = "SELECT a.gml_id, beginnt, nachnameoderfirma, anrede, vorname, geburtsname, geburtsdatum, namensbestandteil, akademischergrad, b.hat ";
+    $sql.= "FROM alkis.ax_person a, alkis.ax_person_temp b WHERE a.gml_id = b.gml_id";
+    #echo $sql;
+    $ret = $this->database->execSQL($sql, 4, 0);
+    while($rs = pg_fetch_array($ret[1])){
+      $this->personen[] = $rs;
+    }
+  }	
 
   function get_last_auftragsnummer(){
     $sql = "SELECT datum FROM tabelleninfo WHERE thema = 'adressaenderungen'";
@@ -96,33 +103,49 @@ class adressaenderungen {
   }
 
   function delete_old_entries(){
-    $sql = "DELETE FROM alkis.ax_anschrift_temp ";
-    if(POSTGRESVERSION >= '810'){
-      $sql.=" USING alkis.ax_anschrift";
-    }
+		# übernommene Anschriften abfragen
+		$sql = "SELECT ax_anschrift_temp.gml_id ";
+		$sql.= "FROM alkis.ax_anschrift_temp, alkis.ax_anschrift ";
     $sql.= " WHERE ((ax_anschrift_temp.ort_post IS NULL AND (ax_anschrift.ort_post IS NULL OR ax_anschrift.ort_post = '')) OR ax_anschrift_temp.ort_post = ax_anschrift.ort_post)";
     $sql.= " AND ((ax_anschrift_temp.postleitzahlpostzustellung IS NULL AND (ax_anschrift.postleitzahlpostzustellung IS NULL OR ax_anschrift.postleitzahlpostzustellung = '')) OR ax_anschrift_temp.postleitzahlpostzustellung = ax_anschrift.postleitzahlpostzustellung)";
     $sql.= " AND ((ax_anschrift_temp.strasse IS NULL AND (ax_anschrift.strasse IS NULL OR ax_anschrift.strasse = '')) OR ax_anschrift_temp.strasse = ax_anschrift.strasse)";
     $sql.= " AND ((ax_anschrift_temp.hausnummer IS NULL AND (ax_anschrift.hausnummer IS NULL OR ax_anschrift.hausnummer = '')) OR ax_anschrift_temp.hausnummer = ax_anschrift.hausnummer)";
+		$sql.= " AND ((ax_anschrift_temp.ortsteil IS NULL AND (ax_anschrift.ortsteil IS NULL OR ax_anschrift.ortsteil = '')) OR ax_anschrift_temp.ortsteil = ax_anschrift.ortsteil)";
     #echo $sql;
     $ret = $this->database->execSQL($sql, 4, 0);
+    while($rs = pg_fetch_array($ret[1])){
+      $uebernommene_anschriften[] = $rs['gml_id'];
+    }
+		if(count($uebernommene_anschriften) > 0){
+			$sql = "DELETE FROM alkis.ax_anschrift_temp WHERE gml_id IN ('".implode("','", $uebernommene_anschriften)."')";			# übernommene Anschriften löschen
+			#echo $sql.'<br>';
+			$ret = $this->database->execSQL($sql, 4, 0);
+			$sql = "DELETE FROM alkis.ax_person_temp WHERE hat IN ('".implode("','", $uebernommene_anschriften)."')";						# die Einträge in ax_person_temp mit neuen übernommenen Anschriften löschen
+			#echo $sql.'<br>';
+			$ret = $this->database->execSQL($sql, 4, 0);
+		}
+		$sql = "DELETE FROM alkis.ax_person_temp ";																																			# die Einträge in ax_person_temp mit alten übernommenen Anschriften löschen
+		if(POSTGRESVERSION >= '810')$sql.="USING alkis.ax_person ";
+		$sql.= "WHERE ax_person_temp.gml_id = ax_person.gml_id AND ax_person_temp.hat = ANY(ax_person.hat)";
+		#echo $sql.'<br>';
+		$ret = $this->database->execSQL($sql, 4, 0);
   }
 
   function export_into_file(){
-    if($this->eigentuemerliste != ''){
+    if($this->personen != ''){
 			$this->get_last_auftragsnummer();
 			$this->auftragsnummer = $this->auftragsnummer + 1;
 			$filename = 'adressaenderungen-export_'.$this->auftragsnummer.'.xml';
 			$fp = fopen(IMAGEPATH.'/'.$filename, 'w');
 			$currenttime=date('Y-m-d_H_i_s',time());
 			fwrite($fp, $this->predata.chr(10));
-      for($i = 0; $i < count($this->eigentuemerliste); $i++){
+      for($i = 0; $i < count($this->personen); $i++){
         $data = '<wfsext:Replace vendorId="AdV" safeToIgnore="false">
-				<AX_Anschrift gml:id="'.$this->eigentuemerliste[$i]['gml_id'].'">
-					<gml:identifier codeSpace="http://www.adv-online.de/">urn:adv:oid:'.$this->eigentuemerliste[$i]['gml_id'].'</gml:identifier>
+				<AX_Person gml:id="'.$this->personen[$i]['gml_id'].'">
+					<gml:identifier codeSpace="http://www.adv-online.de/">urn:adv:oid:'.$this->personen[$i]['gml_id'].'</gml:identifier>
 					<lebenszeitintervall>
 						<AA_Lebenszeitintervall>
-							<beginnt>'.$this->eigentuemerliste[$i]['beginnt'].'</beginnt>
+							<beginnt>'.$this->personen[$i]['beginnt'].'</beginnt>
 						</AA_Lebenszeitintervall>
 					</lebenszeitintervall>
 					<modellart>
@@ -130,42 +153,45 @@ class adressaenderungen {
 							<advStandardModell>DLKM</advStandardModell>
 						</AA_Modellart>
 					</modellart>
-					<anlass>020303</anlass>
-					<ort_Post>'.$this->eigentuemerliste[$i]['ort_post'].'</ort_Post>
-					<postleitzahlPostzustellung>'.$this->eigentuemerliste[$i]['postleitzahlpostzustellung'].'</postleitzahlPostzustellung>
-					<strasse>'.$this->eigentuemerliste[$i]['strasse'].'</strasse>
-					<hausnummer>'.$this->eigentuemerliste[$i]['hausnummer'].'</hausnummer>
-					<ortsteil>'.$this->eigentuemerliste[$i]['ortsteil'].'</ortsteil>
-					<qualitaetsangaben>
-						<AX_DQOhneDatenerhebung>
-							<herkunft>
-								<gmd:LI_Lineage>
-									<gmd:processStep>
-										<gmd:LI_ProcessStep>
-											<gmd:description>
-												<AX_LI_ProcessStep_OhneDatenerhebung_Description>Erhebung</AX_LI_ProcessStep_OhneDatenerhebung_Description>
-											</gmd:description>
-											<gmd:processor>
-												<gmd:CI_ResponsibleParty>
-													<gmd:organisationName>
-														<gco:CharacterString>kvwmap</gco:CharacterString>
-													</gmd:organisationName>
-													<gmd:role>
-														<gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/gmd#CI_RoleCode" codeListValue="processor">processor</gmd:CI_RoleCode>
-													</gmd:role>
-												</gmd:CI_ResponsibleParty>
-											</gmd:processor>
-										</gmd:LI_ProcessStep>
-									</gmd:processStep>
-								</gmd:LI_Lineage>
-							</herkunft>
-						</AX_DQOhneDatenerhebung>
-					</qualitaetsangaben>
-				</AX_Anschrift>
+					<anlass>050100</anlass>';
+				if($this->personen[$i]['nachnameoderfirma'])$data.= '<nachnameOderFirma>'.$this->personen[$i]['nachnameoderfirma'].'</nachnameOderFirma>';
+				if($this->personen[$i]['anrede'])$data.= '<anrede>'.$this->personen[$i]['anrede'].'</anrede>';
+				if($this->personen[$i]['vorname'])$data.= '<vorname>'.$this->personen[$i]['vorname'].'</vorname>';
+				if($this->personen[$i]['geburtsname'])$data.= '<geburtsname>'.$this->personen[$i]['geburtsname'].'</geburtsname>';
+				if($this->personen[$i]['geburtsdatum'])$data.= '<geburtsdatum>'.$this->personen[$i]['geburtsdatum'].'</geburtsdatum>';
+				if($this->personen[$i]['namensbestandteil'])$data.= '<namensbestandteil>'.$this->personen[$i]['namensbestandteil'].'</namensbestandteil>';
+				if($this->personen[$i]['akademischergrad'])$data.= '<akademischerGrad>'.$this->personen[$i]['akademischergrad'].'</akademischerGrad>';
+				$data.= '<hat xlink:href="urn:adv:oid:'.$this->personen[$i]['hat'].'"/>
+				</AX_Person>
 				<ogc:Filter>
-					<ogc:FeatureId fid="'.$this->eigentuemerliste[$i]['gml_id'].str_replace(':', '', str_replace('-', '', $this->eigentuemerliste[$i]['beginnt'])).'" />
+					<ogc:FeatureId fid="'.$this->personen[$i]['gml_id'].str_replace(':', '', str_replace('-', '', $this->personen[$i]['beginnt'])).'" />
 				</ogc:Filter>
 			</wfsext:Replace>'.chr(10);
+        fwrite($fp, $data);
+      }
+			for($i = 0; $i < count($this->anschriften); $i++){
+        $data = '<wfs:Insert>
+				<AX_Anschrift gml:id="'.$this->anschriften[$i]['gml_id'].'">
+					<gml:identifier codeSpace="http://www.adv-online.de/">urn:adv:oid:'.$this->anschriften[$i]['gml_id'].'</gml:identifier>
+					<lebenszeitintervall>
+						<AA_Lebenszeitintervall>
+							<beginnt>9999-01-01T00:00:00Z</beginnt>
+						</AA_Lebenszeitintervall>
+					</lebenszeitintervall>
+					<modellart>
+						<AA_Modellart>
+							<advStandardModell>DLKM</advStandardModell>
+						</AA_Modellart>
+					</modellart>
+					<anlass>050100</anlass>';
+					$data.= '<ort_Post>'.$this->anschriften[$i]['ort_post'].'</ort_Post>';
+					$data.= '<postleitzahlPostzustellung>'.$this->anschriften[$i]['postleitzahlpostzustellung'].'</postleitzahlPostzustellung>';
+					if($this->anschriften[$i]['ortsteil'])$data.= '<ortsteil>'.$this->anschriften[$i]['ortsteil'].'</ortsteil>';
+					$data.= '<strasse>'.$this->anschriften[$i]['strasse'].'</strasse>';
+					$data.= '<hausnummer>'.$this->anschriften[$i]['hausnummer'].'</hausnummer>';
+				$data.= '
+				</AX_Anschrift>
+			</wfs:Insert>'.chr(10);
         fwrite($fp, $data);
       }
 			$antragsnummer = '</wfs:Transaction>
@@ -176,7 +202,7 @@ class adressaenderungen {
 			fwrite($fp, $antragsnummer.chr(10));
 			fwrite($fp, $this->postdata.chr(10));
 			$this->update_auftragsnummer($this->auftragsnummer);
-      return TEMPPATH_REL.'/'.$filename;
+      return TEMPPATH_REL.$filename;
     }
   }
 
