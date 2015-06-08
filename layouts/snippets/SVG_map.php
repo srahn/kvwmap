@@ -641,6 +641,8 @@ function measure(){
 		top.document.GUI.str_pathy.value = "";
 	}
 	else{
+		top.document.GUI.measured_distance.value = 0;
+		measured_distance = 0;
 		freehand_measuring = false;
   	measuring = false;
   	restart();
