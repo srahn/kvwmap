@@ -160,6 +160,7 @@ class administration{
 	
 	function update_code(){
 		$folder = WWWROOT.APPLVERSION;
+		if(defined('HTTP_PROXY'))putenv('https_proxy='.HTTP_PROXY);
 		exec('cd '.$folder.' && sudo -u '.GIT_USER.' git stash && sudo -u '.GIT_USER.' git pull origin', $ausgabe, $ret);
 		if($ret != 0)showAlert('Fehler bei der Ausführung von "git pull origin".');
 	}
