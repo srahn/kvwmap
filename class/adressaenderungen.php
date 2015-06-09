@@ -103,6 +103,12 @@ class adressaenderungen {
   }
 
   function delete_old_entries(){
+		#herrenlose neue Anschriften löschen
+		$sql = "DELETE FROM alkis.ax_anschrift_temp WHERE gml_id NOT IN ";
+		$sql.= "(SELECT ax_anschrift_temp.gml_id FROM alkis.ax_anschrift_temp, alkis.ax_person_temp WHERE ax_person_temp.hat = ax_anschrift_temp.gml_id)";
+		#echo $sql.'<br>';
+		$ret = $this->database->execSQL($sql, 4, 0);
+		
 		# übernommene Anschriften abfragen
 		$sql = "SELECT ax_anschrift_temp.gml_id ";
 		$sql.= "FROM alkis.ax_anschrift_temp, alkis.ax_anschrift ";
