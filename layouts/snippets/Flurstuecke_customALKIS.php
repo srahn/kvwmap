@@ -1,4 +1,5 @@
 <?
+	include_once(SNIPPETS.'sachdatenanzeige_functions.php'); 
  	include(SNIPPETS.'generic_functions.php'); 
 ?>
 <script language="JavaScript" type="text/javascript">
