@@ -6345,7 +6345,7 @@ class GUI {
         $layerdb->setClientEncoding();
         #$path = $layerset[0]['pfad'];
 				$path = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[0]['pfad']);
-				$path = str_replace('$language', $this->user->rolle->language, $layerset[0]['pfad']);
+				$path = str_replace('$language', $this->user->rolle->language, $path);
         $privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
         $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
         $layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
@@ -10460,7 +10460,7 @@ class GUI {
             $layerdb->setClientEncoding();
             #$path = $layerset[$i]['pfad'];
 						$path = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[$i]['pfad']);
-						$path = str_replace('$language', $this->user->rolle->language, $layerset[$i]['pfad']);
+						$path = str_replace('$language', $this->user->rolle->language, $path);
             $privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
             $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
             $layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames']);
@@ -11117,7 +11117,7 @@ class GUI {
 				$layerdb = $this->mapDB->getlayerdatabase($layerset[$i]['Layer_ID'], $this->Stelle->pgdbhost);
 				#$path = $layerset[$i]['pfad'];
 				$path = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[$i]['pfad']);
-				$path = str_replace('$language', $this->user->rolle->language, $layerset[$i]['pfad']);
+				$path = str_replace('$language', $this->user->rolle->language, $path);
 				$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
 				#$path = $this->Stelle->parse_path($layerdb, $path, $privileges);
 				$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames']);      
