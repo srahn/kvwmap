@@ -912,7 +912,7 @@ show_all = function(count){
 <input type="hidden" name="wz" value="">
 
 <?
-if($this->formvars['go'] != 'neu Laden' AND $this->formvars['go'] != 'Layer-Suche' AND $this->formvars['go'] != 'Layer-Suche_Suchen' AND $this->formvars['go'] != 'Sachdaten' AND $this->formvars['go'] != 'get_last_query'){
+if($this->formvars['go'] != 'neu Laden' AND $this->formvars['go'] != 'Layer-Suche' AND $this->formvars['go'] != 'Layer-Suche_Suchen' AND $this->formvars['go'] != 'Sachdaten'){
 ?>
 <input name="go" type="hidden" value="">
 <input type="hidden" name="go_backup" value="">
