@@ -421,6 +421,7 @@
 						$layer->setMetaData('ows_auth_username', $layerset[$i]['wms_auth_username']);
 						$layer->setMetaData('ows_auth_password', $layerset[$i]['wms_auth_password']);
 						$layer->setMetaData('ows_auth_type', 'basic');
+						$layer->setMetaData('wms_exceptions_format', 'application/vnd.ogc.se_xml');
 						
 						$layer->set('dump', 0);
 						$layer->set('type',$layerset[$i]['Datentyp']);
@@ -547,6 +548,9 @@
                 $layer->setProcessing($processing);
               }
             }
+						if ($layerset[$i]['postlabelcache'] != 0) {
+							$layer->set('postlabelcache',$layerset[$i]['postlabelcache']);
+						}
                 
             if ($layerset[$i]['Datentyp']=='3') {
               if($layerset[$i]['transparency'] != ''){
@@ -573,6 +577,7 @@
               # Vektorlayer
               if($layerset[$i]['Data'] != ''){
 								$layerset[$i]['Data'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[$i]['Data']);
+								$layerset[$i]['Data'] = str_replace('$language', $this->user->rolle->language, $layerset[$i]['Data']);
                 $layer->set('data', $layerset[$i]['Data']);
               }
   
@@ -635,9 +640,6 @@
               }
               if ($layerset[$i]['labelrequires']!='') {
                 $layer->set('labelrequires',$layerset[$i]['labelrequires']);
-              }
-              if ($layerset[$i]['postlabelcache']!='') {
-                $layer->set('postlabelcache',$layerset[$i]['postlabelcache']);
               }
               if ($layerset[$i]['tolerance']!='3') {
                 $layer->set('tolerance',$layerset[$i]['tolerance']);
@@ -1170,7 +1172,9 @@
 					if($visible){
 						if($layer['requires'] == ''){
 							$legend .= '<tr><td valign="top">';
-							if($layer['queryable'] == 1 AND !$this->formvars['nurFremdeLayer']){								// die sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen, welches immer den value 0 hat, damit sie beim Neuladen ausgeschaltet werden können, denn eine nicht angehakte Checkbox/Radiobutton wird ja nicht übergeben								$legend .=  '<input type="hidden" name="qLayer'.$layer['Layer_ID'].'" value="0">';
+							if($layer['queryable'] == 1 AND !$this->formvars['nurFremdeLayer']){
+								// die sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen, welches immer den value 0 hat, damit sie beim Neuladen ausgeschaltet werden können, denn eine nicht angehakte Checkbox/Radiobutton wird ja nicht übergeben
+								$legend .=  '<input type="hidden" name="qLayer'.$layer['Layer_ID'].'" value="0">';
 								$legend .=  '<input id="qLayer'.$layer['Layer_ID'].'"';
 								
 								if($this->user->rolle->singlequery){			# singlequery-Modus
@@ -1270,7 +1274,7 @@
 									}
 								}
 								else{
-									$legend .= '<table border="0" cellspacing="2" cellpadding="0">';
+									$legend .= '<table border="0" cellspacing="0" cellpadding="0">';
 									$maplayer = $this->map->getLayerByName($layer['alias']);
 									for($k = 0; $k < $maplayer->numclasses; $k++){
 										$class = $maplayer->getClass($k);
@@ -1307,22 +1311,28 @@
 												}												
 											}
 										}
-										$legend .= '<tr><td>';
+										$legend .= '<tr><td style="line-height: 15px">';
 										if($s > 0){
-											$image = $class->createLegendIcon(18,12);
-											$filename = $this->map_saveWebImage($image,'jpeg');
-											$newname = $this->user->id.basename($filename);
-											rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
+											if($layer['Class'][$k]['Style'][0]['colorrange'] != ''){
+												$newname = rand(0, 1000000).'.jpg';
+												$this->colorramp(IMAGEPATH.$newname, 18, 18, $layer['Class'][$k]['Style'][0]['colorrange']);
+											}
+											else{
+												$image = $class->createLegendIcon(18,12);
+												$filename = $this->map_saveWebImage($image,'jpeg');
+												$newname = $this->user->id.basename($filename);
+												rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
+											}
 											#Anne										
 											$classid = $layer['Class'][$k]['Class_ID'];
 											if($this->mapDB->disabled_classes['status'][$classid] == '0'){
-												$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="0"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img border="0" name="imgclass'.$classid.'" src="graphics/inactive.jpg"></a>';
+												$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="0"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img style="vertical-align:middle" border="0" name="imgclass'.$classid.'" src="graphics/inactive.jpg"></a>';
 											}
 											elseif($this->mapDB->disabled_classes['status'][$classid] == 2){
-												$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="2"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img border="0" name="imgclass'.$classid.'" src="'.TEMPPATH_REL.$newname.'"></a>';
+												$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="2"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img style="vertical-align:middle" border="0" name="imgclass'.$classid.'" src="'.TEMPPATH_REL.$newname.'"></a>';
 											}
 											else{
-												$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="1"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img border="0" name="imgclass'.$classid.'" src="'.TEMPPATH_REL.$newname.'"></a>';
+												$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="1"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img style="vertical-align:middle" border="0" name="imgclass'.$classid.'" src="'.TEMPPATH_REL.$newname.'"></a>';
 											}
 										}
 										$legend .= '&nbsp;<span class="px13">'.html_umlaute($class->name).'</span></td></tr>';
@@ -1409,6 +1419,20 @@
 			return $image->saveWebImage($format, 1, 1, 0);
 		}
 	}	
+	function colorramp($path, $width, $height, $colorrange){
+		$colors = explode(' ', $colorrange);
+		$s[0] = $colors[0];	$s[1] = $colors[1];	$s[2] = $colors[2];
+		$e[0] = $colors[3];	$e[1] = $colors[4];	$e[2] = $colors[5];
+		$img = imagecreatetruecolor($width, $height);
+		for($i = 0; $i < $height; $i++) {
+			$r = $s[0] - ((($s[0]-$e[0])/$height)*$i);
+			$g = $s[1] - ((($s[1]-$e[1])/$height)*$i);
+			$b = $s[2] - ((($s[2]-$e[2])/$height)*$i);
+			$color = imagecolorallocate($img,$r,$g,$b);
+			imagefilledrectangle($img,0,$i,$width,$i+1,$color);
+		}
+		imagejpeg($img, $path, 70); 
+	}
 }class database {  var $ist_Fortfuehrung;  var $debug;  var $loglevel;  var $logfile;  var $commentsign;  var $blocktransaction;  function database() {
     global $debug;
     $this->debug=$debug;
@@ -1649,8 +1673,9 @@
 			$this->oGeorefExt=ms_newRectObj();
 			$this->oGeorefExt->setextent($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
 			$this->nImageWidth=$rs['nImageWidth'];
-			$this->nImageHeight=$rs['nImageHeight'];
+			$this->nImageHeight=$rs['nImageHeight'];			
 			$this->mapsize=$this->nImageWidth.'x'.$this->nImageHeight;
+			$this->auto_map_resize=$rs['auto_map_resize'];
 			@$this->pixwidth=($rs['maxx']-$rs['minx'])/$rs['nImageWidth'];
 			@$this->pixheight=($rs['maxy']-$rs['miny'])/$rs['nImageHeight'];
 			$this->pixsize=($this->pixwidth+$this->pixheight)/2;
@@ -1933,7 +1958,7 @@
 		if($language != 'german') {
 			$sql.='CASE WHEN `Name_'.$language.'` != "" THEN `Name_'.$language.'` ELSE `Name` END AS ';
 		}
-		$sql.='Name, l.alias, l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem, l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version, l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, g.*';
+		$sql.='Name, l.alias, l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem, l.labelmaxscale, l.labelminscale, l.labelrequires, l.postlabelcache, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version, l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, g.*';
     $sql.=' FROM u_rolle2used_layer AS rl,used_layer AS ul,layer AS l, u_groups AS g, u_groups2rolle as gr';
     $sql.=' WHERE rl.stelle_id=ul.Stelle_ID AND rl.layer_id=ul.Layer_ID AND l.Layer_ID=ul.Layer_ID';
     $sql.=' AND (ul.minscale != -1 OR ul.minscale IS NULL) AND l.Gruppe = g.id AND rl.stelle_ID='.$this->Stelle_ID.' AND rl.user_id='.$this->User_ID;
@@ -1977,7 +2002,7 @@
   	#Anne
     $sql_classes = 'SELECT class_id, status FROM u_rolle2used_class WHERE user_id='.$this->User_ID.' AND stelle_id='.$this->Stelle_ID.';';
     $query_classes=mysql_query($sql_classes);
-    while($row = mysql_fetch_array($query_classes)){
+    while($row = mysql_fetch_assoc($query_classes)){
   		$classarray['class_id'][] = $row['class_id'];
 			$classarray['status'][$row['class_id']] = $row['status'];
 		}
@@ -1995,7 +2020,7 @@
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
-    while($rs=mysql_fetch_array($query)) {
+    while($rs=mysql_fetch_assoc($query)) {
       $rs['Style']=$this->read_Styles($rs['Class_ID']);
       $rs['Label']=$this->read_Label($rs['Class_ID']);
       #Anne
@@ -2027,7 +2052,7 @@
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Styles - Lesen der Styledaten:<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
-    while($rs=mysql_fetch_array($query)) {
+    while($rs=mysql_fetch_assoc($query)) {
       $Styles[]=$rs;
     }
     return $Styles;
@@ -2038,7 +2063,7 @@
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Label - Lesen der Labels zur Classe eines Layers:<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
-    while ($rs=mysql_fetch_array($query)) {
+    while ($rs=mysql_fetch_assoc($query)) {
       $Labels[]=$rs;
     }
     return $Labels;

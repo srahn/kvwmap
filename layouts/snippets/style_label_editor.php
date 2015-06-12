@@ -312,7 +312,7 @@ function browser_check(){
 								echo'
 					    		<tr>
 								  	<td class="px13">';
-								  		echo key($this->styledaten).'</td><td><input name="style_'.key($this->styledaten).'" size="11" type="text" value="'.$this->styledaten[key($this->styledaten)].'">';
+								  		echo key($this->styledaten).'</td><td><input name="style_'.key($this->styledaten).'" size="20" type="text" value="'.$this->styledaten[key($this->styledaten)].'">';
 								echo'
 										</td>
 									</tr>';

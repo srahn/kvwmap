@@ -303,7 +303,7 @@ class GUI {
 									}
 								}
 								else{
-									$legend .= '<table border="0" cellspacing="2" cellpadding="0">';
+									$legend .= '<table border="0" cellspacing="0" cellpadding="0">';
 									$maplayer = $this->map->getLayerByName($layer['alias']);
 									for($k = 0; $k < $maplayer->numclasses; $k++){
 										$class = $maplayer->getClass($k);
@@ -340,22 +340,28 @@ class GUI {
 												}												
 											}
 										}
-										$legend .= '<tr><td>';
+										$legend .= '<tr><td style="line-height: 15px">';
 										if($s > 0){
-											$image = $class->createLegendIcon(18,12);
-											$filename = $this->map_saveWebImage($image,'jpeg');
-											$newname = $this->user->id.basename($filename);
-											rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
+											if($layer['Class'][$k]['Style'][0]['colorrange'] != ''){
+												$newname = rand(0, 1000000).'.jpg';
+												$this->colorramp(IMAGEPATH.$newname, 18, 18, $layer['Class'][$k]['Style'][0]['colorrange']);
+											}
+											else{
+												$image = $class->createLegendIcon(18,12);
+												$filename = $this->map_saveWebImage($image,'jpeg');
+												$newname = $this->user->id.basename($filename);
+												rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
+											}
 											#Anne										
 											$classid = $layer['Class'][$k]['Class_ID'];
 											if($this->mapDB->disabled_classes['status'][$classid] == '0'){
-												$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="0"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img border="0" name="imgclass'.$classid.'" src="graphics/inactive.jpg"></a>';
+												$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="0"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img style="vertical-align:middle" border="0" name="imgclass'.$classid.'" src="graphics/inactive.jpg"></a>';
 											}
 											elseif($this->mapDB->disabled_classes['status'][$classid] == 2){
-												$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="2"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img border="0" name="imgclass'.$classid.'" src="'.TEMPPATH_REL.$newname.'"></a>';
+												$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="2"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img style="vertical-align:middle" border="0" name="imgclass'.$classid.'" src="'.TEMPPATH_REL.$newname.'"></a>';
 											}
 											else{
-												$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="1"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img border="0" name="imgclass'.$classid.'" src="'.TEMPPATH_REL.$newname.'"></a>';
+												$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="1"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img style="vertical-align:middle" border="0" name="imgclass'.$classid.'" src="'.TEMPPATH_REL.$newname.'"></a>';
 											}
 										}
 										$legend .= '&nbsp;<span class="px13">'.html_umlaute($class->name).'</span></td></tr>';
@@ -428,7 +434,22 @@ class GUI {
 	  $legend .= '</div>';
     return $legend;
   }
-  
+  	
+	function colorramp($path, $width, $height, $colorrange){
+		$colors = explode(' ', $colorrange);
+		$s[0] = $colors[0];	$s[1] = $colors[1];	$s[2] = $colors[2];
+		$e[0] = $colors[3];	$e[1] = $colors[4];	$e[2] = $colors[5];
+		$img = imagecreatetruecolor($width, $height);
+		for($i = 0; $i < $height; $i++) {
+			$r = $s[0] - ((($s[0]-$e[0])/$height)*$i);
+			$g = $s[1] - ((($s[1]-$e[1])/$height)*$i);
+			$b = $s[2] - ((($s[2]-$e[2])/$height)*$i);
+			$color = imagecolorallocate($img,$r,$g,$b);
+			imagefilledrectangle($img,0,$i,$width,$i+1,$color);
+		}
+		imagejpeg($img, $path, 70); 
+	}
+	
 	function changemenue_with_ajax($id, $status){
     $this->changemenue($id, $status);
   }
@@ -2612,7 +2633,7 @@ class GUI {
             <td class="px13">';
               echo key($this->styledaten).'</td><td><input ';
               if($i === 0)echo 'onkeyup="if(event.keyCode != 8)get_style(this.value)"';
-              echo ' name="style_'.key($this->styledaten).'" size="11" type="text" value="'.$this->styledaten[key($this->styledaten)].'">';
+              echo ' name="style_'.key($this->styledaten).'" size="20" type="text" value="'.$this->styledaten[key($this->styledaten)].'">';
         echo'
             </td>
           </tr>';
@@ -4760,10 +4781,16 @@ class GUI {
 			$style->set('opacity', $dbStyle['opacity']);
 		}
 		
-    $image = $klasse->createLegendIcon(25,18);
-    $filename = $this->map_saveWebImage($image,'jpeg');
-    $newname = $this->user->id.basename($filename);
-    rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
+		if($dbStyle['colorrange'] != ''){
+			$newname = rand(0, 1000000).'.jpg';
+			$this->colorramp(IMAGEPATH.$newname, 25, 18, $dbStyle['colorrange']);
+		}
+		else{
+			$image = $klasse->createLegendIcon(25,18);
+			$filename = $this->map_saveWebImage($image,'jpeg');
+			$newname = $this->user->id.basename($filename);
+			rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
+		}
     return $newname;
   }
 
@@ -12948,7 +12975,7 @@ class db_mapObj{
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
-    while($rs=mysql_fetch_array($query)) {
+    while($rs=mysql_fetch_assoc($query)) {
       $rs['Style']=$this->read_Styles($rs['Class_ID']);
       $rs['Label']=$this->read_Label($rs['Class_ID']);
       #Anne
@@ -12978,7 +13005,7 @@ class db_mapObj{
   	#Anne
     $sql_classes = 'SELECT class_id, status FROM u_rolle2used_class WHERE user_id='.$this->User_ID.' AND stelle_id='.$this->Stelle_ID.';';
     $query_classes=mysql_query($sql_classes);
-    while($row = mysql_fetch_array($query_classes)){
+    while($row = mysql_fetch_assoc($query_classes)){
   		$classarray['class_id'][] = $row['class_id'];
 			$classarray['status'][$row['class_id']] = $row['status'];
 		}
@@ -12992,7 +13019,7 @@ class db_mapObj{
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Styles - Lesen der Styledaten:<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
-    while($rs=mysql_fetch_array($query)) {
+    while($rs=mysql_fetch_assoc($query)) {
       $Styles[]=$rs;
     }
     return $Styles;
@@ -13008,7 +13035,7 @@ class db_mapObj{
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Label - Lesen der Labels zur Classe eines Layers:<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
-    while ($rs=mysql_fetch_array($query)) {
+    while ($rs=mysql_fetch_assoc($query)) {
       $Labels[]=$rs;
     }
     return $Labels;
