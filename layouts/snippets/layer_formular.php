@@ -422,7 +422,7 @@ else {
 		  	<tr>
 		    	<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsSrs; ?></th>
 		    	<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
-		      		<input name="ows_srs" type="text" value="<?php echo $this->layerdata['ows_srs']; ?>" size="25" maxlength="100">
+		      		<input name="ows_srs" type="text" value="<?php echo $this->layerdata['ows_srs']; ?>" size="25" maxlength="255">
 		  		</td>
 		  	</tr>
 		  	<tr>
