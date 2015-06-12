@@ -122,8 +122,7 @@ for($i=0;$i<$anzLayer;$i++){
 
   <?
   	if($this->search == true){			# wenn man von der Suche kam -> Hidden Felder zum Speichern der Suchparameter
-		if($this->last_query != '')echo '<input name="go" type="hidden" value="get_last_query">';
-		else echo '<input name="go" type="hidden" value="Layer-Suche_Suchen">';
+		echo '<input name="go" type="hidden" value="Layer-Suche_Suchen">';
 		echo '		<input name="search" type="hidden" value="true">
   					<input name="selected_layer_id" type="hidden" value="'.$this->formvars['selected_layer_id'].'">
   					<input id="offset_'.$this->formvars['selected_layer_id'].'" name="offset_'.$this->formvars['selected_layer_id'].'" type="hidden" value="'.$this->formvars['offset_'.$this->formvars['selected_layer_id']].'">
@@ -153,8 +152,7 @@ for($i=0;$i<$anzLayer;$i++){
 	  	}
   	}
   	else{
-			if($this->last_query != '')echo '<input name="go" type="hidden" value="get_last_query">';
-			else echo '<input name="go" type="hidden" value="Sachdaten">';
+			echo '<input name="go" type="hidden" value="Sachdaten">';
   	}
   if($this->found != 'false' AND $this->formvars['printversion'] == ''){
   ?>
