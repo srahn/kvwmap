@@ -46,6 +46,10 @@ show_all = function(count){
 <h2>Flurst&uuml;cke</h2>
 <table border="0" cellpadding="2" cellspacing="0">
 <?php
+	$sql = "SELECT max(beginnt)::date FROM ax_fortfuehrungsfall;";
+  $ret=$this->pgdatabase->execSQL($sql,4,0);
+  $aktalkis = pg_fetch_array($ret[1]);
+
 	$this->Stelle->getFunktionen();
 	$forall = false;
 	if($i == '')$i = 0;
@@ -55,7 +59,9 @@ show_all = function(count){
 	$von = $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] + 1;
 	$bis = $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] + $this->formvars['anzahl'];
   if ($anzObj>0) { ?>
-		<br><br>
+		<br>
+		<span style="font-size:80%;">Stand ALKIS vom: <? echo $aktalkis[0]; ?><br></span>
+		<br>
     <u><? echo $gesamt; ?> Flurstück<? if ($gesamt>1) { echo "e"; } ?> gefunden</u>
 		<? if($gesamt > $anzObj){ ?>
 		&nbsp;<a href="javascript:show_all(<? echo $gesamt; ?>);">alle anzeigen</a>
