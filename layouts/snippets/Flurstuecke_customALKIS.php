@@ -45,6 +45,8 @@ show_all = function(count){
 <a name="anfang"></a>
 <h2>Flurst&uuml;cke</h2>
 <table border="0" cellpadding="2" cellspacing="0">
+	<tr>
+		<td align="center">
 <?php
 	$sql = "SELECT max(beginnt)::date FROM alkis.ax_fortfuehrungsfall;";
   $ret=$this->pgdatabase->execSQL($sql,4,0);
@@ -62,7 +64,7 @@ show_all = function(count){
 		<br>
 		<span style="font-size:80%;">Stand ALKIS vom: <? echo $aktalkis[0]; ?><br></span>
 		<br>
-    <u><? echo $gesamt; ?> Flurstück<? if ($gesamt>1) { echo "e"; } ?> gefunden</u>
+    <u><? echo $gesamt; ?> Flurstück<? if ($gesamt>1) { echo "e"; } ?> abgefragt</u>
 		<? if($gesamt > $anzObj){ ?>
 		&nbsp;<a href="javascript:show_all(<? echo $gesamt; ?>);">alle anzeigen</a>
     <br><br>
@@ -78,9 +80,11 @@ show_all = function(count){
         $attribute .= $this->qlayerset[$i]['attributes']['name'][$j];
       }
     }
-
+		echo '<tr><td align="center"><table><tr><td align="left">';
     for ($a=0;$a<$anzObj;$a++) { // 2007-11-13_mh
       $flurstkennz_a=$this->qlayerset[$i]['shape'][$a]['flurstkennz'];
+			$flst=new flurstueck($flurstkennz_a,$this->pgdatabase);
+      $flst->readALB_Data($flurstkennz_a, 'true');	# true, damit man rausbekommt, ob das Flurstück evtl. historisch ist (beim Flurst.-Listenimport)
       $gemkg=substr($flurstkennz_a, 0, 6);
       $flur=substr($flurstkennz_a, 6, 3);
       $zaehler=ltrim(substr($flurstkennz_a, 9, 5), '0');
@@ -88,16 +92,20 @@ show_all = function(count){
       if ($nenner!='') {
         $nenner="/".$nenner;
       }
-      echo '<a href="#'.$flurstkennz_a.'">Gemarkung: '.$gemkg.' - Flur: '.ltrim($flur,"0").' - Flurst&uuml;ck: '.$zaehler.$nenner.'</a><br>';
+			if($flst->FlurstNr){
+				$flst_array[] = $flst;
+				echo '<a href="#'.$flurstkennz_a.'">Gemarkung: '.$gemkg.' - Flur: '.ltrim($flur,"0").' - Flurst&uuml;ck: '.$zaehler.$nenner.'</a>';
+				if($flst->endet!="" OR $flst->hist_alb == 1)echo ' (H)';
+				echo '<br>';
+			}
+			else{
+				echo 'Gemarkung: '.$gemkg.' - Flur: '.ltrim($flur,"0").' - Flurst&uuml;ck: '.$zaehler.$nenner.' nicht gefunden<br>';
+			}
     }
+		echo '</td></tr></table></td></tr>';
 
-
-    for ($k=0;$k<$anzObj;$k++) {
-      $flurstkennz=$this->qlayerset[$i]['shape'][$k]['flurstkennz'];
-      #echo '<br>'.$flurstkennz; #2005-11-30_pk
-      $flst=new flurstueck($flurstkennz,$this->pgdatabase);
-      $flst->readALB_Data($flurstkennz, $this->formvars['without_temporal_filter']);
-    #  $flst->isALK($flurstkennz);
+    for ($k=0;$k<count($flst_array);$k++) {
+      $flst = $flst_array[$k];
       if ($flst->FlurstNr!='') {
         if($k > 0){
           $Flurstueckskennz .= ';';
@@ -107,7 +115,7 @@ show_all = function(count){
 
   <!-- Für jedes einzelne Flurstück -->
   <tr>
-    <td colspan="2">&nbsp;<a name="<? echo $flurstkennz; ?>" href="#<? echo $flurstkennz; ?>"></a></td>
+    <td colspan="2">&nbsp;<a name="<? echo $flst->FlurstKennz; ?>" href="#<? echo $flst->FlurstKennz; ?>"></a></td>
   </tr>
   <tr>
     <td>
