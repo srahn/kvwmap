@@ -453,7 +453,7 @@
         else {
           # Speicherung der Bilddatei erfolgreich, Eintragen in Datenbank
           $GUI->nachweis->database->begintransaction();
-          $ret=$GUI->nachweis->eintragenNeuesDokument($GUI->formvars['datum'],$GUI->formvars['flurid'],$GUI->formvars['VermStelle'], $GUI->formvars['art'], $GUI->formvars['andere_art'], $GUI->formvars['gueltigkeit'],$GUI->formvars['stammnr'],$GUI->formvars['Blattformat'],$GUI->formvars['Blattnr'],$GUI->formvars['rissnummer'],$GUI->formvars['fortfuehrung'],$GUI->formvars['bemerkungen'],$GUI->formvars['artname']."/".$GUI->formvars['zieldateiname'],$GUI->formvars['umring']);
+          $ret=$GUI->nachweis->eintragenNeuesDokument($GUI->formvars['datum'],$GUI->formvars['flurid'],$GUI->formvars['VermStelle'], $GUI->formvars['art'], $GUI->formvars['andere_art'], $GUI->formvars['gueltigkeit'],$GUI->formvars['stammnr'],$GUI->formvars['Blattformat'],$GUI->formvars['Blattnr'],$GUI->formvars['rissnummer'],$GUI->formvars['fortfuehrung'],$GUI->formvars['bemerkungen'],$GUI->formvars['artname']."/".$GUI->formvars['zieldateiname'],$GUI->formvars['umring'], $GUI->user);
           if ($ret[0]) {
             $GUI->nachweis->database->rollbacktransaction();
             $errmsg=$ret[1];
@@ -473,7 +473,7 @@
     else {
       ##################################################
       # 1.2. Änderung eines vorhandenen Dokumentes
-      $ret=$GUI->nachweis->changeDokument($GUI->formvars);
+      $ret=$GUI->nachweis->changeDokument($GUI->formvars, $GUI->user);
       if ($ret[0]) {
         # Die Änderung wurde auf Grund eines Fehlers nicht durchgeführt
         # 1.3 Zurück zum Änderungsformular mit Anzeige der Fehlermeldung

@@ -55,7 +55,7 @@ class Nachweis {
     return $zieldateiname;
   }
   
-  function changeDokument($formvars) {
+  function changeDokument($formvars, $user) {
     #2005-11-25_pk
     #echo 'Änderung des Dokumentes mit der id: '.$formvars['id'];
 
@@ -90,7 +90,7 @@ class Nachweis {
         $formvars['zieldateiname']=$this->getZielDateiName($formvars);
 
         # 4. Ändern der Eintragung in der Datenbank
-        $ret=$this->aktualisierenDokument($formvars['id'],$formvars['datum'],$formvars['flurid'],$formvars['VermStelle'],$formvars['art'],$formvars['andere_art'],$formvars['gueltigkeit'],$formvars['stammnr'],$formvars['Blattformat'],$formvars['Blattnr'],$formvars['rissnummer'],$formvars['fortfuehrung'],$formvars['bemerkungen'],$formvars['umring'],$formvars['artname'].'/'.$formvars['zieldateiname']);
+        $ret=$this->aktualisierenDokument($formvars['id'],$formvars['datum'],$formvars['flurid'],$formvars['VermStelle'],$formvars['art'],$formvars['andere_art'],$formvars['gueltigkeit'],$formvars['stammnr'],$formvars['Blattformat'],$formvars['Blattnr'],$formvars['rissnummer'],$formvars['fortfuehrung'],$formvars['bemerkungen'],$formvars['umring'],$formvars['artname'].'/'.$formvars['zieldateiname'], $user);
         if ($ret[0]) {
           # Aktualisierungsvorgang in der Datenbank nicht erfolgreich
           $errmsg=$ret[1];
@@ -549,14 +549,14 @@ class Nachweis {
     return $ret;
   }
   
-  function eintragenNeuesDokument($datum,$flurid,$VermStelle,$art,$andere_art,$gueltigkeit,$stammnr,$blattformat,$blattnr,$rissnummer,$fortf,$bemerkungen,$zieldatei,$umring) {
+  function eintragenNeuesDokument($datum,$flurid,$VermStelle,$art,$andere_art,$gueltigkeit,$stammnr,$blattformat,$blattnr,$rissnummer,$fortf,$bemerkungen,$zieldatei,$umring,$user) {
     #2005-11-24_pk
     if($fortf == '')$fortf = 'NULL';
     $this->debug->write('Einfügen der Metadaten zum neuen Nachweisdokument in die Sachdatenbank',4);
-    $sql ="INSERT INTO nachweisverwaltung.n_nachweise (flurid,stammnr,art,blattnummer,datum,vermstelle,gueltigkeit,format,link_datei,the_geom,fortfuehrung,rissnummer,bemerkungen)";
+    $sql ="INSERT INTO nachweisverwaltung.n_nachweise (flurid,stammnr,art,blattnummer,datum,vermstelle,gueltigkeit,format,link_datei,the_geom,fortfuehrung,rissnummer,bemerkungen,bearbeiter,zeit)";
     $sql.=" VALUES (".$flurid.",'".trim($stammnr)."','".$art."','".trim($blattnr)."','".$datum."'";
     $sql.=",'".$VermStelle."','".$gueltigkeit."','".$blattformat."','".$zieldatei."',st_transform(st_geometryfromtext('".$umring."', ".$this->client_epsg."), (select srid from geometry_columns where f_table_name = 'n_nachweise'))";
-    $sql.=",".$fortf.",'".$rissnummer."','".$bemerkungen."')";
+    $sql.=",".$fortf.",'".$rissnummer."','".$bemerkungen."','".$user->Vorname." ".$user->Name."', '".date('Y-m-d G:i:s')."')";
 		#echo '<br>Polygon-SQL: '.$sql;
     $ret=$this->database->execSQL($sql,4, 1);
     if($andere_art != ''){
@@ -572,13 +572,14 @@ class Nachweis {
     return $ret;
   }
   
-  function aktualisierenDokument($id,$datum,$flurid,$VermStelle,$art,$andere_art,$gueltigkeit,$stammnr,$Blattformat,$Blattnr,$rissnr,$fortf,$bemerkungen,$umring,$zieldateiname) {
+  function aktualisierenDokument($id,$datum,$flurid,$VermStelle,$art,$andere_art,$gueltigkeit,$stammnr,$Blattformat,$Blattnr,$rissnr,$fortf,$bemerkungen,$umring,$zieldateiname,$user) {
     if($fortf == '')$fortf = 'NULL';
     $this->debug->write('Aktualisieren der Metadaten zu einem bestehenden Nachweisdokument',4);
     $sql="UPDATE nachweisverwaltung.n_nachweise SET flurid='".$flurid."', stammnr='".trim($stammnr)."', art='".$art."'";
     $sql.=",blattnummer='".trim($Blattnr)."', datum='".$datum."', vermstelle='".$VermStelle."'";
     $sql.=",gueltigkeit='".$gueltigkeit."', format='".$Blattformat."',the_geom=st_transform(st_geometryfromtext('".$umring."', ".$this->client_epsg."), (select srid from geometry_columns where f_table_name = 'n_nachweise')), link_datei='".$zieldateiname."'";
     $sql.=",fortfuehrung=".(int)$fortf.",rissnummer='".$rissnr."',bemerkungen='".$bemerkungen."'";
+		$sql.=",bearbeiter='".$user->Vorname." ".$user->Name."', zeit='".date('Y-m-d G:i:s')."'";
     $sql.=" WHERE id = ".$id;
     #echo $sql;
     $ret=$this->database->execSQL($sql,4, 1);
