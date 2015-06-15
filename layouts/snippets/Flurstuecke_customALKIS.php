@@ -46,7 +46,7 @@ show_all = function(count){
 <h2>Flurst&uuml;cke</h2>
 <table border="0" cellpadding="2" cellspacing="0">
 <?php
-	$sql = "SELECT max(beginnt)::date FROM ax_fortfuehrungsfall;";
+	$sql = "SELECT max(beginnt)::date FROM alkis.ax_fortfuehrungsfall;";
   $ret=$this->pgdatabase->execSQL($sql,4,0);
   $aktalkis = pg_fetch_array($ret[1]);
 
