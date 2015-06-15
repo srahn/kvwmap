@@ -1198,7 +1198,7 @@ function url_get_contents($url, $username = NULL, $password = NULL) {
 		}
 		$context = stream_context_create($ctx);
 		$response = @ file_get_contents($url, false, $context);
-		if ($response == false) {
+		if ($response === false) {
 			throw new Exception("Fehler beim Abfragen der URL mit file_get_contents(".$url.")");
 		}
 	}	
