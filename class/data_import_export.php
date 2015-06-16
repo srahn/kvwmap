@@ -699,6 +699,25 @@ class data_import_export {
 					$contenttype = 'text/uko';
 				}break;
 			}
+			# Dokumente auch mit dazupacken
+			if($this->formvars['download_documents'] != ''){
+				if($result == NULL){
+					while($rs=pg_fetch_assoc($ret[1])){
+						$result[] = $rs;
+					}
+				}
+				for($i = 0; $i < count($result); $i++){
+					foreach($result[$i] As $key => $value){
+						$j = $this->attributes['indizes'][$key];
+						if($this->attributes['form_element_type'][$j] == 'Dokument' AND $value != ''){
+							$parts = explode('&original_name=', $value);
+							if($parts[1] == '')$parts[1] = basename($parts[0]);
+							if(file_exists($parts[0]))copy($parts[0], IMAGEPATH.$folder.'/'.$parts[1]);
+							$zip = true;
+						}
+					}
+				}
+			}
 			if($zip){
 				exec(ZIP_PATH.' '.IMAGEPATH.$folder.' '.IMAGEPATH.$folder.'/*'); # Ordner zippen
 				#echo ZIP_PATH.' '.IMAGEPATH.$folder.' '.IMAGEPATH.$folder.'/*';

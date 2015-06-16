@@ -169,6 +169,7 @@ $j=0;
         	<? for($s = 0; $s < 4; $s++){ ?>
         	<div style="float: left; padding: 4px; min-width:20%;">
           <? for($i = 0; $i < $floor+$r; $i++){
+						if($this->data_import_export->attributes['form_element_type'][$j] == 'Dokument')$document_attributes = true;
 						if($this->data_import_export->attributes['name'][$j] == $this->data_import_export->attributes['the_geom'] AND $this->data_import_export->layerdaten['export_privileg'][$selectindex] != 1) continue;
 					?>
       	  <div style="padding: 4px;">
@@ -197,8 +198,14 @@ $j=0;
         </div>
       </div>
 
-      <div style="margin-top:30px; margin-bottom:30px; text-align: center;">
-		<input class="button" name="create" type="button" onclick="data_export();" value="<?php echo $strButtonGenerateShapeData; ?>">
+			<? if($document_attributes){ ?>
+			<div style="margin-top:20px; margin-bottom:0px; text-align: center;">				
+				<input type="checkbox" name="download_documents"><? echo $strDownloadDocuments; ?>
+      </div>
+			<? } ?>
+			
+      <div style="margin-top:30px; margin-bottom:10px; text-align: center;">
+				<input class="button" name="create" type="button" onclick="data_export();" value="<? echo $strButtonGenerateShapeData; ?>">
       </div>
 
     </td>
