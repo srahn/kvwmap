@@ -711,20 +711,28 @@ class data_import_export {
 						$j = $this->attributes['indizes'][$key];
 						if($this->attributes['form_element_type'][$j] == 'Dokument' AND $value != ''){
 							$parts = explode('&original_name=', $value);
-							if($parts[1] == '')$parts[1] = basename($parts[0]);
-							if(file_exists($parts[0]))copy($parts[0], IMAGEPATH.$folder.'/'.$parts[1]);
+							if($parts[1] == '')$parts[1] = basename($parts[0]);		# wenn kein Originalname da, Dateinamen nehmen
+							if(file_exists($parts[0])){
+								if(file_exists(IMAGEPATH.$folder.'/'.$parts[1])){		# wenn schon eine Datei mit dem Originalnamen existiert, wird der Dateiname angehängt
+									$file_parts = explode('.', $parts[1]);
+									$parts[1] = $file_parts[0].'_'.basename($parts[0]);
+								}
+								copy($parts[0], IMAGEPATH.$folder.'/'.$parts[1]);
+							}
 							$zip = true;
 						}
 					}
 				}
 			}
+			# bei Bedarf zippen
 			if($zip){
 				exec(ZIP_PATH.' '.IMAGEPATH.$folder.' '.IMAGEPATH.$folder.'/*'); # Ordner zippen
 				#echo ZIP_PATH.' '.IMAGEPATH.$folder.' '.IMAGEPATH.$folder.'/*';
 				$exportfile = IMAGEPATH.$folder.'.zip';
 				$contenttype = 'application/octet-stream';
 			}
-      $sql = 'DROP TABLE '.$temp_table;		# temp. Tabelle wieder löschen
+			# temp. Tabelle wieder löschen
+      $sql = 'DROP TABLE '.$temp_table;
       $ret = $layerdb->execSQL($sql,4, 0);
       $currenttime=date('Y-m-d H:i:s',time());
     	$user->rolle->setConsumeShape($currenttime,$this->formvars['selected_layer_id'],$count);
