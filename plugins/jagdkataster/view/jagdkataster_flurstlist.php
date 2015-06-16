@@ -1,7 +1,7 @@
 <script language="JavaScript" type="text/javascript">
 <!--
 
-function show_selected_flurst(){
+function send_selected_flurst(go){
 	var semi = false;
 	var flurstkennz = "";
 	var flurstarray = document.getElementsByName("check_flurstueck");
@@ -15,7 +15,7 @@ function show_selected_flurst(){
     }
 	}
 	if(semi == true){
-		document.GUI.go.value = 'Flurstueck_Anzeigen';
+		document.GUI.go.value = go;
     document.GUI.FlurstKennz.value = flurstkennz;
     document.GUI.submit();
   }
@@ -46,6 +46,7 @@ function show_all_flurst(){
 }
 
 function csv_export(){
+	document.GUI.FlurstKennz.value = '';
 	document.GUI.go.value = 'jagdkatastereditor_Flurstuecke_Listen_csv';
 	document.GUI.submit();
 }
@@ -92,10 +93,13 @@ function csv_export(){
       ?>
       <tr>
       	<td valign="top" align="center"><img src="<? echo GRAPHICSPATH?>pfeil_unten-rechts.gif"></td>
-      	<td height="29" valign="bottom" colspan="5"><a href="javascript:show_selected_flurst();">ausgewählte Flurstücke anzeigen</a> | <a href="javascript:show_all_flurst();">alle Flurstücke anzeigen</a></td>
+      	<td height="29" valign="bottom" colspan="6"><a href="javascript:send_selected_flurst('Flurstueck_Anzeigen');">ausgewählte Flurstücke anzeigen</a> | <a href="javascript:send_selected_flurst('jagdkatastereditor_Flurstuecke_Listen_csv');">ausgewählte Flurstücke als CSV exportieren</a></td>
       </tr>
     </table></td>
   </tr>
+	<tr>
+  	<td align="center"><a href="javascript:show_all_flurst();">alle Flurstücke anzeigen</a> | <a href="javascript:csv_export();">alle Flurstücke als CSV exportieren</a></td>
+  </tr>	
   <? if($this->formvars['oid']){ ?>
   <tr>
   	<td align="center"><a href="javascript:document.GUI.go.value = 'jagdbezirk_show_data';javascript:document.GUI.submit()">zurück zum Jagdbezirk</a></td>
@@ -105,9 +109,6 @@ function csv_export(){
     <td align="center"><a href="javascript:document.GUI.go.value = 'jagdbezirke_auswaehlen_Suchen';javascript:document.GUI.submit()">zur&uuml;ck zur Trefferliste</a></td>
   </tr>
   <? } ?>
-  <tr>
-  	<td align="center"><a href="javascript:csv_export();">CSV-Export</a></td>
-  </tr>
   <tr>
   	<td align="center"><a href="javascript:hideMenue();javascript:print();">Drucken</a></td>
   </tr>

@@ -199,20 +199,25 @@
   };
 
 	$this->jagdkatastereditor_listflurst_csv = function() use ($GUI){
+		if($GUI->formvars['FlurstKennz'] != ''){
+			$selected_flurstuecke = explode(';', $GUI->formvars['FlurstKennz']);
+		}
   	$GUI->jagdkataster = new jagdkataster($GUI->pgdatabase);
   	$GUI->flurstuecke = $GUI->jagdkataster->getIntersectedFlurst($GUI->formvars);
-  	for($i = 0; $i < count($GUI->flurstuecke); $i++){          	
-    	$csv .= $GUI->flurstuecke[$i]['gemkgname'].';';
-      $csv .= $GUI->flurstuecke[$i]['flur'].';';
-      $csv .= " ".$GUI->flurstuecke[$i]['zaehlernenner'].";";
-      for($j=0; $j < count($GUI->flurstuecke[$i]['eigentuemer']); $j++){
-      	$csv .= $GUI->flurstuecke[$i]['eigentuemer'][$j].' ('.$GUI->flurstuecke[$i]['eigentuemer_nr'][$j].')   ';
-      }
-      $csv .= ';';
-      $csv .= $GUI->flurstuecke[$i]['albflaeche'].';';
-			$csv .= str_replace('.', ',', round($GUI->flurstuecke[$i]['schnittflaeche'], 2)).';';
-      $csv .= str_replace('.', ',', $GUI->flurstuecke[$i]['anteil']).';';
-     	$csv .= chr(10);  
+  	for($i = 0; $i < count($GUI->flurstuecke); $i++){
+			if($GUI->formvars['FlurstKennz'] == '' OR in_array($GUI->flurstuecke[$i]['flurstkennz'], $selected_flurstuecke)){
+				$csv .= $GUI->flurstuecke[$i]['gemkgname'].';';
+				$csv .= $GUI->flurstuecke[$i]['flur'].';';
+				$csv .= " ".$GUI->flurstuecke[$i]['zaehlernenner'].";";
+				for($j=0; $j < count($GUI->flurstuecke[$i]['eigentuemer']); $j++){
+					$csv .= str_replace(';', ',', $GUI->flurstuecke[$i]['eigentuemer'][$j]).' ('.$GUI->flurstuecke[$i]['eigentuemer_nr'][$j].')   ';
+				}
+				$csv .= ';';
+				$csv .= $GUI->flurstuecke[$i]['albflaeche'].';';
+				$csv .= str_replace('.', ',', round($GUI->flurstuecke[$i]['schnittflaeche'], 2)).';';
+				$csv .= str_replace('.', ',', $GUI->flurstuecke[$i]['anteil']).';';
+				$csv .= chr(10);  
+			}
     }
     $csv = 'Gemarkung;Flur;Zähler/Nenner;Eigentümer (Nr.);amtl. Flst-Fläche;Anteil m²;Anteil %'.chr(10).$csv;
     ob_end_clean();
