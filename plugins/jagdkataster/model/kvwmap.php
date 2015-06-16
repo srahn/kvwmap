@@ -208,7 +208,8 @@
 			if($GUI->formvars['FlurstKennz'] == '' OR in_array($GUI->flurstuecke[$i]['flurstkennz'], $selected_flurstuecke)){
 				$csv .= $GUI->flurstuecke[$i]['gemkgname'].';';
 				$csv .= $GUI->flurstuecke[$i]['flur'].';';
-				$csv .= " ".$GUI->flurstuecke[$i]['zaehlernenner'].";";
+				$csv .= " ".$GUI->flurstuecke[$i]['zaehler'].";";
+				$csv .= " ".$GUI->flurstuecke[$i]['nenner'].";";
 				for($j=0; $j < count($GUI->flurstuecke[$i]['eigentuemer']); $j++){
 					$csv .= str_replace(';', ',', $GUI->flurstuecke[$i]['eigentuemer'][$j]).' ('.$GUI->flurstuecke[$i]['eigentuemer_nr'][$j].')   ';
 				}
@@ -219,7 +220,7 @@
 				$csv .= chr(10);  
 			}
     }
-    $csv = 'Gemarkung;Flur;Zähler/Nenner;Eigentümer (Nr.);amtl. Flst-Fläche;Anteil m²;Anteil %'.chr(10).$csv;
+    $csv = 'Gemarkung;Flur;Zähler;Nenner;Eigentümer (Nr.);amtl. Flst-Fläche;Anteil m²;Anteil %'.chr(10).$csv;
     ob_end_clean();
     header("Content-type: application/vnd.ms-excel");
     header("Content-disposition:  inline; filename=Flurstuecke.csv");
