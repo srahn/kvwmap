@@ -242,9 +242,6 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
         <td align="left" bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett"><a href="javascript:changeorder('strasse,hausnummer');"><?php echo $strName3Short; ?></a></span></td>
         <td align="left"><span class="fett"><a href="javascript:changeorder('postleitzahlpostzustellung, ort_post');"><?php echo $strName4Short; ?></a></span></td>
         <td align="center" colspan="2"><span class="fett"><?php echo $strFst; ?></span></td>
-        <? if($this->Stelle->isFunctionAllowed('Jagdkataster')){ ?>
-        <td align="center"><span class="fett"><?php echo $strHunt; ?></span></td>
-        <? } ?>
       </tr>
   <?php
   for ($i=0;$i<count($this->namen);$i++) {
@@ -266,16 +263,6 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
         <td align="left"><?php echo str_replace(' ','&nbsp;',$this->namen[$i]['name4']); if ($this->namen[$i]['name4']=='') { ?>&nbsp;<?php } ?></td>
         <td align="center"><a href="javascript:flurstsuche('<?php echo $this->namen[$i]['bezirk'].'\',\''.$this->namen[$i]['blatt']; ?>');"><?php echo $strShowFst; ?></a></td>
 				<td align="center"><a href="index.php?go=Zeige_Flurstuecke_zu_Grundbuechern&selBlatt=<?php echo $this->namen[$i]['bezirk'].'-'.$this->namen[$i]['blatt'];?>"><?php echo $strToMap; ?></a></td>
-
-		<? if($this->Stelle->isFunctionAllowed('Jagdkataster')){ ?>
-		<td align="center"><a href="index.php?go=jagdkatastereditor&lfd_nr_name=<?php echo $this->namen[$i]['lfd_nr_name'];
-		?>&name1=<?php echo $this->formvars['name1'];
-		?>&name2=<?php echo $this->formvars['name2'];
-		?>&name3=<?php echo $this->formvars['name3'];
-		?>&name4=<?php echo $this->formvars['name4'];
-		?>&bezirk=<?php echo $this->formvars['bezirk'];
-		?>"><?php echo $strHuntEdit; ?></a></td>
-		<? }	?>
       </tr>
     <? if($this->formvars['withflurst'] == 'on'){ ?>
     	<tr>

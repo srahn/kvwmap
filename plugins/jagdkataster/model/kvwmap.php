@@ -136,25 +136,6 @@
       $GUI->formvars['newpath'] = transformCoordsSVG($GUI->jagdbezirk['svggeom']);
       $GUI->formvars['firstpoly'] = 'true';
     }
-    if($GUI->formvars['lfd_nr_name'] != ''){   # von der Namenssuche
-      $jagdkataster->flurstgeometryWKT = $jagdkataster->getflurstgeometryfromnamen($GUI->formvars, 'wkt');
-      $jagdkataster->flurstgeometrySVG = $jagdkataster->getflurstgeometryfromnamen($GUI->formvars, 'svg');
-      $jagdkataster->flurstgeometrySVG = str_replace('-', '', $jagdkataster->flurstgeometrySVG);
-      $jagdkataster->extent = $jagdkataster->getflurstBBox($jagdkataster->FlurstListe, $GUI->user->rolle->epsg_code);
-      $randx=($jagdkataster->extent->maxx-$jagdkataster->extent->minx)* 20/100;
-      $randy=($jagdkataster->extent->maxy-$jagdkataster->extent->miny)* 20/100;
-      $GUI->map->setextent($jagdkataster->extent->minx-$randx,$jagdkataster->extent->miny-$randy,$jagdkataster->extent->maxx+$randx,$jagdkataster->extent->maxy+$randy);
-	    if(MAPSERVERVERSION >= 600 ) {
-				$GUI->map_scaledenom = $GUI->map->scaledenom;
-			}
-			else {
-				$GUI->map_scaledenom = $GUI->map->scale;
-			}
-      $GUI->formvars['newpathwkt'] = $jagdkataster->flurstgeometryWKT;
-      $GUI->formvars['pathwkt'] = $GUI->formvars['newpathwkt'];
-      $GUI->formvars['newpath'] = $jagdkataster->flurstgeometrySVG;
-      $GUI->formvars['firstpoly'] = 'true';
-    }
     if ($GUI->formvars['CMD']!='') {
       $GUI->navMap($GUI->formvars['CMD']);
       $GUI->user->rolle->saveDrawmode($GUI->formvars['always_draw']);

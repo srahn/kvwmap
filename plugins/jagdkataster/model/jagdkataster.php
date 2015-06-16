@@ -285,36 +285,6 @@ class jagdkataster {
 		return $flurstuecke;
 	}
 
-	function getflurstgeometryfromnamen($formvars, $type){
-		$flurstueck=new flurstueck('',$this->database);
-    $ret=$flurstueck->getFlurstByLfdNrName($formvars['lfd_nr_name'],$formvars['anzahl']);
-    if ($ret[0]) {
-      $this->Fehlermeldung='<br>Es konnten keine Namen abgefragt werden'.$ret[1];
-    }
-    else {
-      $this->FlurstListe = $ret[1];
-      if (count($this->FlurstListe)==0) {
-        $this->Fehlermeldung='<br>Es konnten keine Namen gefunden werden, bitte ändern Sie die Anfrage!';
-      }
-      else {
-      	if($type == 'wkt'){
-        	$sql ="SELECT st_astext(st_union(the_geom)) FROM (select o.objnr as oid,o.the_geom from alkobj_e_fla AS o,alknflst as f";
-      	}
-      	elseif($type == 'svg'){
-      		$sql ="SELECT st_assvg(st_union(the_geom),0,8) FROM (select o.objnr as oid,o.the_geom from alkobj_e_fla AS o,alknflst as f";
-      	}
-    		$sql.=" WHERE o.objnr=f.objnr AND f.flurstkennz IN ('".$this->FlurstListe[0]."'";
-    		for ($i = 1; $i < count($this->FlurstListe); $i++) {
-		      $sql.=",'".$this->FlurstListe[$i]."'";
-		    }
-		    $sql.=")) as foo";
-		    $ret = $this->database->execSQL($sql, 4, 0);
-		    $geom = pg_fetch_array($ret[1]);
-		    return $geom[0];
-      } # ende Ergebnisanzahl größer 0
-    } # ende Abfrage war erfolgreich
-	}
-
 	function getflurstBBox($FlurstListe, $epsgcode) {
     $alk=new ALK();
     $alk->database=$this->database;
