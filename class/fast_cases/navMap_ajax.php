@@ -404,7 +404,8 @@
 						$layer->setMetaData('wms_connectiontimeout',$layerset[$i]['wms_connectiontimeout']);
 						$layer->setMetaData('ows_auth_username', $layerset[$i]['wms_auth_username']);
 						$layer->setMetaData('ows_auth_password', $layerset[$i]['wms_auth_password']);
-						$layer->setMetaData('ows_auth_type', 'basic');						$layer->setMetaData('wms_exceptions_format', 'application/vnd.ogc.se_xml');
+						$layer->setMetaData('ows_auth_type', 'basic');
+						$layer->setMetaData('wms_exceptions_format', 'application/vnd.ogc.se_xml');
 						
 						$layer->set('dump', 0);
 						$layer->set('type',$layerset[$i]['Datentyp']);
@@ -531,6 +532,9 @@
                 $layer->setProcessing($processing);
               }
             }
+						if ($layerset[$i]['postlabelcache'] != 0) {
+							$layer->set('postlabelcache',$layerset[$i]['postlabelcache']);
+						}
                 
             if ($layerset[$i]['Datentyp']=='3') {
               if($layerset[$i]['transparency'] != ''){
@@ -556,7 +560,8 @@
             else {
               # Vektorlayer
               if($layerset[$i]['Data'] != ''){
-							$layerset[$i]['Data'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[$i]['Data']);							$layerset[$i]['Data'] = str_replace('$language', $this->user->rolle->language, $layerset[$i]['Data']);
+								$layerset[$i]['Data'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[$i]['Data']);
+								$layerset[$i]['Data'] = str_replace('$language', $this->user->rolle->language, $layerset[$i]['Data']);
                 $layer->set('data', $layerset[$i]['Data']);
               }
   
@@ -619,9 +624,6 @@
               }
               if ($layerset[$i]['labelrequires']!='') {
                 $layer->set('labelrequires',$layerset[$i]['labelrequires']);
-              }
-              if ($layerset[$i]['postlabelcache']!='') {
-                $layer->set('postlabelcache',$layerset[$i]['postlabelcache']);
               }
               if ($layerset[$i]['tolerance']!='3') {
                 $layer->set('tolerance',$layerset[$i]['tolerance']);
@@ -1723,8 +1725,9 @@
 			$this->oGeorefExt=ms_newRectObj();
 			$this->oGeorefExt->setextent($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
 			$this->nImageWidth=$rs['nImageWidth'];
-			$this->nImageHeight=$rs['nImageHeight'];
+			$this->nImageHeight=$rs['nImageHeight'];			
 			$this->mapsize=$this->nImageWidth.'x'.$this->nImageHeight;
+			$this->auto_map_resize=$rs['auto_map_resize'];
 			@$this->pixwidth=($rs['maxx']-$rs['minx'])/$rs['nImageWidth'];
 			@$this->pixheight=($rs['maxy']-$rs['miny'])/$rs['nImageHeight'];
 			$this->pixsize=($this->pixwidth+$this->pixheight)/2;
@@ -2147,7 +2150,7 @@
   	#Anne
     $sql_classes = 'SELECT class_id, status FROM u_rolle2used_class WHERE user_id='.$this->User_ID.' AND stelle_id='.$this->Stelle_ID.';';
     $query_classes=mysql_query($sql_classes);
-    while($row = mysql_fetch_array($query_classes)){
+    while($row = mysql_fetch_assoc($query_classes)){
   		$classarray['class_id'][] = $row['class_id'];
 			$classarray['status'][$row['class_id']] = $row['status'];
 		}
@@ -2165,7 +2168,7 @@
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
-    while($rs=mysql_fetch_array($query)) {
+    while($rs=mysql_fetch_assoc($query)) {
       $rs['Style']=$this->read_Styles($rs['Class_ID']);
       $rs['Label']=$this->read_Label($rs['Class_ID']);
       #Anne
@@ -2197,7 +2200,7 @@
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Styles - Lesen der Styledaten:<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
-    while($rs=mysql_fetch_array($query)) {
+    while($rs=mysql_fetch_assoc($query)) {
       $Styles[]=$rs;
     }
     return $Styles;
@@ -2208,7 +2211,7 @@
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Label - Lesen der Labels zur Classe eines Layers:<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
-    while ($rs=mysql_fetch_array($query)) {
+    while ($rs=mysql_fetch_assoc($query)) {
       $Labels[]=$rs;
     }
     return $Labels;
@@ -2225,9 +2228,9 @@
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_RollenLayer - Lesen der RollenLayer:<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
-    $Layer = array();
+    $Layer = array();				
     while ($rs=mysql_fetch_array($query)) {
-      $rs['Class']=$this->read_Classes(-$rs['id']);
+      $rs['Class']=$this->read_Classes(-$rs['id'], $this->disabled_classes);
       $Layer[]=$rs;
     }
     return $Layer;

@@ -1900,7 +1900,7 @@ class rolle {
 
 	function setAktivLayer($formvars, $stelle_id, $user_id) {
 		$layer=$this->getLayer('');
-		$rollenlayer=$this->getRollenLayer('', 'import');
+		$rollenlayer=$this->getRollenLayer('', NULL);
 		$this->layerset = array_merge($layer, $rollenlayer);
 		# Eintragen des Status der Layer, 1 angezeigt oder 0 nicht.
 		for ($i=0;$i<count($this->layerset);$i++) {
