@@ -186,15 +186,6 @@ else {
 		      		<input name="labelrequires" type="text" value="<?php echo $this->layerdata['labelrequires']; ?>" size="25" maxlength="100">
 		  		</td>
 		  	</tr>
-				<tr>
-		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPostlabelcache; ?></th>
-		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-		      		<select name="postlabelcache">
-		      			<option <? if($this->layerdata['postlabelcache'] == '0'){echo 'selected ';} ?>value="0"><?php echo $this->strNo; ?></option>
-		      			<option <? if($this->layerdata['postlabelcache'] == 1){echo 'selected ';} ?>value="1"><?php echo $this->strYes; ?></option>		      			
-		      		</select>
-		  		</td>
-		  	</tr>
 		  	<tr>
 		  		<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strConnection; ?></th>
 		  		<td colspan=2 style="border-bottom:1px solid #C3C7C3">
@@ -380,6 +371,15 @@ else {
 		    	<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $stroffsite; ?></th>
 		    	<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<input name="offsite" type="text" value="<?php echo $this->layerdata['offsite']; ?>" size="25" maxlength="11">
+		  		</td>
+		  	</tr>
+				<tr>
+		    	<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPostlabelcache; ?></th>
+		    	<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
+		      		<select name="postlabelcache">
+		      			<option <? if($this->layerdata['postlabelcache'] == '0'){echo 'selected ';} ?>value="0"><?php echo $this->strNo; ?></option>
+		      			<option <? if($this->layerdata['postlabelcache'] == 1){echo 'selected ';} ?>value="1"><?php echo $this->strYes; ?></option>		      			
+		      		</select>
 		  		</td>
 		  	</tr>
 		  </table>
