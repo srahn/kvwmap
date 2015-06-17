@@ -686,7 +686,7 @@ class Nachweis {
     return $errmsg;
   }
   
-  function getNachweise($id,$polygon,$gemarkung,$stammnr,$rissnr,$fortf,$art_einblenden,$richtung,$abfrage_art,$order,$antr_nr, $datum = NULL, $VermStelle = NULL, $gueltigkeit = NULL, $datum2 = NULL, $flur = NULL, $flur_thematisch = NULL) {
+  function getNachweise($id,$polygon,$gemarkung,$stammnr,$rissnr,$fortf,$art_einblenden,$richtung,$abfrage_art,$order,$antr_nr, $datum = NULL, $VermStelle = NULL, $gueltigkeit = NULL, $datum2 = NULL, $flur = NULL, $flur_thematisch = NULL, $andere_art = NULL) {
     # Die Funktion liefert die Nachweise nach verschiedenen Suchverfahren.
     # Vor dem Suchen nach Nachweisen werden jeweils die Suchparameter überprüft    
     if (is_array($id)) { $idListe=$id; } else { $idListe=array($id); }
@@ -809,6 +809,7 @@ class Nachweis {
             $sql.=",'".$art[$i]."'";
           }
           $sql.=")";
+					if($andere_art)$sql.=" AND d.id = ".$andere_art;
         }
 
         if ($order=='') {
@@ -852,9 +853,9 @@ class Nachweis {
 						$sql.=" alkis.pp_flur as flur, ";
 					}
 					$sql.=" nachweisverwaltung.n_nachweise AS n";
-					$sql.= " LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
+					$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
           $sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d"; 
-					$sql.=" 		LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id";
+					$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id";
 					$sql.=" ON n2d.nachweis_id = n.id";
           $sql.=" WHERE 1=1 ";
 					if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
@@ -907,6 +908,7 @@ class Nachweis {
               $sql.=",'".$art[$i]."'";
             }
             $sql.=")";
+						if($andere_art)$sql.=" AND d.id = ".$andere_art;
           }
 
           if ($order=='') {
@@ -947,9 +949,9 @@ class Nachweis {
           $this->debug->write('Abfragen der Nachweise die das Polygon schneiden',4);
           $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS andere_art, d.art AS andere_art_name";
           $sql.=" FROM nachweisverwaltung.n_nachweise AS n";
-					$sql.= " LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
+					$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
           $sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d"; 
-					$sql.=" 		LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id";
+					$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id";
 					$sql.=" ON n2d.nachweis_id = n.id";
  					$sql.=" WHERE 1=1";
           $sql.=" AND st_intersects(st_transform(st_geometryfromtext('".$polygon."',".$this->client_epsg."), (select srid from geometry_columns where f_table_name = 'n_nachweise')),the_geom)";
@@ -965,6 +967,7 @@ class Nachweis {
               $sql.=",'".$art[$i]."'";
             }
             $sql.=")";
+						if($andere_art)$sql.=" AND d.id = ".$andere_art;
           }
           if ($order=='') {
             $order="flurid, stammnr, datum";

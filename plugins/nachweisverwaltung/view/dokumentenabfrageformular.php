@@ -140,7 +140,15 @@ else {
     <td colspan="2"><input type="checkbox" name="suchgn" value="1"<?php if ($this->formvars['suchgn']) { ?> checked<?php } ?>>&nbsp;Grenzniederschrift&nbsp;(GN)</td>
   </tr>
   <tr> 
-    <td width="20%"><input type="checkbox" name="suchan" value="1"<?php if ($this->formvars['suchan']) { ?> checked<?php } ?>>&nbsp;Andere&nbsp;</td>
+    <td width="20%"><input type="checkbox" name="suchan" value="1"<?php if ($this->formvars['suchan']) { ?> checked<?php } ?>>
+			&nbsp;Andere&nbsp;
+			<select name="andere_art" style="width: 185px" onchange="document.getElementsByName('suchan')[0].checked=true;">
+				<option value="">alle</option>
+				<? for($i = 0; $i < count($this->dokumentarten['id']); $i++){?>
+				<option <? if($this->formvars['andere_art'] == $this->dokumentarten['id'][$i]){echo 'selected';} ?> value="<? echo $this->dokumentarten['id'][$i]; ?>"><? echo $this->dokumentarten['art'][$i]; ?></option>	
+				<? } ?>
+			</select>
+		</td>
   </tr>
   <tr>
 	<td>&nbsp;Gültigkeit:

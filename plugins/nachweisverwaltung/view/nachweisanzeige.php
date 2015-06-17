@@ -54,6 +54,7 @@ function getvorschau(url){
 <input type="hidden" name="order" value="<? echo $this->formvars['order']; ?>">
 <input type="hidden" name="richtung" value="<? echo $this->formvars['richtung']; ?>">
 <input type="hidden" name="flur_thematisch" value="<? echo $this->formvars['flur_thematisch']; ?>">
+<input type="hidden" name="andere_art" value="<? echo $this->formvars['andere_art']; ?>">
 	
 <table width="0%" border="0" cellpadding="5" cellspacing="0">
   <tr> 
@@ -235,7 +236,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 					<a target="_blank" onmouseover="getvorschau('<? echo $url; ?>');" href="index.php?go=document_anzeigen&ohnesession=1&id=<?php echo $this->nachweis->Dokumente[$i]['id']; ?>&file=1" title="Ansicht"><img src="graphics/button_ansicht.png" border="0"></a></td>
           <td width="15">
           	<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten')){ ?>
-          	<a href="index.php?go=Nachweisformular&id=<?php echo $this->nachweis->Dokumente[$i]['id'];?>&order=<? echo $this->formvars['order'] ?>&flur_thematisch=<? echo $this->formvars['flur_thematisch']; ?>" title="bearbeiten"><img src="graphics/button_edit.png" border="0"></a></td>
+          	<a href="index.php?go=Nachweisformular&id=<?php echo $this->nachweis->Dokumente[$i]['id'];?>&order=<? echo $this->formvars['order'] ?>&flur_thematisch=<? echo $this->formvars['flur_thematisch']; ?>&andere_art=<? echo $this->formvars['andere_art']; ?>" title="bearbeiten"><img src="graphics/button_edit.png" border="0"></a></td>
           	<? } ?>
           <td width="30">
           	<? if($this->Stelle->isFunctionAllowed('Nachweisloeschen')){ ?>
@@ -315,7 +316,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 	  <span class="fett">Es konnten keine Dokumente zu der Auswahl gefunden werden.<br>
 Wählen Sie neue Suchparameter.</span><br>
 	  <?php } ?>
-         <a href="index.php?go=Nachweisrechercheformular&datum=<? echo $this->formvars['datum']; ?>&datum2=<? echo $this->formvars['datum2']; ?>&VermStelle=<? echo $this->formvars['VermStelle']; ?>&flur_thematisch=<? echo $this->formvars['flur_thematisch']; ?>">&lt;&lt; zur&uuml;ck
+         <a href="index.php?go=Nachweisrechercheformular&datum=<? echo $this->formvars['datum']; ?>&datum2=<? echo $this->formvars['datum2']; ?>&VermStelle=<? echo $this->formvars['VermStelle']; ?>&flur_thematisch=<? echo $this->formvars['flur_thematisch']; ?>&andere_art=<? echo $this->formvars['andere_art']; ?>">&lt;&lt; zur&uuml;ck
          zur Suche</a></td>
   </tr>
   <tr> 

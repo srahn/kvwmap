@@ -283,7 +283,7 @@
     $GUI->nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
     # Suchparameter in Ordnung
     # Recherchieren nach den Nachweisen
-    $ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch']);
+    $ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['andere_art']);
     #$GUI->nachweis->getAnzahlNachweise($GUI->formvars['suchpolygon']);
     if($ret!=''){
       # Fehler bei der Recherche im Datenbestand
@@ -785,11 +785,8 @@
     }
     $GUI->main= PLUGINS."nachweisverwaltung/view/dokumentenabfrageformular.php";
     
-	# Gemeindedaten laden
-    #$GemObj=new gemeinde(0,$GUI->database);
-    #$Gemeindeliste=$GemObj->getGemeindeListe(Array(), "g.Gemeindename");
-    # Formularobjekt für Gemeinde bilden
-    #$GUI->GemFormObj=new FormObject("gemeinde_id","select",$Gemeindeliste["ID"],$GUI->formvars['gemeinde_id'],$Gemeindeliste["Name"],1,0,0,NULL);
+		$nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
+    $GUI->dokumentarten = $nachweis->getDokumentarten();
 			
 	# Abfragen der Gemarkungen
     $GemeindenStelle=$GUI->Stelle->getGemeindeIDs();

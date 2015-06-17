@@ -279,7 +279,7 @@ $legendheight = $this->map->height + 20;
 				</tr>
 				<tr>
 					<td>&nbsp;</td> 
-					<td><?php if ($this->formvars[NACHWEIS_PRIMARY_ATTRIBUTE]!='') { ?><a href="index.php?go=Nachweisanzeige&order=<? echo $this->formvars['order']; ?>&flur_thematisch=<? echo $this->formvars['flur_thematisch']; ?>">&lt;&lt;&nbsp;zur&uuml;ck&nbsp;zum&nbsp;Rechercheergebnis</a><?php } ?></td>
+					<td><?php if ($this->formvars[NACHWEIS_PRIMARY_ATTRIBUTE]!='') { ?><a href="index.php?go=Nachweisanzeige&order=<? echo $this->formvars['order']; ?>&flur_thematisch=<? echo $this->formvars['flur_thematisch']; ?>&andere_art=<? echo $this->formvars['andere_art']; ?>">&lt;&lt;&nbsp;zur&uuml;ck&nbsp;zum&nbsp;Rechercheergebnis</a><?php } ?></td>
 					<td>&nbsp;<span class="fett">Maßstab&nbsp;1:&nbsp;</span><input type="text" id="scale" name="nScale" size="5" value="<?php echo round($this->map->scaledenom); ?>"></td>
 				<? if($this->user->rolle->runningcoords != '0'){ ?>
 				<td width="100px"><span class="fett">&nbsp;<?php echo $this->strCoordinates; ?>:</span>&nbsp;</td>
@@ -305,6 +305,7 @@ $legendheight = $this->map->height + 20;
 						<INPUT TYPE="hidden" NAME="check" VALUE="">
 						<input type="hidden" name="order" value="<?php echo $this->formvars['order']; ?>">
 						<input type="hidden" name="flur_thematisch" value="<? echo $this->formvars['flur_thematisch']; ?>">
+						<input type="hidden" name="andere_art" value="<? echo $this->formvars['andere_art']; ?>">						
 					</td>
 				</tr>
 			</table>
