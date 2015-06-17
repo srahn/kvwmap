@@ -143,7 +143,7 @@
 			$this->savedformvars=$this->user->rolle->getNachweisParameter();
 			$this->formvars=array_merge($this->savedformvars,$this->formvars);
 			$this->nachweis = new Nachweis($this->pgdatabase, $this->user->rolle->epsg_code);
-			$ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkung'],$this->formvars['suchstammnr'],$this->formvars['suchrissnr'],$this->formvars['suchfortf'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr'],$this->formvars['sdatum'], $this->formvars['sVermStelle'], $this->formvars['gueltigkeit'], $this->formvars['sdatum2'], $this->formvars['suchflur'], $this->formvars['flur_thematisch'], $this->formvars['andere_art']);
+			$ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkung'],$this->formvars['suchstammnr'],$this->formvars['suchrissnr'],$this->formvars['suchfortf'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr'],$this->formvars['sdatum'], $this->formvars['sVermStelle'], $this->formvars['gueltigkeit'], $this->formvars['sdatum2'], $this->formvars['suchflur'], $this->formvars['flur_thematisch'], $this->formvars['such_andere_art']);
 			if($ret!=''){
 				$this->nachweisAnzeige();
 				showAlert($ret);

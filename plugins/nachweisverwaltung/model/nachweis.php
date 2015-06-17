@@ -809,7 +809,7 @@ class Nachweis {
             $sql.=",'".$art[$i]."'";
           }
           $sql.=")";
-					if($andere_art)$sql.=" AND d.id = ".$andere_art;
+					if($andere_art)$sql.=" AND d.id IN (".$andere_art.")";
         }
 
         if ($order=='') {
@@ -908,7 +908,7 @@ class Nachweis {
               $sql.=",'".$art[$i]."'";
             }
             $sql.=")";
-						if($andere_art)$sql.=" AND d.id = ".$andere_art;
+						if($andere_art)$sql.=" AND d.id IN (".$andere_art.")";
           }
 
           if ($order=='') {
@@ -967,7 +967,7 @@ class Nachweis {
               $sql.=",'".$art[$i]."'";
             }
             $sql.=")";
-						if($andere_art)$sql.=" AND d.id = ".$andere_art;
+						if($andere_art)$sql.=" AND d.id IN (".$andere_art.")";
           }
           if ($order=='') {
             $order="flurid, stammnr, datum";
@@ -999,7 +999,7 @@ class Nachweis {
         $sql ="SELECT distinct n.*,v.name AS vermst, n2d.dokumentart_id AS andere_art, d.art AS andere_art_name";
         $sql.=" FROM nachweisverwaltung.n_nachweise2antraege AS n2a, nachweisverwaltung.n_vermstelle AS v, nachweisverwaltung.n_nachweise AS n";
         $sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d"; 
-				$sql.=" 		LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id";
+				$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id";
 				$sql.=" ON n2d.nachweis_id = n.id";
         $sql.=" WHERE CAST(n.vermstelle AS integer)=v.id AND n.id=n2a.nachweis_id";
         $sql.=" AND n2a.antrag_id='".$antr_nr."'";
@@ -1014,6 +1014,7 @@ class Nachweis {
             $sql.=",'".$art[$i]."'";
           }
           $sql.=")";
+					if($andere_art)$sql.=" AND d.id IN (".$andere_art.")";
         }
         if ($order=='') {
           $order="flurid, stammnr, datum";

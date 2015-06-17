@@ -142,10 +142,11 @@ else {
   <tr> 
     <td width="20%"><input type="checkbox" name="suchan" value="1"<?php if ($this->formvars['suchan']) { ?> checked<?php } ?>>
 			&nbsp;Andere&nbsp;
-			<select name="andere_art" style="width: 185px" onchange="document.getElementsByName('suchan')[0].checked=true;">
+			<? $such_andere_art = explode(',', $this->formvars['such_andere_art']); ?>
+			<select name="such_andere_art[]" multiple="true" size="1" style="position: absolute;width: 185px" onmouseover="this.size=10" onmouseout="this.size=1" onchange="document.getElementsByName('suchan')[0].checked=true;">
 				<option value="">alle</option>
 				<? for($i = 0; $i < count($this->dokumentarten['id']); $i++){?>
-				<option <? if($this->formvars['andere_art'] == $this->dokumentarten['id'][$i]){echo 'selected';} ?> value="<? echo $this->dokumentarten['id'][$i]; ?>"><? echo $this->dokumentarten['art'][$i]; ?></option>	
+				<option <? if(in_array($this->dokumentarten['id'][$i], $such_andere_art)){echo 'selected';} ?> value="<? echo $this->dokumentarten['id'][$i]; ?>"><? echo $this->dokumentarten['art'][$i]; ?></option>	
 				<? } ?>
 			</select>
 		</td>
