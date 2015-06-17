@@ -221,5 +221,11 @@ include('funktionen/input_check_functions.php');
 	clearsubform = function(subformid){
 		document.getElementById(subformid).innerHTML = '';
 	}
+	
+	switch_gle_view = function(layer_id){
+		currentform.chosen_layer_id.value = layer_id;
+		currentform.go.value='switch_gle_view';
+		overlay_submit(currentform, false);
+	}
 
 </script>

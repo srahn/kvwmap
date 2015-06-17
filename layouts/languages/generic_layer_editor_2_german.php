@@ -29,4 +29,6 @@
  $strRemember="merken";
  $strDontRememberDataset="Datensatz nicht mehr merken";
  $strPrintDataset="Datensatz drucken";
+ $strSwitchGLEViewColumns="zur spaltenweisen Darstellung wechseln";
+ $strSwitchGLEViewRows="zur zeilenweisen Darstellung wechseln";
 ?>

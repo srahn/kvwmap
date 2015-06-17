@@ -293,6 +293,10 @@ a.menuered:hover {
 	background-image: url(../graphics/zoom_select.png);
 }
 
+.switch_gle{
+	background-image: url(../graphics/switch_gle.png);
+}
+
 .save_extent{
 	background-image: url(../graphics/save_extent.png);
 }
@@ -772,4 +776,13 @@ tbody.gle tr:hover {
 	background-color: #c7d9e6; 
 	padding: 2px;
 	padding-left: 8px
+}
+
+.hover-border{
+	padding: 2px;
+}
+
+.hover-border:hover{
+	padding: 1px;
+	border: 1px solid #CCCCCC;
 }

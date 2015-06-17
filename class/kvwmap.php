@@ -106,6 +106,17 @@ class GUI {
     }
 	}
 	
+	function switch_gle_view(){	
+		$this->user->rolle->switch_gle_view($this->formvars['chosen_layer_id']);
+		$this->last_query = $this->user->rolle->get_last_query();
+		$this->formvars['go'] = $this->last_query['go'];
+		if($this->formvars['go'] == 'Layer-Suche_Suchen')$this->GenerischeSuche_Suchen();
+		else{
+			$this->SachdatenAnzeige(NULL);
+			$this->output();
+		}
+	}
+	
 	function setHistTimestamp(){
 		$this->user->rolle->setHistTimestamp($this->formvars['timestamp']);
 		$this->user->rolle->readSettings();	

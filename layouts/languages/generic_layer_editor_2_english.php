@@ -28,4 +28,6 @@
  $strRemember="bookmark";
  $strDontRememberDataset="bookmark record no longer";
  $strPrintDataset="print record";
+ $strSwitchGLEViewColumns="switch to column-based view";
+ $strSwitchGLEViewRows="switch to row-based view";
 ?>
