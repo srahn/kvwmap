@@ -100,7 +100,7 @@ include('funktionen/input_check_functions.php');
   	for(i = 0; i < form_fields.length; i++){
   		fieldstring = form_fields[i]+'';
   		field = fieldstring.split(';'); 
-  		if(document.getElementsByName(fieldstring)[0] != undefined && field[4] != 'Dokument' && field[4] != 'SubFormFK' && (document.getElementsByName(fieldstring)[0].readOnly != true) && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
+  		if(document.getElementsByName(fieldstring)[0] != undefined && field[4] != 'Dokument' && field[4] != 'SubFormFK' && field[6] != 'not_saveable' && (document.getElementsByName(fieldstring)[0].readOnly != true) && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
   			if(field[4] == 'TextFK'){
 			  	alert('Neuer Datensatz nicht im abhängigen Layer!\nGeben Sie neue Datensätze nur über den übergeordneten Layer ein.');
 				}else{
