@@ -6005,8 +6005,8 @@ class GUI {
     $this->titel='WMS Map-Datei erfolgreich exportiert';
     $this->main="ows_exportiert.php";
     # laden der aktuellen Karteneinstellungen
-    $this->formvars['nurAktiveLayer'] = true;
-    $this->class_load_level = 2;    # die Klassen von allen Layern laden
+    if($this->formvars['nurAktiveLayer'] == 1)$this->class_load_level = 1;    # die Klassen von aktiven Layern laden
+		else $this->class_load_level = 2;    # die Klassen von allen Layern laden
     $this->loadMap('DataBase');
     # setzen der WMS-Metadaten
     $this->map->setMetaData("ows_title",$this->formvars['ows_title']);
@@ -6022,6 +6022,7 @@ class GUI {
     $this->wms_onlineresource=MAPSERV_CGI_BIN."?map=".WMS_MAPFILE_PATH.$this->formvars['mapfile_name']."&";
     $this->map->setMetaData("wms_onlineresource",$this->wms_onlineresource);
     $this->map->setMetaData("ows_srs",OWS_SRS);
+		$this->map->setMetaData("wms_enable_request",'*');
     $this->saveMap(WMS_MAPFILE_PATH.$this->formvars['mapfile_name']);
     $getMapRequestExample=$this->wms_onlineresource.'request=getMap&VERSION='.SUPORTED_WMS_VERSION;
     $getMapRequestExample.='&layers='.$this->mapDB->Layer[0]['Name'];
