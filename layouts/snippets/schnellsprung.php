@@ -5,7 +5,7 @@
 <div style="margin-left:10px">
 	<table style="border:1px solid grey">
 	<?
-		$legendheight -= 50;
+		$legendheight -= 48;
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
 		$layerdb = $mapdb->getlayerdatabase(LAYER_ID_SCHNELLSPRUNG, $this->Stelle->pgdbhost);
 		$layerdb->setClientEncoding();

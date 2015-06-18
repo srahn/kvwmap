@@ -103,7 +103,7 @@ function switchlegend(){
 
   $res_x    = $this->map->width;
   $res_y    = $this->map->height;
-  $legendheight = $this->map->height-49;
+  $legendheight = $this->map->height-51;
 	if($this->user->rolle->runningcoords == 1)$legendheight = $legendheight + 22;
   $res_xm   = $this->map->width/2;
   $res_ym   = $this->map->height/2;
