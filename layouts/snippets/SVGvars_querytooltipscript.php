@@ -9,7 +9,7 @@ $SVGvars_querytooltipscript = '
 		var layernumber = new Array();';
 for($i = 0; $i < count($layerset); $i++){
 	if($layerset[$i]['Layer_ID'] != ''){
-		$SVGvars_querytooltipscript.= 'layerset['.$i.'] = top.document.GUI.qLayer'.$layerset[$i]['Layer_ID'].';
+		$SVGvars_querytooltipscript.= 'layerset['.$i.'] = top.document.getElementById("qLayer'.$layerset[$i]['Layer_ID'].'");
 		';
 		$SVGvars_querytooltipscript.= 'layernumber['.$i.'] = '.$layerset[$i]['Layer_ID'].';
 		';
