@@ -18,5 +18,7 @@ $strWarning5="Please enter a name for the print extent.";
 $strSetPrintExtent="Set Print Extent";
 $strUseMapscale="Use Map Scale";
 $strSetRefPoint="Set Reference Point";
+$strConfirm1="A print with this print layout costs ";
+$strConfirm2=" €. Are you sure you want to continue?";
 
 ?>  

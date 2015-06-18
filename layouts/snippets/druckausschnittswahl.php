@@ -9,7 +9,12 @@ function setprintextent(wert){
 	document.GUI.printextent.value = wert;
 }
 
-function druck_pdf(){
+function druck_pdf(preis){
+	if(preis > 0){
+		preis = preis/100;
+		r = confirm("<? echo $strConfirm1; ?>"+preis+"<? echo $strConfirm2; ?>");
+		if(r == false)return;
+	}	
 	if(document.GUI.printextent.value == 'false'){
 		alert("<? echo $strWarning1; ?>");
 	}
@@ -133,7 +138,7 @@ function remove(){
   <tr align="center"> 
     <td colspan="5"> 
       <input class="button" type="button" name="vorschau" value="<?php echo $strButtonPrintPreview; ?>" onclick="preview();">
-      <input class="button" type="button" name="drucken" value="<?php echo $strButtonPrint; ?>" onclick="druck_pdf();">
+      <input class="button" type="button" name="drucken" value="<?php echo $strButtonPrint; ?>" onclick="druck_pdf(<? echo $this->Document->activeframe[0]['preis']; ?>);">
       <br>
     </td>
   </tr>

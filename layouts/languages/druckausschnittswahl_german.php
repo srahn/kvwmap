@@ -18,5 +18,7 @@ $strWarning5="Bitte geben Sie einen Namen für den Druckausschnitt an.";
 $strSetPrintExtent="Druckausschnitt setzen";
 $strUseMapscale="Kartenma\u00dfstab \u00fcbernehmen";
 $strSetRefPoint="Bezugspunkt setzen";
+$strConfirm1="Ein Ausdruck mit diesem Drucklayout kostet ";
+$strConfirm2=" €. Sind Sie sicher, dass Sie fortfahren möchten?";
  
 ?>  
