@@ -2208,7 +2208,7 @@ class rolle {
 		#
 		# trägt die Layer der entsprehenden Rollen für einen Benutzer ein.
 		for ($i=0;$i<count($stellen);$i++) {
-			$sql ='INSERT IGNORE INTO u_rolle2used_layer SELECT '.$user_id.', used_layer.Stelle_ID, used_layer.Layer_ID, "'.$active.'", "0", "1","0"';
+			$sql ='INSERT IGNORE INTO u_rolle2used_layer (user_id, stelle_id, layer_id, aktivStatus, queryStatus, showclasses, logconsume) SELECT '.$user_id.', used_layer.Stelle_ID, used_layer.Layer_ID, "'.$active.'", "0", "1","0"';
 			$sql.=' FROM `used_layer`';
 			$sql.=' WHERE used_layer.Stelle_ID = '.$stellen[$i];
 			$this->debug->write("<p>file:users.php class:rolle function:setLayer - Setzen der Layer der Rollen:<br>".$sql,4);
