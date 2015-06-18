@@ -263,13 +263,14 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers, in
 	var reload = false;
   if(status == true){
     if(thema.checked == false){
-			thema.checked = true;		
+			thema.checked = true;
+			thema.title="Dieses Thema ausschalten";	
 			if(instantreload)reload = true;
 		}
-		query.title="Dieses Thema abfragbar schalten";
+		query.title="Die Abfrage dieses Themas ausschalten";		
   }
 	else{
-		query.title="Die Abfrage dieses Themas ausschalten";		
+		query.title="Dieses Thema abfragbar schalten";
 	}
   if(groupradiolayers != '' && groupradiolayers.value != ''){
     preventDefault(event);
@@ -279,14 +280,17 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers, in
 			if(document.getElementById('thema_'+radiolayer[i]) != undefined){
 				if(document.getElementById('thema_'+radiolayer[i]) != thema){
 					document.getElementById('thema_'+radiolayer[i]).checked = false;
-					if(document.getElementById('qLayer'+radiolayer[i]) != undefined)document.getElementById('qLayer'+radiolayer[i]).checked = false;
+					if(document.getElementById('qLayer'+radiolayer[i]) != undefined){
+						document.getElementById('qLayer'+radiolayer[i]).checked = false;
+					}
 				}
 				else{
 					query.checked = !status;
 					query.checked2 = query.checked;		// den check-Status hier nochmal merken, damit man ihn bei allen Click-Events setzen kann, sonst setzt z.B. Chrome den immer wieder zurueck
 					if(query.checked == true){
 						if(thema.checked == false){
-							thema.checked = true;		
+							thema.checked = true;
+							thema.title="Dieses Thema ausschalten";	
 							if(instantreload)reload = true;
 						}
 					}
@@ -308,7 +312,8 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers, in
 					query.checked2 = query.checked;		// den check-Status hier nochmal merken, damit man ihn bei allen Click-Events setzen kann, sonst setzt z.B. Chrome den immer wieder zurueck
 					if(query.checked == true){
 						if(thema.checked == false){
-							thema.checked = true;		
+							thema.checked = true;
+							thema.title="Dieses Thema ausschalten";	
 							if(instantreload)reload = true;
 						}
 					}
@@ -324,6 +329,7 @@ function updateQuery(event, thema, query, radiolayers, instantreload){
     if(thema.checked == false){
       query.checked = false;
 			thema.title="Dieses Thema sichtbar schalten";
+			query.title="Dieses Thema abfragbar schalten";
     }
 		else{
 			thema.title="Dieses Thema ausschalten";			
