@@ -583,22 +583,29 @@ class Nachweis {
     $sql.=" WHERE id = ".$id;
     #echo $sql;
     $ret=$this->database->execSQL($sql,4, 1);
-    if($andere_art != ''){
-    	$sql = "SELECT dokumentart_id FROM nachweisverwaltung.n_nachweise2dokumentarten WHERE nachweis_id = ".$id.";";
-    	$query=@pg_query($this->database->dbConn,$sql);
-	    $rs=pg_fetch_array($query);
-	    if ($rs[0]!=''){
-    		$sql = "UPDATE nachweisverwaltung.n_nachweise2dokumentarten SET dokumentart_id = ".$andere_art." WHERE nachweis_id = ".$id.";";
-    		#echo $sql;
-    		$ret=$this->database->execSQL($sql,4, 1);
-	    }
-	    else{
-	    	$sql = "INSERT INTO nachweisverwaltung.n_nachweise2dokumentarten";
-	    	$sql .= " SELECT id, ".$andere_art." FROM nachweisverwaltung.n_nachweise WHERE id = ".$id;
-	    	#echo $sql;
-	    	$ret=$this->database->execSQL($sql,4, 1);	
-	    }	
-    }
+		if($art != '111'){
+			$sql = "DELETE FROM nachweisverwaltung.n_nachweise2dokumentarten WHERE nachweis_id = ".$id;
+			#echo $sql;
+			$ret=$this->database->execSQL($sql,4, 1);	
+		}
+		else{
+			if($andere_art != ''){
+				$sql = "SELECT dokumentart_id FROM nachweisverwaltung.n_nachweise2dokumentarten WHERE nachweis_id = ".$id.";";
+				$query=@pg_query($this->database->dbConn,$sql);
+				$rs=pg_fetch_array($query);
+				if ($rs[0]!=''){
+					$sql = "UPDATE nachweisverwaltung.n_nachweise2dokumentarten SET dokumentart_id = ".$andere_art." WHERE nachweis_id = ".$id.";";
+					#echo $sql;
+					$ret=$this->database->execSQL($sql,4, 1);
+				}
+				else{
+					$sql = "INSERT INTO nachweisverwaltung.n_nachweise2dokumentarten";
+					$sql .= " SELECT id, ".$andere_art." FROM nachweisverwaltung.n_nachweise WHERE id = ".$id;
+					#echo $sql;
+					$ret=$this->database->execSQL($sql,4, 1);	
+				}	
+			}
+		}
     if ($ret[0]) {
       # Fehler beim Eintragen in Datenbank
       $ret[1]='Auf Grund eines Datenbankfehlers konnte das Dokument nicht aktualisiert werden!'.$ret[1];
