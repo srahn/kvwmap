@@ -1052,12 +1052,7 @@ function mouseup(evt){
 			document.getElementById("cartesian").setAttribute("transform", "translate(0,'.$res_y.') scale(1,-1)");
 			updatepaths();
 			if(top.currentform.last_doing.value == "add_geom" || top.currentform.last_doing.value == "subtract_geom" || top.currentform.last_doing.value == "move_geometry"){
-				if(top.currentform.pathwkt.value == ""){
-					top.currentform.pathwkt.value = buildwktlinefromsvgpath(top.currentform.newpath.value);
-				}
-				else{
-					top.currentform.pathwkt.value = top.currentform.newpathwkt.value;
-				}
+				top.currentform.pathwkt.value = top.currentform.newpathwkt.value;
 				if(top.currentform.secondline.value == "true" && must_redraw){
 					applylines();
 					must_redraw = false;
@@ -1942,12 +1937,7 @@ function mouseup(evt){
 			document.getElementById("cartesian").setAttribute("transform", "translate(0,'.$res_y.') scale(1,-1)");
 			updatepaths();
 			if(top.currentform.last_doing.value == "add_geom" || top.currentform.last_doing.value == "subtract_geom" || top.currentform.last_doing.value == "move_geometry"){
-				if(top.currentform.pathwkt.value == ""){
-					top.currentform.pathwkt.value = buildwktpolygonfromsvgpath(top.currentform.newpath.value);
-				}
-				else{
-					top.currentform.pathwkt.value = top.currentform.newpathwkt.value;
-				}
+				top.currentform.pathwkt.value = top.currentform.newpathwkt.value;
 				if(top.currentform.secondpoly.value == "true" && must_redraw){
 					applypolygons();
 					must_redraw = false;
