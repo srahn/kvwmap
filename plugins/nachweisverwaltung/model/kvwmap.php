@@ -482,7 +482,7 @@
         showAlert($GUI->Meldung);
       } # end of fehler bei der Änderung
       else {
-				$GUI->nachweisFormAnzeige();
+				$GUI->nachweisAenderungsformular();
         showAlert($ret[1]);
 			}
       # 1.4 Zur zur Anzeige der Rechercheergebnisse mit Meldung über Erfolg der Änderung
