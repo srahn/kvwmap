@@ -106,6 +106,17 @@ class GUI {
     }
 	}
 	
+	function switch_gle_view(){	
+		$this->user->rolle->switch_gle_view($this->formvars['chosen_layer_id']);
+		$this->last_query = $this->user->rolle->get_last_query();
+		$this->formvars['go'] = $this->last_query['go'];
+		if($this->formvars['go'] == 'Layer-Suche_Suchen')$this->GenerischeSuche_Suchen();
+		else{
+			$this->SachdatenAnzeige(NULL);
+			$this->output();
+		}
+	}
+	
 	function setHistTimestamp(){
 		$this->user->rolle->setHistTimestamp($this->formvars['timestamp']);
 		$this->user->rolle->readSettings();	
@@ -303,7 +314,7 @@ class GUI {
 									}
 								}
 								else{
-									$legend .= '<table border="0" cellspacing="2" cellpadding="0">';
+									$legend .= '<table border="0" cellspacing="0" cellpadding="0">';
 									$maplayer = $this->map->getLayerByName($layer['alias']);
 									for($k = 0; $k < $maplayer->numclasses; $k++){
 										$class = $maplayer->getClass($k);
@@ -340,27 +351,31 @@ class GUI {
 												}												
 											}
 										}
-										$image = $class->createLegendIcon(18,12);
-										$filename = $this->map_saveWebImage($image,'jpeg');
-										$newname = $this->user->id.basename($filename);
-										rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
-										#Anne										
-										$classid = $layer['Class'][$k]['Class_ID'];
-										if($this->mapDB->disabled_classes['status'][$classid] == '0'){
-											$legend .= '<tr>
-													<td><input type="hidden" size="2" name="class'.$classid.'" value="0"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img border="0" name="imgclass'.$classid.'" src="graphics/inactive.jpg"></a>&nbsp;<span class="px13">'.html_umlaute($class->name).'</span></td>
-													</tr>';
+										$legend .= '<tr><td style="line-height: 15px">';
+										if($s > 0){
+											if($layer['Class'][$k]['Style'][0]['colorrange'] != ''){
+												$newname = rand(0, 1000000).'.jpg';
+												$this->colorramp(IMAGEPATH.$newname, 18, 18, $layer['Class'][$k]['Style'][0]['colorrange']);
+											}
+											else{
+												$image = $class->createLegendIcon(18,12);
+												$filename = $this->map_saveWebImage($image,'jpeg');
+												$newname = $this->user->id.basename($filename);
+												rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
+											}
+											#Anne										
+											$classid = $layer['Class'][$k]['Class_ID'];
+											if($this->mapDB->disabled_classes['status'][$classid] == '0'){
+												$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="0"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img style="vertical-align:middle" border="0" name="imgclass'.$classid.'" src="graphics/inactive.jpg"></a>';
+											}
+											elseif($this->mapDB->disabled_classes['status'][$classid] == 2){
+												$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="2"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img style="vertical-align:middle" border="0" name="imgclass'.$classid.'" src="'.TEMPPATH_REL.$newname.'"></a>';
+											}
+											else{
+												$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="1"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img style="vertical-align:middle" border="0" name="imgclass'.$classid.'" src="'.TEMPPATH_REL.$newname.'"></a>';
+											}
 										}
-										elseif($this->mapDB->disabled_classes['status'][$classid] == 2){
-											$legend .= '<tr>
-													<td><input type="hidden" size="2" name="class'.$classid.'" value="2"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img border="0" name="imgclass'.$classid.'" src="'.TEMPPATH_REL.$newname.'"></a>&nbsp;<span class="px13">'.html_umlaute($class->name).'</span></td>
-													</tr>';
-										}
-										else{
-											$legend .= '<tr>
-													<td><input type="hidden" size="2" name="class'.$classid.'" value="1"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onmouseout="mouseOutClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')" onclick="changeClassStatus('.$classid.',\''.TEMPPATH_REL.$newname.'\')"><img border="0" name="imgclass'.$classid.'" src="'.TEMPPATH_REL.$newname.'"></a>&nbsp;<span class="px13">'.html_umlaute($class->name).'</span></td>
-													</tr>';
-										}
+										$legend .= '&nbsp;<span class="px13">'.html_umlaute($class->name).'</span></td></tr>';
 									}
 									$legend .= '</table>';
 								}
@@ -430,7 +445,22 @@ class GUI {
 	  $legend .= '</div>';
     return $legend;
   }
-  
+  	
+	function colorramp($path, $width, $height, $colorrange){
+		$colors = explode(' ', $colorrange);
+		$s[0] = $colors[0];	$s[1] = $colors[1];	$s[2] = $colors[2];
+		$e[0] = $colors[3];	$e[1] = $colors[4];	$e[2] = $colors[5];
+		$img = imagecreatetruecolor($width, $height);
+		for($i = 0; $i < $height; $i++) {
+			$r = $s[0] - ((($s[0]-$e[0])/$height)*$i);
+			$g = $s[1] - ((($s[1]-$e[1])/$height)*$i);
+			$b = $s[2] - ((($s[2]-$e[2])/$height)*$i);
+			$color = imagecolorallocate($img,$r,$g,$b);
+			imagefilledrectangle($img,0,$i,$width,$i+1,$color);
+		}
+		imagejpeg($img, $path, 70); 
+	}
+	
 	function changemenue_with_ajax($id, $status){
     $this->changemenue($id, $status);
   }
@@ -935,6 +965,9 @@ class GUI {
                 $layer->setProcessing($processing);
               }
             }
+						if ($layerset[$i]['postlabelcache'] != 0) {
+							$layer->set('postlabelcache',$layerset[$i]['postlabelcache']);
+						}
                 
             if ($layerset[$i]['Datentyp']=='3') {
               if($layerset[$i]['transparency'] != ''){
@@ -961,6 +994,7 @@ class GUI {
               # Vektorlayer
               if($layerset[$i]['Data'] != ''){
 								$layerset[$i]['Data'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[$i]['Data']);
+								$layerset[$i]['Data'] = str_replace('$language', $this->user->rolle->language, $layerset[$i]['Data']);
                 $layer->set('data', $layerset[$i]['Data']);
               }
   
@@ -1023,9 +1057,6 @@ class GUI {
               }
               if ($layerset[$i]['labelrequires']!='') {
                 $layer->set('labelrequires',$layerset[$i]['labelrequires']);
-              }
-              if ($layerset[$i]['postlabelcache']!='') {
-                $layer->set('postlabelcache',$layerset[$i]['postlabelcache']);
               }
               if ($layerset[$i]['tolerance']!='3') {
                 $layer->set('tolerance',$layerset[$i]['tolerance']);
@@ -2613,7 +2644,7 @@ class GUI {
             <td class="px13">';
               echo key($this->styledaten).'</td><td><input ';
               if($i === 0)echo 'onkeyup="if(event.keyCode != 8)get_style(this.value)"';
-              echo ' name="style_'.key($this->styledaten).'" size="11" type="text" value="'.$this->styledaten[key($this->styledaten)].'">';
+              echo ' name="style_'.key($this->styledaten).'" size="20" type="text" value="'.$this->styledaten[key($this->styledaten)].'">';
         echo'
             </td>
           </tr>';
@@ -4187,6 +4218,8 @@ class GUI {
   }
 
   function druckausschnittswahl($loadmapsource){
+		global $selectable_scales;
+		$this->selectable_scales = array_reverse($selectable_scales);
 		$saved_scale = $this->reduce_mapwidth(10);		
     $this->titel='Druckausschnitt wählen';
     $this->main="druckausschnittswahl.php";
@@ -4212,6 +4245,30 @@ class GUI {
     $this->Document->frames = $this->Document->load_frames($this->Stelle->id, NULL);
     #echo '<br>Druckrahmen geladen.';
 
+		if($this->user->rolle->epsg_code == 4326){
+			$center_y = ($this->user->rolle->oGeorefExt->maxy + $this->user->rolle->oGeorefExt->miny) / 2;
+			$zoll_pro_einheit = InchesPerUnit(MS_DD, $center_y);
+			$this->meter_pro_einheit = $zoll_pro_einheit / 39.3701;
+		}
+		else{
+			$this->meter_pro_einheit = 1;
+		}
+		
+		if($this->formvars['printscale'] == ''){			# einen geeigneten Druckmaßstab berechnen
+			$dx = $this->map->extent->maxx-$this->map->extent->minx;
+			$dy = $this->map->extent->maxy-$this->map->extent->miny;
+			$cal_scale_height = $dy * $this->meter_pro_einheit / 0.00035277 / $this->Document->activeframe[0]["mapheight"];
+			$cal_scale_width = $dx * $this->meter_pro_einheit / 0.00035277 / $this->Document->activeframe[0]["mapwidth"];
+			if($cal_scale_width > $cal_scale_height)$cal_scale = $cal_scale_height;
+			else $cal_scale = $cal_scale_width;
+			foreach($this->selectable_scales as $scale){
+				if($cal_scale > $scale){
+					$this->formvars['printscale'] = $scale;
+					break;
+				}
+			}
+		}
+		
     # alle Druckausschnitte der Rolle laden
     $this->Document->ausschnitte = $this->Document->load_ausschnitte($this->Stelle->id, $this->user->id, NULL);
     # wenn Druckausschnitts-ID übergeben, Ausschnitt laden
@@ -4220,16 +4277,8 @@ class GUI {
       # Druckrahmen setzen
       $this->Document->activeframe = $this->Document->load_frames($this->Stelle->id, $this->Document->ausschnitt[0]['frame_id']);
       # Extent setzen
-			if($this->user->rolle->epsg_code == 4326){
-				$center_y = ($this->user->rolle->oGeorefExt->maxy + $this->user->rolle->oGeorefExt->miny) / 2;
-				$zoll_pro_einheit = InchesPerUnit(MS_DD, $center_y);
-				$meter_pro_einheit = $zoll_pro_einheit / 39.3701;
-			}
-			else{
-				$meter_pro_einheit = 1;
-			}
-      $width = $this->Document->activeframe[0]['mapwidth'] * $this->Document->ausschnitt[0]['print_scale']/$meter_pro_einheit * 0.00035277;
-      $height = $this->Document->activeframe[0]['mapheight'] * $this->Document->ausschnitt[0]['print_scale']/$meter_pro_einheit * 0.00035277;
+      $width = $this->Document->activeframe[0]['mapwidth'] * $this->Document->ausschnitt[0]['print_scale']/$this->meter_pro_einheit * 0.00035277;
+      $height = $this->Document->activeframe[0]['mapheight'] * $this->Document->ausschnitt[0]['print_scale']/$this->meter_pro_einheit * 0.00035277;
       $rect= ms_newRectObj();
       $rect->minx = $this->Document->ausschnitt[0]['center_x'] - $width/2;
       $rect->miny = $this->Document->ausschnitt[0]['center_y'] - $height/2;
@@ -4611,12 +4660,12 @@ class GUI {
               $width = $classwidth;
             }
           }
-          $newlegendimage = imagecreatetruecolor($width+$size*0.55*$this->map_factor,$height);
+          $newlegendimage = imagecreatetruecolor($width+$size*1.55*$this->map_factor,$height);
           $backgroundColor = ImageColorAllocate ($newlegendimage, 255, 255, 255);
           imagefilledrectangle($newlegendimage, 0, 0, imagesx($newlegendimage), imagesy($newlegendimage), $backgroundColor);
           ImageCopy($newlegendimage, $layernameimage, 0, 0, 0, 0, imagesx($layernameimage), $size*3.3*$this->map_factor);
           if($layerset[$i]['showclasses']){
-            ImageCopy($newlegendimage, $classimage, 0, $size*3.3*$this->map_factor, 0, 0, imagesx($classimage), imagesy($classimage));
+            ImageCopy($newlegendimage, $classimage, $size*$this->map_factor, $size*3.3*$this->map_factor, 0, 0, imagesx($classimage), imagesy($classimage));
           }
           ImageCopy($newlegendimage, $legendimage, 0, $size*3.3*$this->map_factor+$classheight, 0, 0, imagesx($legendimage), imagesy($legendimage));
           $legendimage = $newlegendimage;
@@ -4743,10 +4792,16 @@ class GUI {
 			$style->set('opacity', $dbStyle['opacity']);
 		}
 		
-    $image = $klasse->createLegendIcon(25,18);
-    $filename = $this->map_saveWebImage($image,'jpeg');
-    $newname = $this->user->id.basename($filename);
-    rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
+		if($dbStyle['colorrange'] != ''){
+			$newname = rand(0, 1000000).'.jpg';
+			$this->colorramp(IMAGEPATH.$newname, 25, 18, $dbStyle['colorrange']);
+		}
+		else{
+			$image = $klasse->createLegendIcon(25,18);
+			$filename = $this->map_saveWebImage($image,'jpeg');
+			$newname = $this->user->id.basename($filename);
+			rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
+		}
     return $newname;
   }
 
@@ -5519,6 +5574,12 @@ class GUI {
       $point->setXY(0, $this->map->height - 2);
       $newcredits->addFeature($feature);
     }
+		
+		# Koordinatengitter-Layer aus dem Mapfile
+    @$gridlayer = $this->map->getLayerByName('grid');
+    if($gridlayer != false){
+      $gridlayer->set('status', MS_ON);
+    }
 
     $this->map->setextent($minx,$miny,$maxx,$maxy);
 		
@@ -5837,10 +5898,18 @@ class GUI {
 			$label1 = $label4/4;
 			$pdf->setColor(0,0,0);
 			$pdf->addText($posx-1.5, $posy+6, 8, '0');
-			$pdf->addText($posx+$width1-5, $posy+6, 8, $label1);
-			$pdf->addText($posx+$width2-5, $posy+6, 8, $label2);
-			$pdf->addText($posx+$width3-5, $posy+6, 8, $label3);
-			$pdf->addText($posx+$width4-5, $posy+6, 8, $label4.' Meter');
+			if($label1/1000 >= 1){
+				$div = 1000;
+				$unit = 'Km';
+			}
+			else{
+				$div = 1;
+				$unit = 'm';
+			}
+			$pdf->addText($posx+$width1-5, $posy+6, 8, round($label1/$div, 2));
+			$pdf->addText($posx+$width2-5, $posy+6, 8, round($label2/$div, 2));
+			$pdf->addText($posx+$width3-5, $posy+6, 8, round($label3/$div, 2));
+			$pdf->addText($posx+$width4-5, $posy+6, 8, round($label4/$div, 2).' '.$unit);
 			$pdf->setLineStyle(0.5);
       $pdf->rectangle($posx, $posy, $width1, 4);
 			$pdf->rectangle($posx, $posy, $width2, 4);
@@ -6315,6 +6384,7 @@ class GUI {
         $layerdb->setClientEncoding();
         #$path = $layerset[0]['pfad'];
 				$path = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[0]['pfad']);
+				$path = str_replace('$language', $this->user->rolle->language, $path);
         $privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
         $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
         $layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
@@ -9408,6 +9478,7 @@ class GUI {
   function mapCommentForm() {
     $this->titel='Kommentar zum Kartenausschnitt';
     $this->main='MapCommentForm.php';
+		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
     $this->loadMap('DataBase');
     $this->drawMap();
     $this->output();
@@ -10428,6 +10499,7 @@ class GUI {
             $layerdb->setClientEncoding();
             #$path = $layerset[$i]['pfad'];
 						$path = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[$i]['pfad']);
+						$path = str_replace('$language', $this->user->rolle->language, $path);
             $privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
             $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
             $layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames']);
@@ -10858,10 +10930,15 @@ class GUI {
   function spatial_processing(){
 		include_(CLASSPATH.'spatial_processor.php');
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-    $layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-    if($layerdb == NULL){
-      $layerdb = $this->pgdatabase;
-    }
+		if(in_array($this->formvars['operation'], array('area', 'length')){
+			$layerdb = $this->pgdatabase;				# wegen st_area_utm und st_length_utm die eigene Datenbank nehmen
+		}
+		else{
+			$layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+			if($layerdb == NULL){
+				$layerdb = $this->pgdatabase;
+			}
+		}
     $this->processor = new spatial_processor($this->user->rolle, $this->database, $layerdb);
     $this->processor->process_query($this->formvars);
   }
@@ -11084,6 +11161,7 @@ class GUI {
 				$layerdb = $this->mapDB->getlayerdatabase($layerset[$i]['Layer_ID'], $this->Stelle->pgdbhost);
 				#$path = $layerset[$i]['pfad'];
 				$path = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[$i]['pfad']);
+				$path = str_replace('$language', $this->user->rolle->language, $path);
 				$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
 				#$path = $this->Stelle->parse_path($layerdb, $path, $privileges);
 				$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames']);      
@@ -12044,10 +12122,10 @@ class GUI {
 	    $oid = $layerset['shape'][$k][$tablename.'_oid'];
 	    $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 			if(MAPSERVERVERSION < 600){
-				$map = ms_newMapObj(DEFAULTMAPFILE);
+				$map = ms_newMapObj(NULL);
 			}
 			else {
-				$map = new mapObj(DEFAULTMAPFILE);
+				$map = new mapObj(NULL);
 			}
 			$map->set('debug', 5);
 	    $layerdb = $mapDB->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
@@ -12786,9 +12864,9 @@ class db_mapObj{
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_RollenLayer - Lesen der RollenLayer:<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
-    $Layer = array();
+    $Layer = array();				
     while ($rs=mysql_fetch_array($query)) {
-      $rs['Class']=$this->read_Classes(-$rs['id']);
+      $rs['Class']=$this->read_Classes(-$rs['id'], $this->disabled_classes);
       $Layer[]=$rs;
     }
     return $Layer;
@@ -12914,7 +12992,7 @@ class db_mapObj{
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
-    while($rs=mysql_fetch_array($query)) {
+    while($rs=mysql_fetch_assoc($query)) {
       $rs['Style']=$this->read_Styles($rs['Class_ID']);
       $rs['Label']=$this->read_Label($rs['Class_ID']);
       #Anne
@@ -12944,7 +13022,7 @@ class db_mapObj{
   	#Anne
     $sql_classes = 'SELECT class_id, status FROM u_rolle2used_class WHERE user_id='.$this->User_ID.' AND stelle_id='.$this->Stelle_ID.';';
     $query_classes=mysql_query($sql_classes);
-    while($row = mysql_fetch_array($query_classes)){
+    while($row = mysql_fetch_assoc($query_classes)){
   		$classarray['class_id'][] = $row['class_id'];
 			$classarray['status'][$row['class_id']] = $row['status'];
 		}
@@ -12958,7 +13036,7 @@ class db_mapObj{
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Styles - Lesen der Styledaten:<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
-    while($rs=mysql_fetch_array($query)) {
+    while($rs=mysql_fetch_assoc($query)) {
       $Styles[]=$rs;
     }
     return $Styles;
@@ -12974,7 +13052,7 @@ class db_mapObj{
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Label - Lesen der Labels zur Classe eines Layers:<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
-    while ($rs=mysql_fetch_array($query)) {
+    while ($rs=mysql_fetch_assoc($query)) {
       $Labels[]=$rs;
     }
     return $Labels;
@@ -13658,11 +13736,17 @@ class db_mapObj{
   }
 
 	function createAutoClasses($values, $attribute, $layer_id, $datatype, $database){
+		global $supportedLanguages;
 		$result_colors = read_colors($database);
 		shuffle($result_colors);
 		for($i = 0; $i < count($values); $i++){
 			if($i == count($result_colors))return;				# Anzahl der Klassen ist auf die Anzahl der Colors beschränkt
 			$classdata['name'] = $values[$i].' ';
+			foreach($supportedLanguages as $language){
+				if($language != 'german'){
+					$classdata['name_'.$language] = $values[$i].' ';
+				}
+			}
       $classdata['layer_id'] = -$layer_id;
       $classdata['expression'] = "('[".$attribute."]' eq '".$values[$i]."')";
       $classdata['order'] = 0;
@@ -13724,6 +13808,7 @@ class db_mapObj{
       $sql .= "labelminscale = ".$formvars['labelminscale'].", ";
     }
     $sql .= "labelrequires = '".$formvars['labelrequires']."', ";
+		$sql .= "postlabelcache = '".$formvars['postlabelcache']."', ";
     $sql .= "`connection` = '".$formvars['connection']."', ";
     $sql .= "`printconnection` = '".$formvars['printconnection']."', ";
     $sql .= "connectiontype = '".$formvars['connectiontype']."', ";
@@ -13783,7 +13868,7 @@ class db_mapObj{
 					$sql .= "`Name_".$language."`, ";
 				}
 			}
-			$sql.="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`) VALUES(";
+			$sql.="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`) VALUES(";
       if($formvars['id'] != ''){
         $sql.="'".$formvars['id']."', ";
       }
@@ -13835,6 +13920,7 @@ class db_mapObj{
       if($formvars['labelminscale']==''){$formvars['labelminscale']='NULL';}
       $sql .= $formvars['labelminscale'].", ";
       $sql .= "'".$formvars['labelrequires']."', ";
+			$sql .= "'".$formvars['postlabelcache']."', ";
       $sql .= "'".$formvars['connection']."', ";
       $sql .= "'".$formvars['printconnection']."', ";
       $sql .= $formvars['connectiontype'].", ";
@@ -14023,6 +14109,7 @@ class db_mapObj{
 			$attributes['form_element_type'][$i]= $rs['form_element_type'];
 			$attributes['form_element_type'][$rs['name']]= $rs['form_element_type'];
 			$rs['options'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $rs['options']);
+			$rs['options'] = str_replace('$language', $this->user->rolle->language, $rs['options']);
 			$attributes['options'][$i]= $rs['options'];
 			$attributes['options'][$rs['name']]= $rs['options'];
 			$attributes['alias'][$i]= $rs['alias'];

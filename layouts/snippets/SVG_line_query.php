@@ -18,9 +18,9 @@
   <INPUT TYPE="hidden" NAME="pixelsize" VALUE="<?php echo $pixelsize; ?>">
 	<input type="hidden" name="pathlength" value="<?php echo $this->formvars['pathlength']; ?>">
 
-	<input name="newpath" type="text" value="<? echo $this->formvars['newpath']; ?>">
-	<input name="pathwkt" type="text" value="<?php echo $this->formvars['pathwkt']; ?>">
-	<input name="newpathwkt" type="text" value="<?php echo $this->formvars['newpathwkt']; ?>">
+	<input name="newpath" type="hidden" value="<? echo $this->formvars['newpath']; ?>">
+	<input name="pathwkt" type="hidden" value="<?php echo $this->formvars['pathwkt']; ?>">
+	<input name="newpathwkt" type="hidden" value="<?php echo $this->formvars['newpathwkt']; ?>">
 	<input name="result" type="hidden" value="">
 	<input name="firstline" type="hidden" value="<?php echo $this->formvars['firstline']; ?>">
 	<input name="secondline" type="hidden" value="<?php echo $this->formvars['secondline']; ?>">
