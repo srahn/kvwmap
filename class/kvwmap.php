@@ -10930,10 +10930,15 @@ class GUI {
   function spatial_processing(){
 		include_(CLASSPATH.'spatial_processor.php');
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-    $layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-    if($layerdb == NULL){
-      $layerdb = $this->pgdatabase;
-    }
+		if(in_array($this->formvars['operation'], array('area', 'length')){
+			$layerdb = $this->pgdatabase;				# wegen st_area_utm und st_length_utm die eigene Datenbank nehmen
+		}
+		else{
+			$layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+			if($layerdb == NULL){
+				$layerdb = $this->pgdatabase;
+			}
+		}
     $this->processor = new spatial_processor($this->user->rolle, $this->database, $layerdb);
     $this->processor->process_query($this->formvars);
   }
