@@ -17,15 +17,6 @@
 			}
 		}  	 
   }
-
-	# Vorschauattribut extrahieren
-	$data = explode('<und>', $this->formvars['data']);
-	for($j = 0; $j < count($data); $j++){
-		$attr = explode('=', $data[$j]);
-		if($attr[0] == 'preview_attribute'){
-			$preview_attribute = $attr[1];
-		}
-	}
  ?>
  <table width="100%" border="0" cellpadding="2" cellspacing="0">
     <tr align="center"> 

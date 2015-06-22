@@ -13,16 +13,19 @@
   if($doit == true){
 ?>
 		<table border="0" cellspacing="0" cellpadding="2" width="100%">
-<?	for ($k=0;$k<$anzObj;$k++) {
-			$dataset = $layer['shape'][$k];								# der aktuelle Datensatz
+<?	
+	$preview_attributes = explode(' ', $this->formvars['preview_attribute']);
+	for ($k=0;$k<$anzObj;$k++){
+		$dataset = $layer['shape'][$k];								# der aktuelle Datensatz
+		for($p = 0; $p < count($preview_attributes); $p++){			
 			for($j = 0; $j < count($attributes['name']); $j++){
-				if($this->formvars['preview_attribute'] == $attributes['name'][$j]){
+				if($preview_attributes[$p] == $attributes['name'][$j]){
 					switch ($attributes['form_element_type'][$j]){
 						case 'Auswahlfeld' : {
 							if(is_array($attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
 								for($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++){
 									if($attributes['enum_value'][$j][$k][$e] == $dataset[$attributes['name'][$j]]){
-										$output = $attributes['enum_output'][$j][$k][$e];
+										$output[$p] = $attributes['enum_output'][$j][$k][$e];
 										break;
 									}
 								}
@@ -30,7 +33,7 @@
 							else{
 								for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
 									if($attributes['enum_value'][$j][$e] == $dataset[$attributes['name'][$j]]){
-										$output = $attributes['enum_output'][$j][$e];
+										$output[$p] = $attributes['enum_output'][$j][$e];
 										break;
 									}
 								}
@@ -38,7 +41,7 @@
 						}break;
 						
 						case 'Autovervollständigungsfeld' : {
-							$output = $attributes['enum_output'][$j][$k];
+							$output[$p] = $attributes['enum_output'][$j][$k];
 						}break;
 						
 						case 'Dokument' : {
@@ -63,39 +66,41 @@
   							}else{
   								echo '<tr><td><a class="preview_link" href="'.$url.$dokumentpfad.'"><img class="preview_doc" src="'.$url.$thumbname.'"></a></td></tr>';
   							}
-								$output = '<table><tr><td>'.$original_name.'</td>';
+								$output[$p] = '<table><tr><td>'.$original_name.'</td>';
 								echo '<input type="hidden" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$dataset[$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].'_alt'.';'.$attributes['nullable'][$j].'" value="'.$dataset[$attributes['name'][$j]].'"></td>';
 							}
-							$output .= '<td><img border="0" title="zum Datensatz" src="'.GRAPHICSPATH.'zum_datensatz.gif"></td></tr></table>';
+							$output[$p] .= '<td><img border="0" title="zum Datensatz" src="'.GRAPHICSPATH.'zum_datensatz.gif"></td></tr></table>';
 						}break;
 						
 						case 'Link': {
-							$output = basename($dataset[$this->formvars['preview_attribute']]);								
+							$output[$p] = basename($dataset[$preview_attributes[$p]]);								
 						} break;
 						
 						default : {
-							$output = $dataset[$this->formvars['preview_attribute']];						
+							$output[$p] = $dataset[$preview_attributes[$p]];						
 						}
 					}
 				}
 			}
-			if($this->formvars['embedded'] == 'true'){
-				echo '<tr style="border: none">
-								<td style="height:20px"><a style="font-size: '.$this->user->rolle->fontsize_gle.'px;" href="javascript:if(document.getElementById(\'subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\').innerHTML == \'\')ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$layer['Layer_ID'].'&value_'.$layer['maintable'].'_oid='.$dataset[$layer['maintable'].'_oid'].'&embedded=true&fromobject=subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'&targetobject='.$this->formvars['targetobject'].'&targetlayer_id='.$this->formvars['targetlayer_id'].'&targetattribute='.$this->formvars['targetattribute'].'&data='.$this->formvars['data'].'\', new Array(document.getElementById(\'subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\')), \'\');clearsubforms('.$layer['Layer_ID'].');">'.$output.'</a><div id="subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'"></div></td>
-							</tr>
-';
-			}
-			else{
-				echo '<tr style="border: none">
-								<td><a style="font-size: '.$this->user->rolle->fontsize_gle.'px;"';
-								if($this->formvars['no_new_window'] != true){
-									echo 	' target="_blank"';
-								}
-				echo ' href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$layer['Layer_ID'].'&value_'.$layer['maintable'].'_oid='.$dataset[$layer['maintable'].'_oid'].'\')">'.$output.'</a></td>
-							</tr>';
-			}
-						
+			if($output[$p] == '')$output[$p] = $preview_attributes[$p];
 		}
+		if($this->formvars['embedded'] == 'true'){
+			echo '<tr style="border: none">
+							<td style="height:20px"><a style="font-size: '.$this->user->rolle->fontsize_gle.'px;" href="javascript:if(document.getElementById(\'subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\').innerHTML == \'\')ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$layer['Layer_ID'].'&value_'.$layer['maintable'].'_oid='.$dataset[$layer['maintable'].'_oid'].'&embedded=true&fromobject=subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'&targetobject='.$this->formvars['targetobject'].'&targetlayer_id='.$this->formvars['targetlayer_id'].'&targetattribute='.$this->formvars['targetattribute'].'&data='.$this->formvars['data'].'\', new Array(document.getElementById(\'subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\')), \'\');clearsubforms('.$layer['Layer_ID'].');">'.implode(' ', $output).'</a><div id="subform'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'"></div></td>
+						</tr>
+';
+		}
+		else{
+			echo '<tr style="border: none">
+							<td><a style="font-size: '.$this->user->rolle->fontsize_gle.'px;"';
+							if($this->formvars['no_new_window'] != true){
+								echo 	' target="_blank"';
+							}
+			echo ' href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$layer['Layer_ID'].'&value_'.$layer['maintable'].'_oid='.$dataset[$layer['maintable'].'_oid'].'\')">'.implode(' ', $output).'</a></td>
+						</tr>';
+		}
+					
+	}
 ?>			    
 		</table>
 
