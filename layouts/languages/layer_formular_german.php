@@ -66,4 +66,5 @@
   $strAlias="Aliasname";
 	$strStatus="Status";
 	$strPostlabelcache="Postlabelcache";
+	$strrequires="Requires";
 ?>  

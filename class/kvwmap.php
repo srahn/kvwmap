@@ -6168,6 +6168,7 @@ class GUI {
       $this->layerdata = $mapDB->get_Layer($this->formvars['selected_layer_id']);
       # Abfragen der Stellen des Layer
       $this->formvars['selstellen']=$mapDB->get_stellen_from_layer($this->formvars['selected_layer_id']);
+			$this->grouplayers = $mapDB->get_layersfromgroup($this->layerdata['Gruppe']);
     }
     $this->stellen=$this->Stelle->getStellen('Bezeichnung');
     $this->Groups = $mapDB->get_Groups();
@@ -13830,6 +13831,8 @@ class db_mapObj{
 		if($formvars['symbolscale'] == ''){$formvars['symbolscale'] = 'NULL';}
     $sql .= "symbolscale = ".$formvars['symbolscale'].", ";
     $sql .= "offsite = '".$formvars['offsite']."', ";
+		if($formvars['requires'] == ''){$formvars['requires'] = 'NULL';}
+		$sql .= "requires = ".$formvars['requires'].", ";
     $sql .= "ows_srs = '".$formvars['ows_srs']."', ";
     $sql .= "wms_name = '".$formvars['wms_name']."', ";
     $sql .= "wms_server_version = '".$formvars['wms_server_version']."', ";
@@ -13868,7 +13871,7 @@ class db_mapObj{
 					$sql .= "`Name_".$language."`, ";
 				}
 			}
-			$sql.="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`) VALUES(";
+			$sql.="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`) VALUES(";
       if($formvars['id'] != ''){
         $sql.="'".$formvars['id']."', ";
       }
@@ -13944,6 +13947,8 @@ class db_mapObj{
 			if($formvars['symbolscale']==''){$formvars['symbolscale']='NULL';}
       $sql .= $formvars['symbolscale'].", ";
       $sql .= "'".$formvars['offsite']."', ";
+			if($formvars['requires']==''){$formvars['requires']='NULL';}
+      $sql .= $formvars['requires'].", ";
       $sql .= "'".$formvars['ows_srs']."', ";
       $sql .= "'".$formvars['wms_name']."', ";
       $sql .= "'".$formvars['wms_server_version']."', ";

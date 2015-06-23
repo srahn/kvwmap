@@ -3118,7 +3118,7 @@ class stelle {
 	function addLayer($layer_ids, $drawingorder) {
 		# Hinzufügen von Layern zur Stelle
 		for ($i=0;$i<count($layer_ids);$i++) {
-			$sql = "SELECT queryable, template, transparency, drawingorder, minscale, maxscale, symbolscale, offsite, privileg, postlabelcache FROM layer WHERE Layer_ID = ".$layer_ids[$i];
+			$sql = "SELECT queryable, template, transparency, drawingorder, minscale, maxscale, symbolscale, offsite, requires, privileg, postlabelcache FROM layer WHERE Layer_ID = ".$layer_ids[$i];
 			$this->debug->write("<p>file:users.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 			$query=mysql_query($sql,$this->database->dbConn);
 			$rs = mysql_fetch_array($query);
@@ -3135,8 +3135,10 @@ class stelle {
 			$offsite = $rs['offsite'];
 			$privileg = $rs['privileg'];
 			$postlabelcache = $rs['postlabelcache'];
-			$sql ='INSERT IGNORE INTO used_layer ( `Stelle_ID` , `Layer_ID` , `queryable` , `drawingorder` , `minscale` , `maxscale` , `symbolscale`, `offsite` , `transparency`, `Filter` , `template` , `header` , `footer` , `privileg`, `postlabelcache` )';
-			$sql.="VALUES ('".$this->id."', '".$layer_ids[$i]."', '".$queryable."', '".$drawingorder."', '".$minscale."', '".$maxscale."', '".$symbolscale."', '".$offsite."' , ".$transparency.", NULL,'".$template."', NULL, NULL, '".$privileg."', '".$postlabelcache."')";
+			if($rs['requires'] == '')$rs['requires']='NULL';
+			$requires = $rs['requires'];
+			$sql ='INSERT IGNORE INTO used_layer ( `Stelle_ID` , `Layer_ID` , `queryable` , `drawingorder` , `minscale` , `maxscale` , `symbolscale`, `offsite` , `transparency`, `Filter` , `template` , `header` , `footer` , `privileg`, `postlabelcache`, `requires` )';
+			$sql.="VALUES ('".$this->id."', '".$layer_ids[$i]."', '".$queryable."', '".$drawingorder."', '".$minscale."', '".$maxscale."', '".$symbolscale."', '".$offsite."' , ".$transparency.", NULL,'".$template."', NULL, NULL, '".$privileg."', '".$postlabelcache."', ".$requires.")";
 			#echo $sql.'<br>';
 			$this->debug->write("<p>file:users.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 			$query=mysql_query($sql,$this->database->dbConn);
