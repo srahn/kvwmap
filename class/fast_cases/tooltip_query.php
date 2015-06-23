@@ -174,7 +174,8 @@
 				}	
 				$layerdb = $this->mapDB->getlayerdatabase($layerset[$i]['Layer_ID'], $this->Stelle->pgdbhost);
 				#$path = $layerset[$i]['pfad'];
-				$path = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[$i]['pfad']);				$path = str_replace('$language', $this->user->rolle->language, $path);
+				$path = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[$i]['pfad']);
+				$path = str_replace('$language', $this->user->rolle->language, $path);
 				$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
 				#$path = $this->Stelle->parse_path($layerdb, $path, $privileges);
 				$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames']);      
@@ -752,8 +753,9 @@
 			$this->oGeorefExt=ms_newRectObj();
 			$this->oGeorefExt->setextent($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
 			$this->nImageWidth=$rs['nImageWidth'];
-			$this->nImageHeight=$rs['nImageHeight'];
+			$this->nImageHeight=$rs['nImageHeight'];			
 			$this->mapsize=$this->nImageWidth.'x'.$this->nImageHeight;
+			$this->auto_map_resize=$rs['auto_map_resize'];
 			@$this->pixwidth=($rs['maxx']-$rs['minx'])/$rs['nImageWidth'];
 			@$this->pixheight=($rs['maxy']-$rs['miny'])/$rs['nImageHeight'];
 			$this->pixsize=($this->pixwidth+$this->pixheight)/2;
@@ -811,8 +813,8 @@
 		if($language != 'german') {
 			$sql.='CASE WHEN `Name_'.$language.'` != "" THEN `Name_'.$language.'` ELSE `Name` END AS ';
 		}
-		$sql.='Name, l.Layer_ID, alias, Datentyp, Gruppe, pfad, maintable, Data, `schema`, document_path, labelitem, connection, printconnection, connectiontype, epsg_code, tolerance, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs, wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, ul.* FROM layer AS l, used_layer AS ul';
-    $sql.=' WHERE l.Layer_ID=ul.Layer_ID AND Stelle_ID='.$this->stelle_id;
+		$sql.='Name, l.Layer_ID, alias, Datentyp, Gruppe, pfad, maintable, Data, `schema`, document_path, labelitem, connection, printconnection, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs, wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, ul.`queryable`, ul.`drawingorder`, ul.`minscale`, ul.`maxscale`, ul.`offsite`, ul.`transparency`, ul.`postlabelcache`, `Filter`, CASE r2ul.gle_view WHEN \'0\' THEN \'generic_layer_editor.php\' WHEN \'1\' THEN \'generic_layer_editor_2.php\' ELSE ul.`template` END as template, `header`, `footer`, ul.`symbolscale`, ul.`logconsume`, ul.`requires`, ul.`privileg`, ul.`export_privileg`, `start_aktiv` FROM layer AS l, used_layer AS ul, u_rolle2used_layer as r2ul';
+    $sql.=' WHERE l.Layer_ID=ul.Layer_ID AND r2ul.Stelle_ID=ul.Stelle_ID AND r2ul.Layer_ID=ul.Layer_ID AND ul.Stelle_ID='.$this->stelle_id.' AND r2ul.User_ID='.$this->user_id;
     if ($LayerName!='') {
       $sql.=' AND (l.Name LIKE "'.$LayerName.'" ';
       if(is_numeric($LayerName)){
@@ -1086,7 +1088,8 @@
 			}
 			$attributes['form_element_type'][$i]= $rs['form_element_type'];
 			$attributes['form_element_type'][$rs['name']]= $rs['form_element_type'];
-			$rs['options'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $rs['options']);			$rs['options'] = str_replace('$language', $this->user->rolle->language, $rs['options']);
+			$rs['options'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $rs['options']);
+			$rs['options'] = str_replace('$language', $this->user->rolle->language, $rs['options']);
 			$attributes['options'][$i]= $rs['options'];
 			$attributes['options'][$rs['name']]= $rs['options'];
 			$attributes['alias'][$i]= $rs['alias'];
