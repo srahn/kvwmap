@@ -12888,7 +12888,7 @@ class db_mapObj{
 			$sql.=' AND g.id IN ('.$groups.')';
 		}
     if($this->nurAufgeklappteLayer){
-      $sql.=' AND (rl.aktivStatus != "0" OR gr.status != "0" OR requires != "")';
+      $sql.=' AND (rl.aktivStatus != "0" OR gr.status != "0" OR ul.requires != "")';
     }
     if($this->nurAktiveLayer){
       $sql.=' AND (rl.aktivStatus != "0")';

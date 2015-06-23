@@ -1311,7 +1311,7 @@
 												}												
 											}
 										}
-										$legend .= '<tr><td style="line-height: 15px">';
+										$legend .= '<tr style="line-height: 15px"><td style="line-height: 14px">';
 										if($s > 0){
 											if($layer['Class'][$k]['Style'][0]['colorrange'] != ''){
 												$newname = rand(0, 1000000).'.jpg';
@@ -1419,20 +1419,6 @@
 			return $image->saveWebImage($format, 1, 1, 0);
 		}
 	}	
-	function colorramp($path, $width, $height, $colorrange){
-		$colors = explode(' ', $colorrange);
-		$s[0] = $colors[0];	$s[1] = $colors[1];	$s[2] = $colors[2];
-		$e[0] = $colors[3];	$e[1] = $colors[4];	$e[2] = $colors[5];
-		$img = imagecreatetruecolor($width, $height);
-		for($i = 0; $i < $height; $i++) {
-			$r = $s[0] - ((($s[0]-$e[0])/$height)*$i);
-			$g = $s[1] - ((($s[1]-$e[1])/$height)*$i);
-			$b = $s[2] - ((($s[2]-$e[2])/$height)*$i);
-			$color = imagecolorallocate($img,$r,$g,$b);
-			imagefilledrectangle($img,0,$i,$width,$i+1,$color);
-		}
-		imagejpeg($img, $path, 70); 
-	}
 }class database {  var $ist_Fortfuehrung;  var $debug;  var $loglevel;  var $logfile;  var $commentsign;  var $blocktransaction;  function database() {
     global $debug;
     $this->debug=$debug;
@@ -1990,7 +1976,7 @@
 		if($language != 'german') {
 			$sql.='CASE WHEN `Name_'.$language.'` != "" THEN `Name_'.$language.'` ELSE `Name` END AS ';
 		}
-		$sql.='Name, l.alias, l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem, l.labelmaxscale, l.labelminscale, l.labelrequires, l.postlabelcache, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version, l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, g.*';
+		$sql.='Name, l.alias, l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem, l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version, l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, g.*';
     $sql.=' FROM u_rolle2used_layer AS rl,used_layer AS ul,layer AS l, u_groups AS g, u_groups2rolle as gr';
     $sql.=' WHERE rl.stelle_id=ul.Stelle_ID AND rl.layer_id=ul.Layer_ID AND l.Layer_ID=ul.Layer_ID';
     $sql.=' AND (ul.minscale != -1 OR ul.minscale IS NULL) AND l.Gruppe = g.id AND rl.stelle_ID='.$this->Stelle_ID.' AND rl.user_id='.$this->User_ID;
@@ -1999,7 +1985,7 @@
 			$sql.=' AND g.id IN ('.$groups.')';
 		}
     if($this->nurAufgeklappteLayer){
-      $sql.=' AND (rl.aktivStatus != "0" OR gr.status != "0" OR requires != "")';
+      $sql.=' AND (rl.aktivStatus != "0" OR gr.status != "0" OR ul.requires != "")';
     }
     if($this->nurAktiveLayer){
       $sql.=' AND (rl.aktivStatus != "0")';
@@ -2112,9 +2098,9 @@
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_RollenLayer - Lesen der RollenLayer:<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
-    $Layer = array();
+    $Layer = array();				
     while ($rs=mysql_fetch_array($query)) {
-      $rs['Class']=$this->read_Classes(-$rs['id']);
+      $rs['Class']=$this->read_Classes(-$rs['id'], $this->disabled_classes);
       $Layer[]=$rs;
     }
     return $Layer;
