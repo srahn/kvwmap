@@ -351,7 +351,7 @@ class GUI {
 												}												
 											}
 										}
-										$legend .= '<tr><td style="line-height: 15px">';
+										$legend .= '<tr style="line-height: 15px"><td style="line-height: 14px">';
 										if($s > 0){
 											if($layer['Class'][$k]['Style'][0]['colorrange'] != ''){
 												$newname = rand(0, 1000000).'.jpg';
