@@ -1,13 +1,6 @@
 <script type="text/javascript" src="funktionen/calendar.js"></script>
 <script type="text/javascript">
 
-<?
-	if($this->formvars['close_window'] != ""){
-		echo 'opener.location.reload();';
-		echo 'window.close();';
-	}
- ?>
-
 add_calendar = function(event, elementid){
 	event.stopPropagation();
 	calendar = new CalendarJS();

@@ -588,10 +588,10 @@ class data_import_export {
     	$rest = substr($sql, strrpos(strtolower($sql), 'from'));
     	if(strpos($select, '.'.$this->attributes['the_geom']) !== false) $geom = $the_geom;	// table.the_geom muss ersetzt werden
     	else	$geom = $this->attributes['the_geom'];	// nur the_geom muss ersetzt werden 
+			$select = str_replace(' '.$geom.',', ' st_transform('.$geom.', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'].',', $select);
 			$select = str_replace(',  '.$geom, ', st_transform('.$geom.', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);    		
 			$select = str_replace(', '.$geom, ', st_transform('.$geom.', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);
 			$select = str_replace(','.$geom, ',st_transform('.$geom.', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);
-			$select = str_replace(' '.$geom.',', ' st_transform('.$geom.', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'].',', $select);
     	$sql = $select.$rest;
     }
     # order by rausnehmen

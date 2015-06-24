@@ -9,7 +9,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 		<td>&nbsp;</td>
   </tr>
   <tr> 
-		<td>Export-Datei erzeugt:&nbsp;<a href="<? echo $this->filename; ?>">herunterladen</a></td>
+		<td>Export-Datei erzeugt:&nbsp;<a target="_blank" href="<? echo $this->filename; ?>">herunterladen</a></td>
   </tr>
   <? } ?>
 	<tr> 
@@ -22,11 +22,6 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   </tr>
   <tr>
   	<td></td>
-  </tr>
-  <tr align="center"> 
-		<td colspan="4">
-			<input type="submit" name="go_plus" value="Tabelle Bereinigen">
-		</td>
   </tr>
 </table>
 <input type="hidden" name="go" value="Adressaenderungen_Export">

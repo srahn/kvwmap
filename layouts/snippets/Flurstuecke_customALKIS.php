@@ -1,4 +1,7 @@
-
+<?
+	include_once(SNIPPETS.'sachdatenanzeige_functions.php'); 
+ 	include(SNIPPETS.'generic_functions.php'); 
+?>
 <script language="JavaScript" type="text/javascript">
 
 send_selected_flurst = function(go, formnummer, wz, target){
@@ -186,7 +189,7 @@ show_all = function(count){
           if($privileg_['amtsgerichtname'] OR $privileg_['amtsgerichtnr']){
           ?>
           <tr>
-                <td align="right"><span class="fett">Amtsgericht:</span>&nbsp;</td>
+                <td align="right"><span class="fett">Amtsgericht</span>&nbsp;</td>
                 <td><?php if($privileg_['amtsgerichtnr']){echo $flst->Amtsgericht['schluessel'];} ?>&nbsp;&nbsp;<?php if($privileg_['amtsgerichtname']){ echo $flst->Amtsgericht['name'];} ?></td>
               </tr>
               <? }
@@ -194,13 +197,13 @@ show_all = function(count){
           if($privileg_['grundbuchbezirkname'] OR $privileg_['grundbuchbezirkschl']){
           ?>
               <tr>
-                <td align="right"><span class="fett">Grundbuchbezirk:</span>&nbsp;</td>
+                <td align="right"><span class="fett">Grundbuchbezirk</span>&nbsp;</td>
                 <td><?php if($privileg_['grundbuchbezirkschl']){ echo $flst->Grundbuchbezirk['schluessel'];} ?>&nbsp;&nbsp;<?php if($privileg_['grundbuchbezirkname']){ echo $flst->Grundbuchbezirk['name'];} ?></td>
               </tr>
           <? }
           if($privileg_['lagebezeichnung']){ ?>
               <tr>
-                <td align="right" valign="top"><span class="fett">Lage:&nbsp;</span></td>
+                <td align="right" valign="top"><span class="fett">Lage&nbsp;</span></td>
                 <td>
                 <?php
                 $anzStrassen=count($flst->Adresse);
@@ -645,7 +648,7 @@ show_all = function(count){
               }
               if($this->Stelle->isFunctionAllowed('Adressaenderungen')) {
                     $eigentuemer = new eigentuemer(NULL, NULL, $this->pgdatabase);
-                    $adressaenderungen =  $eigentuemer->getAdressaenderungen($Eigentuemerliste[$e]->anschrift_gml_id);
+                    $adressaenderungen =  $eigentuemer->getAdressaenderungen($Eigentuemerliste[$e]->gml_id);
                     $aendatum=substr($adressaenderungen['datum'],0,10);
               }
               if ($adressaenderungen['user_id'] != '') {
@@ -662,7 +665,7 @@ show_all = function(count){
                       }
                     }
                   if ($adressaenderungen['user_id'] != '') {
-                echo '<span class="fett"><u>Aktualisierte Adresse ('.$aendatum.' - '.$user->Name.'):</u></span><br>';
+                echo '<span class="fett"><u>Aktualisierte Anschrift ('.$aendatum.' - '.$user->Name.'):</u></span><br>';
                     #if($adressaenderungen['strasse'] == ''){
                     #  echo '&nbsp;&nbsp;<span class="fett">(Strasse leer)</span><br>';
                     #}
@@ -673,7 +676,7 @@ show_all = function(count){
                     #  echo '&nbsp;&nbsp;<span class="fett">(Name4 leer)</span><br>';
                     #}
                     #else{
-                      echo '&nbsp;&nbsp;<span class="fett">'.$adressaenderungen['postleitzahlpostzustellung'].' '.$adressaenderungen['ort_post'].'</span><br>';
+                      echo '&nbsp;&nbsp;<span class="fett">'.$adressaenderungen['postleitzahlpostzustellung'].' '.$adressaenderungen['ort_post'].' '.$adressaenderungen['ortsteil'].'</span><br>';
                     #}
                   }
                   ?>
@@ -681,14 +684,18 @@ show_all = function(count){
                   <td valign="bottom">
                   <?
                   if($this->Stelle->isFunctionAllowed('Adressaenderungen') AND $Eigentuemerliste[$e]->Nr != ''){
-                    if ($adressaenderungen['user_id'] == '') {
-                      echo '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">'; ?>&nbsp;<a target="_blank" href="index.php?go=neuer_Layer_Datensatz&close_after_saving=true&selected_layer_id=<? echo LAYER_ID_ADRESSAENDERUNGEN; ?>&attributenames[0]=ort_post&attributenames[1]=postleitzahlpostzustellung&attributenames[2]=strasse&attributenames[3]=hausnummer&attributenames[4]=gml_id&values[0]=<? echo urlencode($Eigentuemerliste[$e]->ort_post); ?>&values[1]=<? echo urlencode($Eigentuemerliste[$e]->postleitzahlpostzustellung); ?>&values[2]=<? echo urlencode($Eigentuemerliste[$e]->strasse); ?>&values[3]=<? echo urlencode($Eigentuemerliste[$e]->hausnummer); ?>&values[4]=<? echo urlencode($Eigentuemerliste[$e]->anschrift_gml_id); ?>">Adresse aktualisieren</a>
+                    if ($adressaenderungen['user_id'] == '') {											
+											echo '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">'; ?>&nbsp;<a class="buttonlink" href="javascript:ahah('index.php', 'go=neuer_Layer_Datensatz&reload=true&selected_layer_id=<? echo LAYER_ID_ADRESSAENDERUNGEN_PERSON; ?>&attributenames[0]=gml_id&attributenames[1]=hat&values[0]=<? echo urlencode($Eigentuemerliste[$e]->gml_id); ?>&values[1]=<? echo urlencode($Eigentuemerliste[$e]->anschrift_gml_id); ?>&embedded=true&fromobject=subform_ax_person_temp<? echo $e; ?>&targetlayer_id=0&targetattribute=leer', new Array(document.getElementById('subform_ax_person_temp<? echo $e; ?>')), new Array('sethtml'));"><span> Anschrift aktualisieren</span></a>
                   <?}
                     else {
-                      echo '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">'; ?>&nbsp;<a target="_blank" href="index.php?go=Layer-Suche_Suchen&close_after_saving=true&selected_layer_id=<? echo LAYER_ID_ADRESSAENDERUNGEN; ?>&value_gml_id=<? echo urlencode($Eigentuemerliste[$e]->anschrift_gml_id); ?>&operator_gml_id==&attributenames[0]=user_id&values[0]=<? echo $this->user->id ?>">Adresse &auml;ndern</a>
+											echo '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">'; ?>&nbsp;<a class="buttonlink" href="javascript:ahah('index.php', 'go=Layer-Suche_Suchen&reload=true&selected_layer_id=<? echo LAYER_ID_ADRESSAENDERUNGEN_PERSON; ?>&value_gml_id=<? echo urlencode($Eigentuemerliste[$e]->gml_id); ?>&operator_gml_id==&attributenames[0]=user_id&values[0]=<? echo $this->user->id ?>&embedded=true&fromobject=subform_ax_person_temp<? echo $e; ?>&targetlayer_id=0&targetattribute=leer', new Array(document.getElementById('subform_ax_person_temp<? echo $e; ?>')), '');">Anschrift &auml;ndern</a>
                   <?}
                   }?>
                     </td>
+									<tr>
+										<td colspan="2"><div id="subform_ax_person_temp<? echo $e; ?>" style="display:inline"></div></td>
+									</tr>
+									</tr>
                   <tr>
                   <? if($Eigentuemerliste[$e]->Anteil != ''){ ?>
                   <tr>
@@ -905,7 +912,7 @@ show_all = function(count){
 <input type="hidden" name="wz" value="">
 
 <?
-if($this->formvars['go'] != 'neu Laden' AND $this->formvars['go'] != 'Layer-Suche' AND $this->formvars['go'] != 'Layer-Suche_Suchen' AND $this->formvars['go'] != 'Sachdaten' AND $this->formvars['go'] != 'get_last_query'){
+if($this->formvars['go'] != 'neu Laden' AND $this->formvars['go'] != 'Layer-Suche' AND $this->formvars['go'] != 'Layer-Suche_Suchen' AND $this->formvars['go'] != 'Sachdaten'){
 ?>
 <input name="go" type="hidden" value="">
 <input type="hidden" name="go_backup" value="">

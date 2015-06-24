@@ -186,10 +186,18 @@ if ($neueStelle>0 AND $GUI->formvars['go']!='Abbrechen') {
     }
   }
 }
-else {
-  # Stelle_ID wurde nicht in Formular neu ausgewählt,
-  # zuletzt verwendete Stelle des Nutzers verwenden
-  $Stelle_ID=$alteStelle;
+else{
+	$Stelle_ID=$alteStelle;
+	if($GUI->user->StellenZugriff($alteStelle) == 0){
+		$Stelle_ID=$alteStelle;
+		$GUI->Fehlermeldung='Sie haben keine Berechtigung zum Zugriff auf die gewählte Stelle.';
+    if($GUI->formvars['go'] == 'OWS'){
+      $GUI->formvars['go_plus'] = 'Exception';
+    }
+    else{
+      $go='Stelle Wählen';
+    }
+	}
 }
 
 # Erzeugen eines Stellenobjektes

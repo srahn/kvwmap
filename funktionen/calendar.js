@@ -83,7 +83,7 @@ function CalendarJS() {
         },
  
         this.removeElement = function(Obj) {
-			Obj.parentNode.removeChild(Obj);
+					if(Obj.parentNode != undefined)Obj.parentNode.removeChild(Obj);
             //while( Obj.childNodes.length > 0)
             //    Obj.removeChild(Obj.childNodes[Obj.childNodes.length-1]);
             //return Obj;

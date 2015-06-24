@@ -114,7 +114,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	if($go == 'get_last_query'){
 		$GUI->last_query = $GUI->user->rolle->get_last_query();
 		$GUI->formvars['keinzurueck'] = true;
-		$go = $GUI->last_query['go'];
+		$GUI->formvars['go'] = $go = $GUI->last_query['go'];
 	}
 		
 	switch($go){
@@ -360,12 +360,6 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  case 'Adressaenderungen_Export_Exportieren' : {
 			$GUI->checkCaseAllowed('Adressaenderungen_Export');
 			$GUI->export_Adressaenderungen_exportieren();
-	  } break;
-
-	  # Eigentuemerfortführung
-	  case 'export_ESAF64_Tabelle Bereinigen' : {
-			$GUI->checkCaseAllowed('export_ESAF64');
-			$GUI->export_ESAF64_bereiningen();
 	  } break;
 	  
 	  case 'exportWMC' :{

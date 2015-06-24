@@ -24,18 +24,18 @@ function csv_export(){
       <tr>
       	<? if(!$this->formvars['oid']){ ?><td class="fett">Jagdbezirk</td><? } ?>
       	<td class="fett">Eigentümer</td>
-        <td class="fett">Anteil nach ALB</td>
-        <td class="fett">Anteil nach ALK</td>
-        <td class="fett">ALB-Fläche</td>
+				<td class="fett">geometrischer Anteil</td>
+        <td class="fett">Anteil&nbsp;nach amtl.&nbsp;Fläche&nbsp;[%]</td>
+        <td class="fett">Anteil&nbsp;nach amtl.&nbsp;Fläche&nbsp;[m²]</td>
       </tr>
       <?php 
       for ($i = 0; $i < count($this->eigentuemer)-1; $i++) { ?>
       <tr bgcolor="#E6E6F0">
       	<? if(!$this->formvars['oid']){ ?><td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><? echo $this->flurstuecke[$i]['name']; ?></td><? } ?>        
         <td width="49%"><? echo $this->eigentuemer[$i]['eigentuemer']; ?></td>
-        <td width="17%"><? echo round($this->eigentuemer[$i]['albflaeche']*100/$this->eigentuemer['albsumme'], 2); ?> %</td>
-        <td width="17%"><? echo $this->eigentuemer[$i]['anteil_alk']; ?> %</td>
-        <td width="17%"><? echo $this->eigentuemer[$i]['albflaeche']; ?></td>
+				<td><? echo $this->eigentuemer[$i]['anteil_alk']; ?> %</td>
+        <td><? echo round($this->eigentuemer[$i]['albflaeche']*100/$this->eigentuemer['albsumme'], 2); ?> %</td>
+        <td><? echo $this->eigentuemer[$i]['albflaeche']; ?> m²</td>
       </tr>
       <?php  
       }

@@ -421,6 +421,7 @@
 						$layer->setMetaData('ows_auth_username', $layerset[$i]['wms_auth_username']);
 						$layer->setMetaData('ows_auth_password', $layerset[$i]['wms_auth_password']);
 						$layer->setMetaData('ows_auth_type', 'basic');
+						$layer->setMetaData('wms_exceptions_format', 'application/vnd.ogc.se_xml');
 						
 						$layer->set('dump', 0);
 						$layer->set('type',$layerset[$i]['Datentyp']);
@@ -1171,6 +1172,8 @@
 						if($layer['requires'] == ''){
 							$legend .= '<tr><td valign="top">';
 							if($layer['queryable'] == 1 AND !$this->formvars['nurFremdeLayer']){
+								// die sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen, welches immer den value 0 hat, damit sie beim Neuladen ausgeschaltet werden können, denn eine nicht angehakte Checkbox/Radiobutton wird ja nicht übergeben
+								$legend .=  '<input type="hidden" name="qLayer'.$layer['Layer_ID'].'" value="0">';
 								$legend .=  '<input id="qLayer'.$layer['Layer_ID'].'"';
 								
 								if($this->user->rolle->singlequery){			# singlequery-Modus
@@ -1535,6 +1538,38 @@
     $rs=mysql_fetch_array($query);
     return $rs['stelle_id'];
   }
+	function StellenZugriff($stelle_id) {
+		$this->Stellen=$this->getStellen($stelle_id);
+		if (count($this->Stellen['ID'])>0) {
+			return 1;
+		}
+		return 0;
+	}
+	function getStellen($stelle_ID) {
+		$sql ='SELECT s.ID,s.Bezeichnung FROM stelle AS s,rolle AS r';
+		$sql.=' WHERE s.ID=r.stelle_id AND r.user_id='.$this->id;
+		if ($stelle_ID>0) {
+			$sql.=' AND s.ID='.$stelle_ID;
+		}
+		# Zeiteinschränkung
+		$sql.=' AND (';
+		# Zeiteinschränkung wird berücksichtigt
+		$sql.='("'.date('Y-m-d h:i:s').'" >= s.start AND "'.date('Y-m-d h:i:s').'" <= s.stop)';
+		$sql.=' OR ';
+		# Zeiteinschränkung wird nicht berücksichtigt.
+		$sql.='(s.start="0000-00-00 00:00:00" AND s.stop="0000-00-00 00:00:00")';
+		$sql.=')';
+		$sql.=' ORDER BY Bezeichnung';
+		#echo $sql;
+		$this->debug->write("<p>file:users.php class:user->getStellen - Abfragen der Stellen die der User einnehmen darf:<br>".$sql,4);
+		$query=mysql_query($sql,$this->database->dbConn);
+		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+		while($rs=mysql_fetch_array($query)) {
+			$stellen['ID'][]=$rs['ID'];
+			$stellen['Bezeichnung'][]=$rs['Bezeichnung'];
+		}
+		return $stellen;
+	}
 	function clientIpIsValide($remote_addr) {
     # Prüfen ob die übergebene IP Adresse zu den für den Nutzer eingetragenen Adressen passt
     $ips=explode(';',$this->ips);

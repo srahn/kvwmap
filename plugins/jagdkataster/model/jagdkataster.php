@@ -152,7 +152,7 @@ class jagdkataster {
   	if($valid[0] == 't'){
 			if($oid != ''){
 				$sql = "UPDATE jagdkataster.jagdbezirke SET";
-				if($umring != ''){$sql.= " the_geom = st_transform(st_geometryfromtext('".$umring."', ".$this->clientepsg."), ".$this->layerepsg."),";}
+				if($umring != ''){$sql.= " the_geom = st_multi(st_transform(st_geometryfromtext('".$umring."', ".$this->clientepsg."), ".$this->layerepsg.")),";}
 				$sql.= " name = '".$name."',";
 				$sql.= " flaeche = ".(float)$flaeche.",";
 				$sql.= " jb_zuordnung = '".$jb_zuordnung."',";
@@ -164,7 +164,7 @@ class jagdkataster {
 			else{
 				if($umring != ''){
 					$sql = "INSERT INTO jagdkataster.jagdbezirke (id, the_geom, name, art, flaeche, jb_zuordnung, status, verzicht)";
-					$sql.= " VALUES('".$nummer."', st_transform(st_geometryfromtext('".$umring."', ".$this->clientepsg."), ".$this->layerepsg."), '".$name."', '".$art."', ".$flaeche.", '".$jb_zuordnung."', '".$status."', '".$verzicht."')";
+					$sql.= " VALUES('".$nummer."', st_multi(st_transform(st_geometryfromtext('".$umring."', ".$this->clientepsg."), ".$this->layerepsg.")), '".$name."', '".$art."', ".$flaeche.", '".$jb_zuordnung."', '".$status."', '".$verzicht."')";
 				}
 				else{
 					$sql = "INSERT INTO jagdkataster.jagdbezirke (id, name, art, flaeche, jb_zuordnung, status, verzicht)";
@@ -255,6 +255,7 @@ class jagdkataster {
 		$ret = $this->getIntersectedFlurstWithJagdbezirke($oids);
 		while($rs = pg_fetch_array($ret[1])){
 			$rs['anteil'] = round($rs['schnittflaeche'] * 100 / $rs['flurstflaeche'], 2);
+			$rs['schnittflaeche'] = $rs['schnittflaeche'] / $rs['flurstflaeche'] * $rs['albflaeche'];
 			$rs['albflaeche'] = round($rs['albflaeche'], 2);
       $rs['zaehlernenner'] = $rs['zaehler'];
 			if($rs['nenner'] != '')$rs['zaehlernenner'] .= '/'.$rs['nenner'];
@@ -340,7 +341,7 @@ class jagdkataster {
 	}
 	
 	function getEigentuemerListeFromJagdbezirke($oids){
-		$sql = "SELECT round((st_area_utm(st_union(the_geom_inter), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")*100/j_flaeche)::numeric, 2) as anteil_alk, round((sum(flaeche)*(st_area_utm(st_memunion(the_geom_inter), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")/st_area_utm(st_memunion(the_geom), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")))::numeric, 2) AS albflaeche, eigentuemer";
+		$sql = "SELECT round((st_area_utm(st_union(the_geom_inter), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")*100/j_flaeche)::numeric, 2) as anteil_alk, round((sum(flaeche)*(st_area_utm(st_memunion(the_geom_inter), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")/st_area_utm(st_memunion(the_geom), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")))::numeric, 1) AS albflaeche, eigentuemer";
 		$sql.= " FROM(SELECT distinct st_area_utm(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.") as j_flaeche, f.amtlicheflaeche as flaeche, array_to_string(array(";
 		$sql.= "SELECT distinct array_to_string(array[p.nachnameoderfirma, p.vorname], ' ') as name ";
 		$sql.= "FROM alkis.ax_flurstueck ff ";		
@@ -350,7 +351,7 @@ class jagdkataster {
 		$sql.= "LEFT JOIN alkis.ax_namensnummer n ON n.istbestandteilvon = g.gml_id ";
 		$sql.= "LEFT JOIN alkis.ax_namensnummer_eigentuemerart w ON w.wert = n.eigentuemerart ";
 		$sql.= "LEFT JOIN alkis.ax_person p ON n.benennt = p.gml_id ";
-		$sql.= " WHERE f.flurstueckskennzeichen = ff.flurstueckskennzeichen";
+		$sql.= " WHERE n.laufendenummernachdin1421 IS NOT NULL AND f.flurstueckskennzeichen = ff.flurstueckskennzeichen ";
 		$sql.= $this->database->build_temporal_filter(array('ff', 's', 'g', 'b', 'n', 'p'));
 		$sql.= " order by name),' || ') as eigentuemer,";
 		$sql.= " st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.")) AS the_geom_inter, f.wkb_geometry as the_geom";		

@@ -72,7 +72,7 @@ function csv_export(){
         <td class="fett" style="border-top:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">Flur</td>
         <td class="fett" style="border-top:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">Zähler/Nenner</td>
         <td class="fett" style="border-top:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">Eigentümer</td>
-        <td class="fett" style="border-top:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">Flurstücksfläche(ALB)</td>
+        <td class="fett" style="border-top:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">amtl.&nbsp;Fläche</td>
         <td class="fett" style="border-top:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">Anteil am Jagdbezirk</td>
       </tr>
       <?php 

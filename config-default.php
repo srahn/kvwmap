@@ -361,7 +361,9 @@ define("LAYERNAME_GEMARKUNGEN",'Gemeinde');
 define("LAYERNAME_GEMEINDEN",'Gemarkung');
 define("LAYERNAME_FLUR",'Flur');
 define("LAYERNAME_BODENRICHTWERTE",'BORIS');	# Version 1.7.3
-define("LAYER_ID_ADRESSAENDERUNGEN", '162');  # Version 1.6.7
+define("LAYER_ID_ADRESSAENDERUNGEN", '162');  # Version 1.6.7		# in Version 2.1 gelöscht
+define("LAYER_ID_ADRESSAENDERUNGEN_PERSON", '827');  						# Version 2.1
+define("LAYER_ID_ADRESSAENDERUNGEN_ANSCHRIFT", '162');  				# Version 2.1
 define("LAYER_IDS_DOP", '79,80');							# Version 1.8.0
 define("LAYER_ID_JAGDBEZIRKE", '432');				# Version 1.10.0
 define("LAYER_ID_SCHNELLSPRUNG", 749);				# Version 2.0

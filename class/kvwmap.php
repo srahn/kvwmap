@@ -202,6 +202,8 @@ class GUI {
 						if($layer['requires'] == ''){
 							$legend .= '<tr><td valign="top">';
 							if($layer['queryable'] == 1 AND !$this->formvars['nurFremdeLayer']){
+								// die sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen, welches immer den value 0 hat, damit sie beim Neuladen ausgeschaltet werden können, denn eine nicht angehakte Checkbox/Radiobutton wird ja nicht übergeben
+								$legend .=  '<input type="hidden" name="qLayer'.$layer['Layer_ID'].'" value="0">';
 								$legend .=  '<input id="qLayer'.$layer['Layer_ID'].'"';
 								
 								if($this->user->rolle->singlequery){			# singlequery-Modus
@@ -806,6 +808,7 @@ class GUI {
 						$layer->setMetaData('ows_auth_username', $layerset[$i]['wms_auth_username']);
 						$layer->setMetaData('ows_auth_password', $layerset[$i]['wms_auth_password']);
 						$layer->setMetaData('ows_auth_type', 'basic');
+						$layer->setMetaData('wms_exceptions_format', 'application/vnd.ogc.se_xml');
 						
 						$layer->set('dump', 0);
 						$layer->set('type',$layerset[$i]['Datentyp']);
@@ -1987,7 +1990,7 @@ class GUI {
 		else{
 			if($count == 1)$count = 2;		# weil ein select-Feld bei size 1 anders funktioniert
 			pg_result_seek($ret[1], 0);
-			echo'<select size="'.$count.'" style="width: 250px;padding:4px; margin:-2px -17px -4px -4px;" onclick="document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'none\';document.getElementById(\''.$this->formvars['field_id'].'\').value=this.value;document.getElementById(\''.$this->formvars['field_id'].'_output\').value=this.options[this.selectedIndex].text">';				
+			echo'<select size="'.$count.'" style="width: 450px;padding:4px; margin:-2px -17px -4px -4px;" onclick="document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'none\';document.getElementById(\''.$this->formvars['field_id'].'\').value=this.value;document.getElementById(\''.$this->formvars['field_id'].'_output\').value=this.options[this.selectedIndex].text">';				
 			while($rs=pg_fetch_array($ret[1])) {
 				echo '<option onmouseover="this.selected = true;"  value="'.$rs['value'].'">'.$rs['output'].'</option>';
 			}
@@ -2708,16 +2711,10 @@ class GUI {
 		include_(CLASSPATH.'adressaenderungen.php');
     $adressaenderungen = new adressaenderungen($this->pgdatabase);
     $adressaenderungen->delete_old_entries();
-    $adressaenderungen->read_eigentuemer_data();
+    $adressaenderungen->read_anschriften();
+		$adressaenderungen->read_personen();
     $this->filename = $adressaenderungen->export_into_file();
     $this->export_Adressaenderungen();
-  }
-
-  function export_ESAF64_bereiningen(){
-		include_(CLASSPATH.'esaf.php');
-    $esaf = new esaf($this->pgdatabase);
-    $esaf->delete_old_entries();
-    $this->export_ESAF64();
   }
   
   function exportWMC(){
@@ -4532,18 +4529,19 @@ class GUI {
   }
 
   function createlegend($size){
+    $this->map->set('resolution',72);      
     $this->map->legend->set("keysizex", $size*1.8*$this->map_factor);
     $this->map->legend->set("keysizey", $size*1.8*$this->map_factor);
-    $this->map->legend->set("keyspacingx", $size*4*$this->map_factor);
+    $this->map->legend->set("keyspacingx", $size*$this->map_factor);
     $this->map->legend->set("keyspacingy", $size*0.83*$this->map_factor);
     $this->map->legend->label->set("size", $size*$this->map_factor);
 		$this->map->legend->label->set("type", 'truetype');
 		$this->map->legend->label->set("font", 'arial');
-    $this->map->legend->label->set("position", MS_LR);
-    $this->map->legend->label->set("offsetx", $size*-3.3*$this->map_factor);
-    $this->map->legend->label->set("offsety", -1*$size*$this->map_factor);
+    $this->map->legend->label->set("position", MS_C);
+    #$this->map->legend->label->set("offsetx", $size*-5*$this->map_factor);
+    #$this->map->legend->label->set("offsety", -1*$size*$this->map_factor);
     $this->map->legend->label->color->setRGB(0,0,0);
-    $this->map->legend->outlinecolor->setRGB(0,0,0);
+    #$this->map->legend->outlinecolor->setRGB(0,0,0);
     $legendmapDB = new db_mapObj($this->Stelle->id, $this->user->id);
     $legendmapDB->nurAktiveLayer = 1;
     $layerset = $legendmapDB->read_Layer(1);
@@ -4565,10 +4563,7 @@ class GUI {
           if($layerset[$i]['showclasses']){
             for($j = 0; $j < $layer->numclasses; $j++){
               $class = $layer->getClass($j);
-              $draw = true;
-              if($class->name == ''){
-                $class->set('name', ' ');
-              }
+              if($class->name != '')$draw = true;				
             }
           }
         }
@@ -5941,8 +5936,8 @@ class GUI {
     $this->titel='WMS Map-Datei erfolgreich exportiert';
     $this->main="ows_exportiert.php";
     # laden der aktuellen Karteneinstellungen
-    $this->formvars['nurAktiveLayer'] = true;
-    $this->class_load_level = 2;    # die Klassen von allen Layern laden
+    if($this->formvars['nurAktiveLayer'] == 1)$this->class_load_level = 1;    # die Klassen von aktiven Layern laden
+		else $this->class_load_level = 2;    # die Klassen von allen Layern laden
     $this->loadMap('DataBase');
     # setzen der WMS-Metadaten
     $this->map->setMetaData("ows_title",$this->formvars['ows_title']);
@@ -5958,6 +5953,7 @@ class GUI {
     $this->wms_onlineresource=MAPSERV_CGI_BIN."?map=".WMS_MAPFILE_PATH.$this->formvars['mapfile_name']."&";
     $this->map->setMetaData("wms_onlineresource",$this->wms_onlineresource);
     $this->map->setMetaData("ows_srs",OWS_SRS);
+		$this->map->setMetaData("wms_enable_request",'*');
     $this->saveMap(WMS_MAPFILE_PATH.$this->formvars['mapfile_name']);
     $getMapRequestExample=$this->wms_onlineresource.'request=getMap&VERSION='.SUPORTED_WMS_VERSION;
     $getMapRequestExample.='&layers='.$this->mapDB->Layer[0]['Name'];
@@ -10862,10 +10858,15 @@ class GUI {
   function spatial_processing(){
 		include_(CLASSPATH.'spatial_processor.php');
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-    $layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-    if($layerdb == NULL){
-      $layerdb = $this->pgdatabase;
-    }
+		if(in_array($this->formvars['operation'], array('area', 'length'))){
+			$layerdb = $this->pgdatabase;				# wegen st_area_utm und st_length_utm die eigene Datenbank nehmen
+		}
+		else{
+			$layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+			if($layerdb == NULL){
+				$layerdb = $this->pgdatabase;
+			}
+		}
     $this->processor = new spatial_processor($this->user->rolle, $this->database, $layerdb);
     $this->processor->process_query($this->formvars);
   }
@@ -13583,7 +13584,7 @@ class db_mapObj{
 			$sql .= chr(10);
 		}
 		for($i = 0; $i < count($layer_ids); $i++){
-			$sql .= 'UPDATE layer_attributes SET options = REPLACE(options, \''.$layer_ids[$i].'\', @last_layer_id'.$layer_ids[$i].') WHERE layer_id IN(@last_layer_id'.implode(', @last_layer_id', $layer_ids).') AND form_element_type IN (\'SubFormPK\', \'SubFormFK\', \'SubFormEmbeddedPK\');'.chr(10);
+			$sql .= 'UPDATE layer_attributes SET options = REPLACE(options, \''.$layer_ids[$i].'\', @last_layer_id'.$layer_ids[$i].') WHERE layer_id IN(@last_layer_id'.implode(', @last_layer_id', $layer_ids).') AND form_element_type IN (\'SubFormPK\', \'SubFormFK\', \'SubFormEmbeddedPK\', \'Autovervollständigungsfeld\', \'Auswahlfeld\');'.chr(10);
 		}
 		$filename = rand(0, 1000000).'.sql';
 		$fp = fopen(IMAGEPATH.$filename, 'w');
@@ -15054,9 +15055,9 @@ class Document {
   }
 
   function delete_frame($selected_frame_id){
- //   $sql ="DELETE FROM druckrahmen WHERE id = ".$selected_frame_id;
- //   $this->debug->write("<p>file:kvwmap class:Document->delete_frame :",4);
- //   $this->database->execSQL($sql,4, 1);
+    $sql ="DELETE FROM druckrahmen WHERE id = ".$selected_frame_id;
+    $this->debug->write("<p>file:kvwmap class:Document->delete_frame :",4);
+    $this->database->execSQL($sql,4, 1);
     $sql ="DELETE FROM druckrahmen2stelle WHERE druckrahmen_id = ".$selected_frame_id;
     $this->debug->write("<p>file:kvwmap class:Document->delete_frame :",4);
     $this->database->execSQL($sql,4, 1);

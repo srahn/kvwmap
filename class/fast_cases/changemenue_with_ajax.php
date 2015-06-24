@@ -211,6 +211,38 @@
     $rs=mysql_fetch_array($query);
     return $rs['stelle_id'];
   }
+	function StellenZugriff($stelle_id) {
+		$this->Stellen=$this->getStellen($stelle_id);
+		if (count($this->Stellen['ID'])>0) {
+			return 1;
+		}
+		return 0;
+	}
+	function getStellen($stelle_ID) {
+		$sql ='SELECT s.ID,s.Bezeichnung FROM stelle AS s,rolle AS r';
+		$sql.=' WHERE s.ID=r.stelle_id AND r.user_id='.$this->id;
+		if ($stelle_ID>0) {
+			$sql.=' AND s.ID='.$stelle_ID;
+		}
+		# Zeiteinschränkung
+		$sql.=' AND (';
+		# Zeiteinschränkung wird berücksichtigt
+		$sql.='("'.date('Y-m-d h:i:s').'" >= s.start AND "'.date('Y-m-d h:i:s').'" <= s.stop)';
+		$sql.=' OR ';
+		# Zeiteinschränkung wird nicht berücksichtigt.
+		$sql.='(s.start="0000-00-00 00:00:00" AND s.stop="0000-00-00 00:00:00")';
+		$sql.=')';
+		$sql.=' ORDER BY Bezeichnung';
+		#echo $sql;
+		$this->debug->write("<p>file:users.php class:user->getStellen - Abfragen der Stellen die der User einnehmen darf:<br>".$sql,4);
+		$query=mysql_query($sql,$this->database->dbConn);
+		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+		while($rs=mysql_fetch_array($query)) {
+			$stellen['ID'][]=$rs['ID'];
+			$stellen['Bezeichnung'][]=$rs['Bezeichnung'];
+		}
+		return $stellen;
+	}
 	function clientIpIsValide($remote_addr) {
     # Prüfen ob die übergebene IP Adresse zu den für den Nutzer eingetragenen Adressen passt
     $ips=explode(';',$this->ips);
@@ -322,59 +354,61 @@
       $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4);
       return 0;
     }
-    $rs=mysql_fetch_array($query);
-    $this->oGeorefExt=ms_newRectObj();
-    $this->oGeorefExt->setextent($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
-    $this->nImageWidth=$rs['nImageWidth'];
-    $this->nImageHeight=$rs['nImageHeight'];
-    $this->mapsize=$this->nImageWidth.'x'.$this->nImageHeight;
-    @$this->pixwidth=($rs['maxx']-$rs['minx'])/$rs['nImageWidth'];
-    @$this->pixheight=($rs['maxy']-$rs['miny'])/$rs['nImageHeight'];
-    $this->pixsize=($this->pixwidth+$this->pixheight)/2;
-    $this->nZoomFactor=$rs['nZoomFactor'];
-    $this->epsg_code=$rs['epsg_code'];
-    $this->epsg_code2=$rs['epsg_code2'];
-    $this->coordtype=$rs['coordtype'];
-    $this->last_time_id=$rs['last_time_id'];
-    $this->gui=$rs['gui'];
-    $this->language=$rs['language'];
-		$language = $this->language;
-    $this->hideMenue=$rs['hidemenue'];
-    $this->hideLegend=$rs['hidelegend'];
-    $this->fontsize_gle=$rs['fontsize_gle'];
-    $this->highlighting=$rs['highlighting'];
-    $this->scrollposition=$rs['scrollposition'];
-    $this->result_color=$rs['result_color'];
-    $this->always_draw=$rs['always_draw'];
-    $this->runningcoords=$rs['runningcoords'];
-		$this->singlequery=$rs['singlequery'];
-		$this->querymode=$rs['querymode'];
-		$this->geom_edit_first=$rs['geom_edit_first'];		
-		$this->overlayx=$rs['overlayx'];
-		$this->overlayy=$rs['overlayy'];
-		$this->instant_reload=$rs['instant_reload'];
-		$this->menu_auto_close=$rs['menu_auto_close'];
-		if($rs['hist_timestamp'] != ''){
-			$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');			# der wird zur Anzeige des Timestamps benutzt
-			rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');	# der hat die Form, wie der timestamp in der PG-DB steht und wird für die Abfragen benutzt
-		}
-		else rolle::$hist_timestamp = $this->hist_timestamp = '';
-    $buttons = explode(',', $rs['buttons']);
-    $this->back = in_array('back', $buttons);
-    $this->forward = in_array('forward', $buttons);
-    $this->zoomin = in_array('zoomin', $buttons);
-    $this->zoomout = in_array('zoomout', $buttons);
-    $this->zoomall = in_array('zoomall', $buttons);
-    $this->recentre = in_array('recentre', $buttons);
-    $this->jumpto = in_array('jumpto', $buttons);
-    $this->query = in_array('query', $buttons);
-    $this->queryradius = in_array('queryradius', $buttons);
-    $this->polyquery = in_array('polyquery', $buttons);
-    $this->touchquery = in_array('touchquery', $buttons);
-    $this->measure = in_array('measure', $buttons);
-    $this->freepolygon = in_array('freepolygon', $buttons);
-    $this->freetext = in_array('freetext', $buttons);
-    $this->freearrow = in_array('freearrow', $buttons);
-    return 1;
+		if(mysql_num_rows($query) > 0){
+			$rs=mysql_fetch_assoc($query);
+			$this->oGeorefExt=ms_newRectObj();
+			$this->oGeorefExt->setextent($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
+			$this->nImageWidth=$rs['nImageWidth'];
+			$this->nImageHeight=$rs['nImageHeight'];
+			$this->mapsize=$this->nImageWidth.'x'.$this->nImageHeight;
+			@$this->pixwidth=($rs['maxx']-$rs['minx'])/$rs['nImageWidth'];
+			@$this->pixheight=($rs['maxy']-$rs['miny'])/$rs['nImageHeight'];
+			$this->pixsize=($this->pixwidth+$this->pixheight)/2;
+			$this->nZoomFactor=$rs['nZoomFactor'];
+			$this->epsg_code=$rs['epsg_code'];
+			$this->epsg_code2=$rs['epsg_code2'];
+			$this->coordtype=$rs['coordtype'];
+			$this->last_time_id=$rs['last_time_id'];
+			$this->gui=$rs['gui'];
+			$this->language=$rs['language'];
+			$language = $this->language;
+			$this->hideMenue=$rs['hidemenue'];
+			$this->hideLegend=$rs['hidelegend'];
+			$this->fontsize_gle=$rs['fontsize_gle'];
+			$this->highlighting=$rs['highlighting'];
+			$this->scrollposition=$rs['scrollposition'];
+			$this->result_color=$rs['result_color'];
+			$this->always_draw=$rs['always_draw'];
+			$this->runningcoords=$rs['runningcoords'];
+			$this->singlequery=$rs['singlequery'];
+			$this->querymode=$rs['querymode'];
+			$this->geom_edit_first=$rs['geom_edit_first'];		
+			$this->overlayx=$rs['overlayx'];
+			$this->overlayy=$rs['overlayy'];
+			$this->instant_reload=$rs['instant_reload'];
+			$this->menu_auto_close=$rs['menu_auto_close'];
+			if($rs['hist_timestamp'] != ''){
+				$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');			# der wird zur Anzeige des Timestamps benutzt
+				rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');	# der hat die Form, wie der timestamp in der PG-DB steht und wird für die Abfragen benutzt
+			}
+			else rolle::$hist_timestamp = $this->hist_timestamp = '';
+			$buttons = explode(',', $rs['buttons']);
+			$this->back = in_array('back', $buttons);
+			$this->forward = in_array('forward', $buttons);
+			$this->zoomin = in_array('zoomin', $buttons);
+			$this->zoomout = in_array('zoomout', $buttons);
+			$this->zoomall = in_array('zoomall', $buttons);
+			$this->recentre = in_array('recentre', $buttons);
+			$this->jumpto = in_array('jumpto', $buttons);
+			$this->query = in_array('query', $buttons);
+			$this->queryradius = in_array('queryradius', $buttons);
+			$this->polyquery = in_array('polyquery', $buttons);
+			$this->touchquery = in_array('touchquery', $buttons);
+			$this->measure = in_array('measure', $buttons);
+			$this->freepolygon = in_array('freepolygon', $buttons);
+			$this->freetext = in_array('freetext', $buttons);
+			$this->freearrow = in_array('freearrow', $buttons);
+			return 1;
+		}else return 0;
   }
 }?>

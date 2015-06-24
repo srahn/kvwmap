@@ -824,7 +824,7 @@ class pgdatabase {
   function getBuchungenFromGrundbuch($FlurstKennz,$Bezirk,$Blatt,$hist_alb = false, $fiktiv = false) {
   	// max(namensnummer.beschriebderrechtsgemeinschaft) weil es bei einer Buchung mit Zusatz zum Eigentï¿½mer einen weiteren Eintrag mit diesem Zusatz in ax_namensnummer gibt
   	// ohne Aggregation wï¿½rden sonst 2 Buchungen von der Abfrage zurï¿½ckgeliefert werden 
-    $sql ="set enable_seqscan = off;SELECT DISTINCT gem.bezeichnung as gemarkungsname, b.schluesselgesamt AS bezirk, g.buchungsblattnummermitbuchstabenerweiterung AS blatt, s.gml_id, s.laufendenummer AS bvnr, s.buchungsart, art.bezeichner as bezeichnung, f.flurstueckskennzeichen as flurstkennz, s.zaehler::text||'/'||s.nenner::text as anteil, s.nummerimaufteilungsplan as auftplannr, s.beschreibungdessondereigentums as sondereigentum, n.beschriebderrechtsgemeinschaft as zusatz_eigentuemer "; 
+    $sql ="set enable_seqscan = off;SELECT DISTINCT gem.bezeichnung as gemarkungsname, b.schluesselgesamt AS bezirk, g.buchungsblattnummermitbuchstabenerweiterung AS blatt, s.gml_id, s.laufendenummer::integer AS bvnr, s.buchungsart, art.bezeichner as bezeichnung, f.flurstueckskennzeichen as flurstkennz, s.zaehler::text||'/'||s.nenner::text as anteil, s.nummerimaufteilungsplan as auftplannr, s.beschreibungdessondereigentums as sondereigentum, n.beschriebderrechtsgemeinschaft as zusatz_eigentuemer "; 
 		if($FlurstKennz!='') {
 			if($hist_alb) $sql.="FROM alkis.ax_historischesflurstueckohneraumbezug f ";
 			else $sql.="FROM alkis.ax_flurstueck f ";  
@@ -861,7 +861,7 @@ class pgdatabase {
       $sql.=" AND f.flurstueckskennzeichen='".$FlurstKennz."'";
     }
 		if(!$hist_alb) $sql.= $this->build_temporal_filter(array('f', 's', 'g', 'b'));
-    $sql.=" ORDER BY b.schluesselgesamt,g.buchungsblattnummermitbuchstabenerweiterung,s.laufendenummer,f.flurstueckskennzeichen";
+    $sql.=" ORDER BY b.schluesselgesamt,g.buchungsblattnummermitbuchstabenerweiterung,s.laufendenummer::integer,f.flurstueckskennzeichen";
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
@@ -1439,7 +1439,7 @@ class pgdatabase {
   }
   
   function getEigentuemerliste($FlurstKennz,$Bezirk,$Blatt,$BVNR) {
-    $sql = "SELECT distinct n.laufendenummernachdin1421 AS namensnr, p.nachnameoderfirma, p.vorname, p.akademischergrad, p.namensbestandteil, p.geburtsname, p.geburtsdatum::date, anschrift.gml_id as anschrift_gml_id, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, w.bezeichner as Art, n.zaehler||'/'||n.nenner as anteil ";
+    $sql = "SELECT distinct n.laufendenummernachdin1421 AS namensnr, p.gml_id, p.nachnameoderfirma, p.vorname, p.akademischergrad, p.namensbestandteil, p.geburtsname, p.geburtsdatum::date, anschrift.gml_id as anschrift_gml_id, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, anschrift.ortsteil, w.bezeichner as Art, n.zaehler||'/'||n.nenner as anteil ";
 		$sql.= "FROM alkis.ax_buchungsstelle s ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
@@ -1462,7 +1462,7 @@ class pgdatabase {
     $sql.= " ORDER BY namensnr;";
     #echo $sql.'<br><br>';
     $ret=$this->execSQL($sql, 4, 0);
-    if ($ret[0] OR pg_num_rows($ret[1])==0) { return $ret; }
+    if ($ret[0] OR pg_num_rows($ret[1])==0) { return; }
     while ($rs=pg_fetch_array($ret[1])) {
       $Grundbuch = new grundbuch("","",$this->debug);
       
@@ -1478,8 +1478,8 @@ class pgdatabase {
       
       $Eigentuemer = new eigentuemer($Grundbuch,$rs['namensnr']);
 
+			$Eigentuemer->gml_id = $rs['gml_id'];
       $Eigentuemer->lfd_nr=$rs['lfd_nr_name'];
-
       $Eigentuemer->Name[0]=$rs['nachnameoderfirma'];
       if($rs['vorname'] != '')$Eigentuemer->Name[0] .= ', '.$rs['vorname']; 
 			if($rs['namensbestandteil'] != '')$Eigentuemer->Name[0] .= ', '.$rs['namensbestandteil']; 
@@ -1487,9 +1487,10 @@ class pgdatabase {
       $Eigentuemer->Name[1] = $rs['geburtsdatum'];
 			if($rs['geburtsname'] != '')$Eigentuemer->Name[1] = 'geb. '.$rs['geburtsname'].' '.$Eigentuemer->Name[1];
       $Eigentuemer->Name[2] = $rs['strasse'].' '.$rs['hausnummer'];
-      $Eigentuemer->Name[3] = $rs['postleitzahlpostzustellung'].' '.$rs['ort_post'];
+      $Eigentuemer->Name[3] = $rs['postleitzahlpostzustellung'].' '.$rs['ort_post'].' '.$rs['ortsteil'];
 			$Eigentuemer->postleitzahlpostzustellung = $rs['postleitzahlpostzustellung'];
 			$Eigentuemer->ort_post = $rs['ort_post'];
+			$Eigentuemer->ortsteil = $rs['ortsteil'];
 			$Eigentuemer->strasse = $rs['strasse'];
 			$Eigentuemer->hausnummer = $rs['hausnummer'];
       $Eigentuemer->Anteil=$rs['anteil'];

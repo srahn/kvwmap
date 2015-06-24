@@ -190,7 +190,7 @@
 									}break;
 
 									case 'SubFormEmbeddedPK' : {
-										$datapart .= '<div id="'.$name.'_'.$k.'"><img src="'.GRAPHICSPATH.'leer.gif" ';
+										$datapart .= '<div id="'.$layer_id.'_'.$name.'_'.$k.'"><img src="'.GRAPHICSPATH.'leer.gif" ';
 										if($this->new_entry != true AND $no_query != true){
 											$datapart .= 'onload="ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
 															$data = '';
@@ -207,8 +207,8 @@
 															if($attributes['embedded'][$j] == true){
 																$datapart .= '&embedded=true';
 															}
-															$datapart .= '&targetobject='.$name.'_'.$k.'&targetlayer_id='.$layer_id.'&targetattribute='.$name;
-															$datapart .= '\', new Array(document.getElementById(\''.$name.'_'.$k.'\')), new Array(\'sethtml\'));
+															$datapart .= '&targetobject='.$layer_id.'_'.$name.'_'.$k.'&targetlayer_id='.$layer_id.'&targetattribute='.$name;
+															$datapart .= '\', new Array(document.getElementById(\''.$layer_id.'_'.$name.'_'.$k.'\')), new Array(\'sethtml\'));
 														"';
 										}
 										$datapart .= '></div><table width="98%" cellspacing="0" cellpadding="2"><tr style="border: none"><td width="100%" align="right">';
@@ -219,7 +219,7 @@
 											}
 										}
 										if($this->new_entry != true AND $no_query != true){
-											$datapart .= '<a id="show_all_'.$name.'_'.$k.'" style="font-size: '.$linksize.'px;display:none" class="buttonlink" href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
+											$datapart .= '<a id="show_all_'.$layer_id.'_'.$name.'_'.$k.'" style="font-size: '.$linksize.'px;display:none" class="buttonlink" href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
 											for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
 												$datapart .= '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$dataset[$attributes['subform_pkeys'][$j][$p]];
 												$datapart .= '&operator_'.$attributes['subform_pkeys'][$j][$p].'==';
@@ -237,7 +237,7 @@
 													}
 													$data .= '&preview_attribute='.$attributes['preview_attribute'][$j];
 													$datapart .= '&data='.str_replace('&', '<und>', $data);
-													$datapart .= '&selected_layer_id='.$attributes['subform_layer_id'][$j].'&embedded=true&fromobject=subform'.$layer_id.'_'.$k.'_'.$j.'&targetobject='.$name.'_'.$k.'&targetlayer_id='.$layer_id.'&targetattribute='.$name.'\', new Array(document.getElementById(\'subform'.$layer_id.'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'));clearsubforms('.$attributes['subform_layer_id'][$j].');"><span>'.$strNewEmbeddedPK.'</span></a>';
+													$datapart .= '&selected_layer_id='.$attributes['subform_layer_id'][$j].'&embedded=true&fromobject=subform'.$layer_id.'_'.$k.'_'.$j.'&targetobject='.$layer_id.'_'.$name.'_'.$k.'&targetlayer_id='.$layer_id.'&targetattribute='.$name.'\', new Array(document.getElementById(\'subform'.$layer_id.'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'));clearsubforms('.$attributes['subform_layer_id'][$j].');"><span>'.$strNewEmbeddedPK.'</span></a>';
 													$datapart .= '<div style="display:inline" id="subform'.$layer_id.'_'.$k.'_'.$j.'"></div>';
 												}
 												else{

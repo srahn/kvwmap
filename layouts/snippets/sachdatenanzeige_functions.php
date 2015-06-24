@@ -85,9 +85,6 @@ include('funktionen/input_check_functions.php');
   		}
   	}
   	currentform.go.value = 'Sachdaten_speichern';
-  	<? if($this->formvars['close_after_saving']){ ?>
-  		currentform.close_window.value='true';
-  	<?}?>
 		document.getElementById('loader').style.display = '';
 		setTimeout('document.getElementById(\'loaderimg\').src=\'graphics/ajax-loader.gif\'', 50);
   	overlay_submit(currentform, false);
@@ -117,9 +114,6 @@ include('funktionen/input_check_functions.php');
   		}
   	}
   	currentform.go.value = 'neuer_Layer_Datensatz_speichern';
-  	<? if($this->formvars['close_after_saving']){ ?>
-  		currentform.close_window.value='true';
-  	<?}?> 
   	overlay_submit(currentform, false);
 	}
 
@@ -139,7 +133,7 @@ include('funktionen/input_check_functions.php');
 		}
 	}
 
-	subsave_data = function(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data){
+	subsave_data = function(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data, reload){
 		// layer_id ist die von dem Layer, in dem der Datensatz gespeichert werden soll
 		// fromobject ist die id von dem div, welches das Formular des Datensatzes enthaelt
 		// targetobject ist die id von dem Objekt im Hauptformular, welches nach Speicherung des Datensatzes aktualisiert werden soll
@@ -170,9 +164,13 @@ include('funktionen/input_check_functions.php');
 			data = urlstring2formdata(formdata, data);
 		}
 		ahah('index.php', data, new Array(document.getElementById(fromobject), document.getElementById(targetobject)), new Array('sethtml', 'sethtml'));
+		if(reload){
+  		currentform.go.value='get_last_query';
+			overlay_submit(currentform, false);
+  	}
 	}
 
-	subsave_new_layer_data = function(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data){
+	subsave_new_layer_data = function(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data, reload){
 		// layer_id ist die von dem Layer, in dem ein neuer Datensatz gespeichert werden soll
 		// fromobject ist die id von dem div, welches das Formular zur Eingabe des neuen Datensatzes enthaelt
 		// targetobject ist die id von dem Objekt im Hauptformular, welches nach Speicherung des neuen Datensatzes aktualisiert werden soll
@@ -203,6 +201,10 @@ include('funktionen/input_check_functions.php');
 			data = urlstring2formdata(formdata, data);
 		}
 		ahah('index.php', data, new Array(document.getElementById(fromobject), document.getElementById(targetobject)), new Array('sethtml', 'sethtml'));
+		if(reload){
+  		currentform.go.value='get_last_query';
+			overlay_submit(currentform, false);
+  	}
 	}
 
 	clearsubforms = function(layer_id){

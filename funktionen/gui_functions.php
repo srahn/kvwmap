@@ -231,17 +231,17 @@ function getlegend(groupid, layerid, fremde){
 
 function updateThema(event, thema, query, groupradiolayers, queryradiolayers, instantreload){
 	var status = query.checked;
-	console.log(status);
 	var reload = false;
   if(status == true){
     if(thema.checked == false){
-			thema.checked = true;		
+			thema.checked = true;
+			thema.title="Dieses Thema ausschalten";	
 			if(instantreload)reload = true;
 		}
-		query.title="Dieses Thema abfragbar schalten";
+		query.title="Die Abfrage dieses Themas ausschalten";		
   }
 	else{
-		query.title="Die Abfrage dieses Themas ausschalten";		
+		query.title="Dieses Thema abfragbar schalten";
 	}
   if(groupradiolayers != '' && groupradiolayers.value != ''){
     preventDefault(event);
@@ -251,14 +251,19 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers, in
 			if(document.getElementById('thema_'+radiolayer[i]) != undefined){
 				if(document.getElementById('thema_'+radiolayer[i]) != thema){
 					document.getElementById('thema_'+radiolayer[i]).checked = false;
-					if(document.getElementById('qLayer'+radiolayer[i]) != undefined)document.getElementById('qLayer'+radiolayer[i]).checked = false;
+					if(document.getElementById('qLayer'+radiolayer[i]) != undefined){
+						document.getElementById('qLayer'+radiolayer[i]).checked = false;
+					}
 				}
 				else{
 					query.checked = !status;
 					query.checked2 = query.checked;		// den check-Status hier nochmal merken, damit man ihn bei allen Click-Events setzen kann, sonst setzt z.B. Chrome den immer wieder zurueck
 					if(query.checked == true){
-						thema.checked = true;
-						if(instantreload)reload = true;
+						if(thema.checked == false){
+							thema.checked = true;
+							thema.title="Dieses Thema ausschalten";	
+							if(instantreload)reload = true;
+						}
 					}
 				}
 			}
@@ -277,14 +282,17 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers, in
 					query.checked = !status;
 					query.checked2 = query.checked;		// den check-Status hier nochmal merken, damit man ihn bei allen Click-Events setzen kann, sonst setzt z.B. Chrome den immer wieder zurueck
 					if(query.checked == true){
-						thema.checked = true;
-						if(instantreload)reload = true;
+						if(thema.checked == false){
+							thema.checked = true;
+							thema.title="Dieses Thema ausschalten";	
+							if(instantreload)reload = true;
+						}
 					}
 				}
 			}
 		}
   }
-	if(reload)currentform.neuladen.click();
+	if(reload)document.GUI.neuladen.click();
 }
 
 function updateQuery(event, thema, query, radiolayers, instantreload){
@@ -292,6 +300,7 @@ function updateQuery(event, thema, query, radiolayers, instantreload){
     if(thema.checked == false){
       query.checked = false;
 			thema.title="Dieses Thema sichtbar schalten";
+			query.title="Dieses Thema abfragbar schalten";
     }
 		else{
 			thema.title="Dieses Thema ausschalten";			
@@ -315,7 +324,7 @@ function updateQuery(event, thema, query, radiolayers, instantreload){
   		}
   	}
   }
-	if(instantreload)currentform.neuladen.click();
+	if(instantreload)document.GUI.neuladen.click();
 }
 
 function preventDefault(e){
@@ -348,7 +357,7 @@ function selectgroupquery(group, instantreload){
       updateThema('', thema, query, '', '', 0);
     }
   }
-	if(instantreload)currentform.neuladen.click();
+	if(instantreload)document.GUI.neuladen.click();
 }
 
 function selectgroupthema(group, instantreload){
@@ -370,7 +379,7 @@ function selectgroupthema(group, instantreload){
       updateQuery('', thema, query, '', 0);
     }
   }
-	if(instantreload)currentform.neuladen.click();
+	if(instantreload)document.GUI.neuladen.click();
 }
 
 /*Anne*/

@@ -233,7 +233,7 @@
       $csv .= str_replace('.', ',', $GUI->flurstuecke[$i]['anteil']).';';
      	$csv .= chr(10);  
     }
-    $csv = 'Gemarkung;Flur;Zähler/Nenner;Eigentümer (Nr.);Flst-Fläche(ALB);Anteil m²;Anteil %'.chr(10).$csv;
+    $csv = 'Gemarkung;Flur;Zähler/Nenner;Eigentümer (Nr.);amtl. Flst-Fläche;Anteil m²;Anteil %'.chr(10).$csv;
     ob_end_clean();
     header("Content-type: application/vnd.ms-excel");
     header("Content-disposition:  inline; filename=Flurstuecke.csv");
@@ -256,12 +256,12 @@
   	$GUI->eigentuemer = $GUI->jagdkataster->getEigentuemerListe($GUI->formvars);
   	for($i = 0; $i < count($GUI->eigentuemer)-1; $i++){          	
     	$csv .= $GUI->eigentuemer[$i]['eigentuemer'].';';
-      $csv .= str_replace('.', ',', round($GUI->eigentuemer[$i]['albflaeche']*100/$GUI->eigentuemer['albsumme'], 2)).';';
-      $csv .= str_replace('.', ',', $GUI->eigentuemer[$i]['anteil_alk']).';';
+			$csv .= str_replace('.', ',', $GUI->eigentuemer[$i]['anteil_alk']).';';
+      $csv .= str_replace('.', ',', round($GUI->eigentuemer[$i]['albflaeche']*100/$GUI->eigentuemer['albsumme'], 1)).';';
       $csv .= str_replace('.', ',', $GUI->eigentuemer[$i]['albflaeche']).';';
      	$csv .= chr(10);  
     }
-    $csv = 'Eigentümer;Anteil nach ALB;Anteil nach ALK;ALB-Fläche'.chr(10).$csv;
+    $csv = 'Eigentümer;geometrischer Anteil;Anteil nach amtl. Fläche[%];Anteil nach amtl. Fläche[m²]'.chr(10).$csv;
     ob_end_clean();
     header("Content-type: application/vnd.ms-excel");
     header("Content-disposition:  inline; filename=eigentuemer.csv");
