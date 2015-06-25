@@ -14,16 +14,16 @@ $dbname='kvwmapdb';
 $pgdbname='kvwmapsp';
 
 ########################## Metadaten zum Landkreis
-define('LANDKREIS', 'für den Landkreis');
+define('LANDKREIS', 'Landkreis');
 define('AMT', 'Kataster-/Vermessungsamt ');
-define('STRASSE', 'Nordvorpommern und die');
-define('STRASSE2', '');																	# Version 1.7.1
-define('PLZ', 'Hansestadt Stralsund');
-define('ORT', '');
-define('POSTANSCHRIFT', '');
-define('POSTANSCHRIFT_STRASSE', '');
-define('POSTANSCHRIFT_PLZ', '');
-define('POSTANSCHRIFT_ORT', '');
+define('STRASSE', 'Strasse');
+define('STRASSE2', 'Strasse2');																	# Version 1.7.1
+define('PLZ', 'PLZ');
+define('ORT', 'Ort');
+define('POSTANSCHRIFT', 'Postanschrift');
+define('POSTANSCHRIFT_STRASSE', 'Postanschrift Strasse');
+define('POSTANSCHRIFT_PLZ', 'Postanschrift PLZ');
+define('POSTANSCHRIFT_ORT', 'Postanschrift Ort');
 # definiert, ob Nutzername im ALB-Auszug 30 angezeigt wird, oder nicht
 define('BEARBEITER', 'false');			# true/false					# Version 1.7.2
 # Gutachterausschuss BORIS
@@ -131,7 +131,7 @@ define('GIT_USER', '');																	# Version 2.1
 
 ########################## Pfadeinstellungen
 # Installationspfad
-define('INSTALLPATH','/home/gisadmin/');
+define('INSTALLPATH','/var/www/');
 define('WWWROOT',INSTALLPATH.'apps/');
 # --------------- Version 1.6.6 Start
 # diese Einstellung ermöglicht die Vergabe von mehrere Call Back Links
@@ -220,9 +220,6 @@ define('DHK_CALL_PASSWORD', '6789');																	# Version 2.1
 # Parameter für die Strecken- und Flächenreduktion
 define('EARTH_RADIUS', 6384000);																										# Version 2.1
 define('M_QUASIGEOID', 38);																													# Version 2.1
-
-# auswählbare Maßstäbe
-$selectable_scales = array(500, 1000, 2500, 5000, 7500, 10000, 25000, 50000, 100000, 250000, 500000, 1000000);		# Version 2.2
 
 # Unterstützte SRIDs, nur diese stehen zur Auswahl bei der Stellenwahl
 $supportedSRIDs = array(4326,2397,2398,2399,31466,31467,31468,31469,32648,25832,25833,35833,32633,325833,15833,900913,28992);                    # Version 1.6.8
@@ -410,9 +407,6 @@ define('DEFAULTDBWRITE',1);                                       # Version 1.6.
 # Die ID der Stelle aus der Datenbank, auf die alle Nutzer Zugriff haben
 # und die als Einstiegsseite für neue Benutzer eingestellt ist
 define('DEFAULTSTELLE','4');
-
-# Adminstellen
-$admin_stellen = array(3);						# Version 2.2
 
 # Gast-Stellen
 #define('GAST_STELLE', 35);						# Version 1.7.5 			# in Version 1.8.0 geloescht
