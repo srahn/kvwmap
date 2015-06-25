@@ -151,7 +151,7 @@ class Bauauskunft {
   
   function countbaudaten($searchvars){
   	$searchvars['withlimit'] = false;
-  	$ret = $this->getbaudaten_db($searchvars);
+  	$ret = $this->getbaudaten($searchvars);
   	return count($ret);
   }
   
