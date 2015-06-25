@@ -45,8 +45,8 @@ if (!DBWRITE) { echo '<br>Das Schreiben in die Datenbank wird unterdrückt!'; }
 if($userDb == NULL){
 	$userDb = new database();
 	$userDb->host = MYSQL_HOST;
-	$userDb->user = MYSQL_USER;																			
-	$userDb->passwd = MYSQL_PASSWORD;															
+	$userDb->user = MYSQL_USER;
+	$userDb->passwd = MYSQL_PASSWORD;
 	$userDb->dbName = MYSQL_DBNAME;
 }
 $GUI->database = $userDb;
@@ -55,7 +55,7 @@ if (!$GUI->database->open()) {
   if ($GUI->formvars['go']=='install-mysql-db') {
     # Anlegen der neuen Datenbank
     # Herstellen der Verbindung mit defaultwerten
-    $GUI->dbConn=mysql_connect('localhost','kvwmap','kvwmap');
+    $GUI->dbConn=mysql_connect(MYSQL_HOST,'kvwmap','kvwmap');
     $GUI->debug->write("MySQL Datenbank mit ID: ".$GUI->dbConn." und Name: mysql auswählen.",4);
     # Auswählen der Datenbank mysql
     mysql_select_db('mysql',$GUI->dbConn);
