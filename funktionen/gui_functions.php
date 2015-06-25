@@ -264,13 +264,13 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers, in
   if(status == true){
     if(thema.checked == false){
 			thema.checked = true;
-			thema.title="Dieses Thema ausschalten";	
+			thema.title="<? echo $this->deactivatelayer; ?>";	
 			if(instantreload)reload = true;
 		}
-		query.title="Die Abfrage dieses Themas ausschalten";		
+		query.title="<? echo $this->deactivatequery; ?>";		
   }
 	else{
-		query.title="Dieses Thema abfragbar schalten";
+		query.title="<? echo $this->activatequery; ?>";
 	}
   if(groupradiolayers != '' && groupradiolayers.value != ''){
     preventDefault(event);
@@ -290,7 +290,7 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers, in
 					if(query.checked == true){
 						if(thema.checked == false){
 							thema.checked = true;
-							thema.title="Dieses Thema ausschalten";	
+							thema.title="<? echo $this->deactivatelayer; ?>";	
 							if(instantreload)reload = true;
 						}
 					}
@@ -313,7 +313,7 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers, in
 					if(query.checked == true){
 						if(thema.checked == false){
 							thema.checked = true;
-							thema.title="Dieses Thema ausschalten";	
+							thema.title="<? echo $this->deactivatelayer; ?>";	
 							if(instantreload)reload = true;
 						}
 					}
@@ -328,11 +328,11 @@ function updateQuery(event, thema, query, radiolayers, instantreload){
   if(query){
     if(thema.checked == false){
       query.checked = false;
-			thema.title="Dieses Thema sichtbar schalten";
-			query.title="Dieses Thema abfragbar schalten";
+			thema.title="<? echo $this->activatelayer; ?>";
+			query.title="<? echo $this->activatequery; ?>";
     }
 		else{
-			thema.title="Dieses Thema ausschalten";			
+			thema.title="<? echo $this->deactivatelayer; ?>";			
 		}
   }
   if(radiolayers != '' && radiolayers.value != ''){  

@@ -1161,7 +1161,7 @@
 													<a href="javascript:selectgroupthema(document.GUI.layers_of_group_'.$group_id.', '.$this->user->rolle->instant_reload.')"><img border="0" src="graphics/pfeil.gif" title="'.$this->strActivateAllLayers.'"></a>
 												</td>
 												<td>
-													<span class="legend_layer">alle</span>
+													<span class="legend_layer">'.$this->all.'</span>
 												</td>
 											</tr>';
 				}
@@ -1199,9 +1199,9 @@
 								
 								$legend .=  ' name="qLayer'.$layer['Layer_ID'].'" value="1" ';
 								if($layer['queryStatus'] == 1){
-									$legend .=  'checked title="Die Abfrage dieses Themas ausschalten"';
+									$legend .=  'checked title="'.$this->deactivatequery.'"';
 								}
-								$legend .=  ' title="Dieses Thema abfragbar schalten">';
+								$legend .=  ' title="'.$this->activatequery.'">';
 							} 
 							else{
 								$legend .= '<img src="'.GRAPHICSPATH.'leer.gif" width="17" height="1" border="0">'; 
@@ -1222,10 +1222,10 @@
 							}
 							$legend .=  ' name="thema'.$layer['Layer_ID'].'" value="1" ';
 							if($layer['aktivStatus'] == 1){
-								$legend .=  'checked title="Dieses Thema ausschalten"';
+								$legend .=  'checked title="'.$this->deactivatelayer.'"';
 							}
 							else{
-								$legend .=  ' title="Dieses Thema sichtbar schalten"'; 
+								$legend .=  ' title="'.$this->activatelayer.'"'; 
 							}
 							$legend .= ' ></td><td valign="middle">';							
 							if($layer['metalink'] != ''){
@@ -1411,14 +1411,6 @@
 		}
 		return true;
 	}
-	function map_saveWebImage($image,$format) {
-		if(MAPSERVERVERSION >= 600 ) {		
-			return $image->saveWebImage();
-		}
-		else {
-			return $image->saveWebImage($format, 1, 1, 0);
-		}
-	}	
 }class database {  var $ist_Fortfuehrung;  var $debug;  var $loglevel;  var $logfile;  var $commentsign;  var $blocktransaction;  function database() {
     global $debug;
     $this->debug=$debug;
