@@ -20,5 +20,7 @@ $strUseMapscale="Use Map Scale";
 $strSetRefPoint="Set Reference Point";
 $strConfirm1="Selected print layout:\\r\\n";
 $strConfirm2="€\\r\\n\\r\\nContinue?";
+$hoch="portrait";
+$quer="landscape";
 
 ?>  

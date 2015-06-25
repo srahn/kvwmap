@@ -29,4 +29,9 @@
  $this->strActivateAllLayers="Activate/Deactivate all layers";
  $this->FullLayerExtent="zoom to Layer-Exent";
  $this->DisplayClasses="Display/Hide Classes";
+ $this->all="all";
+ $this->deactivatequery="Deactivate query";
+ $this->activatequery="Activate query";
+ $this->deactivatelayer="Deactivate layer";
+ $this->activatelayer="Activate layer";
 ?>

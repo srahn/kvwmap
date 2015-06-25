@@ -30,4 +30,9 @@
  $this->strActivateAllLayers="Alle Themen ein/ausschalten";
  $this->FullLayerExtent="volle Layerausdehnung";
  $this->DisplayClasses="Klassen ein/ausblenden";
+ $this->all="alle";
+ $this->deactivatequery="Die Abfrage dieses Themas ausschalten";
+ $this->activatequery="Dieses Thema abfragbar schalten";
+ $this->deactivatelayer="Dieses Thema ausschalten";
+ $this->activatelayer="Dieses Thema sichtbar schalten";
 ?>

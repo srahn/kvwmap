@@ -1,6 +1,7 @@
 <?php
  # 2008-01-22 pkvvm
   include(LAYOUTPATH.'languages/druckausschnittswahl_'.$this->user->rolle->language.'.php');
+	include(LAYOUTPATH.'languages/map_'.$this->user->rolle->language.'.php');
  ?>
 <script type="text/javascript">
 <!--
@@ -169,7 +170,11 @@ function remove(){
             }
             ?>
       </select>
-    	&nbsp;(<? echo $this->Document->activeframe[0]['format'].')'; ?>
+			<? 
+				$orientation = substr($this->Document->activeframe[0]['format'], 2); 
+				$asize = substr($this->Document->activeframe[0]['format'], 0, 2);				
+			?>
+    	&nbsp;(<? echo $asize.' '.$$orientation.')'; ?>
     </td>
   </tr>
   <tr valign="top"> 
@@ -181,11 +186,11 @@ function remove(){
     <td valign="top">
       <table cellspacing=0 cellpadding=2 border=0 style="border:1px solid #C3C7C3;">
         <tr align="center">
-          <td>Verfügbare Themen:</td>
+          <td><?php echo $strAvailableLayer; ?>:</td>
         </tr>
         <tr align="left">
           <td>
-          <div align="center"><input type="submit" class="button" name="neuladen" value="neu Laden"></div>
+          <div align="center"><input type="submit" class="button" name="neuladen" value="<?php echo $strLoadNew; ?>"></div>
           <br>
         	<div style="width:230; height:<?php echo $this->map->height-59; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
 	          &nbsp;
