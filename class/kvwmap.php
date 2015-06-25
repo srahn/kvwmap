@@ -10441,9 +10441,11 @@ class GUI {
 								else $s = $layer->getShape($result);
 								$count = 0;
 								foreach($s->values as $key => $value){
-									$layerset[$i]['shape'][$j][$key] = utf8_encode($value);
-									$layerset[$i]['attributes']['name'][$count] = $key;
-									$layerset[$i]['attributes']['privileg'][$count] = 0;
+									if($layerset[$i]['Datentyp'] != 3 OR in_array($key, array('x','y','value_0'))){		# für Rasterlayer nur diese Daten ausgeben
+										$layerset[$i]['shape'][$j][$key] = utf8_encode($value);
+										$layerset[$i]['attributes']['name'][$count] = $key;
+										$layerset[$i]['attributes']['privileg'][$count] = 0;
+									}
 									$count++;
 								}
               }
