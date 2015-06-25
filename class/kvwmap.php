@@ -12048,30 +12048,32 @@ class GUI {
 
   function zoomToMaxLayerExtent($layer_id) {
     # Abfragen der maximalen Ausdehnung aller Daten eines Layers
-		
 		$layer = $this->user->rolle->getLayer($layer_id);
 		if($layer == NULL)$layer = $this->user->rolle->getRollenLayer(-$layer_id);
-		$data = $layer[0]['Data'];
-    
-    # suchen nach dem ersten Vorkommen von using
-    $pos = strpos(strtolower($data),'using ');
-
-    # Abschneiden der uing Wörter im Datastatement wenn unique verwendet wurde
-    if ($pos !== false) {
-      $subquery=substr($data,0,$pos);
-    }
-    else {
-      # using kommt nicht vor, es handelt sich um ein einfaches Data Statement in der Form
-      # the_geom from tabelle, übernehmen wie es ist.
-      $subquery = $data;
-    }
-		
 		# Abfragen der Datenbankverbindung des Layers
     $layerdb=$this->mapDB->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
+		
+		$data = $layer[0]['Data'];    
+		if($data != ''){
+			# suchen nach dem ersten Vorkommen von using
+			$pos = strpos(strtolower($data),'using ');
+			# Abschneiden der uing Wörter im Datastatement wenn unique verwendet wurde
+			if ($pos !== false) {
+				$subquery=substr($data,0,$pos);
+			}
+			else {
+				# using kommt nicht vor, es handelt sich um ein einfaches Data Statement in der Form
+				# the_geom from tabelle, übernehmen wie es ist.
+				$subquery = $data;
+			}
+			$explosion = explode(' ', $data);
+			$this->attributes['the_geom'] = $explosion[0];
+		}
+		else{
+			$subquery = substr($layer[0]['pfad'], 7);
+			$this->attributes = $this->mapDB->read_layer_attributes($layer_id, $layerdb, NULL);
+		}
     
-	  $explosion = explode(' ', $data);
-  	$this->attributes['the_geom'] = $explosion[0];
-
 		# Filter berücksichtigen
 		$filter = $this->mapDB->getFilter($layer_id, $this->Stelle->id);
 		if($filter != ''){
