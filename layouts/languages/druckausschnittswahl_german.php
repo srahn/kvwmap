@@ -20,5 +20,7 @@ $strUseMapscale="Kartenma\u00dfstab \u00fcbernehmen";
 $strSetRefPoint="Bezugspunkt setzen";
 $strConfirm1="Gewähltes Drucklayout:\\r\\n";
 $strConfirm2="€\\r\\n\\r\\nFortfahren?";
+$hoch="hoch";
+$quer="quer";
  
 ?>  
