@@ -412,7 +412,7 @@ function selectgroupthema(group, instantreload){
 }
 
 /*Anne*/
-function changeClassStatus(classid,imgsrc){
+function changeClassStatus(classid,imgsrc,instantreload){
 	selClass = document.getElementsByName("class"+classid)[0];
 	selImg   = document.getElementsByName("imgclass"+classid)[0];
 	if(selClass.value=='0'){
@@ -425,6 +425,7 @@ function changeClassStatus(classid,imgsrc){
 		selClass.value='0';
 		selImg.src="graphics/inactive.jpg";
 	}
+	if(instantreload)document.GUI.neuladen.click();
 }
 
 /*Anne*/
