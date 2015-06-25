@@ -36,8 +36,8 @@
 		                   else {
 							 echo '#EBEBEB';}?>"> 
           <td><div align="left">
-            <input type="radio" name="antr_selected" value="<?php echo $this->antrag->antragsliste[$i]['antr_nr']; ?>"<?php
-			 if ($this->antrag->antragsliste[$i]['antr_nr']==$this->formvars['antr_selected']) { ?> checked<?php } ?>>
+            <input type="radio" name="antr_selected" value="<? echo $this->antrag->antragsliste[$i]['antr_nr'].'~'.$this->antrag->antragsliste[$i]['stelle_id']; ?>"<?php
+			 if ($this->antrag->antragsliste[$i]['antr_nr'].'~'.$this->antrag->antragsliste[$i]['stelle_id']==$this->formvars['antr_selected']) { ?> checked<?php } ?>>
           </div></td>
           <td><?php echo $this->antrag->antragsliste[$i]['antr_nr']; ?>
           <div align="left"></div></td>
@@ -46,8 +46,8 @@
           <td><?php echo $this->antrag->antragsliste[$i]['vermart']?> 
             <div align="left"></div></td>
           <td><div align="left"><?php echo $this->formvars['datum']=$this->antrag->antragsliste[$i]['datum']; ?></div></td>
-          <td><div align="left"><a href="index.php?go=Nachweis_antragsnr_form_aufrufen&antr_nr=<?php echo $this->antrag->antragsliste[$i]['antr_nr'];?>" title="bearbeiten"><img src="graphics/button_edit.png" border="0"></a></div></td>
-          <td><div align="left"><a href="index.php?go=Antrag_loeschen&antr_nr=<?php echo $this->antrag->antragsliste[$i]['antr_nr']; ?>" title="löschen"><img src="graphics/button_drop.png" border="0"></a></div></td>
+          <td><div align="left"><a href="index.php?go=Nachweis_antragsnr_form_aufrufen&antr_nr=<? echo $this->antrag->antragsliste[$i]['antr_nr'];?>&stelle_id=<? echo $this->antrag->antragsliste[$i]['stelle_id'];?>" title="bearbeiten"><img src="graphics/button_edit.png" border="0"></a></div></td>
+          <td><div align="left"><a href="index.php?go=Antrag_loeschen&antr_nr=<?php echo $this->antrag->antragsliste[$i]['antr_nr']; ?>&stelle_id=<? echo $this->antrag->antragsliste[$i]['stelle_id'];?>" title="löschen"><img src="graphics/button_drop.png" border="0"></a></div></td>
         </tr>
         <?php
 		}
@@ -65,8 +65,6 @@
 				<option value="Festpunkte_in_Karte_Anzeigen">Zugeordnete Festpunkte in Karte Anzeigen</option>
 				<option value="Festpunkte_in_Liste_Anzeigen">Zugeordnete Festpunkte in Liste Anzeigen</option>
 		 		<option value="Festpunkte_in_KVZ_schreiben">Zugeordnete Festpunkte in KVZ Schreiben</option>
-        <option value="Rechercheergebnis_in_Ordner_zusammenstellen"<?php if ($this->formvars['doc_verwaltung']=='zusammenstellen') { ?> selected<?php } ?>>Rechercheergebnis in Ordner zusammenstellen</option>
-        <option value="Recherche_Ordner_packen"<?php if ($this->formvars['doc_verwaltung']=='zusammenstellen_packen') { ?> selected<?php } ?>>Recherche-Ordner als Zip-Datei herunterladen</option>
         <option value="Uebergabeprotokoll_Erzeugen"<?php if ($this->formvars['antr_verarbeitung']=='erzeugen') { ?> selected<?php } ?>>Übergabeprotokoll erzeugen</option>
         <option value="Zusammenstellen_Zippen">Zusammenstellen & Packen</option>
       </select>

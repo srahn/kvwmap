@@ -48,6 +48,9 @@ function getvorschau(url){
 		}
 	}
 
+	$explosion = explode('~', $this->formvars['suchantrnr']);
+	$suchantrnr = $explosion[0];
+	
 ?>
 
 <input type="hidden" name="go" value="Nachweisanzeige">
@@ -95,7 +98,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 								if($this->formvars['VermStelle'] != '')echo ' von Vermessungsstelle '.$this->formvars['VermStelle'];
               } break;
               case 'antr_nr' : { 
-                ?> aus Vorbereitungsnummer - <?php echo $this->formvars['suchantrnr'];
+                ?> aus Vorbereitungsnummer - <?php echo $suchantrnr;
               } break;
               case 'poly' : {
                 ?> in Suchpolygon<?php 

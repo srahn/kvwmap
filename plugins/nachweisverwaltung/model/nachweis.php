@@ -694,6 +694,9 @@ class Nachweis {
   }
   
   function getNachweise($id,$polygon,$gemarkung,$stammnr,$rissnr,$fortf,$art_einblenden,$richtung,$abfrage_art,$order,$antr_nr, $datum = NULL, $VermStelle = NULL, $gueltigkeit = NULL, $datum2 = NULL, $flur = NULL, $flur_thematisch = NULL, $andere_art = NULL) {
+		$explosion = explode('~', $antr_nr);
+		$antr_nr = $explosion[0];
+		$stelle_id = $explosion[1];
     # Die Funktion liefert die Nachweise nach verschiedenen Suchverfahren.
     # Vor dem Suchen nach Nachweisen werden jeweils die Suchparameter überprüft    
     if (is_array($id)) { $idListe=$id; } else { $idListe=array($id); }
@@ -1010,7 +1013,9 @@ class Nachweis {
 				$sql.=" ON n2d.nachweis_id = n.id";
         $sql.=" WHERE CAST(n.vermstelle AS integer)=v.id AND n.id=n2a.nachweis_id";
         $sql.=" AND n2a.antrag_id='".$antr_nr."'";
-		if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
+				if($stelle_id == '')$sql.=" AND stelle_id IS NULL";
+				else $sql.=" AND stelle_id=".$stelle_id;
+				if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
         if (substr($art_einblenden,0,1)) { $art[]='100'; }
         if (substr($art_einblenden,1,1)) { $art[]='010'; }
         if (substr($art_einblenden,2,1)) { $art[]='001'; }
@@ -1048,10 +1053,12 @@ class Nachweis {
     return $errmsg;
   }
   
-  function getNachw2Antr($antr_nr){
+  function getNachw2Antr($antr_nr,$stelle_id){
     # Funktion liefert alle recherchierten Nachweis-IDs zurück, die zu einer 
     # Antragsnummer abgelegt wurde.
     $sql="SELECT * FROM nachweisverwaltung.n_nachweise2antraege WHERE antrag_id='".$antr_nr."'";
+		if($stelle_id == '')$sql.=" AND stelle_id IS NULL";
+		else $sql.=" AND stelle_id=".$stelle_id;
     # echo '<br>'.$sql;
     $queryret=$this->database->execSQL($sql,4, 0);
     $this->debug->write("<br>nachweis.php Recherche nach den Nachweisen, die zu einer Antrnr gespeichert wurden.<br>".$sql,4);    
@@ -1073,7 +1080,7 @@ class Nachweis {
     return $errmsg;
   }
   
-  function pruefe_Auftrag_hinzufuegen_entfernen($antr_nr){
+  function pruefe_Auftrag_hinzufuegen_entfernen($antr_nr, $stelle_id){
     # Funktion dient zum Prüfen der Eingaben beim Arbeitsschritt Auftrag_hinzufügen oder Auftrag_entfernen
     $strenthalten=0;
     if($antr_nr==''){
@@ -1082,6 +1089,8 @@ class Nachweis {
     else {   
       $sql="SELECT * FROM nachweisverwaltung.n_nachweise2antraege";
       $sql.=" WHERE antrag_id ='".$antr_nr."'";
+			if($stelle_id == '')$sql.=" AND stelle_id IS NULL";
+			else $sql.=" AND stelle_id=".$stelle_id;
       $queryret=$this->database->execSQL($sql,4, 0);
       if ($queryret[0]) {
         $errmsg.='Fehler bei der Abfrage ob schon Nachweise zum Auftrag gehören!';
@@ -1099,7 +1108,7 @@ class Nachweis {
     return $errmsg;
   }
   
-  function zum_Auftrag_hinzufuegen($antrag_id,$nachweis_id){
+  function zum_Auftrag_hinzufuegen($antrag_id,$stelle_id,$nachweis_id){
     #echo '<br>Start der Funktion zum_Autrag_hinzufuegen';
     # Umsortierung der übergebenen ids
     $idselected=array_keys($nachweis_id);
@@ -1107,6 +1116,8 @@ class Nachweis {
       # Abfragen ob die Zuordnung schon existiert.
       $sql ="SELECT * FROM nachweisverwaltung.n_nachweise2antraege";
       $sql.=" WHERE nachweis_id=".(int)$idselected[$i]." AND antrag_id='".$antrag_id."'";
+			if($stelle_id == '')$sql.=" AND stelle_id IS NULL";
+			else $sql.=" AND stelle_id=".$stelle_id;
       $ret=$this->database->execSQL($sql,4, 0);
       if ($ret[0]) { # Fehler bei der Abfrage
         $errmsg='\nFehler beim Abfragen, ob Eintrag existiert.';
@@ -1119,8 +1130,9 @@ class Nachweis {
         }
         else {
           # Zuordnung in Datenbank schreiben
-          $sql ="INSERT INTO nachweisverwaltung.n_nachweise2antraege (nachweis_id,antrag_id)";
-          $sql.=" VALUES (".$idselected[$i].",'".$antrag_id."')";
+          $sql ="INSERT INTO nachweisverwaltung.n_nachweise2antraege (nachweis_id,antrag_id,stelle_id)";
+					if($stelle_id == '')$stelle_id = 'NULL';
+          $sql.=" VALUES (".$idselected[$i].",'".$antrag_id."',".$stelle_id.")";
           $ret=$this->database->execSQL($sql,4, 1);    
           if ($ret[0]) {
             $this->debug->write("<br>Fehler beim hinzufuegen der Dokumente zur Auftragsnummer: ".__LINE__,4);
@@ -1141,12 +1153,14 @@ class Nachweis {
     return $ret;
   }
 
-  function aus_Auftrag_entfernen($antr_nr,$id){
+  function aus_Auftrag_entfernen($antr_nr,$stelle_id,$id){
     #Funktion löscht Nachweise, die unter einer Antragsnummer recherchiert wurde. 
     $idselected=array_keys ($id);
     for ($i=0;$i<count($idselected);$i++) {
       $sql ="DELETE FROM nachweisverwaltung.n_nachweise2antraege";
       $sql.=" WHERE antrag_id='".$antr_nr."' AND nachweis_id='".$idselected[$i]."'";
+			if($stelle_id == '')$sql.=" AND stelle_id IS NULL";
+			else $sql.=" AND stelle_id=".$stelle_id;
       $ret=$this->database->execSQL($sql,4, 1);
       if ($ret[0]) {
         $this->debug->write("<br>Fehler beim entfernen der Dokumente zur Auftragsnummer: ".__LINE__,4);
@@ -1222,7 +1236,7 @@ class Festpunkte {
     $this->tabellenname='fp_punkte_temp';
   }
 
-  function createKVZdatei($antrag_nr, $pkz = '') {
+  function createKVZdatei($antrag_nr, $stelle_id, $pkz = '') {
     # Diese Funktion erzeugt im Verzeichnis der recherchierten Antraege (RECHERCHEERGEBNIS_PATH)
     # ein Datei mit Koordinatenverzeichnis im Satzformat aus GEOI-Programm (Standardisiertes Ausgabeformat)
     # Ausgegeben werden alle Punkte, die zur antrag_nr gehören, die über die Abfrage getFestpunkte in $this->liste geschrieben wurden
@@ -1245,7 +1259,7 @@ class Festpunkte {
     	if($antrag_nr == 'ohne'){
     		$antrag_nr = '';
     	}
-      $ret=$this->getFestpunkte($pkz,'','','','',$antrag_nr,'','pkz');
+      $ret=$this->getFestpunkte($pkz,'','','','',$antrag_nr,$stelle_id,'','pkz');
       if ($ret[0]) {
         $errmsg="Festpunkte konnten nicht abgefragt werden.";
       }
@@ -1641,8 +1655,7 @@ class Festpunkte {
     return $ret;
   }
 
-  # 2006-02-19 pk koordinaten durch the_geom ersetzt
-  function getFestpunkte($pkz,$art,$vermarkt,$verhandelt,$polygon,$antrag_nr,$kmquad,$order) {
+  function getFestpunkte($pkz,$art,$vermarkt,$verhandelt,$polygon,$antrag_nr,$stelle_id,$kmquad,$order) {
     # Die Funktion liefert die Festpunkte nach verschiedenen Suchkriterien.
     if (is_array($pkz)) { $pkzListe=$pkz; } else { $pkzListe=array($pkz); }
     if (is_array($art)) { $artListe=$art; } else {
@@ -1696,6 +1709,8 @@ class Festpunkte {
         }
         if ($antrag_nr!='') {
           $sql.=" AND pkz=p2a.pkz AND p2a.antrag_nr='".$antrag_nr."'";
+					if($stelle_id == '')$sql.=" AND stelle_id IS NULL";
+					else $sql.=" AND stelle_id=".$stelle_id;
         }
         if ($order=='') {
           $order="pkz";

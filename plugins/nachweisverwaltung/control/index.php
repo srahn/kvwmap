@@ -70,23 +70,6 @@
 			$this->erzeugenUebergabeprotokollNachweise_CSV();
 	  }break;
 
-	  case 'Antraganzeige_Rechercheergebnis_in_Ordner_zusammenstellen' : {
-			include (PLUGINS.'nachweisverwaltung/model/kvwmap.php');						# GUI-Objekt erweitern
-			include (PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Klasse einbinden
-			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
-			$ret=$this->DokumenteZumAntragInOrdnerZusammenstellen();
-			$this->Antraege_Anzeigen();
-			showAlert($ret);
-	  } break;
-
-	  case 'Antraganzeige_Recherche_Ordner_packen' : {
-			include (PLUGINS.'nachweisverwaltung/model/kvwmap.php');						# GUI-Objekt erweitern
-			include (PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Klasse einbinden
-			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
-			$filename = $this->DokumenteOrdnerPacken();
-			$this->Datei_Download($filename);
-	  } break;
-
 	  case 'Antraganzeige_Zusammenstellen_Zippen' : {
 			include (PLUGINS.'nachweisverwaltung/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Klasse einbinden

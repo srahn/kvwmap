@@ -411,6 +411,9 @@ define('DEFAULTDBWRITE',1);                                       # Version 1.6.
 # und die als Einstiegsseite für neue Benutzer eingestellt ist
 define('DEFAULTSTELLE','4');
 
+# Adminstellen
+$admin_stellen = array(3);						# Version 2.2
+
 # Gast-Stellen
 #define('GAST_STELLE', 35);						# Version 1.7.5 			# in Version 1.8.0 geloescht
 $gast_stellen = array(35);						# Version 1.8.0

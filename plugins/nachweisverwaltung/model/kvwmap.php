@@ -4,15 +4,20 @@
 
 	$this->DokumenteOrdnerPacken = function() use ($GUI){
     if ($GUI->formvars['antr_selected']!=''){
-      $antrag=new antrag($GUI->formvars['antr_selected'],$GUI->pgdatabase);
-      if (is_dir(RECHERCHEERGEBNIS_PATH.$antrag->nr)){
+			$explosion = explode('~', $GUI->formvars['antr_selected']);
+			$antr_selected = $explosion[0];
+			$stelle_id = $explosion[1];
+      $antrag=new antrag($antr_selected,$stelle_id,$GUI->pgdatabase);
+			$antragsnr = $antrag->nr;
+			if($stelle_id != '')$antragsnr.='~'.$stelle_id;
+      if (is_dir(RECHERCHEERGEBNIS_PATH.$antragsnr)){
         //$result = exec(RECHERCHE_PACK_SKRIPT.' '.$antrag->nr.' '.$antrag->nr.' '.RECHERCHEERGEBNIS_PATH);
         //$result = exec('zip -r '.RECHERCHEERGEBNIS_PATH.$antrag->nr.' '.RECHERCHEERGEBNIS_PATH.$antrag->nr);
         chdir(RECHERCHEERGEBNIS_PATH);
-        $result = exec(ZIP_PATH.' -r '.RECHERCHEERGEBNIS_PATH.$antrag->nr.' '.'./'.$antrag->nr);
+        $result = exec(ZIP_PATH.' -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr);
       }
     }
-    $filename = RECHERCHEERGEBNIS_PATH.$antrag->nr.'.zip';
+    $filename = RECHERCHEERGEBNIS_PATH.$antragsnr.'.zip';
     $tmpfilename = copy_file_to_tmp($filename);
     unlink($filename);
     return $tmpfilename;
@@ -21,11 +26,14 @@
 	$this->DokumenteZumAntragInOrdnerZusammenstellen = function() use ($GUI){
     if ($GUI->formvars['antr_selected']!=''){
       # Vorbereiten des Pfades für die Speicherung der recherchierten Dokumente
-      $antrag=new antrag($GUI->formvars['antr_selected'],$GUI->pgdatabase);
-      $antrag->clearRecherchePfad();
+			$explosion = explode('~', $GUI->formvars['antr_selected']);
+			$antr_selected = $explosion[0];
+			$stelle_id = $explosion[1];
+      $antrag=new antrag($antr_selected,$stelle_id,$GUI->pgdatabase);
+      $antrag->clearRecherchePfad();			
       # Zusammenstellen der Dokumente der Nachweisverwaltung
       $nachweis=new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
-      $ret=$nachweis->getNachw2Antr($GUI->formvars['antr_selected']);
+      $ret=$nachweis->getNachw2Antr($antr_selected,$stelle_id);
       if($ret==''){
         $ret=$nachweis->getNachweise($nachweis->nachweise_id,'','','','','','','','multibleIDs','','');
         if ($ret==''){
@@ -36,7 +44,7 @@
 
       # Zusammenstellen der Einmessungsskizzen der Festpunkte
       $festpunkte=new Festpunkte('',$GUI->pgdatabase);
-      $ret=$festpunkte->getFestpunkte('',array('0','1'),'','','',$GUI->formvars['antr_selected'],'','pkz');
+      $ret=$festpunkte->getFestpunkte('',array('0','1'),'','','',$antr_selected,$stelle_id,'','pkz');
       if ($ret[0]) {
         $errmsg="Festpunkte konnten nicht abgefragt werden.";
       }
@@ -253,7 +261,6 @@
   };
 
 	$this->DokumenteZuAntraegeAnzeigen = function() use ($GUI){
-    #echo 'antr'.$GUI->formvars['antr_selected'];
     $GUI->formvars['suchffr']=1;
     $GUI->formvars['suchkvz']=1;
     $GUI->formvars['suchgn']=1;
@@ -283,7 +290,7 @@
     $GUI->nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
     # Suchparameter in Ordnung
     # Recherchieren nach den Nachweisen
-		$GUI->formvars['such_andere_art'] = implode(',', $GUI->formvars['such_andere_art']);
+		if($GUI->formvars['such_andere_art'] != NULL)$GUI->formvars['such_andere_art'] = implode(',', $GUI->formvars['such_andere_art']);
     $ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['such_andere_art']);
     #$GUI->nachweis->getAnzahlNachweise($GUI->formvars['suchpolygon']);
     if($ret!=''){
@@ -314,8 +321,11 @@
       $GUI->Antraege_Anzeigen();
       showAlert('Wählen Sie bitte eine Antragsnummer aus! ');
     }
-    else {
-      $GUI->antrag = new antrag($antr_nr,$GUI->pgdatabase);
+    else{
+			$explosion = explode('~', $antr_nr);
+			$antr_nr = $explosion[0];
+			$stelle_id = $explosion[1];
+      $GUI->antrag = new antrag($antr_nr,$stelle_id,$GUI->pgdatabase);
       $ret=$GUI->antrag->getFFR($GUI->formvars);
       if ($ret[0]) {
         $GUI->Fehlermeldung=$ret[1];
@@ -336,8 +346,11 @@
       $GUI->Antraege_Anzeigen();
       showAlert('Wählen Sie bitte eine Antragsnummer aus! ');
     }
-    else {
-      $GUI->antrag = new antrag($GUI->formvars['antr_selected'],$GUI->pgdatabase);
+    else{
+			$explosion = explode('~', $GUI->formvars['antr_selected']);
+			$GUI->formvars['antr_selected'] = $explosion[0];
+			$stelle_id = $explosion[1];
+      $GUI->antrag = new antrag($GUI->formvars['antr_selected'],$stelle_id,$GUI->pgdatabase);
       $ret=$GUI->antrag->getFFR($GUI->formvars);
       if ($ret[0]) {
         $GUI->Fehlermeldung=$ret[1];
@@ -370,7 +383,10 @@
       showAlert('Wählen Sie bitte eine Antragsnummer aus! ');
     }
     else {
-      $GUI->antrag = new antrag($GUI->formvars['antr_selected'],$GUI->pgdatabase);
+			$explosion = explode('~', $GUI->formvars['antr_selected']);
+			$GUI->formvars['antr_selected'] = $explosion[0];
+			$stelle_id = $explosion[1];
+      $GUI->antrag = new antrag($GUI->formvars['antr_selected'],$stelle_id,$GUI->pgdatabase);
       $ret=$GUI->antrag->getFFR($GUI->formvars);
       if ($ret[0]) {
         $GUI->Fehlermeldung=$ret[1];
@@ -386,34 +402,6 @@
 		    header('Pragma: public');
 		    print utf8_decode($csv);
       }
-    }
-  };
-
-	$this->vermessungsantragsFormular = function() use ($GUI){
-    if ($GUI->formvars['antr_nr']!=''){
-      $GUI->titel='Antrag überarbeiten';
-      # Antragsdaten aus der Dtaenbank abfragen
-      $GUI->antrag = new antrag('',$GUI->pgdatabase);
-      $ret=$GUI->antrag->getAntraege(array($GUI->formvars['antr_nr']),'',$GUI->formvars['richtung'],$GUI->formvars['order']);
-      if ($ret[0]==0) {
-        $GUI->formvars['verm_art']=$GUI->antrag->antragsliste[0]['verm_art'];
-        $GUI->formvars['antr_nr']=$GUI->antrag->antragsliste[0]['antr_nr'];
-        $GUI->formvars['datum']=$GUI->antrag->antragsliste[0]['datum'];
-        $GUI->formvars['VermStelle']=$GUI->antrag->antragsliste[0]['vermstelle'];
-        $GUI->formvars['antr_nr_a']=$GUI->antrag->antragsliste[0]['antr_nr_a'];
-        $GUI->formvars['antr_nr_b']=$GUI->antrag->antragsliste[0]['antr_nr_b'];
-        $GUI->formvars['go']='Antrag_Aendern';
-        $GUI->vermessungsAntragEingabeForm();
-      }
-      else {
-        $GUI->Antraege_Anzeigen();
-        showAlert($ret[1]);
-      }
-    }
-    else {
-      $GUI->titel='Antrag eingeben';
-      $GUI->formvars['go']='Nachweis_antragsnummer_Senden';
-      $GUI->vermessungsAntragEingabeForm();
     }
   };
 
@@ -631,14 +619,17 @@
 	$this->nachweiseZuAuftrag = function() use ($GUI){
     # echo 'Start der Zuweisung der Dokumente zum Antrag';
     # Hinzufügen von recherchierten Nachweisen zu einem Auftrag
+		$explosion = explode('~', $GUI->formvars['suchantrnr']);
+		$GUI->formvars['suchantrnr'] = $explosion[0];
+		$stelle_id = $explosion[1];
     $GUI->nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
-    $ret=$GUI->nachweis->pruefe_Auftrag_hinzufuegen_entfernen($GUI->formvars['suchantrnr']);
+    $ret=$GUI->nachweis->pruefe_Auftrag_hinzufuegen_entfernen($GUI->formvars['suchantrnr'], $stelle_id);
     if ($ret!=''){ # Fehler bei der Prüfung der Eingangsparameter
       $errmsg=$ret;
     }
     else {
       # Hinzufügen der Dokumente zum Auftrag
-      $ret=$GUI->nachweis->zum_Auftrag_hinzufuegen($GUI->formvars['suchantrnr'],$GUI->formvars['id']);
+      $ret=$GUI->nachweis->zum_Auftrag_hinzufuegen($GUI->formvars['suchantrnr'],$stelle_id,$GUI->formvars['id']);
       if ($ret[0]) { # Fehler beim Hinzufügen der Dokumente zum Antrag in der Datenbank
         $errmsg=$ret[1];
       }
@@ -665,6 +656,9 @@
   };
 
 	$this->nachweiseZuAuftragEntfernen = function() use ($GUI){
+		$explosion = explode('~', $GUI->formvars['suchantrnr']);
+		$suchantrnr = $explosion[0];
+		$stelle_id = $explosion[1];
     # nachweisobjekt erstellen
     $GUI->nachweis = new nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
     # Abfrage, ob schon Löschvorgang schon bestätigt wurde
@@ -672,21 +666,21 @@
       # Löschvorgang wurde noch nicht bestätigt
       # Aufrufen eines Formulars zur Bestätigung des Löschvorganges
       $GUI->formvars['nachfrage_quelle']='Antrag_entfernen';
-      $GUI->formvars['nachfrage']='Möchten sie wirklich Dokumente von der Antragsnummer: ['.$GUI->formvars['suchantrnr'].'] entfernen!';
-      $GUI->bestaetigungsformAnzeigen($GUI->formvars['suchantrnr']);
+      $GUI->formvars['nachfrage']='Möchten sie wirklich Dokumente von der Antragsnummer: ['.$suchantrnr.'] entfernen!';
+      $GUI->bestaetigungsformAnzeigen($suchantrnr);
     }
     else {
       if ($GUI->formvars['bestaetigung']=='JA') {
         # Löschvorgang wurde bestätigt
         # Eingabeparameter prüfen
-        $ret=$GUI->nachweis->pruefe_Auftrag_hinzufuegen_entfernen($GUI->formvars['suchantrnr']);
+        $ret=$GUI->nachweis->pruefe_Auftrag_hinzufuegen_entfernen($suchantrnr,$stelle_id);
         if($ret!=''){ # Fehler bei der Prüfung der Eingangsparameter
           $errmsg=$ret;
         }
         else {
           # Eingabeparameter in Ordnung
           # Nachweise aus Antrag entfernen
-          $ret=$GUI->nachweis->aus_Auftrag_entfernen($GUI->formvars['suchantrnr'],$GUI->formvars['id']);
+          $ret=$GUI->nachweis->aus_Auftrag_entfernen($suchantrnr,$stelle_id,$GUI->formvars['id']);
           $errmsg=$ret[1];
         } # ende Eingabeparameter sind ok
       } # ende Löschvorgang wurde bestätigt
@@ -879,8 +873,11 @@
 	$this->festpunkteZuAntragZeigen = function() use ($GUI){
     # Funktion fragt alle Festpunkte zum einem Antrag heraus und übergibt diese an die Funktion
     # zum Anzeigen der Festpunkte in der Karte
+		$explosion = explode('~', $GUI->formvars['antr_selected']);
+		$GUI->formvars['antr_selected'] = $explosion[0];
+		$stelle_id = $explosion[1];
     $festpunkte=new Festpunkte('',$GUI->pgdatabase);
-    $ret=$festpunkte->getFestpunkte('','','','','',$GUI->formvars['antr_selected'],'','pkz');
+    $ret=$festpunkte->getFestpunkte('','','','','',$GUI->formvars['antr_selected'],$stelle_id,'','pkz');
     if ($ret[0]) {
       $errmsg="Die Festpuntke zum Antrag $GUI->formvars['antr_selected'] konnten nicht abgefragt werden.";
     }
@@ -954,12 +951,15 @@
   };
 
 	$this->festpunkteSuchen = function() use ($GUI){
+		$explosion = explode('~', $GUI->formvars['antr_selected']);
+		$GUI->formvars['antr_selected'] = $explosion[0];
+		$stelle_id = $explosion[1];
     if ($GUI->formvars['antr_selected']=='' AND $GUI->formvars['pkz']=='' AND $GUI->formvars['kiloquad']=='') {
       $GUI->Fehlermeldung='<br>Geben Sie mindestens eine Antragsnummer, Kilometerquadrat oder Punktkennzeichen zu Suche an!';
     }
     else {
       $GUI->festpunkte=new festpunkte('',$GUI->pgdatabase);
-      $ret=$GUI->festpunkte->getFestpunkte(array($GUI->formvars['pkz']),array(0,1,2,3,4,5,6),'','','',$GUI->formvars['antr_selected'],$GUI->formvars['kiloquad'],'pkz');
+      $ret=$GUI->festpunkte->getFestpunkte(array($GUI->formvars['pkz']),array(0,1,2,3,4,5,6),'','','',$GUI->formvars['antr_selected'],$stelle_id,$GUI->formvars['kiloquad'],'pkz');
       if ($ret[0]) {
         $GUI->Fehlermeldung='<br>Es konnten keine Festpunkte abgefragt werden'.$ret[1];
       }
@@ -1207,9 +1207,12 @@
       $GUI->Fehlermeldung='Sie müssen erst eine Antragsnummer angeben.';
       $GUI->festpunkteZuAuftragFormular();
     }
+		$explosion = explode('~', $GUI->formvars['antr_selected']);
+		$GUI->formvars['antr_selected'] = $explosion[0];
+		$stelle_id = $explosion[1];
     $pkz=array_keys($GUI->formvars['pkz']);
     $anzPunkte=count($pkz);
-    $auftrag=new antrag($GUI->formvars['antr_selected'],$GUI->pgdatabase);
+    $auftrag=new antrag($GUI->formvars['antr_selected'],$stelle_id,$GUI->pgdatabase);
     $anzPunkteAdd=0;
     for ($i=0;$i<$anzPunkte;$i++) {
       $ret=$auftrag->addFestpunkt($pkz[$i]);
@@ -1225,13 +1228,15 @@
   };
 
 	$this->festpunkteInKVZschreiben = function() use ($GUI){
-    #19.06.2008, H.Riedel; Abfrage, ob Antrag ausgewaehlt wurde
-    if ($GUI->formvars['antr_selected']=='') {
+		$explosion = explode('~', $GUI->formvars['antr_selected']);
+		$antr_selected = $explosion[0];
+		$stelle_id = $explosion[1];
+    if ($antr_selected=='') {
       $GUI->Fehlermeldung= '<br>Wählen Sie eine Antragsnummer aus!';
     }
     else {
       $festpunkte=new Festpunkte('',$GUI->pgdatabase);
-      $ret=$festpunkte->createKVZdatei($GUI->formvars['antr_selected'], $GUI->formvars['pkz']);
+      $ret=$festpunkte->createKVZdatei($antr_selected, $stelle_id, $GUI->formvars['pkz']);
       if ($ret[0]) {
         $GUI->Fehlermeldung=$ret[1];
       }
@@ -1262,60 +1267,107 @@
     $GUI->main = PLUGINS.'nachweisverwaltung/view/aktualisierungfestpunkte.php';
     $GUI->output();
   };
+
+	$this->vermessungsantragsFormular = function() use ($GUI){
+		global $admin_stellen;
+		if($GUI->formvars['stelle_id'] == $GUI->Stelle->id OR in_array($GUI->Stelle->id, $admin_stellen)){
+			if ($GUI->formvars['antr_nr']!=''){
+				$GUI->titel='Antrag überarbeiten';
+				# Antragsdaten aus der Datenbank abfragen
+				$GUI->antrag = new antrag('','',$GUI->pgdatabase);
+				$ret=$GUI->antrag->getAntraege(array($GUI->formvars['antr_nr']),'',$GUI->formvars['richtung'],$GUI->formvars['order'],$GUI->Stelle->id);
+				if ($ret[0]==0) {
+					$GUI->formvars['verm_art']=$GUI->antrag->antragsliste[0]['verm_art'];
+					$GUI->formvars['antr_nr']=$GUI->antrag->antragsliste[0]['antr_nr'];
+					$GUI->formvars['datum']=$GUI->antrag->antragsliste[0]['datum'];
+					$GUI->formvars['VermStelle']=$GUI->antrag->antragsliste[0]['vermstelle'];
+					$GUI->formvars['antr_nr_a']=$GUI->antrag->antragsliste[0]['antr_nr_a'];
+					$GUI->formvars['antr_nr_b']=$GUI->antrag->antragsliste[0]['antr_nr_b'];
+					$GUI->formvars['go']='Antrag_Aendern';
+					$GUI->vermessungsAntragEingabeForm();
+				}
+				else {
+					$GUI->Antraege_Anzeigen();
+					showAlert($ret[1]);
+				}
+			}
+			else {
+				$GUI->titel='Antrag eingeben';
+				$GUI->formvars['go']='Nachweis_antragsnummer_Senden';
+				$GUI->vermessungsAntragEingabeForm();
+			}
+		}
+		else{
+			$GUI->Antraege_Anzeigen();
+			showAlert("Änderung dieses Antrags nicht erlaubt!");
+		}
+  };
 	
 	$this->vermessungsantragAnlegen = function() use ($GUI){
-    $GUI->antrag= new antrag('',$GUI->pgdatabase);
-    $ret=$GUI->antrag->pruefe_antrag_eintragen($GUI->formvars['antr_nr'],$GUI->formvars['VermStelle'],$GUI->formvars['verm_art'],$GUI->formvars['datum']);
+    $GUI->antrag= new antrag('','',$GUI->pgdatabase);
+    $ret=$GUI->antrag->pruefe_antrag_eintragen($GUI->formvars['antr_nr'],$GUI->formvars['VermStelle'],$GUI->formvars['verm_art'],$GUI->formvars['datum'],$GUI->Stelle->id);
     if($ret==''){
-      $ret=$GUI->antrag->antrag_eintragen($GUI->formvars['antr_nr'],$GUI->formvars['VermStelle'],$GUI->formvars['verm_art'],$GUI->formvars['datum']);
+      $ret=$GUI->antrag->antrag_eintragen($GUI->formvars['antr_nr'],$GUI->formvars['VermStelle'],$GUI->formvars['verm_art'],$GUI->formvars['datum'],$GUI->Stelle->id);
     }
     $GUI->Meldung=$ret;
     $GUI->titel='Neuen Antrag anlegen';
     $GUI->vermessungsAntragEingabeForm();
     showAlert($ret);
   };
-
+	
 	$this->vermessungsantragAendern = function() use ($GUI){
-    $GUI->antrag= new antrag('',$GUI->pgdatabase);
-    $ret=$GUI->antrag->antrag_aendern($GUI->formvars['antr_nr'],$GUI->formvars['VermStelle'],$GUI->formvars['verm_art'],$GUI->formvars['datum']);
-    if ($ret[0]) {
-      $GUI->vermessungsantragsFormular();
-    }
-    else {
-      $GUI->Antraege_Anzeigen();
-    }
-    showAlert($ret[1]);
+		global $admin_stellen;
+		if($GUI->formvars['stelle_id'] == $GUI->Stelle->id OR in_array($GUI->Stelle->id, $admin_stellen)){
+			$GUI->antrag= new antrag('','',$GUI->pgdatabase);
+			$ret=$GUI->antrag->antrag_aendern($GUI->formvars['antr_nr'],$GUI->formvars['VermStelle'],$GUI->formvars['verm_art'],$GUI->formvars['datum'],$GUI->formvars['stelle_id']);
+			if ($ret[0]) {
+				$GUI->vermessungsantragsFormular();
+			}
+			else {
+				$GUI->Antraege_Anzeigen();
+			}
+			showAlert($ret[1]);
+		}
+		else{
+			$GUI->Antraege_Anzeigen();
+			showAlert("Änderung dieses Antrags nicht erlaubt!");
+		}
   };
 	
 	$this->Antraege_Anzeigen = function() use ($GUI){
-    $GUI->menue='menue.php';
     $GUI->titel='Antr&auml;ge';
     $GUI->main = PLUGINS.'nachweisverwaltung/view/antragsanzeige.php';
-    $GUI->antrag = new antrag('',$GUI->pgdatabase);
-    $GUI->antrag->getAntraege('','',$GUI->formvars['richtung'],$GUI->formvars['order']);
+    $GUI->antrag = new antrag('','',$GUI->pgdatabase);
+    $GUI->antrag->getAntraege('','',$GUI->formvars['richtung'],$GUI->formvars['order'], $GUI->Stelle->id);
     $GUI->output();
   };
 
 	$this->Antrag_Loeschen = function() use ($GUI){
-    # 2006-01-30 pk
-    if ($GUI->formvars['bestaetigung']=='JA') {
-      $GUI->antrag = new antrag('',$GUI->pgdatabase);
-      $antragsnummern=array_keys ($GUI->formvars['id']);
-      $ret=$GUI->antrag->antrag_loeschen($antragsnummern[0]);
-      $GUI->Antraege_Anzeigen();
-      showAlert($ret);
-    }
-    else {
-      if ($GUI->formvars['bestaetigung']=='NEIN') {
-        $GUI->Antraege_Anzeigen();
-      }
-      else {
-        #$GUI->formvars['nachfrage_quelle']='Antrag_loeschen';
-        $GUI->formvars['nachfrage']='Möchten Sie den Antrag ['.$GUI->formvars['antr_nr'].'] wirklich löschen?<br>Es werden auch alle im Rechercheordner zusammengestellten Dokumente des Auftrages gelöscht!';
-        $GUI->formvars['id']=$GUI->formvars['antr_nr'];
-        $GUI->bestaetigungsformAnzeigen();
-      }
-    }
+    global $admin_stellen;
+		if($GUI->formvars['stelle_id'] == $GUI->Stelle->id OR in_array($GUI->Stelle->id, $admin_stellen)){
+			if ($GUI->formvars['bestaetigung']=='JA') {
+				$GUI->antrag = new antrag('','',$GUI->pgdatabase);
+				$antragsnummern=array_keys ($GUI->formvars['id']);
+				$ret=$GUI->antrag->antrag_loeschen($antragsnummern[0],$GUI->formvars['stelle_id']);
+				$GUI->Antraege_Anzeigen();
+				showAlert($ret);
+			}
+			else {
+				if ($GUI->formvars['bestaetigung']=='NEIN') {
+					$GUI->Antraege_Anzeigen();
+				}
+				else {
+					#$GUI->formvars['nachfrage_quelle']='Antrag_loeschen';
+					$GUI->formvars['nachfrage']='Möchten Sie den Antrag ['.$GUI->formvars['antr_nr'].'] wirklich löschen?<br>Es werden auch alle im Rechercheordner zusammengestellten Dokumente des Auftrages gelöscht!';
+					$GUI->formvars['id']=$GUI->formvars['antr_nr'];
+					$GUI->bestaetigungsformAnzeigen();
+				}
+			}
+		}
+		else{
+			$GUI->Antraege_Anzeigen();
+			showAlert("Löschen dieses Antrags nicht erlaubt!");
+		}
   };
 	
 	$this->getFormObjVermStelle = function($name, $VermStelle) use ($GUI){
@@ -1345,11 +1397,11 @@
   };
 
 	$this->getFormObjAntr_nr = function($antr_nr) use ($GUI){
-    $Antrag = new Antrag($antr_nr,$GUI->pgdatabase);
-    $back=$Antrag->getAntragsnr_Liste();
+    $Antrag = new Antrag($antr_nr,$GUI->Stelle->id,$GUI->pgdatabase);
+    $back=$Antrag->getAntragsnr_Liste($GUI->Stelle->id);
     if ($back[0]=='') {
       # Fehlerfreie Datenabfrage
-      $FormObjAntr_nr=new FormObject('suchantrnr','select',$back[1]['antr_nr'],array($antr_nr),$back[1]['antr_nr'],1,0,0,NULL);
+      $FormObjAntr_nr=new FormObject('suchantrnr','select',$back[1]['antr_nr_stelle_id'],array($antr_nr),$back[1]['antr_nr'],1,0,0,NULL);
     }
     else {
       $FormObjAntr_nr=new FormObject('suchantrnr','text',array($back[0]),'','',25,255,0,NULL);

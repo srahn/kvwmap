@@ -49,11 +49,14 @@ class antrag {
   # pruefe_antrag_eintragen($antr_nr_a,$antr_nr_b,$VermStelle,$verm_art,$datum)
   ################################################################
 
-  function antrag($nr,$db) {
+  function antrag($nr,$stelle_id,$db) {
     global $debug;
     $this->debug=$debug;
-    if ($nr!='') {
+    if($nr!='') {
       $this->nr=$nr;
+    }
+		if($stelle_id!='') {
+      $this->stelle_id=$stelle_id;
     }
     $this->database=$db;
   }
@@ -68,6 +71,7 @@ class antrag {
     }    
     # Festlegen des Pfades für den Auftrag
     $auftragspfad=RECHERCHEERGEBNIS_PATH.$this->nr;
+		if($this->stelle_id != '')$auftragspfad.='~'.$this->stelle_id;
     #echo '<br>'.$auftragspfad;
     if (!is_dir($auftragspfad)) {
       # Verzeichnis existierte noch nicht. 
@@ -90,7 +94,9 @@ class antrag {
   }
 
   function DokumenteInOrdnerZusammenstellen($nachweis){
-    $auftragspfad=RECHERCHEERGEBNIS_PATH.$this->nr.'/Nachweise/';
+		$antragsnr = $this->nr;
+		if($this->stelle_id != '')$antragsnr.='~'.$this->stelle_id;
+    $auftragspfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Nachweise/';
     # Erzeuge ein Unterverzeichnis für die Nachweisdokumente
     mkdir ($auftragspfad,0777);
     # Führe in Schleif für alle zum Auftrag gehörenden Dokumente folgendes aus
@@ -143,7 +149,9 @@ class antrag {
   }  
 
   function EinmessungsskizzenInOrdnerZusammenstellen($festpunkte){
-    $skizzenpfad=RECHERCHEERGEBNIS_PATH.$this->nr.'/Einmessungsskizzen/';
+		$antragsnr = $this->nr;
+		if($this->stelle_id != '')$antragsnr.='~'.$this->stelle_id;
+    $skizzenpfad=RECHERCHEERGEBNIS_PATH.$antragsnr.'/Einmessungsskizzen/';
     # Erzeuge ein Unterverzeichnis für die Einmessungsskizzen
     mkdir ($skizzenpfad,0777);
     # Frage die in der Liste vorkommenden Kilometerquadrate ab.
@@ -258,7 +266,8 @@ class antrag {
     return $csv;
   }
     
-  function getAntraege($id,$nr,$richtung,$order) {
+  function getAntraege($id,$nr,$richtung,$order,$current_stelle_id) {
+		global $admin_stellen;
     $sql ="SELECT a.*,a.vermstelle,va.art AS vermart,vs.name AS vermst";
     $sql.=" ,SUBSTRING(a.antr_nr from 1 for 2) AS antr_nr_a";
     $sql.=" ,SUBSTRING(a.antr_nr from 4 for 4) AS antr_nr_b";
@@ -271,6 +280,7 @@ class antrag {
       }
       $sql.=")";
     }
+		if(!in_array($current_stelle_id, $admin_stellen))$sql.= " AND stelle_id = ".$current_stelle_id;
     if ($order=='') {
       $order='antr_nr';
     }
@@ -322,6 +332,8 @@ class antrag {
     $sql ="SELECT DISTINCT n.flurid,n.stammnr,n.rissnummer";
     $sql.=" FROM nachweisverwaltung.n_nachweise AS n, nachweisverwaltung.n_nachweise2antraege AS n2a";
     $sql.=" WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
+		if($this->stelle_id == '')$sql.=" AND stelle_id IS NULL";
+		else $sql.=" AND stelle_id=".$this->stelle_id;
     if($formvars['order'] != '')$sql.=" ORDER BY ".$formvars['order'];
     #echo $sql;
     $ret=$this->database->execSQL($sql,4, 0);    
@@ -618,21 +630,21 @@ class antrag {
   }
   
   
-  function pruefe_antrag_eintragen($antr_nr,$VermStelle,$verm_art,$datum) {
+  function pruefe_antrag_eintragen($antr_nr,$VermStelle,$verm_art,$datum,$stelle_id) {
     #prüfen, ob die Antragsnummer korrekt eingegeben wurde!
     $strenthalten=0;
     if($antr_nr==''){
       $errmsg.='Bitte geben Sie die Antragsnummer ein! \n';
     }
-    $this->debug->write("<br>antrag.php pruefe_antrag_eintragen() prüfen der Eingabe der Anträge, ob Antragsnummer schin vorhanden.<br>".$sql,4);        
-    $sql ="SELECT * FROM nachweisverwaltung.n_antraege WHERE antr_nr = '".$antr_nr."'";
+    $this->debug->write("<br>antrag.php pruefe_antrag_eintragen() prüfen der Eingabe der Anträge, ob Antragsnummer schon vorhanden.<br>".$sql,4);        
+    $sql ="SELECT * FROM nachweisverwaltung.n_antraege WHERE antr_nr = '".$antr_nr."' AND stelle_id=".$stelle_id;
     $queryret=$this->database->execSQL($sql,4, 0);
     if ($queryret[0]) {
       $errmsg.='Fehler bei der Abfrage der Anträge! '.$queryret[1].'\n';
     }
     else {
       if (pg_num_rows($queryret[1])>0) {
-        $errmsg.='Antragsnummer '.$antr_nr.' existiert bereits! '.$queryret[1];
+        $errmsg.='Antragsnummer '.$antr_nr.' existiert bereits!';
       }
     }
 
@@ -653,9 +665,9 @@ class antrag {
     return $errmsg;
   }
   
-  function antrag_eintragen($antr_nr,$VermStelle,$verm_art,$datum) {
-    $sql ="INSERT INTO nachweisverwaltung.n_antraege (antr_nr,vermstelle,vermart,datum)";
-    $sql.=" VALUES('".$antr_nr."',".$VermStelle.",".$verm_art.",'".$datum."')";
+  function antrag_eintragen($antr_nr,$VermStelle,$verm_art,$datum,$stelle_id) {
+    $sql ="INSERT INTO nachweisverwaltung.n_antraege (antr_nr,vermstelle,vermart,datum,stelle_id)";
+    $sql.=" VALUES('".$antr_nr."',".$VermStelle.",".$verm_art.",'".$datum."',".$stelle_id.")";
     $queryret=$this->database->execSQL($sql,4, 1);
     if ($queryret[0]) {
       $errmsg='Es konnte keine Antragsnummer in die Datenbank eingetragen werden!\n'; 
@@ -666,57 +678,68 @@ class antrag {
     return $errmsg;
   }
   
-  function antrag_aendern($antr_nr,$VermStelle,$verm_art,$datum) {
-    $sql ="UPDATE nachweisverwaltung.n_antraege SET vermstelle=".(int)$VermStelle.",vermart=".(int)$verm_art.",datum='".$datum."'";
-    $sql.=" WHERE antr_nr='".$antr_nr_a."'";
-    $queryret=$this->database->execSQL($sql,4, 1);
-    if ($queryret[0]) {
-      $ret[0]=1;
-      $ret[1]='Fehler beim ändern der Antragsdaten in der Datenbank! '.$queryret[1]; 
-    }
-    else {
-      $ret[0]=0;
-      $ret[1]='Auftragsdaten erfolgreich geändert!';
-    }
+  function antrag_aendern($antr_nr,$VermStelle,$verm_art,$datum,$stelle_id) {
+		$sql ="UPDATE nachweisverwaltung.n_antraege SET vermstelle=".(int)$VermStelle.",vermart=".(int)$verm_art.",datum='".$datum."'";
+		$sql.=" WHERE antr_nr='".$antr_nr."'";
+		if($stelle_id == '')$sql.=" AND stelle_id IS NULL";
+		else $sql.=" AND stelle_id=".$stelle_id;
+		$queryret=$this->database->execSQL($sql,4, 1);
+		if ($queryret[0]) {
+			$ret[0]=1;
+			$ret[1]='Fehler beim ändern der Antragsdaten in der Datenbank! '.$queryret[1]; 
+		}
+		else {
+			$ret[0]=0;
+			$ret[1]='Auftragsdaten erfolgreich geändert!';
+		}
     return $ret;
   }
   
-  function antrag_loeschen($antr_nr){
-    $this->database->begintransaction();
-    $this->debug->write("<br>antrag.php antrag_loeschen Löschen der Anträge inclusive der Zuordnungen zu Nachweisdokumenten.<br>",4);
-    $sql="DELETE FROM nachweisverwaltung.n_antraege WHERE antr_nr='".$antr_nr."'";
-    $queryret=$this->database->execSQL($sql,4, 1);
-    if ($queryret[0]) {
-      $errmsg.='Fehler beim Löschen des Antrages!';
-    }
-    $sql="DELETE FROM nachweisverwaltung.n_nachweise2antraege WHERE antrag_id='".$antr_nr."'";
-    $queryret=$this->database->execSQL($sql,4, 1);
-    if ($queryret[0]) {
-      $errmsg.='Fehler beim Löschen der Zuordnungen der Nachweisdokumente zum Antrag!';
-    }
-    if ($errmsg!='') {
-      $this->database->rollbacktransaction();
-    }
-    else {
-      $exceptions = array(".", "..");
-      delete_files(RECHERCHEERGEBNIS_PATH.$antr_nr, $exceptions, 0);
-      $errmsg='Antrag erfolgreich gelöscht';
-      $this->database->committransaction();      
-    }
+  function antrag_loeschen($antr_nr, $stelle_id){
+		$this->database->begintransaction();
+		$this->debug->write("<br>antrag.php antrag_loeschen Löschen der Anträge inclusive der Zuordnungen zu Nachweisdokumenten.<br>",4);
+		$sql="DELETE FROM nachweisverwaltung.n_antraege WHERE antr_nr='".$antr_nr."'";
+		if($stelle_id == '')$sql.=" AND stelle_id IS NULL";
+		else $sql.=" AND stelle_id=".$stelle_id;
+		$queryret=$this->database->execSQL($sql,4, 1);
+		if ($queryret[0]) {
+			$errmsg.='Fehler beim Löschen des Antrages!';
+		}
+		$sql="DELETE FROM nachweisverwaltung.n_nachweise2antraege WHERE antrag_id='".$antr_nr."'";
+		if($stelle_id == '')$sql.=" AND stelle_id IS NULL";
+		else $sql.=" AND stelle_id=".$stelle_id;
+		$queryret=$this->database->execSQL($sql,4, 1);
+		if ($queryret[0]) {
+			$errmsg.='Fehler beim Löschen der Zuordnungen der Nachweisdokumente zum Antrag!';
+		}
+		if ($errmsg!='') {
+			$this->database->rollbacktransaction();
+		}
+		else {
+			$exceptions = array(".", "..");
+			if($stelle_id != '')$antr_nr .= '_'.$stelle_id;
+			delete_files(RECHERCHEERGEBNIS_PATH.$antr_nr, $exceptions, 0);
+			$errmsg='Antrag erfolgreich gelöscht';
+			$this->database->committransaction();      
+		}
     return $errmsg;
   }
   
-  function getAntragsnr_Liste() {
-    # fragt alle Vermessungsstellen aus der Datenbank ab (id, Name)
-    $sql = "SELECT * FROM nachweisverwaltung.n_antraege ORDER BY antr_nr";
+  function getAntragsnr_Liste($stelle_id) {
+    global $admin_stellen;		
+    $sql = "SELECT * FROM nachweisverwaltung.n_antraege ";
+		if(!in_array($stelle_id, $admin_stellen))$sql.= "AND stelle_id = ".$stelle_id;
+		$sql.= " ORDER BY antr_nr";
     $queryret=$this->database->execSQL($sql,4, 0);
     if ($queryret[0]) { 
       $errmsg='Fehler bei der Abfrage der Antragsnummern in der Datenbank bei Statement: '; 
     }
     else {
       $Antr_nr_Liste['antr_nr'][0]='';
+			$Antr_nr_Liste['antr_nr_stelle_id'][0]='';
       while($rs=pg_fetch_array($queryret[1])) {
         $Antr_nr_Liste['antr_nr'][]=$rs['antr_nr'];
+				$Antr_nr_Liste['antr_nr_stelle_id'][]=$rs['antr_nr'].'~'.$rs['stelle_id'];
       }
       $errmsg='';
     }
