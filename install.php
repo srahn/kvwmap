@@ -29,38 +29,44 @@
 # stefan.rahn@gdi-service.de                                      #
 ###################################################################
 
-error_reporting(E_ALL & ~E_NOTICE);
+error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
+$debug; $log_mysql; $log_mysql;
 output_header();
 install();
 output_footer();
 
-function output_header() {
-  ?><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" lang="de">
-   <head>
+function output_header() { ?>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" lang="de">
+  <head>
     <title>kvmwap Install</title>
-    <META http-equiv=Content-Type content="text/html; charset=UTF-8">
+    <meta http-equiv=Content-Type content="text/html; charset=UTF-8">
     <link rel="stylesheet" href="layouts/main.css">
-   </head>
-   <body><?php
+  </head>
+  <body style="font-family: Arial, Verdana, Helvetica, sans-serif"><?php
 }
 
-function output_footer() {
-  ?></body>
-  </html><?php
+function output_footer() { ?>
+  </body>
+</html><?php
 }
 
 function install() {
+  global $debug, $log_mysql, $log_postgres;
   if (!file_exists('config.php')) {
     install_config();
   }
   
   include('config.php');
-  show_constants();
+  #show_constants();
 
   include(CLASSPATH.'log.php');
   if(DEBUG_LEVEL > 0) $debug = new debugfile(DEBUGFILE);
+  if (LOG_LEVEL > 0) {
+   $log_mysql = new LogFile(LOGFILE_MYSQL, 'text', 'Log-Datei MySQL' , '#------v: ' . date("Y:m:d H:i:s", time()));
+   $log_postgres = new LogFile(LOGFILE_POSTGRES, 'text', 'Log-Datei-Postgres', '------v: ' . date("Y:m:d H:i:s", time()));
+  }
   ?>
-  <h1>Teste MySQL-Server Verbindung</h1><?php
+  <h1>Teste Verbindung zu MySQL mit Nutzer root</h1><?php
   
   #
   # Teste ob MySQL-Server läuft
@@ -69,12 +75,12 @@ function install() {
   $mysqlRootDb = new database;
   $mysqlRootDb->host = MYSQL_HOST;
   $mysqlRootDb->user = 'root';
-  $mysqlRootDb->passwd = getenv('MYSQL_ENV_MYSQL_ROOT_PASSWORD');
+  $mysqlRootDb->passwd = 'test'; #getenv('MYSQL_ENV_MYSQL_ROOT_PASSWORD');
   $mysqlRootDb->dbName = 'mysql'; ?>
-  Verbindungsdaten für root-Zugang wie folgt gesetzt:<br>
+  Verbindungsdaten für Zugang zu MySQL root Nutzer wie folgt gesetzt:<br>
   Host: <?php echo $mysqlRootDb->host; ?><br>
   User: <?php echo $mysqlRootDb->user; ?><br>
-  Password: <?php echo $mysqlRootDb->passwd; ?><br>
+  Password: <?php #echo $mysqlRootDb->passwd; ?><br>
   Datenbankname: <?php echo $mysqlRootDb->dbName; ?><br><?php
   
   if (mysql_exists($mysqlRootDb)) { ?>
@@ -83,8 +89,9 @@ function install() {
   else { ?>
     Es kann keine Verbindung zur Datenbank <?php echo $mysqlRootDb->dbName; ?> mit Nutzer <?php echo $mysqlRootDb->user; ?>@<?php echo $mysqlRootDb->host; ?> hergestellt werden.<br><?php
     return false;
-  }
+  } ?>
 
+  <h1>Teste Verbindung zu MySQL mit Nutzer <?php echo MYSQL_USER; ?></h1><?php
   #
   # Teste ob kvwmap Datenbank auf MySQL-Server läuft
   # und richte ggf. Nutzer und eine neue leere kvwmap Datenbank ein.
@@ -93,36 +100,49 @@ function install() {
   $mysqlKvwmapDb->host = MYSQL_HOST;
   $mysqlKvwmapDb->user = MYSQL_USER;
   $mysqlKvwmapDb->passwd = MYSQL_PASSWORD;
-  $mysqlKvwmapDb->dbName = MYSQL_DBNAME;
+  $mysqlKvwmapDb->dbName = MYSQL_DBNAME; ?>
+  Verbindungsdaten für Zugang zu MySQL kvwmap Nutzer wie folgt gesetzt:<br>
+  Host: <?php echo $mysqlKvwmapDb->host; ?><br>
+  User: <?php echo $mysqlKvwmapDb->user; ?><br>
+  Password: <?php #echo $mysqlKvwmapDb->passwd; ?><br>
+  Datenbankname: <?php echo $mysqlKvwmapDb->dbName; ?><br><?php
+  
   if (kvwmapdb_exists($mysqlKvwmapDb)) { ?>
     kvwmap Datenbank <?php echo $mysqlKvwmapDb->dbName; ?> existiert schon auf MySQL-Server.<br><?php
-    $mysqlKvwmapDb->close();
+    $kvwmapdb_installed = true;
   }
   else { ?>
     Es kann keine Verbindung zur kvwmap Datenbank <?php echo $mysqlKvwmapDb->dbName; ?> mit Nutzer <?php echo $mysqlKvwmapDb->user; ?>@<?php echo $mysqlKvwmapDb->host; ?> hergestellt werden.<br>
-    Installiere kvwmap Datenbank auf MySQL-Server.<br><?php
-    install_kvwmapdb($mysqlRootDb, $mysqlKvwmapDb);
+    <h1>Installiere kvwmap Datenbank auf MySQL-Server</h1><?php
+    $kvwmapdb_installed = install_kvwmapdb($mysqlRootDb, $mysqlKvwmapDb);
     $mysqlRootDb->close();
-    $mysqlKvwmapDb->close();
-  }
-  
+  } ?>
+
+  <h1>Teste Verbindung zu PostgreSQL mit Nutzer postgres</h1><?php
   #
   # Teste PostgreSQL-Server läuft
   #
-  include(CLASSPATH . 'posgresql.php');
+  include(CLASSPATH . 'postgresql.php');
   $pgsqlPostgresDb = new pgdatabase();
   $pgsqlPostgresDb->host = POSTGRES_HOST;                        
   $pgsqlPostgresDb->user = 'postgres';                          
-  $pgsqlPostgresDb->passwd = getenv('PGSQL_ENV_PGSQL_ROOT_PASSWORD');;                    
-  $pgsqlPostgresDb->dbName = 'postgres';
-  if (postgresql_exists($pgsqlPostgresDb)) { ?>
-    PostgreSQL-Server läuft, Verbindung zur Datenbank <?php echo $pgsqlPostgresDb; ?> kann mit Nutzer: <?php echo $pgsqlPostgresDb->user; ?> host: <?php echo $pgsqlPostgresDb->host; ?> hergestellt werden!<br><?php
+  $pgsqlPostgresDb->passwd = getenv('PGSQL_ENV_POSTGRES_PASSWORD');                    
+  $pgsqlPostgresDb->dbName = 'postgres'; ?>
+  Verbindungsdaten für Zugang zu PostgreSQL postgres Nutzer wie folgt gesetzt:<br>
+  Host: <?php echo $pgsqlPostgresDb->host; ?><br>
+  User: <?php echo $pgsqlPostgresDb->user; ?><br>
+  Password: <?php #echo $pgsqlPostgresDb->passwd; ?><br>
+  Datenbankname: <?php echo $pgsqlPostgresDb->dbName; ?><br><?php
+  
+  if (postgres_exists($pgsqlPostgresDb)) { ?>
+    PostgreSQL-Server läuft, Verbindung zur Datenbank <?php echo $pgsqlPostgresDb->dbName; ?> kann mit Nutzer: <?php echo $pgsqlPostgresDb->user; ?> host: <?php echo $pgsqlPostgresDb->host; ?> hergestellt werden!<br><?php
   }
   else { ?>
     Es kann keine Verbindung zur PostgreSQL-Datenbank <?php echo $pgsqlPostgresDb->dbName; ?> mit Nutzer: <?php echo $pgsqlPostgresDb->user; ?> host: <?php echo $pgsqlPostgresDb->host; ?> hergestellt werden.<br><?php
     return false;
-  }
-  
+  } ?>
+
+  <h1>Teste Verbindung zu PostgreSQL mit Nutzer <?php echo POSTGRES_USER; ?></h1><?php
   #
   # Teste ob kvwmap Datenbank auf PostgreSQL-Server läuft
   # und richte ggf. Nutzer und eine neue leere kvwmap Datenbank ein. 
@@ -131,28 +151,50 @@ function install() {
   $pgsqlKvwmapDb->host = POSTGRES_HOST;                        
   $pgsqlKvwmapDb->user = POSTGRES_USER;                          
   $pgsqlKvwmapDb->passwd = POSTGRES_PASSWORD;                   
-  $pgsqlKvwmapDb->dbName = POSTGRES_DBNAME;
+  $pgsqlKvwmapDb->dbName = POSTGRES_DBNAME; ?>
+  Verbindungsdaten für Zugang zu PostgreSQL kvwmap Nutzer wie folgt gesetzt:<br>
+  Host: <?php echo $pgsqlKvwmapDb->host; ?><br>
+  User: <?php echo $pgsqlKvwmapDb->user; ?><br>
+  Password: <?php# echo $pgsqlKvwmapDb->passwd; ?><br>
+  Datenbankname: <?php echo $pgsqlKvwmapDb->dbName; ?><br><?php
+  
   if (kvwmapsp_exists($pgsqlKvwmapDb)) { ?>
     kvwmaps PostGIS Datenbank <?php echo $pgsqlKvwmapDb->dbName; ?> existiert schon auf PostgreSQL-Server.<br><?php
-    $pgsqlKvwmapDb->close();
+    $kvwmapsp_installed = true;
   }
   else { ?>
     Es kann keine Verbindung zur Postgres Datenbank <?php echo $pgsqlKvwmapDb->dbName; ?> mit Nutzer <?php echo $pgsqlKvwmapDb->user; ?> und host: <?php echo $pgsqlKvwmapDb->host; ?> hergestellt werden.<br>
-    Installiere kvwmap Datenbank auf PostgreSQL-Server.<br><?php
-    install_kvwmapsp($pgsqlPostgresDb, $pgsqlKvwmapDb);
+    <h1>Installiere kvwmap Datenbank auf PostgreSQL-Server</h1><?php
+    $kvwmapsp_installed = install_kvwmapsp($pgsqlPostgresDb, $pgsqlKvwmapDb);
     $pgsqlPostgresDb->close();
+  }
+
+  if ($kvwmapdb_installed and $kvwmapsp_installed) { ?>
+    <h1>Datenbanken kvwmapdb und kvwmapsp stehen jetzt zur Verfügung</h1>
+    Verbindungen zu MySQL und PostgreSQL Datenbanken von kvwmap herstellen und Migration ausführen.<br><?php
+    $mysqlKvwmapDb->open();
+    $pgsqlKvwmapDb->open(); ?>
+
+    Erzeuge die PostGIS Erweiterung in der kvwmapsp Datenbank falls noch nicht vorhanden.<br><?php
+    $sql = "
+      CREATE EXTENSION IF NOT EXISTS postgis
+    ";
+    $pgsqlKvwmapDb->execSQL($sql, 0, 1); ?>
+    
+    <h1>Migrationen für kvwmap Schemas in MySQL und PostgreSQL ausführen</h1><?php
+    #
+    # Führe alle Migration aus und richte damit die aktuellen Datenbankschemas ein.
+    #
+    migrate_databases($mysqlKvwmapDb, $pgsqlKvwmapDb);
+
+    #
+    # Richte eine Stelle für einen Administrator ein.
+    #
+    install_admin_stelle($mysqlKvwmapDb);
+    
+    $pgsqlKvwmapDb->close();
     $pgsqlKvwmapDb->close();
   }
-  
-  #
-  # Führe alle Migration aus und richte damit die aktuellen Datenbankschemas ein.
-  #
-  migragte_databases($mysqlKvwmapDb, $pgsqlKvwmapDb);
-
-  #
-  # Richte eine Stelle für einen Administrator ein.
-  #
-  install_admin_stelle($mysqlKvwmapDb);
 }
 
 function install_config() {
@@ -196,7 +238,7 @@ function install_config() {
     $config
   );
   $config = str_replace(
-    "define('MAPSERVERVERSION', '450');",
+    "define('PHPVERSION', '450');",
     "define('PHPVERSION', '" . versionFormatter(getPHPVersion()) . "');",
     $config
   );
@@ -237,65 +279,61 @@ function show_constants() { ?>
 /*
 * Testet ob es schon eine mysql-Datenbank gibt
 */
-function mysql_exists($mysqlKvwmapDb) {
+function mysql_exists($mysqlKvwmapDb) { ?>
+  Prüfe ob Datenbank mysql schon existiert<br><?php
   return $mysqlKvwmapDb->open();
 }
 
 /*
 * Testet ob es schon eine kvwmapdb gibt
 */
-function kvwmapdb_exists($mysqlKvwmapDb) {
+function kvwmapdb_exists($mysqlKvwmapDb) { ?>
+  Prüfe ob kvwmapdb schon existiert<br><?php
   return $mysqlKvwmapDb->open();
 }
 
 /*
 * Installiert kvwmap-Datenbank
 */
-function install_kvwmapdb ($mysqlRootDb, $mysqlKvwmapDb) {
+function install_kvwmapdb ($mysqlRootDb, $mysqlKvwmapDb) { ?>
+  Erzeuge Nutzer: <?php echo $mysqlKvwmapDb->user; ?><br><?php
   $sql = "
-    CREATE USER '" . $mysqlKvwmapDb->user . "'@'" . $mysqlKvwmapDb->host . "' IDENTIFIED BY '" . $mysqlKvwmapDb->passwd . "';
-    GRANT ALL PRIVILEGES ON * . * TO '" . $mysqlKvwmapDb->user . "'@'" . $mysqlKvwmapDb->host . "';
-    CREATE DATABASE " . $mysqlKvwmapDb->dbName . " CHARACTER SET utf8 COLLATE utf8_general_ci;
-    GRANT ALL PRIVILEGES ON " . $mysqlKvwmapDb->dbnName . ".* TO '" . $mysqlKvwmapDb->user . "'@'" . $mysqlKvwmapDb->host . "' IDENTIFIED BY '" . $mysqlKvwmapDb->passwd . "';
+    CREATE USER '" . $mysqlKvwmapDb->user . "'@'%'
+    IDENTIFIED BY '" . $mysqlKvwmapDb->passwd . "'
   ";
-  $mysqlRootDb->execSQL($sql, 0, 0);  
-  $mysqlRootDb->close();
+  $mysqlRootDb->execSQL($sql, 0, 1); ?>
   
-  # Test ob kvwmap Datenbank leer ist
+  Erzeuge Datenbank: <?php echo $mysqlKvwmapDb->dbName; ?><br><?php
   $sql = "
-    SELECT
-      COUNT(*)
-    FROM
-      information_schema.TABLES
-    WHERE
-      TABLE_SCHEMA='" . $mysqlKvwmapDb->dbName . "'
+    CREATE DATABASE " . $mysqlKvwmapDb->dbName . "
+    CHARACTER SET utf8
+    COLLATE utf8_general_ci
   ";
-  $ret = $mysqlKvwmapDb->execSQL($sql, 0, 0);
-  $result = mysql_fetch_row($ret[1]);
-  if($result[0] > 0) { ?>
-    kvwmap Datenbank nicht leer. Test ob es schon User gibt (also ob es ein gerade angelegtes Schema ist oder nicht).<br><?php
-    $sql = "
-      SELECT
-        COUNT(*)
-      FROM
-        user
-    ";
-    $ret = $mysqlKvwmapDb->execSQL($sql, 0, 0);
-    $result = mysql_fetch_row($ret[1]);
-    if($result[0] > 0) { ?>
-      Die MySQL-Datenbank <?php echo $mysqlKvwmapDb->dbName; ?> ist nicht leer. Installation nicht möglich.<br><?php
-    }
-    else { ?>
-      User-Tabelle leer, also offenbar ein gerade angelegtes Schema -> Beispieldaten einlesen.<br>
-      Um kvwmap benutzen zu können, können Sie jetzt einen ersten Nutzer und eine Admin-Stelle anlegen.<br><?php
-    }
+  $mysqlRootDb->execSQL($sql, 0, 1); ?>
+
+  Setze Rechte für Nutzer: <?php echo $mysqlKvwmapDb->user; ?><br><?php  
+  $sql = "  
+    GRANT ALL PRIVILEGES
+    ON *.*
+    TO '" . $mysqlKvwmapDb->user . "'@'%'
+    IDENTIFIED BY '" . $mysqlKvwmapDb->passwd . "';
+  ";
+  $ret = $mysqlRootDb->execSQL($sql, 0, 1);
+  if ($ret[0]) { ?>
+    Fehler beim installieren der Datenbank: <?php echo $mysqlKvwmapDb->dbName; ?><br><?php
+    return false;
+  }
+  else { ?>
+    Anlegen der Datenbank: <?php echo $mysqlKvwmapDb->dbName; ?> erfolgreich.<br><?php
+    return true;
   }
 }
 
 /*
 * Testet ob die postgre Datenbank auf PostgreSQL-Server läuft
 */
-function postgresql_exists($pgsqlPostgresDb) {
+function postgres_exists($pgsqlPostgresDb) { ?>
+  Prüfe ob Datenbank postgres schon existiert<br><?php
   return @$pgsqlPostgresDb->open();
 }
 
@@ -303,30 +341,53 @@ function postgresql_exists($pgsqlPostgresDb) {
 * Testet ob die kvwmap Datenbank auf PostgreSQL-Server läuft
 */
 
-function kvwmapsp_exists($pgsqlKvwmapDb) {
+function kvwmapsp_exists($pgsqlKvwmapDb) { ?>
+  Prüfe ob Datenbank kvwmapsp schon existiert<br><?php
   return @$pgsqlKvwmapDb->open();
 }
 
 /*
 * Installiert PostGIS-Datenbank
 */
-function install_kvwmapsp($pgsqlPostgresDb, $pgsqlKvwmapDb) {
+function install_kvwmapsp($pgsqlPostgresDb, $pgsqlKvwmapDb) { ?>
+  Erzeuge Nutzer: <?php echo $pgsqlKvwmapDb->user; ?><br><?php
   $sql = "
+    DROP ROLE IF EXISTS
+      " . $pgsqlKvwmapDb->user . ";
+
     CREATE ROLE
-      '" . $pgsqlKvwmapDb->user . "'
+      " . $pgsqlKvwmapDb->user . "
     WITH
       SUPERUSER
+      LOGIN
       PASSWORD '" . $pgsqlKvwmapDb->passwd . "'
   ";
-  $pgsqlPostgresDb->execSQL($sql, 0, 0);  
-  $pgsqlPostgresDb->close();
+  $pgsqlPostgresDb->execSQL($sql, 0, 1); ?>
+  
+  Erzeuge Datenbank: <?php echo $pgsqlKvwmapDb->dbName; ?><br><?php
+  $sql = "
+    CREATE DATABASE
+      " . $pgsqlKvwmapDb->dbName . "
+    WITH
+      OWNER " . $pgsqlKvwmapDb->user . ";
+  ";
+  $query = pg_query($pgsqlPostgresDb->dbConn, $sql);
+  if ($query==0) {
+    $err_msg = "Fehler bei SQL Anweisung:<br>" . $sql . "<br>" . pg_result_error($query);
+    echo "<br><b>" . $err_msg . "</b>";
+    return false;
+  }
+  else { ?>
+    Anlegen der Datenbank: <?php echo $pgsqlKvwmapDb->dbName; ?> erfolgreich.<br><?php
+    return true;
+  }
 }
 
 /*
 * 
 */
 function migrate_databases($mysqlKvwmapDb, $pgsqlKvwmapDb) {
-  include(CLASSPATH.'administration.php');
+  include(CLASSPATH . 'administration.php');
   $administration = new administration($mysqlKvwmapDb, $pgsqlKvwmapDb);
   $administration->get_database_status();
   $administration->update_databases();
@@ -349,9 +410,9 @@ function migrate_databases($mysqlKvwmapDb, $pgsqlKvwmapDb) {
 */
 function install_admin_stelle($mysqlKvwmapDb) {
   $filepath = LAYOUTPATH . 'db/mysql/data/mysql_install_admin.sql';
-  $queryret = $mysqlKvwmapDb->exec_file($filepath);
+  $queryret = $mysqlKvwmapDb->exec_file($filepath, NULL, NULL);
   if ($queryret[0]) { 
-    echo $queryret[1]; ?><br>
+    echo $queryret[1]; ?>
     Fehler beim Ausführen der Datei: <?php echo $filepath; ?><br><?php
   }
   else { ?>
@@ -410,47 +471,3 @@ function versionFormatter($version) {
   );
 }
 ?>
-
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de" lang="de">
- <head>
-  <title><?php echo TITLE; ?></title>
-  <META http-equiv=Content-Type content="text/html; charset=UTF-8">
-  <link rel="stylesheet" href="layouts/main.css">
- </head>
- <body style="font-family: Arial, Verdana, Helvetica, sans-serif" onload="document.login.username.focus();">
-  <form name="install" action="install.php" method="post">
-    <input type="hidden" name="go" value="login">
-    <br>
-    <table align="center" cellspacing="4" cellpadding="12" bgcolor="<? echo BG_DEFAULT; ?>" border="0" style="background-color: <? echo BG_DEFAULT; ?>; box-shadow: 12px 10px 14px #777; border: 1px solid #bbbbbb; background: linear-gradient(<? echo BG_GLEATTRIBUTE; ?> 0%, <? echo BG_DEFAULT ?> 100%);">
-      <tr>
-        <td align="center">
-          <table cellspacing="0" cellpadding="2" border="0">
-            <tr>
-              <td align="center" colspan="2"><h1>kvwmap&nbsp;Installation</h1></td>
-            </tr>
-            <tr>
-              <td>&nbsp;</td>
-            </tr>
-            <tr>
-              <td width="400" colspan="2"><span><?php echo urldecode($msg); ?></span></td>
-            </tr>
-            <tr>
-              <td>&nbsp;</td>
-            </tr>
-            <? if($ready_for_schema_creation){ ?>
-            <tr>
-              <td colspan="2" align="center"><input type="submit" name="create_schemas" value="Datenbank-Schemata anlegen"/></td>
-            </tr>
-            <? } ?>
-            <? if($ready_for_data_insert){ ?>
-            <tr>
-              <td colspan="2" align="center"><input type="submit" name="insert_data" value="Beispieldaten anlegen"/></td>
-            </tr>
-            <? } ?>
-          </table>
-        </td>
-      </tr>
-    </table>
-  </form>
- </body>
-</html>
