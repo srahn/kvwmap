@@ -779,26 +779,20 @@ class Nachweis {
       } break;
       
       case "multibleIDs" : {
-        $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS andere_art, d.art AS andere_art_name";
-          $sql.=" FROM nachweisverwaltung.n_vermstelle AS v";
-		  if($gemarkung != '' AND $flur != ''){
-			$sql.=", alkobj_e_fla as alko, alknflur";
-		  }
-		  $sql.=" , nachweisverwaltung.n_nachweise AS n";
-          $sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d"; 
-					$sql.=" 		LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id";
-					$sql.=" ON n2d.nachweis_id = n.id";
-        $sql.=" WHERE CAST(n.vermstelle AS integer)=v.id";
-		if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
+				$sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring,v.name AS vermst, n2d.dokumentart_id AS andere_art, d.art AS andere_art_name";
+				$sql.=" FROM nachweisverwaltung.n_nachweise AS n";
+				$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
+				$sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d"; 
+				$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id";
+				$sql.=" ON n2d.nachweis_id = n.id";
+        $sql.=" WHERE ";
+				if($gueltigkeit != NULL)$sql.=" gueltigkeit = ".$gueltigkeit." AND ";
         if ($idselected[0]!=0) {
-          $sql.=" AND n.id IN ('".$idselected[0]."'";
+          $sql.=" n.id IN ('".$idselected[0]."'";
           for ($i=1;$i<count($idselected);$i++) {
             $sql.=",'".$idselected[$i]."'";
           }
           $sql.=")";
-        }
-        if($gemarkung != '' AND $flur != ''){
-		  $sql.=" AND alko.objnr = alknflur.objnr AND alknflur.gemkgschl = '".$gemarkung."' AND alknflur.flur = '".str_pad($flur,3,'0',STR_PAD_LEFT)."' AND st_intersects(st_transform(alko.the_geom, (select srid from geometry_columns where f_table_name = 'n_nachweise')), n.the_geom)";
         }
         if($stammnr!=''){
           $sql.=" AND n.stammnr='".$stammnr."'";
@@ -1006,13 +1000,14 @@ class Nachweis {
         # Suche nach Antragsnummer
         # echo '<br>Suche nach Antragsnummer.';
         $this->debug->write('Abfragen der Nachweise die zum Antrag gehören',4);
-        $sql ="SELECT distinct n.*,v.name AS vermst, n2d.dokumentart_id AS andere_art, d.art AS andere_art_name";
-        $sql.=" FROM nachweisverwaltung.n_nachweise2antraege AS n2a, nachweisverwaltung.n_vermstelle AS v, nachweisverwaltung.n_nachweise AS n";
+				$sql ="SELECT distinct n.*,v.name AS vermst, n2d.dokumentart_id AS andere_art, d.art AS andere_art_name";
+        $sql.=" FROM nachweisverwaltung.n_nachweise2antraege AS n2a, nachweisverwaltung.n_nachweise AS n";
+				$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
         $sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d"; 
 				$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n2d.dokumentart_id = d.id";
 				$sql.=" ON n2d.nachweis_id = n.id";
-        $sql.=" WHERE CAST(n.vermstelle AS integer)=v.id AND n.id=n2a.nachweis_id";
-        $sql.=" AND n2a.antrag_id='".$antr_nr."'";
+        $sql.=" WHERE n.id=n2a.nachweis_id";
+        $sql.=" AND n2a.antrag_id='".$antr_nr."'";				
 				if($stelle_id == '')$sql.=" AND stelle_id IS NULL";
 				else $sql.=" AND stelle_id=".$stelle_id;
 				if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
