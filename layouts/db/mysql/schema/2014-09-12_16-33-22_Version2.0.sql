@@ -915,13 +915,14 @@ PRIMARY KEY ( `user_id` , `stelle_id` , `time_id` )
 --
 
 CREATE TABLE `u_consume2layer` (
-`user_id` INT NOT NULL ,
-`stelle_id` INT NOT NULL ,
-`time_id` DATETIME NOT NULL ,
+`user_id` INT NOT NULL,
+`stelle_id` INT NOT NULL,
+`time_id` DATETIME NOT NULL,
 `layer_id` INT NOT NULL,
 PRIMARY KEY ( `user_id` , `stelle_id` , `time_id` , `layer_id`)
-) ENGINE=MyISAM;  
+) ENGINE=MyISAM;
 
+-- ---------------------------------------
 
 --
 -- Table structure for table `u_consumeALK`
@@ -932,39 +933,50 @@ CREATE TABLE `u_consumeALK` (
 `stelle_id` INT NOT NULL ,
 `time_id` DATETIME NOT NULL ,
 `druckrahmen_id` INT NOT NULL,
-PRIMARY KEY ( `user_id` , `stelle_id` , `time_id` ) 
-) ENGINE=MyISAM;  
+PRIMARY KEY ( `user_id` , `stelle_id` , `time_id` )
+) ENGINE=MyISAM;
 
+-- ---------------------------------------
 
 --
 -- Table structure for table `u_consume2comments`
 --
 
 CREATE TABLE `u_consume2comments` (
- `user_id` int(11) NOT NULL,
- `stelle_id` int(11) NOT NULL,
- `time_id` datetime NOT NULL,
- `comment` text,
- PRIMARY KEY  (`user_id`,`stelle_id`,`time_id`)
+`user_id` int(11) NOT NULL,
+`stelle_id` int(11) NOT NULL,
+`time_id` datetime NOT NULL,
+`comment` text,
+PRIMARY KEY  (`user_id`,`stelle_id`,`time_id`)
 ) ENGINE=MyISAM;
 
-# Hinzufügen einer Tabelle zur Speicherung der ALB-Zugriffe
+-- ---------------------------------------
+
+--
+-- Hinzufuegen einer Tabelle zur Speicherung der ALB Zugriffe
+--
 
 CREATE TABLE `u_consumeALB` (
-  `user_id` int(11) NOT NULL,
-  `stelle_id` int(11) NOT NULL,
-  `time_id` datetime NOT NULL,
-  `format` int(11) NOT NULL,
-  `log_number` varchar(255) NOT NULL,
-  `wz` ENUM( '0', '1' ) NULL,
-  `numpages` INT( 11 ) NULL ,
-  PRIMARY KEY  (`user_id`,`stelle_id`,`time_id`,`log_number`)
+`user_id` int(11) NOT NULL,
+`stelle_id` int(11) NOT NULL,
+`time_id` datetime NOT NULL,
+`format` int(11) NOT NULL,
+`log_number` varchar(255) NOT NULL,
+`wz` ENUM( '0', '1' ) NULL,
+`numpages` INT( 11 ) NULL ,
+PRIMARY KEY  (`user_id`,`stelle_id`,`time_id`,`log_number`)
 ) ENGINE=MyISAM;
 
+-- ---------------------------------------
+
+--
+-- Table structure for table `migrations`
+--
+
 CREATE TABLE  `migrations` (
-	`component` VARCHAR( 50 ) NOT NULL ,
-	`type` ENUM(  'mysql',  'postgresql' ) NOT NULL ,
-	`filename` VARCHAR( 255 ) NOT NULL
-) ENGINE = MYISAM ;
+	`component` VARCHAR(50) NOT NULL,
+	`type` ENUM('mysql', 'postgresql') NOT NULL,
+	`filename` VARCHAR(255) NOT NULL
+) ENGINE=MYISAM;
 
 COMMIT;
