@@ -523,16 +523,16 @@ $kvwmap_plugins = array();																			# Version 1.11.0
 define ('INFO1','Prüfen Sie ob Ihr Datenbankmodell aktuell ist.');
 
 # Character Set der MySQL-Datenbank
-define(MYSQL_CHARSET,'UTF8');													# Version 1.7.6		# in Version 1.11.0 auf UTF8 gesetzt
-define(POSTGRES_CHARSET,'UTF8');											# Version 1.8.0		# in Version 1.11.0 auf UTF8 gesetzt
+define('MYSQL_CHARSET','UTF8');													# Version 1.7.6		# in Version 1.11.0 auf UTF8 gesetzt
+define('POSTGRES_CHARSET','UTF8');											# Version 1.8.0		# in Version 1.11.0 auf UTF8 gesetzt
 
 
 ################################ Datenbankangaben setzen ######################		
 # Datenbank für die Nutzerdaten (mysql)
-define(MYSQL_HOST, 'localhost');																	# Version 2.0
-define(MYSQL_USER, '');																						# Version 2.0
-define(MYSQL_PASSWORD, '');																				# Version 2.0
-define(MYSQL_DBNAME, $dbname);																		# Version 2.0
+define('MYSQL_HOST', 'localhost');																	# Version 2.0
+define('MYSQL_USER', '');																						# Version 2.0
+define('MYSQL_PASSWORD', '');																				# Version 2.0
+define('MYSQL_DBNAME', $dbname);																		# Version 2.0
 
 // $userDb=new database();																				# in Version 2.0 gelöscht
 // $userDb->host='localhost';																			# in Version 2.0 gelöscht
@@ -543,10 +543,10 @@ define(MYSQL_DBNAME, $dbname);																		# Version 2.0
 //$GISdb = $userDb; 													# Version 1.7.6			# in Version 2.0 gelöscht
 
 # Datenbank mit den Geometrieobjekten (PostgreSQL mit PostGIS Aufsatz)
-define(POSTGRES_HOST, 'localhost');																# Version 2.0
-define(POSTGRES_USER, '');																				# Version 2.0
-define(POSTGRES_PASSWORD, '');																		# Version 2.0
-define(POSTGRES_DBNAME, $pgdbname);																# Version 2.0
+define('POSTGRES_HOST', 'localhost');																# Version 2.0
+define('POSTGRES_USER', '');																				# Version 2.0
+define('POSTGRES_PASSWORD', '');																		# Version 2.0
+define('POSTGRES_DBNAME', $pgdbname);																# Version 2.0
 	
 // if ($pgdbname!='') {																													# in Version 2.0 gelöscht
 	// if(in_array($_REQUEST['go'], $fast_loading_cases)){		# Version 1.7.6			# in Version 2.0 gelöscht
