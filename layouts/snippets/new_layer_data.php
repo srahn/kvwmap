@@ -12,7 +12,7 @@
 </script>
 <table border="0" cellpadding="5" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
-    <td colspan="5"><h2><?php echo $strtitle; ?>:&nbsp;<? echo $this->qlayerset[$i]['Name']; ?></h2></td>
+    <td colspan="5"><h2><?php echo $strtitle; ?>:&nbsp;<? echo $this->qlayerset[0]['Name']; ?></h2></td>
   </tr>
   <tr <? if($this->formvars['selected_layer_id'] != '')echo 'style="display:none"'; ?>>
   	<td>&nbsp;</td>
@@ -48,24 +48,24 @@
 <?
 if($this->formvars['selected_layer_id'] AND $this->Fehler == ''){
 	$i = 0;	
-	if($this->qlayerset[$i]['template']==''){
+	if($this->qlayerset[0]['template']==''){
 		include(SNIPPETS.'generic_layer_editor_2.php');			# Attribute zeilenweise
 	}
 	else{
-		if(is_file(SNIPPETS.$this->qlayerset[$i]['template'])){
-			include(SNIPPETS.$this->qlayerset[$i]['template']);
+		if(is_file(SNIPPETS.$this->qlayerset[0]['template'])){
+			include(SNIPPETS.$this->qlayerset[0]['template']);
 		}
 		else{
-			if(file_exists(PLUGINS.$this->qlayerset[$i]['template'])){
-				include(PLUGINS.$this->qlayerset[$i]['template']);			# Pluginviews
+			if(file_exists(PLUGINS.$this->qlayerset[0]['template'])){
+				include(PLUGINS.$this->qlayerset[0]['template']);			# Pluginviews
 			}
 			else{
 	   		#Version 1.6.5 pk 2007-04-17
 	   	 	echo '<p>Das in den stellenbezogenen Layereigenschaften angegebene Templatefile:';
-	   	 	echo '<br><span class="fett">'.SNIPPETS.$this->qlayerset[$i]['template'].'</span>';
+	   	 	echo '<br><span class="fett">'.SNIPPETS.$this->qlayerset[0]['template'].'</span>';
 	   	 	echo '<br>kann nicht gefunden werden. Überprüfen Sie ob der angegebene Dateiname richtig ist oder eventuell Leerzeichen angegeben sind.';
 	   	 	echo ' Die Templatezuordnung für die Sachdatenanzeige ändern Sie über Stellen anzeigen, ändern, Layer bearbeiten, stellenbezogen bearbeiten.';
-	   	 	#echo '<p><a href="index.php?go=Layer2Stelle_Editor&selected_layer_id='.$this->qlayerset[$i]['Layer_ID'].'&selected_stelle_id='.$this->Stelle->id.'&stellen_name='.$this->Stelle->Bezeichnung.'">zum Stellenbezogener Layereditor</a> (nur mit Berechtigung möglich)';
+	   	 	#echo '<p><a href="index.php?go=Layer2Stelle_Editor&selected_layer_id='.$this->qlayerset[0]['Layer_ID'].'&selected_stelle_id='.$this->Stelle->id.'&stellen_name='.$this->Stelle->Bezeichnung.'">zum Stellenbezogener Layereditor</a> (nur mit Berechtigung möglich)';
 			}
 		}
 	}
