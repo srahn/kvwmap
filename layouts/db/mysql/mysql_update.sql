@@ -1,23 +1,23 @@
 # SQL-Statements zur Aktualisierung der MySQL-Datenbank von kvwmap
 #
 # Zur Aktualisierung der Datenbank die folgenden SQL-Statements von einer Version zur anderen 
-# in einem SQL-Fenster z.B. in phpMyAdmin ausführen
+# in einem SQL-Fenster z.B. in phpMyAdmin ausfÃ¼hren
 
 ###################################################
-# Änderungen im Datenmodell der Kartenspeicherung #
+# Ã„nderungen im Datenmodell der Kartenspeicherung #
 ###################################################
 
 
 #------------------------------------------------------------------------------------
-# Änderungen von 1.4.2 nach 1.4.3
+# Ã„nderungen von 1.4.2 nach 1.4.3
 # 14.06.2005
-# Verlängerung des Datentypen varchar für das Attribut BlattNr in Baulastentabellen
+# VerlÃ¤ngerung des Datentypen varchar fÃ¼r das Attribut BlattNr in Baulastentabellen
 ALTER TABLE f_Baulasten CHANGE BlattNr BlattNr VARCHAR( 10 ) NOT NULL; 
 ALTER TABLE x_f_Baulasten CHANGE BlattNr BlattNr VARCHAR( 10 ) NOT NULL;
 
 # 13.06.2005
-# Hinzufügen von Spalten in der Tabelle used_layer für die Zuordnung von Templatedateien
-# zur Stellen und Layerabhängigen Sachdatenanzeige
+# HinzufÃ¼gen von Spalten in der Tabelle used_layer fÃ¼r die Zuordnung von Templatedateien
+# zur Stellen und LayerabhÃ¤ngigen Sachdatenanzeige
 ALTER TABLE used_layer
 ADD template VARCHAR(255),
 ADD header VARCHAR(255 ),
@@ -31,35 +31,35 @@ ADD toleranceunits enum('pixels','feet','inches','kilometers','meters','miles','
 Add transparency tinyint(3) unsigned default NULL;
 
 #-----------------------------------------------------------------------------
-# Änderungen von 1.4.4 nach 1.4.5
+# Ã„nderungen von 1.4.4 nach 1.4.5
 
-# Hinzufügen der Tabelle u_labels2classes
+# HinzufÃ¼gen der Tabelle u_labels2classes
 CREATE TABLE u_labels2classes (
   class_id int(11) NOT NULL default '0',
   label_id int(11) NOT NULL default '0',
   PRIMARY KEY  (class_id,label_id)
 ) TYPE=MyISAM;
 
-# Übernahme der Zuordnung der Labels zu den Klassen von classes in u_labels2classes
+# Ãœbernahme der Zuordnung der Labels zu den Klassen von classes in u_labels2classes
 INSERT IGNORE INTO u_labels2classes SELECT Class_ID, Label_ID FROM classes
 WHERE Label_ID > 0 AND Label_ID IS NOT NULL;
 
-# Löschen der Spalte Labels_ID in der Tabelle classes
+# LÃ¶schen der Spalte Labels_ID in der Tabelle classes
 ALTER TABLE classes DROP Label_ID;
 
-# Übernahme der Zuordnung der Styles zu den Klassen von classes in u_styles2classes
+# Ãœbernahme der Zuordnung der Styles zu den Klassen von classes in u_styles2classes
 INSERT IGNORE INTO u_styles2classes SELECT Class_ID, Style_ID FROM classes
 WHERE Style_ID > 0 AND Style_ID IS NOT NULL;
 
-# Löschen der Spalte Style_ID in der Tabelle classes
+# LÃ¶schen der Spalte Style_ID in der Tabelle classes
 ALTER TABLE classes DROP Style_ID;
 
-# Ändern des Datentyps für Spalte Data in Tabelle Layer
+# Ã„ndern des Datentyps fÃ¼r Spalte Data in Tabelle Layer
 
 ALTER TABLE layer CHANGE Data Data TEXT DEFAULT NULL;
 
 # 12.07.2005
-# Hinzufügen der Tabelle u_rolle2used_layer für das Speicher der Einstellungen,
+# HinzufÃ¼gen der Tabelle u_rolle2used_layer fÃ¼r das Speicher der Einstellungen,
 # die an die Rolle gebunden sein sollen.
 CREATE TABLE u_rolle2used_layer (
   user_id int(11) NOT NULL default '0',
@@ -70,15 +70,15 @@ CREATE TABLE u_rolle2used_layer (
   PRIMARY KEY  (user_id,stelle_id,layer_id)
 ) TYPE=MyISAM;
 
-# Hinzufügen der Werte in die Tabelle u_rolle2used_layer, die vorher in der
-# Tabelle used_layer standen und dort an bloß die Stelle gebunden waren.
+# HinzufÃ¼gen der Werte in die Tabelle u_rolle2used_layer, die vorher in der
+# Tabelle used_layer standen und dort an bloÃŸ die Stelle gebunden waren.
 INSERT IGNORE INTO u_rolle2used_layer
 SELECT r.user_id,ul.Stelle_ID,ul.Layer_ID,ul.aktivStatus,ul.queryStatus
 FROM used_layer AS ul, rolle AS r WHERE r.stelle_id=ul.Stelle_ID;
 
 # Entfernen der Spalten aus der Tabelle used_layer
 # neben den nach u_rolle2used_layer verschobenen Statusfeldern
-# werden auch die rect Felder gelöscht, die ebenfalls nicht mehr benötigt werden
+# werden auch die rect Felder gelÃ¶scht, die ebenfalls nicht mehr benÃ¶tigt werden
 ALTER TABLE used_layer
 DROP aktivStatus,
 DROP queryStatus,
@@ -88,64 +88,64 @@ DROP rect_xmax,
 DROP rect_ymax;
 
 # 19.07.2005
-# Hinzufügen einer Spalte drawingorder zur Tabelle u_styles2classes
+# HinzufÃ¼gen einer Spalte drawingorder zur Tabelle u_styles2classes
 # zur Festlegung der Reihenfolge der gezeichneten Symbole einer Klasse
 ALTER TABLE u_styles2classes ADD drawingorder INT(11) UNSIGNED;
 
-# Hinzufügen der Spalten MINSIZE und MAXSIZE zur Tabelle styles
+# HinzufÃ¼gen der Spalten MINSIZE und MAXSIZE zur Tabelle styles
 ALTER TABLE styles ADD minsize INT(11) UNSIGNED;
 ALTER TABLE styles ADD maxsize INT(11) UNSIGNED;
 
-# Hinzufügen der Spalte SYMBOLSCALE zur Tabelle used_layer
+# HinzufÃ¼gen der Spalte SYMBOLSCALE zur Tabelle used_layer
 ALTER TABLE used_layer ADD symbolscale INT( 11 ) UNSIGNED;
 
-# Verlängern des Datentyps für Passwörter in der Tabelle user damit die Spalte
-# mit MD5 Verschlüsselte Zeichenketten aufnehmen kann.
+# VerlÃ¤ngern des Datentyps fÃ¼r PasswÃ¶rter in der Tabelle user damit die Spalte
+# mit MD5 VerschlÃ¼sselte Zeichenketten aufnehmen kann.
 ALTER TABLE user CHANGE passwort passwort VARCHAR( 32 );
 
 # 21.07.2005
-# Hinzufügen einer Spalte drawingorder zur Tabelle classes
+# HinzufÃ¼gen einer Spalte drawingorder zur Tabelle classes
 # zur Festlegung der Reihenfolge der gezeichneten Klassen der Layer
 ALTER TABLE classes ADD drawingorder INT(11) UNSIGNED;
 
 # 25.07.2005
-# Änderung der Spalte Status aus der Tabelle used_layer in queryable In der neuen Spalte
+# Ã„nderung der Spalte Status aus der Tabelle used_layer in queryable In der neuen Spalte
 # wird vermerkt ob ein Layer inerhalb einer Stelle abfragbar sein soll '1' oder nicht '0'
 ALTER TABLE used_layer CHANGE Status queryable ENUM('0','1') DEFAULT '1' NOT NULL; 
 
 # Alle Geometrie Layer (Punkte, Linien und Polygone) werden erst einmal auf abfragbar gesetzt.
-# Kann später angepasst werden.
+# Kann spÃ¤ter angepasst werden.
 UPDATE used_layer AS ul,layer AS l SET ul.queryable='1'
  WHERE ul.Layer_ID=l.Layer_ID AND l.Datentyp IN (0,1,2);
 
-# Hinzufügen der Spalte labelrequires zur Tabelle layer für die Einstellung
+# HinzufÃ¼gen der Spalte labelrequires zur Tabelle layer fÃ¼r die Einstellung
 # wann ein Layer beschriftet werden soll
 ALTER TABLE layer ADD labelrequires varchar(255) default NULL;
 
 # 26.07.2005
-# Übernahme der Spalte selectedButton aus der Tabelle stelle zur Tabelle rolle
-# Hinzufügen der neuen Spalte in Tabelle rolle
+# Ãœbernahme der Spalte selectedButton aus der Tabelle stelle zur Tabelle rolle
+# HinzufÃ¼gen der neuen Spalte in Tabelle rolle
 ALTER TABLE rolle ADD selectedButton VARCHAR(20) DEFAULT 'zoomin' NOT NULL;
-# Übernehmen der Einstellungen aus Tabelle Stelle in Tabelle rolle
+# Ãœbernehmen der Einstellungen aus Tabelle Stelle in Tabelle rolle
 UPDATE rolle AS r,stelle AS s SET r.selectedButton =s.selectedButton WHERE r.stelle_id=s.ID;
-# Spalte in Tabelle stelle löschen
+# Spalte in Tabelle stelle lÃ¶schen
 ALTER TABLE stelle DROP selectedButton;
 
 # 01.08.2005
-# Umbenennen der Spalte AnlFlstPrüfz in Tabelle f_Anlieger und x_f_Anlieger
-ALTER TABLE f_Anlieger CHANGE AnlFlstPrüfz AnlFlstPrüfz CHAR(1) DEFAULT NULL;
-ALTER TABLE x_f_Anlieger CHANGE AnlFlstPrüfz AnlFlstPrüfz CHAR(1) DEFAULT NULL;
+# Umbenennen der Spalte AnlFlstPrÃ¼fz in Tabelle f_Anlieger und x_f_Anlieger
+ALTER TABLE f_Anlieger CHANGE AnlFlstPrÃ¼fz AnlFlstPrÃ¼fz CHAR(1) DEFAULT NULL;
+ALTER TABLE x_f_Anlieger CHANGE AnlFlstPrÃ¼fz AnlFlstPrÃ¼fz CHAR(1) DEFAULT NULL;
 # Umbenennen des Index der Tabelle f_Adressen und x_f_Adressen
-ALTER TABLE f_Adressen DROP INDEX Straße, ADD INDEX Strasse (Strasse);
-ALTER TABLE x_f_Adressen DROP INDEX Straße, ADD INDEX Strasse (Strasse);
+ALTER TABLE f_Adressen DROP INDEX StraÃŸe, ADD INDEX Strasse (Strasse);
+ALTER TABLE x_f_Adressen DROP INDEX StraÃŸe, ADD INDEX Strasse (Strasse);
 # Umbenennen des Indexes der Tabelle v_Strassen und x_v_Strassen
-ALTER TABLE v_Strassen DROP INDEX StraßenName, ADD INDEX StrassenName (StrassenName);
-ALTER TABLE x_v_Strassen DROP INDEX StraßenName, ADD INDEX StrassenName (StrassenName);
+ALTER TABLE v_Strassen DROP INDEX StraÃŸenName, ADD INDEX StrassenName (StrassenName);
+ALTER TABLE x_v_Strassen DROP INDEX StraÃŸenName, ADD INDEX StrassenName (StrassenName);
 # Umbenennen des Indexes in der Tabelle x_g_Eigentuemer
-ALTER TABLE x_g_Eigentuemer DROP INDEX Eigentümerart, ADD INDEX Eigentuemerart (Eigentuemerart);
+ALTER TABLE x_g_Eigentuemer DROP INDEX EigentÃ¼merart, ADD INDEX Eigentuemerart (Eigentuemerart);
 
 # 02.08.2005
-# Erzeugen einer Tabelle für die Definition von Koordinatengitter
+# Erzeugen einer Tabelle fÃ¼r die Definition von Koordinatengitter
 CREATE TABLE m_grids (
   id int(11) NOT NULL auto_increment,
   labelformat enum('DDMM','DDMMSS') NOT NULL default 'DDMM',
@@ -158,7 +158,7 @@ CREATE TABLE m_grids (
   PRIMARY KEY (id)
 ) ENGINE=MyISAM COMMENT='Definition von Koordinatengitter';
 
-# Erzeugen einer Tabelle für die Zuordnung des Grids zu Layern in Stellen
+# Erzeugen einer Tabelle fÃ¼r die Zuordnung des Grids zu Layern in Stellen
 CREATE TABLE m_grids2used_layer (
   grid_id int(11) NOT NULL default '0',
   stelle_id int(11) NOT NULL default '0',
@@ -167,22 +167,22 @@ CREATE TABLE m_grids2used_layer (
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 COLLATE=latin1_german2_ci COMMENT='Zuordnung von Grids zu Layern in Stellen';
 
 #-----------------------------------------------------------------------------
-# Änderungen von 1.4.5 nach 1.5 alpha
-# Ändern des Defaultwertes für die Stelle eines Users
+# Ã„nderungen von 1.4.5 nach 1.5 alpha
+# Ã„ndern des Defaultwertes fÃ¼r die Stelle eines Users
 # Das ist die Stelle, in die der User geleitet wird, wenn er sich das erste mal anmeldet.
 ALTER TABLE user CHANGE stelle_id stelle_id INT(11) DEFAULT '1' NOT NULL;
 
-# Hinzufügen einer Spalte epsg_code zur Tabelle layer zur Speicherung der Projektion in der der
+# HinzufÃ¼gen einer Spalte epsg_code zur Tabelle layer zur Speicherung der Projektion in der der
 # Layer vorliegt. Default ist auf GK Krassowski Streifen 4 gesetzt.
 ALTER TABLE layer ADD epsg_code VARCHAR(6) DEFAULT '2398';
 
-# Hinzufügen einer Spalte epsg_code zur Tabelle rolle zur Speicherung der Projektion in der die
-# Karte für den Benutzer ausgegeben werden soll. Default ist GK Krassowski Streifen 4.
+# HinzufÃ¼gen einer Spalte epsg_code zur Tabelle rolle zur Speicherung der Projektion in der die
+# Karte fÃ¼r den Benutzer ausgegeben werden soll. Default ist GK Krassowski Streifen 4.
 # !! Die angegebene Projektion muss in dem System sein, in dem auch die Angaben zum Extent in der
 # Stelle stehen
 ALTER TABLE rolle ADD epsg_code VARCHAR(6) DEFAULT '2398';
 
-# Hinzufügen von Spalten zur Tabelle Layer für die Konfiguration einer WMS Datenquelle als Layer
+# HinzufÃ¼gen von Spalten zur Tabelle Layer fÃ¼r die Konfiguration einer WMS Datenquelle als Layer
 # Siehe http://mapserver.gis.umn.edu/doc46/wms-client-howto.html
 ALTER TABLE layer
 ADD wms_srs VARCHAR(255) DEFAULT 'EPSG:2398' NOT NULL,
@@ -192,11 +192,11 @@ ADD wms_format VARCHAR(50) DEFAULT 'image/png' NOT NULL,
 ADD wms_connectiontimeout INT(11) DEFAULT 60 NOT NULL;
 
 # 07.11.2005
-# Änderung des Datentyps der Spalte pfad in Tabelle layer
+# Ã„nderung des Datentyps der Spalte pfad in Tabelle layer
 ALTER TABLE `layer` CHANGE `pfad` `pfad` TEXT CHARACTER SET latin1 COLLATE latin1_german2_ci NULL DEFAULT NULL;
 
 # 11.11.2005
-# Erzeugen einer Tabelle für die Zuordnung der Menüpunkte, die den Stellen zugeordnet sind und den Rollen
+# Erzeugen einer Tabelle fÃ¼r die Zuordnung der MenÃ¼punkte, die den Stellen zugeordnet sind und den Rollen
 CREATE TABLE `u_menue2rolle` (
 `user_id` INT( 11 ) NOT NULL ,
 `stelle_id` INT( 11 ) NOT NULL ,
@@ -204,17 +204,17 @@ CREATE TABLE `u_menue2rolle` (
 `status` TINYINT( 1 ) NOT NULL
 );
 
-# Einfügen der aktuellen Zuordnungen der Rollen zu den Menüs
+# EinfÃ¼gen der aktuellen Zuordnungen der Rollen zu den MenÃ¼s
 INSERT INTO u_menue2rolle SELECT DISTINCT r.user_id,m2s.stelle_id,m2s.menue_id,'0'
  FROM u_menue2stelle AS m2s, rolle AS r WHERE r.stelle_id=m2s.stelle_id
  ORDER BY r.stelle_id,r.user_id,m2s.menue_id;
 
 
-# Erzeugen einer Tabelle für die Dokumentenkopfverwaltung
+# Erzeugen einer Tabelle fÃ¼r die Dokumentenkopfverwaltung
 CREATE TABLE `dokumentenkoepfe` (
 `id` INT( 11 ) NOT NULL AUTO_INCREMENT ,
 `Name` VARCHAR( 255 ) NOT NULL ,
-`Hauptüberschrift` VARCHAR( 255 ) NOT NULL ,
+`HauptÃ¼berschrift` VARCHAR( 255 ) NOT NULL ,
 `Untertitel` VARCHAR( 255 ) NOT NULL ,
 `Adresse` VARCHAR( 255 ) NOT NULL ,
 `Ort` VARCHAR( 255 ) NOT NULL ,
@@ -223,31 +223,31 @@ CREATE TABLE `dokumentenkoepfe` (
 PRIMARY KEY ( `id` )
 );
 
-# Einfügen einer Spalte active_head in der Tabelle rolle für die Speicherung des aktuellen Druckkopfes
+# EinfÃ¼gen einer Spalte active_head in der Tabelle rolle fÃ¼r die Speicherung des aktuellen Druckkopfes
 ALTER TABLE `rolle` ADD `active_head` INT( 11 ) NOT NULL ;
 
-# Änderung des Feldes links bei allen Obermenuepunkten in der Tabelle u_menues
+# Ã„nderung des Feldes links bei allen Obermenuepunkten in der Tabelle u_menues
 UPDATE `u_menues` SET `links` = 'index.php?go=changemenue' WHERE `obermenue` = 0;
 
-#Außer bei Karte anzeigen und Gesamtansicht
-UPDATE `u_menues` SET `links` = 'index.php?go=Full_Extent' WHERE `name` = 'Übersicht';
+#AuÃŸer bei Karte anzeigen und Gesamtansicht
+UPDATE `u_menues` SET `links` = 'index.php?go=Full_Extent' WHERE `name` = 'Ãœbersicht';
 UPDATE `u_menues` SET `links` = 'index.php?go=default' WHERE `name` = 'Karte';
 
-# Erzeugen einer neuen Tabelle groups für die Gruppen in denen die Layer gruppiert sind
+# Erzeugen einer neuen Tabelle groups fÃ¼r die Gruppen in denen die Layer gruppiert sind
 CREATE TABLE `u_groups` (
   `id` int(11) NOT NULL auto_increment,
   `Gruppenname` varchar(255) collate latin1_german2_ci NOT NULL,
   PRIMARY KEY  (`id`)
 );
 
-# Übername aller bisherigen Gruppen aus der Tabelle Layer in die Tabelle groups
+# Ãœbername aller bisherigen Gruppen aus der Tabelle Layer in die Tabelle groups
 INSERT INTO `u_groups` (Gruppenname) SELECT DISTINCT `Gruppe` FROM `layer`;
 
-# Ersetzten der Gruppennamen in der Tabelle layer durch dessen id´s aus der neuen Tabelle
-# für die Gruppen u_groups
+# Ersetzten der Gruppennamen in der Tabelle layer durch dessen idÂ´s aus der neuen Tabelle
+# fÃ¼r die Gruppen u_groups
 UPDATE `layer` AS l,`u_groups` AS g SET l.Gruppe=g.id WHERE l.Gruppe=g.Gruppenname;
 
-# Erzeugt eine neue Tabelle für die Speicherung von Eigenschaften, die an der Beziehung
+# Erzeugt eine neue Tabelle fÃ¼r die Speicherung von Eigenschaften, die an der Beziehung
 # zwischen der Rolle und der Gruppe gebunden sind 
 CREATE TABLE `u_groups2rolle` (
   `user_id` int(11) NOT NULL,
@@ -265,87 +265,87 @@ INSERT INTO u_groups2rolle
  AND ul.Stelle_ID=rul.stelle_id AND g.id=l.Gruppe
  ORDER BY rul.user_id,rul.stelle_id,g.id;
 
-# Löschen des bisherigen Schlüssels used_layer_id
+# LÃ¶schen des bisherigen SchlÃ¼ssels used_layer_id
 ALTER TABLE `used_layer` DROP `used_layer_id`;
 
-# Setzen von Primärschlüsseln
+# Setzen von PrimÃ¤rschlÃ¼sseln
 ALTER TABLE `used_layer` ADD PRIMARY KEY ( `Stelle_ID` , `Layer_ID` );
 ALTER TABLE `u_menue2rolle` ADD PRIMARY KEY ( `user_id` , `stelle_id` , `menue_id` );
 
 # 2005-12-02
-# Verlängern der Variablen für phon und email
+# VerlÃ¤ngern der Variablen fÃ¼r phon und email
 ALTER TABLE `user` CHANGE `phon` `phon` VARCHAR(25) DEFAULT NULL;
 ALTER TABLE `user` CHANGE `email` `email` VARCHAR(100) DEFAULT NULL;
 
 #-------------------------------------------------------------------------------------
-# Änderungen von 1.5-beta zu 1.5
+# Ã„nderungen von 1.5-beta zu 1.5
 # 2005-12-15
 
-##### Änderungen an der Tabelle polygon_used_layer
-# Hinzufügen der Spalten layer_id und stelle_id als Ersatz für used_layer_id
-# die schon oben gelöscht worden ist
+##### Ã„nderungen an der Tabelle polygon_used_layer
+# HinzufÃ¼gen der Spalten layer_id und stelle_id als Ersatz fÃ¼r used_layer_id
+# die schon oben gelÃ¶scht worden ist
 ALTER TABLE `polygon_used_layer` ADD `layer_id` INT( 11 ) NOT NULL , ADD `stelle_id` INT( 11 ) NOT NULL;
 
-# Wer keine Daten in der Tabelle polygon_used_layer hatte kann dies überspringen.
-# Wer schon Daten in der Tabelle hatte und die used_layer_id gelöscht hat, muss die used_layer_id´s
-# entsprechend seiner alten Tabelle wieder aufbauen und anschließend dieses Statement ausführen.
+# Wer keine Daten in der Tabelle polygon_used_layer hatte kann dies Ã¼berspringen.
+# Wer schon Daten in der Tabelle hatte und die used_layer_id gelÃ¶scht hat, muss die used_layer_idÂ´s
+# entsprechend seiner alten Tabelle wieder aufbauen und anschlieÃŸend dieses Statement ausfÃ¼hren.
 # Eintragen der layer_id und stelle_id, der used_layer_id in die Tabelle polygon_used_layer
 # update `polygon_used_layer` AS p2ul,`used_layer` AS ul set p2ul.layer_id=ul.Layer_ID,p2ul.stelle_id=ul.Stelle_ID
 # WHERE p2ul.used_layer_id=ul.used_layer_id;
 
-# Löschen der Spalte used_layer_id
+# LÃ¶schen der Spalte used_layer_id
 ALTER TABLE `polygon_used_layer` DROP `used_layer_id`;
 
 # Umbenennen der Tabelle polygon_used_layer in u_polygon2used_layer
 ALTER TABLE `polygon_used_layer` RENAME `u_polygon2used_layer`;
 
-# Löschen des alten und Hinzufügen des neuen Primärschlüssels
+# LÃ¶schen des alten und HinzufÃ¼gen des neuen PrimÃ¤rschlÃ¼ssels
 ALTER TABLE `u_polygon2used_layer` DROP INDEX `polygon_id`;
 ALTER TABLE `u_polygon2used_layer` ADD PRIMARY KEY (`polygon_id`,`layer_id`,`stelle_id`);
 
-###### Änderungen an der Tabelle attribute_access
-# Hinzufügen der Spalten layer_id und stelle_id, die die Spalte used_layer_id
+###### Ã„nderungen an der Tabelle attribute_access
+# HinzufÃ¼gen der Spalten layer_id und stelle_id, die die Spalte used_layer_id
 # ersetzen sollen
 ALTER TABLE `attribute_access` ADD `layer_id` INT( 11 ) NOT NULL ,
 ADD `stelle_id` MEDIUMINT( 11 ) NOT NULL;
 
-# Wer keine Daten in der Tabelle attribute_access stehen hat, kann dies überspringen
-# Wer schon Daten in der Tabelle hatte und die used_layer_id gelöscht hat, muss die used_layer_id´s
-# entsprechend seiner alten Tabelle wieder aufbauen und anschließend dieses Statement ausführen.
+# Wer keine Daten in der Tabelle attribute_access stehen hat, kann dies Ã¼berspringen
+# Wer schon Daten in der Tabelle hatte und die used_layer_id gelÃ¶scht hat, muss die used_layer_idÂ´s
+# entsprechend seiner alten Tabelle wieder aufbauen und anschlieÃŸend dieses Statement ausfÃ¼hren.
 # Eintragen der layer_id und stelle_id, der used_layer_id in die Tabelle polygon_used_layer
 # update `attribute_access` AS a2ul,`used_layer` AS ul set a2ul.layer_id=ul.Layer_ID,a2ul.stelle_id=ul.Stelle_ID
 # WHERE a2ul.used_layer_id=ul.used_layer_id;
 
-# Löschen der Spalte used_layer_id
+# LÃ¶schen der Spalte used_layer_id
 ALTER TABLE `attribute_access` DROP `used_layer_id`;
 
 # Umbenennen der Tabelle in u_attribute2used_layer
 ALTER TABLE `attribute_access` RENAME `u_attribute2used_layer` ;
 
-# Löschen des alten und Hinzufügen des neuen Primärschlüssels
+# LÃ¶schen des alten und HinzufÃ¼gen des neuen PrimÃ¤rschlÃ¼ssels
 ALTER TABLE `u_attribute2used_layer` DROP INDEX `attributename`;
 ALTER TABLE `u_attribute2used_layer` ADD PRIMARY KEY (`attributename`,`layer_id`,`stelle_id`);
 
-#### Löschen der Tabelle classdef_adds
-# Wer diese Tabelle verwendet hat und noch nutzen möchte melde sich bitte bei den Entwicklern
+#### LÃ¶schen der Tabelle classdef_adds
+# Wer diese Tabelle verwendet hat und noch nutzen mÃ¶chte melde sich bitte bei den Entwicklern
 DROP TABLE `classdef_adds`;
 
-# Ändern der Felder aktivStatus und queryStatus von (0,1) auf (0,1,2)
+# Ã„ndern der Felder aktivStatus und queryStatus von (0,1) auf (0,1,2)
 ALTER TABLE `u_rolle2used_layer` CHANGE `aktivStatus` `aktivStatus` ENUM( '0', '1', '2' ) NOT NULL DEFAULT '0',
 CHANGE `queryStatus` `queryStatus` ENUM( '0', '1', '2' ) NOT NULL DEFAULT '0'
 
 #-------------------------------------------------------------------------------------
-# Änderungen von 1.5 zu 1.5.7
+# Ã„nderungen von 1.5 zu 1.5.7
 # 2006-01-30
 
-# Hinzufügen einer Spalte in der Tabelle layer
-# enthält den Attributnamen in den Sachdaten des Layers, der den Winkel des Textes enthält.
+# HinzufÃ¼gen einer Spalte in der Tabelle layer
+# enthÃ¤lt den Attributnamen in den Sachdaten des Layers, der den Winkel des Textes enthÃ¤lt.
 ALTER TABLE `layer` ADD `labelangleitem` VARCHAR( 25 ) NULL AFTER `tileitem`
 
 #-------------------------------------------------------------------------------------
-# Änderungen von 1.5.7 zu 1.5.8
+# Ã„nderungen von 1.5.7 zu 1.5.8
 # 2006-02-11
-# Neue Tabelle für die Speicherung der tatsächlichen Zugriffe
+# Neue Tabelle fÃ¼r die Speicherung der tatsÃ¤chlichen Zugriffe
 CREATE TABLE `u_consume` (
 `user_id` INT NOT NULL ,
 `stelle_id` INT NOT NULL ,
@@ -360,7 +360,7 @@ CREATE TABLE `u_consume` (
 PRIMARY KEY ( `user_id` , `stelle_id` , `time_id` ) 
 ) TYPE=MYISAM;
 
-# Neue Tabelle für die Speicherung der tatsächlichen Zugriffe auf die Layer
+# Neue Tabelle fÃ¼r die Speicherung der tatsÃ¤chlichen Zugriffe auf die Layer
 CREATE TABLE `u_consume2layer` (
 `user_id` INT NOT NULL ,
 `stelle_id` INT NOT NULL ,
@@ -369,29 +369,29 @@ CREATE TABLE `u_consume2layer` (
 PRIMARY KEY ( `user_id` , `stelle_id` , `time_id` , `layer_id`)
 ) TYPE=MYISAM;
 
-# Hinzufügen einer Spalte für die Info ob generell alle Layer innerhalb der Stelle geloggt werden
+# HinzufÃ¼gen einer Spalte fÃ¼r die Info ob generell alle Layer innerhalb der Stelle geloggt werden
 # sollen in Tabelle stelle
 ALTER TABLE `stelle` ADD `logconsume` ENUM( '0', '1' );
 
-# Hinzufügen einer Spalte für die Info ob layer generell geloggt werden soll in Tabelle layer
+# HinzufÃ¼gen einer Spalte fÃ¼r die Info ob layer generell geloggt werden soll in Tabelle layer
 ALTER TABLE `layer` ADD `logconsume` ENUM( '0', '1' );
 
-# Hinzufügen einer Spalte für die Info ob layer innerhalb der Stelle generell geloggt werden soll
+# HinzufÃ¼gen einer Spalte fÃ¼r die Info ob layer innerhalb der Stelle generell geloggt werden soll
 # in Tabelle used_layer
 ALTER TABLE `used_layer` ADD `logconsume` ENUM( '0', '1' );
 
-# Hinzufügen einer Spalte für die Info ob layer innerhalb der Stelle für entsprechenden user
+# HinzufÃ¼gen einer Spalte fÃ¼r die Info ob layer innerhalb der Stelle fÃ¼r entsprechenden user
 # geloggt werden soll in Tabelle u_rolle2used_layer
 ALTER TABLE `u_rolle2used_layer` ADD `logconsume` ENUM( '0', '1' );
 
-# Hinzufügen einer Spalte für die Angabe um den Zusammenhang zum Anzeigen des Layers festzulegen
+# HinzufÃ¼gen einer Spalte fÃ¼r die Angabe um den Zusammenhang zum Anzeigen des Layers festzulegen
 ALTER TABLE `used_layer` ADD `requires` VARCHAR( 255 ) NULL ;
 
 # 2006-03-07
-# Änderung der Struktur der Tabelle dokumentenkoepfe und Umbenennen in druckrahmen
+# Ã„nderung der Struktur der Tabelle dokumentenkoepfe und Umbenennen in druckrahmen
 
 ALTER TABLE `dokumentenkoepfe`
-  DROP `Hauptüberschrift`,
+  DROP `HauptÃ¼berschrift`,
   DROP `Untertitel`,
   DROP `Ort`,
   DROP `Datum`,
@@ -424,10 +424,10 @@ ADD `preis` INT( 11 ) NULL ;
 
 ALTER TABLE `dokumentenkoepfe` RENAME `druckrahmen` ;
 
-# Änderung der Spaltenbezeichnung zur Speicherung des aktiven Druckrahmens in der Tabelle rolle
+# Ã„nderung der Spaltenbezeichnung zur Speicherung des aktiven Druckrahmens in der Tabelle rolle
 ALTER TABLE `rolle` CHANGE `active_head` `active_frame` INT( 11 ) NULL;
 
-# Neue Tabelle für die Speicherung der ALK-PDF-Exporte
+# Neue Tabelle fÃ¼r die Speicherung der ALK-PDF-Exporte
 CREATE TABLE `u_consumeALK` (
 `user_id` INT NOT NULL ,
 `stelle_id` INT NOT NULL ,
@@ -436,11 +436,11 @@ CREATE TABLE `u_consumeALK` (
 PRIMARY KEY ( `user_id` , `stelle_id` , `time_id` ) 
 ) TYPE=MYISAM;
 
-# Ändern des Standardwertes der Spalte stelle_id in der Tabelle user
+# Ã„ndern des Standardwertes der Spalte stelle_id in der Tabelle user
 ALTER TABLE `user` CHANGE `stelle_id` `stelle_id` INT( 11 ) NULL DEFAULT NULL;
 
 #-------------------------------------------------------------------------------------
-# Änderungen von 1.5.8 zu 1.5.9
+# Ã„nderungen von 1.5.8 zu 1.5.9
 # 
 ALTER TABLE `druckrahmen` 
 ADD `refmapsrc` VARCHAR( 255 ) NULL AFTER `mapheight` ,
@@ -464,7 +464,7 @@ ADD `textsize` INT( 11 ) NULL AFTER `textposy` ;
 # Umbenennen der Spalte wms_srs in ows_srs in der Tabelle layer
 ALTER TABLE `layer` CHANGE `wms_srs` `ows_srs` VARCHAR( 255 ) CHARACTER SET latin1 COLLATE latin1_german2_ci NOT NULL DEFAULT 'EPSG:2398';
 
-# Änderungen von 1.5.8 zu 1.5.9 (vergessen)
+# Ã„nderungen von 1.5.8 zu 1.5.9 (vergessen)
 
 ALTER TABLE `u_consume`
 ADD `prev` datetime default NULL,
@@ -479,10 +479,10 @@ CREATE TABLE `u_consume2comments` (
 );
 
 #-------------------------------------------------------------------------------------
-# Änderungen von 1.5.9 zu 1.6.0
+# Ã„nderungen von 1.5.9 zu 1.6.0
 #
 
-# Hinzufügen von stellenbezogenen Metadaten für OWS-Requests
+# HinzufÃ¼gen von stellenbezogenen Metadaten fÃ¼r OWS-Requests
 
 ALTER TABLE `stelle`
 ADD `ows_title` VARCHAR( 255 ) NULL,
@@ -495,7 +495,7 @@ ADD `ows_contactposition` VARCHAR( 255 ) NULL,
 ADD `ows_fees` VARCHAR( 255 ) NULL,
 ADD `ows_srs` VARCHAR( 255 ) NULL;
 
-# Hinzufügen einer Tabelle u_attributfilter2used_layer zur Speicherung der Attribut-Filter der Layer einer Stelle
+# HinzufÃ¼gen einer Tabelle u_attributfilter2used_layer zur Speicherung der Attribut-Filter der Layer einer Stelle
 
 CREATE TABLE `u_attributfilter2used_layer` (
   `Stelle_ID` int(11) NOT NULL,
@@ -507,17 +507,17 @@ CREATE TABLE `u_attributfilter2used_layer` (
   PRIMARY KEY  (`Stelle_ID`,`Layer_ID`,`attributname`)
 );
 
-# Hinzufügen von zwei Spalten angle und angleitem zur Speicherung des Winkels bzw. des Attributes welches den Winkel enthält
+# HinzufÃ¼gen von zwei Spalten angle und angleitem zur Speicherung des Winkels bzw. des Attributes welches den Winkel enthÃ¤lt
 
 ALTER TABLE `styles` 
 ADD `angle` INT( 11 ) NOT NULL ,
 ADD `angleitem` VARCHAR( 255 ) NOT NULL ;
 
-# Hinzufügen einer Spalte last_time_id in Tabelle rolle zur Speicherung des letzten aufgerufenen Kartenausschnitts
+# HinzufÃ¼gen einer Spalte last_time_id in Tabelle rolle zur Speicherung des letzten aufgerufenen Kartenausschnitts
 
 ALTER TABLE `rolle` ADD `last_time_id` DATETIME NOT NULL;
 
-# Hinzufügen einer Tabelle zur Speicherung der ALB-Zugriffe
+# HinzufÃ¼gen einer Tabelle zur Speicherung der ALB-Zugriffe
 
 CREATE TABLE `u_consumeALB` (
   `user_id` int(11) NOT NULL,
@@ -530,15 +530,15 @@ CREATE TABLE `u_consumeALB` (
 
 
 #-------------------------------------------------------------------------------------
-# Änderungen von 1.6.0 zu 1.6.1
+# Ã„nderungen von 1.6.0 zu 1.6.1
 #
 
-## Änderung der Tabelle u_attributfilter2used_layer um zwei neue Operatoren "IS" und "IN"
+## Ã„nderung der Tabelle u_attributfilter2used_layer um zwei neue Operatoren "IS" und "IN"
 
 ALTER TABLE `u_attributfilter2used_layer` CHANGE `operator` `operator` ENUM( '=', '>', '<', 'like', 'IS', 'IN', 'Within', 'Intersects' ) CHARACTER SET latin1 COLLATE latin1_german2_ci NOT NULL
 
 #-------------------------------------------------------------------------------------
-# Änderungen von 1.6.1 zu 1.6.2
+# Ã„nderungen von 1.6.1 zu 1.6.2
 #
 
 CREATE TABLE `druckrahmen2stelle` (
@@ -592,7 +592,7 @@ PRIMARY KEY ( `druckrahmen_id` , `freitext_id` )
 );
 
 #-------------------------------------------------------------------------------------
-# Änderungen von 1.6.2 zu 1.6.3
+# Ã„nderungen von 1.6.2 zu 1.6.3
 #
 ALTER TABLE `stelle`
  ADD `pgdbhost` VARCHAR( 25 ) NOT NULL DEFAULT 'localhost' AFTER `logconsume` ,
@@ -621,7 +621,7 @@ ALTER TABLE `rolle` ADD `gui` varchar(25) collate latin1_german2_ci NOT NULL def
 
 
 #-------------------------------------------------------------------------------------
-# Änderungen von 1.6.3 zu 1.6.4
+# Ã„nderungen von 1.6.3 zu 1.6.4
 #
 
 CREATE TABLE `layer_attributes2stelle` (
@@ -661,7 +661,7 @@ ALTER TABLE `layer` DROP `transparency` ;
 ALTER TABLE `druckfreitexte` CHANGE `text` `text` TEXT NULL DEFAULT NULL;
 
 #-------------------------------------------------------------------------------------
-# Änderungen von 1.6.4 zu 1.6.5
+# Ã„nderungen von 1.6.4 zu 1.6.5
 #
 
 ALTER TABLE `stelle` ADD `epsg_code` INT(6) NOT NULL DEFAULT '2398' AFTER `maxymax` ;
@@ -674,19 +674,19 @@ ALTER TABLE `styles` ADD `width` INT( 11 ) NULL ,
 ADD `sizeitem` VARCHAR( 255 ) NULL ;
 
 #-------------------------------------------------------------------------------------
-# Änderungen von 1.6.5 zu 1.6.6
+# Ã„nderungen von 1.6.5 zu 1.6.6
 #
 
 ALTER TABLE `layer_attributes` CHANGE `form_element_type` `form_element_type` ENUM( 'Text', 'Textfeld', 'Auswahlfeld', 'Geometrie', 'SubFormPK', 'SubFormFK' ) NOT NULL;
 
-# Neue Tabelle für freie Bilder in Druckrahmen
+# Neue Tabelle fÃ¼r freie Bilder in Druckrahmen
 CREATE TABLE `druckfreibilder` (
   `id` int(11) NOT NULL auto_increment,
   `src` varchar(255) collate latin1_german2_ci NOT NULL default '',
   PRIMARY KEY  (`id`)
 );
 
-# Neue Tabelle für die Zuordnung von freien Bildern und den Druckrahmen
+# Neue Tabelle fÃ¼r die Zuordnung von freien Bildern und den Druckrahmen
 CREATE TABLE `druckrahmen2freibilder` (
   `druckrahmen_id` int(11) NOT NULL,
   `freibild_id` int(11) NOT NULL,
@@ -721,7 +721,7 @@ ADD PRIMARY KEY ( `id` , `stelle_id` , `user_id` );
  ALTER TABLE `used_layer` ADD `privileg` ENUM( '0', '1', '2' ) NOT NULL DEFAULT '0';
  
  #-------------------------------------------------------------------------------------
- # Änderungen von 1.6.6 zu 1.6.7
+ # Ã„nderungen von 1.6.6 zu 1.6.7
 #
  
  ALTER TABLE `druckausschnitte` ADD `frame_id` INT( 11 ) NOT NULL ;
@@ -742,59 +742,59 @@ ADD PRIMARY KEY ( `id` , `stelle_id` , `user_id` );
  ALTER TABLE `u_consumeALB` ADD `numpages` INT( 11 ) NULL ;
  
 # ----------------------------------------------------------------------------------------
-# Änderung von 1.6.7 zu 1.6.8
+# Ã„nderung von 1.6.7 zu 1.6.8
 ALTER TABLE `layer_attributes` CHANGE `form_element_type` `form_element_type` ENUM( 'Text', 'Textfeld', 'Auswahlfeld', 'Geometrie', 'SubFormPK', 'SubFormFK', 'Time', 'href', 'Bild' ) CHARACTER SET latin1 COLLATE latin1_german1_ci NOT NULL DEFAULT 'Text';
 
-# Hinzufügen von Spalten für die Angabe einer Sprache und Character Set für die Rolle
+# HinzufÃ¼gen von Spalten fÃ¼r die Angabe einer Sprache und Character Set fÃ¼r die Rolle
 ALTER TABLE `rolle` ADD `language` ENUM( 'german', 'english', 'vietnamese' ) NOT NULL DEFAULT 'german';
 ALTER TABLE `rolle` ADD `charset` ENUM('windows-1252','utf-8','ISO-8859-1','ISO-8859-2','ISO-8859-15','TCVN','VISCII','VPS') NOT NULL DEFAULT 'windows-1252';
 
-# Hinzufügen eines Defaultwertes für die last_time_id in der Tabelle rolle
+# HinzufÃ¼gen eines Defaultwertes fÃ¼r die last_time_id in der Tabelle rolle
 ALTER TABLE `rolle` CHANGE `last_time_id` `last_time_id` DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00';
 
-# Hinzufügen von Spalten für die Englische und Vietnamesische Bezeichnung der Stellen
+# HinzufÃ¼gen von Spalten fÃ¼r die Englische und Vietnamesische Bezeichnung der Stellen
 ALTER TABLE `stelle` ADD `Bezeichnung_english_windows-1252` VARCHAR( 255 ) CHARACTER SET cp1250 COLLATE cp1250_general_ci NULL AFTER `Bezeichnung`;
 ALTER TABLE `stelle` ADD `Bezeichnung_vietnamese_utf-8` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL AFTER `Bezeichnung_english_windows-1252`;
 
-# Neue Spalten für Sprachen in der Tabelle u_menues
+# Neue Spalten fÃ¼r Sprachen in der Tabelle u_menues
 ALTER TABLE `u_menues` ADD `name_english_windows-1252` VARCHAR(100) CHARACTER SET cp1250 COLLATE cp1250_general_ci NULL AFTER `name`;
 ALTER TABLE `u_menues` ADD `name_vietnamese_utf-8` VARCHAR(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL AFTER `name_english_windows-1252`;
 
-# Neue Spalte für das verstecken des Menüs, an die Rolle gebunden
+# Neue Spalte fÃ¼r das verstecken des MenÃ¼s, an die Rolle gebunden
 ALTER TABLE `rolle` ADD `hidemenue` ENUM( '0', '1' ) NOT NULL DEFAULT '0';
 
 ALTER TABLE `rollenlayer` CHANGE `Name` `Name` TEXT NOT NULL;
 
 #------------------------------------------------------------------------------------------
-# Änderung von 1.6.8 zu 1.6.9
-# Hinzufügen einer Spalte für die Tabelle user, in der IP-Adressen der Client-Rechner des Nutzers eingetragen werden können
+# Ã„nderung von 1.6.8 zu 1.6.9
+# HinzufÃ¼gen einer Spalte fÃ¼r die Tabelle user, in der IP-Adressen der Client-Rechner des Nutzers eingetragen werden kÃ¶nnen
 # oder Subnetze, z.B. 139.30.110.216 oder 139.30.111.0
 # Mehrere werden durch ; voneinander getrennt
 # Wird nur wirksam, wenn die neue Konstante CHECK_CLIENT_IP true ist und
 # in der Stelle in der neuen Spalte check_client_ip eine 1 steht
 ALTER TABLE `user` ADD `ips` TEXT NULL AFTER `passwort`;
 
-# Hinzufügen einer neuen Spalte für die Tabelle stelle, in der angegeben werden kann ob die IP-Adressen der Benutzer gegen die
+# HinzufÃ¼gen einer neuen Spalte fÃ¼r die Tabelle stelle, in der angegeben werden kann ob die IP-Adressen der Benutzer gegen die
 # vom Server ermittelte Remote_Addr getestet werden soll. Werte 0 oder 1
 # Wird nur wirksam, wenn die neue Konstante CHECK_CLIENT_IP true ist
 ALTER TABLE `stelle` ADD `check_client_ip` ENUM( '0', '1' ) NOT NULL DEFAULT '0';
 
-# Hinzufügen von Spalten die Speicherung der Sucheparameter nach anderen Dokumentarten
+# HinzufÃ¼gen von Spalten die Speicherung der Sucheparameter nach anderen Dokumentarten
 ALTER TABLE `rolle_nachweise` ADD `showan` CHAR( 1 ) NOT NULL DEFAULT '0' AFTER `showgn` ;
 ALTER TABLE `rolle_nachweise` ADD `suchan` CHAR( 1 ) NOT NULL DEFAULT '0' AFTER `suchgn` ;
 
-# Hinzufügen einer neuen Spalte für die Sortierung der Menüs
+# HinzufÃ¼gen einer neuen Spalte fÃ¼r die Sortierung der MenÃ¼s
 ALTER TABLE `u_menues` ADD `order` INT( 11 ) NOT NULL DEFAULT '0';
 
 
 #------------------------------------------------------------------------------------------
-# Änderung von 1.6.8 zu 1.6.9
+# Ã„nderung von 1.6.8 zu 1.6.9
 
 ALTER TABLE `layer_attributes` CHANGE `form_element_type` `form_element_type` ENUM( 'Text', 'Textfeld', 'Auswahlfeld', 'Geometrie', 'SubFormPK', 'SubFormFK', 'Time', 'Bild', 'Link' ) NOT NULL DEFAULT 'Text';
 
 
 #------------------------------------------------------------------------------------------
-# Änderung von 1.6.9 zu 1.7.0
+# Ã„nderung von 1.6.9 zu 1.7.0
 ALTER TABLE `user` ADD `Namenszusatz` VARCHAR( 50 ) NULL AFTER `Vorname`;
 ALTER TABLE `user` ADD `password_setting_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `passwort`;
 UPDATE `user` SET `password_setting_time` = CURRENT_TIMESTAMP;
@@ -808,7 +808,7 @@ ALTER TABLE `styles` CHANGE `symbolname` `symbolname` VARCHAR( 40 ) DEFAULT NULL
 
 
 #------------------------------------------------------------------------------------------
-# Änderung von 1.7.0 zu 1.7.1
+# Ã„nderung von 1.7.0 zu 1.7.1
 
 ALTER TABLE `layer_attributes` ADD `tooltip` VARCHAR( 255 ) NULL ;
 ALTER TABLE `layer_attributes` CHANGE `form_element_type` `form_element_type` ENUM( 'Text', 'Textfeld', 'Auswahlfeld', 'Geometrie', 'SubFormPK', 'SubFormFK', 'SubFormEmbeddedPK', 'Time', 'Bild', 'Link' ) CHARACTER SET latin1 COLLATE latin1_german2_ci NOT NULL DEFAULT 'Text';
@@ -824,7 +824,7 @@ ALTER TABLE `rolle_nachweise` CHANGE `suchstammnr` `suchstammnr` VARCHAR( 9 )  N
 
 
 #------------------------------------------------------------------------------------------
-# Änderung von 1.7.1 zu 1.7.2
+# Ã„nderung von 1.7.1 zu 1.7.2
 
 ALTER TABLE `styles` CHANGE `angle` `angle` INT( 11 ) NULL;
 ALTER TABLE `rolle` ADD `highlighting` BOOL NOT NULL DEFAULT 0;
@@ -837,22 +837,22 @@ ALTER TABLE `layer_attributes` CHANGE `form_element_type` `form_element_type` EN
 
 
 #------------------------------------------------------------------------------------------
-# Änderung von 1.7.2 zu 1.7.3
+# Ã„nderung von 1.7.2 zu 1.7.3
 
-# Hinzufügen von Plattdeutsch bei der Angabe einer Sprache und Character Set für die Rolle
+# HinzufÃ¼gen von Plattdeutsch bei der Angabe einer Sprache und Character Set fÃ¼r die Rolle
 ALTER TABLE `rolle` CHANGE `language` `language` ENUM( 'german', 'low-german', 'english', 'vietnamese' ) NOT NULL DEFAULT 'german';
 
-# Hinzufügen einer Spalte für die plattdeutsche Bezeichnung der Stellen
+# HinzufÃ¼gen einer Spalte fÃ¼r die plattdeutsche Bezeichnung der Stellen
 ALTER TABLE `stelle` ADD `Bezeichnung_low-german_windows-1252` VARCHAR( 255 ) NULL AFTER `Bezeichnung`;
 
-# Neue Spalte für Plattdeutsche Menübezeichnung in der Tabelle u_menues
+# Neue Spalte fÃ¼r Plattdeutsche MenÃ¼bezeichnung in der Tabelle u_menues
 ALTER TABLE `u_menues` ADD `name_low-german_windows-1252` VARCHAR(100) NULL AFTER `name`;
 
 # Neue Spalten offsetx und offsety im Style
 ALTER TABLE `styles` ADD `offsetx` INT( 11 ) NULL ,
 ADD `offsety` INT( 11 ) NULL ;
 
-# Neue Spalte für das zweite Koordinatensystem
+# Neue Spalte fÃ¼r das zweite Koordinatensystem
 ALTER TABLE `rolle` ADD `epsg_code2` VARCHAR( 5 ) NULL AFTER `epsg_code`;
 
 # Neue Spalte zum rollenbezogenen Speichern der Buttons
@@ -862,7 +862,7 @@ ALTER TABLE `layer_attributes` CHANGE `form_element_type` `form_element_type` EN
 
 
 #------------------------------------------------------------------------------------------
-# Änderung von 1.7.3 zu 1.7.4
+# Ã„nderung von 1.7.3 zu 1.7.4
 
 ALTER TABLE `layer_attributes` ADD `real_name` VARCHAR( 255 ) NULL AFTER `name` ,
 ADD `tablename` VARCHAR( 100 ) NULL AFTER `real_name` ,
@@ -898,7 +898,7 @@ CREATE TABLE `search_attributes2rolle` (
 
 
 #------------------------------------------------------------------------------------------
-# Änderung von 1.7.4 zu 1.7.5
+# Ã„nderung von 1.7.4 zu 1.7.5
 
 ALTER TABLE `user` CHANGE `Funktion` `Funktion` ENUM( 'admin', 'user', 'gast' ) NOT NULL DEFAULT 'user';
 ALTER TABLE `used_layer` ADD `start_aktiv` ENUM( '0', '1' ) NOT NULL DEFAULT '0';
@@ -979,7 +979,7 @@ INSERT INTO `colors` VALUES (12, NULL, 122, 12, 45);
 
 
 #------------------------------------------------------------------------------------------
-# Änderung von 1.7.5 zu 1.7.6
+# Ã„nderung von 1.7.5 zu 1.7.6
 
 ALTER TABLE `styles` CHANGE `size` `size` VARCHAR( 50 ) NULL DEFAULT NULL;
 
@@ -987,11 +987,11 @@ ALTER TABLE `layer` ADD `processing` VARCHAR( 255 ) NULL DEFAULT NULL;
 
 
 #------------------------------------------------------------------------------------------
-# Änderung von 1.7.6 zu 1.8.0
+# Ã„nderung von 1.7.6 zu 1.8.0
 
 ALTER TABLE `druckfreitexte` ADD `type` BOOL NULL ;
 
-ALTER TABLE `layer_attributes` CHANGE `form_element_type` `form_element_type` ENUM( 'Text', 'Textfeld', 'Auswahlfeld', 'Geometrie', 'SubFormPK', 'SubFormFK', 'SubFormEmbeddedPK', 'Time', 'Dokument', 'Link', 'User', 'Fläche', 'dynamicLink' ) NOT NULL DEFAULT 'Text';
+ALTER TABLE `layer_attributes` CHANGE `form_element_type` `form_element_type` ENUM( 'Text', 'Textfeld', 'Auswahlfeld', 'Geometrie', 'SubFormPK', 'SubFormFK', 'SubFormEmbeddedPK', 'Time', 'Dokument', 'Link', 'User', 'FlÃ¤che', 'dynamicLink' ) NOT NULL DEFAULT 'Text';
 
 ALTER TABLE `rolle` CHANGE `result_color` `result_color` INT( 11 ) NULL DEFAULT '1';
 
@@ -1024,7 +1024,7 @@ ADD `datenherr` VARCHAR( 100 ) NULL ;
 
 
 #------------------------------------------------------------------------------------------
-# Änderung von 1.8.0 zu 1.9.0
+# Ã„nderung von 1.8.0 zu 1.9.0
 
 ALTER TABLE `rolle` ADD `coordtype` ENUM( 'dec', 'dms' ) NOT NULL DEFAULT 'dec' AFTER `epsg_code2`;
 
@@ -1040,7 +1040,7 @@ ALTER TABLE `layer_attributes` ADD `decimal_length` INT( 11 ) NULL AFTER `length
 
 
 #------------------------------------------------------------------------------------------
-# Änderung von 1.9.0 zu 1.10.0
+# Ã„nderung von 1.9.0 zu 1.10.0
 
 ALTER TABLE `rolle` ADD `always_draw` BOOLEAN NULL;
 
@@ -1048,14 +1048,14 @@ ALTER TABLE `rolle_nachweise` CHANGE `suchstammnr` `suchstammnr` VARCHAR(15) NOT
 ALTER TABLE `rolle_nachweise` ADD `suchrissnr` VARCHAR(20) NOT NULL AFTER `suchstammnr`,
  			      ADD `suchfortf` INT(4) NULL AFTER `suchrissnr`;
  			      
-ALTER TABLE `layer_attributes` CHANGE `form_element_type` `form_element_type` ENUM('Text','Textfeld','Auswahlfeld','Geometrie','SubFormPK','SubFormFK','SubFormEmbeddedPK','Time','Dokument','Link','User','Stelle','Fläche','dynamicLink') NOT NULL DEFAULT 'Text';
+ALTER TABLE `layer_attributes` CHANGE `form_element_type` `form_element_type` ENUM('Text','Textfeld','Auswahlfeld','Geometrie','SubFormPK','SubFormFK','SubFormEmbeddedPK','Time','Dokument','Link','User','Stelle','FlÃ¤che','dynamicLink') NOT NULL DEFAULT 'Text';
 
 
 
 #------------------------------------------------------------------------------------------
-# Änderung von 1.10.0 zu 1.11.0
+# Ã„nderung von 1.10.0 zu 1.11.0
 
-ALTER TABLE `layer_attributes` CHANGE `form_element_type` `form_element_type` ENUM('Text','Textfeld','Auswahlfeld','Geometrie','SubFormPK','SubFormFK','SubFormEmbeddedPK','Time','Dokument','Link','User','Stelle','Fläche','dynamicLink','Zahl') NOT NULL DEFAULT 'Text';
+ALTER TABLE `layer_attributes` CHANGE `form_element_type` `form_element_type` ENUM('Text','Textfeld','Auswahlfeld','Geometrie','SubFormPK','SubFormFK','SubFormEmbeddedPK','Time','Dokument','Link','User','Stelle','FlÃ¤che','dynamicLink','Zahl') NOT NULL DEFAULT 'Text';
 
 ALTER TABLE `rollenlayer` ADD `Typ` ENUM('search','import') NOT NULL DEFAULT 'search' AFTER `Gruppe`;
 
@@ -1076,11 +1076,11 @@ ALTER TABLE `layer` ADD `metalink` VARCHAR(255) NULL;
 
 
 #------------------------------------------------------------------------------------------
-# Änderung von 1.11.0 zu 1.12.0
+# Ã„nderung von 1.11.0 zu 1.12.0
 
 ALTER TABLE `rolle_nachweise` CHANGE `suchantrnr` `suchantrnr` VARCHAR(11) NOT NULL DEFAULT '';
 
-ALTER TABLE `layer_attributes` CHANGE `form_element_type` `form_element_type` ENUM('Text','Textfeld','Auswahlfeld','Geometrie','SubFormPK','SubFormFK','SubFormEmbeddedPK','Time','Dokument','Link','User','Stelle','Fläche','dynamicLink','Zahl','UserID','Länge') NOT NULL DEFAULT 'Text';
+ALTER TABLE `layer_attributes` CHANGE `form_element_type` `form_element_type` ENUM('Text','Textfeld','Auswahlfeld','Geometrie','SubFormPK','SubFormFK','SubFormEmbeddedPK','Time','Dokument','Link','User','Stelle','FlÃ¤che','dynamicLink','Zahl','UserID','LÃ¤nge') NOT NULL DEFAULT 'Text';
 
 ALTER TABLE `layer_attributes` ADD `group` VARCHAR( 255 ) NULL DEFAULT NULL AFTER `tooltip`;
 
@@ -1104,7 +1104,7 @@ ALTER TABLE `layer` ADD `privileg` ENUM( '0', '1', '2' ) NOT NULL DEFAULT '0';
 ALTER TABLE `layer_attributes` ADD `privileg` BOOLEAN NULL DEFAULT '0';
 ALTER TABLE `layer_attributes` ADD `query_tooltip` BOOLEAN NULL DEFAULT '0';
 
-ALTER TABLE `layer_attributes` CHANGE `form_element_type` `form_element_type` ENUM( 'Text', 'Textfeld', 'Auswahlfeld', 'Checkbox', 'Geometrie', 'SubFormPK', 'SubFormFK', 'SubFormEmbeddedPK', 'Time', 'Dokument', 'Link', 'User', 'Stelle', 'Fläche', 'dynamicLink', 'Zahl', 'UserID', 'Länge' ) NOT NULL DEFAULT 'Text';
+ALTER TABLE `layer_attributes` CHANGE `form_element_type` `form_element_type` ENUM( 'Text', 'Textfeld', 'Auswahlfeld', 'Checkbox', 'Geometrie', 'SubFormPK', 'SubFormFK', 'SubFormEmbeddedPK', 'Time', 'Dokument', 'Link', 'User', 'Stelle', 'FlÃ¤che', 'dynamicLink', 'Zahl', 'UserID', 'LÃ¤nge' ) NOT NULL DEFAULT 'Text';
 
 ALTER TABLE `stelle` ADD `use_layer_aliases` ENUM( '0', '1' ) NOT NULL DEFAULT '0';
 
@@ -1117,7 +1117,7 @@ DELETE FROM `u_funktion2stelle` WHERE erlaubt = 0;
 ALTER TABLE `u_funktion2stelle` DROP  `erlaubt`;
 
 #------------------------------------------------------------------------------------------
-# Änderung von 1.12.0 zu 1.13.0
+# Ã„nderung von 1.12.0 zu 1.13.0
 #
 ALTER TABLE `rolle` CHANGE `gui` `gui` VARCHAR(100) NOT NULL DEFAULT 'gui.php';
 
@@ -1162,10 +1162,10 @@ ADD  `sVermStelle` INT( 11 ) NULL AFTER  `sdatum2`;
 ALTER TABLE  `druckfreitexte` ADD  `offset_attribute` VARCHAR( 255 ) NULL AFTER  `posy`;
 
 #------------------------------------------------------------------------------------------
-# Änderung von 1.13.0 zu 2.0.0
+# Ã„nderung von 1.13.0 zu 2.0.0
 #
 
-ALTER TABLE  `layer_attributes` CHANGE  `form_element_type`  `form_element_type` ENUM(  'Text',  'Textfeld',  'Auswahlfeld',  'Checkbox',  'Geometrie',  'SubFormPK',  'SubFormFK',  'SubFormEmbeddedPK',  'Time',  'Dokument',  'Link',  'User',  'Stelle',  'Fläche',  'dynamicLink',  'Zahl',  'UserID',  'Länge',  'mailto' ) NOT NULL DEFAULT  'Text';
+ALTER TABLE  `layer_attributes` CHANGE  `form_element_type`  `form_element_type` ENUM(  'Text',  'Textfeld',  'Auswahlfeld',  'Checkbox',  'Geometrie',  'SubFormPK',  'SubFormFK',  'SubFormEmbeddedPK',  'Time',  'Dokument',  'Link',  'User',  'Stelle',  'FlÃ¤che',  'dynamicLink',  'Zahl',  'UserID',  'LÃ¤nge',  'mailto' ) NOT NULL DEFAULT  'Text';
 
 ALTER TABLE  `u_rolle2used_class` ADD  `status` INT( 1 ) NOT NULL DEFAULT  0;
 
@@ -1304,7 +1304,7 @@ INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES ('kvwmap', 'my
 INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES ('kvwmap', 'postgresql', '2014-09-12_16-33-22_Version2.0.sql');
 
 
-# Bitte die folgenden Inserts nur ausführen, wenn die entsprechenden Plugins verwendet werden!
+# Bitte die folgenden Inserts nur ausfÃ¼hren, wenn die entsprechenden Plugins verwendet werden!
 
 INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES ('bauleitplanung', 'postgresql', '2014-09-12_16-33-22_Version2.0.sql');
 INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES ('bauleitplanung', 'mysql', '2014-09-12_16-33-22_layer.sql');
