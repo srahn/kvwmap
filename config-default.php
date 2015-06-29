@@ -14,16 +14,16 @@ $dbname='kvwmapdb';
 $pgdbname='kvwmapsp';
 
 ########################## Metadaten zum Landkreis
-define('LANDKREIS', 'für den Landkreis');
+define('LANDKREIS', 'Landkreis');
 define('AMT', 'Kataster-/Vermessungsamt ');
-define('STRASSE', 'Nordvorpommern und die');
-define('STRASSE2', '');																	# Version 1.7.1
-define('PLZ', 'Hansestadt Stralsund');
-define('ORT', '');
-define('POSTANSCHRIFT', '');
-define('POSTANSCHRIFT_STRASSE', '');
-define('POSTANSCHRIFT_PLZ', '');
-define('POSTANSCHRIFT_ORT', '');
+define('STRASSE', 'Strasse');
+define('STRASSE2', 'Strasse2');																	# Version 1.7.1
+define('PLZ', 'PLZ');
+define('ORT', 'Ort');
+define('POSTANSCHRIFT', 'Postanschrift');
+define('POSTANSCHRIFT_STRASSE', 'Postanschrift Strasse');
+define('POSTANSCHRIFT_PLZ', 'Postanschrift PLZ');
+define('POSTANSCHRIFT_ORT', 'Postanschrift Ort');
 # definiert, ob Nutzername im ALB-Auszug 30 angezeigt wird, oder nicht
 define('BEARBEITER', 'false');			# true/false					# Version 1.7.2
 # Gutachterausschuss BORIS
@@ -131,7 +131,7 @@ define('GIT_USER', '');																	# Version 2.1
 
 ########################## Pfadeinstellungen
 # Installationspfad
-define('INSTALLPATH','/home/gisadmin/');
+define('INSTALLPATH','/var/www/');
 define('WWWROOT',INSTALLPATH.'apps/');
 # --------------- Version 1.6.6 Start
 # diese Einstellung ermöglicht die Vergabe von mehrere Call Back Links
