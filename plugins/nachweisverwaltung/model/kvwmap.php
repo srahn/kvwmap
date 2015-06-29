@@ -30,7 +30,7 @@
 			$antr_selected = $explosion[0];
 			$stelle_id = $explosion[1];
       $antrag=new antrag($antr_selected,$stelle_id,$GUI->pgdatabase);
-      $antrag->clearRecherchePfad();			
+      $msg = $antrag->clearRecherchePfad();			
       # Zusammenstellen der Dokumente der Nachweisverwaltung
       $nachweis=new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
       $ret=$nachweis->getNachw2Antr($antr_selected,$stelle_id);
@@ -58,7 +58,7 @@
     else {
       $ret='Geben Sie bitte die entspechende Antragsnummer an';
     }
-    return $ret;
+    return $msg;
   };
 
 	$this->nachweisAenderungsformular = function() use ($GUI){
