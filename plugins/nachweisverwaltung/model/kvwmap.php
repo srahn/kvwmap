@@ -270,6 +270,63 @@
     $GUI->nachweiseRecherchieren();
   };
 
+	$this->setNachweisSuchparameter = function($stelle_id, $user_id, $suchffr,$suchkvz,$suchgn,$suchan,$abfrageart,$suchgemarkung,$suchflur,$stammnr,$suchrissnr,$suchfortf,$suchpolygon,$suchantrnr, $sdatum, $sdatum2, $svermstelle) use ($GUI){
+		$sql ='UPDATE rolle_nachweise SET ';
+		if ($suchffr!='') { $sql.='suchffr="'.$suchffr.'",'; }else{$sql.='suchffr="0",';}
+		if ($suchkvz!='') { $sql.='suchkvz="'.$suchkvz.'",'; }else{$sql.='suchkvz="0",';}
+		if ($suchgn!='') { $sql.='suchgn="'.$suchgn.'",'; }else{$sql.='suchgn="0",';}
+		if ($suchan!='') { $sql.='suchan="'.$suchan.'",'; }else{$sql.='suchan="0",';}
+		if ($abfrageart!='') { $sql.='abfrageart="'.$abfrageart.'",'; }
+		$sql.='suchgemarkung="'.$suchgemarkung.'",';
+		$sql.='suchflur="'.$suchflur.'",';
+		$sql.='suchstammnr="'.$stammnr.'",';
+		$sql.='suchrissnr="'.$suchrissnr.'",';
+		if($suchfortf == '')$suchfortf = 'NULL';
+		$sql.='suchfortf='.$suchfortf.',';
+		if ($suchpolygon!='') { $sql.='suchpolygon="'.$suchpolygon.'",'; }
+		if ($suchantrnr!='') { $sql.='suchantrnr="'.$suchantrnr.'",'; }
+		$sql.='sdatum="'.$sdatum.'",';
+		$sql.='sdatum2="'.$sdatum2.'",';
+		if ($svermstelle!='') { $sql.='sVermStelle='.$svermstelle.','; }else{$sql.='sVermStelle= NULL,' ;}
+		$sql .= 'user_id = '.$user_id;
+		$sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;
+		$GUI->debug->write("<p>file:users.php class:rolle->setNachweisSuchparameter - Setzen der aktuellen Parameter für die Nachweissuche",4);
+		$GUI->database->execSQL($sql,4, 1);
+		return 1;
+	};
+
+	$this->setNachweisAnzeigeparameter = function($stelle_id, $user_id, $showffr,$showkvz,$showgn,$showan,$markffr,$markkvz,$markgn) use ($GUI){
+		$sql ='UPDATE rolle_nachweise SET ';
+		if ($showffr!='') { $sql.='showffr="'.$showffr.'",'; }else{$sql.='showffr="0",';}
+		if ($showkvz!='') { $sql.='showkvz="'.$showkvz.'",'; }else{$sql.='showkvz="0",';}
+		if ($showgn!='') { $sql.='showgn="'.$showgn.'",'; }else{$sql.='showgn="0",';}
+		if ($showan!='') { $sql.='showan="'.$showan.'",'; }else{$sql.='showan="0",';}
+		if ($markffr!='') { $sql.='markffr="'.$markffr.'",'; }
+		if ($markkvz!='') { $sql.='markkvz="'.$markkvz.'",'; }
+		if ($markgn!='') { $sql.='markgn="'.$markgn.'",'; }
+		$sql .= 'user_id = '.$user_id;
+		$sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;
+		$GUI->debug->write("<p>file:users.php class:rolle->setNachweisAnzeigeparameter - Setzen der aktuellen Anzeigeparameter für die Nachweissuche",4);
+		$GUI->database->execSQL($sql,4, 1);
+		return 1;
+	};
+
+	$this->getNachweisParameter = function($stelle_id, $user_id) use ($GUI){
+		$sql ='SELECT *,CONCAT(showffr,showkvz,showgn,showan) AS art_einblenden';
+		$sql.=',CONCAT(markffr,markkvz,markgn) AS art_markieren FROM rolle_nachweise';
+		$sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;
+		$GUI->debug->write("<p>file:users.php class:user->getNachweisParameter - Abfragen der aktuellen Parameter für die Nachweissuche<br>".$sql,4);
+		$query=mysql_query($sql,$GUI->database->dbConn);
+		if ($query==0) { $GUI->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+		if (mysql_num_rows($query)==0) {
+			echo 'Der User mit der ID:'.$user_id.' fehlt mit der Stellen_ID:'.$stelle_id.' in der Tabelle rolle_nachweise.';
+		}
+		else {
+			$rs=mysql_fetch_assoc($query);
+		}
+		return $rs;
+	};
+	
 	$this->nachweiseRecherchieren = function() use ($GUI){
 		$GUI->formvars['suchstammnr'] = trim($GUI->formvars['suchstammnr']);
 		$GUI->formvars['suchrissnr'] = trim($GUI->formvars['suchrissnr']);
@@ -280,12 +337,12 @@
     if ($GUI->formvars['abfrageart']=='poly') {
       $GUI->formvars['suchpolygon'] = $GUI->formvars['newpathwkt'];
     }
-    $GUI->user->rolle->setNachweisSuchparameter($GUI->formvars['suchffr'],$GUI->formvars['suchkvz'],$GUI->formvars['suchgn'], $GUI->formvars['suchan'], $GUI->formvars['abfrageart'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchflur'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['suchpolygon'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'],$GUI->formvars['sdatum2'], $GUI->formvars['sVermStelle']);
+    $GUI->setNachweisSuchparameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['suchffr'],$GUI->formvars['suchkvz'],$GUI->formvars['suchgn'], $GUI->formvars['suchan'], $GUI->formvars['abfrageart'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchflur'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['suchpolygon'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'],$GUI->formvars['sdatum2'], $GUI->formvars['sVermStelle']);
     # Die Anzeigeparameter werden so gesetzt, daß genau das gezeigt wird, wonach auch gesucht wurde.
     # bzw. was als Suchparameter im Formular angegeben wurde.
-    $GUI->user->rolle->setNachweisAnzeigeparameter($GUI->formvars['suchffr'],$GUI->formvars['suchkvz'],$GUI->formvars['suchgn'],$GUI->formvars['suchan'],$GUI->formvars['suchffr'],$GUI->formvars['suchkvz'],$GUI->formvars['suchgn']);
+    $GUI->setNachweisAnzeigeparameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['suchffr'],$GUI->formvars['suchkvz'],$GUI->formvars['suchgn'],$GUI->formvars['suchan'],$GUI->formvars['suchffr'],$GUI->formvars['suchkvz'],$GUI->formvars['suchgn']);
     # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
-    $GUI->formvars = array_merge($GUI->formvars, $GUI->user->rolle->getNachweisParameter());
+    $GUI->formvars = array_merge($GUI->formvars, $GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id));
     # Nachweisobjekt bilden
     $GUI->nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
     # Suchparameter in Ordnung
@@ -639,7 +696,7 @@
     }
     # Zurück zur Anzeige des Rechercheergebnisses mit Meldung über Zuordnung der Dokumente zum Auftrag
     # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
-    $GUI->formvars=$GUI->user->rolle->getNachweisParameter();
+    $GUI->formvars=$GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id);
     $GUI->nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
 		$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur']);
     if ($ret!='') {
@@ -689,7 +746,7 @@
       }
       # Zurück zur Anzeige des Rechercheergebnisses mit Meldung über Zuordnung der Dokumente zum Auftrag
       # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
-      $GUI->formvars=$GUI->user->rolle->getNachweisParameter();
+      $GUI->formvars=$GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id);
       $GUI->nachweis = new nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
 			$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur']);
       $errmsg.=$ret[1];
@@ -752,7 +809,7 @@
         }
       }
       # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
-      $GUI->formvars=$GUI->user->rolle->getNachweisParameter();
+      $GUI->formvars=$GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id);
       # Abfragen der Nachweise entsprechend der eingestellten Suchparameter
 			$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur']);
       if ($ret!='') {
@@ -764,10 +821,8 @@
   };
 	
 	$this->rechercheFormAnzeigen = function() use ($GUI){
-    # 2006-01-23 pk
-    $GUI->menue='menue.php';
     # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
-    $nachweisSuchParameter=$GUI->user->rolle->getNachweisParameter();
+    $nachweisSuchParameter=$GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id);
     $GUI->formvars=array_merge($GUI->formvars,$nachweisSuchParameter);
     # erzeugen des Formularobjektes für Antragsnr
     $GUI->FormObjAntr_nr=$GUI->getFormObjAntr_nr($GUI->formvars['suchantrnr']);    

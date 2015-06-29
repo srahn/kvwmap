@@ -2275,66 +2275,6 @@ class rolle {
 		return 1;
 	}
 
-	function setNachweisSuchparameter($suchffr,$suchkvz,$suchgn,$suchan,$abfrageart,$suchgemarkung,$suchflur,$stammnr,$suchrissnr,$suchfortf,$suchpolygon,$suchantrnr, $sdatum, $sdatum2, $svermstelle) {
-		$sql ='UPDATE rolle_nachweise SET ';
-		if ($suchffr!='') { $sql.='suchffr="'.$suchffr.'",'; }else{$sql.='suchffr="0",';}
-		if ($suchkvz!='') { $sql.='suchkvz="'.$suchkvz.'",'; }else{$sql.='suchkvz="0",';}
-		if ($suchgn!='') { $sql.='suchgn="'.$suchgn.'",'; }else{$sql.='suchgn="0",';}
-		if ($suchan!='') { $sql.='suchan="'.$suchan.'",'; }else{$sql.='suchan="0",';}
-		if ($abfrageart!='') { $sql.='abfrageart="'.$abfrageart.'",'; }
-		$sql.='suchgemarkung="'.$suchgemarkung.'",';
-		$sql.='suchflur="'.$suchflur.'",';
-		$sql.='suchstammnr="'.$stammnr.'",';
-		$sql.='suchrissnr="'.$suchrissnr.'",';
-		if($suchfortf == '')$suchfortf = 'NULL';
-		$sql.='suchfortf='.$suchfortf.',';
-		if ($suchpolygon!='') { $sql.='suchpolygon="'.$suchpolygon.'",'; }
-		if ($suchantrnr!='') { $sql.='suchantrnr="'.$suchantrnr.'",'; }
-		
-		$sql.='sdatum="'.$sdatum.'",';
-		$sql.='sdatum2="'.$sdatum2.'",';
-		if ($svermstelle!='') { $sql.='sVermStelle='.$svermstelle.','; }else{$sql.='sVermStelle= NULL,' ;}
-		
-		$sql .= 'user_id = '.$this->user_id;
-		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-		$this->debug->write("<p>file:users.php class:rolle->setNachweisSuchparameter - Setzen der aktuellen Parameter für die Nachweissuche",4);
-		$this->database->execSQL($sql,4, 1);
-		return 1;
-	}
-
-	function setNachweisAnzeigeparameter($showffr,$showkvz,$showgn,$showan,$markffr,$markkvz,$markgn) {
-		$sql ='UPDATE rolle_nachweise SET ';
-		if ($showffr!='') { $sql.='showffr="'.$showffr.'",'; }else{$sql.='showffr="0",';}
-		if ($showkvz!='') { $sql.='showkvz="'.$showkvz.'",'; }else{$sql.='showkvz="0",';}
-		if ($showgn!='') { $sql.='showgn="'.$showgn.'",'; }else{$sql.='showgn="0",';}
-		if ($showan!='') { $sql.='showan="'.$showan.'",'; }else{$sql.='showan="0",';}
-		if ($markffr!='') { $sql.='markffr="'.$markffr.'",'; }
-		if ($markkvz!='') { $sql.='markkvz="'.$markkvz.'",'; }
-		if ($markgn!='') { $sql.='markgn="'.$markgn.'",'; }
-		$sql .= 'user_id = '.$this->user_id;
-		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-		$this->debug->write("<p>file:users.php class:rolle->setNachweisAnzeigeparameter - Setzen der aktuellen Anzeigeparameter für die Nachweissuche",4);
-		$this->database->execSQL($sql,4, 1);
-		return 1;
-	}
-
-	function getNachweisParameter() {
-		$sql ='SELECT *,CONCAT(showffr,showkvz,showgn,showan) AS art_einblenden';
-		$sql.=',CONCAT(markffr,markkvz,markgn) AS art_markieren FROM rolle_nachweise';
-		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-		$this->debug->write("<p>file:users.php class:user->getNachweisParameter - Abfragen der aktuellen Parameter für die Nachweissuche<br>".$sql,4);
-		$query=mysql_query($sql,$this->database->dbConn);
-		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-		if (mysql_num_rows($query)==0) {
-			echo 'Der User mit der ID:'.$this->user_id.' fehlt mit der Stellen_ID:'.$this->stelle_id.' in der Tabelle rolle_nachweise.';
-		}
-		else {
-			$rs=mysql_fetch_array($query);
-		}
-		return $rs;
-	}
-
-
 	# 2006-03-20 pk
 	function getMapComments($consumetime) {
 		$sql ='SELECT time_id,comment FROM u_consume2comments WHERE';
