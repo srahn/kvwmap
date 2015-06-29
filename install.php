@@ -220,27 +220,27 @@ function install_config() {
   $config = str_replace("define('INSTALLPATH','/home/gisadmin/');", "define('INSTALLPATH','".$installpath."/');", $config);
   $config = str_replace("define('WWWROOT',INSTALLPATH.'apps/');", "define('WWWROOT',INSTALLPATH.'".$www."/');", $config);
   $config = str_replace(
-    "define(MYSQL_HOST, 'localhost');",
-    "define(MYSQL_HOST, (getenv('MYSQL_PORT_3306_TCP_ADDR') == '') ? 'localhost' : getenv('MYSQL_PORT_3306_TCP_ADDR'));",
+    "define('MYSQL_HOST', 'localhost');",
+    "define('MYSQL_HOST', (getenv('MYSQL_PORT_3306_TCP_ADDR') == '') ? 'localhost' : getenv('MYSQL_PORT_3306_TCP_ADDR'));",
     $config
   );
-  $config = str_replace("define(MYSQL_USER, '');", "define(MYSQL_USER, 'kvwmap');", $config);
-  $config = str_replace("define(MYSQL_PASSWORD, '');", "define(MYSQL_PASSWORD, 'kvwmap');", $config);
+  $config = str_replace("define('MYSQL_USER', '');", "define('MYSQL_USER', 'kvwmap');", $config);
+  $config = str_replace("define('MYSQL_PASSWORD', '');", "define('MYSQL_PASSWORD', 'kvwmap');", $config);
   $config = str_replace(
-    "define(MYSQLVERSION, '500');",
-    "define(MYSQLVERSION, '" . versionFormatter(getenv('MYSQL_ENV_MYSQL_MAJOR')) . "');",
+    "define('MYSQLVERSION', '500');",
+    "define('MYSQLVERSION', '" . versionFormatter(getenv('MYSQL_ENV_MYSQL_MAJOR')) . "');",
     $config
   );
   $config = str_replace(
-    "define(POSTGRES_HOST, 'localhost');",
-    "define(POSTGRES_HOST, (getenv('PGSQL_PORT_5432_TCP_ADDR') == '') ? 'localhost' : getenv('PGSQL_PORT_5432_TCP_ADDR'));",
+    "define('POSTGRES_HOST', 'localhost');",
+    "define('POSTGRES_HOST', (getenv('PGSQL_PORT_5432_TCP_ADDR') == '') ? 'localhost' : getenv('PGSQL_PORT_5432_TCP_ADDR'));",
     $config
   );
-  $config = str_replace("define(POSTGRES_USER, '');", "define(POSTGRES_USER, 'kvwmap');", $config);
-  $config = str_replace("define(POSTGRES_PASSWORD, '');", "define(POSTGRES_PASSWORD, 'kvwmap');", $config);
+  $config = str_replace("define('POSTGRES_USER', '');", "define('POSTGRES_USER', 'kvwmap');", $config);
+  $config = str_replace("define('POSTGRES_PASSWORD', '');", "define('POSTGRES_PASSWORD', 'kvwmap');", $config);
   $config = str_replace(
-    "define(POSTGRESVERSION, '500');",
-    "define(POSTGRESVERSION, '" . versionFormatter(getenv('PGSQL_ENV_PG_MAJOR')) . "');",
+    "define('POSTGRESVERSION', '500');",
+    "define('POSTGRESVERSION', '" . versionFormatter(getenv('PGSQL_ENV_PG_MAJOR')) . "');",
     $config
   );
   $config = str_replace(
