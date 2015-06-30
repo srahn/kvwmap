@@ -261,7 +261,7 @@ function install_config() {
   
   $config = str_replace(
     "define('POSTGRESBINPATH', '/usr/lib/postgresql/9.1/bin/');",
-    "define('POSTGRESBINPATH', '/usr/lib/postgresql/". getPostgreSQLVersion() . "/bin/');",
+    "define('POSTGRESBINPATH', '/usr/lib/postgresql/". getenv('PGSQL_ENV_PG_MAJOR') . "/bin/');",
     $config
   );
 
@@ -481,7 +481,7 @@ function getMySQLVersion() {
 
 function getPostgreSQLVersion() { 
   return getVersionFromText(
-    shell_exec('psql -h $MYSQL_PORT_3306_TCP_ADDR -V')
+    shell_exec('psql -h $PGSQL_PORT_5432_TCP_ADDR -V')
   );
 }
 
