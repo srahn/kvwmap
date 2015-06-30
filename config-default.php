@@ -152,7 +152,7 @@ define('NBH_PATH', WWWROOT.APPLVERSION.'tools/UTM33_NBH.lst');			# Version 2.1
 define('MAPSERV_CGI_BIN',URL.'cgi-bin/mapserv');
 define('LOGPATH',INSTALLPATH.'logs/');
 # Shapepath [Pfad zum Shapefileverzeichnis]
-define('SHAPEPATH',INSTALLPATH.'var/data/');
+define('SHAPEPATH',INSTALLPATH.'data/');
 # Custom-Shapepath [Name des Verzeichnisses, in dem die von den Usern hochgeladenen SHPs liegen (muss im SHAPEPATH liegen)]
 #define('CUSTOM_SHAPEPATH', 'custom_shps/');							# Version 1.7.4		# in Version 1.11.0 gelöscht
 # ein extra Schema in der PG-DB, in der die Tabellen der Nutzer Shapes angelegt werden
