@@ -61,6 +61,14 @@ class antrag {
     $this->database=$db;
   }
   
+	function create_uebergabe_logpath($Stelle){
+		$path = RECHERCHEERGEBNIS_PATH.'Uebergebene_Dokumente/'.$Stelle;
+		if(!is_dir($path)){
+			mkdir($path, 0777, true);
+		}
+		return $path;
+	}
+	
   function clearRecherchePfad() {
     # Löschen der vorhandenen alten Dateien des Auftrages oder anlegen eines neuen Verzeichnisses
     if (!is_dir(RECHERCHEERGEBNIS_PATH)) {
@@ -192,7 +200,7 @@ class antrag {
 			return $errmsg;     
 		}
   }  
-  
+  	
   function erzeugenUbergabeprotokoll_PDF() {
     $pdf=new Cezpdf();
     $tmp = array('b'=>'Times-Bold.afm','i'=>'Times-Italic.afm','bi'=>'Times-BoldItalic.afm');

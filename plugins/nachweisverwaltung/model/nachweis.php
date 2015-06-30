@@ -1188,6 +1188,7 @@ class Nachweis {
   function istbelegt($var) {
     return ($var!='');
   }
+		
 }
 
 

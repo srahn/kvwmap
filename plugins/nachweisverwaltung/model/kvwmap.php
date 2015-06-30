@@ -10,11 +10,23 @@
       $antrag=new antrag($antr_selected,$stelle_id,$GUI->pgdatabase);
 			$antragsnr = $antrag->nr;
 			if($stelle_id != '')$antragsnr.='~'.$stelle_id;
-      if (is_dir(RECHERCHEERGEBNIS_PATH.$antragsnr)){
-        //$result = exec(RECHERCHE_PACK_SKRIPT.' '.$antrag->nr.' '.$antrag->nr.' '.RECHERCHEERGEBNIS_PATH);
-        //$result = exec('zip -r '.RECHERCHEERGEBNIS_PATH.$antrag->nr.' '.RECHERCHEERGEBNIS_PATH.$antrag->nr);
+      if(is_dir(RECHERCHEERGEBNIS_PATH.$antragsnr)){
         chdir(RECHERCHEERGEBNIS_PATH);
         $result = exec(ZIP_PATH.' -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr);
+				# Loggen der übergebenen Dokumente
+				$uebergabe_logpath = $antrag->create_uebergabe_logpath($GUI->Stelle->Bezeichnung).'/'.$antr_selected.'_'.date('Y-m-d_H-i-s',time()).'.pdf';
+				$GUI->formvars['Lfd'] = 1;
+				$GUI->formvars['Riss-Nummer'] = 1;
+				$GUI->formvars['Antrags-Nummer'] = 1;
+				$GUI->formvars['FFR'] = 1;
+				$GUI->formvars['KVZ'] = 1;
+				$GUI->formvars['GN'] = 1;
+				$GUI->formvars['andere'] = 1;
+				$GUI->formvars['Datum'] = 1;
+				$GUI->formvars['Datei'] = 1;
+				$GUI->formvars['gemessendurch'] = 1;
+				$GUI->formvars['Gueltigkeit'] = 1;
+				$GUI->erzeugenUebergabeprotokollNachweise_PDF($uebergabe_logpath);
       }
     }
     $filename = RECHERCHEERGEBNIS_PATH.$antragsnr.'.zip';
@@ -327,6 +339,53 @@
 		return $rs;
 	};
 	
+	$this->Suchparameter_loggen = function($formvars, $stelle_id, $user_id) use ($GUI){
+		$sql ='INSERT INTO u_consumeNachweise SELECT ';
+		$sql.='"'.$formvars['suchantrnr'].'", ';
+		$sql.=$stelle_id.', ';
+		$sql.='"'.date('Y-m-d H:i:s',time()).'", ';
+		$sql.='`suchffr`, `suchkvz`, `suchgn`, `suchan`, `abfrageart`, `suchgemarkung`, `suchflur`, `suchstammnr`, `suchrissnr`, `suchfortf`, `suchpolygon`, `suchantrnr`, `sdatum`, `sdatum2`, `sVermStelle`,';
+		if($formvars['flur_thematisch']!='') { $sql.='"'.$formvars['flur_thematisch'].'",'; }else{$sql.='"0",';}
+		$sql.='"'.$formvars['such_andere_art'].'"';
+		$sql.=' FROM rolle_nachweise';
+		$sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;
+		$GUI->debug->write("<p>file:users.php class:rolle->Suchparameter_loggen - Setzen der aktuellen Parameter für die Nachweissuche",4);
+		$GUI->database->execSQL($sql,4, 1);
+	};
+	
+	$this->Suchparameter_anhaengen_PDF = function($pdf, $antrag_nr, $stelle_id) use ($GUI){
+		$row = 0;
+		$options = array('aleft'=>30, 'right'=>30, 'justification'=>'left');
+		$sql = "SELECT * FROM u_consumeNachweise ";
+		$sql.= "WHERE antrag_nr='".$antrag_nr."' AND stelle_id=".$stelle_id;
+		$GUI->debug->write("<p>file:users.php class:user->Suchparameter_anhaengen_PDF <br>".$sql,4);
+		$query=mysql_query($sql,$GUI->database->dbConn);
+		if ($query==0) { $GUI->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+		while($rs = mysql_fetch_assoc($query)){
+			switch ($rs['abfrageart']){
+				case 'indiv_nr' : {
+					$keys = array('suchffr'=>0, 'suchkvz'=>0, 'suchgn'=>0, 'suchan'=>0, 'suchgemarkung'=>0, 'suchflur'=>0, 'suchstammnr'=>0, 'suchrissnr'=>0, 'suchfortf'=>0, 'sdatum'=>0, 'sdatum2'=>0, 'sVermStelle'=>0, 'flur_thematisch'=>0, 'such_andere_art'=>0);
+				}break;
+				case 'poly' : {
+					$keys = array('suchffr'=>0, 'suchkvz'=>0, 'suchgn'=>0, 'suchan'=>0, 'suchpolygon'=>0, 'such_andere_art'=>0);
+				}break;
+				case 'antr_nr' : {
+					$keys = array('suchffr'=>0, 'suchkvz'=>0, 'suchgn'=>0, 'suchan'=>0, 'suchantrnr'=>0, 'such_andere_art'=>0);
+				}break;				
+			}
+			$params = json_encode(array_intersect_key($rs, $keys));
+			if($row < 100){
+				$pdf->ezNewPage();
+				$row = 800;				
+			}
+			$pdf->ezText('<b>Suche '.$rs['time_id'].': '.$rs['abfrageart'].'</b>', 14, $options);
+			#$pdf->ezText('Suchpolygon: '.$rs['suchpolygon'], 16, $options);
+			$pdf->ezText($params, 12, $options);
+			$pdf->ezText(' ', 12, $options);
+		}		
+		return $pdf;
+	};
+	
 	$this->nachweiseRecherchieren = function() use ($GUI){
 		$GUI->formvars['suchstammnr'] = trim($GUI->formvars['suchstammnr']);
 		$GUI->formvars['suchrissnr'] = trim($GUI->formvars['suchrissnr']);
@@ -397,7 +456,7 @@
     }
   };
   
-	$this->erzeugenUebergabeprotokollNachweise_PDF = function() use ($GUI){
+	$this->erzeugenUebergabeprotokollNachweise_PDF = function($logpath = NULL) use ($GUI){
   	# Erzeugen des Übergabeprotokolls mit der Zuordnung der Nachweise zum gewählten Auftrag als PDF-Dokument
   	if($GUI->formvars['antr_selected'] == ''){
       $GUI->Antraege_Anzeigen();
@@ -417,18 +476,26 @@
       else{
 		    include (PDFCLASSPATH."class.ezpdf.php");
 		    $pdf=new Cezpdf();
-		    $pdf=$GUI->antrag->erzeugenUbergabeprotokoll_PDF($GUI->formvars);
-		    $GUI->pdf=$pdf;
-		    $dateipfad=IMAGEPATH;
-		    $currenttime = date('Y-m-d_H:i:s',time());
-		    $name = umlaute_umwandeln($GUI->user->Name);
-		    $dateiname = $name.'-'.$currenttime.'.pdf';
-		    $GUI->outputfile = $dateiname;
-		    $fp=fopen($dateipfad.$dateiname,'wb');
-		    fwrite($fp,$GUI->pdf->ezOutput());
-		    fclose($fp);
-		    $GUI->mime_type='pdf';
-		    $GUI->output();
+		    $pdf=$GUI->antrag->erzeugenUbergabeprotokoll_PDF();		    
+				if($logpath == NULL){					# Ausgabe an den Browser
+					$GUI->pdf=$pdf;
+					$dateipfad=IMAGEPATH;
+					$currenttime = date('Y-m-d_H:i:s',time());
+					$name = umlaute_umwandeln($GUI->user->Name);
+					$dateiname = $name.'-'.$currenttime.'.pdf';
+					$GUI->outputfile = $dateiname;
+					$fp=fopen($dateipfad.$dateiname,'wb');
+					fwrite($fp,$GUI->pdf->ezOutput());
+					fclose($fp);
+					$GUI->mime_type='pdf';
+					$GUI->output();
+				}
+				else{												# Ausgabe als Log-Datei					
+					$pdf=$GUI->Suchparameter_anhaengen_PDF($pdf, $GUI->formvars['antr_selected'], $stelle_id);					
+					$fp=fopen($logpath,'wb');
+					fwrite($fp,$pdf->ezOutput());
+					fclose($fp);
+				}
       }
     }
   };
@@ -691,6 +758,7 @@
         $errmsg=$ret[1];
       }
       else {
+				$GUI->Suchparameter_loggen($GUI->formvars, $GUI->Stelle->id, $GUI->user->id);
         $okmsg=$ret[1];
       }
     }
