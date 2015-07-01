@@ -261,7 +261,7 @@ function install_config() {
   
   $config = str_replace(
     "define('POSTGRESBINPATH', '/usr/lib/postgresql/9.1/bin/');",
-    "define('POSTGRESBINPATH', 'docker exec pgsql-server /usr/bin/');",
+    "define('POSTGRESBINPATH', '/usr/bin/');",
     $config
   );
 
