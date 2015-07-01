@@ -50,9 +50,9 @@ INSERT INTO `rolle` ( `user_id` , `stelle_id` , `nImageWidth` , `nImageHeight` ,
 VALUES (
 @user_id, @stelle_id, '700', '500', 201165, 5867815, 477900, 6081468, '2', 'zoomin', '25833');
 # Referenzkarte eintragen
-INSERT INTO `referenzkarten` (`ID`,`Name` , `Dateiname` , `xmin` , `ymin` , `xmax` , `ymax` , `width` , `height` )
+INSERT INTO `referenzkarten` (`ID`,`Name` , `Dateiname` , `xmin` , `ymin` , `xmax` , `ymax` , `width` , `height`, `epsg_code`)
 VALUES (
- '1','Uebersichtskarte', 'uebersicht_mv.png', 201165, 5867815, 477900, 6081468, '205', '146'
+ '1','Uebersichtskarte', 'uebersicht_mv.png', 201165, 5867815, 477900, 6081468, '205', '146', 25833
 );
 
 ############################################################################
@@ -300,10 +300,22 @@ SET @last_menue_id=LAST_INSERT_ID();
 INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,83);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
 
+# Daten-Export
+INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Daten-Export', 'index.php?go=Daten_Export', @last_level1menue_id, 2, NULL);
+SET @last_menue_id=LAST_INSERT_ID();
+INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,84);
+INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
+
+# Shape Anzeigen
+INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Shape-Anzeigen', 'index.php?go=SHP_Anzeigen', @last_level1menue_id, 2, NULL);
+SET @last_menue_id=LAST_INSERT_ID();
+INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,85);
+INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
+
 # Druckausgabe
 INSERT INTO u_menues (name, links, obermenue, menueebene, target) VALUES ('Druckausgabe', 'index.php?go=Schnelle_Druckausgabe', @last_level1menue_id, 2, '_blank');
 SET @last_menue_id=LAST_INSERT_ID();
-INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,84);
+INSERT INTO u_menue2stelle (stelle_id,menue_id,menue_order) VALUES (@stelle_id,@last_menue_id,86);
 INSERT INTO u_menue2rolle (user_id,stelle_id,menue_id,status) VALUES (@user_id,@stelle_id,@last_menue_id,0);
 
 #### Druckmanager

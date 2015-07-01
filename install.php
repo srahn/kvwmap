@@ -220,27 +220,27 @@ function install_config() {
   $config = str_replace("define('INSTALLPATH','/home/gisadmin/');", "define('INSTALLPATH','".$installpath."/');", $config);
   $config = str_replace("define('WWWROOT',INSTALLPATH.'apps/');", "define('WWWROOT',INSTALLPATH.'".$www."/');", $config);
   $config = str_replace(
-    "define(MYSQL_HOST, 'localhost');",
-    "define(MYSQL_HOST, (getenv('MYSQL_PORT_3306_TCP_ADDR') == '') ? 'localhost' : getenv('MYSQL_PORT_3306_TCP_ADDR'));",
+    "define('MYSQL_HOST', 'localhost');",
+    "define('MYSQL_HOST', (getenv('MYSQL_PORT_3306_TCP_ADDR') == '') ? 'localhost' : getenv('MYSQL_PORT_3306_TCP_ADDR'));",
     $config
   );
-  $config = str_replace("define(MYSQL_USER, '');", "define(MYSQL_USER, 'kvwmap');", $config);
-  $config = str_replace("define(MYSQL_PASSWORD, '');", "define(MYSQL_PASSWORD, 'kvwmap');", $config);
+  $config = str_replace("define('MYSQL_USER', '');", "define('MYSQL_USER', 'kvwmap');", $config);
+  $config = str_replace("define('MYSQL_PASSWORD', '');", "define('MYSQL_PASSWORD', 'kvwmap');", $config);
   $config = str_replace(
-    "define(MYSQLVERSION, '500');",
-    "define(MYSQLVERSION, '" . versionFormatter(getenv('MYSQL_ENV_MYSQL_MAJOR')) . "');",
+    "define('MYSQLVERSION', '500');",
+    "define('MYSQLVERSION', '" . versionFormatter(getenv('MYSQL_ENV_MYSQL_MAJOR')) . "');",
     $config
   );
   $config = str_replace(
-    "define(POSTGRES_HOST, 'localhost');",
-    "define(POSTGRES_HOST, (getenv('PGSQL_PORT_5432_TCP_ADDR') == '') ? 'localhost' : getenv('PGSQL_PORT_5432_TCP_ADDR'));",
+    "define('POSTGRES_HOST', 'localhost');",
+    "define('POSTGRES_HOST', (getenv('PGSQL_PORT_5432_TCP_ADDR') == '') ? 'localhost' : getenv('PGSQL_PORT_5432_TCP_ADDR'));",
     $config
   );
-  $config = str_replace("define(POSTGRES_USER, '');", "define(POSTGRES_USER, 'kvwmap');", $config);
-  $config = str_replace("define(POSTGRES_PASSWORD, '');", "define(POSTGRES_PASSWORD, 'kvwmap');", $config);
+  $config = str_replace("define('POSTGRES_USER', '');", "define('POSTGRES_USER', 'kvwmap');", $config);
+  $config = str_replace("define('POSTGRES_PASSWORD', '');", "define('POSTGRES_PASSWORD', 'kvwmap');", $config);
   $config = str_replace(
-    "define(POSTGRESVERSION, '500');",
-    "define(POSTGRESVERSION, '" . versionFormatter(getenv('PGSQL_ENV_PG_MAJOR')) . "');",
+    "define('POSTGRESVERSION', '500');",
+    "define('POSTGRESVERSION', '" . versionFormatter(getenv('PGSQL_ENV_PG_MAJOR')) . "');",
     $config
   );
   $config = str_replace(
@@ -261,7 +261,13 @@ function install_config() {
   
   $config = str_replace(
     "define('POSTGRESBINPATH', '/usr/lib/postgresql/9.1/bin/');",
-    "define('POSTGRESBINPATH', '/usr/lib/postgresql/". getPostgreSQLVersion() . "/bin/');",
+    "define('POSTGRESBINPATH', 'docker exec pgsql-server /usr/bin/');",
+    $config
+  );
+
+  $config = str_replace(
+    "define('OGR_BINPATH', '/usr/local/bin/');",
+    "define('OGR_BINPATH', 'docker run --volumes-fromo wwwdata geodata/gdal ');",
     $config
   );
 
@@ -481,7 +487,7 @@ function getMySQLVersion() {
 
 function getPostgreSQLVersion() { 
   return getVersionFromText(
-    shell_exec('psql -h $MYSQL_PORT_3306_TCP_ADDR -V')
+    shell_exec('psql -h $PGSQL_PORT_5432_TCP_ADDR -V')
   );
 }
 
