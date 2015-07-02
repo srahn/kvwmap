@@ -61,13 +61,21 @@ class antrag {
     $this->database=$db;
   }
   
+	function create_uebergabe_logpath($Stelle){
+		$path = RECHERCHEERGEBNIS_PATH.'Uebergebene_Dokumente/'.$Stelle;
+		if(!is_dir($path)){
+			mkdir($path, 0777, true);
+		}
+		return $path;
+	}
+	
   function clearRecherchePfad() {
     # Löschen der vorhandenen alten Dateien des Auftrages oder anlegen eines neuen Verzeichnisses
     if (!is_dir(RECHERCHEERGEBNIS_PATH)) {
       # Verzeichnis für recherchierte Aufträge existierte noch nicht. 
       # Anlegen eines neuen Verzeichnisses zur Speicherung der Dokumentendateien entsprechend RECHERCHEERGEBNIS_PATH
       mkdir (RECHERCHEERGEBNIS_PATH, 0777);
-      echo "<br>Verzeichnis für Rechercheergebnisse erstmalig angelegt: ".RECHERCHEERGEBNIS_PATH;
+      $msg = "Verzeichnis für Rechercheergebnisse erstmalig angelegt: ".RECHERCHEERGEBNIS_PATH."\\r\\n";
     }    
     # Festlegen des Pfades für den Auftrag
     $auftragspfad=RECHERCHEERGEBNIS_PATH.$this->nr;
@@ -77,7 +85,7 @@ class antrag {
       # Verzeichnis existierte noch nicht. 
       # Anlegen eines neuen Verzeichnisses zur Speicherung der Dokumentendateien mit Auftragsnummer als Name
       mkdir ($auftragspfad, 0777);
-      echo "<br>Neues Verzeichnis: ".$auftragspfad." für Auftrag hinzugefügt.";
+      $msg = "Neues Verzeichnis: ".$auftragspfad." für Auftrag hinzugefügt.\\r\\n";
     }
     else {
       # Verzeichnis existiert schon. Den gesamten Inhalt löschen
@@ -85,12 +93,13 @@ class antrag {
       if(delete_files($auftragspfad, $exceptions, 0)) {
         # Ordner wieder neu anlegen
         mkdir ($auftragspfad, 0777);
-        echo "<br>Alle alten Dateien des Auftrages vor dem Hinzufügen der neuen Dateien gelöscht.";
+        $msg = "Alle alten Dateien des Auftrages vor dem Hinzufügen der neuen Dateien gelöscht.\\r\\n";
       }
       else {
-        echo "<br>Löschen vorhandener Dateien fehlgeschlagen";
+        $msg = "Löschen vorhandener Dateien fehlgeschlagen.\\r\\n";
       }
     }
+		return $msg;
   }
 
   function DokumenteInOrdnerZusammenstellen($nachweis){
@@ -161,35 +170,37 @@ class antrag {
       mkdir ($skizzenpfad.'/'.$value,0777);
     }
     # Führe in Schleife für alle zum Auftrag gehörenden Einmessungsskizzen folgendes aus
-    foreach($festpunkte->liste AS $festpunkt){
-      # Wie heißt die Datei, die in den Ordner kopiert werden soll
-      # Pfad zur Quelle zusammensetzen
-      $quelle=PUNKTDATEIPATH.$festpunkt['datei'];
-      # Pfad zum Ziel zusammensetzen
-      $ziel=$skizzenpfad.$festpunkt['datei'];;
-      #echo '<br>von:'.$quelle.' nach:'.$ziel;
-      if (!file_exists($quelle)) {
-        $errmsg.='Die Datei '.$quelle.' existiert nicht.\n';
-      }
-      else {
-        if (!file_exists($ziel)){
-          # Wenn die Datei am Ziel noch nicht existiert dort hin kopieren
-          $erfolg=@copy($quelle,$ziel);
-          if ($erfolg==0){
-            # Es konnte aus irgendeinem Grund nicht erfolgreich kopiert werden
-            $errmsg.='Die Datei '.$ziel.' konnte nicht erstellt werden.\n';
-          }
-        }
-        else{
-          # Die Datei, die kopiert werden soll existiert schon am ziel.
-          $errmsg.='Die Datei '.$ziel.' existiert bereits!\n';
-        }
-      }
-    }
-    if ($errmsg==''){ $errmsg='Die Einmessungsskizzen der Festpunkte zum Antrag Nr: '.$this->nr.' wurden erfolgreich in Ordner zusammengestellt';}
-    return $errmsg;     
+		if(count($festpunkte->liste) > 0){
+			foreach($festpunkte->liste AS $festpunkt){
+				# Wie heißt die Datei, die in den Ordner kopiert werden soll
+				# Pfad zur Quelle zusammensetzen
+				$quelle=PUNKTDATEIPATH.$festpunkt['datei'];
+				# Pfad zum Ziel zusammensetzen
+				$ziel=$skizzenpfad.$festpunkt['datei'];;
+				#echo '<br>von:'.$quelle.' nach:'.$ziel;
+				if (!file_exists($quelle)) {
+					$errmsg.='Die Datei '.$quelle.' existiert nicht.\n';
+				}
+				else {
+					if (!file_exists($ziel)){
+						# Wenn die Datei am Ziel noch nicht existiert dort hin kopieren
+						$erfolg=@copy($quelle,$ziel);
+						if ($erfolg==0){
+							# Es konnte aus irgendeinem Grund nicht erfolgreich kopiert werden
+							$errmsg.='Die Datei '.$ziel.' konnte nicht erstellt werden.\n';
+						}
+					}
+					else{
+						# Die Datei, die kopiert werden soll existiert schon am ziel.
+						$errmsg.='Die Datei '.$ziel.' existiert bereits!\n';
+					}
+				}
+			}
+			if ($errmsg==''){ $errmsg='Die Einmessungsskizzen der Festpunkte zum Antrag Nr: '.$this->nr.' wurden erfolgreich in Ordner zusammengestellt';}
+			return $errmsg;     
+		}
   }  
-  
+  	
   function erzeugenUbergabeprotokoll_PDF() {
     $pdf=new Cezpdf();
     $tmp = array('b'=>'Times-Bold.afm','i'=>'Times-Italic.afm','bi'=>'Times-BoldItalic.afm');

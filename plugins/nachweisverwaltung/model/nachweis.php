@@ -1188,6 +1188,7 @@ class Nachweis {
   function istbelegt($var) {
     return ($var!='');
   }
+		
 }
 
 
@@ -1237,6 +1238,7 @@ class Festpunkte {
     # Ausgegeben werden alle Punkte, die zur antrag_nr gehören, die über die Abfrage getFestpunkte in $this->liste geschrieben wurden
     # Verzeichnispfad bilden und prüfen ob schon vorhanden, wenn nicht Verzeichnis anlegen
     if($pkz != '')$pkz = array_values($pkz);
+		if($stelle_id != '')$antrag_nr.='~'.$stelle_id;
     $kvzPfad=RECHERCHEERGEBNIS_PATH.$antrag_nr.'/';
     if (!is_dir($kvzPfad)) {
       mkdir($kvzPfad,0770); # erzeugt das Verzeichnis für den Auftrag, weil es das noch nicht gibt
