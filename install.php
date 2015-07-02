@@ -261,13 +261,13 @@ function install_config() {
   
   $config = str_replace(
     "define('POSTGRESBINPATH', '/usr/lib/postgresql/9.1/bin/');",
-    "define('POSTGRESBINPATH', 'docker exec pgsql-server /usr/bin/');",
+    "define('POSTGRESBINPATH', '/usr/bin/');",
     $config
   );
 
   $config = str_replace(
     "define('OGR_BINPATH', '/usr/local/bin/');",
-    "define('OGR_BINPATH', 'docker run --volumes-fromo wwwdata geodata/gdal ');",
+    "define('OGR_BINPATH', '/usr/bin/');",
     $config
   );
 
