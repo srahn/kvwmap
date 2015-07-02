@@ -69,6 +69,7 @@ class data_import_export {
 			$connectionstring ='user='.$pgdatabase->user;
 			if($pgdatabase->passwd != '')$connectionstring.=' password='.$pgdatabase->passwd;
 			$connectionstring.=' dbname='.$pgdatabase->dbName;
+      if($pgdatabase->host != 'localhost') $connectionstring .= ' host=' . $pgdatabase->host;
 			$this->formvars['connection'] = $connectionstring;
 			$this->formvars['connectiontype'] = 6;
 			$this->formvars['epsg_code'] = $formvars['epsg'];
@@ -201,22 +202,27 @@ class data_import_export {
 		      $command = POSTGRESBINPATH.'shp2pgsql -g the_geom -I -s '.$formvars['epsg'].' -W LATIN1 -c "'.UPLOADPATH.$file.'" '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' > "'.UPLOADPATH.$file.'.sql"'; 
 		      exec($command);
 		     	#echo $command;
-					$fp = fopen(UPLOADPATH.$file.'.sql', 'r+');
-					fwrite($fp, 'SET default_with_oids = true;'.chr(10));
-					fclose($fp);
-					$command = POSTGRESBINPATH.'psql -f "'.UPLOADPATH.$file.'.sql" '.$pgdatabase->dbName.' '.$pgdatabase->user;
+					$command = POSTGRESBINPATH.'psql -h ' . $pgdatabase->host . ' -f "'.UPLOADPATH.$file.'.sql" '.$pgdatabase->dbName.' '.$pgdatabase->user;
 					if($pgdatabase->passwd != '')$command = 'export PGPASSWORD="'.$pgdatabase->passwd.'"; '.$command;
 		      exec($command);
 		     	#echo $command;
-		      $sql = 'SELECT count(*) FROM '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename;
+		      $sql = "
+            ALTER TABLE " . CUSTOM_SHAPE_SCHEMA . "." . $tablename . "
+            SET WITH OIDS;
+            SELECT
+              geometrytype(the_geom) AS geometrytype
+            FROM
+              " . CUSTOM_SHAPE_SCHEMA . "." . $tablename . "
+            LIMIT 1;
+          ";
 		      $ret = $pgdatabase->execSQL($sql,4, 0);
 		      if(!$ret[0]){
-			      $sql = file_get_contents(UPLOADPATH.$file.'.sql');
-			      if(strpos($sql, 'POINT') !== false){
+            $result = pg_fetch_array($ret[1]);
+			      if(strpos($result['geometrytype'], 'POINT') !== false){
 			      	$datatype = 0;
-			      }elseif(strpos($sql, 'LINESTRING') !== false){
+			      }elseif(strpos($result['geometrytype'], 'LINESTRING') !== false){
 			      	$datatype = 1;
-			      }elseif(strpos($sql, 'POLYGON') !== false){
+			      }elseif(strpos($result['geometrytype'], 'POLYGON') !== false){
 			      	$datatype = 2;
 			      }
 						$custom_table['datatype'] = $datatype;

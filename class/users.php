@@ -2567,7 +2567,7 @@ class stelle {
     $this->alb_raumbezug=$rs["alb_raumbezug"];
     $this->alb_raumbezug_wert=$rs["alb_raumbezug_wert"];
     $this->wasserzeichen=$rs["wasserzeichen"];
-    $this->pgdbhost=$rs["pgdbhost"];
+    $this->pgdbhost = ($rs["pgdbhost"] == 'PGSQL_PORT_5432_TCP_ADDR') ? getenv('PGSQL_PORT_5432_TCP_ADDR') : $rs["pgdbhost"];
     $this->pgdbname=$rs["pgdbname"];
     $this->pgdbuser=$rs["pgdbuser"];
     $this->pgdbpasswd=$rs["pgdbpasswd"];
