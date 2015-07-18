@@ -74,7 +74,7 @@ function install() {
   $mysqlRootDb = new database;
   $mysqlRootDb->host = MYSQL_HOST;
   $mysqlRootDb->user = 'root';
-  $mysqlRootDb->passwd = 'test'; #getenv('MYSQL_ENV_MYSQL_ROOT_PASSWORD');
+  $mysqlRootDb->passwd = getenv('MYSQL_ENV_MYSQL_ROOT_PASSWORD');
   $mysqlRootDb->dbName = 'mysql'; ?>
   Verbindungsdaten für Zugang zu MySQL root Nutzer wie folgt gesetzt:<br>
   Host: <?php echo $mysqlRootDb->host; ?><br>
