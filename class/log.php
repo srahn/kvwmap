@@ -1,7 +1,7 @@
 <?
 
 ##########################
-# Klasse f¸r Debug-Datei #
+# Klasse f√ºr Debug-Datei #
 ##########################
 # Klasse debugfile #
 ####################
@@ -29,9 +29,9 @@ class debugfile {
     if ($level>=DEBUG_LEVEL) {
       $ret=@fwrite($this->fp,"\n<br>".$msg);
       if (!$ret) {
-        $this->Fehlermeldung ='In die Debugdatei '.$this->filename.' l‰ﬂt sich nicht schreiben.';
-        $this->Fehlermeldung.='<br>Das kann daran liegen, dass f¸r den WebServer, in dem kvwmap l‰uft, keine Schreibrechte gesetzt sind.';
-        $this->Fehlermeldung.='<br>Pr¸fen Sie die Rechte der Datei!';
+        $this->Fehlermeldung ='In die Debugdatei '.$this->filename.' l√§√üt sich nicht schreiben.';
+        $this->Fehlermeldung.='<br>Das kann daran liegen, dass f√ºr den WebServer, in dem kvwmap l√§uft, keine Schreibrechte gesetzt sind.';
+        $this->Fehlermeldung.='<br>Pr√ºfen Sie die Rechte der Datei!';
         include(LAYOUTPATH."snippets/Fehlermeldung.php");
         exit;
       }
@@ -44,7 +44,7 @@ class debugfile {
   }
 }
 ############################################
-# Klasse f¸r das Loggen von SQL-Statements #
+# Klasse f√ºr das Loggen von SQL-Statements #
 ############################################
 # Klasse LogFile #
 ##################
@@ -62,13 +62,13 @@ class LogFile {
   #
   ################################################################################
 
-  # ˆffnet die Logdatei
+  # √∂ffnet die Logdatei
   function LogFile($filename,$format,$title,$headline) {
     $this->name=$filename;
     $this->fp=fopen($filename,"a");
     $this->format=$format;
     if ($format=="html") {
-      # f¸gt HEML header ein zum loggen in einer HTML-Datei
+      # f√ºgt HEML header ein zum loggen in einer HTML-Datei
       # Wenn title gesetzt ist wird er als Titel im header gesetzt, sonst default.
       if ($title=="") { $title=="Logdatei"; }
       fwrite($this->fp,"<html>\n<head>\n<title>".$title."</title>\n</head>\n<body>");
@@ -82,9 +82,9 @@ class LogFile {
       }
     }
     if (!$ret) {
-      $this->Fehlermeldung ='In die Logdatei '.$this->name.' l‰ﬂt sich nicht schreiben.';
-      $this->Fehlermeldung.='<br>Das kann daran liegen, dass f¸r den WebServer, in dem kvwmap l‰uft, keine Schreibrechte gesetzt sind.';
-      $this->Fehlermeldung.='<br>Pr¸fen Sie die Rechte der Datei!';
+      $this->Fehlermeldung ='In die Logdatei '.$this->name.' l√§√üt sich nicht schreiben.';
+      $this->Fehlermeldung.='<br>Das kann daran liegen, dass f√ºr den WebServer, in dem kvwmap l√§uft, keine Schreibrechte gesetzt sind.';
+      $this->Fehlermeldung.='<br>Pr√ºfen Sie die Rechte der Datei!';
       include(LAYOUTPATH."snippets/Fehlermeldung.php");
       exit;
     }
