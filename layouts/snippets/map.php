@@ -255,7 +255,7 @@ if($this->formvars['gps_follow'] == ''){
 													</table>
 						            </div>
 						          </td>
-						          <td width="100px" class="special-options">
+						          <td width="120px" class="special-options">
 												<input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang
 												<div id="options"></div><!-- hier werden die Spezialoptionen eingefügt -->
 											</td>
