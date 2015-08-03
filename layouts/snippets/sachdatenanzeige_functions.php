@@ -158,16 +158,12 @@ include('funktionen/input_check_functions.php');
 				data_r += '&'+form_fields[i]+'='+document.getElementsByName(form_fields[i])[0].value;
 			}
   	}
-  	data = 'go=Sachdaten_speichern&selected_layer_id='+layer_id+'&fromobject='+fromobject+'&targetobject='+targetobject+'&targetlayer_id='+targetlayer_id+'&targetattribute='+targetattribute+'&data='+data+'&form_field_names='+form_fieldstring+'&embedded=true' + data_r;
+  	data = 'go=Sachdaten_speichern&reload='+reload+'&selected_layer_id='+layer_id+'&fromobject='+fromobject+'&targetobject='+targetobject+'&targetlayer_id='+targetlayer_id+'&targetattribute='+targetattribute+'&data='+data+'&form_field_names='+form_fieldstring+'&embedded=true' + data_r;
 		if(typeof (window.FormData) != 'undefined'){		// in alten IEs gibts FormData nicht
 			formdata = new FormData(currentform);
 			data = urlstring2formdata(formdata, data);
 		}
-		ahah('index.php', data, new Array(document.getElementById(fromobject), document.getElementById(targetobject)), new Array('sethtml', 'sethtml'));
-		if(reload){
-  		currentform.go.value='get_last_query';
-			overlay_submit(currentform, false);
-  	}
+		ahah('index.php', data, new Array(document.getElementById(fromobject), document.getElementById(targetobject), ''), new Array('sethtml', 'sethtml', 'execute_function'));
 	}
 
 	subsave_new_layer_data = function(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, data, reload){
@@ -195,16 +191,12 @@ include('funktionen/input_check_functions.php');
   			data_r += '&'+form_fields[i]+'='+document.getElementsByName(form_fields[i])[0].value;
   		}
   	}
-  	data = 'go=neuer_Layer_Datensatz_speichern&selected_layer_id='+layer_id+'&fromobject='+fromobject+'&targetobject='+targetobject+'&targetlayer_id='+targetlayer_id+'&targetattribute='+targetattribute+'&data='+data+'&form_field_names='+form_fieldstring+'&embedded=true' + data_r;
+  	data = 'go=neuer_Layer_Datensatz_speichern&reload='+reload+'&selected_layer_id='+layer_id+'&fromobject='+fromobject+'&targetobject='+targetobject+'&targetlayer_id='+targetlayer_id+'&targetattribute='+targetattribute+'&data='+data+'&form_field_names='+form_fieldstring+'&embedded=true' + data_r;
 		if(typeof (window.FormData) != 'undefined'){		// in alten IEs gibts FormData nicht
 			formdata = new FormData(currentform);
 			data = urlstring2formdata(formdata, data);
 		}
-		ahah('index.php', data, new Array(document.getElementById(fromobject), document.getElementById(targetobject)), new Array('sethtml', 'sethtml'));
-		if(reload){
-  		currentform.go.value='get_last_query';
-			overlay_submit(currentform, false);
-  	}
+		ahah('index.php', data, new Array(document.getElementById(fromobject), document.getElementById(targetobject), ''), new Array('sethtml', 'sethtml', 'execute_function'));
 	}
 
 	clearsubforms = function(layer_id){
