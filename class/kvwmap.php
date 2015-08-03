@@ -7198,7 +7198,8 @@ class GUI {
     if($this->formvars['embedded'] != ''){    # wenn es ein neuer Datensatz aus einem embedded-Formular ist, muss das entsprechende Attribut des Hauptformulars aktualisiert werden
       header('Content-type: text/html; charset=UTF-8');
       $attributename[0] = $this->formvars['targetattribute'];
-      $attributes = $mapdb->read_layer_attributes($this->formvars['targetlayer_id'], $layerdb, $attributename);
+      $attributes = $mapdb->read_layer_attributes($this->formvars['targetlayer_id'], $layerdb, $attributename);			
+			
       switch ($attributes['form_element_type'][0]){
         case 'Auswahlfeld' : {
           list($sql) = explode(';', $attributes['options'][0]);
@@ -7219,6 +7220,13 @@ class GUI {
           $this->GenerischeSuche_Suchen();
         }break;
       }
+						
+			if($this->formvars['reload']){			# in diesem Fall wird die komplette Seite neu geladen
+				echo '~~';
+				echo "currentform.go.value='get_last_query';
+							overlay_submit(currentform, false);";
+			}
+			
     }
     else{
       if($success == false){
@@ -10277,6 +10285,11 @@ class GUI {
           $this->GenerischeSuche_Suchen();
         }break;
       }
+			if($this->formvars['reload']){			# in diesem Fall wird die komplette Seite neu geladen
+				echo '~~';
+				echo "currentform.go.value='get_last_query';
+							overlay_submit(currentform, false);";
+			}
     }
     else{
 			$this->last_query = $this->user->rolle->get_last_query();
