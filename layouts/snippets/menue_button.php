@@ -66,18 +66,16 @@
         </tr>
         <?php } ?>
 
-        <tr height="50px" valign="bottom">
+        <tr height="50px" valign="middle">
             <td>
              <table border="0" cellpadding="0" cellspacing="0">
               <tr>
-
-               <td>
-                <a href="index.php?go=Stelle_waehlen" target="" title="<?php echo $strChangeTask; ?>"
-                 onmouseover="optionen.src='graphics/optionen_button_in.png';"
-                 onmouseout="optionen.src='graphics/optionen_button_out.png';">
-                 <img src="graphics/optionen_button_out.png" border="0" width="30"height="30" name="optionen">
-                </a>
-               </td>
+							 
+							<td>
+								<a href="index.php?go=Stelle_waehlen" target="" title="<?php echo $strChangeTask; ?>">
+									<div class="button_background"><div class="emboss optionen"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div>
+								</a>
+							</td>
 
       <?
                for ($i=0;$i<count($this->Menue->Menueoption);$i++) {
@@ -85,66 +83,57 @@
 
       <?
                  if ($this->Menue->Menueoption[$i]['name_german']==TITLE_DRUCKEN) {
-      ?>
-               <td>
-                <a href="<?php echo $this->Menue->Menueoption[$i]['links']; ?>" target="<?php echo $this->Menue->Menueoption[$i]['target']; ?>" title="<?php echo $this->Menue->Menueoption[$i]['name']; ?>"
-                 onmouseover="druck.src='graphics/drucker_button_in.png';"
-                 onmouseout="druck.src='graphics/drucker_button_out.png';">
-                 <img src="graphics/drucker_button_out.png" border="0" width="30"height="30" name="druck">
-                </a>
-               </td>
+      ?>							 
+							<td style="padding: 0 0 0 4;">
+								<a href="<?php echo $this->Menue->Menueoption[$i]['links']; ?>" target="<?php echo $this->Menue->Menueoption[$i]['target']; ?>" title="<?php echo $this->Menue->Menueoption[$i]['name']; ?>">
+									<div class="button_background"><div class="emboss drucken"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div>
+								</a>
+							</td>
+							 
       <?
                  }
       ?>
       <?
                  if ($this->Menue->Menueoption[$i]['name_german']==TITLE_SCHNELLDRUCK) {
-      ?>
-               <td>
-                <a href="<?php echo $this->Menue->Menueoption[$i]['links']; ?>" target="<?php echo $this->Menue->Menueoption[$i]['target']; ?>" title="<?php echo $this->Menue->Menueoption[$i]['name']; ?>"
-                 onmouseover="schnelldruck.src='graphics/schnelldruck_button_in.png';"
-                 onmouseout="schnelldruck.src='graphics/schnelldruck_button_out.png';">
-                 <img src="graphics/schnelldruck_button_out.png" border="0" width="30"height="30" name="schnelldruck">
-                </a>
-               </td>
+      ?>							 
+							 <td style="padding: 0 0 0 4;">
+								<a href="<?php echo $this->Menue->Menueoption[$i]['links']; ?>" target="<?php echo $this->Menue->Menueoption[$i]['target']; ?>" title="<?php echo $this->Menue->Menueoption[$i]['name']; ?>">
+									<div class="button_background"><div class="emboss schnelldruck"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div>
+								</a>
+							</td>
       <?
                  }
       ?>
       <?
                  if ($this->Menue->Menueoption[$i]['name_german']==TITLE_KARTE) {
-      ?>
-               <td>
-                <a href="<?php echo $this->Menue->Menueoption[$i]['links']; ?>" target="<?php echo $this->Menue->Menueoption[$i]['target']; ?>" title="<?php echo $this->Menue->Menueoption[$i]['name']; ?>"
-                 onmouseover="karte.src='graphics/karte_button_in.png';"
-                 onmouseout="karte.src='graphics/karte_button_out.png';">
-                 <img src="graphics/karte_button_out.png" border="0" width="30"height="30" name="karte">
-                </a>
-               </td>
+      ?>							 
+							<td style="padding: 0 0 0 4;">
+								<a href="<?php echo $this->Menue->Menueoption[$i]['links']; ?>" target="<?php echo $this->Menue->Menueoption[$i]['target']; ?>" title="<?php echo $this->Menue->Menueoption[$i]['name']; ?>">
+									<div class="button_background"><div class="emboss karte"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div>
+								</a>
+							</td>
       <?
                  }
       ?>
       <?
                  if ($this->Menue->Menueoption[$i]['name_german']==TITLE_NOTIZEN) {
-      ?>
-               <td>
-                <a href="<?php echo $this->Menue->Menueoption[$i]['links']; ?>" target="<?php echo $this->Menue->Menueoption[$i]['target']; ?>" title="<?php echo $this->Menue->Menueoption[$i]['name']; ?>"
-                 onmouseover="notiz.src='graphics/notizen_button_in.png';"
-                 onmouseout="notiz.src='graphics/notizen_button_out.png';">
-                 <img src="graphics/notizen_button_out.png" border="0" width="30"height="30" name="notiz">
-                </a>
-               </td>
+      ?>							 
+							<td style="padding: 0 0 0 4;">
+								<a href="<?php echo $this->Menue->Menueoption[$i]['links']; ?>" target="<?php echo $this->Menue->Menueoption[$i]['target']; ?>" title="<?php echo $this->Menue->Menueoption[$i]['name']; ?>">
+									<div class="button_background"><div class="emboss notiz"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div>
+								</a>
+							</td>					 
       <?
                  }
       ?>
       <?
                  if ($this->Menue->Menueoption[$i]['name_german']==TITLE_HILFE) {
-      ?>
-               <td>
-                <a href="<?php echo $this->Menue->Menueoption[$i]['links']; ?>" target="<?php echo $this->Menue->Menueoption[$i]['target']; ?>" title="<?php echo $this->Menue->Menueoption[$i]['name']; ?>"
-                 onmouseover="hilfe.src='graphics/hilfe_button_in.png';"
-                 onmouseout="hilfe.src='graphics/hilfe_button_out.png';">
-                 <img src="graphics/hilfe_button_out.png" border="0" width="30"height="30" name="hilfe">
-                </a>
-               </td>
+      ?>							 
+							<td style="padding: 0 0 0 4;">
+								<a href="<?php echo $this->Menue->Menueoption[$i]['links']; ?>" target="<?php echo $this->Menue->Menueoption[$i]['target']; ?>" title="<?php echo $this->Menue->Menueoption[$i]['name']; ?>">
+									<div class="button_background"><div class="emboss hilfe"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div>
+								</a>
+							</td>		
       <?
                  }
       ?>
