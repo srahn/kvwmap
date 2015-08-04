@@ -862,7 +862,7 @@ class GUI {
 						$layer->set('debug',MS_ON);
 						
 						# fremde Layer werden auf Verbindung getestet 
-						if($layerset[$i]['aktivStatus'] != 0 AND $layerset[$i]['connectiontype'] == 6 AND strpos($layerset[$i]['connection'], 'host') !== false AND strpos($layerset[$i]['connection'], 'host=localhost') === false){
+						if($layerset[$i]['aktivStatus'] != 0 AND $layerset[$i]['connectiontype'] == 6 AND strpos($layerset[$i]['connection'], 'host') !== false AND strpos($layerset[$i]['connection'], 'host=localhost') === false AND strpos($layerset[$i]['connection'], 'host=pgsql') === false){
 						$connection = explode(' ', trim($layerset[$i]['connection']));
 								for($j = 0; $j < count($connection); $j++){
 								if($connection[$j] != ''){
