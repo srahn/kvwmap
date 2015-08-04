@@ -53,7 +53,7 @@ function buildwktpolygonfromsvgpath(svgpath){
 }
 
 function update_form(art){
-	if(art == 'jbe' || art == 'jbf' || art == 'jbe' || art == 'agf' || art == 'atf' || art == 'apf'){
+	if(art == 'jbe' || art == 'jbf' || art == 'jbe' || art == 'agf' || art == 'atf' || art == 'atv' || art == 'apf'){
 		document.GUI.nummer.value = '';
 		document.getElementById('lfdnr').style.display = 'none';
 		document.getElementById('dummy').style.display = 'none';
