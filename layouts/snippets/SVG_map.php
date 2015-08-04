@@ -763,9 +763,11 @@ function mousedown(evt){
 	   case "next":
 	   break;
 	   case "zoomin":
+			deactivate_vertices();
 	    startPoint(evt);
 	   break;
 	   case "zoomout":
+			deactivate_vertices();
 	    selectPoint(evt);
 	   break;
 	   case "recentre":
