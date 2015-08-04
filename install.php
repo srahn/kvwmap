@@ -221,7 +221,7 @@ function install_config() {
   $config = str_replace("define('WWWROOT',INSTALLPATH.'apps/');", "define('WWWROOT',INSTALLPATH.'".$www."/');", $config);
   $config = str_replace(
     "define('MYSQL_HOST', 'localhost');",
-    "define('MYSQL_HOST', (getenv('MYSQL_PORT_3306_TCP_ADDR') == '') ? 'localhost' : getenv('MYSQL_PORT_3306_TCP_ADDR'));",
+    "define('MYSQL_HOST', 'mysql');",
     $config
   );
   $config = str_replace("define('MYSQL_USER', '');", "define('MYSQL_USER', 'kvwmap');", $config);
@@ -233,7 +233,7 @@ function install_config() {
   );
   $config = str_replace(
     "define('POSTGRES_HOST', 'localhost');",
-    "define('POSTGRES_HOST', (getenv('PGSQL_PORT_5432_TCP_ADDR') == '') ? 'localhost' : getenv('PGSQL_PORT_5432_TCP_ADDR'));",
+    "define('POSTGRES_HOST', 'pgsql');",
     $config
   );
   $config = str_replace("define('POSTGRES_USER', '');", "define('POSTGRES_USER', 'kvwmap');", $config);
