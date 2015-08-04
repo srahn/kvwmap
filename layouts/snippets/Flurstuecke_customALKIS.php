@@ -699,15 +699,15 @@ show_all = function(count){
                   <?
                   if($this->Stelle->isFunctionAllowed('Adressaenderungen') AND $Eigentuemerliste[$e]->Nr != ''){
                     if ($adressaenderungen['user_id'] == '') {											
-											echo '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">'; ?>&nbsp;<a class="buttonlink" href="javascript:ahah('index.php', 'go=neuer_Layer_Datensatz&reload=true&selected_layer_id=<? echo LAYER_ID_ADRESSAENDERUNGEN_PERSON; ?>&attributenames[0]=gml_id&attributenames[1]=hat&values[0]=<? echo urlencode($Eigentuemerliste[$e]->gml_id); ?>&values[1]=<? echo urlencode($Eigentuemerliste[$e]->anschrift_gml_id); ?>&embedded=true&fromobject=subform_ax_person_temp<? echo $e; ?>&targetlayer_id=0&targetattribute=leer', new Array(document.getElementById('subform_ax_person_temp<? echo $e; ?>')), new Array('sethtml'));"><span> Anschrift aktualisieren</span></a>
+											echo '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">'; ?>&nbsp;<a class="buttonlink" href="javascript:ahah('index.php', 'go=neuer_Layer_Datensatz&reload=true&selected_layer_id=<? echo LAYER_ID_ADRESSAENDERUNGEN_PERSON; ?>&attributenames[0]=gml_id&attributenames[1]=hat&values[0]=<? echo urlencode($Eigentuemerliste[$e]->gml_id); ?>&values[1]=<? echo urlencode($Eigentuemerliste[$e]->anschrift_gml_id); ?>&embedded=true&fromobject=subform_ax_person_temp<? echo $b.'_'.$e; ?>&targetlayer_id=0&targetattribute=leer', new Array(document.getElementById('subform_ax_person_temp<? echo $b.'_'.$e; ?>')), new Array('sethtml'));"><span> Anschrift aktualisieren</span></a>
                   <?}
                     else {
-											echo '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">'; ?>&nbsp;<a class="buttonlink" href="javascript:ahah('index.php', 'go=Layer-Suche_Suchen&reload=true&selected_layer_id=<? echo LAYER_ID_ADRESSAENDERUNGEN_PERSON; ?>&value_gml_id=<? echo urlencode($Eigentuemerliste[$e]->gml_id); ?>&operator_gml_id==&attributenames[0]=user_id&values[0]=<? echo $this->user->id ?>&embedded=true&fromobject=subform_ax_person_temp<? echo $e; ?>&targetlayer_id=0&targetattribute=leer', new Array(document.getElementById('subform_ax_person_temp<? echo $e; ?>')), '');">Anschrift &auml;ndern</a>
+											echo '<img src="'.GRAPHICSPATH.'pfeil_links.gif" width="12" height="12" border="0">'; ?>&nbsp;<a class="buttonlink" href="javascript:ahah('index.php', 'go=Layer-Suche_Suchen&reload=true&selected_layer_id=<? echo LAYER_ID_ADRESSAENDERUNGEN_PERSON; ?>&value_gml_id=<? echo urlencode($Eigentuemerliste[$e]->gml_id); ?>&operator_gml_id==&attributenames[0]=user_id&values[0]=<? echo $this->user->id ?>&embedded=true&fromobject=subform_ax_person_temp<? echo $b.'_'.$e; ?>&targetlayer_id=0&targetattribute=leer', new Array(document.getElementById('subform_ax_person_temp<? echo $b.'_'.$e; ?>')), '');">Anschrift &auml;ndern</a>
                   <?}
                   }?>
                     </td>
 									<tr>
-										<td colspan="2"><div id="subform_ax_person_temp<? echo $e; ?>" style="display:inline"></div></td>
+										<td colspan="2"><div id="subform_ax_person_temp<? echo $b.'_'.$e; ?>" style="display:inline"></div></td>
 									</tr>
 									</tr>
                   <tr>
