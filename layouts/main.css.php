@@ -335,6 +335,8 @@ a.menuered:hover {
 
 .button_background{
 	background: linear-gradient(#eff3f6, #DAE4EC);
+	width: 30px;
+	height: 29px;
 }
 
 .emboss{
