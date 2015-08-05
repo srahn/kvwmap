@@ -333,6 +333,10 @@ a.menuered:hover {
 	background-image: url(../graphics/hilfe.png);
 }
 
+.save_layers{
+	background-image: url(../graphics/save_layers.png);
+}
+
 .button_background{
 	background: linear-gradient(#eff3f6, #DAE4EC);
 	width: 30px;
