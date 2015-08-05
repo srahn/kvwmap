@@ -23,6 +23,8 @@
   $strX="R";  
   $strY="H";
   $strSaveExtent="Ausschnitt speichern";
+	$strSaveLayers="Themenauswahl speichern";
+	$strChooseLayers="Themenauswahl laden";
   $strMap="Kartenausschnitt";
   $strMapSize="Größe anpassen";
 	$strLayerControl="Themensteuerung";

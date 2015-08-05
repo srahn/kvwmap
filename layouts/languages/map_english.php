@@ -24,6 +24,8 @@
   $strY="N";
   $strChoose="Load Extent";
   $strSaveExtent="Save Extent";
+	$strSaveLayers="Save Layer Selection";
+	$strChooseLayers="Load Layer Selection";
   $strMap="Map";
 	$strMapSize="Adjust Mapsize";
 	$strLayerControl="Layer Control";
