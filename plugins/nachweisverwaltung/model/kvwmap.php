@@ -1393,8 +1393,8 @@
 
 	$this->vermessungsantragsFormular = function() use ($GUI){
 		global $admin_stellen;
-		if($GUI->formvars['stelle_id'] == $GUI->Stelle->id OR in_array($GUI->Stelle->id, $admin_stellen)){
-			if ($GUI->formvars['antr_nr']!=''){
+		if($GUI->formvars['antr_nr']!=''){
+			if($GUI->formvars['stelle_id'] == $GUI->Stelle->id OR in_array($GUI->Stelle->id, $admin_stellen)){
 				$GUI->titel='Antrag überarbeiten';
 				# Antragsdaten aus der Datenbank abfragen
 				$GUI->antrag = new antrag('','',$GUI->pgdatabase);
@@ -1414,15 +1414,15 @@
 					showAlert($ret[1]);
 				}
 			}
-			else {
-				$GUI->titel='Antrag eingeben';
-				$GUI->formvars['go']='Nachweis_antragsnummer_Senden';
-				$GUI->vermessungsAntragEingabeForm();
+			else{
+				$GUI->Antraege_Anzeigen();
+				showAlert("Änderung dieses Antrags nicht erlaubt!");
 			}
-		}
+		}		
 		else{
-			$GUI->Antraege_Anzeigen();
-			showAlert("Änderung dieses Antrags nicht erlaubt!");
+			$GUI->titel='Antrag eingeben';
+			$GUI->formvars['go']='Nachweis_antragsnummer_Senden';
+			$GUI->vermessungsAntragEingabeForm();
 		}
   };
 	

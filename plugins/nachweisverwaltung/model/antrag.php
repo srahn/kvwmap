@@ -739,7 +739,7 @@ class antrag {
   function getAntragsnr_Liste($stelle_id) {
     global $admin_stellen;		
     $sql = "SELECT * FROM nachweisverwaltung.n_antraege ";
-		if(!in_array($stelle_id, $admin_stellen))$sql.= "AND stelle_id = ".$stelle_id;
+		if(!in_array($stelle_id, $admin_stellen))$sql.= "WHERE stelle_id = ".$stelle_id;
 		$sql.= " ORDER BY antr_nr";
     $queryret=$this->database->execSQL($sql,4, 0);
     if ($queryret[0]) { 
