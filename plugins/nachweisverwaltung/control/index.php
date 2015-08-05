@@ -120,10 +120,10 @@
 				$this->formvars['markffr']=substr($this->formvars['art_markieren'],0,1);
 				$this->formvars['markkvz']=substr($this->formvars['art_markieren'],1,1);
 				$this->formvars['markgn']=substr($this->formvars['art_markieren'],2,1);
-				$this->user->rolle->setNachweisAnzeigeparameter($this->formvars['showffr'],$this->formvars['showkvz'],$this->formvars['showgn'],$this->formvars['showan'],$this->formvars['markffr'],$this->formvars['markkvz'],$this->formvars['markgn']);
+				$this->setNachweisAnzeigeparameter($this->user->rolle->stelle_id, $this->user->rolle->user_id, $this->formvars['showffr'],$this->formvars['showkvz'],$this->formvars['showgn'],$this->formvars['showan'],$this->formvars['markffr'],$this->formvars['markkvz'],$this->formvars['markgn']);
 			}
 			# Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
-			$this->savedformvars=$this->user->rolle->getNachweisParameter();
+			$this->savedformvars=$this->getNachweisParameter($this->user->rolle->stelle_id, $this->user->rolle->user_id);
 			$this->formvars=array_merge($this->savedformvars,$this->formvars);
 			$this->nachweis = new Nachweis($this->pgdatabase, $this->user->rolle->epsg_code);
 			$ret=$this->nachweis->getNachweise(0,$this->formvars['suchpolygon'],$this->formvars['suchgemarkung'],$this->formvars['suchstammnr'],$this->formvars['suchrissnr'],$this->formvars['suchfortf'],$this->formvars['art_einblenden'],$this->formvars['richtung'],$this->formvars['abfrageart'], $this->formvars['order'],$this->formvars['suchantrnr'],$this->formvars['sdatum'], $this->formvars['sVermStelle'], $this->formvars['gueltigkeit'], $this->formvars['sdatum2'], $this->formvars['suchflur'], $this->formvars['flur_thematisch'], $this->formvars['such_andere_art']);
