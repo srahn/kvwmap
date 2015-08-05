@@ -15,8 +15,8 @@
   for ($i=0;$i<$anzLayerComments;$i++) {
   	?>
   <tr>
-    <td><a href="index.php?go=Layerauswahl_Laden&name=<? echo $this->layerComments[$i]['name']; ?>"><? echo $this->layerComments[$i]['name']; ?></a></td>
-    <td><a href="javascript:Bestaetigung('index.php?go=Layerauswahl_loeschen&storetime=<?php echo $this->layerComments[$i]['name']; ?>','<? echo $this->strDeleteWarningMessage; ?>');"><?php echo $this->strDelete; ?></a></td>
+    <td><a href="index.php?go=Layerauswahl_Laden&id=<? echo $this->layerComments[$i]['id']; ?>"><? echo $this->layerComments[$i]['name']; ?></a></td>
+    <td><a href="javascript:Bestaetigung('index.php?go=Layerauswahl_loeschen&id=<?php echo $this->layerComments[$i]['id']; ?>','<? echo $this->strDeleteWarningMessage; ?>');"><?php echo $this->strDelete; ?></a></td>
   </tr>
   <?php 
   }

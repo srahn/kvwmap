@@ -9528,6 +9528,11 @@ class GUI {
     $this->user->rolle->deleteMapComment($this->formvars['storetime']);
     $this->mapCommentSelectForm();
   }
+	
+	function DeleteStoredLayers(){
+    $this->user->rolle->deleteLayerComment($this->formvars['id']);
+    $this->layerCommentSelectForm();
+  }
 
   function mapCommentSelectForm() {
     $this->main='MapCommentSelectForm.php';
@@ -9552,6 +9557,28 @@ class GUI {
     }
     $this->output();
   }
+	
+	function layerCommentLoad(){
+		$ret=$this->user->rolle->getLayerComments($this->formvars['id']);
+    if ($ret[0]) {
+      $this->Fehlermeldung='Es konnten keine gespeicherten Themen abgefragt werden.<br>'.$ret[1];
+    }
+    else {
+			$this->loadMap('DataBase');
+			for($i=0; $i < count($this->layerset); $i++){
+				$formvars['thema'.$this->layerset[$i]['Layer_ID']] = 0;		# erstmal alle ausschalten
+			}
+      $layer_ids = explode(',', $ret[1][0]['layers']);
+			foreach($layer_ids as $layer_id){
+				$formvars['thema'.$layer_id] = 1;
+			}
+			$this->user->rolle->setAktivLayer($formvars, $this->Stelle->id, $this->user->id);
+    }
+		$this->loadMap('DataBase');
+		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
+		$this->drawMap();
+    $this->output();
+	}
 
   function Datei_Download($filename) {
     $this->formvars['filesize'] = filesize(IMAGEPATH.basename($filename));

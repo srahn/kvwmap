@@ -2300,12 +2300,12 @@ class rolle {
 		return $ret;
 	}
 	
-	function getLayerComments($name) {
-		$sql ='SELECT name,layers FROM rolle_saved_layers WHERE';
+	function getLayerComments($id) {
+		$sql ='SELECT id, name, layers FROM rolle_saved_layers WHERE';
 		$sql.=' user_id='.$this->user_id;
 		$sql.=' AND stelle_id='.$this->stelle_id;
-		if($name!=''){
-			$sql.=' AND name="'.$name.'"';
+		if($id!=''){
+			$sql.=' AND id="'.$id.'"';
 		}
 		$sql.=' ORDER BY name';
 		#echo '<br>'.$sql;
@@ -2376,6 +2376,17 @@ class rolle {
 			# Fehler bei Datenbankanfrage
 			$ret[0]=1;
 			$ret[1]='<br>Fehler beim Löschen des Kommentares zum Kartenausschnitt.<br>'.$ret[1];
+		}
+	}
+		
+	function deleteLayerComment($id){
+		$sql = 'DELETE FROM rolle_saved_layers WHERE user_id = '.$this->user_id.' AND stelle_id = '.$this->stelle_id.' AND id = "'.$id.'"';
+		#echo '<br>'.$sql;
+		$queryret=$this->database->execSQL($sql,4, 1);
+		if ($queryret[0]) {
+			# Fehler bei Datenbankanfrage
+			$ret[0]=1;
+			$ret[1]='<br>Fehler beim Löschen der Themenauswahl.<br>'.$ret[1];
 		}
 	}
 

@@ -621,7 +621,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  }break;
 
 	  case 'Kartenkommentar_loeschen' : {
-			$GUI->DeleteStoredMapExtent($GUI->formvars['storetime']);
+			$GUI->DeleteStoredMapExtent();
 	  }break;
 		
 		case 'Layerauswahl_Formular' : {
@@ -634,6 +634,14 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 		
 		case 'Layerauswahl_Waehlen' : {
 			$GUI->layerCommentSelectForm();
+	  }break;
+		
+		case 'Layerauswahl_Laden' : {
+			$GUI->layerCommentLoad();
+	  }break;
+		
+		case 'Layerauswahl_loeschen' : {
+			$GUI->DeleteStoredLayers();
 	  }break;
 
 	  #2006-01-03 pk
