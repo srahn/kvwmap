@@ -341,6 +341,7 @@ class antrag {
     # meistens mindestens ein Fortführungsriss gehört.
     $this->debug->write('nachweis.php getFFR Abfragen der Risse zum Antrag.',4);                
     $sql ="SELECT DISTINCT n.flurid,n.stammnr,n.rissnummer";
+		if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$sql.=",n.".NACHWEIS_SECONDARY_ATTRIBUTE." ";
     $sql.=" FROM nachweisverwaltung.n_nachweise AS n, nachweisverwaltung.n_nachweise2antraege AS n2a";
     $sql.=" WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
 		if($this->stelle_id == '')$sql.=" AND stelle_id IS NULL";
