@@ -1,5 +1,5 @@
 ﻿<?php
-$strTitle="Gespiekerte Koortutsnitte utsöken";
+$strTitleExtent="Gespiekerte Koortutsnitte utsöken";
 $strTime="Tiedstempel";
 $strComment="Kommentor";
 

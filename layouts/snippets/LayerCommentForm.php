@@ -6,16 +6,12 @@
 <br><table border="1" cellspacing="0" cellpadding="2">
   <tr bgcolor="<?php echo BG_DEFAULT ?>">
   <td align="center">
-<h2><?php echo $strTitleExtent; ?></h2>
+<h2><?php echo $strTitleLayers; ?></h2>
 </td>
 </tr>
-<tr><td align="center"><?php echo $strTime; ?><?php
-    # 2006-03-20 pk
-     echo $this->user->rolle->newtime; 
-     
-     ?><br> 
+<tr><td align="center">
     <textarea name="comment" cols="35" rows="4" wrap="VIRTUAL"><?php echo $this->formvars['comment']; ?></textarea>
-<br>	<input type="hidden" name="go" value="Kartenkommentar">
+<br>	<input type="hidden" name="go" value="Layerauswahl">
 	<input type="hidden" name="consumetime" value="<?php echo $this->user->rolle->newtime; ?>">
     <input type="hidden" name="go_plus" id="go_plus" value="">
     <input type="button" name="dummy" value="<?php echo $this->strCancel; ?>" onclick="submitWithValue('GUI','go_plus','Abbrechen')">&nbsp;

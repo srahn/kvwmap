@@ -1,5 +1,5 @@
 ﻿<?php
-$strTitle="wybierz zapisane fragmenty map"; 
+$strTitleExtent="wybierz zapisane fragmenty map"; 
 $strTime="znacznik czasu"; 
 $strComment="komenatrz"; 
 

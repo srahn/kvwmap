@@ -337,6 +337,10 @@ a.menuered:hover {
 	background-image: url(../graphics/save_layers.png);
 }
 
+.load_layers{
+	background-image: url(../graphics/load_layers.png);
+}
+
 .button_background{
 	background: linear-gradient(#eff3f6, #DAE4EC);
 	width: 30px;
@@ -579,7 +583,7 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
   position: absolute;
   top:40%;
   left:50%;
-  width:200px;
+  width:250px;
   height:90px;
 	font-size: 17px;
 	font-family: SourceSansPro2;
@@ -598,7 +602,7 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
   position: absolute;
   top:40%;
   left:50%;
-  width:200px;
+  width:250px;
   height:90px;
 	font-size: 17px;
 	font-family: SourceSansPro2;
@@ -616,7 +620,7 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
   position: absolute;
   top:40%;
   left:50%;
-  width:200px;
+  width:250px;
   height:90px;
 	margin:-45px 0 0 -100px;
   text-align:center;

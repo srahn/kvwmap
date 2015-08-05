@@ -1,5 +1,6 @@
 ﻿<?php
-$strTitle="Kommentar zum Kartenausschnitt";
+$strTitleExtent="Kartenausschnitt speichern";
+$strTitleLayers="Themenauswahl speichern";
 $strTime="Zeitstempel: ";
  
 ?>  

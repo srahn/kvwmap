@@ -1,5 +1,5 @@
 ﻿<?php
-$strTitle="Kommentor zum Koortutsnitt";
+$strTitleExtent="Kommentor zum Koortutsnitt";
 $strTime="Tidstempel: ";
  
 ?>  

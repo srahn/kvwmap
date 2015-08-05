@@ -604,28 +604,37 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  	$GUI->StatistikAuswahlErgebnis();
 	  }break;
 
-	  # 2006-03-20 pk
 	  case 'Kartenkommentar_Formular' : {
-		$GUI->mapCommentForm();
-	  } break;
+			$GUI->mapCommentForm();
+	  }break;
 
-	  # 2006-03-20 pk
 	  case 'Kartenkommentar_Speichern' : {
-		$GUI->mapCommentStore();
-	  } break;
+			$GUI->mapCommentStore();
+	  }break;
 
-	  # 2006-03-20 pk
 	  case 'Kartenkommentar_Waehlen' : {
-		$GUI->mapCommentSelectForm();
-	  } break;
+			$GUI->mapCommentSelectForm();
+	  }break;
 
 	  case 'Kartenkommentar_Zoom' : {
-		$GUI->zoomToStoredMapExtent($GUI->formvars['storetime']);
-	  } break;
+			$GUI->zoomToStoredMapExtent($GUI->formvars['storetime']);
+	  }break;
 
 	  case 'Kartenkommentar_loeschen' : {
-		$GUI->DeleteStoredMapExtent($GUI->formvars['storetime']);
-	  } break;
+			$GUI->DeleteStoredMapExtent($GUI->formvars['storetime']);
+	  }break;
+		
+		case 'Layerauswahl_Formular' : {
+			$GUI->layerCommentForm();
+	  }break;
+
+		case 'Layerauswahl_Speichern' : {
+			$GUI->layerCommentStore();
+	  }break;
+		
+		case 'Layerauswahl_Waehlen' : {
+			$GUI->layerCommentSelectForm();
+	  }break;
 
 	  #2006-01-03 pk
 	  case 'Grundbuchblatt_Auswaehlen' : {

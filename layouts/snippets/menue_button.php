@@ -2,36 +2,6 @@
   include(LAYOUTPATH.'languages/menue_body_'.$this->user->rolle->language.'.php');
 ?>
 
-<script language="JavaScript" type="text/javascript">
-<!--
- button1= new Image();
- button1.src = "graphics/drucker_button_out.png"
- button2= new Image();
- button2.src = "graphics/drucker_button_in.png"
- button3= new Image();
- button3.src = "graphics/karte_button_out.png"
- button4= new Image();
- button4.src = "graphics/karte_button_in.png"
- button5= new Image();
- button5.src = "graphics/notizen_button_in.png"
- button6= new Image();
- button6.src = "graphics/notizen_button_out.png"
- button7= new Image();
- button7.src = "graphics/hilfe_button_out.png"
- button8= new Image();
- button8.src = "graphics/hilfe_button_in.png"
- button9= new Image();
- button9.src = "graphics/optionen_button_out.png"
- button10= new Image();
- button10.src = "graphics/optionen_button_in.png"
- button11= new Image();
- button11.src = "graphics/schnelldruck_button_out.png"
- button12= new Image();
- button12.src = "graphics/schnelldruck_button_in.png"
- //-->
-</script>
-
-
 <table width="<? echo $this->Menue->width+7 ?>" border="0" cellpadding="4" cellspacing="0">
   <tr>
     <td valign="top">
@@ -70,12 +40,12 @@
             <td>
              <table border="0" cellpadding="0" cellspacing="0" width="100%">
               <tr>
-							 
-							<td>
+               <td>
+							<div style="float:left; padding: 0 0 0 0;">
 								<a href="index.php?go=Stelle_waehlen" target="" title="<?php echo $strChangeTask; ?>">
 									<div class="button_background"><div class="emboss optionen"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div>
 								</a>
-							</td>
+							</div>
 
       <?
                for ($i=0;$i<count($this->Menue->Menueoption);$i++) {
@@ -83,57 +53,57 @@
 
       <?
                  if ($this->Menue->Menueoption[$i]['name_german']==TITLE_DRUCKEN) {
-      ?>							 
-							<td style="padding: 0 0 0 4;">
+      ?>
+							<div style="float:left; padding: 0 0 0 4;">
 								<a href="<?php echo $this->Menue->Menueoption[$i]['links']; ?>" target="<?php echo $this->Menue->Menueoption[$i]['target']; ?>" title="<?php echo $this->Menue->Menueoption[$i]['name']; ?>">
 									<div class="button_background"><div class="emboss drucken"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div>
 								</a>
-							</td>
-							 
+							</div>
+
       <?
                  }
       ?>
       <?
                  if ($this->Menue->Menueoption[$i]['name_german']==TITLE_SCHNELLDRUCK) {
-      ?>							 
-							 <td style="padding: 0 0 0 4;">
+      ?>
+							 <div style="float:left; padding: 0 0 0 4;">
 								<a href="<?php echo $this->Menue->Menueoption[$i]['links']; ?>" target="<?php echo $this->Menue->Menueoption[$i]['target']; ?>" title="<?php echo $this->Menue->Menueoption[$i]['name']; ?>">
 									<div class="button_background"><div class="emboss schnelldruck"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div>
 								</a>
-							</td>
+							</div>
       <?
                  }
       ?>
       <?
                  if ($this->Menue->Menueoption[$i]['name_german']==TITLE_KARTE) {
-      ?>							 
-							<td style="padding: 0 0 0 4;">
+      ?>
+							<div style="float:left; padding: 0 0 0 4;">
 								<a href="<?php echo $this->Menue->Menueoption[$i]['links']; ?>" target="<?php echo $this->Menue->Menueoption[$i]['target']; ?>" title="<?php echo $this->Menue->Menueoption[$i]['name']; ?>">
 									<div class="button_background"><div class="emboss karte"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div>
 								</a>
-							</td>
+							</div>
       <?
                  }
       ?>
       <?
                  if ($this->Menue->Menueoption[$i]['name_german']==TITLE_NOTIZEN) {
-      ?>							 
-							<td style="padding: 0 0 0 4;">
+      ?>
+							<div style="float:left; padding: 0 0 0 4;">
 								<a href="<?php echo $this->Menue->Menueoption[$i]['links']; ?>" target="<?php echo $this->Menue->Menueoption[$i]['target']; ?>" title="<?php echo $this->Menue->Menueoption[$i]['name']; ?>">
 									<div class="button_background"><div class="emboss notiz"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div>
 								</a>
-							</td>					 
+							</div>
       <?
                  }
       ?>
       <?
                  if ($this->Menue->Menueoption[$i]['name_german']==TITLE_HILFE) {
-      ?>							 
-							<td style="padding: 0 0 0 4;">
+      ?>
+							<div style="float:left; padding: 0 0 0 4;">
 								<a href="<?php echo $this->Menue->Menueoption[$i]['links']; ?>" target="<?php echo $this->Menue->Menueoption[$i]['target']; ?>" title="<?php echo $this->Menue->Menueoption[$i]['name']; ?>">
 									<div class="button_background"><div class="emboss hilfe"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div>
 								</a>
-							</td>		
+							</div>
       <?
                  }
       ?>
@@ -141,6 +111,7 @@
       <?
                }
       ?>
+               </td>
               </tr>
              </table>
             </td>
@@ -240,7 +211,7 @@
               	  echo '
                   <tr>
                     <td valign="top">
-											<a href="javascript:changemenue('.$this->Menue->Menueoption[$i]['id'].');" >                      
+											<a href="javascript:changemenue('.$this->Menue->Menueoption[$i]['id'].');" >
                       <div name="obermenu" id="menue'.$this->Menue->Menueoption[$i]['id'].'">
 												<div class="menu">
 													<img id="image_'.$this->Menue->Menueoption[$i]['id'].'" src="'.GRAPHICSPATH.'menue_top.gif" width="17" height="17" border="0">

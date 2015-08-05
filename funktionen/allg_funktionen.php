@@ -863,8 +863,8 @@ function showMessage($text) {
 		}
 		Msg.className = 'message_box_visible';
 		Msg.innerHTML = '<?php echo $text; ?>';
-		setTimeout(function() {Msg.className = 'message_box_hide';},500);
-		setTimeout(function() {Msg.className = 'message_box_hidden';},2500);
+		setTimeout(function() {Msg.className = 'message_box_hide';},1000);
+		setTimeout(function() {Msg.className = 'message_box_hidden';},3000);
   </script><?php
 }
 

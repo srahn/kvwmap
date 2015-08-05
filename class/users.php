@@ -2275,7 +2275,6 @@ class rolle {
 		return 1;
 	}
 
-	# 2006-03-20 pk
 	function getMapComments($consumetime) {
 		$sql ='SELECT time_id,comment FROM u_consume2comments WHERE';
 		$sql.=' user_id='.$this->user_id;
@@ -2289,7 +2288,7 @@ class rolle {
 		if ($queryret[0]) {
 			# Fehler bei Datenbankanfrage
 			$ret[0]=1;
-			$ret[1]='<br>Fehler beim Speichern des Kommentares zum Kartenausschnitt.<br>'.$ret[1];
+			$ret[1]='<br>Fehler beim Laden des Kommentares zum Kartenausschnitt.<br>'.$ret[1];
 		}
 		else {
 			while ($rs=mysql_fetch_array($queryret[1])) {
@@ -2300,8 +2299,32 @@ class rolle {
 		}
 		return $ret;
 	}
+	
+	function getLayerComments($name) {
+		$sql ='SELECT name,layers FROM rolle_saved_layers WHERE';
+		$sql.=' user_id='.$this->user_id;
+		$sql.=' AND stelle_id='.$this->stelle_id;
+		if($name!=''){
+			$sql.=' AND name="'.$name.'"';
+		}
+		$sql.=' ORDER BY name';
+		#echo '<br>'.$sql;
+		$queryret=$this->database->execSQL($sql,4, 0);
+		if ($queryret[0]) {
+			# Fehler bei Datenbankanfrage
+			$ret[0]=1;
+			$ret[1]='<br>Fehler beim Laden der Themenauswahl.<br>'.$ret[1];
+		}
+		else {
+			while ($rs=mysql_fetch_array($queryret[1])) {
+				$layerComments[]=$rs;
+			}
+			$ret[0]=0;
+			$ret[1]=$layerComments;
+		}
+		return $ret;
+	}
 
-	# 2006-03-20 pk
 	function insertMapComment($consumetime,$comment) {
 		$sql ='REPLACE INTO u_consume2comments SET';
 		$sql.=' user_id='.$this->user_id;
@@ -2314,6 +2337,29 @@ class rolle {
 			# Fehler bei Datenbankanfrage
 			$ret[0]=1;
 			$ret[1]='<br>Fehler beim Speichern des Kommentares zum Kartenausschnitt.<br>'.$ret[1];
+		}
+		else {
+			$ret[0]=0;
+			$ret[1]=1;
+		}
+		return $ret;
+	}
+	
+	function insertLayerComment($layerset,$comment) {
+		$sql ='REPLACE INTO rolle_saved_layers SET';
+		$sql.=' user_id='.$this->user_id;
+		$sql.=', stelle_id='.$this->stelle_id;
+		$sql.=', name="'.$comment.'"';
+		for($i=0; $i < count($layerset); $i++){
+			if($layerset[$i]['aktivStatus'] == 1)$layers[] = $layerset[$i]['Layer_ID'];
+		}
+		$sql.=', layers="'.implode(',', $layers).'"';
+		#echo '<br>'.$sql;
+		$queryret=$this->database->execSQL($sql,4, 1);
+		if ($queryret[0]) {
+			# Fehler bei Datenbankanfrage
+			$ret[0]=1;
+			$ret[1]='<br>Fehler beim Speichern des Kommentares zur Layerauswahl.<br>'.$ret[1];
 		}
 		else {
 			$ret[0]=0;

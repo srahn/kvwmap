@@ -9483,21 +9483,25 @@ class GUI {
 		}
   }
 
-  # 2006-03-20 pk
   function mapCommentForm() {
-    $this->titel='Kommentar zum Kartenausschnitt';
     $this->main='MapCommentForm.php';
 		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
     $this->loadMap('DataBase');
     $this->drawMap();
     $this->output();
   }
+	
+	function layerCommentForm() {
+    $this->main='LayerCommentForm.php';
+		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
+    $this->loadMap('DataBase');
+    $this->drawMap();
+    $this->output();
+  }
 
-  # 2006-03-20 pk
   function mapCommentStore() {
     $ret=$this->user->rolle->insertMapComment($this->formvars['consumetime'],$this->formvars['comment']);
-    $this->Fehlermeldung='Kommentar zum Kartenausschnitt gespeichert';
-    $this->go='changemenue';
+		showMessage('Ausschnitt gespeichert.');
     $ret=$this->user->rolle->getConsume($this->formvars['consumetime']);
     if ($ret[0]) {
       $this->errmsg="Der nächste Kartenausschnitt konnte nicht abgefragt werden.<br>".$ret[1];
@@ -9510,15 +9514,22 @@ class GUI {
     $this->drawMap();
     $this->output();
   }
+	
+	function layerCommentStore(){
+		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
+		$this->loadMap('DataBase');
+    $ret=$this->user->rolle->insertLayerComment($this->layerset, $this->formvars['comment']);
+    showMessage('Themenauswahl gespeichert.');
+    $this->drawMap();
+    $this->output();
+  }
 
   function DeleteStoredMapExtent(){
     $this->user->rolle->deleteMapComment($this->formvars['storetime']);
     $this->mapCommentSelectForm();
   }
 
-  # 2006-03-20 pk
   function mapCommentSelectForm() {
-    $this->titel='Gespeicherte Kartenausschnitte wählen';
     $this->main='MapCommentSelectForm.php';
     $ret=$this->user->rolle->getMapComments(NULL);
     if ($ret[0]) {
@@ -9526,6 +9537,18 @@ class GUI {
     }
     else {
       $this->mapComments=$ret[1];
+    }
+    $this->output();
+  }
+	
+	function layerCommentSelectForm() {
+    $this->main='LayerCommentSelectForm.php';
+    $ret=$this->user->rolle->getLayerComments(NULL);
+    if ($ret[0]) {
+      $this->Fehlermeldung='Es konnten keine gespeicherten Themen abgefragt werden.<br>'.$ret[1];
+    }
+    else {
+      $this->layerComments=$ret[1];
     }
     $this->output();
   }
