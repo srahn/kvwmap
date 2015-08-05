@@ -848,7 +848,6 @@
   };
   
 	$this->bestaetigungsformAnzeigen = function() use ($GUI){
-    $GUI->menue='menue.php';
     $GUI->titel='Bestätigung';
     $GUI->main = PLUGINS.'nachweisverwaltung/view/bestaetigungsformular.php';
     $GUI->output();
