@@ -496,6 +496,7 @@ class data_import_export {
 		$command = 'ogr2ogr -f '.$exportformat.' -sql "'.$sql.'" '.$exportfile.' PG:"dbname='.$layerdb->dbName.' user='.$layerdb->user;
 		if($layerdb->passwd != '')$command.= ' password='.$layerdb->passwd;
 		if($layerdb->port != '')$command.=' port='.$layerdb->port;
+		if($layerdb->host != '') $command .= ' host=' . $layerdb->host;
 		exec($command.'"');
 	}
 	
@@ -664,6 +665,7 @@ class data_import_export {
 					$command = POSTGRESBINPATH.'pgsql2shp -r -u '.$layerdb->user;
 					if($layerdb->passwd != '')$command.= ' -P "'.$layerdb->passwd.'"';
 					if($layerdb->port != '')$command.=' -p '.$layerdb->port;
+					if($layerdb->host != '') $command .= ' host=' . $layerdb->host;
 					$command.= ' -f '.$exportfile.' '.$layerdb->dbName.' '.$temp_table; 
 					exec($command);
 					#echo $command;
