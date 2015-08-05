@@ -265,6 +265,10 @@ a.menuered:hover {
 	background-image: url(../graphics/drucken.png);
 }
 
+.schnelldruck{
+	background-image: url(../graphics/schnelldruck.png);
+}
+
 .merken{
 	background-image: url(../graphics/merken.png);
 }
@@ -313,8 +317,30 @@ a.menuered:hover {
 	background-image: url(../graphics/resize_map.png);
 }
 
+.optionen{
+	background-image: url(../graphics/optionen.png);
+}
+
+.karte{
+	background-image: url(../graphics/karte.png);
+}
+
+.notiz{
+	background-image: url(../graphics/notiz.png);
+}
+
+.hilfe{
+	background-image: url(../graphics/hilfe.png);
+}
+
+.save_layers{
+	background-image: url(../graphics/save_layers.png);
+}
+
 .button_background{
 	background: linear-gradient(#eff3f6, #DAE4EC);
+	width: 30px;
+	height: 29px;
 }
 
 .emboss{

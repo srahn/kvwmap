@@ -200,7 +200,7 @@ class Nachweis {
   }
   
   function getDokumentarten(){
-  	$sql="SELECT * FROM nachweisverwaltung.n_dokumentarten"; 
+  	$sql="SELECT * FROM nachweisverwaltung.n_dokumentarten order by art"; 
     $ret=$this->database->execSQL($sql,4, 0);    
     if (!$ret[0]) {
       while($rs=pg_fetch_array($ret[1])){

@@ -249,13 +249,14 @@ if($this->formvars['gps_follow'] == ''){
 														<tr>
 															<td style="padding: 0 0 0 5;"><a title="<? echo $strSaveExtent; ?>" href="index.php?go=Kartenkommentar_Formular"><div class="button_background"><div class="emboss save_extent"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div></a></td>
 															<td style="padding: 0 0 0 10;"><a title="<? echo $strChoose ?>" href="index.php?go=Kartenkommentar_Waehlen"><div class="button_background"><div class="emboss load_extent"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div></a></td>
+															<!--td style="padding: 0 0 0 10;"><a title="<? echo $strSaveExtent; ?>" href="index.php?go=Kartenkommentar_Formular"><div class="button_background"><div class="emboss save_layers"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div></a></td-->
 															<td style="padding: 0 0 0 10;"><? if(SHOW_MAP_IMAGE == 'true'){ ?><a title="<? echo $strMapImageURL ?>" id="MapImageLink" target="_blank" href="" onmouseover="javascript:showMapImage();"><div class="button_background"><div class="emboss save_image"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div></a></span><? } ?></td>
 															<td style="padding: 0 0 0 10;"><a title="<? echo $strMapSize; ?>" href="javascript:resizemap2window();" ><div class="button_background"><div class="emboss resize_map"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div></a></td>
 														</tr>
 													</table>
 						            </div>
 						          </td>
-						          <td width="100px" class="special-options">
+						          <td width="120px" class="special-options">
 												<input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang
 												<div id="options"></div><!-- hier werden die Spezialoptionen eingefügt -->
 											</td>
