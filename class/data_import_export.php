@@ -529,16 +529,26 @@ class data_import_export {
 				$j = $attributes['indizes'][$key];
       	if($attributes['type'][$j] != 'geometry' AND $attributes['name'][$i] != 'lock'){
       		$csv .= '"';
-	        if(in_array($attributes['type'][$j], array('numeric', 'float4', 'float8'))){
-	        	$value = str_replace('.', ",", $value);	
-	        }
-					if($attributes['type'][$j] == 'bool'){
-						$value = str_replace('t', "ja", $value);	
-						$value = str_replace('f', "nein", $value);
+					if($this->attributes['form_element_type'][$j] == 'Auswahlfeld'){
+						for($o = 0; $o < count($this->attributes['enum_value'][$j]); $o++){
+							if($value == $this->attributes['enum_value'][$j][$o]){
+								$value = $this->attributes['enum_output'][$j][$o];
+								break;
+							}
+						}
 					}
-	        $value = str_replace(';', ",", $value);
-	        $value = str_replace(chr(10), " ", $value);
-	        $value = str_replace(chr(13), "", $value);
+					else{
+						if(in_array($attributes['type'][$j], array('numeric', 'float4', 'float8'))){
+							$value = str_replace('.', ",", $value);	
+						}
+						if($attributes['type'][$j] == 'bool'){
+							$value = str_replace('t', "ja", $value);	
+							$value = str_replace('f', "nein", $value);
+						}
+						$value = str_replace(';', ",", $value);
+						$value = str_replace(chr(10), " ", $value);
+						$value = str_replace(chr(13), "", $value);
+					}
 	        $csv .= $value.'";';
       	}
       }
@@ -690,6 +700,7 @@ class data_import_export {
 					while($rs=pg_fetch_assoc($ret[1])){
 						$result[] = $rs;
 					}
+					$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $result);
 					$csv = $this->create_csv($result, $this->attributes);
 					$exportfile = $exportfile.'.csv';
 					$fp = fopen($exportfile, 'w');

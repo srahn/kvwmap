@@ -1055,10 +1055,6 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  case 'neuer_Layer_Datensatz_speichern' : {
 			$GUI->neuer_Layer_Datensatz_speichern();
 	  } break;
-
-	  case 'generischer_csv_export' : {
-		$GUI->generic_csv_export();
-	  } break;
 	  
 	  case 'generisches_sachdaten_diagramm' : {
 		$GUI->generisches_sachdaten_diagramm($GUI->formvars['width']);
