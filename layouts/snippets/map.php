@@ -233,14 +233,14 @@ if($this->formvars['gps_follow'] == ''){
 			        					<? } ?>
 			        				</td>
 			        			</tr>
-                                		</table>
-                                	</td>
-                                </tr>
+									</table>
+								</td>
+							</tr>
 			        <?
 			        # 2006-03-20 pk
 			        if ($this->user->rolle->newtime!='') { ?>
 			        <tr style="background-color: <? echo BG_MENUESUB; ?>;">
-			          <td class="map-options" height="33" colspan="3">
+			          <td class="map-options" height="36" colspan="3">
 			          	<table width="100%" border="0" cellpadding="0" cellspacing="0">
 			          		<tr>
 			          			<td>
@@ -270,14 +270,6 @@ if($this->formvars['gps_follow'] == ''){
 			  	</td>
 			  </tr>
         <?php  }  ?>
-        <tr>
-        	<td>
-        	</td>
-        	<td width="200">
-        	</td>
-        	<td>
-        	</td>
-        </tr>
       </table>
       </div>
       </td>
