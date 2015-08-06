@@ -19,7 +19,6 @@ function Bestaetigung(link,text) {
 	      <tr>
 	      	<th style="border-right:1px solid <?php echo BG_DEFAULT ?>">Stelle</th>
 	        <th style="border-right:1px solid <?php echo BG_DEFAULT ?>"><?php echo $this->strName;?></th>
-	        <th><?php echo $strEMail;?></th>
 	      </tr>
 	      <?php 
 	      for($s = 0; $s < count($this->stellen['ID']); $s++){ ?>
@@ -30,7 +29,6 @@ function Bestaetigung(link,text) {
 		      <tr>
 		      	<? if($i == 0){ ?><td align="center" rowspan="<? echo count($this->stellen['user'][$s]['ID']); ?>" style="border-right:1px solid <?php echo BG_DEFAULT ?>" width="200"><? echo count($this->stellen['user'][$s]['ID']).' Nutzer'; ?></td><? } ?>
 		        <td style="border-right:1px solid <?php echo BG_DEFAULT ?>; border-bottom:1px solid <?php echo BG_DEFAULT ?>"><? echo $this->stellen['user'][$s]['Bezeichnung'][$i]; ?></td>
-		        <td style="border-bottom:1px solid <?php echo BG_DEFAULT ?>"><? echo $this->stellen['user'][$s]['email'][$i]; ?>&nbsp;</td>
 		      </tr>
 		   <? } ?>
 		      <tr>
@@ -47,17 +45,25 @@ function Bestaetigung(link,text) {
 	   		for($i = 0; $i < count($this->unassigned_users['ID']); $i++){ ?>
 	      <tr>
 	      	<? if($i == 0){ ?><td align="center" rowspan="<? echo count($this->unassigned_users['ID']); ?>" style="border-right:1px solid <?php echo BG_DEFAULT ?>" width="200"><? echo count($this->unassigned_users['ID']).' Nutzer'; ?></td><? } ?>
-	      	<td style="border-right:1px solid <?php echo BG_DEFAULT ?>; border-bottom:1px solid <?php echo BG_DEFAULT ?>"><? echo $this->unassigned_users['Bezeichnung'][$i]; ?></td
-		      <td style="border-bottom:1px solid <?php echo BG_DEFAULT ?>"><? echo $this->unassigned_users['email'][$i]; ?>&nbsp;</td>
+	      	<td style="border-right:1px solid <?php echo BG_DEFAULT ?>; border-bottom:1px solid <?php echo BG_DEFAULT ?>"><? echo $this->unassigned_users['Bezeichnung'][$i]; ?></td>
 	      </tr>
-	   <? } if($this->user_count){ ?>
+	   <? } if($this->expired_users['ID']){ ?>
+				<tr>
+					<td colspan="3" bgcolor="<?php echo BG_DEFAULT ?>" style="border:1px solid <?php echo BG_DEFAULT ?>"><span class="fett">Abgelaufene Nutzer</span></td>
+				</tr>
+		 <? }
+				for($i = 0; $i < count($this->expired_users['ID']); $i++){ ?>
+				<tr>
+					<? if($i == 0){ ?><td align="center" rowspan="<? echo count($this->expired_users['ID']); ?>" style="border-right:1px solid <?php echo BG_DEFAULT ?>" width="200"><? echo count($this->expired_users['ID']).' Nutzer'; ?></td><? } ?>
+					<td style="border-right:1px solid <?php echo BG_DEFAULT ?>; border-bottom:1px solid <?php echo BG_DEFAULT ?>"><? echo $this->expired_users['Bezeichnung'][$i]; ?></td>
+				</tr>
+		 <? } if($this->user_count){ ?>
 	   		<tr>
 	    		<td colspan="3" bgcolor="<?php echo BG_DEFAULT ?>" style="border:1px solid <?php echo BG_DEFAULT ?>"><span class="fett">Nutzer insgesamt</span></td>
 	    	</tr>
 	      <tr>
 	      	<td align="center" style="border-right:1px solid <?php echo BG_DEFAULT ?>" width="200"><? echo $this->user_count.' Nutzer'; ?></td>
-	      	<td style="border-right:1px solid <?php echo BG_DEFAULT ?>; border-bottom:1px solid <?php echo BG_DEFAULT ?>">&nbsp;</td
-		      <td style="border-bottom:1px solid <?php echo BG_DEFAULT ?>">&nbsp;</td>
+	      	<td style="border-right:1px solid <?php echo BG_DEFAULT ?>; border-bottom:1px solid <?php echo BG_DEFAULT ?>">&nbsp;</td>
 	      </tr>
 	      <? } ?>
 	    </table>

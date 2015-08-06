@@ -794,6 +794,30 @@ class user {
 		return $user;
 	}
 
+	function get_Expired_Users(){
+		# Lesen der User, die abgelaufen sind
+		$sql ='SELECT * FROM user WHERE stop != "0000-00-00 00:00:00" AND "'.date('Y-m-d h:i:s').'" > stop ORDER BY Name';
+		$this->debug->write("<p>file:users.php class:user->get_Expired_Users - Lesen der User zur Stelle:<br>".$sql,4);
+		$query=mysql_query($sql,$this->database->dbConn);
+		if ($query==0) {
+			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+		}
+		else{
+			while($rs=mysql_fetch_array($query)) {
+				$user['ID'][]=$rs['ID'];
+				$user['Bezeichnung'][]=$rs['Name'].', '.$rs['Vorname'];
+				$user['email'][]=$rs['email'];
+			}
+			// Sortieren der User unter Berücksichtigung von Umlauten
+			$sorted_arrays = umlaute_sortieren($user['Bezeichnung'], $user['ID']);
+			$sorted_arrays2 = umlaute_sortieren($user['Bezeichnung'], $user['email']);
+			$user['Bezeichnung'] = $sorted_arrays['array'];
+			$user['ID'] = $sorted_arrays['second_array'];
+			$user['email'] = $sorted_arrays2['second_array'];
+		}
+		return $user;
+	}
+	
 	function getUserDaten($id,$login_name,$order) {
 		$sql ='SELECT * FROM user WHERE 1=1';
 		if ($id>0) {

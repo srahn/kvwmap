@@ -9299,6 +9299,7 @@ class GUI {
     	$this->stellen['user'][$i] = $stelle->getUser();
     }
     $this->unassigned_users = $this->user->get_Unassigned_Users();
+		$this->expired_users = $this->user->get_Expired_Users();
     $all_users = $this->user->getall_Users(NULL);
     $this->user_count = count($all_users['ID']); 
     $this->output();
