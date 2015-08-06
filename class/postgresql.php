@@ -1456,7 +1456,7 @@ class pgdatabase {
       $sql.=" AND g.buchungsblattnummermitbuchstabenerweiterung='".$Blatt."'";
     }
     if ($BVNR!="") {
-      $sql.=" AND s.laufendenummer='".$BVNR."'";
+      $sql.=" AND s.laufendenummer::integer='".$BVNR."'";
     }
 		$sql.= $this->build_temporal_filter(array('s', 'g', 'b', 'n', 'p'));
     $sql.= " ORDER BY namensnr;";
