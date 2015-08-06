@@ -59,6 +59,16 @@ function data_export(){
 	}
 }
 
+function selectall(){
+	var k = 0;
+	obj = document.getElementById('check_attribute_'+k);
+	while(obj != undefined){
+		obj.checked = !obj.checked;
+		k++;
+		obj = document.getElementById('check_attribute_'+k);
+	}
+}
+
 //-->
 </script>
 
@@ -173,7 +183,7 @@ $j=0;
 						if($this->data_import_export->attributes['name'][$j] == $this->data_import_export->attributes['the_geom'] AND $this->data_import_export->layerdaten['export_privileg'][$selectindex] != 1) continue;
 					?>
       	  <div style="padding: 4px;">
-      	  <input type="checkbox" <? if($this->formvars['load'] OR $this->formvars['check_'.$this->data_import_export->attributes['name'][$j]] == 1)echo 'checked'; ?> value="1" name="check_<? echo $this->data_import_export->attributes['name'][$j]; ?>">
+      	  <input id="check_attribute_<? echo $j; ?>" type="checkbox" <? if($this->formvars['load'] OR $this->formvars['check_'.$this->data_import_export->attributes['name'][$j]] == 1)echo 'checked'; ?> value="1" name="check_<? echo $this->data_import_export->attributes['name'][$j]; ?>">
       	  <?php
       	  if($this->data_import_export->attributes['alias'][$j] != ''){
               echo $this->data_import_export->attributes['alias'][$j];
@@ -196,6 +206,7 @@ $j=0;
            }
           } ?>
         </div>
+				&nbsp;&nbsp;&nbsp;&nbsp;<a id="selectall_link" href="javascript:selectall()"><? echo $strSelectAll; ?></a>
       </div>
 
 			<? if($document_attributes){ ?>

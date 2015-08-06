@@ -8,4 +8,5 @@
  $strRecordFromGLE="Record from Query";
  $strRecordsFromGLE="Records from Query";
  $strDownloadDocuments="Download documents";
+ $strSelectAll="select all";
 ?>
