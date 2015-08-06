@@ -12380,11 +12380,12 @@ class GUI {
       $this->titel='historische Flurstückssuche';
     }
     elseif($this->formvars['ALK_Suche'] == 1){
-      $this->titel='ALK-Flurstückssuche';
+      $this->titel='Flurstückssuche (zur Karte)';
     }
     else{
     	$this->titel='Flurstückssuche';
     }
+		if($this->formvars['titel'] != '')$this->titel = $this->formvars['titel'];
     $this->main='flurstueckssuche.php';
     ####### Import ###########
 		$_files = $_FILES;
@@ -12495,11 +12496,12 @@ class GUI {
     $Adresse=new adresse('','','',$this->pgdatabase);
     $this->main='adresssuche.php';
     if($this->formvars['ALK_Suche'] == 1){
-    	$this->titel='ALK-Adressensuche';
+    	$this->titel='Adresssuche (zur Karte)';
     }
     else{
     	$this->titel='Adressensuche';
     }
+		if($this->formvars['titel'] != '')$this->titel = $this->formvars['titel'];
     if ($this->formvars['aktualisieren']=='Neu') {
       $GemID=0; $StrID=0; $StrName=''; $HausID=0; $HausNr='';
     }
