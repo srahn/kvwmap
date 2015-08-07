@@ -2061,6 +2061,8 @@ class GUI {
 		$mapDB->nurAktiveLayer = true;
 		$mapDB->OhneRequires = true;
 		$layer = $mapDB->read_Layer(0);     # 2 = für alle Layer die Klassen laden, 1 = nur für aktive Layer laden, 0 = keine Klassen laden
+		$rollenlayer = $mapDB->read_RollenLayer();
+    $layer = array_merge($layer, $rollenlayer);
 		$anzLayer = count($layer);
 		for($i = 0; $i < $anzLayer; $i++){
 			if($layer[$i]['connectiontype'] == MS_POSTGIS){
