@@ -467,7 +467,7 @@
 			$GUI->formvars['antr_selected'] = $explosion[0];
 			$stelle_id = $explosion[1];
       $GUI->antrag = new antrag($GUI->formvars['antr_selected'],$stelle_id,$GUI->pgdatabase);
-      $ret=$GUI->antrag->getFFR($GUI->formvars);
+      $ret=$GUI->antrag->getFFR($GUI->formvars, true);
       if ($ret[0]) {
         $GUI->Fehlermeldung=$ret[1];
         # Abbruch mit Fehlermeldung und Rücksprung in Auswahl

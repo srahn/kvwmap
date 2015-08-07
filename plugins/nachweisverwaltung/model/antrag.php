@@ -202,17 +202,16 @@ class antrag {
   }  
   	
   function erzeugenUbergabeprotokoll_PDF() {
-    $pdf=new Cezpdf();
+    $pdf=new Cezpdf('A4', 'landscape');
     $tmp = array('b'=>'Times-Bold.afm','i'=>'Times-Italic.afm','bi'=>'Times-BoldItalic.afm');
-    $row=800;
-    $rowGap=0;
-    $colGap=1;
+    $row=560;
+    $rowGap=3;
+    $colGap=3;
     $pdf->selectFont(PDFCLASSPATH.'fonts/Times-Roman.afm',$tmp);
-    $pdf->addText(120,$row-=12,20,'<b>Anlage der Vermessungsvorbereitung</b>');
-    $pdf->addText(165,$row-=20,18,'<b>zur Auftragsnummer '.$this->nr.'</b>');
-    $pdf->addText(200,$row-=20,16,utf8_decode('Liste der Fortführungsrisse'));
-    $row-=3; $pdf->line(200,$row,375,$row);
-    $row-=3; $pdf->line(200,$row,375,$row);
+    $pdf->addText(100,$row-=12,20,'<b>Anlage der Vermessungsvorbereitung zur Auftragsnummer '.$this->nr.'</b>');
+    $pdf->addText(330,$row-=20,16,utf8_decode('Liste der Fortführungsrisse'));
+    $row-=3; $pdf->line(330,$row,505,$row);
+    $row-=3; $pdf->line(330,$row,505,$row);
     
     $rowtab=$row-=15;
 
@@ -220,14 +219,14 @@ class antrag {
     for ($i=0;$i<count($this->FFR);$i++) {
       $row=$row-18;
       $tabledata[$anzTab][]=$this->FFR[$i];
-      if ($row < 300) { $anzTab++; $row=800;}
+      if ($row < 100) { $anzTab++; $row=560;}
     }
         
     $cols='';
     $title='';
     # Konfiguration der Tabelle
     # Allgemeine Einstellungen für die ganze Tabelle
-    $options=array('xPos'=>'left','xOrientation'=>'right','rowGap'=>$rowGap,'colGap'=>$colGap,'showLines'=>2 ,'width'=>550,'showHeadings'=>1,'fontSize'=>12, 'shaded'=>0);
+    $options=array('xPos'=>'left','xOrientation'=>'right','rowGap'=>$rowGap,'colGap'=>$colGap,'showLines'=>2 ,'width'=>780,'showHeadings'=>1,'fontSize'=>12, 'shaded'=>0);
     # Individuelle Einstellungen für die Spalten.
     $options['cols']['Lfd']=array('justification'=>'centre');
     $options['cols']['Riss-Nummer']=array('justification'=>'centre');
@@ -236,24 +235,25 @@ class antrag {
     $options['cols']['KVZ']=array('justification'=>'centre');
     $options['cols']['GN']=array('justification'=>'centre');
     $options['cols']['andere']=array('justification'=>'centre');
-    $options['cols']['Datum']=array('justification'=>'left','width'=>80);
+    $options['cols']['Datum']=array('justification'=>'left');
+		$options['cols']['Datei']=array('justification'=>'left','width'=>200);
     $options['cols']['gemessen durch']=array('justification'=>'left');
     $options['cols'][utf8_decode('Gültigkeit')]=array('justification'=>'centre','width'=>60);
     $pdf->ezSetY($rowtab);
     $pdf->ezTable($tabledata[0],$cols,$title,$options);
     $zahl=$anzTab+1;
-    $pdf->addText(265,10,10,"Seite 1 von $zahl");
+    $pdf->addText(395,10,10,"Seite 1 von $zahl");
     for ($j=1;$j<=$anzTab;$j++){
-      $row=800; $k=$j+1;
+      $row=560; $k=$j+1;
       $pdf->ezNewPage();
-      $pdf->ezSetY(800);
-      $pdf->addText(155,$row-=20,16,'<b>weiter zur Auftragsnummer '.$this->nr.'</b>');
-      $pdf->addText(200,$row-=20,16,utf8_decode('Liste der Fortführungsrisse'));
-      $row-=3; $pdf->line(200,$row,375,$row);
-      $row-=3; $pdf->line(200,$row,375,$row);
+      $pdf->ezSetY(560);
+      $pdf->addText(285,$row-=20,16,'<b>weiter zur Auftragsnummer '.$this->nr.'</b>');
+      $pdf->addText(330,$row-=20,16,utf8_decode('Liste der Fortführungsrisse'));
+      $row-=3; $pdf->line(330,$row,505,$row);
+      $row-=3; $pdf->line(330,$row,505,$row);
       $pdf->ezSetY($row-=15);
       $pdf->ezTable($tabledata[$j],$cols,$title,$options);
-      $pdf->addText(265,10,10,"Seite $k von $zahl");
+      $pdf->addText(395,10,10,"Seite $k von $zahl");
     }
     return $pdf;
   }
@@ -328,7 +328,7 @@ class antrag {
     return $ret;
   }
     
-  function getFFR($formvars) {
+  function getFFR($formvars, $withFileLinks = false) {
     # Abfrage der Vorgänge, die zu einem Auftrag zugeordnet sind
     # Ein Vorgang umfasst alle FFR, GN, KVZ mit gleicher flurid und stammnr
     # Die Abfrage liefert für jeden Vorgang eine Datenzeile zurück
@@ -404,7 +404,8 @@ class antrag {
       if($formvars['Datei']){
 	      $ret=$this->getDatei($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
 	      if ($ret[0]) { return $ret; }
-	      $FFR[$i]['Datei']=$ret[1];
+				if($withFileLinks)$FFR[$i]['Datei'] = '<c:alink:'.basename($ret[1]).'>'.basename($ret[1]).'</c:alink>';
+				else $FFR[$i]['Datei'] = basename($ret[1]);
       }
 
       # Abfrage der Vermessungsstellen im Vorgang
