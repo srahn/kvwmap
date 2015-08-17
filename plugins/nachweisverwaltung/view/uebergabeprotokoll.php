@@ -16,7 +16,7 @@ function create_protocol(){
 -->
 </SCRIPT>
 
-<table width="1035px" border="0" cellpadding="5" cellspacing="0">
+<table width="1100px" border="0" cellpadding="5" cellspacing="0">
 	<tr><td></td></tr>
   <tr> 
     <td align="center" bgcolor="<?php echo BG_FORM ?>"><h2><?php echo $this->titel; ?></h2></td>
@@ -35,8 +35,8 @@ function create_protocol(){
     	<table width="100%" border="1" style="border-collapse:collapse" cellspacing="0" cellpadding="4">
         <tr bgcolor="#FFFFFF"> 
           <td width="40px" <? if($this->formvars['Lfd'] != 1) echo 'bgcolor="#EBEBEB"'; ?>><span class="fett">Lfd</span><input type="checkbox" onchange="document.GUI.submit();" value="1" name="Lfd" <? if($this->formvars['Lfd'] == 1)echo 'checked=true;'; ?>></td>
-          <td width="106px" <? if($this->formvars['Riss-Nummer'] != 1) echo 'bgcolor="#EBEBEB"'; ?>><a href="javascript:change_order('rissnummer');" title="nach Riss-Nummer sortieren"><span class="fett">Riss-Nummer</span></a><input type="checkbox" onchange="document.GUI.submit();" value="1" name="Riss-Nummer" <? if($this->formvars['Riss-Nummer'] == 1)echo 'checked=true;'; ?>></td>
-          <td width="128px" <? if($this->formvars['Antrags-Nummer'] != 1) echo 'bgcolor="#EBEBEB"'; ?>><a href="javascript:change_order('stammnr');" title="nach Antrags-Nummer sortieren"><span class="fett">Antrags-Nummer</span></a><input type="checkbox" onchange="document.GUI.submit();" value="1" name="Antrags-Nummer" <? if($this->formvars['Antrags-Nummer'] == 1)echo 'checked=true;'; ?>></td>
+          <td minwidth="130px" <? if($this->formvars['Riss-Nummer'] != 1) echo 'bgcolor="#EBEBEB"'; ?>><a href="javascript:change_order('rissnummer');" title="nach Riss-Nummer sortieren"><span class="fett">Riss-Nummer</span></a><input type="checkbox" onchange="document.GUI.submit();" value="1" name="Riss-Nummer" <? if($this->formvars['Riss-Nummer'] == 1)echo 'checked=true;'; ?>></td>
+          <td minwidth="140px" <? if($this->formvars['Antrags-Nummer'] != 1) echo 'bgcolor="#EBEBEB"'; ?>><a href="javascript:change_order('stammnr');" title="nach Antrags-Nummer sortieren"><span class="fett">Antrags-Nummer</span></a><input type="checkbox" onchange="document.GUI.submit();" value="1" name="Antrags-Nummer" <? if($this->formvars['Antrags-Nummer'] == 1)echo 'checked=true;'; ?>></td>
           <td width="50px" <? if($this->formvars['FFR'] != 1) echo 'bgcolor="#EBEBEB"'; ?>><span class="fett">FFR</span><input type="checkbox" onchange="document.GUI.submit();" value="1" name="FFR" <? if($this->formvars['FFR'] == 1)echo 'checked=true;'; ?>></td>
           <td width="50px" <? if($this->formvars['KVZ'] != 1) echo 'bgcolor="#EBEBEB"'; ?>><span class="fett">KVZ</span><input type="checkbox" onchange="document.GUI.submit();" value="1" name="KVZ" <? if($this->formvars['KVZ'] == 1)echo 'checked=true;'; ?>></td>
           <td width="45px" <? if($this->formvars['GN'] != 1) echo 'bgcolor="#EBEBEB"'; ?>><span class="fett">GN</span><input type="checkbox" onchange="document.GUI.submit();" value="1" name="GN" <? if($this->formvars['GN'] == 1)echo 'checked=true;'; ?>></td>
@@ -48,16 +48,16 @@ function create_protocol(){
         </tr>
         <? for($i=0; $i < count($this->antrag->FFR); $i++){ ?>
         <tr bgcolor="#ffffff"> 
-          <td align="center" <? if($this->formvars['Lfd'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['Lfd']; ?></td>
-          <td align="center" <? if($this->formvars['Riss-Nummer'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['Riss-Nummer']; ?></td>
-          <td align="center" <? if($this->formvars['Antrags-Nummer'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['Antrags-Nummer']; ?></td>
-          <td align="center" <? if($this->formvars['FFR'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['FFR']; ?></td>
-          <td align="center" <? if($this->formvars['KVZ'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['KVZ']; ?></td>
-          <td align="center" <? if($this->formvars['GN'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['GN']; ?></td>
-          <td align="center" <? if($this->formvars['andere'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['andere']; ?></td>
-          <td align="center" <? if($this->formvars['Datum'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['Datum']; ?></td>
-          <td align="center" <? if($this->formvars['Datei'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['Datei']; ?></td>
-          <td align="center" <? if($this->formvars['gemessendurch'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.utf8_encode($this->antrag->FFR[$i]['gemessen durch']); ?></td>
+          <td valign="top" align="center" <? if($this->formvars['Lfd'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['Lfd']; ?></td>
+          <td valign="top" align="center" <? if($this->formvars['Riss-Nummer'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['Riss-Nummer']; ?></td>
+          <td valign="top" align="center" <? if($this->formvars['Antrags-Nummer'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['Antrags-Nummer']; ?></td>
+          <td valign="top" align="center" <? if($this->formvars['FFR'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['FFR']; ?></td>
+          <td valign="top" align="center" <? if($this->formvars['KVZ'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['KVZ']; ?></td>
+          <td valign="top" align="center" <? if($this->formvars['GN'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['GN']; ?></td>
+          <td valign="top" align="center" <? if($this->formvars['andere'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['andere']; ?></td>
+          <td valign="top" align="center" <? if($this->formvars['Datum'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['Datum']; ?></td>
+          <td valign="top" align="center" <? if($this->formvars['Datei'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['Datei']; ?></td>
+          <td valign="top" align="center" <? if($this->formvars['gemessendurch'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.utf8_encode($this->antrag->FFR[$i]['gemessen durch']); ?></td>
 		  <td align="center" <? if($this->formvars['Gueltigkeit'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['Gueltigkeit']; ?></td>
         </tr>
         <? }?>

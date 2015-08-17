@@ -358,7 +358,8 @@ class antrag {
       
       if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){
       	if($formvars['Riss-Nummer'])$FFR[$i]['Riss-Nummer']=$rs['flurid'].'/'.$rs['rissnummer'];
-      	if($formvars['Antrags-Nummer'])$FFR[$i]['Antrags-Nummer']=str_pad($rs['stammnr'],RISSNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
+				if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$FFR[$i]['Riss-Nummer'] .= ' - '.$rs[NACHWEIS_SECONDARY_ATTRIBUTE];
+      	if($formvars['Antrags-Nummer'])$FFR[$i]['Antrags-Nummer']=$rs['stammnr'];
       }
       else{
       	if($formvars['Antrags-Nummer'])$FFR[$i]['Antrags-Nummer']=$rs['flurid'].'/'.str_pad($rs['stammnr'],ANTRAGSNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
