@@ -942,10 +942,12 @@ class pgdatabase {
 			$sql.=" ORDER BY flurstueckskennzeichen";
 		}
 		else{
-			$sql = "SELECT flurstueckskennzeichen as flurstkennz, zaehler, nenner ";
-			$sql.= "FROM alkis.ax_flurstueck WHERE 1=1 ";
+			$sql = "SELECT distinct flurstueckskennzeichen as flurstkennz, zaehler, nenner ";
+			$sql.= "FROM alkis.ax_flurstueck, alkis.ax_fortfuehrungsfall WHERE 1=1 ";
 			$sql.= "AND land*10000 + gemarkungsnummer = ".$GemkgID." ";
 			$sql.= "AND flurnummer = ".intval($FlurID)." ";
+			$sql.= "AND flurstueckskennzeichen = ANY(zeigtaufaltesflurstueck) ";
+			$sql.= "AND ueberschriftimfortfuehrungsnachweis && ARRAY[10101,10102,10103,10201,10202,10205,10206,10301,10302,10303,10304,10305,10306,10307,10308,10502,10503,10700] ";
 			$sql.= "AND ax_flurstueck.endet IS NOT NULL ";
 			$sql.= "UNION ";
 			$sql.= "SELECT flurstueckskennzeichen as flurstkennz, zaehler, nenner ";
@@ -1820,7 +1822,9 @@ class pgdatabase {
 			$sql.= "FROM alkis.ax_historischesflurstueckohneraumbezug WHERE 1=1 AND land*10000 + gemarkungsnummer = ".(int)$GemkgID." ";
 			$sql.= "UNION ";
 			$sql.= "SELECT flurnummer, lpad(flurnummer::text, 3, '0') AS FlurID, lpad(flurnummer::text, 3, '0') AS Name, land*10000000 + gemarkungsnummer*1000 + flurnummer AS GemFlurID ";
-			$sql.= "FROM alkis.ax_flurstueck WHERE endet is NOT NULL AND land*10000 + gemarkungsnummer = ".(int)$GemkgID." ";
+			$sql.= "FROM alkis.ax_flurstueck, alkis.ax_fortfuehrungsfall WHERE ax_flurstueck.endet is NOT NULL AND land*10000 + gemarkungsnummer = ".(int)$GemkgID." ";
+			$sql.= "AND flurstueckskennzeichen = ANY(zeigtaufaltesflurstueck) ";
+			$sql.= "AND ueberschriftimfortfuehrungsnachweis && ARRAY[10101,10102,10103,10201,10202,10205,10206,10301,10302,10303,10304,10305,10306,10307,10308,10502,10503,10700] ";
 			$sql.= "ORDER BY flurnummer";
 		}
     #echo $sql;
