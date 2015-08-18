@@ -1,6 +1,5 @@
 <? 
 include(LAYOUTPATH.'languages/generic_search_'.$this->user->rolle->language.'.php');
-include(SNIPPETS.'/generic_formelement_definitions.php');
 include(SNIPPETS.'/generic_functions.php');
 include('funktionen/input_check_functions.php'); 
 ?>
