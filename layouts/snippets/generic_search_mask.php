@@ -1,5 +1,6 @@
 <?
 include(LAYOUTPATH.'languages/generic_search_'.$this->user->rolle->language.'.php');
+include(SNIPPETS.'/generic_formelement_definitions.php');
 ?>
 
 <table width="100%" align="center" border="0" cellspacing="0" cellpadding="3" id="searchmasks">
