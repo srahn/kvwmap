@@ -5975,8 +5975,8 @@ class GUI {
     fclose($fp);
 
     if($preview == true){
-      exec(IMAGEMAGICKPATH.'convert -alpha off -density 300x300 '.$dateipfad.$dateiname.' -resize 595x1000 '.$dateipfad.$name.'-'.$currenttime.'.jpg');
-      #echo IMAGEMAGICKPATH.'convert -alpha off -density 300x300  '.$dateipfad.$dateiname.' -resize 595x1000 '.$dateipfad.$name.'-'.$currenttime.'.jpg';
+      exec(IMAGEMAGICKPATH.'convert -density 300x300 '.$dateipfad.$dateiname.' -resize 595x1000 '.$dateipfad.$name.'-'.$currenttime.'.jpg');
+      #echo IMAGEMAGICKPATH.'convert -density 300x300  '.$dateipfad.$dateiname.' -resize 595x1000 '.$dateipfad.$name.'-'.$currenttime.'.jpg';
 			if(!file_exists(IMAGEPATH.$name.'-'.$currenttime.'.jpg')){
 				return TEMPPATH_REL.$name.'-'.$currenttime.'-0.jpg';
 			}
