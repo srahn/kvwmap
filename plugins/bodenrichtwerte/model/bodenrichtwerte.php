@@ -262,7 +262,8 @@ class bodenrichtwertzone {
       if($formvars['entwicklungszustand']){$sql.= "entwicklungszustand = '".$formvars['entwicklungszustand']."', ";}
       if($formvars['beitragszustand']){$sql.= "beitragszustand = '".$formvars['beitragszustand']."', ";}
       if($formvars['nutzungsart']){$sql.= "nutzungsart = '".$formvars['nutzungsart']."', ";}
-      if($formvars['ergaenzende_nutzung']){$sql.= "ergaenzende_nutzung = '".$formvars['ergaenzende_nutzung']."', ";}
+      if($formvars['ergaenzende_nutzung'] == '')$sql.= "ergaenzende_nutzung = NULL, ";
+			else $sql.= "ergaenzende_nutzung = '".$formvars['ergaenzende_nutzung']."', ";
       if($formvars['bauweise']){$sql.= "bauweise = '".$formvars['bauweise']."', ";}
       if($formvars['geschosszahl']){$sql.= "geschosszahl = '".$formvars['geschosszahl']."', ";}
       if($formvars['grundflaechenzahl'] == '')$sql.= "grundflaechenzahl = NULL, ";
