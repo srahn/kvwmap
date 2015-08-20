@@ -21,7 +21,7 @@ class wfs{
 		if($filter != ''){$request .= '&filter='.urlencode($filter);}
 		if($maxfeatures != ''){$request .= '&maxfeatures='.$maxfeatures;}
 		#echo $request;
-    $this->gml = url_get_contents($request, $this->username, $this->password);
+    echo $this->gml = url_get_contents($request, $this->username, $this->password);
 	}
 	
 	function describe_featuretype_request(){
@@ -36,7 +36,7 @@ class wfs{
 	}
 	
 	function create_filter($attributenames, $operators, $values){
-		# Diese Funktion generiert aus Attributnamen, Operatoren und Werten einen ¸ber 'And' verkn¸pften WFS-Filterstring
+		# Diese Funktion generiert aus Attributnamen, Operatoren und Werten einen √ºber 'And' verkn√ºpften WFS-Filterstring
 		if($this->namespace != '')$namespace = $this->namespace.':';
 		$count = count($attributenames);
 		if($count > 0){
@@ -63,7 +63,7 @@ class wfs{
 						$operator = 'PropertyIsGreaterThan';
 					}break;
 					
-					/*case 'LIKE' : {									# geht noch nicht, weil man den requeststring hierf¸r url-encoden muss und dann ist er zu lang 
+					/*case 'LIKE' : {									# geht noch nicht, weil man den requeststring hierf√ºr url-encoden muss und dann ist er zu lang 
 						$operator = 'PropertyIsLike';
 						$operator_attributes = " wildCard='*' singleChar='.' escape='!'";
 						$values[$i] = str_replace('%', '*', $values[$i]);
@@ -101,10 +101,10 @@ class wfs{
 	}
 	
 	function parse_gml($parse_object){
-		# Diese Funktion parst das GML und sucht nach dem ¸bergebenem Tagnamen '$parse_object' und erstellt ein Array von Objekten, die diesem Namen entsprechen
+		# Diese Funktion parst das GML und sucht nach dem √ºbergebenem Tagnamen '$parse_object' und erstellt ein Array von Objekten, die diesem Namen entsprechen
 		# Jedes Objekt ist wiederum ein Array, deren Elemente die im Objekt enthaltenen XML-Tags sind
 		# Jeder XML-Tag ist auch ein Array, dessen Elemente die verschiedenen Eigenschaften des Tags sind (tag,value,type,level,attributes)
-		# attributes ist ein Array, welches die Attribute des Tags enth‰lt
+		# attributes ist ein Array, welches die Attribute des Tags enth√§lt
     $parser = xml_parser_create('ISO-8859-1');
     xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, 0);
     xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE, 1);
@@ -125,14 +125,14 @@ class wfs{
 	}
 			
 	function extract_features(){
-		# liefert die Datens‰tze einer getfeature-Abfrage (zuvor muss get_feature_request() ausgef¸hrt werden)
+		# liefert die Datens√§tze einer getfeature-Abfrage (zuvor muss get_feature_request() ausgef√ºhrt werden)
 		if(strpos($this->gml, 'gmlx:featureMember') !== false)$this->parse_gml('gmlx:featureMember');
 		else $this->parse_gml('gml:featureMember');		
 		if(strpos($this->gml, 'gmlx:posList') !== false)$geomtag = 'gmlx:posList';
 		elseif(strpos($this->gml, 'gml:posList') !== false)$geomtag = 'gml:posList';
 		else $geomtag = 'gml:coordinates';
-		for($i=0; $i < count($this->objects); $i++){		# durchl‰uft alle Objekte
-			for($j = 0; $j < count($this->objects[$i]); $j++){		# durchl‰uft alle Tags im Objekt
+		for($i=0; $i < count($this->objects); $i++){		# durchl√§uft alle Objekte
+			for($j = 0; $j < count($this->objects[$i]); $j++){		# durchl√§uft alle Tags im Objekt
 				# Boundingbox entnehmen und ins aktuelle System transformieren
 				if($this->objects[$i][$j]["tag"] == $geomtag AND $features[$i]['geom'] == ''){
 					#4495561.758,5997768.92 4495532.625,5997774.389 4495517.732,5997697.398 4495530.82,5997694.958 4495538.126,5997693.31 4495545.292,5997691.136 4495547.163,5997690.416 4495561.758,5997768.92
@@ -166,7 +166,7 @@ class wfs{
 	}
 	
 	function get_attributes(){
-		# liefert die Sachattribute eines WFS-Layers (zuvor muss describe_featuretype_request() ausgef¸hrt werden) 
+		# liefert die Sachattribute eines WFS-Layers (zuvor muss describe_featuretype_request() ausgef√ºhrt werden) 
 		$this->parse_gml('sequence');
 		for($j = 0; $j < count($this->objects[0]); $j++){
 			# nur offene oder komplette element-Tags
