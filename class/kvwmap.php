@@ -13076,6 +13076,9 @@ class db_mapObj{
 						if($rs['Style'][$i]['color'] != '' AND $rs['Style'][$i]['color'] != '-1 -1 -1'){
 							$rs['Style'][$i]['outlinecolor'] = $rs['Style'][$i]['color'];
 							$rs['Style'][$i]['color'] = '-1 -1 -1';
+							$rs['Style'][$i]['width'] = 2;
+							$rs['Style'][$i]['minwidth'] = 3;
+							$rs['Style'][$i]['maxwidth'] = 7;
 						}
 					}
 				}
