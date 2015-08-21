@@ -133,6 +133,7 @@ class wfs{
 		else $geomtag = 'gml:coordinates';
 		for($i=0; $i < count($this->objects); $i++){		# durchläuft alle Objekte
 			for($j = 0; $j < count($this->objects[$i]); $j++){		# durchläuft alle Tags im Objekt
+				$coord_pair = array();
 				# Boundingbox entnehmen und ins aktuelle System transformieren
 				if($this->objects[$i][$j]["tag"] == $geomtag AND $features[$i]['geom'] == ''){
 					#4495561.758,5997768.92 4495532.625,5997774.389 4495517.732,5997697.398 4495530.82,5997694.958 4495538.126,5997693.31 4495545.292,5997691.136 4495547.163,5997690.416 4495561.758,5997768.92
