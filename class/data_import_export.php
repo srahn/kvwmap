@@ -613,6 +613,7 @@ class data_import_export {
     # Filter
     $filter = $mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id);
     if($filter != ''){
+			$filter = str_replace('$userid', $user->id, $filter);
     	$sql .= ' AND '.$filter;
     }
 		# Where-Klausel aus Sachdatenabfrage-SQL anhängen
