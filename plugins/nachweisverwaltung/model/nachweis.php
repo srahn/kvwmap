@@ -740,9 +740,10 @@ class Nachweis {
       } break;
       
       case "MergeIDs" : {
-        $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring, st_assvg(st_transform(n.the_geom, ".$this->client_epsg.")) AS svg_umring,v.name AS vermst,n2d.dokumentart_id as andere_art FROM nachweisverwaltung.n_vermstelle AS v, nachweisverwaltung.n_nachweise AS n";
+        $sql ="SELECT distinct n.*,st_astext(st_transform(n.the_geom, ".$this->client_epsg.")) AS wkt_umring, st_assvg(st_transform(n.the_geom, ".$this->client_epsg.")) AS svg_umring,v.name AS vermst,n2d.dokumentart_id as andere_art FROM nachweisverwaltung.n_nachweise AS n";
+				$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
         $sql.=" LEFT JOIN nachweisverwaltung.n_nachweise2dokumentarten n2d ON n2d.nachweis_id = n.id";
-        $sql.=" WHERE CAST(n.vermstelle AS integer)=v.id AND n.id=".(int)$idselected[0];
+        $sql.=" WHERE n.id=".(int)$idselected[0];
 		if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
         #echo $sql;
         $this->debug->write("<br>nachweis.php getNachweise Abfragen der Nachweisdokumente.<br>",4);
