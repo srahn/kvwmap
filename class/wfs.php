@@ -21,7 +21,7 @@ class wfs{
 		if($filter != ''){$request .= '&filter='.urlencode($filter);}
 		if($maxfeatures != ''){$request .= '&maxfeatures='.$maxfeatures;}
 		#echo $request;
-    echo $this->gml = url_get_contents($request, $this->username, $this->password);
+    $this->gml = url_get_contents($request, $this->username, $this->password);
 	}
 	
 	function describe_featuretype_request(){
@@ -105,7 +105,7 @@ class wfs{
 		# Jedes Objekt ist wiederum ein Array, deren Elemente die im Objekt enthaltenen XML-Tags sind
 		# Jeder XML-Tag ist auch ein Array, dessen Elemente die verschiedenen Eigenschaften des Tags sind (tag,value,type,level,attributes)
 		# attributes ist ein Array, welches die Attribute des Tags enthält
-    $parser = xml_parser_create('ISO-8859-1');
+    $parser = xml_parser_create();
     xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, 0);
     xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE, 1);
     xml_parse_into_struct($parser, $this->gml, $values, $tags);
