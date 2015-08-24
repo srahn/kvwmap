@@ -412,9 +412,10 @@ class pgdatabase {
      
   function get_attribute_information($tablename, $columnname){
   	if($columnname != '' AND $tablename != ''){
-  		$sql = "SELECT is_nullable, character_maximum_length, column_default, numeric_precision, numeric_scale, indisunique, indisprimary, pg_get_serial_sequence('".$tablename."', '".$columnname."') as serial ";
+  		$sql = "SELECT is_nullable, character_maximum_length, column_default, numeric_precision, numeric_scale, bool_or(indisunique), bool_or(indisprimary), pg_get_serial_sequence('".$tablename."', '".$columnname."') as serial ";
   		$sql.= "FROM information_schema.columns LEFT JOIN pg_class LEFT JOIN pg_index ON indrelid = pg_class.oid LEFT JOIN pg_attribute ON pg_attribute.attrelid = pg_class.oid ON pg_class.oid = table_name::regclass AND pg_attribute.attnum = any(pg_index.indkey) AND attname = column_name ";
   		$sql.= "WHERE column_name = '".$columnname."' AND table_name = '".$tablename."' AND table_schema = '".$this->schema."' ";
+			$sql.= "GROUP BY is_nullable, character_maximum_length, column_default, numeric_precision, numeric_scale";
 			#echo $sql.'<br>';
   		$ret1 = $this->execSQL($sql, 4, 0);
 	  	if($ret1[0]==0){
