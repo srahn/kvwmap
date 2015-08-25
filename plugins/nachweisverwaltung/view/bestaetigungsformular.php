@@ -23,6 +23,8 @@
 	        <input type="hidden" name="go" value="<?php echo $this->formvars['go']?>">
 					<input type="hidden" name="go_plus" value="<?php echo $this->formvars['go_plus']?>">
           <input type="hidden" name="suchantrnr" value="<?php echo $this->formvars['suchantrnr']; ?>">
+					<input type="hidden" name="order" value="<? echo $this->formvars['order']; ?>">
+					<input type="hidden" name="flur_thematisch" value="<? echo $this->formvars['flur_thematisch']; ?>">
 <?php
 # 2006-01-03 pk
 if (is_array($this->formvars['id'])) {
