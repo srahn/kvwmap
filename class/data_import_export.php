@@ -676,7 +676,7 @@ class data_import_export {
 					$command = POSTGRESBINPATH.'pgsql2shp -r -u '.$layerdb->user;
 					if($layerdb->passwd != '')$command.= ' -P "'.$layerdb->passwd.'"';
 					if($layerdb->port != '')$command.=' -p '.$layerdb->port;
-					if($layerdb->host != '') $command .= ' host=' . $layerdb->host;
+					if($layerdb->host != '') $command .= ' -h ' . $layerdb->host;
 					$command.= ' -f '.$exportfile.' '.$layerdb->dbName.' '.$temp_table; 
 					exec($command);
 					#echo $command;
