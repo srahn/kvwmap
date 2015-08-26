@@ -562,6 +562,7 @@ class spatial_processor {
 	          $sql_where.=" AND st_distance(".$columnname.",st_geomfromtext('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."))";
 	        }
 	        $sql_where.=" <= ".$rand;
+					$punktuell = true;
 	      }
 	      else {
 	        # Behandlung der Suchanfrage mit Rechteck, exakte Suche im Rechteck
@@ -582,11 +583,12 @@ class spatial_processor {
 	   
 	   			   
 	 			if($fromwhere != ''){
+					if(!$punktuell)$columnname = "st_union(".$columnname.")";			# bei punktueller Abfrage wird immer nur eine Objektgeometrie geholt, bei Rechteck-Abfrage die Vereinigung aller getroffenen Geometrien
 	 				if ($client_epsg!=$layer_epsg) {
-		        $sql = "SELECT st_astext(st_transform(st_union(".$columnname."),".$client_epsg.")) AS geomwkt ".$fromwhere." ".$sql_where;
+		        $sql = "SELECT st_astext(st_transform(".$columnname.",".$client_epsg.")) AS geomwkt ".$fromwhere." ".$sql_where;
 		      }
 		      else {
-		        $sql = "SELECT st_astext(st_union(".$columnname.")) AS geomwkt ".$fromwhere." ".$sql_where;
+		        $sql = "SELECT st_astext(".$columnname.") AS geomwkt ".$fromwhere." ".$sql_where;
 		      }  
 	 			}
 	   
