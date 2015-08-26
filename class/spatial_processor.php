@@ -593,7 +593,7 @@ class spatial_processor {
 	 			}
 	   
 	   		# order by wieder einbauen
-        $sql .= $orderby;
+				if($punktuell)$sql .= $orderby;
 	   
 	      # Anh�ngen des Begrenzers zur Einschr�nkung der Anzahl der Ergebniszeilen
 	      $sql.=' LIMIT '.MAXQUERYROWS;
