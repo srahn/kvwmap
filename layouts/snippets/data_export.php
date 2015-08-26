@@ -256,6 +256,7 @@ $j=0;
 <input type="hidden" name="area" value="">
 <INPUT TYPE="hidden" NAME="columnname" VALUE="<? echo $this->formvars['columnname'] ?>">
 <INPUT TYPE="hidden" NAME="fromwhere" VALUE="<? echo $this->formvars['fromwhere']; ?>">
+<INPUT TYPE="HIDDEN" NAME="orderby" VALUE="<? echo $this->formvars['orderby']; ?>">
 <INPUT TYPE="hidden" NAME="export_columnname" VALUE="<? echo $this->data_import_export->formvars['columnname'] ?>">
 <input type="hidden" name="always_draw" value="<? echo $always_draw; ?>">
 

@@ -652,6 +652,7 @@ update_require_attribute = function(attributes, layer_id, value){
 <input type="hidden" name="go_plus" value="">
 <INPUT TYPE="HIDDEN" NAME="columnname" VALUE="<?php echo $this->formvars['columnname']; ?>">
 <INPUT TYPE="HIDDEN" NAME="fromwhere" VALUE="<? echo $this->formvars['fromwhere']; ?>">
+<INPUT TYPE="HIDDEN" NAME="orderby" VALUE="<? echo $this->formvars['orderby']; ?>">
 
 <?php
 	if ($this->Meldung!='') {

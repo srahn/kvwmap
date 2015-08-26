@@ -126,6 +126,7 @@ if ($this->Fehlermeldung!='') {
     	<INPUT TYPE="HIDDEN" NAME="layer_id" VALUE="">
 			<INPUT TYPE="HIDDEN" NAME="columnname" VALUE="">
 			<INPUT TYPE="hidden" NAME="fromwhere" VALUE="">
+			<INPUT TYPE="HIDDEN" NAME="orderby" VALUE="<? echo $this->formvars['orderby']; ?>">
       <input type="reset" name="reset" value="<?php echo $this->strButtonBack; ?>">
       <input type="hidden" name="go_plus" value="">
       <input type="button" name="sendenbutton" value="<?php echo $this->strSend; ?>" onclick="send();">

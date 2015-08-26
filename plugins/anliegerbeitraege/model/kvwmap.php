@@ -24,8 +24,15 @@
       $data = $GUI->mapDB->getData($GUI->formvars['layer_id']);
       $data_explosion = explode(' ', $data);
       $GUI->formvars['columnname'] = $data_explosion[0];
-      $select = $GUI->mapDB->getSelectFromData($data);
-      $GUI->formvars['fromwhere'] = pg_escape_string('from ('.$select.') as foo where 1=1');
+      $select = $fromwhere = $GUI->mapDB->getSelectFromData($data);
+			# order by rausnehmen
+			$orderbyposition = strrpos(strtolower($select), 'order by');
+			$lastfromposition = strrpos(strtolower($select), 'from');
+			if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
+				$fromwhere = substr($select, 0, $orderbyposition);
+				$GUI->formvars['orderby'] = ' '.substr($select, $orderbyposition);
+			}
+			$GUI->formvars['fromwhere'] = pg_escape_string('from ('.$fromwhere.') as foo where 1=1');
       if(strpos(strtolower($GUI->formvars['fromwhere']), ' where ') === false){
         $GUI->formvars['fromwhere'] .= ' where (1=1)';
       }

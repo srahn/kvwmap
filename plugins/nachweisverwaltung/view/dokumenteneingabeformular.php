@@ -301,6 +301,7 @@ $legendheight = $this->map->height + 20;
 						<input type="hidden" name="area" value="">
 						<INPUT TYPE="HIDDEN" NAME="columnname" VALUE="<?php echo $this->formvars['columnname']; ?>">
 						<INPUT TYPE="HIDDEN" NAME="fromwhere" VALUE="<? echo $this->formvars['fromwhere']; ?>">
+						<INPUT TYPE="HIDDEN" NAME="orderby" VALUE="<? echo $this->formvars['orderby']; ?>">
 						<INPUT TYPE="hidden" NAME="result2" VALUE="">
 						<INPUT TYPE="hidden" NAME="check" VALUE="">
 						<input type="hidden" name="order" value="<?php echo $this->formvars['order']; ?>">
