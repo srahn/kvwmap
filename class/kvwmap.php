@@ -3254,7 +3254,14 @@ class GUI {
     $data_explosion = explode(' ', $data);
     $this->formvars['columnname'] = $data_explosion[0];
     $select = $this->mapDB->getSelectFromData($data);
-    $this->formvars['fromwhere'] = pg_escape_string('from ('.$select.') as foo where 1=1');
+		# order by rausnehmen
+		$orderbyposition = strrpos(strtolower($select), 'order by');
+		$lastfromposition = strrpos(strtolower($select), 'from');
+		if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
+			$fromwhere = substr($select, 0, $orderbyposition);
+			$this->formvars['orderby'] = ' '.substr($select, $orderbyposition);
+		}
+    $this->formvars['fromwhere'] = pg_escape_string('from ('.$fromwhere.') as foo where 1=1');
     if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
       $this->formvars['fromwhere'] .= ' where (1=1)';
     }
@@ -3368,14 +3375,15 @@ class GUI {
     $this->formvars['columnname'] = $data_explosion[0];
     $select = $this->mapDB->getSelectFromData($data);
     
-    # order by rausnehmen
+		# order by rausnehmen
 		$orderbyposition = strrpos(strtolower($select), 'order by');
 		$lastfromposition = strrpos(strtolower($select), 'from');
 		if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
-	  	$select = substr($select, 0, $orderbyposition);
-  	}
+			$fromwhere = substr($select, 0, $orderbyposition);
+			$this->formvars['orderby'] = ' '.substr($select, $orderbyposition);
+		}
     
-    $this->formvars['fromwhere'] = pg_escape_string('from ('.$select.') as foo where 1=1');
+    $this->formvars['fromwhere'] = pg_escape_string('from ('.$fromwhere.') as foo where 1=1');
     if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
       $this->formvars['fromwhere'] .= ' where (1=1)';
     }    
@@ -7369,7 +7377,14 @@ class GUI {
             $space_explosion = explode(' ', $data);
             $this->formvars['columnname'] = $space_explosion[0];
             $select = $mapdb->getSelectFromData($data);
-            $this->formvars['fromwhere'] = pg_escape_string('from ('.$select.') as foo where 1=1');
+						# order by rausnehmen
+						$orderbyposition = strrpos(strtolower($select), 'order by');
+						$lastfromposition = strrpos(strtolower($select), 'from');
+						if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
+							$fromwhere = substr($select, 0, $orderbyposition);
+							$this->formvars['orderby'] = ' '.substr($select, $orderbyposition);
+						}
+            $this->formvars['fromwhere'] = pg_escape_string('from ('.$fromwhere.') as foo where 1=1');
             if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
               $this->formvars['fromwhere'] .= ' where (1=1)';
             }
