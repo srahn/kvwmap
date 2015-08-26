@@ -325,7 +325,7 @@ class spatial_processor {
 			}break;
 			
 			case 'add_geometry':{
-				$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['layer_id'], $formvars['fromwhere'], $formvars['columnname']);
+				$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['layer_id'], $formvars['fromwhere'], $formvars['columnname'], $formvars['orderby']);
 				if($querygeometryWKT == ''){
 					break;
 				}
@@ -343,7 +343,7 @@ class spatial_processor {
 			}break;
 			
 			case 'subtract_geometry':{
-				$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['layer_id'], $formvars['fromwhere'], $formvars['columnname']);
+				$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['layer_id'], $formvars['fromwhere'], $formvars['columnname'], $formvars['orderby']);
 				if($querygeometryWKT == ''){
 					break;
 				}
@@ -373,7 +373,7 @@ class spatial_processor {
 		echo $result;
 	}
 	
-	function queryMap($input_coord, $pixsize, $layer_id, $fromwhere, $columnname) {
+	function queryMap($input_coord, $pixsize, $layer_id, $fromwhere, $columnname, $orderby) {
 		# pixsize wird übergeben, weil sie aus dem Geometrieeditor anders sein kann, da es dort eine andere Kartengröße geben kann
     # Abfragebereich berechnen
     $corners=explode(';',$input_coord);
@@ -389,7 +389,7 @@ class spatial_processor {
     $maxy=$miny+$height;
     $rect=ms_newRectObj();
     $rect->setextent($minx,$miny,$maxx,$maxy);
-    $geom = $this->getgeometrybyquery($rect, $layer_id, $fromwhere, $columnname);
+    $geom = $this->getgeometrybyquery($rect, $layer_id, $fromwhere, $columnname, $orderby);
     return $geom;
   }
   
@@ -505,7 +505,7 @@ class spatial_processor {
     return $rs[0];
   }
   
-  function getgeometrybyquery($rect, $layer_id, $fromwhere, $columnname) {
+  function getgeometrybyquery($rect, $layer_id, $fromwhere, $columnname, $orderby) {
   	$dbmap = new db_mapObj($this->rolle->stelle_id, $this->rolle->user_id);
   	if($layer_id != ''){
     	if($layer_id < 0){	# Rollenlayer
@@ -593,7 +593,7 @@ class spatial_processor {
 	 			}
 	   
 	   		# order by wieder einbauen
-        $sql .= $layerset[0]['attributes']['orderby'];
+        $sql .= $orderby;
 	   
 	      # Anh�ngen des Begrenzers zur Einschr�nkung der Anzahl der Ergebniszeilen
 	      $sql.=' LIMIT '.MAXQUERYROWS;
