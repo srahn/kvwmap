@@ -267,6 +267,7 @@ else {
 		
 		<INPUT TYPE="HIDDEN" NAME="columnname" VALUE="<?php echo $this->formvars['columnname']; ?>">
 		<INPUT TYPE="HIDDEN" NAME="fromwhere" VALUE="<? echo $this->formvars['fromwhere']; ?>">
+		<INPUT TYPE="HIDDEN" NAME="orderby" VALUE="<? echo $this->formvars['orderby']; ?>">
     <input type="hidden" name="imgxy" value="300 300"> 
     <input type="hidden" name="imgbox" value="-1 -1 -1 -1">
     <input type="hidden" name="art_markieren" value="111" >

@@ -3253,7 +3253,7 @@ class GUI {
     $data = $this->mapDB->getData($this->formvars['layer_id']);
     $data_explosion = explode(' ', $data);
     $this->formvars['columnname'] = $data_explosion[0];
-    $select = $this->mapDB->getSelectFromData($data);
+    $select = $fromwhere = $this->mapDB->getSelectFromData($data);
 		# order by rausnehmen
 		$orderbyposition = strrpos(strtolower($select), 'order by');
 		$lastfromposition = strrpos(strtolower($select), 'from');
@@ -3373,7 +3373,7 @@ class GUI {
     #echo $data;
     $data_explosion = explode(' ', $data);
     $this->formvars['columnname'] = $data_explosion[0];
-    $select = $this->mapDB->getSelectFromData($data);
+    $select = $fromwhere = $this->mapDB->getSelectFromData($data);
     
 		# order by rausnehmen
 		$orderbyposition = strrpos(strtolower($select), 'order by');
@@ -6792,14 +6792,15 @@ class GUI {
 		    $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
 		    # Geometrie-Übernahme-Layer:
 		    # Spaltenname und from-where abfragen
-		    $select = $this->mapDB->getSelectFromData($data);
+		    $select = $fromwhere = $this->mapDB->getSelectFromData($data);
 		    # order by rausnehmen
 		  	$orderbyposition = strrpos(strtolower($select), 'order by');
 				$lastfromposition = strrpos(strtolower($select), 'from');
 				if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
-			  	$select = substr($select, 0, $orderbyposition);
-		  	}
-		    $this->formvars['fromwhere'] = pg_escape_string('from ('.$select.') as foo where 1=1');
+					$fromwhere = substr($select, 0, $orderbyposition);
+					$this->formvars['orderby'] = ' '.substr($select, $orderbyposition);
+				}
+				$this->formvars['fromwhere'] = pg_escape_string('from ('.$fromwhere.') as foo where 1=1');
 		    if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
 		      $this->formvars['fromwhere'] .= ' where (1=1)';
 		    } 
@@ -8181,15 +8182,15 @@ class GUI {
 	    #echo $data;
 	    $data_explosion = explode(' ', $data);
 	    $this->formvars['columnname'] = $data_explosion[0];
-	    $select = $this->mapDB->getSelectFromData($data);
+	    $select = $fromwhere = $this->mapDB->getSelectFromData($data);
 	    # order by rausnehmen
-			
 			$orderbyposition = strrpos(strtolower($select), 'order by');
 			$lastfromposition = strrpos(strtolower($select), 'from');
 			if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
-		  	$select = substr($select, 0, $orderbyposition);
-	  	}
-	    $this->formvars['fromwhere'] = pg_escape_string('from ('.$select.') as foo where 1=1');
+				$fromwhere = substr($select, 0, $orderbyposition);
+				$this->formvars['orderby'] = ' '.substr($select, $orderbyposition);
+			}
+			$this->formvars['fromwhere'] = pg_escape_string('from ('.$fromwhere.') as foo where 1=1');
 	    if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
 	      $this->formvars['fromwhere'] .= ' where (1=1)';
 	    }
@@ -8617,14 +8618,15 @@ class GUI {
 	    #echo $data;
 	    $data_explosion = explode(' ', $data);
 	    $this->formvars['columnname'] = $data_explosion[0];
-	    $select = $this->mapDB->getSelectFromData($data);
+	    $select = $fromwhere = $this->mapDB->getSelectFromData($data);
 	    # order by rausnehmen
 	  	$orderbyposition = strrpos(strtolower($select), 'order by');
 			$lastfromposition = strrpos(strtolower($select), 'from');
 			if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
-		  	$select = substr($select, 0, $orderbyposition);
-	  	}
-	    $this->formvars['fromwhere'] = pg_escape_string('from ('.$select.') as foo where 1=1');
+				$fromwhere = substr($select, 0, $orderbyposition);
+				$this->formvars['orderby'] = ' '.substr($select, $orderbyposition);
+			}
+			$this->formvars['fromwhere'] = pg_escape_string('from ('.$fromwhere.') as foo where 1=1');
 	    if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
 	      $this->formvars['fromwhere'] .= ' where (1=1)';
 	    }

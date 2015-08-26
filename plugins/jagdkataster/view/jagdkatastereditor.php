@@ -192,6 +192,7 @@ function update_form(art){
 <INPUT TYPE="HIDDEN" NAME="areaunit" VALUE="hektar">
 <INPUT TYPE="HIDDEN" NAME="columnname" VALUE="<?php echo $this->formvars['columnname']; ?>">
 <INPUT TYPE="HIDDEN" NAME="fromwhere" VALUE="<? echo $this->formvars['fromwhere']; ?>">
+<INPUT TYPE="HIDDEN" NAME="orderby" VALUE="<? echo $this->formvars['orderby']; ?>">
 <INPUT TYPE="HIDDEN" NAME="scale" VALUE="<?php echo $scale; ?>">
 <INPUT TYPE="HIDDEN" NAME="go" VALUE="jagdkatastereditor" >
 <INPUT TYPE="HIDDEN" NAME="go_plus" VALUE="" >

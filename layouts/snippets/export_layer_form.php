@@ -160,6 +160,7 @@ function buildwktpolygonfromsvgpath(svgpath){
 <INPUT TYPE="HIDDEN" NAME="columnname" VALUE="">
 <INPUT TYPE="HIDDEN" NAME="go_plus" VALUE="">
 <INPUT TYPE="hidden" NAME="fromwhere" VALUE="">
+<INPUT TYPE="HIDDEN" NAME="orderby" VALUE="<? echo $this->formvars['orderby']; ?>">
 <input type="hidden" name="map_minx" value="<? echo $this->map->extent->minx; ?>">
 <input type="hidden" name="map_miny" value="<? echo $this->map->extent->miny; ?>">
 <input type="hidden" name="map_pixsize" value="<? echo $this->user->rolle->pixsize; ?>">
