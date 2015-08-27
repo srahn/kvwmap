@@ -30,6 +30,10 @@ function ahahDone(url, targets, req, actions) {
 				window.location = url;
 				return;
 			}
+			if(req.getResponseHeader(\'error\') == \'true\'){	// falls man ein Fehler aufgetreten ist
+				alert(req.responseText);
+				return;
+			}
 			var found = false;
     	response = ""+req.responseText;
     	//response = response.replace(/\s/,"");		# bei neueren Postgis-Versionen wird hier das Leerzeichen nach dem M bei asSVG-Abfragen entfernt 

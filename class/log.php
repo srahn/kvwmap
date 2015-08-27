@@ -21,7 +21,7 @@ class debugfile {
   function debugfile($filename) {
     $this->filename=$filename;
     $this->fp=fopen($filename,'w');
-    fwrite($this->fp,"<html>\n<head>\n  <title>kvwmap Debug-Datei</title>\n</head>\n<body>");
+    fwrite($this->fp,"<html>\n<head>\n  <title>kvwmap Debug-Datei</title>\n<META http-equiv=Content-Type content='text/html; charset=UTF-8'>\n</head>\n<body>");
     fwrite($this->fp,"<h2>Debug Datei</h2>");
   }
 
