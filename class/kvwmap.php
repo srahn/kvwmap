@@ -7377,7 +7377,7 @@ class GUI {
             $data = $mapdb->getData($this->formvars['layer_id']);
             $space_explosion = explode(' ', $data);
             $this->formvars['columnname'] = $space_explosion[0];
-            $select = $mapdb->getSelectFromData($data);
+            $select = $fromwhere = $mapdb->getSelectFromData($data);
 						# order by rausnehmen
 						$orderbyposition = strrpos(strtolower($select), 'order by');
 						$lastfromposition = strrpos(strtolower($select), 'from');
