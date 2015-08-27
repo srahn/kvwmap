@@ -163,8 +163,10 @@ class pgdatabase {
       $query=pg_query($this->dbConn,$sql);
       //$query=0;
       if ($query==0) {
+				$errormessage = pg_last_error($this->dbConn);
+				header('error: true');		// damit ajax-Requests das auch mitkriegen
         $ret[0]=1;
-        $ret[1]="Fehler bei SQL Anweisung:<br>".$sql."<br>".pg_result_error($query);
+        $ret[1]="Fehler bei SQL Anweisung:<br><br>\n\n".$sql."\n\n<br><br>".$errormessage;
         echo "<br><b>".$ret[1]."</b>";
         $this->debug->write("<br><b>".$ret[1]."</b>",$debuglevel);
         if ($logsql) {
