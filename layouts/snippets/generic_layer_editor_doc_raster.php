@@ -35,7 +35,7 @@
 		
 </script>
 
-<div id="layer" align="left">
+<div id="layer" align="left" onclick="remove_calendar();">
 <? if($this->new_entry != true){ ?>
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
 	<tr>
@@ -161,6 +161,13 @@
 						}
 						if($attributes['tooltip'][$j]!='' AND $attributes['form_element_type'][$j] != 'Time') {
 						  echo '<td align="right"><a href="#" title="'.$attributes['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
+						}
+						if($attributes['type'][$j] == 'date'){
+							echo '<td align="right"><a href="javascript:;" title=" (TT.MM.JJJJ) '.$attributes['tooltip'][$j].'" ';
+							if($attributes['privileg'][$j] == '1' AND !$lock[$k]){
+								echo 'onclick="add_calendar(event, \''.$attributes['name'][$j].'_'.$k.'\');"';
+							}
+							echo '><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id="calendar_'.$attributes['name'][$j].'_'.$k.'"></div></td>';
 						}
 						echo '</td></tr></table>';
 						echo '</td><td><div id="formelement">';
