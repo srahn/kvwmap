@@ -3,6 +3,7 @@
 
 add_calendar = function(event, elementid){
 	event.stopPropagation();
+	remove_calendar();
 	calendar = new CalendarJS();
 	calendar.init(elementid);
 	document.getElementById('layer').calendar = calendar;
