@@ -1275,7 +1275,7 @@ class ALB {
       $nennerausgabe= '';
       $flst=new flurstueck($FlurstKennz[$f],$this->database);
       $flst->database=$this->database;
-      $ret=$flst->readALB_Data($FlurstKennz[$f]);
+      $ret=$flst->readALB_Data($FlurstKennz[$f], true);
 			$flst->Grundbuecher=$flst->getGrundbuecher();
       if ($ret!='') {
         return $ret;
@@ -1882,7 +1882,7 @@ class ALB {
     # ein Flurstück erzeugen
     $flst=new flurstueck($buchungen[0]['flurstkennz'],$this->database);
     $flst->database=$this->database;
-    $ret=$flst->readALB_Data($buchungen[0]['flurstkennz']);
+    $ret=$flst->readALB_Data($buchungen[0]['flurstkennz'], true);
 		$flst->Grundbuecher=$flst->getGrundbuecher();
 
     if ($wasserzeichen) {
