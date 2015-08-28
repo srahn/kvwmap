@@ -607,7 +607,7 @@
 			}
 			//top.currentform.secondpoly.value = false;
 			redrawfirstpolygon();
-			polygonarea();
+			if(top.currentform.firstpoly.value == "true")polygonarea();
 		}
 		if(linefunctions == true){
 			redrawfirstline();
