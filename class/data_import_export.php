@@ -521,9 +521,8 @@ class data_import_export {
 			foreach($result[$i] As $key => $value){
 				$j = $attributes['indizes'][$key];
       	if($attributes['type'][$j] != 'geometry' AND $attributes['name'][$i] != 'lock'){
-      		$csv .= '"';
 	        if(in_array($attributes['type'][$j], array('numeric', 'float4', 'float8'))){
-	        	$value = str_replace('.', ",", $value);	
+	        	$value = str_replace('.', ",", $value);			# Excel-Datumsproblem
 	        }
 					if($attributes['type'][$j] == 'bool'){
 						$value = str_replace('t', "ja", $value);	
@@ -532,7 +531,8 @@ class data_import_export {
 	        $value = str_replace(';', ",", $value);
 	        $value = str_replace(chr(10), " ", $value);
 	        $value = str_replace(chr(13), "", $value);
-	        $csv .= $value.'";';
+					if(strpos($value, '/') !== false)$value = "'".$value."'";		# Excel-Datumsproblem
+	        $csv .= $value.';';
       	}
       }
       $csv .= chr(13).chr(10);
