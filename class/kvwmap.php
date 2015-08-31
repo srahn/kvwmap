@@ -3255,6 +3255,7 @@ class GUI {
     $this->formvars['columnname'] = $data_explosion[0];
     $select = $fromwhere = $this->mapDB->getSelectFromData($data);
 		# order by rausnehmen
+		$this->formvars['orderby'] = '';
 		$orderbyposition = strrpos(strtolower($select), 'order by');
 		$lastfromposition = strrpos(strtolower($select), 'from');
 		if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
@@ -3376,6 +3377,7 @@ class GUI {
     $select = $fromwhere = $this->mapDB->getSelectFromData($data);
     
 		# order by rausnehmen
+		$this->formvars['orderby'] = '';
 		$orderbyposition = strrpos(strtolower($select), 'order by');
 		$lastfromposition = strrpos(strtolower($select), 'from');
 		if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
@@ -6794,6 +6796,7 @@ class GUI {
 		    # Spaltenname und from-where abfragen
 		    $select = $fromwhere = $this->mapDB->getSelectFromData($data);
 		    # order by rausnehmen
+				$this->formvars['orderby'] = '';
 		  	$orderbyposition = strrpos(strtolower($select), 'order by');
 				$lastfromposition = strrpos(strtolower($select), 'from');
 				if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
@@ -7379,6 +7382,7 @@ class GUI {
             $this->formvars['columnname'] = $space_explosion[0];
             $select = $fromwhere = $mapdb->getSelectFromData($data);
 						# order by rausnehmen
+						$this->formvars['orderby'] = '';
 						$orderbyposition = strrpos(strtolower($select), 'order by');
 						$lastfromposition = strrpos(strtolower($select), 'from');
 						if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
@@ -8184,6 +8188,7 @@ class GUI {
 	    $this->formvars['columnname'] = $data_explosion[0];
 	    $select = $fromwhere = $this->mapDB->getSelectFromData($data);
 	    # order by rausnehmen
+			$this->formvars['orderby'] = '';
 			$orderbyposition = strrpos(strtolower($select), 'order by');
 			$lastfromposition = strrpos(strtolower($select), 'from');
 			if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
@@ -8620,6 +8625,7 @@ class GUI {
 	    $this->formvars['columnname'] = $data_explosion[0];
 	    $select = $fromwhere = $this->mapDB->getSelectFromData($data);
 	    # order by rausnehmen
+			$this->formvars['orderby'] = '';
 	  	$orderbyposition = strrpos(strtolower($select), 'order by');
 			$lastfromposition = strrpos(strtolower($select), 'from');
 			if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
