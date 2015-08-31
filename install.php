@@ -31,6 +31,8 @@
 
 error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
 $debug; $log_mysql; $log_postgres;
+define('KVWMAP_INIT_PASSWORD', (getenv('KVWMAP_INIT_PASSWORD') == '') ? 'KvwMapPW1' : getenv('KVWMAP_INIT_PASSWORD'));
+
 output_header();
 if ($_REQUEST['go'] == 'Installation starten') {
   install();
@@ -247,7 +249,7 @@ function install_config() {
     $config
   );
   $config = str_replace("define('MYSQL_USER', '');", "define('MYSQL_USER', 'kvwmap');", $config);
-  $config = str_replace("define('MYSQL_PASSWORD', '');", "define('MYSQL_PASSWORD', 'kvwmap');", $config);
+  $config = str_replace("define('MYSQL_PASSWORD', '');", "define('MYSQL_PASSWORD', '" . KVWMAP_INIT_PASSWORD . "');", $config);
   $config = str_replace(
     "define('MYSQLVERSION', '500');",
     "define('MYSQLVERSION', '" . versionFormatter(getenv('MYSQL_ENV_MYSQL_MAJOR')) . "');",
@@ -259,7 +261,7 @@ function install_config() {
     $config
   );
   $config = str_replace("define('POSTGRES_USER', '');", "define('POSTGRES_USER', 'kvwmap');", $config);
-  $config = str_replace("define('POSTGRES_PASSWORD', '');", "define('POSTGRES_PASSWORD', 'kvwmap');", $config);
+  $config = str_replace("define('POSTGRES_PASSWORD', '');", "define('POSTGRES_PASSWORD', '" . KVWMAP_INIT_PASSWORD . "');", $config);
   $config = str_replace(
     "define('POSTGRESVERSION', '500');",
     "define('POSTGRESVERSION', '" . versionFormatter(getenv('PGSQL_ENV_PG_MAJOR')) . "');",
@@ -343,13 +345,35 @@ function kvwmapdb_exists($mysqlRootDb, $mysqlKvwmapDb) { ?>
 /*
 * Installiert kvwmap-Datenbank
 */
-function install_kvwmapdb ($mysqlRootDb, $mysqlKvwmapDb) { ?>
-  Erzeuge Nutzer: <?php echo $mysqlKvwmapDb->user; ?><br><?php
+function install_kvwmapdb ($mysqlRootDb, $mysqlKvwmapDb) {
+  # Abfragen ob user mysqlKvwmapDb->user existiert
   $sql = "
-    CREATE USER '" . $mysqlKvwmapDb->user . "'@'" . MYSQL_HOSTS_ALLOWED . "'
-    IDENTIFIED BY '" . $mysqlKvwmapDb->passwd . "'
+    USE mysql;
+
+    SELECT
+      User
+    FROM
+      user
+    WHERE
+      User = '" . $mysqlKvwmapDb->user . "' AND
+      Host = '" . MYSQL_HOSTS_ALLOWED . "'
   ";
-  $mysqlRootDb->execSQL($sql, 0, 1); ?>
+  $mysqlRootDb->execSQL($sql, 0, 1);
+  if ($ret[0]) { ?>
+    Fehler beim Abfragen ob User <?php echo $mysqlKvwmapDb; ?> mit Host <?php echo MYSQL_HOSTS_ALLOWED; ?> schon in Datenbank <?php echo $mysqlKvwmapDb->dbName; ?> existiert.<br><?php
+    return false;
+  }
+  if (mysql_num_rows($ret[1]) > 0 ) { ?>
+    User <?php echo $mysqlKvwmapDb; ?> mit Host <?php echo MYSQL_HOSTS_ALLOWED; ?> existiert schon in Datenbank <?php echo $mysqlKvwmapDb->dbName;
+  }
+  else  { ?>
+    Erzeuge Nutzer: <?php echo $mysqlKvwmapDb->user; ?><br><?php
+    $sql = "
+      CREATE USER '" . $mysqlKvwmapDb->user . "'@'" . MYSQL_HOSTS_ALLOWED . "'
+      IDENTIFIED BY '" . $mysqlKvwmapDb->passwd . "'
+    ";
+    $mysqlRootDb->execSQL($sql, 0, 1);
+  } ?>
   
   Erzeuge Datenbank: <?php echo $mysqlKvwmapDb->dbName; ?><br><?php
   $sql = "
@@ -483,23 +507,35 @@ function admin_stelle_exists($mysqlKvwmapDb) {
 * Trägt alle Einstellungen für eine Admin-Stelle in MySQL-Datenbank von kvwmap ein.
 */
 function install_admin_stelle($mysqlKvwmapDb) {
-  $success = false;
   $filepath = LAYOUTPATH . 'db/mysql/data/mysql_install_admin.sql';
   $queryret = $mysqlKvwmapDb->exec_file($filepath, NULL, NULL);
   if ($queryret[0]) { 
     echo $queryret[1]; ?>
     Fehler beim Ausführen der Datei: <?php echo $filepath; ?><br><?php
+    return false;
   }
-  else { ?>
-    Daten zur Einrichtung der Stelle Administration erfolgreich eingelesen.<br>
-    Sie können sich jetzt mit folgenden Nutzerdaten bei kvwmap anmelden.<br>
-    Nutzername: kvwmap<br>
-    Passwort: kvwmap<br>
-    <br>
-    <a href="index.php">Login</a><?php
-    $success = true;
+  
+  $sql = "
+    UPDATE
+      user
+    SET
+      passwort = MD5('" . KVWMAP_INIT_PASSWORD . "')
+    WHERE
+      login_name = 'kvwmap'
+    ";
+  $ret = $mysqlKvwmapDb->execSQL($sql, 0, 1);
+  if ($ret[0]) { ?>
+    Fehler beim Einstellen des Passwortes für user <?php echo $mysqlKvwmapDb->user; ?> in der Datenbank <?php echo $mysqlKvwmapDb->dbName; ?><br><?php
+    return false;
   }
-  return $success;
+  
+  ?>Daten zur Einrichtung der Stelle Administration erfolgreich eingelesen.<br>
+  Sie können sich jetzt mit folgenden Nutzerdaten bei kvwmap anmelden.<br>
+  Nutzername: kvwmap<br>
+  Passwort: <?php echo KVWMAP_INIT_PASSWORD; ?><br>
+  <br>
+  <a href="index.php">Login</a><?php
+  return true;
 }
 
 function getMySQLVersion() {
