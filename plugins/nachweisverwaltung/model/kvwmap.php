@@ -112,6 +112,7 @@
 		    $GUI->formvars['columnname'] = $data_explosion[0];
 		    $select = $fromwhere = $GUI->mapDB->getSelectFromData($data);
 				# order by rausnehmen
+				$GUI->formvars['orderby'] = '';
 				$orderbyposition = strrpos(strtolower($select), 'order by');
 				$lastfromposition = strrpos(strtolower($select), 'from');
 				if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
@@ -673,6 +674,7 @@
 	    $GUI->formvars['columnname'] = $data_explosion[0];
 	    $select = $fromwhere = $GUI->mapDB->getSelectFromData($data);
 			# order by rausnehmen
+			$GUI->formvars['orderby'] = '';
 			$orderbyposition = strrpos(strtolower($select), 'order by');
 			$lastfromposition = strrpos(strtolower($select), 'from');
 			if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
@@ -938,6 +940,7 @@
 	    $GUI->formvars['columnname'] = $data_explosion[0];
 			$select = $fromwhere = $GUI->mapDB->getSelectFromData($data);
 			# order by rausnehmen
+			$GUI->formvars['orderby'] = '';
 			$orderbyposition = strrpos(strtolower($select), 'order by');
 			$lastfromposition = strrpos(strtolower($select), 'from');
 			if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
