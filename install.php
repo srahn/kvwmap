@@ -32,7 +32,12 @@
 error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
 $debug; $log_mysql; $log_postgres;
 output_header();
-install();
+if ($_REQUEST['go'] == 'Installation starten') {
+  install();
+}
+else {
+  settings();
+}
 output_footer();
 
 function output_header() { ?>
@@ -74,7 +79,7 @@ function install() {
   $mysqlRootDb = new database;
   $mysqlRootDb->host = MYSQL_HOST;
   $mysqlRootDb->user = 'root';
-  $mysqlRootDb->passwd = getenv('MYSQL_ENV_MYSQL_ROOT_PASSWORD');
+  $mysqlRootDb->passwd = MYSQL_ROOT_PASSWORD;
   $mysqlRootDb->dbName = 'mysql'; ?>
   Verbindungsdaten für Zugang zu MySQL root Nutzer wie folgt gesetzt:<br>
   Host: <?php echo $mysqlRootDb->host; ?><br>
@@ -86,7 +91,15 @@ function install() {
     MySQL-Server läuft, Verbindung zur Datenbank <?php echo $mysqlRootDb->dbName; ?> kann mit Nutzer <?php echo $mysqlRootDb->user; ?>@<?php echo $mysqlRootDb->host; ?> hergestellt werden!<br><?php
   }
   else { ?>
-    Es kann keine Verbindung zur Datenbank <?php echo $mysqlRootDb->dbName; ?> mit Nutzer <?php echo $mysqlRootDb->user; ?>@<?php echo $mysqlRootDb->host; ?> hergestellt werden.<br><?php
+    Es kann keine Verbindung zur MySQL Datenbank <?php echo $mysqlRootDb->dbName; ?> mit Nutzer <?php echo $mysqlRootDb->user; ?>@<?php echo $mysqlRootDb->host; ?> hergestellt werden.<br>
+    Das kann folgende Gründe haben:
+    <ul>
+      <li><b>MySQL ist noch nicht installiert:</b> => Installieren sie MySQL</li>
+      <li><b>Der MySQL server host ist nicht korrekt angegeben:</b> => Setzen Sie den richtigen hostnamen in der Datei config.php in der Konstante <b>MYSQL_HOST</b>. In Docker Containern muss der Name mysql oder mysql-server heißen, sonst in der Regel localhost oder 172.0.0.1. Nur wenn sich die Datenbank auf einem anderem Rechner befindet geben Sie hier die entsprechende IP oder den Rechnername an.</li>
+      <li><b>Das Passwort des Datenbanknutzers root ist nicht richtig gesetzt:</b> => Das Passwort kann in der Konstante <b>MYSQL_ROOT_PASSWORD</b> in der Datei config.php eingestellt werden. Nach der erfolgreichen Installation können sie diese Konstante löschen oder das Passwort auf ein Leerzeichen setzen.</li>
+    </ul>
+    <input type="button" value="Script neu starten" onclick="window.location.reload()">
+    <?php
     return false;
   } ?>
 
@@ -103,7 +116,7 @@ function install() {
   Verbindungsdaten für Zugang zu MySQL kvwmap Nutzer wie folgt gesetzt:<br>
   Host: <?php echo $mysqlKvwmapDb->host; ?><br>
   User: <?php echo $mysqlKvwmapDb->user; ?><br>
-  Password: <?php #echo $mysqlKvwmapDb->passwd; ?><br>
+  Password: <?php echo #$mysqlKvwmapDb->passwd; ?><br>
   Datenbankname: <?php echo $mysqlKvwmapDb->dbName; ?><br>
   Debugfilename: <?php echo $mysqlKvwmapDb->debug->filename; ?><br>
   Logfilename: <?php echo $mysqlKvwmapDb->logfile->name; ?><br><?php
@@ -113,7 +126,8 @@ function install() {
     $kvwmapdb_installed = true;
   }
   else { ?>
-    Es kann keine Verbindung zur kvwmap Datenbank <?php echo $mysqlKvwmapDb->dbName; ?> mit Nutzer <?php echo $mysqlKvwmapDb->user; ?>@<?php echo $mysqlKvwmapDb->host; ?> hergestellt werden.<br>
+    Die MySQL Datenbank <?php echo $mysqlKvwmapDb->dbName; ?> existiert nicht oder die Verbindung kann mit dem Nutzer <?php echo $mysqlKvwmapDb->user; ?>@<?php echo $mysqlKvwmapDb->host; ?> nicht hergestellt werden.<br>
+    
     <h1>Installiere kvwmap Datenbank auf MySQL-Server</h1><?php
     $kvwmapdb_installed = install_kvwmapdb($mysqlRootDb, $mysqlKvwmapDb);
   } ?>
@@ -126,7 +140,7 @@ function install() {
   $pgsqlPostgresDb = new pgdatabase();
   $pgsqlPostgresDb->host = POSTGRES_HOST;                        
   $pgsqlPostgresDb->user = 'postgres';                          
-  $pgsqlPostgresDb->passwd = getenv('PGSQL_ENV_POSTGRES_PASSWORD');                    
+  $pgsqlPostgresDb->passwd = POSTGRES_ROOT_PASSWORD;                    
   $pgsqlPostgresDb->dbName = 'postgres'; ?>
   Verbindungsdaten für Zugang zu PostgreSQL postgres Nutzer wie folgt gesetzt:<br>
   Host: <?php echo $pgsqlPostgresDb->host; ?><br>
@@ -138,7 +152,15 @@ function install() {
     PostgreSQL-Server läuft, Verbindung zur Datenbank <?php echo $pgsqlPostgresDb->dbName; ?> kann mit Nutzer: <?php echo $pgsqlPostgresDb->user; ?> host: <?php echo $pgsqlPostgresDb->host; ?> hergestellt werden!<br><?php
   }
   else { ?>
-    Es kann keine Verbindung zur PostgreSQL-Datenbank <?php echo $pgsqlPostgresDb->dbName; ?> mit Nutzer: <?php echo $pgsqlPostgresDb->user; ?> host: <?php echo $pgsqlPostgresDb->host; ?> hergestellt werden.<br><?php
+    Es kann keine Verbindung zur PostgreSQL Datenbank <?php echo $pgsqlPostgresDb->dbName; ?> mit Nutzer <?php echo $pgsqlPostgresDb->user; ?>@<?php echo $pgsqlPostgresDb->host; ?> hergestellt werden.<br>
+    Das kann folgende Gründe haben:
+    <ul>
+      <li><b>PostgreSQL ist noch nicht installiert:</b> => Installieren sie PostgreSQL</li>
+      <li><b>Der PostgreSQL server host ist nicht korrekt angegeben:</b> => Setzen Sie den richtigen hostnamen in der Datei config.php in der Konstante <b>POSTGRES_HOST</b>. In Docker Containern muss der Name pgsql oder pgsql-server heißen, sonst in der Regel localhost oder 172.0.0.1. Nur wenn sich die Datenbank auf einem anderem Rechner befindet geben Sie hier die entsprechende IP oder den Rechnername an.</li>
+      <li><b>Das Passwort des Datenbanknutzers postgres ist nicht richtig gesetzt:</b> => Das Passwort kann in der Konstante <b>POSTGRES_ROOT_PASSWORD</b> in der Datei config.php eingestellt werden. Nach der erfolgreichen Installation können sie diese Konstante löschen oder das Passwort auf ein Leerzeichen setzen.</li>
+    </ul>
+    <input type="button" value="Script neu starten" onclick="window.location.reload()">
+    <?php
     return false;
   } ?>
 
@@ -324,7 +346,7 @@ function kvwmapdb_exists($mysqlRootDb, $mysqlKvwmapDb) { ?>
 function install_kvwmapdb ($mysqlRootDb, $mysqlKvwmapDb) { ?>
   Erzeuge Nutzer: <?php echo $mysqlKvwmapDb->user; ?><br><?php
   $sql = "
-    CREATE USER '" . $mysqlKvwmapDb->user . "'@'172.17.%'
+    CREATE USER '" . $mysqlKvwmapDb->user . "'@'" . MYSQL_HOSTS_ALLOWED . "'
     IDENTIFIED BY '" . $mysqlKvwmapDb->passwd . "'
   ";
   $mysqlRootDb->execSQL($sql, 0, 1); ?>
@@ -341,7 +363,7 @@ function install_kvwmapdb ($mysqlRootDb, $mysqlKvwmapDb) { ?>
   $sql = "  
     GRANT ALL PRIVILEGES
     ON *.*
-    TO '" . $mysqlKvwmapDb->user . "'@'172.17.%'
+    TO '" . $mysqlKvwmapDb->user . "'@'" . MYSQL_HOSTS_ALLOWED . "'
     IDENTIFIED BY '" . $mysqlKvwmapDb->passwd . "';
   ";
   $ret = $mysqlRootDb->execSQL($sql, 0, 1);
@@ -360,7 +382,8 @@ function install_kvwmapdb ($mysqlRootDb, $mysqlKvwmapDb) { ?>
 */
 function postgres_exists($pgsqlPostgresDb) { ?>
   Prüfe ob Datenbank postgres schon existiert<br><?php
-  return @$pgsqlPostgresDb->open();
+  echo $pgsqlPostgresDb->host;
+  return $pgsqlPostgresDb->open();
 }
 
 /*
@@ -506,6 +529,16 @@ function getPHPVersion() {
 function getVersionFromText($text) {
   preg_match('@[0-9]+\.[0-9]+\.[0-9]+@', $text, $version);
   return $version[0];
+}
+
+function settings() { ?>
+  <h1>Installation von kvwmap</h1>
+  Mit diesem Script wird die Konfigurationsdatei config.php, die Datenbanknutzer sowie die MySQL Nutzerdatenbank kvwmap und die PostgreSQL Geo-Datenbank kvwmapsp angelegt.<br>
+  Die Einrichtung erfolgt mit den in config-default.php eingestellten Zugangsdaten. Die Passwörter können nachträglich in der Datei config.php geändert werden.<br><br>
+  <form method="POST" target="install.php">
+    <input type="submit" name="go" value="Installation starten">
+  </form>
+  <?php
 }
 
 function versionFormatter($version) {

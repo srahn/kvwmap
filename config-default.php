@@ -533,6 +533,8 @@ define('MYSQL_HOST', 'localhost');																	# Version 2.0
 define('MYSQL_USER', '');																						# Version 2.0
 define('MYSQL_PASSWORD', '');																				# Version 2.0
 define('MYSQL_DBNAME', $dbname);																		# Version 2.0
+define('MYSQL_ROOT_PASSWORD', getenv('MYSQL_ENV_MYSQL_ROOT_PASSWORD'));
+define('MYSQL_HOSTS_ALLOWED', '172.17.%');
 
 // $userDb=new database();																				# in Version 2.0 gelöscht
 // $userDb->host='localhost';																			# in Version 2.0 gelöscht
@@ -547,6 +549,7 @@ define('POSTGRES_HOST', 'localhost');																# Version 2.0
 define('POSTGRES_USER', '');																				# Version 2.0
 define('POSTGRES_PASSWORD', '');																		# Version 2.0
 define('POSTGRES_DBNAME', $pgdbname);																# Version 2.0
+define('POSTGRES_ROOT_PASSWORD', getenv('PGSQL_ENV_POSTGRES_PASSWORD'));
 	
 // if ($pgdbname!='') {																													# in Version 2.0 gelöscht
 	// if(in_array($_REQUEST['go'], $fast_loading_cases)){		# Version 1.7.6			# in Version 2.0 gelöscht
