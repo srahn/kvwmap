@@ -235,7 +235,7 @@ class antrag {
     $options['cols']['KVZ']=array('justification'=>'centre');
     $options['cols']['GN']=array('justification'=>'centre');
     $options['cols']['andere']=array('justification'=>'centre');
-    $options['cols']['Datum']=array('justification'=>'left');
+    $options['cols']['Datum']=array('justification'=>'left','width'=>75);
 		$options['cols']['Datei']=array('justification'=>'left','width'=>200);
     $options['cols']['gemessen durch']=array('justification'=>'left');
     $options['cols'][utf8_decode('Gültigkeit')]=array('justification'=>'centre','width'=>60);
@@ -347,6 +347,7 @@ class antrag {
 		if($this->stelle_id == '')$sql.=" AND stelle_id IS NULL";
 		else $sql.=" AND stelle_id=".$this->stelle_id;
     if($formvars['order'] != '')$sql.=" ORDER BY ".$formvars['order'];
+		if(NACHWEIS_SECONDARY_ATTRIBUTE != '' AND $formvars['order'] == NACHWEIS_PRIMARY_ATTRIBUTE)$sql.=", ".NACHWEIS_SECONDARY_ATTRIBUTE;
     #echo $sql;
     $ret=$this->database->execSQL($sql,4, 0);    
     if ($ret[0]) { return $ret[1]; }
@@ -403,10 +404,9 @@ class antrag {
       
     	# Abfrage der Dateinamen im Vorgang
       if($formvars['Datei']){
-	      $ret=$this->getDatei($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]);
+	      $ret=$this->getDatei($rs['flurid'],$rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE], $withFileLinks);
 	      if ($ret[0]) { return $ret; }
-				if($withFileLinks)$FFR[$i]['Datei'] = '<c:alink:'.basename($ret[1]).'>'.basename($ret[1]).'</c:alink>';
-				else $FFR[$i]['Datei'] = basename($ret[1]);
+				$FFR[$i]['Datei'] = $ret[1];
       }
 
       # Abfrage der Vermessungsstellen im Vorgang
@@ -433,7 +433,7 @@ class antrag {
   function getDatum($flurid,$nr,$secondary) {
     $this->debug->write('<br>nachweis.php getDatum Abfragen der Datum zu einem Vorgang in der Nachweisführung.',4);
     # Abfragen der Datum zu einem Vorgang in der Nachweisführung
-    $sql.="SELECT DISTINCT n.datum FROM nachweisverwaltung.n_nachweise AS n";		
+    $sql.="SELECT n.datum FROM nachweisverwaltung.n_nachweise AS n";		
 		if ($this->nr!='') {
       $sql.=",nachweisverwaltung.n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
     }
@@ -442,6 +442,7 @@ class antrag {
     }
     $sql.=" AND n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
     if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
+		$sql.= "order by datum";
     $ret=$this->database->execSQL($sql,4, 0);
     if (!$ret[0]) {
       $rs=pg_fetch_array($ret[1]);
@@ -454,10 +455,10 @@ class antrag {
     return $ret;  
   }
   
-	function getDatei($flurid,$nr,$secondary) {
+	function getDatei($flurid,$nr,$secondary, $withFileLinks) {
     $this->debug->write('<br>nachweis.php getDatei Abfragen der Dateien zu einem Vorgang in der Nachweisführung.',4);
     # Abfragen der Datum zu einem Vorgang in der Nachweisführung
-    $sql.="SELECT DISTINCT n.link_datei FROM nachweisverwaltung.n_nachweise AS n";
+    $sql.="SELECT n.link_datei FROM nachweisverwaltung.n_nachweise AS n";
     if ($this->nr!='') {
       $sql.=",nachweisverwaltung.n_nachweise2antraege AS n2a WHERE n.id=n2a.nachweis_id AND n2a.antrag_id='".$this->nr."'";
     }
@@ -466,12 +467,15 @@ class antrag {
     }
     $sql.=" AND n.flurid=".$flurid." AND n.".NACHWEIS_PRIMARY_ATTRIBUTE."='".$nr."'";
     if($secondary != '')$sql.=" AND n.".NACHWEIS_SECONDARY_ATTRIBUTE."='".$secondary."'";
+		$sql.= "order by datum";
     $ret=$this->database->execSQL($sql,4, 0);
     if (!$ret[0]) {
       $rs=pg_fetch_array($ret[1]);
-      $datei=$rs['link_datei'];  
+      if($withFileLinks)$datei= '<c:alink:'.basename($rs['link_datei']).'>'.basename($rs['link_datei']).'</c:alink>';
+			else $datei= basename($rs['link_datei']);
       while($rs=pg_fetch_array($ret[1])) {
-        $datei.=', '.$rs['link_datei'];
+				if($withFileLinks)$datei.=', <c:alink:'.basename($rs['link_datei']).'>'.basename($rs['link_datei']).'</c:alink>';
+        else $datei.=', '.basename($rs['link_datei']);
       }
       $ret[1]=$datei;
     }     
