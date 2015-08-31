@@ -118,7 +118,7 @@ function install() {
   Verbindungsdaten für Zugang zu MySQL kvwmap Nutzer wie folgt gesetzt:<br>
   Host: <?php echo $mysqlKvwmapDb->host; ?><br>
   User: <?php echo $mysqlKvwmapDb->user; ?><br>
-  Password: <?php echo #$mysqlKvwmapDb->passwd; ?><br>
+  Password: <?php #echo $mysqlKvwmapDb->passwd; ?><br>
   Datenbankname: <?php echo $mysqlKvwmapDb->dbName; ?><br>
   Debugfilename: <?php echo $mysqlKvwmapDb->debug->filename; ?><br>
   Logfilename: <?php echo $mysqlKvwmapDb->logfile->name; ?><br><?php
