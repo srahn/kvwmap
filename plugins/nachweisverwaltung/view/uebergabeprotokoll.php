@@ -16,7 +16,7 @@ function create_protocol(){
 -->
 </SCRIPT>
 
-<table width="1100px" border="0" cellpadding="5" cellspacing="0">
+<table width="1200px" border="0" cellpadding="5" cellspacing="0">
 	<tr><td></td></tr>
   <tr> 
     <td align="center" bgcolor="<?php echo BG_FORM ?>"><h2><?php echo $this->titel; ?></h2></td>
@@ -42,7 +42,7 @@ function create_protocol(){
           <td width="45px" <? if($this->formvars['GN'] != 1) echo 'bgcolor="#EBEBEB"'; ?>><span class="fett">GN</span><input type="checkbox" onchange="document.GUI.submit();" value="1" name="GN" <? if($this->formvars['GN'] == 1)echo 'checked=true;'; ?>></td>
           <td width="70px" <? if($this->formvars['andere'] != 1) echo 'bgcolor="#EBEBEB"'; ?>><span class="fett">andere</span><input type="checkbox" onchange="document.GUI.submit();" value="1" name="andere" <? if($this->formvars['andere'] == 1)echo 'checked=true;'; ?>></td>
           <td width="60px" <? if($this->formvars['Datum'] != 1) echo 'bgcolor="#EBEBEB"'; ?>><span class="fett">Datum</span><input type="checkbox" onchange="document.GUI.submit();" value="1" name="Datum" <? if($this->formvars['Datum'] == 1)echo 'checked=true;'; ?>></td>
-          <td width="55px" <? if($this->formvars['Datei'] != 1) echo 'bgcolor="#EBEBEB"'; ?>><span class="fett">Datei</span><input type="checkbox" onchange="document.GUI.submit();" value="1" name="Datei" <? if($this->formvars['Datei'] == 1)echo 'checked=true;'; ?>></td>
+          <td width="250px" <? if($this->formvars['Datei'] != 1) echo 'bgcolor="#EBEBEB"'; ?>><span class="fett">Datei</span><input type="checkbox" onchange="document.GUI.submit();" value="1" name="Datei" <? if($this->formvars['Datei'] == 1)echo 'checked=true;'; ?>></td>
           <td width="130px" <? if($this->formvars['gemessendurch'] != 1) echo 'bgcolor="#EBEBEB"'; ?>><span class="fett">gemessen durch</span><input type="checkbox" onchange="document.GUI.submit();" value="1" name="gemessendurch" <? if($this->formvars['gemessendurch'] == 1)echo 'checked=true;'; ?>></td>
 		  <td width="85px" <? if($this->formvars['Gueltigkeit'] != 1) echo 'bgcolor="#EBEBEB"'; ?>><span class="fett">Gültigkeit</span><input type="checkbox" onchange="document.GUI.submit();" value="1" name="Gueltigkeit" <? if($this->formvars['Gueltigkeit'] == 1)echo 'checked=true;'; ?>></td>
         </tr>
