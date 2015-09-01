@@ -1263,19 +1263,43 @@ function mouseup(evt){
 		top.currentform.last_doing.value = "subtract_geom";
 	};
 
+	// function buildwktlinefromsvgpath(svgpath){
+		// if(svgpath != ""){
+			// var koords;
+			// wkt = "LINESTRING(";
+			// coord = svgpath.split(" ");
+			// wkt = wkt+coord[1]+" "+coord[2];	// ohne M
+			// for(var i = 3; i < coord.length-1; i++){
+				// if(coord[i] != ""){
+					// wkt = wkt+","+coord[i]+" "+coord[i+1];
+				// }
+				// i++;
+			// }
+			// wkt = wkt+")";
+			// return wkt;
+		// }
+		// else{
+			// return "";
+		// }
+	// }
+	
 	function buildwktlinefromsvgpath(svgpath){
 		if(svgpath != ""){
-			var koords;
-			wkt = "LINESTRING(";
-			coord = svgpath.split(" ");
-			wkt = wkt+coord[1]+" "+coord[2];	// ohne M
-			for(var i = 3; i < coord.length-1; i++){
-				if(coord[i] != ""){
-					wkt = wkt+","+coord[i]+" "+coord[i+1];
+			var koords;			
+			var wkt = "";
+			linestrings = svgpath.split("M ");
+			for(var k = 1; k < linestrings.length; k++){
+				if(k > 1)wkt = wkt+"),(";
+				coord = linestrings[k].split(" ");
+				wkt = wkt+coord[0]+" "+coord[1];
+				for(var i = 2; i < coord.length; i=i+2){
+					if(coord[i] != ""){
+						wkt = wkt+","+coord[i]+" "+coord[i+1];
+					}
 				}
-				i++;
 			}
-			wkt = wkt+")";
+			if(linestrings.length > 2)wkt = "MULTILINESTRING(("+wkt+"))";
+			else wkt = "LINESTRING("+wkt+")";
 			return wkt;
 		}
 		else{
@@ -1502,64 +1526,18 @@ function mouseup(evt){
 			svg_path = top.currentform.newpath.value+"";
 			components = svg_path.split(" ");
 			if(components.length > 6){			// nur loeschen, wenn mindestens 3 Eckpunkte uebrig
-				components[parseInt(vertex_id[1])] = "";
-		  	components[parseInt(vertex_id[1])+1] = "";
-				if(components[parseInt(vertex_id[1])-1] == "M" && ( components[parseInt(vertex_id[1])+4] == "M" || components.length < parseInt(vertex_id[1])+7 )){
-					components[parseInt(vertex_id[1])-1] = "";
-					components[parseInt(vertex_id[1])+2] = "";
-					components[parseInt(vertex_id[1])+3] = "";
+				components.splice(parseInt(vertex_id[1]), 2);
+				if(components[parseInt(vertex_id[1])-1] == "M" && ( components[parseInt(vertex_id[1])+2] == "M" || components[parseInt(vertex_id[1])+2] == undefined)){
+					components.splice(parseInt(vertex_id[1]-1), 3);			// in diesem Fall hat der Teil-Linestring nur 2 Eckpunkte und wird komplett entfernt
 				}
-				new_svg_path = "M";
-				for(i = 1; i < components.length; i++){
-					if(components[i] != ""){
-						new_svg_path = new_svg_path + " " + components[i];
-					}
+				if(components[parseInt(vertex_id[1])-3] == "M" && ( components[parseInt(vertex_id[1])] == "M" || components[parseInt(vertex_id[1])] == undefined)){
+					components.splice(parseInt(vertex_id[1]-3), 3);			// in diesem Fall hat der Teil-Linestring nur 2 Eckpunkte und wird komplett entfernt
 				}
+				new_svg_path = components.join(" ");
 				top.currentform.newpath.value = new_svg_path;
 	
-				if(top.currentform.newpathwkt.value != ""){			// wenn ein WKT-String da ist, hier auch den Vertex loeschen
-					wktarray = get_array_from_wktstring(top.currentform.newpathwkt.value);
-					wktarray.splice(parseInt(vertex_id[1]), 2);
-					// wenn vertex nur noch einen Nachbarvertex hat, auch diesen und das "),(" loeschen
-					if(( wktarray[parseInt(vertex_id[1])-3] == "),(" || wktarray[parseInt(vertex_id[1])-3] == "MULTILINESTRING((" ) && ( wktarray[parseInt(vertex_id[1])+2] == "),(" || wktarray[parseInt(vertex_id[1])+2] == "))")){
-						if(wktarray[parseInt(vertex_id[1])-3] == "MULTILINESTRING(("){
-							wktarray.splice(parseInt(vertex_id[1])-2, 5);
-						}
-						else{
-							wktarray.splice(parseInt(vertex_id[1])-3, 5);
-						}
-					}
-					if(( wktarray[parseInt(vertex_id[1])-1] == "),(" || wktarray[parseInt(vertex_id[1])-1] == "MULTILINESTRING((" ) && ( wktarray[parseInt(vertex_id[1])+4] == "),(" || wktarray[parseInt(vertex_id[1])+4] == "))" )){
-						if(wktarray[parseInt(vertex_id[1])-1] == "MULTILINESTRING(("){
-							wktarray.splice(parseInt(vertex_id[1]), 5);
-						}
-						else{
-							wktarray.splice(parseInt(vertex_id[1])-1, 5);
-						}
-					}
-					wktstring = "";
-					komma = 1;
-					for(i = 0; i < wktarray.length; i++){
-						if(wktarray[i] != ""){
-							wktstring = wktstring + wktarray[i];
-							if(i > 0 && wktarray[i].lastIndexOf(")") == -1 && wktarray[i+1].lastIndexOf(")") == -1){		// Kommas einfuegen
-								if(komma == 2){
-									wktstring = wktstring + ",";
-									komma = 1;
-								}
-								else{
-									if(komma == 1){
-										wktstring = wktstring + " ";
-										komma = 2;
-									}
-								}
-							}
-							else{
-								komma = 1;
-							}
-						}
-					}
-					top.currentform.newpathwkt.value = wktstring;
+				if(top.currentform.newpathwkt.value != ""){			// wenn ein WKT-String da ist, diesen neu aus dem SVG erstellen
+					top.currentform.newpathwkt.value = buildwktlinefromsvgpath(new_svg_path);
 				}
 				remove_vertices();													// alle entfernen
 				remove_in_between_vertices();
@@ -2208,11 +2186,10 @@ function mouseup(evt){
 			svg_path = top.currentform.newpath.value+"";
 			components = svg_path.split(" ");
 			if(components.length > 10){			// nur loeschen, wenn mindestens 4 Eckpunkte uebrig
-				components[parseInt(vertex_id[1])] = \'\';
-		  	components[parseInt(vertex_id[1])+1] = \'\';
+				components.splice(parseInt(vertex_id[1]), 2);
 				if(vertex_id[2] != ""){			// Anfangs und Endpunkt
-					components[parseInt(vertex_id[2])] = components[parseInt(vertex_id[1])+2];
-		  		components[parseInt(vertex_id[2])+1] = components[parseInt(vertex_id[1])+3];
+					components[parseInt(vertex_id[2])-2] = components[parseInt(vertex_id[1])];
+		  		components[parseInt(vertex_id[2])-1] = components[parseInt(vertex_id[1])+1];
 				}
 				new_svg_path = "M";
 				for(i = 1; i < components.length; i++){
@@ -2226,8 +2203,8 @@ function mouseup(evt){
 					wktarray = get_array_from_wktstring(top.currentform.newpathwkt.value);
 					wktarray.splice(parseInt(vertex_id[1]), 2);
 					if(vertex_id[2] != ""){			// Anfangs und Endpunkt
-						wktarray[parseInt(vertex_id[2])] = wktarray[parseInt(vertex_id[1])+2];
-						wktarray[parseInt(vertex_id[2])+1] = wktarray[parseInt(vertex_id[1])+3];
+						wktarray[parseInt(vertex_id[2])-2] = wktarray[parseInt(vertex_id[1])];
+						wktarray[parseInt(vertex_id[2])-1] = wktarray[parseInt(vertex_id[1])+1];
 					}
 					wktstring = "";
 					komma = 1;
