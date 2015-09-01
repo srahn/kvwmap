@@ -28,7 +28,7 @@ function Bestaetigung(link,text) {
 		   <? for($i=0;$i<count($this->stellen['user'][$s]['ID']);$i++) { ?>
 		      <tr>
 		      	<? if($i == 0){ ?><td align="center" rowspan="<? echo count($this->stellen['user'][$s]['ID']); ?>" style="border-right:1px solid <?php echo BG_DEFAULT ?>" width="200"><? echo count($this->stellen['user'][$s]['ID']).' Nutzer'; ?></td><? } ?>
-		        <td style="border-right:1px solid <?php echo BG_DEFAULT ?>; border-bottom:1px solid <?php echo BG_DEFAULT ?>"><? echo $this->stellen['user'][$s]['Bezeichnung'][$i]; ?></td>
+						<td style="border-right:1px solid <?php echo BG_DEFAULT ?>; border-bottom:1px solid <?php echo BG_DEFAULT ?>"><a href="index.php?go=Benutzerdaten_Formular&selected_user_id=<? echo $this->stellen['user'][$s]['ID'][$i]; ?>"><? echo $this->stellen['user'][$s]['Bezeichnung'][$i]; ?></a></td>
 		      </tr>
 		   <? } ?>
 		      <tr>
@@ -45,7 +45,7 @@ function Bestaetigung(link,text) {
 	   		for($i = 0; $i < count($this->unassigned_users['ID']); $i++){ ?>
 	      <tr>
 	      	<? if($i == 0){ ?><td align="center" rowspan="<? echo count($this->unassigned_users['ID']); ?>" style="border-right:1px solid <?php echo BG_DEFAULT ?>" width="200"><? echo count($this->unassigned_users['ID']).' Nutzer'; ?></td><? } ?>
-	      	<td style="border-right:1px solid <?php echo BG_DEFAULT ?>; border-bottom:1px solid <?php echo BG_DEFAULT ?>"><? echo $this->unassigned_users['Bezeichnung'][$i]; ?></td>
+					<td style="border-right:1px solid <?php echo BG_DEFAULT ?>; border-bottom:1px solid <?php echo BG_DEFAULT ?>"><a href="index.php?go=Benutzerdaten_Formular&selected_user_id=<? echo $this->unassigned_users['ID'][$i]; ?>"><? echo $this->unassigned_users['Bezeichnung'][$i]; ?></a></td>
 	      </tr>
 	   <? } if($this->expired_users['ID']){ ?>
 				<tr>
@@ -55,7 +55,7 @@ function Bestaetigung(link,text) {
 				for($i = 0; $i < count($this->expired_users['ID']); $i++){ ?>
 				<tr>
 					<? if($i == 0){ ?><td align="center" rowspan="<? echo count($this->expired_users['ID']); ?>" style="border-right:1px solid <?php echo BG_DEFAULT ?>" width="200"><? echo count($this->expired_users['ID']).' Nutzer'; ?></td><? } ?>
-					<td style="border-right:1px solid <?php echo BG_DEFAULT ?>; border-bottom:1px solid <?php echo BG_DEFAULT ?>"><? echo $this->expired_users['Bezeichnung'][$i]; ?></td>
+					<td style="border-right:1px solid <?php echo BG_DEFAULT ?>; border-bottom:1px solid <?php echo BG_DEFAULT ?>"><a href="index.php?go=Benutzerdaten_Formular&selected_user_id=<? echo $this->expired_users['ID'][$i]; ?>"><? echo $this->expired_users['Bezeichnung'][$i]; ?></a></td>
 				</tr>
 		 <? } if($this->user_count){ ?>
 	   		<tr>

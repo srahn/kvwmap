@@ -10,7 +10,7 @@ function Bestaetigung(link,text) {
 }
 </script>
 <a name="oben"></a>
-<table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
+<table width="1000" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
     <td><h2><?php echo $strTitle; ?></h2></td>
   </tr>
@@ -88,7 +88,7 @@ function Bestaetigung(link,text) {
         <td>&nbsp;</td>
         <td><?php echo $this->userdaten[$i]['ID']; ?>&nbsp;&nbsp;</td>
         <td><?php echo $this->userdaten[$i]['Namenszusatz'].' '; ?><?php echo $this->userdaten[$i]['Name']; ?>,&nbsp;<?php echo $this->userdaten[$i]['Vorname']; ?></td>
-				<td><? if($this->userdaten[$i]['stop'] != '0000-00-00') echo $this->userdaten[$i]['start'].'&nbsp;-&nbsp;'.$this->userdaten[$i]['stop']; ?>&nbsp;</td>
+				<td><? if($this->userdaten[$i]['stop'] != '0000-00-00') echo $this->userdaten[$i]['start'].'&nbsp;- '.$this->userdaten[$i]['stop']; ?>&nbsp;</td>
         <td><?php echo $this->userdaten[$i]['phon']; ?>&nbsp;</td>
         <td><?php echo $this->userdaten[$i]['email']; ?>&nbsp;</td>
         <td><a href="index.php?go=Benutzerdaten_Formular&selected_user_id=<?php echo $this->userdaten[$i]['ID']; ?>"><?php echo $this->strChange; ?></a></td>

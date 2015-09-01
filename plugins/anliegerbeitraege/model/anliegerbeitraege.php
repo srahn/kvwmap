@@ -58,7 +58,7 @@ class anliegerbeitraege {
     $ret = $this->database->execSQL($sql, 4, 0);
     $valid = pg_fetch_array($ret[1]);
     if($valid[0] == 't'){
-      $sql = "INSERT INTO anliegerbeitraege_strassen (the_geom)";
+      $sql = "INSERT INTO anliegerbeitraege.anliegerbeitraege_strassen (the_geom)";
       $sql.= " VALUES(st_transform(st_geometryfromtext('".$umring."', ".$this->clientepsg."), ".$this->layerepsg."))";
       $ret = $this->database->execSQL($sql, 4, 1);
       if ($ret[0]) {
@@ -79,9 +79,9 @@ class anliegerbeitraege {
     $ret = $this->database->execSQL($sql, 4, 0);
     $valid = pg_fetch_array($ret[1]);
     if($valid[0] == 't'){
-      $sql = "INSERT INTO anliegerbeitraege_bereiche (the_geom, flaeche) select * from (select st_Intersection(st_transform(st_geometryfromtext('".$umring."', ".$this->clientepsg."), ".$this->layerepsg."),alk.the_geom) as bereich, round(st_area_utm(st_Intersection(st_transform(st_geometryfromtext('".$umring."', ".$this->clientepsg."), ".$this->layerepsg."),alk.the_geom), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.") ::numeric, 2) as flaeche ";
-      $sql.= "from alkobj_e_fla as alk, alknflst "; 
-      $sql.= "where st_transform(st_geometryfromtext('".$umring."', ".$this->clientepsg."), ".$this->layerepsg.") && alk.the_geom AND alknflst.objnr = alk.objnr) as foo ";
+      $sql = "INSERT INTO anliegerbeitraege.anliegerbeitraege_bereiche (the_geom, flaeche) select * from (select bereich, round(st_area_utm(bereich, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.") ::numeric, 2) as flaeche  from (select st_transform(st_Intersection(st_transform(st_geometryfromtext('".$umring."', ".$this->clientepsg."), ".EPSGCODE_ALKIS."),f.wkb_geometry), ".$this->layerepsg.") as bereich ";
+      $sql.= "from alkis.ax_flurstueck as f "; 
+      $sql.= "where st_transform(st_geometryfromtext('".$umring."', ".$this->clientepsg."), ".EPSGCODE_ALKIS.") && f.wkb_geometry) as foo ) as foofoo ";
       $sql.= "WHERE flaeche > 0 ";
       $sql.= "AND (GeometryType(bereich) = 'POLYGON' OR GeometryType(bereich) = 'MULTIPOLYGON')";
       $ret = $this->database->execSQL($sql, 4, 1);
