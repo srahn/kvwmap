@@ -1258,7 +1258,11 @@ function add_vertex(evt){
 		pathx.push(vertex.getAttribute("cx"));
 		pathy.push(vertex.getAttribute("cy"));
 		pathx_world.push(parseFloat(vertex.getAttribute("x")));
-		pathy_world.push(parseFloat(vertex.getAttribute("y")));
+		pathy_world.push(parseFloat(vertex.getAttribute("y")));		
+		if(new_distance > 0){
+			measured_distance = new_distance;
+			showMeasurement(evt);
+		}
 	  redrawPL();
 		vertex.setAttribute("opacity", "0.8");
 	}
