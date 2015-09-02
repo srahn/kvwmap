@@ -200,13 +200,12 @@ class ALB {
       $flst = new flurstueck($flurstkennz,$this->database);
       $flst->readALB_Data($flurstkennz);
 			$flst->Grundbuecher=$flst->getGrundbuecher();
-			$ratio = $flst->ALB_Flaeche/$flst->Klassifizierung[0]['flstflaeche'];
 			$emzges_222 = 0; $emzges_223 = 0;
 			$flaeche_222 = 0; $flaeche_223 = 0;
 			$limit = count($flst->Klassifizierung)+2;
       for($kl = 0; $kl < $limit; $kl++){
 				if($kl == $limit-2){              
-					$nichtgeschaetzt=round($flst->ALB_Flaeche-$flaeche_222-$flaeche_223);
+					$nichtgeschaetzt=$flst->Klassifizierung['nicht_geschaetzt'];
 					if($nichtgeschaetzt <= 0)continue;
 				}
 	      if($formvars['flurstkennz']){ $csv .= $flst->FlurstKennz.';';}
@@ -265,7 +264,6 @@ class ALB {
 				$wert=$flst->Klassifizierung[$kl]['wert'];
 				if($wert != ''){
 					$csv .= '"';
-					$flst->Klassifizierung[$kl]['flaeche'] = $flst->Klassifizierung[$kl]['flaeche'] * $ratio;
 					$emz = round($flst->Klassifizierung[$kl]['flaeche'] * $wert / 100);
 					if($flst->Klassifizierung[$kl]['objart'] == 1000){
 						$emzges_222 = $emzges_222 + $emz;
@@ -537,26 +535,26 @@ class ALB {
 				      }
             if($formvars['klassifizierung']){
 							$csv .= '"';
-							$ratio = $flst->ALB_Flaeche/$flst->Klassifizierung[0]['flstflaeche'];
 							$emzges_222 = 0; $emzges_223 = 0;
 							$flaeche_222 = 0; $flaeche_223 = 0;
 							for($j = 0; $j < count($flst->Klassifizierung); $j++){
-								$wert=$flst->Klassifizierung[$j]['wert'];
-								$flst->Klassifizierung[$j]['flaeche'] = $flst->Klassifizierung[$j]['flaeche'] * $ratio;
-								$emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
-								if($flst->Klassifizierung[$j]['objart'] == 1000){
-									$emzges_222 = $emzges_222 + $emz;
-									$flaeche_222 = $flaeche_222 + $flst->Klassifizierung[$j]['flaeche'];
+								if($flst->Klassifizierung[$j]['flaeche'] != ''){
+									$wert=$flst->Klassifizierung[$j]['wert'];
+									$emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
+									if($flst->Klassifizierung[$j]['objart'] == 1000){
+										$emzges_222 = $emzges_222 + $emz;
+										$flaeche_222 = $flaeche_222 + $flst->Klassifizierung[$j]['flaeche'];
+									}
+									if($flst->Klassifizierung[$j]['objart'] == 3000){
+										$emzges_223 = $emzges_223 + $emz;
+										$flaeche_223 = $flaeche_223 + $flst->Klassifizierung[$j]['flaeche'];
+									}
+									$csv .= utf8_encode(round($flst->Klassifizierung[$j]['flaeche']).' m² ');
+									$csv .= $flst->Klassifizierung[$j]['label'];
+									$csv .= ' EMZ: '.$emz." \n";
 								}
-								if($flst->Klassifizierung[$j]['objart'] == 3000){
-									$emzges_223 = $emzges_223 + $emz;
-									$flaeche_223 = $flaeche_223 + $flst->Klassifizierung[$j]['flaeche'];
-								}
-								$csv .= utf8_encode(round($flst->Klassifizierung[$j]['flaeche']).' m² ');
-								$csv .= $flst->Klassifizierung[$j]['label'];
-								$csv .= ' EMZ: '.$emz." \n";
 							}
-							$nichtgeschaetzt=round($flst->ALB_Flaeche-$flaeche_222-$flaeche_223);
+							$nichtgeschaetzt=$flst->Klassifizierung['nicht_geschaetzt'];
 							if($nichtgeschaetzt > 0){
 								$csv .= utf8_encode('nicht geschätzt: '.$nichtgeschaetzt." m² \n");
 							}
@@ -765,26 +763,26 @@ class ALB {
 	      }
 			if($formvars['klassifizierung']){
 				$csv .= '"';
-				$ratio = $flst->ALB_Flaeche/$flst->Klassifizierung[0]['flstflaeche'];
 				$emzges_222 = 0; $emzges_223 = 0;
 				$flaeche_222 = 0; $flaeche_223 = 0;
 				for($j = 0; $j < count($flst->Klassifizierung); $j++){
-					$wert=$flst->Klassifizierung[$j]['wert'];
-					$flst->Klassifizierung[$j]['flaeche'] = $flst->Klassifizierung[$j]['flaeche'] * $ratio;
-					$emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
-					if($flst->Klassifizierung[$j]['objart'] == 1000){
-						$emzges_222 = $emzges_222 + $emz;
-						$flaeche_222 = $flaeche_222 + $flst->Klassifizierung[$j]['flaeche'];
+					if($flst->Klassifizierung[$j]['flaeche'] != ''){
+						$wert=$flst->Klassifizierung[$j]['wert'];
+						$emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
+						if($flst->Klassifizierung[$j]['objart'] == 1000){
+							$emzges_222 = $emzges_222 + $emz;
+							$flaeche_222 = $flaeche_222 + $flst->Klassifizierung[$j]['flaeche'];
+						}
+						if($flst->Klassifizierung[$j]['objart'] == 3000){
+							$emzges_223 = $emzges_223 + $emz;
+							$flaeche_223 = $flaeche_223 + $flst->Klassifizierung[$j]['flaeche'];
+						}
+						$csv .= utf8_encode(round($flst->Klassifizierung[$j]['flaeche']).' m² ');
+						$csv .= $flst->Klassifizierung[$j]['label'];
+						$csv .= ' EMZ: '.$emz." \n";
 					}
-					if($flst->Klassifizierung[$j]['objart'] == 3000){
-						$emzges_223 = $emzges_223 + $emz;
-						$flaeche_223 = $flaeche_223 + $flst->Klassifizierung[$j]['flaeche'];
-					}
-					$csv .= utf8_encode(round($flst->Klassifizierung[$j]['flaeche']).' m² ');
-					$csv .= $flst->Klassifizierung[$j]['label'];
-					$csv .= ' EMZ: '.$emz." \n";
 				}
-				$nichtgeschaetzt=round($flst->ALB_Flaeche-$flaeche_222-$flaeche_223);
+				$nichtgeschaetzt=$flst->Klassifizierung['nicht_geschaetzt'];
 				if($nichtgeschaetzt > 0){
 					$csv .= utf8_encode('nicht geschätzt: '.$nichtgeschaetzt." m² \n");
 				}
@@ -1020,26 +1018,26 @@ class ALB {
       }
       if($formvars['klassifizierung']){
 				$csv .= '"';
-				$ratio = $flst->ALB_Flaeche/$flst->Klassifizierung[0]['flstflaeche'];
 				$emzges_222 = 0; $emzges_223 = 0;
 				$flaeche_222 = 0; $flaeche_223 = 0;
 				for($j = 0; $j < count($flst->Klassifizierung); $j++){
-					$wert=$flst->Klassifizierung[$j]['wert'];
-					$flst->Klassifizierung[$j]['flaeche'] = $flst->Klassifizierung[$j]['flaeche'] * $ratio;
-					$emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
-					if($flst->Klassifizierung[$j]['objart'] == 1000){
-						$emzges_222 = $emzges_222 + $emz;
-						$flaeche_222 = $flaeche_222 + $flst->Klassifizierung[$j]['flaeche'];
+					if($flst->Klassifizierung[$j]['flaeche'] != ''){
+						$wert=$flst->Klassifizierung[$j]['wert'];
+						$emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
+						if($flst->Klassifizierung[$j]['objart'] == 1000){
+							$emzges_222 = $emzges_222 + $emz;
+							$flaeche_222 = $flaeche_222 + $flst->Klassifizierung[$j]['flaeche'];
+						}
+						if($flst->Klassifizierung[$j]['objart'] == 3000){
+							$emzges_223 = $emzges_223 + $emz;
+							$flaeche_223 = $flaeche_223 + $flst->Klassifizierung[$j]['flaeche'];
+						}
+						$csv .= utf8_encode(round($flst->Klassifizierung[$j]['flaeche']).' m² ');
+						$csv .= $flst->Klassifizierung[$j]['label'];
+						$csv .= ' EMZ: '.$emz." \n";
 					}
-					if($flst->Klassifizierung[$j]['objart'] == 3000){
-						$emzges_223 = $emzges_223 + $emz;
-						$flaeche_223 = $flaeche_223 + $flst->Klassifizierung[$j]['flaeche'];
-					}
-					$csv .= utf8_encode(round($flst->Klassifizierung[$j]['flaeche']).' m² ');
-					$csv .= $flst->Klassifizierung[$j]['label'];
-					$csv .= ' EMZ: '.$emz." \n";
 				}
-				$nichtgeschaetzt=round($flst->ALB_Flaeche-$flaeche_222-$flaeche_223);
+				$nichtgeschaetzt=$flst->Klassifizierung['nicht_geschaetzt'];
 				if($nichtgeschaetzt > 0){
 					$csv .= utf8_encode('nicht geschätzt: '.$nichtgeschaetzt." m² \n");
 				}
@@ -1421,47 +1419,47 @@ class ALB {
           # Gesetzliche Klassifizierung
 					if($flst->Klassifizierung[0]['wert'] != ''){
 						$pdf->addText($col0,$row-=24,$fontSize, 'gesetzl. Klassifizierung Bodenschätzung');
-						$ratio = $flst->ALB_Flaeche/$flst->Klassifizierung[0]['flstflaeche'];
 						$emzges_a = 0; $emzges_gr = 0; $emzges_agr = 0; $emzges_gra = 0;
 						$flaeche_a = 0; $flaeche_gr = 0; $flaeche_agr = 0; $flaeche_gra = 0;
 						for($j = 0; $j < count($flst->Klassifizierung); $j++){
-		        	if($row<120) {
-								# Seitenumbruch
-								$seite++;
-								# aktuelle Seite abschließen
-								$pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
-								# neue Seite beginnen
-								$pageid=$pdf->newPage();
-								$pagecount[$f] = $pagecount[$f] + 1;
-								if ($wasserzeichen) {
-									$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
+							if($flst->Klassifizierung[$j]['flaeche'] != ''){
+								if($row<120) {
+									# Seitenumbruch
+									$seite++;
+									# aktuelle Seite abschließen
+									$pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
+									# neue Seite beginnen
+									$pageid=$pdf->newPage();
+									$pagecount[$f] = $pagecount[$f] + 1;
+									if ($wasserzeichen) {
+										$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
+									}
+									$row=825; # 812 -> 825 2007-04-02 Schmidt
+									$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 								}
-								$row=825; # 812 -> 825 2007-04-02 Schmidt
-								$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+								$wert=$flst->Klassifizierung[$j]['wert'];
+								$emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
+								if($flst->Klassifizierung[$j]['objart'] == 1000){
+									$emzges_a = $emzges_a + $emz;
+									$flaeche_a = $flaeche_a + $flst->Klassifizierung[$j]['flaeche'];
+								}
+								if($flst->Klassifizierung[$j]['objart'] == 2000){
+									$emzges_agr = $emzges_agr + $emz;
+									$flaeche_agr = $flaeche_agr + $flst->Klassifizierung[$j]['flaeche'];
+								}
+								if($flst->Klassifizierung[$j]['objart'] == 3000){
+									$emzges_gr = $emzges_gr + $emz;
+									$flaeche_gr = $flaeche_gr + $flst->Klassifizierung[$j]['flaeche'];
+								}
+								if($flst->Klassifizierung[$j]['objart'] == 4000){
+									$emzges_gra = $emzges_gra + $emz;
+									$flaeche_gra = $flaeche_gra + $flst->Klassifizierung[$j]['flaeche'];
+								}							
+								$pdf->addText($col2,$row-=12,$fontSize, str_pad(round($flst->Klassifizierung[$j]['flaeche']).' m2', 11, ' ', STR_PAD_LEFT));
+								$pdf->addText($col4,$row,$fontSize,utf8_decode($flst->Klassifizierung[$j]['label']));
+								$pdf->addText($col8,$row,$fontSize, 'EMZ: '.$emz);							
+								$pdf->addText($col8a,$row,$fontSize, 'BWZ: '.$wert);
 							}
-							$wert=$flst->Klassifizierung[$j]['wert'];
-							$flst->Klassifizierung[$j]['flaeche'] = $flst->Klassifizierung[$j]['flaeche'] * $ratio;
-							$emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
-							if($flst->Klassifizierung[$j]['objart'] == 1000){
-								$emzges_a = $emzges_a + $emz;
-								$flaeche_a = $flaeche_a + $flst->Klassifizierung[$j]['flaeche'];
-							}
-							if($flst->Klassifizierung[$j]['objart'] == 2000){
-								$emzges_agr = $emzges_agr + $emz;
-								$flaeche_agr = $flaeche_agr + $flst->Klassifizierung[$j]['flaeche'];
-							}
-							if($flst->Klassifizierung[$j]['objart'] == 3000){
-								$emzges_gr = $emzges_gr + $emz;
-								$flaeche_gr = $flaeche_gr + $flst->Klassifizierung[$j]['flaeche'];
-							}
-							if($flst->Klassifizierung[$j]['objart'] == 4000){
-								$emzges_gra = $emzges_gra + $emz;
-								$flaeche_gra = $flaeche_gra + $flst->Klassifizierung[$j]['flaeche'];
-							}							
-							$pdf->addText($col2,$row-=12,$fontSize, str_pad(round($flst->Klassifizierung[$j]['flaeche']).' m2', 11, ' ', STR_PAD_LEFT));
-              $pdf->addText($col4,$row,$fontSize,utf8_decode($flst->Klassifizierung[$j]['label']));
-							$pdf->addText($col8,$row,$fontSize, 'EMZ: '.$emz);							
-							$pdf->addText($col8a,$row,$fontSize, 'BWZ: '.$wert);							
 						}
 	        	if($row<120) {
 							# Seitenumbruch
@@ -1477,7 +1475,7 @@ class ALB {
 							$row=825; # 812 -> 825 2007-04-02 Schmidt
 							$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 						}
-						$nichtgeschaetzt=round($flst->ALB_Flaeche-$flaeche_a-$flaeche_gr-$flaeche_agr-$flaeche_gra);
+						$nichtgeschaetzt=$flst->Klassifizierung['nicht_geschaetzt'];
 						if($nichtgeschaetzt>0){
 							$pdf->addText($col2,$row-=12,$fontSize, 'nicht geschätzt: '.$nichtgeschaetzt.' m²');
 						}
