@@ -7344,7 +7344,7 @@ class GUI {
     $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->titel='neuen Datensatz einfügen';
     $this->main='new_layer_data.php';
-    if($this->formvars['chosen_layer_id']){			# von einer Sachdatenanzeige übergebene Formvars
+    if($this->formvars['chosen_layer_id']){			# für neuen Datensatz verwenden -> von der Sachdatenanzeige übergebene Formvars
     	$this->formvars['CMD'] = '';
     	$this->formvars['selected_layer_id'] = $this->formvars['chosen_layer_id'];
     }
@@ -7361,7 +7361,7 @@ class GUI {
         $privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
         $layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
         
-        ######### von einer Sachdatenanzeige übergebene Formvars #######
+        ######### für neuen Datensatz verwenden -> von der Sachdatenanzeige übergebene Formvars #######
 	      if($this->formvars['chosen_layer_id']){			
 		    	$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
 		      for($i = 0; $i < count($checkbox_names); $i++){
@@ -7397,8 +7397,8 @@ class GUI {
 						if($layerset[0]['shape'][0][$layerset[0]['attributes']['name'][$j]] == '' AND $layerset[0]['attributes']['default'][$j] != '')$layerset[0]['shape'][0][$layerset[0]['attributes']['name'][$j]] = $layerset[0]['attributes']['default'][$j];  // Wenn Defaultwert da und Feld leer, Defaultwert setzen
           }
         }
-        $this->formvars['layer_columnname'] = $layerset[0]['attributes']['name'][$j];
-        $this->formvars['layer_tablename'] = $layerset[0]['attributes']['table_name'][$layerset[0]['attributes']['name'][$j]];
+        $this->formvars['layer_columnname'] = $layerset[0]['attributes']['the_geom'];
+        $this->formvars['layer_tablename'] = $layerset[0]['attributes']['table_name'][$layerset[0]['attributes']['the_geom']];
         $this->qlayerset[0]=$layerset[0];				
 
         # wenn Attributname/Wert-Paare übergeben wurden, diese im Formular einsetzen
@@ -7429,8 +7429,8 @@ class GUI {
 					# evtl. Zoom auf "Mutter-Layer"
 					if($this->formvars['layer_id'] != '' AND $this->formvars['oid'] != '' AND $this->formvars['tablename'] != '' AND $this->formvars['columnname'] != ''){			# das sind die Sachen vom "Mutter"-Layer
 						$parentlayerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
-        		$layerdb = $this->mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-        		$rect = $this->mapDB->zoomToDatasets(array($this->formvars['oid']), $this->formvars['tablename'], $this->formvars['columnname'], 10, $layerdb, $parentlayerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+        		$layerdb2 = $this->mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+        		$rect = $this->mapDB->zoomToDatasets(array($this->formvars['oid']), $this->formvars['tablename'], $this->formvars['columnname'], 10, $layerdb2, $parentlayerset[0]['epsg_code'], $this->user->rolle->epsg_code);
 						if($rect->minx != ''){
 							$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);		# Zoom auf den "Mutter"-Datensatz
 							if (MAPSERVERVERSION > 600) {
@@ -7443,9 +7443,6 @@ class GUI {
         	}
           if($this->geomtype == 'POLYGON' OR $this->geomtype == 'MULTIPOLYGON' OR $this->geomtype == 'GEOMETRY' OR $this->geomtype == 'LINESTRING' OR $this->geomtype == 'MULTILINESTRING'){
             #-----Polygoneditor und Linieneditor---#
-            # aktuellen Kartenausschnitt laden
-            $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-            $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
             $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
             # Spaltenname und from-where abfragen
             if($this->formvars['layer_id'] == ''){
@@ -7467,13 +7464,78 @@ class GUI {
             if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
               $this->formvars['fromwhere'] .= ' where (1=1)';
             }
+						if($this->formvars['chosen_layer_id']){			# für neuen Datensatz verwenden -> Geometrie abfragen
+							if($this->geomtype == 'POLYGON' OR $this->geomtype == 'MULTIPOLYGON' OR $this->geomtype == 'GEOMETRY'){		# Polygonlayer
+								include_once (CLASSPATH.'polygoneditor.php');
+								$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+								$this->geomload = true;			# Geometrie wird das erste Mal geladen, deshalb nicht in den Weiterzeichnenmodus gehen
+								$this->polygon = $polygoneditor->getpolygon($oid, $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], $this->map->extent);
+								if($this->polygon['wktgeom'] != ''){
+									$this->formvars['newpathwkt'] = $this->polygon['wktgeom'];
+									$this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
+									$this->formvars['newpath'] = $this->polygon['svggeom'];
+									$this->formvars['firstpoly'] = 'true';
+									if($this->formvars['zoom'] != 'false'){
+										$rect = $polygoneditor->zoomTopolygon($oid, $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], 10);
+										$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
+										if (MAPSERVERVERSION > 600) {
+											$this->map_scaledenom = $this->map->scaledenom;
+										}
+										else {
+											$this->map_scaledenom = $this->map->scale;
+										}
+									}
+								}
+							}
+							else{			# Linienlayer
+								include_once (CLASSPATH.'lineeditor.php');
+								$lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+								$this->geomload = true;			# Geometrie wird das erste Mal geladen, deshalb nicht in den Weiterzeichnenmodus gehen
+								$this->lines = $lineeditor->getlines($oid, $this->formvars['layer_tablename'], $this->formvars['layer_columnname']);
+								if($this->lines['wktgeom'] != ''){
+									$this->formvars['newpathwkt'] = $this->lines['wktgeom'];
+									$this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
+									$this->formvars['newpath'] = str_replace('-', '', $this->lines['svggeom']);
+									$this->formvars['newpath'] = str_replace('L ', '', $this->formvars['newpath']);		# neuere Postgis-Versionen haben ein L mit drin
+									$this->formvars['firstline'] = 'true';
+									if($this->formvars['zoom'] != 'false'){
+										$rect = $lineeditor->zoomToLine($oid, $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], 10);
+										$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
+										if (MAPSERVERVERSION > 600) {
+											$this->map_scaledenom = $this->map->scaledenom;
+										}
+										else {
+											$this->map_scaledenom = $this->map->scale;
+										}
+									}
+								}
+							}
+						}						
             #-----Polygoneditor und Linieneditor---#
           }
           elseif($this->geomtype == 'POINT'){
             #-----Pointeditor-----#
-            # aktuellen Kartenausschnitt laden
-            $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-            $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
+						if($this->formvars['chosen_layer_id']){			# für neuen Datensatz verwenden -> Geometrie abfragen
+							include_once (CLASSPATH.'pointeditor.php');
+							$pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+							$this->point = $pointeditor->getpoint($oid, $this->formvars['layer_tablename'], $this->formvars['layer_columnname']);
+							if($this->point['pointx'] != ''){
+								$this->formvars['loc_x']=$this->point['pointx'];
+								$this->formvars['loc_y']=$this->point['pointy'];
+								$rect = ms_newRectObj();
+								$rect->minx = $this->point['pointx']-100;
+								$rect->maxx = $this->point['pointx']+100;
+								$rect->miny = $this->point['pointy']-100;
+								$rect->maxy = $this->point['pointy']+100;
+								$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
+								if (MAPSERVERVERSION > 600) {
+									$this->map_scaledenom = $this->map->scaledenom;
+								}
+								else {
+									$this->map_scaledenom = $this->map->scale;
+								}
+							}
+						}
             #-----Pointeditor-----#
           }
           $this->saveMap('');
