@@ -64,7 +64,7 @@ function buildwktpolygonfromsvgpath(svgpath){
 	}
 ?>
 
-<table style="border: 1px solid; border-color: #eeeeee; border-left: none; border-right: none" width="760" border="0" cellpadding="0" cellspacing="5" bgcolor="<?php echo $bgcolor; ?>">
+<table style="border: 1px solid; border-collapse: separate; border-color: #eeeeee; border-left: none; border-right: none" width="760" border="0" cellpadding="0" cellspacing="5" bgcolor="<?php echo $bgcolor; ?>">
   <tr> 
     <td align="center" colspan="5"><a name="geoedit_anchor"><h2><?php echo $this->titel; ?></h2></a></td>
   </tr>
