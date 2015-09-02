@@ -1183,7 +1183,7 @@ class pgdatabase {
   }
   
   function getNutzung($FlurstKennz) {
-    $sql ="SELECT round(st_area_utm(st_intersection(n.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")::numeric * amtlicheflaeche / st_area_utm(f.wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")) AS flaeche, c.class as nutzungskennz, case when c.label is null then m.title else m.title||' - '||c.label end as bezeichnung, n.info, n.zustand, n.name, m.gruppe,c.label, c.blabla";
+    $sql ="SELECT round(st_area_utm(st_intersection(n.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")::numeric * amtlicheflaeche / st_area_utm(f.wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")) AS flaeche, c.class as nutzungskennz, case when c.label is null then m.title else m.title||' - '||c.label end as bezeichnung, n.info, n.zustand, n.name, m.gruppe,c.label, c.blabla, amtlicheflaeche";
 		$sql.=" FROM alkis.ax_flurstueck f, alkis.nutzung n";
 		$sql.=" JOIN alkis.nutzung_meta m ON m.nutz_id=n.nutz_id";
 		$sql.=" LEFT JOIN alkis.nutzung_class c ON c.nutz_id=n.nutz_id AND c.class=n.class";
@@ -1197,10 +1197,20 @@ class pgdatabase {
       # keine Eintragungen zu Nutzungen gefunden
       return $queryret;
     }
-    # Nutzungen zum Flurstï¿½ck wurden erfolgreich abgefragt
+    $summe = 0;
+		$groesste = 0;
+		$i = 0;
     while($rs=pg_fetch_array($queryret[1])) {
+			$summe += $rs['flaeche'];
+			if($groesste < $rs['flaeche']){
+				$groesste = $rs['flaeche'];
+				$index = $i;
+			}
       $Nutzungen[]=$rs;
+			$i++;
     }
+		$diff = $Nutzungen[$i-1]['amtlicheflaeche'] - $summe;
+		$Nutzungen[$index]['flaeche'] += $diff;
     $ret[0]=0;
     $ret[1]=$Nutzungen;
     return $ret;
@@ -1363,8 +1373,8 @@ class pgdatabase {
   }
 
   function getKlassifizierung($FlurstKennz) {
-    $sql ="SELECT flaeche, flstflaeche, n.wert, objart, ARRAY_TO_STRING(ARRAY[k.kurz, b.kurz, z.kurz, e1.kurz, e2.kurz, s.kurz, n.bodenzahlodergruenlandgrundzahl || '/' || n.wert], ' ') as label ";
-		$sql.=" FROM (SELECT round(st_area_utm(st_intersection(n.wkb_geometry, st_intersection(be.wkb_geometry,f.wkb_geometry)), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")::numeric) AS flaeche, round(st_area_utm(f.wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")::numeric) as flstflaeche, n.bodenzahlodergruenlandgrundzahl, n.ackerzahlodergruenlandzahl as wert, n.kulturart as objart, n.kulturart, n.bodenart, n.entstehungsartoderklimastufewasserverhaeltnisse, n.zustandsstufeoderbodenstufe, n.sonstigeangaben";
+    $sql ="SELECT amtlicheflaeche, round(fl_geom / flstflaeche * amtlicheflaeche) AS flaeche, fl_geom, flstflaeche, n.wert, objart, ARRAY_TO_STRING(ARRAY[k.kurz, b.kurz, z.kurz, e1.kurz, e2.kurz, s.kurz, n.bodenzahlodergruenlandgrundzahl || '/' || n.wert], ' ') as label ";
+		$sql.=" FROM (SELECT amtlicheflaeche, st_area_utm(st_intersection(n.wkb_geometry, st_intersection(be.wkb_geometry,f.wkb_geometry)), 25833, 6384000, 38) as fl_geom, st_area_utm(f.wkb_geometry, 25833, 6384000, 38) as flstflaeche, n.bodenzahlodergruenlandgrundzahl, n.ackerzahlodergruenlandzahl as wert, n.kulturart as objart, n.kulturart, n.bodenart, n.entstehungsartoderklimastufewasserverhaeltnisse, n.zustandsstufeoderbodenstufe, n.sonstigeangaben";
     $sql.=" FROM alkis.ax_flurstueck f, alkis.ax_bewertung be, alkis.ax_bodenschaetzung n ";		
     $sql.=" WHERE st_intersects(n.wkb_geometry,f.wkb_geometry) = true AND st_intersects(be.wkb_geometry,f.wkb_geometry) = true AND st_area_utm(st_intersection(n.wkb_geometry, st_intersection(be.wkb_geometry,f.wkb_geometry)), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.") > 0.05 AND f.flurstueckskennzeichen='".$FlurstKennz."'";
 		$sql.= $this->build_temporal_filter(array('f', 'be', 'n'));
@@ -1379,14 +1389,29 @@ class pgdatabase {
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
     if (pg_num_rows($ret[1])>0) {
-      while($rs=pg_fetch_array($ret[1])) {
+			$summe_amt = 0;
+			$summe_geom = 0;
+			$groesste = 0;
+			$i = 0;
+      while($rs=pg_fetch_array($ret[1])){
+				$summe_amt += $rs['flaeche'];
+				$summe_geom += $rs['fl_geom'];
+				if($groesste < $rs['fl_geom']){
+					$groesste = $rs['fl_geom'];
+					$index = $i;
+				}
         $Klassifizierung[]=$rs;
+				$i++;
       }
+			$Klassifizierung['nicht_geschaetzt'] = round(($Klassifizierung[$i-1]['flstflaeche'] - $summe_geom) * $Klassifizierung[$i-1]['amtlicheflaeche'] / $Klassifizierung[$i-1]['flstflaeche']);			
+			$summe_amt += $Klassifizierung['nicht_geschaetzt'];
+			$diff = $Klassifizierung[$i-1]['amtlicheflaeche'] - $summe_amt;
+			$Klassifizierung[$index]['flaeche'] += $diff;
     }
     $ret[1]=$Klassifizierung;
     return $ret;
   }
-  
+	  
 	function getNachfolger($FlurstKennz) {
 		$sql = "SELECT nachfolger, c.endet FROM (";
     $sql.= "SELECT unnest(zeigtaufneuesflurstueck) as nachfolger FROM alkis.ax_fortfuehrungsfall WHERE ARRAY['".$FlurstKennz."'::varchar] <@ zeigtaufaltesflurstueck AND ueberschriftimfortfuehrungsnachweis && ARRAY[10101,10102,10103,10201,10202,10205,10206,10301,10302,10303,10304,10305,10306,10307,10308,10502,10503,10700]) as foo ";

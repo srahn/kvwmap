@@ -331,7 +331,6 @@ show_all = function(count){
 
         <? if($privileg_['klassifizierung']){
 	        	if($flst->Klassifizierung[0]['wert'] != ''){
-	        		$ratio = $flst->ALB_Flaeche/$flst->Klassifizierung[0]['flstflaeche'];
 	        ?>
 	        	<tr>
           		<td colspan="2">
@@ -350,38 +349,38 @@ show_all = function(count){
 		            <?  $emzges_a = 0; $emzges_gr = 0; $emzges_agr = 0; $emzges_gra = 0;
 										$flaeche_a = 0; $flaeche_gr = 0; $flaeche_agr = 0; $flaeche_gra = 0;
 		            	for($j = 0; $j < count($flst->Klassifizierung); $j++){
-		            	$wert=$flst->Klassifizierung[$j]['wert'];
-									$flst->Klassifizierung[$j]['flaeche'] = $flst->Klassifizierung[$j]['flaeche'] * $ratio;
-				          $emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
-				          if($flst->Klassifizierung[$j]['objart'] == 1000){
-				          	$emzges_a = $emzges_a + $emz;
-				          	$flaeche_a = $flaeche_a + $flst->Klassifizierung[$j]['flaeche'];
-				          }
-									if($flst->Klassifizierung[$j]['objart'] == 2000){
-				          	$emzges_agr = $emzges_agr + $emz;
-				          	$flaeche_agr = $flaeche_agr + $flst->Klassifizierung[$j]['flaeche'];
-				          }
-				          if($flst->Klassifizierung[$j]['objart'] == 3000){
-				          	$emzges_gr = $emzges_gr + $emz;
-				          	$flaeche_gr = $flaeche_gr + $flst->Klassifizierung[$j]['flaeche'];
-				          }
-									if($flst->Klassifizierung[$j]['objart'] == 4000){
-				          	$emzges_gra = $emzges_gra + $emz;
-				          	$flaeche_gra = $flaeche_gra + $flst->Klassifizierung[$j]['flaeche'];
-				          }
-		            	?>
-		            <tr>
-		              <td></td>
-		              <td><? echo round($flst->Klassifizierung[$j]['flaeche']); ?> m&sup2&nbsp;</td>
-		              <td><? echo $flst->Klassifizierung[$j]['label']; ?></td>
-		              <td>EMZ: <? echo $emz; ?></td><td>BWZ: <? echo $wert; ?></td>
-		            </tr>
-		            <? } // end for
-		            $nichtgeschaetzt=round($flst->ALB_Flaeche-$flaeche_a-$flaeche_gr-$flaeche_agr-$flaeche_gra);
-		            if ($nichtgeschaetzt>0) { ?>
+										if($flst->Klassifizierung[$j]['flaeche'] != ''){
+											$wert=$flst->Klassifizierung[$j]['wert'];
+											$emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
+											if($flst->Klassifizierung[$j]['objart'] == 1000){
+												$emzges_a = $emzges_a + $emz;
+												$flaeche_a = $flaeche_a + $flst->Klassifizierung[$j]['flaeche'];
+											}
+											if($flst->Klassifizierung[$j]['objart'] == 2000){
+												$emzges_agr = $emzges_agr + $emz;
+												$flaeche_agr = $flaeche_agr + $flst->Klassifizierung[$j]['flaeche'];
+											}
+											if($flst->Klassifizierung[$j]['objart'] == 3000){
+												$emzges_gr = $emzges_gr + $emz;
+												$flaeche_gr = $flaeche_gr + $flst->Klassifizierung[$j]['flaeche'];
+											}
+											if($flst->Klassifizierung[$j]['objart'] == 4000){
+												$emzges_gra = $emzges_gra + $emz;
+												$flaeche_gra = $flaeche_gra + $flst->Klassifizierung[$j]['flaeche'];
+											}
+											?>
+											<tr>
+												<td></td>
+												<td><? echo round($flst->Klassifizierung[$j]['flaeche']); ?> m&sup2&nbsp;</td>
+												<td><? echo $flst->Klassifizierung[$j]['label']; ?></td>
+												<td>EMZ: <? echo $emz; ?></td><td>BWZ: <? echo $wert; ?></td>
+											</tr>
+								<?	}
+									} // end for
+		            if ($flst->Klassifizierung['nicht_geschaetzt'] > 0) { ?>
           				<tr>
           					<td></td>
-          					<td colspan="3">nicht geschätzt: <? echo $nichtgeschaetzt; ?> m&sup2;</td>
+          					<td colspan="3">nicht geschätzt: <? echo $flst->Klassifizierung['nicht_geschaetzt']; ?> m&sup2;</td>
           				</tr>
 		            <? }
         			if ($emzges_a > 0)  {
