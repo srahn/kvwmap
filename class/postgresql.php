@@ -1878,6 +1878,46 @@ class pgdatabase {
 # ALK Funktionen
 ##########################################################################
 	
+	function getGemeindeName($Gemeinde){
+    $this->debug->write("<br>postgres.php->database->getGemeindeName, Abfrage des Gemeindenamens",4);
+    $sql ='SELECT g.gemeindename AS name FROM alkis.pp_gemeinde AS g';
+    $sql.=" WHERE land::text||regierungsbezirk::text||kreis::text||lpad(gemeinde::text, 3, '0') = '".$gemeinde."'";
+    #echo $sql;
+    $ret=$this->execSQL($sql, 4, 0);
+    if ($ret[0]) {
+      $ret[1]='Fehler beim Abfragen des Umschlieï¿½enden Rechtecks um die Gemeinde.<br>'.$ret[1];
+    }
+    else {
+      $rs=pg_fetch_array($ret[1]);
+      $ret[1]=$rs;
+    }
+    return $ret;
+  }
+	
+	function getMERfromGemeinde($gemeinde, $epsgcode) {
+    $this->debug->write("<br>postgres.php->database->getMERfromGemarkung, Abfrage des Maximalen umschliessenden Rechtecks um die Gemeinde",4);
+    $sql ="SELECT MIN(st_xmin(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS minx,MAX(st_xmax(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS maxx";
+    $sql.=",MIN(st_ymin(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS miny,MAX(st_ymax(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS maxy";
+    $sql.=" FROM alkis.pp_gemeinde";
+    $sql.=" WHERE land::text||regierungsbezirk::text||kreis::text||lpad(gemeinde::text, 3, '0') = '".$gemeinde."'";
+    #echo $sql;
+    $ret=$this->execSQL($sql, 4, 0);
+    if ($ret[0]) {
+      $ret[1]='Fehler beim Abfragen des Umschliessenden Rechtecks um die Gemeinde.<br>'.$ret[1];
+    }
+    else {
+      $rs=pg_fetch_array($ret[1]);
+      if ($rs['minx']==0) {
+        $ret[0]=1;
+        $ret[1]='Gemeinde nicht in Datenbank '.$this->dbName.' vorhanden.';
+      }
+      else {
+        $ret[1]=$rs;
+      }
+    }
+    return $ret;
+  }
+	
 	function getMERfromGemarkung($Gemarkung, $epsgcode) {
     $this->debug->write("<br>postgres.php->database->getMERfromGemarkung, Abfrage des Maximalen umschliessenden Rechtecks um die Gemarkung",4);
     $sql ="SELECT MIN(st_xmin(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS minx,MAX(st_xmax(st_envelope(st_transform(the_geom, ".$epsgcode.")))) AS maxx";
@@ -1893,7 +1933,7 @@ class pgdatabase {
       $rs=pg_fetch_array($ret[1]);
       if ($rs['minx']==0) {
         $ret[0]=1;
-        $ret[1]='Gemarkung nicht in ALK Datenbank '.$this->dbName.' vorhanden.';
+        $ret[1]='Gemarkung nicht in Datenbank '.$this->dbName.' vorhanden.';
       }
       else {
         $ret[1]=$rs;
@@ -1918,7 +1958,7 @@ class pgdatabase {
       $rs=pg_fetch_array($ret[1]);
       if ($rs['minx']==0) {
         $ret[0]=1;
-        $ret[1]='Flur nicht in ALK Datenbank '.$this->dbName.' vorhanden.';
+        $ret[1]='Flur nicht in Datenbank '.$this->dbName.' vorhanden.';
       }
       else {
         $ret[1]=$rs;
@@ -1951,7 +1991,7 @@ class pgdatabase {
       $rs=pg_fetch_array($ret[1]);
       if ($rs['minx']==0) {
         $ret[0]=1;
-        $ret[1]='Flurstï¿½ck nicht in Postgres Datenbank '.$this->dbName.' vorhanden.';
+        $ret[1]='Flurstïück nicht in Postgres Datenbank '.$this->dbName.' vorhanden.';
       }
       else {
         $ret[1]=$rs;
