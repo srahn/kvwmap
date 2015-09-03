@@ -87,9 +87,9 @@ class data_import_export {
 			$attrib['order'] = 0;
 			$class_id = $dbmap->new_Class($attrib);
 			$this->formvars['class'] = $class_id;
-			$style['colorred'] = $result_colors[rand(0,10)]['red'];
-			$style['colorgreen'] = $result_colors[rand(0,10)]['green'];
-			$style['colorblue'] = $result_colors[rand(0,10)]['blue'];
+			$style['colorred'] = $result_colors[rand(0,9)]['red'];
+			$style['colorgreen'] = $result_colors[rand(0,9)]['green'];
+			$style['colorblue'] = $result_colors[rand(0,9)]['blue'];
 			$style['outlinecolorred'] = 0;
 			$style['outlinecolorgreen'] = 0;
 			$style['outlinecolorblue'] = 0;
