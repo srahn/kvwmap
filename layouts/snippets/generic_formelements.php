@@ -425,7 +425,7 @@
 									default : {
 										$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$oid.')" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
 										if($attribute_privileg == '0' OR $lock[$k]){
-											$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
+											$datapart .= ' readonly style="display:none;"';
 										}
 										else{
 											$datapart .= ' style="font-size: '.$fontsize.'px;"';
@@ -437,6 +437,10 @@
 											$datapart .= ' maxlength="'.$attributes['length'][$j].'"';
 										}
 										$datapart .= ' size="'.$size.'" type="text" name="'.$fieldname.'" id="'.$name.'_'.$k.'" value="'.htmlspecialchars($value).'">';
+										if($attribute_privileg == '0' OR $lock[$k]){
+											$maxwidth = $size * 9;
+											$datapart .= '<div style="padding: 0 0 0 5; max-width:'.$maxwidth.'px; font-size: '.$fontsize.'px;">'.htmlspecialchars($value).'</div>';
+										}
 										if($attribute_privileg > '0' AND $attributes['options'][$j] != ''){
 											$datapart .= '&nbsp;<a title="automatisch generieren" href="javascript:auto_generate(new Array(\''.implode($attributes['name'], "','").'\'), \''.$attributes['the_geom'].'\', \''.$name.'\', '.$k.', '.$layer_id.');"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
 										}
