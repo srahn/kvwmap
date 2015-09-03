@@ -3709,7 +3709,8 @@ class GUI {
 		}
 		$this->formvars['connection'] = $connectionstring;
 		$this->formvars['epsg_code'] = $layerset[0]['epsg_code'];
-		$this->formvars['transparency'] = 60;
+		if($layerset[0]['Datentyp'] == MS_LAYER_POLYGON)$this->formvars['transparency'] = 60;
+		else $this->formvars['transparency'] = 100;
 		
 		$layer_id = $dbmap->newRollenLayer($this->formvars);
 				
