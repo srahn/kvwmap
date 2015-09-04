@@ -1,4 +1,9 @@
-<?php header('Content-Type: text/html; charset=utf-8'); ?>
+<?php header('Content-Type: text/html; charset=utf-8'); 
+
+  include(LAYOUTPATH.'snippets/ahah.php');
+  echo $ahah;
+
+?>
 <HTML><HEAD><TITLE>kvwmap</TITLE>
 <META http-equiv=Content-Type content="text/html; charset=UTF-8">
 <script type="text/javascript">
