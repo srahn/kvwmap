@@ -31,7 +31,7 @@ function ahahDone(url, targets, req, actions) {
 				return;
 			}
 			if(req.getResponseHeader(\'error\') == \'true\'){	// falls man ein Fehler aufgetreten ist
-				alert(req.responseText);
+				//alert(req.responseText);
 				return;
 			}
 			var found = false;
