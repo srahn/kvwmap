@@ -303,6 +303,21 @@ function save_layout(){
 								</td>
 							</tr>
 	 <?				} break;
+	 
+						case 'Dokument' : { ?>
+							<tr id="tr1_<? echo $this->attributes['name'][$i]; ?>" <? if($this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['xpos'] == ''){echo 'style="display:none"';} ?>>
+								<td>&nbsp;&nbsp;&nbsp;x:</td>
+								<td><input type="text" title="negative Werte bewirken eine rechtsbündige Ausrichtung" name="posx_<? echo $this->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['xpos']; ?>" size="5"></td>
+								<td width="60px">&nbsp;Breite:</td>
+								<td><input  type="text" name="width_<? echo $this->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['width']; ?>" size="5"></td>
+								<td colspan="3"></td>
+							</tr>
+							<tr id="tr2_<? echo $this->attributes['name'][$i]; ?>" <? if($this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['xpos'] == ''){echo 'style="display:none"';} ?>>
+								<td>&nbsp;&nbsp;&nbsp;y:</td>
+								<td><input type="text" name="posy_<? echo $this->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['ypos']; ?>" size="5"></td>
+								<td colspan="5">&nbsp;</td>
+							</tr>	
+			<?			}break;
 					
 						default : {	?>
 							<tr id="tr1_<? echo $this->attributes['name'][$i]; ?>" <? if($this->ddl->selectedlayout[0]['elements'][$this->attributes['name'][$i]]['xpos'] == ''){echo 'style="display:none"';} ?>>

@@ -1211,7 +1211,7 @@ class GUI {
 
         if($this->map_factor != '' and $layerset['Datentyp'] != 8){ 
           # Skalierung der Stylegröße, wenn map_factor gesetzt und nicht vom Type Chart
-          $style->set('size', $dbStyle['size']*$this->map_factor);
+          $style->set('size', $dbStyle['size']*$this->map_factor/1.414);
         }
         else{
           $style->set('size', $dbStyle['size']);
@@ -1219,7 +1219,7 @@ class GUI {
 
         if ($dbStyle['minsize']!='') {
           if($this->map_factor != ''){
-            $style -> set('minsize',$dbStyle['minsize']*$this->map_factor);
+            $style -> set('minsize',$dbStyle['minsize']*$this->map_factor/1.414);
           }
           else{
             $style -> set('minsize',$dbStyle['minsize']);
@@ -1228,7 +1228,7 @@ class GUI {
 
         if ($dbStyle['maxsize']!='') {
           if($this->map_factor != ''){
-            $style -> set('maxsize',$dbStyle['maxsize']*$this->map_factor);
+            $style -> set('maxsize',$dbStyle['maxsize']*$this->map_factor/1.414);
           }
           else{
             $style -> set('maxsize',$dbStyle['maxsize']);
@@ -1251,7 +1251,7 @@ class GUI {
             $style -> set('antialias',$dbStyle['antialias']);
           }
           if($this->map_factor != ''){
-            $style -> set('width',$dbStyle['width']*$this->map_factor);
+            $style -> set('width',$dbStyle['width']*$this->map_factor/1.414);
           }
           else{
             $style->set('width',$dbStyle['width']);
@@ -1260,7 +1260,7 @@ class GUI {
 
         if ($dbStyle['minwidth']!='') {
           if($this->map_factor != ''){
-            $style->set('minwidth',$dbStyle['minwidth']*$this->map_factor);
+            $style->set('minwidth',$dbStyle['minwidth']*$this->map_factor/1.414);
           }
           else{
             $style->set('minwidth',$dbStyle['minwidth']);
@@ -1269,7 +1269,7 @@ class GUI {
 
         if ($dbStyle['maxwidth']!='') {
           if($this->map_factor != ''){
-            $style->set('maxwidth',$dbStyle['maxwidth']*$this->map_factor);
+            $style->set('maxwidth',$dbStyle['maxwidth']*$this->map_factor/1.414);
           }
           else{
             $style->set('maxwidth',$dbStyle['maxwidth']);
@@ -1365,9 +1365,9 @@ class GUI {
           $klasse->label->set('maxsize',$dbLabel['maxsize']);
           # Skalierung der Labelschriftgröße, wenn map_factor gesetzt
           if($this->map_factor != ''){
-            $klasse->label->set('minsize',$dbLabel['minsize']*$this->map_factor);
-            $klasse->label->set('maxsize',$dbLabel['size']*$this->map_factor);
-            $klasse->label->set('size',$dbLabel['size']*$this->map_factor);
+            $klasse->label->set('minsize',$dbLabel['minsize']*$this->map_factor/1.414);
+            $klasse->label->set('maxsize',$dbLabel['size']*$this->map_factor/1.414);
+            $klasse->label->set('size',$dbLabel['size']*$this->map_factor/1.414);
           }
           if ($dbLabel['position']!='') {
             switch ($dbLabel['position']){
@@ -1474,9 +1474,9 @@ class GUI {
           $label->maxsize = $dbLabel['maxsize'];
           # Skalierung der Labelschriftgröße, wenn map_factor gesetzt
           if($this->map_factor != ''){
-            $label->minsize = $dbLabel['minsize']*$this->map_factor;
-            $label->maxsize = $dbLabel['size']*$this->map_factor;
-            $label->size = $dbLabel['size']*$this->map_factor;
+            $label->minsize = $dbLabel['minsize']*$this->map_factor/1.414;
+            $label->maxsize = $dbLabel['size']*$this->map_factor/1.414;
+            $label->size = $dbLabel['size']*$this->map_factor/1.414;
           }
           if ($dbLabel['position']!='') {
             switch ($dbLabel['position']){
@@ -5356,7 +5356,7 @@ class GUI {
 		if(in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf')) ){			// für Bilder und PDFs werden automatisch Thumbnails erzeugt
 			$thumbname = $dateinamensteil[0].'_thumb.jpg';			
 			if(!file_exists($thumbname)){
-				exec(IMAGEMAGICKPATH.'convert -filter Hanning '.$dokument.'[0] -quality 75 -resize '.PREVIEW_IMAGE_WIDTH.'x1000\> '.$thumbname);
+				exec(IMAGEMAGICKPATH.'convert -filter Hanning '.$dokument.'[0] -quality 75 -background white -flatten -resize '.PREVIEW_IMAGE_WIDTH.'x1000\> '.$thumbname);
 			}
 		}
 		else{																// alle anderen Dokumenttypen bekommen entsprechende Dokumentensymbole als Vorschaubild

@@ -187,7 +187,7 @@ class ddl {
 						default : {
 							if($this->page_overflow_by_sublayout)$this->pdf->reopenObject($this->page_id_before_sublayout);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
 							$this->pdf->selectFont($this->layout['elements'][$attributes['name'][$j]]['font']);
-							if($this->layout['elements'][$attributes['name'][$j]]['fontsize'] > 0){
+							if($this->layout['elements'][$attributes['name'][$j]]['fontsize'] > 0 OR $this->layout['elements'][$attributes['name'][$j]]['width'] > 0){
 								$ypos = $this->layout['elements'][$attributes['name'][$j]]['ypos'];
 								#### relative Positionierung über Offset-Attribut ####
 								$offset_attribute = $this->layout['elements'][$attributes['name'][$j]]['offset_attribute'];
@@ -216,11 +216,30 @@ class ddl {
 								if($this->i_on_page == 0){
 									if($this->maxy < $y)$this->maxy = $y;		# beim ersten Datensatz das maxy ermitteln
 								}
-											
-								$text = $this->get_result_value_output($i, $j, $preview);
+																		
 								$width = $this->layout['elements'][$attributes['name'][$j]]['width'];
 								
-								$y = $this->putText($text, $zeilenhoehe, $width, $x, $y, $offsetx);
+								if($attributes['form_element_type'][$j] == 'Dokument'){
+									$dokumentpfad = $this->result[$i][$this->attributes['name'][$j]];
+									$pfadteil = explode('&original_name=', $dokumentpfad);
+									$dateiname = $pfadteil[0];
+									if($dateiname == $this->attributes['alias'][$j] AND $preview)$dateiname = WWWROOT.APPLVERSION.GRAPHICSPATH.'nogeom.png';		// als Platzhalter im Editor
+									if($dateiname != '' AND file_exists($dateiname)){
+										$dateinamensteil=explode('.', $pfadteil[0]);
+										$new_filename = $dateinamensteil[0].'.jpg';
+										exec(IMAGEMAGICKPATH.'convert '.$dateiname.' -background white -flatten '.$new_filename);
+										$size = getimagesize($new_filename);
+										$ratio = $size[1]/$size[0];
+										$height = $ratio*$width;
+										$y = $y-$height;
+										$this->pdf->addJpegFromFile($new_filename, $x, $y, $width);
+										unlink($new_filename);
+									}
+								}
+								else{
+									$text = $this->get_result_value_output($i, $j, $preview);
+									$y = $this->putText($text, $zeilenhoehe, $width, $x, $y, $offsetx);
+								}								
 																
 								if($this->miny > $y)$this->miny = $y;		# miny ist die unterste y-Position das aktuellen Datensatzes 
 								
@@ -232,6 +251,8 @@ class ddl {
 					}
 				}
 				elseif($attributes['name'][$j] == $attributes['the_geom'] AND $this->layout['elements'][$attributes['name'][$j]]['xpos'] > 0){		# Geometrie
+					$this->gui->map->set('width', $this->layout['elements'][$attributes['name'][$j]]['width']*MAPFACTOR);
+					$this->gui->map->set('height', $this->layout['elements'][$attributes['name'][$j]]['width']*MAPFACTOR);
 					if($oids[$i] != ''){
 						if($attributes['geomtype'][$attributes['the_geom']] == 'POINT'){
 							include_(CLASSPATH.'pointeditor.php');
@@ -251,9 +272,7 @@ class ddl {
 							$rect = $polygoneditor->zoomTopolygon($oids[$i], $attributes['table_name'][$attributes['the_geom']], $attributes['the_geom'], 10);
 						}
 						$this->gui->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
-					}
-					$this->gui->map->set('width', $this->layout['elements'][$attributes['name'][$j]]['width']*MAPFACTOR);
-					$this->gui->map->set('height', $this->layout['elements'][$attributes['name'][$j]]['width']*MAPFACTOR);
+					}					
 					if($this->gui->map->selectOutputFormat('jpeg_print') == 1){
 						$this->gui->map->selectOutputFormat('jpeg');
 					}
