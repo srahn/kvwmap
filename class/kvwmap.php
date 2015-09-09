@@ -9659,12 +9659,18 @@ class GUI {
 			$this->loadMap('DataBase');
 			for($i=0; $i < count($this->layerset); $i++){
 				$formvars['thema'.$this->layerset[$i]['Layer_ID']] = 0;		# erstmal alle ausschalten
+				$formvars['qLayer'.$this->layerset[$i]['Layer_ID']] = 0;		# erstmal alle ausschalten
 			}
       $layer_ids = explode(',', $ret[1][0]['layers']);
 			foreach($layer_ids as $layer_id){
 				$formvars['thema'.$layer_id] = 1;
 			}
+			$query_ids = explode(',', $ret[1][0]['query']);
+			foreach($query_ids as $layer_id){
+				$formvars['qLayer'.$layer_id] = 1;
+			}
 			$this->user->rolle->setAktivLayer($formvars, $this->Stelle->id, $this->user->id);
+			$this->user->rolle->setQueryStatus($formvars);
     }
 		$this->loadMap('DataBase');
 		$this->user->rolle->newtime = $this->user->rolle->last_time_id;

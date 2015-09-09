@@ -2325,7 +2325,7 @@ class rolle {
 	}
 	
 	function getLayerComments($id) {
-		$sql ='SELECT id, name, layers FROM rolle_saved_layers WHERE';
+		$sql ='SELECT id, name, layers, query FROM rolle_saved_layers WHERE';
 		$sql.=' user_id='.$this->user_id;
 		$sql.=' AND stelle_id='.$this->stelle_id;
 		if($id!=''){
@@ -2376,8 +2376,10 @@ class rolle {
 		$sql.=', name="'.$comment.'"';
 		for($i=0; $i < count($layerset); $i++){
 			if($layerset[$i]['aktivStatus'] == 1)$layers[] = $layerset[$i]['Layer_ID'];
+			if($layerset[$i]['queryStatus'] == 1)$query[] = $layerset[$i]['Layer_ID'];
 		}
 		$sql.=', layers="'.implode(',', $layers).'"';
+		$sql.=', query="'.implode(',', $query).'"';
 		#echo '<br>'.$sql;
 		$queryret=$this->database->execSQL($sql,4, 1);
 		if ($queryret[0]) {
