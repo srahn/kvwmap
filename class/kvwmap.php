@@ -14673,12 +14673,27 @@ class db_mapObj{
       if($style['backgroundcolorred'] !== NULL){$sql.= ", backgroundcolor = '".$style['backgroundcolorred']." ".$style['backgroundcolorgreen']." ".$style['backgroundcolorblue']."'";}
       if($style['outlinecolor'] !== NULL){$sql.= ", outlinecolor = '".$style['outlinecolor']."'";}
       if($style['outlinecolorred'] !== NULL){$sql.= ", outlinecolor = '".$style['outlinecolorred']." ".$style['outlinecolorgreen']." ".$style['outlinecolorblue']."'";}
+			if($style['colorrange'] !== NULL){$sql.= ", colorrange = '".$style['colorrange']."'";}
+			if($style['datarange'] !== NULL){$sql.= ", datarange = '".$style['datarange']."'";}
+			if($style['opacity'] !== NULL){$sql.= ", opacity = ".$style['opacity'];}
       if($style['minsize']){$sql.= ", minsize = '".$style['minsize']."'";}
       if($style['maxsize']){$sql.= ", maxsize = '".$style['maxsize']."'";}
       if($style['angle']){$sql.= ", angle = '".$style['angle']."'";}
+			if($style['angleitem']){$sql.= ", angleitem = '".$style['angleitem']."'";}
+			if($style['antialias']){$sql.= ", antialias = ".$style['antialias'];}
       if($style['width']){$sql.= ", width = '".$style['width']."'";}
       if($style['minwidth']){$sql.= ", minwidth = '".$style['minwidth']."'";}
       if($style['maxwidth']){$sql.= ", maxwidth = '".$style['maxwidth']."'";}
+			if($style['sizeitem']){$sql.= ", sizeitem = '".$style['sizeitem']."'";}
+			if($style['offsetx']){$sql.= ", offsetx = ".$style['offsetx'];}
+			if($style['offsety']){$sql.= ", offsety = ".$style['offsety'];}
+			if($style['pattern']){$sql.= ", pattern = '".$style['pattern']."'";}
+			if($style['geomtransform']){$sql.= ", geomtransform = '".$style['geomtransform']."'";}
+			if($style['gap']){$sql.= ", gap = ".$style['gap'];}
+			if($style['initialgap']){$sql.= ", initialgap = ".$style['initialgap'];}
+			if($style['linecap']){$sql.= ", linecap = '".$style['linecap']."'";}
+			if($style['linejoin']){$sql.= ", linejoin = '".$style['linejoin']."'";}
+			if($style['linejoinmaxsize']){$sql.= ", linejoinmaxsize = ".$style['linejoinmaxsize'];}
     }
     else{
     # Styleobjekt wird übergeben
