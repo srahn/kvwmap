@@ -9584,9 +9584,11 @@ class GUI {
   }
 	
 	function layerCommentForm() {
+		$this->neuLaden();
+		$this->saveMap('');
+		$currenttime=date('Y-m-d H:i:s',time());
+		$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
     $this->main='LayerCommentForm.php';
-		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-    $this->loadMap('DataBase');
     $this->drawMap();
     $this->output();
   }
