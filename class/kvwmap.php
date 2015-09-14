@@ -10512,291 +10512,293 @@ class GUI {
             $this->qlayerset[]=$layerset[$i];
           } break;
           case MS_POSTGIS : { # PostGIS Layer (6)
-            # Für die performante Suche wird immer zunächst ein Suchrechteck (searchbox) gebildet, egal ob punktuell
-            # oder in einem Suchfenster gesucht wird
-            # Für die Bildung der searchbox wird entweder mit dem angegebenen Suchradius tolerance in der Einheit toleranceunit
-            # aus der Tabelle layers gerechnet oder mit dem im Formular eingegebenen Suchradius (searchradius)
+						if($layerset[$i]['pfad'] != ''){
+							# Für die performante Suche wird immer zunächst ein Suchrechteck (searchbox) gebildet, egal ob punktuell
+							# oder in einem Suchfenster gesucht wird
+							# Für die Bildung der searchbox wird entweder mit dem angegebenen Suchradius tolerance in der Einheit toleranceunit
+							# aus der Tabelle layers gerechnet oder mit dem im Formular eingegebenen Suchradius (searchradius)
 
 
-            # Datenbankobjekt aus Layerdefinition erzeugen
-            # Path laden
-            # Rechte abfragen
-            # Path auf Basis der Rechte einschränken
-            # Attribute aus Path laden
-            # Rechte den Attributen zuweisen
-						$this->mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-            $layerdb = $this->mapDB->getlayerdatabase($layerset[$i]['Layer_ID'], $this->Stelle->pgdbhost);
-            $layerdb->setClientEncoding();
-            #$path = $layerset[$i]['pfad'];
-						$path = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[$i]['pfad']);
-            $privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
-            $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
-            $layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames']);
-				    # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)  ---> steht weiter unten
+							# Datenbankobjekt aus Layerdefinition erzeugen
+							# Path laden
+							# Rechte abfragen
+							# Path auf Basis der Rechte einschränken
+							# Attribute aus Path laden
+							# Rechte den Attributen zuweisen
+							$this->mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+							$layerdb = $this->mapDB->getlayerdatabase($layerset[$i]['Layer_ID'], $this->Stelle->pgdbhost);
+							$layerdb->setClientEncoding();
+							#$path = $layerset[$i]['pfad'];
+							$path = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[$i]['pfad']);
+							$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
+							$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
+							$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames']);
+							# weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)  ---> steht weiter unten
 
-            # order by rausnehmen
-						
-						$orderbyposition = strrpos(strtolower($newpath), 'order by');
-						$lastfromposition = strrpos(strtolower($newpath), 'from');
-						if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
-					  	$layerset[$i]['attributes']['orderby'] = ' '.substr($newpath, $orderbyposition);
-					  	$newpath = substr($newpath, 0, $orderbyposition);
-				  	}
-				  	
-				  	# group by rausnehmen
-						$groupbyposition = strrpos(strtolower($newpath), 'group by');
-						if($groupbyposition !== false){
-							$layerset[$i]['attributes']['groupby'] = ' '.substr($newpath, $groupbyposition);
-							$newpath = substr($newpath, 0, $groupbyposition);
-				  	}
-
-            if($privileges == NULL){    # kein Eintrag -> alle Attribute lesbar
-              for($j = 0; $j < count($layerset[$i]['attributes']['name']); $j++){
-                $layerset[$i]['attributes']['privileg'][$j] = '0';
-                $layerset[$i]['attributes']['privileg'][$layerset[$i]['attributes']['name'][$j]] = '0';
-              }
-            }
-            else{
-              for($j = 0; $j < count($layerset[$i]['attributes']['name']); $j++){
-                $layerset[$i]['attributes']['privileg'][$j] = $privileges[$layerset[$i]['attributes']['name'][$j]];
-                $layerset[$i]['attributes']['privileg'][$layerset[$i]['attributes']['name'][$j]] = $privileges[$layerset[$i]['attributes']['name'][$j]];
-              }
-            }
-            # Wenn kein Template --> generischer Layereditor: Pfad um oids der verwendeten Tabellen erweitern (erstmal testweise rausgenommen)
-            #if($layerset[$i]['template'] == ''){
-              $distinctpos = strpos(strtolower($newpath), 'distinct');
-              if($distinctpos !== false && $distinctpos < 10){
-                $pfad = substr(trim($newpath), $distinctpos+8);
-                $distinct = true;
-              }
-              else{
-                $pfad = substr(trim($newpath), 7);
-              }
-              $j = 0;
-              foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-                if($layerset[$i]['attributes']['oids'][$j]){      # hat Tabelle oids?
-                  $pfad = $layerset[$i]['attributes']['table_alias_name'][$tablename].'.oid AS '.$tablename.'_oid, '.$pfad;
-                }
-                $j++;
-              }
-              if($distinct == true){
-                $pfad = 'DISTINCT '.$pfad;
-              }
-            #}
-            #else{
-            #  $pfad = substr(trim($newpath), 7);
-            #}
-
-            /*
-						if(strpos(strtolower($pfad), 'as the_geom') !== false){
-              $the_geom = 'query.the_geom';
-            }
-            else{
-            */
-            	if($layerset[$i]['attributes']['the_geom'] == ''){					# Geometriespalte ist nicht geladen, da auf "nicht sichtbar" gesetzt --> aus Data holen
-            		$data_attributes = $this->mapDB->getDataAttributes($layerdb, $layerset[$i]['Layer_ID']);
-            		$layerset[$i]['attributes']['the_geom'] = $data_attributes['the_geom'];
-            	}
-              /*if($layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']]){
-                $the_geom = $layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$layerset[$i]['attributes']['the_geom'];
-              }
-              else{*/
-                $the_geom = $layerset[$i]['attributes']['the_geom'];
-            //  }
-            //} 
-
-            # Unterscheidung ob mit Suchradius oder ohne gesucht wird
-            if ($this->formvars['searchradius']>0) {
-              $layerset[$i]['toleranceunits']='meters';
-              $layerset[$i]['tolerance']=$this->formvars['searchradius'];
-            }
-            switch ($layerset[$i]['toleranceunits']) {
-              case 'pixels' : $pixsize=$this->user->rolle->pixsize; break;
-              case 'meters' : $pixsize=1; break;
-              default : $pixsize=$this->user->rolle->pixsize;
-            }
-            $rand=$layerset[$i]['tolerance']*$pixsize;
-
-            # Aktueller EPSG in der die Abfrage ausgeführt wurde
-            $client_epsg=$this->user->rolle->epsg_code;
-            # EPSG-Code des Layers der Abgefragt werden soll
-            $layer_epsg=$layerset[$i]['epsg_code'];
-            # Bildung der Where-Klausel für die räumliche Abfrage mit der searchbox
-            $searchbox_wkt ="POLYGON((";
-            $searchbox_wkt.=strval($rect->minx)." ".strval($rect->miny).",";
-            $searchbox_wkt.=strval($rect->maxx)." ".strval($rect->miny).",";
-            $searchbox_wkt.=strval($rect->maxx)." ".strval($rect->maxy).",";
-            $searchbox_wkt.=strval($rect->minx)." ".strval($rect->maxy).",";
-            $searchbox_wkt.=strval($rect->minx)." ".strval($rect->miny)."))";
-            
-            if($this->querypolygon != ''){
-              $searchbox_wkt = $this->querypolygon;
-            }
-
-            # ---------- punktuelle Suche ---------- #
-            if ($rect->minx==$rect->maxx AND $rect->miny==$rect->maxy AND $this->querypolygon == '') {
-            	$loosesearchbox_wkt ="POLYGON((";
-	            $loosesearchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->miny-$rand).",";
-	            $loosesearchbox_wkt.=strval($rect->maxx+$rand)." ".strval($rect->miny-$rand).",";
-	            $loosesearchbox_wkt.=strval($rect->maxx+$rand)." ".strval($rect->maxy+$rand).",";
-	            $loosesearchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->maxy+$rand).",";
-	            $loosesearchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->miny-$rand)."))";
-              # Behandlung der Suchanfrage mit Punkt, exakte Suche im Kreis
-              if ($client_epsg!=$layer_epsg) {
-              	$sql_where =" AND ".$the_geom." && st_transform(st_geomfromtext('".$loosesearchbox_wkt."',".$client_epsg."),".$layer_epsg.")";
-                $sql_where.=" AND st_distance(".$the_geom.",st_transform(st_geomfromtext('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."),".$layer_epsg."))";
-              }
-              else {
-              	$sql_where =" AND ".$the_geom." && st_geomfromtext('".$loosesearchbox_wkt."',".$client_epsg.")";
-                $sql_where.=" AND st_distance(".$the_geom.",st_geomfromtext('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."))";
-              }
-              $sql_where.=" <= ".$rand;
-            }
-            # ---------- Suche über Polygon ---------- #
-            else {		
-              # Behandlung der Suchanfrage mit Rechteck, exakte Suche im Rechteck
-              if ($client_epsg!=$layer_epsg) {
-                $sql_where =" AND st_intersects(".$the_geom.",st_transform(st_geomfromtext('".$searchbox_wkt."',".$client_epsg."),".$layer_epsg."))";
-              }
-              else {
-                $sql_where =" AND st_intersects(".$the_geom.",st_geomfromtext('".$searchbox_wkt."',".$client_epsg."))";
-              }
-            }
-            # Filter zur Where-Klausel hinzufügen
-            if($layerset[$i]['Filter'] != ''){
-            	$layerset[$i]['Filter'] = str_replace('$userid', $this->user->id, $layerset[$i]['Filter']);
-              $sql_where .= " AND ".$layerset[$i]['Filter'];
-            }
-            if($this->formvars['CMD'] == 'touchquery'){
-            	if(substr_count(strtolower($pfad), ' from ') > 1){			# mehrere froms -> das FROM der Hauptabfrage muss groß geschrieben sein
-            		$fromposition = strpos($pfad, ' FROM ');
-            	}
-            	else{
-            		$fromposition = strpos(strtolower($pfad), ' from ');
-            	}
-            	$new_pfad = $the_geom." ".substr($pfad, $fromposition);
-            	#if($the_geom == 'query.the_geom'){
-	              $sql = "SELECT * FROM (SELECT ".$new_pfad.") as query WHERE 1=1 ".$sql_where;
-	            #}
-	            #else{
-	            #  $sql = "SELECT ".$new_pfad." ".$sql_where;
-	            #}
-	            $ret=$layerdb->execSQL($sql,4, 0);
-	            if(!$ret[0]){
-	            	while($rs=pg_fetch_array($ret[1])){
-	              	$geoms[]=$rs[0];
-	              }
-	            }
-	            if(count($geoms) > 0)$sql = '';
-	            for($g = 0; $g < count($geoms); $g++){
-	            	if($g > 0)$sql .= " UNION ";
-	            	$sql .= "SELECT ".$pfad." AND ".$the_geom." && ('".$geoms[$g]."') AND (st_intersects(".$the_geom.", ('".$geoms[$g]."'::geometry)) OR ".$the_geom." = ('".$geoms[$g]."'))";
-	            }
-            }
-            else{
-	            #if($the_geom == 'query.the_geom'){
-	            	# group by wieder einbauen
-								if($layerset[$i]['attributes']['groupby'] != ''){
-									$pfad .= $layerset[$i]['attributes']['groupby'];
-									$j = 0;
-									foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-												if($layerset[$i]['attributes']['oids'][$j]){      # hat Tabelle oids?
-													$pfad .= ','.$tablename.'_oid ';
-												}
-												$j++;
-									}
-		          	}
-	              $sql = "SELECT * FROM (SELECT ".$pfad.") as query WHERE 1=1 ".$sql_where;
-	            #}
-	            /*else{
-	              $sql = "SELECT ".$pfad." ".$sql_where;
-	              # group by wieder einbauen
-								if($layerset[$i]['attributes']['groupby'] != ''){
-									$sql .= $layerset[$i]['attributes']['groupby'];
-									$j = 0;
-									foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-												if($layerset[$i]['attributes']['oids'][$j]){      # hat Tabelle oids?
-													$sql .= ','.$tablename.'_oid ';
-												}
-												$j++;
-									}
-		          	}
-	            }*/
-            }
-			
-						# order by
-						if($this->formvars['orderby'.$layerset[$i]['Layer_ID']] != ''){									# Fall 1: im GLE soll nach einem Attribut sortiert werden
-							$sql_order = ' ORDER BY '.$this->formvars['orderby'.$layerset[$i]['Layer_ID']];
-						}
-						elseif($layerset[$i]['attributes']['orderby'] != ''){														# Fall 2: der Layer hat im Pfad ein ORDER BY
-							$sql_order = $layerset[$i]['attributes']['orderby'];
-						}
-						if($layerset[$i]['template'] == ''){																				# standardmäßig wird nach der oid sortiert
-							$j = 0;
-							foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-								if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['attributes']['oids'][$j]){      # hat die Haupttabelle oids, dann wird immer ein order by oid gemacht, sonst ist die Sortierung nicht eindeutig
-									if($sql_order == '')$sql_order = ' ORDER BY '.$layerset[$i]['maintable'].'_oid ';
-									else $sql_order .= ', '.$layerset[$i]['maintable'].'_oid ';
-								}
-								$j++;
-							}
-						}
-						if($this->last_query != '' AND $this->last_query[$layerset[$i]['Layer_ID']]['sql'] != ''){
-							$sql = $this->last_query[$layerset[$i]['Layer_ID']]['sql'];
-							if($this->formvars['orderby'.$layerset[$i]['Layer_ID']] == '')$sql_order = $this->last_query[$layerset[$i]['Layer_ID']]['orderby'];
-							$this->formvars['anzahl'] = $this->last_query[$layerset[$i]['Layer_ID']]['limit'];
-							if($this->formvars['offset_'.$layerset[$i]['Layer_ID']] == '')$this->formvars['offset_'.$layerset[$i]['Layer_ID']] = $this->last_query[$layerset[$i]['Layer_ID']]['offset'];
-						}
-
-            # Anhängen des Begrenzers zur Einschränkung der Anzahl der Ergebniszeilen
-            if($this->formvars['anzahl'] == ''){
-              $this->formvars['anzahl'] = MAXQUERYROWS;
-            }
-            $sql_limit =' LIMIT '.$this->formvars['anzahl'];
-            if($this->formvars['offset_'.$layerset[$i]['Layer_ID']] != ''){
-              $sql_limit.=' OFFSET '.$this->formvars['offset_'.$layerset[$i]['Layer_ID']];
-            }
-
-            $layerset[$i]['sql'] = $sql;
-			
-            $ret=$layerdb->execSQL($sql.$sql_order.$sql_limit,4, 0);
-						#echo $sql.$sql_order.$sql_limit;
-            if (!$ret[0]) {
-              while ($rs=pg_fetch_array($ret[1])) {
-                $layerset[$i]['shape'][]=$rs;
-              }
-              # Anzahl der Datensätze abfragen
-              $sql_count = "SELECT count(*) FROM (".$sql.") as foo";
-              $ret=$layerdb->execSQL($sql_count,4, 0);
-              if (!$ret[0]) {
-                $rs=pg_fetch_array($ret[1]);
-                $layerset[$i]['count'] = $rs[0];
-              }
-            }
-            # Hier nach der Abfrage der Sachdaten die weiteren Attributinformationen hinzufügen
-            # Steht an dieser Stelle, weil die Auswahlmöglichkeiten von Auswahlfeldern abhängig sein können
-            $layerset[$i]['attributes'] = $this->mapDB->add_attribute_values($layerset[$i]['attributes'], $layerdb, $layerset[$i]['shape']);
-                     
-						if($layerset[$i]['count'] != 0){
-							if(!$last_query_deleted){			# damit nur die letzte Query gelöscht wird und nicht eine bereits gespeicherte Query eines anderen Layers der aktuellen Abfrage
-								$this->user->rolle->delete_last_query();
-								$last_query_deleted = true;
-							}
-							$this->user->rolle->save_last_query('Sachdaten', $layerset[$i]['Layer_ID'], $sql, $sql_order, $this->formvars['anzahl'], $this->formvars['offset_'.$layerset[$i]['Layer_ID']]);
+							# order by rausnehmen
 							
-							# Querymaps erzeugen
-							if($layerset[$i]['querymap'] == 1 AND $layerset[$i]['attributes']['privileg'][$layerset[$i]['attributes']['the_geom']] >= '0' AND ($layerset[$i]['Datentyp'] == 1 OR $layerset[$i]['Datentyp'] == 2)){
-								for($k = 0; $k < count($layerset[$i]['shape']); $k++){
-									$layerset[$i]['querymaps'][$k] = $this->createQueryMap($layerset[$i], $k);
-								}
+							$orderbyposition = strrpos(strtolower($newpath), 'order by');
+							$lastfromposition = strrpos(strtolower($newpath), 'from');
+							if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
+								$layerset[$i]['attributes']['orderby'] = ' '.substr($newpath, $orderbyposition);
+								$newpath = substr($newpath, 0, $orderbyposition);
 							}
 							
-							# Datendrucklayouts abfragen
-							include_(CLASSPATH.'datendrucklayout.php');
-							$this->ddl = new ddl($this->database);
-							$layerset[$i]['layouts'] = $this->ddl->load_layouts($this->Stelle->id, NULL, $layerset[$i]['Layer_ID'], array(0,1));
-						}            
-            $this->qlayerset[]=$layerset[$i];
+							# group by rausnehmen
+							$groupbyposition = strrpos(strtolower($newpath), 'group by');
+							if($groupbyposition !== false){
+								$layerset[$i]['attributes']['groupby'] = ' '.substr($newpath, $groupbyposition);
+								$newpath = substr($newpath, 0, $groupbyposition);
+							}
+
+							if($privileges == NULL){    # kein Eintrag -> alle Attribute lesbar
+								for($j = 0; $j < count($layerset[$i]['attributes']['name']); $j++){
+									$layerset[$i]['attributes']['privileg'][$j] = '0';
+									$layerset[$i]['attributes']['privileg'][$layerset[$i]['attributes']['name'][$j]] = '0';
+								}
+							}
+							else{
+								for($j = 0; $j < count($layerset[$i]['attributes']['name']); $j++){
+									$layerset[$i]['attributes']['privileg'][$j] = $privileges[$layerset[$i]['attributes']['name'][$j]];
+									$layerset[$i]['attributes']['privileg'][$layerset[$i]['attributes']['name'][$j]] = $privileges[$layerset[$i]['attributes']['name'][$j]];
+								}
+							}
+							# Wenn kein Template --> generischer Layereditor: Pfad um oids der verwendeten Tabellen erweitern (erstmal testweise rausgenommen)
+							#if($layerset[$i]['template'] == ''){
+								$distinctpos = strpos(strtolower($newpath), 'distinct');
+								if($distinctpos !== false && $distinctpos < 10){
+									$pfad = substr(trim($newpath), $distinctpos+8);
+									$distinct = true;
+								}
+								else{
+									$pfad = substr(trim($newpath), 7);
+								}
+								$j = 0;
+								foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
+									if($layerset[$i]['attributes']['oids'][$j]){      # hat Tabelle oids?
+										$pfad = $layerset[$i]['attributes']['table_alias_name'][$tablename].'.oid AS '.$tablename.'_oid, '.$pfad;
+									}
+									$j++;
+								}
+								if($distinct == true){
+									$pfad = 'DISTINCT '.$pfad;
+								}
+							#}
+							#else{
+							#  $pfad = substr(trim($newpath), 7);
+							#}
+
+							/*
+							if(strpos(strtolower($pfad), 'as the_geom') !== false){
+								$the_geom = 'query.the_geom';
+							}
+							else{
+							*/
+								if($layerset[$i]['attributes']['the_geom'] == ''){					# Geometriespalte ist nicht geladen, da auf "nicht sichtbar" gesetzt --> aus Data holen
+									$data_attributes = $this->mapDB->getDataAttributes($layerdb, $layerset[$i]['Layer_ID']);
+									$layerset[$i]['attributes']['the_geom'] = $data_attributes['the_geom'];
+								}
+								/*if($layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']]){
+									$the_geom = $layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$layerset[$i]['attributes']['the_geom'];
+								}
+								else{*/
+									$the_geom = $layerset[$i]['attributes']['the_geom'];
+							//  }
+							//} 
+
+							# Unterscheidung ob mit Suchradius oder ohne gesucht wird
+							if ($this->formvars['searchradius']>0) {
+								$layerset[$i]['toleranceunits']='meters';
+								$layerset[$i]['tolerance']=$this->formvars['searchradius'];
+							}
+							switch ($layerset[$i]['toleranceunits']) {
+								case 'pixels' : $pixsize=$this->user->rolle->pixsize; break;
+								case 'meters' : $pixsize=1; break;
+								default : $pixsize=$this->user->rolle->pixsize;
+							}
+							$rand=$layerset[$i]['tolerance']*$pixsize;
+
+							# Aktueller EPSG in der die Abfrage ausgeführt wurde
+							$client_epsg=$this->user->rolle->epsg_code;
+							# EPSG-Code des Layers der Abgefragt werden soll
+							$layer_epsg=$layerset[$i]['epsg_code'];
+							# Bildung der Where-Klausel für die räumliche Abfrage mit der searchbox
+							$searchbox_wkt ="POLYGON((";
+							$searchbox_wkt.=strval($rect->minx)." ".strval($rect->miny).",";
+							$searchbox_wkt.=strval($rect->maxx)." ".strval($rect->miny).",";
+							$searchbox_wkt.=strval($rect->maxx)." ".strval($rect->maxy).",";
+							$searchbox_wkt.=strval($rect->minx)." ".strval($rect->maxy).",";
+							$searchbox_wkt.=strval($rect->minx)." ".strval($rect->miny)."))";
+							
+							if($this->querypolygon != ''){
+								$searchbox_wkt = $this->querypolygon;
+							}
+
+							# ---------- punktuelle Suche ---------- #
+							if ($rect->minx==$rect->maxx AND $rect->miny==$rect->maxy AND $this->querypolygon == '') {
+								$loosesearchbox_wkt ="POLYGON((";
+								$loosesearchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->miny-$rand).",";
+								$loosesearchbox_wkt.=strval($rect->maxx+$rand)." ".strval($rect->miny-$rand).",";
+								$loosesearchbox_wkt.=strval($rect->maxx+$rand)." ".strval($rect->maxy+$rand).",";
+								$loosesearchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->maxy+$rand).",";
+								$loosesearchbox_wkt.=strval($rect->minx-$rand)." ".strval($rect->miny-$rand)."))";
+								# Behandlung der Suchanfrage mit Punkt, exakte Suche im Kreis
+								if ($client_epsg!=$layer_epsg) {
+									$sql_where =" AND ".$the_geom." && st_transform(st_geomfromtext('".$loosesearchbox_wkt."',".$client_epsg."),".$layer_epsg.")";
+									$sql_where.=" AND st_distance(".$the_geom.",st_transform(st_geomfromtext('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."),".$layer_epsg."))";
+								}
+								else {
+									$sql_where =" AND ".$the_geom." && st_geomfromtext('".$loosesearchbox_wkt."',".$client_epsg.")";
+									$sql_where.=" AND st_distance(".$the_geom.",st_geomfromtext('POINT(".$rect->minx." ".$rect->miny.")',".$client_epsg."))";
+								}
+								$sql_where.=" <= ".$rand;
+							}
+							# ---------- Suche über Polygon ---------- #
+							else {		
+								# Behandlung der Suchanfrage mit Rechteck, exakte Suche im Rechteck
+								if ($client_epsg!=$layer_epsg) {
+									$sql_where =" AND st_intersects(".$the_geom.",st_transform(st_geomfromtext('".$searchbox_wkt."',".$client_epsg."),".$layer_epsg."))";
+								}
+								else {
+									$sql_where =" AND st_intersects(".$the_geom.",st_geomfromtext('".$searchbox_wkt."',".$client_epsg."))";
+								}
+							}
+							# Filter zur Where-Klausel hinzufügen
+							if($layerset[$i]['Filter'] != ''){
+								$layerset[$i]['Filter'] = str_replace('$userid', $this->user->id, $layerset[$i]['Filter']);
+								$sql_where .= " AND ".$layerset[$i]['Filter'];
+							}
+							if($this->formvars['CMD'] == 'touchquery'){
+								if(substr_count(strtolower($pfad), ' from ') > 1){			# mehrere froms -> das FROM der Hauptabfrage muss groß geschrieben sein
+									$fromposition = strpos($pfad, ' FROM ');
+								}
+								else{
+									$fromposition = strpos(strtolower($pfad), ' from ');
+								}
+								$new_pfad = $the_geom." ".substr($pfad, $fromposition);
+								#if($the_geom == 'query.the_geom'){
+									$sql = "SELECT * FROM (SELECT ".$new_pfad.") as query WHERE 1=1 ".$sql_where;
+								#}
+								#else{
+								#  $sql = "SELECT ".$new_pfad." ".$sql_where;
+								#}
+								$ret=$layerdb->execSQL($sql,4, 0);
+								if(!$ret[0]){
+									while($rs=pg_fetch_array($ret[1])){
+										$geoms[]=$rs[0];
+									}
+								}
+								if(count($geoms) > 0)$sql = '';
+								for($g = 0; $g < count($geoms); $g++){
+									if($g > 0)$sql .= " UNION ";
+									$sql .= "SELECT ".$pfad." AND ".$the_geom." && ('".$geoms[$g]."') AND (st_intersects(".$the_geom.", ('".$geoms[$g]."'::geometry)) OR ".$the_geom." = ('".$geoms[$g]."'))";
+								}
+							}
+							else{
+								#if($the_geom == 'query.the_geom'){
+									# group by wieder einbauen
+									if($layerset[$i]['attributes']['groupby'] != ''){
+										$pfad .= $layerset[$i]['attributes']['groupby'];
+										$j = 0;
+										foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
+													if($layerset[$i]['attributes']['oids'][$j]){      # hat Tabelle oids?
+														$pfad .= ','.$tablename.'_oid ';
+													}
+													$j++;
+										}
+									}
+									$sql = "SELECT * FROM (SELECT ".$pfad.") as query WHERE 1=1 ".$sql_where;
+								#}
+								/*else{
+									$sql = "SELECT ".$pfad." ".$sql_where;
+									# group by wieder einbauen
+									if($layerset[$i]['attributes']['groupby'] != ''){
+										$sql .= $layerset[$i]['attributes']['groupby'];
+										$j = 0;
+										foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
+													if($layerset[$i]['attributes']['oids'][$j]){      # hat Tabelle oids?
+														$sql .= ','.$tablename.'_oid ';
+													}
+													$j++;
+										}
+									}
+								}*/
+							}
+				
+							# order by
+							if($this->formvars['orderby'.$layerset[$i]['Layer_ID']] != ''){									# Fall 1: im GLE soll nach einem Attribut sortiert werden
+								$sql_order = ' ORDER BY '.$this->formvars['orderby'.$layerset[$i]['Layer_ID']];
+							}
+							elseif($layerset[$i]['attributes']['orderby'] != ''){														# Fall 2: der Layer hat im Pfad ein ORDER BY
+								$sql_order = $layerset[$i]['attributes']['orderby'];
+							}
+							if($layerset[$i]['template'] == ''){																				# standardmäßig wird nach der oid sortiert
+								$j = 0;
+								foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
+									if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['attributes']['oids'][$j]){      # hat die Haupttabelle oids, dann wird immer ein order by oid gemacht, sonst ist die Sortierung nicht eindeutig
+										if($sql_order == '')$sql_order = ' ORDER BY '.$layerset[$i]['maintable'].'_oid ';
+										else $sql_order .= ', '.$layerset[$i]['maintable'].'_oid ';
+									}
+									$j++;
+								}
+							}
+							if($this->last_query != '' AND $this->last_query[$layerset[$i]['Layer_ID']]['sql'] != ''){
+								$sql = $this->last_query[$layerset[$i]['Layer_ID']]['sql'];
+								if($this->formvars['orderby'.$layerset[$i]['Layer_ID']] == '')$sql_order = $this->last_query[$layerset[$i]['Layer_ID']]['orderby'];
+								$this->formvars['anzahl'] = $this->last_query[$layerset[$i]['Layer_ID']]['limit'];
+								if($this->formvars['offset_'.$layerset[$i]['Layer_ID']] == '')$this->formvars['offset_'.$layerset[$i]['Layer_ID']] = $this->last_query[$layerset[$i]['Layer_ID']]['offset'];
+							}
+
+							# Anhängen des Begrenzers zur Einschränkung der Anzahl der Ergebniszeilen
+							if($this->formvars['anzahl'] == ''){
+								$this->formvars['anzahl'] = MAXQUERYROWS;
+							}
+							$sql_limit =' LIMIT '.$this->formvars['anzahl'];
+							if($this->formvars['offset_'.$layerset[$i]['Layer_ID']] != ''){
+								$sql_limit.=' OFFSET '.$this->formvars['offset_'.$layerset[$i]['Layer_ID']];
+							}
+
+							$layerset[$i]['sql'] = $sql;
+				
+							$ret=$layerdb->execSQL($sql.$sql_order.$sql_limit,4, 0);
+							#echo $sql.$sql_order.$sql_limit;
+							if (!$ret[0]) {
+								while ($rs=pg_fetch_array($ret[1])) {
+									$layerset[$i]['shape'][]=$rs;
+								}
+								# Anzahl der Datensätze abfragen
+								$sql_count = "SELECT count(*) FROM (".$sql.") as foo";
+								$ret=$layerdb->execSQL($sql_count,4, 0);
+								if (!$ret[0]) {
+									$rs=pg_fetch_array($ret[1]);
+									$layerset[$i]['count'] = $rs[0];
+								}
+							}
+							# Hier nach der Abfrage der Sachdaten die weiteren Attributinformationen hinzufügen
+							# Steht an dieser Stelle, weil die Auswahlmöglichkeiten von Auswahlfeldern abhängig sein können
+							$layerset[$i]['attributes'] = $this->mapDB->add_attribute_values($layerset[$i]['attributes'], $layerdb, $layerset[$i]['shape']);
+											 
+							if($layerset[$i]['count'] != 0){
+								if(!$last_query_deleted){			# damit nur die letzte Query gelöscht wird und nicht eine bereits gespeicherte Query eines anderen Layers der aktuellen Abfrage
+									$this->user->rolle->delete_last_query();
+									$last_query_deleted = true;
+								}
+								$this->user->rolle->save_last_query('Sachdaten', $layerset[$i]['Layer_ID'], $sql, $sql_order, $this->formvars['anzahl'], $this->formvars['offset_'.$layerset[$i]['Layer_ID']]);
+								
+								# Querymaps erzeugen
+								if($layerset[$i]['querymap'] == 1 AND $layerset[$i]['attributes']['privileg'][$layerset[$i]['attributes']['the_geom']] >= '0' AND ($layerset[$i]['Datentyp'] == 1 OR $layerset[$i]['Datentyp'] == 2)){
+									for($k = 0; $k < count($layerset[$i]['shape']); $k++){
+										$layerset[$i]['querymaps'][$k] = $this->createQueryMap($layerset[$i], $k);
+									}
+								}
+								
+								# Datendrucklayouts abfragen
+								include_(CLASSPATH.'datendrucklayout.php');
+								$this->ddl = new ddl($this->database);
+								$layerset[$i]['layouts'] = $this->ddl->load_layouts($this->Stelle->id, NULL, $layerset[$i]['Layer_ID'], array(0,1));
+							}            
+							$this->qlayerset[]=$layerset[$i];
+						}
           }  break; # ende Layer ist aus postgis
 
           case MS_WMS : {
