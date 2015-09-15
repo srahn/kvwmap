@@ -786,12 +786,17 @@ class ddl {
   }
   
   function addfreetext($formvars){
+		$i = $formvars['textcount'] - 1;
+		if($formvars['textsize'.$i] != '')$size = $formvars['textsize'.$i];	else $size = 11;
+		if($formvars['textfont'.$i] != '')$font = $formvars['textfont'.$i];
+		if($formvars['textposx'.$i] != '')$posx = $formvars['textposx'.$i]; else $posx = 70;
+		if($formvars['textposy'.$i] != '')$posy = $formvars['textposy'.$i]-20; else $posy = 0;
     $sql = 'INSERT INTO druckfreitexte SET';
     $sql .= ' text = "",';
-    $sql .= ' posx = 0,';
-    $sql .= ' posy = 0,';
-    $sql .= ' size = 0,';
-    $sql .= ' font = "",';
+    $sql .= ' posx = '.$posx.',';
+    $sql .= ' posy = '.$posy.',';
+    $sql .= ' size = '.$size.',';
+    $sql .= ' font = "'.$font.'",';
     $sql .= ' angle = 0';
     $this->debug->write("<p>file:kvwmap class:ddl->addfreetext :",4);
     $this->database->execSQL($sql,4, 1);
