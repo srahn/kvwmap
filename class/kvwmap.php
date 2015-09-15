@@ -7645,6 +7645,7 @@ class GUI {
     $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
     $this->ddl->update_layout($this->formvars, $this->attributes, $_files);
     $this->ddl->addfreetext($this->formvars);
+		$this->scrolldown = true;
 		$this->sachdaten_druck_editor();
 	}
 	

@@ -50,6 +50,9 @@ function message(text){
 }
 
 function onload_functions(){
+	<? if($this->scrolldown){ ?>
+	window.scrollTo(0,document.body.scrollHeight);	
+	<? } ?>
 	if(document.getElementById('scrolldiv') != undefined){
 		document.getElementById('scrolldiv').scrollTop = <? echo $this->user->rolle->scrollposition; ?>;
 	}
