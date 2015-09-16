@@ -634,17 +634,23 @@ show_all = function(count){
             #$flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],$flst->hist_alb);
 						$flst->Buchungen=$flst->getBuchungen(NULL,NULL,$flst->hist_alb);
             for ($b=0;$b<count($flst->Buchungen);$b++) {
-                if($privileg_['bestandsnr']){
-                  $BestandStr ='<a href="index.php?go=Grundbuchblatt_Auswaehlen_Suchen&selBlatt='.$flst->Buchungen[$b]['bezirk'].'-'.$flst->Buchungen[$b]['blatt'].'">'.$flst->Buchungen[$b]['bezirk'].'-'.ltrim($flst->Buchungen[$b]['blatt'], '0').'</a>';
-                  $BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
-                    $BestandStr.=' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
-                    $BestandStr.=' ('.$flst->Buchungen[$b]['buchungsart'].')';
-                    $BestandStr.=' '.$flst->Buchungen[$b]['bezeichnung']; ?>
-              <tr>
-                <td>Bestand</td>
-                <td colspan="2"><? echo $BestandStr; ?></td>
-              </tr>
-              <? }
+							if($privileg_['bestandsnr']){
+								$BestandStr ='<a href="index.php?go=Grundbuchblatt_Auswaehlen_Suchen&selBlatt='.$flst->Buchungen[$b]['bezirk'].'-'.$flst->Buchungen[$b]['blatt'].'">'.$flst->Buchungen[$b]['bezirk'].'-'.ltrim($flst->Buchungen[$b]['blatt'], '0').'</a>';
+								$BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
+									$BestandStr.=' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
+									$BestandStr.=' ('.$flst->Buchungen[$b]['buchungsart'].')';
+									$BestandStr.=' '.$flst->Buchungen[$b]['bezeichnung']; ?>
+								<tr>
+									<td>Bestand</td>
+									<td colspan="2"><? echo $BestandStr; ?></td>
+								</tr>
+              <? if($flst->Buchungen[$b]['blattart'] == 3000){ ?>
+								<tr>
+									<td></td>
+									<td colspan="2">Im Grundbuch noch nicht gebucht.</td>
+								</tr>
+							<? }
+							}
               $Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
                   $anzEigentuemer=count($Eigentuemerliste);
                   for ($e=0;$e<$anzEigentuemer;$e++) { ?>
