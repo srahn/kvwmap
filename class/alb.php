@@ -34,7 +34,7 @@ class ALB {
 		return $values[$index['JSESSIONID'][0]]['value'];
 	}
 		
-	function dhk_call_getPDF($url, $sessionid, $nasfile){
+	function dhk_call_getPDF($url, $sessionid, $nasfile, $filename){
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_POST, true);
@@ -56,7 +56,7 @@ class ALB {
 		header("Content-Type: application/force-download"); 
 		header("Content-Type: application/octet-stream"); 
 		header("Content-Type: application/download"); 
-		header('Content-Disposition: attachment; filename=test.'.$type); 
+		header('Content-Disposition: attachment; filename='.$filename.'.'.$type); 
 		header("Content-Transfer-Encoding: binary"); 
 		return $result;
 	}
