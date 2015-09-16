@@ -180,7 +180,7 @@ class ALB {
     if($formvars['status']){ $csv .= 'Status;';}
     if($formvars['vorgaenger']){ $csv .= 'Vorgaenger;';}
     if($formvars['nachfolger']){ $csv .= 'Nachfolger;';}
-    $csv .= utf8_encode('Klassifizierung-ALB;Klass-Fläche-ALB;EMZ-ALB;Klassifizierung-ALK;Klass-Fläche-ALK;EMZ-ALK;gesamt;');
+    $csv .= utf8_encode('Klassifizierung;Klass-Fläche;EMZ;gesamt;');
     if($formvars['freitext']){ $csv .= 'Freitext;';}
     if($formvars['hinweis']){ $csv .= 'Hinweis;';}
     if($formvars['baulasten']){ $csv .= 'Baulasten;';}
@@ -300,7 +300,7 @@ class ALB {
 						$csv .= utf8_encode(' Grünland gesamt: EMZ '.$emzges_223.' , BWZ '.$BWZ_223);
 					}
 				}
-				$csv .= ';;;;';
+				$csv .= ';';
         	      
 	      if($formvars['freitext']) {
 	        for($j = 0; $j < count($flst->FreiText); $j++){
@@ -454,7 +454,7 @@ class ALB {
     if($formvars['status']){ $csv .= 'Status;';}
     if($formvars['vorgaenger']){ $csv .= 'Vorgaenger;';}
     if($formvars['nachfolger']){ $csv .= 'Nachfolger;';}
-  	if($formvars['klassifizierung']){ $csv .= 'Klassifizierung-ALB;Klassifizierung-ALK;';}
+  	if($formvars['klassifizierung']){ $csv .= 'Klassifizierung;';}
     if($formvars['freitext']){ $csv .= 'Freitext;';}
     if($formvars['hinweis']){ $csv .= 'Hinweis;';}
     if($formvars['baulasten']){ $csv .= 'Baulasten;';}
@@ -566,7 +566,6 @@ class ALB {
 								$BWZ_223 = round($emzges_223/$flaeche_223*100);
 								$csv .= utf8_encode('Grünland gesamt: EMZ '.$emzges_223.', BWZ '.$BWZ_223." \n");
 							}
-			        $csv .= '";"';
 			        $csv .= '";';
 			      }      
 				      if($formvars['freitext']) {
@@ -685,7 +684,7 @@ class ALB {
     if($formvars['status']){ $csv .= 'Status;';}
     if($formvars['vorgaenger']){ $csv .= 'Vorgaenger;';}
     if($formvars['nachfolger']){ $csv .= 'Nachfolger;';}
-  	if($formvars['klassifizierung']){ $csv .= 'Klassifizierung-ALB;Klassifizierung-ALK;';}
+  	if($formvars['klassifizierung']){ $csv .= 'Klassifizierung;';}
     if($formvars['freitext']){ $csv .= 'Freitext;';}
     if($formvars['hinweis']){ $csv .= 'Hinweis;';}
     if($formvars['baulasten']){ $csv .= 'Baulasten;';}
@@ -794,7 +793,6 @@ class ALB {
 					$BWZ_223 = round($emzges_223/$flaeche_223*100);
 					$csv .= utf8_encode('Grünland gesamt: EMZ '.$emzges_223.', BWZ '.$BWZ_223." \n");
 				}
-        $csv .= '";"';
         $csv .= '";';
       }      
 	      if($formvars['freitext']) {
@@ -945,7 +943,7 @@ class ALB {
     if($formvars['status']){ $csv .= 'Status;';}
     if($formvars['vorgaenger']){ $csv .= 'Vorgaenger;';}
     if($formvars['nachfolger']){ $csv .= 'Nachfolger;';}
-    if($formvars['klassifizierung']){ $csv .= 'Klassifizierung-ALB;Klassifizierung-ALK;';}
+    if($formvars['klassifizierung']){ $csv .= 'Klassifizierung;';}
     if($formvars['freitext']){ $csv .= 'Freitext;';}
     if($formvars['hinweis']){ $csv .= 'Hinweis;';}
     if($formvars['baulasten']){ $csv .= 'Baulasten;';}
@@ -1048,8 +1046,7 @@ class ALB {
 				if($emzges_223 > 0){
 					$BWZ_223 = round($emzges_223/$flaeche_223*100);
 					$csv .= utf8_encode('Grünland gesamt: EMZ '.$emzges_223.', BWZ '.$BWZ_223." \n");
-				}
-				$csv .= '";"';        
+				}      
         $csv .= '";';
       }      
       if($formvars['freitext']) {
