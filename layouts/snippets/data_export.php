@@ -31,8 +31,10 @@ function buildwktpolygonfromsvgpath(svgpath){
 function update_coords(){
 	if(document.GUI.export_format.value == 'CSV'){
 		document.getElementById('coord_div').style.display = 'none';
+		document.getElementById('geom_div').style.display = 'none';
 	}
 	else{
+		document.getElementById('geom_div').style.display = '';
 		document.getElementById('coord_div').style.display = 'inline';
 		if(document.GUI.export_format.value == 'KML'){
 			document.getElementById('wgs84').style.display = 'inline';
@@ -182,7 +184,7 @@ $j=0;
 						if($this->data_import_export->attributes['form_element_type'][$j] == 'Dokument')$document_attributes = true;
 						if($this->data_import_export->attributes['name'][$j] == $this->data_import_export->attributes['the_geom'] AND $this->data_import_export->layerdaten['export_privileg'][$selectindex] != 1) continue;
 					?>
-      	  <div style="padding: 4px;">
+      	  <div style="padding: 4px;<? if($this->data_import_export->attributes['name'][$j] == $this->data_import_export->attributes['the_geom']){if($this->formvars['export_format'] == 'CSV'){echo 'display:none"';} echo '" id="geom_div';} ?>">
       	  <input id="check_attribute_<? echo $j; ?>" type="checkbox" <? if($this->formvars['load'] OR $this->formvars['check_'.$this->data_import_export->attributes['name'][$j]] == 1)echo 'checked'; ?> value="1" name="check_<? echo $this->data_import_export->attributes['name'][$j]; ?>">
       	  <?php
       	  if($this->data_import_export->attributes['alias'][$j] != ''){
