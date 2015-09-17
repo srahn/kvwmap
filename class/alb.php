@@ -200,6 +200,7 @@ class ALB {
       $flst = new flurstueck($flurstkennz,$this->database);
       $flst->readALB_Data($flurstkennz);
 			$flst->Grundbuecher=$flst->getGrundbuecher();
+			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,0);
 			$emzges_222 = 0; $emzges_223 = 0;
 			$flaeche_222 = 0; $flaeche_223 = 0;
 			$limit = count($flst->Klassifizierung)+2;
@@ -345,24 +346,18 @@ class ALB {
 	      }
 	      
 					if($formvars['blattnr']){
-		        for($g = 0; $g < count($flst->Grundbuecher); $g++){
-		          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
-		          for($b = 0; $b < count($flst->Buchungen); $b++){
-		          	if($b > 0)$csv .= ' | ';
-		            $csv .= intval($flst->Buchungen[$b]['blatt']).'|';
-		          }
-		        }
+						for($b = 0; $b < count($flst->Buchungen); $b++){
+							if($b > 0)$csv .= ' | ';
+							$csv .= intval($flst->Buchungen[$b]['blatt']).'|';
+						}
 		        $csv .= ';';
 			    }
 			    
 			    if($formvars['pruefzeichen']){
-		        for($g = 0; $g < count($flst->Grundbuecher); $g++){
-		          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
-		          for($b = 0; $b < count($flst->Buchungen); $b++){
-		          	if($b > 0)$csv .= ' | ';
-		            $csv .= str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
-		          }
-		        }
+						for($b = 0; $b < count($flst->Buchungen); $b++){
+							if($b > 0)$csv .= ' | ';
+							$csv .= str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
+						}
 		        $csv .= ';';
 			    }
 			    
@@ -372,33 +367,24 @@ class ALB {
 		      }
 			    
 			    if($formvars['bvnr']){
-		        for($g = 0; $g < count($flst->Grundbuecher); $g++){
-		          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
-		          for($b = 0; $b < count($flst->Buchungen); $b++){
-		          	if($b > 0)$csv .= ' | ';
-		            $csv .= ' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
-		          }
-		        }
+						for($b = 0; $b < count($flst->Buchungen); $b++){
+							if($b > 0)$csv .= ' | ';
+							$csv .= ' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
+						}
 		        $csv .= ';';
 			    }
 			    
 			    if($formvars['buchungsart']){
-		        for($g = 0; $g < count($flst->Grundbuecher); $g++){
-		          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
-		          for($b = 0; $b < count($flst->Buchungen); $b++){
-		          	if($b > 0)$csv .= ' | ';
-		            $csv .= ' ('.$flst->Buchungen[$b]['buchungsart'].')';
-		            $csv .= ' '.$flst->Buchungen[$b]['bezeichnung'];
-		          }
-		        }
+						for($b = 0; $b < count($flst->Buchungen); $b++){
+							if($b > 0)$csv .= ' | ';
+							$csv .= ' ('.$flst->Buchungen[$b]['buchungsart'].')';
+							$csv .= ' '.$flst->Buchungen[$b]['bezeichnung'];
+						}
 		        $csv .= ';';
 		      }
 	      
 	      if($formvars['eigentuemer']){
 	      	$csv .= '"';
-	        for($g = 0; $g < count($flst->Grundbuecher); $g++){
-	        	if($g > 0)$csv .= "\n";
-	          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
 	          for($b = 0; $b < count($flst->Buchungen); $b++){
 	          	if($b > 0)$csv .= "\n";
 	            $Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
@@ -412,7 +398,6 @@ class ALB {
 	              }
 	            }
 	          }
-	        }
 	        $csv .= '";';
 	      }
 	      $csv .= chr(10);
@@ -475,179 +460,176 @@ class ALB {
       $flst = new flurstueck($flurstkennz,$this->database);
       $flst->readALB_Data($flurstkennz);
       $flst->Grundbuecher=$flst->getGrundbuecher();
-      for($g = 0; $g < count($flst->Grundbuecher); $g++){
-          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
-          for($b = 0; $b < count($flst->Buchungen); $b++){
-            $Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
-            $anzEigentuemer=count($Eigentuemerliste);
-            for($e=0;$e<$anzEigentuemer;$e++){
-      
-				      if($formvars['flurstkennz']){ $csv .= $flst->FlurstKennz.';';}
-				      if($formvars['flurstkennz']){ $csv .= "'".$flst->FlurstNr."';";}
-				      if($formvars['gemkgname']){ $csv .= $flst->GemkgName.';';}
-				      if($formvars['gemkgschl']){ $csv .= $flst->GemkgSchl.';';}
-				      if($formvars['flurnr']){ $csv .= $flst->FlurNr.';';}
-				      if($formvars['gemeindename']){ $csv .= $flst->GemeindeName.';';}
-				      if($formvars['gemeinde']){ $csv .= $flst->GemeindeID.';';}
-				      if($formvars['kreisname']){ $csv .= $flst->KreisName.';';}
-				      if($formvars['kreisid']){ $csv .= $flst->KreisID.';';}
-				      if($formvars['finanzamtname']){ $csv .= $flst->FinanzamtName.';';}
-				      if($formvars['finanzamt']){ $csv .= $flst->FinanzamtSchl.';';}
-				      if($formvars['forstname']){ $csv .= $flst->Forstamt['name'].';';}
-				      if($formvars['forstschluessel']){ $csv .= '00'.$flst->Forstamt['schluessel'].';';}
-				      if($formvars['flaeche']){ $csv .= $flst->ALB_Flaeche.';';}
-				      if($formvars['amtsgerichtnr']){ $csv .= $flst->Amtsgericht['schluessel'].';';}
-				      if($formvars['amtsgerichtname']){ $csv .= $flst->Amtsgericht['name'].';';}
-				      if($formvars['grundbuchbezirkschl']){ $csv .= $flst->Grundbuchbezirk['schluessel'].';';}
-				      if($formvars['grundbuchbezirkname']){ $csv .= $flst->Grundbuchbezirk['name'].';';}
-				      if($formvars['lagebezeichnung']){
-				        $anzStrassen=count($flst->Adresse);
-				        for ($s=0;$s<$anzStrassen;$s++) {
-				          $csv .= $flst->Adresse[$s]["gemeindename"].' ';
-				          $csv .= $flst->Adresse[$s]["strassenname"].' ';
-				          $csv .= $flst->Adresse[$s]["hausnr"].' ';
-				        }
-				        $anzLage=count($flst->Lage);
-				        $Lage='';
-				        for ($j=0;$j<$anzLage;$j++) {
-				          $Lage.=' '.$flst->Lage[$j];
-				        }
-				        if ($Lage!='') {
-				          $csv .= TRIM($Lage);
-				        }
-				        $csv .= ';';
-				      }
-				      if($formvars['entsteh']){ $csv .= $flst->Entstehung.';';}
-				      if($formvars['letzff']){ $csv .= $flst->LetzteFF.';';}
-				      if($formvars['karte']){ $csv .= $flst->Flurkarte.';';}
-				      if($formvars['status']){ $csv .= $flst->Status.';';}
-				      if($formvars['vorgaenger']){
-				        for($v = 0; $v < count($flst->Vorgaenger); $v++){
-				          $csv .= $flst->Vorgaenger[$v]['vorgaenger'].' ';
-				        }
-				        $csv .= ';';
-				      }
-				      if($formvars['nachfolger']){
-				        for($v = 0; $v < count($flst->Nachfolger); $v++){
-				          $csv .= $flst->Nachfolger[$v]['nachfolger'].' ';
-				        }
-				        $csv .= ';';
-				      }
-            if($formvars['klassifizierung']){
-							$csv .= '"';
-							$emzges_222 = 0; $emzges_223 = 0;
-							$flaeche_222 = 0; $flaeche_223 = 0;
-							for($j = 0; $j < count($flst->Klassifizierung); $j++){
-								if($flst->Klassifizierung[$j]['flaeche'] != ''){
-									$wert=$flst->Klassifizierung[$j]['wert'];
-									$emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
-									if($flst->Klassifizierung[$j]['objart'] == 1000){
-										$emzges_222 = $emzges_222 + $emz;
-										$flaeche_222 = $flaeche_222 + $flst->Klassifizierung[$j]['flaeche'];
-									}
-									if($flst->Klassifizierung[$j]['objart'] == 3000){
-										$emzges_223 = $emzges_223 + $emz;
-										$flaeche_223 = $flaeche_223 + $flst->Klassifizierung[$j]['flaeche'];
-									}
-									$csv .= utf8_encode(round($flst->Klassifizierung[$j]['flaeche']).' m² ');
-									$csv .= $flst->Klassifizierung[$j]['label'];
-									$csv .= ' EMZ: '.$emz." \n";
+			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,0);
+				for($b = 0; $b < count($flst->Buchungen); $b++){
+					$Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
+					$anzEigentuemer=count($Eigentuemerliste);
+					for($e=0;$e<$anzEigentuemer;$e++){
+						if($formvars['flurstkennz']){ $csv .= $flst->FlurstKennz.';';}
+						if($formvars['flurstkennz']){ $csv .= "'".$flst->FlurstNr."';";}
+						if($formvars['gemkgname']){ $csv .= $flst->GemkgName.';';}
+						if($formvars['gemkgschl']){ $csv .= $flst->GemkgSchl.';';}
+						if($formvars['flurnr']){ $csv .= $flst->FlurNr.';';}
+						if($formvars['gemeindename']){ $csv .= $flst->GemeindeName.';';}
+						if($formvars['gemeinde']){ $csv .= $flst->GemeindeID.';';}
+						if($formvars['kreisname']){ $csv .= $flst->KreisName.';';}
+						if($formvars['kreisid']){ $csv .= $flst->KreisID.';';}
+						if($formvars['finanzamtname']){ $csv .= $flst->FinanzamtName.';';}
+						if($formvars['finanzamt']){ $csv .= $flst->FinanzamtSchl.';';}
+						if($formvars['forstname']){ $csv .= $flst->Forstamt['name'].';';}
+						if($formvars['forstschluessel']){ $csv .= '00'.$flst->Forstamt['schluessel'].';';}
+						if($formvars['flaeche']){ $csv .= $flst->ALB_Flaeche.';';}
+						if($formvars['amtsgerichtnr']){ $csv .= $flst->Amtsgericht['schluessel'].';';}
+						if($formvars['amtsgerichtname']){ $csv .= $flst->Amtsgericht['name'].';';}
+						if($formvars['grundbuchbezirkschl']){ $csv .= $flst->Grundbuchbezirk['schluessel'].';';}
+						if($formvars['grundbuchbezirkname']){ $csv .= $flst->Grundbuchbezirk['name'].';';}
+						if($formvars['lagebezeichnung']){
+							$anzStrassen=count($flst->Adresse);
+							for ($s=0;$s<$anzStrassen;$s++) {
+								$csv .= $flst->Adresse[$s]["gemeindename"].' ';
+								$csv .= $flst->Adresse[$s]["strassenname"].' ';
+								$csv .= $flst->Adresse[$s]["hausnr"].' ';
+							}
+							$anzLage=count($flst->Lage);
+							$Lage='';
+							for ($j=0;$j<$anzLage;$j++) {
+								$Lage.=' '.$flst->Lage[$j];
+							}
+							if ($Lage!='') {
+								$csv .= TRIM($Lage);
+							}
+							$csv .= ';';
+						}
+						if($formvars['entsteh']){ $csv .= $flst->Entstehung.';';}
+						if($formvars['letzff']){ $csv .= $flst->LetzteFF.';';}
+						if($formvars['karte']){ $csv .= $flst->Flurkarte.';';}
+						if($formvars['status']){ $csv .= $flst->Status.';';}
+						if($formvars['vorgaenger']){
+							for($v = 0; $v < count($flst->Vorgaenger); $v++){
+								$csv .= $flst->Vorgaenger[$v]['vorgaenger'].' ';
+							}
+							$csv .= ';';
+						}
+						if($formvars['nachfolger']){
+							for($v = 0; $v < count($flst->Nachfolger); $v++){
+								$csv .= $flst->Nachfolger[$v]['nachfolger'].' ';
+							}
+							$csv .= ';';
+						}
+					if($formvars['klassifizierung']){
+						$csv .= '"';
+						$emzges_222 = 0; $emzges_223 = 0;
+						$flaeche_222 = 0; $flaeche_223 = 0;
+						for($j = 0; $j < count($flst->Klassifizierung); $j++){
+							if($flst->Klassifizierung[$j]['flaeche'] != ''){
+								$wert=$flst->Klassifizierung[$j]['wert'];
+								$emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
+								if($flst->Klassifizierung[$j]['objart'] == 1000){
+									$emzges_222 = $emzges_222 + $emz;
+									$flaeche_222 = $flaeche_222 + $flst->Klassifizierung[$j]['flaeche'];
 								}
+								if($flst->Klassifizierung[$j]['objart'] == 3000){
+									$emzges_223 = $emzges_223 + $emz;
+									$flaeche_223 = $flaeche_223 + $flst->Klassifizierung[$j]['flaeche'];
+								}
+								$csv .= utf8_encode(round($flst->Klassifizierung[$j]['flaeche']).' m² ');
+								$csv .= $flst->Klassifizierung[$j]['label'];
+								$csv .= ' EMZ: '.$emz." \n";
 							}
-							$nichtgeschaetzt=$flst->Klassifizierung['nicht_geschaetzt'];
-							if($nichtgeschaetzt > 0){
-								$csv .= utf8_encode('nicht geschätzt: '.$nichtgeschaetzt." m² \n");
+						}
+						$nichtgeschaetzt=$flst->Klassifizierung['nicht_geschaetzt'];
+						if($nichtgeschaetzt > 0){
+							$csv .= utf8_encode('nicht geschätzt: '.$nichtgeschaetzt." m² \n");
+						}
+						if($emzges_222 > 0){
+							$BWZ_222 = round($emzges_222/$flaeche_222*100);
+							$csv .= 'Ackerland gesamt: EMZ '.$emzges_222.', BWZ '.$BWZ_222." \n";
+						}
+						if($emzges_223 > 0){
+							$BWZ_223 = round($emzges_223/$flaeche_223*100);
+							$csv .= utf8_encode('Grünland gesamt: EMZ '.$emzges_223.', BWZ '.$BWZ_223." \n");
+						}
+						$csv .= '";';
+					}      
+						if($formvars['freitext']) {
+							for($j = 0; $j < count($flst->FreiText); $j++){
+								if($j > 0)$csv .= ' | ';
+								$csv .= $flst->FreiText[$j]['text'];
 							}
-							if($emzges_222 > 0){
-								$BWZ_222 = round($emzges_222/$flaeche_222*100);
-								$csv .= 'Ackerland gesamt: EMZ '.$emzges_222.', BWZ '.$BWZ_222." \n";
+							$csv .= ';';
+						}
+						if ($formvars['hinweis']){ $csv .= $flst->Hinweis['bezeichnung'].';';}
+						if ($formvars['baulasten']){
+							for($bl=0; $bl < count($flst->Baulasten); $bl++) {
+								$csv .= " ".$flst->Baulasten[$bl]['blattnr'];
 							}
-							if($emzges_223 > 0){
-								$BWZ_223 = round($emzges_223/$flaeche_223*100);
-								$csv .= utf8_encode('Grünland gesamt: EMZ '.$emzges_223.', BWZ '.$BWZ_223." \n");
+							$csv .= ';';
+						}
+						if ($formvars['ausfstelle']){ 
+							for($v = 0; $v < count($flst->Verfahren); $v++){
+								if($v > 0)$csv .= ' | ';
+								$csv .= $flst->Verfahren[$v]['ausfstelleid'].' '.$flst->Verfahren[$v]['ausfstellename'];
 							}
-			        $csv .= '";';
-			      }      
-				      if($formvars['freitext']) {
-				        for($j = 0; $j < count($flst->FreiText); $j++){
-				        	if($j > 0)$csv .= ' | ';
-				          $csv .= $flst->FreiText[$j]['text'];
-				        }
-				        $csv .= ';';
-				      }
-				      if ($formvars['hinweis']){ $csv .= $flst->Hinweis['bezeichnung'].';';}
-				      if ($formvars['baulasten']){
-				        for($bl=0; $bl < count($flst->Baulasten); $bl++) {
-				          $csv .= " ".$flst->Baulasten[$bl]['blattnr'];
-				        }
-				        $csv .= ';';
-				      }
-				      if ($formvars['ausfstelle']){ 
-				      	for($v = 0; $v < count($flst->Verfahren); $v++){
-				      		if($v > 0)$csv .= ' | ';
-				      		$csv .= $flst->Verfahren[$v]['ausfstelleid'].' '.$flst->Verfahren[$v]['ausfstellename'];
-				      	}
-				      	$csv .= ';';
-				      }
-				      if ($formvars['verfahren']){
-				      	for($v = 0; $v < count($flst->Verfahren); $v++){
-				      		if($v > 0)$csv .= ' | ';
-				      		$csv .= $flst->Verfahren[$v]['verfnr'].' '.$flst->Verfahren[$v]['verfbemerkung'];
-				      	}
-				      	$csv .= ';';
-				      }
-				      if ($formvars['nutzung']){
-				        $anzNutzung=count($flst->Nutzung);
-				        for ($j = 0; $j < $anzNutzung; $j++){
-				        	if($j > 0)$csv .= ' | ';
-				          $csv .= $flst->Nutzung[$j][flaeche].'m2 ';
-          				$csv .= $flst->Nutzung[$j][nutzungskennz].' ';
-          				if($flst->Nutzung[$j][abkuerzung]!='') {
-						      	$csv .= $flst->Nutzung[$j][abkuerzung].'-';
-						      }
-						      $csv .= $flst->Nutzung[$j][bezeichnung];
-				        }
-				        $csv .= ';';
-				      }
-				      
-				 if($formvars['blattnr']){
-	        $csv .= intval($flst->Buchungen[$b]['blatt']);
-	        $csv .= ';';
-		    }
-		    
-		    if($formvars['pruefzeichen']){
-	        $csv .= str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
-	        $csv .= ';';
-		    }
-		    
-        if($formvars['pruefzeichen_f']){
-	      	$csv .= $flst->Pruefzeichen;
-	      	$csv .= ';';
-	      }
-		    
-		    if($formvars['bvnr']){
-	        $csv .= ' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
-	        $csv .= ';';
-		    }
-		    
-		    if($formvars['buchungsart']){
-          $csv .= ' ('.$flst->Buchungen[$b]['buchungsart'].')';
-          $csv .= ' '.$flst->Buchungen[$b]['bezeichnung'];
-	        $csv .= ';';
-	      }
-				      
-	        $csv .= '\''.$Eigentuemerliste[$e]->Nr.'\'';
-          if($Eigentuemerliste[$e]->Anteil !=''){$csv .= '  zu '.$Eigentuemerliste[$e]->Anteil;}
-          $csv .= ';';
-	        $anzNamenszeilen = count($Eigentuemerliste[$e]->Name);
-	        for($n=0;$n<$anzNamenszeilen;$n++) {
-	        	$csv .= $Eigentuemerliste[$e]->Name[$n].';';
-	        }
-	        $csv .= chr(10);
-        }
-       }
-      }
-      $csv .= chr(10);
+							$csv .= ';';
+						}
+						if ($formvars['verfahren']){
+							for($v = 0; $v < count($flst->Verfahren); $v++){
+								if($v > 0)$csv .= ' | ';
+								$csv .= $flst->Verfahren[$v]['verfnr'].' '.$flst->Verfahren[$v]['verfbemerkung'];
+							}
+							$csv .= ';';
+						}
+						if ($formvars['nutzung']){
+							$anzNutzung=count($flst->Nutzung);
+							for ($j = 0; $j < $anzNutzung; $j++){
+								if($j > 0)$csv .= ' | ';
+								$csv .= $flst->Nutzung[$j][flaeche].'m2 ';
+								$csv .= $flst->Nutzung[$j][nutzungskennz].' ';
+								if($flst->Nutzung[$j][abkuerzung]!='') {
+									$csv .= $flst->Nutzung[$j][abkuerzung].'-';
+								}
+								$csv .= $flst->Nutzung[$j][bezeichnung];
+							}
+							$csv .= ';';
+						}
+						
+			 if($formvars['blattnr']){
+				$csv .= intval($flst->Buchungen[$b]['blatt']);
+				$csv .= ';';
+			}
+			
+			if($formvars['pruefzeichen']){
+				$csv .= str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
+				$csv .= ';';
+			}
+			
+			if($formvars['pruefzeichen_f']){
+				$csv .= $flst->Pruefzeichen;
+				$csv .= ';';
+			}
+			
+			if($formvars['bvnr']){
+				$csv .= ' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
+				$csv .= ';';
+			}
+			
+			if($formvars['buchungsart']){
+				$csv .= ' ('.$flst->Buchungen[$b]['buchungsart'].')';
+				$csv .= ' '.$flst->Buchungen[$b]['bezeichnung'];
+				$csv .= ';';
+			}
+						
+				$csv .= '\''.$Eigentuemerliste[$e]->Nr.'\'';
+				if($Eigentuemerliste[$e]->Anteil !=''){$csv .= '  zu '.$Eigentuemerliste[$e]->Anteil;}
+				$csv .= ';';
+				$anzNamenszeilen = count($Eigentuemerliste[$e]->Name);
+				for($n=0;$n<$anzNamenszeilen;$n++) {
+					$csv .= $Eigentuemerliste[$e]->Name[$n].';';
+				}
+				$csv .= chr(10);
+			}
+		 }
+     $csv .= chr(10);
     }
 
     ob_end_clean();
@@ -706,9 +688,9 @@ class ALB {
       $flst = new flurstueck($flurstkennz,$this->database);
       $flst->readALB_Data($flurstkennz);
       $flst->Grundbuecher=$flst->getGrundbuecher();
+			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,0);
       $anzNutzung=count($flst->Nutzung);
 			for ($n = 0; $n < $anzNutzung; $n++){
-      
 	      if($formvars['flurstkennz']){ $csv .= $flst->FlurstKennz.';';}
 	      if($formvars['flurstkennz']){ $csv .= "'".$flst->FlurstNr."';";}
 	      if($formvars['gemkgname']){ $csv .= $flst->GemkgName.';';}
@@ -825,24 +807,18 @@ class ALB {
 	      }
 		      
 		    if($formvars['blattnr']){
-	        for($g = 0; $g < count($flst->Grundbuecher); $g++){
-	          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
-	          for($b = 0; $b < count($flst->Buchungen); $b++){
-	          	if($b > 0)$csv .= ' | ';
-	            $csv .= intval($flst->Buchungen[$b]['blatt']);
-	          }
-	        }
+					for($b = 0; $b < count($flst->Buchungen); $b++){
+						if($b > 0)$csv .= ' | ';
+						$csv .= intval($flst->Buchungen[$b]['blatt']);
+					}
 	        $csv .= ';';
 		    }
 		    
 		    if($formvars['pruefzeichen']){
-	        for($g = 0; $g < count($flst->Grundbuecher); $g++){
-	          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
-	          for($b = 0; $b < count($flst->Buchungen); $b++){
-	          	if($b > 0)$csv .= ' | ';
-	            $csv .= str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
-	          }
-	        }
+					for($b = 0; $b < count($flst->Buchungen); $b++){
+						if($b > 0)$csv .= ' | ';
+						$csv .= str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
+					}
 	        $csv .= ';';
 		    }
 		    
@@ -852,44 +828,35 @@ class ALB {
 	      }
 		    
 		    if($formvars['bvnr']){
-	        for($g = 0; $g < count($flst->Grundbuecher); $g++){
-	          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
-	          for($b = 0; $b < count($flst->Buchungen); $b++){
-	          	if($b > 0)$csv .= ' | ';
-	            $csv .= ' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
-	          }
-	        }
+					for($b = 0; $b < count($flst->Buchungen); $b++){
+						if($b > 0)$csv .= ' | ';
+						$csv .= ' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
+					}
 	        $csv .= ';';
 		    }
 		    
 		    if($formvars['buchungsart']){
-	        for($g = 0; $g < count($flst->Grundbuecher); $g++){
-	          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
-	          for($b = 0; $b < count($flst->Buchungen); $b++){
-	          	if($b > 0)$csv .= ' | ';
-	            $csv .= ' ('.$flst->Buchungen[$b]['buchungsart'].')';
-	            $csv .= ' '.$flst->Buchungen[$b]['bezeichnung'];
-	          }
-	        }
+					for($b = 0; $b < count($flst->Buchungen); $b++){
+						if($b > 0)$csv .= ' | ';
+						$csv .= ' ('.$flst->Buchungen[$b]['buchungsart'].')';
+						$csv .= ' '.$flst->Buchungen[$b]['bezeichnung'];
+					}
 	        $csv .= ';';
 	      }
 	      
   		if($formvars['eigentuemer']){
-        for($g = 0; $g < count($flst->Grundbuecher); $g++){
-          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
-          for($b = 0; $b < count($flst->Buchungen); $b++){
-            $Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
-            $anzEigentuemer=count($Eigentuemerliste);
-            for($e=0;$e<$anzEigentuemer;$e++){
-            	if($e > 0)$csv .= ' | ';
-              $csv .= $Eigentuemerliste[$e]->Nr.' ';
-              $anzNamenszeilen = count($Eigentuemerliste[$e]->Name);
-              for($nz=0;$nz<$anzNamenszeilen;$nz++) {
-                $csv .= $Eigentuemerliste[$e]->Name[$nz].' ';
-              }
-            }
-          }
-        }
+				for($b = 0; $b < count($flst->Buchungen); $b++){
+					$Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
+					$anzEigentuemer=count($Eigentuemerliste);
+					for($e=0;$e<$anzEigentuemer;$e++){
+						if($e > 0)$csv .= ' | ';
+						$csv .= $Eigentuemerliste[$e]->Nr.' ';
+						$anzNamenszeilen = count($Eigentuemerliste[$e]->Name);
+						for($nz=0;$nz<$anzNamenszeilen;$nz++) {
+							$csv .= $Eigentuemerliste[$e]->Name[$nz].' ';
+						}
+					}
+				}
         $csv .= ';';
       }
 
@@ -963,6 +930,7 @@ class ALB {
       $flst = new flurstueck($flurstkennz,$this->database);
       $flst->readALB_Data($flurstkennz);
 			$flst->Grundbuecher=$flst->getGrundbuecher();
+			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,0);
       if($formvars['flurstkennz']){ $csv .= $flst->FlurstKennz.';';}
       if($formvars['flurstkennz']){ $csv .= "'".$flst->FlurstNr."';";}
       if($formvars['gemkgname']){ $csv .= $flst->GemkgName.';';}
@@ -1092,26 +1060,20 @@ class ALB {
       }
       
       if($formvars['blattnr']){
-	        for($g = 0; $g < count($flst->Grundbuecher); $g++){
-	          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
-	          for($b = 0; $b < count($flst->Buchungen); $b++){
-	          	if($b > 0)$csv .= ' | ';
-	            $csv .= intval($flst->Buchungen[$b]['blatt']);
-	          }
-	        }
-	        $csv .= ';';
-		    }
+				for($b = 0; $b < count($flst->Buchungen); $b++){
+					if($b > 0)$csv .= ' | ';
+					$csv .= intval($flst->Buchungen[$b]['blatt']);
+				}
+				$csv .= ';';
+			}
 		    
-		    if($formvars['pruefzeichen']){
-	        for($g = 0; $g < count($flst->Grundbuecher); $g++){
-	          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
-	          for($b = 0; $b < count($flst->Buchungen); $b++){
-	          	if($b > 0)$csv .= ' | ';
-	            $csv .= str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
-	          }
-	        }
-	        $csv .= ';';
-		    }
+			if($formvars['pruefzeichen']){
+				for($b = 0; $b < count($flst->Buchungen); $b++){
+					if($b > 0)$csv .= ' | ';
+					$csv .= str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
+				}
+				$csv .= ';';
+			}
 		    
     		if($formvars['pruefzeichen_f']){
 	      	$csv .= $flst->Pruefzeichen;
@@ -1119,47 +1081,37 @@ class ALB {
 	      }
 		    
 		    if($formvars['bvnr']){
-	        for($g = 0; $g < count($flst->Grundbuecher); $g++){
-	          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
-	          for($b = 0; $b < count($flst->Buchungen); $b++){
-	          	if($b > 0)$csv .= ' | ';
-	            $csv .= ' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
-	          }
-	        }
+					for($b = 0; $b < count($flst->Buchungen); $b++){
+						if($b > 0)$csv .= ' | ';
+						$csv .= ' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
+					}
 	        $csv .= ';';
 		    }
 		    
 		    if($formvars['buchungsart']){
-	        for($g = 0; $g < count($flst->Grundbuecher); $g++){
-	          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
-	          for($b = 0; $b < count($flst->Buchungen); $b++){
-	          	if($b > 0)$csv .= ' | ';
-	            $csv .= ' ('.$flst->Buchungen[$b]['buchungsart'].')';
-	            $csv .= ' '.$flst->Buchungen[$b]['bezeichnung'];
-	          }
-	        }
+					for($b = 0; $b < count($flst->Buchungen); $b++){
+						if($b > 0)$csv .= ' | ';
+						$csv .= ' ('.$flst->Buchungen[$b]['buchungsart'].')';
+						$csv .= ' '.$flst->Buchungen[$b]['bezeichnung'];
+					}
 	        $csv .= ';';
 	      }
       
       if($formvars['eigentuemer']){
       	$csv .= '"';
-        for($g = 0; $g < count($flst->Grundbuecher); $g++){
-        	if($g > 0)$csv .= "\n";
-          $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
-          for($b = 0; $b < count($flst->Buchungen); $b++){
-          	if($b > 0)$csv .= "\n";
-            $Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
-            $anzEigentuemer=count($Eigentuemerliste);
-            for($e=0;$e<$anzEigentuemer;$e++){
-            	if($e > 0)$csv .= "\n";
-              $csv .= $Eigentuemerliste[$e]->Nr.' ';
-              $anzNamenszeilen = count($Eigentuemerliste[$e]->Name);
-              for($n=0;$n<$anzNamenszeilen;$n++) {
-                $csv .= $Eigentuemerliste[$e]->Name[$n].' ';
-              }
-            }
-          }
-        }
+				for($b = 0; $b < count($flst->Buchungen); $b++){
+					if($b > 0)$csv .= "\n";
+					$Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
+					$anzEigentuemer=count($Eigentuemerliste);
+					for($e=0;$e<$anzEigentuemer;$e++){
+						if($e > 0)$csv .= "\n";
+						$csv .= $Eigentuemerliste[$e]->Nr.' ';
+						$anzNamenszeilen = count($Eigentuemerliste[$e]->Name);
+						for($n=0;$n<$anzNamenszeilen;$n++) {
+							$csv .= $Eigentuemerliste[$e]->Name[$n].' ';
+						}
+					}
+				}
         $csv .= '";';
       }
       $csv .= chr(10);
@@ -1272,6 +1224,7 @@ class ALB {
       $flst->database=$this->database;
       $ret=$flst->readALB_Data($FlurstKennz[$f], true);
 			$flst->Grundbuecher=$flst->getGrundbuecher();
+			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,0);
       if ($ret!='') {
         return $ret;
       }
@@ -1610,207 +1563,199 @@ class ALB {
 	        ####################
 	        switch ($formnummer) {
 	          case 40 : {
-	            for ($g=0;$g<count($flst->Grundbuecher);$g++) {
-	              # Bestand
-	              $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
-	              for ($b=0;$b<count($flst->Buchungen);$b++) {
-	                # Seitenumbruch wenn erforderlich
-	                if($row<120) {
-	                  # Seitenumbruch
-	                  $seite++;
-	                  # aktuelle Seite abschließen
-	                  $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
-	                  # neue Seite beginnen
-	                  $pageid=$pdf->newPage();
-	                  $pagecount[$f] = $pagecount[$f] + 1;
-	                  if ($wasserzeichen) {
-	                    $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
-	                  }
-	                  $row=825; # 812 -> 825 2007-04-02 Schmidt
-	                  $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
-	                }
-	
-	                # Ausgabe der Zeile für die Bestandbezeichnung
-	                $pdf->addText($col0,$row-=12,$fontSize,'Bestand');
-	                $BestandStr =$flst->Buchungen[$b]['bezirk'].'-'.intval($flst->Buchungen[$b]['blatt']);
-	                $BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
-	                $BestandStr.=' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
-	                $BestandStr.=' ('.$flst->Buchungen[$b]['buchungsart'].')';
-	                $BestandStr.=' '.utf8_decode($flst->Buchungen[$b]['bezeichnung']);
-	                $pdf->addText($col2_1,$row,$fontSize,$BestandStr);
-	                $pdf->addText($col0,$row-=12,$fontSize,str_repeat("=",7));
-	
-	                # Abfragen und Ausgeben der Eigentümer zum Grundbuchblatt
-	                $Eigentuemerliste=$flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
-	                $anzEigentuemer=count($Eigentuemerliste);
-	                for ($i=0;$i<$anzEigentuemer;$i++) {
-	                  if($row<120) {
-	                    # Seitenumbruch
-	                    $seite++;
-	                    # aktuelle Seite abschließen
-	                    $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
-	                    # neue Seite beginnen
-	                    $pageid=$pdf->newPage();
-	                    $pagecount[$f] = $pagecount[$f] + 1;
-	                    if ($wasserzeichen) {
-	                      $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
-	                    }
-	                    $row=825; # 812 -> 825 2007-04-02 Schmidt;
-	                    $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
-	                  }
-	                  else {
-	                    $row-=12;
-	                  }
-	                  if ($Eigentuemerliste[$i]->Nr!=0) {
-	                    $pdf->addText($col0,$row-=12,$fontSize,$Eigentuemerliste[$i]->Nr);
-	                    if($Eigentuemerliste[$i]->Anteil != '')$pdf->addText($col3,$row,$fontSize,'zu '.$Eigentuemerliste[$i]->Anteil);
-	                  }
-	                  else {
-	                    $row-=12;
-	                  }
-	                  $anzNamenszeilen=count($Eigentuemerliste[$i]->Name);
-	                  for ($k=0;$k<$anzNamenszeilen;$k++) {
-	                    $pdf->addText($col1,$row-=12,$fontSize,utf8_decode($Eigentuemerliste[$i]->Name[$k]));
-	                  }
-	                } # ende Schleife Eigentümer des Grundbuchblattes
-									if ($flst->Buchungen[$b]['zusatz_eigentuemer'] != '') {
-										$zusatzeigentuemertext = $flst->Buchungen[$b]['zusatz_eigentuemer'];
-										while(strlen($zusatzeigentuemertext) > 60){
-											$positionkomma=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8'),",",'utf8');
-											$positionleerzeichen=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8')," ",'utf8');
-											if($positionkomma>$positionleerzeichen){
-												$positiontrenner=$positionkomma;
-											}
-											else{
-												$positiontrenner=$positionleerzeichen;
-											}
-											if($row<120) {
-												# Seitenumbruch
-												$seite++;
-												# aktuelle Seite abschließen
-												$pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
-												# neue Seite beginnen
-												$pageid=$pdf->newPage();
-												$pagecount[$f] = $pagecount[$f] + 1;
-												if ($wasserzeichen) {
-													$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
-												}
-												$row=825; # 812 -> 825 2007-04-02 Schmidt;
-												$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
-											}
-											$pdf->addText($col1,$row-=12,$fontSize,utf8_decode(mb_substr($zusatzeigentuemertext,0,$positiontrenner,'utf8')));
-											$zusatzeigentuemertext=mb_substr($zusatzeigentuemertext,$positiontrenner+1, 999,'utf8');
-										}
-										$pdf->addText($col1,$row-=12,$fontSize,utf8_decode($zusatzeigentuemertext));
+							for ($b=0;$b<count($flst->Buchungen);$b++) {
+								# Seitenumbruch wenn erforderlich
+								if($row<120) {
+									# Seitenumbruch
+									$seite++;
+									# aktuelle Seite abschließen
+									$pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
+									# neue Seite beginnen
+									$pageid=$pdf->newPage();
+									$pagecount[$f] = $pagecount[$f] + 1;
+									if ($wasserzeichen) {
+										$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
 									}
-	              } # ende Schleife Bestand
-	            } # ende Schleife Grundbuecher
+									$row=825; # 812 -> 825 2007-04-02 Schmidt
+									$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+								}
+
+								# Ausgabe der Zeile für die Bestandbezeichnung
+								$pdf->addText($col0,$row-=12,$fontSize,'Bestand');
+								$BestandStr =$flst->Buchungen[$b]['bezirk'].'-'.intval($flst->Buchungen[$b]['blatt']);
+								$BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
+								$BestandStr.=' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
+								$BestandStr.=' ('.$flst->Buchungen[$b]['buchungsart'].')';
+								$BestandStr.=' '.utf8_decode($flst->Buchungen[$b]['bezeichnung']);
+								$pdf->addText($col2_1,$row,$fontSize,$BestandStr);
+								$pdf->addText($col0,$row-=12,$fontSize,str_repeat("=",7));
+
+								# Abfragen und Ausgeben der Eigentümer zum Grundbuchblatt
+								$Eigentuemerliste=$flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
+								$anzEigentuemer=count($Eigentuemerliste);
+								for ($i=0;$i<$anzEigentuemer;$i++) {
+									if($row<120) {
+										# Seitenumbruch
+										$seite++;
+										# aktuelle Seite abschließen
+										$pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
+										# neue Seite beginnen
+										$pageid=$pdf->newPage();
+										$pagecount[$f] = $pagecount[$f] + 1;
+										if ($wasserzeichen) {
+											$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
+										}
+										$row=825; # 812 -> 825 2007-04-02 Schmidt;
+										$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+									}
+									else {
+										$row-=12;
+									}
+									if ($Eigentuemerliste[$i]->Nr!=0) {
+										$pdf->addText($col0,$row-=12,$fontSize,$Eigentuemerliste[$i]->Nr);
+										if($Eigentuemerliste[$i]->Anteil != '')$pdf->addText($col3,$row,$fontSize,'zu '.$Eigentuemerliste[$i]->Anteil);
+									}
+									else {
+										$row-=12;
+									}
+									$anzNamenszeilen=count($Eigentuemerliste[$i]->Name);
+									for ($k=0;$k<$anzNamenszeilen;$k++) {
+										$pdf->addText($col1,$row-=12,$fontSize,utf8_decode($Eigentuemerliste[$i]->Name[$k]));
+									}
+								} # ende Schleife Eigentümer des Grundbuchblattes
+								if ($flst->Buchungen[$b]['zusatz_eigentuemer'] != '') {
+									$zusatzeigentuemertext = $flst->Buchungen[$b]['zusatz_eigentuemer'];
+									while(strlen($zusatzeigentuemertext) > 60){
+										$positionkomma=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8'),",",'utf8');
+										$positionleerzeichen=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8')," ",'utf8');
+										if($positionkomma>$positionleerzeichen){
+											$positiontrenner=$positionkomma;
+										}
+										else{
+											$positiontrenner=$positionleerzeichen;
+										}
+										if($row<120) {
+											# Seitenumbruch
+											$seite++;
+											# aktuelle Seite abschließen
+											$pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
+											# neue Seite beginnen
+											$pageid=$pdf->newPage();
+											$pagecount[$f] = $pagecount[$f] + 1;
+											if ($wasserzeichen) {
+												$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
+											}
+											$row=825; # 812 -> 825 2007-04-02 Schmidt;
+											$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+										}
+										$pdf->addText($col1,$row-=12,$fontSize,utf8_decode(mb_substr($zusatzeigentuemertext,0,$positiontrenner,'utf8')));
+										$zusatzeigentuemertext=mb_substr($zusatzeigentuemertext,$positiontrenner+1, 999,'utf8');
+									}
+									$pdf->addText($col1,$row-=12,$fontSize,utf8_decode($zusatzeigentuemertext));
+								}
+							} # ende Schleife Bestand
 	          } # ende Ausgabe Formular 40
 	          break;
 	          case 35 : {
-	            for ($g=0;$g<count($flst->Grundbuecher);$g++) {
-	              # Bestand
-	              $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
-	              for ($b=0;$b<count($flst->Buchungen);$b++) {
-	                # Seitenumbruch wenn erforderlich
-	                if($row<120) {
-	                  # Seitenumbruch
-	                  $seite++;
-	                  # aktuelle Seite abschließen
-	                  $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
-	                  # neue Seite beginnen
-	                  $pageid=$pdf->newPage();
-	                  $pagecount[$f] = $pagecount[$f] + 1;
-	                  if ($wasserzeichen) {
-	                    $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
-	                  }
-	                  $row=825; # 812 -> 825 2007-04-02 Schmidt;
-	                  $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
-	                }
-	
-	                # Ausgabe der Zeile für die Bestandbezeichnung
-	                $pdf->addText($col0,$row-=24,$fontSize,'Bestand');
-	                $BestandStr =$flst->Buchungen[$b]['bezirk'].'-'.intval($flst->Buchungen[$b]['blatt']);
-	                $BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
-	                $BestandStr.=' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
-	                $BestandStr.=' ('.$flst->Buchungen[$b]['buchungsart'].')';
-	                $BestandStr.=' '.utf8_decode($flst->Buchungen[$b]['bezeichnung']);
-	                $pdf->addText($col2_1,$row,$fontSize,$BestandStr);
-	                $pdf->addText($col0,$row-=12,$fontSize,str_repeat("=",7));
-	
-	                # Abfragen und Ausgeben der Eigentümer zum Grundbuchblatt
-	                $Eigentuemerliste=$flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
-	                $anzEigentuemer=count($Eigentuemerliste);
-	                for ($i=0;$i<$anzEigentuemer;$i++) {
-	                  if($row<120) {
-	                    # Seitenumbruch
-	                    $seite++;
-	                    # aktuelle Seite abschließen
-	                    $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
-	                    # neue Seite beginnen
-	                    $pageid=$pdf->newPage();
-	                    $pagecount[$f] = $pagecount[$f] + 1;
-	                    if ($wasserzeichen) {
-	                      $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
-	                    }
-	                    $row=825; # 812 -> 825 2007-04-02 Schmidt;
-	                    $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
-	                  }
-	                  else {
-	                    $row-=12;
-	                  }
-	                  if ($Eigentuemerliste[$i]->Nr!=0) {
-	                    $pdf->addText($col0,$row-=12,$fontSize,$Eigentuemerliste[$i]->Nr);
-	                    if($Eigentuemerliste[$i]->Anteil != '')$pdf->addText($col3,$row,$fontSize,'zu '.$Eigentuemerliste[$i]->Anteil);
-	                  }
-	                  else {
-	                    $row-=12;
-	                  }
-	                  $anzNamenszeilen=count($Eigentuemerliste[$i]->Name);
-	                  # --- Kommas rausfiltern ---
-	                  $Eigentuemerliste[$i]->Name_bearb = $Eigentuemerliste[$i]->Name;
-	                  $Eigentuemerliste[$i]->Name_bearb[0] = str_replace(',,,', '', $Eigentuemerliste[$i]->Name_bearb[0]);
-	                  $Eigentuemerliste[$i]->Name_bearb[0] = str_replace(',,', ',', $Eigentuemerliste[$i]->Name_bearb[0]);
-	                  if(mb_substr($Eigentuemerliste[$i]->Name_bearb[0], 0, strlen($Eigentuemerliste[$i]->Name_bearb[0])-1,'utf8') == ','){
-	                    $Eigentuemerliste[$i]->Name_bearb[0] = mb_substr($Eigentuemerliste[$i]->Name_bearb[0], 0, strlen($Eigentuemerliste[$i]->Name_bearb[0])-1,'utf8');
-	                  }
-	                  # ---------------------------
-	                  for ($k=0;$k<$anzNamenszeilen;$k++) {
-	                    $pdf->addText($col1,$row-=12,$fontSize,utf8_decode($Eigentuemerliste[$i]->Name_bearb[$k]));
-	                  }
-	                } # ende Schleife Eigentümer des Grundbuchblattes
-									if ($flst->Buchungen[$b]['zusatz_eigentuemer'] != '') {
-										$zusatzeigentuemertext = $flst->Buchungen[$b]['zusatz_eigentuemer'];
-										while(strlen($zusatzeigentuemertext) > 60){
-											$positionkomma=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8'),",",'utf8');
-											$positionleerzeichen=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8')," ",'utf8');
-											if($positionkomma>$positionleerzeichen){
-												$positiontrenner=$positionkomma;
-											}
-											else{
-												$positiontrenner=$positionleerzeichen;
-											}
-											if($row<120) {
-												# Seitenumbruch
-												$seite++;
-												# aktuelle Seite abschließen
-												$pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
-												# neue Seite beginnen
-												$pageid=$pdf->newPage();
-												$pagecount[$f] = $pagecount[$f] + 1;
-												if ($wasserzeichen) {
-													$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
-												}
-												$row=825; # 812 -> 825 2007-04-02 Schmidt;
-												$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
-											}
-											$pdf->addText($col1,$row-=12,$fontSize,utf8_decode(mb_substr($zusatzeigentuemertext,0,$positiontrenner,'utf8')));
-											$zusatzeigentuemertext=mb_substr($zusatzeigentuemertext,$positiontrenner+1, 999,'utf8');
-										}
-										$pdf->addText($col1,$row-=12,$fontSize,utf8_decode($zusatzeigentuemertext));
+							for ($b=0;$b<count($flst->Buchungen);$b++) {
+								# Seitenumbruch wenn erforderlich
+								if($row<120) {
+									# Seitenumbruch
+									$seite++;
+									# aktuelle Seite abschließen
+									$pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
+									# neue Seite beginnen
+									$pageid=$pdf->newPage();
+									$pagecount[$f] = $pagecount[$f] + 1;
+									if ($wasserzeichen) {
+										$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
 									}
-	              } # ende Schleife Bestand	              
-	            } # ende Schleife Grundbuecher
+									$row=825; # 812 -> 825 2007-04-02 Schmidt;
+									$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+								}
+
+								# Ausgabe der Zeile für die Bestandbezeichnung
+								$pdf->addText($col0,$row-=24,$fontSize,'Bestand');
+								$BestandStr =$flst->Buchungen[$b]['bezirk'].'-'.intval($flst->Buchungen[$b]['blatt']);
+								$BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
+								$BestandStr.=' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
+								$BestandStr.=' ('.$flst->Buchungen[$b]['buchungsart'].')';
+								$BestandStr.=' '.utf8_decode($flst->Buchungen[$b]['bezeichnung']);
+								$pdf->addText($col2_1,$row,$fontSize,$BestandStr);
+								$pdf->addText($col0,$row-=12,$fontSize,str_repeat("=",7));
+
+								# Abfragen und Ausgeben der Eigentümer zum Grundbuchblatt
+								$Eigentuemerliste=$flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
+								$anzEigentuemer=count($Eigentuemerliste);
+								for ($i=0;$i<$anzEigentuemer;$i++) {
+									if($row<120) {
+										# Seitenumbruch
+										$seite++;
+										# aktuelle Seite abschließen
+										$pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
+										# neue Seite beginnen
+										$pageid=$pdf->newPage();
+										$pagecount[$f] = $pagecount[$f] + 1;
+										if ($wasserzeichen) {
+											$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
+										}
+										$row=825; # 812 -> 825 2007-04-02 Schmidt;
+										$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+									}
+									else {
+										$row-=12;
+									}
+									if ($Eigentuemerliste[$i]->Nr!=0) {
+										$pdf->addText($col0,$row-=12,$fontSize,$Eigentuemerliste[$i]->Nr);
+										if($Eigentuemerliste[$i]->Anteil != '')$pdf->addText($col3,$row,$fontSize,'zu '.$Eigentuemerliste[$i]->Anteil);
+									}
+									else {
+										$row-=12;
+									}
+									$anzNamenszeilen=count($Eigentuemerliste[$i]->Name);
+									# --- Kommas rausfiltern ---
+									$Eigentuemerliste[$i]->Name_bearb = $Eigentuemerliste[$i]->Name;
+									$Eigentuemerliste[$i]->Name_bearb[0] = str_replace(',,,', '', $Eigentuemerliste[$i]->Name_bearb[0]);
+									$Eigentuemerliste[$i]->Name_bearb[0] = str_replace(',,', ',', $Eigentuemerliste[$i]->Name_bearb[0]);
+									if(mb_substr($Eigentuemerliste[$i]->Name_bearb[0], 0, strlen($Eigentuemerliste[$i]->Name_bearb[0])-1,'utf8') == ','){
+										$Eigentuemerliste[$i]->Name_bearb[0] = mb_substr($Eigentuemerliste[$i]->Name_bearb[0], 0, strlen($Eigentuemerliste[$i]->Name_bearb[0])-1,'utf8');
+									}
+									# ---------------------------
+									for ($k=0;$k<$anzNamenszeilen;$k++) {
+										$pdf->addText($col1,$row-=12,$fontSize,utf8_decode($Eigentuemerliste[$i]->Name_bearb[$k]));
+									}
+								} # ende Schleife Eigentümer des Grundbuchblattes
+								if ($flst->Buchungen[$b]['zusatz_eigentuemer'] != '') {
+									$zusatzeigentuemertext = $flst->Buchungen[$b]['zusatz_eigentuemer'];
+									while(strlen($zusatzeigentuemertext) > 60){
+										$positionkomma=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8'),",",'utf8');
+										$positionleerzeichen=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8')," ",'utf8');
+										if($positionkomma>$positionleerzeichen){
+											$positiontrenner=$positionkomma;
+										}
+										else{
+											$positiontrenner=$positionleerzeichen;
+										}
+										if($row<120) {
+											# Seitenumbruch
+											$seite++;
+											# aktuelle Seite abschließen
+											$pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
+											# neue Seite beginnen
+											$pageid=$pdf->newPage();
+											$pagecount[$f] = $pagecount[$f] + 1;
+											if ($wasserzeichen) {
+												$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
+											}
+											$row=825; # 812 -> 825 2007-04-02 Schmidt;
+											$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+										}
+										$pdf->addText($col1,$row-=12,$fontSize,utf8_decode(mb_substr($zusatzeigentuemertext,0,$positiontrenner,'utf8')));
+										$zusatzeigentuemertext=mb_substr($zusatzeigentuemertext,$positiontrenner+1, 999,'utf8');
+									}
+									$pdf->addText($col1,$row-=12,$fontSize,utf8_decode($zusatzeigentuemertext));
+								}
+							} # ende Schleife Bestand	              
 	          } # ende Ausgabe Formular 35
 	          break;
 	          case 30 : {
@@ -1818,37 +1763,34 @@ class ALB {
 	            $pdf->addText($col0,$row-=24,$fontSize,'Bestand');
 	            $pdf->addText($col0,$row-12,$fontSize,str_repeat("=",7));
 	
-							for ($g=0;$g<count($flst->Grundbuecher);$g++) {
-	              $flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],0);
-								for ($b=0;$b<count($flst->Buchungen);$b++) {
-									# Seitenumbruch wenn erforderlich
-									if($row<60) {
-										# Seitenumbruch
-										$seite++;
-										# aktuelle Seite abschließen
-										$pdf->addText($col9_1,$row-=24,$fontSize,'Forts. Seite '.$seite);
-										# neue Seite beginnen
-										$pageid=$pdf->newPage();
-										$pagecount[$f] = $pagecount[$f] + 1;
-										if ($wasserzeichen) {
-											$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
-										}
-										$row=825; # 812 -> 825 2007-04-02 Schmidt
-										$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
-										$pdf->addText($col0,$row-=24,$fontSize,'Bestand');
-										$pdf->addText($col0,$row-12,$fontSize,str_repeat("=",7));
+							for ($b=0;$b<count($flst->Buchungen);$b++) {
+								# Seitenumbruch wenn erforderlich
+								if($row<60) {
+									# Seitenumbruch
+									$seite++;
+									# aktuelle Seite abschließen
+									$pdf->addText($col9_1,$row-=24,$fontSize,'Forts. Seite '.$seite);
+									# neue Seite beginnen
+									$pageid=$pdf->newPage();
+									$pagecount[$f] = $pagecount[$f] + 1;
+									if ($wasserzeichen) {
+										$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
 									}
-		
-									# Ausgabe der Zeile für die Bestandbezeichnung
-									$BestandStr =$flst->Buchungen[$b]['bezirk'].'-'.intval($flst->Buchungen[$b]['blatt']);
-									$BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
-									$BestandStr.=' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
-									$BestandStr.=' ('.$flst->Buchungen[$b]['buchungsart'].')';
-									$BestandStr.=' '.utf8_decode($flst->Buchungen[$b]['bezeichnung']);
-									$pdf->addText($col2_1,$row-=12,$fontSize,$BestandStr);
-		
-								} # ende Schleife Bestand
-							}
+									$row=825; # 812 -> 825 2007-04-02 Schmidt
+									$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+									$pdf->addText($col0,$row-=24,$fontSize,'Bestand');
+									$pdf->addText($col0,$row-12,$fontSize,str_repeat("=",7));
+								}
+	
+								# Ausgabe der Zeile für die Bestandbezeichnung
+								$BestandStr =$flst->Buchungen[$b]['bezirk'].'-'.intval($flst->Buchungen[$b]['blatt']);
+								$BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
+								$BestandStr.=' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
+								$BestandStr.=' ('.$flst->Buchungen[$b]['buchungsart'].')';
+								$BestandStr.=' '.utf8_decode($flst->Buchungen[$b]['bezeichnung']);
+								$pdf->addText($col2_1,$row-=12,$fontSize,$BestandStr);
+	
+							} # ende Schleife Bestand
 	          } # ende Ausgabe Bestandsnachweis Formular 30
 	          break;
 	        } # end of switch for Bestandsnachweis
