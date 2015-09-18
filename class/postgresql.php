@@ -1689,6 +1689,25 @@ class pgdatabase {
     }
     return $liste;
 	}
+	
+	function getGrundbuchblattlisteByGemkgIDs($bezirk, $gemkg_ids){
+		$sql = "SELECT DISTINCT buchungsblattnummermitbuchstabenerweiterung as blatt, rtrim(ltrim(buchungsblattnummermitbuchstabenerweiterung,'PF0'),'ABCDEFGHIJKLMNOPQRSTUVWXYZ')::integer ";
+		$sql.="FROM alkis.ax_flurstueck f ";
+		$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id ";
+		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
+		$sql.="WHERE g.land*10000 + g.bezirk = ".$bezirk." AND (blattart = 1000 OR blattart = 2000 OR blattart = 3000) ";
+		$sql.="AND f.land*10000 + f.gemarkungsnummer IN (".implode(',', $gemkg_ids).")";
+		$sql.= $this->build_temporal_filter(array('f', 's', 'g'));
+		$sql.= " ORDER BY rtrim(ltrim(buchungsblattnummermitbuchstabenerweiterung,'PF0'),'ABCDEFGHIJKLMNOPQRSTUVWXYZ')::integer";
+		#echo $sql;
+		$ret=$this->execSQL($sql, 4, 0);
+    if ($ret[0]==0) {
+    	while($rs=pg_fetch_array($ret[1])){
+      	$liste['blatt'][]=$rs['blatt'];
+    	}
+    }
+    return $liste;
+	}
   
   function getGrundbuchbezirksliste(){
   	$sql ="SELECT schluesselgesamt as grundbuchbezschl, bezeichnung FROM alkis.ax_buchungsblattbezirk WHERE 1=1";

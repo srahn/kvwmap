@@ -1433,6 +1433,10 @@ class grundbuch {
   function getGrundbuchblattliste($bezirk){
   	return $this->database->getGrundbuchblattliste($bezirk);
   }
+	
+	function getGrundbuchblattlisteByGemkgIDs($bezirk, $gemkg_ids){
+  	return $this->database->getGrundbuchblattlisteByGemkgIDs($bezirk, $gemkg_ids);
+  }
 }
 
 #-----------------------------------------------------------------------------------------------------------------
