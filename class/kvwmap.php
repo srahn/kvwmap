@@ -3091,7 +3091,12 @@ class GUI {
 		##########################
     if($this->formvars['Bezirk'] != ''){
     	if($this->formvars['selBlatt'])$this->selblattliste = explode(', ',$this->formvars['selBlatt']);
-    	$this->blattliste = $grundbuch->getGrundbuchblattliste($this->formvars['Bezirk']);
+			if($GemeindenStelle != ''){   // Stelle ist auf Gemeinden eingeschränkt
+				$this->blattliste = $grundbuch->getGrundbuchblattlisteByGemkgIDs($this->formvars['Bezirk'], $GemkgListe['GemkgID']);
+			}
+			else{
+				$this->blattliste = $grundbuch->getGrundbuchblattliste($this->formvars['Bezirk']);
+			}
     }
     $this->output();
   }
