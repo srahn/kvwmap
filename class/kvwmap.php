@@ -9664,10 +9664,10 @@ class GUI {
       $this->Fehlermeldung='Es konnten keine gespeicherten Themen abgefragt werden.<br>'.$ret[1];
     }
     else {
-			$this->loadMap('DataBase');
-			for($i=0; $i < count($this->layerset); $i++){
-				$formvars['thema'.$this->layerset[$i]['Layer_ID']] = 0;		# erstmal alle ausschalten
-				$formvars['qLayer'.$this->layerset[$i]['Layer_ID']] = 0;		# erstmal alle ausschalten
+			$layerset = $this->user->rolle->getLayer('');
+			for($i=0; $i < count($layerset); $i++){
+				$formvars['thema'.$layerset[$i]['Layer_ID']] = 0;		# erstmal alle ausschalten
+				$formvars['qLayer'.$layerset[$i]['Layer_ID']] = 0;		# erstmal alle ausschalten
 			}
       $layer_ids = explode(',', $ret[1][0]['layers']);
 			foreach($layer_ids as $layer_id){
