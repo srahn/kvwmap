@@ -3599,6 +3599,7 @@ class GUI {
       	else{
       		$color = $this->user->rolle->readcolor();
 	        $classdata['layer_id'] = -$layer_id;
+					$classdata['name'] = ' ';
 	        $class_id = $dbmap->new_Class($classdata);
 	        if($this->formvars['Datentyp'] == 0){			# Punkt						
 						if(defined('ZOOM2POINT_STYLE_ID') AND ZOOM2POINT_STYLE_ID != ''){

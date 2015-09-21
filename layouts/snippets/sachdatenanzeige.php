@@ -59,9 +59,9 @@ for($i=0;$i<$anzLayer;$i++){
 	   	$bis = $this->qlayerset[$i]['count'];
 	   }
 	   echo'
-	   <table border="0" cellpadding="10" width="100%" cellspacing="0">
+	   <table border="0" cellpadding="2" width="100%" cellspacing="0">
 
-	   	<tr height="40px" valign="top">
+	   	<tr height="50px" valign="top">
 	   		<td align="right" width="38%">';
 	   		if($this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] >= $this->formvars['anzahl'] AND $this->formvars['printversion'] == ''){
 	   			echo '<a href="javascript:prevquery(\'offset_'.$this->qlayerset[$i]['Layer_ID'].'\');">'.$strBackDatasets.'&nbsp;</a>';
@@ -85,7 +85,7 @@ for($i=0;$i<$anzLayer;$i++){
 ?>
 <?
 	if($this->editable == 'true' AND $this->formvars['printversion'] == ''){ ?>
-		<table width="100%" border="0" cellpadding="10" cellspacing="0">
+		<table width="100%" border="0" cellpadding="0" cellspacing="0">
     <tr>
     	<td>&nbsp;</td>
       <td align="center" width="100%"><input type="button" class="button" name="savebutton" value="<? echo $strSave; ?>" onclick="save();">&nbsp;<input class="button" type="reset" value="<? echo $strReset; ?>"></td>
