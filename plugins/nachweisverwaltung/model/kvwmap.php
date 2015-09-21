@@ -353,6 +353,12 @@
 		$GUI->database->execSQL($sql,4, 1);
 	};
 	
+	$this->Suchparameter_loeschen = function($antrag_nr, $stelle_id) use ($GUI){
+		$sql ="DELETE FROM u_consumeNachweise WHERE antrag_nr = '".$antrag_nr."' AND stelle_id = ".$stelle_id;
+		$GUI->debug->write("<p>file:users.php class:rolle->Suchparameter_loeschen - Löschen der Parameter für die Nachweissuche",4);
+		$GUI->database->execSQL($sql,4, 1);
+	};
+	
 	$this->Suchparameter_anhaengen_PDF = function($pdf, $antrag_nr, $stelle_id) use ($GUI){
 		$row = 0;
 		$options = array('aleft'=>30, 'right'=>30, 'justification'=>'left');
@@ -1471,6 +1477,7 @@
 				$GUI->antrag = new antrag('','',$GUI->pgdatabase);
 				$antragsnummern=array_keys ($GUI->formvars['id']);
 				$ret=$GUI->antrag->antrag_loeschen($antragsnummern[0],$GUI->formvars['stelle_id']);
+				if($ret == 'Antrag erfolgreich gelöscht')$GUI->Suchparameter_loeschen($antragsnummern[0], $GUI->formvars['stelle_id']);
 				$GUI->Antraege_Anzeigen();
 				showAlert($ret);
 			}

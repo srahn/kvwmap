@@ -735,7 +735,7 @@ class antrag {
 		}
 		else {
 			$exceptions = array(".", "..");
-			if($stelle_id != '')$antr_nr .= '_'.$stelle_id;
+			if($stelle_id != '')$antr_nr .= '~'.$stelle_id;
 			delete_files(RECHERCHEERGEBNIS_PATH.$antr_nr, $exceptions, 0);
 			$errmsg='Antrag erfolgreich gelöscht';
 			$this->database->committransaction();      
