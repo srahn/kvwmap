@@ -536,6 +536,7 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 .raster_record .tr_hide select:focus{display:none;width:0.0001px;transition: all 0.25s ease;}
 .raster_record .tr_hide input{width:0.0001px;font-size: 0.0001px;height:0.0001px;transition: all 0.25s ease;}
 .raster_record .tr_hide textarea{font-size: 0.0001px !important;transition: all 0.25s ease;}
+.raster_record .tr_hide div{min-width: 0.0001px !important;}
 /* Attribute, die eingeblendet werden sollen: */
 .raster_record .tr_show{visibility:visible;}
 .raster_record .tr_show #formelement{width: 125px;overflow: hidden}
