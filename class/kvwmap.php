@@ -5293,9 +5293,9 @@ class GUI {
 	function deleteDokument($path){
 		$path = array_pop(explode('&dokument=', $path));
 		$path = array_shift(explode('&original_name', $path));
-		if(file_exists($path)){
-			unlink($path);
-		}
+		$dateinamensteil = explode('.', $path);
+		if(file_exists($path))unlink($path);
+		if(file_exists($dateinamensteil[0].'_thumb.jpg'))unlink($dateinamensteil[0].'_thumb.jpg');
 	}
 
   function get_dokument_vorschau($dateinamensteil){
