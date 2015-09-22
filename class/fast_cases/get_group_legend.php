@@ -875,7 +875,7 @@
         if ($dbStyle['color']!='') {
           $RGB=explode(" ",$dbStyle['color']);
           if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
-          $style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+          if(is_numeric($RGB[0]))$style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);					else $style->updateFromString("STYLE COLOR [".$dbStyle['color']."] END");
         }
 				if($dbStyle['opacity'] != '') {		# muss nach color gesetzt werden
 					$style->set('opacity', $dbStyle['opacity']);
