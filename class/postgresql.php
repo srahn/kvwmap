@@ -1414,7 +1414,7 @@ class pgdatabase {
 	function getNachfolger($FlurstKennz) {
 		$sql = "SELECT nachfolger, c.endet FROM (";
     $sql.= "SELECT unnest(zeigtaufneuesflurstueck) as nachfolger FROM alkis.ax_fortfuehrungsfall WHERE ARRAY['".$FlurstKennz."'::varchar] <@ zeigtaufaltesflurstueck AND ueberschriftimfortfuehrungsnachweis && ARRAY[10101,10102,10103,10201,10202,10205,10206,10301,10302,10303,10304,10305,10306,10307,10308,10502,10503,10700]) as foo ";
-		$sql.= "LEFT JOIN alkis.ax_flurstueck c ON c.flurstueckskennzeichen = nachfolger";
+		$sql.= "LEFT JOIN alkis.ax_flurstueck c ON c.flurstueckskennzeichen = nachfolger ORDER BY nachfolger";
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0]) {
       $ret[0]=1;
@@ -1426,7 +1426,7 @@ class pgdatabase {
 				$sql.= "SELECT unnest(a.nachfolgerflurstueckskennzeichen) as nachfolger FROM alkis.ax_historischesflurstueckohneraumbezug as a WHERE a.flurstueckskennzeichen = '".$FlurstKennz."') as foo ";
 				$sql.= "LEFT JOIN alkis.ax_historischesflurstueckohneraumbezug b ON b.flurstueckskennzeichen = nachfolger ";
 				$sql.= "LEFT JOIN alkis.ax_flurstueck c ON c.flurstueckskennzeichen = nachfolger ";			# falls ein Nachfolger in ALKIS historisch ist (endet IS NOT NULL)
-				$sql.= "GROUP BY nachfolger";																														# damit aber immer nur die jüngste Version eines Flurstücks gefunden wird
+				$sql.= "GROUP BY nachfolger ORDER BY nachfolger";																														# damit aber immer nur die jüngste Version eines Flurstücks gefunden wird
 				$queryret=$this->execSQL($sql, 4, 0);	
 				while($rs=pg_fetch_array($queryret[1])){
 					$Nachfolger[]=$rs;
@@ -1444,7 +1444,7 @@ class pgdatabase {
   }
 
   function getVorgaenger($FlurstKennz) {
-    $sql = "SELECT unnest(zeigtaufaltesflurstueck) as vorgaenger FROM alkis.ax_fortfuehrungsfall WHERE ARRAY['".$FlurstKennz."'::varchar] <@ zeigtaufneuesflurstueck AND ueberschriftimfortfuehrungsnachweis && ARRAY[10101,10102,10103,10201,10202,10205,10206,10301,10302,10303,10304,10305,10306,10307,10308,10502,10503,10700]";
+    $sql = "SELECT unnest(zeigtaufaltesflurstueck) as vorgaenger FROM alkis.ax_fortfuehrungsfall WHERE ARRAY['".$FlurstKennz."'::varchar] <@ zeigtaufneuesflurstueck AND ueberschriftimfortfuehrungsnachweis && ARRAY[10101,10102,10103,10201,10202,10205,10206,10301,10302,10303,10304,10305,10306,10307,10308,10502,10503,10700] ORDER BY vorgaenger";
     $queryret=$this->execSQL($sql, 4, 0);
     if($queryret[0]) {
       $ret[0]=1;
@@ -1452,7 +1452,7 @@ class pgdatabase {
     }
     else{
 			if(pg_num_rows($queryret[1]) == 0){			# kein Vorgänger unter ALKIS -> Suche in ALB-Historie
-				$sql = "SELECT flurstueckskennzeichen as vorgaenger, TRUE as hist_alb FROM alkis.ax_historischesflurstueckohneraumbezug WHERE ARRAY['".$FlurstKennz."'::varchar] <@ nachfolgerflurstueckskennzeichen";
+				$sql = "SELECT flurstueckskennzeichen as vorgaenger, TRUE as hist_alb FROM alkis.ax_historischesflurstueckohneraumbezug WHERE ARRAY['".$FlurstKennz."'::varchar] <@ nachfolgerflurstueckskennzeichen ORDER BY vorgaenger";
 				$queryret=$this->execSQL($sql, 4, 0);
 				while($rs=pg_fetch_array($queryret[1])) {
 					$Vorgaenger[]=$rs;
