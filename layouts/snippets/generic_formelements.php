@@ -22,70 +22,15 @@
 									}break;
 
 									case 'Auswahlfeld' : case 'Auswahlfeld_not_saveable' : {
-										if($attribute_privileg == '0' OR $lock[$k]){
-										  if(is_array($attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-												for($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++){
-													if($attributes['enum_value'][$j][$k][$e] == $value){
-														$auswahlfeld_output = $attributes['enum_output'][$j][$k][$e];
-														$auswahlfeld_output_laenge=strlen($auswahlfeld_output)+1;
-														break;
-													}
-												}
-											}
-											else{
-												for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
-													if($attributes['enum_value'][$j][$e] == $value){
-														$auswahlfeld_output = $attributes['enum_output'][$j][$e];
-														$auswahlfeld_output_laenge=strlen($auswahlfeld_output)+1;
-														break;
-													}
-												}
-											}
-                      $datapart .= '<input readonly id="'.$name.'_'.$k.'" style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;" size="'.$auswahlfeld_output_laenge.'" type="text" name="'.$fieldname.'" value="'.$auswahlfeld_output.'">';
-                      $auswahlfeld_output = '';
-                      $auswahlfeld_output_laenge = '';
+										if(is_array($attributes['dependent_options'][$j])){
+											$enum_value = $attributes['enum_value'][$j][$k];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
+											$enum_output = $attributes['enum_output'][$j][$k];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
 										}
 										else{
-											$datapart .= '<select title="'.$alias.'" style="'.$select_width.'font-size: '.$fontsize.'px"';
-											if($attributes['req_by'][$j] != ''){
-												$datapart .= 'onchange="update_require_attribute(\''.$attributes['req_by'][$j].'\', '.$k.','.$layer_id.', new Array(\''.implode($attributes['name'], "','").'\'));set_changed_flag(currentform.changed_'.$oid.')" ';
-											}
-											else{
-												$datapart .= 'onchange="set_changed_flag(currentform.changed_'.$oid.')"';
-											}
-											$datapart .= 'id="'.$name.'_'.$k.'" name="'.$fieldname.'">';
-											$datapart .= '<option value="">-- '.$this->strPleaseSelect.' --</option>';
-											if(is_array($attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-												for($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++){
-													$datapart .= '<option ';
-													if($attributes['enum_value'][$j][$k][$e] == $value OR ($attributes['enum_value'][$j][$k][$e] != '' AND $attributes['enum_value'][$j][$k][$e] == $this->formvars[$layer_id.';'.$attributes['real_name'][$name].';'.$tablename.';'.$oid.';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j]])){
-														$datapart .= 'selected ';
-													}
-													$datapart .= 'value="'.$attributes['enum_value'][$j][$k][$e].'">'.$attributes['enum_output'][$j][$k][$e].'</option>';
-												}
-											}
-											else{
-												for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
-													$datapart .= '<option ';
-													if($attributes['enum_value'][$j][$e] == $value OR ($attributes['enum_value'][$j][$e] != '' AND $attributes['enum_value'][$j][$e] == $this->formvars[$layer_id.';'.$attributes['real_name'][$name].';'.$tablename.';'.$oid.';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j]])){
-														$datapart .= 'selected ';
-													}
-													$datapart .= 'value="'.$attributes['enum_value'][$j][$e].'">'.$attributes['enum_output'][$j][$e].'</option>';
-												}
-											}
-											$datapart .= '</select>';
-											if($attributes['subform_layer_id'][$j] != ''){
-												if($attributes['subform_layer_privileg'][$j] > 0){
-													if($attributes['embedded'][$j] == true){
-														$datapart .= '&nbsp;&nbsp;<a class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz&selected_layer_id='.$attributes['subform_layer_id'][$j].'&embedded=true&fromobject=subform'.$layer_id.'_'.$k.'_'.$j.'&targetobject='.$name.'_'.$k.'&targetlayer_id='.$layer_id.'&targetattribute='.$name.'\', new Array(document.getElementById(\'subform'.$layer_id.'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'));">&nbsp;neu&nbsp;</a>';
-														$datapart .= '<div style="display:inline" id="subform'.$layer_id.'_'.$k.'_'.$j.'"></div>';
-													}
-													else{
-														$datapart .= '&nbsp;&nbsp;<a class="buttonlink" target="_blank" href="index.php?go=neuer_Layer_Datensatz&selected_layer_id='.$attributes['subform_layer_id'][$j].'">&nbsp;neu&nbsp;</a>';
-													}
-												}
-											}
+											$enum_value = $attributes['enum_value'][$j];
+											$enum_output = $attributes['enum_output'][$j];
 										}
+										$datapart .= Auswahlfeld($layer_id, $name, $j, $alias, $fieldname, $value, $this->formvars[$fieldname], $enum_value, $enum_output, $attributes['req_by'][$j], $attributes['name'], $privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $fontsize, $this->strPleaseSelect);
 									}break;
 									
 									case 'Autovervollständigungsfeld' : {
@@ -144,24 +89,38 @@
 											$tablename_ = $attributes['table_name'][$name_];
 											$oid = $dataset[$tablename_.'_oid'];
 											$index = $attributes['indizes'][$attribute_foreign_keys[$f]];
-											if($attributes['form_element_type'][$attribute_foreign_keys[$f]] == 'Autovervollständigungsfeld'){
-												$fieldname_[$f] = $layer_id.';'.$attributes['real_name'][$name_].';'.$tablename_.';'.$oid.';Autovervollständigungsfeld;'.$attributes['nullable'][$index].';'.$attributes['type'][$index];
-												if($dataset[$name_] == '')$dataset[$name_] = $this->formvars[$fieldname_[$f]];
-												if($attributes['subform_layer_privileg'][$index] != '0')$this->editable = 'true';
-												$datapart .= Autovervollstaendigungsfeld($layer_id, $name_, $index, $attributes['alias'][$name_], $fieldname_[$f], $dataset[$name_], $attributes['enum_output'][$index][$k], $attributes['privileg'][$name_], $k, $oid, $attributes['subform_layer_id'][$index], $attributes['subform_layer_privileg'][$index], $attributes['embedded'][$index], $lock[$k], $fontsize);
-												$datapart .= '</td><td align="right" valign="top">';
-											}
-											else{
-												$datapart .= '<input style="font-size: '.(0.9*$fontsize).'px';
-												if($attributes['privileg'][$name_] == '0' OR $lock[$k]){
-													$datapart .= ';background-color:transparent;border:0px;display:none;background-color:#e8e3da;" readonly ';
+											$fieldname_[$f] = $layer_id.';'.$attributes['real_name'][$name_].';'.$tablename_.';'.$oid.';'.$attributes['form_element_type'][$index].';'.$attributes['nullable'][$index].';'.$attributes['type'][$index];
+											if($dataset[$name_] == '')$dataset[$name_] = $this->formvars[$fieldname_[$f]];
+											switch ($attributes['form_element_type'][$attribute_foreign_keys[$f]]){
+												case 'Autovervollständigungsfeld' : {
+													if($attributes['subform_layer_privileg'][$index] != '0')$this->editable = 'true';
+													$datapart .= Autovervollstaendigungsfeld($layer_id, $name_, $index, $attributes['alias'][$name_], $fieldname_[$f], $dataset[$name_], $attributes['enum_output'][$index][$k], $attributes['privileg'][$name_], $k, $oid, $attributes['subform_layer_id'][$index], $attributes['subform_layer_privileg'][$index], $attributes['embedded'][$index], $lock[$k], $fontsize);
+													$datapart .= '</td><td align="right" valign="top">';
+												}break;
+												case 'Auswahlfeld' : {
+													if($attributes['subform_layer_privileg'][$index] != '0')$this->editable = 'true';
+													if(is_array($attributes['dependent_options'][$index])){
+														$enum_value = $attributes['enum_value'][$index][$k];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
+														$enum_output = $attributes['enum_output'][$index][$k];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
+													}
+													else{
+														$enum_value = $attributes['enum_value'][$index];
+														$enum_output = $attributes['enum_output'][$index];
+													}
+													$datapart .= Auswahlfeld($layer_id, $name_, $j, $attributes['alias'][$name_], $fieldname_[$f], $dataset[$name_], $this->formvars[$fieldname_[$f]], $enum_value, $enum_output, $attributes['req_by'][$index], $attributes['name'], $attributes['privileg'][$name_], $k, $oid, $attributes['subform_layer_id'][$index], $attributes['subform_layer_privileg'][$index], $attributes['embedded'][$index], $lock[$k], $fontsize, $this->strPleaseSelect);
+													$datapart .= '</td><td align="right" valign="top">';
+												}break;
+												default : {
+													$datapart .= '<input style="font-size: '.(0.9*$fontsize).'px';
+													if($attributes['privileg'][$name_] == '0' OR $lock[$k]){
+														$datapart .= ';background-color:transparent;border:0px;display:none;background-color:#e8e3da;" readonly ';
+													}
+													else{
+														'" ';
+													}
+													$fieldname_[$f] = $layer_id.';'.$attributes['real_name'][$name_].';'.$tablename_.';'.$oid.';TextFK;0;varchar';
+													$datapart .= ' id="'.$attributes['real_name'][$name_].'_'.$k.'" name="'.$fieldname_[$f].'" value="'.$dataset[$name_].'">';
 												}
-												else{
-													'" ';
-												}
-												$fieldname_[$f] = $layer_id.';'.$attributes['real_name'][$name_].';'.$tablename_.';'.$oid.';TextFK;0;varchar';
-												if($dataset[$name_] == '')$dataset[$name_] = $this->formvars[$fieldname_[$f]];
-												$datapart .= ' id="'.$attributes['real_name'][$name_].'_'.$k.'" name="'.$fieldname_[$f].'" value="'.$dataset[$name_].'">';
 											}
 											$this->form_field_names .= $fieldname_[$f].'|';
 										}

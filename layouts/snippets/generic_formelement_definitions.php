@@ -31,5 +31,51 @@
 		$datapart .= '</td></tr></table>';
 		return $datapart;
 	}
+	
+	function Auswahlfeld($layer_id, $name, $j, $alias, $fieldname, $value, $formvarsfieldname, $enum_value, $enum_output, $req_by, $attributenames, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $lock, $fontsize, $strPleaseSelect){
+		if($privileg == '0' OR $lock){
+			for($e = 0; $e < count($enum_value); $e++){
+				if($enum_value[$e] == $value){
+					$auswahlfeld_output = $enum_output[$e];
+					$auswahlfeld_output_laenge=strlen($auswahlfeld_output)+1;
+					break;
+				}
+			}
+			$datapart .= '<input readonly id="'.$name.'_'.$k.'" style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;" size="'.$auswahlfeld_output_laenge.'" type="text" name="'.$fieldname.'" value="'.$auswahlfeld_output.'">';
+			$auswahlfeld_output = '';
+			$auswahlfeld_output_laenge = '';
+		}
+		else{
+			$datapart .= '<select title="'.$alias.'" style="'.$select_width.'font-size: '.$fontsize.'px"';
+			if($req_by != ''){
+				$datapart .= 'onchange="update_require_attribute(\''.$req_by.'\', '.$k.','.$layer_id.', new Array(\''.implode($attributenames, "','").'\'));set_changed_flag(currentform.changed_'.$oid.')" ';
+			}
+			else{
+				$datapart .= 'onchange="set_changed_flag(currentform.changed_'.$oid.')"';
+			}
+			$datapart .= 'id="'.$name.'_'.$k.'" name="'.$fieldname.'">';
+			$datapart .= '<option value="">-- '.$strPleaseSelect.' --</option>';
+			for($e = 0; $e < count($enum_value); $e++){
+				$datapart .= '<option ';
+				if($enum_value[$e] == $value OR ($enum_value[$e] != '' AND $enum_value[$e] == $formvarsfieldname)){
+					$datapart .= 'selected ';
+				}
+				$datapart .= 'value="'.$enum_value[$e].'">'.$enum_output[$e].'</option>';
+			}
+			$datapart .= '</select>';
+			if($subform_layer_id != ''){
+				if($subform_layer_privileg > 0){
+					if($embedded == true){
+						$datapart .= '&nbsp;&nbsp;<a class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz&selected_layer_id='.$subform_layer_id.'&embedded=true&fromobject=subform'.$layer_id.'_'.$k.'_'.$j.'&targetobject='.$name.'_'.$k.'&targetlayer_id='.$layer_id.'&targetattribute='.$name.'\', new Array(document.getElementById(\'subform'.$layer_id.'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'));">&nbsp;neu&nbsp;</a>';
+						$datapart .= '<div style="display:inline" id="subform'.$layer_id.'_'.$k.'_'.$j.'"></div>';
+					}
+					else{
+						$datapart .= '&nbsp;&nbsp;<a class="buttonlink" target="_blank" href="index.php?go=neuer_Layer_Datensatz&selected_layer_id='.$subform_layer_id.'">&nbsp;neu&nbsp;</a>';
+					}
+				}
+			}
+		}
+		return $datapart;
+	}
 
 ?>
