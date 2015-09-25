@@ -1895,6 +1895,9 @@ class flurstueck {
       $errmsg.='in line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
+		if($without_temporal_filter AND $ret[1]['hist_alb'] == 0){
+			rolle::$hist_timestamp = DateTime::createFromFormat('d.m.Y H:i:s', $ret[1]['beginnt'])->format('Y-m-d\TH:i:s\Z');
+		}
     $rs=$ret[1];
     $this->Zaehler=intval($rs['zaehler']);
     $this->Nenner=intval($rs['nenner']);
@@ -1918,6 +1921,7 @@ class flurstueck {
     $this->ALB_Flaeche=$rs['flaeche'];
 		$this->abweichenderrechtszustand=$rs['abweichenderrechtszustand'];
     $this->endet=$rs['endet'];
+		$this->beginnt=$rs['beginnt'];
 		$this->hist_alb=$rs['hist_alb'];
     $this->Pruefzeichen=$rs['pruefzeichen'];
     $this->Forstamt=$this->getForstamt();	

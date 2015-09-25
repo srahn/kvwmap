@@ -118,7 +118,7 @@ class GUI {
 	}
 	
 	function setHistTimestamp(){
-		$this->user->rolle->setHistTimestamp($this->formvars['timestamp']);
+		$this->user->rolle->setHistTimestamp($this->formvars['timestamp'], $this->formvars['go_next']);
 		$this->user->rolle->readSettings();	
 		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
 		$this->loadMap('DataBase');		
@@ -10325,20 +10325,6 @@ class GUI {
       $FlurstKennzListe=$ret[1];
       $anzFlurst=count($FlurstKennzListe);
     }
-
-		if($this->formvars['historical'] == 1 OR $this->formvars['without_temporal_filter'] == true){		
-			// Der zeitliche Filter wurde ausgeschaltet, um die Flurstücke abfragen zu können 
-			// und den rolle::$hist_timestamp des Nutzers in das Lebenszeitintervall des ersten Flurstücks zu setzen (allerdings nicht bei historischen Flurstücken aus dem ALB).
-			// Das wird immer dann gemacht, wenn eine historische Flurstückssuche gemacht wurde oder
-			// auf Vorgänger oder Nachfolger in der Flurstücksanzeige geklickt wurde.
-			$this->formvars['without_temporal_filter'] = true;
-			$FlurstKennz = $FlurstKennzListe[0];
-			$ret=$this->pgdatabase->getALBData($FlurstKennz, true);
-			if($ret[1]['hist_alb'] == 0){
-				$this->user->rolle->setHistTimestamp($ret[1]['endet']);
-				$this->user->rolle->readSettings();				
-			}
-		}
 	
     $this->mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $layer = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);

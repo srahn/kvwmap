@@ -1414,11 +1414,10 @@ class rolle {
     return 1;
   }
 
-	function setHistTimestamp($timestamp) {
+	function setHistTimestamp($timestamp, $go_next = '') {
 		$sql ='UPDATE rolle SET ';
 		if($timestamp != ''){
 			$time = new DateTime(DateTime::createFromFormat('d.m.Y H:i:s', $timestamp)->format('Y-m-d H:i:s'));
-			$time->modify("-1 second");
 			$sql.='hist_timestamp="'.$time->format('Y-m-d H:i:s').'"';
 			showAlert('Der Zeitpunkt der ALKIS-Historie wurde auf '.$time->format('d.m.Y H:i:s').' geändert.');
 		}
@@ -1432,6 +1431,7 @@ class rolle {
 		$query=mysql_query($sql,$this->database->dbConn);
 		if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		$this->debug->write('Neue Werte für Rolle eingestellt: '.$formvars['nZoomFactor'].', '.$formvars['mapsize'],4);
+		if($go_next != '')echo "<script>window.location.href='index.php?go=".$go_next."';</script>";
 	}
 	
   function readSettings() {

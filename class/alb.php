@@ -198,7 +198,7 @@ class ALB {
     for($i = 0; $i < count($flurstuecke); $i++) {
       $flurstkennz = $flurstuecke[$i];
       $flst = new flurstueck($flurstkennz,$this->database);
-      $flst->readALB_Data($flurstkennz);
+      $flst->readALB_Data($flurstkennz, true);
 			$flst->Grundbuecher=$flst->getGrundbuecher();
 			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,0);
 			$emzges_222 = 0; $emzges_223 = 0;
@@ -458,7 +458,7 @@ class ALB {
     for($i = 0; $i < count($flurstuecke); $i++) {
       $flurstkennz = $flurstuecke[$i];
       $flst = new flurstueck($flurstkennz,$this->database);
-      $flst->readALB_Data($flurstkennz);
+      $flst->readALB_Data($flurstkennz, true);
       $flst->Grundbuecher=$flst->getGrundbuecher();
 			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,0);
 				for($b = 0; $b < count($flst->Buchungen); $b++){
@@ -686,7 +686,7 @@ class ALB {
     for($i = 0; $i < count($flurstuecke); $i++) {
       $flurstkennz = $flurstuecke[$i];
       $flst = new flurstueck($flurstkennz,$this->database);
-      $flst->readALB_Data($flurstkennz);
+      $flst->readALB_Data($flurstkennz, true);
       $flst->Grundbuecher=$flst->getGrundbuecher();
 			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,0);
       $anzNutzung=count($flst->Nutzung);
@@ -928,7 +928,7 @@ class ALB {
     for($i = 0; $i < count($flurstuecke); $i++) {
       $flurstkennz = $flurstuecke[$i];
       $flst = new flurstueck($flurstkennz,$this->database);
-      $flst->readALB_Data($flurstkennz);
+      $flst->readALB_Data($flurstkennz, true);
 			$flst->Grundbuecher=$flst->getGrundbuecher();
 			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,0);
       if($formvars['flurstkennz']){ $csv .= $flst->FlurstKennz.';';}
@@ -2002,7 +2002,7 @@ class ALB {
           # Flurstück erzeugen
           $flst=new flurstueck($buchungen[$b]['flurstkennz'],$this->database);
           $flst->database=$this->database;
-          $ret=$flst->readALB_Data($buchungen[$b]['flurstkennz']);
+          $ret=$flst->readALB_Data($buchungen[$b]['flurstkennz'], true);
 
           # Seitenumbruch wenn erforderlich
           if($row<120) {
@@ -2231,7 +2231,7 @@ class ALB {
           # Flurstück erzeugen
           $flst=new flurstueck($buchungen[$b]['flurstkennz'],$this->database);
           $flst->database=$this->database;
-          $ret=$flst->readALB_Data($buchungen[$b]['flurstkennz']);
+          $ret=$flst->readALB_Data($buchungen[$b]['flurstkennz'], true);
 
           # Seitenumbruch wenn erforderlich
           if($row<120) {

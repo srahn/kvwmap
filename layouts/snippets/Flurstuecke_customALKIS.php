@@ -81,10 +81,11 @@ show_all = function(count){
       }
     }
 		echo '<tr><td align="center"><table><tr><td align="left">';
-    for ($a=0;$a<$anzObj;$a++) { // 2007-11-13_mh
+    for ($a=0;$a<$anzObj;$a++){
+			$set_timestamp = '';
       $flurstkennz_a=$this->qlayerset[$i]['shape'][$a]['flurstkennz'];
 			$flst=new flurstueck($flurstkennz_a,$this->pgdatabase);
-      $flst->readALB_Data($flurstkennz_a, 'true');	# true, damit man rausbekommt, ob das Flurstück evtl. historisch ist (beim Flurst.-Listenimport)
+      $flst->readALB_Data($flurstkennz_a, 'true');	# true, damit man unabhängig vom Zeitstempel ist (z.B. bei der historischen Flurstückssuche oder Flst.-Listenimport)
       $gemkg=substr($flurstkennz_a, 0, 6);
       $flur=substr($flurstkennz_a, 6, 3);
       $zaehler=ltrim(substr($flurstkennz_a, 9, 5), '0');
@@ -120,7 +121,7 @@ show_all = function(count){
   <tr>
     <td>
     <div style="position:relative; top:0px; right:0px; padding:=px; border-color:<?php echo BG_DEFAULT ?>; border-width:1px; border-style:solid;">
-      <table border="0" cellspacing="0" cellpadding="0">
+      <table width="100%" border="0" cellspacing="0" cellpadding="0">
       <tr>
         <td colspan="2">
           <table width="100%">
@@ -260,7 +261,27 @@ show_all = function(count){
               if($privileg_['status']){ ?>
               <tr>
                 <td align="right"><span class="fett"> Status&nbsp;</span></td>
-                <td><?php if ($flst->endet!="" OR $flst->hist_alb == 1) { echo "historisches&nbsp;Flurst&uuml;ck"; if($flst->endet != '')echo "&nbsp;(endet: ".$flst->endet.")"; } else { echo "aktuelles&nbsp;Flurst&uuml;ck"; }  ?></td>
+                <td><?php 
+									$timestamp = DateTime::createFromFormat('d.m.Y H:i:s', $this->user->rolle->hist_timestamp);
+									$beginnt = DateTime::createFromFormat('d.m.Y H:i:s', $flst->beginnt);
+									$endet = DateTime::createFromFormat('d.m.Y H:i:s', $flst->endet);
+									if($flst->endet!="" OR $flst->hist_alb == 1){
+										echo "historisches&nbsp;Flurst&uuml;ck"; 
+										if($flst->endet != ''){
+											if($timestamp == NULL OR $timestamp < $beginnt OR $timestamp > $endet){
+												$set_timestamp = 'setHistTimestamp&timestamp='.$flst->beginnt;
+												echo '<a href="index.php?go='.$set_timestamp.'" title="in die Zeit des Flurstücks wechseln">&nbsp;(endet: '.$flst->endet.')</a>';
+											}
+											else echo "&nbsp;(endet: ".$flst->endet.")";
+										} 
+									} 
+									else{
+										if($timestamp != NULL AND $timestamp < $beginnt){
+											$set_timestamp = 'setHistTimestamp';
+											echo '<a href="index.php?go='.$set_timestamp.'" title="Zeitpunkt auf aktuell setzen">aktuelles&nbsp;Flurst&uuml;ck</a>';
+										}
+										else echo "aktuelles&nbsp;Flurst&uuml;ck"; 
+									}  ?></td>
               </tr>
               <? } ?>
               <?php if ($privileg_['vorgaenger'] AND $flst->Vorgaenger != '') { ?>
@@ -269,7 +290,7 @@ show_all = function(count){
               <td>
                 <?php
                 for($v = 0; $v < count($flst->Vorgaenger); $v++){ ?>
-                  <a href="javascript:overlay_link('go=Flurstueck_Anzeigen&FlurstKennz=<?php echo $flst->Vorgaenger[$v]['vorgaenger']; ?>&without_temporal_filter=true');">
+                  <a href="javascript:overlay_link('go=Flurstueck_Anzeigen&FlurstKennz=<?php echo $flst->Vorgaenger[$v]['vorgaenger']; ?>');">
                   <? echo formatFlurstkennzALK($flst->Vorgaenger[$v]['vorgaenger']).' (H)<br>'; ?>
                   </a>
                 <? } ?>
@@ -277,7 +298,7 @@ show_all = function(count){
                 <td>
                 <? if (count($flst->Vorgaenger) > 1){?>
                   <a href="javascript:overlay_link('go=Flurstueck_Anzeigen&FlurstKennz=<?php echo $flst->Vorgaenger[0]['vorgaenger'];
-                  for($v = 1; $v < count($flst->Vorgaenger); $v++)echo ';'.$flst->Vorgaenger[$v]['vorgaenger']; ?>&without_temporal_filter=true');">alle</a>
+                  for($v = 1; $v < count($flst->Vorgaenger); $v++)echo ';'.$flst->Vorgaenger[$v]['vorgaenger']; ?>');">alle</a>
                 <? } ?>
               </td>
           </tr>
@@ -288,7 +309,7 @@ show_all = function(count){
               <td>
                 <?php
                 for($v = 0; $v < count($flst->Nachfolger); $v++){ ?>
-                  <a href="javascript:overlay_link('go=Flurstueck_Anzeigen&FlurstKennz=<?php echo $flst->Nachfolger[$v]['nachfolger']; ?>&without_temporal_filter=true');">
+                  <a href="javascript:overlay_link('go=Flurstueck_Anzeigen&FlurstKennz=<?php echo $flst->Nachfolger[$v]['nachfolger']; ?>');">
                   <? echo formatFlurstkennzALK($flst->Nachfolger[$v]['nachfolger']);
                   if($flst->Nachfolger[$v]['endet'] != '' OR $flst->Nachfolger[$v]['hist_alb'] != ''){
                     echo ' (H)';
@@ -301,7 +322,7 @@ show_all = function(count){
               <? if(count($flst->Nachfolger) > 1){ ?>
                 <a href="javascript:overlay_link('go=Flurstueck_Anzeigen&FlurstKennz=<?php echo $flst->Nachfolger[0]['nachfolger'];
                 for($v = 1; $v < count($flst->Nachfolger); $v++)
-                echo ';'.$flst->Nachfolger[$v]['nachfolger']; ?>&without_temporal_filter=true');">alle</a>
+                echo ';'.$flst->Nachfolger[$v]['nachfolger']; ?>');">alle</a>
               <? } ?>
               </td>
           </tr>
@@ -750,7 +771,7 @@ show_all = function(count){
 		  <td colspan="2">
             <div class="fstanzeigecontainer">
 
-					<a href="index.php?go=Flurstueck_Auswaehlen&searchInExtent=<?php echo $this->searchInExtent;
+					<a href="index.php?go=Flurstueck_<? if($flst->endet!="" OR $flst->hist_alb == 1)echo 'hist_';?>Auswaehlen&searchInExtent=<?php echo $this->searchInExtent;
 					?>&GemID=<?php echo $flst->GemeindeID;
 					?>&GemkgID=<?php echo $flst->GemkgSchl; ?>&FlurID=<?php echo $flst->FlurID;
 					?>&FlstID=<?php echo $flst->FlurstKennz; ?>">
@@ -770,15 +791,19 @@ show_all = function(count){
 					  &nbsp;&nbsp;
                     </div>
 					</a>
-
-					<a href="index.php?go=ZoomToFlst&FlurstKennz=<?php echo $flst->FlurstKennz; ?>">
-                    <div class="fstanzeigehover">
-					  &nbsp;&nbsp;
-					  Kartenausschnitt
-					  &nbsp;&nbsp;
-                    </div>
-                    </a>
-
+					<?
+						if($flst->hist_alb != 1){
+							$zoomlink = 'ZoomToFlst&FlurstKennz='.$flst->FlurstKennz; 
+							if($set_timestamp != ''){$zoomlink = $set_timestamp.'&go_next='.urlencode($zoomlink); $no_zoom_all = true;};
+					?>
+							<a href="index.php?go=<? echo $zoomlink;?>">
+												<div class="fstanzeigehover">
+								&nbsp;&nbsp;
+								Kartenausschnitt
+								&nbsp;&nbsp;
+							</div>
+							</a>
+					<? }else $no_zoom_all = true; ?>
                     <div class="fstanzeigehover">
 					  &nbsp;&nbsp;
 					  Auszug:
@@ -876,7 +901,7 @@ show_all = function(count){
 		  <td>
           <div class="fstanzeigecontainer">
             <div style="text-align:center;">
-
+							<? if($no_zoom_all != true){ ?>
               <a href="javascript:send_selected_flurst('ZoomToFlst', '');">
               <div class="fstanzeigehover">
                 &nbsp;&nbsp;
@@ -884,7 +909,7 @@ show_all = function(count){
                 &nbsp;&nbsp;
               </div>
               </a>
-
+							<? } ?>
               <div class="fstanzeigehover">
                 &nbsp;&nbsp;
 				Auszug:
