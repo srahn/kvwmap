@@ -41,8 +41,15 @@ class ALB {
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: multipart/form-data'));
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);	
-		curl_setopt($ch, CURLOPT_POSTFIELDS, array('cmd' => 'ausfuehren', 'jsessionid' => $sessionid, 'nasfile' => '@'.$nasfile));
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		if (version_compare(phpversion(), '5.5.0', '<')) {
+			$curl_file = '@'.$nasfile;
+		}
+		else {
+			curl_setopt($ch, CURLOPT_SAFE_UPLOAD, true);
+			$curl_file = new CURLFILE($nasfile, 'text/xml', 'nasfile');
+		}
+		curl_setopt($ch, CURLOPT_POSTFIELDS, array('cmd' => 'ausfuehren', 'jsessionid' => $sessionid, 'nasfile' => $curl_file));
 		$result = curl_exec($ch);
 		curl_close($ch);
 		switch (substr($result, 0, 2)){
