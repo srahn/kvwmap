@@ -23,7 +23,14 @@
 <? if($this->new_entry != true){ ?>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 	<tr>
-		<td width="99%" align="center"><h2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<? echo $layer['Name']; ?></h2></td>
+		<td valign="top" style="padding: 0 0 0 0">
+			<? if($layer['template'] == '' OR $layer['template'] == 'generic_layer_editor_2.php'){ ?>
+			<a href="javascript:switch_gle_view(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'columns.png'; ?>"></a>
+			<? }else{ ?>
+			<a href="javascript:switch_gle_view(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'rows.png'; ?>"></a>
+			<? } ?>
+		</td>
+		<td height="30" width="99%" align="center"><h2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<? echo $layer['Name']; ?></h2></td>
 		<td valign="top" style="padding: 0 10 0 0">
 			<? if($layer['template'] == '' OR $layer['template'] == 'generic_layer_editor_2.php'){ ?>
 			<a href="javascript:switch_gle_view(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'columns.png'; ?>"></a>
@@ -31,7 +38,7 @@
 			<a href="javascript:switch_gle_view(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'rows.png'; ?>"></a>
 			<? } ?>
 		</td>
-		<td align="right">			
+		<td align="right" valign="top">			
 			<a href="javascript:scrollbottom();"><img class="hover-border" title="nach unten" src="<? echo GRAPHICSPATH; ?>pfeil.gif" width="11" height="11" border="0"></a>&nbsp;
 		</td>		
 	</tr>
@@ -50,7 +57,7 @@
   }
   if($doit == true){
 ?>
-<table border="0" cellspacing="10" cellpadding="2" width="100%">
+<table border="0" cellspacing="1" cellpadding="2" width="100%">
 	<tr>
 		<td width="100%">   
 			<table border="1" style="border-collapse:collapse" cellspacing="0" cellpadding="2" width="100%">

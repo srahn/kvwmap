@@ -2290,8 +2290,9 @@ class rolle {
 		return 1;
 	}
 	
-	function saveOverlayPosition($x, $y) {
-		$sql ="UPDATE rolle SET overlayx = ".abs($x).", overlayy=".abs($y);
+	function saveOverlayPosition($x, $y){
+		if($x < 0)$x = 10;
+		$sql ="UPDATE rolle SET overlayx = ".$x.", overlayy=".abs($y);
 		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
 		#echo $sql;
 		$this->debug->write("<p>file:users.php class:rolle function:saveOverlayPosition - :",4);

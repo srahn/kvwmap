@@ -111,10 +111,7 @@ class GUI {
 		$this->last_query = $this->user->rolle->get_last_query();
 		$this->formvars['go'] = $this->last_query['go'];
 		if($this->formvars['go'] == 'Layer-Suche_Suchen')$this->GenerischeSuche_Suchen();
-		else{
-			$this->SachdatenAnzeige(NULL);
-			$this->output();
-		}
+		else $this->queryMap();
 	}
 	
 	function setHistTimestamp(){
