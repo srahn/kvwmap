@@ -1,8 +1,15 @@
-
+<?
+	include(LAYOUTPATH.'languages/druckausschnittswahl_'.$this->user->rolle->language.'.php');
+?>
 <script type="text/javascript">
 <!--
 
-function print(){
+function print(name, format, preis){
+	if(preis > 0){
+		preis = preis/100;
+		r = confirm("<? echo $strConfirm1; ?>"+name+", "+format+": "+preis+"<? echo $strConfirm2; ?>");
+		if(r == false)return;
+	}	
 	document.GUI.target = '_blank';
 	document.GUI.go_plus.value = 'Drucken';
 	document.GUI.submit();
@@ -174,7 +181,7 @@ function preventflickering(evt){
   <tr align="center"> 
     <td colspan="2"> 
       <input class="button" type="button" name="zurueck" value="zurück zum Druckausschnitt" onclick="goback();">
-      <input class="button" type="button" name="drucken" value="Drucken" onclick="print();">
+      <input class="button" type="button" name="drucken" value="Drucken" onclick="print('<? echo $this->Docu->activeframe[0]['Name']; ?>', '<? echo $this->Docu->activeframe[0]['format']; ?>', <? echo $this->Docu->activeframe[0]['preis']; ?>);">
     </td>
   </tr>
   <tr>
