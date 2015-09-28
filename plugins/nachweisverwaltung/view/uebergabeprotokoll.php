@@ -34,7 +34,6 @@ function create_protocol(){
     <td width="100%" bgcolor="<?php echo BG_FORM ?>">
     	<table width="100%" border="1" style="border-collapse:collapse" cellspacing="0" cellpadding="4">
         <tr bgcolor="#FFFFFF"> 
-          <td width="40px" <? if($this->formvars['Lfd'] != 1) echo 'bgcolor="#EBEBEB"'; ?>><span class="fett">Lfd</span><input type="checkbox" onchange="document.GUI.submit();" value="1" name="Lfd" <? if($this->formvars['Lfd'] == 1)echo 'checked=true;'; ?>></td>
           <td minwidth="130px" <? if($this->formvars['Riss-Nummer'] != 1) echo 'bgcolor="#EBEBEB"'; ?>><a href="javascript:change_order('rissnummer');" title="nach Riss-Nummer sortieren"><span class="fett">Riss-Nummer</span></a><input type="checkbox" onchange="document.GUI.submit();" value="1" name="Riss-Nummer" <? if($this->formvars['Riss-Nummer'] == 1)echo 'checked=true;'; ?>></td>
           <td minwidth="140px" <? if($this->formvars['Antrags-Nummer'] != 1) echo 'bgcolor="#EBEBEB"'; ?>><a href="javascript:change_order('stammnr');" title="nach Antrags-Nummer sortieren"><span class="fett">Antrags-Nummer</span></a><input type="checkbox" onchange="document.GUI.submit();" value="1" name="Antrags-Nummer" <? if($this->formvars['Antrags-Nummer'] == 1)echo 'checked=true;'; ?>></td>
           <td width="50px" <? if($this->formvars['FFR'] != 1) echo 'bgcolor="#EBEBEB"'; ?>><span class="fett">FFR</span><input type="checkbox" onchange="document.GUI.submit();" value="1" name="FFR" <? if($this->formvars['FFR'] == 1)echo 'checked=true;'; ?>></td>
@@ -48,7 +47,6 @@ function create_protocol(){
         </tr>
         <? for($i=0; $i < count($this->antrag->FFR); $i++){ ?>
         <tr bgcolor="#ffffff"> 
-          <td valign="top" align="center" <? if($this->formvars['Lfd'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['Lfd']; ?></td>
           <td valign="top" align="center" <? if($this->formvars['Riss-Nummer'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['Riss-Nummer']; ?></td>
           <td valign="top" align="center" <? if($this->formvars['Antrags-Nummer'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['Antrags-Nummer']; ?></td>
           <td valign="top" align="center" <? if($this->formvars['FFR'] != 1) echo 'bgcolor="#EBEBEB">';else echo '>'.$this->antrag->FFR[$i]['FFR']; ?></td>

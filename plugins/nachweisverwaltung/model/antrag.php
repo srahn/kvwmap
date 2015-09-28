@@ -85,7 +85,7 @@ class antrag {
       # Verzeichnis existierte noch nicht. 
       # Anlegen eines neuen Verzeichnisses zur Speicherung der Dokumentendateien mit Auftragsnummer als Name
       mkdir ($auftragspfad, 0777);
-      $msg = "Neues Verzeichnis: ".$auftragspfad." für Auftrag hinzugefügt.\\r\\n";
+      #$msg = "Neues Verzeichnis: ".$auftragspfad." für Auftrag hinzugefügt.\\r\\n";
     }
     else {
       # Verzeichnis existiert schon. Den gesamten Inhalt löschen
@@ -153,7 +153,7 @@ class antrag {
         }
       }
     }
-    if ($errmsg==''){ $errmsg='Die Nachweisdateien zum Antrag Nr: '.$this->nr.' wurden erfolgreich in Ordner zusammengestellt';}
+    #if ($errmsg==''){ $errmsg='Die Nachweisdateien zum Antrag Nr: '.$this->nr.' wurden erfolgreich in Ordner zusammengestellt';}
     return $errmsg;     
   }  
 
@@ -228,7 +228,6 @@ class antrag {
     # Allgemeine Einstellungen für die ganze Tabelle
     $options=array('xPos'=>'left','xOrientation'=>'right','rowGap'=>$rowGap,'colGap'=>$colGap,'showLines'=>2 ,'width'=>780,'showHeadings'=>1,'fontSize'=>12, 'shaded'=>0);
     # Individuelle Einstellungen für die Spalten.
-    $options['cols']['Lfd']=array('justification'=>'centre');
     $options['cols']['Riss-Nummer']=array('justification'=>'centre');
     $options['cols']['Antrags-Nummer']=array('justification'=>'centre');
     $options['cols']['FFR']=array('justification'=>'centre');
@@ -353,10 +352,7 @@ class antrag {
     if ($ret[0]) { return $ret[1]; }
     else { $query_id=$ret[1]; }
     $i=0;
-    while($rs=pg_fetch_array($query_id)) {
-      # Setzen der laufenden Nummer der Vorgänge
-      if($formvars['Lfd'])$FFR[$i]['Lfd']=$i+1;
-      
+    while($rs=pg_fetch_array($query_id)) {      
       if(NACHWEIS_PRIMARY_ATTRIBUTE == 'rissnummer'){
       	if($formvars['Riss-Nummer'])$FFR[$i]['Riss-Nummer']=$rs['flurid'].'/'.$rs['rissnummer'];
 				if(NACHWEIS_SECONDARY_ATTRIBUTE != '')$FFR[$i]['Riss-Nummer'] .= ' - '.$rs[NACHWEIS_SECONDARY_ATTRIBUTE];

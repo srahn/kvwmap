@@ -1240,86 +1240,88 @@ class Festpunkte {
     # Verzeichnispfad bilden und prüfen ob schon vorhanden, wenn nicht Verzeichnis anlegen
     if($pkz != '')$pkz = array_values($pkz);
 		if($stelle_id != '')$antrag_nr.='~'.$stelle_id;
-    $kvzPfad=RECHERCHEERGEBNIS_PATH.$antrag_nr.'/';
-    if (!is_dir($kvzPfad)) {
-      mkdir($kvzPfad,0770); # erzeugt das Verzeichnis für den Auftrag, weil es das noch nicht gibt
-    }
-    $kvzPfad.='KVZ/';
-    if (!is_dir($kvzPfad)) {
-      mkdir($kvzPfad,0775); # erzeugt das Verzeichnis für das KVZ, weil es das noch nicht gibt
-    }
-    # Dateinamen bilden mit Pfadangabe
-    $dateiname=$kvzPfad.KVZAUSGABEDATEINAME;
-    if (!$fp=fopen($dateiname,'w')) {
-      $errmsg="Kann die Datei $dateiname nicht öffnen";
-    }
-    else {
-    	if($antrag_nr == 'ohne'){
-    		$antrag_nr = '';
-    	}
-      $ret=$this->getFestpunkte($pkz,'','','','',$antrag_nr,$stelle_id,'','pkz');
-      if ($ret[0]) {
-        $errmsg="Festpunkte konnten nicht abgefragt werden.";
-      }
-      else {
-        $zeile = KVZKOPF;
-				$zeile.="\r\n"; # Zeilenumbruch
-        for ($i=0;$i<$this->anzPunkte;$i++) {
-		  		if($i!=0)$zeile = "";
-          $p=$this->liste[$i];
-          # Entfernen der - in pkz für Punktnummer ohne -
-          $p["pnr"]=str_replace("-","",$p["pkz"]);
-          $zeile.=$p["ls"]; # Lagestatus
-          $zeile.=" ".str_pad(trim($p["pnr"]),14," ",STR_PAD_LEFT); # Punktkennzeichen
-          $zeile.=" ".str_pad(trim($p["vma"]),3,"0",STR_PAD_LEFT); # Vermarkungsart
-          $zeile.=" ".$p["rw"]; # Rechtswert
-          $zeile.=" ".$p["hw"]; # Hochwert
-          $zeile.=" "; # 47 Leerstelle
-          if ($p["hoe"]=='') {
-            $zeile.=str_repeat(" ",8); # 48-55 Wenn Höhe nicht angegeben mit Leerstellen auffüllen
-          }
-          else {
-            $zeile.=" ".sprintf("%08.3f",$p["hoe"]); # 48-55 Höhe
-          }
-          $zeile.=" "; # 56 Leerstelle
-          if ($p["hz"]=='') {
-            $zeile.=" "; # 57 Wenn HZ nicht angegeben mit Leerzstelle auffüllen
-          }
-          else {
-            $zeile.=sprintf("%1d",$p["hz"]); # 57 HZ
-          }
-          $zeile.=" "; # 58 Leerstelle
-          if ($p["hg"]=='') {
-            $zeile.=" "; # 59 Wenn hg nicht angegeben mit Leerzstelle auffüllen
-          }
-          else {
-            $zeile.=sprintf("%1d",$p["hg"]); # 59 HG
-          }
-          $zeile.="  "; # 60-61 Leerzeichen
-          $zeile.=sprintf("%1d",$p["lz"]); # 62 Lagezuverlässigkeit
-          $zeile.=" "; # 63 Leerstelle
-          $zeile.=sprintf("%1d",$p["lg"]); # 64 Lagegenauigkeitsstufe
-          $zeile.=" "; # 65 Leerstelle
-          $zeile.="\r\n"; # Zeilenumbruch
-          if (!fwrite($fp,$zeile)) {
-            $errmsg.="Kann folgende Zeile nicht in die Datei $dateiname schreiben:<br>".$zeile;
-            $i=$this->anzPunkte; # Zum Abbruch der Schleife
-          }
-        }
-        if (!fclose($fp)) {
-          $errmsg.="Kann die Datei $dateiname nicht schließen.";
-        }
-      } # end of festpunkte konnten abgefragt werden
-    }
-    if ($errmsg!='') {
-      $ret[0]=1;
-      $ret[1]=$errmsg;
-    }
-    else {
-      $ret[0]=0;
-      $ret[1]=$this->anzPunkte." Zeilen in die Datei ".$dateiname." geschrieben.";
-      $ret[2]=$dateiname;
-    }
+		$ret=$this->getFestpunkte($pkz,'','','','',$antrag_nr,$stelle_id,'','pkz');
+		if($this->anzPunkte > 0){
+			$kvzPfad=RECHERCHEERGEBNIS_PATH.$antrag_nr.'/';
+			if (!is_dir($kvzPfad)) {
+				mkdir($kvzPfad,0770); # erzeugt das Verzeichnis für den Auftrag, weil es das noch nicht gibt
+			}
+			$kvzPfad.='KVZ/';
+			if (!is_dir($kvzPfad)) {
+				mkdir($kvzPfad,0775); # erzeugt das Verzeichnis für das KVZ, weil es das noch nicht gibt
+			}
+			# Dateinamen bilden mit Pfadangabe
+			$dateiname=$kvzPfad.KVZAUSGABEDATEINAME;
+			if (!$fp=fopen($dateiname,'w')) {
+				$errmsg="Kann die Datei $dateiname nicht öffnen";
+			}
+			else {
+				if($antrag_nr == 'ohne'){
+					$antrag_nr = '';
+				}
+				if ($ret[0]) {
+					$errmsg="Festpunkte konnten nicht abgefragt werden.";
+				}
+				else{
+					$zeile = KVZKOPF;
+					$zeile.="\r\n"; # Zeilenumbruch
+					for ($i=0;$i<$this->anzPunkte;$i++) {
+						if($i!=0)$zeile = "";
+						$p=$this->liste[$i];
+						# Entfernen der - in pkz für Punktnummer ohne -
+						$p["pnr"]=str_replace("-","",$p["pkz"]);
+						$zeile.=$p["ls"]; # Lagestatus
+						$zeile.=" ".str_pad(trim($p["pnr"]),14," ",STR_PAD_LEFT); # Punktkennzeichen
+						$zeile.=" ".str_pad(trim($p["vma"]),3,"0",STR_PAD_LEFT); # Vermarkungsart
+						$zeile.=" ".$p["rw"]; # Rechtswert
+						$zeile.=" ".$p["hw"]; # Hochwert
+						$zeile.=" "; # 47 Leerstelle
+						if ($p["hoe"]=='') {
+							$zeile.=str_repeat(" ",8); # 48-55 Wenn Höhe nicht angegeben mit Leerstellen auffüllen
+						}
+						else {
+							$zeile.=" ".sprintf("%08.3f",$p["hoe"]); # 48-55 Höhe
+						}
+						$zeile.=" "; # 56 Leerstelle
+						if ($p["hz"]=='') {
+							$zeile.=" "; # 57 Wenn HZ nicht angegeben mit Leerzstelle auffüllen
+						}
+						else {
+							$zeile.=sprintf("%1d",$p["hz"]); # 57 HZ
+						}
+						$zeile.=" "; # 58 Leerstelle
+						if ($p["hg"]=='') {
+							$zeile.=" "; # 59 Wenn hg nicht angegeben mit Leerzstelle auffüllen
+						}
+						else {
+							$zeile.=sprintf("%1d",$p["hg"]); # 59 HG
+						}
+						$zeile.="  "; # 60-61 Leerzeichen
+						$zeile.=sprintf("%1d",$p["lz"]); # 62 Lagezuverlässigkeit
+						$zeile.=" "; # 63 Leerstelle
+						$zeile.=sprintf("%1d",$p["lg"]); # 64 Lagegenauigkeitsstufe
+						$zeile.=" "; # 65 Leerstelle
+						$zeile.="\r\n"; # Zeilenumbruch
+						if (!fwrite($fp,$zeile)) {
+							$errmsg.="Kann folgende Zeile nicht in die Datei $dateiname schreiben:<br>".$zeile;
+							$i=$this->anzPunkte; # Zum Abbruch der Schleife
+						}
+					}
+					if (!fclose($fp)) {
+						$errmsg.="Kann die Datei $dateiname nicht schließen.";
+					}
+				} # end of festpunkte konnten abgefragt werden
+			}
+			if ($errmsg!='') {
+				$ret[0]=1;
+				$ret[1]=$errmsg;
+			}
+			else {
+				$ret[0]=0;
+				if($this->anzPunkte > 0)$ret[1]=$this->anzPunkte." Zeilen in die Datei ".$dateiname." geschrieben.";
+				$ret[2]=$dateiname;
+			}
+		}
     return $ret;
   }
 

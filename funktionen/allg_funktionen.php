@@ -777,10 +777,10 @@ function microtime_float(){
    return ((float)$usec + (float)$sec);
 }
 
-function copy_file_to_tmp($frompath){
+function copy_file_to_tmp($frompath, $dateiname = ''){
   $dateityp = explode('.',$frompath);
   $dateipfad=IMAGEPATH;
-  $dateiname=rand(100000,999999).'.'.$dateityp[1];
+  if($dateiname == '')$dateiname=rand(100000,999999).'.'.$dateityp[1];
   if(copy($frompath, $dateipfad.$dateiname) == true){
     return TEMPPATH_REL.$dateiname;
   }

@@ -2,6 +2,13 @@
 
 	$GUI = $this;
 
+	$this->Datei_Download = function($filename) use ($GUI){
+    $GUI->formvars['filename'] = $filename;
+    $GUI->titel='Datei-Download';
+		$GUI->main= PLUGINS.'nachweisverwaltung/view/dateidownload.php';
+    $GUI->output();
+  };
+	
 	$this->DokumenteOrdnerPacken = function() use ($GUI){
     if ($GUI->formvars['antr_selected']!=''){
 			$explosion = explode('~', $GUI->formvars['antr_selected']);
@@ -12,10 +19,6 @@
 			if($stelle_id != '')$antragsnr.='~'.$stelle_id;
       if(is_dir(RECHERCHEERGEBNIS_PATH.$antragsnr)){
         chdir(RECHERCHEERGEBNIS_PATH);
-        $result = exec(ZIP_PATH.' -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr);
-				# Loggen der übergebenen Dokumente
-				$uebergabe_logpath = $antrag->create_uebergabe_logpath($GUI->Stelle->Bezeichnung).'/'.$antr_selected.'_'.date('Y-m-d_H-i-s',time()).'.pdf';
-				$GUI->formvars['Lfd'] = 1;
 				$GUI->formvars['Riss-Nummer'] = 1;
 				$GUI->formvars['Antrags-Nummer'] = 1;
 				$GUI->formvars['FFR'] = 1;
@@ -26,11 +29,16 @@
 				$GUI->formvars['Datei'] = 1;
 				$GUI->formvars['gemessendurch'] = 1;
 				$GUI->formvars['Gueltigkeit'] = 1;
-				$GUI->erzeugenUebergabeprotokollNachweise_PDF($uebergabe_logpath);
+				$GUI->erzeugenUebergabeprotokollNachweise_PDF(RECHERCHEERGEBNIS_PATH.$antragsnr.'/'.$antrag->nr.'_'.date('Y-m-d_H-i-s',time()).'.pdf');
+        $result = exec(ZIP_PATH.' -r '.RECHERCHEERGEBNIS_PATH.$antragsnr.' '.'./'.$antragsnr);
+				# Loggen der übergebenen Dokumente
+				$uebergabe_logpath = $antrag->create_uebergabe_logpath($GUI->Stelle->Bezeichnung).'/'.$antr_selected.'_'.date('Y-m-d_H-i-s',time()).'.pdf';
+				$GUI->erzeugenUebergabeprotokollNachweise_PDF($uebergabe_logpath, true);
       }
     }
     $filename = RECHERCHEERGEBNIS_PATH.$antragsnr.'.zip';
-    $tmpfilename = copy_file_to_tmp($filename);
+		$dateiname = $antrag->nr.'_'.date('Y-m-d_H-i-s',time()).'.zip';
+    $tmpfilename = copy_file_to_tmp($filename, $dateiname);
     unlink($filename);
     return $tmpfilename;
   };
@@ -462,7 +470,7 @@
     }
   };
   
-	$this->erzeugenUebergabeprotokollNachweise_PDF = function($logpath = NULL) use ($GUI){
+	$this->erzeugenUebergabeprotokollNachweise_PDF = function($path = NULL, $with_search_params = false) use ($GUI){
   	# Erzeugen des Übergabeprotokolls mit der Zuordnung der Nachweise zum gewählten Auftrag als PDF-Dokument
   	if($GUI->formvars['antr_selected'] == ''){
       $GUI->Antraege_Anzeigen();
@@ -470,9 +478,9 @@
     }
     else{
 			$explosion = explode('~', $GUI->formvars['antr_selected']);
-			$GUI->formvars['antr_selected'] = $explosion[0];
+			$antr_selected = $explosion[0];
 			$stelle_id = $explosion[1];
-      $GUI->antrag = new antrag($GUI->formvars['antr_selected'],$stelle_id,$GUI->pgdatabase);
+      $GUI->antrag = new antrag($antr_selected,$stelle_id,$GUI->pgdatabase);
       $ret=$GUI->antrag->getFFR($GUI->formvars, true);
       if ($ret[0]) {
         $GUI->Fehlermeldung=$ret[1];
@@ -480,10 +488,10 @@
         $GUI->Antraege_Anzeigen();
       }
       else{
-		    include (PDFCLASSPATH."class.ezpdf.php");
+		    include_once (PDFCLASSPATH."class.ezpdf.php");
 		    $pdf=new Cezpdf();
 		    $pdf=$GUI->antrag->erzeugenUbergabeprotokoll_PDF();		    
-				if($logpath == NULL){					# Ausgabe an den Browser
+				if($path == NULL){					# Ausgabe direkt an den Browser
 					$GUI->pdf=$pdf;
 					$dateipfad=IMAGEPATH;
 					$currenttime = date('Y-m-d_H:i:s',time());
@@ -496,9 +504,9 @@
 					$GUI->mime_type='pdf';
 					$GUI->output();
 				}
-				else{												# Ausgabe als Log-Datei					
-					$pdf=$GUI->Suchparameter_anhaengen_PDF($pdf, $GUI->formvars['antr_selected'], $stelle_id);					
-					$fp=fopen($logpath,'wb');
+				else{											# Ausgabe als Datei auf dem Server
+					if($with_search_params)$pdf=$GUI->Suchparameter_anhaengen_PDF($pdf, $antr_selected, $stelle_id);					
+					$fp=fopen($path,'wb');
 					fwrite($fp,$pdf->ezOutput());
 					fclose($fp);
 				}

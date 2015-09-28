@@ -9684,14 +9684,6 @@ class GUI {
     $this->output();
 	}
 
-  function Datei_Download($filename) {
-    $this->formvars['filesize'] = filesize(IMAGEPATH.basename($filename));
-    $this->formvars['filename'] = $filename;
-    $this->titel='Datei-Download';
-    $this->main='dateidownload.php';
-    $this->output();
-  }
-
   function composePolygonWKTString($pathx,$pathy,$minx,$miny,$scale) {
     # Bildung des WKT-Stings für das Umringpolygon aus den Formularwerten
     $pix_rechts=explode(',',$pathx);

@@ -75,7 +75,7 @@
 			include (PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Klasse einbinden
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$ret=$this->DokumenteZumAntragInOrdnerZusammenstellen();
-			showAlert($ret);
+			if($ret != '')showAlert($ret);
 			$filename = $this->DokumenteOrdnerPacken();
 			$this->Datei_Download($filename);
 	  } break;
