@@ -48,8 +48,8 @@
 <?
 if($this->formvars['selected_layer_id'] AND $this->Fehler == ''){
 	$i = 0;	
-	if($this->qlayerset[0]['template']==''){
-		include(SNIPPETS.'generic_layer_editor_2.php');			# Attribute zeilenweise
+	if($this->qlayerset[0]['template']=='generic_layer_editor.php'){
+		include(SNIPPETS.'generic_layer_editor_2.php');			# Attribute zeilenweise auch bei spaltenweiser Darstellung
 	}
 	else{
 		if(is_file(SNIPPETS.$this->qlayerset[0]['template'])){
