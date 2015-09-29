@@ -1830,7 +1830,7 @@ function mouseup(evt){
 		bufferfunctions = true;
 
 		function add_buffer(){
-			buffer = prompt("Breite des Puffers in Metern:", "10");
+			buffer = prompt("Breite des Puffers in Metern:", top.currentform.bufferwidth.value);
 			if(buffer){
 				top.currentform.secondpoly.value = true;
 				top.currentform.firstpoly.value = true;

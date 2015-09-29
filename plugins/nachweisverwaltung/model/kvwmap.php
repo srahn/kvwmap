@@ -651,11 +651,6 @@
 	};
 
 	$this->nachweisFormAnzeige = function($nachweis = NULL) use ($GUI){
-    # letzte Änderung 2006-01-23 pk
-    # Anzeige des Formulars zum Eintragen neuer/Ändern vorhandener Metadaten zu einem Nachweisdokument
-    # (FFR, KVZ oder GN)
-    $GUI->menue='menue.php';
-
     # Wenn eine oid in formvars übergeben wurde ist es eine Änderung, sonst Neueingabe
     if ($GUI->formvars['oid']=='') {
       $GUI->titel='Dokumenteneingabe';
@@ -664,8 +659,7 @@
       $GUI->titel='Dokumenteneingabe (neuer Ausschnitt)';
     }
     $GUI->main = PLUGINS."nachweisverwaltung/view/dokumenteneingabeformular.php";
-    # 2006-01-27
-    # aktuellen Kartenausschnitt laden + zeichnen!
+    $GUI->formvars['bufferwidth'] = 2;
     $saved_scale = $GUI->reduce_mapwidth(100);
 		
 		if($GUI->formvars['neuladen']){

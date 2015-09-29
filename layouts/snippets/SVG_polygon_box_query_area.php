@@ -29,7 +29,7 @@
 	<input name="pathx_second" type="hidden" value="<?php echo $this->formvars['pathx_second']; ?>">
 	<input name="pathy_second" type="hidden" value="<?php echo $this->formvars['pathy_second']; ?>">
 	<input type="hidden" name="svghelp" id="svghelp">
-	<input type="hidden" name="bufferwidth" value="<?php echo $this->formvars['bufferwidth']; ?>">
+	<input type="hidden" name="bufferwidth" value="<? if($this->formvars['bufferwidth'])echo $this->formvars['bufferwidth']; else echo '10'; ?>">
 	<input type="hidden" name="measured_distance" value="<? echo $this->formvars['measured_distance']; ?>">
 	<?
 	if($this->formvars['last_button'] == '' or $this->formvars['last_doing'] == ''){
