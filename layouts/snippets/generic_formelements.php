@@ -289,6 +289,7 @@
 									} break;
 
 									case 'dynamicLink': {
+										$show_link = false;
 										$explosion = explode(';', $attributes['options'][$j]);		# url;alias;embedded
 										$href = $explosion[0];
 										if($explosion[1] != ''){
@@ -305,20 +306,23 @@
 										$explosion1 = explode('$', $href);
 										for($d = 1; $d < count($explosion1); $d++){
 											$explosion2 = explode('&', $explosion1[$d]);
+											if($dataset[$explosion2[0]] != '')$show_link = true;
 											$href = str_replace('$'.$explosion2[0], $dataset[$explosion2[0]], $href);
 										}
-										if($explosion[2] == 'embedded'){
-											$datapart .= '<a href="javascript:if(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\').innerHTML != \'\'){clearsubform(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\');} else {ahah(\''.$href.'\', \'\', new Array(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'))}">';
-											$datapart .= $alias;
-											$datapart .= '</a><br>';
-											$datapart .= '<div style="display:inline" id="dynamicLink'.$layer_id.'_'.$k.'_'.$j.'"></div>';
-										}
-										else{
-											$datapart .= '<a ';
-											if($explosion[2] != 'no_new_window'){$datapart .= 'target="_blank"';}
-											$datapart .= ' style="font-size: '.$fontsize.'px" href="'.$href.'">';
-											$datapart .= $alias;
-											$datapart .= '</a><br>';
+										if($show_link){
+											if($explosion[2] == 'embedded'){
+												$datapart .= '<a href="javascript:if(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\').innerHTML != \'\'){clearsubform(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\');} else {ahah(\''.$href.'\', \'\', new Array(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'))}">';
+												$datapart .= $alias;
+												$datapart .= '</a><br>';
+												$datapart .= '<div style="display:inline" id="dynamicLink'.$layer_id.'_'.$k.'_'.$j.'"></div>';
+											}
+											else{
+												$datapart .= '<a ';
+												if($explosion[2] != 'no_new_window'){$datapart .= 'target="_blank"';}
+												$datapart .= ' style="font-size: '.$fontsize.'px" href="'.$href.'">';
+												$datapart .= $alias;
+												$datapart .= '</a><br>';
+											}
 										}
 									} break;
 									
