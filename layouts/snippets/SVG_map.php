@@ -1097,7 +1097,7 @@ top.document.getElementById("vertices").SVGshow_vertices = show_vertices;		// da
 
 function toggle_vertices(){
 	remove_vertices();
-	if(top.document.GUI.punktfang.checked || top.document.GUI.orthofang.checked){
+	if(top.document.GUI.punktfang.checked || (top.document.GUI.orthofang != undefined && top.document.GUI.orthofang.checked)){
 		request_vertices();
 	}
 }
@@ -1120,6 +1120,7 @@ function show_vertices(){
 		circle = new Array();
 		circle2 = new Array();
 		line = new Array();
+		var start_vertex = "";
 		image_coords = new Array();
 		kreis1 = document.getElementById("kreis");
 		linie1 = document.getElementById("linie");
