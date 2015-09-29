@@ -588,7 +588,6 @@ function polygonquery(){
 	}
 	else{
 		deletepolygon();
-		redrawPolygon();
 	}
 }
 
@@ -1036,7 +1035,8 @@ function deletepolygon(){
 	for(i = 0; i < c; i++){
   	polypathx.pop();
   	polypathy.pop();
-	}	
+	}
+	document.getElementById("polygon").setAttribute("points", "");
 }			
 		
 function redrawPolygon(){
@@ -1371,6 +1371,7 @@ function restart(){
 		pathx_world.pop();
   	pathy_world.pop();
 	}
+	deletepolygon();
   redrawPL();
 }
 
@@ -1558,6 +1559,7 @@ function highlight(evt){
 	if(top.document.GUI.orthofang != undefined){
 		options1 = top.document.getElementById("options").innerHTML="";
 	}
+	if(measuring || polydrawing)deactivate_vertices();
 }
 
 
