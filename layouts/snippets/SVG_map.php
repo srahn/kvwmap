@@ -577,6 +577,10 @@ function touchquery(){
 }
 
 function polygonquery(){
+	if((measuring || polydrawing) && (top.document.GUI.punktfang.checked)){
+		remove_vertices();
+		request_vertices();
+	}
 	doing = "polygonquery";
 	document.getElementById("canvas").setAttribute("cursor", "help");
 	// Wenn im UTM-System gemessen wird, NBH-Datei laden
@@ -629,6 +633,10 @@ function noMeasuring(){
 }
 
 function measure(){
+	if((measuring || polydrawing) && (top.document.GUI.punktfang.checked || (top.document.GUI.orthofang != undefined && top.document.GUI.orthofang.checked))){
+		remove_vertices();
+		request_vertices();
+	}
 	options1 = top.document.getElementById("options");
 	options1.innerHTML=\'<input type="checkbox" onclick="toggle_vertices()" name="orthofang">&nbsp;Ortho-Fang\';
 	// Wenn im UTM-System gemessen wird, NBH-Datei laden
@@ -642,6 +650,7 @@ function measure(){
 	else{
 		top.document.GUI.measured_distance.value = 0;
 		measured_distance = 0;
+		new_distance = 0;
 		freehand_measuring = false;
   	measuring = false;
   	restart();
@@ -1560,7 +1569,6 @@ function highlight(evt){
 	if(top.document.GUI.orthofang != undefined){
 		options1 = top.document.getElementById("options").innerHTML="";
 	}
-	if(measuring || polydrawing)deactivate_vertices();
 }
 
 
