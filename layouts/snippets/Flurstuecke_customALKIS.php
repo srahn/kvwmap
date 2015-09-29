@@ -86,6 +86,8 @@ show_all = function(count){
       $flurstkennz_a=$this->qlayerset[$i]['shape'][$a]['flurstkennz'];
 			$flst=new flurstueck($flurstkennz_a,$this->pgdatabase);
       $flst->readALB_Data($flurstkennz_a, 'true');	# true, damit man unabhängig vom Zeitstempel ist (z.B. bei der historischen Flurstückssuche oder Flst.-Listenimport)
+			$flst->Grundbuecher=$flst->getGrundbuecher();
+			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,$flst->hist_alb);
       $gemkg=substr($flurstkennz_a, 0, 6);
       $flur=substr($flurstkennz_a, 6, 3);
       $zaehler=ltrim(substr($flurstkennz_a, 9, 5), '0');
@@ -650,10 +652,6 @@ show_all = function(count){
                 <td colspan="3"><span class="fett">Eigentümer</span></td>
               </tr>
             <? 
-					$flst->Grundbuecher=$flst->getGrundbuecher();
-					#for ($g=0;$g<count($flst->Grundbuecher);$g++) {
-            #$flst->Buchungen=$flst->getBuchungen($flst->Grundbuecher[$g]['bezirk'],$flst->Grundbuecher[$g]['blatt'],$flst->hist_alb);
-						$flst->Buchungen=$flst->getBuchungen(NULL,NULL,$flst->hist_alb);
             for ($b=0;$b<count($flst->Buchungen);$b++) {
 							if($privileg_['bestandsnr']){
 								$BestandStr ='<a href="index.php?go=Grundbuchblatt_Auswaehlen_Suchen&selBlatt='.$flst->Buchungen[$b]['bezirk'].'-'.$flst->Buchungen[$b]['blatt'].'">'.$flst->Buchungen[$b]['bezirk'].'-'.ltrim($flst->Buchungen[$b]['blatt'], '0').'</a>';
@@ -751,8 +749,7 @@ show_all = function(count){
 									$flst->Buchungen[$b]['zusatz_eigentuemer'] = str_replace('<br>zu 1/', 'zu 1/', $flst->Buchungen[$b]['zusatz_eigentuemer']);
       						echo '<tr><td></td><td colspan="2">'.$flst->Buchungen[$b]['zusatz_eigentuemer'].'</td></tr>';
       			 			} ?>
-              <? }
-          #} ?>
+              <? } ?>
           </table>
         </td>
         </tr>
