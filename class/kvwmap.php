@@ -2173,7 +2173,7 @@ class GUI {
 		$height = $this->formvars['browserheight'] - HEADER_FOOTER_HEIGHT;
 		if($this->user->rolle->hideMenue == 1)$width = $width + 195;
 		if($this->user->rolle->hideLegend == 1)$width = $width + 254;
-		if($this->user->rolle->runningcoords == 1)$height = $height - 22;
+		$height = $height - 22;
 		if($height < 0)$height = 10;
 		if($width < 0)$width = 10;
 		if($height % 2 != 0)$height = $height - 1;		# muss gerade sein, sonst verspringt die Karte beim Panen immer um 1 Pixel

@@ -307,11 +307,10 @@ if(!in_array($go, $non_spatial_cases)){		// für fast_cases, die keinen Raumbezu
 			$GUI->pgdatabase->setClientEncoding();
 		}
 	}
-
+	$GUI->epsg_codes = $GUI->pgdatabase->read_epsg_codes(false);
 	# Umrechnen der für die Stelle eingetragenen Koordinaten in das aktuelle System der Rolle
 	# wenn die EPSG-Codes voneinander abweichen
 	if ($GUI->Stelle->epsg_code != $GUI->user->rolle->epsg_code){
-		$epsg_codes = $GUI->pgdatabase->read_epsg_codes(false);	
 		$user_epsg = $epsg_codes[$GUI->user->rolle->epsg_code];
 		if($user_epsg['minx'] != ''){							// Koordinatensystem ist räumlich eingegrenzt
 			if($GUI->Stelle->epsg_code != 4326){

@@ -95,7 +95,7 @@ class pgdatabase {
     $ret = $this->execSQL($sql, 4, 0);		
     if($ret[0]==0){
 			$i = 0;
-      while($row = pg_fetch_array($ret[1])){
+      while($row = pg_fetch_assoc($ret[1])){
       	if($row['alias'] != ''){
       		$row['srtext'] = $row['alias'];
       	}

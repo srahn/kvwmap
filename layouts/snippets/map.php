@@ -167,7 +167,7 @@ if($this->formvars['gps_follow'] == ''){
         				<td width="100%" colspan="3" class="map-bottom">
         					<table width="100%" border="0" cellpadding="0" cellspacing="0">
 						        <tr style="background-color: <? echo BG_MENUETOP; ?>;">
-						          <td width="25%" height="30">
+						          <td style="width:150px;height:30px">
 												<div style="width:150px;" onmouseover="document.getElementById('scales').style.display='inline-block';" onmouseout="document.getElementById('scales').style.display='none';">
 													<div valign="top" style="height:0px; position:relative;">
 														<div id="scales" style="display:none; position:absolute; left:60px; bottom:-1px; width: 78px; vertical-align:top; overflow:hidden; border:solid grey 1px;">
@@ -183,45 +183,27 @@ if($this->formvars['gps_follow'] == ''){
 													&nbsp;&nbsp;<span class="fett"><?php echo $this->strMapScale; ?>&nbsp;1:&nbsp;</span><input type="text" id="scale" autocomplete="off" name="nScale" style="width:58px" value="<?php echo round($this->map_scaledenom); ?>">
 												</div>
 						          </td>
-						          <td width="50%" align="center">
-						          	<? if($this->map->width > 700) {
-						          		echo '<div id="lagebezeichnung">';
-						          		if($this->Lagebezeichung!=''){
-														echo '<span class="fett">Gemeinde:&nbsp;</span>'.$this->Lagebezeichung['gemeindename'].' <span class="fett">Gemarkung:</span>&nbsp;'.$this->Lagebezeichung['gemkgname'].' <span class="fett">Flur:</span>&nbsp;'.$this->Lagebezeichung['flur'];
-						          		} ?>
-						          	</div>
-						          </td>
-						          <? }else{ ?>
-						          <td>&nbsp;</td>
-						          <? } ?>
+			        				<td align="left" style="width:80%;<? if($this->user->rolle->runningcoords == '0'){echo ';display:none';} ?>">
+			          				<span class="fett"><?php echo $this->strCoordinates; ?></span>&nbsp;
+			          				<input type="text" style="width: 190px" class="transparent_input" name="runningcoords" value=""><span title="<? echo $this->epsg_codes[$this->user->rolle->epsg_code]['srtext']; ?>">EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?></span>
+											</td>
 						          <td width="25%" align="right">
-						            <img id="scalebar" style="margin-right:35px" alt="Maßstabsleiste" src="<? echo $this->img['scalebar']; ?>">
+						            <img id="scalebar" style="margin-right:5px" alt="Maßstabsleiste" src="<? echo $this->img['scalebar']; ?>">
 						          </td>
 						        </tr>
 						    </table>
 						  	</td>
 						  </tr>
-						  <? if($this->map->width < 700) { ?>
-						  <tr style="background-color: <? echo BG_MENUETOP; ?>;">
-			          <td colspan="3" align="center">
-			          	<div id="lagebezeichnung">
-			          		<?php 
-			          		if($this->Lagebezeichung!=''){
-			          			echo '<span class="fett">Gemeinde:&nbsp;</span>'.$this->Lagebezeichung['gemeindename'].' <span class="fett">Gemarkung:</span>&nbsp;'.$this->Lagebezeichung['gemkgname'].' <span class="fett">Flur:</span>&nbsp;'.$this->Lagebezeichung['flur'];
-			          		} ?>
-			          	</div>
-			          </td>
-			        </tr>
-			        <? } ?>
         			<tr>
         				<td width="100%" colspan="3" class="map-bottom">
         					<table width="100%" border="0" cellpadding="0" cellspacing="0">
-			        			<tr style="background-color: <? echo BG_MENUETOP; if($this->user->rolle->runningcoords == '0'){echo ';display:none';} ?>">
-			        				<td style="width:100px">
-			          					<span class="fett">&nbsp;&nbsp;<?php echo $this->strCoordinates; ?></span>&nbsp;
-			          				</td>
-			        				<td colspan="2"><input type="text" style="width: 190px" class="transparent_input" name="runningcoords" value="">&nbsp;EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?></td>
-			        			</tr>
+										<tr style="background-color: <? echo BG_MENUETOP; ?>;">
+											<td colspan="3" style="height:22px" align="center">
+						          	<div id="lagebezeichnung">
+						          <?	if($this->Lagebezeichung!='')echo '<span class="fett">Gemeinde:&nbsp;</span>'.$this->Lagebezeichung['gemeindename'].' <span class="fett">Gemarkung:</span>&nbsp;'.$this->Lagebezeichung['gemkgname'].' ('.$this->Lagebezeichung['gemkgschl'].') <span class="fett">Flur:</span>&nbsp;'.$this->Lagebezeichung['flur']; ?>
+						          	</div>
+						          </td>
+										</tr>
 			        			<tr id="showcoords" style="background-color: <? echo BG_MENUETOP; ?>;display:none">
 			        				<td style="width:150px">
 			          					<span class="fett">&nbsp;&nbsp;<?php echo $strShowCoordinates; ?></span>&nbsp;
