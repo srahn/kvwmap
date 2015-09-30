@@ -103,15 +103,15 @@ function popup(id){
 
 		     			<? if ($this->formvars['nutzung']=='stelle') { ?>
 				    <tr>
-			      	<td colspan="2"><li>ALK-Drucke der Stelle: <?php echo $this->account->Bezeichnung;?></li></td>
+			      	<td colspan="2"><li>Karten-Drucke der Stelle: <?php echo $this->account->Bezeichnung;?></li></td>
 			      </tr>
 			      <? }elseif($this->formvars['nutzung']=='nutzer'){ ?>
 			    	<tr>
-			        <td colspan="2"><li>ALK-Drucke durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> </li></td>
+			        <td colspan="2"><li>Karten-Drucke durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> </li></td>
 			      <tr>
 			      <? }elseif($this->formvars['nutzung']=='stelle_nutzer' ){ ?>
 			      <tr>
-				      <td colspan="2"><li>ALK-Drucke durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> über
+				      <td colspan="2"><li>Karten-Drucke durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> über
 				          die Stelle: <?php echo $this->account->Bezeichnung ;?></li>
 				      </td>
 				    </tr>
@@ -125,7 +125,7 @@ function popup(id){
 		                    <tr bgcolor="#FFFFFF">
 		                      <td width="40%"><span class="fett">Drucklayout</span></td>
 		                      <td width="27%"><span class="fett">Format</span></td>
-		                      <td width="33%"><span class="fett">Anzahl der ALK-Drucke</span></td>
+		                      <td width="33%"><span class="fett">Anzahl der Karten-Drucke</span></td>
 		                    </tr>
 		                    <tr bgcolor="#FFFFFF">
 		                      <td colspan="13"><hr></td>
@@ -171,15 +171,15 @@ function popup(id){
 
 		     			<? if ($this->formvars['nutzung']=='stelle') { ?>
 				    <tr>
-			      	<td colspan="2"><li>ALB-Drucke der Stelle: <?php echo $this->account->Bezeichnung;?></li></td>
+			      	<td colspan="2"><li>Buch-Auszüge der Stelle: <?php echo $this->account->Bezeichnung;?></li></td>
 			      </tr>
 			      <? }elseif($this->formvars['nutzung']=='nutzer'){ ?>
 			    	<tr>
-			        <td colspan="2"><li>ALB-Drucke durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> </li></td>
+			        <td colspan="2"><li>Buch-Auszüge durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> </li></td>
 			      <tr>
 			      <? }elseif($this->formvars['nutzung']=='stelle_nutzer' ){ ?>
 			      <tr>
-				      <td colspan="2"><li>ALB-Drucke durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> über
+				      <td colspan="2"><li>Buch-Auszüge durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> über
 				          die Stelle: <?php echo $this->account->Bezeichnung ;?></li>
 				      </td>
 				    </tr>
@@ -191,8 +191,8 @@ function popup(id){
 		                <td>
 		                	<table width="100%" border="0" cellpadding="5" cellspacing="0">
 		                    <tr bgcolor="#FFFFFF">
-		                      <td width="33%"><span class="fett">ALB-Format</span></td>
-		                      <td width="33%"><span class="fett">Anzahl der ALB-Drucke</span></td>
+		                      <td width="33%"><span class="fett">Format</span></td>
+		                      <td width="33%"><span class="fett">Anzahl der Buch-Auszüge</span></td>
 		                      <td width="33%"><span class="fett">Anzahl der Seiten</span></td>
 		                    </tr>
 		                    <tr bgcolor="#FFFFFF">
@@ -308,15 +308,15 @@ function popup(id){
 		     			
 		     		<? if ($this->formvars['nutzung']=='stelle') { ?>
 				    <tr>
-			      	<td colspan="2"><li>Shape-Exporte der Stelle: <?php echo $this->account->Bezeichnung;?></li></td>
+			      	<td colspan="2"><li>Vektor-Exporte der Stelle: <?php echo $this->account->Bezeichnung;?></li></td>
 			      </tr>
 			      <? }elseif($this->formvars['nutzung']=='nutzer'){ ?>
 			    	<tr>
-			        <td colspan="2"><li>Shape-Exporte durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> </li></td>
+			        <td colspan="2"><li>Vektor-Exporte durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> </li></td>
 			      <tr>
 			      <? }elseif($this->formvars['nutzung']=='stelle_nutzer' ){ ?>
 			      <tr>
-				      <td colspan="2"><li>Shape-Exporte durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> über
+				      <td colspan="2"><li>Vektor-Exporte durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> über
 				          die Stelle: <?php echo $this->account->Bezeichnung ;?></li>
 				      </td>
 				    </tr>

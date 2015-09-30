@@ -556,8 +556,6 @@ class data_import_export {
     }
     
     $currenttime=date('Y-m-d H:i:s',time());
-    #$this->user->rolle->setConsumeCSV($currenttime,$this->formvars['chosen_layer_id'],count($result)); TODO!!!
-
 		return utf8_decode($csv);
 	}
   
@@ -578,6 +576,7 @@ class data_import_export {
   }
 	
 	function export_exportieren($formvars, $stelle, $user){
+		$currenttime=date('Y-m-d H:i:s',time());
   	$this->formvars = $formvars;
   	$layerset = $user->rolle->getLayer($this->formvars['selected_layer_id']);
     $mapdb = new db_mapObj($stelle->id,$user->id);
@@ -656,7 +655,7 @@ class data_import_export {
     $sql = 'SELECT * FROM public.'.$temp_table;
     $ret = $layerdb->execSQL($sql,4, 0);
     if(!$ret[0]){
-      #$count = pg_num_rows($ret[1]);
+      $count = pg_num_rows($ret[1]);
       #showAlert('Abfrage erfolgreich. Es wurden '.$count.' Zeilen geliefert.');
       $this->formvars['layer_name'] = umlaute_umwandeln($this->formvars['layer_name']);
       $this->formvars['layer_name'] = str_replace('.', '_', $this->formvars['layer_name']);
@@ -708,6 +707,7 @@ class data_import_export {
 					fwrite($fp, $csv);
 					fclose($fp);
 					$contenttype = 'application/vnd.ms-excel';
+					$user->rolle->setConsumeCSV($currenttime,$this->formvars['selected_layer_id'], $count);
 				}break;
 				
 				case 'UKO' : {
@@ -754,8 +754,7 @@ class data_import_export {
 			# temp. Tabelle wieder löschen
       $sql = 'DROP TABLE '.$temp_table;
       $ret = $layerdb->execSQL($sql,4, 0);
-      $currenttime=date('Y-m-d H:i:s',time());
-    	$user->rolle->setConsumeShape($currenttime,$this->formvars['selected_layer_id'],$count);
+    	if($this->formvars['export_format'] != 'CSV')$user->rolle->setConsumeShape($currenttime,$this->formvars['selected_layer_id'],$count);
 			
 	    ob_end_clean();
 			header('Content-type: '.$contenttype);
