@@ -263,7 +263,7 @@ function install_config() {
   $config = str_replace("define('POSTGRES_USER', '');", "define('POSTGRES_USER', 'kvwmap');", $config);
   $config = str_replace("define('POSTGRES_PASSWORD', '');", "define('POSTGRES_PASSWORD', '" . KVWMAP_INIT_PASSWORD . "');", $config);
   $config = str_replace(
-    "define('POSTGRESVERSION', '500');",
+    "define('POSTGRESVERSION', '804');",
     "define('POSTGRESVERSION', '" . versionFormatter(getenv('PGSQL_ENV_PG_MAJOR')) . "');",
     $config
   );
