@@ -1182,10 +1182,13 @@ class pgdatabase {
   }
   
   function getNutzung($FlurstKennz) {
-    $sql ="SELECT round(st_area_utm(st_intersection(n.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")::numeric * amtlicheflaeche / st_area_utm(f.wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")) AS flaeche, c.class as nutzungskennz, case when c.label is null then m.title else m.title||' - '||c.label end as bezeichnung, n.info, n.zustand, n.name, m.gruppe,c.label, c.blabla, amtlicheflaeche";
-		$sql.=" FROM alkis.ax_flurstueck f, alkis.nutzung n";
-		$sql.=" JOIN alkis.nutzung_meta m ON m.nutz_id=n.nutz_id";
-		$sql.=" LEFT JOIN alkis.nutzung_class c ON c.nutz_id=n.nutz_id AND c.class=n.class";
+    $sql ="SELECT round(st_area_utm(st_intersection(n.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")::numeric * amtlicheflaeche / st_area_utm(f.wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")) AS flaeche, nas.nutzungsartengruppe::text||nas.nutzungsart::text||nas.untergliederung1::text||nas.untergliederung2::text as nutzungskennz, nag.gruppe||' '||coalesce(na.nutzungsart, '')||' '||coalesce(nu1.untergliederung1, '')||' '||coalesce(nu2.untergliederung2, '') as bezeichnung, n.info, n.zustand, n.name, amtlicheflaeche";
+		$sql.=" FROM alkis.ax_flurstueck f, alkis.n_nutzung n";
+		$sql.=" left join alkis.n_nutzungsartenschluessel nas on n.nutzungsartengruppe = nas.nutzungsartengruppe and n.werteart1 = nas.werteart1 and n.werteart2 = nas.werteart2";
+		$sql.=" left join alkis.n_nutzungsartengruppe nag on nas.nutzungsartengruppe = nag.schluessel";
+		$sql.=" left join alkis.n_nutzungsart na on nas.nutzungsartengruppe = na.nutzungsartengruppe and nas.nutzungsart = na.schluessel";
+		$sql.=" left join alkis.n_untergliederung1 nu1 on nas.nutzungsartengruppe = nu1.nutzungsartengruppe and nas.nutzungsart = nu1.nutzungsart and nas.untergliederung1 = nu1.schluessel";
+		$sql.=" left join alkis.n_untergliederung2 nu2 on nas.nutzungsartengruppe = nu2.nutzungsartengruppe and nas.nutzungsart = nu2.nutzungsart and nas.untergliederung2 = nu2.schluessel and nas.untergliederung2 = nu2.schluessel";
 		$sql.=" WHERE st_intersects(n.wkb_geometry,f.wkb_geometry) = true";
 		$sql.=" AND st_area_utm(st_intersection(n.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.") > 0.05";
 		$sql.=" AND f.flurstueckskennzeichen = '".$FlurstKennz."'";
