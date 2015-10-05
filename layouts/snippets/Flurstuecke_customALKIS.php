@@ -624,12 +624,12 @@ show_all = function(count){
 			          <td align="right" valign="top">&nbsp;<?php echo $flst->Nutzung[$j][nutzungskennz]; ?>&nbsp;</td>
 			          <td valign="top">
 			          <?php
-			          if (strlen($flst->Nutzung[$j][bezeichnung])>60) {
+			          if (strlen($flst->Nutzung[$j][bezeichnung])>80) {
 			            $needle=array(
-			             strrpos(substr($flst->Nutzung[$j][bezeichnung],0,60),','),
-			             strrpos(substr($flst->Nutzung[$j][bezeichnung],0,60),'-'),
-			             strrpos(substr($flst->Nutzung[$j][bezeichnung],0,60),'/'),
-			             strrpos(substr($flst->Nutzung[$j][bezeichnung],0,60),' ')
+			             strrpos(substr($flst->Nutzung[$j][bezeichnung],0,80),','),
+			             strrpos(substr($flst->Nutzung[$j][bezeichnung],0,80),'-'),
+			             strrpos(substr($flst->Nutzung[$j][bezeichnung],0,80),'/'),
+			             strrpos(substr($flst->Nutzung[$j][bezeichnung],0,80),' ')
 			            );
 			            rsort($needle);
 			            echo substr($flst->Nutzung[$j][bezeichnung],0,$needle[0]+1)."<br>".substr($flst->Nutzung[$j][bezeichnung],$needle[0]+1);
