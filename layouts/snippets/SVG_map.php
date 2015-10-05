@@ -675,6 +675,8 @@ function save_measure_path(){
 
 function get_measure_path(){
 	if(top.document.GUI.str_pathx.value != ""){
+		pathx = new Array();
+		pathy = new Array();
 		document.getElementById(doing+"0").style.setProperty("fill", "ghostwhite","");
 		doing = "measure";
 		measuring = true;
