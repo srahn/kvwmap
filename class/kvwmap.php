@@ -6704,7 +6704,7 @@ class GUI {
       }
 			if($this->formvars['printversion'] == '' AND $this->user->rolle->querymode == 1){		# bei aktivierter Datenabfrage in extra Fenster --> Laden der Karte und zoom auf Treffer (das Zeichnen der Karte passiert in einem separaten Ajax-Request aus dem Overlay heraus)
 				$this->loadMap('DataBase');
-				if(count($this->qlayerset[$i]['shape']) > 0 AND ($layerset[0]['shape'][0][$layerset[0]['attributes']['the_geom']] != '' OR $layerset[0]['shape'][0]['geom'] != '')){			# wenn was gefunden wurde und der Layer Geometrie hat, auf Datensätze zoomen
+				if(count($this->qlayerset[$i]['shape']) > 0 AND ($layerset[0]['shape'][0][$layerset[0]['attributes']['the_geom']] != '' OR $layerset[0]['shape'][0]['wfs_geom'] != '')){			# wenn was gefunden wurde und der Layer Geometrie hat, auf Datensätze zoomen
 					$this->zoomed = true;
 					switch ($layerset[0]['connectiontype']) {
 						case MS_POSTGIS : {
@@ -6721,7 +6721,7 @@ class GUI {
 							}
 						}break;
 						case MS_WFS : {
-							$this->formvars['wkt'] = $layerset[0]['shape'][0]['geom'];
+							$this->formvars['wkt'] = $layerset[0]['shape'][0]['wfs_geom'];
 							$this->formvars['epsg'] = $layerset[0]['epsg_code'];
 							$this->zoom2wkt();
 						}break;
