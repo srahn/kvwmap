@@ -146,10 +146,12 @@ th a {
 }
 
 
-a {  
+a, img {  
 	color: firebrick; 
 	TEXT-DECORATION: none;
 	font-size: 15px;
+	border: none;
+	outline:none;
 }
 
 a:focus{
