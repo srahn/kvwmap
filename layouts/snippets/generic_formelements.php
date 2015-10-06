@@ -221,7 +221,7 @@
 									}break;
 
 									case 'Time': {
-										$datapart .= '<input readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
+										$datapart .= '<input readonly style="padding: 0 0 0 3;border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
 										$datapart .= ' size="'.$size.'" type="text" name="'.$fieldname.'" value="'.$value.'">';
 									}break;
 
@@ -272,7 +272,7 @@
 									case 'Link': {
 										if ($value!='') {
 											if(substr($value, 0, 4) == 'http')$target = '_blank';
-											$datapart .= '<a class="link" target="'.$target.'" style="font-size: '.$fontsize.'px" href="'.$value.'">';
+											$datapart .= '<a style="padding: 0 0 0 3;" class="link" target="'.$target.'" style="font-size: '.$fontsize.'px" href="'.$value.'">';
 											if($attributes['options'][$j] != ''){
 												$datapart .= $attributes['options'][$j];
 											}
@@ -311,7 +311,7 @@
 										}
 										if($show_link){
 											if($explosion[2] == 'embedded'){
-												$datapart .= '<a href="javascript:if(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\').innerHTML != \'\'){clearsubform(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\');} else {ahah(\''.$href.'\', \'\', new Array(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'))}">';
+												$datapart .= '<a style="padding: 0 0 0 3;" href="javascript:if(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\').innerHTML != \'\'){clearsubform(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\');} else {ahah(\''.$href.'\', \'\', new Array(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'))}">';
 												$datapart .= $alias;
 												$datapart .= '</a><br>';
 												$datapart .= '<div style="display:inline" id="dynamicLink'.$layer_id.'_'.$k.'_'.$j.'"></div>';
@@ -319,7 +319,7 @@
 											else{
 												$datapart .= '<a ';
 												if($explosion[2] != 'no_new_window'){$datapart .= 'target="_blank"';}
-												$datapart .= ' style="font-size: '.$fontsize.'px" href="'.$href.'">';
+												$datapart .= ' style="padding: 0 0 0 3;font-size: '.$fontsize.'px" href="'.$href.'">';
 												$datapart .= $alias;
 												$datapart .= '</a><br>';
 											}
@@ -328,7 +328,7 @@
 									
 									case 'mailto': {
 										if ($value!='') {
-											$datapart .= '<a class="link" target="_blank" style="font-size: '.$fontsize.'px" href="mailto:'.$value.'">';
+											$datapart .= '<a style="padding: 0 0 0 3;" class="link" target="_blank" style="font-size: '.$fontsize.'px" href="mailto:'.$value.'">';
 											if($attributes['options'][$j] != ''){
 												$datapart .= $attributes['options'][$j];
 											}
@@ -403,7 +403,7 @@
 										if($attribute_privileg == '0' OR $lock[$k]){
 											$maxwidth = $size * 9;
 											$minwidth = $size * 7.1;
-											$datapart .= '<div style="padding: 0 0 0 5; min-width: '.$minwidth.'px; max-width:'.$maxwidth.'px; font-size: '.$fontsize.'px;">'.htmlspecialchars($value).'</div>';
+											$datapart .= '<div style="padding: 0 0 0 3; min-width: '.$minwidth.'px; max-width:'.$maxwidth.'px; font-size: '.$fontsize.'px;">'.htmlspecialchars($value).'</div>';
 										}
 										if($attribute_privileg > '0' AND $attributes['options'][$j] != ''){
 											$datapart .= '&nbsp;<a title="automatisch generieren" href="javascript:auto_generate(new Array(\''.implode($attributes['name'], "','").'\'), \''.$attributes['the_geom'].'\', \''.$name.'\', '.$k.', '.$layer_id.');"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
