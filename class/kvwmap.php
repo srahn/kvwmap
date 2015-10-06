@@ -12486,6 +12486,7 @@ class GUI {
 			$this->formvars['selFlstID'] = implode(', ', $importliste);
 			$this->formvars['GemkgID'] = substr($importliste[0], 0, 6);
 			$this->formvars['FlurID'] = substr($importliste[0], 6, 3);
+			$this->formvars['historical'] = 1;
 		}
 		##########################
 		# Übernahme der Formularwerte für die Einstellung der Auswahlmaske

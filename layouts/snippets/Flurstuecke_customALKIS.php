@@ -85,7 +85,7 @@ show_all = function(count){
 			$set_timestamp = '';
       $flurstkennz_a=$this->qlayerset[$i]['shape'][$a]['flurstkennz'];
 			$flst=new flurstueck($flurstkennz_a,$this->pgdatabase);
-      $flst->readALB_Data($flurstkennz_a, 'true');	# true, damit man unabhängig vom Zeitstempel ist (z.B. bei der historischen Flurstückssuche oder Flst.-Listenimport)
+      $flst->readALB_Data($flurstkennz_a, $this->formvars['historical']);	# bei historical=true, wird unabhängig vom Zeitstempel abgefragt (z.B. bei der historischen Flurstückssuche oder Flst.-Listenimport)
 			$flst->Grundbuecher=$flst->getGrundbuecher();
 			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,$flst->hist_alb);
       $gemkg=substr($flurstkennz_a, 0, 6);
