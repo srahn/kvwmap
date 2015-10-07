@@ -3466,6 +3466,11 @@ class GUI {
           $this->debug->write("<p>file:kvwmap :PolygonEditor_Senden :",4);
           $ret = $layerdb->execSQL($sql,4, 1);
         }
+				elseif($this->attributes['name'][$i] != 'oid' AND $this->attributes['form_element_type'][$i] == 'UserID'){
+          $sql = "UPDATE ".$this->formvars['layer_tablename']." SET ".$this->attributes['name'][$i]." = ".$this->user->id." WHERE oid = '".$this->formvars['oid']."'";
+          $this->debug->write("<p>file:kvwmap :PolygonEditor_Senden :",4);
+          $ret = $layerdb->execSQL($sql,4, 1);
+        }
       }
       $umring = $this->formvars['newpathwkt'];
       $ret = $polygoneditor->eintragenFlaeche($umring, $this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname']);
@@ -7230,6 +7235,9 @@ class GUI {
         	elseif($table['type'][$i] == 'Stelle'){                       # Typ "Stelle"
             $sql.= "'".$this->Stelle->Bezeichnung."', ";
           }
+					elseif($table['type'][$i] == 'StelleID'){                       # Typ "StelleID"
+            $sql.= "'".$this->Stelle->id."', ";
+          }
           elseif($table['type'][$i] != 'Text_not_saveable' AND $table['type'][$i] != 'Auswahlfeld_not_saveable' AND $table['type'][$i] != 'SubFormPK' AND $table['type'][$i] != 'SubFormFK' AND ($this->formvars[$table['formfield'][$i]] != '' OR $table['type'][$i] == 'Checkbox')){
           	if($table['type'][$i] == 'Zahl'){                       # Typ "Zahl"
 	            $this->formvars[$table['formfield'][$i]] = str_replace(' ', '', $this->formvars[$table['formfield'][$i]]);		# bei Zahlen das Leerzeichen (Tausendertrenner) entfernen
@@ -10411,6 +10419,9 @@ class GUI {
             } break;
             case 'Stelle' : {
 							$eintrag = $this->Stelle->Bezeichnung;
+            } break;
+						case 'StelleID' : {
+							$eintrag = $this->Stelle->id;
             } break;
             case 'Geometrie' : {
               # nichts machen

@@ -133,6 +133,9 @@
 				  		<option value="Stelle" ';
 				  		if($this->attributes['form_element_type'][$i] == 'Stelle'){echo 'selected';}
 				  		echo ' >Stelle</option>
+							<option value="StelleID" ';
+				  		if($this->attributes['form_element_type'][$i] == 'StelleID'){echo 'selected';}
+				  		echo ' >StelleID</option>
 				  		<option value="Dokument" ';
 				  		if($this->attributes['form_element_type'][$i] == 'Dokument'){echo 'selected';}
 				  		echo ' >Dokument</option>
