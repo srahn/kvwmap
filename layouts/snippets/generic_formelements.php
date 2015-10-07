@@ -290,13 +290,14 @@
 
 									case 'dynamicLink': {
 										$show_link = false;
+										$options = $attributes['options'][$j];
 										for($a = 0; $a < count($attributes['name']); $a++){
-											if(strpos($attributes['options'][$j], '$'.$attributes['name'][$a]) !== false){
-												$attributes['options'][$j] = str_replace('$'.$attributes['name'][$a], $dataset[$attributes['name'][$a]], $attributes['options'][$j]);
+											if(strpos($options, '$'.$attributes['name'][$a]) !== false){
+												$options = str_replace('$'.$attributes['name'][$a], $dataset[$attributes['name'][$a]], $options);
 												if($dataset[$attributes['name'][$a]] != '')$show_link = true;
 											}
 										}
-										$explosion = explode(';', $attributes['options'][$j]);		# url;alias;embedded
+										$explosion = explode(';', $options);		# url;alias;embedded
 										$href = $explosion[0];
 										if($explosion[1] != ''){
 											$alias = $explosion[1];
