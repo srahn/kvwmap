@@ -1481,8 +1481,9 @@
 				$antragsnummern=array_keys ($GUI->formvars['id']);
 				$ret=$GUI->antrag->antrag_loeschen($antragsnummern[0],$GUI->formvars['stelle_id']);
 				if($ret == 'Antrag erfolgreich gelöscht')$GUI->Suchparameter_loeschen($antragsnummern[0], $GUI->formvars['stelle_id']);
-				$GUI->Antraege_Anzeigen();
 				showAlert($ret);
+				if($GUI->formvars['go_next'] != '')echo "<script>window.location.href='index.php?go=".$GUI->formvars['go_next']."';</script>";
+				else $GUI->Antraege_Anzeigen();
 			}
 			else {
 				if ($GUI->formvars['bestaetigung']=='NEIN') {
@@ -1499,7 +1500,7 @@
 		else{
 			$GUI->Antraege_Anzeigen();
 			showAlert("Löschen dieses Antrags nicht erlaubt!");
-		}
+		}		
   };
 	
 	$this->getFormObjVermStelle = function($name, $VermStelle) use ($GUI){
