@@ -30,7 +30,7 @@
 											$enum_value = $attributes['enum_value'][$j];
 											$enum_output = $attributes['enum_output'][$j];
 										}
-										$datapart .= Auswahlfeld($layer_id, $name, $j, $alias, $fieldname, $value, $this->formvars[$fieldname], $enum_value, $enum_output, $attributes['req_by'][$j], $attributes['name'], $privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $fontsize, $this->strPleaseSelect);
+										$datapart .= Auswahlfeld($layer_id, $name, $j, $alias, $fieldname, $value, $this->formvars[$fieldname], $enum_value, $enum_output, $attributes['req_by'][$j], $attributes['name'], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $fontsize, $this->strPleaseSelect);
 									}break;
 									
 									case 'Autovervollständigungsfeld' : {
