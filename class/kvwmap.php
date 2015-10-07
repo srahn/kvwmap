@@ -12476,6 +12476,7 @@ class GUI {
   function flurstwahl() {
     if($this->formvars['historical'] == 1){
       $this->titel='historische Flurstückssuche';
+			$this->formvars['without_temporal_filter'] = 1;
     }
     elseif($this->formvars['ALK_Suche'] == 1){
       $this->titel='Flurstückssuche (zur Karte)';
@@ -12497,7 +12498,7 @@ class GUI {
 			$this->formvars['selFlstID'] = implode(', ', $importliste);
 			$this->formvars['GemkgID'] = substr($importliste[0], 0, 6);
 			$this->formvars['FlurID'] = substr($importliste[0], 6, 3);
-			$this->formvars['historical'] = 1;
+			$this->formvars['without_temporal_filter'] = 1;
 		}
 		##########################
 		# Übernahme der Formularwerte für die Einstellung der Auswahlmaske

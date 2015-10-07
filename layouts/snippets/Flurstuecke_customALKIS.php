@@ -85,7 +85,7 @@ show_all = function(count){
 			$set_timestamp = '';
       $flurstkennz_a=$this->qlayerset[$i]['shape'][$a]['flurstkennz'];
 			$flst=new flurstueck($flurstkennz_a,$this->pgdatabase);
-      $flst->readALB_Data($flurstkennz_a, $this->formvars['historical']);	# bei historical=true, wird unabhängig vom Zeitstempel abgefragt (z.B. bei der historischen Flurstückssuche oder Flst.-Listenimport)
+      $flst->readALB_Data($flurstkennz_a, $this->formvars['without_temporal_filter']);	# bei without_temporal_filter=true, wird unabhängig vom Zeitstempel abgefragt (z.B. bei der historischen Flurstückssuche oder Flst.-Listenimport oder beim Sprung zum Vorgänger/Nachfolger)
 			$flst->Grundbuecher=$flst->getGrundbuecher();
 			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,$flst->hist_alb);
       $gemkg=substr($flurstkennz_a, 0, 6);
@@ -292,7 +292,7 @@ show_all = function(count){
               <td>
                 <?php
                 for($v = 0; $v < count($flst->Vorgaenger); $v++){ ?>
-                  <a href="javascript:overlay_link('go=Flurstueck_Anzeigen&FlurstKennz=<?php echo $flst->Vorgaenger[$v]['vorgaenger']; ?>');">
+                  <a href="javascript:overlay_link('go=Flurstueck_Anzeigen&FlurstKennz=<?php echo $flst->Vorgaenger[$v]['vorgaenger']; ?>&without_temporal_filter=1');">
                   <? echo formatFlurstkennzALK($flst->Vorgaenger[$v]['vorgaenger']).' (H)<br>'; ?>
                   </a>
                 <? } ?>
@@ -300,7 +300,7 @@ show_all = function(count){
                 <td>
                 <? if (count($flst->Vorgaenger) > 1){?>
                   <a href="javascript:overlay_link('go=Flurstueck_Anzeigen&FlurstKennz=<?php echo $flst->Vorgaenger[0]['vorgaenger'];
-                  for($v = 1; $v < count($flst->Vorgaenger); $v++)echo ';'.$flst->Vorgaenger[$v]['vorgaenger']; ?>');">alle</a>
+                  for($v = 1; $v < count($flst->Vorgaenger); $v++)echo ';'.$flst->Vorgaenger[$v]['vorgaenger']; ?>&without_temporal_filter=1');">alle</a>
                 <? } ?>
               </td>
           </tr>
@@ -311,7 +311,7 @@ show_all = function(count){
               <td>
                 <?php
                 for($v = 0; $v < count($flst->Nachfolger); $v++){ ?>
-                  <a href="javascript:overlay_link('go=Flurstueck_Anzeigen&FlurstKennz=<?php echo $flst->Nachfolger[$v]['nachfolger']; ?>');">
+                  <a href="javascript:overlay_link('go=Flurstueck_Anzeigen&FlurstKennz=<?php echo $flst->Nachfolger[$v]['nachfolger']; ?>&without_temporal_filter=1');">
                   <? echo formatFlurstkennzALK($flst->Nachfolger[$v]['nachfolger']);
                   if($flst->Nachfolger[$v]['endet'] != '' OR $flst->Nachfolger[$v]['hist_alb'] != ''){
                     echo ' (H)';
@@ -324,7 +324,7 @@ show_all = function(count){
               <? if(count($flst->Nachfolger) > 1){ ?>
                 <a href="javascript:overlay_link('go=Flurstueck_Anzeigen&FlurstKennz=<?php echo $flst->Nachfolger[0]['nachfolger'];
                 for($v = 1; $v < count($flst->Nachfolger); $v++)
-                echo ';'.$flst->Nachfolger[$v]['nachfolger']; ?>');">alle</a>
+                echo ';'.$flst->Nachfolger[$v]['nachfolger']; ?>&without_temporal_filter=1');">alle</a>
               <? } ?>
               </td>
           </tr>
