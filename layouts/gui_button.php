@@ -62,7 +62,7 @@ if($this->user->rolle->querymode == 1){
 				</script>
 <? if($this->user->rolle->querymode == 1){ ?>
 				<form name="GUI2" enctype="multipart/form-data" method="post" action="index.php" id="GUI2">
-					<div id="overlaydiv" style="display:none;padding:3px;left:150px;top:150px;width:auto;max-width:<? echo $this->map->width; ?>position:absolute;z-index: 1000;-moz-box-shadow: 12px 10px 14px #777;-webkit-box-shadow: 12px 10px 14px #777;box-shadow: 12px 10px 14px #777;">
+					<div id="overlaydiv" style="display:none;padding:3px;left:150px;top:150px;width:auto;max-width:<? echo $this->map->width; ?>;position:absolute;z-index: 1000;-moz-box-shadow: 12px 10px 14px #777;-webkit-box-shadow: 12px 10px 14px #777;box-shadow: 12px 10px 14px #777;">
 						<div style="position:absolute;left:0px;top:0px;width:100%;height:10px;border-top: 1px solid #bbbbbb;background-color: #dddddd;cursor:n-resize;" onmousedown="resizestart(document.getElementById('contentdiv'), 'n');"></div>
 						<div style="position:absolute;left:0px;top:0px;width:10px;height:100%;border-left: 1px solid #bbbbbb;background-color: #dddddd;cursor:w-resize;" onmousedown="resizestart(document.getElementById('contentdiv'), 'w');"></div>	
 						<div style="position:absolute;right:0px;top:0px;width:10px;height:100%;border-right: 1px solid #bbbbbb;background-color: #dddddd;cursor:e-resize;" onmousedown="resizestart(document.getElementById('contentdiv'), 'e');"></div>
