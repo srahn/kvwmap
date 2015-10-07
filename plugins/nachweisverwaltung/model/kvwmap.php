@@ -10,8 +10,7 @@
   };
 	
 	$this->DokumenteOrdnerPacken = function() use ($GUI){
-    if ($GUI->formvars['antr_selected']!=''){
-			if(strpos($GUI->formvars['antr_selected'], '~') == false)$GUI->formvars['antr_selected'] = str_replace('|', '~', $GUI->formvars['antr_selected']); # für Benutzung im GLE
+    if ($GUI->formvars['antr_selected']!=''){			
 			$explosion = explode('~', $GUI->formvars['antr_selected']);
 			$antr_selected = $explosion[0];
 			$stelle_id = $explosion[1];
@@ -46,7 +45,7 @@
 
 	$this->DokumenteZumAntragInOrdnerZusammenstellen = function() use ($GUI){
     if ($GUI->formvars['antr_selected']!=''){
-      # Vorbereiten des Pfades für die Speicherung der recherchierten Dokumente
+      if(strpos($GUI->formvars['antr_selected'], '~') == false)$GUI->formvars['antr_selected'] = str_replace('|', '~', $GUI->formvars['antr_selected']); # für Benutzung im GLE
 			$explosion = explode('~', $GUI->formvars['antr_selected']);
 			$antr_selected = $explosion[0];
 			$stelle_id = $explosion[1];
@@ -282,6 +281,7 @@
   };
 
 	$this->DokumenteZuAntraegeAnzeigen = function() use ($GUI){
+		if(strpos($GUI->formvars['antr_selected'], '~') == false)$GUI->formvars['antr_selected'] = str_replace('|', '~', $GUI->formvars['antr_selected']); # für Benutzung im GLE
     $GUI->formvars['suchffr']=1;
     $GUI->formvars['suchkvz']=1;
     $GUI->formvars['suchgn']=1;
