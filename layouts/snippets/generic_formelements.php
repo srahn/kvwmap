@@ -290,24 +290,19 @@
 
 									case 'dynamicLink': {
 										$show_link = false;
+										for($a = 0; $a < count($attributes['name']); $a++){
+											if(strpos($attributes['options'][$j], '$'.$attributes['name'][$a]) !== false){
+												$attributes['options'][$j] = str_replace('$'.$attributes['name'][$a], $dataset[$attributes['name'][$a]], $attributes['options'][$j]);
+												if($dataset[$attributes['name'][$a]] != '')$show_link = true;
+											}
+										}
 										$explosion = explode(';', $attributes['options'][$j]);		# url;alias;embedded
 										$href = $explosion[0];
 										if($explosion[1] != ''){
 											$alias = $explosion[1];
-											$explosion1 = explode('$', $alias);
-											for($d = 1; $d < count($explosion1); $d++){
-												$explosion2 = explode('&', $explosion1[$d]);
-												$alias = str_replace('$'.$explosion2[0], $dataset[$explosion2[0]], $alias);
-											}
 										}
 										else{
 											$alias = $href;
-										}
-										$explosion1 = explode('$', $href);
-										for($d = 1; $d < count($explosion1); $d++){
-											$explosion2 = explode('&', $explosion1[$d]);
-											if($dataset[$explosion2[0]] != '')$show_link = true;
-											$href = str_replace('$'.$explosion2[0], $dataset[$explosion2[0]], $href);
 										}
 										if($show_link){
 											if($explosion[2] == 'embedded'){

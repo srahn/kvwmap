@@ -11,7 +11,8 @@
 	
 	$this->DokumenteOrdnerPacken = function() use ($GUI){
     if ($GUI->formvars['antr_selected']!=''){
-			$explosion = explode('~', $GUI->formvars['antr_selected']);
+			if(strpos($GUI->formvars['antr_selected'], '~') !== false)$explosion = explode('~', $GUI->formvars['antr_selected']);
+			else $explosion = explode('%', $GUI->formvars['antr_selected']);			# für Benutzung im GLE
 			$antr_selected = $explosion[0];
 			$stelle_id = $explosion[1];
       $antrag=new antrag($antr_selected,$stelle_id,$GUI->pgdatabase);
