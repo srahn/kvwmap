@@ -10,7 +10,7 @@ else{
 	$branch = array_pop($explosion);
 	echo '<table><tr><td>Branch:</td><td>'.$branch.'</td></tr>';
 	echo '<tr><td>Status:</td><td>';
-	if(strpos($ausgabe[1], '# Your branch is behind') === 0){
+	if(strpos($ausgabe[1], 'Your branch is behind') !== false){
 		$explosion = explode(' ', $ausgabe[1]);
 		for($i = 0; $i < count($explosion); $i++){
 			if($explosion[$i] == 'by')$num_commits_behind = $explosion[$i+1];
