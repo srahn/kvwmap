@@ -7301,16 +7301,19 @@ class GUI {
 			
       switch ($attributes['form_element_type'][0]){
         case 'Auswahlfeld' : {
-          list($sql) = explode(';', $attributes['options'][0]);
-          $sql = str_replace(' from ', ',oid from ', strtolower($sql));    # auch die oid abfragen
-          $re=$layerdb->execSQL($sql,4,0);
-          if ($re[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; var_dump($layerdb); return 0; }
-          while($rs = pg_fetch_array($re[1])){
-            $html .= '<option ';
-            if($rs['oid'] == $last_oid){$html .= 'selected ';}
-            $html .= 'value="'.$rs['value'].'">'.$rs['output'].'</option>';
-          }
-          echo '~'.$html;
+					if(strpos($attributes['options'][0], '<requires>') !== false)echo "~~currentform.go.value='get_last_query';overlay_submit(currentform, false);";		# wenn <requires> verwendet wird, muss komplett neu geladen werden
+					else{		# andernfalls wird nur das Auswahlfeld ausgetauscht und die Option gleich selektiert
+						list($sql) = explode(';', $attributes['options'][0]);
+						$sql = str_replace(' from ', ',oid from ', strtolower($sql));    # auch die oid abfragen
+						$re=$layerdb->execSQL($sql,4,0);
+						if ($re[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; var_dump($layerdb); return 0; }
+						while($rs = pg_fetch_array($re[1])){
+							$html .= '<option ';
+							if($rs['oid'] == $last_oid){$html .= 'selected ';}
+							$html .= 'value="'.$rs['value'].'">'.$rs['output'].'</option>';
+						}
+						echo '~'.$html;
+					}
         }break;
         
         case 'SubFormEmbeddedPK' : {
