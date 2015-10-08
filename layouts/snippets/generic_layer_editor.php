@@ -66,54 +66,50 @@
 			  
 			  <?
 			  	for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
-					if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
-						if($this->qlayerset[$i]['attributes']['type'][$j] != 'geometry'){
-							echo '<td ';
-								//if($attributes['group'][0] != '')echo 'width="10%"';
-								echo ' valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';
-								if($attributes['privileg'][$j] != '0' AND !$lock[$k]){
-									$this->editable = 'true';
-								}
-								if($attributes['alias'][$j] == ''){
-									$attributes['alias'][$j] = $attributes['name'][$j];
-								}
-								echo '<table ';
-								//if($attributes['group'][0] != '')echo 'width="200px"';
-								echo 'width="100%";';
-								echo '><tr><td>';
-								if($attributes['form_element_type'][$j] != 'SubFormPK' AND $attributes['form_element_type'][$j] != 'SubFormEmbeddedPK'){
-									echo '<a style="font-size: '.$this->user->rolle->fontsize_gle.'px" title="Sortieren nach '.$attributes['alias'][$j].'" href="javascript:change_orderby(\''.$attributes['name'][$j].'\', '.$layer['Layer_ID'].');">
-													'.$attributes['alias'][$j].'</a>';
-								}
-								else{
-									echo '<span style="font-size: '.$this->user->rolle->fontsize_gle.'px; color:#222222;">'.$attributes['alias'][$j].'</span>';
-								}
-								if($attributes['nullable'][$j] == '0' AND $attributes['privileg'][$j] != '0'){
-									echo '<span title="Eingabe erforderlich">*</span>';
-								}
-								if($attributes['tooltip'][$j]!='' AND $attributes['form_element_type'][$j] != 'Time'){
-								  echo '<td align="right"><a href="javascript:void(0);" title="'.$attributes['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
-								}
-								if($attributes['type'][$j] == 'date' OR $attributes['type'][$j] == 'timestamp' OR $attributes['type'][$j] == 'timestamptz'){
-								  echo '<td align="right"><a href="javascript:;" title=" (TT.MM.JJJJ) '.$attributes['tooltip'][$j].'" ';
-								  if($attributes['privileg'][$j] == '1' AND !$lock[$k]){
-									echo 'onclick="add_calendar(event, \''.$attributes['name'][$j].'_'.$k.'\');"';
-								  }
-								  echo '><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id=calendar_'.$attributes['name'][$j].'_'.$k.'"></div></td>';
-								}
-								echo '</td></tr></table>';
-								echo '</td>';
+						if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
+							if($this->qlayerset[$i]['attributes']['type'][$j] != 'geometry'){
+								echo '<td ';
+									//if($attributes['group'][0] != '')echo 'width="10%"';
+									echo ' valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';
+									if($attributes['privileg'][$j] != '0' AND !$lock[$k]){
+										$this->editable = 'true';
+									}
+									if($attributes['alias'][$j] == ''){
+										$attributes['alias'][$j] = $attributes['name'][$j];
+									}
+									echo '<table ';
+									//if($attributes['group'][0] != '')echo 'width="200px"';
+									echo 'width="100%";';
+									echo '><tr><td>';
+									if($attributes['form_element_type'][$j] != 'SubFormPK' AND $attributes['form_element_type'][$j] != 'SubFormEmbeddedPK'){
+										echo '<a style="font-size: '.$this->user->rolle->fontsize_gle.'px" title="Sortieren nach '.$attributes['alias'][$j].'" href="javascript:change_orderby(\''.$attributes['name'][$j].'\', '.$layer['Layer_ID'].');">
+														'.$attributes['alias'][$j].'</a>';
+									}
+									else{
+										echo '<span style="font-size: '.$this->user->rolle->fontsize_gle.'px; color:#222222;">'.$attributes['alias'][$j].'</span>';
+									}
+									if($attributes['nullable'][$j] == '0' AND $attributes['privileg'][$j] != '0'){
+										echo '<span title="Eingabe erforderlich">*</span>';
+									}
+									if($attributes['tooltip'][$j]!='' AND $attributes['form_element_type'][$j] != 'Time'){
+										echo '<td align="right"><a href="javascript:void(0);" title="'.$attributes['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
+									}
+									if($attributes['type'][$j] == 'date' OR $attributes['type'][$j] == 'timestamp' OR $attributes['type'][$j] == 'timestamptz'){
+										echo '<td align="right"><a href="javascript:;" title=" (TT.MM.JJJJ) '.$attributes['tooltip'][$j].'" ';
+										if($attributes['privileg'][$j] == '1' AND !$lock[$k]){
+										echo 'onclick="add_calendar(event, \''.$attributes['name'][$j].'_'.$k.'\');"';
+										}
+										echo '><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id=calendar_'.$attributes['name'][$j].'_'.$k.'"></div></td>';
+									}
+									echo '</td></tr></table>';
+									echo '</td>';
+							}
+							else{
+								echo '<td bgcolor="'.BG_GLEATTRIBUTE.'">&nbsp;</td>';
+							}
 						}
-					}
 			  	}
 			  ?>
-			  <td bgcolor="<? echo BG_GLEATTRIBUTE; ?>">
-			  	&nbsp;
-			  </td>
-			 <!-- <td>
-			  	&nbsp;
-			  </td>--> 
-			    
 			  </tr>
 <?
 	for ($k=0;$k<$anzObj;$k++) {
