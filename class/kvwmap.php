@@ -7388,7 +7388,10 @@ class GUI {
 		      for($i = 0; $i < count($form_fields); $i++){
 			      if($form_fields[$i] != ''){
 			        $element = explode(';', $form_fields[$i]);
-			        if($element[3] == $oid AND !in_array($layerset[0]['attributes']['constraints'][$element[1]],  array('PRIMARY KEY', 'UNIQUE'))){		# Primärschlüssel werden nicht mitübergeben
+			        if($element[3] == $oid 
+								 AND !in_array($layerset[0]['attributes']['constraints'][$element[1]],  array('PRIMARY KEY', 'UNIQUE'))  # Primärschlüssel werden nicht mitübergeben
+								 AND !in_array($layerset[0]['attributes']['form_element_type'][$layerset[0]['attributes']['indizes'][$element[1]]], array('Time', 'User', 'UserID', 'Stelle', 'StelleID')) # und automatisch generierte Typen auch nicht
+							){		
 				        $element[3] = '';
 				        $this->formvars[implode(';', $element)] = $this->formvars[$form_fields[$i]];
 			        }
