@@ -217,8 +217,7 @@
 					$pfad = substr(trim($path), 7);
 				}
 				$j = 0;
-				foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-					if($layerset[$i]['attributes']['oids'][$j]){      # hat Tabelle oids?					if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['attributes']['oids'][$j]){		# hat Haupttabelle oids?
+				foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){					if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['attributes']['oids'][$j]){		# hat Haupttabelle oids?
 						$pfad = $layerset[$i]['attributes']['table_alias_name'][$tablename].'.oid AS '.$tablename.'_oid, '.$pfad;
 					}
 					$j++;
@@ -312,8 +311,7 @@
 				if($layerset[$i]['attributes']['groupby'] != ''){
 					$sql .= $layerset[$i]['attributes']['groupby'];
 					$j = 0;
-					foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-						if($layerset[$i]['attributes']['oids'][$j]){      # hat Tabelle oids?
+					foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){						if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['attributes']['oids'][$j]){		# hat Haupttabelle oids?
 							$sql .= ','.$tablename.'_oid ';
 						}
 						$j++;
