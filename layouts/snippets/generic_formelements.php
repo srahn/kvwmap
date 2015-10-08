@@ -30,7 +30,7 @@
 											$enum_value = $attributes['enum_value'][$j];
 											$enum_output = $attributes['enum_output'][$j];
 										}
-										$datapart .= Auswahlfeld($layer_id, $name, $j, $alias, $fieldname, $value, $this->formvars[$fieldname], $enum_value, $enum_output, $attributes['req_by'][$j], $attributes['name'], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $fontsize, $this->strPleaseSelect);
+										$datapart .= Auswahlfeld($layer_id, $name, $j, $alias, $fieldname, $value, $enum_value, $enum_output, $attributes['req_by'][$j], $attributes['name'], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $fontsize, $this->strPleaseSelect);
 									}break;
 									
 									case 'Autovervollständigungsfeld' : {
@@ -107,7 +107,7 @@
 														$enum_value = $attributes['enum_value'][$index];
 														$enum_output = $attributes['enum_output'][$index];
 													}
-													$datapart .= Auswahlfeld($layer_id, $name_, $j, $attributes['alias'][$name_], $fieldname_[$f], $dataset[$name_], $this->formvars[$fieldname_[$f]], $enum_value, $enum_output, $attributes['req_by'][$index], $attributes['name'], $attributes['privileg'][$name_], $k, $oid, $attributes['subform_layer_id'][$index], $attributes['subform_layer_privileg'][$index], $attributes['embedded'][$index], $lock[$k], $fontsize, $this->strPleaseSelect);
+													$datapart .= Auswahlfeld($layer_id, $name_, $j, $attributes['alias'][$name_], $fieldname_[$f], $dataset[$name_], $enum_value, $enum_output, $attributes['req_by'][$index], $attributes['name'], $attributes['privileg'][$name_], $k, $oid, $attributes['subform_layer_id'][$index], $attributes['subform_layer_privileg'][$index], $attributes['embedded'][$index], $lock[$k], $fontsize, $this->strPleaseSelect);
 													$datapart .= '</td><td align="right" valign="top">';
 												}break;
 												default : {
