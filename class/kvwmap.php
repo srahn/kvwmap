@@ -6550,7 +6550,7 @@ class GUI {
 					$pfad .= $layerset[0]['attributes']['groupby'];
 					$j = 0;
 					foreach($layerset[0]['attributes']['all_table_names'] as $tablename){
-								if($layerset[0]['attributes']['oids'][$j]){      # hat Tabelle oids?
+								if($tablename == $layerset[0]['maintable'] AND $layerset[0]['attributes']['oids'][$j]){		# hat Haupttabelle oids?
 									$pfad .= ','.$tablename.'_oid ';
 								}
 								$j++;
@@ -10715,7 +10715,7 @@ class GUI {
 								}
 								$j = 0;
 								foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-									if($layerset[$i]['attributes']['oids'][$j]){      # hat Tabelle oids?
+									if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['attributes']['oids'][$j]){		# hat Haupttabelle oids?
 										$pfad = $layerset[$i]['attributes']['table_alias_name'][$tablename].'.oid AS '.$tablename.'_oid, '.$pfad;
 									}
 									$j++;
@@ -10841,7 +10841,7 @@ class GUI {
 										$pfad .= $layerset[$i]['attributes']['groupby'];
 										$j = 0;
 										foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-													if($layerset[$i]['attributes']['oids'][$j]){      # hat Tabelle oids?
+													if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['attributes']['oids'][$j]){		# hat Haupttabelle oids?
 														$pfad .= ','.$tablename.'_oid ';
 													}
 													$j++;
@@ -11375,7 +11375,7 @@ class GUI {
 				}
 				$j = 0;
 				foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-					if($layerset[$i]['attributes']['oids'][$j]){      # hat Tabelle oids?
+					if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['attributes']['oids'][$j]){		# hat Haupttabelle oids?
 						$pfad = $layerset[$i]['attributes']['table_alias_name'][$tablename].'.oid AS '.$tablename.'_oid, '.$pfad;
 					}
 					$j++;
@@ -11470,7 +11470,7 @@ class GUI {
 					$sql .= $layerset[$i]['attributes']['groupby'];
 					$j = 0;
 					foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-						if($layerset[$i]['attributes']['oids'][$j]){      # hat Tabelle oids?
+						if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['attributes']['oids'][$j]){		# hat Haupttabelle oids?
 							$sql .= ','.$tablename.'_oid ';
 						}
 						$j++;
