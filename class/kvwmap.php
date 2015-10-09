@@ -2379,7 +2379,7 @@ class GUI {
     $layerdb->setClientEncoding();
     $attributenames[0] = $this->formvars['attribute'];
     $attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
-		$options = $attributes['options'][$this->formvars['attribute']];
+		$options = array_shift(explode(';', $attributes['options'][$this->formvars['attribute']]));
     $reqby_start = strpos(strtolower($options), "<required by>");
     if($reqby_start > 0)$sql = substr($options, 0, $reqby_start);else $sql = $options; 
 		$attributenames = explode('|', $this->formvars['attributenames']);
