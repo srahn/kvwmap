@@ -194,6 +194,9 @@ function urlstring2formdata(formdata, string){
 function overlay_submit(gui, start){
 	// diese Funktion macht beim Fenstermodus und einer Kartenabfrage oder einem Aufruf aus dem Overlay-Fenster einen ajax-Request mit den Formulardaten des uebergebenen Formularobjektes, ansonsten einen normalen Submit
 	if(typeof FormData !== 'undefined' && (1 == <? echo $this->user->rolle->querymode; ?> && start || gui.id == 'GUI2')){	
+		<? if($this->last_query_requested){ ?>
+			gui.go.value = 'get_last_query';
+		<? } ?>
 		formdata = new FormData(gui);
 		formdata.append("mime_type", "overlay_html");	
 		ahah("index.php", formdata, new Array(document.getElementById('contentdiv')), new Array("sethtml"));	
