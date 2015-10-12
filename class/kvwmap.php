@@ -8826,7 +8826,7 @@ class GUI {
             if($this->formvars['value_'.$filter[$i]['attributname']] == NULL OR
               ($this->formvars['value_'.$filter[$i]['attributname']] == $filter[$i]['attributvalue'] AND
                $this->formvars['operator_'.$filter[$i]['attributname']] == $filter[$i]['operator'])){
-              $this->formvars['value_'.$filter[$i]['attributname']] = $filter[$i]['attributvalue'];
+              $this->formvars['value_'.$filter[$i]['attributname']] = pg_escape_string($filter[$i]['attributvalue']);
               $this->formvars['operator_'.$filter[$i]['attributname']] = $filter[$i]['operator'];
               $setAttributes[$filter[$i]['attributname']]++;
             }
