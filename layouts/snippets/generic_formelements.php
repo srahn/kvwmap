@@ -244,7 +244,7 @@
 											}											
 											$datapart .= '<table border="0"><tr><td>';
 											if($hover_preview){
-												$onmouseover='onmouseenter="document.getElementById(\'preview_img\').src=this.src" onmouseleave="document.getElementById(\'preview_img\').src=\''.GRAPHICSPATH.'leer.gif\'"';
+												$onmouseover='onmouseenter="document.getElementById(\'vorschau\').style.border=\'1px solid grey\';document.getElementById(\'preview_img\').src=this.src" onmouseleave="document.getElementById(\'vorschau\').style.border=\'none\';document.getElementById(\'preview_img\').src=\''.GRAPHICSPATH.'leer.gif\'"';
 											}
 											if(in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf')) ){
 												$datapart .= '<a href="'.$url.$dokumentpfad.'"><img class="preview_image" src="'.$url.$thumbname.'" '.$onmouseover.'></a>';									
