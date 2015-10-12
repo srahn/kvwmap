@@ -1814,7 +1814,7 @@ class pgdatabase {
     $sql.=" FROM alkis.ax_gemeinde as g, alkis.ax_gemarkung as gem, alkis.ax_flurstueck as f";
     $sql.=" JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(f.weistauf)";
     $sql.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND s.lage = lpad(l.lage,5,'0')";
-    $sql.=" WHERE g.gemeinde = f.gemeinde AND f.gemarkungsnummer = gem.gemarkungsnummer";
+    $sql.=" WHERE g.gemeinde = f.gemeinde AND f.gemarkungsnummer = gem.gemarkungsnummer AND f.gemeinde = l.gemeinde";
     if ($GemID!='') {
       $sql.=" AND g.schluesselgesamt=".(int)$GemID;
     }
@@ -1823,7 +1823,7 @@ class pgdatabase {
     }
 		$sql.= $this->build_temporal_filter(array('g', 'gem', 'f', 'l', 's'));
     $sql.=" ORDER BY gemeinde, strassenname";
-    #echo $sql;
+    echo $sql;
     $this->debug->write("<p>postgres getStrassenListe Abfragen der Strassendaten:<br>".$sql,4);
     $queryret=$this->execSQL($sql, 4, 0);
     $i = 0;
