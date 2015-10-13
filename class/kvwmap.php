@@ -10196,7 +10196,6 @@ class GUI {
   }
 
   function flurstSuchen() {
-    # 2006-02-01 pk
     $GemID=$this->formvars['GemID'];
     $GemkgID=$this->formvars['GemkgID'];
     if ($this->formvars['FlurID']!='-1') {
