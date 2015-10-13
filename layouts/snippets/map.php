@@ -187,7 +187,7 @@ if($this->formvars['gps_follow'] == ''){
 			          				<input type="text" style="width: 190px" class="transparent_input" name="runningcoords" value=""><span title="<? echo $this->epsg_codes[$this->user->rolle->epsg_code]['srtext']; ?>">EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?></span>
 											</td>
 						          <td width="25%" align="right">
-						            <img id="scalebar" style="margin-right:<? if($this->user->rolle->hideLegend)echo '30';else echo '5'; ?>px" alt="Maßstabsleiste" src="<? echo $this->img['scalebar']; ?>">
+						            <img id="scalebar" style="padding-right:<? if($this->user->rolle->hideLegend)echo '35';else echo '5'; ?>px" alt="Maßstabsleiste" src="<? echo $this->img['scalebar']; ?>">
 						          </td>
 						        </tr>
 						    </table>
