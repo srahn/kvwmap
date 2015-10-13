@@ -285,7 +285,7 @@ function install_config() {
   
   $config = str_replace(
     "define('POSTGRESBINPATH', '/usr/lib/postgresql/9.1/bin/');",
-    "define('POSTGRESBINPATH', '/usr/local/bin/');",
+    "define('POSTGRESBINPATH', '/usr/bin/');",
     $config
   );
 

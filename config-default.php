@@ -198,7 +198,7 @@ define('PDFCLASSPATH',WWWROOT.'PDFClass/');
 define('POSTGRESBINPATH', '/usr/lib/postgresql/9.1/bin/');         # Version 1.6.4
 
 # Bin-Pfad der OGR-tools (ogr2ogr, ogrinfo)
-define('OGR_BINPATH', '/usr/local/bin/');					# Version 1.7.4
+define('OGR_BINPATH', '/usr/bin/');					# Version 1.7.4
 
 # Pfad zum Zip-Programm (unter Linux: 'zip -j', unter Windows z.B. 'c:/programme/Zip/bin/zip.exe')
 define('ZIP_PATH', 'zip -j');													# Version 1.7.3  hier wurde das ' -j' angehängt
