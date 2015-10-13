@@ -103,8 +103,7 @@ function switchlegend(){
 
   $res_x    = $this->map->width;
   $res_y    = $this->map->height;
-  $legendheight = $this->map->height-51;
-	if($this->user->rolle->runningcoords == 1)$legendheight = $legendheight + 22;
+  $legendheight = $this->map->height-29;
   $res_xm   = $this->map->width/2;
   $res_ym   = $this->map->height/2;
   $dx       = $this->map->extent->maxx-$this->map->extent->minx;
@@ -188,7 +187,7 @@ if($this->formvars['gps_follow'] == ''){
 			          				<input type="text" style="width: 190px" class="transparent_input" name="runningcoords" value=""><span title="<? echo $this->epsg_codes[$this->user->rolle->epsg_code]['srtext']; ?>">EPSG-Code:<?php echo $this->user->rolle->epsg_code; ?></span>
 											</td>
 						          <td width="25%" align="right">
-						            <img id="scalebar" style="margin-right:5px" alt="Maßstabsleiste" src="<? echo $this->img['scalebar']; ?>">
+						            <img id="scalebar" style="margin-right:<? if($this->user->rolle->hideLegend)echo '30';else echo '5'; ?>px" alt="Maßstabsleiste" src="<? echo $this->img['scalebar']; ?>">
 						          </td>
 						        </tr>
 						    </table>
