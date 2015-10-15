@@ -1782,17 +1782,16 @@ class pgdatabase {
     $sql.="SELECT DISTINCT CASE WHEN TRIM(nr)='' THEN 'ohne' ELSE LOWER(id) END AS id, CASE WHEN TRIM(nr)='' THEN 'ohne Nr' ELSE TRIM(nr) END AS nrtext";
     $sql.=",(CASE WHEN TRIM(ordernr)='' THEN '0' ELSE SPLIT_PART(TRIM(ordernr),' ',1) END) as ordernr FROM (";
     $sql.=" SELECT DISTINCT '".$GemID."-".$StrID."-'||TRIM(".HAUSNUMMER_TYPE."(l.hausnummer)) AS id, ".HAUSNUMMER_TYPE."(l.hausnummer) AS nr, l.hausnummer AS ordernr";
-    $sql.=" FROM alkis.ax_gemeinde as g, alkis.ax_flurstueck as f";
-    $sql.=" JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(f.weistauf)";
+    $sql.=" FROM alkis.ax_gemeinde as g, alkis.ax_lagebezeichnungmithausnummer l";
     $sql.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND l.lage = lpad(s.lage,5,'0')";
-    $sql.=" WHERE g.gemeinde = f.gemeinde";
+    $sql.=" WHERE g.gemeinde = l.gemeinde";
     if ($GemID!='') {
       $sql.=" AND g.schluesselgesamt=".(int)$GemID;
     }
     if ($StrID!='') {
       $sql.=" AND l.lage='".$StrID."'";
     }
-		$sql.= $this->build_temporal_filter(array('g', 'f', 'l', 's'));
+		$sql.= $this->build_temporal_filter(array('g', 'l', 's'));
     $sql.=") AS foo ";
     $sql.=") AS foofoo ORDER BY ".$order;
     #echo $sql;
