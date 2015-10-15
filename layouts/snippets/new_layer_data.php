@@ -91,7 +91,7 @@ if($this->formvars['selected_layer_id'] AND $this->Fehler == ''){
 
 <?
 	if ($this->Meldung1!='') {
-		showAlert('Fehler bei der Eingabe:\n'.$this->Meldung1);
+		$this->alert = 'Fehler bei der Eingabe:\n'.$this->Meldung1;
 	}
 ?>  
 

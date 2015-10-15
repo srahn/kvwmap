@@ -1956,6 +1956,9 @@ class GUI {
           $this->user->rolle->gui='gui.php';
         }
         include (LAYOUTPATH.$this->user->rolle->gui);
+				if($this->alert != ''){
+					echo '<script type="text/javascript">alert("'.$this->alert.'");</script>';			# manchmal machen alert-Ausgaben über die allgemeinde Funktioen showAlert Probleme, deswegen am besten erst hier am Ende ausgeben
+				}
       } break;
 			case 'overlay_html' : {
 				$this->overlaymain = $this->main;
