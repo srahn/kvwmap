@@ -12667,7 +12667,7 @@ class GUI {
       $StrFormObj=new selectFormObject("StrID","select",$StrassenListe['StrID'],$StrSelected,$StrassenListe['Name'],"1","","",NULL);
       # Unterscheidung ob Strasse ausgewählt wurde
       if ($StrFormObj->selected){
-      	if($GemID == -1){
+      	if($GemID == -1 OR $GemID == ''){
 					$Gemeinde = $Gemarkung->getGemarkungListe(NULL, array($this->formvars['GemkgID']), NULL);
 		    	$GemID = $Gemeinde['gemeinde'][0];
 		    }
