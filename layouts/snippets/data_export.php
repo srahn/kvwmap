@@ -61,11 +61,13 @@ function data_export(){
 	}
 }
 
-function selectall(){
+function selectall(geom){
 	var k = 0;
 	obj = document.getElementById('check_attribute_'+k);
 	while(obj != undefined){
-		obj.checked = !obj.checked;
+		if(obj.name != 'check_'+geom){
+			obj.checked = !obj.checked;			
+		}
 		k++;
 		obj = document.getElementById('check_attribute_'+k);
 	}
@@ -208,7 +210,7 @@ $j=0;
            }
           } ?>
         </div>
-				&nbsp;&nbsp;&nbsp;&nbsp;<a id="selectall_link" href="javascript:selectall()"><? echo $strSelectAll; ?></a>
+				&nbsp;&nbsp;&nbsp;&nbsp;<a id="selectall_link" href="javascript:selectall('<? echo $this->data_import_export->attributes['the_geom']; ?>')"><? echo $strSelectAll; ?></a>
       </div>
 
 			<? if($document_attributes){ ?>
