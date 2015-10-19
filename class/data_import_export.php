@@ -617,8 +617,9 @@ class data_import_export {
     	$sql = $select.$rest;
     }
     # order by rausnehmen
-  	$orderbyposition = strpos(strtolower($sql), 'order by');
-  	if($orderbyposition !== false){
+  	$orderbyposition = strrpos(strtolower($sql), 'order by');
+		$lastfromposition = strrpos(strtolower($sql), 'from');
+  	if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
 	  	$orderby = ' '.substr($sql, $orderbyposition);
 	  	$sql = substr($sql, 0, $orderbyposition);
   	}
