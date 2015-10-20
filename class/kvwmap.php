@@ -6612,7 +6612,7 @@ class GUI {
         }
         # Hier nach der Abfrage der Sachdaten die weiteren Attributinformationen hinzufügen
         # Steht an dieser Stelle, weil die Auswahlmöglichkeiten von Auswahlfeldern abhängig sein können
-        $layerset[0]['attributes'] = $mapDB->add_attribute_values($layerset[0]['attributes'], $layerdb, $layerset[0]['shape']);
+        $layerset[0]['attributes'] = $mapDB->add_attribute_values($layerset[0]['attributes'], $layerdb, $layerset[0]['shape'], true, $this->Stelle->id);
         
 				if($layerset[0]['count'] != 0 AND $this->formvars['embedded_subformPK'] == '' AND $this->formvars['embedded'] == '' AND $this->formvars['embedded_dataPDF'] == ''){
 					#if($this->formvars['go'] != 'neuer_Layer_Datensatz_speichern'){		// wenns nur die Anzeige des gerade angelegten Datensatzes ist, nicht als last_query speichern (wieder rausgenommen)
@@ -6761,7 +6761,7 @@ class GUI {
 					$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
 					$this->attributes = $mapdb->read_layer_attributes($this->formvars['layer_id'], $layerdb, $privileges['attributenames']);
 					# weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
-					$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $this->qlayerset['shape'], true);
+					$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $this->qlayerset['shape'], true, $this->Stelle->id);
         }break;
         
         case MS_WFS : {
@@ -6848,7 +6848,7 @@ class GUI {
 	          $this->qlayerset['shape'][0][$this->attributes['name'][$i]] = $this->formvars['value_'.$this->attributes['name'][$i]];
 	        }
           # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
-					$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $this->qlayerset['shape'], true);
+					$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $this->qlayerset['shape'], true, $this->Stelle->id);
         }break;
       }
     }
@@ -6921,7 +6921,7 @@ class GUI {
 	          $this->qlayerset['shape'][0][$attributes['name'][$i]] = $this->formvars['value_'.$attributes['name'][$i]];
 	        }
           # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
-					$this->attributes = $mapdb->add_attribute_values($attributes, $layerdb, $this->qlayerset['shape'], true);
+					$this->attributes = $mapdb->add_attribute_values($attributes, $layerdb, $this->qlayerset['shape'], true, $this->Stelle->id);
 					
 					# Speichern einer neuen Suchabfrage
 					if($this->formvars['go_plus'] == 'Suchabfrage_speichern'){
@@ -6966,7 +6966,7 @@ class GUI {
 								}
 							}
 							# für jede Suchmaske ein eigenes attributes-Array erzeugen, da z.B. die Auswahllisten ja anders sein können
-							$this->{'attributes'.$m} = $mapdb->add_attribute_values($attributes, $layerdb, $this->qlayerset['shape'], true);
+							$this->{'attributes'.$m} = $mapdb->add_attribute_values($attributes, $layerdb, $this->qlayerset['shape'], true, $this->Stelle->id);
 						}
 					}
         }break;
@@ -7434,7 +7434,7 @@ class GUI {
         }
         
         # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
-				$this->qlayerset[0]['attributes'] = $mapDB->add_attribute_values($this->qlayerset[0]['attributes'], $layerdb, $this->qlayerset[0]['shape'], true);
+				$this->qlayerset[0]['attributes'] = $mapDB->add_attribute_values($this->qlayerset[0]['attributes'], $layerdb, $this->qlayerset[0]['shape'], true, $this->Stelle->id);
         $this->new_entry = true;
 
         $this->geomtype = $this->qlayerset[0]['attributes']['geomtype'][$this->qlayerset[0]['attributes']['the_geom']];
@@ -7598,7 +7598,7 @@ class GUI {
       $layerdb->setClientEncoding();
       $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
 			# weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
-			$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, NULL, true);
+			$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, NULL, true, $this->Stelle->id);
       $this->ddl->layouts = $this->ddl->load_layouts(NULL, NULL, $this->formvars['selected_layer_id'], NULL);
     }
     if($this->formvars['aktivesLayout']){
@@ -7692,7 +7692,7 @@ class GUI {
     $layerdb->setClientEncoding();
     $attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
     # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
-		$attributes = $mapDB->add_attribute_values($attributes, $layerdb, NULL, true);
+		$attributes = $mapDB->add_attribute_values($attributes, $layerdb, NULL, true, $this->Stelle->id);
     # Testdaten erzeugen
 		if($selectedlayout['type'] != 0)$count = 2;else $count = 1;		# nur beim Untereinandertyp oder eingebettet-Typ mehrere Datensätze erzeugen
     for($i = 0; $i < $count; $i++){
@@ -7759,7 +7759,7 @@ class GUI {
 		# Attribute laden
 		$attributes = $mapDB->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, $privileges['attributenames']);
     # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
-		$attributes = $mapDB->add_attribute_values($attributes, $layerdb, $result, true);
+		$attributes = $mapDB->add_attribute_values($attributes, $layerdb, $result, true, $this->Stelle->id);
 		$this->attributes = $attributes; 
     # Layouts abfragen
     $this->ddl->layouts = $this->ddl->load_layouts($this->Stelle->id, NULL, $this->formvars['chosen_layer_id'], array(0,1));
@@ -7821,7 +7821,7 @@ class GUI {
 		# Attribute laden
 		$attributes = $mapDB->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, $privileges['attributenames']);
     # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
-		$attributes = $mapDB->add_attribute_values($attributes, $layerdb, $result, true);
+		$attributes = $mapDB->add_attribute_values($attributes, $layerdb, $result, true, $this->Stelle->id);
 		$this->attributes = $attributes; 
     # aktives Layout abfragen
     if($this->formvars['aktivesLayout'] != ''){
@@ -7857,7 +7857,7 @@ class GUI {
     $minimum = 0;
     $maxlabelwidth = 0;
     # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
-		$attributes = $mapDB->add_attribute_values($attributes, $layerdb, NULL, true);
+		$attributes = $mapDB->add_attribute_values($attributes, $layerdb, NULL, true, $this->Stelle->id);
 		$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
     # Daten abfragen
     $sql = $newpath;
@@ -10918,7 +10918,7 @@ class GUI {
 							}
 							# Hier nach der Abfrage der Sachdaten die weiteren Attributinformationen hinzufügen
 							# Steht an dieser Stelle, weil die Auswahlmöglichkeiten von Auswahlfeldern abhängig sein können
-							$layerset[$i]['attributes'] = $this->mapDB->add_attribute_values($layerset[$i]['attributes'], $layerdb, $layerset[$i]['shape']);
+							$layerset[$i]['attributes'] = $this->mapDB->add_attribute_values($layerset[$i]['attributes'], $layerdb, $layerset[$i]['shape'], true, $this->Stelle->id);
 											 
 							if($layerset[$i]['count'] != 0){
 								if(!$last_query_deleted){			# damit nur die letzte Query gelöscht wird und nicht eine bereits gespeicherte Query eines anderen Layers der aktuellen Abfrage
@@ -11498,7 +11498,7 @@ class GUI {
 				
 				# Hier nach der Abfrage der Sachdaten die weiteren Attributinformationen hinzufügen
 				# Steht an dieser Stelle, weil die Auswahlmöglichkeiten von Auswahlfeldern abhängig sein können
-				$layerset[$i]['attributes'] = $this->mapDB->add_attribute_values($layerset[$i]['attributes'], $layerdb, $layerset[$i]['shape'], true);
+				$layerset[$i]['attributes'] = $this->mapDB->add_attribute_values($layerset[$i]['attributes'], $layerdb, $layerset[$i]['shape'], true, $this->Stelle->id);
 				
 				if($found)$this->qlayerset[]=$layerset[$i];
 			}
@@ -13539,7 +13539,7 @@ class db_mapObj{
     }
   }
 
-  function add_attribute_values($attributes, $database, $query_result, $withvalues = true){
+  function add_attribute_values($attributes, $database, $query_result, $withvalues = true, $stelle_id){
     # Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
     for($i = 0; $i < count($attributes['name']); $i++){
 			if($attributes['constraints'][$i] != '' AND !in_array($attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))){  # das sind die Auswahlmöglichkeiten, die durch die Tabellendefinition in Postgres fest vorgegeben sind
@@ -13603,7 +13603,7 @@ class db_mapObj{
                   }
                 }
                 elseif($attributes['options'][$i] != ''){
-                  $sql = $attributes['options'][$i];
+                  $sql = str_replace('$stelleid', $stelle_id, $attributes['options'][$i]);
                   $ret=$database->execSQL($sql,4,0);
                   if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
                   while($rs = pg_fetch_array($ret[1])){

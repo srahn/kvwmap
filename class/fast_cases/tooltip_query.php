@@ -337,7 +337,7 @@
 				
 				# Hier nach der Abfrage der Sachdaten die weiteren Attributinformationen hinzufügen
 				# Steht an dieser Stelle, weil die Auswahlmöglichkeiten von Auswahlfeldern abhängig sein können
-				$layerset[$i]['attributes'] = $this->mapDB->add_attribute_values($layerset[$i]['attributes'], $layerdb, $layerset[$i]['shape'], true);
+				$layerset[$i]['attributes'] = $this->mapDB->add_attribute_values($layerset[$i]['attributes'], $layerdb, $layerset[$i]['shape'], true, $this->Stelle->id);
 				
 				if($found)$this->qlayerset[]=$layerset[$i];
 			}
@@ -1117,7 +1117,7 @@
 		}
 		return $attributes;
   }
-  function add_attribute_values($attributes, $database, $query_result, $withvalues = true){
+  function add_attribute_values($attributes, $database, $query_result, $withvalues = true, $stelle_id){
     # Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
     for($i = 0; $i < count($attributes['name']); $i++){
 			if($attributes['constraints'][$i] != '' AND !in_array($attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))){  # das sind die Auswahlmöglichkeiten, die durch die Tabellendefinition in Postgres fest vorgegeben sind
@@ -1181,7 +1181,7 @@
                   }
                 }
                 elseif($attributes['options'][$i] != ''){
-                  $sql = $attributes['options'][$i];
+                  $sql = str_replace('$stelleid', $stelle_id, $attributes['options'][$i]);
                   $ret=$database->execSQL($sql,4,0);
                   if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
                   while($rs = pg_fetch_array($ret[1])){
