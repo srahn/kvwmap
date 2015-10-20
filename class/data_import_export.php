@@ -707,7 +707,7 @@ class data_import_export {
 					while($rs=pg_fetch_assoc($ret[1])){
 						$result[] = $rs;
 					}
-					$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $result);
+					$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $result, true, $stelle->id);
 					$csv = $this->create_csv($result, $this->attributes);
 					$exportfile = $exportfile.'.csv';
 					$fp = fopen($exportfile, 'w');
