@@ -6526,9 +6526,10 @@ class GUI {
         else{
           $pfad = substr(trim($newpath), 7);
         }
+				$geometrie_tabelle = $layerset[0]['attributes']['table_name'][$layerset[0]['attributes']['the_geom']];
         $j = 0;
         foreach($layerset[0]['attributes']['all_table_names'] as $tablename){
-					if($tablename == $layerset[0]['maintable'] AND $layerset[0]['attributes']['oids'][$j]){		# hat Haupttabelle oids?
+					if(($tablename == $layerset[0]['maintable'] OR $tablename == $geometrie_tabelle) AND $layerset[0]['attributes']['oids'][$j]){		# hat Haupttabelle oder Geometrietabelle oids?
             $pfad = $layerset[0]['attributes']['table_alias_name'][$tablename].'.oid AS '.$tablename.'_oid, '.$pfad;
 						if($this->formvars['operator_'.$tablename.'_oid'] == '')$this->formvars['operator_'.$tablename.'_oid'] = '=';
             if($this->formvars['value_'.$tablename.'_oid']){
@@ -6717,9 +6718,9 @@ class GUI {
 					switch ($layerset[0]['connectiontype']) {
 						case MS_POSTGIS : {
 							for($k = 0; $k < count($this->qlayerset[$i]['shape']); $k++){
-								$oids[] = $this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['maintable'].'_oid'];
+								$oids[] = $this->qlayerset[$i]['shape'][$k][$geometrie_tabelle.'_oid'];
 							}
-							$rect = $mapDB->zoomToDatasets($oids, $layerset[0]['maintable'], $layerset[0]['attributes']['the_geom'], 10, $layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+							$rect = $mapDB->zoomToDatasets($oids, $geometrie_tabelle, $layerset[0]['attributes']['the_geom'], 10, $layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
 							$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
 							if (MAPSERVERVERSION > 600) {
 								$this->map_scaledenom = $this->map->scaledenom;
@@ -10715,9 +10716,10 @@ class GUI {
 								else{
 									$pfad = substr(trim($newpath), 7);
 								}
+								$geometrie_tabelle = $layerset[$i]['attributes']['table_name'][$layerset[$i]['attributes']['the_geom']];
 								$j = 0;
 								foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-									if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['attributes']['oids'][$j]){		# hat Haupttabelle oids?
+									if(($tablename == $layerset[$i]['maintable'] OR $tablename == $geometrie_tabelle) AND $layerset[$i]['attributes']['oids'][$j]){		# hat Haupttabelle oder Geometrietabelle oids?
 										$pfad = $layerset[$i]['attributes']['table_alias_name'][$tablename].'.oid AS '.$tablename.'_oid, '.$pfad;
 									}
 									$j++;
@@ -12345,7 +12347,10 @@ class GUI {
 		    $style->outlinecolor->setRGB(110,110,110);
 		    # Datensatz-Layer erzeugen
 		    $layer=ms_newLayerObj($map);
-		    if($layerset['schema'] != ''){
+				if($layerset['attributes']['schema_name'][$tablename] != ''){
+					$tablename = $layerset['attributes']['schema_name'][$tablename].'.'.$tablename;
+				}
+		    elseif($layerset['schema'] != ''){
 		    	$tablename = $layerset['schema'].'.'.$tablename;
 		    }    
 		    $datastring = $layerset['attributes']['the_geom']." from (select oid as id, ".$layerset['attributes']['the_geom']." from ".$tablename;
@@ -14266,8 +14271,15 @@ class db_mapObj{
 			$attributes['name'][$i]= $rs['name'];
 			$attributes['indizes'][$rs['name']] = $i;
 			$attributes['real_name'][$rs['name']]= $rs['real_name'];
-			if($rs['tablename'])$attributes['table_name'][$i]= $rs['tablename'];
-			if($rs['tablename'])$attributes['table_name'][$rs['name']] = $rs['tablename']; 
+			if($rs['tablename']){
+				if(strpos($rs['tablename'], '.') !== false){
+					$explosion = explode('.', $rs['tablename']);
+					$rs['tablename'] = $explosion[1];		# Tabellenname ohne Schema
+					$attributes['schema_name'][$rs['tablename']] = $explosion[0];
+				}
+				$attributes['table_name'][$i]= $rs['tablename'];
+				$attributes['table_name'][$rs['name']] = $rs['tablename']; 
+			}
 			if($rs['table_alias_name'])$attributes['table_alias_name'][$i]= $rs['table_alias_name'];
 			if($rs['table_alias_name'])$attributes['table_alias_name'][$rs['name']]= $rs['table_alias_name'];
 			$attributes['table_alias_name'][$rs['tablename']]= $rs['table_alias_name'];
