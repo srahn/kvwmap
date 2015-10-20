@@ -11377,9 +11377,10 @@ class GUI {
 				else{
 					$pfad = substr(trim($path), 7);
 				}
+				$geometrie_tabelle = $layerset[$i]['attributes']['table_name'][$layerset[$i]['attributes']['the_geom']];
 				$j = 0;
 				foreach($layerset[$i]['attributes']['all_table_names'] as $tablename){
-					if($tablename == $layerset[$i]['maintable'] AND $layerset[$i]['attributes']['oids'][$j]){		# hat Haupttabelle oids?
+					if(($tablename == $layerset[$i]['maintable'] OR $tablename == $geometrie_tabelle) AND $layerset[$i]['attributes']['oids'][$j]){		# hat Haupttabelle oder Geometrietabelle oids?
 						$pfad = $layerset[$i]['attributes']['table_alias_name'][$tablename].'.oid AS '.$tablename.'_oid, '.$pfad;
 					}
 					$j++;
@@ -11448,7 +11449,7 @@ class GUI {
 				}
 				else{		################ mouseover auf Datensatz in Sachdatenanzeige ################
 					$showdata = 'false';
-					$sql_where = " AND ".$layerset[$i]['maintable']."_oid = ".$this->formvars['oid'];
+					$sql_where = " AND ".$geometrie_tabelle."_oid = ".$this->formvars['oid'];
 				}
 				
 				# SVG-Geometrie abfragen für highlighting
