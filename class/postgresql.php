@@ -894,7 +894,7 @@ class pgdatabase {
       }
       $sql.=")";
     }
-    $sql.=" ORDER BY gmk.bezeichnung";
+    $sql.=" ORDER BY pp.gemarkungsname";
     #echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
