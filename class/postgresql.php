@@ -877,7 +877,7 @@ class pgdatabase {
   }
  
   function getGemeindeListeByGemIDByGemkgSchl($GemID,$GemkgID){
-    $sql ="SELECT pp.schluesselgesamt as GemkgID, pp.gemarkungsname, gem.bezeichnung as gemeindename, gem.schluesselgesamt as gemeinde ";
+    $sql ="SELECT pp.schluesselgesamt as GemkgID, pp.gemarkungsname as Name, gem.bezeichnung as gemeindename, gem.schluesselgesamt as gemeinde ";
     $sql.="FROM alkis.ax_gemeinde AS gem, alkis.pp_gemarkung as pp ";
     $sql.="WHERE pp.gemeinde=gem.gemeinde AND pp.kreis=gem.kreis ";
     if ($GemID[0]!='') {
