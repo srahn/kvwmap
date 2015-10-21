@@ -877,9 +877,9 @@ class pgdatabase {
   }
  
   function getGemeindeListeByGemIDByGemkgSchl($GemID,$GemkgID){
-    $sql ="SELECT DISTINCT gmk.schluesselgesamt AS GemkgID,gmk.bezeichnung AS Name,gem.bezeichnung as gemeindename, gem.schluesselgesamt as gemeinde";
-    $sql.=" FROM alkis.ax_gemarkung AS gmk, alkis.ax_gemeinde AS gem, alkis.gemeinde_gemarkung as g_g ";
-    $sql.="WHERE g_g.gemeinde=gem.gemeinde AND g_g.kreis=gem.kreis AND g_g.gemarkung=gmk.gemarkungsnummer";
+    $sql ="SELECT pp.schluesselgesamt as GemkgID, pp.gemarkungsname, gem.bezeichnung as gemeindename, gem.schluesselgesamt as gemeinde ";
+    $sql.="FROM alkis.ax_gemeinde AS gem, alkis.pp_gemarkung as pp ";
+    $sql.="WHERE pp.gemeinde=gem.gemeinde AND pp.kreis=gem.kreis ";
     if ($GemID[0]!='') {
       $sql.=" AND gem.schluesselgesamt IN (".$GemID[0];
       for ($i=1;$i<count($GemID);$i++) {
@@ -888,13 +888,12 @@ class pgdatabase {
       $sql.=")";
     }
     if ($GemkgID[0]!='') {
-      $sql.=" AND gmk.schluesselgesamt IN (".$GemkgID[0];
+      $sql.=" AND pp.schluesselgesamt IN (".$GemkgID[0];
       for ($i=1;$i<count($GemkgID);$i++) {
         $sql.=",".$GemkgID[$i];
       }
       $sql.=")";
     }
-		$sql.= $this->build_temporal_filter(array('gmk', 'gem'));
     $sql.=" ORDER BY gmk.bezeichnung";
     #echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
