@@ -10602,7 +10602,14 @@ class GUI {
               $projFROM = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);
     					$projTO = ms_newprojectionobj("init=epsg:".$layerset[$i]['epsg_code']);
 							$rect->project($projFROM, $projTO);
-							$layer->queryByRect($rect);	
+							if($layerset[$i]['Datentyp'] == 3){		# bei Rasterlayern nur punktuell abfragen
+								$point=ms_newPointObj();
+								$point->setXY($rect->minx+($rect->maxx-$rect->minx)/2, $rect->miny+($rect->maxy-$rect->miny)/2);
+								@$layer->queryByPoint($point, MS_MULTIPLE, 0);	
+							}
+							else{
+								@$layer->queryByRect($rect);	
+							}
               $anzResult=$layer->getNumResults();
               for ($j=0;$j<$anzResult;$j++){
 								$result = $layer->getResult($j);
