@@ -633,12 +633,6 @@ class data_import_export {
     if($this->formvars['newpathwkt']){
     	$sql.= " AND ".$the_geom." && st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code'].") AND ST_INTERSECTS(".$the_geom.", st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."))";
     }
-    # Filter
-    $filter = $mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id);
-    if($filter != ''){
-			$filter = str_replace('$userid', $user->id, $filter);
-    	$sql .= ' AND '.$filter;
-    }
 		# Where-Klausel aus Sachdatenabfrage-SQL anhängen
   	if($this->formvars['sql_'.$this->formvars['selected_layer_id']]){
   		$where = substr(strip_pg_escape_string($this->formvars['sql_'.$this->formvars['selected_layer_id']]), strrpos(strtolower(strip_pg_escape_string($this->formvars['sql_'.$this->formvars['selected_layer_id']])), 'where')+5);
@@ -654,6 +648,12 @@ class data_import_export {
 	    	$sql = $sql." AND ".$where;
 	    }
   	}
+		# Filter
+    $filter = $mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id);
+    if($filter != ''){
+			$filter = str_replace('$userid', $user->id, $filter);
+    	$sql = 'SELECT * FROM ('.$sql.') as query2 WHERE '.$filter;
+    }		
     $sql.= $orderby;
 		#echo $sql;
     $temp_table = 'shp_export_'.rand(1, 10000);
