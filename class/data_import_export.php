@@ -400,7 +400,7 @@ class data_import_export {
       exec($command);
       #echo $command;
 			
-			$command = POSTGRESBINPATH.'psql -f '.UPLOADPATH.$this->formvars['table_name'].'.sql '.$database->dbName.' '.$database->user;
+			$command = POSTGRESBINPATH.'psql -h '.$pgdatabase->host.' -f '.UPLOADPATH.$this->formvars['table_name'].'.sql '.$database->dbName.' '.$database->user;
 			if($database->passwd != '')$command = 'export PGPASSWORD='.$database->passwd.'; '.$command;
       exec($command);
       #echo $command;
