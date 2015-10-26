@@ -73,9 +73,10 @@ update_buttons = function(all, layer_id){
 
 selectall = function(layer_id){
 	var k = 0;
-	obj = document.getElementById(layer_id+'_'+k);
+	var obj = document.getElementById(layer_id+'_'+k);
+	var status = obj.checked;
 	while(obj != undefined){
-		obj.checked = !obj.checked;
+		obj.checked = !status;
 		k++;
 		obj = document.getElementById(layer_id+'_'+k);
 	}

@@ -63,10 +63,11 @@ function data_export(){
 
 function selectall(geom){
 	var k = 0;
-	obj = document.getElementById('check_attribute_'+k);
+	var obj = document.getElementById('check_attribute_'+k);
+	var status = obj.checked;
 	while(obj != undefined){
 		if(obj.name != 'check_'+geom){
-			obj.checked = !obj.checked;			
+			obj.checked = !status;			
 		}
 		k++;
 		obj = document.getElementById('check_attribute_'+k);
