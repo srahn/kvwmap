@@ -131,10 +131,10 @@ include(SNIPPETS.'/generic_formelement_definitions.php');
       				}
            ?></td>
           </tr><?					
+					if($this->attributes['group'][$i] != $this->attributes['group'][$i+1] OR $this->attributes['type'][$i+1] == 'geometry'){		# wenn die nächste Gruppe anders ist, Tabelle schliessen
+						echo '</table></td></tr>';
+					}
         }
-				if($this->attributes['group'][$i] != $this->attributes['group'][$i+1]){		# wenn die nächste Gruppe anders ist, Tabelle schliessen
-					echo '</table></td></tr>';
-				}
       }
 ?>
 </table>
