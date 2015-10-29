@@ -26,6 +26,8 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 	$this->buchungen = $this->gbblaetter[$gb];
 	$alle_flst = array();
 	echo '<br><h2>'.$this->titel.' '.$this->buchungen[0]['bezirk'].'-'.$this->buchungen[0]['blatt'].'</h2><br>';
+	$currenttime=date('Y-m-d H:i:s',time());
+	$this->user->rolle->setConsumeALB($currenttime, 'Grundbuchblattanzeige', array($this->buchungen[0]['bezirk'].'-'.$this->buchungen[0]['blatt']), 0, 'NULL');		# das Grundbuchblattkennzeichen wird geloggt
   $anzObj=count($this->buchungen);
   if ($anzObj>0) {?>
 	<table border="1" cellspacing="0" cellpadding="2">

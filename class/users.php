@@ -491,7 +491,7 @@ class account {
 			}
 			$sql.=' AND u_consumeALB.stelle_id = s.ID';
 			$sql.=' AND u_consumeALB.user_id = u.ID';
-			$sql.= ' AND format='.$rs['format'];
+			$sql.= " AND format='".$rs['format']."'";
 			if($rs['stelle_id'] != ''){
 				$sql.= ' AND u_consumeALB.stelle_id='.$rs['stelle_id'];
 			}

@@ -644,7 +644,10 @@ show_all = function(count){
           </td>
         </tr>
         <? } ?>
-        <? if($privileg_['eigentuemer']){?>
+        <? if($privileg_['eigentuemer']){
+						$currenttime=date('Y-m-d H:i:s',time());
+						$this->user->rolle->setConsumeALB($currenttime, 'Flurstücksanzeige', array($flst->FlurstKennz), 0, 'NULL');		# das Flurstückskennzeichen wird geloggt
+				?>
         <tr>
         <td colspan="2">
             <table border="0" cellspacing="0" cellpadding="2">

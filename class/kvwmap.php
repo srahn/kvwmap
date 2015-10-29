@@ -5253,9 +5253,11 @@ class GUI {
 				$formvars['offset'] = '';
 				$ret=$flurstueck->getNamen($formvars,$GemkgListe['GemkgID']);
         $this->anzNamenGesamt=count($ret[1]);
-
-        if($this->formvars['withflurst'] == 'on'){
-          for($i = 0; $i < count($this->namen); $i++){
+        
+				for($i = 0; $i < count($this->namen); $i++){
+					$currenttime=date('Y-m-d H:i:s',time());
+					$this->user->rolle->setConsumeALB($currenttime, 'Eigentümersuche', array($this->namen[$i]['gml_id']), 0, 'NULL');		# die gml_id aus ax_namensnummer wird geloggt
+					if($this->formvars['withflurst'] == 'on'){
             $ret[1] = $flurstueck->getFlurstByGrundbuecher(array($this->namen[$i]['bezirk'].'-'.$this->namen[$i]['blatt']));
             $this->namen[$i]['flurstuecke'] = $ret[1];
             for($j = 0; $j < count($this->namen[$i]['flurstuecke']); $j++){
