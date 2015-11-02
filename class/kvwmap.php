@@ -10588,7 +10588,7 @@ class GUI {
         switch ($layerset[$i]['connectiontype']) {
           case MS_SHAPEFILE : { # Shape File Layer (1)
             if ($this->formvars['searchradius'] > 0 OR $this->querypolygon != '') {
-              showAlert('Sie können für die Abfrage von Shapelayern nur die einfache Sachdatenabfrage verwenden.');
+              showAlert('Sie können für die Abfrage von Shape- und Rasterlayern nur die einfache Sachdatenabfrage verwenden.');
             }
             else{
               $layer=ms_newLayerObj($map);
