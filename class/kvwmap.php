@@ -3504,6 +3504,23 @@ class GUI {
         $oids[] = $element[3];
       }
     }
+		
+		$this->last_query = $this->user->rolle->get_last_query();
+		#if($this->formvars['search']){        # man kam von der Suche   -> nochmal suchen
+			$this->formvars['embedded_dataPDF'] = true;		# damit der Aufruf von output() verhindert wird
+			$this->GenerischeSuche_Suchen();
+		#}
+		#else{                                 # man kam aus einer Sachdatenabfrage    -> nochmal abfragen			# den Fall kann man wohl ignorieren, weil die Suche bei lastquery auch für die Kartenabfrage funktioniert...
+		#	$this->queryMap();
+		#}
+		$attributes = $this->qlayerset[0]['attributes'];
+		$attribute = $this->formvars['klass_'.$this->formvars['chosen_layer_id']];
+		$result= $this->qlayerset[0]['shape'];
+		
+		for($i = 0; $i < count($result); $i++){
+			$geom_oids[] = $result[$i][$this->formvars['layer_tablename'].'_oid'];
+		}
+		
     if($oids != ''){
       # Layer erzeugen
       $data = $dbmap->getData($this->formvars['chosen_layer_id']);
@@ -3519,8 +3536,8 @@ class GUI {
       	$select = str_replace($this->formvars['layer_columnname'], 'oid, '.$this->formvars['layer_columnname'], $select);
       	$select = str_replace('*', '*, oid', $select);
       }
-      if($this->formvars['klass_'.$this->formvars['chosen_layer_id']] != '' AND strpos($select, '*') === false AND strpos($select, $this->formvars['klass_'.$this->formvars['chosen_layer_id']]) === false){			# Attribut für automatische Klassifizierung mit ins data packen
-      	$select = str_replace(' from ', ', '.$this->formvars['klass_'.$this->formvars['chosen_layer_id']].' from ', strtolower($select));
+      if($attribute != '' AND strpos($select, '*') === false AND strpos($select, $attribute) === false){			# Attribut für automatische Klassifizierung mit ins data packen
+      	$select = str_replace(' from ', ', '.$attribute.' from ', strtolower($select));
       }
       if(strpos(strtolower($select), ' where ') === false){
         $select .= " WHERE ";
@@ -3586,19 +3603,7 @@ class GUI {
       
       if($this->formvars['selektieren'] != '1'){      # highlighten (gelb)
       	# ------------ automatische Klassifizierung -------------------
-      	if($this->formvars['klass_'.$this->formvars['chosen_layer_id']] != ''){					
-					$this->last_query = $this->user->rolle->get_last_query();
-					#if($this->formvars['search']){        # man kam von der Suche   -> nochmal suchen
-						$this->formvars['embedded_dataPDF'] = true;		# damit der Aufruf von output() verhindert wird
-						$this->GenerischeSuche_Suchen();
-					#}
-					#else{                                 # man kam aus einer Sachdatenabfrage    -> nochmal abfragen			# den Fall kann man wohl ignorieren, weil die Suche bei lastquery auch für die Kartenabfrage funktioniert...
-					#	$this->queryMap();
-					#}
-					$attributes = $this->qlayerset[0]['attributes'];
-					$attribute = $this->formvars['klass_'.$this->formvars['chosen_layer_id']];
-					$result= $this->qlayerset[0]['shape'];
-					
+      	if($attribute != ''){										
 					for($i = 0; $i < count($result); $i++){		# Auswahlfelder behandeln
 						foreach($result[$i] As $key => $value){
 							$name = $value;
@@ -3626,7 +3631,7 @@ class GUI {
 							}
 						}
 					}
-      		$dbmap->createAutoClasses(array_unique($classes), $this->formvars['klass_'.$this->formvars['chosen_layer_id']], $layer_id, $this->formvars['Datentyp'], $this->database);
+      		$dbmap->createAutoClasses(array_unique($classes), $attribute, $layer_id, $this->formvars['Datentyp'], $this->database);
       	}
       	# ------------ automatische Klassifizierung -------------------
       	else{
@@ -3695,7 +3700,7 @@ class GUI {
       $this->user->rolle->set_one_Group($this->user->id, $this->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
       $this->loadMap('DataBase');
       # Polygon abfragen und Extent setzen
-      $rect = $dbmap->zoomToDatasets($oids, $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], 10, $layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+      $rect = $dbmap->zoomToDatasets($geom_oids, $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], 10, $layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
       $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
 	    if (MAPSERVERVERSION > 600) {
 				$this->map_scaledenom = $this->map->scaledenom;
