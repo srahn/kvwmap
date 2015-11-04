@@ -743,6 +743,11 @@ show_all = function(count){
                   	<td>zu <? echo $Eigentuemerliste[$e]->Anteil; ?></td>
                   </tr>
                   <? } ?>
+									<? if($Eigentuemerliste[$e]->zusatz_eigentuemer != ''){ ?>
+                  <tr>
+                  	<td><? echo $Eigentuemerliste[$e]->zusatz_eigentuemer; ?></td>
+                  </tr>
+                  <? } ?>
                 </table>
                 </td>
                 <? } ?>
