@@ -837,7 +837,7 @@ class pgdatabase {
 			
 			$sql.="LEFT JOIN alkis.ax_buchungsstelle_buchungsart art ON s.buchungsart = art.wert ";
 			$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
-			$sql.="LEFT JOIN alkis.ax_namensnummer n ON n.istbestandteilvon = g.gml_id AND (n.beschriebderrechtsgemeinschaft IS NOT NULL OR n.artderrechtsgemeinschaft IS NOT NULL) ";
+			$sql.="LEFT JOIN alkis.ax_namensnummer n ON n.istbestandteilvon = g.gml_id AND (n.nummer = '0000.00.00.00.00' OR n.nummer IS NULL) AND (n.beschriebderrechtsgemeinschaft IS NOT NULL OR n.artderrechtsgemeinschaft IS NOT NULL) ";
 			if(!$hist_alb) $sql.= $this->build_temporal_filter(array('n'));
 			$sql.="LEFT JOIN alkis.lk_ax_artderrechtsgemeinschaft adrg ON n.artderrechtsgemeinschaft = adrg.wert ";
 		}
