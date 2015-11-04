@@ -3586,19 +3586,47 @@ class GUI {
       
       if($this->formvars['selektieren'] != '1'){      # highlighten (gelb)
       	# ------------ automatische Klassifizierung -------------------
-      	if($this->formvars['klass_'.$this->formvars['chosen_layer_id']] != ''){
-      		$count = 0;				
-      		$form_fields = explode('|', $this->formvars['form_field_names']);
-      		for($i = 0; $i < count($form_fields); $i++){
-			      if($form_fields[$i] != ''){
-			        $element = explode(';', $form_fields[$i]);
-		        	if($element[1] == $this->formvars['klass_'.$this->formvars['chosen_layer_id']] AND $element[3] == $oids[$count]){		# Test ob attributename == Klassifizierungsattribut und die oid im Array der selektierten oids vorkommt
-		        		$values[] = $this->formvars[$form_fields[$i]];
-		        		$count++;
-		        	}
-			      }
-      		}
-      		$dbmap->createAutoClasses(array_values(array_unique($values)), $this->formvars['klass_'.$this->formvars['chosen_layer_id']], $layer_id, $this->formvars['Datentyp'], $this->database);
+      	if($this->formvars['klass_'.$this->formvars['chosen_layer_id']] != ''){					
+					$this->last_query = $this->user->rolle->get_last_query();
+					#if($this->formvars['search']){        # man kam von der Suche   -> nochmal suchen
+						$this->formvars['embedded_dataPDF'] = true;		# damit der Aufruf von output() verhindert wird
+						$this->GenerischeSuche_Suchen();
+					#}
+					#else{                                 # man kam aus einer Sachdatenabfrage    -> nochmal abfragen			# den Fall kann man wohl ignorieren, weil die Suche bei lastquery auch für die Kartenabfrage funktioniert...
+					#	$this->queryMap();
+					#}
+					$attributes = $this->qlayerset[0]['attributes'];
+					$attribute = $this->formvars['klass_'.$this->formvars['chosen_layer_id']];
+					$result= $this->qlayerset[0]['shape'];
+					
+					for($i = 0; $i < count($result); $i++){		# Auswahlfelder behandeln
+						foreach($result[$i] As $key => $value){
+							$name = $value;
+							$j = $attributes['indizes'][$key];
+							if($attributes['type'][$j] != 'geometry' AND $attributes['name'][$i] != 'lock'){
+								if($attributes['form_element_type'][$j] == 'Auswahlfeld'){
+									if(is_array($attributes['dependent_options'][$j])){
+										$enum_value = $attributes['enum_value'][$j][$i];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
+										$enum_output = $attributes['enum_output'][$j][$i];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
+									}
+									else{
+										$enum_value = $attributes['enum_value'][$j];
+										$enum_output = $attributes['enum_output'][$j];
+									}
+									for($o = 0; $o < count($enum_value); $o++){
+										if($value == $enum_value[$o]){
+											$name = $enum_output[$o];
+											break;
+										}
+									}
+								}
+							}
+							if($attribute === $key){
+								$classes[$value] = $name;
+							}
+						}
+					}
+      		$dbmap->createAutoClasses(array_unique($classes), $this->formvars['klass_'.$this->formvars['chosen_layer_id']], $layer_id, $this->formvars['Datentyp'], $this->database);
       	}
       	# ------------ automatische Klassifizierung -------------------
       	else{
@@ -13932,20 +13960,21 @@ class db_mapObj{
     return mysql_insert_id();
   }
 
-	function createAutoClasses($values, $attribute, $layer_id, $datatype, $database){
+	function createAutoClasses($classes, $attribute, $layer_id, $datatype, $database){
 		global $supportedLanguages;
 		$result_colors = read_colors($database);
 		shuffle($result_colors);
-		for($i = 0; $i < count($values); $i++){
+		$i = 0;
+		foreach($classes as $value => $name){
 			if($i == count($result_colors))return;				# Anzahl der Klassen ist auf die Anzahl der Colors beschränkt
-			$classdata['name'] = $values[$i].' ';
+			$classdata['name'] = $name.' ';
 			foreach($supportedLanguages as $language){
 				if($language != 'german'){
-					$classdata['name_'.$language] = $values[$i].' ';
+					$classdata['name_'.$language] = $name.' ';
 				}
 			}
       $classdata['layer_id'] = -$layer_id;
-      $classdata['expression'] = "('[".$attribute."]' eq '".$values[$i]."')";
+      $classdata['expression'] = "('[".$attribute."]' eq '".$value."')";
       $classdata['order'] = 0;
       $class_id = $this->new_Class($classdata);
     	$style['colorred'] = $result_colors[$i]['red'];
@@ -13969,6 +13998,7 @@ class db_mapObj{
       }
       $style_id = $this->new_Style($style);
       $this->addStyle2Class($class_id, $style_id, 0);          # den Style der Klasse zuordnen
+			$i++;
 		}
 	}
 

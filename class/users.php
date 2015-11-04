@@ -1900,6 +1900,15 @@ class rolle {
 			}
 			else{
 				$mapdb->deleteRollenLayer(-$layer_id);			# 1 Rollenlayer soll deaktiviert=gelöscht werden
+				# auch die Klassen und styles löschen
+				if($rollenlayerset[$i]['Class'] != ''){
+					foreach($rollenlayerset[$i]['Class'] as $class){
+						$mapdb->delete_Class($class['Class_ID']);
+						foreach($class['Style'] as $style){
+							$mapdb->delete_Style($style['Style_ID']);
+						}
+					}
+				}
 				return;
 			}
 		}
