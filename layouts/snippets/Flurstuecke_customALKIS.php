@@ -680,45 +680,30 @@ show_all = function(count){
               <td valign="top"><? echo $Eigentuemerliste[$e]->Nr ?>&nbsp;&nbsp;&nbsp;</td>
               <td valign="top">
               <?
-                    $anzNamenszeilen=count($Eigentuemerliste[$e]->Name);
-                    $Eigentuemerliste[$e]->Name_bearb = $Eigentuemerliste[$e]->Name;
-                    $Eigentuemerliste[$e]->Name_bearb[0] = str_replace(',,,', '', $Eigentuemerliste[$e]->Name_bearb[0]);
-              $Eigentuemerliste[$e]->Name_bearb[0] = str_replace(',,', ',', $Eigentuemerliste[$e]->Name_bearb[0]);
-              if(substr($Eigentuemerliste[$e]->Name_bearb[0], strlen($Eigentuemerliste[$e]->Name_bearb[0])-1) == ','){
-                $Eigentuemerliste[$e]->Name_bearb[0] = substr($Eigentuemerliste[$e]->Name_bearb[0], 0, strlen($Eigentuemerliste[$e]->Name_bearb[0])-1);
-              }
-              if($this->Stelle->isFunctionAllowed('Adressaenderungen')) {
-                    $eigentuemer = new eigentuemer(NULL, NULL, $this->pgdatabase);
-                    $adressaenderungen =  $eigentuemer->getAdressaenderungen($Eigentuemerliste[$e]->gml_id);
-                    $aendatum=substr($adressaenderungen['datum'],0,10);
-              }
-              if ($adressaenderungen['user_id'] != '') {
-                $user = new user(NULL, $adressaenderungen['user_id'], $this->database);
-              }
+                $anzNamenszeilen=count($Eigentuemerliste[$e]->Name);
+                $Eigentuemerliste[$e]->Name_bearb = $Eigentuemerliste[$e]->Name;
+								if($this->Stelle->isFunctionAllowed('Adressaenderungen')) {
+											$eigentuemer = new eigentuemer(NULL, NULL, $this->pgdatabase);
+											$adressaenderungen =  $eigentuemer->getAdressaenderungen($Eigentuemerliste[$e]->gml_id);
+											$aendatum=substr($adressaenderungen['datum'],0,10);
+								}
+								if ($adressaenderungen['user_id'] != '') {
+									$user = new user(NULL, $adressaenderungen['user_id'], $this->database);
+								}
               ?>
                 <table border="0" cellspacing="0" cellpadding="2">
                   <tr>
                   <td>
                   <?
                     for ($n=0;$n<$anzNamenszeilen;$n++) {
-                      if (!($Eigentuemerliste[$e]->Name_bearb[$n]=="" OR $Eigentuemerliste[$e]->Name_bearb[$n]=='.')) {
+                      if (!($Eigentuemerliste[$e]->Name_bearb[$n]=="" OR $Eigentuemerliste[$e]->Name_bearb[$n]==' ')) {
                           echo $Eigentuemerliste[$e]->Name_bearb[$n].'<br>';
                       }
                     }
                   if ($adressaenderungen['user_id'] != '') {
-                echo '<span class="fett"><u>Aktualisierte Anschrift ('.$aendatum.' - '.$user->Name.'):</u></span><br>';
-                    #if($adressaenderungen['strasse'] == ''){
-                    #  echo '&nbsp;&nbsp;<span class="fett">(Strasse leer)</span><br>';
-                    #}
-                    #else{
+											echo '<span class="fett"><u>Aktualisierte Anschrift ('.$aendatum.' - '.$user->Name.'):</u></span><br>';
                       echo '&nbsp;&nbsp;<span class="fett">'.$adressaenderungen['strasse'].' '.$adressaenderungen['hausnummer'].'</span><br>';
-                    #}
-                    #if($adressaenderungen['neu_name4'] == ''){
-                    #  echo '&nbsp;&nbsp;<span class="fett">(Name4 leer)</span><br>';
-                    #}
-                    #else{
                       echo '&nbsp;&nbsp;<span class="fett">'.$adressaenderungen['postleitzahlpostzustellung'].' '.$adressaenderungen['ort_post'].' '.$adressaenderungen['ortsteil'].'</span><br>';
-                    #}
                   }
                   ?>
                   </td>
