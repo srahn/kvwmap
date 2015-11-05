@@ -89,8 +89,9 @@
 						<table width="100%" cellspacing="0" cellpadding="0">
 							<tr>
 								<? if($layer['connectiontype'] == 6){ ?>
-								<td>
-									<input style="display:none" id="<? echo $layer['Layer_ID'].'_'.$k; ?>" type="checkbox" name="check;<? echo $attributes['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>">&nbsp;
+								<td align="left">
+									<input id="<? echo $layer['Layer_ID'].'_'.$k; ?>" type="checkbox" name="check;<? echo $attributes['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>">&nbsp;
+									<span style="color:<? echo TXT_GLEHEADER; ?>;"><? echo $strSelectThisDataset; ?></span>
 								</td>
 								<? } ?>
 								<td align="right">
@@ -323,6 +324,147 @@
 	}
 ?>
 	</tr>
+	
+<?	if($this->formvars['printversion'] == ''){?>
+	<tr>
+		<td colspan="2"align="left">
+		<? if($layer['connectiontype'] == 6 AND $this->new_entry != true AND $layer['Layer_ID'] > 0){ ?>
+			<table width="100%" border="0" cellspacing="4" cellpadding="0">
+				<tr>
+					<td colspan="2">
+						<i><? echo $layer['Name'] ?></i>:&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:selectall(<? echo $layer['Layer_ID']; ?>);">
+						<? if ($layer['count'] > MAXQUERYROWS) {
+						    echo $strSelectAllShown;
+						   } else {
+						    echo $strSelectAll;
+						   } ?>
+						</a>
+					</td>
+				</tr>
+				<tr>
+					<? if($layer['export_privileg'] != 0){ ?>
+					<td style="padding: 5 0 0 0;">
+						<select id="all_<? echo $layer['Layer_ID']; ?>" name="all_<? echo $layer['Layer_ID']; ?>" onchange="update_buttons(this.value, <? echo $layer['Layer_ID']; ?>);">
+							<option value=""><? echo $strSelectedDatasets.':'; ?></option>
+							<option value="true"><? echo $strAllDatasets.':'; ?><? if ($layer['count'] > MAXQUERYROWS){	echo "&nbsp;(".$layer['count'].")"; } ?></option>
+						</select>
+					</td>					
+					<? }else{ ?>
+					<td style="padding: 5 0 0 0;"><? echo $strSelectedDatasets.':'; ?></td>
+					<? } ?>
+				</tr>
+				<tr>
+					<td>
+						<table cellspacing="0" cellpadding="0">
+							<tr>
+						<? if($this->formvars['go'] == 'Zwischenablage' OR $this->formvars['go'] == 'gemerkte_Datensaetze_anzeigen'){ ?>
+								<td style="padding: 0 0 0 10;"><a title="<? echo $strDontRememberDataset; ?>" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);remove_from_clipboard(<? echo $layer['Layer_ID']; ?>);"><div class="button_background"><div class="emboss nicht_mehr_merken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div></a></td>
+							<? }else{ ?>
+								<td id="merk_link_<? echo $layer['Layer_ID']; ?>" style="padding: 5 10 0 0;"><a title="<? echo $strRemember; ?>" href="javascript:add_to_clipboard(<? echo $layer['Layer_ID']; ?>);"><div class="button_background"><div class="emboss merken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div></a></td>
+							<? } ?>
+					<? if($layer['privileg'] == '2'){ ?>
+								<td id="delete_link_<? echo $layer['Layer_ID']; ?>" style="padding: 5 10 0 0;"><a title="<? echo $strdelete; ?>" href="javascript:delete_datasets(<?php echo $layer['Layer_ID']; ?>);"><div class="button_background"><div class="emboss datensatz_loeschen"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div></td>
+					<?} if($layer['export_privileg'] != 0){ ?>
+								<td style="padding: 5 10 0 0;"><a title="<? echo $strExport; ?>" href="javascript:daten_export(<?php echo $layer['Layer_ID']; ?>, <? echo $layer['count']; ?>);"><div class="button_background"><div class="emboss datensatz_exportieren"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div></a></td>
+					<? } if($layer['layouts']){ ?>
+								<td id="print_link_<? echo $layer['Layer_ID']; ?>" style="padding: 5 10 0 0;"><a title="<? echo $strPrint; ?>" href="javascript:print_data(<?php echo $layer['Layer_ID']; ?>);"><div class="button_background"><div class="emboss drucken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div></a></td>
+					<? } ?>
+					<? if($privileg != ''){ ?>
+								<td id="zoom_link_<? echo $layer['Layer_ID']; ?>" style="padding: 5 10 0 0;"><a title="<? echo $strzoomtodatasets; ?>" href="javascript:zoomto_datasets(<?php echo $layer['Layer_ID']; ?>, '<? echo $geom_tablename; ?>', '<? echo $columnname; ?>');"><div class="emboss zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+								<td id="classify_link_<? echo $layer['Layer_ID']; ?>" style="padding: 5 0 0 0;">
+									<select style="width: 130px" name="klass_<?php echo $layer['Layer_ID']; ?>">
+										<option value=""><? echo $strClassify; ?>:</option>
+										<?
+										for($j = 0; $j < count($attributes['name']); $j++){
+											if($attributes['name'][$j] != $attributes['the_geom']){
+												echo '<option value="'.$attributes['name'][$j].'">'.$attributes['alias'][$j].'</option>';
+											}
+										}
+										?>
+									</select>
+								</td>
+					<?}?>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr style="display:none">
+					<td height="23" colspan="3">
+						&nbsp;&nbsp;&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:showcharts(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCreateChart; ?></a>
+					</td>
+				</tr>
+				<tr id="charts_<?php echo $layer['Layer_ID']; ?>" style="display:none">
+					<td></td>
+					<td>
+						<table>
+							<tr>
+								<td colspan="2">
+									&nbsp;&nbsp;<select name="charttype_<?php echo $layer['Layer_ID']; ?>" onchange="change_charttype(<?php echo $layer['Layer_ID']; ?>);">
+										<option value="bar">Balkendiagramm</option>
+										<option value="mirrorbar">doppeltes Balkendiagramm</option>
+										<option value="circle">Kreisdiagramm</option>
+									</select>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									&nbsp;&nbsp;Beschriftung:
+								</td>
+								<td>
+									<select style="width:133px" id="" name="chartlabel_<?php echo $layer['Layer_ID']; ?>" >
+										<?
+										for($j = 0; $j < count($attributes['name']); $j++){
+											if($attributes['name'][$j] != $attributes['the_geom']){
+												echo '<option value="'.$attributes['name'][$j].'">'.$attributes['alias'][$j].'</option>';
+											}
+										}
+										?>
+									</select>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									&nbsp;&nbsp;Wert:
+								</td>
+								<td>
+									<select style="width:133px" name="chartvalue_<?php echo $layer['Layer_ID']; ?>" onchange="create_chart(<?php echo $layer['Layer_ID']; ?>);">
+										<option value="">--- Bitte Wählen ---</option>
+										<?
+										for($j = 0; $j < count($attributes['name']); $j++){
+											if($attributes['name'][$j] != $attributes['the_geom']){
+												echo '<option value="'.$attributes['name'][$j].'">'.$attributes['alias'][$j].'</option>';
+											}
+										}
+										?>
+									</select>
+								</td>
+							</tr>
+							<tr id="split_<?php echo $layer['Layer_ID']; ?>" style="display:none">
+								<td>
+									&nbsp;&nbsp;Trenn-Attribut:
+								</td>
+								<td>
+									<select style="width:133px" name="chartsplit_<?php echo $layer['Layer_ID']; ?>" onchange="create_chart(<?php echo $layer['Layer_ID']; ?>);">
+										<option value="">--- Bitte Wählen ---</option>
+										<?
+										for($j = 0; $j < count($attributes['name']); $j++){
+											if($attributes['name'][$j] != $attributes['the_geom']){
+												echo '<option value="'.$attributes['name'][$j].'">'.$attributes['alias'][$j].'</option>';
+											}
+										}
+										?>
+									</select>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		<?} ?>
+		</td>
+	</tr>
+	<? } ?>
+	
 <table>
 </div>
 <input type="hidden" name="checkbox_names_<? echo $layer['Layer_ID']; ?>" value="<? echo $checkbox_names; ?>">
