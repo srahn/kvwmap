@@ -737,21 +737,21 @@ show_all = function(count){
 										<td colspan="2"><div id="subform_ax_person_temp<? echo $b.'_'.$e; ?>" style="display:inline"></div></td>
 									</tr>
 									</tr>
-                  <tr>
-									<? if($Eigentuemerliste[$e]->zusatz_eigentuemer != ''){ ?>
-                  <tr>
-                  	<td><? echo $Eigentuemerliste[$e]->zusatz_eigentuemer; ?></td>
-                  </tr>
-                  <? } ?>
-                  <? if($Eigentuemerliste[$e]->Anteil != ''){ ?>
-                  <tr>
-                  	<td>zu <? echo $Eigentuemerliste[$e]->Anteil; ?></td>
-                  </tr>
-                  <? } ?>
                 </table>
                 </td>
-                <? } ?>
-              </tr>
+							</tr>
+							<? if($Eigentuemerliste[$e]->zusatz_eigentuemer != ''){ ?>
+								<tr>
+									<td colspan="2"><? echo $Eigentuemerliste[$e]->zusatz_eigentuemer; ?></td>
+								</tr>
+								<? } ?>
+								<? if($Eigentuemerliste[$e]->Anteil != ''){ ?>
+								<tr>
+									<td></td>
+									<td>zu <? echo $Eigentuemerliste[$e]->Anteil; ?></td>
+								</tr>
+								<? } ?>
+							<? } ?>
               <? if($flst->Buchungen[$b]['zusatz_eigentuemer'] != ''){
 									$flst->Buchungen[$b]['zusatz_eigentuemer'] = str_replace('zu', '<br>zu', $flst->Buchungen[$b]['zusatz_eigentuemer']);
 									$flst->Buchungen[$b]['zusatz_eigentuemer'] = str_replace('<br>zu 1/', 'zu 1/', $flst->Buchungen[$b]['zusatz_eigentuemer']);
