@@ -9491,6 +9491,14 @@ class GUI {
     $this->loadMap('DataBase');
     # zwischenspeichern des vorherigen Maßstabs
     $oldscale=round($this->map_scaledenom);
+		if ($oldscale!=$this->formvars['nScale'] AND $this->formvars['nScale'] != '') {
+      # Zoom auf den in der Maßstabsauswahl ausgewählten Maßstab
+      # wenn er sich von der vorherigen Maßstabszahl unterscheidet
+      # (das heißt wenn eine andere Zahl eingegeben wurde)
+      $this->scaleMap($this->formvars['nScale']);
+			$this->user->rolle->saveSettings($this->map->extent);
+			$this->user->rolle->readSettings();
+    }
     # Zoom auf den in der Referenzkarte ausgewählten Ausschnitt
     if ($this->formvars['refmap_x'] > 0) {
       $this->zoomToRefExt();
@@ -9501,12 +9509,6 @@ class GUI {
       if ($this->formvars['CMD']!='') {
         $this->navMap($this->formvars['CMD']);
       }
-    }
-    if ($oldscale!=$this->formvars['nScale'] AND $this->formvars['nScale'] != '') {
-      # Zoom auf den in der Maßstabsauswahl ausgewählten Maßstab
-      # wenn er sich von der vorherigen Maßstabszahl unterscheidet
-      # (das heißt wenn eine andere Zahl eingegeben wurde)
-      $this->scaleMap($this->formvars['nScale']);
     }
   }
   
