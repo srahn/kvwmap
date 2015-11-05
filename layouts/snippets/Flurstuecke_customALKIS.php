@@ -742,10 +742,10 @@ show_all = function(count){
 							</tr>
 							<? if($Eigentuemerliste[$e]->zusatz_eigentuemer != ''){ ?>
 								<tr>
-									<td colspan="2"><? echo $Eigentuemerliste[$e]->zusatz_eigentuemer; ?></td>
+									<td colspan="2"><? echo $Eigentuemerliste[$e]->zusatz_eigentuemer; if($Eigentuemerliste[$e]->Anteil != '')echo 'zu '.$Eigentuemerliste[$e]->Anteil;?></td>
 								</tr>
-								<? } ?>
-								<? if($Eigentuemerliste[$e]->Anteil != ''){ ?>
+								<? }
+									 elseif($Eigentuemerliste[$e]->Anteil != ''){ ?>
 								<tr>
 									<td></td>
 									<td>zu <? echo $Eigentuemerliste[$e]->Anteil; ?></td>
