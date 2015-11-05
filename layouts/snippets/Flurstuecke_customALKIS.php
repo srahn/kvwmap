@@ -738,14 +738,14 @@ show_all = function(count){
 									</tr>
 									</tr>
                   <tr>
-                  <? if($Eigentuemerliste[$e]->Anteil != ''){ ?>
-                  <tr>
-                  	<td>zu <? echo $Eigentuemerliste[$e]->Anteil; ?></td>
-                  </tr>
-                  <? } ?>
 									<? if($Eigentuemerliste[$e]->zusatz_eigentuemer != ''){ ?>
                   <tr>
                   	<td><? echo $Eigentuemerliste[$e]->zusatz_eigentuemer; ?></td>
+                  </tr>
+                  <? } ?>
+                  <? if($Eigentuemerliste[$e]->Anteil != ''){ ?>
+                  <tr>
+                  	<td>zu <? echo $Eigentuemerliste[$e]->Anteil; ?></td>
                   </tr>
                   <? } ?>
                 </table>
