@@ -1797,7 +1797,7 @@ class pgdatabase {
   
   function getHausNrListe($GemID,$StrID,$HausNr,$PolygonWKTString,$order) {
     # 2006-01-31
-    $order='ordernr';
+    $order='ordernr, nrtext';
     # Abfragen der Hausnummern
     $sql ="SELECT id,nrtext, to_number(ordernr, '999999') as ordernr FROM (";
     $sql.="SELECT DISTINCT CASE WHEN TRIM(nr)='' THEN 'ohne' ELSE LOWER(id) END AS id, CASE WHEN TRIM(nr)='' THEN 'ohne Nr' ELSE TRIM(nr) END AS nrtext";
