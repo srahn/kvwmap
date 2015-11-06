@@ -30,7 +30,7 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 	$this->user->rolle->setConsumeALB($currenttime, 'Grundbuchblattanzeige', array($this->buchungen[0]['bezirk'].'-'.$this->buchungen[0]['blatt']), 0, 'NULL');		# das Grundbuchblattkennzeichen wird geloggt
   $anzObj=count($this->buchungen);
   if ($anzObj>0) {?>
-	<table border="1" cellspacing="0" cellpadding="2">
+	<table border="1" cellspacing="0" cellpadding="2" style="width:100%">
 	  <tr bgcolor="<?php echo BG_DEFAULT ?>">
 	    <th colspan="3">Buchung</th>
 	    <th colspan="6">Flurst&uuml;ck</th>
@@ -38,7 +38,7 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 	  <tr bgcolor="<?php echo BG_DEFAULT ?>">
 	    <th>BVNR</th>
 	    <th>EBRH</th>
-	    <th width="150">Eigentümer</th>
+	    <th style="width:250px">Eigentümer</th>
 	    <th>Lage</th>
 	    <th width="250">Nutzung</th>
 	    <th>Gemarkung</th>
@@ -84,7 +84,7 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 			if($this->Stelle->funktionen['MV0600']['erlaubt']){ ?>&nbsp;<a href="index.php?go=ALKIS_Auszug&formnummer=MV0600&Buchungsstelle=<? echo $this->buchungen[0]['gml_id'] ?>" target="_blank">Grundstücksnachweis</a>&nbsp;<? } ?>
 			</td>
       <td valign="top" align="center"><?php echo '&nbsp;'.$this->buchungen[0]['erbbaurechtshinw'];?></td>
-      <td valign="top" rowspan="<? echo $anzObj; ?>">
+      <td style="width:250px" valign="top" rowspan="<? echo $anzObj; ?>">
       	<table>
       		<? echo $Eigentuemer; ?>
       	</table>
