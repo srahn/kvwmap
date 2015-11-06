@@ -82,7 +82,6 @@ show_all = function(count){
     }
 		echo '<tr><td align="center"><table><tr><td align="left">';
     for ($a=0;$a<$anzObj;$a++){
-			$set_timestamp = '';
       $flurstkennz_a=$this->qlayerset[$i]['shape'][$a]['flurstkennz'];
 			$flst=new flurstueck($flurstkennz_a,$this->pgdatabase);
       $flst->readALB_Data($flurstkennz_a, $this->formvars['without_temporal_filter']);	# bei without_temporal_filter=true, wird unabhängig vom Zeitstempel abgefragt (z.B. bei der historischen Flurstückssuche oder Flst.-Listenimport oder beim Sprung zum Vorgänger/Nachfolger)
@@ -108,6 +107,7 @@ show_all = function(count){
 		echo '</td></tr></table></td></tr>';
 
     for ($k=0;$k<count($flst_array);$k++) {
+			$set_timestamp = '';
       $flst = $flst_array[$k];
       if ($flst->FlurstNr!='') {
         if($k > 0){
@@ -779,7 +779,7 @@ show_all = function(count){
 					<?
 						if($flst->hist_alb != 1){
 							$zoomlink = 'ZoomToFlst&FlurstKennz='.$flst->FlurstKennz; 
-							if($set_timestamp != ''){$zoomlink = $set_timestamp.'&go_next='.urlencode($zoomlink); $no_zoom_all = true;};
+							if($set_timestamp != '')$zoomlink = $set_timestamp.'&go_next='.urlencode($zoomlink);else $zoom_all = true;
 					?>
 							<a href="index.php?go=<? echo $zoomlink;?>">
 												<div class="fstanzeigehover">
@@ -788,8 +788,8 @@ show_all = function(count){
 								&nbsp;&nbsp;
 							</div>
 							</a>
-					<? }else $no_zoom_all = true; ?>
-                    <div class="fstanzeigehover">
+					<? } ?>
+              <div class="fstanzeigehover">
 					  &nbsp;&nbsp;
 					  Auszug:
 						<select style="width: 130px" onchange="this.options[this.selectedIndex].onchange();">
@@ -886,7 +886,7 @@ show_all = function(count){
 		  <td>
           <div class="fstanzeigecontainer">
             <div style="text-align:center;">
-							<? if($no_zoom_all != true){ ?>
+							<? if($zoom_all == true){ ?>
               <a href="javascript:send_selected_flurst('ZoomToFlst', '');">
               <div class="fstanzeigehover">
                 &nbsp;&nbsp;
