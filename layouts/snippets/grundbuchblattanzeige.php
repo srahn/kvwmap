@@ -87,9 +87,6 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
       <td valign="top" rowspan="<? echo $anzObj; ?>">
       	<table>
       		<? echo $Eigentuemer; ?>
-      		<? if($this->buchungen[0]['zusatz_eigentuemer'] != ''){
-      				echo '<tr><td colspan="2">'.$this->buchungen[0]['zusatz_eigentuemer'].'</td></tr>';
-      			 } ?>
       	</table>
       </td>
     	<td valign="top"><? echo $Adressbezeichnung.'&nbsp;'; ?></td>

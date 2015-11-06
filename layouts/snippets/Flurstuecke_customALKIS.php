@@ -736,13 +736,8 @@ show_all = function(count){
 									<td>zu <? echo $Eigentuemerliste[$e]->Anteil; ?></td>
 								</tr>
 								<? } ?>
-							<? } ?>
-              <? if($flst->Buchungen[$b]['zusatz_eigentuemer'] != ''){
-									$flst->Buchungen[$b]['zusatz_eigentuemer'] = str_replace('zu', '<br>zu', $flst->Buchungen[$b]['zusatz_eigentuemer']);
-									$flst->Buchungen[$b]['zusatz_eigentuemer'] = str_replace('<br>zu 1/', 'zu 1/', $flst->Buchungen[$b]['zusatz_eigentuemer']);
-      						echo '<tr><td></td><td colspan="2">'.$flst->Buchungen[$b]['zusatz_eigentuemer'].'</td></tr>';
-      			 			} ?>
-              <? } ?>
+							<? }
+               } ?>
           </table>
         </td>
         </tr>
