@@ -53,11 +53,14 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
     $Eigentuemerliste=$flst->getEigentuemerliste($this->buchungen[0]['bezirk'],$this->buchungen[0]['blatt'],$this->buchungen[0]['bvnr']);
     $Eigentuemer = '';
     for ($i=0;$i<count($Eigentuemerliste);$i++) {
-    	$Eigentuemer .= '<tr><td valign="top">'.$Eigentuemerliste[$i]->Nr.'.</td><td>';
+    	$Eigentuemer .= '<tr><td valign="top">'.$Eigentuemerliste[$i]->Nr.'</td><td>';
     	for ($k=0;$k<count($Eigentuemerliste[$i]);$k++) {
       	$Eigentuemer .= $Eigentuemerliste[$i]->Name[$k].'<br>';
-    	}
-    	if($Eigentuemerliste[$i]->Anteil)$Eigentuemer .= 'zu '.$Eigentuemerliste[$i]->Anteil.'<br>';
+    	}			
+			if($Eigentuemerliste[$i]->zusatz_eigentuemer != ''){
+				$Eigentuemer .= '</td></tr><tr><td colspan="2">'.$Eigentuemerliste[$i]->zusatz_eigentuemer; if($Eigentuemerliste[$i]->Anteil != '')$Eigentuemer .= ' zu '.$Eigentuemerliste[$i]->Anteil; $Eigentuemer .= '</td></tr><tr><td>';
+			}
+			elseif($Eigentuemerliste[$i]->Anteil)$Eigentuemer .= 'zu '.$Eigentuemerliste[$i]->Anteil.'<br>';
     	$Eigentuemer .= '</td></tr>';
     }
     $Adressbezeichnung = '';
