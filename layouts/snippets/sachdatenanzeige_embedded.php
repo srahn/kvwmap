@@ -4,7 +4,7 @@
   
 	$i = 0;
 
-  if($this->qlayerset[$i]['template']==''){
+  if($this->qlayerset[$i]['template']=='' OR in_array($this->qlayerset[$i]['template'], array('generic_layer_editor.php', 'generic_layer_editor_2.php'))){
    	include(SNIPPETS.'generic_layer_editor_2_embedded.php');
 	}
   else{																																		# falls man mal ein eigenes Subformular einbinden will
