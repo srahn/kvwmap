@@ -1293,7 +1293,7 @@ class rolle {
         $sql.=')';
       }
     }
-		$sql.=' ORDER BY ul.drawingorder';
+		$sql.=' ORDER BY ul.drawingorder desc';
     #echo $sql.'<br>';
     $this->debug->write("<p>file:users.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);

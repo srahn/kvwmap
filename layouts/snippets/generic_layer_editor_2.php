@@ -22,7 +22,7 @@
 	}
 ?>
 <div id="layer" onclick="remove_calendar();">
-<? if($this->new_entry != true){ ?>
+<? if($this->new_entry != true AND $layer['requires'] == ''){ ?>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 	<tr>
 		<td width="99%" align="center"><h2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<? echo $layer['Name']; ?></h2></td>
@@ -499,7 +499,7 @@
 
 <?
   }
-  else {
+  elseif($layer['requires'] == ''){
 ?>
 <table border="0" cellspacing="10" cellpadding="2">
   <tr>
