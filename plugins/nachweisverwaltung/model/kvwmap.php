@@ -60,6 +60,7 @@
     $GUI->menue='menue.php';
     $GUI->main= PLUGINS.'nachweisverwaltung/view/dokumenteneingabeformular.php';
     $GUI->titel='Dokument überarbeiten';    
+		if($GUI->formvars['reset_layers'])$GUI->reset_layers(NULL);
     # Nachweisdaten aus Datenbank abfragen
     $nachweis=new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
     # abfragen der Dokumentarten
@@ -77,7 +78,14 @@
       $nachweis->document=$nachweis->Dokumente[0];
       # Laden der letzten Karteneinstellung
       $saved_scale = $GUI->reduce_mapwidth(100);
-			$GUI->loadMap('DataBase');
+		
+			if($GUI->formvars['neuladen']){
+				$GUI->neuLaden();
+			}
+			else{
+				$GUI->loadMap('DataBase');
+			}
+			
 			if($_SERVER['REQUEST_METHOD'] == 'GET')$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
       
       $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id);
@@ -527,6 +535,7 @@
     # letzte Änderung 2006-01-23 pk
     # Anzeige des Formulars zum Eintragen neuer/Ändern vorhandener Metadaten zu einem Nachweisdokument
     # (FFR, KVZ oder GN)
+		if($GUI->formvars['reset_layers'])$GUI->reset_layers(NULL);
     $GUI->menue='menue.php';
 
     # Wenn eine oid in formvars übergeben wurde ist es eine Änderung, sonst Neueingabe

@@ -306,6 +306,7 @@ $legendheight = $this->map->height + 20;
 						<INPUT TYPE="hidden" NAME="check" VALUE="">
 						<input type="hidden" name="order" value="<?php echo $this->formvars['order']; ?>">
 						<input type="hidden" name="flur_thematisch" value="<? echo $this->formvars['flur_thematisch']; ?>">
+						<INPUT TYPE="hidden" NAME="reset_layers" VALUE="">
 					</td>
 				</tr>
 			</table>
@@ -338,7 +339,7 @@ $legendheight = $this->map->height + 20;
 									?><input type="submit" name="neuladen" value="<?php echo $strLoadNew; ?>" tabindex="1"></div>
 									<div id="legendcontrol">
 										<a href="index.php?go=reset_querys"><img src="graphics/tool_info.png" border="0" alt="Informationsabfrage." title="Informationsabfrage | Hier klicken, um alle Abfragehaken zu entfernen" width="17"></a>
-										<a href="index.php?go=reset_layers"><img src="graphics/layer.png" border="0" alt="Themensteuerung." title="Themensteuerung | Hier klicken, um alle Themen zu deaktivieren" width="20" height="20"></a><br>
+										<a href="javascript:document.GUI.reset_layers.value=1;document.GUI.submit();"><img src="graphics/layer.png" border="0" alt="Themensteuerung." title="Themensteuerung | Hier klicken, um alle Themen zu deaktivieren" width="20" height="20"></a><br>
 									</div>
 								<div id="scrolldiv" style="height:<?php echo $legendheight; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
 								<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
