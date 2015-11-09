@@ -118,7 +118,6 @@
 													else{
 														'" ';
 													}
-													$fieldname_[$f] = $layer_id.';'.$attributes['real_name'][$name_].';'.$tablename_.';'.$oid.';TextFK;0;varchar';
 													$datapart .= ' id="'.$attributes['real_name'][$name_].'_'.$k.'" name="'.$fieldname_[$f].'" value="'.$dataset[$name_].'">';
 												}
 											}
