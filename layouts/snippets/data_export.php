@@ -49,7 +49,7 @@ function update_coords(){
 
 function data_export(){
 	if(document.GUI.selected_layer_id.value != ''){
-		if(document.GUI.newpath.value != ''){
+		if(document.GUI.newpathwkt.value == '' && document.GUI.newpath.value != ''){
 			document.GUI.newpathwkt.value = buildwktpolygonfromsvgpath(document.GUI.newpath.value);
 		}
 		document.GUI.go_plus.value = 'Exportieren';
