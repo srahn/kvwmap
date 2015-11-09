@@ -6635,7 +6635,7 @@ class GUI {
 				#echo "Abfragestatement: ".$sql.$sql_order.$sql_limit;
         $ret=$layerdb->execSQL('SET enable_seqscan=off;'.$sql.$sql_order.$sql_limit,4, 0);
         if (!$ret[0]) {
-          while ($rs=pg_fetch_array($ret[1])) {
+          while ($rs=pg_fetch_assoc($ret[1])) {
             $layerset[0]['shape'][]=$rs;
           }
           # Anzahl der Datensätze abfragen
@@ -10953,7 +10953,7 @@ class GUI {
 							$ret=$layerdb->execSQL($sql.$sql_order.$sql_limit,4, 0);
 							#echo $sql.$sql_order.$sql_limit;
 							if (!$ret[0]) {
-								while ($rs=pg_fetch_array($ret[1])) {
+								while ($rs=pg_fetch_assoc($ret[1])) {
 									$layerset[$i]['shape'][]=$rs;
 								}
 								# Anzahl der Datensätze abfragen
