@@ -11539,7 +11539,7 @@ class GUI {
 				#echo '<br>sql:<br>'.$sql;
 				$ret=$layerdb->execSQL($sql.$sql_limit,4, 0);
 				if (!$ret[0]) {
-					while ($rs=pg_fetch_array($ret[1])) {
+					while ($rs=pg_fetch_assoc($ret[1])) {
 						$found = true;
 						$layerset[$i]['shape'][]=$rs;
 					}
