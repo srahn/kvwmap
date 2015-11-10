@@ -1246,8 +1246,7 @@
 							# Bei eingeschalteten Layern kann man auf die maximale Ausdehnung des Layers zoomen
 							if ($layer['aktivStatus'] == 1) {
 								if ($layer['connectiontype']==6) {
-									# Link zum Zoomen auf maximalen Extent des Layers erstmal nur für PostGIS Layer
-									$legend.='&nbsp;<a href="index.php?go=zoomToMaxLayerExtent&layer_id='.$layer['Layer_ID'].'"><img src="graphics/maxLayerExtent.gif" border="0" title="'.$this->FullLayerExtent.'"></a>';
+									# Link zum Zoomen auf maximalen Extent des Layers erstmal nur für PostGIS Layer									$legend.='&nbsp;<a href="javascript:zoomToMaxLayerExtent('.$layer['Layer_ID'].');"><img src="graphics/maxLayerExtent.gif" border="0" title="'.$this->FullLayerExtent.'"></a>';
 								}
 							}
 						}

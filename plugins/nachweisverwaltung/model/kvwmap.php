@@ -106,16 +106,15 @@
       $nachweis->document=$nachweis->Dokumente[0];
       # Laden der letzten Karteneinstellung
       $saved_scale = $GUI->reduce_mapwidth(100);
-		
 			if($GUI->formvars['neuladen']){
 				$GUI->neuLaden();
 			}
 			else{
 				$GUI->loadMap('DataBase');
 			}
-			
 			if($_SERVER['REQUEST_METHOD'] == 'GET')$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
-      
+      # zoomToMaxLayerExtent
+			if($GUI->formvars['zoom_layer_id'] != '')$GUI->zoomToMaxLayerExtent($GUI->formvars['zoom_layer_id']);
       $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id);
 	    if(!$GUI->formvars['layer_id']){
 	      $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
@@ -672,16 +671,13 @@
     $GUI->main = PLUGINS."nachweisverwaltung/view/dokumenteneingabeformular.php";
     $GUI->formvars['bufferwidth'] = 2;
     $saved_scale = $GUI->reduce_mapwidth(100);
-		
 		if($GUI->formvars['neuladen']){
       $GUI->neuLaden();
     }
     else{
       $GUI->loadMap('DataBase');
     }
-		
 		if($_SERVER['REQUEST_METHOD'] == 'GET')$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
-    
     $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id);
   	if(!$GUI->formvars['layer_id']){
       $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
@@ -723,6 +719,7 @@
       $GUI->formvars['newpathwkt'] = $nachweis->document['wkt_umring'];
       $GUI->formvars['pathwkt'] = $GUI->formvars['newpathwkt'];
     }
+		elseif($GUI->formvars['zoom_layer_id'] != '')$GUI->zoomToMaxLayerExtent($GUI->formvars['zoom_layer_id']);	# zoomToMaxLayerExtent
     
     $GUI->saveMap('');
     $currenttime=date('Y-m-d H:i:s',time());

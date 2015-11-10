@@ -455,17 +455,6 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->zoom_toLine();
 	  }break;
 
-	  # zoom to maximum extent of the layer
-	  case 'zoomToMaxLayerExtent' : {
-		# Karteninformationen lesen
-		$GUI->loadMap('DataBase');
-		$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-		$GUI->zoomToMaxLayerExtent($GUI->formvars['layer_id']);
-		$GUI->drawMap();
-		$GUI->saveMap('');
-		$GUI->output();
-	  }break;
-
 	  # PolygonEditor
 	  case 'PolygonEditor' : {
 		$GUI->PolygonEditor();

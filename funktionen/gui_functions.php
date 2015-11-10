@@ -417,6 +417,12 @@ function selectgroupthema(group, instantreload){
 	if(instantreload)document.GUI.neuladen.click();
 }
 
+function zoomToMaxLayerExtent(zoom_layer_id){
+	console.log(currentform.go.value);
+	currentform.zoom_layer_id.value = zoom_layer_id;
+	overlay_submit(currentform);
+}
+
 /*Anne*/
 function changeClassStatus(classid,imgsrc,instantreload){
 	selClass = document.getElementsByName("class"+classid)[0];

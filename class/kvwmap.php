@@ -284,7 +284,7 @@ class GUI {
 							if ($layer['aktivStatus'] == 1) {
 								if ($layer['connectiontype']==6) {
 									# Link zum Zoomen auf maximalen Extent des Layers erstmal nur für PostGIS Layer
-									$legend.='&nbsp;<a href="index.php?go=zoomToMaxLayerExtent&layer_id='.$layer['Layer_ID'].'"><img src="graphics/maxLayerExtent.gif" border="0" title="'.$this->FullLayerExtent.'"></a>';
+									$legend.='&nbsp;<a href="javascript:zoomToMaxLayerExtent('.$layer['Layer_ID'].')"><img src="graphics/maxLayerExtent.gif" border="0" title="'.$this->FullLayerExtent.'"></a>';
 								}
 							}
 						}
@@ -2720,6 +2720,7 @@ class GUI {
 			}
 		}
 		$legend .= '<input type="hidden" name="layers" value="'.$this->layer_id_string.'">';
+		$legend .= '<input type="hidden" name="zoom_layer_id" value="">';
 		return $legend;
   }
 	  
@@ -3213,6 +3214,8 @@ class GUI {
 				}
 			}
     }
+		# zoomToMaxLayerExtent
+		if($this->formvars['zoom_layer_id'] != '')$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
     $this->saveMap('');
     if($this->formvars['CMD'] != 'previous' AND $this->formvars['CMD'] != 'next'){
     	$currenttime=date('Y-m-d H:i:s',time());
@@ -3288,6 +3291,8 @@ class GUI {
 				}
 			}
     }
+		# zoomToMaxLayerExtent
+		if($this->formvars['zoom_layer_id'] != '')$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
     # Spaltenname und from-where abfragen
     $data = $this->mapDB->getData($this->formvars['layer_id']);
     $data_explosion = explode(' ', $data);
@@ -3407,6 +3412,8 @@ class GUI {
 				}
 			}
 		}
+		# zoomToMaxLayerExtent
+		if($this->formvars['zoom_layer_id'] != '')$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
     # Geometrie-Übernahme-Layer:
     # Spaltenname und from-where abfragen
     $data = $this->mapDB->getData($this->formvars['layer_id']);
@@ -4290,6 +4297,8 @@ class GUI {
       $this->loadMap($loadmapsource);
     }
 		if($_SERVER['REQUEST_METHOD'] == 'GET')$this->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
+		# zoomToMaxLayerExtent
+		if($this->formvars['zoom_layer_id'] != '')$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
     # aktuellen Druckkopf laden
     $this->Document=new Document($this->database);
     if($this->formvars['angle'] == ''){
@@ -7485,6 +7494,8 @@ class GUI {
 						$this->loadMap('DataBase');
 					}											
 					if($_SERVER['REQUEST_METHOD'] == 'GET')$this->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist          
+					# zoomToMaxLayerExtent
+					if($this->formvars['zoom_layer_id'] != '')$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
 					# evtl. Zoom auf "Mutter-Layer"
 					if($this->formvars['layer_id'] != '' AND $this->formvars['oid'] != '' AND $this->formvars['tablename'] != '' AND $this->formvars['columnname'] != ''){			# das sind die Sachen vom "Mutter"-Layer
 						$parentlayerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
@@ -9491,6 +9502,8 @@ class GUI {
     $this->loadMap('DataBase');
     # zwischenspeichern des vorherigen Maßstabs
     $oldscale=round($this->map_scaledenom);
+		# zoomToMaxLayerExtent
+		if($this->formvars['zoom_layer_id'] != '')$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
 		if ($oldscale!=$this->formvars['nScale'] AND $this->formvars['nScale'] != '') {
       # Zoom auf den in der Maßstabsauswahl ausgewählten Maßstab
       # wenn er sich von der vorherigen Maßstabszahl unterscheidet
