@@ -499,7 +499,7 @@
 
 <?
   }
-  elseif($layer['requires'] == ''){
+  elseif($layer['requires'] == '' AND $layer['required'] == ''){
 ?>
 <table border="0" cellspacing="10" cellpadding="2">
   <tr>
