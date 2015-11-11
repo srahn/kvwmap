@@ -744,13 +744,7 @@ class data_import_export {
 			$exportfile = IMAGEPATH.$folder.'/'.$this->formvars['layer_name'];
 			switch($this->formvars['export_format']){
 				case 'Shape' : { 
-					$command = POSTGRESBINPATH.'pgsql2shp -r -u '.$layerdb->user;
-					if($layerdb->passwd != '')$command.= ' -P "'.$layerdb->passwd.'"';
-					if($layerdb->port != '')$command.=' -p '.$layerdb->port;
-					if($layerdb->host != '') $command .= ' -h ' . $layerdb->host;
-					$command.= ' -f '.$exportfile.' '.$layerdb->dbName.' '.$temp_table; 
-					exec($command);
-					#echo $command;
+					$this->ogr2ogr_export($sql, '"ESRI Shapefile"', $exportfile.'.shp', $layerdb);
 					$fp = fopen($exportfile.'.cpg', 'w');
 					fwrite($fp, 'UTF-8');
 					fclose($fp);
