@@ -11,7 +11,7 @@
 								$fieldname = $layer_id.';'.$attributes['real_name'][$name].';'.$tablename.';'.$oid.';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j];
 								switch ($attributes['form_element_type'][$j]){
 									case 'Textfeld' : {
-										$datapart .= '<textarea title="'.$alias.'" cols="45" onchange="set_changed_flag(currentform.changed_'.$oid.')"';
+										$datapart .= '<textarea title="'.$alias.'" cols="45" onchange="set_changed_flag(currentform.changed_'.$layer_id.'_'.$oid.')"';
 										if($attribute_privileg == '0' OR $lock[$k]){
 											$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
 										}
@@ -38,7 +38,7 @@
 									}break;
 									
 									case 'Checkbox' : {
-										$datapart .= '<input type="checkbox" title="'.$alias.'" cols="45" onchange="set_changed_flag(currentform.changed_'.$oid.')"';
+										$datapart .= '<input type="checkbox" title="'.$alias.'" cols="45" onchange="set_changed_flag(currentform.changed_'.$layer_id.'_'.$oid.')"';
 										if($attribute_privileg == '0' OR $lock[$k]){
 											$datapart .= ' onclick="return false" style="border:0px;background-color:transparent;"';
 										}
@@ -261,7 +261,7 @@
 											$datapart .= '<input type="hidden" name="'.$layer_id.';'.$attributes['real_name'][$name].';'.$tablename.';'.$oid.';'.$attributes['form_element_type'][$j].'_alt'.';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$value.'">';
 										}
 										if($attribute_privileg != '0' AND !$lock[$k]){
-											$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$oid.')" style="font-size: '.$fontsize.'px" size="43" type="file" onchange="this.title=this.value;" id="'.$name.'_'.$k.'" name="'.$fieldname.'">';
+											$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$layer_id.'_'.$oid.')" style="font-size: '.$fontsize.'px" size="43" type="file" onchange="this.title=this.value;" id="'.$name.'_'.$k.'" name="'.$fieldname.'">';
 										}
 										else{
 											$datapart .= '&nbsp;';
@@ -281,7 +281,7 @@
 											$datapart .= '</a><br>';
 										}
 										if($attribute_privileg != '0' OR $lock[$k]){
-											$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$oid.')" style="font-size: '.$fontsize.'px" size="'.$size.'" type="text" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
+											$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$layer_id.'_'.$oid.')" style="font-size: '.$fontsize.'px" size="'.$size.'" type="text" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 										}else{
 											$datapart .= '<input type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 										}
@@ -333,14 +333,14 @@
 											$datapart .= '</a><br>';
 										}
 										if($attribute_privileg != '0' OR $lock[$k]){
-											$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$oid.')" style="font-size: '.$fontsize.'px" size="'.$size.'" type="text" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
+											$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$layer_id.'_'.$oid.')" style="font-size: '.$fontsize.'px" size="'.$size.'" type="text" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 										}else{
 											$datapart .= '<input type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 										}
 									} break;
 
 									case 'Fläche': {
-										$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$oid.')" id="custom_area" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
+										$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$layer_id.'_'.$oid.')" id="custom_area" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
 										if($attribute_privileg == '0' OR $lock[$k]){
 											$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
 										}
@@ -351,7 +351,7 @@
 									}break;
 									
 									case 'Länge': {
-										$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$oid.')" id="custom_length" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
+										$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$layer_id.'_'.$oid.')" id="custom_length" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
 										if($attribute_privileg == '0' OR $lock[$k]){
 											$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
 										}
@@ -364,7 +364,7 @@
 									case 'Zahl': {
 										# bei Zahlen Tausendertrennzeichen einfügen 
 										$value = tausenderTrenner($value);
-										$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$oid.')" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
+										$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$layer_id.'_'.$oid.')" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
 										if($attribute_privileg == '0' OR $lock[$k]){
 											$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
 										}
@@ -381,7 +381,7 @@
 									}break;
 									
 									default : {
-										$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$oid.')" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
+										$datapart .= '<input onchange="set_changed_flag(currentform.changed_'.$layer_id.'_'.$oid.')" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
 										if($attribute_privileg == '0' OR $lock[$k]){
 											$datapart .= ' readonly style="display:none;"';
 										}
