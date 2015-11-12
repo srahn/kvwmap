@@ -2,7 +2,7 @@
 
 	function Autovervollstaendigungsfeld($layer_id, $name, $j, $alias, $fieldname, $value, $output, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $lock, $fontsize){
 		$datapart = '<table cellpadding="0" cellspacing="0"><tr><td><div>';
-		$datapart .= '<input autocomplete="off" title="'.$alias.'" onkeydown="if(this.backup_value==undefined){this.backup_value=this.value; document.getElementById(\''.$name.'_'.$k.'\').backup_value=document.getElementById(\''.$name.'_'.$k.'\').value;}" onkeyup="autocomplete1(\''.$layer_id.'\', \''.$name.'\', \''.$name.'_'.$k.'\', this.value);" onchange="if(document.getElementById(\'suggests_'.$name.'_'.$k.'\').style.display==\'block\'){this.value=this.backup_value; document.getElementById(\''.$name.'_'.$k.'\').value=document.getElementById(\''.$name.'_'.$k.'\').backup_value; setTimeout(function(){document.getElementById(\'suggests_'.$name.'_'.$k.'\').style.display = \'none\';}, 500);}if(\''.$oid.'\' != \'\')set_changed_flag(currentform.changed_'.$oid.')"';
+		$datapart .= '<input autocomplete="off" title="'.$alias.'" onkeydown="if(this.backup_value==undefined){this.backup_value=this.value; document.getElementById(\''.$name.'_'.$k.'\').backup_value=document.getElementById(\''.$name.'_'.$k.'\').value;}" onkeyup="autocomplete1(\''.$layer_id.'\', \''.$name.'\', \''.$name.'_'.$k.'\', this.value);" onchange="if(document.getElementById(\'suggests_'.$name.'_'.$k.'\').style.display==\'block\'){this.value=this.backup_value; document.getElementById(\''.$name.'_'.$k.'\').value=document.getElementById(\''.$name.'_'.$k.'\').backup_value; setTimeout(function(){document.getElementById(\'suggests_'.$name.'_'.$k.'\').style.display = \'none\';}, 500);}if(\''.$oid.'\' != \'\')set_changed_flag(currentform.changed_'.$layer_id.'_'.$oid.')"';
 		if($privileg == '0' OR $lock){
 			$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
 		}
@@ -48,10 +48,10 @@
 		else{
 			$datapart .= '<select title="'.$alias.'" style="'.$select_width.'font-size: '.$fontsize.'px"';
 			if($req_by != ''){
-				$datapart .= 'onchange="update_require_attribute(\''.$req_by.'\', '.$k.','.$layer_id.', new Array(\''.implode($attributenames, "','").'\'));set_changed_flag(currentform.changed_'.$oid.')" ';
+				$datapart .= 'onchange="update_require_attribute(\''.$req_by.'\', '.$k.','.$layer_id.', new Array(\''.implode($attributenames, "','").'\'));set_changed_flag(currentform.changed_'.$layer_id.'_'.$oid.')" ';
 			}
 			else{
-				$datapart .= 'onchange="set_changed_flag(currentform.changed_'.$oid.')"';
+				$datapart .= 'onchange="set_changed_flag(currentform.changed_'.$layer_id.'_'.$oid.')"';
 			}
 			$datapart .= 'id="'.$name.'_'.$k.'" name="'.$fieldname.'">';
 			$datapart .= '<option value="">-- '.$strPleaseSelect.' --</option>';
