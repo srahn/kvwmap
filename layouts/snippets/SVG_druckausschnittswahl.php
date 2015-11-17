@@ -552,11 +552,13 @@ function deletelast(evt) {
   <rect id="background" style="fill:white" width="100%" height="100%"/>
 	<g id="moveGroup" transform="translate(0 0)">
 	  <image xlink:href="'.$bg_pic.'" height="100%" width="100%" y="0" x="0"/>
+		<g id="cartesian" transform="translate(0,'.$res_y.') scale(1,-1)">
+			<polygon points="" id="polygon" style="fill-opacity:0.5;fill:rgb(192,192,255);stroke:blue;stroke-width:2"/>
+		</g>
 		<rect id="canvas_FS" cursor="crosshair" onmousedown="task(evt)" onmousemove="hide_tooltip();" width="100%" height="100%" opacity="0" fill="cornflowerblue" visibility="visible"/>
 		<rect id="canvas" cursor="crosshair" onmousedown="mousedown(evt)" onmousemove="mousemove(evt);hide_tooltip();" onmouseup="mouseup(evt);" fill="yellow" width="100%" height="100%" opacity="0" visibility="hidden"/>
 		<g id="cartesian" transform="translate(0,'.$res_y.') scale(1,-1)">
 			<use id="pointposition" xlink:href="#crosshair_blue" x="'.$refpoint_x.'" y="'.$refpoint_y.'"/>
-			<polygon points="" id="polygon" style="fill-opacity:0.5;fill:rgb(192,192,255);stroke:blue;stroke-width:2"/>
 			<g id="auswahl" transform="rotate('.$angle.' '.$pixel_x.' '.$pixel_y.')">
 				<g id="auswahl2" transform="translate('.$pos_x.' '.$pos_y.')">			   		   				
 					<rect id="rechteck" x="0" y="0" rx="0" ry="0" width="'.$printwidth.'" height="'.$printheight.'" style="fill:none;stroke:black;stroke-width:2;"></rect>
