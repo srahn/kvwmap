@@ -77,15 +77,18 @@
 			var pixelsize = document.GUI.pixelsize;
 			var polygon = svgdoc.getElementById("polygon");			
 			// nix
-			// nix
 			
 			input_coord = document.GUI.INPUT_COORD.value;
       cmd = document.GUI.CMD.value;
 			
-			var code2execute;
-			if(browser != 'firefox')code2execute = 'moveback()';
+			var code2execute_before;
+			var code2execute_after;
+			if(browser != 'firefox'){
+				code2execute_before = 'moveback()';
+				code2execute_after = 'startup()';
+			}
 			
-  		ahah("index.php", postdata+"&mime_type=map_ajax&INPUT_COORD="+input_coord+"&CMD="+cmd+"&code2execute="+code2execute, 
+  		ahah("index.php", postdata+"&mime_type=map_ajax&INPUT_COORD="+input_coord+"&CMD="+cmd+"&code2execute_before="+code2execute_before+"&code2execute_after="+code2execute_after, 
   		new Array(
 				'',
   			mapimg, 
@@ -99,10 +102,9 @@
   			maxy,
   			pixelsize,			
   			polygon,
-  			'',
 				''
   		), 			 
-  		new Array("execute_function", "xlink:href", "src", "src", "setvalue", "sethtml", "setvalue", "setvalue", "setvalue", "setvalue", "setvalue", "points", "execute_function", "execute_function"));
+  		new Array("execute_function", "xlink:href", "src", "src", "setvalue", "sethtml", "setvalue", "setvalue", "setvalue", "setvalue", "setvalue", "points", "execute_function"));
 						
   		document.GUI.INPUT_COORD.value = '';
   		document.GUI.CMD.value = '';
@@ -353,6 +355,7 @@ function startup(){';
 	}
 	get_polygon_path();	
 	redrawPolygon();
+	set_suchkreis();
 	eval(doing+"()");	
   document.getElementById(doing+"0").style.setProperty("fill",highlighted,"");
 }
@@ -490,6 +493,7 @@ function moveback_ff(evt){
 	stopwaiting();
 	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("xlink:href", "")\', 400);
 	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("style", "display:none")\', 400);
+	startup();
 }
 
 
@@ -623,6 +627,10 @@ function ppquery(){
 // in pquery() und pquery_prompt() aufgeteilt, da der Promt sonst auch bei jedem reload erscheint   
 function pquery_prompt(){     
   top.document.GUI.searchradius.value=prompt("Geben Sie den Suchradius in Meter ein.",top.document.GUI.searchradius.value);
+  set_suchkreis();
+}
+
+function set_suchkreis(){
   radius = (top.document.GUI.searchradius.value / parseFloat(top.document.GUI.pixelsize.value));
   document.getElementById("suchkreis").setAttribute("r", radius);
 }
@@ -824,6 +832,7 @@ function mousedown(evt){
 	    	client_x = evt.clientX;
 			  client_y = resy - evt.clientY;
 			  if(client_x == pathx[pathx.length-1] && client_y == pathy[pathy.length-1]){
+					evt.preventDefault();
 			  	recentre();		// Streckenmessung bei Doppelklick beenden
 			  }
 			  else{

@@ -19,10 +19,9 @@ $pixelsize    = ($dx/$res_x+$dy/$res_y)/2;		# ist $scale in SVG_map.php
 #			var pixelsize = document.GUI.pixelsize;
 #			var polygon = svgdoc.getElementById("polygon");
 #			// nix
-#			// nix
 
-if($this->formvars['code2execute'] != '')$response = $this->formvars['code2execute'];
-$response .=
+
+$response = $this->formvars['code2execute_before'].
 '~'.$this->img['hauptkarte'].'~
 '.$this->img['scalebar'].'~
 '.$this->img['referenzkarte'].'~
@@ -36,8 +35,7 @@ $response.= '~
 '.$this->map->extent->maxx.'~
 '.$this->map->extent->maxy.'~
 '.$pixelsize.'~
-~startup()
-~update_legend(\''.$this->layerhiddenstring.'\')';
+~update_legend(\''.$this->layerhiddenstring.'\');'.$this->formvars['code2execute_after'];
 
 ob_end_clean();
 header('Content-Type: text/html; charset=utf-8');
