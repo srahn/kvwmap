@@ -511,7 +511,7 @@ function sleep(milliseconds) {
 
 function moveback(evt){
 	// bei allen anderen Browsern gibt es kein onload für das Kartenbild, deswegen wird diese Funktion als erstes ausgefuehrt
-	document.getElementById("mapimg").setAttribute("xlink:href", "/'.APPLVERSION.GRAPHICSPATH.'leer.gif")
+	document.getElementById("mapimg").setAttribute("xlink:href", "'.dirname($_SERVER['SCRIPT_NAME']).'/'.GRAPHICSPATH.'leer.gif")
 	document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");
 	// Redlining-Sachen loeschen
 	while(child = document.getElementById("redlining").firstChild){
