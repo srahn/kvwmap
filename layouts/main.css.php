@@ -64,6 +64,7 @@ form {
 
 .px16{
 	font-size: 16px;
+	line-height: 16px;
 }
 
 .px17{
