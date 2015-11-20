@@ -1579,7 +1579,7 @@
     $ips=explode(';',$this->ips);
     foreach ($ips AS $ip) {
       if (trim($ip)!='') {
-        $ip=trim($ip);				if(!is_numeric(array_pop(explode('.', $ip))))echo $ip = gethostbyname($ip);			# für dyndns-Hosts
+        $ip=trim($ip);				if(!is_numeric(array_pop(explode('.', $ip))))$ip = gethostbyname($ip);			# für dyndns-Hosts
         if (in_subnet($remote_addr,$ip)) {
           $this->debug->write('<br>IP:'.$remote_addr.' paßt zu '.$ip,4);
           #echo '<br>IP:'.$remote_addr.' paßt zu '.$ip;

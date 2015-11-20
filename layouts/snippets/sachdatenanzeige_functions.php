@@ -32,7 +32,7 @@ include('funktionen/input_check_functions.php');
 		}
 	}
 	
-	nextquery = function(offset){
+	nextdatasets = function(offset){
 		currentform.target = '';
 		if(currentform.go_backup.value != ''){
 			currentform.go.value = currentform.go_backup.value;
@@ -44,8 +44,31 @@ include('funktionen/input_check_functions.php');
 		obj.value = parseInt(obj.value) + <? echo $this->formvars['anzahl']; ?>;
 		overlay_submit(currentform, false);
 	}
+	
+	lastdatasets = function(offset, count){
+		currentform.target = '';
+		if(currentform.go_backup.value != ''){
+			currentform.go.value = currentform.go_backup.value;
+		}
+		obj = document.getElementById(offset);
+		if(obj.value == '' || obj.value == undefined){
+			obj.value = 0;
+		}
+		obj.value = count - (count % <? echo $this->formvars['anzahl']; ?>);
+		overlay_submit(currentform, false);
+	}
+	
+	firstdatasets = function(offset){
+		currentform.target = '';
+		if(currentform.go_backup.value != ''){
+			currentform.go.value = currentform.go_backup.value;
+		}
+		obj = document.getElementById(offset);
+		obj.value = 0;
+		overlay_submit(currentform, false);
+	}
 
-	prevquery = function(offset){
+	prevdatasets = function(offset){
 		currentform.target = '';
 		if(currentform.go_backup.value != ''){
 			currentform.go.value = currentform.go_backup.value;

@@ -693,7 +693,7 @@ class user {
     foreach ($ips AS $ip) {
       if (trim($ip)!='') {
         $ip=trim($ip);
-				if(!is_numeric(array_pop(explode('.', $ip))))echo $ip = gethostbyname($ip);			# für dyndns-Hosts
+				if(!is_numeric(array_pop(explode('.', $ip))))$ip = gethostbyname($ip);			# für dyndns-Hosts
         if (in_subnet($remote_addr, $ip)) {
           $this->debug->write('<br>IP:'.$remote_addr.' paßt zu '.$ip,4);
           #echo '<br>IP:'.$remote_addr.' paßt zu '.$ip;
@@ -1298,8 +1298,12 @@ class rolle {
     $this->debug->write("<p>file:users.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
     if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		$i = 0;
     while ($rs=mysql_fetch_array($query)) {
-      $layer[]=$rs;
+      $layer[$i]=$rs;
+			$layer['layer_ids'][$rs['Layer_ID']] =& $layer[$i];
+			$layer['layer_ids'][$layer[$i]['requires']]['required'] = $rs['Layer_ID'];
+			$i++;
     }
     return $layer;
   }

@@ -37,16 +37,22 @@ class data_import_export {
 
 ################# Import #################
 	
-  function create_shape_rollenlayer($formvars, $type, $stelle, $user, $database, $pgdatabase){
+  function create_import_rollenlayer($formvars, $type, $stelle, $user, $database, $pgdatabase){
+		$_files = $_FILES;
+		$file = $_files['gpxfile']['name'];
 		switch ($type){
 			case 'Shape' : {
-				$custom_table = $this->import_custom_shape($formvars, $pgdatabase);
+				$custom_tables = $this->import_custom_shape($formvars, $pgdatabase);
 			}break;
 			case 'point' : {
-				$custom_table = $this->import_custom_pointlist($formvars, $pgdatabase);
+				$custom_tables = $this->import_custom_pointlist($formvars, $pgdatabase);
+			}break;
+			case 'GPX' : {
+				$custom_tables = $this->import_custom_gpx($formvars, $pgdatabase);
+				$formvars['epsg'] = 4326;
 			}break;
 		}
-		if($custom_table['datatype'] !== NULL){			# ------ Rollenlayer erzeugen ------- #
+		foreach($custom_tables as $custom_table){				# ------ Rollenlayer erzeugen ------- #
 			$result_colors = read_colors($database);
 			$dbmap = new db_mapObj($stelle->id, $user->id);
 			$group = $dbmap->getGroupbyName('Eigene Importe');
@@ -60,7 +66,7 @@ class data_import_export {
 			$this->formvars['user_id'] = $user->id;
 			$this->formvars['stelle_id'] = $stelle->id;
 			$this->formvars['aktivStatus'] = 1;
-			$this->formvars['Name'] = $file." (".date('d.m. H:i',time()).")";;
+			$this->formvars['Name'] = $file." (".date('d.m. H:i',time()).")".str_repeat(' ', $custom_table['datatype']);
 			$this->formvars['Gruppe'] = $groupid;
 			$this->formvars['Typ'] = 'import';
 			$this->formvars['Datentyp'] = $custom_table['datatype'];
@@ -100,8 +106,9 @@ class data_import_export {
 					$style['symbolname'] = 'circle';
 				}break;
 				case 1 :{
-					$style['size'] = 1;
-					$style['maxsize'] = 2;
+					$style['width'] = 2;
+					$style['minwidth'] = 1;
+					$style['maxwidth'] = 3;
 					$style['symbolname'] = NULL;
 				}break;
 				case 2 :{
@@ -185,7 +192,7 @@ class data_import_export {
 			$custom_table['datatype'] = 0;
 			$custom_table['tablename'] = $tablename;
 			$custom_table['labelitem'] = 'spalte'.$labelitem;
-			return $custom_table;
+			return array($custom_table);
 		}
 	}
 	
@@ -227,7 +234,47 @@ class data_import_export {
 			      }
 						$custom_table['datatype'] = $datatype;
 						$custom_table['tablename'] = $tablename;
-						return $custom_table;
+						return array($custom_table);
+					}
+				}
+			}
+		}
+	}
+	
+	function import_custom_gpx($formvars, $pgdatabase){
+		$_files = $_FILES;	
+		if($_files['gpxfile']['name']){
+      $importfile = UPLOADPATH.$_files['gpxfile']['name'];
+      if(move_uploaded_file($_files['gpxfile']['tmp_name'],$importfile)){
+				if(file_exists($importfile)){
+					if($formvars['tracks']){
+						$tablename = 'a'.strtolower(umlaute_umwandeln(basename($importfile))).rand(1,1000000);
+						$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $importfile, $pgdatabase, 'tracks');
+						$sql = '
+							ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' SET WITH OIDS;
+							ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' RENAME "desc" TO desc_;
+							ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' RENAME "number" TO number_;							
+						';
+						$ret = $pgdatabase->execSQL($sql,4, 0);
+						$custom_table['datatype'] = 1;
+						$custom_table['tablename'] = $tablename;
+						$custom_tables[] = $custom_table;
+					}
+					if($formvars['waypoints']){
+						$tablename = 'a'.strtolower(umlaute_umwandeln(basename($importfile))).rand(1,1000000);
+						$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $importfile, $pgdatabase, 'waypoints');
+						$sql = '
+							ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' SET WITH OIDS;
+							ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' RENAME "desc" TO desc_;
+							ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' RENAME "time" TO time_;		
+						';
+						$ret = $pgdatabase->execSQL($sql,4, 0);
+						$custom_table['datatype'] = 0;
+						$custom_table['tablename'] = $tablename;
+						$custom_tables[] = $custom_table;
+					}
+		      if(!$ret[0]){
+						return $custom_tables;
 					}
 				}
 			}
@@ -492,12 +539,22 @@ class data_import_export {
     }
   }
 	
-	function ogr2ogr($sql, $exportformat, $exportfile, $layerdb){
+	function ogr2ogr_export($sql, $exportformat, $exportfile, $layerdb){
 		$command = 'ogr2ogr -f '.$exportformat.' -sql "'.$sql.'" '.$exportfile.' PG:"dbname='.$layerdb->dbName.' user='.$layerdb->user;
 		if($layerdb->passwd != '')$command.= ' password='.$layerdb->passwd;
 		if($layerdb->port != '')$command.=' port='.$layerdb->port;
 		if($layerdb->host != '') $command .= ' host=' . $layerdb->host;
 		exec($command.'"');
+	}
+	
+	function ogr2ogr_import($schema, $tablename, $importfile, $database, $options){
+		$command = 'ogr2ogr -f PostgreSQL -lco GEOMETRY_NAME=the_geom -nln '.$tablename.' PG:"dbname='.$database->dbName.' user='.$database->user.' active_schema='.$schema;
+		if($database->passwd != '')$command.= ' password='.$database->passwd;
+		if($database->port != '')$command.=' port='.$database->port;
+		if($database->host != '') $command .= ' host=' . $database->host;
+		$command .= '" '.$importfile.' '.$options;
+		#echo $command;
+		exec($command);
 	}
 	
 	function create_csv($result, $attributes){
@@ -687,13 +744,7 @@ class data_import_export {
 			$exportfile = IMAGEPATH.$folder.'/'.$this->formvars['layer_name'];
 			switch($this->formvars['export_format']){
 				case 'Shape' : { 
-					$command = POSTGRESBINPATH.'pgsql2shp -r -u '.$layerdb->user;
-					if($layerdb->passwd != '')$command.= ' -P "'.$layerdb->passwd.'"';
-					if($layerdb->port != '')$command.=' -p '.$layerdb->port;
-					if($layerdb->host != '') $command .= ' -h ' . $layerdb->host;
-					$command.= ' -f '.$exportfile.' '.$layerdb->dbName.' '.$temp_table; 
-					exec($command);
-					#echo $command;
+					$this->ogr2ogr_export($sql, '"ESRI Shapefile"', $exportfile.'.shp', $layerdb);
 					$fp = fopen($exportfile.'.cpg', 'w');
 					fwrite($fp, 'UTF-8');
 					fclose($fp);
@@ -701,13 +752,13 @@ class data_import_export {
 				}break;
 				
 				case 'GML' : {
-					$this->ogr2ogr($sql, 'GML', $exportfile.'.xml', $layerdb);
+					$this->ogr2ogr_export($sql, 'GML', $exportfile.'.xml', $layerdb);
 					$zip = true;
 				}break;
 				
 				case 'KML' : {
 					$exportfile = $exportfile.'.kml';
-					$this->ogr2ogr($sql, 'KML', $exportfile, $layerdb);
+					$this->ogr2ogr_export($sql, 'KML', $exportfile, $layerdb);
 					$contenttype = 'application/vnd.google-earth.kml+xml';
 				}break;
 				

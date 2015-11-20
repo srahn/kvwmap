@@ -37,7 +37,7 @@ function show_details(oid){
 	currentform.details.value = 'true';
 	currentform.offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value = '';
 	currentform.value_b_plan_stammdaten_oid.value = oid;
-	currentform.submit();
+	overlay_submit(currentform, false);
 }
 
 function go_back(){
@@ -46,7 +46,7 @@ function go_back(){
 	currentform.selected_layer_id.value = <? echo $this->qlayerset[$i]['Layer_ID'] ?>;
 	currentform.value_b_plan_stammdaten_oid.value = '';
 	currentform.offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value = currentform._offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value;
-	currentform.submit();
+	overlay_submit(currentform, false);
 }
 
 function copy_dataset(plan_id){
@@ -770,7 +770,7 @@ else {
   }
 ?>
 
-<input type="hidden" value="1" name="changed_<? echo $layer['shape'][$k][$attributes['table_name'][$attributes['name'][0]].'_oid']; ?>">
+<input type="hidden" value="1" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][0]].'_oid']; ?>">
 <input name="search" type="hidden" value="true">
 <input type="hidden" name="details" value="<? echo $this->formvars['details']; ?>">
 <input type="hidden" name="plan_id" value="">

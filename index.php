@@ -928,7 +928,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->gpx_import();
 	  } break;
 	  
-	  case 'GPX_Import_importieren' : {
+	  case 'GPX_Import_Laden' : {
 			$GUI->checkCaseAllowed('GPX_Import');
 			$GUI->gpx_import_importieren();
 	  } break;

@@ -66,7 +66,7 @@
 			onmouseenter="if(typeof FormData !== 'undefined')ahah('index.php', 'go=tooltip_query&querylayer_id=<? echo $layer['Layer_ID']; ?>&oid=<? echo $layer['shape'][$k][$attributes['table_name'][$attributes['the_geom']].'_oid']; ?>', new Array(top.document.GUI.result, ''), new Array('setvalue', 'execute_function'));"
 			<? } ?>
 			>
-	    <input type="hidden" value="" name="changed_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
+	    <input type="hidden" value="" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
 	    <table id="dstable" class="tgle" <? if($attributes['group'][0] != ''){echo 'border="0" cellpadding="6" cellspacing="0"';}else{echo 'border="1"';} ?>>
 				<? if($this->new_entry != true AND $this->formvars['printversion'] == ''){ ?>
 	      <thead class="gle">
@@ -499,7 +499,7 @@
 
 <?
   }
-  elseif($layer['requires'] == ''){
+  elseif($layer['requires'] == '' AND $layer['required'] == ''){
 ?>
 <table border="0" cellspacing="10" cellpadding="2">
   <tr>
