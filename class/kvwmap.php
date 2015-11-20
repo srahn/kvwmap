@@ -6643,17 +6643,21 @@ class GUI {
 				$layerset[0]['sql'] = $sql;
 				#echo "Abfragestatement: ".$sql.$sql_order.$sql_limit;
         $ret=$layerdb->execSQL('SET enable_seqscan=off;'.$sql.$sql_order.$sql_limit,4, 0);
-        if (!$ret[0]) {
+        if(!$ret[0]){
           while ($rs=pg_fetch_assoc($ret[1])) {
             $layerset[0]['shape'][]=$rs;
           }
-          # Anzahl der Datensätze abfragen
-          $sql_count = "SELECT count(*) FROM (".$sql.") as foo";
-          $ret=$layerdb->execSQL($sql_count,4, 0);
-          if (!$ret[0]) {
-            $rs=pg_fetch_array($ret[1]);
-            $layerset[0]['count'] = $rs[0];
-          }
+					$num_rows = pg_num_rows($ret[1]);
+					if($num_rows < $this->formvars['anzahl'])$layerset[0]['count'] = $num_rows;
+					else{
+						# Anzahl der Datensätze abfragen
+						$sql_count = "SELECT count(*) FROM (".$sql.") as foo";
+						$ret=$layerdb->execSQL($sql_count,4, 0);
+						if(!$ret[0]){
+							$rs=pg_fetch_array($ret[1]);
+							$layerset[0]['count'] = $rs[0];
+						}
+					}
         }
         # Hier nach der Abfrage der Sachdaten die weiteren Attributinformationen hinzufügen
         # Steht an dieser Stelle, weil die Auswahlmöglichkeiten von Auswahlfeldern abhängig sein können
@@ -10969,12 +10973,16 @@ class GUI {
 								while ($rs=pg_fetch_assoc($ret[1])) {
 									$layerset[$i]['shape'][]=$rs;
 								}
-								# Anzahl der Datensätze abfragen
-								$sql_count = "SELECT count(*) FROM (".$sql.") as foo";
-								$ret=$layerdb->execSQL($sql_count,4, 0);
-								if (!$ret[0]) {
-									$rs=pg_fetch_array($ret[1]);
-									$layerset[$i]['count'] = $rs[0];
+								$num_rows = pg_num_rows($ret[1]);
+								if($num_rows < $this->formvars['anzahl'])$layerset[$i]['count'] = $num_rows;
+								else{
+									# Anzahl der Datensätze abfragen
+									$sql_count = "SELECT count(*) FROM (".$sql.") as foo";
+									$ret=$layerdb->execSQL($sql_count,4, 0);
+									if (!$ret[0]) {
+										$rs=pg_fetch_array($ret[1]);
+										$layerset[$i]['count'] = $rs[0];
+									}
 								}
 							}
 							# Hier nach der Abfrage der Sachdaten die weiteren Attributinformationen hinzufügen
