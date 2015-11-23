@@ -6648,7 +6648,7 @@ class GUI {
             $layerset[0]['shape'][]=$rs;
           }
 					$num_rows = pg_num_rows($ret[1]);
-					if($num_rows < $this->formvars['anzahl'])$layerset[0]['count'] = $num_rows;
+					if($this->formvars['offset_'.$layerset[0]['Layer_ID']] == '' AND $num_rows < $this->formvars['anzahl'])$layerset[0]['count'] = $num_rows;
 					else{
 						# Anzahl der Datensätze abfragen
 						$sql_count = "SELECT count(*) FROM (".$sql.") as foo";
@@ -10974,7 +10974,7 @@ class GUI {
 									$layerset[$i]['shape'][]=$rs;
 								}
 								$num_rows = pg_num_rows($ret[1]);
-								if($num_rows < $this->formvars['anzahl'])$layerset[$i]['count'] = $num_rows;
+								if($this->formvars['offset_'.$layerset[$i]['Layer_ID']] == '' AND $num_rows < $this->formvars['anzahl'])$layerset[$i]['count'] = $num_rows;
 								else{
 									# Anzahl der Datensätze abfragen
 									$sql_count = "SELECT count(*) FROM (".$sql.") as foo";
