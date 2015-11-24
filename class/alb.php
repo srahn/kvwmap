@@ -398,11 +398,13 @@ class ALB {
 	            $anzEigentuemer=count($Eigentuemerliste);
 	            for($e=0;$e<$anzEigentuemer;$e++){
 	            	if($e > 0)$csv .= "\n";
-	              $csv .= $Eigentuemerliste[$e]->Nr.' ';
-	              $anzNamenszeilen = count($Eigentuemerliste[$e]->Name);
-	              for($n=0;$n<$anzNamenszeilen;$n++) {
-	                $csv .= $Eigentuemerliste[$e]->Name[$n].' ';
-	              }
+	              $csv .= $Eigentuemerliste[$e]->zusatz_eigentuemer;
+								$csv .= $Eigentuemerliste[$e]->Nr;
+								$anzNamenszeilen = count($Eigentuemerliste[$e]->Name);
+								for($n=0;$n<$anzNamenszeilen;$n++) {
+									$csv .= ' '.$Eigentuemerliste[$e]->Name[$n];
+								}						
+								if($Eigentuemerliste[$e]->Anteil != '')$csv .= '  zu '.$Eigentuemerliste[$e]->Anteil;
 	            }
 	          }
 	        $csv .= '";';
@@ -626,7 +628,8 @@ class ALB {
 				$csv .= ';';
 			}
 						
-				$csv .= '\''.$Eigentuemerliste[$e]->Nr.'\'';
+				if($Eigentuemerliste[$e]->Nr != '')$csv .= '\''.$Eigentuemerliste[$e]->Nr.'\'';
+				$csv .= $Eigentuemerliste[$e]->zusatz_eigentuemer;
 				if($Eigentuemerliste[$e]->Anteil !=''){$csv .= '  zu '.$Eigentuemerliste[$e]->Anteil;}
 				$csv .= ';';
 				$anzNamenszeilen = count($Eigentuemerliste[$e]->Name);
@@ -857,11 +860,13 @@ class ALB {
 					$anzEigentuemer=count($Eigentuemerliste);
 					for($e=0;$e<$anzEigentuemer;$e++){
 						if($e > 0)$csv .= ' | ';
-						$csv .= $Eigentuemerliste[$e]->Nr.' ';
+						$csv .= $Eigentuemerliste[$e]->zusatz_eigentuemer;
+						$csv .= $Eigentuemerliste[$e]->Nr;
 						$anzNamenszeilen = count($Eigentuemerliste[$e]->Name);
-						for($nz=0;$nz<$anzNamenszeilen;$nz++) {
-							$csv .= $Eigentuemerliste[$e]->Name[$nz].' ';
-						}
+						for($n=0;$n<$anzNamenszeilen;$n++) {
+							$csv .= ' '.$Eigentuemerliste[$e]->Name[$n];
+						}						
+						if($Eigentuemerliste[$e]->Anteil != '')$csv .= '  zu '.$Eigentuemerliste[$e]->Anteil;
 					}
 				}
         $csv .= ';';
@@ -1112,11 +1117,13 @@ class ALB {
 					$anzEigentuemer=count($Eigentuemerliste);
 					for($e=0;$e<$anzEigentuemer;$e++){
 						if($e > 0)$csv .= "\n";
-						$csv .= $Eigentuemerliste[$e]->Nr.' ';
+						$csv .= $Eigentuemerliste[$e]->zusatz_eigentuemer;
+						$csv .= $Eigentuemerliste[$e]->Nr;
 						$anzNamenszeilen = count($Eigentuemerliste[$e]->Name);
 						for($n=0;$n<$anzNamenszeilen;$n++) {
-							$csv .= $Eigentuemerliste[$e]->Name[$n].' ';
-						}
+							$csv .= ' '.$Eigentuemerliste[$e]->Name[$n];
+						}						
+						if($Eigentuemerliste[$e]->Anteil != '')$csv .= '  zu '.$Eigentuemerliste[$e]->Anteil;
 					}
 				}
         $csv .= '";';
