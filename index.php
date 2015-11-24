@@ -48,6 +48,8 @@ define(CASE_COMPRESS, false);																																						#
 #										- man muss einen anderen EPSG-Code als den der Ref-Karte (2398) eingestellt haben		#
 # 	tooltip_query:	- ein Datensatz mit Bild muss abgefragt werden																			#
 #																																																				#
+#		alle:						- die Stelle muss die IP checken  																									#
+#																																																				#
 #########################################################################################################
 
 $non_spatial_cases = array('changemenue_with_ajax');		// für non-spatial cases wird in start.php keine Verbindung zur PostgreSQL aufgebaut usw.
