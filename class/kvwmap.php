@@ -3941,9 +3941,6 @@ class GUI {
     $layerdb = $dbmap->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
     $pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
     if($this->formvars['oid'] != '') {
-    	if($layerset[0]['schema'] != ''){
-    		$this->formvars['layer_tablename'] = $layerset[0]['schema'].'.'.$this->formvars['layer_tablename'];
-    	}
       $this->point = $pointeditor->getpoint($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname']);
       $rect = ms_newRectObj();
 			if(defined('ZOOMBUFFER') AND ZOOMBUFFER > 0)$rand = ZOOMBUFFER;
