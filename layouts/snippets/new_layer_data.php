@@ -12,7 +12,7 @@
 </script>
 <table border="0" cellpadding="5" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
-    <td colspan="5"><h2><?php echo $strtitle; ?>:&nbsp;<? echo $this->qlayerset[0]['Name']; ?></h2></td>
+    <td colspan="5"><h2><?php echo $strtitle; ?>:&nbsp;<? if($this->qlayerset[0]['alias'] != '')echo $this->qlayerset[0]['alias']; else echo $this->qlayerset[0]['Name']; ?></h2></td>
   </tr>
   <tr <? if($this->formvars['selected_layer_id'] != '')echo 'style="display:none"'; ?>>
   	<td>&nbsp;</td>

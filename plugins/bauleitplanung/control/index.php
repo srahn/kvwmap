@@ -83,7 +83,13 @@
 			$rect = $rok->getExtentFromRokNrBplan($this->formvars['roknr'], $this->formvars['art'], 10, $this->user->rolle->epsg_code);
 			$this->loadMap('DataBase');
 			if ($rect->minx!=0 and $rect->miny!=0 and $rect->maxx!=0 and $rect->maxy!=0) {
-				$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);	  
+				$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
+				if (MAPSERVERVERSION > 600) {
+					$this->map_scaledenom = $this->map->scaledenom;
+				}
+				else {
+					$this->map_scaledenom = $this->map->scale;
+				}
 			}
 			else {
 				$this->Fehlermeldung='Es konnte kein Geltungsbereich mit ROK-Nr. = '.$this->formvars['roknr'].' gefunden werden.';
