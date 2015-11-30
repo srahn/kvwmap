@@ -2066,7 +2066,7 @@ class GUI {
     $layer = array_merge($layer, $rollenlayer);
 		$anzLayer = count($layer);
 		for($i = 0; $i < $anzLayer; $i++){
-			if($layer[$i]['connectiontype'] == MS_POSTGIS){
+			if($layer[$i]['connectiontype'] == MS_POSTGIS AND in_array($layer[$i]['Datentyp'], array(MS_LAYER_POINT, MS_LAYER_LINE, MS_LAYER_POLYGON))){
 				if($this->formvars['scale'] < $layer[$i]['minscale'] OR $layer[$i]['maxscale'] > 0 AND $this->formvars['scale'] > $layer[$i]['maxscale']){
         	continue;
       	}
@@ -2077,12 +2077,13 @@ class GUI {
 				$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects('.$data_attributes['the_geom'].', '.$extent.')';
 				# Filter hinzufügen
 				if($layer[$i]['Filter'] != ''){
+					$layer[$i]['Filter'] = str_replace('$userid', $this->user->id, $layer[$i]['Filter']);
           $fromwhere .= " AND ".$layer[$i]['Filter'];
         }
 				if($data_attributes['the_geom'] != ''){
 					switch($layer[$i]['Datentyp']){
 						case MS_LAYER_POINT : {
-							$sql = 'SELECT st_x(the_geom), st_y(the_geom) FROM (SELECT st_transform('.$data_attributes['the_geom'].', '.$this->user->rolle->epsg_code.') as '.$data_attributes['the_geom'].' '.$fromwhere.') foo LIMIT 10000';
+							$sql = 'SELECT st_x(the_geom), st_y(the_geom) FROM (SELECT st_transform('.$data_attributes['the_geom'].', '.$this->user->rolle->epsg_code.') as the_geom '.$fromwhere.') foo LIMIT 10000';
 						}break;
 					
 						case MS_LAYER_LINE : {				
