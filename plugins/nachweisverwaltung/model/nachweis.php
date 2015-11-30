@@ -428,10 +428,21 @@ class Nachweis {
   
 	function CreateNachweisDokumentVorschau($dateiname){
 		$dateinamensteil=explode('.',$dateiname);
-		$command = IMAGEMAGICKPATH.'convert '.$dateiname.'[0] -quality 75 -resize 800x800\> '.$dateinamensteil[0].'_thumb.jpg';
-		exec($command);
-		if(!file_exists($dateinamensteil[0].'_thumb.jpg')){
-			return 'Fehler! Das Vorschaubild konnte mit folgendem Befehl nicht generiert werden: '.$command;
+		$command = IMAGEMAGICKPATH.'convert '.$dateiname.'[0] -quality 75 -background white -flatten -resize 800x800\> '.$dateinamensteil[0].'_thumb.jpg';
+		exec($command, $ausgabe, $ret);
+		if($ret == 1){
+			$type = $dateinamensteil[1];
+  		switch ($type) {  			
+  			default : {
+  				$image = imagecreatefromgif(GRAPHICSPATH.'document.gif');
+          $textbox = imagettfbbox(13, 0, WWWROOT.APPLVERSION.'fonts/arial.ttf', '.'.$type);
+          $textwidth = $textbox[2] - $textbox[0] + 13;
+          $blue = ImageColorAllocate ($image, 26, 87, 150);
+          imagettftext($image, 13, 0, 22, 34, $blue, WWWROOT.APPLVERSION.'fonts/arial_bold.ttf', $type);
+          $thumbname = $dateinamensteil[0].'_thumb.jpg';
+          imagejpeg($image, $thumbname);
+  			}
+  		}
 		}
   }
 	
