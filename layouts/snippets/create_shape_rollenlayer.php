@@ -21,7 +21,7 @@ function save(){
   <tr align="center"> 
     <td colspan="3"><h2><?php echo $this->titel; ?></h2></td>
   </tr>
-  <? if($this->shape->formvars['zipfile'] == ''){ ?>
+  <? if($this->shape->formvars['file1'] == ''){ ?>
   <tr>
   	<td>&nbsp;</td>
   	<td colspan="2"><?php echo $strLoadZipArchieve; ?></td>
@@ -30,7 +30,7 @@ function save(){
   <tr>
   	<td>&nbsp;</td>
 		<td align="right"><span class="fett"><?php echo $strZipArchive; ?></span></td>
-		<td><input type="file" name="zipfile"></td>
+		<td><input type="file" name="file1"></td>
 		<td>&nbsp;</td>
 	</tr>
 	<tr align="center">

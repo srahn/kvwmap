@@ -39,7 +39,7 @@ class data_import_export {
 	
   function create_import_rollenlayer($formvars, $type, $stelle, $user, $database, $pgdatabase){
 		$_files = $_FILES;
-		$file = $_files['gpxfile']['name'];
+		$file = $_files['file1']['name'];
 		switch ($type){
 			case 'Shape' : {
 				$custom_tables = $this->import_custom_shape($formvars, $pgdatabase);
@@ -49,6 +49,10 @@ class data_import_export {
 			}break;
 			case 'GPX' : {
 				$custom_tables = $this->import_custom_gpx($formvars, $pgdatabase);
+				$formvars['epsg'] = 4326;
+			}break;
+			case 'OVL' : {
+				$custom_tables = $this->import_custom_ovl($formvars, $pgdatabase);
 				$formvars['epsg'] = 4326;
 			}break;
 		}
@@ -139,9 +143,9 @@ class data_import_export {
   
 	function load_custom_pointlist($formvars){
 		$_files = $_FILES;
-		if($_files['pointfile']['name']){
-			$this->pointfile = UPLOADPATH.$_files['pointfile']['name'];
-			if(move_uploaded_file($_files['pointfile']['tmp_name'], $this->pointfile)){
+		if($_files['file1']['name']){
+			$this->pointfile = UPLOADPATH.$_files['file1']['name'];
+			if(move_uploaded_file($_files['file1']['tmp_name'], $this->pointfile)){
 				$rows = file($this->pointfile);
 				$delimiters = array(';', ' ', ',');		# erlaubte Trennzeichen
 				while(count($delimiters) > 0 AND count($this->columns) < 2){
@@ -153,9 +157,9 @@ class data_import_export {
 	}
 	
 	function import_custom_pointlist($formvars, $pgdatabase){
-		$rows = file($formvars['pointfile']);
+		$rows = file($formvars['file1']);
 		$delimiters = array(';', ' ', ',');		# erlaubte Trennzeichen
-		$tablename = 'a'.strtolower(umlaute_umwandeln(basename($formvars['pointfile']))).rand(1,1000000);
+		$tablename = 'a'.strtolower(umlaute_umwandeln(basename($formvars['file1']))).rand(1,1000000);
 		$columns = explode($formvars['delimiter'], $rows[0]);
 		$sql = "CREATE TABLE ".CUSTOM_SHAPE_SCHEMA.".".$tablename." (";
 		$komma = false;
@@ -181,7 +185,7 @@ class data_import_export {
 					$komma = true;
 				}
 				else{
-					$$formvars['column'.$i] = $columns[$i];			# Hier werden $x und $y gesetzt
+					$formvars['column'.$i] = $columns[$i];			# Hier werden $x und $y gesetzt
 				}
 			}
 			$sql.= ", st_geomfromtext('POINT(".$x." ".$y.")', ".$formvars['epsg']."));";
@@ -196,11 +200,77 @@ class data_import_export {
 		}
 	}
 	
+	function import_custom_ovl($formvars, $pgdatabase){
+		$_files = $_FILES;
+		if($_files['file1']['name']){
+			$this->ovlfile = UPLOADPATH.$_files['file1']['name'];
+			if(move_uploaded_file($_files['file1']['tmp_name'], $this->ovlfile)){
+				$rows = file($this->ovlfile);
+				$tablename = 'a'.strtolower(umlaute_umwandeln(basename($formvars['file1']))).rand(1,1000000);		
+				foreach($rows as $row){
+					$kvp = explode('=', $row);
+					if($kvp[1] != '')$kvps[$kvp[0]] = $kvp[1];
+					if($kvp[0] == 'XKoord' OR $kvp[0] == 'XKoord0'){
+						$geom = $kvp[1];
+						$geom_start = true;
+						$komma = false;
+					}
+					elseif($geom_start){
+						if($komma){
+							$geom.= ',';
+							$komma = false;
+						}
+						else{
+							$geom.= ' ';
+							$komma = true;
+						}
+						$geom.= $kvp[1];
+						if($startpoint == '')$startpoint = $geom;
+					}
+				}
+				switch($kvps['Typ']){
+					case 2 : case 6:	{
+						$geomtype = 'POINT';
+						$geom = 'POINT('.$geom.')';
+						$custom_table['datatype'] = 0;
+					}break;
+					
+					case 3 :	{
+						$geomtype = 'LINESTRING';
+						$geom = 'LINESTRING('.$geom.')';
+						$custom_table['datatype'] = 1;
+					}break;
+					case 4 :	{
+						$geomtype = 'POLYGON';
+						$geom .= ','.$startpoint;			// Polygonring schliessen
+						$geom = 'POLYGON(('.$geom.'))';
+						$custom_table['datatype'] = 2;
+					}break;
+				}				
+				$sql = "CREATE TABLE ".CUSTOM_SHAPE_SCHEMA.".".$tablename." (";
+				$sql.= "label varchar";
+				$sql.= ")WITH (OIDS=TRUE);";
+				$sql.= "SELECT AddGeometryColumn('".CUSTOM_SHAPE_SCHEMA."', '".$tablename."', 'the_geom', 4326, '".$geomtype."', 2);";
+				
+				$sql.= "INSERT INTO ".CUSTOM_SHAPE_SCHEMA.".".$tablename." VALUES(";
+				$sql.= "'".$kvps['Text']."'";
+				$sql.= ", st_geomfromtext('".$geom."', 4326));";
+				#echo $sql;
+				$ret = $pgdatabase->execSQL($sql,4, 0);
+				if(!$ret[0]){
+					$custom_table['tablename'] = $tablename;
+					$custom_table['labelitem'] = 'label';
+					return array($custom_table);
+				}
+			}
+		}
+	}
+	
 	function import_custom_shape($formvars, $pgdatabase){
 		$_files = $_FILES;	
-		if($_files['zipfile']['name']){     # eine Zipdatei wurde ausgewählt
-      $nachDatei = UPLOADPATH.$_files['zipfile']['name'];
-      if(move_uploaded_file($_files['zipfile']['tmp_name'],$nachDatei)){
+		if($_files['file1']['name']){     # eine Zipdatei wurde ausgewählt
+      $nachDatei = UPLOADPATH.$_files['file1']['name'];
+      if(move_uploaded_file($_files['file1']['tmp_name'],$nachDatei)){
 				$files = unzip($nachDatei, false, false, true);
 				$firstfile = explode('.', $files[0]);
 				$file = $firstfile[0];
@@ -243,9 +313,9 @@ class data_import_export {
 	
 	function import_custom_gpx($formvars, $pgdatabase){
 		$_files = $_FILES;	
-		if($_files['gpxfile']['name']){
-      $importfile = UPLOADPATH.$_files['gpxfile']['name'];
-      if(move_uploaded_file($_files['gpxfile']['tmp_name'],$importfile)){
+		if($_files['file1']['name']){
+      $importfile = UPLOADPATH.$_files['file1']['name'];
+      if(move_uploaded_file($_files['file1']['tmp_name'],$importfile)){
 				if(file_exists($importfile)){
 					if($formvars['tracks']){
 						$tablename = 'a'.strtolower(umlaute_umwandeln(basename($importfile))).rand(1,1000000);

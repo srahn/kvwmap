@@ -934,6 +934,16 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->checkCaseAllowed('GPX_Import');
 			$GUI->gpx_import_importieren();
 	  } break;
+		
+		case 'OVL_Import' : {
+			$GUI->checkCaseAllowed('OVL_Import');
+			$GUI->ovl_import();
+	  } break;
+	  
+	  case 'OVL_Import_Laden' : {
+			$GUI->checkCaseAllowed('OVL_Import');
+			$GUI->ovl_import_importieren();
+	  } break;
 
 		case 'SHP_Anzeigen' : {
 			$GUI->create_shp_rollenlayer();
