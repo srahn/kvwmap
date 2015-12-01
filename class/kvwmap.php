@@ -6536,8 +6536,8 @@ class GUI {
 								$sql_where .= ' AND query.'.$layerset[0]['attributes']['name'][$i].' '.$this->formvars[$prefix.'operator_'.$layerset[0]['attributes']['name'][$i]].' ';
 							}
 						}
-						if($this->formvars['value2_'.$layerset[0]['attributes']['name'][$i]] != ''){
-							$sql_where.=' AND \''.$this->formvars['value2_'.$layerset[0]['attributes']['name'][$i]].'\'';
+						if($this->formvars[$prefix.'value2_'.$layerset[0]['attributes']['name'][$i]] != ''){
+							$sql_where.=' AND \''.$this->formvars[$prefix.'value2_'.$layerset[0]['attributes']['name'][$i]].'\'';
 						}
 						# räumliche Einschränkung
 						if($m == 0 AND $layerset[0]['attributes']['name'][$i] == $layerset[0]['attributes']['the_geom']){		// nur einmal machen, also nur bei $m == 0
