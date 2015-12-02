@@ -181,11 +181,11 @@ class data_import_export {
 			for($i = 0; $i < count($columns); $i++){
 				if($formvars['column'.$i] != 'x' AND $formvars['column'.$i] != 'y'){
 					if($komma)$sql.= ", ";
-					$sql.= "E'".addslashes($columns[$i])."'";
+					$sql.= "E'".addslashes(utf8_encode($columns[$i]))."'";
 					$komma = true;
 				}
 				else{
-					$formvars['column'.$i] = $columns[$i];			# Hier werden $x und $y gesetzt
+					$$formvars['column'.$i] = $columns[$i];			# Hier werden $x und $y gesetzt (nicht das doppelte $ wegnehmen!)
 				}
 			}
 			$sql.= ", st_geomfromtext('POINT(".$x." ".$y.")', ".$formvars['epsg']."));";
