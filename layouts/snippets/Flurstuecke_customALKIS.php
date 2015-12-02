@@ -207,7 +207,7 @@ show_all = function(count){
           ?>
           <tr>
                 <td align="right"><span class="fett">Amtsgericht</span>&nbsp;</td>
-                <td><?php if($privileg_['amtsgerichtnr']){echo $flst->Amtsgericht['schluessel'];} ?>&nbsp;&nbsp;<?php if($privileg_['amtsgerichtname']){ echo $flst->Amtsgericht['name'];} ?></td>
+                <td><?php if($privileg_['amtsgerichtname']){ echo $flst->Amtsgericht['name'];} ?>&nbsp;<? if($privileg_['amtsgerichtnr']){echo '('.$flst->Amtsgericht['schluessel'].')';} ?></td>
               </tr>
               <? }
               $both = ($privileg_['grundbuchbezirkname'] AND $privileg_['grundbuchbezirkschl']);
@@ -215,7 +215,7 @@ show_all = function(count){
           ?>
               <tr>
                 <td align="right"><span class="fett">Grundbuchbezirk</span>&nbsp;</td>
-                <td><?php if($privileg_['grundbuchbezirkschl']){ echo $flst->Grundbuchbezirk['schluessel'];} ?>&nbsp;&nbsp;<?php if($privileg_['grundbuchbezirkname']){ echo $flst->Grundbuchbezirk['name'];} ?></td>
+                <td><?php if($privileg_['grundbuchbezirkname']){ echo $flst->Grundbuchbezirk['name'];} ?>&nbsp;<? if($privileg_['grundbuchbezirkschl']){ echo '('.$flst->Grundbuchbezirk['schluessel'].')';} ?></td>
               </tr>
           <? }
           if($privileg_['lagebezeichnung']){ ?>
