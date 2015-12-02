@@ -61,7 +61,7 @@ class ddl {
 	
 	function add_freetexts($i, $offsetx, $offsety, $type, $pagenumber = NULL, $pagecount = NULL){
 		if(count($this->remaining_freetexts) == 0)return;
-		if($this->page_overflow_by_sublayout)$this->pdf->reopenObject($this->page_id_before_sublayout);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
+		if($type != 'everypage' AND $this->page_overflow_by_sublayout)$this->pdf->reopenObject($this->page_id_before_sublayout);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
     for($j = 0; $j < count($this->layout['texts']); $j++){		
 			# der Freitext wurde noch nicht geschrieben und ist entweder ein fester Freitext oder ein fortlaufender oder einer, der auf jeder Seite erscheinen soll
     	if(in_array($this->layout['texts'][$j]['id'], $this->remaining_freetexts) AND $this->layout['texts'][$j]['posy'] > 0){	# nur Freitexte mit einem y-Wert werden geschrieben
@@ -101,7 +101,7 @@ class ddl {
 				}
 			}
 	  }
-		$this->pdf->closeObject();									# falls in eine alte Seite geschrieben wurde, zurückkehren
+		if($type != 'everypage')$this->pdf->closeObject();									# falls in eine alte Seite geschrieben wurde, zurückkehren
 		return $remaining_freetexts;
 	}
 	
