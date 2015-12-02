@@ -149,7 +149,7 @@
 							echo '</td>
 							</tr>
 							<tr>
-			 					<td align="center" colspan="5"><input class="button" type="button" onclick="save(\''.$this->stelle->id.'\');" name="speichern" value="speichern">
+			 					<td align="center" colspan="5"><input class="button" type="button" onclick="save(\''.implode('|', $this->stellen['ID']).'\');" name="speichern" value="speichern">
 			 					</td>
 			 				</tr>
 			 				<tr>
