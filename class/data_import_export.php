@@ -45,6 +45,7 @@ class data_import_export {
 				$custom_tables = $this->import_custom_shape($formvars, $pgdatabase);
 			}break;
 			case 'point' : {
+				$file = basename($formvars['file1']);
 				$custom_tables = $this->import_custom_pointlist($formvars, $pgdatabase);
 			}break;
 			case 'GPX' : {
@@ -150,7 +151,7 @@ class data_import_export {
 				$delimiters = array(';', ' ', ',');		# erlaubte Trennzeichen
 				while(count($delimiters) > 0 AND count($this->columns) < 2){
 					$this->delimiter = array_shift($delimiters);
-					$this->columns = explode($this->delimiter, $rows[0]);
+					$this->columns = explode($this->delimiter, utf8_encode($rows[0]));
 				}
 			}
 		}
@@ -161,20 +162,33 @@ class data_import_export {
 		$delimiters = array(';', ' ', ',');		# erlaubte Trennzeichen
 		$tablename = 'a'.strtolower(umlaute_umwandeln(basename($formvars['file1']))).rand(1,1000000);
 		$columns = explode($formvars['delimiter'], $rows[0]);
+		for($i = 0; $i < count($columns); $i++){
+			if($formvars['column'.$i] == 'x' AND !is_numeric($columns[$i]))$headlines = true;		// die erste Zeile enthält die Spaltenüberschriften
+		}
 		$sql = "CREATE TABLE ".CUSTOM_SHAPE_SCHEMA.".".$tablename." (";
 		$komma = false;
 		for($i = 0; $i < count($columns); $i++){
 			if($formvars['column'.$i] != 'x' AND $formvars['column'.$i] != 'y'){
 				if($komma)$sql.= ", ";
 				$j = $i+1;
-				$sql.= "spalte".$j." varchar";
+				if($headlines){
+					$column = strtolower(umlaute_umwandeln(utf8_encode($columns[$i])));
+					$sql.= $column." varchar";
+					if($formvars['column'.$i] == 'label')$labelitem = $column;
+				}
+				else{
+					$sql.= "spalte".$j." varchar";
+					if($formvars['column'.$i] == 'label')$labelitem = 'spalte'.$j;
+				}
 				$komma = true;
-				if($formvars['column'.$i] == 'label')$labelitem = $i+1;
 			}
 		}
 		$sql.= ")WITH (OIDS=TRUE);";
 		$sql.= "SELECT AddGeometryColumn('".CUSTOM_SHAPE_SCHEMA."', '".$tablename."', 'the_geom', ".$formvars['epsg'].", 'POINT', 2);";
+		$sql.= "CREATE INDEX ".$tablename."_gist_idx ON ".CUSTOM_SHAPE_SCHEMA.".".$tablename." USING gist (the_geom );";
+		$i = 0;
 		foreach($rows as $row){
+			if($headlines AND $i == 0){$i++;continue;}				// Überschriftenzeile auslassen
 			$columns = explode($formvars['delimiter'], $row);
 			$sql.= "INSERT INTO ".CUSTOM_SHAPE_SCHEMA.".".$tablename." VALUES(";
 			$komma = false;
@@ -189,13 +203,14 @@ class data_import_export {
 				}
 			}
 			$sql.= ", st_geomfromtext('POINT(".$x." ".$y.")', ".$formvars['epsg']."));";
+			$i++;
 		}
 		#echo $sql;
 		$ret = $pgdatabase->execSQL($sql,4, 0);
 		if(!$ret[0]){
 			$custom_table['datatype'] = 0;
 			$custom_table['tablename'] = $tablename;
-			$custom_table['labelitem'] = 'spalte'.$labelitem;
+			$custom_table['labelitem'] = $labelitem;
 			return array($custom_table);
 		}
 	}
