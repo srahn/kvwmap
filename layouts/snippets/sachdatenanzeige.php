@@ -5,13 +5,18 @@
  ?>
 	<img height="7" src="<? echo GRAPHICSPATH ?>leer.gif">
 	<a name="oben"></a>	
-<?php
+<? if($this->user->rolle->querymode == 1){ ?>
+	<script type="text/javascript">
+		document.getElementById('overlayfooter').style.display = 'none';
+		document.getElementById('savebutton').style.display = 'none';
+	</script>
+<? }
+$this->found = 'false';
 $anzLayer=count($this->qlayerset);
 if ($anzLayer==0) {
 	?>
 <span style="font:normal 12px verdana, arial, helvetica, sans-serif; color:#FF0000;"><? echo $strNoLayer; ?></span>	<br/>
-	<?php
-	$this->found = 'false';
+	<?php	
 }
 for($i=0;$i<$anzLayer;$i++){
 	if ($this->qlayerset[$i]['template']=='') {
@@ -62,7 +67,7 @@ for($i=0;$i<$anzLayer;$i++){
 	   echo'
 	   <table border="0" cellpadding="2" width="100%" cellspacing="0">
 
-	   	<tr height="50px" valign="top">
+	   	<tr valign="top">
 	   		<td align="right" width="38%">';
 	   		if($this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] >= $this->formvars['anzahl'] AND $this->formvars['printversion'] == ''){
 					echo '<a href="javascript:firstdatasets(\'offset_'.$this->qlayerset[$i]['Layer_ID'].'\');"><img src="'.GRAPHICSPATH.'go-first.png" class="hover-border" style="vertical-align:middle" title="'.$strFirstDatasets.'"></a>&nbsp;&nbsp;&nbsp;';
@@ -86,30 +91,44 @@ for($i=0;$i<$anzLayer;$i++){
    }
 }
 ?>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td align="right">
+			<a href="javascript:scrolltop();"><img class="hover-border" title="nach oben" src="<? echo GRAPHICSPATH; ?>pfeil2.gif" width="11" height="11" border="0"></a>&nbsp;&nbsp;&nbsp;
+		</td>
+	</tr>
+</table>
 <?
-	if($this->editable == 'true' AND $this->formvars['printversion'] == ''){ ?>
+	if($this->found != 'false' AND $this->formvars['printversion'] == ''){	?>		
 		<table width="100%" border="0" cellpadding="0" cellspacing="0">
     <tr>
-    	<td>&nbsp;</td>
-      <td align="center" width="100%"><input type="button" class="button" name="savebutton" value="<? echo $strSave; ?>" onclick="save();">&nbsp;<input class="button" type="reset" value="<? echo $strReset; ?>"></td>
-      <td align="right"><a href="javascript:scrolltop();"><img class="hover-border" title="nach oben" src="<? echo GRAPHICSPATH; ?>pfeil2.gif" width="11" height="11" border="0"></a></td>
+    	<td width="49%"></td>
+      <td align="center">
+			<?  if($this->editable == 'true'){
+						if($this->user->rolle->querymode == 1){ ?>
+							<script type="text/javascript">
+								document.getElementById('savebutton').style.display = 'block';
+							</script>
+				<?  }else{ ?>
+							<input type="button" class="button" name="savebutton" value="<? echo $strSave; ?>" onclick="save();">
+				<? 	}
+					}?>
+			</td>
+			<td align="right" width="49%">
+		<? if($this->user->rolle->querymode == 1){ ?>
+					<script type="text/javascript">
+						document.getElementById('overlayfooter').style.display = 'block';
+					</script>
+		<? }else{ ?>
+			<a href="javascript:druck();" class="px13"><? echo $this->printversion; ?></a>&nbsp;
+			<? } ?>
+			</td>
     </tr>
 		<tr>
 			<td height="30" valign="bottom" align="center" colspan="5" id="loader" style="display:none"><img id="loaderimg" src="graphics/ajax-loader.gif"></td>
 		</tr>
   </table>
-<?
-	}
-	else{ ?>
-		<table width="100%" border="0" cellpadding="10" cellspacing="0">
-    <tr>
-    	<td>&nbsp;</td>
-      <td>&nbsp;</td>
-      <td align="right"><a href="javascript:scrolltop();"><img title="nach oben" src="<? echo GRAPHICSPATH; ?>pfeil2.gif" width="11" height="11" border="0"></a></td>
-    </tr>
-  </table>
-<?	}
-?>
+<? } ?>
   <br><div align="center">
 
 
@@ -157,11 +176,7 @@ for($i=0;$i<$anzLayer;$i++){
   	else{
 			echo '<input name="go" type="hidden" value="Sachdaten">';
   	}
-  if($this->found != 'false' AND $this->formvars['printversion'] == ''){
   ?>
-  <a href="javascript:druck();"><? echo $strDataPrint; ?></a>
-  <br><br>
-  <?}?>
   <a name="unten"></a>
   <input type="hidden" name="anzahl" value="<? echo $this->formvars['anzahl']; ?>">
   <input type="hidden" name="printversion" value="">
