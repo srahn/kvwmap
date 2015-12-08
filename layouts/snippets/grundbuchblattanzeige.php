@@ -77,9 +77,21 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
     		$Nutzunglangtext.=$flst->Nutzung[$i]['flaeche'].'m<sup>2</sup> '.$flst->Nutzung[$i]['bezeichnung'].'<br>';
     	}
     }
+		$index = 0;
+		$rowspan[$index] = 0;
+		for($i=0;$i<$anzObj;$i++){
+			if($this->buchungen[$index]['bvnr'] == $this->buchungen[$i]['bvnr']){
+				$rowspan[$index]++;
+			}
+			else{
+				$index = $i;
+				$rowspan[$index] = 1;
+			}
+		}
+		
 	  ?>
 	  <tr>
-      <td valign="top" align="center">
+      <td valign="top" align="center" <? if($rowspan[0] > 1)echo 'rowspan="'.$rowspan[0].'"' ?>>
 			<? echo $this->buchungen[0]['bvnr'];
 			if($this->Stelle->funktionen['MV0600']['erlaubt']){ ?>&nbsp;<a href="index.php?go=ALKIS_Auszug&formnummer=MV0600&Buchungsstelle=<? echo $this->buchungen[0]['gml_id'] ?>" target="_blank">Grundstücksnachweis</a>&nbsp;<? } ?>
 			</td>
@@ -125,10 +137,12 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 	    	}
 	    }
 	    ?><tr>
-	      <td valign="top" align="center">
+				<? if($rowspan[$i] != ''){ ?>
+	      <td valign="top" align="center" <? if($rowspan[$i] > 1)echo 'rowspan="'.$rowspan[$i].'"' ?>>
 					<? echo $this->buchungen[$i]['bvnr'];
 					if($this->Stelle->funktionen['MV0600']['erlaubt']){ ?>&nbsp;<a href="index.php?go=ALKIS_Auszug&formnummer=MV0600&Buchungsstelle=<? echo $this->buchungen[$i]['gml_id'] ?>" target="_blank">Grundstücksnachweis</a>&nbsp;<? } ?>
 				</td>
+				<? } ?>
 	      <td valign="top" align="center"><?php echo '&nbsp;'.$this->buchungen[$i]['erbbaurechtshinw'];?></td>
 	    	<td valign="top"><? echo $Adressbezeichnung.'&nbsp;'; ?></td>
 	    	<td valign="top"><? echo $Nutzunglangtext.'&nbsp;'; ?></td>
