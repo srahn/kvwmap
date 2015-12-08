@@ -283,6 +283,7 @@ show_all = function(count){
 											echo '<a href="index.php?go='.$set_timestamp.'" title="Zeitpunkt auf aktuell setzen">aktuelles&nbsp;Flurst&uuml;ck</a>';
 										}
 										else echo "aktuelles&nbsp;Flurst&uuml;ck"; 
+										if($flst->strittigeGrenze)echo ' (strittige Grenze)';
 									}  ?></td>
               </tr>
               <? } ?>
