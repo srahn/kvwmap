@@ -11416,7 +11416,8 @@ class GUI {
     $this->mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->queryrect = $rect;
 		if($this->formvars['querylayer_id'] != '' AND $this->formvars['querylayer_id'] != 'undefined'){
-			$layerset = $this->user->rolle->getLayer($this->formvars['querylayer_id']);
+			if($this->formvars['querylayer_id'] < 0)$layerset=$this->user->rolle->getRollenLayer(-$this->formvars['querylayer_id']);
+			else $layerset = $this->user->rolle->getLayer($this->formvars['querylayer_id']);
 			$this->formvars['qLayer'.$this->formvars['querylayer_id']] = '1';
 		}
 		else{
@@ -13984,7 +13985,7 @@ class db_mapObj{
     if($rs['Typ'] == 'import'){		# beim Shape-Import-Layern die Tabelle löschen
 			$explosion = explode('using', $rs['Data']);
     	$explosion = explode(CUSTOM_SHAPE_SCHEMA.'.', $explosion[0]);
-    	$sql = 'DROP TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$explosion[1].';';
+    	$sql = 'DROP TABLE IF EXISTS '.CUSTOM_SHAPE_SCHEMA.'.'.$explosion[1].';';
     	$sql.= 'DELETE FROM geometry_columns WHERE f_table_schema = \''.CUSTOM_SHAPE_SCHEMA.'\' AND f_table_name = \''.$explosion[1].'\'';
     	$this->debug->write("<p>file:kvwmap class:db_mapObj->deleteRollenLayer - Löschen eines RollenLayers:<br>".$sql,4);
       $query=pg_query($sql);

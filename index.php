@@ -47,6 +47,7 @@ define(CASE_COMPRESS, false);																																						#
 #										- ein räumlich gefilterter Layer muss an sein																				#
 #										- man muss einen anderen EPSG-Code als den der Ref-Karte (2398) eingestellt haben		#
 # 	tooltip_query:	- ein Datensatz mit Bild muss abgefragt werden																			#
+#										- getRollenLayer() reinkopieren																											#
 #																																																				#
 #		alle:						- die Stelle muss die IP checken  																									#
 #																																																				#
