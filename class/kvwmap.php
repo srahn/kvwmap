@@ -13983,7 +13983,7 @@ class db_mapObj{
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
     $rs=mysql_fetch_array($query);
     if($rs['Typ'] == 'import'){		# beim Shape-Import-Layern die Tabelle löschen
-			$explosion = explode('using', $rs['Data']);
+			$explosion = explode('WHERE', $rs['Data']);
     	$explosion = explode(CUSTOM_SHAPE_SCHEMA.'.', $explosion[0]);
     	$sql = 'DROP TABLE IF EXISTS '.CUSTOM_SHAPE_SCHEMA.'.'.$explosion[1].';';
     	$sql.= 'DELETE FROM geometry_columns WHERE f_table_schema = \''.CUSTOM_SHAPE_SCHEMA.'\' AND f_table_name = \''.$explosion[1].'\'';
