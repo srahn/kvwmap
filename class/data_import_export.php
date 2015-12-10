@@ -342,7 +342,6 @@ class data_import_export {
 							ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' SET WITH OIDS;
 							ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' RENAME "desc" TO desc_;
 							ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' RENAME "number" TO number_;
-							CREATE INDEX '.$tablename.'_geom_idx ON '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' USING gist(the_geom);
 						';
 						$ret = $pgdatabase->execSQL($sql,4, 0);
 						$custom_table['datatype'] = 1;
@@ -356,7 +355,6 @@ class data_import_export {
 							ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' SET WITH OIDS;
 							ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' RENAME "desc" TO desc_;
 							ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' RENAME "time" TO time_;
-							CREATE INDEX '.$tablename.'_geom_idx ON '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' USING gist(the_geom);
 						';
 						$ret = $pgdatabase->execSQL($sql,4, 0);
 						$custom_table['datatype'] = 0;
@@ -381,7 +379,6 @@ class data_import_export {
 					$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $formvars['epsg'], $importfile, $pgdatabase, NULL);
 					$sql = '
 						ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' SET WITH OIDS;
-						CREATE INDEX '.$tablename.'_geom_idx ON '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' USING gist(the_geom);
 					';
 					$ret = $pgdatabase->execSQL($sql,4, 0);
 					# Punkte
