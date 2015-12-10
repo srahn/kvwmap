@@ -146,7 +146,6 @@ daten_export = function(layer_id, anzahl, format){
 		currentform.chosen_layer_id.value = layer_id;
 		currentform.go_backup.value = currentform.go.value;
 		currentform.go.value = 'Daten_Export';
-		currentform.export_format.value = format;
 		currentform.submit();
 	}
 }

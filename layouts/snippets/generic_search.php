@@ -234,7 +234,7 @@ function add_searchmask(layer_id){
   </tr>
   <tr> 
     <td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3" colspan="5"> 
-      <select style="width:250px" size="1"  name="selected_layer_id" onchange="document.GUI.submit();" <? if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
+      <select style="width:250px" size="1"  name="selected_layer_id" onchange="document.GUI.searchmask_count.value=0;document.GUI.submit();" <? if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
         <option value="">  -- <? echo $this->strPleaseSelect; ?> --  </option>
         <?
         for($i = 0; $i < count($this->layerdaten['ID']); $i++){         
@@ -308,7 +308,7 @@ function add_searchmask(layer_id){
   <tr> 
     <td colspan="5" id="searchmasks">
 
-<? if(count($this->attributes) > 0){  							
+<? if(count($this->attributes) > 0){
 		for($m = 0; $m <= $this->formvars['searchmask_count']; $m++){ 
 			$searchmask_number = $m; 		?>
 			<div>

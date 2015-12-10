@@ -159,18 +159,21 @@ for($i=0;$i<$anzLayer;$i++){
   		}
 
 			if($this->formvars['quicksearch'] != true){
-				for($j = 0; $j < count($this->qlayerset[0]['attributes']['type']); $j++){
-					if($this->qlayerset[0]['attributes']['type'][$j] != 'geometry'){
-						echo '
-							<input name="value_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars['value_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
-							<input name="value2_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars['value2_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
-							<input name="operator_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars['operator_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
-						';
+				for($m = 0; $m <= $this->formvars['searchmask_count']; $m++){
+					if($m > 0)$prefix = $m.'_';
+					for($j = 0; $j < count($this->qlayerset[0]['attributes']['type']); $j++){
+						if($this->qlayerset[0]['attributes']['type'][$j] != 'geometry'){
+							echo '
+								<input name="'.$prefix.'value_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars[$prefix.'value_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
+								<input name="'.$prefix.'value2_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars[$prefix.'value2_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
+								<input name="'.$prefix.'operator_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars[$prefix.'operator_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
+							';
+						}
 					}
 				}
 			}
 	  	if($this->formvars['printversion'] == '' AND $this->formvars['keinzurueck'] == ''){
-	  		echo '<a href="javascript:back();">'.$strbackToSearch.'</a><br><br>';
+	  		echo '<a href="javascript:currentform.go.value=\'Layer-Suche\';currentform.submit();">'.$strbackToSearch.'</a><br><br>';
 	  	}
   	}
   	else{
@@ -211,7 +214,7 @@ for($i=0;$i<$anzLayer;$i++){
 <input name="newpathwkt" type="hidden" value="<?php echo $this->formvars['newpathwkt']; ?>">
 <input name="result" type="hidden" value="">
 <input name="firstpoly" type="hidden" value="<?php echo $this->formvars['firstpoly']; ?>">
-<input name="export_format" type="hidden" value="<?php echo $this->formvars['export_format']; ?>">
+<input type="hidden" name="searchmask_count" value="<? echo $this->formvars['searchmask_count']; ?>">
 
 <div id="vorschau" style="box-shadow: 12px 10px 14px #777;z-index: 1000; position: fixed; right:20px; top:20px; ">
 	<img id="preview_img" src="<? echo GRAPHICSPATH.'leer.gif'; ?>">

@@ -2,7 +2,6 @@
 include(LAYOUTPATH.'languages/generic_search_'.$this->user->rolle->language.'.php');
 include_once(SNIPPETS.'/generic_formelement_definitions.php');
 ?>
-
 <table width="100%" align="center" border="0" cellspacing="0" cellpadding="3" id="searchmasks">
 <?    
 			if($searchmask_number > 0){						// es ist nicht die erste Suchmaske, sondern eine weitere hinzugefügte
@@ -16,6 +15,7 @@ include_once(SNIPPETS.'/generic_formelement_definitions.php');
 						&nbsp;
 						<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text1, Style[0], document.getElementById('Tip1'))" onmouseout="htm()">
 						<div id="Tip1" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+						<!--a href="javascript:close_record('record_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>');" title="Schlie&szlig;en"><img style="border:none" src="<? echo GRAPHICSPATH."symbol_delete.gif"; ?>"></img></a-->
 					</td>
 				</tr>
 				<?

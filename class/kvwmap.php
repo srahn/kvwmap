@@ -6975,7 +6975,7 @@ class GUI {
 						$this->user->rolle->save_search($this->attributes, $this->formvars);
 						$this->formvars['searches'] = $this->formvars['search_name'];
 					}
-					$this->formvars['searchmask_count'] = 0;		// darf erst nach dem speichern passieren
+					if($this->formvars['searchmask_count'] == '')$this->formvars['searchmask_count'] = 0;		// darf erst nach dem speichern passieren
 					# Löschen einer Suchabfrage
 					if($this->formvars['go_plus'] == 'Suchabfrage_löschen'){
 						$this->user->rolle->delete_search($this->formvars['searches'], $this->formvars['selected_layer_id']);
