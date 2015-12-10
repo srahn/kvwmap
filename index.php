@@ -944,6 +944,16 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->checkCaseAllowed('OVL_Import');
 			$GUI->ovl_import_importieren();
 	  } break;
+		
+		case 'DXF_Import' : {
+			$GUI->checkCaseAllowed('DXF_Import');
+			$GUI->dxf_import();
+	  } break;
+	  
+	  case 'DXF_Import_Laden' : {
+			$GUI->checkCaseAllowed('DXF_Import');
+			$GUI->dxf_import_importieren();
+	  } break;
 
 		case 'SHP_Anzeigen' : {
 			$GUI->create_shp_rollenlayer();

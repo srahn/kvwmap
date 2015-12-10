@@ -56,6 +56,9 @@ class data_import_export {
 				$custom_tables = $this->import_custom_ovl($formvars, $pgdatabase);
 				$formvars['epsg'] = 4326;
 			}break;
+			case 'DXF' : {
+				$custom_tables = $this->import_custom_dxf($formvars, $pgdatabase);
+			}break;
 		}
 		foreach($custom_tables as $custom_table){				# ------ Rollenlayer erzeugen ------- #
 			$result_colors = read_colors($database);
@@ -75,8 +78,8 @@ class data_import_export {
 			$this->formvars['Gruppe'] = $groupid;
 			$this->formvars['Typ'] = 'import';
 			$this->formvars['Datentyp'] = $custom_table['datatype'];
-			$this->formvars['Data'] = 'the_geom from '.CUSTOM_SHAPE_SCHEMA.'.'.$custom_table['tablename'].' using srid='.$formvars['epsg'];
-			$this->formvars['query'] = 'SELECT * FROM '.$custom_table['tablename'].' WHERE 1=1';
+			$this->formvars['Data'] = 'the_geom from (SELECT oid, the_geom FROM '.CUSTOM_SHAPE_SCHEMA.'.'.$custom_table['tablename'].' WHERE 1=1 '.$custom_table['where'].')as foo using unique oid using srid='.$formvars['epsg'];
+			$this->formvars['query'] = 'SELECT * FROM '.$custom_table['tablename'].' WHERE 1=1'.$custom_table['where'];
 			$connectionstring ='user='.$pgdatabase->user;
 			if($pgdatabase->passwd != '')$connectionstring.=' password='.$pgdatabase->passwd;
 			$connectionstring.=' dbname='.$pgdatabase->dbName;
@@ -334,11 +337,12 @@ class data_import_export {
 				if(file_exists($importfile)){
 					if($formvars['tracks']){
 						$tablename = 'a'.strtolower(umlaute_umwandeln(basename($importfile))).rand(1,1000000);
-						$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $importfile, $pgdatabase, 'tracks');
+						$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $formvars['epsg'], $importfile, $pgdatabase, 'tracks');
 						$sql = '
 							ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' SET WITH OIDS;
 							ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' RENAME "desc" TO desc_;
-							ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' RENAME "number" TO number_;							
+							ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' RENAME "number" TO number_;
+							CREATE INDEX '.$tablename.'_geom_idx ON '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' USING gist(the_geom);
 						';
 						$ret = $pgdatabase->execSQL($sql,4, 0);
 						$custom_table['datatype'] = 1;
@@ -347,17 +351,51 @@ class data_import_export {
 					}
 					if($formvars['waypoints']){
 						$tablename = 'a'.strtolower(umlaute_umwandeln(basename($importfile))).rand(1,1000000);
-						$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $importfile, $pgdatabase, 'waypoints');
+						$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $formvars['epsg'], $importfile, $pgdatabase, 'waypoints');
 						$sql = '
 							ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' SET WITH OIDS;
 							ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' RENAME "desc" TO desc_;
-							ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' RENAME "time" TO time_;		
+							ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' RENAME "time" TO time_;
+							CREATE INDEX '.$tablename.'_geom_idx ON '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' USING gist(the_geom);
 						';
 						$ret = $pgdatabase->execSQL($sql,4, 0);
 						$custom_table['datatype'] = 0;
 						$custom_table['tablename'] = $tablename;
 						$custom_tables[] = $custom_table;
 					}
+		      if(!$ret[0]){
+						return $custom_tables;
+					}
+				}
+			}
+		}
+	}
+		
+	function import_custom_dxf($formvars, $pgdatabase){
+		$_files = $_FILES;	
+		if($_files['file1']['name']){
+      $importfile = UPLOADPATH.$_files['file1']['name'];
+      if(move_uploaded_file($_files['file1']['tmp_name'],$importfile)){
+				if(file_exists($importfile)){
+					$tablename = 'a'.strtolower(umlaute_umwandeln(basename($importfile))).rand(1,1000000);
+					$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $formvars['epsg'], $importfile, $pgdatabase, NULL);
+					$sql = '
+						ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' SET WITH OIDS;
+						CREATE INDEX '.$tablename.'_geom_idx ON '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' USING gist(the_geom);
+					';
+					$ret = $pgdatabase->execSQL($sql,4, 0);
+					# Punkte
+					$custom_tables[0]['datatype'] = 0;
+					$custom_tables[0]['tablename'] = $tablename;
+					$custom_tables[0]['where'] = " AND geometrytype(the_geom) = 'POINT'";
+					# Linien
+					$custom_tables[1]['datatype'] = 1;
+					$custom_tables[1]['tablename'] = $tablename;
+					$custom_tables[1]['where'] = " AND geometrytype(the_geom) = 'LINESTRING'";
+					# Flächen
+					$custom_tables[2]['datatype'] = 2;
+					$custom_tables[2]['tablename'] = $tablename;
+					$custom_tables[2]['where'] = " AND geometrytype(the_geom) = 'POLYGON'";
 		      if(!$ret[0]){
 						return $custom_tables;
 					}
@@ -632,8 +670,8 @@ class data_import_export {
 		exec($command.'"');
 	}
 	
-	function ogr2ogr_import($schema, $tablename, $importfile, $database, $options){
-		$command = 'ogr2ogr -f PostgreSQL -lco GEOMETRY_NAME=the_geom -nln '.$tablename.' PG:"dbname='.$database->dbName.' user='.$database->user.' active_schema='.$schema;
+	function ogr2ogr_import($schema, $tablename, $epsg, $importfile, $database, $options){
+		$command = 'export PGCLIENTENCODING=LATIN1;ogr2ogr -f PostgreSQL -lco GEOMETRY_NAME=the_geom -nln '.$tablename.' -a_srs EPSG:'.$epsg.' PG:"dbname='.$database->dbName.' user='.$database->user.' active_schema='.$schema;
 		if($database->passwd != '')$command.= ' password='.$database->passwd;
 		if($database->port != '')$command.=' port='.$database->port;
 		if($database->host != '') $command .= ' host=' . $database->host;

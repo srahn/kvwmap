@@ -8271,6 +8271,24 @@ class GUI {
     $this->output();
   }
 	
+	function dxf_import(){
+    $this->titel='DXF-Import';
+    $this->main='dxf_import.php';
+    $this->output();
+  }
+  
+  function dxf_import_importieren(){
+		include_(CLASSPATH.'data_import_export.php');
+		$this->data_import_export = new data_import_export();
+		$layer_id = $this->data_import_export->create_import_rollenlayer($this->formvars, 'DXF', $this->Stelle, $this->user, $this->database, $this->pgdatabase);
+		$this->loadMap('DataBase');
+		$this->zoomToMaxLayerExtent($layer_id);
+		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
+    $this->drawMap();
+    $this->saveMap('');
+    $this->output();
+  }
+	
 	function ovl_import(){
     $this->titel='OVL-Import';
     $this->main='ovl_import.php';
@@ -13988,6 +14006,7 @@ class db_mapObj{
 
   function newRollenLayer($formvars){
     $formvars['Data'] = str_replace ( "'", "''", $formvars['Data']);
+		$formvars['query'] = str_replace ( "'", "''", $formvars['query']);
 
     $sql = "INSERT INTO rollenlayer (`user_id`, `stelle_id`, `aktivStatus`, `Name`, `Datentyp`, `Gruppe`, `Typ`, `Data`, `query`, `connection`, `connectiontype`, `transparency`, `epsg_code`, `labelitem`) VALUES(";
     $sql .= "'".$formvars['user_id']."', ";
