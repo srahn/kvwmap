@@ -77,11 +77,11 @@ if($this->user->rolle->querymode == 1){
 						<div id="contentdiv" style="background: url(<? echo GRAPHICSPATH; ?>bg.gif);border: 1px solid #cccccc;max-width:<? echo $this->map->width+200; ?>px;height:100%;max-height:<? echo $this->user->rolle->nImageHeight+30; ?>px;position:relative;overflow-y: scroll;overflow-x: auto;">
 						<? if($this->overlaymain != '')include(LAYOUTPATH.'snippets/overlay.php'); ?>
 						</div>
-						<div id="overlayfooter" style="display:none;background: url(<? echo GRAPHICSPATH; ?>bg.gif);border: 1px solid #cccccc;max-width:<? echo $this->map->width+200; ?>px;position:relative;">
+						<div id="overlayfooter" style="<? if($this->found == 'false' OR $this->formvars['printversion'] != '')echo 'display:none;'; ?>background: url(<? echo GRAPHICSPATH; ?>bg.gif);border: 1px solid #cccccc;max-width:<? echo $this->map->width+200; ?>px;position:relative;">
 							<table style="width:100%">
 								<tr>
 									<td style="width:49%">&nbsp;</td>
-									<td align="center"><div id="savebutton" style="display:none"><input type="button" class="button" name="savebutton" value="<? echo $this->strSave; ?>" onclick="save();"></div></td>
+									<td align="center"><div id="savebutton" <? if($this->editable != 'true')echo 'style="display:none"'; ?>><input type="button" class="button" name="savebutton" value="<? echo $this->strSave; ?>" onclick="save();"></div></td>
 									<td style="width:49%" align="right"><a href="javascript:druck();" class="px13"><? echo $this->printversion; ?></a>&nbsp;</td>
 								</tr>
 							</table>
