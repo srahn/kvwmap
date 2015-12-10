@@ -7,8 +7,8 @@
 	<a name="oben"></a>	
 <? if($this->user->rolle->querymode == 1){ ?>
 	<script type="text/javascript">
-		document.getElementById('overlayfooter').style.display = 'none';
-		document.getElementById('savebutton').style.display = 'none';
+		if(document.getElementById('overlayfooter') != undefined)document.getElementById('overlayfooter').style.display = 'none';
+		if(document.getElementById('savebutton') != undefined)document.getElementById('savebutton').style.display = 'none';
 	</script>
 <? }
 $this->found = 'false';
@@ -107,7 +107,7 @@ for($i=0;$i<$anzLayer;$i++){
 			<?  if($this->editable == 'true'){
 						if($this->user->rolle->querymode == 1){ ?>
 							<script type="text/javascript">
-								document.getElementById('savebutton').style.display = 'block';
+								if(document.getElementById('savebutton') != undefined)document.getElementById('savebutton').style.display = 'block';
 							</script>
 				<?  }else{ ?>
 							<input type="button" class="button" name="savebutton" value="<? echo $strSave; ?>" onclick="save();">
@@ -117,7 +117,7 @@ for($i=0;$i<$anzLayer;$i++){
 			<td align="right" width="49%">
 		<? if($this->user->rolle->querymode == 1){ ?>
 					<script type="text/javascript">
-						document.getElementById('overlayfooter').style.display = 'block';
+						if(document.getElementById('overlayfooter') != undefined)document.getElementById('overlayfooter').style.display = 'block';
 					</script>
 		<? }else{ ?>
 			<a href="javascript:druck();" class="px13"><? echo $this->printversion; ?></a>&nbsp;
