@@ -395,10 +395,15 @@
 											$datapart .= ' maxlength="'.$attributes['length'][$j].'"';
 										}
 										$datapart .= ' size="'.$size.'" type="text" name="'.$fieldname.'" id="'.$name.'_'.$k.'" value="'.htmlspecialchars($value).'">';
-										if($attribute_privileg == '0' OR $lock[$k]){
-											$maxwidth = $size * 9;
-											$minwidth = $size * 7.1;
-											$datapart .= '<div style="padding: 0 0 0 3; min-width: '.$minwidth.'px; max-width:'.$maxwidth.'px; font-size: '.$fontsize.'px;">'.htmlspecialchars($value).'</div>';
+										if($attribute_privileg == '0' OR $lock[$k]){ // nur lesbares Attribut
+											if($size == 12){		// spaltenweise
+												$datapart .= htmlspecialchars($value);
+											}
+											else{								// zeilenweise
+												$maxwidth = $size * 9;
+												$minwidth = $size * 7.1;
+												$datapart .= '<div style="padding: 0 0 0 3; min-width: '.$minwidth.'px; max-width:'.$maxwidth.'px; font-size: '.$fontsize.'px;">'.htmlspecialchars($value).'</div>';
+											}
 										}
 										if($attribute_privileg > '0' AND $attributes['options'][$j] != ''){
 											$datapart .= '&nbsp;<a title="automatisch generieren" href="javascript:auto_generate(new Array(\''.implode($attributes['name'], "','").'\'), \''.$attributes['the_geom'].'\', \''.$name.'\', '.$k.', '.$layer_id.');"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
