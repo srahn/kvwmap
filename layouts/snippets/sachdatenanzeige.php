@@ -160,7 +160,10 @@ for($i=0;$i<$anzLayer;$i++){
 
 			if($this->formvars['quicksearch'] != true){
 				for($m = 0; $m <= $this->formvars['searchmask_count']; $m++){
-					if($m > 0)$prefix = $m.'_';
+					if($m > 0){
+						$prefix = $m.'_';
+						echo '<input name="boolean_operator_'.$m.'" type="hidden" value="'.$this->formvars['boolean_operator_'.$m].'">';
+					}
 					for($j = 0; $j < count($this->qlayerset[0]['attributes']['type']); $j++){
 						if($this->qlayerset[0]['attributes']['type'][$j] != 'geometry'){
 							echo '
