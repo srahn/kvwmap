@@ -11996,6 +11996,7 @@ class GUI {
 
   function zoomToALKFlurst($FlurstListe,$border){
 		include_(CLASSPATH.'alk.php');
+		$dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
     $alk=new ALK();
     $alk->database=$this->pgdatabase;
     $ret=$alk->getMERfromFlurstuecke($FlurstListe, $this->user->rolle->epsg_code);
@@ -12009,12 +12010,23 @@ class GUI {
       $randy=($rect->maxy-$rect->miny)*$border/100;
     }
 		$epsg = EPSGCODE_ALKIS;
-		$datastring ="the_geom from (select f.gml_id as oid, wkb_geometry as the_geom from alkis.ax_flurstueck as f";
-		$datastring.=" WHERE f.flurstueckskennzeichen IN ('".$FlurstListe[0]."' ";
+		$layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
+		$data = $layerset[0]['Data'];
+		$explosion = explode(' ', $data);
+		$datageom = $explosion[0];
+		$explosion = explode('using unique ', strtolower($data));
+		$end = $explosion[1];
+		$select = $dbmap->getSelectFromData($data);
+		$whereposition = strpos(strtolower($select), ' where ');
+		$withoutwhere = substr($select, 0, $whereposition);
+		$fromposition = strpos(strtolower($withoutwhere), ' from ');
+		$alias = $this->pgdatabase->get_table_alias('alkis.ax_flurstueck', $fromposition, $withoutwhere);
+		if(strpos(strtolower($select), ' where ') === false)$select .= " WHERE ";
+		else $select .= " AND ";		
+		$datastring = $datageom." from (".$select;
+		$datastring.=" ".$alias.".flurstueckskennzeichen IN ('".$FlurstListe[0]."' ";
     $legendentext="Flurstück";
-    if(count($FlurstListe) > 1){
-      $legendentext .= "e";
-    }
+    if(count($FlurstListe) > 1)$legendentext .= "e";
     $legendentext .= " (".date('d.m. H:i',time())."):<br>".$FlurstListe[0];
     for ($i=1;$i<count($FlurstListe);$i++) {
       $datastring.=",'".$FlurstListe[$i]."'";
@@ -12022,13 +12034,10 @@ class GUI {
     }
    	$datastring.=") ";
 		$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN endet IS NULL ELSE beginnt <= '\$hist_timestamp' and ('\$hist_timestamp' <= endet or endet IS NULL) END";
-		$dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
 		# Filter
-		$layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
 		$filter = $dbmap->getFilter($layerset[0]['Layer_ID'], $this->Stelle->id);
 		if($filter != '')$datastring.= ' AND '.$filter;
-		$datastring.=") as foo using unique oid using srid=".$epsg;
-
+		$datastring.=") as foo using unique ".$end;
     $group = $dbmap->getGroupbyName('Suchergebnis');
     if($group != ''){
       $groupid = $group['id'];
@@ -12036,7 +12045,6 @@ class GUI {
     else{
       $groupid = $dbmap->newGroup('Suchergebnis', 0);
     }
-
     $this->formvars['user_id'] = $this->user->id;
     $this->formvars['stelle_id'] = $this->Stelle->id;
     $this->formvars['aktivStatus'] = 1;
