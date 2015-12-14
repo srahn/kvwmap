@@ -283,7 +283,7 @@ class ALB {
 					}					
 					$csv .= $flst->Klassifizierung[$kl]['label'];
 					$csv .= '";';
-					$csv .= round($flst->Klassifizierung[$kl]['flaeche']).';';
+					$csv .= $flst->Klassifizierung[$kl]['flaeche'].';';
 					$csv .= $emz;
 					$flst->emz = true;
 				}
@@ -541,7 +541,7 @@ class ALB {
 									$emzges_223 = $emzges_223 + $emz;
 									$flaeche_223 = $flaeche_223 + $flst->Klassifizierung[$j]['flaeche'];
 								}
-								$csv .= utf8_encode(round($flst->Klassifizierung[$j]['flaeche']).' m² ');
+								$csv .= utf8_encode($flst->Klassifizierung[$j]['flaeche'].' m² ');
 								$csv .= $flst->Klassifizierung[$j]['label'];
 								$csv .= ' EMZ: '.$emz." \n";
 							}
@@ -768,7 +768,7 @@ class ALB {
 							$emzges_223 = $emzges_223 + $emz;
 							$flaeche_223 = $flaeche_223 + $flst->Klassifizierung[$j]['flaeche'];
 						}
-						$csv .= utf8_encode(round($flst->Klassifizierung[$j]['flaeche']).' m² ');
+						$csv .= utf8_encode($flst->Klassifizierung[$j]['flaeche'].' m² ');
 						$csv .= $flst->Klassifizierung[$j]['label'];
 						$csv .= ' EMZ: '.$emz." \n";
 					}
@@ -1010,7 +1010,7 @@ class ALB {
 							$emzges_223 = $emzges_223 + $emz;
 							$flaeche_223 = $flaeche_223 + $flst->Klassifizierung[$j]['flaeche'];
 						}
-						$csv .= utf8_encode(round($flst->Klassifizierung[$j]['flaeche']).' m² ');
+						$csv .= utf8_encode($flst->Klassifizierung[$j]['flaeche'].' m² ');
 						$csv .= $flst->Klassifizierung[$j]['label'];
 						$csv .= ' EMZ: '.$emz." \n";
 					}
