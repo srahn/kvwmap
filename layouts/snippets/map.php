@@ -133,6 +133,7 @@ if($this->formvars['gps_follow'] == ''){
             <INPUT TYPE="hidden" NAME="maxy" VALUE="<?php echo $this->map->extent->maxy; ?>">
             <INPUT TYPE="hidden" NAME="pixelsize" VALUE="<?php echo $pixelsize; ?>">
             <INPUT TYPE="HIDDEN" NAME="CMD" VALUE="">
+						<INPUT TYPE="HIDDEN" NAME="last_button" VALUE="">
             <INPUT TYPE="HIDDEN" NAME="INPUT_TYPE" VALUE="">
             <INPUT TYPE="HIDDEN" NAME="INPUT_COORD" VALUE="">
             <INPUT TYPE="HIDDEN" NAME="searchradius" VALUE="<?php echo $this->formvars['searchradius']; ?>">

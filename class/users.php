@@ -1263,18 +1263,6 @@ class rolle {
     return 1;
   }
 
-  function getSelectedButton() {
-    # Eintragen des aktiven Button
-    $sql ='SELECT selectedButton FROM rolle';
-    $sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-    $this->debug->write("<p>file:users.php class:rolle->getSelectedButton - Abfragen des zuletzt gewählten Buttons aus dem Kartenfensters:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);
-    $this->selectedButton=$rs['selectedButton'];
-    return $this->selectedButton;
-  }
-
   function getLayer($LayerName) {
 		global $language;
     # Abfragen der Layer in der Rolle
@@ -1489,6 +1477,7 @@ class rolle {
 				rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');	# der hat die Form, wie der timestamp in der PG-DB steht und wird für die Abfragen benutzt
 			}
 			else rolle::$hist_timestamp = $this->hist_timestamp = '';
+			$this->selectedButton=$rs['selectedButton'];
 			$buttons = explode(',', $rs['buttons']);
 			$this->back = in_array('back', $buttons);
 			$this->forward = in_array('forward', $buttons);

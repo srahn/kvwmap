@@ -143,6 +143,13 @@
 			document.GUI.go.value = "neu Laden";
       get_map_ajax('go=navMap_ajax');
      break;
+		 case "zoomin_wheel":
+      path = pathx[0]+","+pathy[0]+";"+pathx[2]+","+pathy[2];
+      document.GUI.INPUT_COORD.value  = path;
+      document.GUI.CMD.value          = "zoomin_wheel";
+			document.GUI.go.value = "neu Laden";
+      get_map_ajax('go=navMap_ajax');
+     break;
      case "recentre":
       path = pathx[0]+","+pathy[0];
       document.GUI.INPUT_COORD.value  = path;
@@ -292,7 +299,7 @@ $svg='<?xml version="1.0"?>
 	var current_freearrow;
   moving  = false;
   moved  = false;
-  var doing = "'.$this->user->rolle->getSelectedButton().'";
+  var doing = "'.$this->user->rolle->selectedButton.'";
 	mouse_down = false;
   var highlighted  = "yellow";
   var cmd   = ""; 
@@ -409,7 +416,7 @@ function mousewheelzoom(){
 	pathy[0] = Math.round(zx.f);
 	pathx[2] = Math.round(zx.e + resx*zx.a); 
 	pathy[2] = Math.round(zx.f + resy*zx.a);
-	sendpath("zoomin_box", pathx, pathy);
+	sendpath("zoomin_wheel", pathx, pathy);
 }
 
 function mousewheelchange(evt){
@@ -538,16 +545,6 @@ function go_next(){
   top.go_cmd(cmd);
 }
 
-function zoomin(){
-  doing = "zoomin";
-  document.getElementById("canvas").setAttribute("cursor", "crosshair");
-}
-
-function zoomout(){
-  doing = "zoomout";
-  document.getElementById("canvas").setAttribute("cursor", "crosshair");
-}
-
 function zoomall(){
   document.getElementById("canvas").setAttribute("cursor", "wait");
   cmd="Full_Extent";
@@ -565,9 +562,29 @@ function recentre(){
   document.getElementById("canvas").setAttribute("cursor", "move"); //setAttribute("cursor", "url(#MyMove)");
 }
 
+function zoomin(){
+  doing = "zoomin";
+  document.getElementById("canvas").setAttribute("cursor", "crosshair");
+}
+
+function zoomout(){
+  doing = "zoomout";
+  document.getElementById("canvas").setAttribute("cursor", "crosshair");
+}
+
 function showcoords(){
 	doing = "showcoords";
   document.getElementById("canvas").setAttribute("cursor", "crosshair");
+}
+
+function ppquery(){
+  top.document.GUI.last_button.value = doing = "ppquery";
+  document.getElementById("canvas").setAttribute("cursor", "help");
+}  
+
+function touchquery(){
+	doing = "touchquery";
+	document.getElementById("canvas").setAttribute("cursor", "help");
 }
 
 function pquery(){
@@ -575,9 +592,15 @@ function pquery(){
   document.getElementById("canvas").setAttribute("cursor", "help");
 }
 
-function touchquery(){
-	doing = "touchquery";
-	document.getElementById("canvas").setAttribute("cursor", "help");
+// in pquery() und pquery_prompt() aufgeteilt, da der Promt sonst auch bei jedem reload erscheint   
+function pquery_prompt(){     
+  top.document.GUI.searchradius.value=prompt("Geben Sie den Suchradius in Meter ein.",top.document.GUI.searchradius.value);
+  set_suchkreis();
+}
+
+function set_suchkreis(){
+  radius = (top.document.GUI.searchradius.value / parseFloat(top.document.GUI.pixelsize.value));
+  document.getElementById("suchkreis").setAttribute("r", radius);
 }
 
 function polygonquery(){
@@ -619,22 +642,6 @@ function addfreetext(){
 	texttyping = false;
 }
 		    
-function ppquery(){
-  doing = "ppquery";
-  document.getElementById("canvas").setAttribute("cursor", "help");
-}   
-  
-// in pquery() und pquery_prompt() aufgeteilt, da der Promt sonst auch bei jedem reload erscheint   
-function pquery_prompt(){     
-  top.document.GUI.searchradius.value=prompt("Geben Sie den Suchradius in Meter ein.",top.document.GUI.searchradius.value);
-  set_suchkreis();
-}
-
-function set_suchkreis(){
-  radius = (top.document.GUI.searchradius.value / parseFloat(top.document.GUI.pixelsize.value));
-  document.getElementById("suchkreis").setAttribute("r", radius);
-}
-
 function noMeasuring(){
   measuring = false;
   restart();

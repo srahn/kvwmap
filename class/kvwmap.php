@@ -1535,10 +1535,13 @@ class GUI {
         $this->user->rolle->setSelectedButton('zoomin');
         $this->zoomMap($this->user->rolle->nZoomFactor);
       } break;
+			case "zoomin_wheel" : {
+        $this->zoomMap($this->user->rolle->nZoomFactor);
+      } break;
       case "zoomout" : {
         $this->user->rolle->setSelectedButton('zoomout');
         $this->zoomMap($this->user->rolle->nZoomFactor*-1);
-      } break;
+      } break;			
       case "recentre" : {
         $this->user->rolle->setSelectedButton('recentre');
         $this->zoomMap(1);
@@ -9536,6 +9539,7 @@ class GUI {
 	
   function neuLaden() {
 		$this->saveLegendRoleParameters();
+		if($this->formvars['last_button'] != '')$this->user->rolle->setSelectedButton($this->formvars['last_button']);		// das ist für den Fall, dass ein Button schon angeklickt wurde, aber die Aktion nicht ausgeführt wurde
     # Karteninformationen lesen
     $this->loadMap('DataBase');
     # zwischenspeichern des vorherigen Maßstabs

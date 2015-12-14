@@ -173,7 +173,7 @@ $svg='<?xml version="1.0"?>
 	var dragdone  = false; 
 	var moving  = false;
 	var moved  = false;
-	var doing = "'.$this->user->rolle->getSelectedButton().'";
+	var doing = "'.$this->user->rolle->selectedButton.'";
 	var highlighted  = "yellow";
 	var cmd   = "";
 	var width = '.$printwidth.';

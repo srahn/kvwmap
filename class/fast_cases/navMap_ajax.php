@@ -1113,7 +1113,7 @@
       case "zoomin" : {
         $this->user->rolle->setSelectedButton('zoomin');
         $this->zoomMap($this->user->rolle->nZoomFactor);
-      } break;
+			} break;			case "zoomin_wheel" : {        $this->zoomMap($this->user->rolle->nZoomFactor);      } break;
       case "zoomout" : {
         $this->user->rolle->setSelectedButton('zoomout');
         $this->zoomMap($this->user->rolle->nZoomFactor*-1);
