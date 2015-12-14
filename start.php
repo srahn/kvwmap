@@ -358,6 +358,8 @@ if($_SESSION['login_routines'] == true){
 			}
     }
 	}
+	# Zurücksetzen des histtimestamps
+	if($GUI->user->rolle->hist_timestamp != '')$GUI->setHistTimestamp();
 	$_SESSION['login_routines'] = false;
 }
 
