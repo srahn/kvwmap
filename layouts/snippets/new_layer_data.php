@@ -5,11 +5,12 @@
 	include(SNIPPETS.'sachdatenanzeige_functions.php'); 
  ?>
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
-<script type="text/javascript">
-<!--
-
-//-->
-</script>
+<? if($this->user->rolle->querymode == 1){ ?>
+	<script type="text/javascript">
+		if(document.getElementById('overlayfooter') != undefined)document.getElementById('overlayfooter').style.display = 'none';
+		if(document.getElementById('savebutton') != undefined)document.getElementById('savebutton').style.display = 'none';
+	</script>
+<? } ?>
 <table border="0" cellpadding="5" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
     <td colspan="5"><h2><?php echo $strtitle; ?>:&nbsp;<? if($this->qlayerset[0]['alias'] != '')echo $this->qlayerset[0]['alias']; else echo $this->qlayerset[0]['Name']; ?></h2></td>
