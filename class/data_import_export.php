@@ -680,11 +680,11 @@ class data_import_export {
 	function create_csv($result, $attributes){
     # Spaltenüberschriften schreiben
     # Excel is zu blöd für 'ID' als erstes Attribut
-    if($attributes['alias'][0] == 'ID'){
-      $attributes['alias'][0] = 'id';
+		if(substr($attributes['alias'][0], 0, 2) == 'ID'){
+      $attributes['alias'][0] = str_replace('ID', 'id', $attributes['alias'][0]);
     }
-    if($attributes['name'][0] == 'ID'){
-      $attributes['name'][0] = 'id';
+    if(substr($attributes['name'][0], 0, 2) == 'ID'){
+      $attributes['name'][0] = str_replace('ID', 'id', $attributes['name'][0]);
     }
     foreach($result[0] As $key => $value){
 			$i = $attributes['indizes'][$key];
@@ -782,6 +782,27 @@ class data_import_export {
     }
 		
     $sql = $stelle->parse_path($layerdb, $path, $selection);		# parse_path wird hier benutzt um die Auswahl der Attribute auf das Pfad-SQL zu übertragen
+		
+		# oid auch abfragen
+		$distinctpos = strpos(strtolower($sql), 'distinct');
+		if($distinctpos !== false && $distinctpos < 10){
+			$pfad = substr(trim($sql), $distinctpos+8);
+			$distinct = true;
+		}
+		else{
+			$pfad = substr(trim($sql), 7);
+		}
+		$j = 0;
+		foreach($this->attributes['all_table_names'] as $tablename){
+			if(($tablename == $layerset[0]['maintable']) AND $this->attributes['oids'][$j]){		# hat Haupttabelle oids?
+				$pfad = $this->attributes['table_alias_name'][$tablename].'.oid AS '.$tablename.'_oid, '.$pfad;
+			}
+			$j++;
+		}
+		if($distinct == true){
+			$pfad = 'DISTINCT '.$pfad;
+		}
+		$sql = "SELECT ".$pfad;		
     
     if($this->attributes['table_alias_name'][$this->attributes['the_geom']] != $this->attributes['table_name'][$this->attributes['the_geom']]){
     	$the_geom = $this->attributes['table_alias_name'][$this->attributes['the_geom']].'.'.$this->attributes['the_geom'];
@@ -823,7 +844,7 @@ class data_import_export {
   	if($where != ''){
   		$orderbyposition = strpos(strtolower($where), 'order by');
   		if($orderbyposition)$where = substr($where, 0, $orderbyposition);
-	    if(strpos($where, 'query.') !== false){
+	    if(strpos($where, 'query.') !== false OR strpos($where, '_oid') !== false){
 	    	if($this->formvars['epsg']){
 	    		$where = str_replace('), '.$layerset[0]['epsg_code'].')', '), '.$this->formvars['epsg'].')', $where);		# die räumliche Einschränkung das Such-SQLs auf den neuen EPSG-Code anpassen
 	    	}
