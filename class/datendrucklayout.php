@@ -61,7 +61,10 @@ class ddl {
 	
 	function add_freetexts($i, $offsetx, $offsety, $type, $pagenumber = NULL, $pagecount = NULL){
 		if(count($this->remaining_freetexts) == 0)return;
-		if($type != 'everypage' AND $this->page_overflow_by_sublayout)$this->pdf->reopenObject($this->page_id_before_sublayout);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
+		if($type != 'everypage' AND $this->page_overflow_by_sublayout){
+			$this->pdf->reopenObject($this->page_id_before_sublayout);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
+			$this->page_overflow_by_sublayout = false;
+		}
     for($j = 0; $j < count($this->layout['texts']); $j++){		
 			# der Freitext wurde noch nicht geschrieben und ist entweder ein fester Freitext oder ein fortlaufender oder einer, der auf jeder Seite erscheinen soll
     	if(in_array($this->layout['texts'][$j]['id'], $this->remaining_freetexts) AND $this->layout['texts'][$j]['posy'] > 0){	# nur Freitexte mit einem y-Wert werden geschrieben
@@ -88,7 +91,7 @@ class ddl {
 							if($this->maxy < $y)$this->maxy = $y;		# beim ersten Datensatz das maxy ermitteln
 						}
 						if($this->i_on_page > 0){		# bei allen darauffolgenden den y-Wert um Offset verschieben
-							$y = $y - $this->yoffset_onpage-22;
+							$y = $y - $this->yoffset_onpage-16;
 						}
 					}
 					$text = $this->substituteFreitext($this->layout['texts'][$j]['text'], $i, $pagenumber, $pagecount);
@@ -145,7 +148,7 @@ class ddl {
 								$offy = 842 - $ypos + $offsety;
 								
 								if($this->layout['type'] != 0 AND $this->i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben
-									$offy = $offy + $this->yoffset_onpage+22;
+									$offy = $offy + $this->yoffset_onpage+16;
 								}	
 								# beim jedem Datensatz die Gesamthoehe der Elemente des Datensatzes ermitteln
 								if($this->i_on_page == 0){
@@ -212,7 +215,7 @@ class ddl {
 								$x = $this->layout['elements'][$attributes['name'][$j]]['xpos'];								
 								$y = $ypos - $offsety;
 								if($this->layout['type'] != 0 AND $this->i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben
-									$y = $y - $this->yoffset_onpage-22;
+									$y = $y - $this->yoffset_onpage-16;
 								}	
 								# beim jedem Datensatz die Gesamthoehe der Elemente des Datensatzes ermitteln
 								if($this->i_on_page == 0){
@@ -288,7 +291,7 @@ class ddl {
 						if($this->maxy < $y+$this->layout['elements'][$attributes['name'][$j]]['width'])$this->maxy = $y+$this->layout['elements'][$attributes['name'][$j]]['width'];		# beim ersten Datensatz das maxy ermitteln
 					}    
 					if($this->layout['type'] != 0 AND $this->i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben
-						$y = $y - $this->yoffset_onpage-22;
+						$y = $y - $this->yoffset_onpage-16;
 					}
 					$this->pdf->addJpegFromFile(IMAGEPATH.$newname, $x, $y, $this->layout['elements'][$attributes['name'][$j]]['width']);
 					# Rechteck um die Karte
