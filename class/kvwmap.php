@@ -6737,15 +6737,7 @@ class GUI {
 
     $i = 0;
     $this->search = true;
-		if($this->formvars['embedded_dataPDF']){			# wenn diese Suche für ein eingebettetes Drucklayout ist und Treffer da sind -> Checkboxen simulieren
-			if(count($this->qlayerset[$i]['shape']) > 0){
-				for($k = 0; $k < count($this->qlayerset[$i]['shape']); $k++){
-					$checkbox_names[$k] = 'check;'.$layerset[0]['attributes']['table_alias_name'][$this->qlayerset[$i]['maintable']].';'.$this->qlayerset[$i]['maintable'].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['maintable'].'_oid'];
-					$this->formvars[$checkbox_names[$k]] = 'on';
-				}
-				$this->formvars['checkbox_names_'.$this->formvars['selected_layer_id']] = implode('|', $checkbox_names);
-			}
-		}
+		if($this->formvars['embedded_dataPDF']){}		# wenn diese Suche für ein eingebettetes Drucklayout ist und Treffer da sind -> nichts weiter machen
     elseif($this->formvars['embedded_subformPK'] != ''){
       header('Content-type: text/html; charset=UTF-8');      
       include(LAYOUTPATH.'snippets/embedded_subformPK.php');			# listenförmige Ausgabe mit Links untereinander
@@ -7855,21 +7847,26 @@ class GUI {
   	}
 		$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
     # Daten abfragen
-    for($i = 0; $i < count($checkbox_names); $i++){
-      if($this->formvars[$checkbox_names[$i]] == 'on'){
-        $element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
-        $sql = $newpath." AND ".$element[1].".oid = ".$element[3];
-        $oids[] = $element[3];
-        #echo $sql.'<br><br>';
-        $this->debug->write("<p>file:kvwmap class:generischer_sachdaten_druck :",4);
-        $ret = $layerdb->execSQL($sql,4, 1);
-        if (!$ret[0]) {
-          while ($rs=pg_fetch_array($ret[1])) {
-            $result[] = $rs;
-          }
-        }
-      }
-    }
+		if($this->qlayerset[0]['shape'] != null){
+			$result = $this->qlayerset[0]['shape'];
+		}
+		else{
+			for($i = 0; $i < count($checkbox_names); $i++){
+				if($this->formvars[$checkbox_names[$i]] == 'on'){
+					$element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
+					$sql = $newpath." AND ".$element[1].".oid = ".$element[3];
+					$oids[] = $element[3];
+					#echo $sql.'<br><br>';
+					$this->debug->write("<p>file:kvwmap class:generischer_sachdaten_druck :",4);
+					$ret = $layerdb->execSQL($sql,4, 1);
+					if (!$ret[0]) {
+						while ($rs=pg_fetch_array($ret[1])) {
+							$result[] = $rs;
+						}
+					}
+				}
+			}
+		}
 		# Attribute laden
 		$attributes = $mapDB->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, $privileges['attributenames']);
     # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
