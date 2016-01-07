@@ -87,7 +87,7 @@ class ddl {
 						if($this->i_on_page == 0){
 							if($this->maxy < $y)$this->maxy = $y;		# beim ersten Datensatz das maxy ermitteln
 						}
-						if($this->i_on_page > 0){		# bei allen darauffolgenden den y-Wert um Offset verschieben
+						if($offset_attribute == '' AND $this->i_on_page > 0){		# bei allen darauffolgenden den y-Wert um Offset verschieben (aber nur bei absolut positionierten)
 							$y = $y - $this->yoffset_onpage-22;
 						}
 					}
@@ -144,7 +144,7 @@ class ddl {
 								
 								$offy = 842 - $ypos + $offsety;
 								
-								if($this->layout['type'] != 0 AND $this->i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben
+								if($this->layout['type'] != 0 AND $offset_attribute == '' AND $this->i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben (aber nur bei abolut positionierten)
 									$offy = $offy + $this->yoffset_onpage+22;
 								}	
 								# beim jedem Datensatz die Gesamthoehe der Elemente des Datensatzes ermitteln
@@ -211,7 +211,7 @@ class ddl {
 								$zeilenhoehe = $this->layout['elements'][$attributes['name'][$j]]['fontsize'];      		      		
 								$x = $this->layout['elements'][$attributes['name'][$j]]['xpos'];								
 								$y = $ypos - $offsety;
-								if($this->layout['type'] != 0 AND $this->i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben
+								if($this->layout['type'] != 0 AND $offset_attribute == '' AND $this->i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben (aber nur bei absolut positionierten)
 									$y = $y - $this->yoffset_onpage-22;
 								}	
 								# beim jedem Datensatz die Gesamthoehe der Elemente des Datensatzes ermitteln
