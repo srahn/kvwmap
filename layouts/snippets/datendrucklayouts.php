@@ -193,18 +193,18 @@ function save_layout(){
           <td class="fett" style="border-top:1px solid #C3C7C3;border-bottom:1px solid #C3C7C3" colspan=8 >&nbsp;Layoutdaten</td>
         </tr>
         <tr>
-          <td  colspan=4 style="border-bottom:1px solid #C3C7C3">
+          <td colspan=8 style="border-bottom:1px solid #C3C7C3">
           	&nbsp;<span class="fett">Name:</span> 
-          	<input type="text" name="name" value="<? echo $this->ddl->selectedlayout[0]['name'] ?>" size="27">
-          </td>
-          <td  colspan=4 style="border-bottom:1px solid #C3C7C3">
-          	&nbsp;<span class="fett">Typ:</span> 
+          	<input type="text" name="name" value="<? echo $this->ddl->selectedlayout[0]['name'] ?>" size="23">
+          	&nbsp;&nbsp;&nbsp;<span class="fett">Typ:</span> 
           	<select name="type">
-          		<option value="0" <? if($this->ddl->selectedlayout[0]['type'] == 0)echo 'selected' ?>>pro Datensatz eine Seite</option>
-          		<option value="1" <? if($this->ddl->selectedlayout[0]['type'] == 1)echo 'selected' ?>>Datensätze untereinander</option>
+          		<option value="0" <? if($this->ddl->selectedlayout[0]['type'] == 0)echo 'selected' ?>>neue Seite für jeden Datensatz</option>
+          		<option value="1" <? if($this->ddl->selectedlayout[0]['type'] == 1)echo 'selected' ?>>Datensätze fortlaufend</option>
 							<option value="2" <? if($this->ddl->selectedlayout[0]['type'] == 2)echo 'selected' ?>>eingebettet</option>
-          	</select>	
-          </td>
+          	</select>
+						&nbsp;&nbsp;&nbsp;<span class="fett">Abstand:</span>
+						<input type="text" name="gap" title="Der Abstand zwischen den Datensätzen. Ist nur beim fortlaufenden oder eingebetteten Typ relevant." value="<? echo $this->ddl->selectedlayout[0]['gap'] ?>" size="2">
+					</td>
         </tr>
         <tr>
         	<td class="fett" align="center" style="border-bottom:1px solid #C3C7C3" colspan="8">&nbsp;Hintergrundbild&nbsp;</td>

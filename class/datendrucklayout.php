@@ -91,7 +91,7 @@ class ddl {
 							if($this->maxy < $y)$this->maxy = $y;		# beim ersten Datensatz das maxy ermitteln
 						}
 						if($offset_attribute == '' AND $this->i_on_page > 0){		# bei allen darauffolgenden den y-Wert um Offset verschieben (aber nur bei absolut positionierten)
-							$y = $y - $this->yoffset_onpage-16;
+							$y = $y - $this->yoffset_onpage-$this->layout['gap'];
 						}
 					}
 					$text = $this->substituteFreitext($this->layout['texts'][$j]['text'], $i, $pagenumber, $pagecount);
@@ -148,7 +148,7 @@ class ddl {
 								$offy = 842 - $ypos + $offsety;
 								
 								if($this->layout['type'] != 0 AND $offset_attribute == '' AND $this->i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben (aber nur bei abolut positionierten)
-									$offy = $offy + $this->yoffset_onpage+16;
+									$offy = $offy + $this->yoffset_onpage+$this->layout['gap'];
 								}	
 								# beim jedem Datensatz die Gesamthoehe der Elemente des Datensatzes ermitteln
 								if($this->i_on_page == 0){
@@ -215,7 +215,7 @@ class ddl {
 								$x = $this->layout['elements'][$attributes['name'][$j]]['xpos'];								
 								$y = $ypos - $offsety;
 								if($this->layout['type'] != 0 AND $offset_attribute == '' AND $this->i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben (aber nur bei absolut positionierten)
-									$y = $y - $this->yoffset_onpage-16;
+									$y = $y - $this->yoffset_onpage-$this->layout['gap'];
 								}	
 								# beim jedem Datensatz die Gesamthoehe der Elemente des Datensatzes ermitteln
 								if($this->i_on_page == 0){
@@ -291,7 +291,7 @@ class ddl {
 						if($this->maxy < $y+$this->layout['elements'][$attributes['name'][$j]]['width'])$this->maxy = $y+$this->layout['elements'][$attributes['name'][$j]]['width'];		# beim ersten Datensatz das maxy ermitteln
 					}    
 					if($this->layout['type'] != 0 AND $this->i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben
-						$y = $y - $this->yoffset_onpage-16;
+						$y = $y - $this->yoffset_onpage-$this->layout['gap'];
 					}
 					$this->pdf->addJpegFromFile(IMAGEPATH.$newname, $x, $y, $this->layout['elements'][$attributes['name'][$j]]['width']);
 					# Rechteck um die Karte
@@ -537,6 +537,7 @@ class ddl {
       else $sql .= ", `usersize` = NULL";
       $sql .= ", `font_date` = '".$formvars['font_date']."'";
       $sql .= ", `font_user` = '".$formvars['font_user']."'";
+			$sql .= ", `gap` = ".(int)$formvars['gap'];
       if($formvars['type'] != '')$sql .= ", `type` = ".(int)$formvars['type'];
       else $sql .= ", `type` = NULL";
       if($_files['bgsrc']['name']){
@@ -640,6 +641,7 @@ class ddl {
       else $sql .= ", `usersize` = NULL";
       $sql .= ", `font_date` = '".$formvars['font_date']."'";
       $sql .= ", `font_user` = '".$formvars['font_user']."'";
+			$sql .= ", `gap` = ".(int)$formvars['gap'];
       if($formvars['type'])$sql .= ", `type` = ".(int)$formvars['type'];
       else $sql .= ", `type` = NULL";
       if($_files['bgsrc']['name']){
