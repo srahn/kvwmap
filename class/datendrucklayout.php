@@ -469,7 +469,9 @@ class ddl {
 			$this->layout['offset_attributes'] = array();
 			
 			for($j = 0; $j < count($this->layout['texts']); $j++){
-				$this->remaining_freetexts[] = $this->layout['texts'][$j]['id'];		# zu Beginn jedes Datensatzes sind alle Freitexte noch zu schreiben
+				if($i == 0 OR $this->layout['texts'][$j]['type'] != 1){
+					$this->remaining_freetexts[] = $this->layout['texts'][$j]['id'];		# zu Beginn jedes Datensatzes sind alle Freitexte noch zu schreiben, bei fortlaufenden Layouts aber nur die fortlaufenden Freitexte
+				}
 			}
 			
 			################# Daten schreiben ###############
