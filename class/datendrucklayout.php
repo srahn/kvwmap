@@ -171,6 +171,9 @@ class ddl {
 										$this->gui->formvars['operator_'.$this->attributes['subform_pkeys'][$j][$p]] = '=';
 									}							
 									$this->gui->GenerischeSuche_Suchen();
+									for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){			# die Suchparameter für die Layersuche wieder leeren
+										$this->gui->formvars['value_'.$this->attributes['subform_pkeys'][$j][$p]] = '';
+									}	
 									$this->gui->formvars['aktivesLayout'] = $sublayout;
 									$page_id_before_sublayout = $this->pdf->currentContents;
 									$y = $this->gui->generischer_sachdaten_druck_drucken($this->pdf, $offx, $offy);
@@ -449,7 +452,7 @@ class ddl {
 				$this->datasetcount_on_page = 0; # ??
 				$this->i_on_page = 1;	# ??
 				$this->maxy = 800;
-				$offsety = 35;		# das ist für den Fall, dass ein Sublayout in einem Sublayout einen Seitenüberlauf verursacht hat
+				#$offsety = 35;		TODO: testen beim bldam # das ist für den Fall, dass ein Sublayout in einem Sublayout einen Seitenüberlauf verursacht hat
 			}
     	if($this->layout['type'] == 0 AND $i > 0){		# neue Seite beim seitenweisen Typ und neuem Datensatz 
     		$this->pdf->newPage();
@@ -461,9 +464,9 @@ class ddl {
 				#$this->maxy = 0;
 				if(!$this->initial_yoffset)$this->initial_yoffset = 780-$this->maxy;			# der Offset von oben gesehen, mit dem das erste fortlaufende Element auf der ersten Seite beginnt; wird benutzt, um die fortlaufenden Elemente ab der 2. Seite oben beginnen zu lassen
   			$this->miny = 1000000;
-				$offsety = 0;
+				if($this->layout['type'] == 2)$offsety = 50; else $offsety = 0;
 				$this->pdf->newPage();
-				$this->add_static_elements($offsetx, $offsety);
+				#$this->add_static_elements($offsetx, $offsety);
 			}
 			$this->yoffset_onpage = $this->maxy - $this->miny;			# der Offset mit dem die Elemente beim Untereinander-Typ nach unten versetzt werden
 			$this->layout['offset_attributes'] = array();
