@@ -73,19 +73,19 @@ class ddl {
 				OR ($type == 'everypage' AND $this->layout['texts'][$j]['type'] == 2)){									
 					$this->pdf->selectFont($this->layout['texts'][$j]['font']);								
 					$x = $this->layout['texts'][$j]['posx'];
-					$ypos = $this->layout['texts'][$j]['posy'];
+					$y = $this->layout['texts'][$j]['posy'];
 					$offset_attribute = $this->layout['texts'][$j]['offset_attribute'];
 					if($offset_attribute != ''){			# ist ein offset_attribute gesetzt
 						$offset_value = $this->layout['offset_attributes'][$offset_attribute];
 						if($offset_value != ''){																							# dieses Attribut wurde auch schon geschrieben, d.h. dessen y-Position ist bekannt -> Freitext relativ dazu setzen
-							$ypos = $this->handlePageOverflow($offset_attribute, $offset_value, $ypos);		# Seitenüberläufe berücksichtigen
+							$y = $this->handlePageOverflow($offset_attribute, $offset_value, $y);		# Seitenüberläufe berücksichtigen
 						}
 						else{
 							$remaining_freetexts[] = $this->layout['texts'][$j]['id'];
 							continue;			# der Freitext ist abhängig aber das Attribut noch nicht geschrieben, Freitext merken und überspringen
 						}
 					}
-					$y = $ypos - $offsety;
+					if($offset_attribute == '')$y = $y - $offsety;
 					if($type == 'running'){	# fortlaufende Freitexte
 						$pagecount = count($this->pdf->objects['3']['info']['pages']);								
 						if($this->layout['type'] == 1 AND $offset_attribute == '' AND $pagecount > 1)$y = $y + $this->initial_yoffset;		# ab der 2. Seite sollen die forlaufenden absolut positionierten Elemente oben auf der Seite beginnen
@@ -201,13 +201,13 @@ class ddl {
 							if($this->page_overflow_by_sublayout)$this->pdf->reopenObject($this->page_id_before_sublayout);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
 							$this->pdf->selectFont($this->layout['elements'][$attributes['name'][$j]]['font']);
 							if($this->layout['elements'][$attributes['name'][$j]]['fontsize'] > 0 OR $this->layout['elements'][$attributes['name'][$j]]['width'] > 0){
-								$ypos = $this->layout['elements'][$attributes['name'][$j]]['ypos'];
+								$y = $this->layout['elements'][$attributes['name'][$j]]['ypos'];
 								#### relative Positionierung über Offset-Attribut ####
 								$offset_attribute = $this->layout['elements'][$attributes['name'][$j]]['offset_attribute'];
 								if($offset_attribute != ''){			# es ist ein offset_attribute gesetzt
 									$offset_value = $this->layout['offset_attributes'][$offset_attribute];
 									if($offset_value != ''){		# Offset wurde auch schon bestimmt, relative y-Position berechnen
-										$ypos = $this->handlePageOverflow($offset_attribute, $offset_value, $ypos);		# Seitenüberläufe berücksichtigen
+										$y = $this->handlePageOverflow($offset_attribute, $offset_value, $y);		# Seitenüberläufe berücksichtigen
 									}
 									else{
 										#$remaining_attributes[] = $attributes['name'][$j];	# Offset wurde noch nicht bestimmt, Attribut merken und überspringen
@@ -223,9 +223,9 @@ class ddl {
 								$x = $this->layout['elements'][$attributes['name'][$j]]['xpos'];								
 								
 								$pagecount = count($this->pdf->objects['3']['info']['pages']);								
-								if($this->layout['type'] == 1 AND $offset_attribute == '' AND $pagecount > 1)$ypos = $ypos + $this->initial_yoffset;		# ab der 2. Seite sollen die forlaufenden absolut positionierten Elemente oben auf der Seite beginnen
+								if($this->layout['type'] == 1 AND $offset_attribute == '' AND $pagecount > 1)$y = $y + $this->initial_yoffset;		# ab der 2. Seite sollen die forlaufenden absolut positionierten Elemente oben auf der Seite beginnen
 								
-								$y = $ypos - $offsety;
+								if($offset_attribute == '')$y = $y - $offsety;
 								if($this->layout['type'] != 0 AND $offset_attribute == '' AND $this->i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben (aber nur bei absolut positionierten)
 									$y = $y - $this->yoffset_onpage-$this->layout['gap'];
 								}	
@@ -452,7 +452,7 @@ class ddl {
 				$this->datasetcount_on_page = 0; # ??
 				$this->i_on_page = 1;	# ??
 				$this->maxy = 800;
-				#$offsety = 35;		TODO: testen beim bldam # das ist für den Fall, dass ein Sublayout in einem Sublayout einen Seitenüberlauf verursacht hat
+				#$offsety = 35;		# das ist für den Fall, dass ein Sublayout in einem Sublayout einen Seitenüberlauf verursacht hat
 			}
     	if($this->layout['type'] == 0 AND $i > 0){		# neue Seite beim seitenweisen Typ und neuem Datensatz 
     		$this->pdf->newPage();
@@ -476,14 +476,13 @@ class ddl {
 					$this->remaining_freetexts[] = $this->layout['texts'][$j]['id'];		# zu Beginn jedes Datensatzes sind alle Freitexte noch zu schreiben, bei fortlaufenden Layouts aber nur die fortlaufenden Freitexte
 				}
 			}
-			
 			################# Daten schreiben ###############
 			for($j = 0; $j < count($this->attributes['name']); $j++){
 				if($this->layout['elements'][$attributes['name'][$j]]['ypos'] > 0){
 					$this->remaining_attributes[$this->attributes['name'][$j]] = $this->attributes['name'][$j];		# zum Anfang sind alle Attribute noch zu schreiben
 				}
 			}
-			$test = 0;
+			$test = 0;			
 			while($test < 100 AND count($this->remaining_attributes) > 0){
 				$this->add_attribute_elements($selected_layer_id, $layerdb, $this->attributes, $oids, $offsetx, $offsety, $i, $preview);	# übrig sind die, die noch nicht geschrieben wurden, weil sie abhängig sind
 				$test++;
