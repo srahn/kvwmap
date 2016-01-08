@@ -87,6 +87,8 @@ class ddl {
 					}
 					$y = $ypos - $offsety;
 					if($type == 'running'){	# fortlaufende Freitexte
+						$pagecount = count($this->pdf->objects['3']['info']['pages']);								
+						if($this->layout['type'] == 1 AND $offset_attribute == '' AND $pagecount > 1)$y = $y + $this->initial_yoffset;		# ab der 2. Seite sollen die forlaufenden absolut positionierten Elemente oben auf der Seite beginnen
 						if($this->i_on_page == 0){
 							if($this->maxy < $y)$this->maxy = $y;		# beim ersten Datensatz das maxy ermitteln
 						}
@@ -144,6 +146,9 @@ class ddl {
 									}
 								}
 								#### relative Positionierung über Offset-Attribut ####
+								
+								$pagecount = count($this->pdf->objects['3']['info']['pages']);								
+								if($this->layout['type'] == 1 AND $offset_attribute == '' AND $pagecount > 1)$ypos = $ypos + $this->initial_yoffset;		# ab der 2. Seite sollen die forlaufenden absolut positionierten Elemente oben auf der Seite beginnen
 								
 								$offy = 842 - $ypos + $offsety;
 								
@@ -213,6 +218,10 @@ class ddl {
 								
 								$zeilenhoehe = $this->layout['elements'][$attributes['name'][$j]]['fontsize'];      		      		
 								$x = $this->layout['elements'][$attributes['name'][$j]]['xpos'];								
+								
+								$pagecount = count($this->pdf->objects['3']['info']['pages']);								
+								if($this->layout['type'] == 1 AND $offset_attribute == '' AND $pagecount > 1)$ypos = $ypos + $this->initial_yoffset;		# ab der 2. Seite sollen die forlaufenden absolut positionierten Elemente oben auf der Seite beginnen
+								
 								$y = $ypos - $offsety;
 								if($this->layout['type'] != 0 AND $offset_attribute == '' AND $this->i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben (aber nur bei absolut positionierten)
 									$y = $y - $this->yoffset_onpage-$this->layout['gap'];
@@ -449,9 +458,10 @@ class ddl {
 	    if($this->datasetcount_on_page > 0 AND $this->layout['type'] != 0 AND $this->miny < $this->yoffset_onpage/$this->datasetcount_on_page + 50){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
 				$this->datasetcount_on_page = 0;
 				$this->i_on_page = 0;
-				$this->maxy = 0;
+				#$this->maxy = 0;
+				if(!$this->initial_yoffset)$this->initial_yoffset = 780-$this->maxy;			# der Offset von oben gesehen, mit dem das erste fortlaufende Element auf der ersten Seite beginnt; wird benutzt, um die fortlaufenden Elemente ab der 2. Seite oben beginnen zu lassen
   			$this->miny = 1000000;
-				$offsety = 50;
+				$offsety = 0;
 				$this->pdf->newPage();
 				$this->add_static_elements($offsetx, $offsety);
 			}
