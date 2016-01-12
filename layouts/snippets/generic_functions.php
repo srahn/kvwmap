@@ -164,20 +164,24 @@ select_this_dataset = function(layer_id, n){
 
 add_to_clipboard = function(layer_id){
 	if(check_for_selection(layer_id)){
+		saved_go = currentform.go.value;
 		currentform.chosen_layer_id.value = layer_id;
 		currentform.go.value = 'Datensaetze_Merken';
 		formdata = new FormData(currentform);
 		ahah("index.php", formdata, new Array(), new Array());
+		currentform.go.value = saved_go;
 		message("Datensätze gemerkt");
 	}
 }
 
 remove_from_clipboard = function(layer_id){
 	if(check_for_selection(layer_id)){
+		saved_go = currentform.go.value;
 		currentform.chosen_layer_id.value = layer_id;
 		currentform.go.value = 'Datensaetze_nicht_mehr_merken';
 		formdata = new FormData(currentform);
 		ahah("index.php", formdata, new Array(), new Array());
+		currentform.go.value = saved_go;
 		message("Datensätze entfernt");
 	}
 }
