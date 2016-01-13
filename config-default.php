@@ -122,6 +122,16 @@ define('CHECK_CLIENT_IP',true);                               # Version 1.6.9 Se
 # maximale Länge der Passwörter
 define('PASSWORD_MAXLENGTH', 16);		# Version 2.1
 
+# Prüfung neues Passwort
+# Auskommentiert, wenn das Passwort vom Admin auf "unendlichen" Zeitraum vergeben wird
+# erste Stelle  0 = Prüft die Stärke des Passworts (3 von 4 Kriterien müssen erfüllt sein) - die weiteren Stellen werden ignoriert
+# erste Stelle  1 = Prüft statt Stärke die nachfolgenden Kriterien:
+# zweite Stelle 1 = Es müssen Kleinbuchstaben enthalten sein
+# dritte Stelle 1 = Es müssen Großbuchstaben enthalten sein
+# vierte Stelle 1 = Es müssen Zahlen enthalten sein
+# fünfte Stelle 1 = Es müssen Sonderzeichen enthalten sein
+define('PASSWORD_CHECK', '01010');															# Version 2.3
+
 # Wenn das kvwmap-Verzeichnis ein git-Repository ist, kann diese Konstante auf den User gesetzt werden, der das Repository angelegt hat.
 # Damit der Apache-User dann die git-Befehle als dieser User ausführen kann, muss man als root über den Befehl "visudo" die /etc/sudoers editieren.
 # Dort muss dann eine Zeile in dieser Form hinzugefügt werden: 

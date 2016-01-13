@@ -312,57 +312,100 @@ function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
 * @return string Fehlermeldung zur Beschreibung, was an dem Password schlecht ist, oder leerer String, wenn Password gut ist.
 * @see    createRandomPassword(), checkPasswordAge, $GUI, $user, $stelle
 */
+# Passwortprüfung
 function isPasswordValide($oldPassword,$newPassword,$newPassword2) {
   $password_errors = array();
-  
-  # Prüft ob überhaupt ein neues Password eingegeben wurde (leerer String)
-  if (strlen($newPassword)==0 OR strlen($newPassword2)==0) {
-  	$password_errors[] = "ist leer oder dessen Wiederholung";
-  }
-  else {
-    # Prüft ob neues Passwort nicht vieleicht genau dem alten Passwort entspricht
-    if ($oldPassword==$newPassword)
-      $password_errors[] = "muß sich vom alten unterscheiden";
+  $check = 0;
 
-    # Prüft ob neues Passwort der Wiederholung entspricht
-    if ($newPassword!=$newPassword2)
-      $password_errors[] = "muß mit der Wiederholung übereinstimmen";
-    
-	  # Prüft die Länge des Passwortes
-	  $strlen = strlen($newPassword);
-	  if($strlen <= 5) {
-	    $password_errors[] = "ist zu kurz";
-	  }
-		
-		if($strlen > PASSWORD_MAXLENGTH) {
-	    $password_errors[] = "ist zu lang";
-	  }
-  
-	  # Prüft die Anzahl unterschiedlicher Zeichen
-	  $count_chars = count_chars($newPassword, 3);
-	  if(strlen($count_chars) < $strlen / 2) {
-	    $password_errors[] = "hat zu viele gleiche Zeichen";
-	  }
-	  
-	  # Prüft die Verwendung von Sonderzeichen
-	  $strength = 0;
-	  $patterns = array('#[a-z]#','#[A-Z]#','#[0-9]#','/[¬!"£$%^&*()`{}\[\]:@~;\'#<>?,.\/\\-=_+\|]/');
-	  foreach($patterns as $pattern) {
-	  	if(preg_match($pattern,$newPassword,$matches)) {
-	      $strength++;
-	    }
-	  }
-	  // strength=
-	  // 1 - weak
-	  // 2 - not weak
-	  // 3 - acceptable
-	  // 4 - strong 
-	  if ($strength<3) {
-	  	$password_errors[] = "hat zu wenig Sonderzeichen";
-	  }
+  # Prüft ob überhaupt etwas eingegeben wurde
+  if (strlen($newPassword)==0 or strlen($newPassword2)==0) {
+  	$password_errors[] = "ist leer";
+  	$check = 1;
   }
-    
-  //Zusammenstellung der Fehlermeldung, wenn kein Fehler vorlag Rückgabe eines leeren Strings
+
+  # Prüft ob neues Passwort nicht genau dem alten Passwort entspricht
+  if ($check == 0 and $oldPassword==$newPassword) {
+    $password_errors[] = "muss sich vom alten unterscheiden";
+    $check = 1;
+  }
+
+  # Prüft ob neues Passwort der Wiederholung entspricht
+  if ($check == 0 and $newPassword!=$newPassword2) {
+    $password_errors[] = "muss mit der Wiederholung übereinstimmen";
+    $check = 1;
+  }
+
+  # Prüft die Länge des Passwortes
+  $strlen = strlen($newPassword);
+  if($check == 0 and $strlen <= 5) {
+    $password_errors[] = "ist zu kurz";
+    $check = 1;
+  }
+
+  if($check == 0 and $strlen > PASSWORD_MAXLENGTH) {
+    $password_errors[] = "ist zu lang";
+    $check = 1;
+  }
+
+  # Prüft die Anzahl unterschiedlicher Zeichen
+  $count_chars = count_chars($newPassword, 3);
+  if($check == 0 and strlen($count_chars) < $strlen / 2) {
+    $password_errors[] = "hat zu viele gleiche Zeichen";
+    $check = 1;
+  }
+
+  if($check == 0) {
+
+    # Prüft die Stärke des Passworts
+    if (substr(PASSWORD_CHECK,0,1)=='0') {
+      $strength = 0;
+      $patterns = array('#[a-z]#','#[A-Z]#','#[0-9]#','/[¬!"£$%^&*()`{}\[\]:@~;\'#<>?,.\/\\-=_+\|]/');
+      foreach($patterns as $pattern) {
+      	if(preg_match($pattern,$newPassword,$matches)) {
+          $strength++;
+        }
+      }
+      // strength=
+      // 1 - weak
+      // 2 - not weak
+      // 3 - acceptable
+      // 4 - strong
+      if ($strength<3) {
+      	$password_errors[] = "ist zu schwach";
+      }
+    }
+
+    # Prüft auf Kleinbuchstaben
+    if (substr(PASSWORD_CHECK,0,1)=='1' and substr(PASSWORD_CHECK,1,1)=='1') {
+      if(!preg_match('/[a-z]/',$newPassword)) {
+        $password_errors[] = "weist keine Kleinbuchstaben auf";
+      }
+    }
+
+    # Prüft auf Großbuchstaben
+    if (substr(PASSWORD_CHECK,0,1)=='1' and substr(PASSWORD_CHECK,2,1)=='1') {
+      if(!preg_match('/[A-Z]/',$newPassword)) {
+        $password_errors[] = "weist keine Großbuchstaben auf";
+      }
+    }
+
+    # Prüft auf Zahlen
+    if (substr(PASSWORD_CHECK,0,1)=='1' and substr(PASSWORD_CHECK,3,1)=='1') {
+      if(!preg_match('/[0-9]/',$newPassword)) {
+        $password_errors[] = "weist keine Zahlen auf";
+      }
+    }
+
+    # Prüft auf Sonderzeichen
+    if (substr(PASSWORD_CHECK,0,1)=='1' and substr(PASSWORD_CHECK,4,1)=='1') {
+      if(!preg_match('/[¬!"£$%^&*()`{}\[\]:@~;\'#<>?,.\/\\-=_+\|]/',$newPassword)) {
+        $password_errors[] = "weist keine Sonderzeichen auf";
+      }
+    }
+
+  }
+
+  //Zusammenstellung der Fehlermeldung - wenn kein Fehler vorlag: Rückgabe eines leeren Strings
   $return_string = "";
   $anzErrors=count($password_errors);
   for($i=0;$i<$anzErrors;$i++) {

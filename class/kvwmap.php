@@ -11559,7 +11559,14 @@ class GUI {
 				# SVG-Geometrie abfragen für highlighting
 				if($this->user->rolle->highlighting == '1'){
 					if($layerset[$i]['Datentyp'] != MS_LAYER_POINT){
-						$pfad = "st_assvg(st_transform(".$layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$the_geom.", ".$client_epsg."), 0, 8) AS highlight_geom, ".$pfad;
+						$rand = 10;
+						$box_wkt ="POLYGON((";
+						$box_wkt.=strval($this->user->rolle->oGeorefExt->minx-$rand)." ".strval($this->user->rolle->oGeorefExt->miny-$rand).",";
+						$box_wkt.=strval($this->user->rolle->oGeorefExt->maxx+$rand)." ".strval($this->user->rolle->oGeorefExt->miny-$rand).",";
+						$box_wkt.=strval($this->user->rolle->oGeorefExt->maxx+$rand)." ".strval($this->user->rolle->oGeorefExt->maxy+$rand).",";
+						$box_wkt.=strval($this->user->rolle->oGeorefExt->minx-$rand)." ".strval($this->user->rolle->oGeorefExt->maxy+$rand).",";
+						$box_wkt.=strval($this->user->rolle->oGeorefExt->minx-$rand)." ".strval($this->user->rolle->oGeorefExt->miny-$rand)."))";
+						$pfad = "st_assvg(st_transform(st_simplify(st_intersection(".$layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$the_geom.", st_transform(st_geomfromtext('".$box_wkt."',".$client_epsg."), ".$layer_epsg.")), ".$this->map_scaledenom."/10000), ".$client_epsg."), 0, 8) AS highlight_geom, ".$pfad;
 					}
 					else{
 						$buffer = $this->map_scaledenom/260;
