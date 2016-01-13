@@ -179,12 +179,13 @@ class ddl {
 									if($page_id_before_sublayout != $page_id_after_sublayout){
 										$this->page_overflow_by_sublayout = true;		# bei einem Seitenüberlauf, der durch ein Sublayout verursacht wurde, wird sich hier die vorhergehende Page-ID gemerkt
 										$this->page_id_before_sublayout = $page_id_before_sublayout;
-										$this->miny_on_new_page = $y;
+										#$this->miny_on_new_page = $y;
+										#$this->miny[$this->pdf->currentContents] = $y;
 									}
 								}
 								# den letzten y-Wert dieses Elements in das Offset-Array schreiben
 								$this->layout['offset_attributes'][$attributes['name'][$j]] = $y;
-								if($this->miny > $y)$this->miny = $y;		# miny ist die unterste y-Position das aktuellen Datensatzes 
+								if(!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y)$this->miny[$this->pdf->currentContents] = $y;		# miny ist die unterste y-Position das aktuellen Datensatzes 
 								
 								$this->layout['page_id'][$attributes['name'][$j]] = $this->pdf->currentContents;		# und die Page-ID merken, in der das Attribut beendet wurde								
 								$this->pdf->closeObject();			# falls in eine alte Seite geschrieben wurde, zurückkehren
@@ -212,8 +213,8 @@ class ddl {
 										continue 2; 
 									}
 								}
-								elseif($this->layout['type'] == 0 AND $this->pdf->getFirstPageId() != end($this->pdf->ezPages)){
-									$this->pdf->reopenObject($this->pdf->getFirstPageId());		# zurück zur ersten Seite bei seitenweisem Typ und allen absolut positionierten Attributen, wenn erforderlich
+								elseif($this->layout['type'] == 0 AND $this->pdf->getFirstPageId() != end($this->pdf->objects['3']['info']['pages'])+1){
+									#$this->pdf->reopenObject($this->pdf->getFirstPageId());		# zurück zur ersten Seite bei seitenweisem Typ und allen absolut positionierten Attributen, wenn erforderlich
 								}
 								#### relative Positionierung über Offset-Attribut ####									
 								
@@ -224,14 +225,16 @@ class ddl {
 								if($this->layout['type'] == 1 AND $offset_attribute == '' AND $pagecount > 1)$y = $y + $this->initial_yoffset;		# ab der 2. Seite sollen die forlaufenden absolut positionierten Elemente oben auf der Seite beginnen
 								
 								if($offset_attribute == '')$y = $y - $offsety;
+								
 								if($this->layout['type'] != 0 AND $offset_attribute == '' AND $this->i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben (aber nur bei absolut positionierten)
 									$y = $y - $this->yoffset_onpage-$this->layout['gap'];
 								}	
+								
 								# beim jedem Datensatz die Gesamthoehe der Elemente des Datensatzes ermitteln
 								if($this->i_on_page == 0){
 									if($this->maxy < $y)$this->maxy = $y;		# beim ersten Datensatz das maxy ermitteln
 								}
-																		
+								
 								$width = $this->layout['elements'][$attributes['name'][$j]]['width'];
 								
 								if($attributes['form_element_type'][$j] == 'Dokument'){
@@ -256,7 +259,7 @@ class ddl {
 									$y = $this->putText($text, $zeilenhoehe, $width, $x, $y, $offsetx);
 								}								
 																
-								if($this->miny > $y)$this->miny = $y;		# miny ist die unterste y-Position das aktuellen Datensatzes 
+								if(!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y)$this->miny[$this->pdf->currentContents] = $y;		# miny ist die unterste y-Position das aktuellen Datensatzes 
 								
 								$this->layout['offset_attributes'][$attributes['name'][$j]] = $y;					# den unteren y-Wert dieses Elements in das Offset-Array schreiben
 								$this->layout['page_id'][$attributes['name'][$j]] = $this->pdf->currentContents;		# und die Page-ID merken, in der das Attribut beendet wurde
@@ -306,7 +309,7 @@ class ddl {
 					$this->pdf->addJpegFromFile(IMAGEPATH.$newname, $x, $y, $this->layout['elements'][$attributes['name'][$j]]['width']);
 					# Rechteck um die Karte
 					$this->pdf->rectangle($x, $y, $this->layout['elements'][$attributes['name'][$j]]['width'], $this->layout['elements'][$attributes['name'][$j]]['width']);
-					if($this->miny > $y)$this->miny = $y;
+					if(!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y)$this->miny[$this->pdf->currentContents] = $y;
 				}
 				unset($this->remaining_attributes[$attributes['name'][$j]]);		# das Attribut aus den remaining_attributes entfernen
 			}
@@ -318,13 +321,14 @@ class ddl {
 		if($this->layout['page_id'][$offset_attribute] != $this->pdf->currentContents){
 			$backto_oldpage = true;															# das Offset-Attribut wurde auf einer anderen Seite beendet -> zu dieser Seite zurückkehren
 		}
-		if($offset_value - $ypos < 20){	# Seitenüberlauf
-			$offset_value = 842 + $offset_value - 20 - 30;	# Offsetwert so anpassen, dass er für die neue Seite passt
+		if($offset_value - $ypos < 40){	# Seitenüberlauf
+			$offset_value = 842 + $offset_value - 40 - 30;	# Offsetwert so anpassen, dass er für die neue Seite passt
 			if($backto_oldpage){
 				$this->pdf->reopenObject($this->getNextPage($this->layout['page_id'][$offset_attribute]));		# die nächste Seite der Seite des Offset-Attributes nehmen
 			}
 			else{
 				$this->pdf->ezNewPage();			# eine neue Seite beginnen
+				$this->miny[$this->pdf->currentContents] = 900;
 			}
 		}
 		elseif($backto_oldpage){
@@ -335,9 +339,10 @@ class ddl {
 	}
 	
 	function getNextPage($pageid){
-		for($i = 1; $i <= count($this->pdf->ezPages); $i++){
-			if($this->pdf->ezPages[$i] == $pageid){
-				return $this->pdf->ezPages[$i+1];
+		$pages = $this->pdf->objects['3']['info']['pages'];
+		for($i = 1; $i <= count($pages); $i++){
+			if($pages[$i]+1 == $pageid){			# die Page-IDs sind komischerweise alle um 1 größer
+				return $pages[$i+1]+1;
 			}
 		}
 	}
@@ -357,7 +362,14 @@ class ddl {
 		$fh = $this->pdf->getFontHeight($fontsize);
 		$y = $y + $fh;
 		$this->pdf->ezSetY($y);		
-		return $this->pdf->ezText(iconv("UTF-8", "CP1252", $text), $fontsize, $options);
+		$page_id_before_puttext = $this->pdf->currentContents;
+		$ret = $this->pdf->ezText(iconv("UTF-8", "CP1252", $text), $fontsize, $options);
+		$page_id_after_puttext = $this->pdf->currentContents;
+		if($page_id_before_puttext != $page_id_after_puttext){
+			$this->page_overflow_by_sublayout = true;
+			$this->page_id_before_sublayout = $page_id_before_puttext;
+		}
+		return $ret;
 	}
   
   function substituteFreitext($text, $i, $pagenumber, $pagecount){
@@ -424,8 +436,7 @@ class ddl {
 		$this->result = $result;
   	$this->user = $user;
   	$this->maxy = 0;
-  	$this->miny = 1000000;
-		if($offsety)$this->miny = 842 - $offsety;
+  	#$this->miny = 1000000;
   	$this->i_on_page = -1;
   	$this->datasetcount_on_page = 0;
 		$this->page_overflow_by_sublayout = false;
@@ -436,37 +447,41 @@ class ddl {
 		else{
 			$this->pdf = $pdfobject;			# ein PDF-Objekt wurde aus einem übergeordneten Druckrahmen/Layer übergeben
 		}
-		$this->pdf->ezSetMargins(30,20,0,0);
+		$this->miny[$this->pdf->currentContents] = 1000000;
+		if($offsety)$this->miny[$this->pdf->currentContents] = 842 - $offsety;
+		$this->pdf->ezSetMargins(40,30,0,0);
     if($this->layout['elements'][$attributes['the_geom']]['xpos'] > 0){		# wenn ein Geometriebild angezeigt werden soll -> loadmap()
     	$this->gui->map_factor = MAPFACTOR;
     	$this->gui->loadmap('DataBase');
     }
 		$this->add_static_elements($offsetx, $offsety);
-    for($i = 0; $i < count($result); $i++){		
+    for($i = 0; $i < count($result); $i++){
+			$lastpage = end($this->pdf->objects['3']['info']['pages'])+1;
     	$this->i_on_page++;
 			if($this->page_overflow_by_sublayout != false){
 				$this->page_overflow_by_sublayout = false;						
-				$this->miny = $this->miny_on_new_page; 
+				#$this->miny = $this->miny_on_new_page; 
+				if(!$this->initial_yoffset)$this->initial_yoffset = 780-$this->maxy;			# der Offset von oben gesehen, mit dem das erste fortlaufende Element auf der ersten Seite beginnt; wird benutzt, um die fortlaufenden Elemente ab der 2. Seite oben beginnen zu lassen
 				$this->datasetcount_on_page = 0; # ??
 				$this->i_on_page = 1;	# ??
 				$this->maxy = 800;
-				$offsety = 50;		# das ist für den Fall, dass ein Sublayout in einem Sublayout einen Seitenüberlauf verursacht hat (hier muss eigentlich der Offset der nächsten Seite rein)
+				if($this->layout['type'] == 2)$offsety = 50;		# das ist für den Fall, dass ein Sublayout in einem Sublayout einen Seitenüberlauf verursacht hat (hier muss eigentlich der Offset der nächsten Seite rein)
 			}
     	if($this->layout['type'] == 0 AND $i > 0){		# neue Seite beim seitenweisen Typ und neuem Datensatz 
     		$this->pdf->newPage();
 				$this->add_static_elements($offsetx, $offsety);
-    	}			
-	    if($this->datasetcount_on_page > 0 AND $this->layout['type'] != 0 AND $this->miny < $this->yoffset_onpage/$this->datasetcount_on_page + 50){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
+    	}	
+	    if($this->datasetcount_on_page > 0 AND $this->layout['type'] != 0 AND $this->miny[$lastpage] < $this->yoffset_onpage/$this->datasetcount_on_page + 70){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
 				$this->datasetcount_on_page = 0;
 				$this->i_on_page = 0;
 				#$this->maxy = 0;
 				if(!$this->initial_yoffset)$this->initial_yoffset = 780-$this->maxy;			# der Offset von oben gesehen, mit dem das erste fortlaufende Element auf der ersten Seite beginnt; wird benutzt, um die fortlaufenden Elemente ab der 2. Seite oben beginnen zu lassen
-  			$this->miny = 1000000;
 				if($this->layout['type'] == 2)$offsety = 50; else $offsety = 0;
 				$this->pdf->newPage();
+				$this->miny[$lastpage] = 1000000;
 				#$this->add_static_elements($offsetx, $offsety);
 			}
-			$this->yoffset_onpage = $this->maxy - $this->miny;			# der Offset mit dem die Elemente beim Untereinander-Typ nach unten versetzt werden
+			$this->yoffset_onpage = $this->maxy - $this->miny[$lastpage];			# der Offset mit dem die Elemente beim Untereinander-Typ nach unten versetzt werden
 			$this->layout['offset_attributes'] = array();
 			
 			for($j = 0; $j < count($this->layout['texts']); $j++){
@@ -507,11 +522,12 @@ class ddl {
 			return $dateipfad.$dateiname;			
 		}
 		else{
-			return $this->miny;		# der letzte y-Wert wird zurückgeliefert, um nachfolgende Elemente darunter zu setzen
+			return $this->miny[$this->pdf->currentContents];		# der letzte y-Wert wird zurückgeliefert, um nachfolgende Elemente darunter zu setzen
 		}
 	}
 	
 	function add_everypage_elements(){
+		$this->pdf->ezSetMargins(0,0,0,0);
 		$pages = $this->pdf->objects['3']['info']['pages'];
 		$pagecount = count($pages);
 		for($i = 0; $i < $pagecount; $i++){
