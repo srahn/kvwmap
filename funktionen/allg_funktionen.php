@@ -896,7 +896,7 @@ function showAlert($text) {
   </script><?php
 }
 
-function showMessage($text) {
+function showMessage($text, $fade = true) {
   ?>
   <script type="text/javascript">
 		var Msg = document.getElementById("message_box");
@@ -905,9 +905,15 @@ function showMessage($text) {
 			var Msg = document.getElementById("message_box");
 		}
 		Msg.className = 'message_box_visible';
-		Msg.innerHTML = '<?php echo $text; ?>';
-		setTimeout(function() {Msg.className = 'message_box_hide';},1000);
-		setTimeout(function() {Msg.className = 'message_box_hidden';},3000);
+		Msg.style.top = document.body.scrollTop + 500;		
+		var innerhtml = '<?php echo $text; ?>';
+		<? if($fade == true){ ?>
+			setTimeout(function() {Msg.className = 'message_box_hide';},1000);
+			setTimeout(function() {Msg.className = 'message_box_hidden';},3000);
+		<? }else{ ?>
+			innerhtml += '<br><br><input type="button" onclick="this.parentNode.className = \'message_box_hidden\';" value="ok">';
+		<? } ?>
+		Msg.innerHTML = innerhtml;
   </script><?php
 }
 

@@ -7383,7 +7383,7 @@ class GUI {
       }
       else{
         if($this->formvars['close_window'] == ""){
-					if($result[0] != '')showAlert('Eintrag erfolgreich.\n'.$result[0]);
+					if($result[0] != '')showMessage('Eintrag erfolgreich.\n'.$result[0], false);
           else showMessage('Eintrag erfolgreich!');
         }
         if($this->formvars['weiter_erfassen'] == 1){

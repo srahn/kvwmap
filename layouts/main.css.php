@@ -587,15 +587,16 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 .message_box_visible{
   opacity: 1;
   position: absolute;
-  top:40%;
+  top:500px;
   left:50%;
   width:250px;
-  height:90px;
+  #height:90px;
 	font-size: 17px;
 	font-family: SourceSansPro2;
 	margin:-45px 0 0 -100px;
+	padding: 20px;
   text-align:center;
-	line-height: 90px;
+	line-height: 20px;
   border: 1px solid grey;
   background-color: #DAE4EC;
 	box-shadow: 0px 0px 14px #777;
