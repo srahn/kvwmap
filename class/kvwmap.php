@@ -14002,10 +14002,16 @@ class db_mapObj{
     if($rs['Typ'] == 'import'){		# beim Shape-Import-Layern die Tabelle löschen
 			$explosion = explode('WHERE', $rs['Data']);
     	$explosion = explode(CUSTOM_SHAPE_SCHEMA.'.', $explosion[0]);
-    	$sql = 'DROP TABLE IF EXISTS '.CUSTOM_SHAPE_SCHEMA.'.'.$explosion[1].';';
-    	$sql.= 'DELETE FROM geometry_columns WHERE f_table_schema = \''.CUSTOM_SHAPE_SCHEMA.'\' AND f_table_name = \''.$explosion[1].'\'';
-    	$this->debug->write("<p>file:kvwmap class:db_mapObj->deleteRollenLayer - Löschen eines RollenLayers:<br>".$sql,4);
-      $query=pg_query($sql);
+			$sql = "SELECT count(id) FROM rollenlayer WHERE Data like '%".$explosion[1]."%'";
+			$query=mysql_query($sql);
+			if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+			$rs=mysql_fetch_array($query);
+			if($rs[0] == 1){		# Tabelle nur löschen, wenn das der einzige Layer ist, der sie benutzt
+				$sql = 'DROP TABLE IF EXISTS '.CUSTOM_SHAPE_SCHEMA.'.'.$explosion[1].';';
+				$sql.= 'DELETE FROM geometry_columns WHERE f_table_schema = \''.CUSTOM_SHAPE_SCHEMA.'\' AND f_table_name = \''.$explosion[1].'\'';
+				$this->debug->write("<p>file:kvwmap class:db_mapObj->deleteRollenLayer - Löschen eines RollenLayers:<br>".$sql,4);
+				$query=pg_query($sql);
+			}
     }
     $sql = 'DELETE FROM rollenlayer WHERE id = '.$id;
     #echo $sql;
