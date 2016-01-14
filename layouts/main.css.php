@@ -600,7 +600,7 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
   border: 1px solid grey;
   background-color: #DAE4EC;
 	box-shadow: 0px 0px 14px #777;
-	z-index: 1000;
+	z-index: 1000000;
 }
 
 .message_box_hide{
