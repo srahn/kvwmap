@@ -163,7 +163,7 @@ class data_import_export {
 	function import_custom_pointlist($formvars, $pgdatabase){
 		$rows = file($formvars['file1']);
 		$delimiters = array(';', ' ', ',');		# erlaubte Trennzeichen
-		$tablename = 'a'.strtolower(umlaute_umwandeln(basename($formvars['file1']))).rand(1,1000000);
+		$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($formvars['file1']), 0, 15))).rand(1,1000000);
 		$columns = explode($formvars['delimiter'], $rows[0]);
 		for($i = 0; $i < count($columns); $i++){
 			if($formvars['column'.$i] == 'x' AND !is_numeric($columns[$i]))$headlines = true;		// die erste Zeile enthält die Spaltenüberschriften
@@ -224,7 +224,7 @@ class data_import_export {
 			$this->ovlfile = UPLOADPATH.$_files['file1']['name'];
 			if(move_uploaded_file($_files['file1']['tmp_name'], $this->ovlfile)){
 				$rows = file($this->ovlfile);
-				$tablename = 'a'.strtolower(umlaute_umwandeln(basename($formvars['file1']))).rand(1,1000000);		
+				$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($formvars['file1']), 0, 15))).rand(1,1000000);		
 				foreach($rows as $row){
 					$kvp = explode('=', $row);
 					if($kvp[1] != '')$kvps[$kvp[0]] = $kvp[1];
@@ -293,7 +293,7 @@ class data_import_export {
 				$firstfile = explode('.', $files[0]);
 				$file = $firstfile[0];
 				if(file_exists(UPLOADPATH.$file.'.dbf') OR file_exists(UPLOADPATH.$file.'.DBF')){
-					$tablename = 'a'.strtolower(umlaute_umwandeln($file)).rand(1,1000000);
+					$tablename = 'a'.strtolower(umlaute_umwandeln(substr($file, 0, 15))).rand(1,1000000);
 		      $command = POSTGRESBINPATH.'shp2pgsql -g the_geom -I -s '.$formvars['epsg'].' -W LATIN1 -c "'.UPLOADPATH.$file.'" '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' > "'.UPLOADPATH.$file.'.sql"'; 
 		      exec($command);
 		     	#echo $command;
@@ -336,7 +336,7 @@ class data_import_export {
       if(move_uploaded_file($_files['file1']['tmp_name'],$importfile)){
 				if(file_exists($importfile)){
 					if($formvars['tracks']){
-						$tablename = 'a'.strtolower(umlaute_umwandeln(basename($importfile))).rand(1,1000000);
+						$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($importfile), 0, 15))).rand(1,1000000);
 						$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $formvars['epsg'], $importfile, $pgdatabase, 'tracks');
 						$sql = '
 							ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' SET WITH OIDS;
@@ -375,7 +375,7 @@ class data_import_export {
       $importfile = UPLOADPATH.$_files['file1']['name'];
       if(move_uploaded_file($_files['file1']['tmp_name'],$importfile)){
 				if(file_exists($importfile)){
-					$tablename = 'a'.strtolower(umlaute_umwandeln(basename($importfile))).rand(1,1000000);
+					$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($importfile), 0, 15))).rand(1,1000000);
 					$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $formvars['epsg'], $importfile, $pgdatabase, NULL);
 					$sql = '
 						ALTER TABLE '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' SET WITH OIDS;
