@@ -78,7 +78,9 @@ class data_import_export {
 			$this->formvars['Gruppe'] = $groupid;
 			$this->formvars['Typ'] = 'import';
 			$this->formvars['Datentyp'] = $custom_table['datatype'];
-			$this->formvars['Data'] = 'the_geom from (SELECT oid, the_geom FROM '.CUSTOM_SHAPE_SCHEMA.'.'.$custom_table['tablename'].' WHERE 1=1 '.$custom_table['where'].')as foo using unique oid using srid='.$formvars['epsg'];
+			$select = 'oid, the_geom';
+			if($custom_table['labelitem'] != '')$select .= ', '.$custom_table['labelitem'];
+			$this->formvars['Data'] = 'the_geom from (SELECT '.$select.' FROM '.CUSTOM_SHAPE_SCHEMA.'.'.$custom_table['tablename'].' WHERE 1=1 '.$custom_table['where'].')as foo using unique oid using srid='.$formvars['epsg'];
 			$this->formvars['query'] = 'SELECT * FROM '.$custom_table['tablename'].' WHERE 1=1'.$custom_table['where'];
 			$connectionstring ='user='.$pgdatabase->user;
 			if($pgdatabase->passwd != '')$connectionstring.=' password='.$pgdatabase->passwd;
