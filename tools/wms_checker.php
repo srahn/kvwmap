@@ -97,9 +97,9 @@ while($line = mysql_fetch_array($result)){
   $bounding = implode(",", array($extent->minx, $extent->miny, $extent->maxx, $extent->maxy));
   
   $url = $line["connection"]."&REQUEST=GetMap&EXCEPTIONS=XML&SRS=EPSG:".$line["epsg_code"]."&WIDTH=400&HEIGHT=400&BBOX=".$bounding;
-	if(strpos(strtolower($line["connection"]), '&version=') === false)$line["connection"] .= '&VERSION='.$line["wms_server_version"];
-	if(strpos(strtolower($line["connection"]), '&layers=') === false)$line["connection"] .= '&LAYERS='.$line["wms_name"];
-	if(strpos(strtolower($line["connection"]), '&format=') === false)$line["connection"] .= '&FORMAT='.$line["wms_format"];
+	if(strpos(strtolower($line["connection"]), '&version=') === false)$url .= '&VERSION='.$line["wms_server_version"];
+	if(strpos(strtolower($line["connection"]), '&layers=') === false)$url .= '&LAYERS='.$line["wms_name"];
+	if(strpos(strtolower($line["connection"]), '&format=') === false)$url .= '&FORMAT='.$line["wms_format"];
   $status = checkStatus($url);
 	
 	if(!$status[0])$color = '#db5a5a';
