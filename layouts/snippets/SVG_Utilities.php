@@ -3079,7 +3079,7 @@ $measurefunctions = '
 				<use id="pointposition" xlink:href="#crosshair_blue" x="-500" y="-500"/>
 				<circle id="startvertex" cx="-500" cy="-500" r="2" style="fill:blue;stroke:blue;stroke-width:2"/>
 			</g>
-			<rect id="canvas" cursor="crosshair" onmousedown="mousedown(evt);" onmousemove="mousemove(evt);hide_tooltip();" onmouseup="mouseup(evt);" width="100%" height="100%" opacity="0" visibility="visible"/>
+			<rect id="canvas" cursor="crosshair" onmousedown="mousedown(evt);" onmousemove="mousemove(evt);" onmouseup="mouseup(evt);" width="100%" height="100%" opacity="0" visibility="visible"/>
 			<g id="in_between_vertices" transform="translate(0,'.$res_y.') scale(1,-1)">			
 			</g>
 			<g id="vertices" transform="translate(0,'.$res_y.') scale(1,-1)">			
@@ -3114,7 +3114,7 @@ $measurefunctions = '
 	  </g>
 	  
 
-	  <g id="alleButtons" transform="translate(0 0)">
+	  <g id="alleButtons" onmouseout="hide_tooltip()" transform="translate(0 0)">
 	  ';
 
 	$navbuttons ='
