@@ -240,6 +240,9 @@ $supportedSRIDs = array(4326,2397,2398,2399,31466,31467,31468,31469,32648,25832,
 # Unterstützte Sprachen, nur diese stehen zur Auswahl bei der Stellenwahl ('german', 'low-german', 'english', 'polish', 'vietnamese')
 $supportedLanguages = array('german');															# Version 2.0
 
+# Hier kann festgelegt werden, ob in den Optionen das Feld "Zeitpunkt für historische Daten" erscheinen soll, oder nicht (true/false)
+define('HIST_TIMESTAMP', true);																											# Version 2.3
+
 # Name der Stopwortdatei
 define('STOPWORDFILE',SHAPEPATH.'gazetteer/top10000de.txt');
 
