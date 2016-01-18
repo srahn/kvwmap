@@ -9550,10 +9550,18 @@ class GUI {
       $this->errmsg="Der gespeicherte Kartenausschnitt konnte nicht abgefragt werden.<br>".$ret[1];
     }
     else {
-
       $this->user->rolle->set_last_time_id($storetime);
       $this->user->rolle->newtime = $storetime;
-      $this->map->setextent($ret[1]['minx'],$ret[1]['miny'],$ret[1]['maxx'],$ret[1]['maxy']);
+			$rect = ms_newRectObj();
+			$rect->setextent($ret[1]['minx'],$ret[1]['miny'],$ret[1]['maxx'],$ret[1]['maxy']);
+			if($ret[1]['epsg_code'] != '' AND $ret[1]['epsg_code'] != $this->user->rolle->epsg_code){
+				$rect = ms_newRectObj();
+				$rect->setextent($ret[1]['minx'],$ret[1]['miny'],$ret[1]['maxx'],$ret[1]['maxy']);
+				$projFROM = ms_newprojectionobj("init=epsg:".$ret[1]['epsg_code']);
+				$projTO = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);
+				$rect->project($projFROM, $projTO);
+			}
+      $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
     	if(MAPSERVERVERSION >= 600 ) {
 				$this->map_scaledenom = $this->map->scaledenom;
 			}

@@ -1632,13 +1632,12 @@ class rolle {
         $sql.=', stelle_id='.$this->stelle_id;
         $sql.=', time_id="'.$time.'"';
         $sql.=',activity="'.$activity.'"';
-        # 2006-09-29 pk
         if ($prevtime=="0000-00-00 00:00:00" OR $prevtime=='') {
           $prevtime=$time;
         }
         $sql.=',prev="'.$prevtime.'"';        
-        # 2006-02-16 pk
         $sql.=', nimagewidth='.$this->nImageWidth.',nimageheight='.$this->nImageHeight;
+				$sql.=", epsg_code='".$this->epsg_code."'";
         $sql.=', minx='.$this->oGeorefExt->minx.', miny='.$this->oGeorefExt->miny;
         $sql.=', maxx='.$this->oGeorefExt->maxx.', maxy='.$this->oGeorefExt->maxy;
         #echo $sql;
