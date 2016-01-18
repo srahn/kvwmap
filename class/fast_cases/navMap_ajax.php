@@ -1851,7 +1851,7 @@
         }
         $sql.=',prev="'.$prevtime.'"';        
         # 2006-02-16 pk
-        $sql.=', nimagewidth='.$this->nImageWidth.',nimageheight='.$this->nImageHeight;
+        $sql.=', nimagewidth='.$this->nImageWidth.',nimageheight='.$this->nImageHeight;				$sql.=", epsg_code='".$this->epsg_code."'";
         $sql.=', minx='.$this->oGeorefExt->minx.', miny='.$this->oGeorefExt->miny;
         $sql.=', maxx='.$this->oGeorefExt->maxx.', maxy='.$this->oGeorefExt->maxy;
         #echo $sql;
