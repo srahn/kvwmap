@@ -104,7 +104,7 @@ function show(){
 				</tr>
 			</table>
 			<? }
-					else echo 'Kein geeignetes Trennzeichen gefunden. Erlaubte Trennzeichen: ";" "," und Leerzeichen' ?>
+					else echo 'Kein geeignetes Trennzeichen gefunden. Erlaubte Trennzeichen: ";" "," Leerzeichen und Tab' ?>
 			<input type="hidden" name="epsg" value="<? echo $this->formvars['epsg']; ?>">
 			<input type="hidden" name="file1" value="<? echo $this->data_import_export->pointfile; ?>">
 			<input type="hidden" name="delimiter" value="<? echo $this->data_import_export->delimiter; ?>">

@@ -33,6 +33,7 @@ class data_import_export {
   function data_import_export() {
     global $debug;
     $this->debug=$debug;
+		$this->delimiters = array(';', ' ', ',', "\t");		# erlaubte Trennzeichen
   }
 
 ################# Import #################
@@ -153,9 +154,8 @@ class data_import_export {
 			$this->pointfile = UPLOADPATH.$_files['file1']['name'];
 			if(move_uploaded_file($_files['file1']['tmp_name'], $this->pointfile)){
 				$rows = file($this->pointfile);
-				$delimiters = array(';', ' ', ',');		# erlaubte Trennzeichen
-				while(count($delimiters) > 0 AND count($this->columns) < 2){
-					$this->delimiter = array_shift($delimiters);
+				while(count($this->delimiters) > 0 AND count($this->columns) < 2){
+					$this->delimiter = array_shift($this->delimiters);
 					$this->columns = explode($this->delimiter, utf8_encode($rows[0]));
 				}
 			}
@@ -164,7 +164,6 @@ class data_import_export {
 	
 	function import_custom_pointlist($formvars, $pgdatabase){
 		$rows = file($formvars['file1']);
-		$delimiters = array(';', ' ', ',');		# erlaubte Trennzeichen
 		$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($formvars['file1']), 0, 15))).rand(1,1000000);
 		$columns = explode($formvars['delimiter'], $rows[0]);
 		for($i = 0; $i < count($columns); $i++){
