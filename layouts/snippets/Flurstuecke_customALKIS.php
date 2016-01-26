@@ -841,6 +841,7 @@ show_all = function(count){
         <span class="fett">Für alle ausgewählten Flurstücke:</span><br>
       </td>
     </tr>
+		<? if($this->qlayerset[$i]['export_privileg'] != 0){ ?>
     <tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
 		  <td colspan="2">
           <div class="fstanzeigecontainer">
@@ -882,6 +883,7 @@ show_all = function(count){
           </div>
   		  </td>
 		</tr>
+		<? } ?>
 		<tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
 		  <td>
           <div class="fstanzeigecontainer">
