@@ -1,4 +1,4 @@
-<?
+<?php
 
   $this->goNotExecutedInPlugins = false;
   
@@ -6,15 +6,40 @@
 
     case 'say_hallo' : {
       include(PLUGINS . 'xplankonverter/model/xplan.php');
-      $xplan = new $xplan;
-      $this->loadMap('DataBase');          # Karte anzeigen
-      $currenttime=date('Y-m-d H:i:s',time());
-      $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-      $this->drawMap();
-      $this->saveMap('');
+
+      // Die Verbindung zur Datenbank kvwmapsp ist verfügbar in
+      //$this->pgdatabase->dbConn);
+      $this->xplan = new xplan($this->pgdatabase);
+      
+      // Einbindung des Views
+      $this->main=PLUGINS . 'xplankonverter/view/xplan.php';
+
       $this->output();
+
+    } break;
+    
+    case 'build_gml' : {
+      include(PLUGINS . 'xplankonverter/model/build_gml.php');
+      
+      // Die Verbindung zur Datenbank kvwmapsp ist verfügbar in
+      //$this->pgdatabase->dbConn);
+      $this->gml_builder = new gml_builder($this->pgdatabase);
+      
+      // Einbindung des Views
+      $this->main=PLUGINS . 'xplankonverter/view/build_gml.php';
+      
+      $this->output();
+      
     } break;
 
+    case 'home' : {
+      // Einbindung des Views
+      $this->main=PLUGINS . 'xplankonverter/view/home.php';
+
+      $this->output();
+
+    } break;
+    
     default : {
       $this->goNotExecutedInPlugins = true;    // in diesem Plugin wurde go nicht ausgeführt
     }
