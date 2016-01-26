@@ -52,23 +52,10 @@ class ALB {
 		curl_setopt($ch, CURLOPT_POSTFIELDS, array('cmd' => 'ausfuehren', 'jsessionid' => $sessionid, 'nasfile' => $curl_file));
 		$result = curl_exec($ch);
 		curl_close($ch);
-		switch (substr($result, 0, 2)){
-			case 'PK' : $type = 'zip'; break;
-			case '<?' : $type = 'xml'; break;
-			case '%P' : $type = 'pdf'; break;
-		}
-		header("Pragma: public"); 
-		header("Expires: 0"); 
-		header("Cache-Control: must-revalidate, post-check=0, pre-check=0"); 
-		header("Content-Type: application/force-download"); 
-		header("Content-Type: application/octet-stream"); 
-		header("Content-Type: application/download"); 
-		header('Content-Disposition: attachment; filename='.$filename.'.'.$type); 
-		header("Content-Transfer-Encoding: binary"); 
 		return $result;
 	}
 	
-	function create_nas_request_xml_file($FlurstKennz, $Grundbuchbezirk, $Grundbuchblatt, $Buchnungstelle, $formnummer){
+	function create_nas_request_xml_file($FlurstKennz, $Grundbuchbezirk, $Grundbuchblatt, $Buchnungstelle, $print_params, $formnummer){
 		$xml = '<?xml version="1.0" encoding="UTF-8"?>
 <CPA_Benutzungsauftrag
  xmlns ="http://www.cpa-systems.de/namespaces/adv/gid/6.0"
@@ -92,10 +79,15 @@ class ALB {
 	</empfaenger>
 	<ausgabeform>application/xml</ausgabeform>
 	<art>'.$formnummer.'</art>
-	<koordinatenreferenzsystem xlink:href="urn:adv:crs:ETRS89_UTM33"/>
-	<anforderungsmerkmale>';
+	<koordinatenreferenzsystem xlink:href="urn:adv:crs:ETRS89_UTM33"/>';
+	
+	if($print_params == NULL) $xml .= '<anforderungsmerkmale>';
 	
 	switch($formnummer){
+		case '0110' : case '0111' : case '0120' : case '0121' : {   
+			$xml .= '<zentrumskoordinate srsName="urn:adv:crs:ETRS89_UTM33">'.$print_params['coord'].'</zentrumskoordinate>';
+		}break;
+	
 		case 'MV0700' : {   
 			$xml .= '
 			<wfs:Query typeName="adv:AX_Buchungsblatt">
@@ -131,12 +123,15 @@ class ALB {
 			if(count($FlurstKennz) > 1)$xml .= '</ogc:Or>';
 		}
 	}
-		
-  $xml .='
-				</ogc:Filter>
-			</wfs:Query>
-	</anforderungsmerkmale>
+	
+	if($print_params == NULL){
+		$xml .='
+					</ogc:Filter>
+				</wfs:Query>
+		</anforderungsmerkmale>';
+	}
 
+	$xml .='
 	<profilkennung>mvaaa</profilkennung>
 	<antragsnummer>BWAPK_0000002</antragsnummer>
 	<selektionsmassstab>1000</selektionsmassstab>
@@ -144,8 +139,8 @@ class ALB {
 	<verarbeitungszeitpunkt>2014-10-28T10:56:40Z</verarbeitungszeitpunkt>
 	<folgeverarbeitung>
 		<CPA_FOLGEVA>
-			<ausgabemasstab>500</ausgabemasstab>
-			<formatangabe>A4h</formatangabe>
+			<ausgabemasstab>'.$print_params['printscale'].'</ausgabemasstab>
+			<formatangabe>'.$print_params['format'].'</formatangabe>
 			<ausgabemedium>1000</ausgabemedium>
 			<datenformat>5000</datenformat>
 		</CPA_FOLGEVA>

@@ -148,7 +148,7 @@ function preventflickering(evt){
 <? 
       	if(strpos($this->Docu->activeframe[0]['format'], 'quer') !== false)$height = 420;			# das ist die Höhe des Vorschaubildes
       	else $height = 842;																																		# das ist die Höhe des Vorschaubildes
-      	$ratio = $height/$this->Docu->height;
+      	@$ratio = $height/$this->Docu->height;
       	$size = round(12*$ratio);
       	$posx = 200;
       	$posy = 200;

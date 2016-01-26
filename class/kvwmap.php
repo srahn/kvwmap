@@ -4064,7 +4064,7 @@ class GUI {
       $this->formvars['worldprintwidth'] = $this->Document->selectedframe[0]['mapwidth'] * $this->formvars['printscale'] * 0.0003526;
       $this->formvars['worldprintheight'] = $this->Document->selectedframe[0]['mapheight'] * $this->formvars['printscale'] * 0.0003526;
 			$this->formvars['map_factor'] = 1;
-      $this->previewfile = $this->createMapPDF($this->formvars['aktiverRahmen'], true, true);
+      if($this->Document->selectedframe[0]['dhk_call'] == '')$this->previewfile = $this->createMapPDF($this->formvars['aktiverRahmen'], true, true);
 
       # Fonts auslesen
       $this->document->fonts = searchdir(PDFCLASSPATH.'fonts/', true);
@@ -4289,6 +4289,7 @@ class GUI {
 		$saved_scale = $this->reduce_mapwidth(10);		
     $this->titel='Druckausschnitt wählen';
     $this->main="druckausschnittswahl.php";
+		$this->Document=new Document($this->database);
     # aktuellen Kartenausschnitt laden + zeichnen!
 		$this->noMinMaxScaling = $this->formvars['no_minmax_scaling'];
   	if($this->formvars['neuladen']){
@@ -4300,8 +4301,9 @@ class GUI {
 		if($_SERVER['REQUEST_METHOD'] == 'GET')$this->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
 		# zoomToMaxLayerExtent
 		if($this->formvars['zoom_layer_id'] != '')$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
-    # aktuellen Druckkopf laden
-    $this->Document=new Document($this->database);
+		# Kartendrucklayouts laden
+    $this->Document->frames = $this->Document->load_frames($this->Stelle->id, NULL);
+    # aktuelles Layout laden    
     if($this->formvars['angle'] == ''){
       $this->formvars['angle'] = 0;
     }
@@ -4309,9 +4311,7 @@ class GUI {
       $this->Document->save_active_frame($this->formvars['aktiverRahmen'], $this->user->id, $this->Stelle->id);
     }
     $frameid = $this->Document->get_active_frameid($this->user->id, $this->Stelle->id);
-    $this->Document->activeframe = $this->Document->load_frames($this->Stelle->id, $frameid);
-    $this->Document->frames = $this->Document->load_frames($this->Stelle->id, NULL);
-    #echo '<br>Druckrahmen geladen.';
+		$this->Document->activeframe = $this->Document->load_frames($this->Stelle->id, $frameid);
 
 		if($this->user->rolle->epsg_code == 4326){
 			$center_y = ($this->user->rolle->oGeorefExt->maxy + $this->user->rolle->oGeorefExt->miny) / 2;
@@ -5562,497 +5562,499 @@ class GUI {
  
   
   function createMapPDF($frame_id, $preview, $fast = false) {
-    # Abfrage der aktuellen Karte
-    if($this->formvars['post_map_factor']){
-      $this->map_factor = $this->formvars['post_map_factor'];
-    }
-    elseif($this->formvars['map_factor'] != ''){
-    	$this->map_factor = $this->formvars['map_factor'];
-    }
-    else{
-      $this->map_factor = MAPFACTOR;
-    }
-    # Wenn in der Anfrage für loadmapsource POST übergeben wurde, werden alle Kartenparameter aus formvars entnommen
-    if($this->formvars['loadmapsource']){
-      $this->loadMap($this->formvars['loadmapsource']);
-    }
-    else{
-      $this->loadMap('DataBase');
-    }
-    # Erzeugen neue Dokument-Klasse
-    # Enthält das Template für den Druchrahmen und alle Einstellungen zur Ausgestalltung
     $Document=new Document($this->database);
     $this->Docu=$Document;
     $this->Docu->activeframe = $this->Docu->load_frames(NULL, $frame_id);
-
-    # Karte
-    if($this->map->selectOutputFormat('jpeg_print') == 1){
-      $this->map->selectOutputFormat('jpeg');
-    }
-    if($fast == true){			# schnelle Druckausgabe ohne Druckausschnittswahl, beim Schnelldruck und im Druckrahmeneditor
-    	$this->formvars['referencemap'] = 1;
-    	$this->formvars['printscale'] = round($this->map_scaledenom);
-    	$this->formvars['refpoint_x'] = $this->formvars['center_x'] = $this->map->extent->minx + ($this->map->extent->maxx-$this->map->extent->minx)/2;
-    	$this->formvars['refpoint_y'] = $this->formvars['center_y'] = $this->map->extent->miny + ($this->map->extent->maxy-$this->map->extent->miny)/2;    	
-    	$this->formvars['worldprintwidth'] = $this->Docu->activeframe[0]['mapwidth'] * $this->formvars['printscale'] * 0.0003526;
-    	$this->formvars['worldprintheight'] = $this->Docu->activeframe[0]['mapheight'] * $this->formvars['printscale'] * 0.0003526;
-    }
-    #echo $this->formvars['center_x'].'<br>';
-    #echo $this->formvars['center_y'].'<br>';
-    #echo $this->formvars['worldprintwidth'].'<br>';
-    #echo $this->formvars['worldprintheight'].'<br>';
-    $breite = $this->formvars['worldprintwidth']/2;
-    $höhe = $this->formvars['worldprintheight']/2;
-
-    if($this->formvars['angle'] != 0){
-      $diag = sqrt(pow($breite, 2) + pow($höhe, 2));
-      $gamma = asin($breite/$diag);
-      $alpha = deg2rad(90) - deg2rad(abs($this->formvars['angle'])) - $gamma;
-      $bboxwidth = cos($alpha) * $diag;
-      $alpha2 = $gamma - deg2rad(abs($this->formvars['angle']));
-      $bboxheight = cos($alpha2) * $diag;
-      $minx = $this->formvars['center_x'] - $bboxwidth;
-      $miny = $this->formvars['center_y'] - $bboxheight;
-      $maxx = $this->formvars['center_x'] + $bboxwidth;
-      $maxy = $this->formvars['center_y'] + $bboxheight;
-      $widthratio = $bboxwidth / $breite;
-      $heightratio = $bboxheight / $höhe;
-    }
-    else{
-      $minx = $this->formvars['center_x'] - $this->formvars['worldprintwidth']/2;
-      $miny = $this->formvars['center_y'] - $this->formvars['worldprintheight']/2;
-      $maxx = $this->formvars['center_x'] + $this->formvars['worldprintwidth']/2;
-      $maxy = $this->formvars['center_y'] + $this->formvars['worldprintheight']/2;
-			$widthratio = 1;
-      $heightratio = 1;
-    }
-		$this->map->set('width', $this->Docu->activeframe[0]['mapwidth'] * $widthratio * $this->map_factor);
-    $this->map->set('height', $this->Docu->activeframe[0]['mapheight'] * $heightratio * $this->map_factor);
-
-    # copyright-layer aus dem Mapfile
-    @$creditslayer = $this->map->getLayerByName('credits');
-    if($creditslayer != false){
-      $newcredits = ms_newLayerObj($this->map, $creditslayer);
-      $feature = $newcredits->getShape(-1, 0);
-      if(MAPSERVERVERSION > 500){
-        $feature=$newcredits->getFeature(0,-1);
-      }
-      else{
-        $feature=$newcredits->getShape(-1, 0);
-      }
-      $line = $feature->line(0);
-      $point = $line->point(0);
-      $point->setXY(0, $this->map->height - 2);
-      $newcredits->addFeature($feature);
-    }
 		
-		# Koordinatengitter-Layer aus dem Mapfile
-    @$gridlayer = $this->map->getLayerByName('grid');
-    if($gridlayer != false){
-      $gridlayer->set('status', MS_ON);
-    }
-
-    $this->map->setextent($minx,$miny,$maxx,$maxy);
-		
-		# Welt-Eckkordinaten
-		$this->minx = round($minx, 1);
-		$this->miny = round($miny, 1);
-		$this->maxx = round($maxx, 1);
-		$this->maxy = round($maxy, 1);
-    
-    if(MAPSERVERVERSION >= 600 ) {
-    		$this->map_scaledenom = $this->map->scaledenom;
-    	}
-    	else {
-    		$this->map_scaledenom = $this->map->scale;
-	}
-    
-    $currenttime=date('Y-m-d H:i:s',time());
-    # loggen der Druckausgabe
-    if($preview == true){
-      $this->user->rolle->setConsumeActivity($currenttime,'print_preview',$this->user->rolle->last_time_id);
-    }
-    else{
-      $this->user->rolle->oGeorefExt->minx = $minx;
-      $this->user->rolle->oGeorefExt->miny = $miny;
-      $this->user->rolle->oGeorefExt->maxx = $maxx;
-      $this->user->rolle->oGeorefExt->maxy = $maxy;
-      $this->user->rolle->nImageWidth = $this->map->width;
-      $this->user->rolle->nImageHeight = $this->map->height;
-      $this->user->rolle->setConsumeActivity($currenttime,'print',$this->user->rolle->last_time_id);
-      $this->user->rolle->setConsumeALK($currenttime, $this->Docu->activeframe[0]['id']);
-    }
-
-    /**
-    * Problem: Es gibt WMS, die trotz der Einstellung EXCEPTIONS=application/vnd.ogc.se_inimage kein Bild mit Fehlermeldung
-    * schicken, sondern gar kein Bild bzw. nichts.
-    * Der Fall und auch andere Fälle bei denen kein Bild zurück kommt müssen abgefangen werden.
-    * 1) Es wird für jeden WMS Layer getestet ob der GetMap Request ein Bild liefert
-    * 2) Wennn kein Bild geliefert wird, wird an Stelle der WMS online_url eine url zu einem Proxy gesetzt
-    *    der die Fehlermeldung in ein Bild integriert und ausliefert
-    * Eingefügt am 19.09.2008 von pk
-    
-    # Schritt 1)
-    $extent=$this->map->extent;
-    for ($l=1;$l<=$this->map->numlayers;$l++) {
-      $layer=$this->map->getLayer($l);
-      if($layer->status == 1 AND $layer->connectiontype == 7 AND $layer->connection!='') {
-        $wmsRequestStr=$layer->connection.'&BBOX='.$extent->minx.','.$extent->miny.','.$extent->maxx.','.$extent->maxy.'&WIDTH='.$this->map->width.'&HEIGHT='.$this->map->height;
-        if (getimagesize($wmsRequestStr)==false) {
-          # Es handelt sich nicht um ein Bild,
-          # Schritt 2)
-          if (0) {
-            echo 'Der Layer <b>'.$layer->name.'</b> kann in der Größe und Auflösung von '.strval(72*$this->map_factor).'dpi nicht für den Druck verwendet werden.';
-            echo '<br><font size="-2">Die Anfrage: <a href="'.$wmsRequestStr.'" target="_blank">'.$wmsRequestStr.'</a> liefert kein Bild sondern die folgende Fehlermeldung:</font>';
-            echo '<br><b><font color="#FF0000">'.trim(strip_tags(file_get_contents($wmsRequestStr))).'</font></b>';
-            echo '<br>Wenden Sie sich an den WMS Anbieter oder drucken Sie die Karte in einem kleineren Format aus.<br><hr><br>';
-          }
-          $newConnection="http://www.gdi-service.de/wmstileproxy/index.php?online_resource_url=".str_replace("?","&",$layer->connection);
-          $layer->set('connection',$newConnection);
-        }
-      }
-    }
-*/
-		#$this->saveMap('');
-		#$this->debug->write("<p>Maßstab des Drucks:".$this->map_scaledenom,4);
-    $this->drawMap();
-
-    if($this->formvars['angle'] != 0){
-      $angle = -1 * $this->formvars['angle'];
-      $image = imagecreatefromjpeg(IMAGEPATH.basename($this->img['hauptkarte']));
-      $rotatedimage = imagerotate($image, $angle, 0);
-      $width = imagesx($rotatedimage);
-      $height = imagesy($rotatedimage);
-      $clipwidth = $this->Docu->activeframe[0]['mapwidth']*$this->map_factor;
-      $clipheight = $this->Docu->activeframe[0]['mapheight']*$this->map_factor;
-      $clipx = ($width - $clipwidth) / 2;
-      $clipy = ($height - $clipheight) / 2;
-      $clippedimage = imagecreatetruecolor($clipwidth, $clipheight);
-      ImageCopy($clippedimage, $rotatedimage, 0, 0, $clipx, $clipy, $clipwidth, $clipheight);
-      imagejpeg($clippedimage, IMAGEPATH.basename($this->img['hauptkarte']), 100);
-    }
-
-    # Übersichtskarte
-    if($this->Docu->activeframe[0]['refmapfile'] AND $this->formvars['referencemap']){
-      $refmapfile = DRUCKRAHMEN_PATH.$this->Docu->activeframe[0]['refmapfile'];
-      $zoomfactor = $this->Docu->activeframe[0]['refzoom'];
-      $refwidth = $this->Docu->activeframe[0]['refwidth']*$this->map_factor;
-			$refheight = $this->Docu->activeframe[0]['refheight']*$this->map_factor;
-			$width = $refwidth*$widthratio;
-			$height = $refheight*$heightratio;
-			$this->Docu->referencemap = $this->createReferenceMap($width, $height, $refwidth, $refheight, $angle, $minx,$miny,$maxx,$maxy, $zoomfactor, $refmapfile);
-    }
-
-    # Einbinden der PDF Klassenbibliotheken
-    include (PDFCLASSPATH."class.ezpdf.php");
-    switch ($this->Docu->activeframe[0]['format']) {
-    	case "A5hoch" : {
-        # Erzeugen neue pdf-Klasse
-        $pdf=new Cezpdf('A5', 'portrait');
-        $this->Docu->height = 595;
-      } break;
-
-      case "A5quer" : {
-        # Erzeugen neue pdf-Klasse
-        $pdf=new Cezpdf('A5', 'landscape');
-        $this->Docu->height = 420;
-      } break;
-    	
-      case "A4hoch" : {
-        # Erzeugen neue pdf-Klasse
-        $pdf=new Cezpdf();
-        $this->Docu->height = 842;
-      } break;
-
-      case "A4quer" : {
-        # Erzeugen neue pdf-Klasse
-        $pdf=new Cezpdf('A4', 'landscape');
-        $this->Docu->height = 595;
-      } break;
-
-      case "A3hoch" : {
-        # Erzeugen neue pdf-Klasse
-        $pdf=new Cezpdf('A3', 'portrait');
-        $this->Docu->height = 1191;
-      } break;
-
-      case "A3quer" : {
-       # Erzeugen neue pdf-Klasse
-        $pdf=new Cezpdf('A3','landscape');
-        $this->Docu->height = 842;
-      } break;
-
-      case "A2hoch" : {
-        # Erzeugen neue pdf-Klasse
-        $pdf=new Cezpdf('A2', 'portrait');
-        $this->Docu->height = 1684;
-      } break;
-
-      case "A2quer" : {
-        # Erzeugen neue pdf-Klasse
-        $pdf=new Cezpdf('A2', 'landscape');
-        $this->Docu->height = 1191;
-      } break;
-
-      case "A1hoch" : {
-        # Erzeugen neue pdf-Klasse
-        $pdf=new Cezpdf('A1', 'portrait');
-        $this->Docu->height = 2384;
-      } break;
-
-      case "A1quer" : {
-       # Erzeugen neue pdf-Klasse
-        $pdf=new Cezpdf('A1','landscape');
-        $this->Docu->height = 1684;
-      } break;
-
-      case "A0hoch" : {
-        # Erzeugen neue pdf-Klasse
-        $pdf=new Cezpdf('A0', 'portrait');
-        $this->Docu->height = 3370;
-      } break;
-
-      case "A0quer" : {
-       # Erzeugen neue pdf-Klasse
-        $pdf=new Cezpdf('A0','landscape');
-        $this->Docu->height = 2384;
-      } break;
-    }
-
-    # Wasserzeichen hinzufügen
-    if($this->Docu->activeframe[0]['watermark'] != ''){
-      $this->addwatermark($this->Docu->activeframe[0]);
-    }
-
-    # Lagebezeichnung
-    if(LAGEBEZEICHNUNGSART == 'Flurbezeichnung'){
-	    $flur = new Flur('','','',$this->pgdatabase);
-	    $bildmitte['rw']=$this->formvars['refpoint_x'];
-	    $bildmitte['hw']=$this->formvars['refpoint_y'];
-	    $this->lagebezeichnung = $flur->getBezeichnungFromPosition($bildmitte, $this->user->rolle->epsg_code);
-    }
-
-    # Hinzufügen des Hintergrundbildes als Druckrahmen
-    $pdf->addJpegFromFile(DRUCKRAHMEN_PATH.basename($this->Docu->activeframe[0]['headsrc']),$this->Docu->activeframe[0]['headposx'],$this->Docu->activeframe[0]['headposy'],$this->Docu->activeframe[0]['headwidth']);
-
-    # Hinzufügen der vom MapServer produzierten Karte
-    $pdf->addJpegFromFile(IMAGEPATH.basename($this->img['hauptkarte']),$this->Docu->activeframe[0]['mapposx'],$this->Docu->activeframe[0]['mapposy'],$this->Docu->activeframe[0]['mapwidth'], $this->Docu->activeframe[0]['mapheight']);
-		
-		# Rechteck um die Karte
-		$posx1 = $this->Docu->activeframe[0]['mapposx'];
-		$posy1 = $this->Docu->activeframe[0]['mapposy'];
-		$pdf->rectangle($posx1, $posy1, $this->Docu->activeframe[0]['mapwidth'], $this->Docu->activeframe[0]['mapheight']);
-		
-    # Hinzufügen der Referenzkarte, wenn eine angegeben ist.
-    if($this->Docu->activeframe[0]['refmapfile'] AND $this->formvars['referencemap']){
-      $pdf->addJpegFromFile(DRUCKRAHMEN_PATH.basename($this->Docu->activeframe[0]['refmapsrc']),$this->Docu->activeframe[0]['refmapposx'],$this->Docu->activeframe[0]['refmapposy'],$this->Docu->activeframe[0]['refmapwidth']);
-      $pdf->addJpegFromFile(IMAGEPATH.basename($this->Docu->referencemap),$this->Docu->activeframe[0]['refposx'],$this->Docu->activeframe[0]['refposy'],$this->Docu->activeframe[0]['refwidth'], $this->Docu->activeframe[0]['refheight']);
-    }
-		
-		# Attribute
-		$this->gemeinde = utf8_decode($this->lagebezeichnung[1]['gemeindename'].' ('.$this->lagebezeichnung[1]['gemeinde'].')');
-		$this->gemarkung = utf8_decode($this->lagebezeichnung[1]['gemkgname'].' ('.$this->lagebezeichnung[1]['gemkgschl'].')');
-		$this->flur = utf8_decode($this->lagebezeichnung[1]['flur']);
-		$this->flurstueck = utf8_decode($this->lagebezeichnung[1]['flurst']);
-		$this->lage = utf8_decode($this->lagebezeichnung[1]['strasse']).' '.$this->lagebezeichnung[1]['hausnummer'];
-		$this->date = date("d.m.Y");
-		$this->scale = $this->formvars['printscale'];
-		
-    $pdf->selectFont($this->Docu->activeframe[0]['font_date']);
-    if($this->Docu->activeframe[0]['datesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['dateposx'],$this->Docu->activeframe[0]['dateposy'],$this->Docu->activeframe[0]['datesize'], $this->date);
-    $pdf->selectFont($this->Docu->activeframe[0]['font_scale']);
-    if($this->Docu->activeframe[0]['scalesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['scaleposx'],$this->Docu->activeframe[0]['scaleposy'],$this->Docu->activeframe[0]['scalesize'],'1: '.$this->scale);
-    $pdf->selectFont($this->Docu->activeframe[0]['font_oscale']);
-    if($this->Docu->activeframe[0]['oscalesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['oscaleposx'],$this->Docu->activeframe[0]['oscaleposy'],$this->Docu->activeframe[0]['oscalesize'],'1:xxxx');		
-		$pdf->selectFont($this->Docu->activeframe[0]['font_lage']);
-    if($this->Docu->activeframe[0]['lagesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['lageposx'],$this->Docu->activeframe[0]['lageposy'],$this->Docu->activeframe[0]['lagesize'],$this->lage);
-		$pdf->selectFont($this->Docu->activeframe[0]['font_gemeinde']);
-    if($this->Docu->activeframe[0]['gemeindesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['gemeindeposx'],$this->Docu->activeframe[0]['gemeindeposy'],$this->Docu->activeframe[0]['gemeindesize'],$this->gemeinde);		
-    $pdf->selectFont($this->Docu->activeframe[0]['font_gemarkung']);
-    if($this->Docu->activeframe[0]['gemarkungsize'] > 0)$pdf->addText($this->Docu->activeframe[0]['gemarkungposx'],$this->Docu->activeframe[0]['gemarkungposy'],$this->Docu->activeframe[0]['gemarkungsize'],$this->gemarkung);
-    $pdf->selectFont($this->Docu->activeframe[0]['font_flur']);
-    if($this->Docu->activeframe[0]['flursize'] > 0)$pdf->addText($this->Docu->activeframe[0]['flurposx'],$this->Docu->activeframe[0]['flurposy'],$this->Docu->activeframe[0]['flursize'], $this->flur);
-		$pdf->selectFont($this->Docu->activeframe[0]['font_flurst']);
-    if($this->Docu->activeframe[0]['flurstsize'] > 0)$pdf->addText($this->Docu->activeframe[0]['flurstposx'],$this->Docu->activeframe[0]['flurstposy'],$this->Docu->activeframe[0]['flurstsize'], $this->flurstueck);
-
-    # Freie Graphiken
-    for($j = 0; $j < count($this->Docu->activeframe[0]['bilder']); $j++){
-      $bild=$this->Docu->activeframe[0]['bilder'][$j];
-      #var_dump($bild);
-      if ($bild['height']>0) {
-        $pdf->addJpegFromFile(GRAPHICSPATH.'custom/'.$bild['src'],$bild['posx'],$bild['posy'],$bild['width'],$bild['height']);
-      }
-      else {
-        $pdf->addJpegFromFile(GRAPHICSPATH.'custom/'.$bild['src'],$bild['posx'],$bild['posy'],$bild['width']);
-      }
-    }
-
-    # Freitexte
-    for($j = 0; $j < count($this->Docu->activeframe[0]['texts']); $j++){
-      $pdf->selectFont($this->Docu->activeframe[0]['texts'][$j]['font']);
-      if($this->Docu->activeframe[0]['texts'][$j]['text'] == '' AND $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']] != ''){    // ein Freitext hat keinen Text aber in der Druckausschnittswahl wurde ein Text vom Nutzer eingefügt
-        $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']] = str_replace(chr(10), ';', $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']]);
-        $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']] = str_replace(chr(13), '', $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']]);
-        $this->Docu->activeframe[0]['texts'][$j]['text'] = $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']];
-      }
-      $freitext = explode(';', $this->substituteFreitext(utf8_decode($this->Docu->activeframe[0]['texts'][$j]['text'])));
-      $anzahlzeilen = count($freitext);
-      $alpha = $this->Docu->activeframe[0]['texts'][$j]['angle'];
-      for($i = 0; $i < $anzahlzeilen; $i++){
-        $h = $i * $this->Docu->activeframe[0]['texts'][$j]['size'] * 1.25;
-        $a = sin(deg2rad($alpha)) * $h;
-        $b = cos(deg2rad($alpha)) * $h;
-        $posx = $this->Docu->activeframe[0]['texts'][$j]['posx'] + $a;
-        $posy = $this->Docu->activeframe[0]['texts'][$j]['posy'] - $b;
-        
-      	if($posx < 0){		# rechtsbündig
-      		$posx = $pdf->ez['pageWidth'] + $posx;
-      		$justification = 'right';
-      		$orientation = 'left';
-      		$data = array(array(1 => $freitext[$i]));
-      		$pdf->ezSetY($posy+$this->Docu->activeframe[0]['texts'][$j]['size']);
-	      	$pdf->ezTable($data, NULL, NULL, 
-	      	array('xOrientation'=>$orientation, 
-								'xPos'=>$posx, 
-								#'width'=>$this->layout['elements'][$attributes['name'][$j]]['width'], 
-								#'maxWidth'=>$this->layout['elements'][$attributes['name'][$j]]['width'], 
-								'fontSize' => $this->Docu->activeframe[0]['texts'][$j]['size'], 
-								'showHeadings'=>0, 
-								'shaded'=>0, 
-								'cols'=>array(1 => array('justification'=>$justification)),
-								'showLines'=>0
-								)
-	      	);
-				}
-				else{
-        	$pdf->addText($posx,$posy,$this->Docu->activeframe[0]['texts'][$j]['size'],$freitext[$i], -1 * $alpha);
-				}
-      }
-    }
-        
-    # Nutzer
-    if($this->Docu->activeframe[0]['usersize'] > 0){
-      $pdf->selectFont($this->Docu->activeframe[0]['font_user']);
-    	$pdf->addText($this->Docu->activeframe[0]['userposx'],$this->Docu->activeframe[0]['userposy'],$this->Docu->activeframe[0]['usersize'], utf8_decode('Stelle: '.$this->Stelle->Bezeichnung.', Nutzer: '.$this->user->Name));
-    }
-
-    # Nordpfeil
-    if($this->Docu->activeframe[0]['arrowposx'] != 0){
-      $arrow_start = rotate(array(0, -1*$this->Docu->activeframe[0]['arrowlength']/2), -1*$this->formvars['angle']);
-      $arrow_end = rotate(array(0, $this->Docu->activeframe[0]['arrowlength']/2), -1*$this->formvars['angle']);
-      $arrow_base_length = $this->Docu->activeframe[0]['arrowlength'] * 0.375;
-      $arrow_head_length = $this->Docu->activeframe[0]['arrowlength'] * 0.4625;
-      $arrow_head_width = $this->Docu->activeframe[0]['arrowlength'] * 0.1125;
-      $pdf->setLineStyle(0.6,'round');
-      $pdf->line($this->Docu->activeframe[0]['arrowposx'] + $arrow_start[0], $this->Docu->activeframe[0]['arrowposy'] + $arrow_start[1], $this->Docu->activeframe[0]['arrowposx'] + $arrow_end[0], $this->Docu->activeframe[0]['arrowposy'] + $arrow_end[1]);
-      $pdata = translate(rotate(array(0,$this->Docu->activeframe[0]['arrowlength']/2-$arrow_base_length, -1*$arrow_head_width/2,$this->Docu->activeframe[0]['arrowlength']/2-$arrow_head_length,0,$this->Docu->activeframe[0]['arrowlength']/2), -1*$this->formvars['angle']),$this->Docu->activeframe[0]['arrowposx'],$this->Docu->activeframe[0]['arrowposy']);
-      $pdf->polygon($pdata,3);
-      $pdf->polygon($pdata,3,1);
-      $pdata = translate(rotate(array(0,$this->Docu->activeframe[0]['arrowlength']/2-$arrow_base_length, $arrow_head_width/2,$this->Docu->activeframe[0]['arrowlength']/2-$arrow_head_length,0,$this->Docu->activeframe[0]['arrowlength']/2), -1*$this->formvars['angle']),$this->Docu->activeframe[0]['arrowposx'],$this->Docu->activeframe[0]['arrowposy']);
-      $pdf->polygon($pdata,3);
-      $pdf->setColor(1,1,1);
-      $pdf->polygon($pdata,3,1);
-    }
-		
-		# Maßstabsleiste
-    if($this->Docu->activeframe[0]['scalebarposx'] != 0){
-			$posx = $this->Docu->activeframe[0]['scalebarposx'];
-			$posy = $this->Docu->activeframe[0]['scalebarposy'];
-			$scalebarwidth = 40; 	# in mm
-			$width4 = $scalebarwidth / 0.3529411; 	# in PDF-Pixeln
-			$width3 = 3*$width4/4;
-			$width2 = $width4/2;
-			$width1 = $width4/4;
-			$label4 = $scalebarwidth / 1000 * $this->formvars['printscale'];
-			$label3 = 3*$label4/4;
-			$label2 = $label4/2;
-			$label1 = $label4/4;
-			$pdf->setColor(0,0,0);
-			$pdf->addText($posx-1.5, $posy+6, 8, '0');
-			if($label1/1000 >= 1){
-				$div = 1000;
-				$unit = 'Km';
+		if($this->Docu->activeframe[0]['dhk_call'] != ''){
+			$output = $this->ALKIS_Kartenauszug($this->Docu->activeframe[0], $this->formvars);
+		}
+		else{
+			# Abfrage der aktuellen Karte
+			if($this->formvars['post_map_factor']){
+				$this->map_factor = $this->formvars['post_map_factor'];
+			}
+			elseif($this->formvars['map_factor'] != ''){
+				$this->map_factor = $this->formvars['map_factor'];
 			}
 			else{
-				$div = 1;
-				$unit = 'm';
+				$this->map_factor = MAPFACTOR;
 			}
-			$pdf->addText($posx+$width1-5, $posy+6, 8, round($label1/$div, 2));
-			$pdf->addText($posx+$width2-5, $posy+6, 8, round($label2/$div, 2));
-			$pdf->addText($posx+$width3-5, $posy+6, 8, round($label3/$div, 2));
-			$pdf->addText($posx+$width4-5, $posy+6, 8, round($label4/$div, 2).' '.$unit);
-			$pdf->setLineStyle(0.5);
-      $pdf->rectangle($posx, $posy, $width1, 4);
-			$pdf->rectangle($posx, $posy, $width2, 4);
-			$pdf->rectangle($posx, $posy, $width3, 4);
-			$pdf->rectangle($posx, $posy, $width4, 4);
-			$smallrects = 10;
-			$smallrectwidth = $width1 / $smallrects;
-			for($s = 0; $s < $smallrects; $s++){
-				$pdf->rectangle($posx, $posy, $smallrectwidth*($s+1), 4);
+			# Wenn in der Anfrage für loadmapsource POST übergeben wurde, werden alle Kartenparameter aus formvars entnommen
+			if($this->formvars['loadmapsource']){
+				$this->loadMap($this->formvars['loadmapsource']);
 			}
-    }
-		    
-    # variable Freitexte
-		for($j = 1; $j <= $this->formvars['last_freetext_id']; $j++){
-			$pdf->selectFont(PDFCLASSPATH.'fonts/Helvetica.afm');
-			if(strpos($this->Docu->activeframe[0]['format'], 'quer') !== false)$height = 420;			# das ist die Höhe des Vorschaubildes
-			else $height = 842;																																		# das ist die Höhe des Vorschaubildes
-			$ratio = $height/$this->Docu->height;
-			if($this->formvars['freetext'.$j] != ''){      
-				$posx = ($this->formvars['freetext_posx'.$j]+1)/$ratio;
-				$posy = ($this->formvars['freetext_posy'.$j]+1-$height)/$ratio*-1;
-				$boxwidth = ($this->formvars['freetext_width'.$j]+6)/$ratio;
-				$boxheight = ($this->formvars['freetext_height'.$j]+8)/$ratio;
-				$fontsize = $this->formvars['freetext_fontsize'.$j]/$ratio;
-				$pdf->setColor(1,1,1);
-				$pdf->filledRectangle($posx, $posy-$boxheight, $boxwidth, $boxheight);
-				$pdf->setColor(0,0,0);
-				$pdf->Rectangle($posx, $posy-$boxheight, $boxwidth, $boxheight);
+			else{
+				$this->loadMap('DataBase');
+			}
+			# Karte
+			if($this->map->selectOutputFormat('jpeg_print') == 1){
+				$this->map->selectOutputFormat('jpeg');
+			}
+			if($fast == true){			# schnelle Druckausgabe ohne Druckausschnittswahl, beim Schnelldruck und im Druckrahmeneditor
+				$this->formvars['referencemap'] = 1;
+				$this->formvars['printscale'] = round($this->map_scaledenom);
+				$this->formvars['refpoint_x'] = $this->formvars['center_x'] = $this->map->extent->minx + ($this->map->extent->maxx-$this->map->extent->minx)/2;
+				$this->formvars['refpoint_y'] = $this->formvars['center_y'] = $this->map->extent->miny + ($this->map->extent->maxy-$this->map->extent->miny)/2;    	
+				$this->formvars['worldprintwidth'] = $this->Docu->activeframe[0]['mapwidth'] * $this->formvars['printscale'] * 0.0003526;
+				$this->formvars['worldprintheight'] = $this->Docu->activeframe[0]['mapheight'] * $this->formvars['printscale'] * 0.0003526;
+			}
+			#echo $this->formvars['center_x'].'<br>';
+			#echo $this->formvars['center_y'].'<br>';
+			#echo $this->formvars['worldprintwidth'].'<br>';
+			#echo $this->formvars['worldprintheight'].'<br>';
+			$breite = $this->formvars['worldprintwidth']/2;
+			$höhe = $this->formvars['worldprintheight']/2;
+
+			if($this->formvars['angle'] != 0){
+				$diag = sqrt(pow($breite, 2) + pow($höhe, 2));
+				$gamma = asin($breite/$diag);
+				$alpha = deg2rad(90) - deg2rad(abs($this->formvars['angle'])) - $gamma;
+				$bboxwidth = cos($alpha) * $diag;
+				$alpha2 = $gamma - deg2rad(abs($this->formvars['angle']));
+				$bboxheight = cos($alpha2) * $diag;
+				$minx = $this->formvars['center_x'] - $bboxwidth;
+				$miny = $this->formvars['center_y'] - $bboxheight;
+				$maxx = $this->formvars['center_x'] + $bboxwidth;
+				$maxy = $this->formvars['center_y'] + $bboxheight;
+				$widthratio = $bboxwidth / $breite;
+				$heightratio = $bboxheight / $höhe;
+			}
+			else{
+				$minx = $this->formvars['center_x'] - $this->formvars['worldprintwidth']/2;
+				$miny = $this->formvars['center_y'] - $this->formvars['worldprintheight']/2;
+				$maxx = $this->formvars['center_x'] + $this->formvars['worldprintwidth']/2;
+				$maxy = $this->formvars['center_y'] + $this->formvars['worldprintheight']/2;
+				$widthratio = 1;
+				$heightratio = 1;
+			}
+			$this->map->set('width', $this->Docu->activeframe[0]['mapwidth'] * $widthratio * $this->map_factor);
+			$this->map->set('height', $this->Docu->activeframe[0]['mapheight'] * $heightratio * $this->map_factor);
+
+			# copyright-layer aus dem Mapfile
+			@$creditslayer = $this->map->getLayerByName('credits');
+			if($creditslayer != false){
+				$newcredits = ms_newLayerObj($this->map, $creditslayer);
+				$feature = $newcredits->getShape(-1, 0);
+				if(MAPSERVERVERSION > 500){
+					$feature=$newcredits->getFeature(0,-1);
+				}
+				else{
+					$feature=$newcredits->getShape(-1, 0);
+				}
+				$line = $feature->line(0);
+				$point = $line->point(0);
+				$point->setXY(0, $this->map->height - 2);
+				$newcredits->addFeature($feature);
+			}
 			
-				$this->formvars['freetext'.$j] = str_replace(chr(10), ';', $this->formvars['freetext'.$j]);
-				$this->formvars['freetext'.$j] = str_replace(chr(13), '', $this->formvars['freetext'.$j]);
-				$freitext = explode(';', $this->formvars['freetext'.$j]);
+			# Koordinatengitter-Layer aus dem Mapfile
+			@$gridlayer = $this->map->getLayerByName('grid');
+			if($gridlayer != false){
+				$gridlayer->set('status', MS_ON);
+			}
+
+			$this->map->setextent($minx,$miny,$maxx,$maxy);
+			
+			# Welt-Eckkordinaten
+			$this->minx = round($minx, 1);
+			$this->miny = round($miny, 1);
+			$this->maxx = round($maxx, 1);
+			$this->maxy = round($maxy, 1);
+			
+			if(MAPSERVERVERSION >= 600 ) {
+					$this->map_scaledenom = $this->map->scaledenom;
+				}
+				else {
+					$this->map_scaledenom = $this->map->scale;
+		}
+			
+			$currenttime=date('Y-m-d H:i:s',time());
+			# loggen der Druckausgabe
+			if($preview == true){
+				$this->user->rolle->setConsumeActivity($currenttime,'print_preview',$this->user->rolle->last_time_id);
+			}
+			else{
+				$this->user->rolle->oGeorefExt->minx = $minx;
+				$this->user->rolle->oGeorefExt->miny = $miny;
+				$this->user->rolle->oGeorefExt->maxx = $maxx;
+				$this->user->rolle->oGeorefExt->maxy = $maxy;
+				$this->user->rolle->nImageWidth = $this->map->width;
+				$this->user->rolle->nImageHeight = $this->map->height;
+				$this->user->rolle->setConsumeActivity($currenttime,'print',$this->user->rolle->last_time_id);
+				$this->user->rolle->setConsumeALK($currenttime, $this->Docu->activeframe[0]['id']);
+			}
+
+			/**
+			* Problem: Es gibt WMS, die trotz der Einstellung EXCEPTIONS=application/vnd.ogc.se_inimage kein Bild mit Fehlermeldung
+			* schicken, sondern gar kein Bild bzw. nichts.
+			* Der Fall und auch andere Fälle bei denen kein Bild zurück kommt müssen abgefangen werden.
+			* 1) Es wird für jeden WMS Layer getestet ob der GetMap Request ein Bild liefert
+			* 2) Wennn kein Bild geliefert wird, wird an Stelle der WMS online_url eine url zu einem Proxy gesetzt
+			*    der die Fehlermeldung in ein Bild integriert und ausliefert
+			* Eingefügt am 19.09.2008 von pk
+			
+			# Schritt 1)
+			$extent=$this->map->extent;
+			for ($l=1;$l<=$this->map->numlayers;$l++) {
+				$layer=$this->map->getLayer($l);
+				if($layer->status == 1 AND $layer->connectiontype == 7 AND $layer->connection!='') {
+					$wmsRequestStr=$layer->connection.'&BBOX='.$extent->minx.','.$extent->miny.','.$extent->maxx.','.$extent->maxy.'&WIDTH='.$this->map->width.'&HEIGHT='.$this->map->height;
+					if (getimagesize($wmsRequestStr)==false) {
+						# Es handelt sich nicht um ein Bild,
+						# Schritt 2)
+						if (0) {
+							echo 'Der Layer <b>'.$layer->name.'</b> kann in der Größe und Auflösung von '.strval(72*$this->map_factor).'dpi nicht für den Druck verwendet werden.';
+							echo '<br><font size="-2">Die Anfrage: <a href="'.$wmsRequestStr.'" target="_blank">'.$wmsRequestStr.'</a> liefert kein Bild sondern die folgende Fehlermeldung:</font>';
+							echo '<br><b><font color="#FF0000">'.trim(strip_tags(file_get_contents($wmsRequestStr))).'</font></b>';
+							echo '<br>Wenden Sie sich an den WMS Anbieter oder drucken Sie die Karte in einem kleineren Format aus.<br><hr><br>';
+						}
+						$newConnection="http://www.gdi-service.de/wmstileproxy/index.php?online_resource_url=".str_replace("?","&",$layer->connection);
+						$layer->set('connection',$newConnection);
+					}
+				}
+			}
+	*/
+			#$this->saveMap('');
+			#$this->debug->write("<p>Maßstab des Drucks:".$this->map_scaledenom,4);
+			$this->drawMap();
+
+			if($this->formvars['angle'] != 0){
+				$angle = -1 * $this->formvars['angle'];
+				$image = imagecreatefromjpeg(IMAGEPATH.basename($this->img['hauptkarte']));
+				$rotatedimage = imagerotate($image, $angle, 0);
+				$width = imagesx($rotatedimage);
+				$height = imagesy($rotatedimage);
+				$clipwidth = $this->Docu->activeframe[0]['mapwidth']*$this->map_factor;
+				$clipheight = $this->Docu->activeframe[0]['mapheight']*$this->map_factor;
+				$clipx = ($width - $clipwidth) / 2;
+				$clipy = ($height - $clipheight) / 2;
+				$clippedimage = imagecreatetruecolor($clipwidth, $clipheight);
+				ImageCopy($clippedimage, $rotatedimage, 0, 0, $clipx, $clipy, $clipwidth, $clipheight);
+				imagejpeg($clippedimage, IMAGEPATH.basename($this->img['hauptkarte']), 100);
+			}
+
+			# Übersichtskarte
+			if($this->Docu->activeframe[0]['refmapfile'] AND $this->formvars['referencemap']){
+				$refmapfile = DRUCKRAHMEN_PATH.$this->Docu->activeframe[0]['refmapfile'];
+				$zoomfactor = $this->Docu->activeframe[0]['refzoom'];
+				$refwidth = $this->Docu->activeframe[0]['refwidth']*$this->map_factor;
+				$refheight = $this->Docu->activeframe[0]['refheight']*$this->map_factor;
+				$width = $refwidth*$widthratio;
+				$height = $refheight*$heightratio;
+				$this->Docu->referencemap = $this->createReferenceMap($width, $height, $refwidth, $refheight, $angle, $minx,$miny,$maxx,$maxy, $zoomfactor, $refmapfile);
+			}
+
+			# Einbinden der PDF Klassenbibliotheken
+			include (PDFCLASSPATH."class.ezpdf.php");
+			switch ($this->Docu->activeframe[0]['format']) {
+				case "A5hoch" : {
+					# Erzeugen neue pdf-Klasse
+					$pdf=new Cezpdf('A5', 'portrait');
+					$this->Docu->height = 595;
+				} break;
+
+				case "A5quer" : {
+					# Erzeugen neue pdf-Klasse
+					$pdf=new Cezpdf('A5', 'landscape');
+					$this->Docu->height = 420;
+				} break;
+				
+				case "A4hoch" : {
+					# Erzeugen neue pdf-Klasse
+					$pdf=new Cezpdf();
+					$this->Docu->height = 842;
+				} break;
+
+				case "A4quer" : {
+					# Erzeugen neue pdf-Klasse
+					$pdf=new Cezpdf('A4', 'landscape');
+					$this->Docu->height = 595;
+				} break;
+
+				case "A3hoch" : {
+					# Erzeugen neue pdf-Klasse
+					$pdf=new Cezpdf('A3', 'portrait');
+					$this->Docu->height = 1191;
+				} break;
+
+				case "A3quer" : {
+				 # Erzeugen neue pdf-Klasse
+					$pdf=new Cezpdf('A3','landscape');
+					$this->Docu->height = 842;
+				} break;
+
+				case "A2hoch" : {
+					# Erzeugen neue pdf-Klasse
+					$pdf=new Cezpdf('A2', 'portrait');
+					$this->Docu->height = 1684;
+				} break;
+
+				case "A2quer" : {
+					# Erzeugen neue pdf-Klasse
+					$pdf=new Cezpdf('A2', 'landscape');
+					$this->Docu->height = 1191;
+				} break;
+
+				case "A1hoch" : {
+					# Erzeugen neue pdf-Klasse
+					$pdf=new Cezpdf('A1', 'portrait');
+					$this->Docu->height = 2384;
+				} break;
+
+				case "A1quer" : {
+				 # Erzeugen neue pdf-Klasse
+					$pdf=new Cezpdf('A1','landscape');
+					$this->Docu->height = 1684;
+				} break;
+
+				case "A0hoch" : {
+					# Erzeugen neue pdf-Klasse
+					$pdf=new Cezpdf('A0', 'portrait');
+					$this->Docu->height = 3370;
+				} break;
+
+				case "A0quer" : {
+				 # Erzeugen neue pdf-Klasse
+					$pdf=new Cezpdf('A0','landscape');
+					$this->Docu->height = 2384;
+				} break;
+			}
+
+			# Wasserzeichen hinzufügen
+			if($this->Docu->activeframe[0]['watermark'] != ''){
+				$this->addwatermark($this->Docu->activeframe[0]);
+			}
+
+			# Lagebezeichnung
+			if(LAGEBEZEICHNUNGSART == 'Flurbezeichnung'){
+				$flur = new Flur('','','',$this->pgdatabase);
+				$bildmitte['rw']=$this->formvars['refpoint_x'];
+				$bildmitte['hw']=$this->formvars['refpoint_y'];
+				$this->lagebezeichnung = $flur->getBezeichnungFromPosition($bildmitte, $this->user->rolle->epsg_code);
+			}
+
+			# Hinzufügen des Hintergrundbildes als Druckrahmen
+			$pdf->addJpegFromFile(DRUCKRAHMEN_PATH.basename($this->Docu->activeframe[0]['headsrc']),$this->Docu->activeframe[0]['headposx'],$this->Docu->activeframe[0]['headposy'],$this->Docu->activeframe[0]['headwidth']);
+
+			# Hinzufügen der vom MapServer produzierten Karte
+			$pdf->addJpegFromFile(IMAGEPATH.basename($this->img['hauptkarte']),$this->Docu->activeframe[0]['mapposx'],$this->Docu->activeframe[0]['mapposy'],$this->Docu->activeframe[0]['mapwidth'], $this->Docu->activeframe[0]['mapheight']);
+			
+			# Rechteck um die Karte
+			$posx1 = $this->Docu->activeframe[0]['mapposx'];
+			$posy1 = $this->Docu->activeframe[0]['mapposy'];
+			$pdf->rectangle($posx1, $posy1, $this->Docu->activeframe[0]['mapwidth'], $this->Docu->activeframe[0]['mapheight']);
+			
+			# Hinzufügen der Referenzkarte, wenn eine angegeben ist.
+			if($this->Docu->activeframe[0]['refmapfile'] AND $this->formvars['referencemap']){
+				$pdf->addJpegFromFile(DRUCKRAHMEN_PATH.basename($this->Docu->activeframe[0]['refmapsrc']),$this->Docu->activeframe[0]['refmapposx'],$this->Docu->activeframe[0]['refmapposy'],$this->Docu->activeframe[0]['refmapwidth']);
+				$pdf->addJpegFromFile(IMAGEPATH.basename($this->Docu->referencemap),$this->Docu->activeframe[0]['refposx'],$this->Docu->activeframe[0]['refposy'],$this->Docu->activeframe[0]['refwidth'], $this->Docu->activeframe[0]['refheight']);
+			}
+			
+			# Attribute
+			$this->gemeinde = utf8_decode($this->lagebezeichnung[1]['gemeindename'].' ('.$this->lagebezeichnung[1]['gemeinde'].')');
+			$this->gemarkung = utf8_decode($this->lagebezeichnung[1]['gemkgname'].' ('.$this->lagebezeichnung[1]['gemkgschl'].')');
+			$this->flur = utf8_decode($this->lagebezeichnung[1]['flur']);
+			$this->flurstueck = utf8_decode($this->lagebezeichnung[1]['flurst']);
+			$this->lage = utf8_decode($this->lagebezeichnung[1]['strasse']).' '.$this->lagebezeichnung[1]['hausnummer'];
+			$this->date = date("d.m.Y");
+			$this->scale = $this->formvars['printscale'];
+			
+			$pdf->selectFont($this->Docu->activeframe[0]['font_date']);
+			if($this->Docu->activeframe[0]['datesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['dateposx'],$this->Docu->activeframe[0]['dateposy'],$this->Docu->activeframe[0]['datesize'], $this->date);
+			$pdf->selectFont($this->Docu->activeframe[0]['font_scale']);
+			if($this->Docu->activeframe[0]['scalesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['scaleposx'],$this->Docu->activeframe[0]['scaleposy'],$this->Docu->activeframe[0]['scalesize'],'1: '.$this->scale);
+			$pdf->selectFont($this->Docu->activeframe[0]['font_oscale']);
+			if($this->Docu->activeframe[0]['oscalesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['oscaleposx'],$this->Docu->activeframe[0]['oscaleposy'],$this->Docu->activeframe[0]['oscalesize'],'1:xxxx');		
+			$pdf->selectFont($this->Docu->activeframe[0]['font_lage']);
+			if($this->Docu->activeframe[0]['lagesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['lageposx'],$this->Docu->activeframe[0]['lageposy'],$this->Docu->activeframe[0]['lagesize'],$this->lage);
+			$pdf->selectFont($this->Docu->activeframe[0]['font_gemeinde']);
+			if($this->Docu->activeframe[0]['gemeindesize'] > 0)$pdf->addText($this->Docu->activeframe[0]['gemeindeposx'],$this->Docu->activeframe[0]['gemeindeposy'],$this->Docu->activeframe[0]['gemeindesize'],$this->gemeinde);		
+			$pdf->selectFont($this->Docu->activeframe[0]['font_gemarkung']);
+			if($this->Docu->activeframe[0]['gemarkungsize'] > 0)$pdf->addText($this->Docu->activeframe[0]['gemarkungposx'],$this->Docu->activeframe[0]['gemarkungposy'],$this->Docu->activeframe[0]['gemarkungsize'],$this->gemarkung);
+			$pdf->selectFont($this->Docu->activeframe[0]['font_flur']);
+			if($this->Docu->activeframe[0]['flursize'] > 0)$pdf->addText($this->Docu->activeframe[0]['flurposx'],$this->Docu->activeframe[0]['flurposy'],$this->Docu->activeframe[0]['flursize'], $this->flur);
+			$pdf->selectFont($this->Docu->activeframe[0]['font_flurst']);
+			if($this->Docu->activeframe[0]['flurstsize'] > 0)$pdf->addText($this->Docu->activeframe[0]['flurstposx'],$this->Docu->activeframe[0]['flurstposy'],$this->Docu->activeframe[0]['flurstsize'], $this->flurstueck);
+
+			# Freie Graphiken
+			for($j = 0; $j < count($this->Docu->activeframe[0]['bilder']); $j++){
+				$bild=$this->Docu->activeframe[0]['bilder'][$j];
+				#var_dump($bild);
+				if ($bild['height']>0) {
+					$pdf->addJpegFromFile(GRAPHICSPATH.'custom/'.$bild['src'],$bild['posx'],$bild['posy'],$bild['width'],$bild['height']);
+				}
+				else {
+					$pdf->addJpegFromFile(GRAPHICSPATH.'custom/'.$bild['src'],$bild['posx'],$bild['posy'],$bild['width']);
+				}
+			}
+
+			# Freitexte
+			for($j = 0; $j < count($this->Docu->activeframe[0]['texts']); $j++){
+				$pdf->selectFont($this->Docu->activeframe[0]['texts'][$j]['font']);
+				if($this->Docu->activeframe[0]['texts'][$j]['text'] == '' AND $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']] != ''){    // ein Freitext hat keinen Text aber in der Druckausschnittswahl wurde ein Text vom Nutzer eingefügt
+					$this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']] = str_replace(chr(10), ';', $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']]);
+					$this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']] = str_replace(chr(13), '', $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']]);
+					$this->Docu->activeframe[0]['texts'][$j]['text'] = $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']];
+				}
+				$freitext = explode(';', $this->substituteFreitext(utf8_decode($this->Docu->activeframe[0]['texts'][$j]['text'])));
 				$anzahlzeilen = count($freitext);
+				$alpha = $this->Docu->activeframe[0]['texts'][$j]['angle'];
 				for($i = 0; $i < $anzahlzeilen; $i++){
-					$h = $i * $fontsize * 1.25;
-					$pdf->addText($posx+$fontsize*0.3333,$posy-$h-$fontsize*1.18, $fontsize,utf8_decode($freitext[$i]), 0);
-				}      	
+					$h = $i * $this->Docu->activeframe[0]['texts'][$j]['size'] * 1.25;
+					$a = sin(deg2rad($alpha)) * $h;
+					$b = cos(deg2rad($alpha)) * $h;
+					$posx = $this->Docu->activeframe[0]['texts'][$j]['posx'] + $a;
+					$posy = $this->Docu->activeframe[0]['texts'][$j]['posy'] - $b;
+					
+					if($posx < 0){		# rechtsbündig
+						$posx = $pdf->ez['pageWidth'] + $posx;
+						$justification = 'right';
+						$orientation = 'left';
+						$data = array(array(1 => $freitext[$i]));
+						$pdf->ezSetY($posy+$this->Docu->activeframe[0]['texts'][$j]['size']);
+						$pdf->ezTable($data, NULL, NULL, 
+						array('xOrientation'=>$orientation, 
+									'xPos'=>$posx, 
+									#'width'=>$this->layout['elements'][$attributes['name'][$j]]['width'], 
+									#'maxWidth'=>$this->layout['elements'][$attributes['name'][$j]]['width'], 
+									'fontSize' => $this->Docu->activeframe[0]['texts'][$j]['size'], 
+									'showHeadings'=>0, 
+									'shaded'=>0, 
+									'cols'=>array(1 => array('justification'=>$justification)),
+									'showLines'=>0
+									)
+						);
+					}
+					else{
+						$pdf->addText($posx,$posy,$this->Docu->activeframe[0]['texts'][$j]['size'],$freitext[$i], -1 * $alpha);
+					}
+				}
 			}
-    }
-		
-		# Legende
-    if($this->Docu->activeframe[0]['legendsize'] > 0){
-      $legend = $this->createlegend($this->Docu->activeframe[0]['legendsize']);
-			if($this->formvars['legend_extra']){
-				$pdf->newPage();
-				$this->Docu->activeframe[0]['legendposx'] = 50;
-				$this->Docu->activeframe[0]['legendposy'] = $this->Docu->height - $legend['height']/$this->map_factor - 50;
+					
+			# Nutzer
+			if($this->Docu->activeframe[0]['usersize'] > 0){
+				$pdf->selectFont($this->Docu->activeframe[0]['font_user']);
+				$pdf->addText($this->Docu->activeframe[0]['userposx'],$this->Docu->activeframe[0]['userposy'],$this->Docu->activeframe[0]['usersize'], utf8_decode('Stelle: '.$this->Stelle->Bezeichnung.', Nutzer: '.$this->user->Name));
 			}
-      $pdf->addJpegFromFile(IMAGEPATH.basename($legend['name']),$this->Docu->activeframe[0]['legendposx'],$this->Docu->activeframe[0]['legendposy'],$legend['width']/$this->map_factor);
-    }
-    
-    $this->pdf=$pdf;
 
-    $dateipfad=IMAGEPATH;
-    $currenttime = date('Y-m-d_H_i_s',time());
-    $name = umlaute_umwandeln($this->user->Name);    
-    $dateiname = $name.'-'.$currenttime.'.pdf';
-    $this->outputfile = $dateiname;
-    $fp=fopen($dateipfad.$dateiname,'wb');
-    fwrite($fp,$this->pdf->ezOutput());
-    fclose($fp);
+			# Nordpfeil
+			if($this->Docu->activeframe[0]['arrowposx'] != 0){
+				$arrow_start = rotate(array(0, -1*$this->Docu->activeframe[0]['arrowlength']/2), -1*$this->formvars['angle']);
+				$arrow_end = rotate(array(0, $this->Docu->activeframe[0]['arrowlength']/2), -1*$this->formvars['angle']);
+				$arrow_base_length = $this->Docu->activeframe[0]['arrowlength'] * 0.375;
+				$arrow_head_length = $this->Docu->activeframe[0]['arrowlength'] * 0.4625;
+				$arrow_head_width = $this->Docu->activeframe[0]['arrowlength'] * 0.1125;
+				$pdf->setLineStyle(0.6,'round');
+				$pdf->line($this->Docu->activeframe[0]['arrowposx'] + $arrow_start[0], $this->Docu->activeframe[0]['arrowposy'] + $arrow_start[1], $this->Docu->activeframe[0]['arrowposx'] + $arrow_end[0], $this->Docu->activeframe[0]['arrowposy'] + $arrow_end[1]);
+				$pdata = translate(rotate(array(0,$this->Docu->activeframe[0]['arrowlength']/2-$arrow_base_length, -1*$arrow_head_width/2,$this->Docu->activeframe[0]['arrowlength']/2-$arrow_head_length,0,$this->Docu->activeframe[0]['arrowlength']/2), -1*$this->formvars['angle']),$this->Docu->activeframe[0]['arrowposx'],$this->Docu->activeframe[0]['arrowposy']);
+				$pdf->polygon($pdata,3);
+				$pdf->polygon($pdata,3,1);
+				$pdata = translate(rotate(array(0,$this->Docu->activeframe[0]['arrowlength']/2-$arrow_base_length, $arrow_head_width/2,$this->Docu->activeframe[0]['arrowlength']/2-$arrow_head_length,0,$this->Docu->activeframe[0]['arrowlength']/2), -1*$this->formvars['angle']),$this->Docu->activeframe[0]['arrowposx'],$this->Docu->activeframe[0]['arrowposy']);
+				$pdf->polygon($pdata,3);
+				$pdf->setColor(1,1,1);
+				$pdf->polygon($pdata,3,1);
+			}
+			
+			# Maßstabsleiste
+			if($this->Docu->activeframe[0]['scalebarposx'] != 0){
+				$posx = $this->Docu->activeframe[0]['scalebarposx'];
+				$posy = $this->Docu->activeframe[0]['scalebarposy'];
+				$scalebarwidth = 40; 	# in mm
+				$width4 = $scalebarwidth / 0.3529411; 	# in PDF-Pixeln
+				$width3 = 3*$width4/4;
+				$width2 = $width4/2;
+				$width1 = $width4/4;
+				$label4 = $scalebarwidth / 1000 * $this->formvars['printscale'];
+				$label3 = 3*$label4/4;
+				$label2 = $label4/2;
+				$label1 = $label4/4;
+				$pdf->setColor(0,0,0);
+				$pdf->addText($posx-1.5, $posy+6, 8, '0');
+				if($label1/1000 >= 1){
+					$div = 1000;
+					$unit = 'Km';
+				}
+				else{
+					$div = 1;
+					$unit = 'm';
+				}
+				$pdf->addText($posx+$width1-5, $posy+6, 8, round($label1/$div, 2));
+				$pdf->addText($posx+$width2-5, $posy+6, 8, round($label2/$div, 2));
+				$pdf->addText($posx+$width3-5, $posy+6, 8, round($label3/$div, 2));
+				$pdf->addText($posx+$width4-5, $posy+6, 8, round($label4/$div, 2).' '.$unit);
+				$pdf->setLineStyle(0.5);
+				$pdf->rectangle($posx, $posy, $width1, 4);
+				$pdf->rectangle($posx, $posy, $width2, 4);
+				$pdf->rectangle($posx, $posy, $width3, 4);
+				$pdf->rectangle($posx, $posy, $width4, 4);
+				$smallrects = 10;
+				$smallrectwidth = $width1 / $smallrects;
+				for($s = 0; $s < $smallrects; $s++){
+					$pdf->rectangle($posx, $posy, $smallrectwidth*($s+1), 4);
+				}
+			}
+					
+			# variable Freitexte
+			for($j = 1; $j <= $this->formvars['last_freetext_id']; $j++){
+				$pdf->selectFont(PDFCLASSPATH.'fonts/Helvetica.afm');
+				if(strpos($this->Docu->activeframe[0]['format'], 'quer') !== false)$height = 420;			# das ist die Höhe des Vorschaubildes
+				else $height = 842;																																		# das ist die Höhe des Vorschaubildes
+				$ratio = $height/$this->Docu->height;
+				if($this->formvars['freetext'.$j] != ''){      
+					$posx = ($this->formvars['freetext_posx'.$j]+1)/$ratio;
+					$posy = ($this->formvars['freetext_posy'.$j]+1-$height)/$ratio*-1;
+					$boxwidth = ($this->formvars['freetext_width'.$j]+6)/$ratio;
+					$boxheight = ($this->formvars['freetext_height'.$j]+8)/$ratio;
+					$fontsize = $this->formvars['freetext_fontsize'.$j]/$ratio;
+					$pdf->setColor(1,1,1);
+					$pdf->filledRectangle($posx, $posy-$boxheight, $boxwidth, $boxheight);
+					$pdf->setColor(0,0,0);
+					$pdf->Rectangle($posx, $posy-$boxheight, $boxwidth, $boxheight);
+				
+					$this->formvars['freetext'.$j] = str_replace(chr(10), ';', $this->formvars['freetext'.$j]);
+					$this->formvars['freetext'.$j] = str_replace(chr(13), '', $this->formvars['freetext'.$j]);
+					$freitext = explode(';', $this->formvars['freetext'.$j]);
+					$anzahlzeilen = count($freitext);
+					for($i = 0; $i < $anzahlzeilen; $i++){
+						$h = $i * $fontsize * 1.25;
+						$pdf->addText($posx+$fontsize*0.3333,$posy-$h-$fontsize*1.18, $fontsize,utf8_decode($freitext[$i]), 0);
+					}      	
+				}
+			}
+			
+			# Legende
+			if($this->Docu->activeframe[0]['legendsize'] > 0){
+				$legend = $this->createlegend($this->Docu->activeframe[0]['legendsize']);
+				if($this->formvars['legend_extra']){
+					$pdf->newPage();
+					$this->Docu->activeframe[0]['legendposx'] = 50;
+					$this->Docu->activeframe[0]['legendposy'] = $this->Docu->height - $legend['height']/$this->map_factor - 50;
+				}
+				$pdf->addJpegFromFile(IMAGEPATH.basename($legend['name']),$this->Docu->activeframe[0]['legendposx'],$this->Docu->activeframe[0]['legendposy'],$legend['width']/$this->map_factor);
+			}
+			$this->pdf=$pdf;
+			$output = $this->pdf->ezOutput();
+		}	
+		$dateipfad=IMAGEPATH;
+		$currenttime = date('Y-m-d_H_i_s',time());
+		$name = umlaute_umwandeln($this->user->Name);    
+		$dateiname = $name.'-'.$currenttime.'.pdf';
+		$this->outputfile = $dateiname;
+		$fp=fopen($dateipfad.$dateiname,'wb');
+		fwrite($fp, $output);
+		fclose($fp);
 
-    if($preview == true){
-      exec(IMAGEMAGICKPATH.'convert -density 300x300 '.$dateipfad.$dateiname.' -resize 595x1000 '.$dateipfad.$name.'-'.$currenttime.'.jpg');
-      #echo IMAGEMAGICKPATH.'convert -density 300x300  '.$dateipfad.$dateiname.' -resize 595x1000 '.$dateipfad.$name.'-'.$currenttime.'.jpg';
+		if($preview == true){
+			exec(IMAGEMAGICKPATH.'convert -density 300x300 '.$dateipfad.$dateiname.' -resize 595x1000 '.$dateipfad.$name.'-'.$currenttime.'.jpg');
+			#echo IMAGEMAGICKPATH.'convert -density 300x300  '.$dateipfad.$dateiname.' -resize 595x1000 '.$dateipfad.$name.'-'.$currenttime.'.jpg';
 			if(!file_exists(IMAGEPATH.$name.'-'.$currenttime.'.jpg')){
 				return TEMPPATH_REL.$name.'-'.$currenttime.'-0.jpg';
 			}
 			else{
 				return TEMPPATH_REL.$name.'-'.$currenttime.'.jpg';
 			}
-    }
+		}
   }
   
   function substituteFreitext($text){
@@ -10110,8 +10112,6 @@ class GUI {
     }
     else{
       $FlurstKennz=$ret[1];
-      #$this->getFunktionen();
-      # Prüfen ob stelle Formular 30 sehen darf
 			$this->getFunktionen();
 			if(!$this->Stelle->funktionen[$formnummer]['erlaubt']){
 				showAlert('Die Anzeige dieses Nachweises ist für diese Stelle nicht erlaubt.');
@@ -10119,7 +10119,7 @@ class GUI {
 			}
       # Ausgabe der Flurstücksdaten im PDF Format
 			$ALB=new ALB($this->pgdatabase);
-			$nasfile = $ALB->create_nas_request_xml_file($FlurstKennz, $Grundbuchbezirk, $Grundbuchblatt, $Buchnungstelle, $formnummer);
+			$nasfile = $ALB->create_nas_request_xml_file($FlurstKennz, $Grundbuchbezirk, $Grundbuchblatt, $Buchnungstelle, NULL, $formnummer);
 			$sessionid = $ALB->dhk_call_login(DHK_CALL_URL, DHK_CALL_USER, DHK_CALL_PASSWORD);
 			
 			$currenttime=date('Y-m-d_H-i-s',time());
@@ -10139,11 +10139,44 @@ class GUI {
 					$filename = 'Flurstücksnachweis_'.$currenttime;
 				}break;
 			}
+			$output = $ALB->dhk_call_getPDF(DHK_CALL_URL, $sessionid, $nasfile, $filename);
+			switch (substr($result, 0, 2)){
+				case 'PK' : $type = 'zip'; break;
+				case '<?' : $type = 'xml'; break;
+				case '%P' : $type = 'pdf'; break;
+			}
 			$currenttime=date('Y-m-d H:i:s',time());
       $this->user->rolle->setConsumeALB($currenttime, substr($formnummer, 3, 3),$log_number, 0, 'NULL');
-			
-			print $ALB->dhk_call_getPDF(DHK_CALL_URL, $sessionid, $nasfile, $filename);
+			header("Pragma: public"); 
+			header("Expires: 0"); 
+			header("Cache-Control: must-revalidate, post-check=0, pre-check=0"); 
+			header("Content-Type: application/force-download"); 
+			header("Content-Type: application/octet-stream"); 
+			header("Content-Type: application/download"); 
+			header('Content-Disposition: attachment; filename='.$filename.'.'.$type); 
+			header("Content-Transfer-Encoding: binary"); 
+			print $output;
 		}
+	}
+	
+	function ALKIS_Kartenauszug($layout, $formvars){
+		include_(CLASSPATH.'alb.php');
+		$ALB=new ALB($this->pgdatabase);
+		$point=ms_newPointObj();
+		$point->setXY($formvars['center_x'], $formvars['center_y']);
+		$projFROM = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);
+		$projTO = ms_newprojectionobj("init=epsg:".EPSGCODE_ALKIS);
+		$point->project($projFROM, $projTO);
+		$print_params['coord'] = $point->x.' '.$point->y;
+		$print_params['printscale'] = $formvars['printscale'];
+		$print_params['format'] = substr($layout['format'], 0, 3);
+		$formnummer = $layout['dhk_call'];
+		$nasfile = $ALB->create_nas_request_xml_file(NULL, NULL, NULL, NULL, $print_params, $formnummer);
+		$sessionid = $ALB->dhk_call_login(DHK_CALL_URL, DHK_CALL_USER, DHK_CALL_PASSWORD);			
+		$currenttime=date('Y-m-d_H-i-s',time());
+		$filename = 'Kartenauszug_'.$currenttime;
+		$this->user->rolle->setConsumeALK($currenttime, $this->Docu->activeframe[0]['id']);
+		return $ALB->dhk_call_getPDF(DHK_CALL_URL, $sessionid, $nasfile, $filename);
 	}
 	
   function ALB_Anzeigen($FlurstKennz,$formnummer,$Grundbuchbezirk,$Grundbuchblatt) {
@@ -15515,6 +15548,7 @@ class Document {
 
       $sql = "INSERT INTO `druckrahmen`";
       $sql .= " SET `Name` = '".$formvars['Name']."'";
+			$sql .= ", `dhk_call` = '".$formvars['dhk_call']."'";
       $sql .= ", `headposx` = ".$formvars['headposx'];
       $sql .= ", `headposy` = ".$formvars['headposy'];
       $sql .= ", `headwidth` = ".$formvars['headwidth'];
@@ -15664,6 +15698,7 @@ class Document {
 
       $sql ="UPDATE `druckrahmen`";
       $sql .= " SET `Name` = '".$formvars['Name']."'";
+			$sql .= ", `dhk_call` = '".$formvars['dhk_call']."'";
       $sql .= ", `headposx` = '".$formvars['headposx']."'";
       $sql .= ", `headposy` = '".$formvars['headposy']."'";
       $sql .= ", `headwidth` = '".$formvars['headwidth']."'";
@@ -15809,7 +15844,7 @@ class Document {
   }
 
   function get_active_frameid($userid, $stelleid){
-    $sql ='SELECT active_frame from rolle, druckrahmen WHERE active_frame = druckrahmen.id AND `user_id` ='.$userid.' AND `stelle_id` ='.$stelleid;
+    $sql ='SELECT active_frame from rolle WHERE `user_id` ='.$userid.' AND `stelle_id` ='.$stelleid;
     $this->debug->write("<p>file:kvwmap class:GUI->get_active_frameid :<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }

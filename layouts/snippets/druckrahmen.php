@@ -196,6 +196,23 @@ function addfreetext(){
         <tr>
           <td class="fett" style="border-bottom:1px solid #C3C7C3" colspan=8 >&nbsp;Layoutdaten</td>
         </tr>
+				<? if(defined('DHK_CALL_URL') AND DHK_CALL_URL != ''){ ?>
+				<tr>
+        	<td class="fett" align="center" style="border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;DHK-Call-Schnittstelle&nbsp;</td>
+        	<td class="fett" align="center" style="border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;</td>
+        </tr>
+				<tr>
+        	<td class="fett" align="center" style="border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">
+						Art:
+						<select style="width: 200px" name="dhk_call">
+							<option value="">--- Auswahl ---</option>
+          		<option value="0110" <? if($this->Document->selectedframe[0]['dhk_call'] == '0110')echo 'selected'; ?>>Liegenschaftskarte</option>
+							<option value="0120" <? if($this->Document->selectedframe[0]['dhk_call'] == '0120')echo 'selected'; ?>>Liegenschaftskarte mit Bodenschätzung</option>
+          	</select>
+					</td>
+        	<td class="fett" align="center" style="border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;</td>
+        </tr>
+				<? } ?>
         <tr>
         	<td class="fett" align="center" style="border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Hintergrundbild&nbsp;</td>
         	<td class="fett" align="center" style="border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Referenzkartenhintergrund&nbsp;</td>
