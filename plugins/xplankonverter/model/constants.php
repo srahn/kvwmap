@@ -14,7 +14,7 @@
 	define('PG_CONNECTION', pg_connect(PG_CONNECTION_STRING));
 	
 	define('CONTENT_SCHEME', 'gml_classes');
-	define('STRUCTURE_SCHEME', 'xplan_eatest');
+	define('STRUCTURE_SCHEME', 'xplan_uml');
 	
 	$packages[] = 'Basisklassen';
 	#  $packages[] = 'Bebauungsplan';

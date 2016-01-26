@@ -37,12 +37,16 @@ class gml_builder {
     $this->database = $database;
   }
 
-  function build_gml(){
+  function build_gml($plan_id = "365208ec-c418-11e5-995f-93757a8c548c"){
     include('constants.php');
-    // make constant
-    $structureScheme = 'xplan_uml';
-    $contentScheme = 'gml_classes';
     
+    // make constants available as variables (easier to use in double-quoted strings)
+    $structureScheme = STRUCTURE_SCHEME;
+    $contentScheme   = CONTENT_SCHEME;
+
+    // TODO: als Parameter an die Funktion übergeben
+    $plan_id = "365208ec-c418-11e5-995f-93757a8c548c";
+
     $xplan_gml = 
       "<XPlanAuszug 
         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" 
@@ -64,33 +68,38 @@ class gml_builder {
       FROM $structureScheme.packages p 
         RIGHT JOIN $structureScheme.uml_classes uc ON p.id = uc.package_id
       WHERE 
---         uc.xmi_id IN (SELECT child_id FROM $structureScheme.class_generalizations)
---       AND
         uc.xmi_id NOT IN (SELECT parent_id FROM $structureScheme.class_generalizations)
       AND
         p.name IN (" . PACKAGES . ")";
     $result = pg_query($this->database->dbConn, $sql);
-//     $num_rows = pg_num_rows($result);
-//     echo "$sql ==> $num_rows";
     while ($gml_class = pg_fetch_array($result)) {
       $gml_className = strtolower($gml_class['name']);
-      
+
       // check if the class exists
+      // TODO: kann entfallen, sobald Struktur-Schema und Inhalts-Schema konsistent sind 
       $sql = "SELECT oid
         FROM pg_class
         WHERE relname = '$gml_className' AND relnamespace = (SELECT oid FROM pg_namespace WHERE nspname = '$contentScheme')";
       if (!($cur_class = pg_fetch_row(pg_query(PG_CONNECTION, $sql)))) continue;
-      
+
       // check, if there is a position field in that relation
       $sql = "SELECT 1 FROM pg_attribute WHERE attrelid = {$cur_class[0]} AND attname = 'position'";
+      $position_attr = "";
       if (pg_fetch_row(pg_query(PG_CONNECTION, $sql))) {
         // position field exists --> fetch transformed position
-        $sql = "SELECT *, st_asgml(position) AS position FROM $contentScheme.$gml_className";
-      } else {
-        // no position field --> fetch normally
-        $sql = "SELECT * FROM $contentScheme.$gml_className";
+        $position_attr = ", st_asgml(position) AS position";
       }
+      $sql = "SELECT cl.* $position_attr
+        FROM
+          $contentScheme.rp_plan AS p JOIN
+          $contentScheme.rp_bereich AS b ON p.gml_id = b.gehoertzuplan JOIN -- verknuepft plan mit bereich
+          $contentScheme.rp_bereich2rp_objekt AS b2o ON b.gml_id = b2o.rp_bereich_gml_id JOIN -- verknuepft bereicht mit bereich2objekt
+          $contentScheme.$gml_className AS cl ON b2o.rp_objekt_gml_id = cl.gml_id -- verknuepft bereich2objekt mit leaf class 
+        WHERE
+        p.gml_id = '$plan_id' -- die gml_id vom plan";
       $gml_objects = pg_query(PG_CONNECTION, $sql);
+//     $num_rows = pg_num_rows($gml_objects);
+//     echo "$sql ==> $num_rows";
       
       while ($gml_object = pg_fetch_array($gml_objects, NULL, PGSQL_ASSOC)) {
         $xplan_gml .= "<gml:featureMember>";
