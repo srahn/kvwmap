@@ -44,7 +44,7 @@ class gml_builder {
     $structureScheme = STRUCTURE_SCHEME;
     $contentScheme   = CONTENT_SCHEME;
 
-    // TODO: als Parameter an die Funktion übergeben
+    // TODO: als Parameter an die Funktion Ã¼bergeben
     $plan_id = "365208ec-c418-11e5-995f-93757a8c548c";
 
     $xplan_gml = 
@@ -109,9 +109,9 @@ class gml_builder {
         for ($i = 0; $i < count($gml_objectKeys); $i++){
           switch ($gml_objectKeys[$i]) {
             case "position":
-              $xplan_gml .= "<position>";
-              $xplan_gml .= $gml_object[$gml_objectKeys[$i]];
-              $xplan_gml .= "</position>";
+              $gmlElemInner .= "<position>";
+              $gmlElemInner .= $gml_object[$gml_objectKeys[$i]];
+              $gmlElemInner .= "</position>";
               break;
             case "gml_id":
               // gml_id is formated as element attribute
@@ -131,7 +131,7 @@ class gml_builder {
           }
         }
         $gmlElemOpenTag .= ">";
-        $xplan_gml .= "$gmlElemOpenTag$gmlElemInner</$gml_className>";
+        $xplan_gml .= $gmlElemOpenTag . $gmlElemInner . "</" . $gml_className . ">";
         $xplan_gml .= "</gml:featureMember>";
       }
     }
