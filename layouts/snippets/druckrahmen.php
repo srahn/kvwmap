@@ -1,10 +1,10 @@
 <?
 if($this->Document->selectedframe[0]['format'] == 'A5hoch'){ $formatx = 420; $formaty = 595;}
-if($this->Document->selectedframe[0]['format'] == 'A5quer'){ $formatx = 595; $formaty = 420;} 
+if($this->Document->selectedframe[0]['format'] == 'A5quer'){ $formatx = 595; $formaty = 420;}
 if($this->Document->selectedframe[0]['format'] == 'A4hoch'){ $formatx = 595; $formaty = 842;}
 if($this->Document->selectedframe[0]['format'] == 'A4quer'){ $formatx = 842; $formaty = 595;}
 if($this->Document->selectedframe[0]['format'] == 'A3hoch'){ $formatx = 842; $formaty = 1191;}
-if($this->Document->selectedframe[0]['format'] == 'A3quer'){ $formatx = 1191; $formaty = 842;} 
+if($this->Document->selectedframe[0]['format'] == 'A3quer'){ $formatx = 1191; $formaty = 842;}
 if($this->Document->selectedframe[0]['format'] == 'A2hoch'){ $formatx = 1191; $formaty = 1684;}
 if($this->Document->selectedframe[0]['format'] == 'A2quer'){ $formatx = 1684; $formaty = 1191;}
 if($this->Document->selectedframe[0]['format'] == 'A1hoch'){ $formatx = 1684; $formaty = 2384;}
@@ -16,7 +16,6 @@ $preview_height = round(595 * $formaty / $formatx);
 ?>
 
 <script type="text/javascript">
-<!--
 
 function image_coords(event){
 	document.getElementById('coords').style.visibility='';
@@ -39,7 +38,7 @@ function image_coords(event){
 
 	pos_x2 = Math.round(document.GUI.formatx.value * pos_x / 595);
 	pos_y2 = Math.round(document.GUI.formaty.value - document.GUI.formaty.value * pos_y / <? echo $preview_height; ?>);
-	
+
 	document.getElementById("coords").style.left = pos_x+7;
 	document.getElementById("coords").style.top = pos_y+7;
 	document.getElementById("posx").value = pos_x2;
@@ -48,22 +47,22 @@ function image_coords(event){
 
 function updateheight(imagewidth, imageheight){
 	ratio = imageheight/imagewidth;
-	document.GUI.headheight.value = Math.round(document.GUI.headwidth.value * ratio); 
+	document.GUI.headheight.value = Math.round(document.GUI.headwidth.value * ratio);
 }
 
 function updatewidth(imagewidth, imageheight){
 	ratio = imagewidth/imageheight;
-	document.GUI.headwidth.value = Math.round(document.GUI.headheight.value * ratio); 
+	document.GUI.headwidth.value = Math.round(document.GUI.headheight.value * ratio);
 }
 
 function updaterefheight(imagewidth, imageheight){
 	ratio = imageheight/imagewidth;
-	document.GUI.refmapheight.value = Math.round(document.GUI.refmapwidth.value * ratio); 
+	document.GUI.refmapheight.value = Math.round(document.GUI.refmapwidth.value * ratio);
 }
 
 function updaterefwidth(imagewidth, imageheight){
 	ratio = imagewidth/imageheight;
-	document.GUI.refmapwidth.value = Math.round(document.GUI.refmapheight.value * ratio); 
+	document.GUI.refmapwidth.value = Math.round(document.GUI.refmapheight.value * ratio);
 }
 
 function updateformatinfo(){
@@ -121,8 +120,20 @@ function addfreetext(){
 	document.GUI.go.value = 'Druckrahmen_Freitexthinzufuegen';
 	document.GUI.submit();
 }
-  
-//-->
+
+function art_hide(){
+	if(document.GUI.call.checked){
+		document.getElementById('art_call').style.visibility = 'hidden';
+		document.GUI.dhk_call.options[0].value = '';
+		document.GUI.dhk_call.options[1].value = '';
+	}
+	else{
+		document.getElementById('art_call').style.visibility = 'visible';
+		document.GUI.dhk_call.options[0].value = '0110';
+		document.GUI.dhk_call.options[1].value = '0120';
+	}
+}
+
 </script>
 
 <br>
@@ -130,7 +141,7 @@ function addfreetext(){
 
 <h2><?php echo $this->titel; ?></h2>
 
-<?php 
+<?php
 	if ($this->Document->fehlermeldung != '') {
   echo "<script type=\"text/javascript\">
       <!--
@@ -140,92 +151,85 @@ function addfreetext(){
   ;
 }
 
-?>       
+?>
 
 <table border="0" cellspacing="2" cellpadding="0">
-  <tr>
+  <tr height="40px">
     <td colspan=3>&nbsp;</td>
   </tr>
   <tr>
     <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
     <td >
-      <table width=100% cellpadding="2" cellspacing="2" style="border:1px solid #C3C7C3">
-        <tr>
-          <td class="fett" colspan=2 style="border-bottom:1px solid #C3C7C3">&nbsp;Layoutauswahl</td>
-          <td class="fett" style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3">&nbsp;Stelle</td>
-        </tr>
-        <tr>
-          <td colspan=1>
-            &nbsp;<select style="width: 200px" name="aktiverRahmen" onchange="document.GUI.submit()">
-            <?  
-            for($i = 0; $i < count($this->Document->frames); $i++){
-            	
-              echo ($this->formvars['aktiverRahmen']<>$this->Document->frames[$i]['id']) ? '<option value="'.$this->Document->frames[$i]['id'].'">'.$this->Document->frames[$i]['Name'].'  ('.$this->Document->frames[$i]['id'].')</option>' : '<option value="'.$this->Document->frames[$i]['id'].'" selected>'.$this->Document->frames[$i]['Name'].'  ('.$this->Document->frames[$i]['id'].')</option>';
-            }
-            ?>
-          </select> 
+      <table border="0" width="100%" cellpadding="2" cellspacing="2" style="border:1px solid #C3C7C3">
+        <tr height="50px">
+          <td colspan="8" valign="top">
+            <table border="0" width="100%">
+              <tr>
+                <td class="fett">&nbsp;Layout</td>
+              </tr>
+              <tr>
+                <td>
+                  &nbsp;<select style="width: 200px" name="aktiverRahmen" onchange="document.GUI.submit()">
+                  <?
+                  for($i = 0; $i < count($this->Document->frames); $i++){
+                    echo ($this->formvars['aktiverRahmen']<>$this->Document->frames[$i]['id']) ? '<option value="'.$this->Document->frames[$i]['id'].'">'.$this->Document->frames[$i]['Name'].'  ('.$this->Document->frames[$i]['id'].')</option>' : '<option value="'.$this->Document->frames[$i]['id'].'" selected>'.$this->Document->frames[$i]['Name'].'  ('.$this->Document->frames[$i]['id'].')</option>';
+                  }
+                  ?>
+                  </select>
+                 </td>
+								 <td align="center">
+                  <input class="button" type="submit" name="go_plus" value="zu Stelle &raquo;">
+                 </td>
+								 <td align="right">
+                  <select style="width: 260px" name="stelle">
+                		<?
+                		for($i = 0; $i < count($this->stellendaten['ID']); $i++){
+      			    			echo '<option value="'.$this->stellendaten['ID'][$i].'" ';
+      			    			if($this->formvars['stelle'] == $this->stellendaten['ID'][$i]){
+      			    				echo 'selected';
+      			    			}
+      			    			echo '>'.$this->stellendaten['Bezeichnung'][$i].'</option>';
+      			    		}
+                		?>
+                  </select>&nbsp;
+                </td>
+              </tr>
+            </table>
           </td>
-          <td>
-            <input class="button" type="submit" name="go_plus" value="übernehmen >>">
+        </tr>
+			<? if(defined('DHK_CALL_URL') AND DHK_CALL_URL != '') { ?>
+				<tr height="50px">
+          <td valign="middle" colspan="8" style="border-top:1px solid #C3C7C3">
+            <table border="0">
+              <tr>
+                <td>
+        	      <input type="checkbox" name="call" onmousedown="art_hide()" <? if($this->Document->selectedframe[0]['dhk_call'] != '') echo 'checked=true'; ?>>&nbsp;Zugriff auf DHK-Call-Schnittstelle
+                </td>
+                <td id="art_call" class="fett" <? if($this->Document->selectedframe[0]['dhk_call'] == '')echo 'style="visibility:hidden"'; ?>>
+									&nbsp;&nbsp;&nbsp;&nbsp;&raquo;&nbsp;Art:
+									<select style="width: 260px" name="dhk_call">
+										<option value="0110" <? if($this->Document->selectedframe[0]['dhk_call'] == '0110')echo 'selected'; ?>>Liegenschaftskarte</option>
+										<option value="0120" <? if($this->Document->selectedframe[0]['dhk_call'] == '0120')echo 'selected'; ?>>Liegenschaftskarte mit Bodenschätzung</option>
+          	      </select>
+                </td>
+              </tr>
+            </table>
           </td>
-          <td style="border-left:1px solid #C3C7C3">
-          	<select style="width: 200px" name="stelle">
-          		<?
-          		for($i = 0; $i < count($this->stellendaten['ID']); $i++){
-			    			echo '<option value="'.$this->stellendaten['ID'][$i].'" ';
-			    			if($this->formvars['stelle'] == $this->stellendaten['ID'][$i]){
-			    				echo 'selected';
-			    			}
-			    			echo '>'.$this->stellendaten['Bezeichnung'][$i].'</option>';
-			    		}
-          		?>
-          	</select>
-          </td>
         </tr>
-      </table> 
-    </td>
-    <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-  </tr> 
-  <tr>
-    <td colspan=3>&nbsp;</td>
-  </tr>
-  <tr>
-    <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-    <td>
-      <table width=605 border=0 cellpadding="2" cellspacing="2" style="border:1px solid #C3C7C3">
+			<? } ?>
         <tr>
-          <td class="fett" style="border-bottom:1px solid #C3C7C3" colspan=8 >&nbsp;Layoutdaten</td>
-        </tr>
-				<? if(defined('DHK_CALL_URL') AND DHK_CALL_URL != ''){ ?>
-				<tr>
-        	<td class="fett" align="center" style="border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;DHK-Call-Schnittstelle&nbsp;</td>
-        	<td class="fett" align="center" style="border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;</td>
-        </tr>
-				<tr>
-        	<td class="fett" align="center" style="border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">
-						Art:
-						<select style="width: 200px" name="dhk_call">
-							<option value="">--- Auswahl ---</option>
-          		<option value="0110" <? if($this->Document->selectedframe[0]['dhk_call'] == '0110')echo 'selected'; ?>>Liegenschaftskarte</option>
-							<option value="0120" <? if($this->Document->selectedframe[0]['dhk_call'] == '0120')echo 'selected'; ?>>Liegenschaftskarte mit Bodenschätzung</option>
-          	</select>
-					</td>
-        	<td class="fett" align="center" style="border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;</td>
-        </tr>
-				<? } ?>
-        <tr>
-        	<td class="fett" align="center" style="border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Hintergrundbild&nbsp;</td>
-        	<td class="fett" align="center" style="border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Referenzkartenhintergrund&nbsp;</td>
+        	<td class="fett" align="center" style="border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3; border-top:1px solid #C3C7C3;" colspan="4">&nbsp;Hintergrundbild&nbsp;</td>
+        	<td class="fett" align="center" style="border-bottom:1px solid #C3C7C3; border-top:1px solid #C3C7C3;" colspan="4">&nbsp;Referenzkartenhintergrund&nbsp;</td>
         </tr>
         <tr>
         	<td>&nbsp;x:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" name="headposx" value="<? echo $this->Document->selectedframe[0]['headposx'] ?>" size="5"></td>
 					<td>&nbsp;Breite:</td>
-					<td style="border-right:2px solid #C3C7C3"><input onchange="updateheight(<? echo $this->Document->headsize[0].','.$this->Document->headsize[1] ?>);" type="text" name="headwidth" value="<? echo $this->Document->selectedframe[0]['headwidth'] ?>" size="5"></td>       	
+					<td style="border-right:2px solid #C3C7C3"><input onchange="updateheight(<? echo $this->Document->headsize[0].','.$this->Document->headsize[1] ?>);" type="text" name="headwidth" value="<? echo $this->Document->selectedframe[0]['headwidth'] ?>" size="5"></td>
         	<td>&nbsp;x:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" name="refmapposx" value="<? echo $this->Document->selectedframe[0]['refmapposx'] ?>" size="5"></td>
 					<td>&nbsp;Breite:</td>
-					<td><input type="text" name="refmapwidth" onchange="updaterefheight(<? echo $this->Document->refmapsize[0].','.$this->Document->refmapsize[1] ?>);" value="<? echo $this->Document->selectedframe[0]['refmapwidth'] ?>" size="5"></td>					               	
+					<td><input type="text" name="refmapwidth" onchange="updaterefheight(<? echo $this->Document->refmapsize[0].','.$this->Document->refmapsize[1] ?>);" value="<? echo $this->Document->selectedframe[0]['refmapwidth'] ?>" size="5"></td>
         </tr>
         <tr>
         	<td>&nbsp;y:</td>
@@ -253,7 +257,7 @@ function addfreetext(){
         </tr>
       </table>
       <table width=605 border=0 cellpadding="2" cellspacing="2" style="border:1px solid #C3C7C3">
-  			
+
   			<tr>
           <td style="border-bottom:1px solid #C3C7C3" colspan=8>&nbsp;</td>
         </tr>
@@ -284,7 +288,7 @@ function addfreetext(){
 					<td width="7%">&nbsp;x:</td>
         	<td width="18%" style="border-right:1px solid #C3C7C3"><input type="text" name="refposx" value="<? echo $this->Document->selectedframe[0]['refposx'] ?>" size="5"></td>
         	<td>&nbsp;Breite:</td>
-					<td><input type="text" name="refwidth" value="<? echo $this->Document->selectedframe[0]['refwidth'] ?>" size="5"></td>					               	
+					<td><input type="text" name="refwidth" value="<? echo $this->Document->selectedframe[0]['refwidth'] ?>" size="5"></td>
         </tr>
         <tr>
         	<td>&nbsp;y:</td>
@@ -296,7 +300,7 @@ function addfreetext(){
         	<td>&nbsp;Höhe:</td>
         	<td><input type="text" name="refheight" value="<? echo $this->Document->selectedframe[0]['refheight'] ?>" size="5"></td>
         </tr>
-				
+
 				<tr>
         	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Lage&nbsp;($lage)</td>
         	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Gemeinde&nbsp;($gemeinde)</td>
@@ -307,12 +311,12 @@ function addfreetext(){
         	<td colspan="2" style="border-right:2px solid #C3C7C3" align="center">
         		<select name="font_lage">
 	        		<?
-	        		for($i = 0; $i < count($this->document->fonts); $i++){
+	        		for($i = 0; $i < count($this->Document->fonts); $i++){
 	        			echo '<option ';
-	        			if($this->Document->selectedframe[0]['font_lage'] == $this->document->fonts[$i]){
+	        			if($this->Document->selectedframe[0]['font_lage'] == $this->Document->fonts[$i]){
 	        				echo 'selected ';
 	        			}
-	        			echo 'value="'.$this->document->fonts[$i].'">'.basename($this->document->fonts[$i]).'</option>';
+	        			echo 'value="'.$this->Document->fonts[$i].'">'.basename($this->Document->fonts[$i]).'</option>';
 	        		}
 	        		?>
         		</select>
@@ -322,16 +326,16 @@ function addfreetext(){
 					<td colspan="2" align="center">
 						<select name="font_gemeinde">
 	        		<?
-	        		for($i = 0; $i < count($this->document->fonts); $i++){
+	        		for($i = 0; $i < count($this->Document->fonts); $i++){
 	        			echo '<option ';
-	        			if($this->Document->selectedframe[0]['font_gemeinde'] == $this->document->fonts[$i]){
+	        			if($this->Document->selectedframe[0]['font_gemeinde'] == $this->Document->fonts[$i]){
 	        				echo 'selected ';
 	        			}
-	        			echo 'value="'.$this->document->fonts[$i].'">'.basename($this->document->fonts[$i]).'</option>';
+	        			echo 'value="'.$this->Document->fonts[$i].'">'.basename($this->Document->fonts[$i]).'</option>';
 	        		}
 	        		?>
         		</select>
-					</td>        						               	
+					</td>
         </tr>
         <tr>
         	<td>&nbsp;y:</td>
@@ -341,7 +345,7 @@ function addfreetext(){
         	<td style="border-right:1px solid #C3C7C3"><input type="text" name="gemeindeposy" value="<? echo $this->Document->selectedframe[0]['gemeindeposy'] ?>" size="5"></td>
         	<td colspan="2" align="center"><input type="text" name="gemeindesize" value="<? echo $this->Document->selectedframe[0]['gemeindesize'] ?>" size="5">&nbsp;pt</td>
         </tr>
-				
+
         <tr>
         	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Gemarkung&nbsp;($gemarkung)</td>
         	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Flur&nbsp;($flur)</td>
@@ -352,12 +356,12 @@ function addfreetext(){
         	<td colspan="2" style="border-right:2px solid #C3C7C3" align="center">
         		<select name="font_gemarkung">
 	        		<?
-	        		for($i = 0; $i < count($this->document->fonts); $i++){
+	        		for($i = 0; $i < count($this->Document->fonts); $i++){
 	        			echo '<option ';
-	        			if($this->Document->selectedframe[0]['font_gemarkung'] == $this->document->fonts[$i]){
+	        			if($this->Document->selectedframe[0]['font_gemarkung'] == $this->Document->fonts[$i]){
 	        				echo 'selected ';
 	        			}
-	        			echo 'value="'.$this->document->fonts[$i].'">'.basename($this->document->fonts[$i]).'</option>';
+	        			echo 'value="'.$this->Document->fonts[$i].'">'.basename($this->Document->fonts[$i]).'</option>';
 	        		}
 	        		?>
         		</select>
@@ -367,16 +371,16 @@ function addfreetext(){
 					<td colspan="2" align="center">
 						<select name="font_flur">
 	        		<?
-	        		for($i = 0; $i < count($this->document->fonts); $i++){
+	        		for($i = 0; $i < count($this->Document->fonts); $i++){
 	        			echo '<option ';
-	        			if($this->Document->selectedframe[0]['font_flur'] == $this->document->fonts[$i]){
+	        			if($this->Document->selectedframe[0]['font_flur'] == $this->Document->fonts[$i]){
 	        				echo 'selected ';
 	        			}
-	        			echo 'value="'.$this->document->fonts[$i].'">'.basename($this->document->fonts[$i]).'</option>';
+	        			echo 'value="'.$this->Document->fonts[$i].'">'.basename($this->Document->fonts[$i]).'</option>';
 	        		}
 	        		?>
         		</select>
-					</td>        						               	
+					</td>
         </tr>
         <tr>
         	<td>&nbsp;y:</td>
@@ -396,12 +400,12 @@ function addfreetext(){
         	<td colspan="2" style="border-right:2px solid #C3C7C3" align="center">
         		<select name="font_flurst">
 	        		<?
-	        		for($i = 0; $i < count($this->document->fonts); $i++){
+	        		for($i = 0; $i < count($this->Document->fonts); $i++){
 	        			echo '<option ';
-	        			if($this->Document->selectedframe[0]['font_flurst'] == $this->document->fonts[$i]){
+	        			if($this->Document->selectedframe[0]['font_flurst'] == $this->Document->fonts[$i]){
 	        				echo 'selected ';
 	        			}
-	        			echo 'value="'.$this->document->fonts[$i].'">'.basename($this->document->fonts[$i]).'</option>';
+	        			echo 'value="'.$this->Document->fonts[$i].'">'.basename($this->Document->fonts[$i]).'</option>';
 	        		}
 	        		?>
         		</select>
@@ -411,16 +415,16 @@ function addfreetext(){
         	<td colspan="2" align="center">
         		<select name="font_date">
 	        		<?
-	        		for($i = 0; $i < count($this->document->fonts); $i++){
+	        		for($i = 0; $i < count($this->Document->fonts); $i++){
 	        			echo '<option ';
-	        			if($this->Document->selectedframe[0]['font_date'] == $this->document->fonts[$i]){
+	        			if($this->Document->selectedframe[0]['font_date'] == $this->Document->fonts[$i]){
 	        				echo 'selected ';
 	        			}
-	        			echo 'value="'.$this->document->fonts[$i].'">'.basename($this->document->fonts[$i]).'</option>';
+	        			echo 'value="'.$this->Document->fonts[$i].'">'.basename($this->Document->fonts[$i]).'</option>';
 	        		}
 	        		?>
         		</select>
-        	</td>					               	
+        	</td>
         </tr>
         <tr>
         	<td>&nbsp;y:</td>
@@ -440,12 +444,12 @@ function addfreetext(){
         	<td colspan="2" style="border-right:2px solid #C3C7C3" align="center">
         		<select name="font_legend">
 	        		<?
-	        		for($i = 0; $i < count($this->document->fonts); $i++){
+	        		for($i = 0; $i < count($this->Document->fonts); $i++){
 	        			echo '<option ';
-	        			if($this->Document->selectedframe[0]['font_legend'] == $this->document->fonts[$i]){
+	        			if($this->Document->selectedframe[0]['font_legend'] == $this->Document->fonts[$i]){
 	        				echo 'selected ';
 	        			}
-	        			echo 'value="'.$this->document->fonts[$i].'">'.basename($this->document->fonts[$i]).'</option>';
+	        			echo 'value="'.$this->Document->fonts[$i].'">'.basename($this->Document->fonts[$i]).'</option>';
 	        		}
 	        		?>
         		</select>
@@ -455,12 +459,12 @@ function addfreetext(){
         	<td colspan="2" align="center">
         		<select name="font_user">
 	        		<?
-	        		for($i = 0; $i < count($this->document->fonts); $i++){
+	        		for($i = 0; $i < count($this->Document->fonts); $i++){
 	        			echo '<option ';
-	        			if($this->Document->selectedframe[0]['font_user'] == $this->document->fonts[$i]){
+	        			if($this->Document->selectedframe[0]['font_user'] == $this->Document->fonts[$i]){
 	        				echo 'selected ';
 	        			}
-	        			echo 'value="'.$this->document->fonts[$i].'">'.basename($this->document->fonts[$i]).'</option>';
+	        			echo 'value="'.$this->Document->fonts[$i].'">'.basename($this->Document->fonts[$i]).'</option>';
 	        		}
 	        		?>
         		</select>
@@ -474,7 +478,7 @@ function addfreetext(){
         	<td style="border-right:1px solid #C3C7C3"><input type="text" name="userposy" value="<? echo $this->Document->selectedframe[0]['userposy'] ?>" size="5"></td>
         	<td colspan="2" align="center"><input type="text" name="usersize" value="<? echo $this->Document->selectedframe[0]['usersize'] ?>" size="5">&nbsp;pt</td>
         </tr>
-        
+
         <tr>
         	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Nordpfeil&nbsp;</td>
         	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">Maßstab&nbsp;($scale)</td>
@@ -482,18 +486,18 @@ function addfreetext(){
         <tr>
         	<td>&nbsp;x:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" name="arrowposx" value="<? echo $this->Document->selectedframe[0]['arrowposx'] ?>" size="5"></td>
-        	<td style="border-right:2px solid #C3C7C3" colspan="2" align="center">Länge:&nbsp;<input type="text" name="arrowlength" value="<? echo $this->Document->selectedframe[0]['arrowlength'] ?>" size="5">&nbsp;</td>		
+        	<td style="border-right:2px solid #C3C7C3" colspan="2" align="center">Länge:&nbsp;<input type="text" name="arrowlength" value="<? echo $this->Document->selectedframe[0]['arrowlength'] ?>" size="5">&nbsp;</td>
         	<td>&nbsp;x:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" name="scaleposx" value="<? echo $this->Document->selectedframe[0]['scaleposx'] ?>" size="5"></td>
         	<td colspan="2" align="center">
         		<select name="font_scale">
 	        		<?
-	        		for($i = 0; $i < count($this->document->fonts); $i++){
+	        		for($i = 0; $i < count($this->Document->fonts); $i++){
 	        			echo '<option ';
-	        			if($this->Document->selectedframe[0]['font_scale'] == $this->document->fonts[$i]){
+	        			if($this->Document->selectedframe[0]['font_scale'] == $this->Document->fonts[$i]){
 	        				echo 'selected ';
 	        			}
-	        			echo 'value="'.$this->document->fonts[$i].'">'.basename($this->document->fonts[$i]).'</option>';
+	        			echo 'value="'.$this->Document->fonts[$i].'">'.basename($this->Document->fonts[$i]).'</option>';
 	        		}
 	        		?>
         		</select>
@@ -507,7 +511,7 @@ function addfreetext(){
         	<td style="border-right:1px solid #C3C7C3"><input type="text" name="scaleposy" value="<? echo $this->Document->selectedframe[0]['scaleposy'] ?>" size="5"></td>
         	<td colspan="2" align="center"><input type="text" name="scalesize" value="<? echo $this->Document->selectedframe[0]['scalesize'] ?>" size="5">&nbsp;pt</td>
         </tr>
-				
+
 				 <tr>
         	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-right:2px solid #C3C7C3; border-bottom:1px solid #C3C7C3" colspan="4">&nbsp;Maßstabsleiste&nbsp;</td>
         	<td class="fett" align="center" style="border-top:2px solid #C3C7C3; border-bottom:0px solid #C3C7C3" colspan="4">&nbsp;</td>
@@ -515,7 +519,7 @@ function addfreetext(){
         <tr>
         	<td>&nbsp;x:</td>
         	<td style="border-right:1px solid #C3C7C3"><input type="text" name="scalebarposx" value="<? echo $this->Document->selectedframe[0]['scalebarposx'] ?>" size="5"></td>
-        	<td style="border-right:2px solid #C3C7C3" colspan="2" align="center">&nbsp;</td>		
+        	<td style="border-right:2px solid #C3C7C3" colspan="2" align="center">&nbsp;</td>
         	<td></td>
         	<td style="border-right:1px solid #C3C7C3"></td>
         	<td colspan="2" align="center">
@@ -529,11 +533,11 @@ function addfreetext(){
         	<td style="border-right:1px solid #C3C7C3"></td>
         	<td colspan="2" align="center"></td>
         </tr>
-        
+
         <tr>
           <td class="fett" style="border-top:2px solid #C3C7C3" colspan=8 align="center">Freitexte</td>
         </tr>
- 
+
         <? for($i = 0; $i < count($this->Document->selectedframe[0]['texts']); $i++){ ?>
 	        <tr>
 	        	<td rowspan="1" style="border-top:2px solid #C3C7C3;">&nbsp;</td>
@@ -542,12 +546,12 @@ function addfreetext(){
 	        	<td style="border-top:2px solid #C3C7C3;" colspan=2 align="center">
 	        		<select name="textfont<? echo $i ?>">
 		        		<?
-		        		for($j = 0; $j < count($this->document->fonts); $j++){
+		        		for($j = 0; $j < count($this->Document->fonts); $j++){
 		        			echo '<option ';
-		        			if($this->Document->selectedframe[0]['texts'][$i]['font'] == $this->document->fonts[$j]){
+		        			if($this->Document->selectedframe[0]['texts'][$i]['font'] == $this->Document->fonts[$j]){
 		        				echo 'selected ';
 		        			}
-		        			echo 'value="'.$this->document->fonts[$j].'">'.basename($this->document->fonts[$j]).'</option>';
+		        			echo 'value="'.$this->Document->fonts[$j].'">'.basename($this->Document->fonts[$j]).'</option>';
 		        		}
 		        		?>
 	        		</select>
@@ -555,7 +559,7 @@ function addfreetext(){
 	        </tr>
 	        <tr>
 	        	<td>&nbsp;x:</td>
-	        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="textposx<? echo $i ?>" value="<? echo $this->Document->selectedframe[0]['texts'][$i]['posx'] ?>" size="5"></td>	        	
+	        	<td style="border-right:1px solid #C3C7C3"><input type="text" name="textposx<? echo $i ?>" value="<? echo $this->Document->selectedframe[0]['texts'][$i]['posx'] ?>" size="5"></td>
 	        	<td colspan="2"><input type="text" name="textsize<? echo $i ?>" value="<? echo $this->Document->selectedframe[0]['texts'][$i]['size'] ?>" size="5">&nbsp;pt</td>
 	        </tr>
 	       	<tr>
@@ -568,12 +572,12 @@ function addfreetext(){
 	        	<td colspan="2" align="right"><a href="javascript:Bestaetigung('index.php?go=Druckrahmen_Freitextloeschen&freitext_id=<? echo $this->Document->selectedframe[0]['texts'][$i]['id'] ?>&aktiverRahmen=<? echo $this->formvars['aktiverRahmen']; ?>', 'Wollen Sie den Freitext wirklich löschen?');">löschen</a></td>
 	        </tr>
 	      <? } ?>
-	      
+
 	      <tr>
           <td style="border-top:2px solid #C3C7C3" colspan="4" align="left">&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:addfreetext();">Freitext hinzufügen</a></td>
           <td style="border-top:2px solid #C3C7C3" colspan="4" align="right"><input type="checkbox" name="variable_freetexts" value="1" <? if($this->Document->selectedframe[0]['variable_freetexts'] == 1) echo 'checked=true'; ?>>&nbsp;variable Freitexte&nbsp;</td>
-        </tr>        
-        
+        </tr>
+
         <tr>
           <td class="fett" style="border-top:2px solid #C3C7C3" colspan=8 align="center">Wasserzeichen</td>
         </tr>
@@ -584,12 +588,12 @@ function addfreetext(){
         	<td style="border-top:1px solid #C3C7C3;" colspan=2 align="center">
         		<select name="font_watermark">
 	        		<?
-	        		for($i = 0; $i < count($this->document->fonts); $i++){
+	        		for($i = 0; $i < count($this->Document->fonts); $i++){
 	        			echo '<option ';
-	        			if($this->Document->selectedframe[0]['font_watermark'] == $this->document->fonts[$i]){
+	        			if($this->Document->selectedframe[0]['font_watermark'] == $this->Document->fonts[$i]){
 	        				echo 'selected ';
 	        			}
-	        			echo 'value="'.$this->document->fonts[$i].'">'.basename($this->document->fonts[$i]).'</option>';
+	        			echo 'value="'.$this->Document->fonts[$i].'">'.basename($this->Document->fonts[$i]).'</option>';
 	        		}
 	        		?>
         		</select>
@@ -602,7 +606,7 @@ function addfreetext(){
         	<td colspan="3" style="border-right:1px solid #C3C7C3">Transparenz:&nbsp;<input type="text" name="watermarktransparency" value="<? echo $this->Document->selectedframe[0]['watermarktransparency'] ?>" size="1"></td>
         	<td colspan="2" align="center"><input type="text" name="watermarksize" value="<? echo $this->Document->selectedframe[0]['watermarksize'] ?>" size="5">&nbsp;pt</td>
         </tr>
-        
+
         <tr>
           <td style="border-top:1px solid #C3C7C3" colspan=8>&nbsp;</td>
         </tr>
@@ -637,25 +641,25 @@ function addfreetext(){
         </tr>
         <tr>
           <td  colspan=8 style="border-bottom:1px solid #C3C7C3">
-          	&nbsp;<span class="fett">Name:</span> 
+          	&nbsp;<span class="fett">Name:</span>
           	<input type="text" name="Name" value="<? echo $this->Document->selectedframe[0]['Name'] ?>" size="27">
           </td>
         </tr>
-      </table> 
+      </table>
     </td>
     <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
   </tr>
- 
+
   <tr>
     <td colspan=3>&nbsp;</td>
-  </tr>  
-  
-  <tr align="center"> 
-    <td colspan="3"> 
+  </tr>
+
+  <tr align="center">
+    <td colspan="3">
     <input class="button" type="button" name="go_plus" value="Layout löschen" onclick="Bestaetigung('index.php?go=Druckrahmen_Löschen&selected_frame_id=<? echo $this->Document->selectedframe[0]['id']; ?>', 'Wollen Sie dieses Layout wirklich löschen?');">&nbsp;<input class="button" type="submit" name="go_plus" value="Änderungen Speichern">&nbsp;<input class="button" type="submit" name="go_plus" value="als neues Layout speichern">
     </td>
   </tr>
-  
+
   <tr>
     <td colspan=3>&nbsp;</td>
   </tr>
