@@ -798,7 +798,6 @@ class data_import_export {
 			if(strpos($orderby, $this->attributes['name'][$i])){						# oder es kommt im ORDER BY des Layer-Query vor
 				$selection[$this->attributes['name'][$i]] = 1;
 			}
-			echo $this->attributes['form_element_type'][$i].'<br>';
 			if($this->formvars['download_documents'] != '' AND $this->attributes['form_element_type'][$i] == 'Dokument'){			# oder das Attribut ist vom Typ "Dokument" und die Dokumente sollen auch exportiert werden
 				$selection[$this->attributes['name'][$i]] = 1;
 			}
@@ -973,13 +972,13 @@ class data_import_export {
       $ret = $layerdb->execSQL($sql,4, 0);
     	if($this->formvars['export_format'] != 'CSV')$user->rolle->setConsumeShape($currenttime,$this->formvars['selected_layer_id'],$count);
 			
-	    // ob_end_clean();
-			// header('Content-type: '.$contenttype);
-			// header("Content-disposition:  attachment; filename=".basename($exportfile));
-			// header("Content-Length: ".filesize($exportfile));
-			// header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-			// header('Pragma: public');
-			// readfile($exportfile);
+	    ob_end_clean();
+			header('Content-type: '.$contenttype);
+			header("Content-disposition:  attachment; filename=".basename($exportfile));
+			header("Content-Length: ".filesize($exportfile));
+			header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+			header('Pragma: public');
+			readfile($exportfile);
     }
     else{
       showAlert('Abfrage fehlgeschlagen.');
