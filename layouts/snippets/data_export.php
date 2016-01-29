@@ -74,6 +74,19 @@ function selectall(geom){
 	}
 }
 
+function select_document_attributes(ids){
+	if(document.GUI.download_documents.checked){
+		var k = 0;
+		var id = ids.split(',');
+		var obj = document.getElementById('check_attribute_'+id[k]);
+		while(obj != undefined){
+			obj.checked = true;			
+			k++;
+			obj = document.getElementById('check_attribute_'+id[k]);
+		}
+	}
+}
+
 //-->
 </script>
 
@@ -184,7 +197,7 @@ $j=0;
         	<? for($s = 0; $s < 4; $s++){ ?>
         	<div style="float: left; padding: 4px; min-width:20%;">
           <? for($i = 0; $i < $floor+$r; $i++){
-						if($this->data_import_export->attributes['form_element_type'][$j] == 'Dokument')$document_attributes = true;
+						if($this->data_import_export->attributes['form_element_type'][$j] == 'Dokument'){$document_attributes = true; $document_ids[] = $j;}
 						if($this->data_import_export->attributes['name'][$j] == $this->data_import_export->attributes['the_geom'] AND $this->data_import_export->layerdaten['export_privileg'][$selectindex] != 1) continue;
 					?>
       	  <div style="padding: 4px;<? if($this->data_import_export->attributes['name'][$j] == $this->data_import_export->attributes['the_geom']){if($this->formvars['export_format'] == 'CSV'){echo 'display:none"';} echo '" id="geom_div';} ?>">
@@ -216,7 +229,7 @@ $j=0;
 
 			<? if($document_attributes){ ?>
 			<div style="margin-top:20px; margin-bottom:0px; text-align: center;">				
-				<input type="checkbox" name="download_documents"><? echo $strDownloadDocuments; ?>
+				<input type="checkbox" onclick="select_document_attributes('<? echo implode(',', $document_ids); ?>');" name="download_documents"><? echo $strDownloadDocuments; ?>
       </div>
 			<? } ?>
 			

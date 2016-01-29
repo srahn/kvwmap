@@ -765,24 +765,46 @@ class data_import_export {
   	$layerset = $user->rolle->getLayer($this->formvars['selected_layer_id']);
     $mapdb = new db_mapObj($stelle->id,$user->id);
     $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $stelle->pgdbhost);
-		$path = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[0]['pfad']);
+		$sql = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[0]['pfad']);
     $privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
     $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
 		
 		# Where-Klausel aus Sachdatenabfrage-SQL
 		$where = substr(strip_pg_escape_string($this->formvars['sql_'.$this->formvars['selected_layer_id']]), strrpos(strtolower(strip_pg_escape_string($this->formvars['sql_'.$this->formvars['selected_layer_id']])), 'where')+5);
 		
+		# order by rausnehmen
+  	$orderbyposition = strrpos(strtolower($sql), 'order by');
+		$lastfromposition = strrpos(strtolower($sql), 'from');
+  	if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
+	  	$orderby = ' '.substr($sql, $orderbyposition);
+	  	$sql = substr($sql, 0, $orderbyposition);
+  	}
+		# group by rausnehmen
+		$groupbyposition = strpos(strtolower($sql), 'group by');
+		if($groupbyposition !== false){
+			$groupby = ' '.substr($sql, $groupbyposition);
+			$sql = substr($sql, 0, $groupbyposition);
+  	}
+		
+		# Zusammensammeln der Attribute, die abgefragt werden müssen
     for($i = 0; $i < count($this->attributes['name']); $i++){
     	if($this->formvars['check_'.$this->attributes['name'][$i]]){		# Entweder das Attribut wurde angehakt
     		$selection[$this->attributes['name'][$i]] = 1;
-				$selected_attributes[] = $this->attributes['name'][$i];						# Zusammensammeln der angehakten Attribute
+				$selected_attributes[] = $this->attributes['name'][$i];						# Zusammensammeln der angehakten Attribute, denn nur die sollen weiter unten auch exportiert werden
     	}
 			if(strpos($where, 'query.'.$this->attributes['name'][$i])){			# oder es kommt in der Where-Bedingung des Sachdatenabfrage-SQLs vor
 				$selection[$this->attributes['name'][$i]] = 1;
 			}
+			if(strpos($orderby, $this->attributes['name'][$i])){						# oder es kommt im ORDER BY des Layer-Query vor
+				$selection[$this->attributes['name'][$i]] = 1;
+			}
+			echo $this->attributes['form_element_type'][$i].'<br>';
+			if($this->formvars['download_documents'] != '' AND $this->attributes['form_element_type'][$i] == 'Dokument'){			# oder das Attribut ist vom Typ "Dokument" und die Dokumente sollen auch exportiert werden
+				$selection[$this->attributes['name'][$i]] = 1;
+			}
     }
 		
-    $sql = $stelle->parse_path($layerdb, $path, $selection);		# parse_path wird hier benutzt um die Auswahl der Attribute auf das Pfad-SQL zu übertragen
+    $sql = $stelle->parse_path($layerdb, $sql, $selection);		# parse_path wird hier benutzt um die Auswahl der Attribute auf das Pfad-SQL zu übertragen
 		
 		# oid auch abfragen
 		$distinctpos = strpos(strtolower($sql), 'distinct');
@@ -824,19 +846,6 @@ class data_import_export {
 			$select = str_replace(','.$geom, ',st_transform('.$geom.', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);
     	$sql = $select.$rest;
     }
-    # order by rausnehmen
-  	$orderbyposition = strrpos(strtolower($sql), 'order by');
-		$lastfromposition = strrpos(strtolower($sql), 'from');
-  	if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
-	  	$orderby = ' '.substr($sql, $orderbyposition);
-	  	$sql = substr($sql, 0, $orderbyposition);
-  	}
-		# group by rausnehmen
-		$groupbyposition = strpos(strtolower($sql), 'group by');
-		if($groupbyposition !== false){
-			$groupby = ' '.substr($sql, $groupbyposition);
-			$sql = substr($sql, 0, $groupbyposition);
-  	}
   	# über Polygon einschränken
     if($this->formvars['newpathwkt']){
     	$sql.= " AND ".$the_geom." && st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code'].") AND ST_INTERSECTS(".$the_geom.", st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."))";
@@ -964,13 +973,13 @@ class data_import_export {
       $ret = $layerdb->execSQL($sql,4, 0);
     	if($this->formvars['export_format'] != 'CSV')$user->rolle->setConsumeShape($currenttime,$this->formvars['selected_layer_id'],$count);
 			
-	    ob_end_clean();
-			header('Content-type: '.$contenttype);
-			header("Content-disposition:  attachment; filename=".basename($exportfile));
-			header("Content-Length: ".filesize($exportfile));
-			header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-			header('Pragma: public');
-			readfile($exportfile);
+	    // ob_end_clean();
+			// header('Content-type: '.$contenttype);
+			// header("Content-disposition:  attachment; filename=".basename($exportfile));
+			// header("Content-Length: ".filesize($exportfile));
+			// header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+			// header('Pragma: public');
+			// readfile($exportfile);
     }
     else{
       showAlert('Abfrage fehlgeschlagen.');
