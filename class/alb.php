@@ -858,8 +858,8 @@ class ALB {
 						$csv .= $Eigentuemerliste[$e]->zusatz_eigentuemer;
 						$csv .= $Eigentuemerliste[$e]->Nr;
 						$anzNamenszeilen = count($Eigentuemerliste[$e]->Name);
-						for($n=0;$n<$anzNamenszeilen;$n++) {
-							$csv .= ' '.$Eigentuemerliste[$e]->Name[$n];
+						for($na=0;$na<$anzNamenszeilen;$na++) {
+							$csv .= ' '.$Eigentuemerliste[$e]->Name[$na];
 						}						
 						if($Eigentuemerliste[$e]->Anteil != '')$csv .= '  zu '.$Eigentuemerliste[$e]->Anteil;
 					}
