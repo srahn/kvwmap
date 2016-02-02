@@ -35,7 +35,7 @@ include_once(SNIPPETS.'/generic_form_parts.php');
 				$this->attributes = $this->{'attributes'.$searchmask_number};   # dieses Attributarray nehmen, weil eine gespeicherte Suche geladen wurde
 			}
 			for($i = 0; $i < count($this->attributes['name']); $i++){
-        if($this->attributes['type'][$i] != 'geometry'){
+        if($this->attributes['type'][$i] != 'geometry' AND $this->attributes['form_element_type'][$i] != 'SubFormFK'){
 				
 					if($this->attributes['group'][$i] != $this->attributes['group'][$i-1]){		# wenn die vorige Gruppe anders ist, Tabelle beginnen
 						$explosion = explode(';', $this->attributes['group'][$i]);

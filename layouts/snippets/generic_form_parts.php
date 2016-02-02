@@ -5,6 +5,7 @@
 	global $strShowFK;
 	global $strShowAll;
 	global $strNewEmbeddedPK;
+	global $hover_preview;
 
 	function attribute_name($layer_id, $attributes, $j, $k, $fontsize){
 		$datapart .= '<table ';
@@ -43,6 +44,7 @@
 		global $strShowFK;
 		global $strShowAll;
 		global $strNewEmbeddedPK;
+		global $hover_preview;
 		# $dataset 																											# der aktuelle Datensatz
 		$name = $attributes['name'][$j];																# der Name des Attributs
 		$alias = $attributes['alias'][$j];															# der Aliasname des Attributs

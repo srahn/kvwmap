@@ -61,7 +61,7 @@ function suche(){
 	var nogo = '';
 	<?
 	for($i = 0; $i < count($this->attributes['type']); $i++){ 
-		if($this->attributes['type'][$i] != 'geometry'){		
+		if($this->attributes['type'][$i] != 'geometry' AND $this->attributes['form_element_type'][$i] != 'SubFormFK'){		
 			if($this->attributes['mandatory'][$i] == 1){
 				if($this->attributes['alias'][$i] == ''){
 					$this->attributes['alias'][$i] = $this->attributes['name'][$i];
