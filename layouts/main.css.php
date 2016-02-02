@@ -652,6 +652,18 @@ thead.gle th {
  text-align:left;
 }
 
+.gle_attribute_name { 
+ padding-left: 2px;
+ padding-right: 2px;
+ vertical-align: top;
+ background-color: <? echo BG_GLEATTRIBUTE; ?>;
+}
+
+.gle_attribute_value { 
+ padding-left: 4px;
+ padding-right: 5px;
+}
+
 tbody.gle tr { 
  border:1px dotted gray;
 }

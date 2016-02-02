@@ -30,11 +30,11 @@ session_start();
 # stefan.rahn@gdi-service.de                                      #
 ###################################################################
 
-function microtime_float1(){
-   list($usec, $sec) = explode(" ", microtime());
-   return ((float)$usec + (float)$sec);
-}
-$starttime=microtime_float1();
+// function microtime_float1(){
+   // list($usec, $sec) = explode(" ", microtime());
+   // return ((float)$usec + (float)$sec);
+// }
+// $starttime=microtime_float1();
 
 ob_start ();    // Ausgabepufferung starten
 $go = $_REQUEST['go'];
@@ -1498,10 +1498,10 @@ include('end.php');
 
 if(CASE_COMPRESS AND FAST_CASE)case_compressor::write_fast_case_file($go);
 
-$executiontimes['time'][] = microtime_float1();
-$executiontimes['action'][] = 'Ende';
-for($i = 0;  $i < count($executiontimes['time']); $i++){
-	$dauer = $executiontimes['time'][$i] - $starttime;
-	echo chr(10).chr(13).'<br>'.$executiontimes['action'][$i].': '.$dauer.'s';
-}
+// $executiontimes['time'][] = microtime_float1();
+// $executiontimes['action'][] = 'Ende';
+// for($i = 0;  $i < count($executiontimes['time']); $i++){
+	// $dauer = $executiontimes['time'][$i] - $starttime;
+	// echo chr(10).chr(13).'<br>'.$executiontimes['action'][$i].': '.$dauer.'s';
+// }
 ?>

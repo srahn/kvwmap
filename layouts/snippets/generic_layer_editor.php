@@ -186,7 +186,8 @@
 			  				}
 			  			}
 			  			else{
-								include(SNIPPETS.'generic_formelements.php');
+								#include(SNIPPETS.'generic_formelements.php');
+								$datapart .= attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size, $this->user->rolle->fontsize_gle);
 								echo $datapart;
 			  			}
 			  			echo '

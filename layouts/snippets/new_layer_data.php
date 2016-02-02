@@ -1,4 +1,5 @@
 <?php
+	include(SNIPPETS.'generic_form_parts.php');
 	include(SNIPPETS.'generic_formelement_definitions.php'); 
   include(LAYOUTPATH.'languages/new_layer_data_'.$this->user->rolle->language.'.php');
 	
