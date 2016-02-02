@@ -32,6 +32,20 @@
       
     } break;
 
+    case 'convert' : {
+      include(PLUGINS . 'xplankonverter/model/convert.php');
+      
+      // Die Verbindung zur Datenbank kvwmapsp ist verfügbar in
+      //$this->pgdatabase->dbConn);
+      $this->converter = new converter($this->pgdatabase);
+      
+      // Einbindung des Views
+      $this->main=PLUGINS . 'xplankonverter/view/convert.php';
+      
+      $this->output();
+      
+    } break;
+
     case 'home' : {
       // Einbindung des Views
       $this->main=PLUGINS . 'xplankonverter/view/home.php';
