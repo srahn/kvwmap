@@ -2,8 +2,6 @@
  # 2008-09-30 sr
   include(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'.php');
  
-	include(SNIPPETS.'generic_functions.php'); 
- 
 	# Variablensubstitution
 	$layer = $this->qlayerset[$i];
 	$attributes = $layer['attributes'];

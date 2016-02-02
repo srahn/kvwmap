@@ -1,8 +1,6 @@
 <?
  
 	include(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'.php');
- 
- 	include(SNIPPETS.'generic_functions.php'); 
 	
 	$checkbox_names = '';
 	$columnname = '';
@@ -172,7 +170,7 @@
 						if($attributes['position'][$j] != 'daneben')$datapart .= '<tr>';							# wenn Attribut nicht daneben -> neue Zeile beginnen
 						if($attributes['attribute_name'][$j] != 'kein'){
 							$td = '	<td class="gle_attribute_name" '; if($attributes['group'][0] != '' AND $attributes['position'][$j] != 'daneben')$td .= 'width="10%">';else $td.='width="1%">';
-							$td.= 			attribute_name($layer['Layer_ID'], $attributes, $j, $this->user->rolle->fontsize_gle);
+							$td.= 			attribute_name($layer['Layer_ID'], $attributes, $j, $k, $this->user->rolle->fontsize_gle);
 							$td.= '	</td>';
 							if($nl AND $attributes['attribute_name'][$j] != 'oben')$next_line .= $td; else $datapart .= $td;
 						}

@@ -1,8 +1,6 @@
 <?
 
 	include(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'.php');
-
-	include(SNIPPETS.'generic_functions.php'); 
   
 	$checkbox_names = '';
 	$columnname = '';
