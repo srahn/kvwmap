@@ -1,7 +1,6 @@
 <? 
 include(LAYOUTPATH.'languages/generic_search_'.$this->user->rolle->language.'.php');
-include(SNIPPETS.'/generic_functions.php');
-include('funktionen/input_check_functions.php'); 
+include(SNIPPETS.'/sachdatenanzeige_functions.php');
 ?>
 
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
