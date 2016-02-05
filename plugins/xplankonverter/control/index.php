@@ -33,7 +33,7 @@
     } break;
 
     case 'convert' : {
-      include(PLUGINS . 'xplankonverter/model/convert.php');
+      include(PLUGINS . 'xplankonverter/model/converter.php');
       
       // Die Verbindung zur Datenbank kvwmapsp ist verfügbar in
       //$this->pgdatabase->dbConn);
