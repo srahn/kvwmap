@@ -35,12 +35,16 @@ include_once(SNIPPETS.'/generic_form_parts.php');
 				$this->attributes = $this->{'attributes'.$searchmask_number};   # dieses Attributarray nehmen, weil eine gespeicherte Suche geladen wurde
 			}
 			for($i = 0; $i < count($this->attributes['name']); $i++){
-        if($this->attributes['type'][$i] != 'geometry' AND $this->attributes['form_element_type'][$i] != 'SubFormFK'){
-				
-					if($this->attributes['group'][$i] != $this->attributes['group'][$i-1]){		# wenn die vorige Gruppe anders ist, Tabelle beginnen
+        if($this->attributes['type'][$i] != 'geometry' AND $this->attributes['form_element_type'][$i] != 'SubFormFK'){					
+					if($this->attributes['group'][$i] != $this->attributes['group'][$last_attribute_index]){		# wenn die vorige Gruppe anders ist: ...
 						$explosion = explode(';', $this->attributes['group'][$i]);
 						if($explosion[1] != '')$collapsed = true;else $collapsed = false;
 						$groupname = $explosion[0];
+						if($last_attribute_index !== NULL){		# ... Tabelle schliessen, wenn es nicht die erste Gruppe ist
+							echo '</table></td></tr>';
+						}
+						$last_attribute_index = $i;					
+						# ... Tabelle beginnen
 						echo '<tr>
 										<td colspan="5" width="100%">
 											<table cellpadding="3" cellspacing="0" width="100%" id="colgroup'.$layer['Layer_ID'].'_'.$i.'_'.$searchmask_number.'"  style="'; if(!$collapsed)echo 'display:none;'; echo ' border:1px solid grey">
@@ -131,10 +135,10 @@ include_once(SNIPPETS.'/generic_form_parts.php');
       				}
            ?></td>
           </tr><?					
-					if($this->attributes['group'][$i] != $this->attributes['group'][$i+1] OR ($this->attributes['group'][$i] != '' AND $this->attributes['type'][$i+1] == 'geometry')){		# wenn die nächste Gruppe anders ist, Tabelle schliessen
-						echo '</table></td></tr>';
-					}
         }
       }
+			if($last_attribute_index !== NULL){		# ... Tabelle schliessen, wenn es Gruppen gibt
+				echo '</table></td></tr>';
+			}
 ?>
 </table>
