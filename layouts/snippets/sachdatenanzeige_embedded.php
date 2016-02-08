@@ -1,5 +1,5 @@
 <?php
-	include(SNIPPETS.'generic_formelement_definitions.php'); 
+	include(SNIPPETS.'generic_form_parts.php'); 
   include(LAYOUTPATH.'languages/sachdatenanzeige_'.$this->user->rolle->language.'.php');
   
 	$i = 0;
