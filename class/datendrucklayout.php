@@ -340,7 +340,7 @@ class ddl {
 	
 	function getNextPage($pageid){
 		$pages = $this->pdf->objects['3']['info']['pages'];
-		for($i = 1; $i <= count($pages); $i++){
+		for($i = 0; $i <= count($pages); $i++){
 			if($pages[$i]+1 == $pageid){			# die Page-IDs sind komischerweise alle um 1 größer
 				return $pages[$i+1]+1;
 			}
