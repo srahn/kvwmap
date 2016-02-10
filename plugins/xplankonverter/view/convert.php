@@ -2,10 +2,9 @@
   <h1>XPlanGML Konverter</h1>
   <iframe id="converter-frame" style="width:100%;height:500px;border:0;"
   <?php
-    #echo "src=\"plugins/xplankonverter/view/iconvert.php ";
-    echo "srcdoc=\"";
     include 'iconvert.php';
-  ?>
+    echo "srcdoc=\"".showStep1();
+    ?>
   "></iframe>
   <?php
   ?>
