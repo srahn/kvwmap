@@ -510,17 +510,15 @@ show_all = function(count){
         </td>
         </tr>
         <?php } ?>
-        <?php if ($privileg_['hinweis'] AND $flst->Hinweis[0]['hinwzflst']!='') { ?>
+        <?php if ($privileg_['hinweis'] AND $flst->strittigeGrenze){ ?>
         <tr>
           <td colspan="2">
             <table border="0" cellspacing="0" cellpadding="2">
             <tr>
-              <td valign="top"><span class="fett">Hinweise:</span>&nbsp;</td>
+              <td valign="top"><span class="fett">Hinweise zum Flurstück:</span>&nbsp;</td>
               <td>
               <?php
-              for($h = 0; $h < count($flst->Hinweis); $h++){
-                echo $flst->Hinweis[$h]['bezeichnung'].'<br>';
-              }
+              echo 'strittige Grenze';
               ?>
               </td>
             </tr>
