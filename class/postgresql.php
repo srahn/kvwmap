@@ -1392,6 +1392,23 @@ class pgdatabase {
     $ret[1]=$Forstrecht;
     return $ret;
   }
+	
+	function getStrittigeGrenze($FlurstKennz) {
+    $sql ="SELECT bf.gml_id";
+    $sql.=" FROM alkis.ax_flurstueck f, alkis.ax_besondereflurstuecksgrenze bf ";
+    $sql.=" WHERE st_covers(f.wkb_geometry, bf.wkb_geometry) = true  AND f.flurstueckskennzeichen='".$FlurstKennz."'";
+		$sql.= $this->build_temporal_filter(array('f', 'bf'));
+		#echo $sql;
+    $ret=$this->execSQL($sql, 4, 0);
+    if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
+    if (pg_num_rows($ret[1])>0) {
+      while($rs=pg_fetch_array($ret[1])) {
+        $strittigeGrenze[]=$rs;
+      }
+    }
+    $ret[1]=$strittigeGrenze;
+    return $ret;
+  }
 
   function getKlassifizierung($FlurstKennz) {
     $sql ="SELECT amtlicheflaeche, round(fl_geom / flstflaeche * amtlicheflaeche) AS flaeche, fl_geom, flstflaeche, n.wert, objart, ARRAY_TO_STRING(ARRAY[k.kurz, b.kurz, z.kurz, e1.kurz, e2.kurz, s.kurz, n.bodenzahlodergruenlandgrundzahl || '/' || n.wert], ' ') as label ";
