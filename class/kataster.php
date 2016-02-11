@@ -1519,6 +1519,15 @@ class flurstueck {
     return $Strassenrecht;
   }
 	
+	function getStrittigeGrenze() {
+    if ($this->FlurstKennz=="") { return 0; }
+    $this->debug->write("<br>kataster.php->flurstueck->getStrittigeGrenze Abfrage der strittigen Grenzen zum Flurstück<br>".$sql,4);
+    $ret=$this->database->getStrittigeGrenze($this->FlurstKennz);
+    if ($ret[0] AND DBWRITE) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    $strittigeGrenze=$ret[1];
+    return $strittigeGrenze;
+  }	
+	
 	function getForstrecht() {
     if ($this->FlurstKennz=="") { return 0; }
     $this->debug->write("<br>kataster.php->flurstueck->getForstrecht Abfrage des Forstrechts zum Flurstück<br>".$sql,4);
@@ -1921,7 +1930,8 @@ class flurstueck {
 		$this->NaturUmweltrecht=$this->getNaturUmweltrecht();
 		$this->BauBodenrecht=$this->getBauBodenrecht();
 		$this->Denkmalschutzrecht=$this->getDenkmalschutzrecht();		
-		$this->Sonstigesrecht=$this->getSonstigesrecht();				
+		$this->Sonstigesrecht=$this->getSonstigesrecht();			
+		$this->strittigeGrenze=$this->getStrittigeGrenze();		
     //$this->Grundbuecher=$this->getGrundbuecher();							# steht im Snippet
     //$this->Buchungen=$this->getBuchungen($Bezirk,$Blatt,1);		# steht im Snippet
     $this->Amtsgericht=$this->getAmtsgericht(); 
