@@ -113,7 +113,7 @@ include_once(SNIPPETS.'/generic_form_parts.php');
                 }break;
 								
 								case 'Autovervollständigungsfeld' : {
-									echo Autovervollstaendigungsfeld($this->formvars['selected_layer_id'], $this->attributes['name'][$i], $i, $this->attributes['alias'][$i], $prefix.'value_'.$this->attributes['name'][$i], $this->formvars[$prefix.'value_'.$this->attributes['name'][$i]], $attributes['enum_output'][$i][$k], 1, 0, NULL, NULL, NULL, NULL, false, 15);
+									echo Autovervollstaendigungsfeld($this->formvars['selected_layer_id'], $this->attributes['name'][$i], $i, $this->attributes['alias'][$i], $prefix.'value_'.$this->attributes['name'][$i], $this->formvars[$prefix.'value_'.$this->attributes['name'][$i]], $this->attributes['enum_output'][$i][0], 1, 0, NULL, NULL, NULL, NULL, false, 15);
 								}break;
                 
                 case 'Checkbox' : {
