@@ -1518,16 +1518,7 @@ class flurstueck {
     $Strassenrecht=$ret[1];
     return $Strassenrecht;
   }
-	
-	function getStrittigeGrenze() {
-    if ($this->FlurstKennz=="") { return 0; }
-    $this->debug->write("<br>kataster.php->flurstueck->getStrittigeGrenze Abfrage der strittigen Grenzen zum Flurstück<br>".$sql,4);
-    $ret=$this->database->getStrittigeGrenze($this->FlurstKennz);
-    if ($ret[0] AND DBWRITE) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $strittigeGrenze=$ret[1];
-    return $strittigeGrenze;
-  }	
-	
+		
 	function getForstrecht() {
     if ($this->FlurstKennz=="") { return 0; }
     $this->debug->write("<br>kataster.php->flurstueck->getForstrecht Abfrage des Forstrechts zum Flurstück<br>".$sql,4);
