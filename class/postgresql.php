@@ -1509,7 +1509,7 @@ class pgdatabase {
   }
   
   function getEigentuemerliste($FlurstKennz,$Bezirk,$Blatt,$BVNR) {
-    $sql = "SELECT distinct case when bestehtausrechtsverhaeltnissenzu is not null or n.beschriebderrechtsgemeinschaft is not null or n.artderrechtsgemeinschaft is not null then true else false end as order1, coalesce(n.laufendenummernachdin1421, lpad(split_part(n.nummer, '.', 1), 4, '0')||'.'||lpad(split_part(n.nummer, '.', 2), 2, '0')||'.'||lpad(split_part(n.nummer, '.', 3), 2, '0')||'.'||lpad(split_part(n.nummer, '.', 4), 2, '0'), '0') as order2, CASE WHEN n.beschriebderrechtsgemeinschaft is null and n.artderrechtsgemeinschaft is null THEN n.laufendenummernachdin1421 ELSE NULL END AS namensnr, p.gml_id, p.nachnameoderfirma, p.vorname, p.akademischergrad, p.namensbestandteil, p.geburtsname, p.geburtsdatum::date, anschrift.gml_id as anschrift_gml_id, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, anschrift.ortsteil, w.bezeichner as Art, n.zaehler||'/'||n.nenner as anteil, coalesce(NULLIF(n.beschriebderrechtsgemeinschaft, ''),adrg.artderrechtsgemeinschaft) as zusatz_eigentuemer ";
+    $sql = "SELECT distinct case when bestehtausrechtsverhaeltnissenzu is not null or n.beschriebderrechtsgemeinschaft is not null or n.artderrechtsgemeinschaft is not null then true else false end as order1, coalesce(n.laufendenummernachdin1421, lpad(split_part(n.nummer, '.', 1), 4, '0')||'.'||lpad(split_part(n.nummer, '.', 2), 2, '0')||'.'||lpad(split_part(n.nummer, '.', 3), 2, '0')||'.'||lpad(split_part(n.nummer, '.', 4), 2, '0'), '0') as order2, CASE WHEN n.beschriebderrechtsgemeinschaft is null and n.artderrechtsgemeinschaft is null THEN n.laufendenummernachdin1421 ELSE NULL END AS namensnr, p.gml_id, p.nachnameoderfirma, p.vorname, p.akademischergrad, p.namensbestandteil, p.geburtsname, p.geburtsdatum::date, anschrift.gml_id as anschrift_gml_id, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, anschrift.ortsteil, anschrift.bestimmungsland, w.bezeichner as Art, n.zaehler||'/'||n.nenner as anteil, coalesce(NULLIF(n.beschriebderrechtsgemeinschaft, ''),adrg.artderrechtsgemeinschaft) as zusatz_eigentuemer ";
 		$sql.= "FROM alkis.ax_buchungsstelle s ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
@@ -1562,6 +1562,7 @@ class pgdatabase {
 			$Eigentuemer->postleitzahlpostzustellung = $rs['postleitzahlpostzustellung'];
 			$Eigentuemer->ort_post = $rs['ort_post'];
 			$Eigentuemer->ortsteil = $rs['ortsteil'];
+			$Eigentuemer->Name[4] = $Eigentuemer->bestimmungsland = $rs['bestimmungsland'];			
 			$Eigentuemer->strasse = $rs['strasse'];
 			$Eigentuemer->hausnummer = $rs['hausnummer'];
       $Eigentuemer->Anteil=$rs['anteil'];
@@ -1591,7 +1592,7 @@ class pgdatabase {
 		$caseSensitive = $formvars['caseSensitive'];
 		$order = $formvars['order'];
 			
-    $sql = "set enable_seqscan = off;set enable_mergejoin = off;set enable_hashjoin = off;SELECT distinct n.gml_id, n.laufendenummernachdin1421 AS lfd_nr_name, p.nachnameoderfirma, p.vorname, p.namensbestandteil, p.akademischergrad, p.geburtsname, p.geburtsdatum, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, anschrift.ortsteil, g.buchungsblattnummermitbuchstabenerweiterung as blatt, b.schluesselgesamt as bezirk ";
+    $sql = "set enable_seqscan = off;set enable_mergejoin = off;set enable_hashjoin = off;SELECT distinct n.gml_id, n.laufendenummernachdin1421 AS lfd_nr_name, p.nachnameoderfirma, p.vorname, p.namensbestandteil, p.akademischergrad, p.geburtsname, p.geburtsdatum, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, anschrift.ortsteil, anschrift.bestimmungsland, g.buchungsblattnummermitbuchstabenerweiterung as blatt, b.schluesselgesamt as bezirk ";
 		$sql.= "FROM alkis.ax_person p ";
 		$sql.= "LEFT JOIN alkis.ax_anschrift anschrift ON anschrift.gml_id = ANY(p.hat) ";
 		$sql.= "LEFT JOIN alkis.ax_namensnummer n ON n.benennt = p.gml_id ";
@@ -1651,7 +1652,7 @@ class pgdatabase {
 	      $namen[$i]['name2'] = $rs['geburtsdatum'];
 				if($rs['geburtsname'] != '')$namen[$i]['name2'] .= ' geb. '.$rs['geburtsname'];
 	      $namen[$i]['name3'] = $rs['strasse'].' '.$rs['hausnummer'];
-	      $namen[$i]['name4'] = $rs['postleitzahlpostzustellung'].' '.$rs['ort_post'].' '.$rs['ortsteil'];
+	      $namen[$i]['name4'] = $rs['postleitzahlpostzustellung'].' '.$rs['ort_post'].' '.$rs['ortsteil'].' '.$rs['bestimmungsland'];
         $i++;
       }
       $ret[1]=$namen;
