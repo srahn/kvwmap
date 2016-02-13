@@ -26,20 +26,46 @@
 # stefan.rahn@gdi-service.de                                      #
 ###################################################################
 #############################
-# Klasse converter #
+# Klasse Converter #
 #############################
 
-class converter {
+class Converter {
+  
+  static $STATUS = array('in Bearbeitung', 'Konvertierung offen', 'Konvertierung abgeschlossen');
     
-  function converter($database) {
+  function Converter($structDb, $contentDbConn) {
     global $debug;
     $this->debug=$debug;
-    $this->database = $database;
+    $this->structDb = $structDb;
+    $this->contentDbConn = $contentDbConn;
   }
 
   function say_hello($msg){
     $hallo = 'Hallo XPlan: <br>' . $msg;
     return $hallo;
+  }
+  
+  function getConversions() {
+    $sql = "
+        SELECT 
+          oid AS id,
+          nspname AS name,
+          'Ruleset A' AS ruleset,
+          0 AS status
+        FROM pg_namespace WHERE nspowner = 16385
+    ";
+    $result = pg_query($this->contentDbConn, $sql);
+    $data = array();
+    while ($konvertierung = pg_fetch_assoc($result)) {
+      $data[] = $konvertierung;
+    }
+    return $data;
+//     return array(
+//         array('id' => 1, 'name' => 'Konvertierung 1', 'ruleset' => 'Ruleset A', 'status' => 0),
+//         array('id' => 2, 'name' => 'Konvertierung 2', 'ruleset' => 'Ruleset B', 'status' => 1),
+//         array('id' => 3, 'name' => 'Konvertierung 3', 'ruleset' => 'Ruleset B', 'status' => 0),
+//         array('id' => 4, 'name' => 'Konvertierung 4', 'ruleset' => 'Ruleset A', 'status' => 2),
+//     );
   }
 }
   
