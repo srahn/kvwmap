@@ -1397,6 +1397,7 @@ class pgdatabase {
     $sql ="SELECT bf.gml_id";
     $sql.=" FROM alkis.ax_flurstueck f, alkis.ax_besondereflurstuecksgrenze bf ";
     $sql.=" WHERE st_covers(f.wkb_geometry, bf.wkb_geometry) = true  AND f.flurstueckskennzeichen='".$FlurstKennz."'";
+		$sql.=" AND 1000 = ANY(artderflurstuecksgrenze)";
 		$sql.= $this->build_temporal_filter(array('f', 'bf'));
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
