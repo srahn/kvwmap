@@ -125,7 +125,7 @@
 								$datapart .= '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$dataset[$attributes['subform_pkeys'][$j][$p]];
 								$datapart .= '&operator_'.$attributes['subform_pkeys'][$j][$p].'==';
 							}
-							$datapart .= 	'\')"';
+							$datapart .= 	'&subform_link=true\')"';
 							if($attributes['no_new_window'][$j] != true){
 								$datapart .= 	' target="_blank"';
 							}
@@ -196,7 +196,7 @@
 								$datapart .= '&value_'.$attribute_foreign_keys[$f].'='.$dataset[$attribute_foreign_keys[$f]];
 								$datapart .= '&operator_'.$attribute_foreign_keys[$f].'==';
 							}
-							$datapart .= 	'\')"';
+							$datapart .= 	'&subform_link=true\')"';
 							if($attributes['no_new_window'][$j] != true){
 								$datapart .= 	' target="_blank"';
 							}
@@ -241,7 +241,7 @@
 							$datapart .= '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$dataset[$attributes['subform_pkeys'][$j][$p]];
 							$datapart .= '&operator_'.$attributes['subform_pkeys'][$j][$p].'==';
 						}
-						$datapart .= 	'\')"><span>'.$strShowAll.'</span></a>';												
+						$datapart .= 	'&subform_link=true\')"><span>'.$strShowAll.'</span></a>';												
 						if($attributes['subform_layer_privileg'][$j] > 0 AND !$lock[$k]){
 							if($attributes['embedded'][$j] == true){
 								$datapart .= '&nbsp;<a class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz';
