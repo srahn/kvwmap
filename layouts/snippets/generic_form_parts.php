@@ -188,13 +188,6 @@
 						}
 						$gui->form_field_names .= $fieldname_[$f].'|';
 					}
-					#$size = $size - 10;
-					#$datapart .= '<input size="'.$size.'" style="border:0px;background-color:transparent;font-size: '.$fontsize.'px"';
-					#$size = $size + 10;
-					#if($attribute_privileg == '0' OR $lock[$k]){
-					#	$datapart .= ' readonly style="background-color:#e8e3da;"';
-					#}
-					#$datapart .= ' type="text" name="'.$fieldname.'" value="'.$value.'">';
 					$datapart .= $value.' ';
 					if($gui->new_entry != true){
 						if($value != ''){
