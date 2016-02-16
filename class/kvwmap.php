@@ -10051,10 +10051,10 @@ class GUI {
 
 	function ALKIS_Auszug($FlurstKennz,$Grundbuchbezirk,$Grundbuchblatt,$Buchnungstelle,$formnummer){
 		include_(CLASSPATH.'alb.php');
-    if($FlurstKennz == NULL AND $formnummer < 26){
+    if($FlurstKennz[0] == '' AND ($Grundbuchbezirk != NULL OR $Buchnungstelle != NULL)){
       $grundbuch=new grundbuch($Grundbuchbezirk,$Grundbuchblatt,$this->pgdatabase);
       # Abfrage aller Flurstücke, die auf dem angegebenen Grundbuchblatt liegen.
-      $ret=$grundbuch->getBuchungen('','','',1);
+      $ret=$grundbuch->getBuchungen('','','',1, $Buchnungstelle);
       $buchungen=$ret[1];
       for ($b=0;$b < count($buchungen);$b++) {
         $FlurstKennz[] = $buchungen[$b]['flurstkennz'];
@@ -10064,8 +10064,10 @@ class GUI {
     $ret=$this->Stelle->getFlurstueckeAllowed($FlurstKennz,$this->pgdatabase);
     if ($ret[0]) {
       $this->Fehlermeldung=$ret[1];
-      $this->titel='Flurstücksanzeige';
-      $this->main='flurstuecksanzeige.php';
+      $this->loadMap('DataBase');
+			$this->user->rolle->newtime = $this->user->rolle->last_time_id;
+			$this->drawMap();
+			$this->output();
     }
     else{
       $FlurstKennz=$ret[1];
@@ -10107,23 +10109,23 @@ class GUI {
 	
   function ALB_Anzeigen($FlurstKennz,$formnummer,$Grundbuchbezirk,$Grundbuchblatt) {
 		include_(CLASSPATH.'alb.php');
-    if($FlurstKennz == NULL AND $formnummer < 26){
+    if($FlurstKennz[0] == '' AND ($Grundbuchbezirk != NULL OR $Buchnungstelle != NULL)){
       $grundbuch=new grundbuch($Grundbuchbezirk,$Grundbuchblatt,$this->pgdatabase);
       # Abfrage aller Flurstücke, die auf dem angegebenen Grundbuchblatt liegen.
-      $ret=$grundbuch->getBuchungen('','','',1);
+      $ret=$grundbuch->getBuchungen('','','',1, $Buchnungstelle);
       $buchungen=$ret[1];
       for ($b=0;$b < count($buchungen);$b++) {
         $FlurstKennz[] = $buchungen[$b]['flurstkennz'];
       }
     }
-
     # Abfrage der Berechtigung zum Anzeigen der FlurstKennz
     $ret=$this->Stelle->getFlurstueckeAllowed($FlurstKennz,$this->pgdatabase);
-
     if ($ret[0]) {
       $this->Fehlermeldung=$ret[1];
-      $this->titel='Flurstücksanzeige';
-      $this->main='flurstuecksanzeige.php';
+      $this->loadMap('DataBase');
+			$this->user->rolle->newtime = $this->user->rolle->last_time_id;
+			$this->drawMap();
+			$this->output();
     }
     else {
       $FlurstKennz=$ret[1];

@@ -846,7 +846,7 @@ class pgdatabase {
     return $ret;
   }
   
-  function getBuchungenFromGrundbuch($FlurstKennz,$Bezirk,$Blatt,$hist_alb = false, $fiktiv = false) {
+  function getBuchungenFromGrundbuch($FlurstKennz,$Bezirk,$Blatt,$hist_alb = false, $fiktiv = false, $buchungsstelle = NULL) {
     $sql ="set enable_seqscan = off;SELECT DISTINCT gem.bezeichnung as gemarkungsname, g.land * 10000 + g.bezirk as bezirk, g.bezirk as gbezirk, g.buchungsblattnummermitbuchstabenerweiterung AS blatt, g.blattart, s.gml_id, s.laufendenummer AS bvnr, ltrim(s.laufendenummer, '~>')::integer, s.buchungsart, art.bezeichner as bezeichnung, f.flurstueckskennzeichen as flurstkennz, s.zaehler::text||'/'||s.nenner::text as anteil, s.nummerimaufteilungsplan as auftplannr, s.beschreibungdessondereigentums as sondereigentum "; 
 		if($FlurstKennz!='') {
 			if($hist_alb) $sql.="FROM alkis.ax_historischesflurstueckohneraumbezug f ";
@@ -884,6 +884,9 @@ class pgdatabase {
     if ($FlurstKennz!='') {
       $sql.=" AND f.flurstueckskennzeichen='".$FlurstKennz."'";
     }
+		if ($buchungsstelle!='') {
+      $sql.=" AND s.gml_id='".$buchungsstelle."'";
+    }		
 		if(!$hist_alb) $sql.= $this->build_temporal_filter(array('f', 's', 'g'));
     $sql.=" ORDER BY g.bezirk,g.buchungsblattnummermitbuchstabenerweiterung,ltrim(s.laufendenummer, '~>')::integer,f.flurstueckskennzeichen";
 		#echo $sql;
@@ -1099,6 +1102,7 @@ class pgdatabase {
 		$sql .= ") ";
 		$sql.="AND f.flurstueckskennzeichen IN ('".implode($FlurstKennz, "', '")."')";
     $this->debug->write("<p>postgresql.php getFlurstuecksKennzByGemeindeIDs() Abfragen erlaubten Flurstückskennzeichen nach Gemeindeids:<br>".$sql,4);
+		#echo $sql;
     $query=pg_query($sql);
     if ($query==0) {
       $ret[0]=1; $ret[1]="Fehler bei der Abfrage der zur Anzeige erlaubten Flurstücke";
