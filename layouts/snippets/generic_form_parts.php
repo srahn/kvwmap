@@ -173,7 +173,7 @@
 									$enum_output = $attributes['enum_output'][$index];
 								}
 								$datapart .= Auswahlfeld($layer_id, $name_, $j, $attributes['alias'][$name_], $fieldname_[$f], $dataset[$name_], $enum_value, $enum_output, $attributes['req_by'][$index], $attributes['name'], $attributes['privileg'][$name_], $k, $oid, $attributes['subform_layer_id'][$index], $attributes['subform_layer_privileg'][$index], $attributes['embedded'][$index], $lock[$k], $fontsize, $gui->strPleaseSelect);
-								$datapart .= '</td><td align="right" valign="top">';
+								$datapart .= '</td><td align="right">';
 							}break;
 							default : {
 								$datapart .= '<input style="font-size: '.(0.9*$fontsize).'px';
@@ -188,13 +188,14 @@
 						}
 						$gui->form_field_names .= $fieldname_[$f].'|';
 					}
-					$size = $size - 10;
-					$datapart .= '<input size="'.$size.'" style="border:0px;background-color:transparent;font-size: '.$fontsize.'px"';
-					$size = $size + 10;
-					if($attribute_privileg == '0' OR $lock[$k]){
-						$datapart .= ' readonly style="background-color:#e8e3da;"';
-					}
-					$datapart .= ' type="text" name="'.$fieldname.'" value="'.$value.'">';
+					#$size = $size - 10;
+					#$datapart .= '<input size="'.$size.'" style="border:0px;background-color:transparent;font-size: '.$fontsize.'px"';
+					#$size = $size + 10;
+					#if($attribute_privileg == '0' OR $lock[$k]){
+					#	$datapart .= ' readonly style="background-color:#e8e3da;"';
+					#}
+					#$datapart .= ' type="text" name="'.$fieldname.'" value="'.$value.'">';
+					$datapart .= $value.' ';
 					if($gui->new_entry != true){
 						if($value != ''){
 							$datapart .= '<a class="buttonlink" href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
