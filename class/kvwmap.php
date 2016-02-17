@@ -1632,7 +1632,16 @@ class GUI {
       $this->debug->write('<br>Es wird auf einen Punkt gezoomt',4);
       # Erzeugen eines Punktobjektes
       $oPixelPos=ms_newPointObj();
-			
+						
+			if($this->formvars['epsg_code'] != '' AND $this->formvars['epsg_code'] != $this->user->rolle->epsg_code){
+				$oPixelPos->setXY($minx,$maxy);
+				$projFROM = ms_newprojectionobj("init=epsg:".$this->formvars['epsg_code']);
+				$projTO = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);
+				$oPixelPos->project($projFROM, $projTO);
+				$minx = $oPixelPos->x;
+				$maxy = $oPixelPos->y;
+			}
+						
       if($this->formvars['CMD'] != 'jump_coords'){
         $oPixelPos->setXY($minx,$maxy);
         $this->map->zoompoint($nZoomFactor,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);

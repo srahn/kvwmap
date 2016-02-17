@@ -172,10 +172,31 @@ else {
         <g transform="scale(0.7) translate(-5 0)">
           <use xlink:href="#jump_coords" transform="translate(2.1 -5.9) scale(0.9)"/> 
         </g>
-        <rect id="coords0" onmouseover="show_tooltip(\''.$strCoordinatesZoom.'\',evt.clientX,evt.clientY)" onmousedown="hide_tooltip();highlight(evt);noMeasuring();" onmouseup="top.coords_input();showcoords();" x="0" y="0" width="25" height="25" style="fill:white;opacity:0.25"/>
+        <rect id="coords0" onmouseover="show_tooltip(\''.$strCoordinatesZoom.'\',evt.clientX,evt.clientY)" onmousedown="hide_tooltip();highlight(evt);noMeasuring();" onmouseup="top.coords_input();" x="0" y="0" width="25" height="25" style="fill:white;opacity:0.25"/>
       </g>';
     $last_x += 26;
   	return $coords1;
+	}
+	
+	function coords2($strCoordinatesQuery){
+		global $last_x;
+		$coords2 ='
+      <g id="coords2" transform="translate('.$last_x.' 0)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+          <set attributeName="filter" begin="coords2.mousedown" fill="freeze" to="none"/>
+          <set attributeName="filter" begin="coords2.mouseup;coords2.mouseout" fill="freeze" to="url(#Schatten)"/>
+        </rect>
+        <g transform="translate(-1 9) scale(0.55 0.7)">
+					<text x="18" y="14" style="text-anchor:middle;fill:rgb(0,0,0);font-size:15;font-family:Tahoma;font-weight:bold">x,y</text>
+				</g>
+				<g transform="translate(2.5 4.5) scale(0.9 1.1)">
+					<text x="18" y="14" style="text-anchor:middle;fill:rgb(0,0,0);font-size:15;font-family:Arial;font-weight:bold">?</text>
+        </g>
+        <rect id="coords0" onmouseover="show_tooltip(\''.$strCoordinatesQuery.'\',evt.clientX,evt.clientY)" onmousedown="hide_tooltip();highlight(evt);noMeasuring();" onmouseup="showcoords();" x="0" y="0" width="25" height="25" style="fill:white;opacity:0.25"/>
+      </g>';
+    $last_x += 26;
+  	return $coords2;
 	}
 	
 	function ppquery($strInfo){
@@ -366,6 +387,7 @@ if($this->user->rolle->recentre){$SVGvars_mainnavbuttons .= recentre($strPan);}
 if($this->user->rolle->zoomin){$SVGvars_mainnavbuttons .= zoomin($strZoomIn);}
 if($this->user->rolle->zoomout){$SVGvars_mainnavbuttons .= zoomout($strZoomOut);}
 if($this->user->rolle->jumpto){$SVGvars_mainnavbuttons .= coords1($strCoordinatesZoom);}
+if($this->user->rolle->coord_query){$SVGvars_mainnavbuttons .= coords2($strCoordinatesQuery);}
 if($this->user->rolle->query){$SVGvars_mainnavbuttons .= ppquery($strInfo);}
 if($this->user->rolle->touchquery){$SVGvars_mainnavbuttons .= touchquery($strTouchInfo);}
 if($this->user->rolle->queryradius){$SVGvars_mainnavbuttons .= pquery($strInfoWithRadius);}

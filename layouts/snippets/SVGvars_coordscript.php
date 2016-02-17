@@ -1,5 +1,11 @@
 <?php
  
+	foreach($this->epsg_codes as $epsg_code){
+		$epsg_codes .= '<option';
+		if($this->user->rolle->epsg_code == $epsg_code['srid'])$epsg_codes .= ' selected';
+		$epsg_codes .= ' value="'.$epsg_code['srid'].'">'.$epsg_code['srid'].': '.$epsg_code['srtext'].'</option>';
+	}
+ 
   $javascript ='
   	<script type="text/javascript">
 	<!--
@@ -70,9 +76,9 @@
 			return str_split[0]+sep+str_split[1];
 		}					
 	
-		function coords_input(){
+		function coords_input_alt(){
 			epsgcode = \''.$this->user->rolle->epsg_code.'\';
-			coordtype = \''.$this->user->rolle->coordtype.'\';		
+			coordtype = \''.$this->user->rolle->coordtype.'\';
 			var mittex  = '.$this->map->width.'/2*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value);
 			var mittey  = parseFloat(top.document.GUI.maxy.value) - '.$this->map->height.'/2*parseFloat(top.document.GUI.pixelsize.value);
 			mittex = format_number(mittex, true, true, false);
@@ -88,6 +94,45 @@
 					alert("Falsches Format");
 					return;
 				}
+				document.GUI.INPUT_COORD.value = coords2[0]+","+coords2[1];
+				document.GUI.CMD.value = "jump_coords";
+				document.GUI.submit();
+			}
+		}
+		
+		function coords_input(){
+			epsgcode = \''.$this->user->rolle->epsg_code.'\';		
+			var mittex  = '.$this->map->width.'/2*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value);
+			var mittey  = parseFloat(top.document.GUI.maxy.value) - '.$this->map->height.'/2*parseFloat(top.document.GUI.pixelsize.value);
+			mittex = format_number(mittex, true, true, false);
+			mittey = format_number(mittey, true, true, false);
+			var Msg = document.getElementById("message_box");
+			Msg.className = \'message_box_visible\';
+			content = \'<div style="position: absolute;top: 0px;right: 0px"><a href="#" onclick="javascript:document.getElementById(\\\'message_box\\\').className = \\\'message_box_hidden\\\';" title="Schlie&szlig;en"><img style="border:none" src="'.GRAPHICSPATH.'exit2.png"></img></a></div>\';
+			content+= \'<div style="height: 30px">Koordinatenzoom</div>\';
+			content+= \'<table style="padding: 5px"><tr><td align="left" style="width: 300px" class="px15">Geben Sie hier die gewünschten Koordinaten ein.</td></tr>\';
+			content+= \'<tr><td><input style="width: 310px" type="text" id="input_coords" name="input_coords" value="\'+mittex+\' \'+mittey+\'"></td></tr>\';
+			content+= \'<tr><td>Koordinatensystem:&nbsp;<select name="epsg_code" style="width: 310px">'.$epsg_codes.'</select></td></tr></table>\';
+			content+= \'<br><input type="button" value="OK" onclick="coords_input_submit()">\';
+			Msg.innerHTML = content;
+			document.getElementById(\'input_coords\').select();
+		}
+		
+		function coords_input_submit(){
+			coordtype = \''.$this->user->rolle->coordtype.'\';
+			coords1 = document.getElementById(\'input_coords\').value;
+			if(coords1){
+				coords2 = coords1.split(" ");
+				if(epsgcode == 4326 && coordtype == "dms"){
+					coords2[0] = dms2dec(coords2[0])+"";
+					coords2[1] = dms2dec(coords2[1])+"";
+				}
+				if(!coords2[0] || !coords2[1] || coords2[0].search(/[^-\d.]/g) != -1 || coords2[1].search(/[^-\d.]/g) != -1){
+					alert("Falsches Format");
+					return;
+				}
+				document.getElementById(\'message_box\').className = \'message_box_hidden\';
+				startwaiting();
 				document.GUI.INPUT_COORD.value = coords2[0]+","+coords2[1];
 				document.GUI.CMD.value = "jump_coords";
 				document.GUI.submit();
