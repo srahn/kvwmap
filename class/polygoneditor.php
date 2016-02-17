@@ -104,7 +104,8 @@ class polygoneditor {
   }
 	
 	function getpolygon($oid, $tablename, $columnname, $extent){
-		$sql = "SELECT st_assvg(st_transform(".$columnname.",".$this->clientepsg."), 0, 8) AS svggeom, st_astext(st_transform(".$columnname.",".$this->clientepsg.")) AS wktgeom FROM ".$tablename." WHERE oid = ".$oid;
+		$sql = "SELECT st_assvg(st_transform(st_union(".$columnname."),".$this->clientepsg."), 0, 8) AS svggeom, st_astext(st_transform(st_union(".$columnname."),".$this->clientepsg.")) AS wktgeom FROM ".$tablename;
+		if($oid != NULL)$sql .= " WHERE oid = ".$oid;
 		$ret = $this->database->execSQL($sql, 4, 0);
 		$polygon = pg_fetch_array($ret[1]);
 		$polygon['svggeom'] = transformCoordsSVG($polygon['svggeom']); 

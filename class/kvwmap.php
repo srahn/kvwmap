@@ -6929,7 +6929,7 @@ class GUI {
     	$this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, NULL, $this->formvars['selected_group_id']);	
     }
     if($this->formvars['selected_layer_id']){
-    	if($this->formvars['layer_id'] == '')$this->formvars['layer_id'] = $this->formvars['selected_layer_id'];
+    	if($this->formvars['layer_id'] == '')$this->formvars['layer_id'] = $this->formvars['selected_layer_id'];			
     	$data = $mapdb->getData($this->formvars['layer_id']);
 	    $data_explosion = explode(' ', $data);
 	    $this->formvars['columnname'] = $data_explosion[0];
@@ -6953,7 +6953,22 @@ class GUI {
 				$this->formvars['fromwhere'] = pg_escape_string('from ('.$fromwhere.') as foo where 1=1');
 		    if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
 		      $this->formvars['fromwhere'] .= ' where (1=1)';
-		    } 
+		    }
+				
+				if($this->formvars['layer_id'] < 0){	# Rollenlayer sofort selektieren
+					$layerdb = $mapdb->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+					include_once (CLASSPATH.'polygoneditor.php');
+					$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+					$tablename = '('.$fromwhere.') as foo';
+					$this->polygon = $polygoneditor->getpolygon(NULL, $tablename, $this->formvars['columnname'], $this->map->extent);
+					if($this->polygon['wktgeom'] != ''){
+						$this->formvars['newpathwkt'] = $this->polygon['wktgeom'];
+						$this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
+						$this->formvars['newpath'] = $this->polygon['svggeom'];
+						$this->formvars['firstpoly'] = 'true';
+					}
+				}
+				
 		    if($this->formvars['CMD']== 'Full_Extent' OR $this->formvars['CMD'] == 'recentre' OR $this->formvars['CMD'] == 'zoomin' OR $this->formvars['CMD'] == 'zoomout' OR $this->formvars['CMD'] == 'previous' OR $this->formvars['CMD'] == 'next') {
 		      $this->navMap($this->formvars['CMD']);
 		    }
