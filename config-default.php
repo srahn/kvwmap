@@ -205,7 +205,7 @@ define('DRUCKRAHMEN_PATH',SHAPEPATH.'druckrahmen/');
 define('PDFCLASSPATH',WWWROOT.'PDFClass/');
 
 # Bin-Pfad der Postgres-tools (shp2pgsql, pgsql2shp)
-define('POSTGRESBINPATH', '/usr/lib/postgresql/9.1/bin/');         # Version 1.6.4
+define('POSTGRESBINPATH', '/usr/bin/');         # Version 1.6.4
 
 # Bin-Pfad der OGR-tools (ogr2ogr, ogrinfo)
 define('OGR_BINPATH', '/usr/bin/');					# Version 1.7.4
