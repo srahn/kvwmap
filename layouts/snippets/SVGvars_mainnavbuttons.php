@@ -193,7 +193,7 @@ else {
 				<g transform="translate(2.5 4.5) scale(0.9 1.1)">
 					<text x="18" y="14" style="text-anchor:middle;fill:rgb(0,0,0);font-size:15;font-family:Arial;font-weight:bold">?</text>
         </g>
-        <rect id="coords0" onmouseover="show_tooltip(\''.$strCoordinatesQuery.'\',evt.clientX,evt.clientY)" onmousedown="hide_tooltip();highlight(evt);noMeasuring();" onmouseup="showcoords();" x="0" y="0" width="25" height="25" style="fill:white;opacity:0.25"/>
+        <rect id="coords02" onmouseover="show_tooltip(\''.$strCoordinatesQuery.'\',evt.clientX,evt.clientY)" onmousedown="hide_tooltip();highlight(evt);noMeasuring();" onmouseup="showcoords();" x="0" y="0" width="25" height="25" style="fill:white;opacity:0.25"/>
       </g>';
     $last_x += 26;
   	return $coords2;
