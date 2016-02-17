@@ -11618,7 +11618,7 @@ class GUI {
 				# SVG-Geometrie abfragen für highlighting
 				if($this->user->rolle->highlighting == '1'){
 					if($layerset[$i]['Datentyp'] != MS_LAYER_POINT){
-						$rand = 10;
+						$rand = $this->map_scaledenom/1000;
 						$box_wkt ="POLYGON((";
 						$box_wkt.=strval($this->user->rolle->oGeorefExt->minx-$rand)." ".strval($this->user->rolle->oGeorefExt->miny-$rand).",";
 						$box_wkt.=strval($this->user->rolle->oGeorefExt->maxx+$rand)." ".strval($this->user->rolle->oGeorefExt->miny-$rand).",";
