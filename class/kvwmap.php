@@ -11632,7 +11632,7 @@ class GUI {
 				
 				# SVG-Geometrie abfragen für highlighting
 				if($this->user->rolle->highlighting == '1'){
-					if($layerset[$i]['Datentyp'] != MS_LAYER_POINT){
+					if($layerset[$i]['attributes']['geomtype'][$the_geom] != 'POINT'){ 
 						$rand = $this->map_scaledenom/1000;
 						$box_wkt ="POLYGON((";
 						$box_wkt.=strval($this->user->rolle->oGeorefExt->minx-$rand)." ".strval($this->user->rolle->oGeorefExt->miny-$rand).",";
@@ -13783,7 +13783,10 @@ class db_mapObj{
 												}
 											}
 											if(strpos($options, '<requires>') !== false){
-												$options = '';    # wenn in diesem Datensatz des Query-Results ein benötigtes Attribut keinen Wert hat (also nicht alle <requires>-Einträge ersetzt wurden), sind die abhängigen Optionen für diesen Datensatz leer
+												#$options = '';    # wenn in diesem Datensatz des Query-Results ein benötigtes Attribut keinen Wert hat (also nicht alle <requires>-Einträge ersetzt wurden), sind die abhängigen Optionen für diesen Datensatz leer
+												$attribute_value = $query_result[$k][$attributes['name'][$i]];
+												if($attribute_value != '')$options = "select '".$attribute_value."' as value, '".$attribute_value."' as output";
+												else $options = '';		# wenn in diesem Datensatz des Query-Results ein benötigtes Attribut keinen Wert hat (also nicht alle <requires>-Einträge ersetzt wurden) aber das eigentliche Attribut einen Wert hat, wird dieser Wert als value und output genommen, ansonsten sind die Optionen leer
 											}
 											$attributes['dependent_options'][$i][$k] = $options;
                     }
