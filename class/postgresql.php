@@ -1581,8 +1581,14 @@ class pgdatabase {
   }
   
   function getNamen($formvars, $gemkgschl){
-    $n1 = '%'.$formvars['name1'].'%';
-		$n2 = '%'.$formvars['name2'].'%';
+		if(!$formvars['exakt']){
+			$n1 = '%'.$formvars['name1'].'%';
+			$n2 = '%'.$formvars['name2'].'%';
+		}
+		else{
+			$n1 = $formvars['name1'];
+			$n2 = $formvars['name2'];
+		}
 		$n3 = '%'.$formvars['name3'].'%';
 		$n4 = '%'.$formvars['name4'].'%';
 		$n5 = '%'.$formvars['name5'].'%';
@@ -1607,8 +1613,8 @@ class pgdatabase {
 		$sql.= "LEFT JOIN alkis.ax_buchungsstelle s ON s.istbestandteilvon = g.gml_id ";
 		$sql.= "LEFT JOIN alkis.ax_flurstueck f ON f.istgebucht = s.gml_id OR f.gml_id = ANY(s.verweistauf) OR f.istgebucht = ANY(s.an) ";
 		$sql.= " WHERE 1=1 ";
-    if($n1 != '%%')$sql.=" AND lower(nachnameoderfirma) LIKE lower('".$n1."') ";
-		if($n2 != '%%')$sql.=" AND lower(vorname) LIKE lower('".$n2."') ";
+    if($n1 != '%%' AND $n1 != '')$sql.=" AND lower(nachnameoderfirma) LIKE lower('".$n1."') ";
+		if($n2 != '%%' AND $n2 != '')$sql.=" AND lower(vorname) LIKE lower('".$n2."') ";
 		if($n3 != '%%')$sql.=" AND lower(geburtsname) LIKE lower('".$n3."') ";
 		if($n4 != '%%')$sql.=" AND geburtsdatum = '".$n4."' ";
 		if($n5 != '%%')$sql.=" AND lower(strasse) LIKE lower('".$n5."') ";
