@@ -3022,6 +3022,15 @@ class GUI {
       case "save_all_layer_attributes" : {
         $this->save_all_layer_attributes();
       } break;
+      case "custom"  : {
+        $admin_function_file = LAYOUTPATH . 'custom/adminfunctions.php';
+        if (file_exists($admin_function_file)) {
+          $this->main = $admin_function_file;
+          $this->titel = 'Eigene Administrationsfunktionen';
+        } else {
+          $this->showAdminFunctions();
+        }
+      } break;
       default : {
         $this->showAdminFunctions();
       }
