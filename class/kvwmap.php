@@ -7226,28 +7226,33 @@ class GUI {
 				$attributevalues[] = $this->formvars[$form_fields[$i]];
         $tablename[$element[2]]['type'][] = $element[4];
         $tablename[$element[2]]['formfield'][] = $form_fields[$i];
-
-        # Prüfen ob ein neues Bild angegebeben wurde
+        # Dokumente sammeln
         if($element[4] == 'Dokument'){
           if($_files[$form_fields[$i]]['name']){
-            # Dateiname erzeugen
-            $name_array=explode('.',basename($_files[$form_fields[$i]]['name']));
-            $datei_name=$name_array[0];
-            $datei_erweiterung=array_pop($name_array);
-						$doc_path = $mapdb->getDocument_Path($layerset[0]['document_path'], $attributes['options'][$element[1]], $attributenames, $attributevalues, $layerdb);
-            $nachDatei = $doc_path.'.'.$datei_erweiterung; 
-            # Bild in das Datenverzeichnis kopieren
-            if (move_uploaded_file($_files[$form_fields[$i]]['tmp_name'],$nachDatei)) {
-              //echo '<br>Lade '.$_files[$form_fields[$i]]['tmp_name'].' nach '.$nachDatei.' hoch';
-              $this->formvars[$form_fields[$i]] = $nachDatei."&original_name=".$_files[$form_fields[$i]]['name'];
-            } # ende von Datei wurde erfolgreich in Datenverzeichnis kopiert
-            else {
-              echo '<br>Datei: '.$_files[$form_fields[$i]]['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
-            }
-          } # ende vom Fall, dass ein neues Dokument hochgeladen wurde
+						$document_attributes[$i] = $element[1];
+          }
         }
       }
     }
+		
+		# Dokumente speichern
+		if(count($document_attributes) > 0){
+			foreach($document_attributes as $i => $attribute_name){
+				# Dateiname erzeugen
+				$name_array=explode('.',basename($_files[$form_fields[$i]]['name']));
+				$datei_name=$name_array[0];
+				$datei_erweiterung=array_pop($name_array);
+				$doc_path = $mapdb->getDocument_Path($layerset[0]['document_path'], $attributes['options'][$attribute_name], $attributenames, $attributevalues, $layerdb);
+				$nachDatei = $doc_path.'.'.$datei_erweiterung; 
+				# Bild in das Datenverzeichnis kopieren
+				if(move_uploaded_file($_files[$form_fields[$i]]['tmp_name'],$nachDatei)){
+					$this->formvars[$form_fields[$i]] = $nachDatei."&original_name=".$_files[$form_fields[$i]]['name'];
+				}
+				else{
+					echo '<br>Datei: '.$_files[$form_fields[$i]]['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
+				}
+			}
+		}
     
     if($this->formvars['geomtype'] == 'POLYGON' OR $this->formvars['geomtype'] == 'MULTIPOLYGON' OR $this->formvars['geomtype'] == 'GEOMETRY'){
       if($this->formvars['newpathwkt'] == '' AND $this->formvars['newpath'] != ''){   # wenn keine WKT-Geoemtrie da ist, muss die WKT-Geometrie aus dem SVG erzeugt werden
