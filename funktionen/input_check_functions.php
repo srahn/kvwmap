@@ -25,12 +25,13 @@
 			}
 		}
 		if(type == 'int2' || type == 'int4' || type == 'int8'){
-			if(input.value.search(/[^-\d]/g) != -1 || input.value.search(/.-/g) != -1){
+			var val = input.value.replace(/[a-zA-Z]/g, '');
+			if(input.value.search(/,/g) != -1 || input.value.search(/\./g) != -1){
 				alert('Es sind nur ganzzahlige Angaben erlaubt!');
-				var val = input.value.replace(/[^-\d]/g, '');
-				val = val.replace(/-/g, '');
-				input.value = val;
+				val = val.replace(/,/g, '');
+				val = val.replace(/\./g, '');
 			}
+			input.value = val;
 		}
 	}
 
