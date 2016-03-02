@@ -103,7 +103,8 @@ class ddl {
 					$remaining_freetexts[] = $this->layout['texts'][$j]['id'];
 				}
 			}
-			if($type != 'everypage')$this->pdf->closeObject();									# falls in eine alte Seite geschrieben wurde, zurückkehren
+			#if($type != 'everypage')$this->pdf->closeObject();									# falls in eine alte Seite geschrieben wurde, zurückkehren
+			# erstmal rausgenommen, wenn doch gebraucht, vielleicht nur machen, wenn es wirklich eine alte Seite und nicht die letzte Seite ist
 	  }
 		return $remaining_freetexts;
 	}
