@@ -188,7 +188,7 @@ class ddl {
 								if(!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y)$this->miny[$this->pdf->currentContents] = $y;		# miny ist die unterste y-Position das aktuellen Datensatzes 
 								
 								$this->layout['page_id'][$attributes['name'][$j]] = $this->pdf->currentContents;		# und die Page-ID merken, in der das Attribut beendet wurde								
-								$this->pdf->closeObject();			# falls in eine alte Seite geschrieben wurde, zurückkehren
+								if($this->pdf->currentContents != end($this->pdf->objects['3']['info']['pages'])+1)$this->pdf->closeObject();									# falls in eine alte Seite geschrieben wurde, zurückkehren
 								# Saves wieder setzen
 								$this->gui->formvars['selected_layer_id'] = $layerid_save;
 								$this->gui->formvars['chosen_layer_id'] = $layerid_save;
@@ -263,7 +263,7 @@ class ddl {
 								
 								$this->layout['offset_attributes'][$attributes['name'][$j]] = $y;					# den unteren y-Wert dieses Elements in das Offset-Array schreiben
 								$this->layout['page_id'][$attributes['name'][$j]] = $this->pdf->currentContents;		# und die Page-ID merken, in der das Attribut beendet wurde
-								$this->pdf->closeObject();									# falls in eine alte Seite geschrieben wurde, zurückkehren
+								if($this->pdf->currentContents != end($this->pdf->objects['3']['info']['pages'])+1)$this->pdf->closeObject();									# falls in eine alte Seite geschrieben wurde, zurückkehren
 							}
 						}
 					}
