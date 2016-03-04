@@ -10573,6 +10573,7 @@ class GUI {
               # Prüfen ob ein neues Bild angegebeben wurde
               if($_files[$form_fields[$i]]['name']){			# die Dokument-Attribute werden hier zusammen gesammelt, weil der Datei-Upload gemacht werden muss, nachdem alle Attribute durchlaufen worden sind (wegen dem DocumentPath)
 								$attr_oid['layer_id'] = $layer_id;
+								$attr_oid['tablename'] = $tablename;
 								$attr_oid['attributename'] = $attributname;
 								$attr_oid['oid'] = $oid;
 								$document_attributes[$i] = $attr_oid;
@@ -10639,7 +10640,8 @@ class GUI {
 					if ($old != '' AND $old != $eintrag) {
 						$this->deleteDokument($old);
 					}
-					# Dateiname in der Datentabelle aktualisieren
+					$updates[$attr_oid['layer_id']][$attr_oid['tablename']][$attr_oid['oid']]['eintrag'][] = $eintrag;
+					$updates[$attr_oid['layer_id']][$attr_oid['tablename']][$attr_oid['oid']]['attributename'][] = $attr_oid['attributename'];
 				} # ende von Datei wurde erfolgreich in Datenverzeichnis kopiert
 				else {
 					echo '<br>Datei: '.$_files[$form_fields[$i]]['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
