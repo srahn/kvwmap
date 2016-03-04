@@ -10571,28 +10571,11 @@ class GUI {
           switch($formtype) {
             case 'Dokument' : {
               # Prüfen ob ein neues Bild angegebeben wurde
-              if($_files[$form_fields[$i]]['name']){
-                # Dateiname erzeugen
-                $name_array=explode('.',basename($_files[$form_fields[$i]]['name']));
-                $datei_name=$name_array[0];
-                $datei_erweiterung=array_pop($name_array);
-                $doc_path = $mapdb->getDocument_Path($layerset[$layer_id][0]['document_path'], $attributes['options'][$element[1]], $attributenames[$oid], $$attributevalues[$oid], $layerdb[$layer_id]);
-                $nachDatei = $doc_path.'.'.$datei_erweiterung;
-                $eintrag = $nachDatei."&original_name=".$_files[$form_fields[$i]]['name'];
-                if($datei_name == 'delete')$eintrag = '';
-                # Bild in das Datenverzeichnis kopieren
-                if (move_uploaded_file($_files[$form_fields[$i]]['tmp_name'],$nachDatei) OR $datei_name == 'delete') {
-                  #echo '<br>Lade '.$_files[$form_fields[$i]]['tmp_name'].' nach '.$nachDatei.' hoch';
-                  # Wenn eine alte Datei existiert, die nicht so heißt wie die neue --> löschen
-                  $old = $this->formvars[str_replace(';Dokument;', ';Dokument_alt;', $form_fields[$i])];
-                  if ($old != '' AND $old != $eintrag) {
-                  	$this->deleteDokument($old);
-                  }
-                  # Dateiname in der Datentabelle aktualisieren
-                } # ende von Datei wurde erfolgreich in Datenverzeichnis kopiert
-                else {
-                  echo '<br>Datei: '.$_files[$form_fields[$i]]['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
-                }
+              if($_files[$form_fields[$i]]['name']){			# die Dokument-Attribute werden hier zusammen gesammelt, weil der Datei-Upload gemacht werden muss, nachdem alle Attribute durchlaufen worden sind (wegen dem DocumentPath)
+								$attr_oid['layer_id'] = $layer_id;
+								$attr_oid['attributename'] = $attributname;
+								$attr_oid['oid'] = $oid;
+								$document_attributes[$i] = $attr_oid;
               } # ende vom Fall, dass ein neues Dokument hochgeladen wurde
             } break; # ende case Bild
             case 'Time' : {
@@ -10638,6 +10621,31 @@ class GUI {
         }
       }
     }
+		if(count($document_attributes)> 0){
+			foreach($document_attributes as $i => $attr_oid){
+				# Dateiname erzeugen
+				$name_array=explode('.',basename($_files[$form_fields[$i]]['name']));
+				$datei_name=$name_array[0];
+				$datei_erweiterung=array_pop($name_array);
+				$doc_path = $mapdb->getDocument_Path($layerset[$attr_oid['layer_id']][0]['document_path'], $attributes['options'][$attr_oid['attributename']], $attributenames[$attr_oid['oid']], $$attributevalues[$attr_oid['oid']], $layerdb[$attr_oid['layer_id']]);
+				$nachDatei = $doc_path.'.'.$datei_erweiterung;
+				$eintrag = $nachDatei."&original_name=".$_files[$form_fields[$i]]['name'];
+				if($datei_name == 'delete')$eintrag = '';
+				# Bild in das Datenverzeichnis kopieren
+				if (move_uploaded_file($_files[$form_fields[$i]]['tmp_name'],$nachDatei) OR $datei_name == 'delete') {
+					#echo '<br>Lade '.$_files[$form_fields[$i]]['tmp_name'].' nach '.$nachDatei.' hoch';
+					# Wenn eine alte Datei existiert, die nicht so heißt wie die neue --> löschen
+					$old = $this->formvars[str_replace(';Dokument;', ';Dokument_alt;', $form_fields[$i])];
+					if ($old != '' AND $old != $eintrag) {
+						$this->deleteDokument($old);
+					}
+					# Dateiname in der Datentabelle aktualisieren
+				} # ende von Datei wurde erfolgreich in Datenverzeichnis kopiert
+				else {
+					echo '<br>Datei: '.$_files[$form_fields[$i]]['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
+				}
+			}
+		}
 		if($updates != NULL){
 			foreach($updates as $layer_id => $layer){
 				foreach($layer as $tablename => $table){
