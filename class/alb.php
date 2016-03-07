@@ -136,7 +136,6 @@ class ALB {
 	<antragsnummer>BWAPK_0000002</antragsnummer>
 	<selektionsmassstab>1000</selektionsmassstab>
 	<mitMetadaten>false</mitMetadaten>
-	<verarbeitungszeitpunkt>2014-10-28T10:56:40Z</verarbeitungszeitpunkt>
 	<folgeverarbeitung>
 		<CPA_FOLGEVA>
 			<ausgabemasstab>'.$print_params['printscale'].'</ausgabemasstab>
