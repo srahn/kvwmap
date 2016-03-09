@@ -12,6 +12,7 @@
   $strSetGPSPosition="GPS Position setzen";
   $strRuler="Streckenmessung";
   $strBuffer="Puffer hinzufuegen";
+	$strSpecialBuffer="Puffer erweitern";
 	$strBufferedLine="gepufferte Linie hinzufuegen";
 	$strParallelPolygon="linksseitig gepufferte Linie hinzufuegen";
   $strMoveGeometry="Geometrie verschieben";
