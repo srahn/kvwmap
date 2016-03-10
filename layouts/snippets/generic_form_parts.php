@@ -76,7 +76,7 @@
 		else{
 			switch ($attributes['form_element_type'][$j]){
 				case 'Textfeld' : {
-					$datapart .= '<textarea title="'.$alias.'" cols="45" onchange="set_changed_flag(currentform.changed_'.$layer_id.'_'.$oid.')"';
+					$datapart .= '<textarea title="'.$alias.'" id="'.$name.'_'.$k.'" cols="45" onchange="set_changed_flag(currentform.changed_'.$layer_id.'_'.$oid.')"';
 					if($attribute_privileg == '0' OR $lock[$k]){
 						$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
 					}
@@ -84,6 +84,9 @@
 						$datapart .= ' style="font-size: '.$fontsize.'px"';
 					}
 					$datapart .= ' rows="3" name="'.$fieldname.'">'.$value.'</textarea>';
+					if($attribute_privileg > '0' AND $attributes['options'][$j] != ''){
+						$datapart .= '&nbsp;<a title="automatisch generieren" href="javascript:auto_generate(new Array(\''.implode($attributes['name'], "','").'\'), \''.$attributes['the_geom'].'\', \''.$name.'\', '.$k.', '.$layer_id.');"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
+					}
 				}break;
 
 				case 'Auswahlfeld' : case 'Auswahlfeld_not_saveable' : {
