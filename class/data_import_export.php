@@ -759,6 +759,36 @@ class data_import_export {
 		}
   }
 	
+	function create_ovl($datentyp, $layerdb, $table, $column){
+		$ovl_type = array(MS_LAYER_POINT => 6, MS_LAYER_LINE => 3, MS_LAYER_POLYGON => 4);
+		$sql.= "SELECT st_astext(";
+		if($datentyp == MS_LAYER_POLYGON)$sql.= "ST_MakePolygon(st_exteriorring(geom))) as geom ";
+		else $sql.= "geom) as geom ";
+		$sql.= "FROM (select (st_dump(st_union(".$column."))).geom as geom FROM ".$table.") as foo";
+		#echo $sql;
+		$ret = $layerdb->execSQL($sql,4, 1);
+		if(!$ret[0]){
+			$i = 0;
+			while($rs=pg_fetch_assoc($ret[1])){
+				$wkt = str_replace('POLYGON((', '', $rs['geom']);
+				$wkt = str_replace('LINESTRING(', '', $wkt);
+				$wkt = str_replace('POINT(', '', $wkt);
+				$wkt = str_replace(')', '', $wkt);
+				$coords = explode(',', $wkt);
+				$coord_count = count($coords);
+				if($datentyp == MS_LAYER_POLYGON)$coord_count = $coord_count - 1;
+				$ovl[$i] = '[Overlay]'.chr(10).'Symbols=1'.chr(10).'[MapLage]'.chr(10).'[Symbol 1]'.chr(10).'Typ='.$ovl_type[$datentyp].chr(10).'Group=1'.chr(10).'Dir=100'.chr(10).'Art=1'.chr(10).'Col=1'.chr(10).'Zoom=1'.chr(10).'Size=103'.chr(10).'Area=4'.chr(10).'Punkte='.$coord_count.chr(10);				
+				for($c = 0; $c < $coord_count; $c++){
+					$coords_part = explode(' ', $coords[$c]);
+					$ovl[$i] .= 'XKoord'.$c.'='.$coords_part[0].chr(10);
+					$ovl[$i] .= 'YKoord'.$c.'='.$coords_part[1].chr(10);
+				}
+				$i++;
+			}
+		}
+		return $ovl;
+  }
+	
 	function export_exportieren($formvars, $stelle, $user){
 		$currenttime=date('Y-m-d H:i:s',time());
   	$this->formvars = $formvars;
@@ -933,6 +963,17 @@ class data_import_export {
 					fwrite($fp, $uko);
 					fclose($fp);
 					$contenttype = 'text/uko';
+				}break;
+				
+				case 'OVL' : {
+					$ovl = $this->create_ovl($layerset[0]['Datentyp'], $layerdb, $temp_table, $this->attributes['the_geom']);
+					for($i = 0; $i < count($ovl); $i++){
+						$exportfile2 = $exportfile.'_'.$i.'.ovl';
+						$fp = fopen($exportfile2, 'w');
+						fwrite($fp, $ovl[$i]);
+						fclose($fp);
+					}
+					$zip = true;
 				}break;
 			}
 			# Dokumente auch mit dazupacken

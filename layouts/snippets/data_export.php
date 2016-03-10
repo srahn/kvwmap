@@ -36,9 +36,10 @@ function update_coords(){
 	else{
 		document.getElementById('geom_div').style.display = '';
 		document.getElementById('coord_div').style.display = 'inline';
-		if(document.GUI.export_format.value == 'KML'){
+		if(document.GUI.export_format.value == 'KML' || document.GUI.export_format.value == 'OVL'){
 			document.getElementById('wgs84').style.display = 'inline';
 			document.GUI.epsg.style.display = 'none';
+			document.GUI.epsg.value = 4326;
 		}
 		else{
 			document.getElementById('wgs84').style.display = 'none';
@@ -156,6 +157,7 @@ $j=0;
 									<option <? if($this->formvars['export_format'] == 'GML')echo 'selected '; ?> value="GML">GML</option>
 									<option <? if($this->formvars['export_format'] == 'KML')echo 'selected '; ?> value="KML">KML</option>
 									<option <? if($this->formvars['export_format'] == 'UKO')echo 'selected '; ?> value="UKO">UKO</option>
+									<option <? if($this->formvars['export_format'] == 'OVL')echo 'selected '; ?> value="OVL">OVL</option>
 								<? } ?>
 									<option <? if($this->formvars['export_format'] == 'CSV')echo 'selected '; ?> value="CSV">CSV</option>
 								</select>
@@ -172,7 +174,7 @@ $j=0;
 						</tr>
 						<tr>
 							<td>
-								<select name="epsg" <? if($this->formvars['export_format'] == 'KML')echo 'style="display:none"'; ?>>
+								<select name="epsg" <? if($this->formvars['export_format'] == 'KML' OR $this->formvars['export_format'] == 'OVL'){$this->formvars['epsg'] = 4326; echo 'style="display:none"';} ?>>
 									<option value="">-- Auswahl --</option>
 									<?
 									foreach($this->epsg_codes as $epsg_code){
@@ -182,7 +184,7 @@ $j=0;
 									}
 								?>
 								</select>
-								<span id="wgs84" <? if($this->formvars['export_format'] != 'KML')echo 'style="display:none"'; ?>>4326: WGS84</span>
+								<span id="wgs84" <? if($this->formvars['export_format'] != 'KML' AND $this->formvars['export_format'] != 'OVL')echo 'style="display:none"'; ?>>4326: WGS84</span>
 							</td>
 						</tr>
 					</table>
