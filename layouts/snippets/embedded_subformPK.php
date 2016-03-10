@@ -80,6 +80,7 @@
 							$output[$p] = $dataset[$preview_attributes[$p]];						
 						}
 					}
+					if($output[$p] == '')$output[$p] = ' ';
 				}
 			}
 			if($output[$p] == '')$output[$p] = $preview_attributes[$p];
