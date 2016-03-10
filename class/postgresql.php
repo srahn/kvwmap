@@ -424,7 +424,7 @@ class pgdatabase {
 	      $attr_info = pg_fetch_assoc($ret1[1]);
 	      if($attr_info['is_nullable'] == 'NO' AND $attr_info['serial'] == '' AND substr($attr_info['column_default'], 0, 7) != 'nextval'){$attr_info['is_nullable'] = '0';}else{$attr_info['is_nullable'] = '1';}
 	      if($attr_info['character_maximum_length'] == NULL){$attr_info['character_maximum_length'] = 'NULL';}
-	      if($attr_info['numeric_scale'] < 1){$attr_info['numeric_scale'] = 'NULL';}	      
+	      if($attr_info['numeric_scale'] == ''){$attr_info['numeric_scale'] = 'NULL';}	      
 	      if($attr_info['column_default'] != '' AND $attr_info['serial'] == '' AND substr($attr_info['column_default'], 0, 7) != 'nextval'){
 		      $attr_info['column_default'] = 'SELECT '.$attr_info['column_default'];
 		     	#echo $sql.'<br>';

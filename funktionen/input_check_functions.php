@@ -4,6 +4,10 @@
 		if(type == 'numeric' || type == 'float4' || type == 'float8'){
 			var val = input.value.replace(/[a-zA-Z]/g, '');
 			val = val.replace(/,/g, '.');
+			if(parseInt(decimal_length) == 0 && val.search(/\./) > 0){
+				alert(unescape('F%FCr dieses Feld sind keine Nachkommastellen erlaubt.'));
+				val = val.replace(/\./g, '');
+			}
 			parts = val.split('.');
 			ohne_leerz = parts[0].replace(/ /g, '').length;
 			mit_leerz = parts[0].length;
