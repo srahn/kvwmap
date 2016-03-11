@@ -34,6 +34,7 @@ include_once(SNIPPETS.'/generic_form_parts.php');
 			if($this->{'attributes'.$searchmask_number} != NULL){
 				$this->attributes = $this->{'attributes'.$searchmask_number};   # dieses Attributarray nehmen, weil eine gespeicherte Suche geladen wurde
 			}
+			$last_attribute_index = NULL;
 			for($i = 0; $i < count($this->attributes['name']); $i++){
         if($this->attributes['type'][$i] != 'geometry' AND $this->attributes['form_element_type'][$i] != 'SubFormFK'){					
 					if($this->attributes['group'][$i] != $this->attributes['group'][$last_attribute_index]){		# wenn die vorige Gruppe anders ist: ...
