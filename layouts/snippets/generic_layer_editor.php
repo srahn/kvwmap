@@ -12,7 +12,7 @@
 	$layer = $this->qlayerset[$i];
 	$attributes = $layer['attributes'];
 	$size = 12;
-	$select_width = ''; 
+	$select_width = 'width: 100px;'; 
 	if($layer['alias'] != '' AND $this->Stelle->useLayerAliases){
 		$layer['Name'] = $layer['alias'];
 	}
@@ -165,29 +165,8 @@
 				if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
 					if($attributes['type'][$j] != 'geometry'){
 						echo '<td>';
-							
-							if($attributes['constraints'][$j] != '' AND !in_array($attributes['constraints'][$j], array('PRIMARY KEY', 'UNIQUE'))){
-			  				if($attributes['privileg'][$j] == '0' OR $lock[$k]){
-			  					$size1 = 1.3*strlen($layer['shape'][$k][$attributes['name'][$j]]);
-									echo '<input readonly style="background-color:#e8e3da;" size="'.$size1.'" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$layer['shape'][$k][$attributes['name'][$j]].'">';
-								}
-								else{
-			  					echo '<select onchange="set_changed_flag(currentform.changed_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" title="'.$attributes['alias'][$j].'"  style="font-size: '.$this->user->rolle->fontsize_gle.'px" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'">';
-									for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
-										echo '<option ';
-										if($attributes['enum_value'][$j][$e] == $layer['shape'][$k][$attributes['name'][$j]]){
-											echo 'selected ';
-										}
-										echo 'value="'.$attributes['enum_value'][$j][$e].'">'.$attributes['enum_output'][$j][$e].'</option>';
-									}
-									echo '</select>';
-			  				}
-			  			}
-			  			else{
-								#include(SNIPPETS.'generic_formelements.php');
-								$datapart .= attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size, $this->user->rolle->fontsize_gle);
-								echo $datapart;
-			  			}
+							$datapart .= attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size, $select_width, $this->user->rolle->fontsize_gle);
+							echo $datapart;
 			  			echo '
 									</td>
 							';
