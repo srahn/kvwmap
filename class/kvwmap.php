@@ -12558,14 +12558,16 @@ class GUI {
 		    # Haupt-Layer erzeugen
 		    $layer=ms_newLayerObj($map);
 		    $layer->set('data',$layerset['Data']);    
-				$layerset['Filter'] = str_replace('$userid', $this->user->id, $layerset['Filter']);
-				if (substr($layerset['Filter'],0,1)=='(') {
-					$expr=$layerset['Filter'];
+				if($layerset['Filter'] != ''){
+					$layerset['Filter'] = str_replace('$userid', $this->user->id, $layerset['Filter']);
+					if (substr($layerset['Filter'],0,1)=='(') {
+						$expr=$layerset['Filter'];
+					}
+					else{
+						$expr=buildExpressionString($layerset['Filter']);
+					}
+					$layer->setFilter($expr);
 				}
-				else{
-					$expr=buildExpressionString($layerset['Filter']);
-				}
-				$layer->setFilter($expr);
 		    $layer->set('status',MS_ON);
 		    $layer->set('template', ' ');
 		    $layer->set('name','querymap'.$k);
