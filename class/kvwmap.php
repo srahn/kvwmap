@@ -2143,7 +2143,8 @@ class GUI {
 		}
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		if($this->formvars['layer_id'] > 0){
-			$layer = $mapDB->get_Layer($this->formvars['layer_id']);
+			$layer = $this->user->rolle->getLayer($this->formvars['layer_id']);
+			$layer = $layer[0];
 		}
 		else{
 			$rollenlayer = $mapDB->read_RollenLayer(-$this->formvars['layer_id'], NULL);
@@ -2163,6 +2164,11 @@ class GUI {
 			$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects('.$data_attributes['the_geom'].', '.$extent.') ';
 			if($layer['Datentyp'] !== '1' AND $this->formvars['layer_id'] > 0 AND $this->formvars['oid']){		# bei Linienlayern werden auch die eigenen Punkte geholt, bei Polygonen nicht
 				$fromwhere .= 'AND exclude_oid != '.$this->formvars['oid'];
+			}
+			# Filter hinzufügen
+			if($layer['Filter'] != ''){
+				$layer['Filter'] = str_replace('$userid', $this->user->id, $layer['Filter']);
+				$fromwhere .= " AND ".$layer['Filter'];
 			}
 			# LINE / POLYGON
 			$sql = 'SELECT st_x(the_geom), st_y(the_geom) FROM (SELECT st_transform(st_pointn(foo.linestring, foo.count1), '.$this->user->rolle->epsg_code.') AS the_geom
@@ -12537,7 +12543,7 @@ class GUI {
 	    # Auf den Datensatz zoomen
 	    $sql ="SELECT st_xmin(bbox) AS minx,st_ymin(bbox) AS miny,st_xmax(bbox) AS maxx,st_ymax(bbox) AS maxy";
 	    $sql.=" FROM (SELECT box2D(st_transform(".$layerset['attributes']['the_geom'].", ".$this->user->rolle->epsg_code.")) as bbox";
-	    $sql.=" FROM ".$tablename." WHERE oid = '".$oid."') AS foo";
+	    $sql.=" FROM ".$tablename." WHERE oid = '".$oid."') AS foo";			
 	    $ret = $layerdb->execSQL($sql, 4, 0);
 	    $rs = pg_fetch_array($ret[1]);
 	    $rect = ms_newRectObj();
@@ -12552,6 +12558,14 @@ class GUI {
 		    # Haupt-Layer erzeugen
 		    $layer=ms_newLayerObj($map);
 		    $layer->set('data',$layerset['Data']);    
+				$layerset['Filter'] = str_replace('$userid', $this->user->id, $layerset['Filter']);
+				if (substr($layerset['Filter'],0,1)=='(') {
+					$expr=$layerset['Filter'];
+				}
+				else{
+					$expr=buildExpressionString($layerset['Filter']);
+				}
+				$layer->setFilter($expr);
 		    $layer->set('status',MS_ON);
 		    $layer->set('template', ' ');
 		    $layer->set('name','querymap'.$k);
