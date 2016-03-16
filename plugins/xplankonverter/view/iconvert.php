@@ -220,7 +220,7 @@
         <button id='xpc-new-conversion' type='button' class='btn btn-primary' onclick='step1_new_conversion'>Neuen Regelsatz anlegen</button>
         </div></div></div>
       <div id='step_4' class='tab-pane fade in <?php echo ($config['active']==='step4' ? 'active' : '');?>'><div class='panel panel-default'><div class='_panel-heading panel-body'>
-        <h4>Konsistenzprüfung</h4>
+        <h4>Konsistenzprï¿½fung</h4>
       </div></div></div>
     </div>
   <?php
