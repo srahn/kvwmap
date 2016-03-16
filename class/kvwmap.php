@@ -2489,11 +2489,14 @@ class GUI {
       ImageCopy($mainimage, $scaleimage, imagesx($mainimage)-imagesx($scaleimage), imagesy($mainimage)-imagesy($scaleimage), 0, 0, imagesx($scaleimage), imagesy($scaleimage));
       ob_end_clean();
       ob_start("output_handler");
+      header('content-type: image/png');
+#      header('Content-Disposition: attachment; filename="Karte.png"');
       ImagePNG($mainimage);
     }
     else{
     	ob_end_clean();
       header('content-type: image/jpg');
+#      header('Content-Disposition: attachment; filename="Karte.jpg"');
       readfile(IMAGEPATH.$jpgfile);
     }
   }
