@@ -131,9 +131,13 @@ class ALB {
 		</anforderungsmerkmale>';
 	}
 
+  # check ob die Konstanten existieren. Kann in einer Version > 2.4 rausgenommen werden.
+  if (!defined('DHK_CALL_PROFILKENNUNG')) define('DHK_CALL_PROFILKENNUNG', 'mvaaa');
+  if (!defined('DHK_CALL_ANTRAGSNUMMER')) define('DHK_CALL_ANTRAGSNUMMER', 'BWAPK_0000002');
+
 	$xml .='
-	<profilkennung>mvaaa</profilkennung>
-	<antragsnummer>BWAPK_0000002</antragsnummer>
+	<profilkennung>' . DHK_CALL_PROFILKENNUNG . '</profilkennung>
+	<antragsnummer>' . DHK_CALL_ANTRAGSNUMMER . '</antragsnummer>
 	<selektionsmassstab>1000</selektionsmassstab>
 	<mitMetadaten>false</mitMetadaten>
 	<folgeverarbeitung>
@@ -144,7 +148,7 @@ class ALB {
 			<datenformat>5000</datenformat>
 		</CPA_FOLGEVA>
 	</folgeverarbeitung>
-	<auftragsnummer>BWAPK_0000002</auftragsnummer>
+	<auftragsnummer>' . DHK_CALL_ANTRAGSNUMMER . '</auftragsnummer>
 	<portionierung></portionierung>
 	<konvertierungskonfig></konvertierungskonfig>
 </CPA_Benutzungsauftrag>';

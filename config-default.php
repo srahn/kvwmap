@@ -226,6 +226,8 @@ define('EPSGCODE_ALKIS','25833');
 define('DHK_CALL_URL', 'http://dhkserver/call?form=login');						# Version 2.1
 define('DHK_CALL_USER', '12345');																			# Version 2.1
 define('DHK_CALL_PASSWORD', '6789');																	# Version 2.1
+define('DHK_CALL_ANTRAGSNUMMER', 'BWAPK_0000002');										# Version 2.4
+define('DHK_CALL_PROFILKENNUNG', 'mvaaa');														# Version 2.4
 
 # Parameter für die Strecken- und Flächenreduktion
 define('EARTH_RADIUS', 6384000);																										# Version 2.1
