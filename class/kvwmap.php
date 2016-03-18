@@ -2462,7 +2462,7 @@ class GUI {
   	$this->drawMap();
   	$randomnumber = rand(0, 1000000);
   	$svgfile  = $randomnumber.'.svg';
-  	$jpgfile = $randomnumber.'.jpg';
+  	$jpgfile = 'Kartenbild_'.$randomnumber.'.jpg';
   	$fpsvg = fopen(IMAGEPATH.$svgfile,w);
   	$svg='<?xml version="1.0"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
@@ -2487,18 +2487,9 @@ class GUI {
         $scaleimage = imagecreatefrompng(IMAGEPATH.basename($this->img['scalebar']));
       }
       ImageCopy($mainimage, $scaleimage, imagesx($mainimage)-imagesx($scaleimage), imagesy($mainimage)-imagesy($scaleimage), 0, 0, imagesx($scaleimage), imagesy($scaleimage));
-      ob_end_clean();
-      ob_start("output_handler");
-      header('content-type: image/png');
-#      header('Content-Disposition: attachment; filename="Karte.png"');
-      ImagePNG($mainimage);
+			imagejpeg($mainimage, IMAGEPATH.$jpgfile);
     }
-    else{
-    	ob_end_clean();
-      header('content-type: image/jpg');
-#      header('Content-Disposition: attachment; filename="Karte.jpg"');
-      readfile(IMAGEPATH.$jpgfile);
-    }
+		header('Location: '.TEMPPATH_REL.$jpgfile);
   }
 
   # Funktion zu Testzwecken der postgresql-Datenbankanfragens
