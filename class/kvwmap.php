@@ -12138,6 +12138,8 @@ class GUI {
 		$withoutwhere = substr($select, 0, $whereposition);
 		$fromposition = strpos(strtolower($withoutwhere), ' from ');
 		$alias = $this->pgdatabase->get_table_alias('alkis.ax_flurstueck', $fromposition, $withoutwhere);
+		$orderbyposition = strpos(strtolower($select), ' order by ');
+		if($orderbyposition > 0)$select = substr($select, 0, $orderbyposition);
 		if(strpos(strtolower($select), ' where ') === false)$select .= " WHERE ";
 		else $select .= " AND ";		
 		$datastring = $datageom." from (".$select;
