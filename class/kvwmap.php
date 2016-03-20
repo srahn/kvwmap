@@ -2489,14 +2489,13 @@ class GUI {
       ImageCopy($mainimage, $scaleimage, imagesx($mainimage)-imagesx($scaleimage), imagesy($mainimage)-imagesy($scaleimage), 0, 0, imagesx($scaleimage), imagesy($scaleimage));
       ob_end_clean();
       ob_start("output_handler");
-      header('content-type: image/png');
-#      header('Content-Disposition: attachment; filename="Karte.png"');
-      ImagePNG($mainimage);
+      header('Content-Disposition: inline; filename="Karte.jpg"');
+      ImageJPEG($mainimage);
     }
     else{
     	ob_end_clean();
       header('content-type: image/jpg');
-#      header('Content-Disposition: attachment; filename="Karte.jpg"');
+      header('Content-Disposition: inline; filename="Karte.jpg"');
       readfile(IMAGEPATH.$jpgfile);
     }
   }
@@ -12141,6 +12140,8 @@ class GUI {
 		$withoutwhere = substr($select, 0, $whereposition);
 		$fromposition = strpos(strtolower($withoutwhere), ' from ');
 		$alias = $this->pgdatabase->get_table_alias('alkis.ax_flurstueck', $fromposition, $withoutwhere);
+		$orderbyposition = strpos(strtolower($select), ' order by ');
+		if($orderbyposition > 0)$select = substr($select, 0, $orderbyposition);
 		if(strpos(strtolower($select), ' where ') === false)$select .= " WHERE ";
 		else $select .= " AND ";		
 		$datastring = $datageom." from (".$select;
