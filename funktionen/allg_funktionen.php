@@ -1370,8 +1370,6 @@ function formvars_strip($formvars, $strip_list) {
 function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $subject, $message, $attachement, $mode, $smtp_server, $smtp_port) {
   if ($mode == 'sendEmail async') {
     # Erstelle Befehl für sendEmail und schreibe in Temp Verzeichnis.
-    $smtp_server = 'smtp.p4.net';
-    $smtp_port = '25';
     $str = '-v -t ' . $to_email . ' -f ' . $from_email . ' -s ' . $smtp_server . ':' . $smtp_port . ' -o tls=yes -u "' . $subject . '" -m "' . $message;
     $str = array('to_email' => $to_email, 'from_email' => $from_email, 'subject' => $subject, 'message' => $message, 'attachment' => $attachement);
     if(!is_dir(MAILQUEUEPATH)){
