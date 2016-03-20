@@ -250,6 +250,8 @@ define('STOPWORDFILE',SHAPEPATH.'gazetteer/top10000de.txt');
 
 # Imagepath
 define('IMAGEPATH',INSTALLPATH.'tmp/');
+# Mailpath
+define('MAILQUEUEPATH', IMAGEPATH . 'mail_queue/');           # Version 2.4
 # Pfad für selbst gemachte Bilder
 define('CUSTOM_IMAGE_PATH',SHAPEPATH.'bilder/');                # Version 1.6.9
 #Cachespeicherort

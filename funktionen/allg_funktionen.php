@@ -1041,8 +1041,6 @@ function date_ok($date) {
 
 
    $yy = strtok($date,"-");
-   $mm = strtok("-");
-   $dd = strtok("-");
 
    $ok = True;
 
@@ -1374,10 +1372,16 @@ function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $
     # Erstelle Befehl für sendEmail und schreibe in Temp Verzeichnis.
     $smtp_server = 'smtp.p4.net';
     $smtp_port = '25';
-    $str = '-v -t ' . $to_email . ' -f ' . $from_email . ' -s ' . $smtp_server ':' . $smtp_port . ' -o tls=yes -u "' . $subject . '" -m "' . $message;
-    $file = IMAGEPATH . uniquid('mail', true) . '.txt';
-    file_put_contents($file, $str);
-  }
+    $str = '-v -t ' . $to_email . ' -f ' . $from_email . ' -s ' . $smtp_server . ':' . $smtp_port . ' -o tls=yes -u "' . $subject . '" -m "' . $message;
+    $str = array('to_email' => $to_email, 'from_email' => $from_email, 'subject' => $subject, 'message' => $message, 'attachment' => $attachement);
+    if(!is_dir(MAILQUEUEPATH)){
+      mkdir(MAILQUEUEPATH);
+    }
+    $file = MAILQUEUEPATH . 'email' . date('YmdHis', time()) . '_' . uniqid('', false) . '.txt';
+    $str_json = json_encode($str); 
+    #echo 'Schreibe text: ' . $str_json . ' in Datei: ' . $file;
+    file_put_contents($file, $str_json); 
+} else {
 	$grenze = "---" . md5(uniqid(mt_rand(), 1)) . "---";
 
 	$headers ="MIME-Version: 1.0\r\n";
@@ -1414,6 +1418,7 @@ function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $
 #  echo 'headers: '.$headers.'<br>';  
 	if (@mail($to_email, $subject, $botschaft, $headers)) return 1;
 	else return 0;
+  }
 }
 
 function sendEmail($from, $to, $subject, $message, $attachement) {
