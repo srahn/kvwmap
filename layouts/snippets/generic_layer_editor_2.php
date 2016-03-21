@@ -175,7 +175,7 @@
 							if($nl AND $attributes['attribute_name'][$j] != 'oben')$next_line .= $td; else $datapart .= $td;
 						}
 						if($attributes['attribute_name'][$j] == 'oben')$nl = true;										# Attributname soll oben stehen -> alle weiteren tds für die nächste Zeile aufsammeln
-						$td = '	<td class="gle_attribute_value" width="10px"'; if($attributes['position'][$j+1] != 'daneben')$td .= 'colspan="20"'; $td .= '>';												
+						$td = '	<td class="gle_attribute_value"'; if($attributes['position'][$j+1] != 'daneben')$td .= 'colspan="20"'; $td .= '>';												
 						$td.= 			attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size, $select_width, $this->user->rolle->fontsize_gle);
 						$td.= '	</td>';
 						if($nl)$next_line .= $td; else $datapart .= $td;
