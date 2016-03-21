@@ -548,12 +548,12 @@ class pgdatabase {
 	      		}
 	      	}
 	      }
-	      else{ # tabellenname.attributname
+	      else{ # 'irgendein String' as ...
 	        $fieldname = explode('.', $explosion[0]);
 	        if(strpos($fieldname[count($fieldname)-1], "'") !== false){
-	          return '';
+	          $name_pair['no_real_attribute'] = true;
 	        }
-	        else{
+	        else{		# tabellenname.attributname
 	          $name_pair['real_name'] = $fieldname[count($fieldname)-1];
 	          $name_pair['name'] = $explosion[count($explosion)-1];
 	        }
