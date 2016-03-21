@@ -36,7 +36,7 @@ include_once(SNIPPETS.'/generic_form_parts.php');
 			}
 			$last_attribute_index = NULL;
 			for($i = 0; $i < count($this->attributes['name']); $i++){
-        if($this->attributes['type'][$i] != 'geometry' AND $this->attributes['form_element_type'][$i] != 'SubFormFK'){					
+        if($this->attributes['type'][$i] != 'geometry' AND !($this->attributes['form_element_type'][$i] == 'SubFormFK' AND $this->attributes['type'][$i] == 'not_saveable')){					
 					if($this->attributes['group'][$i] != $this->attributes['group'][$last_attribute_index]){		# wenn die vorige Gruppe anders ist: ...
 						$explosion = explode(';', $this->attributes['group'][$i]);
 						if($explosion[1] != '')$collapsed = true;else $collapsed = false;
@@ -75,12 +75,19 @@ include_once(SNIPPETS.'/generic_form_parts.php');
           ?></td>
             <td>&nbsp;&nbsp;</td>
             <td width="100px">
+							<?
+								if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == 'LIKE' 					# ähnlich vorauswählen
+								OR (in_array($this->attributes['form_element_type'][$i], array('Text','Textfeld')) 
+										AND in_array($this->attributes['type'][$i], array('varchar', 'text', 'not_saveable')) 
+										AND $this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == '')
+								)$this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] = 'LIKE';
+							?>
               <select  style="width:75px" <? if(count($this->attributes['enum_value'][$i]) == 0){ ?>onchange="operatorchange('<? echo $this->attributes['name'][$i]; ?>', <? echo $searchmask_number; ?>);" id="<? echo $prefix; ?>operator_<? echo $this->attributes['name'][$i]; ?>" <? } ?> name="<? echo $prefix; ?>operator_<? echo $this->attributes['name'][$i]; ?>">
                 <option title="<? echo $strEqualHint; ?>" value="=" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == '='){ echo 'selected';} ?> >=</option>
                 <option title="<? echo $strNotEqualHint; ?>" value="!=" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == '!='){ echo 'selected';} ?> >!=</option>
                 <option title="<? echo $strLowerHint; ?>" value="<" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == '<'){ echo 'selected';} ?> ><</option>
                 <option title="<? echo $strGreaterHint; ?>" value=">" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == '>'){ echo 'selected';} ?> >></option>
-                <option title="<? echo $strLikeHint; ?>" value="LIKE" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == 'LIKE' OR (in_array($this->attributes['form_element_type'][$i], array('Text','Textfeld')) AND in_array($this->attributes['type'][$i], array('varchar', 'text', 'not_saveable')) AND $this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == '')){ echo 'selected';} ?> ><? echo $strLike; ?></option>
+                <option title="<? echo $strLikeHint; ?>" value="LIKE" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == 'LIKE'){ echo 'selected';} ?> ><? echo $strLike; ?></option>
                 <option title="<? echo $strLikeHint; ?>" value="NOT LIKE" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == 'NOT LIKE'){ echo 'selected';} ?> ><? echo $strNotLike; ?></option>
                 <option title="<? echo $strIsEmptyHint; ?>" value="IS NULL" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == 'IS NULL'){ echo 'selected';} ?> ><? echo $strIsEmpty; ?></option>
                 <option title="<? echo $strIsNotEmptyHint; ?>" value="IS NOT NULL" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == 'IS NOT NULL'){ echo 'selected';} ?> ><? echo $strIsNotEmpty; ?></option>
@@ -114,7 +121,19 @@ include_once(SNIPPETS.'/generic_form_parts.php');
                 }break;
 								
 								case 'Autovervollständigungsfeld' : {
-									echo Autovervollstaendigungsfeld($this->formvars['selected_layer_id'], $this->attributes['name'][$i], $i, $this->attributes['alias'][$i], $prefix.'value_'.$this->attributes['name'][$i], $this->formvars[$prefix.'value_'.$this->attributes['name'][$i]], $this->attributes['enum_output'][$i][0], 1, 0, NULL, NULL, NULL, NULL, false, 15);
+									echo '<div id="'.$prefix.'_avf_'.$this->attributes['name'][$i].'" style="';
+									if(in_array($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]], array('LIKE', 'NOT LIKE')))echo 'display:none';
+									echo '">';
+										echo Autovervollstaendigungsfeld($this->formvars['selected_layer_id'], $this->attributes['name'][$i], $i, $this->attributes['alias'][$i], $prefix.'value_'.$this->attributes['name'][$i], $this->formvars[$prefix.'value_'.$this->attributes['name'][$i]], $this->attributes['enum_output'][$i][0], 1, $prefix, NULL, NULL, NULL, NULL, false, 15);
+									echo '</div>';
+									echo '<div id="'.$prefix.'_text_'.$this->attributes['name'][$i].'" style="';
+									if(!in_array($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]], array('LIKE', 'NOT LIKE')))echo 'display:none';
+									echo '">';
+										echo '<input size="24" id="'.$prefix.'text_value_'.$this->attributes['name'][$i].'" name="'.$prefix.'value_'.$this->attributes['name'][$i].'" type="text" value="'.$this->formvars[$prefix.'value_'.$this->attributes['name'][$i]].'"';
+										if(!in_array($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]], array('LIKE', 'NOT LIKE')))echo ' disabled="true"';
+										echo '>';
+									echo '</div>';
+									
 								}break;
                 
                 case 'Checkbox' : {

@@ -51,9 +51,27 @@ function operatorchange(attributname, searchmask_number){
 		document.getElementById(prefix+"value_"+attributname).size = 9;
 	}
 	else{
-		changeInputType(document.getElementById(prefix+"value2_"+attributname), "hidden");
-		document.getElementById(prefix+"value2_"+attributname).value = "";
-		document.getElementById(prefix+"value_"+attributname).size = 24;
+		if(document.getElementById(prefix+"value2_"+attributname) != undefined){
+			changeInputType(document.getElementById(prefix+"value2_"+attributname), "hidden");
+			document.getElementById(prefix+"value2_"+attributname).value = "";
+			document.getElementById(prefix+"value_"+attributname).size = 24;
+		}
+	}
+	if(document.getElementById(prefix+"_avf_"+attributname) != undefined){
+		if(document.getElementById(prefix+"operator_"+attributname).value == "LIKE" || document.getElementById(prefix+"operator_"+attributname).value == "NOT LIKE"){
+			document.getElementById(prefix+"_avf_"+attributname).style.display = 'none';
+			document.getElementById(prefix+"_text_"+attributname).style.display = 'inline';
+			document.getElementById(prefix+"text_value_"+attributname).value = '';
+			document.getElementById(attributname+"_"+prefix).disabled = true;
+			document.getElementById(prefix+"text_value_"+attributname).disabled = false;
+		}
+		else{
+			document.getElementById(prefix+"_avf_"+attributname).style.display = 'inline';
+			document.getElementById(prefix+"_text_"+attributname).style.display = 'none';			
+			document.getElementById(attributname+"_"+prefix).value = '';
+			document.getElementById(attributname+"_"+prefix).disabled = false;
+			document.getElementById(prefix+"text_value_"+attributname).disabled = true;
+		}
 	}
 }
 

@@ -6496,35 +6496,35 @@ class GUI {
 				$path = str_replace('$language', $this->user->rolle->language, $path);
         $privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
         $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
-        $layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
+        $attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
 		    # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
-		   	# $layerset[0]['attributes'] = $mapDB->add_attribute_values($layerset[0]['attributes'], $layerdb, NULL, true); kann weg, weils weiter unten steht
+		   	# $attributes = $mapDB->add_attribute_values($attributes, $layerdb, NULL, true); kann weg, weils weiter unten steht
 
     		# order by rausnehmen
 		  	$orderbyposition = strrpos(strtolower($newpath), 'order by');
 				$lastfromposition = strrpos(strtolower($newpath), 'from');
 		  	if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
-			  	$layerset[0]['attributes']['orderby'] = ' '.substr($newpath, $orderbyposition);
+			  	$attributes['orderby'] = ' '.substr($newpath, $orderbyposition);
 			  	$newpath = substr($newpath, 0, $orderbyposition);
 		  	}
 		  	
 		  	# group by rausnehmen
 				$groupbyposition = strpos(strtolower($newpath), 'group by');
 				if($groupbyposition !== false){
-					$layerset[0]['attributes']['groupby'] = ' '.substr($newpath, $groupbyposition);
+					$attributes['groupby'] = ' '.substr($newpath, $groupbyposition);
 					$newpath = substr($newpath, 0, $groupbyposition);
 		  	}
             
         if($privileges == NULL){    # kein Eintrag -> alle Attribute lesbar
-          for($j = 0; $j < count($layerset[0]['attributes']['name']); $j++){
-            $layerset[0]['attributes']['privileg'][$j] = '0';
-            $layerset[0]['attributes']['privileg'][$layerset[0]['attributes']['name'][$j]] = '0';
+          for($j = 0; $j < count($attributes['name']); $j++){
+            $attributes['privileg'][$j] = '0';
+            $attributes['privileg'][$attributes['name'][$j]] = '0';
           }
         }
         else{
-          for($j = 0; $j < count($layerset[0]['attributes']['name']); $j++){
-            $layerset[0]['attributes']['privileg'][$j] = $privileges[$layerset[0]['attributes']['name'][$j]];
-            $layerset[0]['attributes']['privileg'][$layerset[0]['attributes']['name'][$j]] = $privileges[$layerset[0]['attributes']['name'][$j]];
+          for($j = 0; $j < count($attributes['name']); $j++){
+            $attributes['privileg'][$j] = $privileges[$attributes['name'][$j]];
+            $attributes['privileg'][$attributes['name'][$j]] = $privileges[$attributes['name'][$j]];
           }
         }
 
@@ -6538,61 +6538,87 @@ class GUI {
 						$sql_where .= ' AND (';		// eine äußere Klammer, dadurch die ORs darin eingeschlossen sind
 					}
 					$sql_where .= ' (1=1';			// klammern
-					for($i = 0; $i < count($layerset[0]['attributes']['name']); $i++){
-						if($this->formvars[$prefix.'value_'.$layerset[0]['attributes']['name'][$i]] != ''){
-							if($this->formvars[$prefix.'operator_'.$layerset[0]['attributes']['name'][$i]] == 'LIKE' OR $this->formvars[$prefix.'operator_'.$layerset[0]['attributes']['name'][$i]] == 'NOT LIKE'){
-								$value = $this->formvars[$prefix.'value_'.$layerset[0]['attributes']['name'][$i]];
+					$value_like = '';
+					$operator_like = '';
+					for($i = 0; $i < count($attributes['name']); $i++){
+						$value = $this->formvars[$prefix.'value_'.$attributes['name'][$i]];
+						$operator = $this->formvars[$prefix.'operator_'.$attributes['name'][$i]];
+						if($value != ''){
+							if($operator == 'LIKE' OR $operator == 'NOT LIKE'){
 								if(strpos($value, '%') === false)$value = '%'.$value.'%';
-								$sql_where .= ' AND LOWER(CAST(query.'.$layerset[0]['attributes']['name'][$i].' AS TEXT)) '.$this->formvars[$prefix.'operator_'.$layerset[0]['attributes']['name'][$i]].' ';
+								################  Autovervollständigungsfeld ########################################
+								if($attributes['form_element_type'][$i] = 'Autovervollständigungsfeld' AND $attributes['options'][$i] != ''){
+									$optionen = explode(';', $attributes['options'][$i]);  # SQL; weitere Optionen
+									$sql = 'SELECT * FROM ('.$optionen[0].') as foo WHERE output '.$operator.' \''.$value.'\'';
+									$ret=$layerdb->execSQL($sql,4,0);
+									if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
+									while($rs = pg_fetch_assoc($ret[1])){
+										$keys[] = $rs['value'];
+									}
+									$value_like = $value;					# Value sichern
+									$operator_like = $operator;			# Operator sichern
+									$this->formvars[$prefix.'value_'.$attributes['name'][$i]] = implode('|', $keys);
+									$this->formvars[$prefix.'operator_'.$attributes['name'][$i]] = 'IN';									
+									$i--;
+									continue;		# dieses Attribut nochmal behandeln aber diesmal mit dem Operator IN und den gefundenen Schlüsseln der LIKE-Suche
+								}
+								#####################################################################################
+								$sql_where .= ' AND LOWER(CAST(query.'.$attributes['name'][$i].' AS TEXT)) '.$operator.' ';
 								$sql_where.='LOWER(\''.$value.'\')';
 							}
 							else{
-								if($this->formvars[$prefix.'operator_'.$layerset[0]['attributes']['name'][$i]] == 'IN'){
-									$parts = explode('|', $this->formvars[$prefix.'value_'.$layerset[0]['attributes']['name'][$i]]);
+								if($operator == 'IN'){
+									$parts = explode('|', $value);
 									for($j = 0; $j < count($parts); $j++){
 										if(substr($parts[$j], 0, 1) != '\''){$parts[$j] = '\''.$parts[$j];}
 										if(substr($parts[$j], -1) != '\''){$parts[$j] = $parts[$j].'\'';}
 									}
 									$instring = implode(',', $parts);
-									$sql_where .= ' AND LOWER(CAST(query.'.$layerset[0]['attributes']['name'][$i].' AS TEXT)) '.$this->formvars[$prefix.'operator_'.$layerset[0]['attributes']['name'][$i]].' ';
+									$sql_where .= ' AND LOWER(CAST(query.'.$attributes['name'][$i].' AS TEXT)) '.$operator.' ';
 									$sql_where .= '('.strtolower($instring).')';
+									if($value_like != ''){			# Parameter wieder auf die der LIKE-Suche setzen
+										$this->formvars[$prefix.'operator_'.$attributes['name'][$i]] = $operator_like;
+										$this->formvars[$prefix.'value_'.$attributes['name'][$i]] = $value_like;
+										$value_like = '';
+										$operator_like = '';
+									}
 								}
 								else{
-									$sql_where .= ' AND query.'.$layerset[0]['attributes']['name'][$i].' '.$this->formvars[$prefix.'operator_'.$layerset[0]['attributes']['name'][$i]].' ';
-									$sql_where.='\''.$this->formvars[$prefix.'value_'.$layerset[0]['attributes']['name'][$i]].'\'';
+									$sql_where .= ' AND query.'.$attributes['name'][$i].' '.$operator.' ';
+									$sql_where.='\''.$value.'\'';
 								}
 							}
 						}
-						elseif($this->formvars[$prefix.'operator_'.$layerset[0]['attributes']['name'][$i]] == 'IS NULL' OR $this->formvars[$prefix.'operator_'.$layerset[0]['attributes']['name'][$i]] == 'IS NOT NULL'){
-							if($layerset[0]['attributes']['type'][$i] == 'bpchar' OR $layerset[0]['attributes']['type'][$i] == 'varchar' OR $layerset[0]['attributes']['type'][$i] == 'text'){
-								if($this->formvars[$prefix.'operator_'.$layerset[0]['attributes']['name'][$i]] == 'IS NULL'){
-									$sql_where .= ' AND (query.'.$layerset[0]['attributes']['name'][$i].' '.$this->formvars[$prefix.'operator_'.$layerset[0]['attributes']['name'][$i]].' OR query.'.$layerset[0]['attributes']['name'][$i].' = \'\') ';
+						elseif($operator == 'IS NULL' OR $operator == 'IS NOT NULL'){
+							if($attributes['type'][$i] == 'bpchar' OR $attributes['type'][$i] == 'varchar' OR $attributes['type'][$i] == 'text'){
+								if($operator == 'IS NULL'){
+									$sql_where .= ' AND (query.'.$attributes['name'][$i].' '.$operator.' OR query.'.$attributes['name'][$i].' = \'\') ';
 								}
 								else{
-									$sql_where .= ' AND query.'.$layerset[0]['attributes']['name'][$i].' '.$this->formvars[$prefix.'operator_'.$layerset[0]['attributes']['name'][$i]].' AND query.'.$layerset[0]['attributes']['name'][$i].' != \'\' ';
+									$sql_where .= ' AND query.'.$attributes['name'][$i].' '.$operator.' AND query.'.$attributes['name'][$i].' != \'\' ';
 								}
 							}
 							else{
-								$sql_where .= ' AND query.'.$layerset[0]['attributes']['name'][$i].' '.$this->formvars[$prefix.'operator_'.$layerset[0]['attributes']['name'][$i]].' ';
+								$sql_where .= ' AND query.'.$attributes['name'][$i].' '.$operator.' ';
 							}
 						}
-						if($this->formvars[$prefix.'value2_'.$layerset[0]['attributes']['name'][$i]] != ''){
-							$sql_where.=' AND \''.$this->formvars[$prefix.'value2_'.$layerset[0]['attributes']['name'][$i]].'\'';
+						if($this->formvars[$prefix.'value2_'.$attributes['name'][$i]] != ''){
+							$sql_where.=' AND \''.$this->formvars[$prefix.'value2_'.$attributes['name'][$i]].'\'';
 						}
 						# räumliche Einschränkung
-						if($m == 0 AND $layerset[0]['attributes']['name'][$i] == $layerset[0]['attributes']['the_geom']){		// nur einmal machen, also nur bei $m == 0
+						if($m == 0 AND $attributes['name'][$i] == $attributes['the_geom']){		// nur einmal machen, also nur bei $m == 0
 							if($this->formvars['newpathwkt'] != ''){
 								if (strpos(strtolower($this->formvars['newpathwkt']), 'polygon') !== false) {
 									# Suche im Suchpolygon
-									$spatial_sql_where =' AND st_intersects('.$layerset[0]['attributes']['the_geom'].', (st_transform(st_geomfromtext(\''.$this->formvars['newpathwkt'].'\', '.$this->user->rolle->epsg_code.'), '.$layerset[0]['epsg_code'].')))';  
+									$spatial_sql_where =' AND st_intersects('.$attributes['the_geom'].', (st_transform(st_geomfromtext(\''.$this->formvars['newpathwkt'].'\', '.$this->user->rolle->epsg_code.'), '.$layerset[0]['epsg_code'].')))';  
 								}
 								if (strpos(strtolower($this->formvars['newpathwkt']), 'point') !== false) {
 									# Suche an Punktkoordinaten mit übergebener SRID
-									$spatial_sql_where.=" AND st_within(st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$this->formvars['epsg_code']."), ".$layerset[0]['epsg_code']."), ".$layerset[0]['attributes']['the_geom'].")";
+									$spatial_sql_where.=" AND st_within(st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$this->formvars['epsg_code']."), ".$layerset[0]['epsg_code']."), ".$attributes['the_geom'].")";
 								}
 							}
 							# Suche nur im Stellen-Extent
-							$spatial_sql_where.=' AND ('.$layerset[0]['attributes']['the_geom'].' && st_transform(st_geomfromtext(\'POLYGON(('.$this->Stelle->MaxGeorefExt->minx.' '.$this->Stelle->MaxGeorefExt->miny.', '.$this->Stelle->MaxGeorefExt->maxx.' '.$this->Stelle->MaxGeorefExt->miny.', '.$this->Stelle->MaxGeorefExt->maxx.' '.$this->Stelle->MaxGeorefExt->maxy.', '.$this->Stelle->MaxGeorefExt->minx.' '.$this->Stelle->MaxGeorefExt->maxy.', '.$this->Stelle->MaxGeorefExt->minx.' '.$this->Stelle->MaxGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layerset[0]['epsg_code'].') OR '.$layerset[0]['attributes']['the_geom'].' IS NULL)';
+							$spatial_sql_where.=' AND ('.$attributes['the_geom'].' && st_transform(st_geomfromtext(\'POLYGON(('.$this->Stelle->MaxGeorefExt->minx.' '.$this->Stelle->MaxGeorefExt->miny.', '.$this->Stelle->MaxGeorefExt->maxx.' '.$this->Stelle->MaxGeorefExt->miny.', '.$this->Stelle->MaxGeorefExt->maxx.' '.$this->Stelle->MaxGeorefExt->maxy.', '.$this->Stelle->MaxGeorefExt->minx.' '.$this->Stelle->MaxGeorefExt->maxy.', '.$this->Stelle->MaxGeorefExt->minx.' '.$this->Stelle->MaxGeorefExt->miny.'))\', '.$this->user->rolle->epsg_code.'), '.$layerset[0]['epsg_code'].') OR '.$attributes['the_geom'].' IS NULL)';
 						}
 					}
 					$sql_where .= ')';		// Klammer von der boolschen Verkettung wieder zu
@@ -6608,11 +6634,11 @@ class GUI {
         else{
           $pfad = substr(trim($newpath), 7);
         }
-				$geometrie_tabelle = $layerset[0]['attributes']['table_name'][$layerset[0]['attributes']['the_geom']];
+				$geometrie_tabelle = $attributes['table_name'][$attributes['the_geom']];
         $j = 0;
-        foreach($layerset[0]['attributes']['all_table_names'] as $tablename){
-					if(($tablename == $layerset[0]['maintable'] OR $tablename == $geometrie_tabelle) AND $layerset[0]['attributes']['oids'][$j]){		# hat Haupttabelle oder Geometrietabelle oids?
-            $pfad = $layerset[0]['attributes']['table_alias_name'][$tablename].'.oid AS '.$tablename.'_oid, '.$pfad;
+        foreach($attributes['all_table_names'] as $tablename){
+					if(($tablename == $layerset[0]['maintable'] OR $tablename == $geometrie_tabelle) AND $attributes['oids'][$j]){		# hat Haupttabelle oder Geometrietabelle oids?
+            $pfad = $attributes['table_alias_name'][$tablename].'.oid AS '.$tablename.'_oid, '.$pfad;
 						if($this->formvars['operator_'.$tablename.'_oid'] == '')$this->formvars['operator_'.$tablename.'_oid'] = '=';
             if($this->formvars['value_'.$tablename.'_oid']){
               $sql_where .= ' AND '.$tablename.'_oid '.$this->formvars['operator_'.$tablename.'_oid'].' '.$this->formvars['value_'.$tablename.'_oid'];
@@ -6632,11 +6658,11 @@ class GUI {
         }
         
         # group by wieder einbauen
-				if($layerset[0]['attributes']['groupby'] != ''){
-					$pfad .= $layerset[0]['attributes']['groupby'];
+				if($attributes['groupby'] != ''){
+					$pfad .= $attributes['groupby'];
 					$j = 0;
-					foreach($layerset[0]['attributes']['all_table_names'] as $tablename){
-								if($tablename == $layerset[0]['maintable'] AND $layerset[0]['attributes']['oids'][$j]){		# hat Haupttabelle oids?
+					foreach($attributes['all_table_names'] as $tablename){
+								if($tablename == $layerset[0]['maintable'] AND $attributes['oids'][$j]){		# hat Haupttabelle oids?
 									$pfad .= ','.$tablename.'_oid ';
 								}
 								$j++;
@@ -6648,13 +6674,13 @@ class GUI {
         if($this->formvars['orderby'.$layerset[0]['Layer_ID']] != ''){									# Fall 1: im GLE soll nach einem Attribut sortiert werden
           $sql_order = ' ORDER BY '.$this->formvars['orderby'.$layerset[0]['Layer_ID']];
         }
-        elseif($layerset[0]['attributes']['orderby'] != ''){										# Fall 2: der Layer hat im Pfad ein ORDER BY
-        	$sql_order = $layerset[0]['attributes']['orderby'];
+        elseif($attributes['orderby'] != ''){										# Fall 2: der Layer hat im Pfad ein ORDER BY
+        	$sql_order = $attributes['orderby'];
         }
         																																						# standardmäßig wird nach der oid sortiert
 				$j = 0;
-				foreach($layerset[0]['attributes']['all_table_names'] as $tablename){
-					if($tablename == $layerset[0]['maintable'] AND $layerset[0]['attributes']['oids'][$j]){      # hat die Haupttabelle oids, dann wird immer ein order by oid gemacht, sonst ist die Sortierung nicht eindeutig
+				foreach($attributes['all_table_names'] as $tablename){
+					if($tablename == $layerset[0]['maintable'] AND $attributes['oids'][$j]){      # hat die Haupttabelle oids, dann wird immer ein order by oid gemacht, sonst ist die Sortierung nicht eindeutig
 						if($sql_order == '')$sql_order = ' ORDER BY '.$layerset[0]['maintable'].'_oid ';
 						else $sql_order .= ', '.$layerset[0]['maintable'].'_oid ';
 					}
@@ -6699,7 +6725,7 @@ class GUI {
         }
         # Hier nach der Abfrage der Sachdaten die weiteren Attributinformationen hinzufügen
         # Steht an dieser Stelle, weil die Auswahlmöglichkeiten von Auswahlfeldern abhängig sein können
-        $layerset[0]['attributes'] = $mapDB->add_attribute_values($layerset[0]['attributes'], $layerdb, $layerset[0]['shape'], true, $this->Stelle->id);
+        $attributes = $mapDB->add_attribute_values($attributes, $layerdb, $layerset[0]['shape'], true, $this->Stelle->id);
         
 				if($layerset[0]['count'] != 0 AND $this->formvars['embedded_subformPK'] == '' AND $this->formvars['embedded'] == '' AND $this->formvars['embedded_dataPDF'] == ''){
 					#if($this->formvars['go'] != 'neuer_Layer_Datensatz_speichern'){		// wenns nur die Anzeige des gerade angelegten Datensatzes ist, nicht als last_query speichern (wieder rausgenommen)
@@ -6709,7 +6735,7 @@ class GUI {
 					#}
         
 					# Querymaps erzeugen
-					if($layerset[0]['querymap'] == 1 AND $layerset[0]['attributes']['privileg'][$layerset[0]['attributes']['the_geom']] >= '0' AND ($layerset[0]['Datentyp'] == 1 OR $layerset[0]['Datentyp'] == 2)){
+					if($layerset[0]['querymap'] == 1 AND $attributes['privileg'][$attributes['the_geom']] >= '0' AND ($layerset[0]['Datentyp'] == 1 OR $layerset[0]['Datentyp'] == 2)){
 						for($k = 0; $k < count($layerset[0]['shape']); $k++){
 							$layerset[0]['querymaps'][$k] = $this->createQueryMap($layerset[0], $k);
 						}
@@ -6729,7 +6755,6 @@ class GUI {
 						$this->layerset[0]['shape'][0][$attributenames[$i]] = $values[$i];
 					}
 				}
-				$this->qlayerset[0]=$layerset[0];
       }break;
      
       case MS_WFS : {
@@ -6745,13 +6770,13 @@ class GUI {
         # Attributnamen ermitteln
         $wfs->describe_featuretype_request();
 				$wfs->getTargetNamespace();
-        $layerset[0]['attributes'] = $wfs->get_attributes();
+        $attributes = $wfs->get_attributes();
         # Filterstring erstellen
-        for($i = 0; $i < count($layerset[0]['attributes']['name']); $i++){
-          if($this->formvars['value_'.$layerset[0]['attributes']['name'][$i]] != '' OR $this->formvars['operator_'.$layerset[0]['attributes']['name'][$i]] == 'IS NULL' OR $this->formvars['operator_'.$layerset[0]['attributes']['name'][$i]] == 'IS NOT NULL'){
-            $attributenames[] = $layerset[0]['attributes']['name'][$i];
-            $operators[] = $this->formvars['operator_'.$layerset[0]['attributes']['name'][$i]];
-            $values[] = $this->formvars['value_'.$layerset[0]['attributes']['name'][$i]];
+        for($i = 0; $i < count($attributes['name']); $i++){
+          if($this->formvars['value_'.$attributes['name'][$i]] != '' OR $this->formvars['operator_'.$attributes['name'][$i]] == 'IS NULL' OR $this->formvars['operator_'.$attributes['name'][$i]] == 'IS NOT NULL'){
+            $attributenames[] = $attributes['name'][$i];
+            $operators[] = $this->formvars['operator_'.$attributes['name'][$i]];
+            $values[] = $this->formvars['value_'.$attributes['name'][$i]];
           }
         }
         $filter = $wfs->create_filter($attributenames, $operators, $values);
@@ -6762,15 +6787,17 @@ class GUI {
         $wfs->get_feature_request(NULL, $filter, $this->formvars['anzahl']);
         $features = $wfs->extract_features();
         for($j = 0; $j < count($features); $j++){
-          for($k = 0; $k < count($layerset[0]['attributes']['name']); $k++){
-            $layerset[0]['shape'][$j][$layerset[0]['attributes']['name'][$k]] = $features[$j]['value'][$layerset[0]['attributes']['name'][$k]];
-            $layerset[0]['attributes']['privileg'][$k] = 0;
+          for($k = 0; $k < count($attributes['name']); $k++){
+            $layerset[0]['shape'][$j][$attributes['name'][$k]] = $features[$j]['value'][$attributes['name'][$k]];
+            $attributes['privileg'][$k] = 0;
           }
           $layerset[0]['shape'][$j]['wfs_geom'] = $features[$j]['geom'];
         }
-        $this->qlayerset[]=$layerset[0];
       }break;
     }   # Ende switch connectiontype
+		
+		$layerset[0]['attributes'] = $attributes;
+		$this->qlayerset[0]=$layerset[0];
 
     $i = 0;
     $this->search = true;
@@ -6791,14 +6818,14 @@ class GUI {
       }
 			if($this->formvars['printversion'] == '' AND $this->user->rolle->querymode == 1){		# bei aktivierter Datenabfrage in extra Fenster --> Laden der Karte und zoom auf Treffer (das Zeichnen der Karte passiert in einem separaten Ajax-Request aus dem Overlay heraus)
 				$this->loadMap('DataBase');
-				if(count($this->qlayerset[$i]['shape']) > 0 AND ($layerset[0]['shape'][0][$layerset[0]['attributes']['the_geom']] != '' OR $layerset[0]['shape'][0]['wfs_geom'] != '')){			# wenn was gefunden wurde und der Layer Geometrie hat, auf Datensätze zoomen
+				if(count($this->qlayerset[$i]['shape']) > 0 AND ($layerset[0]['shape'][0][$attributes['the_geom']] != '' OR $layerset[0]['shape'][0]['wfs_geom'] != '')){			# wenn was gefunden wurde und der Layer Geometrie hat, auf Datensätze zoomen
 					$this->zoomed = true;
 					switch ($layerset[0]['connectiontype']) {
 						case MS_POSTGIS : {
 							for($k = 0; $k < count($this->qlayerset[$i]['shape']); $k++){
 								$oids[] = $this->qlayerset[$i]['shape'][$k][$geometrie_tabelle.'_oid'];
 							}
-							$rect = $mapDB->zoomToDatasets($oids, $geometrie_tabelle, $layerset[0]['attributes']['the_geom'], 10, $layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+							$rect = $mapDB->zoomToDatasets($oids, $geometrie_tabelle, $attributes['the_geom'], 10, $layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code);
 							$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
 							if (MAPSERVERVERSION > 600) {
 								$this->map_scaledenom = $this->map->scaledenom;
@@ -13893,7 +13920,7 @@ class db_mapObj{
 									for($k = 0; $k < count($query_result); $k++){
 										$sql = $attributes['options'][$i];
 										$value = $query_result[$k][$attributes['name'][$i]];
-										if($value != ''){
+										if($value != '' AND strpos($value, '%') === false AND strpos($value, '|') === false){			# falls eine LIKE-Suche mit % oder eine IN-Suche mit | durchgeführt wurde
 											$sql = 'SELECT * FROM ('.$sql.') as foo WHERE value = \''.$value.'\'';
 											$ret=$database->execSQL($sql,4,0);
 											if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
