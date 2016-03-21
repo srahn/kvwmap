@@ -1,3 +1,4 @@
+
 <?php
 /* hier befindet sich ein lose Sammlung von Funktionen, die so oder ähnlich im php
  * Funktionenumfang nicht existieren, in älteren Versionen nicht existiert haben,
@@ -905,7 +906,7 @@ function showMessage($text, $fade = true) {
 			var Msg = document.getElementById("message_box");
 		}
 		Msg.className = 'message_box_visible';
-		Msg.style.top = document.body.scrollTop + 350;		
+		Msg.style.top = document.body.scrollTop + 500;		
 		var innerhtml = '<?php echo $text; ?>';
 		<? if($fade == true){ ?>
 			setTimeout(function() {Msg.className = 'message_box_hide';},1000);
@@ -1040,8 +1041,6 @@ function date_ok($date) {
 
 
    $yy = strtok($date,"-");
-   $mm = strtok("-");
-   $dd = strtok("-");
 
    $ok = True;
 
@@ -1368,7 +1367,19 @@ function formvars_strip($formvars, $strip_list) {
 * }
 * mail_att("empf@domain","Email mit Anhang","Im Anhang sind mehrere Datei",$anhang); 
 **/
-function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $subject, $message, $attachement) {
+function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $subject, $message, $attachement, $mode, $smtp_server, $smtp_port) {
+  if ($mode == 'sendEmail async') {
+    # Erstelle Befehl für sendEmail und schreibe in Temp Verzeichnis.
+    $str = '-v -t ' . $to_email . ' -f ' . $from_email . ' -s ' . $smtp_server . ':' . $smtp_port . ' -o tls=yes -u "' . $subject . '" -m "' . $message;
+    $str = array('to_email' => $to_email, 'from_email' => $from_email, 'subject' => $subject, 'message' => $message, 'attachment' => $attachement);
+    if(!is_dir(MAILQUEUEPATH)){
+      mkdir(MAILQUEUEPATH);
+    }
+    $file = MAILQUEUEPATH . 'email' . date('YmdHis', time()) . '_' . uniqid('', false) . '.txt';
+    $str_json = json_encode($str); 
+    #echo 'Schreibe text: ' . $str_json . ' in Datei: ' . $file;
+    file_put_contents($file, $str_json); 
+} else {
 	$grenze = "---" . md5(uniqid(mt_rand(), 1)) . "---";
 
 	$headers ="MIME-Version: 1.0\r\n";
@@ -1405,6 +1416,12 @@ function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $
 #  echo 'headers: '.$headers.'<br>';  
 	if (@mail($to_email, $subject, $botschaft, $headers)) return 1;
 	else return 0;
+  }
+}
+
+function sendEmail($from, $to, $subject, $message, $attachement) {
+  echo exec('sendEmail -v -t ' . $to . ' -f ' . $from . ' -s smtp.p4.net:25 -o tls=yes -u "' . $subject . '" -m "' . $message);
+  #echo exec('sendEmail -v -t ' . $to . ' -f ' . $from . ' -s smtp.p4.net:25 -o tls=yes -u "' . $subject . '" -m "' . $message . '" -a kvwmap-server/README.md');
 }
 
 /*
