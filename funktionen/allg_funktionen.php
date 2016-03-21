@@ -906,7 +906,7 @@ function showMessage($text, $fade = true) {
 			var Msg = document.getElementById("message_box");
 		}
 		Msg.className = 'message_box_visible';
-		Msg.style.top = document.body.scrollTop + 500;		
+		Msg.style.top = document.body.scrollTop + 350;		
 		var innerhtml = '<?php echo $text; ?>';
 		<? if($fade == true){ ?>
 			setTimeout(function() {Msg.className = 'message_box_hide';},1000);
