@@ -661,7 +661,7 @@ class data_import_export {
   }
 	
 	function ogr2ogr_export($sql, $exportformat, $exportfile, $layerdb){
-		$command = OGR_BINPATH.'ogr2ogr -f '.$exportformat.' -sql "'.$sql.'" '.$exportfile.' PG:"dbname='.$layerdb->dbName.' user='.$layerdb->user;
+		$command = 'export PGCLIENTENCODING=LATIN1;'.OGR_BINPATH.'ogr2ogr -f '.$exportformat.' -sql "'.$sql.'" '.$exportfile.' PG:"dbname='.$layerdb->dbName.' user='.$layerdb->user;
 		if($layerdb->passwd != '')$command.= ' password='.$layerdb->passwd;
 		if($layerdb->port != '')$command.=' port='.$layerdb->port;
 		if($layerdb->host != '') $command .= ' host=' . $layerdb->host;
@@ -821,6 +821,7 @@ class data_import_export {
     	if($this->formvars['check_'.$this->attributes['name'][$i]]){		# Entweder das Attribut wurde angehakt
     		$selection[$this->attributes['name'][$i]] = 1;
 				$selected_attributes[] = $this->attributes['name'][$i];						# Zusammensammeln der angehakten Attribute, denn nur die sollen weiter unten auch exportiert werden
+				$selected_attr_types[] = $this->attributes['type'][$i];
     	}
 			if(strpos($where, 'query.'.$this->attributes['name'][$i])){			# oder es kommt in der Where-Bedingung des Sachdatenabfrage-SQLs vor
 				$selection[$this->attributes['name'][$i]] = 1;
@@ -904,6 +905,13 @@ class data_import_export {
     $temp_table = 'shp_export_'.rand(1, 10000);
     $sql = 'CREATE TABLE public.'.$temp_table.' AS '.$sql;		# temporäre Tabelle erzeugen, damit das/die Schema/ta berücksichtigt werden
     $ret = $layerdb->execSQL($sql,4, 0);
+		
+		if($this->formvars['export_format'] == 'Shape'){				# das Abschneiden bei nicht in der Länge begrenzten Textspalten verhindern
+			for($s = 0; $s < count($selected_attributes); $s++){
+				if(in_array($selected_attr_types[$s], array('text', 'varchar')))$selected_attributes[$s] = $selected_attributes[$s].'::varchar(255)';
+			}
+		}
+		
     $sql = 'SELECT '.implode(', ', $selected_attributes).' FROM public.'.$temp_table;		# auf die ausgewählten Attribute einschränken
     $ret = $layerdb->execSQL($sql,4, 0);
     if(!$ret[0]){
