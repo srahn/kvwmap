@@ -98,7 +98,7 @@
 						$enum_value = $attributes['enum_value'][$j];
 						$enum_output = $attributes['enum_output'][$j];
 					}
-					if($attributes['nullable'][$j] != '0')$strPleaseSelect = $gui->strPleaseSelect;
+					if($attributes['nullable'][$j] != '0' OR $gui->new_entry == true)$strPleaseSelect = $gui->strPleaseSelect;
 					$datapart .= Auswahlfeld($layer_id, $name, $j, $alias, $fieldname, $value, $enum_value, $enum_output, $attributes['req_by'][$j], $attributes['name'], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $select_width, $fontsize, $strPleaseSelect);
 				}break;
 				
