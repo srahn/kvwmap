@@ -38,7 +38,8 @@ class ddl {
     $this->gui = $gui;
   }
   
-  function add_static_elements($offsetx, $offsety){
+  function add_static_elements($offsetx){
+		$offsety = $this->offsety;
 		# Hintergrundbild    
 		if($this->layout['bgsrc']){
     	$this->pdf->addJpegFromFile(DRUCKRAHMEN_PATH.basename($this->layout['bgsrc']),$this->layout['bgposx']+$offsetx,$this->layout['bgposy']-$offsety,$this->layout['bgwidth']);
@@ -59,7 +60,7 @@ class ddl {
     }
   }
 	
-	function add_freetexts($i, $offsetx, $offsety, $type, $pagenumber = NULL, $pagecount = NULL){
+	function add_freetexts($i, $offsetx, $type, $pagenumber = NULL, $pagecount = NULL){
 		if(count($this->remaining_freetexts) == 0)return;
     for($j = 0; $j < count($this->layout['texts']); $j++){
 			if($type != 'everypage' AND $this->page_overflow_by_sublayout){
@@ -85,7 +86,7 @@ class ddl {
 							continue;			# der Freitext ist abhängig aber das Attribut noch nicht geschrieben, Freitext merken und überspringen
 						}
 					}
-					if($offset_attribute == '')$y = $y - $offsety;
+					if($offset_attribute == '')$y = $y - $this->offsety;
 					if($type == 'running'){	# fortlaufende Freitexte
 						$pagecount = count($this->pdf->objects['3']['info']['pages']);								
 						if($this->layout['type'] == 1 AND $offset_attribute == '' AND $pagecount > 1)$y = $y + $this->initial_yoffset;		# ab der 2. Seite sollen die forlaufenden absolut positionierten Elemente oben auf der Seite beginnen
@@ -108,13 +109,13 @@ class ddl {
 		return $remaining_freetexts;
 	}
 	
-	function add_attribute_elements($selected_layer_id, $layerdb, $attributes, $oids, $offsetx, $offsety, $i, $preview){
+	function add_attribute_elements($selected_layer_id, $layerdb, $attributes, $oids, $offsetx, $i, $preview){
 		for($j = 0; $j < count($attributes['name']); $j++){		
 			$wordwrapoffset = 1;
 			if(in_array($attributes['name'][$j], $this->remaining_attributes) AND $this->layout['elements'][$attributes['name'][$j]]['ypos'] > 0){		# wenn Attribut noch nicht geschrieben wurde und einen y-Wert hat
 				# da ein Attribut zu einem Seitenüberlauf führen kann, müssen davor alle festen Freitexte geschrieben werden, die geschrieben werden können
 				# d.h. alle, deren Position nicht abhängig vom einem Attribut ist und alle deren Position abhängig ist und das Attribut schon geschrieben wurde
-				$this->remaining_freetexts = $this->add_freetexts($i, $offsetx, $offsety, 'fixed');			#  feste Freitexte hinzufügen
+				$this->remaining_freetexts = $this->add_freetexts($i, $offsetx, 'fixed');			#  feste Freitexte hinzufügen
 				if($attributes['type'][$j] != 'geometry'){
 					switch ($attributes['form_element_type'][$j]){
 						case 'SubFormPK' : case 'SubFormEmbeddedPK' : {
@@ -148,7 +149,7 @@ class ddl {
 								$pagecount = count($this->pdf->objects['3']['info']['pages']);								
 								if($this->layout['type'] == 1 AND $offset_attribute == '' AND $pagecount > 1)$ypos = $ypos + $this->initial_yoffset;		# ab der 2. Seite sollen die forlaufenden absolut positionierten Elemente oben auf der Seite beginnen
 								
-								$offy = 842 - $ypos + $offsety;
+								$offy = 842 - $ypos + $this->offsety;
 								
 								if($this->layout['type'] != 0 AND $offset_attribute == '' AND $this->i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben (aber nur bei abolut positionierten)
 									$offy = $offy + $this->yoffset_onpage+$this->layout['gap'];
@@ -216,20 +217,19 @@ class ddl {
 								elseif($this->layout['type'] == 0 AND $this->pdf->getFirstPageId() != end($this->pdf->objects['3']['info']['pages'])+1){
 									#$this->pdf->reopenObject($this->pdf->getFirstPageId());		# zurück zur ersten Seite bei seitenweisem Typ und allen absolut positionierten Attributen, wenn erforderlich
 								}
-								#### relative Positionierung über Offset-Attribut ####									
-								
+								#### relative Positionierung über Offset-Attribut ####																	
 								$zeilenhoehe = $this->layout['elements'][$attributes['name'][$j]]['fontsize'];      		      		
 								$x = $this->layout['elements'][$attributes['name'][$j]]['xpos'];								
 								
 								$pagecount = count($this->pdf->objects['3']['info']['pages']);								
 								if($this->layout['type'] == 1 AND $offset_attribute == '' AND $pagecount > 1)$y = $y + $this->initial_yoffset;		# ab der 2. Seite sollen die forlaufenden absolut positionierten Elemente oben auf der Seite beginnen
 								
-								if($offset_attribute == '')$y = $y - $offsety;
+								if($offset_attribute == '')$y = $y - $this->offsety;
 								
 								if($this->layout['type'] != 0 AND $offset_attribute == '' AND $this->i_on_page > 0){		# beim Untereinander-Typ y-Wert um Offset verschieben (aber nur bei absolut positionierten)
 									$y = $y - $this->yoffset_onpage-$this->layout['gap'];
 								}	
-								
+																
 								# beim jedem Datensatz die Gesamthoehe der Elemente des Datensatzes ermitteln
 								if($this->i_on_page == 0){
 									if($this->maxy < $y)$this->maxy = $y;		# beim ersten Datensatz das maxy ermitteln
@@ -299,7 +299,7 @@ class ddl {
 					$newname = $this->user->id.basename($filename);
 					rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
 					$x = $this->layout['elements'][$attributes['name'][$j]]['xpos'] + $offsetx;
-					$y = $this->layout['elements'][$attributes['name'][$j]]['ypos'] - $offsety;
+					$y = $this->layout['elements'][$attributes['name'][$j]]['ypos'] - $this->offsety;
 					if($this->i_on_page == 0){
 						if($this->maxy < $y+$this->layout['elements'][$attributes['name'][$j]]['width'])$this->maxy = $y+$this->layout['elements'][$attributes['name'][$j]]['width'];		# beim ersten Datensatz das maxy ermitteln
 					}    
@@ -317,7 +317,6 @@ class ddl {
 	}
 	
 	function handlePageOverflow($offset_attribute, $offset_value, $ypos){
-		#if($this->layout['page_id'][$offset_attribute] != end($this->pdf->ezPages)){
 		if($this->layout['page_id'][$offset_attribute] != $this->pdf->currentContents){
 			$backto_oldpage = true;															# das Offset-Attribut wurde auf einer anderen Seite beendet -> zu dieser Seite zurückkehren
 		}
@@ -328,7 +327,9 @@ class ddl {
 			}
 			else{
 				$this->pdf->ezNewPage();			# eine neue Seite beginnen
-				$this->miny[$this->pdf->currentContents] = 900;
+				$this->miny[$this->pdf->currentContents] = 842;
+				$this->maxy = 800;
+				if($this->layout['type'] == 2)$this->offsety = 50;
 			}
 		}
 		elseif($backto_oldpage){
@@ -436,6 +437,7 @@ class ddl {
 		$this->result = $result;
   	$this->user = $user;
   	$this->maxy = 0;
+		$this->offsety = $offsety;
   	#$this->miny = 1000000;
   	$this->i_on_page = -1;
   	$this->datasetcount_on_page = 0;
@@ -448,13 +450,13 @@ class ddl {
 			$this->pdf = $pdfobject;			# ein PDF-Objekt wurde aus einem übergeordneten Druckrahmen/Layer übergeben
 		}
 		$this->miny[$this->pdf->currentContents] = 1000000;
-		if($offsety)$this->miny[$this->pdf->currentContents] = 842 - $offsety;
+		if($this->offsety)$this->miny[$this->pdf->currentContents] = 842 - $this->offsety;
 		$this->pdf->ezSetMargins(40,30,0,0);
     if($this->layout['elements'][$attributes['the_geom']]['xpos'] > 0){		# wenn ein Geometriebild angezeigt werden soll -> loadmap()
     	$this->gui->map_factor = MAPFACTOR;
     	$this->gui->loadmap('DataBase');
     }
-		$this->add_static_elements($offsetx, $offsety);
+		$this->add_static_elements($offsetx);
     for($i = 0; $i < count($result); $i++){
 			$lastpage = end($this->pdf->objects['3']['info']['pages'])+1;
     	$this->i_on_page++;
@@ -465,18 +467,18 @@ class ddl {
 				$this->datasetcount_on_page = 0; # ??
 				$this->i_on_page = 1;	# ??
 				$this->maxy = 800;
-				if($this->layout['type'] == 2)$offsety = 50;		# das ist für den Fall, dass ein Sublayout in einem Sublayout einen Seitenüberlauf verursacht hat (hier muss eigentlich der Offset der nächsten Seite rein)
+				if($this->layout['type'] == 2)$this->offsety = 50;		# das ist für den Fall, dass ein Sublayout in einem Sublayout einen Seitenüberlauf verursacht hat (hier muss eigentlich der Offset der nächsten Seite rein)
 			}
     	if($this->layout['type'] == 0 AND $i > 0){		# neue Seite beim seitenweisen Typ und neuem Datensatz 
     		$this->pdf->newPage();
-				$this->add_static_elements($offsetx, $offsety);
+				$this->add_static_elements($offsetx);
     	}	
 	    if($this->datasetcount_on_page > 0 AND $this->layout['type'] != 0 AND $this->miny[$lastpage] < $this->yoffset_onpage/$this->datasetcount_on_page + 70){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
 				$this->datasetcount_on_page = 0;
 				$this->i_on_page = 0;
 				#$this->maxy = 0;
 				if(!$this->initial_yoffset)$this->initial_yoffset = 780-$this->maxy;			# der Offset von oben gesehen, mit dem das erste fortlaufende Element auf der ersten Seite beginnt; wird benutzt, um die fortlaufenden Elemente ab der 2. Seite oben beginnen zu lassen
-				if($this->layout['type'] == 2)$offsety = 50; else $offsety = 0;
+				if($this->layout['type'] == 2)$this->offsety = 50; else $this->offsety = 0;
 				$this->pdf->newPage();
 				$this->miny[$lastpage] = 1000000;
 				#$this->add_static_elements($offsetx, $offsety);
@@ -497,14 +499,14 @@ class ddl {
 			}
 			$test = 0;			
 			while($test < 100 AND count($this->remaining_attributes) > 0){
-				$this->add_attribute_elements($selected_layer_id, $layerdb, $this->attributes, $oids, $offsetx, $offsety, $i, $preview);	# übrig sind die, die noch nicht geschrieben wurden, weil sie abhängig sind
+				$this->add_attribute_elements($selected_layer_id, $layerdb, $this->attributes, $oids, $offsetx, $i, $preview);	# übrig sind die, die noch nicht geschrieben wurden, weil sie abhängig sind
 				$test++;
 			}			
 			################# Daten schreiben ###############
 			
 			################# fortlaufende Freitexte schreiben ###############
 			# (die festen Freitexte werden vor jedem Attribut geschrieben, da ein Attribut zu einem Seitenüberlauf führen können)
-			$this->remaining_freetexts = $this->add_freetexts($i, $offsetx, $offsety, 'running');
+			$this->remaining_freetexts = $this->add_freetexts($i, $offsetx, 'running');
 			################# fortlaufende Freitexte schreiben ###############
       $this->datasetcount_on_page++;
     }
