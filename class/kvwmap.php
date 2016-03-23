@@ -6547,11 +6547,11 @@ class GUI {
 						$operator = $this->formvars[$prefix.'operator_'.$attributes['name'][$i]];
 						if($value != ''){
 							if($operator == 'LIKE' OR $operator == 'NOT LIKE'){
-								if(strpos($value, '%') === false)$value = '%'.$value.'%';
 								################  Autovervollständigungsfeld ########################################
-								if($attributes['form_element_type'][$i] = 'Autovervollständigungsfeld' AND $attributes['options'][$i] != ''){
+								if($attributes['form_element_type'][$i] == 'Autovervollständigungsfeld' AND $attributes['options'][$i] != ''){
 									$optionen = explode(';', $attributes['options'][$i]);  # SQL; weitere Optionen
-									$sql = 'SELECT * FROM ('.$optionen[0].') as foo WHERE output '.$operator.' \''.$value.'\'';
+									if(strpos($value, '%') === false)$value2 = '%'.$value.'%';
+									$sql = 'SELECT * FROM ('.$optionen[0].') as foo WHERE output '.$operator.' \''.$value2.'\'';
 									$ret=$layerdb->execSQL($sql,4,0);
 									if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
 									while($rs = pg_fetch_assoc($ret[1])){
@@ -6565,6 +6565,7 @@ class GUI {
 									continue;		# dieses Attribut nochmal behandeln aber diesmal mit dem Operator IN und den gefundenen Schlüsseln der LIKE-Suche
 								}
 								#####################################################################################
+								if(strpos($value, '%') === false)$value = '%'.$value.'%';
 								$sql_where .= ' AND LOWER(CAST(query.'.$attributes['name'][$i].' AS TEXT)) '.$operator.' ';
 								$sql_where.='LOWER(\''.$value.'\')';
 							}
@@ -6939,7 +6940,7 @@ class GUI {
 		}
 	}
 	
-	function GenerischeSuche_Suchmaske(){	
+	function GenerischeSuche_Suchmaske(){
 		if($this->formvars['selected_layer_id']){   	
       $layerset=$this->user->rolle->getLayer($this->formvars['selected_layer_id']);
       switch ($layerset[0]['connectiontype']) {
@@ -7038,13 +7039,7 @@ class GUI {
           $path = $mapdb->getPath($this->formvars['selected_layer_id']);
           $privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
           $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
-          $attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
-          # wenn Attributname/Wert-Paare übergeben wurden, diese im Formular einsetzen
-	        for($i = 0; $i < count($attributes['name']); $i++){
-	          $this->qlayerset['shape'][0][$attributes['name'][$i]] = $this->formvars['value_'.$attributes['name'][$i]];
-	        }
-          # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
-					$this->attributes = $mapdb->add_attribute_values($attributes, $layerdb, $this->qlayerset['shape'], true, $this->Stelle->id);
+          $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
 					
 					# Speichern einer neuen Suchabfrage
 					if($this->formvars['go_plus'] == 'Suchabfrage_speichern'){
@@ -7060,16 +7055,17 @@ class GUI {
 					# die Namen aller gespeicherten Suchabfragen dieser Rolle zu diesem Layer laden
 					$this->searchset=$this->user->rolle->getsearches($this->formvars['selected_layer_id']);
 					# die ausgewählte Suchabfrage laden
-					if($this->formvars['searches'] != ''){				
-						$this->selected_search = $this->user->rolle->getsearch($this->formvars['selected_layer_id'], $this->formvars['searches']);
-						$this->formvars['searchmask_count'] = $this->selected_search[0]['searchmask_number'];
-						for($m = 0; $m <= $this->formvars['searchmask_count']; $m++){
-							if($m > 0){				// es ist nicht die erste Suchmaske, sondern eine weitere hinzugefügte
-								$prefix = $m.'_';
-							}
-							else{
-								$prefix = '';
-							}
+					
+					for($m = 0; $m <= $this->formvars['searchmask_count']; $m++){
+						if($m > 0){				// es ist nicht die erste Suchmaske, sondern eine weitere hinzugefügte
+							$prefix = $m.'_';
+						}
+						else{
+							$prefix = '';
+						}
+						if($this->formvars['searches'] != ''){		# die Suchparameter einer gespeicherten Suchabfrage laden
+							$this->selected_search = $this->user->rolle->getsearch($this->formvars['selected_layer_id'], $this->formvars['searches']);
+							$this->formvars['searchmask_count'] = $this->selected_search[0]['searchmask_number'];
 							# alle Suchparameter leeren
 							for($i = 0; $i < count($this->attributes['name']); $i++){
 								$this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] = '';
@@ -7083,14 +7079,18 @@ class GUI {
 									$this->formvars[$prefix.'operator_'.$this->selected_search[$i]['attribute']] = $this->selected_search[$i]['operator'];
 									$this->formvars[$prefix.'value_'.$this->selected_search[$i]['attribute']] = $this->selected_search[$i]['value1'];
 									$this->formvars[$prefix.'value2_'.$this->selected_search[$i]['attribute']] = $this->selected_search[$i]['value2']; 
-									
 									$this->qlayerset['shape'][0][$this->selected_search[$i]['attribute']] = $this->selected_search[$i]['value1'];
-									
 								}
 							}
-							# für jede Suchmaske ein eigenes attributes-Array erzeugen, da z.B. die Auswahllisten ja anders sein können
-							$this->{'attributes'.$m} = $mapdb->add_attribute_values($attributes, $layerdb, $this->qlayerset['shape'], true, $this->Stelle->id);
 						}
+						else{
+							for($i = 0; $i < count($this->attributes['name']); $i++){
+								$this->qlayerset['shape'][0][$this->attributes['name'][$i]] = $this->formvars[$prefix.'value_'.$this->attributes['name'][$i]];
+								$this->attributes['operator'][$i] = $this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]];
+							}
+						}
+						# für jede Suchmaske ein eigenes attributes-Array erzeugen, da z.B. die Auswahllisten ja anders sein können
+						$this->{'attributes'.$m} = $mapdb->add_attribute_values($this->attributes, $layerdb, $this->qlayerset['shape'], true, $this->Stelle->id);
 					}
         }break;
 				
@@ -13922,7 +13922,7 @@ class db_mapObj{
 									for($k = 0; $k < count($query_result); $k++){
 										$sql = $attributes['options'][$i];
 										$value = $query_result[$k][$attributes['name'][$i]];
-										if($value != '' AND strpos($value, '%') === false AND strpos($value, '|') === false){			# falls eine LIKE-Suche mit % oder eine IN-Suche mit | durchgeführt wurde
+										if($value != '' AND !in_array($attributes['operator'][$i], array('LIKE', 'NOT LIKE', 'IN'))){			# falls eine LIKE-Suche oder eine IN-Suche durchgeführt wurde
 											$sql = 'SELECT * FROM ('.$sql.') as foo WHERE value = \''.$value.'\'';
 											$ret=$database->execSQL($sql,4,0);
 											if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
