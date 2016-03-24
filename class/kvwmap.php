@@ -7370,6 +7370,10 @@ class GUI {
 					elseif($table['type'][$i] == 'StelleID'){                       # Typ "StelleID"
             $sql.= "'".$this->Stelle->id."', ";
           }
+					elseif($table['type'][$i] == 'Dokument'){                       # Typ "Dokument"
+            $sql.= "'".$this->formvars[$table['formfield'][$i]]."', ";
+						$this->formvars[$table['formfield'][$i]] = '';				# leeren, falls weiter_erfassen angehakt
+          }
           elseif($table['type'][$i] != 'Text_not_saveable' AND $table['type'][$i] != 'Auswahlfeld_not_saveable' AND $table['type'][$i] != 'SubFormPK' AND $table['type'][$i] != 'SubFormFK' AND ($this->formvars[$table['formfield'][$i]] != '' OR $table['type'][$i] == 'Checkbox')){
           	if($table['type'][$i] == 'Zahl'){                       # Typ "Zahl"
 	            $this->formvars[$table['formfield'][$i]] = str_replace(' ', '', $this->formvars[$table['formfield'][$i]]);		# bei Zahlen das Leerzeichen (Tausendertrenner) entfernen
