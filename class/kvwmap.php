@@ -12156,6 +12156,7 @@ class GUI {
 		$epsg = EPSGCODE_ALKIS;
 		$layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
 		$data = $layerset[0]['Data'];
+		if($data == '')$data ="the_geom from (select f.gml_id as oid, wkb_geometry as the_geom from alkis.ax_flurstueck as f where 1=1) as foo using unique oid using srid=".$epsg;
 		$explosion = explode(' ', $data);
 		$datageom = $explosion[0];
 		$explosion = explode('using unique ', strtolower($data));
