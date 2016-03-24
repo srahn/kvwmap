@@ -10697,7 +10697,8 @@ class GUI {
 				foreach($layer as $tablename => $table){
 					foreach($table as $oid => $row){
 						if(count($row['attributename']) > 0){
-							$sql = "UPDATE ".$tablename." SET ";
+							$sql = "LOCK TABLE ".$tablename." IN SHARE ROW EXCLUSIVE MODE;";
+							$sql .= "UPDATE ".$tablename." SET ";
 							for($i = 0; $i < count($row['attributename']); $i++){
 								if($i > 0)$sql .= ', ';
 								$sql .= $row['attributename'][$i]." = ";
