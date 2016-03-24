@@ -11292,7 +11292,43 @@ class GUI {
         } # ende Switch
       } # ende der Behandlung der zur Abfrage ausgewählten Layer
     } # ende der Schleife zur Abfrage der Layer der Stelle
-    $this->main='sachdatenanzeige.php';
+		
+		if($this->last_query != '' AND $this->user->rolle->querymode == 1){		# bei aktivierter Datenabfrage in extra Fenster --> Laden der Karte und zoom auf Treffer (das Zeichnen der Karte passiert in einem separaten Ajax-Request aus dem Overlay heraus)
+			$attributes = $this->qlayerset[0]['attributes'];
+			$geometrie_tabelle = $attributes['table_name'][$attributes['the_geom']];
+			$this->loadMap('DataBase');			
+			if(count($this->qlayerset[0]['shape']) > 0 AND ($this->qlayerset[0]['shape'][0][$attributes['the_geom']] != '')){			# wenn was gefunden wurde und der Layer Geometrie hat, auf Datensätze zoomen
+				$this->zoomed = true;
+				switch ($this->qlayerset[0]['connectiontype']) {
+					case MS_POSTGIS : {
+						for($k = 0; $k < count($this->qlayerset[0]['shape']); $k++){
+							$oids[] = $this->qlayerset[0]['shape'][$k][$geometrie_tabelle.'_oid'];
+						}
+						$rect = $this->mapDB->zoomToDatasets($oids, $geometrie_tabelle, $attributes['the_geom'], 10, $layerdb, $this->qlayerset[0]['epsg_code'], $this->user->rolle->epsg_code);
+						$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
+						if (MAPSERVERVERSION > 600) {
+							$this->map_scaledenom = $this->map->scaledenom;
+						}
+						else {
+							$this->map_scaledenom = $this->map->scale;
+						}
+					}break;
+					case MS_WFS : {
+						$this->formvars['wkt'] = $this->qlayerset[0]['shape'][0]['wfs_geom'];
+						$this->formvars['epsg'] = $this->qlayerset[0]['epsg_code'];
+						$this->zoom2wkt();
+					}break;
+				}
+			}
+			$this->user->rolle->newtime = $this->user->rolle->last_time_id;
+			$this->saveMap('');
+			if($this->formvars['mime_type'] != 'overlay_html'){		// bei Suche aus normaler Suchmaske (nicht aus Overlay) heraus --> Zeichnen der Karte und Darstellung der Sachdaten im Overlay
+				$this->drawMap();
+				$this->main = 'map.php';
+				$this->overlaymain = 'sachdatenanzeige.php';
+			}
+		}
+		else $this->main='sachdatenanzeige.php';
   }
 
   function WLDGE_Auswaehlen() {
