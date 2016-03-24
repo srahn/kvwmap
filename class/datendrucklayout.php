@@ -243,15 +243,14 @@ class ddl {
 									$dateiname = $pfadteil[0];
 									if($dateiname == $this->attributes['alias'][$j] AND $preview)$dateiname = WWWROOT.APPLVERSION.GRAPHICSPATH.'nogeom.png';		// als Platzhalter im Editor
 									if($dateiname != '' AND file_exists($dateiname)){
-										$dateinamensteil=explode('.', $pfadteil[0]);
-										$new_filename = $dateinamensteil[0].'_.jpg';
+										$dateinamensteil=explode('.', $dateiname);
+										$new_filename = IMAGEPATH.basename($dateinamensteil[0]).'.jpg';
 										exec(IMAGEMAGICKPATH.'convert '.$dateiname.' -background white -flatten '.$new_filename);
 										$size = getimagesize($new_filename);
 										$ratio = $size[1]/$size[0];
 										$height = $ratio*$width;
 										$y = $y-$height;
 										$this->pdf->addJpegFromFile($new_filename, $x, $y, $width);
-										unlink($new_filename);
 									}
 								}
 								else{
