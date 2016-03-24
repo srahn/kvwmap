@@ -25,7 +25,7 @@ function changeInputType(oldObject, oType) {
 	if(oldObject != undefined){
 	  var newObject = document.createElement('input');
 	  newObject.type = oType;
-	  if(oldObject.size) newObject.size = oldObject.size;
+	  if(oldObject.style.width) newObject.style.width = oldObject.style.width;
 	  if(oldObject.value) newObject.value = oldObject.value;
 	  if(oldObject.name) newObject.name = oldObject.name;
 	  if(oldObject.id) newObject.id = oldObject.id;
@@ -48,13 +48,13 @@ function operatorchange(attributname, searchmask_number){
 	}
 	if(document.getElementById(prefix+"operator_"+attributname).value == "between"){
 		changeInputType(document.getElementById(prefix+"value2_"+attributname), "text");
-		document.getElementById(prefix+"value_"+attributname).size = 9;
+		document.getElementById(prefix+"value_"+attributname).style.width = '145px';
 	}
 	else{
 		if(document.getElementById(prefix+"value2_"+attributname) != undefined){
 			changeInputType(document.getElementById(prefix+"value2_"+attributname), "hidden");
 			document.getElementById(prefix+"value2_"+attributname).value = "";
-			document.getElementById(prefix+"value_"+attributname).size = 24;
+			document.getElementById(prefix+"value_"+attributname).style.width = '293px';
 		}
 	}
 	if(document.getElementById(prefix+"_avf_"+attributname) != undefined){
