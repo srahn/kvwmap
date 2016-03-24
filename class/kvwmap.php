@@ -7332,7 +7332,8 @@ class GUI {
     foreach($tablename as $table){
       $execute = false;
       if($table['tablename'] != '' AND $table['tablename'] == $layerset[0]['maintable']){		# nur Attribute aus der Haupttabelle werden gespeichert
-        $sql = "INSERT INTO ".$table['tablename']." (";
+				$sql = "LOCK TABLE ".$table['tablename']." IN SHARE ROW EXCLUSIVE MODE;";
+        $sql.= "INSERT INTO ".$table['tablename']." (";
         for($i = 0; $i < count($table['attributname']); $i++){
           if(($table['type'][$i] != 'Text_not_saveable' AND $table['type'][$i] != 'Auswahlfeld_not_saveable' AND $table['type'][$i] != 'SubFormPK' AND $table['type'][$i] != 'SubFormFK' AND $this->formvars[$table['formfield'][$i]] != '') 
           OR $table['type'][$i] == 'Checkbox' OR $table['type'][$i] == 'Time' OR $table['type'][$i] == 'User' OR $table['type'][$i] == 'UserID' OR $table['type'][$i] == 'Stelle' OR $table['type'][$i] == 'StelleID' OR $table['type'][$i] == 'Geometrie'){
@@ -7370,7 +7371,7 @@ class GUI {
 					elseif($table['type'][$i] == 'StelleID'){                       # Typ "StelleID"
             $sql.= "'".$this->Stelle->id."', ";
           }
-					elseif($table['type'][$i] == 'Dokument'){                       # Typ "Dokument"
+					elseif($table['type'][$i] == 'Dokument' AND $this->formvars[$table['formfield'][$i]] != ''){                       # Typ "Dokument"
             $sql.= "'".$this->formvars[$table['formfield'][$i]]."', ";
 						$this->formvars[$table['formfield'][$i]] = '';				# leeren, falls weiter_erfassen angehakt
           }
