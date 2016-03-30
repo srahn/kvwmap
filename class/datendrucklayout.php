@@ -533,7 +533,7 @@ class ddl {
 		$pagecount = count($pages);
 		for($i = 0; $i < $pagecount; $i++){
 			$this->pdf->reopenObject($pages[$i]+1);		# die Page-IDs sind komischerweise alle um 1 größer
-			$this->add_freetexts(0, 0, 0, 'everypage', $i + 1, $pagecount);
+			$this->add_freetexts(0, 0, 'everypage', $i + 1, $pagecount);
 			$this->pdf->closeObject();
 		}
 	}
