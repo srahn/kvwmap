@@ -560,16 +560,19 @@ function recentre(){
 		save_measure_path();
 	}
   doing = "recentre";
+	top.document.GUI.last_button.value = doing = "recentre";
   document.getElementById("canvas").setAttribute("cursor", "move"); //setAttribute("cursor", "url(#MyMove)");
 }
 
 function zoomin(){
   doing = "zoomin";
+	top.document.GUI.last_button.value = doing = "zoomin";
   document.getElementById("canvas").setAttribute("cursor", "crosshair");
 }
 
 function zoomout(){
   doing = "zoomout";
+	top.document.GUI.last_button.value = doing = "zoomout";
   document.getElementById("canvas").setAttribute("cursor", "crosshair");
 }
 
@@ -585,11 +588,13 @@ function ppquery(){
 
 function touchquery(){
 	doing = "touchquery";
+	top.document.GUI.last_button.value = doing = "touchquery";
 	document.getElementById("canvas").setAttribute("cursor", "help");
 }
 
 function pquery(){
   doing = "pquery";
+	top.document.GUI.last_button.value = doing = "pquery";
   document.getElementById("canvas").setAttribute("cursor", "help");
 }
 
