@@ -242,15 +242,6 @@ $supportedSRIDs = array(4326,2397,2398,2399,31466,31467,31468,31469,32648,25832,
 # Unterstützte Sprachen, nur diese stehen zur Auswahl bei der Stellenwahl ('german', 'low-german', 'english', 'polish', 'vietnamese')
 $supportedLanguages = array('german');															# Version 2.0
 
-# Hier kann festgelegt werden, ob in den Optionen das Feld "Zeitpunkt für historische Daten" erscheinen soll, oder nicht (true/false)
-define('HIST_TIMESTAMP', true);																											# Version 2.3
-
-# Name der Stopwortdatei
-define('STOPWORDFILE',SHAPEPATH.'gazetteer/top10000de.txt');
-
-# Imagepath
-define('IMAGEPATH',INSTALLPATH.'tmp/');
-
 # E-Mail Einstellungen
 # Methode zum Versenden von E-Mails. Mögliche Optionen:
 # sendmail: E-Mails werden direkt mit sendmail versendet. (default)
@@ -266,6 +257,14 @@ define('MAILSMTPPORT', 25);													# Version 2.4
 # Muss nur angegeben werden, wenn Methode sendEmail async verwendet wird.
 define('MAILQUEUEPATH', IMAGEPATH . 'mail_queue/');           # Version 2.4
 
+# Hier kann festgelegt werden, ob in den Optionen das Feld "Zeitpunkt für historische Daten" erscheinen soll, oder nicht (true/false)
+define('HIST_TIMESTAMP', true);																											# Version 2.3
+
+# Name der Stopwortdatei
+define('STOPWORDFILE',SHAPEPATH.'gazetteer/top10000de.txt');
+
+# Imagepath
+define('IMAGEPATH',INSTALLPATH.'tmp/');
 # Pfad für selbst gemachte Bilder
 define('CUSTOM_IMAGE_PATH',SHAPEPATH.'bilder/');                # Version 1.6.9
 #Cachespeicherort
