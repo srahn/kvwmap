@@ -1368,60 +1368,62 @@ function formvars_strip($formvars, $strip_list) {
 * mail_att("empf@domain","Email mit Anhang","Im Anhang sind mehrere Datei",$anhang); 
 **/
 function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $subject, $message, $attachement, $mode, $smtp_server, $smtp_port) {
-  if ($mode == 'sendEmail async') {
-    # Erstelle Befehl für sendEmail und schreibe in Temp Verzeichnis.
-    $str = '-v -t ' . $to_email . ' -f ' . $from_email . ' -s ' . $smtp_server . ':' . $smtp_port . ' -o tls=yes -u "' . $subject . '" -m "' . $message;
-    $str = array('to_email' => $to_email, 'from_email' => $from_email, 'subject' => $subject, 'message' => $message, 'attachment' => $attachement);
-    if(!is_dir(MAILQUEUEPATH)){
-      mkdir(MAILQUEUEPATH);
-    }
-    $file = MAILQUEUEPATH . 'email' . date('YmdHis', time()) . '_' . uniqid('', false) . '.txt';
-    $str_json = json_encode($str); 
-    #echo 'Schreibe text: ' . $str_json . ' in Datei: ' . $file;
-    file_put_contents($file, $str_json); 
-} else {
-	$grenze = "---" . md5(uniqid(mt_rand(), 1)) . "---";
+	$success = false;
+	switch ($mode) {
+		case 'sendEmail async': {
+			# Erstelle Befehl für sendEmail und schreibe in Temp Verzeichnis.
+			$str = '-v -t ' . $to_email . ' -f ' . $from_email . ' -s ' . $smtp_server . ':' . $smtp_port . ' -o tls=yes -u "' . $subject . '" -m "' . $message;
+			$str = array('to_email' => $to_email, 'from_email' => $from_email, 'subject' => $subject, 'message' => $message, 'attachment' => $attachement);
+			if(!is_dir(MAILQUEUEPATH)){
+				mkdir(MAILQUEUEPATH);
+			}
+			$file = MAILQUEUEPATH . 'email' . date('YmdHis', time()) . '_' . uniqid('', false) . '.txt';
+			$str_json = json_encode($str); 
+			#echo 'Schreibe text: ' . $str_json . ' in Datei: ' . $file;
+			$success = file_put_contents($file, $str_json);
+		} break;
+		default : {
+			$grenze = "---" . md5(uniqid(mt_rand(), 1)) . "---";
 
-	$headers ="MIME-Version: 1.0\r\n";
-	$headers .= 'From: ' . $from_email . "\r\n";
-  $headers .= 'Reply-To: ' . $reply_email . "\r\n";
-  if (!empty($cc_email)) $headers .= 'Cc: ' . $cc_email . "\r\n";
-	$headers .= "Content-Type: multipart/mixed;\n\tboundary=$grenze\r\n";
+			$headers ="MIME-Version: 1.0\r\n";
+			$headers .= 'From: ' . $from_email . "\r\n";
+			$headers .= 'Reply-To: ' . $reply_email . "\r\n";
+			if (!empty($cc_email)) $headers .= 'Cc: ' . $cc_email . "\r\n";
+			$headers .= "Content-Type: multipart/mixed;\n\tboundary=$grenze\r\n";
 
-	$botschaft = "\n--$grenze\n";
-	$botschaft.="Content-transfer-encoding: 7BIT\r\n";
-	$botschaft.="Content-type: text/plain; charset=UTF-8\n\n";
-	$botschaft.= $message;
-  
-  if ($attachement) {
-  	$botschaft.="\n\n";
-  	$botschaft.="\n--$grenze\n";
+			$botschaft = "\n--$grenze\n";
+			$botschaft.="Content-transfer-encoding: 7BIT\r\n";
+			$botschaft.="Content-type: text/plain; charset=UTF-8\n\n";
+			$botschaft.= $message;
 
-  	$botschaft.="Content-Type: application/octetstream;\n\tname=" . basename($attachement) . "\n";
-  	$botschaft.="Content-Transfer-Encoding: base64\n";
-  	$botschaft.="Content-Disposition: attachment;\n\tfilename=" . basename($attachement) . "\n\n";
+			if ($attachement) {
+				$botschaft.="\n\n";
+				$botschaft.="\n--$grenze\n";
 
-  	$zeiger_auf_datei=fopen($attachement,"rb");
-  	$inhalt_der_datei=fread($zeiger_auf_datei,filesize($attachement));
-  	fclose($zeiger_auf_datei);
+				$botschaft.="Content-Type: application/octetstream;\n\tname=" . basename($attachement) . "\n";
+				$botschaft.="Content-Transfer-Encoding: base64\n";
+				$botschaft.="Content-Disposition: attachment;\n\tfilename=" . basename($attachement) . "\n\n";
 
-  	$inhalt_der_datei=chunk_split(base64_encode($inhalt_der_datei));
-  	$botschaft.=$inhalt_der_datei;
-  	$botschaft.="\n\n";
-  	$botschaft.="--$grenze";
-  }
-#  echo 'to_email: '.$to_email.'<br>';
-#  echo 'subject: '.$subject.'<br>';
-#  echo 'botschaft: '.$botschaft.'<br>';
-#  echo 'headers: '.$headers.'<br>';  
-	if (@mail($to_email, $subject, $botschaft, $headers)) return 1;
-	else return 0;
-  }
-}
+				$zeiger_auf_datei=fopen($attachement,"rb");
+				$inhalt_der_datei=fread($zeiger_auf_datei,filesize($attachement));
+				fclose($zeiger_auf_datei);
 
-function sendEmail($from, $to, $subject, $message, $attachement) {
-  echo exec('sendEmail -v -t ' . $to . ' -f ' . $from . ' -s smtp.p4.net:25 -o tls=yes -u "' . $subject . '" -m "' . $message);
-  #echo exec('sendEmail -v -t ' . $to . ' -f ' . $from . ' -s smtp.p4.net:25 -o tls=yes -u "' . $subject . '" -m "' . $message . '" -a kvwmap-server/README.md');
+				$inhalt_der_datei=chunk_split(base64_encode($inhalt_der_datei));
+				$botschaft.=$inhalt_der_datei;
+				$botschaft.="\n\n";
+				$botschaft.="--$grenze";
+			}
+			#  echo 'to_email: '.$to_email.'<br>';
+			#  echo 'subject: '.$subject.'<br>';
+			#  echo 'botschaft: '.$botschaft.'<br>';
+			#  echo 'headers: '.$headers.'<br>';  
+			$success = @mail($to_email, $subject, $botschaft, $headers);
+		}
+	}
+	if ($success)
+		return 1;
+	else
+		return 0;
 }
 
 /*

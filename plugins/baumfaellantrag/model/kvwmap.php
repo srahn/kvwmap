@@ -75,13 +75,13 @@
 		# create and send email for bearbeiter
 		$mail_bearbeiter = array();
 		include (PLUGINS . $plugin_name . '/view/email_bearbeiter_template.php');
-		$success = mail_att($mail_bearbeiter['from_name'], $mail_bearbeiter['from_email'], $mail_bearbeiter['to_email'], $mail_bearbeiter['cc_email'], $mail_bearbeiter['reply_email'],	$mail_bearbeiter['subject'], $mail_bearbeiter['message'], $mail_bearbeiter['attachement'], 'sendEmail', 'smtp.p4.net', 25);
+		$success = mail_att($mail_bearbeiter['from_name'], $mail_bearbeiter['from_email'], $mail_bearbeiter['to_email'], $mail_bearbeiter['cc_email'], $mail_bearbeiter['reply_email'],	$mail_bearbeiter['subject'], $mail_bearbeiter['message'], $mail_bearbeiter['attachement'], MAILMETHOD, MAILSMTPSERVER, MAILSMTPPORT);
 		
 		if ($success and $data['email'] != '') {
 			# create and send email for absender
 			$mail_absender = array();
 			include (PLUGINS . $plugin_name . '/view/email_absender_template.php');
-			$success = mail_att($mail_absender['from_name'], $mail_absender['from_email'], $mail_absender['to_email'], $mail_absender['cc_email'], $mail_absender['reply_email'],	$mail_absender['subject'], $mail_absender['message'], $mail_absender['attachement'], 'sendEmail', 'smtp.p4.net', 25);
+			$success = mail_att($mail_absender['from_name'], $mail_absender['from_email'], $mail_absender['to_email'], $mail_absender['cc_email'], $mail_absender['reply_email'],	$mail_absender['subject'], $mail_absender['message'], $mail_absender['attachement'], MAILMETHOD, MAILSMTPSERVER, MAILSMTPPORT);
 		}
 
 	return array("success" => $success, "antrag_id" => $antrag_id, "xml_file" =>  $xml_file_name, "pdf_file" => $pdf_file_name, "zip_file" => $zip_file_name, "email_text" => $email_text, "email_recipient" => $email_recipient, "authority_processingTime" => $data['authority_processingTime'], "data" => $data);

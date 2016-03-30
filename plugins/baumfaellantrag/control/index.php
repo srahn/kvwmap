@@ -26,7 +26,8 @@
 
 			# Format
 			$this->formvars['mime_type'] = 'formatter';
-			$this->formvars['format'] = 'json';
+			if ($this->formvars['format'] == '')
+				$this->formvars['format'] = "json";
 
 			$this->GenerischeSuche_Suchen();
 		} break;
@@ -56,7 +57,8 @@
 
 			# Format
 			$this->formvars['mime_type'] = 'formatter';
-			$this->formvars['format'] = 'json';
+			if ($this->formvars['format'] == '')
+				$this->formvars['format'] = "json";
 
 			$this->GenerischeSuche_Suchen();
 		} break;
@@ -86,7 +88,8 @@
 
 			# Format
 			$this->formvars['mime_type'] = 'formatter';
-			$this->formvars['format'] = 'json';
+			if ($this->formvars['format'] == '')
+				$this->formvars['format'] = "json";
 
 			$this->GenerischeSuche_Suchen();
 		} break;
