@@ -6586,13 +6586,13 @@ class GUI {
 										$operator_like = '';
 									}
 								}
-								else{
+								elseif($operator != 'IS NULL' AND $operator != 'IS NOT NULL'){
 									$sql_where .= ' AND query.'.$attributes['name'][$i].' '.$operator.' ';
 									$sql_where.='\''.$value.'\'';
 								}
 							}
 						}
-						elseif($operator == 'IS NULL' OR $operator == 'IS NOT NULL'){
+						if($operator == 'IS NULL' OR $operator == 'IS NOT NULL'){
 							if($attributes['type'][$i] == 'bpchar' OR $attributes['type'][$i] == 'varchar' OR $attributes['type'][$i] == 'text'){
 								if($operator == 'IS NULL'){
 									$sql_where .= ' AND (query.'.$attributes['name'][$i].' '.$operator.' OR query.'.$attributes['name'][$i].' = \'\') ';
@@ -9628,7 +9628,7 @@ class GUI {
 	
   function neuLaden() {
 		$this->saveLegendRoleParameters();
-		if($this->formvars['last_button'] != '')$this->user->rolle->setSelectedButton($this->formvars['last_button']);		// das ist für den Fall, dass ein Button schon angeklickt wurde, aber die Aktion nicht ausgeführt wurde
+		if(in_array($this->formvars['last_button'], array('zoomin', 'zoomout', 'recentre', 'pquery', 'touchquery', 'ppquery', 'polygonquery')))$this->user->rolle->setSelectedButton($this->formvars['last_button']);		// das ist für den Fall, dass ein Button schon angeklickt wurde, aber die Aktion nicht ausgeführt wurde
     # Karteninformationen lesen
     $this->loadMap('DataBase');
     # zwischenspeichern des vorherigen Maßstabs
@@ -11739,13 +11739,15 @@ class GUI {
 				if($this->user->rolle->highlighting == '1'){
 					if($layerset[$i]['attributes']['geomtype'][$the_geom] != 'POINT'){ 
 						$rand = $this->map_scaledenom/1000;
+						$tolerance = $this->map_scaledenom/10000;
+						if($layer_epsg == 4326)$tolerance = $tolerance / 60000;		# wegen der Einheit Grad
 						$box_wkt ="POLYGON((";
 						$box_wkt.=strval($this->user->rolle->oGeorefExt->minx-$rand)." ".strval($this->user->rolle->oGeorefExt->miny-$rand).",";
 						$box_wkt.=strval($this->user->rolle->oGeorefExt->maxx+$rand)." ".strval($this->user->rolle->oGeorefExt->miny-$rand).",";
 						$box_wkt.=strval($this->user->rolle->oGeorefExt->maxx+$rand)." ".strval($this->user->rolle->oGeorefExt->maxy+$rand).",";
 						$box_wkt.=strval($this->user->rolle->oGeorefExt->minx-$rand)." ".strval($this->user->rolle->oGeorefExt->maxy+$rand).",";
 						$box_wkt.=strval($this->user->rolle->oGeorefExt->minx-$rand)." ".strval($this->user->rolle->oGeorefExt->miny-$rand)."))";
-						$pfad = "st_assvg(st_transform(st_simplify(st_intersection(".$layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$the_geom.", st_transform(st_geomfromtext('".$box_wkt."',".$client_epsg."), ".$layer_epsg.")), ".$this->map_scaledenom."/10000), ".$client_epsg."), 0, 8) AS highlight_geom, ".$pfad;
+						$pfad = "st_assvg(st_transform(st_simplify(st_intersection(".$layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$the_geom.", st_transform(st_geomfromtext('".$box_wkt."',".$client_epsg."), ".$layer_epsg.")), ".$tolerance."), ".$client_epsg."), 0, 8) AS highlight_geom, ".$pfad;
 					}
 					else{
 						$buffer = $this->map_scaledenom/260;
