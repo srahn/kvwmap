@@ -200,7 +200,7 @@ class ddl {
 						default : {
 							if($this->page_overflow_by_sublayout)$this->pdf->reopenObject($this->page_id_before_sublayout);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
 							$this->pdf->selectFont($this->layout['elements'][$attributes['name'][$j]]['font']);
-							if($this->layout['elements'][$attributes['name'][$j]]['fontsize'] > 0 OR $this->layout['elements'][$attributes['name'][$j]]['width'] > 0){
+							if($this->layout['elements'][$attributes['name'][$j]]['fontsize'] > 0 OR $attributes['form_element_type'][$j] == 'Dokument'){
 								$y = $this->layout['elements'][$attributes['name'][$j]]['ypos'];
 								#### relative Positionierung über Offset-Attribut ####
 								$offset_attribute = $this->layout['elements'][$attributes['name'][$j]]['offset_attribute'];
@@ -238,6 +238,7 @@ class ddl {
 								$width = $this->layout['elements'][$attributes['name'][$j]]['width'];
 								
 								if($attributes['form_element_type'][$j] == 'Dokument'){
+									if($width == '')$width = 50;
 									$dokumentpfad = $this->result[$i][$this->attributes['name'][$j]];
 									$pfadteil = explode('&original_name=', $dokumentpfad);
 									$dateiname = $pfadteil[0];
@@ -503,6 +504,10 @@ class ddl {
 			}			
 			################# Daten schreiben ###############
 			
+			#################  feste Freitexte hinzufügen, falls keine Attribute da sind ##################
+			$this->remaining_freetexts = $this->add_freetexts($i, $offsetx, $offsety, 'fixed');
+			###############################################################################################
+			
 			################# fortlaufende Freitexte schreiben ###############
 			# (die festen Freitexte werden vor jedem Attribut geschrieben, da ein Attribut zu einem Seitenüberlauf führen können)
 			$this->remaining_freetexts = $this->add_freetexts($i, $offsetx, 'running');
@@ -566,7 +571,7 @@ class ddl {
       else $sql .= ", `usersize` = NULL";
       $sql .= ", `font_date` = '".$formvars['font_date']."'";
       $sql .= ", `font_user` = '".$formvars['font_user']."'";
-			$sql .= ", `gap` = ".(int)$formvars['gap'];
+			if($formvars['gap'] != '')$sql .= ", `gap` = ".(int)$formvars['gap'];
       if($formvars['type'] != '')$sql .= ", `type` = ".(int)$formvars['type'];
       else $sql .= ", `type` = NULL";
       if($_files['bgsrc']['name']){
