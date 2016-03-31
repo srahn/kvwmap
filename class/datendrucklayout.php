@@ -505,7 +505,7 @@ class ddl {
 			################# Daten schreiben ###############
 			
 			#################  feste Freitexte hinzufügen, falls keine Attribute da sind ##################
-			$this->remaining_freetexts = $this->add_freetexts($i, $offsetx, $offsety, 'fixed');
+			$this->remaining_freetexts = $this->add_freetexts($i, $offsetx, 'fixed');
 			###############################################################################################
 			
 			################# fortlaufende Freitexte schreiben ###############
