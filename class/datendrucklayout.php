@@ -322,14 +322,18 @@ class ddl {
 		}
 		if($offset_value - $ypos < 40){	# Seitenüberlauf
 			$offset_value = 842 + $offset_value - 40 - 30;	# Offsetwert so anpassen, dass er für die neue Seite passt
-			if($backto_oldpage){
-				$this->pdf->reopenObject($this->getNextPage($this->layout['page_id'][$offset_attribute]));		# die nächste Seite der Seite des Offset-Attributes nehmen
+			$next_page = $this->getNextPage($this->layout['page_id'][$offset_attribute]);
+			if($next_page != NULL){
+				$this->pdf->reopenObject($next_page);		# die nächste Seite der Seite des Offset-Attributes nehmen
 			}
-			else{
+			else{																			# wenns noch keine gibt, neue Seite erstellen
+				$page_id_before = $this->pdf->currentContents;
 				$this->pdf->ezNewPage();			# eine neue Seite beginnen
 				$this->miny[$this->pdf->currentContents] = 842;
 				$this->maxy = 800;
 				if($this->layout['type'] == 2)$this->offsety = 50;
+				$this->page_overflow_by_sublayout = true;
+				$this->page_id_before_sublayout = $page_id_before;
 			}
 		}
 		elseif($backto_oldpage){
@@ -342,10 +346,11 @@ class ddl {
 	function getNextPage($pageid){
 		$pages = $this->pdf->objects['3']['info']['pages'];
 		for($i = 0; $i <= count($pages); $i++){
-			if($pages[$i]+1 == $pageid){			# die Page-IDs sind komischerweise alle um 1 größer
+			if($pages[$i]+1 == $pageid AND $pages[$i+1] != ''){			# die Page-IDs sind komischerweise alle um 1 größer
 				return $pages[$i+1]+1;
 			}
 		}
+		return NULL;
 	}
 	
 	function putText($text, $fontsize, $width, $x, $y, $offsetx){	
@@ -366,6 +371,7 @@ class ddl {
 		$page_id_before_puttext = $this->pdf->currentContents;
 		$ret = $this->pdf->ezText(iconv("UTF-8", "CP1252", $text), $fontsize, $options);
 		$page_id_after_puttext = $this->pdf->currentContents;
+		#echo $page_id_before_puttext.' '.$page_id_after_puttext.' '.$text.'<br>';
 		if($page_id_before_puttext != $page_id_after_puttext){
 			$this->page_overflow_by_sublayout = true;
 			$this->page_id_before_sublayout = $page_id_before_puttext;
