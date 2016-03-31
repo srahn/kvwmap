@@ -1372,15 +1372,15 @@ function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $
 	switch ($mode) {
 		case 'sendEmail async': {
 			# Erstelle Befehl für sendEmail und schreibe in Temp Verzeichnis.
-			$str = '-v -t ' . $to_email . ' -f ' . $from_email . ' -s ' . $smtp_server . ':' . $smtp_port . ' -o tls=yes -u "' . $subject . '" -m "' . $message;
 			$str = array('to_email' => $to_email, 'from_email' => $from_email, 'subject' => $subject, 'message' => $message, 'attachment' => $attachement);
 			if(!is_dir(MAILQUEUEPATH)){
 				mkdir(MAILQUEUEPATH);
 			}
 			$file = MAILQUEUEPATH . 'email' . date('YmdHis', time()) . '_' . uniqid('', false) . '.txt';
-			$str_json = json_encode($str); 
-			#echo 'Schreibe text: ' . $str_json . ' in Datei: ' . $file;
-			$success = file_put_contents($file, $str_json);
+			$success = file_put_contents(
+				$file,
+				json_encode($str)
+			);
 		} break;
 		default : {
 			$grenze = "---" . md5(uniqid(mt_rand(), 1)) . "---";

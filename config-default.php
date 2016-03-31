@@ -264,7 +264,8 @@ define('MAILSMTPSERVER', '');						# Version 2.4
 define('MAILSMTPPORT', 25);													# Version 2.4
 # Verzeichnis für die JSON-Dateien mit denzu versendenen E-Mails.
 # Muss nur angegeben werden, wenn Methode sendEmail async verwendet wird.
-define('MAILQUEUEPATH', IMAGEPATH . 'mail_queue/');           # Version 2.4
+define('MAILQUEUEPATH', IMAGEPATH . 'mail_queue/');			# Version 2.4
+define('MAILARCHIVPATH', LOGPATH . 'mail_archiv/');			# Version 2.4
 
 # Pfad für selbst gemachte Bilder
 define('CUSTOM_IMAGE_PATH',SHAPEPATH.'bilder/');                # Version 1.6.9
