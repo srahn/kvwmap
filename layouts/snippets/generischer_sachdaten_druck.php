@@ -3,6 +3,10 @@
 <!--
 
 function print(){
+	if(document.GUI.aktivesLayout.value == ''){
+		alert('Bitte wählen Sie ein Druck-Layout aus.');
+		return;
+	}
 	document.GUI.target = '_blank';
 	document.GUI.go_plus.value = 'Drucken';
 	document.GUI.submit();
@@ -58,10 +62,10 @@ function back(){
           </select> 
           </td>
           <td align="left"> 
-			    	<input class="button" type="submit" name="zurueck" value="zurück" onclick="back();">
+			    	<input class="button" type="button" name="zurueck" value="zurück" onclick="back();">
 			    </td>
           <td align="left"> 
-			    	<input class="button" type="submit" name="drucken" value="Drucken" onclick="print();">
+			    	<input class="button" type="button" name="drucken" value="Drucken" onclick="print();">
 			    </td>
         </tr>
       </table> 
