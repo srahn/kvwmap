@@ -6586,13 +6586,13 @@ class GUI {
 										$operator_like = '';
 									}
 								}
-								else{
+								elseif($operator != 'IS NULL' AND $operator != 'IS NOT NULL'){
 									$sql_where .= ' AND query.'.$attributes['name'][$i].' '.$operator.' ';
 									$sql_where.='\''.$value.'\'';
 								}
 							}
 						}
-						elseif($operator == 'IS NULL' OR $operator == 'IS NOT NULL'){
+						if($operator == 'IS NULL' OR $operator == 'IS NOT NULL'){
 							if($attributes['type'][$i] == 'bpchar' OR $attributes['type'][$i] == 'varchar' OR $attributes['type'][$i] == 'text'){
 								if($operator == 'IS NULL'){
 									$sql_where .= ' AND (query.'.$attributes['name'][$i].' '.$operator.' OR query.'.$attributes['name'][$i].' = \'\') ';
