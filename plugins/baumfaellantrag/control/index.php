@@ -112,12 +112,17 @@
 
 			# erzeuge eine eindeutige Nummer für diesen Antrag
 			$antrag_id = date("YmdHis") . str_pad(rand(1, 99), 2, "00", STR_PAD_LEFT);
-			
+
+			# erzeuge die benötigten Dateien
+			$application_data = $this->createFiles($antrag_id, $application_data);
+			#echo 'mandateRef after createFiles: ' . $application_data['mandateReference'];
+			# speicher die Antragsdaten in der Datenbank
 			if ($this->saveApplicationData($antrag_id, $application_data)) {
-				$this->qlayerset[0]['shape'][0] = $this->packAndMail($antrag_id, $application_data);;
+				# Wenn das geklappt hat, packe die Dateien in zip und versende die E-Mails.
+				$this->qlayerset[0]['shape'][0] = $this->packAndMail($antrag_id, $application_data);
 			}
 			else {
-				$this->qlayerset[0]['shape'][0] = array("success" => 0, "data" => $application_data);;
+				$this->qlayerset[0]['shape'][0] = array("success" => 0, "data" => $application_data);
 			}
 			$this->mime_type = "formatter";
 			if ($this->formvars['format'] == '') $this->formvars['format'] = "json";
