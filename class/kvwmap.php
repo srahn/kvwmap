@@ -1713,6 +1713,9 @@ class GUI {
         $this->user->rolle->set_one_Group($this->user->id, $this->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
         $this->loadMap('DataBase');
 
+				if($this->map->scaledenom > COORD_ZOOM_SCALE){
+					$this->map->zoomscale(COORD_ZOOM_SCALE/4,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
+				}
         # hier wurden Weltkoordinaten übergeben
         $this->pixwidth = ($this->map->extent->maxx - $this->map->extent->minx)/$this->map->width;
         $pixel_x = ($minx-$this->map->extent->minx)/$this->pixwidth;

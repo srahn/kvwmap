@@ -368,6 +368,9 @@ define('CHECKPUNKTDATEI', 'true');      # true/false                            
 # Minmale Maßstabszahl
 define('MINSCALE', 100);                                                        # Version 1.7.0
 
+# Maßstab ab dem bei einem Koordinatensprung auch gezoomt wird
+define('COORD_ZOOM_SCALE', 50000);																							# Version 2.4
+
 # Puffer (in Metern) der beim Zoom auf ein Objekt hinzugegeben wird
 define('ZOOMBUFFER', 100);                                                        # Version 2.1
 
