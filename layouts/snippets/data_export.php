@@ -50,6 +50,10 @@ function update_coords(){
 
 function data_export(){
 	if(document.GUI.selected_layer_id.value != ''){
+		if(document.GUI.anzahl == undefined && document.GUI.newpathwkt.value == '' && document.GUI.newpath.value == ''){
+			var sure = confirm('<? echo $strSure; ?>');
+			if(sure == false)return;
+		}
 		if(document.GUI.newpathwkt.value == '' && document.GUI.newpath.value != ''){
 			document.GUI.newpathwkt.value = buildwktpolygonfromsvgpath(document.GUI.newpath.value);
 		}
@@ -58,7 +62,7 @@ function data_export(){
 		document.GUI.go_plus.value = '';
 	}
 	else{
-		alert('Bitten wählen Sie einen Layer aus.');
+		alert('Bitte wählen Sie ein Thema aus.');
 	}
 }
 
@@ -122,7 +126,7 @@ $j=0;
         <div style="padding-top:1px; padding-bottom:5px;">
 					<table>
 						<tr>
-							<td><? echo $this->strLayer; ?>:</td>
+							<td><? echo $strLayer; ?>:</td>
 						</tr>
 						<tr>
 							<td>
