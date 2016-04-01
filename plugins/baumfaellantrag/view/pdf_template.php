@@ -1,4 +1,5 @@
 <?php
+  error_reporting(E_ERROR | E_PARSE);
 	include (PDFCLASSPATH."class.ezpdf.php");
   $pdf=new Cezpdf();
 	$pdf->selectFont(PDFCLASSPATH.'fonts/Courier.afm');
