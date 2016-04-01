@@ -1456,9 +1456,9 @@ class pgdatabase {
   }
 	  
 	function getNachfolger($FlurstKennz) {
-		$sql = "SELECT nachfolger, c.endet FROM (";
+		$sql = "SELECT DISTINCT ON (nachfolger) nachfolger, c.endet FROM (";
     $sql.= "SELECT unnest(zeigtaufneuesflurstueck) as nachfolger FROM alkis.ax_fortfuehrungsfall WHERE ARRAY['".$FlurstKennz."'::varchar] <@ zeigtaufaltesflurstueck AND NOT ARRAY['".$FlurstKennz."'::varchar] <@ zeigtaufneuesflurstueck) as foo ";
-		$sql.= "LEFT JOIN alkis.ax_flurstueck c ON c.flurstueckskennzeichen = nachfolger ORDER BY nachfolger";
+		$sql.= "LEFT JOIN alkis.ax_flurstueck c ON c.flurstueckskennzeichen = nachfolger ORDER BY nachfolger, c.endet DESC";
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0]) {
       $ret[0]=1;

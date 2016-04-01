@@ -97,7 +97,7 @@ show_all = function(count){
 			if($flst->FlurstNr){
 				$flst_array[] = $flst;
 				echo '<a href="#'.$flurstkennz_a.'">Gemarkung: '.$gemkg.' - Flur: '.ltrim($flur,"0").' - Flurst&uuml;ck: '.$zaehler.$nenner.'</a>';
-				if($flst->endet!="" OR $flst->hist_alb == 1)echo ' (H)';
+				if($flst->Nachfolger != '')echo ' (H)';
 				echo '<br>';
 			}
 			else{
@@ -153,13 +153,18 @@ show_all = function(count){
 											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 											Versionen:
 											<select name="versions_<? echo $k; ?>" onchange="location.href='index.php?go=setHistTimestamp&timestamp='+this.value" style="width: 87px">
-												<? for($v = 0; $v < count($flst->Versionen); $v++){
+												<? $selected = false; 
+													 for($v = 0; $v < count($flst->Versionen); $v++){
 														$beginnt = DateTime::createFromFormat('d.m.Y H:i:s', $flst->Versionen[$v]['beginnt']);
 														$endet = DateTime::createFromFormat('d.m.Y H:i:s', $flst->Versionen[$v]['endet']);
 														echo '<option ';
-														if(($timestamp == NULL AND $endet == NULL) OR ($timestamp >= $beginnt AND $timestamp <= $endet))echo 'selected';
+														if(
+															($timestamp == NULL AND $endet == NULL) OR 																	# timestamp aktuell und letzte Version
+															($timestamp >= $beginnt AND $timestamp <= $endet) OR												# timestamp liegt im Intervall
+															($v == count($flst->Versionen)-1 AND $selected == false)										# timestamp außerhalb des Intervalls (Vorschau)
+														){$selected = true; echo 'selected';}
 														if($flst->Versionen[$v]['endet'] != '')echo ' value="'.$flst->Versionen[$v]['beginnt'].'">'.$flst->Versionen[$v]['beginnt'].'</option>';
-														else echo ' value="">'.$flst->Versionen[$v]['beginnt'].' (aktuell)</option>';
+														else echo ' value="">'.$flst->Versionen[$v]['beginnt'].'</option>';
 													 }
 												?>
 											</select>
@@ -283,7 +288,7 @@ show_all = function(count){
                 <td><?php 
 									$beginnt = DateTime::createFromFormat('d.m.Y H:i:s', $flst->beginnt);
 									$endet = DateTime::createFromFormat('d.m.Y H:i:s', $flst->endet);
-									if($flst->endet!="" OR $flst->hist_alb == 1){
+									if($flst->Nachfolger != ''){
 										echo "historisches&nbsp;Flurst&uuml;ck"; 
 										if($flst->endet != ''){
 											if($timestamp == NULL OR $timestamp < $beginnt OR $timestamp > $endet){
@@ -298,7 +303,10 @@ show_all = function(count){
 											$set_timestamp = 'setHistTimestamp';
 											echo '<a href="index.php?go='.$set_timestamp.'" title="Zeitpunkt auf aktuell setzen">aktuelles&nbsp;Flurst&uuml;ck</a>';
 										}
-										else echo "aktuelles&nbsp;Flurst&uuml;ck"; 										
+										else{
+											echo "aktuelles&nbsp;Flurst&uuml;ck";
+											if($flst->endet != '')echo ' (historische Version)';
+										}
 									}  ?></td>
               </tr>
               <? } ?>
