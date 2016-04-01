@@ -160,7 +160,7 @@ show_all = function(count){
 														echo '<option ';
 														if(
 															($timestamp == NULL AND $endet == NULL) OR 																	# timestamp aktuell und letzte Version
-															($timestamp >= $beginnt AND $timestamp <= $endet) OR												# timestamp liegt im Intervall
+															($timestamp >= $beginnt AND $timestamp < $endet) OR												# timestamp liegt im Intervall
 															($v == count($flst->Versionen)-1 AND $selected == false)										# timestamp außerhalb des Intervalls (Vorschau)
 														){$selected = true; echo 'selected';}
 														if($flst->Versionen[$v]['endet'] != '')echo ' value="'.$flst->Versionen[$v]['beginnt'].'">'.$flst->Versionen[$v]['beginnt'].'</option>';
@@ -291,7 +291,7 @@ show_all = function(count){
 									if($flst->Nachfolger != ''){
 										echo "historisches&nbsp;Flurst&uuml;ck"; 
 										if($flst->endet != ''){
-											if($timestamp == NULL OR $timestamp < $beginnt OR $timestamp > $endet){
+											if($timestamp == NULL OR $timestamp < $beginnt OR $timestamp >= $endet){
 												$set_timestamp = 'setHistTimestamp&timestamp='.$flst->beginnt;
 												echo '<a href="index.php?go='.$set_timestamp.'" title="in die Zeit des Flurstücks wechseln">&nbsp;(endet: '.$flst->endet.')</a>';
 											}
