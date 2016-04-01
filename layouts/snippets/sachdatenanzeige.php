@@ -218,6 +218,7 @@ for($i=0;$i<$anzLayer;$i++){
 <input name="result" type="hidden" value="">
 <input name="firstpoly" type="hidden" value="<?php echo $this->formvars['firstpoly']; ?>">
 <input type="hidden" name="searchmask_count" value="<? echo $this->formvars['searchmask_count']; ?>">
+<input type="hidden" name="within" value="<? echo $this->formvars['within']; ?>">
 
 <div id="vorschau" style="pointer-events:none; box-shadow: 12px 10px 14px #777;z-index: 1000; position: fixed; right:20px; top:20px; ">
 	<img id="preview_img" src="<? echo GRAPHICSPATH.'leer.gif'; ?>">

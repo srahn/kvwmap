@@ -6614,11 +6614,12 @@ class GUI {
 						# räumliche Einschränkung
 						if($m == 0 AND $attributes['name'][$i] == $attributes['the_geom']){		// nur einmal machen, also nur bei $m == 0
 							if($this->formvars['newpathwkt'] != ''){
-								if (strpos(strtolower($this->formvars['newpathwkt']), 'polygon') !== false) {
+								if(strpos(strtolower($this->formvars['newpathwkt']), 'polygon') !== false){
 									# Suche im Suchpolygon
-									$spatial_sql_where =' AND st_intersects('.$attributes['the_geom'].', (st_transform(st_geomfromtext(\''.$this->formvars['newpathwkt'].'\', '.$this->user->rolle->epsg_code.'), '.$layerset[0]['epsg_code'].')))';  
+									if($this->formvars['within'] == 1)$sp_op = 'st_within'; else $sp_op = 'st_intersects';
+									$spatial_sql_where =' AND '.$sp_op.'('.$attributes['the_geom'].', (st_transform(st_geomfromtext(\''.$this->formvars['newpathwkt'].'\', '.$this->user->rolle->epsg_code.'), '.$layerset[0]['epsg_code'].')))';  
 								}
-								if (strpos(strtolower($this->formvars['newpathwkt']), 'point') !== false) {
+								if(strpos(strtolower($this->formvars['newpathwkt']), 'point') !== false){
 									# Suche an Punktkoordinaten mit übergebener SRID
 									$spatial_sql_where.=" AND st_within(st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$this->formvars['epsg_code']."), ".$layerset[0]['epsg_code']."), ".$attributes['the_geom'].")";
 								}
