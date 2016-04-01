@@ -1,9 +1,10 @@
 #!/bin/bash
 
-smtp_server=`grep "define('MAILSMTPSERVER'" config.php | awk -F "'" '{print $4}'`
-smtp_port=`grep "define('MAILSMTPPORT'" config.php | awk -F "'" '{print $4}'`
-mail_queue_path=`grep "define('MAILQUEUEPATH'" config.php | awk -F "'" '{print $4}'`
-mail_archiv_path=`grep "define('MAILARCHIVPATH'" config.php | awk -F "'" '{print $4}'`
+kvwmap_config="$(dirname $0)/../config.php"
+smtp_server=`grep "define('MAILSMTPSERVER'" ${kvwmap_config} | awk -F "'" '{print $4}'`
+smtp_port=`grep "define('MAILSMTPPORT'" ${kvwmap_config} | awk -F "'" '{print $4}'`
+mail_queue_path=`grep "define('MAILQUEUEPATH'" ${kvwmap_config} | awk -F "'" '{print $4}'`
+mail_archiv_path=`grep "define('MAILARCHIVPATH'" ${kvwmap_config} | awk -F "'" '{print $4}'`
 
 mkdir -p $mail_archiv_path
 
