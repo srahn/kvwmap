@@ -47,6 +47,7 @@ show_all = function(count){
 	<tr>
 		<td align="center">
 <?php
+	$timestamp = DateTime::createFromFormat('d.m.Y H:i:s', $this->user->rolle->hist_timestamp);
 	$sql = "SELECT max(beginnt)::date FROM alkis.ax_fortfuehrungsfall;";
   $ret=$this->pgdatabase->execSQL($sql,4,0);
   $aktalkis = pg_fetch_array($ret[1]);
@@ -146,7 +147,24 @@ show_all = function(count){
               <? if($privileg_['flurstkennz']){ ?>
               <tr>
                 <td align="right"><span class="fett">Flurst&uuml;ck&nbsp;</span></td>
-                <td> <? echo $flst->FlurstNr; ?>&nbsp;(<?php echo $flst->Flurstkennz_alt; ?>)</td>
+                <td>
+									<? echo $flst->FlurstNr; ?>&nbsp;(<?php echo $flst->Flurstkennz_alt; ?>)
+									<? if(count($flst->Versionen) > 1){ ?>
+											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+											Versionen:
+											<select name="versions_<? echo $k; ?>" onchange="location.href='index.php?go=setHistTimestamp&timestamp='+this.value" style="width: 87px">
+												<? for($v = 0; $v < count($flst->Versionen); $v++){
+														$beginnt = DateTime::createFromFormat('d.m.Y H:i:s', $flst->Versionen[$v]['beginnt']);
+														$endet = DateTime::createFromFormat('d.m.Y H:i:s', $flst->Versionen[$v]['endet']);
+														echo '<option ';
+														if(($timestamp == NULL AND $endet == NULL) OR ($timestamp >= $beginnt AND $timestamp <= $endet))echo 'selected';
+														if($flst->Versionen[$v]['endet'] != '')echo ' value="'.$flst->Versionen[$v]['beginnt'].'">'.$flst->Versionen[$v]['beginnt'].'</option>';
+														else echo ' value="">'.$flst->Versionen[$v]['beginnt'].' (aktuell)</option>';
+													 }
+												?>
+											</select>
+									<? }	?>
+								</td>
               </tr>
               <? }
           $both = ($privileg_['gemkgname'] AND $privileg_['gemkgschl']);
@@ -263,7 +281,6 @@ show_all = function(count){
               <tr>
                 <td align="right"><span class="fett"> Status&nbsp;</span></td>
                 <td><?php 
-									$timestamp = DateTime::createFromFormat('d.m.Y H:i:s', $this->user->rolle->hist_timestamp);
 									$beginnt = DateTime::createFromFormat('d.m.Y H:i:s', $flst->beginnt);
 									$endet = DateTime::createFromFormat('d.m.Y H:i:s', $flst->endet);
 									if($flst->endet!="" OR $flst->hist_alb == 1){

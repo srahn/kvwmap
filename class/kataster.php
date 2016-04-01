@@ -1864,7 +1864,14 @@ class flurstueck {
       break;
     }
   }
-
+	
+	function getVersionen() {
+    if ($this->FlurstKennz=="") { return 0; }
+    $this->debug->write("<p>kataster flurstueck->getVersionen (vom Flurstück):<br>",4);
+    $versionen=$this->database->getVersionen('alkis.ax_flurstueck', $this->gml_id);
+    return $versionen;
+  }
+	
 	function getNachfolger() {
     if ($this->FlurstKennz=="") { return 0; }
     $this->debug->write("<p>kataster flurstueck->getNachfolger (vom Flurstück):<br>",4);
@@ -1892,6 +1899,7 @@ class flurstueck {
 			else rolle::$hist_timestamp = '';
 		}
     $rs=$ret[1];
+		$this->gml_id=$rs['gml_id'];
     $this->Zaehler=intval($rs['zaehler']);
     $this->Nenner=intval($rs['nenner']);
     $this->FlurstNr=$this->Zaehler;
@@ -1937,6 +1945,7 @@ class flurstueck {
     $this->Amtsgericht=$this->getAmtsgericht(); 
     $this->Vorgaenger=$this->getVorgaenger();	
     $this->Nachfolger=$this->getNachfolger();	
+		$this->Versionen=$this->getVersionen();	
     # Abfragen der Nutzungen
     $this->Nutzung=$this->getNutzung();
     if(ALKIS){}		# ALKIS TODO
