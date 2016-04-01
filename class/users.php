@@ -1935,6 +1935,12 @@ class rolle {
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
 
+	function resetClasses(){
+		$sql = 'DELETE FROM u_rolle2used_class WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+		$this->debug->write("<p>file:users.php class:rolle->resetQuerys - resetten aller aktiven Layer zur Rolle:",4);
+		$this->database->execSQL($sql,4, $this->loglevel);
+	}
+	
 	function setAktivLayer($formvars, $stelle_id, $user_id) {
 		$layer=$this->getLayer('');
 		$rollenlayer=$this->getRollenLayer('', NULL);
