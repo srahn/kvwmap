@@ -1488,7 +1488,7 @@ class pgdatabase {
   }
 
   function getVorgaenger($FlurstKennz) {
-    $sql = "SELECT unnest(zeigtaufaltesflurstueck) as vorgaenger FROM alkis.ax_fortfuehrungsfall WHERE ARRAY['".$FlurstKennz."'::varchar] <@ zeigtaufneuesflurstueck AND NOT ARRAY['".$FlurstKennz."'::varchar] <@ zeigtaufaltesflurstueck ORDER BY vorgaenger";
+    $sql = "SELECT unnest(zeigtaufaltesflurstueck) as vorgaenger, array_to_string(array_agg(bezeichner), ';') as anlass FROM alkis.ax_fortfuehrungsfall, alkis.ax_fortfuehrungsanlaesse WHERE ARRAY['".$FlurstKennz."'::varchar] <@ zeigtaufneuesflurstueck AND NOT ARRAY['".$FlurstKennz."'::varchar] <@ zeigtaufaltesflurstueck AND wert = ANY(ueberschriftimfortfuehrungsnachweis) GROUP BY zeigtaufaltesflurstueck ORDER BY vorgaenger";
     $queryret=$this->execSQL($sql, 4, 0);
     if($queryret[0]) {
       $ret[0]=1;

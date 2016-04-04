@@ -39,6 +39,16 @@ show_all = function(count){
 	currentform.submit();
 }
 
+show_versioning = function(flst){
+	document.getElementById('no_versioning_'+flst).style.display = 'none';
+	document.getElementById('versioning_'+flst).style.display = '';
+}
+
+hide_versioning = function(flst){
+	document.getElementById('no_versioning_'+flst).style.display = 'inline';
+	document.getElementById('versioning_'+flst).style.display = 'none';
+}
+
 </script>
 <br>
 <a name="anfang"></a>
@@ -146,29 +156,85 @@ show_all = function(count){
 
               <? if($privileg_['flurstkennz']){ ?>
               <tr>
-                <td align="right"><span class="fett">Flurst&uuml;ck&nbsp;</span></td>
+								<td colspan="2">
+									<table cellspacing="0" cellpadding="0">
+										<tr>
+											<td valign="top">
+												<span class="px17 fett"><? echo $flst->Flurstkennz_alt; ?></span>
+											</td>
+											<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+											<td>
+												<div id="no_versioning_<? echo $flst->FlurstKennz; ?>">
+													<table cellspacing="0" cellpadding="2">
+														<tr>
+															<td>
+																<a href="javascript:show_versioning('<? echo $flst->FlurstKennz; ?>');"><img src="<? echo GRAPHICSPATH.'plus.gif'; ?>"></a>
+															</td>
+															<td>
+																<span class="px14">Versionierung</span>
+															</td>
+														</tr>
+													</table>
+												</div>
+												<div id="versioning_<? echo $flst->FlurstKennz; ?>" style="border: 1px solid <? echo BG_DEFAULT ?>; display:none">
+													<table cellspacing="0" cellpadding="3">
+														<tr style="background-color: #EDEFEF;">
+															<td style="border-bottom: 1px solid <? echo BG_DEFAULT ?>">
+																<a href="javascript:hide_versioning('<? echo $flst->FlurstKennz; ?>');"><img src="<? echo GRAPHICSPATH.'minus.gif'; ?>"></a>
+															</td>
+															<td style="border-bottom: 1px solid <? echo BG_DEFAULT ?>">
+																<span class="fett px14">Versionierung</span>
+															</td>
+														</tr>
+														<tr>
+															<td></td>
+															<td>
+																<span class="fett px14">Lebenszeit:&nbsp;&nbsp;</span><span class="px14"><? echo $flst->beginnt.'&nbsp;&nbsp;-&nbsp;&nbsp;'.$flst->endet; ?></span>
+															</td>
+														</tr>
+														<? if($flst->Vorgaenger[0]['anlass'] != ''){ ?>
+														<tr>
+															<td></td>
+															<td>
+																<span class="fett px14">Anlass:&nbsp;&nbsp;</span><span class="px14"><? echo $flst->Vorgaenger[0]['anlass']; ?></span>
+															</td>
+														</tr>
+														<? } ?>
+														<tr>
+															<td></td>
+															<td>
+																<? if(count($flst->Versionen) > 1){ ?>
+																	<span class="fett px14">Versionswahl:</span>
+																	<select name="versions_<? echo $k; ?>" onchange="location.href='index.php?go=setHistTimestamp&timestamp='+this.value" style="width: 87px">
+																		<? $selected = false; 
+																			 for($v = 0; $v < count($flst->Versionen); $v++){
+																				$beginnt = DateTime::createFromFormat('d.m.Y H:i:s', $flst->Versionen[$v]['beginnt']);
+																				$endet = DateTime::createFromFormat('d.m.Y H:i:s', $flst->Versionen[$v]['endet']);
+																				echo '<option ';
+																				if(
+																					($timestamp == NULL AND $endet == NULL) OR 																	# timestamp aktuell und letzte Version
+																					($timestamp >= $beginnt AND $timestamp < $endet) OR												# timestamp liegt im Intervall
+																					($v == count($flst->Versionen)-1 AND $selected == false)										# timestamp außerhalb des Intervalls (Vorschau)
+																				){$selected = true; echo 'selected';}
+																				if($flst->Versionen[$v]['endet'] != '')echo ' value="'.$flst->Versionen[$v]['beginnt'].'">'.$flst->Versionen[$v]['beginnt'].'</option>';
+																				else echo ' value="">'.$flst->Versionen[$v]['beginnt'].'</option>';
+																			 }
+																		?>
+																	</select>
+																<? }	?>
+															</td>
+														</tr>
+													</table>
+												</div>
+											</td>
+										</tr>
+									</table>
+								</td>
+							</tr>
+							<tr>
+                <td align="right"><span class="fett">Flurst&uuml;cksnummer&nbsp;</span></td>
                 <td>
-									<? echo $flst->FlurstNr; ?>&nbsp;(<?php echo $flst->Flurstkennz_alt; ?>)
-									<? if(count($flst->Versionen) > 1){ ?>
-											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-											Versionen:
-											<select name="versions_<? echo $k; ?>" onchange="location.href='index.php?go=setHistTimestamp&timestamp='+this.value" style="width: 87px">
-												<? $selected = false; 
-													 for($v = 0; $v < count($flst->Versionen); $v++){
-														$beginnt = DateTime::createFromFormat('d.m.Y H:i:s', $flst->Versionen[$v]['beginnt']);
-														$endet = DateTime::createFromFormat('d.m.Y H:i:s', $flst->Versionen[$v]['endet']);
-														echo '<option ';
-														if(
-															($timestamp == NULL AND $endet == NULL) OR 																	# timestamp aktuell und letzte Version
-															($timestamp >= $beginnt AND $timestamp < $endet) OR												# timestamp liegt im Intervall
-															($v == count($flst->Versionen)-1 AND $selected == false)										# timestamp außerhalb des Intervalls (Vorschau)
-														){$selected = true; echo 'selected';}
-														if($flst->Versionen[$v]['endet'] != '')echo ' value="'.$flst->Versionen[$v]['beginnt'].'">'.$flst->Versionen[$v]['beginnt'].'</option>';
-														else echo ' value="">'.$flst->Versionen[$v]['beginnt'].'</option>';
-													 }
-												?>
-											</select>
-									<? }	?>
+									<? echo $flst->FlurstNr; ?>
 								</td>
               </tr>
               <? }
