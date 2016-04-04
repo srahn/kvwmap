@@ -165,6 +165,10 @@ class ddl {
 								}
 								else{
 									$this->gui->formvars['embedded_dataPDF'] = true;
+									for($p = 0; $p < count($attributes['name']); $p++){			# erstmal alle Suchparameter des übergeordneten Layers für die Layersuche leeren
+										$this->gui->formvars['value_'.$attributes['name'][$p]] = '';
+										$this->gui->formvars['operator_'.$attributes['name'][$p]] = '';
+									}
 									for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){			# die Suchparameter für die Layersuche
 										$this->gui->formvars['value_'.$this->attributes['subform_pkeys'][$j][$p]] = $this->result[$i][$attributes['subform_pkeys'][$j][$p]];
 										$this->gui->formvars['operator_'.$this->attributes['subform_pkeys'][$j][$p]] = '=';
