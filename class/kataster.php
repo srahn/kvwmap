@@ -1872,6 +1872,7 @@ class flurstueck {
 		for($b=0; $b<count($this->Buchungen); $b++){
 			$versionen= array_merge($versionen, $this->database->getVersionen('alkis.ax_buchungsstelle', $this->Buchungen[$b]['gml_id']));
 		}
+		usort($versionen, function($a, $b){return DateTime::createFromFormat('d.m.Y H:i:s', $a['beginnt']) > DateTime::createFromFormat('d.m.Y H:i:s', $b['beginnt']);});
     return $versionen;
   }
 	
@@ -1948,7 +1949,6 @@ class flurstueck {
     $this->Amtsgericht=$this->getAmtsgericht(); 
     $this->Vorgaenger=$this->getVorgaenger();	
     $this->Nachfolger=$this->getNachfolger();	
-		$this->Versionen=$this->getVersionen();	
     # Abfragen der Nutzungen
     $this->Nutzung=$this->getNutzung();
     if(ALKIS){}		# ALKIS TODO
