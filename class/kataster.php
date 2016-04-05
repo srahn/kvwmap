@@ -1871,10 +1871,13 @@ class flurstueck {
     $versionen=$this->database->getVersionen('alkis.ax_flurstueck', $this->gml_id);
 		for($b=0; $b<count($this->Buchungen); $b++){
 			$versionen= array_merge($versionen, $this->database->getVersionen('alkis.ax_buchungsstelle', $this->Buchungen[$b]['gml_id']));
-		}
-		$versionen = array_map("unserialize", array_unique(array_map("serialize", $versionen)));
+		}		
 		usort($versionen, function($a, $b){return DateTime::createFromFormat('d.m.Y H:i:s', $a['beginnt']) > DateTime::createFromFormat('d.m.Y H:i:s', $b['beginnt']);});
-    return $versionen;
+		for($i = 0; $i < count($versionen); $i++){
+			if($unique_versionen[$versionen[$i]['beginnt']]['endet'] > $versionen[$i]['endet'])$unique_versionen[$versionen[$i]['beginnt']]['endet'] = $versionen[$i]['endet'];
+			if($versionen[$i]['anlass'] != '')$unique_versionen[$versionen[$i]['beginnt']]['anlass'] .= $versionen[$i]['anlass'].' ';
+		}
+    return $unique_versionen;
   }
 	
 	function getNachfolger() {

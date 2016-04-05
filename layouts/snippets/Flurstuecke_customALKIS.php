@@ -199,19 +199,21 @@ hide_versioning = function(flst){
 																<? if(count($flst->Versionen) > 1){ ?>
 																	<span class="fett px14">Versionswahl:</span>
 																	<select name="versions_<? echo $k; ?>" onchange="location.href='index.php?go=setHistTimestamp&timestamp='+this.value" style="max-width: 500px">
-																		<? $selected = false; 
-																			 for($v = 0; $v < count($flst->Versionen); $v++){
-																				$beginnt = DateTime::createFromFormat('d.m.Y H:i:s', $flst->Versionen[$v]['beginnt']);
-																				$endet = DateTime::createFromFormat('d.m.Y H:i:s', $flst->Versionen[$v]['endet']);
+																		<? $selected = false;
+																			 $v = 0;
+																			 foreach($flst->Versionen as $version_beginnt => $version){
+																				$beginnt = DateTime::createFromFormat('d.m.Y H:i:s', $beginnt);
+																				$endet = DateTime::createFromFormat('d.m.Y H:i:s', $version['endet']);
 																				echo '<option ';
 																				if(
 																					($timestamp == NULL AND $endet == NULL) OR 																	# timestamp aktuell und letzte Version
 																					($timestamp >= $beginnt AND $timestamp < $endet) OR												# timestamp liegt im Intervall
 																					($v == count($flst->Versionen)-1 AND $selected == false)										# timestamp außerhalb des Intervalls (Vorschau)
 																				){$selected = true; echo 'selected';}
-																				if($flst->Versionen[$v]['endet'] != '')echo ' value="'.$flst->Versionen[$v]['beginnt'].'">';
+																				if($version['endet'] != '')echo ' value="'.$version_beginnt.'">';
 																				else echo ' value="">';
-																				echo $flst->Versionen[$v]['beginnt'].' '.$flst->Versionen[$v]['anlass'].'</option>';
+																				echo $version_beginnt.' '.$version['anlass'].'</option>';
+																				$v++;
 																			 }
 																		?>
 																	</select>
