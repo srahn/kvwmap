@@ -1,0 +1,135 @@
+.xplankonverter {
+  margin: auto;
+  width: 97%
+}
+
+.xplankonverter div.table {
+  display: table;
+  background-color: #ddd;
+  padding: 0px;
+  margin-top: 10px;
+  border-spacing: 1px;
+  min-width: 200px;
+  width: 100%;
+/*  -webkit-border-top-left-radius: 5px;
+  -webkit-border-top-right-radius: 5px;
+  -moz-border-top-left-radius: 5px;
+  -moz-border-top-right-radius: 5px;
+  -khtml-border-top-left-radius: 5px;
+  -khtml-border-top-right-radius: 5px;*/
+}
+div.tr { 
+  display:table-row;
+}
+div.th {
+  display:table-cell;
+  padding: 5px;
+  background-color: #eee;
+/*  -webkit-border-top-left-radius: 5px;
+  -webkit-border-top-right-radius: 5px;
+  -moz-border-top-left-radius: 5px;
+  -moz-border-top-right-radius: 5px;
+  -khtml-border-top-left-radius: 5px;
+  -khtml-border-top-right-radius: 5px;*/
+}
+div.td { 
+  display:table-cell;
+  padding: 5px;
+  background-color: #fff;
+}
+
+.xplankonverter div.step {
+  float: left;
+  margin-right: 10px;
+  padding: 5px;
+  background-color: #ddd;
+}
+
+.xplankonverter h2 {
+  font-weight: bold;
+  margin-top: 12px;
+  margin-bottom: 0px;
+}
+
+.button {
+  display: inline-block;
+  border-radius: 4px;
+  background-color: #f4511e;
+  border: none;
+  color: #000;
+  text-align: center;
+  font-size: 1em;
+  padding: 5px;
+  width: 100px;
+  transition: all 0.5s;
+  cursor: pointer;
+  margin-left: 50%;
+  margin-bottom: 20px;
+  background-image: linear-gradient(#DAE4EC, #c7d9e6);
+}
+
+.button span {
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+  transition: 0.5s;
+}
+
+.button span:after {
+  content: '»';
+  position: absolute;
+  opacity: 0;
+  top: 0;
+  right: -20px;
+  transition: 0.5s;
+}
+
+.button:hover span {
+  padding-right: 25px;
+}
+
+.button:hover span:after {
+  opacity: 1;
+  right: 0;
+}
+
+
+/*
+.xplankonverter .button {
+    float: right;
+    background-color: #4CAF50;
+    border: none;
+    font-size: 1em;
+    color: #000;
+    padding: 5px;
+    width: 60px;
+    text-align: center;
+    -webkit-transition-duration: 0.4s; 
+    transition-duration: 0.4s;
+    text-decoration: none;
+    overflow: hidden;
+    cursor: pointer;
+    background-image: linear-gradient(#DAE4EC, #c7d9e6);
+    margin-left: 10px;
+    margin-bottom: 20px;
+}
+
+.xplankonverter .button:after {
+    content: "";
+    background: #90EE90;
+    display: block;
+    position: absolute;
+    padding-top: 300%;
+    padding-left: 350%;
+    margin-left: -20px!important;
+    margin-top: -120%;
+    opacity: 0;
+    transition: all 0.8s
+}
+
+.xplankonverter .button:active:after {
+    padding: 0;
+    margin: 0;
+    opacity: 1;
+    transition: 0s
+}*/
