@@ -192,20 +192,12 @@ hide_versioning = function(flst){
 																<span class="fett px14">Lebenszeit:&nbsp;&nbsp;</span><span class="px14"><? echo $flst->beginnt.'&nbsp;&nbsp;-&nbsp;&nbsp;'.$flst->endet; ?></span>
 															</td>
 														</tr>
-														<? if($flst->Vorgaenger[0]['anlass'] != ''){ ?>
-														<tr>
-															<td></td>
-															<td>
-																<span class="fett px14">Anlass:&nbsp;&nbsp;</span><span class="px14"><? echo $flst->Vorgaenger[0]['anlass']; ?></span>
-															</td>
-														</tr>
-														<? } ?>
 														<tr>
 															<td></td>
 															<td>
 																<? if(count($flst->Versionen) > 1){ ?>
 																	<span class="fett px14">Versionswahl:</span>
-																	<select name="versions_<? echo $k; ?>" onchange="location.href='index.php?go=setHistTimestamp&timestamp='+this.value" style="width: 87px">
+																	<select name="versions_<? echo $k; ?>" onchange="location.href='index.php?go=setHistTimestamp&timestamp='+this.value" style="max-width: 500px">
 																		<? $selected = false; 
 																			 for($v = 0; $v < count($flst->Versionen); $v++){
 																				$beginnt = DateTime::createFromFormat('d.m.Y H:i:s', $flst->Versionen[$v]['beginnt']);
@@ -216,8 +208,9 @@ hide_versioning = function(flst){
 																					($timestamp >= $beginnt AND $timestamp < $endet) OR												# timestamp liegt im Intervall
 																					($v == count($flst->Versionen)-1 AND $selected == false)										# timestamp außerhalb des Intervalls (Vorschau)
 																				){$selected = true; echo 'selected';}
-																				if($flst->Versionen[$v]['endet'] != '')echo ' value="'.$flst->Versionen[$v]['beginnt'].'">'.$flst->Versionen[$v]['beginnt'].'</option>';
-																				else echo ' value="">'.$flst->Versionen[$v]['beginnt'].'</option>';
+																				if($flst->Versionen[$v]['endet'] != '')echo ' value="'.$flst->Versionen[$v]['beginnt'].'">';
+																				else echo ' value="">';
+																				echo $flst->Versionen[$v]['beginnt'].' '.$flst->Versionen[$v]['anlass'].'</option>';
 																			 }
 																		?>
 																	</select>

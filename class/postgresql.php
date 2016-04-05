@@ -1514,7 +1514,7 @@ class pgdatabase {
   }
 	
 	function getVersionen($table, $gml_id){
-		$sql = "SELECT beginnt::timestamp, endet::timestamp FROM ".$table." WHERE gml_id = '".$gml_id."' ORDER BY beginnt";
+		$sql = "SELECT beginnt::timestamp, endet::timestamp, bezeichner as anlass FROM ".$table.", alkis.ax_fortfuehrungsanlaesse WHERE gml_id = '".$gml_id."' AND wert = anlass::integer ORDER BY beginnt";
 		$queryret=$this->execSQL($sql, 4, 0);
 		while($rs=pg_fetch_assoc($queryret[1])) {
 			$versionen[]=$rs;
