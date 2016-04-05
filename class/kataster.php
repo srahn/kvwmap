@@ -1875,7 +1875,10 @@ class flurstueck {
 		usort($versionen, function($a, $b){return DateTime::createFromFormat('d.m.Y H:i:s', $a['beginnt']) > DateTime::createFromFormat('d.m.Y H:i:s', $b['beginnt']);});
 		for($i = 0; $i < count($versionen); $i++){
 			if($unique_versionen[$versionen[$i]['beginnt']]['endet'] == '' OR $unique_versionen[$versionen[$i]['beginnt']]['endet'] > $versionen[$i]['endet'])$unique_versionen[$versionen[$i]['beginnt']]['endet'] = $versionen[$i]['endet'];
-			if($versionen[$i]['anlass'] != '' AND strpos($unique_versionen[$versionen[$i]['beginnt']]['anlass'], $versionen[$i]['anlass']) === false)$unique_versionen[$versionen[$i]['beginnt']]['anlass'] .= $versionen[$i]['anlass'].' ';
+			if($versionen[$i]['anlass'] != ''){
+				$unique_versionen[$versionen[$i]['beginnt']]['anlass'][] = $versionen[$i]['anlass'];
+				$unique_versionen[$versionen[$i]['beginnt']]['anlass'] = array_unique($unique_versionen[$versionen[$i]['beginnt']]['anlass']);
+			}
 		}
     return $unique_versionen;
   }

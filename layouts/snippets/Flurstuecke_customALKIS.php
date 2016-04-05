@@ -212,7 +212,7 @@ hide_versioning = function(flst){
 																				){$selected = true; echo 'selected';}
 																				if($version['endet'] != '')echo ' value="'.$version_beginnt.'">';
 																				else echo ' value="">';
-																				echo $version_beginnt.' '.$version['anlass'].'</option>';
+																				echo $version_beginnt.' '.implode('; ', $version['anlass']).'</option>';
 																				$v++;
 																			 }
 																		?>
