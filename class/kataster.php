@@ -1869,12 +1869,12 @@ class flurstueck {
     if ($this->FlurstKennz=="") { return 0; }
     $this->debug->write("<p>kataster flurstueck->getVersionen (vom Flurstück):<br>",4);
     $versionen=$this->database->getVersionen('alkis.ax_flurstueck', $this->gml_id);
-		for($b=0; $b<count($this->Buchungen); $b++){
+		for($b=0; $b < count($this->Buchungen); $b++){
 			$versionen= array_merge($versionen, $this->database->getVersionen('alkis.ax_buchungsstelle', $this->Buchungen[$b]['gml_id']));
 		}		
 		usort($versionen, function($a, $b){return DateTime::createFromFormat('d.m.Y H:i:s', $a['beginnt']) > DateTime::createFromFormat('d.m.Y H:i:s', $b['beginnt']);});
 		for($i = 0; $i < count($versionen); $i++){
-			if($unique_versionen[$versionen[$i]['beginnt']]['endet'] > $versionen[$i]['endet'])$unique_versionen[$versionen[$i]['beginnt']]['endet'] = $versionen[$i]['endet'];
+			if($unique_versionen[$versionen[$i]['beginnt']]['endet'] == '' OR $unique_versionen[$versionen[$i]['beginnt']]['endet'] > $versionen[$i]['endet'])$unique_versionen[$versionen[$i]['beginnt']]['endet'] = $versionen[$i]['endet'];
 			if($versionen[$i]['anlass'] != '')$unique_versionen[$versionen[$i]['beginnt']]['anlass'] .= $versionen[$i]['anlass'].' ';
 		}
     return $unique_versionen;
