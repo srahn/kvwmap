@@ -202,7 +202,7 @@ hide_versioning = function(flst){
 																		<? $selected = false;
 																			 $v = 0;
 																			 foreach($flst->Versionen as $version_beginnt => $version){
-																				$beginnt = DateTime::createFromFormat('d.m.Y H:i:s', $beginnt);
+																				$beginnt = DateTime::createFromFormat('d.m.Y H:i:s', $version_beginnt);
 																				$endet = DateTime::createFromFormat('d.m.Y H:i:s', $version['endet']);
 																				echo '<option ';
 																				if(
