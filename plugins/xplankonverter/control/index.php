@@ -41,7 +41,7 @@
       $this->converter = new Converter($this->pgdatabase, PG_CONNECTION);
       
       // Einbindung des Views
-      $this->main=PLUGINS . 'xplankonverter/view/convert.php';
+      $this->main = PLUGINS . 'xplankonverter/view/convert.php';
       
       $this->initialData = array(
         'config' => array(
@@ -67,6 +67,11 @@
       
     } break;
 
+    case 'xplankonverter_konvertierungen_index' : {
+      $this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
+      $this->output();
+    } break;
+
     case 'home' : {
       // Einbindung des Views
       $this->main=PLUGINS . 'xplankonverter/view/home.php';
@@ -74,7 +79,7 @@
       $this->output();
 
     } break;
-    
+
     default : {
       $this->goNotExecutedInPlugins = true;    // in diesem Plugin wurde go nicht ausgeführt
     }
