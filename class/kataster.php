@@ -1876,7 +1876,7 @@ class flurstueck {
 		for($i = 0; $i < count($versionen); $i++){
 			if($unique_versionen[$versionen[$i]['beginnt']]['endet'] == '' OR $unique_versionen[$versionen[$i]['beginnt']]['endet'] > $versionen[$i]['endet'])$unique_versionen[$versionen[$i]['beginnt']]['endet'] = $versionen[$i]['endet'];
 			if($versionen[$i]['anlass'] != ''){
-				$unique_versionen[$versionen[$i]['beginnt']]['anlass'][] = $versionen[$i]['anlass'];
+				$unique_versionen[$versionen[$i]['beginnt']]['anlass'][] = $versionen[$i]['anlass'].' ';
 				$unique_versionen[$versionen[$i]['beginnt']]['anlass'] = array_unique($unique_versionen[$versionen[$i]['beginnt']]['anlass']);
 			}
 		}
