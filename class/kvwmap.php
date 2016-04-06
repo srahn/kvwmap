@@ -10545,6 +10545,60 @@ class GUI {
 		}	
 	} # ende function flurstSuchenByLatLng
 
+	function Flurstueck_GetVersionen(){
+		$ret=$this->Stelle->getFlurstueckeAllowed($FlurstKennzListe, $this->pgdatabase);
+    if($ret[0]) {
+      $this->Fehlermeldung=$ret[1];
+    }
+    else{
+      $flst = new flurstueck($this->formvars['flurstkennz'], $this->pgdatabase);
+			$versionen = $flst->getVersionen();
+			$output = '	<table cellspacing="0" cellpadding="3">
+										<tr style="background-color: #EDEFEF;">
+											<td style="border-bottom: 1px solid '.BG_DEFAULT.'">
+												<a href="javascript:hide_versioning(\''.$this->formvars['flurstkennz'].'\');"><img src="'.GRAPHICSPATH.'minus.gif"></a>
+											</td>
+											<td style="border-bottom: 1px solid '.BG_DEFAULT.'">
+												<span class="fett px14">Versionierung</span>
+											</td>
+										</tr>
+										<tr>
+											<td></td>
+											<td>
+												<span class="fett px14">Lebenszeit:&nbsp;&nbsp;</span><span class="px14">'.$flst->beginnt.'&nbsp;&nbsp;-&nbsp;&nbsp;'.$flst->endet.'</span>
+											</td>
+										</tr>
+										<tr>
+											<td></td>
+											<td>';
+												if(count($versionen) > 1){
+			$output.= '					<span class="fett px14">Versionswahl:</span>
+													<select name="versions_'.$k.'" onchange="location.href=\'index.php?go=setHistTimestamp&timestamp=\'+this.value" style="max-width: 500px">';
+													$selected = false;
+													$v = 0;
+													foreach($versionen as $version_beginnt => $version){
+														$beginnt = DateTime::createFromFormat('d.m.Y H:i:s', $version_beginnt);
+														$endet = DateTime::createFromFormat('d.m.Y H:i:s', $version['endet']);
+														$output.= '<option ';
+														if(
+															($timestamp == NULL AND $endet == NULL) OR 																	# timestamp aktuell und letzte Version
+															($timestamp >= $beginnt AND $timestamp < $endet) OR												# timestamp liegt im Intervall
+															($v == count($versionen)-1 AND $selected == false)										# timestamp außerhalb des Intervalls (Vorschau)
+														){$selected = true; $output.= 'selected';}
+														if($version['endet'] != '')$output.= ' value="'.$version_beginnt.'">';
+														else $output.= ' value="">';
+														$output.= $version_beginnt.' '.implode(' ', $version['anlass']).'</option>';
+														$v++;
+													}
+			$output.= '					</select>';
+												}
+			$output.= '			</td>
+										</tr>
+									</table>';
+			echo $output;
+    }
+	}
+	
   function flurstAnzeige($FlurstKennzListe) {
     # 2006-01-26 pk
     # Abfrage der Berechtigung zum Anzeigen der FlurstKennzListe

@@ -42,6 +42,7 @@ show_all = function(count){
 show_versioning = function(flst){
 	document.getElementById('no_versioning_'+flst).style.display = 'none';
 	document.getElementById('versioning_'+flst).style.display = '';
+	ahah('index.php', 'go=Flurstueck_GetVersionen&flurstkennz='+flst, new Array(document.getElementById('versioning_'+flst)), new Array('sethtml'));
 }
 
 hide_versioning = function(flst){
@@ -97,9 +98,6 @@ hide_versioning = function(flst){
       $flst->readALB_Data($flurstkennz_a, $this->formvars['without_temporal_filter']);	# bei without_temporal_filter=true, wird unabhängig vom Zeitstempel abgefragt (z.B. bei der historischen Flurstückssuche oder Flst.-Listenimport oder beim Sprung zum Vorgänger/Nachfolger)
 			$flst->Grundbuecher=$flst->getGrundbuecher();
 			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,$flst->hist_alb);
-			for($b=0; $b < count($flst->Buchungen); $b++){
-				$flst->Eigentuemerliste[$flst->Buchungen[$b]['bezirk'].'_'.$flst->Buchungen[$b]['blatt'].'_'.$flst->Buchungen[$b]['bvnr']] = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
-			}
 			$flst->Versionen=$flst->getVersionen();	
       $gemkg=substr($flurstkennz_a, 0, 6);
       $flur=substr($flurstkennz_a, 6, 3);
@@ -180,51 +178,7 @@ hide_versioning = function(flst){
 														</tr>
 													</table>
 												</div>
-												<div id="versioning_<? echo $flst->FlurstKennz; ?>" style="border: 1px solid <? echo BG_DEFAULT ?>; display:none">
-													<table cellspacing="0" cellpadding="3">
-														<tr style="background-color: #EDEFEF;">
-															<td style="border-bottom: 1px solid <? echo BG_DEFAULT ?>">
-																<a href="javascript:hide_versioning('<? echo $flst->FlurstKennz; ?>');"><img src="<? echo GRAPHICSPATH.'minus.gif'; ?>"></a>
-															</td>
-															<td style="border-bottom: 1px solid <? echo BG_DEFAULT ?>">
-																<span class="fett px14">Versionierung</span>
-															</td>
-														</tr>
-														<tr>
-															<td></td>
-															<td>
-																<span class="fett px14">Lebenszeit:&nbsp;&nbsp;</span><span class="px14"><? echo $flst->beginnt.'&nbsp;&nbsp;-&nbsp;&nbsp;'.$flst->endet; ?></span>
-															</td>
-														</tr>
-														<tr>
-															<td></td>
-															<td>
-																<? if(count($flst->Versionen) > 1){ ?>
-																	<span class="fett px14">Versionswahl:</span>
-																	<select name="versions_<? echo $k; ?>" onchange="location.href='index.php?go=setHistTimestamp&timestamp='+this.value" style="max-width: 500px">
-																		<? $selected = false;
-																			 $v = 0;
-																			 foreach($flst->Versionen as $version_beginnt => $version){
-																				$beginnt = DateTime::createFromFormat('d.m.Y H:i:s', $version_beginnt);
-																				$endet = DateTime::createFromFormat('d.m.Y H:i:s', $version['endet']);
-																				echo '<option ';
-																				if(
-																					($timestamp == NULL AND $endet == NULL) OR 																	# timestamp aktuell und letzte Version
-																					($timestamp >= $beginnt AND $timestamp < $endet) OR												# timestamp liegt im Intervall
-																					($v == count($flst->Versionen)-1 AND $selected == false)										# timestamp außerhalb des Intervalls (Vorschau)
-																				){$selected = true; echo 'selected';}
-																				if($version['endet'] != '')echo ' value="'.$version_beginnt.'">';
-																				else echo ' value="">';
-																				echo $version_beginnt.' '.implode(' ', $version['anlass']).'</option>';
-																				$v++;
-																			 }
-																		?>
-																	</select>
-																<? }	?>
-															</td>
-														</tr>
-													</table>
-												</div>
+												<div id="versioning_<? echo $flst->FlurstKennz; ?>" style="border: 1px solid <? echo BG_DEFAULT ?>; display:none"></div>
 											</td>
 										</tr>
 									</table>
@@ -760,8 +714,7 @@ hide_versioning = function(flst){
 								</tr>
 							<? }
 							}
-              #$Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
-							$Eigentuemerliste = $flst->Eigentuemerliste[$flst->Buchungen[$b]['bezirk'].'_'.$flst->Buchungen[$b]['blatt'].'_'.$flst->Buchungen[$b]['bvnr']];
+              $Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
                   $anzEigentuemer=count($Eigentuemerliste);
                   for ($e=0;$e<$anzEigentuemer;$e++) { ?>
               <tr>

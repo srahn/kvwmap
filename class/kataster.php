@@ -1546,18 +1546,18 @@ class flurstueck {
     return $Klassifizierung;
   }
 
-  function getBuchungen($Bezirk,$Blatt,$hist_alb = false) {
+  function getBuchungen($Bezirk,$Blatt,$hist_alb = false, $without_temporal_filter = false){
     if ($this->FlurstKennz=="") { return 0; }
     $this->debug->write("<br>kataster.php->flurstueck->getBuchungen Abfrage der Buchungen zum Flurstück auf dem Grundbuch<br>",4);
     #$ret=$this->database->getBuchungen($this->FlurstKennz);
-    $ret=$this->database->getBuchungenFromGrundbuch($this->FlurstKennz,$Bezirk,$Blatt,$hist_alb, $this->fiktiv);
+    $ret=$this->database->getBuchungenFromGrundbuch($this->FlurstKennz,$Bezirk,$Blatt,$hist_alb, $this->fiktiv, NULL, $without_temporal_filter);
     return $ret[1];
   }
 
-  function getGrundbuecher() {
+  function getGrundbuecher($without_temporal_filter = false) {
     if ($this->FlurstKennz=="") { return 0; }
     $this->debug->write("<br>kataster.php->flurstueck->getGrundbuecher Abfrage der Angaben zum Grundbuch auf dem das Flurstück gebucht ist<br>",4);
-    $ret=$this->database->getGrundbuecher($this->FlurstKennz, $this->hist_alb);
+    $ret=$this->database->getGrundbuecher($this->FlurstKennz, $this->hist_alb, false, $without_temporal_filter);
 		if($ret['fiktiv'])$this->fiktiv = true;
     return $ret[1];
   }
@@ -1606,14 +1606,14 @@ class flurstueck {
     return $FlstListe;
   }
 
-  function getEigentuemerliste($Bezirk,$Blatt,$BVNR) {
+  function getEigentuemerliste($Bezirk,$Blatt,$BVNR,$without_temporal_filter = false) {
     if ($this->FlurstKennz=="") {
       $Grundbuch = new grundbuch("","",$this->debug);
       $Eigentuemerliste[0] = new eigentuemer($Grundbuch,"");
       return $Eigentuemerliste;
     }
     $this->debug->write("<p>kataster flurstueck->getEigentuemerliste Abfragen der Flurstücksdaten aus dem ALK Bestand:<br>",4);
-    $ret=$this->database->getEigentuemerliste($this->FlurstKennz,$Bezirk,$Blatt,$BVNR);
+    $ret=$this->database->getEigentuemerliste($this->FlurstKennz,$Bezirk,$Blatt,$BVNR,$without_temporal_filter);
     if ($ret[0] AND DBWRITE) {
       $Grundbuch = new grundbuch("","",$this->debug);
       $Eigentuemerliste[0] = new eigentuemer($Grundbuch,"");
@@ -1868,18 +1868,23 @@ class flurstueck {
 	function getVersionen() {
     if ($this->FlurstKennz=="") { return 0; }
     $this->debug->write("<p>kataster flurstueck->getVersionen (vom Flurstück):<br>",4);
-    $versionen=$this->database->getVersionen('alkis.ax_flurstueck', array($this->gml_id));
-		for($b=0; $b < count($this->Buchungen); $b++){
-			$buchungsstelle_gml_ids[] = $this->Buchungen[$b]['gml_id'];
-		}		
-		foreach($this->Eigentuemerliste as $Eigentuemerliste){
-			foreach($Eigentuemerliste as $Eigentuemer){
-				$namensnummer_gml_ids[] = $Eigentuemer->n_gml_id;
+		$this->readALB_Data($this->FlurstKennz, false);
+		$Grundbuecher=$this->getGrundbuecher(true);
+		$Buchungen=$this->getBuchungen(NULL,NULL,false, true);
+		for($b=0; $b < count($Buchungen); $b++){
+			$buchungsstelle_gml_ids[] = $Buchungen[$b]['gml_id'];
+			$Eigentuemerliste = $this->getEigentuemerliste($Buchungen[$b]['bezirk'],$Buchungen[$b]['blatt'],$Buchungen[$b]['bvnr']);
+      $anzEigentuemer=count($Eigentuemerliste);
+      for($e=0;$e<$anzEigentuemer;$e++){
+				$namensnummer_gml_ids[] = $Eigentuemerliste[$e]->n_gml_id;
 			}
 		}
+		$versionen= $this->database->getVersionen('alkis.ax_flurstueck', array($this->gml_id));
 		$versionen= array_merge($versionen, $this->database->getVersionen('alkis.ax_buchungsstelle', $buchungsstelle_gml_ids));
 		$versionen= array_merge($versionen, $this->database->getVersionen('alkis.ax_namensnummer', $namensnummer_gml_ids));
+		# sortieren
 		usort($versionen, function($a, $b){return DateTime::createFromFormat('d.m.Y H:i:s', $a['beginnt']) > DateTime::createFromFormat('d.m.Y H:i:s', $b['beginnt']);});
+		# gleiche beginnts rausnehmen, Anlässe zusammenfassen
 		for($i = 0; $i < count($versionen); $i++){
 			if($unique_versionen[$versionen[$i]['beginnt']]['endet'] == '' OR $unique_versionen[$versionen[$i]['beginnt']]['endet'] > $versionen[$i]['endet'])$unique_versionen[$versionen[$i]['beginnt']]['endet'] = $versionen[$i]['endet'];
 			$unique_versionen[$versionen[$i]['beginnt']]['anlass'][] = $versionen[$i]['anlass'];
