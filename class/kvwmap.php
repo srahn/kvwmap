@@ -10546,7 +10546,6 @@ class GUI {
 	} # ende function flurstSuchenByLatLng
 
 	function Flurstueck_GetVersionen(){
-		$timestamp = DateTime::createFromFormat('d.m.Y H:i:s', $this->user->rolle->hist_timestamp);
 		$ret=$this->Stelle->getFlurstueckeAllowed($FlurstKennzListe, $this->pgdatabase);
     if($ret[0]) {
       $this->Fehlermeldung=$ret[1];
@@ -10554,6 +10553,7 @@ class GUI {
     else{
       $flst = new flurstueck($this->formvars['flurstkennz'], $this->pgdatabase);
 			$versionen = $flst->getVersionen();
+			$timestamp = DateTime::createFromFormat('d.m.Y H:i:s', $this->user->rolle->hist_timestamp);
 			$output = '	<table cellspacing="0" cellpadding="3">
 										<tr style="background-color: #EDEFEF;">
 											<td style="border-bottom: 1px solid '.BG_DEFAULT.'">
