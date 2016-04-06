@@ -1537,7 +1537,7 @@ class pgdatabase {
     if ($BVNR!="") {
       $sql.=" AND s.laufendenummer='".$BVNR."'";
     }
-		$sql.= $this->build_temporal_filter(array('s', 'g', 'b', 'n', 'p'));
+		if(!$without_temporal_filter)$sql.= $this->build_temporal_filter(array('s', 'g', 'b', 'n', 'p'));
     $sql.= " ORDER BY order1, order2;";
     #echo $sql.'<br><br>';
     $ret=$this->execSQL($sql, 4, 0);
