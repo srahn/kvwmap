@@ -1371,10 +1371,11 @@ function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $
 	$success = false;
 	switch ($mode) {
 		case 'sendEmail async': {
-			# Erstelle Befehl für sendEmail und schreibe in Temp Verzeichnis.
+			# Erstelle Befehl für sendEmail und schreibe in mail queue Verzeichnis.
 			$str = array('to_email' => $to_email, 'from_email' => $from_email, 'subject' => $subject, 'message' => $message, 'attachment' => $attachement);
 			if(!is_dir(MAILQUEUEPATH)){
 				mkdir(MAILQUEUEPATH);
+				chmod(MAILQUEUEPATH, 'g+w');
 			}
 			$file = MAILQUEUEPATH . 'email' . date('YmdHis', time()) . '_' . uniqid('', false) . '.txt';
 			$success = file_put_contents(
