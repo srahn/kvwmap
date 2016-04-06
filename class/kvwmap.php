@@ -10575,17 +10575,17 @@ class GUI {
 			$output.= '					<span class="fett px14">Versionswahl:</span>
 													<select name="versions_'.$k.'" onchange="location.href=\'index.php?go=setHistTimestamp&timestamp=\'+this.value" style="max-width: 500px">';
 													$selected = false;
-													$v = 0;
+													$v = 1;
+													$count = count($versionen);
 													foreach($versionen as $version_beginnt => $version){
 														$beginnt = DateTime::createFromFormat('d.m.Y H:i:s', $version_beginnt);
 														$endet = DateTime::createFromFormat('d.m.Y H:i:s', $version['endet']);
 														$output.= '<option ';
-														if(
-															($timestamp == NULL AND $endet == NULL) OR 																	# timestamp aktuell und letzte Version
-															($timestamp >= $beginnt AND $timestamp < $endet) OR												# timestamp liegt im Intervall
-															($v == count($versionen)-1 AND $selected == false)										# timestamp außerhalb des Intervalls (Vorschau)
+														if($selected == false AND
+															($timestamp >= $beginnt) OR				# timestamp liegt im Intervall
+															($v == $count)										# letzte Version (aktuell)
 														){$selected = true; $output.= 'selected';}
-														if($version['endet'] != '')$output.= ' value="'.$version_beginnt.'">';
+														if($v < $count)$output.= ' value="'.$version_beginnt.'">';
 														else $output.= ' value="">';
 														$output.= $version_beginnt.' '.implode(' ', $version['anlass']).'</option>';
 														$v++;
