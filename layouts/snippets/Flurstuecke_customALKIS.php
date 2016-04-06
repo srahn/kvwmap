@@ -97,6 +97,9 @@ hide_versioning = function(flst){
       $flst->readALB_Data($flurstkennz_a, $this->formvars['without_temporal_filter']);	# bei without_temporal_filter=true, wird unabhängig vom Zeitstempel abgefragt (z.B. bei der historischen Flurstückssuche oder Flst.-Listenimport oder beim Sprung zum Vorgänger/Nachfolger)
 			$flst->Grundbuecher=$flst->getGrundbuecher();
 			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,$flst->hist_alb);
+			for($b=0; $b < count($flst->Buchungen); $b++){
+				$flst->Eigentuemerliste[$flst->Buchungen[$b]['bezirk'].'_'.$flst->Buchungen[$b]['blatt'].'_'.$flst->Buchungen[$b]['bvnr']] = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
+			}
 			$flst->Versionen=$flst->getVersionen();	
       $gemkg=substr($flurstkennz_a, 0, 6);
       $flur=substr($flurstkennz_a, 6, 3);
@@ -757,7 +760,8 @@ hide_versioning = function(flst){
 								</tr>
 							<? }
 							}
-              $Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
+              #$Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
+							$Eigentuemerliste = $flst->Eigentuemerliste[$flst->Buchungen[$b]['bezirk'].'_'.$flst->Buchungen[$b]['blatt'].'_'.$flst->Buchungen[$b]['bvnr']];
                   $anzEigentuemer=count($Eigentuemerliste);
                   for ($e=0;$e<$anzEigentuemer;$e++) { ?>
               <tr>
