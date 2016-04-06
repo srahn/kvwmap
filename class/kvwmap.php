@@ -10563,12 +10563,12 @@ class GUI {
 												<span class="fett px14">Versionierung</span>
 											</td>
 										</tr>
-										<tr>
+										<!--tr>
 											<td></td>
 											<td>
 												<span class="fett px14">Lebenszeit:&nbsp;&nbsp;</span><span class="px14">'.$flst->beginnt.'&nbsp;&nbsp;-&nbsp;&nbsp;'.$flst->endet.'</span>
 											</td>
-										</tr>
+										</tr-->
 										<tr>
 											<td></td>
 											<td>';
@@ -10578,12 +10578,17 @@ class GUI {
 													$selected = false;
 													$v = 1;
 													$count = count($versionen);
-													foreach($versionen as $version_beginnt => $version){
+													reset($versionen);
+													while($version = current($versionen)){
+														$version_beginnt = key($versionen);
+														$next_version = next($versionen);
+														$next_version_beginnt = key($versionen);
 														$beginnt = DateTime::createFromFormat('d.m.Y H:i:s', $version_beginnt);
+														$next_beginnt = DateTime::createFromFormat('d.m.Y H:i:s', $next_version_beginnt);
 														$output.= '<option ';
 														if($selected == false AND
-															($timestamp >= $beginnt) OR				# timestamp liegt im Intervall
-															($v == $count)										# letzte Version (aktuell)
+															(($timestamp >= $beginnt AND $timestamp < $next_beginnt) OR				# timestamp liegt im Intervall
+															$v == $count)																											# letzte Version (aktuell)
 														){$selected = true; $output.= 'selected';}
 														if($v < $count)$output.= ' value="'.$version_beginnt.'">';
 														else $output.= ' value="">';
