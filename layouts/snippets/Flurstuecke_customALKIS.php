@@ -98,7 +98,6 @@ hide_versioning = function(flst){
       $flst->readALB_Data($flurstkennz_a, $this->formvars['without_temporal_filter']);	# bei without_temporal_filter=true, wird unabhängig vom Zeitstempel abgefragt (z.B. bei der historischen Flurstückssuche oder Flst.-Listenimport oder beim Sprung zum Vorgänger/Nachfolger)
 			$flst->Grundbuecher=$flst->getGrundbuecher();
 			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,$flst->hist_alb);
-			$flst->Versionen=$flst->getVersionen();	
       $gemkg=substr($flurstkennz_a, 0, 6);
       $flur=substr($flurstkennz_a, 6, 3);
       $zaehler=ltrim(substr($flurstkennz_a, 9, 5), '0');
