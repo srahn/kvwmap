@@ -1877,11 +1877,13 @@ class flurstueck {
       $anzEigentuemer=count($Eigentuemerliste);
       for($e=0;$e<$anzEigentuemer;$e++){
 				$namensnummer_gml_ids[] = $Eigentuemerliste[$e]->n_gml_id;
+				$person_gml_ids[] = $Eigentuemerliste[$e]->gml_id;
 			}
 		}
 		$versionen= $this->database->getVersionen('alkis.ax_flurstueck', array($this->gml_id));
 		$versionen= array_merge($versionen, $this->database->getVersionen('alkis.ax_buchungsstelle', $buchungsstelle_gml_ids));
 		$versionen= array_merge($versionen, $this->database->getVersionen('alkis.ax_namensnummer', $namensnummer_gml_ids));
+		$versionen= array_merge($versionen, $this->database->getVersionen('alkis.ax_person', $person_gml_ids));
 		# sortieren
 		usort($versionen, function($a, $b){return DateTime::createFromFormat('d.m.Y H:i:s', $a['beginnt']) > DateTime::createFromFormat('d.m.Y H:i:s', $b['beginnt']);});
 		# gleiche beginnts rausnehmen, Anlässe zusammenfassen
