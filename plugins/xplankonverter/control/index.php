@@ -72,6 +72,15 @@
       $this->output();
     } break;
 
+    case 'xplankonverter_shapefiles_index' : {
+      $this->main = '../../plugins/xplankonverter/view/shapefiles.php';
+      $this->output();
+    } break;
+
+    case 'xplankonverter_shapefiles_upload' : {
+      var_dump($this->formvars);
+    } break;
+
     case 'home' : {
       // Einbindung des Views
       $this->main=PLUGINS . 'xplankonverter/view/home.php';

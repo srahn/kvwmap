@@ -18,4 +18,3 @@
   <li class='<?php echo ($config['step4']['disabled'] ? 'disabled' : ($config['active']==='step4' ? 'active' : ''));?>'><a data-toggle='tab'>Schritt 4</a></li>
   <li><a data-toggle='tab' href='#map'>Karte</a></li>
 </ul>
--

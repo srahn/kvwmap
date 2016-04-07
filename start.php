@@ -368,14 +368,30 @@ if($GUI->user->rolle->auto_map_resize AND $GUI->formvars['browserwidth'] != '')$
 
 if(isset($_FILES)) {
 	foreach ($_FILES AS $datei) {
-		$name = strtolower(basename($datei['name']));
-		if(strpos($name,'.php') OR strpos($name,'.phtml') OR strpos($name,'.php3')) {
-			echo 'PHP Dateien dürfen nicht hochgeladen werden. Auch nicht '.$datei['name'];
-			move_uploaded_file($datei['tmp_name'],LOGPATH.'AusfuehrbareDatei_vom'.date('d.m.Y',time()).'_stelleID'.$GUI->Stelle->id.'_userID'.$GUI->user->id.'_'.$datei['name'].'.txt');
-			unset($_FILES);
-			exit;
-		}
+    if (!is_array($datei['name'])) # $datei so umformen als wäre es ein multi file upload
+      $datei = array_map(
+        function($attribute) {
+          return array($attribute);
+        },
+        $datei
+      );
+    foreach ($datei['name'] AS $i => $datei_name) {
+    	$base_name = strtolower(basename($datei_name));
+    	if(strpos($base_name, '.php') OR strpos($base_name, '.phtml') OR strpos($base_name, '.php3'))
+        $forbidden_files[] = array('name' => $datei_name, 'tmp_name' => $datei['tmp_name'][$i]);
+    }
 	}
+  if (count($forbidden_files) > 0) {
+    echo 'PHP Dateien dürfen nicht hochgeladen werden. Auch nicht:';
+    foreach ($forbidden_files AS $forbidden_file) {
+	    echo '<br>' . $forbidden_file['name'];
+	    move_uploaded_file(
+        $forbidden_file['tmp_name'],
+        LOGPATH . 'AusfuehrbareDatei_vom' . date('c',time()) . '_stelleID' . $GUI->Stelle->id . '_userID' . $GUI->user->id . '_' . $forbidden_file['name'] . '.txt'
+      );
+    }
+		unset($_FILES);
+		exit;
+  }
 }
-
 ?>
