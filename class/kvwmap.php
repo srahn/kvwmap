@@ -10583,8 +10583,9 @@ class GUI {
 															(($timestamp >= $beginnt AND $timestamp < $next_beginnt) OR				# timestamp liegt im Intervall
 															$v == $count)																											# letzte Version (aktuell)
 														){$selected = true; $output.= 'selected';}
-														if($v < $count)$output.= ' value="'.$version_beginnt.'">';
-														else $output.= ' value="">';
+														if($v < $count)$output.= ' value="'.$version_beginnt.'"';
+														else $output.= ' value=""';
+														$output.= ' title="'.implode(', ', $version['table']).'">';
 														$output.= $version_beginnt.' '.implode(' ', $version['anlass']).'</option>';
 														$v++;
 													}

@@ -1880,10 +1880,10 @@ class flurstueck {
 				$person_gml_ids[] = $Eigentuemerliste[$e]->gml_id;
 			}
 		}
-		$versionen= $this->database->getVersionen('alkis.ax_flurstueck', array($this->gml_id));
-		$versionen= array_merge($versionen, $this->database->getVersionen('alkis.ax_buchungsstelle', $buchungsstelle_gml_ids));
-		$versionen= array_merge($versionen, $this->database->getVersionen('alkis.ax_namensnummer', $namensnummer_gml_ids));
-		$versionen= array_merge($versionen, $this->database->getVersionen('alkis.ax_person', $person_gml_ids));
+		$versionen= $this->database->getVersionen('ax_flurstueck', array($this->gml_id));
+		$versionen= array_merge($versionen, $this->database->getVersionen('ax_buchungsstelle', $buchungsstelle_gml_ids));
+		$versionen= array_merge($versionen, $this->database->getVersionen('ax_namensnummer', $namensnummer_gml_ids));
+		$versionen= array_merge($versionen, $this->database->getVersionen('ax_person', $person_gml_ids));
 		# sortieren
 		usort($versionen, function($a, $b){return DateTime::createFromFormat('d.m.Y H:i:s', $a['beginnt']) > DateTime::createFromFormat('d.m.Y H:i:s', $b['beginnt']);});
 		# gleiche beginnts rausnehmen, Anlässe zusammenfassen
@@ -1891,6 +1891,7 @@ class flurstueck {
 			if($unique_versionen[$versionen[$i]['beginnt']]['endet'] == '' OR $unique_versionen[$versionen[$i]['beginnt']]['endet'] > $versionen[$i]['endet'])$unique_versionen[$versionen[$i]['beginnt']]['endet'] = $versionen[$i]['endet'];
 			$unique_versionen[$versionen[$i]['beginnt']]['anlass'][] = $versionen[$i]['anlass'];
 			$unique_versionen[$versionen[$i]['beginnt']]['anlass'] = array_unique($unique_versionen[$versionen[$i]['beginnt']]['anlass']);
+			$unique_versionen[$versionen[$i]['beginnt']]['table'][] = $versionen[$i]['table'];
 		}
     return $unique_versionen;
   }
