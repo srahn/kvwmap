@@ -1868,7 +1868,7 @@ class flurstueck {
 	function getVersionen() {
     if ($this->FlurstKennz=="") { return 0; }
     $this->debug->write("<p>kataster flurstueck->getVersionen (vom Flurstück):<br>",4);
-		$this->readALB_Data($this->FlurstKennz, false);
+		$this->readALB_Data($this->FlurstKennz, true);
 		$Grundbuecher=$this->getGrundbuecher(true);							# die Grundbücher ohne zeitlichen Filter abfragen
 		$Buchungen=$this->getBuchungen(NULL,NULL,false, true);	# die Buchungen ohne zeitlichen Filter abfragen
 		for($b=0; $b < count($Buchungen); $b++){
