@@ -5,7 +5,7 @@
 <script language="javascript" type="text/javascript">
 	function shapeFileFunctionsFormatter(value, row) {
     output = '<a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=10&operator_shapefile_id==&value_shapefile_id=' + value + '"><i class="fa fa-pencil"></i></a>&nbsp;&nbsp;';
-    output += '<a href="index.php?go=xplankonverter_shapefiles_delete&shapefile_id=' + row.shapefile_id + '"><i class="fa fa-trash"></i></a>&nbsp;';
+    output += '<a href="index.php?go=xplankonverter_shapefiles_delete&konvertierung_id=' + row.konvertierung_id + '&shapefile_id=' + row.shapefile_id + '"><i class="fa fa-trash"></i></a>&nbsp;';
     return output;
   }
 </script>
@@ -86,33 +86,15 @@ if (isset($_FILES['shape_files']) and $_FILES['shape_files']['name'][0] != '') {
       
       }
       if ($uploaded_file['state'] == 'neu') {
-        # load into database table
-
-        /*
-
-  $command = POSTGRESBINPATH.'shp2pgsql -g the_geom -W LATIN1 '.$this->formvars['table_option'].' ';
-  if($this->formvars['srid'] != ''){
-    $command .= '-s '.$this->formvars['srid'].' ';
-  }
-  if($this->formvars['gist'] != ''){
-    $command .= '-I ';
-  }
-  $command.= UPLOADPATH.$this->formvars['dbffile'].' '.$this->formvars['table_name'].' > '.UPLOADPATH.$this->formvars['table_name'].'.sql'; 
-  exec($command);
-  #echo $command;
-	
-	$command = POSTGRESBINPATH.'psql -h '.$database->host.' -f '.UPLOADPATH.$this->formvars['table_name'].'.sql '.$database->dbName.' '.$database->user;
-	if($database->passwd != '')$command = 'export PGPASSWORD='.$database->passwd.'; '.$command;
-  exec($command);
-
-*/
-
         # register in list of shape files in database
         $shapeFile = new ShapeFile($this->pgdatabase, 'xplankonverter', 'shapefiles');
-        $shapeFile->set('filename', $uploaded_file['filename']);
-        $shapeFile->set('konvertierung_id', $this->konvertierung->get('id'));
-        $shapeFile->set('stelle_id', $this->Stelle->id);
-        $shapeFile->save();
+        $shapeFile->create(
+          array(
+            'filename' => $uploaded_file['filename'],
+            'konvertierung_id' => $this->konvertierung->get('id'),
+            'stelle_id' => $this->Stelle->id
+          )
+        );
       }
     }
   }

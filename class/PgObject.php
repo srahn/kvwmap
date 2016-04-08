@@ -37,7 +37,9 @@ class PgObject {
     $this->pgDatabase = $pgDatabase;
     $this->schema = $schema;
     $this->tableName = $tableName;
+    $this->qualifiedTableName = $schema . '.' . $tableName;
     $this->data = array();
+    $this->debug = false;
   }
 
   function find_by_id($id) {
@@ -45,18 +47,15 @@ class PgObject {
       SELECT
         *
       FROM
-        " . $this->qualified_table_name() . "
+        " . $this->qualifiedTableName . "
       WHERE
         id = " . $id . "
     ";
-    echo '<p>sql: ' . $sql;
+    #echo '<p>sql: ' . $sql;
     $query = pg_query($this->pgDatabase->dbConn, $sql);
     $this->data = pg_fetch_assoc($query);
   }
 
-  function qualified_table_name() {
-    return $this->schema . '.' . $this->tableName;
-  }
   function getAttributes() {
     return array_keys($this->data);
   }
@@ -76,7 +75,7 @@ class PgObject {
 
   function save() {
     $sql = "
-      INSERT INTO " . $this->qualified_table_name() . "(
+      INSERT INTO " . $this->qualifiedTableName . "(
         " . implode(', ', $this->getAttributes()) . "
       )
       VALUES (
@@ -95,7 +94,7 @@ class PgObject {
     $sql = "
       DELETE
       FROM
-        " . $this->qualified_table_name() . "
+        " . $this->qualifiedTableName . "
       WHERE
         id = " . $this->get('id') . "
     ";
@@ -111,6 +110,11 @@ class PgObject {
     $GUI->layer_Datensaetze_loeschen(false);
 */
     return $result;
+  }
+
+  function debug($msg) {
+    if ($this->debug)
+      echo $msg;
   }
 }
 ?>
