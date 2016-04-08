@@ -7112,11 +7112,12 @@ class GUI {
 		$this->sachdaten_speichern();
 	}
 
-  function layer_Datensaetze_loeschen(){
+  function layer_Datensaetze_loeschen($output = true){
     $success = true;
     $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $layerdb = $mapdb->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
     $checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
+    var_dump($checkbox_names);
     for($i = 0; $i < count($checkbox_names); $i++){
       if($this->formvars[$checkbox_names[$i]] == 'on'){
         $element = explode(';', $checkbox_names[$i]);     #  check;table_alias;table;oid
@@ -7139,30 +7140,33 @@ class GUI {
         }
       }
     }
-    if($this->formvars['embedded'] == ''){
-      if($success == false){
-        showAlert('Löschen fehlgeschlagen');
+    if ($output) {
+      if($this->formvars['embedded'] == ''){
+        if($success == false){
+          showAlert('Löschen fehlgeschlagen');
+        }
+        else{
+          showAlert('Löschen erfolgreich');
+        }
+        $this->loadMap('DataBase');
+        $this->user->rolle->newtime = $this->user->rolle->last_time_id;
+        $this->drawMap();
+        $this->output();
       }
       else{
-        showAlert('Löschen erfolgreich');
-      }
-      $this->loadMap('DataBase');
-      $this->user->rolle->newtime = $this->user->rolle->last_time_id;
-      $this->drawMap();
-      $this->output();
-    }
-    else{
-      header('Content-type: text/html; charset=UTF-8');
-      $attributenames[0] = $this->formvars['targetattribute'];
-      $attributes = $mapdb->read_layer_attributes($this->formvars['targetlayer_id'], $layerdb, $attributenames);
-      switch ($attributes['form_element_type'][0]){
-        case 'SubFormEmbeddedPK' : {
-          $this->formvars['embedded_subformPK'] = true;
-          echo '~';
-          $this->GenerischeSuche_Suchen();
-        }break;
+        header('Content-type: text/html; charset=UTF-8');
+        $attributenames[0] = $this->formvars['targetattribute'];
+        $attributes = $mapdb->read_layer_attributes($this->formvars['targetlayer_id'], $layerdb, $attributenames);
+        switch ($attributes['form_element_type'][0]){
+          case 'SubFormEmbeddedPK' : {
+            $this->formvars['embedded_subformPK'] = true;
+            echo '~';
+            $this->GenerischeSuche_Suchen();
+          }break;
+        }
       }
     }
+    return $success;
   }
 
   function neuer_Layer_Datensatz_speichern(){

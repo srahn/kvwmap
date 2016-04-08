@@ -1,7 +1,11 @@
 <?php
 
   $this->goNotExecutedInPlugins = false;
-  
+
+  include_once(CLASSPATH . 'PgObject.php');
+  include(PLUGINS . 'xplankonverter/model/konvertierung.php');
+  include(PLUGINS . 'xplankonverter/model/shapefiles.php');
+
   switch($this->go){
 
     case 'say_hallo' : {
@@ -73,12 +77,34 @@
     } break;
 
     case 'xplankonverter_shapefiles_index' : {
-      $this->main = '../../plugins/xplankonverter/view/shapefiles.php';
+      if ($this->formvars['konvertierung_id'] == '') {
+        $this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+        $this->main = 'Hinweis.php';
+      }
+      else {
+        $this->konvertierung = new Konvertierung($this->pgdatabase, 'xplankonverter', 'konvertierungen');
+        $this->konvertierung->find_by_id($this->formvars['konvertierung_id']);
+        if (isInStelleAllowed($this->Stelle->id, $this->konvertierung->get('stelle_id'))) {
+          $this->main = '../../plugins/xplankonverter/view/shapefiles.php';
+        }
+      }
       $this->output();
     } break;
 
-    case 'xplankonverter_shapefiles_upload' : {
-      var_dump($this->formvars);
+    case 'xplankonverter_shapefiles_delete' : {
+      if ($this->formvars['shapefile_id'] == '') {
+        $this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher ein Shape Datei ausgewählt wurde.';
+        $this->main = 'Hinweis.php';
+      }
+      else {
+        $shapefile = new Shapefile($this->pgdatabase, 'xplankonverter', 'shapefiles');
+        $shapefile->find_by_id($this->formvars['shapefile_id']);
+        if (isInStelleAllowed($this->Stelle->id, $shapefile->get('stelle_id'))) {
+          $shapefile->deleteShape();
+          $this->main = '../../plugins/xplankonverter/view/shapefiles.php';
+        }
+      }
+      $this->output();
     } break;
 
     case 'home' : {
@@ -93,5 +119,12 @@
       $this->goNotExecutedInPlugins = true;    // in diesem Plugin wurde go nicht ausgeführt
     }
   }
-
+function isInStelleAllowed($guiStelleId, $requestStelleId) {
+  if ($guiStelleId == $requestStelleId)
+    return true;
+  else {
+    echo '<br>(Diese Aktion kann nur von der Stelle ' . $this->Stelle->Bezeichnung . ' aus aufgerufen werden';
+    return false;
+  }
+}
 ?>

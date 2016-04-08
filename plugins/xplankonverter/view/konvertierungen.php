@@ -13,7 +13,7 @@
 <table
   id="konvertierungen_table"
   data-toggle="table"
-  data-url="index.php?go=Layer-Suche_Suchen&selected_layer_id=8&mime_type=formatter&format=json"
+  data-url="index.php?go=Layer-Suche_Suchen&selected_layer_id=<?php echo XPLANKONVERTER_KONVERTIERUNGEN_LAYER_ID; ?>&mime_type=formatter&format=json"
   data-height="100%"
   data-click-to-select="false"
   data-sort-name="bezeichnung"
@@ -30,6 +30,12 @@
 >
   <thead>
     <tr>
+      <th
+        data-field="konvertierung_id"
+        data-sortable="true"
+        data-visible="false"
+        data-switchable="true"
+      >Konvertierung Id</th>
       <th
         data-field="bezeichnung"
         data-sortable="true"
@@ -50,7 +56,7 @@
         data-formatter="konvertierungFunctionsFormatter"
         data-switchable="false"
         class="text-right"
-      ></th>
+      >Funktionen</th>
     </tr>
   </thead>
 </table>

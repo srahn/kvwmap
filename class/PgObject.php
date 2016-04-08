@@ -45,15 +45,18 @@ class PgObject {
       SELECT
         *
       FROM
-        " . $this->schema . "." . $this->tableName . "
+        " . $this->qualified_table_name() . "
       WHERE
         id = " . $id . "
     ";
-    #echo '<p>sql: ' . $sql;
+    echo '<p>sql: ' . $sql;
     $query = pg_query($this->pgDatabase->dbConn, $sql);
     $this->data = pg_fetch_assoc($query);
   }
 
+  function qualified_table_name() {
+    return $this->schema . '.' . $this->tableName;
+  }
   function getAttributes() {
     return array_keys($this->data);
   }
@@ -73,7 +76,7 @@ class PgObject {
 
   function save() {
     $sql = "
-      INSERT INTO " . $this->schema . '.' . $this->tableName . "(
+      INSERT INTO " . $this->qualified_table_name() . "(
         " . implode(', ', $this->getAttributes()) . "
       )
       VALUES (
@@ -86,6 +89,28 @@ class PgObject {
     $row = pg_fetch_assoc($query);
     $this->set('id', $row['id']);
     return $this->get('id');
+  }
+
+  function delete() {
+    $sql = "
+      DELETE
+      FROM
+        " . $this->qualified_table_name() . "
+      WHERE
+        id = " . $this->get('id') . "
+    ";
+    #echo '<p>sql: ' . $sql;
+    $result = pg_query($this->pgDatabase->dbConn, $sql);
+
+    # this must have been happen when GLE is used
+/*  
+    $oid = $this->get('oid');
+    $GUI->formvars['chosen_layer_id'] = $layer_id;
+    $GUI->formvars['checkbox_names_' . $layer_id] = 'check;shapefiles;shapefiles;' . $oid;
+    $GUI->formvars['check;shapefiles;shapefiles;' . $oid] = 'on';
+    $GUI->layer_Datensaetze_loeschen(false);
+*/
+    return $result;
   }
 }
 ?>
