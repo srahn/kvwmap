@@ -328,7 +328,7 @@ hide_versions = function(flst){
 										}
 										else{
 											echo "aktuelles&nbsp;Flurst&uuml;ck";
-											if($flst->endet != '')echo ' (historische Version)';
+											if($timestamp != '')echo ' (historische Version)';
 										}
 									}  ?></td>
               </tr>
