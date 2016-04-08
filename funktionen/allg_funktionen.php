@@ -1,3 +1,4 @@
+
 <?php
 /* hier befindet sich ein lose Sammlung von Funktionen, die so oder ähnlich im php
  * Funktionenumfang nicht existieren, in älteren Versionen nicht existiert haben,
@@ -905,7 +906,7 @@ function showMessage($text, $fade = true) {
 			var Msg = document.getElementById("message_box");
 		}
 		Msg.className = 'message_box_visible';
-		Msg.style.top = document.body.scrollTop + 500;		
+		Msg.style.top = document.body.scrollTop + 350;		
 		var innerhtml = '<?php echo $text; ?>';
 		<? if($fade == true){ ?>
 			setTimeout(function() {Msg.className = 'message_box_hide';},1000);
@@ -1040,8 +1041,6 @@ function date_ok($date) {
 
 
    $yy = strtok($date,"-");
-   $mm = strtok("-");
-   $dd = strtok("-");
 
    $ok = True;
 
@@ -1368,43 +1367,64 @@ function formvars_strip($formvars, $strip_list) {
 * }
 * mail_att("empf@domain","Email mit Anhang","Im Anhang sind mehrere Datei",$anhang); 
 **/
-function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $subject, $message, $attachement) {
-	$grenze = "---" . md5(uniqid(mt_rand(), 1)) . "---";
+function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $subject, $message, $attachement, $mode, $smtp_server, $smtp_port) {
+	$success = false;
+	switch ($mode) {
+		case 'sendEmail async': {
+			# Erstelle Befehl für sendEmail und schreibe in mail queue Verzeichnis.
+			$str = array('to_email' => $to_email, 'from_email' => $from_email, 'subject' => $subject, 'message' => $message, 'attachment' => $attachement);
+			if(!is_dir(MAILQUEUEPATH)){
+				mkdir(MAILQUEUEPATH);
+				chmod(MAILQUEUEPATH, 'g+w');
+			}
+			$file = MAILQUEUEPATH . 'email' . date('YmdHis', time()) . '_' . uniqid('', false) . '.txt';
+			$success = file_put_contents(
+				$file,
+				json_encode($str)
+			);
+		} break;
+		default : {
+			$grenze = "---" . md5(uniqid(mt_rand(), 1)) . "---";
 
-	$headers ="MIME-Version: 1.0\r\n";
-	$headers .= 'From: ' . $from_email . "\r\n";
-  $headers .= 'Reply-To: ' . $reply_email . "\r\n";
-  if (!empty($cc_email)) $headers .= 'Cc: ' . $cc_email . "\r\n";
-	$headers .= "Content-Type: multipart/mixed;\n\tboundary=$grenze\r\n";
+			$headers ="MIME-Version: 1.0\r\n";
+			$headers .= 'From: ' . $from_email . "\r\n";
+			$headers .= 'Reply-To: ' . $reply_email . "\r\n";
+			if (!empty($cc_email)) $headers .= 'Cc: ' . $cc_email . "\r\n";
+			$headers .= "Content-Type: multipart/mixed;\n\tboundary=$grenze\r\n";
 
-	$botschaft = "\n--$grenze\n";
-	$botschaft.="Content-transfer-encoding: 7BIT\r\n";
-	$botschaft.="Content-type: text/plain; charset=UTF-8\n\n";
-	$botschaft.= $message;
-  
-  if ($attachement) {
-  	$botschaft.="\n\n";
-  	$botschaft.="\n--$grenze\n";
+			$botschaft = "\n--$grenze\n";
+			$botschaft.="Content-transfer-encoding: 7BIT\r\n";
+			$botschaft.="Content-type: text/plain; charset=UTF-8\n\n";
+			$botschaft.= $message;
 
-  	$botschaft.="Content-Type: application/octetstream;\n\tname=" . basename($attachement) . "\n";
-  	$botschaft.="Content-Transfer-Encoding: base64\n";
-  	$botschaft.="Content-Disposition: attachment;\n\tfilename=" . basename($attachement) . "\n\n";
+			if ($attachement) {
+				$botschaft.="\n\n";
+				$botschaft.="\n--$grenze\n";
 
-  	$zeiger_auf_datei=fopen($attachement,"rb");
-  	$inhalt_der_datei=fread($zeiger_auf_datei,filesize($attachement));
-  	fclose($zeiger_auf_datei);
+				$botschaft.="Content-Type: application/octetstream;\n\tname=" . basename($attachement) . "\n";
+				$botschaft.="Content-Transfer-Encoding: base64\n";
+				$botschaft.="Content-Disposition: attachment;\n\tfilename=" . basename($attachement) . "\n\n";
 
-  	$inhalt_der_datei=chunk_split(base64_encode($inhalt_der_datei));
-  	$botschaft.=$inhalt_der_datei;
-  	$botschaft.="\n\n";
-  	$botschaft.="--$grenze";
-  }
-#  echo 'to_email: '.$to_email.'<br>';
-#  echo 'subject: '.$subject.'<br>';
-#  echo 'botschaft: '.$botschaft.'<br>';
-#  echo 'headers: '.$headers.'<br>';  
-	if (@mail($to_email, $subject, $botschaft, $headers)) return 1;
-	else return 0;
+				$zeiger_auf_datei=fopen($attachement,"rb");
+				$inhalt_der_datei=fread($zeiger_auf_datei,filesize($attachement));
+				fclose($zeiger_auf_datei);
+
+				$inhalt_der_datei=chunk_split(base64_encode($inhalt_der_datei));
+				$botschaft.=$inhalt_der_datei;
+				$botschaft.="\n\n";
+				$botschaft.="--$grenze";
+			}
+			#  echo 'to_email: '.$to_email.'<br>';
+			#  echo 'subject: '.$subject.'<br>';
+			#  echo 'botschaft: '.$botschaft.'<br>';
+			#  echo 'headers: '.$headers.'<br>';  
+			$success = @mail($to_email, $subject, $botschaft, $headers);
+		}
+	}
+	if ($success)
+		return 1;
+	else
+		return 0;
 }
 
 /*

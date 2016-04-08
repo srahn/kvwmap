@@ -669,7 +669,7 @@
       $GUI->titel='Dokumenteneingabe (neuer Ausschnitt)';
     }
     $GUI->main = PLUGINS."nachweisverwaltung/view/dokumenteneingabeformular.php";
-    $GUI->formvars['bufferwidth'] = 2;
+    if($GUI->formvars['bufferwidth'] == '')$GUI->formvars['bufferwidth'] = 2;
     $saved_scale = $GUI->reduce_mapwidth(100);
 		if($GUI->formvars['neuladen']){
       $GUI->neuLaden();

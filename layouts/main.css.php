@@ -587,9 +587,9 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 .message_box_visible{
   opacity: 1;
   position: absolute;
-  top:500px;
-  left:50%;
-  width:250px;
+  top:350px;
+  left:45%;
+  min-width:250px;
   #height:90px;
 	font-size: 17px;
 	font-family: SourceSansPro2;
@@ -607,37 +607,39 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 	opacity: 0;
 	transition: opacity 2s ease-out;
   position: absolute;
-  top:40%;
-  left:50%;
-  width:250px;
-  height:90px;
+  top:350px;
+  left:45%;
+  min-width:250px;
+  #height:90px;
 	font-size: 17px;
 	font-family: SourceSansPro2;
 	margin:-45px 0 0 -100px;
+	padding: 20px;
   text-align:center;
-	line-height: 90px;
+	line-height: 20px;
   border: 1px solid grey;
   background-color: #DAE4EC;
 	box-shadow: 0px 0px 14px #777;
-	z-index: 1000;
+	z-index: 1000000;
 }
 
 .message_box_hidden{
 	display: none;
   position: absolute;
-  top:40%;
-  left:50%;
-  width:250px;
-  height:90px;
+  top:350;
+  left:45%;
+  min-width:250px;
+  #height:90px;
 	margin:-45px 0 0 -100px;
   text-align:center;
+	padding: 20px;
 	font-size: 17px;
 	font-family: SourceSansPro2;
-	line-height: 90px;
+	line-height: 20px;
   border: 1px solid grey;
   background-color: #DAE4EC;
 	box-shadow: 0px 0px 14px #777;
-	z-index: 1000;
+	z-index: 1000000;
 }
 
 table.tgle {
@@ -650,6 +652,18 @@ table.tgle {
 thead.gle th { 
  padding:4px 4px 4px 4px;
  text-align:left;
+}
+
+.gle_attribute_name { 
+ padding-left: 2px;
+ padding-right: 2px;
+ vertical-align: top;
+ background-color: <? echo BG_GLEATTRIBUTE; ?>;
+}
+
+.gle_attribute_value { 
+ padding-left: 4px;
+ padding-right: 5px;
 }
 
 tbody.gle tr { 

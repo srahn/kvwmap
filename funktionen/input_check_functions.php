@@ -4,6 +4,10 @@
 		if(type == 'numeric' || type == 'float4' || type == 'float8'){
 			var val = input.value.replace(/[a-zA-Z]/g, '');
 			val = val.replace(/,/g, '.');
+			if(parseInt(decimal_length) == 0 && val.search(/\./) > 0){
+				alert(unescape('F%FCr dieses Feld sind keine Nachkommastellen erlaubt.'));
+				val = val.replace(/\./g, '');
+			}
 			parts = val.split('.');
 			ohne_leerz = parts[0].replace(/ /g, '').length;
 			mit_leerz = parts[0].length;
@@ -25,12 +29,13 @@
 			}
 		}
 		if(type == 'int2' || type == 'int4' || type == 'int8'){
-			if(input.value.search(/[^-\d]/g) != -1 || input.value.search(/.-/g) != -1){
+			var val = input.value.replace(/[a-zA-Z]/g, '');
+			if(input.value.search(/,/g) != -1 || input.value.search(/\./g) != -1){
 				alert('Es sind nur ganzzahlige Angaben erlaubt!');
-				var val = input.value.replace(/[^-\d]/g, '');
-				val = val.replace(/-/g, '');
-				input.value = val;
+				val = val.replace(/,/g, '');
+				val = val.replace(/\./g, '');
 			}
+			input.value = val;
 		}
 	}
 

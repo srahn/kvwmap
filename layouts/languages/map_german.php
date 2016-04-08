@@ -11,7 +11,8 @@
   $strZoomOut="Herauszoomen";
   $strZoomToFullExtent="Gesamtansicht";
   $strPan="Verschieben / Pan";
-  $strCoordinatesZoom="Koordinatenzoom/Abfrage";
+  $strCoordinatesZoom="Koordinatenzoom";
+	$strCoordinatesQuery="Koordinatenabfrage";
   $strInfo="Informationsabfrage";
   $strTouchInfo="Informationsabfrage auf angrenzende Objekte";
   $strInfoWithRadius="Informationsabfrage mit Suchradius";

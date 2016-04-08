@@ -1,6 +1,4 @@
 <?php
-
-	include(SNIPPETS.'generic_functions.php'); 
 	
   $doit = false;
   $anzObj = count($this->qlayerset[$i]['shape']);

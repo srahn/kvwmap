@@ -96,7 +96,8 @@
 		  				}
 		  			}
 		  			else{
-							include(SNIPPETS.'generic_formelements.php');
+							#include(SNIPPETS.'generic_formelements.php');
+							$datapart .= attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size, $select_width, $this->user->rolle->fontsize_gle);
 							echo $datapart;
 		  			}
 						if($attributes['privileg'][$j] >= '0' AND !($attributes['privileg'][$j] == '0' AND $attributes['form_element_type'][$j] == 'Auswahlfeld')){

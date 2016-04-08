@@ -5,7 +5,7 @@
 #                                                                  #
 ####################################################################
 # aktuelle Versionsnummer
-define('VERSION','2.2');
+define('VERSION','2.3');
 define('APPLVERSION','kvwmap/');
 # Bezeichnung der MySQL-Datenbank mit den Benutzerdaten
 $dbname='kvwmapdb';
@@ -205,10 +205,10 @@ define('DRUCKRAHMEN_PATH',SHAPEPATH.'druckrahmen/');
 define('PDFCLASSPATH',WWWROOT.'PDFClass/');
 
 # Bin-Pfad der Postgres-tools (shp2pgsql, pgsql2shp)
-define('POSTGRESBINPATH', '/usr/lib/postgresql/9.1/bin/');         # Version 1.6.4
+define('POSTGRESBINPATH', '/usr/bin/');         # Version 1.6.4
 
 # Bin-Pfad der OGR-tools (ogr2ogr, ogrinfo)
-define('OGR_BINPATH', '/usr/local/bin/');					# Version 1.7.4
+define('OGR_BINPATH', '/usr/bin/');					# Version 1.7.4
 
 # Pfad zum Zip-Programm (unter Linux: 'zip -j', unter Windows z.B. 'c:/programme/Zip/bin/zip.exe')
 define('ZIP_PATH', 'zip -j');													# Version 1.7.3  hier wurde das ' -j' angehängt
@@ -226,6 +226,8 @@ define('EPSGCODE_ALKIS','25833');
 define('DHK_CALL_URL', 'http://dhkserver/call?form=login');						# Version 2.1
 define('DHK_CALL_USER', '12345');																			# Version 2.1
 define('DHK_CALL_PASSWORD', '6789');																	# Version 2.1
+define('DHK_CALL_ANTRAGSNUMMER', 'BWAPK_0000002');										# Version 2.4
+define('DHK_CALL_PROFILKENNUNG', 'mvaaa');														# Version 2.4
 
 # Parameter für die Strecken- und Flächenreduktion
 define('EARTH_RADIUS', 6384000);																										# Version 2.1
@@ -248,6 +250,23 @@ define('STOPWORDFILE',SHAPEPATH.'gazetteer/top10000de.txt');
 
 # Imagepath
 define('IMAGEPATH',INSTALLPATH.'tmp/');
+
+# E-Mail Einstellungen
+# Methode zum Versenden von E-Mails. Mögliche Optionen:
+# sendmail: E-Mails werden direkt mit sendmail versendet. (default)
+# sendEmail async: E-Mails werden erst in einem temporären Verzeichnis MAILQUEUEPATH
+# 	abgelegt und können später durch das Script tools/sendEmailAsync.sh
+# 	versendet werden. Dort muss auch MAILQUEUEPATH eingestellt werden.
+define('MAILMETHOD', 'sendmail');						# Version 2.4
+# SMTP-Server, Muss nur angegeben werden, wenn Methode sendEmail async verwendet wird.
+define('MAILSMTPSERVER', '');						# Version 2.4
+# SMTP-Port, Muss nur angegeben werden, wenn Methode sendEmail async verwendet wird.
+define('MAILSMTPPORT', 25);													# Version 2.4
+# Verzeichnis für die JSON-Dateien mit denzu versendenen E-Mails.
+# Muss nur angegeben werden, wenn Methode sendEmail async verwendet wird.
+define('MAILQUEUEPATH', '/var/www/logs/kvwmap/mail_queue/');			# Version 2.4
+define('MAILARCHIVPATH', '/var/www/logs/kvwmap/mail_archiv/');			# Version 2.4
+
 # Pfad für selbst gemachte Bilder
 define('CUSTOM_IMAGE_PATH',SHAPEPATH.'bilder/');                # Version 1.6.9
 #Cachespeicherort
@@ -349,6 +368,9 @@ define('CHECKPUNKTDATEI', 'true');      # true/false                            
 
 # Minmale Maßstabszahl
 define('MINSCALE', 100);                                                        # Version 1.7.0
+
+# Maßstab ab dem bei einem Koordinatensprung auch gezoomt wird
+define('COORD_ZOOM_SCALE', 50000);																							# Version 2.4
 
 # Puffer (in Metern) der beim Zoom auf ein Objekt hinzugegeben wird
 define('ZOOMBUFFER', 100);                                                        # Version 2.1

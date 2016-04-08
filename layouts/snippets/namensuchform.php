@@ -138,14 +138,14 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 
 <table border="0" cellpadding="0" cellspacing="2" width="100%" style="padding: 10px">
   <tr>
-    <td colspan="2" class="menu"><span class="fett">&nbsp;Person</span></td>
+    <td colspan="3" class="menu"><span class="fett">&nbsp;Person</span></td>
   </tr>
   <tr>
-    <td colspan="2" height="10">&nbsp;</td>
+    <td colspan="3" height="10">&nbsp;</td>
   </tr>
   <tr>
     <td height="28" align="right" width="220px"><span class="fett"><?php echo $strName1; ?>:&nbsp;</span></td>
-    <td>
+    <td width="210px">
 			<div style="width:150px;">
 				<input name="name1" type="text" value="<? echo htmlentities($this->formvars['name1'], NULL, 'UTF-8'); ?>" size="25" tabindex="1">
 				<div valign="top" style="height:0px; position:relative;">
@@ -153,6 +153,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 				</div>
 			</div>
 		</td>
+		<td rowspan="2"><input type="checkbox" name="exakt" value="1" <? if($this->formvars['exakt']) echo 'checked'; ?>> exakte Suche</td>
   </tr>
   <tr>
     <td height="28" align="right"><span class="fett"><?php echo $strName2; ?>:&nbsp;</span></td>
@@ -201,10 +202,10 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 </table>
 <table border="0" cellpadding="0" cellspacing="2" width="100%" style="padding: 10px">
   <tr>
-    <td colspan="2" class="menu"><span class="fett">&nbsp;Gebiet</span></td>
+    <td colspan="3" class="menu"><span class="fett">&nbsp;Gebiet</span></td>
   </tr>
   <tr>
-    <td colspan="2" height="10">&nbsp;</td>
+    <td colspan="3" height="10">&nbsp;</td>
   </tr>
   <tr>
     <td height="28" align="right" width="220px"><span class="fett"><?php echo $strGbbez; ?>:&nbsp;</span></td>
@@ -225,7 +226,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 </table>
 <table border="0" cellpadding="0" cellspacing="2" width="100%" style="padding: 10px">
   <tr>
-    <td colspan="2">&nbsp;</td>
+    <td colspan="3">&nbsp;</td>
   </tr>
   <!--
   <tr>
@@ -233,10 +234,10 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
     <input name="caseSensitive" type="checkbox" value="1"<?php if ($this->formvars['caseSensitive']) { ?> checked<?php } ?>><tr><td colspan="2"></td>
   <tr><td colspan="2"></tr>//-->
   <tr bgcolor="#FFFFCC">
-    <td colspan="2"><em><?php echo $strHintWildcard; ?>.</em></td>
+    <td colspan="3"><em><?php echo $strHintWildcard; ?>.</em></td>
   </tr>
   <tr>
-    <td colspan="2" height="10">&nbsp;</td>
+    <td colspan="3" height="10">&nbsp;</td>
   </tr>
   </tr>
 </table>
@@ -276,7 +277,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
       	<td class="menu">&nbsp;</td>
         <td class="menu" align="center"><span class="fett"><a href="javascript:changeorder('bezirk');"><?php echo $strGbbezShort; ?></a></span></td>
         <td class="menu" align="center"><span class="fett"><a href="javascript:changeorder('blatt');"><?php echo $strGbblShort; ?></a></span></td>
-        <td class="menu" align="left"><span class="fett"><a href="javascript:changeorder('nachnameoderfirma');"><?php echo $strName1Short; ?></a></span></td>
+        <td class="menu" align="left"><span class="fett"><a href="javascript:changeorder('nachnameoderfirma, vorname');"><?php echo $strName1Short; ?></a></span></td>
         <td class="menu" align="left"><span class="fett"><a href="javascript:changeorder('geburtsname');"><?php echo $strName2Short; ?></a></span></td>
         <td class="menu" align="left" bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett"><a href="javascript:changeorder('strasse,hausnummer');"><?php echo $strName3Short; ?></a></span></td>
         <td class="menu" align="left"><span class="fett"><a href="javascript:changeorder('postleitzahlpostzustellung, ort_post');"><?php echo $strName4Short; ?></a></span></td>

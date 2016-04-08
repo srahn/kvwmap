@@ -1,0 +1,5 @@
+BEGIN;
+
+ALTER TABLE `druckrahmen` ADD `dhk_call` VARCHAR( 10 ) NULL DEFAULT NULL AFTER `id`;
+
+COMMIT;

@@ -56,6 +56,7 @@ if($this->user->rolle->querymode == 1){
 				<input type="hidden" name="overlayy" value="<? echo $this->user->rolle->overlayy; ?>">
 				<input type="hidden" name="browserwidth">
 				<input type="hidden" name="browserheight">
+				<div id="message_box" class="message_box_hidden"></div>
         </form>
 				<script type="text/javascript">
 					currentform = document.GUI;
@@ -92,5 +93,4 @@ if($this->user->rolle->querymode == 1){
       </td>
     </tr>
 </table>
-<div id="message_box" class="message_box_hidden"></div>
 </BODY></HTML>

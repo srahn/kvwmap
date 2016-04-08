@@ -52,23 +52,10 @@ class ALB {
 		curl_setopt($ch, CURLOPT_POSTFIELDS, array('cmd' => 'ausfuehren', 'jsessionid' => $sessionid, 'nasfile' => $curl_file));
 		$result = curl_exec($ch);
 		curl_close($ch);
-		switch (substr($result, 0, 2)){
-			case 'PK' : $type = 'zip'; break;
-			case '<?' : $type = 'xml'; break;
-			case '%P' : $type = 'pdf'; break;
-		}
-		header("Pragma: public"); 
-		header("Expires: 0"); 
-		header("Cache-Control: must-revalidate, post-check=0, pre-check=0"); 
-		header("Content-Type: application/force-download"); 
-		header("Content-Type: application/octet-stream"); 
-		header("Content-Type: application/download"); 
-		header('Content-Disposition: attachment; filename='.$filename.'.'.$type); 
-		header("Content-Transfer-Encoding: binary"); 
 		return $result;
 	}
 	
-	function create_nas_request_xml_file($FlurstKennz, $Grundbuchbezirk, $Grundbuchblatt, $Buchnungstelle, $formnummer){
+	function create_nas_request_xml_file($FlurstKennz, $Grundbuchbezirk, $Grundbuchblatt, $Buchnungstelle, $print_params, $formnummer){
 		$xml = '<?xml version="1.0" encoding="UTF-8"?>
 <CPA_Benutzungsauftrag
  xmlns ="http://www.cpa-systems.de/namespaces/adv/gid/6.0"
@@ -92,10 +79,15 @@ class ALB {
 	</empfaenger>
 	<ausgabeform>application/xml</ausgabeform>
 	<art>'.$formnummer.'</art>
-	<koordinatenreferenzsystem xlink:href="urn:adv:crs:ETRS89_UTM33"/>
-	<anforderungsmerkmale>';
+	<koordinatenreferenzsystem xlink:href="urn:adv:crs:ETRS89_UTM33"/>';
+	
+	if($print_params == NULL) $xml .= '<anforderungsmerkmale>';
 	
 	switch($formnummer){
+		case '0110' : case '0111' : case '0120' : case '0121' : {   
+			$xml .= '<zentrumskoordinate srsName="urn:adv:crs:ETRS89_UTM33">'.$print_params['coord'].'</zentrumskoordinate>';
+		}break;
+	
 		case 'MV0700' : {   
 			$xml .= '
 			<wfs:Query typeName="adv:AX_Buchungsblatt">
@@ -131,26 +123,32 @@ class ALB {
 			if(count($FlurstKennz) > 1)$xml .= '</ogc:Or>';
 		}
 	}
-		
-  $xml .='
-				</ogc:Filter>
-			</wfs:Query>
-	</anforderungsmerkmale>
+	
+	if($print_params == NULL){
+		$xml .='
+					</ogc:Filter>
+				</wfs:Query>
+		</anforderungsmerkmale>';
+	}
 
-	<profilkennung>mvaaa</profilkennung>
-	<antragsnummer>BWAPK_0000002</antragsnummer>
+  # check ob die Konstanten existieren. Kann in einer Version > 2.4 rausgenommen werden.
+  if (!defined('DHK_CALL_PROFILKENNUNG')) define('DHK_CALL_PROFILKENNUNG', 'mvaaa');
+  if (!defined('DHK_CALL_ANTRAGSNUMMER')) define('DHK_CALL_ANTRAGSNUMMER', 'BWAPK_0000002');
+
+	$xml .='
+	<profilkennung>' . DHK_CALL_PROFILKENNUNG . '</profilkennung>
+	<antragsnummer>' . DHK_CALL_ANTRAGSNUMMER . '</antragsnummer>
 	<selektionsmassstab>1000</selektionsmassstab>
 	<mitMetadaten>false</mitMetadaten>
-	<verarbeitungszeitpunkt>2014-10-28T10:56:40Z</verarbeitungszeitpunkt>
 	<folgeverarbeitung>
 		<CPA_FOLGEVA>
-			<ausgabemasstab>500</ausgabemasstab>
-			<formatangabe>A4h</formatangabe>
+			<ausgabemasstab>'.$print_params['printscale'].'</ausgabemasstab>
+			<formatangabe>'.$print_params['format'].'</formatangabe>
 			<ausgabemedium>1000</ausgabemedium>
 			<datenformat>5000</datenformat>
 		</CPA_FOLGEVA>
 	</folgeverarbeitung>
-	<auftragsnummer>BWAPK_0000002</auftragsnummer>
+	<auftragsnummer>' . DHK_CALL_ANTRAGSNUMMER . '</auftragsnummer>
 	<portionierung></portionierung>
 	<konvertierungskonfig></konvertierungskonfig>
 </CPA_Benutzungsauftrag>';
@@ -863,8 +861,8 @@ class ALB {
 						$csv .= $Eigentuemerliste[$e]->zusatz_eigentuemer;
 						$csv .= $Eigentuemerliste[$e]->Nr;
 						$anzNamenszeilen = count($Eigentuemerliste[$e]->Name);
-						for($n=0;$n<$anzNamenszeilen;$n++) {
-							$csv .= ' '.$Eigentuemerliste[$e]->Name[$n];
+						for($na=0;$na<$anzNamenszeilen;$na++) {
+							$csv .= ' '.$Eigentuemerliste[$e]->Name[$na];
 						}						
 						if($Eigentuemerliste[$e]->Anteil != '')$csv .= '  zu '.$Eigentuemerliste[$e]->Anteil;
 					}

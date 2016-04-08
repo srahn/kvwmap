@@ -9,4 +9,6 @@
  $strRecordsFromGLE="Records from Query";
  $strDownloadDocuments="Download documents";
  $strSelectAll="select all";
+ $strLayer="Layer";
+ $strSure='Are you sure you want to export the whole layer?\n\nThis might take a while.';
 ?>

@@ -661,7 +661,7 @@ class data_import_export {
   }
 	
 	function ogr2ogr_export($sql, $exportformat, $exportfile, $layerdb){
-		$command = OGR_BINPATH.'ogr2ogr -f '.$exportformat.' -sql "'.$sql.'" '.$exportfile.' PG:"dbname='.$layerdb->dbName.' user='.$layerdb->user;
+		$command = 'export PGCLIENTENCODING=LATIN1;'.OGR_BINPATH.'ogr2ogr -f '.$exportformat.' -sql "'.$sql.'" '.$exportfile.' PG:"dbname='.$layerdb->dbName.' user='.$layerdb->user;
 		if($layerdb->passwd != '')$command.= ' password='.$layerdb->passwd;
 		if($layerdb->port != '')$command.=' port='.$layerdb->port;
 		if($layerdb->host != '') $command .= ' host=' . $layerdb->host;
@@ -759,30 +759,82 @@ class data_import_export {
 		}
   }
 	
+	function create_ovl($datentyp, $layerdb, $table, $column){
+		$ovl_type = array(MS_LAYER_POINT => 6, MS_LAYER_LINE => 3, MS_LAYER_POLYGON => 4);
+		$sql.= "SELECT st_astext(";
+		if($datentyp == MS_LAYER_POLYGON)$sql.= "ST_MakePolygon(st_exteriorring(geom))) as geom ";
+		else $sql.= "geom) as geom ";
+		$sql.= "FROM (select (st_dump(st_union(".$column."))).geom as geom FROM ".$table.") as foo";
+		#echo $sql;
+		$ret = $layerdb->execSQL($sql,4, 1);
+		if(!$ret[0]){
+			$i = 0;
+			while($rs=pg_fetch_assoc($ret[1])){
+				$wkt = str_replace('POLYGON((', '', $rs['geom']);
+				$wkt = str_replace('LINESTRING(', '', $wkt);
+				$wkt = str_replace('POINT(', '', $wkt);
+				$wkt = str_replace(')', '', $wkt);
+				$coords = explode(',', $wkt);
+				$coord_count = count($coords);
+				if($datentyp == MS_LAYER_POLYGON)$coord_count = $coord_count - 1;
+				$ovl[$i] = '[Overlay]'.chr(10).'Symbols=1'.chr(10).'[MapLage]'.chr(10).'[Symbol 1]'.chr(10).'Typ='.$ovl_type[$datentyp].chr(10).'Group=1'.chr(10).'Dir=100'.chr(10).'Art=1'.chr(10).'Col=1'.chr(10).'Zoom=1'.chr(10).'Size=103'.chr(10).'Area=4'.chr(10).'Punkte='.$coord_count.chr(10);				
+				for($c = 0; $c < $coord_count; $c++){
+					$coords_part = explode(' ', $coords[$c]);
+					$ovl[$i] .= 'XKoord'.$c.'='.$coords_part[0].chr(10);
+					$ovl[$i] .= 'YKoord'.$c.'='.$coords_part[1].chr(10);
+				}
+				$i++;
+			}
+		}
+		return $ovl;
+  }
+	
 	function export_exportieren($formvars, $stelle, $user){
 		$currenttime=date('Y-m-d H:i:s',time());
   	$this->formvars = $formvars;
   	$layerset = $user->rolle->getLayer($this->formvars['selected_layer_id']);
     $mapdb = new db_mapObj($stelle->id,$user->id);
     $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $stelle->pgdbhost);
-		$path = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[0]['pfad']);
+		$sql = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[0]['pfad']);
     $privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
     $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
 		
 		# Where-Klausel aus Sachdatenabfrage-SQL
 		$where = substr(strip_pg_escape_string($this->formvars['sql_'.$this->formvars['selected_layer_id']]), strrpos(strtolower(strip_pg_escape_string($this->formvars['sql_'.$this->formvars['selected_layer_id']])), 'where')+5);
 		
+		# order by rausnehmen
+  	$orderbyposition = strrpos(strtolower($sql), 'order by');
+		$lastfromposition = strrpos(strtolower($sql), 'from');
+  	if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
+	  	$orderby = ' '.substr($sql, $orderbyposition);
+	  	$sql = substr($sql, 0, $orderbyposition);
+  	}
+		# group by rausnehmen
+		$groupbyposition = strpos(strtolower($sql), 'group by');
+		if($groupbyposition !== false){
+			$groupby = ' '.substr($sql, $groupbyposition);
+			$sql = substr($sql, 0, $groupbyposition);
+  	}
+		
+		# Zusammensammeln der Attribute, die abgefragt werden müssen
     for($i = 0; $i < count($this->attributes['name']); $i++){
     	if($this->formvars['check_'.$this->attributes['name'][$i]]){		# Entweder das Attribut wurde angehakt
     		$selection[$this->attributes['name'][$i]] = 1;
-				$selected_attributes[] = $this->attributes['name'][$i];						# Zusammensammeln der angehakten Attribute
+				$selected_attributes[] = $this->attributes['name'][$i];						# Zusammensammeln der angehakten Attribute, denn nur die sollen weiter unten auch exportiert werden
+				$selected_attr_types[] = $this->attributes['type'][$i];
     	}
 			if(strpos($where, 'query.'.$this->attributes['name'][$i])){			# oder es kommt in der Where-Bedingung des Sachdatenabfrage-SQLs vor
 				$selection[$this->attributes['name'][$i]] = 1;
 			}
+			if(strpos($orderby, $this->attributes['name'][$i])){						# oder es kommt im ORDER BY des Layer-Query vor
+				$selection[$this->attributes['name'][$i]] = 1;
+			}
+			if($this->formvars['download_documents'] != '' AND $this->attributes['form_element_type'][$i] == 'Dokument'){			# oder das Attribut ist vom Typ "Dokument" und die Dokumente sollen auch exportiert werden
+				$selection[$this->attributes['name'][$i]] = 1;
+			}
     }
 		
-    $sql = $stelle->parse_path($layerdb, $path, $selection);		# parse_path wird hier benutzt um die Auswahl der Attribute auf das Pfad-SQL zu übertragen
+    $sql = $stelle->parse_path($layerdb, $sql, $selection);		# parse_path wird hier benutzt um die Auswahl der Attribute auf das Pfad-SQL zu übertragen
 		
 		# oid auch abfragen
 		$distinctpos = strpos(strtolower($sql), 'distinct');
@@ -824,19 +876,6 @@ class data_import_export {
 			$select = str_replace(','.$geom, ',st_transform('.$geom.', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);
     	$sql = $select.$rest;
     }
-    # order by rausnehmen
-  	$orderbyposition = strrpos(strtolower($sql), 'order by');
-		$lastfromposition = strrpos(strtolower($sql), 'from');
-  	if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
-	  	$orderby = ' '.substr($sql, $orderbyposition);
-	  	$sql = substr($sql, 0, $orderbyposition);
-  	}
-		# group by rausnehmen
-		$groupbyposition = strpos(strtolower($sql), 'group by');
-		if($groupbyposition !== false){
-			$groupby = ' '.substr($sql, $groupbyposition);
-			$sql = substr($sql, 0, $groupbyposition);
-  	}
   	# über Polygon einschränken
     if($this->formvars['newpathwkt']){
     	$sql.= " AND ".$the_geom." && st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code'].") AND ST_INTERSECTS(".$the_geom.", st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."))";
@@ -866,6 +905,13 @@ class data_import_export {
     $temp_table = 'shp_export_'.rand(1, 10000);
     $sql = 'CREATE TABLE public.'.$temp_table.' AS '.$sql;		# temporäre Tabelle erzeugen, damit das/die Schema/ta berücksichtigt werden
     $ret = $layerdb->execSQL($sql,4, 0);
+		
+		if($this->formvars['export_format'] == 'Shape'){				# das Abschneiden bei nicht in der Länge begrenzten Textspalten verhindern
+			for($s = 0; $s < count($selected_attributes); $s++){
+				if(in_array($selected_attr_types[$s], array('text', 'varchar')))$selected_attributes[$s] = $selected_attributes[$s].'::varchar(255)';
+			}
+		}
+		
     $sql = 'SELECT '.implode(', ', $selected_attributes).' FROM public.'.$temp_table;		# auf die ausgewählten Attribute einschränken
     $ret = $layerdb->execSQL($sql,4, 0);
     if(!$ret[0]){
@@ -925,6 +971,17 @@ class data_import_export {
 					fwrite($fp, $uko);
 					fclose($fp);
 					$contenttype = 'text/uko';
+				}break;
+				
+				case 'OVL' : {
+					$ovl = $this->create_ovl($layerset[0]['Datentyp'], $layerdb, $temp_table, $this->attributes['the_geom']);
+					for($i = 0; $i < count($ovl); $i++){
+						$exportfile2 = $exportfile.'_'.$i.'.ovl';
+						$fp = fopen($exportfile2, 'w');
+						fwrite($fp, $ovl[$i]);
+						fclose($fp);
+					}
+					$zip = true;
 				}break;
 			}
 			# Dokumente auch mit dazupacken

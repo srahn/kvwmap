@@ -947,6 +947,7 @@ class user {
 			if($formvars['zoomall']){$buttons .= 'zoomall,';}
 			if($formvars['recentre']){$buttons .= 'recentre,';}
 			if($formvars['jumpto']){$buttons .= 'jumpto,';}
+			if($formvars['coord_query']){$buttons .= 'coord_query,';}
 			if($formvars['query']){$buttons .= 'query,';}
 			if($formvars['touchquery']){$buttons .= 'touchquery,';}
 			if($formvars['queryradius']){$buttons .= 'queryradius,';}
@@ -1486,6 +1487,7 @@ class rolle {
 			$this->zoomall = in_array('zoomall', $buttons);
 			$this->recentre = in_array('recentre', $buttons);
 			$this->jumpto = in_array('jumpto', $buttons);
+			$this->coord_query = in_array('coord_query', $buttons);			
 			$this->query = in_array('query', $buttons);
 			$this->queryradius = in_array('queryradius', $buttons);
 			$this->polyquery = in_array('polyquery', $buttons);
@@ -1933,6 +1935,12 @@ class rolle {
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
 
+	function resetClasses(){
+		$sql = 'DELETE FROM u_rolle2used_class WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+		$this->debug->write("<p>file:users.php class:rolle->resetQuerys - resetten aller aktiven Layer zur Rolle:",4);
+		$this->database->execSQL($sql,4, $this->loglevel);
+	}
+	
 	function setAktivLayer($formvars, $stelle_id, $user_id) {
 		$layer=$this->getLayer('');
 		$rollenlayer=$this->getRollenLayer('', NULL);

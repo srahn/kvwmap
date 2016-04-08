@@ -36,9 +36,10 @@ function update_coords(){
 	else{
 		document.getElementById('geom_div').style.display = '';
 		document.getElementById('coord_div').style.display = 'inline';
-		if(document.GUI.export_format.value == 'KML'){
+		if(document.GUI.export_format.value == 'KML' || document.GUI.export_format.value == 'OVL'){
 			document.getElementById('wgs84').style.display = 'inline';
 			document.GUI.epsg.style.display = 'none';
+			document.GUI.epsg.value = 4326;
 		}
 		else{
 			document.getElementById('wgs84').style.display = 'none';
@@ -49,6 +50,10 @@ function update_coords(){
 
 function data_export(){
 	if(document.GUI.selected_layer_id.value != ''){
+		if(document.GUI.anzahl == undefined && document.GUI.newpathwkt.value == '' && document.GUI.newpath.value == ''){
+			var sure = confirm('<? echo $strSure; ?>');
+			if(sure == false)return;
+		}
 		if(document.GUI.newpathwkt.value == '' && document.GUI.newpath.value != ''){
 			document.GUI.newpathwkt.value = buildwktpolygonfromsvgpath(document.GUI.newpath.value);
 		}
@@ -57,7 +62,7 @@ function data_export(){
 		document.GUI.go_plus.value = '';
 	}
 	else{
-		alert('Bitten wählen Sie einen Layer aus.');
+		alert('Bitte wählen Sie ein Thema aus.');
 	}
 }
 
@@ -71,6 +76,19 @@ function selectall(geom){
 		}
 		k++;
 		obj = document.getElementById('check_attribute_'+k);
+	}
+}
+
+function select_document_attributes(ids){
+	if(document.GUI.download_documents.checked){
+		var k = 0;
+		var id = ids.split(',');
+		var obj = document.getElementById('check_attribute_'+id[k]);
+		while(obj != undefined){
+			obj.checked = true;			
+			k++;
+			obj = document.getElementById('check_attribute_'+id[k]);
+		}
 	}
 }
 
@@ -108,7 +126,7 @@ $j=0;
         <div style="padding-top:1px; padding-bottom:5px;">
 					<table>
 						<tr>
-							<td><? echo $this->strLayer; ?>:</td>
+							<td><? echo $strLayer; ?>:</td>
 						</tr>
 						<tr>
 							<td>
@@ -143,6 +161,7 @@ $j=0;
 									<option <? if($this->formvars['export_format'] == 'GML')echo 'selected '; ?> value="GML">GML</option>
 									<option <? if($this->formvars['export_format'] == 'KML')echo 'selected '; ?> value="KML">KML</option>
 									<option <? if($this->formvars['export_format'] == 'UKO')echo 'selected '; ?> value="UKO">UKO</option>
+									<option <? if($this->formvars['export_format'] == 'OVL')echo 'selected '; ?> value="OVL">OVL</option>
 								<? } ?>
 									<option <? if($this->formvars['export_format'] == 'CSV')echo 'selected '; ?> value="CSV">CSV</option>
 								</select>
@@ -159,7 +178,7 @@ $j=0;
 						</tr>
 						<tr>
 							<td>
-								<select name="epsg" <? if($this->formvars['export_format'] == 'KML')echo 'style="display:none"'; ?>>
+								<select name="epsg" <? if($this->formvars['export_format'] == 'KML' OR $this->formvars['export_format'] == 'OVL'){$this->formvars['epsg'] = 4326; echo 'style="display:none"';} ?>>
 									<option value="">-- Auswahl --</option>
 									<?
 									foreach($this->epsg_codes as $epsg_code){
@@ -169,7 +188,7 @@ $j=0;
 									}
 								?>
 								</select>
-								<span id="wgs84" <? if($this->formvars['export_format'] != 'KML')echo 'style="display:none"'; ?>>4326: WGS84</span>
+								<span id="wgs84" <? if($this->formvars['export_format'] != 'KML' AND $this->formvars['export_format'] != 'OVL')echo 'style="display:none"'; ?>>4326: WGS84</span>
 							</td>
 						</tr>
 					</table>
@@ -184,7 +203,7 @@ $j=0;
         	<? for($s = 0; $s < 4; $s++){ ?>
         	<div style="float: left; padding: 4px; min-width:20%;">
           <? for($i = 0; $i < $floor+$r; $i++){
-						if($this->data_import_export->attributes['form_element_type'][$j] == 'Dokument')$document_attributes = true;
+						if($this->data_import_export->attributes['form_element_type'][$j] == 'Dokument'){$document_attributes = true; $document_ids[] = $j;}
 						if($this->data_import_export->attributes['name'][$j] == $this->data_import_export->attributes['the_geom'] AND $this->data_import_export->layerdaten['export_privileg'][$selectindex] != 1) continue;
 					?>
       	  <div style="padding: 4px;<? if($this->data_import_export->attributes['name'][$j] == $this->data_import_export->attributes['the_geom']){if($this->formvars['export_format'] == 'CSV'){echo 'display:none"';} echo '" id="geom_div';} ?>">
@@ -216,7 +235,7 @@ $j=0;
 
 			<? if($document_attributes){ ?>
 			<div style="margin-top:20px; margin-bottom:0px; text-align: center;">				
-				<input type="checkbox" name="download_documents"><? echo $strDownloadDocuments; ?>
+				<input type="checkbox" onclick="select_document_attributes('<? echo implode(',', $document_ids); ?>');" name="download_documents"><? echo $strDownloadDocuments; ?>
       </div>
 			<? } ?>
 			

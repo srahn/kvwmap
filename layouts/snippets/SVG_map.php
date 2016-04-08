@@ -370,6 +370,7 @@ function startup(){';
 function sendpath(cmd, pathx, pathy){
 	startwaiting();
 	top.sendpath(cmd, pathx, pathy);
+	if(cmd == "polygonquery")deletepolygon();
 }
 
 if (!window.requestAnimationFrame){ 
@@ -559,16 +560,19 @@ function recentre(){
 		save_measure_path();
 	}
   doing = "recentre";
+	top.document.GUI.last_button.value = doing = "recentre";
   document.getElementById("canvas").setAttribute("cursor", "move"); //setAttribute("cursor", "url(#MyMove)");
 }
 
 function zoomin(){
   doing = "zoomin";
+	top.document.GUI.last_button.value = doing = "zoomin";
   document.getElementById("canvas").setAttribute("cursor", "crosshair");
 }
 
 function zoomout(){
   doing = "zoomout";
+	top.document.GUI.last_button.value = doing = "zoomout";
   document.getElementById("canvas").setAttribute("cursor", "crosshair");
 }
 
@@ -584,11 +588,13 @@ function ppquery(){
 
 function touchquery(){
 	doing = "touchquery";
+	top.document.GUI.last_button.value = doing = "touchquery";
 	document.getElementById("canvas").setAttribute("cursor", "help");
 }
 
 function pquery(){
   doing = "pquery";
+	top.document.GUI.last_button.value = doing = "pquery";
   document.getElementById("canvas").setAttribute("cursor", "help");
 }
 
@@ -1582,6 +1588,7 @@ function highlight(evt){
 	if(document.getElementById("freetext0") != undefined){document.getElementById("freetext0").style.setProperty("fill","ghostwhite","");}
 	if(document.getElementById("freearrow0") != undefined){document.getElementById("freearrow0").style.setProperty("fill","ghostwhite","");}
 	if(document.getElementById("coords0") != undefined){document.getElementById("coords0").style.setProperty("fill","ghostwhite","");}
+	if(document.getElementById("coords02") != undefined){document.getElementById("coords02").style.setProperty("fill","ghostwhite","");}
   evt.target.style.setProperty("fill",highlighted,"");
   document.getElementById("suchkreis").setAttribute("cx", -10000);
 	if(top.document.GUI.orthofang != undefined){
