@@ -10224,7 +10224,7 @@ class GUI {
 				}break;
 			}
 			$output = $ALB->dhk_call_getPDF(DHK_CALL_URL, $sessionid, $nasfile, $filename);
-			switch (substr($result, 0, 2)){
+			switch (substr($output, 0, 2)){
 				case 'PK' : $type = 'zip'; break;
 				case '<?' : $type = 'xml'; break;
 				case '%P' : $type = 'pdf'; break;
