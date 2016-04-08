@@ -1892,6 +1892,7 @@ class flurstueck {
 			$unique_versionen[$versionen[$i]['beginnt']]['anlass'][] = $versionen[$i]['anlass'];
 			$unique_versionen[$versionen[$i]['beginnt']]['anlass'] = array_unique($unique_versionen[$versionen[$i]['beginnt']]['anlass']);
 			$unique_versionen[$versionen[$i]['beginnt']]['table'][] = $versionen[$i]['table'];
+			$unique_versionen[$versionen[$i]['beginnt']]['table'] = array_unique($unique_versionen[$versionen[$i]['beginnt']]['table']);
 		}
     return $unique_versionen;
   }
