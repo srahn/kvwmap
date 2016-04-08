@@ -10557,24 +10557,17 @@ class GUI {
 			$output = '	<table cellspacing="0" cellpadding="3">
 										<tr style="background-color: #EDEFEF;">
 											<td style="border-bottom: 1px solid '.BG_DEFAULT.'">
-												<a href="javascript:hide_versioning(\''.$this->formvars['flurstkennz'].'\');"><img src="'.GRAPHICSPATH.'minus.gif"></a>
+												<a href="javascript:hide_versions(\''.$this->formvars['flurstkennz'].'\');"><img src="'.GRAPHICSPATH.'minus.gif"></a>
 											</td>
 											<td style="border-bottom: 1px solid '.BG_DEFAULT.'">
-												<span class="fett px14">Versionierung</span>
+												<span class="px14">Versionen</span>
 											</td>
 										</tr>
-										<!--tr>
-											<td></td>
-											<td>
-												<span class="fett px14">Lebenszeit:&nbsp;&nbsp;</span><span class="px14">'.$flst->beginnt.'&nbsp;&nbsp;-&nbsp;&nbsp;'.$flst->endet.'</span>
-											</td>
-										</tr-->
 										<tr>
 											<td></td>
 											<td>';
-												if(count($versionen) > 1){
-			$output.= '					<span class="fett px14">Versionswahl:</span>
-													<select name="versions_'.$k.'" onchange="location.href=\'index.php?go=setHistTimestamp&timestamp=\'+this.value" style="max-width: 500px">';
+												if(count($versionen) > 0){
+			$output.= '					<select name="versions_'.$k.'" onchange="location.href=\'index.php?go=setHistTimestamp&timestamp=\'+this.value" style="max-width: 500px">';
 													$selected = false;
 													$v = 1;
 													$count = count($versionen);

@@ -39,15 +39,15 @@ show_all = function(count){
 	currentform.submit();
 }
 
-show_versioning = function(flst){
-	document.getElementById('no_versioning_'+flst).style.display = 'none';
-	document.getElementById('versioning_'+flst).style.display = '';
-	ahah('index.php', 'go=Flurstueck_GetVersionen&flurstkennz='+flst, new Array(document.getElementById('versioning_'+flst)), new Array('sethtml'));
+show_versions = function(flst){
+	document.getElementById('no_versions_'+flst).style.display = 'none';
+	document.getElementById('versions_'+flst).style.display = '';
+	ahah('index.php', 'go=Flurstueck_GetVersionen&flurstkennz='+flst, new Array(document.getElementById('versions_'+flst)), new Array('sethtml'));
 }
 
-hide_versioning = function(flst){
-	document.getElementById('no_versioning_'+flst).style.display = 'inline';
-	document.getElementById('versioning_'+flst).style.display = 'none';
+hide_versions = function(flst){
+	document.getElementById('no_versions_'+flst).style.display = 'inline';
+	document.getElementById('versions_'+flst).style.display = 'none';
 }
 
 </script>
@@ -153,9 +153,8 @@ hide_versioning = function(flst){
       <table border="0" cellspacing="0" cellpadding="0">
         <tr>
           <td>
-          <table border="0" cellspacing="0" cellpadding="2">
-
-              <? if($privileg_['flurstkennz']){ ?>
+          <? if($privileg_['flurstkennz']){ ?>
+						<table border="0" cellspacing="0" cellpadding="2">
               <tr>
 								<td colspan="2">
 									<table cellspacing="0" cellpadding="0">
@@ -165,31 +164,37 @@ hide_versioning = function(flst){
 											</td>
 											<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
 											<td>
-												<div id="no_versioning_<? echo $flst->FlurstKennz; ?>">
+												<div id="no_versions_<? echo $flst->FlurstKennz; ?>">
 													<table cellspacing="0" cellpadding="2">
 														<tr>
 															<td>
-																<a href="javascript:show_versioning('<? echo $flst->FlurstKennz; ?>');"><img src="<? echo GRAPHICSPATH.'plus.gif'; ?>"></a>
+																<a href="javascript:show_versions('<? echo $flst->FlurstKennz; ?>');"><img src="<? echo GRAPHICSPATH.'plus.gif'; ?>"></a>
 															</td>
 															<td>
-																<span class="px14">Versionierung</span>
+																<span class="px14">Versionen</span>
 															</td>
 														</tr>
 													</table>
 												</div>
-												<div id="versioning_<? echo $flst->FlurstKennz; ?>" style="border: 1px solid <? echo BG_DEFAULT ?>; display:none"></div>
+												<div id="versions_<? echo $flst->FlurstKennz; ?>" style="border: 1px solid <? echo BG_DEFAULT ?>; display:none"></div>
 											</td>
 										</tr>
 									</table>
 								</td>
 							</tr>
+						</table>
+					<? } ?>
+
+				<table border="0" cellspacing="0" cellpadding="2">
+				
+				<? if($privileg_['flurstkennz']){ ?>
 							<tr>
                 <td align="right"><span class="fett">Flurst&uuml;cksnummer&nbsp;</span></td>
                 <td>
 									<? echo $flst->FlurstNr; ?>
 								</td>
               </tr>
-              <? }
+					<? } 
           $both = ($privileg_['gemkgname'] AND $privileg_['gemkgschl']);
           if($privileg_['gemkgname'] OR $privileg_['gemkgschl']){
               ?>
@@ -239,7 +244,7 @@ hide_versioning = function(flst){
           if($privileg_['flaeche']){ ?>
               <tr>
                 <td align="right"><span class="fett">Fl&auml;che&nbsp;</span></td>
-                <td><?php echo $flst->ALB_Flaeche; ?>m&sup2;</td>
+                <td><?php echo $flst->ALB_Flaeche; ?>&nbsp;m&sup2;</td>
               </tr>
           <? }
           $both = ($privileg_['amtsgerichtname'] AND $privileg_['amtsgerichtnr']);
