@@ -327,6 +327,7 @@ class jagdkataster {
 		$sql.= " st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.")) AS the_geom_inter, f.wkb_geometry as the_geom";		
 		$sql.= " FROM alkis.ax_gemarkung AS g, jagdkataster.jagdbezirke, alkis.ax_flurstueck AS f";
 		$sql.= " WHERE f.gemarkungsnummer = g.gemarkungsnummer";
+		$sql.= $this->database->build_temporal_filter(array('f'));
 		$sql.= " AND jagdbezirke.oid IN (".implode(',', $oids).")";
 		$sql.= " AND f.wkb_geometry && st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.") AND st_intersects(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS."))";
 		$sql.= " AND st_area_utm(st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.")), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.") > 1) as foo";
