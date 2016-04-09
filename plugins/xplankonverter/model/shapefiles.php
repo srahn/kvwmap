@@ -5,8 +5,13 @@
 
 class ShapeFile extends PgObject {
 
-  function ShapeFile($pgDatabase, $schema, $tableName) {
-    $this->PgObject($pgDatabase, $schema, $tableName);
+  function ShapeFile($myDatabase, $pgDatabase, $stelle, $user, $schema, $tableName, $epsg) {
+    $this->PgObject($pgDatabase, $schema, $tableName, $epsg);
+    $this->myDatabase = $myDatabase;
+    $this->stelle = $stelle;
+    $this->user = $user;
+    $this->epsg = $epsg;
+    $this->importer = new data_import_export();
     $this->debug = false;
   }
 
@@ -18,8 +23,17 @@ class ShapeFile extends PgObject {
     return '"' . $this->dataSchemaName() . '"."' . $this->get('filename') . '"';
   }
 
+  function dataTableName() {
+    $this->debug('Wandel ' . $this->get('filename') . ' to ' . 'shp_'. strtolower(umlaute_umwandeln($this->get('filename'))));
+    return 'shp_'. strtolower(umlaute_umwandeln($this->get('filename')));
+  }
+
+  function uploadShapePath() {
+    return XPLANKONVERTER_SHAPE_PATH . $this->get('konvertierung_id') . '/';
+  }
+
   function uploadShapeFileName() {
-    return XPLANKONVERTER_SHAPE_PATH . $this->get('konvertierung_id') . '/' . $this->get('filename');
+    return  $this->uploadShapePath() . $this->get('filename');
   }
 
   function deleteShape() { 
@@ -34,7 +48,7 @@ class ShapeFile extends PgObject {
   * representing this shape file
   */
   function deleteLayer() {
-    $this->debug('<p>Delete Layer: ' . $this->get('filename'));
+    $this->debug('<p>Delete Layer: ' . $this->dataTableName());
   }
 
   /*
@@ -61,7 +75,7 @@ class ShapeFile extends PgObject {
     if ($this->get('konvertierung_id') == '' or $this->get('fileName') == '')
       $this->find_by_id($this->get('id'));
 
-    foreach(array('shp', 'shx', 'dbf') AS $extension) {
+    foreach(array('shp', 'shx', 'dbf', 'sql') AS $extension) {
       $this->debug('<br>' . $this->uploadShapeFileName() . '.' . $extension);
       unlink(XPLANKONVERTER_SHAPE_PATH . $this->get('konvertierung_id') . '/' . $this->get('filename') . '.' . $extension);
     }
@@ -78,7 +92,12 @@ class ShapeFile extends PgObject {
     $this->createDataTableSchema();
 
     # load into database table
-    $this->loadIntoDataTable();
+    $created_tables = $this->loadIntoDataTable();
+    var_dump($created_tables);
+
+    # create rollen layer
+    echo 'create rollen layer';
+    $this->importer->create_rollenlayer($this->myDatabase, $this->pgDatabase, $this->stelle, $this->user, $this->dataTableName(), $this->dataSchemaName(), $created_tables[0], $this->epsg);
   }
 
   function createDataTableSchema() {
@@ -95,23 +114,14 @@ class ShapeFile extends PgObject {
     $this->debug('<p>Lade Daten in die Tabelle: ' . $this->qualifiedDataTableName());
     $this->deleteDataTable();
 
-    $command = POSTGRESBINPATH .
-      'shp2pgsql -g geom -W LATIN1 -I ' .
-      $this->uploadShapeFileName() . ' ' .
-      $this->qualifiedDataTableName() . ' > ' .
-      $this->uploadShapeFileName() . '.sql';
-    $this->debug('<p>Exec command: ' . $command);
-    exec($command);
-	
-  	$command = POSTGRESBINPATH .
-      'psql' .
-      ' -U ' . $this->pgDatabase->user .
-      ' -f ' . $this->uploadShapeFileName() . '.sql' .
-      ' ' . $this->pgDatabase->dbName;
-  	if($this->pgDatabase->passwd != '')
-      $command = 'export PGPASSWORD=' . $this->pgDatabase->passwd .'; ' . $command;
-    $this->debug('<p>Exec command: ' . $command);
-    exec($command);
+    return $this->importer->load_shp_into_pgsql(
+      $this->pgDatabase,
+      $this->uploadShapePath(),
+      $this->get('filename'),
+      '25832',
+      $this->dataSchemaName(),
+      $this->dataTableName()
+    );
   }
 }
   
