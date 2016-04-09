@@ -13,7 +13,7 @@
 #                                                                 #   
 # This program is distributed in the hope that it will be useful, #  
 # but WITHOUT ANY WARRANTY; without even the implied warranty of  #
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the    #
+# MERCHANTABILITY or FITNESS FO<a href="data_import_export.php" id="" title="data_import_export">data_import_export</a>R A PARTICULAR PURPOSE. See the    #
 # GNU General Public License for more details.                    #
 #                                                                 #  
 # You should have received a copy of the GNU General Public       #
@@ -292,44 +292,66 @@ class data_import_export {
       if(move_uploaded_file($_files['file1']['tmp_name'],$nachDatei)){
 				$files = unzip($nachDatei, false, false, true);
 				$firstfile = explode('.', $files[0]);
-				$file = $firstfile[0];
-				if(file_exists(UPLOADPATH.$file.'.dbf') OR file_exists(UPLOADPATH.$file.'.DBF')){
-					$tablename = 'a'.strtolower(umlaute_umwandeln(substr($file, 0, 15))).rand(1,1000000);
-		      $command = POSTGRESBINPATH.'shp2pgsql -g the_geom -I -s '.$formvars['epsg'].' -W LATIN1 -c "'.UPLOADPATH.$file.'" '.CUSTOM_SHAPE_SCHEMA.'.'.$tablename.' > "'.UPLOADPATH.$file.'.sql"'; 
-		      exec($command);
-		     	#echo $command;
-					$command = POSTGRESBINPATH.'psql -h ' . $pgdatabase->host . ' -f "'.UPLOADPATH.$file.'.sql" '.$pgdatabase->dbName.' '.$pgdatabase->user;
-					if($pgdatabase->passwd != '')$command = 'export PGPASSWORD="'.$pgdatabase->passwd.'"; '.$command;
-		      exec($command);
-		     	#echo $command;
-		      $sql = "
-            ALTER TABLE " . CUSTOM_SHAPE_SCHEMA . "." . $tablename . "
-            SET WITH OIDS;
-            SELECT
-              geometrytype(the_geom) AS geometrytype
-            FROM
-              " . CUSTOM_SHAPE_SCHEMA . "." . $tablename . "
-            LIMIT 1;
-          ";
-		      $ret = $pgdatabase->execSQL($sql,4, 0);
-		      if(!$ret[0]){
-            $result = pg_fetch_array($ret[1]);
-			      if(strpos($result['geometrytype'], 'POINT') !== false){
-			      	$datatype = 0;
-			      }elseif(strpos($result['geometrytype'], 'LINESTRING') !== false){
-			      	$datatype = 1;
-			      }elseif(strpos($result['geometrytype'], 'POLYGON') !== false){
-			      	$datatype = 2;
-			      }
-						$custom_table['datatype'] = $datatype;
-						$custom_table['tablename'] = $tablename;
-						return array($custom_table);
-					}
-				}
+				return $this->load_shp_into_pgsql(
+					$pgdatabase,
+					UPLOADPATH,
+					$firstfile[0],
+					$formvars['epsg'],
+					CUSTOM_SHAPE_SCHEMA,
+					'a' . strtolower(umlaute_umwandeln(substr($file, 0, 15))) . rand(1,1000000)
+				);
 			}
 		}
 	}
-	
+
+	function load_shp_into_pgsql($pgdatabase, $uploadpath, $file, $epsg, $schemaname, $tablename) {
+		if(file_exists($uploadpath . $file . '.dbf') OR file_exists($uploadpath . $file . '.DBF')){
+	    $command = POSTGRESBINPATH .
+				'shp2pgsql' .
+				' -g the_geom' .
+				' -I' .
+				' -s ' . $epsg .
+				' -W LATIN1' .
+				' -c "' . $uploadpath . $file . '"' .
+				' ' . $schemaname . '.' . $tablename .
+				' > "' . $uploadpath . $file . '.sql"';
+	    exec($command);
+	   	#echo $command;
+			$command = POSTGRESBINPATH .
+				'psql' .
+				' -h ' . $pgdatabase->host .
+				' -f "' . $uploadpath . $file . '.sql"' .
+				' ' . $pgdatabase->dbName . ' ' . $pgdatabase->user;
+			if ($pgdatabase->passwd != '')
+				$command = 'export PGPASSWORD="' . $pgdatabase->passwd . '"; ' . $command;
+	    exec($command);
+	   	#echo $command;
+	    $sql = "
+	      ALTER TABLE " . $schemaname . "." . $tablename . "
+	      SET WITH OIDS;
+	      SELECT
+	        geometrytype(the_geom) AS geometrytype
+	      FROM
+	        " . $schemaname . "." . $tablename . "
+	      LIMIT 1;
+	    ";
+	    $ret = $pgdatabase->execSQL($sql,4, 0);
+	    if(!$ret[0]){
+	      $result = pg_fetch_array($ret[1]);
+	      if(strpos($result['geometrytype'], 'POINT') !== false){
+	      	$datatype = 0;
+	      }elseif(strpos($result['geometrytype'], 'LINESTRING') !== false){
+	      	$datatype = 1;
+	      }elseif(strpos($result['geometrytype'], 'POLYGON') !== false){
+	      	$datatype = 2;
+	      }
+				$custom_table['datatype'] = $datatype;
+				$custom_table['tablename'] = $tablename;
+				return array($custom_table);
+			}
+		}
+	}
+
 	function import_custom_gpx($formvars, $pgdatabase){
 		$_files = $_FILES;	
 		if($_files['file1']['name']){
