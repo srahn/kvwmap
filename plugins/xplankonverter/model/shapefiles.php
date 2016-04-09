@@ -93,11 +93,10 @@ class ShapeFile extends PgObject {
 
     # load into database table
     $created_tables = $this->loadIntoDataTable();
-    var_dump($created_tables);
 
     # create rollen layer
-    echo 'create rollen layer';
-    $this->importer->create_rollenlayer($this->myDatabase, $this->pgDatabase, $this->stelle, $this->user, $this->dataTableName(), $this->dataSchemaName(), $created_tables[0], $this->epsg);
+    $this->debug('Create layer');
+#    $this->importer->create_layer($this->myDatabase, $this->pgDatabase, $this->stelle, $this->user, $this->dataTableName(), $this->dataSchemaName(), $created_tables[0], $this->epsg);
   }
 
   function createDataTableSchema() {

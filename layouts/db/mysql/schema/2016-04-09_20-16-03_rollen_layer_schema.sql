@@ -1,1 +1,0 @@
-ALTER TABLE `rollenlayer` ADD `pg_schema` VARCHAR(255) NULL AFTER `labelitem`;

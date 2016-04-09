@@ -14288,7 +14288,7 @@ class db_mapObj{
     $formvars['Data'] = str_replace ( "'", "''", $formvars['Data']);
 		$formvars['query'] = str_replace ( "'", "''", $formvars['query']);
 
-    $sql = "INSERT INTO rollenlayer (`user_id`, `stelle_id`, `aktivStatus`, `Name`, `Datentyp`, `Gruppe`, `Typ`, `Data`, `query`, `connection`, `connectiontype`, `transparency`, `epsg_code`, `labelitem`, `pg_schema`) VALUES(";
+    $sql = "INSERT INTO rollenlayer (`user_id`, `stelle_id`, `aktivStatus`, `Name`, `Datentyp`, `Gruppe`, `Typ`, `Data`, `query`, `connection`, `connectiontype`, `transparency`, `epsg_code`, `labelitem`) VALUES(";
     $sql .= "'".$formvars['user_id']."', ";
     $sql .= "'".$formvars['stelle_id']."', ";
     $sql .= "'".$formvars['aktivStatus']."', ";
@@ -14302,8 +14302,7 @@ class db_mapObj{
     $sql .= "'".$formvars['connectiontype']."', ";
     $sql .= "'".$formvars['transparency']."', ";
     $sql .= "'".$formvars['epsg_code']."', ";
-    $sql .= "'".$formvars['labelitem']."', ";
-    $sql .= "'".$formvars['pg_schema']."'";
+    $sql .= "'".$formvars['labelitem']."'";
     $sql .= ")";
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->newRollenLayer - Erzeugen eines RollenLayers:<br>".$sql,4);

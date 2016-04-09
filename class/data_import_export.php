@@ -76,7 +76,7 @@ class data_import_export {
     return -$layer_id;
   }
 
-	function create_rollenlayer($database, $pgdatabase, $stelle, $user, $layername, $pg_schema, $custom_table, $epsg) {
+	function create_rollenlayer($database, $pgdatabase, $stelle, $user, $layername, $schema, $custom_table, $epsg) {
 		$result_colors = read_colors($database);
 		$dbmap = new db_mapObj($stelle->id, $user->id);
 		$group = $dbmap->getGroupbyName('Eigene Importe');
@@ -96,7 +96,7 @@ class data_import_export {
 		$this->formvars['Datentyp'] = $custom_table['datatype'];
 		$select = 'oid, the_geom';
 		if($custom_table['labelitem'] != '') $select .= ', ' . $custom_table['labelitem'];
-		$this->formvars['Data'] = 'the_geom from (SELECT ' . $select . ' FROM ' . $pg_schema . '.' . $custom_table['tablename'] . ' WHERE 1=1 ' . $custom_table['where'] . ') as foo using unique oid using srid=' . $epsg;
+		$this->formvars['Data'] = 'the_geom from (SELECT ' . $select . ' FROM ' . $schema . '.' . $custom_table['tablename'] . ' WHERE 1=1 ' . $custom_table['where'] . ') as foo using unique oid using srid=' . $epsg;
 		$this->formvars['query'] = 'SELECT * FROM ' . $custom_table['tablename'] . ' WHERE 1=1' . $custom_table['where'];
 		$connectionstring ='user=' . $pgdatabase->user;
 		if($pgdatabase->passwd != '')
@@ -108,7 +108,6 @@ class data_import_export {
 		$this->formvars['connectiontype'] = 6;
 		$this->formvars['epsg_code'] = $epsg;
 		$this->formvars['transparency'] = 65;
-    $this->formvars['pg_schema'] = $pg_schema;
 		if($custom_table['labelitem'] != '')
 			$this->formvars['labelitem'] = $custom_table['labelitem'];
 		$layer_id = $dbmap->newRollenLayer($this->formvars);
