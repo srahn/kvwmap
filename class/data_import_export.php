@@ -62,92 +62,100 @@ class data_import_export {
 			}break;
 		}
 		foreach($custom_tables as $custom_table){				# ------ Rollenlayer erzeugen ------- #
-			$result_colors = read_colors($database);
-			$dbmap = new db_mapObj($stelle->id, $user->id);
-			$group = $dbmap->getGroupbyName('Eigene Importe');
-			if($group != ''){
-				$groupid = $group['id'];
-			}
-			else{
-				$groupid = $dbmap->newGroup('Eigene Importe', 1);
-			}
-			$user->rolle->set_one_Group($user->id, $stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
-			$this->formvars['user_id'] = $user->id;
-			$this->formvars['stelle_id'] = $stelle->id;
-			$this->formvars['aktivStatus'] = 1;
-			$this->formvars['Name'] = $file." (".date('d.m. H:i',time()).")".str_repeat(' ', $custom_table['datatype']);
-			$this->formvars['Gruppe'] = $groupid;
-			$this->formvars['Typ'] = 'import';
-			$this->formvars['Datentyp'] = $custom_table['datatype'];
-			$select = 'oid, the_geom';
-			if($custom_table['labelitem'] != '')$select .= ', '.$custom_table['labelitem'];
-			$this->formvars['Data'] = 'the_geom from (SELECT '.$select.' FROM '.CUSTOM_SHAPE_SCHEMA.'.'.$custom_table['tablename'].' WHERE 1=1 '.$custom_table['where'].')as foo using unique oid using srid='.$formvars['epsg'];
-			$this->formvars['query'] = 'SELECT * FROM '.$custom_table['tablename'].' WHERE 1=1'.$custom_table['where'];
-			$connectionstring ='user='.$pgdatabase->user;
-			if($pgdatabase->passwd != '')$connectionstring.=' password='.$pgdatabase->passwd;
-			$connectionstring.=' dbname='.$pgdatabase->dbName;
-      if($pgdatabase->host != 'localhost') $connectionstring .= ' host=' . $pgdatabase->host;
-			$this->formvars['connection'] = $connectionstring;
-			$this->formvars['connectiontype'] = 6;
-			$this->formvars['epsg_code'] = $formvars['epsg'];
-			$this->formvars['transparency'] = 65;
-			if($custom_table['labelitem'] != '')$this->formvars['labelitem'] = $custom_table['labelitem'];
-			$layer_id = $dbmap->newRollenLayer($this->formvars);
-			$layerdb = $dbmap->getlayerdatabase(-$layer_id, $this->Stelle->pgdbhost);
-			$layerdb->setClientEncoding();
-			$path = $this->formvars['query'];
-			$attributes = $dbmap->load_attributes($layerdb, $path);
-			$dbmap->save_postgis_attributes(-$layer_id, $attributes, '');
-			$attrib['name'] = ' ';
-			$attrib['layer_id'] = -$layer_id;
-			$attrib['expression'] = '';
-			$attrib['order'] = 0;
-			$class_id = $dbmap->new_Class($attrib);
-			$this->formvars['class'] = $class_id;
-			$style['colorred'] = $result_colors[rand(0,9)]['red'];
-			$style['colorgreen'] = $result_colors[rand(0,9)]['green'];
-			$style['colorblue'] = $result_colors[rand(0,9)]['blue'];
-			$style['outlinecolorred'] = 0;
-			$style['outlinecolorgreen'] = 0;
-			$style['outlinecolorblue'] = 0;
-			switch ($custom_table['datatype']) {
-				case 0 :{
-					$style['size'] = 8;
-					$style['maxsize'] = 8;
-					$style['symbolname'] = 'circle';
-				}break;
-				case 1 :{
-					$style['width'] = 2;
-					$style['minwidth'] = 1;
-					$style['maxwidth'] = 3;
-					$style['symbolname'] = NULL;
-				}break;
-				case 2 :{
-					$style['size'] = 1;
-					$style['maxsize'] = 2;
-					$style['symbolname'] = NULL;
-				}
-			}
-			$style['backgroundcolor'] = NULL;
-			$style['minsize'] = NULL;
-			$style['angle'] = 360;
-			$style_id = $dbmap->new_Style($style);	
-			$dbmap->addStyle2Class($class_id, $style_id, 0);          # den Style der Klasse zuordnen
-			if($custom_table['labelitem'] != ''){
-				$label['font'] = 'arial';
-				$label['color'] = '0 0 0';
-				$label['outlinecolor'] = '255 255 255';
-				$label['size'] = 8;
-				$label['minsize'] = 6;
-				$label['maxsize'] = 10;
-				$label['position'] = 9;
-				$new_label_id = $dbmap->new_Label($label);				
-				$dbmap->addLabel2Class($class_id, $new_label_id, 0);
-			}
+			$layer_id = $this->create_rollenlayer($database, $pgdatabase, $stelle, $user, $file, CUSTOM_SHAPE_SCHEMA, $custom_table, $formvars['epsg']);
 		}
     return -$layer_id;
   }
-  
+
+	function create_rollenlayer($database, $pgdatabase, $stelle, $user, $file, $shape_schema, $custom_table, $epsg) {
+		$result_colors = read_colors($database);
+		$dbmap = new db_mapObj($stelle->id, $user->id);
+		$group = $dbmap->getGroupbyName('Eigene Importe');
+		if($group != ''){
+			$groupid = $group['id'];
+		}
+		else{
+			$groupid = $dbmap->newGroup('Eigene Importe', 1);
+		}
+		$user->rolle->set_one_Group($user->id, $stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
+		$this->formvars['user_id'] = $user->id;
+		$this->formvars['stelle_id'] = $stelle->id;
+		$this->formvars['aktivStatus'] = 1;
+		$this->formvars['Name'] = $file." (".date('d.m. H:i',time()).")".str_repeat(' ', $custom_table['datatype']);
+		$this->formvars['Gruppe'] = $groupid;
+		$this->formvars['Typ'] = 'import';
+		$this->formvars['Datentyp'] = $custom_table['datatype'];
+		$select = 'oid, the_geom';
+		if($custom_table['labelitem'] != '') $select .= ', ' . $custom_table['labelitem'];
+		$this->formvars['Data'] = 'the_geom from (SELECT ' . $select . ' FROM ' . $shape_schema . '.' . $custom_table['tablename'] . ' WHERE 1=1 ' . $custom_table['where'] . ') as foo using unique oid using srid=' . $epsg;
+		$this->formvars['query'] = 'SELECT * FROM ' . $custom_table['tablename'] . ' WHERE 1=1' . $custom_table['where'];
+		$connectionstring ='user=' . $pgdatabase->user;
+		if($pgdatabase->passwd != '')
+      $connectionstring .=' password=' . $pgdatabase->passwd;
+		$connectionstring .= ' dbname=' . $pgdatabase->dbName;
+    if($pgdatabase->host != 'localhost')
+      $connectionstring .= ' host=' . $pgdatabase->host;
+		$this->formvars['connection'] = $connectionstring;
+		$this->formvars['connectiontype'] = 6;
+		$this->formvars['epsg_code'] = $epsg;
+		$this->formvars['transparency'] = 65;
+		if($custom_table['labelitem'] != '')
+			$this->formvars['labelitem'] = $custom_table['labelitem'];
+		$layer_id = $dbmap->newRollenLayer($this->formvars);
+		$layerdb = $dbmap->getlayerdatabase(-$layer_id, $this->Stelle->pgdbhost);
+		$layerdb->setClientEncoding();
+		$path = $this->formvars['query'];
+		$attributes = $dbmap->load_attributes($layerdb, $path);
+		$dbmap->save_postgis_attributes(-$layer_id, $attributes, '');
+		$attrib['name'] = ' ';
+		$attrib['layer_id'] = -$layer_id;
+		$attrib['expression'] = '';
+		$attrib['order'] = 0;
+		$class_id = $dbmap->new_Class($attrib);
+		$this->formvars['class'] = $class_id;
+		$style['colorred'] = $result_colors[rand(0,9)]['red'];
+		$style['colorgreen'] = $result_colors[rand(0,9)]['green'];
+		$style['colorblue'] = $result_colors[rand(0,9)]['blue'];
+		$style['outlinecolorred'] = 0;
+		$style['outlinecolorgreen'] = 0;
+		$style['outlinecolorblue'] = 0;
+		switch ($custom_table['datatype']) {
+			case 0 :{
+				$style['size'] = 8;
+				$style['maxsize'] = 8;
+				$style['symbolname'] = 'circle';
+			}break;
+			case 1 :{
+				$style['width'] = 2;
+				$style['minwidth'] = 1;
+				$style['maxwidth'] = 3;
+				$style['symbolname'] = NULL;
+			}break;
+			case 2 :{
+				$style['size'] = 1;
+				$style['maxsize'] = 2;
+				$style['symbolname'] = NULL;
+			}
+		}
+		$style['backgroundcolor'] = NULL;
+		$style['minsize'] = NULL;
+		$style['angle'] = 360;
+		$style_id = $dbmap->new_Style($style);
+		$dbmap->addStyle2Class($class_id, $style_id, 0);          # den Style der Klasse zuordnen
+		if($custom_table['labelitem'] != ''){
+			$label['font'] = 'arial';
+			$label['color'] = '0 0 0';
+			$label['outlinecolor'] = '255 255 255';
+			$label['size'] = 8;
+			$label['minsize'] = 6;
+			$label['maxsize'] = 10;
+			$label['position'] = 9;
+			$new_label_id = $dbmap->new_Label($label);
+			$dbmap->addLabel2Class($class_id, $new_label_id, 0);
+		}
+    return $layer_id;
+	}
+
 	function load_custom_pointlist($formvars){
 		$_files = $_FILES;
 		if($_files['file1']['name']){
