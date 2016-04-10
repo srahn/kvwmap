@@ -1184,6 +1184,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  case 'Layer_Löschen' : {    
 			$GUI->checkCaseAllowed('Layer_Anzeigen');
 			$GUI->LayerLoeschen();
+			$this->LayerAnzeigen();
 	  } break;
 
 	  case 'Layer2Stelle_Reihenfolge' : {

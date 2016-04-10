@@ -2809,7 +2809,7 @@ class GUI {
     # 4. trägt die im Formular übersendeten Map-Parameter in der Stelle und Rolle ein
     # zu 1:
     $this->LayerLoeschen(0);
-
+    $this->LayerAnzeigen();
   }
 
   function showStyles() {
@@ -6469,7 +6469,6 @@ class GUI {
     $stelle[] = $this->Stelle->id;
     $this->Stelle->deleteLayer($layer, $this->pgdatabase);
     $this->user->rolle->deleteLayer('', $stelle, $layer);
-    $this->LayerAnzeigen();
   }
 
   function LayerAnzeigen() {
