@@ -1513,7 +1513,7 @@ class pgdatabase {
   }
 	
 	function getVersionen($table, $gml_ids){
-		$sql = "SELECT beginnt::timestamp, endet::timestamp, bezeichner as anlass FROM ".$table." LEFT JOIN alkis.ax_fortfuehrungsanlaesse ON wert = NULLIF(anlass, '')::integer WHERE gml_id IN ('".implode("','", $gml_ids)."') ORDER BY beginnt";
+		$sql = "SELECT beginnt::timestamp, endet::timestamp, bezeichner as anlass, '".$table."' as table FROM alkis.".$table." LEFT JOIN alkis.ax_fortfuehrungsanlaesse ON wert = NULLIF(anlass, '')::integer WHERE gml_id IN ('".implode("','", $gml_ids)."') ORDER BY beginnt";
 		$queryret=$this->execSQL($sql, 4, 0);
 		while($rs=pg_fetch_assoc($queryret[1])) {
 			$versionen[]=$rs;
