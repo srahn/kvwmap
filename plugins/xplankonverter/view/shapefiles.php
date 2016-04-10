@@ -56,11 +56,22 @@
     </tr>
   </thead>
 </table>
-
+<div style="clear:both"></div>
 <form action="index.php" method="post" enctype="multipart/form-data">
   <input type="hidden" name="go" value="xplankonverter_shapefiles_index">
   <input type="hidden" name="konvertierung_id" value="<?php echo $this->formvars['konvertierung_id']; ?>">
-  <input type="file" name="shape_files[]" multiple><input type="submit" value="Upload">
+  <div class="file-upload">
+    <input type="file" name="shape_files[]" multiple>
+    <select name="epsg_code">
+      <option value="25832" selected>25832</option>
+      <option value="25833">25833</option>
+      <option value="35833">35833</option>
+      <option value="31467">31467</option>
+      <option value="31468">31468</option>
+      <option value="31469">31469</option>
+    </select>
+    <input type="submit" value="Upload">
+  </div>
 </form>
 <p>
 <?php

@@ -84,7 +84,7 @@ switch($this->go){
       $this->main = 'Hinweis.php';
     }
     else {
-      $this->konvertierung = new Konvertierung($this->database, $this->pgdatabase, 'xplankonverter', 'konvertierungen');
+      $this->konvertierung = new Konvertierung($this, 'xplankonverter', 'konvertierungen');
       $this->konvertierung->find_by('id', $this->formvars['konvertierung_id']);
       if (isInStelleAllowed($this->Stelle->id, $this->konvertierung->get('stelle_id'))) {
         if (isset($_FILES['shape_files']) and $_FILES['shape_files']['name'][0] != '') {
@@ -107,15 +107,42 @@ switch($this->go){
 
           foreach($uploaded_files AS $uploaded_file) {
             if ($uploaded_file['extension'] == 'dbf' and $uploaded_file['state'] != 'ignoriert') {
-              # load data to database, register shape files
-              $shapeFile = new ShapeFile($this->pgdatabase, 'xplankonverter', 'shapefiles', 25832);
+
+              # delete existing shape file 
+              $shapeFile = new ShapeFile($this, 'xplankonverter', 'shapefiles');
+              $shapeFile = $shapeFile->find_where("
+                filename = '" . $uploaded_file['filename'] . "' AND
+                konvertierung_id = '" . $this->konvertierung->get('id') . "' AND
+                stelle_id = " . $this->konvertierung->get('stelle_id')
+              );
+              if (!empty($shapeFile->data)) {
+                $this->debug('<p>Lösche gefundenes shape file.');
+                $shapeFile->deleteLayer();
+                $shapeFile->deleteDataTable();
+                $shapeFile->delete();
+              }
+
+              # create new record in shapefile table
               $shapeFile->create(
                 array(
                   'filename' => $uploaded_file['filename'],
                   'konvertierung_id' => $this->konvertierung->get('id'),
-                  'stelle_id' => $this->Stelle->id
+                  'stelle_id' => $this->konvertierung->get('stelle_id'),
+                  'epsg_code' => $this->formvars['epsg_code']
                 )
               );
+
+              # Create schema for data table if not exists
+              $shapeFile->createDataTableSchema();
+
+              # load into database table
+              $created_tables = $shapeFile->loadIntoDataTable();
+              echo '<p>created_tables: ';
+              var_dump($created_tables);
+              # Set datatype for shapefile
+              $shapeFile->set('datatype', $created_tables[0]['datatype']);
+              $shapeFile->update();
+
 
               # create layer
               $this->formvars['Name'] = $shapeFile->get('filename');
@@ -124,7 +151,7 @@ switch($this->go){
               $this->formvars['pfad'] = 'Select * from ' . $shapeFile->dataTableName() . ' where 1=1';
               $this->formvars['Data'] = 'the_geom from (select oid, * from ' .
                 $shapeFile->dataSchemaName() . '.' . $shapeFile->dataTableName() .
-                ' where 1=1) as foo using unique oid using srid=25833';
+                ' where 1=1) as foo using unique oid using srid=' . $shapeFile->get('epsg_code');
               $this->formvars['maintable'] = $shapeFile->dataTableName();
               $this->formvars['schema'] = $shapeFile->dataSchemaName();
               $this->formvars['connection'] = $this->pgdatabase->connect_string;
@@ -132,13 +159,13 @@ switch($this->go){
               $this->formvars['filteritem'] = 'oid';
               $this->formvars['tolerance'] = '5';
               $this->formvars['toleranceunits'] = 'pixels';
-              $this->formvars['epsg_code'] = $shapeFile->epsg;
+              $this->formvars['epsg_code'] = $shapeFile->get('epsg_code');
               $this->formvars['querymap'] = '1';
               $this->formvars['queryable'] = '1';
               $this->formvars['transparency'] = '75';
               $this->formvars['postlabelcache'] = '0';
               $this->formvars['allstellen'] = '2300';
-              $this->formvars['ows_srs'] = 'EPSG:' . $shapeFile->epsg . ' EPSG:25833 EPSG:4326 EPSG:2398';
+              $this->formvars['ows_srs'] = 'EPSG:' . $shapeFile->get('epsg_code') . ' EPSG:25833 EPSG:4326 EPSG:2398';
               $this->formvars['wms_server_version'] = '1.1.0';
               $this->formvars['wms_format'] = 'image/png';
               $this->formvars['wms_connectiontimeout'] = '60';
@@ -147,6 +174,12 @@ switch($this->go){
 
               $shapeFile->set('layer_id', $this->formvars['selected_layer_id']);
               $shapeFile->update();
+
+              $this->Stellenzuweisung(
+                array($shapeFile->get('layer_id')),
+                array($this->konvertierung->get('stelle_id'))
+              );
+
 
 /*              # create layer if not exists
               $layer = new LAYER($this->database);
@@ -178,12 +211,17 @@ switch($this->go){
       $this->main = 'Hinweis.php';
     }
     else {
-      $shapefile = new Shapefile($this->pgdatabase, 'xplankonverter', 'shapefiles', 25832);
+      $shapefile = new Shapefile($this, 'xplankonverter', 'shapefiles');
       $shapefile->find_by('id', $this->formvars['shapefile_id']);
       if (isInStelleAllowed($this->Stelle->id, $shapefile->get('stelle_id'))) {
-        $shapefile->deleteShape();
-        $this->formvars['selected_layer_id'] = $shapefile->get('layer_id');
-        $this->LayerLoeschen();
+        # Delete the layerdefinition in mysql (rolleneinstellungen, layer, classes, styles, etc.)
+        $shapefile->deleteLayer();
+        # Delete the postgis data table that hold the data of the shape file
+        $shapefile->deleteDataTable();
+        # Delete the uploaded shape files itself
+        $shapefile->deleteUploadFiles();
+        # Delete the record in postgres shapefile table (unregister for konverter)
+        $shapefile->delete();
         $this->main = '../../plugins/xplankonverter/view/shapefiles.php';
       }
     }

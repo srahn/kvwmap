@@ -54,6 +54,8 @@ CREATE TABLE xplankonverter.shapefiles
   konvertierung_id integer,
   stelle_id integer,
   layer_id integer,
+  epsg_code integer,
+  datatype smallint,
   CONSTRAINT shapes_pkey PRIMARY KEY (id)
 )
 WITH ( OIDS=TRUE );

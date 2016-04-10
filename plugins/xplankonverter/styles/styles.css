@@ -51,6 +51,17 @@ div.td {
   margin-bottom: 0px;
 }
 
+.xplankonverter .file-upload {
+  width: 100%;
+  margin-bottom: 20px;
+  text-align: left;
+  display:block;
+}
+.xplankonverter .file-upload > * {
+	margin-right: 40px;
+	display:inline;
+}
+
 .button {
   display: inline-block;
   border-radius: 4px;

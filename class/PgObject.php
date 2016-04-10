@@ -31,15 +31,16 @@
 
 class PgObject {
   
-  function PgObject($database, $schema, $tableName) {
+  function PgObject($gui, $schema, $tableName) {
     global $debug;
     $this->debug=$debug;
-    $this->database = $database;
+    $this->gui = $gui;
+    $this->database = $gui->pgdatabase;
     $this->schema = $schema;
     $this->tableName = $tableName;
     $this->qualifiedTableName = $schema . '.' . $tableName;
     $this->data = array();
-    $this->debug = false;
+    $this->debug = true;
   }
 
   function find_by($attribute, $value) {
@@ -51,9 +52,32 @@ class PgObject {
       WHERE
         \"" . $attribute . "\" = '" . $value . "'
     ";
-    $this->debug('<p>sql: ' . $sql);
+    $this->debug('<p>find_by sql: ' . $sql);
     $query = pg_query($this->database->dbConn, $sql);
     $this->data = pg_fetch_assoc($query);
+  }
+
+  /*
+  * Search for an record in the database
+  * by the given where clause
+  * @ return an object with this record
+  */
+  function find_where($where) {
+    $sql = "
+      SELECT
+        *
+      FROM
+        " . $this->schema . '.' . $this->tableName . "
+      WHERE
+        " . $where . "
+    ";
+    $this->debug('<p>sql: ' . $sql);
+    $query = pg_query($this->database->dbConn, $sql);
+    if (pg_num_rows($query) == 0)
+      $this->data = array();
+    else
+      $this->data = pg_fetch_assoc($query);
+    return $this;
   }
 
   function getAttributes() {
@@ -81,9 +105,11 @@ class PgObject {
     return $value;
   }
 
-  function save() {
+  function create($data) {
+    if (!empty($data))
+      $this->data = $data;
     $sql = "
-      INSERT INTO " . $this->qualifiedTableName . "(
+      INSERT INTO " . $this->qualifiedTableName . " (
         " . implode(', ', $this->getAttributes()) . "
       )
       VALUES (
@@ -91,7 +117,7 @@ class PgObject {
       )
       RETURNING id
     ";
-    #echo '<p>sql: ' . $sql;
+    $this->debug('<p>Insert into pg table sql: ' . $sql);
     $query = pg_query($this->database->dbConn, $sql);
     $row = pg_fetch_assoc($query);
     $this->set('id', $row['id']);
@@ -107,7 +133,7 @@ class PgObject {
       WHERE
         id = " . $this->get('id') . "
     ";
-    $this->debug('<p>sql: ' . $sql);
+    $this->debug('<p>Update in pg table sql: ' . $sql);
     $query = pg_query($this->database->dbConn, $sql);
   }
 
@@ -119,17 +145,8 @@ class PgObject {
       WHERE
         id = " . $this->get('id') . "
     ";
-    #echo '<p>sql: ' . $sql;
+    $this->debug('<p>Delete in pg table sql: ' . $sql);
     $result = pg_query($this->database->dbConn, $sql);
-
-    # this must have been happen when GLE is used
-/*  
-    $oid = $this->get('oid');
-    $GUI->formvars['chosen_layer_id'] = $layer_id;
-    $GUI->formvars['checkbox_names_' . $layer_id] = 'check;shapefiles;shapefiles;' . $oid;
-    $GUI->formvars['check;shapefiles;shapefiles;' . $oid] = 'on';
-    $GUI->layer_Datensaetze_loeschen(false);
-*/
     return $result;
   }
 

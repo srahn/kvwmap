@@ -5,13 +5,10 @@
 
 class ShapeFile extends PgObject {
 
-  function ShapeFile($database, $schema, $tableName, $epsg) {
-    $this->PgObject($database, $schema, $tableName, $epsg);
-    $this->stelle = $stelle;
-    $this->user = $user;
-    $this->epsg = $epsg;
+  function ShapeFile($gui, $schema, $tableName) {
+    $this->PgObject($gui, $schema, $tableName);
     $this->importer = new data_import_export();
-    $this->debug = false;
+    $this->debug = true;
   }
 
   function dataSchemaName() {
@@ -23,7 +20,7 @@ class ShapeFile extends PgObject {
   }
 
   function dataTableName() {
-    $this->debug('Wandel ' . $this->get('filename') . ' to ' . 'shp_'. strtolower(umlaute_umwandeln($this->get('filename'))));
+    #$this->debug('Wandel ' . $this->get('filename') . ' to ' . 'shp_'. strtolower(umlaute_umwandeln($this->get('filename'))));
     return 'shp_'. strtolower(umlaute_umwandeln($this->get('filename')));
   }
 
@@ -35,19 +32,14 @@ class ShapeFile extends PgObject {
     return  $this->uploadShapePath() . $this->get('filename');
   }
 
-  function deleteShape() { 
-    $this->deleteLayer();
-    $this->deleteDataTable();
-    $this->deleteUploadFiles();
-    $this->delete(); # function in supper class
-  }
-
   /*
   * Delete the Layer in mySQL tables
   * representing this shape file
   */
   function deleteLayer() {
-    $this->debug('<p>Delete Layer: ' . $this->dataTableName());
+    $this->debug('<p>Delete Layer in mysql db: ' . $this->dataTableName());
+    $this->gui->formvars['selected_layer_id'] = $this->get('layer_id');
+    $this->gui->LayerLoeschen();
   }
 
   /*
@@ -55,7 +47,7 @@ class ShapeFile extends PgObject {
   * of the shapefile
   */
   function deleteDataTable() {
-    $this->debug('<p>Delete Table: ' . $this->qualifiedDataTableName());
+    $this->debug('<p>Delete data table in pgsql db: ' . $this->qualifiedDataTableName());
     $sql = "
       DROP TABLE IF EXISTS
         " . $this->qualifiedDataTableName() . "
@@ -71,28 +63,13 @@ class ShapeFile extends PgObject {
   function deleteUploadFiles() {
     $this->debug('<p>Delete Upload Files');
     $konvertierung_id = $this->get('konvertierung_id');
-    if ($this->get('konvertierung_id') == '' or $this->get('fileName') == '')
+    if ($this->get('konvertierung_id') == '' or $this->get('filename') == '')
       $this->find_by('id', $this->get('id'));
 
     foreach(array('shp', 'shx', 'dbf', 'sql') AS $extension) {
-      $this->debug('<br>' . $this->uploadShapeFileName() . '.' . $extension);
+      $this->debug('<br>Delete file: ' . $this->uploadShapeFileName() . '.' . $extension);
       unlink(XPLANKONVERTER_SHAPE_PATH . $this->get('konvertierung_id') . '/' . $this->get('filename') . '.' . $extension);
     }
-  }
-
-  function create($params) {
-    # create record in shapefiles table
-    foreach($params AS $key => $value) {
-      $this->set($key, $value);
-    }
-    $this->save();
-
-    # Create schema for data table if not exists
-    $this->createDataTableSchema();
-
-    # load into database table
-    $created_tables = $this->loadIntoDataTable();
-    $this->datatype = $created_tables[0]['datatype'];
   }
 
   function createDataTableSchema() {
@@ -107,13 +84,12 @@ class ShapeFile extends PgObject {
 
   function loadIntoDataTable() {
     $this->debug('<p>Lade Daten in die Tabelle: ' . $this->qualifiedDataTableName());
-    $this->deleteDataTable();
 
     return $this->importer->load_shp_into_pgsql(
       $this->database,
       $this->uploadShapePath(),
       $this->get('filename'),
-      '25832',
+      $this->get('epsg_code'),
       $this->dataSchemaName(),
       $this->dataTableName()
     );
