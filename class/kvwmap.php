@@ -6294,6 +6294,7 @@ class GUI {
 
   function Layereditor_KlasseHinzufuegen(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+    $attrib['name'] = $this->formvars['class_name'];
     $attrib['layer_id'] = $this->formvars['selected_layer_id'];
     $attrib['order'] = 1;
     $mapDB->new_Class($attrib);
