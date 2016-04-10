@@ -1149,7 +1149,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  case 'Layereditor_Als neuen Layer eintragen' : {
 			$GUI->checkCaseAllowed('Layereditor');
 			$GUI->LayerAnlegen();
-			$this->Layereditor();
+			$GUI->Layereditor();
 	  } break;
 
 	  case 'Layereditor_Ändern' : {
@@ -1184,7 +1184,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  case 'Layer_Löschen' : {    
 			$GUI->checkCaseAllowed('Layer_Anzeigen');
 			$GUI->LayerLoeschen();
-			$this->LayerAnzeigen();
+			$GUI->LayerAnzeigen();
 	  } break;
 
 	  case 'Layer2Stelle_Reihenfolge' : {
