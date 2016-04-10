@@ -1143,7 +1143,8 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 
 	  case 'Layereditor_Klasse_Hinzufügen' : {
 			$GUI->checkCaseAllowed('Layereditor');
-			$GUI->Layereditor_KlasseHinzufuegen();    
+			$GUI->Layereditor_KlasseHinzufuegen();
+			$GUI->Layereditor();
 	  } break;
 
 	  case 'Layereditor_Als neuen Layer eintragen' : {

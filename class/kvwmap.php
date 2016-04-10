@@ -6297,7 +6297,6 @@ class GUI {
     $attrib['layer_id'] = $this->formvars['selected_layer_id'];
     $attrib['order'] = 1;
     $mapDB->new_Class($attrib);
-    $this->Layereditor();
   }
 	
   function LayerAnlegen(){
