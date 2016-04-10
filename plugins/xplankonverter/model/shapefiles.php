@@ -8,7 +8,7 @@ class ShapeFile extends PgObject {
   function ShapeFile($gui, $schema, $tableName) {
     $this->PgObject($gui, $schema, $tableName);
     $this->importer = new data_import_export();
-    $this->debug = true;
+    $this->debug = false;
   }
 
   function dataSchemaName() {

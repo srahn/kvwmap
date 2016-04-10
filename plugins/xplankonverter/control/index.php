@@ -137,12 +137,10 @@ switch($this->go){
 
               # load into database table
               $created_tables = $shapeFile->loadIntoDataTable();
-              echo '<p>created_tables: ';
-              var_dump($created_tables);
+
               # Set datatype for shapefile
               $shapeFile->set('datatype', $created_tables[0]['datatype']);
               $shapeFile->update();
-
 
               # create layer
               $this->formvars['Name'] = $shapeFile->get('filename');
@@ -172,30 +170,23 @@ switch($this->go){
               $this->formvars['selstellen'] = '1, ' . $this->konvertierung->get('stelle_id') . ', 1, ' . $this->konvertierung->get('stelle_id');
               $this->LayerAnlegen();
 
+              # Assign layer_id to shape file record
               $shapeFile->set('layer_id', $this->formvars['selected_layer_id']);
               $shapeFile->update();
 
+              # Ordne layer zur Stelle
               $this->Stellenzuweisung(
                 array($shapeFile->get('layer_id')),
                 array($this->konvertierung->get('stelle_id'))
               );
 
+              # Füge eine Klasse zum neuen Layer hinzu.
+              $this->formvars['class_name'] = 'alle';
+              $this->formvars['class_id'] = $this->Layereditor_KlasseHinzufuegen();
 
-/*              # create layer if not exists
-              $layer = new LAYER($this->database);
-              $layer->find_where("`Gruppe` = " . $layerGroup . " AND `Name` = " . $shapeFile['filename']);
-              if (empty($layer->get('id'))) {
-                $layer->create(
-                  array(
-                   'Name' => $shapeFile->get('filename'),
-                   'Datentyp' => 5,
-                   'Gruppe' => $konvertieriung->getLayerGroupId(),
-                   'path' => 'SELECT * FROM ' . $shapeFile->get('dataTableName'),
-                   'data' => 'the_geom from (Select * FROM ' . $shapeFile->get('dataTableName') . ') USING 25833'
-                  )
-                );
-              }
-*/
+              # Füge einen Style zur Klasse hinzu
+              $this->add_style();
+
             }
           }
         } # end of upload files

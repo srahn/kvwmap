@@ -40,7 +40,7 @@ class PgObject {
     $this->tableName = $tableName;
     $this->qualifiedTableName = $schema . '.' . $tableName;
     $this->data = array();
-    $this->debug = true;
+    $this->debug = false;
   }
 
   function find_by($attribute, $value) {
