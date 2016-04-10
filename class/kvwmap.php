@@ -6385,18 +6385,13 @@ class GUI {
 				showAlert('Keine connection angegeben.');
 			}
 		}
-		
+
     # Stellenzuweisung
-    $stellen = explode(', ',$this->formvars['selstellen']);
-    for($i = 0; $i < count($stellen); $i++){
-      $stelle = new stelle($stellen[$i], $this->database);
-      $stelle->addLayer(array($this->formvars['selected_layer_id']), 0);
-      $users = $stelle->getUser();
-      for($j = 0; $j < count($users['ID']); $j++){
-        $this->user->rolle->setGroups($users['ID'][$j], array($stellen[$i]), array($this->formvars['selected_layer_id']), 0); # Hinzufügen der Layergruppen der selektierten Layer zur Rolle
-        $this->user->rolle->setLayer($users['ID'][$j], array($stellen[$i]), 0); # Hinzufügen der Layer zur Rolle
-      }
-    }
+		$stellen = $this->Stellenzuweisung(
+      array($this->formvars['selected_layer_id']),
+      explode(', ', $this->formvars['selstellen'])
+    );
+
     # Löschen der in der Selectbox entfernten Stellen
       $layerstellen = $mapDB->get_stellen_from_layer($this->formvars['selected_layer_id']);
       for($i = 0; $i < count($layerstellen['ID']); $i++){
@@ -6449,6 +6444,25 @@ class GUI {
       $mapDB->update_Class($attrib);
     }
     $this->Layereditor();
+  }
+
+  /*
+  * Weist Layer Stellen zu
+  * @params array Array von layer_ids, die den Stellen zugewiesen werden sollen.
+  * @params array Array von Stellen, denen die Layer zugewiesen werden sollen.
+  * @return void
+  */
+  function Stellenzuweisung($layer_ids, $stellen_ids) {
+    for($i = 0; $i < count($stellen_ids); $i++) {
+      $stelle = new stelle($stellen_ids[$i], $this->database);
+      $stelle->addLayer($layer_ids, 0);
+      $users = $stelle->getUser();
+      for($j = 0; $j < count($users['ID']); $j++){
+        $this->user->rolle->setGroups($users['ID'][$j], array($stellen_ids[$i]), $layer_ids, 0); # Hinzufügen der Layergruppen der selektierten Layer zur Rolle
+        $this->user->rolle->setLayer($users['ID'][$j], array($stellen_ids[$i]), 0); # Hinzufügen der Layer zur Rolle
+      }
+    }
+    return $stellen_ids;
   }
 
   function LayerLoeschen(){
