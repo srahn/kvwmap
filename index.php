@@ -313,6 +313,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  # neuen Style hinzufügen
 	  case 'add_style' : {
 		$GUI->add_style();
+		$GUI->get_styles();
 	  } break;
 	  
 	  # Style in der Drawingorder nach oben verschieben

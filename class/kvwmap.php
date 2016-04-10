@@ -2611,15 +2611,34 @@ class GUI {
   function add_style(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $style = array();
-    $style['color'] = '0 0 0';
-    $style['size'] = 1;
-    $style['maxsize'] = 1;
+    switch ($this->formvars['Datentyp']) {
+      case 0 : {
+        $style['symbolname'] = 'circle';
+        $style['size'] = 6;
+        $style['maxsize'] = 8;
+        $style['color'] = '255 255 255';
+        $style['outlinecolor'] = '0 0 0';
+      } break;
+      case 1 : {
+        $style['color'] = '0 0 0';
+        $style['width'] = '2';
+      } break;
+      case 2 : {
+        $style['color'] = '255 255 255';
+        $style['outlinecolor'] = '0 0 0';
+      } break;
+      default : {
+        $style['size'] = 2;
+        $style['maxsize'] = 2;
+        $style['color'] = '0 0 0';
+      }
+    }
     if (MAPSERVERVERSION > '500') {
     	$style['angle'] = 360;
     }
+    var_dump($style);
     $new_style_id = $mapDB->new_Style($style);
     $mapDB->addStyle2Class($this->formvars['class_id'], $new_style_id, NULL);
-    $this->get_styles();
   }
 
   function delete_style(){
@@ -6297,7 +6316,7 @@ class GUI {
     $attrib['name'] = $this->formvars['class_name'];
     $attrib['layer_id'] = $this->formvars['selected_layer_id'];
     $attrib['order'] = 1;
-    $mapDB->new_Class($attrib);
+    return $mapDB->new_Class($attrib);
   }
 	
   function LayerAnlegen(){
