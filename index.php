@@ -1132,27 +1132,28 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  } break;
 
 	  case 'Layereditor' : {
-			$GUI->checkCaseAllowed('Layer_Anzeigen');
+			$GUI->checkCaseAllowed('Layereditor');
 			$GUI->Layereditor();
 	  } break;
 
 	  case 'Layereditor_Klasse_Löschen' : {
-			$GUI->checkCaseAllowed('Layer_Anzeigen');
+			$GUI->checkCaseAllowed('Layereditor');
 			$GUI->Layereditor_KlasseLoeschen();
 	  } break;
 
 	  case 'Layereditor_Klasse_Hinzufügen' : {
-			$GUI->checkCaseAllowed('Layer_Anzeigen');
+			$GUI->checkCaseAllowed('Layereditor');
 			$GUI->Layereditor_KlasseHinzufuegen();    
 	  } break;
 
 	  case 'Layereditor_Als neuen Layer eintragen' : {
-			$GUI->checkCaseAllowed('Layer_Anzeigen');
+			$GUI->checkCaseAllowed('Layereditor');
 			$GUI->LayerAnlegen();
+			$this->Layereditor();
 	  } break;
 
 	  case 'Layereditor_Ändern' : {
-			$GUI->checkCaseAllowed('Layer_Anzeigen');
+			$GUI->checkCaseAllowed('Layereditor');
 			$GUI->LayerAendern();
 	  } break;
 

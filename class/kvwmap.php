@@ -6355,7 +6355,6 @@ class GUI {
 				}
 			}
 		}
-    $this->Layereditor();
   }
 
   function LayerAendern(){
