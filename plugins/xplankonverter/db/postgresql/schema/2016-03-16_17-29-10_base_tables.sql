@@ -11,6 +11,7 @@ CREATE TABLE xplankonverter.konvertierungen
   beschreibung text,
   status xplankonverter.enum_konvertierungsstatus NOT NULL DEFAULT 'erstellt',
   stelle_id integer,
+  layer_group_id integer,
   CONSTRAINT konvertierungen_id_pkey PRIMARY KEY (id)
 ) WITH ( OIDS=TRUE );
 COMMENT ON COLUMN xplankonverter.konvertierungen.bezeichnung IS 'Bezeichnung der Konvertierung. (Freitext)';
@@ -20,7 +21,7 @@ COMMENT ON COLUMN xplankonverter.konvertierungen.stelle_id IS 'Die Id der Stelle
 
 CREATE TABLE xplankonverter.regeln
 (
-  id integer,
+  id serial NOT NULL,
   class_name character varying,
   factory xplankonverter.enum_factory NOT NULL DEFAULT 'sql',
   sql text,
@@ -45,3 +46,19 @@ COMMENT ON COLUMN xplankonverter.regeln.epsg_code IS 'EPSG-Code in dem die Geome
 COMMENT ON COLUMN xplankonverter.regeln.konvertierung_id IS 'Id der Konvertierung zu dem diese Regel gehört.';
 COMMENT ON COLUMN xplankonverter.regeln.stelle_id IS 'Id der Stelle in der die Konvertierungsregel erstellt und angewendet werden kann.';
 COMMIT;
+
+CREATE TABLE xplankonverter.shapefiles
+(
+  id serial NOT NULL,
+  filename character varying,
+  konvertierung_id integer,
+  stelle_id integer,
+  layer_id integer,
+  CONSTRAINT shapes_pkey PRIMARY KEY (id)
+)
+WITH ( OIDS=TRUE );
+COMMENT ON COLUMN xplankonverter.shapefiles.id IS 'Id der Shape Datei.';
+COMMENT ON COLUMN xplankonverter.shapefiles.filename IS 'Dateiname der Shape Datei.';
+COMMENT ON COLUMN xplankonverter.shapefiles.konvertierung_id IS 'Id der Konvertierung zu der die Shape Datei gehört.';
+COMMENT ON COLUMN xplankonverter.shapefiles.stelle_id IS 'Id der Stelle in kvwmap zu der die Shape Datei gehört.';
+COMMENT ON COLUMN xplankonverter.shapefiles.layer_id IS 'Id des Layers in den die Shape Datei eingelesen wurde.';

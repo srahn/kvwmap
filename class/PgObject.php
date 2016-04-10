@@ -31,10 +31,10 @@
 
 class PgObject {
   
-  function PgObject($pgDatabase, $schema, $tableName) {
+  function PgObject($database, $schema, $tableName) {
     global $debug;
     $this->debug=$debug;
-    $this->pgDatabase = $pgDatabase;
+    $this->database = $database;
     $this->schema = $schema;
     $this->tableName = $tableName;
     $this->qualifiedTableName = $schema . '.' . $tableName;
@@ -42,17 +42,17 @@ class PgObject {
     $this->debug = false;
   }
 
-  function find_by_id($id) {
+  function find_by($attribute, $value) {
     $sql = "
       SELECT
         *
       FROM
-        " . $this->qualifiedTableName . "
+        \"" . $this->schema . "\".\"" . $this->tableName . "\"
       WHERE
-        id = " . $id . "
+        \"" . $attribute . "\" = '" . $value . "'
     ";
-    #echo '<p>sql: ' . $sql;
-    $query = pg_query($this->pgDatabase->dbConn, $sql);
+    $this->debug('<p>sql: ' . $sql);
+    $query = pg_query($this->database->dbConn, $sql);
     $this->data = pg_fetch_assoc($query);
   }
 
@@ -62,6 +62,14 @@ class PgObject {
 
   function getValues() {
     return array_values($this->data);
+  }
+
+  function getKVP() {
+    $kvp = array();
+    foreach($this->data AS $key => $value) {
+      $kvp[] = "\"" . $key . "\" = '" . $value . "'";
+    }
+    return $kvp;
   }
 
   function get($attribute) {
@@ -84,10 +92,23 @@ class PgObject {
       RETURNING id
     ";
     #echo '<p>sql: ' . $sql;
-    $query = pg_query($this->pgDatabase->dbConn, $sql);
+    $query = pg_query($this->database->dbConn, $sql);
     $row = pg_fetch_assoc($query);
     $this->set('id', $row['id']);
     return $this->get('id');
+  }
+
+  function update() {
+    $sql = "
+      UPDATE
+        \"" . $this->schema . "\".\"" . $this->tableName . "\"
+      SET
+        " . implode(', ', $this->getKVP()) . "
+      WHERE
+        id = " . $this->get('id') . "
+    ";
+    $this->debug('<p>sql: ' . $sql);
+    $query = pg_query($this->database->dbConn, $sql);
   }
 
   function delete() {
@@ -99,7 +120,7 @@ class PgObject {
         id = " . $this->get('id') . "
     ";
     #echo '<p>sql: ' . $sql;
-    $result = pg_query($this->pgDatabase->dbConn, $sql);
+    $result = pg_query($this->database->dbConn, $sql);
 
     # this must have been happen when GLE is used
 /*  

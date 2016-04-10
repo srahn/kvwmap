@@ -5,9 +5,8 @@
 
 class ShapeFile extends PgObject {
 
-  function ShapeFile($myDatabase, $pgDatabase, $stelle, $user, $schema, $tableName, $epsg) {
-    $this->PgObject($pgDatabase, $schema, $tableName, $epsg);
-    $this->myDatabase = $myDatabase;
+  function ShapeFile($database, $schema, $tableName, $epsg) {
+    $this->PgObject($database, $schema, $tableName, $epsg);
     $this->stelle = $stelle;
     $this->user = $user;
     $this->epsg = $epsg;
@@ -20,7 +19,7 @@ class ShapeFile extends PgObject {
   }
 
   function qualifiedDataTableName() {
-    return '"' . $this->dataSchemaName() . '"."' . $this->get('filename') . '"';
+    return '"' . $this->dataSchemaName() . '"."' . $this->dataTableName() . '"';
   }
 
   function dataTableName() {
@@ -62,7 +61,7 @@ class ShapeFile extends PgObject {
         " . $this->qualifiedDataTableName() . "
     ";
     $this->debug('<p>sql: ' . $sql);
-    $result = pg_query($this->pgDatabase->dbConn, $sql);
+    $result = pg_query($this->database->dbConn, $sql);
     return $result;
   }
 
@@ -73,7 +72,7 @@ class ShapeFile extends PgObject {
     $this->debug('<p>Delete Upload Files');
     $konvertierung_id = $this->get('konvertierung_id');
     if ($this->get('konvertierung_id') == '' or $this->get('fileName') == '')
-      $this->find_by_id($this->get('id'));
+      $this->find_by('id', $this->get('id'));
 
     foreach(array('shp', 'shx', 'dbf', 'sql') AS $extension) {
       $this->debug('<br>' . $this->uploadShapeFileName() . '.' . $extension);
@@ -93,10 +92,7 @@ class ShapeFile extends PgObject {
 
     # load into database table
     $created_tables = $this->loadIntoDataTable();
-
-    # create rollen layer
-    $this->debug('Create layer');
-#    $this->importer->create_layer($this->myDatabase, $this->pgDatabase, $this->stelle, $this->user, $this->dataTableName(), $this->dataSchemaName(), $created_tables[0], $this->epsg);
+    $this->datatype = $created_tables[0]['datatype'];
   }
 
   function createDataTableSchema() {
@@ -105,7 +101,7 @@ class ShapeFile extends PgObject {
       CREATE SCHEMA IF NOT EXISTS " . $this->dataSchemaName() . "
     ";
     $this->debug('<p>sql: ' . $sql);
-    $result = pg_query($this->pgDatabase->dbConn, $sql);
+    $result = pg_query($this->database->dbConn, $sql);
     return $result;
   }
 
@@ -114,7 +110,7 @@ class ShapeFile extends PgObject {
     $this->deleteDataTable();
 
     return $this->importer->load_shp_into_pgsql(
-      $this->pgDatabase,
+      $this->database,
       $this->uploadShapePath(),
       $this->get('filename'),
       '25832',
