@@ -2636,7 +2636,6 @@ class GUI {
     if (MAPSERVERVERSION > '500') {
     	$style['angle'] = 360;
     }
-    var_dump($style);
     $new_style_id = $mapDB->new_Style($style);
     $mapDB->addStyle2Class($this->formvars['class_id'], $new_style_id, NULL);
   }
