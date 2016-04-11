@@ -3,9 +3,11 @@
 ?>
 <script language="javascript" type="text/javascript">
 	function konvertierungFunctionsFormatter(value, row) {
-    output = '<a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=8&operator_konvertierung_id==&value_konvertierung_id=' + value + '"><i class="fa fa-pencil"></i></a>&nbsp;&nbsp;';
-    output += '<a href="index.php?go=xplankonverter_shapefiles_index&konvertierung_id=' + value + '"><i class="fa fa-play"></i></a>&nbsp;&nbsp;';
-    output += '<a href=""><i class="fa fa-trash"></i></a>&nbsp;';
+    output =  '<a title="Konvertierung bearbeiten" href="index.php?go=Layer-Suche_Suchen&selected_layer_id=8&operator_konvertierung_id==&value_konvertierung_id=' + value + '"><i class="fa fa-pencil"></i></a>&nbsp;&nbsp;';
+    output += '<a title="Shapefiles bearbeiten" href="index.php?go=xplankonverter_shapefiles_index&konvertierung_id=' + value + '"><i class="fa fa-upload"></i></a>&nbsp;&nbsp;';
+    output += '<a title="Konvertierung validieren" href="index.php?go=xplankonverter_konvertierungen_validate&konvertierung_id=' + value + '"><i class="fa fa-check-square-o"></i></a>&nbsp;';
+    output += '<a title="Konvertierung ausf&uuml;hren" href="index.php?go=xplankonverter_konvertierungen_execute&konvertierung_id=' + value + '"><i class="fa fa-play"></i></a>&nbsp;';
+    output += '<a title="Konvertierung l&ouml;schen" href=""><i class="fa fa-trash"></i></a>&nbsp;';
     return output;
   }
 </script>
