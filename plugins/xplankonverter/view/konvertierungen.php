@@ -9,6 +9,13 @@
     return output;
   }
 </script>
+<!--ul class='nav nav-tabs'>
+  <li class='<?php echo ($config['active']==='step1' ? 'active' : '');?>'><a data-toggle='tab'>Schritt 1</a></li>
+  <li class='<?php echo ($config['step2']['disabled'] ? 'disabled' : ($config['active']==='step2' ? 'active' : ''));?>'><a data-toggle='tab'>Schritt 2</a></li>
+  <li class='<?php echo ($config['step3']['disabled'] ? 'disabled' : ($config['active']==='step3' ? 'active' : ''));?>'><a data-toggle='tab'>Schritt 3</a></li>
+  <li class='<?php echo ($config['step4']['disabled'] ? 'disabled' : ($config['active']==='step4' ? 'active' : ''));?>'><a data-toggle='tab'>Schritt 4</a></li>
+  <li><a data-toggle='tab' href='#map'>Karte</a></li>
+</ul//-->
 <h2>Konvertierungen</h2>
 <table
   id="konvertierungen_table"
