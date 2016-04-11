@@ -269,25 +269,26 @@ switch($this->go){
       $this->main = 'Hinweis.php';
     }
     else {
-      $this->konvertierung = new Konvertierung($this->pgdatabase, 'xplankonverter', 'konvertierungen');
-      $this->konvertierung->find_by_id($this->formvars['konvertierung_id']);
+      $this->konvertierung = new Konvertierung($this, 'xplankonverter', 'konvertierungen');
+      $this->konvertierung->find_by('id', $this->formvars['konvertierung_id']);
       if (isInStelleAllowed($this->Stelle->id, $this->konvertierung->get('stelle_id'))) {
         if ($this->konvertierung->get('status') == Konvertierung::$STATUS[1]) {
           // set status
           $this->konvertierung->set('status', Konvertierung::$STATUS[2]);
           $this->konvertierung->update();
-          $this->validator = new Validator($this->pgdatabase, PG_CONNECTION);
-          $this->validator->validateKonvertierung(
+          $validator = new Validator();
+          $validator->validateKonvertierung(
               $this->konvertierung,
               function() { // Validation successful
-                echo 'SUCCESS';
+                $this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
               },
               function($error) { // Validation failed
-                echo $error;
+                $this->Hinweis = 'Bei der Validierung ist ein Fehler aufgetreten: '.$error;
+                $this->main = 'Hinweis.php';
               }
           );
-        }
-        $this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
+        } else
+          $this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
       }
     }
     $this->output();
@@ -299,24 +300,21 @@ switch($this->go){
       $this->main = 'Hinweis.php';
     }
     else {
-      $this->konvertierung = new Konvertierung($this->pgdatabase, 'xplankonverter', 'konvertierungen');
-      $this->konvertierung->find_by_id($this->formvars['konvertierung_id']);
+      $this->konvertierung = new Konvertierung($this, 'xplankonverter', 'konvertierungen');
+      $this->konvertierung->find_by('id', $this->formvars['konvertierung_id']);
       if (isInStelleAllowed($this->Stelle->id, $this->konvertierung->get('stelle_id'))) {
-        if ($this->konvertierung->get('status') != 'validiert') {
-          $this->validator = new Validator($this->pgdatabase, PG_CONNECTION);
-          $this->validator->validateKonvertierung(
-              $this->konvertierung,
-              function() { // Validation successful
-                echo 'SUCCESS';
-              },
-              function($error) { // Validation failed
-                echo $error;
-              }
-          );
+        if ($this->konvertierung->get('status') == 'validiert') {
+          // Status setzen
+          $this->konvertierung->set('status', Konvertierung::$STATUS[5]);
+          $this->konvertierung->update();
+          // Seite updaten
+          $this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
+          // Konvertierung starten
+          // XPlan-GML ausgeben
         } else {
-          echo 'Jetz Konvertieren';
+          $this->Hinweis = 'Die ausgewählte Konvertierung muss zuerst validiert werden.';
+          $this->main = 'Hinweis.php';
         }
-        $this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
       }
     }
     $this->output();

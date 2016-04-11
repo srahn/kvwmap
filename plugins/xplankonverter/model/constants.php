@@ -1,21 +1,21 @@
 <?php
 	define('PG_DB_HOST', '85.214.126.13');
 	define('PG_DB_PORT', '5432');
-	define('PG_DATABASE', 'rplaene');
+	define('PG_DATABASE', 'kvwmapsp');
 	define('PG_USER_NAME', 'pgadmin');
 	define('PG_PASSWORD', 'PaGeMin2');
-	
+
 	define('PG_CONNECTION_STRING',
 	  ' host='     . PG_DB_HOST .
-	  ' port='     . PG_DB_PORT . 
+	  ' port='     . PG_DB_PORT .
 	  ' user='     . PG_USER_NAME .
 	  ' password=' . PG_PASSWORD .
 	  ' dbname='   . PG_DATABASE);
 	define('PG_CONNECTION', pg_connect(PG_CONNECTION_STRING));
-	
+
 	define('CONTENT_SCHEME', 'gml_classes');
 	define('STRUCTURE_SCHEME', 'xplan_uml');
-	
+
 	$packages[] = 'Basisklassen';
 	#  $packages[] = 'Bebauungsplan';
 	#  $packages[] = 'BP_Aufschuettung_Abgrabung_Bodenschaetze';
@@ -23,7 +23,7 @@
 	#  $packages[] = 'BP_Bebauung';
 	#  $packages[] = 'BP_Erhaltungssatzung_und_Denkmalschutz';
 	#  $packages[] = 'BP_Gemeinbedarf_Spiel_und_Sportanlagen';
-	#  $packages[] = 'BP_Landwirtschaft, Wald- und Grünflächen';
+	#  $packages[] = 'BP_Landwirtschaft, Wald- und Grï¿½nflï¿½chen';
 	#  $packages[] = 'BP_Naturschutz_Landschaftsbild_Naturhaushalt';
 	#  $packages[] = 'BP_Raster';
 	#  $packages[] = 'BP_Sonstiges';

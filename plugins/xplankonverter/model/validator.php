@@ -31,19 +31,11 @@
 
 class Validator {
 
-  function Validator($structDb, $contentDbConn) {
-    global $debug;
-    $this->debug=$debug;
-    $this->structDb = $structDb;
-    $this->contentDbConn = $contentDbConn;
-  }
-
-  function say_hello($msg){
-    $hallo = 'Hallo XPlan: <br>' . $msg;
-    return $hallo;
+  function Validator() {
   }
 
   function doValidate($konvertierung) {
+    // validate here
     if (true)
       return array('success' => 'OK');
     else
@@ -55,11 +47,13 @@ class Validator {
     if ($result['success'] == 'OK') {
       // status setzen
       $konvertierung->set('status', Konvertierung::$STATUS[4]);
+      $konvertierung->update();
       // success callback ausführen
      $success();
     } else {
       // status setzen
       $konvertierung->set('status', Konvertierung::$STATUS[3]);
+      $konvertierung->update();
       // error callback ausfuehren
      $failure($result['error']);
     }
