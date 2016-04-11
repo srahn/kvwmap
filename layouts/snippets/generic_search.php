@@ -266,7 +266,7 @@ function add_searchmask(layer_id){
   	</td>
   </tr>
   <tr>
-    <td id="searches1"><? if($this->formvars['selected_layer_id'] != ''){ ?><a href="javascript:showsearches();"><? echo $strSearches; ?></a><? } ?>&nbsp;<? echo '('.count($this->searchset).')'; ?></td>
+    <td id="searches1"><? if($this->formvars['selected_layer_id'] != ''){ ?><a href="javascript:showsearches();"><? echo $strSearches; ?></a><? echo ' ('.count($this->searchset).')';} ?>&nbsp;</td>
   </tr>
   <tr id="searches2" style="display:none"> 
     <td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3">
