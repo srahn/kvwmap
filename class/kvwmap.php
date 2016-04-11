@@ -1948,8 +1948,7 @@ class GUI {
   			$result[] = $data;
   		}
     }
-		if (count($result) == 1) $result = $result[0];
-		if (count($result) == 1) $result = $result[0];
+#		if (count($result) == 1) $result = $result[0];
 		return $result;
 	}
 
@@ -2612,15 +2611,34 @@ class GUI {
   function add_style(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $style = array();
-    $style['color'] = '0 0 0';
-    $style['size'] = 1;
-    $style['maxsize'] = 1;
+    switch ($this->formvars['Datentyp']) {
+      case 0 : {
+        $style['symbolname'] = 'circle';
+        $style['size'] = 6;
+        $style['maxsize'] = 8;
+        $style['color'] = '255 255 255';
+        $style['outlinecolor'] = '0 0 0';
+      } break;
+      case 1 : {
+        $style['color'] = '0 0 0';
+        $style['width'] = '2';
+      } break;
+      case 2 : {
+        $style['color'] = '255 255 255';
+        $style['outlinecolor'] = '0 0 0';
+      } break;
+      default : {
+        $style['size'] = 2;
+        $style['maxsize'] = 2;
+        $style['color'] = '0 0 0';
+      }
+    }
     if (MAPSERVERVERSION > '500') {
     	$style['angle'] = 360;
     }
+    var_dump($style);
     $new_style_id = $mapDB->new_Style($style);
     $mapDB->addStyle2Class($this->formvars['class_id'], $new_style_id, NULL);
-    $this->get_styles();
   }
 
   function delete_style(){
@@ -2810,7 +2828,7 @@ class GUI {
     # 4. trägt die im Formular übersendeten Map-Parameter in der Stelle und Rolle ein
     # zu 1:
     $this->LayerLoeschen(0);
-
+    $this->LayerAnzeigen();
   }
 
   function showStyles() {
@@ -6295,10 +6313,10 @@ class GUI {
 
   function Layereditor_KlasseHinzufuegen(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+    $attrib['name'] = $this->formvars['class_name'];
     $attrib['layer_id'] = $this->formvars['selected_layer_id'];
     $attrib['order'] = 1;
-    $mapDB->new_Class($attrib);
-    $this->Layereditor();
+    return $mapDB->new_Class($attrib);
   }
 	
   function LayerAnlegen(){
@@ -6356,7 +6374,6 @@ class GUI {
 				}
 			}
 		}
-    $this->Layereditor();
   }
 
   function LayerAendern(){
@@ -6387,18 +6404,13 @@ class GUI {
 				showAlert('Keine connection angegeben.');
 			}
 		}
-		
+
     # Stellenzuweisung
-    $stellen = explode(', ',$this->formvars['selstellen']);
-    for($i = 0; $i < count($stellen); $i++){
-      $stelle = new stelle($stellen[$i], $this->database);
-      $stelle->addLayer(array($this->formvars['selected_layer_id']), 0);
-      $users = $stelle->getUser();
-      for($j = 0; $j < count($users['ID']); $j++){
-        $this->user->rolle->setGroups($users['ID'][$j], array($stellen[$i]), array($this->formvars['selected_layer_id']), 0); # Hinzufügen der Layergruppen der selektierten Layer zur Rolle
-        $this->user->rolle->setLayer($users['ID'][$j], array($stellen[$i]), 0); # Hinzufügen der Layer zur Rolle
-      }
-    }
+		$stellen = $this->Stellenzuweisung(
+      array($this->formvars['selected_layer_id']),
+      explode(', ', $this->formvars['selstellen'])
+    );
+
     # Löschen der in der Selectbox entfernten Stellen
       $layerstellen = $mapDB->get_stellen_from_layer($this->formvars['selected_layer_id']);
       for($i = 0; $i < count($layerstellen['ID']); $i++){
@@ -6453,6 +6465,25 @@ class GUI {
     $this->Layereditor();
   }
 
+  /*
+  * Weist Layer Stellen zu
+  * @params array Array von layer_ids, die den Stellen zugewiesen werden sollen.
+  * @params array Array von Stellen, denen die Layer zugewiesen werden sollen.
+  * @return void
+  */
+  function Stellenzuweisung($layer_ids, $stellen_ids) {
+    for($i = 0; $i < count($stellen_ids); $i++) {
+      $stelle = new stelle($stellen_ids[$i], $this->database);
+      $stelle->addLayer($layer_ids, 0);
+      $users = $stelle->getUser();
+      for($j = 0; $j < count($users['ID']); $j++){
+        $this->user->rolle->setGroups($users['ID'][$j], array($stellen_ids[$i]), $layer_ids, 0); # Hinzufügen der Layergruppen der selektierten Layer zur Rolle
+        $this->user->rolle->setLayer($users['ID'][$j], array($stellen_ids[$i]), 0); # Hinzufügen der Layer zur Rolle
+      }
+    }
+    return $stellen_ids;
+  }
+
   function LayerLoeschen(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $mapDB->deleteLayer($this->formvars['selected_layer_id']);
@@ -6471,7 +6502,6 @@ class GUI {
     $stelle[] = $this->Stelle->id;
     $this->Stelle->deleteLayer($layer, $this->pgdatabase);
     $this->user->rolle->deleteLayer('', $stelle, $layer);
-    $this->LayerAnzeigen();
   }
 
   function LayerAnzeigen() {
@@ -10587,8 +10617,9 @@ class GUI {
 															(($timestamp >= $beginnt AND $timestamp < $next_beginnt) OR				# timestamp liegt im Intervall
 															$v == $count)																											# letzte Version (aktuell)
 														){$selected = true; $output.= 'selected';}
-														if($v < $count)$output.= ' value="'.$version_beginnt.'">';
-														else $output.= ' value="">';
+														if($v < $count)$output.= ' value="'.$version_beginnt.'"';
+														else $output.= ' value=""';
+														$output.= ' title="'.implode(', ', $version['table']).'">';
 														$output.= $version_beginnt.' '.implode(' ', $version['anlass']).'</option>';
 														$v++;
 													}

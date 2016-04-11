@@ -11,6 +11,7 @@ CREATE TABLE xplankonverter.konvertierungen
   beschreibung text,
   status xplankonverter.enum_konvertierungsstatus NOT NULL DEFAULT 'erstellt',
   stelle_id integer,
+  layer_group_id integer,
   CONSTRAINT konvertierungen_id_pkey PRIMARY KEY (id)
 ) WITH ( OIDS=TRUE );
 COMMENT ON COLUMN xplankonverter.konvertierungen.bezeichnung IS 'Bezeichnung der Konvertierung. (Freitext)';
@@ -20,7 +21,7 @@ COMMENT ON COLUMN xplankonverter.konvertierungen.stelle_id IS 'Die Id der Stelle
 
 CREATE TABLE xplankonverter.regeln
 (
-  id integer,
+  id serial NOT NULL,
   class_name character varying,
   factory xplankonverter.enum_factory NOT NULL DEFAULT 'sql',
   sql text,
@@ -45,3 +46,66 @@ COMMENT ON COLUMN xplankonverter.regeln.epsg_code IS 'EPSG-Code in dem die Geome
 COMMENT ON COLUMN xplankonverter.regeln.konvertierung_id IS 'Id der Konvertierung zu dem diese Regel gehört.';
 COMMENT ON COLUMN xplankonverter.regeln.stelle_id IS 'Id der Stelle in der die Konvertierungsregel erstellt und angewendet werden kann.';
 COMMIT;
+
+CREATE TABLE xplankonverter.shapefiles
+(
+  id serial NOT NULL,
+  filename character varying,
+  konvertierung_id integer,
+  stelle_id integer,
+  layer_id integer,
+  epsg_code integer,
+  datatype smallint,
+  CONSTRAINT shapes_pkey PRIMARY KEY (id)
+)
+WITH ( OIDS=TRUE );
+COMMENT ON COLUMN xplankonverter.shapefiles.id IS 'Id der Shape Datei.';
+COMMENT ON COLUMN xplankonverter.shapefiles.filename IS 'Dateiname der Shape Datei.';
+COMMENT ON COLUMN xplankonverter.shapefiles.konvertierung_id IS 'Id der Konvertierung zu der die Shape Datei gehört.';
+COMMENT ON COLUMN xplankonverter.shapefiles.stelle_id IS 'Id der Stelle in kvwmap zu der die Shape Datei gehört.';
+COMMENT ON COLUMN xplankonverter.shapefiles.layer_id IS 'Id des Layers in den die Shape Datei eingelesen wurde.';
+
+CREATE TABLE gml_classes.xp_plan (
+  gml_id uuid NOT NULL DEFAULT uuid_generate_v1mc(),
+  aendert uuid, -- DataType XP_VerbundenerPlan
+  beschreibung text,
+  bezugshoehe text,
+  erstellungsmassstab text,
+  genehmigungsdatum text,
+  hatgenerattribut uuid, -- DataType XP_GenerAttribut
+  informell uuid, -- DataType XP_ExterneReferenz
+  internalid text,
+  kommentar text,
+  name text,
+  nummer text,
+  raeumlichergeltungsbereich geometry, -- Union XP_Flaechengeometrie
+  rechtsverbindlich uuid, -- DataType XP_ExterneReferenz
+  refbegruendung uuid, -- DataType XP_ExterneReferenz
+  refbeschreibung uuid, -- DataType XP_ExterneReferenz
+  refexternalcodelist uuid, -- DataType XP_ExterneReferenz
+  reflegende uuid, -- DataType XP_ExterneReferenz
+  refplangrundlage uuid, -- DataType XP_ExterneReferenz
+  refrechtsplan uuid, -- DataType XP_ExterneReferenz
+  technherstelldatum text,
+  untergangsdatum text,
+  verfahrensmerkmale uuid, -- DataType XP_VerfahrensMerkmal
+  wurdegeaendertvon uuid, -- DataType XP_VerbundenerPlan
+  xplangmlversion text DEFAULT '4.1'::text,
+  CONSTRAINT xp_plan_pkey PRIMARY KEY (gml_id)
+)
+WITH ( OIDS=FALSE);
+COMMENT ON TABLE gml_classes.xp_plan IS 'Tabelle XP_Plan';
+COMMENT ON COLUMN gml_classes.xp_plan.aendert IS 'DataType XP_VerbundenerPlan';
+COMMENT ON COLUMN gml_classes.xp_plan.hatgenerattribut IS 'DataType XP_GenerAttribut';
+COMMENT ON COLUMN gml_classes.xp_plan.informell IS 'DataType XP_ExterneReferenz';
+COMMENT ON COLUMN gml_classes.xp_plan.raeumlichergeltungsbereich IS 'Union XP_Flaechengeometrie';
+COMMENT ON COLUMN gml_classes.xp_plan.rechtsverbindlich IS 'DataType XP_ExterneReferenz';
+COMMENT ON COLUMN gml_classes.xp_plan.refbegruendung IS 'DataType XP_ExterneReferenz';
+COMMENT ON COLUMN gml_classes.xp_plan.refbeschreibung IS 'DataType XP_ExterneReferenz';
+COMMENT ON COLUMN gml_classes.xp_plan.refexternalcodelist IS 'DataType XP_ExterneReferenz';
+COMMENT ON COLUMN gml_classes.xp_plan.reflegende IS 'DataType XP_ExterneReferenz';
+COMMENT ON COLUMN gml_classes.xp_plan.refplangrundlage IS 'DataType XP_ExterneReferenz';
+COMMENT ON COLUMN gml_classes.xp_plan.refrechtsplan IS 'DataType XP_ExterneReferenz';
+COMMENT ON COLUMN gml_classes.xp_plan.verfahrensmerkmale IS 'DataType XP_VerfahrensMerkmal';
+COMMENT ON COLUMN gml_classes.xp_plan.wurdegeaendertvon IS 'DataType XP_VerbundenerPlan';
+

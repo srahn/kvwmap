@@ -60,9 +60,14 @@ class pgdatabase {
   function open() {
   	if($this->port == '') $this->port = 5432;
     #$this->debug->write("<br>Datenbankverbindung öffnen: Datenbank: ".$this->dbName." User: ".$this->user,4);
-		$connect_string = 'dbname='.$this->dbName.' port='.$this->port.' user='.$this->user.' password='.$this->passwd;
-		if($this->host != 'localhost' AND $this->host != '127.0.0.1')$connect_string .= ' host='.$this->host;		// das beschleunigt den Connect extrem
-    $this->dbConn=pg_connect($connect_string);
+		$this->connect_string = '' .
+      'dbname='. $this->dbName .
+      ' port=' . $this->port .
+      ' user=' . $this->user .
+      ' password=' . $this->passwd;
+		if($this->host != 'localhost' AND $this->host != '127.0.0.1')
+      $this->connect_string .= ' host=' . $this->host; // das beschleunigt den Connect extrem
+    $this->dbConn = pg_connect($this->connect_string);
     $this->debug->write("Datenbank mit Connection_ID: ".$this->dbConn." geöffnet.",4);
     # $this->version = pg_version($this->dbConn); geht erst mit PHP 5
     $this->version = POSTGRESVERSION;
@@ -1508,7 +1513,7 @@ class pgdatabase {
   }
 	
 	function getVersionen($table, $gml_ids){
-		$sql = "SELECT beginnt::timestamp, endet::timestamp, bezeichner as anlass FROM ".$table." LEFT JOIN alkis.ax_fortfuehrungsanlaesse ON wert = NULLIF(anlass, '')::integer WHERE gml_id IN ('".implode("','", $gml_ids)."') ORDER BY beginnt";
+		$sql = "SELECT beginnt::timestamp, endet::timestamp, bezeichner as anlass, '".$table."' as table FROM alkis.".$table." LEFT JOIN alkis.ax_fortfuehrungsanlaesse ON wert = NULLIF(anlass, '')::integer WHERE gml_id IN ('".implode("','", $gml_ids)."') ORDER BY beginnt";
 		$queryret=$this->execSQL($sql, 4, 0);
 		while($rs=pg_fetch_assoc($queryret[1])) {
 			$versionen[]=$rs;

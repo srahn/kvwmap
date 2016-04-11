@@ -31,38 +31,69 @@
 
 class PgObject {
   
-  function PgObject($pgDatabase, $schema, $tableName) {
+  function PgObject($gui, $schema, $tableName) {
     global $debug;
     $this->debug=$debug;
-    $this->pgDatabase = $pgDatabase;
+    $this->gui = $gui;
+    $this->database = $gui->pgdatabase;
     $this->schema = $schema;
     $this->tableName = $tableName;
+    $this->qualifiedTableName = $schema . '.' . $tableName;
     $this->data = array();
+    $this->debug = false;
   }
 
-  function find_by_id($id) {
+  function find_by($attribute, $value) {
     $sql = "
       SELECT
         *
       FROM
-        " . $this->qualified_table_name() . "
+        \"" . $this->schema . "\".\"" . $this->tableName . "\"
       WHERE
-        id = " . $id . "
+        \"" . $attribute . "\" = '" . $value . "'
     ";
-    echo '<p>sql: ' . $sql;
-    $query = pg_query($this->pgDatabase->dbConn, $sql);
+    $this->debug('<p>find_by sql: ' . $sql);
+    $query = pg_query($this->database->dbConn, $sql);
     $this->data = pg_fetch_assoc($query);
   }
 
-  function qualified_table_name() {
-    return $this->schema . '.' . $this->tableName;
+  /*
+  * Search for an record in the database
+  * by the given where clause
+  * @ return an object with this record
+  */
+  function find_where($where) {
+    $sql = "
+      SELECT
+        *
+      FROM
+        " . $this->schema . '.' . $this->tableName . "
+      WHERE
+        " . $where . "
+    ";
+    $this->debug('<p>sql: ' . $sql);
+    $query = pg_query($this->database->dbConn, $sql);
+    if (pg_num_rows($query) == 0)
+      $this->data = array();
+    else
+      $this->data = pg_fetch_assoc($query);
+    return $this;
   }
+
   function getAttributes() {
     return array_keys($this->data);
   }
 
   function getValues() {
     return array_values($this->data);
+  }
+
+  function getKVP() {
+    $kvp = array();
+    foreach($this->data AS $key => $value) {
+      $kvp[] = "\"" . $key . "\" = '" . $value . "'";
+    }
+    return $kvp;
   }
 
   function get($attribute) {
@@ -74,9 +105,11 @@ class PgObject {
     return $value;
   }
 
-  function save() {
+  function create($data) {
+    if (!empty($data))
+      $this->data = $data;
     $sql = "
-      INSERT INTO " . $this->qualified_table_name() . "(
+      INSERT INTO " . $this->qualifiedTableName . " (
         " . implode(', ', $this->getAttributes()) . "
       )
       VALUES (
@@ -84,33 +117,42 @@ class PgObject {
       )
       RETURNING id
     ";
-    #echo '<p>sql: ' . $sql;
-    $query = pg_query($this->pgDatabase->dbConn, $sql);
+    $this->debug('<p>Insert into pg table sql: ' . $sql);
+    $query = pg_query($this->database->dbConn, $sql);
     $row = pg_fetch_assoc($query);
     $this->set('id', $row['id']);
     return $this->get('id');
+  }
+
+  function update() {
+    $sql = "
+      UPDATE
+        \"" . $this->schema . "\".\"" . $this->tableName . "\"
+      SET
+        " . implode(', ', $this->getKVP()) . "
+      WHERE
+        id = " . $this->get('id') . "
+    ";
+    $this->debug('<p>Update in pg table sql: ' . $sql);
+    $query = pg_query($this->database->dbConn, $sql);
   }
 
   function delete() {
     $sql = "
       DELETE
       FROM
-        " . $this->qualified_table_name() . "
+        " . $this->qualifiedTableName . "
       WHERE
         id = " . $this->get('id') . "
     ";
-    #echo '<p>sql: ' . $sql;
-    $result = pg_query($this->pgDatabase->dbConn, $sql);
-
-    # this must have been happen when GLE is used
-/*  
-    $oid = $this->get('oid');
-    $GUI->formvars['chosen_layer_id'] = $layer_id;
-    $GUI->formvars['checkbox_names_' . $layer_id] = 'check;shapefiles;shapefiles;' . $oid;
-    $GUI->formvars['check;shapefiles;shapefiles;' . $oid] = 'on';
-    $GUI->layer_Datensaetze_loeschen(false);
-*/
+    $this->debug('<p>Delete in pg table sql: ' . $sql);
+    $result = pg_query($this->database->dbConn, $sql);
     return $result;
+  }
+
+  function debug($msg) {
+    if ($this->debug)
+      echo $msg;
   }
 }
 ?>
