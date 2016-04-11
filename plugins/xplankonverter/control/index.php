@@ -11,62 +11,31 @@ include(PLUGINS . 'xplankonverter/model/xplan.php');
 
 switch($this->go){
 
-  case 'get_comments':
-    $xplan->get_comments($this->formvars);
-    break;
-  case 'get_planzeichen':
-    $xplan->get_planzeichen($this->formvars);
-    break;
-  case 'get_plaene':
-    $xplan->get_plaene($this->formvars);
-    break;
-  case 'get_inspirefeaturetype':
-    $xplan->get_inspirefeaturetype($this->formvars);
-    break;
-  case 'get_inspireenumeration':
-    $xplan->get_inspireenumeration($this->formvars);
-    break;
-  case 'load_xsd':
-    $xplan->load_xsd($this->formvars['file'], $this->formvars['truncate']);
-    break;
-  case 'show_comments':
-    if ($this->formvars['action'] == 'Hinzufügen') {
-      create_comments($this->formvars);
-      show_comments();
-    }
-    break;
-  case 'show_calendar':
-    $xplan->show_calendar();
-    break;
   case 'show_elements':
-    $xplan->show_elements();
-    break;
-  case 'show_hilfe':
-    $xplan->show_hilfe();
-    break;
-  case 'show_ontologie':
-    $xplan->show_ontologie();
-    break;
-  case 'show_inspire':
-    $xplan->show_inspire();
-    break;
-  case 'show_impressium':
-    $xplan->show_impressium();
-    break;
-  case 'show_plaene':
-    $xplan->show_plaene();
-    break;
-  case 'show_planzeichen':
-    $xplan->show_planzeichen();
+    $packages = array();
+    $sql  = "
+      SELECT
+        DISTINCT package
+      FROM
+        xplan.elements
+      ORDER BY
+        package
+    ";
+    $result = pg_query($this->pgdatabase->dbConn, $sql);
+    $this->packages = pg_fetch_all($result);
+    array_unshift($packages, array('package' => 'Alle'));
+    $this->main = PLUGINS . 'xplankonverter/view/elements.php';
+    $this->output();
     break;
   case 'show_simple_types':
     $this->main = PLUGINS . 'xplankonverter/view/simple_types.php';
     $this->output();
     break;
   case 'show_uml':
-    $xplan->show_uml();
+    $this->main = PLUGINS . 'xplankonverter/view/uml_diagramms.php';
+    $this->output();
     break;
-  
+
   case 'build_gml' : {
     include(PLUGINS . 'xplankonverter/model/build_gml.php');
     

@@ -119,17 +119,17 @@
       echo '<b><a name= "xplan:' . $row['simple_type_name'] . '">';
       if ($row['altoderneusimpletypes'] == "veraltet"){echo "<s>";}
       echo $row['simple_type_name'];
-      if ($row['altoderneusimpletypes'] == "neu"){echo " <img src=\"images/aenderung.png\" height=\"13\">";}
+      if ($row['altoderneusimpletypes'] == "neu"){echo " <img src=\"plugins/xplankonverter/images/aenderung.png\" height=\"13\">";}
       echo '</a>';
-      if ($row['altoderneusimpletypes'] == "veraltet"){echo " <img src=\"images/veraltet.png\" height=\"13\"></s>";}
+      if ($row['altoderneusimpletypes'] == "veraltet"){echo " <img src=\"plugins/xplankonverter/images/veraltet.png\" height=\"13\"></s>";}
       echo '</a></b><br>' . '&nbsp;&nbsp; ';
       if ($row['altoderneuenumerations'] == "veraltet"){echo '<s>';}
       echo $row['enumeration_value'] . ' '. $row['enumeration_name'];
       if ($row['altoderneuenumerations'] == "neu"){
-        echo " <img src=\"images/aenderung.png\" height=\"13\">";
+        echo " <img src=\"plugins/xplankonverter/images/aenderung.png\" height=\"13\">";
       }
       if ($row['altoderneuenumerations'] == "veraltet"){
-        echo "</s> <img src=\"images/veraltet.png\" height=\"13\">";  
+        echo "</s> <img src=\"plugins/xplankonverter/images/veraltet.png\" height=\"13\">";  
       }
       echo '</a><br>';
     
@@ -137,8 +137,8 @@
       echo '&nbsp;&nbsp; ';
       if ($row['altoderneuenumerations'] == "veraltet") {echo "<s>";}
       echo  $row['enumeration_value'] . ' '. $row['enumeration_name'];
-      if ($row['altoderneuenumerations'] == "neu") {echo " <img src=\"images/aenderung.png\" height=\"13\">";}
-      if ($row['altoderneuenumerations'] == "veraltet") {echo "</s> <img src=\"images/veraltet.png\" height=\"13\">";}
+      if ($row['altoderneuenumerations'] == "neu") {echo " <img src=\"plugins/xplankonverter/images/aenderung.png\" height=\"13\">";}
+      if ($row['altoderneuenumerations'] == "veraltet") {echo "</s> <img src=\"plugins/xplankonverter/images/veraltet.png\" height=\"13\">";}
       echo '</a><br>';
     }
   }
