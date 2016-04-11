@@ -68,6 +68,20 @@ switch($this->go){
     $xplan->show_uml();
     break;
 
+  case 'build_gml_alt' : {
+    include(PLUGINS . 'xplankonverter/model/build_gml_alt.php');
+
+    // Die Verbindung zur Datenbank kvwmapsp ist verfügbar in
+    //$this->pgdatabase->dbConn);
+    $this->gml_builder = new gml_builder_alt($this->pgdatabase);
+
+    // Einbindung des Views
+    $this->main=PLUGINS . 'xplankonverter/view/build_gml.php';
+
+    $this->output();
+
+  } break;
+
   case 'build_gml' : {
     include(PLUGINS . 'xplankonverter/model/build_gml.php');
 
@@ -295,6 +309,7 @@ switch($this->go){
   } break;
 
   case 'xplankonverter_konvertierungen_execute': {
+    include(PLUGINS . 'xplankonverter/model/build_gml.php');
     if ($this->formvars['konvertierung_id'] == '') {
       $this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
       $this->main = 'Hinweis.php';
@@ -310,7 +325,25 @@ switch($this->go){
           // Seite updaten
           $this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
           // Konvertierung starten
+          //
+          // Konvertierung hier ...
+          //
+          // Status setzen
+          $this->konvertierung->set('status', Konvertierung::$STATUS[5]);
+          $this->konvertierung->update();
+
           // XPlan-GML ausgeben
+          $this->gml_builder = new Gml_builder($this->pgdatabase);
+          $gml_id = $this->gml_builder->findRPPlanByKonvertierung($this->konvertierung);
+          $gmlString = $this->gml_builder->build_gml($gml_id);
+          $this->gml_builder->saveGML($gmlString, XPLANKONVERTER_SHAPE_PATH . $this->konvertierung->get('id') . '/xplan_' . $this->konvertierung->get('id') . '.gml');
+          //$this->gml_builder->saveGML($gmlString, PLUGINS . 'xplankonverter/xplan_' . $this->konvertierung->get('id') . '.gml');
+
+          // Status setzen
+          $this->konvertierung->set('status', Konvertierung::$STATUS[6]);
+          $this->konvertierung->update();
+
+          $this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
         } else {
           $this->Hinweis = 'Die ausgewählte Konvertierung muss zuerst validiert werden.';
           $this->main = 'Hinweis.php';

@@ -54,9 +54,9 @@
 	$packages[] = 'RP__Basisobjekte';
 	$packages[] = 'RP_Freiraumstruktur';
 	$packages[] = 'RP_Infrastruktur';
-	$packages[] = 'RP_Raster';
+	##$packages[] = 'RP_Raster';
 	$packages[] = 'RP_Siedlungsstruktur';
-	$packages[] = 'RP_Sonstiges';
+	##$packages[] = 'RP_Sonstiges';
 	#  $packages[] = 'SO_Basisobjekte';
 	#  $packages[] = 'SO_NachrichtlicheUebernahmen';
 	#  $packages[] = 'SonstigePlanwerke';
@@ -65,8 +65,8 @@
 	#  $packages[] = 'SO_SonstigeGebiete';
 	#  $packages[] = 'SO_Sonstiges';
 	$packages[] = 'XP_Basisobjekte';
-	$packages[] = 'XP_Enumerationen';
+	##$packages[] = 'XP_Enumerationen';
 	$packages[] = 'XP_Praesentationsobjekte';
-	$packages[] = 'XP_Raster';
+	##$packages[] = 'XP_Raster';
 	define('PACKAGES', "'" . implode("','", $packages) . "'");
 ?>
