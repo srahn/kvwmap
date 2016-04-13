@@ -53,7 +53,7 @@ define(CASE_COMPRESS, false);																																						#
 #																																																				#
 #########################################################################################################
 
-$non_spatial_cases = array('changemenue_with_ajax');		// für non-spatial cases wird in start.php keine Verbindung zur PostgreSQL aufgebaut usw.
+$non_spatial_cases = array('changemenue_with_ajax', 'get_select_list');		// für non-spatial cases wird in start.php keine Verbindung zur PostgreSQL aufgebaut usw.
 $spatial_cases = array('navMap_ajax', 'tooltip_query', 'get_group_legend');
 $fast_loading_cases = array_merge($spatial_cases, $non_spatial_cases);
 

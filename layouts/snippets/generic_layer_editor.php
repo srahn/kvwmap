@@ -70,7 +70,7 @@
 									//if($attributes['group'][0] != '')echo 'width="10%"';
 									echo ' valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';
 									if($attributes['privileg'][$j] != '0' AND !$lock[$k]){
-										$this->editable = 'true';
+										$this->editable = $layer['Layer_ID'];
 									}
 									if($attributes['alias'][$j] == ''){
 										$attributes['alias'][$j] = $attributes['name'][$j];
@@ -135,62 +135,34 @@
 
 		for($j = 0; $j < count($attributes['name']); $j++){
 			$datapart = '';
-		?>
-	    
-<?				
-				if($layer['shape'][$k][$attributes['name'][$j]] == ''){
-					#$layer['shape'][$k][$attributes['name'][$j]] = $this->formvars[$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j]];
+			if(($attributes['privileg'][$j] == '0' AND $attributes['form_element_type'][$j] == 'Auswahlfeld') OR ($attributes['form_element_type'][$j] == 'Text' AND $attributes['type'][$j] == 'not_saveable')){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar
+				$attributes['form_element_type'][$j] .= '_not_saveable';
+			}
+			if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
+				if($attributes['type'][$j] != 'geometry'){
+					echo '<td>';
+					$datapart .= attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size, $select_width, $this->user->rolle->fontsize_gle);
+					echo $datapart;
+					echo '
+							</td>
+					';			  			
+					if($attributes['privileg'][$j] >= '0'){
+						$this->form_field_names .= $layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'|';
+					}
 				}
-				if(($attributes['privileg'][$j] == '0' AND $attributes['form_element_type'][$j] == 'Auswahlfeld') OR ($attributes['form_element_type'][$j] == 'Text' AND $attributes['type'][$j] == 'not_saveable')){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar
-					$attributes['form_element_type'][$j] .= '_not_saveable';
+				else {
+					$columnname = $attributes['name'][$j];
+					$tablename = $attributes['table_name'][$attributes['name'][$j]];
+					$geomtype = $attributes['geomtype'][$attributes['name'][$j]];
+					$dimension = $attributes['dimension'][$j];
+					$privileg = $attributes['privileg'][$j];
+					$nullable = $attributes['nullable'][$j];
+					$this->form_field_names .= $layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';Geometrie;'.$attributes['nullable'][$j].'|';
 				}
-				
-				// if($attributes['group'][$j] != $attributes['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Tabelle beginnen
-					// $explosion = explode(';', $attributes['group'][$j]);
-					// if($explosion[1] != '')$collapsed = true;else $collapsed = false;
-					// $groupname = $explosion[0];
-					// echo '<tr>
-									// <td colspan="2">
-										// <table width="100%" id="colgroup'.$layer['Layer_ID'].'_'.$j.'_'.$k.'" class="tgle" '; if(!$collapsed)echo 'style="display:none"'; echo ' border="2"><tbody width="100%" class="gle">
-											// <tr>
-												// <td width="100%" bgcolor="'.BG_GLEATTRIBUTE.'" colspan="2">&nbsp;<a href="javascript:void(0);" onclick="javascript:document.getElementById(\'group'.$layer['Layer_ID'].'_'.$j.'_'.$k.'\').style.display=\'\';document.getElementById(\'colgroup'.$layer['Layer_ID'].'_'.$j.'_'.$k.'\').style.display=\'none\';"><img border="0" src="'.GRAPHICSPATH.'/plus.gif"></a>&nbsp;<span class="fett">'.$groupname.'</span></td>
-											// </tr>
-										// </table>
-										// <table class="tgle" id="group'.$layer['Layer_ID'].'_'.$j.'_'.$k.'" '; if($collapsed)echo 'style="display:none"'; echo 'border="2"><tbody class="gle">
-											// <tr>
-												// <td bgcolor="'.BG_GLEATTRIBUTE.'" colspan="2">&nbsp;<a href="javascript:void(0);" onclick="javascript:document.getElementById(\'group'.$layer['Layer_ID'].'_'.$j.'_'.$k.'\').style.display=\'none\';document.getElementById(\'colgroup'.$layer['Layer_ID'].'_'.$j.'_'.$k.'\').style.display=\'\';"><img border="0" src="'.GRAPHICSPATH.'/minus.gif"></a>&nbsp;<span class="fett">'.$groupname.'</span></td>
-											// </tr>';
-				// }
-				
-				if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
-					if($attributes['type'][$j] != 'geometry'){
-						echo '<td>';
-							$datapart .= attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size, $select_width, $this->user->rolle->fontsize_gle);
-							echo $datapart;
-			  			echo '
-									</td>
-							';
-
-			  			// if($attributes['group'][$j] != $attributes['group'][$j+1] OR ($attributes['group'][$j] != '' AND $attributes['type'][$j+1] == 'geometry' AND $attributes['name'][$j+2] == NULL)){		# wenn die nächste Gruppe anders ist (oder das nächste Attribut eine Geometrie und auch das letzte Attribut), Tabelle schliessen
-								// echo '</table></td></tr>';
-			  			// }
-			  			
-							if($attributes['privileg'][$j] >= '0'){
-								$this->form_field_names .= $layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'|';
-							}
-			  		}
-			  		else {
-			  			$columnname = $attributes['name'][$j];
-			  			$tablename = $attributes['table_name'][$attributes['name'][$j]];
-			  			$geomtype = $attributes['geomtype'][$attributes['name'][$j]];
-			  			$dimension = $attributes['dimension'][$j];
-			  			$privileg = $attributes['privileg'][$j];
-			  			$nullable = $attributes['nullable'][$j];
-			  			$this->form_field_names .= $layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';Geometrie;'.$attributes['nullable'][$j].'|';
-			  		}
-				}
+			}
 		}
 				if(($columnname != '' OR $layer['shape'][$k]['geom'] != '') AND $this->new_entry != true AND $this->formvars['printversion'] == ''){
+					$geometry = true;
 					// if($attributes['group'][0] != ''){ ?>
 						 <!--tr><td colspan="2"><table width="100%" class="tgle" border="2"><tbody class="gle"-->
 					 <? //} ?>
@@ -259,14 +231,39 @@
 
 ?>
 			    </td>
-			    <? //if($attributes['group'][0] != ''){ ?>
-								<!--/table></td></tr-->
-					<? //}		    
-	}
+		<? 	} ?>
+				</tr>
+<?	} 
+			if($this->new_entry != true AND $this->editable == $layer['Layer_ID']){
+?>
+				<tr>
+					<td style="border: none">&nbsp;</td>
+				</tr>
+				<tr>
+					<td style="background-color:<? echo BG_GLEHEADER; ?>;"></td>
+					<?					
+						for($j = 0; $j < count($attributes['name']); $j++){
+							$datapart = '';
+							if(($attributes['privileg'][$j] == '0' AND $attributes['form_element_type'][$j] == 'Auswahlfeld') OR ($attributes['form_element_type'][$j] == 'Text' AND $attributes['type'][$j] == 'not_saveable')){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar
+								$attributes['form_element_type'][$j] .= '_not_saveable';
+							}
+							if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
+								if($attributes['type'][$j] != 'geometry'){
+									echo '<td>';
+									$datapart .= attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size, $select_width, $this->user->rolle->fontsize_gle, true);
+									echo $datapart;
+									echo '</td>';
+								}
+							}
+						}
+						if($geometry){
+							echo '<td>&nbsp;</td>';
+						}
+					?>
+				</tr>
+				
+	<?  } ?>
 
- ?>
-			</tr>
-<?	} ?>
 			</table>
 		</td>
 	</tr>

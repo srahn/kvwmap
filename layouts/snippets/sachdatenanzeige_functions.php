@@ -507,6 +507,16 @@ include('funktionen/input_check_functions.php');
 		}
 		overlay_submit(currentform);
 	}
+	
+	change_all = function(layer_id, k, attribute){
+		value = document.getElementById(attribute+'_'+k).value;
+		for(var i = 0; i < k; i++){
+			if(document.getElementById(layer_id+'_'+i).checked){
+				document.getElementById(attribute+'_'+i).value = value;
+				document.getElementById(attribute+'_'+i).onchange();
+			}
+		}		
+	}
 
 	set_changed_flag = function(flag){
 		flag.value=1;

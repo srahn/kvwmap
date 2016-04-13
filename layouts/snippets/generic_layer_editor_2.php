@@ -164,7 +164,7 @@
 				
 				if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
 					if($attributes['type'][$j] != 'geometry'){
-						if($attributes['privileg'][$j] != '0' AND !$lock[$k])$this->editable = 'true';
+						if($attributes['privileg'][$j] != '0' AND !$lock[$k])$this->editable = $layer['Layer_ID'];
 						if($attributes['alias'][$j] == '')$attributes['alias'][$j] = $attributes['name'][$j];
 						
 						if($attributes['position'][$j] != 'daneben')$datapart .= '<tr>';							# wenn Attribut nicht daneben -> neue Zeile beginnen
