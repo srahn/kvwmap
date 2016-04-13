@@ -7725,12 +7725,20 @@ class GUI {
   }
 
 	function sachdaten_druck_editor(){
+		global $admin_stellen;
 		include_once(CLASSPATH.'datendrucklayout.php');
 		$ddl=new ddl($this->database, $this);
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-    $this->ddl=$ddl;
-    $this->stellendaten=$this->user->getStellen('Bezeichnung');
-    $this->layerdaten = $mapdb->get_postgis_layers('Name');
+    $this->ddl=$ddl;    
+    if(in_array($this->Stelle->id, $admin_stellen)){										# eine Admin-Stelle darf alle Layer und Stellen sehen
+			$this->layerdaten = $mapdb->get_postgis_layers('Name');
+			$this->stellendaten=$this->user->getStellen('Bezeichnung');
+		}
+		else{																																# eine normale Stelle nur die eigenen Layer und die eigene Stelle
+			$this->layerdaten = $this->Stelle->getqueryablePostgisLayers(NULL, NULL);
+			$this->stellendaten['ID'][0] = $this->Stelle->id;
+			$this->stellendaten['Bezeichnung'][0] = $this->Stelle->Bezeichnung;
+		}
     # Fonts auslesen
     $this->ddl->fonts = $this->ddl->get_fonts();
     if($this->formvars['selected_layer_id']){
