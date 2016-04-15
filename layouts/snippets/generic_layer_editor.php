@@ -234,7 +234,7 @@
 		<? 	} ?>
 				</tr>
 <?	} 
-			if($this->new_entry != true AND $this->editable == $layer['Layer_ID']){
+			if(false and $this->new_entry != true AND $this->editable == $layer['Layer_ID']){
 ?>
 				<tr>
 					<td style="border: none">&nbsp;</td>
