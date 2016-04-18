@@ -234,7 +234,7 @@
 		<? 	} ?>
 				</tr>
 <?	} 
-			if(false and $this->new_entry != true AND $this->editable == $layer['Layer_ID']){
+			if($this->new_entry != true AND $this->editable == $layer['Layer_ID']){
 ?>
 				<tr>
 					<td style="border: none">&nbsp;</td>
@@ -250,8 +250,9 @@
 							if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
 								if($attributes['type'][$j] != 'geometry'){
 									echo '<td>';
-									$datapart .= attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size, $select_width, $this->user->rolle->fontsize_gle, true);
-									echo $datapart;
+									if($attributes['form_element_type'][$j] != 'Dokument'){
+										echo attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size, $select_width, $this->user->rolle->fontsize_gle, true);
+									}
 									echo '</td>';
 								}
 							}

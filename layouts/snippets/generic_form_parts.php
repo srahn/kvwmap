@@ -110,7 +110,7 @@
 				}break;
 				
 				case 'Autovervollständigungsfeld' : {
-					$datapart .= Autovervollstaendigungsfeld($layer_id, $name, $j, $alias, $fieldname, $value, $attributes['enum_output'][$j][$k], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $fontsize);
+					$datapart .= Autovervollstaendigungsfeld($layer_id, $name, $j, $alias, $fieldname, $value, $attributes['enum_output'][$j][$k], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $fontsize, NULL);
 				}break;
 				
 				case 'Checkbox' : {
@@ -159,7 +159,6 @@
 				}break;
 
 				case 'SubFormFK' : {
-					if($change_all)continue;
 					$datapart .= '<table width="100%" cellpadding="0" cellspacing="0"><tr><td>';
 					$attribute_foreign_keys = $attributes['subform_fkeys'][$j];	# die FKeys des aktuellen Attributes
 					for($f = 0; $f < count($attribute_foreign_keys); $f++){											
@@ -171,12 +170,12 @@
 						if($dataset[$name_] == '')$dataset[$name_] = $gui->formvars[$fieldname_[$f]];
 						switch ($attributes['form_element_type'][$attribute_foreign_keys[$f]]){
 							case 'Autovervollständigungsfeld' : {
-								if($attributes['subform_layer_privileg'][$index] != '0')$gui->editable = 'true';
-								$datapart .= Autovervollstaendigungsfeld($layer_id, $name_, $index, $attributes['alias'][$name_], $fieldname_[$f], $dataset[$name_], $attributes['enum_output'][$index][$k], $attributes['privileg'][$name_], $k, $oid, $attributes['subform_layer_id'][$index], $attributes['subform_layer_privileg'][$index], $attributes['embedded'][$index], $lock[$k], $fontsize);
+								if($attributes['subform_layer_privileg'][$index] != '0')$gui->editable = $layer_id;
+								$datapart .= Autovervollstaendigungsfeld($layer_id, $name_, $index, $attributes['alias'][$name_], $fieldname_[$f], $dataset[$name_], $attributes['enum_output'][$index][$k], $attributes['privileg'][$name_], $k, $oid, $attributes['subform_layer_id'][$index], $attributes['subform_layer_privileg'][$index], $attributes['embedded'][$index], $lock[$k], $fontsize, $change_all);
 								$datapart .= '</td><td align="right" valign="top">';
 							}break;
 							case 'Auswahlfeld' : {
-								if($attributes['subform_layer_privileg'][$index] != '0')$gui->editable = 'true';
+								if($attributes['subform_layer_privileg'][$index] != '0')$gui->editable = $layer_id;
 								if(is_array($attributes['dependent_options'][$index])){
 									$enum_value = $attributes['enum_value'][$index][$k];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
 									$enum_output = $attributes['enum_output'][$index][$k];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
@@ -488,17 +487,21 @@
 		return $datapart;
 	}
 
-	function Autovervollstaendigungsfeld($layer_id, $name, $j, $alias, $fieldname, $value, $output, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $lock, $fontsize){
+	function Autovervollstaendigungsfeld($layer_id, $name, $j, $alias, $fieldname, $value, $output, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $lock, $fontsize, $change_all = false){
+		if($change_all){
+			$onchange = 'change_all('.$layer_id.', '.$k.', \''.$name.'\');';
+			$onchange_output = 'change_all('.$layer_id.', '.$k.', \'output_'.$name.'\');';
+		}
 		$datapart = '<table cellpadding="0" cellspacing="0"><tr><td><div>';
-		$datapart .= '<input autocomplete="off" title="'.$alias.'" onkeydown="if(this.backup_value==undefined){this.backup_value=this.value; document.getElementById(\''.$name.'_'.$k.'\').backup_value=document.getElementById(\''.$name.'_'.$k.'\').value;}" onkeyup="autocomplete1(\''.$layer_id.'\', \''.$name.'\', \''.$name.'_'.$k.'\', this.value);" onchange="if(document.getElementById(\'suggests_'.$name.'_'.$k.'\').style.display==\'block\'){this.value=this.backup_value; document.getElementById(\''.$name.'_'.$k.'\').value=document.getElementById(\''.$name.'_'.$k.'\').backup_value; setTimeout(function(){document.getElementById(\'suggests_'.$name.'_'.$k.'\').style.display = \'none\';}, 500);}if(\''.$oid.'\' != \'\')set_changed_flag(currentform.changed_'.$layer_id.'_'.$oid.')"';
+		$datapart .= '<input autocomplete="off" title="'.$alias.'" onkeydown="if(this.backup_value==undefined){this.backup_value=this.value; document.getElementById(\''.$name.'_'.$k.'\').backup_value=document.getElementById(\''.$name.'_'.$k.'\').value;}" onkeyup="autocomplete1(\''.$layer_id.'\', \''.$name.'\', \''.$name.'_'.$k.'\', this.value);" onchange="if(document.getElementById(\'suggests_'.$name.'_'.$k.'\').style.display==\'block\'){this.value=this.backup_value; document.getElementById(\''.$name.'_'.$k.'\').value=document.getElementById(\''.$name.'_'.$k.'\').backup_value; setTimeout(function(){document.getElementById(\'suggests_'.$name.'_'.$k.'\').style.display = \'none\';}, 500);}'.$onchange_output.'if(\''.$oid.'\' != \'\')set_changed_flag(currentform.changed_'.$layer_id.'_'.$oid.')"';
 		if($privileg == '0' OR $lock){
 			$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
 		}
 		else{
 			$datapart .= ' style="font-size: '.$fontsize.'px;"';
 		}
-		$datapart .= ' size="40" type="text" id="'.$name.'_'.$k.'_output" value="'.htmlspecialchars($output).'">';
-		$datapart .= '<input type="hidden" readonly name="'.$fieldname.'" id="'.$name.'_'.$k.'" value="'.htmlspecialchars($value).'">';
+		$datapart .= ' size="40" type="text" id="output_'.$name.'_'.$k.'" value="'.htmlspecialchars($output).'">';
+		$datapart .= '<input type="hidden" onchange="'.$onchange.';" name="'.$fieldname.'" id="'.$name.'_'.$k.'" value="'.htmlspecialchars($value).'">';
 		$datapart .= '<div valign="top" style="height:0px; position:relative;">
 				<div id="suggests_'.$name.'_'.$k.'" style="z-index: 3000;display:none; position:absolute; left:0px; top:0px; width: 400px; vertical-align:top; overflow:hidden; border:solid grey 1px;"></div>
 			</div>

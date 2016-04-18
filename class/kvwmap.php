@@ -2035,14 +2035,14 @@ class GUI {
 		elseif($count == 0 ){		# wenn nichts gefunden wurde
 			echo '~document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'none\';';
 			echo 'document.getElementById(\''.$this->formvars['field_id'].'\').value = document.getElementById(\''.$this->formvars['field_id'].'\').backup_value;';
-			echo 'output = document.getElementById(\''.$this->formvars['field_id'].'_output\').value;';
-			echo 'document.getElementById(\''.$this->formvars['field_id'].'_output\').value = output.substring(0, output.length-1);';
-			echo 'document.getElementById(\''.$this->formvars['field_id'].'_output\').onkeyup();';
+			echo 'output = document.getElementById(\'output_'.$this->formvars['field_id'].'\').value;';
+			echo 'document.getElementById(\'output_'.$this->formvars['field_id'].'\').value = output.substring(0, output.length-1);';
+			echo 'document.getElementById(\'output_'.$this->formvars['field_id'].'\').onkeyup();';
 		}
 		else{
 			if($count == 1)$count = 2;		# weil ein select-Feld bei size 1 anders funktioniert
 			pg_result_seek($ret[1], 0);
-			echo'<select size="'.$count.'" style="width: 450px;padding:4px; margin:-2px -17px -4px -4px;" onclick="document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'none\';document.getElementById(\''.$this->formvars['field_id'].'\').value=this.value;document.getElementById(\''.$this->formvars['field_id'].'_output\').value=this.options[this.selectedIndex].text">';				
+			echo'<select size="'.$count.'" style="width: 450px;padding:4px; margin:-2px -17px -4px -4px;" onclick="document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'none\';document.getElementById(\''.$this->formvars['field_id'].'\').value=this.value;document.getElementById(\''.$this->formvars['field_id'].'\').onchange();document.getElementById(\'output_'.$this->formvars['field_id'].'\').value=this.options[this.selectedIndex].text;document.getElementById(\'output_'.$this->formvars['field_id'].'\').onchange();">';				
 			while($rs=pg_fetch_array($ret[1])) {
 				echo '<option onmouseover="this.selected = true;"  value="'.$rs['value'].'">'.$rs['output'].'</option>';
 			}
