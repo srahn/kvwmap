@@ -134,6 +134,7 @@ include('funktionen/input_check_functions.php');
   		}
   	}
   	currentform.go.value = 'neuer_Layer_Datensatz_speichern';
+		document.getElementById('go_plus').disabled = true;
   	overlay_submit(currentform, false);
 	}
 
