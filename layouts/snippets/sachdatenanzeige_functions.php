@@ -520,7 +520,7 @@ include('funktionen/input_check_functions.php');
 	}
 
 	set_changed_flag = function(flag){
-		flag.value=1;
+		if(flag != undefined)flag.value=1;
 	}
 
 </script>
