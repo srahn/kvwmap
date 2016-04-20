@@ -17,6 +17,13 @@
 		$layer['Name'] = $layer['alias'];
 	}
 ?>
+<SCRIPT src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></SCRIPT>
+<script type="text/javascript">
+
+	Text[1]=["Hilfe:","Sie können hier die Attribut-Werte von mehreren Datensätzen gleichzeitig bearbeiten. Die Werte werden nur für die ausgewählten Datensätze übernommen."]
+
+</script>
+
 <div id="layer" onclick="remove_calendar();">
 <? if($this->new_entry != true AND $layer['requires'] == ''){ ?>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -58,7 +65,7 @@
 <table border="0" cellspacing="1" cellpadding="2" width="100%">
 	<tr>
 		<td width="100%">   
-			<table border="1" style="border-collapse:collapse" cellspacing="0" cellpadding="2" width="100%">
+			<table class="gle1_table" cellspacing="0" cellpadding="2" width="100%">
 			  <tr bgcolor="<?php echo BG_DEFAULT ?>">
 				<td></td>
 			  
@@ -122,11 +129,11 @@
 		<td style="background-color:<? echo BG_GLEHEADER; ?>;">
 		  <? if($this->new_entry != true AND $this->formvars['printversion'] == ''){ ?>
 		  <table>
-			<tr>
-			  <td>
-				<input id="<? echo $layer['Layer_ID'].'_'.$k; ?>" type="checkbox" name="check;<? echo $attributes['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>">&nbsp;
-			  </td>
-			</tr>
+				<tr>
+					<td style="line-height: 1px; ">
+						<input id="<? echo $layer['Layer_ID'].'_'.$k; ?>" type="checkbox" name="check;<? echo $attributes['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>">&nbsp;
+					</td>
+				</tr>
 		  </table>
 		  <? } ?>
 	</td>
@@ -234,13 +241,19 @@
 		<? 	} ?>
 				</tr>
 <?	} 
-			if(false and $this->new_entry != true AND $this->editable == $layer['Layer_ID']){
+			if($this->new_entry != true AND $this->editable == $layer['Layer_ID']){
 ?>
-				<tr>
-					<td style="border: none">&nbsp;</td>
+				<tr id="edit_all1_<? echo $layer['Layer_ID']; ?>" style="height: 30px">
+					<td colspan="200" style="border: none;vertical-align: bottom"><a href="javascript:switch_edit_all(<? echo $layer['Layer_ID']; ?>);"><? echo $strEditAll; ?></a></td>
 				</tr>
-				<tr>
-					<td style="background-color:<? echo BG_GLEHEADER; ?>;"></td>
+				<tr id="edit_all2_<? echo $layer['Layer_ID']; ?>" style="height: 30px; display: none">
+					<td colspan="200" style="border: none;vertical-align: bottom"><a href="javascript:switch_edit_all(<? echo $layer['Layer_ID']; ?>);"><? echo $strEditAll; ?></a></td>
+				</tr>
+				<tr id="edit_all3_<? echo $layer['Layer_ID']; ?>" style="display: none">
+					<td style="text-align: center; background-color:<? echo BG_GLEHEADER; ?>;">
+						<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[1],Style[0], document.getElementById('TipLayer<? echo $layer['Layer_ID']; ?>'))" onmouseout="htm()">
+						<DIV id="TipLayer<? echo $layer['Layer_ID']; ?>" style="visibility:hidden;position:absolute;z-index:1000;"></DIV>
+					</td>
 					<?					
 						for($j = 0; $j < count($attributes['name']); $j++){
 							$datapart = '';
@@ -256,9 +269,6 @@
 									echo '</td>';
 								}
 							}
-						}
-						if($geometry){
-							echo '<td>&nbsp;</td>';
 						}
 					?>
 				</tr>

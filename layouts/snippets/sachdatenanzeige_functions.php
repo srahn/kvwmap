@@ -509,6 +509,19 @@ include('funktionen/input_check_functions.php');
 		overlay_submit(currentform);
 	}
 	
+	switch_edit_all = function(layer_id){
+		if(document.getElementById('edit_all3_'+layer_id).style.display == 'none'){
+			document.getElementById('edit_all1_'+layer_id).style.display = 'none';			
+			document.getElementById('edit_all2_'+layer_id).style.display = '';
+			document.getElementById('edit_all3_'+layer_id).style.display = '';
+		}
+		else{
+			document.getElementById('edit_all1_'+layer_id).style.display = '';			
+			document.getElementById('edit_all2_'+layer_id).style.display = 'none';
+			document.getElementById('edit_all3_'+layer_id).style.display = 'none';
+		}
+	}
+	
 	change_all = function(layer_id, k, attribute){
 		value = document.getElementById(attribute+'_'+k).value;
 		for(var i = 0; i < k; i++){			
