@@ -129,7 +129,7 @@
 		onmouseenter="ahah('index.php', 'go=tooltip_query&querylayer_id=<? echo $layer['Layer_ID']; ?>&oid=<? echo $layer['shape'][$k][$attributes['table_name'][$attributes['the_geom']].'_oid']; ?>', new Array(top.document.GUI.result, ''), new Array('setvalue', 'execute_function'));"
 	<? } ?>
 	>
-		<td style="background-color:<? echo BG_GLEHEADER; ?>;">
+		<td style="background-color:<? echo BG_DEFAULT; ?>;">
 		  <? if($this->new_entry != true AND $this->formvars['printversion'] == ''){ ?>
 		  <table>
 				<tr>
@@ -260,7 +260,7 @@
 						if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
 							if($this->qlayerset[$i]['attributes']['type'][$j] != 'geometry'){
 								echo '<td ';
-									echo ' valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';
+									echo ' valign="top" bgcolor="'.BG_DEFAULT.'">';
 									if($attributes['alias'][$j] == ''){
 										$attributes['alias'][$j] = $attributes['name'][$j];
 									}
