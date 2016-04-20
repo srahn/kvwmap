@@ -114,7 +114,7 @@
 				}break;
 				
 				case 'Checkbox' : {
-					$datapart .= '<input type="checkbox" title="'.$alias.'" cols="45" onchange="'.$onchange.'"';
+					$datapart .= '<input type="checkbox" id="'.$name.'_'.$k.'" title="'.$alias.'" cols="45" onchange="'.$onchange.'"';
 					if($attribute_privileg == '0' OR $lock[$k]){
 						$datapart .= ' onclick="return false" style="border:0px;background-color:transparent;"';
 					}
@@ -124,7 +124,6 @@
 				}break;
 
 				case 'SubFormPK' : {
-					if($change_all)continue;
 					$datapart .= '<input style="font-size: '.$fontsize.'px"';
 					if($attribute_privileg == '0' OR $lock[$k]){
 						$datapart .= ' readonly style="background-color:#e8e3da;"';
@@ -220,7 +219,6 @@
 				}break;
 
 				case 'SubFormEmbeddedPK' : {
-					if($change_all)continue;
 					$datapart .= '<div id="'.$layer_id.'_'.$name.'_'.$k.'"><img src="'.GRAPHICSPATH.'leer.gif" ';
 					if($gui->new_entry != true AND $no_query != true){
 						$datapart .= 'onload="ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
@@ -354,7 +352,7 @@
 						$datapart .= '</a><br>';
 					}
 					if($attribute_privileg != '0' OR $lock[$k]){
-						$datapart .= '<input onchange="'.$onchange.'" style="font-size: '.$fontsize.'px" size="'.$size.'" type="text" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
+						$datapart .= '<input onchange="'.$onchange.'" id="'.$name.'_'.$k.'" style="font-size: '.$fontsize.'px" size="'.$size.'" type="text" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 					}else{
 						$datapart .= '<input type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 					}
@@ -406,7 +404,7 @@
 						$datapart .= '</a><br>';
 					}
 					if($attribute_privileg != '0' OR $lock[$k]){
-						$datapart .= '<input onchange="'.$onchange.'" style="font-size: '.$fontsize.'px" size="'.$size.'" type="text" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
+						$datapart .= '<input onchange="'.$onchange.'" id="'.$name.'_'.$k.'" style="font-size: '.$fontsize.'px" size="'.$size.'" type="text" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 					}else{
 						$datapart .= '<input type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 					}

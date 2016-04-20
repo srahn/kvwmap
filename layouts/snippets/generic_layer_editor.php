@@ -20,7 +20,7 @@
 <SCRIPT src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></SCRIPT>
 <script type="text/javascript">
 
-	Text[1]=["Hilfe:","Sie können hier die Attribut-Werte von mehreren Datensätzen gleichzeitig bearbeiten. Die Werte werden nur für die ausgewählten Datensätze übernommen."]
+	Text[1]=["Hilfe:","Sie können hier die Attribut-Werte von mehreren Datensätzen gleichzeitig bearbeiten. Die Werte werden nur für die ausgewählten Datensätze übernommen."];
 
 </script>
 
@@ -28,6 +28,9 @@
 <? if($this->new_entry != true AND $layer['requires'] == ''){ ?>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 	<tr>
+		<td align="right" valign="top" style="padding: 0 10 0 0">
+			<a href="javascript:scrollbottom();"><img class="hover-border" title="nach unten" src="<? echo GRAPHICSPATH; ?>pfeil.gif" width="11" height="11" border="0"></a>&nbsp;
+		</td>
 		<td valign="top" style="padding: 0 0 0 0">
 			<? if($layer['template'] == '' OR $layer['template'] == 'generic_layer_editor_2.php'){ ?>
 			<a href="javascript:switch_gle_view(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'columns.png'; ?>"></a>
@@ -43,9 +46,9 @@
 			<a href="javascript:switch_gle_view(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'rows.png'; ?>"></a>
 			<? } ?>
 		</td>
-		<td align="right" valign="top">			
+		<td align="right" valign="top">
 			<a href="javascript:scrollbottom();"><img class="hover-border" title="nach unten" src="<? echo GRAPHICSPATH; ?>pfeil.gif" width="11" height="11" border="0"></a>&nbsp;
-		</td>		
+		</td>
 	</tr>
 </table>
 <?
@@ -249,7 +252,43 @@
 				<tr id="edit_all2_<? echo $layer['Layer_ID']; ?>" style="height: 30px; display: none">
 					<td colspan="200" style="border: none;vertical-align: bottom"><a href="javascript:switch_edit_all(<? echo $layer['Layer_ID']; ?>);"><? echo $strEditAll; ?></a></td>
 				</tr>
-				<tr id="edit_all3_<? echo $layer['Layer_ID']; ?>" style="display: none">
+				<tr id="edit_all3_<? echo $layer['Layer_ID']; ?>" bgcolor="<?php echo BG_DEFAULT ?>" style="display: none">
+				<td></td>
+			  
+			  <?
+			  	for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
+						if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
+							if($this->qlayerset[$i]['attributes']['type'][$j] != 'geometry'){
+								echo '<td ';
+									echo ' valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';
+									if($attributes['alias'][$j] == ''){
+										$attributes['alias'][$j] = $attributes['name'][$j];
+									}
+									echo '<table ';
+									echo 'width="100%";';
+									echo '><tr><td>';
+									echo '<span style="font-size: '.$this->user->rolle->fontsize_gle.'px; color:#222222;">'.$attributes['alias'][$j].'</span>';
+									if($attributes['nullable'][$j] == '0' AND $attributes['privileg'][$j] != '0'){
+										echo '<span title="Eingabe erforderlich">*</span>';
+									}
+									if($attributes['tooltip'][$j]!='' AND $attributes['form_element_type'][$j] != 'Time'){
+										echo '<td align="right"><a href="javascript:void(0);" title="'.$attributes['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
+									}
+									if($attributes['type'][$j] == 'date' OR $attributes['type'][$j] == 'timestamp' OR $attributes['type'][$j] == 'timestamptz'){
+										echo '<td align="right"><a href="javascript:;" title=" (TT.MM.JJJJ) '.$attributes['tooltip'][$j].'" ';
+										if($attributes['privileg'][$j] == '1' AND !$lock[$k]){
+											echo 'onclick="add_calendar(event, \''.$attributes['name'][$j].'_'.$k.'\');"';
+										}
+										echo '><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id=calendar_'.$attributes['name'][$j].'_'.$k.'"></div></td>';
+									}
+									echo '</td></tr></table>';
+									echo '</td>';
+							}
+						}
+			  	}
+			  ?>
+			  </tr>
+				<tr id="edit_all4_<? echo $layer['Layer_ID']; ?>" style="display: none">
 					<td style="text-align: center; background-color:<? echo BG_GLEHEADER; ?>;">
 						<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[1],Style[0], document.getElementById('TipLayer<? echo $layer['Layer_ID']; ?>'))" onmouseout="htm()">
 						<DIV id="TipLayer<? echo $layer['Layer_ID']; ?>" style="visibility:hidden;position:absolute;z-index:1000;"></DIV>
@@ -263,7 +302,7 @@
 							if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
 								if($attributes['type'][$j] != 'geometry'){
 									echo '<td>';
-									if($attributes['form_element_type'][$j] != 'Dokument'){
+									if(!in_array($attributes['form_element_type'][$j], array('Dokument', 'SubFormPK', 'SubFormEmbeddedPK'))){
 										echo attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size, $select_width, $this->user->rolle->fontsize_gle, true);
 									}
 									echo '</td>';

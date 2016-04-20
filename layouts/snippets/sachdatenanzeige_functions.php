@@ -514,19 +514,27 @@ include('funktionen/input_check_functions.php');
 			document.getElementById('edit_all1_'+layer_id).style.display = 'none';			
 			document.getElementById('edit_all2_'+layer_id).style.display = '';
 			document.getElementById('edit_all3_'+layer_id).style.display = '';
+			document.getElementById('edit_all4_'+layer_id).style.display = '';
 		}
 		else{
 			document.getElementById('edit_all1_'+layer_id).style.display = '';			
 			document.getElementById('edit_all2_'+layer_id).style.display = 'none';
 			document.getElementById('edit_all3_'+layer_id).style.display = 'none';
+			document.getElementById('edit_all4_'+layer_id).style.display = 'none';
 		}
 	}
 	
 	change_all = function(layer_id, k, attribute){
-		value = document.getElementById(attribute+'_'+k).value;
+		allfield = document.getElementById(attribute+'_'+k);
 		for(var i = 0; i < k; i++){			
 			if(document.getElementById(layer_id+'_'+i).checked){
-				document.getElementById(attribute+'_'+i).value = value;
+				formfield = document.getElementById(attribute+'_'+i);
+				if(formfield.type == 'checkbox'){
+					formfield.checked = allfield.checked;
+				}
+				else{
+					formfield.value = allfield.value;
+				}
 				document.getElementById(attribute+'_'+i).onchange();
 			}
 		}		
