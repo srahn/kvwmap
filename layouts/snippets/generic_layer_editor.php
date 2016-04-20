@@ -260,7 +260,7 @@
 						if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
 							if($this->qlayerset[$i]['attributes']['type'][$j] != 'geometry'){
 								echo '<td ';
-									echo ' valign="top" bgcolor="'.BG_DEFAULT.'">';
+									echo ' valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';
 									if($attributes['alias'][$j] == ''){
 										$attributes['alias'][$j] = $attributes['name'][$j];
 									}
