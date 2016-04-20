@@ -485,7 +485,7 @@
 		return $datapart;
 	}
 
-	function Autovervollstaendigungsfeld($layer_id, $name, $j, $alias, $fieldname, $value, $output, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $lock, $fontsize, $change_all = false){
+	function Autovervollstaendigungsfeld($layer_id, $name, $j, $alias, $fieldname, $value, $output, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $lock, $fontsize, $change_all){
 		if($change_all){
 			$onchange = 'change_all('.$layer_id.', '.$k.', \''.$name.'\');';
 			$onchange_output = 'change_all('.$layer_id.', '.$k.', \'output_'.$name.'\');';
@@ -535,7 +535,10 @@
 			$auswahlfeld_output_laenge = '';
 		}
 		else{
-			if($change_all){
+			if(!$change_all){
+				$onchange = 'set_changed_flag(currentform.changed_'.$layer_id.'_'.$oid.');';
+			}
+			else{
 				$onchange = 'change_all('.$layer_id.', '.$k.', \''.$name.'\');';
 			}
 			$datapart .= '<select title="'.$alias.'" style="'.$select_width.'font-size: '.$fontsize.'px"';
