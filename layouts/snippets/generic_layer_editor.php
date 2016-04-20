@@ -289,7 +289,7 @@
 			  ?>
 			  </tr>
 				<tr id="edit_all4_<? echo $layer['Layer_ID']; ?>" style="display: none">
-					<td style="text-align: center; background-color:<? echo BG_GLEHEADER; ?>;">
+					<td style="text-align: center; background-color:<? echo BG_DEFAULT; ?>;">
 						<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[1],Style[0], document.getElementById('TipLayer<? echo $layer['Layer_ID']; ?>'))" onmouseout="htm()">
 						<DIV id="TipLayer<? echo $layer['Layer_ID']; ?>" style="visibility:hidden;position:absolute;z-index:1000;"></DIV>
 					</td>
