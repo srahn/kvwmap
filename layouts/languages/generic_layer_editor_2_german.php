@@ -31,4 +31,5 @@
  $strPrintDataset="Datensatz drucken";
  $strSwitchGLEViewColumns="zur spaltenweisen Darstellung wechseln";
  $strSwitchGLEViewRows="zur zeilenweisen Darstellung wechseln";
+ $strEditAll="mehrere bearbeiten";
 ?>

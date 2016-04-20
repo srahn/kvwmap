@@ -2035,14 +2035,14 @@ class GUI {
 		elseif($count == 0 ){		# wenn nichts gefunden wurde
 			echo '~document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'none\';';
 			echo 'document.getElementById(\''.$this->formvars['field_id'].'\').value = document.getElementById(\''.$this->formvars['field_id'].'\').backup_value;';
-			echo 'output = document.getElementById(\''.$this->formvars['field_id'].'_output\').value;';
-			echo 'document.getElementById(\''.$this->formvars['field_id'].'_output\').value = output.substring(0, output.length-1);';
-			echo 'document.getElementById(\''.$this->formvars['field_id'].'_output\').onkeyup();';
+			echo 'output = document.getElementById(\'output_'.$this->formvars['field_id'].'\').value;';
+			echo 'document.getElementById(\'output_'.$this->formvars['field_id'].'\').value = output.substring(0, output.length-1);';
+			echo 'document.getElementById(\'output_'.$this->formvars['field_id'].'\').onkeyup();';
 		}
 		else{
 			if($count == 1)$count = 2;		# weil ein select-Feld bei size 1 anders funktioniert
 			pg_result_seek($ret[1], 0);
-			echo'<select size="'.$count.'" style="width: 450px;padding:4px; margin:-2px -17px -4px -4px;" onclick="document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'none\';document.getElementById(\''.$this->formvars['field_id'].'\').value=this.value;document.getElementById(\''.$this->formvars['field_id'].'_output\').value=this.options[this.selectedIndex].text">';				
+			echo'<select size="'.$count.'" style="width: 450px;padding:4px; margin:-2px -17px -4px -4px;" onclick="document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'none\';document.getElementById(\''.$this->formvars['field_id'].'\').value=this.value;document.getElementById(\''.$this->formvars['field_id'].'\').onchange();document.getElementById(\'output_'.$this->formvars['field_id'].'\').value=this.options[this.selectedIndex].text;document.getElementById(\'output_'.$this->formvars['field_id'].'\').onchange();">';				
 			while($rs=pg_fetch_array($ret[1])) {
 				echo '<option onmouseover="this.selected = true;"  value="'.$rs['value'].'">'.$rs['output'].'</option>';
 			}
@@ -7725,12 +7725,20 @@ class GUI {
   }
 
 	function sachdaten_druck_editor(){
+		global $admin_stellen;
 		include_once(CLASSPATH.'datendrucklayout.php');
 		$ddl=new ddl($this->database, $this);
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-    $this->ddl=$ddl;
-    $this->stellendaten=$this->user->getStellen('Bezeichnung');
-    $this->layerdaten = $mapdb->get_postgis_layers('Name');
+    $this->ddl=$ddl;    
+    if(in_array($this->Stelle->id, $admin_stellen)){										# eine Admin-Stelle darf alle Layer und Stellen sehen
+			$this->layerdaten = $mapdb->get_postgis_layers('Name');
+			$this->stellendaten=$this->user->getStellen('Bezeichnung');
+		}
+		else{																																# eine normale Stelle nur die eigenen Layer und die eigene Stelle
+			$this->layerdaten = $this->Stelle->getqueryablePostgisLayers(NULL, NULL);
+			$this->stellendaten['ID'][0] = $this->Stelle->id;
+			$this->stellendaten['Bezeichnung'][0] = $this->Stelle->Bezeichnung;
+		}
     # Fonts auslesen
     $this->ddl->fonts = $this->ddl->get_fonts();
     if($this->formvars['selected_layer_id']){
@@ -13564,9 +13572,10 @@ class db_mapObj{
 						if($rs['Style'][$i]['color'] != '' AND $rs['Style'][$i]['color'] != '-1 -1 -1'){
 							$rs['Style'][$i]['outlinecolor'] = $rs['Style'][$i]['color'];
 							$rs['Style'][$i]['color'] = '-1 -1 -1';
-							$rs['Style'][$i]['width'] = 2;
-							$rs['Style'][$i]['minwidth'] = 3;
-							$rs['Style'][$i]['maxwidth'] = 7;
+							if($rs['Style'][$i]['width'] == '')$rs['Style'][$i]['width'] = 3;
+							if($rs['Style'][$i]['minwidth'] == '')$rs['Style'][$i]['minwidth'] = 2;
+							if($rs['Style'][$i]['maxwidth'] == '')$rs['Style'][$i]['maxwidth'] = 4;
+							$rs['Style'][$i]['symbolname'] = '';
 						}
 					}
 				}

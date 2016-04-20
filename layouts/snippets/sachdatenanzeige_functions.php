@@ -134,6 +134,7 @@ include('funktionen/input_check_functions.php');
   		}
   	}
   	currentform.go.value = 'neuer_Layer_Datensatz_speichern';
+		document.getElementById('go_plus').disabled = true;
   	overlay_submit(currentform, false);
 	}
 
@@ -507,9 +508,32 @@ include('funktionen/input_check_functions.php');
 		}
 		overlay_submit(currentform);
 	}
+	
+	switch_edit_all = function(layer_id){
+		if(document.getElementById('edit_all3_'+layer_id).style.display == 'none'){
+			document.getElementById('edit_all1_'+layer_id).style.display = 'none';			
+			document.getElementById('edit_all2_'+layer_id).style.display = '';
+			document.getElementById('edit_all3_'+layer_id).style.display = '';
+		}
+		else{
+			document.getElementById('edit_all1_'+layer_id).style.display = '';			
+			document.getElementById('edit_all2_'+layer_id).style.display = 'none';
+			document.getElementById('edit_all3_'+layer_id).style.display = 'none';
+		}
+	}
+	
+	change_all = function(layer_id, k, attribute){
+		value = document.getElementById(attribute+'_'+k).value;
+		for(var i = 0; i < k; i++){			
+			if(document.getElementById(layer_id+'_'+i).checked){
+				document.getElementById(attribute+'_'+i).value = value;
+				document.getElementById(attribute+'_'+i).onchange();
+			}
+		}		
+	}
 
 	set_changed_flag = function(flag){
-		flag.value=1;
+		if(flag != undefined)flag.value=1;
 	}
 
 </script>
