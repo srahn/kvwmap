@@ -12912,7 +12912,7 @@ class GUI {
     $GemeindenStelle=$this->Stelle->getGemeindeIDs();
     $Gemeinde=new gemeinde('',$this->pgdatabase);
     # Abfrage der Gemeinde Namen
-    $GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle);
+    $GemListe=$Gemeinde->getGemeindeListe(array_keys($GemeindenStelle));
     # Abfragen der Gemarkungen zur Gemeinde
     $Gemarkung=new gemarkung('',$this->pgdatabase);
     # Auswahl nur über die zulässigen Gemeinden

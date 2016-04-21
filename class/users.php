@@ -3583,14 +3583,22 @@ class stelle {
 	}
 
 	function getGemeindeIDs() {
-		$sql = 'SELECT Gemeinde_ID AS ID FROM stelle_gemeinden WHERE Stelle_ID = '.$this->id;
+		$sql = 'SELECT Gemeinde_ID, Gemarkung, Flur FROM stelle_gemeinden WHERE Stelle_ID = '.$this->id;
 		#echo $sql;
 		$this->debug->write("<p>file:users.php class:stelle->getGemeindeIDs - Lesen der GemeindeIDs zur Stelle:<br>".$sql,4);
 		$query=mysql_query($sql,$this->database->dbConn);
-		while($rs=mysql_fetch_array($query)) {
-			$liste[] = $rs;
+		while($rs=mysql_fetch_assoc($query)) {			
+			if($rs['Gemarkung'] != ''){
+				if($rs['Flur'] != ''){
+					$gemeindeliste[$rs['Gemeinde_ID']][$rs['Gemarkung']][] = $rs['Flur'];
+				}
+				else{
+					$gemeindeliste[$rs['Gemeinde_ID']][$rs['Gemarkung']] = NULL;
+				}
+			}
+			else $gemeindeliste[$rs['Gemeinde_ID']] = NULL;
 		}
-		return $liste;
+		return $gemeindeliste;		
 	}
 
 	function getGemeinden($database) {
