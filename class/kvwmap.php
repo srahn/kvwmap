@@ -3108,11 +3108,10 @@ class GUI {
     $grundbuch = new grundbuch('', '', $this->pgdatabase);
     $GemeindenStelle=$this->Stelle->getGemeindeIDs();
     if($GemeindenStelle != ''){   // Stelle ist auf Gemeinden eingeschränkt
-      $Gemeinde=new gemeinde('',$this->pgdatabase);
-      $GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle);
       $Gemarkung=new gemarkung('',$this->pgdatabase);
-      $GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'');
-      $gbliste = $grundbuch->getGrundbuchbezirkslisteByGemkgIDs($GemkgListe['GemkgID']);
+			$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), NULL);
+			$ganze_gemarkungen = array_merge($GemkgListe['GemkgID'], array_keys($GemeindenStelle['ganze_gemarkung']));
+      $gbliste = $grundbuch->getGrundbuchbezirkslisteByGemkgIDs($ganze_gemarkungen, $GemeindenStelle['eingeschr_gemarkung']);
     }
     else{
       $gbliste = $grundbuch->getGrundbuchbezirksliste();
@@ -3135,7 +3134,7 @@ class GUI {
     if($this->formvars['Bezirk'] != ''){
     	if($this->formvars['selBlatt'])$this->selblattliste = explode(', ',$this->formvars['selBlatt']);
 			if($GemeindenStelle != ''){   // Stelle ist auf Gemeinden eingeschränkt
-				$this->blattliste = $grundbuch->getGrundbuchblattlisteByGemkgIDs($this->formvars['Bezirk'], $GemkgListe['GemkgID']);
+				$this->blattliste = $grundbuch->getGrundbuchblattlisteByGemkgIDs($this->formvars['Bezirk'], $ganze_gemarkungen, $GemeindenStelle['eingeschr_gemarkung']);
 			}
 			else{
 				$this->blattliste = $grundbuch->getGrundbuchblattliste($this->formvars['Bezirk']);
@@ -12906,17 +12905,14 @@ class GUI {
 		$FlstID=$this->formvars['FlstID'];
 		$FlstNr=$this->formvars['FlstNr'];
 		$selFlstID = explode(', ',$this->formvars['selFlstID']);
-    #$this->searchInExtent=$this->formvars['searchInExtent'];
-    # Abfragen für welche Gemeinden die Stelle Zugriffsrechte hat
-    # GemeindenStelle wird eine Liste mit ID´s der Gemeinden zugewiesen, die zur Stelle gehören
     $GemeindenStelle=$this->Stelle->getGemeindeIDs();
-    $Gemeinde=new gemeinde('',$this->pgdatabase);
+    #$Gemeinde=new gemeinde('',$this->pgdatabase);
     # Abfrage der Gemeinde Namen
-    $GemListe=$Gemeinde->getGemeindeListe(array_keys($GemeindenStelle));
+    #$GemListe=$Gemeinde->getGemeindeListe(array_merge(array_keys($GemeindenStelle['ganze_gemeinde']), array_keys($GemeindenStelle['eingeschr_gemeinde'])));
     # Abfragen der Gemarkungen zur Gemeinde
     $Gemarkung=new gemarkung('',$this->pgdatabase);
     # Auswahl nur über die zulässigen Gemeinden
-    $GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'');
+    $GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
     // Sortieren der Gemarkungen unter Berücksichtigung von Umlauten
     $sorted_arrays = umlaute_sortieren($GemkgListe['Bezeichnung'], $GemkgListe['GemkgID']);
     $GemkgListe['Bezeichnung'] = $sorted_arrays['array'];
@@ -12936,7 +12932,7 @@ class GUI {
       # Abragen der Fluren zur Gemarkung
       if ($GemkgID==0) { $GemkgID=$GemkgListe['GemkgID'][0]; }
       $Flur=new Flur('','','',$this->pgdatabase);
-    	$FlurListe=$Flur->getFlurListe($GemkgID,'', $this->formvars['historical']);
+    	$FlurListe=$Flur->getFlurListe($GemkgID, $GemeindenStelle['eingeschr_gemarkung'][$GemkgID], $this->formvars['historical']);
       # Erzeugen des Formobjektes für die Flurauswahl
       if (count($FlurListe['FlurID'])==1) { $FlurID=$FlurListe['FlurID'][0]; }
       $FlurFormObj=new selectFormObject("FlurID","select",$FlurListe['FlurID'],array($FlurID),$FlurListe['Name'],"1","","",NULL);
@@ -12946,10 +12942,6 @@ class GUI {
       if ($FlurFormObj->selected) {
         # Abfragen der Flurstücke zur Flur
         $FlstNr=new flurstueck('',$this->pgdatabase);
-        # Wenn mal ALK Flächendeckend vorhanden ist, können Flurstücke auch über aktuellen Ausschnitt gewählt werden.
-        # dann die nächste aktive Zeile durch die beiden nächsten auskommentierten Zeilen ersetzen
-        # $FlstNrExtentListe=$FlstNr->getFlstListeByExtent($this->user->rolle->oGeorefExt);
-        # $FlstNrListe=$FlstNr->getFlstListe($GemID,$GemkgID,$FlurID,$FlstNrExtentListe,'FKZ');
         if ($FlurID==0) { $FlurID=$FlurListe['FlurID'][0]; }
         $FlstNrListe=$FlstNr->getFlstListe($GemID,$GemkgID,$FlurID, $this->formvars['historical']);
         # Erzeugen des Formobjektes für die Flurstücksauswahl

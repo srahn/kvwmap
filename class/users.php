@@ -3587,18 +3587,17 @@ class stelle {
 		#echo $sql;
 		$this->debug->write("<p>file:users.php class:stelle->getGemeindeIDs - Lesen der GemeindeIDs zur Stelle:<br>".$sql,4);
 		$query=mysql_query($sql,$this->database->dbConn);
-		while($rs=mysql_fetch_assoc($query)) {			
+		while($rs=mysql_fetch_assoc($query)) {
 			if($rs['Gemarkung'] != ''){
-				if($rs['Flur'] != ''){
-					$gemeindeliste[$rs['Gemeinde_ID']][$rs['Gemarkung']][] = $rs['Flur'];
-				}
-				else{
-					$gemeindeliste[$rs['Gemeinde_ID']][$rs['Gemarkung']] = NULL;
-				}
+				$liste['eingeschr_gemeinde'][$rs['Gemeinde_ID']] = NULL;
+				if($rs['Flur'] != '')$liste['eingeschr_gemarkung'][$rs['Gemarkung']][] = $rs['Flur'];
+				else $liste['ganze_gemarkung'][$rs['Gemarkung']] = NULL;
 			}
-			else $gemeindeliste[$rs['Gemeinde_ID']] = NULL;
+			else{
+				$liste['ganze_gemeinde'][$rs['Gemeinde_ID']] = NULL;
+			}
 		}
-		return $gemeindeliste;		
+		return $liste;		
 	}
 
 	function getGemeinden($database) {

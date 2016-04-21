@@ -1165,9 +1165,9 @@ class gemarkung {
     return $rs['GemeindeSchl'];
   }
 
-  function getGemarkungListe($GemID,$GemkgID) {
+  function getGemarkungListe($ganzeGemID, $GemkgID) {
     # Abfragen der Gemarkungen mit seinen GemeindeNamen
-    $Liste=$this->database->getGemeindeListeByGemIDByGemkgSchl($GemID,$GemkgID);
+    $Liste=$this->database->getGemeindeListeByGemIDByGemkgSchl($ganzeGemID, $GemkgID);
     return $Liste;
   }
   
@@ -1409,16 +1409,16 @@ class grundbuch {
   	return $this->database->getGrundbuchbezirksliste();
   }
 
-  function getGrundbuchbezirkslisteByGemkgIDs($gemkg_ids){
-  	return $this->database->getGrundbuchbezirkslisteByGemkgIDs($gemkg_ids);
+  function getGrundbuchbezirkslisteByGemkgIDs($ganze_gemkg_ids, $eingeschr_gemkg_ids){
+  	return $this->database->getGrundbuchbezirkslisteByGemkgIDs($ganze_gemkg_ids, $eingeschr_gemkg_ids);
   }
   
   function getGrundbuchblattliste($bezirk){
   	return $this->database->getGrundbuchblattliste($bezirk);
   }
 	
-	function getGrundbuchblattlisteByGemkgIDs($bezirk, $gemkg_ids){
-  	return $this->database->getGrundbuchblattlisteByGemkgIDs($bezirk, $gemkg_ids);
+	function getGrundbuchblattlisteByGemkgIDs($bezirk, $ganze_gemkg_ids, $eingeschr_gemkg_ids){
+  	return $this->database->getGrundbuchblattlisteByGemkgIDs($bezirk, $ganze_gemkg_ids, $eingeschr_gemkg_ids);
   }
 }
 
