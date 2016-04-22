@@ -2060,7 +2060,7 @@ class flurstueck {
     return $Flurstuecke;
   }
 
-  function getNamen($formvars,$gemkgschl) {
+  function getNamen($formvars,$ganze_gemkg_ids, $eingeschr_gemkg_ids) {
     if ($formvars['name1']=='' AND $formvars['name2']=='' AND $formvars['name3']=='' AND $formvars['name4']=='' AND $formvars['name5']=='' AND $formvars['name6']=='' AND $formvars['name7']=='' AND $formvars['name8']=='') {
       $ret[0]=1;
       $ret[1]='<br>Geben Sie mindestens einen Suchbegriff ein!';
@@ -2069,7 +2069,7 @@ class flurstueck {
     	if($blatt != ''){
     		$blatt = str_pad($blatt, 5, '0', STR_PAD_LEFT);
     	}
-      $ret=$this->database->getNamen($formvars, $gemkgschl);
+      $ret=$this->database->getNamen($formvars, $ganze_gemkg_ids, $eingeschr_gemkg_ids);
       if ($ret[0]) {
         $ret[1]='<br>Fehler bei der Abfrage der Eigentümernamen.'.$ret[1];
       }
