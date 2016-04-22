@@ -7252,6 +7252,7 @@ class GUI {
         $tablename[$element[2]]['tablename'] = $element[2];
         $tablename[$element[2]]['attributname'][] = $attributenames[] = $element[1];
 				$attributevalues[] = $this->formvars[$form_fields[$i]];
+				if($this->formvars['embedded'] != '')$formfieldstring .= '&'.$form_fields[$i].'='.$this->formvars[$form_fields[$i]];
         $tablename[$element[2]]['type'][] = $element[4];
         $tablename[$element[2]]['formfield'][] = $form_fields[$i];
         # Dokumente sammeln
@@ -7446,6 +7447,12 @@ class GUI {
           $this->formvars['embedded_subformPK'] = true;
           echo '~';
           $this->GenerischeSuche_Suchen();
+					if($this->formvars['weiter_erfassen'] == 1){
+						echo '~href_save = document.getElementById("new_'.$this->formvars['targetobject'].'").href;';
+						echo 'document.getElementById("new_'.$this->formvars['targetobject'].'").href = document.getElementById("new_'.$this->formvars['targetobject'].'").href.replace("go=neuer_Layer_Datensatz", "go=neuer_Layer_Datensatz&weiter_erfassen=1'.$formfieldstring.'");';
+						echo 'document.getElementById("new_'.$this->formvars['targetobject'].'").click();';
+						echo 'document.getElementById("new_'.$this->formvars['targetobject'].'").href = href_save;';
+					}
         }break;
       }
 						

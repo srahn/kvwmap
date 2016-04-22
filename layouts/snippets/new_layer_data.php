@@ -76,7 +76,7 @@ if($this->formvars['selected_layer_id'] AND $this->Fehler == ''){
 	<tr align="center"> 
   	<td>
   		<input type="button" name="go_plus" id="go_plus" value="<? echo $strSave; ?>" onclick="save_new_dataset();">&nbsp;&nbsp;&nbsp;&nbsp;
-  		<input type="checkbox" name="weiter_erfassen" value="1" <? if($this->formvars['weiter_erfassen'] == 1)echo 'checked="true"'; ?>>und einen weiteren Datensatz erfassen
+  		<input type="checkbox" name="weiter_erfassen" value="1" <? if($this->formvars['weiter_erfassen'] == 1)echo 'checked="true"'; ?>><? echo $strCreateAnotherOne; ?>
   	</td>
 	</tr>
 	<tr>

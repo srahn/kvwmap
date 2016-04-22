@@ -256,7 +256,7 @@
 						$datapart .= 	'&subform_link=true\')"><span>'.$strShowAll.'</span></a>';												
 						if($attributes['subform_layer_privileg'][$j] > 0 AND !$lock[$k]){
 							if($attributes['embedded'][$j] == true){
-								$datapart .= '&nbsp;<a class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz';
+								$datapart .= '&nbsp;<a id="new_'.$layer_id.'_'.$name.'_'.$k.'" class="buttonlink" href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz';
 								$data = '';
 								for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
 									$datapart .= '&attributenames['.$p.']='.$attributes['subform_pkeys'][$j][$p];
