@@ -1080,7 +1080,7 @@ class pgdatabase {
 			}
 		}
 		$sql .= ")";
-		$sql.="AND f.flurstueckskennzeichen IN ('".implode($FlurstKennz, "', '")."') ";
+		$sql.="AND f.flurstueckskennzeichen IN ('".implode("','", $FlurstKennz)."') ";
 		$sql.="UNION ";
 		$sql.="SELECT f.flurstueckskennzeichen as flurstkennz FROM alkis.ax_flurstueck AS f ";
 		$sql.="WHERE (FALSE";
@@ -1092,7 +1092,7 @@ class pgdatabase {
 			}
 		}
 		$sql .= ")";
-		$sql.="AND f.flurstueckskennzeichen IN ('".implode($FlurstKennz, "', '")."')";
+		$sql.="AND f.flurstueckskennzeichen IN ('".implode("','", $FlurstKennz)."')";
     $this->debug->write("<p>postgresql.php getFlurstuecksKennzByGemeindeIDs() Abfragen erlaubten Flurstückskennzeichen nach Gemeindeids:<br>".$sql,4);
 		#echo $sql;
     $query=pg_query($sql);

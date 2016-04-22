@@ -10508,7 +10508,7 @@ class GUI {
 	} # ende function flurstSuchenByLatLng
 
 	function Flurstueck_GetVersionen(){
-		$ret=$this->Stelle->getFlurstueckeAllowed($FlurstKennzListe, $this->pgdatabase);
+		$ret=$this->Stelle->getFlurstueckeAllowed(array($this->formvars['flurstkennz']), $this->pgdatabase);
     if($ret[0]) {
       $this->Fehlermeldung=$ret[1];
     }
