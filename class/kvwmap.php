@@ -2616,11 +2616,11 @@ class GUI {
         $style['symbolname'] = 'circle';
         $style['size'] = 6;
         $style['maxsize'] = 8;
-        $style['color'] = '255 255 255';
-        $style['outlinecolor'] = '0 0 0';
+        $style['color'] = ($this->formvars['style_color'] != '') ? $this->formvars['style_color'] : '255 255 255';
+        $style['outlinecolor'] = ($this->formvars['style_outlinecolor'] != '') ? $this->formvars['style_outlinecolor'] : '0 0 0';
       } break;
       case 1 : {
-        $style['color'] = '0 0 0';
+        $style['color'] = ($this->formvars['style_color'] != '') ? $this->formvars['style_color'] : '0 0 0';
         $style['width'] = '2';
       } break;
       case 2 : {
