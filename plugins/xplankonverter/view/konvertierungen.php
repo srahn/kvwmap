@@ -2,12 +2,46 @@
   include('header.php');
 ?>
 <script language="javascript" type="text/javascript">
+  $(function () {
+    result = $('#eventsResult');
+
+    // event handler
+    $('#konvertierungen_table').on('load-success.bs.table', function (e, data) {
+      result.text('Tabelle erfolgreich geladen.');
+      $('.fa-play').click(
+        starteKonvertierung
+      );
+    })
+    .on('load-error.bs.table', function (e, status) {
+      result.text('Event: load-error.bs.table');
+    });
+    // more examples for register events on data tables: http://jsfiddle.net/wenyi/e3nk137y/36/
+  });
+
+  // functions
+  starteKonvertierung = function(e) {
+    var konvertierung_id = $(e.target).parent().parent().attr('konvertierung_id');
+    result.text('Starte Konvertierung für Id: ' + konvertierung_id);
+    $.ajax({
+      url: 'index.php?go=xplankonverter_konvertierung_ausfuehren',
+      data: {
+        konvertierung_id: konvertierung_id
+      },
+      success: function(response) {
+        result.text(response.msg);
+      }
+    });
+  };
+  
+  // formatter functions
 	function konvertierungFunctionsFormatter(value, row) {
-    output =  '<a title="Konvertierung bearbeiten" href="index.php?go=Layer-Suche_Suchen&selected_layer_id=8&operator_konvertierung_id==&value_konvertierung_id=' + value + '"><i class="fa fa-pencil"></i></a>&nbsp;&nbsp;';
+    output = '<span konvertierung_id="' + value + '">';
+    output +=  '<a title="Konvertierung bearbeiten" href="index.php?go=Layer-Suche_Suchen&selected_layer_id=8&operator_konvertierung_id==&value_konvertierung_id=' + value + '"><i class="fa fa-pencil"></i></a>&nbsp;&nbsp;';
     output += '<a title="Shapefiles bearbeiten" href="index.php?go=xplankonverter_shapefiles_index&konvertierung_id=' + value + '"><i class="fa fa-upload"></i></a>&nbsp;&nbsp;';
     output += '<a title="Konvertierung validieren" href="index.php?go=xplankonverter_konvertierungen_validate&konvertierung_id=' + value + '"><i class="fa fa-check-square-o"></i></a>&nbsp;';
-    output += '<a title="Konvertierung ausf&uuml;hren" href="index.php?go=xplankonverter_konvertierungen_execute&konvertierung_id=' + value + '"><i class="fa fa-play"></i></a>&nbsp;';
+    output += '<a id="konvertierung_ausfuehren" href="#"><i title="Konvertierung ausf&uuml;hren" class="fa fa-play"></i></a>&nbsp;';
     output += '<a title="Konvertierung l&ouml;schen" href=""><i class="fa fa-trash"></i></a>&nbsp;';
+    output += '</span>';
     return output;
   }
 </script>
@@ -19,6 +53,9 @@
   <li><a data-toggle='tab' href='#map'>Karte</a></li>
 </ul//-->
 <h2>Konvertierungen</h2>
+<div class="alert alert-success" id="eventsResult">
+    Here is the result of event.
+</div>
 <table
   id="konvertierungen_table"
   data-toggle="table"

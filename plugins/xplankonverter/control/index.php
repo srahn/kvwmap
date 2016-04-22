@@ -279,9 +279,6 @@ switch($this->go){
           $this->konvertierung->update();
           // Seite updaten
           $this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
-          // Konvertierung starten
-          //
-          // Konvertierung hier ...
           //
           // Status setzen
           $this->konvertierung->set('status', Konvertierung::$STATUS[5]);
@@ -306,6 +303,15 @@ switch($this->go){
       }
     }
     $this->output();
+  } break;
+
+  case 'xplankonverter_konvertierung_ausfuehren' : {
+    $response = array(
+      'success' => true,
+      'msg' => 'Konvertierung erfolgreich ausgeführt.'
+    );
+    header('Content-Type: application/json');
+    echo json_encode($response);
   } break;
 
   case 'home' : {
