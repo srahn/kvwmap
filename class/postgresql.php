@@ -1071,30 +1071,35 @@ class pgdatabase {
  
   function getFlurstuecksKennzByGemeindeIDs($GemeindenStelle, $FlurstKennz){
 		$sql ="SELECT f.flurstueckskennzeichen as flurstkennz FROM alkis.ax_historischesflurstueckohneraumbezug AS f, alkis.pp_gemarkung AS g ";
-		$sql.="WHERE f.gemarkungsnummer=g.gemarkung AND (FALSE";
-		if($GemeindenStelle['ganze_gemeinde'] != NULL)$sql.=" OR (g.land::text||g.regierungsbezirk::text||lpad(g.kreis::text, 2, '0')||lpad(g.gemeinde::text, 3, '0'))::integer IN (".implode(',', array_keys($GemeindenStelle['ganze_gemeinde'])).")";
-		if($GemeindenStelle['ganze_gemarkung'] != NULL)$sql.=" OR f.land*10000 + f.gemarkungsnummer IN (".implode(',', array_keys($GemeindenStelle['ganze_gemarkung'])).")";
-		if($GemeindenStelle['eingeschr_gemarkung'] != NULL){
-			foreach($GemeindenStelle['eingeschr_gemarkung'] as $eingeschr_gemkg_id => $fluren){
-				$sql.=" OR (f.land*10000 + f.gemarkungsnummer = ".$eingeschr_gemkg_id." AND flurnummer IN (".implode(',', $fluren)."))";
-			}
-		}
-		$sql .= ")";
+		$sql.="WHERE f.gemarkungsnummer=g.gemarkung ";
 		$sql.="AND f.flurstueckskennzeichen IN ('".implode("','", $FlurstKennz)."') ";
+		if($GemeindenStelle != NULL){
+			$sql.="AND (FALSE";
+			if($GemeindenStelle['ganze_gemeinde'] != NULL)$sql.=" OR (g.land::text||g.regierungsbezirk::text||lpad(g.kreis::text, 2, '0')||lpad(g.gemeinde::text, 3, '0'))::integer IN (".implode(',', array_keys($GemeindenStelle['ganze_gemeinde'])).")";
+			if($GemeindenStelle['ganze_gemarkung'] != NULL)$sql.=" OR f.land*10000 + f.gemarkungsnummer IN (".implode(',', array_keys($GemeindenStelle['ganze_gemarkung'])).")";
+			if($GemeindenStelle['eingeschr_gemarkung'] != NULL){
+				foreach($GemeindenStelle['eingeschr_gemarkung'] as $eingeschr_gemkg_id => $fluren){
+					$sql.=" OR (f.land*10000 + f.gemarkungsnummer = ".$eingeschr_gemkg_id." AND flurnummer IN (".implode(',', $fluren)."))";
+				}
+			}
+			$sql .= ")";
+		}		
 		$sql.="UNION ";
 		$sql.="SELECT f.flurstueckskennzeichen as flurstkennz FROM alkis.ax_flurstueck AS f ";
-		$sql.="WHERE (FALSE";
-		if($GemeindenStelle['ganze_gemeinde'] != NULL)$sql.=" OR (f.land::text||f.regierungsbezirk::text||lpad(f.kreis::text, 2, '0')||lpad(f.gemeinde::text, 3, '0'))::integer IN (".implode(',', array_keys($GemeindenStelle['ganze_gemeinde'])).")";
-		if($GemeindenStelle['ganze_gemarkung'] != NULL)$sql.=" OR f.land*10000 + f.gemarkungsnummer IN (".implode(',', array_keys($GemeindenStelle['ganze_gemarkung'])).")";
-		if($GemeindenStelle['eingeschr_gemarkung'] != NULL){
-			foreach($GemeindenStelle['eingeschr_gemarkung'] as $eingeschr_gemkg_id => $fluren){
-				$sql.=" OR (f.land*10000 + f.gemarkungsnummer = ".$eingeschr_gemkg_id." AND flurnummer IN (".implode(',', $fluren)."))";
+		$sql.="WHERE f.flurstueckskennzeichen IN ('".implode("','", $FlurstKennz)."') ";
+		if($GemeindenStelle != NULL){
+			$sql.="AND (FALSE";
+			if($GemeindenStelle['ganze_gemeinde'] != NULL)$sql.=" OR (f.land::text||f.regierungsbezirk::text||lpad(f.kreis::text, 2, '0')||lpad(f.gemeinde::text, 3, '0'))::integer IN (".implode(',', array_keys($GemeindenStelle['ganze_gemeinde'])).")";
+			if($GemeindenStelle['ganze_gemarkung'] != NULL)$sql.=" OR f.land*10000 + f.gemarkungsnummer IN (".implode(',', array_keys($GemeindenStelle['ganze_gemarkung'])).")";
+			if($GemeindenStelle['eingeschr_gemarkung'] != NULL){
+				foreach($GemeindenStelle['eingeschr_gemarkung'] as $eingeschr_gemkg_id => $fluren){
+					$sql.=" OR (f.land*10000 + f.gemarkungsnummer = ".$eingeschr_gemkg_id." AND flurnummer IN (".implode(',', $fluren)."))";
+				}
 			}
+			$sql .= ")";
 		}
-		$sql .= ")";
-		$sql.="AND f.flurstueckskennzeichen IN ('".implode("','", $FlurstKennz)."')";
     $this->debug->write("<p>postgresql.php getFlurstuecksKennzByGemeindeIDs() Abfragen erlaubten Flurstückskennzeichen nach Gemeindeids:<br>".$sql,4);
-		#echo $sql;
+		echo $sql;
     $query=pg_query($sql);
     if ($query==0) {
       $ret[0]=1; $ret[1]="Fehler bei der Abfrage der zur Anzeige erlaubten Flurstücke";

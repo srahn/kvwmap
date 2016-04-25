@@ -3587,18 +3587,20 @@ class stelle {
 		#echo $sql;
 		$this->debug->write("<p>file:users.php class:stelle->getGemeindeIDs - Lesen der GemeindeIDs zur Stelle:<br>".$sql,4);
 		$query=mysql_query($sql,$this->database->dbConn);
-		$liste['ganze_gemeinde'] = Array();
-		$liste['eingeschr_gemeinde'] = Array();
-		$liste['ganze_gemarkung'] = Array();
-		$liste['eingeschr_gemarkung'] = Array();
-		while($rs=mysql_fetch_assoc($query)) {
-			if($rs['Gemarkung'] != ''){
-				$liste['eingeschr_gemeinde'][$rs['Gemeinde_ID']] = NULL;
-				if($rs['Flur'] != '')$liste['eingeschr_gemarkung'][$rs['Gemarkung']][] = $rs['Flur'];
-				else $liste['ganze_gemarkung'][$rs['Gemarkung']] = NULL;
-			}
-			else{
-				$liste['ganze_gemeinde'][$rs['Gemeinde_ID']] = NULL;
+		if(mysql_num_rows($query) > 0){
+			$liste['ganze_gemeinde'] = Array();
+			$liste['eingeschr_gemeinde'] = Array();
+			$liste['ganze_gemarkung'] = Array();
+			$liste['eingeschr_gemarkung'] = Array();
+			while($rs=mysql_fetch_assoc($query)) {
+				if($rs['Gemarkung'] != ''){
+					$liste['eingeschr_gemeinde'][$rs['Gemeinde_ID']] = NULL;
+					if($rs['Flur'] != '')$liste['eingeschr_gemarkung'][$rs['Gemarkung']][] = $rs['Flur'];
+					else $liste['ganze_gemarkung'][$rs['Gemarkung']] = NULL;
+				}
+				else{
+					$liste['ganze_gemeinde'][$rs['Gemeinde_ID']] = NULL;
+				}
 			}
 		}
 		return $liste;		
