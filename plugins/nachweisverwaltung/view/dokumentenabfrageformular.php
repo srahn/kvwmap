@@ -235,7 +235,7 @@ else {
     </td>
   </tr>
   <tr> 
-    <td height="35px" colspan="2"><input type="radio" name="abfrageart" value="poly" <?php if ($this->formvars['abfrageart']=='poly' OR $this->formvars['abfrageart']=='') { ?> checked<?php } ?>> 
+    <td height="35px" colspan="2"><input type="radio" name="abfrageart" id="abfrageart_poly" value="poly" <?php if ($this->formvars['abfrageart']=='poly' OR $this->formvars['abfrageart']=='') { ?> checked<?php } ?>> 
    <span class="fett">Auswahl im Kartenausschnitt über Suchpolygon</span></td>
   </tr>
   <tr> 
