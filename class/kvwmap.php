@@ -12912,6 +12912,8 @@ class GUI {
           $FlstID = array($FLstID);
         }
         $FlstNrFormObj=new FormObject("FlstID","select",$FlstNrListe['FlstID'],array($FlstID),$FlstNrListe['FlstNr'],"12","","multiple",100);
+				$FlstNrFormObj->insertOption('alle',false,' -- alle -- ', 0);
+				$FlstNrFormObj->addJavaScript('onclick', 'if(this.value==\'alle\'){this.options[0].selected = false; for(var i=1; i<this.options.length; i++){this.options[i].selected = true;}}');
         $FlstNrFormObj->outputHTML();
         if($this->formvars['selFlstID'] != ''){
           $SelectedFlstNrFormObj=new FormObject("selectedFlstID","select", $selFlstID, NULL, $selFlstID,"12","","multiple",170);
@@ -13206,7 +13208,7 @@ class FormObject {
   } # ende constructor
 
   function addJavaScript($event,$script){
-    $this->JavaScript=$event.'="'.$script.'"';
+    $this->JavaScript.=' '.$event.'="'.$script.'"';
   }
 
   function addOption($value,$selected,$label) {
