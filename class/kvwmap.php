@@ -6310,10 +6310,105 @@ class GUI {
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $attrib['name'] = $this->formvars['class_name'];
     $attrib['layer_id'] = $this->formvars['selected_layer_id'];
-    $attrib['order'] = 1;
+    $attrib['order'] = ($this->formvars['class_order'] != '') ? $this->formvars['class_order'] : 1;
+    $attrib['expression'] = ($this->formvars['class_expression'] != '') ? $this->formvars['class_expression'] : '';
     return $mapDB->new_Class($attrib);
   }
-	
+
+  function Layereditor_AutoklassenHinzufuegen() {
+    $num_classes = 5;
+    $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+    $this->layerdata = $mapDB->get_Layer($this->formvars['selected_layer_id']);
+    $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+    $this->formvars['Datentyp'] = $this->layerdata['Datentyp'];
+
+    # Get the sql to query the map data
+    if ($this->formvars['jahr'] == '') $this->formvars['jahr'] = '15';
+    $this->layerdata['Data'] = str_replace('$jahr', str_replace(';', '', $this->formvars['jahr']), $this->layerdata['Data']);
+    if ($this->formvars['geschlecht'] == '') $this->formvars['geschlecht'] = 'g';
+    $this->layerdata['Data'] = str_replace('$geschlecht', str_replace(';', '', $this->formvars['geschlecht']), $this->layerdata['Data']);
+    $begin = strpos($this->layerdata['Data'], '(') + 1;
+    $end = strrpos($this->layerdata['Data'], ')');
+    $data_sql = substr($this->layerdata['Data'], $begin, $end - $begin);
+
+  #  $method = 'gleich große Klassengrenzen';
+    $method = 'gleiche Anzahl Klassenmitglieder';
+    $auto_classes = $this->AutoklassenErzeugen($layerdb, $data_sql, $this->layerdata['classitem'], $method, $num_classes);
+
+    for ($i = 0; $i < count($auto_classes); $i++) {
+      $this->formvars['class_name'] = $auto_classes[$i]['name'];
+      $this->formvars['class_order'] = $auto_classes[$i]['order'];
+      $this->formvars['class_expression'] = $auto_classes[$i]['expression'];
+      $class = $this->Layereditor_KlasseHinzufuegen();
+    }
+  }
+  
+  function AutoklassenErzeugen($layerdb, $data_sql, $class_item, $method, $num_classes) {
+    $classes = array();
+
+    switch ($method) {
+      case 'gleiche große Klassengrenzen' : {
+        $sql = "
+          SELECT
+            min(" . $class_item . "),
+            max(" . $class_item . ")
+          FROM
+            (
+              " . $data_sql . "
+            ) AS data
+        ";
+        #echo '<br>' . $sql;
+
+        $ret=$layerdb->execSQL($sql, 4, 0);
+        if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
+        while($rs = pg_fetch_assoc($ret[1])){
+          $min = $rs['min'];
+          $max = $rs['max'];
+        }
+        $round_faktor = pow(10, strlen((string)$min) - 1);
+        $range_floor = floor($min / $round_faktor) * $round_faktor;
+        $range_ceil = ceil($max / $round_faktor) * $round_faktor;
+        $range_step = ($range_ceil - $range_floor) / ($num_classes);
+
+        for ($order = 1; $range_floor < $range_ceil; $range_floor += $range_step) {
+          $class['name'] = $range_floor . ' - ' . ($range_floor + $range_step);
+          $class['order'] = $order++;
+          $class['expression'] = '([' . $class_item . '] >= ' . $range_floor . ' AND [' . $class_item . '] < ' . ($range_floor + $range_step) . ')';
+          $classes[] = $class;
+        }
+      } break;
+      case 'gleiche Anzahl Klassenmitglieder' : {
+        $sql = "
+          SELECT
+            " . $class_item . "
+          FROM
+            (
+              " . $data_sql . "
+            ) AS data
+          ORDER BY
+            " . $class_item . "
+        ";
+
+        $ret=$layerdb->execSQL($sql, 4, 0);
+        if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
+        $rows = pg_fetch_all($ret[1]);
+        $range_floor = 0;
+        $range_ceil = count($rows);
+        $range_step = floor($range_ceil / $num_classes);
+        for ($order = 1; $range_floor < ($range_ceil - 1); $range_floor += $range_step) {
+          if ($order == $num_classes) {
+            $range_step = $range_ceil - $range_floor - 1;
+          }
+          $class['name'] = $rows[$range_floor][$class_item] . ' - ' . $rows[$range_floor + $range_step][$class_item];
+          $class['order'] = $order++;
+          $class['expression'] = '([' . $class_item . '] >= ' . $rows[$range_floor][$class_item] . ' AND [' . $class_item . '] < ' . $rows[$range_floor + $range_step][$class_item] . ')';
+          $classes[] = $class;
+        }
+      } break;
+    }
+    return $classes;
+  }
+
   function LayerAnlegen(){
 		global $supportedLanguages;
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);

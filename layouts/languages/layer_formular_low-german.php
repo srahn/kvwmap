@@ -36,6 +36,7 @@
   $strSignOrder="Riegfolg vun de Teiken";
   $strDelete="löschen";
   $strAddClass="Klass tau fögen";
+  $strAddAutoClasses="Klassen van süllmst tau fögen";
   $strOtherExtentions="tosett Instellen";
   $strButtonSave="Ännern";
   $strBack="Trüggsetten";

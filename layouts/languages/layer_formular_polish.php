@@ -36,6 +36,7 @@
   $strSignOrder="kolejność znaków"; 
   $strDelete="usuń"; 
   $strAddClass="dodaj klasę"; 
+  $strAddAutoClasses="Dodaj klas";
   $strOtherExtentions="zaawansowane ustawienia"; 
   $strButtonSave="zmień"; 
   $strBack="cofnij"; 

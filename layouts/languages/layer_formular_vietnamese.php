@@ -36,6 +36,7 @@
   $strSignOrder="Thứ tự ký hiệu";
   $strDelete="Xóa";
   $strAddClass="Thêm lớp";
+  $strAddAutoClasses="Thêm lớp";
   $strOtherExtentions="Các lựa chọn khác";
   $strButtonBack="Quay lại";  
   $strButtonSave="Lưu sửa đổi";

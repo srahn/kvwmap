@@ -1148,6 +1148,12 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->Layereditor();
 	  } break;
 
+	  case 'Layereditor_Autoklassen_Hinzufügen' : {
+			$GUI->checkCaseAllowed('Layereditor');
+			$GUI->Layereditor_AutoklassenHinzufuegen();
+			$GUI->Layereditor();
+	  } break;
+
 	  case 'Layereditor_Als neuen Layer eintragen' : {
 			$GUI->checkCaseAllowed('Layereditor');
 			$GUI->LayerAnlegen();

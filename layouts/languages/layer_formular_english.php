@@ -37,6 +37,7 @@
   $strSignOrder="Drawingorder";
   $strDelete="Delete";
   $strAddClass="Add class";
+  $strAddAutoClasses="Add auto classes";
   $strOtherExtentions="extended configuration";
   $strBack="Back";
   $strButtonSave="Save";
