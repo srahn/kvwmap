@@ -124,7 +124,7 @@ include_once(SNIPPETS.'/generic_form_parts.php');
 									echo '<div id="'.$prefix.'_avf_'.$this->attributes['name'][$i].'" style="';
 									if(in_array($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]], array('LIKE', 'NOT LIKE')))echo 'display:none';
 									echo '">';
-										echo Autovervollstaendigungsfeld($this->formvars['selected_layer_id'], $this->attributes['name'][$i], $i, $this->attributes['alias'][$i], $prefix.'value_'.$this->attributes['name'][$i], $this->formvars[$prefix.'value_'.$this->attributes['name'][$i]], $this->attributes['enum_output'][$i][0], 1, $prefix, NULL, NULL, NULL, NULL, false, 15);
+										echo Autovervollstaendigungsfeld($this->formvars['selected_layer_id'], $this->attributes['name'][$i], $i, $this->attributes['alias'][$i], $prefix.'value_'.$this->attributes['name'][$i], $this->formvars[$prefix.'value_'.$this->attributes['name'][$i]], $this->attributes['enum_output'][$i][0], 1, $prefix, NULL, NULL, NULL, NULL, false, 15, false, 40);
 									echo '</div>';
 									echo '<div id="'.$prefix.'_text_'.$this->attributes['name'][$i].'" style="';
 									if(!in_array($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]], array('LIKE', 'NOT LIKE')))echo 'display:none';
