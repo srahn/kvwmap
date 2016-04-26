@@ -10414,12 +10414,21 @@ class GUI {
     if(count($GemkgListe['GemkgID']) > 0){
       # Die Gemarkung ist ausgewählt und gültig aber Flur leer, zoom auf Gemarkung
       if($FlurID==0 OR $FlurID=='-1'){
-        $this->loadMap('DataBase');
-        $this->zoomToALKGemarkung($GemkgID,10);	
-        $currenttime=date('Y-m-d H:i:s',time());
-        $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-        $this->drawMap();
-        $this->saveMap('');
+				if($this->formvars['ALK_Suche'] == 1){
+					$this->loadMap('DataBase');
+					$this->zoomToALKGemarkung($GemkgID,10);	
+					$currenttime=date('Y-m-d H:i:s',time());
+					$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
+					$this->drawMap();
+					$this->saveMap('');
+				}
+				else{			# Anzeige der Flurstuecke der Gemarkung
+					$FlstNr=new flurstueck('',$this->pgdatabase);
+					$FlstNrListe=$FlstNr->getFlstListe($GemID,$GemkgID,'',$this->formvars['historical']);
+					$FlstID = $FlstNrListe['FlstID'];
+					$FlurstKennz = array_values(array_unique($FlstID));
+					$this->flurstAnzeige($FlurstKennz);
+				}
       }
       else {
         # ist Gemarkung und Flur ausgefüllt aber keine Angabe zum Flurstück, zoom auf Flur
@@ -10435,7 +10444,6 @@ class GUI {
 	        else{			# Anzeige der Flurstuecke der Flur
 	      		$FlstNr=new flurstueck('',$this->pgdatabase);
 	      		$FlstNrListe=$FlstNr->getFlstListe($GemID,$GemkgID,$FlurID,$this->formvars['historical']);
-		        $FLstID=$FlstNrListe['FlstID'][0];
 		        $FlstID = $FlstNrListe['FlstID'];
 	          $FlurstKennz = array_values(array_unique($FlstID));
 	          $this->flurstAnzeige($FlurstKennz);
