@@ -7,7 +7,6 @@ include_once(CLASSPATH . 'LayerGroup.php');
 include_once(CLASSPATH . 'data_import_export.php');
 include(PLUGINS . 'xplankonverter/model/konvertierung.php');
 include(PLUGINS . 'xplankonverter/model/shapefiles.php');
-include(PLUGINS . 'xplankonverter/model/validator.php');
 include(PLUGINS . 'xplankonverter/model/xplan.php');
 
 switch($this->go){
@@ -39,7 +38,7 @@ switch($this->go){
 
   case 'build_gml' : {
     include(PLUGINS . 'xplankonverter/model/build_gml.php');
-
+    
     // Die Verbindung zur Datenbank kvwmapsp ist verfügbar in
     //$this->pgdatabase->dbConn);
     $this->gml_builder = new gml_builder($this->pgdatabase);
@@ -58,10 +57,10 @@ switch($this->go){
     // Die Verbindung zur Datenbank kvwmapsp ist verfügbar in
     //$this->pgdatabase->dbConn);
     $this->converter = new Converter($this->pgdatabase, PG_CONNECTION);
-
+    
     // Einbindung des Views
     $this->main = PLUGINS . 'xplankonverter/view/convert.php';
-
+    
     $this->initialData = array(
       'config' => array(
         'active' => 'step1',
@@ -91,7 +90,70 @@ switch($this->go){
     $this->output();
   } break;
 
-  case 'xplankonverter_shapefiles_index' : {
+  /*
+  * Anwendungsfall, der aus jeder gml_class einen Layer erzeugt.
+  */
+  /*
+  case 'xplankonverter_xplan_classes' : {
+    # get layerGroupId or create a group if not exists
+    $layer_group_id = 12;
+
+    $gml_classes = getGMLClasses();
+
+    foreach($gml_classes AS $gml_class) {
+      foreach(array(0 => 'point', 1 => 'line', 2 => 'polygon') AS $geom_type_key => $geom_type_value) {
+        # create layer
+        $this->formvars['Name'] = $gml_class['name'];
+        $this->formvars['Datentyp'] = $shapeFile->get('datatype');
+        $this->formvars['Gruppe'] = $layer_group_id;
+        $this->formvars['pfad'] = 'Select * from ' . $shapeFile->dataTableName() . ' where 1=1';
+        $this->formvars['Data'] = 'the_geom from (select oid, * from ' .
+          $shapeFile->dataSchemaName() . '.' . $shapeFile->dataTableName() .
+          ' where 1=1) as foo using unique oid using srid=' . $shapeFile->get('epsg_code');
+        $this->formvars['maintable'] = $shapeFile->dataTableName();
+        $this->formvars['schema'] = $shapeFile->dataSchemaName();
+        $this->formvars['connection'] = $this->pgdatabase->connect_string;
+        $this->formvars['connectiontype'] = '6';
+        $this->formvars['filteritem'] = 'oid';
+        $this->formvars['tolerance'] = '5';
+        $this->formvars['toleranceunits'] = 'pixels';
+        $this->formvars['epsg_code'] = $shapeFile->get('epsg_code');
+        $this->formvars['querymap'] = '1';
+        $this->formvars['queryable'] = '1';
+        $this->formvars['transparency'] = '75';
+        $this->formvars['postlabelcache'] = '0';
+        $this->formvars['allstellen'] = '2300';
+        $this->formvars['ows_srs'] = 'EPSG:' . $shapeFile->get('epsg_code') . ' EPSG:25833 EPSG:4326 EPSG:2398';
+        $this->formvars['wms_server_version'] = '1.1.0';
+        $this->formvars['wms_format'] = 'image/png';
+        $this->formvars['wms_connectiontimeout'] = '60';
+        $this->formvars['selstellen'] = '1, ' . $this->konvertierung->get('stelle_id') . ', 1, ' . $this->konvertierung->get('stelle_id');
+        $this->LayerAnlegen();
+
+
+        # Ordne layer zur Stelle
+        $this->Stellenzuweisung(
+          array($shapeFile->get('layer_id')),
+          array($this->konvertierung->get('stelle_id'))
+        );
+
+        # Füge eine Klasse zum neuen Layer hinzu.
+        $this->formvars['class_name'] = 'alle';
+        $this->formvars['class_id'] = $this->Layereditor_KlasseHinzufuegen();
+
+        # Füge einen Style zur Klasse hinzu
+        $this->add_style();
+
+      }
+    }
+  #}  end of upload files
+  $this->main = '../../plugins/xplankonverter/view/shapefiles.php';
+      
+   
+    $this->output();
+  } break;
+*/
+  case 'xplankonverter_shapefiles_index': {
     if ($this->formvars['konvertierung_id'] == '') {
       $this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
       $this->main = 'Hinweis.php';
@@ -121,7 +183,7 @@ switch($this->go){
           foreach($uploaded_files AS $uploaded_file) {
             if ($uploaded_file['extension'] == 'dbf' and $uploaded_file['state'] != 'ignoriert') {
 
-              # delete existing shape file
+              # delete existing shape file 
               $shapeFile = new ShapeFile($this, 'xplankonverter', 'shapefiles');
               $shapeFile = $shapeFile->find_where("
                 filename = '" . $uploaded_file['filename'] . "' AND
@@ -279,9 +341,6 @@ switch($this->go){
           $this->konvertierung->update();
           // Seite updaten
           $this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
-          // Konvertierung starten
-          //
-          // Konvertierung hier ...
           //
           // Status setzen
           $this->konvertierung->set('status', Konvertierung::$STATUS[5]);
@@ -308,9 +367,19 @@ switch($this->go){
     $this->output();
   } break;
 
+  case 'xplankonverter_konvertierung_ausfuehren' : {
+    $response = array(
+      'success' => true,
+      'msg' => 'Konvertierung erfolgreich ausgeführt.'
+    );
+    header('Content-Type: application/json');
+    echo json_encode($response);
+  } break;
+
   case 'home' : {
     // Einbindung des Views
     $this->main=PLUGINS . 'xplankonverter/view/home.php';
+
     $this->output();
 
   } break;
