@@ -3553,20 +3553,24 @@ class GUI {
       }
     }
 		
-		$this->last_query = $this->user->rolle->get_last_query();
-		#if($this->formvars['search']){        # man kam von der Suche   -> nochmal suchen
-			$this->formvars['embedded_dataPDF'] = true;		# damit der Aufruf von output() verhindert wird
-			$this->GenerischeSuche_Suchen();
-		#}
-		#else{                                 # man kam aus einer Sachdatenabfrage    -> nochmal abfragen			# den Fall kann man wohl ignorieren, weil die Suche bei lastquery auch für die Kartenabfrage funktioniert...
-		#	$this->queryMap();
-		#}
-		$attributes = $this->qlayerset[0]['attributes'];
-		$attribute = $this->formvars['klass_'.$this->formvars['chosen_layer_id']];
-		$result= $this->qlayerset[0]['shape'];
-		
-		for($i = 0; $i < count($result); $i++){
-			$geom_oids[] = $result[$i][$this->formvars['layer_tablename'].'_oid'];
+		if($this->formvars['no_query'] != true){
+			$this->last_query = $this->user->rolle->get_last_query();
+			#if($this->formvars['search']){        # man kam von der Suche   -> nochmal suchen
+				$this->formvars['embedded_dataPDF'] = true;		# damit der Aufruf von output() verhindert wird
+				$this->GenerischeSuche_Suchen();
+			#}
+			#else{                                 # man kam aus einer Sachdatenabfrage    -> nochmal abfragen			# den Fall kann man wohl ignorieren, weil die Suche bei lastquery auch für die Kartenabfrage funktioniert...
+			#	$this->queryMap();
+			#}
+			$attributes = $this->qlayerset[0]['attributes'];
+			$attribute = $this->formvars['klass_'.$this->formvars['chosen_layer_id']];
+			$result= $this->qlayerset[0]['shape'];
+			for($i = 0; $i < count($result); $i++){
+				$geom_oids[] = $result[$i][$this->formvars['layer_tablename'].'_oid'];
+			}
+		}
+		else{			# wird von der Jagdbezirkssuche aus verwendet
+			$geom_oids = $oids;
 		}
 		
     if($oids != ''){
