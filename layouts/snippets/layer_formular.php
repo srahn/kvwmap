@@ -562,7 +562,7 @@ else {
 			}
 			?>
 			<tr>
-				<td style="border-bottom:1px solid #C3C7C3" colspan="8"><a href="index.php?go=Layereditor_Klasse_Hinzufügen&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>#Klassen"><?php echo $strAddClass; ?></a></td>
+				<td style="border-bottom:1px solid #C3C7C3" colspan="8"><a href="index.php?go=Layereditor_Klasse_Hinzufügen&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>#Klassen"><?php echo $strAddClass; ?></a> | <a href="index.php?go=Layereditor_Autoklassen_Hinzufügen&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>#Klassen"><?php echo $strAddAutoClasses; ?></a></td>
 			</tr>
 			<tr>
 				<td colspan="8"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>">Styles und Labels bearbeiten</a></td>
