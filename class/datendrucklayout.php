@@ -169,6 +169,7 @@ class ddl {
 										$this->gui->formvars['value_'.$attributes['name'][$p]] = '';
 										$this->gui->formvars['operator_'.$attributes['name'][$p]] = '';
 									}
+									$this->gui->formvars['value_'.$this->layerset['maintable'].'_oid'] = '';
 									for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){			# die Suchparameter für die Layersuche
 										$this->gui->formvars['value_'.$this->attributes['subform_pkeys'][$j][$p]] = $this->result[$i][$attributes['subform_pkeys'][$j][$p]];
 										$this->gui->formvars['operator_'.$this->attributes['subform_pkeys'][$j][$p]] = '=';
@@ -441,6 +442,7 @@ class ddl {
   function createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $selected_layer_id, $layout, $oids, $result, $stelle, $user, $preview = NULL){
 		# Für einen ausgewählten Layer wird das übergebene Result-Set nach den Vorgaben des übergebenen Layouts in ein PDF geschrieben
 		# Werden $pdfobject, $offsetx und $offsety übergeben, wird kein neues PDF-Objekt erzeugt, sondern das übergebene PDF-Objekt eines übergeordneten Layers+Layout verwendet (eingebettete Layouts)
+		$this->layerset = $layerset[0];
   	$this->layout = $layout;
   	$this->Stelle = $stelle;
 		$this->attributes = $attributes;
@@ -482,8 +484,9 @@ class ddl {
     	if($this->layout['type'] == 0 AND $i > 0){		# neue Seite beim seitenweisen Typ und neuem Datensatz 
     		$this->pdf->newPage();
 				$this->add_static_elements($offsetx);
-    	}	
-	    if($this->datasetcount_on_page > 0 AND $this->layout['type'] != 0 AND $this->miny[$lastpage] < $this->yoffset_onpage/$this->datasetcount_on_page + 70){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
+    	}
+			$this->yoffset_onpage = $this->maxy - $this->miny[$lastpage];			# der Offset mit dem die Elemente beim Untereinander-Typ nach unten versetzt werden
+			if($this->datasetcount_on_page > 0 AND $this->layout['type'] != 0 AND $this->miny[$lastpage] < $this->yoffset_onpage/$this->datasetcount_on_page + 40){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
 				$this->datasetcount_on_page = 0;
 				$this->i_on_page = 0;
 				#$this->maxy = 0;
@@ -492,8 +495,7 @@ class ddl {
 				$this->pdf->newPage();
 				$this->miny[$lastpage] = 1000000;
 				#$this->add_static_elements($offsetx, $offsety);
-			}
-			$this->yoffset_onpage = $this->maxy - $this->miny[$lastpage];			# der Offset mit dem die Elemente beim Untereinander-Typ nach unten versetzt werden
+			}			
 			$this->layout['offset_attributes'] = array();
 			
 			for($j = 0; $j < count($this->layout['texts']); $j++){
