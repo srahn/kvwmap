@@ -997,6 +997,13 @@ class GUI {
               if($layerset[$i]['Data'] != ''){
 								$layerset[$i]['Data'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[$i]['Data']);
 								$layerset[$i]['Data'] = str_replace('$language', $this->user->rolle->language, $layerset[$i]['Data']);
+
+                if ($this->formvars['jahr'] == '') $this->formvars['jahr'] = '15';
+                $layerset[$i]['Data'] = str_replace('$jahr', str_replace(';', '', $this->formvars['jahr']), $layerset[$i]['Data']);
+
+                if ($this->formvars['geschlecht'] == '') $this->formvars['geschlecht'] = 'g';
+                $layerset[$i]['Data'] = str_replace('$geschlecht', str_replace(';', '', $this->formvars['geschlecht']), $layerset[$i]['Data']);
+
                 $layer->set('data', $layerset[$i]['Data']);
               }
   
