@@ -1046,7 +1046,7 @@ class Nachweis {
           $this->richtung="ASC";
         }
         $sql.=" ORDER BY ".$order." ".$richtung;        
-        $ret=$this->database->execSQL($sql,4, 0);    
+        $ret=$this->database->execSQL($sql,4, 1);    
         if (!$ret[0]) {
           while ($rs=pg_fetch_array($ret[1])) {
             $nachweise[]=$rs;
