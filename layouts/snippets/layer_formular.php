@@ -562,7 +562,28 @@ else {
 			}
 			?>
 			<tr>
-				<td style="border-bottom:1px solid #C3C7C3" colspan="8"><a href="index.php?go=Layereditor_Klasse_Hinzufügen&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>#Klassen"><?php echo $strAddClass; ?></a> | <a href="index.php?go=Layereditor_Autoklassen_Hinzufügen&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>#Klassen"><?php echo $strAddAutoClasses; ?></a></td>
+        <td style="border-bottom:1px solid #C3C7C3" colspan="8">
+          <a href="index.php?go=Layereditor_Klasse_Hinzufügen&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>#Klassen"><?php echo $strAddClass; ?></a>
+        </td>
+      </tr>
+      <tr>
+        <td style="border-bottom:1px solid #C3C7C3" colspan="8">
+            <!--Methode:
+            <select name="classification_method">
+              <option value="gleich große Klassengrenzen">gleiche Klassengrösse</option>
+              <option value="gleiche Anzahl Klassenmitglieder">gleiche Anzahl in Klasse</option>
+            </select>
+            Anzahl Klassen:
+            <select name="num_classes">
+              <option value="3">3</option>
+              <option value="3">4</option>
+              <option value="3">5</option>
+              <option value="3">6</option>
+              <option value="3">7</option>
+              <option value="3">8</option>
+            </select> //-->
+            <a href="index.php?go=Layereditor_Autoklassen_Hinzufügen&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&=num_classes=5&classification_method=gleiche Anzahl Klassenmitglieder#Klassen"><?php echo $strAddAutoClasses; ?></a>
+        </td>
 			</tr>
 			<tr>
 				<td colspan="8"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>">Styles und Labels bearbeiten</a></td>
