@@ -2631,8 +2631,8 @@ class GUI {
         $style['width'] = '2';
       } break;
       case 2 : {
-        $style['color'] = '255 255 255';
-        $style['outlinecolor'] = '0 0 0';
+        $style['color'] = ($this->formvars['style_color'] != '') ? $this->formvars['style_color'] : '255 255 255';
+        $style['outlinecolor'] = ($this->formvars['style_outlinecolor'] != '') ? $this->formvars['style_outlinecolor'] : '0 0 0';
       } break;
       default : {
         $style['size'] = 2;
@@ -6331,15 +6331,23 @@ class GUI {
     $end = strrpos($this->layerdata['Data'], ')');
     $data_sql = substr($this->layerdata['Data'], $begin, $end - $begin);
 
-  #  $method = 'gleich große Klassengrenzen';
-    $method = 'gleiche Anzahl Klassenmitglieder';
-    $auto_classes = $this->AutoklassenErzeugen($layerdb, $data_sql, $this->layerdata['classitem'], $method, $num_classes);
+    $auto_classes = $this->AutoklassenErzeugen(
+      $layerdb,
+      $data_sql,
+      $this->layerdata['classitem'],
+      ($this->formvars['classification_method'] != '' ) ? $this->formvars['classification_method'] : 'gleiche Anzahl Klassenmitglieder',
+      ($this->formvars['num_classes'] != '' ) ? $this->formvars['num_classes'] : 5
+    );
 
     for ($i = 0; $i < count($auto_classes); $i++) {
       $this->formvars['class_name'] = $auto_classes[$i]['name'];
       $this->formvars['class_order'] = $auto_classes[$i]['order'];
       $this->formvars['class_expression'] = $auto_classes[$i]['expression'];
-      $class = $this->Layereditor_KlasseHinzufuegen();
+
+      $this->formvars['class_id'] = $this->Layereditor_KlasseHinzufuegen();
+      $this->formvars['style_color'] = $auto_classes[$i]['style_color'];
+      $this->formvars['style_outlinecolor'] = $auto_classes[$i]['style_outlinecolor'];
+      $this->add_style();
     }
   }
   
@@ -6347,7 +6355,7 @@ class GUI {
     $classes = array();
 
     switch ($method) {
-      case 'gleiche große Klassengrenzen' : {
+      case 'gleich große Klassengrenzen' : {
         $sql = "
           SELECT
             min(" . $class_item . "),
@@ -6405,6 +6413,14 @@ class GUI {
           $classes[] = $class;
         }
       } break;
+    }
+    $color = 255;
+    $color_step = floor(255 / $num_classes);
+    $half_color_step = round($color_step / 2);
+    foreach ($classes AS $key => $class) {
+      $color -= $color_step;
+      $classes[$key]['style_color'] = ($color + $half_color_step). ' ' . ($color + $half_color_step) . ' 255';
+      $classes[$key]['style_outlinecolor'] = $color . ' ' . $color . ' 255';
     }
     return $classes;
   }
