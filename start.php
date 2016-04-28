@@ -212,7 +212,7 @@ if (CHECK_CLIENT_IP) {
 		#echo '<br>IP-Adresse des Clients wird in dieser Stelle geprüft.';
     $GUI->debug->write('<br>IP-Adresse des Clients wird in dieser Stelle geprüft.',4);
 		# Remote_Address mit ips des Users vergleichen
-	  if ($GUI->user->clientIpIsValide(getenv('REMOTE_ADDR'))==false) {
+	  if ($GUI->formvars['go'] != 'logout' AND $GUI->user->clientIpIsValide(getenv('REMOTE_ADDR'))==false) {
 	  	# Remote_Addr stimmt nicht mit den ips des Users überein
 	  	# bzw. ist nicht innerhalb eines angegebenen Subnetzes
 	    # Nutzer ist nicht berechtigt in die gewünschte Stelle zu wechseln
