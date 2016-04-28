@@ -360,6 +360,8 @@ if($_SESSION['login_routines'] == true){
 	}
 	# Zurücksetzen des histtimestamps
 	if($GUI->user->rolle->hist_timestamp != '')$GUI->setHistTimestamp();
+	# Zurücksetzen der veränderten Klassen
+	$GUI->user->rolle->resetClasses();
 	$_SESSION['login_routines'] = false;
 }
 

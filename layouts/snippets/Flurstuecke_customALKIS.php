@@ -39,6 +39,17 @@ show_all = function(count){
 	currentform.submit();
 }
 
+show_versions = function(flst){
+	document.getElementById('no_versions_'+flst).style.display = 'none';
+	document.getElementById('versions_'+flst).style.display = '';
+	ahah('index.php', 'go=Flurstueck_GetVersionen&flurstkennz='+flst, new Array(document.getElementById('versions_'+flst)), new Array('sethtml'));
+}
+
+hide_versions = function(flst){
+	document.getElementById('no_versions_'+flst).style.display = 'inline';
+	document.getElementById('versions_'+flst).style.display = 'none';
+}
+
 </script>
 <br>
 <a name="anfang"></a>
@@ -47,6 +58,7 @@ show_all = function(count){
 	<tr>
 		<td align="center">
 <?php
+	$timestamp = DateTime::createFromFormat('d.m.Y H:i:s', $this->user->rolle->hist_timestamp);
 	$sql = "SELECT max(beginnt)::date FROM alkis.ax_fortfuehrungsfall;";
   $ret=$this->pgdatabase->execSQL($sql,4,0);
   $aktalkis = pg_fetch_array($ret[1]);
@@ -96,7 +108,7 @@ show_all = function(count){
 			if($flst->FlurstNr){
 				$flst_array[] = $flst;
 				echo '<a href="#'.$flurstkennz_a.'">Gemarkung: '.$gemkg.' - Flur: '.ltrim($flur,"0").' - Flurst&uuml;ck: '.$zaehler.$nenner.'</a>';
-				if($flst->endet!="" OR $flst->hist_alb == 1)echo ' (H)';
+				if($flst->Nachfolger != '')echo ' (H)';
 				echo '<br>';
 			}
 			else{
@@ -141,14 +153,48 @@ show_all = function(count){
       <table border="0" cellspacing="0" cellpadding="0">
         <tr>
           <td>
-          <table border="0" cellspacing="0" cellpadding="2">
-
-              <? if($privileg_['flurstkennz']){ ?>
+          <? if($privileg_['flurstkennz']){ ?>
+						<table border="0" cellspacing="0" cellpadding="2">
               <tr>
-                <td align="right"><span class="fett">Flurst&uuml;ck&nbsp;</span></td>
-                <td> <? echo $flst->FlurstNr; ?>&nbsp;(<?php echo $flst->Flurstkennz_alt; ?>)</td>
+								<td colspan="2">
+									<table cellspacing="0" cellpadding="0">
+										<tr>
+											<td valign="top">
+												<span class="px17 fett"><? echo $flst->Flurstkennz_alt; ?></span>
+											</td>
+											<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+											<td>
+												<div id="no_versions_<? echo $flst->FlurstKennz; ?>">
+													<table cellspacing="0" cellpadding="2">
+														<tr>
+															<td>
+																<a href="javascript:show_versions('<? echo $flst->FlurstKennz; ?>');"><img src="<? echo GRAPHICSPATH.'plus.gif'; ?>"></a>
+															</td>
+															<td>
+																<span class="px14">Versionen</span>
+															</td>
+														</tr>
+													</table>
+												</div>
+												<div id="versions_<? echo $flst->FlurstKennz; ?>" style="border: 1px solid <? echo BG_DEFAULT ?>; display:none"></div>
+											</td>
+										</tr>
+									</table>
+								</td>
+							</tr>
+						</table>
+					<? } ?>
+
+				<table border="0" cellspacing="0" cellpadding="2">
+				
+				<? if($privileg_['flurstkennz']){ ?>
+							<tr>
+                <td align="right"><span class="fett">Flurst&uuml;cksnummer&nbsp;</span></td>
+                <td>
+									<? echo $flst->FlurstNr; ?>
+								</td>
               </tr>
-              <? }
+					<? } 
           $both = ($privileg_['gemkgname'] AND $privileg_['gemkgschl']);
           if($privileg_['gemkgname'] OR $privileg_['gemkgschl']){
               ?>
@@ -198,7 +244,7 @@ show_all = function(count){
           if($privileg_['flaeche']){ ?>
               <tr>
                 <td align="right"><span class="fett">Fl&auml;che&nbsp;</span></td>
-                <td><?php echo $flst->ALB_Flaeche; ?>m&sup2;</td>
+                <td><?php echo $flst->ALB_Flaeche; ?>&nbsp;m&sup2;</td>
               </tr>
           <? }
           $both = ($privileg_['amtsgerichtname'] AND $privileg_['amtsgerichtnr']);
@@ -263,13 +309,12 @@ show_all = function(count){
               <tr>
                 <td align="right"><span class="fett"> Status&nbsp;</span></td>
                 <td><?php 
-									$timestamp = DateTime::createFromFormat('d.m.Y H:i:s', $this->user->rolle->hist_timestamp);
 									$beginnt = DateTime::createFromFormat('d.m.Y H:i:s', $flst->beginnt);
 									$endet = DateTime::createFromFormat('d.m.Y H:i:s', $flst->endet);
-									if($flst->endet!="" OR $flst->hist_alb == 1){
+									if($flst->Nachfolger != ''){
 										echo "historisches&nbsp;Flurst&uuml;ck"; 
 										if($flst->endet != ''){
-											if($timestamp == NULL OR $timestamp < $beginnt OR $timestamp > $endet){
+											if($timestamp == NULL OR $timestamp < $beginnt OR $timestamp >= $endet){
 												$set_timestamp = 'setHistTimestamp&timestamp='.$flst->beginnt;
 												echo '<a href="index.php?go='.$set_timestamp.'" title="in die Zeit des Flurstücks wechseln">&nbsp;(endet: '.$flst->endet.')</a>';
 											}
@@ -281,7 +326,10 @@ show_all = function(count){
 											$set_timestamp = 'setHistTimestamp';
 											echo '<a href="index.php?go='.$set_timestamp.'" title="Zeitpunkt auf aktuell setzen">aktuelles&nbsp;Flurst&uuml;ck</a>';
 										}
-										else echo "aktuelles&nbsp;Flurst&uuml;ck"; 										
+										else{
+											echo "aktuelles&nbsp;Flurst&uuml;ck";
+											if($timestamp != '')echo ' (historische Version)';
+										}
 									}  ?></td>
               </tr>
               <? } ?>

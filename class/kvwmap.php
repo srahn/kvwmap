@@ -1713,6 +1713,9 @@ class GUI {
         $this->user->rolle->set_one_Group($this->user->id, $this->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
         $this->loadMap('DataBase');
 
+				if($this->map->scaledenom > COORD_ZOOM_SCALE){
+					$this->map->zoomscale(COORD_ZOOM_SCALE/4,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
+				}
         # hier wurden Weltkoordinaten übergeben
         $this->pixwidth = ($this->map->extent->maxx - $this->map->extent->minx)/$this->map->width;
         $pixel_x = ($minx-$this->map->extent->minx)/$this->pixwidth;
@@ -2032,14 +2035,14 @@ class GUI {
 		elseif($count == 0 ){		# wenn nichts gefunden wurde
 			echo '~document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'none\';';
 			echo 'document.getElementById(\''.$this->formvars['field_id'].'\').value = document.getElementById(\''.$this->formvars['field_id'].'\').backup_value;';
-			echo 'output = document.getElementById(\''.$this->formvars['field_id'].'_output\').value;';
-			echo 'document.getElementById(\''.$this->formvars['field_id'].'_output\').value = output.substring(0, output.length-1);';
-			echo 'document.getElementById(\''.$this->formvars['field_id'].'_output\').onkeyup();';
+			echo 'output = document.getElementById(\'output_'.$this->formvars['field_id'].'\').value;';
+			echo 'document.getElementById(\'output_'.$this->formvars['field_id'].'\').value = output.substring(0, output.length-1);';
+			echo 'document.getElementById(\'output_'.$this->formvars['field_id'].'\').onkeyup();';
 		}
 		else{
 			if($count == 1)$count = 2;		# weil ein select-Feld bei size 1 anders funktioniert
 			pg_result_seek($ret[1], 0);
-			echo'<select size="'.$count.'" style="width: 450px;padding:4px; margin:-2px -17px -4px -4px;" onclick="document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'none\';document.getElementById(\''.$this->formvars['field_id'].'\').value=this.value;document.getElementById(\''.$this->formvars['field_id'].'_output\').value=this.options[this.selectedIndex].text">';				
+			echo'<select size="'.$count.'" style="width: 450px;padding:4px; margin:-2px -17px -4px -4px;" onclick="document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'none\';document.getElementById(\''.$this->formvars['field_id'].'\').value=this.value;document.getElementById(\''.$this->formvars['field_id'].'\').onchange();document.getElementById(\'output_'.$this->formvars['field_id'].'\').value=this.options[this.selectedIndex].text;document.getElementById(\'output_'.$this->formvars['field_id'].'\').onchange();">';				
 			while($rs=pg_fetch_array($ret[1])) {
 				echo '<option onmouseover="this.selected = true;"  value="'.$rs['value'].'">'.$rs['output'].'</option>';
 			}
@@ -3105,11 +3108,10 @@ class GUI {
     $grundbuch = new grundbuch('', '', $this->pgdatabase);
     $GemeindenStelle=$this->Stelle->getGemeindeIDs();
     if($GemeindenStelle != ''){   // Stelle ist auf Gemeinden eingeschränkt
-      $Gemeinde=new gemeinde('',$this->pgdatabase);
-      $GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle);
       $Gemarkung=new gemarkung('',$this->pgdatabase);
-      $GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'');
-      $gbliste = $grundbuch->getGrundbuchbezirkslisteByGemkgIDs($GemkgListe['GemkgID']);
+			$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), NULL);
+			$ganze_gemarkungen = array_merge($GemkgListe['GemkgID'], array_keys($GemeindenStelle['ganze_gemarkung']));
+      $gbliste = $grundbuch->getGrundbuchbezirkslisteByGemkgIDs($ganze_gemarkungen, $GemeindenStelle['eingeschr_gemarkung']);
     }
     else{
       $gbliste = $grundbuch->getGrundbuchbezirksliste();
@@ -3132,7 +3134,7 @@ class GUI {
     if($this->formvars['Bezirk'] != ''){
     	if($this->formvars['selBlatt'])$this->selblattliste = explode(', ',$this->formvars['selBlatt']);
 			if($GemeindenStelle != ''){   // Stelle ist auf Gemeinden eingeschränkt
-				$this->blattliste = $grundbuch->getGrundbuchblattlisteByGemkgIDs($this->formvars['Bezirk'], $GemkgListe['GemkgID']);
+				$this->blattliste = $grundbuch->getGrundbuchblattlisteByGemkgIDs($this->formvars['Bezirk'], $ganze_gemarkungen, $GemeindenStelle['eingeschr_gemarkung']);
 			}
 			else{
 				$this->blattliste = $grundbuch->getGrundbuchblattliste($this->formvars['Bezirk']);
@@ -3551,20 +3553,24 @@ class GUI {
       }
     }
 		
-		$this->last_query = $this->user->rolle->get_last_query();
-		#if($this->formvars['search']){        # man kam von der Suche   -> nochmal suchen
-			$this->formvars['embedded_dataPDF'] = true;		# damit der Aufruf von output() verhindert wird
-			$this->GenerischeSuche_Suchen();
-		#}
-		#else{                                 # man kam aus einer Sachdatenabfrage    -> nochmal abfragen			# den Fall kann man wohl ignorieren, weil die Suche bei lastquery auch für die Kartenabfrage funktioniert...
-		#	$this->queryMap();
-		#}
-		$attributes = $this->qlayerset[0]['attributes'];
-		$attribute = $this->formvars['klass_'.$this->formvars['chosen_layer_id']];
-		$result= $this->qlayerset[0]['shape'];
-		
-		for($i = 0; $i < count($result); $i++){
-			$geom_oids[] = $result[$i][$this->formvars['layer_tablename'].'_oid'];
+		if($this->formvars['no_query'] != true){
+			$this->last_query = $this->user->rolle->get_last_query();
+			#if($this->formvars['search']){        # man kam von der Suche   -> nochmal suchen
+				$this->formvars['embedded_dataPDF'] = true;		# damit der Aufruf von output() verhindert wird
+				$this->GenerischeSuche_Suchen();
+			#}
+			#else{                                 # man kam aus einer Sachdatenabfrage    -> nochmal abfragen			# den Fall kann man wohl ignorieren, weil die Suche bei lastquery auch für die Kartenabfrage funktioniert...
+			#	$this->queryMap();
+			#}
+			$attributes = $this->qlayerset[0]['attributes'];
+			$attribute = $this->formvars['klass_'.$this->formvars['chosen_layer_id']];
+			$result= $this->qlayerset[0]['shape'];
+			for($i = 0; $i < count($result); $i++){
+				$geom_oids[] = $result[$i][$this->formvars['layer_tablename'].'_oid'];
+			}
+		}
+		else{			# wird von der Jagdbezirkssuche aus verwendet
+			$geom_oids = $oids;
 		}
 		
     if($oids != ''){
@@ -5262,18 +5268,16 @@ class GUI {
     if ($this->formvars['anzahl']==0) {
       $this->formvars['anzahl']=10;
     }
-    $this->main='namensuchform.php';
-
-    # 2006-29-06 sr: Gemarkungsformobjekt nur für Gemeinden der Stelle
-    $GemeindenStelle=$this->Stelle->getGemeindeIDs();
-    $Gemeinde=new gemeinde('',$this->pgdatabase);
-    # Auswahl aller Gemeinden der Stelle
-		$GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle);
-
-    # Abfragen der Gemarkungen mit dazugehörigen Namen der Gemeinden
-    $GemkgID=$this->formvars['GemkgID'];
-    $Gemarkung=new gemarkung('',$this->pgdatabase);
-    $GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'');
+    $this->main='namensuchform.php';		
+		$GemeindenStelle=$this->Stelle->getGemeindeIDs();
+		$GemkgID=$this->formvars['GemkgID'];
+		$Gemarkung=new gemarkung('',$this->pgdatabase);
+		if($GemeindenStelle == NULL){
+			$GemkgListe=$Gemarkung->getGemarkungListe(NULL, NULL);
+		}
+		else{
+			$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
+		}
     // Sortieren der Gemarkungen unter Berücksichtigung von Umlauten
     $sorted_arrays = umlaute_sortieren($GemkgListe['Bezeichnung'], $GemkgListe['GemkgID']);
     $GemkgListe['Bezeichnung'] = $sorted_arrays['array'];
@@ -5281,13 +5285,11 @@ class GUI {
     # Erzeugen des Formobjektes für die Gemarkungsauswahl    
     $this->GemkgFormObj=new selectFormObject("GemkgID","select",$GemkgListe['GemkgID'],array($GemkgID),$GemkgListe['Bezeichnung'],"1","","",NULL);
     $this->GemkgFormObj->insertOption(-1,0,'--Auswahl--',0);
-    $this->GemkgFormObj->outputHTML();
-    $GemkgID=$this->formvars['GemkgID'];
-    
+    $this->GemkgFormObj->outputHTML();    
     # Abragen der Fluren zur Gemarkung
     if($GemkgID > 0){
     	$Flur=new Flur('','','',$this->pgdatabase);
-			$FlurListe=$Flur->getFlurListe($GemkgID,'');
+			$FlurListe=$Flur->getFlurListe($GemkgID, $GemeindenStelle['eingeschr_gemarkung'][$GemkgID], false);
     	# Erzeugen des Formobjektes für die Flurauswahl
     	if (count($FlurListe['FlurID'])==1) { $FlurID=$FlurListe['FlurID'][0]; }
     }
@@ -5298,25 +5300,15 @@ class GUI {
   }	
 	
 	function nameSuchen() {
-    # 2006-29-06 sr: auf Gemarkungen der Stelle einschränken
-    if($this->formvars['GemkgID'] > 0){       # es wurde eine Gemarkung ausgewählt
-      $GemkgListe['GemkgID'] = array($this->formvars['GemkgID']);
-    }
-    else{                                     # es wurde keine Gemarkung ausgewählt -> wenn Stelle eingeschränkt, erlaubte Gemarkungen setzen
-      $GemeindenStelle=$this->Stelle->getGemeindeIDs();
-      if($GemeindenStelle != NULL){
-        $Gemeinde=new gemeinde('',$this->pgdatabase);
-        # Auswahl aller Gemeinden der Stelle
-        $GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle);
-        # Abfragen der Gemarkungen mit dazugehörigen Namen der Gemeinden
-        $Gemarkung=new gemarkung('',$this->pgdatabase);
-				$GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'');
-      }
-    }
-
+		$GemeindenStelle=$this->Stelle->getGemeindeIDs();
+		if($GemeindenStelle != ''){
+			$Gemarkung=new gemarkung('',$this->pgdatabase);
+			$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), NULL);						# hier die Gemarkungen der ganzen Gemeinden ermitteln
+			$ganze_gemarkungen = array_merge($GemkgListe['GemkgID'], array_keys($GemeindenStelle['ganze_gemarkung']));	# und mit den ganzen Gemarkungen vereinen
+		}
     $formvars = $this->formvars;
     $flurstueck=new flurstueck('',$this->pgdatabase);
-		$ret=$flurstueck->getNamen($formvars,$GemkgListe['GemkgID']);
+		$ret=$flurstueck->getNamen($formvars,$ganze_gemarkungen, $GemeindenStelle['eingeschr_gemarkung']);
     if ($ret[0]) {
       $this->Fehlermeldung='<br>Es konnten keine Namen abgefragt werden'.$ret[1];
       $this->namenWahl();
@@ -5329,7 +5321,7 @@ class GUI {
       else {
 				$formvars['anzahl'] = '';
 				$formvars['offset'] = '';
-				$ret=$flurstueck->getNamen($formvars,$GemkgListe['GemkgID']);
+				$ret=$flurstueck->getNamen($formvars, $ganze_gemarkungen, $GemeindenStelle['eingeschr_gemarkung']);
         $this->anzNamenGesamt=count($ret[1]);
         
 				for($i = 0; $i < count($this->namen); $i++){
@@ -6586,13 +6578,13 @@ class GUI {
 										$operator_like = '';
 									}
 								}
-								else{
+								elseif($operator != 'IS NULL' AND $operator != 'IS NOT NULL'){
 									$sql_where .= ' AND query.'.$attributes['name'][$i].' '.$operator.' ';
 									$sql_where.='\''.$value.'\'';
 								}
 							}
 						}
-						elseif($operator == 'IS NULL' OR $operator == 'IS NOT NULL'){
+						if($operator == 'IS NULL' OR $operator == 'IS NOT NULL'){
 							if($attributes['type'][$i] == 'bpchar' OR $attributes['type'][$i] == 'varchar' OR $attributes['type'][$i] == 'text'){
 								if($operator == 'IS NULL'){
 									$sql_where .= ' AND (query.'.$attributes['name'][$i].' '.$operator.' OR query.'.$attributes['name'][$i].' = \'\') ';
@@ -6611,11 +6603,12 @@ class GUI {
 						# räumliche Einschränkung
 						if($m == 0 AND $attributes['name'][$i] == $attributes['the_geom']){		// nur einmal machen, also nur bei $m == 0
 							if($this->formvars['newpathwkt'] != ''){
-								if (strpos(strtolower($this->formvars['newpathwkt']), 'polygon') !== false) {
+								if(strpos(strtolower($this->formvars['newpathwkt']), 'polygon') !== false){
 									# Suche im Suchpolygon
-									$spatial_sql_where =' AND st_intersects('.$attributes['the_geom'].', (st_transform(st_geomfromtext(\''.$this->formvars['newpathwkt'].'\', '.$this->user->rolle->epsg_code.'), '.$layerset[0]['epsg_code'].')))';  
+									if($this->formvars['within'] == 1)$sp_op = 'st_within'; else $sp_op = 'st_intersects';
+									$spatial_sql_where =' AND '.$sp_op.'('.$attributes['the_geom'].', (st_transform(st_geomfromtext(\''.$this->formvars['newpathwkt'].'\', '.$this->user->rolle->epsg_code.'), '.$layerset[0]['epsg_code'].')))';  
 								}
-								if (strpos(strtolower($this->formvars['newpathwkt']), 'point') !== false) {
+								if(strpos(strtolower($this->formvars['newpathwkt']), 'point') !== false){
 									# Suche an Punktkoordinaten mit übergebener SRID
 									$spatial_sql_where.=" AND st_within(st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$this->formvars['epsg_code']."), ".$layerset[0]['epsg_code']."), ".$attributes['the_geom'].")";
 								}
@@ -7147,7 +7140,7 @@ class GUI {
 		}
 		$sql = 'DELETE FROM zwischenablage WHERE user_id = '.$this->user->id.' AND stelle_id = '.$this->Stelle->id;
 		if($this->formvars['chosen_layer_id'] != '')$sql.= ' AND layer_id = '.$this->formvars['chosen_layer_id'];
-		if(count($oids) > 0)$sql.= ' AND oid IN ('.implode($oids).')';
+		if(count($oids) > 0)$sql.= ' AND oid IN ('.implode(', ', $oids).')';
 		#echo $sql.'<br>';
 		$ret = $this->database->execSQL($sql,4, 1);
 		if(count($oids) == 0){
@@ -7263,6 +7256,7 @@ class GUI {
         $tablename[$element[2]]['tablename'] = $element[2];
         $tablename[$element[2]]['attributname'][] = $attributenames[] = $element[1];
 				$attributevalues[] = $this->formvars[$form_fields[$i]];
+				if($this->formvars['embedded'] != '')$formfieldstring .= '&'.$form_fields[$i].'='.$this->formvars[$form_fields[$i]];
         $tablename[$element[2]]['type'][] = $element[4];
         $tablename[$element[2]]['formfield'][] = $form_fields[$i];
         # Dokumente sammeln
@@ -7457,6 +7451,12 @@ class GUI {
           $this->formvars['embedded_subformPK'] = true;
           echo '~';
           $this->GenerischeSuche_Suchen();
+					if($this->formvars['weiter_erfassen'] == 1){
+						echo '~href_save = document.getElementById("new_'.$this->formvars['targetobject'].'").href;';
+						echo 'document.getElementById("new_'.$this->formvars['targetobject'].'").href = document.getElementById("new_'.$this->formvars['targetobject'].'").href.replace("go=neuer_Layer_Datensatz", "go=neuer_Layer_Datensatz&weiter_erfassen=1'.$formfieldstring.'");';
+						echo 'document.getElementById("new_'.$this->formvars['targetobject'].'").click();';
+						echo 'document.getElementById("new_'.$this->formvars['targetobject'].'").href = href_save;';
+					}
         }break;
       }
 						
@@ -7721,12 +7721,20 @@ class GUI {
   }
 
 	function sachdaten_druck_editor(){
+		global $admin_stellen;
 		include_once(CLASSPATH.'datendrucklayout.php');
 		$ddl=new ddl($this->database, $this);
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-    $this->ddl=$ddl;
-    $this->stellendaten=$this->user->getStellen('Bezeichnung');
-    $this->layerdaten = $mapdb->get_postgis_layers('Name');
+    $this->ddl=$ddl;    
+    if(in_array($this->Stelle->id, $admin_stellen)){										# eine Admin-Stelle darf alle Layer und Stellen sehen
+			$this->layerdaten = $mapdb->get_postgis_layers('Name');
+			$this->stellendaten=$this->user->getStellen('Bezeichnung');
+		}
+		else{																																# eine normale Stelle nur die eigenen Layer und die eigene Stelle
+			$this->layerdaten = $this->Stelle->getqueryablePostgisLayers(NULL, NULL);
+			$this->stellendaten['ID'][0] = $this->Stelle->id;
+			$this->stellendaten['Bezeichnung'][0] = $this->Stelle->Bezeichnung;
+		}
     # Fonts auslesen
     $this->ddl->fonts = $this->ddl->get_fonts();
     if($this->formvars['selected_layer_id']){
@@ -9628,7 +9636,7 @@ class GUI {
 	
   function neuLaden() {
 		$this->saveLegendRoleParameters();
-		if($this->formvars['last_button'] != '')$this->user->rolle->setSelectedButton($this->formvars['last_button']);		// das ist für den Fall, dass ein Button schon angeklickt wurde, aber die Aktion nicht ausgeführt wurde
+		if(in_array($this->formvars['last_button'], array('zoomin', 'zoomout', 'recentre', 'pquery', 'touchquery', 'ppquery', 'polygonquery')))$this->user->rolle->setSelectedButton($this->formvars['last_button']);		// das ist für den Fall, dass ein Button schon angeklickt wurde, aber die Aktion nicht ausgeführt wurde
     # Karteninformationen lesen
     $this->loadMap('DataBase');
     # zwischenspeichern des vorherigen Maßstabs
@@ -10146,37 +10154,6 @@ class GUI {
 		return $scale;
 	}
 
-  function getFormObjGemGemkgFlur($Gemeinde,$Gemarkung,$Flur) {
-    $GemObj = new gemeinde(0,$this->database);
-    $back=$GemObj->getGemeindeListe(0, 'GemeindeName');
-    if ($Gemeinde=='') {
-      $Gemeinde=$back['ID'][0];
-    }
-    $GemFormObj=new selectFormObject('Gemeinde','select',$back['ID'],array($Gemeinde),$back['Name'],1,0,0,NULL);
-    $GemkgObj = new gemarkung(0,$this->database);
-    $back=$GemkgObj->getGemarkungListe(array($Gemeinde),0,'gmk.GemkgName');
-    $GemkgFormObj=new selectFormObject('Gemarkung','select',$back['GemkgID'],array($Gemarkung),$back['Name'],1,0,0,NULL);
-    if (in_array ($Gemarkung, $back['GemkgID'])==FALSE) {
-      $Gemarkung=$back['GemkgID'][0];
-    }
-    $FlurObj = new flur(0,0,0);
-    $back=$FlurObj->getFlurListe($Gemarkung,0,'FlurNr');
-    $FlurFormObj=new selectFormObject('Flur','select',$back['FlurID'],array($Flur),$back['Name'],1,0,0,NULL);
-    if (count($back['FlurID'])==0) {
-      $this->Fehlermeldung='<font color="#ff0000">Keine Fluren zur Gemarkung gefunden!</font>';
-    }
-    else {
-      if ($Flur=='' OR in_array ($Flur, $back['FlurID'])==FALSE) {
-        $Flur=$back['FlurID'][0];
-      }
-    }
-    # Zuweisen der Formularobjekte zur Rückgabevariable
-    $ret['Gemeinde']=$GemFormObj;
-    $ret['Gemarkung']=$GemkgFormObj;
-    $ret['Flur']=$FlurFormObj;
-    return $ret;
-  }
-
   function getFunktionen() {
     $this->Stelle->getFunktionen();
   }
@@ -10231,7 +10208,7 @@ class GUI {
 				}break;
 			}
 			$output = $ALB->dhk_call_getPDF(DHK_CALL_URL, $sessionid, $nasfile, $filename);
-			switch (substr($result, 0, 2)){
+			switch (substr($output, 0, 2)){
 				case 'PK' : $type = 'zip'; break;
 				case '<?' : $type = 'xml'; break;
 				case '%P' : $type = 'pdf'; break;
@@ -10441,12 +10418,21 @@ class GUI {
     if(count($GemkgListe['GemkgID']) > 0){
       # Die Gemarkung ist ausgewählt und gültig aber Flur leer, zoom auf Gemarkung
       if($FlurID==0 OR $FlurID=='-1'){
-        $this->loadMap('DataBase');
-        $this->zoomToALKGemarkung($GemkgID,10);	
-        $currenttime=date('Y-m-d H:i:s',time());
-        $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-        $this->drawMap();
-        $this->saveMap('');
+				if($this->formvars['ALK_Suche'] == 1){
+					$this->loadMap('DataBase');
+					$this->zoomToALKGemarkung($GemkgID,10);	
+					$currenttime=date('Y-m-d H:i:s',time());
+					$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
+					$this->drawMap();
+					$this->saveMap('');
+				}
+				else{			# Anzeige der Flurstuecke der Gemarkung
+					$FlstNr=new flurstueck('',$this->pgdatabase);
+					$FlstNrListe=$FlstNr->getFlstListe($GemID,$GemkgID,'',$this->formvars['historical']);
+					$FlstID = $FlstNrListe['FlstID'];
+					$FlurstKennz = array_values(array_unique($FlstID));
+					$this->flurstAnzeige($FlurstKennz);
+				}
       }
       else {
         # ist Gemarkung und Flur ausgefüllt aber keine Angabe zum Flurstück, zoom auf Flur
@@ -10462,7 +10448,6 @@ class GUI {
 	        else{			# Anzeige der Flurstuecke der Flur
 	      		$FlstNr=new flurstueck('',$this->pgdatabase);
 	      		$FlstNrListe=$FlstNr->getFlstListe($GemID,$GemkgID,$FlurID,$this->formvars['historical']);
-		        $FLstID=$FlstNrListe['FlstID'][0];
 		        $FlstID = $FlstNrListe['FlstID'];
 	          $FlurstKennz = array_values(array_unique($FlstID));
 	          $this->flurstAnzeige($FlurstKennz);
@@ -10541,6 +10526,59 @@ class GUI {
 		}	
 	} # ende function flurstSuchenByLatLng
 
+	function Flurstueck_GetVersionen(){
+		$ret=$this->Stelle->getFlurstueckeAllowed(array($this->formvars['flurstkennz']), $this->pgdatabase);
+    if($ret[0]) {
+      $this->Fehlermeldung=$ret[1];
+    }
+    else{
+      $flst = new flurstueck($this->formvars['flurstkennz'], $this->pgdatabase);
+			$versionen = $flst->getVersionen();
+			$timestamp = DateTime::createFromFormat('d.m.Y H:i:s', $this->user->rolle->hist_timestamp);
+			$output = '	<table cellspacing="0" cellpadding="3">
+										<tr style="background-color: #EDEFEF;">
+											<td style="border-bottom: 1px solid '.BG_DEFAULT.'">
+												<a href="javascript:hide_versions(\''.$this->formvars['flurstkennz'].'\');"><img src="'.GRAPHICSPATH.'minus.gif"></a>
+											</td>
+											<td style="border-bottom: 1px solid '.BG_DEFAULT.'">
+												<span class="px14">Versionen</span>
+											</td>
+										</tr>
+										<tr>
+											<td></td>
+											<td>';
+												if(count($versionen) > 0){
+			$output.= '					<select name="versions_'.$k.'" onchange="location.href=\'index.php?go=setHistTimestamp&timestamp=\'+this.value" style="max-width: 500px">';
+													$selected = false;
+													$v = 1;
+													$count = count($versionen);
+													reset($versionen);
+													while($version = current($versionen)){
+														$version_beginnt = key($versionen);
+														$next_version = next($versionen);
+														$next_version_beginnt = key($versionen);
+														$beginnt = DateTime::createFromFormat('d.m.Y H:i:s', $version_beginnt);
+														$next_beginnt = DateTime::createFromFormat('d.m.Y H:i:s', $next_version_beginnt);
+														$output.= '<option ';
+														if($selected == false AND
+															(($timestamp >= $beginnt AND $timestamp < $next_beginnt) OR				# timestamp liegt im Intervall
+															$v == $count)																											# letzte Version (aktuell)
+														){$selected = true; $output.= 'selected';}
+														if($v < $count)$output.= ' value="'.$version_beginnt.'"';
+														else $output.= ' value=""';
+														$output.= ' title="'.implode(', ', $version['table']).'">';
+														$output.= $version_beginnt.' '.implode(' ', $version['anlass']).'</option>';
+														$v++;
+													}
+			$output.= '					</select>';
+												}
+			$output.= '			</td>
+										</tr>
+									</table>';
+			echo $output;
+    }
+	}
+	
   function flurstAnzeige($FlurstKennzListe) {
     # 2006-01-26 pk
     # Abfrage der Berechtigung zum Anzeigen der FlurstKennzListe
@@ -11293,7 +11331,7 @@ class GUI {
       } # ende der Behandlung der zur Abfrage ausgewählten Layer
     } # ende der Schleife zur Abfrage der Layer der Stelle
 		
-		if($this->last_query != '' AND $this->user->rolle->querymode == 1){		# bei aktivierter Datenabfrage in extra Fenster --> Laden der Karte und zoom auf Treffer (das Zeichnen der Karte passiert in einem separaten Ajax-Request aus dem Overlay heraus)
+		if($this->last_query_requested AND $this->last_query != '' AND $this->user->rolle->querymode == 1){		# bei get_last_query und aktivierter Datenabfrage in extra Fenster --> Laden der Karte und zoom auf Treffer (das Zeichnen der Karte passiert in einem separaten Ajax-Request aus dem Overlay heraus)
 			$attributes = $this->qlayerset[0]['attributes'];
 			$geometrie_tabelle = $attributes['table_name'][$attributes['the_geom']];
 			$this->loadMap('DataBase');			
@@ -11739,13 +11777,15 @@ class GUI {
 				if($this->user->rolle->highlighting == '1'){
 					if($layerset[$i]['attributes']['geomtype'][$the_geom] != 'POINT'){ 
 						$rand = $this->map_scaledenom/1000;
+						$tolerance = $this->map_scaledenom/10000;
+						if($layer_epsg == 4326)$tolerance = $tolerance / 60000;		# wegen der Einheit Grad
 						$box_wkt ="POLYGON((";
 						$box_wkt.=strval($this->user->rolle->oGeorefExt->minx-$rand)." ".strval($this->user->rolle->oGeorefExt->miny-$rand).",";
 						$box_wkt.=strval($this->user->rolle->oGeorefExt->maxx+$rand)." ".strval($this->user->rolle->oGeorefExt->miny-$rand).",";
 						$box_wkt.=strval($this->user->rolle->oGeorefExt->maxx+$rand)." ".strval($this->user->rolle->oGeorefExt->maxy+$rand).",";
 						$box_wkt.=strval($this->user->rolle->oGeorefExt->minx-$rand)." ".strval($this->user->rolle->oGeorefExt->maxy+$rand).",";
 						$box_wkt.=strval($this->user->rolle->oGeorefExt->minx-$rand)." ".strval($this->user->rolle->oGeorefExt->miny-$rand)."))";
-						$pfad = "st_assvg(st_transform(st_simplify(st_intersection(".$layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$the_geom.", st_transform(st_geomfromtext('".$box_wkt."',".$client_epsg."), ".$layer_epsg.")), ".$this->map_scaledenom."/10000), ".$client_epsg."), 0, 8) AS highlight_geom, ".$pfad;
+						$pfad = "st_assvg(st_transform(st_simplify(st_intersection(".$layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$the_geom.", st_transform(st_geomfromtext('".$box_wkt."',".$client_epsg."), ".$layer_epsg.")), ".$tolerance."), ".$client_epsg."), 0, 8) AS highlight_geom, ".$pfad;
 					}
 					else{
 						$buffer = $this->map_scaledenom/260;
@@ -12184,7 +12224,7 @@ class GUI {
 
   function zoomToALKFlurst($FlurstListe,$border){
 		include_(CLASSPATH.'alk.php');
-		$dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
+		$dbmap = new db_mapObj($this->Stelle->id,$this->user->id, $this->database);
     $alk=new ALK();
     $alk->database=$this->pgdatabase;
     $ret=$alk->getMERfromFlurstuecke($FlurstListe, $this->user->rolle->epsg_code);
@@ -12839,17 +12879,14 @@ class GUI {
 		$FlstID=$this->formvars['FlstID'];
 		$FlstNr=$this->formvars['FlstNr'];
 		$selFlstID = explode(', ',$this->formvars['selFlstID']);
-    #$this->searchInExtent=$this->formvars['searchInExtent'];
-    # Abfragen für welche Gemeinden die Stelle Zugriffsrechte hat
-    # GemeindenStelle wird eine Liste mit ID´s der Gemeinden zugewiesen, die zur Stelle gehören
     $GemeindenStelle=$this->Stelle->getGemeindeIDs();
-    $Gemeinde=new gemeinde('',$this->pgdatabase);
-    # Abfrage der Gemeinde Namen
-    $GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle);
-    # Abfragen der Gemarkungen zur Gemeinde
-    $Gemarkung=new gemarkung('',$this->pgdatabase);
-    # Auswahl nur über die zulässigen Gemeinden
-    $GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'');
+		$Gemarkung=new gemarkung('',$this->pgdatabase);
+		if($GemeindenStelle == NULL){
+			$GemkgListe=$Gemarkung->getGemarkungListe(NULL, NULL);
+		}
+		else{
+			$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
+		}
     // Sortieren der Gemarkungen unter Berücksichtigung von Umlauten
     $sorted_arrays = umlaute_sortieren($GemkgListe['Bezeichnung'], $GemkgListe['GemkgID']);
     $GemkgListe['Bezeichnung'] = $sorted_arrays['array'];
@@ -12869,7 +12906,7 @@ class GUI {
       # Abragen der Fluren zur Gemarkung
       if ($GemkgID==0) { $GemkgID=$GemkgListe['GemkgID'][0]; }
       $Flur=new Flur('','','',$this->pgdatabase);
-    	$FlurListe=$Flur->getFlurListe($GemkgID,'', $this->formvars['historical']);
+    	$FlurListe=$Flur->getFlurListe($GemkgID, $GemeindenStelle['eingeschr_gemarkung'][$GemkgID], $this->formvars['historical']);
       # Erzeugen des Formobjektes für die Flurauswahl
       if (count($FlurListe['FlurID'])==1) { $FlurID=$FlurListe['FlurID'][0]; }
       $FlurFormObj=new selectFormObject("FlurID","select",$FlurListe['FlurID'],array($FlurID),$FlurListe['Name'],"1","","",NULL);
@@ -12879,10 +12916,6 @@ class GUI {
       if ($FlurFormObj->selected) {
         # Abfragen der Flurstücke zur Flur
         $FlstNr=new flurstueck('',$this->pgdatabase);
-        # Wenn mal ALK Flächendeckend vorhanden ist, können Flurstücke auch über aktuellen Ausschnitt gewählt werden.
-        # dann die nächste aktive Zeile durch die beiden nächsten auskommentierten Zeilen ersetzen
-        # $FlstNrExtentListe=$FlstNr->getFlstListeByExtent($this->user->rolle->oGeorefExt);
-        # $FlstNrListe=$FlstNr->getFlstListe($GemID,$GemkgID,$FlurID,$FlstNrExtentListe,'FKZ');
         if ($FlurID==0) { $FlurID=$FlurListe['FlurID'][0]; }
         $FlstNrListe=$FlstNr->getFlstListe($GemID,$GemkgID,$FlurID, $this->formvars['historical']);
         # Erzeugen des Formobjektes für die Flurstücksauswahl
@@ -12891,6 +12924,8 @@ class GUI {
           $FlstID = array($FLstID);
         }
         $FlstNrFormObj=new FormObject("FlstID","select",$FlstNrListe['FlstID'],array($FlstID),$FlstNrListe['FlstNr'],"12","","multiple",100);
+				$FlstNrFormObj->insertOption('alle',false,' -- alle -- ', 0);
+				$FlstNrFormObj->addJavaScript('onclick', 'if(this.value==\'alle\'){this.options[0].selected = false; for(var i=1; i<this.options.length; i++){this.options[i].selected = true;}}');
         $FlstNrFormObj->outputHTML();
         if($this->formvars['selFlstID'] != ''){
           $SelectedFlstNrFormObj=new FormObject("selectedFlstID","select", $selFlstID, NULL, $selFlstID,"12","","multiple",170);
@@ -12949,18 +12984,19 @@ class GUI {
       $selHausID = explode(', ',$this->formvars['selHausID']);
     }
     $Gemeinde=new gemeinde('',$this->pgdatabase);
-    # 2006-01-02 pk
+		$Gemarkung=new gemarkung('',$this->pgdatabase);
     $GemeindenStelle=$this->Stelle->getGemeindeIDs();
-    $GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle);
-    # Wenn nur eine Gemeinde zur Auswahl steht, wird diese gewählt
-    # Verhalten so, als würde die Gemeinde vorher gewählt worden sein.
-    if (count($GemListe['ID'])==1) {
-      $GemID=$GemListe['ID'][0];
-    }
-    
-    # Abfragen der Gemarkungen zur Gemeinde
-    $Gemarkung=new gemarkung('',$this->pgdatabase);
-    $GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'');
+		
+		if($GemeindenStelle == NULL){
+			$GemListe=$Gemeinde->getGemeindeListe(NULL);			
+			$GemkgListe=$Gemarkung->getGemarkungListe(NULL,'');
+		}
+		else{
+			$GemListe=$Gemeinde->getGemeindeListe(array_merge(array_keys($GemeindenStelle['ganze_gemeinde']), array_keys($GemeindenStelle['eingeschr_gemeinde'])));
+			$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
+		}
+		# Wenn nur eine Gemeinde zur Auswahl steht, wird diese gewählt; Verhalten so, als würde die Gemeinde vorher gewählt worden sein.
+		if(count($GemListe['ID'])==1)$GemID=$GemListe['ID'][0];
     // Sortieren der Gemarkungen unter Berücksichtigung von Umlauten
     $sorted_arrays = umlaute_sortieren($GemkgListe['Bezeichnung'], $GemkgListe['GemkgID']);
     $GemkgListe['Bezeichnung'] = $sorted_arrays['array'];
@@ -13184,7 +13220,7 @@ class FormObject {
   } # ende constructor
 
   function addJavaScript($event,$script){
-    $this->JavaScript=$event.'="'.$script.'"';
+    $this->JavaScript.=' '.$event.'="'.$script.'"';
   }
 
   function addOption($value,$selected,$label) {
@@ -13335,12 +13371,14 @@ class db_mapObj{
   var $nurAufgeklappteLayer;
   var $Stelle_ID;
   var $User_ID;
+	var $database;
 
-  function db_mapObj($Stelle_ID,$User_ID) {
+  function db_mapObj($Stelle_ID, $User_ID, $database = NULL) {
     global $debug;
     $this->debug=$debug;
     $this->Stelle_ID=$Stelle_ID;
     $this->User_ID=$User_ID;
+		$this->database=$database;
   }
 
 	function read_ReferenceMap() {
@@ -13505,9 +13543,10 @@ class db_mapObj{
 						if($rs['Style'][$i]['color'] != '' AND $rs['Style'][$i]['color'] != '-1 -1 -1'){
 							$rs['Style'][$i]['outlinecolor'] = $rs['Style'][$i]['color'];
 							$rs['Style'][$i]['color'] = '-1 -1 -1';
-							$rs['Style'][$i]['width'] = 2;
-							$rs['Style'][$i]['minwidth'] = 3;
-							$rs['Style'][$i]['maxwidth'] = 7;
+							if($rs['Style'][$i]['width'] == '')$rs['Style'][$i]['width'] = 3;
+							if($rs['Style'][$i]['minwidth'] == '')$rs['Style'][$i]['minwidth'] = 2;
+							if($rs['Style'][$i]['maxwidth'] == '')$rs['Style'][$i]['maxwidth'] = 4;
+							$rs['Style'][$i]['symbolname'] = '';
 						}
 					}
 				}
@@ -14966,8 +15005,9 @@ class db_mapObj{
       $sql.= '("'.$class->name.'", '.$class->layer_id.', "'.$expression.'", "'.$class->drawingorder.'")';
     }
     #echo $sql;
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Group - Erstellen einer Klasse zu einem Layer:<br>".$sql,4);
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->new_Class - Erstellen einer Klasse zu einem Layer:<br>".$sql,4);
     $query=mysql_query($sql);
+		if($this->database != NULL)$this->database->logfile->write($sql.';');
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
 
     return mysql_insert_id();
@@ -15065,6 +15105,7 @@ class db_mapObj{
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->new_Style - Erzeugen eines Styles:<br>".$sql,4);
     $query=mysql_query($sql);
+		if($this->database != NULL)$this->database->logfile->write($sql.';');
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
     return mysql_insert_id();
   }
@@ -15156,6 +15197,7 @@ class db_mapObj{
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->addStyle2Class - Hinzufügen eines Styles zu einer Klasse:<br>".$sql,4);
     $query=mysql_query($sql);
+		if($this->database != NULL)$this->database->logfile->write($sql.';');
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
   }
 

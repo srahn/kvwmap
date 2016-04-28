@@ -124,7 +124,7 @@ include('funktionen/input_check_functions.php');
   	for(i = 0; i < form_fields.length; i++){
   		fieldstring = form_fields[i]+'';
   		field = fieldstring.split(';'); 
-  		if(document.getElementsByName(fieldstring)[0] != undefined && field[4] != 'Dokument' && field[4] != 'SubFormFK' && field[6] != 'not_saveable' && (document.getElementsByName(fieldstring)[0].readOnly != true) && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
+  		if(document.getElementsByName(fieldstring)[0] != undefined && field[4] != 'SubFormFK' && field[6] != 'not_saveable' && (document.getElementsByName(fieldstring)[0].readOnly != true) && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
 			  alert('Das Feld '+document.getElementsByName(fieldstring)[0].title+' erfordert eine Eingabe.');
   			return;
   		}
@@ -134,6 +134,7 @@ include('funktionen/input_check_functions.php');
   		}
   	}
   	currentform.go.value = 'neuer_Layer_Datensatz_speichern';
+		document.getElementById('go_plus').disabled = true;
   	overlay_submit(currentform, false);
 	}
 
@@ -166,7 +167,7 @@ include('funktionen/input_check_functions.php');
   	for(i = 0; i < form_fields.length-1; i++){
   		fieldstring = form_fields[i]+'';
   		field = fieldstring.split(';');
-  		if(document.getElementsByName(fieldstring)[0] != undefined && document.getElementsByName(fieldstring)[0].readOnly != true && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
+  		if(document.getElementsByName(fieldstring)[0] != undefined && field[4] != 'Dokument' && document.getElementsByName(fieldstring)[0].readOnly != true && field[5] == '0' && document.getElementsByName(fieldstring)[0].value == ''){
   			alert('Das Feld '+document.getElementsByName(fieldstring)[0].title+' erfordert eine Eingabe.');
   			return;
   		}
@@ -507,9 +508,40 @@ include('funktionen/input_check_functions.php');
 		}
 		overlay_submit(currentform);
 	}
+	
+	switch_edit_all = function(layer_id){
+		if(document.getElementById('edit_all3_'+layer_id).style.display == 'none'){
+			document.getElementById('edit_all1_'+layer_id).style.display = 'none';			
+			document.getElementById('edit_all2_'+layer_id).style.display = '';
+			document.getElementById('edit_all3_'+layer_id).style.display = '';
+			document.getElementById('edit_all4_'+layer_id).style.display = '';
+		}
+		else{
+			document.getElementById('edit_all1_'+layer_id).style.display = '';			
+			document.getElementById('edit_all2_'+layer_id).style.display = 'none';
+			document.getElementById('edit_all3_'+layer_id).style.display = 'none';
+			document.getElementById('edit_all4_'+layer_id).style.display = 'none';
+		}
+	}
+	
+	change_all = function(layer_id, k, attribute){
+		allfield = document.getElementById(attribute+'_'+k);
+		for(var i = 0; i < k; i++){			
+			if(document.getElementById(layer_id+'_'+i).checked){
+				formfield = document.getElementById(attribute+'_'+i);
+				if(formfield.type == 'checkbox'){
+					formfield.checked = allfield.checked;
+				}
+				else{
+					formfield.value = allfield.value;
+				}
+				document.getElementById(attribute+'_'+i).onchange();
+			}
+		}		
+	}
 
 	set_changed_flag = function(flag){
-		flag.value=1;
+		if(flag != undefined)flag.value=1;
 	}
 
 </script>

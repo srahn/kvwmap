@@ -311,7 +311,7 @@ class jagdkataster {
 	}
 	
 	function getEigentuemerListeFromJagdbezirke($oids){
-		$sql = "SELECT round((st_area_utm(st_union(the_geom_inter), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")*100/j_flaeche)::numeric, 2) as anteil_alk, round((sum(flaeche)*(st_area_utm(st_memunion(the_geom_inter), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")/st_area_utm(st_memunion(the_geom), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")))::numeric, 1) AS albflaeche, eigentuemer";
+		$sql = "SELECT round((st_area_utm(st_union(the_geom_inter), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")*100/j_flaeche)::numeric, 2) as anteil_alk, round(sum(flaeche*(st_area_utm(the_geom_inter, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")/st_area_utm(the_geom, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")))::numeric, 1) AS albflaeche, eigentuemer";
 		$sql.= " FROM(SELECT distinct st_area_utm(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.") as j_flaeche, f.amtlicheflaeche as flaeche, array_to_string(array(";
 		$sql.= "SELECT distinct array_to_string(array[p.nachnameoderfirma, p.vorname], ' ') as name ";
 		$sql.= "FROM alkis.ax_flurstueck ff ";		
@@ -327,6 +327,7 @@ class jagdkataster {
 		$sql.= " st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.")) AS the_geom_inter, f.wkb_geometry as the_geom";		
 		$sql.= " FROM alkis.ax_gemarkung AS g, jagdkataster.jagdbezirke, alkis.ax_flurstueck AS f";
 		$sql.= " WHERE f.gemarkungsnummer = g.gemarkungsnummer";
+		$sql.= $this->database->build_temporal_filter(array('f'));
 		$sql.= " AND jagdbezirke.oid IN (".implode(',', $oids).")";
 		$sql.= " AND f.wkb_geometry && st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.") AND st_intersects(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS."))";
 		$sql.= " AND st_area_utm(st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.")), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.") > 1) as foo";

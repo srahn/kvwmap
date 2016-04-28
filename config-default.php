@@ -250,8 +250,23 @@ define('STOPWORDFILE',SHAPEPATH.'gazetteer/top10000de.txt');
 
 # Imagepath
 define('IMAGEPATH',INSTALLPATH.'tmp/');
-# Mailpath
-define('MAILQUEUEPATH', IMAGEPATH . 'mail_queue/');           # Version 2.4
+
+# E-Mail Einstellungen
+# Methode zum Versenden von E-Mails. Mögliche Optionen:
+# sendmail: E-Mails werden direkt mit sendmail versendet. (default)
+# sendEmail async: E-Mails werden erst in einem temporären Verzeichnis MAILQUEUEPATH
+# 	abgelegt und können später durch das Script tools/sendEmailAsync.sh
+# 	versendet werden. Dort muss auch MAILQUEUEPATH eingestellt werden.
+define('MAILMETHOD', 'sendmail');						# Version 2.4
+# SMTP-Server, Muss nur angegeben werden, wenn Methode sendEmail async verwendet wird.
+define('MAILSMTPSERVER', '');						# Version 2.4
+# SMTP-Port, Muss nur angegeben werden, wenn Methode sendEmail async verwendet wird.
+define('MAILSMTPPORT', 25);													# Version 2.4
+# Verzeichnis für die JSON-Dateien mit denzu versendenen E-Mails.
+# Muss nur angegeben werden, wenn Methode sendEmail async verwendet wird.
+define('MAILQUEUEPATH', '/var/www/logs/kvwmap/mail_queue/');			# Version 2.4
+define('MAILARCHIVPATH', '/var/www/logs/kvwmap/mail_archiv/');			# Version 2.4
+
 # Pfad für selbst gemachte Bilder
 define('CUSTOM_IMAGE_PATH',SHAPEPATH.'bilder/');                # Version 1.6.9
 #Cachespeicherort
@@ -353,6 +368,9 @@ define('CHECKPUNKTDATEI', 'true');      # true/false                            
 
 # Minmale Maßstabszahl
 define('MINSCALE', 100);                                                        # Version 1.7.0
+
+# Maßstab ab dem bei einem Koordinatensprung auch gezoomt wird
+define('COORD_ZOOM_SCALE', 50000);																							# Version 2.4
 
 # Puffer (in Metern) der beim Zoom auf ein Objekt hinzugegeben wird
 define('ZOOMBUFFER', 100);                                                        # Version 2.1

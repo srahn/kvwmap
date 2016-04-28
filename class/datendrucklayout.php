@@ -165,6 +165,11 @@ class ddl {
 								}
 								else{
 									$this->gui->formvars['embedded_dataPDF'] = true;
+									for($p = 0; $p < count($attributes['name']); $p++){			# erstmal alle Suchparameter des übergeordneten Layers für die Layersuche leeren
+										$this->gui->formvars['value_'.$attributes['name'][$p]] = '';
+										$this->gui->formvars['operator_'.$attributes['name'][$p]] = '';
+									}
+									$this->gui->formvars['value_'.$this->layerset['maintable'].'_oid'] = '';
 									for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){			# die Suchparameter für die Layersuche
 										$this->gui->formvars['value_'.$this->attributes['subform_pkeys'][$j][$p]] = $this->result[$i][$attributes['subform_pkeys'][$j][$p]];
 										$this->gui->formvars['operator_'.$this->attributes['subform_pkeys'][$j][$p]] = '=';
@@ -200,7 +205,7 @@ class ddl {
 						default : {
 							if($this->page_overflow_by_sublayout)$this->pdf->reopenObject($this->page_id_before_sublayout);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
 							$this->pdf->selectFont($this->layout['elements'][$attributes['name'][$j]]['font']);
-							if($this->layout['elements'][$attributes['name'][$j]]['fontsize'] > 0 OR $this->layout['elements'][$attributes['name'][$j]]['width'] > 0){
+							if($this->layout['elements'][$attributes['name'][$j]]['fontsize'] > 0 OR $attributes['form_element_type'][$j] == 'Dokument'){
 								$y = $this->layout['elements'][$attributes['name'][$j]]['ypos'];
 								#### relative Positionierung über Offset-Attribut ####
 								$offset_attribute = $this->layout['elements'][$attributes['name'][$j]]['offset_attribute'];
@@ -238,6 +243,7 @@ class ddl {
 								$width = $this->layout['elements'][$attributes['name'][$j]]['width'];
 								
 								if($attributes['form_element_type'][$j] == 'Dokument'){
+									if($width == '')$width = 50;
 									$dokumentpfad = $this->result[$i][$this->attributes['name'][$j]];
 									$pfadteil = explode('&original_name=', $dokumentpfad);
 									$dateiname = $pfadteil[0];
@@ -321,14 +327,18 @@ class ddl {
 		}
 		if($offset_value - $ypos < 40){	# Seitenüberlauf
 			$offset_value = 842 + $offset_value - 40 - 30;	# Offsetwert so anpassen, dass er für die neue Seite passt
-			if($backto_oldpage){
-				$this->pdf->reopenObject($this->getNextPage($this->layout['page_id'][$offset_attribute]));		# die nächste Seite der Seite des Offset-Attributes nehmen
+			$next_page = $this->getNextPage($this->layout['page_id'][$offset_attribute]);
+			if($next_page != NULL){
+				$this->pdf->reopenObject($next_page);		# die nächste Seite der Seite des Offset-Attributes nehmen
 			}
-			else{
+			else{																			# wenns noch keine gibt, neue Seite erstellen
+				$page_id_before = $this->pdf->currentContents;
 				$this->pdf->ezNewPage();			# eine neue Seite beginnen
 				$this->miny[$this->pdf->currentContents] = 842;
 				$this->maxy = 800;
 				if($this->layout['type'] == 2)$this->offsety = 50;
+				$this->page_overflow_by_sublayout = true;
+				$this->page_id_before_sublayout = $page_id_before;
 			}
 		}
 		elseif($backto_oldpage){
@@ -341,10 +351,11 @@ class ddl {
 	function getNextPage($pageid){
 		$pages = $this->pdf->objects['3']['info']['pages'];
 		for($i = 0; $i <= count($pages); $i++){
-			if($pages[$i]+1 == $pageid){			# die Page-IDs sind komischerweise alle um 1 größer
+			if($pages[$i]+1 == $pageid AND $pages[$i+1] != ''){			# die Page-IDs sind komischerweise alle um 1 größer
 				return $pages[$i+1]+1;
 			}
 		}
+		return NULL;
 	}
 	
 	function putText($text, $fontsize, $width, $x, $y, $offsetx){	
@@ -365,6 +376,7 @@ class ddl {
 		$page_id_before_puttext = $this->pdf->currentContents;
 		$ret = $this->pdf->ezText(iconv("UTF-8", "CP1252", $text), $fontsize, $options);
 		$page_id_after_puttext = $this->pdf->currentContents;
+		#echo $page_id_before_puttext.' '.$page_id_after_puttext.' '.$text.'<br>';
 		if($page_id_before_puttext != $page_id_after_puttext){
 			$this->page_overflow_by_sublayout = true;
 			$this->page_id_before_sublayout = $page_id_before_puttext;
@@ -430,6 +442,7 @@ class ddl {
   function createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $selected_layer_id, $layout, $oids, $result, $stelle, $user, $preview = NULL){
 		# Für einen ausgewählten Layer wird das übergebene Result-Set nach den Vorgaben des übergebenen Layouts in ein PDF geschrieben
 		# Werden $pdfobject, $offsetx und $offsety übergeben, wird kein neues PDF-Objekt erzeugt, sondern das übergebene PDF-Objekt eines übergeordneten Layers+Layout verwendet (eingebettete Layouts)
+		$this->layerset = $layerset[0];
   	$this->layout = $layout;
   	$this->Stelle = $stelle;
 		$this->attributes = $attributes;
@@ -471,8 +484,9 @@ class ddl {
     	if($this->layout['type'] == 0 AND $i > 0){		# neue Seite beim seitenweisen Typ und neuem Datensatz 
     		$this->pdf->newPage();
 				$this->add_static_elements($offsetx);
-    	}	
-	    if($this->datasetcount_on_page > 0 AND $this->layout['type'] != 0 AND $this->miny[$lastpage] < $this->yoffset_onpage/$this->datasetcount_on_page + 70){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
+    	}
+			$this->yoffset_onpage = $this->maxy - $this->miny[$lastpage];			# der Offset mit dem die Elemente beim Untereinander-Typ nach unten versetzt werden
+			if($this->datasetcount_on_page > 0 AND $this->layout['type'] != 0 AND $this->miny[$lastpage] < $this->yoffset_onpage/$this->datasetcount_on_page + 40){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
 				$this->datasetcount_on_page = 0;
 				$this->i_on_page = 0;
 				#$this->maxy = 0;
@@ -481,8 +495,7 @@ class ddl {
 				$this->pdf->newPage();
 				$this->miny[$lastpage] = 1000000;
 				#$this->add_static_elements($offsetx, $offsety);
-			}
-			$this->yoffset_onpage = $this->maxy - $this->miny[$lastpage];			# der Offset mit dem die Elemente beim Untereinander-Typ nach unten versetzt werden
+			}			
 			$this->layout['offset_attributes'] = array();
 			
 			for($j = 0; $j < count($this->layout['texts']); $j++){
@@ -502,6 +515,10 @@ class ddl {
 				$test++;
 			}			
 			################# Daten schreiben ###############
+			
+			#################  feste Freitexte hinzufügen, falls keine Attribute da sind ##################
+			$this->remaining_freetexts = $this->add_freetexts($i, $offsetx, 'fixed');
+			###############################################################################################
 			
 			################# fortlaufende Freitexte schreiben ###############
 			# (die festen Freitexte werden vor jedem Attribut geschrieben, da ein Attribut zu einem Seitenüberlauf führen können)
@@ -533,7 +550,7 @@ class ddl {
 		$pagecount = count($pages);
 		for($i = 0; $i < $pagecount; $i++){
 			$this->pdf->reopenObject($pages[$i]+1);		# die Page-IDs sind komischerweise alle um 1 größer
-			$this->add_freetexts(0, 0, 0, 'everypage', $i + 1, $pagecount);
+			$this->add_freetexts(0, 0, 'everypage', $i + 1, $pagecount);
 			$this->pdf->closeObject();
 		}
 	}
@@ -566,7 +583,7 @@ class ddl {
       else $sql .= ", `usersize` = NULL";
       $sql .= ", `font_date` = '".$formvars['font_date']."'";
       $sql .= ", `font_user` = '".$formvars['font_user']."'";
-			$sql .= ", `gap` = ".(int)$formvars['gap'];
+			if($formvars['gap'] != '')$sql .= ", `gap` = ".(int)$formvars['gap'];
       if($formvars['type'] != '')$sql .= ", `type` = ".(int)$formvars['type'];
       else $sql .= ", `type` = NULL";
       if($_files['bgsrc']['name']){

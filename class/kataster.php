@@ -1165,9 +1165,9 @@ class gemarkung {
     return $rs['GemeindeSchl'];
   }
 
-  function getGemarkungListe($GemID,$GemkgID) {
+  function getGemarkungListe($ganzeGemID, $GemkgID) {
     # Abfragen der Gemarkungen mit seinen GemeindeNamen
-    $Liste=$this->database->getGemeindeListeByGemIDByGemkgSchl($GemID,$GemkgID);
+    $Liste=$this->database->getGemeindeListeByGemIDByGemkgSchl($ganzeGemID, $GemkgID);
     return $Liste;
   }
   
@@ -1409,16 +1409,16 @@ class grundbuch {
   	return $this->database->getGrundbuchbezirksliste();
   }
 
-  function getGrundbuchbezirkslisteByGemkgIDs($gemkg_ids){
-  	return $this->database->getGrundbuchbezirkslisteByGemkgIDs($gemkg_ids);
+  function getGrundbuchbezirkslisteByGemkgIDs($ganze_gemkg_ids, $eingeschr_gemkg_ids){
+  	return $this->database->getGrundbuchbezirkslisteByGemkgIDs($ganze_gemkg_ids, $eingeschr_gemkg_ids);
   }
   
   function getGrundbuchblattliste($bezirk){
   	return $this->database->getGrundbuchblattliste($bezirk);
   }
 	
-	function getGrundbuchblattlisteByGemkgIDs($bezirk, $gemkg_ids){
-  	return $this->database->getGrundbuchblattlisteByGemkgIDs($bezirk, $gemkg_ids);
+	function getGrundbuchblattlisteByGemkgIDs($bezirk, $ganze_gemkg_ids, $eingeschr_gemkg_ids){
+  	return $this->database->getGrundbuchblattlisteByGemkgIDs($bezirk, $ganze_gemkg_ids, $eingeschr_gemkg_ids);
   }
 }
 
@@ -1546,18 +1546,18 @@ class flurstueck {
     return $Klassifizierung;
   }
 
-  function getBuchungen($Bezirk,$Blatt,$hist_alb = false) {
+  function getBuchungen($Bezirk,$Blatt,$hist_alb = false, $without_temporal_filter = false){
     if ($this->FlurstKennz=="") { return 0; }
     $this->debug->write("<br>kataster.php->flurstueck->getBuchungen Abfrage der Buchungen zum Flurstück auf dem Grundbuch<br>",4);
     #$ret=$this->database->getBuchungen($this->FlurstKennz);
-    $ret=$this->database->getBuchungenFromGrundbuch($this->FlurstKennz,$Bezirk,$Blatt,$hist_alb, $this->fiktiv);
+    $ret=$this->database->getBuchungenFromGrundbuch($this->FlurstKennz,$Bezirk,$Blatt,$hist_alb, $this->fiktiv, NULL, $without_temporal_filter);
     return $ret[1];
   }
 
-  function getGrundbuecher() {
+  function getGrundbuecher($without_temporal_filter = false) {
     if ($this->FlurstKennz=="") { return 0; }
     $this->debug->write("<br>kataster.php->flurstueck->getGrundbuecher Abfrage der Angaben zum Grundbuch auf dem das Flurstück gebucht ist<br>",4);
-    $ret=$this->database->getGrundbuecher($this->FlurstKennz, $this->hist_alb);
+    $ret=$this->database->getGrundbuecher($this->FlurstKennz, $this->hist_alb, false, $without_temporal_filter);
 		if($ret['fiktiv'])$this->fiktiv = true;
     return $ret[1];
   }
@@ -1606,14 +1606,14 @@ class flurstueck {
     return $FlstListe;
   }
 
-  function getEigentuemerliste($Bezirk,$Blatt,$BVNR) {
+  function getEigentuemerliste($Bezirk,$Blatt,$BVNR,$without_temporal_filter = false) {
     if ($this->FlurstKennz=="") {
       $Grundbuch = new grundbuch("","",$this->debug);
       $Eigentuemerliste[0] = new eigentuemer($Grundbuch,"");
       return $Eigentuemerliste;
     }
     $this->debug->write("<p>kataster flurstueck->getEigentuemerliste Abfragen der Flurstücksdaten aus dem ALK Bestand:<br>",4);
-    $ret=$this->database->getEigentuemerliste($this->FlurstKennz,$Bezirk,$Blatt,$BVNR);
+    $ret=$this->database->getEigentuemerliste($this->FlurstKennz,$Bezirk,$Blatt,$BVNR,$without_temporal_filter);
     if ($ret[0] AND DBWRITE) {
       $Grundbuch = new grundbuch("","",$this->debug);
       $Eigentuemerliste[0] = new eigentuemer($Grundbuch,"");
@@ -1864,7 +1864,39 @@ class flurstueck {
       break;
     }
   }
-
+	
+	function getVersionen() {
+    if ($this->FlurstKennz=="") { return 0; }
+    $this->debug->write("<p>kataster flurstueck->getVersionen (vom Flurstück):<br>",4);
+		$this->readALB_Data($this->FlurstKennz, true);
+		$Grundbuecher=$this->getGrundbuecher(true);							# die Grundbücher ohne zeitlichen Filter abfragen
+		$Buchungen=$this->getBuchungen(NULL,NULL,false, true);	# die Buchungen ohne zeitlichen Filter abfragen
+		for($b=0; $b < count($Buchungen); $b++){
+			$buchungsstelle_gml_ids[] = $Buchungen[$b]['gml_id'];
+			$Eigentuemerliste = $this->getEigentuemerliste($Buchungen[$b]['bezirk'],$Buchungen[$b]['blatt'],$Buchungen[$b]['bvnr'], true);		# die Eigentümer ohne zeitlichen Filter abfragen
+      $anzEigentuemer=count($Eigentuemerliste);
+      for($e=0;$e<$anzEigentuemer;$e++){
+				$namensnummer_gml_ids[] = $Eigentuemerliste[$e]->n_gml_id;
+				$person_gml_ids[] = $Eigentuemerliste[$e]->gml_id;
+			}
+		}
+		$versionen= $this->database->getVersionen('ax_flurstueck', array($this->gml_id));
+		$versionen= array_merge($versionen, $this->database->getVersionen('ax_buchungsstelle', $buchungsstelle_gml_ids));
+		$versionen= array_merge($versionen, $this->database->getVersionen('ax_namensnummer', $namensnummer_gml_ids));
+		$versionen= array_merge($versionen, $this->database->getVersionen('ax_person', $person_gml_ids));
+		# sortieren
+		usort($versionen, function($a, $b){return DateTime::createFromFormat('d.m.Y H:i:s', $a['beginnt']) > DateTime::createFromFormat('d.m.Y H:i:s', $b['beginnt']);});
+		# gleiche beginnts rausnehmen, Anlässe zusammenfassen
+		for($i = 0; $i < count($versionen); $i++){
+			if($unique_versionen[$versionen[$i]['beginnt']]['endet'] == '' OR $unique_versionen[$versionen[$i]['beginnt']]['endet'] > $versionen[$i]['endet'])$unique_versionen[$versionen[$i]['beginnt']]['endet'] = $versionen[$i]['endet'];
+			$unique_versionen[$versionen[$i]['beginnt']]['anlass'][] = $versionen[$i]['anlass'];
+			$unique_versionen[$versionen[$i]['beginnt']]['anlass'] = array_unique($unique_versionen[$versionen[$i]['beginnt']]['anlass']);
+			$unique_versionen[$versionen[$i]['beginnt']]['table'][] = $versionen[$i]['table'];
+			$unique_versionen[$versionen[$i]['beginnt']]['table'] = array_unique($unique_versionen[$versionen[$i]['beginnt']]['table']);
+		}
+    return $unique_versionen;
+  }
+	
 	function getNachfolger() {
     if ($this->FlurstKennz=="") { return 0; }
     $this->debug->write("<p>kataster flurstueck->getNachfolger (vom Flurstück):<br>",4);
@@ -1892,6 +1924,7 @@ class flurstueck {
 			else rolle::$hist_timestamp = '';
 		}
     $rs=$ret[1];
+		$this->gml_id=$rs['gml_id'];
     $this->Zaehler=intval($rs['zaehler']);
     $this->Nenner=intval($rs['nenner']);
     $this->FlurstNr=$this->Zaehler;
@@ -2027,7 +2060,7 @@ class flurstueck {
     return $Flurstuecke;
   }
 
-  function getNamen($formvars,$gemkgschl) {
+  function getNamen($formvars,$ganze_gemkg_ids, $eingeschr_gemkg_ids) {
     if ($formvars['name1']=='' AND $formvars['name2']=='' AND $formvars['name3']=='' AND $formvars['name4']=='' AND $formvars['name5']=='' AND $formvars['name6']=='' AND $formvars['name7']=='' AND $formvars['name8']=='') {
       $ret[0]=1;
       $ret[1]='<br>Geben Sie mindestens einen Suchbegriff ein!';
@@ -2036,7 +2069,7 @@ class flurstueck {
     	if($blatt != ''){
     		$blatt = str_pad($blatt, 5, '0', STR_PAD_LEFT);
     	}
-      $ret=$this->database->getNamen($formvars, $gemkgschl);
+      $ret=$this->database->getNamen($formvars, $ganze_gemkg_ids, $eingeschr_gemkg_ids);
       if ($ret[0]) {
         $ret[1]='<br>Fehler bei der Abfrage der Eigentümernamen.'.$ret[1];
       }

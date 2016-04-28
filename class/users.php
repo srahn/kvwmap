@@ -1271,7 +1271,7 @@ class rolle {
 		if($language != 'german') {
 			$sql.='CASE WHEN `Name_'.$language.'` != "" THEN `Name_'.$language.'` ELSE `Name` END AS ';
 		}
-		$sql.='Name, l.Layer_ID, alias, Datentyp, Gruppe, pfad, maintable, Data, `schema`, document_path, labelitem, connection, printconnection, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs, wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, ul.`queryable`, ul.`drawingorder`, ul.`minscale`, ul.`maxscale`, ul.`offsite`, ul.`transparency`, ul.`postlabelcache`, `Filter`, CASE r2ul.gle_view WHEN \'0\' THEN \'generic_layer_editor.php\' WHEN \'1\' THEN \'generic_layer_editor_2.php\' ELSE ul.`template` END as template, `header`, `footer`, ul.`symbolscale`, ul.`logconsume`, ul.`requires`, ul.`privileg`, ul.`export_privileg`, `start_aktiv` FROM layer AS l, used_layer AS ul, u_rolle2used_layer as r2ul';
+		$sql.='Name, l.Layer_ID, alias, Datentyp, Gruppe, pfad, maintable, Data, `schema`, document_path, labelitem, connection, printconnection, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs, wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, ul.`queryable`, ul.`drawingorder`, ul.`minscale`, ul.`maxscale`, ul.`offsite`, ul.`transparency`, ul.`postlabelcache`, `Filter`, CASE r2ul.gle_view WHEN \'0\' THEN \'generic_layer_editor.php\' ELSE ul.`template` END as template, `header`, `footer`, ul.`symbolscale`, ul.`logconsume`, ul.`requires`, ul.`privileg`, ul.`export_privileg`, `start_aktiv` FROM layer AS l, used_layer AS ul, u_rolle2used_layer as r2ul';
     $sql.=' WHERE l.Layer_ID=ul.Layer_ID AND r2ul.Stelle_ID=ul.Stelle_ID AND r2ul.Layer_ID=ul.Layer_ID AND ul.Stelle_ID='.$this->stelle_id.' AND r2ul.User_ID='.$this->user_id;
     if ($LayerName!='') {
       $sql.=' AND (l.Name LIKE "'.$LayerName.'" ';
@@ -1935,6 +1935,12 @@ class rolle {
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
 
+	function resetClasses(){
+		$sql = 'DELETE FROM u_rolle2used_class WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+		$this->debug->write("<p>file:users.php class:rolle->resetQuerys - resetten aller aktiven Layer zur Rolle:",4);
+		$this->database->execSQL($sql,4, $this->loglevel);
+	}
+	
 	function setAktivLayer($formvars, $stelle_id, $user_id) {
 		$layer=$this->getLayer('');
 		$rollenlayer=$this->getRollenLayer('', NULL);
@@ -3577,14 +3583,27 @@ class stelle {
 	}
 
 	function getGemeindeIDs() {
-		$sql = 'SELECT Gemeinde_ID AS ID FROM stelle_gemeinden WHERE Stelle_ID = '.$this->id;
+		$sql = 'SELECT Gemeinde_ID, Gemarkung, Flur FROM stelle_gemeinden WHERE Stelle_ID = '.$this->id;
 		#echo $sql;
 		$this->debug->write("<p>file:users.php class:stelle->getGemeindeIDs - Lesen der GemeindeIDs zur Stelle:<br>".$sql,4);
 		$query=mysql_query($sql,$this->database->dbConn);
-		while($rs=mysql_fetch_array($query)) {
-			$liste[] = $rs;
+		if(mysql_num_rows($query) > 0){
+			$liste['ganze_gemeinde'] = Array();
+			$liste['eingeschr_gemeinde'] = Array();
+			$liste['ganze_gemarkung'] = Array();
+			$liste['eingeschr_gemarkung'] = Array();
+			while($rs=mysql_fetch_assoc($query)) {
+				if($rs['Gemarkung'] != ''){
+					$liste['eingeschr_gemeinde'][$rs['Gemeinde_ID']] = NULL;
+					if($rs['Flur'] != '')$liste['eingeschr_gemarkung'][$rs['Gemarkung']][] = $rs['Flur'];
+					else $liste['ganze_gemarkung'][$rs['Gemarkung']] = NULL;
+				}
+				else{
+					$liste['ganze_gemeinde'][$rs['Gemeinde_ID']] = NULL;
+				}
+			}
 		}
-		return $liste;
+		return $liste;		
 	}
 
 	function getGemeinden($database) {

@@ -2008,6 +2008,7 @@ function mouseup(evt){
 	  top.currentform.newpath.value = path;
 	  if(pathy.length > 2){
 	  	top.currentform.firstpoly.value = true;
+			if(top.currentform.firstpoly.onchange)top.currentform.firstpoly.onchange();
 	  	polygonarea();
 	  }
 	}

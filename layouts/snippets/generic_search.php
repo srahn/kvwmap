@@ -266,7 +266,7 @@ function add_searchmask(layer_id){
   	</td>
   </tr>
   <tr>
-    <td id="searches1"><? if($this->formvars['selected_layer_id'] != ''){ ?><a href="javascript:showsearches();"><? echo $strSearches; ?></a><? } ?>&nbsp;</td>
+    <td id="searches1"><? if($this->formvars['selected_layer_id'] != ''){ ?><a href="javascript:showsearches();"><? echo $strSearches; ?></a><? echo ' ('.count($this->searchset).')';} ?>&nbsp;</td>
   </tr>
   <tr id="searches2" style="display:none"> 
     <td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3">
@@ -304,6 +304,8 @@ function add_searchmask(layer_id){
   <? if($this->formvars['map_flag'] != ''){ ?>
   <tr id="map2"> 
     <td align="right" style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3">
+			<input type="checkbox" name="within" value="1" <? if($this->formvars['within'] == 1)echo 'checked'; ?>>
+			<? echo $strWithin; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     	<? echo $this->strUseGeometryOf; ?>: 
   		<select name="layer_id" onchange="document.GUI.submit();">
   			<?

@@ -23,7 +23,7 @@ $xml_string =
 			<element id="ZWECK_FAX">' . $data['fax'] . '</element>
 			<element id="ZWECK_EMAIL">' . $data['email'] . '</element>
 			<element id="ZWECK_ANTRAGSTELLER_IST">' . $data['ownerinfo'] . '</element>
-			<element id="ZWECK_VOLLMACHT">' . $data['mandateReference'] . '</element>
+			<element id="ZWECK_VOLLMACHT">' . $mandate_file . '</element>
 			<element id="ZWECK_STANDORT_LAND_ID">' . $data['cadastre_stateId'] . '</element>
 			<element id="ZWECK_STANDORT_KREIS_ID">' . $data['cadastre_districtId'] . '</element>
 			<element id="ZWECK_STANDORT_GEMEINDE_ID">' . $data['cadastre_municipalityId'] . '</element>
@@ -56,7 +56,7 @@ $xml_string .= '<element id="DVZ_EMPF_EMAIL">' . $data['authority_email'] . '</e
 			';
 $xml_string .= '<element id="DVZ_EMPF_BEARBEITUNGSZEIT">' . $data['authority_processingTime'] . '</element>
 			';
-$xml_string .= '<element id="ZWECK_BAUM_BILD">' . $data['locationSketchReference'] . '</element>
+$xml_string .= '<element id="ZWECK_BAUM_BILD">' . $sketch_reference_file . '</element>
 			';
 			for ($i = 0; $i < count ( $data['wood_species'] ); $i++ ) {
 				$nr = $i + 1;
