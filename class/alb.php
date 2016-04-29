@@ -2620,15 +2620,14 @@ class ALB {
           else {
             $row-=12;
           }
-          if ($Eigentuemerliste[$i]->Nr!=0) {
-#            $pdf->addText($col0,$row-=12,$fontSize,$Eigentuemerliste[$i]->Nr);
-            $pdf->addText($col1,$row-=12,$fontSize,$Eigentuemerliste[$i]->Nr);
-#            if($Eigentuemerliste[$i]->Anteil != '')$pdf->addText($col3,$row,$fontSize,'zu '.$Eigentuemerliste[$i]->Anteil);
-            if($Eigentuemerliste[$i]->Anteil != '')$pdf->addText($col27,$row,$fontSize,'zu '.$Eigentuemerliste[$i]->Anteil);
-          }
-          else {
-            $row-=12;
-          }
+					$pdf->addText($col0,$row-=12,$fontSize,$Eigentuemerliste[$i]->Nr);
+					if($Eigentuemerliste[$i]->zusatz_eigentuemer != ''){
+						$zusatz = $Eigentuemerliste[$i]->zusatz_eigentuemer; if($Eigentuemerliste[$i]->Anteil != '')$zusatz .= ' zu '.$Eigentuemerliste[$i]->Anteil;
+						$pdf->addText($col1,$row-=12,$fontSize,utf8_decode($zusatz));
+					}
+					elseif($Eigentuemerliste[$i]->Anteil != ''){
+						$pdf->addText($col1,$row-=12,$fontSize,utf8_decode($Eigentuemerliste[$i]->Anteil));
+					}
           $anzNamenszeilen=count($Eigentuemerliste[$i]->Name);
           for ($k=0;$k<$anzNamenszeilen;$k++) {
 #            $pdf->addText($col1,$row-=12,$fontSize,$Eigentuemerliste[$i]->Name[$k]);
@@ -2850,15 +2849,14 @@ class ALB {
           else {
             $row-=12;
           }
-          if ($Eigentuemerliste[$i]->Nr!=0) {
-#            $pdf->addText($col0,$row-=12,$fontSize,$Eigentuemerliste[$i]->Nr);
-            $pdf->addText($col1,$row-=12,$fontSize,$Eigentuemerliste[$i]->Nr);
-#            if($Eigentuemerliste[$i]->Anteil != '')$pdf->addText($col3,$row,$fontSize,'zu '.$Eigentuemerliste[$i]->Anteil);
-            if($Eigentuemerliste[$i]->Anteil != '')$pdf->addText($col27,$row,$fontSize,'zu '.$Eigentuemerliste[$i]->Anteil);
-          }
-          else {
-            $row-=12;
-          }
+					$pdf->addText($col0,$row-=12,$fontSize,$Eigentuemerliste[$i]->Nr);
+					if($Eigentuemerliste[$i]->zusatz_eigentuemer != ''){
+						$zusatz = $Eigentuemerliste[$i]->zusatz_eigentuemer; if($Eigentuemerliste[$i]->Anteil != '')$zusatz .= ' zu '.$Eigentuemerliste[$i]->Anteil;
+						$pdf->addText($col1,$row-=12,$fontSize,utf8_decode($zusatz));
+					}
+					elseif($Eigentuemerliste[$i]->Anteil != ''){
+						$pdf->addText($col1,$row-=12,$fontSize,utf8_decode($Eigentuemerliste[$i]->Anteil));
+					}
           $anzNamenszeilen=count($Eigentuemerliste[$i]->Name);
           for ($k=0;$k<$anzNamenszeilen;$k++) {
 #            $pdf->addText($col1,$row-=12,$fontSize,$Eigentuemerliste[$i]->Name[$k]);
