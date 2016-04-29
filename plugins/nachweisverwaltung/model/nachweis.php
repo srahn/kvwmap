@@ -734,7 +734,7 @@ class Nachweis {
 		  if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
           #echo $sql;
           $this->debug->write("<br>nachweis.php getNachweise Abfragen der Nachweisdokumente.<br>",4);
-          $ret=$this->database->execSQL($sql,4, 0);
+          $ret=$this->database->execSQL($sql,4, 1);
           if ($ret[0]) { # Fehler in der Datenbankabfrage
             $errmsg.=$ret[1];
           }
@@ -775,7 +775,7 @@ class Nachweis {
 	          $sql.=")";
 	        }
 	        #echo $sql;
-	        $ret1=$this->database->execSQL($sql,4, 0);
+	        $ret1=$this->database->execSQL($sql,4, 1);
           if (pg_num_rows($ret[1])==0) {
             $errmsg.='\nEs konnte kein Dokument gefunden werden.';
           }
@@ -841,7 +841,7 @@ class Nachweis {
         $sql.=" ORDER BY ".$order." ".$richtung;
         #echo $sql;
         $this->debug->write("<br>nachweis.php getNachweise Abfragen der Nachweisdokumente.<br>",4);
-        $ret=$this->database->execSQL($sql,4, 0);    
+        $ret=$this->database->execSQL($sql,4, 1);    
         if (!$ret[0]) {
           while ($rs=pg_fetch_array($ret[1])) {
             $nachweise[]=$rs;
@@ -940,7 +940,7 @@ class Nachweis {
           $sql.=" ORDER BY ".$order." ".$richtung;
           #echo $sql;
           $this->debug->write("<br>nachweis.php getNachweise Abfragen der Nachweisdokumente.<br>",4);
-          $ret=$this->database->execSQL($sql,4, 0);    
+          $ret=$this->database->execSQL($sql,4, 1);    
           if (!$ret[0]) {
             while ($rs=pg_fetch_array($ret[1])) {
               $nachweise[]=$rs;
@@ -997,7 +997,7 @@ class Nachweis {
           }
           $sql.=" ORDER BY ".$order." ".$richtung;
           #echo $sql;        
-          $ret=$this->database->execSQL($sql,4, 0);    
+          $ret=$this->database->execSQL($sql,4, 1);    
           if (!$ret[0]) {
             while ($rs=pg_fetch_array($ret[1])) {
               $nachweise[]=$rs;
