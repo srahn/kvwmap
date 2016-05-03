@@ -661,7 +661,7 @@ class data_import_export {
   }
 	
 	function ogr2ogr_export($sql, $exportformat, $exportfile, $layerdb){
-		$command = 'export PGCLIENTENCODING=UTF-8;'.OGR_BINPATH.'ogr2ogr -f '.$exportformat.' -lco ENCODING=UTF-8 -sql "'.$sql.'" '.$exportfile.' PG:"dbname='.$layerdb->dbName.' user='.$layerdb->user;
+		$command = 'export PGCLIENTENCODING=UTF-8;'.OGR_BINPATH.'ogr2ogr -f '.$exportformat.' -lco ENCODING=LATIN1 -sql "'.$sql.'" '.$exportfile.' PG:"dbname='.$layerdb->dbName.' user='.$layerdb->user;
 		if($layerdb->passwd != '')$command.= ' password='.$layerdb->passwd;
 		if($layerdb->port != '')$command.=' port='.$layerdb->port;
 		if($layerdb->host != '') $command .= ' host=' . $layerdb->host;
