@@ -48,7 +48,8 @@ function checkStatus($request){
         $info = getExceptionCode($data);  
       }
       else{
-        $status = true;  
+				if(strpos($data, '‰PNG') === false AND strpos($data, 'JFIF') === false)$status = false;
+        else $status = true;  
       }
     }
   }
