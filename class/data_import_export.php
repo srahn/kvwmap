@@ -908,7 +908,7 @@ class data_import_export {
 		
 		if($this->formvars['export_format'] == 'Shape'){				# das Abschneiden bei nicht in der Länge begrenzten Textspalten verhindern
 			for($s = 0; $s < count($selected_attributes); $s++){
-				if(in_array($selected_attr_types[$s], array('text', 'varchar')))$selected_attributes[$s] = $selected_attributes[$s].'::varchar(255)';
+				if(in_array($selected_attr_types[$s], array('text', 'varchar')))$selected_attributes[$s] = $selected_attributes[$s].'::varchar(254)';
 			}
 		}
 		
