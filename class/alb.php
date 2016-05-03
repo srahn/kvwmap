@@ -2482,7 +2482,7 @@ class ALB {
 
   function ALBAuszug_Bestand($Grundbuchbezirk,$Grundbuchblatt,$formnummer,$wasserzeichen) {
     $pdf=new Cezpdf();
-    $pdf->selectFont(PDFCLASSPATH.'fonts/Courier.afm');
+		$pdf->selectFont(PDFCLASSPATH.'fonts/Helvetica.afm');
     # Hilfsobjekte erzeugen
 
     $grundbuch=new grundbuch($Grundbuchbezirk,$Grundbuchblatt,$this->database);
