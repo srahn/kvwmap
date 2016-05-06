@@ -118,14 +118,7 @@ $SVGvars_querytooltipscript .= '
 				tooltipgroup.setAttribute(\'visibility\', \'visible\');
 			}
 		}				
-			
-		function mouse_move(evt){
-			top.coords_anzeige(evt);
-		 	if(doing == "ppquery"){
-		 		hidetooltip(evt);
-		 	}
-		}		
-				
+						
 		window.setInterval("tooltip_query()", 100);
 		
 		function cleartext(object){
