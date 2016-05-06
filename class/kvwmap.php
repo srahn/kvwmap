@@ -11898,6 +11898,10 @@ class GUI {
 									$output .= '##';
 									$attribcount++;
 								} break;
+								case 'Checkbox': {
+		              $layer['shape'][$k][$attributes['name'][$j]] = str_replace('f', 'nein',  $layer['shape'][$k][$attributes['name'][$j]]);
+									$layer['shape'][$k][$attributes['name'][$j]] = str_replace('t', 'ja',  $layer['shape'][$k][$attributes['name'][$j]]);
+								}
 				        default : {
 		              $output .=  $attributes['alias'][$j].': ';
 		              $attribcount++;
