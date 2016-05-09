@@ -2229,9 +2229,9 @@ class ALB {
 
 	        # Amtsgericht, Grundbuchbezirk
 	        $pdf->addText($col0,$row-=12,$fontSize,'Amtsgericht');
-	        $pdf->addText($col2,$row,$fontSize,$flst->Amtsgericht['name'].' ('.utf8_decode($flst->Amtsgericht['schluessel']).')');
+	        $pdf->addText($col2,$row,$fontSize,utf8_decode($flst->Amtsgericht['name']).' ('.$flst->Amtsgericht['schluessel'].')');
 	        $pdf->addText($col0,$row-=12,$fontSize,'Grundbuchbezirk');
-	        $pdf->addText($col2,$row,$fontSize,$flst->Grundbuchbezirk['name'].' ('.utf8_decode($flst->Grundbuchbezirk['schluessel']).')');
+	        $pdf->addText($col2,$row,$fontSize,utf8_decode($flst->Grundbuchbezirk['name']).' ('.$flst->Grundbuchbezirk['schluessel'].')');
 		    $row-=18;
 	        ################################################################################
 	        # Bestandsnachweis #
