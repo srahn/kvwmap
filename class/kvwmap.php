@@ -5464,16 +5464,11 @@ class GUI {
 		else{																// alle anderen Dokumenttypen bekommen entsprechende Dokumentensymbole als Vorschaubild
 			$dateinamensteil[1] = 'gif';
   		switch ($type) {  			
-  			case 'doc' :{
-					$thumbname = WWWROOT.APPLVERSION.GRAPHICSPATH.'openoffice.gif';
-  			}break;
-  			
   			default : {
   				$image = imagecreatefromgif(GRAPHICSPATH.'document.gif');
-          $textbox = imagettfbbox(13, 0, WWWROOT.APPLVERSION.'fonts/arial.ttf', '.'.$type);
-          $textwidth = $textbox[2] - $textbox[0] + 13;
           $blue = ImageColorAllocate ($image, 26, 87, 150);
-          imagettftext($image, 13, 0, 22, 34, $blue, WWWROOT.APPLVERSION.'fonts/arial_bold.ttf', $type);
+					if(strlen($type) > 3)$xoffset = 4;
+          imagettftext($image, 12, 0, 23-$xoffset, 34, $blue, WWWROOT.APPLVERSION.'fonts/SourceSansPro-Semibold.ttf', $type);
           $thumbname = IMAGEPATH.rand(0,100000).'.gif';
           imagegif($image, $thumbname);
   			}
@@ -12070,6 +12065,10 @@ class GUI {
 									$output .= '##';
 									$attribcount++;
 								} break;
+								case 'Checkbox': {
+		              $layer['shape'][$k][$attributes['name'][$j]] = str_replace('f', 'nein',  $layer['shape'][$k][$attributes['name'][$j]]);
+									$layer['shape'][$k][$attributes['name'][$j]] = str_replace('t', 'ja',  $layer['shape'][$k][$attributes['name'][$j]]);
+								}
 				        default : {
 		              $output .=  $attributes['alias'][$j].': ';
 		              $attribcount++;

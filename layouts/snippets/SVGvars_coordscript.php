@@ -10,28 +10,39 @@
   	<script type="text/javascript">
 	<!--
 	
-		function dec2dms(number){
+		function dec2dms(number, coordtype){
 			number = number+"";
 			part1 = number.split(".");
 			degrees = part1[0];
 			minutes = parseFloat("0."+part1[1]) * 60;
-			minutes = minutes+"";
-			part2 = minutes.split(".");
-			minutes = part2[0];
-			if(part2[1] != undefined)seconds = Math.round(parseFloat("."+part2[1]) * 60);
-			else seconds = "00";			
-			return degrees+"°"+minutes+"\'"+seconds+\'"\';
+			if(coordtype == "dmin"){
+				minutes = Math.round(minutes*1000)/1000;
+				minutes = minutes+"";
+				return degrees+"°"+minutes;
+			}
+			else{
+				minutes = minutes+"";
+				part2 = minutes.split(".");
+				minutes = part2[0];
+				if(part2[1] != undefined)seconds = Math.round(parseFloat("."+part2[1]) * 60);
+				else seconds = "00";
+				return degrees+"°"+minutes+"\'"+seconds+\'"\';
+			}			
 		}
 		
-		function dms2dec(number){
+		function dms2dec(number, coordtype){
+			var seconds = 0;
 			number = number+"";
 			part1 = number.split("°");
 			degrees = parseFloat(part1[0]);
 			part2 = part1[1].split("\'");
 			minutes = parseFloat(part2[0]);
-			seconds = part2[1].replace(/"/g, "");
-			seconds = parseFloat(seconds)/60;
+			if(coordtype == "dms"){
+				seconds = part2[1].replace(/"/g, "");
+				seconds = parseFloat(seconds)/60;
+			}
 			minutes = (minutes+seconds)/60;
+			console.log(Math.round((degrees + minutes)*10000)/10000);
 			return Math.round((degrees + minutes)*10000)/10000;  
 		}
 		
@@ -39,8 +50,8 @@
 			coordtype = \''.$this->user->rolle->coordtype.'\';
 			epsgcode = \''.$this->user->rolle->epsg_code.'\';
 			if(meters == false && epsgcode == 4326){
-				if(coordtype == "dms" && convert == true){
-					return dec2dms(number);
+				if(coordtype != "dec" && convert == true){
+					return dec2dms(number, coordtype);
 				}
 				else{
 					stellen = 5;
@@ -75,33 +86,8 @@
 			else{sep = ".";	}
 			return str_split[0]+sep+str_split[1];
 		}					
-	
-		function coords_input_alt(){
-			epsgcode = \''.$this->user->rolle->epsg_code.'\';
-			coordtype = \''.$this->user->rolle->coordtype.'\';
-			var mittex  = '.$this->map->width.'/2*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value);
-			var mittey  = parseFloat(top.document.GUI.maxy.value) - '.$this->map->height.'/2*parseFloat(top.document.GUI.pixelsize.value);
-			mittex = format_number(mittex, true, true, false);
-			mittey = format_number(mittey, true, true, false);
-			coords1 = prompt("Geben Sie die gewünschten Koordinaten ein \noder klicken Sie auf Abbrechen für die Koordinatenabfrage.",mittex+" "+mittey);
-			if(coords1){
-				coords2 = coords1.split(" ");
-				if(epsgcode == 4326 && coordtype == "dms"){
-					coords2[0] = dms2dec(coords2[0])+"";
-					coords2[1] = dms2dec(coords2[1])+"";
-				}
-				if(!coords2[0] || !coords2[1] || coords2[0].search(/[^-\d.]/g) != -1 || coords2[1].search(/[^-\d.]/g) != -1){
-					alert("Falsches Format");
-					return;
-				}
-				document.GUI.INPUT_COORD.value = coords2[0]+","+coords2[1];
-				document.GUI.CMD.value = "jump_coords";
-				document.GUI.submit();
-			}
-		}
-		
+			
 		function coords_input(){
-			epsgcode = \''.$this->user->rolle->epsg_code.'\';		
 			var mittex  = '.$this->map->width.'/2*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value);
 			var mittey  = parseFloat(top.document.GUI.maxy.value) - '.$this->map->height.'/2*parseFloat(top.document.GUI.pixelsize.value);
 			mittex = format_number(mittex, true, true, false);
@@ -112,7 +98,7 @@
 			content+= \'<div style="height: 30px">Koordinatenzoom</div>\';
 			content+= \'<table style="padding: 5px"><tr><td align="left" style="width: 300px" class="px15">Geben Sie hier die gewünschten Koordinaten ein.</td></tr>\';
 			content+= \'<tr><td><input style="width: 310px" type="text" id="input_coords" name="input_coords" value="\'+mittex+\' \'+mittey+\'"></td></tr>\';
-			content+= \'<tr><td>Koordinatensystem:&nbsp;<select name="epsg_code" style="width: 310px">'.$epsg_codes.'</select></td></tr></table>\';
+			content+= \'<tr><td>Koordinatensystem:&nbsp;<select name="epsg_code" id="epsg_code" style="width: 310px">'.$epsg_codes.'</select></td></tr></table>\';
 			content+= \'<br><input type="button" value="OK" onclick="coords_input_submit()">\';
 			Msg.innerHTML = content;
 			document.getElementById(\'input_coords\').select();
@@ -121,11 +107,12 @@
 		function coords_input_submit(){
 			coordtype = \''.$this->user->rolle->coordtype.'\';
 			coords1 = document.getElementById(\'input_coords\').value;
+			epsgcode = document.getElementById(\'epsg_code\').value;
 			if(coords1){
 				coords2 = coords1.split(" ");
-				if(epsgcode == 4326 && coordtype == "dms"){
-					coords2[0] = dms2dec(coords2[0])+"";
-					coords2[1] = dms2dec(coords2[1])+"";
+				if(epsgcode == 4326 && coordtype != "dec"){
+					coords2[0] = dms2dec(coords2[0], coordtype)+"";
+					coords2[1] = dms2dec(coords2[1], coordtype)+"";
 				}
 				if(!coords2[0] || !coords2[1] || coords2[0].search(/[^-\d.]/g) != -1 || coords2[1].search(/[^-\d.]/g) != -1){
 					alert("Falsches Format");
@@ -166,6 +153,16 @@
 					if(top.document.GUI.runningcoords != undefined)top.document.GUI.runningcoords.value = coorxf + " / " + cooryf; 
 				}
 			}			
+		}
+		
+		function show_coords(evt){
+			coorx = evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value);
+			coory = top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value);
+			if(top.document.GUI.secondcoords != undefined)top.ahah("index.php", "go=spatial_processing&curSRID='.$this->user->rolle->epsg_code.'&newSRID='.$this->user->rolle->epsg_code2.'&point="+coorx+" "+coory+"&operation=transformPoint&resulttype=wkt&coordtype='.$this->user->rolle->coordtype.'", new Array(top.document.GUI.secondcoords), "");
+			coorx = top.format_number(coorx, true, true, false);
+			coory = top.format_number(coory, true, true, false);
+			top.document.GUI.firstcoords.value = coorx+" "+coory; 
+			top.document.getElementById("showcoords").style.display="";
 		}
 
 	//-->

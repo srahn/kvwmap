@@ -5,9 +5,9 @@
   $strName="Nachname*";
   $strForeName="Vorname*";
   $strLogInName="Loginname*";
-  $strChangePassword="Auch Password ändern?";
-  $strPassword="Password";
-  $strReEnterPassword='Passwordwiederholung';
+  $strChangePassword="Auch Passwort ändern?";
+  $strPassword="Passwort";
+  $strReEnterPassword='Passwortwiederholung';
   $strAuthorizeTask="Berechtigte Stellen";
   $strTelephone="Telefon";
   $strEmail="E-Mail";
