@@ -1353,6 +1353,26 @@ function formvars_strip($formvars, $strip_list) {
 	return $stripped_formvars;
 }
 
+/*
+* Funktion ersetzt in $str die Schlüsselwörter, die in $params
+* als key übergeben werden durch die values von $params
+*/
+function replace_params($str, $params) {
+  #echo '<p>String vorher:<br>' . $str;
+  #echo '<p>Params:<br>' . $params;
+  $parts = explode(',', $params);
+  foreach ($parts AS $part) {
+    $param = explode(':', $part);
+    $str = str_replace(
+      trim($param[0], ' "'),
+      trim($param[1], ' "'),
+      $str
+    );
+  }
+  #echo '<p>String nachher:<br>' . $str;
+  return $str;
+}
+
 /**
 * Funktion sendet e-mail mit Dateien im Anhang
 * siehe http://www.php-einfach.de/codeschnipsel_1114.php

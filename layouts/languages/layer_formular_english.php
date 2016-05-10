@@ -6,6 +6,7 @@
   $strGroup="Group";
   $strPath="Query";
   $strData="Data";
+  $strLayerParams="Layer parameters";
   $strTileIndex="Tileindex";
   $strTileItem="Tileitem";
   $strLabelAngleItem="Labelangleitem";

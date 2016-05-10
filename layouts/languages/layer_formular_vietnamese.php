@@ -6,6 +6,7 @@
   $strGroup="Nhóm";
   $strPath="Đường dẫn";
   $strData="Số liệu";
+  $strLayerParams="Thông số lớp";
   $strTileIndex="Chỉ số bảo mật";
   $strTileItem="Mục bảo mật";
   $strLabelAngleItem="Mục góc gán nhãn";

@@ -5,7 +5,8 @@
   $strDataType="rodzaj danych*"; 
   $strGroup="grupa*"; 
   $strPath="ścieżka"; 
-  $strData="dane"; 
+  $strData="dane";
+  $strLayerParams="parametry warstw";
   $strTileIndex="Tileindex";
   $strTileItem="Tileitem";
   $strLabelAngleItem="powierzchnia etykiety"; 
