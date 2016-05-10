@@ -997,8 +997,7 @@ class GUI {
               if($layerset[$i]['Data'] != ''){
 								$layerset[$i]['Data'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[$i]['Data']);
 								$layerset[$i]['Data'] = str_replace('$language', $this->user->rolle->language, $layerset[$i]['Data']);
-								$layerset[$i]['Data'] = replace_params($layerset[$i]['Data'], $layerset[$i]['rolle_params']);
-
+								$layerset[$i]['Data'] = replace_params($layerset[$i]['Data'], $this->user->rolle->layer_params);
                 $layer->set('data', $layerset[$i]['Data']);
               }
   
@@ -6311,7 +6310,7 @@ class GUI {
     $this->layerdata = $mapDB->get_Layer($this->formvars['selected_layer_id']);
     $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
     $this->formvars['Datentyp'] = $this->layerdata['Datentyp'];
-    $this->layerdata['Data'] = replace_params($this->layerdata['Data'], $this->layerdata['rolle_params']);
+    $this->layerdata['Data'] = replace_params($this->layerdata['Data'], $this->user->rolle->layer_params);
 
     $begin = strpos($this->layerdata['Data'], '(') + 1;
     $end = strrpos($this->layerdata['Data'], ')');
@@ -6647,7 +6646,7 @@ class GUI {
         #$path = $layerset[0]['pfad'];
 				$path = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[0]['pfad']);
 				$path = str_replace('$language', $this->user->rolle->language, $path);
-				$path = replace_params($path, $layerset[0]['rolle_params']);
+				$path = replace_params($path, $this->user->rolle->layer_params);
 
         $privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
         $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
@@ -11118,7 +11117,7 @@ class GUI {
 							#$path = $layerset[$i]['pfad'];
 							$path = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[$i]['pfad']);
 							$path = str_replace('$language', $this->user->rolle->language, $path);
-							$path = replace_params($path, $layerset[$i]['rolle_params']);
+							$path = replace_params($path, $this->user->rolle->layer_params);
 
 							$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
 							$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
@@ -11823,7 +11822,7 @@ class GUI {
 				#$path = $layerset[$i]['pfad'];
 				$path = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[$i]['pfad']);
 				$path = str_replace('$language', $this->user->rolle->language, $path);
-				$path = replace_params($path, $layerset[$i]['rolle_params']);
+				$path = replace_params($path, $this->user->rolle->layer_params);
 
 				$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
 				#$path = $this->Stelle->parse_path($layerdb, $path, $privileges);
@@ -13549,6 +13548,7 @@ class db_mapObj{
     $this->debug=$debug;
     $this->Stelle_ID=$Stelle_ID;
     $this->User_ID=$User_ID;
+		$this->rolle = new rolle($User_ID, $Stelle_ID, $database);
 		$this->database=$database;
   }
 
@@ -13585,15 +13585,42 @@ class db_mapObj{
 	
   function read_Layer($withClasses, $groups = NULL){
 		global $language;
-    $sql ='SELECT DISTINCT rl.*,ul.*, l.Layer_ID, ';
 		if($language != 'german') {
-			$sql.='CASE WHEN `Name_'.$language.'` != "" THEN `Name_'.$language.'` ELSE `Name` END AS ';
+			$name_column = "
+			CASE
+				WHEN `l.Name_" . $language . "` != \"\" THEN `l.Name_" . $language . "`
+				ELSE `l.Name`
+			END AS l.Name";
 		}
-		$sql.='Name, l.alias, l.Datentyp, l.Gruppe, l.pfad, l.Data, l.default_params, rl.rolle_params, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem, l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem, l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version, l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, g.*';
-    $sql.=' FROM u_rolle2used_layer AS rl,used_layer AS ul,layer AS l, u_groups AS g, u_groups2rolle as gr';
-    $sql.=' WHERE rl.stelle_id=ul.Stelle_ID AND rl.layer_id=ul.Layer_ID AND l.Layer_ID=ul.Layer_ID';
-    $sql.=' AND (ul.minscale != -1 OR ul.minscale IS NULL) AND l.Gruppe = g.id AND rl.stelle_ID='.$this->Stelle_ID.' AND rl.user_id='.$this->User_ID;
-    $sql.=' AND gr.id = g.id AND gr.stelle_id='.$this->Stelle_ID.' AND gr.user_id='.$this->User_ID;
+		else
+			$name_column = "l.Name";
+
+		$sql = "
+			SELECT DISTINCT
+				rl.*,
+				ul.*,
+				l.Layer_ID," .
+				$name_column . ",
+				l.alias,
+				l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem,
+				l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem,
+				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version,
+				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status,
+				g.*
+			FROM
+				u_rolle2used_layer AS rl,
+				used_layer AS ul,
+				layer AS l,
+				u_groups AS g,
+				u_groups2rolle as gr
+			WHERE
+				rl.stelle_id = ul.Stelle_ID AND
+				rl.layer_id = ul.Layer_ID AND
+				l.Layer_ID = ul.Layer_ID AND
+				(ul.minscale != -1 OR ul.minscale IS NULL) AND l.Gruppe = g.id AND rl.stelle_ID = " . $this->Stelle_ID . " AND rl.user_id = " . $this->User_ID . " AND
+				gr.id = g.id AND
+				gr.stelle_id = " . $this->Stelle_ID . " AND
+				gr.user_id = " . $this->User_ID;
 		if($groups != NULL){
 			$sql.=' AND g.id IN ('.$groups.')';
 		}
@@ -13930,8 +13957,7 @@ class db_mapObj{
   	if($layer_id < 0){	# Rollenlayer
   		$sql = "
 				SELECT
-					Data,
-					default_params AS rolle_params
+					Data
 				FROM
 					rollenlayer
 				WHERE
@@ -13941,14 +13967,11 @@ class db_mapObj{
   	else{
     	$sql = "
 				SELECT
-					l.Data,
-					rl.rolle_params
+					Data
 				FROM
-					layer l,
-					u_rolle2used_layer rl
+					layer
 				WHERE
-					l.Layer_ID = rl.Layer_ID AND
-					l.Layer_ID = " . $layer_id . "
+					Layer_ID = " . $layer_id . "
 			";
   	}
   	#echo $sql;
@@ -13956,7 +13979,7 @@ class db_mapObj{
     $query=mysql_query($sql);
     if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     $rs = mysql_fetch_assoc($query);
-    $data = replace_params($rs['Data'], $rs['rolle_params']);
+    $data = replace_params($rs['Data'], $this->rolle->layer_params);
     return $data;
   }
 

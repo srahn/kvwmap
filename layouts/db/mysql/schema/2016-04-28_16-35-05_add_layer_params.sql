@@ -1,9 +1,17 @@
 BEGIN;
 
-ALTER TABLE `layer`
-  ADD `default_params` text NOT NULL AFTER `Data`;
+	CREATE TABLE	`layer_parameter` (
+		`id` 
+		`key` VARCHAR( 255 ) NOT NULL ,
+		`alias` VARCHAR( 255 ) NOT NULL,
+		`default_value` VARCHAR( 255 ) NOT NULL ,
+		`options_sql` TEXT NOT NULL
+	) ENGINE = MYISAM ;
 
-ALTER TABLE `u_rolle2used_layer`
-  ADD `rolle_params` varchar(255) NOT NULL;
+	ALTER TABLE `rolle`
+		ADD `layer_params` text NULL DEFAULT NULL;
+
+	ALTER TABLE `stelle`
+		ADD `selectable_layer_params` text NULL DEFAULT NULL;
 
 COMMIT;

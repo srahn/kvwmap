@@ -1,16 +1,17 @@
 <?function replace_params($str, $params) {
-  echo '<p>String vorher:<br>' . $str;
-  echo '<p>Params:<br>' . $params;
+  #echo '<p>String vorher:<br>' . $str;
+  #echo '<p>Params:<br>' . $params;
   $parts = explode(',', $params);
   foreach ($parts AS $part) {
     $param = explode(':', $part);
+		#echo '<p>Replace: ' . '$' . trim($param[0], ' "') . ' by ' . trim($param[1], ' "');
     $str = str_replace(
-      trim($param[0], ' "'),
+      '$' . trim($param[0], ' "'),
       trim($param[1], ' "'),
       $str
     );
   }
-  echo '<p>String nachher:<br>' . $str;
+  #echo '<p>String nachher:<br>' . $str;
   return $str;
 }
 function in_subnet($ip,$net) {
@@ -577,7 +578,7 @@ function in_subnet($ip,$net) {
               if($layerset[$i]['Data'] != ''){
 								$layerset[$i]['Data'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[$i]['Data']);
 								$layerset[$i]['Data'] = str_replace('$language', $this->user->rolle->language, $layerset[$i]['Data']);
-								$layerset[$i]['Data'] = replace_params($layerset[$i]['Data'], $$layerset[$i]['params']);
+								$layerset[$i]['Data'] = replace_params($layerset[$i]['Data'], $this->user->rolle->layer_params);
 
                 $layer->set('data', $layerset[$i]['Data']);
               }

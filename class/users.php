@@ -1267,23 +1267,51 @@ class rolle {
   function getLayer($LayerName) {
 		global $language;
     # Abfragen der Layer in der Rolle
-		$sql ='SELECT ';
 		if($language != 'german') {
-			$sql.='CASE WHEN `Name_'.$language.'` != "" THEN `Name_'.$language.'` ELSE `Name` END AS ';
+			$name_column = "
+			CASE
+				WHEN `l.Name_" . $language . "` != \"\" THEN `l.Name_" . $language . "`
+				ELSE `l.Name`
+			END AS l.Name";
 		}
-		$sql.='Name, l.Layer_ID, alias, Datentyp, Gruppe, pfad, maintable, Data, l.default_params, r2ul.rolle_params, `schema`, document_path, labelitem, connection, printconnection, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs, wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, ul.`queryable`, ul.`drawingorder`, ul.`minscale`, ul.`maxscale`, ul.`offsite`, ul.`transparency`, ul.`postlabelcache`, `Filter`, CASE r2ul.gle_view WHEN \'0\' THEN \'generic_layer_editor.php\' ELSE ul.`template` END as template, `header`, `footer`, ul.`symbolscale`, ul.`logconsume`, ul.`requires`, ul.`privileg`, ul.`export_privileg`, `start_aktiv` FROM layer AS l, used_layer AS ul, u_rolle2used_layer as r2ul';
-    $sql.=' WHERE l.Layer_ID=ul.Layer_ID AND r2ul.Stelle_ID=ul.Stelle_ID AND r2ul.Layer_ID=ul.Layer_ID AND ul.Stelle_ID='.$this->stelle_id.' AND r2ul.User_ID='.$this->user_id;
-    if ($LayerName!='') {
-      $sql.=' AND (l.Name LIKE "'.$LayerName.'" ';
-      if(is_numeric($LayerName)){
-        $sql.='OR l.Layer_ID = "'.$LayerName.'")';
-      }
-      else{
-        $sql.=')';
-      }
-    }
-		$sql.=' ORDER BY ul.drawingorder desc';
-    #echo $sql.'<br>';
+		else
+			$name_column = "l.Name";
+
+		if ($LayerName != '') {
+			$layer_name_filter = " AND (l.Name LIKE '" . $LayerName . "'";
+			if(is_numeric($LayerName))
+				$layer_name_filter .= " OR l.Layer_ID = " . $LayerName;
+			$layer_name_filter .= ")";
+		}
+
+		$sql = "
+			SELECT " .
+				$name_column . ",
+				l.Layer_ID,
+				alias, Datentyp, Gruppe, pfad, maintable, Data, `schema`, document_path, labelitem, connection, printconnection,
+				connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
+				wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, ul.`queryable`, ul.`drawingorder`,
+				ul.`minscale`, ul.`maxscale`, ul.`offsite`, ul.`transparency`, ul.`postlabelcache`, `Filter`,
+				CASE r2ul.gle_view
+					WHEN '0' THEN 'generic_layer_editor.php'
+					ELSE ul.`template`
+				END as template,
+				`header`, `footer`, ul.`symbolscale`, ul.`logconsume`, ul.`requires`, ul.`privileg`, ul.`export_privileg`, `start_aktiv`
+			FROM
+				layer AS l,
+				used_layer AS ul,
+				u_rolle2used_layer as r2ul
+			WHERE
+				l.Layer_ID=ul.Layer_ID AND
+				r2ul.Stelle_ID=ul.Stelle_ID AND
+				r2ul.Layer_ID=ul.Layer_ID AND
+				ul.Stelle_ID= " . $this->stelle_id . " AND
+				r2ul.User_ID= " . $this->user_id .
+				$layer_name_filter . "
+			ORDER BY
+				ul.drawingorder desc
+		";
+		#echo $sql.'<br>';
     $this->debug->write("<p>file:users.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
     if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
@@ -1431,7 +1459,15 @@ class rolle {
   function readSettings() {
 		global $language;
     # Abfragen und Zuweisen der Einstellungen der Rolle
-    $sql ='SELECT * FROM rolle WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+    $sql = "
+			SELECT
+				*
+			FROM
+				rolle
+			WHERE
+				user_id = " . $this->user_id . " AND
+				stelle_id = " . $this->stelle_id . "
+		";
     #echo $sql;
     $this->debug->write("<p>file:users.php class:rolle function:readSettings - Abfragen der Einstellungen der Rolle:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
@@ -1440,7 +1476,7 @@ class rolle {
       return 0;
     }
 		if(mysql_num_rows($query) > 0){
-			$rs=mysql_fetch_assoc($query);
+			$rs = mysql_fetch_assoc($query);
 			$this->oGeorefExt=ms_newRectObj();
 			$this->oGeorefExt->setextent($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
 			$this->nImageWidth=$rs['nImageWidth'];
@@ -1473,11 +1509,13 @@ class rolle {
 			$this->overlayy=$rs['overlayy'];
 			$this->instant_reload=$rs['instant_reload'];
 			$this->menu_auto_close=$rs['menu_auto_close'];
+			$this->layer_params = $rs['layer_params'];
 			if($rs['hist_timestamp'] != ''){
 				$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');			# der wird zur Anzeige des Timestamps benutzt
 				rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');	# der hat die Form, wie der timestamp in der PG-DB steht und wird für die Abfragen benutzt
 			}
-			else rolle::$hist_timestamp = $this->hist_timestamp = '';
+			else
+				rolle::$hist_timestamp = $this->hist_timestamp = '';
 			$this->selectedButton=$rs['selectedButton'];
 			$buttons = explode(',', $rs['buttons']);
 			$this->back = in_array('back', $buttons);
