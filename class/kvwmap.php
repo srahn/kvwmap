@@ -997,12 +997,7 @@ class GUI {
               if($layerset[$i]['Data'] != ''){
 								$layerset[$i]['Data'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[$i]['Data']);
 								$layerset[$i]['Data'] = str_replace('$language', $this->user->rolle->language, $layerset[$i]['Data']);
-
-                if ($this->formvars['jahr'] == '') $this->formvars['jahr'] = '15';
-                $layerset[$i]['Data'] = str_replace('$jahr', str_replace(';', '', $this->formvars['jahr']), $layerset[$i]['Data']);
-
-                if ($this->formvars['geschlecht'] == '') $this->formvars['geschlecht'] = 'g';
-                $layerset[$i]['Data'] = str_replace('$geschlecht', str_replace(';', '', $this->formvars['geschlecht']), $layerset[$i]['Data']);
+								$layerset[$i]['Data'] = replace_params($layerset[$i]['Data'], $layerset[$i]['rolle_params']);
 
                 $layer->set('data', $layerset[$i]['Data']);
               }
@@ -6321,12 +6316,8 @@ class GUI {
     $this->layerdata = $mapDB->get_Layer($this->formvars['selected_layer_id']);
     $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
     $this->formvars['Datentyp'] = $this->layerdata['Datentyp'];
+    $this->layerdata['Data'] = replace_params($this->layerdata['Data'], $this->layerdata['rolle_params']);
 
-    # Get the sql to query the map data
-    if ($this->formvars['jahr'] == '') $this->formvars['jahr'] = '15';
-    $this->layerdata['Data'] = str_replace('$jahr', str_replace(';', '', $this->formvars['jahr']), $this->layerdata['Data']);
-    if ($this->formvars['geschlecht'] == '') $this->formvars['geschlecht'] = 'g';
-    $this->layerdata['Data'] = str_replace('$geschlecht', str_replace(';', '', $this->formvars['geschlecht']), $this->layerdata['Data']);
     $begin = strpos($this->layerdata['Data'], '(') + 1;
     $end = strrpos($this->layerdata['Data'], ')');
     $data_sql = substr($this->layerdata['Data'], $begin, $end - $begin);
@@ -6412,6 +6403,33 @@ class GUI {
           $class['expression'] = '([' . $class_item . '] >= ' . $rows[$range_floor][$class_item] . ' AND [' . $class_item . '] < ' . $rows[$range_floor + $range_step][$class_item] . ')';
           $classes[] = $class;
         }
+      } break;
+      case 'nach Histogramm' : {
+        # sql zur Berechnung des Histogramms
+        $sql = "
+          SELECT
+            round(
+              (" . $class_item . " - (
+                SELECT
+                  min(" . $class_item . ")
+                FROM
+                  (" . $data_sql . ") AS data
+                )
+              ) * (
+                SELECT
+                  100 / (max(" . $class_item . ") - min(" . $class_item . "))
+                FROM
+                  (" . $data_sql . ") AS data
+              )
+            ) prozent,
+            count(*) anzahl
+          FROM
+            (" . $data_sql . ") AS data
+          GROUP BY
+            prozent
+          ORDER BY
+            prozent
+        ";
       } break;
     }
     $color = 255;
@@ -6510,7 +6528,6 @@ class GUI {
 				showAlert('Keine connection angegeben.');
 			}
 		}
-
     # Stellenzuweisung
 		$stellen = $this->Stellenzuweisung(
       array($this->formvars['selected_layer_id']),
@@ -6635,6 +6652,8 @@ class GUI {
         #$path = $layerset[0]['pfad'];
 				$path = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[0]['pfad']);
 				$path = str_replace('$language', $this->user->rolle->language, $path);
+				$path = replace_params($path, $layerset[0]['rolle_params']);
+
         $privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
         $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
         $attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
@@ -11104,13 +11123,14 @@ class GUI {
 							#$path = $layerset[$i]['pfad'];
 							$path = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[$i]['pfad']);
 							$path = str_replace('$language', $this->user->rolle->language, $path);
+							$path = replace_params($path, $layerset[$i]['rolle_params']);
+
 							$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
 							$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
 							$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames']);
 							# weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)  ---> steht weiter unten
 
 							# order by rausnehmen
-							
 							$orderbyposition = strrpos(strtolower($newpath), 'order by');
 							$lastfromposition = strrpos(strtolower($newpath), 'from');
 							if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
@@ -11179,8 +11199,7 @@ class GUI {
 								else{*/
 									$the_geom = $layerset[$i]['attributes']['the_geom'];
 							//  }
-							//} 
-
+							//}
 							# Unterscheidung ob mit Suchradius oder ohne gesucht wird
 							if ($this->formvars['searchradius']>0) {
 								$layerset[$i]['toleranceunits']='meters';
@@ -11809,6 +11828,8 @@ class GUI {
 				#$path = $layerset[$i]['pfad'];
 				$path = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[$i]['pfad']);
 				$path = str_replace('$language', $this->user->rolle->language, $path);
+				$path = replace_params($path, $layerset[$i]['rolle_params']);
+
 				$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
 				#$path = $this->Stelle->parse_path($layerdb, $path, $privileges);
 				$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames']);      
@@ -13569,7 +13590,7 @@ class db_mapObj{
 		if($language != 'german') {
 			$sql.='CASE WHEN `Name_'.$language.'` != "" THEN `Name_'.$language.'` ELSE `Name` END AS ';
 		}
-		$sql.='Name, l.alias, l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem, l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem, l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version, l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, g.*';
+		$sql.='Name, l.alias, l.Datentyp, l.Gruppe, l.pfad, l.Data, l.default_params, rl.rolle_params, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem, l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem, l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version, l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, g.*';
     $sql.=' FROM u_rolle2used_layer AS rl,used_layer AS ul,layer AS l, u_groups AS g, u_groups2rolle as gr';
     $sql.=' WHERE rl.stelle_id=ul.Stelle_ID AND rl.layer_id=ul.Layer_ID AND l.Layer_ID=ul.Layer_ID';
     $sql.=' AND (ul.minscale != -1 OR ul.minscale IS NULL) AND l.Gruppe = g.id AND rl.stelle_ID='.$this->Stelle_ID.' AND rl.user_id='.$this->User_ID;
@@ -13908,17 +13929,35 @@ class db_mapObj{
 
   function getData($layer_id){
   	if($layer_id < 0){	# Rollenlayer
-  		$sql ='SELECT Data FROM rollenlayer WHERE -id = '.$layer_id;
+  		$sql = "
+				SELECT
+					Data,
+					default_params AS rolle_params
+				FROM
+					rollenlayer
+				WHERE
+					-id = " . $layer_id . "
+			";
   	}
   	else{
-    	$sql ='SELECT Data FROM layer WHERE Layer_ID = '.$layer_id;
+    	$sql = "
+				SELECT
+					l.Data,
+					rl.rolle_params
+				FROM
+					layer l,
+					u_rolle2used_layer rl
+				WHERE
+					l.Layer_ID = rl.Layer_ID AND
+					l.Layer_ID = " . $layer_id . "
+			";
   	}
   	#echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->getData - Lesen des Data-Statements des Layers:<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    $rs = mysql_fetch_array($query);
-    $data = $rs[0];
+    $rs = mysql_fetch_assoc($query);
+    $data = replace_params($rs['Data'], $rs['rolle_params']);
     return $data;
   }
 
@@ -14502,6 +14541,7 @@ class db_mapObj{
     $sql .= "pfad = '".$formvars['pfad']."', ";
     $sql .= "maintable = '".$formvars['maintable']."', ";
     $sql .= "Data = '".$formvars['Data']."', ";
+    $sql .= "`default_params` = '" . $formvars['default_params'] . "', ";
     $sql .= "`schema` = '".$formvars['schema']."', ";
     $sql .= "document_path = '".$formvars['document_path']."', ";
     $sql .= "tileindex = '".$formvars['tileindex']."', ";
@@ -14579,7 +14619,7 @@ class db_mapObj{
 					$sql .= "`Name_".$language."`, ";
 				}
 			}
-			$sql.="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`) VALUES(";
+			$sql.="`alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `default_params`, schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `postlabelcache`, `connection`, `printconnection`, `connectiontype`, `classitem`, `filteritem`, `cluster_maxdistance`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `symbolscale`, `offsite`, `requires`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datenherr`, `metalink`, `status`) VALUES(";
       if($formvars['id'] != ''){
         $sql.="'".$formvars['id']."', ";
       }
@@ -14610,6 +14650,7 @@ class db_mapObj{
       else{
         $sql .= "'".$formvars['Data']."', ";
       }
+      $sql .= "'" . $formvars['default_params'] . "', ";
       if($formvars['schema'] == ''){
         $sql .= "NULL, ";
       }

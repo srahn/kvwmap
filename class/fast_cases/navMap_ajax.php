@@ -1,4 +1,19 @@
-<?function in_subnet($ip,$net) {
+<?function replace_params($str, $params) {
+  echo '<p>String vorher:<br>' . $str;
+  echo '<p>Params:<br>' . $params;
+  $parts = explode(',', $params);
+  foreach ($parts AS $part) {
+    $param = explode(':', $part);
+    $str = str_replace(
+      trim($param[0], ' "'),
+      trim($param[1], ' "'),
+      $str
+    );
+  }
+  echo '<p>String nachher:<br>' . $str;
+  return $str;
+}
+function in_subnet($ip,$net) {
 	$ipparts=explode('.',$ip);
 	$netparts=explode('.',$net);
 
@@ -562,12 +577,7 @@
               if($layerset[$i]['Data'] != ''){
 								$layerset[$i]['Data'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[$i]['Data']);
 								$layerset[$i]['Data'] = str_replace('$language', $this->user->rolle->language, $layerset[$i]['Data']);
-
-                if ($this->formvars['jahr'] == '') $this->formvars['jahr'] = '15';
-                $layerset[$i]['Data'] = str_replace('$jahr', str_replace(';', '', $this->formvars['jahr']), $layerset[$i]['Data']);
-
-                if ($this->formvars['geschlecht'] == '') $this->formvars['geschlecht'] = 'g';
-                $layerset[$i]['Data'] = str_replace('$geschlecht', str_replace(';', '', $this->formvars['geschlecht']), $layerset[$i]['Data']);
+								$layerset[$i]['Data'] = replace_params($layerset[$i]['Data'], $$layerset[$i]['params']);
 
                 $layer->set('data', $layerset[$i]['Data']);
               }

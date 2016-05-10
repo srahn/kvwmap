@@ -407,6 +407,15 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			header('Location: '.$locationStr);
 	  } break;
 
+		case 'update_params' : {
+			$GUI->update_params();
+			$GUI->loadMap('DataBase');
+			$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+			$GUI->drawMap();
+			$GUI->saveMap('');
+			$GUI->output();
+		} break;
+
 	  case 'Flurstuecks-CSV-Export' : {
 			$GUI->export_flurst_csv();
 	  } break;
