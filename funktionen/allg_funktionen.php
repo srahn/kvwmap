@@ -1363,8 +1363,9 @@ function replace_params($str, $params) {
   $parts = explode(',', $params);
   foreach ($parts AS $part) {
     $param = explode(':', $part);
+		#echo '<p>Replace: ' . '$' . trim($param[0], ' "') . ' by ' . trim($param[1], ' "');
     $str = str_replace(
-      trim($param[0], ' "'),
+      '$' . trim($param[0], ' "'),
       trim($param[1], ' "'),
       $str
     );
