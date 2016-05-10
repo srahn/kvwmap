@@ -779,9 +779,13 @@ function world2pixelsvg(pathWelt){
 
 
 // -------------------------mausinteraktionen auf canvas------------------------------
-// id="canvas" onmousedown="canvas(evt)" onmousemove="hide_tooltip();movePoint(evt);moveVector(evt)" onmouseup="endPoint(evt);endMove(evt)" width="100%" height="100%" opacity="0"/>
-// function canvas(evt){
 
+function mouse_move(evt){
+	top.coords_anzeige(evt);
+	if(doing == "ppquery"){
+		hidetooltip(evt);
+	}
+}		
 
 function mousedown(evt){
 	mouse_down = true;
@@ -806,7 +810,7 @@ function mousedown(evt){
 	    startMove(evt);
 	   break;
 		case "showcoords":
-	    show_coords(evt);
+	    top.show_coords(evt);
 	   break;
 	   case "pquery":
 	    startPoint(evt);
@@ -1417,16 +1421,6 @@ function redrawPL(){
 	}
   // polygon um punktepfad erweitern
   document.getElementById("polyline").setAttribute("points", path);
-}
-
-function show_coords(evt){
-	coorx = evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value);
-	coory = top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value);
-	if(top.document.GUI.secondcoords != undefined)top.ahah("index.php", "go=spatial_processing&curSRID='.$this->user->rolle->epsg_code.'&newSRID='.$this->user->rolle->epsg_code2.'&point="+coorx+" "+coory+"&operation=transformPoint&resulttype=wkt&coordtype='.$this->user->rolle->coordtype.'", new Array(top.document.GUI.secondcoords), "");
-	coorx = top.format_number(coorx, true, true, false);
-	coory = top.format_number(coory, true, true, false);
-	top.document.GUI.firstcoords.value = coorx+" "+coory; 
-	top.document.getElementById("showcoords").style.display="";
 }
 
 // ----------------------------punkt setzen---------------------------------

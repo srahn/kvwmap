@@ -700,7 +700,7 @@ class data_import_export {
   }
 	
 	function ogr2ogr_export($sql, $exportformat, $exportfile, $layerdb){
-		$command = 'export PGCLIENTENCODING=LATIN1;'.OGR_BINPATH.'ogr2ogr -f '.$exportformat.' -sql "'.$sql.'" '.$exportfile.' PG:"dbname='.$layerdb->dbName.' user='.$layerdb->user;
+		$command = 'export PGCLIENTENCODING=UTF-8;'.OGR_BINPATH.'ogr2ogr -f '.$exportformat.' -lco ENCODING=LATIN1 -sql "'.$sql.'" '.$exportfile.' PG:"dbname='.$layerdb->dbName.' user='.$layerdb->user;
 		if($layerdb->passwd != '')$command.= ' password='.$layerdb->passwd;
 		if($layerdb->port != '')$command.=' port='.$layerdb->port;
 		if($layerdb->host != '') $command .= ' host=' . $layerdb->host;
@@ -947,7 +947,7 @@ class data_import_export {
 		
 		if($this->formvars['export_format'] == 'Shape'){				# das Abschneiden bei nicht in der Länge begrenzten Textspalten verhindern
 			for($s = 0; $s < count($selected_attributes); $s++){
-				if(in_array($selected_attr_types[$s], array('text', 'varchar')))$selected_attributes[$s] = $selected_attributes[$s].'::varchar(255)';
+				if(in_array($selected_attr_types[$s], array('text', 'varchar')))$selected_attributes[$s] = $selected_attributes[$s].'::varchar(254)';
 			}
 		}
 		
@@ -972,9 +972,6 @@ class data_import_export {
 			switch($this->formvars['export_format']){
 				case 'Shape' : { 
 					$this->ogr2ogr_export($sql, '"ESRI Shapefile"', $exportfile.'.shp', $layerdb);
-					$fp = fopen($exportfile.'.cpg', 'w');
-					fwrite($fp, 'UTF-8');
-					fclose($fp);
 					$zip = true;
 				}break;
 				

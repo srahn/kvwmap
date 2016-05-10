@@ -92,13 +92,14 @@ class ddl {
 						if($this->layout['type'] == 1 AND $offset_attribute == '' AND $pagecount > 1)$y = $y + $this->initial_yoffset;		# ab der 2. Seite sollen die forlaufenden absolut positionierten Elemente oben auf der Seite beginnen
 						if($this->i_on_page == 0){
 							if($this->maxy < $y)$this->maxy = $y;		# beim ersten Datensatz das maxy ermitteln
-						}
+						}						
 						if($offset_attribute == '' AND $this->i_on_page > 0){		# bei allen darauffolgenden den y-Wert um Offset verschieben (aber nur bei absolut positionierten)
 							$y = $y - $this->yoffset_onpage-$this->layout['gap'];
 						}
 					}
-					$text = $this->substituteFreitext($this->layout['texts'][$j]['text'], $i, $pagenumber, $pagecount);
-					$this->putText($text, $this->layout['texts'][$j]['size'], NULL, $x, $y, $offsetx);
+					$text = $this->substituteFreitext($this->layout['texts'][$j]['text'], $i, $pagenumber, $pagecount);					
+					$y = $this->putText($text, $this->layout['texts'][$j]['size'], NULL, $x, $y, $offsetx);
+					if(!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y)$this->miny[$this->pdf->currentContents] = $y;		# miny ist die unterste y-Position das aktuellen Datensatzes 
 				}
 				else{
 					$remaining_freetexts[] = $this->layout['texts'][$j]['id'];
@@ -375,8 +376,8 @@ class ddl {
 		$this->pdf->ezSetY($y);		
 		$page_id_before_puttext = $this->pdf->currentContents;
 		$ret = $this->pdf->ezText(iconv("UTF-8", "CP1252", $text), $fontsize, $options);
-		$page_id_after_puttext = $this->pdf->currentContents;
-		#echo $page_id_before_puttext.' '.$page_id_after_puttext.' '.$text.'<br>';
+		$page_id_after_puttext = $this->pdf->currentContents;		
+		#if($this->gui->user->id == 101)echo $page_id_before_puttext.' '.$page_id_after_puttext.' '.$text.'<br>';
 		if($page_id_before_puttext != $page_id_after_puttext){
 			$this->page_overflow_by_sublayout = true;
 			$this->page_id_before_sublayout = $page_id_before_puttext;
@@ -478,7 +479,7 @@ class ddl {
 				if(!$this->initial_yoffset)$this->initial_yoffset = 780-$this->maxy;			# der Offset von oben gesehen, mit dem das erste fortlaufende Element auf der ersten Seite beginnt; wird benutzt, um die fortlaufenden Elemente ab der 2. Seite oben beginnen zu lassen
 				$this->datasetcount_on_page = 0; # ??
 				$this->i_on_page = 1;	# ??
-				$this->maxy = 800;
+				$this->maxy = 781;
 				if($this->layout['type'] == 2)$this->offsety = 50;		# das ist für den Fall, dass ein Sublayout in einem Sublayout einen Seitenüberlauf verursacht hat (hier muss eigentlich der Offset der nächsten Seite rein)
 			}
     	if($this->layout['type'] == 0 AND $i > 0){		# neue Seite beim seitenweisen Typ und neuem Datensatz 

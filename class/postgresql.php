@@ -1104,7 +1104,7 @@ class pgdatabase {
 			$sql .= ")";
 		}
     $this->debug->write("<p>postgresql.php getFlurstuecksKennzByGemeindeIDs() Abfragen erlaubten Flurstückskennzeichen nach Gemeindeids:<br>".$sql,4);
-		echo $sql;
+		#echo $sql;
     $query=pg_query($sql);
     if ($query==0) {
       $ret[0]=1; $ret[1]="Fehler bei der Abfrage der zur Anzeige erlaubten Flurstücke";
