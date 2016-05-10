@@ -1849,7 +1849,7 @@ class ALB {
     $pdf->line(50,745,565,745);
   }
 
-  function ALBAuszug_Flurstueck($FlurstKennz,$formnummer,$wasserzeichen='') {
+  function ALBAuszug_Flurstueck($FlurstKennz,$formnummer,$wasserzeichen) {
   	global $katasterfuehrendestelle;
     $pdf=new Cezpdf();
     $pdf->selectFont(PDFCLASSPATH.'fonts/Helvetica.afm');
@@ -1878,9 +1878,9 @@ class ALB {
 
     for($f = 0; $f < count($FlurstKennz); $f++){
       $pagecount[$f] = $pagecount[$f] + 1;
-      #if ($wasserzeichen) {
-      #  $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
-      #}
+      if ($wasserzeichen) {
+        $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
+      }
       $seite=1;
       $row=825; # 812 -> 825  2007-04-02 Schmidt
       $nennerausgabe= '';
@@ -2037,9 +2037,9 @@ class ALB {
   	            # neue Seite beginnen
   	            $pageid=$pdf->newPage();
   	            $pagecount[$f] = $pagecount[$f] + 1;
-  	            #if ($wasserzeichen) {
-  	            #	$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
-  	            #}
+  	            if ($wasserzeichen) {
+  	            	$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
+  	            }
   	            $row=825; # 812 -> 825 2007-04-02 Schmidt
   	          	$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
   	          }
@@ -2104,9 +2104,9 @@ class ALB {
                 # neue Seite beginnen
                 $pageid=$pdf->newPage();
                 $pagecount[$f] = $pagecount[$f] + 1;
-                #if ($wasserzeichen) {
-                #  $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
-                #}
+                if ($wasserzeichen) {
+                  $pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
+                }
                 $row=825; # 812 -> 825 2007-04-02 Schmidt
                 $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
               }
@@ -2140,9 +2140,9 @@ class ALB {
 						# neue Seite beginnen
 						$pageid=$pdf->newPage();
 						$pagecount[$f] = $pagecount[$f] + 1;
-						#if ($wasserzeichen) {
-						#	$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
-						#}
+						if ($wasserzeichen) {
+							$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
+						}
 						$row=825; # 812 -> 825 2007-04-02 Schmidt
 						$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 					}
@@ -2178,9 +2178,9 @@ class ALB {
 				# neue Seite beginnen
 				$pageid=$pdf->newPage();
 				$pagecount[$f] = $pagecount[$f] + 1;
-				#if ($wasserzeichen) {
-				#	$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
-				#}
+				if ($wasserzeichen) {
+					$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
+				}
 				$row=825; # 812 -> 825 2007-04-02 Schmidt
 				$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 			}
@@ -2214,9 +2214,9 @@ class ALB {
             # neue Seite beginnen
             $pageid=$pdf->newPage();
             $pagecount[$f] = $pagecount[$f] + 1;
-            #if ($wasserzeichen) {
-            #	$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
-            #}
+            if ($wasserzeichen) {
+            	$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
+            }
             $row=825; # 812 -> 825 2007-04-02 Schmidt
           	$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
           }
@@ -2248,9 +2248,9 @@ class ALB {
 									# neue Seite beginnen
 									$pageid=$pdf->newPage();
 									$pagecount[$f] = $pagecount[$f] + 1;
-									#if ($wasserzeichen) {
-									#	$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
-									#}
+									if ($wasserzeichen) {
+										$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
+									}
 									$row=825; # 812 -> 825 2007-04-02 Schmidt
 									$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 								}
@@ -2276,9 +2276,9 @@ class ALB {
 										# neue Seite beginnen
 										$pageid=$pdf->newPage();
 										$pagecount[$f] = $pagecount[$f] + 1;
-										#if ($wasserzeichen) {
-										#	$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
-										#}
+										if ($wasserzeichen) {
+											$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
+										}
 										$row=825; # 812 -> 825 2007-04-02 Schmidt;
 										$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 									}
@@ -2317,9 +2317,9 @@ class ALB {
 											# neue Seite beginnen
 											$pageid=$pdf->newPage();
 											$pagecount[$f] = $pagecount[$f] + 1;
-											#if ($wasserzeichen) {
-											#	$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
-											#}
+											if ($wasserzeichen) {
+												$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
+											}
 											$row=825; # 812 -> 825 2007-04-02 Schmidt;
 											$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 										}
@@ -2342,9 +2342,9 @@ class ALB {
 									# neue Seite beginnen
 									$pageid=$pdf->newPage();
 									$pagecount[$f] = $pagecount[$f] + 1;
-									#if ($wasserzeichen) {
-									#	$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
-									#}
+									if ($wasserzeichen) {
+										$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
+									}
 									$row=825; # 812 -> 825 2007-04-02 Schmidt;
 									$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 								}
@@ -2370,9 +2370,9 @@ class ALB {
 										# neue Seite beginnen
 										$pageid=$pdf->newPage();
 										$pagecount[$f] = $pagecount[$f] + 1;
-										#if ($wasserzeichen) {
-										#	$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
-										#}
+										if ($wasserzeichen) {
+											$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
+										}
 										$row=825; # 812 -> 825 2007-04-02 Schmidt;
 										$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 									}
@@ -2419,9 +2419,9 @@ class ALB {
 											# neue Seite beginnen
 											$pageid=$pdf->newPage();
 											$pagecount[$f] = $pagecount[$f] + 1;
-											#if ($wasserzeichen) {
-											#	$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
-											#}
+											if ($wasserzeichen) {
+												$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
+											}
 											$row=825; # 812 -> 825 2007-04-02 Schmidt;
 											$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 										}
@@ -2447,9 +2447,9 @@ class ALB {
 									# neue Seite beginnen
 									$pageid=$pdf->newPage();
 									$pagecount[$f] = $pagecount[$f] + 1;
-									#if ($wasserzeichen) {
-									#	$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
-									#}
+									if ($wasserzeichen) {
+										$pdf->addJpegFromFile(WWWROOT.APPLVERSION.$wasserzeichen,0,0,600); # 2007-04-02 Schmidt
+									}
 									$row=825; # 812 -> 825 2007-04-02 Schmidt
 									$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 									$pdf->addText($col0,$row-=24,$fontSize,'Bestand');
