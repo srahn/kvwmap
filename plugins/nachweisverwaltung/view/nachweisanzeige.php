@@ -90,7 +90,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
               case 'indiv_nr' : { 
 								if($this->formvars['suchgemarkung'] != '') echo ' in Gemarkung: '.$this->formvars['suchgemarkung'];
 								if($this->formvars['suchflur'] != '') echo ' in Flur: '.str_pad($this->formvars['suchflur'],3,'0',STR_PAD_LEFT);
-                if($this->formvars['suchstammnr'] != '')echo ' mit Antragsnummer: '.str_pad(intval($this->formvars['suchstammnr']),ANTRAGSNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
+                if($this->formvars['suchstammnr'] != '')echo ' mit Antragsnummer: '.$this->formvars['suchstammnr'];
                 if($this->formvars['suchrissnr'] != '')echo ' mit Rissnummer: '.$this->formvars['suchrissnr'];
                 if($this->formvars['suchfortf'] != '')echo ' mit Fortführung: '.$this->formvars['suchfortf'];
 								if($this->formvars['datum'] != '')echo ' von '.$this->formvars['datum'];
