@@ -1,7 +1,6 @@
 <? 
 include(LAYOUTPATH.'languages/generic_search_'.$this->user->rolle->language.'.php');
-include(SNIPPETS.'/generic_functions.php');
-include('funktionen/input_check_functions.php'); 
+include(SNIPPETS.'/sachdatenanzeige_functions.php');
 ?>
 
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
@@ -26,7 +25,7 @@ function changeInputType(oldObject, oType) {
 	if(oldObject != undefined){
 	  var newObject = document.createElement('input');
 	  newObject.type = oType;
-	  if(oldObject.size) newObject.size = oldObject.size;
+	  if(oldObject.style.width) newObject.style.width = oldObject.style.width;
 	  if(oldObject.value) newObject.value = oldObject.value;
 	  if(oldObject.name) newObject.name = oldObject.name;
 	  if(oldObject.id) newObject.id = oldObject.id;
@@ -49,12 +48,30 @@ function operatorchange(attributname, searchmask_number){
 	}
 	if(document.getElementById(prefix+"operator_"+attributname).value == "between"){
 		changeInputType(document.getElementById(prefix+"value2_"+attributname), "text");
-		document.getElementById(prefix+"value_"+attributname).size = 9;
+		document.getElementById(prefix+"value_"+attributname).style.width = '145px';
 	}
 	else{
-		changeInputType(document.getElementById(prefix+"value2_"+attributname), "hidden");
-		document.getElementById(prefix+"value2_"+attributname).value = "";
-		document.getElementById(prefix+"value_"+attributname).size = 24;
+		if(document.getElementById(prefix+"value2_"+attributname) != undefined){
+			changeInputType(document.getElementById(prefix+"value2_"+attributname), "hidden");
+			document.getElementById(prefix+"value2_"+attributname).value = "";
+			document.getElementById(prefix+"value_"+attributname).style.width = '293px';
+		}
+	}
+	if(document.getElementById(prefix+"_avf_"+attributname) != undefined){
+		if(document.getElementById(prefix+"operator_"+attributname).value == "LIKE" || document.getElementById(prefix+"operator_"+attributname).value == "NOT LIKE"){
+			document.getElementById(prefix+"_avf_"+attributname).style.display = 'none';
+			document.getElementById(prefix+"_text_"+attributname).style.display = 'inline';
+			document.getElementById(prefix+"text_value_"+attributname).value = '';
+			document.getElementById(attributname+"_"+prefix).disabled = true;
+			document.getElementById(prefix+"text_value_"+attributname).disabled = false;
+		}
+		else{
+			document.getElementById(prefix+"_avf_"+attributname).style.display = 'inline';
+			document.getElementById(prefix+"_text_"+attributname).style.display = 'none';			
+			document.getElementById(attributname+"_"+prefix).value = '';
+			document.getElementById(attributname+"_"+prefix).disabled = false;
+			document.getElementById(prefix+"text_value_"+attributname).disabled = true;
+		}
 	}
 }
 
@@ -62,7 +79,7 @@ function suche(){
 	var nogo = '';
 	<?
 	for($i = 0; $i < count($this->attributes['type']); $i++){ 
-		if($this->attributes['type'][$i] != 'geometry'){		
+		if($this->attributes['type'][$i] != 'geometry' AND $this->attributes['form_element_type'][$i] != 'SubFormFK'){		
 			if($this->attributes['mandatory'][$i] == 1){
 				if($this->attributes['alias'][$i] == ''){
 					$this->attributes['alias'][$i] = $this->attributes['name'][$i];
@@ -234,7 +251,7 @@ function add_searchmask(layer_id){
   </tr>
   <tr> 
     <td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3" colspan="5"> 
-      <select style="width:250px" size="1"  name="selected_layer_id" onchange="document.GUI.submit();" <? if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
+      <select style="width:250px" size="1"  name="selected_layer_id" onchange="document.GUI.searchmask_count.value=0;document.GUI.submit();" <? if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
         <option value="">  -- <? echo $this->strPleaseSelect; ?> --  </option>
         <?
         for($i = 0; $i < count($this->layerdaten['ID']); $i++){         
@@ -249,7 +266,7 @@ function add_searchmask(layer_id){
   	</td>
   </tr>
   <tr>
-    <td id="searches1"><? if($this->formvars['selected_layer_id'] != ''){ ?><a href="javascript:showsearches();"><? echo $strSearches; ?></a><? } ?>&nbsp;</td>
+    <td id="searches1"><? if($this->formvars['selected_layer_id'] != ''){ ?><a href="javascript:showsearches();"><? echo $strSearches; ?></a><? if(count($this->searchset) > 0)echo ' ('.count($this->searchset).')';} ?>&nbsp;</td>
   </tr>
   <tr id="searches2" style="display:none"> 
     <td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3">
@@ -287,6 +304,8 @@ function add_searchmask(layer_id){
   <? if($this->formvars['map_flag'] != ''){ ?>
   <tr id="map2"> 
     <td align="right" style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3;border-left:1px solid #C3C7C3">
+			<input type="checkbox" name="within" value="1" <? if($this->formvars['within'] == 1)echo 'checked'; ?>>
+			<? echo $strWithin; ?>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     	<? echo $this->strUseGeometryOf; ?>: 
   		<select name="layer_id" onchange="document.GUI.submit();">
   			<?
@@ -308,7 +327,7 @@ function add_searchmask(layer_id){
   <tr> 
     <td colspan="5" id="searchmasks">
 
-<? if(count($this->attributes) > 0){  							
+<? if(count($this->attributes) > 0){
 		for($m = 0; $m <= $this->formvars['searchmask_count']; $m++){ 
 			$searchmask_number = $m; 		?>
 			<div>

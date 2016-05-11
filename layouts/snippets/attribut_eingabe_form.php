@@ -234,8 +234,10 @@ function setlayers(selected_options){
 				';
 			}
 			if(count($this->attributes) > 0){
+				if($this->attributes['name'][$the_geom_index[0]] != '')$geom_check = 'document.GUI.check_'.$this->attributes['name'][$the_geom_index[0]].'.checked';
+				else $geom_check = 0;
 				echo '<tr>
-			 					<td align="center" colspan="5"><br><br><input class="button" type="button" name="speichern" value="speichern" onclick="save(document.GUI.check_'.$this->attributes['name'][$the_geom_index[0]].'.checked);">
+			 					<td align="center" colspan="5"><br><br><input class="button" type="button" name="speichern" value="speichern" onclick="save('.$geom_check.');">
 			 					</td>
 			 				</tr>';
 			}

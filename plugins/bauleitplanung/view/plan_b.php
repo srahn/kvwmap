@@ -1,7 +1,5 @@
 <?php
 
-	include(SNIPPETS.'generic_functions.php'); 
-
   $doit = false;
   $anzObj = count($this->qlayerset[$i]['shape']);
   if ($anzObj > 0) {
@@ -23,39 +21,39 @@
 <script type="text/javascript">
 <!--
 
-function nurZahlen(el)
+nurZahlen = function(el)
 {
   var val = el.value.replace(/[^-\.\d]/g, '');
   el.value = val;
 }
 
 
-function show_details(oid){
+show_details = function(oid){
 	currentform.go.value = 'Layer-Suche_Suchen';
 	currentform.search.value = 'true';
 	currentform.selected_layer_id.value = <? echo $this->qlayerset[$i]['Layer_ID'] ?>;
 	currentform.details.value = 'true';
 	currentform.offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value = '';
 	currentform.value_b_plan_stammdaten_oid.value = oid;
-	currentform.submit();
+	overlay_submit(currentform, false);
 }
 
-function go_back(){
+go_back = function(){
 	currentform.details.value = '';
 	currentform.go.value = 'Layer-Suche_Suchen';
 	currentform.selected_layer_id.value = <? echo $this->qlayerset[$i]['Layer_ID'] ?>;
 	currentform.value_b_plan_stammdaten_oid.value = '';
 	currentform.offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value = currentform._offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value;
-	currentform.submit();
+	overlay_submit(currentform, false);
 }
 
-function copy_dataset(plan_id){
+copy_dataset = function(plan_id){
 	currentform.plan_id.value = plan_id;
 	currentform.go.value = 'copy_bplan';
 	currentform.submit();
 }
 
-function update_bplan_from_rok(plan_id){
+update_bplan_from_rok = function(plan_id){
 	really = confirm('Wollen Sie die Flächen der Gebiete und Sondergebiete wirklich mit den ROK-Flächen überschreiben?');
 	if(really){
 		currentform.plan_id.value = plan_id;
@@ -64,7 +62,7 @@ function update_bplan_from_rok(plan_id){
 	}
 }
 
-function delete_dataset(plan_id){
+delete_dataset = function(plan_id){
 	really = confirm('Wollen Sie diesen Datensatz wirklich löschen?');
 	if(really){
 		if((currentform.details.value != 'true' && currentform.value_b_plan_stammdaten_oid.value == '') || (currentform.details.value == 'true' && currentform.value_b_plan_stammdaten_oid.value != '')){		// Trefferliste vorhanden -> wieder zurück zur Trefferliste
@@ -79,17 +77,17 @@ function delete_dataset(plan_id){
 	}
 }
 
-function zoomto(roknr, art){
+zoom_to = function(roknr, art){
 	currentform.roknr.value = roknr;
 	currentform.art.value = art;
 	currentform.go.value = 'zoomtobplan';
 	currentform.submit();
 }
 
-function set_changed_flag(flag){
+set_changed_flag = function(flag){
 }
 
-function update_planart(){
+update_planart = function(){
 	if(document.getElementById('art_0').value == 'Innenbereichssatzung' || document.getElementById('art_0').value == 'Außenbereichssatzung'){
 		document.getElementById('kap').style.display = '';
 	}
@@ -100,7 +98,7 @@ function update_planart(){
 	}
 }
 
-function update_gebietstyp(){
+update_gebietstyp = function(){
 	if(document.getElementById('kap2_gemziel_s')){
 		if(document.getElementById('gebietstyp_s_0').value == 33){	// Wohnen+Ferienwohnen
 			document.getElementById('kap2_gemziel_s').style.display = '';
@@ -693,6 +691,10 @@ function update_gebietstyp(){
 </tr>
 </table>
 <br>
+<? 
+$checkbox_names = 'check;'.$attributes['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].'|'; ?>
+<input checked style="visibility:hidden" id="<? echo $layer['Layer_ID'].'_'.$k; ?>" type="checkbox" name="check;<? echo $attributes['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>">
+<input type="hidden" name="checkbox_names_<? echo $layer['Layer_ID']; ?>" value="<? echo $checkbox_names; ?>">
 <? if($this->new_entry != true){ ?>
 <table width="100%" border="0" cellpadding="2" cellspacing="0">
   <tr align="center"> 
@@ -701,7 +703,8 @@ function update_gebietstyp(){
     	<input type="button" class="button" name="savebutton2" value="Datensatz kopieren" onclick="copy_dataset(<? echo $this->qlayerset[$i]['shape'][$k]['plan_id']; ?>);">&nbsp;&nbsp;
     	<input type="button" class="button" name="deletebutton" value="Löschen" onclick="delete_dataset(<? echo $this->qlayerset[$i]['shape'][$k]['plan_id']; ?>);">&nbsp;&nbsp;
 			<input type="button" class="button" name="rokbutton" value="Flächen aus ROK holen" onclick="update_bplan_from_rok(<? echo $this->qlayerset[$i]['shape'][$k]['plan_id']; ?>);">&nbsp;&nbsp;
-    	<input type="button" class="button" name="mapbutton" value="In die Karte" onclick="zoomto('<? echo $this->qlayerset[$i]['shape'][$k]['lfd_rok_nr']; ?>', '<? echo $this->qlayerset[$i]['shape'][$k]['art']; ?>');">
+    	<input type="button" class="button" name="mapbutton" value="In die Karte" onclick="zoom_to('<? echo $this->qlayerset[$i]['shape'][$k]['lfd_rok_nr']; ?>', '<? echo $this->qlayerset[$i]['shape'][$k]['art']; ?>');">
+			<input type="button" class="button" name="printbutton" value="Drucken" onclick="print_data(<?php echo $this->qlayerset[$i]['Layer_ID']; ?>);">
     </td>
   </tr>
 	<tr>
@@ -770,7 +773,7 @@ else {
   }
 ?>
 
-<input type="hidden" value="1" name="changed_<? echo $layer['shape'][$k][$attributes['table_name'][$attributes['name'][0]].'_oid']; ?>">
+<input type="hidden" value="1" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][0]].'_oid']; ?>">
 <input name="search" type="hidden" value="true">
 <input type="hidden" name="details" value="<? echo $this->formvars['details']; ?>">
 <input type="hidden" name="plan_id" value="">

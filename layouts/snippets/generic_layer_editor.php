@@ -1,8 +1,6 @@
 <?
 
 	include(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'.php');
-
-	include(SNIPPETS.'generic_functions.php'); 
   
 	$checkbox_names = '';
 	$columnname = '';
@@ -14,15 +12,20 @@
 	$layer = $this->qlayerset[$i];
 	$attributes = $layer['attributes'];
 	$size = 12;
-	$select_width = ''; 
+	$select_width = 'width: 100px;'; 
 	if($layer['alias'] != '' AND $this->Stelle->useLayerAliases){
 		$layer['Name'] = $layer['alias'];
 	}
 ?>
+<SCRIPT src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></SCRIPT>
+
 <div id="layer" onclick="remove_calendar();">
-<? if($this->new_entry != true){ ?>
+<? if($this->new_entry != true AND $layer['requires'] == ''){ ?>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 	<tr>
+		<td align="right" valign="top" style="padding: 0 10 0 0">
+			<a href="javascript:scrollbottom();"><img class="hover-border" title="nach unten" src="<? echo GRAPHICSPATH; ?>pfeil.gif" width="11" height="11" border="0"></a>&nbsp;
+		</td>
 		<td valign="top" style="padding: 0 0 0 0">
 			<? if($layer['template'] == '' OR $layer['template'] == 'generic_layer_editor_2.php'){ ?>
 			<a href="javascript:switch_gle_view(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewColumns; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'columns.png'; ?>"></a>
@@ -38,9 +41,9 @@
 			<a href="javascript:switch_gle_view(<? echo $layer['Layer_ID']; ?>);"><img title="<? echo $strSwitchGLEViewRows; ?>" class="hover-border" src="<? echo GRAPHICSPATH.'rows.png'; ?>"></a>
 			<? } ?>
 		</td>
-		<td align="right" valign="top">			
+		<td align="right" valign="top">
 			<a href="javascript:scrollbottom();"><img class="hover-border" title="nach unten" src="<? echo GRAPHICSPATH; ?>pfeil.gif" width="11" height="11" border="0"></a>&nbsp;
-		</td>		
+		</td>
 	</tr>
 </table>
 <?
@@ -60,79 +63,75 @@
 <table border="0" cellspacing="1" cellpadding="2" width="100%">
 	<tr>
 		<td width="100%">   
-			<table border="1" style="border-collapse:collapse" cellspacing="0" cellpadding="2" width="100%">
+			<table class="gle1_table" cellspacing="0" cellpadding="2" width="100%">
 			  <tr bgcolor="<?php echo BG_DEFAULT ?>">
 				<td></td>
 			  
 			  <?
 			  	for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
-					if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
-						if($this->qlayerset[$i]['attributes']['type'][$j] != 'geometry'){
-							echo '<td ';
-								//if($attributes['group'][0] != '')echo 'width="10%"';
-								echo ' valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';
-								if($attributes['privileg'][$j] != '0' AND !$lock[$k]){
-									$this->editable = 'true';
-								}
-								if($attributes['alias'][$j] == ''){
-									$attributes['alias'][$j] = $attributes['name'][$j];
-								}
-								echo '<table ';
-								//if($attributes['group'][0] != '')echo 'width="200px"';
-								echo 'width="100%";';
-								echo '><tr><td>';
-								if($attributes['form_element_type'][$j] != 'SubFormPK' AND $attributes['form_element_type'][$j] != 'SubFormEmbeddedPK'){
-									echo '<a style="font-size: '.$this->user->rolle->fontsize_gle.'px" title="Sortieren nach '.$attributes['alias'][$j].'" href="javascript:change_orderby(\''.$attributes['name'][$j].'\', '.$layer['Layer_ID'].');">
-													'.$attributes['alias'][$j].'</a>';
-								}
-								else{
-									echo '<span style="font-size: '.$this->user->rolle->fontsize_gle.'px; color:#222222;">'.$attributes['alias'][$j].'</span>';
-								}
-								if($attributes['nullable'][$j] == '0' AND $attributes['privileg'][$j] != '0'){
-									echo '<span title="Eingabe erforderlich">*</span>';
-								}
-								if($attributes['tooltip'][$j]!='' AND $attributes['form_element_type'][$j] != 'Time'){
-								  echo '<td align="right"><a href="javascript:void(0);" title="'.$attributes['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
-								}
-								if($attributes['type'][$j] == 'date' OR $attributes['type'][$j] == 'timestamp' OR $attributes['type'][$j] == 'timestamptz'){
-								  echo '<td align="right"><a href="javascript:;" title=" (TT.MM.JJJJ) '.$attributes['tooltip'][$j].'" ';
-								  if($attributes['privileg'][$j] == '1' AND !$lock[$k]){
-									echo 'onclick="add_calendar(event, \''.$attributes['name'][$j].'_'.$k.'\');"';
-								  }
-								  echo '><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id=calendar_'.$attributes['name'][$j].'_'.$k.'"></div></td>';
-								}
-								echo '</td></tr></table>';
-								echo '</td>';
+						if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
+							if($this->qlayerset[$i]['attributes']['type'][$j] != 'geometry'){
+								echo '<td ';
+									//if($attributes['group'][0] != '')echo 'width="10%"';
+									echo ' valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';
+									if($attributes['privileg'][$j] != '0' AND !$lock[$k]){
+										$this->editable = $layer['Layer_ID'];
+									}
+									if($attributes['alias'][$j] == ''){
+										$attributes['alias'][$j] = $attributes['name'][$j];
+									}
+									echo '<table ';
+									//if($attributes['group'][0] != '')echo 'width="200px"';
+									echo 'width="100%";';
+									echo '><tr><td>';
+									if($attributes['form_element_type'][$j] != 'SubFormPK' AND $attributes['form_element_type'][$j] != 'SubFormEmbeddedPK'){
+										echo '<a style="font-size: '.$this->user->rolle->fontsize_gle.'px" title="Sortieren nach '.$attributes['alias'][$j].'" href="javascript:change_orderby(\''.$attributes['name'][$j].'\', '.$layer['Layer_ID'].');">
+														'.$attributes['alias'][$j].'</a>';
+									}
+									else{
+										echo '<span style="font-size: '.$this->user->rolle->fontsize_gle.'px; color:#222222;">'.$attributes['alias'][$j].'</span>';
+									}
+									if($attributes['nullable'][$j] == '0' AND $attributes['privileg'][$j] != '0'){
+										echo '<span title="Eingabe erforderlich">*</span>';
+									}
+									if($attributes['tooltip'][$j]!='' AND $attributes['form_element_type'][$j] != 'Time'){
+										echo '<td align="right"><a href="javascript:void(0);" title="'.$attributes['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
+									}
+									if($attributes['type'][$j] == 'date' OR $attributes['type'][$j] == 'timestamp' OR $attributes['type'][$j] == 'timestamptz'){
+										echo '<td align="right"><a href="javascript:;" title=" (TT.MM.JJJJ) '.$attributes['tooltip'][$j].'" ';
+										if($attributes['privileg'][$j] == '1' AND !$lock[$k]){
+										echo 'onclick="add_calendar(event, \''.$attributes['name'][$j].'_'.$k.'\');"';
+										}
+										echo '><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id=calendar_'.$attributes['name'][$j].'_'.$k.'"></div></td>';
+									}
+									echo '</td></tr></table>';
+									echo '</td>';
+							}
+							else{
+								echo '<td bgcolor="'.BG_GLEATTRIBUTE.'">&nbsp;</td>';
+							}
 						}
-					}
 			  	}
 			  ?>
-			  <td bgcolor="<? echo BG_GLEATTRIBUTE; ?>">
-			  	&nbsp;
-			  </td>
-			 <!-- <td>
-			  	&nbsp;
-			  </td>--> 
-			    
 			  </tr>
 <?
 	for ($k=0;$k<$anzObj;$k++) {
 		$checkbox_names .= 'check;'.$attributes['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].'|';
 ?>
-	<input type="hidden" value="" name="changed_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
+	<input type="hidden" value="" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
 	<tr 
 	<? if($this->user->rolle->querymode == 1){ ?>
-		onmouseenter="ahah('index.php', 'go=tooltip_query&querylayer_id=<? echo $layer['Layer_ID']; ?>&oid=<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>', new Array(top.document.GUI.result, ''), new Array('setvalue', 'execute_function'));"
+		onmouseenter="ahah('index.php', 'go=tooltip_query&querylayer_id=<? echo $layer['Layer_ID']; ?>&oid=<? echo $layer['shape'][$k][$attributes['table_name'][$attributes['the_geom']].'_oid']; ?>', new Array(top.document.GUI.result, ''), new Array('setvalue', 'execute_function'));"
 	<? } ?>
 	>
-		<td style="background-color:<? echo BG_GLEHEADER; ?>;">
+		<td style="background-color:<? echo BG_DEFAULT; ?>;">
 		  <? if($this->new_entry != true AND $this->formvars['printversion'] == ''){ ?>
 		  <table>
-			<tr>
-			  <td>
-				<input id="<? echo $layer['Layer_ID'].'_'.$k; ?>" type="checkbox" name="check;<? echo $attributes['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>">&nbsp;
-			  </td>
-			</tr>
+				<tr>
+					<td style="line-height: 1px; ">
+						<input id="<? echo $layer['Layer_ID'].'_'.$k; ?>" type="checkbox" name="check;<? echo $attributes['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>">&nbsp;
+					</td>
+				</tr>
 		  </table>
 		  <? } ?>
 	</td>
@@ -141,82 +140,34 @@
 
 		for($j = 0; $j < count($attributes['name']); $j++){
 			$datapart = '';
-		?>
-	    
-<?				
-				if($layer['shape'][$k][$attributes['name'][$j]] == ''){
-					$layer['shape'][$k][$attributes['name'][$j]] = $this->formvars[$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j]];
+			if(($attributes['privileg'][$j] == '0' AND $attributes['form_element_type'][$j] == 'Auswahlfeld') OR ($attributes['form_element_type'][$j] == 'Text' AND $attributes['type'][$j] == 'not_saveable')){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar
+				$attributes['form_element_type'][$j] .= '_not_saveable';
+			}
+			if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
+				if($attributes['type'][$j] != 'geometry'){
+					echo '<td>';
+					$datapart .= attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size, $select_width, $this->user->rolle->fontsize_gle);
+					echo $datapart;
+					echo '
+							</td>
+					';			  			
+					if($attributes['privileg'][$j] >= '0'){
+						$this->form_field_names .= $layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'|';
+					}
 				}
-				if(($attributes['privileg'][$j] == '0' AND $attributes['form_element_type'][$j] == 'Auswahlfeld') OR ($attributes['form_element_type'][$j] == 'Text' AND $attributes['type'][$j] == 'not_saveable')){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar
-					$attributes['form_element_type'][$j] .= '_not_saveable';
+				else {
+					$columnname = $attributes['name'][$j];
+					$tablename = $attributes['table_name'][$attributes['name'][$j]];
+					$geomtype = $attributes['geomtype'][$attributes['name'][$j]];
+					$dimension = $attributes['dimension'][$j];
+					$privileg = $attributes['privileg'][$j];
+					$nullable = $attributes['nullable'][$j];
+					$this->form_field_names .= $layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';Geometrie;'.$attributes['nullable'][$j].'|';
 				}
-				
-				// if($attributes['group'][$j] != $attributes['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Tabelle beginnen
-					// $explosion = explode(';', $attributes['group'][$j]);
-					// if($explosion[1] != '')$collapsed = true;else $collapsed = false;
-					// $groupname = $explosion[0];
-					// echo '<tr>
-									// <td colspan="2">
-										// <table width="100%" id="colgroup'.$layer['Layer_ID'].'_'.$j.'_'.$k.'" class="tgle" '; if(!$collapsed)echo 'style="display:none"'; echo ' border="2"><tbody width="100%" class="gle">
-											// <tr>
-												// <td width="100%" bgcolor="'.BG_GLEATTRIBUTE.'" colspan="2">&nbsp;<a href="javascript:void(0);" onclick="javascript:document.getElementById(\'group'.$layer['Layer_ID'].'_'.$j.'_'.$k.'\').style.display=\'\';document.getElementById(\'colgroup'.$layer['Layer_ID'].'_'.$j.'_'.$k.'\').style.display=\'none\';"><img border="0" src="'.GRAPHICSPATH.'/plus.gif"></a>&nbsp;<span class="fett">'.$groupname.'</span></td>
-											// </tr>
-										// </table>
-										// <table class="tgle" id="group'.$layer['Layer_ID'].'_'.$j.'_'.$k.'" '; if($collapsed)echo 'style="display:none"'; echo 'border="2"><tbody class="gle">
-											// <tr>
-												// <td bgcolor="'.BG_GLEATTRIBUTE.'" colspan="2">&nbsp;<a href="javascript:void(0);" onclick="javascript:document.getElementById(\'group'.$layer['Layer_ID'].'_'.$j.'_'.$k.'\').style.display=\'none\';document.getElementById(\'colgroup'.$layer['Layer_ID'].'_'.$j.'_'.$k.'\').style.display=\'\';"><img border="0" src="'.GRAPHICSPATH.'/minus.gif"></a>&nbsp;<span class="fett">'.$groupname.'</span></td>
-											// </tr>';
-				// }
-				
-				if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
-					if($attributes['type'][$j] != 'geometry'){
-						echo '<td>';
-							
-							if($attributes['constraints'][$j] != '' AND !in_array($attributes['constraints'][$j], array('PRIMARY KEY', 'UNIQUE'))){
-			  				if($attributes['privileg'][$j] == '0' OR $lock[$k]){
-			  					$size1 = 1.3*strlen($layer['shape'][$k][$attributes['name'][$j]]);
-									echo '<input readonly style="background-color:#e8e3da;" size="'.$size1.'" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$layer['shape'][$k][$attributes['name'][$j]].'">';
-								}
-								else{
-			  					echo '<select onchange="set_changed_flag(currentform.changed_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" title="'.$attributes['alias'][$j].'"  style="font-size: '.$this->user->rolle->fontsize_gle.'px" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'">';
-									for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
-										echo '<option ';
-										if($attributes['enum_value'][$j][$e] == $layer['shape'][$k][$attributes['name'][$j]]){
-											echo 'selected ';
-										}
-										echo 'value="'.$attributes['enum_value'][$j][$e].'">'.$attributes['enum_output'][$j][$e].'</option>';
-									}
-									echo '</select>';
-			  				}
-			  			}
-			  			else{
-								include(SNIPPETS.'generic_formelements.php');
-								echo $datapart;
-			  			}
-			  			echo '
-									</td>
-							';
-
-			  			// if($attributes['group'][$j] != $attributes['group'][$j+1] OR ($attributes['group'][$j] != '' AND $attributes['type'][$j+1] == 'geometry' AND $attributes['name'][$j+2] == NULL)){		# wenn die nächste Gruppe anders ist (oder das nächste Attribut eine Geometrie und auch das letzte Attribut), Tabelle schliessen
-								// echo '</table></td></tr>';
-			  			// }
-			  			
-							if($attributes['privileg'][$j] >= '0'){
-								$this->form_field_names .= $layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'|';
-							}
-			  		}
-			  		else {
-			  			$columnname = $attributes['name'][$j];
-			  			$tablename = $attributes['table_name'][$attributes['name'][$j]];
-			  			$geomtype = $attributes['geomtype'][$attributes['name'][$j]];
-			  			$dimension = $attributes['dimension'][$j];
-			  			$privileg = $attributes['privileg'][$j];
-			  			$nullable = $attributes['nullable'][$j];
-			  			$this->form_field_names .= $layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';Geometrie;'.$attributes['nullable'][$j].'|';
-			  		}
-				}
+			}
 		}
 				if(($columnname != '' OR $layer['shape'][$k]['geom'] != '') AND $this->new_entry != true AND $this->formvars['printversion'] == ''){
+					$geometry = true;
 					// if($attributes['group'][0] != ''){ ?>
 						 <!--tr><td colspan="2"><table width="100%" class="tgle" border="2"><tbody class="gle"-->
 					 <? //} ?>
@@ -285,14 +236,79 @@
 
 ?>
 			    </td>
-			    <? //if($attributes['group'][0] != ''){ ?>
-								<!--/table></td></tr-->
-					<? //}		    
-	}
+		<? 	} ?>
+				</tr>
+<?	} 
+			if($this->new_entry != true AND $this->editable == $layer['Layer_ID']){
+?>
+				<tr id="edit_all1_<? echo $layer['Layer_ID']; ?>" style="height: 30px">
+					<td colspan="200" style="border: none;vertical-align: bottom"><a href="javascript:switch_edit_all(<? echo $layer['Layer_ID']; ?>);"><? echo $strEditAll; ?></a></td>
+				</tr>
+				<tr id="edit_all2_<? echo $layer['Layer_ID']; ?>" style="height: 30px; display: none">
+					<td colspan="200" style="border: none;vertical-align: bottom"><a href="javascript:switch_edit_all(<? echo $layer['Layer_ID']; ?>);"><? echo $strEditAll; ?></a></td>
+				</tr>
+				<tr id="edit_all3_<? echo $layer['Layer_ID']; ?>" bgcolor="<?php echo BG_DEFAULT ?>" style="display: none">
+				<td></td>
+			  
+			  <?
+			  	for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
+						if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
+							if($this->qlayerset[$i]['attributes']['type'][$j] != 'geometry'){
+								echo '<td ';
+									echo ' valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';
+									if($attributes['alias'][$j] == ''){
+										$attributes['alias'][$j] = $attributes['name'][$j];
+									}
+									echo '<table ';
+									echo 'width="100%";';
+									echo '><tr><td>';
+									echo '<span style="font-size: '.$this->user->rolle->fontsize_gle.'px; color:#222222;">'.$attributes['alias'][$j].'</span>';
+									if($attributes['nullable'][$j] == '0' AND $attributes['privileg'][$j] != '0'){
+										echo '<span title="Eingabe erforderlich">*</span>';
+									}
+									if($attributes['tooltip'][$j]!='' AND $attributes['form_element_type'][$j] != 'Time'){
+										echo '<td align="right"><a href="javascript:void(0);" title="'.$attributes['tooltip'][$j].'"><img src="'.GRAPHICSPATH.'emblem-important.png" border="0"></a></td>';
+									}
+									if($attributes['type'][$j] == 'date' OR $attributes['type'][$j] == 'timestamp' OR $attributes['type'][$j] == 'timestamptz'){
+										echo '<td align="right"><a href="javascript:;" title=" (TT.MM.JJJJ) '.$attributes['tooltip'][$j].'" ';
+										if($attributes['privileg'][$j] == '1' AND !$lock[$k]){
+											echo 'onclick="add_calendar(event, \''.$attributes['name'][$j].'_'.$k.'\');"';
+										}
+										echo '><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id=calendar_'.$attributes['name'][$j].'_'.$k.'"></div></td>';
+									}
+									echo '</td></tr></table>';
+									echo '</td>';
+							}
+						}
+			  	}
+			  ?>
+			  </tr>
+				<tr id="edit_all4_<? echo $layer['Layer_ID']; ?>" style="display: none">
+					<td style="text-align: center; background-color:<? echo BG_DEFAULT; ?>;">
+						<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(new Array('Hilfe:','Sie können hier die Attribut-Werte von mehreren Datensätzen gleichzeitig bearbeiten. Die Werte werden nur für die ausgewählten Datensätze übernommen.'),Style[0], document.getElementById('TipLayer<? echo $layer['Layer_ID']; ?>'))" onmouseout="htm()">
+						<DIV id="TipLayer<? echo $layer['Layer_ID']; ?>" style="visibility:hidden;position:absolute;z-index:1000;"></DIV>
+					</td>
+					<?					
+						for($j = 0; $j < count($attributes['name']); $j++){
+							$datapart = '';
+							if(($attributes['privileg'][$j] == '0' AND $attributes['form_element_type'][$j] == 'Auswahlfeld') OR ($attributes['form_element_type'][$j] == 'Text' AND $attributes['type'][$j] == 'not_saveable')){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar
+								$attributes['form_element_type'][$j] .= '_not_saveable';
+							}
+							if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
+								if($attributes['type'][$j] != 'geometry'){
+									echo '<td>';
+									if(!in_array($attributes['form_element_type'][$j], array('Dokument', 'SubFormPK', 'SubFormEmbeddedPK'))){
+										echo attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size, $select_width, $this->user->rolle->fontsize_gle, true);
+									}
+									echo '</td>';
+								}
+							}
+						}
+					?>
+				</tr>
+				
+	<?  } ?>
 
- ?>
-			</tr>
-<?	} ?>
 			</table>
 		</td>
 	</tr>
@@ -443,7 +459,7 @@
 
 <?
   }
-  else {
+  elseif($layer['requires'] == ''){
 ?>
 <table border="0" cellspacing="10" cellpadding="2">
   <tr>

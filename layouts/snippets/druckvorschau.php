@@ -148,13 +148,13 @@ function preventflickering(evt){
 <? 
       	if(strpos($this->Docu->activeframe[0]['format'], 'quer') !== false)$height = 420;			# das ist die Höhe des Vorschaubildes
       	else $height = 842;																																		# das ist die Höhe des Vorschaubildes
-      	$ratio = $height/$this->Docu->height;
+      	@$ratio = $height/$this->Docu->height;
       	$size = round(12*$ratio);
       	$posx = 200;
       	$posy = 200;
 ?>
 	<!-- hier wird viel mit Childs und Parents anstatt mit ids gemacht, weil das nur die Vorlage für die nachher geclonten Freitexte ist -->
-	<div onmouseover="this.style.border='2px dotted grey'; this.lastChild.style.display=''; this.style.cursor='move';" onmouseout="this.style.border='1px solid black'; this.lastChild.style.display='none';" onmousedown="start_move(event);" onmouseup="deactivate();" title="Freitext" id="text" style="display:none; background-color: white; border: 1px solid black; position: absolute; visibility: visible; left: <? echo $posx; ?>px; top: <? echo $posy; ?>px; padding:3px"><textarea wrap="off" name="freetext" style="overflow: hidden; resize: none; width: 150px; height: 70px; border: none; background-color:transparent; font-size: <? echo $size; ?>px; font-family: Helvetica;">hier Text eingegeben...</textarea><input type="hidden" name="freetext_posx" value="<? echo $posx; ?>"><input type="hidden" name="freetext_posy" value="<? echo $posy; ?>"><input type="hidden" name="freetext_width" value="150"><input type="hidden" name="freetext_height" value="70"><input type="hidden" name="freetext_fontsize" value="<? echo $size; ?>">
+	<div onmouseover="this.style.border='2px dotted grey'; this.lastChild.style.display=''; this.style.cursor='move';" onmouseout="this.style.border='1px solid black'; this.lastChild.style.display='none';" onmousedown="start_move(event);" onmouseup="deactivate();" title="Freitext" id="text" style="display:none; background-color: white; border: 1px solid black; position: absolute; visibility: visible; left: <? echo $posx; ?>px; top: <? echo $posy; ?>px; padding:3px"><textarea wrap="off" name="freetext" onclick="if(this.innerHTML == 'hier Text eingegeben...')this.innerHTML='';" style="overflow: hidden; resize: none; width: 150px; height: 70px; border: none; background-color:transparent; font-size: <? echo $size; ?>px; font-family: Helvetica;">hier Text eingegeben...</textarea><input type="hidden" name="freetext_posx" value="<? echo $posx; ?>"><input type="hidden" name="freetext_posy" value="<? echo $posy; ?>"><input type="hidden" name="freetext_width" value="150"><input type="hidden" name="freetext_height" value="70"><input type="hidden" name="freetext_fontsize" value="<? echo $size; ?>">
 		<!-- obiges und unteres muss so hintereinander stehen, sonst gibt es zwischen den Elementen noch Textelemente -->
 		<div style="display:none; width:100%;">
 			<img title="Freitext löschen" onclick="delete_freetext(this);" onmouseover="this.style.cursor='pointer';" style="position: absolute; bottom:3px; left:0px" src="graphics/symbol_delete.gif">

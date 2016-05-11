@@ -259,6 +259,13 @@ class spatial_processor {
 					$result = $this->buffer_ring($polywkt1, $formvars['resulttype'], $formvars['width']);
 				}
 			}break;
+			
+			case 'add_buffer_within_polygon':{
+				$rs = $this->add_buffer_within_polygon($polywkt1, $polywkt2, $formvars);
+				$result = $rs['svg'];
+				$result .= '||';
+				$result .= $rs['wkt'];
+			}break;			
 		
 			case 'add_buffered_line':{
 				if($formvars['width'] == ''){$formvars['width'] = 50;}
@@ -415,10 +422,10 @@ class spatial_processor {
   
   function buffer_ring($geom_1, $type, $width){
   	if($type == 'wkt'){
-  		$sql = "select st_astext(st_difference(st_buffer(st_geomfromtext('".$geom_1."'), ".$width."), st_geomfromtext('".$geom_1."')))";
+  		$sql = "select st_astext(st_difference(st_buffer(st_geomfromtext('".$geom_1."'), ".$width.", 16), st_geomfromtext('".$geom_1."')))";
   	}
   	else{
-  		$sql = "select st_assvg(st_difference(st_buffer(st_geomfromtext('".$geom_1."'), ".$width."), st_geomfromtext('".$geom_1."')),0,5)";
+  		$sql = "select st_assvg(st_difference(st_buffer(st_geomfromtext('".$geom_1."'), ".$width.", 16), st_geomfromtext('".$geom_1."')),0,5)";
   	}
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
@@ -428,6 +435,25 @@ class spatial_processor {
     	$rs = pg_fetch_array($ret[1]);
     }
     return $rs[0];
+  }
+		
+	function add_buffer_within_polygon($geom_1, $geom_2, $formvars){
+		$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['layer_id'], $formvars['fromwhere'], $formvars['columnname'], $formvars['orderby']);
+  	if(substr_count($geom_2, ',') == 0){			# wenn Linestring nur aus einem Eckpunkt besteht -> in POINT umwandeln -> Kreis entsteht
+  		$geom_2 = $this->pointfromlinestring($geom_2);
+  	}
+		if($geom_1 == ''){
+			$geom_1 = 'GEOMETRYCOLLECTION EMPTY';
+		}
+  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0,8) as svg FROM (SELECT (ST_SnapToGrid(st_union(ST_SnapToGrid(st_geomfromtext('".$geom_1."'), 0.0001), ST_SnapToGrid(   st_intersection(st_geomfromtext('".$querygeometryWKT."'),  st_buffer(st_geomfromtext('".$formvars['path3']."'), (select st_distance(st_geomfromtext('".$formvars['path3']."'), st_geomfromtext('".$geom_2."'))), 16)  )   , 0.0001)), 0.0001)) as geom) as foo";
+  	$ret = $this->pgdatabase->execSQL($sql,4, 0);
+    if ($ret[0]) {
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
+    }
+    else {
+    	$rs = pg_fetch_assoc($ret[1]);
+    }
+    return $rs;
   }
 	
 	function add_buffered_line($geom_1, $geom_2, $type, $width){

@@ -88,6 +88,7 @@
     $GUI->menue='menue.php';
     $GUI->main= PLUGINS.'nachweisverwaltung/view/dokumenteneingabeformular.php';
     $GUI->titel='Dokument überarbeiten';    
+		if($GUI->formvars['reset_layers'])$GUI->reset_layers(NULL);
     # Nachweisdaten aus Datenbank abfragen
     $nachweis=new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
     # abfragen der Dokumentarten
@@ -105,9 +106,15 @@
       $nachweis->document=$nachweis->Dokumente[0];
       # Laden der letzten Karteneinstellung
       $saved_scale = $GUI->reduce_mapwidth(100);
-			$GUI->loadMap('DataBase');
+			if($GUI->formvars['neuladen']){
+				$GUI->neuLaden();
+			}
+			else{
+				$GUI->loadMap('DataBase');
+			}
 			if($_SERVER['REQUEST_METHOD'] == 'GET')$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
-      
+      # zoomToMaxLayerExtent
+			if($GUI->formvars['zoom_layer_id'] != '')$GUI->zoomToMaxLayerExtent($GUI->formvars['zoom_layer_id']);
       $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id);
 	    if(!$GUI->formvars['layer_id']){
 	      $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
@@ -652,6 +659,8 @@
 	};
 
 	$this->nachweisFormAnzeige = function($nachweis = NULL) use ($GUI){
+		if($GUI->formvars['reset_layers'])$GUI->reset_layers(NULL);
+
     # Wenn eine oid in formvars übergeben wurde ist es eine Änderung, sonst Neueingabe
     if ($GUI->formvars['oid']=='') {
       $GUI->titel='Dokumenteneingabe';
@@ -660,18 +669,15 @@
       $GUI->titel='Dokumenteneingabe (neuer Ausschnitt)';
     }
     $GUI->main = PLUGINS."nachweisverwaltung/view/dokumenteneingabeformular.php";
-    $GUI->formvars['bufferwidth'] = 2;
+    if($GUI->formvars['bufferwidth'] == '')$GUI->formvars['bufferwidth'] = 2;
     $saved_scale = $GUI->reduce_mapwidth(100);
-		
 		if($GUI->formvars['neuladen']){
       $GUI->neuLaden();
     }
     else{
       $GUI->loadMap('DataBase');
     }
-		
 		if($_SERVER['REQUEST_METHOD'] == 'GET')$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
-    
     $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id);
   	if(!$GUI->formvars['layer_id']){
       $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
@@ -713,6 +719,7 @@
       $GUI->formvars['newpathwkt'] = $nachweis->document['wkt_umring'];
       $GUI->formvars['pathwkt'] = $GUI->formvars['newpathwkt'];
     }
+		elseif($GUI->formvars['zoom_layer_id'] != '')$GUI->zoomToMaxLayerExtent($GUI->formvars['zoom_layer_id']);	# zoomToMaxLayerExtent
     
     $GUI->saveMap('');
     $currenttime=date('Y-m-d H:i:s',time());
@@ -724,10 +731,13 @@
     
     # Abfragen der Gemarkungen
     $GemeindenStelle=$GUI->Stelle->getGemeindeIDs();
-    $Gemeinde=new gemeinde('',$GUI->pgdatabase);
-    $GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle);
     $Gemarkung=new gemarkung('',$GUI->pgdatabase);
-    $GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'');
+		if($GemeindenStelle == NULL){
+			$GemkgListe=$Gemarkung->getGemarkungListe(NULL, NULL);
+		}
+		else{
+			$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
+		}
         
     # Erzeugen des Formobjektes für die Gemarkungsauswahl
     $GUI->GemkgFormObj=new FormObject("Gemarkung","select",$GemkgListe['GemkgID'],$GUI->formvars['Gemarkung'],$GemkgListe['Bezeichnung'],"1","","",NULL);
@@ -916,10 +926,13 @@
 			
 	# Abfragen der Gemarkungen
     $GemeindenStelle=$GUI->Stelle->getGemeindeIDs();
-    $Gemeinde=new gemeinde('',$GUI->pgdatabase);
-    $GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle);
     $Gemarkung=new gemarkung('',$GUI->pgdatabase);
-    $GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'');
+		if($GemeindenStelle == NULL){
+			$GemkgListe=$Gemarkung->getGemarkungListe(NULL, NULL);
+		}
+		else{
+			$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
+		}
     # Erzeugen des Formobjektes für die Gemarkungsauswahl
     $GUI->GemkgFormObj=new FormObject("suchgemarkung","select",$GemkgListe['GemkgID'],$GUI->formvars['suchgemarkung'],$GemkgListe['Bezeichnung'],"1","","",NULL);
 		$GUI->GemkgFormObj->insertOption('',0,'--Auswahl--',0);

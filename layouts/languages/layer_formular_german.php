@@ -33,6 +33,7 @@
   $strID="ID";
   $strClass="Klasse";
   $strExpression="Expression";
+	$strText="Text";
   $strSignOrder="Zeichenreihenfolge";
   $strDelete="löschen";
   $strAddClass="Klasse hinzufügen";
@@ -67,4 +68,5 @@
 	$strStatus="Status";
 	$strPostlabelcache="Postlabelcache";
 	$strrequires="Requires";
+	$strClusterMaxdistance="Cluster:Maxdistance";
 ?>  

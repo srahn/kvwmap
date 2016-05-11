@@ -141,17 +141,24 @@
 							<tr>
 								<td colspan="5" height="40px" align="center" valign="middle">';
 							if($this->stelle->id != '' AND $this->layer[0]['Name'] != ''){
-								echo '<a href="javascript:get_from_default(\''.$attributenames.'\', \''.$this->stelle->id.'\');">Default-Rechte übernehmen</a>';
+								echo '<a href="javascript:get_from_default(\''.$attributenames.'\', \''.$this->stelle->id.'\');">Default-Rechte übernehmen</a>
+									</td>
+								</tr>
+								<tr>
+									<td align="center" colspan="5"><input class="button" type="button" onclick="save(\''.implode('|', $this->stellen['ID']).'\');" name="speichern" value="speichern">
+									</td>
+								</tr>';
 							}
 							elseif(count($this->stellen['ID']) > 0){
-								echo '<a href="javascript:get_from_default(\''.$attributenames.'\', \''.implode('|', $this->stellen['ID']).'\');">Default-Rechte allen Stellen zuweisen</a>';
+								echo '<a href="javascript:get_from_default(\''.$attributenames.'\', \''.implode('|', $this->stellen['ID']).'\');">Default-Rechte allen Stellen zuweisen</a>
+									</td>
+								</tr>
+								<tr>
+									<td align="center" colspan="5"><input class="button" type="button" onclick="save(\'\');" name="speichern" value="speichern">
+									</td>
+								</tr>';
 							}
-							echo '</td>
-							</tr>
-							<tr>
-			 					<td align="center" colspan="5"><input class="button" type="button" onclick="save(\''.$this->stelle->id.'\');" name="speichern" value="speichern">
-			 					</td>
-			 				</tr>
+							echo '
 			 				<tr>
 			 					<td>&nbsp;</td>
 			 				</tr>

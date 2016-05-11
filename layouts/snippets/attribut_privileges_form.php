@@ -98,6 +98,22 @@ function save(stelle){
   <tr>
   	<td>
   		<table>
+				<tr>
+					<td></td>
+					<td></td>
+					<td>
+						<? 
+						$stellenanzahl = count($this->stellen['ID']);
+						if($stellenanzahl > 0){
+						$width1 = $width = 280*$stellenanzahl;
+						if($width > 840)$width = 840;
+						if($width1 > 840){ ?>
+						<div id="upperscrollbar" style="overflow:auto; overflow-y:hidden;width:840px" onscroll="document.getElementById('stellendiv').scrollLeft=this.scrollLeft">
+							<div style="width:<? echo $width1; ?>px;height:1px"></div>
+						</div>
+						<? } ?>
+					</td>
+				</tr>
   			<tr>
 			  	<td valign="top">
 			  		<div style="border:1px solid black;">
@@ -108,12 +124,8 @@ function save(stelle){
 							</table>
 						</div>
 					<td>	
-					<? $stellenanzahl = count($this->stellen['ID']);
-						 if($stellenanzahl > 0){
-						 	 $width = 280*$stellenanzahl;
-						 	 if($width > 840)$width = 840; ?>
 					<td valign="top">
-						<div id="stellendiv" style="border:1px solid black; width:<? echo $width; ?>px; float:right; overflow:auto; overflow-y:hidden" onscroll="document.GUI.scrollposition.value = this.scrollLeft;">
+						<div id="stellendiv" style="border:1px solid black; width:<? echo $width; ?>px; float:right; overflow:auto; overflow-y:hidden" onscroll="document.GUI.scrollposition.value = this.scrollLeft; document.getElementById('upperscrollbar').scrollLeft=this.scrollLeft">
 							<table border="1" style="border-collapse:collapse" cellspacing="0" cellpadding="10">
 								<tr>
 							<?

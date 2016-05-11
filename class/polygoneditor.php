@@ -51,15 +51,16 @@ class polygoneditor {
 		$rect = ms_newRectObj();
     $rect->minx=$rs['minx']; 
     $rect->maxx=$rs['maxx'];
-    $rect->miny=$rs['miny']; 
+    $rect->miny=$rs['miny'];
     $rect->maxy=$rs['maxy'];
-		if(defined('ZOOMBUFFER') AND ZOOMBUFFER > 0){
-			if($this->clientepsg == 4326)$randx = $randy = ZOOMBUFFER/10000;
-			else $randx = $randy = ZOOMBUFFER;
+		if($border == NULL AND defined('ZOOMBUFFER') AND ZOOMBUFFER > 0)$border = ZOOMBUFFER;
+		if($border != NULL){
+			if($this->clientepsg == 4326)$border = $border/10000;
+			$randx=$randy=$border;
 		}
-		else{
-			$randx=($rect->maxx-$rect->minx)*$border/100;
-			$randy=($rect->maxy-$rect->miny)*$border/100;
+		else{		
+			$randx=($rect->maxx-$rect->minx)*0.1;
+			$randy=($rect->maxy-$rect->miny)*0.1;
 		}		
     $rect->minx -= $randx;
     $rect->miny -= $randy;
@@ -104,7 +105,8 @@ class polygoneditor {
   }
 	
 	function getpolygon($oid, $tablename, $columnname, $extent){
-		$sql = "SELECT st_assvg(st_transform(".$columnname.",".$this->clientepsg."), 0, 8) AS svggeom, st_astext(st_transform(".$columnname.",".$this->clientepsg.")) AS wktgeom FROM ".$tablename." WHERE oid = ".$oid;
+		$sql = "SELECT st_assvg(st_transform(st_union(".$columnname."),".$this->clientepsg."), 0, 8) AS svggeom, st_astext(st_transform(st_union(".$columnname."),".$this->clientepsg.")) AS wktgeom FROM ".$tablename;
+		if($oid != NULL)$sql .= " WHERE oid = ".$oid;
 		$ret = $this->database->execSQL($sql, 4, 0);
 		$polygon = pg_fetch_array($ret[1]);
 		$polygon['svggeom'] = transformCoordsSVG($polygon['svggeom']); 

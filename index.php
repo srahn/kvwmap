@@ -47,10 +47,13 @@ define(CASE_COMPRESS, false);																																						#
 #										- ein räumlich gefilterter Layer muss an sein																				#
 #										- man muss einen anderen EPSG-Code als den der Ref-Karte (2398) eingestellt haben		#
 # 	tooltip_query:	- ein Datensatz mit Bild muss abgefragt werden																			#
+#										- getRollenLayer() reinkopieren																											#
+#																																																				#
+#		alle:						- die Stelle muss die IP checken  																									#
 #																																																				#
 #########################################################################################################
 
-$non_spatial_cases = array('changemenue_with_ajax');		// für non-spatial cases wird in start.php keine Verbindung zur PostgreSQL aufgebaut usw.
+$non_spatial_cases = array('changemenue_with_ajax', 'get_select_list');		// für non-spatial cases wird in start.php keine Verbindung zur PostgreSQL aufgebaut usw.
 $spatial_cases = array('navMap_ajax', 'tooltip_query', 'get_group_legend');
 $fast_loading_cases = array_merge($spatial_cases, $non_spatial_cases);
 
@@ -114,6 +117,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	if($go == 'get_last_query'){
 		$GUI->last_query = $GUI->user->rolle->get_last_query();
 		$GUI->formvars['keinzurueck'] = true;
+		$GUI->last_query_requested = true;		# get_last_query wurde direkt aufgerufen
 		$GUI->formvars['go'] = $go = $GUI->last_query['go'];
 	}
 		
@@ -452,17 +456,6 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  case 'zoomToLine' : {
 			if($GUI->formvars['mime_type'] != '')$GUI->mime_type = $GUI->formvars['mime_type'];
 			$GUI->zoom_toLine();
-	  }break;
-
-	  # zoom to maximum extent of the layer
-	  case 'zoomToMaxLayerExtent' : {
-		# Karteninformationen lesen
-		$GUI->loadMap('DataBase');
-		$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-		$GUI->zoomToMaxLayerExtent($GUI->formvars['layer_id']);
-		$GUI->drawMap();
-		$GUI->saveMap('');
-		$GUI->output();
 	  }break;
 
 	  # PolygonEditor
@@ -938,9 +931,29 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->gpx_import();
 	  } break;
 	  
-	  case 'GPX_Import_importieren' : {
+	  case 'GPX_Import_Laden' : {
 			$GUI->checkCaseAllowed('GPX_Import');
 			$GUI->gpx_import_importieren();
+	  } break;
+		
+		case 'OVL_Import' : {
+			$GUI->checkCaseAllowed('OVL_Import');
+			$GUI->ovl_import();
+	  } break;
+	  
+	  case 'OVL_Import_Laden' : {
+			$GUI->checkCaseAllowed('OVL_Import');
+			$GUI->ovl_import_importieren();
+	  } break;
+		
+		case 'DXF_Import' : {
+			$GUI->checkCaseAllowed('DXF_Import');
+			$GUI->dxf_import();
+	  } break;
+	  
+	  case 'DXF_Import_Laden' : {
+			$GUI->checkCaseAllowed('DXF_Import');
+			$GUI->dxf_import_importieren();
 	  } break;
 
 		case 'SHP_Anzeigen' : {
@@ -1057,11 +1070,11 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  } break;
 	  
 	  case 'generisches_sachdaten_diagramm' : {
-		$GUI->generisches_sachdaten_diagramm($GUI->formvars['width']);
+			$GUI->generisches_sachdaten_diagramm($GUI->formvars['width']);
 	  } break;
 	  
 	  case 'generischer_sachdaten_druck' : {
-		$GUI->generischer_sachdaten_druck();
+			$GUI->generischer_sachdaten_druck();
 	  } break;
 	  
 	  case 'generischer_sachdaten_druck_Drucken' : {
@@ -1069,48 +1082,48 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  } break;
 	  
 	  case 'sachdaten_druck_editor' : {
-		$GUI->checkCaseAllowed('sachdaten_druck_editor');
-		$GUI->sachdaten_druck_editor();
+			$GUI->checkCaseAllowed('sachdaten_druck_editor');
+			$GUI->sachdaten_druck_editor();
 	  } break;
 	  
 	  case 'sachdaten_druck_editor_als neues Layout speichern' : {
-		$GUI->checkCaseAllowed('sachdaten_druck_editor');
-		$GUI->sachdaten_druck_editor_speichern();
+			$GUI->checkCaseAllowed('sachdaten_druck_editor');
+			$GUI->sachdaten_druck_editor_speichern();
 	  } break;
 	  
 	  case 'sachdaten_druck_editor_Änderungen Speichern' : {
-		$GUI->checkCaseAllowed('sachdaten_druck_editor');
-		$GUI->sachdaten_druck_editor_aendern();
+			$GUI->checkCaseAllowed('sachdaten_druck_editor');
+			$GUI->sachdaten_druck_editor_aendern();
 	  } break;
 	  
 	  case 'sachdaten_druck_editor_Löschen' : {
-		$GUI->checkCaseAllowed('sachdaten_druck_editor');
-		$GUI->sachdaten_druck_editor_loeschen();
+			$GUI->checkCaseAllowed('sachdaten_druck_editor');
+			$GUI->sachdaten_druck_editor_loeschen();
 	  } break;
 	  
 	  case 'sachdaten_druck_editor_übernehmen >>' : {
-		$GUI->checkCaseAllowed('sachdaten_druck_editor');
-		$GUI->sachdaten_druck_editor_add2stelle();
+			$GUI->checkCaseAllowed('sachdaten_druck_editor');
+			$GUI->sachdaten_druck_editor_add2stelle();
 	  } break;
 	  
 	  case 'sachdaten_druck_editor_Freitexthinzufuegen' :
-		$GUI->checkCaseAllowed('sachdaten_druck_editor'); {
-		$GUI->sachdaten_druck_editor_Freitexthinzufuegen();
+			$GUI->checkCaseAllowed('sachdaten_druck_editor'); {
+			$GUI->sachdaten_druck_editor_Freitexthinzufuegen();
 	  } break;
 	  
 	  case 'sachdaten_druck_editor_Freitextloeschen' : {
-		$GUI->checkCaseAllowed('sachdaten_druck_editor');
-		$GUI->sachdaten_druck_editor_Freitextloeschen();
+			$GUI->checkCaseAllowed('sachdaten_druck_editor');
+			$GUI->sachdaten_druck_editor_Freitextloeschen();
 	  } break;
 	  
 	  case 'Layer_Export' : {
-		$GUI->checkCaseAllowed($go);
-		$GUI->layer_export();
+			$GUI->checkCaseAllowed($go);
+			$GUI->layer_export();
 	  } break;
 	  
 	  case 'Layer_Export_Exportieren' : {
-		$GUI->checkCaseAllowed('Layer_Export');
-		$GUI->layer_export_exportieren();
+			$GUI->checkCaseAllowed('Layer_Export');
+			$GUI->layer_export_exportieren();
 	  } break;
 
 		case 'Style_Label_Editor' : {
@@ -1119,244 +1132,244 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  } break;
 
 	  case 'Layereditor' : {
-		$GUI->checkCaseAllowed('Layer_Anzeigen');
-		$GUI->Layereditor();
+			$GUI->checkCaseAllowed('Layer_Anzeigen');
+			$GUI->Layereditor();
 	  } break;
 
 	  case 'Layereditor_Klasse_Löschen' : {
-		$GUI->checkCaseAllowed('Layer_Anzeigen');
-		$GUI->Layereditor_KlasseLoeschen();
+			$GUI->checkCaseAllowed('Layer_Anzeigen');
+			$GUI->Layereditor_KlasseLoeschen();
 	  } break;
 
 	  case 'Layereditor_Klasse_Hinzufügen' : {
-		$GUI->checkCaseAllowed('Layer_Anzeigen');
-		$GUI->Layereditor_KlasseHinzufuegen();    
+			$GUI->checkCaseAllowed('Layer_Anzeigen');
+			$GUI->Layereditor_KlasseHinzufuegen();    
 	  } break;
 
 	  case 'Layereditor_Als neuen Layer eintragen' : {
-		$GUI->checkCaseAllowed('Layer_Anzeigen');
-		$GUI->LayerAnlegen();
+			$GUI->checkCaseAllowed('Layer_Anzeigen');
+			$GUI->LayerAnlegen();
 	  } break;
 
 	  case 'Layereditor_Ändern' : {
-		$GUI->checkCaseAllowed('Layer_Anzeigen');
-		$GUI->LayerAendern();
+			$GUI->checkCaseAllowed('Layer_Anzeigen');
+			$GUI->LayerAendern();
 	  } break;
 
 	  case 'Layereditor_erweiterte Einstellungen' : {
-		$GUI->checkCaseAllowed('Attributeditor');
-		$GUI->Attributeditor();
+			$GUI->checkCaseAllowed('Attributeditor');
+			$GUI->Attributeditor();
 	  } break;
 
 	  case 'Attributeditor' : {
-		$GUI->checkCaseAllowed('Attributeditor');
-		$GUI->Attributeditor();
+			$GUI->checkCaseAllowed('Attributeditor');
+			$GUI->Attributeditor();
 	  } break;
 
 	  case 'Attributeditor_speichern' : {    
-		$GUI->checkCaseAllowed('Attributeditor');
-		$GUI->Attributeditor_speichern();
+			$GUI->checkCaseAllowed('Attributeditor');
+			$GUI->Attributeditor_speichern();
 	  } break;
 
 	  case 'Layer_Anzeigen' : {
-		$GUI->checkCaseAllowed($go);
-		$GUI->LayerAnzeigen();
+			$GUI->checkCaseAllowed($go);
+			$GUI->LayerAnzeigen();
 	  } break;
 	  
 	  case 'Layer_Uebersicht' : {
-		$GUI->LayerUebersicht();
+			$GUI->LayerUebersicht();
 	  } break;
 
 	  case 'Layer_Löschen' : {    
-		$GUI->checkCaseAllowed('Layer_Anzeigen');
-		$GUI->LayerLoeschen();
+			$GUI->checkCaseAllowed('Layer_Anzeigen');
+			$GUI->LayerLoeschen();
 	  } break;
 
 	  case 'Layer2Stelle_Reihenfolge' : {
-		$GUI->checkCaseAllowed('Stellen_Anzeigen');
-		$GUI->Layer2Stelle_Reihenfolge();
+			$GUI->checkCaseAllowed('Stellen_Anzeigen');
+			$GUI->Layer2Stelle_Reihenfolge();
 	  } break;
 
 	  case 'Layer2Stelle_Reihenfolge_Speichern' : {    
-		$GUI->checkCaseAllowed('Stellen_Anzeigen');
-		$GUI->Layer2Stelle_ReihenfolgeSpeichern();
+			$GUI->checkCaseAllowed('Stellen_Anzeigen');
+			$GUI->Layer2Stelle_ReihenfolgeSpeichern();
 	  } break;
 
 	  case 'Layer2Stelle_Editor' : {
-		$GUI->checkCaseAllowed('Stellen_Anzeigen');
-		$GUI->Layer2Stelle_Editor();
+			$GUI->checkCaseAllowed('Stellen_Anzeigen');
+			$GUI->Layer2Stelle_Editor();
 	  } break;
 
 	  case 'Layer2Stelle_Editor_Speichern' : {
-		$GUI->checkCaseAllowed('Stellen_Anzeigen');
-		$GUI->Layer2Stelle_EditorSpeichern();
+			$GUI->checkCaseAllowed('Stellen_Anzeigen');
+			$GUI->Layer2Stelle_EditorSpeichern();
 	  } break;
 
 		case 'Layerattribut-Rechteverwaltung' : {
-		$GUI->checkCaseAllowed('Layerattribut-Rechteverwaltung');
-		$GUI->layer_attributes_privileges();
+			$GUI->checkCaseAllowed('Layerattribut-Rechteverwaltung');
+			$GUI->layer_attributes_privileges();
 	  } break;
 
 	  case 'Layerattribut-Rechteverwaltung_speichern' : {
-		$GUI->checkCaseAllowed('Layerattribut-Rechteverwaltung');
-		$GUI->layer_attributes_privileges_save();
+			$GUI->checkCaseAllowed('Layerattribut-Rechteverwaltung');
+			$GUI->layer_attributes_privileges_save();
 	  } break;
 
 	  case 'Stelleneditor' : {
-		$GUI->checkCaseAllowed('Stellen_Anzeigen');
-		$GUI->Stelleneditor();
+			$GUI->checkCaseAllowed('Stellen_Anzeigen');
+			$GUI->Stelleneditor();
 	  } break;
 
 	  case 'Stelle_Löschen' : {
-		$GUI->checkCaseAllowed('Stellen_Anzeigen');
-		$GUI->StelleLoeschen();
+			$GUI->checkCaseAllowed('Stellen_Anzeigen');
+			$GUI->StelleLoeschen();
 	  } break;
 
 	  case 'Stelleneditor_Als neue Stelle eintragen' : {
-		$GUI->checkCaseAllowed('Stellen_Anzeigen');
-		$GUI->StelleAnlegen();
+			$GUI->checkCaseAllowed('Stellen_Anzeigen');
+			$GUI->StelleAnlegen();
 	  } break;
 
 	  case 'Stelleneditor_Ändern' : {
-		$GUI->checkCaseAllowed('Stellen_Anzeigen');
-		$GUI->StelleAendern();
+			$GUI->checkCaseAllowed('Stellen_Anzeigen');
+			$GUI->StelleAendern();
 	  } break;
 
 	  case 'Stellen_Anzeigen' : {
-		$GUI->checkCaseAllowed('Stellen_Anzeigen');
-		$GUI->StellenAnzeigen();
+			$GUI->checkCaseAllowed('Stellen_Anzeigen');
+			$GUI->StellenAnzeigen();
 	  } break;
 	  
 	  case 'Filterverwaltung' : {
-		$GUI->checkCaseAllowed('Filterverwaltung');
-		$GUI->Filterverwaltung();
-		$currenttime=date('Y-m-d H:i:s',time());
-		$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
-		$GUI->drawMap();
-		$GUI->output();
+			$GUI->checkCaseAllowed('Filterverwaltung');
+			$GUI->Filterverwaltung();
+			$currenttime=date('Y-m-d H:i:s',time());
+			$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+			$GUI->drawMap();
+			$GUI->output();
 	  }break;
 
 	  case 'Filterverwaltung_speichern' : {
-		$GUI->checkCaseAllowed('Filterverwaltung');
-		$GUI->Filter_speichern($GUI->formvars);
-		$currenttime=date('Y-m-d H:i:s',time());
-		$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
-		$GUI->drawMap();
-		$GUI->output();
+			$GUI->checkCaseAllowed('Filterverwaltung');
+			$GUI->Filter_speichern($GUI->formvars);
+			$currenttime=date('Y-m-d H:i:s',time());
+			$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+			$GUI->drawMap();
+			$GUI->output();
 	  }break;
 
 		case 'BenutzerStellen_Anzeigen' : {
-		$GUI->BenutzerNachStellenAnzeigen();
+			$GUI->BenutzerNachStellenAnzeigen();
 	  } break;
 	  
 	  case 'BenutzerderStelleAnzeigen' : {
-		$GUI->BenutzerderStelleAnzeigen();
+			$GUI->BenutzerderStelleAnzeigen();
 	  } break;
 
 	  case 'Benutzerdaten_Anzeigen' : {
-		$GUI->checkCaseAllowed('Benutzerdaten_Anzeigen');
-		$GUI->BenutzerdatenAnzeigen();
+			$GUI->checkCaseAllowed('Benutzerdaten_Anzeigen');
+			$GUI->BenutzerdatenAnzeigen();
 	  } break;
 
 	  case 'Benutzerdaten_Formular' : {
-		$GUI->checkCaseAllowed('Benutzerdaten_Formular');
-		$GUI->BenutzerdatenFormular();
+			$GUI->checkCaseAllowed('Benutzerdaten_Formular');
+			$GUI->BenutzerdatenFormular();
 	  } break;
 
 	  case 'Benutzer_Löschen' : {
-		$GUI->checkCaseAllowed('Benutzerdaten_Anzeigen');
-		$GUI->BenutzerLöschen();
+			$GUI->checkCaseAllowed('Benutzerdaten_Anzeigen');
+			$GUI->BenutzerLöschen();
 	  } break;
 
 	  case 'Benutzerdaten_Als neuen Nutzer eintragen' : {
-		$GUI->checkCaseAllowed('Benutzerdaten_Formular');
-		$GUI->BenutzerdatenAnlegen();
+			$GUI->checkCaseAllowed('Benutzerdaten_Formular');
+			$GUI->BenutzerdatenAnlegen();
 	  } break;
 
 	  case 'Benutzerdaten_Ändern' : {
-		$GUI->checkCaseAllowed('Benutzerdaten_Formular');
-		$GUI->BenutzerdatenAendern();
+			$GUI->checkCaseAllowed('Benutzerdaten_Formular');
+			$GUI->BenutzerdatenAendern();
 	  } break;
 
 
 	  case 'Funktionen_Anzeigen' : {
-		$GUI->checkCaseAllowed('Funktionen_Anzeigen');
-		$GUI->FunktionenAnzeigen();
+			$GUI->checkCaseAllowed('Funktionen_Anzeigen');
+			$GUI->FunktionenAnzeigen();
 	  } break;
 
 	  case 'Funktionen_Formular' : {    
-		$GUI->checkCaseAllowed('Funktionen_Formular');
-		$GUI->FunktionenFormular();
+			$GUI->checkCaseAllowed('Funktionen_Formular');
+			$GUI->FunktionenFormular();
 	  } break;
 
 	  case 'Funktion_Löschen' : {
-		$GUI->checkCaseAllowed('Funktionen_Anzeigen');
-		$GUI->FunktionLoeschen();
+			$GUI->checkCaseAllowed('Funktionen_Anzeigen');
+			$GUI->FunktionLoeschen();
 	  } break;
 
 	  case 'Funktionen_Als neue Funktion eintragen' : {
-		$GUI->checkCaseAllowed('Funktionen_Formular');
-		$GUI->FunktionAnlegen();    
+			$GUI->checkCaseAllowed('Funktionen_Formular');
+			$GUI->FunktionAnlegen();    
 	  } break;
 
 	  case 'Funktionen_Ändern' : {
-		$GUI->checkCaseAllowed('Funktionen_Formular');
-		$GUI->FunktionAendern();
+			$GUI->checkCaseAllowed('Funktionen_Formular');
+			$GUI->FunktionAendern();
 	  } break;
 		
 	  case 'help' : {
-		include(WWWROOT.APPLVERSION.'help/hilfe.php');
+			include(WWWROOT.APPLVERSION.'help/hilfe.php');
 	  } break;
 
 	  case 'hilfe_nachweisverw': {
-		include(WWWROOT.APPLVERSION.'help/hilfe_nachweisverw.php');
+			include(WWWROOT.APPLVERSION.'help/hilfe_nachweisverw.php');
 	  } break;
 
 	  case 'hilfe_dokumente': {
-		include(WWWROOT.APPLVERSION.'help/hilfe_nachweisverw.php');
+			include(WWWROOT.APPLVERSION.'help/hilfe_nachweisverw.php');
 	  } break;
 
 	  # Flurstuecksauswahl zum festlegen pot. Geothermie-Bohrpunkte
 	  case 'Geothermie_Abfrage' : {
-		$GUI->geothermie_start();
+			$GUI->geothermie_start();
 	  } break;
 
 	  # pot. Geothermie-Bohrpunkte festlegen und zu DB hinzufuegen
 	  case 'Geothermie_Eingabe' : {
-		$GUI->geothermie_anfrage();
+			$GUI->geothermie_anfrage();
 	  } break;
 
 	  # Polygon/Versiegelung digitalisieren
 	  case 'Versiegelung' : {
-		$GUI->versiegelungsFlaechenErfassung();
+			$GUI->versiegelungsFlaechenErfassung();
 	  } break;
 
 		case 'Versiegelung_Senden' : {
-		$GUI->versiegelungsFlaechenSenden();
+			$GUI->versiegelungsFlaechenSenden();
 	  } break;
 
 	  case "Ändern" : {
-		$GUI->loadMap('DataBase');
-		$GUI->scaleMap($GUI->formvars['nScale']);
-		$currenttime=date('Y-m-d H:i:s',time());
-		$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
-		$GUI->drawMap();
-		$GUI->saveMap('');
-		$GUI->output();
+			$GUI->loadMap('DataBase');
+			$GUI->scaleMap($GUI->formvars['nScale']);
+			$currenttime=date('Y-m-d H:i:s',time());
+			$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+			$GUI->drawMap();
+			$GUI->saveMap('');
+			$GUI->output();
 	  } break;
 
 	  case "tooltip_query" : {
-		$GUI->show_query_tooltip = true;
-		$GUI->queryMap();
+			$GUI->show_query_tooltip = true;
+			$GUI->queryMap();
 	  } break;
 
 	  case "neu Laden" : {
-		$GUI->neuLaden();
-		$GUI->saveMap('');
-		$currenttime=date('Y-m-d H:i:s',time());
-		$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
-		$GUI->drawMap();
-		$GUI->output();
+			$GUI->neuLaden();
+			$GUI->saveMap('');
+			$currenttime=date('Y-m-d H:i:s',time());
+			$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+			$GUI->drawMap();
+			$GUI->output();
 	  } break;
 		
 		case "setMapExtent" : {
@@ -1364,10 +1377,10 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 		} break;
 
 	  case "history_move" : {
-		$GUI->neuLaden();
-		$GUI->saveMap('');
-		$GUI->drawMap();
-		$GUI->output();
+			$GUI->neuLaden();
+			$GUI->saveMap('');
+			$GUI->drawMap();
+			$GUI->output();
 	  } break;
 
 	  case "ZoomToFlst" : {
@@ -1383,66 +1396,70 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 	  } break;
 
 	  case "Full_Extent" : {
-		$GUI->loadMap('DataBase');
-		$GUI->navMap('Full_Extent');
-		$currenttime=date('Y-m-d H:i:s',time());
-		$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
-		$GUI->drawMap();
-		$GUI->saveMap('');
-		$GUI->output();
+			$GUI->loadMap('DataBase');
+			$GUI->navMap('Full_Extent');
+			$currenttime=date('Y-m-d H:i:s',time());
+			$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+			$GUI->drawMap();
+			$GUI->saveMap('');
+			$GUI->output();
 	  } break;
 
 		case "Adresse_Auswaehlen" : {
 			$GUI->checkCaseAllowed($go);
-		$GUI->adresswahl();
-		$GUI->output();
+			$GUI->adresswahl();
+			$GUI->output();
 	  } break;
 
 	  case "ALK-Adresse_Auswaehlen" : {
-		$GUI->checkCaseAllowed($go);
-		$GUI->formvars['ALK_Suche'] = 1;
-		$GUI->adresswahl();
-		$GUI->output();
+			$GUI->checkCaseAllowed($go);
+			$GUI->formvars['ALK_Suche'] = 1;
+			$GUI->adresswahl();
+			$GUI->output();
 	  } break;
 
 	  case "Adresse_Auswaehlen_Suchen" : {
-		$GUI->adresseSuchen();
-		$GUI->output();
+			$GUI->adresseSuchen();
+			$GUI->output();
 	  } break;
 	  
 	  case "ALK-Adresse_Auswaehlen_Suchen" : {
-		$GUI->adresseSuchen();
-		$GUI->output();
+			$GUI->adresseSuchen();
+			$GUI->output();
 	  } break;
 
 	  case "Flurstueck_hist_Auswaehlen" : {
-		$GUI->checkCaseAllowed($go);
-		$GUI->formvars['historical'] = 1;
-		$GUI->flurstwahl();
-		$GUI->output();
+			$GUI->checkCaseAllowed($go);
+			$GUI->formvars['historical'] = 1;
+			$GUI->flurstwahl();
+			$GUI->output();
 	  } break;
 
 		case "ALK-Flurstueck_Auswaehlen" : {
 			$GUI->checkCaseAllowed($go);
 			$GUI->formvars['ALK_Suche'] = 1;
-		$GUI->flurstwahl();
-		$GUI->output();
+			$GUI->flurstwahl();
+			$GUI->output();
 	  } break;
 
 	  case "Flurstueck_Auswaehlen" : {
-		$GUI->checkCaseAllowed($go);
-		$GUI->flurstwahl();
-		$GUI->output();
+			$GUI->checkCaseAllowed($go);
+			$GUI->flurstwahl();
+			$GUI->output();
+	  } break;
+		
+		 case "Flurstueck_GetVersionen" : {
+			$GUI->Flurstueck_GetVersionen();
 	  } break;
 
 	  case "Flurstueck_Auswaehlen_Suchen" : {
-		$GUI->flurstSuchen();
-		$GUI->output();
+			$GUI->flurstSuchen();
+			$GUI->output();
 	  } break;
 	  
 	  case "ALK-Flurstueck_Auswaehlen_Suchen" : {
-		$GUI->flurstSuchen();
-		$GUI->output();
+			$GUI->flurstSuchen();
+			$GUI->output();
 	  } break;
 		
 		case 'ALKIS_Auszug' : {

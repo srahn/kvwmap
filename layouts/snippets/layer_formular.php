@@ -9,6 +9,7 @@ Text[0]=["Hilfe:","Wendet eine Prozessierungsanweisung für den Layer an. Die un
 Text[1]=["Hilfe:","Die Haupttabelle ist diejenige der im Query-SQL-Statement abgefragten Tabellen, die die oid liefern soll.<br><br>Die Haupttabelle muss oids besitzen, diese müssen allerdings nicht im SQL angegeben werden.<br><br>Ist das Feld Haupttabelle leer, wird der Name der Haupttabelle automatisch eingetragen. Bei einer Layerdefinition über mehrere Tabellen hinweg kann es sein, dass kvwmap die falsche Tabelle als Haupttabelle auswählt. In diesem Fall kann hier händisch die gewünschte Tabelle eingetragen werden. Achtung: Wenn die Tabellennamen im Query-SQL geändert werden, muss auch der Eintrag im Feld Haupttabelle angepasst werden!"]
 Text[2]=["Hilfe:","Das Query-SQL ist das SQL-Statement, welches für die Sachdatenabfrage verwendet wird. Es kann eine beliebige Abfrage auf Tabellen oder Sichten sein, eine WHERE-Bedingung ist aber erforderlich. Der Schemaname wird hier nicht angegeben, sondern im Feld 'Schema'"]
 Text[3]=["Hilfe:","Das Data-Feld wird vom Mapserver für die Kartendarstellung verwendet (siehe Mapserver-Doku). Etwaige Schemanamen müssen hier angegeben werden."]
+Text[4]=["Hilfe:","Bei Punktlayern kann durch Angabe dieses Wertes die Clusterbildung aktiviert werden. Der Wert ist der Radius in Pixeln, in dem Punktobjekte zu einem Cluster zusammengefasst werden. <br>Damit die Cluster dargestellt werden können, muss es eine Klasse mit der Expression \"('[Cluster:FeatureCount]' != '1')\" geben. Cluster:FeatureCount kann auch als Labelitem verwendet werden, um die Anzahl der Punkte pro Cluster anzuzeigen."]
 
   function testConnection() {
     if (document.getElementById('connectiontype').value == 7) {
@@ -235,6 +236,13 @@ else {
 		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strFilterItem; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      		<input name="filteritem" type="text" value="<?php echo $this->layerdata['filteritem']; ?>" size="25" maxlength="100">
+		  		</td>
+		  	</tr>
+				<tr>
+		    	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strClusterMaxdistance; ?></th>
+		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+		      		<input name="cluster_maxdistance" type="text" value="<?php echo $this->layerdata['cluster_maxdistance']; ?>" size="25" maxlength="11">&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[4], Style[0], document.getElementById('TipLayer5'))" onmouseout="htm()">
+						<div id="TipLayer5" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 		  		</td>
 		  	</tr>
 		  	<tr>
@@ -528,6 +536,7 @@ else {
 	<?			}
 				}		?>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strExpression; ?></td>
+				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strText; ?></td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strSignOrder; ?></td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strDelete; ?></td>
 	<!--			<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">ändern</td>  -->
@@ -545,6 +554,7 @@ else {
 					}
 				}
 				echo '<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><textarea name="expression['.$this->classes[$i]['Class_ID'].']" cols="28" rows="3">'.$this->classes[$i]['Expression'].'</textarea></td>
+				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><textarea name="text['.$this->classes[$i]['text'].']" cols="18" rows="3">'.$this->classes[$i]['text'].'</textarea></td>
 				<td align="center" style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><input size="3" type="text" name="order['.$this->classes[$i]['Class_ID'].']" value="'.$this->classes[$i]['drawingorder'].'"></td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><a href="javascript:Bestaetigung(\'index.php?go=Layereditor_Klasse_Löschen&class_id='.$this->classes[$i]['Class_ID'].'&selected_layer_id='.$this->formvars['selected_layer_id'].'#Klassen\', \''.$this->strDeleteWarningMessage.'\');">'.$this->strDelete.'</a></td>
 			</tr>						
@@ -552,10 +562,10 @@ else {
 			}
 			?>
 			<tr>
-				<td style="border-bottom:1px solid #C3C7C3" colspan="5"><a href="index.php?go=Layereditor_Klasse_Hinzufügen&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>#Klassen"><?php echo $strAddClass; ?></a></td>
+				<td style="border-bottom:1px solid #C3C7C3" colspan="8"><a href="index.php?go=Layereditor_Klasse_Hinzufügen&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>#Klassen"><?php echo $strAddClass; ?></a></td>
 			</tr>
 			<tr>
-				<td colspan="5"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>">Styles und Labels bearbeiten</a></td>
+				<td colspan="8"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>">Styles und Labels bearbeiten</a></td>
 			</tr>
 		</table>
 		<?}?>

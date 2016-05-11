@@ -14,68 +14,32 @@
   <tr align="center"> 
     <td colspan="3"><h2><?php echo $this->titel; ?></h2></td>
   </tr>
-  <? if($this->gpx->formvars['gpxfile'] == ''){ ?>
   <tr>
   	<td>&nbsp;</td>
-		<td align="center" style="border-bottom:1px solid #C3C7C3"><span class="fett">GPX-Datei</span>
-		<input class="button" type="file" name="gpxfile" size="12">
-		<input class="button" type="submit" name="goplus" value="Laden"></td>
-		<td>&nbsp;</td>
-	</tr>
-	<? }
-			elseif($this->gpx->formvars['dbffile'] == ''){ ?>
-	<tr>
-  	<td>&nbsp;</td>
-		<td align="center" style="border-bottom:1px solid #C3C7C3"><span class="fett">GPX-Datei</span>
-		<input class="button" type="file" name="gpxfile" size="12">
-		<input class="button" type="submit" name="goplus" value="Laden"></td>
+		<td colspan="2" align="center" style="border-bottom:1px solid #C3C7C3">
+			<span class="fett">GPX-Datei</span>
+			<input class="button" type="file" name="file1" size="12">
 		<td>&nbsp;</td>
 	</tr>
 	<tr>
 		<td>&nbsp;</td>
-		<td>Laden der GPX-Datei nicht erfolgreich.</td>
+		<td height="30"><span class="fett">Was soll importiert werden?</span></td>
+		<td><input type="checkbox" name="tracks" value="1" checked>Tracks</td>
 		<td>&nbsp;</td>
-	</tr> 
-	<? }else{ ?>
+	</tr>
+	<tr>
+		<td></td>
+		<td></td>
+		<td><input type="checkbox" name="waypoints" value="1" checked>Waypoints</td>
+		<td></td>
+	</tr>
 	<tr>
 		<td>&nbsp;</td>
-		<td>GPX-Datei erfolgreich geladen. Wie soll die PostgreSQL-Tabelle heißen?</td>
+		<td colspan="2" align="center" style="border-top:1px solid #C3C7C3"><input class="button" type="submit" name="go_plus" value="Laden"></td>
 		<td>&nbsp;</td>
-	</tr> 
-  <tr>
-  	<td>&nbsp;</td>
-  	<td align="center">  		
-  		<table border="0">
-  			<tr>
-  				<td align="right"><span class="fett">Tabellenname:</span></td>
-  				<td align="center" height="35"><input name="table_name" type="text" value="<? echo array_pop(explode('/', strtolower(dirname($this->gpx->formvars['dbffile'])))); ?>" size="25" class="input"></td>
-  			</tr>
-  			<tr>
-  				<td height="30" align="right"><span class="fett">Optionen:</span></td>
-  				<td><input type="radio" name="table_option" value="-c" checked>Tabelle neu anlegen</td>
-  			</tr>
-  			<tr>
-  				<td></td>
-  				<td><input type="radio" name="table_option" value="-d">Tabelle überschreiben</td>
-  			</tr>
-  			<tr>
-  				<td></td>
-  				<td><input type="radio" name="table_option" value="-a">Daten anhängen</td>
-  			</tr>
-  		</table>
-  	</td>
-  	<td>&nbsp;</td>
-  </tr>
-  <tr>
-  	<td colspan="3" align="center"><input name="go_plus" value="importieren" type="submit" class="button" ></td>
-  </tr>
-  <? } ?>
-  <tr> 
-    <td colspan="3">&nbsp;</td>
-  </tr>
+	</tr>	
 </table>
 
-<input type="hidden" name="dbffile" value="<? echo $this->gpx->formvars['dbffile']; ?>">
 <input type="hidden" name="go" value="GPX_Import">
 
 

@@ -1,6 +1,4 @@
 <?php
-
-	include(SNIPPETS.'generic_functions.php'); 
 	
   $doit = false;
   $anzObj = count($this->qlayerset[$i]['shape']);
@@ -30,32 +28,32 @@ function nurZahlen(el)
 }
 
 
-function show_details(oid){
+show_details = function(oid){
 	currentform.go.value = 'Layer-Suche_Suchen';
 	currentform.search.value = 'true';
 	currentform.selected_layer_id.value = <? echo $this->qlayerset[$i]['Layer_ID'] ?>;
 	currentform.details.value = 'true';
 	currentform.offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value = '';
 	currentform.value_f_plan_stammdaten_oid.value = oid;
-	currentform.submit();
+	overlay_submit(currentform, false);
 }
 
-function go_back(){
+go_back = function(){
 	currentform.details.value = '';
 	currentform.go.value = 'Layer-Suche_Suchen';
 	currentform.selected_layer_id.value = <? echo $this->qlayerset[$i]['Layer_ID'] ?>;
 	currentform.value_f_plan_stammdaten_oid.value = '';
 	currentform.offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value = currentform._offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value;
-	currentform.submit();
+	overlay_submit(currentform, false);
 }
 
-function copy_dataset(plan_id){
+copy_dataset = function(plan_id){
 	currentform.plan_id.value = plan_id;
 	currentform.go.value = 'copy_fplan';
 	currentform.submit();
 }
 
-function update_fplan_from_rok(plan_id){
+update_fplan_from_rok = function(plan_id){
 	really = confirm('Wollen Sie die Flächen der Gebiete und Sondergebiete wirklich mit den ROK-Flächen überschreiben?');
 	if(really){
 		currentform.plan_id.value = plan_id;
@@ -64,7 +62,7 @@ function update_fplan_from_rok(plan_id){
 	}
 }
 
-function delete_dataset(plan_id){
+delete_dataset = function(plan_id){
 	really = confirm('Wollen Sie diesen Datensatz wirklich löschen?');
 	if(really){
 		if((currentform.details.value != 'true' && currentform.value_f_plan_stammdaten_oid.value == '') || (currentform.details.value == 'true' && currentform.value_f_plan_stammdaten_oid.value != '')){		// Trefferliste vorhanden -> wieder zurück zur Trefferliste
@@ -79,17 +77,17 @@ function delete_dataset(plan_id){
 	}
 }
 
-function zoomto(roknr, art){
+zoom_to = function(roknr, art){
 	currentform.roknr.value = roknr;
 	currentform.art.value = art;
 	currentform.go.value = 'zoomtobplan';
 	currentform.submit();
 }
 
-function set_changed_flag(flag){
+set_changed_flag = function(flag){
 }
 
-function update_gebietstyp(){
+update_gebietstyp = function(){
 	if(document.getElementById('kap2_gemziel')){
 		if(document.getElementById('gebietstyp_0').value == 33){	// Wohnen+Ferienwohnen
 			document.getElementById('kap2_gemziel').style.display = '';
@@ -698,7 +696,7 @@ else {
   }
 ?>
 
-<input type="hidden" value="1" name="changed_<? echo $layer['shape'][$k][$attributes['table_name'][$attributes['name'][0]].'_oid']; ?>">
+<input type="hidden" value="1" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][0]].'_oid']; ?>">
 <input name="search" type="hidden" value="true">
 <input type="hidden" name="details" value="<? echo $this->formvars['details']; ?>">
 <input type="hidden" name="plan_id" value="">

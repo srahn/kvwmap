@@ -34,4 +34,5 @@
  $this->activatequery="Activate query";
  $this->deactivatelayer="Deactivate layer";
  $this->activatelayer="Activate layer";
+ $this->printversion="Printversion";
 ?>

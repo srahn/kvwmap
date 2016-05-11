@@ -534,7 +534,7 @@
             }
 						if ($layerset[$i]['postlabelcache'] != 0) {
 							$layer->set('postlabelcache',$layerset[$i]['postlabelcache']);
-						}
+						}						if($layerset[$i]['Datentyp'] == MS_LAYER_POINT AND $layerset[$i]['cluster_maxdistance'] != ''){							$layer->cluster->maxdistance = $layerset[$i]['cluster_maxdistance'];							$layer->cluster->region = 'ellipse';						}
                 
             if ($layerset[$i]['Datentyp']=='3') {
               if($layerset[$i]['transparency'] != ''){
@@ -1113,7 +1113,7 @@
       case "zoomin" : {
         $this->user->rolle->setSelectedButton('zoomin');
         $this->zoomMap($this->user->rolle->nZoomFactor);
-      } break;
+			} break;			case "zoomin_wheel" : {        $this->zoomMap($this->user->rolle->nZoomFactor);      } break;
       case "zoomout" : {
         $this->user->rolle->setSelectedButton('zoomout');
         $this->zoomMap($this->user->rolle->nZoomFactor*-1);
@@ -1646,7 +1646,7 @@
     $ips=explode(';',$this->ips);
     foreach ($ips AS $ip) {
       if (trim($ip)!='') {
-        $ip=trim($ip);
+        $ip=trim($ip);				if(!is_numeric(array_pop(explode('.', $ip))))$ip = gethostbyname($ip);			# für dyndns-Hosts
         if (in_subnet($remote_addr,$ip)) {
           $this->debug->write('<br>IP:'.$remote_addr.' paßt zu '.$ip,4);
           #echo '<br>IP:'.$remote_addr.' paßt zu '.$ip;
@@ -1851,7 +1851,7 @@
         }
         $sql.=',prev="'.$prevtime.'"';        
         # 2006-02-16 pk
-        $sql.=', nimagewidth='.$this->nImageWidth.',nimageheight='.$this->nImageHeight;
+        $sql.=', nimagewidth='.$this->nImageWidth.',nimageheight='.$this->nImageHeight;				$sql.=", epsg_code='".$this->epsg_code."'";
         $sql.=', minx='.$this->oGeorefExt->minx.', miny='.$this->oGeorefExt->miny;
         $sql.=', maxx='.$this->oGeorefExt->maxx.', maxy='.$this->oGeorefExt->maxy;
         #echo $sql;
@@ -2111,7 +2111,7 @@
       }
     }
     return $epsg_codes;
-  }
+	}		function getBezeichnungFromPosition($position, $epsgcode) {    $this->debug->write("<p>kataster.php Flur->getBezeichnungFromPosition:",4);		$sql ="SELECT gm.bezeichnung as gemeindename, fl.gemeinde, gk.bezeichnung as gemkgname, fl.land::text||fl.gemarkungsnummer::text as gemkgschl, fl.flurnummer as flur, CASE WHEN fl.nenner IS NULL THEN fl.zaehler::text ELSE fl.zaehler::text||'/'||fl.nenner::text end as flurst, s.bezeichnung as strasse, l.hausnummer ";    $sql.="FROM alkis.ax_gemarkung as gk, alkis.ax_gemeinde as gm, alkis.ax_flurstueck as fl ";		$sql.="LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(fl.weistauf) ";		$sql.="LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND s.lage = lpad(l.lage,5,'0') ";    $sql.="WHERE gk.gemarkungsnummer = fl.gemarkungsnummer AND gm.kreis = fl.kreis AND gm.gemeinde = fl.gemeinde ";    $sql.=" AND ST_WITHIN(st_transform(st_geomfromtext('POINT(".$position['rw']." ".$position['hw'].")',".$epsgcode."), ".EPSGCODE_ALKIS."),fl.wkb_geometry) ";		$sql.= $this->build_temporal_filter(array('gk', 'gm', 'fl'));    #echo $sql;    $ret=$this->execSQL($sql,4, 0);    if ($ret[0]!=0) {      $ret[1]='Fehler bei der Abfrage der Datenbank.'.$ret[1];    }    else {      if (pg_num_rows($ret[1])>0) {        $ret[1]=pg_fetch_array($ret[1]);      }    }    return $ret;  }		function build_temporal_filter($tablenames){		$timestamp = rolle::$hist_timestamp;		if($timestamp == ''){			foreach($tablenames as $tablename){				$filter .= ' AND '.$tablename.'.endet IS NULL ';			}		}		else{			foreach($tablenames as $tablename){				$filter .= ' AND '.$tablename.'.beginnt <= \''.$timestamp.'\' and (\''.$timestamp.'\' <= '.$tablename.'.endet or '.$tablename.'.endet IS NULL) ';			}		}		return $filter;	}
   function close() {
     $this->debug->write("<br>PostgreSQL Verbindung mit ID: ".$this->dbConn." schließen.",4);
     return pg_close($this->dbConn);
@@ -2137,8 +2137,7 @@
     $sql ='SELECT DISTINCT rl.*,ul.*, l.Layer_ID, ';
 		if($language != 'german') {
 			$sql.='CASE WHEN `Name_'.$language.'` != "" THEN `Name_'.$language.'` ELSE `Name` END AS ';
-		}
-		$sql.='Name, l.alias, l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem, l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version, l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, g.*';
+		}		$sql.='Name, l.alias, l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem, l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem, l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version, l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, g.*';
     $sql.=' FROM u_rolle2used_layer AS rl,used_layer AS ul,layer AS l, u_groups AS g, u_groups2rolle as gr';
     $sql.=' WHERE rl.stelle_id=ul.Stelle_ID AND rl.layer_id=ul.Layer_ID AND l.Layer_ID=ul.Layer_ID';
     $sql.=' AND (ul.minscale != -1 OR ul.minscale IS NULL) AND l.Gruppe = g.id AND rl.stelle_ID='.$this->Stelle_ID.' AND rl.user_id='.$this->User_ID;
@@ -2209,8 +2208,7 @@
 					$rs['Status'] = 1;
 					for($i = 0; $i < count($rs['Style']); $i++){
 						if($rs['Style'][$i]['color'] != '' AND $rs['Style'][$i]['color'] != '-1 -1 -1'){
-							$rs['Style'][$i]['outlinecolor'] = $rs['Style'][$i]['color'];
-							$rs['Style'][$i]['color'] = '-1 -1 -1';							$rs['Style'][$i]['width'] = 2;							$rs['Style'][$i]['minwidth'] = 3;							$rs['Style'][$i]['maxwidth'] = 7;
+							$rs['Style'][$i]['outlinecolor'] = $rs['Style'][$i]['color'];							$rs['Style'][$i]['color'] = '-1 -1 -1';							if($rs['Style'][$i]['width'] == '')$rs['Style'][$i]['width'] = 3;							if($rs['Style'][$i]['minwidth'] == '')$rs['Style'][$i]['minwidth'] = 2;							if($rs['Style'][$i]['maxwidth'] == '')$rs['Style'][$i]['maxwidth'] = 4;							$rs['Style'][$i]['symbolname'] = '';
 						}
 					}
 				}
@@ -2277,24 +2275,5 @@
     $this->database=$database;
     $this->LayerName=LAYERNAME_FLUR;
   }
-	function getBezeichnungFromPosition($position, $epsgcode) {
-    $this->debug->write("<p>kataster.php Flur->getBezeichnungFromPosition:",4);
-		$sql ="SELECT gm.bezeichnung as gemeindename, fl.gemeinde, gk.bezeichnung as gemkgname, fl.land::text||fl.gemarkungsnummer::text as gemkgschl, fl.flurnummer as flur, CASE WHEN fl.nenner IS NULL THEN fl.zaehler::text ELSE fl.zaehler::text||'/'||fl.nenner::text end as flurst, s.bezeichnung as strasse, l.hausnummer ";
-    $sql.="FROM alkis.ax_gemarkung as gk, alkis.ax_gemeinde as gm, alkis.ax_flurstueck as fl ";
-		$sql.="LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(fl.weistauf) ";
-		$sql.="LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND s.lage = lpad(l.lage,5,'0') ";
-    $sql.="WHERE gk.gemarkungsnummer = fl.gemarkungsnummer AND gm.kreis = fl.kreis AND gm.gemeinde = fl.gemeinde ";
-    $sql.=" AND ST_WITHIN(st_transform(st_geomfromtext('POINT(".$position['rw']." ".$position['hw'].")',".$epsgcode."), ".EPSGCODE_ALKIS."),fl.wkb_geometry)";
-    #echo $sql;
-    $ret=$this->database->execSQL($sql,4, 0);
-    if ($ret[0]!=0) {
-      $ret[1]='Fehler bei der Abfrage der Datenbank.'.$ret[1];
-    }
-    else {
-      if (pg_num_rows($ret[1])>0) {
-        $ret[1]=pg_fetch_array($ret[1]);
-      }
-    }
-    return $ret;
-  }
+	function getBezeichnungFromPosition($position, $epsgcode){		return $this->database->getBezeichnungFromPosition($position, $epsgcode);  }
 }?>

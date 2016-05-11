@@ -116,6 +116,19 @@
              </table>
             </td>
           </tr>
+					
+					  <tr>
+  	<td valign="top" bgcolor="<? echo BG_MENUETOP; ?>">
+			<a href="index.php?go=logout">
+				<div>
+				<div class="menu">
+					<img src="<? echo GRAPHICSPATH; ?>leer.gif" width="17" height="17" border="0"><span class="red">&nbsp;Logout</span>
+				</div>
+				</div>
+			</a>
+  	</td>
+  </tr>
+					
           <tr>
             <td>
 
@@ -140,8 +153,8 @@
                   }
 									echo'
 													<tr>
-														<td>
-															<img src="'.GRAPHICSPATH.'leer.gif" width="17" height="1" border="0">
+														<td valign="top">
+															<img src="'.GRAPHICSPATH.'submenue.png" width="17" height="17" border="0">
 							</td>
 							<td>';
 									?>

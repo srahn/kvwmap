@@ -26,9 +26,11 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 	$this->buchungen = $this->gbblaetter[$gb];
 	$alle_flst = array();
 	echo '<br><h2>'.$this->titel.' '.$this->buchungen[0]['bezirk'].'-'.$this->buchungen[0]['blatt'].'</h2><br>';
+	$currenttime=date('Y-m-d H:i:s',time());
+	$this->user->rolle->setConsumeALB($currenttime, 'Grundbuchblattanzeige', array($this->buchungen[0]['bezirk'].'-'.$this->buchungen[0]['blatt']), 0, 'NULL');		# das Grundbuchblattkennzeichen wird geloggt
   $anzObj=count($this->buchungen);
   if ($anzObj>0) {?>
-	<table border="1" cellspacing="0" cellpadding="2">
+	<table border="1" cellspacing="0" cellpadding="2" style="width:1000px">
 	  <tr bgcolor="<?php echo BG_DEFAULT ?>">
 	    <th colspan="3">Buchung</th>
 	    <th colspan="6">Flurst&uuml;ck</th>
@@ -36,7 +38,7 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 	  <tr bgcolor="<?php echo BG_DEFAULT ?>">
 	    <th>BVNR</th>
 	    <th>EBRH</th>
-	    <th width="150">Eigentümer</th>
+	    <th style="width:250px">Eigentümer</th>
 	    <th>Lage</th>
 	    <th width="250">Nutzung</th>
 	    <th>Gemarkung</th>
@@ -51,11 +53,14 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
     $Eigentuemerliste=$flst->getEigentuemerliste($this->buchungen[0]['bezirk'],$this->buchungen[0]['blatt'],$this->buchungen[0]['bvnr']);
     $Eigentuemer = '';
     for ($i=0;$i<count($Eigentuemerliste);$i++) {
-    	$Eigentuemer .= '<tr><td valign="top">'.$Eigentuemerliste[$i]->Nr.'.</td><td>';
+    	$Eigentuemer .= '<tr><td valign="top">'.$Eigentuemerliste[$i]->Nr.'</td><td>';
     	for ($k=0;$k<count($Eigentuemerliste[$i]);$k++) {
       	$Eigentuemer .= $Eigentuemerliste[$i]->Name[$k].'<br>';
-    	}
-    	if($Eigentuemerliste[$i]->Anteil)$Eigentuemer .= 'zu '.$Eigentuemerliste[$i]->Anteil.'<br>';
+    	}			
+			if($Eigentuemerliste[$i]->zusatz_eigentuemer != ''){
+				$Eigentuemer .= '</td></tr><tr><td colspan="2">'.$Eigentuemerliste[$i]->zusatz_eigentuemer; if($Eigentuemerliste[$i]->Anteil != '')$Eigentuemer .= ' zu '.$Eigentuemerliste[$i]->Anteil; $Eigentuemer .= '</td></tr><tr><td>';
+			}
+			elseif($Eigentuemerliste[$i]->Anteil)$Eigentuemer .= 'zu '.$Eigentuemerliste[$i]->Anteil.'<br>';
     	$Eigentuemer .= '</td></tr>';
     }
     $Adressbezeichnung = '';
@@ -72,19 +77,28 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
     		$Nutzunglangtext.=$flst->Nutzung[$i]['flaeche'].'m<sup>2</sup> '.$flst->Nutzung[$i]['bezeichnung'].'<br>';
     	}
     }
+		$index = 0;
+		$rowspan[$index] = 0;
+		for($i=0;$i<$anzObj;$i++){
+			if($this->buchungen[$index]['bvnr'] == $this->buchungen[$i]['bvnr']){
+				$rowspan[$index]++;
+			}
+			else{
+				$index = $i;
+				$rowspan[$index] = 1;
+			}
+		}
+		
 	  ?>
 	  <tr>
-      <td valign="top" align="center">
+      <td valign="top" align="center" <? if($rowspan[0] > 1)echo 'rowspan="'.$rowspan[0].'"' ?>>
 			<? echo $this->buchungen[0]['bvnr'];
 			if($this->Stelle->funktionen['MV0600']['erlaubt']){ ?>&nbsp;<a href="index.php?go=ALKIS_Auszug&formnummer=MV0600&Buchungsstelle=<? echo $this->buchungen[0]['gml_id'] ?>" target="_blank">Grundstücksnachweis</a>&nbsp;<? } ?>
 			</td>
       <td valign="top" align="center"><?php echo '&nbsp;'.$this->buchungen[0]['erbbaurechtshinw'];?></td>
-      <td valign="top" rowspan="<? echo $anzObj; ?>">
+      <td style="width:250px" valign="top" rowspan="<? echo $anzObj; ?>">
       	<table>
       		<? echo $Eigentuemer; ?>
-      		<? if($this->buchungen[0]['zusatz_eigentuemer'] != ''){
-      				echo '<tr><td colspan="2">'.$this->buchungen[0]['zusatz_eigentuemer'].'</td></tr>';
-      			 } ?>
       	</table>
       </td>
     	<td valign="top"><? echo $Adressbezeichnung.'&nbsp;'; ?></td>
@@ -123,10 +137,12 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 	    	}
 	    }
 	    ?><tr>
-	      <td valign="top" align="center">
+				<? if($rowspan[$i] != ''){ ?>
+	      <td valign="top" align="center" <? if($rowspan[$i] > 1)echo 'rowspan="'.$rowspan[$i].'"' ?>>
 					<? echo $this->buchungen[$i]['bvnr'];
 					if($this->Stelle->funktionen['MV0600']['erlaubt']){ ?>&nbsp;<a href="index.php?go=ALKIS_Auszug&formnummer=MV0600&Buchungsstelle=<? echo $this->buchungen[$i]['gml_id'] ?>" target="_blank">Grundstücksnachweis</a>&nbsp;<? } ?>
 				</td>
+				<? } ?>
 	      <td valign="top" align="center"><?php echo '&nbsp;'.$this->buchungen[$i]['erbbaurechtshinw'];?></td>
 	    	<td valign="top"><? echo $Adressbezeichnung.'&nbsp;'; ?></td>
 	    	<td valign="top"><? echo $Nutzunglangtext.'&nbsp;'; ?></td>

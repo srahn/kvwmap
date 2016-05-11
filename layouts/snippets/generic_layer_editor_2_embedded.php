@@ -35,7 +35,7 @@
 ?>
 	<tr>
 		<td>
-			<input type="hidden" value="" name="changed_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
+			<input type="hidden" value="" name="changed_<? echo $layer['Layer_ID'].'_'.$layer['shape'][$k][$layer['maintable'].'_oid']; ?>"> 
 			<table class="tgle" border="1">
 			  <tbody class="gle">
 <?		$trans_oid = explode('|', $layer['shape'][$k]['lock']);
@@ -57,7 +57,7 @@
 <?				if($attributes['type'][$j] != 'geometry'){
 						echo '<td  valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';
 						if($attributes['privileg'][$j] != '0' AND !$lock[$k]){
-							$this->editable = 'true';
+							$this->editable = $layer['Layer_ID'];
 						}
 						if($attributes['alias'][$j] == ''){
 							$attributes['alias'][$j] = $attributes['name'][$j];
@@ -96,7 +96,8 @@
 		  				}
 		  			}
 		  			else{
-							include(SNIPPETS.'generic_formelements.php');
+							#include(SNIPPETS.'generic_formelements.php');
+							$datapart .= attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size, $select_width, $this->user->rolle->fontsize_gle);
 							echo $datapart;
 		  			}
 						if($attributes['privileg'][$j] >= '0' AND !($attributes['privileg'][$j] == '0' AND $attributes['form_element_type'][$j] == 'Auswahlfeld')){

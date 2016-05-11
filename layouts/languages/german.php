@@ -35,4 +35,5 @@
  $this->activatequery="Dieses Thema abfragbar schalten";
  $this->deactivatelayer="Dieses Thema ausschalten";
  $this->activatelayer="Dieses Thema sichtbar schalten";
+ $this->printversion="Druckversion";
 ?>

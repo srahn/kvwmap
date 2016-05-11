@@ -58,6 +58,7 @@ function zoomto_datasets(layer_id){
 	if(check_for_selection(layer_id)){
 		document.GUI.go.value = 'zoomto_selected_datasets';
 		document.GUI.chosen_layer_id.value = layer_id;
+		document.GUI.no_query.value = 'true';
 		document.GUI.submit();
 	}
 }
@@ -235,5 +236,6 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 <input type="hidden" name="chosen_layer_id" value="<? echo LAYER_ID_JAGDBEZIRKE; ?>">
 <input type="hidden" name="layer_columnname" value="the_geom">
 <input type="hidden" name="layer_tablename" value="jagdbezirke">
+<input type="hidden" name="no_query" value="">
 
 

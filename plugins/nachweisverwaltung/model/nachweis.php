@@ -428,10 +428,21 @@ class Nachweis {
   
 	function CreateNachweisDokumentVorschau($dateiname){
 		$dateinamensteil=explode('.',$dateiname);
-		$command = IMAGEMAGICKPATH.'convert '.$dateiname.'[0] -quality 75 -resize 800x800\> '.$dateinamensteil[0].'_thumb.jpg';
-		exec($command);
-		if(!file_exists($dateinamensteil[0].'_thumb.jpg')){
-			return 'Fehler! Das Vorschaubild konnte mit folgendem Befehl nicht generiert werden: '.$command;
+		$command = IMAGEMAGICKPATH.'convert '.$dateiname.'[0] -quality 75 -background white -flatten -resize 800x800\> '.$dateinamensteil[0].'_thumb.jpg';
+		exec($command, $ausgabe, $ret);
+		if($ret == 1){
+			$type = $dateinamensteil[1];
+  		switch ($type) {  			
+  			default : {
+  				$image = imagecreatefromgif(GRAPHICSPATH.'document.gif');
+          $textbox = imagettfbbox(13, 0, WWWROOT.APPLVERSION.'fonts/arial.ttf', '.'.$type);
+          $textwidth = $textbox[2] - $textbox[0] + 13;
+          $blue = ImageColorAllocate ($image, 26, 87, 150);
+          imagettftext($image, 13, 0, 22, 34, $blue, WWWROOT.APPLVERSION.'fonts/arial_bold.ttf', $type);
+          $thumbname = $dateinamensteil[0].'_thumb.jpg';
+          imagejpeg($image, $thumbname);
+  			}
+  		}
 		}
   }
 	
@@ -723,7 +734,7 @@ class Nachweis {
 		  if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
           #echo $sql;
           $this->debug->write("<br>nachweis.php getNachweise Abfragen der Nachweisdokumente.<br>",4);
-          $ret=$this->database->execSQL($sql,4, 0);
+          $ret=$this->database->execSQL($sql,4, 1);
           if ($ret[0]) { # Fehler in der Datenbankabfrage
             $errmsg.=$ret[1];
           }
@@ -764,7 +775,7 @@ class Nachweis {
 	          $sql.=")";
 	        }
 	        #echo $sql;
-	        $ret1=$this->database->execSQL($sql,4, 0);
+	        $ret1=$this->database->execSQL($sql,4, 1);
           if (pg_num_rows($ret[1])==0) {
             $errmsg.='\nEs konnte kein Dokument gefunden werden.';
           }
@@ -830,7 +841,7 @@ class Nachweis {
         $sql.=" ORDER BY ".$order." ".$richtung;
         #echo $sql;
         $this->debug->write("<br>nachweis.php getNachweise Abfragen der Nachweisdokumente.<br>",4);
-        $ret=$this->database->execSQL($sql,4, 0);    
+        $ret=$this->database->execSQL($sql,4, 1);    
         if (!$ret[0]) {
           while ($rs=pg_fetch_array($ret[1])) {
             $nachweise[]=$rs;
@@ -929,7 +940,7 @@ class Nachweis {
           $sql.=" ORDER BY ".$order." ".$richtung;
           #echo $sql;
           $this->debug->write("<br>nachweis.php getNachweise Abfragen der Nachweisdokumente.<br>",4);
-          $ret=$this->database->execSQL($sql,4, 0);    
+          $ret=$this->database->execSQL($sql,4, 1);    
           if (!$ret[0]) {
             while ($rs=pg_fetch_array($ret[1])) {
               $nachweise[]=$rs;
@@ -986,7 +997,7 @@ class Nachweis {
           }
           $sql.=" ORDER BY ".$order." ".$richtung;
           #echo $sql;        
-          $ret=$this->database->execSQL($sql,4, 0);    
+          $ret=$this->database->execSQL($sql,4, 1);    
           if (!$ret[0]) {
             while ($rs=pg_fetch_array($ret[1])) {
               $nachweise[]=$rs;
@@ -1035,7 +1046,7 @@ class Nachweis {
           $this->richtung="ASC";
         }
         $sql.=" ORDER BY ".$order." ".$richtung;        
-        $ret=$this->database->execSQL($sql,4, 0);    
+        $ret=$this->database->execSQL($sql,4, 1);    
         if (!$ret[0]) {
           while ($rs=pg_fetch_array($ret[1])) {
             $nachweise[]=$rs;

@@ -9,7 +9,7 @@
 		document.getElementById("svghelp").SVGupdate_geometry();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 	}
 	
-	function show_foreign_vertices(){
+	function show_vertices(){
 		document.getElementById("svghelp").SVGshow_foreign_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 	}
 
@@ -68,6 +68,7 @@
 	var transformfunctions = false;
 	var coord_input_functions = false;
 	var bufferfunctions = false;
+	var special_bufferfunctions = false;
 	var polygonfunctions = false;
 	var flurstuecksqueryfunctions = false;
 	var boxfunctions = false;
@@ -654,9 +655,11 @@
 	  	world_x = (client_x * scale) + minx;
 	  	world_y = (client_y * scale) + miny;
 		}
-		else{																		// Weltkoordinaten (bei GPS)
+		else{																		// Weltkoordinaten (bei GPS oder Punktfang)
 			world_x = evt.clientX;
 			world_y = evt.clientY; 
+	  	client_x = (world_x - minx)/scale;
+	  	client_y = (world_y - miny)/scale;
 		}
 
 	  switch(top.currentform.last_doing.value){
@@ -743,6 +746,19 @@
 					top.currentform.secondpoly.value = true;
 					top.ahah("index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&operation=add_parallel_polygon&width="+top.currentform.bufferwidth.value+"&geotype=line&resulttype=svgwkt&layer_id="+top.currentform.layer_id.value, new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
 				}				
+			break;
+			case "add_buffer_within_polygon":
+				pathx_second.push(world_x);
+				pathy_second.push(world_y);
+				path_second = buildsvglinepath(pathx_second, pathy_second);
+				pathx_second.pop();
+				pathy_second.pop();
+				client_y = resy - client_y;
+				top.currentform.INPUT_COORD.value  = client_x+","+client_y+";"+client_x+","+client_y;
+				top.currentform.firstpoly.value = "true";
+				top.currentform.secondpoly.value = "true";
+				buffer_geom = top.currentform.buffer_geom.value;		// die gesicherte Geometrie, um die gepuffert werden soll
+				top.ahah("index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&path2="+path_second+"&path3="+buffer_geom+"&operation=add_buffer_within_polygon&input_coord="+top.currentform.INPUT_COORD.value+"&pixsize='.$pixelsize.'&resulttype=svgwkt&fromwhere="+top.currentform.fromwhere.value+"&orderby="+top.currentform.orderby.value+"&columnname="+top.currentform.columnname.value+"&layer_id="+top.currentform.layer_id.value+"&geotype=line&resulttype=svgwkt", new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));				
 			break;
 			case "move_geometry":
 				startMoveGeom(client_x, client_y);
@@ -896,6 +912,9 @@ function mouseup(evt){
 				document.getElementById("buffer1").style.setProperty("fill","ghostwhite", "");
 				document.getElementById("buffer2").style.setProperty("fill","ghostwhite", "");
 		  }
+			if(special_bufferfunctions == true){			
+				document.getElementById("buffer3").style.setProperty("fill","ghostwhite", "");
+			}
 		  if(flurstuecksqueryfunctions == true){
 		  	document.getElementById("ppquery0").style.setProperty("fill","ghostwhite", "");
 		  	document.getElementById("ppquery1").style.setProperty("fill","ghostwhite", "");
@@ -1879,6 +1898,27 @@ function mouseup(evt){
 		}
 
 	';
+	
+	$special_buffer_functions ='
+	
+		special_bufferfunctions = true;
+		
+		function add_buffer_within_polygon(){
+			top.currentform.last_doing.value = "add_buffer_within_polygon";
+			if(top.currentform.pathwkt.value == "" && top.currentform.newpath.value != ""){
+				top.currentform.pathwkt.value = buildwktpolygonfromsvgpath(top.currentform.newpath.value);
+			}
+			else{
+				if(top.currentform.newpathwkt.value != ""){
+					top.currentform.pathwkt.value = top.currentform.newpathwkt.value;
+				}
+			}
+		  if(top.currentform.secondpoly.value == "true"){
+				applypolygons();
+			}
+		}
+	
+	';
 
 	$flurstqueryfunctions ='
 
@@ -1968,6 +2008,7 @@ function mouseup(evt){
 	  top.currentform.newpath.value = path;
 	  if(pathy.length > 2){
 	  	top.currentform.firstpoly.value = true;
+			if(top.currentform.firstpoly.onchange)top.currentform.firstpoly.onchange();
 	  	polygonarea();
 	  }
 	}
@@ -3079,7 +3120,7 @@ $measurefunctions = '
 				<use id="pointposition" xlink:href="#crosshair_blue" x="-500" y="-500"/>
 				<circle id="startvertex" cx="-500" cy="-500" r="2" style="fill:blue;stroke:blue;stroke-width:2"/>
 			</g>
-			<rect id="canvas" cursor="crosshair" onmousedown="mousedown(evt);" onmousemove="mousemove(evt);hide_tooltip();" onmouseup="mouseup(evt);" width="100%" height="100%" opacity="0" visibility="visible"/>
+			<rect id="canvas" cursor="crosshair" onmousedown="mousedown(evt);" onmousemove="mousemove(evt);" onmouseup="mouseup(evt);" width="100%" height="100%" opacity="0" visibility="visible"/>
 			<g id="in_between_vertices" transform="translate(0,'.$res_y.') scale(1,-1)">			
 			</g>
 			<g id="vertices" transform="translate(0,'.$res_y.') scale(1,-1)">			
@@ -3114,7 +3155,7 @@ $measurefunctions = '
 	  </g>
 	  
 
-	  <g id="alleButtons" transform="translate(0 0)">
+	  <g id="alleButtons" onmouseout="hide_tooltip()" transform="translate(0 0)">
 	  ';
 
 	$navbuttons ='
@@ -3494,6 +3535,31 @@ $measurefunctions = '
         <rect id="buffer2" onmouseover="show_tooltip(\''.$strParallelPolygon.'\',evt.clientX,evt.clientY)" onmousedown="add_parallel_polygon();hide_tooltip();highlightbyid(\'buffer2\');" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
       </g>';
     return $bufferbuttons;
+  }
+	
+	 function special_bufferbuttons($strSpecialBuffer){
+  	global $last_x;
+  	$last_x += 26;
+    $special_bufferbuttons = '
+      <g id="buffer_add" transform="translate('.$last_x.' 0)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+          <set attributeName="filter" begin="buffer3.mousedown" fill="freeze" to="none"/>
+          <set attributeName="filter" begin="buffer3.mouseup;buffer3.mouseout" fill="freeze" to="url(#Schatten)"/>
+        </rect>
+				<polygon
+					points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284
+						379.5,218 378.5,139 357.5,138 260.5,91"
+					transform="translate(-3 -3) scale(0.065)"
+					 style="fill:rgb(222,222,222);stroke:rgb(0,0,0);stroke-width:15"/>
+        <polygon
+					points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284
+						379.5,218 378.5,139 357.5,138 260.5,91"
+					transform="translate(3 3) scale(0.04)"
+					 style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
+        <rect id="buffer3" onmouseover="show_tooltip(\''.$strSpecialBuffer.'\',evt.clientX,evt.clientY)" onmousedown="add_buffer_within_polygon();hide_tooltip();highlightbyid(\'buffer3\');" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
+      </g>';
+    return $special_bufferbuttons;
   }
 
 	function transform_buttons($strMoveGeometry){

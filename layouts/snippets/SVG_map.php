@@ -77,15 +77,18 @@
 			var pixelsize = document.GUI.pixelsize;
 			var polygon = svgdoc.getElementById("polygon");			
 			// nix
-			// nix
 			
 			input_coord = document.GUI.INPUT_COORD.value;
       cmd = document.GUI.CMD.value;
 			
-			var code2execute;
-			if(browser != 'firefox')code2execute = 'moveback()';
+			var code2execute_before;
+			var code2execute_after;
+			if(browser != 'firefox'){
+				code2execute_before = 'moveback()';
+				code2execute_after = 'startup()';
+			}
 			
-  		ahah("index.php", postdata+"&mime_type=map_ajax&INPUT_COORD="+input_coord+"&CMD="+cmd+"&code2execute="+code2execute, 
+  		ahah("index.php", postdata+"&mime_type=map_ajax&INPUT_COORD="+input_coord+"&CMD="+cmd+"&code2execute_before="+code2execute_before+"&code2execute_after="+code2execute_after, 
   		new Array(
 				'',
   			mapimg, 
@@ -99,10 +102,9 @@
   			maxy,
   			pixelsize,			
   			polygon,
-  			'',
 				''
   		), 			 
-  		new Array("execute_function", "xlink:href", "src", "src", "setvalue", "sethtml", "setvalue", "setvalue", "setvalue", "setvalue", "setvalue", "points", "execute_function", "execute_function"));
+  		new Array("execute_function", "xlink:href", "src", "src", "setvalue", "sethtml", "setvalue", "setvalue", "setvalue", "setvalue", "setvalue", "points", "execute_function"));
 						
   		document.GUI.INPUT_COORD.value = '';
   		document.GUI.CMD.value = '';
@@ -138,6 +140,13 @@
       path = pathx[0]+","+pathy[0]+";"+pathx[2]+","+pathy[2];
       document.GUI.INPUT_COORD.value  = path;
       document.GUI.CMD.value          = "zoomin";
+			document.GUI.go.value = "neu Laden";
+      get_map_ajax('go=navMap_ajax');
+     break;
+		 case "zoomin_wheel":
+      path = pathx[0]+","+pathy[0]+";"+pathx[2]+","+pathy[2];
+      document.GUI.INPUT_COORD.value  = path;
+      document.GUI.CMD.value          = "zoomin_wheel";
 			document.GUI.go.value = "neu Laden";
       get_map_ajax('go=navMap_ajax');
      break;
@@ -290,7 +299,7 @@ $svg='<?xml version="1.0"?>
 	var current_freearrow;
   moving  = false;
   moved  = false;
-  var doing = "'.$this->user->rolle->getSelectedButton().'";
+  var doing = "'.$this->user->rolle->selectedButton.'";
 	mouse_down = false;
   var highlighted  = "yellow";
   var cmd   = ""; 
@@ -353,6 +362,7 @@ function startup(){';
 	}
 	get_polygon_path();	
 	redrawPolygon();
+	set_suchkreis();
 	eval(doing+"()");	
   document.getElementById(doing+"0").style.setProperty("fill",highlighted,"");
 }
@@ -360,6 +370,7 @@ function startup(){';
 function sendpath(cmd, pathx, pathy){
 	startwaiting();
 	top.sendpath(cmd, pathx, pathy);
+	if(cmd == "polygonquery")deletepolygon();
 }
 
 if (!window.requestAnimationFrame){ 
@@ -406,7 +417,7 @@ function mousewheelzoom(){
 	pathy[0] = Math.round(zx.f);
 	pathx[2] = Math.round(zx.e + resx*zx.a); 
 	pathy[2] = Math.round(zx.f + resy*zx.a);
-	sendpath("zoomin_box", pathx, pathy);
+	sendpath("zoomin_wheel", pathx, pathy);
 }
 
 function mousewheelchange(evt){
@@ -490,6 +501,7 @@ function moveback_ff(evt){
 	stopwaiting();
 	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("xlink:href", "")\', 400);
 	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("style", "display:none")\', 400);
+	startup();
 }
 
 
@@ -507,7 +519,7 @@ function sleep(milliseconds) {
 
 function moveback(evt){
 	// bei allen anderen Browsern gibt es kein onload für das Kartenbild, deswegen wird diese Funktion als erstes ausgefuehrt
-	document.getElementById("mapimg").setAttribute("xlink:href", "/'.APPLVERSION.GRAPHICSPATH.'leer.gif")
+	document.getElementById("mapimg").setAttribute("xlink:href", "'.dirname($_SERVER['SCRIPT_NAME']).'/'.GRAPHICSPATH.'leer.gif")
 	document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");
 	// Redlining-Sachen loeschen
 	while(child = document.getElementById("redlining").firstChild){
@@ -534,16 +546,6 @@ function go_next(){
   top.go_cmd(cmd);
 }
 
-function zoomin(){
-  doing = "zoomin";
-  document.getElementById("canvas").setAttribute("cursor", "crosshair");
-}
-
-function zoomout(){
-  doing = "zoomout";
-  document.getElementById("canvas").setAttribute("cursor", "crosshair");
-}
-
 function zoomall(){
   document.getElementById("canvas").setAttribute("cursor", "wait");
   cmd="Full_Extent";
@@ -558,7 +560,20 @@ function recentre(){
 		save_measure_path();
 	}
   doing = "recentre";
+	top.document.GUI.last_button.value = doing = "recentre";
   document.getElementById("canvas").setAttribute("cursor", "move"); //setAttribute("cursor", "url(#MyMove)");
+}
+
+function zoomin(){
+  doing = "zoomin";
+	top.document.GUI.last_button.value = doing = "zoomin";
+  document.getElementById("canvas").setAttribute("cursor", "crosshair");
+}
+
+function zoomout(){
+  doing = "zoomout";
+	top.document.GUI.last_button.value = doing = "zoomout";
+  document.getElementById("canvas").setAttribute("cursor", "crosshair");
 }
 
 function showcoords(){
@@ -566,14 +581,32 @@ function showcoords(){
   document.getElementById("canvas").setAttribute("cursor", "crosshair");
 }
 
-function pquery(){
-  doing = "pquery";
+function ppquery(){
+  top.document.GUI.last_button.value = doing = "ppquery";
   document.getElementById("canvas").setAttribute("cursor", "help");
-}
+}  
 
 function touchquery(){
 	doing = "touchquery";
+	top.document.GUI.last_button.value = doing = "touchquery";
 	document.getElementById("canvas").setAttribute("cursor", "help");
+}
+
+function pquery(){
+  doing = "pquery";
+	top.document.GUI.last_button.value = doing = "pquery";
+  document.getElementById("canvas").setAttribute("cursor", "help");
+}
+
+// in pquery() und pquery_prompt() aufgeteilt, da der Promt sonst auch bei jedem reload erscheint   
+function pquery_prompt(){     
+  top.document.GUI.searchradius.value=prompt("Geben Sie den Suchradius in Meter ein.",top.document.GUI.searchradius.value);
+  set_suchkreis();
+}
+
+function set_suchkreis(){
+  radius = (top.document.GUI.searchradius.value / parseFloat(top.document.GUI.pixelsize.value));
+  document.getElementById("suchkreis").setAttribute("r", radius);
 }
 
 function polygonquery(){
@@ -615,18 +648,6 @@ function addfreetext(){
 	texttyping = false;
 }
 		    
-function ppquery(){
-  doing = "ppquery";
-  document.getElementById("canvas").setAttribute("cursor", "help");
-}   
-  
-// in pquery() und pquery_prompt() aufgeteilt, da der Promt sonst auch bei jedem reload erscheint   
-function pquery_prompt(){     
-  top.document.GUI.searchradius.value=prompt("Geben Sie den Suchradius in Meter ein.",top.document.GUI.searchradius.value);
-  radius = (top.document.GUI.searchradius.value / parseFloat(top.document.GUI.pixelsize.value));
-  document.getElementById("suchkreis").setAttribute("r", radius);
-}
-
 function noMeasuring(){
   measuring = false;
   restart();
@@ -758,9 +779,13 @@ function world2pixelsvg(pathWelt){
 
 
 // -------------------------mausinteraktionen auf canvas------------------------------
-// id="canvas" onmousedown="canvas(evt)" onmousemove="hide_tooltip();movePoint(evt);moveVector(evt)" onmouseup="endPoint(evt);endMove(evt)" width="100%" height="100%" opacity="0"/>
-// function canvas(evt){
 
+function mouse_move(evt){
+	top.coords_anzeige(evt);
+	if(doing == "ppquery"){
+		hidetooltip(evt);
+	}
+}		
 
 function mousedown(evt){
 	mouse_down = true;
@@ -785,7 +810,7 @@ function mousedown(evt){
 	    startMove(evt);
 	   break;
 		case "showcoords":
-	    show_coords(evt);
+	    top.show_coords(evt);
 	   break;
 	   case "pquery":
 	    startPoint(evt);
@@ -824,6 +849,7 @@ function mousedown(evt){
 	    	client_x = evt.clientX;
 			  client_y = resy - evt.clientY;
 			  if(client_x == pathx[pathx.length-1] && client_y == pathy[pathy.length-1]){
+					evt.preventDefault();
 			  	recentre();		// Streckenmessung bei Doppelklick beenden
 			  }
 			  else{
@@ -1397,16 +1423,6 @@ function redrawPL(){
   document.getElementById("polyline").setAttribute("points", path);
 }
 
-function show_coords(evt){
-	coorx = evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value);
-	coory = top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value);
-	if(top.document.GUI.secondcoords != undefined)top.ahah("index.php", "go=spatial_processing&curSRID='.$this->user->rolle->epsg_code.'&newSRID='.$this->user->rolle->epsg_code2.'&point="+coorx+" "+coory+"&operation=transformPoint&resulttype=wkt&coordtype='.$this->user->rolle->coordtype.'", new Array(top.document.GUI.secondcoords), "");
-	coorx = top.format_number(coorx, true, true, false);
-	coory = top.format_number(coory, true, true, false);
-	top.document.GUI.firstcoords.value = coorx+" "+coory; 
-	top.document.getElementById("showcoords").style.display="";
-}
-
 // ----------------------------punkt setzen---------------------------------
 function selectPoint(evt) {
   cmd = doing;
@@ -1566,6 +1582,7 @@ function highlight(evt){
 	if(document.getElementById("freetext0") != undefined){document.getElementById("freetext0").style.setProperty("fill","ghostwhite","");}
 	if(document.getElementById("freearrow0") != undefined){document.getElementById("freearrow0").style.setProperty("fill","ghostwhite","");}
 	if(document.getElementById("coords0") != undefined){document.getElementById("coords0").style.setProperty("fill","ghostwhite","");}
+	if(document.getElementById("coords02") != undefined){document.getElementById("coords02").style.setProperty("fill","ghostwhite","");}
   evt.target.style.setProperty("fill",highlighted,"");
   document.getElementById("suchkreis").setAttribute("cx", -10000);
 	if(top.document.GUI.orthofang != undefined){

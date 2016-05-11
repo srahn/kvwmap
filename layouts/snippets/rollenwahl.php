@@ -96,10 +96,11 @@ Text_histtimestamp=["<? echo $strHelp; ?>:","<? echo $strHinthist_timestamp; ?>"
 				<img src="<? echo GRAPHICSPATH.'arrow.png'; ?>"><input type="checkbox" name="freearrow" value="1" <? if($this->user->rolle->freearrow){echo 'checked="true"';} ?>>  		
 				<br>
 				<img src="<? echo GRAPHICSPATH.'jumpto.png'; ?>"><input type="checkbox" name="jumpto" value="1" <? if($this->user->rolle->jumpto){echo 'checked="true"';} ?>>&nbsp;
+				<img src="<? echo GRAPHICSPATH.'coord_query.png'; ?>"><input type="checkbox" name="coord_query" value="1" <? if($this->user->rolle->coord_query){echo 'checked="true"';} ?>>&nbsp;
 				<img src="<? echo GRAPHICSPATH.'query.png'; ?>"><input type="checkbox" name="query" value="1" <? if($this->user->rolle->query){echo 'checked="true"';} ?>>&nbsp;
 				<img src="<? echo GRAPHICSPATH.'touchquery.png'; ?>"><input type="checkbox" name="touchquery" value="1" <? if($this->user->rolle->touchquery){echo 'checked="true"';} ?>>&nbsp;
 				<img src="<? echo GRAPHICSPATH.'query-radius.png'; ?>"><input type="checkbox" name="queryradius" value="1" <? if($this->user->rolle->queryradius){echo 'checked="true"';} ?>>&nbsp;
-				<img src="<? echo GRAPHICSPATH.'polyquery.jpg'; ?>"><input type="checkbox" name="polyquery" value="1" <? if($this->user->rolle->polyquery){echo 'checked="true"';} ?>>&nbsp;
+				<img src="<? echo GRAPHICSPATH.'polyquery.png'; ?>"><input type="checkbox" name="polyquery" value="1" <? if($this->user->rolle->polyquery){echo 'checked="true"';} ?>>&nbsp;
 				<img src="<? echo GRAPHICSPATH.'measure.png'; ?>"><input type="checkbox" name="measure" value="1" <? if($this->user->rolle->measure){echo 'checked="true"';} ?>>
 				<img src="<? echo GRAPHICSPATH.'freepolygon.png'; ?>"><input type="checkbox" name="freepolygon" value="1" <? if($this->user->rolle->freepolygon){echo 'checked="true"';} ?>>
 				<img src="<? echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text_buttons, Style[0], document.getElementById('Tip4'))" onmouseout="htm()">
@@ -304,6 +305,7 @@ Text_histtimestamp=["<? echo $strHelp; ?>:","<? echo $strHinthist_timestamp; ?>"
 				<div id="Tip19" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 			</td>
 		</tr>
+		<? if(HIST_TIMESTAMP){ ?>
 		<tr>		
 			<td align="left" style="padding: 8px; padding-top: 0px"><? echo $strhist_timestamp; ?>:&nbsp;<a href="javascript:;" onclick="new CalendarJS().init('hist_timestamp');"><img title="TT.MM.JJJJ hh:mm:ss" src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar" style="bottom:100px"><input type="hidden" id="calendar_hist_timestamp"></div></td>
 			<td style="padding: 8px; padding-top: 0px">
@@ -312,6 +314,7 @@ Text_histtimestamp=["<? echo $strHelp; ?>:","<? echo $strHinthist_timestamp; ?>"
 				<div id="Tip20" style="visibility:hidden;position:absolute;z-index:1000;"></div>
 			</td>			
 		</tr>
+		<? } ?>
 	</table>
 </div>
 <table>

@@ -1,17 +1,22 @@
 <?
-	include(SNIPPETS.'generic_formelement_definitions.php'); 
+	include(SNIPPETS.'generic_form_parts.php');
   include(LAYOUTPATH.'languages/sachdatenanzeige_'.$this->user->rolle->language.'.php');
 	include(SNIPPETS.'sachdatenanzeige_functions.php'); 
  ?>
 	<img height="7" src="<? echo GRAPHICSPATH ?>leer.gif">
 	<a name="oben"></a>	
-<?php
+<? if($this->user->rolle->querymode == 1){ ?>
+	<script type="text/javascript">
+		if(document.getElementById('overlayfooter') != undefined)document.getElementById('overlayfooter').style.display = 'none';
+		if(document.getElementById('savebutton') != undefined)document.getElementById('savebutton').style.display = 'none';
+	</script>
+<? }
+$this->found = 'false';
 $anzLayer=count($this->qlayerset);
 if ($anzLayer==0) {
 	?>
 <span style="font:normal 12px verdana, arial, helvetica, sans-serif; color:#FF0000;"><? echo $strNoLayer; ?></span>	<br/>
-	<?php
-	$this->found = 'false';
+	<?php	
 }
 for($i=0;$i<$anzLayer;$i++){
 	if ($this->qlayerset[$i]['template']=='') {
@@ -48,32 +53,35 @@ for($i=0;$i<$anzLayer;$i++){
 		}
 	}
 	
-  if($this->qlayerset[$i]['connectiontype'] == MS_POSTGIS AND $this->qlayerset[$i]['count'] > 1){
-	   # BlÃ¤tterfunktion
+	$gesamt = $this->qlayerset[$i]['count'];
+  if($this->qlayerset[$i]['connectiontype'] == MS_POSTGIS AND $gesamt > 1){
+	   # Blätterfunktion
 	   if($this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] == ''){
 		   $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] = 0;
 		 }
 		 $von = $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] + 1;
 	   $bis = $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] + $this->formvars['anzahl'];
-	   if($bis > $this->qlayerset[$i]['count']){
-	   	$bis = $this->qlayerset[$i]['count'];
+	   if($bis > $gesamt){
+	   	$bis = $gesamt;
 	   }
 	   echo'
 	   <table border="0" cellpadding="2" width="100%" cellspacing="0">
 
-	   	<tr height="50px" valign="top">
+	   	<tr valign="top">
 	   		<td align="right" width="38%">';
 	   		if($this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] >= $this->formvars['anzahl'] AND $this->formvars['printversion'] == ''){
-	   			echo '<a href="javascript:prevquery(\'offset_'.$this->qlayerset[$i]['Layer_ID'].'\');">'.$strBackDatasets.'&nbsp;</a>';
+					echo '<a href="javascript:firstdatasets(\'offset_'.$this->qlayerset[$i]['Layer_ID'].'\');"><img src="'.GRAPHICSPATH.'go-first.png" class="hover-border" style="vertical-align:middle" title="'.$strFirstDatasets.'"></a>&nbsp;&nbsp;&nbsp;';
+	   			echo '<a href="javascript:prevdatasets(\'offset_'.$this->qlayerset[$i]['Layer_ID'].'\');"><img src="'.GRAPHICSPATH.'go-previous.png" class="hover-border" style="vertical-align:middle" title="'.$strBackDatasets.'"></a>&nbsp;';
 	   		}
-	      echo '&nbsp;
+	      echo '
 				</td>
 				<td width="200px" align="center">
-					<span class="fett">'.$von.' - '.$bis.' '.$strFromDatasets.' '.$this->qlayerset[$i]['count'].'</span>
+					<span class="fett">'.$von.' - '.$bis.' '.$strFromDatasets.' '.$gesamt.'</span>
 				</td>
 	      <td width="38%">';
-	      if($bis < $this->qlayerset[$i]['count'] AND $this->formvars['printversion'] == ''){
-	      	echo '<a href="javascript:nextquery(\'offset_'.$this->qlayerset[$i]['Layer_ID'].'\');">&nbsp;&nbsp;'.$strForwardDatasets.'</a>';
+	      if($bis < $gesamt AND $this->formvars['printversion'] == ''){
+	      	echo '&nbsp;<a href="javascript:nextdatasets(\'offset_'.$this->qlayerset[$i]['Layer_ID'].'\');"><img src="'.GRAPHICSPATH.'go-next.png" class="hover-border" style="vertical-align:middle" title="'.$strForwardDatasets.'"></a>&nbsp;&nbsp;&nbsp;';
+					echo '<a href="javascript:lastdatasets(\'offset_'.$this->qlayerset[$i]['Layer_ID'].'\', '.$gesamt.');"><img src="'.GRAPHICSPATH.'go-last.png" class="hover-border" style="vertical-align:middle" title="'.$strLastDatasets.'"></a>';
 	      }
 	      echo '
 				</td>
@@ -83,30 +91,44 @@ for($i=0;$i<$anzLayer;$i++){
    }
 }
 ?>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td align="right">
+			<a href="javascript:scrolltop();"><img class="hover-border" title="nach oben" src="<? echo GRAPHICSPATH; ?>pfeil2.gif" width="11" height="11" border="0"></a>&nbsp;&nbsp;&nbsp;
+		</td>
+	</tr>
+</table>
 <?
-	if($this->editable == 'true' AND $this->formvars['printversion'] == ''){ ?>
+	if($this->found != 'false' AND $this->formvars['printversion'] == ''){	?>		
 		<table width="100%" border="0" cellpadding="0" cellspacing="0">
     <tr>
-    	<td>&nbsp;</td>
-      <td align="center" width="100%"><input type="button" class="button" name="savebutton" value="<? echo $strSave; ?>" onclick="save();">&nbsp;<input class="button" type="reset" value="<? echo $strReset; ?>"></td>
-      <td align="right"><a href="javascript:scrolltop();"><img class="hover-border" title="nach oben" src="<? echo GRAPHICSPATH; ?>pfeil2.gif" width="11" height="11" border="0"></a></td>
+    	<td width="49%"></td>
+      <td align="center">
+			<?  if($this->editable != ''){
+						if($this->user->rolle->querymode == 1){ ?>
+							<script type="text/javascript">
+								if(document.getElementById('savebutton') != undefined)document.getElementById('savebutton').style.display = 'block';
+							</script>
+				<?  }else{ ?>
+							<input type="button" class="button" name="savebutton" value="<? echo $strSave; ?>" onclick="save();">
+				<? 	}
+					}?>
+			</td>
+			<td align="right" width="49%">
+		<? if($this->user->rolle->querymode == 1){ ?>
+					<script type="text/javascript">
+						if(document.getElementById('overlayfooter') != undefined)document.getElementById('overlayfooter').style.display = 'block';
+					</script>
+		<? }else{ ?>
+			<a href="javascript:druck();" class="px13"><? echo $this->printversion; ?></a>&nbsp;
+			<? } ?>
+			</td>
     </tr>
 		<tr>
 			<td height="30" valign="bottom" align="center" colspan="5" id="loader" style="display:none"><img id="loaderimg" src="graphics/ajax-loader.gif"></td>
 		</tr>
   </table>
-<?
-	}
-	else{ ?>
-		<table width="100%" border="0" cellpadding="10" cellspacing="0">
-    <tr>
-    	<td>&nbsp;</td>
-      <td>&nbsp;</td>
-      <td align="right"><a href="javascript:scrolltop();"><img title="nach oben" src="<? echo GRAPHICSPATH; ?>pfeil2.gif" width="11" height="11" border="0"></a></td>
-    </tr>
-  </table>
-<?	}
-?>
+<? } ?>
   <br><div align="center">
 
 
@@ -137,28 +159,30 @@ for($i=0;$i<$anzLayer;$i++){
   		}
 
 			if($this->formvars['quicksearch'] != true){
-				for($j = 0; $j < count($this->qlayerset[0]['attributes']['type']); $j++){
-					if($this->qlayerset[0]['attributes']['type'][$j] != 'geometry'){
-						echo '
-							<input name="value_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars['value_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
-							<input name="value2_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars['value2_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
-							<input name="operator_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars['operator_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
-						';
+				for($m = 0; $m <= $this->formvars['searchmask_count']; $m++){
+					if($m > 0){
+						$prefix = $m.'_';
+						echo '<input name="boolean_operator_'.$m.'" type="hidden" value="'.$this->formvars['boolean_operator_'.$m].'">';
+					}
+					for($j = 0; $j < count($this->qlayerset[0]['attributes']['type']); $j++){
+						if($this->qlayerset[0]['attributes']['type'][$j] != 'geometry'){
+							echo '
+								<input name="'.$prefix.'value_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars[$prefix.'value_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
+								<input name="'.$prefix.'value2_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars[$prefix.'value2_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
+								<input name="'.$prefix.'operator_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars[$prefix.'operator_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
+							';
+						}
 					}
 				}
 			}
-	  	if($this->formvars['printversion'] == '' AND $this->formvars['keinzurueck'] == ''){
-	  		echo '<a href="javascript:back();">'.$strbackToSearch.'</a><br><br>';
+	  	if($this->formvars['printversion'] == '' AND $this->formvars['keinzurueck'] == '' AND $this->formvars['subform_link'] == ''){
+	  		echo '<a href="javascript:currentform.go.value=\'Layer-Suche\';currentform.submit();">'.$strbackToSearch.'</a><br><br>';
 	  	}
   	}
   	else{
 			echo '<input name="go" type="hidden" value="Sachdaten">';
   	}
-  if($this->found != 'false' AND $this->formvars['printversion'] == ''){
   ?>
-  <a href="javascript:druck();"><? echo $strDataPrint; ?></a>
-  <br><br>
-  <?}?>
   <a name="unten"></a>
   <input type="hidden" name="anzahl" value="<? echo $this->formvars['anzahl']; ?>">
   <input type="hidden" name="printversion" value="">
@@ -193,8 +217,9 @@ for($i=0;$i<$anzLayer;$i++){
 <input name="newpathwkt" type="hidden" value="<?php echo $this->formvars['newpathwkt']; ?>">
 <input name="result" type="hidden" value="">
 <input name="firstpoly" type="hidden" value="<?php echo $this->formvars['firstpoly']; ?>">
-<input name="export_format" type="hidden" value="<?php echo $this->formvars['export_format']; ?>">
+<input type="hidden" name="searchmask_count" value="<? echo $this->formvars['searchmask_count']; ?>">
+<input type="hidden" name="within" value="<? echo $this->formvars['within']; ?>">
 
-<div id="vorschau" style="border: 1px solid grey;z-index: 1000; position: fixed; right:20px; top:20px; ">
+<div id="vorschau" style="pointer-events:none; box-shadow: 12px 10px 14px #777;z-index: 1000; position: fixed; right:20px; top:20px; ">
 	<img id="preview_img" src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
 </div>

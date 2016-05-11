@@ -24,7 +24,7 @@
 	<input name="newpathwkt" type="hidden" value="<?php echo $this->formvars['newpathwkt']; ?>">
 	<input name="result" type="hidden" value="">
 	<input name="area" type="hidden" value="">
-	<input name="firstpoly" type="hidden" value="<?php echo $this->formvars['firstpoly']; ?>">
+	<input name="firstpoly" type="hidden" value="<?php echo $this->formvars['firstpoly']; ?>" onchange="document.getElementById('abfrageart_poly').checked = true;">
 	<input name="secondpoly" type="hidden" value="<?php echo $this->formvars['secondpoly']; ?>">
 	<input name="pathx_second" type="hidden" value="<?php echo $this->formvars['pathx_second']; ?>">
 	<input name="pathy_second" type="hidden" value="<?php echo $this->formvars['pathy_second']; ?>">

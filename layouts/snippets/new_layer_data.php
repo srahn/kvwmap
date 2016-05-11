@@ -1,18 +1,19 @@
 <?php
-	include(SNIPPETS.'generic_formelement_definitions.php'); 
+	include(SNIPPETS.'generic_form_parts.php');
   include(LAYOUTPATH.'languages/new_layer_data_'.$this->user->rolle->language.'.php');
 	
 	include(SNIPPETS.'sachdatenanzeige_functions.php'); 
  ?>
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
-<script type="text/javascript">
-<!--
-
-//-->
-</script>
+<? if($this->user->rolle->querymode == 1){ ?>
+	<script type="text/javascript">
+		if(document.getElementById('overlayfooter') != undefined)document.getElementById('overlayfooter').style.display = 'none';
+		if(document.getElementById('savebutton') != undefined)document.getElementById('savebutton').style.display = 'none';
+	</script>
+<? } ?>
 <table border="0" cellpadding="5" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
-    <td colspan="5"><h2><?php echo $strtitle; ?>:&nbsp;<? echo $this->qlayerset[0]['Name']; ?></h2></td>
+    <td colspan="5"><h2><?php echo $strtitle; ?>:&nbsp;<? if($this->qlayerset[0]['alias'] != '')echo $this->qlayerset[0]['alias']; else echo $this->qlayerset[0]['Name']; ?></h2></td>
   </tr>
   <tr <? if($this->formvars['selected_layer_id'] != '')echo 'style="display:none"'; ?>>
   	<td>&nbsp;</td>
@@ -74,8 +75,8 @@ if($this->formvars['selected_layer_id'] AND $this->Fehler == ''){
 <table width="100%" border="0" cellpadding="2" cellspacing="0">
 	<tr align="center"> 
   	<td>
-  		<input type="button" name="go_plus" value="<? echo $strSave; ?>" onclick="save_new_dataset();">&nbsp;&nbsp;&nbsp;&nbsp;
-  		<input type="checkbox" name="weiter_erfassen" value="1" <? if($this->formvars['weiter_erfassen'] == 1)echo 'checked="true"'; ?>>und einen weiteren Datensatz erfassen
+  		<input type="button" name="go_plus" id="go_plus" value="<? echo $strSave; ?>" onclick="save_new_dataset();">&nbsp;&nbsp;&nbsp;&nbsp;
+  		<input type="checkbox" name="weiter_erfassen" value="1" <? if($this->formvars['weiter_erfassen'] == 1)echo 'checked="true"'; ?>><? echo $strCreateAnotherOne; ?>
   	</td>
 	</tr>
 	<tr>
@@ -91,7 +92,7 @@ if($this->formvars['selected_layer_id'] AND $this->Fehler == ''){
 
 <?
 	if ($this->Meldung1!='') {
-		showAlert('Fehler bei der Eingabe:\n'.$this->Meldung1);
+		$this->alert = 'Fehler bei der Eingabe:\n'.$this->Meldung1;
 	}
 ?>  
 

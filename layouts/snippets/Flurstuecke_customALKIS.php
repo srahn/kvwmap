@@ -1,6 +1,5 @@
 <?
 	include_once(SNIPPETS.'sachdatenanzeige_functions.php'); 
- 	include(SNIPPETS.'generic_functions.php'); 
 ?>
 <script language="JavaScript" type="text/javascript">
 
@@ -40,6 +39,17 @@ show_all = function(count){
 	currentform.submit();
 }
 
+show_versions = function(flst){
+	document.getElementById('no_versions_'+flst).style.display = 'none';
+	document.getElementById('versions_'+flst).style.display = '';
+	ahah('index.php', 'go=Flurstueck_GetVersionen&flurstkennz='+flst, new Array(document.getElementById('versions_'+flst)), new Array('sethtml'));
+}
+
+hide_versions = function(flst){
+	document.getElementById('no_versions_'+flst).style.display = 'inline';
+	document.getElementById('versions_'+flst).style.display = 'none';
+}
+
 </script>
 <br>
 <a name="anfang"></a>
@@ -48,6 +58,7 @@ show_all = function(count){
 	<tr>
 		<td align="center">
 <?php
+	$timestamp = DateTime::createFromFormat('d.m.Y H:i:s', $this->user->rolle->hist_timestamp);
 	$sql = "SELECT max(beginnt)::date FROM alkis.ax_fortfuehrungsfall;";
   $ret=$this->pgdatabase->execSQL($sql,4,0);
   $aktalkis = pg_fetch_array($ret[1]);
@@ -82,7 +93,6 @@ show_all = function(count){
     }
 		echo '<tr><td align="center"><table><tr><td align="left">';
     for ($a=0;$a<$anzObj;$a++){
-			$set_timestamp = '';
       $flurstkennz_a=$this->qlayerset[$i]['shape'][$a]['flurstkennz'];
 			$flst=new flurstueck($flurstkennz_a,$this->pgdatabase);
       $flst->readALB_Data($flurstkennz_a, $this->formvars['without_temporal_filter']);	# bei without_temporal_filter=true, wird unabhängig vom Zeitstempel abgefragt (z.B. bei der historischen Flurstückssuche oder Flst.-Listenimport oder beim Sprung zum Vorgänger/Nachfolger)
@@ -98,7 +108,7 @@ show_all = function(count){
 			if($flst->FlurstNr){
 				$flst_array[] = $flst;
 				echo '<a href="#'.$flurstkennz_a.'">Gemarkung: '.$gemkg.' - Flur: '.ltrim($flur,"0").' - Flurst&uuml;ck: '.$zaehler.$nenner.'</a>';
-				if($flst->endet!="" OR $flst->hist_alb == 1)echo ' (H)';
+				if($flst->Nachfolger != '')echo ' (H)';
 				echo '<br>';
 			}
 			else{
@@ -108,6 +118,7 @@ show_all = function(count){
 		echo '</td></tr></table></td></tr>';
 
     for ($k=0;$k<count($flst_array);$k++) {
+			$set_timestamp = '';
       $flst = $flst_array[$k];
       if ($flst->FlurstNr!='') {
         if($k > 0){
@@ -142,14 +153,48 @@ show_all = function(count){
       <table border="0" cellspacing="0" cellpadding="0">
         <tr>
           <td>
-          <table border="0" cellspacing="0" cellpadding="2">
-
-              <? if($privileg_['flurstkennz']){ ?>
+          <? if($privileg_['flurstkennz']){ ?>
+						<table border="0" cellspacing="0" cellpadding="2">
               <tr>
-                <td align="right"><span class="fett">Flurst&uuml;ck&nbsp;</span></td>
-                <td> <? echo $flst->FlurstNr; ?>&nbsp;(<?php echo $flst->Flurstkennz_alt; ?>)</td>
+								<td colspan="2">
+									<table cellspacing="0" cellpadding="0">
+										<tr>
+											<td valign="top">
+												<span class="px17 fett"><? echo $flst->Flurstkennz_alt; ?></span>
+											</td>
+											<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+											<td>
+												<div id="no_versions_<? echo $flst->FlurstKennz; ?>">
+													<table cellspacing="0" cellpadding="2">
+														<tr>
+															<td>
+																<a href="javascript:show_versions('<? echo $flst->FlurstKennz; ?>');"><img src="<? echo GRAPHICSPATH.'plus.gif'; ?>"></a>
+															</td>
+															<td>
+																<span class="px14">Versionen</span>
+															</td>
+														</tr>
+													</table>
+												</div>
+												<div id="versions_<? echo $flst->FlurstKennz; ?>" style="border: 1px solid <? echo BG_DEFAULT ?>; display:none"></div>
+											</td>
+										</tr>
+									</table>
+								</td>
+							</tr>
+						</table>
+					<? } ?>
+
+				<table border="0" cellspacing="0" cellpadding="2">
+				
+				<? if($privileg_['flurstkennz']){ ?>
+							<tr>
+                <td align="right"><span class="fett">Flurst&uuml;cksnummer&nbsp;</span></td>
+                <td>
+									<? echo $flst->FlurstNr; ?>
+								</td>
               </tr>
-              <? }
+					<? } 
           $both = ($privileg_['gemkgname'] AND $privileg_['gemkgschl']);
           if($privileg_['gemkgname'] OR $privileg_['gemkgschl']){
               ?>
@@ -199,7 +244,7 @@ show_all = function(count){
           if($privileg_['flaeche']){ ?>
               <tr>
                 <td align="right"><span class="fett">Fl&auml;che&nbsp;</span></td>
-                <td><?php echo $flst->ALB_Flaeche; ?>m&sup2;</td>
+                <td><?php echo $flst->ALB_Flaeche; ?>&nbsp;m&sup2;</td>
               </tr>
           <? }
           $both = ($privileg_['amtsgerichtname'] AND $privileg_['amtsgerichtnr']);
@@ -207,7 +252,7 @@ show_all = function(count){
           ?>
           <tr>
                 <td align="right"><span class="fett">Amtsgericht</span>&nbsp;</td>
-                <td><?php if($privileg_['amtsgerichtnr']){echo $flst->Amtsgericht['schluessel'];} ?>&nbsp;&nbsp;<?php if($privileg_['amtsgerichtname']){ echo $flst->Amtsgericht['name'];} ?></td>
+                <td><?php if($privileg_['amtsgerichtname']){ echo $flst->Amtsgericht['name'];} ?>&nbsp;<? if($privileg_['amtsgerichtnr']){echo '('.$flst->Amtsgericht['schluessel'].')';} ?></td>
               </tr>
               <? }
               $both = ($privileg_['grundbuchbezirkname'] AND $privileg_['grundbuchbezirkschl']);
@@ -215,7 +260,7 @@ show_all = function(count){
           ?>
               <tr>
                 <td align="right"><span class="fett">Grundbuchbezirk</span>&nbsp;</td>
-                <td><?php if($privileg_['grundbuchbezirkschl']){ echo $flst->Grundbuchbezirk['schluessel'];} ?>&nbsp;&nbsp;<?php if($privileg_['grundbuchbezirkname']){ echo $flst->Grundbuchbezirk['name'];} ?></td>
+                <td><?php if($privileg_['grundbuchbezirkname']){ echo $flst->Grundbuchbezirk['name'];} ?>&nbsp;<? if($privileg_['grundbuchbezirkschl']){ echo '('.$flst->Grundbuchbezirk['schluessel'].')';} ?></td>
               </tr>
           <? }
           if($privileg_['lagebezeichnung']){ ?>
@@ -264,13 +309,12 @@ show_all = function(count){
               <tr>
                 <td align="right"><span class="fett"> Status&nbsp;</span></td>
                 <td><?php 
-									$timestamp = DateTime::createFromFormat('d.m.Y H:i:s', $this->user->rolle->hist_timestamp);
 									$beginnt = DateTime::createFromFormat('d.m.Y H:i:s', $flst->beginnt);
 									$endet = DateTime::createFromFormat('d.m.Y H:i:s', $flst->endet);
-									if($flst->endet!="" OR $flst->hist_alb == 1){
+									if($flst->Nachfolger != ''){
 										echo "historisches&nbsp;Flurst&uuml;ck"; 
 										if($flst->endet != ''){
-											if($timestamp == NULL OR $timestamp < $beginnt OR $timestamp > $endet){
+											if($timestamp == NULL OR $timestamp < $beginnt OR $timestamp >= $endet){
 												$set_timestamp = 'setHistTimestamp&timestamp='.$flst->beginnt;
 												echo '<a href="index.php?go='.$set_timestamp.'" title="in die Zeit des Flurstücks wechseln">&nbsp;(endet: '.$flst->endet.')</a>';
 											}
@@ -282,7 +326,10 @@ show_all = function(count){
 											$set_timestamp = 'setHistTimestamp';
 											echo '<a href="index.php?go='.$set_timestamp.'" title="Zeitpunkt auf aktuell setzen">aktuelles&nbsp;Flurst&uuml;ck</a>';
 										}
-										else echo "aktuelles&nbsp;Flurst&uuml;ck"; 
+										else{
+											echo "aktuelles&nbsp;Flurst&uuml;ck";
+											if($timestamp != '')echo ' (historische Version)';
+										}
 									}  ?></td>
               </tr>
               <? } ?>
@@ -394,7 +441,7 @@ show_all = function(count){
 											?>
 											<tr>
 												<td></td>
-												<td><? echo round($flst->Klassifizierung[$j]['flaeche']); ?> m&sup2&nbsp;</td>
+												<td><? echo $flst->Klassifizierung[$j]['flaeche']; ?> m&sup2&nbsp;</td>
 												<td><? echo $flst->Klassifizierung[$j]['label']; ?></td>
 												<td>EMZ: <? echo $emz; ?></td><td>BWZ: <? echo $wert; ?></td>
 											</tr>
@@ -510,17 +557,15 @@ show_all = function(count){
         </td>
         </tr>
         <?php } ?>
-        <?php if ($privileg_['hinweis'] AND $flst->Hinweis[0]['hinwzflst']!='') { ?>
+        <?php if ($privileg_['hinweis'] AND $flst->strittigeGrenze){ ?>
         <tr>
           <td colspan="2">
             <table border="0" cellspacing="0" cellpadding="2">
             <tr>
-              <td valign="top"><span class="fett">Hinweise:</span>&nbsp;</td>
+              <td valign="top"><span class="fett">Hinweise zum Flurstück:</span>&nbsp;</td>
               <td>
               <?php
-              for($h = 0; $h < count($flst->Hinweis); $h++){
-                echo $flst->Hinweis[$h]['bezeichnung'].'<br>';
-              }
+              echo 'strittige Grenze';
               ?>
               </td>
             </tr>
@@ -644,7 +689,10 @@ show_all = function(count){
           </td>
         </tr>
         <? } ?>
-        <? if($privileg_['eigentuemer']){?>
+        <? if($privileg_['eigentuemer']){
+						$currenttime=date('Y-m-d H:i:s',time());
+						$this->user->rolle->setConsumeALB($currenttime, 'Flurstücksanzeige', array($flst->FlurstKennz), 0, 'NULL');		# das Flurstückskennzeichen wird geloggt
+				?>
         <tr>
         <td colspan="2">
             <table border="0" cellspacing="0" cellpadding="2">
@@ -677,45 +725,30 @@ show_all = function(count){
               <td valign="top"><? echo $Eigentuemerliste[$e]->Nr ?>&nbsp;&nbsp;&nbsp;</td>
               <td valign="top">
               <?
-                    $anzNamenszeilen=count($Eigentuemerliste[$e]->Name);
-                    $Eigentuemerliste[$e]->Name_bearb = $Eigentuemerliste[$e]->Name;
-                    $Eigentuemerliste[$e]->Name_bearb[0] = str_replace(',,,', '', $Eigentuemerliste[$e]->Name_bearb[0]);
-              $Eigentuemerliste[$e]->Name_bearb[0] = str_replace(',,', ',', $Eigentuemerliste[$e]->Name_bearb[0]);
-              if(substr($Eigentuemerliste[$e]->Name_bearb[0], strlen($Eigentuemerliste[$e]->Name_bearb[0])-1) == ','){
-                $Eigentuemerliste[$e]->Name_bearb[0] = substr($Eigentuemerliste[$e]->Name_bearb[0], 0, strlen($Eigentuemerliste[$e]->Name_bearb[0])-1);
-              }
-              if($this->Stelle->isFunctionAllowed('Adressaenderungen')) {
-                    $eigentuemer = new eigentuemer(NULL, NULL, $this->pgdatabase);
-                    $adressaenderungen =  $eigentuemer->getAdressaenderungen($Eigentuemerliste[$e]->gml_id);
-                    $aendatum=substr($adressaenderungen['datum'],0,10);
-              }
-              if ($adressaenderungen['user_id'] != '') {
-                $user = new user(NULL, $adressaenderungen['user_id'], $this->database);
-              }
+                $anzNamenszeilen=count($Eigentuemerliste[$e]->Name);
+                $Eigentuemerliste[$e]->Name_bearb = $Eigentuemerliste[$e]->Name;
+								if($this->Stelle->isFunctionAllowed('Adressaenderungen')) {
+											$eigentuemer = new eigentuemer(NULL, NULL, $this->pgdatabase);
+											$adressaenderungen =  $eigentuemer->getAdressaenderungen($Eigentuemerliste[$e]->gml_id);
+											$aendatum=substr($adressaenderungen['datum'],0,10);
+								}
+								if ($adressaenderungen['user_id'] != '') {
+									$user = new user(NULL, $adressaenderungen['user_id'], $this->database);
+								}
               ?>
                 <table border="0" cellspacing="0" cellpadding="2">
                   <tr>
                   <td>
                   <?
                     for ($n=0;$n<$anzNamenszeilen;$n++) {
-                      if (!($Eigentuemerliste[$e]->Name_bearb[$n]=="" OR $Eigentuemerliste[$e]->Name_bearb[$n]=='.')) {
+                      if (!($Eigentuemerliste[$e]->Name_bearb[$n]=="" OR $Eigentuemerliste[$e]->Name_bearb[$n]==' ')) {
                           echo $Eigentuemerliste[$e]->Name_bearb[$n].'<br>';
                       }
                     }
                   if ($adressaenderungen['user_id'] != '') {
-                echo '<span class="fett"><u>Aktualisierte Anschrift ('.$aendatum.' - '.$user->Name.'):</u></span><br>';
-                    #if($adressaenderungen['strasse'] == ''){
-                    #  echo '&nbsp;&nbsp;<span class="fett">(Strasse leer)</span><br>';
-                    #}
-                    #else{
+											echo '<span class="fett"><u>Aktualisierte Anschrift ('.$aendatum.' - '.$user->Name.'):</u></span><br>';
                       echo '&nbsp;&nbsp;<span class="fett">'.$adressaenderungen['strasse'].' '.$adressaenderungen['hausnummer'].'</span><br>';
-                    #}
-                    #if($adressaenderungen['neu_name4'] == ''){
-                    #  echo '&nbsp;&nbsp;<span class="fett">(Name4 leer)</span><br>';
-                    #}
-                    #else{
                       echo '&nbsp;&nbsp;<span class="fett">'.$adressaenderungen['postleitzahlpostzustellung'].' '.$adressaenderungen['ort_post'].' '.$adressaenderungen['ortsteil'].'</span><br>';
-                    #}
                   }
                   ?>
                   </td>
@@ -734,22 +767,22 @@ show_all = function(count){
 										<td colspan="2"><div id="subform_ax_person_temp<? echo $b.'_'.$e; ?>" style="display:inline"></div></td>
 									</tr>
 									</tr>
-                  <tr>
-                  <? if($Eigentuemerliste[$e]->Anteil != ''){ ?>
-                  <tr>
-                  	<td>zu <? echo $Eigentuemerliste[$e]->Anteil; ?></td>
-                  </tr>
-                  <? } ?>
                 </table>
                 </td>
-                <? } ?>
-              </tr>
-              <? if($flst->Buchungen[$b]['zusatz_eigentuemer'] != ''){
-									$flst->Buchungen[$b]['zusatz_eigentuemer'] = str_replace('zu', '<br>zu', $flst->Buchungen[$b]['zusatz_eigentuemer']);
-									$flst->Buchungen[$b]['zusatz_eigentuemer'] = str_replace('<br>zu 1/', 'zu 1/', $flst->Buchungen[$b]['zusatz_eigentuemer']);
-      						echo '<tr><td></td><td colspan="2">'.$flst->Buchungen[$b]['zusatz_eigentuemer'].'</td></tr>';
-      			 			} ?>
-              <? } ?>
+							</tr>
+							<? if($Eigentuemerliste[$e]->zusatz_eigentuemer != ''){ ?>
+								<tr>
+									<td colspan="2"><? echo $Eigentuemerliste[$e]->zusatz_eigentuemer; if($Eigentuemerliste[$e]->Anteil != '')echo ' zu '.$Eigentuemerliste[$e]->Anteil;?></td>
+								</tr>
+								<? }
+									 elseif($Eigentuemerliste[$e]->Anteil != ''){ ?>
+								<tr>
+									<td></td>
+									<td>zu <? echo $Eigentuemerliste[$e]->Anteil; ?></td>
+								</tr>
+								<? } ?>
+							<? }
+               } ?>
           </table>
         </td>
         </tr>
@@ -791,7 +824,7 @@ show_all = function(count){
 					<?
 						if($flst->hist_alb != 1){
 							$zoomlink = 'ZoomToFlst&FlurstKennz='.$flst->FlurstKennz; 
-							if($set_timestamp != ''){$zoomlink = $set_timestamp.'&go_next='.urlencode($zoomlink); $no_zoom_all = true;};
+							if($set_timestamp != '')$zoomlink = $set_timestamp.'&go_next='.urlencode($zoomlink);else $zoom_all = true;
 					?>
 							<a href="index.php?go=<? echo $zoomlink;?>">
 												<div class="fstanzeigehover">
@@ -800,8 +833,8 @@ show_all = function(count){
 								&nbsp;&nbsp;
 							</div>
 							</a>
-					<? }else $no_zoom_all = true; ?>
-                    <div class="fstanzeigehover">
+					<? } ?>
+              <div class="fstanzeigehover">
 					  &nbsp;&nbsp;
 					  Auszug:
 						<select style="width: 130px" onchange="this.options[this.selectedIndex].onchange();">
@@ -853,6 +886,7 @@ show_all = function(count){
         <span class="fett">Für alle ausgewählten Flurstücke:</span><br>
       </td>
     </tr>
+		<? if($this->qlayerset[$i]['export_privileg'] != 0){ ?>
     <tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
 		  <td colspan="2">
           <div class="fstanzeigecontainer">
@@ -894,11 +928,12 @@ show_all = function(count){
           </div>
   		  </td>
 		</tr>
+		<? } ?>
 		<tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
 		  <td>
           <div class="fstanzeigecontainer">
             <div style="text-align:center;">
-							<? if($no_zoom_all != true){ ?>
+							<? if($zoom_all == true){ ?>
               <a href="javascript:send_selected_flurst('ZoomToFlst', '');">
               <div class="fstanzeigehover">
                 &nbsp;&nbsp;

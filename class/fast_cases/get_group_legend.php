@@ -1246,8 +1246,7 @@
 							# Bei eingeschalteten Layern kann man auf die maximale Ausdehnung des Layers zoomen
 							if ($layer['aktivStatus'] == 1) {
 								if ($layer['connectiontype']==6) {
-									# Link zum Zoomen auf maximalen Extent des Layers erstmal nur für PostGIS Layer
-									$legend.='&nbsp;<a href="index.php?go=zoomToMaxLayerExtent&layer_id='.$layer['Layer_ID'].'"><img src="graphics/maxLayerExtent.gif" border="0" title="'.$this->FullLayerExtent.'"></a>';
+									# Link zum Zoomen auf maximalen Extent des Layers erstmal nur für PostGIS Layer									$legend.='&nbsp;<a href="javascript:zoomToMaxLayerExtent('.$layer['Layer_ID'].');"><img src="graphics/maxLayerExtent.gif" border="0" title="'.$this->FullLayerExtent.'"></a>';
 								}
 							}
 						}
@@ -1580,7 +1579,7 @@
     $ips=explode(';',$this->ips);
     foreach ($ips AS $ip) {
       if (trim($ip)!='') {
-        $ip=trim($ip);
+        $ip=trim($ip);				if(!is_numeric(array_pop(explode('.', $ip))))$ip = gethostbyname($ip);			# für dyndns-Hosts
         if (in_subnet($remote_addr,$ip)) {
           $this->debug->write('<br>IP:'.$remote_addr.' paßt zu '.$ip,4);
           #echo '<br>IP:'.$remote_addr.' paßt zu '.$ip;

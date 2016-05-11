@@ -4,6 +4,10 @@
  ?>
 
 <script type="text/javascript" src="funktionen/calendar.js"></script>
+<script src="funktionen/tooltip.js" language="JavaScript"  type="text/javascript"></script>
+<script type="text/javascript">
+Text[0]=["Hilfe:","Zeigt auch die zum Grundbuchblatt geh&ouml;renden Flurst&uuml;cke an"]
+</script>
 <script type="text/javascript">
 <!--
 
@@ -57,7 +61,7 @@
 		document.GUI.go.value = 'Namen_Auswaehlen_Suchen';
 		document.GUI.submit();
 	}
-	
+
 	function send_selected_flurst(go, i, formnummer, wz, target){
 		currentform.go_backup.value=currentform.go.value;
 		var semi = false;
@@ -122,7 +126,7 @@
 		document.GUI.go.value = 'Suche_Flurstuecke_zu_Grundbuechern';
 		document.GUI.submit();
 	}
-		
+
 //-->
 </script>
 
@@ -131,22 +135,30 @@
 include(LAYOUTPATH."snippets/Fehlermeldung.php");
 }
 ?><p>
-<table border="0" cellpadding="0" cellspacing="2">
+
+<table border="0" cellpadding="0" cellspacing="2" width="100%" style="padding: 10px">
   <tr>
-    <td align="right"><span class="fett"><?php echo $strName1; ?>:</span></td>
-    <td>
-			<div style="width:150px;">				
+    <td colspan="3" class="menu"><span class="fett">&nbsp;Person</span></td>
+  </tr>
+  <tr>
+    <td colspan="3" height="10">&nbsp;</td>
+  </tr>
+  <tr>
+    <td height="28" align="right" width="220px"><span class="fett"><?php echo $strName1; ?>:&nbsp;</span></td>
+    <td width="210px">
+			<div style="width:150px;">
 				<input name="name1" type="text" value="<? echo htmlentities($this->formvars['name1'], NULL, 'UTF-8'); ?>" size="25" tabindex="1">
 				<div valign="top" style="height:0px; position:relative;">
 					<div id="suggests1" style="display:none; position:absolute; left:0px; top:0px; width: 150px; vertical-align:top; overflow:hidden; border:solid grey 1px;"></div>
 				</div>
 			</div>
 		</td>
+		<td rowspan="2"><input type="checkbox" name="exakt" value="1" <? if($this->formvars['exakt']) echo 'checked'; ?>> exakte Suche</td>
   </tr>
   <tr>
-    <td align="right"><span class="fett"><?php echo $strName2; ?>:</span></td>
+    <td height="28" align="right"><span class="fett"><?php echo $strName2; ?>:&nbsp;</span></td>
     <td>
-			<div style="width:150px;">				
+			<div style="width:150px;">
 				<input name="name2" type="text" value="<?php echo $this->formvars['name2']; ?>" size="25" tabindex="1">
 				<div valign="top" style="height:0px; position:relative;">
 					<div id="suggests2" style="display:none; position:absolute; left:0px; top:0px; width: 150px; vertical-align:top; overflow:hidden; border:solid grey 1px;"></div>
@@ -155,12 +167,12 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 		</td>
   </tr>
   <tr>
-    <td align="right"><span class="fett"><?php echo $strName3; ?>:</span>
+    <td height="28" align="right"><span class="fett"><?php echo $strName3; ?>:&nbsp;</span>
       </td>
     <td><input name="name3" type="text" value="<?php echo $this->formvars['name3']; ?>" size="25"  tabindex="3"></td>
   </tr>
   <tr>
-    <td height="28" align="right"><span class="fett"><?php echo $strName4; ?>:</span>
+    <td height="28" height="28" align="right"><span class="fett"><?php echo $strName4; ?>:&nbsp;</span>
       </td>
     <td>
 			<input name="name4" type="text" value="<?php echo $this->formvars['name4']; ?>" size="25"  tabindex="4">
@@ -168,40 +180,53 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 		</td>
   </tr>
 	<tr>
-    <td align="right"><span class="fett"><?php echo $strName5; ?>:</span>
+    <td height="28" align="right"><span class="fett"><?php echo $strName5; ?>:&nbsp;</span>
     </td>
     <td><input name="name5" type="text" value="<?php echo $this->formvars['name5']; ?>" size="25" tabindex="1"></td>
   </tr>
   <tr>
-    <td align="right"><span class="fett"><?php echo $strName6; ?>:</span>
+    <td height="28" align="right"><span class="fett"><?php echo $strName6; ?>:&nbsp;</span>
       </td>
     <td><input name="name6" type="text" value="<?php echo $this->formvars['name6']; ?>" size="25" tabindex="2"></td>
   </tr>
   <tr>
-    <td align="right"><span class="fett"><?php echo $strName7; ?>:</span>
+    <td height="28" align="right"><span class="fett"><?php echo $strName7; ?>:&nbsp;</span>
       </td>
     <td><input name="name7" type="text" value="<?php echo $this->formvars['name7']; ?>" size="25"  tabindex="3"></td>
   </tr>
   <tr>
-    <td height="28" align="right"><span class="fett"><?php echo $strName8; ?>:</span>
+    <td height="28" align="right"><span class="fett"><?php echo $strName8; ?>:&nbsp;</span>
       </td>
     <td><input name="name8" type="text" value="<?php echo $this->formvars['name8']; ?>" size="25"  tabindex="4"></td>
   </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="2" width="100%" style="padding: 10px">
   <tr>
-    <td height="28" align="right"><span class="fett"><?php echo $strGbbez; ?>:</span></td>
+    <td colspan="3" class="menu"><span class="fett">&nbsp;Gebiet</span></td>
+  </tr>
+  <tr>
+    <td colspan="3" height="10">&nbsp;</td>
+  </tr>
+  <tr>
+    <td height="28" align="right" width="220px"><span class="fett"><?php echo $strGbbez; ?>:&nbsp;</span></td>
     <td><input name="bezirk" type="text" value="<?php echo $this->formvars['bezirk']; ?>" size="6"  tabindex="5"></td>
   </tr>
   <tr>
-    <td height="28" align="right"><span class="fett"><?php echo $strGbbl; ?>:</span></td>
+    <td height="28" align="right"><span class="fett"><?php echo $strGbbl; ?>:&nbsp;</span></td>
     <td><input name="blatt" type="text" value="<?php echo $this->formvars['blatt']; ?>" size="6"  tabindex="6"></td>
   </tr>
   <tr>
-    <td height="28" align="right"><span class="fett"><?php echo $strGemkg; ?>:</span></td>
+    <td height="28" align="right"><span class="fett"><?php echo $strGemkg; ?>:&nbsp;</span></td>
     <td><?php echo $this->GemkgFormObj->html; ?></td>
   </tr>
   <tr>
-    <td height="28" align="right"><span class="fett"><?php echo $strFlur; ?>:</span></td>
+    <td height="28" align="right"><span class="fett"><?php echo $strFlur; ?>:&nbsp;</span></td>
     <td><?php echo $this->FlurFormObj->html; ?></td>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="2" width="100%" style="padding: 10px">
+  <tr>
+    <td colspan="3">&nbsp;</td>
   </tr>
   <!--
   <tr>
@@ -209,20 +234,35 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
     <input name="caseSensitive" type="checkbox" value="1"<?php if ($this->formvars['caseSensitive']) { ?> checked<?php } ?>><tr><td colspan="2"></td>
   <tr><td colspan="2"></tr>//-->
   <tr bgcolor="#FFFFCC">
-    <td colspan="2"><em><?php echo $strHintWildcard; ?>.</em></td>
+    <td colspan="3"><em><?php echo $strHintWildcard; ?>.</em></td>
   </tr>
   <tr>
-    <td colspan="1"><span class="fett"><?php echo $strShowHits; ?>:</span><input name="anzahl" onkeyup="checknumbers(this, 'int2', '', '');" type="text" value="<?php echo $this->formvars['anzahl']; ?>" size="2" tabindex="5"></td>
-    <td colspan="1"><span class="fett"><?php echo $strShowWithFst; ?>:</span><input name="withflurst" type="checkbox" <? if($this->formvars['withflurst'] == 'on'){echo 'checked';} ?>></td>
+    <td colspan="3" height="10">&nbsp;</td>
+  </tr>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="2" width="100%">
+  <tr>
+    <td height="28" align="right" width="220px"><span class="fett"><?php echo $strShowHits; ?>:&nbsp;</span></td>
+    <td><input name="anzahl" onkeyup="checknumbers(this, 'int2', '', '');" type="text" value="<?php echo $this->formvars['anzahl']; ?>" size="2" tabindex="5"></td>
   </tr>
   <tr>
-   <td colspan="3" align="center">
-<br>
-<input type="hidden" name="go" value="Namen_Auswaehlen">
-<input type="submit" onclick="save();" style="width: 0px;height: 0px;border: none">
-<input type="button" name="go_plus" onclick="save();" value="<?php echo $strSearch; ?>" tabindex="0"><br>
+    <td height="28" align="right" width="220px"><span class="fett"><?php echo $strShowWithFst; ?>:&nbsp;</span></td>
+    <td>
+      <input name="withflurst" type="checkbox" <? if($this->formvars['withflurst'] == 'on'){echo 'checked';} ?>>&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[0], Style[0], document.getElementById('TipLayer1'))" onmouseout="htm()">
+	  <div id="TipLayer1" style="visibility:hidden;position:absolute;z-index:1000;"></div>
+    </td>
+  </tr>
+  <tr>
+    <td width="290px">&nbsp;</td>
+    <td>
+      <input type="hidden" name="go" value="Namen_Auswaehlen">
+      <input type="submit" onclick="save();" style="width: 0px;height: 0px;border: none">
+      <input type="button" name="go_plus" onclick="save();" value="<?php echo $strSearch; ?>" tabindex="0"><br>
    </td>
-  </tr><?php
+  </tr>
+
+<?php
   $anzNamen=count($this->namen);
   if ($anzNamen>0) {
    ?>
@@ -234,39 +274,39 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
     <br>
 </span>	<table border="1" cellpadding="3" cellspacing="0">
       <tr bgcolor="<?php echo BG_DEFAULT ?>">
-      	<td>&nbsp;</td>
-        <td align="center"><span class="fett"><a href="javascript:changeorder('bezirk');"><?php echo $strGbbezShort; ?></a></span></td>
-        <td align="center"><span class="fett"><a href="javascript:changeorder('blatt');"><?php echo $strGbblShort; ?></a></span></td>
-        <td align="left"><span class="fett"><a href="javascript:changeorder('nachnameoderfirma');"><?php echo $strName1Short; ?></a></span></td>
-        <td align="left"><span class="fett"><a href="javascript:changeorder('geburtsname');"><?php echo $strName2Short; ?></a></span></td>
-        <td align="left" bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett"><a href="javascript:changeorder('strasse,hausnummer');"><?php echo $strName3Short; ?></a></span></td>
-        <td align="left"><span class="fett"><a href="javascript:changeorder('postleitzahlpostzustellung, ort_post');"><?php echo $strName4Short; ?></a></span></td>
-        <td align="center" colspan="2"><span class="fett"><?php echo $strFst; ?></span></td>
+      	<td class="menu">&nbsp;</td>
+        <td class="menu" align="center"><span class="fett"><a href="javascript:changeorder('bezirk');"><?php echo $strGbbezShort; ?></a></span></td>
+        <td class="menu" align="center"><span class="fett"><a href="javascript:changeorder('blatt');"><?php echo $strGbblShort; ?></a></span></td>
+        <td class="menu" align="left"><span class="fett"><a href="javascript:changeorder('nachnameoderfirma, vorname');"><?php echo $strName1Short; ?></a></span></td>
+        <td class="menu" align="left"><span class="fett"><a href="javascript:changeorder('geburtsname');"><?php echo $strName2Short; ?></a></span></td>
+        <td class="menu" align="left" bgcolor="<?php echo BG_DEFAULT ?>"><span class="fett"><a href="javascript:changeorder('strasse,hausnummer');"><?php echo $strName3Short; ?></a></span></td>
+        <td class="menu" align="left"><span class="fett"><a href="javascript:changeorder('postleitzahlpostzustellung, ort_post');"><?php echo $strName4Short; ?></a></span></td>
+        <td class="menu" align="center" colspan="2"><span class="fett"><?php echo $strFst; ?></span></td>
       </tr>
   <?php
   for ($i=0;$i<count($this->namen);$i++) {
-  	
+
   	$this->namen[$i]['name1'] = str_replace(',,,', '', $this->namen[$i]['name1']);
 		$this->namen[$i]['name1'] = str_replace(',,', ',', $this->namen[$i]['name1']);
 		if(substr($this->namen[$i]['name1'], strlen($this->namen[$i]['name1'])-1) == ',') {
 			$this->namen[$i]['name1'] = substr($this->namen[$i]['name1'], 0, strlen($this->namen[$i]['name1'])-1);
 		}
-  	
+
   ?>
       <tr>
-      	<td><input type="checkbox" name="check_grundbuch" value="<? echo $this->namen[$i]['bezirk'].'-'.$this->namen[$i]['blatt']; ?>"></td>
-        <td align="center"><a href="javascript:grundbuchsuche(<?php echo '\''.$this->namen[$i]['bezirk'].'\',\''.$this->namen[$i]['blatt'].'\''; ?>);"><?php echo $this->namen[$i]['bezirk']; ?></a></td>
-        <td align="center"><a href="javascript:grundbuchsuche(<?php echo '\''.$this->namen[$i]['bezirk'].'\',\''.$this->namen[$i]['blatt'].'\''; ?>);"><?php echo $this->namen[$i]['blatt']; ?></a></td>
-        <td align="left"><?php echo str_replace(' ','&nbsp;',$this->namen[$i]['name1']); if ($this->namen[$i]['name1']=='') { ?>&nbsp;<?php } ?></td>
-        <td align="left"><?php echo str_replace(' ','&nbsp;',$this->namen[$i]['name2']); if ($this->namen[$i]['name2']=='') { ?>&nbsp;<?php } ?></td>
-        <td align="left"><?php echo str_replace(' ','&nbsp;',$this->namen[$i]['name3']); if ($this->namen[$i]['name3']=='') { ?>&nbsp;<?php } ?></td>
-        <td align="left"><?php echo str_replace(' ','&nbsp;',$this->namen[$i]['name4']); if ($this->namen[$i]['name4']=='') { ?>&nbsp;<?php } ?></td>
-        <td align="center"><a href="javascript:flurstsuche('<?php echo $this->namen[$i]['bezirk'].'\',\''.$this->namen[$i]['blatt']; ?>');"><?php echo $strShowFst; ?></a></td>
-				<td align="center"><a href="index.php?go=Zeige_Flurstuecke_zu_Grundbuechern&selBlatt=<?php echo $this->namen[$i]['bezirk'].'-'.$this->namen[$i]['blatt'];?>"><?php echo $strToMap; ?></a></td>
+      	<td style="border: 1px solid #cccccc;"><input type="checkbox" name="check_grundbuch" value="<? echo $this->namen[$i]['bezirk'].'-'.$this->namen[$i]['blatt']; ?>"></td>
+        <td style="border: 1px solid #cccccc;" align="center"><a href="javascript:grundbuchsuche(<?php echo '\''.$this->namen[$i]['bezirk'].'\',\''.$this->namen[$i]['blatt'].'\''; ?>);"><?php echo $this->namen[$i]['bezirk']; ?></a></td>
+        <td style="border: 1px solid #cccccc;" align="center"><a href="javascript:grundbuchsuche(<?php echo '\''.$this->namen[$i]['bezirk'].'\',\''.$this->namen[$i]['blatt'].'\''; ?>);"><?php echo $this->namen[$i]['blatt']; ?></a></td>
+        <td style="border: 1px solid #cccccc;" align="left"><?php echo str_replace(' ','&nbsp;',$this->namen[$i]['name1']); if ($this->namen[$i]['name1']=='') { ?>&nbsp;<?php } ?></td>
+        <td style="border: 1px solid #cccccc;" align="left"><?php echo str_replace(' ','&nbsp;',$this->namen[$i]['name2']); if ($this->namen[$i]['name2']=='') { ?>&nbsp;<?php } ?></td>
+        <td style="border: 1px solid #cccccc;" align="left"><?php echo str_replace(' ','&nbsp;',$this->namen[$i]['name3']); if ($this->namen[$i]['name3']=='') { ?>&nbsp;<?php } ?></td>
+        <td style="border: 1px solid #cccccc;" align="left"><?php echo str_replace(' ','&nbsp;',$this->namen[$i]['name4']); if ($this->namen[$i]['name4']=='') { ?>&nbsp;<?php } ?></td>
+        <td style="border: 1px solid #cccccc;" align="center"><a href="javascript:flurstsuche('<?php echo $this->namen[$i]['bezirk'].'\',\''.$this->namen[$i]['blatt']; ?>');"><?php echo $strShowFst; ?></a></td>
+		<td style="border: 1px solid #cccccc;" align="center"><a href="index.php?go=Zeige_Flurstuecke_zu_Grundbuechern&selBlatt=<?php echo $this->namen[$i]['bezirk'].'-'.$this->namen[$i]['blatt'];?>"><?php echo $strToMap; ?></a></td>
       </tr>
     <? if($this->formvars['withflurst'] == 'on'){ ?>
     	<tr>
-    		<td colspan="10">
+    		<td style="border: 1px solid #cccccc; border-top: 0px solid #ffffff;" colspan="10">
 
     			<table width="100%" border="0" cellpadding="0" cellspacing="0">
     				<tr>

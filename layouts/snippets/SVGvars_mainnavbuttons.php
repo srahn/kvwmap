@@ -172,10 +172,31 @@ else {
         <g transform="scale(0.7) translate(-5 0)">
           <use xlink:href="#jump_coords" transform="translate(2.1 -5.9) scale(0.9)"/> 
         </g>
-        <rect id="coords0" onmouseover="show_tooltip(\''.$strCoordinatesZoom.'\',evt.clientX,evt.clientY)" onmousedown="hide_tooltip();highlight(evt);noMeasuring();" onmouseup="top.coords_input();showcoords();" x="0" y="0" width="25" height="25" style="fill:white;opacity:0.25"/>
+        <rect id="coords0" onmouseover="show_tooltip(\''.$strCoordinatesZoom.'\',evt.clientX,evt.clientY)" onmousedown="hide_tooltip();highlight(evt);noMeasuring();" onmouseup="top.coords_input();" x="0" y="0" width="25" height="25" style="fill:white;opacity:0.25"/>
       </g>';
     $last_x += 26;
   	return $coords1;
+	}
+	
+	function coords2($strCoordinatesQuery){
+		global $last_x;
+		$coords2 ='
+      <g id="coords2" transform="translate('.$last_x.' 0)">
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
+        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+          <set attributeName="filter" begin="coords2.mousedown" fill="freeze" to="none"/>
+          <set attributeName="filter" begin="coords2.mouseup;coords2.mouseout" fill="freeze" to="url(#Schatten)"/>
+        </rect>
+        <g transform="translate(-1 9) scale(0.55 0.7)">
+					<text x="18" y="14" style="text-anchor:middle;fill:rgb(0,0,0);font-size:15;font-family:Tahoma;font-weight:bold">x,y</text>
+				</g>
+				<g transform="translate(2.5 4.5) scale(0.9 1.1)">
+					<text x="18" y="14" style="text-anchor:middle;fill:rgb(0,0,0);font-size:15;font-family:Arial;font-weight:bold">?</text>
+        </g>
+        <rect id="coords02" onmouseover="show_tooltip(\''.$strCoordinatesQuery.'\',evt.clientX,evt.clientY)" onmousedown="hide_tooltip();highlight(evt);noMeasuring();" onmouseup="showcoords();" x="0" y="0" width="25" height="25" style="fill:white;opacity:0.25"/>
+      </g>';
+    $last_x += 26;
+  	return $coords2;
 	}
 	
 	function ppquery($strInfo){
@@ -187,7 +208,7 @@ else {
           <set attributeName="filter" begin="ppquery0.mousedown" fill="freeze" to="none"/>
           <set attributeName="filter" begin="ppquery0.mouseup;ppquery0.mouseout" fill="freeze" to="url(#Schatten)"/>
         </rect>
-        <text transform="scale(1.3 0.7)" x="9.75" y="24" style="text-anchor:middle;fill:rgb(0,0,0);font-size:20;font-family:Times;font-weight:bold;">
+        <text transform="scale(1.7 1.1)" x="7" y="17" style="text-anchor:middle;fill:rgb(0,0,0);font-size:20;font-family:Times;font-weight:bold;">
          i </text>
         <rect id="ppquery0" onmouseover="show_tooltip(\''.$strInfo.'\',evt.clientX,evt.clientY)" onmousedown="ppquery();hide_tooltip();highlight(evt);noMeasuring();" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
       </g>';
@@ -204,7 +225,7 @@ else {
           <set attributeName="filter" begin="touchquery0.mousedown" fill="freeze" to="none"/>
           <set attributeName="filter" begin="touchquery0.mouseup;touchquery0.mouseout" fill="freeze" to="url(#Schatten)"/>
         </rect>
-        <text transform="scale(1.3 0.7)" x="9.75" y="24" style="text-anchor:middle;fill:rgb(0,0,0);font-size:20;font-family:Times;font-weight:bold;">
+				<text transform="scale(1.3 0.8)" x="9.3" y="21" style="text-anchor:middle;fill:rgb(0,0,0);font-size:20;font-family:Times;font-weight:bold;">
          i </text>
 				<defs>
 				<g id="arrow">
@@ -236,8 +257,8 @@ else {
           <set attributeName="filter" begin="pquery0.mousedown" fill="freeze" to="none"/>
           <set attributeName="filter" begin="pquery0.mouseup;pquery0.mouseout" fill="freeze" to="url(#Schatten)"/>
         </rect>
-        <circle cx="13" cy="13" r="8" style="fill:none;stroke:rgb(0,0,0);stroke-width:1"/>
-        <text transform="scale(1.3 0.7)" x="9.75" y="24" style="text-anchor:middle;fill:rgb(0,0,0);font-size:20;font-family:Times;font-weight:bold;">
+        <circle cx="12.5" cy="13" r="8.5" style="fill:none;stroke:rgb(0,0,0);stroke-width:1"/>
+				<text transform="scale(1.3 0.8)" x="9.3" y="21" style="text-anchor:middle;fill:rgb(0,0,0);font-size:20;font-family:Times;font-weight:bold;">
          i </text>
         <rect id="pquery0" onmouseover="show_tooltip(\''.$strInfoWithRadius.'\',evt.clientX,evt.clientY)" onmousedown="pquery();pquery_prompt();highlight(evt);noMeasuring();" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
       </g>';
@@ -255,11 +276,10 @@ else {
           <set attributeName="filter" begin="polygonquery0.mouseup;polygonquery0.mouseout" fill="freeze" to="url(#Schatten)"/>
         </rect>
         <polygon
-					points="252.5,91 177.5,113 106.5,192 128.5,360 116.5,384 127.5,408 173.5,417 282.5,351 394.5,284
-						379.5,218 378.5,239 357.5,138 260.5,91"
-					transform="matrix(1 0 0 0.95 0 0) scale(0.055)"
+					points="252.5,91 177.5,113 106.5,192 128.5,360 116.5,384 127.5,408 173.5,417 282.5,351 394.5,284 379.5,218 378.5,239 357.5,138 260.5,91"
+					transform="translate(-1.5 -1) scale(0.058)"
 					 style="fill:rgb(222,222,222);stroke:rgb(0,0,0);stroke-width:18"/>
-        <text transform="scale(1.3 0.7)" x="9.75" y="24" style="text-anchor:middle;fill:rgb(0,0,0);font-size:20;font-family:Times;font-weight:bold;">
+				<text transform="scale(1.3 0.8)" x="9.3" y="21" style="text-anchor:middle;fill:rgb(0,0,0);font-size:20;font-family:Times;font-weight:bold;">
          i </text>
         <rect id="polygonquery0" onmouseover="show_tooltip(\''.$strInfoInPolygon.'\',evt.clientX,evt.clientY)" onmousedown="polygonquery();highlight(evt);hidetooltip(evt);noMeasuring();" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
       </g>';
@@ -298,8 +318,8 @@ else {
         <polygon
 					points="252.5,91 177.5,113 106.5,192 128.5,360 116.5,384 127.5,408 173.5,417 282.5,351 394.5,284
 						379.5,218 378.5,239 357.5,138 260.5,91"
-					transform="matrix(1 0 0 0.95 0 0) scale(0.055)"
-					 style="fill:rgb(222,222,222);stroke:rgb(0,0,0);stroke-width:18"/>
+					transform="translate(-1.5 -1) scale(0.055)"
+					 style="fill:rgb(222,222,222);stroke:rgb(180,30,30);stroke-width:18"/>
         <rect id="freepolygon0" onmouseover="show_tooltip(\''.$strFreePolygon.'\',evt.clientX,evt.clientY)" onmousedown="drawpolygon();highlight(evt);hidetooltip(evt);noMeasuring();" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
       </g>';
     $last_x += 26;
@@ -315,7 +335,7 @@ else {
           <set attributeName="filter" begin="freetext0.mousedown" fill="freeze" to="none"/>
           <set attributeName="filter" begin="freetext0.mouseup;freetext0.mouseout" fill="freeze" to="url(#Schatten)"/>
         </rect>
-        <text transform="scale(1.3 1)" x="10" y="19" style="text-anchor:middle;fill:rgb(0,0,0);font-size:20;font-family:Times;font-weight:bold;">
+        <text transform="scale(1.3 1)" x="10" y="19" style="text-anchor:middle;fill:rgb(180,30,30);font-size:20;font-family:Times;font-weight:bold;">
          T </text>
         <rect id="freetext0" onmouseover="show_tooltip(\''.$strFreeText.'\',evt.clientX,evt.clientY)" onmousedown="addfreetext();highlight(evt);hidetooltip(evt);noMeasuring();" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
       </g>';
@@ -334,7 +354,7 @@ else {
         </rect>
         <polygon points="-5 -40, 5 -40, 5 -20, 15 -20, 0 0, -15 -20, -5 -20, -5 -40"
 					transform="translate(6 6) scale(0.45) rotate(135)"
-					 style="fill:rgb(222,222,222);stroke:rgb(0,0,0);stroke-width:2"/>
+					 style="fill:rgb(222,222,222);stroke:rgb(180,30,30);stroke-width:2"/>
         <rect id="freearrow0" onmouseover="show_tooltip(\''.$strFreeArrow.'\',evt.clientX,evt.clientY)" onmousedown="drawarrow();highlight(evt);hidetooltip(evt);noMeasuring();" x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;opacity:0.25"/>
       </g>';
     $last_x += 26;
@@ -362,11 +382,12 @@ else {
     
 if($this->user->rolle->back){$SVGvars_mainnavbuttons .= previous($prevbuttoncolor, $strPreviousView, $prevmouseupfunction);}
 if($this->user->rolle->forward){$SVGvars_mainnavbuttons .= forward($nextbuttoncolor, $strNextView, $mouseupfunction);}
-if($this->user->rolle->zoomin){$SVGvars_mainnavbuttons .= zoomin($strZoomIn);}
-if($this->user->rolle->zoomout){$SVGvars_mainnavbuttons .= zoomout($strZoomOut);}
 if($this->user->rolle->zoomall){$SVGvars_mainnavbuttons .= zoomall($strZoomToFullExtent);}
 if($this->user->rolle->recentre){$SVGvars_mainnavbuttons .= recentre($strPan);}
+if($this->user->rolle->zoomin){$SVGvars_mainnavbuttons .= zoomin($strZoomIn);}
+if($this->user->rolle->zoomout){$SVGvars_mainnavbuttons .= zoomout($strZoomOut);}
 if($this->user->rolle->jumpto){$SVGvars_mainnavbuttons .= coords1($strCoordinatesZoom);}
+if($this->user->rolle->coord_query){$SVGvars_mainnavbuttons .= coords2($strCoordinatesQuery);}
 if($this->user->rolle->query){$SVGvars_mainnavbuttons .= ppquery($strInfo);}
 if($this->user->rolle->touchquery){$SVGvars_mainnavbuttons .= touchquery($strTouchInfo);}
 if($this->user->rolle->queryradius){$SVGvars_mainnavbuttons .= pquery($strInfoWithRadius);}

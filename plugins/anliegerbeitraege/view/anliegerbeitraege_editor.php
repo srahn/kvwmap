@@ -2,6 +2,13 @@
 <script language="JavaScript">
 <!--
 
+function toggle_vertices(){
+	save = document.GUI.layer_id.value;
+	document.GUI.layer_id.value = 0;
+	document.getElementById("vertices").SVGtoggle_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+	document.GUI.layer_id.value = save;
+}
+
 function save_road(){
 	if(document.GUI.newpathwkt.value == ''){
 		if(document.GUI.newpath.value == ''){
@@ -39,11 +46,13 @@ function save_buffer(){
 function createbuffer(){
 	top.document.GUI.secondpoly.value = true;
   if(top.document.GUI.newpathwkt.value != ""){
+		top.document.GUI.buffer_geom.value = top.document.GUI.newpathwkt.value;
   	top.ahah("index.php", "go=spatial_processing&path1="+top.document.GUI.newpathwkt.value+"&width="+top.document.GUI.buffersize.value+"&operation=buffer_ring&resulttype=svgwkt", new Array(top.document.GUI.result, ""), new Array("setvalue", "execute_function"));
   }
   else{
   	if(top.document.GUI.newpath.value != ""){
   		newpath = buildwktpolygonfromsvgpath(top.document.GUI.newpath.value);
+			top.document.GUI.buffer_geom.value = newpath;
   		top.ahah("index.php", "go=spatial_processing&path1="+newpath+"&width="+top.document.GUI.buffersize.value+"&operation=buffer_ring&resulttype=svgwkt", new Array(top.document.GUI.result, ""), new Array("setvalue", "execute_function"));
   	}
   }
@@ -94,7 +103,7 @@ function buildwktpolygonfromsvgpath(svgpath){
     <td rowspan="8">&nbsp;</td>
     <td colspan="2" rowspan="8"> 
       <?php
-				include(LAYOUTPATH.'snippets/SVG_polygon_query_area.php')
+				include(PLUGINS.'anliegerbeitraege/view/SVG_polygon_query_special_buffer.php')
 			?>
     </td>
   </tr>
@@ -102,6 +111,7 @@ function buildwktpolygonfromsvgpath(svgpath){
   <tr>
   	<td>Geometrieabfrage-Layer:<br>
   		<select name="layer_id" onchange="document.GUI.submit();">
+				<option value="0"> - alle - </option>
   			<?
   				for($i = 0; $i < count($this->queryable_postgis_layers['ID']); $i++){
   					echo '<option';
@@ -133,17 +143,17 @@ function buildwktpolygonfromsvgpath(svgpath){
   </tr>
   <tr>
   	<td></td>
-  	<td align="right"><input type="checkbox" name="always_draw" value="1" <?if($always_draw == 1 OR $always_draw == 'true')echo 'checked'; ?>>&nbsp;weiterzeichnen&nbsp;&nbsp;</td>
+  	<td align="right">
+			<input type="checkbox" name="always_draw" value="1" <?if($always_draw == 1 OR $always_draw == 'true')echo 'checked'; ?>>&nbsp;weiterzeichnen&nbsp;&nbsp;
+			<input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;Punktfang
+		</td>
   </tr>
 </table>
 <INPUT TYPE="HIDDEN" NAME="columnname" VALUE="<? echo $this->formvars['columnname']; ?>">
 <INPUT TYPE="HIDDEN" NAME="fromwhere" VALUE="<? echo $this->formvars['fromwhere']; ?>">
 <INPUT TYPE="HIDDEN" NAME="orderby" VALUE="<? echo $this->formvars['orderby']; ?>">
-<INPUT TYPE="HIDDEN" NAME="minx" VALUE="<?php echo $this->map->extent->minx; ?>"> 
-<INPUT TYPE="HIDDEN" NAME="miny" VALUE="<?php echo $this->map->extent->miny; ?>"> 
-<INPUT TYPE="HIDDEN" NAME="maxx" VALUE="<?php echo $this->map->extent->maxx; ?>"> 
-<INPUT TYPE="HIDDEN" NAME="maxy" VALUE="<?php echo $this->map->extent->maxy; ?>"> 
 <INPUT TYPE="HIDDEN" NAME="scale" VALUE="<?php echo $scale; ?>">    
 <INPUT TYPE="HIDDEN" NAME="go" VALUE="anliegerbeitraege" >
 <INPUT TYPE="HIDDEN" NAME="go_plus" VALUE="" >
+<INPUT TYPE="HIDDEN" NAME="oid" VALUE="<?php echo $this->formvars['oid']; ?>">
     	

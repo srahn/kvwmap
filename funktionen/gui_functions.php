@@ -63,6 +63,7 @@ function onload_functions(){
 	<? if($this->user->rolle->auto_map_resize){ ?>
 	window.onresize = function(){clearTimeout(doit);doit = setTimeout(resizemap2window, 200);};
 	<? } ?>
+	document.fullyLoaded = true;
 }
 
 var dragobjekt = null;
@@ -89,20 +90,24 @@ function stop(event){
 }
 
 function dragstart(element){
-  dragobjekt = element;
-  dragx = posx - dragobjekt.offsetLeft;
-  dragy = posy - dragobjekt.offsetTop;
+	if(document.fullyLoaded){
+		dragobjekt = element;
+		dragx = posx - dragobjekt.offsetLeft;
+		dragy = posy - dragobjekt.offsetTop;
+	}
 }
 
 function resizestart(element, type){
-	resizeobjekt = element;
-	resizetype = type;
-	dragx = posx - resizeobjekt.parentNode.offsetLeft;
-  dragy = posy - resizeobjekt.parentNode.offsetTop;
-  resizex = posx;
-  resizey = posy;
-	width = parseInt(resizeobjekt.offsetWidth);		// da style.width auf 100% steht
-	height = parseInt(resizeobjekt.offsetHeight);	// da style.height auf 100% steht
+	if(document.fullyLoaded){
+		resizeobjekt = element;
+		resizetype = type;
+		dragx = posx - resizeobjekt.parentNode.offsetLeft;
+		dragy = posy - resizeobjekt.parentNode.offsetTop;
+		resizex = posx;
+		resizey = posy;
+		width = parseInt(resizeobjekt.offsetWidth);		// da style.width auf 100% steht
+		height = parseInt(resizeobjekt.offsetHeight);	// da style.height auf 100% steht
+	}
 }
 
 
@@ -412,6 +417,12 @@ function selectgroupthema(group, instantreload){
     }
   }
 	if(instantreload)document.GUI.neuladen.click();
+}
+
+function zoomToMaxLayerExtent(zoom_layer_id){
+	console.log(currentform.go.value);
+	currentform.zoom_layer_id.value = zoom_layer_id;
+	overlay_submit(currentform);
 }
 
 /*Anne*/

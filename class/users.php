@@ -491,7 +491,7 @@ class account {
 			}
 			$sql.=' AND u_consumeALB.stelle_id = s.ID';
 			$sql.=' AND u_consumeALB.user_id = u.ID';
-			$sql.= ' AND format='.$rs['format'];
+			$sql.= " AND format='".$rs['format']."'";
 			if($rs['stelle_id'] != ''){
 				$sql.= ' AND u_consumeALB.stelle_id='.$rs['stelle_id'];
 			}
@@ -693,7 +693,8 @@ class user {
     foreach ($ips AS $ip) {
       if (trim($ip)!='') {
         $ip=trim($ip);
-        if (in_subnet($remote_addr,$ip)) {
+				if(!is_numeric(array_pop(explode('.', $ip))))$ip = gethostbyname($ip);			# für dyndns-Hosts
+        if (in_subnet($remote_addr, $ip)) {
           $this->debug->write('<br>IP:'.$remote_addr.' paßt zu '.$ip,4);
           #echo '<br>IP:'.$remote_addr.' paßt zu '.$ip;
           return 1;
@@ -946,6 +947,7 @@ class user {
 			if($formvars['zoomall']){$buttons .= 'zoomall,';}
 			if($formvars['recentre']){$buttons .= 'recentre,';}
 			if($formvars['jumpto']){$buttons .= 'jumpto,';}
+			if($formvars['coord_query']){$buttons .= 'coord_query,';}
 			if($formvars['query']){$buttons .= 'query,';}
 			if($formvars['touchquery']){$buttons .= 'touchquery,';}
 			if($formvars['queryradius']){$buttons .= 'queryradius,';}
@@ -1262,18 +1264,6 @@ class rolle {
     return 1;
   }
 
-  function getSelectedButton() {
-    # Eintragen des aktiven Button
-    $sql ='SELECT selectedButton FROM rolle';
-    $sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-    $this->debug->write("<p>file:users.php class:rolle->getSelectedButton - Abfragen des zuletzt gewählten Buttons aus dem Kartenfensters:<br>".$sql,4);
-    $query=mysql_query($sql,$this->database->dbConn);
-    if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-    $rs=mysql_fetch_array($query);
-    $this->selectedButton=$rs['selectedButton'];
-    return $this->selectedButton;
-  }
-
   function getLayer($LayerName) {
 		global $language;
     # Abfragen der Layer in der Rolle
@@ -1281,7 +1271,7 @@ class rolle {
 		if($language != 'german') {
 			$sql.='CASE WHEN `Name_'.$language.'` != "" THEN `Name_'.$language.'` ELSE `Name` END AS ';
 		}
-		$sql.='Name, l.Layer_ID, alias, Datentyp, Gruppe, pfad, maintable, Data, `schema`, document_path, labelitem, connection, printconnection, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs, wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, ul.`queryable`, ul.`drawingorder`, ul.`minscale`, ul.`maxscale`, ul.`offsite`, ul.`transparency`, ul.`postlabelcache`, `Filter`, CASE r2ul.gle_view WHEN \'0\' THEN \'generic_layer_editor.php\' WHEN \'1\' THEN \'generic_layer_editor_2.php\' ELSE ul.`template` END as template, `header`, `footer`, ul.`symbolscale`, ul.`logconsume`, ul.`requires`, ul.`privileg`, ul.`export_privileg`, `start_aktiv` FROM layer AS l, used_layer AS ul, u_rolle2used_layer as r2ul';
+		$sql.='Name, l.Layer_ID, alias, Datentyp, Gruppe, pfad, maintable, Data, `schema`, document_path, labelitem, connection, printconnection, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs, wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, ul.`queryable`, ul.`drawingorder`, ul.`minscale`, ul.`maxscale`, ul.`offsite`, ul.`transparency`, ul.`postlabelcache`, `Filter`, CASE r2ul.gle_view WHEN \'0\' THEN \'generic_layer_editor.php\' ELSE ul.`template` END as template, `header`, `footer`, ul.`symbolscale`, ul.`logconsume`, ul.`requires`, ul.`privileg`, ul.`export_privileg`, `start_aktiv` FROM layer AS l, used_layer AS ul, u_rolle2used_layer as r2ul';
     $sql.=' WHERE l.Layer_ID=ul.Layer_ID AND r2ul.Stelle_ID=ul.Stelle_ID AND r2ul.Layer_ID=ul.Layer_ID AND ul.Stelle_ID='.$this->stelle_id.' AND r2ul.User_ID='.$this->user_id;
     if ($LayerName!='') {
       $sql.=' AND (l.Name LIKE "'.$LayerName.'" ';
@@ -1292,13 +1282,17 @@ class rolle {
         $sql.=')';
       }
     }
-		$sql.=' ORDER BY ul.drawingorder';
+		$sql.=' ORDER BY ul.drawingorder desc';
     #echo $sql.'<br>';
     $this->debug->write("<p>file:users.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
     if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		$i = 0;
     while ($rs=mysql_fetch_array($query)) {
-      $layer[]=$rs;
+      $layer[$i]=$rs;
+			$layer['layer_ids'][$rs['Layer_ID']] =& $layer[$i];
+			$layer['layer_ids'][$layer[$i]['requires']]['required'] = $rs['Layer_ID'];
+			$i++;
     }
     return $layer;
   }
@@ -1484,6 +1478,7 @@ class rolle {
 				rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');	# der hat die Form, wie der timestamp in der PG-DB steht und wird für die Abfragen benutzt
 			}
 			else rolle::$hist_timestamp = $this->hist_timestamp = '';
+			$this->selectedButton=$rs['selectedButton'];
 			$buttons = explode(',', $rs['buttons']);
 			$this->back = in_array('back', $buttons);
 			$this->forward = in_array('forward', $buttons);
@@ -1492,6 +1487,7 @@ class rolle {
 			$this->zoomall = in_array('zoomall', $buttons);
 			$this->recentre = in_array('recentre', $buttons);
 			$this->jumpto = in_array('jumpto', $buttons);
+			$this->coord_query = in_array('coord_query', $buttons);			
 			$this->query = in_array('query', $buttons);
 			$this->queryradius = in_array('queryradius', $buttons);
 			$this->polyquery = in_array('polyquery', $buttons);
@@ -1631,13 +1627,12 @@ class rolle {
         $sql.=', stelle_id='.$this->stelle_id;
         $sql.=', time_id="'.$time.'"';
         $sql.=',activity="'.$activity.'"';
-        # 2006-09-29 pk
         if ($prevtime=="0000-00-00 00:00:00" OR $prevtime=='') {
           $prevtime=$time;
         }
         $sql.=',prev="'.$prevtime.'"';        
-        # 2006-02-16 pk
         $sql.=', nimagewidth='.$this->nImageWidth.',nimageheight='.$this->nImageHeight;
+				$sql.=", epsg_code='".$this->epsg_code."'";
         $sql.=', minx='.$this->oGeorefExt->minx.', miny='.$this->oGeorefExt->miny;
         $sql.=', maxx='.$this->oGeorefExt->maxx.', maxy='.$this->oGeorefExt->maxy;
         #echo $sql;
@@ -1864,7 +1859,7 @@ class rolle {
 	}
 
 	function getRollenLayer($LayerName, $typ = NULL) {
-    $sql ="SELECT l.*, -l.id as Layer_ID, l.query as pfad FROM rollenlayer AS l";
+    $sql ="SELECT l.*, -l.id as Layer_ID, l.query as pfad, 1 as queryable FROM rollenlayer AS l";
     $sql.=' WHERE l.stelle_id = '.$this->stelle_id.' AND l.user_id = '.$this->user_id;
     if ($LayerName!='') {
       $sql.=' AND (l.Name LIKE "'.$LayerName.'" ';
@@ -1899,6 +1894,15 @@ class rolle {
 			}
 			else{
 				$mapdb->deleteRollenLayer(-$layer_id);			# 1 Rollenlayer soll deaktiviert=gelöscht werden
+				# auch die Klassen und styles löschen
+				if($rollenlayerset[$i]['Class'] != ''){
+					foreach($rollenlayerset[$i]['Class'] as $class){
+						$mapdb->delete_Class($class['Class_ID']);
+						foreach($class['Style'] as $style){
+							$mapdb->delete_Style($style['Style_ID']);
+						}
+					}
+				}
 				return;
 			}
 		}
@@ -1931,6 +1935,12 @@ class rolle {
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
 
+	function resetClasses(){
+		$sql = 'DELETE FROM u_rolle2used_class WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+		$this->debug->write("<p>file:users.php class:rolle->resetQuerys - resetten aller aktiven Layer zur Rolle:",4);
+		$this->database->execSQL($sql,4, $this->loglevel);
+	}
+	
 	function setAktivLayer($formvars, $stelle_id, $user_id) {
 		$layer=$this->getLayer('');
 		$rollenlayer=$this->getRollenLayer('', NULL);
@@ -3573,14 +3583,27 @@ class stelle {
 	}
 
 	function getGemeindeIDs() {
-		$sql = 'SELECT Gemeinde_ID AS ID FROM stelle_gemeinden WHERE Stelle_ID = '.$this->id;
+		$sql = 'SELECT Gemeinde_ID, Gemarkung, Flur FROM stelle_gemeinden WHERE Stelle_ID = '.$this->id;
 		#echo $sql;
 		$this->debug->write("<p>file:users.php class:stelle->getGemeindeIDs - Lesen der GemeindeIDs zur Stelle:<br>".$sql,4);
 		$query=mysql_query($sql,$this->database->dbConn);
-		while($rs=mysql_fetch_array($query)) {
-			$liste[] = $rs;
+		if(mysql_num_rows($query) > 0){
+			$liste['ganze_gemeinde'] = Array();
+			$liste['eingeschr_gemeinde'] = Array();
+			$liste['ganze_gemarkung'] = Array();
+			$liste['eingeschr_gemarkung'] = Array();
+			while($rs=mysql_fetch_assoc($query)) {
+				if($rs['Gemarkung'] != ''){
+					$liste['eingeschr_gemeinde'][$rs['Gemeinde_ID']] = NULL;
+					if($rs['Flur'] != '')$liste['eingeschr_gemarkung'][$rs['Gemarkung']][] = $rs['Flur'];
+					else $liste['ganze_gemarkung'][$rs['Gemarkung']] = NULL;
+				}
+				else{
+					$liste['ganze_gemeinde'][$rs['Gemeinde_ID']] = NULL;
+				}
+			}
 		}
-		return $liste;
+		return $liste;		
 	}
 
 	function getGemeinden($database) {

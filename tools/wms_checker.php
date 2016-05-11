@@ -1,4 +1,4 @@
-<?
+<?php
 
 ########################################################################################################################################################################
 #																																																																																			 #
@@ -48,7 +48,13 @@ function checkStatus($request){
         $info = getExceptionCode($data);  
       }
       else{
-        $status = true;  
+				if(strpos($data, '‰PNG') === false AND strpos($data, 'JFIF') === false){
+					$status = false;
+					$info = substr($data, 0, 255);
+				}
+        else{
+					$status = true;  
+				}
       }
     }
   }
@@ -96,7 +102,10 @@ while($line = mysql_fetch_array($result)){
   $extent->project($wgsProjection, $userProjection);
   $bounding = implode(",", array($extent->minx, $extent->miny, $extent->maxx, $extent->maxy));
   
-  $url = $line["connection"]."&REQUEST=GetMap&EXCEPTIONS=XML&SRS=EPSG:".$line["epsg_code"]."&WIDTH=400&HEIGHT=400&BBOX=".$bounding;
+  $url = $line["connection"]."&SERVICE=WMS&REQUEST=GetMap&EXCEPTIONS=XML&SRS=EPSG:".$line["epsg_code"]."&WIDTH=400&HEIGHT=400&BBOX=".$bounding;
+	if(strpos(strtolower($line["connection"]), 'version=') === false)$url .= '&VERSION='.$line["wms_server_version"];
+	if(strpos(strtolower($line["connection"]), 'layers=') === false)$url .= '&LAYERS='.$line["wms_name"];
+	if(strpos(strtolower($line["connection"]), 'format=') === false)$url .= '&FORMAT='.$line["wms_format"];
   $status = checkStatus($url);
 	
 	if(!$status[0])$color = '#db5a5a';

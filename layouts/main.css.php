@@ -64,6 +64,7 @@ form {
 
 .px16{
 	font-size: 16px;
+	line-height: 16px;
 }
 
 .px17{
@@ -537,6 +538,7 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 .raster_record .tr_hide select{font-size: 0.0001px !important;width:0.0001px;transition: all 0.25s ease;}
 .raster_record .tr_hide select:focus{display:none;width:0.0001px;transition: all 0.25s ease;}
 .raster_record .tr_hide input{width:0.0001px;font-size: 0.0001px;height:0.0001px;transition: all 0.25s ease;}
+.raster_record .tr_hide input[type=checkbox]{display:none;width:12px;font-size: 15px;height:12px;transition: all 0.25s ease;}
 .raster_record .tr_hide textarea{font-size: 0.0001px !important;transition: all 0.25s ease;}
 .raster_record .tr_hide div{min-width: 0.0001px !important;}
 /* Attribute, die eingeblendet werden sollen: */
@@ -559,6 +561,7 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 .raster_record_open td{line-height: 16px;padding: 2px;transition: all 0.25s ease;}
 .raster_record_open a{font-size: 15px;transition: all 0.25s ease;}
 .raster_record_open input{width:200px;font-size: 15px;height:22px;transition: all 0.25s ease;}
+.raster_record_open input[type=checkbox]{width:12px;font-size: 15px;height:12px;transition: all 0.25s ease;}
 .raster_record_open textarea{font-size: 15px;transition: all 0.25s ease;}
 .raster_record_open .tr_show #formelement{width: 100%;overflow: visible}
 .raster_record_open .tr_show input[type=file]{width:290px;font-size: 15px;height:22px;transition: all 0.25s ease;}
@@ -584,56 +587,59 @@ a:hover .preview_image{width: <? echo PREVIEW_IMAGE_WIDTH; ?>px;transition: all 
 .message_box_visible{
   opacity: 1;
   position: absolute;
-  top:40%;
-  left:50%;
-  width:250px;
-  height:90px;
+  top:350px;
+  left:45%;
+  min-width:250px;
+  #height:90px;
 	font-size: 17px;
 	font-family: SourceSansPro2;
 	margin:-45px 0 0 -100px;
+	padding: 20px;
   text-align:center;
-	line-height: 90px;
+	line-height: 20px;
   border: 1px solid grey;
   background-color: #DAE4EC;
 	box-shadow: 0px 0px 14px #777;
-	z-index: 1000;
+	z-index: 1000000;
 }
 
 .message_box_hide{
 	opacity: 0;
 	transition: opacity 2s ease-out;
   position: absolute;
-  top:40%;
-  left:50%;
-  width:250px;
-  height:90px;
+  top:350px;
+  left:45%;
+  min-width:250px;
+  #height:90px;
 	font-size: 17px;
 	font-family: SourceSansPro2;
 	margin:-45px 0 0 -100px;
+	padding: 20px;
   text-align:center;
-	line-height: 90px;
+	line-height: 20px;
   border: 1px solid grey;
   background-color: #DAE4EC;
 	box-shadow: 0px 0px 14px #777;
-	z-index: 1000;
+	z-index: 1000000;
 }
 
 .message_box_hidden{
 	display: none;
   position: absolute;
-  top:40%;
-  left:50%;
-  width:250px;
-  height:90px;
+  top:350;
+  left:45%;
+  min-width:250px;
+  #height:90px;
 	margin:-45px 0 0 -100px;
   text-align:center;
+	padding: 20px;
 	font-size: 17px;
 	font-family: SourceSansPro2;
-	line-height: 90px;
+	line-height: 20px;
   border: 1px solid grey;
   background-color: #DAE4EC;
 	box-shadow: 0px 0px 14px #777;
-	z-index: 1000;
+	z-index: 1000000;
 }
 
 table.tgle {
@@ -648,6 +654,18 @@ thead.gle th {
  text-align:left;
 }
 
+.gle_attribute_name { 
+ padding-left: 2px;
+ padding-right: 2px;
+ vertical-align: top;
+ background-color: <? echo BG_GLEATTRIBUTE; ?>;
+}
+
+.gle_attribute_value { 
+ padding-left: 4px;
+ padding-right: 5px;
+}
+
 tbody.gle tr { 
  border:1px dotted gray;
 }
@@ -655,6 +673,16 @@ tbody.gle tr {
 tbody.gle tr:hover { 
  border:1px solid #03476F;
 }
+
+
+.gle1_table{
+    border-collapse: collapse;
+}
+
+.gle1_table>tbody>tr>td{
+    border: 1px solid grey;
+}
+
 
 #calendar { /* Fuer IE <= 6 */
 	text-align: center;
