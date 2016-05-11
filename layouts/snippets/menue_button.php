@@ -153,8 +153,8 @@
                   }
 									echo'
 													<tr>
-														<td>
-															<img src="'.GRAPHICSPATH.'leer.gif" width="17" height="1" border="0">
+														<td valign="top">
+															<img src="'.GRAPHICSPATH.'submenue.png" width="17" height="17" border="0">
 							</td>
 							<td>';
 									?>

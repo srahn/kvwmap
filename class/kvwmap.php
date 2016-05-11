@@ -3474,7 +3474,7 @@ class GUI {
 					$this->formvars['newpath'] = $this->polygon['svggeom'];
 					$this->formvars['firstpoly'] = 'true';
 					if($this->formvars['zoom'] != 'false'){
-						$rect = $polygoneditor->zoomTopolygon($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], 10);
+						$rect = $polygoneditor->zoomTopolygon($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], NULL);
 						$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
 						if (MAPSERVERVERSION > 600) {
 							$this->map_scaledenom = $this->map->scaledenom;
@@ -3989,7 +3989,7 @@ class GUI {
     	}
       $this->loadMap('DataBase');
       # Polygon abfragen und Extent setzen
-      $rect = $polygoneditor->zoomTopolygon($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], 10);
+      $rect = $polygoneditor->zoomTopolygon($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], NULL);
       $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
 			
 			# damit nicht außerhalb des Stellen-Extents gezoomt wird
@@ -7833,7 +7833,7 @@ class GUI {
 									$this->formvars['newpath'] = $this->polygon['svggeom'];
 									$this->formvars['firstpoly'] = 'true';
 									if($this->formvars['zoom'] != 'false'){
-										$rect = $polygoneditor->zoomTopolygon($oid, $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], 10);
+										$rect = $polygoneditor->zoomTopolygon($oid, $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], NULL);
 										$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
 										if (MAPSERVERVERSION > 600) {
 											$this->map_scaledenom = $this->map->scaledenom;

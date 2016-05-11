@@ -344,7 +344,12 @@ function isPasswordValide($oldPassword,$newPassword,$newPassword2) {
   }
 
   if($check == 0 and $strlen > PASSWORD_MAXLENGTH) {
-    $password_errors[] = "ist zu lang";
+    $password_errors[] = "ist zu lang (maximal ".PASSWORD_MAXLENGTH." Zeichen)";
+    $check = 1;
+  }
+	
+  if($check == 0 and $strlen < PASSWORD_MINLENGTH) {
+    $password_errors[] = "ist zu kurz (mindestens ".PASSWORD_MINLENGTH." Zeichen)";
     $check = 1;
   }
 
