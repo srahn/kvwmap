@@ -1,5 +1,6 @@
 ﻿<?php
   $strAsteriskRequired="Cần điền đủ thông tin cho những trường có dấu *";  
+	$strClassItem="Classitem";
   $strDataBankID="Số ID cơ sở dữ liệu*";
   $strName="Tên*";
   $strDataType="Kiểu dữ liệu*";

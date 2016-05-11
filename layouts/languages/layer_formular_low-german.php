@@ -1,12 +1,12 @@
 ﻿<?php
   $strAsteriskRequired="Weerte mit een * mööst du indragen";
+	$strClassItem="Classitem";
   $strLayerID="Layer ID*";
   $strName="Naam*";
   $strDataType="Datentyp*";
   $strGroup="Grupp*";
   $strPath="Padd";
   $strData="Data";
-  $strLayerParams="Layer Parameter";
   $strTileIndex="Tileindex";
   $strTileItem="Tileitem";
   $strLabelAngleItem="Labelangleitem";

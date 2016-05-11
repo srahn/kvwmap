@@ -1,12 +1,12 @@
 ﻿<?php
   $strAsteriskRequired="wartości oznaczone * muszą zostać wpisane";
-  $strDataBankID="warstwa ID*"; 
+	$strClassItem="Classitem";
+  $strDataBankID="warstwa ID*";
   $strName="nazwa*"; 
   $strDataType="rodzaj danych*"; 
   $strGroup="grupa*"; 
   $strPath="ścieżka"; 
   $strData="dane";
-  $strLayerParams="parametry warstw";
   $strTileIndex="Tileindex";
   $strTileItem="Tileitem";
   $strLabelAngleItem="powierzchnia etykiety"; 

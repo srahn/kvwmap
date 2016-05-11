@@ -1,12 +1,12 @@
 ﻿<?php
   $strAsteriskRequired="Werte mit * mussen eingetragen werden";
+	$strClassItem="Classitem";
 	$strLayerID="Layer ID*";
   $strName="Name";
   $strDataType="Datentyp*";
   $strGroup="Gruppe*";
   $strPath="Query";
   $strData="Data";
-  $strLayerParams="Layer Parameter";
   $strTileIndex="Tileindex";
   $strTileItem="Tileitem";
   $strLabelAngleItem="Labelangleitem";

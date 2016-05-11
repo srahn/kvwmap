@@ -1,12 +1,12 @@
 ﻿<?php
   $strAsteriskRequired="Fields marked with an asterisk * are required";
+	$strClassItem="Classitem";
   $strLayerID="Layer ID*";
   $strName="Name";
   $strDataType="Datatype*";
   $strGroup="Group";
   $strPath="Query";
   $strData="Data";
-  $strLayerParams="Layer parameters";
   $strTileIndex="Tileindex";
   $strTileItem="Tileitem";
   $strLabelAngleItem="Labelangleitem";
