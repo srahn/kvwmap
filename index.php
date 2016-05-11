@@ -149,7 +149,17 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 		case 'getNBH' : {
 			$GUI->getNBH();
 		}break;
-				
+
+		case 'setLayerParams' : {
+			$GUI->setLayerParams();
+#			$GUI->user->rolle->readSettings();
+			$GUI->loadMap('DataBase');
+			$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+			$GUI->drawMap();
+			$GUI->saveMap('');
+			$GUI->output();
+		} break;
+
 		case 'changemenue' : {
 			$GUI->changemenue($GUI->formvars['id'], $GUI->formvars['status']);
 			$GUI->loadMap('DataBase');
@@ -406,15 +416,6 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			}
 			header('Location: '.$locationStr);
 	  } break;
-
-		case 'update_params' : {
-			$GUI->update_params();
-			$GUI->loadMap('DataBase');
-			$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-			$GUI->drawMap();
-			$GUI->saveMap('');
-			$GUI->output();
-		} break;
 
 	  case 'Flurstuecks-CSV-Export' : {
 			$GUI->export_flurst_csv();

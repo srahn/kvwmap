@@ -405,13 +405,6 @@ else {
 							</select>
 		  		</td>
 		  	</tr>
-				<tr>
-					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLayerParams; ?></th>
-					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
-						<textarea name="default_params" cols="50" rows="1" maxlength="255"><? echo $this->layerdata['default_params']; ?></textarea>&nbsp;&nbsp;<img src="<?php echo GRAPHICSPATH;?>icon_i.png" onMouseOver="stm(Text[5], Style[0], document.getElementById('TipLayer6'))" onmouseout="htm()">
-						<div id="TipLayer6" style="visibility:hidden;position:absolute;z-index:1000;"></div>
-					</td>
-				</tr>
 		  </table>
 		  <br>
     	<a name="stellenzuweisung"></a>
@@ -544,6 +537,7 @@ else {
 				}		?>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strExpression; ?></td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strText; ?></td>
+				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strClassItem; ?></td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strSignOrder; ?></td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><?php echo $strDelete; ?></td>
 	<!--			<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">ändern</td>  -->
@@ -562,9 +556,10 @@ else {
 				}
 				echo '<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><textarea name="expression['.$this->classes[$i]['Class_ID'].']" cols="28" rows="3">'.$this->classes[$i]['Expression'].'</textarea></td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><textarea name="text['.$this->classes[$i]['text'].']" cols="18" rows="3">'.$this->classes[$i]['text'].'</textarea></td>
+				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><input type="text" name="class_item['.$this->classes[$i]['Class_ID'].']" size="18" value="' . $this->classes[$i]['class_item'] . '"></td>
 				<td align="center" style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><input size="3" type="text" name="order['.$this->classes[$i]['Class_ID'].']" value="'.$this->classes[$i]['drawingorder'].'"></td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3"><a href="javascript:Bestaetigung(\'index.php?go=Layereditor_Klasse_Löschen&class_id='.$this->classes[$i]['Class_ID'].'&selected_layer_id='.$this->formvars['selected_layer_id'].'#Klassen\', \''.$this->strDeleteWarningMessage.'\');">'.$this->strDelete.'</a></td>
-			</tr>						
+			</tr>
 				';
 			}
 			?>

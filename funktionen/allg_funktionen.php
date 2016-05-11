@@ -1358,19 +1358,10 @@ function formvars_strip($formvars, $strip_list) {
 * als key übergeben werden durch die values von $params
 */
 function replace_params($str, $params) {
-  #echo '<p>String vorher:<br>' . $str;
-  #echo '<p>Params:<br>' . $params;
-  $parts = explode(',', $params);
-  foreach ($parts AS $part) {
-    $param = explode(':', $part);
-		#echo '<p>Replace: ' . '$' . trim($param[0], ' "') . ' by ' . trim($param[1], ' "');
-    $str = str_replace(
-      '$' . trim($param[0], ' "'),
-      trim($param[1], ' "'),
-      $str
-    );
-  }
-  #echo '<p>String nachher:<br>' . $str;
+	foreach ($params AS $key => $value) {
+		#echo '<br>Replace: ' . '$' . $key . ' by ' . $value;
+		$str = str_replace('$' . $key, $value, $str);
+	}
   return $str;
 }
 

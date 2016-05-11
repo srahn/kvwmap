@@ -1,20 +1,4 @@
-<?function replace_params($str, $params) {
-  #echo '<p>String vorher:<br>' . $str;
-  #echo '<p>Params:<br>' . $params;
-  $parts = explode(',', $params);
-  foreach ($parts AS $part) {
-    $param = explode(':', $part);
-		#echo '<p>Replace: ' . '$' . trim($param[0], ' "') . ' by ' . trim($param[1], ' "');
-    $str = str_replace(
-      '$' . trim($param[0], ' "'),
-      trim($param[1], ' "'),
-      $str
-    );
-  }
-  #echo '<p>String nachher:<br>' . $str;
-  return $str;
-}
-function in_subnet($ip,$net) {
+<?function in_subnet($ip,$net) {
 	$ipparts=explode('.',$ip);
 	$netparts=explode('.',$net);
 
@@ -48,12 +32,12 @@ function in_subnet($ip,$net) {
 	}
 	return 0;
 }
-function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
-  $passwordSettingUnixTime=strtotime($passwordSettingTime); # Unix Zeit in Sekunden an dem das Passwort gesetzt wurde
-  $allowedPasswordAgeDays=round($allowedPassordAgeMonth*30.5); # Zeitintervall, wie alt das Password sein darf in Tagen
-  $passwordAgeDays=round((time()-$passwordSettingUnixTime)/60/60/24); # Zeitinterval zwischen setzen des Passwortes und aktueller Zeit in Tagen
-  $allowedPasswordAgeRemainDays=$allowedPasswordAgeDays-$passwordAgeDays; # Zeitinterval wie lange das Passwort noch gilt in Tagen
-	return $allowedPasswordAgeRemainDays; // Passwort ist abgelaufen wenn Wert < 1  
+function replace_params($str, $params) {
+	foreach ($params AS $key => $value) {
+		#echo '<br>Replace: ' . '$' . $key . ' by ' . $value;
+		$str = str_replace('$' . $key, $value, $str);
+	}
+  return $str;
 }
 function strip_pg_escape_string($string){
 	$string = str_replace("''", "'", $string);
@@ -445,7 +429,7 @@ function in_subnet($ip,$net) {
 						$layer->set('debug',MS_ON);
 						
 						# fremde Layer werden auf Verbindung getestet 
-						if($layerset[$i]['aktivStatus'] != 0 AND $layerset[$i]['connectiontype'] == 6 AND strpos($layerset[$i]['connection'], 'host') !== false AND strpos($layerset[$i]['connection'], 'host=localhost') === false){
+						if($layerset[$i]['aktivStatus'] != 0 AND $layerset[$i]['connectiontype'] == 6 AND strpos($layerset[$i]['connection'], 'host') !== false AND strpos($layerset[$i]['connection'], 'host=localhost') === false AND strpos($layerset[$i]['connection'], 'host=pgsql') === false){
 						$connection = explode(' ', trim($layerset[$i]['connection']));
 								for($j = 0; $j < count($connection); $j++){
 								if($connection[$j] != ''){
@@ -550,7 +534,12 @@ function in_subnet($ip,$net) {
             }
 						if ($layerset[$i]['postlabelcache'] != 0) {
 							$layer->set('postlabelcache',$layerset[$i]['postlabelcache']);
-						}						if($layerset[$i]['Datentyp'] == MS_LAYER_POINT AND $layerset[$i]['cluster_maxdistance'] != ''){							$layer->cluster->maxdistance = $layerset[$i]['cluster_maxdistance'];							$layer->cluster->region = 'ellipse';						}
+						}
+						
+						if($layerset[$i]['Datentyp'] == MS_LAYER_POINT AND $layerset[$i]['cluster_maxdistance'] != ''){
+							$layer->cluster->maxdistance = $layerset[$i]['cluster_maxdistance'];
+							$layer->cluster->region = 'ellipse';
+						}
                 
             if ($layerset[$i]['Datentyp']=='3') {
               if($layerset[$i]['transparency'] != ''){
@@ -578,8 +567,7 @@ function in_subnet($ip,$net) {
               if($layerset[$i]['Data'] != ''){
 								$layerset[$i]['Data'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[$i]['Data']);
 								$layerset[$i]['Data'] = str_replace('$language', $this->user->rolle->language, $layerset[$i]['Data']);
-								$layerset[$i]['Data'] = replace_params($layerset[$i]['Data'], $this->user->rolle->layer_params);
-
+								$layerset[$i]['Data'] = replace_params($layerset[$i]['Data'], rolle::$layer_params);
                 $layer->set('data', $layerset[$i]['Data']);
               }
   
@@ -807,7 +795,7 @@ function in_subnet($ip,$net) {
 
         if($this->map_factor != '' and $layerset['Datentyp'] != 8){ 
           # Skalierung der Stylegröße, wenn map_factor gesetzt und nicht vom Type Chart
-          $style->set('size', $dbStyle['size']*$this->map_factor);
+          $style->set('size', $dbStyle['size']*$this->map_factor/1.414);
         }
         else{
           $style->set('size', $dbStyle['size']);
@@ -815,7 +803,7 @@ function in_subnet($ip,$net) {
 
         if ($dbStyle['minsize']!='') {
           if($this->map_factor != ''){
-            $style -> set('minsize',$dbStyle['minsize']*$this->map_factor);
+            $style -> set('minsize',$dbStyle['minsize']*$this->map_factor/1.414);
           }
           else{
             $style -> set('minsize',$dbStyle['minsize']);
@@ -824,7 +812,7 @@ function in_subnet($ip,$net) {
 
         if ($dbStyle['maxsize']!='') {
           if($this->map_factor != ''){
-            $style -> set('maxsize',$dbStyle['maxsize']*$this->map_factor);
+            $style -> set('maxsize',$dbStyle['maxsize']*$this->map_factor/1.414);
           }
           else{
             $style -> set('maxsize',$dbStyle['maxsize']);
@@ -847,7 +835,7 @@ function in_subnet($ip,$net) {
             $style -> set('antialias',$dbStyle['antialias']);
           }
           if($this->map_factor != ''){
-            $style -> set('width',$dbStyle['width']*$this->map_factor);
+            $style -> set('width',$dbStyle['width']*$this->map_factor/1.414);
           }
           else{
             $style->set('width',$dbStyle['width']);
@@ -856,7 +844,7 @@ function in_subnet($ip,$net) {
 
         if ($dbStyle['minwidth']!='') {
           if($this->map_factor != ''){
-            $style->set('minwidth',$dbStyle['minwidth']*$this->map_factor);
+            $style->set('minwidth',$dbStyle['minwidth']*$this->map_factor/1.414);
           }
           else{
             $style->set('minwidth',$dbStyle['minwidth']);
@@ -865,7 +853,7 @@ function in_subnet($ip,$net) {
 
         if ($dbStyle['maxwidth']!='') {
           if($this->map_factor != ''){
-            $style->set('maxwidth',$dbStyle['maxwidth']*$this->map_factor);
+            $style->set('maxwidth',$dbStyle['maxwidth']*$this->map_factor/1.414);
           }
           else{
             $style->set('maxwidth',$dbStyle['maxwidth']);
@@ -878,7 +866,8 @@ function in_subnet($ip,$net) {
         if ($dbStyle['color']!='') {
           $RGB=explode(" ",$dbStyle['color']);
           if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
-          if(is_numeric($RGB[0]))$style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);					else $style->updateFromString("STYLE COLOR [".$dbStyle['color']."] END");
+          if(is_numeric($RGB[0]))$style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+					else $style->updateFromString("STYLE COLOR [".$dbStyle['color']."] END");
         }
 				if($dbStyle['opacity'] != '') {		# muss nach color gesetzt werden
 					$style->set('opacity', $dbStyle['opacity']);
@@ -960,9 +949,9 @@ function in_subnet($ip,$net) {
           $klasse->label->set('maxsize',$dbLabel['maxsize']);
           # Skalierung der Labelschriftgröße, wenn map_factor gesetzt
           if($this->map_factor != ''){
-            $klasse->label->set('minsize',$dbLabel['minsize']*$this->map_factor);
-            $klasse->label->set('maxsize',$dbLabel['size']*$this->map_factor);
-            $klasse->label->set('size',$dbLabel['size']*$this->map_factor);
+            $klasse->label->set('minsize',$dbLabel['minsize']*$this->map_factor/1.414);
+            $klasse->label->set('maxsize',$dbLabel['size']*$this->map_factor/1.414);
+            $klasse->label->set('size',$dbLabel['size']*$this->map_factor/1.414);
           }
           if ($dbLabel['position']!='') {
             switch ($dbLabel['position']){
@@ -1069,9 +1058,9 @@ function in_subnet($ip,$net) {
           $label->maxsize = $dbLabel['maxsize'];
           # Skalierung der Labelschriftgröße, wenn map_factor gesetzt
           if($this->map_factor != ''){
-            $label->minsize = $dbLabel['minsize']*$this->map_factor;
-            $label->maxsize = $dbLabel['size']*$this->map_factor;
-            $label->size = $dbLabel['size']*$this->map_factor;
+            $label->minsize = $dbLabel['minsize']*$this->map_factor/1.414;
+            $label->maxsize = $dbLabel['size']*$this->map_factor/1.414;
+            $label->size = $dbLabel['size']*$this->map_factor/1.414;
           }
           if ($dbLabel['position']!='') {
             switch ($dbLabel['position']){
@@ -1131,11 +1120,14 @@ function in_subnet($ip,$net) {
       case "zoomin" : {
         $this->user->rolle->setSelectedButton('zoomin');
         $this->zoomMap($this->user->rolle->nZoomFactor);
-			} break;			case "zoomin_wheel" : {        $this->zoomMap($this->user->rolle->nZoomFactor);      } break;
+      } break;
+			case "zoomin_wheel" : {
+        $this->zoomMap($this->user->rolle->nZoomFactor);
+      } break;
       case "zoomout" : {
         $this->user->rolle->setSelectedButton('zoomout');
         $this->zoomMap($this->user->rolle->nZoomFactor*-1);
-      } break;
+      } break;			
       case "recentre" : {
         $this->user->rolle->setSelectedButton('recentre');
         $this->zoomMap(1);
@@ -1208,7 +1200,16 @@ function in_subnet($ip,$net) {
       $this->debug->write('<br>Es wird auf einen Punkt gezoomt',4);
       # Erzeugen eines Punktobjektes
       $oPixelPos=ms_newPointObj();
-			
+						
+			if($this->formvars['epsg_code'] != '' AND $this->formvars['epsg_code'] != $this->user->rolle->epsg_code){
+				$oPixelPos->setXY($minx,$maxy);
+				$projFROM = ms_newprojectionobj("init=epsg:".$this->formvars['epsg_code']);
+				$projTO = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);
+				$oPixelPos->project($projFROM, $projTO);
+				$minx = $oPixelPos->x;
+				$maxy = $oPixelPos->y;
+			}
+						
       if($this->formvars['CMD'] != 'jump_coords'){
         $oPixelPos->setXY($minx,$maxy);
         $this->map->zoompoint($nZoomFactor,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
@@ -1280,6 +1281,9 @@ function in_subnet($ip,$net) {
         $this->user->rolle->set_one_Group($this->user->id, $this->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
         $this->loadMap('DataBase');
 
+				if($this->map->scaledenom > COORD_ZOOM_SCALE){
+					$this->map->zoomscale(COORD_ZOOM_SCALE/4,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
+				}
         # hier wurden Weltkoordinaten übergeben
         $this->pixwidth = ($this->map->extent->maxx - $this->map->extent->minx)/$this->map->width;
         $pixel_x = ($minx-$this->map->extent->minx)/$this->pixwidth;
@@ -1433,21 +1437,6 @@ function in_subnet($ip,$net) {
 	  }
     return $Lagebezeichnung;
   }
-  function getFlurbezeichnung($epsgcode) {
-    $Flurbezeichnung = '';
- 	  $flur = new Flur('','','',$this->pgdatabase);
-		$bildmitte['rw']=($this->map->extent->maxx+$this->map->extent->minx)/2;
-		$bildmitte['hw']=($this->map->extent->maxy+$this->map->extent->miny)/2;
-		$ret=$flur->getBezeichnungFromPosition($bildmitte, $epsgcode);
-		if ($ret[0]) {
-		}
-		else {
-			if ($ret[1]['flur'] != '') {
-				$Flurbezeichnung = $ret[1];
-			}
-		}
-		return $Flurbezeichnung;
-  }
   function output() {
 	  foreach($this->formvars as $key => $value){
 			#if(is_string($value))$this->formvars[$key] = stripslashes($value);
@@ -1470,6 +1459,9 @@ function in_subnet($ip,$net) {
           $this->user->rolle->gui='gui.php';
         }
         include (LAYOUTPATH.$this->user->rolle->gui);
+				if($this->alert != ''){
+					echo '<script type="text/javascript">alert("'.$this->alert.'");</script>';			# manchmal machen alert-Ausgaben über die allgemeinde Funktioen showAlert Probleme, deswegen am besten erst hier am Ende ausgeben
+				}
       } break;
 			case 'overlay_html' : {
 				$this->overlaymain = $this->main;
@@ -1664,8 +1656,9 @@ function in_subnet($ip,$net) {
     $ips=explode(';',$this->ips);
     foreach ($ips AS $ip) {
       if (trim($ip)!='') {
-        $ip=trim($ip);				if(!is_numeric(array_pop(explode('.', $ip))))$ip = gethostbyname($ip);			# für dyndns-Hosts
-        if (in_subnet($remote_addr,$ip)) {
+        $ip=trim($ip);
+				if(!is_numeric(array_pop(explode('.', $ip))))$ip = gethostbyname($ip);			# für dyndns-Hosts
+        if (in_subnet($remote_addr, $ip)) {
           $this->debug->write('<br>IP:'.$remote_addr.' paßt zu '.$ip,4);
           #echo '<br>IP:'.$remote_addr.' paßt zu '.$ip;
           return 1;
@@ -1717,7 +1710,7 @@ function in_subnet($ip,$net) {
     $this->alb_raumbezug=$rs["alb_raumbezug"];
     $this->alb_raumbezug_wert=$rs["alb_raumbezug_wert"];
     $this->wasserzeichen=$rs["wasserzeichen"];
-    $this->pgdbhost=$rs["pgdbhost"];
+    $this->pgdbhost = ($rs["pgdbhost"] == 'PGSQL_PORT_5432_TCP_ADDR') ? getenv('PGSQL_PORT_5432_TCP_ADDR') : $rs["pgdbhost"];
     $this->pgdbname=$rs["pgdbname"];
     $this->pgdbuser=$rs["pgdbuser"];
     $this->pgdbpasswd=$rs["pgdbpasswd"];
@@ -1736,6 +1729,7 @@ function in_subnet($ip,$net) {
     $this->checkPasswordAge=$rs["check_password_age"];
     $this->allowedPasswordAge=$rs["allowed_password_age"];
     $this->useLayerAliases=$rs["use_layer_aliases"];
+		$this->selectable_layer_params = $rs['selectable_layer_params'];
   }
   function checkClientIpIsOn() {
     $sql ='SELECT check_client_ip FROM stelle WHERE ID = '.$this->id;
@@ -1749,7 +1743,7 @@ function in_subnet($ip,$net) {
     }
     return 0;
   }
-}class rolle {  var $user_id;  var $stelle_id;  var $debug;  var $database;  var $loglevel;  static $hist_timestamp;	function rolle($user_id,$stelle_id,$database) {
+}class rolle {  var $user_id;  var $stelle_id;  var $debug;  var $database;  var $loglevel;  static $hist_timestamp;  static $layer_params;	function rolle($user_id,$stelle_id,$database) {
 		global $debug;
 		$this->debug=$debug;
 		$this->user_id=$user_id;
@@ -1762,7 +1756,15 @@ function in_subnet($ip,$net) {
   function readSettings() {
 		global $language;
     # Abfragen und Zuweisen der Einstellungen der Rolle
-    $sql ='SELECT * FROM rolle WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+    $sql = "
+			SELECT
+				*
+			FROM
+				rolle
+			WHERE
+				user_id = " . $this->user_id . " AND
+				stelle_id = " . $this->stelle_id . "
+		";
     #echo $sql;
     $this->debug->write("<p>file:users.php class:rolle function:readSettings - Abfragen der Einstellungen der Rolle:<br>".$sql,4);
     $query=mysql_query($sql,$this->database->dbConn);
@@ -1771,7 +1773,7 @@ function in_subnet($ip,$net) {
       return 0;
     }
 		if(mysql_num_rows($query) > 0){
-			$rs=mysql_fetch_assoc($query);
+			$rs = mysql_fetch_assoc($query);
 			$this->oGeorefExt=ms_newRectObj();
 			$this->oGeorefExt->setextent($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
 			$this->nImageWidth=$rs['nImageWidth'];
@@ -1804,11 +1806,14 @@ function in_subnet($ip,$net) {
 			$this->overlayy=$rs['overlayy'];
 			$this->instant_reload=$rs['instant_reload'];
 			$this->menu_auto_close=$rs['menu_auto_close'];
+			rolle::$layer_params = (array)json_decode('{' . $rs['layer_params'] . '}');
 			if($rs['hist_timestamp'] != ''){
 				$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');			# der wird zur Anzeige des Timestamps benutzt
 				rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');	# der hat die Form, wie der timestamp in der PG-DB steht und wird für die Abfragen benutzt
 			}
-			else rolle::$hist_timestamp = $this->hist_timestamp = '';
+			else
+				rolle::$hist_timestamp = $this->hist_timestamp = '';
+			$this->selectedButton=$rs['selectedButton'];
 			$buttons = explode(',', $rs['buttons']);
 			$this->back = in_array('back', $buttons);
 			$this->forward = in_array('forward', $buttons);
@@ -1817,6 +1822,7 @@ function in_subnet($ip,$net) {
 			$this->zoomall = in_array('zoomall', $buttons);
 			$this->recentre = in_array('recentre', $buttons);
 			$this->jumpto = in_array('jumpto', $buttons);
+			$this->coord_query = in_array('coord_query', $buttons);			
 			$this->query = in_array('query', $buttons);
 			$this->queryradius = in_array('queryradius', $buttons);
 			$this->polyquery = in_array('polyquery', $buttons);
@@ -1863,13 +1869,12 @@ function in_subnet($ip,$net) {
         $sql.=', stelle_id='.$this->stelle_id;
         $sql.=', time_id="'.$time.'"';
         $sql.=',activity="'.$activity.'"';
-        # 2006-09-29 pk
         if ($prevtime=="0000-00-00 00:00:00" OR $prevtime=='') {
           $prevtime=$time;
         }
         $sql.=',prev="'.$prevtime.'"';        
-        # 2006-02-16 pk
-        $sql.=', nimagewidth='.$this->nImageWidth.',nimageheight='.$this->nImageHeight;				$sql.=", epsg_code='".$this->epsg_code."'";
+        $sql.=', nimagewidth='.$this->nImageWidth.',nimageheight='.$this->nImageHeight;
+				$sql.=", epsg_code='".$this->epsg_code."'";
         $sql.=', minx='.$this->oGeorefExt->minx.', miny='.$this->oGeorefExt->miny;
         $sql.=', maxx='.$this->oGeorefExt->maxx.', maxy='.$this->oGeorefExt->maxy;
         #echo $sql;
@@ -2024,9 +2029,14 @@ function in_subnet($ip,$net) {
   function open() {
   	if($this->port == '') $this->port = 5432;
     #$this->debug->write("<br>Datenbankverbindung öffnen: Datenbank: ".$this->dbName." User: ".$this->user,4);
-		$connect_string = 'dbname='.$this->dbName.' port='.$this->port.' user='.$this->user.' password='.$this->passwd;
-		if($this->host != 'localhost' AND $this->host != '127.0.0.1')$connect_string .= ' host='.$this->host;		// das beschleunigt den Connect extrem
-    $this->dbConn=pg_connect($connect_string);
+		$this->connect_string = '' .
+      'dbname='. $this->dbName .
+      ' port=' . $this->port .
+      ' user=' . $this->user .
+      ' password=' . $this->passwd;
+		if($this->host != 'localhost' AND $this->host != '127.0.0.1')
+      $this->connect_string .= ' host=' . $this->host; // das beschleunigt den Connect extrem
+    $this->dbConn = pg_connect($this->connect_string);
     $this->debug->write("Datenbank mit Connection_ID: ".$this->dbConn." geöffnet.",4);
     # $this->version = pg_version($this->dbConn); geht erst mit PHP 5
     $this->version = POSTGRESVERSION;
@@ -2062,8 +2072,10 @@ function in_subnet($ip,$net) {
       $query=pg_query($this->dbConn,$sql);
       //$query=0;
       if ($query==0) {
+				$errormessage = pg_last_error($this->dbConn);
+				header('error: true');		// damit ajax-Requests das auch mitkriegen
         $ret[0]=1;
-        $ret[1]="Fehler bei SQL Anweisung:<br>".$sql."<br>".pg_result_error($query);
+        $ret[1]="Fehler bei SQL Anweisung:<br><br>\n\n".$sql."\n\n<br><br>".$errormessage;
         echo "<br><b>".$ret[1]."</b>";
         $this->debug->write("<br><b>".$ret[1]."</b>",$debuglevel);
         if ($logsql) {
@@ -2113,7 +2125,7 @@ function in_subnet($ip,$net) {
     $ret = $this->execSQL($sql, 4, 0);		
     if($ret[0]==0){
 			$i = 0;
-      while($row = pg_fetch_array($ret[1])){
+      while($row = pg_fetch_assoc($ret[1])){
       	if($row['alias'] != ''){
       		$row['srtext'] = $row['alias'];
       	}
@@ -2129,16 +2141,18 @@ function in_subnet($ip,$net) {
       }
     }
     return $epsg_codes;
-	}		function getBezeichnungFromPosition($position, $epsgcode) {    $this->debug->write("<p>kataster.php Flur->getBezeichnungFromPosition:",4);		$sql ="SELECT gm.bezeichnung as gemeindename, fl.gemeinde, gk.bezeichnung as gemkgname, fl.land::text||fl.gemarkungsnummer::text as gemkgschl, fl.flurnummer as flur, CASE WHEN fl.nenner IS NULL THEN fl.zaehler::text ELSE fl.zaehler::text||'/'||fl.nenner::text end as flurst, s.bezeichnung as strasse, l.hausnummer ";    $sql.="FROM alkis.ax_gemarkung as gk, alkis.ax_gemeinde as gm, alkis.ax_flurstueck as fl ";		$sql.="LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(fl.weistauf) ";		$sql.="LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND s.lage = lpad(l.lage,5,'0') ";    $sql.="WHERE gk.gemarkungsnummer = fl.gemarkungsnummer AND gm.kreis = fl.kreis AND gm.gemeinde = fl.gemeinde ";    $sql.=" AND ST_WITHIN(st_transform(st_geomfromtext('POINT(".$position['rw']." ".$position['hw'].")',".$epsgcode."), ".EPSGCODE_ALKIS."),fl.wkb_geometry) ";		$sql.= $this->build_temporal_filter(array('gk', 'gm', 'fl'));    #echo $sql;    $ret=$this->execSQL($sql,4, 0);    if ($ret[0]!=0) {      $ret[1]='Fehler bei der Abfrage der Datenbank.'.$ret[1];    }    else {      if (pg_num_rows($ret[1])>0) {        $ret[1]=pg_fetch_array($ret[1]);      }    }    return $ret;  }		function build_temporal_filter($tablenames){		$timestamp = rolle::$hist_timestamp;		if($timestamp == ''){			foreach($tablenames as $tablename){				$filter .= ' AND '.$tablename.'.endet IS NULL ';			}		}		else{			foreach($tablenames as $tablename){				$filter .= ' AND '.$tablename.'.beginnt <= \''.$timestamp.'\' and (\''.$timestamp.'\' <= '.$tablename.'.endet or '.$tablename.'.endet IS NULL) ';			}		}		return $filter;	}
+  }
   function close() {
     $this->debug->write("<br>PostgreSQL Verbindung mit ID: ".$this->dbConn." schließen.",4);
     return pg_close($this->dbConn);
   }
-}class db_mapObj {  var $debug;  var $referenceMap;  var $Layer;  var $anzLayer;  var $nurAufgeklappteLayer;  var $Stelle_ID;  var $User_ID;  function db_mapObj($Stelle_ID,$User_ID) {
+}class db_mapObj {  var $debug;  var $referenceMap;  var $Layer;  var $anzLayer;  var $nurAufgeklappteLayer;  var $Stelle_ID;  var $User_ID;  var $database;  function db_mapObj($Stelle_ID, $User_ID, $database = NULL) {
     global $debug;
     $this->debug=$debug;
     $this->Stelle_ID=$Stelle_ID;
     $this->User_ID=$User_ID;
+		$this->rolle = new rolle($User_ID, $Stelle_ID, $database);
+		$this->database=$database;
   }
 	function read_ReferenceMap() {
     $sql ='SELECT r.* FROM referenzkarten AS r, stelle AS s WHERE r.ID=s.Referenzkarte_ID';
@@ -2152,14 +2166,42 @@ function in_subnet($ip,$net) {
   }  
   function read_Layer($withClasses, $groups = NULL){
 		global $language;
-    $sql ='SELECT DISTINCT rl.*,ul.*, l.Layer_ID, ';
 		if($language != 'german') {
-			$sql.='CASE WHEN `Name_'.$language.'` != "" THEN `Name_'.$language.'` ELSE `Name` END AS ';
-		}		$sql.='Name, l.alias, l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem, l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem, l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version, l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, g.*';
-    $sql.=' FROM u_rolle2used_layer AS rl,used_layer AS ul,layer AS l, u_groups AS g, u_groups2rolle as gr';
-    $sql.=' WHERE rl.stelle_id=ul.Stelle_ID AND rl.layer_id=ul.Layer_ID AND l.Layer_ID=ul.Layer_ID';
-    $sql.=' AND (ul.minscale != -1 OR ul.minscale IS NULL) AND l.Gruppe = g.id AND rl.stelle_ID='.$this->Stelle_ID.' AND rl.user_id='.$this->User_ID;
-    $sql.=' AND gr.id = g.id AND gr.stelle_id='.$this->Stelle_ID.' AND gr.user_id='.$this->User_ID;
+			$name_column = "
+			CASE
+				WHEN `l.Name_" . $language . "` != \"\" THEN `l.Name_" . $language . "`
+				ELSE `l.Name`
+			END AS l.Name";
+		}
+		else
+			$name_column = "l.Name";
+
+		$sql = "
+			SELECT DISTINCT
+				rl.*,
+				ul.*,
+				l.Layer_ID," .
+				$name_column . ",
+				l.alias,
+				l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem,
+				l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem,
+				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version,
+				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status,
+				g.*
+			FROM
+				u_rolle2used_layer AS rl,
+				used_layer AS ul,
+				layer AS l,
+				u_groups AS g,
+				u_groups2rolle as gr
+			WHERE
+				rl.stelle_id = ul.Stelle_ID AND
+				rl.layer_id = ul.Layer_ID AND
+				l.Layer_ID = ul.Layer_ID AND
+				(ul.minscale != -1 OR ul.minscale IS NULL) AND l.Gruppe = g.id AND rl.stelle_ID = " . $this->Stelle_ID . " AND rl.user_id = " . $this->User_ID . " AND
+				gr.id = g.id AND
+				gr.stelle_id = " . $this->Stelle_ID . " AND
+				gr.user_id = " . $this->User_ID;
 		if($groups != NULL){
 			$sql.=' AND g.id IN ('.$groups.')';
 		}
@@ -2226,7 +2268,12 @@ function in_subnet($ip,$net) {
 					$rs['Status'] = 1;
 					for($i = 0; $i < count($rs['Style']); $i++){
 						if($rs['Style'][$i]['color'] != '' AND $rs['Style'][$i]['color'] != '-1 -1 -1'){
-							$rs['Style'][$i]['outlinecolor'] = $rs['Style'][$i]['color'];							$rs['Style'][$i]['color'] = '-1 -1 -1';							if($rs['Style'][$i]['width'] == '')$rs['Style'][$i]['width'] = 3;							if($rs['Style'][$i]['minwidth'] == '')$rs['Style'][$i]['minwidth'] = 2;							if($rs['Style'][$i]['maxwidth'] == '')$rs['Style'][$i]['maxwidth'] = 4;							$rs['Style'][$i]['symbolname'] = '';
+							$rs['Style'][$i]['outlinecolor'] = $rs['Style'][$i]['color'];
+							$rs['Style'][$i]['color'] = '-1 -1 -1';
+							if($rs['Style'][$i]['width'] == '')$rs['Style'][$i]['width'] = 3;
+							if($rs['Style'][$i]['minwidth'] == '')$rs['Style'][$i]['minwidth'] = 2;
+							if($rs['Style'][$i]['maxwidth'] == '')$rs['Style'][$i]['maxwidth'] = 4;
+							$rs['Style'][$i]['symbolname'] = '';
 						}
 					}
 				}
@@ -2283,15 +2330,4 @@ function in_subnet($ip,$net) {
     }
     return $Layer;
   }
-}class Flur {  var $FlurID;  var $database;	function Flur($GemID,$GemkgID,$FlurID,$database) {
-    # constructor
-    global $debug;
-    $this->debug=$debug;
-    $this->GemID=$GemID;
-    $this->GemkgID=$GemkgID;
-    $this->FlurID=$FlurID;
-    $this->database=$database;
-    $this->LayerName=LAYERNAME_FLUR;
-  }
-	function getBezeichnungFromPosition($position, $epsgcode){		return $this->database->getBezeichnungFromPosition($position, $epsgcode);  }
 }?>

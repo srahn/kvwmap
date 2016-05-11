@@ -1221,6 +1221,7 @@ class rolle {
 	var $database;
 	var $loglevel;
 	static $hist_timestamp;
+	static $layer_params;
 
 	function rolle($user_id,$stelle_id,$database) {
 		global $debug;
@@ -1324,7 +1325,7 @@ class rolle {
     }
     return $layer;
   }
-	
+
 
   # 2006-02-11 pk
   function getAktivLayer($aktivStatus,$queryStatus,$logconsume) {
@@ -1509,7 +1510,7 @@ class rolle {
 			$this->overlayy=$rs['overlayy'];
 			$this->instant_reload=$rs['instant_reload'];
 			$this->menu_auto_close=$rs['menu_auto_close'];
-			$this->layer_params = $rs['layer_params'];
+			rolle::$layer_params = (array)json_decode('{' . $rs['layer_params'] . '}');
 			if($rs['hist_timestamp'] != ''){
 				$this->hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('d.m.Y H:i:s');			# der wird zur Anzeige des Timestamps benutzt
 				rolle::$hist_timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $rs['hist_timestamp'])->format('Y-m-d\TH:i:s\Z');	# der hat die Form, wie der timestamp in der PG-DB steht und wird für die Abfragen benutzt
@@ -1537,7 +1538,47 @@ class rolle {
 			return 1;
 		}else return 0;
   }
-	  
+
+	function get_layer_params($selectable_layer_params) {
+		$layer_params = array();
+		if (!empty($selectable_layer_params)) {
+			$sql = "
+				SELECT
+					*
+				FROM
+					layer_parameter
+				WHERE
+					id IN (" . $selectable_layer_params . ")
+			";
+			$params_result = $this->database->execSQL($sql, 4, 1);
+			if ($params_result[0]) {
+				echo '<br>Fehler bei der Abfrage der Layerparameter mit SQL: ' . $sql;
+			}
+			else {
+				while ($param = mysql_fetch_assoc($params_result[1])) {
+					$layer_params[] = $param;
+				}
+			}
+		}
+		return $layer_params;
+	}
+
+	function set_layer_params($layer_params) {
+		$sql = "
+			UPDATE
+				rolle
+			SET
+				`layer_params` = '" . $layer_params . "'
+			WHERE
+				user_id = " . $this->user_id . " AND
+				stelle_id = " . $this->stelle_id . "
+		";
+		#echo $sql;
+		$ret = $this->database->execSQL($sql,4, 1);
+		rolle::$layer_params = (array)json_decode('{' . $layer_params . '}');
+		return $ret;
+	}
+
   function set_last_time_id($time){
     # Eintragen der last_time_id
     $sql = 'UPDATE rolle SET last_time_id="'.$time.'"';
@@ -2658,6 +2699,7 @@ class stelle {
     $this->checkPasswordAge=$rs["check_password_age"];
     $this->allowedPasswordAge=$rs["allowed_password_age"];
     $this->useLayerAliases=$rs["use_layer_aliases"];
+		$this->selectable_layer_params = $rs['selectable_layer_params'];
   }
 
   function checkClientIpIsOn() {
