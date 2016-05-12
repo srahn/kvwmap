@@ -13679,23 +13679,23 @@ class db_mapObj{
     $this->disabled_classes = $this->read_disabled_classes();
 		$i = 0;
     while ($rs=mysql_fetch_assoc($query)) {
-      if($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivStatus'] != '0')){    # bei withclasses == 2 werden für alle Layer die Klassen geladen, bei withclasses == 1 werden die Klassen nur dann geladen, wenn der Layer aktiv ist
-        $rs['Class']=$this->read_Classes($rs['Layer_ID'], $this->disabled_classes);
-      }
-			if($rs['maxscale'] > 0)$rs['maxscale'] = $rs['maxscale']+0.3;
-			if($rs['minscale'] > 0)$rs['minscale'] = $rs['minscale']-0.3;
 			$rs['classitem'] = replace_params(
 					$rs['classitem'],
 					rolle::$layer_params
 			);
+			if ($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivStatus'] != '0')) {
+				# bei withclasses == 2 werden für alle Layer die Klassen geladen,
+				# bei withclasses == 1 werden Klassen nur dann geladen, wenn der Layer aktiv ist
+				$rs['Class']=$this->read_Classes($rs['Layer_ID'], $this->disabled_classes, false, $rs['classitem']);
+			}
+			if($rs['maxscale'] > 0)$rs['maxscale'] = $rs['maxscale']+0.3;
+			if($rs['minscale'] > 0)$rs['minscale'] = $rs['minscale']-0.3;
       $this->Layer[$i]=$rs;
 			$this->Layer['layer_ids'][$rs['Layer_ID']] =& $this->Layer[$i];		# damit man mit einer Layer-ID als Schlüssel auf dieses Array zugreifen kann
 			$i++;
     }
     return $this->Layer;
   }
-
-  
 
   function read_Groups($all = false, $order = '') {
 		global $language;
@@ -13756,14 +13756,53 @@ class db_mapObj{
     return $Classes;
   }
 
-  function read_Classes($Layer_ID, $disabled_classes = NULL, $all_languages = false) {
+  function read_Classes($Layer_ID, $disabled_classes = NULL, $all_languages = false, $layer_class_item = '') {
 		global $language;
-    $sql ='SELECT ';
 		if(!$all_languages AND $language != 'german') {
-			$sql.='CASE WHEN `Name_'.$language.'` IS NOT NULL THEN `Name_'.$language.'` ELSE `Name` END AS ';
+			$name_column = "
+			CASE
+				WHEN `Name_" . $language . "`IS NOT NULL THEN `Name_" . $language . "`
+				ELSE `Name`
+			END AS Name";
 		}
-		$sql.='Name, `Name_low-german`, Name_english, Name_polish, Name_vietnamese, Class_ID, Layer_ID, Expression, class_item, drawingorder, text FROM classes';
-    $sql.=' WHERE Layer_ID='.$Layer_ID.' ORDER BY class_item, drawingorder,Class_ID';
+		else
+			$name_column = "Name";
+			
+		$sql = "
+			SELECT " .
+				(
+					(!$all_languages AND $language != 'german') ? "
+						CASE
+							WHEN `Name_" . $language . "`IS NOT NULL THEN `Name_" . $language . "`
+							ELSE `Name`
+						END AS Name
+					" : "Name"
+				) . ",
+				`Name_low-german`,
+				`Name_english`,
+				`Name_polish`,
+				`Name_vietnamese`,
+				Class_ID,
+				Layer_ID,
+				Expression,
+				class_item,
+				drawingorder,
+				text
+			FROM
+				classes
+			WHERE
+				Layer_ID = " . $Layer_ID . " AND
+				(
+					class_item IS NULL " .
+					(
+						(!empty($layer_class_item)) ? " OR	class_item = '" . $layer_class_item . "'" : ""
+					) . "
+				)
+			ORDER BY
+				class_item,
+				drawingorder,
+				Class_ID
+		";
     #echo $sql.'<br>';
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>".$sql,4);
     $query=mysql_query($sql);
