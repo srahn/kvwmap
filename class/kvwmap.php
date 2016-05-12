@@ -6293,7 +6293,7 @@ class GUI {
     # Abfragen der Layerdaten wenn eine layer_id zur Änderung selektiert ist
     if ($this->formvars['selected_layer_id'] > 0) {
       $this->classes = $mapDB->read_Classes($this->formvars['selected_layer_id'], NULL, true);
-      $this->layerdata = $mapDB->get_Layer($this->formvars['selected_layer_id']);
+      $this->layerdata = $mapDB->get_Layer($this->formvars['selected_layer_id'], false);
       # Abfragen der Stellen des Layer
       $this->formvars['selstellen']=$mapDB->get_stellen_from_layer($this->formvars['selected_layer_id']);
 			$this->grouplayers = $mapDB->get_layersfromgroup($this->layerdata['Gruppe']);
@@ -6321,9 +6321,9 @@ class GUI {
   }
 
   function Layereditor_AutoklassenHinzufuegen() {
-    $num_classes = 5;
+    $num_classes = (empty($this->formvars['num_classes'])) ? 5 : $this->formvars['num_classes'];
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-    $this->layerdata = $mapDB->get_Layer($this->formvars['selected_layer_id']);
+    $this->layerdata = $mapDB->get_Layer($this->formvars['selected_layer_id'], true);
     $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
     $this->formvars['Datentyp'] = $this->layerdata['Datentyp'];
     $this->layerdata['Data'] = replace_params($this->layerdata['Data'], rolle::$layer_params);
@@ -13754,20 +13754,11 @@ class db_mapObj{
       $Classes[]=$rs;
     }
     return $Classes;
-  }
+	}
 
-  function read_Classes($Layer_ID, $disabled_classes = NULL, $all_languages = false, $layer_class_item = '') {
+	function read_Classes($Layer_ID, $disabled_classes = NULL, $all_languages = false, $layer_class_item = '') {
 		global $language;
-		if(!$all_languages AND $language != 'german') {
-			$name_column = "
-			CASE
-				WHEN `Name_" . $language . "`IS NOT NULL THEN `Name_" . $language . "`
-				ELSE `Name`
-			END AS Name";
-		}
-		else
-			$name_column = "Name";
-			
+
 		$sql = "
 			SELECT " .
 				(
@@ -13791,13 +13782,14 @@ class db_mapObj{
 			FROM
 				classes
 			WHERE
-				Layer_ID = " . $Layer_ID . " AND
+				Layer_ID = " . $Layer_ID .
 				(
-					class_item IS NULL " .
-					(
-						(!empty($layer_class_item)) ? " OR	class_item = '" . $layer_class_item . "'" : ""
-					) . "
-				)
+					(!empty($layer_class_item)) ? " AND
+						(
+							class_item IN (NULL, '', '" . $layer_class_item . "')
+						)
+					" : ""
+				) . "
 			ORDER BY
 				class_item,
 				drawingorder,
@@ -15069,16 +15061,18 @@ class db_mapObj{
     return $layer;
   }
 
-  function get_Layer($id) {
+  function get_Layer($id, $replace_class_item = false) {
     $sql ='SELECT * FROM layer WHERE Layer_ID = '.$id;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->get_Layer - Lesen eines Layers:<br>".$sql,4);
     $query=mysql_query($sql);
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
     $layer = mysql_fetch_array($query);
-		$layer['classitem'] = replace_params(
-			$layer['classitem'],
-			rolle::$layer_params
-		);
+		if ($replace_class_item) {
+			$layer['classitem'] = replace_params(
+				$layer['classitem'],
+				rolle::$layer_params
+			);
+		}
     return $layer;
   }
   
