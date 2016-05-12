@@ -678,7 +678,19 @@ class data_import_export {
 		exec($command);
 	}
 	
-	function create_csv($result, $attributes){
+	function create_csv($result, $attributes, $groupnames){
+		# Gruppennamen in die erste Zeile schreiben
+		if($groupnames != ''){
+			foreach($result[0] As $key => $value){
+				$i = $attributes['indizes'][$key];
+				if($attributes['type'][$i] != 'geometry' AND $attributes['name'][$i] != 'lock'){
+					$groupname = explode(';', $attributes['group'][$i]);
+					$csv .= $groupname[0].';';
+				}
+			}
+			$csv .= chr(13).chr(10);
+		}
+		
     # Spaltenüberschriften schreiben
     # Excel is zu blöd für 'ID' als erstes Attribut
 		if(substr($attributes['alias'][0], 0, 2) == 'ID'){
@@ -957,7 +969,7 @@ class data_import_export {
 						$result[] = $rs;
 					}
 					$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $result, true, $stelle->id);
-					$csv = $this->create_csv($result, $this->attributes);
+					$csv = $this->create_csv($result, $this->attributes, $formvars['export_groupnames']);
 					$exportfile = $exportfile.'.csv';
 					$fp = fopen($exportfile, 'w');
 					fwrite($fp, $csv);
