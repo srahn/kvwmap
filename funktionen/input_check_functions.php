@@ -1,6 +1,6 @@
 <script type="text/javascript">
 
-	checknumbers = function(input, type, length, decimal_length){console.log('joo');
+	checknumbers = function(input, type, length, decimal_length){
 		if(type == 'numeric' || type == 'float4' || type == 'float8'){
 			var val = input.value.replace(/[a-zA-Z]/g, '');
 			val = val.replace(/,/g, '.');
