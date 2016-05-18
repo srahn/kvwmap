@@ -661,7 +661,7 @@ class data_import_export {
   }
 	
 	function ogr2ogr_export($sql, $exportformat, $exportfile, $layerdb){
-		$command = 'export PGCLIENTENCODING=UTF-8;'.OGR_BINPATH.'ogr2ogr -f '.$exportformat.' -lco ENCODING=LATIN1 -sql "'.$sql.'" '.$exportfile.' PG:"dbname='.$layerdb->dbName.' user='.$layerdb->user;
+		$command = 'export PGCLIENTENCODING=UTF-8;'.OGR_BINPATH.'ogr2ogr -f '.$exportformat.' -lco ENCODING=UTF-8 -sql "'.$sql.'" '.$exportfile.' PG:"dbname='.$layerdb->dbName.' user='.$layerdb->user;
 		if($layerdb->passwd != '')$command.= ' password='.$layerdb->passwd;
 		if($layerdb->port != '')$command.=' port='.$layerdb->port;
 		if($layerdb->host != '') $command .= ' host=' . $layerdb->host;
@@ -678,7 +678,19 @@ class data_import_export {
 		exec($command);
 	}
 	
-	function create_csv($result, $attributes){
+	function create_csv($result, $attributes, $groupnames){
+		# Gruppennamen in die erste Zeile schreiben
+		if($groupnames != ''){
+			foreach($result[0] As $key => $value){
+				$i = $attributes['indizes'][$key];
+				if($attributes['type'][$i] != 'geometry' AND $attributes['name'][$i] != 'lock'){
+					$groupname = explode(';', $attributes['group'][$i]);
+					$csv .= $groupname[0].';';
+				}
+			}
+			$csv .= chr(13).chr(10);
+		}
+		
     # Spaltenüberschriften schreiben
     # Excel is zu blöd für 'ID' als erstes Attribut
 		if(substr($attributes['alias'][0], 0, 2) == 'ID'){
@@ -798,6 +810,7 @@ class data_import_export {
 		$sql = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[0]['pfad']);
     $privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
     $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
+		$filter = $mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id);
 		
 		# Where-Klausel aus Sachdatenabfrage-SQL
 		$where = substr(strip_pg_escape_string($this->formvars['sql_'.$this->formvars['selected_layer_id']]), strrpos(strtolower(strip_pg_escape_string($this->formvars['sql_'.$this->formvars['selected_layer_id']])), 'where')+5);
@@ -827,6 +840,9 @@ class data_import_export {
 				$selection[$this->attributes['name'][$i]] = 1;
 			}
 			if(strpos($orderby, $this->attributes['name'][$i])){						# oder es kommt im ORDER BY des Layer-Query vor
+				$selection[$this->attributes['name'][$i]] = 1;
+			}
+			if(strpos($filter, $this->attributes['name'][$i])){						# oder es kommt im Filter des Layers vor
 				$selection[$this->attributes['name'][$i]] = 1;
 			}
 			if($this->formvars['download_documents'] != '' AND $this->attributes['form_element_type'][$i] == 'Dokument'){			# oder das Attribut ist vom Typ "Dokument" und die Dokumente sollen auch exportiert werden
@@ -895,7 +911,6 @@ class data_import_export {
 	    }
   	}
 		# Filter
-    $filter = $mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id);
     if($filter != ''){
 			$filter = str_replace('$userid', $user->id, $filter);
     	$sql = 'SELECT * FROM ('.$sql.') as query2 WHERE '.$filter;
@@ -933,6 +948,11 @@ class data_import_export {
 			switch($this->formvars['export_format']){
 				case 'Shape' : { 
 					$this->ogr2ogr_export($sql, '"ESRI Shapefile"', $exportfile.'.shp', $layerdb);
+					if(!file_exists($exportfile.'.cpg')){		// ältere ogr-Versionen erzeugen die cpg-Datei nicht
+						$fp = fopen($exportfile.'.cpg', 'w');
+						fwrite($fp, 'UTF-8');
+						fclose($fp);
+					}
 					$zip = true;
 				}break;
 				
@@ -952,7 +972,7 @@ class data_import_export {
 						$result[] = $rs;
 					}
 					$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $result, true, $stelle->id);
-					$csv = $this->create_csv($result, $this->attributes);
+					$csv = $this->create_csv($result, $this->attributes, $formvars['export_groupnames']);
 					$exportfile = $exportfile.'.csv';
 					$fp = fopen($exportfile, 'w');
 					fwrite($fp, $csv);
