@@ -810,6 +810,7 @@ class data_import_export {
 		$sql = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[0]['pfad']);
     $privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
     $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
+		$filter = $mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id);
 		
 		# Where-Klausel aus Sachdatenabfrage-SQL
 		$where = substr(strip_pg_escape_string($this->formvars['sql_'.$this->formvars['selected_layer_id']]), strrpos(strtolower(strip_pg_escape_string($this->formvars['sql_'.$this->formvars['selected_layer_id']])), 'where')+5);
@@ -839,6 +840,9 @@ class data_import_export {
 				$selection[$this->attributes['name'][$i]] = 1;
 			}
 			if(strpos($orderby, $this->attributes['name'][$i])){						# oder es kommt im ORDER BY des Layer-Query vor
+				$selection[$this->attributes['name'][$i]] = 1;
+			}
+			if(strpos($filter, $this->attributes['name'][$i])){						# oder es kommt im Filter des Layers vor
 				$selection[$this->attributes['name'][$i]] = 1;
 			}
 			if($this->formvars['download_documents'] != '' AND $this->attributes['form_element_type'][$i] == 'Dokument'){			# oder das Attribut ist vom Typ "Dokument" und die Dokumente sollen auch exportiert werden
@@ -907,7 +911,6 @@ class data_import_export {
 	    }
   	}
 		# Filter
-    $filter = $mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id);
     if($filter != ''){
 			$filter = str_replace('$userid', $user->id, $filter);
     	$sql = 'SELECT * FROM ('.$sql.') as query2 WHERE '.$filter;
