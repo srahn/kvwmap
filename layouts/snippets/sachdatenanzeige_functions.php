@@ -270,7 +270,7 @@ include('funktionen/input_check_functions.php');
 		for(i = 0; i < attributenamesarray.length; i++){
 			if(document.getElementById(attributenamesarray[i]+'_'+k) != undefined){
 				attributenames += attributenamesarray[i] + '|';
-				attributevalues += document.getElementById(attributenamesarray[i]+'_'+k).value + '|';
+				attributevalues += encodeURIComponent(document.getElementById(attributenamesarray[i]+'_'+k).value) + '|';
 			}
 			else if(attributenamesarray[i] == geom_attribute ){	// wenn es das Geometrieattribut ist, handelt es sich um eine Neuerfassung --> aktuelle Geometrie nehmen
 				if(document.GUI.loc_x != undefined && document.GUI.loc_x.value != ''){		// Punktgeometrie
