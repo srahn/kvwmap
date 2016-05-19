@@ -21,7 +21,7 @@ $bbox = array("left" => 11.85321, "bottom" => 53.96559, "right" => 11.93711, "to
 *(abfrage war erfolgreich) oder false(d.h. abfrage war nicht erfolgreich) und das zweite
 * ist wenn der erste wert false ist eine kurze Info was falsch ist.
 */
-function checkStatus($request){
+function checkStatus($request, $username, $password){
   $info = null;
   $ch = curl_init();
   curl_setopt($ch, CURLOPT_URL, $request);
@@ -29,6 +29,7 @@ function checkStatus($request){
   curl_setopt($ch, CURLOPT_CONNECTTIMEOUT,1);
 	curl_setopt($ch, CURLOPT_VERBOSE, 1);
 	curl_setopt($ch, CURLOPT_HEADER, 1);
+	if($username != '')curl_setopt($ch, CURLOPT_USERPWD, $username.':'.$password);	
 	$response = curl_exec($ch);
 	$header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
 	$header = substr($response, 0, $header_size);
@@ -102,11 +103,12 @@ while($line = mysql_fetch_array($result)){
   $extent->project($wgsProjection, $userProjection);
   $bounding = implode(",", array($extent->minx, $extent->miny, $extent->maxx, $extent->maxy));
   
-  $url = $line["connection"]."&SERVICE=WMS&REQUEST=GetMap&EXCEPTIONS=XML&SRS=EPSG:".$line["epsg_code"]."&WIDTH=400&HEIGHT=400&BBOX=".$bounding;
+  $url = $line["connection"]."&SERVICE=WMS&REQUEST=GetMap&EXCEPTIONS=application/vnd.ogc.se_xml&SRS=EPSG:".$line["epsg_code"]."&WIDTH=400&HEIGHT=400&BBOX=".$bounding;
 	if(strpos(strtolower($line["connection"]), 'version=') === false)$url .= '&VERSION='.$line["wms_server_version"];
 	if(strpos(strtolower($line["connection"]), 'layers=') === false)$url .= '&LAYERS='.$line["wms_name"];
 	if(strpos(strtolower($line["connection"]), 'format=') === false)$url .= '&FORMAT='.$line["wms_format"];
-  $status = checkStatus($url);
+	if(strpos(strtolower($line["connection"]), 'styles=') === false)$url .= '&STYLES=';
+  $status = checkStatus($url, $line['wms_auth_username'], $line['wms_auth_password']);
 	
 	if(!$status[0])$color = '#db5a5a';
 	else $color = '#36908a';
