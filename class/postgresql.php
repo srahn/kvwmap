@@ -847,7 +847,7 @@ class pgdatabase {
   }
   
   function getBuchungenFromGrundbuch($FlurstKennz,$Bezirk,$Blatt,$hist_alb = false, $fiktiv = false, $buchungsstelle = NULL, $without_temporal_filter = false) {
-    $sql ="set enable_seqscan = off;SELECT DISTINCT gem.bezeichnung as gemarkungsname, g.land * 10000 + g.bezirk as bezirk, g.bezirk as gbezirk, g.buchungsblattnummermitbuchstabenerweiterung AS blatt, g.blattart, s.gml_id, s.laufendenummer AS bvnr, ltrim(s.laufendenummer, '~>')::integer, s.buchungsart, art.bezeichner as bezeichnung, f.flurstueckskennzeichen as flurstkennz, s.zaehler::text||'/'||s.nenner::text as anteil, s.nummerimaufteilungsplan as auftplannr, s.beschreibungdessondereigentums as sondereigentum "; 
+    $sql ="set enable_seqscan = off;SELECT DISTINCT gem.bezeichnung as gemarkungsname, g.land * 10000 + g.bezirk as bezirk, g.bezirk as gbezirk, g.buchungsblattnummermitbuchstabenerweiterung AS blatt, g.blattart, s.gml_id, s.laufendenummer AS bvnr, ltrim(s.laufendenummer, '~>a')::integer, s.buchungsart, art.bezeichner as bezeichnung, f.flurstueckskennzeichen as flurstkennz, s.zaehler::text||'/'||s.nenner::text as anteil, s.nummerimaufteilungsplan as auftplannr, s.beschreibungdessondereigentums as sondereigentum "; 
 		if($FlurstKennz!='') {
 			if($hist_alb) $sql.="FROM alkis.ax_historischesflurstueckohneraumbezug f ";
 			else $sql.="FROM alkis.ax_flurstueck f ";  
@@ -882,7 +882,7 @@ class pgdatabase {
       $sql.=" AND s.gml_id='".$buchungsstelle."'";
     }		
 		if(!$hist_alb AND !$without_temporal_filter) $sql.= $this->build_temporal_filter(array('f', 's', 'g'));
-    $sql.=" ORDER BY g.bezirk,g.buchungsblattnummermitbuchstabenerweiterung,ltrim(s.laufendenummer, '~>')::integer,f.flurstueckskennzeichen";
+    $sql.=" ORDER BY g.bezirk,g.buchungsblattnummermitbuchstabenerweiterung,ltrim(s.laufendenummer, '~>a')::integer,f.flurstueckskennzeichen";
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
