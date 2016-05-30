@@ -378,7 +378,7 @@ class ddl {
 		$y = $y + $fh;
 		$this->pdf->ezSetY($y);		
 		$page_id_before_puttext = $this->pdf->currentContents;
-		$ret = $this->pdf->ezText(iconv("UTF-8", "CP1252", $text), $fontsize, $options);
+		$ret = $this->pdf->ezText(iconv("UTF-8", "CP1252//TRANSLIT", $text), $fontsize, $options);
 		$page_id_after_puttext = $this->pdf->currentContents;		
 		#if($this->gui->user->id == 101)echo $page_id_before_puttext.' '.$page_id_after_puttext.' '.$text.'<br>';
 		if($page_id_before_puttext != $page_id_after_puttext){

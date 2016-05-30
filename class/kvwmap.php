@@ -6101,8 +6101,8 @@ class GUI {
 		fclose($fp);
 
 		if($preview == true){
-			exec(IMAGEMAGICKPATH.'convert -density 300x300 '.$dateipfad.$dateiname.' -resize 595x1000 '.$dateipfad.$name.'-'.$currenttime.'.jpg');
-			#echo IMAGEMAGICKPATH.'convert -density 300x300  '.$dateipfad.$dateiname.' -resize 595x1000 '.$dateipfad.$name.'-'.$currenttime.'.jpg';
+			exec(IMAGEMAGICKPATH.'convert -density 300x300 '.$dateipfad.$dateiname.' -background white -flatten -resize 595x1000 '.$dateipfad.$name.'-'.$currenttime.'.jpg');
+			#echo IMAGEMAGICKPATH.'convert -density 300x300 '.$dateipfad.$dateiname.' -background white -flatten -resize 595x1000 '.$dateipfad.$name.'-'.$currenttime.'.jpg';
 			if(!file_exists(IMAGEPATH.$name.'-'.$currenttime.'.jpg')){
 				return TEMPPATH_REL.$name.'-'.$currenttime.'-0.jpg';
 			}
@@ -14309,7 +14309,7 @@ class db_mapObj{
     }
   }
 
-  function add_attribute_values($attributes, $database, $query_result, $withvalues = true, $stelle_id){
+  function add_attribute_values($attributes, $database, $query_result, $withvalues = true, $stelle_id, $only_current_enums = false){
     # Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
     for($i = 0; $i < count($attributes['name']); $i++){
 			if($attributes['constraints'][$i] != '' AND !in_array($attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))){  # das sind die Auswahlmöglichkeiten, die durch die Tabellendefinition in Postgres fest vorgegeben sind
@@ -14339,11 +14339,18 @@ class db_mapObj{
                 # ------<required by>------
                 # -----<requires>------
                 if(strpos(strtolower($attributes['options'][$i]), "<requires>") > 0){
+									if($only_current_enums){		# Ermittlung der Spalte, die als value dient
+										$explo1 = explode(' as value', strtolower($attributes['options'][$i]));
+										$attribute_value_column = array_pop(explode(' ', $explo1[0]));
+									}
                   if($query_result != NULL){
                     for($k = 0; $k < count($query_result); $k++){
 											$options = $attributes['options'][$i];
 											foreach($attributes['name'] as $attributename){
 												if(strpos($options, '<requires>'.$attributename.'</requires>') !== false AND $query_result[$k][$attributename] != ''){
+													if($only_current_enums){	# in diesem Fall werden nicht alle Auswahlmöglichkeiten abgefragt, sondern nur die aktuellen Werte des Datensatzes (wird z.B. beim Daten-Export verwendet, da hier nur lesend zugegriffen wird und die Datenmengen sehr groß sein können)
+														$options = str_ireplace('where', 'where '.$attribute_value_column.' = \''.$query_result[$k][$attributes['name'][$i]].'\' AND ', $options);
+													}
 													$options = str_replace('<requires>'.$attributename.'</requires>', "'".$query_result[$k][$attributename]."'", $options);
 												}
 											}

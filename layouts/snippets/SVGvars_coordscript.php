@@ -126,19 +126,25 @@
 			}
 		}
 
-		function coords_anzeige(evt) {
+		function coords_anzeige(evt, vertex) {
+			if(top.document.GUI.activated_vertex != undefined && top.document.GUI.activated_vertex.value != 0 && vertex == null)return;
 			minx = '.$this->Stelle->MaxGeorefExt->minx.';
 			miny = '.$this->Stelle->MaxGeorefExt->miny.';
 			maxx = '.$this->Stelle->MaxGeorefExt->maxx.';
 			maxy = '.$this->Stelle->MaxGeorefExt->maxy.';
-		  coorx = evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value);
-		  coory = parseFloat(top.document.GUI.maxy.value) - evt.clientY*parseFloat(top.document.GUI.pixelsize.value);
-		  					
-		  coorxf = format_number(coorx, true, true, false);
-		  cooryf = format_number(coory, true, true, false);
 			
-			if(coorx < minx || coorx > maxx)coorxf = "undefiniert";
-			if(coory < miny || coory > maxy)cooryf = "undefiniert";
+			if(vertex != null){
+				coorxf = top.format_number(vertex.getAttribute("x"), false, false, false);
+				console.log(coorxf);
+				cooryf = top.format_number(vertex.getAttribute("y"), false, false, false);
+			}
+			else{
+				coorxf = top.format_number(evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value), true, true, false);
+				cooryf = top.format_number(top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value), true, true, false);
+			}
+			
+			if(coorxf < minx || coorxf > maxx)coorxf = "undefiniert";
+			if(cooryf < miny || cooryf > maxy)cooryf = "undefiniert";
 		  
 			if(top.document.GUI.lastcoordx != undefined && top.document.GUI.lastcoordx.value != ""){
 				vectorx = top.document.GUI.lastcoordx.value - coorxf;
@@ -148,19 +154,21 @@
 				if(top.document.GUI.runningcoords != undefined)top.document.GUI.runningcoords.value = coorxf + " / " + cooryf + "   " + distance + " m"; 
 			}
 			else{
-				if(top.document.GUI.activated_vertex == undefined || top.document.GUI.activated_vertex.value == 0){		// nur wenn kein Punkt ueber den Punktfang aktiviert wurde
-					window.status = " R:" + coorxf + " / H:" + cooryf + "   EPSG: "+'.$this->user->rolle->epsg_code.';
-					if(top.document.GUI.runningcoords != undefined)top.document.GUI.runningcoords.value = coorxf + " / " + cooryf; 
-				}
+				window.status = " R:" + coorxf + " / H:" + cooryf + "   EPSG: "+'.$this->user->rolle->epsg_code.';
+				if(top.document.GUI.runningcoords != undefined)top.document.GUI.runningcoords.value = coorxf + " / " + cooryf; 
 			}			
 		}
 		
-		function show_coords(evt){
-			coorx = evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value);
-			coory = top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value);
+		function show_coords(evt, vertex){
+			if(vertex != null){
+				coorx = top.format_number(vertex.getAttribute("x"), false, false, false);
+				coory = top.format_number(vertex.getAttribute("y"), false, false, false);
+			}
+			else{
+				coorx = top.format_number(evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value), true, true, false);
+				coory = top.format_number(top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value), true, true, false);
+			}
 			if(top.document.GUI.secondcoords != undefined)top.ahah("index.php", "go=spatial_processing&curSRID='.$this->user->rolle->epsg_code.'&newSRID='.$this->user->rolle->epsg_code2.'&point="+coorx+" "+coory+"&operation=transformPoint&resulttype=wkt&coordtype='.$this->user->rolle->coordtype.'", new Array(top.document.GUI.secondcoords), "");
-			coorx = top.format_number(coorx, true, true, false);
-			coory = top.format_number(coory, true, true, false);
 			top.document.GUI.firstcoords.value = coorx+" "+coory; 
 			top.document.getElementById("showcoords").style.display="";
 		}

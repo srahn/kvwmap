@@ -781,7 +781,7 @@ function world2pixelsvg(pathWelt){
 // -------------------------mausinteraktionen auf canvas------------------------------
 
 function mouse_move(evt){
-	top.coords_anzeige(evt);
+	top.coords_anzeige(evt, null);
 	if(doing == "ppquery"){
 		hidetooltip(evt);
 	}
@@ -810,7 +810,7 @@ function mousedown(evt){
 	    startMove(evt);
 	   break;
 		case "showcoords":
-	    top.show_coords(evt);
+	    top.show_coords(evt, null);
 	   break;
 	   case "pquery":
 	    startPoint(evt);
@@ -1227,11 +1227,12 @@ function remove_vertices(){
 }
 
 function activate_vertex(evt){
-	evt.target.setAttribute("opacity", "1");
-	coordx = evt.target.getAttribute("x");
-	coordy = evt.target.getAttribute("y");
-	image_coordx = evt.target.getAttribute("cx");
-	image_coordy = evt.target.getAttribute("cy");
+	vertex = evt.target;
+	vertex.setAttribute("opacity", "1");
+	coordx = vertex.getAttribute("x");
+	coordy = vertex.getAttribute("y");
+	image_coordx = vertex.getAttribute("cx");
+	image_coordy = vertex.getAttribute("cy");
 	if(doing == "measure" && measuring){
 		pathx.push(image_coordx);
 		pathy.push(image_coordy);
@@ -1241,8 +1242,9 @@ function activate_vertex(evt){
 		redrawPL();
 		deletelast(evt);
 	}
-	if(top.document.GUI.runningcoords != undefined)top.document.GUI.runningcoords.value = top.format_number(coordx, false, false, false) + " / " + top.format_number(coordy, false, false, false); 
-	top.document.GUI.activated_vertex.value = evt.target.getAttribute("id");
+	//if(top.document.GUI.runningcoords != undefined)top.document.GUI.runningcoords.value = top.format_number(coordx, false, false, false) + " / " + top.format_number(coordy, false, false, false); 
+	top.document.GUI.activated_vertex.value = vertex.getAttribute("id");
+	top.coords_anzeige(evt, vertex);
 }
 
 function activate_line(evt){
@@ -1314,6 +1316,9 @@ function add_vertex(evt){
 		redrawPolygon();
 		polygonarea(evt);
 		vertex.setAttribute("opacity", "0.8");
+	}
+	if(doing == "showcoords"){
+		top.show_coords(evt, vertex);
 	}
 }
 
