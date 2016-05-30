@@ -152,12 +152,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 
 		case 'setLayerParams' : {
 			$GUI->setLayerParams();
-#			$GUI->user->rolle->readSettings();
-			$GUI->loadMap('DataBase');
-			$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-			$GUI->drawMap();
-			$GUI->saveMap('');
-			$GUI->output();
+			echo "onLayerParamsUpdated('success')";
 		} break;
 
 		case 'changemenue' : {

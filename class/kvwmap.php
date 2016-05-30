@@ -8190,7 +8190,10 @@ class GUI {
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$layerset = $this->user->rolle->getLayer($this->formvars['chosen_layer_id']);
     $layerdb = $mapDB->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
-    $path = $mapDB->getPath($this->formvars['chosen_layer_id']);
+		$path = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[0]['pfad']);
+		$path = str_replace('$language', $this->user->rolle->language, $path);
+		$path = replace_params($path, rolle::$layer_params);
+
     $privileges = $this->Stelle->get_attributes_privileges($this->formvars['chosen_layer_id']);
     $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
     # order by rausnehmen
