@@ -3,23 +3,23 @@
 # kvwmap - Kartenserver f�r Kreisverwaltungen                     #
 ###################################################################
 # Lizenz                                                          #
-#                                                                 # 
+#                                                                 #
 # Copyright (C) 2004  Peter Korduan                               #
-#                                                                 # 
+#                                                                 #
 # This program is free software; you can redistribute it and/or   #
-# modify it under the terms of the GNU General Public License as  # 
-# published by the Free Software Foundation; either version 2 of  # 
-# the License, or (at your option) any later version.             # 
-#                                                                 #   
-# This program is distributed in the hope that it will be useful, #  
+# modify it under the terms of the GNU General Public License as  #
+# published by the Free Software Foundation; either version 2 of  #
+# the License, or (at your option) any later version.             #
+#                                                                 #
+# This program is distributed in the hope that it will be useful, #
 # but WITHOUT ANY WARRANTY; without even the implied warranty of  #
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the    #
 # GNU General Public License for more details.                    #
-#                                                                 #  
+#                                                                 #
 # You should have received a copy of the GNU General Public       #
 # License along with this program; if not, write to the Free      #
-# Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,  # 
-# MA 02111-1307, USA.                                             # 
+# Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,  #
+# MA 02111-1307, USA.                                             #
 #                                                                 #
 # Kontakt:                                                        #
 # peter.korduan@gdi-service.de                                    #
@@ -40,7 +40,7 @@ class polygoneditor {
     $this->layerepsg = $layerepsg;
     #echo '<br>EPSG-Code vom Layer:'.$this->layerepsg;
   }
-  
+
   function zoomTopolygon($oid, $tablename, $columnname,  $border) {
   	# Eine Variante mit der nur einmal transformiert wird
   	$sql ="SELECT st_xmin(bbox) AS minx,st_ymin(bbox) AS miny,st_xmax(bbox) AS maxx,st_ymax(bbox) AS maxy";
@@ -49,7 +49,7 @@ class polygoneditor {
     $ret = $this->database->execSQL($sql, 4, 0);
 		$rs = pg_fetch_array($ret[1]);
 		$rect = ms_newRectObj();
-    $rect->minx=$rs['minx']; 
+    $rect->minx=$rs['minx'];
     $rect->maxx=$rs['maxx'];
     $rect->miny=$rs['miny'];
     $rect->maxy=$rs['maxy'];
@@ -58,17 +58,17 @@ class polygoneditor {
 			if($this->clientepsg == 4326)$border = $border/10000;
 			$randx=$randy=$border;
 		}
-		else{		
+		else{
 			$randx=($rect->maxx-$rect->minx)*0.1;
 			$randy=($rect->maxy-$rect->miny)*0.1;
-		}		
+		}
     $rect->minx -= $randx;
     $rect->miny -= $randy;
     $rect->maxx += $randx;
     $rect->maxy += $randy;
     return $rect;
   }
-  
+
   function pruefeEingabedaten($newpathwkt) {
     $ret[1]='';
     $ret[0]=0;
@@ -84,10 +84,10 @@ class polygoneditor {
       	$ret[0]=1;
 			}
     }
-    return $ret; 
+    return $ret;
   }
-  
-  function eintragenFlaeche($umring, $oid, $tablename, $columnname){  	
+
+  function eintragenFlaeche($umring, $oid, $tablename, $columnname){
 		if($umring == '')$sql = "UPDATE ".$tablename." SET ".$columnname." = NULL WHERE oid = ".$oid;
 		else $sql = "UPDATE ".$tablename." SET ".$columnname." = st_transform(st_multi(st_geometryfromtext('".$umring."',".$this->clientepsg.")),".$this->layerepsg.") WHERE oid = ".$oid;
 		$ret = $this->database->execSQL($sql, 4, 1);
@@ -103,14 +103,14 @@ class polygoneditor {
 		}
     return $ret;
   }
-	
+
 	function getpolygon($oid, $tablename, $columnname, $extent){
 		$sql = "SELECT st_assvg(st_transform(st_union(".$columnname."),".$this->clientepsg."), 0, 8) AS svggeom, st_astext(st_transform(st_union(".$columnname."),".$this->clientepsg.")) AS wktgeom FROM ".$tablename;
 		if($oid != NULL)$sql .= " WHERE oid = ".$oid;
 		$ret = $this->database->execSQL($sql, 4, 0);
 		$polygon = pg_fetch_array($ret[1]);
-		$polygon['svggeom'] = transformCoordsSVG($polygon['svggeom']); 
+		$polygon['svggeom'] = transformCoordsSVG($polygon['svggeom']);
 		return $polygon;
-	}	  
+	}
 }
 ?>
