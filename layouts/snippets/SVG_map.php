@@ -368,7 +368,6 @@ function startup(){';
 }
 
 function sendpath(cmd, pathx, pathy){
-	startwaiting();
 	top.sendpath(cmd, pathx, pathy);
 	if(cmd == "polygonquery")deletepolygon();
 }

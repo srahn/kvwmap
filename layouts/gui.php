@@ -2,9 +2,6 @@
 <META http-equiv=Content-Type content="text/html; charset=UTF-8">
 <? 
 include(WWWROOT.APPLVERSION.'funktionen/gui_functions.php');
-if($this->user->rolle->querymode == 1){
-	#if(!$this->formvars['anzahl'])$this->formvars['anzahl'] = MAXQUERYROWS;
-}
 ?>
 <link rel="shortcut icon" href="graphics/wappen/favicon.ico">
 <link rel="stylesheet" href="<?php echo 'layouts/'.$this->style; ?>">
@@ -81,7 +78,18 @@ if($this->user->rolle->querymode == 1){
 						<div id="overlayfooter" style="<? if($this->found == 'false' OR $this->formvars['printversion'] != '')echo 'display:none;'; ?>background: url(<? echo GRAPHICSPATH; ?>bg.gif);border: 1px solid #cccccc;max-width:<? echo $this->map->width+200; ?>px;position:relative;">
 							<table style="width:100%">
 								<tr>
-									<td style="width:49%">&nbsp;</td>
+									<td style="width:49%" class="px13">&nbsp;<? echo $this->strLimit; ?>&nbsp;
+										<? $selectable_limits = array(10, 25, 50, 100, 200); ?>
+										<select name="anzahl" id="anzahl" onchange="javascript:overlay_submit(currentform, false);">
+											<? foreach($selectable_limits as $limit){
+											if($this->formvars['anzahl'] != '' AND $custom_limit != true AND !in_array($this->formvars['anzahl'], $selectable_limits) AND $this->formvars['anzahl'] < $limit){
+												$custom_limit = true;	?>
+												<option value="<? echo $this->formvars['anzahl'];?>" selected><? echo $this->formvars['anzahl']; ?></option>
+											<? } ?>
+											<option value="<? echo $limit; ?>" <? if($this->formvars['anzahl'] == $limit)echo 'selected'?>><? echo $limit; ?></option>
+											<? } ?>
+										</select>
+									</td>
 									<td align="center"><div id="savebutton" <? if($this->editable == '')echo 'style="display:none"'; ?>><input type="button" class="button" name="savebutton" value="<? echo $this->strSave; ?>" onclick="save();"></div></td>
 									<td style="width:49%" align="right"><a href="javascript:druck();" class="px13"><? echo $this->printversion; ?></a>&nbsp;</td>
 								</tr>

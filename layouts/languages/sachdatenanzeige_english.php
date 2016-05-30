@@ -12,4 +12,5 @@ $strLastDatasets="end";
 $strFirstDatasets="start";
 $strbackToSearch="back to search";
 $strNoLayer="Please select a layer for the data query!";
+$strLimit="Limit Resultcount:";
 ?>
