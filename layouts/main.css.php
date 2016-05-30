@@ -848,3 +848,12 @@ tbody.gle tr:hover {
 	padding: 1px;
 	border: 1px solid #CCCCCC;
 }
+
+.fa {
+	color: gray;
+}
+
+.fa:hover {
+	color: #993333;
+	cursor: pointer;
+}

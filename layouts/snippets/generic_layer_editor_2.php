@@ -398,7 +398,7 @@
 						</table>
 					</td>
 				</tr>
-				<tr style="display:none">
+				<tr style="display:true">
 					<td height="23" colspan="3">
 						&nbsp;&nbsp;&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:showcharts(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCreateChart; ?></a>
 					</td>

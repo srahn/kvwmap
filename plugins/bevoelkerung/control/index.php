@@ -25,6 +25,82 @@
 			$prog->transpose();
 		} break;
 
+		case 'show_ternary_charts' : {
+			include(PLUGINS.'bevoelkerung/model/prognose.php');
+			$prog = new prognose($this->pgdatabase);
+			$this->triple = $prog->find_triple($this->formvars['layer_parameter_jahr'], $this->formvars['layer_parameter_geschlecht'], 'junge', 'ew', 'alte');
+			$this->main = PLUGINS.'bevoelkerung/view/bevoelkerung_dreiecksdiagramm.php';
+			$this->output();
+		} break;
+
+		case 'create_ternary_charts' : {
+			include(PLUGINS.'bevoelkerung/model/prognose.php');
+			include PLUGINS.'bevoelkerung/model/chart.php';
+			$prog = new prognose($this->pgdatabase);
+			$style = array(													// Optionen
+				"size"					 => 500,							//	- Größe des Charts in Pixeln (quadratisch, default 400px)
+				"titleColor"		 => 'black',					//	- Farbe der Überschrift (default: black, kann Format '#xxxxxx' sein oder Farbname aus Definition s.u.)
+				"axisColor"			=> 'blue',						//	- Farbe der Achsen (default: black)
+				"minorAxisColor" => 'gray50',					//	- Farbe der Gitterachsen (default: axisColor)
+				"valueColor1"		 => 'green',					//	- Farbe der Datenpunkte (default: green)
+				"valueColor2"		 => 'blue',					//	- Farbe der Datenpunkte auf Ebene 2(default: blue)
+				"valueColor3"		 => 'red',					//	- Farbe der Datenpunkte auf Ebene 2(default: red)
+				"labelColor"		 => 'magenta',				//	- Farbe der Achsenbeschriftungen (default: gray75)
+				"backgoundColor" => 'white',				//	- Hintergrundfarbe (default: white)
+				"markerSize"		 => 7									//	- Größe der Datenpunkte in Pixeln (default: 5px)
+			);
+			$geschlechter = array('g' => 'Gesamtbevölkerung', 'm' => 'Bevölkerung männlich', 'w' => 'Bevölkerung weiblich');
+			$axis = array("Junge", "Erwachsene", "Alte");
+			$this->von_jahr = 15;
+			$this->bis_jahr = 40;
+			$this->image_maps = array();
+			/*
+			$chart_file = PLUGINS . 'bevoelkerung/img/tc_test.png';
+			drawTernaryChart(
+				$chart_file,
+				array("Junge", "Erwachsene", "Alte"),
+				array(array(20, 50, 30)),
+				'Gesamtbevölkerung im Jahr 20' . $jahr,
+				$style
+			);
+			*/
+			for($jahr = $this->von_jahr; $jahr <= $this->bis_jahr; $jahr++) {
+				foreach($geschlechter AS $geschlecht_abk => $geschlecht_label) {
+					$chart_file = PLUGINS . 'bevoelkerung/img/tc_' . $geschlecht_abk . '_' . $jahr . '.png';
+					if (!file_exists($chart_file)) {
+						$areas = drawTernaryChart(
+							$chart_file,
+							$axis,
+							array(
+								array(
+									'legend_name' => 'Nahbereiche',
+									'values' => $prog->find_triple('bereichs', $jahr, $geschlecht_abk, 'junge', 'ew', 'alte', 'gebiet')
+								),
+								array(
+									'legend_name' => 'Kreise',
+									'values' => $prog->find_triple('kreis', $jahr, $geschlecht_abk, 'junge', 'ew', 'alte', 'gebiet')
+								),
+								array(
+									'legend_name' => 'Land',
+									'values' => $prog->find_triple('land', $jahr, $geschlecht_abk, 'junge', 'ew', 'alte', 'gebiet')
+								)
+							),
+							$geschlecht_label . ' im Jahr 20' . $jahr,
+							$style
+						);
+						$areas_file = PLUGINS . 'bevoelkerung/img/tc_' . $geschlecht_abk . '_' . $jahr . '_areas.html';
+						writeImageMap(
+							$areas_file,
+							$areas
+						);
+					}
+				}
+			}
+
+			$this->main = PLUGINS.'bevoelkerung/view/bevoelkerung_dreiecksdiagramme.php';
+			$this->output();
+		} break;
+
 		default : {
 			$this->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
 		}

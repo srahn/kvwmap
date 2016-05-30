@@ -12,6 +12,7 @@ if($this->user->rolle->querymode == 1){
 <link rel="stylesheet" href="<?php echo 'layouts/custom/'.CUSTOM_STYLE; ?>">
 <? } ?>
 <? include(WWWROOT.APPLVERSION.'funktionen/msgboxes.php'); ?>
+<link rel="stylesheet" href="../3rdparty/font-awesome-4.6.3/css/font-awesome.min.css" type="text/css">
 </HEAD>
 <BODY onload="onload_functions();">
 	<div id="sperrdiv" style="position: absolute;height: 100%;z-index: 1000000;opacity: 0.3;background-color: grey;"></div>

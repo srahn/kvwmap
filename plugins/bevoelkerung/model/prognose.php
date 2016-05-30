@@ -28,11 +28,11 @@ class prognose {
 	}
 
 	function transpose() {
-		$sql = "
+/*		$sql = "
 			TRUNCATE mvbevoelkerung.zahlen;
 		";
 		$ret = $this->database->execSQL($sql, 4, 0);
-
+*/
 		foreach (glob(BEVOELKERUNG_IMPORT_DATA_PATH . '*.sql') as $filename) {
 			if (strpos($filename, 'Prognose') !== false) {
 				$year = substr($filename, -13, 4);
@@ -127,7 +127,7 @@ class prognose {
 				sed -i 's|ENGINE=InnoDB|--ENGINE=InnoDB|g' " . $filename . "
 				sed -i 's|UNLOCK TABLES|--LOCK TABLES|g' " . $filename . "
 				sed -i 's|LOCK TABLES|--LOCK TABLES|g' " . $filename . "
-				sed -i 's|massen|mvbevoelkerung.massen|g' " . $filename . "
+				sed -i 's| massen| mvbevoelkerung.massen|g' " . $filename . "
 			");
 		}
 	}
@@ -151,7 +151,7 @@ class prognose {
 			FROM
 				" . $tablename . "
 		";
-
+		print_r($this->database);
 		$ret = $this->database->execSQL($sql, 4, 0);
 
 		if ($ret[0] == 0) {
@@ -200,7 +200,7 @@ class prognose {
 
 		echo "<br>Kopiere in Tabelle mvbevoelkerung.zahlen von CSV-Datei: " . $csvfilename;
 		$sql = "
-			COPY mvbevoelkerung.zahlen FROM '" . $csvfilename . "'
+			COPY mvbevoelkerung.zahlen (jahr, mstand, kennungnum, masse, prz, wbl, v, bu, z) FROM '" . $csvfilename . "'
 			WITH
 				CSV
 				DELIMITER ';'
@@ -255,6 +255,30 @@ class prognose {
 			WHERE
 				jahr = '" . $year . "'
 		";*/
+	}
+
+	function find_triple($bereich, $jahr, $geschlecht, $col1, $col2, $col3, $label) {
+		$sql = "
+			SELECT
+				round((" . $col1 . " / summe * 100)::numeric, 1),
+				round((" . $col2 . " / summe * 100)::numeric, 1),
+				round((" . $col3 . " / summe * 100)::numeric, 1), " .
+				$label . "
+			FROM
+				mvbevoelkerung." . $bereich . "vergleiche
+			WHERE
+				jahr = " . $jahr . " AND
+				geschlecht = '" . $geschlecht . "'
+		";
+		#echo $sql;
+		$ret = $this->database->execSQL($sql, 4, 0);
+		if ($ret[0] == 0) {
+			$result = array();
+			while ($rs = pg_fetch_row($ret[1])) {
+				$result[] = $rs;
+			}
+		}
+		return $result;
 	}
 }
 ?>
