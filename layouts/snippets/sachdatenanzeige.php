@@ -112,16 +112,15 @@ for($i=0;$i<$anzLayer;$i++){
 					</script>
 				<? }else{
 							echo '&nbsp;'.$strLimit; ?>&nbsp;
-							<? $selectable_limits = array(10, 25, 50, 100, 200); ?>
-										<select name="anzahl" id="anzahl" onchange="javascript:overlay_submit(currentform, false);">
-											<? foreach($selectable_limits as $limit){
-											if($this->formvars['anzahl'] != '' AND $custom_limit != true AND !in_array($this->formvars['anzahl'], $selectable_limits) AND $this->formvars['anzahl'] < $limit){
-												$custom_limit = true;	?>
-												<option value="<? echo $this->formvars['anzahl'];?>" selected><? echo $this->formvars['anzahl']; ?></option>
-											<? } ?>
-											<option value="<? echo $limit; ?>" <? if($this->formvars['anzahl'] == $limit)echo 'selected'?>><? echo $limit; ?></option>
-											<? } ?>
-										</select>
+							<select name="anzahl" id="anzahl" onchange="javascript:overlay_submit(currentform, false);">
+								<? foreach($selectable_limits as $limit){
+								if($this->formvars['anzahl'] != '' AND $custom_limit != true AND !in_array($this->formvars['anzahl'], $selectable_limits) AND $this->formvars['anzahl'] < $limit){
+									$custom_limit = true;	?>
+									<option value="<? echo $this->formvars['anzahl'];?>" selected><? echo $this->formvars['anzahl']; ?></option>
+								<? } ?>
+								<option value="<? echo $limit; ?>" <? if($this->formvars['anzahl'] == $limit)echo 'selected'?>><? echo $limit; ?></option>
+								<? } ?>
+							</select>
 					<? } ?>
 			</td>
       <td align="center">

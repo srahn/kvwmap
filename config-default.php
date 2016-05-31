@@ -233,6 +233,9 @@ define('DHK_CALL_PROFILKENNUNG', 'mvaaa');														# Version 2.4
 define('EARTH_RADIUS', 6384000);																										# Version 2.1
 define('M_QUASIGEOID', 38);																													# Version 2.1
 
+# auswählbare Treffermengen
+$selectable_limits = array(10, 25, 50, 100, 200);			# Version 2.4
+
 # auswählbare Maßstäbe
 $selectable_scales = array(500, 1000, 2500, 5000, 7500, 10000, 25000, 50000, 100000, 250000, 500000, 1000000);		# Version 2.2
 
