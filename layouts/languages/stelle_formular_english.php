@@ -21,8 +21,6 @@
   $strOwsSrs="OWS SRS";
   $strLogo="Logo";
   $strNoLogoSelected="No logo selected";
-  $strWaterMark="Watermark";
-  $strNoWatermarkSelected="No watermark selected";
   $strALBReferencingRegion="ALB referencing region";
   $strALBReferencingRegionKey="ALB key of referencing region";
   $strMenuPoint="Menu point";

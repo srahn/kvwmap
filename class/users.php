@@ -2600,7 +2600,6 @@ class stelle {
     $this->epsg_code=$rs["epsg_code"];
     $this->alb_raumbezug=$rs["alb_raumbezug"];
     $this->alb_raumbezug_wert=$rs["alb_raumbezug_wert"];
-    $this->wasserzeichen=$rs["wasserzeichen"];
     $this->pgdbhost = ($rs["pgdbhost"] == 'PGSQL_PORT_5432_TCP_ADDR') ? getenv('PGSQL_PORT_5432_TCP_ADDR') : $rs["pgdbhost"];
     $this->pgdbname=$rs["pgdbname"];
     $this->pgdbuser=$rs["pgdbuser"];
@@ -2819,12 +2818,6 @@ class stelle {
 		elseif($stellendaten['wappen_save']){
 			$sql.=', wappen="'.$stellendaten['wappen_save'].'"';
 		}
-		if($stellendaten['wasserzeichen']){
-			$sql.=', wasserzeichen="'.$_files['wasserzeichen']['name'].'"';
-		}
-		elseif($stellendaten['wasserzeichen_save']){
-			$sql.=', wasserzeichen="'.$stellendaten['wasserzeichen_save'].'"';
-		}
 		$sql.=', check_client_ip="';if($stellendaten['checkClientIP']=='1')$sql.='1';else $sql.='0';$sql.='"';
 		$sql.=', check_password_age="';if($stellendaten['checkPasswordAge']=='1')$sql.='1';else $sql.='0';$sql.='"';
 		$sql.=', allowed_password_age=';if($stellendaten['allowedPasswordAge']!='')$sql.=$stellendaten['allowedPasswordAge'];else $sql.='6';
@@ -2892,9 +2885,6 @@ class stelle {
 		$sql.=', wappen_link= "'.$stellendaten['wappen_link'].'"';
 		if($stellendaten['wappen']){
 			$sql.=', wappen="'.$stellendaten['wappen'].'"';
-		}
-		if($stellendaten['wasserzeichen']){
-			$sql.=', wasserzeichen="'.$stellendaten['wasserzeichen'].'"';
 		}
 		$sql.=', check_client_ip="';if($stellendaten['checkClientIP']=='1')$sql.='1';else $sql.='0';$sql.='"';
 		$sql.=', check_password_age="';if($stellendaten['checkPasswordAge']=='1')$sql.='1';else $sql.='0';$sql.='"';

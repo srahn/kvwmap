@@ -8652,13 +8652,6 @@ class GUI {
             #echo '<br>Lade '.$_files['Wappen']['tmp_name'].' nach '.$nachDatei.' hoch';
         }
       }
-      if($_files['wasserzeichen']['name']){
-        $this->formvars['wasserzeichen'] = $_files['wasserzeichen']['name'];
-        $nachDatei = WWWROOT.APPLVERSION.WAPPENPATH.$_files['wasserzeichen']['name'];
-        if (move_uploaded_file($_files['wasserzeichen']['tmp_name'],$nachDatei)) {
-            #echo '<br>Lade '.$_files['wasserzeichen']['tmp_name'].' nach '.$nachDatei.' hoch';
-        }
-      }
       $stelleid = $this->formvars['selected_stelle_id'];
       $Stelle = new stelle($stelleid,$this->user->database);
       $Stelle->language = $this->Stelle->language;
@@ -8887,7 +8880,6 @@ class GUI {
       $this->formvars['ows_fees'] = $this->stellendaten['ows_fees'];
       $this->formvars['ows_srs'] = $this->stellendaten['ows_srs'];
       $this->formvars['wappen'] = $this->stellendaten['wappen'];
-      $this->formvars['wasserzeichen'] = $this->stellendaten['wasserzeichen'];
       $this->formvars['alb_raumbezug'] = $this->stellendaten['alb_raumbezug'];
       $this->formvars['alb_raumbezug_wert'] = $this->stellendaten['alb_raumbezug_wert'];
 			$this->formvars['checkClientIP'] = $this->stellendaten['check_client_ip'];
@@ -10302,37 +10294,20 @@ class GUI {
           exit();
         }
       }
-      # Prüfen ob stelle ohne wz ausgeben darf
-      if ($this->formvars['wz']==0) {
-        if(!$this->Stelle->funktionen['ohneWasserzeichen']['erlaubt']) {
-          showAlert('Die Anzeige ohne Wasserzeichen ist für diese Stelle nicht erlaubt.');
-          # Wenn nicht erlaubt wird wz auf 1 gesetzt.
-          $this->formvars['wz']=1;
-        }
-      }
       # Ausgabe der Flurstücksdaten im PDF Format
       include (PDFCLASSPATH."class.ezpdf.php");
       $pdf=new Cezpdf();
       $ALB=new ALB($this->pgdatabase);
 
-      if($this->formvars['wz']){
-        if($this->Stelle->wasserzeichen){
-          $wasserzeichen = WAPPENPATH.$this->Stelle->wasserzeichen;
-        }
-        else{
-          $wasserzeichen = WASSERZEICHEN;
-        }
-      }
-
       if($formnummer < 26){
         $log_number = array($Grundbuchbezirk.'-'.$Grundbuchblatt);
         $currenttime=date('Y-m-d H:i:s',time());
-        $pdf=$ALB->ALBAuszug_Bestand($Grundbuchbezirk,$Grundbuchblatt,$formnummer,$wasserzeichen);
+        $pdf=$ALB->ALBAuszug_Bestand($Grundbuchbezirk,$Grundbuchblatt,$formnummer);
         $this->user->rolle->setConsumeALB($currenttime,$formnummer,$log_number,$this->formvars['wz'],$pdf->pagecount);
       }
       else{
         $currenttime=date('Y-m-d H:i:s',time());
-        $pdf=$ALB->ALBAuszug_Flurstueck($FlurstKennz,$formnummer,$wasserzeichen);
+        $pdf=$ALB->ALBAuszug_Flurstueck($FlurstKennz,$formnummer);
         $this->user->rolle->setConsumeALB($currenttime,$formnummer,$FlurstKennz,$this->formvars['wz'],$pdf->pagecount);
       }
       $this->pdf=$pdf;

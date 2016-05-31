@@ -21,8 +21,6 @@
   $strOwsSrs="OWS SRS";
   $strLogo="Wappen*";
   $strNoLogoSelected="kein Wappen ausgewählt";
-  $strWaterMark="Wasserzeichen";
-  $strNoWatermarkSelected="kein Wasserzeichen ausgewählt";
   $strALBReferencingRegion="ALB_Raumbezug";
   $strALBReferencingRegionKey="ALB_Raumbezugschlüssel";
   $strMenuPoint="Menüpunkte";

@@ -290,7 +290,7 @@ define ('GRAPHICSPATH','graphics/');
 # Wappen
 define('WAPPENPATH',GRAPHICSPATH.'wappen/');
 # Wasserzeichenbild für Ausdrucke
-define('WASSERZEICHEN',WAPPENPATH.'wappen_wz.jpg');
+#define('WASSERZEICHEN',WAPPENPATH.'wappen_wz.jpg');			# in Version 2.4 gelöscht
 # Layouts
 define ('LAYOUTPATH',WWWROOT.APPLVERSION.'layouts/');
 define ('SNIPPETS',LAYOUTPATH.'snippets/');
