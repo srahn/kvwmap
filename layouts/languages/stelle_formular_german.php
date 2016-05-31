@@ -43,4 +43,6 @@
   $strEpsgCode="EPSG-Code";
   $strUseLayerAliases="Layer-Aliasnamen verwenden";
 	$strWappenLink="Wappen-Link";
+	$strcheckClientIP="IP-Adressen überprüfen";
+	$strhist_timestamp="historische Zeitstempel zulassen";
 ?>

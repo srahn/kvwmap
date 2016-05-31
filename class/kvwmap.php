@@ -8890,9 +8890,11 @@ class GUI {
       $this->formvars['wasserzeichen'] = $this->stellendaten['wasserzeichen'];
       $this->formvars['alb_raumbezug'] = $this->stellendaten['alb_raumbezug'];
       $this->formvars['alb_raumbezug_wert'] = $this->stellendaten['alb_raumbezug_wert'];
+			$this->formvars['checkClientIP'] = $this->stellendaten['check_client_ip'];
       $this->formvars['checkPasswordAge'] = $this->stellendaten['check_password_age'];
       $this->formvars['allowedPasswordAge'] = $this->stellendaten['allowed_password_age'];
       $this->formvars['use_layer_aliases'] = $this->stellendaten['use_layer_aliases'];
+			$this->formvars['hist_timestamp'] = $this->stellendaten['hist_timestamp'];
       $this->formvars['selmenues'] = $Stelle->getMenue(0);
       $Stelle->getFunktionen();
       $this->formvars['selfunctions'] = $Stelle->funktionen['array'];
@@ -10543,7 +10545,7 @@ class GUI {
 											<td></td>
 											<td>';
 												if(count($versionen) > 0){
-			$output.= '					<select name="versions_'.$k.'" onchange="location.href=\'index.php?go=setHistTimestamp&timestamp=\'+this.value" style="max-width: 500px">';
+			$output.= '					<select name="versions_'.$k.'" onchange="location.href=\'index.php?go=setHistTimestamp&timestamp=\'+this.value+\'&go_next=get_last_query\'" style="max-width: 500px">';
 													$selected = false;
 													$v = 1;
 													$count = count($versionen);
