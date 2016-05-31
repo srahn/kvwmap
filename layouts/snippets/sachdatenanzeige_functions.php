@@ -176,7 +176,7 @@ include('funktionen/input_check_functions.php');
   			return;
   		}
 			if(document.getElementsByName(form_fields[i])[0] != undefined){
-				data_r += '&'+form_fields[i]+'='+document.getElementsByName(form_fields[i])[0].value;
+				//data_r += '&'+form_fields[i]+'='+document.getElementsByName(form_fields[i])[0].value;		// kann evtl. weg
 			}
   	}
   	data = 'go=Sachdaten_speichern&reload='+reload+'&selected_layer_id='+layer_id+'&fromobject='+fromobject+'&targetobject='+targetobject+'&targetlayer_id='+targetlayer_id+'&targetattribute='+targetattribute+'&data='+data+'&form_field_names='+form_fieldstring+'&embedded=true' + data_r;
@@ -209,7 +209,7 @@ include('funktionen/input_check_functions.php');
   			return;
   		}
   		if(document.getElementsByName(form_fields[i])[0] != undefined){
-  			data_r += '&'+form_fields[i]+'='+document.getElementsByName(form_fields[i])[0].value;
+  			//data_r += '&'+form_fields[i]+'='+document.getElementsByName(form_fields[i])[0].value;			// kann evtl. weg
   		}
   	}
   	data = 'go=neuer_Layer_Datensatz_speichern&reload='+reload+'&selected_layer_id='+layer_id+'&fromobject='+fromobject+'&targetobject='+targetobject+'&targetlayer_id='+targetlayer_id+'&targetattribute='+targetattribute+'&data='+data+'&form_field_names='+form_fieldstring+'&embedded=true' + data_r;
