@@ -490,7 +490,7 @@ class ddl {
 				$this->add_static_elements($offsetx);
     	}
 			$this->yoffset_onpage = $this->maxy - $this->miny[$lastpage];			# der Offset mit dem die Elemente beim Untereinander-Typ nach unten versetzt werden
-			if($this->datasetcount_on_page > 0 AND $this->layout['type'] != 0 AND $this->miny[$lastpage] < $this->yoffset_onpage/$this->datasetcount_on_page + 40){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
+			if($this->datasetcount_on_page > 0 AND $this->layout['type'] != 0 AND $this->miny[$lastpage] < $this->yoffset_onpage/$this->datasetcount_on_page + 60){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
 				$this->datasetcount_on_page = 0;
 				$this->i_on_page = 0;
 				#$this->maxy = 0;
