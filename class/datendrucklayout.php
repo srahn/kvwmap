@@ -378,7 +378,7 @@ class ddl {
 		$y = $y + $fh;
 		$this->pdf->ezSetY($y);		
 		$page_id_before_puttext = $this->pdf->currentContents;
-		$ret = $this->pdf->ezText(iconv("UTF-8", "CP1252", $text), $fontsize, $options);
+		$ret = $this->pdf->ezText(iconv("UTF-8", "CP1252//TRANSLIT", $text), $fontsize, $options);
 		$page_id_after_puttext = $this->pdf->currentContents;		
 		#if($this->gui->user->id == 101)echo $page_id_before_puttext.' '.$page_id_after_puttext.' '.$text.'<br>';
 		if($page_id_before_puttext != $page_id_after_puttext){
@@ -490,7 +490,7 @@ class ddl {
 				$this->add_static_elements($offsetx);
     	}
 			$this->yoffset_onpage = $this->maxy - $this->miny[$lastpage];			# der Offset mit dem die Elemente beim Untereinander-Typ nach unten versetzt werden
-			if($this->datasetcount_on_page > 0 AND $this->layout['type'] != 0 AND $this->miny[$lastpage] < $this->yoffset_onpage/$this->datasetcount_on_page + 40){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
+			if($this->datasetcount_on_page > 0 AND $this->layout['type'] != 0 AND $this->miny[$lastpage] < $this->yoffset_onpage/$this->datasetcount_on_page + 60){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
 				$this->datasetcount_on_page = 0;
 				$this->i_on_page = 0;
 				#$this->maxy = 0;

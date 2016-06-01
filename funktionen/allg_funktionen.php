@@ -1,4 +1,3 @@
-
 <?php
 /* hier befindet sich ein lose Sammlung von Funktionen, die so oder ähnlich im php
  * Funktionenumfang nicht existieren, in älteren Versionen nicht existiert haben,

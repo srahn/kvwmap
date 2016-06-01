@@ -233,6 +233,9 @@ define('DHK_CALL_PROFILKENNUNG', 'mvaaa');														# Version 2.4
 define('EARTH_RADIUS', 6384000);																										# Version 2.1
 define('M_QUASIGEOID', 38);																													# Version 2.1
 
+# auswählbare Treffermengen
+$selectable_limits = array(10, 25, 50, 100, 200);			# Version 2.4
+
 # auswählbare Maßstäbe
 $selectable_scales = array(500, 1000, 2500, 5000, 7500, 10000, 25000, 50000, 100000, 250000, 500000, 1000000);		# Version 2.2
 
@@ -243,7 +246,7 @@ $supportedSRIDs = array(4326,2397,2398,2399,31466,31467,31468,31469,32648,25832,
 $supportedLanguages = array('german');															# Version 2.0
 
 # Hier kann festgelegt werden, ob in den Optionen das Feld "Zeitpunkt für historische Daten" erscheinen soll, oder nicht (true/false)
-define('HIST_TIMESTAMP', true);																											# Version 2.3
+#define('HIST_TIMESTAMP', true);								# Version 2.3 		# in Version 2.4 wieder gelöscht (ist jetzt stellenbezogen)
 
 # Name der Stopwortdatei
 define('STOPWORDFILE',SHAPEPATH.'gazetteer/top10000de.txt');
@@ -287,7 +290,7 @@ define ('GRAPHICSPATH','graphics/');
 # Wappen
 define('WAPPENPATH',GRAPHICSPATH.'wappen/');
 # Wasserzeichenbild für Ausdrucke
-define('WASSERZEICHEN',WAPPENPATH.'wappen_wz.jpg');
+#define('WASSERZEICHEN',WAPPENPATH.'wappen_wz.jpg');			# in Version 2.4 gelöscht
 # Layouts
 define ('LAYOUTPATH',WWWROOT.APPLVERSION.'layouts/');
 define ('SNIPPETS',LAYOUTPATH.'snippets/');

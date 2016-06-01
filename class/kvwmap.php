@@ -6068,8 +6068,8 @@ class GUI {
 		fclose($fp);
 
 		if($preview == true){
-			exec(IMAGEMAGICKPATH.'convert -density 300x300 '.$dateipfad.$dateiname.' -resize 595x1000 '.$dateipfad.$name.'-'.$currenttime.'.jpg');
-			#echo IMAGEMAGICKPATH.'convert -density 300x300  '.$dateipfad.$dateiname.' -resize 595x1000 '.$dateipfad.$name.'-'.$currenttime.'.jpg';
+			exec(IMAGEMAGICKPATH.'convert -density 300x300 '.$dateipfad.$dateiname.' -background white -flatten -resize 595x1000 '.$dateipfad.$name.'-'.$currenttime.'.jpg');
+			#echo IMAGEMAGICKPATH.'convert -density 300x300 '.$dateipfad.$dateiname.' -background white -flatten -resize 595x1000 '.$dateipfad.$name.'-'.$currenttime.'.jpg';
 			if(!file_exists(IMAGEPATH.$name.'-'.$currenttime.'.jpg')){
 				return TEMPPATH_REL.$name.'-'.$currenttime.'-0.jpg';
 			}
@@ -8652,13 +8652,6 @@ class GUI {
             #echo '<br>Lade '.$_files['Wappen']['tmp_name'].' nach '.$nachDatei.' hoch';
         }
       }
-      if($_files['wasserzeichen']['name']){
-        $this->formvars['wasserzeichen'] = $_files['wasserzeichen']['name'];
-        $nachDatei = WWWROOT.APPLVERSION.WAPPENPATH.$_files['wasserzeichen']['name'];
-        if (move_uploaded_file($_files['wasserzeichen']['tmp_name'],$nachDatei)) {
-            #echo '<br>Lade '.$_files['wasserzeichen']['tmp_name'].' nach '.$nachDatei.' hoch';
-        }
-      }
       $stelleid = $this->formvars['selected_stelle_id'];
       $Stelle = new stelle($stelleid,$this->user->database);
       $Stelle->language = $this->Stelle->language;
@@ -8887,12 +8880,13 @@ class GUI {
       $this->formvars['ows_fees'] = $this->stellendaten['ows_fees'];
       $this->formvars['ows_srs'] = $this->stellendaten['ows_srs'];
       $this->formvars['wappen'] = $this->stellendaten['wappen'];
-      $this->formvars['wasserzeichen'] = $this->stellendaten['wasserzeichen'];
       $this->formvars['alb_raumbezug'] = $this->stellendaten['alb_raumbezug'];
       $this->formvars['alb_raumbezug_wert'] = $this->stellendaten['alb_raumbezug_wert'];
+			$this->formvars['checkClientIP'] = $this->stellendaten['check_client_ip'];
       $this->formvars['checkPasswordAge'] = $this->stellendaten['check_password_age'];
       $this->formvars['allowedPasswordAge'] = $this->stellendaten['allowed_password_age'];
       $this->formvars['use_layer_aliases'] = $this->stellendaten['use_layer_aliases'];
+			$this->formvars['hist_timestamp'] = $this->stellendaten['hist_timestamp'];
       $this->formvars['selmenues'] = $Stelle->getMenue(0);
       $Stelle->getFunktionen();
       $this->formvars['selfunctions'] = $Stelle->funktionen['array'];
@@ -10300,37 +10294,20 @@ class GUI {
           exit();
         }
       }
-      # Prüfen ob stelle ohne wz ausgeben darf
-      if ($this->formvars['wz']==0) {
-        if(!$this->Stelle->funktionen['ohneWasserzeichen']['erlaubt']) {
-          showAlert('Die Anzeige ohne Wasserzeichen ist für diese Stelle nicht erlaubt.');
-          # Wenn nicht erlaubt wird wz auf 1 gesetzt.
-          $this->formvars['wz']=1;
-        }
-      }
       # Ausgabe der Flurstücksdaten im PDF Format
       include (PDFCLASSPATH."class.ezpdf.php");
       $pdf=new Cezpdf();
       $ALB=new ALB($this->pgdatabase);
 
-      if($this->formvars['wz']){
-        if($this->Stelle->wasserzeichen){
-          $wasserzeichen = WAPPENPATH.$this->Stelle->wasserzeichen;
-        }
-        else{
-          $wasserzeichen = WASSERZEICHEN;
-        }
-      }
-
       if($formnummer < 26){
         $log_number = array($Grundbuchbezirk.'-'.$Grundbuchblatt);
         $currenttime=date('Y-m-d H:i:s',time());
-        $pdf=$ALB->ALBAuszug_Bestand($Grundbuchbezirk,$Grundbuchblatt,$formnummer,$wasserzeichen);
+        $pdf=$ALB->ALBAuszug_Bestand($Grundbuchbezirk,$Grundbuchblatt,$formnummer);
         $this->user->rolle->setConsumeALB($currenttime,$formnummer,$log_number,$this->formvars['wz'],$pdf->pagecount);
       }
       else{
         $currenttime=date('Y-m-d H:i:s',time());
-        $pdf=$ALB->ALBAuszug_Flurstueck($FlurstKennz,$formnummer,$wasserzeichen);
+        $pdf=$ALB->ALBAuszug_Flurstueck($FlurstKennz,$formnummer);
         $this->user->rolle->setConsumeALB($currenttime,$formnummer,$FlurstKennz,$this->formvars['wz'],$pdf->pagecount);
       }
       $this->pdf=$pdf;
@@ -10543,7 +10520,7 @@ class GUI {
 											<td></td>
 											<td>';
 												if(count($versionen) > 0){
-			$output.= '					<select name="versions_'.$k.'" onchange="location.href=\'index.php?go=setHistTimestamp&timestamp=\'+this.value" style="max-width: 500px">';
+			$output.= '					<select name="versions_'.$k.'" onchange="location.href=\'index.php?go=setHistTimestamp&timestamp=\'+this.value+\'&go_next=get_last_query\'" style="max-width: 500px">';
 													$selected = false;
 													$v = 1;
 													$count = count($versionen);
@@ -13900,7 +13877,7 @@ class db_mapObj{
     }
   }
 
-  function add_attribute_values($attributes, $database, $query_result, $withvalues = true, $stelle_id){
+  function add_attribute_values($attributes, $database, $query_result, $withvalues = true, $stelle_id, $only_current_enums = false){
     # Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
     for($i = 0; $i < count($attributes['name']); $i++){
 			if($attributes['constraints'][$i] != '' AND !in_array($attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))){  # das sind die Auswahlmöglichkeiten, die durch die Tabellendefinition in Postgres fest vorgegeben sind
@@ -13930,11 +13907,18 @@ class db_mapObj{
                 # ------<required by>------
                 # -----<requires>------
                 if(strpos(strtolower($attributes['options'][$i]), "<requires>") > 0){
+									if($only_current_enums){		# Ermittlung der Spalte, die als value dient
+										$explo1 = explode(' as value', strtolower($attributes['options'][$i]));
+										$attribute_value_column = array_pop(explode(' ', $explo1[0]));
+									}
                   if($query_result != NULL){
                     for($k = 0; $k < count($query_result); $k++){
 											$options = $attributes['options'][$i];
 											foreach($attributes['name'] as $attributename){
 												if(strpos($options, '<requires>'.$attributename.'</requires>') !== false AND $query_result[$k][$attributename] != ''){
+													if($only_current_enums){	# in diesem Fall werden nicht alle Auswahlmöglichkeiten abgefragt, sondern nur die aktuellen Werte des Datensatzes (wird z.B. beim Daten-Export verwendet, da hier nur lesend zugegriffen wird und die Datenmengen sehr groß sein können)
+														$options = str_ireplace('where', 'where '.$attribute_value_column.' = \''.$query_result[$k][$attributes['name'][$i]].'\' AND ', $options);
+													}
 													$options = str_replace('<requires>'.$attributename.'</requires>', "'".$query_result[$k][$attributename]."'", $options);
 												}
 											}

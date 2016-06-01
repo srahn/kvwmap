@@ -164,6 +164,7 @@ hide_versions = function(flst){
 											</td>
 											<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
 											<td>
+												<? if($this->Stelle->hist_timestamp){ ?>
 												<div id="no_versions_<? echo $flst->FlurstKennz; ?>">
 													<table cellspacing="0" cellpadding="2">
 														<tr>
@@ -178,6 +179,7 @@ hide_versions = function(flst){
 												</div>
 												<div id="versions_<? echo $flst->FlurstKennz; ?>" style="border: 1px solid <? echo BG_DEFAULT ?>; display:none"></div>
 											</td>
+											<? } ?>
 										</tr>
 									</table>
 								</td>
@@ -314,7 +316,7 @@ hide_versions = function(flst){
 									if($flst->Nachfolger != ''){
 										echo "historisches&nbsp;Flurst&uuml;ck"; 
 										if($flst->endet != ''){
-											if($timestamp == NULL OR $timestamp < $beginnt OR $timestamp >= $endet){
+											if($this->Stelle->hist_timestamp AND ($timestamp == NULL OR $timestamp < $beginnt OR $timestamp >= $endet)){
 												$set_timestamp = 'setHistTimestamp&timestamp='.$flst->beginnt;
 												echo '<a href="index.php?go='.$set_timestamp.'" title="in die Zeit des Flurstücks wechseln">&nbsp;(endet: '.$flst->endet.')</a>';
 											}
@@ -322,7 +324,7 @@ hide_versions = function(flst){
 										} 
 									} 
 									else{
-										if($timestamp != NULL AND $timestamp < $beginnt){
+										if($this->Stelle->hist_timestamp AND $timestamp != NULL AND $timestamp < $beginnt){
 											$set_timestamp = 'setHistTimestamp';
 											echo '<a href="index.php?go='.$set_timestamp.'" title="Zeitpunkt auf aktuell setzen">aktuelles&nbsp;Flurst&uuml;ck</a>';
 										}

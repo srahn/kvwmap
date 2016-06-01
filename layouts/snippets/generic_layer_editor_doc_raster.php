@@ -34,7 +34,7 @@
 </script>
 
 <div id="layer" align="left" onclick="remove_calendar();">
-<? if($this->new_entry != true){ ?>
+<? if($this->formvars['embedded_subformPK'] == '' AND $this->new_entry != true){ ?>
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
 	<tr>
 		<td valign="top" style="padding: 0 0 0 0">
@@ -82,9 +82,11 @@
 	$geomtype = '';
 	$dimension = '';
 	$privileg = '';
+	if($this->formvars['embedded_subformPK'] == '')$records_per_row = 5;
+	else $records_per_row = 3;
 	for ($k=0;$k<$anzObj;$k++) {
 		$checkbox_names .= 'check;'.$attributes['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].'|';
-		if($k%5==0){
+		if($k%$records_per_row == 0){
 ?>
 	</tr>
 </table>
@@ -201,7 +203,6 @@
 		  				}
 		  			}
 		  			else{
-							#include(SNIPPETS.'generic_formelements.php');
 							$datapart .= attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size, $select_width, $this->user->rolle->fontsize_gle);
 							echo $datapart;
 		  			}
@@ -341,7 +342,7 @@
 ?>
 	</tr>
 	
-<?	if($this->formvars['printversion'] == ''){?>
+<?	if($this->formvars['embedded_subformPK'] == '' AND $this->formvars['printversion'] == ''){?>
 	<tr>
 		<td colspan="2"align="left">
 		<? if($layer['connectiontype'] == 6 AND $this->new_entry != true AND $layer['Layer_ID'] > 0){ ?>
