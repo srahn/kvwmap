@@ -82,9 +82,11 @@
 	$geomtype = '';
 	$dimension = '';
 	$privileg = '';
+	if($this->formvars['embedded_subformPK'] == '')$records_per_row = 5;
+	else $records_per_row = 3;
 	for ($k=0;$k<$anzObj;$k++) {
 		$checkbox_names .= 'check;'.$attributes['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].'|';
-		if($k%5==0){
+		if($k%$records_per_row == 0){
 ?>
 	</tr>
 </table>
