@@ -1,5 +1,6 @@
 <?
 	# dies ist das Snippet für die Sachdatenanzeige eines aufgeklappten Links aus einer SubformEmbeddedPK-Liste
+	# es wird aber auch als Rahmen für das eingebettete Rasterlayout verwendet, damit hier ein Speichern-Button erscheint
 	include(SNIPPETS.'generic_form_parts.php'); 
   include(LAYOUTPATH.'languages/sachdatenanzeige_'.$this->user->rolle->language.'.php');
   
