@@ -6540,36 +6540,39 @@ class GUI {
           ORDER BY
             " . $class_item . "
         ";
+        #echo '<p>' . $sql;
         $ret=$layerdb->execSQL($sql, 4, 0);
         if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
         $data = pg_fetch_all($ret[1]);
 
-        // flatten data
-        $flatData = array();
-        array_walk($data, function($item, $idx, $data) {
-          $data[0][] = (float)($item[$data[1]]);
-        }, array(&$flatData,$class_item));
+        if (count($data) > 0) {
+          // flatten data
+          $flatData = array();
+          array_walk($data, function($item, $idx, $data) {
+            $data[0][] = (float)($item[$data[1]]);
+          }, array(&$flatData,$class_item));
 
-        // divide data into #num_classes# clusters by 'divide and conquer'-approach
-        // starting with a single cluster, every iteration the cluster with highest
-        // residual energy is iteratively split into two, until the number of
-        // clusters equals #num_classes#
-        $centers = kMeansClustering::kMeansNoSeeds($flatData, $num_classes);
+          // divide data into #num_classes# clusters by 'divide and conquer'-approach
+          // starting with a single cluster, every iteration the cluster with highest
+          // residual energy is iteratively split into two, until the number of
+          // clusters equals #num_classes#
+          $centers = kMeansClustering::kMeansNoSeeds($flatData, $num_classes);
 
-        // calculate class ranges from cluster centers
-        $ranges = array("0");
-        for ($cIdx = 1; $cIdx < count($centers); $cIdx++) {
-          $ranges[] = number_format(($centers[$cIdx-1]+ $centers[$cIdx]) /2, 2);
-        }
-        $ranges[]= "100";
+          // calculate class ranges from cluster centers
+          $ranges = array("0");
+          for ($cIdx = 1; $cIdx < count($centers); $cIdx++) {
+            $ranges[] = number_format(($centers[$cIdx-1]+ $centers[$cIdx]) /2, 2);
+          }
+          $ranges[]= "100";
 
-        // build classes
-        for ($order = $rIdx = 1; $rIdx < count($ranges); $rIdx++) {
-          $class['name'] = $ranges[$rIdx-1] . ' - ' . $ranges[$rIdx];
-          $class['class_item'] = $class_item;
-          $class['order'] = $order++;
-          $class['expression'] = '([' . $class_item . '] >= ' . $ranges[$rIdx-1] . ' AND [' . $class_item . '] < ' . $ranges[$rIdx] . ')';
-          $classes[] = $class;
+          // build classes
+          for ($order = $rIdx = 1; $rIdx < count($ranges); $rIdx++) {
+            $class['name'] = $ranges[$rIdx-1] . ' - ' . $ranges[$rIdx];
+            $class['class_item'] = $class_item;
+            $class['order'] = $order++;
+            $class['expression'] = '([' . $class_item . '] >= ' . str_replace(',', '', $ranges[$rIdx-1]) . ' AND [' . $class_item . '] < ' . str_replace(',', '', $ranges[$rIdx]) . ')';
+            $classes[] = $class;
+          }
         }
       } break;
     }

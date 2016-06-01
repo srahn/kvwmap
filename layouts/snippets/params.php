@@ -6,12 +6,13 @@
 			foreach($params AS $param) {
 				echo '&layer_parameter_' . $param['key'] . "=' + document.getElementById('layer_parameter_" . $param['key'] . "').value + '";
 			} ?>';
-			debug_ulp = this;
-			console.log('Versende: ' + data);
 			ahah('index.php', data, [''], ['execute_function']);
 		}
+		function onLayerParameterChanged(parameter) {
+			document.getElementById("update_layer_parameter_button").style.color = "red";
+		}
 		function onLayerParamsUpdated(status) {
-			console.log('status: ' + status);
+			document.getElementById("update_layer_parameter_button").style.color = "gray";
 		}
 	</script><?php
 foreach($params AS $param) {
@@ -27,12 +28,12 @@ foreach($params AS $param) {
 		}
 	}
 	echo $param['alias']; ?>
-	<select id="layer_parameter_<?php echo $param['key']; ?>" name="layer_parameter_<?php echo $param['key']; ?>"><?php
+	<select id="layer_parameter_<?php echo $param['key']; ?>" name="layer_parameter_<?php echo $param['key']; ?>" onchange="onLayerParameterChanged(this);"><?php
 		foreach($options AS $option) { ?>
 			<option value="<?php echo $option['value']; ?>"<?php echo $option['selected']; ?>><?php echo $option['output']; ?></option><?php
 		} ?>
 	</select>&nbsp;<?php
 }
 ?>&nbsp;
-<i class="fa fa-floppy-o" aria-hidden="true" onclick="updateLayerParams();"></i>&nbsp;
+<i id="update_layer_parameter_button" class="fa fa-floppy-o" aria-hidden="true" onclick="updateLayerParams();"></i>&nbsp;
 <i class="fa fa-times" aria-hidden="true" onclick="toggleLayerParamsBar();"></i>&nbsp;

@@ -584,7 +584,7 @@ else {
               <option value="3">7</option>
               <option value="3">8</option>
             </select> //-->
-            <a href="index.php?go=Layereditor_Autoklassen_Hinzufügen&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&=num_classes=5&classification_method=gleiche Anzahl Klassenmitglieder#Klassen"><?php echo $strAddAutoClasses; ?></a>
+            <a href="index.php?go=Layereditor_Autoklassen_Hinzufügen&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&=num_classes=5&classification_method=Clustering nach Jenk, Mininierung Abweichung i.d. Klassen"><?php echo $strAddAutoClasses; ?></a>
         </td>
 			</tr>
 			<tr>
