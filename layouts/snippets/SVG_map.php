@@ -61,6 +61,7 @@
 	
    
   function get_map_ajax(postdata){
+		startwaiting();
 		if(document.GUI.legendtouched.value == 0){
   		svgdoc = document.SVG.getSVGDocument();	
 			// nix
