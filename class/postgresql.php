@@ -91,7 +91,7 @@ class pgdatabase {
       $sql.=" WHERE spatial_ref_sys.srid IN (".implode(',', $supportedSRIDs).")";
     }
     if($order)$sql.=" ORDER BY srtext";
-    echo $sql;		
+    #echo $sql;		
     $ret = $this->execSQL($sql, 4, 0);		
     if($ret[0]==0){
 			$i = 0;
