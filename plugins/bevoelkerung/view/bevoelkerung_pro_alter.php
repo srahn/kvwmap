@@ -77,7 +77,8 @@ function change_orderby(attribute, layer_id){
 ?></tr>
 <?
 	for ($k=0;$k<$anzObj;$k++) {
-		if($resultSet[$k]['nr'] < 0){		# nur die Gruppen 0 - 101 für das Diagramm anhaken
+		#if($resultSet[$k]['nr'] < 0){		# nur die Gruppen 0 - 101 für das Diagramm anhaken
+		if(true){		# nur die Gruppen 0 - 101 für das Diagramm anhaken
 		$checkbox_names .= 'check;'.$attributes['table_alias_name'][$attributes['name'][0]].';'.$attributes['table_name'][$attributes['name'][0]].';'.$resultSet[$k][$attributes['table_name'][$attributes['name'][0]].'_oid'].'|';
 		?>
   		<input id="<? echo $layerId.'_'.$k; ?>" type="hidden" value="on" name="check;<? echo $attributes['table_alias_name'][$attributes['name'][0]].';'.$attributes['table_name'][$attributes['name'][0]].';'.$resultSet[$k][$attributes['table_name'][$attributes['name'][0]].'_oid']; ?>">
@@ -86,7 +87,7 @@ function change_orderby(attribute, layer_id){
 ?>
 			<tr>
 <?		for($j = 0; $j < count($attributes['name']); $j++){
-				if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $resultSet[$k]['nr'] >= 300){		# nur die Interval-Gruppen darstellen){
+				if($attributes['invisible'][$attributes['name'][$j]] != 'true'){		# nur die Interval-Gruppen darstellen){
 					if($attributes['name'][$j] != 'nr' AND $attributes['type'][$j] != 'geometry'){
 						echo '<td><input title="'.$attributes['alias'][$j].'" ';
 						if($attributes['length'][$j]){
@@ -183,7 +184,7 @@ function change_orderby(attribute, layer_id){
 								</td>
 								<td>
 									<select style="width:133px" name="chartcomparison_<?php echo $layerId; ?>" onchange="create_chart(<?php echo $layerId; ?>);">
-										<option value="einwohner2030p" selected="true">2030</option>
+										<option value="e2040" selected="true">2040</option>
 									</select>
 								</td>
 							</tr>
@@ -202,5 +203,5 @@ function change_orderby(attribute, layer_id){
 	</tr>
 </table>
 <input type="hidden" name="checkbox_names_<? echo $layerId; ?>" value="<? echo $checkbox_names; ?>">
-<input type="hidden" name="orderby<? echo $layerId; ?>" id="orderby<? echo $layerId; ?>" value="<? echo $this->formvars['orderby'.$layerId]; ?>,geschlecht">
+<input type="hidden" name="orderby<? echo $layerId; ?>" id="orderby<? echo $layerId; ?>" value="<? echo $this->formvars['orderby'.$layerId]; ?>">
 
