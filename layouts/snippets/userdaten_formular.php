@@ -58,7 +58,7 @@ else {
   </tr>
   <tr>
     <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLogInName;?></th>
-    <td style="border-bottom:1px solid #C3C7C3"><input name="loginname" type="text" value="<?php echo $this->formvars['loginname']; ?>" size="15" maxlength="15"></td>
+    <td style="border-bottom:1px solid #C3C7C3"><input name="loginname" type="text" value="<?php echo $this->formvars['loginname']; ?>" size="15" maxlength="100"></td>
   </tr><?php if ($this->formvars['selected_user_id']>0) {?>
   <tr>
     <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strChangePassword;?></th>
