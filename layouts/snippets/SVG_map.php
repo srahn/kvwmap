@@ -61,6 +61,7 @@
 	
    
   function get_map_ajax(postdata){
+		startwaiting();
 		if(document.GUI.legendtouched.value == 0){
   		svgdoc = document.SVG.getSVGDocument();	
 			// nix
@@ -368,7 +369,6 @@ function startup(){';
 }
 
 function sendpath(cmd, pathx, pathy){
-	startwaiting();
 	top.sendpath(cmd, pathx, pathy);
 	if(cmd == "polygonquery")deletepolygon();
 }

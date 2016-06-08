@@ -36,4 +36,5 @@
  $this->deactivatelayer="Dieses Thema ausschalten";
  $this->activatelayer="Dieses Thema sichtbar schalten";
  $this->printversion="Druckversion";
+ $this->strLimit="Anzahl Treffer:";
 ?>

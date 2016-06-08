@@ -33,11 +33,6 @@
 
 class spatial_processor {
   
-  ###################### Liste der Funktionen ####################################
-  #
-  # 
-  ################################################################################
-
   function spatial_processor($rolle, $database, $pgdatabase) {
     global $debug;
     $this->debug = $debug;
@@ -58,41 +53,28 @@ class spatial_processor {
     }
   }
   
-  function union($geom_1, $geom_2, $type){
-  	if($type == 'wkt'){
-  		//$sql = "SELECT st_astext(validize_polygon(st_union(st_geomfromtext('".$geom_1."'), st_geomfromtext('".$geom_2."'))))";
-  		$sql = "SELECT st_astext(ST_SnapToGrid(st_union(ST_SnapToGrid(st_geomfromtext('".$geom_1."'), 0.0001), ST_SnapToGrid(st_geomfromtext('".$geom_2."'), 0.0001)), 0.0001))";
-  	}
-  	else{
-  		//$sql = "SELECT st_assvg(validize_polygon(st_union(st_geomfromtext('".$geom_1."'), st_geomfromtext('".$geom_2."'))),0,8)";
-  		$sql = "SELECT st_assvg(ST_SnapToGrid(st_union(ST_SnapToGrid(st_geomfromtext('".$geom_1."'), 0.0001), ST_SnapToGrid(st_geomfromtext('".$geom_2."'), 0.0001)), 0.0001),0,8)";
-  	}
+  function union($geom_1, $geom_2){
+  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0,8) as svg FROM (SELECT st_union(st_geomfromtext('".$geom_1."'), st_geomfromtext('".$geom_2."')) as geom) as foo";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
       $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
     }
     else {
-    	$rs = pg_fetch_array($ret[1]);
+    	$rs = pg_fetch_assoc($ret[1]);
     }
-    return $rs[0];
+    return $rs;
   }
   
-  function difference($geom_1, $geom_2, $type){
-  	if($type == 'wkt'){
-  		$sql = "SELECT st_astext(ST_SnapToGrid(st_difference(ST_SnapToGrid(st_geomfromtext('".$geom_1."'), 0.0001), ST_SnapToGrid(st_geomfromtext('".$geom_2."'), 0.0001)), 0.0001))";
-  	}
-  	else{
-  		$sql = "SELECT st_assvg(ST_SnapToGrid(st_difference(ST_SnapToGrid(st_geomfromtext('".$geom_1."'), 0.0001), ST_SnapToGrid(st_geomfromtext('".$geom_2."'), 0.0001)), 0.0001),0,8)";
-  	}
+  function difference($geom_1, $geom_2){
+  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0,8) as svg FROM (SELECT st_difference(st_geomfromtext('".$geom_1."'), st_geomfromtext('".$geom_2."')) as geom) as foo";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
-  	#return $sql;
     if ($ret[0]) {
       $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
     }
     else {
-    	$rs = pg_fetch_array($ret[1]);
+    	$rs = pg_fetch_assoc($ret[1]);
     }
-    return $rs[0];
+    return $rs;
   }
   
   function area($geom, $unit){
@@ -123,22 +105,16 @@ class spatial_processor {
     return $rs[0].'~'.$rs[0];
   }
 	
-	function translate($geom, $type, $x, $y){
-  	if($type == 'wkt'){
-  		$sql = "SELECT st_astext(st_translate(st_geomfromtext('".$geom."'), ".$x.", ".$y."))";
-  	}
-  	else{
-  		$sql = "SELECT st_assvg(st_translate(st_geomfromtext('".$geom."'), ".$x.", ".$y."),0,8)";
-  	}
+	function translate($geom, $x, $y){
+  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0,8) as svg FROM (SELECT st_translate(st_geomfromtext('".$geom."'), ".$x.", ".$y.") as geom) as foo";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
-  	#return $sql;
     if ($ret[0]) {
       $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
     }
     else {
     	$rs = pg_fetch_array($ret[1]);
     }
-    return $rs[0];
+    return $rs;
   }
   
   function process_query($formvars){
@@ -216,48 +192,32 @@ class spatial_processor {
 			}break;
 			
 			case 'get_closest_line':{
-				if($formvars['resulttype'] == 'svgwkt'){
-					$result = $this->get_closest_line($polywkt1, 'svg', $formvars['fromwhere']);
-					$result .= '||';
-					$result .= $this->get_closest_line($polywkt1, 'wkt', $formvars['fromwhere']);
-				}
-				else{
-					$result = $this->get_closest_line($polywkt1, $formvars['resulttype'], $formvars['fromwhere']);
-				}
+				$rs = $this->get_closest_line($polywkt1, $formvars['fromwhere']);
+				$result = $rs['svg'];
+				$result .= '||';
+				$result .= $rs['wkt'];
 			}break;
 			
 			case 'translate':{
-				if($formvars['resulttype'] == 'svgwkt'){
-					$result = $this->translate($polywkt1, 'svg', $formvars['translate_x'], $formvars['translate_y']);
-					$result .= '||';
-					$result .= $this->translate($polywkt1, 'wkt', $formvars['translate_x'], $formvars['translate_y']);
-				}
-				else{
-					$result = $this->translate($polywkt1, $formvars['resulttype'], $formvars['translate_x'], $formvars['translate_y']);
-				}
+				$rs = $this->translate($polywkt1, $formvars['translate_x'], $formvars['translate_y']);
+				$result = $rs['svg'];
+				$result .= '||';
+				$result .= $rs['wkt'];
 			}break;
 			
 			case 'buffer':{
 				if($formvars['width'] == ''){$formvars['width'] = 50;}
-				if($formvars['resulttype'] == 'svgwkt'){
-					$result = $this->buffer($polywkt1, 'svg', $formvars['width']);
-					$result .= '||';
-					$result .= $this->buffer($polywkt1, 'wkt', $formvars['width']);
-				}
-				else{
-					$result = $this->buffer($polywkt1, $formvars['resulttype'], $formvars['width']);
-				}
+				$rs = $this->buffer($polywkt1, $formvars['width']);
+				$result = $rs['svg'];
+				$result .= '||';
+				$result .= $rs['wkt'];
 			}break;
 			
 			case 'buffer_ring':{
-				if($formvars['resulttype'] == 'svgwkt'){
-					$result = $this->buffer_ring($polywkt1, 'svg', $formvars['width']);
-					$result .= '||';
-					$result .= $this->buffer_ring($polywkt1, 'wkt', $formvars['width']);
-				}
-				else{
-					$result = $this->buffer_ring($polywkt1, $formvars['resulttype'], $formvars['width']);
-				}
+				$rs = $this->buffer_ring($polywkt1, $formvars['width']);
+				$result = $rs['svg'];
+				$result .= '||';
+				$result .= $rs['wkt'];
 			}break;
 			
 			case 'add_buffer_within_polygon':{
@@ -269,48 +229,32 @@ class spatial_processor {
 		
 			case 'add_buffered_line':{
 				if($formvars['width'] == ''){$formvars['width'] = 50;}
-				if($formvars['resulttype'] == 'svgwkt'){
-					$result = $this->add_buffered_line($polywkt1, $polywkt2, 'svg', $formvars['width']);
-					$result .= '||';
-					$result .= $this->add_buffered_line($polywkt1, $polywkt2, 'wkt', $formvars['width']);
-				}
-				else{
-					$result = $this->add_buffered_line($polywkt1, $polywkt2, $formvars['resulttype'], $formvars['width']);
-				}
+				$rs = $this->add_buffered_line($polywkt1, $polywkt2, $formvars['width']);
+				$result = $rs['svg'];
+				$result .= '||';
+				$result .= $rs['wkt'];
 			}break;
 			
 			case 'add_parallel_polygon':{
 				if($formvars['width'] == ''){$formvars['width'] = 50;}
-				if($formvars['resulttype'] == 'svgwkt'){
-					$result = $this->add_parallel_polygon($polywkt1, $polywkt2, 'svg', $formvars['width']);
-					$result .= '||';
-					$result .= $this->add_parallel_polygon($polywkt1, $polywkt2, 'wkt', $formvars['width']);
-				}
-				else{
-					$result = $this->add_parallel_polygon($polywkt1, $polywkt2, $formvars['resulttype'], $formvars['width']);
-				}
+				$rs = $this->add_parallel_polygon($polywkt1, $polywkt2, $formvars['width']);
+				$result = $rs['svg'];
+				$result .= '||';
+				$result .= $rs['wkt'];
 			}break;
 		
 			case 'add':{
-				if($formvars['resulttype'] == 'svgwkt'){
-					$result = $this->union($polywkt1, $polywkt2, 'svg');
-					$result .= '||';
-					$result .= $this->union($polywkt1, $polywkt2, 'wkt');
-				}
-				else{
-					$result = $this->union($polywkt1, $polywkt2, $formvars['resulttype']);
-				}
+				$rs = $this->union($polywkt1, $polywkt2);
+				$result = $rs['svg'];
+				$result .= '||';
+				$result .= $rs['wkt'];
 			}break;
 			
 			case 'subtract':{
-				if($formvars['resulttype'] == 'svgwkt'){
-					$result = $this->difference($polywkt1, $polywkt2, 'svg');
-					$result .= '||';
-					$result .= $this->difference($polywkt1, $polywkt2, 'wkt');
-				}
-				else{
-					$result = $this->difference($polywkt1, $polywkt2, $formvars['resulttype']);
-				}
+				$rs = $this->difference($polywkt1, $polywkt2);
+				$result = $rs['svg'];
+				$result .= '||';
+				$result .= $rs['wkt'];
 			}break;
 			
 			case 'area':{
@@ -339,14 +283,10 @@ class spatial_processor {
 				if($polywkt1 == ''){
 					$polywkt1 = $querygeometryWKT;
 				}
-				if($formvars['resulttype'] == 'svgwkt'){
-					$result = $this->union($polywkt1, $querygeometryWKT, 'svg');
-					$result .= '||';
-					$result .= $this->union($polywkt1, $querygeometryWKT, 'wkt');
-				}
-				else{
-					$result = $this->union($polywkt1, $polywkt2, $formvars['resulttype']);
-				}
+				$rs = $this->union($polywkt1, $querygeometryWKT);
+				$result = $rs['svg'];
+				$result .= '||';
+				$result .= $rs['wkt'];
 			}break;
 			
 			case 'subtract_geometry':{
@@ -358,16 +298,10 @@ class spatial_processor {
 					$polywkt1 = $querygeometryWKT;
 				}
 				$diff = $polywkt1;
-				if($formvars['resulttype'] == 'svgwkt'){
-					//$result = $this->difference($diff, $querygeometryWKT, 'svg');
-					$result = $this->difference($diff, $querygeometryWKT, 'svg');
-					$result .= '||';
-					//$result .= $this->difference($diff, $querygeometryWKT, 'wkt');
-					$result .= $this->difference($diff, $querygeometryWKT, 'wkt');
-				}
-				else{
-					$result = $this->difference($diff, $polywkt2, $formvars['resulttype']);
-				}
+				$rs = $this->difference($diff, $querygeometryWKT);
+				$result = $rs['svg'];
+				$result .= '||';
+				$result .= $rs['wkt'];
 			}break;
 			
 		}
@@ -400,41 +334,31 @@ class spatial_processor {
     return $geom;
   }
   
-  function buffer($geom_1, $type, $width){
+  function buffer($geom_1, $width){
   	if(substr_count($geom_1, ',') == 1){			# wenn Polygon nur aus einem Eckpunkt besteht -> in POINT umwandeln -> Kreis entsteht
   		$geom_1 = $this->pointfrompolygon($geom_1);
   	}
-  	if($type == 'wkt'){
-  		$sql = "select st_astext(st_buffer(st_geomfromtext('".$geom_1."'), ".$width."))";
-  	}
-  	else{
-  		$sql = "select st_assvg(st_buffer(st_geomfromtext('".$geom_1."'), ".$width."),0,5)";
-  	}
+  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0,8) as svg FROM (select st_buffer(st_geomfromtext('".$geom_1."'), ".$width.") as geom) as foo";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
       $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
     }
     else {
-    	$rs = pg_fetch_array($ret[1]);
+    	$rs = pg_fetch_assoc($ret[1]);
     }
-    return $rs[0];
+    return $rs;
   }
   
-  function buffer_ring($geom_1, $type, $width){
-  	if($type == 'wkt'){
-  		$sql = "select st_astext(st_difference(st_buffer(st_geomfromtext('".$geom_1."'), ".$width.", 16), st_geomfromtext('".$geom_1."')))";
-  	}
-  	else{
-  		$sql = "select st_assvg(st_difference(st_buffer(st_geomfromtext('".$geom_1."'), ".$width.", 16), st_geomfromtext('".$geom_1."')),0,5)";
-  	}
+  function buffer_ring($geom_1, $width){
+  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0,8) as svg FROM (select st_difference(st_buffer(st_geomfromtext('".$geom_1."'), ".$width.", 16), st_geomfromtext('".$geom_1."')) as geom) as foo";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
       $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
     }
     else {
-    	$rs = pg_fetch_array($ret[1]);
+    	$rs = pg_fetch_assoc($ret[1]);
     }
-    return $rs[0];
+    return $rs;
   }
 		
 	function add_buffer_within_polygon($geom_1, $geom_2, $formvars){
@@ -445,7 +369,7 @@ class spatial_processor {
 		if($geom_1 == ''){
 			$geom_1 = 'GEOMETRYCOLLECTION EMPTY';
 		}
-  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0,8) as svg FROM (SELECT (ST_SnapToGrid(st_union(ST_SnapToGrid(st_geomfromtext('".$geom_1."'), 0.0001), ST_SnapToGrid(   st_intersection(st_geomfromtext('".$querygeometryWKT."'),  st_buffer(st_geomfromtext('".$formvars['path3']."'), (select st_distance(st_geomfromtext('".$formvars['path3']."'), st_geomfromtext('".$geom_2."'))), 16)  )   , 0.0001)), 0.0001)) as geom) as foo";
+  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0,8) as svg FROM (SELECT (st_union(st_geomfromtext('".$geom_1."'), st_intersection(st_geomfromtext('".$querygeometryWKT."'),  st_buffer(st_geomfromtext('".$formvars['path3']."'), (select st_distance(st_geomfromtext('".$formvars['path3']."'), st_geomfromtext('".$geom_2."'))), 16)))) as geom) as foo";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
       $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
@@ -456,45 +380,29 @@ class spatial_processor {
     return $rs;
   }
 	
-	function add_buffered_line($geom_1, $geom_2, $type, $width){
+	function add_buffered_line($geom_1, $geom_2, $width){
   	if(substr_count($geom_2, ',') == 0){			# wenn Linestring nur aus einem Eckpunkt besteht -> in POINT umwandeln -> Kreis entsteht
   		$geom_2 = $this->pointfromlinestring($geom_2);
   	}
 		if($geom_1 == ''){
 			$geom_1 = 'GEOMETRYCOLLECTION EMPTY';
 		}
-  	if($type == 'wkt'){
-  		//$sql = "SELECT st_astext(validize_polygon(st_union(st_geomfromtext('".$geom_1."'), st_geomfromtext('".$geom_2."'))))";
-  		$sql = "SELECT st_astext(ST_SnapToGrid(st_union(ST_SnapToGrid(st_geomfromtext('".$geom_1."'), 0.0001), ST_SnapToGrid(st_buffer(st_geomfromtext('".$geom_2."'), ".$width."), 0.0001)), 0.0001))";
-  	}
-  	else{
-  		//$sql = "SELECT st_assvg(validize_polygon(st_union(st_geomfromtext('".$geom_1."'), st_geomfromtext('".$geom_2."'))),0,8)";
-  		$sql = "SELECT st_assvg(ST_SnapToGrid(st_union(ST_SnapToGrid(st_geomfromtext('".$geom_1."'), 0.0001), ST_SnapToGrid(st_buffer(st_geomfromtext('".$geom_2."'), ".$width."), 0.0001)), 0.0001),0,8)";
-  	}
+  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0,8) as svg FROM (SELECT st_union(st_geomfromtext('".$geom_1."'), st_buffer(st_geomfromtext('".$geom_2."'), ".$width.")) as geom) as foo";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
       $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
     }
     else {
-    	$rs = pg_fetch_array($ret[1]);
+    	$rs = pg_fetch_assoc($ret[1]);
     }
-    return $rs[0];
+    return $rs;
   }
 	
-	function add_parallel_polygon($geom_1, $geom_2, $type, $width){
+	function add_parallel_polygon($geom_1, $geom_2, $width){
 		if($geom_1 == ''){
 			$geom_1 = 'GEOMETRYCOLLECTION EMPTY';
 		}
-  	if($type == 'wkt'){
-  		//$sql = "SELECT st_astext(validize_polygon(st_union(st_geomfromtext('".$geom_1."'), st_geomfromtext('".$geom_2."'))))";
-  		//$sql = "SELECT st_astext(ST_SnapToGrid(st_union(ST_SnapToGrid(st_geomfromtext('".$geom_1."'), 0.0001), st_concavehull(st_union(ST_SnapToGrid(st_geomfromtext('".$geom_2."'), 0.0001), ST_SnapToGrid(st_offsetcurve(st_geomfromtext('".$geom_2."'), ".$width."), 0.0001)), 0.96)), 0.0001))";
-			$sql = "SELECT st_astext(ST_SnapToGrid(st_union(ST_SnapToGrid(st_geomfromtext('".$geom_1."'), 0.0001), geom), 0.0001)) FROM st_dump((SELECT ST_Polygonize(st_union(ST_Boundary(ST_Buffer(the_geom, ".$width.", 'endcap=flat join=round')), the_geom)) AS buffer_sides FROM (SELECT ST_GeomFromText('".$geom_2."') AS the_geom) AS table1));";
-  	}
-  	else{
-  		//$sql = "SELECT st_assvg(validize_polygon(st_union(st_geomfromtext('".$geom_1."'), st_geomfromtext('".$geom_2."'))),0,8)";
-  		//$sql = "SELECT st_assvg(ST_SnapToGrid(st_union(ST_SnapToGrid(st_geomfromtext('".$geom_1."'), 0.0001), st_concavehull(st_union(ST_SnapToGrid(st_geomfromtext('".$geom_2."'), 0.0001), ST_SnapToGrid(st_offsetcurve(st_geomfromtext('".$geom_2."'), ".$width."), 0.0001)), 0.96)), 0.0001),0,8)";
-			$sql = "SELECT st_assvg(ST_SnapToGrid(st_union(ST_SnapToGrid(st_geomfromtext('".$geom_1."'), 0.0001), geom), 0.0001),0,8) FROM st_dump((SELECT ST_Polygonize(st_union(ST_Boundary(ST_Buffer(the_geom, ".$width.", 'endcap=flat join=round')), the_geom)) AS buffer_sides FROM (SELECT ST_GeomFromText('".$geom_2."') AS the_geom) AS table1));";
-  	}
+  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0,8) as svg FROM (SELECT st_astext(st_union(st_geomfromtext('".$geom_1."'), geom)) as geom FROM st_dump((SELECT ST_Polygonize(st_union(ST_Boundary(ST_Buffer(the_geom, ".$width.", 'endcap=flat join=round')), the_geom)) AS buffer_sides FROM (SELECT ST_GeomFromText('".$geom_2."') AS the_geom) AS table1))) as foo";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
       $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
@@ -502,11 +410,11 @@ class spatial_processor {
     else {
     	$rs = pg_fetch_array($ret[1]);
     }
-    return $rs[0];
+    return $rs;
   }
 
   
-  function get_closest_line($input_coord, $type, $fromwhere){
+  function get_closest_line($input_coord, $type, $fromwhere){		# wird nicht verwendet
   	$coord1 = explode(';',$input_coord);
   	$coord2 = explode(',',$coord1[0]);
   	$worldx = $this->rolle->oGeorefExt->minx+$this->rolle->pixsize*$coord2[0]; # x Wert

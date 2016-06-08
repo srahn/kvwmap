@@ -21,8 +21,6 @@
   $strOwsSrs="OWS SRS";
   $strLogo="Wappen*";
   $strNoLogoSelected="kein Wappen ausgewählt";
-  $strWaterMark="Wasserzeichen";
-  $strNoWatermarkSelected="kein Wasserzeichen ausgewählt";
   $strALBReferencingRegion="ALB_Raumbezug";
   $strALBReferencingRegionKey="ALB_Raumbezugschlüssel";
   $strMenuPoint="Menüpunkte";
@@ -43,4 +41,6 @@
   $strEpsgCode="EPSG-Code";
   $strUseLayerAliases="Layer-Aliasnamen verwenden";
 	$strWappenLink="Wappen-Link";
+	$strcheckClientIP="IP-Adressen überprüfen";
+	$strhist_timestamp="historische Zeitstempel zulassen";
 ?>
