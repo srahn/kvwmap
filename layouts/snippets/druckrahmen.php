@@ -208,8 +208,8 @@ function art_hide(){
                 <td id="art_call" class="fett" <? if($this->Document->selectedframe[0]['dhk_call'] == '')echo 'style="visibility:hidden"'; ?>>
 									&nbsp;&nbsp;&nbsp;&nbsp;&raquo;&nbsp;Art:
 									<select style="width: 260px" name="dhk_call">
-										<option value="0110" <? if($this->Document->selectedframe[0]['dhk_call'] == '0110')echo 'selected'; ?>>Liegenschaftskarte</option>
-										<option value="0120" <? if($this->Document->selectedframe[0]['dhk_call'] == '0120')echo 'selected'; ?>>Liegenschaftskarte mit Bodenschätzung</option>
+										<option value="<? if($this->Document->selectedframe[0]['dhk_call'] != '')echo '0110'; ?>" <? if($this->Document->selectedframe[0]['dhk_call'] == '0110')echo 'selected'; ?>>Liegenschaftskarte</option>
+										<option value="<? if($this->Document->selectedframe[0]['dhk_call'] != '')echo '0120'; ?>" <? if($this->Document->selectedframe[0]['dhk_call'] == '0120')echo 'selected'; ?>>Liegenschaftskarte mit Bodenschätzung</option>
           	      </select>
                 </td>
               </tr>

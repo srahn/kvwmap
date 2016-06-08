@@ -288,10 +288,13 @@ if($this->formvars['gps_follow'] == ''){
 								<a href="index.php?go=reset_layers"><img src="graphics/layer.png" border="0" alt="<? echo $strLayerControl; ?>" title="<? echo $strLayerControl.' | '.$strDeactivateAllLayer; ?>" width="20" height="20"></a><br>
 							</div>
 						<div id="scrolldiv" onscroll="document.GUI.scrollposition.value = this.scrollTop;" style="height:<?php echo $legendheight; ?>; overflow:auto; scrollbar-base-color:<?php echo BG_DEFAULT ?>">
-						<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
-						<div onclick="document.GUI.legendtouched.value = 1;" id="legend">
-							<? echo $this->legende; ?>
-						</div>
+							<input type="hidden" name="nurFremdeLayer" value="<? echo $this->formvars['nurFremdeLayer']; ?>">
+							<div onclick="document.GUI.legendtouched.value = 1;" id="legend">
+								<? echo $this->legende; ?>
+							</div>
+							<script type="text/javascript">
+								document.getElementById('scrolldiv').scrollTop = <? echo $this->user->rolle->scrollposition; ?>;
+							</script>
 						</div>
 							</td>
 						</tr>

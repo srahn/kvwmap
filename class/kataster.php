@@ -1928,7 +1928,7 @@ class flurstueck {
     $this->Zaehler=intval($rs['zaehler']);
     $this->Nenner=intval($rs['nenner']);
     $this->FlurstNr=$this->Zaehler;
-    $this->Flurstkennz_alt = $rs['gemkgschl'].'-'.$rs['flurnr'].'-'.str_pad($rs['zaehler'], 5, '0', STR_PAD_LEFT).'/'.str_pad($rs['nenner'], 3, '0', STR_PAD_LEFT).'.00';
+    $this->Flurstkennz_alt = $rs['gemkgschl'].'-'.$rs['flurnr'].'-'.str_pad($rs['zaehler'], 5, '0', STR_PAD_LEFT).'/'.str_pad($rs['nenner'], 3, '0', STR_PAD_LEFT);
     if ($this->Nenner!='') { $this->FlurstNr.="/".$this->Nenner; }
     $this->KreisID=$rs['kreisid'];
     $this->KreisName=$rs['kreisname'];
