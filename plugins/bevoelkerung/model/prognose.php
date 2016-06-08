@@ -16,7 +16,7 @@ class prognose {
 	*/
 	function import() {
 		$dir = new DirectoryIterator(BEVOELKERUNG_IMPORT_DATA_PATH);
-		echo 'loop through ' . BEVOELKERUNG_IMPORT_DATA_PATH . '*.gz <br>';
+		echo 'Loop through ' . BEVOELKERUNG_IMPORT_DATA_PATH . '*.gz <br>';
 		foreach (glob(BEVOELKERUNG_IMPORT_DATA_PATH . '*.gz') as $filename) {
 			echo 'Packe ' . $filename . ' aus.<br>';
 			exec('gunzip ' . $filename);
@@ -151,7 +151,6 @@ class prognose {
 			FROM
 				" . $tablename . "
 		";
-		print_r($this->database);
 		$ret = $this->database->execSQL($sql, 4, 0);
 
 		if ($ret[0] == 0) {
@@ -161,9 +160,23 @@ class prognose {
 			# Insgesamt werden folgende Felder ausgegeben:
 			# jahr, mstand, kennungnum, masse, prz, wbl, v, bu, z
 			while ($row = pg_fetch_assoc($ret[1])) {
+				switch ($row['mstand']) {
+					case 'KBu2014' : {
+						$mstand = 3;
+					} break;
+					case 'AUG2015' : {
+						$mstand = 2;
+					} break;
+					case 'AUG2014' : {
+						$mstand = 1;
+					} break;
+					default : { # Prognose
+						$mstand = 0;
+					}
+				}
 				$values = array(
 					intval($row['jahr']) - 2000, # jahr
-					$row['mstand'], # mstand
+					$mstand, # mstand
 					intval($row['kennungnum']), # kennungnum
 					$row['masse'], # masse
 					intval($row['prz']) # prz

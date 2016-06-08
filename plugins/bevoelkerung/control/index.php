@@ -101,6 +101,45 @@
 			$this->output();
 		} break;
 
+		case 'bevoelkerung_dynamische_karten' : {
+			$this->params = $this->user->rolle->get_layer_params($this->Stelle->selectable_layer_params, $this->pgdatabase);
+			$this->title = "Dynamische Karte";
+			$this->message = "Diese Funktion erzeugt alle durch die Layer-Parameter möglichen Varianten der aktuell angezeigten Kartendarstellung und zeigt ein Formular an in dem man sich diese schnell nacheinander ansehen kann.";
+
+			$geschlechter = array('g' => 'Gesamtbevölkerung', 'm' => 'Bevölkerung männlich', 'w' => 'Bevölkerung weiblich');
+			$datenreihen = array();
+			foreach ($this->params['datenreihe']['options'] AS $option) {
+				$datenreihen[$option['value']] = $option['output'];
+			}
+			$this->von_jahr = 15;
+			$this->bis_jahr = 40;
+			$this->maps = array();
+
+			for($jahr = $this->von_jahr; $jahr <= $this->bis_jahr; $jahr++) {
+				foreach($geschlechter AS $geschlecht_abk => $geschlecht_label) {
+					foreach($datenreihen AS $datenreihe_abk => $datenreihe_label) {
+						# setze layer parameter
+						rolle::$layer_params = (array)json_decode('{"jahr":"' . $jahr . '", "geschlecht":"' . $geschlecht_abk . '", "datenreihe":"' . $datenreihe_abk . '"}');
+						$map_image_file = PLUGINS . 'bevoelkerung/img/maps/' . $datenreihe_abk . '_' . $geschlecht_abk . '_' . $jahr . '.jpg';
+
+						if (!file_exists($map_image_file)) {
+							# erzeuge die Karte
+							$this->loadMap('DataBase');
+							$this->drawMap();
+							# kopiere die temporäre Datei in cache Verzeichnis und benenne um.
+							rename(
+								IMAGEPATH . basename($this->img['hauptkarte']),
+								$map_image_file
+							);
+						}
+					}
+				}
+			}
+
+			$this->main = PLUGINS . 'bevoelkerung/view/bevoelkerung_dynamische_karten.php';
+			$this->output();
+		} break;
+
 		default : {
 			$this->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
 		}

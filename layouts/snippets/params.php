@@ -1,5 +1,5 @@
 <?php
-	$params = $this->user->rolle->get_layer_params($this->Stelle->selectable_layer_params);?>
+	$params = $this->user->rolle->get_layer_params($this->Stelle->selectable_layer_params, $this->pgdatabase);?>
 	<script language="javascript" type="text/javascript">
 		function updateLayerParams() {
 			var data = 'go=setLayerParams<?php

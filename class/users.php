@@ -1539,7 +1539,7 @@ class rolle {
 		}else return 0;
   }
 
-	function get_layer_params($selectable_layer_params) {
+	function get_layer_params($selectable_layer_params, $pgdatabase) {
 		$layer_params = array();
 		if (!empty($selectable_layer_params)) {
 			$sql = "
@@ -1556,7 +1556,12 @@ class rolle {
 			}
 			else {
 				while ($param = mysql_fetch_assoc($params_result[1])) {
-					$layer_params[] = $param;
+					$options_result = $pgdatabase->execSQL($param['options_sql'], 4, 1);
+					$param['options'] = array();
+					while ($option = pg_fetch_assoc($options_result[1])) {
+						$param['options'][] = $option;
+					}
+					$layer_params[$param['key']] = $param;
 				}
 			}
 		}

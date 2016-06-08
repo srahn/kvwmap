@@ -589,7 +589,7 @@
               }
               # Setzen der Spalte nach der der Layer klassifiziert werden soll
               if ($layerset[$i]['classitem']!='') {
-                $layer->set('classitem',$layerset[$i]['classitem']);
+                $layer->set('classitem', replace_params($layerset[$i]['classitem'], rolle::$layer_params));
               }
               else {
                 #$layer->set('classitem','id');
@@ -793,13 +793,18 @@
           }
         }
 
-        if($this->map_factor != '' and $layerset['Datentyp'] != 8){ 
-          # Skalierung der Stylegröße, wenn map_factor gesetzt und nicht vom Type Chart
-          $style->set('size', $dbStyle['size']*$this->map_factor/1.414);
-        }
-        else{
-          $style->set('size', $dbStyle['size']);
-        }
+				if ($layerset['Datentyp'] == 8) {
+					# Skalierung der Stylegröße when Type Chart
+					$style->setbinding(MS_STYLE_BINDING_SIZE, $dbStyle['size']);
+				}
+				else {
+					if($this->map_factor != '') {
+						$style->set('size', $dbStyle['size']*$this->map_factor/1.414);
+					}
+					else{
+						$style->set('size', $dbStyle['size']);
+					}
+				}
 
         if ($dbStyle['minsize']!='') {
           if($this->map_factor != ''){
@@ -1743,17 +1748,20 @@
     }
     return 0;
   }
-}class rolle {  var $user_id;  var $stelle_id;  var $debug;  var $database;  var $loglevel;  static $hist_timestamp;  static $layer_params;	function rolle($user_id,$stelle_id,$database) {
-		global $debug;
-		$this->debug=$debug;
-		$this->user_id=$user_id;
-		$this->stelle_id=$stelle_id;
-		$this->database=$database;
-		#$this->layerset=$this->getLayer('');
-		#$this->groupset=$this->getGroups('');
-		$this->loglevel = 0;
-	}
-  function readSettings() {
+}class rolle {  var $user_id;  var $stelle_id;  var $debug;  var $database;  var $loglevel;
+		static $hist_timestamp;
+		static $layer_params;
+		function rolle($user_id,$stelle_id,$database) {
+			global $debug;
+			$this->debug=$debug;
+			$this->user_id=$user_id;
+			$this->stelle_id=$stelle_id;
+			$this->database=$database;
+			#$this->layerset=$this->getLayer('');
+			#$this->groupset=$this->getGroups('');
+			$this->loglevel = 0;
+		}
+    function readSettings() {
 		global $language;
     # Abfragen und Zuweisen der Einstellungen der Rolle
     $sql = "
@@ -2226,9 +2234,15 @@
     $this->disabled_classes = $this->read_disabled_classes();
 		$i = 0;
     while ($rs=mysql_fetch_assoc($query)) {
-      if($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivStatus'] != '0')){    # bei withclasses == 2 werden für alle Layer die Klassen geladen, bei withclasses == 1 werden die Klassen nur dann geladen, wenn der Layer aktiv ist
-        $rs['Class']=$this->read_Classes($rs['Layer_ID'], $this->disabled_classes);
-      }
+			$rs['classitem'] = replace_params(
+					$rs['classitem'],
+					rolle::$layer_params
+			);
+			if ($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivStatus'] != '0')) {
+				# bei withclasses == 2 werden für alle Layer die Klassen geladen,
+				# bei withclasses == 1 werden Klassen nur dann geladen, wenn der Layer aktiv ist
+				$rs['Class']=$this->read_Classes($rs['Layer_ID'], $this->disabled_classes, false, $rs['classitem']);
+			}
 			if($rs['maxscale'] > 0)$rs['maxscale'] = $rs['maxscale']+0.3;
 			if($rs['minscale'] > 0)$rs['minscale'] = $rs['minscale']-0.3;
       $this->Layer[$i]=$rs;
@@ -2247,14 +2261,45 @@
 		}
 		return $classarray;
   }
-  function read_Classes($Layer_ID, $disabled_classes = NULL, $all_languages = false) {
+	function read_Classes($Layer_ID, $disabled_classes = NULL, $all_languages = false, $layer_class_item = '') {
 		global $language;
-    $sql ='SELECT ';
-		if(!$all_languages AND $language != 'german') {
-			$sql.='CASE WHEN `Name_'.$language.'` IS NOT NULL THEN `Name_'.$language.'` ELSE `Name` END AS ';
-		}
-		$sql.='Name, `Name_low-german`, Name_english, Name_polish, Name_vietnamese, Class_ID, Layer_ID, Expression, drawingorder, text FROM classes';
-    $sql.=' WHERE Layer_ID='.$Layer_ID.' ORDER BY drawingorder,Class_ID';
+
+		$sql = "
+			SELECT " .
+				(
+					(!$all_languages AND $language != 'german') ? "
+						CASE
+							WHEN `Name_" . $language . "`IS NOT NULL THEN `Name_" . $language . "`
+							ELSE `Name`
+						END AS Name
+					" : "Name"
+				) . ",
+				`Name_low-german`,
+				`Name_english`,
+				`Name_polish`,
+				`Name_vietnamese`,
+				Class_ID,
+				Layer_ID,
+				Expression,
+				class_item,
+				drawingorder,
+				text
+			FROM
+				classes
+			WHERE
+				Layer_ID = " . $Layer_ID .
+				(
+					(!empty($layer_class_item)) ? " AND
+						(
+							class_item IN (NULL, '', '" . $layer_class_item . "')
+						)
+					" : ""
+				) . "
+			ORDER BY
+				class_item,
+				drawingorder,
+				Class_ID
+		";
     #echo $sql.'<br>';
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>".$sql,4);
     $query=mysql_query($sql);
@@ -2283,7 +2328,7 @@
 				else $rs['Status'] = 1;
       }
       else $rs['Status'] = 1;
-			
+
       $Classes[]=$rs;
     }
     return $Classes;
