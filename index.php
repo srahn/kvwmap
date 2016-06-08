@@ -1386,7 +1386,7 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 			$GUI->drawMap();
 			$GUI->output();
 	  } break;
-		
+
 		case "setMapExtent" : {
 			$GUI->setMapExtent();
 		} break;

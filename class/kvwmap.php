@@ -1031,7 +1031,7 @@ class GUI {
               }
               # Setzen der Spalte nach der der Layer klassifiziert werden soll
               if ($layerset[$i]['classitem']!='') {
-                $layer->set('classitem',$layerset[$i]['classitem']);
+                $layer->set('classitem', replace_params($layerset[$i]['classitem'], rolle::$layer_params));
               }
               else {
                 #$layer->set('classitem','id');
@@ -1223,14 +1223,18 @@ class GUI {
             }
           }
         }
-
-        if($this->map_factor != '' and $layerset['Datentyp'] != 8){
-          # Skalierung der Stylegröße, wenn map_factor gesetzt und nicht vom Type Chart
-          $style->set('size', $dbStyle['size']*$this->map_factor/1.414);
-        }
-        else{
-          $style->set('size', $dbStyle['size']);
-        }
+				if ($layerset['Datentyp'] == 8) {
+					# Skalierung der Stylegröße when Type Chart
+					$style->setbinding(MS_STYLE_BINDING_SIZE, $dbStyle['size']);
+				}
+				else {
+					if($this->map_factor != '') {
+						$style->set('size', $dbStyle['size']*$this->map_factor/1.414);
+					}
+					else{
+						$style->set('size', $dbStyle['size']);
+					}
+				}
 
         if ($dbStyle['minsize']!='') {
           if($this->map_factor != ''){
@@ -6327,6 +6331,7 @@ class GUI {
     $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
     $this->formvars['Datentyp'] = $this->layerdata['Datentyp'];
     $this->layerdata['Data'] = replace_params($this->layerdata['Data'], rolle::$layer_params);
+		$this->layerdata['classitem'] = replace_params($this->layerdata['classitem'], rolle::$layer_params);
 
     $begin = strpos($this->layerdata['Data'], '(') + 1;
     $end = strrpos($this->layerdata['Data'], ')');
@@ -6351,7 +6356,6 @@ class GUI {
       $this->formvars['style_outlinecolor'] = $auto_classes[$i]['style_outlinecolor'];
       $this->add_style();
     }
-    print_r($auto_classes);
   }
 
   function AutoklassenErzeugen($layerdb, $data_sql, $class_item, $method, $num_classes) {
@@ -6653,6 +6657,7 @@ class GUI {
   function LayerAendern(){
 		global $supportedLanguages;
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$this->user->rolle->readSettings();
     $mapDB->updateLayer($this->formvars);
     $old_layer_id = $this->formvars['selected_layer_id'];
     if($this->formvars['id'] != ''){
