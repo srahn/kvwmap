@@ -56,7 +56,7 @@
 	$packages[] = 'RP_Infrastruktur';
 	##$packages[] = 'RP_Raster';
 	$packages[] = 'RP_Siedlungsstruktur';
-	##$packages[] = 'RP_Sonstiges';
+	$packages[] = 'RP_Sonstiges';
 	#  $packages[] = 'SO_Basisobjekte';
 	#  $packages[] = 'SO_NachrichtlicheUebernahmen';
 	#  $packages[] = 'SonstigePlanwerke';

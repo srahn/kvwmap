@@ -64,6 +64,91 @@ class Converter {
     }
     return $data;
   }
+
+  function regeln_anwenden($konvertierung_id) {
+    #echo '<h1>Wende Regeln für Konvertierung ' . $konvertierung_id . ' an<br></h1>';
+    
+    # Lösche alle vorher existierenden gml_classes für eine Konvertierung
+    # Regeln der Konvertierung abfragen
+    #Wählt alle Regeln aus, die entweder eine Konvertierungsid besitzen oder 
+    #ansonsten Konvertierung nach Plan abfragen
+    # $Konvertierung_id entspricht Spalte konvertierung_id in gml_classes.rp_plan
+    # gml_id in gml_classes.rp_plan entspricht gehoertzuplan in gml_classes.rp_bereich
+    # gml_id in rp_bereich entspricht bereich_gml_id in xplankonverter.regeln
+    $sql = "
+      SELECT
+        r.sql
+      FROM
+        xplankonverter.regeln r
+      INNER JOIN
+        gml_classes.rp_bereich b
+      ON 
+        r.bereich_gml_id = b.gml_id
+      INNER JOIN
+        gml_classes.rp_plan p 
+      ON
+        b.gehoertzuplan = p.gml_id
+      WHERE
+        p.konvertierung_id = " . $konvertierung_id . "
+      OR
+        r.konvertierung_id = " . $konvertierung_id . "
+    ";
+    $result = pg_query($this->contentDbConn, $sql);
+     /*while ($row_sql = pg_fetch_row($result)){
+      #Regel Ausführen:
+     
+      $result_regel_anwenden = pg_query($conn,  $row_sql[0]);
+      if(!$result_regel_awenden){
+        echo "Ein Fehler ist in der Regel" . $row_sql[0] . "aufgetreten!<br><br>";
+      }
+    }*/
+  }
+  
+  function gmlfeatures_loeschen($konvertierung_id){
+    # FUNKTIONIERT NOCH NICHT
+    /*
+    # Löscht alle Einträge, die mit der spezifischen $konvertierung_id assoziiert sind in allen Tabellen von gmlclasses
+    
+    # Selektiert die gml_ids aller Objekte mit der KonvertierungsId
+    $sql ="
+    SELECT
+      rp_objekt_gml_id
+    FROM
+      gml_classes.rp_bereich2rp_objekt a
+    INNER JOIN
+      gml_classes.rp_bereich b
+    ON 
+      a.rp_bereich_gml_id = b.gml_id
+    INNER JOIN
+      gml_classes.rp_plan p 
+    ON
+      b.gehoertzuplan = p.gml_id
+    WHERE
+      p.konvertierung_id = ". $konvertierung_id . "
+    ";
+    $result = pg_query($this->contentDbConn, $sql);
+    while ($row_sql = pg_fetch_row($result)){
+      $gmlfeature_gmlid[] = $row_sql[0];
+      # echo $row_sql[0] . '<br><br>';
+    }
+    
+    #Selektiert alle vorkommenden Featuretypen aus einer Liste (inklusive XP_Objekte, RP_Plan, RP_Bereiche etc)
+    $sql = "
+      SELECT
+        table_name
+      FROM
+        information_schema.tables
+      WHERE
+        table_schema = 'gml_classes'
+    ";
+    $result = pg_query($this->contentDbConn, $sql);
+    while ($row_sql = pg_fetch_row($result)){
+      $gmlclasses = $row_sql[0];
+    }
+    # Nun für jedes relevante Schema überprüfen, ob GML_ID vorkommt
+    */
+  }
+  
 }
 
 ?>
