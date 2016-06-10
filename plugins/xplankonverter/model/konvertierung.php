@@ -30,7 +30,7 @@ class Konvertierung extends PgObject {
     foreach($tables AS $table) {
       $sql = "
         DELETE FROM
-          " . $table "
+          " . $table . "
         WHERE
           konvertierung_id = " . $this->get('id') . "
       ";
