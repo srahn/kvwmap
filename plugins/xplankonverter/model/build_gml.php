@@ -44,15 +44,17 @@ class Gml_builder {
     return pg_fetch_assoc($result)['gml_id'];
   }
 
+  
   function generate_gml($plan_id) {
-    $xplan_gml =
+    # XPlan XSD's sind derzeit unter: http://xplan-raumordnung.de/devk/model/2016-05-06_XSD hinterlegt
+  $xplan_gml =
       "<XPlanAuszug
         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
         xmlns:wfs=\"http://www.opengis.net/wfs\"
         xmlns:gml=\"http://www.opengis.net/gml\"
         xmlns:xlink=\"http://www.w3.org/1999/xlink\"
-        xmlns:xplan=\"http://www.xplanung.de/xplangml/3/0\"
-        xmlns=\"http://www.xplanung.de/xplangml/3/0\"
+        xmlns:xplan=\"http://xplan-raumordnung.de/devk/model/2016-05-06_XSD\"
+        xmlns=\"http://xplan-raumordnung.de/devk/model/2016-05-06_XSD\"
         xsi:schemaLocation=\"http://www.xplanung.de/xplangml/3/0 ../../Schema/XPlanung-Operationen.xsd\">
         <gml:boundedBy>
           <gml:Envelope srsName=\"EPSG:31466\">
@@ -70,15 +72,15 @@ class Gml_builder {
     // make constants available as variables (easier to use in double-quoted strings)
     $structureScheme = STRUCTURE_SCHEME;
     $contentScheme   = CONTENT_SCHEME;
-
+    # XPlan XSD's sind derzeit unter: http://xplan-raumordnung.de/devk/model/2016-05-06_XSD/ hinterlegt
     $xplan_gml =
       "<XPlanAuszug
         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
         xmlns:wfs=\"http://www.opengis.net/wfs\"
         xmlns:gml=\"http://www.opengis.net/gml\"
         xmlns:xlink=\"http://www.w3.org/1999/xlink\"
-        xmlns:xplan=\"http://www.xplanung.de/xplangml/3/0\"
-        xmlns=\"http://www.xplanung.de/xplangml/3/0\"
+        xmlns:xplan=\"http://xplan-raumordnung.de/devk/model/2016-05-06_XSD\"
+        xmlns=\"http://xplan-raumordnung.de/devk/model/2016-05-06_XSD\"
         xsi:schemaLocation=\"http://www.xplanung.de/xplangml/3/0 ../../Schema/XPlanung-Operationen.xsd\">
         <gml:boundedBy>
           <gml:Envelope srsName=\"EPSG:31466\">

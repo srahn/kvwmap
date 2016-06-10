@@ -9,6 +9,7 @@ include(PLUGINS . 'xplankonverter/model/konvertierung.php');
 include(PLUGINS . 'xplankonverter/model/shapefiles.php');
 include(PLUGINS . 'xplankonverter/model/validator.php');
 include(PLUGINS . 'xplankonverter/model/xplan.php');
+include(PLUGINS . 'xplankonverter/model/constants.php');
 
 switch($this->go){
 
@@ -53,7 +54,6 @@ switch($this->go){
 
   case 'convert' : {
     include(PLUGINS . 'xplankonverter/model/converter.php');
-    include(PLUGINS . 'xplankonverter/model/constants.php');
 
     // Die Verbindung zur Datenbank kvwmapsp ist verfügbar in
     //$this->pgdatabase->dbConn);
@@ -261,6 +261,20 @@ switch($this->go){
       }
     }
     $this->output();
+  } break;
+
+  case 'xplankonverter_regeln_anwenden': {
+    include(PLUGINS . 'xplankonverter/model/converter.php');
+
+    if ($this->formvars['konvertierung_id'] == '') {
+      $this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+      $this->main = 'Hinweis.php';
+    }
+    else {
+      $this->converter = new Converter($this->pgdatabase, PG_CONNECTION);
+      $this->converter->gmlfeatures_loeschen($this->formvars['konvertierung_id']);
+      $this->converter->regeln_anwenden($this->formvars['konvertierung_id']);
+    }
   } break;
 
   case 'xplankonverter_konvertierungen_execute': {
