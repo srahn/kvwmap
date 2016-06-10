@@ -154,7 +154,7 @@ class PgObject {
     $query = pg_query($this->database->dbConn, $sql);
     $results = array();
     while ($rs = pg_fetch_assoc($query)) {
-      $results[] = $rs
+      $results[] = $rs;
     }
     return $result;
   }
