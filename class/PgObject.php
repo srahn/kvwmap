@@ -150,6 +150,15 @@ class PgObject {
     return $result;
   }
 
+  function getSQLResults($sql) {
+    $query = pg_query($this->database->dbConn, $sql);
+    $results = array();
+    while ($rs = pg_fetch_assoc($query)) {
+      $results[] = $rs
+    }
+    return $result;
+  }
+
   function debug($msg) {
     if ($this->debug)
       echo $msg;
