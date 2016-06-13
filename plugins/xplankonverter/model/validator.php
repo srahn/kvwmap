@@ -46,13 +46,13 @@ class Validator {
     $result = $this->doValidate($konvertierung);
     if ($result['success'] == 'OK') {
       // status setzen
-      $konvertierung->set('status', Konvertierung::$STATUS[4]);
+      $konvertierung->set('status', Konvertierung::$STATUS['VALIDIERUNG_OK']);
       $konvertierung->update();
       // success callback ausführen
      $success();
     } else {
       // status setzen
-      $konvertierung->set('status', Konvertierung::$STATUS[3]);
+      $konvertierung->set('status', Konvertierung::$STATUS['VALIDIERUNG_ERR']);
       $konvertierung->update();
       // error callback ausfuehren
      $failure($result['error']);
