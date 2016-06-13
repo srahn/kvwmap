@@ -5,6 +5,8 @@ include_once(CLASSPATH . 'PgObject.php');
 include_once(CLASSPATH . 'MyObject.php');
 include_once(CLASSPATH . 'LayerGroup.php');
 include_once(CLASSPATH . 'data_import_export.php');
+include(PLUGINS . 'xplankonverter/model/RP_Plan.php');
+include(PLUGINS . 'xplankonverter/model/RP_Bereich.php');
 include(PLUGINS . 'xplankonverter/model/konvertierung.php');
 include(PLUGINS . 'xplankonverter/model/shapefiles.php');
 include(PLUGINS . 'xplankonverter/model/validator.php');
@@ -277,7 +279,8 @@ switch($this->go){
     }
   } break;
 
-  case 'xplankonverter_konvertierungen_execute': {
+#  case 'xplankonverter_konvertierungen_execute': {
+  case 'xplankonverter_konvertierung_ausfuehren' : {
     include(PLUGINS . 'xplankonverter/model/build_gml.php');
     if ($this->formvars['konvertierung_id'] == '') {
       $this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
@@ -300,8 +303,15 @@ switch($this->go){
 
           // XPlan-GML ausgeben
           $this->gml_builder = new Gml_builder($this->pgdatabase);
-          $gml_id = $this->gml_builder->findRPPlanByKonvertierung($this->konvertierung);
-          $gmlString = $this->gml_builder->build_gml($gml_id);
+          $this->plan = new RP_Plan($this, 'gml_classes', 'rp_plan');
+          $this->plan->find_by('konvertierung_id', $this->konvertierung->get('id'));
+//           $bereiche = new RP_Bereich($this, 'gml_classes', 'rp_bereich');
+//           $bereiche->find_by('gehoertzuplan', $this->plan->get('gml_id'));
+//           $this->plan->bereiche = $bereiche;
+
+//          $gml_id = $this->gml_builder->findRPPlanByKonvertierung($this->konvertierung);
+//          $gmlString = $this->gml_builder->build_gml($this->konvertierung, $gml_id);
+          $gmlString = $this->gml_builder->build_gml($this->konvertierung, $this->plan);
           $this->gml_builder->saveGML($gmlString, XPLANKONVERTER_SHAPE_PATH . $this->konvertierung->get('id') . '/xplan_' . $this->konvertierung->get('id') . '.gml');
           //$this->gml_builder->saveGML($gmlString, PLUGINS . 'xplankonverter/xplan_' . $this->konvertierung->get('id') . '.gml');
 
@@ -319,7 +329,8 @@ switch($this->go){
     $this->output();
   } break;
 
-  case 'xplankonverter_konvertierung_ausfuehren' : {
+#  case 'xplankonverter_konvertierung_ausfuehren' : {
+  case 'xplankonverter_konvertierungen_execute': {
     $response = array(
       'success' => true,
       'msg' => 'Konvertierung erfolgreich ausgeführt.'
