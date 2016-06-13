@@ -241,9 +241,9 @@ switch($this->go){
       $this->konvertierung = new Konvertierung($this, 'xplankonverter', 'konvertierungen');
       $this->konvertierung->find_by('id', $this->formvars['konvertierung_id']);
       if (isInStelleAllowed($this->Stelle->id, $this->konvertierung->get('stelle_id'))) {
-        if ($this->konvertierung->get('status') == Konvertierung::$STATUS[1]) {
+        if ($this->konvertierung->get('status') == Konvertierung::$STATUS['ERSTELLT']) {
           // set status
-          $this->konvertierung->set('status', Konvertierung::$STATUS[2]);
+          $this->konvertierung->set('status', Konvertierung::$STATUS['IN_VALIDIERUNG']);
           $this->konvertierung->update();
           $validator = new Validator();
           $validator->validateKonvertierung(
@@ -287,15 +287,15 @@ switch($this->go){
       $this->konvertierung = new Konvertierung($this, 'xplankonverter', 'konvertierungen');
       $this->konvertierung->find_by('id', $this->formvars['konvertierung_id']);
       if (isInStelleAllowed($this->Stelle->id, $this->konvertierung->get('stelle_id'))) {
-        if ($this->konvertierung->get('status') == 'validiert') {
+        if ($this->konvertierung->get('status') == Konvertierung::$STATUS['VALIDIERUNG_OK']) {
           // Status setzen
-          $this->konvertierung->set('status', Konvertierung::$STATUS[5]);
+          $this->konvertierung->set('status', Konvertierung::$STATUS['IN_KONVERTIERUNG']);
           $this->konvertierung->update();
           // Seite updaten
           $this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
           //
           // Status setzen
-          $this->konvertierung->set('status', Konvertierung::$STATUS[5]);
+          $this->konvertierung->set('status', Konvertierung::$STATUS['IN_KONVERTIERUNG']);
           $this->konvertierung->update();
 
           // XPlan-GML ausgeben
@@ -306,7 +306,7 @@ switch($this->go){
           //$this->gml_builder->saveGML($gmlString, PLUGINS . 'xplankonverter/xplan_' . $this->konvertierung->get('id') . '.gml');
 
           // Status setzen
-          $this->konvertierung->set('status', Konvertierung::$STATUS[6]);
+          $this->konvertierung->set('status', Konvertierung::$STATUS['KONVERTIERUNG_OK']);
           $this->konvertierung->update();
 
           $this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
