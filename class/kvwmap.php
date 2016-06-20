@@ -10566,8 +10566,9 @@ class GUI {
 	
     $this->mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $layer = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
+		$layerdb = $this->mapDB->getlayerdatabase($layer[0]['Layer_ID'], $this->Stelle->pgdbhost);
     $privileges = $this->Stelle->get_attributes_privileges($layer[0]['Layer_ID']);
-    $layer[0]['attributes'] = $this->mapDB->read_layer_attributes($layer[0]['Layer_ID'], $this->pgdatabase, $privileges['attributenames']);
+    $layer[0]['attributes'] = $this->mapDB->read_layer_attributes($layer[0]['Layer_ID'], $layerdb, $privileges['attributenames']);
 
     if($privileges == NULL){    # kein Eintrag -> alle Attribute lesbar
       for($j = 0; $j < count($layer[0]['attributes']['name']); $j++){
