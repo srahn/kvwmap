@@ -7215,10 +7215,14 @@ class GUI {
       else{
         showAlert('Löschen erfolgreich');
       }
-      $this->loadMap('DataBase');
-      $this->user->rolle->newtime = $this->user->rolle->last_time_id;
-      $this->drawMap();
-      $this->output();
+			$this->last_query = $this->user->rolle->get_last_query();
+      if($this->formvars['search']){        # man kam von der Suche   -> nochmal suchen
+        $this->GenerischeSuche_Suchen();
+      }
+      else{                                 # man kam aus einer Sachdatenabfrage    -> nochmal abfragen
+				$this->last_query_requested = true;
+        $this->queryMap();
+      }
     }
     else{
       header('Content-type: text/html; charset=UTF-8');
