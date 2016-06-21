@@ -78,7 +78,7 @@ include_once(SNIPPETS.'/generic_form_parts.php');
 							<?
 								if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == 'LIKE' 					# ähnlich vorauswählen
 								OR (in_array($this->attributes['form_element_type'][$i], array('Text','Textfeld')) 
-										AND in_array($this->attributes['type'][$i], array('varchar', 'text', 'not_saveable')) 
+										AND in_array($this->attributes['type'][$i], array('varchar', 'text')) 
 										AND $this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == '')
 								)$this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] = 'LIKE';
 							?>
