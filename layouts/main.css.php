@@ -674,6 +674,16 @@ tbody.gle tr:hover {
  border:1px solid #03476F;
 }
 
+
+.gle1_table{
+    border-collapse: collapse;
+}
+
+.gle1_table>tbody>tr>td{
+    border: 1px solid grey;
+}
+
+
 #calendar { /* Fuer IE <= 6 */
 	text-align: center;
 	position: absolute;
