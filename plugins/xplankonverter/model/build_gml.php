@@ -268,15 +268,12 @@ class Gml_builder {
   function save($path){
     rewind($this->tmpFile);
     $file = fopen($path,'w');
-    $page_size = 2 << 16;
-    while (!feof($this->tmpFile)) {
-      $chunk = fread($this->tmpFile, $page_size);
-      fwrite($file, $chunk);
-    }
+
+    stream_copy_to_stream($this->tmpFile,$file);
+
     fclose($file);
   }
-
-  /*
+    /*
   * Diese Funktion formatiert und speichert den Inhalt
   * der temporären Datei an einen gegebenen Pfad im Dateisystem.
   * Der Inhalt wird dazu in eine DOMDocumentObjekt gelesen und
