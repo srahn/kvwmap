@@ -82,7 +82,7 @@ if($this->user->rolle->querymode == 1){
 							<table style="width:100%">
 								<tr>
 									<td style="width:49%">&nbsp;</td>
-									<td align="center"><div id="savebutton" <? if($this->editable != 'true')echo 'style="display:none"'; ?>><input type="button" class="button" name="savebutton" value="<? echo $this->strSave; ?>" onclick="save();"></div></td>
+									<td align="center"><div id="savebutton" <? if($this->editable == '')echo 'style="display:none"'; ?>><input type="button" class="button" name="savebutton" value="<? echo $this->strSave; ?>" onclick="save();"></div></td>
 									<td style="width:49%" align="right"><a href="javascript:druck();" class="px13"><? echo $this->printversion; ?></a>&nbsp;</td>
 								</tr>
 							</table>

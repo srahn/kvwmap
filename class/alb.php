@@ -1143,8 +1143,8 @@ class ALB {
     return $ret;
   }
 
-  function getFlurstKennzByGemeindeIDs($Gemeinde_IDs, $FlurstKennz) {
-    $ret = $this->database->getFlurstuecksKennzByGemeindeIDs($Gemeinde_IDs, $FlurstKennz);
+  function getFlurstKennzByGemeindeIDs($GemeindenStelle, $FlurstKennz) {
+    $ret = $this->database->getFlurstuecksKennzByGemeindeIDs($GemeindenStelle, $FlurstKennz);
     return $ret;
   }
 

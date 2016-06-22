@@ -2208,8 +2208,7 @@
 					$rs['Status'] = 1;
 					for($i = 0; $i < count($rs['Style']); $i++){
 						if($rs['Style'][$i]['color'] != '' AND $rs['Style'][$i]['color'] != '-1 -1 -1'){
-							$rs['Style'][$i]['outlinecolor'] = $rs['Style'][$i]['color'];
-							$rs['Style'][$i]['color'] = '-1 -1 -1';							$rs['Style'][$i]['width'] = 2;							$rs['Style'][$i]['minwidth'] = 3;							$rs['Style'][$i]['maxwidth'] = 7;
+							$rs['Style'][$i]['outlinecolor'] = $rs['Style'][$i]['color'];							$rs['Style'][$i]['color'] = '-1 -1 -1';							if($rs['Style'][$i]['width'] == '')$rs['Style'][$i]['width'] = 3;							if($rs['Style'][$i]['minwidth'] == '')$rs['Style'][$i]['minwidth'] = 2;							if($rs['Style'][$i]['maxwidth'] == '')$rs['Style'][$i]['maxwidth'] = 4;							$rs['Style'][$i]['symbolname'] = '';
 						}
 					}
 				}

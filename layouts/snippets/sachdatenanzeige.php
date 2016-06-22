@@ -104,7 +104,7 @@ for($i=0;$i<$anzLayer;$i++){
     <tr>
     	<td width="49%"></td>
       <td align="center">
-			<?  if($this->editable == 'true'){
+			<?  if($this->editable != ''){
 						if($this->user->rolle->querymode == 1){ ?>
 							<script type="text/javascript">
 								if(document.getElementById('savebutton') != undefined)document.getElementById('savebutton').style.display = 'block';
