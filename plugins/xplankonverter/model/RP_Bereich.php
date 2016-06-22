@@ -5,12 +5,15 @@
 
 class RP_Bereich extends PgObject {
 
-  function RP_Bereich($gui, $schema, $tableName) {
-    $this->PgObject($gui, $schema, $tableName);
+  static $schema = 'gml_classes';
+  static $tableName = 'rp_bereich';
+
+  function RP_Bereich($gui) {
+    $this->PgObject($gui, RP_Bereich::$schema, RP_Bereich::$tableName);
     $this->rp_objekte = array();
   }
 
-  function holeObjekte() {
+  function holeObjekte($konvertierung_id) {
     $this->rp_objekte;
   }
 
