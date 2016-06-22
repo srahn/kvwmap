@@ -11,7 +11,7 @@ include(PLUGINS . 'xplankonverter/model/konvertierung.php');
 include(PLUGINS . 'xplankonverter/model/shapefiles.php');
 include(PLUGINS . 'xplankonverter/model/validator.php');
 include(PLUGINS . 'xplankonverter/model/xplan.php');
-include(PLUGINS . 'xplankonverter/model/constants.php');
+#include(PLUGINS . 'xplankonverter/model/constants.php');
 
 switch($this->go){
 
@@ -279,7 +279,6 @@ switch($this->go){
     }
   } break;
 
-#  case 'xplankonverter_konvertierungen_execute': {
   case 'xplankonverter_konvertierung_ausfuehren' : {
     include(PLUGINS . 'xplankonverter/model/build_gml.php');
     if ($this->formvars['konvertierung_id'] == '') {
@@ -303,17 +302,14 @@ switch($this->go){
 
           // XPlan-GML ausgeben
           $this->gml_builder = new Gml_builder($this->pgdatabase);
-          $this->plan = new RP_Plan($this, 'gml_classes', 'rp_plan');
+          $this->plan = new RP_Plan($this);
           $this->plan->find_by('konvertierung_id', $this->konvertierung->get('id'));
-//           $bereiche = new RP_Bereich($this, 'gml_classes', 'rp_bereich');
+//           $bereiche = new RP_Bereich($this);
 //           $bereiche->find_by('gehoertzuplan', $this->plan->get('gml_id'));
 //           $this->plan->bereiche = $bereiche;
 
-//          $gml_id = $this->gml_builder->findRPPlanByKonvertierung($this->konvertierung);
-//          $gmlString = $this->gml_builder->build_gml($this->konvertierung, $gml_id);
-          $gmlString = $this->gml_builder->build_gml($this->konvertierung, $this->plan);
-          $this->gml_builder->saveGML($gmlString, XPLANKONVERTER_SHAPE_PATH . $this->konvertierung->get('id') . '/xplan_' . $this->konvertierung->get('id') . '.gml');
-          //$this->gml_builder->saveGML($gmlString, PLUGINS . 'xplankonverter/xplan_' . $this->konvertierung->get('id') . '.gml');
+          $this->gml_builder->build_gml($this->konvertierung, $this->plan);
+          $this->gml_builder->save(XPLANKONVERTER_SHAPE_PATH . $this->konvertierung->get('id') . '/xplan_' . $this->konvertierung->get('id') . '.gml');
 
           // Status setzen
           $this->konvertierung->set('status', Konvertierung::$STATUS['KONVERTIERUNG_OK']);
@@ -330,7 +326,7 @@ switch($this->go){
   } break;
 
 #  case 'xplankonverter_konvertierung_ausfuehren' : {
-  case 'xplankonverter_konvertierungen_execute': {
+  case 'xplankonverter_konvertierung_ausfuehren_alt' : {
     $response = array(
       'success' => true,
       'msg' => 'Konvertierung erfolgreich ausgeführt.'

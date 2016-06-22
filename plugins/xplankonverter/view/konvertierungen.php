@@ -31,8 +31,9 @@
         result.text(response.msg);
       }
     });
+    location.reload(true);
   };
-  
+
   // formatter functions
 	function konvertierungFunctionsFormatter(value, row) {
     output = '<span konvertierung_id="' + value + '">';

@@ -5,8 +5,11 @@
 
 class RP_Plan extends PgObject {
 
-  function RP_Plan($gui, $schema, $tableName) {
-    $this->PgObject($gui, $schema, $tableName);
+  static $schema = 'gml_classes';
+  static $tableName = 'rp_plan';
+
+  function RP_Plan($gui) {
+    $this->PgObject($gui, RP_Plan::$schema, RP_Plan::$tableName);
     $this->bereiche = array();
   }
 
