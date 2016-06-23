@@ -9,7 +9,7 @@
 
 	function attribute_name($layer_id, $attributes, $j, $k, $fontsize){
 		$datapart .= '<table ';
-		if($attributes['group'][0] != '' AND $attributes['position'][$j+1] != 'daneben' AND $attributes['position'][$j-1] != 'daneben' AND $attributes['position'][$j] != 'daneben')$datapart .= 'width="200px"';
+		if($attributes['group'][0] != '' AND $attributes['arrangement'][$j+1] != 1 AND $attributes['arrangement'][$j-1] != 1 AND $attributes['arrangement'][$j] != 1)$datapart .= 'width="200px"';
 		else $datapart .= 'width="100%"';
 		$datapart .= '><tr style="border: none"><td>';
 		if(!in_array($attributes['form_element_type'][$j], array('SubFormPK', 'SubFormEmbeddedPK', 'SubFormFK', 'dynamicLink'))){
@@ -61,7 +61,10 @@
 			$onchange = 'change_all('.$layer_id.', '.$k.', \''.$name.'\');';
 		}
 
-		if($attributes['position'][$j+1] == 'daneben' OR $attributes['position'][$j] == 'daneben')$size = 12;
+		if($attributes['arrangement'][$j+1] == 1 OR $attributes['arrangement'][$j] == 1){
+			$size = 20;
+			$select_width = 'width: 155px;';
+		}
 		
 		if($attributes['constraints'][$j] != '' AND !in_array($attributes['constraints'][$j], array('PRIMARY KEY', 'UNIQUE'))){
 			if($attributes['privileg'][$j] == '0' OR $lock[$k]){

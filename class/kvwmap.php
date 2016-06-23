@@ -14566,6 +14566,8 @@ class db_mapObj{
       $sql.= "options = '".$formvars['options_'.$attributes['name'][$i]]."', ";
       $sql.= 'tooltip = "'.$formvars['tooltip_'.$attributes['name'][$i]].'", ';
       $sql.= '`group` = "'.$formvars['group_'.$attributes['name'][$i]].'", ';
+			$sql.= 'arrangement = '.$formvars['arrangement_'.$attributes['name'][$i]].', ';
+			$sql.= 'labeling = '.$formvars['labeling_'.$attributes['name'][$i]].', ';
 			if($formvars['raster_visibility_'.$attributes['name'][$i]] == '')$formvars['raster_visibility_'.$attributes['name'][$i]] = 'NULL';
       $sql.= 'raster_visibility = '.$formvars['raster_visibility_'.$attributes['name'][$i]].', ';
       if($formvars['mandatory_'.$attributes['name'][$i]] == '')$formvars['mandatory_'.$attributes['name'][$i]] = 'NULL';
@@ -14578,7 +14580,7 @@ class db_mapObj{
 			}
 			if($formvars['quicksearch_'.$attributes['name'][$i]] == '')$formvars['quicksearch_'.$attributes['name'][$i]] = 'NULL';
 			$sql.= 'quicksearch = '.$formvars['quicksearch_'.$attributes['name'][$i]];
-      $sql.= " ON DUPLICATE KEY UPDATE name = '".$attributes['name'][$i]."', form_element_type = '".$formvars['form_element_'.$attributes['name'][$i]]."', options = '".$formvars['options_'.$attributes['name'][$i]]."', tooltip = '".$formvars['tooltip_'.$attributes['name'][$i]]."', `group` = '".$formvars['group_'.$attributes['name'][$i]]."', alias = '".$formvars['alias_'.$attributes['name'][$i]]."', ";
+      $sql.= " ON DUPLICATE KEY UPDATE name = '".$attributes['name'][$i]."', form_element_type = '".$formvars['form_element_'.$attributes['name'][$i]]."', options = '".$formvars['options_'.$attributes['name'][$i]]."', tooltip = '".$formvars['tooltip_'.$attributes['name'][$i]]."', `group` = '".$formvars['group_'.$attributes['name'][$i]]."', arrangement = ".$formvars['arrangement_'.$attributes['name'][$i]].", labeling = ".$formvars['labeling_'.$attributes['name'][$i]].", alias = '".$formvars['alias_'.$attributes['name'][$i]]."', ";
 			foreach($supportedLanguages as $language){
 				if($language != 'german'){
 					$sql.= '`alias_'.$language.'` = "'.$formvars['alias_'.$language.'_'.$attributes['name'][$i]].'", ';
@@ -14623,7 +14625,7 @@ class db_mapObj{
 		if(!$all_languages AND $language != 'german') {
 			$sql.='CASE WHEN `alias_'.$language.'` != "" THEN `alias_'.$language.'` ELSE `alias` END AS ';
 		}
-		$sql.='alias, `alias_low-german`, alias_english, alias_polish, alias_vietnamese, layer_id, name, real_name, tablename, table_alias_name, type, geometrytype, constraints, nullable, length, decimal_length, `default`, form_element_type, options, tooltip, `group`, raster_visibility, mandatory, quicksearch, `order`, privileg, query_tooltip FROM layer_attributes WHERE layer_id = '.$layer_id.$einschr.' ORDER BY `order`';
+		$sql.='alias, `alias_low-german`, alias_english, alias_polish, alias_vietnamese, layer_id, name, real_name, tablename, table_alias_name, type, geometrytype, constraints, nullable, length, decimal_length, `default`, form_element_type, options, tooltip, `group`, arrangement, labeling, raster_visibility, mandatory, quicksearch, `order`, privileg, query_tooltip FROM layer_attributes WHERE layer_id = '.$layer_id.$einschr.' ORDER BY `order`';
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_layer_attributes:<br>".$sql,4);
 		$query=mysql_query($sql);
 		if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
@@ -14679,6 +14681,8 @@ class db_mapObj{
 			$attributes['alias_vietnamese'][$i]= $rs['alias_vietnamese'];
 			$attributes['tooltip'][$i]= $rs['tooltip'];
 			$attributes['group'][$i]= $rs['group'];
+			$attributes['arrangement'][$i]= $rs['arrangement'];
+			$attributes['labeling'][$i]= $rs['labeling'];
 			$attributes['raster_visibility'][$i]= $rs['raster_visibility'];
 			$attributes['mandatory'][$i]= $rs['mandatory'];
 			$attributes['quicksearch'][$i]= $rs['quicksearch'];
