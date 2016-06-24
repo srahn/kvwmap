@@ -33,9 +33,9 @@ backto = function(go){
   currentform.submit();
 }
 
-show_all = function(count){
+show_all = function(){
 	currentform.offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value = 0;
-	currentform.anzahl.value = count;
+	currentform.anzahl.value = currentform.anzahl.options[currentform.anzahl.options.length-1].value;
 	currentform.submit();
 }
 
@@ -77,7 +77,7 @@ hide_versions = function(flst){
 		<br>
     <u><? echo $gesamt; ?> Flurstück<? if ($gesamt>1) { echo "e"; } ?> abgefragt</u>
 		<? if($gesamt > $anzObj){ ?>
-		&nbsp;<a href="javascript:show_all(<? echo $gesamt; ?>);">alle anzeigen</a>
+		&nbsp;<a href="javascript:show_all();">alle anzeigen</a>
     <br><br>
 		<u>Flurstücke <? echo $von; ?> bis <? echo $bis; ?></u>
 		<? } ?>
