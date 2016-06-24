@@ -61,9 +61,18 @@
 			$onchange = 'change_all('.$layer_id.', '.$k.', \''.$name.'\');';
 		}
 
+		# Ermittlung einer geeigneten Größe für das Atrtibut
 		if($attributes['arrangement'][$j+1] == 1 OR $attributes['arrangement'][$j] == 1){
-			$size = 20;
-			$select_width = 'width: 155px;';
+			$a = $j;
+			$b = $j+1;
+			while($a > $j-4 AND $attributes['arrangement'][$a] == 1)$a--;		# 4 vorwärts gucken
+			while($b < $j+4 AND $attributes['arrangement'][$b] == 1)$b++;		# 4 rückwärts gucken
+			$attributes_in_row = $b-$a;
+			if($attributes['labeling'][$j] == 0)$size=40;
+			else $size = 60;
+			$size = $size/$attributes_in_row;
+			$sw = 8*$size;
+			$select_width = 'width: '.$sw.'px;';
 		}
 		
 		if($attributes['constraints'][$j] != '' AND !in_array($attributes['constraints'][$j], array('PRIMARY KEY', 'UNIQUE'))){
