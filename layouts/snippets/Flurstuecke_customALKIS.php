@@ -71,7 +71,9 @@ hide_versions = function(flst){
 	if($gesamt == '')$gesamt = $anzObj;
 	$von = $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] + 1;
 	$bis = $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] + $this->formvars['anzahl'];
-  if ($anzObj>0) { ?>
+  if ($anzObj>0) {
+		$this->found = 'true';
+	?>
 		<br>
 		<span style="font-size:80%;">Stand ALKIS vom: <? echo $aktalkis[0]; ?><br></span>
 		<br>
