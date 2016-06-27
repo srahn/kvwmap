@@ -122,6 +122,9 @@ define('CHECK_CLIENT_IP',true);                               # Version 1.6.9 Se
 # maximale Länge der Passwörter
 define('PASSWORD_MAXLENGTH', 16);		# Version 2.1
 
+# minimale Länge der Passwörter
+define('PASSWORD_MINLENGTH', 6);		# Version 2.4
+
 # Prüfung neues Passwort
 # Auskommentiert, wenn das Passwort vom Admin auf "unendlichen" Zeitraum vergeben wird
 # erste Stelle  0 = Prüft die Stärke des Passworts (3 von 4 Kriterien müssen erfüllt sein) - die weiteren Stellen werden ignoriert
