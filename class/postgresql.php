@@ -83,7 +83,7 @@ class pgdatabase {
 	
 	function read_epsg_codes($order = true){
     global $supportedSRIDs;
-    $sql ="SELECT spatial_ref_sys.srid, coalesce(alias, substr(srtext, 9)) as srtext, minx, miny, maxx, maxy FROM spatial_ref_sys ";
+    $sql ="SELECT spatial_ref_sys.srid, coalesce(alias, substr(srtext, 9, 35)) as srtext, minx, miny, maxx, maxy FROM spatial_ref_sys ";
     $sql.="LEFT JOIN spatial_ref_sys_alias ON spatial_ref_sys_alias.srid = spatial_ref_sys.srid";
     # Wenn zu unterstützende SRIDs angegeben sind, ist die Abfrage diesbezüglich eingeschränkt
     $anzSupportedSRIDs = count($supportedSRIDs);
@@ -96,9 +96,6 @@ class pgdatabase {
     if($ret[0]==0){
 			$i = 0;
       while($row = pg_fetch_assoc($ret[1])){
-      	if(strlen($row['srtext']) > 30){
-					$row['srtext'] = substr($row['srtext'], 0, 30);
-				}				
 				$epsg_codes[$row['srid']] = $row;
 				$i++;
       }
