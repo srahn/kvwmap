@@ -83,7 +83,7 @@ class pgdatabase {
 	
 	function read_epsg_codes($order = true){
     global $supportedSRIDs;
-    $sql ="SELECT spatial_ref_sys.srid, coalesce(alias, substr(srtext, 9)) as srtext, minx, miny, maxx, maxy FROM spatial_ref_sys ";
+    $sql ="SELECT spatial_ref_sys.srid, coalesce(alias, substr(srtext, 9, 35)) as srtext, minx, miny, maxx, maxy FROM spatial_ref_sys ";
     $sql.="LEFT JOIN spatial_ref_sys_alias ON spatial_ref_sys_alias.srid = spatial_ref_sys.srid";
     # Wenn zu unterstützende SRIDs angegeben sind, ist die Abfrage diesbezüglich eingeschränkt
     $anzSupportedSRIDs = count($supportedSRIDs);
@@ -96,9 +96,6 @@ class pgdatabase {
     if($ret[0]==0){
 			$i = 0;
       while($row = pg_fetch_assoc($ret[1])){
-      	if(strlen($row['srtext']) > 30){
-					$row['srtext'] = substr($row['srtext'], 0, 30);
-				}				
 				$epsg_codes[$row['srid']] = $row;
 				$i++;
       }
@@ -1503,8 +1500,13 @@ class pgdatabase {
     return $ret;
   }
 	
-	function getVersionen($table, $gml_ids){
-		$sql = "SELECT beginnt::timestamp, endet::timestamp, bezeichner as anlass, '".$table."' as table FROM alkis.".$table." LEFT JOIN alkis.ax_fortfuehrungsanlaesse ON wert = NULLIF(anlass, '')::integer WHERE gml_id IN ('".implode("','", $gml_ids)."') ORDER BY beginnt";
+	function getVersionen($table, $gml_ids, $start){
+		$versionen = array();
+		$sql = "SELECT beginnt::timestamp, endet::timestamp, bezeichner as anlass, '".$table."' as table ";
+		$sql.= "FROM alkis.".$table." LEFT JOIN alkis.ax_fortfuehrungsanlaesse ON wert = NULLIF(anlass, '')::integer ";
+		$sql.= "WHERE gml_id IN ('".implode("','", $gml_ids)."') ";
+		if($start)$sql.= "AND beginnt::timestamp > '".$start."' ";
+		$sql.= "ORDER BY beginnt";
 		$queryret=$this->execSQL($sql, 4, 0);
 		while($rs=pg_fetch_assoc($queryret[1])) {
 			$versionen[]=$rs;
