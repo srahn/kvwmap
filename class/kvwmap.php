@@ -3094,7 +3094,7 @@ class GUI {
 				echo 'Layer: '.$layer['Name'].'<br>';
 				$layerdb = $mapDB->getlayerdatabase($layer['Layer_ID'], $this->Stelle->pgdbhost);
 	    	$attributes = $mapDB->load_attributes($layerdb, $layer['pfad']);
-	    	$mapDB->save_postgis_attributes($layer['Layer_ID'], $attributes, '');
+	    	$mapDB->save_postgis_attributes($layer['Layer_ID'], $attributes, '', '');
 	    	$mapDB->delete_old_attributes($layer['Layer_ID'], $attributes);
 			}
 		}
@@ -6331,7 +6331,7 @@ class GUI {
 				$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 				$path = strip_pg_escape_string($this->formvars['pfad']);
 				$attributes = $mapDB->load_attributes($layerdb, $path);
-				$mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes, $this->formvars['maintable']);
+				$mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes, $this->formvars['maintable'], $this->formvars['schema']);
 				$mapDB->delete_old_attributes($this->formvars['selected_layer_id'], $attributes);
 				#---------- Speichern der Layerattribute -------------------
 			}
@@ -6391,7 +6391,7 @@ class GUI {
 			    $layerdb->setClientEncoding();
 			    $path = strip_pg_escape_string($this->formvars['pfad']);
 			    $attributes = $mapDB->load_attributes($layerdb, $path);
-			    $mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes, $this->formvars['maintable']);
+			    $mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes, $this->formvars['maintable'], $this->formvars['schema']);
 			    #---------- Speichern der Layerattribute -------------------
 				}
 				if($this->formvars['pfad'] == '' OR $attributes != NULL){
@@ -7356,7 +7356,7 @@ class GUI {
     foreach($tablename as $table){
       $execute = false;
       if($table['tablename'] != '' AND $table['tablename'] == $layerset[0]['maintable']){		# nur Attribute aus der Haupttabelle werden gespeichert
-				$sql = "LOCK TABLE ".$table['tablename']." IN SHARE ROW EXCLUSIVE MODE;";
+				if(!$layerset[0]['maintable_is_view'])$sql = "LOCK TABLE ".$table['tablename']." IN SHARE ROW EXCLUSIVE MODE;";
         $sql.= "INSERT INTO ".$table['tablename']." (";
         for($i = 0; $i < count($table['attributname']); $i++){
           if(($table['type'][$i] != 'Text_not_saveable' AND $table['type'][$i] != 'Auswahlfeld_not_saveable' AND $table['type'][$i] != 'SubFormPK' AND $table['type'][$i] != 'SubFormFK' AND $this->formvars[$table['formfield'][$i]] != '') 
@@ -10743,7 +10743,7 @@ class GUI {
 				foreach($layer as $tablename => $table){
 					foreach($table as $oid => $row){
 						if(count($row['attributename']) > 0){
-							$sql = "LOCK TABLE ".$tablename." IN SHARE ROW EXCLUSIVE MODE;";
+							if(!$layerset[$layer_id][0]['maintable_is_view'])$sql = "LOCK TABLE ".$tablename." IN SHARE ROW EXCLUSIVE MODE;";
 							$sql .= "UPDATE ".$tablename." SET ";
 							for($i = 0; $i < count($row['attributename']); $i++){
 								if($i > 0)$sql .= ', ';
@@ -14128,7 +14128,7 @@ class db_mapObj{
     return $attributes;
   }
   
-  function save_postgis_attributes($layer_id, $attributes, $maintable){
+  function save_postgis_attributes($layer_id, $attributes, $maintable, $schema){
     	for($i = 0; $i < count($attributes['name']); $i++){
     		$sql = "INSERT INTO layer_attributes SET ";
   	  	$sql.= "layer_id = ".$layer_id.", ";
@@ -14162,11 +14162,20 @@ class db_mapObj{
     	}
     	
     	if($maintable == ''){
-    		$sql = "UPDATE layer SET maintable = '".$attributes['all_table_names'][0]."' WHERE (maintable IS NULL OR maintable = '') AND Layer_ID = ".$layer_id;
+				$maintable = $attributes['all_table_names'][0];
+    		$sql = "UPDATE layer SET maintable = '".$maintable."' WHERE (maintable IS NULL OR maintable = '') AND Layer_ID = ".$layer_id;
     		$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>".$sql,4);
   	    $query=mysql_query($sql);
   	    if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
     	}
+			
+			$sql = "select 1 from information_schema.views WHERE table_name = '".$maintable."' AND table_schema = '".$schema."'";
+			$query = pg_query($sql);
+			$is_view = pg_num_rows($query);
+			$sql = "UPDATE layer SET maintable_is_view = ".$is_view." WHERE Layer_ID = ".$layer_id;
+			$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>".$sql,4);
+			$query=mysql_query($sql);
+			if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
     	
     	# den PRIMARY KEY constraint rausnehmen, falls der tablename nicht der maintable entspricht
     	$sql = "UPDATE layer_attributes, layer SET constraints = '' WHERE layer_attributes.layer_id = ".$layer_id." AND layer.Layer_ID = ".$layer_id." AND constraints = 'PRIMARY KEY' AND tablename != maintable";
