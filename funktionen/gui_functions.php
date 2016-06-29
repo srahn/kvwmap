@@ -425,6 +425,28 @@ function zoomToMaxLayerExtent(zoom_layer_id){
 	overlay_submit(currentform);
 }
 
+function getLayerOptions(layer_id){
+	ahah('index.php', 'go=getLayerOptions&layer_id='+layer_id, new Array(document.getElementById('options_'+layer_id)), new Array('sethtml'));
+}
+
+function activateAllClasses(class_ids){
+	var classids = class_ids.split(",");
+	for(i = 0; i < classids.length; i++){
+		selClass = document.getElementsByName("class"+classids[i])[0];
+		if(selClass != undefined)selClass.value = 1;
+	}
+	overlay_submit(currentform);
+}
+
+function deactivateAllClasses(class_ids){
+	var classids = class_ids.split(",");
+	for(i = 0; i < classids.length; i++){
+		selClass = document.getElementsByName("class"+classids[i])[0];
+		if(selClass != undefined)selClass.value = 0;
+	}
+	overlay_submit(currentform);
+}
+
 /*Anne*/
 function changeClassStatus(classid,imgsrc,instantreload){
 	selClass = document.getElementsByName("class"+classid)[0];

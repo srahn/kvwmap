@@ -134,6 +134,10 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
       $GUI->output();
 		}break;
 				
+		case 'getLayerOptions' : {
+			$GUI->getLayerOptions();
+	  } break;
+				
 		case 'switch_gle_view' : {
 			$GUI->switch_gle_view();
 	  } break;

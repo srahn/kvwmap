@@ -848,3 +848,22 @@ tbody.gle tr:hover {
 	padding: 1px;
 	border: 1px solid #CCCCCC;
 }
+
+.layerOptions{
+	border: 1px solid #aaaaaa;
+	background: #EDEFEF;
+	padding:3px;
+	right:50px;
+	top:0px;
+	width: 200px;
+	position:absolute;
+	z-index: 1000;
+	-moz-box-shadow: 12px 10px 14px #777;
+	-webkit-box-shadow: 12px 10px 14px #777;
+	box-shadow: 12px 10px 14px #777;
+}
+
+.layerOptions ul{
+	padding: 0px;
+	padding-left: 25px;
+}
