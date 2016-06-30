@@ -112,27 +112,51 @@ class GUI {
 		$disabled_classes = $mapDB->read_disabled_classes();
 		$layer[0]['Class'] = $mapDB->read_Classes($this->formvars['layer_id'], $disabled_classes);
 		echo '
-		<div class="layerOptions">
-			<form name="layerOptionsForm'.$this->formvars['layer_id'].'">
-				<ul>';
-				if ($layer[0]['connectiontype']==6) {
-					echo '<li><a href="javascript:zoomToMaxLayerExtent('.$this->formvars['layer_id'].')">'.$this->FullLayerExtent.'</a></li>';
-				}
-				if($layer[0]['Class'][0]['Name'] != ''){
-					for($c = 0; $c < count($layer[0]['Class']); $c++){
-						$class_ids[] = $layer[0]['Class'][$c]['Class_ID'];
-					}
-					echo '<li><a href="javascript:getlegend(\''.$layer[0]['Gruppe'].'\', '.$this->formvars['layer_id'].', document.GUI.nurFremdeLayer.value)">';
-					if($layer[0]['showclasses'])echo $this->HideClasses;
-					else echo $this->DisplayClasses;
-					echo '</a></li>';
-					if($layer[0]['Class'][1]['Status'] == '1')echo '<li><a href="javascript:deactivateAllClasses(\''.implode(',', $class_ids).'\')">'.$this->deactivateAllClasses.'</a></li>';
-					if($layer[0]['Class'][1]['Status'] == '0')echo '<li><a href="javascript:activateAllClasses(\''.implode(',', $class_ids).'\')">'.$this->activateAllClasses.'</a></li>';
-				}
-				echo '<li>Tranparenz: <input name="transparency" style="width: 30px" value="50"><input type="range" id="transparency_slider" style="width: 100px" value="50" oninput="transparency.value=parseInt(transparency_slider.value)"></li>
-			</form>
+		<div class="layerOptions" id="options_content_'.$this->formvars['layer_id'].'">
+			<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:closeLayerOptions('.$this->formvars['layer_id'].');" title="Schlie&szlig;en"><img style="border:none" src="'.GRAPHICSPATH.'exit2.png"></img></a></div>
+			<table cellspacing="0" cellpadding="0" style="padding-bottom: 8px">
+				<tr>
+					<td class="layerOptionsHeader">
+						<span class="fett">'.$this->layerOptions.'</span>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<ul>';
+						if ($layer[0]['connectiontype']==6) {
+							echo '<li><a href="javascript:zoomToMaxLayerExtent('.$this->formvars['layer_id'].')">'.$this->FullLayerExtent.'</a></li>';
+						}
+						if($layer[0]['Class'][0]['Name'] != ''){
+							for($c = 0; $c < count($layer[0]['Class']); $c++){
+								$class_ids[] = $layer[0]['Class'][$c]['Class_ID'];
+							}
+							echo '<li><a href="javascript:getlegend(\''.$layer[0]['Gruppe'].'\', '.$this->formvars['layer_id'].', document.GUI.nurFremdeLayer.value);closeLayerOptions('.$this->formvars['layer_id'].')">';
+							if($layer[0]['showclasses'])echo $this->HideClasses;
+							else echo $this->DisplayClasses;
+							echo '</a></li>';
+							if($layer[0]['Class'][0]['Status'] == '1' || $layer[0]['Class'][1]['Status'] == '1')echo '<li><a href="javascript:deactivateAllClasses(\''.implode(',', $class_ids).'\')">'.$this->deactivateAllClasses.'</a></li>';
+							if($layer[0]['Class'][0]['Status'] == '0' || $layer[0]['Class'][1]['Status'] == '0')echo '<li><a href="javascript:activateAllClasses(\''.implode(',', $class_ids).'\')">'.$this->activateAllClasses.'</a></li>';
+						}
+						echo '<li><span>Tranparenz:</span> <input name="layer_options_transparency" style="width: 30px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" style="width: 120px" value="'.$layer[0]['transparency'].'" oninput="layer_options_transparency.value=parseInt(transparency_slider.value)"></li>
+					</td>
+				</tr>
+				<tr>
+					<td align="center">
+						<input type="button" onmouseup="saveLayerOptions('.$this->formvars['layer_id'].')" value="'.$this->strSave.'">
+					</td>
+				</tr>
+			</table>
 		</div>
+		~
+		posy = document.getElementById(\'options_'.$this->formvars['layer_id'].'\').getBoundingClientRect().top - 48
+		if(posy < 70)posy = 70;
+		if(posy > document.GUI.browserheight.value-220)posy = document.GUI.browserheight.value-220;
+		document.getElementById(\'options_content_'.$this->formvars['layer_id'].'\').style.top = posy;
 		';
+	}
+	
+	function saveLayerOptions(){	
+		$this->user->rolle->setTransparency($this->formvars);
 	}
 	
 	function switch_gle_view(){	
@@ -312,23 +336,11 @@ class GUI {
 							# Bei eingeschalteten Layern kann man auf die maximale Ausdehnung des Layers zoomen
 							if($layer['aktivStatus'] == 1){
 								$legend.='&nbsp;<a href="javascript:getLayerOptions('.$layer['Layer_ID'].')"><img src="graphics/rows.png" border="0" title="'.$this->layerOptions.'"></a>';
-								$legend.='<div style="position:relative" id="options_'.$layer['Layer_ID'].'"></div>';
-								if ($layer['connectiontype']==6) {
-									# Link zum Zoomen auf maximalen Extent des Layers erstmal nur für PostGIS Layer
-									#$legend.='&nbsp;<a href="javascript:zoomToMaxLayerExtent('.$layer['Layer_ID'].')"><img src="graphics/maxLayerExtent.gif" border="0" title="'.$this->FullLayerExtent.'"></a>';
-								}
+								$legend.='<div style="position:static" id="options_'.$layer['Layer_ID'].'"></div>';
 							}
 						}
 						if($layer['aktivStatus'] == 1 AND $layer['Class'][0]['Name'] != ''){
 							if($layer['requires'] == '' AND $layer['Layer_ID'] > 0){
-								// $legend .=  ' <a href="javascript:getlegend(\''.$group_id.'\', '.$layer['Layer_ID'].', document.GUI.nurFremdeLayer.value)" title="'.$this->DisplayClasses.'"><img border="0" src="graphics/';
-								// if($layer['showclasses']){
-									// $legend .=  'minus.gif';
-								// }
-								// else{
-									// $legend .=  'plus.gif';
-								// }
-								// $legend .=  '"></a>
 								$legend .= '<input id="classes_'.$layer['Layer_ID'].'" name="classes_'.$layer['Layer_ID'].'" type="hidden" value="'.$layer['showclasses'].'">';
 							}
 							if($layer['showclasses'] != 0){
@@ -13426,11 +13438,12 @@ class db_mapObj{
 	
   function read_Layer($withClasses, $groups = NULL){
 		global $language;
-    $sql ='SELECT DISTINCT rl.*,ul.*, l.Layer_ID, ';
+    $sql ='SELECT DISTINCT coalesce(rl.transparency, ul.transparency, 100) as transparency, rl.`aktivStatus`, rl.`queryStatus`, rl.`gle_view`, rl.`showclasses`, rl.`logconsume`, ';
+		$sql.=' ul.`queryable`, ul.`drawingorder`, ul.`minscale`, ul.`maxscale`, ul.`offsite`, ul.`postlabelcache`, ul.`Filter`, ul.`template`, ul.`header`, ul.`footer`, ul.`symbolscale`, ul.`logconsume`, ul.`requires`, ul.`privileg`, ul.`export_privileg`, ';
 		if($language != 'german') {
 			$sql.='CASE WHEN `Name_'.$language.'` != "" THEN `Name_'.$language.'` ELSE `Name` END AS ';
 		}
-		$sql.='Name, l.alias, l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem, l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem, l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version, l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, g.*';
+		$sql.=' l.Layer_ID, Name, l.alias, l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, l.labelitem, l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection, l.printconnection, l.connectiontype, l.classitem, l.filteritem, l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_server_version, l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, g.*';
     $sql.=' FROM u_rolle2used_layer AS rl,used_layer AS ul,layer AS l, u_groups AS g, u_groups2rolle as gr';
     $sql.=' WHERE rl.stelle_id=ul.Stelle_ID AND rl.layer_id=ul.Layer_ID AND l.Layer_ID=ul.Layer_ID';
     $sql.=' AND (ul.minscale != -1 OR ul.minscale IS NULL) AND l.Gruppe = g.id AND rl.stelle_ID='.$this->Stelle_ID.' AND rl.user_id='.$this->User_ID;

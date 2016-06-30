@@ -850,20 +850,32 @@ tbody.gle tr:hover {
 }
 
 .layerOptions{
-	border: 1px solid #aaaaaa;
+	border: 1px solid #cccccc;
 	background: #EDEFEF;
-	padding:3px;
-	right:50px;
-	top:0px;
+	padding:0px;
+	right:80px;
+	top:300px;
 	width: 200px;
 	position:absolute;
 	z-index: 1000;
-	-moz-box-shadow: 12px 10px 14px #777;
-	-webkit-box-shadow: 12px 10px 14px #777;
-	box-shadow: 12px 10px 14px #777;
+	-moz-box-shadow: 6px 5px 7px #777;
+	-webkit-box-shadow: 6px 5px 7px #777;
+	box-shadow: 6px 5px 7px #777;
+}
+
+.layerOptionsHeader{
+	background-color: #c7d9e6;
+	padding: 2px 2px 2px 8px;
 }
 
 .layerOptions ul{
+	color: lightsteelblue;
+	margin: 5px;
 	padding: 0px;
-	padding-left: 25px;
+	padding-left: 5px;
+	list-style: square inside none;
+}
+
+.layerOptions span{
+	color: #252525;
 }

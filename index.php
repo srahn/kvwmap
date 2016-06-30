@@ -137,6 +137,15 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 		case 'getLayerOptions' : {
 			$GUI->getLayerOptions();
 	  } break;
+		
+		case 'saveLayerOptions' : {
+			$GUI->saveLayerOptions();
+			$GUI->loadMap('DataBase');
+			$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+			$GUI->drawMap();
+			$GUI->saveMap('');
+			$GUI->output();
+	  } break;		
 				
 		case 'switch_gle_view' : {
 			$GUI->switch_gle_view();

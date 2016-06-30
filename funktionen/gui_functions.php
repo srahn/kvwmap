@@ -426,7 +426,26 @@ function zoomToMaxLayerExtent(zoom_layer_id){
 }
 
 function getLayerOptions(layer_id){
-	ahah('index.php', 'go=getLayerOptions&layer_id='+layer_id, new Array(document.getElementById('options_'+layer_id)), new Array('sethtml'));
+	if(document.GUI.layer_options_open.value != '')closeLayerOptions(document.GUI.layer_options_open.value);
+	ahah('index.php', 'go=getLayerOptions&layer_id='+layer_id, new Array(document.getElementById('options_'+layer_id), ''), new Array('sethtml', 'execute_function'));
+	document.GUI.layer_options_open.value = layer_id;
+}
+
+function closeLayerOptions(layer_id){
+	document.getElementById('options_'+layer_id).innerHTML='';
+}
+
+function saveLayerOptions(layer_id){	
+	document.GUI.go.value = 'saveLayerOptions';
+	document.GUI.submit();
+}
+
+function scrollLayerOptions(){
+	layer_id = document.GUI.layer_options_open.value;
+	if(layer_id != ''){
+		posy = document.getElementById('options_'+layer_id).getBoundingClientRect().top -48;
+		if(posy > 70 && posy < document.GUI.browserheight.value-220)document.getElementById('options_content_'+layer_id).style.top = posy;
+	}
 }
 
 function activateAllClasses(class_ids){
