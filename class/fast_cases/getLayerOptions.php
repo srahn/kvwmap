@@ -133,7 +133,7 @@ class GUI {
 							if($layer[0]['Class'][0]['Status'] == '1' || $layer[0]['Class'][1]['Status'] == '1')echo '<li><a href="javascript:deactivateAllClasses(\''.implode(',', $class_ids).'\')">'.$this->deactivateAllClasses.'</a></li>';
 							if($layer[0]['Class'][0]['Status'] == '0' || $layer[0]['Class'][1]['Status'] == '0')echo '<li><a href="javascript:activateAllClasses(\''.implode(',', $class_ids).'\')">'.$this->activateAllClasses.'</a></li>';
 						}
-						echo '<li><span>Tranparenz:</span> <input name="layer_options_transparency" style="width: 30px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" style="width: 120px" value="'.$layer[0]['transparency'].'" oninput="layer_options_transparency.value=parseInt(transparency_slider.value)"></li>
+						echo '<li><span>Transparenz:</span> <input name="layer_options_transparency" style="width: 30px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" style="width: 120px" value="'.$layer[0]['transparency'].'" oninput="layer_options_transparency.value=parseInt(transparency_slider.value)"></li>
 					</td>
 				</tr>
 				<tr>
