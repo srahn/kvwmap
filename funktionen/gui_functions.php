@@ -432,7 +432,8 @@ function getLayerOptions(layer_id){
 }
 
 function closeLayerOptions(layer_id){
-	document.getElementById('options_'+layer_id).innerHTML='';
+	document.GUI.layer_options_open.value = '';
+	document.getElementById('options_'+layer_id).innerHTML=' ';
 }
 
 function saveLayerOptions(layer_id){	

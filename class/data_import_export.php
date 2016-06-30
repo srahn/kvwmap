@@ -742,8 +742,8 @@ class data_import_export {
 						$value = str_replace('f', "nein", $value);
 					}
 					$value = str_replace(';', ",", $value);
-					$value = str_replace(chr(10), " ", $value);
-					$value = str_replace(chr(13), "", $value);
+					#$value = str_replace(chr(10), " ", $value);
+					#$value = str_replace(chr(13), "", $value);
 					if(strpos($value, '/') !== false)$value = "'".$value."'";		# Excel-Datumsproblem
 	        $csv .= $value.';';
       	}
