@@ -7007,7 +7007,7 @@ class GUI {
 		
     # wenn Gruppe ausgewählt, Einschränkung auf Layer dieser Gruppe 
     if($this->formvars['selected_group_id'] AND $this->formvars['selected_layer_id'] == ''){
-    	$this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, NULL, $this->formvars['selected_group_id']);	
+    	$this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, $this->formvars['selected_group_id']);	
     }
     if($this->formvars['selected_layer_id']){
     	if($this->formvars['layer_id'] == '')$this->formvars['layer_id'] = $this->formvars['selected_layer_id'];			
@@ -7063,15 +7063,12 @@ class GUI {
       if($this->formvars['selected_layer_id'] > 0)$this->layerset=$this->user->rolle->getLayer($this->formvars['selected_layer_id']);
 			else $this->layerset=$this->user->rolle->getRollenlayer(-$this->formvars['selected_layer_id']);
       $this->formvars['selected_group_id'] = $this->layerset[0]['Gruppe']; 
-			$this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, NULL, $this->formvars['selected_group_id']);	
+			$this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, $this->formvars['selected_group_id']);	
       switch ($this->layerset[0]['connectiontype']) {
         case MS_POSTGIS : {
           $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
           $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-          $layerdb->setClientEncoding();
-					
-					print_r($this->layerset);
-					
+          $layerdb->setClientEncoding();					
           $path = $mapdb->getPath($this->formvars['selected_layer_id']);
           $privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
           $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);

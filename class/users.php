@@ -3333,6 +3333,9 @@ class stelle {
 			$sql .= ' UNION ';
 			$sql .= 'SELECT -id as Layer_ID, concat(substring( `Name` FROM 1 FOR locate( ")", `Name` )), CASE WHEN Typ = "search" THEN " -Suchergebnis-" ELSE " -Shape-Import-" END), "", Gruppe, " ", `connection` FROM rollenlayer';
 			$sql .= ' WHERE stelle_id = '.$this->id.' AND user_id = '.$user_id.' AND connectiontype = 6';
+			if($group_id != NULL){
+				$sql .=' AND Gruppe = '.$group_id;
+			}
 		}
 
 
