@@ -7001,7 +7001,7 @@ class GUI {
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->titel=$this->formvars['titel'];
     $this->main='generic_search.php';
-    $this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, NULL);
+    $this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
 		$this->layergruppen['ID'] = array_values(array_unique($this->layerdaten['Gruppe']));
 		$this->layergruppen = $mapdb->get_Groups($this->layergruppen);		# Gruppen mit Pfaden versehen
 		
@@ -7060,7 +7060,8 @@ class GUI {
 	    	########################################################################
     	}    	
       $this->formvars['anzahl'] = MAXQUERYROWS;
-      $this->layerset=$this->user->rolle->getLayer($this->formvars['selected_layer_id']);
+      if($this->formvars['selected_layer_id'] > 0)$this->layerset=$this->user->rolle->getLayer($this->formvars['selected_layer_id']);
+			else $this->layerset=$this->user->rolle->getRollenlayer(-$this->formvars['selected_layer_id']);
       $this->formvars['selected_group_id'] = $this->layerset[0]['Gruppe']; 
 			$this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, NULL, $this->formvars['selected_group_id']);	
       switch ($this->layerset[0]['connectiontype']) {
@@ -7068,6 +7069,9 @@ class GUI {
           $mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
           $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
           $layerdb->setClientEncoding();
+					
+					print_r($this->layerset);
+					
           $path = $mapdb->getPath($this->formvars['selected_layer_id']);
           $privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
           $newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);

@@ -1878,7 +1878,7 @@ class rolle {
     $query=mysql_query($sql,$this->database->dbConn);
     if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$layer = array();
-    while ($rs=mysql_fetch_array($query)) {
+    while ($rs=mysql_fetch_assoc($query)) {
       $layer[]=$rs;
     }
     return $layer;
@@ -3331,7 +3331,7 @@ class stelle {
 		}
 		if($user_id != NULL){
 			$sql .= ' UNION ';
-			$sql .= 'SELECT -id as Layer_ID, concat(substring( `Name` FROM 1 FOR locate( ")", `Name` )), CASE WHEN Typ = "search" THEN " -Suchergebnis-" ELSE " -Shape-Import-" END), "", -1, " ", `connection` FROM rollenlayer';
+			$sql .= 'SELECT -id as Layer_ID, concat(substring( `Name` FROM 1 FOR locate( ")", `Name` )), CASE WHEN Typ = "search" THEN " -Suchergebnis-" ELSE " -Shape-Import-" END), "", Gruppe, " ", `connection` FROM rollenlayer';
 			$sql .= ' WHERE stelle_id = '.$this->id.' AND user_id = '.$user_id.' AND connectiontype = 6';
 		}
 
@@ -3344,7 +3344,7 @@ class stelle {
 			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
 		}
 		else{
-			while($rs=mysql_fetch_array($query)){
+			while($rs=mysql_fetch_assoc($query)){
 				 
 				# fremde Layer werden auf Verbindung getestet (erstmal rausgenommen, dauert relativ lange)
 				// if(strpos($rs['connection'], 'host') !== false AND strpos($rs['connection'], 'host=localhost') === false){
