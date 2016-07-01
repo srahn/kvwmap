@@ -742,9 +742,7 @@ class data_import_export {
 						$value = str_replace('f', "nein", $value);
 					}
 					$value = str_replace(';', ",", $value);
-					$value = str_replace(chr(10), " ", $value);
-					$value = str_replace(chr(13), "", $value);
-					if(strpos($value, '/') !== false)$value = "'".$value."'";		# Excel-Datumsproblem
+					if(strpos($value, '/') !== false OR strpos($value, chr(10)) !== false)$value = '"'.$value.'"';		# Excel-Datumsproblem oder Zeilenumbruch
 	        $csv .= $value.';';
       	}
       }
