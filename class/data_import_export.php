@@ -97,7 +97,7 @@ class data_import_export {
 			$layerdb->setClientEncoding();
 			$path = $this->formvars['query'];
 			$attributes = $dbmap->load_attributes($layerdb, $path);
-			$dbmap->save_postgis_attributes(-$layer_id, $attributes, '');
+			$dbmap->save_postgis_attributes(-$layer_id, $attributes, '', '');
 			$attrib['name'] = ' ';
 			$attrib['layer_id'] = -$layer_id;
 			$attrib['expression'] = '';
