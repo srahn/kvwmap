@@ -853,7 +853,7 @@ tbody.gle tr:hover {
 	border: 1px solid #cccccc;
 	background: #EDEFEF;
 	padding:0px;
-	right:80px;
+	right:210px;
 	top:300px;
 	width: 200px;
 	position:absolute;

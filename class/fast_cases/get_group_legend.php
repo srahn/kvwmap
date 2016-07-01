@@ -1244,7 +1244,7 @@
 								$legend .= '</a>';
 							}
 							# Bei eingeschalteten Layern kann man auf die maximale Ausdehnung des Layers zoomen
-							if($layer['aktivStatus'] == 1){								$legend.='&nbsp;<a href="javascript:getLayerOptions('.$layer['Layer_ID'].')"><img src="graphics/rows.png" border="0" title="'.$this->layerOptions.'"></a>';								$legend.='<div style="position:static" id="options_'.$layer['Layer_ID'].'"></div>';
+							if($layer['aktivStatus'] == 1){								$legend.='&nbsp;<a href="javascript:getLayerOptions('.$layer['Layer_ID'].')"><img src="graphics/rows.png" border="0" title="'.$this->layerOptions.'"></a>';								$legend.='<div style="position:static" id="options_'.$layer['Layer_ID'].'"> </div>';
 							}
 						}
 						if($layer['aktivStatus'] == 1 AND $layer['Class'][0]['Name'] != ''){
