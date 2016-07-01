@@ -40,18 +40,19 @@ ob_start ();    // Ausgabepufferung starten
 $go = $_REQUEST['go'];
 if($_REQUEST['go_plus'] != '')$go = $go.'_'.$_REQUEST['go_plus'];
 
-#########################################################################################################
-define(CASE_COMPRESS, false);																																						#
-#																																																				#
-# 	navMap_ajax: 		- unter 1:10 zoomen																																	#
-#										- ein räumlich gefilterter Layer muss an sein																				#
-#										- man muss einen anderen EPSG-Code als den der Ref-Karte (2398) eingestellt haben		#
-# 	tooltip_query:	- ein Datensatz mit Bild muss abgefragt werden																			#
-#										- getRollenLayer() reinkopieren																											#
-#																																																				#
-#		alle:						- die Stelle muss die IP checken  																									#
-#																																																				#
-#########################################################################################################
+###########################################################################################################
+define(CASE_COMPRESS, false);																																						  #
+#																																																				  #
+# 	navMap_ajax: 		  - unter 1:10 zoomen																																	#
+#										  - ein räumlich gefilterter Layer muss an sein																				#
+#										  - man muss einen anderen EPSG-Code als den der Ref-Karte (2398) eingestellt haben		#
+# 	tooltip_query:	  - ein Datensatz mit Bild muss agefragt werden																			  #
+#										  - getRollenLayer() reinkopieren																										  #
+#   getLayerOptions:  - getRollenLayer() reinkopieren																											#
+#																																																				  #
+#		ALLE:						  - die Stelle muss die IP checken  																								  #
+#																																																				  #
+###########################################################################################################
 
 $non_spatial_cases = array('getLayerOptions', 'get_select_list');		// für non-spatial cases wird in start.php keine Verbindung zur PostgreSQL aufgebaut usw.
 $spatial_cases = array('navMap_ajax', 'tooltip_query', 'get_group_legend');

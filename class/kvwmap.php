@@ -108,7 +108,8 @@ class GUI {
 	
 	function getLayerOptions(){
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-		$layer = $this->user->rolle->getLayer($this->formvars['layer_id']);
+		if($this->formvars['layer_id'] > 0)$layer = $this->user->rolle->getLayer($this->formvars['layer_id']);
+		else $layer = $this->user->rolle->getRollenLayer(-$this->formvars['layer_id']);
 		$disabled_classes = $mapDB->read_disabled_classes();
 		$layer[0]['Class'] = $mapDB->read_Classes($this->formvars['layer_id'], $disabled_classes);
 		echo '
