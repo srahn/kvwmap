@@ -11925,6 +11925,7 @@ class GUI {
 				        default : {
 		              $output .=  $attributes['alias'][$j].': ';
 		              $attribcount++;
+									$layer['shape'][$k][$attributes['name'][$j]] = str_replace(chr(10), '##',  $layer['shape'][$k][$attributes['name'][$j]]);
 		              $output .= $layer['shape'][$k][$attributes['name'][$j]].'  ';
 		              $output .= '##';
 				        }
