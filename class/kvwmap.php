@@ -7003,7 +7003,7 @@ class GUI {
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->titel=$this->formvars['titel'];
     $this->main='generic_search.php';
-    $this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id);
+    $this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, 'import');
 		$this->layergruppen['ID'] = array_values(array_unique($this->layerdaten['Gruppe']));
 		$this->layergruppen = $mapdb->get_Groups($this->layergruppen);		# Gruppen mit Pfaden versehen
 		

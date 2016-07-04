@@ -3305,7 +3305,7 @@ class stelle {
 		return $layer;
 	}
 
-	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL){
+	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL, $rollenlayer_type = NULL){
 		global $language;
 		$sql = 'SELECT layer.Layer_ID, ';
 		if($language != 'german') {
@@ -3332,13 +3332,14 @@ class stelle {
 		if($user_id != NULL){
 			$sql .= ' UNION ';
 			$sql .= 'SELECT -id as Layer_ID, concat(substring( `Name` FROM 1 FOR locate( ")", `Name` )), CASE WHEN Typ = "search" THEN " -Suchergebnis-" ELSE " -Shape-Import-" END), "", Gruppe, " ", `connection` FROM rollenlayer';
-			$sql .= ' WHERE stelle_id = '.$this->id.' AND user_id = '.$user_id.' AND connectiontype = 6';
+			$sql .= ' WHERE stelle_id = '.$this->id.' AND user_id = '.$user_id.' AND connectiontype = 6';			
+			if($rollenlayer_type != NULL){
+				$sql .=' AND Typ = "'.$rollenlayer_type.'"';
+			}
 			if($group_id != NULL){
 				$sql .=' AND Gruppe = '.$group_id;
 			}
 		}
-
-
 		$sql .= ' ORDER BY Name';
 		#echo $sql;
 		$this->debug->write("<p>file:users.php class:stelle->getqueryableVectorLayers - Lesen der abfragbaren VektorLayer zur Stelle:<br>".$sql,4);
