@@ -6519,6 +6519,8 @@ class GUI {
 			$this->formvars['selected_layer_id'] = $this->last_query['layer_ids'][0];
 		}
     $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
+		if($this->formvars['selected_layer_id'] > 0)$layerset=$this->user->rolle->getLayer($this->formvars['selected_layer_id']);
+		else $layerset=$this->user->rolle->getRollenlayer(-$this->formvars['selected_layer_id']);
     switch ($layerset[0]['connectiontype']) {
       case MS_POSTGIS : {
         $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
