@@ -51,7 +51,7 @@ function checkStatus($request, $username, $password){
       else{
 				if(strpos($data, '‰PNG') === false AND strpos($data, 'JFIF') === false){
 					$status = false;
-					$info = substr($data, 0, 255);
+					$info = substr(strip_tags($data), 0, 255);
 				}
         else{
 					$status = true;  
