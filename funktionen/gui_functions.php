@@ -444,7 +444,8 @@ function saveLayerOptions(layer_id){
 function scrollLayerOptions(){
 	layer_id = document.GUI.layer_options_open.value;
 	if(layer_id != ''){
-		posy = document.getElementById('options_'+layer_id).getBoundingClientRect().top-62;
+		legend_posy = document.getElementById('legenddiv').getBoundingClientRect().top;
+		posy = document.getElementById('options_'+layer_id).getBoundingClientRect().top - (13+legend_posy);
 		if(posy > 70 && posy < document.GUI.browserheight.value-220)document.getElementById('options_content_'+layer_id).style.top = posy;
 	}
 }

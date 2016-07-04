@@ -147,7 +147,8 @@ class GUI {
 			</table>
 		</div>
 		~
-		posy = document.getElementById(\'options_'.$this->formvars['layer_id'].'\').getBoundingClientRect().top - 62;
+		legend_posy = document.getElementById(\'legenddiv\').getBoundingClientRect().top;
+		posy = document.getElementById(\'options_'.$this->formvars['layer_id'].'\').getBoundingClientRect().top - (13+legend_posy);
 		if(posy < 70)posy = 70;
 		if(posy > document.GUI.browserheight.value-220)posy = document.GUI.browserheight.value-220;
 		document.getElementById(\'options_content_'.$this->formvars['layer_id'].'\').style.top = posy;
