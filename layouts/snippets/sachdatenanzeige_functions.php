@@ -382,7 +382,11 @@ include('funktionen/input_check_functions.php');
 	daten_export = function(layer_id, anzahl, format){
 		currentform.all.value = document.getElementById('all_'+layer_id).value;
 		if(currentform.all.value || check_for_selection(layer_id)){				// entweder alle gefundenen oder die ausgewaehlten
-			currentform.anzahl.value = anzahl;
+			var option = document.createElement("option");
+			option.text = anzahl;
+			option.value = anzahl;
+			currentform.anzahl.add(option);
+			currentform.anzahl.selectedIndex = currentform.anzahl.options.length-1;
 			currentform.chosen_layer_id.value = layer_id;
 			currentform.go_backup.value = currentform.go.value;
 			currentform.go.value = 'Daten_Export';
