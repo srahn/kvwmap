@@ -124,13 +124,15 @@ class GUI {
 							echo '<li><a href="javascript:zoomToMaxLayerExtent('.$this->formvars['layer_id'].')">'.$this->FullLayerExtent.'</a></li>';
 						}
 						if($layer[0]['Class'][0]['Name'] != ''){
+							if($layer[0]['showclasses'] != ''){
+								echo '<li><a href="javascript:getlegend(\''.$layer[0]['Gruppe'].'\', '.$this->formvars['layer_id'].', document.GUI.nurFremdeLayer.value);closeLayerOptions('.$this->formvars['layer_id'].')">';
+								if($layer[0]['showclasses'])echo $this->HideClasses;
+								else echo $this->DisplayClasses;
+								echo '</a></li>';
+							}
 							for($c = 0; $c < count($layer[0]['Class']); $c++){
 								$class_ids[] = $layer[0]['Class'][$c]['Class_ID'];
 							}
-							echo '<li><a href="javascript:getlegend(\''.$layer[0]['Gruppe'].'\', '.$this->formvars['layer_id'].', document.GUI.nurFremdeLayer.value);closeLayerOptions('.$this->formvars['layer_id'].')">';
-							if($layer[0]['showclasses'])echo $this->HideClasses;
-							else echo $this->DisplayClasses;
-							echo '</a></li>';
 							if($layer[0]['Class'][0]['Status'] == '1' || $layer[0]['Class'][1]['Status'] == '1')echo '<li><a href="javascript:deactivateAllClasses(\''.implode(',', $class_ids).'\')">'.$this->deactivateAllClasses.'</a></li>';
 							if($layer[0]['Class'][0]['Status'] == '0' || $layer[0]['Class'][1]['Status'] == '0')echo '<li><a href="javascript:activateAllClasses(\''.implode(',', $class_ids).'\')">'.$this->activateAllClasses.'</a></li>';
 						}
