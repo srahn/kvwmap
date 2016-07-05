@@ -920,5 +920,7 @@ tbody.gle tr:hover {
 }
 
 #nu_gruppe_nutzungsart_table td{
+	vertical-align: top;
 	min-width: 85px;
+	max-width: 350px;
 }
