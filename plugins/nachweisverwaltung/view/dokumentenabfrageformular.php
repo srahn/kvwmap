@@ -19,7 +19,7 @@ function save(){
 			alert('Bitte geben Sie eine Gemarkung, eine Antragsnummer, eine Rissnummer, ein Datum oder eine Fortführung an.');
 			return;
 		}
-		if(document.GUI.suchgemarkung.value == '' && document.GUI.suchstammnr.value == '' && document.GUI.sdatum.value == ''){
+		if(document.GUI.suchgemarkung.value == '' && document.GUI.suchstammnr.value == '' && document.GUI.sdatum.value == '' && document.GUI.suchbemerkung.value == ''){
 			alert('Bitte geben Sie Suchparameter an.');
 			return;
 		}
@@ -99,6 +99,7 @@ function clear(){
 	document.GUI.sdatum.value = '';
 	document.GUI.sdatum2.value = '';
 	document.GUI.sVermStelle.value = '';
+	document.GUI.suchbemerkung.value = '';
 }
 
 function show_dokauswahlen(){
@@ -239,7 +240,7 @@ else {
     <td colspan="2">
       <table border="0" cellspacing="0" cellpadding="2">
         <tr>
-          <td rowspan="7" valign="top"><input type="radio" name="abfrageart" value="indiv_nr" <?php if ($this->formvars['abfrageart']=='indiv_nr') { ?> checked<?php } ?>>
+          <td rowspan="8" valign="top"><input type="radio" name="abfrageart" value="indiv_nr" <?php if ($this->formvars['abfrageart']=='indiv_nr') { ?> checked<?php } ?>>
           </td>
         </tr>
 		<tr><td colspan="3"><span class="fett">Auswahl über Attribute</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:clear();" title="Suchfelder leeren"><img style="vertical-align:top;" src="<? echo GRAPHICSPATH.'edit-clear.png'; ?>"></a></td></tr>
@@ -300,6 +301,11 @@ else {
 	          ?>
 			    </td>
 			  </tr>
+				<tr>
+					<td colspan="3">Bemerkung:<br>
+						<input type="text" name="suchbemerkung" size="29" value="<? echo $this->formvars['suchbemerkung']; ?>">
+					</td>
+				</tr>
       </table>
     </td>
   </tr>
