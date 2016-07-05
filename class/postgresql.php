@@ -1192,7 +1192,7 @@ class pgdatabase {
   }
   
   function getNutzung($FlurstKennz) {
-    $sql ="SELECT round((st_area_utm(st_intersection(n.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")::numeric * amtlicheflaeche / st_area_utm(f.wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID."))::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche, nas.nutzungsartengruppe::text||nas.nutzungsart::text||nas.untergliederung1::text||nas.untergliederung2::text as nutzungskennz, nag.gruppe||' '||coalesce(na.nutzungsart, '')||' '||coalesce(nu1.untergliederung1, '')||' '||coalesce(nu2.untergliederung2, '') as bezeichnung, n.info, n.zustand, n.name, amtlicheflaeche";
+    $sql ="SELECT round((st_area_utm(st_intersection(n.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")::numeric * amtlicheflaeche / st_area_utm(f.wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID."))::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche, nas.nutzungsartengruppe::text||nas.nutzungsart::text||nas.untergliederung1::text||nas.untergliederung2::text as nutzungskennz, nag.gruppe||' '||coalesce(na.nutzungsart, '')||' '||coalesce(nu1.untergliederung1, '')||' '||coalesce(nu2.untergliederung2, '') as bezeichnung, nag.bereich, nag.gruppe, na.nutzungsart, nu1.untergliederung1, nu2.untergliederung2, n.info, n.zustand, n.name, amtlicheflaeche";
 		$sql.=" FROM alkis.ax_flurstueck f, alkis.n_nutzung n";
 		$sql.=" left join alkis.n_nutzungsartenschluessel nas on n.nutzungsartengruppe = nas.nutzungsartengruppe and n.werteart1 = nas.werteart1 and n.werteart2 = nas.werteart2";
 		$sql.=" left join alkis.n_nutzungsartengruppe nag on nas.nutzungsartengruppe = nag.schluessel";
@@ -1203,6 +1203,7 @@ class pgdatabase {
 		$sql.=" AND st_area_utm(st_intersection(n.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.") > 0.001";
 		$sql.=" AND f.flurstueckskennzeichen = '".$FlurstKennz."'";
 		$sql.= $this->build_temporal_filter(array('f','n'));
+		$sql.=" ORDER BY nutzungskennz";
 		#echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0] OR pg_num_rows($queryret[1])==0) {

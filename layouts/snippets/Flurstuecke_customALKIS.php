@@ -658,40 +658,44 @@ hide_versions = function(flst){
           <td colspan="2">
             <table border="0" cellspacing="0" cellpadding="2">
               <tr>
-                <td colspan="3"><span class="fett">Nutzung</span></td>
+                <td><span class="fett">Nutzung</span></td>
               </tr>
               <tr>
-                <td><span class="fett">Fl&auml;che&nbsp;</span></td>
-                <td><span class="fett">Nutzung&nbsp;</span></td>
-                <td><span class="fett">Bezeichnung</span></td>
-              </tr>
+                <td>
               <?php
               $anzNutzung=count($flst->Nutzung);
-              for ($j=0;$j<$anzNutzung;$j++) { ?>
-              <tr>
-			          <td align="right" valign="top"><?php echo $flst->Nutzung[$j][flaeche]; ?> m&sup2;&nbsp;</td>
-			          <td align="right" valign="top">&nbsp;<?php echo $flst->Nutzung[$j][nutzungskennz]; ?>&nbsp;</td>
-			          <td valign="top">
-			          <?php
-			          if (strlen($flst->Nutzung[$j][bezeichnung])>80) {
-			            $needle=array(
-			             strrpos(substr($flst->Nutzung[$j][bezeichnung],0,80),','),
-			             strrpos(substr($flst->Nutzung[$j][bezeichnung],0,80),'-'),
-			             strrpos(substr($flst->Nutzung[$j][bezeichnung],0,80),'/'),
-			             strrpos(substr($flst->Nutzung[$j][bezeichnung],0,80),' ')
-			            );
-			            rsort($needle);
-			            echo substr($flst->Nutzung[$j][bezeichnung],0,$needle[0]+1)."<br>".substr($flst->Nutzung[$j][bezeichnung],$needle[0]+1);
-			          } else {
-			            echo $flst->Nutzung[$j][bezeichnung];
-			          }
-			  				if ($flst->Nutzung[$j][kurzbezeichnung]!='') { ?> (<?php echo $flst->Nutzung[$j][kurzbezeichnung]; ?>)<?php } ?>
-			  				</td>
-			        </tr>
+              for ($j=0;$j<$anzNutzung;$j++){
+								if($flst->Nutzung[$j]['bereich'] != $flst->Nutzung[$j-1]['bereich']){
+									if($j > 0){ ?></table></div></div><? } ?>
+									<div id="nu_bereich">
+										<span id="nu_bereich_span"><? echo $flst->Nutzung[$j]['bereich']; ?></span>
+										<div id="nu_gruppe_nutzungsart">
+								<? }
+										if($flst->Nutzung[$j]['gruppe'] != $flst->Nutzung[$j-1]['gruppe']){
+											if($j > 0 AND $flst->Nutzung[$j]['bereich'] == $flst->Nutzung[$j-1]['bereich']){ ?></table><? } ?>
+											<span id="nu_gruppe_nutzungsart_span"><? echo $flst->Nutzung[$j]['gruppe']; ?></span>
+											<table id="nu_gruppe_nutzungsart_table">
+												<tr>
+													<th>Fläche</th><th>Schlüssel</th><th>Nutzung</th>
+												</tr>
+								<?  } ?>
+												<tr>
+													<td><? echo $flst->Nutzung[$j][flaeche]; ?> m&sup2;&nbsp;</td>
+													<td><? echo $flst->Nutzung[$j][nutzungskennz]; ?></td>
+													<td>
+														<? echo implode(', ', array_filter(array($flst->Nutzung[$j]['nutzungsart'], $flst->Nutzung[$j]['untergliederung1'], $flst->Nutzung[$j]['untergliederung2'])));
+															 if($flst->Nutzung[$j]['nutzungsart'] == '' AND $flst->Nutzung[$j]['untergliederung1'] == '' AND $flst->Nutzung[$j]['untergliederung2'] == '')echo '&mdash;'; ?>
+													</td>
+												</tr>
               <?php } ?>
-          </table>
-          </td>
-        </tr>
+											</table>
+										</div>
+									</div>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
         <? } ?>
         <? if($privileg_['eigentuemer']){
 						$currenttime=date('Y-m-d H:i:s',time());

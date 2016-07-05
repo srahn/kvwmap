@@ -879,3 +879,46 @@ tbody.gle tr:hover {
 .layerOptions span{
 	color: #252525;
 }
+
+#nu_bereich{
+	position: relative;
+	background-color: #dae4ec;
+	padding: 7px;
+	margin-bottom: 7px;
+}
+
+#nu_bereich_span{
+	position: absolute;
+	font-family: SourceSansPro2;
+	line-height: 18px;
+}
+
+#nu_gruppe_nutzungsart{
+	background-color: white;
+	margin-left: 90px;
+	padding: 7px;
+}
+
+#nu_gruppe_nutzungsart_span{
+	font-family: SourceSansPro2;
+	line-height: 18px;
+}
+
+#nu_gruppe_nutzungsart_table{
+	margin-left: 10px;
+	margin-top: 5px;
+	margin-bottom: 10px;
+	padding: 0px;
+	border-spacing: 0px;
+}
+
+#nu_gruppe_nutzungsart_table th{
+	text-align: left;
+	font-family: SourceSansPro2;
+	font-size: 15px;
+	font-weight: 600;
+}
+
+#nu_gruppe_nutzungsart_table td{
+	min-width: 85px;
+}
