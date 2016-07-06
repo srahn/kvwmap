@@ -281,7 +281,7 @@ class spatial_processor {
 					break;
 				}
 				if($polywkt1 == ''){
-					$polywkt1 = $querygeometryWKT;
+					$polywkt1 = 'POINT EMPTY';
 				}
 				$rs = $this->union($polywkt1, $querygeometryWKT);
 				$result = $rs['svg'];
