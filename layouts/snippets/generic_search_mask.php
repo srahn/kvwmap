@@ -93,7 +93,7 @@ include_once(SNIPPETS.'/generic_form_parts.php');
                 <option title="<? echo $strLowerHint; ?>" value="<" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == '<'){ echo 'selected';} ?> ><</option>
                 <option title="<? echo $strGreaterHint; ?>" value=">" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == '>'){ echo 'selected';} ?> >></option>
 								<? }
-								if(!in_array($this->attributes['type'][$i], array('int2', 'int4', 'int8', 'numeric', 'float4', 'float8', 'date', 'timestampt', 'timestamptz'))){ ?>
+								if($this->attributes['form_element_type'][$i] == 'Autovervollständigungsfeld' OR !in_array($this->attributes['type'][$i], array('int2', 'int4', 'int8', 'numeric', 'float4', 'float8', 'date', 'timestampt', 'timestamptz'))){ ?>
                 <option title="<? echo $strLikeHint; ?>" value="LIKE" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == 'LIKE'){ echo 'selected';} ?> ><? echo $strLike; ?></option>
                 <option title="<? echo $strLikeHint; ?>" value="NOT LIKE" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == 'NOT LIKE'){ echo 'selected';} ?> ><? echo $strNotLike; ?></option>
 								<? }
