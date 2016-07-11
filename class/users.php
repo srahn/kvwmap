@@ -2398,6 +2398,8 @@ class rolle {
 	}
 	
 	function insertLayerComment($layerset,$comment) {
+		$layers = array();
+		$query = array();
 		$sql ='REPLACE INTO rolle_saved_layers SET';
 		$sql.=' user_id='.$this->user_id;
 		$sql.=', stelle_id='.$this->stelle_id;
