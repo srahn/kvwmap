@@ -141,7 +141,17 @@ class GUI {
 				</tr>
 				<tr>
 					<td align="center">
-						<input type="button" onmouseup="saveLayerOptions('.$this->formvars['layer_id'].')" value="'.$this->strSave.'">
+						<table cellspacing="0" cellpadding="0">
+							<tr>';
+							if($this->formvars['layer_id'] > 0){
+				echo '	<td>
+									<input type="button" onmouseup="resetLayerOptions('.$this->formvars['layer_id'].')" value="'.$this->strReset.'">
+								</td>';}
+				echo '	<td>
+									<input type="button" onmouseup="saveLayerOptions('.$this->formvars['layer_id'].')" value="'.$this->strSave.'">
+								</td>
+							</tr>
+						</table>
 					</td>
 				</tr>
 			</table>

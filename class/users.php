@@ -2051,6 +2051,14 @@ class rolle {
 			$this->database->execSQL($sql,4, $this->loglevel);
 		}
 	}
+	
+	function removeTransparency($formvars) {
+		$sql ='UPDATE u_rolle2used_layer set transparency = NULL';
+		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+		$sql.=' AND layer_id='.$formvars['layer_options_open'];
+		$this->debug->write("<p>file:users.php class:rolle->setTransparency:",4);
+		$this->database->execSQL($sql,4, $this->loglevel);
+	}
 
 	function setSize($mapsize) {
 		# setzen der Werte, die aktuell für die Nutzung der Stelle durch den Nutzer gelten sollen.

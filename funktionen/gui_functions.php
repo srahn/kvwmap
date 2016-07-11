@@ -441,6 +441,11 @@ function saveLayerOptions(layer_id){
 	document.GUI.submit();
 }
 
+function resetLayerOptions(layer_id){	
+	document.GUI.go.value = 'resetLayerOptions';
+	document.GUI.submit();
+}
+
 function scrollLayerOptions(){
 	layer_id = document.GUI.layer_options_open.value;
 	if(layer_id != ''){
