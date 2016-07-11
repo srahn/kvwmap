@@ -9,8 +9,8 @@ include(PLUGINS . 'xplankonverter/model/RP_Plan.php');
 include(PLUGINS . 'xplankonverter/model/RP_Bereich.php');
 include(PLUGINS . 'xplankonverter/model/konvertierung.php');
 include(PLUGINS . 'xplankonverter/model/shapefiles.php');
+include(PLUGINS . 'xplankonverter/model/validator.php');
 include(PLUGINS . 'xplankonverter/model/xplan.php');
-#include(PLUGINS . 'xplankonverter/model/constants.php');
 
 switch($this->go){
 
@@ -41,7 +41,7 @@ switch($this->go){
 
   case 'build_gml' : {
     include(PLUGINS . 'xplankonverter/model/build_gml.php');
-    
+
     // Die Verbindung zur Datenbank kvwmapsp ist verfügbar in
     //$this->pgdatabase->dbConn);
     $this->gml_builder = new gml_builder($this->pgdatabase);
@@ -59,10 +59,10 @@ switch($this->go){
     // Die Verbindung zur Datenbank kvwmapsp ist verfügbar in
     //$this->pgdatabase->dbConn);
     $this->converter = new Converter($this->pgdatabase, PG_CONNECTION);
-    
+
     // Einbindung des Views
     $this->main = PLUGINS . 'xplankonverter/view/convert.php';
-    
+
     $this->initialData = array(
       'config' => array(
         'active' => 'step1',
@@ -150,8 +150,8 @@ switch($this->go){
     }
   #}  end of upload files
   $this->main = '../../plugins/xplankonverter/view/shapefiles.php';
-      
-   
+
+
     $this->output();
   } break;
 */
@@ -185,7 +185,7 @@ switch($this->go){
           foreach($uploaded_files AS $uploaded_file) {
             if ($uploaded_file['extension'] == 'dbf' and $uploaded_file['state'] != 'ignoriert') {
 
-              # delete existing shape file 
+              # delete existing shape file
               $shapeFile = new ShapeFile($this, 'xplankonverter', 'shapefiles');
               $shapeFile = $shapeFile->find_where("
                 filename = '" . $uploaded_file['filename'] . "' AND
