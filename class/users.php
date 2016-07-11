@@ -1941,10 +1941,12 @@ class rolle {
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
 	
-	function setAktivLayer($formvars, $stelle_id, $user_id) {
-		$layer=$this->getLayer('');
-		$rollenlayer=$this->getRollenLayer('', NULL);
-		$this->layerset = array_merge($layer, $rollenlayer);
+	function setAktivLayer($formvars, $stelle_id, $user_id, $ignore_rollenlayer = false) {
+		$this->layerset=$this->getLayer('');
+		if(!$ignore_rollenlayer){
+			$rollenlayer=$this->getRollenLayer('', NULL);
+			$this->layerset = array_merge($this->layerset, $rollenlayer);
+		}
 		# Eintragen des Status der Layer, 1 angezeigt oder 0 nicht.
 		for ($i=0;$i<count($this->layerset);$i++) {
 			#echo $i.' '.$this->layerset[$i]['Layer_ID'].' '.$formvars['thema'.$this->layerset[$i]['Layer_ID']].'<br>';
@@ -1976,19 +1978,21 @@ class rolle {
 				}
 			}
 		}
-		$mapdb = new db_mapObj($stelle_id, $user_id);
-		$rollenlayerset = $mapdb->read_RollenLayer();
-		for($i = 0; $i < count($rollenlayerset); $i++){
-			if($formvars['thema'.$rollenlayerset[$i]['Layer_ID']] == 0){
-				$mapdb->deleteRollenLayer($rollenlayerset[$i]['id']);
-				$mapdb->delete_layer_attributes(-$rollenlayerset[$i]['id']);
-				# auch die Klassen und styles löschen
-				if($rollenlayerset[$i]['Class'] != ''){
-					foreach($rollenlayerset[$i]['Class'] as $class){
-						$mapdb->delete_Class($class['Class_ID']);
-						if($class['Style'] != ''){
-							foreach($class['Style'] as $style){
-								$mapdb->delete_Style($style['Style_ID']);
+		if(!$ignore_rollenlayer){
+			$mapdb = new db_mapObj($stelle_id, $user_id);
+			$rollenlayerset = $mapdb->read_RollenLayer();
+			for($i = 0; $i < count($rollenlayerset); $i++){
+				if($formvars['thema'.$rollenlayerset[$i]['Layer_ID']] == 0){
+					$mapdb->deleteRollenLayer($rollenlayerset[$i]['id']);
+					$mapdb->delete_layer_attributes(-$rollenlayerset[$i]['id']);
+					# auch die Klassen und styles löschen
+					if($rollenlayerset[$i]['Class'] != ''){
+						foreach($rollenlayerset[$i]['Class'] as $class){
+							$mapdb->delete_Class($class['Class_ID']);
+							if($class['Style'] != ''){
+								foreach($class['Style'] as $style){
+									$mapdb->delete_Style($style['Style_ID']);
+								}
 							}
 						}
 					}
@@ -2405,8 +2409,10 @@ class rolle {
 		$sql.=', stelle_id='.$this->stelle_id;
 		$sql.=', name="'.$comment.'"';
 		for($i=0; $i < count($layerset); $i++){
-			if($layerset[$i]['aktivStatus'] == 1)$layers[] = $layerset[$i]['Layer_ID'];
-			if($layerset[$i]['queryStatus'] == 1)$query[] = $layerset[$i]['Layer_ID'];
+			if($layerset[$i]['Layer_ID'] > 0 AND $layerset[$i]['aktivStatus'] == 1){
+				$layers[] = $layerset[$i]['Layer_ID'];
+				if($layerset[$i]['queryStatus'] == 1)$query[] = $layerset[$i]['Layer_ID'];
+			}
 		}
 		$sql.=', layers="'.implode(',', $layers).'"';
 		$sql.=', query="'.implode(',', $query).'"';

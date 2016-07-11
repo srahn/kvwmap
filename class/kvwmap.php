@@ -9933,7 +9933,7 @@ class GUI {
 			foreach($query_ids as $layer_id){
 				$formvars['qLayer'.$layer_id] = 1;
 			}
-			$this->user->rolle->setAktivLayer($formvars, $this->Stelle->id, $this->user->id);
+			$this->user->rolle->setAktivLayer($formvars, $this->Stelle->id, $this->user->id, true);
 			$this->user->rolle->setQueryStatus($formvars);
     }
 		$this->loadMap('DataBase');
