@@ -3182,6 +3182,7 @@ class stelle {
 		# Aktualisieren der LayerzuStelle-Eigenschaften
 		$sql = 'UPDATE used_layer SET Layer_ID = '.$formvars['selected_layer_id'];
 		$sql .= ', queryable = "'.$formvars['queryable'].'"';
+		$sql .= ', use_geom = '.$formvars['use_geom'];
 		if ($formvars['minscale']!='') {
 			$sql .= ', minscale = '.$formvars['minscale'];
 		}
@@ -3321,7 +3322,7 @@ class stelle {
 		return $layer;
 	}
 
-	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL, $rollenlayer_type = NULL){
+	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL, $rollenlayer_type = NULL, $use_geom = NULL){
 		global $language;
 		$sql = 'SELECT layer.Layer_ID, ';
 		if($language != 'german') {
@@ -3339,6 +3340,9 @@ class stelle {
 		if($privileg != NULL){
 			$sql .=' AND used_layer.privileg >= "'.$privileg.'"';
 		}
+		if($use_geom != NULL){
+			$sql .=' AND used_layer.use_geom = 1';
+		}		
 		if($group_id != NULL){
 			$sql .=' AND u_groups.id = '.$group_id;
 		}
