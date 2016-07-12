@@ -15005,7 +15005,7 @@ class db_mapObj{
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->new_Class - Erstellen einer Klasse zu einem Layer:<br>".$sql,4);
     $query=mysql_query($sql);
-		if($this->database != NULL)$this->database->logfile->write($sql.';');
+		if($this->database->logfile != NULL)$this->database->logfile->write($sql.';');
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
 
     return mysql_insert_id();
@@ -15103,7 +15103,7 @@ class db_mapObj{
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->new_Style - Erzeugen eines Styles:<br>".$sql,4);
     $query=mysql_query($sql);
-		if($this->database != NULL)$this->database->logfile->write($sql.';');
+		if($this->database->logfile != NULL)$this->database->logfile->write($sql.';');
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
     return mysql_insert_id();
   }
@@ -15195,7 +15195,7 @@ class db_mapObj{
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->addStyle2Class - Hinzufügen eines Styles zu einer Klasse:<br>".$sql,4);
     $query=mysql_query($sql);
-		if($this->database != NULL)$this->database->logfile->write($sql.';');
+		if($this->database->logfile != NULL)$this->database->logfile->write($sql.';');
     if ($query==0) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__; return 0; }
   }
 
