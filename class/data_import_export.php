@@ -742,7 +742,10 @@ class data_import_export {
 						$value = str_replace('f', "nein", $value);
 					}
 					$value = str_replace(';', ",", $value);
-					if(strpos($value, '/') !== false OR strpos($value, chr(10)) !== false OR strpos($value, chr(13)) !== false)$value = '"'.$value.'"';		# Excel-Datumsproblem oder Zeilenumbruch
+					if(strpos($value, '/') !== false OR strpos($value, chr(10)) !== false OR strpos($value, chr(13)) !== false){		# Excel-Datumsproblem oder Zeilenumbruch
+						$value = str_replace('"', "'", $value);
+						$value = '"'.$value.'"';
+					}
 	        $csv .= $value.';';
       	}
       }
