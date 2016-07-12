@@ -10827,8 +10827,8 @@ class GUI {
       }
 			if($this->formvars['reload']){			# in diesem Fall wird die komplette Seite neu geladen
 				echo '~~';
-				echo "currentform.go.value='get_last_query';
-							overlay_submit(currentform, false);";
+				echo "document.GUI.go.value='get_last_query';
+							document.GUI.submit();";
 			}
     }
     else{
