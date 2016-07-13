@@ -436,45 +436,6 @@ switch($this->go){
 		echo json_encode($response);
 	} break;
 
-	case 'xplankonverter_konvertierungen_execute': {
-		include(PLUGINS . 'xplankonverter/model/build_gml.php');
-		if ($this->formvars['konvertierung_id'] == '') {
-			$this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
-			$this->main = 'Hinweis.php';
-		}
-		else {
-			$this->konvertierung = new Konvertierung($this, 'xplankonverter', 'konvertierungen');
-			$this->konvertierung->find_by('id', $this->formvars['konvertierung_id']);
-			if (isInStelleAllowed($this->Stelle->id, $this->konvertierung->get('stelle_id'))) {
-				if ($this->konvertierung->get('status') == 'validiert') {
-					// Status setzen
-					$this->konvertierung->set('status', Konvertierung::$STATUS[5]);
-					$this->konvertierung->update();
-					// Seite updaten
-					$this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
-					//
-					// Status setzen
-					$this->konvertierung->set('status', Konvertierung::$STATUS[5]);
-					$this->konvertierung->update();
-					// XPlan-GML ausgeben
-					$this->gml_builder = new Gml_builder($this->pgdatabase);
-					$gml_id = $this->gml_builder->findRPPlanByKonvertierung($this->konvertierung);
-					$gmlString = $this->gml_builder->build_gml($gml_id);
-					$this->gml_builder->saveGML($gmlString, XPLANKONVERTER_SHAPE_PATH . $this->konvertierung->get('id') . '/xplan_' . $this->konvertierung->get('id') . '.gml');
-					//$this->gml_builder->saveGML($gmlString, PLUGINS . 'xplankonverter/xplan_' . $this->konvertierung->get('id') . '.gml');
-					// Status setzen
-					$this->konvertierung->set('status', Konvertierung::$STATUS[6]);
-					$this->konvertierung->update();
-					$this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
-				} else {
-					$this->Hinweis = 'Die ausgewählte Konvertierung muss zuerst validiert werden.';
-					$this->main = 'Hinweis.php';
-				}
-			}
-		}
-		$this->output();
-	} break;
-
 	case 'xplankonverter_konvertierung_loeschen' : {
 		$konvertierung = new Konvertierung($this, 'xplankonverter', 'konvertierungen');
 		$konvertierung->find_by('id', $this->formvars['konvertierung_id']);

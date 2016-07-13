@@ -9,10 +9,10 @@
     $('#konvertierungen_table')
     .on('load-success.bs.table', function (e, data) {
       result.text('Tabelle erfolgreich geladen.');
-      $('#konvertierung_ausfuehren').click(
+      $('.fa-play').click(
         starteKonvertierung
       );
-      $('#konvertierung_loeschen').click(
+      $('.fa-trash').click(
         loescheKonvertierung
       );
     })
