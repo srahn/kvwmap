@@ -63,18 +63,18 @@ class data_import_export {
 		}
 		foreach($custom_tables as $custom_table){				# ------ Rollenlayer erzeugen ------- #
 			$layer_id = $this->create_rollenlayer(
-        $database,
-        $pgdatabase,
-        $stelle,
-        $user,
-        $file." (".date('d.m. H:i',time()).")".str_repeat(' ', $custom_table['datatype']),
-        CUSTOM_SHAPE_SCHEMA,
-        $custom_table,
-        $formvars['epsg']
-      );
+				$database,
+				$pgdatabase,
+				$stelle,
+				$user,
+				$file." (".date('d.m. H:i',time()).")".str_repeat(' ', $custom_table['datatype']),
+				CUSTOM_SHAPE_SCHEMA,
+				$custom_table,
+				$formvars['epsg']
+			);
 		}
-    return -$layer_id;
-  }
+		return -$layer_id;
+	}
 
 	function create_rollenlayer($database, $pgdatabase, $stelle, $user, $layername, $schema, $custom_table, $epsg) {
 		$result_colors = read_colors($database);
@@ -90,32 +90,29 @@ class data_import_export {
 		$this->formvars['user_id'] = $user->id;
 		$this->formvars['stelle_id'] = $stelle->id;
 		$this->formvars['aktivStatus'] = 1;
-		$this->formvars['Name'] = $layername;
+		$this->formvars['Name'] = $file." (".date('d.m. H:i',time()).")".str_repeat(' ', $custom_table['datatype']);
 		$this->formvars['Gruppe'] = $groupid;
 		$this->formvars['Typ'] = 'import';
 		$this->formvars['Datentyp'] = $custom_table['datatype'];
 		$select = 'oid, the_geom';
-		if($custom_table['labelitem'] != '') $select .= ', ' . $custom_table['labelitem'];
-		$this->formvars['Data'] = 'the_geom from (SELECT ' . $select . ' FROM ' . $schema . '.' . $custom_table['tablename'] . ' WHERE 1=1 ' . $custom_table['where'] . ') as foo using unique oid using srid=' . $epsg;
-		$this->formvars['query'] = 'SELECT * FROM ' . $custom_table['tablename'] . ' WHERE 1=1' . $custom_table['where'];
-		$connectionstring ='user=' . $pgdatabase->user;
-		if($pgdatabase->passwd != '')
-      $connectionstring .=' password=' . $pgdatabase->passwd;
-		$connectionstring .= ' dbname=' . $pgdatabase->dbName;
-    if($pgdatabase->host != 'localhost')
-      $connectionstring .= ' host=' . $pgdatabase->host;
+		if($custom_table['labelitem'] != '')$select .= ', '.$custom_table['labelitem'];
+		$this->formvars['Data'] = 'the_geom from (SELECT '.$select.' FROM '.CUSTOM_SHAPE_SCHEMA.'.'.$custom_table['tablename'].' WHERE 1=1 '.$custom_table['where'].')as foo using unique oid using srid='.$formvars['epsg'];
+		$this->formvars['query'] = 'SELECT * FROM '.$custom_table['tablename'].' WHERE 1=1'.$custom_table['where'];
+		$connectionstring ='user='.$pgdatabase->user;
+		if($pgdatabase->passwd != '')$connectionstring.=' password='.$pgdatabase->passwd;
+		$connectionstring.=' dbname='.$pgdatabase->dbName;
+    if($pgdatabase->host != 'localhost') $connectionstring .= ' host=' . $pgdatabase->host;
 		$this->formvars['connection'] = $connectionstring;
 		$this->formvars['connectiontype'] = 6;
-		$this->formvars['epsg_code'] = $epsg;
+		$this->formvars['epsg_code'] = $formvars['epsg'];
 		$this->formvars['transparency'] = 65;
-		if($custom_table['labelitem'] != '')
-			$this->formvars['labelitem'] = $custom_table['labelitem'];
+		if($custom_table['labelitem'] != '')$this->formvars['labelitem'] = $custom_table['labelitem'];
 		$layer_id = $dbmap->newRollenLayer($this->formvars);
 		$layerdb = $dbmap->getlayerdatabase(-$layer_id, $this->Stelle->pgdbhost);
 		$layerdb->setClientEncoding();
 		$path = $this->formvars['query'];
 		$attributes = $dbmap->load_attributes($layerdb, $path);
-		$dbmap->save_postgis_attributes(-$layer_id, $attributes, '');
+		$dbmap->save_postgis_attributes(-$layer_id, $attributes, '', '');
 		$attrib['name'] = ' ';
 		$attrib['layer_id'] = -$layer_id;
 		$attrib['expression'] = '';
@@ -149,7 +146,7 @@ class data_import_export {
 		$style['backgroundcolor'] = NULL;
 		$style['minsize'] = NULL;
 		$style['angle'] = 360;
-		$style_id = $dbmap->new_Style($style);
+		$style_id = $dbmap->new_Style($style);	
 		$dbmap->addStyle2Class($class_id, $style_id, 0);          # den Style der Klasse zuordnen
 		if($custom_table['labelitem'] != ''){
 			$label['font'] = 'arial';
@@ -159,7 +156,7 @@ class data_import_export {
 			$label['minsize'] = 6;
 			$label['maxsize'] = 10;
 			$label['position'] = 9;
-			$new_label_id = $dbmap->new_Label($label);
+			$new_label_id = $dbmap->new_Label($label);				
 			$dbmap->addLabel2Class($class_id, $new_label_id, 0);
 		}
     return $layer_id;
@@ -700,7 +697,7 @@ class data_import_export {
   }
 	
 	function ogr2ogr_export($sql, $exportformat, $exportfile, $layerdb){
-		$command = 'export PGCLIENTENCODING=LATIN1;'.OGR_BINPATH.'ogr2ogr -f '.$exportformat.' -sql "'.$sql.'" '.$exportfile.' PG:"dbname='.$layerdb->dbName.' user='.$layerdb->user;
+		$command = 'export PGCLIENTENCODING=UTF-8;'.OGR_BINPATH.'ogr2ogr -f '.$exportformat.' -lco ENCODING=UTF-8 -sql "'.$sql.'" '.$exportfile.' PG:"dbname='.$layerdb->dbName.' user='.$layerdb->user;
 		if($layerdb->passwd != '')$command.= ' password='.$layerdb->passwd;
 		if($layerdb->port != '')$command.=' port='.$layerdb->port;
 		if($layerdb->host != '') $command .= ' host=' . $layerdb->host;
@@ -717,7 +714,19 @@ class data_import_export {
 		exec($command);
 	}
 	
-	function create_csv($result, $attributes){
+	function create_csv($result, $attributes, $groupnames){
+		# Gruppennamen in die erste Zeile schreiben
+		if($groupnames != ''){
+			foreach($result[0] As $key => $value){
+				$i = $attributes['indizes'][$key];
+				if($attributes['type'][$i] != 'geometry' AND $attributes['name'][$i] != 'lock'){
+					$groupname = explode(';', $attributes['group'][$i]);
+					$csv .= $groupname[0].';';
+				}
+			}
+			$csv .= chr(13).chr(10);
+		}
+		
     # Spaltenüberschriften schreiben
     # Excel is zu blöd für 'ID' als erstes Attribut
 		if(substr($attributes['alias'][0], 0, 2) == 'ID'){
@@ -769,9 +778,10 @@ class data_import_export {
 						$value = str_replace('f', "nein", $value);
 					}
 					$value = str_replace(';', ",", $value);
-					$value = str_replace(chr(10), " ", $value);
-					$value = str_replace(chr(13), "", $value);
-					if(strpos($value, '/') !== false)$value = "'".$value."'";		# Excel-Datumsproblem
+					if(strpos($value, '/') !== false OR strpos($value, chr(10)) !== false OR strpos($value, chr(13)) !== false){		# Excel-Datumsproblem oder Zeilenumbruch
+						$value = str_replace('"', "'", $value);
+						$value = '"'.$value.'"';
+					}
 	        $csv .= $value.';';
       	}
       }
@@ -837,6 +847,7 @@ class data_import_export {
 		$sql = str_replace('$hist_timestamp', rolle::$hist_timestamp, $layerset[0]['pfad']);
     $privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
     $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
+		$filter = $mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id);
 		
 		# Where-Klausel aus Sachdatenabfrage-SQL
 		$where = substr(strip_pg_escape_string($this->formvars['sql_'.$this->formvars['selected_layer_id']]), strrpos(strtolower(strip_pg_escape_string($this->formvars['sql_'.$this->formvars['selected_layer_id']])), 'where')+5);
@@ -866,6 +877,9 @@ class data_import_export {
 				$selection[$this->attributes['name'][$i]] = 1;
 			}
 			if(strpos($orderby, $this->attributes['name'][$i])){						# oder es kommt im ORDER BY des Layer-Query vor
+				$selection[$this->attributes['name'][$i]] = 1;
+			}
+			if(strpos($filter, $this->attributes['name'][$i])){						# oder es kommt im Filter des Layers vor
 				$selection[$this->attributes['name'][$i]] = 1;
 			}
 			if($this->formvars['download_documents'] != '' AND $this->attributes['form_element_type'][$i] == 'Dokument'){			# oder das Attribut ist vom Typ "Dokument" und die Dokumente sollen auch exportiert werden
@@ -934,7 +948,6 @@ class data_import_export {
 	    }
   	}
 		# Filter
-    $filter = $mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id);
     if($filter != ''){
 			$filter = str_replace('$userid', $user->id, $filter);
     	$sql = 'SELECT * FROM ('.$sql.') as query2 WHERE '.$filter;
@@ -947,7 +960,7 @@ class data_import_export {
 		
 		if($this->formvars['export_format'] == 'Shape'){				# das Abschneiden bei nicht in der Länge begrenzten Textspalten verhindern
 			for($s = 0; $s < count($selected_attributes); $s++){
-				if(in_array($selected_attr_types[$s], array('text', 'varchar')))$selected_attributes[$s] = $selected_attributes[$s].'::varchar(255)';
+				if(in_array($selected_attr_types[$s], array('text', 'varchar')))$selected_attributes[$s] = $selected_attributes[$s].'::varchar(254)';
 			}
 		}
 		
@@ -972,9 +985,11 @@ class data_import_export {
 			switch($this->formvars['export_format']){
 				case 'Shape' : { 
 					$this->ogr2ogr_export($sql, '"ESRI Shapefile"', $exportfile.'.shp', $layerdb);
-					$fp = fopen($exportfile.'.cpg', 'w');
-					fwrite($fp, 'UTF-8');
-					fclose($fp);
+					if(!file_exists($exportfile.'.cpg')){		// ältere ogr-Versionen erzeugen die cpg-Datei nicht
+						$fp = fopen($exportfile.'.cpg', 'w');
+						fwrite($fp, 'UTF-8');
+						fclose($fp);
+					}
 					$zip = true;
 				}break;
 				
@@ -993,8 +1008,8 @@ class data_import_export {
 					while($rs=pg_fetch_assoc($ret[1])){
 						$result[] = $rs;
 					}
-					$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $result, true, $stelle->id);
-					$csv = $this->create_csv($result, $this->attributes);
+					$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $result, true, $stelle->id, true);
+					$csv = $this->create_csv($result, $this->attributes, $formvars['export_groupnames']);
 					$exportfile = $exportfile.'.csv';
 					$fp = fopen($exportfile, 'w');
 					fwrite($fp, $csv);

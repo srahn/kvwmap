@@ -111,32 +111,7 @@
 				echo '<tr><td colspan="2" align="center"><span class="red">Dieser Datensatz wurde bereits übertragen und kann nicht bearbeitet werden.</span></td></tr>';
 				$lock[$k] = true;
 			}
-			
-			// $attributes['position'][3] = 'daneben';
-			// $attributes['position'][4] = 'daneben';
-			// $attributes['position'][5] = 'daneben';
-			// $attributes['position'][6] = 'daneben';
-			// $attributes['position'][16] = 'daneben';
-			// $attributes['position'][18] = 'daneben';
-			// $attributes['position'][19] = 'daneben';
-			// $attributes['position'][20] = 'daneben';
-			// $attributes['position'][22] = 'daneben';
-			// $attributes['position'][23] = 'daneben';
-			// $attributes['position'][31] = 'daneben';
-			// $attributes['position'][32] = 'daneben';
-			// $attributes['position'][33] = 'daneben';
-			// $attributes['position'][34] = 'daneben';
-			// $attributes['attribute_name'][2] = 'oben';
-			// $attributes['attribute_name'][3] = 'oben';
-			// $attributes['attribute_name'][4] = 'oben';
-			// $attributes['attribute_name'][5] = 'oben';
-			// $attributes['attribute_name'][6] = 'oben';
-			// $attributes['attribute_name'][30] = 'oben';
-			// $attributes['attribute_name'][31] = 'oben';
-			// $attributes['attribute_name'][32] = 'oben';
-			// $attributes['attribute_name'][33] = 'oben';
-			// $attributes['attribute_name'][34] = 'oben';
-			
+						
 			for($j = 0; $j < count($attributes['name']); $j++){
 				if($layer['shape'][$k][$attributes['name'][$j]] == ''){
 					#$layer['shape'][$k][$attributes['name'][$j]] = $this->formvars[$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j]];
@@ -158,29 +133,29 @@
 										</table>
 										<table width="100%" class="tgle" id="group'.$layer['Layer_ID'].'_'.$j.'_'.$k.'" '; if($collapsed)$datapart .= 'style="display:none"'; $datapart .= 'border="2"><tbody class="gle">
 											<tr>
-												<td bgcolor="'.BG_GLEATTRIBUTE.'" colspan="20">&nbsp;<a href="javascript:void(0);" onclick="javascript:document.getElementById(\'group'.$layer['Layer_ID'].'_'.$j.'_'.$k.'\').style.display=\'none\';document.getElementById(\'colgroup'.$layer['Layer_ID'].'_'.$j.'_'.$k.'\').style.display=\'\';"><img border="0" src="'.GRAPHICSPATH.'/minus.gif"></a>&nbsp;&nbsp;<span class="fett">'.$groupname.'</span></td>
+												<td bgcolor="'.BG_GLEATTRIBUTE.'" colspan="40">&nbsp;<a href="javascript:void(0);" onclick="javascript:document.getElementById(\'group'.$layer['Layer_ID'].'_'.$j.'_'.$k.'\').style.display=\'none\';document.getElementById(\'colgroup'.$layer['Layer_ID'].'_'.$j.'_'.$k.'\').style.display=\'\';"><img border="0" src="'.GRAPHICSPATH.'/minus.gif"></a>&nbsp;&nbsp;<span class="fett">'.$groupname.'</span></td>
 											</tr>';
 				}
 				
 				if($attributes['invisible'][$attributes['name'][$j]] != 'true' AND $attributes['name'][$j] != 'lock'){
 					if($attributes['type'][$j] != 'geometry'){
-						if($attributes['privileg'][$j] != '0' AND !$lock[$k])$this->editable = 'true';
+						if($attributes['privileg'][$j] != '0' AND !$lock[$k])$this->editable = $layer['Layer_ID'];
 						if($attributes['alias'][$j] == '')$attributes['alias'][$j] = $attributes['name'][$j];
 						
-						if($attributes['position'][$j] != 'daneben')$datapart .= '<tr>';							# wenn Attribut nicht daneben -> neue Zeile beginnen
-						if($attributes['attribute_name'][$j] != 'kein'){
-							$td = '	<td class="gle_attribute_name" '; if($attributes['group'][0] != '' AND $attributes['position'][$j] != 'daneben')$td .= 'width="10%">';else $td.='width="1%">';
+						if($attributes['arrangement'][$j] != 1)$datapart .= '<tr>';							# wenn Attribut nicht daneben -> neue Zeile beginnen
+						if($attributes['labeling'][$j] != 2){
+							$td = '	<td class="gle_attribute_name" '; if($attributes['labeling'][$j] == 1 AND $attributes['arrangement'][$j] == 1 AND $attributes['arrangement'][$j+1] != 1)$td .= 'colspan="20" ';if($attributes['group'][0] != '' AND $attributes['arrangement'][$j] != 1)$td .= 'width="10%">';else $td.='width="1%">';
 							$td.= 			attribute_name($layer['Layer_ID'], $attributes, $j, $k, $this->user->rolle->fontsize_gle);
 							$td.= '	</td>';
-							if($nl AND $attributes['attribute_name'][$j] != 'oben')$next_line .= $td; else $datapart .= $td;
+							if($nl AND $attributes['labeling'][$j] != 1)$next_line .= $td; else $datapart .= $td;
 						}
-						if($attributes['attribute_name'][$j] == 'oben')$nl = true;										# Attributname soll oben stehen -> alle weiteren tds für die nächste Zeile aufsammeln
-						$td = '	<td class="gle_attribute_value"'; if($attributes['position'][$j+1] != 'daneben')$td .= 'colspan="20"'; $td .= '>';												
+						if($attributes['labeling'][$j] == 1)$nl = true;										# Attributname soll oben stehen -> alle weiteren tds für die nächste Zeile aufsammeln
+						$td = '	<td class="gle_attribute_value"'; if($attributes['arrangement'][$j+1] != 1)$td .= 'colspan="20"'; $td .= '>';												
 						$td.= 			attribute_value($this, $layer['Layer_ID'], $attributes, $j, $k, $layer['shape'][$k], $size, $select_width, $this->user->rolle->fontsize_gle);
 						$td.= '	</td>';
 						if($nl)$next_line .= $td; else $datapart .= $td;
-						if($attributes['position'][$j+1] != 'daneben')$datapart .= '</tr>';						# wenn nächstes Attribut nicht daneben -> Zeile abschliessen
-						if($attributes['position'][$j+1] != 'daneben' AND $nl){												# die aufgesammelten tds in neuer Zeile ausgeben
+						if($attributes['arrangement'][$j+1] != 1)$datapart .= '</tr>';						# wenn nächstes Attribut nicht daneben -> Zeile abschliessen
+						if($attributes['arrangement'][$j+1] != 1 AND $nl){												# die aufgesammelten tds in neuer Zeile ausgeben
 							$datapart .= '<tr>'.$next_line.'</tr>';
 							$next_line = '';
 							$nl = false;

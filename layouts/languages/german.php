@@ -29,11 +29,16 @@
  $this->strActivateAllQueries="Alle Abfragen ein/ausschalten";
  $this->strActivateAllLayers="Alle Themen ein/ausschalten";
  $this->FullLayerExtent="volle Layerausdehnung";
- $this->DisplayClasses="Klassen ein/ausblenden";
+ $this->DisplayClasses="Klassen einblenden";
+ $this->HideClasses="Klassen ausblenden";
+ $this->deactivateAllClasses="Klassen deaktivieren";
+ $this->activateAllClasses="Klassen aktivieren";
  $this->all="alle";
  $this->deactivatequery="Die Abfrage dieses Themas ausschalten";
  $this->activatequery="Dieses Thema abfragbar schalten";
  $this->deactivatelayer="Dieses Thema ausschalten";
  $this->activatelayer="Dieses Thema sichtbar schalten";
  $this->printversion="Druckversion";
+ $this->strLimit="Anzahl Treffer:";
+ $this->layerOptions="Optionen";
 ?>

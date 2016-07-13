@@ -167,7 +167,7 @@
 
 		$sql = '';
 		for ($i = 0; $i < count ( $data['wood_species'] ); $i++ ) {
-			$sql .= "
+			$sql = "
 				INSERT INTO baumfaellantrag.antraege (
 					nr,
 					surname,

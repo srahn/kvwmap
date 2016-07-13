@@ -19,7 +19,7 @@ function save(){
 			alert('Bitte geben Sie eine Gemarkung, eine Antragsnummer, eine Rissnummer, ein Datum oder eine Fortführung an.');
 			return;
 		}
-		if(document.GUI.suchgemarkung.value == '' && document.GUI.suchstammnr.value == '' && document.GUI.sdatum.value == ''){
+		if(document.GUI.suchgemarkung.value == '' && document.GUI.suchstammnr.value == '' && document.GUI.sdatum.value == '' && document.GUI.suchbemerkung.value == ''){
 			alert('Bitte geben Sie Suchparameter an.');
 			return;
 		}
@@ -99,6 +99,40 @@ function clear(){
 	document.GUI.sdatum.value = '';
 	document.GUI.sdatum2.value = '';
 	document.GUI.sVermStelle.value = '';
+	document.GUI.suchbemerkung.value = '';
+}
+
+function show_dokauswahlen(){
+	if(document.getElementById('dokauswahl2').style.display == 'none'){
+		document.getElementById('dokauswahl1').style.borderTop="1px solid grey";
+		document.getElementById('dokauswahl1').style.borderLeft="1px solid grey";
+		document.getElementById('dokauswahl1').style.borderRight="1px solid grey";
+		document.getElementById('dokauswahl2').style.display = '';
+	}
+	else{
+		document.getElementById('dokauswahl1').style.border="none";
+		document.getElementById('dokauswahl2').style.display = 'none';
+	}
+}
+
+function save_dokauswahl(){
+	if(document.GUI.dokauswahl_name.value != ''){
+		document.GUI.go_plus.value = 'Dokumentauswahl_speichern';
+		document.GUI.submit();
+	}
+	else{
+		alert('Bitte geben Sie einen Namen für die Dokumentauswahl an.');
+	}
+}
+
+function delete_dokauswahl(){
+	if(document.GUI.dokauswahlen.value != ''){
+		document.GUI.go_plus.value = 'Dokumentauswahl_löschen';
+		document.GUI.submit();
+	}
+	else{
+		alert('Es wurde keine Dokumentauswahl ausgewählt.');
+	}
 }
   
 //-->
@@ -119,8 +153,8 @@ else {
     </div></td>
   </tr>
   <tr> 
-    <td rowspan="16">&nbsp;</td>
-    <td rowspan="16"> 
+    <td rowspan="17">&nbsp;</td>
+    <td rowspan="17"> 
       <?php
 				include(LAYOUTPATH.'snippets/SVG_polygon_box_query_area.php')
 			?>
@@ -151,14 +185,50 @@ else {
 			</select>
 		</td>
   </tr>
+	<tr>
+		<td>
+			<table cellpadding="2" cellspacing="0">
+				<tr>
+					<td id="dokauswahl1"><a href="javascript:show_dokauswahlen();">&nbsp;gespeicherte Auswahlen...</a></td>
+				</tr>
+				<tr id="dokauswahl2" style="display:none"> 
+					<td style="border-bottom:1px solid grey;border-right:1px solid grey;border-left:1px solid grey">
+						<table border="0" cellspacing="0" cellpadding="1">
+							<tr align="center"> 
+								<td colspan="2"  align="right">
+									Name:&nbsp;<input type="text" name="dokauswahl_name" value="<? echo $this->formvars['dokauswahl_name']; ?>">
+									<input class="button" type="button" style="width:74px" name="speichern" value="Speichern" onclick="save_dokauswahl();">
+								</td>
+							</tr>
+							<tr>
+								<td align="right"  colspan="2">
+									<input class="button" type="button" style="width:74px" name="delete" value="Löschen" onclick="delete_dokauswahl();">
+									<select name="dokauswahlen">
+										<option value="">  -- Auswahl --  </option>
+										<?
+											for($i = 0; $i < count($this->dokauswahlset); $i++){
+												echo '<option value="'.$this->dokauswahlset[$i]['id'].'" ';
+												if($this->selected_dokauswahlset[0]['id'] == $this->dokauswahlset[$i]['id']){echo 'selected ';}
+												echo '>'.$this->dokauswahlset[$i]['name'].'</option>';
+											}
+										?>
+									</select>
+									<input class="button" type="button" style="width:74px" name="laden" value="Laden" onclick="document.GUI.submit();">
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</td>
   <tr>
-	<td>&nbsp;Gültigkeit:
-		<select name="gueltigkeit">
-			<option value="">--- Auswahl ---</option>
-			<option value="1">gültige Nachweise</option>
-			<option value="0">ungültige Nachweise</option>
-		</select>
-	</td>
+		<td>&nbsp;Gültigkeit:
+			<select name="gueltigkeit">
+				<option value="">--- Auswahl ---</option>
+				<option value="1">gültige Nachweise</option>
+				<option value="0">ungültige Nachweise</option>
+			</select>
+		</td>
   </tr>
   <tr> 
     <td colspan="2"><hr align="center" noshade></td>
@@ -170,7 +240,7 @@ else {
     <td colspan="2">
       <table border="0" cellspacing="0" cellpadding="2">
         <tr>
-          <td rowspan="7" valign="top"><input type="radio" name="abfrageart" value="indiv_nr" <?php if ($this->formvars['abfrageart']=='indiv_nr') { ?> checked<?php } ?>>
+          <td rowspan="8" valign="top"><input type="radio" name="abfrageart" value="indiv_nr" <?php if ($this->formvars['abfrageart']=='indiv_nr') { ?> checked<?php } ?>>
           </td>
         </tr>
 		<tr><td colspan="3"><span class="fett">Auswahl über Attribute</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:clear();" title="Suchfelder leeren"><img style="vertical-align:top;" src="<? echo GRAPHICSPATH.'edit-clear.png'; ?>"></a></td></tr>
@@ -231,11 +301,16 @@ else {
 	          ?>
 			    </td>
 			  </tr>
+				<tr>
+					<td colspan="3">Bemerkung:<br>
+						<input type="text" name="suchbemerkung" size="29" value="<? echo $this->formvars['suchbemerkung']; ?>">
+					</td>
+				</tr>
       </table>
     </td>
   </tr>
   <tr> 
-    <td height="35px" colspan="2"><input type="radio" name="abfrageart" value="poly" <?php if ($this->formvars['abfrageart']=='poly' OR $this->formvars['abfrageart']=='') { ?> checked<?php } ?>> 
+    <td height="35px" colspan="2"><input type="radio" name="abfrageart" id="abfrageart_poly" value="poly" <?php if ($this->formvars['abfrageart']=='poly' OR $this->formvars['abfrageart']=='') { ?> checked<?php } ?>> 
    <span class="fett">Auswahl im Kartenausschnitt über Suchpolygon</span></td>
   </tr>
   <tr> 

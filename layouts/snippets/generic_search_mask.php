@@ -36,7 +36,7 @@ include_once(SNIPPETS.'/generic_form_parts.php');
 			}
 			$last_attribute_index = NULL;
 			for($i = 0; $i < count($this->attributes['name']); $i++){
-        if($this->attributes['type'][$i] != 'geometry' AND !($this->attributes['form_element_type'][$i] == 'SubFormFK' AND $this->attributes['type'][$i] == 'not_saveable')){					
+        if($this->attributes['form_element_type'][$i] != 'dynamicLink' AND !($this->attributes['form_element_type'][$i] == 'SubFormFK' AND $this->attributes['type'][$i] == 'not_saveable')){					
 					if($this->attributes['group'][$i] != $this->attributes['group'][$last_attribute_index]){		# wenn die vorige Gruppe anders ist: ...
 						$explosion = explode(';', $this->attributes['group'][$i]);
 						if($explosion[1] != '')$collapsed = true;else $collapsed = false;
@@ -78,21 +78,35 @@ include_once(SNIPPETS.'/generic_form_parts.php');
 							<?
 								if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == 'LIKE' 					# ähnlich vorauswählen
 								OR (in_array($this->attributes['form_element_type'][$i], array('Text','Textfeld')) 
-										AND in_array($this->attributes['type'][$i], array('varchar', 'text', 'not_saveable')) 
+										AND in_array($this->attributes['type'][$i], array('varchar', 'text')) 
 										AND $this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == '')
 								)$this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] = 'LIKE';
 							?>
               <select  style="width:75px" <? if(count($this->attributes['enum_value'][$i]) == 0){ ?>onchange="operatorchange('<? echo $this->attributes['name'][$i]; ?>', <? echo $searchmask_number; ?>);" id="<? echo $prefix; ?>operator_<? echo $this->attributes['name'][$i]; ?>" <? } ?> name="<? echo $prefix; ?>operator_<? echo $this->attributes['name'][$i]; ?>">
                 <option title="<? echo $strEqualHint; ?>" value="=" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == '='){ echo 'selected';} ?> >=</option>
+							<? if($this->attributes['type'][$i] != 'geometry'){ ?>
                 <option title="<? echo $strNotEqualHint; ?>" value="!=" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == '!='){ echo 'selected';} ?> >!=</option>
+							<? }
+								if(!in_array($this->attributes['type'][$i], array('bool'))){
+									if($this->attributes['type'][$i] != 'geometry'){ ?>
+								<? if(!in_array($this->attributes['type'][$i], array('text'))){ ?>
                 <option title="<? echo $strLowerHint; ?>" value="<" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == '<'){ echo 'selected';} ?> ><</option>
                 <option title="<? echo $strGreaterHint; ?>" value=">" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == '>'){ echo 'selected';} ?> >></option>
+								<? }
+								if($this->attributes['form_element_type'][$i] == 'Autovervollständigungsfeld' OR !in_array($this->attributes['type'][$i], array('int2', 'int4', 'int8', 'numeric', 'float4', 'float8', 'date', 'timestampt', 'timestamptz'))){ ?>
                 <option title="<? echo $strLikeHint; ?>" value="LIKE" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == 'LIKE'){ echo 'selected';} ?> ><? echo $strLike; ?></option>
                 <option title="<? echo $strLikeHint; ?>" value="NOT LIKE" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == 'NOT LIKE'){ echo 'selected';} ?> ><? echo $strNotLike; ?></option>
+								<? }
+								} ?>
                 <option title="<? echo $strIsEmptyHint; ?>" value="IS NULL" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == 'IS NULL'){ echo 'selected';} ?> ><? echo $strIsEmpty; ?></option>
                 <option title="<? echo $strIsNotEmptyHint; ?>" value="IS NOT NULL" <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == 'IS NOT NULL'){ echo 'selected';} ?> ><? echo $strIsNotEmpty; ?></option>
+								<? if($this->attributes['type'][$i] != 'geometry'){ ?>
                 <option title="<? echo $strInHint; ?>" value="IN" <? if (count($this->attributes['enum_value'][$i]) > 0){ echo 'disabled="true"'; } ?> <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == 'IN'){ echo 'selected';} ?> ><? echo $strIsIn; ?></option>
+								<? if(!in_array($this->attributes['type'][$i], array('text'))){ ?>
                 <option title="<? echo $strBetweenHint; ?>" value="between" <? if (count($this->attributes['enum_value'][$i]) > 0){ echo 'disabled="true"'; } ?> <? if($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]] == 'between'){ echo 'selected';} ?> ><? echo $strBetween; ?></option>
+								<? }
+									}
+								} ?>
               </select>
             </td>
             <td>&nbsp;&nbsp;</td>
@@ -124,7 +138,7 @@ include_once(SNIPPETS.'/generic_form_parts.php');
 									echo '<div id="'.$prefix.'_avf_'.$this->attributes['name'][$i].'" style="';
 									if(in_array($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]], array('LIKE', 'NOT LIKE')))echo 'display:none';
 									echo '">';
-										echo Autovervollstaendigungsfeld($this->formvars['selected_layer_id'], $this->attributes['name'][$i], $i, $this->attributes['alias'][$i], $prefix.'value_'.$this->attributes['name'][$i], $this->formvars[$prefix.'value_'.$this->attributes['name'][$i]], $this->attributes['enum_output'][$i][0], 1, $prefix, NULL, NULL, NULL, NULL, false, 15);
+										echo Autovervollstaendigungsfeld($this->formvars['selected_layer_id'], $this->attributes['name'][$i], $i, $this->attributes['alias'][$i], $prefix.'value_'.$this->attributes['name'][$i], $this->formvars[$prefix.'value_'.$this->attributes['name'][$i]], $this->attributes['enum_output'][$i][0], 1, $prefix, NULL, NULL, NULL, NULL, false, 15, false, 40);
 									echo '</div>';
 									echo '<div id="'.$prefix.'_text_'.$this->attributes['name'][$i].'" style="';
 									if(!in_array($this->formvars[$prefix.'operator_'.$this->attributes['name'][$i]], array('LIKE', 'NOT LIKE')))echo 'display:none';

@@ -35,6 +35,7 @@
         result.text(response.msg);
       }
     });
+    location.reload(true);
   };
 
   loescheKonvertierung = function(e) {
@@ -52,7 +53,6 @@
     });
   };
 
-  // formatter functions
 	function konvertierungFunctionsFormatter(value, row) {
     output = '<span konvertierung_id="' + value + '">';
     output +=  '<a title="Konvertierung bearbeiten" href="index.php?go=Layer-Suche_Suchen&selected_layer_id=8&operator_konvertierung_id==&value_konvertierung_id=' + value + '"><i class="fa fa-pencil"></i></a>&nbsp;&nbsp;';
@@ -63,6 +63,7 @@
     output += '</span>';
     return output;
   }
+
 </script>
 <!--ul class='nav nav-tabs'>
   <li class='<?php echo ($config['active']==='step1' ? 'active' : '');?>'><a data-toggle='tab'>Schritt 1</a></li>

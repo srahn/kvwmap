@@ -18,19 +18,19 @@ class case_compressor {
 			
 			# wenn er noch nicht da ist, den leeren Klassenkörper ermitteln
 			if(self::$classarray[$classname] == ''){
-				self::$classarray[$classname]['code'] = chr(13).'class '.$classname.$extends.' {'.chr(13);		
+				self::$classarray[$classname]['code'] = chr(10).'class '.$classname.$extends.' {'.chr(10);		
 				foreach($properties as $prop) {
 					if($prop->isStatic())$var = 'static'; else $var = 'var';
 					#if($prop->isPublic())$public = 'public '; else $public = '';
-					self::$classarray[$classname]['code'] .= chr(13).'  '.$public.$var.' $'.$prop->getName();
+					self::$classarray[$classname]['code'] .= chr(10).'  '.$public.$var.' $'.$prop->getName();
 					if(@$prop->getValue() != '')self::$classarray[$classname]['code'] .= ' = '.@$prop->getValue().';';
 					else self::$classarray[$classname]['code'] .= ';';
 				}
-				self::$classarray[$classname]['code'] .= chr(13);
+				self::$classarray[$classname]['code'] .= chr(10);
 			}
 			# wenn er noch nicht da ist, den Funktionscode ermitteln und zum Klassen-Array hinzufügen
 			if(self::$classarray[$classname][$functionname] != true){
-				self::$classarray[$classname]['code'] .= chr(13).self::get_function_body($func);
+				self::$classarray[$classname]['code'] .= chr(10).self::get_function_body($func);
 				self::$classarray[$classname][$functionname] = true;	// merken, dass Funktion schon extrahiert wurde
 			}
 		}
@@ -38,7 +38,7 @@ class case_compressor {
 			# wenn er noch nicht da ist, den Funktionscode ermitteln und zum nonclassfunction-String hinzufügen
 			if(self::$nonclassfunctionarray[$functionname] != true){
 				$func = new ReflectionFunction($functionname);				
-				self::$nonclassfunctionstring .= chr(13).self::get_function_body($func);
+				self::$nonclassfunctionstring .= chr(10).self::get_function_body($func);
 				self::$nonclassfunctionarray[$functionname] = true;		// merken, dass Funktion schon extrahiert wurde
 			}
 		}		
@@ -57,12 +57,12 @@ class case_compressor {
 	public static function write_fast_case_file($go){
 		$fast_case_classfile = CLASSPATH.'fast_cases/'.$go.'.php';
 		$handle = fopen($fast_case_classfile, "w+");
-		fwrite($handle, '<?'.chr(13));
-		fwrite($handle, self::$nonclassfunctionstring.chr(13));
+		fwrite($handle, '<?'.chr(10));
+		fwrite($handle, self::$nonclassfunctionstring.chr(10));
 		foreach(self::$classarray as $class){	
-			fwrite($handle, $class['code'].'}'.chr(13));
+			fwrite($handle, $class['code'].'}'.chr(10));
 		}
-		fwrite($handle, '?>'.chr(13));
+		fwrite($handle, '?>'.chr(10));
 		fclose($handle);		
 	}
 
