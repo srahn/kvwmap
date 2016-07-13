@@ -3336,12 +3336,14 @@ class stelle {
 		$sql .=' WHERE stelle_id = '.$this->id;
 		$sql .=' AND layer.Gruppe = u_groups.id AND (layer.connectiontype = 6 OR layer.connectiontype = 9)';
 		$sql .=' AND layer.Layer_ID = used_layer.Layer_ID';
-		$sql .=' AND used_layer.queryable = \'1\'';
-		if($privileg != NULL){
-			$sql .=' AND used_layer.privileg >= "'.$privileg.'"';
-		}
 		if($use_geom != NULL){
 			$sql .=' AND used_layer.use_geom = 1';
+		}
+		else{
+			$sql .=' AND used_layer.queryable = \'1\'';
+		}
+		if($privileg != NULL){
+			$sql .=' AND used_layer.privileg >= "'.$privileg.'"';
 		}		
 		if($group_id != NULL){
 			$sql .=' AND u_groups.id = '.$group_id;
