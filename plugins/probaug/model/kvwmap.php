@@ -11,12 +11,13 @@
     # Abfragen für welche Gemeinden die Stelle Zugriffsrechte hat
     # GemeindenStelle wird eine Liste mit ID´s der Gemeinden zugewiesen, die zur Stelle gehören
     $GemeindenStelle=$GUI->Stelle->getGemeindeIDs();
-    $Gemeinde=new gemeinde('',$GUI->pgdatabase);
-    # Abfrage der Gemeinde Namen
-    $GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle);
-    # Abfragen der Gemarkungen zur Gemeinde
     $Gemarkung=new gemarkung('',$GUI->pgdatabase);
-    $GUI->GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'');
+		if($GemeindenStelle == NULL){
+			$GUI->GemkgListe=$Gemarkung->getGemarkungListe(NULL, NULL);
+		}
+		else{
+			$GUI->GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
+		}
     $GUI->main = PLUGINS.'probaug/view/bauauskunftsuche.php';
     $GUI->titel='Bauauskunftsuche';
   };

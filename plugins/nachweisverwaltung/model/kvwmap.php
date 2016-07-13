@@ -115,7 +115,7 @@
 			if($_SERVER['REQUEST_METHOD'] == 'GET')$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
       # zoomToMaxLayerExtent
 			if($GUI->formvars['zoom_layer_id'] != '')$GUI->zoomToMaxLayerExtent($GUI->formvars['zoom_layer_id']);
-      $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id);
+      $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true);
 	    if(!$GUI->formvars['layer_id']){
 	      $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
 	      $GUI->formvars['layer_id'] = $layerset[0]['Layer_ID'];
@@ -355,6 +355,41 @@
 		return $rs;
 	};
 	
+	$this->save_Dokumentauswahl = function($stelle_id, $user_id, $formvars) use ($GUI){
+		if(!$formvars['suchan'])$formvars['such_andere_art'] = array();
+		if($formvars['suchffr'] == '')$formvars['suchffr'] = 0;
+		if($formvars['suchkvz'] == '')$formvars['suchkvz'] = 0;
+		if($formvars['suchgn'] == '')$formvars['suchgn'] = 0;
+		$sql ='INSERT INTO rolle_nachweise_dokumentauswahl (stelle_id, user_id, name, ffr, kvz, gn, andere) VALUES (';
+		$sql .= $stelle_id.', '.$user_id.', "'.$formvars['dokauswahl_name'].'", '.$formvars['suchffr'].', '.$formvars['suchkvz'].', '.$formvars['suchgn'].', "'.implode(',', $formvars['such_andere_art']).'")';
+		#echo $sql;
+		$GUI->debug->write("<p>file:users.php class:rolle->save_Dokumentauswahl ",4);
+		$GUI->database->execSQL($sql,4, 1);
+		return mysql_insert_id();
+	};
+	
+	$this->delete_Dokumentauswahl = function($id) use ($GUI){
+		$sql ='DELETE FROM rolle_nachweise_dokumentauswahl ';
+		$sql.='WHERE id='.$id;
+		#echo $sql;
+		$GUI->debug->write("<p>file:users.php class:rolle->delete_Dokumentauswahl ",4);
+		$GUI->database->execSQL($sql,4, 1);
+	};
+		
+	$this->get_Dokumentauswahl = function($stelle_id, $user_id, $dokauswahl_id) use ($GUI){
+		$sql ='SELECT * FROM rolle_nachweise_dokumentauswahl ';
+		$sql.='WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;
+		if($dokauswahl_id != '')$sql.=' AND id = '.$dokauswahl_id;
+		#echo $sql;
+		$GUI->debug->write("<p>file:users.php class:rolle->get_Dokumentauswahl ",4);
+		$query=mysql_query($sql,$GUI->database->dbConn);
+		if ($query==0) { $GUI->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+		while($rs=mysql_fetch_assoc($query)){
+			$dokauswahlen[] = $rs;
+		}
+		return $dokauswahlen;
+	};
+	
 	$this->Suchparameter_loggen = function($formvars, $stelle_id, $user_id) use ($GUI){
 		$sql ='INSERT INTO u_consumeNachweise SELECT ';
 		$sql.='"'.$formvars['suchantrnr'].'", ';
@@ -429,7 +464,7 @@
     # Suchparameter in Ordnung
     # Recherchieren nach den Nachweisen
 		if($GUI->formvars['such_andere_art'] != NULL)$GUI->formvars['such_andere_art'] = implode(',', $GUI->formvars['such_andere_art']);
-    $ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['such_andere_art']);
+    $ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnr'],$GUI->formvars['suchfortf'],$GUI->formvars['art_einblenden'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['gueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['such_andere_art'], $GUI->formvars['suchbemerkung']);
     #$GUI->nachweis->getAnzahlNachweise($GUI->formvars['suchpolygon']);
     if($ret!=''){
       # Fehler bei der Recherche im Datenbestand
@@ -678,7 +713,7 @@
       $GUI->loadMap('DataBase');
     }
 		if($_SERVER['REQUEST_METHOD'] == 'GET')$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
-    $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id);
+    $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true);
   	if(!$GUI->formvars['layer_id']){
       $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
       $GUI->formvars['layer_id'] = $layerset[0]['Layer_ID'];
@@ -731,10 +766,13 @@
     
     # Abfragen der Gemarkungen
     $GemeindenStelle=$GUI->Stelle->getGemeindeIDs();
-    $Gemeinde=new gemeinde('',$GUI->pgdatabase);
-    $GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle);
     $Gemarkung=new gemarkung('',$GUI->pgdatabase);
-    $GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'');
+		if($GemeindenStelle == NULL){
+			$GemkgListe=$Gemarkung->getGemarkungListe(NULL, NULL);
+		}
+		else{
+			$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
+		}
         
     # Erzeugen des Formobjektes für die Gemarkungsauswahl
     $GUI->GemkgFormObj=new FormObject("Gemarkung","select",$GemkgListe['GemkgID'],$GUI->formvars['Gemarkung'],$GemkgListe['Bezeichnung'],"1","","",NULL);
@@ -904,9 +942,32 @@
   };
 	
 	$this->rechercheFormAnzeigen = function() use ($GUI){
-    # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
+		# Speichern einer neuen Dokumentauswahl
+		if($GUI->formvars['go_plus'] == 'Dokumentauswahl_speichern'){
+			$GUI->formvars['dokauswahlen'] = $GUI->save_Dokumentauswahl($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars);
+		}
+		# Löschen einer Dokumentauswahl
+		if($GUI->formvars['go_plus'] == 'Dokumentauswahl_löschen'){
+			$GUI->delete_Dokumentauswahl($GUI->formvars['dokauswahlen']);
+			$GUI->formvars['dokauswahl_name'] = '';
+		}
+		# die Namen aller gespeicherten Dokumentauswahlen dieser Rolle laden
+		$GUI->dokauswahlset=$GUI->get_Dokumentauswahl($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, NULL);
+		# Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
     $nachweisSuchParameter=$GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id);
-    $GUI->formvars=array_merge($GUI->formvars,$nachweisSuchParameter);
+		$GUI->formvars=array_merge($GUI->formvars,$nachweisSuchParameter);
+		# die Parameter einer gespeicherten Dokumentauswahl laden
+		if($GUI->formvars['dokauswahlen'] != ''){
+			$GUI->selected_dokauswahlset = $GUI->get_Dokumentauswahl($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars['dokauswahlen']);
+			$GUI->formvars['dokauswahl_name'] = $GUI->selected_dokauswahlset[0]['name'];			
+			$GUI->formvars['suchffr'] = $GUI->selected_dokauswahlset[0]['ffr'];
+			$GUI->formvars['suchkvz'] = $GUI->selected_dokauswahlset[0]['kvz'];
+			$GUI->formvars['suchgn'] = $GUI->selected_dokauswahlset[0]['gn'];
+			if($GUI->selected_dokauswahlset[0]['andere'] != ''){
+				$GUI->formvars['suchan'] = 1;
+				$GUI->formvars['such_andere_art'] = $GUI->selected_dokauswahlset[0]['andere'];
+			}
+		}
     # erzeugen des Formularobjektes für Antragsnr
     $GUI->FormObjAntr_nr=$GUI->getFormObjAntr_nr($GUI->formvars['suchantrnr']);    
     # Wenn eine oid in formvars übergeben wurde ist es eine Änderung, sonst Neueingabe
@@ -923,10 +984,13 @@
 			
 	# Abfragen der Gemarkungen
     $GemeindenStelle=$GUI->Stelle->getGemeindeIDs();
-    $Gemeinde=new gemeinde('',$GUI->pgdatabase);
-    $GemListe=$Gemeinde->getGemeindeListe($GemeindenStelle);
     $Gemarkung=new gemarkung('',$GUI->pgdatabase);
-    $GemkgListe=$Gemarkung->getGemarkungListe($GemListe['ID'],'');
+		if($GemeindenStelle == NULL){
+			$GemkgListe=$Gemarkung->getGemarkungListe(NULL, NULL);
+		}
+		else{
+			$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
+		}
     # Erzeugen des Formobjektes für die Gemarkungsauswahl
     $GUI->GemkgFormObj=new FormObject("suchgemarkung","select",$GemkgListe['GemkgID'],$GUI->formvars['suchgemarkung'],$GemkgListe['Bezeichnung'],"1","","",NULL);
 		$GUI->GemkgFormObj->insertOption('',0,'--Auswahl--',0);
@@ -944,7 +1008,7 @@
       $GUI->user->rolle->saveDrawmode($GUI->formvars['always_draw']);
     }
 	
-    $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id);
+    $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true);
     # Spaltenname und from-where abfragen
   	if(!$GUI->formvars['layer_id']){
       $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);

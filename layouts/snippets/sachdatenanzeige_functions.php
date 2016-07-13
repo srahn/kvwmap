@@ -134,6 +134,7 @@ include('funktionen/input_check_functions.php');
   		}
   	}
   	currentform.go.value = 'neuer_Layer_Datensatz_speichern';
+		document.getElementById('go_plus').disabled = true;
   	overlay_submit(currentform, false);
 	}
 
@@ -175,7 +176,7 @@ include('funktionen/input_check_functions.php');
   			return;
   		}
 			if(document.getElementsByName(form_fields[i])[0] != undefined){
-				data_r += '&'+form_fields[i]+'='+document.getElementsByName(form_fields[i])[0].value;
+				//data_r += '&'+form_fields[i]+'='+document.getElementsByName(form_fields[i])[0].value;		// kann evtl. weg
 			}
   	}
   	data = 'go=Sachdaten_speichern&reload='+reload+'&selected_layer_id='+layer_id+'&fromobject='+fromobject+'&targetobject='+targetobject+'&targetlayer_id='+targetlayer_id+'&targetattribute='+targetattribute+'&data='+data+'&form_field_names='+form_fieldstring+'&embedded=true' + data_r;
@@ -208,7 +209,7 @@ include('funktionen/input_check_functions.php');
   			return;
   		}
   		if(document.getElementsByName(form_fields[i])[0] != undefined){
-  			data_r += '&'+form_fields[i]+'='+document.getElementsByName(form_fields[i])[0].value;
+  			//data_r += '&'+form_fields[i]+'='+document.getElementsByName(form_fields[i])[0].value;			// kann evtl. weg
   		}
   	}
   	data = 'go=neuer_Layer_Datensatz_speichern&reload='+reload+'&selected_layer_id='+layer_id+'&fromobject='+fromobject+'&targetobject='+targetobject+'&targetlayer_id='+targetlayer_id+'&targetattribute='+targetattribute+'&data='+data+'&form_field_names='+form_fieldstring+'&embedded=true' + data_r;
@@ -269,7 +270,7 @@ include('funktionen/input_check_functions.php');
 		for(i = 0; i < attributenamesarray.length; i++){
 			if(document.getElementById(attributenamesarray[i]+'_'+k) != undefined){
 				attributenames += attributenamesarray[i] + '|';
-				attributevalues += document.getElementById(attributenamesarray[i]+'_'+k).value + '|';
+				attributevalues += encodeURIComponent(document.getElementById(attributenamesarray[i]+'_'+k).value) + '|';
 			}
 			else if(attributenamesarray[i] == geom_attribute ){	// wenn es das Geometrieattribut ist, handelt es sich um eine Neuerfassung --> aktuelle Geometrie nehmen
 				if(document.GUI.loc_x != undefined && document.GUI.loc_x.value != ''){		// Punktgeometrie
@@ -381,7 +382,11 @@ include('funktionen/input_check_functions.php');
 	daten_export = function(layer_id, anzahl, format){
 		currentform.all.value = document.getElementById('all_'+layer_id).value;
 		if(currentform.all.value || check_for_selection(layer_id)){				// entweder alle gefundenen oder die ausgewaehlten
-			currentform.anzahl.value = anzahl;
+			var option = document.createElement("option");
+			option.text = anzahl;
+			option.value = anzahl;
+			currentform.anzahl.add(option);
+			currentform.anzahl.selectedIndex = currentform.anzahl.options.length-1;
 			currentform.chosen_layer_id.value = layer_id;
 			currentform.go_backup.value = currentform.go.value;
 			currentform.go.value = 'Daten_Export';
@@ -507,9 +512,40 @@ include('funktionen/input_check_functions.php');
 		}
 		overlay_submit(currentform);
 	}
+	
+	switch_edit_all = function(layer_id){
+		if(document.getElementById('edit_all3_'+layer_id).style.display == 'none'){
+			document.getElementById('edit_all1_'+layer_id).style.display = 'none';			
+			document.getElementById('edit_all2_'+layer_id).style.display = '';
+			document.getElementById('edit_all3_'+layer_id).style.display = '';
+			document.getElementById('edit_all4_'+layer_id).style.display = '';
+		}
+		else{
+			document.getElementById('edit_all1_'+layer_id).style.display = '';			
+			document.getElementById('edit_all2_'+layer_id).style.display = 'none';
+			document.getElementById('edit_all3_'+layer_id).style.display = 'none';
+			document.getElementById('edit_all4_'+layer_id).style.display = 'none';
+		}
+	}
+	
+	change_all = function(layer_id, k, attribute){
+		allfield = document.getElementById(attribute+'_'+k);
+		for(var i = 0; i < k; i++){			
+			if(document.getElementById(layer_id+'_'+i).checked){
+				formfield = document.getElementById(attribute+'_'+i);
+				if(formfield.type == 'checkbox'){
+					formfield.checked = allfield.checked;
+				}
+				else{
+					formfield.value = allfield.value;
+				}
+				document.getElementById(attribute+'_'+i).onchange();
+			}
+		}		
+	}
 
 	set_changed_flag = function(flag){
-		flag.value=1;
+		if(flag != undefined)flag.value=1;
 	}
 
 </script>

@@ -6,6 +6,8 @@ include_once(CLASSPATH . 'MyObject.php');
 include_once(CLASSPATH . 'LayerGroup.php');
 include_once(CLASSPATH . 'data_import_export.php');
 include(PLUGINS . 'xplankonverter/model/gml_file.php');
+include(PLUGINS . 'xplankonverter/model/RP_Plan.php');
+include(PLUGINS . 'xplankonverter/model/RP_Bereich.php');
 include(PLUGINS . 'xplankonverter/model/konvertierung.php');
 include(PLUGINS . 'xplankonverter/model/regel.php');
 include(PLUGINS . 'xplankonverter/model/shapefiles.php');
@@ -42,7 +44,7 @@ switch($this->go){
 
   case 'build_gml' : {
     include(PLUGINS . 'xplankonverter/model/build_gml.php');
-
+    
     // Die Verbindung zur Datenbank kvwmapsp ist verfügbar in
     //$this->pgdatabase->dbConn);
     $this->gml_builder = new gml_builder($this->pgdatabase);
@@ -61,7 +63,7 @@ switch($this->go){
 
     // Einbindung des Views
     $this->main = PLUGINS . 'xplankonverter/view/convert.php';
-
+    
     $this->initialData = array(
       'config' => array(
         'active' => 'step1',
@@ -91,7 +93,70 @@ switch($this->go){
     $this->output();
   } break;
 
-  case 'xplankonverter_shapefiles_index' : {
+  /*
+  * Anwendungsfall, der aus jeder gml_class einen Layer erzeugt.
+  */
+  /*
+  case 'xplankonverter_xplan_classes' : {
+    # get layerGroupId or create a group if not exists
+    $layer_group_id = 12;
+
+    $gml_classes = getGMLClasses();
+
+    foreach($gml_classes AS $gml_class) {
+      foreach(array(0 => 'point', 1 => 'line', 2 => 'polygon') AS $geom_type_key => $geom_type_value) {
+        # create layer
+        $this->formvars['Name'] = $gml_class['name'];
+        $this->formvars['Datentyp'] = $shapeFile->get('datatype');
+        $this->formvars['Gruppe'] = $layer_group_id;
+        $this->formvars['pfad'] = 'Select * from ' . $shapeFile->dataTableName() . ' where 1=1';
+        $this->formvars['Data'] = 'the_geom from (select oid, * from ' .
+          $shapeFile->dataSchemaName() . '.' . $shapeFile->dataTableName() .
+          ' where 1=1) as foo using unique oid using srid=' . $shapeFile->get('epsg_code');
+        $this->formvars['maintable'] = $shapeFile->dataTableName();
+        $this->formvars['schema'] = $shapeFile->dataSchemaName();
+        $this->formvars['connection'] = $this->pgdatabase->connect_string;
+        $this->formvars['connectiontype'] = '6';
+        $this->formvars['filteritem'] = 'oid';
+        $this->formvars['tolerance'] = '5';
+        $this->formvars['toleranceunits'] = 'pixels';
+        $this->formvars['epsg_code'] = $shapeFile->get('epsg_code');
+        $this->formvars['querymap'] = '1';
+        $this->formvars['queryable'] = '1';
+        $this->formvars['transparency'] = '75';
+        $this->formvars['postlabelcache'] = '0';
+        $this->formvars['allstellen'] = '2300';
+        $this->formvars['ows_srs'] = 'EPSG:' . $shapeFile->get('epsg_code') . ' EPSG:25833 EPSG:4326 EPSG:2398';
+        $this->formvars['wms_server_version'] = '1.1.0';
+        $this->formvars['wms_format'] = 'image/png';
+        $this->formvars['wms_connectiontimeout'] = '60';
+        $this->formvars['selstellen'] = '1, ' . $this->konvertierung->get('stelle_id') . ', 1, ' . $this->konvertierung->get('stelle_id');
+        $this->LayerAnlegen();
+
+
+        # Ordne layer zur Stelle
+        $this->Stellenzuweisung(
+          array($shapeFile->get('layer_id')),
+          array($this->konvertierung->get('stelle_id'))
+        );
+
+        # Füge eine Klasse zum neuen Layer hinzu.
+        $this->formvars['class_name'] = 'alle';
+        $this->formvars['class_id'] = $this->Layereditor_KlasseHinzufuegen();
+
+        # Füge einen Style zur Klasse hinzu
+        $this->add_style();
+
+      }
+    }
+  #}  end of upload files
+  $this->main = '../../plugins/xplankonverter/view/shapefiles.php';
+      
+   
+    $this->output();
+  } break;
+*/
+  case 'xplankonverter_shapefiles_index': {
     if ($this->formvars['konvertierung_id'] == '') {
       $this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
       $this->main = 'Hinweis.php';
@@ -120,7 +185,7 @@ switch($this->go){
           foreach($uploaded_files AS $uploaded_file) {
             if ($uploaded_file['extension'] == 'dbf' and $uploaded_file['state'] != 'ignoriert') {
 
-              # delete existing shape file
+              # delete existing shape file 
               $shapeFile = new ShapeFile($this, 'xplankonverter', 'shapefiles');
               $shapeFile = $shapeFile->find_where("
                 filename = '" . $uploaded_file['filename'] . "' AND
@@ -239,9 +304,9 @@ switch($this->go){
       $this->konvertierung = new Konvertierung($this, 'xplankonverter', 'konvertierungen');
       $this->konvertierung->find_by('id', $this->formvars['konvertierung_id']);
       if (isInStelleAllowed($this->Stelle->id, $this->konvertierung->get('stelle_id'))) {
-        if ($this->konvertierung->get('status') == Konvertierung::$STATUS[1]) {
+        if ($this->konvertierung->get('status') == Konvertierung::$STATUS['ERSTELLT']) {
           // set status
-          $this->konvertierung->set('status', Konvertierung::$STATUS[2]);
+          $this->konvertierung->set('status', Konvertierung::$STATUS['IN_VALIDIERUNG']);
           $this->konvertierung->update();
           $validator = new Validator();
           $validator->validateKonvertierung(
@@ -275,93 +340,181 @@ switch($this->go){
     }
   } break;
 
-  case 'xplankonverter_konvertierungen_execute': {
-    include(PLUGINS . 'xplankonverter/model/build_gml.php');
-    if ($this->formvars['konvertierung_id'] == '') {
-      $this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
-      $this->main = 'Hinweis.php';
-    }
-    else {
-      $this->konvertierung = new Konvertierung($this, 'xplankonverter', 'konvertierungen');
-      $this->konvertierung->find_by('id', $this->formvars['konvertierung_id']);
-      if (isInStelleAllowed($this->Stelle->id, $this->konvertierung->get('stelle_id'))) {
-        if ($this->konvertierung->get('status') == 'validiert') {
-          // Status setzen
-          $this->konvertierung->set('status', Konvertierung::$STATUS[5]);
-          $this->konvertierung->update();
-          // Seite updaten
-          $this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
-          //
-          // Status setzen
-          $this->konvertierung->set('status', Konvertierung::$STATUS[5]);
-          $this->konvertierung->update();
+	case 'xplankonverter_konvertierung_ausfuehren' : {
+		include(PLUGINS . 'xplankonverter/model/build_gml.php');
+		if ($this->formvars['konvertierung_id'] == '') {
+			$this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+			$this->main = 'Hinweis.php';
+		}
+		else {
+			$this->konvertierung = new Konvertierung($this, 'xplankonverter', 'konvertierungen');
+			$this->konvertierung->find_by('id', $this->formvars['konvertierung_id']);
+			if (isInStelleAllowed($this->Stelle->id, $this->konvertierung->get('stelle_id'))) {
+				if ($this->konvertierung->get('status') == Konvertierung::$STATUS['VALIDIERUNG_OK']) {
+					// Status setzen
+					$this->konvertierung->set('status', Konvertierung::$STATUS['IN_KONVERTIERUNG']);
+					$this->konvertierung->update();
+					// Seite updaten
+					$this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
+					//
+					// Status setzen
+					$this->konvertierung->set('status', Konvertierung::$STATUS['IN_KONVERTIERUNG']);
+					$this->konvertierung->update();
 
-          // XPlan-GML ausgeben
-          $this->gml_builder = new Gml_builder($this->pgdatabase);
-          $gml_id = $this->gml_builder->findRPPlanByKonvertierung($this->konvertierung);
-          $gmlString = $this->gml_builder->build_gml($gml_id);
-          $this->gml_builder->saveGML($gmlString, XPLANKONVERTER_SHAPE_PATH . $this->konvertierung->get('id') . '/xplan_' . $this->konvertierung->get('id') . '.gml');
-          //$this->gml_builder->saveGML($gmlString, PLUGINS . 'xplankonverter/xplan_' . $this->konvertierung->get('id') . '.gml');
+					// XPlan-GML ausgeben
+					$this->gml_builder = new Gml_builder($this->pgdatabase);
+					$this->plan = new RP_Plan($this);
+					$this->plan->find_by('konvertierung_id', $this->konvertierung->get('id'));
+//					 $bereiche = new RP_Bereich($this);
+//					 $bereiche->find_by('gehoertzuplan', $this->plan->get('gml_id'));
+//					 $this->plan->bereiche = $bereiche;
 
-          // Status setzen
-          $this->konvertierung->set('status', Konvertierung::$STATUS[6]);
-          $this->konvertierung->update();
+					$this->gml_builder->build_gml($this->konvertierung, $this->plan);
+					$this->gml_builder->save(XPLANKONVERTER_SHAPE_PATH . $this->konvertierung->get('id') . '/xplan_' . $this->konvertierung->get('id') . '.gml');
 
-          $this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
-        } else {
-          $this->Hinweis = 'Die ausgewählte Konvertierung muss zuerst validiert werden.';
-          $this->main = 'Hinweis.php';
-        }
-      }
-    }
-    $this->output();
-  } break;
+					// Status setzen
+					$this->konvertierung->set('status', Konvertierung::$STATUS['KONVERTIERUNG_OK']);
+					$this->konvertierung->update();
 
-  case 'xplankonverter_konvertierung_loeschen' : {
-    $konvertierung = new Konvertierung($this, 'xplankonverter', 'konvertierungen');
-    $konvertierung->find_by('id', $this->formvars['konvertierung_id']);
+					$this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
+				} else {
+					$this->Hinweis = 'Die ausgewählte Konvertierung muss zuerst validiert werden.';
+					$this->main = 'Hinweis.php';
+				}
+			}
+		}
+		$this->output();
+	} break;
 
-    # Lösche gml-Datei
-    $gml_file = new gml_file(XPLANKONVERTER_SHAPE_PATH . $konvertierung->get('id') . '/xplan_' . $konvertierung->get('id') . '.gml');
-    $msg = 'Lösche gml file: '. $gml_file->filename;
-    $gml_file->delete();
-    
-    # Lösche Regeln
-    $regeln = $konvertierung->getRegeln();
-    $msg .= 'Regeln: '. print_r($regeln);
+	case 'xplankonverter_konvertierung_ausfuehren' : {
+		include(PLUGINS . 'xplankonverter/model/build_gml.php');
+		if ($this->formvars['konvertierung_id'] == '') {
+			$this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+			$this->main = 'Hinweis.php';
+		}
+		else {
+			$this->konvertierung = new Konvertierung($this, 'xplankonverter', 'konvertierungen');
+			$this->konvertierung->find_by('id', $this->formvars['konvertierung_id']);
+			if (isInStelleAllowed($this->Stelle->id, $this->konvertierung->get('stelle_id'))) {
+				if ($this->konvertierung->get('status') == Konvertierung::$STATUS['VALIDIERUNG_OK']) {
+					// Status setzen
+					$this->konvertierung->set('status', Konvertierung::$STATUS['IN_KONVERTIERUNG']);
+					$this->konvertierung->update();
+					// Seite updaten
+					$this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
+					//
+					// Status setzen
+					$this->konvertierung->set('status', Konvertierung::$STATUS['IN_KONVERTIERUNG']);
+					$this->konvertierung->update();
+					// XPlan-GML ausgeben
+					$this->gml_builder = new Gml_builder($this->pgdatabase);
+					$this->plan = new RP_Plan($this);
+					$this->plan->find_by('konvertierung_id', $this->konvertierung->get('id'));
+//					 $bereiche = new RP_Bereich($this);
+//					 $bereiche->find_by('gehoertzuplan', $this->plan->get('gml_id'));
+//					 $this->plan->bereiche = $bereiche;
+					$this->gml_builder->build_gml($this->konvertierung, $this->plan);
+					$this->gml_builder->save(XPLANKONVERTER_SHAPE_PATH . $this->konvertierung->get('id') . '/xplan_' . $this->konvertierung->get('id') . '.gml');
+					// Status setzen
+					$this->konvertierung->set('status', Konvertierung::$STATUS['KONVERTIERUNG_OK']);
+					$this->konvertierung->update();
+					$this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
+				} else {
+					$this->Hinweis = 'Die ausgewählte Konvertierung muss zuerst validiert werden.';
+					$this->main = 'Hinweis.php';
+				}
+			}
+		}
+		$this->output();
+	} break;
 
-    # Lösche Layer
-    #$shapeFile->deleteLayer();
+	case 'xplankonverter_konvertierung_ausfuehren_alt' : {
+		$response = array(
+			'success' => true,
+			'msg' => 'Konvertierung erfolgreich ausgeführt.'
+		);
+		header('Content-Type: application/json');
+		echo json_encode($response);
+	} break;
 
-    # Lösche Shapes
-    #$shapeFile->deleteDataTable();
-    #$shapeFile->delete();
+	case 'xplankonverter_konvertierungen_execute': {
+		include(PLUGINS . 'xplankonverter/model/build_gml.php');
+		if ($this->formvars['konvertierung_id'] == '') {
+			$this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+			$this->main = 'Hinweis.php';
+		}
+		else {
+			$this->konvertierung = new Konvertierung($this, 'xplankonverter', 'konvertierungen');
+			$this->konvertierung->find_by('id', $this->formvars['konvertierung_id']);
+			if (isInStelleAllowed($this->Stelle->id, $this->konvertierung->get('stelle_id'))) {
+				if ($this->konvertierung->get('status') == 'validiert') {
+					// Status setzen
+					$this->konvertierung->set('status', Konvertierung::$STATUS[5]);
+					$this->konvertierung->update();
+					// Seite updaten
+					$this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
+					//
+					// Status setzen
+					$this->konvertierung->set('status', Konvertierung::$STATUS[5]);
+					$this->konvertierung->update();
+					// XPlan-GML ausgeben
+					$this->gml_builder = new Gml_builder($this->pgdatabase);
+					$gml_id = $this->gml_builder->findRPPlanByKonvertierung($this->konvertierung);
+					$gmlString = $this->gml_builder->build_gml($gml_id);
+					$this->gml_builder->saveGML($gmlString, XPLANKONVERTER_SHAPE_PATH . $this->konvertierung->get('id') . '/xplan_' . $this->konvertierung->get('id') . '.gml');
+					//$this->gml_builder->saveGML($gmlString, PLUGINS . 'xplankonverter/xplan_' . $this->konvertierung->get('id') . '.gml');
+					// Status setzen
+					$this->konvertierung->set('status', Konvertierung::$STATUS[6]);
+					$this->konvertierung->update();
+					$this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
+				} else {
+					$this->Hinweis = 'Die ausgewählte Konvertierung muss zuerst validiert werden.';
+					$this->main = 'Hinweis.php';
+				}
+			}
+		}
+		$this->output();
+	} break;
 
-    # Lösche Bereiche
-    # Lösche Plan
-    # Lösche Regel
+	case 'xplankonverter_konvertierung_loeschen' : {
+		$konvertierung = new Konvertierung($this, 'xplankonverter', 'konvertierungen');
+		$konvertierung->find_by('id', $this->formvars['konvertierung_id']);
+		# Lösche gml-Datei
+		$gml_file = new gml_file(XPLANKONVERTER_SHAPE_PATH . $konvertierung->get('id') . '/xplan_' . $konvertierung->get('id') . '.gml');
+		$msg = 'Lösche gml file: '. $gml_file->filename;
+		$gml_file->delete();
+	
+		# Lösche Regeln
+		$regeln = $konvertierung->getRegeln();
+		$msg .= 'Regeln: '. print_r($regeln);
+		# Lösche Layer
+		#$shapeFile->deleteLayer();
+		# Lösche Shapes
+		#$shapeFile->deleteDataTable();
+		#$shapeFile->delete();
+		# Lösche Bereiche
+		# Lösche Plan
+		# Lösche Regel
+		# Lösche Konvertierung
+		#$konvertierung->delete();
+		$response = array(
+			'success' => true,
+			'msg' => 'Konvertierung erfolgreich gelöscht. ' . $msg
+		);
+		header('Content-Type: application/json');
+		echo json_encode($response);
+	} break;
 
-    # Lösche Konvertierung
-    #$konvertierung->delete();
+	case 'home' : {
+		// Einbindung des Views
+		$this->main=PLUGINS . 'xplankonverter/view/home.php';
+		$this->output();
+	} break;
 
-    $response = array(
-      'success' => true,
-      'msg' => 'Konvertierung erfolgreich gelöscht. ' . $msg
-    );
-    header('Content-Type: application/json');
-    echo json_encode($response);
-  } break;
+	default : {
+		$this->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
+	}
 
-  case 'home' : {
-    // Einbindung des Views
-    $this->main=PLUGINS . 'xplankonverter/view/home.php';
-    $this->output();
-
-  } break;
-
-  default : {
-    $this->goNotExecutedInPlugins = true;    // in diesem Plugin wurde go nicht ausgeführt
-  }
 }
 
 function isInStelleAllowed($guiStelleId, $requestStelleId) {

@@ -90,7 +90,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
               case 'indiv_nr' : { 
 								if($this->formvars['suchgemarkung'] != '') echo ' in Gemarkung: '.$this->formvars['suchgemarkung'];
 								if($this->formvars['suchflur'] != '') echo ' in Flur: '.str_pad($this->formvars['suchflur'],3,'0',STR_PAD_LEFT);
-                if($this->formvars['suchstammnr'] != '')echo ' mit Antragsnummer: '.str_pad(intval($this->formvars['suchstammnr']),ANTRAGSNUMMERMAXLENGTH,'0',STR_PAD_LEFT);
+                if($this->formvars['suchstammnr'] != '')echo ' mit Antragsnummer: '.$this->formvars['suchstammnr'];
                 if($this->formvars['suchrissnr'] != '')echo ' mit Rissnummer: '.$this->formvars['suchrissnr'];
                 if($this->formvars['suchfortf'] != '')echo ' mit Fortführung: '.$this->formvars['suchfortf'];
 								if($this->formvars['datum'] != '')echo ' von '.$this->formvars['datum'];
@@ -177,7 +177,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 			}else echo $bgcolor;
             ?>
 			"> 
-          <td><div align="center"> 
+          <td align="left"> 
               <input type="checkbox" name="id[<?php echo $this->nachweis->Dokumente[$i]['id']; ?>]" value="<?php echo $this->nachweis->Dokumente[$i]['id']; ?>"<?php 
         # Püfen ob das Dokument markiert werden soll
                 
@@ -192,8 +192,11 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
             ?> checked<?php 
           }
         }
-        ?>>
-            </div></td>
+        ?>>	
+				<? if($this->nachweis->Dokumente[$i]['bemerkungen'] != ''){ ?>
+					<img src="<? echo GRAPHICSPATH.'emblem-important.png'; ?>" title="Bemerkungen: <? echo $this->nachweis->Dokumente[$i]['bemerkungen']; ?>">
+				<? } ?>
+          </td>
           <td><?php echo $this->formvars['id']=$this->nachweis->Dokumente[$i]['id']; ?></td>
           <td><div align="center"><?php echo $this->formvars['flurid']=$this->nachweis->Dokumente[$i]['flurid']; ?></div></td>
           <? if(NACHWEIS_PRIMARY_ATTRIBUTE != 'rissnummer'){ ?>  

@@ -1165,9 +1165,9 @@ class gemarkung {
     return $rs['GemeindeSchl'];
   }
 
-  function getGemarkungListe($GemID,$GemkgID) {
+  function getGemarkungListe($ganzeGemID, $GemkgID) {
     # Abfragen der Gemarkungen mit seinen GemeindeNamen
-    $Liste=$this->database->getGemeindeListeByGemIDByGemkgSchl($GemID,$GemkgID);
+    $Liste=$this->database->getGemeindeListeByGemIDByGemkgSchl($ganzeGemID, $GemkgID);
     return $Liste;
   }
   
@@ -1409,16 +1409,16 @@ class grundbuch {
   	return $this->database->getGrundbuchbezirksliste();
   }
 
-  function getGrundbuchbezirkslisteByGemkgIDs($gemkg_ids){
-  	return $this->database->getGrundbuchbezirkslisteByGemkgIDs($gemkg_ids);
+  function getGrundbuchbezirkslisteByGemkgIDs($ganze_gemkg_ids, $eingeschr_gemkg_ids){
+  	return $this->database->getGrundbuchbezirkslisteByGemkgIDs($ganze_gemkg_ids, $eingeschr_gemkg_ids);
   }
   
   function getGrundbuchblattliste($bezirk){
   	return $this->database->getGrundbuchblattliste($bezirk);
   }
 	
-	function getGrundbuchblattlisteByGemkgIDs($bezirk, $gemkg_ids){
-  	return $this->database->getGrundbuchblattlisteByGemkgIDs($bezirk, $gemkg_ids);
+	function getGrundbuchblattlisteByGemkgIDs($bezirk, $ganze_gemkg_ids, $eingeschr_gemkg_ids){
+  	return $this->database->getGrundbuchblattlisteByGemkgIDs($bezirk, $ganze_gemkg_ids, $eingeschr_gemkg_ids);
   }
 }
 
@@ -1880,10 +1880,11 @@ class flurstueck {
 				$person_gml_ids[] = $Eigentuemerliste[$e]->gml_id;
 			}
 		}
-		$versionen= $this->database->getVersionen('ax_flurstueck', array($this->gml_id));
-		$versionen= array_merge($versionen, $this->database->getVersionen('ax_buchungsstelle', $buchungsstelle_gml_ids));
-		$versionen= array_merge($versionen, $this->database->getVersionen('ax_namensnummer', $namensnummer_gml_ids));
-		$versionen= array_merge($versionen, $this->database->getVersionen('ax_person', $person_gml_ids));
+		$versionen= $this->database->getVersionen('ax_flurstueck', array($this->gml_id), NULL);
+		$flst_beginnt = $versionen[0]['beginnt'];
+		$versionen= array_merge($versionen, $this->database->getVersionen('ax_buchungsstelle', $buchungsstelle_gml_ids, $flst_beginnt));
+		$versionen= array_merge($versionen, $this->database->getVersionen('ax_namensnummer', $namensnummer_gml_ids, $flst_beginnt));
+		$versionen= array_merge($versionen, $this->database->getVersionen('ax_person', $person_gml_ids, $flst_beginnt));
 		# sortieren
 		usort($versionen, function($a, $b){return DateTime::createFromFormat('d.m.Y H:i:s', $a['beginnt']) > DateTime::createFromFormat('d.m.Y H:i:s', $b['beginnt']);});
 		# gleiche beginnts rausnehmen, Anlässe zusammenfassen
@@ -1928,7 +1929,7 @@ class flurstueck {
     $this->Zaehler=intval($rs['zaehler']);
     $this->Nenner=intval($rs['nenner']);
     $this->FlurstNr=$this->Zaehler;
-    $this->Flurstkennz_alt = $rs['gemkgschl'].'-'.$rs['flurnr'].'-'.str_pad($rs['zaehler'], 5, '0', STR_PAD_LEFT).'/'.str_pad($rs['nenner'], 3, '0', STR_PAD_LEFT).'.00';
+    $this->Flurstkennz_alt = $rs['gemkgschl'].'-'.$rs['flurnr'].'-'.str_pad($rs['zaehler'], 5, '0', STR_PAD_LEFT).'/'.str_pad($rs['nenner'], 3, '0', STR_PAD_LEFT);
     if ($this->Nenner!='') { $this->FlurstNr.="/".$this->Nenner; }
     $this->KreisID=$rs['kreisid'];
     $this->KreisName=$rs['kreisname'];
@@ -2060,7 +2061,7 @@ class flurstueck {
     return $Flurstuecke;
   }
 
-  function getNamen($formvars,$gemkgschl) {
+  function getNamen($formvars,$ganze_gemkg_ids, $eingeschr_gemkg_ids) {
     if ($formvars['name1']=='' AND $formvars['name2']=='' AND $formvars['name3']=='' AND $formvars['name4']=='' AND $formvars['name5']=='' AND $formvars['name6']=='' AND $formvars['name7']=='' AND $formvars['name8']=='') {
       $ret[0]=1;
       $ret[1]='<br>Geben Sie mindestens einen Suchbegriff ein!';
@@ -2069,7 +2070,7 @@ class flurstueck {
     	if($blatt != ''){
     		$blatt = str_pad($blatt, 5, '0', STR_PAD_LEFT);
     	}
-      $ret=$this->database->getNamen($formvars, $gemkgschl);
+      $ret=$this->database->getNamen($formvars, $ganze_gemkg_ids, $eingeschr_gemkg_ids);
       if ($ret[0]) {
         $ret[1]='<br>Fehler bei der Abfrage der Eigentümernamen.'.$ret[1];
       }

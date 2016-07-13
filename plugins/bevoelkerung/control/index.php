@@ -1,4 +1,4 @@
-<?
+<?php
 
 	$this->goNotExecutedInPlugins = false;
 		
@@ -12,9 +12,21 @@
 			$this->main = PLUGINS.'bevoelkerung/view/bevoelkerung_bericht.php';
 			$this->output();
 		}break;
-		
+
+		case 'bevoelkerung_import_prognose' : {
+			include(PLUGINS.'bevoelkerung/model/prognose.php');
+			$prog = new prognose($this->pgdatabase);
+			$prog->import();
+		} break;
+
+		case 'bevoelkerung_transpose_prognose' : {
+			include(PLUGINS.'bevoelkerung/model/prognose.php');
+			$prog = new prognose($this->pgdatabase);
+			$prog->transpose();
+		} break;
+
 		default : {
-			$this->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgef¸hrt
+			$this->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgef√ºhrt
 		}
 	}
 	
