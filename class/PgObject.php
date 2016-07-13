@@ -58,9 +58,8 @@ class PgObject {
   }
 
   /*
-  * Search for an record in the database
-  * by the given where clause
-  * @ return an object with this record
+  * Search for an record in the database by the given where clause
+  * @ return an array with all found object
   */
   function find_where($where) {
     $sql = "
@@ -73,11 +72,11 @@ class PgObject {
     ";
     $this->debug('<p>sql: ' . $sql);
     $query = pg_query($this->database->dbConn, $sql);
-    if (pg_num_rows($query) == 0)
-      $this->data = array();
-    else
-      $this->data = pg_fetch_assoc($query);
-    return $this;
+		$result = array();
+		while($this->data = pg_fetch_assoc($query)) {
+			$result[] = clone $this;
+		}
+    return $result;
   }
 
   function getAttributes() {

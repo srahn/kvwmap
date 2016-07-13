@@ -187,11 +187,12 @@ switch($this->go){
 
               # delete existing shape file 
               $shapeFile = new ShapeFile($this, 'xplankonverter', 'shapefiles');
-              $shapeFile = $shapeFile->find_where("
+              $shapeFiles = $shapeFile->find_where("
                 filename = '" . $uploaded_file['filename'] . "' AND
                 konvertierung_id = '" . $this->konvertierung->get('id') . "' AND
                 stelle_id = " . $this->konvertierung->get('stelle_id')
               );
+							$shapeFile = $shapeFiles[0]; # es kann nur eins geben
               if (!empty($shapeFile->data)) {
                 $this->debug('<p>Lösche gefundenes shape file.');
                 $shapeFile->deleteLayer();
@@ -481,12 +482,14 @@ switch($this->go){
 		$konvertierung->find_by('id', $this->formvars['konvertierung_id']);
 		# Lösche gml-Datei
 		$gml_file = new gml_file(XPLANKONVERTER_SHAPE_PATH . $konvertierung->get('id') . '/xplan_' . $konvertierung->get('id') . '.gml');
-		$msg = 'Lösche gml file: '. $gml_file->filename;
+		$msg = "\nLösche gml file: ". $gml_file->filename;
 		$gml_file->delete();
 	
 		# Lösche Regeln
 		$regeln = $konvertierung->getRegeln();
-		$msg .= 'Regeln: '. print_r($regeln);
+		foreach($regeln AS $regel) {
+			$msg .= "\nLösche Regel ". $regel->get('name') . ' für Klasse ' . $regel->get('class_name');
+		}
 		# Lösche Layer
 		#$shapeFile->deleteLayer();
 		# Lösche Shapes
