@@ -406,44 +406,47 @@ class data_import_export {
   function shp_import_speichern($formvars, $database){
    	$this->formvars = $formvars;
     if(file_exists(UPLOADPATH.$this->formvars['dbffile'])){
+			$importfile = basename($this->formvars['dbffile'], '.dbf');
 			include_(CLASSPATH.'dbf.php');
       $this->dbf = new dbf();
       $this->dbf->header = $this->dbf->get_dbf_header(UPLOADPATH.$this->formvars['dbffile']);
       $this->dbf->header = $this->dbf->get_sql_types($this->dbf->header);
+			$sql = 'SELECT ';
       for($i = 0; $i < count($this->dbf->header); $i++){
-        if($i > 0){
-          $alterstring .= ';';
-        }
         if($this->formvars['check_'.$this->dbf->header[$i][0]]){
-          $alterstring .= $this->formvars['dbf_name_'.$this->dbf->header[$i][0]].' as '.strtolower($this->formvars['sql_name_'.$this->dbf->header[$i][0]]).' '.$this->formvars['sql_type_'.$this->dbf->header[$i][0]];
-          if($this->formvars['primary_key'] == $this->dbf->header[$i][0]){
-            $alterstring .= ' PRIMARY KEY';
-          }
-        }
-        else{
-          $alterstring .= $this->formvars['dbf_name_'.$this->dbf->header[$i][0]].' as NULL';
+					if($this->formvars['primary_key'] != $this->formvars['sql_name_'.$this->dbf->header[$i][0]]){
+						if($i > 0)$sql .= ', ';
+						#$sql .= 'CAST ('.$this->formvars['dbf_name_'.$this->dbf->header[$i][0]].' AS '.$this->formvars['sql_type_'.$this->dbf->header[$i][0]].') as '.strtolower($this->formvars['sql_name_'.$this->dbf->header[$i][0]]);
+						$sql .= $this->formvars['dbf_name_'.$this->dbf->header[$i][0]].' as '.strtolower($this->formvars['sql_name_'.$this->dbf->header[$i][0]]);
+					}
         }
       }
-      if($this->formvars['table_option'] == '-u') {
-        $command = POSTGRESBINPATH.'shp2pgsql -g the_geom -A "'.$alterstring.'" -a ';
-      }
-      else {
-        $command = POSTGRESBINPATH.'shp2pgsql -g the_geom -A "'.$alterstring.'" '.$this->formvars['table_option'].' ';
-      }
-      if($this->formvars['srid'] != ''){
-        $command .= '-s '.$this->formvars['srid'].' ';
-      }
-      if($this->formvars['gist'] != ''){
-        $command .= '-I ';
-      }
-      if($this->formvars['oids'] != ''){
-        $command .= '-o ';
-      }
-      if($this->formvars['primary_key'] == 'gid'){
-        $command .= '-P ';
-      }
-      $command.= UPLOADPATH.$this->formvars['dbffile'].' '.$this->formvars['table_name'].' > '.UPLOADPATH.$this->formvars['table_name'].'.sql'; 
-      exec($command);
+			$sql .= ' FROM '.$importfile;
+			$options = $this->formvars['table_option'];
+			$options.= ' -nlt PROMOTE_TO_MULTI -lco FID=gid';
+			$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $this->formvars['table_name'], $formvars['epsg'], UPLOADPATH.$importfile.'.shp', $database, NULL, $sql, $options);
+			
+			
+      // if($this->formvars['table_option'] == '-u') {
+        // $command = POSTGRESBINPATH.'shp2pgsql -g the_geom -A "'.$alterstring.'" -a ';
+      // }
+      // else {
+        // $command = POSTGRESBINPATH.'shp2pgsql -g the_geom -A "'.$alterstring.'" '.$this->formvars['table_option'].' ';
+      // }
+      // if($this->formvars['srid'] != ''){
+        // $command .= '-s '.$this->formvars['srid'].' ';
+      // }
+      // if($this->formvars['gist'] != ''){
+        // $command .= '-I ';
+      // }
+      // if($this->formvars['oids'] != ''){
+        // $command .= '-o ';
+      // }
+      // if($this->formvars['primary_key'] == 'gid'){
+        // $command .= '-P ';
+      // }
+      // $command.= UPLOADPATH.$this->formvars['dbffile'].' '.$this->formvars['table_name'].' > '.UPLOADPATH.$this->formvars['table_name'].'.sql'; 
+      // exec($command);
       #echo $command;
       
       # erzeugte SQL-Datei anpassen
@@ -505,25 +508,25 @@ class data_import_export {
         fclose($newsql);
       }
       
-			$command = POSTGRESBINPATH.'psql -f '.UPLOADPATH.$this->formvars['table_name'].'.sql '.$database->dbName.' -U '.$database->user;
-			if($database->passwd != '')$command = 'export PGPASSWORD='.$database->passwd.'; '.$command;
-      exec($command);
-      #echo $command;
+			// $command = POSTGRESBINPATH.'psql -f '.UPLOADPATH.$this->formvars['table_name'].'.sql '.$database->dbName.' -U '.$database->user;
+			// if($database->passwd != '')$command = 'export PGPASSWORD='.$database->passwd.'; '.$command;
+      // exec($command);
+      // #echo $command;
 			
-      $sql = 'SELECT count(*) FROM '.$this->formvars['table_name'];
-      $ret = $database->execSQL($sql,4, 0);
-      if (!$ret[0]) {
-        $count = pg_fetch_array($ret[1]);
-        $alert = 'Import erfolgreich.';
-        if($this->formvars['table_option'] == '-c'){
-        	$alert.= ' Die Tabelle '.$this->formvars['table_name'].' wurde erzeugt.';
-        }
-        $alert .= ' Die Tabelle enthält jetzt '.$count[0].' Datensätze.';
-        showAlert($alert);
-      }
-      else{
-        showAlert('Import fehlgeschlagen.');
-      }
+      // $sql = 'SELECT count(*) FROM '.$this->formvars['table_name'];
+      // $ret = $database->execSQL($sql,4, 0);
+      // if (!$ret[0]) {
+        // $count = pg_fetch_array($ret[1]);
+        // $alert = 'Import erfolgreich.';
+        // if($this->formvars['table_option'] == '-c'){
+        	// $alert.= ' Die Tabelle '.$this->formvars['table_name'].' wurde erzeugt.';
+        // }
+        // $alert .= ' Die Tabelle enthält jetzt '.$count[0].' Datensätze.';
+        // showAlert($alert);
+      // }
+      // else{
+        // showAlert('Import fehlgeschlagen.');
+      // }
     }
   }
   
@@ -669,13 +672,17 @@ class data_import_export {
 		exec($command.'"');
 	}
 	
-	function ogr2ogr_import($schema, $tablename, $epsg, $importfile, $database, $options){
-		$command = 'export PGCLIENTENCODING=LATIN1;'.OGR_BINPATH.'ogr2ogr -f PostgreSQL -lco GEOMETRY_NAME=the_geom -nln '.$tablename.' -a_srs EPSG:'.$epsg.' PG:"dbname='.$database->dbName.' user='.$database->user.' active_schema='.$schema;
+	function ogr2ogr_import($schema, $tablename, $epsg, $importfile, $database, $layer, $sql = NULL, $options = NULL){
+		$command = 'export PGCLIENTENCODING=LATIN1;'.OGR_BINPATH.'ogr2ogr ';
+		if($options != NULL)$command.= $options;
+		$command.= ' -f PostgreSQL -lco GEOMETRY_NAME=the_geom -nln '.$tablename.' -a_srs EPSG:'.$epsg;
+		if($sql != NULL)$command.= ' -sql "'.$sql.'"';
+		$command.= ' PG:"dbname='.$database->dbName.' user='.$database->user.' active_schema='.$schema;
 		if($database->passwd != '')$command.= ' password='.$database->passwd;
 		if($database->port != '')$command.=' port='.$database->port;
 		if($database->host != '') $command .= ' host=' . $database->host;
-		$command .= '" '.$importfile.' '.$options;
-		#echo $command;
+		$command .= '" '.$importfile.' '.$layer;
+		echo $command;
 		exec($command);
 	}
 	

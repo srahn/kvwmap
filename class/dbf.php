@@ -97,13 +97,13 @@ class dbf {
 			    }
 			    else{
 			    	if($dbf_header[$i][2] < 6){
-			    		$dbf_header[$i]['type'] = 'int2';
+			    		$dbf_header[$i]['type'] = 'smallint';
 			    	}
 			    	elseif($dbf_header[$i][2] < 11){
-			    		$dbf_header[$i]['type'] = 'int4';
+			    		$dbf_header[$i]['type'] = 'integer';
 			    	}
 			    	elseif($dbf_header[$i][2] < 20){
-			    		$dbf_header[$i]['type'] = 'int8';
+			    		$dbf_header[$i]['type'] = 'bigint';
 			    	}
 			    	else{
 			    		$dbf_header[$i]['type'] = 'numeric('.$dbf_header[$i][2].',0)';

@@ -22,11 +22,14 @@
 	function save(){
 		if(document.GUI.table_name.value == '' || document.GUI.table_name.value == '<Tabellenname>'){
 			alert('Bitte geben Sie einen Tabellennamen an.')
+			return;
 		}
-		else{
-			document.GUI.go_plus.value = 'speichern';
-			document.GUI.submit();
+		if(document.GUI.epsg.value == ''){
+			alert('Bitte geben Sie einen EPSG-Code an.');
+			return;
 		}
+		document.GUI.go_plus.value = 'speichern';
+		document.GUI.submit();
 	}
   
 //-->
@@ -36,7 +39,7 @@
   <tr align="center"> 
     <td colspan="3"><h2><?php echo $strTitle; ?></h2></td>
   </tr>
-  <? if($this->shape->formvars['zipfile'] == ''){ ?>
+  <? if($this->data_import_export->formvars['zipfile'] == ''){ ?>
   <tr>
   	<td>&nbsp;</td>
   	<td><?php echo $strLoadZipArchieve; ?></td>
@@ -61,19 +64,19 @@
   				<td colspan="4" align="center"><span class="fett">PostgreSQL-Tabelle</span></td>
   			</tr>
   			<tr>
-  				<td colspan="2" align="center"><input name="dbffile" type="text" value="<? echo $this->shape->dbf->file; ?>" readonly></td>
+  				<td colspan="2" align="center"><input name="dbffile" type="text" value="<? echo $this->data_import_export->dbf->file; ?>" readonly></td>
   				<td>&nbsp;</td>
   				<td colspan="4" align="center" height="35"><input name="table_name" type="text" value="<Tabellenname>" size="15" class="input"></td>
   			</tr>
-  			<? for($i = 0; $i < count($this->shape->dbf->header); $i++){ ?>
+  			<? for($i = 0; $i < count($this->data_import_export->dbf->header); $i++){ ?>
 				<tr>
-					<td><input name="dbf_name_<? echo $this->shape->dbf->header[$i][0]; ?>" type="text" value="<? echo $this->shape->dbf->header[$i][0]; ?>" readonly size="20"></td>
-					<td><input name="dbf_type_<? echo $this->shape->dbf->header[$i][0]; ?>" type="text" value="<? echo $this->shape->dbf->header[$i]['type']; ?>" readonly size="10"></td>
-					<td>==></td>
-					<td><input name="check_<? echo $this->shape->dbf->header[$i][0] ?>" type="checkbox" onclick="update_inputs('<? echo $this->shape->dbf->header[$i][0]; ?>');" checked></td>
-					<td><input name="sql_name_<? echo $this->shape->dbf->header[$i][0]; ?>" type="text" value="<? echo $this->shape->dbf->header[$i][0]; ?>" size="20"></td>
-					<td><input name="sql_type_<? echo $this->shape->dbf->header[$i][0]; ?>" type="text" value="<? echo $this->shape->dbf->header[$i]['type']; ?>" size="10"></td>
-					<td><input name="primary_key" id="pkey_<? echo $this->shape->dbf->header[$i][0]; ?>" title="Primärschlüssel" type="radio" value="<? echo $this->shape->dbf->header[$i][0]; ?>"></td>
+					<td><input name="dbf_name_<? echo $this->data_import_export->dbf->header[$i][0]; ?>" type="text" value="<? echo $this->data_import_export->dbf->header[$i][0]; ?>" readonly size="20"></td>
+					<!--td><input name="dbf_type_<? echo $this->data_import_export->dbf->header[$i][0]; ?>" type="text" value="<? echo $this->data_import_export->dbf->header[$i]['type']; ?>" readonly size="10"></td-->
+					<td>&nbsp;&nbsp;==>&nbsp;&nbsp;</td>
+					<td><input name="check_<? echo $this->data_import_export->dbf->header[$i][0] ?>" type="checkbox" onclick="update_inputs('<? echo $this->data_import_export->dbf->header[$i][0]; ?>');" checked></td>
+					<td><input name="sql_name_<? echo $this->data_import_export->dbf->header[$i][0]; ?>" type="text" value="<? echo $this->data_import_export->dbf->header[$i][0]; ?>" size="20"></td>
+					<!--td><input name="sql_type_<? echo $this->data_import_export->dbf->header[$i][0]; ?>" type="text" value="<? echo $this->data_import_export->dbf->header[$i]['type']; ?>" size="10"></td-->
+					<!--td><input name="primary_key" id="pkey_<? echo $this->data_import_export->dbf->header[$i][0]; ?>" title="Primärschlüssel" type="radio" value="<? echo $this->data_import_export->dbf->header[$i][0]; ?>"></td-->
 				</tr>
   			<? } ?>
   		</table>
@@ -88,26 +91,26 @@
   				<td height="30"><span class="fett">Optionen:</span></td>
   			</tr>
   			<tr>
-  				<td><input type="radio" name="table_option" value="-c" checked>Tabelle neu anlegen</td>
+  				<td><input type="radio" name="table_option" value="" checked>Tabelle neu anlegen</td>
   				<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-  				<td>srid:&nbsp;<input type="text" name="srid" size="5" value="<? echo EPSGCODE; ?>"></td>
+  				<td>EPSG-Code:&nbsp;<input type="text" name="epsg" size="5" value=""></td>
   				<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-  				<td><input name="primary_key" type="radio" value="gid" checked>&nbsp;mit gid-Index</td>
+  				<!--td><input name="primary_key" type="radio" value="gid" checked>&nbsp;mit gid-Index</td-->
   			</tr>
   			<tr>
-  				<td><input type="radio" name="table_option" value="-d">Tabelle überschreiben</td>
+  				<td><input type="radio" name="table_option" value="-overwrite">Tabelle überschreiben</td>
   				<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-  				<td><input type="checkbox" name="gist">&nbsp;GiST-Index erzeugen</td>
+					<td></td>
   			</tr>
   			<tr>
-  				<td><input type="radio" name="table_option" value="-a">Daten anhängen</td>
+  				<td><input type="radio" name="table_option" value="-append">Daten anhängen</td>
   				<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-  				<td><input type="checkbox" name="oids" checked>&nbsp;mit oids</td>
+  				<td></td>
   			</tr>
-  			<tr>
-				  <td><input type="radio" name="table_option" value="-u">Daten aktualisieren</td>
+  			<!--tr>
+				  <td><input type="radio" name="table_option" value="-update">Daten aktualisieren</td>
 				  <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-				  </tr>
+				  </tr-->
   		</table>
   	</td>
   	<td>&nbsp;</td>

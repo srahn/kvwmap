@@ -8538,20 +8538,20 @@ class GUI {
 	}	
 
   function shp_import_speichern(){
-		include_(CLASSPATH.'shape.php');
+		include_once (CLASSPATH.'data_import_export.php');
     $this->titel='Shape-Import';
     $this->main='shape_import.php';
-    $this->shape = new shape();
-    $this->shape->shp_import_speichern($this->formvars, $this->pgdatabase);
+    $this->data_import_export = new data_import_export();
+    $this->data_import_export->shp_import_speichern($this->formvars, $this->pgdatabase);
     $this->output();
   }
 
   function shp_import(){
-		include_(CLASSPATH.'shape.php');
+		include_once (CLASSPATH.'data_import_export.php');
     $this->titel='Shape-Import';
     $this->main='shape_import.php';
-    $this->shape = new shape();
-    $this->shape->shp_import($this->formvars);
+		$this->data_import_export = new data_import_export();
+    $this->data_import_export->shp_import($this->formvars);
     $this->output();
   }
 
