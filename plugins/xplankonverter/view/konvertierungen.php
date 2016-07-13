@@ -73,7 +73,7 @@
   <li><a data-toggle='tab' href='#map'>Karte</a></li>
 </ul//-->
 <h2>Konvertierungen</h2>
-<div class="alert alert-success" id="eventsResult">
+<div class="alert alert-success" style="white-space: pre-wrap" id="eventsResult">
     Here is the result of event.
 </div>
 <table

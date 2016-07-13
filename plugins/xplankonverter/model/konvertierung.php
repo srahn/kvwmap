@@ -67,7 +67,7 @@ class Konvertierung extends PgObject {
 
   function getRegeln() {
     $regel = new Regel($this->gui, $this->schema);
-    return $regel->find_by('konvertierung_id', $this->get('id'));
+    return $regel->find_where('konvertierung_id = ' . $this->get('id'));
   }
 
 }
