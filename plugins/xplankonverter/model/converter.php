@@ -31,9 +31,9 @@
 
 class Converter {
 
-  function Converter($structDb, $contentDbConn) {
+  function Converter($structDb, $contentDb) {
     $this->structDb = $structDb;
-    $this->contentDbConn = $contentDbConn;
+    $this->contentDb = (empty($contentDb)) ? $structDb : $contentDb;
   }
 
   function say_hello($msg){
@@ -43,7 +43,7 @@ class Converter {
 
   function findRPPlanByKonvertierung($konvertierung) {
     $sql = "SELECT gml_id FROM gml_classes.rp_plan WHERE konvertierung_id == " . $konvertierung->get('id');
-    $result = pg_query($this->contentDbConn, $sql);
+    $result = pg_query($this->contentDb->dbConn, $sql);
     return pg_fetch_assoc($result)['gml_id'];
   }
 
@@ -57,7 +57,7 @@ class Converter {
           0 AS status
         FROM pg_namespace WHERE nspowner = 16385
     ";
-    $result = pg_query($this->contentDbConn, $sql);
+    $result = pg_query($this->contentDb->dbConn, $sql);
     $data = array();
     while ($konvertierung = pg_fetch_assoc($result)) {
       $data[] = $konvertierung;
@@ -93,7 +93,7 @@ class Converter {
       OR
         r.konvertierung_id = " . $konvertierung_id . "
     ";
-    $result = pg_query($this->contentDbConn, $sql);
+    $result = pg_query($this->contentDb->dbConn, $sql);
      /*while ($row_sql = pg_fetch_row($result)){
       #Regel Ausführen:
      
@@ -126,7 +126,7 @@ class Converter {
     WHERE
       p.konvertierung_id = ". $konvertierung_id . "
     ";
-    $result = pg_query($this->contentDbConn, $sql);
+    $result = pg_query($this->contentDb->dbConn, $sql);
     while ($row_sql = pg_fetch_row($result)){
       $gmlfeature_gmlid[] = $row_sql[0];
       # echo $row_sql[0] . '<br><br>';
@@ -141,7 +141,7 @@ class Converter {
       WHERE
         table_schema = 'gml_classes'
     ";
-    $result = pg_query($this->contentDbConn, $sql);
+    $result = pg_query($this->contentDb->dbConn, $sql);
     while ($row_sql = pg_fetch_row($result)){
       $gmlclasses = $row_sql[0];
     }

@@ -33,7 +33,7 @@ class Gml_builder {
 
   function gml_builder($database) {
     global $debug;
-    $this->debug=$debug;
+    $this->debug = $debug;
     $this->database = $database;
   }
 
@@ -106,16 +106,16 @@ class Gml_builder {
       $sql = "SELECT oid
         FROM pg_class
         WHERE relname = '$gml_className' AND relnamespace = (SELECT oid FROM pg_namespace WHERE nspname = '$contentScheme')";
-      if (!($cur_class = pg_fetch_row(pg_query(PG_CONNECTION, $sql)))) continue;
+      if (!($cur_class = pg_fetch_row(pg_query($this->database->dbConn, $sql)))) continue;
 
       // check, if there is a gml_id field in that relation
       $sql = "SELECT 1 FROM pg_attribute WHERE attrelid = {$cur_class[0]} AND attname = 'gml_id'";
-      if (!pg_fetch_row(pg_query(PG_CONNECTION, $sql))) continue;
+      if (!pg_fetch_row(pg_query($this->database->dbConn, $sql))) continue;
 
       // check, if there is a position field in that relation
       $sql = "SELECT 1 FROM pg_attribute WHERE attrelid = {$cur_class[0]} AND attname = 'position'";
       $position_attr = "";
-      if (pg_fetch_row(pg_query(PG_CONNECTION, $sql))) {
+      if (pg_fetch_row(pg_query($this->database->dbConn, $sql))) {
         // position field exists --> fetch transformed position
         $position_attr = ", st_asgml(position) AS position";
       }
@@ -127,7 +127,7 @@ class Gml_builder {
           $contentScheme.$gml_className AS cl ON b2o.rp_objekt_gml_id = cl.gml_id -- verknuepft bereich2objekt mit leaf class
         WHERE
         p.gml_id = '$plan_id' -- die gml_id vom plan";
-      $gml_objects = pg_query(PG_CONNECTION, $sql);
+      $gml_objects = pg_query($this->database->dbConn, $sql);
 //     $num_rows = pg_num_rows($gml_objects);
 //     echo "$sql ==> $num_rows";
 
