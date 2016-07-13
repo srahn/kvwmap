@@ -9,10 +9,10 @@
     $('#konvertierungen_table')
     .on('load-success.bs.table', function (e, data) {
       result.text('Tabelle erfolgreich geladen.');
-      $('.fa-play').click(
+      $('#konvertierung_ausfuehren').click(
         starteKonvertierung
       );
-      $('.fa-trash').click(
+      $('#konvertierung_loeschen').click(
         loescheKonvertierung
       );
     })
@@ -38,6 +38,28 @@
     location.reload(true);
   };
 
+  // formatter functions
+  function konvertierungFunctionsFormatter(value, row) {
+    console.log('Row',value,row);
+    var funcIsDisabled,
+      disableFrag = ' disabled" onclick="return false';
+    output = '<span class="btn-group" role="group" konvertierung_id="' + value + '">';
+    // enabled by status of konvertierung
+    funcIsDisabled = row.status != "<?php echo Konvertierung::$STATUS['ERSTELLT']; ?>"
+                  && row.status != "<?php echo Konvertierung::$STATUS['IN_ERSTELLUNG']; ?>";
+    output += '<a class="btn btn-link btn-xs xpk-func-btn' + (funcIsDisabled ? disableFrag : '') + '" title="Konvertierung bearbeiten" href="index.php?go=Layer-Suche_Suchen&selected_layer_id=8&operator_konvertierung_id==&value_konvertierung_id=' + value + '"><i class="fa fa-lg fa-pencil"></i></a>';
+    funcIsDisabled = row.status != "<?php echo Konvertierung::$STATUS['ERSTELLT']; ?>";
+    output += '<a class="btn btn-link btn-xs  xpk-func-btn' + (funcIsDisabled ? disableFrag : '') + '" title="Shapefiles bearbeiten" href="index.php?go=xplankonverter_shapefiles_index&konvertierung_id=' + value + '"><i class="fa fa-lg fa-upload"></i></a>';
+    funcIsDisabled = row.status != "<?php echo Konvertierung::$STATUS['ERSTELLT']; ?>";
+    output += '<a class="btn btn-link btn-xs  xpk-func-btn' + (funcIsDisabled ? disableFrag : '') + '" title="Konvertierung validieren" href="index.php?go=xplankonverter_konvertierungen_validate&konvertierung_id=' + value + '"><i class="fa fa-lg fa-check-square-o"></i></a>';
+    funcIsDisabled = row.status != "<?php echo Konvertierung::$STATUS['VALIDIERUNG_OK']; ?>";
+    output += '<a class="btn btn-link btn-xs xpk-func-btn' + (funcIsDisabled ? disableFrag : '') + '" title="Konvertierung ausf&uuml;hren" id="konvertierung_ausfuehren" href="#"><i class="fa fa-lg fa-play"></i></a>';
+    // allways enabled
+    output += '<a class="btn btn-link btn-xs" title="Konvertierung l&ouml;schen" href="#" id="konvertierung_loeschen"><i class="fa fa-trash"></i></a>';
+    output += '</span>';
+    return output;
+  }
+
   loescheKonvertierung = function(e) {
     var konvertierung_id = $(e.target).parent().parent().attr('konvertierung_id');
     $(this).closest('tr').remove();
@@ -52,17 +74,6 @@
       }
     });
   };
-
-	function konvertierungFunctionsFormatter(value, row) {
-    output = '<span konvertierung_id="' + value + '">';
-    output +=  '<a title="Konvertierung bearbeiten" href="index.php?go=Layer-Suche_Suchen&selected_layer_id=8&operator_konvertierung_id==&value_konvertierung_id=' + value + '"><i class="fa fa-pencil"></i></a>&nbsp;&nbsp;';
-    output += '<a title="Shapefiles bearbeiten" href="index.php?go=xplankonverter_shapefiles_index&konvertierung_id=' + value + '"><i class="fa fa-upload"></i></a>&nbsp;&nbsp;';
-    output += '<a title="Konvertierung validieren" href="index.php?go=xplankonverter_konvertierungen_validate&konvertierung_id=' + value + '"><i class="fa fa-check-square-o"></i></a>&nbsp;';
-    output += '<a id="konvertierung_ausfuehren" href="#" title="Konvertierung ausf&uuml;hren"><i class="fa fa-play"></i></a>&nbsp;';
-    output += '<a id="konvertierung_loeschen" href="#" title="Konvertierung l&ouml;schen"><i class="fa fa-trash"></i></a>&nbsp;';
-    output += '</span>';
-    return output;
-  }
 
 </script>
 <!--ul class='nav nav-tabs'>
