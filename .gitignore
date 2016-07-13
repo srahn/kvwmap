@@ -6,3 +6,4 @@ layouts/snippets/custom/*
 symbols/custom/*
 graphics/wappen/*
 graphics/custom/*
+plugins/*/config/config.php

@@ -1,4 +1,5 @@
 ﻿<?php
+	$strTitle="Layer Editor";
   $strAsteriskRequired="Werte mit * mussen eingetragen werden";
 	$strLayerID="Layer ID*";
   $strName="Name";

@@ -265,18 +265,7 @@ else {
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
               <input name="wappen_link" type="text" value="<?php echo $this->formvars['wappen_link']; ?>" size="50" maxlength="100">
           </td>
-        </tr>
-        <tr>
-          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWaterMark; ?></th>
-          <td style="border-bottom:1px solid #C3C7C3">
-            &nbsp;<input type="file" name="wasserzeichen" size="15"><br>
-            &nbsp;<? echo $this->formvars['wasserzeichen'] ?>
-          </td>
-          <td style="border-bottom:1px solid #C3C7C3">
-            &nbsp;<img src="<? echo WAPPENPATH.basename($this->formvars['wasserzeichen']); ?>" width="100" alt="<?php echo $strNoWatermarkSelected; ?>">
-            <input type="hidden" name="wasserzeichen_save" value="<? echo $this->formvars['wasserzeichen']; ?>">
-          </td>
-        </tr>				
+        </tr>			
         <tr>
           <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strALBReferencingRegion; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
@@ -578,6 +567,12 @@ else {
         </tr>
         <tr>
           <td align="right" style="border-bottom:1px solid #C3C7C3">
+            <input name="checkClientIP" type="checkbox" value="1" <?php if ($this->formvars['checkClientIP']) { ?> checked<?php } ?>>
+          </td>
+          <td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strcheckClientIP; ?></td>
+        </tr>
+        <tr>
+          <td align="right" style="border-bottom:1px solid #C3C7C3">
             <input name="checkPasswordAge" type="checkbox" value="1" <?php if ($this->formvars['checkPasswordAge']) { ?> checked<?php } ?>>
           </td>
           <td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strCheckPasswordAge; ?></td>
@@ -593,7 +588,13 @@ else {
             <input name="use_layer_aliases" type="checkbox" value="1" <? if ($this->formvars['use_layer_aliases']) { ?> checked<? } ?>>
           </td>
           <td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strUseLayerAliases; ?></td>
-        </tr>  
+        </tr>
+        <tr>
+          <td align="right" style="border-bottom:1px solid #C3C7C3">
+            <input name="hist_timestamp" type="checkbox" value="1" <?php if ($this->formvars['hist_timestamp']) { ?> checked<?php } ?>>
+          </td>
+          <td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strhist_timestamp; ?></td>
+        </tr>				
     </table>
   </td>
   </tr>

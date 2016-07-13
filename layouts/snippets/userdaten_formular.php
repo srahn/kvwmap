@@ -58,7 +58,7 @@ else {
   </tr>
   <tr>
     <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLogInName;?></th>
-    <td style="border-bottom:1px solid #C3C7C3"><input name="loginname" type="text" value="<?php echo $this->formvars['loginname']; ?>" size="15" maxlength="15"></td>
+    <td style="border-bottom:1px solid #C3C7C3"><input name="loginname" type="text" value="<?php echo $this->formvars['loginname']; ?>" size="15" maxlength="100"></td>
   </tr><?php if ($this->formvars['selected_user_id']>0) {?>
   <tr>
     <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strChangePassword;?></th>
@@ -107,10 +107,10 @@ else {
           <td>
           <?
           ?> 
-            <select name="selectedstellen" size="4" multiple style="width:160px">
+            <select name="selectedstellen" size="4" multiple style="width:300px">
             <? 
             for($i=0; $i < count($this->formvars['selstellen']["Bezeichnung"]); $i++){
-              	echo '<option value="'.$this->formvars['selstellen']["ID"][$i].'">'.$this->formvars['selstellen']["Bezeichnung"][$i].'</option>';
+              	echo '<option value="'.$this->formvars['selstellen']["ID"][$i].'" title="'.$this->formvars['selstellen']["Bezeichnung"][$i].'">'.$this->formvars['selstellen']["Bezeichnung"][$i].'</option>';
                }
             ?>
             </select>
@@ -120,9 +120,9 @@ else {
             <input type="button" name="substractPlaces" value="&gt;&gt;" onClick=substractOptions(document.GUI.selectedstellen,document.GUI.selstellen,'value')>
           </td>
           <td> 
-            <select name="allstellen" size="4" multiple style="width:160px">
+            <select name="allstellen" size="4" multiple style="width:300px">
             <? for($i=0; $i < count($this->formvars['stellen']["Bezeichnung"]); $i++){
-              	echo '<option value="'.$this->formvars['stellen']["ID"][$i].'">'.$this->formvars['stellen']["Bezeichnung"][$i].'</option>';
+              	echo '<option value="'.$this->formvars['stellen']["ID"][$i].'" title="'.$this->formvars['stellen']["Bezeichnung"][$i].'">'.$this->formvars['stellen']["Bezeichnung"][$i].'</option>';
                }
             ?>
             </select>

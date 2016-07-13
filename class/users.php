@@ -1271,7 +1271,7 @@ class rolle {
 		if($language != 'german') {
 			$sql.='CASE WHEN `Name_'.$language.'` != "" THEN `Name_'.$language.'` ELSE `Name` END AS ';
 		}
-		$sql.='Name, l.Layer_ID, alias, Datentyp, Gruppe, pfad, maintable, Data, `schema`, document_path, labelitem, connection, printconnection, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs, wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, ul.`queryable`, ul.`drawingorder`, ul.`minscale`, ul.`maxscale`, ul.`offsite`, ul.`transparency`, ul.`postlabelcache`, `Filter`, CASE r2ul.gle_view WHEN \'0\' THEN \'generic_layer_editor.php\' ELSE ul.`template` END as template, `header`, `footer`, ul.`symbolscale`, ul.`logconsume`, ul.`requires`, ul.`privileg`, ul.`export_privileg`, `start_aktiv` FROM layer AS l, used_layer AS ul, u_rolle2used_layer as r2ul';
+		$sql.='Name, l.Layer_ID, alias, Datentyp, Gruppe, pfad, maintable, maintable_is_view, Data, `schema`, document_path, labelitem, connection, printconnection, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs, wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, ul.`queryable`, ul.`drawingorder`, ul.`minscale`, ul.`maxscale`, ul.`offsite`, coalesce(r2ul.transparency, ul.transparency, 100) as transparency, ul.`postlabelcache`, `Filter`, CASE r2ul.gle_view WHEN \'0\' THEN \'generic_layer_editor.php\' ELSE ul.`template` END as template, `header`, `footer`, ul.`symbolscale`, ul.`logconsume`, ul.`requires`, ul.`privileg`, ul.`export_privileg`, `start_aktiv`, r2ul.showclasses FROM layer AS l, used_layer AS ul, u_rolle2used_layer as r2ul';
     $sql.=' WHERE l.Layer_ID=ul.Layer_ID AND r2ul.Stelle_ID=ul.Stelle_ID AND r2ul.Layer_ID=ul.Layer_ID AND ul.Stelle_ID='.$this->stelle_id.' AND r2ul.User_ID='.$this->user_id;
     if ($LayerName!='') {
       $sql.=' AND (l.Name LIKE "'.$LayerName.'" ';
@@ -1288,7 +1288,7 @@ class rolle {
     $query=mysql_query($sql,$this->database->dbConn);
     if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$i = 0;
-    while ($rs=mysql_fetch_array($query)) {
+    while ($rs=mysql_fetch_assoc($query)) {
       $layer[$i]=$rs;
 			$layer['layer_ids'][$rs['Layer_ID']] =& $layer[$i];
 			$layer['layer_ids'][$layer[$i]['requires']]['required'] = $rs['Layer_ID'];
@@ -1878,7 +1878,7 @@ class rolle {
     $query=mysql_query($sql,$this->database->dbConn);
     if ($query==0) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
 		$layer = array();
-    while ($rs=mysql_fetch_array($query)) {
+    while ($rs=mysql_fetch_assoc($query)) {
       $layer[]=$rs;
     }
     return $layer;
@@ -1941,10 +1941,12 @@ class rolle {
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
 	
-	function setAktivLayer($formvars, $stelle_id, $user_id) {
-		$layer=$this->getLayer('');
-		$rollenlayer=$this->getRollenLayer('', NULL);
-		$this->layerset = array_merge($layer, $rollenlayer);
+	function setAktivLayer($formvars, $stelle_id, $user_id, $ignore_rollenlayer = false) {
+		$this->layerset=$this->getLayer('');
+		if(!$ignore_rollenlayer){
+			$rollenlayer=$this->getRollenLayer('', NULL);
+			$this->layerset = array_merge($this->layerset, $rollenlayer);
+		}
 		# Eintragen des Status der Layer, 1 angezeigt oder 0 nicht.
 		for ($i=0;$i<count($this->layerset);$i++) {
 			#echo $i.' '.$this->layerset[$i]['Layer_ID'].' '.$formvars['thema'.$this->layerset[$i]['Layer_ID']].'<br>';
@@ -1976,19 +1978,21 @@ class rolle {
 				}
 			}
 		}
-		$mapdb = new db_mapObj($stelle_id, $user_id);
-		$rollenlayerset = $mapdb->read_RollenLayer();
-		for($i = 0; $i < count($rollenlayerset); $i++){
-			if($formvars['thema'.$rollenlayerset[$i]['Layer_ID']] == 0){
-				$mapdb->deleteRollenLayer($rollenlayerset[$i]['id']);
-				$mapdb->delete_layer_attributes(-$rollenlayerset[$i]['id']);
-				# auch die Klassen und styles löschen
-				if($rollenlayerset[$i]['Class'] != ''){
-					foreach($rollenlayerset[$i]['Class'] as $class){
-						$mapdb->delete_Class($class['Class_ID']);
-						if($class['Style'] != ''){
-							foreach($class['Style'] as $style){
-								$mapdb->delete_Style($style['Style_ID']);
+		if(!$ignore_rollenlayer){
+			$mapdb = new db_mapObj($stelle_id, $user_id);
+			$rollenlayerset = $mapdb->read_RollenLayer();
+			for($i = 0; $i < count($rollenlayerset); $i++){
+				if($formvars['thema'.$rollenlayerset[$i]['Layer_ID']] == 0){
+					$mapdb->deleteRollenLayer($rollenlayerset[$i]['id']);
+					$mapdb->delete_layer_attributes(-$rollenlayerset[$i]['id']);
+					# auch die Klassen und styles löschen
+					if($rollenlayerset[$i]['Class'] != ''){
+						foreach($rollenlayerset[$i]['Class'] as $class){
+							$mapdb->delete_Class($class['Class_ID']);
+							if($class['Style'] != ''){
+								foreach($class['Style'] as $style){
+									$mapdb->delete_Style($style['Style_ID']);
+								}
 							}
 						}
 					}
@@ -2029,6 +2033,31 @@ class rolle {
 			$this->debug->write("<p>file:users.php class:rolle->setClassStatus - Speichern des Status der Klassen zur Rolle:",4);
 			$this->database->execSQL($sql,4, $this->loglevel);
 		}
+	}
+	
+	function setTransparency($formvars) {
+		if($formvars['layer_options_open'] > 0){		# normaler Layer
+			$sql ='UPDATE u_rolle2used_layer set transparency = '.$formvars['layer_options_transparency'];
+			$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+			$sql.=' AND layer_id='.$formvars['layer_options_open'];
+			$this->debug->write("<p>file:users.php class:rolle->setTransparency:",4);
+			$this->database->execSQL($sql,4, $this->loglevel);
+		}
+		elseif($formvars['layer_options_open'] < 0){		# Rollenlayer
+			$sql ='UPDATE rollenlayer set transparency = '.$formvars['layer_options_transparency'];
+			$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+			$sql.=' AND id= -1*'.$formvars['layer_options_open'];
+			$this->debug->write("<p>file:users.php class:rolle->setTransparency:",4);
+			$this->database->execSQL($sql,4, $this->loglevel);
+		}
+	}
+	
+	function removeTransparency($formvars) {
+		$sql ='UPDATE u_rolle2used_layer set transparency = NULL';
+		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+		$sql.=' AND layer_id='.$formvars['layer_options_open'];
+		$this->debug->write("<p>file:users.php class:rolle->setTransparency:",4);
+		$this->database->execSQL($sql,4, $this->loglevel);
 	}
 
 	function setSize($mapsize) {
@@ -2381,13 +2410,17 @@ class rolle {
 	}
 	
 	function insertLayerComment($layerset,$comment) {
+		$layers = array();
+		$query = array();
 		$sql ='REPLACE INTO rolle_saved_layers SET';
 		$sql.=' user_id='.$this->user_id;
 		$sql.=', stelle_id='.$this->stelle_id;
 		$sql.=', name="'.$comment.'"';
 		for($i=0; $i < count($layerset); $i++){
-			if($layerset[$i]['aktivStatus'] == 1)$layers[] = $layerset[$i]['Layer_ID'];
-			if($layerset[$i]['queryStatus'] == 1)$query[] = $layerset[$i]['Layer_ID'];
+			if($layerset[$i]['Layer_ID'] > 0 AND $layerset[$i]['aktivStatus'] == 1){
+				$layers[] = $layerset[$i]['Layer_ID'];
+				if($layerset[$i]['queryStatus'] == 1)$query[] = $layerset[$i]['Layer_ID'];
+			}
 		}
 		$sql.=', layers="'.implode(',', $layers).'"';
 		$sql.=', query="'.implode(',', $query).'"';
@@ -2600,7 +2633,6 @@ class stelle {
     $this->epsg_code=$rs["epsg_code"];
     $this->alb_raumbezug=$rs["alb_raumbezug"];
     $this->alb_raumbezug_wert=$rs["alb_raumbezug_wert"];
-    $this->wasserzeichen=$rs["wasserzeichen"];
     $this->pgdbhost = ($rs["pgdbhost"] == 'PGSQL_PORT_5432_TCP_ADDR') ? getenv('PGSQL_PORT_5432_TCP_ADDR') : $rs["pgdbhost"];
     $this->pgdbname=$rs["pgdbname"];
     $this->pgdbuser=$rs["pgdbuser"];
@@ -2620,6 +2652,7 @@ class stelle {
     $this->checkPasswordAge=$rs["check_password_age"];
     $this->allowedPasswordAge=$rs["allowed_password_age"];
     $this->useLayerAliases=$rs["use_layer_aliases"];
+		$this->hist_timestamp=$rs["hist_timestamp"];
   }
 
   function checkClientIpIsOn() {
@@ -2818,35 +2851,11 @@ class stelle {
 		elseif($stellendaten['wappen_save']){
 			$sql.=', wappen="'.$stellendaten['wappen_save'].'"';
 		}
-		if($stellendaten['wasserzeichen']){
-			$sql.=', wasserzeichen="'.$_files['wasserzeichen']['name'].'"';
-		}
-		elseif($stellendaten['wasserzeichen_save']){
-			$sql.=', wasserzeichen="'.$stellendaten['wasserzeichen_save'].'"';
-		}
-		$sql.=', check_password_age="';
-		if ($stellendaten['checkPasswordAge']=='1') {
-			$sql.='1';
-		}
-		else {
-			$sql.='0';
-		}
-		$sql.='"';
-		$sql.=', allowed_password_age=';
-		if ($stellendaten['allowedPasswordAge']!='') {
-			$sql.=$stellendaten['allowedPasswordAge'];
-		}
-		else {
-			$sql.='6';
-		}
-		$sql.=', use_layer_aliases="';
-		if ($stellendaten['use_layer_aliases']=='1') {
-			$sql.='1';
-		}
-		else {
-			$sql.='0';
-		}
-		$sql.='"';
+		$sql.=', check_client_ip="';if($stellendaten['checkClientIP']=='1')$sql.='1';else $sql.='0';$sql.='"';
+		$sql.=', check_password_age="';if($stellendaten['checkPasswordAge']=='1')$sql.='1';else $sql.='0';$sql.='"';
+		$sql.=', allowed_password_age=';if($stellendaten['allowedPasswordAge']!='')$sql.=$stellendaten['allowedPasswordAge'];else $sql.='6';
+		$sql.=', use_layer_aliases="';if($stellendaten['use_layer_aliases']=='1')$sql.='1';else $sql.='0';$sql.='"';
+		$sql.=', hist_timestamp="';if($stellendaten['hist_timestamp']=='1')$sql.='1';else $sql.='0';$sql.='"';
 		# Abfrage starten
 		$ret=$this->database->execSQL($sql,4, 0);
 		if ($ret[0]) {
@@ -2910,32 +2919,11 @@ class stelle {
 		if($stellendaten['wappen']){
 			$sql.=', wappen="'.$stellendaten['wappen'].'"';
 		}
-		if($stellendaten['wasserzeichen']){
-			$sql.=', wasserzeichen="'.$stellendaten['wasserzeichen'].'"';
-		}
-		$sql.=', check_password_age="';
-		if ($stellendaten['checkPasswordAge']=='1') {
-			$sql.='1';
-		}
-		else {
-			$sql.='0';
-		}
-		$sql.='"';
-		$sql.=', allowed_password_age=';
-		if ($stellendaten['allowedPasswordAge']!='') {
-			$sql.=$stellendaten['allowedPasswordAge'];
-		}
-		else {
-			$sql.='6';
-		}
-		$sql.=', use_layer_aliases="';
-		if ($stellendaten['use_layer_aliases']=='1') {
-			$sql.='1';
-		}
-		else {
-			$sql.='0';
-		}
-		$sql.='"';
+		$sql.=', check_client_ip="';if($stellendaten['checkClientIP']=='1')$sql.='1';else $sql.='0';$sql.='"';
+		$sql.=', check_password_age="';if($stellendaten['checkPasswordAge']=='1')$sql.='1';else $sql.='0';$sql.='"';
+		$sql.=', allowed_password_age=';if ($stellendaten['allowedPasswordAge']!='')$sql.=$stellendaten['allowedPasswordAge'];else $sql.='6';
+		$sql.=', use_layer_aliases="';if ($stellendaten['use_layer_aliases']=='1')$sql.='1';else $sql.='0';$sql.='"';
+		$sql.=', hist_timestamp="';if($stellendaten['hist_timestamp']=='1')$sql.='1';else $sql.='0';$sql.='"';
 		$sql.=' WHERE ID = '.$this->id;
 		#echo $sql;
 		# Abfrage starten
@@ -3194,6 +3182,7 @@ class stelle {
 		# Aktualisieren der LayerzuStelle-Eigenschaften
 		$sql = 'UPDATE used_layer SET Layer_ID = '.$formvars['selected_layer_id'];
 		$sql .= ', queryable = "'.$formvars['queryable'].'"';
+		$sql .= ', use_geom = '.$formvars['use_geom'];
 		if ($formvars['minscale']!='') {
 			$sql .= ', minscale = '.$formvars['minscale'];
 		}
@@ -3333,7 +3322,7 @@ class stelle {
 		return $layer;
 	}
 
-	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL){
+	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL, $rollenlayer_type = NULL, $use_geom = NULL){
 		global $language;
 		$sql = 'SELECT layer.Layer_ID, ';
 		if($language != 'german') {
@@ -3351,6 +3340,9 @@ class stelle {
 		if($privileg != NULL){
 			$sql .=' AND used_layer.privileg >= "'.$privileg.'"';
 		}
+		if($use_geom != NULL){
+			$sql .=' AND used_layer.use_geom = 1';
+		}		
 		if($group_id != NULL){
 			$sql .=' AND u_groups.id = '.$group_id;
 		}
@@ -3359,11 +3351,15 @@ class stelle {
 		}
 		if($user_id != NULL){
 			$sql .= ' UNION ';
-			$sql .= 'SELECT -id as Layer_ID, concat(substring( `Name` FROM 1 FOR locate( ")", `Name` )), CASE WHEN Typ = "search" THEN " -Suchergebnis-" ELSE " -Shape-Import-" END), "", -1, " ", `connection` FROM rollenlayer';
-			$sql .= ' WHERE stelle_id = '.$this->id.' AND user_id = '.$user_id.' AND connectiontype = 6';
+			$sql .= 'SELECT -id as Layer_ID, concat(substring( `Name` FROM 1 FOR locate( ")", `Name` )), CASE WHEN Typ = "search" THEN " -Suchergebnis-" ELSE " -Shape-Import-" END), "", Gruppe, " ", `connection` FROM rollenlayer';
+			$sql .= ' WHERE stelle_id = '.$this->id.' AND user_id = '.$user_id.' AND connectiontype = 6';			
+			if($rollenlayer_type != NULL){
+				$sql .=' AND Typ = "'.$rollenlayer_type.'"';
+			}
+			if($group_id != NULL){
+				$sql .=' AND Gruppe = '.$group_id;
+			}
 		}
-
-
 		$sql .= ' ORDER BY Name';
 		#echo $sql;
 		$this->debug->write("<p>file:users.php class:stelle->getqueryableVectorLayers - Lesen der abfragbaren VektorLayer zur Stelle:<br>".$sql,4);
@@ -3372,7 +3368,7 @@ class stelle {
 			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
 		}
 		else{
-			while($rs=mysql_fetch_array($query)){
+			while($rs=mysql_fetch_assoc($query)){
 				 
 				# fremde Layer werden auf Verbindung getestet (erstmal rausgenommen, dauert relativ lange)
 				// if(strpos($rs['connection'], 'host') !== false AND strpos($rs['connection'], 'host=localhost') === false){

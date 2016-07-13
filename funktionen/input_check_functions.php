@@ -35,7 +35,9 @@
 				val = val.replace(/,/g, '');
 				val = val.replace(/\./g, '');
 			}
-			input.value = val;
+			if(input.value != val){
+				input.value = val;
+			}
 		}
 	}
 

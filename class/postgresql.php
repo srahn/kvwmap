@@ -88,29 +88,19 @@ class pgdatabase {
 	
 	function read_epsg_codes($order = true){
     global $supportedSRIDs;
-    $sql ="SELECT spatial_ref_sys.srid, srtext, alias, minx, miny, maxx, maxy FROM spatial_ref_sys ";
+    $sql ="SELECT spatial_ref_sys.srid, coalesce(alias, substr(srtext, 9, 35)) as srtext, minx, miny, maxx, maxy FROM spatial_ref_sys ";
     $sql.="LEFT JOIN spatial_ref_sys_alias ON spatial_ref_sys_alias.srid = spatial_ref_sys.srid";
     # Wenn zu unterstützende SRIDs angegeben sind, ist die Abfrage diesbezüglich eingeschränkt
     $anzSupportedSRIDs = count($supportedSRIDs);
     if ($anzSupportedSRIDs > 0) {
       $sql.=" WHERE spatial_ref_sys.srid IN (".implode(',', $supportedSRIDs).")";
     }
-    if($order)$sql.=" ORDER BY spatial_ref_sys.srid";
+    if($order)$sql.=" ORDER BY srtext";
     #echo $sql;		
     $ret = $this->execSQL($sql, 4, 0);		
     if($ret[0]==0){
 			$i = 0;
       while($row = pg_fetch_assoc($ret[1])){
-      	if($row['alias'] != ''){
-      		$row['srtext'] = $row['alias'];
-      	}
-      	else{
-	        $explosion = explode('[', $row['srtext']);
-	        if(strlen($explosion[1]) > 30){
-	          $explosion[1] = substr($explosion[1], 0, 30);
-	        }
-	        $row['srtext'] = $explosion[1];
-      	}
 				$epsg_codes[$row['srid']] = $row;
 				$i++;
       }
@@ -852,7 +842,7 @@ class pgdatabase {
   }
   
   function getBuchungenFromGrundbuch($FlurstKennz,$Bezirk,$Blatt,$hist_alb = false, $fiktiv = false, $buchungsstelle = NULL, $without_temporal_filter = false) {
-    $sql ="set enable_seqscan = off;SELECT DISTINCT gem.bezeichnung as gemarkungsname, g.land * 10000 + g.bezirk as bezirk, g.bezirk as gbezirk, g.buchungsblattnummermitbuchstabenerweiterung AS blatt, g.blattart, s.gml_id, s.laufendenummer AS bvnr, ltrim(s.laufendenummer, '~>')::integer, s.buchungsart, art.bezeichner as bezeichnung, f.flurstueckskennzeichen as flurstkennz, s.zaehler::text||'/'||s.nenner::text as anteil, s.nummerimaufteilungsplan as auftplannr, s.beschreibungdessondereigentums as sondereigentum "; 
+    $sql ="set enable_seqscan = off;SELECT DISTINCT gem.bezeichnung as gemarkungsname, g.land * 10000 + g.bezirk as bezirk, g.bezirk as gbezirk, g.buchungsblattnummermitbuchstabenerweiterung AS blatt, g.blattart, s.gml_id, s.laufendenummer AS bvnr, ltrim(s.laufendenummer, '~>a')::integer, s.buchungsart, art.bezeichner as bezeichnung, f.flurstueckskennzeichen as flurstkennz, s.zaehler::text||'/'||s.nenner::text as anteil, s.nummerimaufteilungsplan as auftplannr, s.beschreibungdessondereigentums as sondereigentum "; 
 		if($FlurstKennz!='') {
 			if($hist_alb) $sql.="FROM alkis.ax_historischesflurstueckohneraumbezug f ";
 			else $sql.="FROM alkis.ax_flurstueck f ";  
@@ -887,7 +877,7 @@ class pgdatabase {
       $sql.=" AND s.gml_id='".$buchungsstelle."'";
     }		
 		if(!$hist_alb AND !$without_temporal_filter) $sql.= $this->build_temporal_filter(array('f', 's', 'g'));
-    $sql.=" ORDER BY g.bezirk,g.buchungsblattnummermitbuchstabenerweiterung,ltrim(s.laufendenummer, '~>')::integer,f.flurstueckskennzeichen";
+    $sql.=" ORDER BY g.bezirk,g.buchungsblattnummermitbuchstabenerweiterung,ltrim(s.laufendenummer, '~>a')::integer,f.flurstueckskennzeichen";
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
@@ -1104,7 +1094,7 @@ class pgdatabase {
 			$sql .= ")";
 		}
     $this->debug->write("<p>postgresql.php getFlurstuecksKennzByGemeindeIDs() Abfragen erlaubten Flurstückskennzeichen nach Gemeindeids:<br>".$sql,4);
-		echo $sql;
+		#echo $sql;
     $query=pg_query($sql);
     if ($query==0) {
       $ret[0]=1; $ret[1]="Fehler bei der Abfrage der zur Anzeige erlaubten Flurstücke";
@@ -1207,7 +1197,7 @@ class pgdatabase {
   }
   
   function getNutzung($FlurstKennz) {
-    $sql ="SELECT round((st_area_utm(st_intersection(n.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")::numeric * amtlicheflaeche / st_area_utm(f.wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID."))::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche, nas.nutzungsartengruppe::text||nas.nutzungsart::text||nas.untergliederung1::text||nas.untergliederung2::text as nutzungskennz, nag.gruppe||' '||coalesce(na.nutzungsart, '')||' '||coalesce(nu1.untergliederung1, '')||' '||coalesce(nu2.untergliederung2, '') as bezeichnung, n.info, n.zustand, n.name, amtlicheflaeche";
+    $sql ="SELECT round((st_area_utm(st_intersection(n.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.")::numeric * amtlicheflaeche / st_area_utm(f.wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID."))::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche, nas.nutzungsartengruppe::text||nas.nutzungsart::text||nas.untergliederung1::text||nas.untergliederung2::text as nutzungskennz, nag.gruppe||' '||coalesce(na.nutzungsart, '')||' '||coalesce(nu1.untergliederung1, '')||' '||coalesce(nu2.untergliederung2, '') as bezeichnung, nag.bereich, nag.gruppe, na.nutzungsart, nu1.untergliederung1, nu2.untergliederung2, n.info, n.zustand, n.name, amtlicheflaeche";
 		$sql.=" FROM alkis.ax_flurstueck f, alkis.n_nutzung n";
 		$sql.=" left join alkis.n_nutzungsartenschluessel nas on n.nutzungsartengruppe = nas.nutzungsartengruppe and n.werteart1 = nas.werteart1 and n.werteart2 = nas.werteart2";
 		$sql.=" left join alkis.n_nutzungsartengruppe nag on nas.nutzungsartengruppe = nag.schluessel";
@@ -1218,6 +1208,7 @@ class pgdatabase {
 		$sql.=" AND st_area_utm(st_intersection(n.wkb_geometry,f.wkb_geometry), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.", ".M_QUASIGEOID.") > 0.001";
 		$sql.=" AND f.flurstueckskennzeichen = '".$FlurstKennz."'";
 		$sql.= $this->build_temporal_filter(array('f','n'));
+		$sql.=" ORDER BY nutzungskennz";
 		#echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
     if ($queryret[0] OR pg_num_rows($queryret[1])==0) {
@@ -1515,8 +1506,13 @@ class pgdatabase {
     return $ret;
   }
 	
-	function getVersionen($table, $gml_ids){
-		$sql = "SELECT beginnt::timestamp, endet::timestamp, bezeichner as anlass, '".$table."' as table FROM alkis.".$table." LEFT JOIN alkis.ax_fortfuehrungsanlaesse ON wert = NULLIF(anlass, '')::integer WHERE gml_id IN ('".implode("','", $gml_ids)."') ORDER BY beginnt";
+	function getVersionen($table, $gml_ids, $start){
+		$versionen = array();
+		$sql = "SELECT beginnt::timestamp, endet::timestamp, bezeichner as anlass, '".$table."' as table ";
+		$sql.= "FROM alkis.".$table." LEFT JOIN alkis.ax_fortfuehrungsanlaesse ON wert = NULLIF(anlass, '')::integer ";
+		$sql.= "WHERE gml_id IN ('".implode("','", $gml_ids)."') ";
+		if($start)$sql.= "AND beginnt::timestamp > '".$start."' ";
+		$sql.= "ORDER BY beginnt";
 		$queryret=$this->execSQL($sql, 4, 0);
 		while($rs=pg_fetch_assoc($queryret[1])) {
 			$versionen[]=$rs;

@@ -1244,23 +1244,11 @@
 								$legend .= '</a>';
 							}
 							# Bei eingeschalteten Layern kann man auf die maximale Ausdehnung des Layers zoomen
-							if ($layer['aktivStatus'] == 1) {
-								if ($layer['connectiontype']==6) {
-									# Link zum Zoomen auf maximalen Extent des Layers erstmal nur für PostGIS Layer									$legend.='&nbsp;<a href="javascript:zoomToMaxLayerExtent('.$layer['Layer_ID'].');"><img src="graphics/maxLayerExtent.gif" border="0" title="'.$this->FullLayerExtent.'"></a>';
-								}
+							if($layer['aktivStatus'] == 1){								$legend.='&nbsp;<a href="javascript:getLayerOptions('.$layer['Layer_ID'].')"><img src="graphics/rows.png" border="0" title="'.$this->layerOptions.'"></a>';								$legend.='<div style="position:static" id="options_'.$layer['Layer_ID'].'"> </div>';
 							}
 						}
 						if($layer['aktivStatus'] == 1 AND $layer['Class'][0]['Name'] != ''){
-							if($layer['requires'] == '' AND $layer['Layer_ID'] > 0){
-								$legend .=  ' <a href="javascript:getlegend(\''.$group_id.'\', '.$layer['Layer_ID'].', document.GUI.nurFremdeLayer.value)" title="'.$this->DisplayClasses.'"><img border="0" src="graphics/';
-								if($layer['showclasses']){
-									$legend .=  'minus.gif';
-								}
-								else{
-									$legend .=  'plus.gif';
-								}
-								$legend .=  '"></a>
-								<input id="classes_'.$layer['Layer_ID'].'" name="classes_'.$layer['Layer_ID'].'" type="hidden" value="'.$layer['showclasses'].'">';
+							if($layer['requires'] == '' AND $layer['Layer_ID'] > 0){								$legend .= '<input id="classes_'.$layer['Layer_ID'].'" name="classes_'.$layer['Layer_ID'].'" type="hidden" value="'.$layer['showclasses'].'">';
 							}
 							if($layer['showclasses'] != 0){
 								if($layer['connectiontype'] == 7){      # WMS   
