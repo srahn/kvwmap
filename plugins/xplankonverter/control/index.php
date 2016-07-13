@@ -5,7 +5,9 @@ include_once(CLASSPATH . 'PgObject.php');
 include_once(CLASSPATH . 'MyObject.php');
 include_once(CLASSPATH . 'LayerGroup.php');
 include_once(CLASSPATH . 'data_import_export.php');
+include(PLUGINS . 'xplankonverter/model/gml_file.php');
 include(PLUGINS . 'xplankonverter/model/konvertierung.php');
+include(PLUGINS . 'xplankonverter/model/regel.php');
 include(PLUGINS . 'xplankonverter/model/shapefiles.php');
 include(PLUGINS . 'xplankonverter/model/validator.php');
 include(PLUGINS . 'xplankonverter/model/xplan.php');
@@ -55,9 +57,7 @@ switch($this->go){
   case 'convert' : {
     include(PLUGINS . 'xplankonverter/model/converter.php');
 
-    // Die Verbindung zur Datenbank kvwmapsp ist verfügbar in
-    //$this->pgdatabase->dbConn);
-    $this->converter = new Converter($this->pgdatabase, PG_CONNECTION);
+    $this->converter = new Converter($this->pgdatabase, $this->pgdatabase);
 
     // Einbindung des Views
     $this->main = PLUGINS . 'xplankonverter/view/convert.php';
@@ -117,7 +117,6 @@ switch($this->go){
           $layer_group_id = $this->konvertierung->get('layer_group_id');
           if (empty($layer_group_id))
             $layer_group_id = $this->konvertierung->createLayerGroup();
-
           foreach($uploaded_files AS $uploaded_file) {
             if ($uploaded_file['extension'] == 'dbf' and $uploaded_file['state'] != 'ignoriert') {
 
@@ -134,7 +133,6 @@ switch($this->go){
                 $shapeFile->deleteDataTable();
                 $shapeFile->delete();
               }
-
               # create new record in shapefile table
               $shapeFile->create(
                 array(
@@ -271,7 +269,7 @@ switch($this->go){
       $this->main = 'Hinweis.php';
     }
     else {
-      $this->converter = new Converter($this->pgdatabase, PG_CONNECTION);
+      $this->converter = new Converter($this->pgdatabase, $this->pgdatabase);
       $this->converter->gmlfeatures_loeschen($this->formvars['konvertierung_id']);
       $this->converter->regeln_anwenden($this->formvars['konvertierung_id']);
     }
@@ -319,10 +317,36 @@ switch($this->go){
     $this->output();
   } break;
 
-  case 'xplankonverter_konvertierung_ausfuehren' : {
+  case 'xplankonverter_konvertierung_loeschen' : {
+    $konvertierung = new Konvertierung($this, 'xplankonverter', 'konvertierungen');
+    $konvertierung->find_by('id', $this->formvars['konvertierung_id']);
+
+    # Lösche gml-Datei
+    $gml_file = new gml_file(XPLANKONVERTER_SHAPE_PATH . $konvertierung->get('id') . '/xplan_' . $konvertierung->get('id') . '.gml');
+    $msg = 'Lösche gml file: '. $gml_file->filename;
+    $gml_file->delete();
+    
+    # Lösche Regeln
+    $regeln = $konvertierung->getRegeln();
+    $msg .= 'Regeln: '. print_r($regeln);
+
+    # Lösche Layer
+    #$shapeFile->deleteLayer();
+
+    # Lösche Shapes
+    #$shapeFile->deleteDataTable();
+    #$shapeFile->delete();
+
+    # Lösche Bereiche
+    # Lösche Plan
+    # Lösche Regel
+
+    # Lösche Konvertierung
+    #$konvertierung->delete();
+
     $response = array(
       'success' => true,
-      'msg' => 'Konvertierung erfolgreich ausgeführt.'
+      'msg' => 'Konvertierung erfolgreich gelöscht. ' . $msg
     );
     header('Content-Type: application/json');
     echo json_encode($response);
@@ -428,8 +452,12 @@ function xplankonverter_copy_uploaded_shp_file($file, $dest_dir) {
     }
   }
   else {
-    if ($file['unziped'])
-      unlink($file['tmp_name']);
+    if ($file['unziped']) {
+      if (is_dir($file['tmp_name']))
+        delete_files($file['tmp_name']);
+      else
+        unlink($file['tmp_name']);
+    }
     $file['state'] = 'ignoriert';
   }
   return $file;

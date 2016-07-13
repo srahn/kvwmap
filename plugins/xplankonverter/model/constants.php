@@ -1,18 +1,4 @@
 <?php
-	define('PG_DB_HOST', '85.214.126.13');
-	define('PG_DB_PORT', '5432');
-	define('PG_DATABASE', 'kvwmapsp');
-	define('PG_USER_NAME', 'pgadmin');
-	define('PG_PASSWORD', 'PaGeMin2');
-
-	define('PG_CONNECTION_STRING',
-	  ' host='     . PG_DB_HOST .
-	  ' port='     . PG_DB_PORT .
-	  ' user='     . PG_USER_NAME .
-	  ' password=' . PG_PASSWORD .
-	  ' dbname='   . PG_DATABASE);
-	define('PG_CONNECTION', pg_connect(PG_CONNECTION_STRING));
-
 	define('CONTENT_SCHEME', 'gml_classes');
 	define('STRUCTURE_SCHEME', 'xplan_uml');
 
