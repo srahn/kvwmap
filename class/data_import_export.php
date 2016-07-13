@@ -206,7 +206,8 @@ class data_import_export {
 					$$formvars['column'.$i] = $columns[$i];			# Hier werden $x und $y gesetzt (nicht das doppelte $ wegnehmen!)
 				}
 			}
-			$sql.= ", st_geomfromtext('POINT(".$x." ".$y.")', ".$formvars['epsg']."));";
+			if($komma)$sql.= ", ";
+			$sql.= "st_geomfromtext('POINT(".$x." ".$y.")', ".$formvars['epsg']."));";
 			$i++;
 		}
 		#echo $sql;
