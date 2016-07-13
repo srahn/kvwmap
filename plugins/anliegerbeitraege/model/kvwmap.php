@@ -13,7 +13,7 @@
       $GUI->navMap($GUI->formvars['CMD']);
       $GUI->user->rolle->saveDrawmode($GUI->formvars['always_draw']);
     }
-    $GUI->queryable_postgis_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id);
+    $GUI->queryable_postgis_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true);
 
   	if(!$GUI->formvars['layer_id']){
       $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);

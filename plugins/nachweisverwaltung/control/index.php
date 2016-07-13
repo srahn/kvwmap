@@ -217,6 +217,22 @@
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$this->rechercheFormAnzeigen();
 	  } break;
+		
+		case 'Nachweisrechercheformular_Dokumentauswahl_speichern':{
+			$this->checkCaseAllowed('Nachweisrechercheformular');
+			include (PLUGINS.'nachweisverwaltung/model/kvwmap.php');						# GUI-Objekt erweitern
+			include (PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Klasse einbinden
+			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
+			$this->rechercheFormAnzeigen();
+	  } break;
+		
+		case 'Nachweisrechercheformular_Dokumentauswahl_löschen':{
+			$this->checkCaseAllowed('Nachweisrechercheformular');
+			include (PLUGINS.'nachweisverwaltung/model/kvwmap.php');						# GUI-Objekt erweitern
+			include (PLUGINS.'nachweisverwaltung/model/nachweis.php');					# nachweis-Klasse einbinden
+			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
+			$this->rechercheFormAnzeigen();
+	  } break;		
 
 	  # Rechercheanfrage an die Datenbank senden/ mit prüfen der Eingabedaten
 	  case 'Nachweisrechercheformular_Senden':{
