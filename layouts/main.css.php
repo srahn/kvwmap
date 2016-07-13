@@ -848,3 +848,79 @@ tbody.gle tr:hover {
 	padding: 1px;
 	border: 1px solid #CCCCCC;
 }
+
+.layerOptions{
+	border: 1px solid #cccccc;
+	background: #EDEFEF;
+	padding:0px;
+	right:210px;
+	top:300px;
+	width: 200px;
+	position:absolute;
+	z-index: 1000;
+	-moz-box-shadow: 6px 5px 7px #777;
+	-webkit-box-shadow: 6px 5px 7px #777;
+	box-shadow: 6px 5px 7px #777;
+}
+
+.layerOptionsHeader{
+	background-color: #c7d9e6;
+	padding: 2px 2px 2px 8px;
+}
+
+.layerOptions ul{
+	color: lightsteelblue;
+	margin: 5px;
+	padding: 0px;
+	padding-left: 5px;
+	list-style: square inside none;
+}
+
+.layerOptions span{
+	color: #252525;
+}
+
+#nu_bereich{
+	position: relative;
+	background-color: #dae4ec;
+	padding: 7px;
+	margin-bottom: 7px;
+}
+
+#nu_bereich_span{
+	position: absolute;
+	font-family: SourceSansPro2;
+	line-height: 18px;
+}
+
+#nu_gruppe_nutzungsart{
+	background-color: white;
+	margin-left: 90px;
+	padding: 7px;
+}
+
+#nu_gruppe_nutzungsart_span{
+	font-family: SourceSansPro2;
+	line-height: 18px;
+}
+
+#nu_gruppe_nutzungsart_table{
+	margin-left: 10px;
+	margin-top: 5px;
+	margin-bottom: 10px;
+	padding: 0px;
+	border-spacing: 0px;
+}
+
+#nu_gruppe_nutzungsart_table th{
+	text-align: left;
+	font-family: SourceSansPro2;
+	font-size: 15px;
+	font-weight: 600;
+}
+
+#nu_gruppe_nutzungsart_table td{
+	vertical-align: top;
+	min-width: 85px;
+	max-width: 350px;
+}

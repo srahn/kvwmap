@@ -53,9 +53,6 @@ function onload_functions(){
 	<? if($this->scrolldown){ ?>
 	window.scrollTo(0,document.body.scrollHeight);	
 	<? } ?>
-	if(document.getElementById('scrolldiv') != undefined){
-		document.getElementById('scrolldiv').scrollTop = <? echo $this->user->rolle->scrollposition; ?>;
-	}
 	document.onmousemove = drag;
   document.onmouseup = dragstop;
 	document.onmousedown = stop;
@@ -63,6 +60,7 @@ function onload_functions(){
 	<? if($this->user->rolle->auto_map_resize){ ?>
 	window.onresize = function(){clearTimeout(doit);doit = setTimeout(resizemap2window, 200);};
 	<? } ?>
+	document.fullyLoaded = true;
 }
 
 var dragobjekt = null;
@@ -89,20 +87,24 @@ function stop(event){
 }
 
 function dragstart(element){
-  dragobjekt = element;
-  dragx = posx - dragobjekt.offsetLeft;
-  dragy = posy - dragobjekt.offsetTop;
+	if(document.fullyLoaded){
+		dragobjekt = element;
+		dragx = posx - dragobjekt.offsetLeft;
+		dragy = posy - dragobjekt.offsetTop;
+	}
 }
 
 function resizestart(element, type){
-	resizeobjekt = element;
-	resizetype = type;
-	dragx = posx - resizeobjekt.parentNode.offsetLeft;
-  dragy = posy - resizeobjekt.parentNode.offsetTop;
-  resizex = posx;
-  resizey = posy;
-	width = parseInt(resizeobjekt.offsetWidth);		// da style.width auf 100% steht
-	height = parseInt(resizeobjekt.offsetHeight);	// da style.height auf 100% steht
+	if(document.fullyLoaded){
+		resizeobjekt = element;
+		resizetype = type;
+		dragx = posx - resizeobjekt.parentNode.offsetLeft;
+		dragy = posy - resizeobjekt.parentNode.offsetTop;
+		resizex = posx;
+		resizey = posy;
+		width = parseInt(resizeobjekt.offsetWidth);		// da style.width auf 100% steht
+		height = parseInt(resizeobjekt.offsetHeight);	// da style.height auf 100% steht
+	}
 }
 
 
@@ -193,6 +195,9 @@ function urlstring2formdata(formdata, string){
 
 function overlay_submit(gui, start){
 	// diese Funktion macht beim Fenstermodus und einer Kartenabfrage oder einem Aufruf aus dem Overlay-Fenster einen ajax-Request mit den Formulardaten des uebergebenen Formularobjektes, ansonsten einen normalen Submit
+<? if($this->main == 'map.php'){ ?>
+	startwaiting();
+<? } ?>
 	if(typeof FormData !== 'undefined' && (1 == <? echo $this->user->rolle->querymode; ?> && start || gui.id == 'GUI2')){	
 		formdata = new FormData(gui);
 		formdata.append("mime_type", "overlay_html");	
@@ -417,6 +422,54 @@ function selectgroupthema(group, instantreload){
 function zoomToMaxLayerExtent(zoom_layer_id){
 	console.log(currentform.go.value);
 	currentform.zoom_layer_id.value = zoom_layer_id;
+	overlay_submit(currentform);
+}
+
+function getLayerOptions(layer_id){
+	if(document.GUI.layer_options_open.value != '')closeLayerOptions(document.GUI.layer_options_open.value);
+	ahah('index.php', 'go=getLayerOptions&layer_id='+layer_id, new Array(document.getElementById('options_'+layer_id), ''), new Array('sethtml', 'execute_function'));
+	document.GUI.layer_options_open.value = layer_id;
+}
+
+function closeLayerOptions(layer_id){
+	document.GUI.layer_options_open.value = '';
+	document.getElementById('options_'+layer_id).innerHTML=' ';
+}
+
+function saveLayerOptions(layer_id){	
+	document.GUI.go.value = 'saveLayerOptions';
+	document.GUI.submit();
+}
+
+function resetLayerOptions(layer_id){	
+	document.GUI.go.value = 'resetLayerOptions';
+	document.GUI.submit();
+}
+
+function scrollLayerOptions(){
+	layer_id = document.GUI.layer_options_open.value;
+	if(layer_id != ''){
+		legend_posy = document.getElementById('legenddiv').getBoundingClientRect().top;
+		posy = document.getElementById('options_'+layer_id).getBoundingClientRect().top - (13+legend_posy);
+		if(posy > 70 && posy < document.GUI.browserheight.value-220)document.getElementById('options_content_'+layer_id).style.top = posy;
+	}
+}
+
+function activateAllClasses(class_ids){
+	var classids = class_ids.split(",");
+	for(i = 0; i < classids.length; i++){
+		selClass = document.getElementsByName("class"+classids[i])[0];
+		if(selClass != undefined)selClass.value = 1;
+	}
+	overlay_submit(currentform);
+}
+
+function deactivateAllClasses(class_ids){
+	var classids = class_ids.split(",");
+	for(i = 0; i < classids.length; i++){
+		selClass = document.getElementsByName("class"+classids[i])[0];
+		if(selClass != undefined)selClass.value = 0;
+	}
 	overlay_submit(currentform);
 }
 

@@ -387,7 +387,9 @@ function save_layout(){
         <tr id="tr2_<? echo $this->attributes['the_geom']; ?>" <? if($this->ddl->selectedlayout[0]['elements'][$this->attributes['the_geom']]['xpos'] == ''){echo 'style="display:none"';} ?>>
         	<td>&nbsp;&nbsp;&nbsp;y:</td>
         	<td><input type="text" name="posy_<? echo $this->attributes['the_geom']; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->attributes['the_geom']]['ypos']; ?>" size="5"></td>
-        	<td colspan="5">&nbsp;</td>
+        	<td width="60px">&nbsp;Rand:</td>
+					<td><input  type="text" name="fontsize_<? echo $this->attributes['the_geom']; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->attributes['the_geom']]['fontsize']; ?>" size="5">m</td>
+					<td colspan="3"></td>
         </tr>	
 <?   	}
  		} ?>

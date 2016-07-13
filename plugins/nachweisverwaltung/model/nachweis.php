@@ -704,7 +704,7 @@ class Nachweis {
     return $errmsg;
   }
   
-  function getNachweise($id,$polygon,$gemarkung,$stammnr,$rissnr,$fortf,$art_einblenden,$richtung,$abfrage_art,$order,$antr_nr, $datum = NULL, $VermStelle = NULL, $gueltigkeit = NULL, $datum2 = NULL, $flur = NULL, $flur_thematisch = NULL, $andere_art = NULL) {
+  function getNachweise($id,$polygon,$gemarkung,$stammnr,$rissnr,$fortf,$art_einblenden,$richtung,$abfrage_art,$order,$antr_nr, $datum = NULL, $VermStelle = NULL, $gueltigkeit = NULL, $datum2 = NULL, $flur = NULL, $flur_thematisch = NULL, $andere_art = NULL, $suchbemerkung = NULL) {
 		$explosion = explode('~', $antr_nr);
 		$antr_nr = $explosion[0];
 		$stelle_id = $explosion[1];
@@ -734,7 +734,7 @@ class Nachweis {
 		  if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit;
           #echo $sql;
           $this->debug->write("<br>nachweis.php getNachweise Abfragen der Nachweisdokumente.<br>",4);
-          $ret=$this->database->execSQL($sql,4, 0);
+          $ret=$this->database->execSQL($sql,4, 1);
           if ($ret[0]) { # Fehler in der Datenbankabfrage
             $errmsg.=$ret[1];
           }
@@ -775,7 +775,7 @@ class Nachweis {
 	          $sql.=")";
 	        }
 	        #echo $sql;
-	        $ret1=$this->database->execSQL($sql,4, 0);
+	        $ret1=$this->database->execSQL($sql,4, 1);
           if (pg_num_rows($ret[1])==0) {
             $errmsg.='\nEs konnte kein Dokument gefunden werden.';
           }
@@ -827,7 +827,9 @@ class Nachweis {
           $sql.=")";
 					if($andere_art)$sql.=" AND d.id IN (".$andere_art.")";
         }
-
+				if($suchbemerkung != ''){
+          $sql.=" AND n.bemerkungen LIKE '%".$suchbemerkung."%'";
+        }				
         if ($order=='') {
           $order="flurid, stammnr, datum";
         }
@@ -841,7 +843,7 @@ class Nachweis {
         $sql.=" ORDER BY ".$order." ".$richtung;
         #echo $sql;
         $this->debug->write("<br>nachweis.php getNachweise Abfragen der Nachweisdokumente.<br>",4);
-        $ret=$this->database->execSQL($sql,4, 0);    
+        $ret=$this->database->execSQL($sql,4, 1);    
         if (!$ret[0]) {
           while ($rs=pg_fetch_array($ret[1])) {
             $nachweise[]=$rs;
@@ -926,7 +928,9 @@ class Nachweis {
             $sql.=")";
 						if($andere_art)$sql.=" AND d.id IN (".$andere_art.")";
           }
-
+					if($suchbemerkung != ''){
+						$sql.=" AND n.bemerkungen LIKE '%".$suchbemerkung."%'";
+					}
           if ($order=='') {
             $order="flurid, stammnr, datum";
           }
@@ -940,7 +944,7 @@ class Nachweis {
           $sql.=" ORDER BY ".$order." ".$richtung;
           #echo $sql;
           $this->debug->write("<br>nachweis.php getNachweise Abfragen der Nachweisdokumente.<br>",4);
-          $ret=$this->database->execSQL($sql,4, 0);    
+          $ret=$this->database->execSQL($sql,4, 1);    
           if (!$ret[0]) {
             while ($rs=pg_fetch_array($ret[1])) {
               $nachweise[]=$rs;
@@ -997,7 +1001,7 @@ class Nachweis {
           }
           $sql.=" ORDER BY ".$order." ".$richtung;
           #echo $sql;        
-          $ret=$this->database->execSQL($sql,4, 0);    
+          $ret=$this->database->execSQL($sql,4, 1);    
           if (!$ret[0]) {
             while ($rs=pg_fetch_array($ret[1])) {
               $nachweise[]=$rs;
@@ -1046,7 +1050,7 @@ class Nachweis {
           $this->richtung="ASC";
         }
         $sql.=" ORDER BY ".$order." ".$richtung;        
-        $ret=$this->database->execSQL($sql,4, 0);    
+        $ret=$this->database->execSQL($sql,4, 1);    
         if (!$ret[0]) {
           while ($rs=pg_fetch_array($ret[1])) {
             $nachweise[]=$rs;

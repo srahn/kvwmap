@@ -176,7 +176,7 @@ include('funktionen/input_check_functions.php');
   			return;
   		}
 			if(document.getElementsByName(form_fields[i])[0] != undefined){
-				data_r += '&'+form_fields[i]+'='+document.getElementsByName(form_fields[i])[0].value;
+				//data_r += '&'+form_fields[i]+'='+document.getElementsByName(form_fields[i])[0].value;		// kann evtl. weg
 			}
   	}
   	data = 'go=Sachdaten_speichern&reload='+reload+'&selected_layer_id='+layer_id+'&fromobject='+fromobject+'&targetobject='+targetobject+'&targetlayer_id='+targetlayer_id+'&targetattribute='+targetattribute+'&data='+data+'&form_field_names='+form_fieldstring+'&embedded=true' + data_r;
@@ -209,7 +209,7 @@ include('funktionen/input_check_functions.php');
   			return;
   		}
   		if(document.getElementsByName(form_fields[i])[0] != undefined){
-  			data_r += '&'+form_fields[i]+'='+document.getElementsByName(form_fields[i])[0].value;
+  			//data_r += '&'+form_fields[i]+'='+document.getElementsByName(form_fields[i])[0].value;			// kann evtl. weg
   		}
   	}
   	data = 'go=neuer_Layer_Datensatz_speichern&reload='+reload+'&selected_layer_id='+layer_id+'&fromobject='+fromobject+'&targetobject='+targetobject+'&targetlayer_id='+targetlayer_id+'&targetattribute='+targetattribute+'&data='+data+'&form_field_names='+form_fieldstring+'&embedded=true' + data_r;
@@ -270,7 +270,7 @@ include('funktionen/input_check_functions.php');
 		for(i = 0; i < attributenamesarray.length; i++){
 			if(document.getElementById(attributenamesarray[i]+'_'+k) != undefined){
 				attributenames += attributenamesarray[i] + '|';
-				attributevalues += document.getElementById(attributenamesarray[i]+'_'+k).value + '|';
+				attributevalues += encodeURIComponent(document.getElementById(attributenamesarray[i]+'_'+k).value) + '|';
 			}
 			else if(attributenamesarray[i] == geom_attribute ){	// wenn es das Geometrieattribut ist, handelt es sich um eine Neuerfassung --> aktuelle Geometrie nehmen
 				if(document.GUI.loc_x != undefined && document.GUI.loc_x.value != ''){		// Punktgeometrie
@@ -382,7 +382,11 @@ include('funktionen/input_check_functions.php');
 	daten_export = function(layer_id, anzahl, format){
 		currentform.all.value = document.getElementById('all_'+layer_id).value;
 		if(currentform.all.value || check_for_selection(layer_id)){				// entweder alle gefundenen oder die ausgewaehlten
-			currentform.anzahl.value = anzahl;
+			var option = document.createElement("option");
+			option.text = anzahl;
+			option.value = anzahl;
+			currentform.anzahl.add(option);
+			currentform.anzahl.selectedIndex = currentform.anzahl.options.length-1;
 			currentform.chosen_layer_id.value = layer_id;
 			currentform.go_backup.value = currentform.go.value;
 			currentform.go.value = 'Daten_Export';

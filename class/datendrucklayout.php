@@ -92,13 +92,14 @@ class ddl {
 						if($this->layout['type'] == 1 AND $offset_attribute == '' AND $pagecount > 1)$y = $y + $this->initial_yoffset;		# ab der 2. Seite sollen die forlaufenden absolut positionierten Elemente oben auf der Seite beginnen
 						if($this->i_on_page == 0){
 							if($this->maxy < $y)$this->maxy = $y;		# beim ersten Datensatz das maxy ermitteln
-						}
+						}						
 						if($offset_attribute == '' AND $this->i_on_page > 0){		# bei allen darauffolgenden den y-Wert um Offset verschieben (aber nur bei absolut positionierten)
 							$y = $y - $this->yoffset_onpage-$this->layout['gap'];
 						}
 					}
-					$text = $this->substituteFreitext($this->layout['texts'][$j]['text'], $i, $pagenumber, $pagecount);
-					$this->putText($text, $this->layout['texts'][$j]['size'], NULL, $x, $y, $offsetx);
+					$text = $this->substituteFreitext($this->layout['texts'][$j]['text'], $i, $pagenumber, $pagecount);					
+					$y = $this->putText($text, $this->layout['texts'][$j]['size'], NULL, $x, $y, $offsetx);
+					if(!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y)$this->miny[$this->pdf->currentContents] = $y;		# miny ist die unterste y-Position das aktuellen Datensatzes 
 				}
 				else{
 					$remaining_freetexts[] = $this->layout['texts'][$j]['id'];
@@ -250,13 +251,15 @@ class ddl {
 									if($dateiname == $this->attributes['alias'][$j] AND $preview)$dateiname = WWWROOT.APPLVERSION.GRAPHICSPATH.'nogeom.png';		// als Platzhalter im Editor
 									if($dateiname != '' AND file_exists($dateiname)){
 										$dateinamensteil=explode('.', $dateiname);
-										$new_filename = IMAGEPATH.basename($dateinamensteil[0]).'.jpg';
-										exec(IMAGEMAGICKPATH.'convert '.$dateiname.' -background white -flatten '.$new_filename);
-										$size = getimagesize($new_filename);
-										$ratio = $size[1]/$size[0];
-										$height = $ratio*$width;
-										$y = $y-$height;
-										$this->pdf->addJpegFromFile($new_filename, $x, $y, $width);
+										if(in_array(strtolower($dateinamensteil[1]), array('jpg', 'png', 'gif', 'tif', 'pdf'))){
+											$new_filename = IMAGEPATH.basename($dateinamensteil[0]).'.jpg';
+											exec(IMAGEMAGICKPATH.'convert '.$dateiname.' -background white -flatten '.$new_filename);
+											$size = getimagesize($new_filename);
+											$ratio = $size[1]/$size[0];
+											$height = $ratio*$width;
+											$y = $y-$height;
+											$this->pdf->addJpegFromFile($new_filename, $x, $y, $width);
+										}
 									}
 								}
 								else{
@@ -277,13 +280,14 @@ class ddl {
 					$this->gui->map->set('width', $this->layout['elements'][$attributes['name'][$j]]['width']*MAPFACTOR);
 					$this->gui->map->set('height', $this->layout['elements'][$attributes['name'][$j]]['width']*MAPFACTOR);
 					if($oids[$i] != ''){
+						if($this->layout['elements'][$attributes['name'][$j]]['fontsize'] > 0)$rand = $this->layout['elements'][$attributes['name'][$j]]['fontsize'];		# bei Geometrie-Attributen wird in fontsize der Zoom-Rand gespeichert
+						elseif(defined('ZOOMBUFFER') AND ZOOMBUFFER > 0)$rand = ZOOMBUFFER;
+						else $rand = 100;
 						if($attributes['geomtype'][$attributes['the_geom']] == 'POINT'){
 							include_(CLASSPATH.'pointeditor.php');
 							$pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->gui->user->rolle->epsg_code);							
 							$point = $pointeditor->getpoint($oids[$i], $attributes['table_name'][$attributes['the_geom']], $attributes['the_geom']);
 							$rect = ms_newRectObj();
-							if(defined('ZOOMBUFFER') AND ZOOMBUFFER > 0)$rand = ZOOMBUFFER;
-							else $rand = 100;
 							$rect->minx = $point['pointx']-$rand;
 							$rect->maxx = $point['pointx']+$rand;
 							$rect->miny = $point['pointy']-$rand;
@@ -292,7 +296,7 @@ class ddl {
 						else{
 							include_(CLASSPATH.'polygoneditor.php');
 							$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->gui->user->rolle->epsg_code);
-							$rect = $polygoneditor->zoomTopolygon($oids[$i], $attributes['table_name'][$attributes['the_geom']], $attributes['the_geom'], 10);
+							$rect = $polygoneditor->zoomTopolygon($oids[$i], $attributes['table_name'][$attributes['the_geom']], $attributes['the_geom'], $rand);
 						}
 						$this->gui->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
 					}					
@@ -374,9 +378,9 @@ class ddl {
 		$y = $y + $fh;
 		$this->pdf->ezSetY($y);		
 		$page_id_before_puttext = $this->pdf->currentContents;
-		$ret = $this->pdf->ezText(iconv("UTF-8", "CP1252", $text), $fontsize, $options);
-		$page_id_after_puttext = $this->pdf->currentContents;
-		#echo $page_id_before_puttext.' '.$page_id_after_puttext.' '.$text.'<br>';
+		$ret = $this->pdf->ezText(iconv("UTF-8", "CP1252//TRANSLIT", $text), $fontsize, $options);
+		$page_id_after_puttext = $this->pdf->currentContents;		
+		#if($this->gui->user->id == 101)echo $page_id_before_puttext.' '.$page_id_after_puttext.' '.$text.'<br>';
 		if($page_id_before_puttext != $page_id_after_puttext){
 			$this->page_overflow_by_sublayout = true;
 			$this->page_id_before_sublayout = $page_id_before_puttext;
@@ -452,7 +456,6 @@ class ddl {
 		$this->offsety = $offsety;
   	#$this->miny = 1000000;
   	$this->i_on_page = -1;
-  	$this->datasetcount_on_page = 0;
 		$this->page_overflow_by_sublayout = false;
 		if($pdfobject == NULL){
 			include (PDFCLASSPATH."class.ezpdf.php");				# Einbinden der PDF Klassenbibliotheken
@@ -476,9 +479,8 @@ class ddl {
 				$this->page_overflow_by_sublayout = false;						
 				#$this->miny = $this->miny_on_new_page; 
 				if(!$this->initial_yoffset)$this->initial_yoffset = 780-$this->maxy;			# der Offset von oben gesehen, mit dem das erste fortlaufende Element auf der ersten Seite beginnt; wird benutzt, um die fortlaufenden Elemente ab der 2. Seite oben beginnen zu lassen
-				$this->datasetcount_on_page = 0; # ??
 				$this->i_on_page = 1;	# ??
-				$this->maxy = 800;
+				$this->maxy = 781;
 				if($this->layout['type'] == 2)$this->offsety = 50;		# das ist für den Fall, dass ein Sublayout in einem Sublayout einen Seitenüberlauf verursacht hat (hier muss eigentlich der Offset der nächsten Seite rein)
 			}
     	if($this->layout['type'] == 0 AND $i > 0){		# neue Seite beim seitenweisen Typ und neuem Datensatz 
@@ -486,8 +488,7 @@ class ddl {
 				$this->add_static_elements($offsetx);
     	}
 			$this->yoffset_onpage = $this->maxy - $this->miny[$lastpage];			# der Offset mit dem die Elemente beim Untereinander-Typ nach unten versetzt werden
-			if($this->datasetcount_on_page > 0 AND $this->layout['type'] != 0 AND $this->miny[$lastpage] < $this->yoffset_onpage/$this->datasetcount_on_page + 40){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
-				$this->datasetcount_on_page = 0;
+			if($this->layout['type'] != 0 AND $this->miny[$lastpage] < 80){		# neue Seite beim Untereinander-Typ oder eingebettet-Typ und Seitenüberlauf
 				$this->i_on_page = 0;
 				#$this->maxy = 0;
 				if(!$this->initial_yoffset)$this->initial_yoffset = 780-$this->maxy;			# der Offset von oben gesehen, mit dem das erste fortlaufende Element auf der ersten Seite beginnt; wird benutzt, um die fortlaufenden Elemente ab der 2. Seite oben beginnen zu lassen
@@ -524,7 +525,6 @@ class ddl {
 			# (die festen Freitexte werden vor jedem Attribut geschrieben, da ein Attribut zu einem Seitenüberlauf führen können)
 			$this->remaining_freetexts = $this->add_freetexts($i, $offsetx, 'running');
 			################# fortlaufende Freitexte schreiben ###############
-      $this->datasetcount_on_page++;
     }
 		if($pdfobject == NULL){		# nur wenn kein PDF-Objekt aus einem übergeordneten Layer übergeben wurde, PDF erzeugen
 			# Freitexte hinzufügen, die auf jeder Seite erscheinen sollen (Seitennummerierung etc.)
@@ -616,7 +616,8 @@ class ddl {
 				if($formvars['border_'.$attributes['name'][$i]])$sql.= " ,border = ".(int)$formvars['border_'.$attributes['name'][$i]];
 				else $sql.= " ,border = NULL";
 				$sql.= " ,font = '".$formvars['font_'.$attributes['name'][$i]]."'";
-				$sql.= " ,fontsize = ".(int)$formvars['fontsize_'.$attributes['name'][$i]];
+				if($formvars['fontsize_'.$attributes['name'][$i]])$sql.= " ,fontsize = ".(int)$formvars['fontsize_'.$attributes['name'][$i]];
+				else $sql.= " ,fontsize = NULL";
 				#echo $sql;
         $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
         $this->database->execSQL($sql,4, 1);
@@ -716,7 +717,8 @@ class ddl {
 				if($formvars['border_'.$attributes['name'][$i]] != '')$sql.= " ,border = ".(int)$formvars['border_'.$attributes['name'][$i]];
 				else $sql.= " ,border = NULL";
 				$sql.= " ,font = '".$formvars['font_'.$attributes['name'][$i]]."'";
-				$sql.= " ,fontsize = ".(int)$formvars['fontsize_'.$attributes['name'][$i]];
+				if($formvars['fontsize_'.$attributes['name'][$i]])$sql.= " ,fontsize = ".(int)$formvars['fontsize_'.$attributes['name'][$i]];
+				else $sql.= " ,fontsize = NULL";
 				#echo $sql;
         $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
         $this->database->execSQL($sql,4, 1);

@@ -18,7 +18,7 @@
 			$qlayerset['shape'][0][$attributes['name'][$i]] = $this->formvars['value_'.$attributes['name'][$i]];
 		}
 		# weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
-		$attributes = $mapdb->add_attribute_values($attributes, $layerdb, $qlayerset['shape'], true);	
+		$attributes = $mapdb->add_attribute_values($attributes, $layerdb, $qlayerset['shape'], true, $this->Stelle->id);	
 	
 		for($i = 0; $i < count($attributes['name']); $i++){
 			if($attributes['name'][$i] == 'oid'){

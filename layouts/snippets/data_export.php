@@ -28,14 +28,22 @@ function buildwktpolygonfromsvgpath(svgpath){
 	return wkt;
 }
 
-function update_coords(){
+function update_format(){
+	if(document.GUI.export_format.value == 'UKO' || document.GUI.export_format.value == 'OVL'){
+		document.getElementById('attributes_div').style.visibility = 'hidden';
+	}
+	else{
+		document.getElementById('attributes_div').style.visibility = 'visible';
+	}
 	if(document.GUI.export_format.value == 'CSV'){
 		document.getElementById('coord_div').style.display = 'none';
 		document.getElementById('geom_div').style.display = 'none';
+		document.getElementById('groupnames_div').style.visibility = 'visible';		
 	}
 	else{
 		document.getElementById('geom_div').style.display = '';
 		document.getElementById('coord_div').style.display = 'inline';
+		document.getElementById('groupnames_div').style.visibility = 'hidden';
 		if(document.GUI.export_format.value == 'KML' || document.GUI.export_format.value == 'OVL'){
 			document.getElementById('wgs84').style.display = 'inline';
 			document.GUI.epsg.style.display = 'none';
@@ -155,7 +163,7 @@ $j=0;
 						</tr>
 						<tr>
 							<td>
-								<select name="export_format" onchange="update_coords();">
+								<select name="export_format" onchange="update_format();">
 								<? if($this->data_import_export->layerdaten['export_privileg'][$selectindex] == 1 AND $this->data_import_export->attributes['the_geom'] != ''){ ?>
 									<option <? if($this->formvars['export_format'] == 'Shape')echo 'selected '; ?> value="Shape">Shape</option>
 									<option <? if($this->formvars['export_format'] == 'GML')echo 'selected '; ?> value="GML">GML</option>
@@ -199,12 +207,13 @@ $j=0;
 
       </div>
 
-      <div style="border-bottom:1px solid #C3C7C3; border-left: 1px solid #C3C7C3; border-right: 1px solid #C3C7C3; padding-top:10px; padding-bottom:5px; padding-left:5px; padding-right:5px;">
-        <?php echo $strAttributeSelection; ?>:
+      <div id="attributes_div" style="<? if($this->formvars['export_format'] == 'UKO' OR $this->formvars['export_format'] == 'OVL'){echo 'visibility:hidden';}else{echo 'visibility:visible';} ?>;border-bottom:1px solid #C3C7C3; border-left: 1px solid #C3C7C3; border-right: 1px solid #C3C7C3; padding-top:10px; padding-bottom:5px; padding-left:5px; padding-right:5px;">
+        &nbsp;&nbsp;<?php echo $strAttributeSelection; ?>:
         <div class="flexcontainer2">
         	<? for($s = 0; $s < 4; $s++){ ?>
         	<div style="float: left; padding: 4px; min-width:20%;">
           <? for($i = 0; $i < $floor+$r; $i++){
+						if($this->data_import_export->attributes['group'][$j] != '')$groupnames = true;
 						if($this->data_import_export->attributes['form_element_type'][$j] == 'Dokument'){$document_attributes = true; $document_ids[] = $j;}
 						if($this->data_import_export->attributes['name'][$j] == $this->data_import_export->attributes['the_geom'] AND $this->data_import_export->layerdaten['export_privileg'][$selectindex] != 1) continue;
 					?>
@@ -234,11 +243,27 @@ $j=0;
         </div>
 				&nbsp;&nbsp;&nbsp;&nbsp;<a id="selectall_link" href="javascript:selectall('<? echo $this->data_import_export->attributes['the_geom']; ?>')"><? echo $strSelectAll; ?></a>
       </div>
-
-			<? if($document_attributes){ ?>
-			<div style="margin-top:20px; margin-bottom:0px; text-align: center;">				
-				<input type="checkbox" onclick="select_document_attributes('<? echo implode(',', $document_ids); ?>');" name="download_documents"><? echo $strDownloadDocuments; ?>
-      </div>
+			
+			<? if($groupnames OR $document_attributes){ ?>
+				<div style="border-bottom:1px solid #C3C7C3; border-left: 1px solid #C3C7C3; border-right: 1px solid #C3C7C3; padding-top:10px; padding-bottom:5px; padding-left:5px; padding-right:5px;">
+					&nbsp;&nbsp;<? echo $strOptions; ?>:
+					<table cellspacing="7">
+						<? if($groupnames){ ?>
+						<tr>
+							<td>
+								<div id="groupnames_div" style="<? if($this->formvars['export_format'] != 'CSV'){echo 'visibility:hidden';}else{echo 'visibility:visible';} ?>"><input type="checkbox" name="export_groupnames"><? echo $strExportGroupnames; ?></div>
+							</td>
+						</tr>
+						<? }
+						if($document_attributes){ ?>
+						<tr>
+							<td>
+								<input type="checkbox" onclick="select_document_attributes('<? echo implode(',', $document_ids); ?>');" name="download_documents"><? echo $strDownloadDocuments; ?>
+							</td>
+						</tr>
+					<? } ?>
+					</table>
+				</div>
 			<? } ?>
 			
       <div style="margin-top:30px; margin-bottom:10px; text-align: center;">

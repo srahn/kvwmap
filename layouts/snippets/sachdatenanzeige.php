@@ -1,4 +1,5 @@
-<?
+<? 
+	global $selectable_limits;
 	include(SNIPPETS.'generic_form_parts.php');
   include(LAYOUTPATH.'languages/sachdatenanzeige_'.$this->user->rolle->language.'.php');
 	include(SNIPPETS.'sachdatenanzeige_functions.php'); 
@@ -102,7 +103,27 @@ for($i=0;$i<$anzLayer;$i++){
 	if($this->found != 'false' AND $this->formvars['printversion'] == ''){	?>		
 		<table width="100%" border="0" cellpadding="0" cellspacing="0">
     <tr>
-    	<td width="49%"></td>
+    	<td width="49%" class="px13">
+				<? if($this->user->rolle->querymode == 1){ ?>
+					<script type="text/javascript">
+						if(document.getElementById('overlayfooter') != undefined){
+							document.getElementById('overlayfooter').style.display = 'block';
+							document.getElementById('anzahl').value = '<? echo $this->formvars['anzahl']; ?>';
+						}
+					</script>
+				<? }else{
+							echo '&nbsp;'.$strLimit; ?>&nbsp;
+							<select name="anzahl" id="anzahl" onchange="javascript:overlay_submit(currentform, false);">
+								<? foreach($selectable_limits as $limit){
+								if($this->formvars['anzahl'] != '' AND $custom_limit != true AND !in_array($this->formvars['anzahl'], $selectable_limits) AND $this->formvars['anzahl'] < $limit){
+									$custom_limit = true;	?>
+									<option value="<? echo $this->formvars['anzahl'];?>" selected><? echo $this->formvars['anzahl']; ?></option>
+								<? } ?>
+								<option value="<? echo $limit; ?>" <? if($this->formvars['anzahl'] == $limit)echo 'selected'?>><? echo $limit; ?></option>
+								<? } ?>
+							</select>
+					<? } ?>
+			</td>
       <td align="center">
 			<?  if($this->editable != ''){
 						if($this->user->rolle->querymode == 1){ ?>
@@ -184,7 +205,6 @@ for($i=0;$i<$anzLayer;$i++){
   	}
   ?>
   <a name="unten"></a>
-  <input type="hidden" name="anzahl" value="<? echo $this->formvars['anzahl']; ?>">
   <input type="hidden" name="printversion" value="">
   <input type="hidden" name="go_backup" value="">
   <input name="querypolygon" type="hidden" value="<?php echo $this->querypolygon; ?>">

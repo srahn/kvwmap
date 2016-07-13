@@ -9,7 +9,7 @@
 
 	function attribute_name($layer_id, $attributes, $j, $k, $fontsize){
 		$datapart .= '<table ';
-		if($attributes['group'][0] != '' AND $attributes['position'][$j+1] != 'daneben' AND $attributes['position'][$j-1] != 'daneben' AND $attributes['position'][$j] != 'daneben')$datapart .= 'width="200px"';
+		if($attributes['group'][0] != '' AND $attributes['arrangement'][$j+1] != 1 AND $attributes['arrangement'][$j-1] != 1 AND $attributes['arrangement'][$j] != 1)$datapart .= 'width="200px"';
 		else $datapart .= 'width="100%"';
 		$datapart .= '><tr style="border: none"><td>';
 		if(!in_array($attributes['form_element_type'][$j], array('SubFormPK', 'SubFormEmbeddedPK', 'SubFormFK', 'dynamicLink'))){
@@ -61,7 +61,19 @@
 			$onchange = 'change_all('.$layer_id.', '.$k.', \''.$name.'\');';
 		}
 
-		if($attributes['position'][$j+1] == 'daneben' OR $attributes['position'][$j] == 'daneben')$size = 12;
+		# Ermittlung einer geeigneten Größe für das Atrtibut
+		if($attributes['arrangement'][$j+1] == 1 OR $attributes['arrangement'][$j] == 1){
+			$a = $j;
+			$b = $j+1;
+			while($a > $j-4 AND $attributes['arrangement'][$a] == 1)$a--;		# 4 vorwärts gucken
+			while($b < $j+4 AND $attributes['arrangement'][$b] == 1)$b++;		# 4 rückwärts gucken
+			$attributes_in_row = $b-$a;
+			if($attributes['labeling'][$j] == 0)$size=40;
+			else $size = 60;
+			$size = $size/$attributes_in_row;
+			$sw = 8*$size;
+			$select_width = 'width: '.$sw.'px;';
+		}
 		
 		if($attributes['constraints'][$j] != '' AND !in_array($attributes['constraints'][$j], array('PRIMARY KEY', 'UNIQUE'))){
 			if($attributes['privileg'][$j] == '0' OR $lock[$k]){
@@ -266,7 +278,7 @@
 								}
 								$data .= '&preview_attribute='.$attributes['preview_attribute'][$j];
 								$datapart .= '&data='.str_replace('&', '<und>', $data);
-								$datapart .= '&selected_layer_id='.$attributes['subform_layer_id'][$j].'&embedded=true&fromobject=subform'.$layer_id.'_'.$k.'_'.$j.'&targetobject='.$layer_id.'_'.$name.'_'.$k.'&targetlayer_id='.$layer_id.'&targetattribute='.$name.'\', new Array(document.getElementById(\'subform'.$layer_id.'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'));clearsubforms('.$attributes['subform_layer_id'][$j].');"><span>'.$strNewEmbeddedPK.'</span></a>';
+								$datapart .= '&selected_layer_id='.$attributes['subform_layer_id'][$j].'&embedded=true&fromobject=subform'.$layer_id.'_'.$k.'_'.$j.'&targetobject='.$layer_id.'_'.$name.'_'.$k.'&targetlayer_id='.$layer_id.'&targetattribute='.$name.'\', new Array(document.getElementById(\'subform'.$layer_id.'_'.$k.'_'.$j.'\'), \'\'), new Array(\'sethtml\', \'execute_function\'));clearsubforms('.$attributes['subform_layer_id'][$j].');"><span>'.$strNewEmbeddedPK.'</span></a>';
 								$datapart .= '<div style="display:inline" id="subform'.$layer_id.'_'.$k.'_'.$j.'"></div>';
 							}
 							else{
@@ -471,7 +483,7 @@
 							$datapart .= htmlspecialchars($value);
 						}
 						else{								// zeilenweise
-							$maxwidth = $size * 9;
+							$maxwidth = $size * 11;
 							$minwidth = $size * 7.1;
 							$datapart .= '<div style="padding: 0 0 0 3; min-width: '.$minwidth.'px; max-width:'.$maxwidth.'px; font-size: '.$fontsize.'px;">'.htmlspecialchars($value).'</div>';
 						}
