@@ -6,10 +6,14 @@
     result = $('#eventsResult');
 
     // event handler
-    $('#konvertierungen_table').on('load-success.bs.table', function (e, data) {
+    $('#konvertierungen_table')
+    .on('load-success.bs.table', function (e, data) {
       result.text('Tabelle erfolgreich geladen.');
-      $('.fa-play').click(
+      $('#konvertierung_ausfuehren').click(
         starteKonvertierung
+      );
+      $('#konvertierung_loeschen').click(
+        loescheKonvertierung
       );
     })
     .on('load-error.bs.table', function (e, status) {
@@ -51,10 +55,26 @@
     funcIsDisabled = row.status != "<?php echo Konvertierung::$STATUS['VALIDIERUNG_OK']; ?>";
     output += '<a class="btn btn-link btn-xs xpk-func-btn' + (funcIsDisabled ? disableFrag : '') + '" title="Konvertierung ausf&uuml;hren" id="konvertierung_ausfuehren" href="#"><i class="fa fa-lg fa-play"></i></a>';
     // allways enabled
-    output += '<a class="btn btn-link btn-xs" title="Konvertierung l&ouml;schen" href="http://www.google.de"><i class="fa fa-lg fa-trash"></i></a>';
+    output += '<a class="btn btn-link btn-xs" title="Konvertierung l&ouml;schen" href="#" id="konvertierung_loeschen"><i class="fa fa-trash"></i></a>';
     output += '</span>';
     return output;
   }
+
+  loescheKonvertierung = function(e) {
+    var konvertierung_id = $(e.target).parent().parent().attr('konvertierung_id');
+    $(this).closest('tr').remove();
+    result.text('Lösche Konvertierung für Id: ' + konvertierung_id);
+    $.ajax({
+      url: 'index.php?go=xplankonverter_konvertierung_loeschen',
+      data: {
+        konvertierung_id: konvertierung_id
+      },
+      success: function(response) {
+        result.text(response.msg);
+      }
+    });
+  };
+
 </script>
 <!--ul class='nav nav-tabs'>
   <li class='<?php echo ($config['active']==='step1' ? 'active' : '');?>'><a data-toggle='tab'>Schritt 1</a></li>
@@ -70,7 +90,7 @@
 <table
   id="konvertierungen_table"
   data-toggle="table"
-  data-url="index.php?go=Layer-Suche_Suchen&selected_layer_id=<?php echo XPLANKONVERTER_KONVERTIERUNGEN_LAYER_ID; ?>&mime_type=formatter&format=json"
+  data-url="index.php?go=Layer-Suche_Suchen&selected_layer_id=<?php echo XPLANKONVERTER_KONVERTIERUNGEN_LAYER_ID; ?>&anzahl=1000&mime_type=formatter&format=json"
   data-height="100%"
   data-click-to-select="false"
   data-sort-name="bezeichnung"

@@ -2,6 +2,7 @@
  $strTitle="Layereigenschaften stellenbezogen";
  $strTask="der Stelle";
  $strQueryable="abfragbar";
+ $strGeomUsable="Geometrie übernehmbar";
  $strMinScale="Min scale";
  $strMaxScale="Max scale";
  $strOffSite="Offsite";

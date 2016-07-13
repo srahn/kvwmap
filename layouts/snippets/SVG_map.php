@@ -61,6 +61,7 @@
 	
    
   function get_map_ajax(postdata){
+		startwaiting();
 		if(document.GUI.legendtouched.value == 0){
   		svgdoc = document.SVG.getSVGDocument();	
 			// nix
@@ -368,7 +369,6 @@ function startup(){';
 }
 
 function sendpath(cmd, pathx, pathy){
-	startwaiting();
 	top.sendpath(cmd, pathx, pathy);
 	if(cmd == "polygonquery")deletepolygon();
 }
@@ -779,9 +779,13 @@ function world2pixelsvg(pathWelt){
 
 
 // -------------------------mausinteraktionen auf canvas------------------------------
-// id="canvas" onmousedown="canvas(evt)" onmousemove="hide_tooltip();movePoint(evt);moveVector(evt)" onmouseup="endPoint(evt);endMove(evt)" width="100%" height="100%" opacity="0"/>
-// function canvas(evt){
 
+function mouse_move(evt){
+	top.coords_anzeige(evt, null);
+	if(doing == "ppquery"){
+		hidetooltip(evt);
+	}
+}		
 
 function mousedown(evt){
 	mouse_down = true;
@@ -806,7 +810,7 @@ function mousedown(evt){
 	    startMove(evt);
 	   break;
 		case "showcoords":
-	    show_coords(evt);
+	    top.show_coords(evt, null);
 	   break;
 	   case "pquery":
 	    startPoint(evt);
@@ -1223,11 +1227,12 @@ function remove_vertices(){
 }
 
 function activate_vertex(evt){
-	evt.target.setAttribute("opacity", "1");
-	coordx = evt.target.getAttribute("x");
-	coordy = evt.target.getAttribute("y");
-	image_coordx = evt.target.getAttribute("cx");
-	image_coordy = evt.target.getAttribute("cy");
+	vertex = evt.target;
+	vertex.setAttribute("opacity", "1");
+	coordx = vertex.getAttribute("x");
+	coordy = vertex.getAttribute("y");
+	image_coordx = vertex.getAttribute("cx");
+	image_coordy = vertex.getAttribute("cy");
 	if(doing == "measure" && measuring){
 		pathx.push(image_coordx);
 		pathy.push(image_coordy);
@@ -1237,8 +1242,9 @@ function activate_vertex(evt){
 		redrawPL();
 		deletelast(evt);
 	}
-	if(top.document.GUI.runningcoords != undefined)top.document.GUI.runningcoords.value = top.format_number(coordx, false, false, false) + " / " + top.format_number(coordy, false, false, false); 
-	top.document.GUI.activated_vertex.value = evt.target.getAttribute("id");
+	//if(top.document.GUI.runningcoords != undefined)top.document.GUI.runningcoords.value = top.format_number(coordx, false, false, false) + " / " + top.format_number(coordy, false, false, false); 
+	top.document.GUI.activated_vertex.value = vertex.getAttribute("id");
+	top.coords_anzeige(evt, vertex);
 }
 
 function activate_line(evt){
@@ -1310,6 +1316,9 @@ function add_vertex(evt){
 		redrawPolygon();
 		polygonarea(evt);
 		vertex.setAttribute("opacity", "0.8");
+	}
+	if(doing == "showcoords"){
+		top.show_coords(evt, vertex);
 	}
 }
 
@@ -1417,16 +1426,6 @@ function redrawPL(){
 	}
   // polygon um punktepfad erweitern
   document.getElementById("polyline").setAttribute("points", path);
-}
-
-function show_coords(evt){
-	coorx = evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value);
-	coory = top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value);
-	if(top.document.GUI.secondcoords != undefined)top.ahah("index.php", "go=spatial_processing&curSRID='.$this->user->rolle->epsg_code.'&newSRID='.$this->user->rolle->epsg_code2.'&point="+coorx+" "+coory+"&operation=transformPoint&resulttype=wkt&coordtype='.$this->user->rolle->coordtype.'", new Array(top.document.GUI.secondcoords), "");
-	coorx = top.format_number(coorx, true, true, false);
-	coory = top.format_number(coory, true, true, false);
-	top.document.GUI.firstcoords.value = coorx+" "+coory; 
-	top.document.getElementById("showcoords").style.display="";
 }
 
 // ----------------------------punkt setzen---------------------------------

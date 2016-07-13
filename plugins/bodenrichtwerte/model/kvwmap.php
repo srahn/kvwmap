@@ -37,7 +37,7 @@
   	$gemarkungsliste=$GemkgObj->getGemarkungListe(array($GUI->formvars['gemeinde']),array());
     $GUI->GemkgFormObj=new FormObject('gemarkung','select',$gemarkungsliste['GemkgID'],$GUI->formvars['gemarkung'],$gemarkungsliste['Name'],1,0,0,158);
     
-    $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id);
+    $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true);
     # Spaltenname und from-where abfragen
     if(!$GUI->formvars['layer_id']){
       $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
