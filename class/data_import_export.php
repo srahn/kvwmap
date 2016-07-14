@@ -452,7 +452,6 @@ class data_import_export {
         if($this->formvars['check_'.$this->dbf->header[$i][0]]){
 					if($this->formvars['primary_key'] != $this->formvars['sql_name_'.$this->dbf->header[$i][0]]){
 						if($i > 0)$sql .= ', ';
-						#$sql .= 'CAST ('.$this->formvars['dbf_name_'.$this->dbf->header[$i][0]].' AS '.$this->formvars['sql_type_'.$this->dbf->header[$i][0]].') as '.strtolower($this->formvars['sql_name_'.$this->dbf->header[$i][0]]);
 						$sql .= $this->formvars['dbf_name_'.$this->dbf->header[$i][0]].' as '.strtolower($this->formvars['sql_name_'.$this->dbf->header[$i][0]]);
 					}
         }
@@ -460,109 +459,84 @@ class data_import_export {
 			$sql .= ' FROM '.$importfile;
 			$options = $this->formvars['table_option'];
 			$options.= ' -nlt PROMOTE_TO_MULTI -lco FID=gid';
-			$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $this->formvars['table_name'], $formvars['epsg'], UPLOADPATH.$importfile.'.shp', $database, NULL, $sql, $options);
+			$ret = $this->ogr2ogr_import($this->formvars['schema_name'], $this->formvars['table_name'], $formvars['epsg'], UPLOADPATH.$importfile.'.shp', $database, NULL, $sql, $options);
 			
-			
+      
+      // # erzeugte SQL-Datei anpassen
       // if($this->formvars['table_option'] == '-u') {
-        // $command = POSTGRESBINPATH.'shp2pgsql -g the_geom -A "'.$alterstring.'" -a ';
-      // }
-      // else {
-        // $command = POSTGRESBINPATH.'shp2pgsql -g the_geom -A "'.$alterstring.'" '.$this->formvars['table_option'].' ';
-      // }
-      // if($this->formvars['srid'] != ''){
-        // $command .= '-s '.$this->formvars['srid'].' ';
-      // }
-      // if($this->formvars['gist'] != ''){
-        // $command .= '-I ';
-      // }
-      // if($this->formvars['oids'] != ''){
-        // $command .= '-o ';
-      // }
-      // if($this->formvars['primary_key'] == 'gid'){
-        // $command .= '-P ';
-      // }
-      // $command.= UPLOADPATH.$this->formvars['dbffile'].' '.$this->formvars['table_name'].' > '.UPLOADPATH.$this->formvars['table_name'].'.sql'; 
-      // exec($command);
-      #echo $command;
-      
-      # erzeugte SQL-Datei anpassen
-      if($this->formvars['table_option'] == '-u') {
-        $oldsqld = UPLOADPATH.$this->formvars['table_name'].'.sql';
-        # Shared lock auf die Quelldatei
-        $oldsql = fopen($oldsqld, "r");
-        flock($oldsql, 1) or die("Kann die Quelldatei $oldsqld nicht locken.");
-        # Exclusive lock auf die Zieldatei     
-        $newsql = fopen($oldsqld.".new", "w");
-        flock($newsql, 2) or die("Kann die Zieldatei $newsql nicht locken.");
-				# Zeilenweises einlesen der SQL-Datei $oldsqld in das array *sqlold zum weiteren Umformen
-        $sqlold = file($oldsqld);
-				# Anzahl der Zeilen bestimmen
-				$anzzei = count($sqlold);
-				# Schleife für jede Zeile durchlaufen
-				for ($i = 0; $i < $anzzei; $i++) {
-				# Neuer SQL-Befehl $sqlnew wird gelesen
-					$sqlnew = $sqlold[$i];
-				# Wenn der SQL-Befehl mit INSERT beginnt, dann weiterverarbeiten
-          if (substr($sqlnew,0,6) == "INSERT") {
-  			# alte Befehlszeile wird bei jedem Leerzeichen gesplittet  
-            $old = explode(" ",$sqlnew);
-  			# Feldbezeichner werden herausgelesen, sind durch Kommata getrennt
-            $feld = explode(",",$old[3]);
-  			# da Feldbezeichner in der INSERT-Anweisung eingeklammert sind werden die oeffnende und schliessende Klammer entfernt
-            for ($j=0; $j < count($feld); $j++) {
-              $feld[$j] = trim($feld[$j],"()");
-            }
-  			# heraussuchen, an welcher Stelle der primary_key steht
-            $primkey = array_search($this->formvars['primary_key'],$feld);
-  			# Werte extrahieren, sind duch Kommata getrennt
-  			# Achtung, kommen in den Werten Kommata vor, so wird hier ein fehlerhaftes Statement erzeugt, da die Anzahl der Felder nicht mehr mit der Anzahl der Werte uebereinstimmt
-            $wert = explode(",",$old[5]);
-  			# Bereinigen der Werte
-            for ($j=0; $j < count($wert); $j++) {
-              $wert[$j] = trim($wert[$j]);
-              $wert[$j] = trim($wert[$j],"(;)");
-            }
-  			# SQL-Anweisung neu schreiben
-            $sqlnew = "UPDATE ".$this->formvars['table_name']." SET ";
-  			# den Feldbezeichnern die Werte zuweisen
-            for ($j=0; $j < count($feld); $j++) {
-              $sqlnew .= $feld[$j]." = ". $wert[$j];
-    		# Wertzuweisungen mit Komma voneinander trennen
-              if ($j < count($feld)-1) {
-                $sqlnew .= ", ";
-              }
-            }
-  			# Bindungung hinzufuegen 
-            $sqlnew .= " WHERE ".$feld[$primkey]." = ".$wert[$primkey].";";
-          }
-  			# SQL-Anweisung in die neue Datei $newsql schreiben  
-          fwrite($newsql,$sqlnew);
-        }
-        fclose($oldsql);
-        unlink($oldsqld);
-        rename($oldsqld.".new", $oldsqld);
-        fclose($newsql);
-      }
-      
-			// $command = POSTGRESBINPATH.'psql -f '.UPLOADPATH.$this->formvars['table_name'].'.sql '.$database->dbName.' -U '.$database->user;
-			// if($database->passwd != '')$command = 'export PGPASSWORD='.$database->passwd.'; '.$command;
-      // exec($command);
-      // #echo $command;
-			
-      // $sql = 'SELECT count(*) FROM '.$this->formvars['table_name'];
-      // $ret = $database->execSQL($sql,4, 0);
-      // if (!$ret[0]) {
-        // $count = pg_fetch_array($ret[1]);
-        // $alert = 'Import erfolgreich.';
-        // if($this->formvars['table_option'] == '-c'){
-        	// $alert.= ' Die Tabelle '.$this->formvars['table_name'].' wurde erzeugt.';
+        // $oldsqld = UPLOADPATH.$this->formvars['table_name'].'.sql';
+        // # Shared lock auf die Quelldatei
+        // $oldsql = fopen($oldsqld, "r");
+        // flock($oldsql, 1) or die("Kann die Quelldatei $oldsqld nicht locken.");
+        // # Exclusive lock auf die Zieldatei     
+        // $newsql = fopen($oldsqld.".new", "w");
+        // flock($newsql, 2) or die("Kann die Zieldatei $newsql nicht locken.");
+				// # Zeilenweises einlesen der SQL-Datei $oldsqld in das array *sqlold zum weiteren Umformen
+        // $sqlold = file($oldsqld);
+				// # Anzahl der Zeilen bestimmen
+				// $anzzei = count($sqlold);
+				// # Schleife für jede Zeile durchlaufen
+				// for ($i = 0; $i < $anzzei; $i++) {
+				// # Neuer SQL-Befehl $sqlnew wird gelesen
+					// $sqlnew = $sqlold[$i];
+				// # Wenn der SQL-Befehl mit INSERT beginnt, dann weiterverarbeiten
+          // if (substr($sqlnew,0,6) == "INSERT") {
+  			// # alte Befehlszeile wird bei jedem Leerzeichen gesplittet  
+            // $old = explode(" ",$sqlnew);
+  			// # Feldbezeichner werden herausgelesen, sind durch Kommata getrennt
+            // $feld = explode(",",$old[3]);
+  			// # da Feldbezeichner in der INSERT-Anweisung eingeklammert sind werden die oeffnende und schliessende Klammer entfernt
+            // for ($j=0; $j < count($feld); $j++) {
+              // $feld[$j] = trim($feld[$j],"()");
+            // }
+  			// # heraussuchen, an welcher Stelle der primary_key steht
+            // $primkey = array_search($this->formvars['primary_key'],$feld);
+  			// # Werte extrahieren, sind duch Kommata getrennt
+  			// # Achtung, kommen in den Werten Kommata vor, so wird hier ein fehlerhaftes Statement erzeugt, da die Anzahl der Felder nicht mehr mit der Anzahl der Werte uebereinstimmt
+            // $wert = explode(",",$old[5]);
+  			// # Bereinigen der Werte
+            // for ($j=0; $j < count($wert); $j++) {
+              // $wert[$j] = trim($wert[$j]);
+              // $wert[$j] = trim($wert[$j],"(;)");
+            // }
+  			// # SQL-Anweisung neu schreiben
+            // $sqlnew = "UPDATE ".$this->formvars['table_name']." SET ";
+  			// # den Feldbezeichnern die Werte zuweisen
+            // for ($j=0; $j < count($feld); $j++) {
+              // $sqlnew .= $feld[$j]." = ". $wert[$j];
+    		// # Wertzuweisungen mit Komma voneinander trennen
+              // if ($j < count($feld)-1) {
+                // $sqlnew .= ", ";
+              // }
+            // }
+  			// # Bindungung hinzufuegen 
+            // $sqlnew .= " WHERE ".$feld[$primkey]." = ".$wert[$primkey].";";
+          // }
+  			// # SQL-Anweisung in die neue Datei $newsql schreiben  
+          // fwrite($newsql,$sqlnew);
         // }
-        // $alert .= ' Die Tabelle enthält jetzt '.$count[0].' Datensätze.';
-        // showAlert($alert);
+        // fclose($oldsql);
+        // unlink($oldsqld);
+        // rename($oldsqld.".new", $oldsqld);
+        // fclose($newsql);
       // }
-      // else{
-        // showAlert('Import fehlgeschlagen.');
-      // }
+			
+			if($ret == 0){
+				$sql = 'SELECT count(*) FROM '.$this->formvars['schema_name'].'.'.$this->formvars['table_name'];
+				$ret = $database->execSQL($sql,4, 0);
+				if (!$ret[0]) {
+					$count = pg_fetch_row($ret[1]);
+					$alert = 'Import erfolgreich.';
+					if($this->formvars['table_option'] == ''){
+						$alert.= ' Die Tabelle '.$this->formvars['schema_name'].'.'.$this->formvars['table_name'].' wurde erzeugt.';
+					}
+					$alert .= ' Die Tabelle enthält jetzt '.$count[0].' Datensätze.';
+					showAlert($alert);
+				}
+			}
+      else{
+        showAlert('Import fehlgeschlagen.');
+      }
     }
   }
   
@@ -593,53 +567,7 @@ class data_import_export {
       }
     }
   }
-  
-  function simple_shp_import_speichern($formvars, $database){
-  	$this->formvars = $formvars;
-    if(file_exists(UPLOADPATH.$this->formvars['dbffile'])){      
-      $command = POSTGRESBINPATH.'shp2pgsql -g the_geom -W LATIN1 '.$this->formvars['table_option'].' ';
-      if($this->formvars['srid'] != ''){
-        $command .= '-s '.$this->formvars['srid'].' ';
-      }
-      if($this->formvars['gist'] != ''){
-        $command .= '-I ';
-      }
-      $command.= UPLOADPATH.$this->formvars['dbffile'].' '.$this->formvars['table_name'].' > '.UPLOADPATH.$this->formvars['table_name'].'.sql'; 
-      exec($command);
-      #echo $command;
-			
-			$command = POSTGRESBINPATH.'psql -h '.$database->host.' -f '.UPLOADPATH.$this->formvars['table_name'].'.sql '.$database->dbName.' '.$database->user;
-			if($database->passwd != '')$command = 'export PGPASSWORD='.$database->passwd.'; '.$command;
-      exec($command);
-      #echo $command;
-      $sql = 'SELECT count(*) FROM '.$this->formvars['table_name'];
-      $ret = $database->execSQL($sql,4, 0);
-      if (!$ret[0]) {
-        $count = pg_fetch_array($ret[1]);
-        $alert = 'Import erfolgreich.';
-        if($this->formvars['table_option'] == '-c'){
-        	$alert.= ' Die Tabelle '.$this->formvars['table_name'].' wurde erzeugt.';
-        	$sql = 'INSERT INTO shp_import_tables (tabellenname) VALUES (\''.$this->formvars['table_name'].'\')';
-        	$ret = $database->execSQL($sql,4, 1);
-        }
-        $alert .= ' Die Tabelle enthält jetzt '.$count[0].' Datensätze.';
-        showAlert($alert);
-      }
-      else{
-        showAlert('Import fehlgeschlagen.');
-      }
-    }
-  }
-  
-  function simple_shp_import($formvars, $database){
-  	$this->shp_import($formvars);
-  	$sql = 'SELECT DISTINCT * FROM shp_import_tables';
-  	$ret = $database->execSQL($sql,4, 0);
-    while($rs = pg_fetch_array($ret[1])){
-    	$this->tables[] = $rs;
-    }
-  }
-	
+  	
 	function get_ukotable_srid($database){
 		$sql = "select srid from geometry_columns where f_table_name = 'uko_polygon'";
 		$ret = $database->execSQL($sql,4, 1);
@@ -718,8 +646,9 @@ class data_import_export {
 		if($database->port != '')$command.=' port='.$database->port;
 		if($database->host != '') $command .= ' host=' . $database->host;
 		$command .= '" '.$importfile.' '.$layer;
-		echo $command;
-		exec($command);
+		#echo $command;
+		exec($command, $output, $ret);
+		return $ret;
 	}
 	
 	function create_csv($result, $attributes, $groupnames){
