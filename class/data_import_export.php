@@ -96,7 +96,7 @@ class data_import_export {
 		$this->formvars['Datentyp'] = $custom_table['datatype'];
 		$select = 'oid, the_geom';
 		if($custom_table['labelitem'] != '')$select .= ', '.$custom_table['labelitem'];
-		$this->formvars['Data'] = 'the_geom from (SELECT '.$select.' FROM '.CUSTOM_SHAPE_SCHEMA.'.'.$custom_table['tablename'].' WHERE 1=1 '.$custom_table['where'].')as foo using unique oid using srid='.$formvars['epsg'];
+		$this->formvars['Data'] = 'the_geom from (SELECT '.$select.' FROM '.CUSTOM_SHAPE_SCHEMA.'.'.$custom_table['tablename'].' WHERE 1=1 '.$custom_table['where'].')as foo using unique oid using srid='.$epsg;
 		$this->formvars['query'] = 'SELECT * FROM '.$custom_table['tablename'].' WHERE 1=1'.$custom_table['where'];
 		$connectionstring ='user='.$pgdatabase->user;
 		if($pgdatabase->passwd != '')$connectionstring.=' password='.$pgdatabase->passwd;
@@ -104,7 +104,7 @@ class data_import_export {
     if($pgdatabase->host != 'localhost') $connectionstring .= ' host=' . $pgdatabase->host;
 		$this->formvars['connection'] = $connectionstring;
 		$this->formvars['connectiontype'] = 6;
-		$this->formvars['epsg_code'] = $formvars['epsg'];
+		$this->formvars['epsg_code'] = $epsg;
 		$this->formvars['transparency'] = 65;
 		if($custom_table['labelitem'] != '')$this->formvars['labelitem'] = $custom_table['labelitem'];
 		$layer_id = $dbmap->newRollenLayer($this->formvars);
