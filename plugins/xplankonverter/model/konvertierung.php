@@ -21,7 +21,7 @@ class Konvertierung extends PgObject {
   }
 
   function createLayerGroup() {
-    $layerGroup = new LayerGroup($this->gui->database);
+		$layerGroup = new MyObject($this->gui->database, 'u_groups');
     $layerGroup->create(array(
       'Gruppenname' => $this->get('bezeichnung')
     ));
