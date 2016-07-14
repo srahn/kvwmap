@@ -8550,7 +8550,7 @@ class GUI {
 			$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
 			# Daten abfragen
 			$element = explode(';', $checkbox_names[0]);   #  check;table_alias;table;oid
-			$where = " AND ".$element[1].".oid IN (";
+			$where = " WHERE ".$element[2]."_oid IN (";
 			for($i = 0; $i < count($checkbox_names); $i++){
 				if($this->formvars[$checkbox_names[$i]] == 'on'){
 					$element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid

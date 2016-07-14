@@ -814,7 +814,7 @@ class data_import_export {
 		$filter = $mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id);
 		
 		# Where-Klausel aus Sachdatenabfrage-SQL
-		$where = substr(strip_pg_escape_string($this->formvars['sql_'.$this->formvars['selected_layer_id']]), strrpos(strtolower(strip_pg_escape_string($this->formvars['sql_'.$this->formvars['selected_layer_id']])), 'where')+5);
+		$where = substr(strip_pg_escape_string($this->formvars['sql_'.$this->formvars['selected_layer_id']]), strrpos(strtolower(strip_pg_escape_string($this->formvars['sql_'.$this->formvars['selected_layer_id']])), 'where'));
 		
 		# order by rausnehmen
   	$orderbyposition = strrpos(strtolower($sql), 'order by');
@@ -873,61 +873,35 @@ class data_import_export {
 			$pfad = 'DISTINCT '.$pfad;
 		}
 		$sql = "SELECT ".$pfad;		
-    
-    if($this->attributes['table_alias_name'][$this->attributes['the_geom']] != $this->attributes['table_name'][$this->attributes['the_geom']]){
-    	$the_geom = $this->attributes['table_alias_name'][$this->attributes['the_geom']].'.'.$this->attributes['the_geom'];
-    }
-    else{
-    	$the_geom = $this->attributes['the_geom'];
-    }
-    
-		# Transformieren von the_geom im Select-Teil
-    if($this->formvars['epsg']){
-    	$select = substr($sql, 0, strrpos(strtolower($sql), 'from'));
-    	$rest = substr($sql, strrpos(strtolower($sql), 'from'));
-    	if(strpos($select, '.'.$this->attributes['the_geom']) !== false) $geom = $the_geom;	// table.the_geom muss ersetzt werden
-    	else	$geom = $this->attributes['the_geom'];	// nur the_geom muss ersetzt werden 
-			$select = str_replace(' '.$geom.',', ' st_transform('.$geom.', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'].',', $select);
-			$select = str_replace(',  '.$geom, ', st_transform('.$geom.', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);    		
-			$select = str_replace(', '.$geom, ', st_transform('.$geom.', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);
-			$select = str_replace(','.$geom, ',st_transform('.$geom.', '.$this->formvars['epsg'].') as '.$this->attributes['the_geom'], $select);
-    	$sql = $select.$rest;
-    }
-  	# über Polygon einschränken
-    if($this->formvars['newpathwkt']){
-    	$sql.= " AND ".$the_geom." && st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code'].") AND ST_INTERSECTS(".$the_geom.", st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."))";
-    }
-		# Where-Klausel aus Sachdatenabfrage-SQL anhängen
-  	if($where != ''){
+        
+		# Bedingungen
+  	if($where != ''){		# Where-Klausel aus Sachdatenabfrage-SQL (abgefragter Extent, Suchparameter oder oids)
   		$orderbyposition = strpos(strtolower($where), 'order by');
   		if($orderbyposition)$where = substr($where, 0, $orderbyposition);
-	    if(strpos($where, 'query.') !== false OR strpos($where, '_oid') !== false){
-	    	if($this->formvars['epsg']){
-	    		$where = str_replace('), '.$layerset[0]['epsg_code'].')', '), '.$this->formvars['epsg'].')', $where);		# die räumliche Einschränkung das Such-SQLs auf den neuen EPSG-Code anpassen
-	    	}
-	    	$sql = "SELECT * FROM (".$sql.$groupby.") as query WHERE 1=1 AND ".$where;
-	    }
-	    else{
-	    	$sql = $sql." AND ".$where;
-	    }
+	    $sql = "SELECT * FROM (".$sql.$groupby.") as query ".$where;
   	}
-		# Filter
-    if($filter != ''){
+    elseif($filter != ''){		# Filter muss nur dazu, wenn kein $where vorhanden, also keine Abfrage gemacht wurde, sondern der gesamte Layer exportiert werden soll (Filter ist ja schon im $where enthalten)
 			$filter = str_replace('$userid', $user->id, $filter);
-    	$sql = 'SELECT * FROM ('.$sql.') as query2 WHERE '.$filter;
-    }		
+    	$sql = "SELECT * FROM (".$sql.$groupby.") as query WHERE ".$filter;
+    }
+    if($this->formvars['newpathwkt']){	# über Polygon einschränken
+    	$sql.= " AND ST_INTERSECTS(".$this->attributes['the_geom'].", st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."))";
+    }
     $sql.= $orderby;
 		#echo $sql;
+		
     $temp_table = 'shp_export_'.rand(1, 10000);
     $sql = 'CREATE TABLE public.'.$temp_table.' AS '.$sql;		# temporäre Tabelle erzeugen, damit das/die Schema/ta berücksichtigt werden
     $ret = $layerdb->execSQL($sql,4, 0);
-		
-		if($this->formvars['export_format'] == 'Shape'){				# das Abschneiden bei nicht in der Länge begrenzten Textspalten verhindern
-			for($s = 0; $s < count($selected_attributes); $s++){
+				
+		for($s = 0; $s < count($selected_attributes); $s++){
+			# Transformieren der Geometrie
+			if($this->attributes['the_geom'] == $selected_attributes[$s])$selected_attributes[$s] = 'st_transform('.$selected_attributes[$s].', '.$this->formvars['epsg'].')';
+			# das Abschneiden bei nicht in der Länge begrenzten Textspalten verhindern
+			if($this->formvars['export_format'] == 'Shape'){
 				if(in_array($selected_attr_types[$s], array('text', 'varchar')))$selected_attributes[$s] = $selected_attributes[$s].'::varchar(254)';
 			}
 		}
-		
     $sql = 'SELECT '.implode(', ', $selected_attributes).' FROM public.'.$temp_table;		# auf die ausgewählten Attribute einschränken
     $ret = $layerdb->execSQL($sql,4, 0);
     if(!$ret[0]){
