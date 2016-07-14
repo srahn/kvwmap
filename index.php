@@ -999,16 +999,6 @@ if(FAST_CASE OR $GUI->goNotExecutedInPlugins){
 		case 'Punktliste_Anzeigen_Anzeigen' : {
 			$GUI->create_point_rollenlayer_import();
 	  } break;
-
-	  case 'simple_SHP_Import' : {
-			$GUI->checkCaseAllowed('simple_SHP_Import');
-			$GUI->simple_shp_import();
-	  } break;
-
-	  case 'simple_SHP_Import_speichern' : {
-			$GUI->checkCaseAllowed('simple_SHP_Import');
-			$GUI->simple_shp_import_speichern();
-	  } break;
 	  
 	  case 'SHP_Import' : {
 			$GUI->checkCaseAllowed('SHP_Import');
