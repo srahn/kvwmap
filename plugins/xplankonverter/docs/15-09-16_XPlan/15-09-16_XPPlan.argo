@@ -1,0 +1,87 @@
+<argo version="6">
+  <documentation>
+    <authorname></authorname>
+    <authoremail></authoremail>
+    <version>0.34</version>
+    <description>
+      
+    </description>
+  </documentation>
+  <settings>
+    <notationlanguage>UML 1.4</notationlanguage>
+    <showboldnames>true</showboldnames>
+    <useguillemots>false</useguillemots>
+    <showassociationnames>true</showassociationnames>
+    <showvisibility>true</showvisibility>
+    <showmultiplicity>true</showmultiplicity>
+    <showinitialvalue>false</showinitialvalue>
+    <showproperties>true</showproperties>
+    <showtypes>true</showtypes>
+    <showstereotypes>false</showstereotypes>
+    <showsingularmultiplicities>true</showsingularmultiplicities>
+    <defaultshadowwidth>1</defaultshadowwidth>
+    <hidebidirectionalarrows>true</hidebidirectionalarrows>    
+    <fontname>Dialog</fontname>
+    <fontsize>12</fontsize>
+    <defaultstereotypeview>0</defaultstereotypeview>
+    <activediagram>RP_Basisobjekte</activediagram>
+  </settings>
+  <searchpath href="PROJECT_DIR" />
+  <members>
+    <member type="profile"
+            name="15-09-16_XPPlan_profile.profile" />
+    <member type="xmi"
+            name="15-09-16_XPPlan.xmi" />
+    <member type="pgml"
+            name="15-09-16_XPPlan_XP_Basisobjekte.pgml"
+            diagramclass="org.argouml.uml.diagram.static_structure.ui.UMLClassDiagram"
+            diagramname="XP_Basisobjekte" />
+    <member type="pgml"
+            name="15-09-16_XPPlan_XP_Praesentationsobjekte.pgml"
+            diagramclass="org.argouml.uml.diagram.static_structure.ui.UMLClassDiagram"
+            diagramname="XP_Praesentationsobjekte" />
+    <member type="pgml"
+            name="15-09-16_XPPlan_RP_Basisobjekte.pgml"
+            diagramclass="org.argouml.uml.diagram.static_structure.ui.UMLClassDiagram"
+            diagramname="RP_Basisobjekte" />
+    <member type="pgml"
+            name="15-09-16_XPPlan_RP_Freiraumstruktur.pgml"
+            diagramclass="org.argouml.uml.diagram.static_structure.ui.UMLClassDiagram"
+            diagramname="RP_Freiraumstruktur" />
+    <member type="pgml"
+            name="15-09-16_XPPlan_XP_Raster.pgml"
+            diagramclass="org.argouml.uml.diagram.static_structure.ui.UMLClassDiagram"
+            diagramname="XP_Raster" />
+    <member type="pgml"
+            name="15-09-16_XPPlan_RP_Infrastruktur.pgml"
+            diagramclass="org.argouml.uml.diagram.static_structure.ui.UMLClassDiagram"
+            diagramname="RP_Infrastruktur" />
+    <member type="pgml"
+            name="15-09-16_XPPlan_RP_Siedlungsstruktur.pgml"
+            diagramclass="org.argouml.uml.diagram.static_structure.ui.UMLClassDiagram"
+            diagramname="RP_Siedlungsstruktur" />
+    <member type="pgml"
+            name="15-09-16_XPPlan_RP_Sonstiges.pgml"
+            diagramclass="org.argouml.uml.diagram.static_structure.ui.UMLClassDiagram"
+            diagramname="RP_Sonstiges" />
+    <member type="pgml"
+            name="15-09-16_XPPlan_RP_Raster.pgml"
+            diagramclass="org.argouml.uml.diagram.static_structure.ui.UMLClassDiagram"
+            diagramname="RP_Raster" />
+    <member type="pgml"
+            name="15-09-16_XPPlan_XP_Enumerationen.pgml"
+            diagramclass="org.argouml.uml.diagram.static_structure.ui.UMLClassDiagram"
+            diagramname="XP_Enumerationen" />
+    <member type="pgml"
+            name="15-09-16_XPPlan_RFPVersion1.pgml"
+            diagramclass="org.argouml.uml.diagram.static_structure.ui.UMLClassDiagram"
+            diagramname="RFPVersion1" />
+    <member type="pgml"
+            name="15-09-16_XPPlan_RFPVersion2.pgml"
+            diagramclass="org.argouml.uml.diagram.static_structure.ui.UMLClassDiagram"
+            diagramname="RFPVersion2" />
+    <member type="todo"
+            name="15-09-16_XPPlan.todo" />
+  </members>
+  <historyfile name="" />
+</argo>
