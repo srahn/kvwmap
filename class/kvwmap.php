@@ -8588,24 +8588,6 @@ class GUI {
     $this->output();
   }
 
-  function simple_shp_import_speichern(){
-		include_once (CLASSPATH.'data_import_export.php');
-    $this->titel='Shape-Import';
-    $this->main='simple_shape_import.php';
-    $this->data_import_export = new data_import_export();
-    $this->data_import_export->simple_shp_import_speichern($this->formvars, $this->pgdatabase);
-    $this->output();
-  }
-
-  function simple_shp_import(){
-		include_once (CLASSPATH.'data_import_export.php');
-    $this->data_import_export = new data_import_export();
-    $this->data_import_export->simple_shp_import($this->formvars, $this->pgdatabase);
-    $this->main='simple_shape_import.php';
-    $this->titel='Shape-Import';
-    $this->output();
-  }
-
   function daten_export(){
 		include_once (CLASSPATH.'data_import_export.php');
     if($this->formvars['chosen_layer_id'] != '')$this->formvars['selected_layer_id'] = $this->formvars['chosen_layer_id'];		# aus der Sachdatenanzeige des GLE
