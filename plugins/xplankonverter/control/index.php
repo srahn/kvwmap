@@ -190,7 +190,7 @@ switch($this->go){
                 konvertierung_id = '" . $this->konvertierung->get('id') . "' AND
                 stelle_id = " . $this->konvertierung->get('stelle_id')
               );
-							$shapeFile = $shapeFiles[0]; # es kann nur eins geben
+              if (!empty($shapeFiles)) $shapeFile = $shapeFiles[0]; # es kann nur eins geben
               if (!empty($shapeFile->data)) {
                 $this->debug('<p>Lösche gefundenes shape file.');
                 $shapeFile->deleteLayer();
@@ -443,7 +443,7 @@ switch($this->go){
 		$gml_file = new gml_file(XPLANKONVERTER_SHAPE_PATH . $konvertierung->get('id') . '/xplan_' . $konvertierung->get('id') . '.gml');
 		$msg = "\nLösche gml file: ". $gml_file->filename;
 		$gml_file->delete();
-	
+
 		# Lösche Regeln
 		$regeln = $konvertierung->getRegeln();
 		foreach($regeln AS $regel) {
