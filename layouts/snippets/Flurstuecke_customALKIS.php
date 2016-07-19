@@ -61,7 +61,7 @@ hide_versions = function(flst){
 	$timestamp = DateTime::createFromFormat('d.m.Y H:i:s', $this->user->rolle->hist_timestamp);
 	$sql = "SELECT max(beginnt)::date FROM alkis.ax_fortfuehrungsfall;";
   $ret=$this->pgdatabase->execSQL($sql,4,0);
-  $aktalkis = pg_fetch_array($ret[1]);
+  $aktalkis = pg_fetch_row($ret[1]);
 
 	$this->Stelle->getFunktionen();
 	$forall = false;
