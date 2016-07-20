@@ -16,4 +16,5 @@
 	$strBufferedLine="gepufferte Linie hinzufuegen";
 	$strParallelPolygon="linksseitig gepufferte Linie hinzufuegen";
   $strMoveGeometry="Geometrie verschieben";
+	$strReverse="Linienrichtung drehen";
 ?>  
