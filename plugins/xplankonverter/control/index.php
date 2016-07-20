@@ -341,21 +341,17 @@ switch($this->go){
 
   case 'xplankonverter_konvertierung_ausfuehren' : {
     include(PLUGINS . 'xplankonverter/model/build_gml.php');
+    $response = array();
     if ($this->formvars['konvertierung_id'] == '') {
-      $this->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
-      $this->main = 'Hinweis.php';
+      $response['success'] = false;
+      $response['msg'] = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
     }
     else {
       $this->konvertierung = new Konvertierung($this, 'xplankonverter', 'konvertierungen');
       $this->konvertierung->find_by('id', $this->formvars['konvertierung_id']);
       if (isInStelleAllowed($this->Stelle->id, $this->konvertierung->get('stelle_id'))) {
         if ($this->konvertierung->get('status') == Konvertierung::$STATUS['VALIDIERUNG_OK']) {
-          // Status setzen
-          $this->konvertierung->set('status', Konvertierung::$STATUS['IN_KONVERTIERUNG']);
-          $this->konvertierung->update();
-          // Seite updaten
-          $this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
-          //
+
           // Status setzen
           $this->konvertierung->set('status', Konvertierung::$STATUS['IN_KONVERTIERUNG']);
           $this->konvertierung->update();
@@ -375,21 +371,14 @@ switch($this->go){
           $this->konvertierung->set('status', Konvertierung::$STATUS['KONVERTIERUNG_OK']);
           $this->konvertierung->update();
 
-          $this->main = '../../plugins/xplankonverter/view/konvertierungen.php';
+          $response['success'] = true;
+          $response['msg'] = 'Konvertierung erfolgreich ausgeführt.';
         } else {
-          $this->Hinweis = 'Die ausgewählte Konvertierung muss zuerst validiert werden.';
-          $this->main = 'Hinweis.php';
+          $response['success'] = false;
+          $response['msg'] = 'Die ausgewählte Konvertierung muss zuerst validiert werden.';
         }
       }
     }
-    $this->output();
-  } break;
-
-  case 'xplankonverter_konvertierung_ausfuehren_alt' : {
-    $response = array(
-        'success' => true,
-        'msg' => 'Konvertierung erfolgreich ausgeführt.'
-    );
     header('Content-Type: application/json');
     echo json_encode($response);
   } break;
