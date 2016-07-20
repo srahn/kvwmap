@@ -898,6 +898,7 @@ function mouseup(evt){
 				document.getElementById("vertex_edit1").style.setProperty("fill","ghostwhite", "");
 				document.getElementById("ppquery0").style.setProperty("fill","ghostwhite", "");
 		  	document.getElementById("ppquery1").style.setProperty("fill","ghostwhite", "");
+				document.getElementById("reverse0").style.setProperty("fill","ghostwhite", "");
 				remove_vertices();
 				remove_in_between_vertices();
 			}
@@ -1174,6 +1175,13 @@ function mouseup(evt){
 	function split_lines(){
 		applylines();
 		top.currentform.last_doing.value = "split_lines";
+	}
+	
+	function reverse_geom(){
+		applylines();
+		top.currentform.secondline.value = true;
+		must_redraw = true;
+		top.ahah("index.php", "go=spatial_processing&path1="+top.currentform.pathwkt.value+"&operation=reverse&resulttype=svgwkt", new Array(top.currentform.result, ""), new Array("setvalue", "execute_function"));
 	}
 	
 	function applylines(){
@@ -3439,7 +3447,7 @@ $measurefunctions = '
 					<rect id="split0" onmouseover="show_tooltip(\''.$strSplitLine.'\',evt.clientX,evt.clientY)" x="0" y="0" width="25" height="25" style="fill:white;opacity:0.25"/>
 				</g>
 				
-				<g id="line" onmousedown="split_lines();highlightbyid(\'split0\');" transform="translate(182 0 )">
+				<g id="line" onmousedown="reverse_geom();highlightbyid(\'reverse0\');" transform="translate(182 0 )">
 		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
 		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
 		      	<set attributeName="filter" begin="del0.mousedown" fill="freeze" to="none"/>
@@ -3457,7 +3465,7 @@ $measurefunctions = '
 							transform="matrix(1 0 0 1 0 0) scale(0.05)"
 							 style="fill:none;stroke:rgb(0,0,0);stroke-width:30"/>
 					</g>
-					<rect id="split0" onmouseover="show_tooltip(\''.$strReverse.'\',evt.clientX,evt.clientY)" x="0" y="0" width="25" height="25" style="fill:white;opacity:0.25"/>
+					<rect id="reverse0" onmouseover="show_tooltip(\''.$strReverse.'\',evt.clientX,evt.clientY)" x="0" y="0" width="25" height="25" style="fill:white;opacity:0.25"/>
 				</g>
 		';
 		$last_x = 182;
