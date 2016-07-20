@@ -3202,7 +3202,7 @@ $measurefunctions = '
 					</rect>
 					<g transform="translate(0 -4.5)">
 						<polygon points="178.579,57.7353 164.258,51.2544 178.96,44.515 174.48,51.1628"
-							 style="fill:rgb(0,0,0);stroke:rgb(0,0,0);stroke-width:2" transform="scale(0.7) translate(-5 0) rotate(320.992 13.3045 25.4374) rotate(2.66158 14.8833 25.1086) translate(-0.0187408 0.792412) translate(-0.846674 1.15063) translate(0.846674 -1.15063) translate(-8.46674 11.5063) translate(8.46674 -11.5063) rotate(1 14.8488 24.959) rotate(1 14.8322 24.9037) rotate(1 14.8138 24.849) rotate(1 14.7934 24.795) rotate(1 14.7712 24.7418) rotate(1 14.7471 24.6893) rotate(-1 14.7212 24.6378) rotate(-1 14.7471 24.6893) rotate(-1 14.7712 24.7418) rotate(-1 14.7934 24.795) rotate(-1 14.8138 24.849) rotate(-1 14.8322 24.9037) rotate(-1 14.8488 24.959) rotate(-1 14.8634 25.0148) rotate(-1 14.876 25.0711) translate(-0.205848 0.251079) rotate(-1 14.8867 25.1278) rotate(-1 14.8954 25.1849) rotate(-1 14.9021 25.2422) rotate(-1 14.9067 25.2997) rotate(-1 14.9094 25.3573) translate(0.318975 -0.00363643) matrix(-1 0 0 1 100 -25) scale(0.5) rotate(180) translate(-345 -152)"/>
+							 style="fill:rgb(0,0,0);stroke:rgb(0,0,0);stroke-width:2" transform="scale(0.36) translate(-139 136) rotate(-45 0 0)"/>
 						<path d="M137.5 355 C230.674 287.237 311.196 227.137 396.5 349"
 							transform="matrix(1 0 0 1 0 0) scale(0.05)"
 							 style="fill:none;stroke:rgb(0,0,0);stroke-width:30"/>
@@ -3318,7 +3318,7 @@ $measurefunctions = '
 		return $boxbuttons;
 	}
 
-	function linebuttons($strUndo, $strDeleteLine, $strDrawLine, $strDelLine, $strSplitLine){
+	function linebuttons($strUndo, $strDeleteLine, $strDrawLine, $strDelLine, $strSplitLine, $strReverse){
 		global $last_x;
 		$linebuttons = '
 				 <g id="undo" onmousedown="deletelastline(evt);" transform="translate(0 0)">
@@ -3329,14 +3329,14 @@ $measurefunctions = '
 					</rect>
 					<g transform="translate(0 -4.5)">
 						<polygon points="178.579,57.7353 164.258,51.2544 178.96,44.515 174.48,51.1628"
-							 style="fill:rgb(0,0,0);stroke:rgb(0,0,0);stroke-width:2" transform="scale(0.7) translate(-5 0) rotate(320.992 13.3045 25.4374) rotate(2.66158 14.8833 25.1086) translate(-0.0187408 0.792412) translate(-0.846674 1.15063) translate(0.846674 -1.15063) translate(-8.46674 11.5063) translate(8.46674 -11.5063) rotate(1 14.8488 24.959) rotate(1 14.8322 24.9037) rotate(1 14.8138 24.849) rotate(1 14.7934 24.795) rotate(1 14.7712 24.7418) rotate(1 14.7471 24.6893) rotate(-1 14.7212 24.6378) rotate(-1 14.7471 24.6893) rotate(-1 14.7712 24.7418) rotate(-1 14.7934 24.795) rotate(-1 14.8138 24.849) rotate(-1 14.8322 24.9037) rotate(-1 14.8488 24.959) rotate(-1 14.8634 25.0148) rotate(-1 14.876 25.0711) translate(-0.205848 0.251079) rotate(-1 14.8867 25.1278) rotate(-1 14.8954 25.1849) rotate(-1 14.9021 25.2422) rotate(-1 14.9067 25.2997) rotate(-1 14.9094 25.3573) translate(0.318975 -0.00363643) matrix(-1 0 0 1 100 -25) scale(0.5) rotate(180) translate(-345 -152)"/>
+							 style="fill:rgb(0,0,0);stroke:rgb(0,0,0);stroke-width:2" transform="scale(0.36) translate(-139 136) rotate(-45 0 0)"/>
 						<path d="M137.5 355 C230.674 287.237 311.196 227.137 396.5 349"
 							transform="matrix(1 0 0 1 0 0) scale(0.05)"
 							 style="fill:none;stroke:rgb(0,0,0);stroke-width:30"/>
 					</g>
 	        <rect id="undo0" onmouseover="show_tooltip(\''.$strUndo.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="1" ry="1" width="25" height="25" transform="translate(0 0)" style="fill:white;opacity:0.25"/>
 	      </g>
-
+				
 	      <g id="new" onmousedown="restartline();highlightbyid(\'line0\');" transform="translate(26 0 )">
 	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
 	        <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
@@ -3438,8 +3438,29 @@ $measurefunctions = '
 						<line x1="300" y1="340" x2="150" y2="160" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="fill:rgb(222,222,222);stroke:rgb(111,111,111);stroke-width:35"/>
 					<rect id="split0" onmouseover="show_tooltip(\''.$strSplitLine.'\',evt.clientX,evt.clientY)" x="0" y="0" width="25" height="25" style="fill:white;opacity:0.25"/>
 				</g>
+				
+				<g id="line" onmousedown="split_lines();highlightbyid(\'split0\');" transform="translate(182 0 )">
+		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:white;stroke:none;"/>
+		      <rect x="0" y="0" rx="1" ry="1" width="25" height="25" style="fill:rgb(233,233,233);stroke:#4A4A4A;stroke-width:0.2;filter:url(#Schatten)">
+		      	<set attributeName="filter" begin="del0.mousedown" fill="freeze" to="none"/>
+						<set attributeName="filter" begin="del0.mouseup;del0.mouseout" fill="freeze" to="url(#Schatten)"/>
+					</rect>
+					<g transform="scale(0.9 0.9) translate(8 3) rotate(20 0 0)">
+						<line	x1="81.5" y1="391" x2="127.5" y2="250" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
+						<line	x1="127.5" y1="250" x2="310.5" y2="243" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
+						<line	x1="310.5" y1="243" x2="370.5" y2="103" transform="matrix(1 0 0 1 0 0) scale(0.05)" style="fill:rgb(144,144,144);stroke:rgb(0,0,0);stroke-width:25"/>
+					</g>
+					<g transform="translate(-2 -6) rotate(-5 0 0)">
+						<polygon points="178.579,57.7353 164.258,51.2544 178.96,44.515 174.48,51.1628"
+							 style="fill:rgb(0,0,0);stroke:rgb(0,0,0);stroke-width:2" transform="scale(0.36) translate(-139 136) rotate(-45 0 0)"/>
+						<path d="M137.5 355 C230.674 287.237 311.196 227.137 430 349"
+							transform="matrix(1 0 0 1 0 0) scale(0.05)"
+							 style="fill:none;stroke:rgb(0,0,0);stroke-width:30"/>
+					</g>
+					<rect id="split0" onmouseover="show_tooltip(\''.$strReverse.'\',evt.clientX,evt.clientY)" x="0" y="0" width="25" height="25" style="fill:white;opacity:0.25"/>
+				</g>
 		';
-		$last_x = 156;
+		$last_x = 182;
 		return $linebuttons;
 	}
 
