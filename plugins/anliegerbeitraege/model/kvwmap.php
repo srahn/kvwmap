@@ -64,7 +64,7 @@
     }
     else{
       $umring = $GUI->formvars['newpathwkt'];
-      $ret = $anliegerbeitraege->eintragenNeueStrasse($umring);
+      $ret = $anliegerbeitraege->eintragenNeueStrasse($umring, $GUI->Stelle->id);
       if ($ret[0]) { # fehler beim eintrag
           $GUI->Meldung=$ret[1];
       }
@@ -90,7 +90,7 @@
     }
     else{
       $umring = $GUI->formvars['newpathwkt'];
-      $ret = $anliegerbeitraege->eintragenNeueBereiche($umring);
+      $ret = $anliegerbeitraege->eintragenNeueBereiche($umring, $GUI->Stelle->id);
       if ($ret[0]) { # fehler beim eintrag
           $GUI->Meldung=$ret[1];
       }
