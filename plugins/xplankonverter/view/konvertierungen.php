@@ -31,16 +31,20 @@
       data: {
         konvertierung_id: konvertierung_id
       },
-      success: function(response) {
+      error: function(response) {
         result.text(response.msg);
+      },
+      success: function(response) {
+        $('#konvertierungen_table').on('load-success.bs.table', function () {
+          result.text(response.msg);
+        });
+        $('#konvertierungen_table').bootstrapTable('refresh');
       }
     });
-    location.reload(true);
   };
 
   // formatter functions
   function konvertierungFunctionsFormatter(value, row) {
-    console.log('Row',value,row);
     var funcIsDisabled,
       disableFrag = ' disabled" onclick="return false';
     output = '<span class="btn-group" role="group" konvertierung_id="' + value + '">';
@@ -53,9 +57,9 @@
     funcIsDisabled = row.status != "<?php echo Konvertierung::$STATUS['ERSTELLT']; ?>";
     output += '<a class="btn btn-link btn-xs  xpk-func-btn' + (funcIsDisabled ? disableFrag : '') + '" title="Konvertierung validieren" href="index.php?go=xplankonverter_konvertierungen_validate&konvertierung_id=' + value + '"><i class="fa fa-lg fa-check-square-o"></i></a>';
     funcIsDisabled = row.status != "<?php echo Konvertierung::$STATUS['VALIDIERUNG_OK']; ?>";
-    output += '<a class="btn btn-link btn-xs xpk-func-btn' + (funcIsDisabled ? disableFrag : '') + '" title="Konvertierung ausf&uuml;hren" id="konvertierung_ausfuehren" href="#"><i class="fa fa-lg fa-play"></i></a>';
+    output += '<a class="btn btn-link btn-xs xpk-func-btn' + (funcIsDisabled ? disableFrag : '') + '" title="Konvertierung ausf&uuml;hren" id="konvertierung_ausfuehren_'+value+'" href="#"><i class="fa fa-lg fa-play"></i></a>';
     // allways enabled
-    output += '<a class="btn btn-link btn-xs" title="Konvertierung l&ouml;schen" href="#" id="konvertierung_loeschen"><i class="fa fa-trash"></i></a>';
+    output += '<a class="btn btn-link btn-xs" title="Konvertierung l&ouml;schen" href="#" id="konvertierung_loeschen_'+value+'"><i class="fa fa-trash"></i></a>';
     output += '</span>';
     return output;
   }
