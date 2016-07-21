@@ -78,6 +78,7 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
     	}
     }
 		$index = 0;
+		$rowspan = array();
 		$rowspan[$index] = 0;
 		for($i=0;$i<$anzObj;$i++){
 			if($this->buchungen[$index]['bvnr'] == $this->buchungen[$i]['bvnr']){
